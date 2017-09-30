@@ -119,6 +119,8 @@ public class TypeAdapter extends AbstractPluginAdapter {
 	}
 
 	static private String getShortenedName(String className, String name, boolean isPackage) {
+		if (name == null) 
+			return null;
 		name = ASTKeywordVisitor.removeBrackets(name);
 		if (className != null) {
 			if (name.equals(className))

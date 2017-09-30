@@ -11,13 +11,13 @@
 package net.sf.j2s.core.astvisitors;
 //LAST PROBLEM
 
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Stack;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -37,7 +38,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
@@ -50,7 +50,7 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.ThisExpression;
@@ -59,16 +59,17 @@ import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import net.sf.j2s.core.adapters.Bindings;
 import net.sf.j2s.core.adapters.FieldAdapter;
 import net.sf.j2s.core.adapters.FinalVariable;
+import net.sf.j2s.core.adapters.J2SMapAdapter;
 
 //BH 9/10/2017 -- adds full byte, short, and int distinction using class-level local fields $b$, $s$, and $i$, which are IntXArray[1].
-// 
 
 /**
  * This class will traverse most of the common keyword and common expression,
- * processing all interconversion among primitive types byte char short int, and long
- * as well as all boxing and unboxing of Character/char, Integer/int, etc.
+ * processing all interconversion among primitive types byte char short int, and
+ * long as well as all boxing and unboxing of Character/char, Integer/int, etc.
  * 
  * @author zhou renjian
  * @author Bob Hanson
@@ -76,67 +77,101 @@ import net.sf.j2s.core.adapters.FinalVariable;
  */
 public class ASTKeywordVisitor extends ASTEmptyVisitor {
 
-	
-	private boolean isArray = false;
-	
 	private final static String CHARCODEAT0 = ".$c()";
+
+	private final static String defaultNonQualified = "javajs.api.js;" + "swingjs.api.js;" + "swingjs.JSToolkit;";
+
+	private static String[] nonQualifiedPackages;
+
+	private final static String[] nonQualifiedClasses = new String[] {
+			// these classes are called from JavaScript or represent JavaScript
+			// functions
+			"swingjs.JSAppletViewer", "swingjs.JSFrameViewer", "java.applet.AppletContext", "java.applet.AppletStub",
+
+			// these classes need no qualification
+			"java.lang.Boolean", "java.lang.Byte", "java.lang.Character", "java.lang.Double", "java.lang.Float",
+			"java.lang.Integer", "java.lang.Long", "java.lang.Math", "java.lang.Number", "java.lang.reflect.Array",
+			"java.lang.Short", "java.lang.System", "java.lang.String",
+
+			// I have no idea why these are here
+			"java.util.Date", // TODO _- really???
+			"java.util.EventListenerProxy", "java.util.EventObject", };
+
+	private static final String primitiveTypeEquivalents = "Boolean,Byte,Character,Short,Integer,Long,Float,Double,";
+
+	private static final String getPrimitiveTYPE(String name) {
+		int pt = primitiveTypeEquivalents.indexOf(name.substring(1)) - 1;
+		String type = primitiveTypeEquivalents.substring(pt);
+		return type.substring(0, type.indexOf(",")) + ".TYPE";
+	}
+
+	private boolean isArray = false;
+	protected int blockLevel = 0;
+	protected int currentBlockForVisit = -1;
+	protected String b$name;
+	protected Stack<String> methodDeclareNameStack = new Stack<String>();
+
+
 	/**
-	 * holds all static field definitions for insertion at the end of the class def
-	 * and allows setting of local typed integer arrays for fast processing of bytes  
+	 * holds all static field definitions for insertion at the end of the class
+	 * def and allows setting of local typed integer arrays for fast processing
+	 * of bytes
 	 * 
 	 */
 	protected StaticBuffer staticFieldDefBuffer = new StaticBuffer();
-	
+
 	/**
-	 * StaticBuffer holds definitions that need to come after all methods are defined, with blocks defined just
-	 * once for any given class. 
+	 * StaticBuffer holds definitions that need to come after all methods are
+	 * defined, with blocks defined just once for any given class.
 	 * 
-	 * The buffer also provides a very efficient way to do byte, short, and int operation processing by using
-	 * the trick that if we have defined  
+	 * The buffer also provides a very efficient way to do byte, short, and int
+	 * operation processing by using the trick that if we have defined
 	 * 
 	 * var $b$ = new Int8Array(1)
 	 * 
-	 * then we can use that to "filter" a (necessarily) 32-bit integer JavaScript variable to reproduce the effect of 
-	 * being a byte or short or int. This is done as follows:
+	 * then we can use that to "filter" a (necessarily) 32-bit integer
+	 * JavaScript variable to reproduce the effect of being a byte or short or
+	 * int. This is done as follows:
 	 * 
-	 * Java: 
+	 * Java:
 	 * 
-	 *   byte b = (byte) 300;
-	 *   
+	 * byte b = (byte) 300;
+	 * 
 	 * JavaScript:
 	 * 
-	 *   var b = ($b$[0] = 300, $b$[0]);
-	 *   
-	 * This works because Int8Arrays really are bytes, and they can only hold bytes. So 
+	 * var b = ($b$[0] = 300, $b$[0]);
 	 * 
-	 *   $b$[0] = 300
+	 * This works because Int8Arrays really are bytes, and they can only hold
+	 * bytes. So
 	 * 
-	 * sets $b$[0] to be 44, and ($b$[0] = 300, $b$[0]) then passes that value on to the 
-	 * receiving variable b (which itself is a 32-bit integer, actually).
+	 * $b$[0] = 300
 	 * 
-	 * It was a surprise to me that the "(..., $b$[0])" business was necessary. 
+	 * sets $b$[0] to be 44, and ($b$[0] = 300, $b$[0]) then passes that value
+	 * on to the receiving variable b (which itself is a 32-bit integer,
+	 * actually).
+	 * 
+	 * It was a surprise to me that the "(..., $b$[0])" business was necessary.
 	 * However, it turns out that
 	 * 
-	 *   b = $b$[0] = 300;
-	 *   
-	 * is really short for the two (undesired) independent processes: 
+	 * b = $b$[0] = 300;
 	 * 
-	 *   b = 300;
-	 *   $b$[0] = 300;
+	 * is really short for the two (undesired) independent processes:
+	 * 
+	 * b = 300; $b$[0] = 300;
 	 *
 	 * not the (desired) sequential pair
 	 * 
-	 *   $b$[0] = 300;
-	 *   b = $b$[0];
-	 *   
+	 * $b$[0] = 300; b = $b$[0];
+	 * 
 	 * But
-	 *  
-	 *   var b = ($b$[0] = 300, $b$[0]);
-	 * 	
+	 * 
+	 * var b = ($b$[0] = 300, $b$[0]);
+	 * 
 	 * is precisely this second meaning.
 	 * 
 	 * 
-	 * We turn this action off using the field isArray so that these don't get nested.
+	 * We turn this action off using the field isArray so that these don't get
+	 * nested.
 	 * 
 	 * @author Bob Hanson
 	 *
@@ -144,26 +179,26 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	class StaticBuffer {
 		private StringBuffer buf;
 		private String added = "";
-		
+
 		boolean hasAssert;
-		
+
 		StaticBuffer() {
 			buf = new StringBuffer();
 		}
-		
+
 		StaticBuffer append(String s) {
 			buf.append(s);
 			return this;
 		}
-		
+
 		String getAssertString() {
 			return (hasAssert ? "C$.$_ASSERT_ENABLED_ = ClassLoader.$getClassAssertionStatus(C$);\r\n" : "");
 		}
-		
+
 		public String toString() {
 			return getAssertString() + added + buf;
 		}
-		
+
 		void addType(String name) {
 			char a = name.charAt(0);
 			// note that this character may not be in the phrase "new Int Array"
@@ -185,30 +220,6 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				break;
 			}
 			added += ";\r\n";
-		}
-	}
-
-	protected int blockLevel = 0;
-
-	protected Stack<String> methodDeclareNameStack = new Stack<String>();
-
-	protected int currentBlockForVisit = -1;
-
-	protected void visitList(List<ASTNode> list, String seperator) {
-		for (Iterator<ASTNode> iter = list.iterator(); iter.hasNext();) {
-			boxingNode(iter.next(), false);
-			if (iter.hasNext()) {
-				buffer.append(seperator);
-			}
-		}
-	}
-
-	protected void visitList(List<ASTNode> list, String seperator, int begin, int end) {
-		for (int i = begin; i < end; i++) {
-			boxingNode(list.get(i), false);
-			if (i < end - 1) {
-				buffer.append(seperator);
-			}
 		}
 	}
 
@@ -240,8 +251,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 
 	public boolean visit(ArrayInitializer node) {
 		// as in: public String[] d = {"1", "2"};
-		//ITypeBinding binding = node.resolveTypeBinding();
-		//int n = binding.getDimensions();
+		// ITypeBinding binding = node.resolveTypeBinding();
+		// int n = binding.getDimensions();
 		buffer.append(j2sGetArrayClass(node.resolveTypeBinding(), -1));
 		buffer.append(", [");
 		@SuppressWarnings("unchecked")
@@ -293,7 +304,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 
 		if (opType == null) {
 			left.accept(this);
-			buffer.append(" = ");		
+			buffer.append(" = ");
 			addExpressionAsTargetType(right, leftTypeBinding, "=", null);
 			if (needParenthesis) {
 				buffer.append(")");
@@ -434,62 +445,6 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return false;
 	}
 
-	/**
-	 * check to change charAt to charCodeAt   
-	 *  
-	 * @param right
-	 * @param pt
-	 */
-	private void addCharCodeAt(Expression right, int pt) {
-		String charCodeAt0 = CHARCODEAT0;
-		if (right instanceof MethodInvocation) {
-			// if possible, just replace "charAt" with "charCodeAt"
-			MethodInvocation m = (MethodInvocation) right;
-			if ("charAt".equals(m.getName().toString())) {
-				if ((pt = buffer.indexOf(".charAt", pt)) >= 0) {
-					charCodeAt0 = "Code" + buffer.substring(pt + 5); // At....
-					buffer.setLength(pt + 5);
-				}
-			}
-		}
-		buffer.append(charCodeAt0);
-	}
-
-	protected void clearVariables(List<FinalVariable> vars) {
-		for (int i = vars.size(); --i >= 0;) {
-			FinalVariable var = vars.get(i);
-			if (var.blockLevel >= blockLevel) {
-				vars.remove(i);
-			}
-		}
-	}
-
-	public void endVisit(MethodDeclaration node) {
-		List<FinalVariable> finalVars = getVariableList('f');
-		List<FinalVariable> visitedVars = getVariableList('v');
-		List<FinalVariable> normalVars = getVariableList('n');
-		@SuppressWarnings("unchecked")
-		List<SingleVariableDeclaration> parameters = node.parameters();
-		IMethodBinding resolveBinding = node.resolveBinding();
-		String methodSig = (resolveBinding == null ? null : resolveBinding.getKey());
-		for (int i = parameters.size() - 1; i >= 0; i--) {
-			SingleVariableDeclaration varDecl = parameters.get(i);
-			SimpleName name = varDecl.getName();
-			IBinding binding = name.resolveBinding();
-			if (binding != null) {
-				String identifier = name.getIdentifier();
-				FinalVariable f = new FinalVariable(blockLevel + 1, identifier, methodSig);
-				f.toVariableName = getIndexedVarName(identifier, normalVars.size());
-				normalVars.remove(f);
-				if (Modifier.isFinal(binding.getModifiers())) {
-					finalVars.remove(f);
-				}
-				visitedVars.remove(f);
-			}
-		}
-		super.endVisit(node);
-	}
-
 	public boolean visit(BooleanLiteral node) {
 		buffer.append(node.booleanValue());
 		return false;
@@ -531,7 +486,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 
 	public boolean visit(ConditionalExpression node) {
 		// tricky part here is that the overall expression should have a target,
-		// not the individual ones. 
+		// not the individual ones.
 		ITypeBinding binding = node.resolveTypeBinding();
 		Expression expThen = node.getThenExpression();
 		Expression expElse = node.getElseExpression();
@@ -543,58 +498,54 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return false;
 	}
 
-	public boolean visit(InstanceofExpression node) {
-		Type right = node.getRightOperand();
-		ITypeBinding binding = right.resolveBinding();
-		if (binding  == null)
-			return false;
-		buffer.append("Clazz.instanceOf(");
-		node.getLeftOperand().accept(this);
-		buffer.append(", ");
-		if (right instanceof ArrayType) {
-			buffer.append(j2sGetArrayClass(binding, 1));
+	public boolean visit(FieldAccess node) {
+		// Field access expression AST node type.
+		// FieldAccess:
+		// Expression . Identifier
+		//
+		//
+		// Note that there are several kinds of expressions that resemble field
+		// access expressions: qualified names, this expressions, and super
+		// field access expressions. The following guidelines help with correct
+		// usage:
+		// •An expression like "foo.this" can only be represented as a this
+		// expression (ThisExpression) containing a simple name. "this" is a
+		// keyword, and therefore invalid as an identifier.
+		// •An expression like "this.foo" can only be represented as a field
+		// access expression (FieldAccess) containing a this expression and a
+		// simple name. Again, this is because "this" is a keyword, and
+		// therefore invalid as an identifier.
+		// •An expression with "super" can only be represented as a super field
+		// access expression (SuperFieldAccess). "super" is a also keyword, and
+		// therefore invalid as an identifier.
+		// •An expression like "foo.bar" can be represented either as a
+		// qualified name (QualifiedName) or as a field access expression
+		// (FieldAccess) containing simple names. Either is acceptable, and
+		// there is no way to choose between them without information about what
+		// the names resolve to (ASTParser may return either).
+		// •Other expressions ending in an identifier, such as "foo().bar" can
+		// only be represented as field access expressions (FieldAccess).
+
+		IVariableBinding varBinding = node.resolveFieldBinding();
+		Expression expression = node.getExpression();
+		if (checkStaticBinding(varBinding)) {
+			// e.g. i += 3 + y + ++(new >>Test_Static<<().y);
+			buffer.append('(');
 		} else {
-			buffer.append("\"" + ASTKeywordVisitor.removeBrackets(binding.getQualifiedName()) + "\"");
-			//right.accept(this);
+			varBinding = null;
 		}
-		buffer.append(")");
-		return false;
-	}
 
-	public boolean visit(Modifier node) {
-		return false;
-	}
+		expression.accept(this);
 
-	public boolean visit(NumberLiteral node) {
-		String token = node.getToken();
-		if (token.endsWith("L") || token.endsWith("l")) {
-			buffer.append(token.substring(0, token.length() - 1));
-		} else if (!token.startsWith("0x") && !token.startsWith("0X")) {
-			if (token.endsWith("F") || token.endsWith("f") || token.endsWith("D") || token.endsWith("d")) {
-				buffer.append(token.substring(0, token.length() - 1));
-			} else {
-				buffer.append(token);
-			}
-		} else {
-			buffer.append(token);
+		if (varBinding != null) {
+			buffer.append(", ");
+			addQualifiedNameFromBinding(varBinding);
+			buffer.append(')');
 		}
+		buffer.append(".");
+		node.getName().accept(this);
 		return false;
 	}
-
-	public boolean visit(NullLiteral node) {
-		ITypeBinding binding = node.resolveTypeBinding();
-		if (binding != null)
-			buffer.append("null");
-		return super.visit(node);
-	}
-
-	public boolean visit(ParenthesizedExpression node) {
-		buffer.append("(");
-		node.getExpression().accept(this);
-		buffer.append(")");
-		return false;
-	}
-
 
 	/**
 	 * Infix operators (typesafe enumeration).
@@ -744,49 +695,56 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return false;
 	}
 
-	private void addExtendedOperands(List<?> extendedOperands, String operator, char pre, char post, boolean isToString) {		
-		if (extendedOperands.size() > 0) {
-			buffer.append(' ');
-			for (Iterator<?> iter = extendedOperands.iterator(); iter.hasNext();) {
-				buffer.append(operator);
-				buffer.append(pre);
-				ASTNode element = (ASTNode) iter.next();
-				addOperand((Expression) element, isToString);
-				buffer.append(post);
-			}
+	public boolean visit(InstanceofExpression node) {
+		Type right = node.getRightOperand();
+		ITypeBinding binding = right.resolveBinding();
+		if (binding == null)
+			return false;
+		buffer.append("Clazz.instanceOf(");
+		node.getLeftOperand().accept(this);
+		buffer.append(", ");
+		if (right instanceof ArrayType) {
+			buffer.append(j2sGetArrayClass(binding, 1));
+		} else {
+			buffer.append("\"" + ASTKeywordVisitor.removeBrackets(binding.getQualifiedName()) + "\"");
+			// right.accept(this);
 		}
+		buffer.append(")");
+		return false;
 	}
 
-	/**
-	 * The left operand is primitive boolean. Check to see if the operator is ^,
-	 * |, or &, or if the left or right operand is such an expression. 
-	 * 
-	 * If so, we are going to box this all as a Boolean(....).valueOf()
-	 * 
-	 * @param node
-	 * @return
-	 */
-	private boolean isBitwiseBinaryOperator(InfixExpression node) {
-		if (checkSimpleBooleanOperator(node.getOperator().toString())) {
-			return true;
-		}
-		Expression left = node.getLeftOperand();
-		if (left instanceof InfixExpression) {
-			if (isBitwiseBinaryOperator((InfixExpression) left)) {
-				return true;
+	public boolean visit(Modifier node) {
+		return false;
+	}
+
+	public boolean visit(NumberLiteral node) {
+		String token = node.getToken();
+		if (token.endsWith("L") || token.endsWith("l")) {
+			buffer.append(token.substring(0, token.length() - 1));
+		} else if (!token.startsWith("0x") && !token.startsWith("0X")) {
+			if (token.endsWith("F") || token.endsWith("f") || token.endsWith("D") || token.endsWith("d")) {
+				buffer.append(token.substring(0, token.length() - 1));
+			} else {
+				buffer.append(token);
 			}
-		}
-		Expression right = node.getRightOperand();
-		if (right instanceof InfixExpression) {
-			if (isBitwiseBinaryOperator((InfixExpression) right)) {
-				return true;
-			}
+		} else {
+			buffer.append(token);
 		}
 		return false;
 	}
 
-	private boolean checkSimpleBooleanOperator(String op) {
-		return (op.equals("^") || op.equals("|") || op.equals("&"));
+	public boolean visit(NullLiteral node) {
+		ITypeBinding binding = node.resolveTypeBinding();
+		if (binding != null)
+			buffer.append("null");
+		return super.visit(node);
+	}
+
+	public boolean visit(ParenthesizedExpression node) {
+		buffer.append("(");
+		node.getExpression().accept(this);
+		buffer.append(")");
+		return false;
 	}
 
 	public boolean visit(PrefixExpression node) {
@@ -803,7 +761,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		Expression left = node.getOperand();
 		ITypeBinding leftTypeBinding = left.resolveTypeBinding();
 		IVariableBinding varBinding = getLeftVariableBinding(left, leftTypeBinding);
-		boolean isChar = (leftTypeBinding != null && leftTypeBinding.isPrimitive() && "char".equals(leftTypeBinding.getName()));
+		boolean isChar = (leftTypeBinding != null && leftTypeBinding.isPrimitive()
+				&& "char".equals(leftTypeBinding.getName()));
 		boolean needParenthesis = false;
 		ASTNode parent = node.getParent();
 		if (checkStaticBinding(varBinding)) {
@@ -833,39 +792,12 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return false;
 	}
 
-	/**
-	 * 
-	 * @param left
-	 * @param parent  null for prefix
-	 * @param varBinding
-	 * @param op
-	 * @param b 
-	 */
-	private void addCharacterPrePostFix(Expression left, ASTNode parent,
-			IVariableBinding varBinding, String op, boolean isPrefix) {
-		boolean addAnonymousWrapper = !isPrefix &&  !(parent instanceof Statement); 
-		if (addAnonymousWrapper) {
-			buffer.append("($p$ = ");
-			addFieldName(left, varBinding);
-			buffer.append(", ");
-			staticFieldDefBuffer.addType("p");
-		}
-		
-		addFieldName(left, varBinding);
-		buffer.append(" = String.fromCharCode(");
-		addFieldName(left, varBinding);
-		buffer.append(CHARCODEAT0).append("++".equals(op) ? "+1" : "-1");
-		buffer.append(")");
-		if (addAnonymousWrapper) {
-			buffer.append(", $p$)");
-		}
-	}
-
 	public boolean visit(PostfixExpression node) {
 		Expression left = node.getOperand();
 		ITypeBinding leftTypeBinding = left.resolveTypeBinding();
 		IVariableBinding varBinding = getLeftVariableBinding(left, leftTypeBinding);
-		boolean isChar = (leftTypeBinding != null && leftTypeBinding.isPrimitive() && "char".equals(leftTypeBinding.getName()));
+		boolean isChar = (leftTypeBinding != null && leftTypeBinding.isPrimitive()
+				&& "char".equals(leftTypeBinding.getName()));
 		boolean needParenthesis = false;
 		ASTNode parent = node.getParent();
 		if (checkStaticBinding(varBinding)) {
@@ -878,7 +810,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		} else {
 			varBinding = null;
 		}
-			
+
 		String op = node.getOperator().toString();
 		if (isChar) {
 			addCharacterPrePostFix(left, parent, varBinding, op, false);
@@ -891,7 +823,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		}
 		return false;
 	}
-	
+
 	public boolean visit(QualifiedName node) {
 		if (FieldAdapter.isSimpleQualified(node)) {
 			String constValue = getConstantValue(node);
@@ -904,7 +836,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		IVariableBinding varBinding = (nameBinding instanceof IVariableBinding ? (IVariableBinding) nameBinding : null);
 		ASTNode parent = node.getParent();
 		Name qualifier = node.getQualifier();
-		if (!checkStaticBinding(varBinding) ||qualifier.resolveBinding() instanceof ITypeBinding)
+		if (!checkStaticBinding(varBinding) || qualifier.resolveBinding() instanceof ITypeBinding)
 			varBinding = null;
 		String nodeStr = qualifier.toString();
 		boolean skipQualifier = (nodeStr.equals("net.sf.j2s.html") || nodeStr.equals("org.eclipse.swt.internal.xhtml"));
@@ -939,123 +871,120 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 						name = name.substring(10);
 					}
 					if (isStatic(nameBinding))
-						name = getSimpleName(name);
+						name = getStaticQualifier(name);
 				}
 			}
 		}
-				
+
 		if (!skipQualifier) {
 			if (varBinding != null) {
 				if (qualifier instanceof SimpleName) {
-					//buffer.append(">>qsn>>");
-					addQualifiedName(varBinding);
-					//buffer.append("<qsn<");
+					addQualifiedNameFromBinding(varBinding);
+					// buffer.append("<qsn<");
 				} else {
 					buffer.append('(');
-					//buffer.append("<qsn1<" + name);
 					if (name == null)
 						qualifier.accept(this);
 					else
 						buffer.append(name);
 					buffer.append(", ");
-					addQualifiedName(varBinding);
+					addQualifiedNameFromBinding(varBinding);
 					buffer.append(')');
 				}
 			} else if (name == null) {
-				//buffer.append("<qnonly<");
-
 				node.getQualifier().accept(this);
 			} else {
-				//buffer.append("<qnn<");
 				buffer.append(name);
 			}
 			buffer.append('.');
 		}
-		//buffer.append("<qnname<" + node.getName());
 		node.getName().accept(this);
 		return false;
 	}
 
-	public boolean visit(FieldAccess node) {
-		// Field access expression AST node type.
-		// FieldAccess:
-		// Expression . Identifier
-		//
-		//
-		// Note that there are several kinds of expressions that resemble field
-		// access expressions: qualified names, this expressions, and super
-		// field access expressions. The following guidelines help with correct
-		// usage:
-		// •An expression like "foo.this" can only be represented as a this
-		// expression (ThisExpression) containing a simple name. "this" is a
-		// keyword, and therefore invalid as an identifier.
-		// •An expression like "this.foo" can only be represented as a field
-		// access expression (FieldAccess) containing a this expression and a
-		// simple name. Again, this is because "this" is a keyword, and
-		// therefore invalid as an identifier.
-		// •An expression with "super" can only be represented as a super field
-		// access expression (SuperFieldAccess). "super" is a also keyword, and
-		// therefore invalid as an identifier.
-		// •An expression like "foo.bar" can be represented either as a
-		// qualified name (QualifiedName) or as a field access expression
-		// (FieldAccess) containing simple names. Either is acceptable, and
-		// there is no way to choose between them without information about what
-		// the names resolve to (ASTParser may return either).
-		// •Other expressions ending in an identifier, such as "foo().bar" can
-		// only be represented as field access expressions (FieldAccess).
+	public boolean visit(SimpleName node) {
 
-		IVariableBinding varBinding = node.resolveFieldBinding();
-		Expression expression = node.getExpression();
-		if (checkStaticBinding(varBinding)) {
-			// e.g.  i += 3 + y + ++(new >>Test_Static<<().y);
-			buffer.append('(');
-		} else {
-			varBinding = null;
+		String constValue = getConstantValue(node);
+		if (constValue != null) {
+			buffer.append(constValue);
+			return false;
 		}
-		
-		expression.accept(this);
-		
-		if (varBinding != null) {
-			buffer.append(", ");
-			addQualifiedName(varBinding);
-			buffer.append(')');
+		IBinding binding = node.resolveBinding();
+		if (binding instanceof ITypeBinding) {
+			ITypeBinding typeBinding = (ITypeBinding) binding;
+			String name = typeBinding.getQualifiedName();
+			if (name.startsWith("org.eclipse.swt.internal.xhtml.") || name.startsWith("net.sf.j2s.html.")) {
+				buffer.append(node.getIdentifier());
+				return false;
+			}
 		}
-		buffer.append(".");
-		node.getName().accept(this);
-		return false;
-	}
-
-	private void addQualifiedName(IVariableBinding varBinding) {
-		String name = assureQualifiedName(getShortenedQualifiedName(varBinding.getDeclaringClass().getQualifiedName()));
-		if (isStatic(varBinding) && !name.startsWith("C$.")) {
-		  appendSimpleName(null, name, true); 
+		ASTNode xparent = node.getParent();
+		if (xparent == null) {
+			buffer.append(node);
+			return false;
+		}
+		char ch = '\0';
+		if (buffer.length() > 0) {
+			ch = buffer.charAt(buffer.length() - 1);
+		}
+		if (ch == '.' && xparent instanceof QualifiedName) {
+			if (binding != null && binding instanceof IVariableBinding) {
+				IVariableBinding varBinding = (IVariableBinding) binding;
+				ITypeBinding declaringClass = varBinding.getVariableDeclaration().getDeclaringClass();
+				String fieldName = getJ2SName(node);
+				if (J2SMapAdapter.checkSameName(declaringClass, fieldName)) {
+					buffer.append('$');
+				}
+				if (checkKeywordViolation(fieldName, false)) {
+					buffer.append('$');
+				}
+				if (declaringClass != null && isInheritedFieldName(declaringClass, fieldName)) {
+					fieldName = getFieldName(declaringClass, fieldName);
+				}
+				buffer.append(fieldName);
+				return false;
+			}
+			buffer.append(node);
+			return false;
+		}
+		if (xparent instanceof ClassInstanceCreation && !(binding instanceof IVariableBinding)) {
+			String name = (binding == null ? getJ2SName(node) : node.resolveTypeBinding().getQualifiedName());
+			buffer.append(assureQualifiedName(getShortenedQualifiedName(name)));
+			return false;
+		}
+		if (binding == null) {
+			String name = getShortenedQualifiedName(getJ2SName(node));
+			if (checkKeywordViolation(name, true))
+				buffer.append('$');
+			buffer.append(name);
+			return false;
+		}
+		if (binding instanceof IVariableBinding) {
+			simpleNameInVarBinding(node, ch, (IVariableBinding) binding);
+		} else if (binding instanceof IMethodBinding) {
+			simpleNameInMethodBinding(node, ch, (IMethodBinding) binding);
 		} else {
+			ITypeBinding typeBinding = node.resolveTypeBinding();
+			String name = (typeBinding == null ? node.getFullyQualifiedName()
+					: assureQualifiedName(getShortenedQualifiedName(typeBinding.getQualifiedName())));
+			if (checkKeywordViolation(name, false))
+				buffer.append('$');
 			buffer.append(name);
 		}
+		return false;
+	}
+
+	public boolean visit(SimpleType node) {
+
+		ITypeBinding binding = node.resolveBinding();
+		buffer.append(
+				binding == null ? node : assureQualifiedName(getShortenedQualifiedName(binding.getQualifiedName())));
+		return false;
 	}
 
 	public boolean visit(StringLiteral node) {
 		buffer.append(node.getEscapedValue());
 		return false;
-	}
-
-	/**
-	 * Do not allow char or Character in a switch or array; instead use int
-	 * 
-	 * @param exp
-	 */
-	protected void addNonCharacter(Expression exp) {
-		String name = exp.resolveTypeBinding().getName();
-		switch (name) {
-		case "char":
-		case "Character":
-			addOperand(exp, false);
-			break;
-		default:
-		case "String":
-			exp.accept(this);
-			break;
-		}
 	}
 
 	public boolean visit(TypeLiteral node) {
@@ -1100,125 +1029,38 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return false;
 	}
 
-	protected void addVariable(FinalVariable f, String identifier, IBinding binding) {
-		List<FinalVariable> finalVars = getVariableList('f');
-		List<FinalVariable> normalVars = getVariableList('n');
-		f.toVariableName = getIndexedVarName(identifier, normalVars.size());
-		normalVars.add(f);
-		if (Modifier.isFinal(binding.getModifiers()))
-			finalVars.add(f);
+
+	
+	////////// END visit/endVisit ///////////
+	
+	
+
+	private static boolean isBoxTyped(Expression exp) {
+		return exp.resolveBoxing() || exp.resolveUnboxing();
 	}
 
-	/**
-	 * box or unbox as necessary
-	 * 
-	 * @param element
-	 * @param toCharCode true to append .c$(), not .valueOf();
-	 * @return true if boxing or unboxing
-	 */
-	protected boolean boxingNode(ASTNode element, boolean toCharCode) {
-		// Double > x  will be unboxed
-		// Character == 'c' will be  unboxed
-		// f$Integer(int) will be boxed 
-		if (element instanceof Expression) {
-			Expression exp = (Expression) element;
-			if (exp.resolveBoxing()) {
-				// expression is the site of a boxing conversion
-				ITypeBinding typeBinding = exp.resolveTypeBinding();
-				if (typeBinding.isPrimitive()) {
-					String name = typeBinding.getName();
-					name = (name.equals("char") ? "Character"
-							: name.equals("int") ? "Integer"
-									: Character.toUpperCase(name.charAt(0)) + name.substring(1));
-					getBuffer().append("new " + name + "(");
-					element.accept(this);
-					getBuffer().append(")");
-					return true;
-				}
-			} else if (exp.resolveUnboxing()) {
-				// expression is the site of an unboxing conversion
-				ITypeBinding typeBinding = exp.resolveTypeBinding();
-				if (!typeBinding.isPrimitive()) {
-					String name = typeBinding.getQualifiedName();
-					name = (name.indexOf("Integer") >= 0 ? "int"
-							: name.indexOf("Character") >= 0 ? "char" : name.replace("java.lang.", "").toLowerCase());
-					getBuffer().append("(");
-					element.accept(this);
-					getBuffer().append(toCharCode && name == "char" ? ").$c()" : ")." + name + "Value()");
-					return true;
-				}
-			}
-			String constValue = getConstantValue(exp);
-			if (constValue != null) {
-				buffer.append(constValue);
-				return false;
-			}
-
-		}
-		element.accept(this);
-		return false;
-	}
-
-	private final static String defaultNonQualified = 
-			  "javajs.api.js;"
-			+ "swingjs.api.js;"
-			+ "swingjs.JSToolkit;";
-	
-	private static String[] nonQualifiedPackages;
-	
-	public static void setNoQualifiedNamePackages(String names) {
-		names = defaultNonQualified + (names == null ? "" : names);
-		nonQualifiedPackages = names.split(";");
-		for (int i = nonQualifiedPackages.length; --i >= 0;) {
-			String s = nonQualifiedPackages[i];
-			if (s.startsWith("*."))
-				nonQualifiedPackages[i] = s.substring(1);
-			nonQualifiedPackages[i] = (s.endsWith("*") ? s.substring(0, s.length() - 1) : s + ".");
-		}
-	}
-	
-	private final static String[] nonQualifiedClasses = new String[] {
-			// these classes are called from JavaScript or represent JavaScript functions
-			"swingjs.JSAppletViewer",
-			"swingjs.JSFrameViewer",
-			"java.applet.AppletContext",
-			"java.applet.AppletStub",
-			
-			// these classes need no qualification
-			"java.lang.Boolean", 
-			"java.lang.Byte", 
-			"java.lang.Character", 
-			"java.lang.Double",
-			"java.lang.Float",
-			"java.lang.Integer",
-			"java.lang.Long", 
-			"java.lang.Math", 
-			"java.lang.Number",
-			"java.lang.reflect.Array", 
-			"java.lang.Short",
-			"java.lang.System",
-			"java.lang.String",
-			
-			// I have no idea why these are here
-			"java.util.Date", // TODO _- really???
-			"java.util.EventListenerProxy",
-			"java.util.EventObject",
-	};
-	
 	protected final static boolean isMethodQualified(String className, String methodName) {
 		for (int i = nonQualifiedClasses.length; --i >= 0;) {
 			String s = nonQualifiedClasses[i];
 			if (className.equals(s)) {
 				// leave selected String methods the same
-				return (className.equals("java.lang.String") && "charAt,codePointAt,format,getBytes,substring,indexOf,lastIndexOf,toUpperCase,toLowerCase,trim,valueOf".indexOf(methodName) < 0);
+				return (className.equals("java.lang.String")
+						&& "charAt,codePointAt,format,getBytes,substring,indexOf,lastIndexOf,toUpperCase,toLowerCase,trim,valueOf"
+								.indexOf(methodName) < 0);
 			}
 		}
 		return true;
 	}
 
+	protected static boolean isNumericType(String type) {
+		return (type != null && "int long byte short".indexOf(type) >= 0);
+	}
+
 	/**
-	 * Check to see if this class is in a package for which we exclude parameter qualification
-	 * @param className 
+	 * Check to see if this class is in a package for which we exclude parameter
+	 * qualification
+	 * 
+	 * @param className
 	 * @return
 	 */
 	public static boolean isPackageQualified(String className) {
@@ -1235,102 +1077,28 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 
 	/**
-	 * Check to see if we have a static variable. 
-	 * 
-	 * @param varBinding
-	 * @return
+	 * Add the Clazz.arrayClass$(class, ndim) call to create a faux class with
+	 * the correct _paramType and __NDIM
+	 *
+	 * @param type
+	 * @param dimFlag
+	 *            -1 : initialized depth; n > 0 uninitialized depth as
+	 *            Clazz.arrayClass$; 0: not necessary
+	 * @return JavaScript for array creation
 	 */
-	protected boolean checkStaticBinding(IVariableBinding varBinding) {
-		ITypeBinding declaring;
-		String qName;
-		return isStatic(varBinding)
-				&& (declaring = varBinding.getDeclaringClass()) != null
-				&& !(qName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
-				&& !qName.startsWith("net.sf.j2s.html.");
-	}
-	
-
-	protected static boolean isNumericType(String type) {
-		return (type != null  && "int long byte short".indexOf(type) >= 0);
-	}
-
-	protected void appendDefaultValue(Type type) {
-		Code code = (type == null || !type.isPrimitiveType() ? null : ((PrimitiveType) type).getPrimitiveTypeCode());
-		buffer.append(code == null ? "null"
-				: code == PrimitiveType.BOOLEAN ? "false" 
-				: code == PrimitiveType.CHAR ? "'\\0'" : "0");
-	}
-
-	protected void appendInitializer(Expression initializer, Type fieldType) {
-		if (initializer == null) {
-			appendDefaultValue(fieldType);
-		} else {
-			String term = null;
-			if (fieldType.isPrimitiveType()
-					&& ((PrimitiveType) fieldType).getPrimitiveTypeCode() == PrimitiveType.CHAR) {
-				ITypeBinding tBinding = initializer.resolveTypeBinding();
-				if (tBinding != null && !("char".equals(tBinding.getName()))) {
-					buffer.append("String.fromCharCode(");
-					term = ")";
-				}
-			}
-			initializer.accept(this);
-			if (term != null)
-				buffer.append(term);
-		}
-	}
-
-	/**
-	 * Determine the qualified parameter suffix for method names, including
-	 * constructors. 
-	 * 
-	 * @param nodeName
-	 * @param binding
-	 * 
-	 * @return
-	 */
-	protected String getJ2SParamQualifier(String nodeName, IMethodBinding binding) {
-		// The problem is that System.out and System.err are PrintStreams, and we
-		// do not intend to change those. So in the case that we just wrote
-		// "System....", we use that instead and do not qualify the name
-		// Note: binding can be null if we have errors in the Java and we are compiling
-		if (binding == null || nodeName != null && nodeName.startsWith("System."))
-			return "";
-		String methodName = binding.getName();
-		String className = binding.getDeclaringClass().getQualifiedName();
-		if (!isPackageQualified(className) || !isMethodQualified(className, methodName))
-			return "";
-		ITypeBinding[] paramTypes = binding.getMethodDeclaration().getParameterTypes();
-
-		// BH: Note that Map.put$K$V is translated to actual values
-		// if .getMethodDeclaration() is not used.
-		// Without that, it uses the bound parameters such as
-		// String, Object instead of the declared ones, such as $TK$TV
-
-		StringBuffer sbParams = new StringBuffer();
-		int nParams = paramTypes.length;
-		if (nParams == 0 && methodName.equals("length"))
-			return "$"; // so that String implements CharSequence
-		for (int i = 0; i < nParams; i++)
-			sbParams.append("$").append(j2sGetParamCode(paramTypes[i], true));
-		String s = sbParams.toString();
-		// exception for special case: setting static main(String[] args) to
-		// "main", and "main()" to "main$"
-		if ("main".equals(methodName) && isStatic(binding)) {
-			if (s.length() == 0) {
-				s = "$";
-			} else if (s.equals("$SA")) {
-				s = "";
-			}
-		}
-		return s;
+	static String j2sGetArrayClass(ITypeBinding type, int dimFlag) {
+		ITypeBinding ebinding = type.getElementType();
+		String params = (ebinding.isPrimitive() ? getPrimitiveTYPE(ebinding.getName())
+				: ASTKeywordVisitor.removeBrackets(ebinding.getQualifiedName()))
+				+ (dimFlag == 0 ? "" : ", " + dimFlag * type.getDimensions());
+		return (dimFlag > 0 ? "Clazz.arrayClass$(" + params + ")" : " Clazz.newArray$(" + params);
 	}
 
 	protected static String j2sGetParamCode(ITypeBinding binding, boolean addAAA) {
 		String prefix = (binding.getKey().indexOf(":T") >= 0 ? "T" : null);
 		String name = binding.getQualifiedName();
 		String arrays = null;
-			
+
 		int pt = name.indexOf("[");
 		if (pt >= 0) {
 			arrays = name.substring(pt + (name.indexOf("[L") >= 0 ? 1 : 0));
@@ -1338,10 +1106,12 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		}
 		// catching putAll$java_util_Map<? extends K,? extends V>
 		// (java.util.AbstractMap.js)
-		
-		// NOTE: If any of these are changed, they must be changed in j2sSwingJS as well.
-		// NOTE: These are the same as standard Java Spec, with the exception of Short, which is "H" instead of "S"
-		
+
+		// NOTE: If any of these are changed, they must be changed in j2sSwingJS
+		// as well.
+		// NOTE: These are the same as standard Java Spec, with the exception of
+		// Short, which is "H" instead of "S"
+
 		switch (name = ASTKeywordVisitor.removeBrackets(name)) {
 		case "boolean":
 			name = "Z";
@@ -1381,116 +1151,112 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			break;
 		}
 		if (arrays != null) {
-			if (addAAA) 
+			if (addAAA)
 				arrays = arrays.replaceAll("\\[\\]", "A");
 			name += arrays;
 		}
 		return name;
 	}
 
-
-
-	/**
-	 * A general method to handle implicit casting.
-	 * 
-	 * @param left
-	 * @param assignmentBinding
-	 * @param leftName
-	 * @param op
-	 * @param right
-	 * @param rightName
-	 */
-	private void addPrimitiveTypedExpression(Expression left, IVariableBinding assignmentBinding, String leftName, String op,
-			Expression right, String rightName, List<?> extendedOperands, boolean isAssignment) {
-		// byte|short|int|long /= ...
-		// convert to proper number of bits
-
-		// byte a |= right
-
-		// becomes
-
-		// a = ($b$[0] = a | right, $b$[0])
-
-		//
-		String classIntArray = null;
-		String more = null;
-		boolean fromChar = ("char".equals(rightName));
-		boolean fromIntType = ("long int short byte".indexOf(rightName) >= 0);
-		boolean addParens = (op != "r" || fromChar);
-		boolean isDiv = "/".equals(op);
-		boolean toChar = false;
-		switch (leftName) {
-		case "char":
-			if (!fromChar) {
-				buffer.append("String.fromCharCode(");
-				more = ")";
-				addParens = false;
+	public static String removeBrackets(String qName) {
+		if (qName == null) {
+			return qName;
+		}
+		int length = qName.length();
+		StringBuffer buf = new StringBuffer();
+		int ltCount = 0;
+		for (int i = 0; i < length; i++) {
+			char c = qName.charAt(i);
+			if (c == '<') {
+				ltCount++;
+			} else if (c == '>') {
+				ltCount--;
 			}
-			toChar = true;
-			break;
-		default:
-		case "long":
-			if (!fromIntType || isDiv)
-				more = "|0";
-			break;
-		case "int":
-			if (op != null && (!isDiv && fromIntType) || fromChar || rightName.equals("short")) {
-				break;
+			if (ltCount == 0 && c != '>') {
+				buf.append(c);
 			}
-			//$FALL-THROUGH$
-		case "short":
-			if (right.equals("byte") && !isDiv)
-				break;
-			//$FALL-THROUGH$
-		case "byte":
-			if (!isArray) {
-				classIntArray = "$" + leftName.charAt(0) + "$[0]";
-				staticFieldDefBuffer.addType(leftName);
-			}
-			break;
 		}
-		boolean wasArray = isArray;
-		if (classIntArray != null) {
-			if (addParens)
-				buffer.append("(");
-			buffer.append(classIntArray).append(" = ");
-			isArray = true;
-		}
-		if (left != null) {
-			addFieldName(left, assignmentBinding);
-			buffer.append(op);
-			if (isAssignment)
-				buffer.append("(");
-		}
-		if (!boxingNode(right, fromChar) && fromChar && !toChar)
-			buffer.append(CHARCODEAT0); 
-		if (extendedOperands != null) {
-			addExtendedOperands(extendedOperands, op, ' ', ' ', false);
-		}
-		if (left != null && isAssignment) {
-			buffer.append(")");
-		}
-		if (classIntArray != null) {
-			buffer.append(", ").append(classIntArray);
-			if (addParens)
-				buffer.append(")");
-			isArray = wasArray;
-		}
-		if (more != null)
-			buffer.append(more);
+		qName = buf.toString().trim();
+		return qName;
 	}
 
+	public static void setNoQualifiedNamePackages(String names) {
+		names = defaultNonQualified + (names == null ? "" : names);
+		nonQualifiedPackages = names.split(";");
+		for (int i = nonQualifiedPackages.length; --i >= 0;) {
+			String s = nonQualifiedPackages[i];
+			if (s.startsWith("*."))
+				nonQualifiedPackages[i] = s.substring(1);
+			nonQualifiedPackages[i] = (s.endsWith("*") ? s.substring(0, s.length() - 1) : s + ".");
+		}
+	}
+
+	////////////////////////////////
+
+	/**
+	 * 
+	 * @param left
+	 * @param parent
+	 *            null for prefix
+	 * @param varBinding
+	 * @param op
+	 * @param b
+	 */
+	private void addCharacterPrePostFix(Expression left, ASTNode parent, IVariableBinding varBinding, String op,
+			boolean isPrefix) {
+		boolean addAnonymousWrapper = !isPrefix && !(parent instanceof Statement);
+		if (addAnonymousWrapper) {
+			buffer.append("($p$ = ");
+			addFieldName(left, varBinding);
+			buffer.append(", ");
+			staticFieldDefBuffer.addType("p");
+		}
+
+		addFieldName(left, varBinding);
+		buffer.append(" = String.fromCharCode(");
+		addFieldName(left, varBinding);
+		buffer.append(CHARCODEAT0).append("++".equals(op) ? "+1" : "-1");
+		buffer.append(")");
+		if (addAnonymousWrapper) {
+			buffer.append(", $p$)");
+		}
+	}
+
+	/**
+	 * check to change charAt to charCodeAt
+	 * 
+	 * @param right
+	 * @param pt
+	 */
+	private void addCharCodeAt(Expression right, int pt) {
+		String charCodeAt0 = CHARCODEAT0;
+		if (right instanceof MethodInvocation) {
+			// if possible, just replace "charAt" with "charCodeAt"
+			MethodInvocation m = (MethodInvocation) right;
+			if ("charAt".equals(m.getName().toString())) {
+				if ((pt = buffer.indexOf(".charAt", pt)) >= 0) {
+					charCodeAt0 = "Code" + buffer.substring(pt + 5); // At....
+					buffer.setLength(pt + 5);
+				}
+			}
+		}
+		buffer.append(charCodeAt0);
+	}
 
 	/**
 	 * Append an expression, coercing to primitive numeric types of the target
 	 * parameter if needed. Used for Method arguments and return values, as well
-	 * as variable declaration fragments, where we know the target type and 
-	 * no operator is involved.
+	 * as variable declaration fragments, where we know the target type and no
+	 * operator is involved.
 	 * 
 	 * 
 	 * @param exp
-	 * @param targetType ITypeBinding or TYPE or string
-	 * @param op just an identifier of the context: = for assignment, r for return statement, v for variable declaration fragment, p for method parameter
+	 * @param targetType
+	 *            ITypeBinding or TYPE or string
+	 * @param op
+	 *            just an identifier of the context: = for assignment, r for
+	 *            return statement, v for variable declaration fragment, p for
+	 *            method parameter
 	 */
 	protected void addExpressionAsTargetType(Expression exp, Object targetType, String op, List<?> extendedOperands) {
 		if (targetType == null
@@ -1503,11 +1269,13 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			// BH: Question: When does typeBinding == null?
 			// A: when there is a compilation error, I think.
 			// OK, now we have the same situation as any operand.
-			String paramName = (targetType instanceof ITypeBinding ? ((ITypeBinding)targetType).getName() : targetType.toString());
+			String paramName = (targetType instanceof ITypeBinding ? ((ITypeBinding) targetType).getName()
+					: targetType.toString());
 			boolean isNumeric = isNumericType(paramName);
 			if ((isNumeric || paramName.equals("char")) && !isBoxTyped(exp)) {
 				// using operator "m" to limit int application of $i$
-				addPrimitiveTypedExpression(null, null, paramName, op, exp, expTypeBinding.getName(), extendedOperands, false);
+				addPrimitiveTypedExpression(null, null, paramName, op, exp, expTypeBinding.getName(), extendedOperands,
+						false);
 			} else {
 				// char f() { return Character }
 				// Character f() { return char }
@@ -1517,8 +1285,47 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		}
 	}
 
-	private static boolean isBoxTyped(Expression exp) {
-		return exp.resolveBoxing() || exp.resolveUnboxing();
+	private void addExtendedOperands(List<?> extendedOperands, String operator, char pre, char post,
+			boolean isToString) {
+		if (extendedOperands.size() > 0) {
+			buffer.append(' ');
+			for (Iterator<?> iter = extendedOperands.iterator(); iter.hasNext();) {
+				buffer.append(operator);
+				buffer.append(pre);
+				ASTNode element = (ASTNode) iter.next();
+				addOperand((Expression) element, isToString);
+				buffer.append(post);
+			}
+		}
+	}
+
+	private void addFieldName(Expression left, IVariableBinding qualifier) {
+		if (qualifier != null) {
+			addQualifiedNameFromBinding(qualifier);
+			buffer.append('.');
+			left = (left instanceof QualifiedName ? ((QualifiedName) left).getName()
+					: left instanceof FieldAccess ? ((FieldAccess) left).getName() : left);
+		}
+		boxingNode(left, false);
+	}
+
+	/**
+	 * add a reference to the static field prior to defining it.
+	 * 
+	 * @param left
+	 */
+	private void addLeftSidePrefixName(Expression left) {
+		if (left instanceof QualifiedName) {
+			if ((left = ((QualifiedName) left).getQualifier()) instanceof SimpleName)
+				return;
+		} else if (left instanceof FieldAccess) {
+			if ((left = ((FieldAccess) left).getExpression()) instanceof ThisExpression)
+				return;
+		} else {
+			return;
+		}
+		left.accept(this);
+		buffer.append(", ");
 	}
 
 	@SuppressWarnings("null")
@@ -1530,9 +1337,10 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			ITypeBinding paramType = parameterTypes[i];
 			Expression arg = (i < argCount ? (Expression) arguments.get(i) : null);
 			if (i == nparam - 1) {
-				// BH: can't just check for an array; it has to be an array with the right number of dimensions
+				// BH: can't just check for an array; it has to be an array with
+				// the right number of dimensions
 				if (nparam != argCount || methodIsVarArgs && paramType.isArray()
-						&& arg.resolveTypeBinding().getDimensions() != paramType.getDimensions() 
+						&& arg.resolveTypeBinding().getDimensions() != paramType.getDimensions()
 						&& !(arg instanceof NullLiteral)) {
 					buffer.append("[");
 					for (int j = i; j < argCount; j++) {
@@ -1551,7 +1359,25 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		}
 	}
 
-	
+	/**
+	 * Do not allow char or Character in a switch or array; instead use int
+	 * 
+	 * @param exp
+	 */
+	protected void addNonCharacter(Expression exp) {
+		String name = exp.resolveTypeBinding().getName();
+		switch (name) {
+		case "char":
+		case "Character":
+			addOperand(exp, false);
+			break;
+		default:
+		case "String":
+			exp.accept(this);
+			break;
+		}
+	}
+
 	/**
 	 * add the operand, checking to see if it needs some adjustment:
 	 * 
@@ -1620,41 +1446,353 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		}
 	}
 
+	/**
+	 * A general method to handle implicit casting.
+	 * 
+	 * @param left
+	 * @param assignmentBinding
+	 * @param leftName
+	 * @param op
+	 * @param right
+	 * @param rightName
+	 */
+	private void addPrimitiveTypedExpression(Expression left, IVariableBinding assignmentBinding, String leftName,
+			String op, Expression right, String rightName, List<?> extendedOperands, boolean isAssignment) {
+		// byte|short|int|long /= ...
+		// convert to proper number of bits
 
-	private void addFieldName(Expression left, IVariableBinding qualifier) {
-		if (qualifier != null) {
-			addQualifiedName(qualifier);
-			buffer.append('.');
-			left = (left instanceof QualifiedName ? ((QualifiedName) left).getName()
-					: left instanceof FieldAccess ? ((FieldAccess) left).getName() : left);
+		// byte a |= right
+
+		// becomes
+
+		// a = ($b$[0] = a | right, $b$[0])
+
+		//
+		String classIntArray = null;
+		String more = null;
+		boolean fromChar = ("char".equals(rightName));
+		boolean fromIntType = ("long int short byte".indexOf(rightName) >= 0);
+		boolean addParens = (op != "r" || fromChar);
+		boolean isDiv = "/".equals(op);
+		boolean toChar = false;
+		switch (leftName) {
+		case "char":
+			if (!fromChar) {
+				buffer.append("String.fromCharCode(");
+				more = ")";
+				addParens = false;
+			}
+			toChar = true;
+			break;
+		default:
+		case "long":
+			if (!fromIntType || isDiv)
+				more = "|0";
+			break;
+		case "int":
+			if (op != null && (!isDiv && fromIntType) || fromChar || rightName.equals("short")) {
+				break;
+			}
+			//$FALL-THROUGH$
+		case "short":
+			if (right.equals("byte") && !isDiv)
+				break;
+			//$FALL-THROUGH$
+		case "byte":
+			if (!isArray) {
+				classIntArray = "$" + leftName.charAt(0) + "$[0]";
+				staticFieldDefBuffer.addType(leftName);
+			}
+			break;
 		}
-		boxingNode(left, false);
-	}
-
-	private boolean haveDirectStaticAccess(Expression exp) {
-		return exp instanceof SimpleName
-				|| (exp instanceof QualifiedName && ((QualifiedName) exp).getQualifier() instanceof SimpleName)
-				|| (exp instanceof FieldAccess && ((FieldAccess) exp).getExpression() instanceof ThisExpression);
-
+		boolean wasArray = isArray;
+		if (classIntArray != null) {
+			if (addParens)
+				buffer.append("(");
+			buffer.append(classIntArray).append(" = ");
+			isArray = true;
+		}
+		if (left != null) {
+			addFieldName(left, assignmentBinding);
+			buffer.append(op);
+			if (isAssignment)
+				buffer.append("(");
+		}
+		if (!boxingNode(right, fromChar) && fromChar && !toChar)
+			buffer.append(CHARCODEAT0);
+		if (extendedOperands != null) {
+			addExtendedOperands(extendedOperands, op, ' ', ' ', false);
+		}
+		if (left != null && isAssignment) {
+			buffer.append(")");
+		}
+		if (classIntArray != null) {
+			buffer.append(", ").append(classIntArray);
+			if (addParens)
+				buffer.append(")");
+			isArray = wasArray;
+		}
+		if (more != null)
+			buffer.append(more);
 	}
 
 	/**
-	 * add a reference to the static field prior to defining it.
+	 * for example: new Test_Static().y++
 	 * 
-	 * @param left
+	 * @param varBinding
 	 */
-	private void addLeftSidePrefixName(Expression left) {
-		if (left instanceof QualifiedName) {
-			if ((left = ((QualifiedName) left).getQualifier()) instanceof SimpleName)
-				return;
-		} else if (left instanceof FieldAccess) {
-			if ((left = ((FieldAccess) left).getExpression()) instanceof ThisExpression) 
-				return;
-		} else {
-			return;
+	private void addQualifiedNameFromBinding(IVariableBinding varBinding) {
+		appendShortenedQualifiedName(varBinding.getDeclaringClass().getQualifiedName(), isStatic(varBinding));
+	}
+
+	protected void addVariable(FinalVariable f, String identifier, IBinding binding) {
+		List<FinalVariable> finalVars = getVariableList('f');
+		List<FinalVariable> normalVars = getVariableList('n');
+		f.toVariableName = getIndexedVarName(identifier, normalVars.size());
+		normalVars.add(f);
+		if (Modifier.isFinal(binding.getModifiers()))
+			finalVars.add(f);
+	}
+
+	protected void appendDefaultValue(Type type) {
+		Code code = (type == null || !type.isPrimitiveType() ? null : ((PrimitiveType) type).getPrimitiveTypeCode());
+		buffer.append(code == null ? "null"
+				: code == PrimitiveType.BOOLEAN ? "false" : code == PrimitiveType.CHAR ? "'\\0'" : "0");
+	}
+
+	@SuppressWarnings("null")
+	protected void appendFieldName(ASTNode parent, ITypeBinding declaringClass, boolean isPrivate) {
+		String name = declaringClass.getQualifiedName();
+		boolean isThis = false;
+		int superLevel = 0;
+		ITypeBinding originalType = null;
+		while (parent != null) {
+			if (parent instanceof AbstractTypeDeclaration) {
+				AbstractTypeDeclaration type = (AbstractTypeDeclaration) parent;
+				ITypeBinding typeBinding = type.resolveBinding();
+				if (typeBinding != null && originalType == null) {
+					originalType = typeBinding;
+				}
+				superLevel++;
+				if (Bindings.isSuperType(declaringClass, typeBinding)) {
+					if (superLevel == 1) {
+						buffer.append(isPrivate ? "P$." : "this.");
+						isThis = true;
+					} else {
+						name = typeBinding.getQualifiedName();
+					}
+					break;
+				}
+			} else if (parent instanceof AnonymousClassDeclaration) {
+				AnonymousClassDeclaration type = (AnonymousClassDeclaration) parent;
+				ITypeBinding typeBinding = type.resolveBinding();
+				if (typeBinding != null && originalType == null) {
+					originalType = typeBinding;
+				}
+				superLevel++;
+				if (Bindings.isSuperType(declaringClass, typeBinding)) {
+					if (superLevel == 1) {
+						buffer.append(isPrivate ? "P$." : "this.");
+						isThis = true;
+					} else {
+						name = typeBinding.getQualifiedName();
+						if ((name == null || name.length() == 0) && typeBinding.isLocal()) {
+							name = typeBinding.getBinaryName();
+							int idx0 = name.lastIndexOf(".");
+							if (idx0 == -1) {
+								idx0 = 0;
+							}
+							int idx1 = name.indexOf('$', idx0);
+							if (idx1 != -1) {
+								int idx2 = name.indexOf('$', idx1 + 1);
+								String parentAnon = "";
+								if (idx2 == -1) { // maybe the name is already
+													// "$1$2..." for Java5.0+ in
+													// Eclipse 3.2+
+									parent = parent.getParent();
+									while (parent != null) {
+										if (parent instanceof AbstractTypeDeclaration) {
+											break;
+										} else if (parent instanceof AnonymousClassDeclaration) {
+											AnonymousClassDeclaration atype = (AnonymousClassDeclaration) parent;
+											ITypeBinding aTypeBinding = atype.resolveBinding();
+											String aName = aTypeBinding.getBinaryName();
+											parentAnon = aName.substring(aName.indexOf('$')) + parentAnon;
+										}
+										parent = parent.getParent();
+									}
+									name = name.substring(0, idx1) + parentAnon + name.substring(idx1);
+								}
+							}
+						}
+					}
+					break;
+				}
+			}
+			parent = parent.getParent();
 		}
-		left.accept(this);
-		buffer.append(", ");
+
+		if (!isThis) {
+			buffer.append("this");
+			buffer.append(b$name = ".b$[\"" + getShortenedQualifiedName(name) + "\"]");
+			buffer.append(".");
+		}
+	}
+
+	/**
+	 * Proved access to C$.$clinit$ when a static method is called.
+	 * 
+	 * @param methodName
+	 * @param className
+	 * @param mustEscape
+	 */
+	protected void appendQualifiedStaticName(ASTNode methodName, String className, boolean mustEscape) {
+		// BH: The idea here is to load these on demand.
+		// It will require synchronous loading,
+		// but it will ensure that a class is only
+		// loaded when it is really needed.
+		mustEscape &= (className.indexOf(".") >= 0 && !className.startsWith("java.lang."));
+		if (mustEscape) {
+			Integer n = getStaticNameIndex(className);
+			buffer.append("(I$[" + n + "] || (I$[" + n + "]=Clazz.static$('");
+		}
+		if (methodName == null)
+			buffer.append(className);
+		else
+			methodName.accept(this);
+		if (mustEscape)
+			buffer.append("')))");
+	}
+
+	protected void appendShortenedQualifiedName(String name, boolean isStatic) {
+		name = assureQualifiedName(getShortenedQualifiedName(name));
+		if (isStatic && !name.startsWith("C$.")) {
+			appendQualifiedStaticName(null, name, true);
+		} else {
+			buffer.append(name);
+		}
+	}
+
+	protected void appendStaticFieldValue(Expression initializer, Type fieldType) {
+		//TODO hard to believe this is correct - not developed? 
+		addExpressionAsTargetType(initializer, fieldType, "v", null);
+	}
+
+	/**
+	 * box or unbox as necessary
+	 * 
+	 * @param element
+	 * @param toCharCode
+	 *            true to append .c$(), not .valueOf();
+	 * @return true if boxing or unboxing
+	 */
+	protected boolean boxingNode(ASTNode element, boolean toCharCode) {
+		// Double > x will be unboxed
+		// Character == 'c' will be unboxed
+		// f$Integer(int) will be boxed
+		if (element instanceof Expression) {
+			Expression exp = (Expression) element;
+			if (exp.resolveBoxing()) {
+				// expression is the site of a boxing conversion
+				ITypeBinding typeBinding = exp.resolveTypeBinding();
+				if (typeBinding.isPrimitive()) {
+					String name = typeBinding.getName();
+					name = (name.equals("char") ? "Character"
+							: name.equals("int") ? "Integer"
+									: Character.toUpperCase(name.charAt(0)) + name.substring(1));
+					getBuffer().append("new " + name + "(");
+					element.accept(this);
+					getBuffer().append(")");
+					return true;
+				}
+			} else if (exp.resolveUnboxing()) {
+				// expression is the site of an unboxing conversion
+				ITypeBinding typeBinding = exp.resolveTypeBinding();
+				if (!typeBinding.isPrimitive()) {
+					String name = typeBinding.getQualifiedName();
+					name = (name.indexOf("Integer") >= 0 ? "int"
+							: name.indexOf("Character") >= 0 ? "char" : name.replace("java.lang.", "").toLowerCase());
+					getBuffer().append("(");
+					element.accept(this);
+					getBuffer().append(toCharCode && name == "char" ? ").$c()" : ")." + name + "Value()");
+					return true;
+				}
+			}
+			String constValue = getConstantValue(exp);
+			if (constValue != null) {
+				buffer.append(constValue);
+				return false;
+			}
+
+		}
+		element.accept(this);
+		return false;
+	}
+
+	private boolean checkSimpleBooleanOperator(String op) {
+		return (op.equals("^") || op.equals("|") || op.equals("&"));
+	}
+
+	/**
+	 * Check to see if we have a static variable.
+	 * 
+	 * @param varBinding
+	 * @return
+	 */
+	protected boolean checkStaticBinding(IVariableBinding varBinding) {
+		ITypeBinding declaring;
+		String qName;
+		return isStatic(varBinding) && (declaring = varBinding.getDeclaringClass()) != null
+				&& !(qName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
+				&& !qName.startsWith("net.sf.j2s.html.");
+	}
+
+	/**
+	 * Determine the qualified parameter suffix for method names, including
+	 * constructors.
+	 * 
+	 * @param nodeName
+	 * @param binding
+	 * 
+	 * @return
+	 */
+	protected String getJ2SParamQualifier(String nodeName, IMethodBinding binding) {
+		// The problem is that System.out and System.err are PrintStreams, and
+		// we
+		// do not intend to change those. So in the case that we just wrote
+		// "System....", we use that instead and do not qualify the name
+		// Note: binding can be null if we have errors in the Java and we are
+		// compiling
+		if (binding == null || nodeName != null && nodeName.startsWith("System."))
+			return "";
+		String methodName = binding.getName();
+		String className = binding.getDeclaringClass().getQualifiedName();
+		if (!isPackageQualified(className) || !isMethodQualified(className, methodName))
+			return "";
+		ITypeBinding[] paramTypes = binding.getMethodDeclaration().getParameterTypes();
+
+		// BH: Note that Map.put$K$V is translated to actual values
+		// if .getMethodDeclaration() is not used.
+		// Without that, it uses the bound parameters such as
+		// String, Object instead of the declared ones, such as $TK$TV
+
+		StringBuffer sbParams = new StringBuffer();
+		int nParams = paramTypes.length;
+		if (nParams == 0 && methodName.equals("length"))
+			return "$"; // so that String implements CharSequence
+		for (int i = 0; i < nParams; i++)
+			sbParams.append("$").append(j2sGetParamCode(paramTypes[i], true));
+		String s = sbParams.toString();
+		// exception for special case: setting static main(String[] args) to
+		// "main", and "main()" to "main$"
+		if ("main".equals(methodName) && isStatic(binding)) {
+			if (s.length() == 0) {
+				s = "$";
+			} else if (s.equals("$SA")) {
+				s = "";
+			}
+		}
+		return s;
 	}
 
 	private IVariableBinding getLeftVariableBinding(Expression left, IBinding leftTypeBinding) {
@@ -1668,86 +1806,182 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return null;
 	}
 
-	public static String removeBrackets(String qName) {
-		if (qName == null) {
-			return qName;
-		}
-		int length = qName.length();
-		StringBuffer buf = new StringBuffer();
-		int ltCount = 0;
-		for (int i = 0; i < length; i++) {
-			char c = qName.charAt(i);
-			if (c == '<') {
-				ltCount++;
-			} else if (c == '>') {
-				ltCount--;
-			}
-			if (ltCount == 0 && c != '>') {
-				buf.append(c);
-			}
-		}
-		qName = buf.toString().trim();
-		return qName;
+	private boolean haveDirectStaticAccess(Expression exp) {
+		return exp instanceof SimpleName
+				|| (exp instanceof QualifiedName && ((QualifiedName) exp).getQualifier() instanceof SimpleName)
+				|| (exp instanceof FieldAccess && ((FieldAccess) exp).getExpression() instanceof ThisExpression);
+
 	}
 
-	private static final String primitiveTypeEquivalents = "Boolean,Byte,Character,Short,Integer,Long,Float,Double,";
-	
-	private static final String getPrimitiveTYPE(String name) {
-	  int pt = primitiveTypeEquivalents.indexOf(name.substring(1)) - 1;
-	  String type = primitiveTypeEquivalents.substring(pt);
-	  return type.substring(0, type.indexOf(",")) + ".TYPE";
-	}
-	
 	/**
-	 * Add the Clazz.arrayClass$(class, ndim) call to create a
-	 * faux class with the correct _paramType and __NDIM
-	 *
-	 * @param type
-	 * @param dimFlag  -1 : initialized depth; n > 0 uninitialized depth as Clazz.arrayClass$; 0: not necessary 
-	 * @return JavaScript for array creation
+	 * The left operand is primitive boolean. Check to see if the operator is ^,
+	 * |, or &, or if the left or right operand is such an expression.
+	 * 
+	 * If so, we are going to box this all as a Boolean(....).valueOf()
+	 * 
+	 * @param node
+	 * @return
 	 */
-    static String j2sGetArrayClass(ITypeBinding type, int dimFlag) {
-    	ITypeBinding ebinding = type.getElementType();
-    	String params = (ebinding.isPrimitive() ? getPrimitiveTYPE(ebinding.getName()) : ASTKeywordVisitor.removeBrackets(ebinding.getQualifiedName())) 
-    			+ (dimFlag == 0 ? "" : ", " + dimFlag * type.getDimensions());
-		return (dimFlag > 0 ? "Clazz.arrayClass$(" + params + ")" 
-				: " Clazz.newArray$(" + params);
-	}
-
-	protected void appendSimpleName(ASTNode name, String className, boolean mustEscape) {
-		// BH: The idea here is to load these on demand.
-		// It will require synchronous loading,
-		// but it will ensure that a class is only
-		// loaded when it is really needed.
-		mustEscape &= (className.indexOf(".") >= 0 && !className.startsWith("java.lang."));
-		if (mustEscape) {
-			Integer n = getStaticNameIndex(className);
-			buffer.append("(I$[" + n  + "] || (I$[" + n  + "]=Clazz.static$('");
+	private boolean isBitwiseBinaryOperator(InfixExpression node) {
+		if (checkSimpleBooleanOperator(node.getOperator().toString())) {
+			return true;
 		}
-		if (name == null)
-			buffer.append(className);
-		else
-			name.accept(this);
-		if (mustEscape)
-			buffer.append("')))");			
+		Expression left = node.getLeftOperand();
+		if (left instanceof InfixExpression) {
+			if (isBitwiseBinaryOperator((InfixExpression) left)) {
+				return true;
+			}
+		}
+		Expression right = node.getRightOperand();
+		if (right instanceof InfixExpression) {
+			if (isBitwiseBinaryOperator((InfixExpression) right)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
-	protected String getSimpleName(String className) {
-		if (className.indexOf(".") < 0)
-			return className;
-		Integer n = getStaticNameIndex(className);
-		return "(I$[" + n + "] || (I$[" + n + "]=Clazz.static$('" + className + "')))";
+	private void simpleNameInMethodBinding(SimpleName node, char ch, IMethodBinding mthBinding) {
+		String thisClassName = getClassName();
+		if (isStatic(mthBinding)) {
+			IMethodBinding variableDeclaration = mthBinding.getMethodDeclaration();
+			ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
+			boolean isClassString = false;
+			if (declaringClass != null) {
+				isClassString = "java.lang.String".equals(declaringClass.getQualifiedName());
+				ASTNode parent = node.getParent();
+				if (parent instanceof MethodInvocation) {
+					MethodInvocation mthInv = (MethodInvocation) parent;
+					if (mthInv.getExpression() == null) {
+						String name = declaringClass.getQualifiedName();
+						name = assureQualifiedName(getShortenedQualifiedName(name));
+						if (name.length() != 0) {
+							buffer.append(name);
+							buffer.append(".");
+						}
+					}
+				}
+			}
+			// String name = variableDeclaration.getName();
+			String name = getJ2SName(node);
+			name = getShortenedQualifiedName(name);
+			if (isClassString && "$valueOf".equals(name))
+				name = "valueOf";
+			buffer.append(name);
+		} else {
+			ASTNode parent = node.getParent();
+			boolean isClassString = false;
+			if (parent != null && !(parent instanceof FieldAccess)) {
+				IMethodBinding variableDeclaration = mthBinding.getMethodDeclaration();
+				ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
+				if (declaringClass != null && thisClassName != null && ch != '.') {
+					isClassString = "java.lang.String".equals(declaringClass.getQualifiedName());
+					appendFieldName(parent, declaringClass, Modifier.isPrivate(mthBinding.getModifiers()));
+				}
+			}
+			// String name = node.getFullyQualifiedName();
+			String name = getJ2SName(node);
+			name = getShortenedQualifiedName(name);
+			if (!(isClassString && "valueOf".equals(name)) && checkKeywordViolation(name, false)) {
+				buffer.append('$');
+			}
+			buffer.append(name);
+		}
 	}
 
-	private Map<String, Integer>htStaticNames = new Hashtable<>();
-	private int staticCount;
-	
-	private Integer getStaticNameIndex(String name) {
-		Integer n = htStaticNames.get(name);
-		if (n == null)
-			htStaticNames.put(name,  n = new Integer(staticCount++));
-		return n;
+	private void simpleNameInVarBinding(SimpleName node, char ch, IVariableBinding varBinding) {
+		String thisClassName = getClassName();
+		if (isStatic(varBinding)) {
+			IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
+			ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
+			if (ch != '.' && ch != '\"' && declaringClass != null) {
+				String name = declaringClass.getQualifiedName();
+				if ((name == null || name.length() == 0) && declaringClass.isAnonymous()) {
+					// TODO: FIXME: I count the anonymous class name myself
+					// and the binary name of the anonymous class will conflict
+					// with my anonymous class name!
+					name = declaringClass.getBinaryName();
+				}
+				name = assureQualifiedName(getShortenedQualifiedName(name));
+				if (name.length() != 0) {
+					buffer.append(name);
+					buffer.append(".");
+				}
+			}
+			String fieldName = getJ2SName(node);
+			if (J2SMapAdapter.checkSameName(declaringClass, fieldName)) {
+				buffer.append('$');
+			}
+			if (checkKeywordViolation(fieldName, false)) {
+				buffer.append('$');
+			}
+			if (declaringClass != null && isInheritedFieldName(declaringClass, fieldName)) {
+				fieldName = getFieldName(declaringClass, fieldName);
+			}
+			buffer.append(fieldName);
+		} else {
+			ASTNode parent = node.getParent();
+			if (parent != null && !(parent instanceof FieldAccess)) {
+				IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
+				ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
+				if (declaringClass != null && thisClassName != null && ch != '.') {
+					appendFieldName(parent, declaringClass, false);
+				}
+			}
+
+			String fieldVar = null;
+			if (isFinalSensible() && Modifier.isFinal(varBinding.getModifiers())
+					&& varBinding.getDeclaringMethod() != null) {
+				String key = varBinding.getDeclaringMethod().getKey();
+				if (methodDeclareNameStack.size() == 0 || !key.equals(methodDeclareNameStack.peek())) {
+					buffer.append("this.$finals.");
+					if (currentBlockForVisit != -1) {
+						List<FinalVariable> finalVars = getVariableList('f');
+						List<FinalVariable> visitedVars = getVariableList('v');
+						int size = finalVars.size();
+						for (int i = 0; i < size; i++) {
+							FinalVariable vv = finalVars.get(size - i - 1);
+							if (vv.variableName.equals(varBinding.getName()) && vv.blockLevel <= currentBlockForVisit) {
+								if (!visitedVars.contains(vv)) {
+									visitedVars.add(vv);
+								}
+								fieldVar = vv.toVariableName;
+							}
+						}
+					}
+				}
+			}
+
+			IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
+			ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
+			String fieldName = (declaringClass != null ? getJ2SName(node)
+					: fieldVar == null ? getNormalVariableName(node.getIdentifier()) : fieldVar);
+			if (checkKeywordViolation(fieldName, true))
+				buffer.append('$');
+			if (declaringClass != null && J2SMapAdapter.checkSameName(declaringClass, fieldName))
+				buffer.append('$');
+			if (declaringClass != null && isInheritedFieldName(declaringClass, fieldName))
+				fieldName = getFieldName(declaringClass, fieldName);
+			buffer.append(fieldName);
+		}
 	}
 
-	
+	protected void visitList(List<ASTNode> list, String seperator) {
+		for (Iterator<ASTNode> iter = list.iterator(); iter.hasNext();) {
+			boxingNode(iter.next(), false);
+			if (iter.hasNext()) {
+				buffer.append(seperator);
+			}
+		}
+	}
+
+	protected void visitList(List<ASTNode> list, String seperator, int begin, int end) {
+		for (int i = begin; i < end; i++) {
+			boxingNode(list.get(i), false);
+			if (i < end - 1) {
+				buffer.append(seperator);
+			}
+		}
+	}
+
 }

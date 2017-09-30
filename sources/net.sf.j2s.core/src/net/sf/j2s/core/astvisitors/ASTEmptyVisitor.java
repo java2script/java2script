@@ -12,6 +12,7 @@ package net.sf.j2s.core.astvisitors;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -117,10 +118,47 @@ import net.sf.j2s.core.adapters.VariableAdapter;
  */
 public class ASTEmptyVisitor extends ASTVisitor {
 
+	// TODO: Clazz.$new(test.Test_Interface2.construct,[]); from 	  new Test_Interface2();
+
+    // 
+	/**
+	 * Prove access to C$.$clinit$ when a static field is accessed 
+	 * 
+	 * @param className
+	 * @return
+	 */
+	protected String getStaticQualifier(String className) {
+		if (className.indexOf(".") < 0)
+			return className;
+		Integer n = getStaticNameIndex(className);
+		return "(I$[" + n + "] || (I$[" + n + "]=Clazz.static$('" + className + "')))";
+	}
+
+	private Map<String, Integer>htStaticNames = new Hashtable<>();
+	private int staticCount;
+	
+	/**
+	 * register a qualified static name as an import var I$
+	 * @param name
+	 * @return
+	 */
+	protected Integer getStaticNameIndex(String name) {
+		Integer n = htStaticNames.get(name);
+		if (n == null)
+			htStaticNames.put(name,  n = new Integer(staticCount++));
+		return n;
+	}
+
+	
+
 	protected HashSet<String> definedPackageNames;
 
 	public void setPackageNames(HashSet<String> definedPackageNames) {
 		this.definedPackageNames = definedPackageNames;
+	}
+
+	protected static boolean isFinal(BodyDeclaration b) {
+		return Modifier.isFinal(b.getModifiers());
 	}
 
 	protected static boolean isStatic(BodyDeclaration b) {
@@ -401,7 +439,6 @@ public class ASTEmptyVisitor extends ASTVisitor {
 	}
 
 	public boolean visit(TagElement node) {
-		buffer.append(">>vis tagE " + node);
 		return false;
 	}
 

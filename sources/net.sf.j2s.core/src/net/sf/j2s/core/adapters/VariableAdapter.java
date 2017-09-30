@@ -182,6 +182,8 @@ public class VariableAdapter extends AbstractPluginAdapter {
 	 * @return
 	 */
 	public String getConstantValue(Expression node) {
+		if (node == null)
+			return null;
 		Object constValue = node.resolveConstantExpressionValue();
 		if (constValue != null && (constValue instanceof Number
 				|| constValue instanceof Character
