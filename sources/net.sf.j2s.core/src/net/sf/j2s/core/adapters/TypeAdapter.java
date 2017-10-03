@@ -44,7 +44,9 @@ public class TypeAdapter extends AbstractPluginAdapter {
 		String thisPackageName = visitor.getPackageName();
 		fullClassName = (thisPackageName == null || thisPackageName.length() == 0 
 				|| "java.lang".equals(thisPackageName)
+				|| thisClassName.startsWith("C$")
 				? thisClassName : thisPackageName + '.' + thisClassName);
+//		System.err.println("TypeAdapter setting className,fullClassName:" + thisClassName + " " + fullClassName);
 	}
 
 	public String getFullClassName() {
@@ -114,7 +116,7 @@ public class TypeAdapter extends AbstractPluginAdapter {
 	 * @param name
 	 * @return
 	 */
-	public String getShortenedQualifiedName(String name) {
+	public String getShortenedQualifiedName(String name) {		
 		return getShortenedName(fullClassName, name, false);
 	}
 

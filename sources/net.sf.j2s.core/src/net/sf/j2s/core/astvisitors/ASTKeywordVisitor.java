@@ -941,7 +941,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				if (declaringClass != null && isInheritedFieldName(declaringClass, fieldName)) {
 					fieldName = getFieldName(declaringClass, fieldName);
 				}
-				buffer.append(fieldName);
+				buffer.append(assureQualifiedName(getShortenedQualifiedName(fieldName)));
 				return false;
 			}
 			buffer.append(node);
@@ -1842,7 +1842,6 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 
 	private void simpleNameInMethodBinding(SimpleName node, char ch, IMethodBinding mthBinding) {
-		String thisClassName = getClassName();
 		if (isStatic(mthBinding)) {
 			IMethodBinding variableDeclaration = mthBinding.getMethodDeclaration();
 			ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
@@ -1874,7 +1873,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			if (parent != null && !(parent instanceof FieldAccess)) {
 				IMethodBinding variableDeclaration = mthBinding.getMethodDeclaration();
 				ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
-				if (declaringClass != null && thisClassName != null && ch != '.') {
+				if (declaringClass != null && getClassName() != null && ch != '.') {
 					isClassString = "java.lang.String".equals(declaringClass.getQualifiedName());
 					appendFieldName(parent, declaringClass, Modifier.isPrivate(mthBinding.getModifiers()));
 				}
@@ -1890,10 +1889,10 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 
 	private void simpleNameInVarBinding(SimpleName node, char ch, IVariableBinding varBinding) {
-		String thisClassName = getClassName();
 		if (isStatic(varBinding)) {
 			IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
 			ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
+			
 			if (ch != '.' && ch != '\"' && declaringClass != null) {
 				String name = declaringClass.getQualifiedName();
 				if ((name == null || name.length() == 0) && declaringClass.isAnonymous()) {
@@ -1924,7 +1923,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			if (parent != null && !(parent instanceof FieldAccess)) {
 				IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
 				ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
-				if (declaringClass != null && thisClassName != null && ch != '.') {
+				if (declaringClass != null && getClassName() != null && ch != '.') {
 					appendFieldName(parent, declaringClass, false);
 				}
 			}
@@ -1954,15 +1953,15 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 
 			IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
 			ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
-			String fieldName = (declaringClass != null ? getJ2SName(node)
+			String name = (declaringClass != null ? getJ2SName(node)
 					: fieldVar == null ? getNormalVariableName(node.getIdentifier()) : fieldVar);
-			if (checkKeywordViolation(fieldName, true))
+			if (checkKeywordViolation(name, true))
 				buffer.append('$');
-			if (declaringClass != null && J2SMapAdapter.checkSameName(declaringClass, fieldName))
+			if (declaringClass != null && J2SMapAdapter.checkSameName(declaringClass, name))
 				buffer.append('$');
-			if (declaringClass != null && isInheritedFieldName(declaringClass, fieldName))
-				fieldName = getFieldName(declaringClass, fieldName);
-			buffer.append(fieldName);
+			if (declaringClass != null && isInheritedFieldName(declaringClass, name))
+				name = getFieldName(declaringClass, name);
+			buffer.append(name);
 		}
 	}
 
