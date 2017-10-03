@@ -1882,39 +1882,6 @@ J2S.Cache.put = function(filename, data) {
 			if (J2S._version.indexOf("$Date: ") == 0)
 				J2S._version = (J2S._version.substring(7) + " -").split(" -")[0] + " (J2S)"
 			Clazz.loadClass("java.lang.Class");
-			var viewerOptions = Clazz._4Name("java.util.Hashtable").newInstance();
-      viewerOptions.put = viewerOptions.put$TK$TV;
-			J2S._setAppletParams(applet._availableParams, viewerOptions, applet.__Info, true);
-			viewerOptions.put("appletReadyCallback","J2S._readyCallback");
-			viewerOptions.put("applet", true);
-			viewerOptions.put("name", applet._id);// + "_object");
-			viewerOptions.put("syncId", J2S._syncId);
-			if (J2S._isAsync)
-				viewerOptions.put("async", true);
-			if (applet._color) 
-				viewerOptions.put("bgcolor", applet._color);
-			if (applet._startupScript)
-				viewerOptions.put("script", applet._startupScript)
-			if (J2S._syncedApplets.length)
-				viewerOptions.put("synccallback", "J2S._mySyncCallback");
-			viewerOptions.put("signedApplet", "true");
-			viewerOptions.put("platform", applet._platform);
-			if (applet._is2D)
-				viewerOptions.put("display",applet._id + "_canvas2d");
-
-			// viewerOptions.put("repaintManager", "J.render");
-			viewerOptions.put("documentBase", document.location.href);
-			var codePath = applet._j2sPath + "/";
-      
-			if (codePath.indexOf("://") < 0) {
-				var base = document.location.href.split("#")[0].split("?")[0].split("/");
-				if (codePath.indexOf("/") == 0)
-					base = [base[0], codePath.substring(1)];
-				else
-					base[base.length - 1] = codePath;
-				codePath = base.join("/");
-			}
-			viewerOptions.put("codePath", codePath);
 			J2S._registerApplet(applet._id, applet);
 			try {
         if (applet.__Info.main) {
@@ -1926,6 +1893,39 @@ J2S.Cache.put = function(filename, data) {
           }
           cl.$clazz$.main([]);
         } else {
+    			var viewerOptions = Clazz._4Name("java.util.Hashtable").newInstance();
+          viewerOptions.put = viewerOptions.put$TK$TV;
+    			J2S._setAppletParams(applet._availableParams, viewerOptions, applet.__Info, true);
+    			viewerOptions.put("appletReadyCallback","J2S._readyCallback");
+    			viewerOptions.put("applet", true);
+    			viewerOptions.put("name", applet._id);// + "_object");
+    			viewerOptions.put("syncId", J2S._syncId);
+    			if (J2S._isAsync)
+    				viewerOptions.put("async", true);
+    			if (applet._color) 
+    				viewerOptions.put("bgcolor", applet._color);
+    			if (applet._startupScript)
+    				viewerOptions.put("script", applet._startupScript)
+    			if (J2S._syncedApplets.length)
+    				viewerOptions.put("synccallback", "J2S._mySyncCallback");
+    			viewerOptions.put("signedApplet", "true");
+    			viewerOptions.put("platform", applet._platform);
+    			if (applet._is2D)
+    				viewerOptions.put("display",applet._id + "_canvas2d");
+    
+    			// viewerOptions.put("repaintManager", "J.render");
+    			viewerOptions.put("documentBase", document.location.href);
+    			var codePath = applet._j2sPath + "/";
+          
+    			if (codePath.indexOf("://") < 0) {
+    				var base = document.location.href.split("#")[0].split("?")[0].split("/");
+    				if (codePath.indexOf("/") == 0)
+    					base = [base[0], codePath.substring(1)];
+    				else
+    					base[base.length - 1] = codePath;
+    				codePath = base.join("/");
+    			}
+    			viewerOptions.put("codePath", codePath);
   				applet._newApplet(viewerOptions);
         }
 			} catch (e) {

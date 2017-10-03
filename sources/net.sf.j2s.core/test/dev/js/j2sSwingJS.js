@@ -232,12 +232,12 @@ Clazz.$newClass = function(cl) {
   return Class_;
 }
 
-Clazz.$newEnumConst = function (c, enumName, enumOrdinal, args, cl) {
+Clazz.$newEnumConst = function(vals, c, enumName, enumOrdinal, args, cl) {
   var o = Clazz.$new(c, args, cl);
   o.$name = enumName;
   o.$ordinal = enumOrdinal;
   var clazzEnum = c.exClazz;
-  return clazzEnum[enumName] = clazzEnum.prototype[enumName] = o;
+  vals.push(clazzEnum[enumName] = clazzEnum.prototype[enumName] = o);
 }
     
 Clazz.super$ = function(cl, obj) {
@@ -248,10 +248,10 @@ Clazz.super$ = function(cl, obj) {
 }
 
 Clazz.newInstance$ = function (objThis, args, isInner) {
-  if (args && (args[0] == _prepOnly 
-  || args[0] == Clazz.inheritArgs 
-  || args[1] == Clazz.inheritArgs 
-  || args[2] == Clazz.inheritArgs 
+  if (args && ( 
+     args[0] == Clazz.inheritArgs 
+     || args[1] == Clazz.inheritArgs 
+     || args[2] == Clazz.inheritArgs 
   )) {
     // Just declaring a class, not creating an instance or doing field preparation.
     // That is, we are just generating the prototypes for this method using new superClass()
@@ -269,7 +269,8 @@ Clazz.newInstance$ = function (objThis, args, isInner) {
   objThis.__JSID__ = ++_jsid;
 
   if (!isInner) {
-    if ((!args || args && args.length == 0) && objThis.construct) {
+    if ((!args || args && args.length == 0) 
+    && objThis.construct) {
     // allow for direct default call "new foo()" to run with its default constructor
       objThis.construct.apply(objThis);  
     }
@@ -288,10 +289,7 @@ Clazz.newInstance$ = function (objThis, args, isInner) {
       (of$ ? appendMap(appendMap({}, of$), finalVars) : finalVars)
       : of$ ? of$ : null);
   }
-  if (outerObj == null || outerObj == _prepOnly || !outerObj.__CLASS_NAME__)
-    return;
-  // hack for outer obj being WINDOW
-  if (!objThis || outerObj == window)
+  if (!outerObj || !objThis || !outerObj.__CLASS_NAME__)
     return;
   // BH: For efficiency: Save the b$ array with the OUTER class as $b$, 
   // as its keys are properties of it and can be used again.
@@ -301,7 +299,7 @@ Clazz.newInstance$ = function (objThis, args, isInner) {
   if (!b) {
     b = outerObj.b$;
     // Inner class of an inner class must inherit all outer object references. Note that this 
-    // can cause conflicts. For example, b%["java.awt.Component"] could refer to the wrong
+    // can cause conflicts. For example, b$["java.awt.Component"] could refer to the wrong
     // object if I did this wrong.
     // 
     if (!b) {
@@ -331,6 +329,12 @@ Clazz.newInstance$ = function (objThis, args, isInner) {
   objThis.b$ = b;
 };
 
+Clazz.defineStatics$ = function(cl, a) {
+ for (var i = 0;i < a.length;){
+   var s = a[i++]
+   cl[s] = cl.prototype[s] = a[i++];
+ }
+}
 /**
  * in-place shift of an array by k elements, starting with element i0,
  * resetting its length in case it is arguments (which does not have the
@@ -363,11 +367,16 @@ Clazz.newMethod$ = function (clazzThis, funName, funBody, isStatic) {
   Clazz.saemCount0++;
   funBody.exName = funName;
   funBody.exClazz = clazzThis; // make it traceable
-    
+  var f;
   if (isStatic || funName == "construct")
-    clazzThis[funName] = function(){clazzThis.$clinit$ && clazzThis.$clinit$();return funBody};
+    f = clazzThis[funName] = clazzThis.prototype[funName] = function(){clazzThis.$clinit$ && clazzThis.$clinit$();return funBody.apply(this, arguments)};
   else
-  clazzThis.prototype[funName] = funBody;
+    f = clazzThis.prototype[funName] = funBody;
+  
+  f.exName = funName;
+  f.exClazz = clazzThis; // make it traceable
+    
+
 };                     
 
 var aas = "AAA";
@@ -1450,7 +1459,7 @@ if (isSafari) {
  */ 
 Clazz.inheritArgs = new (function(){return {"$J2SNOCREATE$":true}})();
 
-var _prepOnly = new (function(){return {"$J2SPREPONLY$":true}})();
+//var _prepOnly = new (function(){return {"$J2SPREPONLY$":true}})();
 
 var _jsid = 0;
 
