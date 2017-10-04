@@ -201,12 +201,12 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 						if (name.length() != 0) {
 							if (staticFields) {
 								if (qualifier instanceof SimpleName) {
-									buffer.append(assureQualifiedName(getShortenedQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+									buffer.append(fixName(varBinding.getDeclaringClass().getQualifiedName()));
 								} else {
 									buffer.append('(');
 									buffer.append(name);
 									buffer.append(", ");
-									buffer.append(assureQualifiedName(getShortenedQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+									buffer.append(fixName(varBinding.getDeclaringClass().getQualifiedName()));
 									buffer.append(')');
 								}
 							} else {
@@ -228,13 +228,14 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		}
 		if (!qualifierVisited) {
 			if (staticFields) {
+				String name = fixName(varBinding.getDeclaringClass().getQualifiedName());
 				if (qName instanceof SimpleName) {
-					buffer.append(assureQualifiedName(getShortenedQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+					buffer.append(name);
 				} else {
 					buffer.append('(');
 					node.getQualifier().accept(this);
 					buffer.append(", ");
-					buffer.append(assureQualifiedName(getShortenedQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+					buffer.append(name);
 					buffer.append(')');
 				}
 			} else {

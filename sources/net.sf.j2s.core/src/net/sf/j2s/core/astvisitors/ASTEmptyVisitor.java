@@ -167,10 +167,6 @@ public class ASTEmptyVisitor extends ASTVisitor {
 
 
 
-	protected String assureQualifiedName(String name) {
-		return TypeAdapter.assureQualifiedName(name);
-	}
-
 	protected boolean checkKeywordViolation(String name, boolean checkPackages) {
 		return FieldAdapter.checkKeywordViolation(name, checkPackages ? definedPackageNames : null);
 	}

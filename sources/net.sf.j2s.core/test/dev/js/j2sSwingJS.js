@@ -369,14 +369,9 @@ Clazz.newMethod$ = function (clazzThis, funName, funBody, isStatic) {
   funBody.exClazz = clazzThis; // make it traceable
   var f;
   if (isStatic || funName == "construct")
-    f = clazzThis[funName] = clazzThis.prototype[funName] = function(){clazzThis.$clinit$ && clazzThis.$clinit$();return funBody.apply(this, arguments)};
+    clazzThis[funName] = clazzThis.prototype[funName] = funBody;
   else
-    f = clazzThis.prototype[funName] = funBody;
-  
-  f.exName = funName;
-  f.exClazz = clazzThis; // make it traceable
-    
-
+    clazzThis.prototype[funName] = funBody;
 };                     
 
 var aas = "AAA";

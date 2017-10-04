@@ -101,7 +101,7 @@ public class TypeAdapter extends AbstractPluginAdapter {
 	}
 
 	static public String getShortenedPackageNameFromClassName(String fullName) {
-		return getShortenedName(null, fullName.substring(0, fullName.lastIndexOf('.')), true);
+		return assureQualifiedName(getShortenedName(null, fullName.substring(0, fullName.lastIndexOf('.')), true));
 	}
 
 	/**
@@ -120,7 +120,7 @@ public class TypeAdapter extends AbstractPluginAdapter {
 		return getShortenedName(fullClassName, name, false);
 	}
 
-	static private String getShortenedName(String className, String name, boolean isPackage) {
+	static public String getShortenedName(String className, String name, boolean isPackage) {
 		if (name == null) 
 			return null;
 		name = ASTKeywordVisitor.removeBrackets(name);
@@ -207,7 +207,7 @@ public class TypeAdapter extends AbstractPluginAdapter {
 		String[] packages = null;
 		boolean existedKeyword = false;
 		for (int i = 0; i < keywords.length; i++) {
-			if (name.indexOf(keywords[i]) != -1) {
+			if (name.indexOf(keywords[i]) >= 0) {
 				if (packages == null) {
 					packages = name.split("\\.");
 				}
