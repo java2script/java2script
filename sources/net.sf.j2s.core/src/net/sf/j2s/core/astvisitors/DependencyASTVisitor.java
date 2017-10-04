@@ -483,30 +483,6 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 //		return null;
 //	}
 
-	public boolean isClassKnown(String qualifiedName) {
-		String[] knownClasses = new String[] { 
-				"java.lang.Object", "java.lang.Class", 
-				"java.lang.String",
-				"java.lang.Byte", "java.lang.Character",
-				"java.lang.Short", "java.lang.Long", 
-				"java.lang.Integer", "java.lang.Float", 
-				"java.lang.Double", 
-				"java.io.Serializable", "java.lang.Iterable", 
-				"java.lang.CharSequence", "java.lang.Cloneable",
-				"java.lang.Comparable", "java.lang.Runnable", 
-				"java.util.Comparator", "java.lang.System",
-				// BH ????? "java.io.PrintStream", 
-				"java.lang.Math", 
-				};
-
-		for (int i = 0; i < knownClasses.length; i++) {
-			if (knownClasses[i].equals(qualifiedName)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	public boolean isDebugging() {
 		return isDebugging;
 	}
@@ -1048,10 +1024,11 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	 * TypeDeclaration)
 	 */
 	public boolean visit(EnumDeclaration node) {
-		addMusts(node, true);
+		musts.add("java.lang.Enum");
+		addMusts(node);
 //		visitForRequires(node);
 //		visitForOptionals(node);
-		return super.visit(node);
+		return true;
 	}
 
 	/*
@@ -1061,10 +1038,10 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	 * TypeDeclaration)
 	 */
 	public boolean visit(TypeDeclaration node) {
-		addMusts(node, true);
+		addMusts(node);
 //		visitForRequires(node);
 //		visitForOptionals(node);
-		return super.visit(node);
+		return true;
 	}
 
 //	/*
@@ -1078,7 +1055,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 //		return false;
 //	}
 
-	protected void addMusts(AbstractTypeDeclaration node, boolean isEnum) {
+	protected void addMusts(AbstractTypeDeclaration node) {
 		// Enum and class 
 		ITypeBinding resolveBinding = node.resolveBinding();
 		if (resolveBinding != null && resolveBinding.isTopLevel()) {
@@ -1087,8 +1064,6 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			classBindingSet.add(resolveBinding);
 		}
 		readTags(node);
-		if (isEnum)
-			musts.add("java.lang.Enum");
 		Type superType = (node instanceof TypeDeclaration ? ((TypeDeclaration) node).getSuperclassType() : null);
 		if (superType != null)
 			addMust(node, superType);

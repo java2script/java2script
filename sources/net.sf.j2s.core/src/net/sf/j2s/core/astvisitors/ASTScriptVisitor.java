@@ -400,7 +400,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		String prefix = null, postfix = null;
 		IMethodBinding methodDeclaration = null;
 		IMethodBinding constructorBinding = node.resolveConstructorBinding();
-		String fqName = getShortenedQualifiedName(TypeAdapter.getTypeStringName(node.getType()));
+		String className = TypeAdapter.getTypeStringName(node.getType());
+		String fqName = getShortenedQualifiedName(className);
 		if (constructorBinding != null) {
 			methodDeclaration = constructorBinding.getMethodDeclaration();
 		}
@@ -424,7 +425,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			else
 				buffer.append(" new ").append(fqName).append("(");
 		} else {
-			open$new(fqName, ".construct" + getJ2SParamQualifier(null, constructorBinding));
+			open$new(className, ".construct" + getJ2SParamQualifier(null, constructorBinding));
 			prefix = ",[";
 			postfix = "]";
 		}
@@ -1409,11 +1410,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		if (superclassType != null) {
 			if (!haveSuperInterface)
 				buffer.append(", null");
-			ITypeBinding superclass = superclassType.resolveBinding();
-			if (superclass != null && !superclass.isTopLevel() && !isStatic(superclass)) {
-				buffer.append(",");
-				addInnerTypeInstance(null, fixName(superclass.getQualifiedName()), null, null, null, true, null);
-			}
+			// TODO: removed -- what was it? Not used?
+			// superclass instance. But why?
+//			ITypeBinding superclass = superclassType.resolveBinding();
+	//		if (superclass != null && !superclass.isTopLevel() && !isStatic(superclass)) {
+		//		buffer.append(",");
+			//	addInnerTypeInstance(null, fixName(superclass.getQualifiedName()), null, null, null, true, null);
+			//}
 		}
 
 		// remove excessive null parameters

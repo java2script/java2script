@@ -12,14 +12,13 @@
 package net.sf.j2s.core.adapters;
 
 import net.sf.j2s.core.astvisitors.ASTEmptyVisitor;
-import net.sf.j2s.core.astvisitors.IPluginVisitor;
 
 /**
  * @author zhou renjian
  *
  * 2006-12-27
  */
-public class AbstractPluginAdapter implements IPluginVisitor {
+public class AbstractPluginAdapter {
 
 	protected ASTEmptyVisitor visitor;
 	

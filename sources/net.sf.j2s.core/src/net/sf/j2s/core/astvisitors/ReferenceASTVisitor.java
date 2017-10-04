@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
  *
  * 2006-5-1
  */
+@Deprecated
 public class ReferenceASTVisitor extends ASTVisitor {
 
 	private boolean isReferenced = false;

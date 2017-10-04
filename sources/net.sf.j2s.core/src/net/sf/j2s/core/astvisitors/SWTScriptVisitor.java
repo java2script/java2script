@@ -38,6 +38,7 @@ import net.sf.j2s.core.adapters.FieldAdapter;
 import net.sf.j2s.core.adapters.PackageAdapter;
 import net.sf.j2s.core.adapters.TypeAdapter;
 
+@Deprecated
 public class SWTScriptVisitor extends ASTScriptVisitor {
 
 	private static String[] swtPackages = null;

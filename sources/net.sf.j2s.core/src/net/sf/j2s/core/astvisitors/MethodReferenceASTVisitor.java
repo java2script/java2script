@@ -37,6 +37,7 @@ import net.sf.j2s.core.adapters.Bindings;
  * @author zhou renjian
  * 2006-5-1
  */
+@Deprecated
 public class MethodReferenceASTVisitor extends ASTVisitor {
 
 	private boolean isReferenced;

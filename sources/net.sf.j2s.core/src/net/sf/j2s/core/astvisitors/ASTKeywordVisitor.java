@@ -1156,25 +1156,26 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 
 	public static String removeBrackets(String qName) {
-		if (qName == null) {
+		if (qName == null || qName.indexOf('<') < 0)
 			return qName;
-		}
-		int length = qName.length();
 		StringBuffer buf = new StringBuffer();
 		int ltCount = 0;
-		for (int i = 0; i < length; i++) {
-			char c = qName.charAt(i);
-			if (c == '<') {
+		char c;
+		for (int i = 0, len = qName.length(); i < len; i++) {
+			switch (c = qName.charAt(i)) {
+			case '<':
 				ltCount++;
-			} else if (c == '>') {
+				continue;
+			case '>':
 				ltCount--;
-			}
-			if (ltCount == 0 && c != '>') {
-				buf.append(c);
+				continue;
+			default:
+				if (ltCount == 0)
+					buf.append(c);
+				continue;
 			}
 		}
-		qName = buf.toString().trim();
-		return qName;
+		return buf.toString().trim();
 	}
 
 	public static void setNoQualifiedNamePackages(String names) {
@@ -1635,7 +1636,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		// It will require synchronous loading,
 		// but it will ensure that a class is only
 		// loaded when it is really needed.
-		mustEscape &= (className.indexOf(".") >= 0 && !className.startsWith("java.lang."));
+		mustEscape &= (className.indexOf(".") >= 0 && !isClassKnown(className));
 		if (mustEscape) {
 			if (doCache) {
 				if (className.equals(getFullClassName())) {
@@ -1665,11 +1666,16 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	 * @param doCache
 	 */
 	protected void appendShortenedQualifiedName(String name, boolean isStatic, boolean doCache) {
-		name = (doCache ? fixName(name) : fixNameNoC$(name));
-		if (isStatic && !name.startsWith("C$.")) {
+		name = removeBrackets(name);
+		String shortName = (doCache ? fixName(name) : fixNameNoC$(name));
+		if (isStatic && !shortName.startsWith("C$.") && !shortName.equals("C$")) {
+//			buffer.append("<<" + name + " " + shortName + " " + doCache + " " + isClassKnown(name) + ">>");
+			if (!doCache || isClassKnown(name))
+				name = shortName;
+	//		buffer.append("<<" + name + " " + ">>");
 			appendQualifiedStaticName(null, name, true, doCache);
 		} else {
-			buffer.append(name);
+			buffer.append(shortName);
 		}
 	}
 

@@ -92,7 +92,6 @@ import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -101,6 +100,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+import net.sf.j2s.core.adapters.AbstractPluginAdapter;
 import net.sf.j2s.core.adapters.FieldAdapter;
 import net.sf.j2s.core.adapters.FinalVariable;
 import net.sf.j2s.core.adapters.J2SMapAdapter;
@@ -117,6 +117,29 @@ import net.sf.j2s.core.adapters.VariableAdapter;
  * @author Bob Hanson
  */
 public class ASTEmptyVisitor extends ASTVisitor {
+
+	private final static String[] knownClasses = new String[] { 
+			"java.lang.Object", "java.lang.Class", 
+			"java.lang.String",
+			"java.lang.Byte", "java.lang.Character",
+			"java.lang.Short", "java.lang.Long", 
+			"java.lang.Integer", "java.lang.Float", 
+			"java.lang.Double", 
+			"java.io.Serializable", "java.lang.Iterable", 
+			"java.lang.CharSequence", "java.lang.Cloneable",
+			"java.lang.Comparable", "java.lang.Runnable", 
+			"java.util.Comparator", "java.lang.System",
+			// BH ????? "java.io.PrintStream", 
+			"java.lang.Math", 
+			};
+
+	protected static boolean isClassKnown(String qualifiedName) {
+		for (int i = 0; i < knownClasses.length; i++)
+			if (knownClasses[i].equals(qualifiedName))
+				return true;
+		return false;
+	}
+
 
 	// TODO: Clazz.$new(test.Test_Interface2.construct,[]); from 	  new Test_Interface2();
 
@@ -266,38 +289,28 @@ public class ASTEmptyVisitor extends ASTVisitor {
 
 	/**
 	 * Buffer may be set to other buffer.
-	 * @see ASTScriptVisitor#visit(TypeDeclaration) 
 	 * @param buffer
 	 */
 	public void setBuffer(StringBuffer buffer) {
 		this.buffer = buffer;
 	}
 
-	protected Map<Class<?>, IPluginVisitor> visitorMap = new HashMap<Class<?>, IPluginVisitor>();
+	protected Map<Class<?>, AbstractPluginAdapter> adapterMap = new HashMap<Class<?>, AbstractPluginAdapter>();
 	
-	public Object getAdaptable(Class<?> clazz) {
-		if (clazz == ASTEmptyVisitor.class) {
-			return this;
-		}
-		Object visitor = visitorMap.get(clazz);
-		if (visitor != null) {
-			return visitor;
-		}
+	public AbstractPluginAdapter getAdaptable(Class<?> clazz) {
 		try {
-			Object newInstance = clazz.newInstance();
-			if (newInstance instanceof IPluginVisitor) {
-				registerPluginVisitor((IPluginVisitor) newInstance);
-				return newInstance;
-			}
-		} catch (InstantiationException | IllegalAccessException e) {
-			e.printStackTrace();
+			AbstractPluginAdapter adapter = adapterMap.get(clazz);
+			return (adapter == null ? (adapter = registerPluginVisitor((AbstractPluginAdapter) clazz.newInstance()))
+					: adapter);
+		} catch (@SuppressWarnings("unused") InstantiationException | IllegalAccessException e) {
+			return null;
 		}
-		return null;
 	}
 
-	public void registerPluginVisitor(IPluginVisitor visitor) {
-		visitor.setVisitor(this);
-		visitorMap.put(visitor.getClass(), visitor);
+	public AbstractPluginAdapter registerPluginVisitor(AbstractPluginAdapter adapter) {
+		adapter.setVisitor(this);
+		adapterMap.put(adapter.getClass(), adapter);
+		return adapter;
 	}
 	
 	protected int lastPos = Integer.MAX_VALUE;

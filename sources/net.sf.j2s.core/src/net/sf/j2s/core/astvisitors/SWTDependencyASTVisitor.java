@@ -29,6 +29,7 @@ import net.sf.j2s.core.adapters.Bindings;
  *
  * 2006-8-5
  */
+@Deprecated
 public class SWTDependencyASTVisitor extends DependencyASTVisitor {
 
 	protected String[] getFilterMethods() {
