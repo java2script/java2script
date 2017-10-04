@@ -211,7 +211,9 @@ Clazz.$new = function(c, args, cl) {
     
   // an inner class will attach arguments to the arguments returned
   // Integer will be passed as is here, without c.exClazz, or cl
-  var f = new (Function.prototype.bind.apply(cl || c.exClazz || c, arguments));
+  cl = cl || c.exClazz || c;
+  cl.$clinit$ && cl.$clinit$();
+  var f = new (Function.prototype.bind.apply(cl, arguments));
   if (args[2] != Clazz.inheritArgs)
     c.apply(f, args);
     

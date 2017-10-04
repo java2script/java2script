@@ -1,5 +1,6 @@
 // j2sApplet.js (based on JmolCore.js)
 
+// BH 10/4/2017 2:25:03 PM adds Clazz.loadClass("javajs.util.Base64")
 // BH 7/18/2017 10:46:44 AM adds J2S._canClickFileReader, fixing J2S.getFileFromDialog for Chrome and Safari
 // BH 7/15/2017 11:04:06 AM drag/up functions not found in draggable (not hoisted)
 // BH 3/5/2017 5:49:30 PM mouse wheel action
@@ -847,7 +848,8 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 			: filename.indexOf(".png") >= 0 ? "image/png" 
 			: filename.indexOf(".gif") >= 0 ? "image/gif" 
 			: filename.indexOf(".jpg") >= 0 | filename.indexOf(".jpeg") >= 0? "image/jpg" : ""));
-		var isString = (typeof data == "string");    
+		var isString = (typeof data == "string"); 
+    Clazz.loadClass("javajs.util.Base64");   
    	data = (self.JU ? JU : javajs.util).Base64.getBase64$BA(isString ? data.getBytes("UTF-8") : data).toString();
 		encoding || (encoding = "base64");
 		var url = J2S._serverUrl;
@@ -892,8 +894,10 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 	J2S._strToBytes = function(s) {
 		if (Clazz.instanceOf(s, self.ArrayBuffer))
 			return J2S._toBytes(s);
-    if (s.indexOf(";base64,") == 0)
+    if (s.indexOf(";base64,") == 0) {
+      Clazz.loadClass("javajs.util.Base64");
       return (self.JU || javajs.util).Base64.decodeBase64$S(s.substring(8));
+    }
     // not UTF-8
 		var b = (Clazz.newArray$ ? Clazz.newArray$(Byte.TYPE, s.length) : Clazz.newByteArray(s.length, 0));
 		for (var i = s.length; --i >= 0;)
@@ -2037,6 +2041,7 @@ J2S.Cache.put = function(filename, data) {
         } else {
               System.out.println("Jsmol.js J2S._loadImage using data URI for " + id) 
         }
+        Clazz.loadClass("javajs.util.Base64")
         image.src = (typeof bytes == "string" ? bytes : 
           "data:" + (self.JU || javajs.util).Rdr.guessMimeTypeForBytes$BA(bytes) + ";base64," + (self.JU|| javajs.util).Base64.getBase64$BA(bytes));
       }
