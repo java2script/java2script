@@ -104,7 +104,6 @@ import net.sf.j2s.core.adapters.AbstractPluginAdapter;
 import net.sf.j2s.core.adapters.FieldAdapter;
 import net.sf.j2s.core.adapters.FinalVariable;
 import net.sf.j2s.core.adapters.J2SMapAdapter;
-import net.sf.j2s.core.adapters.PackageAdapter;
 import net.sf.j2s.core.adapters.TypeAdapter;
 import net.sf.j2s.core.adapters.VariableAdapter;
 
@@ -118,6 +117,28 @@ import net.sf.j2s.core.adapters.VariableAdapter;
  */
 public class ASTEmptyVisitor extends ASTVisitor {
 
+	protected String thisPackageName;
+	
+	public static String[] basePackages =  {
+			"java.lang", 
+			"java.lang.ref", 
+			"java.lang.ref.reflect", 
+			"java.lang.reflect", 
+			"java.lang.annotation",
+			"java.lang.instrument",
+			"java.lang.management",
+			"java.io", 
+			"java.util"
+	};
+ 
+	public boolean isBasePackage() {
+		for (int i = 0; i < basePackages.length; i++)
+			if (basePackages[i].equals(thisPackageName))
+				return true;
+		return false;
+	}
+
+
 	private final static String[] knownClasses = new String[] { 
 			"java.lang.Object", "java.lang.Class", 
 			"java.lang.String",
@@ -129,7 +150,7 @@ public class ASTEmptyVisitor extends ASTVisitor {
 			"java.lang.CharSequence", "java.lang.Cloneable",
 			"java.lang.Comparable", "java.lang.Runnable", 
 			"java.util.Comparator", "java.lang.System",
-			// BH ????? "java.io.PrintStream", 
+			"java.lang.ClassLoader",
 			"java.lang.Math", 
 			};
 
@@ -138,6 +159,29 @@ public class ASTEmptyVisitor extends ASTVisitor {
 			if (knownClasses[i].equals(qualifiedName))
 				return true;
 		return false;
+	}
+
+	public static String removeBrackets(String qName) {
+		if (qName == null || qName.indexOf('<') < 0)
+			return qName;
+		StringBuffer buf = new StringBuffer();
+		int ltCount = 0;
+		char c;
+		for (int i = 0, len = qName.length(); i < len; i++) {
+			switch (c = qName.charAt(i)) {
+			case '<':
+				ltCount++;
+				continue;
+			case '>':
+				ltCount--;
+				continue;
+			default:
+				if (ltCount == 0)
+					buf.append(c);
+				continue;
+			}
+		}
+		return buf.toString().trim();
 	}
 
 
@@ -161,18 +205,17 @@ public class ASTEmptyVisitor extends ASTVisitor {
 	private int staticCount;
 	
 	/**
-	 * register a qualified static name as an import var I$
+	 * Register a qualified static name as an import var I$[n]
+	 * unless it ends with "Exception". 
 	 * @param name
-	 * @return
+	 * @return the next available index for this compilation unit
 	 */
 	protected Integer getStaticNameIndex(String name) {
 		Integer n = htStaticNames.get(name);
-		if (n == null)
+		if (n == null && !name.endsWith("Exception"))
 			htStaticNames.put(name,  n = new Integer(staticCount++));
 		return n;
 	}
-
-	
 
 	protected HashSet<String> definedPackageNames;
 
@@ -230,15 +273,11 @@ public class ASTEmptyVisitor extends ASTVisitor {
 	}
 
 	public String getPackageName() {
-		return ((PackageAdapter) getAdaptable(PackageAdapter.class)).getPackageName();
+		return thisPackageName;
 	}
 
 	protected String getShortenedQualifiedName(String name) {
 		return ((TypeAdapter) getAdaptable(TypeAdapter.class)).getShortenedQualifiedName(name);
-	}
-
-	protected boolean isBasePackage() {
-		return ((PackageAdapter) getAdaptable(PackageAdapter.class)).isBasePackage();
 	}
 
 	protected boolean isFinalSensible() {
@@ -267,7 +306,7 @@ public class ASTEmptyVisitor extends ASTVisitor {
 	}
 
 	protected void setPackageName(String packageName) {
-		((PackageAdapter) getAdaptable(PackageAdapter.class)).setPackageName(packageName);
+		thisPackageName = packageName;
 	}
 	
 //	public void setToCompileVariableName(boolean toCompress) {

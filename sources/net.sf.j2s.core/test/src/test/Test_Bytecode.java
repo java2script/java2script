@@ -6,22 +6,22 @@ public class Test_Bytecode extends Test_ {
 	double y = 4.4;
 
 	void setX(int x) {
-		assert(x == 3);
 		System.out.println("BC_setX(int) " + x);
+		assert(x == 3);
 		this.x = x;
 	}
 	
 	void setX(double x) {
-		assert(x == 1.1);
 		System.out.println("BC_setX(double) " + x);
+		assert(x == 1.1 || x == 4.4);
 		// in SwingJS this next call causes an infinite loop
 		//setX((int) x);
 	}
 	
 
 	void setX(Double x) {
-		assert(false);
 		System.out.println("BC_setX(Number) " + x);
+		assert(false);
 		// note that in JavaScript, the above construction uses "valueOf" not "toString" for x.
 		// this results in reporting "3" for new Double(3.0) instead of "3.0"
 	}

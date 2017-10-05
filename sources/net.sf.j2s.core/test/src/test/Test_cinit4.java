@@ -11,6 +11,4 @@ class Test_cinit4 {
 		assert(Test_Cinit.p == p);
 	}
 
-	
-	
 }

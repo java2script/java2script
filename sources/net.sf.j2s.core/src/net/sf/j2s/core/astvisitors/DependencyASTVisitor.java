@@ -34,7 +34,6 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import net.sf.j2s.core.adapters.Bindings;
-import net.sf.j2s.core.adapters.TypeAdapter;
 
 /**
  * 
@@ -318,17 +317,23 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		// save the Clazz.declarePackage for later
 		String js = buf.toString();
 		String prefix = "";
-		if (js.indexOf("Clazz.declarePackage") == 0) {
+		String suffix = "";
+		if (js.indexOf("p$.") < 0)
+			js = js.replace(",p$=C$.prototype","");
+		if (js.indexOf("I$") == js.lastIndexOf("I$"))
+			js = js.replace(",I$=[]","");
+		if (js.indexOf("var P$=") == 0) {
 			int index = js.indexOf("\r\n");
-			prefix = js.substring(0, index + 2);
+			prefix = "(function(){" + js.substring(0, index + 2);
 			js = js.substring(index + 2);
+			suffix = "})();\r\n";
 		}
 		if (musts.size() == 0) {// && requires.size() == 0 && optionals.size() == 0) {
-			if (ASTScriptVisitor.needsWrapper(js))
-				js = "(function() {\r\n" + js + "}) ();\r\n";
+			if (prefix == "")
+				js = "(function() {\r\n" + js + "})();\r\n";
 		} else {
 			buf = new StringBuffer();
-			buf.append("Clazz.load (");
+			buf.append("Clazz.load(");
 
 			// add must/requires
 
@@ -385,7 +390,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			buf.append(");\r\n");
 			js = buf.toString();
 		}
-		return prefix + js;
+		return prefix + js + suffix;
 	}	
 	
 //	/**
@@ -1123,7 +1128,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			qualifiedName = superBinding.getQualifiedName();
 			qn.binding = superBinding;
 		}
-		qualifiedName = TypeAdapter.discardGenericType(qualifiedName);
+		qualifiedName = removeBrackets(qualifiedName);
 		qn.qualifiedName = qualifiedName;
 		if (isQualifiedNameOK(qualifiedName, node)) {
 			musts.add(qn);

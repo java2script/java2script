@@ -4,6 +4,7 @@ public interface Test_Interface {
 	
 	int x = 3;
 	String y = "y";
+	String[] s = new String[3];
 	
 	
   public static void main(String[] args) {

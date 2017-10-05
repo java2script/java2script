@@ -707,7 +707,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		if (right instanceof ArrayType) {
 			buffer.append(j2sGetArrayClass(binding, 1));
 		} else {
-			buffer.append("\"" + ASTKeywordVisitor.removeBrackets(binding.getQualifiedName()) + "\"");
+			buffer.append("\"" + removeBrackets(binding.getQualifiedName()) + "\"");
 			// right.accept(this);
 		}
 		buffer.append(")");
@@ -995,7 +995,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			buffer.append(j2sGetArrayClass(binding, 1));
 		} else {
 			// BH we are creating a new Class object around this class
-			buffer.append("Clazz.$newClass(" + ASTKeywordVisitor.removeBrackets(binding.getQualifiedName()) + ")");
+			buffer.append("Clazz.$newClass(" + removeBrackets(binding.getQualifiedName()) + ")");
 		}
 		return false;
 	}
@@ -1086,7 +1086,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	static String j2sGetArrayClass(ITypeBinding type, int dimFlag) {
 		ITypeBinding ebinding = type.getElementType();
 		String params = (ebinding.isPrimitive() ? getPrimitiveTYPE(ebinding.getName())
-				: ASTKeywordVisitor.removeBrackets(ebinding.getQualifiedName()))
+				: removeBrackets(ebinding.getQualifiedName()))
 				+ (dimFlag == 0 ? "" : ", " + dimFlag * type.getDimensions());
 		return (dimFlag > 0 ? "Clazz.arrayClass$(" + params + ")" : " Clazz.newArray$(" + params);
 	}
@@ -1109,7 +1109,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		// NOTE: These are the same as standard Java Spec, with the exception of
 		// Short, which is "H" instead of "S"
 
-		switch (name = ASTKeywordVisitor.removeBrackets(name)) {
+		switch (name = removeBrackets(name)) {
 		case "boolean":
 			name = "Z";
 			break;
@@ -1153,29 +1153,6 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			name += arrays;
 		}
 		return name;
-	}
-
-	public static String removeBrackets(String qName) {
-		if (qName == null || qName.indexOf('<') < 0)
-			return qName;
-		StringBuffer buf = new StringBuffer();
-		int ltCount = 0;
-		char c;
-		for (int i = 0, len = qName.length(); i < len; i++) {
-			switch (c = qName.charAt(i)) {
-			case '<':
-				ltCount++;
-				continue;
-			case '>':
-				ltCount--;
-				continue;
-			default:
-				if (ltCount == 0)
-					buf.append(c);
-				continue;
-			}
-		}
-		return buf.toString().trim();
 	}
 
 	public static void setNoQualifiedNamePackages(String names) {
@@ -1540,7 +1517,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	 * @param varBinding
 	 */
 	private void addQualifiedNameFromBinding(IVariableBinding varBinding) {
-		appendShortenedQualifiedName(varBinding.getDeclaringClass().getQualifiedName(), isStatic(varBinding), true);
+		appendShortenedQualifiedName(thisPackageName, varBinding.getDeclaringClass().getQualifiedName(), isStatic(varBinding), true);
 	}
 
 	protected void addVariable(FinalVariable f, String identifier, IBinding binding) {
@@ -1575,7 +1552,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				superLevel++;
 				if (Bindings.isSuperType(declaringClass, typeBinding)) {
 					if (superLevel == 1) {
-						buffer.append(isPrivate ? "P$." : "this.");
+						buffer.append(isPrivate ? "p$." : "this.");
 						isThis = true;
 					} else {
 						name = typeBinding.getQualifiedName();
@@ -1636,6 +1613,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		// It will require synchronous loading,
 		// but it will ensure that a class is only
 		// loaded when it is really needed.
+		className = removeBrackets(className);
 		mustEscape &= (className.indexOf(".") >= 0 && !isClassKnown(className));
 		if (mustEscape) {
 			if (doCache) {
@@ -1644,14 +1622,17 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					return;
 				}
 				Integer n = getStaticNameIndex(className);
-				buffer.append("(I$[" + n + "] || (I$[" + n + "]=");
+				if (n == null)
+					doCache = false;
+				else
+					buffer.append("(I$[" + n + "] || (I$[" + n + "]=");
 			}
 			buffer.append("Clazz.static$('");
 		}
 		if (methodQualifier == null) {
 			buffer.append(className);
 		} else if (mustEscape) {
-			buffer.append(fixNameNoC$(className));
+			buffer.append(fixNameNoC$(null, className));
 		} else {
 			methodQualifier.accept(this);
 		}
@@ -1665,11 +1646,10 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	 * @param isStatic
 	 * @param doCache
 	 */
-	protected void appendShortenedQualifiedName(String name, boolean isStatic, boolean doCache) {
+	protected void appendShortenedQualifiedName(String packageName, String name, boolean isStatic, boolean doCache) {
 		name = removeBrackets(name);
-		String shortName = (doCache ? fixName(name) : fixNameNoC$(name));
-		if (isStatic && !shortName.startsWith("C$.") && !shortName.equals("C$")) {
-//			buffer.append("<<" + name + " " + shortName + " " + doCache + " " + isClassKnown(name) + ">>");
+		String shortName = (doCache ? fixName(name) : fixNameNoC$(packageName, name));
+		if (isStatic && (shortName.length() < 2 || shortName.charAt(1) != '$')) {
 			if (!doCache || isClassKnown(name))
 				name = shortName;
 	//		buffer.append("<<" + name + " " + ">>");
@@ -1753,13 +1733,12 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				&& !qName.startsWith("net.sf.j2s.html.");
 	}
 
-	protected String fixNameNoC$(String name) {
-		return (name == null ? null : TypeAdapter.assureQualifiedName(TypeAdapter.getShortenedName(null, name, false)));
-//		return (name == null ? null : TypeAdapter.assureQualifiedName(getShortenedQualifiedName(name)));
+	protected String fixNameNoC$(String packageName, String name) {
+		return (name == null ? null : TypeAdapter.assureQualifiedName(packageName, TypeAdapter.getShortenedName(null, name, false)));
 	}
 
 	protected String fixName(String name) {
-		return (name == null ? null : TypeAdapter.assureQualifiedName(getShortenedQualifiedName(name)));
+		return (name == null ? null : TypeAdapter.assureQualifiedName(thisPackageName, getShortenedQualifiedName(name)));
 	}
 
 	/**

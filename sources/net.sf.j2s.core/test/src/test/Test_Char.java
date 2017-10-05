@@ -11,7 +11,7 @@ class Test_Char extends Test_ {
 		int i = (int) c;
 		c = (char) 0xd800df84;
 		assert(i == 57220);
-		System.out.println(s.length() + " " + Character.charCount(s.codePointAt(0)) + " " + Character.getName(c));
+		System.out.println(s.length() + " ? " + Character.charCount(s.codePointAt(0)) + " " + Character.getName(c));
 		
 		assert(getIntFromChar1('c') == 99);
 		assert(getIntFromChar2('c') == 99);

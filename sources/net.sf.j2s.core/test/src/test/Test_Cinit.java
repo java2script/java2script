@@ -12,10 +12,10 @@ class Test_Cinit extends Test_ {
 	}
 
 	public static void main(String[] args) {
-		System.out.println(i);
-		System.out.println(p);
+		System.out.println("i is " + i);
+		System.out.println("p is " + p);
 		assert (i == 0 && p == 33);
-		System.out.println(Test_cinit4.j);
+		System.out.println("Test_cint4.j is " + Test_cinit4.j);
 		assert (Test_cinit4.j == 0);
 		new Test_cinit4(33);
 		System.out.println("Test_Cinit OK");

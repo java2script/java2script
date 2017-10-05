@@ -35,7 +35,6 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 
 import net.sf.j2s.core.adapters.Bindings;
 import net.sf.j2s.core.adapters.FieldAdapter;
-import net.sf.j2s.core.adapters.PackageAdapter;
 import net.sf.j2s.core.adapters.TypeAdapter;
 
 @Deprecated
@@ -59,10 +58,9 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 				swt + ".layout", 
 				swt + ".widgets"
 		};
-		String[] pkgs = PackageAdapter.basePackages;
-		String[] packages = new String[swtInnerPackages.length + pkgs.length];
-		System.arraycopy(pkgs, 0, packages, 0, pkgs.length);
-		System.arraycopy(swtInnerPackages, 0, packages, pkgs.length, swtInnerPackages.length);
+		String[] packages = new String[swtInnerPackages.length + basePackages.length];
+		System.arraycopy(basePackages, 0, packages, 0, basePackages.length);
+		System.arraycopy(swtInnerPackages, 0, packages, basePackages.length, swtInnerPackages.length);
 		swtPackages = packages;
 	}
 

@@ -20,7 +20,7 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.WildcardType;
 
-import net.sf.j2s.core.astvisitors.ASTKeywordVisitor;
+import net.sf.j2s.core.astvisitors.ASTEmptyVisitor;
 
 /**
  * 
@@ -34,6 +34,7 @@ public class TypeAdapter extends AbstractPluginAdapter {
 
 	private String thisClassName = "";
 	private String fullClassName = "";
+	private String thisPackageName;
 
 	public String getClassName() {
 		return thisClassName;
@@ -41,7 +42,7 @@ public class TypeAdapter extends AbstractPluginAdapter {
 
 	public void setClassName(String className) {
 		thisClassName = className;
-		String thisPackageName = visitor.getPackageName();
+		thisPackageName = visitor.getPackageName();
 		fullClassName = (thisPackageName == null || thisPackageName.length() == 0 
 				|| "java.lang".equals(thisPackageName)
 				|| thisClassName.startsWith("C$")
@@ -51,17 +52,6 @@ public class TypeAdapter extends AbstractPluginAdapter {
 
 	public String getFullClassName() {
 		return fullClassName;
-	}
-
-	/**
-	 * Discard generic type from the given full class name. There are no generic
-	 * types in JavaScript.
-	 * 
-	 * @param name
-	 * @return
-	 */
-	static public String discardGenericType(String name) {
-		return (name == null ? null : ASTKeywordVisitor.removeBrackets(name));
 	}
 
 	/**
@@ -81,7 +71,7 @@ public class TypeAdapter extends AbstractPluginAdapter {
 		if (binding == null) {
 			return false;
 		}
-		String bindingName = discardGenericType(binding.getQualifiedName());
+		String bindingName = ASTEmptyVisitor.removeBrackets(binding.getQualifiedName());
 		if (name.equals(bindingName)) {
 			return true;
 		}
@@ -100,8 +90,8 @@ public class TypeAdapter extends AbstractPluginAdapter {
 		return false;
 	}
 
-	static public String getShortenedPackageNameFromClassName(String fullName) {
-		return assureQualifiedName(getShortenedName(null, fullName.substring(0, fullName.lastIndexOf('.')), true));
+	static public String getShortenedPackageNameFromClassName(String thisPackageName, String fullName) {
+		return assureQualifiedName(thisPackageName, getShortenedName(null, fullName.substring(0, fullName.lastIndexOf('.')), true));
 	}
 
 	/**
@@ -124,8 +114,8 @@ public class TypeAdapter extends AbstractPluginAdapter {
 		if (name == null) 
 			return null;
 		if (!isPackage) {
-			className= ASTKeywordVisitor.removeBrackets(className);
-			name = ASTKeywordVisitor.removeBrackets(name);
+			className= ASTEmptyVisitor.removeBrackets(className);
+			name = ASTEmptyVisitor.removeBrackets(name);
 		}
 		if (className != null) {
 			if (name.equals(className))
@@ -202,9 +192,14 @@ public class TypeAdapter extends AbstractPluginAdapter {
 	}
 
 	@SuppressWarnings("null")
-	public static String assureQualifiedName(String name) {
-		if (name == null || name.length() == 0) {
+	public static String assureQualifiedName(String thisPackageName, String name) {
+		if (name == null || name.length() == 0)
 			return name;
+		if (thisPackageName != null) {
+			if (name.startsWith(thisPackageName + "."))
+				return "P$." + name.substring(thisPackageName.length() + 1);
+			if (name.equals(thisPackageName))
+				return "P$";
 		}
 		String[] keywords = FieldAdapter.keywords;
 		String[] packages = null;
