@@ -13,6 +13,7 @@
 
 // TODO: Check String.contentEquals -- CharSequence?  StringBuffer.shareValue??
 
+// BH 10/4/2017 5:06:43 PM conversion to $clinit$ and call-secific dynamic class loading 
 // BH 9/21/2017 10:39:26 PM adds ClassLoader.getSystemClassLoader().setDefaultAssertionStatus$Z(tf)
 // BH 9/7/2017 10:53:30 AM adds Clazz.assert; deprecates all Clazz.floatToInt, floatToByte, etc. 
 // BH 8/30/2017 6:40:11 PM adds $newClass()
@@ -792,10 +793,17 @@ Clazz.declareInterface = function (prefix, name, interfacez) {
 };
 
 Clazz.decorateAsClass = function (prefix, name, clazzFun, clazzParent, 
-    interfacez, parentClazzInstance) {
+    interfacez, mode) {
   var prefixName = (prefix ? prefix.__PKG_NAME__ || prefix.__CLASS_NAME__ : null);
   var qName = (prefixName ? prefixName + "." : "") + name;
-    if (Clazz._Loader._classPending[qName]) {
+  
+  if (typeof mode == "number") {
+    if ((mode & 1) != (clazzParent ? 1 : 0)) 
+      alert("j2sSwingjs:decorateAsClass: Missing superclass required for " + qName + " check inner class order?");
+    if ((mode & 2) != (interfacez ? 2 : 0)) 
+      alert("j2sSwingjs:decorateAsClass: Missing superinterface required for " + qName + " check inner class order?");
+  }      
+  if (Clazz._Loader._classPending[qName]) {
       delete Clazz._Loader._classPending[qName];
       Clazz._Loader._classCountOK++;
       Clazz._Loader._classCountPending--;
@@ -808,11 +816,15 @@ Clazz.decorateAsClass = function (prefix, name, clazzFun, clazzParent,
   else if (!clazzFun)
     clazzFun = function () {Clazz.newInstance$(this,arguments)};
   decorateFunction(clazzFun, prefix, name);
+  return Clazz.setParents(clazzFun, clazzParent, interfacez);
+};
+
+Clazz.setParents = function(clazzFun, clazzParent, interfacez) {
   inheritClass(clazzFun, clazzParent);
   if (interfacez)
     implementOf(clazzFun, interfacez);
   return clazzFun;
-};
+}
 
 Clazz.cloneFinals = function () {
   var o = {};
@@ -1023,19 +1035,20 @@ var extendJO = Clazz._extendJO = function(c, name, isNumber) {
 
 };
 
-var decorateAsType = function (clazzFun, qClazzName, clazzParent, 
-    interfacez, parentClazzInstance, inheritClazzFuns, _decorateAsType) {
-   extendJO(clazzFun, qClazzName);
-  clazzFun.equals = inF.equals;
-  clazzFun.getName = inF.getName;
-  if (inheritClazzFuns)
-    for (var i = innerNames.length, name; --i >= 0;)
-      clazzFun[name = innerNames[i]] = inF[name];
-  inheritClass(clazzFun, clazzParent);
-  if (interfacez)
-    implementOf(clazzFun, interfacez);
-  return clazzFun;
-};
+// Deprecated
+// var decorateAsType = function (clazzFun, qClazzName, clazzParent, 
+//     interfacez, parentClazzInstance, inheritClazzFuns, _decorateAsType) {
+//    extendJO(clazzFun, qClazzName);
+//   clazzFun.equals = inF.equals;
+//   clazzFun.getName = inF.getName;
+//   if (inheritClazzFuns)
+//     for (var i = innerNames.length, name; --i >= 0;)
+//      clazzFun[name = innerNames[i]] = inF[name];
+//   inheritClass(clazzFun, clazzParent);
+//   if (interfacez)
+//     implementOf(clazzFun, interfacez);
+//   return clazzFun;
+// };
 
 /**
  * Implementation of Java's keyword "implements".
@@ -1519,11 +1532,6 @@ var inheritClass = Clazz._inheritClass = function (clazzThis, clazzSuper, objSup
       // Don't change clazzThis.protoype! Keep it!
     } else if (objSuper) {
       doDebugger();
-      // ! Unsafe reference prototype to an instance!
-      // Feb 19, 2006 --josson
-      // OK for this reference to an instance, as this is anonymous instance,
-      // which is not referenced elsewhere.
-      // March 13, 2006
       clazzThis.prototype = objSuper; 
     } else if (clazzSuper == Number) {
       clazzThis.prototype = new Number ();
@@ -1538,12 +1546,6 @@ var inheritClass = Clazz._inheritClass = function (clazzThis, clazzSuper, objSup
     stack1[i] = stack[i];
   clazzThis.__STACK__ = stack1;
   clazzThis.__STACKPT__ = n; 
-
-  /*
-   * Is it necessary to reassign the class name?
-   * Mar 10, 2006 --josson
-   */
-  //clazzThis.__CLASS_NAME__ = thisClassName;
   clazzThis.prototype.__CLASS_NAME__ = clazzThis.__CLASS_NAME__;
 };
 
@@ -1551,20 +1553,16 @@ var inheritClass = Clazz._inheritClass = function (clazzThis, clazzSuper, objSup
 
 Clazz.declarePackage ("java.io");
 //Clazz.declarePackage ("java.lang");
-Clazz.declarePackage ("java.lang.annotation"); // java.lang
-Clazz.declarePackage ("java.lang.instrument"); // java.lang
-Clazz.declarePackage ("java.lang.management"); // java.lang
-Clazz.declarePackage ("java.lang.reflect"); // java.lang
-Clazz.declarePackage ("java.lang.ref");  // java.lang.ref
+Clazz.declarePackage ("java.lang.annotation");
+Clazz.declarePackage ("java.lang.instrument");
+Clazz.declarePackage ("java.lang.management");
+Clazz.declarePackage ("java.lang.reflect");
+Clazz.declarePackage ("java.lang.ref");
 java.lang.ref.reflect = java.lang.reflect;
 Clazz.declarePackage ("java.util");
-//var reflect = Clazz.declarePackage ("java.lang.reflect");
 Clazz.declarePackage ("java.security");
 
 
-/*
- * Consider these interfaces are basic!
- */
 Clazz.declareInterface (java.io,"Closeable");
 Clazz.declareInterface (java.io,"DataInput");
 Clazz.declareInterface (java.io,"DataOutput");
