@@ -45,20 +45,9 @@ import net.sf.j2s.core.adapters.ExtendedAdapter;
 public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 	
 	private boolean isDebugging = false;
-	/**
-	 * allow @j2sXHTML and @j2sXCSS extensions for Javadoc
-	 * 
-	 * experimental; not implemented; uses adapters.ExtendedAdapter
-	 * 
-	 */
-	private boolean allowExtensions = false;
+
 	private ArrayList<Javadoc> rootJavaDocs; 
 
-	public void setAllowExtensions(boolean tf) {
-		allowExtensions = tf;
-	}
-
-	
 	public boolean isDebugging() {
 		return isDebugging;
 	}

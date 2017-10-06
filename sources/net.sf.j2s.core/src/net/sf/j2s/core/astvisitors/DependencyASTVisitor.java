@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import net.sf.j2s.core.adapters.Bindings;
+import net.sf.j2s.core.adapters.ExtendedAdapter;
 
 /**
  * 
@@ -506,8 +507,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 				&& !"long".equals(qualifiedName) && !"short".equals(qualifiedName) && !"byte".equals(qualifiedName)
 				&& !"char".equals(qualifiedName) && !"boolean".equals(qualifiedName) && !"void".equals(qualifiedName)
 				&& !qualifiedName.startsWith("org.w3c.dom.")
-				&& !qualifiedName.startsWith("org.eclipse.swt.internal.xhtml.")
-				&& !qualifiedName.startsWith("net.sf.j2s.html.")) {
+				&& !(allowExtensions && ExtendedAdapter.isHTMLClass(qualifiedName, false))) {
 			ASTNode root = node.getRoot();
 			if (root instanceof CompilationUnit) {
 				CompilationUnit type = (CompilationUnit) root;

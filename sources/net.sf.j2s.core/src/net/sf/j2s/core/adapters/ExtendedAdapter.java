@@ -187,6 +187,28 @@ public class ExtendedAdapter extends AbstractPluginAdapter {
 		}
 		return false;
 	}
+
+	public static String trimName(String name, boolean isAll) {
+		if (name.indexOf("net.sf.j2s.html.") == 0) {
+			return name.substring(16);
+		}
+		if (isAll) {
+			String xhtml = "org.eclipse.swt.internal.xhtml.";
+			if (name.indexOf(xhtml) == 0) {
+				name = name.substring(xhtml.length());
+			}
+			xhtml = "$wt.internal.xhtml.";
+			if (name.indexOf(xhtml) == 0) {
+				name = name.substring(xhtml.length());
+			}
+		}
+		return name;
+	}
+
+	public static boolean isHTMLClass(String name, boolean isExact) {
+		return (isExact ? name.equals("net.sf.j2s.html") || name.equals("org.eclipse.swt.internal.xhtml") 
+				: name.startsWith("org.eclipse.swt.internal.xhtml.") || name.startsWith("net.sf.j2s.html."));
+	}
 	
 //	/*
 //	 * Read HTML/CSS sources from @j2sXHTML, @J2SXCSS or others

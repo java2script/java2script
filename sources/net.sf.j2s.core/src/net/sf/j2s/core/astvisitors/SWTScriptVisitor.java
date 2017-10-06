@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
 import net.sf.j2s.core.adapters.Bindings;
+import net.sf.j2s.core.adapters.ExtendedAdapter;
 import net.sf.j2s.core.adapters.FieldAdapter;
 import net.sf.j2s.core.adapters.TypeAdapter;
 
@@ -105,7 +106,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		IBinding binding = node.resolveBinding();
 		if (binding != null && binding instanceof ITypeBinding) {
 			String name = ((ITypeBinding) binding).getQualifiedName();
-			if (name.startsWith("org.eclipse.swt.internal.xhtml.") || name.startsWith("net.sf.j2s.html.")) {
+			if (ExtendedAdapter.isHTMLClass(name, false)) {
 				String identifier = node.getIdentifier();
 				if ("window".equals(identifier)) {
 					identifier = "w$";
@@ -180,18 +181,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 						if (name.indexOf("java.lang.") == 0) {
 							name = name.substring(10);
 						}
-						String xhtml = "org.eclipse.swt.internal.xhtml.";
-						if (name.indexOf(xhtml) == 0) {
-							name = name.substring(xhtml.length());
-						}
-						xhtml = "net.sf.j2s.html.";
-						if (name.indexOf(xhtml) == 0) {
-							name = name.substring(xhtml.length());
-						}
-						xhtml = "$wt.internal.xhtml.";
-						if (name.indexOf(xhtml) == 0) {
-							name = name.substring(xhtml.length());
-						}
+						name = ExtendedAdapter.trimName(name, true);
 						if ("window".equals(name)) {
 							name = "w$";
 						} else if ("document".equals(name)) {
@@ -219,9 +209,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 			}
 		}
 		Name qName = node.getQualifier();
-		String nodeStr = qName.toString();
-		if (nodeStr.equals("net.sf.j2s.html")
-				|| nodeStr.equals("org.eclipse.swt.internal.xhtml")) {
+		if (ExtendedAdapter.isHTMLClass(qName.toString(),  true)) {
 			node.getName().accept(this);
 			return false;
 		}
@@ -266,28 +254,10 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 				fqName = "noname";
 			}
 			fqName = getShortenedQualifiedName(fqName);
-			String filterKey = "org.eclipse.swt.internal.xhtml.";
-			if (fqName.startsWith(filterKey)) {
+			String filterName = ExtendedAdapter.trimName(fqName, true);
+			if (!filterName.equals(fqName)) {
 				buffer.append(" new ");
-				buffer.append(fqName.substring(filterKey.length()));
-				buffer.append(" (");
-				visitList(node.arguments(), ", ");
-				buffer.append(")");
-				return false;
-			}
-			filterKey = "net.sf.j2s.html.";
-			if (fqName.startsWith(filterKey)) {
-				buffer.append(" new ");
-				buffer.append(fqName.substring(filterKey.length()));
-				buffer.append(" (");
-				visitList(node.arguments(), ", ");
-				buffer.append(")");
-				return false;
-			}
-			filterKey = "$wt.internal.xhtml.";
-			if (fqName.startsWith(filterKey)) {
-				buffer.append(" new ");
-				buffer.append(fqName.substring(filterKey.length()));
+				buffer.append(filterName);
 				buffer.append(" (");
 				visitList(node.arguments(), ", ");
 				buffer.append(")");

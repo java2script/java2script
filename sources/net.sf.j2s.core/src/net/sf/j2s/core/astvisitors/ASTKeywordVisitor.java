@@ -60,6 +60,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import net.sf.j2s.core.adapters.Bindings;
+import net.sf.j2s.core.adapters.ExtendedAdapter;
 import net.sf.j2s.core.adapters.FieldAdapter;
 import net.sf.j2s.core.adapters.FinalVariable;
 import net.sf.j2s.core.adapters.J2SMapAdapter;
@@ -839,8 +840,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		Name qualifier = node.getQualifier();
 		if (!checkStaticBinding(varBinding) || qualifier.resolveBinding() instanceof ITypeBinding)
 			varBinding = null;
-		String nodeStr = qualifier.toString();
-		boolean skipQualifier = (nodeStr.equals("net.sf.j2s.html") || nodeStr.equals("org.eclipse.swt.internal.xhtml"));
+		boolean skipQualifier = (allowExtensions && ExtendedAdapter.isHTMLClass(qualifier.toString(), true));
 		String name = null;
 		if (!skipQualifier && parent != null && !(parent instanceof QualifiedName)) {
 			while (qualifier instanceof QualifiedName) {
@@ -865,9 +865,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					// RadiusData.EnumType e = RadiusData.EnumType.THREE;
 					// avoid generate duplicated RadiusData
 					name = typeBinding.getQualifiedName();
-					if (name.indexOf("net.sf.j2s.html.") == 0) {
-						name = name.substring(16);
-					}
+					if (allowExtensions)
+						name = ExtendedAdapter.trimName(name, false); //?? probably should be true
 					if (name.indexOf("java.lang.") == 0) {
 						name = name.substring(10);
 					}
@@ -910,13 +909,10 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			return false;
 		}
 		IBinding binding = node.resolveBinding();
-		if (binding instanceof ITypeBinding) {
-			ITypeBinding typeBinding = (ITypeBinding) binding;
-			String name = typeBinding.getQualifiedName();
-			if (name.startsWith("org.eclipse.swt.internal.xhtml.") || name.startsWith("net.sf.j2s.html.")) {
-				buffer.append(node.getIdentifier());
-				return false;
-			}
+		if (allowExtensions && binding instanceof ITypeBinding
+			&& ExtendedAdapter.isHTMLClass(((ITypeBinding) binding).getQualifiedName(), false)) {
+			buffer.append(node.getIdentifier());
+			return false;
 		}
 		ASTNode xparent = node.getParent();
 		if (xparent == null) {
@@ -1727,10 +1723,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	 */
 	protected boolean checkStaticBinding(IVariableBinding varBinding) {
 		ITypeBinding declaring;
-		String qName;
 		return isStatic(varBinding) && (declaring = varBinding.getDeclaringClass()) != null
-				&& !(qName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
-				&& !qName.startsWith("net.sf.j2s.html.");
+				&& (!allowExtensions || !ExtendedAdapter.isHTMLClass(declaring.getQualifiedName(), false));
 	}
 
 	protected String fixNameNoC$(String packageName, String name) {

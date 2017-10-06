@@ -164,6 +164,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		methodOverloadingSupported = parent.methodOverloadingSupported;
 		interfaceCastingSupported = parent.interfaceCastingSupported;
 		definedPackageNames = parent.definedPackageNames;
+		allowExtensions = parent.allowExtensions;
 		setDebugging(parent.isDebugging());
 		// BH abandoning all compiler variable name compressing -- Google
 		// Closure Compiler is way better

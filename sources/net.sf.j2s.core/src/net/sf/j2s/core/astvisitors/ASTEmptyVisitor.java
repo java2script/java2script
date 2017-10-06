@@ -187,7 +187,24 @@ public class ASTEmptyVisitor extends ASTVisitor {
 
 	// TODO: Clazz.$new(test.Test_Interface2.construct,[]); from 	  new Test_Interface2();
 
-    // 
+	/**
+	 * allow @j2sXHTML and @j2sXCSS extensions for Javadoc
+	 * 
+	 * experimental; not implemented; uses adapters.ExtendedAdapter
+	 * 
+	 */
+	protected boolean allowExtensions = false;
+
+	/**
+	 * not implemented 
+	 * 
+	 * @param tf
+	 */
+	public void setAllowExtensions(boolean tf) {
+		allowExtensions = tf;
+	}
+
+	
 	/**
 	 * Prove access to C$.$clinit$ when a static field is accessed 
 	 * 
