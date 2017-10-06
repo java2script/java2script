@@ -117,6 +117,10 @@ import net.sf.j2s.core.adapters.VariableAdapter;
  */
 public class ASTEmptyVisitor extends ASTVisitor {
 
+	ASTEmptyVisitor() {
+		super();
+	}
+	
 	protected String thisPackageName;
 	
 	public static String[] basePackages =  {

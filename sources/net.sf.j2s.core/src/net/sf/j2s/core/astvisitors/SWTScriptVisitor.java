@@ -41,6 +41,12 @@ import net.sf.j2s.core.adapters.TypeAdapter;
 @Deprecated
 public class SWTScriptVisitor extends ASTScriptVisitor {
 
+	
+	public SWTScriptVisitor() {
+		super();
+		setAllowExtensions(true);
+	}
+	
 	private static String[] swtPackages = null;
 	static {
 		String swt = "org.eclipse.swt";
