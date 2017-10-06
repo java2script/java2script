@@ -47,7 +47,6 @@ public class TypeAdapter extends AbstractPluginAdapter {
 				|| "java.lang".equals(thisPackageName)
 				|| thisClassName.startsWith("C$")
 				? thisClassName : thisPackageName + '.' + thisClassName);
-//		System.err.println("TypeAdapter setting className,fullClassName:" + thisClassName + " " + fullClassName);
 	}
 
 	public String getFullClassName() {

@@ -119,7 +119,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	 * of bytes
 	 * 
 	 */
-	protected StaticBuffer staticFieldDefBuffer = new StaticBuffer();
+	protected StaticBuffer staticBuffer = new StaticBuffer();
 
 	/**
 	 * StaticBuffer holds definitions that need to come after all methods are
@@ -1184,7 +1184,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			buffer.append("($p$ = ");
 			addFieldName(left, varBinding);
 			buffer.append(", ");
-			staticFieldDefBuffer.addType("p");
+			staticBuffer.addType("p");
 		}
 
 		addFieldName(left, varBinding);
@@ -1476,7 +1476,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		case "byte":
 			if (!isArray) {
 				classIntArray = "$" + leftName.charAt(0) + "$[0]";
-				staticFieldDefBuffer.addType(leftName);
+				staticBuffer.addType(leftName);
 			}
 			break;
 		}
