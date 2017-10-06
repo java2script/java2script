@@ -235,6 +235,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		addDeclareOrDecorate(node, binding, false, false, true, packageAndName);
 		String oldClassName = typeAdapter.getClassName();
 		typeAdapter.setClassName(shortClassName);
+		// endVisit:
 		addAllMethods(node, node.bodyDeclarations(), false, false, true);
 		buffer.append(")");
 		typeAdapter.setClassName(oldClassName);
@@ -471,9 +472,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public void endVisit(EnumDeclaration node) {
-		if (isInnerClassInit(node))
+		if (node.resolveBinding() == null || isInnerClassInit(node))
 			return;
-		buffer.append(staticBuffer);
 		addAllMethods(node, node.bodyDeclarations(), true, false, false);
 		super.endVisit(node);
 	}
@@ -1105,7 +1105,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 		StaticBuffer oldStaticBuffer = null;
 
-		if (!isEnum) {
+		if (isEnum) {
+			buffer.append(staticBuffer);
+		} else {
 
 			// if this is not an Enum, save the old static def buffer; start a
 			// new one
@@ -1183,6 +1185,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 		if (isEnum) {
 			buffer.append(staticBuffer.getAssertString());
+			addDefaultConstructor();
+			addEnumConstants(((EnumDeclaration) node).enumConstants());
 		} else {
 			buffer.append(staticBuffer); // also writes the assert string
 			if (isAnonymous) {
@@ -1192,23 +1196,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				// otherwise, dump the oldStatic buffer and start a new one
 				buffer.append(oldStaticBuffer);
 				staticBuffer = new StaticBuffer();
+				if (!isInterface)
+					addDefaultConstructor();
 			}
 		}
 
 		if (!isAnonymous) {
-
-			if (!isInterface) {
-
-				// make sure we have a default constructor, even if one is not
-				// given
-
-				addDefaultConstructor();
-			}
-			
-			if (isEnum) {
-				addEnumConstants(((EnumDeclaration) node).enumConstants());
-			}
-
 			readSources((BodyDeclaration) node, "@j2sSuffix", "\r\n", "\r\n", true, false);
 		}
 
