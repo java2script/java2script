@@ -841,7 +841,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		if (!checkStaticBinding(varBinding) || qualifier.resolveBinding() instanceof ITypeBinding)
 			varBinding = null;
 		boolean skipQualifier = (allowExtensions && ExtendedAdapter.isHTMLClass(qualifier.toString(), true));
-		String name = null;
+		String className = null;
 		if (!skipQualifier && parent != null && !(parent instanceof QualifiedName)) {
 			while (qualifier instanceof QualifiedName) {
 				IBinding binding = qualifier.resolveBinding();
@@ -864,15 +864,14 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					// Compiling inner Class or enum type, like:
 					// RadiusData.EnumType e = RadiusData.EnumType.THREE;
 					// avoid generate duplicated RadiusData
-					name = typeBinding.getQualifiedName();
+					className = typeBinding.getQualifiedName();
 					if (allowExtensions)
-						name = ExtendedAdapter.trimName(name, false); //?? probably should be true
-					if (name.indexOf("java.lang.") == 0) {
-						name = name.substring(10);
+						className = ExtendedAdapter.trimName(className, false); //?? probably should be true
+					if (className.indexOf("java.lang.") == 0) {
+						className = className.substring(10);
 					}
 					if (isStatic(nameBinding))
-						name = getStaticQualifier(name);
-				}
+						className = getQualifiedStaticName(null, className, true, true, false);				}
 			}
 		}
 
@@ -883,18 +882,18 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					// buffer.append("<qsn<");
 				} else {
 					buffer.append('(');
-					if (name == null)
+					if (className == null)
 						qualifier.accept(this);
 					else
-						buffer.append(name);
+						buffer.append(className);
 					buffer.append(", ");
 					addQualifiedNameFromBinding(varBinding);
 					buffer.append(')');
 				}
-			} else if (name == null) {
+			} else if (className == null) {
 				node.getQualifier().accept(this);
 			} else {
-				buffer.append(name);
+				buffer.append(className);
 			}
 			buffer.append('.');
 		}
@@ -920,21 +919,12 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			return false;
 		}
 		char ch = (buffer.length() == 0 ? '\0' : buffer.charAt(buffer.length() - 1));
+		// looking for "." or '"' here.
 		if (ch == '.' && xparent instanceof QualifiedName) {
 			if (binding != null && binding instanceof IVariableBinding) {
 				IVariableBinding varBinding = (IVariableBinding) binding;
 				ITypeBinding declaringClass = varBinding.getVariableDeclaration().getDeclaringClass();
-				String fieldName = getJ2SName(node);
-				if (J2SMapAdapter.checkSameName(declaringClass, fieldName)) {
-					buffer.append('$');
-				}
-				if (checkKeywordViolation(fieldName, false)) {
-					buffer.append('$');
-				}
-				if (declaringClass != null && isInheritedFieldName(declaringClass, fieldName)) {
-					fieldName = getFieldName(declaringClass, fieldName);
-				}
-				buffer.append(fixName(fieldName));
+				appendCheckedFieldName(getJ2SName(node), declaringClass, false);
 				return false;
 			}
 			buffer.append(node);
@@ -965,6 +955,16 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			buffer.append(name);
 		}
 		return false;
+	}
+
+	protected void appendCheckedFieldName(String fieldName, ITypeBinding classBinding, boolean checkPackages) {
+		if (checkKeywordViolation(fieldName, checkPackages))
+			buffer.append("$");
+		if (classBinding != null && J2SMapAdapter.checkSameName(classBinding, fieldName))
+			buffer.append("$");
+		if (classBinding != null && isInheritedFieldName(classBinding, fieldName))
+			fieldName = getFieldName(classBinding, fieldName);
+		buffer.append(fieldName);
 	}
 
 	public boolean visit(SimpleType node) {
@@ -1531,11 +1531,11 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				: code == PrimitiveType.BOOLEAN ? "false" : code == PrimitiveType.CHAR ? "'\\0'" : "0");
 	}
 
-	protected void appendFieldName(ASTNode parent, ITypeBinding declaringClass, boolean isPrivate) {
+	protected void appendClassNameAndDot(ASTNode parent, ITypeBinding declaringClass, boolean isPrivate) {
 		String name = declaringClass.getQualifiedName();
-		boolean isThis = false;
 		int superLevel = 0;
 		ITypeBinding originalType = null;
+		boolean isThis = false;
 		while (parent != null) {
 			boolean isAnonymous = (parent instanceof AnonymousClassDeclaration);
 			ITypeBinding typeBinding = (isAnonymous ? ((AnonymousClassDeclaration) parent).resolveBinding()
@@ -1550,37 +1550,36 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					if (superLevel == 1) {
 						buffer.append(isPrivate ? "p$." : "this.");
 						isThis = true;
-					} else {
-						name = typeBinding.getQualifiedName();
-						if (!isAnonymous)
-							break;
-						if ((name == null || name.length() == 0) && typeBinding.isLocal()) {
-							name = typeBinding.getBinaryName();
-							int idx0 = name.lastIndexOf(".");
-							if (idx0 == -1) {
-								idx0 = 0;
-							}
-							int idx1 = name.indexOf('$', idx0);
-							if (idx1 != -1) {
-								int idx2 = name.indexOf('$', idx1 + 1);
-								String parentAnon = "";
-								if (idx2 == -1) { // maybe the name is already
-													// "$1$2..." for Java5.0+ in
-													// Eclipse 3.2+
-									parent = parent.getParent();
-									while (parent != null) {
-										if (parent instanceof AbstractTypeDeclaration) {
-											break;
-										} else if (parent instanceof AnonymousClassDeclaration) {
-											AnonymousClassDeclaration atype = (AnonymousClassDeclaration) parent;
-											ITypeBinding aTypeBinding = atype.resolveBinding();
-											String aName = aTypeBinding.getBinaryName();
-											parentAnon = aName.substring(aName.indexOf('$')) + parentAnon;
-										}
-										parent = parent.getParent();
+					}
+					name = typeBinding.getQualifiedName();
+					if (!isAnonymous)
+						break;
+					if ((name == null || name.length() == 0) && typeBinding.isLocal()) {
+						name = typeBinding.getBinaryName();
+						int idx0 = name.lastIndexOf(".");
+						if (idx0 == -1) {
+							idx0 = 0;
+						}
+						int idx1 = name.indexOf('$', idx0);
+						if (idx1 != -1) {
+							int idx2 = name.indexOf('$', idx1 + 1);
+							String parentAnon = "";
+							if (idx2 == -1) { // maybe the name is already
+												// "$1$2..." for Java5.0+ in
+												// Eclipse 3.2+
+								parent = parent.getParent();
+								while (parent != null) {
+									if (parent instanceof AbstractTypeDeclaration) {
+										break;
+									} else if (parent instanceof AnonymousClassDeclaration) {
+										AnonymousClassDeclaration atype = (AnonymousClassDeclaration) parent;
+										ITypeBinding aTypeBinding = atype.resolveBinding();
+										String aName = aTypeBinding.getBinaryName();
+										parentAnon = aName.substring(aName.indexOf('$')) + parentAnon;
 									}
-									name = name.substring(0, idx1) + parentAnon + name.substring(idx1);
+									parent = parent.getParent();
 								}
+								name = name.substring(0, idx1) + parentAnon + name.substring(idx1);
 							}
 						}
 					}
@@ -1589,51 +1588,10 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			}
 			parent = parent.getParent();
 		}
-
-		if (!isThis) {
-			buffer.append("this");
-			buffer.append(b$name = ".b$[\"" + getShortenedQualifiedName(name) + "\"]");
-			buffer.append(".");
-		}
-	}
-
-	/**
-	 * Proved access to C$.$clinit$ when a static method is called.
-	 * 
-	 * @param methodQualifier
-	 * @param className
-	 * @param mustEscape
-	 */
-	protected void appendQualifiedStaticName(SimpleName methodQualifier, String className, boolean mustEscape, boolean doCache) {
-		// BH: The idea here is to load these on demand.
-		// It will require synchronous loading,
-		// but it will ensure that a class is only
-		// loaded when it is really needed.
-		className = removeBrackets(className);
-		mustEscape &= (className.indexOf(".") >= 0 && !isClassKnown(className));
-		if (mustEscape) {
-			if (doCache) {
-				if (className.equals(getFullClassName())) {
-					buffer.append("C$"); // anonymous class will be like this
-					return;
-				}
-				Integer n = getStaticNameIndex(className);
-				if (n == null)
-					doCache = false;
-				else
-					buffer.append("(I$[" + n + "] || (I$[" + n + "]=");
-			}
-			buffer.append("Clazz.static$('");
-		}
-		if (methodQualifier == null) {
-			buffer.append(className);
-		} else if (mustEscape) {
-			buffer.append(fixNameNoC$(null, className));
-		} else {
-			methodQualifier.accept(this);
-		}
-		if (mustEscape)
-			buffer.append(doCache ? "')))" : "')");
+		if (isThis)
+			return;
+		appendSyntheticReference(name);
+		buffer.append(".");
 	}
 
 	/**
@@ -1648,16 +1606,15 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		if (isStatic && (shortName.length() < 2 || shortName.charAt(1) != '$')) {
 			if (!doCache || isClassKnown(name))
 				name = shortName;
-	//		buffer.append("<<" + name + " " + ">>");
-			appendQualifiedStaticName(null, name, true, doCache);
+			getQualifiedStaticName(null, name, true, doCache, true);
 		} else {
 			buffer.append(shortName);
 		}
 	}
 
-	protected void appendStaticFieldValue(Expression initializer, Type fieldType) {
-		//TODO hard to believe this is correct - not developed? 
-		addExpressionAsTargetType(initializer, fieldType, "v", null);
+	protected void appendSyntheticReference(String name) {
+		buffer.append("this");
+		buffer.append(b$name = ".b$['" + fixNameNoC$(null, name) + "']");
 	}
 
 	/**
@@ -1727,6 +1684,13 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				&& (!allowExtensions || !ExtendedAdapter.isHTMLClass(declaring.getQualifiedName(), false));
 	}
 
+	/**
+	 * may return P$ if packageName is not null
+	 * 
+	 * @param packageName
+	 * @param name
+	 * @return
+	 */
 	protected String fixNameNoC$(String packageName, String name) {
 		return (name == null ? null : TypeAdapter.assureQualifiedName(packageName, TypeAdapter.getShortenedName(null, name, false)));
 	}
@@ -1794,6 +1758,71 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return null;
 	}
 
+	/**
+	 * Proved access to C$.$clinit$ when a static method is called or a static field is accessed.
+	 * 
+	 * @param methodQualifier
+	 *            SimpleName qualifier in qualifier.methodName()
+	 * @param className
+	 * @param mustEscape
+	 * @param doCache
+	 * @param doAppend
+	 */
+	protected String getQualifiedStaticName(SimpleName methodQualifier, String className, boolean mustEscape,
+			boolean doCache, boolean doAppend) {
+		// BH: The idea here is to load these on demand.
+		// It will require synchronous loading,
+		// but it will ensure that a class is only
+		// loaded when it is really needed.
+		className = removeBrackets(className);
+		mustEscape &= (className.indexOf(".") >= 0 && !isClassKnown(className));
+		String s = null;
+		if (!mustEscape) {
+			if (methodQualifier != null) {
+				methodQualifier.accept(this);
+				return  null;
+			}
+			s = className;
+			doCache = false;
+		}
+		Integer n = null;
+		if (doCache) {
+			if (className.equals(getFullClassName()))
+				s = "C$"; // anonymous class will be like this
+			else
+				n = getStaticNameIndex(className);
+		}
+		if (s == null) {
+			if (methodQualifier != null)
+				className = fixNameNoC$(null, className);
+			s = "Clazz.static$(";
+			String[] parts = className.split("\\.");
+			int nclass = 0;
+			for (int i = 0; i < parts.length; i++) {
+				String part = parts[i];
+				if (i == 0 && part.equals("C$")) {
+					s += "C$";
+					continue;
+				}
+				s += (i == 0 ? "'" : ".");
+				s += part;
+				if (Character.isUpperCase(part.charAt(0))) {
+					if (nclass > 0)
+						s = "Clazz.static$(" + s;
+					if (++nclass == 1 && s.indexOf("'") >= 0)
+						s += "'";
+					s += ")";
+				}
+			}
+			if (n != null)
+				s = "(I$[" + n + "] || (I$[" + n + "]=" + s + "))";
+		}
+		if (doAppend)
+			buffer.append(s);
+		return s;
+
+	}
+
 	private boolean haveDirectStaticAccess(Expression exp) {
 		return exp instanceof SimpleName
 				|| (exp instanceof QualifiedName && ((QualifiedName) exp).getQualifier() instanceof SimpleName)
@@ -1840,12 +1869,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				if (parent instanceof MethodInvocation) {
 					MethodInvocation mthInv = (MethodInvocation) parent;
 					if (mthInv.getExpression() == null) {
-						String name = declaringClass.getQualifiedName();
-						name = fixName(name);
-						if (name.length() != 0) {
-							buffer.append(name);
-							buffer.append(".");
-						}
+						addFixedQualifierWithDot(declaringClass);
 					}
 				}
 			}
@@ -1861,12 +1885,11 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
 				if (declaringClass != null && getClassName() != null && ch != '.') {
 					isClassString = "java.lang.String".equals(declaringClass.getQualifiedName());
-					appendFieldName(parent, declaringClass, Modifier.isPrivate(mthBinding.getModifiers()));
+					appendClassNameAndDot(parent, declaringClass, Modifier.isPrivate(mthBinding.getModifiers()));
 				}
 			}
 			// String name = node.getFullyQualifiedName();
-			String name = getJ2SName(node);
-			name = getShortenedQualifiedName(name);
+			String name = getShortenedQualifiedName(getJ2SName(node));
 			if (!(isClassString && "valueOf".equals(name)) && checkKeywordViolation(name, false)) {
 				buffer.append('$');
 			}
@@ -1874,13 +1897,22 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		}
 	}
 
+	private void addFixedQualifierWithDot(ITypeBinding declaringClass) {
+		String name = declaringClass.getQualifiedName();
+		name = fixName(name);
+		if (name.length() != 0) {
+			buffer.append(name);
+			buffer.append(".");
+		}
+	}
+
 	private void simpleNameInVarBinding(SimpleName node, char ch, IVariableBinding varBinding) {
+		String name = null;
+		IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
+		ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
 		if (isStatic(varBinding)) {
-			IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
-			ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
-			
-			if (ch != '.' && ch != '\"' && declaringClass != null) {
-				String name = declaringClass.getQualifiedName();
+			if (ch != '.' && ch != '"' && ch != '\'' && declaringClass != null) {
+				name = declaringClass.getQualifiedName();
 				if ((name == null || name.length() == 0) && declaringClass.isAnonymous()) {
 					// TODO: FIXME: I count the anonymous class name myself
 					// and the binary name of the anonymous class will conflict
@@ -1891,31 +1923,19 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				if (name.length() != 0) {
 					buffer.append(name);
 					buffer.append(".");
+					ch = '.';
 				}
 			}
-			String fieldName = getJ2SName(node);
-			if (J2SMapAdapter.checkSameName(declaringClass, fieldName)) {
-				buffer.append('$');
-			}
-			if (checkKeywordViolation(fieldName, false)) {
-				buffer.append('$');
-			}
-			if (declaringClass != null && isInheritedFieldName(declaringClass, fieldName)) {
-				fieldName = getFieldName(declaringClass, fieldName);
-			}
-			buffer.append(fieldName);
 		} else {
 			ASTNode parent = node.getParent();
 			if (parent != null && !(parent instanceof FieldAccess)) {
-				IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
-				ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
 				if (declaringClass != null && getClassName() != null && ch != '.') {
-					appendFieldName(parent, declaringClass, false);
+					appendClassNameAndDot(parent, declaringClass, false);
+					ch = '.';
 				}
 			}
-
 			String fieldVar = null;
-			if (isFinalSensible() && Modifier.isFinal(varBinding.getModifiers())
+			if (isAnonymousClass() && Modifier.isFinal(varBinding.getModifiers())
 					&& varBinding.getDeclaringMethod() != null) {
 				String key = varBinding.getDeclaringMethod().getKey();
 				if (methodDeclareNameStack.size() == 0 || !key.equals(methodDeclareNameStack.peek())) {
@@ -1936,19 +1956,12 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					}
 				}
 			}
-
-			IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
-			ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
-			String name = (declaringClass != null ? getJ2SName(node)
-					: fieldVar == null ? getNormalVariableName(node.getIdentifier()) : fieldVar);
-			if (checkKeywordViolation(name, true))
-				buffer.append('$');
-			if (declaringClass != null && J2SMapAdapter.checkSameName(declaringClass, name))
-				buffer.append('$');
-			if (declaringClass != null && isInheritedFieldName(declaringClass, name))
-				name = getFieldName(declaringClass, name);
-			buffer.append(name);
+			if (declaringClass == null)
+				name = (fieldVar == null ? getNormalVariableName(node.getIdentifier()) : fieldVar);
 		}
+		if (declaringClass != null)
+			name = getJ2SName(node);
+		appendCheckedFieldName(name, declaringClass, ch != '.');
 	}
 
 	protected void visitList(List<ASTNode> list, String seperator) {

@@ -28,10 +28,10 @@ import org.eclipse.jdt.core.dom.Expression;
 public class VariableAdapter extends AbstractPluginAdapter {
 	
 	/**
-	 * Final variables only make senses (need "this.f$[...]") inside anonymous
+	 * Final variables only make senses (need "this.$finals[...]") inside anonymous
 	 * class.
 	 */
-	public boolean isFinalSensible = true;
+	public boolean isAnonymousClass = true;
 
 	/**
 	 * List of variables that are declared as final.

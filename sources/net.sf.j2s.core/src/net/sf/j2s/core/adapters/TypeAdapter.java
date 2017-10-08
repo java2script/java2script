@@ -89,18 +89,28 @@ public class TypeAdapter extends AbstractPluginAdapter {
 		return false;
 	}
 
+	/**
+	 * 
+	 * @param thisPackageName if not null, will replace this by P$
+	 * 
+	 * @param fullName
+	 * @return
+	 */
 	static public String getShortenedPackageNameFromClassName(String thisPackageName, String fullName) {
 		return assureQualifiedName(thisPackageName, getShortenedName(null, fullName.substring(0, fullName.lastIndexOf('.')), true));
 	}
 
 	/**
-	 * Shorten fully qualified class names starting with java.lang.
+	 * Shorten fully qualified class names starting with java.lang and
+	 * will replace a class name with C$.
+	 * Use static getShortenedName(null, name, false) if that is not desired.
 	 * 
 	 * Here are the situations: 
 	 * 1. Remove "java.lang." in most cases 
 	 * 2. "org.eclipse.swt.SWT" to "$WT" 
 	 * 3. "org.eclipse.swt.internal.browser.OS" to "O$" 
 	 * 4. "org.eclipse.swt." to "$wt."
+	 * 5. current class name to C$
 	 * 
 	 * @param name
 	 * @return
@@ -109,6 +119,14 @@ public class TypeAdapter extends AbstractPluginAdapter {
 		return getShortenedName(fullClassName, name, false);
 	}
 
+	/**
+	 * 
+	 * @param className if not null, allows for conversion to C$
+	 * 
+	 * @param name
+	 * @param isPackage
+	 * @return
+	 */
 	static public String getShortenedName(String className, String name, boolean isPackage) {
 		if (name == null) 
 			return null;
@@ -190,6 +208,14 @@ public class TypeAdapter extends AbstractPluginAdapter {
 						: null);
 	}
 
+	/**
+	 * may return P$
+	 * 
+	 * @param thisPackageName
+	 *            null to not allow P$
+	 * @param name
+	 * @return
+	 */
 	@SuppressWarnings("null")
 	public static String assureQualifiedName(String thisPackageName, String name) {
 		if (name == null || name.length() == 0)

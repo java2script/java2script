@@ -188,9 +188,6 @@ public class ASTEmptyVisitor extends ASTVisitor {
 		return buf.toString().trim();
 	}
 
-
-	// TODO: Clazz.$new(test.Test_Interface2.construct,[]); from 	  new Test_Interface2();
-
 	/**
 	 * allow @j2sXHTML and @j2sXCSS extensions for Javadoc
 	 * 
@@ -209,19 +206,6 @@ public class ASTEmptyVisitor extends ASTVisitor {
 	}
 
 	
-	/**
-	 * Prove access to C$.$clinit$ when a static field is accessed 
-	 * 
-	 * @param className
-	 * @return
-	 */
-	protected String getStaticQualifier(String className) {
-		if (className.indexOf(".") < 0)
-			return className;
-		Integer n = getStaticNameIndex(className);
-		return "(I$[" + n + "] || (I$[" + n + "]=Clazz.static$('" + className + "')))";
-	}
-
 	private Map<String, Integer>htStaticNames = new Hashtable<>();
 	private int staticCount;
 	
@@ -297,12 +281,21 @@ public class ASTEmptyVisitor extends ASTVisitor {
 		return thisPackageName;
 	}
 
+	/**
+	 * Shorten fully qualified class names starting with java.lang and will
+	 * replace a class name with C$. Use static getShortenedName(null, name,
+	 * false) if that is not desired.
+	 * 
+	 * 
+	 * @param name
+	 * @return
+	 */
 	protected String getShortenedQualifiedName(String name) {
 		return ((TypeAdapter) getAdaptable(TypeAdapter.class)).getShortenedQualifiedName(name);
 	}
 
-	protected boolean isFinalSensible() {
-		return ((VariableAdapter) getAdaptable(VariableAdapter.class)).isFinalSensible;
+	protected boolean isAnonymousClass() {
+		return ((VariableAdapter) getAdaptable(VariableAdapter.class)).isAnonymousClass;
 	}
 
 	protected boolean isInheritedFieldName(ITypeBinding binding, String name) {

@@ -63,7 +63,7 @@ public class FieldAdapter extends AbstractPluginAdapter {
 		"catch", "throw", "throws", "continue", "switch", "default",
 		"case", "export", "import", "const",/*"label", */"with",
 		// BH and a few of our own, based on checking developer console:
-		 "construct", "apply", "arguments", "bind", "call", "caller",
+		 "c$", "apply", "arguments", "bind", "call", "caller",
 		 "watch", "unwatch", "valueOf", "isPrototypeOf", "isGenerator", 
 		 "prototype"
 	};
