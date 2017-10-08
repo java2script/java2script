@@ -4,9 +4,9 @@ import java.awt.Component;
 import java.awt.Dimension;
 import javax.swing.JMenu;
 import swingjs.api.js.DOMNode;
-import javajs.J2SRequireImport;
+//import javajs.J2SRequireImport;
 
-@J2SRequireImport(swingjs.jquery.JQueryUI.class)
+//@J2SRequireImport(swingjs.jquery.JQueryUI.class)
 public class JSMenuUI extends JSMenuItemUI {
 
 	private JMenu jm;

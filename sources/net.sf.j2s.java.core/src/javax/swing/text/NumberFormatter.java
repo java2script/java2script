@@ -38,7 +38,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import javajs.J2SIgnoreImport;
-import javajs.J2SRequireImport;
+//import javajs.J2SRequireImport;
 
 
 /**
@@ -104,8 +104,8 @@ import javajs.J2SRequireImport;
  */
 
 // SwingJS J2S bug #16 NumberFormat.js includes the inner public class NumberFormat.Field, which is called here by instanceOf 
-@J2SRequireImport(NumberFormat.class)
-@J2SIgnoreImport(NumberFormat.Field.class)
+//@J2SRequireImport(NumberFormat.class)
+//@J2SIgnoreImport(NumberFormat.Field.class)
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class NumberFormatter extends InternationalFormatter {
     /** The special characters from the Format instance. */

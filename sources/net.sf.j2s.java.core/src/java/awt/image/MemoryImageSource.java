@@ -37,8 +37,6 @@ import java.util.Enumeration;
 
 import javajs.util.AU;
 
-import javajs.J2SRequireImport;
-
 /**
  * This class is an implementation of the ImageProducer interface which
  * uses an array to produce pixel values for an Image.  Here is an example
@@ -111,7 +109,7 @@ import javajs.J2SRequireImport;
  * @author      Animation capabilities inspired by the
  *              MemoryAnimationSource class written by Garth Dickie
  */
-@J2SRequireImport (java.awt.image.ColorModel.class)
+//@J2SRequireImport (java.awt.image.ColorModel.class)
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class MemoryImageSource implements ImageProducer {
     int width;

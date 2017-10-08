@@ -4,7 +4,7 @@ package swingjs.plaf;
 import java.util.Dictionary;
 import java.util.Enumeration;
 
-import javajs.J2SRequireImport;
+//import javajs.J2SRequireImport;
 
 import javax.swing.SwingConstants;
 
@@ -21,10 +21,11 @@ import sun.swing.DefaultLookup;
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 
-@J2SRequireImport(swingjs.jquery.JQueryUI.class)
+//@J2SRequireImport(swingjs.jquery.JQueryUI.class)
 @SuppressWarnings({"rawtypes", "unchecked", "unused"})
 public class JSSliderUI extends JSLightweightUI implements PropertyChangeListener, ChangeListener {
 
+	private static Class jsqueryUI = swingjs.jquery.JQueryUI.class;
 	JSlider jSlider;
 	private int min, max, val, majorSpacing, minorSpacing;
 	protected boolean paintTicks;

@@ -27,7 +27,7 @@ C$.$Matcher$1$=function(){
   });
 };
 
-Clazz.newMethod$(C$, 'construct$java_util_regex_Pattern$CharSequence', function(pat,cs){
+Clazz.newMethod$(C$, 'c$$java_util_regex_Pattern$CharSequence', function(pat,cs){
   this.pat=pat;
   this.charSeq=cs;
   this.leftBound=0;
@@ -148,7 +148,7 @@ Clazz.newMethod$(C$,"processReplacement$S",function(replacement){
               this.replacementParts[this.replacementParts.length]=res.subSequence$I$I(replacementPos,res.length$());
               replacementPos=res.length$();
             }
-            this.replacementParts[this.replacementParts.length]= Clazz.$new(java.util.regex.Matcher$1.construct,[this]);
+            this.replacementParts[this.replacementParts.length]= Clazz.$new(java.util.regex.Matcher$1.c$,[this]);
             var group=this.group(gr);
             replacementPos+=group.length;
             res.append$S(group);
@@ -183,7 +183,7 @@ Clazz.newMethod$(C$,"processReplacement$S",function(replacement){
 
 Clazz.newMethod$(C$,"region$I$I",function(leftBound,rightBound){
   if(leftBound>rightBound||leftBound<0||rightBound<0||leftBound>this.charSeq.length$()||rightBound>this.charSeq.length$()){
-    throw Clazz.$new(IndexOutOfBoundsException.construct$, [leftBound+" is out of bound of "+rightBound]);
+    throw Clazz.$new(IndexOutOfBoundsException.c$, [leftBound+" is out of bound of "+rightBound]);
   }
   this.leftBound=leftBound;
   this.rightBound=rightBound;

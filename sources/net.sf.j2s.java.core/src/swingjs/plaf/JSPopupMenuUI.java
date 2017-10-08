@@ -4,12 +4,12 @@ package swingjs.plaf;
 import java.awt.Dimension;
 import javax.swing.JPopupMenu;
 import javax.swing.LookAndFeel;
-import javajs.J2SRequireImport;
+//import javajs.J2SRequireImport;
 import swingjs.JSUtil;
 import swingjs.api.js.JSSwingMenu;
 import swingjs.api.js.DOMNode;
 
-@J2SRequireImport(swingjs.jquery.JQueryUI.class)
+//@J2SRequireImport(swingjs.jquery.JQueryUI.class)
 public class JSPopupMenuUI extends JSPanelUI {
 	
 	// a frameless independent window

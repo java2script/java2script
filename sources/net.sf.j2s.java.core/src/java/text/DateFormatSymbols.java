@@ -46,7 +46,7 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import javajs.J2SRequireImport;
+//import javajs.J2SRequireImport;
 import sun.util.resources.LocaleData;
 
 /**
@@ -94,7 +94,7 @@ import sun.util.resources.LocaleData;
  * @see          java.util.SimpleTimeZone
  * @author       Chen-Lieh Huang
  */
-@J2SRequireImport(LocaleData.class)
+//@J2SRequireImport(LocaleData.class)
 public class DateFormatSymbols implements Cloneable {
 
     /**

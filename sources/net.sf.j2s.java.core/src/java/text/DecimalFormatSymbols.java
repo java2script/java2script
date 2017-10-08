@@ -44,7 +44,7 @@ package java.text;
 //import java.text.spi.DecimalFormatSymbolsProvider;
 import java.util.Hashtable;
 
-import javajs.J2SRequireImport;
+//import javajs.J2SRequireImport;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -65,7 +65,7 @@ import sun.util.resources.LocaleData;
  * @author       Mark Davis
  * @author       Alan Liu
  */
-@J2SRequireImport(LocaleData.class)
+//@J2SRequireImport(LocaleData.class)
 public class DecimalFormatSymbols implements Cloneable {
 
     /**

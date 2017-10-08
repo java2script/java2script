@@ -22,7 +22,7 @@ import java.lang.annotation.Annotation;
  * constructor. Information about the constructor can be accessed, and the
  * constructor can be invoked dynamically.
  * 
- * @j2sRequireImport java.lang.Void
+ * @//j2sRequireImport java.lang.Void
  */
 public final class Constructor<T> extends AccessibleObject implements GenericDeclaration, Member {
 

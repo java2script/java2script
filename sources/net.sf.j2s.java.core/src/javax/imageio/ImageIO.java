@@ -38,7 +38,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import javajs.J2SRequireImport;
+//import javajs.J2SRequireImport;
 import javajs.api.Interface;
 
 import javax.imageio.stream.ImageInputStream;
@@ -61,7 +61,7 @@ import swingjs.JSUtil;
  * simple encoding and decoding.
  * 
  */
-@J2SRequireImport(ImageInputStream.class)
+//@J2SRequireImport(ImageInputStream.class)
 public final class ImageIO {
 
 	// private static final IIORegistry theRegistry =

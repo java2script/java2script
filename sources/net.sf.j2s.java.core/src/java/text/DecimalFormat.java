@@ -49,7 +49,7 @@ import java.util.ArrayList;
 //import java.util.Currency;
 import java.util.Hashtable;
 
-import javajs.J2SRequireImport;
+//import javajs.J2SRequireImport;
 import java.util.Locale;
 import java.util.ResourceBundle;
 //import java.util.concurrent.atomic.AtomicInteger;
@@ -377,7 +377,7 @@ import sun.util.resources.LocaleData;
  * @author       Mark Davis
  * @author       Alan Liu
  */
-@J2SRequireImport(DecimalFormatSymbols.class)
+//@J2SRequireImport(DecimalFormatSymbols.class)
 public class DecimalFormat extends NumberFormat {
 
     /**

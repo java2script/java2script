@@ -27,7 +27,7 @@
  */
 package javax.swing;
 
-import javajs.J2SRequireImport;
+//import javajs.J2SRequireImport;
 import java.awt.Color;
 import java.awt.Font;
 import javax.swing.border.BevelBorder;
@@ -50,8 +50,8 @@ import javax.swing.border.TitledBorder;
  *
  * @author David Kloba
  */
-@J2SRequireImport({BevelBorder.class, EmptyBorder.class, EtchedBorder.class, 
-	CompoundBorder.class, LineBorder.class, MatteBorder.class, TitledBorder.class})
+//@J2SRequireImport({BevelBorder.class, EmptyBorder.class, EtchedBorder.class, 
+//	CompoundBorder.class, LineBorder.class, MatteBorder.class, TitledBorder.class})
 public class BorderFactory
 {
 

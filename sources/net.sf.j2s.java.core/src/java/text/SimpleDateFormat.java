@@ -56,7 +56,7 @@ import java.util.ResourceBundle;
 import java.util.TimeZone;
 import sun.util.calendar.CalendarUtils;
 import sun.util.resources.LocaleData;
-import javajs.J2SRequireImport;
+//import javajs.J2SRequireImport;
 //import sun.util.calendar.ZoneInfoFile;
 
 /**
@@ -343,10 +343,10 @@ import javajs.J2SRequireImport;
  * @see          DateFormatSymbols
  * @author       Mark Davis, Chen-Lieh Huang, Alan Liu
  */
-@J2SRequireImport( { 
-	java.util.GregorianCalendar.class, 
-	java.util.Calendar.class, java.util.TimeZone.class, 
-	sun.util.calendar.ZoneInfo.class, java.text.DecimalFormat.class })
+//@J2SRequireImport( { 
+//	java.util.GregorianCalendar.class, 
+//	java.util.Calendar.class, java.util.TimeZone.class, 
+//	sun.util.calendar.ZoneInfo.class, java.text.DecimalFormat.class })
 @SuppressWarnings("unused")
 public class SimpleDateFormat extends DateFormat {
 

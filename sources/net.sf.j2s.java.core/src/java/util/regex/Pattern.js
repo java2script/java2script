@@ -10,12 +10,12 @@ Clazz.newMethod$(C$,"$init$", function(){
   this.regexp=null;
 }, 1);
 
-Clazz.newMethod$(C$,"construct", function(){
+Clazz.newMethod$(C$,"$c", function(){
   C$.$init$.apply(this);
 }, 1);
 
 Clazz.newMethod$(C$,"matcher$CharSequence", function(cs){
-  return Clazz.$new(java.util.regex.Matcher.construct$java_util_regex_Pattern$CharSequence, [this, cs]);
+  return Clazz.$new(java.util.regex.Matcher.c$$java_util_regex_Pattern$CharSequence, [this, cs]);
 });
 
 Clazz.newMethod$(C$,"split$CharSequence$I", function(input,limit){

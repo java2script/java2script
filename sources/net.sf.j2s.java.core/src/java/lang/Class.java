@@ -24,7 +24,7 @@
  */
 
 package java.lang;
-//DEPRECATED -- SEE J2SSwingJS.js
+
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -1690,7 +1690,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		/**
 		 * @j2sNative
 		 * 
-		 *     return Clazz.$new(java.lang.reflect.Method.construct$Class$S$ClassA$Class$ClassA$I, [this, name,
+		 *     return Clazz.$new(java.lang.reflect.Method.c$$Class$S$ClassA$Class$ClassA$I, [this, name,
 		 *     	                    paramTypes, java.lang.Void, [], 0]);
 		 */
 		{
@@ -1758,7 +1758,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		/**
 		 * @j2sNative
 		 * 
-		 * return Clazz.$new(java.lang.reflect.Constructor.construct$Class$ClassA$ClassA$I, [this, parameterTypes || [], [], java.lang.reflect.Modifier.PUBLIC]);
+		 * return Clazz.$new(java.lang.reflect.Constructor.c$$Class$ClassA$ClassA$I, [this, parameterTypes || [], [], java.lang.reflect.Modifier.PUBLIC]);
 		 */
 		{
 			return null;
@@ -2137,7 +2137,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	public InputStream getResourceAsStream(String name) {
 		// allows an optional second argument to be a base directory in JavaScript
 	    @SuppressWarnings("unused")
-		String clazzName = this.$clazz$.__CLASS_NAME__;
+		String clazzName = $clazz$.__CLASS_NAME__;
 		/**
 		 * @j2sNative
 	    if (!name)
@@ -2183,7 +2183,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	        fname = d.join("/");
 	      }
 	      Clazz.loadClass("java.net.URL");
-	      url = Clazz.$new(java.net.URL.construct$S,[fname]);
+	      url = Clazz.$new(java.net.URL.c$$S,[fname]);
 	    } catch (e) {
 	      return null;
 	    }
@@ -2198,7 +2198,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	    var bytes = (data.__BYTESIZE == 1 ? data : J2S._strToBytes(data));
 	    Clazz.loadClass("java.io.BufferedInputStream");
 	    Clazz.loadClass("java.io.ByteArrayInputStream");
-	    var is = Clazz.$new(java.io.BufferedInputStream.construct$java_io_InputStream, [Clazz.$new(java.io.ByteArrayInputStream.construct$BA, [bytes])]); 
+	    var is = Clazz.$new(java.io.BufferedInputStream.c$$java_io_InputStream, [Clazz.$new(java.io.ByteArrayInputStream.c$$BA, [bytes])]); 
 	    is.url = url;
 	    url._streamData = is;
 	    return is;

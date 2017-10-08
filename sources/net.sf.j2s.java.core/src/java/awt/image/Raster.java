@@ -38,7 +38,7 @@
 
 
 package java.awt.image;
-import javajs.J2SRequireImport;
+////import javajs.J2SRequireImport;
 import swingjs.api.Interface;
 import java.awt.Rectangle;
 import java.awt.Point;
@@ -124,7 +124,7 @@ import sun.awt.image.SunWritableRaster;
  * @see java.awt.image.MultiPixelPackedSampleModel
  */
 
-@J2SRequireImport({ java.awt.image.MultiPixelPackedSampleModel.class, java.awt.image.SinglePixelPackedSampleModel.class })
+//@J2SRequireImport({ java.awt.image.MultiPixelPackedSampleModel.class, java.awt.image.SinglePixelPackedSampleModel.class })
 public class Raster {
 
     /**
