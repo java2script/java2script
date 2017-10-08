@@ -67,7 +67,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
 import net.sf.j2s.core.adapters.FinalVariable;
-import net.sf.j2s.core.adapters.J2SMapAdapter;
 import net.sf.j2s.core.adapters.MethodAdapter;
 import net.sf.j2s.core.adapters.TypeAdapter;
 import net.sf.j2s.core.adapters.VariableAdapter;
@@ -339,7 +338,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			// inner nonstatic class
 			IMethodBinding constructorBinding = node.resolveConstructorBinding();
 			addInnerTypeInstance(node,
-					fixName(binding.isAnonymous() || binding.isLocal() ? binding.getBinaryName()
+					(binding.isAnonymous() || binding.isLocal() ? binding.getBinaryName()
 							: binding.getQualifiedName()),
 					node.getExpression(), null,
 					(constructorBinding == null ? null : constructorBinding.getMethodDeclaration()), null);
@@ -482,7 +481,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	// private void addEnumAnonStatics(List<?> bodyDeclarations, boolean isEnum)
 	// {
 	// // TODO: THIS IS NOT CORRECT!!! Need clinit
-	// buffer.append("\r\n//<<enumanonstatics:\r\n");
 	// for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 	// BodyDeclaration element = (BodyDeclaration) iter.next();
 	// if (!isStatic(element))
@@ -1493,7 +1491,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	 */
 	private void addInnerTypeInstance(ClassInstanceCreation node, String innerName, Expression outerClassExpr,
 			String finals, IMethodBinding methodDeclaration, String superAnonName) {
-		
 		open$new(superAnonName == null ? innerName : superAnonName,
 				methodDeclaration == null ? ".$init$" : ".c$" + getJ2SParamQualifier(null, methodDeclaration));
 
