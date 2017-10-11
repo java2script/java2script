@@ -1,9 +1,12 @@
 // BH 9/24/2017 4:21:05 PM new syntax for decorateAsClass
+(function() {
 Clazz.declarePackage("java.util.regex");
-Clazz.load(null,"java.util.regex.Pattern",["java.lang.IllegalArgumentException","$.StringBuffer","java.util.regex.Matcher"],function(){
-var C$=Clazz.decorateAsClass(java.util.regex,"Pattern",function(){
+
+var C$=Clazz.newClass$(java.util.regex,"Pattern",function(){
   Clazz.newInstance$(this,arguments);
-},null,java.io.Serializable);
+});
+
+C$.$clinit$ = function() {delete C$.$clinit$;Clazz.incl$(C$, 1);}
 
 Clazz.newMethod$(C$,"$init$", function(){
   this.$flags=0;
@@ -15,7 +18,7 @@ Clazz.newMethod$(C$,"$c", function(){
 }, 1);
 
 Clazz.newMethod$(C$,"matcher$CharSequence", function(cs){
-  return Clazz.$new(java.util.regex.Matcher.c$$java_util_regex_Pattern$CharSequence, [this, cs]);
+  return Clazz.$new(Clazz.incl$("java.util.regex.Matcher").c$$java_util_regex_Pattern$CharSequence, [this, cs]);
 });
 
 Clazz.newMethod$(C$,"split$CharSequence$I", function(input,limit){
@@ -93,17 +96,4 @@ Clazz.newMethod$(C$,"quote$S",function(s){
   return sb.append$S(s.substring(apos)).append("\\E").toString();
 }, 1);
 
-
-Clazz.defineStatics$(C$,[
-  "UNIX_LINES",1,
-  "CASE_INSENSITIVE",2,
-  "COMMENTS",4,
-  "MULTILINE",8,
-  "LITERAL",16,
-  "DOTALL",32,
-  "UNICODE_CASE",64,
-  "CANON_EQ",128,
-  "flagsBitMask",239
-]); 
-
-});
+})();

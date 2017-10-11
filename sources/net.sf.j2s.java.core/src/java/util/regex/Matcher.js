@@ -4,28 +4,35 @@
 //BH fix for String not having .length() or .subSequence()
 //BH fix for not reinitializing correctly
 //BH note that start(groupIndex) is not implemented for groupIndex > 0
+(function(){
 
 Clazz.declarePackage("java.util.regex");
-Clazz.load(["java.util.regex.MatchResult"],"java.util.regex.Matcher",["java.lang.IllegalArgumentException","$.IndexOutOfBoundsException","$.NullPointerException","$.StringBuffer"],function(){
 
-
-var C$=Clazz.decorateAsClass(java.util.regex,"Matcher",function(){
-  java.util.regex.Matcher$1 || java.util.regex.Matcher.$Matcher$1$();
+var C$=Clazz.newClass$(java.util.regex,"Matcher",function(){
   Clazz.newInstance$(this,arguments);
-},null,java.util.regex.MatchResult);
+},null,"java.util.regex.MatchResult");
 
 
-C$.$Matcher$1$=function(){
-  var C$=Clazz.decorateAsClass(java.util.regex,"Matcher$1",function(){
+C$.$clinit$ = function() {
+delete C$.$clinit$;
+Clazz.incl$(C$, 1);
+};
+
+(function(){
+
+  var C$=Clazz.newClass$(java.util.regex,"Matcher$1",function(){
     Clazz.newInstance$(this, arguments[0], true);
   });
+  
+  C$.$clinit$ = function() {delete C$.$clinit$;Clazz.incl$(C$, 1);}
+
   Clazz.newMethod$(C$, "$init$", function() {
       this.grN=0;
   }, 1);
   Clazz.newMethod$(C$,"toString", function(){
     return this.b$["java.util.regex.Matcher"].group(this.grN);
   });
-};
+})();
 
 Clazz.newMethod$(C$, 'c$$java_util_regex_Pattern$CharSequence', function(pat,cs){
   this.pat=pat;
@@ -148,7 +155,7 @@ Clazz.newMethod$(C$,"processReplacement$S",function(replacement){
               this.replacementParts[this.replacementParts.length]=res.subSequence$I$I(replacementPos,res.length$());
               replacementPos=res.length$();
             }
-            this.replacementParts[this.replacementParts.length]= Clazz.$new(java.util.regex.Matcher$1.c$,[this]);
+            this.replacementParts[this.replacementParts.length]= Clazz.$new(Clazz.incl$("java.util.regex.Matcher$1").c$,[this]);
             var group=this.group(gr);
             replacementPos+=group.length;
             res.append$S(group);
@@ -321,6 +328,4 @@ Clazz.newMethod$(C$,"usePattern$java.util_regex_Pattern",function(pat){
   return this;
 });
 
-Clazz.defineStatics$(C$,["MODE_FIND",1,"MODE_MATCH",2]);
-
-}); 
+})();
