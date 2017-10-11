@@ -749,7 +749,32 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return false;
 	}
 
+	/**
+ 	 * Postfix operators (typesafe enumeration).
+	 * <pre>
+	 * PostfixOperator:
+	 *    <b><code>++</code></b>  <code>INCREMENT</code>
+	 *    <b><code>--</code></b>  <code>DECREMENT</code>
+	 * </pre>
+	 */
+	public boolean visit(PostfixExpression node) {
+		return addPrePost(node, node.getOperand(), node.getOperator().toString(), true);
+	}
+
+	/**
+ 	 * Prefix operators (typesafe enumeration).
+	 * <pre>
+	 * PrefixOperator:
+	 *    <b><code>++</code></b>  <code>INCREMENT</code>
+	 *    <b><code>--</code></b>  <code>DECREMENT</code>
+	 *    <b><code>+</code></b>  <code>PLUS</code>
+	 *    <b><code>-</code></b>  <code>MINUS</code>
+	 *    <b><code>~</code></b>  <code>COMPLEMENT</code>
+	 *    <b><code>!</code></b>  <code>NOT</code>
+	 * </pre>
+	 */
 	public boolean visit(PrefixExpression node) {
+		// Q: Can you really have a constant here?
 		String constValue = getConstantValue(node);
 		if (constValue != null) {
 			buffer.append(constValue);
@@ -760,70 +785,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			buffer.append(op);
 			return super.visit(node);
 		}
-		Expression left = node.getOperand();
-		ITypeBinding leftTypeBinding = left.resolveTypeBinding();
-		IVariableBinding varBinding = getLeftVariableBinding(left, leftTypeBinding);
-		boolean isChar = (leftTypeBinding != null && leftTypeBinding.isPrimitive()
-				&& "char".equals(leftTypeBinding.getName()));
-		boolean needParenthesis = false;
-		ASTNode parent = node.getParent();
-		if (checkStaticBinding(varBinding)) {
-			needParenthesis = (isChar || !haveDirectStaticAccess(left))
-					&& !(parent instanceof Statement || parent instanceof ParenthesizedExpression);
-			if (needParenthesis) {
-				buffer.append("(");
-			}
-			addLeftSidePrefixName(left);
-			parent = null;
-		} else {
-			varBinding = null;
-		}
-		if (isChar) {
-			if (varBinding == null)
-				buffer.append("(");
-			addCharacterPrePostFix(left, parent, varBinding, op, true);
-			if (varBinding == null)
-				buffer.append(")");
-		} else {
-			buffer.append(op);
-			addFieldName(left, varBinding);
-		}
-		if (needParenthesis) {
-			buffer.append(")");
-		}
-		return false;
-	}
-
-	public boolean visit(PostfixExpression node) {
-		Expression left = node.getOperand();
-		ITypeBinding leftTypeBinding = left.resolveTypeBinding();
-		IVariableBinding varBinding = getLeftVariableBinding(left, leftTypeBinding);
-		boolean isChar = (leftTypeBinding != null && leftTypeBinding.isPrimitive()
-				&& "char".equals(leftTypeBinding.getName()));
-		boolean needParenthesis = false;
-		ASTNode parent = node.getParent();
-		if (checkStaticBinding(varBinding)) {
-			needParenthesis = (isChar || !haveDirectStaticAccess(left))
-					&& !(parent instanceof Statement || parent instanceof ParenthesizedExpression);
-			if (needParenthesis) {
-				buffer.append("(");
-			}
-			addLeftSidePrefixName(left);
-		} else {
-			varBinding = null;
-		}
-
-		String op = node.getOperator().toString();
-		if (isChar) {
-			addCharacterPrePostFix(left, parent, varBinding, op, false);
-		} else {
-			addFieldName(left, varBinding);
-			buffer.append(op);
-		}
-		if (needParenthesis) {
-			buffer.append(")");
-		}
-		return false;
+		return addPrePost(node, node.getOperand(), node.getOperator().toString(), false);
 	}
 
 	public boolean visit(QualifiedName node) {
@@ -1027,6 +989,47 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	////////// END visit/endVisit ///////////
 	
 	
+	private boolean addPrePost(Expression node, Expression left, String op, boolean isPost) {
+		ASTNode parent = node.getParent();
+		ITypeBinding leftTypeBinding = left.resolveTypeBinding();
+		IVariableBinding varBinding = getLeftVariableBinding(left, leftTypeBinding);
+		boolean isChar = (leftTypeBinding != null && leftTypeBinding.isPrimitive()
+				&& "char".equals(leftTypeBinding.getName()));
+		String term = "";
+		if (checkStaticBinding(varBinding)) {
+			if ((isChar || !haveDirectStaticAccess(left))
+					&& !(parent instanceof Statement || parent instanceof ParenthesizedExpression)) {
+				buffer.append("(");
+				term = ")";
+			}
+			addLeftSidePrefixName(left);
+		} else {
+			varBinding = null;
+		}
+
+		if (isPost) {
+			if (isChar) {
+				addCharacterPrePostFix(left, parent, varBinding, op, false);
+			} else {
+				addFieldName(left, varBinding);
+				buffer.append(op);
+			}
+		} else {
+			if (isChar) {
+				if (varBinding == null)
+					buffer.append("(");
+				addCharacterPrePostFix(left, (varBinding == null ? parent : null), varBinding, op, true);
+				if (varBinding == null)
+					buffer.append(")");
+			} else {
+				buffer.append(op);
+				addFieldName(left, varBinding);
+			}
+
+		}
+		buffer.append(term);
+		return false;
+	}
 
 	private static boolean isBoxTyped(Expression exp) {
 		return exp.resolveBoxing() || exp.resolveUnboxing();
@@ -1399,11 +1402,19 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			return;
 		}
 		// to numeric only
+		// oddly enough, 'c' is considered a simple
 		if (exp instanceof CharacterLiteral) {
 			buffer.append(0 + ((CharacterLiteral) exp).charValue());
 		} else if (exp instanceof SimpleName || exp instanceof QualifiedName) {
+			int pt = buffer.length();
 			boxingNode(exp, false);
-			buffer.append(CHARCODEAT0);
+			if (pt == buffer.length() - 3 && buffer.charAt(pt) == '\'') {
+				char c = buffer.charAt(pt + 1);
+				buffer.setLength(pt);
+				buffer.append((int) c);
+			} else {
+				buffer.append(CHARCODEAT0);
+			}
 		} else if (exp instanceof PrefixExpression || exp instanceof PostfixExpression
 				|| exp instanceof ParenthesizedExpression) {
 			boxingNode(exp, false);
@@ -1595,7 +1606,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 
 	/**
-	 * Append a shortened qualified name, possibly using Clazz.static$ for dynamic loading
+	 * Append a shortened qualified name, possibly using Clazz.incl$ for dynamic loading
 	 * @param name
 	 * @param isStatic
 	 * @param doCache
@@ -1795,20 +1806,20 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		if (s == null) {
 			if (methodQualifier != null)
 				className = fixNameNoC$(null, className);
-			s = "Clazz.static$(";
+			s = "Clazz.incl$(";
 			String[] parts = className.split("\\.");
 			int nclass = 0;
 			for (int i = 0; i < parts.length; i++) {
 				String part = parts[i];
-				if (i == 0 && part.equals("C$")) {
-					s += "C$";
+				if (i == 0 && (part.equals("C$") || part.equals("P$"))) {
+					s += part;
 					continue;
 				}
 				s += (i == 0 ? "'" : ".");
 				s += part;
 				if (Character.isUpperCase(part.charAt(0))) {
 					if (nclass > 0)
-						s = "Clazz.static$(" + s;
+						s = "Clazz.incl$(" + s;
 					if (++nclass == 1 && s.indexOf("'") >= 0)
 						s += "'";
 					s += ")";

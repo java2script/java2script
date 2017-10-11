@@ -161,9 +161,6 @@ window["j2s.object.native"] = true;
 
 ;(function(Clazz, J2S) {
 
-Clazz.makeConstructor = function(){debugger}
-
-Clazz.defineMethod = function(){debugger}
 
 Clazz.popup = Clazz.log = Clazz.error = window.alert;
 
@@ -187,19 +184,40 @@ Clazz.assert = function(clazz, obj, tf, msg) {
     if (Clazz._assertFunction) {
       return Clazz._assertFunction(clazz, obj, msg || Clazz.getStackTrace());
     }
-    Clazz.loadClass("java.lang.AssertionError");
+    Clazz.incl$("java.lang.AssertionError");
     if (msg == null)
       throw new AssertionError();
     else
-      throw Clazz.$new(AssertionError.construct$S, [msg]);
+      throw Clazz.$new(AssertionError.c$$S, [msg]);
   }
 }
 //J2S._debugCode = false;
 
-Clazz.static$ = function(cName) {
-  if (cName.indexOf(".") < 0)
-    cName = "java.lang." + cName;  
-  return Clazz._4Name(cName, null, null, true);
+Clazz.incl$ = function(cName, isFinalize) {
+  if (!cName)
+    return null;
+  if (isFinalize) {
+    var cl = cName;
+    // C$.$clinit$ call to finalize all dependencies
+    inheritClass(cl, Clazz.incl$(cl.$incl$[0]));
+    var interfacez = Clazz.incl$(cl.$incl$[1]);
+    if (interfacez != null)
+      implementOf(cl, interfacez);
+      delete cl.$incl$;      
+    return;
+  }
+  if (cName instanceof Array) {
+    unwrapArray(cName);
+    for (var i = 0; i < cName.length; i++)
+      Clazz.incl$(cName[i]);
+    return;
+  }
+  if (typeof cName == "string") {
+    return Clazz._4Name(cName, null, null, true);
+  } 
+  var cl = cName;
+  cl.$clinit$ && cl.$clinit$();
+  return cl;
 }
 
 Clazz.$new = function(c, args, cl) {
@@ -208,7 +226,7 @@ Clazz.$new = function(c, args, cl) {
   var t0 = (_profileNew ? window.performance.now() : 0);
   
   if (c.__CLASS_NAME__)
-    c = c.construct;
+    c = c.c$;
     
   // an inner class will attach arguments to the arguments returned
   // Integer will be passed as is here, without c.exClazz, or cl
@@ -223,13 +241,12 @@ Clazz.$new = function(c, args, cl) {
   return f;
 }
 
-
 Clazz.$newClass = function(cl) {
   // $Class$ is the java.lang.Class object wrapper
   // $clazz$ is the unwrapped JavaScript object
   if (cl.$Class$)
     return cl.$Class$;
-  java.lang.Class || Clazz.loadClass("java.lang.Class");
+  java.lang.Class || Clazz.incl$("java.lang.Class");
   var Class_ = cl.$Class$ = new java.lang.Class();
   Class_.$clazz$ = cl;
   return Class_;
@@ -243,10 +260,13 @@ Clazz.$newEnumConst = function(vals, c, enumName, enumOrdinal, args, cl) {
   vals.push(clazzEnum[enumName] = clazzEnum.prototype[enumName] = o);
 }
     
-Clazz.super$ = function(cl, obj) {
-  if (cl.superClazz && cl.superClazz.construct) {
+Clazz.super$ = function(cl, obj, andInit) {
+  if (cl.superClazz && cl.superClazz.c$) {
     // added [] here to account for the possibility of vararg default constructor
-    cl.superClazz.construct.apply(obj, [[]]);
+    cl.superClazz.c$.apply(obj, [[]]);
+  }
+  if (andInit) {
+    cl.$init$.apply(obj);
   }
 }
 
@@ -273,9 +293,9 @@ Clazz.newInstance$ = function (objThis, args, isInner) {
 
   if (!isInner) {
     if ((!args || args && args.length == 0) 
-    && objThis.construct) {
+    && objThis.c$) {
     // allow for direct default call "new foo()" to run with its default constructor
-      objThis.construct.apply(objThis);  
+      objThis.c$.apply(objThis);  
     }
     return;
   }
@@ -338,21 +358,42 @@ Clazz.defineStatics$ = function(cl, a) {
    cl[s] = cl.prototype[s] = a[i++];
  }
 }
+
 /**
- * in-place shift of an array by k elements, starting with element i0,
- * resetting its length in case it is arguments (which does not have the
- * .shift() method. Returns a[i0] 
+ * Expand the shortened list of class names.
+ * For example:
+ * JU.Log, $.Display, $.Decorations
+ * will be expanded to 
+ * JU.Log, JU.Display, JU.Decorations
+ * where "$." stands for the previous class name's package.
+ *
+ * This method will be used to unwrap the required/optional classes list and 
+ * the ignored classes list.
  */
-var shiftArray = function(a, i0, k) {
-  if (a == null || k > a.length)
-    return null;
-  k || (k == 1);
-  i0 || (i0 == 0);
-  var arg = a[i0];
-  for (var i = i0, n = a.length - k; i < n; i++)
-    a[i] = a[i + k];
-  a.length -= k;
-  return arg;
+/* private */
+var unwrapArray = function (arr) {
+  if (!arr || arr.length == 0)
+    return [];
+  var last = null;
+  for (var i = 0; i < arr.length; i++) {
+    if (!arr[i])
+      continue;
+    if (arr[i].charAt (0) == '$') {
+      if (arr[i].charAt (1) == '.') {
+        if (!last)
+          continue;
+        var idx = last.lastIndexOf (".");
+        if (idx != -1) {
+          var prefix = last.substring (0, idx);
+          arr[i] = prefix + arr[i].substring (1);
+        }
+      } else {
+        arr[i] = "org.eclipse.s" + arr[i].substring (1);
+      }
+    }
+    last = arr[i];
+  }
+  return arr;
 };
 
 /**
@@ -371,7 +412,7 @@ Clazz.newMethod$ = function (clazzThis, funName, funBody, isStatic) {
   funBody.exName = funName;
   funBody.exClazz = clazzThis; // make it traceable
   var f;
-  if (isStatic || funName == "construct")
+  if (isStatic || funName == "c$")
     clazzThis[funName] = clazzThis.prototype[funName] = funBody;
   else
     clazzThis.prototype[funName] = funBody;
@@ -513,6 +554,24 @@ Clazz.newArray$ = function(baseClass, paramType, ndims, params) {
   }  
   return newTypedA$(baseClass, params, nbits, ndims);
 }
+
+
+/**
+ * in-place shift of an array by k elements, starting with element i0,
+ * resetting its length in case it is arguments (which does not have the
+ * .shift() method. Returns a[i0] 
+ */
+var shiftArray = function(a, i0, k) {
+  if (a == null || k > a.length)
+    return null;
+  k || (k == 1);
+  i0 || (i0 == 0);
+  var arg = a[i0];
+  for (var i = i0, n = a.length - k; i < n; i++)
+    a[i] = a[i + k];
+  a.length -= k;
+  return arg;
+};
 
 var getParamCode = Clazz._getParamCode = function(cl) {
   cl.$clazz$ && (cl = cl.$clazz$);
@@ -781,50 +840,41 @@ var checkDeclared = function(name, type) {
   _declared[name] = type;
 }
 
-Clazz.declareInterface = function (prefix, name, interfacez) {
+Clazz.newInterface$ = function (prefix, name, interfacez) {
   var clazzFun = function () {};
   if (J2S._debugCore)
     checkDeclared((prefix.__PKG_NAME__ || prefix.__CLASS_NAME__) + "." + name, 1);
-  decorateFunction(clazzFun, prefix, name);
-  if (interfacez)
-    implementOf(clazzFun, interfacez);
-  clazzFun.$$INT$$ = clazzFun;
-  return clazzFun;
+  return decorateFunction(clazzFun, prefix, name, [null, interfacez]);
 };
 
-Clazz.decorateAsClass = function (prefix, name, clazzFun, clazzParent, 
+Clazz.newClass$ = function (prefix, name, clazzFun, clazzParent, 
     interfacez, mode) {
   var prefixName = (prefix ? prefix.__PKG_NAME__ || prefix.__CLASS_NAME__ : null);
   var qName = (prefixName ? prefixName + "." : "") + name;
   
   if (typeof mode == "number") {
     if ((mode & 1) != (clazzParent ? 1 : 0)) 
-      alert("j2sSwingjs:decorateAsClass: Missing superclass required for " + qName + " check inner class order?");
+      alert("j2sSwingjs:newClass$: Missing superclass required for " + qName + " check inner class order?");
     if ((mode & 2) != (interfacez ? 2 : 0)) 
-      alert("j2sSwingjs:decorateAsClass: Missing superinterface required for " + qName + " check inner class order?");
+      alert("j2sSwingjs:newClass$: Missing superinterface required for " + qName + " check inner class order?");
   }      
-  if (Clazz._Loader._classPending[qName]) {
+  
+/*  if (Clazz._Loader._classPending[qName]) {
       delete Clazz._Loader._classPending[qName];
       Clazz._Loader._classCountOK++;
       Clazz._Loader._classCountPending--;
     }
-  if (Clazz._Loader && Clazz._Loader._checkLoad) {
+*/
+//  if (Clazz._Loader && Clazz._Loader._checkLoad) {
     Clazz._lastDecorated = prefixName + "." + name
-  }
+//  }
   if (unloadedClasses[qName])
     clazzFun = unloadedClasses[qName];
   else if (!clazzFun)
     clazzFun = function () {Clazz.newInstance$(this,arguments)};
-  decorateFunction(clazzFun, prefix, name);
-  return Clazz.setParents(clazzFun, clazzParent, interfacez);
+  return decorateFunction(clazzFun, prefix, name, [clazzParent, interfacez]);
 };
 
-Clazz.setParents = function(clazzFun, clazzParent, interfacez) {
-  inheritClass(clazzFun, clazzParent);
-  if (interfacez)
-    implementOf(clazzFun, interfacez);
-  return clazzFun;
-}
 
 Clazz.cloneFinals = function () {
   var o = {};
@@ -1014,7 +1064,7 @@ var extendObject = function(clazz) {
 
 }
     
-var extendJO = Clazz._extendJO = function(c, name, isNumber) {
+var extendJO = function(c, name, isNumber) {
   if (name)
     c.__CLASS_NAME__ = c.prototype.__CLASS_NAME__ = name;
     
@@ -1060,26 +1110,31 @@ var extendJO = Clazz._extendJO = function(c, name, isNumber) {
  * @param interfacez Array of interfaces
  */
 var implementOf = Clazz._implementOf = function (clazzThis, interfacez) {
+  if (!interfacez)
+    return;
+  var i;
   if (arguments.length >= 2) {
-    if (!clazzThis.implementz)
-      clazzThis.implementz = [];
-    var impls = clazzThis.implementz;
+    var impls = clazzThis.implementz || (clazzThis.implementz = []);
     if (arguments.length == 2) {
-      if (typeof interfacez == "function") {
-        impls.push(interfacez);
-        copyProperties(clazzThis, interfacez);
-      } else if (interfacez instanceof Array) {
-        for (var i = 0; i < interfacez.length; i++) {
-          impls.push(interfacez[i]);
-          copyProperties(clazzThis, interfacez[i]);
+      if (typeof interfacez == "string") {
+        i = interfacez;
+        if (!(interfacez = Clazz.incl$(interfacez))) {
+          alert("Missing interface: " + i);
+          return;
         }
       }
+      if (!(interfacez instanceof Array)) {
+        impls.push(interfacez);
+        copyProperties(clazzThis, interfacez);
+        return;
+      } 
+      i = -1;
     } else {
-      for (var i = 1; i < arguments.length; i++) {
-        impls.push(arguments[i]);
-        copyProperties(clazzThis, arguments[i]);
-      }
+      i = 0;
+      interfacez = arguments;
     }
+    while( ++i < interfacez.length)
+      implementOf(clazzThis, interfacez[i]);
   }
 };
 
@@ -1185,7 +1240,7 @@ Clazz.getInheritedLevel = function (clazzTarget, clazzBase, isTgtStr, isBaseStr)
       for (var i = 0; i < impls.length; i++) {
         var implsLevel = equalsOrExtendsLevel (impls[i], clazzBase);
         if (implsLevel >= 0)
-          return level + implsLevel + 1 + (clazzBase.$$INT$$ == clazzBase ? -0.2 : 0);
+          return 1//level + implsLevel + 1 + (clazzBase.$$INT$$ == clazzBase ? -0.2 : 0);
       }
     }
     zzalc = zzalc.superClazz;
@@ -1196,7 +1251,7 @@ Clazz.getInheritedLevel = function (clazzTarget, clazzBase, isTgtStr, isBaseStr)
         // So if both #test(CharSequence) and #test(Object) existed,
         // #test("hello") will correctly call #test(CharSequence)
         // instead of #test(Object).
-        level + 1.5 // 1.5! Special!
+        1//level + 1.5 // 1.5! Special!
       : -1);
     level++;
   }
@@ -1228,9 +1283,7 @@ for (var i = innerNames.length, name; --i >= 0;)
 /* private */
 var copyProperties = function(clazzThis, clazzSuper) {
   for (var o in clazzSuper)
-    if (o != "b$" 
-        && o != "prototype" && o != "superClazz"
-        && o != "__CLASS_NAME__" && o != "implementz"
+    if (!excludeSuper(o)
         && (typeof clazzSuper[o] != "function" || !checkInnerFunction(clazzSuper, o)))
       clazzThis[o] = clazzThis.prototype[o] = clazzSuper[o];
 };
@@ -1415,6 +1468,7 @@ Clazz.getStackTrace = function(n) {
  */
 Clazz.allPackage = {};
 
+
 /**
  * Will be used to keep value of whether the class is defined or not.
  */
@@ -1473,7 +1527,7 @@ Clazz.inheritArgs = new (function(){return {"$J2SNOCREATE$":true}})();
 
 var _jsid = 0;
 
-var decorateFunction = Clazz._decorateFunction = function (clazzFun, prefix, name) {
+var decorateFunction = Clazz._decorateFunction = function (clazzFun, prefix, name, parentAndInterfaces) {
   var qName;
   if (!prefix) {
     // e.g. Clazz.declareInterface (null, "ICorePlugin", org.eclipse.ui.IPlugin);
@@ -1499,9 +1553,22 @@ var decorateFunction = Clazz._decorateFunction = function (clazzFun, prefix, nam
 
   if (Clazz._Loader) 
     Clazz._Loader.updateNodeForFunctionDecoration(qName);
-  return;
+    clazzFun.$incl$ = parentAndInterfaces;
+  return clazzFun;
+
 };
 
+
+var excludeSuper = function(o) {
+ return o == "b$"
+      || o == "$init$"
+      || o == "c$" 
+      || o == "$Class$"
+      || o == "prototype" 
+      || o == "__CLASS_NAME__" 
+      || o == "superClazz"
+      || o == "implementz"
+}
 /**
  * Inherit class with "extends" keyword and also copy those static members. 
  * Example, as in Java, if NAME is a static member of ClassA, and ClassB 
@@ -1510,46 +1577,48 @@ var decorateFunction = Clazz._decorateFunction = function (clazzFun, prefix, nam
  * @param clazzThis child class to be extended
  * @param clazzSuper super class which is inherited from
  */
-var inheritClass = Clazz._inheritClass = function (clazzThis, clazzSuper, objSuper) {
+var inheritClass = function(clazzThis, clazzSuper, objSuper){
+  if (clazzSuper) {  
   //var thisClassName = Clazz.getClassName (clazzThis);
-  var stack = (clazzSuper ? (clazzSuper.__STACK__ || [clazzSuper]) : []);
-  var n = stack.length;
-  if (n) {
     for (var o in clazzSuper) {
-      if (o != "b$" 
-      && o != "$Class$"
-      && o != "prototype" 
-      && o != "superClazz"
-      && o.indexOf("__STACK") != 0
-      && o != "_PREP_"
-      && o != "__CLASS_NAME__" 
-      && o != "implementz"
-      && !checkInnerFunction (clazzSuper, o)) {
+      if (clazzThis[o] == undefined
+      && !excludeSuper(o)
+      && !checkInnerFunction (clazzSuper, o))
         clazzThis[o] = clazzSuper[o];
-      }
     }
+    var p = clazzThis.prototype;
     if (unloadedClasses[Clazz.getClassName(clazzThis, true)]) {
       // Don't change clazzThis.protoype! Keep it!
-    } else if (objSuper) {
-      doDebugger();
-      clazzThis.prototype = objSuper; 
     } else if (clazzSuper == Number) {
       clazzThis.prototype = new Number ();
     } else {
       clazzThis.prototype = new clazzSuper (null, Clazz.inheritArgs);     
     } 
+    for (o in p)
+      clazzThis.prototype[o] = p[o];
   }
-  clazzThis.superClazz = clazzSuper;
-  var stack1 = new Array(n + 1);
-  stack1[n] = clazzThis;
-  for (var i = n; --i >= 0;)
-    stack1[i] = stack[i];
-  clazzThis.__STACK__ = stack1;
-  clazzThis.__STACKPT__ = n; 
   clazzThis.prototype.__CLASS_NAME__ = clazzThis.__CLASS_NAME__;
+  clazzThis.superClazz = clazzSuper;
 };
 
 ////////////////////////// default package declarations ////////////////////////
+
+
+/*
+ * Check whether given package's classpath is setup or not.
+ * Only "java" and "org.eclipse.swt" are accepted in argument.
+ */
+/* private */
+var needPackage = function(pkg) {
+  // note that false != null and true != null
+  return (window[pkg + ".registered"] != null && !classpathMap["@" + pkg]);
+}
+
+  // Make sure that packageClasspath ("java", base, true); 
+  // is called before any _Loader#loadClass is called.
+
+  if (needPackage("java"))
+    _Loader.loadPackage("java");
 
 Clazz.declarePackage ("java.io");
 //Clazz.declarePackage ("java.lang");
@@ -1563,19 +1632,19 @@ Clazz.declarePackage ("java.util");
 Clazz.declarePackage ("java.security");
 
 
-Clazz.declareInterface (java.io,"Closeable");
-Clazz.declareInterface (java.io,"DataInput");
-Clazz.declareInterface (java.io,"DataOutput");
-Clazz.declareInterface (java.io,"Externalizable");
-Clazz.declareInterface (java.io,"Flushable");
-Clazz.declareInterface (java.io,"Serializable");
-Clazz.declareInterface (java.lang,"Iterable");
-Clazz.declareInterface (java.lang,"CharSequence");
-Clazz.declareInterface (java.lang,"Cloneable");
-Clazz.declareInterface (java.lang,"Appendable");
-Clazz.declareInterface (java.lang,"Comparable");
-Clazz.declareInterface (java.lang,"Runnable");
-Clazz.declareInterface (java.util,"Comparator");
+Clazz.newInterface$ (java.io,"Closeable");
+Clazz.newInterface$ (java.io,"DataInput");
+Clazz.newInterface$ (java.io,"DataOutput");
+Clazz.newInterface$ (java.io,"Externalizable");
+Clazz.newInterface$ (java.io,"Flushable");
+Clazz.newInterface$ (java.io,"Serializable");
+Clazz.newInterface$ (java.lang,"Iterable");
+Clazz.newInterface$ (java.lang,"CharSequence");
+Clazz.newInterface$ (java.lang,"Cloneable");
+Clazz.newInterface$ (java.lang,"Appendable");
+Clazz.newInterface$ (java.lang,"Comparable");
+Clazz.newInterface$ (java.lang,"Runnable");
+Clazz.newInterface$ (java.util,"Comparator");
 
 //////// (int) conversions //////////
 
@@ -1844,43 +1913,6 @@ if (self.Clazz && Clazz.isClassDefined) {
 }
 
 /**
- * Expand the shortened list of class names.
- * For example:
- * JU.Log, $.Display, $.Decorations
- * will be expanded to 
- * JU.Log, JU.Display, JU.Decorations
- * where "$." stands for the previous class name's package.
- *
- * This method will be used to unwrap the required/optional classes list and 
- * the ignored classes list.
- */
-/* private */
-var unwrapArray = function (arr) {
-  if (!arr || arr.length == 0)
-    return [];
-  var last = null;
-  for (var i = 0; i < arr.length; i++) {
-    if (!arr[i])
-      continue;
-    if (arr[i].charAt (0) == '$') {
-      if (arr[i].charAt (1) == '.') {
-        if (!last)
-          continue;
-        var idx = last.lastIndexOf (".");
-        if (idx != -1) {
-          var prefix = last.substring (0, idx);
-          arr[i] = prefix + arr[i].substring (1);
-        }
-      } else {
-        arr[i] = "org.eclipse.s" + arr[i].substring (1);
-      }
-    }
-    last = arr[i];
-  }
-  return arr;
-};
-
-/**
  * Used to keep to-be-loaded classes.
  */
 /* private */
@@ -1991,6 +2023,10 @@ Clazz.loadClass = function (name, onLoaded, async) {
     // maybe more here
   }
   name && _Loader.loadClass(name, onLoaded, true, async, 1);
+  var cl = Clazz.allClasses[name];
+  cl && cl.$incl$ && cl.$incl$();
+  return true;
+
 }
 
 /**
@@ -2006,14 +2042,11 @@ _Loader.loadClass = _Loader.prototype.loadClass = function (name, onLoaded, forc
     return evalType(name);
 
   System.out.println("loadClass " + name)
+  var path = _Loader.getClasspathFor(name);
 
-  // Make sure that packageClasspath ("java", base, true); 
-  // is called before any _Loader#loadClass is called.
-
-  if (needPackage("java"))
-    _Loader.loadPackage("java");
-  if (needPackage("core"))
-    _Loader.loadPackage("core");  
+    loadScript$(path);//(n, n.path, n.requiredBy, false, onLoaded ? function(_loadClass){ isLoadingEntryClass = bSave; onLoaded()}: null);
+}
+/*
 
 //  var swtPkg = "org.eclipse.swt";
 //  if (name.indexOf (swtPkg) == 0 || name.indexOf ("$wt") == 0) {
@@ -2037,6 +2070,7 @@ _Loader.loadClass = _Loader.prototype.loadClass = function (name, onLoaded, forc
 
     return;    
   }
+  
   var b;
   if ((b = isClassDefined(name)) || isClassExcluded(name)) {
     if (b && onLoaded) {
@@ -2051,15 +2085,19 @@ _Loader.loadClass = _Loader.prototype.loadClass = function (name, onLoaded, forc
     }
     return b;
   }
+   
   var path = _Loader.getClasspathFor(name);
   var existed = loadedScripts[path];
     var qq = classQueue;
+    
+    
   if (!existed)
     for (var i = qq.length; --i >= 0;)
       if (qq[i].path == path || qq[i].name == name) {
         existed = true;
         break;
       }
+
   if (existed) {
     if (onLoaded) {
       var n = findNode(name);
@@ -2079,7 +2117,7 @@ _Loader.loadClass = _Loader.prototype.loadClass = function (name, onLoaded, forc
   n.path = path;
   n.isPackage = (path.lastIndexOf("package.js") == path.length - 10);
   if (n.isPackage)
-    Clazz._nodeDepth = 0;   
+    Clazz._nodeDepth = 0;
   mappingPathNameNode(path, name, n);
   n.onLoaded = onLoaded;
   n.status = Node.STATUS_KNOWN;
@@ -2103,6 +2141,7 @@ _Loader.loadClass = _Loader.prototype.loadClass = function (name, onLoaded, forc
   } else if (needBeingQueued) {
     qq.push(n);
   }
+  
   if (!needBeingQueued) { // can be loaded directly
     var bSave = false;
     if (onLoaded) {  
@@ -2110,20 +2149,11 @@ _Loader.loadClass = _Loader.prototype.loadClass = function (name, onLoaded, forc
       isLoadingEntryClass = true;
     }
     if (forced)onLoaded = null;
-    addChildClassNode(clazzTreeRoot, n, true);
-    loadScript(n, n.path, n.requiredBy, false, onLoaded ? function(_loadClass){ isLoadingEntryClass = bSave; onLoaded()}: null);
+    //addChildClassNode(clazzTreeRoot, n, true);
+    loadScript$(path);//(n, n.path, n.requiredBy, false, onLoaded ? function(_loadClass){ isLoadingEntryClass = bSave; onLoaded()}: null);
   }
 };
 
-/*
- * Check whether given package's classpath is setup or not.
- * Only "java" and "org.eclipse.swt" are accepted in argument.
- */
-/* private */
-var needPackage = function(pkg) {
-  // note that false != null and true != null
-  return (window[pkg + ".registered"] != null && !classpathMap["@" + pkg]);
-}
 
 /* private */
 _Loader.loadPackage = function(pkg, fSuccess) {
@@ -2350,12 +2380,7 @@ Clazz._lastEvalError = null;
 
 /* private */
 var evaluate = function(file, js) {
-  if (js.indexOf("c$") >= 0 && js.indexOf("var c$") < 0) {
-    // some older J2S files are like this, without a function wrapper, so we provide that here.
-    js = "(function(){var c$;" + js + "})();";
-  }
   try {
-  ;
     eval(js + ";//# sourceURL="+file);
   } catch (e) {      
     var s = "[Java2Script] The required class file \n\n" + file + (js.indexOf("data: no") ? 
@@ -2368,7 +2393,6 @@ var evaluate = function(file, js) {
     Clazz.alert(s);
     throw e;
   }
-  _Loader.onScriptLoaded(file, false);
 }
 
 /* private */
@@ -2398,6 +2422,8 @@ var removeScriptNode = function (n) {
 
 /* public */
 Clazz._4Name = function(clazzName, applet, state, asClazz) {
+    if (clazzName.indexOf(".") < 0)
+      clazzName = "java.lang." + clazzName;  
   var isok = Clazz.isClassDefined(clazzName);
   if (isok && asClazz) {
     var cl = Clazz.allClasses[clazzName];
@@ -2405,8 +2431,6 @@ Clazz._4Name = function(clazzName, applet, state, asClazz) {
     return cl;
   } 
   if (!isok) {
-    
-//  if (!Clazz.isClassDefined(clazzName)) {
     var name2 = null;
     if (clazzName.indexOf("$") >= 0) {
       // BH we allow Java's java.swing.JTable.$BooleanRenderer as a stand-in for java.swing.JTable.BooleanRenderer
@@ -2445,11 +2469,44 @@ Clazz._4Name = function(clazzName, applet, state, asClazz) {
  */ 
 Clazz.currentPath= "";
 
+
+var loadScript$ = function(file) {
+
+  Clazz.currentPath = file;
+  loadedScripts[file] = true;
+  // also remove from queue
+  removeArrayItem(classQueue, file);
+
+  var file0 = file;
+  if (Clazz._debugging) {
+    file = file.replace(/\.z\.js/,".js");
+  }
+
+  _Loader.onScriptLoading(file);
+
+    var data = J2S._getFileData(file);
+    try{
+      evaluate(file, data);
+      _Loader.onScriptLoaded(file, false);
+    }catch(e) {
+      _Loader.onScriptLoaded(file, e);
+      var s = ""+e;
+      if (data.indexOf("Error") >= 0)
+        s = data;
+      if (s.indexOf("missing ] after element list")>= 0)
+        s = "File not found";
+      doDebugger()
+      alert(s + " loading file " + file);
+    }
+    
+  return;
+}
+
 /**
  * Load *.js by adding script elements into head. Hook the onload event to
  * load the next class in dependency tree.
  */
-/* private */
+/* private 
 var loadScript = function (node, file, why, ignoreOnload, fSuccess, _loadScript) {
 
   Clazz.currentPath = file;
@@ -2484,6 +2541,10 @@ var loadScript = function (node, file, why, ignoreOnload, fSuccess, _loadScript)
     var data = J2S._getFileData(file);
     try{
       evaluate(file, data);
+      return;
+      
+      // none of this is necessary any more
+      
       var node = mapPath2ClassNode["@" + file0];
       if (node.status < Node.STATUS_CONTENT_LOADED)
         node.status = Node.STATUS_CONTENT_LOADED; // BH allowing load to update the node
@@ -2503,7 +2564,6 @@ var loadScript = function (node, file, why, ignoreOnload, fSuccess, _loadScript)
     return;
   }
   
-  
 System.out.println("for file " + file +" fSuccess = " + (fSuccess ? fSuccess.toString() : ""))
 
   var info = {
@@ -2517,6 +2577,8 @@ System.out.println("for file " + file +" fSuccess = " + (fSuccess ? fSuccess.toS
   inLoadingThreads++;
   J2S.$ajax(info);
 };
+
+  */
 
 var removeArrayItem = function(arr, item) {
   var i = findArrayItem(arr, item);
@@ -2538,7 +2600,7 @@ var findArrayItem = function(arr, item) {
 }
 
 
-/* private */
+/* private
 var W3CScriptOnCallback = function (path, forError, fSuccess) {
   var s = Clazz.getStackTrace();
   // if (!fSuccess)alert("why no fSuccess?" + s)
@@ -2567,7 +2629,7 @@ var W3CScriptOnCallback = function (path, forError, fSuccess) {
       tryToLoadNext(path, f);
   };
 };
-
+ */
 /* private */
 var isLoadingEntryClass = true;
 
@@ -2578,7 +2640,7 @@ var besidesJavaPackage = false;
  * After class is loaded, this method will be executed to check whether there
  * are classes in the dependency tree that need to be loaded.
  */
-/* private */
+/* private 
 var tryToLoadNext = function (file, fSuccess) {
   var node = mapPath2ClassNode["@" + file];
   if (!node) // maybe class tree root
@@ -2639,11 +2701,10 @@ var tryToLoadNext = function (file, fSuccess) {
   } else if (node.musts.length == 0 && node.optionals.length == 0) {
     updateNode(node);
   }
-  /*
-   * Maybe in #optinalLoaded inside above _Loader#updateNode calls, 
-   * _Loader.keepOnLoading is set false (Already loaded the wanted
-   * classes), so here check to stop.
-   */
+  //Maybe in #optinalLoaded inside above _Loader#updateNode calls, 
+  // _Loader.keepOnLoading is set false (Already loaded the wanted
+  // classes), so here check to stop.
+  //
    
   if (!_Loader.keepOnLoading) // set externally
     return;
@@ -2659,7 +2720,7 @@ var tryToLoadNext = function (file, fSuccess) {
       loadClassNode(n); // will increase inLoadingThreads!
     }
   } else if ((cq = classQueue).length != 0) { 
-    /* queue must be loaded in order! */
+    // queue must be loaded in order! 
     n = cq.shift();
     if (!loadedScripts[n.path] 
         || cq.length != 0 
@@ -2669,17 +2730,6 @@ var tryToLoadNext = function (file, fSuccess) {
       addChildClassNode(clazzTreeRoot, n, true);
       loadScript(n, n.path, n.requiredBy, false);
     } else if (isLoadingEntryClass) {
-      /*
-       * The first time reaching here is the time when ClassLoader
-       * is trying to load entry class. Class with #main method and
-       * is to be executed is called Entry Class.
-       *
-       * Here when loading entry class, ClassLoader should not call
-       * the next following loading script. This is because, those
-       * scripts will try to mark the class as loaded directly and
-       * then continue to call #onLoaded callback method,
-       * which results in an script error!
-       */
       isLoadingEntryClass = false;
     }
   } else if ((n = findNextRequiredClass(Node.STATUS_KNOWN))) {
@@ -2774,18 +2824,18 @@ var tryToLoadNext = function (file, fSuccess) {
   }
   _Loader.onGlobalLoaded();
 };
-
 Clazz._showDone = function() {
       System.out.println("I think I'm done: " + Clazz.saemCount0 + " methods, " + Clazz.saemCount1 + " overridden, " + Clazz.saemCount2 + " processed");
       Clazz.showDuplicates(true);
 }
 
 var tracks = [];
+*/
 
 /*
  * There are classes reference cycles. Try to detect and break those cycles.
  */
-/* private */
+/* private 
 var checkCycle = function (node, file) {
   var ts = tracks;
   var len = ts.length;
@@ -2832,7 +2882,8 @@ var checkCycle = function (node, file) {
   return false; // done 
 };
 
-
+*/
+/*
 _Loader._classCountPending = 0;
 _Loader._classCountOK = 0;
 _Loader._classPending = {};
@@ -2879,7 +2930,7 @@ Clazz.nodeDepth = 0;
 /**
  * Update the dependency tree nodes recursively.
  */
-/* private */
+/* private 
 updateNode = function(node, ulev, chain, _updateNode) {
   ulev || (ulev = 0);
   chain || (chain = "");
@@ -3013,14 +3064,14 @@ updateNode = function(node, ulev, chain, _updateNode) {
   }
 };
 
-/* private */
+/* private 
 var checkStatusIs = function(arr, status){
   for (var i = arr.length; --i >= 0;)
     if (arr[i].status < status)
       return false;
   return true;
 }
-/* private */
+/* private 
 var doneLoading = function(node, level, _doneLoading) {
   node.status = level;
   _Loader.onScriptCompleted(node.path);
@@ -3036,7 +3087,7 @@ var doneLoading = function(node, level, _doneLoading) {
   destroyClassNode(node);
   return true;
 }
-
+*/
 /*
  * Be used to record already used random numbers. And next new random
  * number should not be in the property set.
@@ -4073,16 +4124,8 @@ window["java.registered"] = true;
   
 ///////////////// special definitions of standard Java class methods ///////////
 
-var c$, m$ = Clazz.newMethod$;
+var C$, m$ = Clazz.newMethod$;
 
-/*
-Clazz._setDeclared("java.lang.Thread",java.lang.Thread = Thread = function () {});
-m$(Thread, "construct", function(){}, 1); 
-m$(Thread, "currentThread", function () {
-  return this.J2S_THREAD;
-}, 1);
-Thread.J2S_THREAD = Thread.prototype.J2S_THREAD = Clazz.$new(Thread);
-*/
 Clazz._setDeclared("java.lang.Math", java.lang.Math = Math);
 
 Math.rint || (Math.rint = function(a) {
@@ -4121,7 +4164,7 @@ if(supportsNativeObject){
   extendObject(Number);
 }
 Number.__CLASS_NAME__="Number";
-Clazz._implementOf(Number,java.io.Serializable);
+implementOf(Number,java.io.Serializable);
 Number.equals=Clazz._inF.equals;
 Number.getName=Clazz._inF.getName;
 Number.prototype.compareTo = function(x) { var a = this.valueOf(), b = x.valueOf(); return (a < b ? -1 : a == b ? 0 : 1) };
@@ -4167,7 +4210,7 @@ return this.valueOf();
 });
 
 Clazz._setDeclared("java.lang.Integer", java.lang.Integer=Integer=function(){
-if (typeof arguments[0] != "object")this.construct(arguments[0]);
+if (typeof arguments[0] != "object")this.c$(arguments[0]);
 });
 
 var setJ2STypeclass = function(cl, type, paramCode) {
@@ -4185,9 +4228,9 @@ var setJ2STypeclass = function(cl, type, paramCode) {
 var decorateAsNumber = function (clazzFun, qClazzName, type, PARAMCODE) {
   clazzFun.prototype.valueOf=function(){return 0;};
   clazzFun.prototype.__VAL0__ = 1;
-  Clazz._extendJO(clazzFun, qClazzName, true);
-  Clazz._inheritClass(clazzFun, Number);
-  Clazz._implementOf(clazzFun, Comparable);
+  extendJO(clazzFun, qClazzName, true);
+  inheritClass(clazzFun, Number);
+  implementOf(clazzFun, Comparable);
   setJ2STypeclass(clazzFun, type, PARAMCODE);
   return clazzFun;
 };
@@ -4204,7 +4247,7 @@ Integer.toString=Integer.prototype.toString=function(){
   return "" + this.valueOf();
 };
 
-m$(Integer, "construct", function(v){
+m$(Integer, "c$", function(v){
  v == null && (v = 0);
  if (typeof v != "number")
   v = Integer.parseIntRadix(v, 10);
@@ -4256,11 +4299,11 @@ Integer.numberOfTrailingZeros=Integer.prototype.numberOfTrailingZeros;
 m$(Integer,"parseIntRadix",
 function(s,radix){
 if(s==null){
-throw Clazz.$new(NumberFormatException.construct$S, ["null"]);
+throw Clazz.$new(NumberFormatException.c$$S, ["null"]);
 }if(radix<2){
-throw Clazz.$new(NumberFormatException.construct$S, ["radix "+radix+" less than Character.MIN_RADIX"]);
+throw Clazz.$new(NumberFormatException.c$$S, ["radix "+radix+" less than Character.MIN_RADIX (2)"]);
 }if(radix>36){
-throw Clazz.$new(NumberFormatException.construct$S, ["radix "+radix+" greater than Character.MAX_RADIX"]);
+throw Clazz.$new(NumberFormatException.c$$S, ["radix "+radix+" greater than Character.MAX_RADIX (16)"]);
 }
 if (radix == 10) {
   for (var i = s.length; --i >= 0;) {
@@ -4268,12 +4311,12 @@ if (radix == 10) {
     if (c >= 48 && c <= 57) 
       continue;
     if (i > 0 || c != 43 && c != 45)
-      throw Clazz.$new(NumberFormatException.construct$S, ["Not a Number : "+s]);
+      throw Clazz.$new(NumberFormatException.c$$S, ["Not a Number : "+s]);
   }
 }
 var i=parseInt(s,radix);
 if(isNaN(i)){
-throw Clazz.$new(NumberFormatException.construct$S, ["Not a Number : "+s]);
+throw Clazz.$new(NumberFormatException.c$$S, ["Not a Number : "+s]);
 }
 return i;
 });
@@ -4287,7 +4330,7 @@ Integer.parseInt=Integer.prototype.parseInt;
 
 m$(Integer,"$valueOf",
 function(s){
-  return Clazz.$new(Integer.construct, [s]);
+  return Clazz.$new(Integer.c$, [s]);
 });
 
 Integer.$valueOf=Integer.prototype.$valueOf;
@@ -4333,8 +4376,8 @@ return (radix == 8 ? parseInt(n, 8) : n);
 m$(Integer,"decode", function(n){
   n = Integer.decodeRaw(n);
   if (isNaN(n) || n < Integer.MIN_VALUE|| n > Integer.MAX_VALUE)
-  throw Clazz.$new(NumberFormatException.construct$S,["Invalid Integer"]);
-  return Clazz.$new(Integer.construct, [n]);
+  throw Clazz.$new(NumberFormatException.c$$S,["Invalid Integer"]);
+  return Clazz.$new(Integer.c$, [n]);
 }, 1);
 
 m$(Integer,"hashCode",
@@ -4345,7 +4388,7 @@ return this.valueOf();
 // Note that Long is problematic in JavaScript 
 
 Clazz._setDeclared("java.lang.Long", java.lang.Long=Long=function(){
-if (typeof arguments[0] != "object")this.construct(arguments[0]);
+if (typeof arguments[0] != "object")this.c$(arguments[0]);
 });
 
 decorateAsNumber(Long, "Long", "long", "L");
@@ -4358,7 +4401,7 @@ return"class java.lang.Long";
 return""+this.valueOf();
 };
 
-m$(Long, "construct", function(v){
+m$(Long, "c$", function(v){
   v == null && (v = 0);
   v = (typeof v == "number" ? Math.round(v) : Integer.parseIntRadix(v, 10));
   this.valueOf=function(){return v;};
@@ -4377,7 +4420,7 @@ Long.parseLong=Long.prototype.parseLong;
 
 m$(Long,"$valueOf",
 function(s){
-return Clazz.$new(Long.construct, [s]);
+return Clazz.$new(Long.c$, [s]);
 });
 
 Long.$valueOf=Long.prototype.$valueOf;
@@ -4410,16 +4453,16 @@ m$(Long,"decode",
 function(n){
   n = Integer.decodeRaw(n);
   if (isNaN(n))
-    throw Clazz.$new(NumberFormatException.construct$S, ["Invalid Long"]);
-  return Clazz.$new(Long.construct, [n]);
+    throw Clazz.$new(NumberFormatException.c$$S, ["Invalid Long"]);
+  return Clazz.$new(Long.c$, [n]);
 }, 1);
 
 Clazz._setDeclared("java.lang.Short", java.lang.Short = Short = function(){
-if (typeof arguments[0] != "object")this.construct(arguments[0]);
+if (typeof arguments[0] != "object")this.c$(arguments[0]);
 });
 decorateAsNumber(Short, "Short", "short", "H");
 
-m$(Short, "construct",
+m$(Short, "c$",
 function (v) {
  v == null && (v = 0);
  if (typeof v != "number")
@@ -4427,7 +4470,7 @@ function (v) {
  v = v.shortValue();
  this.valueOf = function () {return v;};
 }, 1);
-Short.prototype.construct = Short.construct;
+Short.prototype.c$ = Short.c$;
 
 
 
@@ -4459,7 +4502,7 @@ Short.parseShort = Short.prototype.parseShort;
 
 m$(Short, "$valueOf",
 function (s) {
-  return Clazz.$new(Short.construct, [s]);
+  return Clazz.$new(Short.c$, [s]);
 });
 
 Short.$valueOf = Short.prototype.$valueOf;
@@ -4491,16 +4534,16 @@ m$(Short, "decode",
 function(n){
   n = Integer.decodeRaw(n);
   if (isNaN(n) || n < -32768|| n > 32767)
-    throw Clazz.$new(NumberFormatException.construct$S, ["Invalid Short"]);
-  return Clazz.$new(Short.construct, [n]);
+    throw Clazz.$new(NumberFormatException.c$$S, ["Invalid Short"]);
+  return Clazz.$new(Short.c$, [n]);
 }, 1);
 
 Clazz._setDeclared("java.lang.Byte", java.lang.Byte=Byte=function(){
-if (typeof arguments[0] != "object")this.construct(arguments[0]);
+if (typeof arguments[0] != "object")this.c$(arguments[0]);
 });
 decorateAsNumber(Byte,"Byte", "byte", "B");
 
-m$(Byte, "construct", function(v){
+m$(Byte, "c$", function(v){
  if (typeof v != "number")
    v = Integer.parseIntRadix(v, 10);
  v = v.byteValue();
@@ -4538,7 +4581,7 @@ Byte.parseByte=Byte.prototype.parseByte;
 
 m$(Byte, "$valueOf",
 function (s) {
-  return Clazz.$new(Byte.construct, [s]);
+  return Clazz.$new(Byte.c$, [s]);
 });
 
 Byte.$valueOf=Byte.prototype.$valueOf;
@@ -4570,8 +4613,8 @@ m$(Byte,"decode",
 function(n){
   n = Integer.decodeRaw(n);
   if (isNaN(n) || n < -128|| n > 127)
-    throw Clazz.$new(NumberFormatException.construct$S, ["Invalid Byte"]);
-  return Clazz.$new(Byte.construct, [n]);
+    throw Clazz.$new(NumberFormatException.c$$S, ["Invalid Byte"]);
+  return Clazz.$new(Byte.c$, [n]);
 }, 1);
 
 Clazz._floatToString = function(f) {
@@ -4582,11 +4625,11 @@ Clazz._floatToString = function(f) {
 }
 
 Clazz._setDeclared("java.lang.Float", java.lang.Float=Float=function(){
-if (typeof arguments[0] != "object")this.construct(arguments[0]);
+if (typeof arguments[0] != "object")this.c$(arguments[0]);
 });
 decorateAsNumber(Float,"Float", "float", "F");
 
-m$(Float, "construct", function(v){
+m$(Float, "c$", function(v){
  v == null && (v = 0);
  if (typeof v != "number") 
   v = Number(v);
@@ -4621,12 +4664,12 @@ Float.NaN=Number.NaN;
 m$(Float,"parseFloat",
 function(s){
 if(s==null){
-throw Clazz.$new(NumberFormatException.construct$S, ["null"]);
+throw Clazz.$new(NumberFormatException.c$$S, ["null"]);
 }
 if (typeof s == "number")return s;  // important -- typeof NaN is "number" and is OK here
 var floatVal=Number(s);
 if(isNaN(floatVal)){
-throw Clazz.$new(NumberFormatException.construct$S, ["Not a Number : "+s]);
+throw Clazz.$new(NumberFormatException.c$$S, ["Not a Number : "+s]);
 }
 return floatVal;
 });
@@ -4634,7 +4677,7 @@ Float.parseFloat=Float.prototype.parseFloat;
 
 m$(Float,"$valueOf",
 function(s){
-return Clazz.$new(Float.construct, [s]);
+return Clazz.$new(Float.c$, [s]);
 });
 
 Float.$valueOf=Float.prototype.$valueOf;
@@ -4666,7 +4709,7 @@ return s.valueOf()==this.valueOf();
 });
 
 Clazz._setDeclared("java.lang.Double", java.lang.Double=Double=function(){
-if (typeof arguments[0] != "object")this.construct(arguments[0]);
+if (typeof arguments[0] != "object")this.c$(arguments[0]);
 });
 decorateAsNumber(Double,"Double", "double", "D");
 Double.toString=Double.prototype.toString=function(){
@@ -4678,7 +4721,7 @@ return"class java.lang.Double";
 return Clazz._floatToString(this.valueOf());
 };
 
-m$(Double, "construct", function(v){
+m$(Double, "c$", function(v){
  v == null && (v = 0);
  if (typeof v != "number") 
   v = Double.parseDouble(v);
@@ -4707,12 +4750,12 @@ Double.isInfinite=Double.prototype.isInfinite;
 m$(Double,"parseDouble",
 function(s){
 if(s==null){
-  throw Clazz.$new(NumberFormatException.construct$S, ["null"]);
+  throw Clazz.$new(NumberFormatException.c$$S, ["null"]);
 }
 if (typeof s == "number")return s;  // important -- typeof NaN is "number" and is OK here
 var doubleVal=Number(s);
 if(isNaN(doubleVal)){
-throw Clazz.$new(NumberFormatException.construct$S, ["Not a Number : "+s]);
+throw Clazz.$new(NumberFormatException.c$$S, ["Not a Number : "+s]);
 }
 return doubleVal;
 });
@@ -4720,7 +4763,7 @@ Double.parseDouble=Double.prototype.parseDouble;
 
 m$(Double,"$valueOf",
 function(v){
-return Clazz.$new(Double.construct, [v]);
+return Clazz.$new(Double.c$, [v]);
 });
 
 Double.$valueOf=Double.prototype.$valueOf;
@@ -4742,20 +4785,20 @@ return s.valueOf()==this.valueOf();
 
 Clazz._setDeclared("java.lang.Boolean", 
 Boolean = java.lang.Boolean = Boolean || function(){
-if (typeof arguments[0] != "object")this.construct(arguments[0]);
+if (typeof arguments[0] != "object")this.c$(arguments[0]);
 });
 
 if (supportsNativeObject) {
   extendObject(Boolean);
 }
 Boolean.__CLASS_NAME__="Boolean";
-Clazz._implementOf(Boolean,[java.io.Serializable,java.lang.Comparable]);
+implementOf(Boolean,[java.io.Serializable,java.lang.Comparable]);
 setJ2STypeclass(Boolean, "boolean", "Z");
 Boolean.equals=Clazz._inF.equals;
 Boolean.getName=Clazz._inF.getName;
 Boolean.serialVersionUID=Boolean.prototype.serialVersionUID=-3665804199014368530;
 
-m$(Boolean, "construct",
+m$(Boolean, "c$",
 function(s){
   var b = ((typeof s == "string" ? Boolean.toBoolean(s) : s) ? true : false);
   this.valueOf=function(){return b;};
@@ -4821,11 +4864,11 @@ return(typeof name == "string" ? name.equalsIgnoreCase$S("true") : !!name);
 // so instead we have to do a lexical switch from "new Boolean" to "Boolean.from"
 m$(Boolean,"from",
 function(name){
-return Clazz.$new(Boolean.construct, [typeof name == "string" ? name.equalsIgnoreCase$S("true") : !!name]);
+return Clazz.$new(Boolean.c$, [typeof name == "string" ? name.equalsIgnoreCase$S("true") : !!name]);
 }, 1);
 
-Boolean.TRUE=Boolean.prototype.TRUE=Clazz.$new(Boolean.construct, [true]);
-Boolean.FALSE=Boolean.prototype.FALSE=Clazz.$new(Boolean.construct, [false]);
+Boolean.TRUE=Boolean.prototype.TRUE=Clazz.$new(Boolean.c$, [true]);
+Boolean.FALSE=Boolean.prototype.FALSE=Clazz.$new(Boolean.c$, [false]);
 //Boolean.TYPE=Boolean.prototype.TYPE=Boolean;
 
 
@@ -5007,7 +5050,7 @@ if(supportsNativeObject){
 //   java.lang.AbstractStringBuilder
 //   java.util.regex.Matcher,Pattern
  
-Clazz._implementOf(String,[java.io.Serializable,CharSequence,Comparable]);
+implementOf(String,[java.io.Serializable,CharSequence,Comparable]);
 
 String.__PARAMCODE = "S";
 String.getName=Clazz._inF.getName;
@@ -5511,106 +5554,101 @@ default:
 
 })(Clazz._Encoding);
 
-
-//c$=Clazz.decorateAsClass(function() {}, java.lang, "Class");
-//Clazz._setDeclared("java.lang.Class", java.lang.Class); 
-
-
-c$=Clazz.decorateAsClass(java.lang,"Character",function(){
-if (typeof arguments[0] != "object")this.construct(arguments[0]);
+C$=Clazz.newClass$(java.lang,"Character",function(){
+if (typeof arguments[0] != "object")this.c$(arguments[0]);
 },null,[java.io.Serializable,Comparable]);
 Clazz._setDeclared("java.lang.Character", java.lang.Character); 
 setJ2STypeclass(Character, "char", "C");
 
-m$(c$,"getName",
+m$(C$,"getName",
 function(){
 return "?";
 }, 1);
 
-m$(c$,"construct",
+m$(C$,"c$",
 function(value){
 this.value=value;
 }, 1);
 
-m$(c$,"charValue",
+m$(C$,"charValue",
 function(){
 return this.value;
 });
 
-m$(c$,"hashCode",
+m$(C$,"hashCode",
 function(){
 return(this.value).charCodeAt(0);
 });
-m$(c$,"equals",
+m$(C$,"equals",
 function(obj){
 if(Clazz.instanceOf(obj,Character)){
 return(this.value).charCodeAt(0)==((obj).charValue()).charCodeAt(0);
 }return false;
 });
-m$(c$,"equals$O",
+m$(C$,"equals$O",
 function(obj){
 if(Clazz.instanceOf(obj,Character)){
 return(this.value).charCodeAt(0)==((obj).charValue()).charCodeAt(0);
 }return false;
 });
-m$(c$,"charCodeAt",
+m$(C$,"charCodeAt",
 function(i){
 return(this.value).charCodeAt(i);
 });
 
-c$.prototype.$c = function(){return this.value.charCodeAt(0)};
+C$.prototype.$c = function(){return this.value.charCodeAt(0)};
 
-m$(c$,"compareTo",
+m$(C$,"compareTo",
 function(c){
 return(this.value).charCodeAt(0)-(c.value).charCodeAt(0);
 });
-m$(c$,"toLowerCase",
+m$(C$,"toLowerCase",
 function(c){
 return(""+c).toLowerCase().charAt(0);
 }, 1);
-m$(c$,"toUpperCase",
+m$(C$,"toUpperCase",
 function(c){
 return(""+c).toUpperCase().charAt(0);
 }, 1);
-m$(c$,"isDigit",
+m$(C$,"isDigit",
 function(c){
 c = c.charCodeAt(0);
 return (48 <= c && c <= 57);
 }, 1);
-m$(c$,"isUpperCase",
+m$(C$,"isUpperCase",
 function(c){
 c = c.charCodeAt(0);
 return (65 <= c && c <= 90);
 }, 1);
-m$(c$,"isLowerCase",
+m$(C$,"isLowerCase",
 function(c){
 c = c.charCodeAt(0);
 return (97 <= c && c <= 122);
 }, 1);
-m$(c$,"isWhitespace",
+m$(C$,"isWhitespace",
 function(c){
 c = (c).charCodeAt(0);
 return (c >= 0x1c && c <= 0x20 || c >= 0x9 && c <= 0xd || c == 0x1680
   || c >= 0x2000 && c != 0x2007 && (c <= 0x200b || c == 0x2028 || c == 0x2029 || c == 0x3000));
 }, 1);
-m$(c$,"isLetter",
+m$(C$,"isLetter",
 function(c){
 c = c.charCodeAt(0);
 return (65 <= c && c <= 90 || 97 <= c && c <= 122);
 }, 1);
-m$(c$,"isLetterOrDigit",
+m$(C$,"isLetterOrDigit",
 function(c){
 c = c.charCodeAt(0);
 return (65 <= c && c <= 90 || 97 <= c && c <= 122 || 48 <= c && c <= 57);
 }, 1);
-m$(c$,"isSpaceChar",
+m$(C$,"isSpaceChar",
 function(c){
  var i = c.charCodeAt(0);
 if(i==0x20||i==0xa0||i==0x1680)return true;
 if(i<0x2000)return false;
 return i<=0x200b||i==0x2028||i==0x2029||i==0x202f||i==0x3000;
 }, 1);
-m$(c$,"digit",
+m$(C$,"digit",
 function(c,radix){
 var i = c.charCodeAt(0);
 if(radix >= 2 && radix <= 36){
@@ -5628,7 +5666,7 @@ if(radix >= 2 && radix <= 36){
 }
 return -1;
 }, 1);
-m$(c$,"toString",
+m$(C$,"toString",
 function(c){
 if (arguments.length == 0) {
   if(this===Character){
@@ -5639,24 +5677,18 @@ if (arguments.length == 0) {
 }
 return String.valueOf(c);
 }, 1);
-m$(c$,"charCount", function(codePoint){
+m$(C$,"charCount", function(codePoint){
   return codePoint >= 0x010000 ? 2 : 1;
 }, 1);
-
-Clazz.defineStatics$(c$,[
-"MIN_VALUE",'\u0000',
-"MAX_VALUE",'\uffff',
-"MIN_RADIX",2,
-"MAX_RADIX",36]);
 
 // TODO: Only asking for problems declaring Date. This is not necessary
 
 Clazz._setDeclared("java.util.Date", java.util.Date=Date);
 //Date.TYPE="java.util.Date";
 Date.__CLASS_NAME__="Date";
-Clazz._implementOf(Date,[java.io.Serializable,java.lang.Comparable]);
+implementOf(Date,[java.io.Serializable,java.lang.Comparable]);
 
-m$(java.util.Date, "construct", function(t) {
+m$(java.util.Date, "c$", function(t) {
   this.setTime(t || System.currentTimeMillis())
 }, 1);
 
@@ -5696,76 +5728,76 @@ return parseInt(ht)^parseInt((ht>>32));
 // TODO: This is not right. Why here????
 
 /*
-c$=declareType(java.util,"EventObject",null,java.io.Serializable);
+C$=declareType(java.util,"EventObject",null,java.io.Serializable);
 Clazz._setDeclared("java.util.EventObject", java.util.EventObject); 
 
-m$(c$, "construct", function(source){
+m$(C$, "c$", function(source){
 this.source=null;
 if(arguments.length > 0  && source!=null)this.source=source;
 else throw new IllegalArgumentException();
 }, 1);
 
-m$(c$,"getSource",
+m$(C$,"getSource",
 function(){
 return this.source;
 });
-m$(c$,"toString",
+m$(C$,"toString",
 function(){
 return this.getClass().getName()+"[source="+String.valueOf(this.source)+']';
 });
-Clazz.declareInterface(java.util,"EventListener");
+Clazz.newInterface$(java.util,"EventListener");
 
-c$=Clazz.decorateAsClass(function(){
+C$=Clazz.newClass$(function(){
 this.listener=null;
 },java.util,"EventListenerProxy",null,java.util.EventListener);
-m$(c$, "construct", function(listener){
+m$(C$, "c$", function(listener){
 this.listener=listener;
 },1);
 
-m$(c$,"getListener",
+m$(C$,"getListener",
 function(){
 return this.listener;
 });
 */
 
-Clazz.declareInterface(java.util,"Iterator");
+Clazz.newInterface$(java.util,"Iterator");
 
-Clazz.declareInterface(java.util,"ListIterator",java.util.Iterator);
-Clazz.declareInterface(java.util,"Enumeration");
-Clazz.declareInterface(java.util,"Collection",Iterable);
+Clazz.newInterface$(java.util,"ListIterator",java.util.Iterator);
+Clazz.newInterface$(java.util,"Enumeration");
+Clazz.newInterface$(java.util,"Collection",Iterable);
 
-Clazz.declareInterface(java.util,"Set",java.util.Collection);
-Clazz.declareInterface(java.util,"Map");
-Clazz.declareInterface(java.util.Map,"Entry");
+Clazz.newInterface$(java.util,"Set",java.util.Collection);
+Clazz.newInterface$(java.util,"Map");
+Clazz.newInterface$(java.util.Map,"Entry");
 
-Clazz.declareInterface(java.util,"List",java.util.Collection);
+Clazz.newInterface$(java.util,"List",java.util.Collection);
 
-Clazz.declareInterface(java.util,"Queue",java.util.Collection);
-Clazz.declareInterface(java.util,"RandomAccess");
+Clazz.newInterface$(java.util,"Queue",java.util.Collection);
+Clazz.newInterface$(java.util,"RandomAccess");
 
-var C$ = Clazz.decorateAsClass (java.lang, "Throwable", function () {
+var C$ = Clazz.newClass$ (java.lang, "Throwable", function () {
 Clazz.newInstance$ (this, arguments);
 }, null, java.io.Serializable);
 
-m$(C$, 'construct', function () {
+m$(C$, 'c$', function () {
 this.fillInStackTrace ();
 this.detailMessage = this.stack;
 this.cause = this;
 }, 1);
 
-m$(C$, 'construct$S', function (message) {
+m$(C$, 'c$$S', function (message) {
 this.fillInStackTrace ();
 this.cause = this;
 this.detailMessage = message;
 }, 1);
 
-m$(C$, 'construct$S$Throwable', function (message, cause) {
+m$(C$, 'c$$S$Throwable', function (message, cause) {
 this.fillInStackTrace ();
 this.detailMessage = message;
 this.cause = cause;
 }, 1);
 
-m$(C$, 'construct$Throwable', function (cause) {
+m$(C$, 'c$$Throwable', function (cause) {
 this.fillInStackTrace ();
 this.detailMessage = (cause == null ? this.stack : cause.toString ());
 this.cause = cause;
@@ -5782,8 +5814,8 @@ return (this.cause === this ? null : this.cause);
 });
 
 m$(C$, 'initCause$Throwable', function (cause) {
-if (this.cause !== this) throw Clazz.$new(IllegalStateException.construct$S,["Can't overwrite cause"]);
-if (cause === this) throw Clazz.$new(IllegalArgumentException.construct$S,["Self-causation not permitted"]);
+if (this.cause !== this) throw Clazz.$new(IllegalStateException.c$$S,["Can't overwrite cause"]);
+if (cause === this) throw Clazz.$new(IllegalArgumentException.c$$S,["Self-causation not permitted"]);
 this.cause = cause;
 return this;
 });
@@ -5834,7 +5866,7 @@ while (index < 20 && caller != null) {
   if (superCaller.exClazz != null) {
     nativeClazz = superCaller.exClazz;
   }
-  var st =Clazz.$new(StackTraceElement.construct, [
+  var st =Clazz.$new(StackTraceElement.c$, [
     ((nativeClazz != null && nativeClazz.__CLASS_NAME__.length != 0) ?
     nativeClazz.__CLASS_NAME__ : "anonymous"),
     ((superCaller.exName == null) ? "anonymous" : superCaller.exName),
@@ -5844,7 +5876,7 @@ while (index < 20 && caller != null) {
   for (var i = 0; i < callerList.length; i++) {
     if (callerList[i] == superCaller) {
       // ... stack information lost as recursive invocation existed ...
-      var st =Clazz.$new(StackTraceElement.construct, ["lost", "missing", null, -3]);
+      var st =Clazz.$new(StackTraceElement.c$, ["lost", "missing", null, -3]);
       st.nativeClazz = null;
       this.stackTrace.push(st);
       index = 100;
@@ -5862,19 +5894,19 @@ return this;
 
 Clazz.newMethod$(C$, 'setStackTrace$StackTraceElementA', function (stackTrace) {
 var defensiveCopy = stackTrace.clone ();
-for (var i = 0; i < defensiveCopy.length; i++) if (defensiveCopy[i] == null) throw Clazz.$new(NullPointerException.construct$S,["stackTrace[" + i + "]"]);
+for (var i = 0; i < defensiveCopy.length; i++) if (defensiveCopy[i] == null) throw Clazz.$new(NullPointerException.c$$S,["stackTrace[" + i + "]"]);
 
 this.stackTrace = defensiveCopy;
 });
 
-c$=Clazz.decorateAsClass(java.lang,"StackTraceElement",function(){
+C$=Clazz.newClass$(java.lang,"StackTraceElement",function(){
 this.declaringClass=null;
 this.methodName=null;
 this.fileName=null;
 this.lineNumber=0;
 },null,java.io.Serializable);
 
-m$(c$, "construct",function(cls,method,file,line){
+m$(C$, "c$",function(cls,method,file,line){
 if(cls==null||method==null){
 throw new NullPointerException();
 }this.declaringClass=cls;
@@ -5883,7 +5915,7 @@ this.fileName=file;
 this.lineNumber=line;
 },1);
 
-m$(c$,"equals$O",
+m$(C$,"equals$O",
 function(obj){
 if(!(Clazz.instanceOf(obj,StackTraceElement))){
 return false;
@@ -5905,35 +5937,35 @@ return false;
 return false;
 }return true;
 });
-m$(c$,"getClassName",
+m$(C$,"getClassName",
 function(){
 return(this.declaringClass==null)?"<unknown class>":this.declaringClass;
 });
-m$(c$,"getFileName",
+m$(C$,"getFileName",
 function(){
 return this.fileName;
 });
-m$(c$,"getLineNumber",
+m$(C$,"getLineNumber",
 function(){
 return this.lineNumber;
 });
-m$(c$,"getMethodName",
+m$(C$,"getMethodName",
 function(){
 return(this.methodName==null)?"<unknown method>":this.methodName;
 });
-m$(c$,"hashCode",
+m$(C$,"hashCode",
 function(){
 if(this.methodName==null){
 return 0;
 }return this.methodName.hashCode()^this.declaringClass.hashCode();
 });
-m$(c$,"isNativeMethod",
+m$(C$,"isNativeMethod",
 function(){
 return this.lineNumber==-2;
 });
-m$(c$,"toString",
+m$(C$,"toString",
 function(){
-var buf=Clazz.$new(StringBuilder.construct$I, [80]);
+var buf=Clazz.$new(StringBuilder.c$$I, [80]);
 buf.append$S(this.getClassName());
 buf.append$S('.');
 buf.append$S(this.getMethodName());
@@ -5961,7 +5993,7 @@ TypeError.prototype.getMessage || (TypeError.prototype.getMessage = function(){ 
 Clazz.Error = Error;
 
 var declareType = function(prefix, name, clazzSuper, interfacez) {
-  return Clazz.decorateAsClass(prefix, name, null, clazzSuper, interfacez);
+  return Clazz.newClass$(prefix, name, null, clazzSuper, interfacez);
 };
 
 // at least allow Error() by itself to work as before
@@ -5972,7 +6004,7 @@ Clazz._Error || (Clazz._Error = Error);
 })();
 
 inheritClass(Clazz._Error, Throwable);
-Clazz.decorateAsClass (java.lang, "Error", function (){return Clazz._Error();}, Throwable);
+Clazz.newClass$ (java.lang, "Error", function (){return Clazz._Error();}, Throwable);
 
 declareType(java.lang,"Exception",Throwable);
 declareType(java.lang,"RuntimeException",Exception);
@@ -6016,61 +6048,62 @@ declareType(java.lang,"UnsupportedOperationException",RuntimeException);
 declareType(java.lang,"VerifyError",LinkageError);
 
 declareType(java.lang,"ClassCastException",RuntimeException);
-c$=Clazz.decorateAsClass(java.lang,"ClassNotFoundException",function(){this.ex=null;},Exception);
-m$(c$, "construct$S$Throwable", function(detailMessage,exception){
-c$.superClazz.construct$S$Throwable.apply(this, arguments);
+
+C$=Clazz.newClass$(java.lang,"ClassNotFoundException",function(){this.ex=null;},Exception);
+m$(C$, "c$$S$Throwable", function(detailMessage,exception){
+C$.superClazz.c$$S$Throwable.apply(this, arguments);
 this.ex=exception;
 }, 1);
-m$(c$,"getException",
+m$(C$,"getException",
 function(){
 return this.ex;
 });
-m$(c$,"getCause",
+m$(C$,"getCause",
 function(){
 return this.ex;
 });
 
-c$=declareType(java.lang,"StringIndexOutOfBoundsException",IndexOutOfBoundsException);
-m$(c$, "construct$I", function(index){
-c$.superClazz.construct$S.apply(this,["String index out of range: "+index]);
+C$=declareType(java.lang,"StringIndexOutOfBoundsException",IndexOutOfBoundsException);
+m$(C$, "c$$I", function(index){
+C$.superClazz.c$$S.apply(this,["String index out of range: "+index]);
 }, 1);
 
-c$=Clazz.decorateAsClass(java.lang.reflect,"InvocationTargetException",function(){this.target=null;},Exception);
-m$(c$, "construct$Throwable", function(exception){
-c$.superClazz.construct$Throwable.apply(this, arguments);
+C$=Clazz.newClass$(java.lang.reflect,"InvocationTargetException",function(){this.target=null;},Exception);
+m$(C$, "c$$Throwable", function(exception){
+C$.superClazz.c$$Throwable.apply(this, arguments);
 this.target=exception;
 }, 1);
-m$(c$, "construct$Throwable$S", function(exception,detailMessage){
-c$.superClazz.construct$S$Throwable.apply(this,[detailMessage,exception]);
+m$(C$, "c$$Throwable$S", function(exception,detailMessage){
+C$.superClazz.c$$S$Throwable.apply(this,[detailMessage,exception]);
 this.target=exception;
 }, 1);
-m$(c$,"getTargetException",
+m$(C$,"getTargetException",
 function(){
 return this.target;
 });
-m$(c$,"getCause",
+m$(C$,"getCause",
 function(){
 return this.target;
 });
 
-c$=Clazz.decorateAsClass(java.lang.reflect,"UndeclaredThrowableException",function(){this.undeclaredThrowable=null;},RuntimeException);
-m$(c$, "construct$Throwable", function(exception){
-c$.superClazz.construct$Throwable.apply(this, arguments);
+C$=Clazz.newClass$(java.lang.reflect,"UndeclaredThrowableException",function(){this.undeclaredThrowable=null;},RuntimeException);
+m$(C$, "c$$Throwable", function(exception){
+C$.superClazz.c$$Throwable.apply(this, arguments);
 this.undeclaredThrowable=exception;
 this.initCause(exception);
 },1);
 
-m$(c$, "construct$Throwable$S", function(exception,detailMessage){
-c$.superClazz.construct$S.apply(this,[detailMessage]);
+m$(C$, "c$$Throwable$S", function(exception,detailMessage){
+C$.superClazz.c$$S.apply(this,[detailMessage]);
 this.undeclaredThrowable=exception;
 this.initCause(exception);
 },1);
 
-m$(c$,"getUndeclaredThrowable",
+m$(C$,"getUndeclaredThrowable",
 function(){
 return this.undeclaredThrowable;
 });
-m$(c$,"getCause",
+m$(C$,"getCause",
 function(){
 return this.undeclaredThrowable;
 });
@@ -6089,20 +6122,20 @@ declareType(java.io,"NotActiveException",java.io.ObjectStreamException);
 declareType(java.io,"NotSerializableException",java.io.ObjectStreamException);
 declareType(java.io,"StreamCorruptedException",java.io.ObjectStreamException);
 
-c$=Clazz.decorateAsClass(java.io,"InterruptedIOException",function(){
+C$=Clazz.newClass$(java.io,"InterruptedIOException",function(){
 this.bytesTransferred=0;
 },java.io.IOException);
 
-c$=Clazz.decorateAsClass(java.io,"InvalidClassException",function(){
+C$=Clazz.newClass$(java.io,"InvalidClassException",function(){
 this.classname=null;
 },java.io.ObjectStreamException);
 
-m$(c$, "construct$S$S", function(className,detailMessage){
-c$.superClazz.construct$S.apply(this,[detailMessage]);
+m$(C$, "c$$S$S", function(className,detailMessage){
+C$.superClazz.c$$S.apply(this,[detailMessage]);
 this.classname=className;
 },1);
 
-m$(c$,"getMessage",
+m$(C$,"getMessage",
 function(){
 var msg=Clazz.superCall(this,java.io.InvalidClassException,"getMessage",[]);
 if(this.classname!=null){
@@ -6110,27 +6143,27 @@ msg=this.classname+';' + ' '+msg;
 }return msg;
 });
 
-c$=Clazz.decorateAsClass(java.io,"OptionalDataException",function(){
+C$=Clazz.newClass$(java.io,"OptionalDataException",function(){
 this.eof=false;
 this.length=0;
 },java.io.ObjectStreamException);
 
-c$=Clazz.decorateAsClass(java.io,"WriteAbortedException",function(){
+C$=Clazz.newClass$(java.io,"WriteAbortedException",function(){
 this.detail=null;
 },java.io.ObjectStreamException);
 
-m$(c$, "construct$S$Throwable", function(detailMessage, rootCause){
-c$.superClazz.construct$S.apply(this,[detailMessage]);
+m$(C$, "c$$S$Throwable", function(detailMessage, rootCause){
+C$.superClazz.c$$S.apply(this,[detailMessage]);
 this.detail=rootCause;
 this.initCause(rootCause);
 }, 1);
 
-m$(c$,"getMessage",
+m$(C$,"getMessage",
 function(){
-var msg=c$.superClazz.getMessage.apply(this);
+var msg=C$.superClazz.getMessage.apply(this);
 return (this.detail ? msg + "; "+this.detail.toString() : msg);
 });
-m$(c$,"getCause",
+m$(C$,"getCause",
 function(){
 return this.detail;
 });
@@ -6139,25 +6172,25 @@ declareType(java.util,"EmptyStackException",RuntimeException);
 declareType(java.util,"NoSuchElementException",RuntimeException);
 declareType(java.util,"TooManyListenersException",Exception);
 
-c$=declareType(java.util,"ConcurrentModificationException",RuntimeException);
-m$(c$, "construct", function(detailMessage, rootCause){
-Clazz.super$(c$, this);
+C$=declareType(java.util,"ConcurrentModificationException",RuntimeException);
+m$(C$, "c$", function(detailMessage, rootCause){
+Clazz.super$(C$, this);
 }, 1);
 
-c$=Clazz.decorateAsClass(java.util,"MissingResourceException",function(){
+C$=Clazz.newClass$(java.util,"MissingResourceException",function(){
 this.className=null;
 this.key=null;
 },RuntimeException);
-m$(c$, "construct$S$S$S", function(detailMessage,className,resourceName){
-c$.superClazz.construct$S.apply(this,[detailMessage]);
+m$(C$, "c$$S$S$S", function(detailMessage,className,resourceName){
+C$.superClazz.c$$S.apply(this,[detailMessage]);
 this.className=className;
 this.key=resourceName;
 }, 1);
-m$(c$,"getClassName",
+m$(C$,"getClassName",
 function(){
 return this.className;
 });
-m$(c$,"getKey",
+m$(C$,"getKey",
 function(){
 return this.key;
 });
@@ -6165,127 +6198,124 @@ return this.key;
 declareType(java.lang,"Void");
 java.lang.Void.TYPE=java.lang.Void;
 
-Clazz.declareInterface(java.lang.reflect,"GenericDeclaration");
-Clazz.declareInterface(java.lang.reflect,"AnnotatedElement");
+Clazz.newInterface$(java.lang.reflect,"GenericDeclaration");
+Clazz.newInterface$(java.lang.reflect,"AnnotatedElement");
 
-c$=declareType(java.lang.reflect,"AccessibleObject",null,java.lang.reflect.AnnotatedElement);
-m$(c$, "construct",function(){
+C$=declareType(java.lang.reflect,"AccessibleObject",null,java.lang.reflect.AnnotatedElement);
+m$(C$, "c$",function(){
 }, 1);
-m$(c$,"isAccessible",
+m$(C$,"isAccessible",
 function(){
 return false;
 });
-m$(c$,"setAccessible",
+m$(C$,"setAccessible",
 function(objects,flag){
 return;
 },1);
-m$(c$,"setAccessible",
+m$(C$,"setAccessible",
 function(flag){
 return;
 });
-m$(c$,"isAnnotationPresent",
+m$(C$,"isAnnotationPresent",
 function(annotationType){
 return false;
 });
-m$(c$,"getDeclaredAnnotations",
+m$(C$,"getDeclaredAnnotations",
 function(){
 return new Array(0);
 });
-m$(c$,"getAnnotations",
+m$(C$,"getAnnotations",
 function(){
 return new Array(0);
 });
-m$(c$,"getAnnotation",
+m$(C$,"getAnnotation",
 function(annotationType){
 return null;
 });
-m$(c$,"marshallArguments",
+m$(C$,"marshallArguments",
 function(parameterTypes,args){
 return null;
 }, 1);
-m$(c$,"invokeV",
+m$(C$,"invokeV",
 function(receiver,args){
 return;
 });
-m$(c$,"invokeL",
+m$(C$,"invokeL",
 function(receiver,args){
 return null;
 });
-m$(c$,"invokeI",
+m$(C$,"invokeI",
 function(receiver,args){
 return 0;
 });
-m$(c$,"invokeJ",
+m$(C$,"invokeJ",
 function(receiver,args){
 return 0;
 });
-m$(c$,"invokeF",
+m$(C$,"invokeF",
 function(receiver,args){
 return 0.0;
 });
-m$(c$,"invokeD",
+m$(C$,"invokeD",
 function(receiver,args){
 return 0.0;
 });
-c$.emptyArgs=c$.prototype.emptyArgs=new Array(0);
-Clazz.declareInterface(java.lang.reflect,"InvocationHandler");
-c$=Clazz.declareInterface(java.lang.reflect,"Member");
-Clazz.defineStatics$(c$, [
-"PUBLIC",0,
-"DECLARED",1]);
+C$.emptyArgs=C$.prototype.emptyArgs=new Array(0);
+Clazz.newInterface$(java.lang.reflect,"InvocationHandler");
+C$=Clazz.newInterface$(java.lang.reflect,"Member");
 
-c$=declareType(java.lang.reflect,"Modifier");
-m$(c$, "construct", function(){}, 1);
+C$=declareType(java.lang.reflect,"Modifier");
+m$(C$, "c$", function(){}, 1);
 
-m$(c$,"isAbstract",
+m$(C$,"isAbstract",
 function(modifiers){
 return((modifiers&1024)!=0);
 }, 1);
-m$(c$,"isFinal",
+m$(C$,"isFinal",
 function(modifiers){
 return((modifiers&16)!=0);
 }, 1);
-m$(c$,"isInterface",
+m$(C$,"isInterface",
 function(modifiers){
 return((modifiers&512)!=0);
 }, 1);
-m$(c$,"isNative",
+m$(C$,"isNative",
 function(modifiers){
 return((modifiers&256)!=0);
 }, 1);
-m$(c$,"isPrivate",
+m$(C$,"isPrivate",
 function(modifiers){
 return((modifiers&2)!=0);
 }, 1);
-m$(c$,"isProtected",
+m$(C$,"isProtected",
 function(modifiers){
 return((modifiers&4)!=0);
 }, 1);
-m$(c$,"isPublic",
+m$(C$,"isPublic",
 function(modifiers){
 return((modifiers&1)!=0);
 }, 1);
-m$(c$,"isStatic",
+m$(C$,"isStatic",
 function(modifiers){
 return((modifiers&8)!=0);
 }, 1);
-m$(c$,"isStrict",
+m$(C$,"isStrict",
 function(modifiers){
 return((modifiers&2048)!=0);
 }, 1);
-m$(c$,"isSynchronized",
+m$(C$,"isSynchronized",
 function(modifiers){
 return((modifiers&32)!=0);
 }, 1);
-m$(c$,"isTransient",
+m$(C$,"isTransient",
 function(modifiers){
 return((modifiers&128)!=0);
 }, 1);
-m$(c$,"isVolatile",
+m$(C$,"isVolatile",
 function(modifiers){
 return((modifiers&64)!=0);
 }, 1);
-m$(c$,"toString",
+m$(C$,"toString",
 function(modifiers){
 var sb=new Array(0);
 if(java.lang.reflect.Modifier.isPublic(modifiers))sb[sb.length]="public";
@@ -6304,44 +6334,26 @@ if(sb.length>0){
 return sb.join(" ");
 }return"";
 }, 1);
-Clazz.defineStatics$(c$,[
-"PUBLIC",0x1,
-"PRIVATE",0x2,
-"PROTECTED",0x4,
-"STATIC",0x8,
-"FINAL",0x10,
-"SYNCHRONIZED",0x20,
-"VOLATILE",0x40,
-"TRANSIENT",0x80,
-"NATIVE",0x100,
-"INTERFACE",0x200,
-"ABSTRACT",0x400,
-"STRICT",0x800,
-"BRIDGE",0x40,
-"VARARGS",0x80,
-"SYNTHETIC",0x1000,
-"ANNOTATION",0x2000,
-"ENUM",0x4000]);
 
 var newMethodNotFoundException = function (clazz, method) {
   var message = "Method " + Clazz.getClassName (clazz, true) + (method ? "." 
           + method : "") + " was not found";
   System.out.println(message);
   console.log(message);
-  throw Clazz.$new(java.lang.NoSuchMethodException.construct$S, [message]);        
+  throw Clazz.$new(java.lang.NoSuchMethodException.c$$S, [message]);        
 };
 
-c$=Clazz.decorateAsClass(java.lang.reflect,"Constructor",function(){
+C$=Clazz.newClass$(java.lang.reflect,"Constructor",function(){
 this.Class_=null;
 this.parameterTypes=null;
 this.exceptionTypes=null;
 this.modifiers=0;
-this.signature="construct";
+this.signature="c$";
 this.constr = null;
 },java.lang.reflect.AccessibleObject,[java.lang.reflect.GenericDeclaration,java.lang.reflect.Member]);
 
-m$(c$, "construct$Class$ClassA$ClassA$I", function(declaringClass,parameterTypes,checkedExceptions,modifiers){
-Clazz.super$(c$, this);
+m$(C$, "c$$Class$ClassA$ClassA$I", function(declaringClass,parameterTypes,checkedExceptions,modifiers){
+Clazz.super$(C$, this);
 this.Class_=declaringClass;
 this.parameterTypes=parameterTypes;
 for (var i = 0; i < parameterTypes.length; i++) {
@@ -6351,35 +6363,35 @@ this.constr = this.Class_.$clazz$[this.signature];
 this.exceptionTypes=checkedExceptions;
 this.modifiers=modifiers;
 }, 1);
-m$(c$,"getTypeParameters",
+m$(C$,"getTypeParameters",
 function(){
 return null;
 });
-m$(c$,"toGenericString",
+m$(C$,"toGenericString",
 function(){
 return null;
 });
-m$(c$,"getGenericParameterTypes",
+m$(C$,"getGenericParameterTypes",
 function(){
 return null;
 });
-m$(c$,"getGenericExceptionTypes",
+m$(C$,"getGenericExceptionTypes",
 function(){
 return null;
 });
-m$(c$,"getParameterAnnotations",
+m$(C$,"getParameterAnnotations",
 function(){
 return null;
 });
-m$(c$,"isVarArgs",
+m$(C$,"isVarArgs",
 function(){
 return false;
 });
-m$(c$,"isSynthetic",
+m$(C$,"isSynthetic",
 function(){
 return false;
 });
-m$(c$,"equals$O",
+m$(C$,"equals$O",
 function(object){
 if(object!=null&&Clazz.instanceOf(object,java.lang.reflect.Constructor)){
 var other=object;
@@ -6393,31 +6405,31 @@ if(params1[i]!==params2[i])return false;
 return true;
 }}}return false;
 });
-m$(c$,"getDeclaringClass",
+m$(C$,"getDeclaringClass",
 function(){
 return this.Class_;
 });
-m$(c$,"getExceptionTypes",
+m$(C$,"getExceptionTypes",
 function(){
 return this.exceptionTypes;
 });
-m$(c$,"getModifiers",
+m$(C$,"getModifiers",
 function(){
 return this.modifiers;
 });
-m$(c$,"getName",
+m$(C$,"getName",
 function(){
 return this.getDeclaringClass().getName();
 });
-m$(c$,"getParameterTypes",
+m$(C$,"getParameterTypes",
 function(){
 return this.parameterTypes;
 });
-m$(c$,"hashCode",
+m$(C$,"hashCode",
 function(){
 return this.getDeclaringClass().getName().hashCode();
 });
-m$(c$,"newInstance$OA", function(args){
+m$(C$,"newInstance$OA", function(args){
   var instance = null;
   if (this.constr) {
     var a = (args ? new Array(args.length) : null);
@@ -6436,54 +6448,54 @@ m$(c$,"newInstance$OA", function(args){
     newMethodNotFoundException(this.Class_.$clazz$, this.signature);  
   return instance;
 });
-m$(c$,"toString",
+m$(C$,"toString",
 function(){
 return null;
 });
 
-c$=declareType(java.lang.reflect,"Field",java.lang.reflect.AccessibleObject,java.lang.reflect.Member);
-m$(c$,"isSynthetic",
+C$=declareType(java.lang.reflect,"Field",java.lang.reflect.AccessibleObject,java.lang.reflect.Member);
+m$(C$,"isSynthetic",
 function(){
 return false;
 });
-m$(c$,"toGenericString",
+m$(C$,"toGenericString",
 function(){
 return null;
 });
-m$(c$,"isEnumConstant",
+m$(C$,"isEnumConstant",
 function(){
 return false;
 });
-m$(c$,"getGenericType",
+m$(C$,"getGenericType",
 function(){
 return null;
 });
-m$(c$,"equals$O",
+m$(C$,"equals$O",
 function(object){
 return false;
 });
-m$(c$,"getDeclaringClass",
+m$(C$,"getDeclaringClass",
 function(){
 return null;
 });
-m$(c$,"getName",
+m$(C$,"getName",
 function(){
 return null;
 });
-m$(c$,"getType",
+m$(C$,"getType",
 function(){
 return null;
 });
-m$(c$,"hashCode",
+m$(C$,"hashCode",
 function(){
 return 0;
 });
-m$(c$,"toString",
+m$(C$,"toString",
 function(){
 return null;
 });
 
-c$=Clazz.decorateAsClass(java.lang.reflect,"Method",function(){
+C$=Clazz.newClass$(java.lang.reflect,"Method",function(){
 this.Class_=null;
 this.name=null;
 this.returnType=null;
@@ -6491,8 +6503,8 @@ this.parameterTypes=null;
 this.exceptionTypes=null;
 this.modifiers=0;
 },java.lang.reflect.AccessibleObject,[java.lang.reflect.GenericDeclaration,java.lang.reflect.Member]);
-m$(c$, "construct$Class$S$ClassA$Class$ClassA$I", function(declaringClass,name,parameterTypes,returnType,checkedExceptions,modifiers){
-Clazz.super$(c$, this);
+m$(C$, "c$$Class$S$ClassA$Class$ClassA$I", function(declaringClass,name,parameterTypes,returnType,checkedExceptions,modifiers){
+Clazz.super$(C$, this);
 this.Class_=declaringClass;
 this.name=name;
 this.parameterTypes=parameterTypes;
@@ -6500,47 +6512,47 @@ this.returnType=returnType;
 this.exceptionTypes=checkedExceptions;
 this.modifiers=modifiers;
 }, 1);
-m$(c$,"getTypeParameters",
+m$(C$,"getTypeParameters",
 function(){
 return null;
 });
-m$(c$,"toGenericString",
+m$(C$,"toGenericString",
 function(){
 return null;
 });
-m$(c$,"getGenericParameterTypes",
+m$(C$,"getGenericParameterTypes",
 function(){
 return null;
 });
-m$(c$,"getGenericExceptionTypes",
+m$(C$,"getGenericExceptionTypes",
 function(){
 return null;
 });
-m$(c$,"getGenericReturnType",
+m$(C$,"getGenericReturnType",
 function(){
 return null;
 });
-m$(c$,"getParameterAnnotations",
+m$(C$,"getParameterAnnotations",
 function(){
 return null;
 });
-m$(c$,"isVarArgs",
+m$(C$,"isVarArgs",
 function(){
 return false;
 });
-m$(c$,"isBridge",
+m$(C$,"isBridge",
 function(){
 return false;
 });
-m$(c$,"isSynthetic",
+m$(C$,"isSynthetic",
 function(){
 return false;
 });
-m$(c$,"getDefaultValue",
+m$(C$,"getDefaultValue",
 function(){
 return null;
 });
-m$(c$,"equals$O",
+m$(C$,"equals$O",
 function(object){
 if(object!=null&&Clazz.instanceOf(object,java.lang.reflect.Method)){
 var other=object;
@@ -6554,35 +6566,35 @@ if(params1[i]!==params2[i])return false;
 return true;
 }}}return false;
 });
-m$(c$,"getDeclaringClass",
+m$(C$,"getDeclaringClass",
 function(){
 return this.Class_;
 });
-m$(c$,"getExceptionTypes",
+m$(C$,"getExceptionTypes",
 function(){
 return this.exceptionTypes;
 });
-m$(c$,"getModifiers",
+m$(C$,"getModifiers",
 function(){
 return this.modifiers;
 });
-m$(c$,"getName",
+m$(C$,"getName",
 function(){
 return this.name;
 });
-m$(c$,"getParameterTypes",
+m$(C$,"getParameterTypes",
 function(){
 return this.parameterTypes; 
 });
-m$(c$,"getReturnType",
+m$(C$,"getReturnType",
 function(){
 return this.returnType;
 });
-m$(c$,"hashCode",
+m$(C$,"hashCode",
 function(){
 return this.getDeclaringClass().getName().hashCode()^this.getName().hashCode();
 });
-m$(c$,"invoke$O$OA",
+m$(C$,"invoke$O$OA",
 function(receiver,args){
 var name0 = this.getName();
 var name = name0;
@@ -6600,13 +6612,16 @@ if (m == null)
   newMethodNotFoundException(this.Class_.$clazz$, name);  
 return m.apply(receiver,a);
 });
-m$(c$,"toString",
+m$(C$,"toString",
 function(){
 return null;
 });
 
+  if (needPackage("core"))
+    _Loader.loadPackage("core");  
 
 //Clazz._Loader.loadZJar(Clazz._Loader.getJ2SLibBase() + "core/coreswingjs.z.js", "swingjs.JSUtil");
+
 
 
 })(Clazz, J2S); // requires JSmolCore.js

@@ -164,6 +164,10 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		interfaceCastingSupported = parent.interfaceCastingSupported;
 		definedPackageNames = parent.definedPackageNames;
 		allowExtensions = parent.allowExtensions;
+		htStaticNames = parent.htStaticNames;
+		staticCount = parent.staticCount;
+
+		
 		setDebugging(parent.isDebugging());
 		// BH abandoning all compiler variable name compressing -- Google
 		// Closure Compiler is way better
@@ -236,7 +240,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		String oldClassName = typeAdapter.getClassName();
 		typeAdapter.setClassName(shortClassName);
 		// endVisit:
-		addAllMethods(node, node.bodyDeclarations(), false, false, true);
+		addAllMethods(node, node.bodyDeclarations(), false, false, true, true);
 		buffer.append(")");
 		typeAdapter.setClassName(oldClassName);
 		return false;
@@ -270,7 +274,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(BreakStatement node) {
-
 		buffer.append("break");
 		SimpleName label = node.getLabel();
 		if (label != null) {
@@ -352,14 +355,14 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		if (constructorBinding != null) {
 			methodDeclaration = constructorBinding.getMethodDeclaration();
 		}
+		boolean isDefault = false;
 		if ("String".equals(fqName)) {
 			// special treatment for String -- see j2sSwingJS.js
 			buffer.append(" String.instantialize(");
 		} else if ("Object".equals(fqName)) {
 			// For discussion, please visit
 			// http://groups.google.com/group/java2script/browse_thread/thread/3d6deb9c3c0a0cda
-			buffer.append(" new Clazz._O("); // BH removing
-												// window.JavaObject
+			buffer.append(" new Clazz._O("); // BH removing window.JavaObject
 		} else if (noConstructorNames.indexOf(fqName) >= 0) {
 			// look out for java.lang.Integer and the like -- just pass it
 			// directly
@@ -373,16 +376,17 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				buffer.append(" new ").append(fqName).append("(");
 		} else {
 			open$new(className, ".c$" + getJ2SParamQualifier(null, constructorBinding));
+			isDefault = node.arguments().isEmpty();
 			prefix = ",[";
 			postfix = "]";
 		}
-		addMethodParameterList(node.arguments(), methodDeclaration, true, prefix, postfix);
+		if (!isDefault)
+			addMethodParameterList(node.arguments(), methodDeclaration, true, prefix, postfix);
 		buffer.append(")");
 		return false;
 	}
 
 	public boolean visit(ConstructorInvocation node) {
-
 		IMethodBinding constructorBinding = node.resolveConstructorBinding();
 		List<?> arguments = node.arguments();
 		String qualifiedParams = getJ2SParamQualifier(null, constructorBinding);
@@ -395,7 +399,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(ContinueStatement node) {
-
 		buffer.append("continue");
 		SimpleName label = node.getLabel();
 		if (label != null) {
@@ -407,7 +410,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(DoStatement node) {
-
 		buffer.append("do ");
 		node.getBody().accept(this);
 		buffer.append(" while (");
@@ -417,13 +419,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(EmptyStatement node) {
-
 		buffer.append(";");
 		return false;
 	}
 
 	public boolean visit(EnhancedForStatement node) {
-
 		SimpleName name = node.getParameter().getName();
 		String varName = name.getIdentifier();
 		buffer.append("for (var ");
@@ -468,33 +468,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(EnumDeclaration node) {
-		return addDeclareOrDecorate(node, node.resolveBinding(), true, false, false, null);
+	    addDeclareOrDecorate(node, node.resolveBinding(), true, false, false, null);
+		if (node.resolveBinding() != null && !isInnerClassInit(node))
+			addAllMethods(node, node.bodyDeclarations(), true, false, false, true);
+		return false;
 	}
 
-	public void endVisit(EnumDeclaration node) {
-		if (node.resolveBinding() == null || isInnerClassInit(node))
-			return;
-		addAllMethods(node, node.bodyDeclarations(), true, false, false);
-		super.endVisit(node);
-	}
-
-	// private void addEnumAnonStatics(List<?> bodyDeclarations, boolean isEnum)
-	// {
-	// // TODO: THIS IS NOT CORRECT!!! Need clinit
-	// for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
-	// BodyDeclaration element = (BodyDeclaration) iter.next();
-	// if (!isStatic(element))
-	// continue;
-	// if (isEnum && element instanceof Initializer)
-	// element.accept(this);
-	// else if (element instanceof FieldDeclaration)
-	// addStaticFieldFragments((FieldDeclaration) element);
-	// }
-	// buffer.append("\r\n//:enumanonstatics>>\r\n");
-	// }
-	//
 	public boolean visit(EnumConstantDeclaration node) {
-
 		buffer.append("this.");
 		node.getName().accept(this);
 		buffer.append(" = ");
@@ -1030,20 +1010,10 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	 * 
 	 */
 	public boolean visit(TypeDeclaration node) {
-		return addDeclareOrDecorate(node, node.resolveBinding(), false, node.isInterface(), false, null);
-	}
-
-	/**
-	 * Class declaration is complete; C$ is known. Time to add all the fields
-	 * and methods. Outer classes only, as inner classes have already been taken
-	 * care of.
-	 * 
-	 */
-	public void endVisit(TypeDeclaration node) {
-		if (node.resolveBinding() == null || isInnerClassInit(node))
-			return;
-		addAllMethods(node, node.bodyDeclarations(), false, node.isInterface(), false);
-		super.endVisit(node);
+		boolean hasDependents = addDeclareOrDecorate(node, node.resolveBinding(), false, node.isInterface(), false, null);
+		if (node.resolveBinding() != null && !isInnerClassInit(node))
+			addAllMethods(node, node.bodyDeclarations(), false, node.isInterface(), false, hasDependents);
+		return false;
 	}
 
 	public boolean visit(VariableDeclarationStatement node) {
@@ -1083,10 +1053,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	 * @param isAnonymous
 	 */
 	private void addAllMethods(ASTNode node, List<?> bodyDeclarations, boolean isEnum, boolean isInterface,
-			boolean isAnonymous) {
+			boolean isAnonymous, boolean hasDependents) {
 
-		if (!isAnonymous)
-			addClinit(bodyDeclarations, isInterface);
+		addClinit(bodyDeclarations, isInterface, hasDependents);
 
 		StaticBuffer oldStaticBuffer = null;
 
@@ -1226,7 +1195,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	 * @param bodyDeclarations
 	 * @param isInterface
 	 */
-	private void addClinit(List<?> bodyDeclarations, boolean isInterface) {
+	private void addClinit(List<?> bodyDeclarations, boolean isInterface, boolean hasDependents) {
 		List<BodyDeclaration> lst = new ArrayList<BodyDeclaration>();
 		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			BodyDeclaration element = (BodyDeclaration) iter.next();
@@ -1236,6 +1205,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			// even if they are their default values. This is because
 			// they might have been modified by other actions between the
 			// time they were initially initialized and when $clinit$ is run.
+			// This happens when the static fields in class A reference  
+			// static fields in class B, which in turn reference static fields in Class A.
+			
 
 			if (isField || element instanceof Initializer) {
 				if ((isInterface || isStatic(element)) && !checkj2sIgnore(element)) {
@@ -1243,9 +1215,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				}
 			}
 		}
-		if (lst.size() > 0) {
+		if (lst.size() > 0 || hasDependents) {
 			int len = buffer.length();
-			buffer.append("\r\nC$.$clinit$ = function() {delete C$.$clinit$;\r\n");
+			buffer.append("\r\nC$.$clinit$ = function() {delete C$.$clinit$;Clazz.incl$(C$, 1);\r\n");
 			for (int i = lst.size(); --i >= 0;) {
 				BodyDeclaration element = lst.remove(0);
 				if (element instanceof Initializer) {
@@ -1267,8 +1239,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					}
 				}
 			}
-			if (len == 0)
-				buffer.append("}\r\n");
+			if (len == 0 || hasDependents)
+				buffer.append("};\r\n");
 			else
 				buffer.setLength(len);
 		}
@@ -1310,7 +1282,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		if (packageAndName == null)
 			packageAndName = getPackageAndName();
 		
-		buffer.append(isInterface ? "Clazz.declareInterface(" : "Clazz.decorateAsClass(");
+		buffer.append(isInterface ? "Clazz.newInterface$(" : "Clazz.newClass$(");
 		
 		// arg1 is the package name or null
 		// arg2 is the full class name in quotes
@@ -1334,6 +1306,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 		// arg3: class definition function, C$, which is called in Clazz.$new().
 
+		boolean hasDependents = false;
 		if (isAnonymous) {
 			if (!(node.getParent() instanceof EnumConstantDeclaration))
 				func = "function(){Clazz.newInstance$(this, arguments[0], true);}";
@@ -1385,20 +1358,27 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 		buffer.append(", ");
 		
-		if (isAnonymous)
-			getQualifiedStaticName(null, superclassName, true, false, true);
-		else
-			buffer.append(superclassName); // taken care of by loading
-
+		if (superclassName.equals("null")) {
+			buffer.append("null");
+		} else { 
+			hasDependents = true;
+			if (isAnonymous)
+				getQualifiedStaticName(null, superclassName, true, false, true);
+			else
+				buffer.append("'" + superclassName + "'"); // taken care of by loading
+		}
 		
 		// arg5: superinterface(s) if not null
 
 		if (superInterface != null) {
-			buffer.append(", ");
-			getQualifiedStaticName(null, superInterface.getQualifiedName(), true, false, true);
+			hasDependents = true;
+			buffer.append(", '");
+			buffer.append(fixNameNoC$(null, superInterface.getQualifiedName()));
+			buffer.append("'");
 		} else if (superInterfaceTypes != null) {
 			int size = superInterfaceTypes.size();
-			if (size < 0) {
+			if (size > 0) {
+				hasDependents = true;
 				buffer.append(", ");
 				String term = "";
 				if (size > 1) {
@@ -1410,7 +1390,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					buffer.append(sep);
 					ASTNode element = (ASTNode) iter.next();
 					ITypeBinding sbinding = ((Type) element).resolveBinding();
-					buffer.append(sbinding == null ? element : fixName(sbinding.getQualifiedName()));
+					buffer.append("'");
+					buffer.append(sbinding == null ? element : fixNameNoC$(null, sbinding.getQualifiedName()));
+					buffer.append("'");
 					sep = ", ";
 				}
 				buffer.append(term);
@@ -1426,7 +1408,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		// add the prototype var p$, used for calling private methods, specifically. 
 		
 		buffer.append("),p$=C$.prototype;\r\n");
-		return false;
+		return hasDependents;
 	}
 
 	/**
@@ -1495,19 +1477,19 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				methodDeclaration == null ? ".$init$" : ".c$" + getJ2SParamQualifier(null, methodDeclaration));
 
 		// add constructor application arguments: [object, parameters]
-		
+
 		buffer.append(", [");
 		if (outerClassExpr == null)
 			buffer.append("this");
 		else
 			outerClassExpr.accept(this);
-		
+
 		// add final variable array
-		
+
 		buffer.append(", ").append(finals == null ? "null" : finals);
 
-		// add parameters 
-		
+		// add parameters
+
 		if (methodDeclaration != null) {
 			List<?> args = node.arguments();
 			addMethodParameterList(args, methodDeclaration, true,
@@ -1515,13 +1497,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		buffer.append("]");
 
-		// an anonymous class will be calling a constructor in another class, so
+		// an anonymous class will be calling a constructor in another
+		// class, so
 		// we need to indicate its actual call explicitly
+
 		if (superAnonName != null)
 			buffer.append(",").append(innerName);
 
-		// close the method
-		
 		buffer.append(")");
 	}
 
@@ -1687,10 +1669,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	/**
-	 * Start a new Clazz.$new() call for class creation or inner classes. Uses Clazz.static$ for dynamic loading
+	 * Start a new Clazz.$new() call for class creation or inner classes. Uses Clazz.incl$ for dynamic loading
 	 * 
 	 * @param className
 	 * @param dotMethodName
+	 * @return true if this is the default constructor
 	 */
 	private void open$new(String className, String dotMethodName) {
 		buffer.append("Clazz.$new(");
@@ -1699,7 +1682,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			buffer.append("C$");
 		else 
 			getQualifiedStaticName(null, className, true, true, true);
-		buffer.append(dotMethodName);
+		boolean isDefault = dotMethodName.equals(".c$");
+		if (!isDefault)
+			buffer.append(dotMethodName);
 	}
 
 	private ITypeBinding resolveParentBinding(ASTNode xparent) {

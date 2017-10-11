@@ -205,9 +205,10 @@ public class ASTEmptyVisitor extends ASTVisitor {
 		allowExtensions = tf;
 	}
 
+
 	
-	private Map<String, Integer>htStaticNames = new Hashtable<>();
-	private int staticCount;
+	protected Map<String, Integer>htStaticNames = new Hashtable<>();
+	protected int[] staticCount = new int[1];
 	
 	/**
 	 * Register a qualified static name as an import var I$[n]
@@ -218,7 +219,7 @@ public class ASTEmptyVisitor extends ASTVisitor {
 	protected Integer getStaticNameIndex(String name) {
 		Integer n = htStaticNames.get(name);
 		if (n == null && !name.endsWith("Exception"))
-			htStaticNames.put(name,  n = new Integer(staticCount++));
+			htStaticNames.put(name,  n = new Integer(staticCount[0]++));
 		return n;
 	}
 
