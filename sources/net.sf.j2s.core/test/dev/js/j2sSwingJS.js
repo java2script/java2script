@@ -376,19 +376,20 @@ var unwrapArray = function (arr) {
     return [];
   var last = null;
   for (var i = 0; i < arr.length; i++) {
-    if (!arr[i])
+    var ai = arr[i];
+    if (typeof ai != "string")
       continue;
-    if (arr[i].charAt (0) == '$') {
-      if (arr[i].charAt (1) == '.') {
+    if (ai.charAt(0) == '$') {
+      if (ai.charAt(1) == '.') {
         if (!last)
           continue;
-        var idx = last.lastIndexOf (".");
+        var idx = last.lastIndexOf(".");
         if (idx != -1) {
           var prefix = last.substring (0, idx);
-          arr[i] = prefix + arr[i].substring (1);
+          arr[i] = prefix + ai.substring(1);
         }
       } else {
-        arr[i] = "org.eclipse.s" + arr[i].substring (1);
+        arr[i] = "org.eclipse.s" + ai.substring (1);
       }
     }
     last = arr[i];
