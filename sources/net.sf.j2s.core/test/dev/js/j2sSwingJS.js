@@ -3,16 +3,10 @@
 
 // latest author: Bob Hanson, St. Olaf College, hansonr@stolaf.edu
 
-// TODO: check array.clone
-// TODO: check issue for static calls not showing up in requirements. 
-//           How to handle static calls other class static methods?
-// TODO: check issue that some static calls do not need to be put in must/optional 
-// TODO: getResourceAsStream is using new .BufferedInputStream and Clazz.isAB()
-
 // NOTES by Bob Hanson
 
-// TODO: Check String.contentEquals -- CharSequence?  StringBuffer.shareValue??
-
+// BH 10/13/2017 7:03:28 AM fix for String.initialize(bytes) applying bytes as arguments
+// BH 10/12/2017 6:34:01 AM totally re-written class loading using incl$(); no dependency nodes
 // BH 10/4/2017 5:06:43 PM conversion to $clinit$ and call-secific dynamic class loading 
 // BH 9/21/2017 10:39:26 PM adds ClassLoader.getSystemClassLoader().setDefaultAssertionStatus$Z(tf)
 // BH 9/7/2017 10:53:30 AM adds Clazz.assert; deprecates all Clazz.floatToInt, floatToByte, etc. 
@@ -194,6 +188,7 @@ Clazz.assert = function(clazz, obj, tf, msg) {
 //J2S._debugCode = false;
 
 Clazz.incl$ = function(cName, isFinalize) {
+// this is really Clazz.loadClass
   if (!cName)
     return null;
   if (isFinalize) {
@@ -2014,18 +2009,25 @@ _Loader.loadPackageClasspath = function (pkg, base, isIndex, fSuccess, mode, pt)
 /**
  * BH: allows user/developer to load classes even though wrapping and Google
  * Closure Compiler has not been run on the class.
+ * 
+ *   
  *   
  */
 Clazz.loadClass = function (name, onLoaded, async) {
   if (!self.Class) {
     Class = Clazz;
     Class.forName = Clazz._4Name;
-    JavaObject = Clazz._O;
     // maybe more here
   }
-  name && _Loader.loadClass(name, onLoaded, true, async, 1);
-  var cl = Clazz.allClasses[name];
-  cl && cl.$incl$ && cl.$incl$();
+  if (!name)
+    return;
+  if (!async)
+    return Clazz.incl$(name);   
+  name && _Loader.loadClass(name, function() {
+    var cl = Clazz.allClasses[name];
+    cl && cl.$incl$ && cl.$incl$();
+    onLoaded(cl);
+  }, true, async, 1);
   return true;
 
 }
@@ -3323,12 +3325,12 @@ var mappingPathNameNode = function (path, name, node) {
   map["#" + name] = node;
 };
 
-/* protected */
+/* protected
 var loadClassNode = function (node) {
   var name = node.name;
   if (!isClassDefined (name) 
       && !isClassExcluded (name)) {
-    var path = _Loader.getClasspathFor (name/*, true*/);
+    var path = _Loader.getClasspathFor (name);
     node.path = path;
     mappingPathNameNode (path, name, node);
     if (!loadedScripts[path]) {
@@ -3338,7 +3340,7 @@ var loadClassNode = function (node) {
   }
   return false;
 };
-
+ */
 
 /**
  * Used in package
@@ -4879,31 +4881,25 @@ Clazz._Encoding={
   ASCII:"ascii"
 };
 
-
-
-
-
-
-
 (function(Encoding) {
 
-Encoding.UTF8="utf-8";
-Encoding.UTF16="utf-16";
-Encoding.ASCII="ascii";
-
-
 Encoding.guessEncoding=function(str){
-if(str.charCodeAt(0)==0xEF&&str.charCodeAt(1)==0xBB&&str.charCodeAt(2)==0xBF){
-return Encoding.UTF8;
-}else if(str.charCodeAt(0)==0xFF&&str.charCodeAt(1)==0xFE){
-return Encoding.UTF16;
-}else{
-return Encoding.ASCII;
-}
+return (str.charCodeAt(0)==0xEF&&str.charCodeAt(1)==0xBB&&str.charCodeAt(2)==0xBF ? Encoding.UTF8
+  : str.charCodeAt(0)==0xFF&&str.charCodeAt(1)==0xFE ? Encoding.UTF16 
+  : Encoding.ASCII);
 };
 
-Encoding.readUTF8=function(str){
-var encoding=this.guessEncoding(str);
+Encoding.guessEncodingArray=function(a, offset){
+return (a[offset]==0xEF&&a[offset + 1]==0xBB&&a[offset + 2]==0xBF ? Encoding.UTF8 
+  : a[offset + 0]==0xFF&&a[offset + 1]==0xFE ? Encoding.UTF16 : Encoding.ASCII);
+};
+
+Encoding.readUTF8Array=function(a, offset, length){
+if (arguments.length == 1) {
+  offset = 0;
+  length = a.length;
+}
+var encoding=Encoding.guessEncodingArray(a);
 var startIdx=0;
 if(encoding==Encoding.UTF8){
 startIdx=3;
@@ -4911,28 +4907,26 @@ startIdx=3;
 startIdx=2;
 }
 var arrs=new Array();
-for(var i=startIdx;i<str.length;i++){
-var charCode=str.charCodeAt(i);
+for(var i=offset + startIdx, endIdx = offset + length; i < endIdx; i++){
+var charCode=a[i];
 if(charCode<0x80){
-arrs[arrs.length]=str.charAt(i);
+arrs[arrs.length]=String.fromCharCode(charCode);
 }else if(charCode>0xc0&&charCode<0xe0){
 var c1=charCode&0x1f;
-i++;
-var c2=str.charCodeAt(i)&0x3f;
+var c2=a[++i]&0x3f;
 var c=(c1<<6)+c2;
 arrs[arrs.length]=String.fromCharCode(c);
 }else if(charCode>=0xe0){
 var c1=charCode&0x0f;
-i++;
-var c2=str.charCodeAt(i)&0x3f;
-i++;
-var c3=str.charCodeAt(i)&0x3f;
+var c2=a[++i]&0x3f;
+var c3=a[++i]&0x3f;
 var c=(c1<<12)+(c2<<6)+c3;
 arrs[arrs.length]=String.fromCharCode(c);
 }
 }
 return arrs.join('');
 };
+
 
 Encoding.convert2UTF8=function(str){
 var encoding=this.guessEncoding(str);
@@ -4962,76 +4956,6 @@ arrs[offset+i-startIdx]=String.fromCharCode(c1)+String.fromCharCode(c2)+String.f
 }
 }
 return arrs.join('');
-};
-Encoding.base64Chars=new Array(
-'A','B','C','D','E','F','G','H',
-'I','J','K','L','M','N','O','P',
-'Q','R','S','T','U','V','W','X',
-'Y','Z','a','b','c','d','e','f',
-'g','h','i','j','k','l','m','n',
-'o','p','q','r','s','t','u','v',
-'w','x','y','z','0','1','2','3',
-'4','5','6','7','8','9','+','/'
-);
-Encoding.encodeBase64=function(str){
-if(str==null||str.length==0)return str;
-var b64=Encoding.base64Chars;
-var length=str.length;
-var index=0;
-var buf=[];
-var c0,c1,c2;
-while(index<length){
-c0=str.charCodeAt(index++);
-buf[buf.length]=b64[c0>>2];
-if(index<length){
-c1=str.charCodeAt(index++);
-buf[buf.length]=b64[((c0<<4)&0x30)|(c1>>4)];
-if(index<length){
-c2=str.charCodeAt(index++);
-buf[buf.length]=b64[((c1<<2)&0x3c)|(c2>>6)];
-buf[buf.length]=b64[c2&0x3F];
-}else{
-buf[buf.length]=b64[((c1<<2)&0x3c)];
-buf[buf.length]='=';
-}
-}else{
-buf[buf.length]=b64[(c0<<4)&0x30];
-buf[buf.length]='=';
-buf[buf.length]='=';
-}
-}
-return buf.join('');
-};
-Encoding.decodeBase64=function(str){
-if(str==null||str.length==0)return str;
-var b64=Encoding.base64Chars;
-var xb64=Encoding.xBase64Chars;
-if(Encoding.xBase64Chars==null){
-xb64=new Object();
-for(var i=0;i<b64.length;i++){
-xb64[b64[i]]=i;
-}
-Encoding.xBase64Chars=xb64;
-}
-var length=str.length;
-var index=0;
-var buf=[];
-var c0,c1,c2,c3;
-var c=0;
-while(index<length&&c++<60000){
-c0=xb64[str.charAt(index++)];
-c1=xb64[str.charAt(index++)];
-c2=xb64[str.charAt(index++)];
-c3=xb64[str.charAt(index++)];
-buf[buf.length]=String.fromCharCode(((c0<<2)&0xff)|c1>>4);
-if(c2!=null){
-buf[buf.length]=String.fromCharCode(((c1<<4)&0xff)|c2>>2);
-if(c3!=null){
-buf[buf.length]=String.fromCharCode(((c2<<6)&0xff)|c3);
-}
-}
-}
-return buf.join('');
 };
 
 if(String.prototype.$replace==null){
@@ -5453,40 +5377,60 @@ sp.subSequence$I$I = sp.substring;
 sp.toString || (sp.toString=function(){return this.valueOf();});
 })(String.prototype);
 
+/*
+String(byte[] bytes)
+String(char[] value)
+String(StringBuffer buffer)
+String(StringBuilder builder)
+String(String original)
+
+String(byte[] ascii, int hibyte)
+String(byte[] bytes, Charset charset)
+String(byte[] bytes, String charsetName)
+
+String(byte[] bytes, int offset, int length)
+String(char[] value, int offset, int count)
+String(int[] codePoints, int offset, int count)
+
+String(byte[] bytes, int offset, int length, Charset charset)
+String(byte[] bytes, int offset, int length, String charsetName)
+String(byte[] ascii, int hibyte, int offset, int count)
+*/
+
 String.instantialize=function(){
 switch (arguments.length) {
 case 0:
   return new String();
 case 1:
+  // String(byte[] bytes)
+  // String(char[] value)
+  // String(StringBuffer buffer)
+  // String(StringBuilder builder)
+  // String(String original)
   var x=arguments[0];
   if (x.__BYTESIZE || x instanceof Array){
-    return (x.length == 0 ? "" : typeof x[0]=="number" ? Encoding.readUTF8(String.fromCharCode.apply(null, x)) : x.join(''));
+    return (x.length == 0 ? "" : typeof x[0]=="number" ? Encoding.readUTF8Array(x) : x.join(''));
   }
-  if(typeof x=="string"||x instanceof String){
-    return new String(x);
-  }
-  if(x.__CLASS_NAME__=="StringBuffer"||x.__CLASS_NAME__=="java.lang.StringBuffer"){
-    var value=x.shareValue();
-    var length=x.length$();
-    var valueCopy=new Array(length);
-    for(var i=0;i<length;i++){
-      valueCopy[i]=value[i];
-    }
-    return valueCopy.join('')
-  }
-  return""+x;
+  return x.toString();
 case 2:  
+  // String(byte[] ascii, int hibyte)
+  // String(byte[] bytes, Charset charset)
+  // String(byte[] bytes, String charsetName)
+
   var x=arguments[0];
   var hibyte=arguments[1];
-  if(typeof hibyte=="string"){
-    return String.instantialize(x,0,x.length,hibyte);
-  }
-  return String.instantialize(x,hibyte,0,x.length);
+  return (typeof hibyte=="number" ? String.instantialize(x,hibyte,0,x.length) 
+    : String.instantialize(x,0,x.length,hibyte);
 case 3:
+  // String(byte[] bytes, int offset, int length)
+  // String(char[] value, int offset, int count)
+  // String(int[] codePoints, int offset, int count)
+
   var bytes=arguments[0];
   var offset=arguments[1];
   var length=arguments[2];
   if(arguments[2]instanceof Array){
+    // ???
     bytes=arguments[2];
     offset=arguments[0];
     length=arguments[1];
@@ -5509,23 +5453,17 @@ case 3:
   }
   return arr.join('');
 case 4:
+  // String(byte[] bytes, int offset, int length, Charset charset)
+  // String(byte[] bytes, int offset, int length, String charsetName)
+  // String(byte[] ascii, int hibyte, int offset, int count)
+
   var bytes=arguments[0];
-  var y=arguments[3];
-  if(typeof y=="string"||y instanceof String){
+  var encoding=arguments[3];
+  if(typeof encoding != "number"){
+    // assumes UTF-8
     var offset=arguments[1];
     var length=arguments[2];
-    var arr=new Array(length);
-    for(var i=0;i<length;i++){
-      arr[i]=bytes[offset+i];
-      if(typeof arr[i]=="number"){
-        arr[i]=String.fromCharCode(arr[i]&0xff);
-      }
-    }
-    var cs=y.toLowerCase();
-    if(cs=="utf-8"||cs=="utf8"){
-      return Encoding.readUTF8(arr.join(''));
-    }
-    return arr.join('');
+    return Encoding.readUTF8Array(arr, offset, length);
   }
   var count=arguments[3];
   var offset=arguments[2];
@@ -5543,6 +5481,7 @@ case 4:
   }
   return value.join('');
 default:
+  // ????
   var s="";
   for(var i=0;i<arguments.length;i++){
     s+=arguments[i];
