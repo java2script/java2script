@@ -11,146 +11,166 @@
 
 package net.sf.j2s.core.astvisitors;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.EnumDeclaration;
-import org.eclipse.jdt.core.dom.IAnnotationBinding;
-import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
-import org.eclipse.jdt.core.dom.TagElement;
-import org.eclipse.jdt.core.dom.TextElement;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 
-import net.sf.j2s.core.adapters.Bindings;
 import net.sf.j2s.core.adapters.ExtendedAdapter;
 
 /**
  * 
- * @author zhou renjian
+ * This class now just retrieves all package names
  * 
- *         2006-5-2
+ * @author zhou renjian         2006-5-2
+ * @author Bob Hanson
  */
 @SuppressWarnings("rawtypes")
 public class DependencyASTVisitor extends ASTEmptyVisitor {
 
-	public static String joinArrayClasses(StringBuffer buf, String[] ss, String last) {
-		return joinArrayClasses(buf, ss, last, ", ");
-	}
-
-	public static String joinArrayClasses(StringBuffer buf, String[] ss, String last, String seperator) {
-		String lastClassName = last;
-		for (int i = 0; i < ss.length; i++) {
-			buf.append("\"");
-			boolean dollared = true;
-			if (lastClassName == null) {
-				dollared = false;
-			} else {
-				int idx1 = lastClassName.lastIndexOf('.');
-				int idx2 = ss[i].lastIndexOf('.');
-				if (idx1 == -1 || idx2 == -1 || idx1 != idx2) {
-					dollared = false;
-				} else {
-					if (lastClassName.subSequence(0, idx1).equals(ss[i].subSequence(0, idx2))) {
-						buf.append("$");
-						buf.append(ss[i].substring(idx2));
-					} else {
-						dollared = false;
-					}
-				}
-			}
-			if (!dollared) {
-				String key = "org.eclipse.swt.";
-				if (ss[i].startsWith(key)) {
-					buf.append("$wt.");
-					buf.append(ss[i].substring(key.length()));
-				} else {
-					buf.append(ss[i]);
-				}
-			}
-			lastClassName = ss[i];
-			buf.append("\"");
-			if (i != ss.length - 1) {
-				buf.append(seperator);
-			}
-		}
-		return lastClassName;
-	}
-
-	public static void main(String[] args) {
-		Set<String> set = new HashSet<String>();
-		set.add("java.lang.UnsupportedOperationException");
-		set.add("java.lang.CloneNotSupportedException");
-		set.add("java.io.ObjectOutputStream");
-		set.add("java.lang.ClassNotFoundException");
-		set.add("java.io.ObjectInputStream");
-		set.add("java.lang.IllegalStateException");
-		set.add("java.lang.IllegalArgumentException");
-		set.add("java.lang.CloneNotSupportedException");
-		set.add("java.io.IOException");
-		set.add("java.io.PrintWriter");
-		set.add("java.util.NoSuchElementException");
-		set.add("java.lang.Float");
-		set.add("java.util.ConcurrentModificationException");
-		set.add("java.lang.ClassCastException");
-		set.add("java.lang.NullPointerException");
-		set.add("java.lang.StringIndexOutOfBoundsException");
-		String[] s = new String[] { "java.lang.Character", "java.lang.InternalError", "java.util.Collections",
-				"java.io.FileInputStream", "java.lang.InterruptedException", "java.lang.IndexOutOfBoundsException",
-				"java.lang.ArrayIndexOutOfBoundsException" };
-		for (int i = 0; i < s.length; i++) {
-			set.add(s[i]);
-		}
-		s = new String[] { "java.io.ObjectOutputStream", "java.text.SimpleDateFormat", "java.util.TimeZone",
-				"java.lang.ClassNotFoundException", "java.io.ObjectInputStream", "java.lang.CloneNotSupportedException",
-				"java.lang.IllegalArgumentException", "java.util.Locale", "java.io.IOException", "java.text.DateFormat",
-				"java.util.GregorianCalendar", "java.util.Calendar", "java.lang.ref.SoftReference" };
-		for (int i = 0; i < s.length; i++) {
-			set.add(s[i]);
-		}
-		String[] ss = set.toArray(new String[0]);
-		StringBuffer buf = new StringBuffer();
-		Arrays.sort(ss);
-		joinArrayClasses(buf, ss, null);
-		System.out.println(buf.toString().replaceAll(", ", ",\r\n\t"));
-	}
-
-	protected Set<String> classNameSet = new HashSet<String>();
-
-	protected Set<ITypeBinding> classBindingSet = new HashSet<ITypeBinding>();
-
-	protected Set<Object> musts = new HashSet<Object>();
-
-//	protected Set<Object> requires = new HashSet<Object>();
-//
-//	protected Set<Object> optionals = new HashSet<Object>();
-
-	protected Set<Object> ignores = new HashSet<Object>();
-
+	
 	private boolean isDebugging = false;
 
-//	private Javadoc[] nativeJavadoc = null;
-//	private ASTNode javadocRoot = null;
+	public void setDebugging(boolean isDebugging) {
+		this.isDebugging = isDebugging;
+	}
 
-	public boolean toCompileVariableName = false;
-
-	private String[] classNames;
-
-	private HashSet<String> definedBasePackageNames;
+	public boolean isDebugging() {
+		return isDebugging;
+	}
 
 	private String[] defaultPackageNamesDefined = {"java", "javax", "sun", "jsjava", "jsjavax", "jssun"};
 
+	private HashSet<String> definedBasePackageNames;
+
+	public HashSet<String> getDefinedBasePackages() {
+		return definedBasePackageNames;
+	}
+
+	public boolean visit(PackageDeclaration node) {
+		//String name = ;
+		//setPackageName(name);
+		addPackage("" + node.getName());
+		return false;
+	}
+
+	private void addPackage(String name) {
+		int pt = name.indexOf(".");
+		if (pt >= 0)
+			name = name.substring(0, pt);
+		if (definedBasePackageNames == null) {
+			definedBasePackageNames = new HashSet<String>();
+			for (int i = defaultPackageNamesDefined.length; --i >= 0;)
+				definedBasePackageNames.add(defaultPackageNamesDefined[i]);
+		}
+		definedBasePackageNames.add(name);
+	}
+
+//	public static String joinArrayClasses(StringBuffer buf, String[] ss, String last) {
+//		return joinArrayClasses(buf, ss, last, ", ");
+//	}
+//
+//	public static String joinArrayClasses(StringBuffer buf, String[] ss, String last, String seperator) {
+//		String lastClassName = last;
+//		for (int i = 0; i < ss.length; i++) {
+//			buf.append("\"");
+//			boolean dollared = true;
+//			if (lastClassName == null) {
+//				dollared = false;
+//			} else {
+//				int idx1 = lastClassName.lastIndexOf('.');
+//				int idx2 = ss[i].lastIndexOf('.');
+//				if (idx1 == -1 || idx2 == -1 || idx1 != idx2) {
+//					dollared = false;
+//				} else {
+//					if (lastClassName.subSequence(0, idx1).equals(ss[i].subSequence(0, idx2))) {
+//						buf.append("$");
+//						buf.append(ss[i].substring(idx2));
+//					} else {
+//						dollared = false;
+//					}
+//				}
+//			}
+//			if (!dollared) {
+//				String key = "org.eclipse.swt.";
+//				if (ss[i].startsWith(key)) {
+//					buf.append("$wt.");
+//					buf.append(ss[i].substring(key.length()));
+//				} else {
+//					buf.append(ss[i]);
+//				}
+//			}
+//			lastClassName = ss[i];
+//			buf.append("\"");
+//			if (i != ss.length - 1) {
+//				buf.append(seperator);
+//			}
+//		}
+//		return lastClassName;
+//	}
+//
+//	public static void main(String[] args) {
+//		Set<String> set = new HashSet<String>();
+//		set.add("java.lang.UnsupportedOperationException");
+//		set.add("java.lang.CloneNotSupportedException");
+//		set.add("java.io.ObjectOutputStream");
+//		set.add("java.lang.ClassNotFoundException");
+//		set.add("java.io.ObjectInputStream");
+//		set.add("java.lang.IllegalStateException");
+//		set.add("java.lang.IllegalArgumentException");
+//		set.add("java.lang.CloneNotSupportedException");
+//		set.add("java.io.IOException");
+//		set.add("java.io.PrintWriter");
+//		set.add("java.util.NoSuchElementException");
+//		set.add("java.lang.Float");
+//		set.add("java.util.ConcurrentModificationException");
+//		set.add("java.lang.ClassCastException");
+//		set.add("java.lang.NullPointerException");
+//		set.add("java.lang.StringIndexOutOfBoundsException");
+//		String[] s = new String[] { "java.lang.Character", "java.lang.InternalError", "java.util.Collections",
+//				"java.io.FileInputStream", "java.lang.InterruptedException", "java.lang.IndexOutOfBoundsException",
+//				"java.lang.ArrayIndexOutOfBoundsException" };
+//		for (int i = 0; i < s.length; i++) {
+//			set.add(s[i]);
+//		}
+//		s = new String[] { "java.io.ObjectOutputStream", "java.text.SimpleDateFormat", "java.util.TimeZone",
+//				"java.lang.ClassNotFoundException", "java.io.ObjectInputStream", "java.lang.CloneNotSupportedException",
+//				"java.lang.IllegalArgumentException", "java.util.Locale", "java.io.IOException", "java.text.DateFormat",
+//				"java.util.GregorianCalendar", "java.util.Calendar", "java.lang.ref.SoftReference" };
+//		for (int i = 0; i < s.length; i++) {
+//			set.add(s[i]);
+//		}
+//		String[] ss = set.toArray(new String[0]);
+//		StringBuffer buf = new StringBuffer();
+//		Arrays.sort(ss);
+//		joinArrayClasses(buf, ss, null);
+//		System.out.println(buf.toString().replaceAll(", ", ",\r\n\t"));
+//	}
+//
+//	protected Set<String> classNameSet = new HashSet<String>();
+//
+//	protected Set<ITypeBinding> classBindingSet = new HashSet<ITypeBinding>();
+//
+//	protected Set<Object> musts = new HashSet<Object>();
+//
+////	protected Set<Object> requires = new HashSet<Object>();
+////
+////	protected Set<Object> optionals = new HashSet<Object>();
+//
+//	protected Set<Object> ignores = new HashSet<Object>();
+//
+//
+////	private Javadoc[] nativeJavadoc = null;
+////	private ASTNode javadocRoot = null;
+//
+//	public boolean toCompileVariableName = false;
+//
+//	private String[] classNames;
+//
 //	private void addDeclClassReference(ASTNode node, ITypeBinding binding) {
 //		ITypeBinding declaringClass = binding.getDeclaringClass();
 //		QNTypeBinding qn = new QNTypeBinding();		
@@ -168,19 +188,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 //		}
 //		addReference(node, qualifiedName, qn);
 //	}
-
-	private void addPackage(String name) {
-		int pt = name. indexOf(".");
-		if (pt >= 0)
-			name = name.substring(0, pt);
-		if (definedBasePackageNames == null) {
-			definedBasePackageNames = new HashSet<String>();
-			for (int i = defaultPackageNamesDefined.length; --i >= 0;)
-				definedBasePackageNames.add(defaultPackageNamesDefined[i]);
-		}
-		definedBasePackageNames.add(name);
-	}
-
+//
 //	private void addReference(ASTNode node, String qualifiedName, QNTypeBinding qn) {
 //		qualifiedName = TypeAdapter.discardGenericType(qualifiedName);
 //		if (isQualifiedNameOK(qualifiedName, node) && !musts.contains(qualifiedName)
@@ -193,23 +201,23 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 //			}
 //		}
 //	}
-
-	/**
-	 * @param node
-	 */
-	public boolean isNodeInMustPath(ASTNode node) {
-		return false;
-	}
-
-	private void checkJ2SClazzMethods(StringBuffer buf) {
-		// If only java.lang.reflect.Array.newInstance was referenced,
-		// it will have been changed to Clazz.newArray$, and
-		// we can remove the dependency on java.lang.reflect.Array
-		if (buf.indexOf("java.lang.reflect.Array.") < 0) { 
-		  ignores.add("java.lang.reflect.Array");
-		}
-	}
-
+//
+//	/**
+//	 * @param node
+//	 */
+//	public boolean isNodeInMustPath(ASTNode node) {
+//		return false;
+//	}
+//
+//	private void checkJ2SClazzMethods(StringBuffer buf) {
+//		// If only java.lang.reflect.Array.newInstance was referenced,
+//		// it will have been changed to Clazz.newArray$, and
+//		// we can remove the dependency on java.lang.reflect.Array
+//		if (buf.indexOf("java.lang.reflect.Array.") < 0) { 
+//		  ignores.add("java.lang.reflect.Array");
+//		}
+//	}
+//
 //	private void checkJavadocs(ASTNode root) {
 //		if (root != javadocRoot) {
 //			nativeJavadoc = null;
@@ -261,149 +269,142 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 //		
 //	}
 	
-	/**
-	 * @return Returns the thisClassName.
-	 */
-	public String[] getClassNames() {
-		return (classNames == null ? classNames = classNameSet.toArray(new String[0]) : classNames);
-	}
-	
-	public HashSet<String> getDefinedBasePackages() {
-		return definedBasePackageNames;
-	}
-
-	
-	public String getDependencyScript(StringBuffer buf) {
-		checkJ2SClazzMethods(buf);
-		removeSubClasses(musts);
-//		removeSubClasses(requires);
-//		removeSubClasses(optionals);
-
-		boolean checkInnerClasses = true;
-		getClassNames();
-		// BH: I have no idea why this would be checked -- just no inner
-		// classes?
-		for (int i = 0; i < classNames.length; i++) {
-			if ("net.sf.j2s.ajax.ASWTClass".equals(classNames[i])) {
-				checkInnerClasses = false;
-				break;
-			}
-		}
-		if (checkInnerClasses) {
-			removeInnerClasses(musts);
-//			removeInnerClasses(requires);
-//			removeInnerClasses(optionals);
-		}
-
-		musts.remove("");
-//		requires.remove("");
-//		optionals.remove("");
-
-		for (Iterator iter = ignores.iterator(); iter.hasNext();) {
-			String s = (String) iter.next();
-			musts.remove(s);
-//			requires.remove(s);
-//			optionals.remove(s);
-		}
-//		for (Iterator iter = musts.iterator(); iter.hasNext();) {
-//			String s = (String) iter.next();
-//			requires.remove(s);
-//			optionals.remove(s);
+//	/**
+//	 * @return Returns the thisClassName.
+//	 */
+//	public String[] getClassNames() {
+//		return (classNames == null ? classNames = classNameSet.toArray(new String[0]) : classNames);
+//	}
+//	
+//	public String getDependencyScript(StringBuffer buf) {
+//		checkJ2SClazzMethods(buf);
+//		removeSubClasses(musts);
+////		removeSubClasses(requires);
+////		removeSubClasses(optionals);
+//
+//		boolean checkInnerClasses = true;
+//		getClassNames();
+//		// BH: I have no idea why this would be checked -- just no inner
+//		// classes?
+//		for (int i = 0; i < classNames.length; i++) {
+//			if ("net.sf.j2s.ajax.ASWTClass".equals(classNames[i])) {
+//				checkInnerClasses = false;
+//				break;
+//			}
 //		}
-//		for (Iterator iter = requires.iterator(); iter.hasNext();) {
-//			String s = (String) iter.next();
-//			optionals.remove(s);
+//		if (checkInnerClasses) {
+//			removeInnerClasses(musts);
+////			removeInnerClasses(requires);
+////			removeInnerClasses(optionals);
 //		}
-
-		// save the Clazz.declarePackage for later
-		String js = buf.toString();
-		String prefix = "";
-		String suffix = "";
-		if (js.indexOf("p$.") < 0)
-			js = js.replace(",p$=C$.prototype","");
-		if (js.indexOf("I$") == js.lastIndexOf("I$"))
-			js = js.replace(",I$=[]","");
-		if (js.indexOf("var P$=") == 0) {
-			int index = js.indexOf("\r\n");
-			prefix = "(function(){" + js.substring(0, index + 2);
-			js = js.substring(index + 2);
-			suffix = "})();\r\n";
-		}
-		if (musts.size() == 0) {// && requires.size() == 0 && optionals.size() == 0) {
-			if (prefix == "")
-				js = "(function() {\r\n" + js + "})();\r\n";
-		} else {
-			buf = new StringBuffer();
-			
-//			buf.append("Clazz.load(");
-
-			// add must/requires
-
-			if (musts.size() > 0) {
-				buf.append("Clazz.incl$([");
-				String[] ss = musts.toArray(new String[0]);
-				Arrays.sort(ss);
-				joinArrayClasses(buf, ss, null);
-				buf.append("]);\r\n");
-			}
-
-			
-//			if (musts.size() > 0) {// || requires.size() > 0) {
-//				buf.append("[");
+//
+//		musts.remove("");
+////		requires.remove("");
+////		optionals.remove("");
+//
+//		for (Iterator iter = ignores.iterator(); iter.hasNext();) {
+//			String s = (String) iter.next();
+//			musts.remove(s);
+////			requires.remove(s);
+////			optionals.remove(s);
+//		}
+////		for (Iterator iter = musts.iterator(); iter.hasNext();) {
+////			String s = (String) iter.next();
+////			requires.remove(s);
+////			optionals.remove(s);
+////		}
+////		for (Iterator iter = requires.iterator(); iter.hasNext();) {
+////			String s = (String) iter.next();
+////			optionals.remove(s);
+////		}
+//
+//		// save the Clazz.declarePackage for later
+//		String js = buf.toString();
+//		String prefix = "";
+//		String suffix = "";
+//		if (js.indexOf("I$") == js.lastIndexOf("I$"))
+//			js = js.replace(",I$=[]","");
+//		if (js.indexOf("var P$=") == 0) {
+//			int index = js.indexOf("\r\n");
+//			prefix = "(function(){" + js.substring(0, index + 2);
+//			js = js.substring(index + 2);
+//			suffix = "})();\r\n";
+//		}
+//		if (musts.size() == 0) {// && requires.size() == 0 && optionals.size() == 0) {
+//			if (prefix == "")
+//				js = "(function() {\r\n" + js + "})();\r\n";
+//		} else {
+//			buf = new StringBuffer();
+//			
+////			buf.append("Clazz.load(");
+//
+//			// add must/requires
+//
+//			if (musts.size() > 0) {
+//				buf.append("Clazz.load([");
 //				String[] ss = musts.toArray(new String[0]);
 //				Arrays.sort(ss);
-//				/*String lastClassName = */ joinArrayClasses(buf, ss, null);
-////				if (musts.size() != 0 && requires.size() != 0) {
-////					buf.append(", ");
-////				}
-////				ss = requires.toArray(new String[0]);
-////				Arrays.sort(ss);
-////				joinArrayClasses(buf, ss, lastClassName);
-//				buf.append("], ");
-//			} else {
-//				buf.append("null, ");
+//				joinArrayClasses(buf, ss, null);
+//				buf.append("]);\r\n");
 //			}
 //
-//			// add class names
-//
-//			boolean isArray = (classNameSet.size() > 1);
-//			if (isArray) {
-//				buf.append("[");
-//			}
-//			joinArrayClasses(buf, getClassNames(), null);
-//			if (isArray) {
-//				buf.append("]");
-//			}
-//			buf.append(", ");
-//
-////			// add optionals
-////
-////			if (optionals.size() > 0) {
+//			
+////			if (musts.size() > 0) {// || requires.size() > 0) {
 ////				buf.append("[");
-////				String[] ss = optionals.toArray(new String[0]);
+////				String[] ss = musts.toArray(new String[0]);
 ////				Arrays.sort(ss);
-////				joinArrayClasses(buf, ss, null);
+////				/*String lastClassName = */ joinArrayClasses(buf, ss, null);
+//////				if (musts.size() != 0 && requires.size() != 0) {
+//////					buf.append(", ");
+//////				}
+//////				ss = requires.toArray(new String[0]);
+//////				Arrays.sort(ss);
+//////				joinArrayClasses(buf, ss, lastClassName);
 ////				buf.append("], ");
 ////			} else {
-//				buf.append("null, ");
+////				buf.append("null, ");
 ////			}
 ////
-//			// check for anonymous wrapper if not multiple classes
-//
-//			if (isArray || !js.endsWith("})()\r\n") || !js.startsWith("\r\n(function")) {
-//				buf.append("function(){\r\n");
-//				buf.append(js);
-//				buf.append("}");
-//			} else {
-//				// just make outer function not anonymous
-//				buf.append("\r\n").append(js.substring(3, js.length() - 5));
-//			}
-//			buf.append(");\r\n");
-			js = buf.toString() + js;
-		}
-		return prefix + js + suffix;
-	}	
-	
+////			// add class names
+////
+////			boolean isArray = (classNameSet.size() > 1);
+////			if (isArray) {
+////				buf.append("[");
+////			}
+////			joinArrayClasses(buf, getClassNames(), null);
+////			if (isArray) {
+////				buf.append("]");
+////			}
+////			buf.append(", ");
+////
+//////			// add optionals
+//////
+//////			if (optionals.size() > 0) {
+//////				buf.append("[");
+//////				String[] ss = optionals.toArray(new String[0]);
+//////				Arrays.sort(ss);
+//////				joinArrayClasses(buf, ss, null);
+//////				buf.append("], ");
+//////			} else {
+////				buf.append("null, ");
+//////			}
+//////
+////			// check for anonymous wrapper if not multiple classes
+////
+////			if (isArray || !js.endsWith("})()\r\n") || !js.startsWith("\r\n(function")) {
+////				buf.append("function(){\r\n");
+////				buf.append(js);
+////				buf.append("}");
+////			} else {
+////				// just make outer function not anonymous
+////				buf.append("\r\n").append(js.substring(3, js.length() - 5));
+////			}
+////			buf.append(");\r\n");
+//			js = buf.toString() + js;
+//		}
+//		return prefix + js + suffix;
+//	}	
+//	
 //	/**
 //	 * Method with "j2s*" tag.
 //	 * 
@@ -498,11 +499,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 //		}
 //		return null;
 //	}
-
-	public boolean isDebugging() {
-		return isDebugging;
-	}
-
+//
 //	/**
 //	 * @param node
 //	 */
@@ -552,160 +549,156 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 //		return toCompileVariableName;
 //	}
 
-	private void readClasses(Annotation annotation, Set<Object> set) {
-		StringBuffer buf = new StringBuffer();
-		IAnnotationBinding annotationBinding = annotation.resolveAnnotationBinding();
-		if (annotationBinding != null) {
-			IMemberValuePairBinding[] valuePairs = annotationBinding.getAllMemberValuePairs();
-			if (valuePairs != null && valuePairs.length > 0) {
-				for (int i = 0; i < valuePairs.length; i++) {
-					Object value = valuePairs[i].getValue();
-					if (value instanceof Object[]) {
-						Object[] values = (Object[]) value;
-						for (int j = 0; j < values.length; j++) {
-							Object item = values[j];
-							if (item instanceof ITypeBinding) {
-								ITypeBinding binding = (ITypeBinding) item;
-								buf.append(binding.getQualifiedName());
-								buf.append(",");
-							}
-						}
-						continue;
-					} else if (value instanceof ITypeBinding) {
-						ITypeBinding binding = (ITypeBinding) value;
-						value = binding.getQualifiedName();
-					}
-
-					buf.append(value);
-					buf.append(",");
-				}
-			}
-		}
-		String[] split = buf.toString().trim().split("\\s*,\\s*");
-		for (int i = 0; i < split.length; i++) {
-			String s = split[i].trim();
-			if (s.length() > 0) {
-				set.add(s);
-			}
-		}
-	}
-
-	private void readClasses(TagElement tagEl, Set<Object> set) {
-		List<?> fragments = tagEl.fragments();
-		StringBuffer buf = new StringBuffer();
-		boolean isFirstLine = true;
-		for (Iterator iterator = fragments.iterator(); iterator.hasNext();) {
-			TextElement commentEl = (TextElement) iterator.next();
-			String text = commentEl.getText().trim();
-			if (isFirstLine) {
-				if (text.length() == 0) {
-					continue;
-				}
-			}
-			buf.append(text);
-			buf.append(",");
-		}
-		String[] split = buf.toString().trim().split("\\s*,\\s*");
-		for (int i = 0; i < split.length; i++) {
-			String s = split[i].trim();
-			if (s.length() > 0) {
-				set.add(s);
-			}
-		}
-	}
-	
-	private void readTags(AbstractTypeDeclaration node) {
-		Javadoc javadoc = node.getJavadoc();
-		if (javadoc != null) {
-			List tags = javadoc.tags();
-			if (tags.size() != 0) {
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					String tagName = tagEl.getTagName();
-					if ("@j2sRequireImport".equals(tagName)) {
-						readClasses(tagEl, musts);// requires);
-//					} else if ("@j2sOptionalImport".equals(tagName)) {
-//						readClasses(tagEl, optionals);
-					} else if ("@j2sIgnoreImport".equals(tagName)) {
-						readClasses(tagEl, ignores);
-					}
-				}
-			}
-		}
-		List modifiers = node.modifiers();
-		for (Iterator iter = modifiers.iterator(); iter.hasNext();) {
-			Object obj = iter.next();
-			if (obj instanceof Annotation) {
-				Annotation annotation = (Annotation) obj;
-				String qName = annotation.getTypeName().getFullyQualifiedName();
-				int idx = qName.indexOf("J2S");
-				if (idx != -1) {
-					String annName = qName.substring(idx);
-					annName = annName.replaceFirst("J2S", "@j2s");
-					if (annName.startsWith("@j2sRequireImport")) {
-						readClasses(annotation, musts);//requires);
-//					} else if (annName.startsWith("@j2sOptionalImport")) {
-//						readClasses(annotation, optionals);
-					} else if (annName.startsWith("@j2sIgnoreImport")) {
-						readClasses(annotation, ignores);
-					}
-				}
-			}
-		}
-	}
-
-	private void removeInnerClasses(Set<Object> set) {
-		List<Object> toRemoveList = new ArrayList<Object>();
-		for (Iterator iterator = set.iterator(); iterator.hasNext();) {
-			Object next = iterator.next();
-			String name;
-			if (next instanceof QNTypeBinding) {
-				QNTypeBinding qn = (QNTypeBinding) next;
-				name = qn.qualifiedName;
-			} else {
-				name = (String) next;
-			}
-			for (int i = 0; i < classNames.length; i++) {
-				if (name.startsWith(classNames[i] + ".")) {
-					toRemoveList.add(next);
-				}
-			}
-		}
-		for (Iterator iterator = toRemoveList.iterator(); iterator.hasNext();) {
-			set.remove(iterator.next());
-		}
-	}
-
-	private void removeSubClasses(Set<Object> set) {
-		Set<QNTypeBinding> removed = new HashSet<QNTypeBinding>();
-		Set<QNTypeBinding> reseted = new HashSet<QNTypeBinding>();
-		out: for (Iterator iter = set.iterator(); iter.hasNext();) {
-			Object n = iter.next();
-			if (!(n instanceof QNTypeBinding))
-				continue;
-			QNTypeBinding qn = (QNTypeBinding) n;
-			if (qn.binding != null) {
-				for (Iterator iterator = classBindingSet.iterator(); iterator.hasNext();) {
-					ITypeBinding binding = (ITypeBinding) iterator.next();
-					if (Bindings.isSuperType(binding, qn.binding)) {
-						removed.add(qn);
-						continue out;
-					}
-				}
-			}
-			reseted.add(qn);
-		}
-		set.removeAll(removed);
-		set.removeAll(reseted);
-		for (Iterator<QNTypeBinding> i = reseted.iterator(); i.hasNext();) {
-			set.add(i.next().qualifiedName);
-		}
-	}
-
-	public void setDebugging(boolean isDebugging) {
-		this.isDebugging = isDebugging;
-	}
-
+//	private void readClasses(Annotation annotation, Set<Object> set) {
+//		StringBuffer buf = new StringBuffer();
+//		IAnnotationBinding annotationBinding = annotation.resolveAnnotationBinding();
+//		if (annotationBinding != null) {
+//			IMemberValuePairBinding[] valuePairs = annotationBinding.getAllMemberValuePairs();
+//			if (valuePairs != null && valuePairs.length > 0) {
+//				for (int i = 0; i < valuePairs.length; i++) {
+//					Object value = valuePairs[i].getValue();
+//					if (value instanceof Object[]) {
+//						Object[] values = (Object[]) value;
+//						for (int j = 0; j < values.length; j++) {
+//							Object item = values[j];
+//							if (item instanceof ITypeBinding) {
+//								ITypeBinding binding = (ITypeBinding) item;
+//								buf.append(binding.getQualifiedName());
+//								buf.append(",");
+//							}
+//						}
+//						continue;
+//					} else if (value instanceof ITypeBinding) {
+//						ITypeBinding binding = (ITypeBinding) value;
+//						value = binding.getQualifiedName();
+//					}
+//
+//					buf.append(value);
+//					buf.append(",");
+//				}
+//			}
+//		}
+//		String[] split = buf.toString().trim().split("\\s*,\\s*");
+//		for (int i = 0; i < split.length; i++) {
+//			String s = split[i].trim();
+//			if (s.length() > 0) {
+//				set.add(s);
+//			}
+//		}
+//	}
+//
+//	private void readClasses(TagElement tagEl, Set<Object> set) {
+//		List<?> fragments = tagEl.fragments();
+//		StringBuffer buf = new StringBuffer();
+//		boolean isFirstLine = true;
+//		for (Iterator iterator = fragments.iterator(); iterator.hasNext();) {
+//			TextElement commentEl = (TextElement) iterator.next();
+//			String text = commentEl.getText().trim();
+//			if (isFirstLine) {
+//				if (text.length() == 0) {
+//					continue;
+//				}
+//			}
+//			buf.append(text);
+//			buf.append(",");
+//		}
+//		String[] split = buf.toString().trim().split("\\s*,\\s*");
+//		for (int i = 0; i < split.length; i++) {
+//			String s = split[i].trim();
+//			if (s.length() > 0) {
+//				set.add(s);
+//			}
+//		}
+//	}
+//	
+//	private void readTags(AbstractTypeDeclaration node) {
+//		Javadoc javadoc = node.getJavadoc();
+//		if (javadoc != null) {
+//			List tags = javadoc.tags();
+//			if (tags.size() != 0) {
+//				for (Iterator iter = tags.iterator(); iter.hasNext();) {
+//					TagElement tagEl = (TagElement) iter.next();
+//					String tagName = tagEl.getTagName();
+//					if ("@j2sRequireImport".equals(tagName)) {
+//						readClasses(tagEl, musts);// requires);
+////					} else if ("@j2sOptionalImport".equals(tagName)) {
+////						readClasses(tagEl, optionals);
+//					} else if ("@j2sIgnoreImport".equals(tagName)) {
+//						readClasses(tagEl, ignores);
+//					}
+//				}
+//			}
+//		}
+//		List modifiers = node.modifiers();
+//		for (Iterator iter = modifiers.iterator(); iter.hasNext();) {
+//			Object obj = iter.next();
+//			if (obj instanceof Annotation) {
+//				Annotation annotation = (Annotation) obj;
+//				String qName = annotation.getTypeName().getFullyQualifiedName();
+//				int idx = qName.indexOf("J2S");
+//				if (idx != -1) {
+//					String annName = qName.substring(idx);
+//					annName = annName.replaceFirst("J2S", "@j2s");
+//					if (annName.startsWith("@j2sRequireImport")) {
+//						readClasses(annotation, musts);//requires);
+////					} else if (annName.startsWith("@j2sOptionalImport")) {
+////						readClasses(annotation, optionals);
+//					} else if (annName.startsWith("@j2sIgnoreImport")) {
+//						readClasses(annotation, ignores);
+//					}
+//				}
+//			}
+//		}
+//	}
+//
+//	private void removeInnerClasses(Set<Object> set) {
+//		List<Object> toRemoveList = new ArrayList<Object>();
+//		for (Iterator iterator = set.iterator(); iterator.hasNext();) {
+//			Object next = iterator.next();
+//			String name;
+//			if (next instanceof QNTypeBinding) {
+//				QNTypeBinding qn = (QNTypeBinding) next;
+//				name = qn.qualifiedName;
+//			} else {
+//				name = (String) next;
+//			}
+//			for (int i = 0; i < classNames.length; i++) {
+//				if (name.startsWith(classNames[i] + ".")) {
+//					toRemoveList.add(next);
+//				}
+//			}
+//		}
+//		for (Iterator iterator = toRemoveList.iterator(); iterator.hasNext();) {
+//			set.remove(iterator.next());
+//		}
+//	}
+//
+//	private void removeSubClasses(Set<Object> set) {
+//		Set<QNTypeBinding> removed = new HashSet<QNTypeBinding>();
+//		Set<QNTypeBinding> reseted = new HashSet<QNTypeBinding>();
+//		out: for (Iterator iter = set.iterator(); iter.hasNext();) {
+//			Object n = iter.next();
+//			if (!(n instanceof QNTypeBinding))
+//				continue;
+//			QNTypeBinding qn = (QNTypeBinding) n;
+//			if (qn.binding != null) {
+//				for (Iterator iterator = classBindingSet.iterator(); iterator.hasNext();) {
+//					ITypeBinding binding = (ITypeBinding) iterator.next();
+//					if (Bindings.isSuperType(binding, qn.binding)) {
+//						removed.add(qn);
+//						continue out;
+//					}
+//				}
+//			}
+//			reseted.add(qn);
+//		}
+//		set.removeAll(removed);
+//		set.removeAll(reseted);
+//		for (Iterator<QNTypeBinding> i = reseted.iterator(); i.hasNext();) {
+//			set.add(i.next().qualifiedName);
+//		}
+//	}
+//
 //	public boolean visit(Block node) {
 //		ASTNode parent = node.getParent();
 //		if (parent instanceof MethodDeclaration) {
@@ -791,7 +784,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 //		}
 //		return super.visit(node);
 //	}
-
+//
 //	public boolean visit(FieldDeclaration node) {
 //		if (getJ2STag(node, "@j2sIgnore") != null) {
 //			return false;
@@ -802,7 +795,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 //	public boolean visit(ImportDeclaration node) {
 //		return false;
 //	}
-
+//
 //	public boolean visit(InstanceofExpression node) {
 //		// this is wrong. instanceof is not a dependency. 
 //		
@@ -940,14 +933,6 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 ////		}
 //		return super.visit(node);
 //	}
-
-	public boolean visit(PackageDeclaration node) {
-		String name = "" + node.getName();
-		setPackageName(name);
-		addPackage(name);
-		return false;
-	}
-
 //	/*
 //	 * (non-Javadoc)
 //	 * 
@@ -1031,34 +1016,34 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 //		}
 //		return super.visit(node);
 //	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.
-	 * TypeDeclaration)
-	 */
-	public boolean visit(EnumDeclaration node) {
-		//musts.add("java.lang.Enum");
-		//addMusts(node);
-//		visitForRequires(node);
-//		visitForOptionals(node);
-		return true;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.
-	 * TypeDeclaration)
-	 */
-	public boolean visit(TypeDeclaration node) {
-		//addMusts(node);
-//		visitForRequires(node);
-//		visitForOptionals(node);
-		return true;
-	}
-
+//
+//	/*
+//	 * (non-Javadoc)
+//	 * 
+//	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.
+//	 * TypeDeclaration)
+//	 */
+//	public boolean visit(EnumDeclaration node) {
+//		//musts.add("java.lang.Enum");
+//		//addMusts(node);
+////		visitForRequires(node);
+////		visitForOptionals(node);
+//		return true;
+//	}
+//
+//	/*
+//	 * (non-Javadoc)
+//	 * 
+//	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.
+//	 * TypeDeclaration)
+//	 */
+//	public boolean visit(TypeDeclaration node) {
+//		//addMusts(node);
+////		visitForRequires(node);
+////		visitForOptionals(node);
+//		return true;
+//	}
+//
 //	/*
 //	 * (non-Javadoc)
 //	 * 
@@ -1070,81 +1055,81 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 //		return false;
 //	}
 
-	protected void addMusts(AbstractTypeDeclaration node) {
-		// Enum and class 
-		ITypeBinding resolveBinding = node.resolveBinding();
-		if (resolveBinding != null && resolveBinding.isTopLevel()) {
-			String thisClassName = resolveBinding.getQualifiedName();
-			classNameSet.add(thisClassName);
-			classBindingSet.add(resolveBinding);
-		}
-		readTags(node);
-		Type superType = (node instanceof TypeDeclaration ? ((TypeDeclaration) node).getSuperclassType() : null);
-		if (superType != null)
-			addMust(node, superType);
-		List superInterfaces = (node instanceof TypeDeclaration ? ((TypeDeclaration) node).superInterfaceTypes()
-				: ((EnumDeclaration) node).superInterfaceTypes());
-		if (superInterfaces.size() > 0) {
-			for (Iterator iter = superInterfaces.iterator(); iter.hasNext();)
-				addMust(node, (Type) iter.next());
-//				
-//				
-//				ITypeBinding superBinding = superType.resolveBinding();
-//				if (superBinding != null) {
-//					QNTypeBinding qn = new QNTypeBinding();
-//					String qualifiedName;				
-//					ITypeBinding binding = superBinding.getDeclaringClass();
-//					if (binding != null) {
-//						ITypeBinding declaringClass = null;
-//						while ((declaringClass = binding.getDeclaringClass()) != null) {
-//							binding = declaringClass;
-//						}
-//						qualifiedName = binding.getQualifiedName();
-//						qn.binding = binding;
-//					} else {
-//						qualifiedName = superBinding.getQualifiedName();
-//						qn.binding = superBinding;
-//					}
-//					qualifiedName = TypeAdapter.discardGenericType(qualifiedName);
-//					qn.qualifiedName = qualifiedName;
-//					if (isQualifiedNameOK(qualifiedName, node)) {
-//						musts.add(qn);
-//					}
-//				}
-////				else {
-////					qn.qualifiedName = superType.toString();
-////					qn.binding = superBinding;
-////					musts.add(qn);
+//	protected void addMusts(AbstractTypeDeclaration node) {
+//		// Enum and class 
+//		ITypeBinding resolveBinding = node.resolveBinding();
+//		if (resolveBinding != null && resolveBinding.isTopLevel()) {
+//			String thisClassName = resolveBinding.getQualifiedName();
+//			classNameSet.add(thisClassName);
+//			classBindingSet.add(resolveBinding);
+//		}
+//		readTags(node);
+//		Type superType = (node instanceof TypeDeclaration ? ((TypeDeclaration) node).getSuperclassType() : null);
+//		if (superType != null)
+//			addMust(node, superType);
+//		List superInterfaces = (node instanceof TypeDeclaration ? ((TypeDeclaration) node).superInterfaceTypes()
+//				: ((EnumDeclaration) node).superInterfaceTypes());
+//		if (superInterfaces.size() > 0) {
+//			for (Iterator iter = superInterfaces.iterator(); iter.hasNext();)
+//				addMust(node, (Type) iter.next());
+////				
+////				
+////				ITypeBinding superBinding = superType.resolveBinding();
+////				if (superBinding != null) {
+////					QNTypeBinding qn = new QNTypeBinding();
+////					String qualifiedName;				
+////					ITypeBinding binding = superBinding.getDeclaringClass();
+////					if (binding != null) {
+////						ITypeBinding declaringClass = null;
+////						while ((declaringClass = binding.getDeclaringClass()) != null) {
+////							binding = declaringClass;
+////						}
+////						qualifiedName = binding.getQualifiedName();
+////						qn.binding = binding;
+////					} else {
+////						qualifiedName = superBinding.getQualifiedName();
+////						qn.binding = superBinding;
+////					}
+////					qualifiedName = TypeAdapter.discardGenericType(qualifiedName);
+////					qn.qualifiedName = qualifiedName;
+////					if (isQualifiedNameOK(qualifiedName, node)) {
+////						musts.add(qn);
+////					}
 ////				}
+//////				else {
+//////					qn.qualifiedName = superType.toString();
+//////					qn.binding = superBinding;
+//////					musts.add(qn);
+//////				}
+////			}
+//		}
+//	}
+//
+//	private void addMust(ASTNode node, Type superType) {
+//		ITypeBinding superBinding = superType.resolveBinding();
+//		if (superBinding == null)
+//			return;
+//		QNTypeBinding qn = new QNTypeBinding();
+//		String qualifiedName;
+//		ITypeBinding binding = superBinding.getDeclaringClass();
+//		if (binding != null) {
+//			ITypeBinding declaringClass = null;
+//			while ((declaringClass = binding.getDeclaringClass()) != null) {
+//				binding = declaringClass;
 //			}
-		}
-	}
-
-	private void addMust(ASTNode node, Type superType) {
-		ITypeBinding superBinding = superType.resolveBinding();
-		if (superBinding == null)
-			return;
-		QNTypeBinding qn = new QNTypeBinding();
-		String qualifiedName;
-		ITypeBinding binding = superBinding.getDeclaringClass();
-		if (binding != null) {
-			ITypeBinding declaringClass = null;
-			while ((declaringClass = binding.getDeclaringClass()) != null) {
-				binding = declaringClass;
-			}
-			qualifiedName = binding.getQualifiedName();
-			qn.binding = binding;
-		} else {
-			qualifiedName = superBinding.getQualifiedName();
-			qn.binding = superBinding;
-		}
-		qualifiedName = removeBrackets(qualifiedName);
-		qn.qualifiedName = qualifiedName;
-		if (isQualifiedNameOK(qualifiedName, node)) {
-			musts.add(qn);
-		}
-	}
-	
+//			qualifiedName = binding.getQualifiedName();
+//			qn.binding = binding;
+//		} else {
+//			qualifiedName = superBinding.getQualifiedName();
+//			qn.binding = superBinding;
+//		}
+//		qualifiedName = removeBrackets(qualifiedName);
+//		qn.qualifiedName = qualifiedName;
+//		if (isQualifiedNameOK(qualifiedName, node)) {
+//			musts.add(qn);
+//		}
+//	}
+//
 //	/**
 //	 * @param node  
 //	 */
@@ -1198,7 +1183,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 //			}
 //		}
 //	}
-
+//
 //	boolean visitNativeJavadoc(Javadoc javadoc, Block node, boolean superVisit) {
 //		if (javadoc != null) {
 //			List tags = javadoc.tags();
@@ -1247,25 +1232,25 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 
 }
 
-class QNTypeBinding {
-	String qualifiedName;
-	ITypeBinding binding;
-
-	public boolean equals(Object obj) {
-		if (obj == null)
-			return false;
-		if (obj instanceof String)
-			return qualifiedName.equals(obj);
-
-		if (obj instanceof QNTypeBinding) {
-			QNTypeBinding b = (QNTypeBinding) obj;
-			return qualifiedName.equals(b.qualifiedName);
-		}
-		return false;
-	}
-
-	public int hashCode() {
-		return qualifiedName.hashCode();
-	}
-
-}
+//class QNTypeBinding {
+//	String qualifiedName;
+//	ITypeBinding binding;
+//
+//	public boolean equals(Object obj) {
+//		if (obj == null)
+//			return false;
+//		if (obj instanceof String)
+//			return qualifiedName.equals(obj);
+//
+//		if (obj instanceof QNTypeBinding) {
+//			QNTypeBinding b = (QNTypeBinding) obj;
+//			return qualifiedName.equals(b.qualifiedName);
+//		}
+//		return false;
+//	}
+//
+//	public int hashCode() {
+//		return qualifiedName.hashCode();
+//	}
+//
+//}

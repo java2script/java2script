@@ -953,7 +953,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			buffer.append(j2sGetArrayClass(binding, 1));
 		} else {
 			// BH we are creating a new Class object around this class
-			buffer.append("Clazz.$newClass(" + removeBrackets(binding.getQualifiedName()) + ")");
+			buffer.append("Clazz.getClass(" + removeBrackets(binding.getQualifiedName()) + ")");
 		}
 		return false;
 	}
@@ -1606,7 +1606,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 
 	/**
-	 * Append a shortened qualified name, possibly using Clazz.incl$ for dynamic loading
+	 * Append a shortened qualified name, possibly using Clazz.load for dynamic loading
 	 * @param name
 	 * @param isStatic
 	 * @param doCache
@@ -1806,7 +1806,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		if (s == null) {
 			if (methodQualifier != null)
 				className = fixNameNoC$(null, className);
-			s = "Clazz.incl$(";
+			s = "Clazz.load(";
 			String[] parts = className.split("\\.");
 			int nclass = 0;
 			for (int i = 0; i < parts.length; i++) {
@@ -1819,7 +1819,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				s += part;
 				if (Character.isUpperCase(part.charAt(0))) {
 					if (nclass > 0)
-						s = "Clazz.incl$(" + s;
+						s = "Clazz.load(" + s;
 					if (++nclass == 1 && s.indexOf("'") >= 0)
 						s += "'";
 					s += ")";

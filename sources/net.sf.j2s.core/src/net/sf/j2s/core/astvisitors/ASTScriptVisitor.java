@@ -9,7 +9,9 @@
  *     Zhou Renjian - initial API and implementation
  *******************************************************************************/
 package net.sf.j2s.core.astvisitors;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -148,7 +150,7 @@ MUST list in the Clazz.load() call.
 /**
  * 
  * @author zhou renjian 2006-12-3
- * @author Bob Hanson 2017-08/2017-09
+ * @author Bob Hanson 2017-08,09,10
  *
  * 
  * 
@@ -157,6 +159,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 	private void setInnerGlobals(ASTScriptVisitor parent, ASTNode node, String visitorClassName) {
 		innerTypeNode = node;
+//		parent.buffer.append("<<new inner " + visitorClassName + " " + node.hashCode() + ">>");
 		setPackageName(parent.getPackageName());
 		setClassName(visitorClassName);
 
@@ -211,7 +214,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		if (isBasePackage()) {
 			buffer.append(name);
 		} else {
-			buffer.append("Clazz.declarePackage(\"").append(name).append("\")");
+			buffer.append("Clazz.newPackage$(\"").append(name).append("\")");
 		}
 		buffer.append(",I$=[];\r\n");
 		return false;
@@ -1000,8 +1003,10 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 	private static final String noConstructorNames = "Boolean,Byte,Short,Integer,Long,Float,Double";
 
+	private static final String ELEMENT_KEY = "__@J2S_ELEMENT__";
+
 	private void addAnonymousFunctionWrapper(boolean isOpen) {
-		buffer.append(isOpen ? (buffer.lastIndexOf(")") >= buffer.length() - 3 ? ";" : "") + "\r\n(function(){var C$="
+		buffer.append(isOpen ? (buffer.lastIndexOf(")") >= buffer.length() - 3 ? ";" : "") + "\r\n(function(){"
 				: "})()\r\n");
 	}
 
@@ -1030,23 +1035,28 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	 * @param node
 	 * @param binding
 	 * @param BodyDeclarations
-	 * @param type 'a' (anonymous class), 'e' (Enum), 'i' (Interface), or 'c' (standard class)
+	 * @param type
+	 *            'a' (anonymous class), 'e' (Enum), 'i' (Interface), or 'c'
+	 *            (standard class)
 	 * @return false
 	 */
-	private boolean addClassOrInterface(ASTNode node, ITypeBinding binding, List<?> bodyDeclarations, char type)  {		
+	private boolean addClassOrInterface(ASTNode node, ITypeBinding binding, List<?> bodyDeclarations, char type) {
 		if (binding == null)
 			return false;
 
 		boolean isAnonymous = (type == 'a');
 		boolean isEnum = (type == 'e');
-		boolean isInterface = (type  == 'i');
-		
+		boolean isInterface = (type == 'i');
+
 		TypeAdapter typeAdapter = ((TypeAdapter) getAdaptable(TypeAdapter.class));
 		ASTNode parent = node.getParent();
+		// buffer.append(">>" + binding.getName() + (innerTypeNode != null) +
+		// (node == innerTypeNode) + " " + node.hashCode() + (innerTypeNode ==
+		// null ? "null" : " " + innerTypeNode.hashCode()) + ">>");
 		if (isAnonymous) {
 			buffer.append("(");
-		} else if (node != innerTypeNode && parent != null
-				&& ((parent instanceof AbstractTypeDeclaration) || (parent instanceof TypeDeclarationStatement))) {
+		} else if (node != innerTypeNode
+				&& (parent instanceof AbstractTypeDeclaration || parent instanceof TypeDeclarationStatement)) {
 			// if this is an inner class, we use a temporary visitor to put its
 			// definition in the static buffer and return
 			String className;
@@ -1064,28 +1074,35 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				tempVisitor = new ASTScriptVisitor(); // Default visitor
 			}
 			tempVisitor.setInnerGlobals(this, node, className);
+			// buffer.append(">>" + className + ">>");
 			node.accept(tempVisitor);
+			// buffer.append(">>creating static buffer for " + className +
+			// "<<");
+			// staticBuffer.append(">>static>>");
 			staticBuffer.append(tempVisitor.getBuffer().toString());
+			// staticBuffer.append("<<static<<");
+			// buffer.append(">>exiting<<");
 			return false;
 		}
 		boolean isTopLevel = binding.isTopLevel();
-		if (isTopLevel)
+		if (isTopLevel) {
 			typeAdapter.setClassName(binding.getName());
-		
+			buffer.append(ELEMENT_KEY + binding.getName() + "\r\n");
+		}
+
 		// add the anonymous wrapper if needed
-		
-		boolean needAnonymousWrapper =  (!isInterface || checkInterfaceHasMethods(bodyDeclarations));
-		if (needAnonymousWrapper)
+
+		if (!isTopLevel)
 			addAnonymousFunctionWrapper(true);
 		
 		// begin the class or interface definition
-		
-		buffer.append(isInterface ? "Clazz.newInterface$(" : "Clazz.newClass$(");
+
+		buffer.append("var C$=" + (isInterface ? "Clazz.newInterface$(" : "Clazz.newClass$("));
 
 		// arg1 is the package name
 		// arg2 is the full class name in quotes
 		// arg3 is the class definition function, C$, which is called in
-		// Clazz.$new().
+		// Clazz.new().
 		// arg4 is the superclass
 		// arg5 is the superinterface(s)
 
@@ -1113,7 +1130,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		ITypeBinding superInterface = null;
 		List<?> superInterfaceTypes = null;
 
-		// arg3: class definition function, C$, or null to add the standard function at run time
+		// arg3: class definition function, C$, or null to add the standard
+		// function at run time
 
 		boolean hasDependents = false;
 		if (isAnonymous) {
@@ -1140,8 +1158,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 				// add all inner classes iteratively
 
-				for (int i = 0; i < innerClasses.size(); i++)
-					innerClasses.get(i).accept(this);
+				if (!isInterface)
+					for (int i = 0; i < innerClasses.size(); i++)
+						innerClasses.get(i).accept(this);
 
 				// continue with Clazz.decorateAsClass...
 				// add the newInstance$ call, which:
@@ -1152,10 +1171,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				// (d) includes a call to the constructor c$() when called
 				// directly by the
 				// user using new Foo()
-				buffer.append("Clazz.newInstance$(this, arguments");
-				if (!isTopLevel)
-					buffer.append("[0], " + !isStatic(binding));
-				buffer.append(");\r\n");
+				if (!isInterface) {
+					buffer.append("Clazz.newInstance$(this, arguments");
+					if (!isTopLevel)
+						buffer.append("[0], " + !isStatic(binding));
+					buffer.append(");\r\n");
+				}
 				buffer.append("}");
 			}
 			superclassName = "" + getSuperclassName(binding);
@@ -1260,7 +1281,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		if (lstStatic.size() > 0 || hasDependents) {
 			int len = buffer.length();
-			buffer.append("\r\nC$.$clinit$ = function() {delete C$.$clinit$;Clazz.incl$(C$, 1);\r\n");
+			buffer.append("\r\nC$.$clinit$ = function() {delete C$.$clinit$;Clazz.load(C$, 1);\r\n");
 			for (int i = lstStatic.size(); --i >= 0;) {
 				BodyDeclaration element = lstStatic.remove(0);
 				if (element instanceof Initializer) {
@@ -1299,6 +1320,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			// if this is not an Enum, save the old static def buffer; start a
 			// new one
 
+			// buffer.append(">>oldLen=" + staticBuffer.toString().length() +
+			// "<<");
 			oldStaticBuffer = staticBuffer;
 			staticBuffer = new StaticBuffer();
 		}
@@ -1377,13 +1400,17 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			addDefaultConstructor();
 			addEnumConstants(((EnumDeclaration) node).enumConstants());
 		} else {
+			// buffer.append(">>>adding1>>>" + this);
 			buffer.append(staticBuffer); // also writes the assert string
+			// buffer.append("<<<adding1<<<" + this);
 			if (isAnonymous) {
 				// if anonymous, restore old static def buffer
 				staticBuffer = oldStaticBuffer;
 			} else {
 				// otherwise, dump the oldStatic buffer and start a new one
+				// buffer.append(">>>adding2>>>" + this);
 				buffer.append(oldStaticBuffer);
+				// buffer.append("<<<adding2<<<" + this);
 				staticBuffer = new StaticBuffer();
 				if (!isInterface)
 					addDefaultConstructor();
@@ -1394,7 +1421,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			readSources((BodyDeclaration) node, "@j2sSuffix", "\r\n", "\r\n", true, false);
 		}
 
-		if (needAnonymousWrapper) {
+		if (!isTopLevel) {
 			addAnonymousFunctionWrapper(false);
 		}
 
@@ -1438,7 +1465,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				anonName = getNameForBinding(anonDeclare.resolveBinding());
 				buffer.append("\r\n");
 			}
-			buffer.append("Clazz.$newEnumConst(vals, C$.c$").append(getJ2SParamQualifier(null, binding))
+			buffer.append("Clazz.newEnumConst$(vals, C$.c$").append(getJ2SParamQualifier(null, binding))
 					.append(", \"");
 			enumConst.getName().accept(this);
 			buffer.append("\", " + i);
@@ -1490,7 +1517,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	
 	/**
 	 * 
-	 * generate the Clazz.$new(...) call for an inner class.
+	 * generate the Clazz.new(...) call for an inner class.
 	 * 
 	 * @param node
 	 * @param innerName
@@ -1554,7 +1581,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			// We allow use of a default constructor using new foo().
 			// Here we always add a [] argument to a default constuctor, as null
 			// will indicate
-			// that we did not use Clazz.$new and instead called new foo()
+			// that we did not use Clazz.new and instead called new foo()
 			// directly.
 			if (prefix != null) {
 				buffer.append(prefix);
@@ -1578,7 +1605,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	private void addSuperConstructor(SuperConstructorInvocation node, IMethodBinding methodDeclaration) {
 		if (node == null) {
 			// default constructor
-			buffer.append("Clazz.super$(C$, this,1);\r\n");
+			buffer.append("Clazz.super(C$, this,1);\r\n");
 			return;
 		} 
 		buffer.append("C$.superClazz.c$")
@@ -1670,14 +1697,14 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	/**
-	 * Start a new Clazz.$new() call for class creation or inner classes. Uses Clazz.incl$ for dynamic loading
+	 * Start a new Clazz.new() call for class creation or inner classes. Uses Clazz.load for dynamic loading
 	 * 
 	 * @param className
 	 * @param dotMethodName
 	 * @return true if this is the default constructor
 	 */
 	private void open$new(String className, String dotMethodName) {
-		buffer.append("Clazz.$new(");
+		buffer.append("Clazz.new(");
 		String name = fixName(className);
 		if (name.equals("C$"))
 			buffer.append("C$");
@@ -1692,6 +1719,33 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		return (xparent instanceof AbstractTypeDeclaration ? ((AbstractTypeDeclaration) xparent).resolveBinding()
 				: xparent instanceof AnonymousClassDeclaration ? ((AnonymousClassDeclaration) xparent).resolveBinding()
 						: null);
+	}
+
+	/**
+	 * Separate the buffer into a list so that all top-level elements can be in
+	 * their own file (as is done in Java).
+	 * 
+	 * We do not have to worry about inner classes, as they are never referenced
+	 * directly.
+	 * 
+	 * @return List {elementName, js, elementName, js, ....}
+	 */
+	public List<String> getElementList() {
+		String trailer = "//Created " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + "\n";
+		List<String> elements = new ArrayList<String>();
+		String js = buffer.toString();
+		if (js.indexOf("I$") == js.lastIndexOf("I$"))
+			js = js.replace(",I$=[]","");
+		String[] parts = js.split(ELEMENT_KEY);
+		String header = parts[0];
+		for (int i = 1; i < parts.length; i++) {
+			js = parts[i];
+			int pt = js.indexOf("\r\n");
+			elements.add(js.substring(0, pt));
+			js = js.substring(pt + 2);
+			elements.add("(function(){" + header + js + "})();\r\n" + trailer);
+		}		
+		return elements;
 	}
 
 }

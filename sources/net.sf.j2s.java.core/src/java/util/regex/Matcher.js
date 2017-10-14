@@ -4,9 +4,7 @@
 //BH fix for String not having .length() or .subSequence()
 //BH fix for not reinitializing correctly
 //BH note that start(groupIndex) is not implemented for groupIndex > 0
-(function(){
-
-Clazz.declarePackage("java.util.regex");
+(function(){Clazz.newPackage$("java.util.regex");
 
 var C$=Clazz.newClass$(java.util.regex,"Matcher",function(){
   Clazz.newInstance$(this,arguments);
@@ -15,7 +13,7 @@ var C$=Clazz.newClass$(java.util.regex,"Matcher",function(){
 
 C$.$clinit$ = function() {
 delete C$.$clinit$;
-Clazz.incl$(C$, 1);
+Clazz.load(C$, 1);
 };
 
 (function(){
@@ -24,7 +22,7 @@ Clazz.incl$(C$, 1);
     Clazz.newInstance$(this, arguments[0], true);
   });
   
-  C$.$clinit$ = function() {delete C$.$clinit$;Clazz.incl$(C$, 1);}
+  C$.$clinit$ = function() {delete C$.$clinit$;Clazz.load(C$, 1);}
 
   Clazz.newMethod$(C$, "$init$", function() {
       this.grN=0;
@@ -155,7 +153,7 @@ Clazz.newMethod$(C$,"processReplacement$S",function(replacement){
               this.replacementParts[this.replacementParts.length]=res.subSequence$I$I(replacementPos,res.length$());
               replacementPos=res.length$();
             }
-            this.replacementParts[this.replacementParts.length]= Clazz.$new(Clazz.incl$("java.util.regex.Matcher$1").c$,[this]);
+            this.replacementParts[this.replacementParts.length]= Clazz.new(Clazz.incl$("java.util.regex.Matcher$1").c$,[this]);
             var group=this.group(gr);
             replacementPos+=group.length;
             res.append$S(group);
@@ -190,7 +188,7 @@ Clazz.newMethod$(C$,"processReplacement$S",function(replacement){
 
 Clazz.newMethod$(C$,"region$I$I",function(leftBound,rightBound){
   if(leftBound>rightBound||leftBound<0||rightBound<0||leftBound>this.charSeq.length$()||rightBound>this.charSeq.length$()){
-    throw Clazz.$new(IndexOutOfBoundsException.c$, [leftBound+" is out of bound of "+rightBound]);
+    throw Clazz.new(IndexOutOfBoundsException.c$, [leftBound+" is out of bound of "+rightBound]);
   }
   this.leftBound=leftBound;
   this.rightBound=rightBound;
@@ -254,7 +252,7 @@ Clazz.newMethod$(C$,"matches",function(){
 Clazz.newMethod$(C$,"quoteReplacement$S",function(string){
   if(string.indexOf('\\') < 0 && string.indexOf ('$')<0) ; // '))
     return string;
-  var res= Clazz.$new(StringBuffer, [string.length*2]);
+  var res= Clazz.new(StringBuffer, [string.length*2]);
   var ch;
   var len=string.length;
   for(var i=0;i<len;i++){

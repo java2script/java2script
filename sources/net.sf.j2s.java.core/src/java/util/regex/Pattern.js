@@ -1,12 +1,12 @@
 // BH 9/24/2017 4:21:05 PM new syntax for decorateAsClass
 (function() {
-Clazz.declarePackage("java.util.regex");
+Clazz.newPackage$("java.util.regex");
 
 var C$=Clazz.newClass$(java.util.regex,"Pattern",function(){
   Clazz.newInstance$(this,arguments);
 });
 
-C$.$clinit$ = function() {delete C$.$clinit$;Clazz.incl$(C$, 1);}
+C$.$clinit$ = function() {delete C$.$clinit$;Clazz.load(C$, 1);}
 
 Clazz.newMethod$(C$,"$init$", function(){
   this.$flags=0;
@@ -18,7 +18,7 @@ Clazz.newMethod$(C$,"$c", function(){
 }, 1);
 
 Clazz.newMethod$(C$,"matcher$CharSequence", function(cs){
-  return Clazz.$new(Clazz.incl$("java.util.regex.Matcher").c$$java_util_regex_Pattern$CharSequence, [this, cs]);
+  return Clazz.new(Clazz.load("java.util.regex.Matcher").c$$java_util_regex_Pattern$CharSequence, [this, cs]);
 });
 
 Clazz.newMethod$(C$,"split$CharSequence$I", function(input,limit){

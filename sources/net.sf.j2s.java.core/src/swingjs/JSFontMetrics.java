@@ -78,7 +78,7 @@ public class JSFontMetrics extends FontMetrics {
   	 * 
   	 * var spt;
   	 * return ((pt + 0 == pt ? pt : (pt = (spt = pt).charCodeAt(0))) < 256 ? 
-  	 *       Clazz.floatToInt(this.getWidthsFloat()[pt])
+  	 *       (this.getWidthsFloat()[pt] | 0)
   	 *     : this.stringWidth$S(isChar ? spt : String.fromCharCode (pt)));
   	 */
   	{

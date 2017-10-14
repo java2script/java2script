@@ -1869,7 +1869,7 @@ public final class Formatter implements Flushable {
      *         <tt>null</tt> then a {@link StringBuilder} will be created.
      */
     public Formatter(Appendable a) {
-        if (a == null || false)
+        if (a == null)
             a = new StringBuilder();
         init(a, Locale.getDefault());
     }
