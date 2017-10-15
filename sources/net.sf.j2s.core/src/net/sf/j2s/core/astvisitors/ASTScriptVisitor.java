@@ -275,7 +275,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			return false;
 		AnonymousClassDeclaration anonDeclare = node.getAnonymousClassDeclaration();
 		if (anonDeclare != null) {
-			String anonClassName = getNameForBinding(binding);
+			String anonClassName = getAnonymousName(binding);
 			buffer.append("(");
 			VariableAdapter variableAdapter = (VariableAdapter) getAdaptable(VariableAdapter.class);
 			variableAdapter.isAnonymousClass = true;
@@ -1099,21 +1099,25 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		// arg5 is the superinterface(s)
 
 		// arg1: package name or null
-		// arg2: full class name in quotes
+		// arg2: shortened class name in quotes
 
-		String packageAndName, oldClassName = null, shortClassName = null;
+		String oldClassName = null;
+		String fullClassName, defaultPackageName;
+		
+		
 		if (isAnonymous) {
 			oldClassName = typeAdapter.getClassName();
-			String fullClassName = getNameForBinding(binding);
-			int pt = fullClassName.lastIndexOf('.');
-			shortClassName = fullClassName.substring(pt + 1);
-			packageAndName = (pt >= 0 ? TypeAdapter.getShortenedPackageNameFromClassName(thisPackageName, fullClassName)
-					: "null") + ", \"" + shortClassName + "\"";
+			fullClassName = getAnonymousName(binding);	// P$.Test_Enum$Planet$1
+			defaultPackageName = "null";
 		} else {
-			packageAndName = getPackageAndName();
+			fullClassName = getFullClassName(); // test.Test_Enum.Planet
+			defaultPackageName =  getPackageName();
 		}
-
-		buffer.append(packageAndName).append(", ");
+		int pt = fullClassName.lastIndexOf('.');
+		String shortClassName = fullClassName.substring(pt + 1);
+		String packageName = (pt < 0 ? defaultPackageName
+				: TypeAdapter.getShortenedPackageNameFromClassName(thisPackageName, fullClassName));
+		buffer.append(packageName + ", \"" + shortClassName + "\", ");
 
 		// set up func, superclass, and superInterface
 
@@ -1229,9 +1233,9 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			buffer.append(", 1");
 		} else {
 			// remove excessive null parameters
-			int pt;
-			while (", null".equals(buffer.substring(pt = buffer.length() - 6)))
-				buffer.setLength(pt);
+			int i;
+			while (", null".equals(buffer.substring(i = buffer.length() - 6)))
+				buffer.setLength(i);
 		}
 		
 		// close the initializer
@@ -1452,7 +1456,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			if (anonDeclare != null) {
 				// BH: add the anonymous class definition inline!
 				anonDeclare.accept(this);
-				anonName = getNameForBinding(anonDeclare.resolveBinding());
+				anonName = getAnonymousName(anonDeclare.resolveBinding());
 				buffer.append("\r\n");
 			}
 			buffer.append("Clazz.newEnumConst$(vals, C$.c$").append(getJ2SParamQualifier(null, binding))
@@ -1637,20 +1641,12 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		return parent;
 	}
 
-	private String getNameForBinding(ITypeBinding binding) {
+	private String getAnonymousName(ITypeBinding binding) {
 		String binaryName = null, bindingKey;
 		if ((binding.isAnonymous() || binding.isLocal()) && (binaryName = binding.getBinaryName()) == null
 				&& (bindingKey = binding.getKey()) != null)
-			binaryName = bindingKey = bindingKey.substring(1, bindingKey.length() - 1).replace('/', '.');
+			binaryName = bindingKey.substring(1, bindingKey.length() - 1).replace('/', '.');
 		return fixName(binaryName == null ? binding.getQualifiedName() : binaryName);
-	}
-
-	private String getPackageAndName() {
-		String fullClassName = getFullClassName();
-		int pt = fullClassName.lastIndexOf('.');
-		return (pt < 0 ? getPackageName()
-				: TypeAdapter.getShortenedPackageNameFromClassName(thisPackageName, fullClassName)) + ", \""
-				+ fullClassName.substring(pt + 1) + "\"";
 	}
 
 	private String getSuperClass(ITypeBinding declaringClass) {
