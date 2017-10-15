@@ -37,7 +37,7 @@ import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.MissingResourceException;
-
+import java.util.Properties;
 import java.awt.datatransfer.Clipboard;
 import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.DragGestureListener;
@@ -1139,120 +1139,105 @@ public abstract class Toolkit {
                                       int imageoffset,
                                       int imagelength);
 
-//    /**
-//     * Gets a <code>PrintJob</code> object which is the result of initiating
-//     * a print operation on the toolkit's platform.
-//     * <p>
-//     * Each actual implementation of this method should first check if there
-//     * is a security manager installed. If there is, the method should call
-//     * the security manager's <code>checkPrintJobAccess</code> method to
-//     * ensure initiation of a print operation is allowed. If the default
-//     * implementation of <code>checkPrintJobAccess</code> is used (that is,
-//     * that method is not overriden), then this results in a call to the
-//     * security manager's <code>checkPermission</code> method with a <code>
-//     * RuntimePermission("queuePrintJob")</code> permission.
-//     *
-//     * @param   frame the parent of the print dialog. May not be null.
-//     * @param   jobtitle the title of the PrintJob. A null title is equivalent
-//     *          to "".
-//     * @param   props a Properties object containing zero or more properties.
-//     *          Properties are not standardized and are not consistent across
-//     *          implementations. Because of this, PrintJobs which require job
-//     *          and page control should use the version of this function which
-//     *          takes JobAttributes and PageAttributes objects. This object
-//     *          may be updated to reflect the user's job choices on exit. May
-//     *          be null.
-//     *
-//     * @return  a <code>PrintJob</code> object, or <code>null</code> if the
-//     *          user cancelled the print job.
-//     * @throws  NullPointerException if frame is null.  This exception is
-//     *          always thrown when GraphicsEnvironment.isHeadless() returns
-//     *          true.
-//     * @throws  SecurityException if this thread is not allowed to initiate a
-//     *          print job request
-//     * @see     java.awt.GraphicsEnvironment#isHeadless
-//     * @see     java.awt.PrintJob
-//     * @see     java.lang.RuntimePermission
-//     * @since   JDK1.1
-//     */
-//    public abstract PrintJob getPrintJob(Frame frame, String jobtitle,
-//                                         Properties props);
-//
-//    /**
-//     * Gets a <code>PrintJob</code> object which is the result of initiating
-//     * a print operation on the toolkit's platform.
-//     * <p>
-//     * Each actual implementation of this method should first check if there
-//     * is a security manager installed. If there is, the method should call
-//     * the security manager's <code>checkPrintJobAccess</code> method to
-//     * ensure initiation of a print operation is allowed. If the default
-//     * implementation of <code>checkPrintJobAccess</code> is used (that is,
-//     * that method is not overriden), then this results in a call to the
-//     * security manager's <code>checkPermission</code> method with a <code>
-//     * RuntimePermission("queuePrintJob")</code> permission.
-//     *
-//     * @param   frame the parent of the print dialog. May be null if and only
-//     *          if jobAttributes is not null and jobAttributes.getDialog()
-//     *          returns JobAttributes.DialogType.NONE or
-//     *          JobAttributes.DialogType.COMMON.
-//     * @param   jobtitle the title of the PrintJob. A null title is equivalent
-//     *          to "".
-//     * @param   jobAttributes a set of job attributes which will control the
-//     *          PrintJob. The attributes will be updated to reflect the user's
-//     *          choices as outlined in the JobAttributes documentation. May be
-//     *          null.
-//     * @param   pageAttributes a set of page attributes which will control the
-//     *          PrintJob. The attributes will be applied to every page in the
-//     *          job. The attributes will be updated to reflect the user's
-//     *          choices as outlined in the PageAttributes documentation. May be
-//     *          null.
-//     *
-//     * @return  a <code>PrintJob</code> object, or <code>null</code> if the
-//     *          user cancelled the print job.
-//     * @throws  NullPointerException if frame is null and either jobAttributes
-//     *          is null or jobAttributes.getDialog() returns
-//     *          JobAttributes.DialogType.NATIVE.
-//     * @throws  IllegalArgumentException if pageAttributes specifies differing
-//     *          cross feed and feed resolutions. Also if this thread has
-//     *          access to the file system and jobAttributes specifies
-//     *          print to file, and the specified destination file exists but
-//     *          is a directory rather than a regular file, does not exist but
-//     *          cannot be created, or cannot be opened for any other reason.
-//     *          However in the case of print to file, if a dialog is also
-//     *          requested to be displayed then the user will be given an
-//     *          opportunity to select a file and proceed with printing.
-//     *          The dialog will ensure that the selected output file
-//     *          is valid before returning from this method.
-//     *          <p>
-//     *          This exception is always thrown when GraphicsEnvironment.isHeadless()
-//     *          returns true.
-//     * @throws  SecurityException if this thread is not allowed to initiate a
-//     *          print job request, or if jobAttributes specifies print to file,
-//     *          and this thread is not allowed to access the file system
-//     * @see     java.awt.PrintJob
-//     * @see     java.awt.GraphicsEnvironment#isHeadless
-//     * @see     java.lang.RuntimePermission
-//     * @see     java.awt.JobAttributes
-//     * @see     java.awt.PageAttributes
-//     * @since   1.3
-//     */
-//    public PrintJob getPrintJob(Frame frame, String jobtitle,
-//                                JobAttributes jobAttributes,
-//                                PageAttributes pageAttributes) {
-//        // Override to add printing support with new job/page control classes
-//
-//        if (GraphicsEnvironment.isHeadless()) {
-//            throw new IllegalArgumentException();
-//        }
-//
-//        if (this != Toolkit.getDefaultToolkit()) {
-//            return Toolkit.getDefaultToolkit().getPrintJob(frame, jobtitle,
-//                                                           jobAttributes,
-//                                                           pageAttributes);
-//        } else {
-//            return getPrintJob(frame, jobtitle, null);
-//        }
-//    }
+    /**
+     * Gets a <code>PrintJob</code> object which is the result of initiating
+     * a print operation on the toolkit's platform.
+     * <p>
+     * Each actual implementation of this method should first check if there
+     * is a security manager installed. If there is, the method should call
+     * the security manager's <code>checkPrintJobAccess</code> method to
+     * ensure initiation of a print operation is allowed. If the default
+     * implementation of <code>checkPrintJobAccess</code> is used (that is,
+     * that method is not overriden), then this results in a call to the
+     * security manager's <code>checkPermission</code> method with a <code>
+     * RuntimePermission("queuePrintJob")</code> permission.
+     *
+     * @param   frame the parent of the print dialog. May not be null.
+     * @param   jobtitle the title of the PrintJob. A null title is equivalent
+     *          to "".
+     * @param   props a Properties object containing zero or more properties.
+     *          Properties are not standardized and are not consistent across
+     *          implementations. Because of this, PrintJobs which require job
+     *          and page control should use the version of this function which
+     *          takes JobAttributes and PageAttributes objects. This object
+     *          may be updated to reflect the user's job choices on exit. May
+     *          be null.
+     * @return  a <code>PrintJob</code> object, or <code>null</code> if the
+     *          user cancelled the print job.
+     * @throws  NullPointerException if frame is null
+     * @throws  SecurityException if this thread is not allowed to initiate a
+     *          print job request
+     * @see     java.awt.GraphicsEnvironment#isHeadless
+     * @see     java.awt.PrintJob
+     * @see     java.lang.RuntimePermission
+     * @since   JDK1.1
+     */
+    public abstract PrintJob getPrintJob(Frame frame, String jobtitle,
+                                         Properties props);
+
+    /**
+     * Gets a <code>PrintJob</code> object which is the result of initiating
+     * a print operation on the toolkit's platform.
+     * <p>
+     * Each actual implementation of this method should first check if there
+     * is a security manager installed. If there is, the method should call
+     * the security manager's <code>checkPrintJobAccess</code> method to
+     * ensure initiation of a print operation is allowed. If the default
+     * implementation of <code>checkPrintJobAccess</code> is used (that is,
+     * that method is not overriden), then this results in a call to the
+     * security manager's <code>checkPermission</code> method with a <code>
+     * RuntimePermission("queuePrintJob")</code> permission.
+     *
+     * @param   frame the parent of the print dialog. May not be null.
+     * @param   jobtitle the title of the PrintJob. A null title is equivalent
+     *          to "".
+     * @param   jobAttributes a set of job attributes which will control the
+     *          PrintJob. The attributes will be updated to reflect the user's
+     *          choices as outlined in the JobAttributes documentation. May be
+     *          null.
+     * @param   pageAttributes a set of page attributes which will control the
+     *          PrintJob. The attributes will be applied to every page in the
+     *          job. The attributes will be updated to reflect the user's
+     *          choices as outlined in the PageAttributes documentation. May be
+     *          null.
+     * @return  a <code>PrintJob</code> object, or <code>null</code> if the
+     *          user cancelled the print job.
+     * @throws  NullPointerException if frame is null
+     * @throws  IllegalArgumentException if pageAttributes specifies differing
+     *          cross feed and feed resolutions. Also if this thread has
+     *          access to the file system and jobAttributes specifies
+     *          print to file, and the specified destination file exists but
+     *          is a directory rather than a regular file, does not exist but
+     *          cannot be created, or cannot be opened for any other reason.
+     *          However in the case of print to file, if a dialog is also
+     *          requested to be displayed then the user will be given an
+     *          opportunity to select a file and proceed with printing.
+     *          The dialog will ensure that the selected output file
+     *          is valid before returning from this method.
+     * @throws  SecurityException if this thread is not allowed to initiate a
+     *          print job request, or if jobAttributes specifies print to file,
+     *          and this thread is not allowed to access the file system
+     * @see     java.awt.PrintJob
+     * @see     java.awt.GraphicsEnvironment#isHeadless
+     * @see     java.lang.RuntimePermission
+     * @see     java.awt.JobAttributes
+     * @see     java.awt.PageAttributes
+     * @since   1.3
+     */
+    public PrintJob getPrintJob(Frame frame, String jobtitle,
+                                JobAttributes jobAttributes,
+                                PageAttributes pageAttributes) {
+        // Override to add printing support with new job/page control classes
+
+        if (this != Toolkit.getDefaultToolkit()) {
+            return Toolkit.getDefaultToolkit().getPrintJob(frame, jobtitle,
+                                                           jobAttributes,
+                                                           pageAttributes);
+        } else {
+            return getPrintJob(frame, jobtitle, null);
+        }
+    }
+
 //
 //    /**
 //     * Emits an audio beep.

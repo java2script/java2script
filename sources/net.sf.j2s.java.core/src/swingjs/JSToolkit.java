@@ -13,6 +13,9 @@ import java.awt.FontMetrics;
 import java.awt.Frame;
 import java.awt.GraphicsConfiguration;
 import java.awt.Image;
+import java.awt.JobAttributes;
+import java.awt.PageAttributes;
+import java.awt.PrintJob;
 import java.awt.Window;
 import java.awt.datatransfer.Clipboard;
 import java.awt.dnd.DragGestureEvent;
@@ -37,6 +40,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Properties;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.Line;
@@ -915,4 +919,30 @@ public class JSToolkit extends SunToolkit {
   public void beep() {
   	System.out.println("JSToolkit.beep");
   }
+
+	/**
+	 * Get a gnu.jpdf.PDFJob.
+	 * 
+	 * for now we are ignoring props
+	 */
+	@Override
+	public PrintJob getPrintJob(Frame frame, String jobtitle, Properties props) {
+		JSPrintJob job = (JSPrintJob) JSUtil.getInstance("swingjs.JSPrintJob");
+		job.setProperties(jobtitle, props);
+		return (PrintJob) (Object) job;
+	}
+	
+	/**
+	 * Get a gnu.jpdf.PDFJob.
+	 * 
+	 * for now we are ignoring jobAttributes and pageAttributes
+	 */
+	@Override
+	public PrintJob getPrintJob(Frame frame, String jobtitle,
+			JobAttributes jobAttributes, PageAttributes pageAttributes) {
+		JSPrintJob job = (JSPrintJob) JSUtil.getInstance("swingjs.JSPrintJob");
+		job.setAttributes(jobtitle, jobAttributes, pageAttributes);
+		return (PrintJob) (Object) job;
+	}
+
 }

@@ -203,16 +203,16 @@ public interface RenderedImage {
 //     */
 //    Raster getData(Rectangle rect);
 
-//    /**
-//     * Computes an arbitrary rectangular region of the RenderedImage
-//     * and copies it into a caller-supplied WritableRaster.  The region
-//     * to be computed is determined from the bounds of the supplied
-//     * WritableRaster.  The supplied WritableRaster must have a
-//     * SampleModel that is compatible with this image.  If raster is null,
-//     * an appropriate WritableRaster is created.
-//     * @param raster a WritableRaster to hold the returned portion of the
-//     *               image, or null.
-//     * @return a reference to the supplied or created WritableRaster.
-//     */
-//    WritableRaster copyData(WritableRaster raster);
+    /**
+     * Computes an arbitrary rectangular region of the RenderedImage
+     * and copies it into a caller-supplied WritableRaster.  The region
+     * to be computed is determined from the bounds of the supplied
+     * WritableRaster.  The supplied WritableRaster must have a
+     * SampleModel that is compatible with this image.  If raster is null,
+     * an appropriate WritableRaster is created.
+     * @param raster a WritableRaster to hold the returned portion of the
+     *               image, or null.
+     * @return a reference to the supplied or created WritableRaster.
+     */
+    WritableRaster copyData(WritableRaster raster);
 }

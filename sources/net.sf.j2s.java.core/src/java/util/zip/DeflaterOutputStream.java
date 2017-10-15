@@ -46,6 +46,119 @@ class DeflaterOutputStream extends swingjs.jzlib.DeflaterOutputStream {
 		super(null);
   }
 
+  /**
+   * Creates a new output stream with the specified compressor,
+   * buffer size and flush mode.
+
+   * @param out the output stream
+   * @param def the compressor ("deflater")
+   * @param size the output buffer size
+   * @param syncFlush
+   *        if {@code true} the {@link #flush()} method of this
+   *        instance flushes the compressor with flush mode
+   *        {@link Deflater#SYNC_FLUSH} before flushing the output
+   *        stream, otherwise only flushes the output stream
+   *
+   * @throws IllegalArgumentException if size is <= 0
+   *
+   * @since 1.7
+   */
+  public DeflaterOutputStream(OutputStream out,
+                              Deflater def,
+                              int size,
+                              boolean syncFlush) {
+      super(out, def, size, syncFlush);
+  }
+
+
+  /**
+   * Creates a new output stream with the specified compressor and
+   * buffer size.
+   *
+   * <p>The new output stream instance is created as if by invoking
+   * the 4-argument constructor DeflaterOutputStream(out, def, size, false).
+   *
+   * @param out the output stream
+   * @param def the compressor ("deflater")
+   * @param size the output buffer size
+   * @exception IllegalArgumentException if size is <= 0
+   */
+  public DeflaterOutputStream(OutputStream out, Deflater def, int size) {
+      this(out, def, size, false);
+  }
+
+  /**
+   * Creates a new output stream with the specified compressor, flush
+   * mode and a default buffer size.
+   *
+   * @param out the output stream
+   * @param def the compressor ("deflater")
+   * @param syncFlush
+   *        if {@code true} the {@link #flush()} method of this
+   *        instance flushes the compressor with flush mode
+   *        {@link Deflater#SYNC_FLUSH} before flushing the output
+   *        stream, otherwise only flushes the output stream
+   *
+   * @since 1.7
+   */
+  public DeflaterOutputStream(OutputStream out,
+                              Deflater def,
+                              boolean syncFlush) {
+      this(out, def, 512, syncFlush);
+  }
+
+
+  /**
+   * Creates a new output stream with the specified compressor and
+   * a default buffer size.
+   *
+   * <p>The new output stream instance is created as if by invoking
+   * the 3-argument constructor DeflaterOutputStream(out, def, false).
+   *
+   * @param out the output stream
+   * @param def the compressor ("deflater")
+   */
+  public DeflaterOutputStream(OutputStream out, Deflater def) {
+      this(out, def, 512, false);
+  }
+
+  boolean usesDefaultDeflater = false;
+
+
+  /**
+   * Creates a new output stream with a default compressor, a default
+   * buffer size and the specified flush mode.
+   *
+   * @param out the output stream
+   * @param syncFlush
+   *        if {@code true} the {@link #flush()} method of this
+   *        instance flushes the compressor with flush mode
+   *        {@link Deflater#SYNC_FLUSH} before flushing the output
+   *        stream, otherwise only flushes the output stream
+   *
+   * @since 1.7
+   */
+  public DeflaterOutputStream(OutputStream out, boolean syncFlush) {
+	  super(out);
+	   jzSetDOS(out, deflater, 0, true);
+	  jzSetDOS(out, deflater, 0, true);
+      usesDefaultDeflater = true;
+  }
+
+  /**
+   * Creates a new output stream with a default compressor and buffer size.
+   *
+   * <p>The new output stream instance is created as if by invoking
+   * the 2-argument constructor DeflaterOutputStream(out, false).
+   *
+   * @param out the output stream
+   */
+  public DeflaterOutputStream(OutputStream out) {
+      this(out, false);
+      usesDefaultDeflater = true;
+  }
+
+
   public DeflaterOutputStream(ByteArrayOutputStream bos, Deflater deflater) {
 	super(bos);
     setDOS(bos, deflater);
