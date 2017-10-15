@@ -155,11 +155,10 @@ MUST list in the Clazz.load() call.
  * 
  * 
  */
-public class ASTScriptVisitor extends ASTJ2SDocVisitor {
+public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 	private void setInnerGlobals(ASTScriptVisitor parent, ASTNode node, String visitorClassName) {
 		innerTypeNode = node;
-//		parent.buffer.append("<<new inner " + visitorClassName + " " + node.hashCode() + ">>");
 		setPackageName(parent.getPackageName());
 		setClassName(visitorClassName);
 
@@ -967,7 +966,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	 * 
 	 */
 	public boolean visit(TypeDeclaration node) {
-		return addClassOrInterface(node, node.resolveBinding(), node.bodyDeclarations(), node.isInterface() ? 'i' : 'c');
+		return addClassOrInterface(node, node.resolveBinding(), node.bodyDeclarations(), node.isInterface() ? 'i' : 
+			node.isLocalTypeDeclaration() ? 'l' : 'c');
 	}
 	
 	/**
@@ -1047,6 +1047,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		boolean isAnonymous = (type == 'a');
 		boolean isEnum = (type == 'e');
 		boolean isInterface = (type == 'i');
+		boolean isLocal = (type == 'l');
 
 		TypeAdapter typeAdapter = ((TypeAdapter) getAdaptable(TypeAdapter.class));
 		ASTNode parent = node.getParent();
@@ -1074,14 +1075,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				tempVisitor = new ASTScriptVisitor(); // Default visitor
 			}
 			tempVisitor.setInnerGlobals(this, node, className);
-			// buffer.append(">>" + className + ">>");
 			node.accept(tempVisitor);
-			// buffer.append(">>creating static buffer for " + className +
-			// "<<");
-			// staticBuffer.append(">>static>>");
 			staticBuffer.append(tempVisitor.getBuffer().toString());
-			// staticBuffer.append("<<static<<");
-			// buffer.append(">>exiting<<");
 			return false;
 		}
 		boolean isTopLevel = binding.isTopLevel();
@@ -1208,13 +1203,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			buffer.append(", '");
 			buffer.append(fixNameNoC$(null, superInterface.getQualifiedName()));
 			buffer.append("'");
-		} else if (superInterfaceTypes != null) {
-			int size = superInterfaceTypes.size();
-			if (size > 0) {
+			buffer.append("?<<");
+		} else if (superInterfaceTypes != null && superInterfaceTypes.size() > 0) {
 				hasDependents = true;
 				buffer.append(", ");
 				String term = "";
-				if (size > 1) {
+				if (superInterfaceTypes.size() > 1) {
 					buffer.append("[");
 					term = "]";
 				}
@@ -1229,15 +1223,21 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					sep = ", ";
 				}
 				buffer.append(term);
-			}
+		} else {
+			buffer.append(", null");
 		}
 
-		// remove excessive null parameters
-
-		int pt;
-		while (", null".equals(buffer.substring(pt = buffer.length() - 6)))
-			buffer.setLength(pt);
-
+		if (isLocal) {
+			buffer.append(", 2");
+		} else if (isAnonymous) {
+			buffer.append(", 1");
+		} else {
+			// remove excessive null parameters
+			int pt;
+			while (", null".equals(buffer.substring(pt = buffer.length() - 6)))
+				buffer.setLength(pt);
+		}
+		
 		// close the initializer
 
 		buffer.append(");\r\n");
@@ -1320,8 +1320,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			// if this is not an Enum, save the old static def buffer; start a
 			// new one
 
-			// buffer.append(">>oldLen=" + staticBuffer.toString().length() +
-			// "<<");
 			oldStaticBuffer = staticBuffer;
 			staticBuffer = new StaticBuffer();
 		}
@@ -1400,17 +1398,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			addDefaultConstructor();
 			addEnumConstants(((EnumDeclaration) node).enumConstants());
 		} else {
-			// buffer.append(">>>adding1>>>" + this);
 			buffer.append(staticBuffer); // also writes the assert string
-			// buffer.append("<<<adding1<<<" + this);
 			if (isAnonymous) {
 				// if anonymous, restore old static def buffer
 				staticBuffer = oldStaticBuffer;
 			} else {
 				// otherwise, dump the oldStatic buffer and start a new one
-				// buffer.append(">>>adding2>>>" + this);
 				buffer.append(oldStaticBuffer);
-				// buffer.append("<<<adding2<<<" + this);
 				staticBuffer = new StaticBuffer();
 				if (!isInterface)
 					addDefaultConstructor();
@@ -1616,18 +1610,19 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		addCallInit();
 	}
 
-	private boolean checkInterfaceHasMethods(List<?> nodes) {
-		for (Iterator<?> iter = nodes.iterator(); iter.hasNext();) {
-			BodyDeclaration element = (BodyDeclaration) iter.next();
-			if ((element instanceof Initializer
-					|| element instanceof FieldDeclaration
-							&& (isStatic(element) || ((FieldDeclaration) element).fragments().size() > 0)
-					|| element instanceof MethodDeclaration && isStatic(element)) && !checkj2sIgnore(element))
-				return true;
-		}
-		return false;
-	}
-
+// this test fails for inner Interfaces
+//	private boolean checkInterfaceHasMethods(List<?> nodes) {
+//		for (Iterator<?> iter = nodes.iterator(); iter.hasNext();) {
+//			BodyDeclaration element = (BodyDeclaration) iter.next();
+//			if ((element instanceof Initializer
+//					|| element instanceof FieldDeclaration
+//							&& (isStatic(element) || ((FieldDeclaration) element).fragments().size() > 0)
+//					|| element instanceof MethodDeclaration && isStatic(element)) && !checkj2sIgnore(element))
+//				return true;
+//		}
+//		return false;
+//	}
+	
 	private void clearVariables(List<FinalVariable> vars) {
 		for (int i = vars.size(); --i >= 0;) {
 			FinalVariable var = vars.get(i);

@@ -535,7 +535,7 @@ var newTypedA$ = function(baseClass, args, nBits, ndims) {
     arr.__BYTESIZE = arr.BYTES_PER_ELEMENT || (nBits >> 3);
   }
   arr.getClass = function () { return Clazz.arrayClass$(baseClass, Math.abs(ndims)) };
-  arr.__ARRAYTYPE = paramType;
+  arr.__ARRAYTYPE = paramType; // referenced in java.lang.Class
   arr.__BASECLASS = baseClass;
   arr.__NDIM = ndims;
   return arr;
@@ -759,16 +759,10 @@ Clazz.newInterface$ = function (prefix, name, interfacez) {
 };
 
 Clazz.newClass$ = function (prefix, name, clazzFun, clazzParent, 
-    interfacez, mode) {
+    interfacez, type) {
   var prefixName = (prefix ? prefix.__PKG_NAME__ || prefix.__CLASS_NAME__ : null);
   var qName = (prefixName ? prefixName + "." : "") + name;
   
-  if (typeof mode == "number") {
-    if ((mode & 1) != (clazzParent ? 1 : 0)) 
-      alert("j2sSwingjs:newClass$: Missing superclass required for " + qName + " check inner class order?");
-    if ((mode & 2) != (interfacez ? 2 : 0)) 
-      alert("j2sSwingjs:newClass$: Missing superinterface required for " + qName + " check inner class order?");
-  }      
   
 /*  if (Clazz._Loader._classPending[qName]) {
       delete Clazz._Loader._classPending[qName];
@@ -783,7 +777,7 @@ Clazz.newClass$ = function (prefix, name, clazzFun, clazzParent,
     clazzFun = unloadedClasses[qName];
   else if (!clazzFun)
     clazzFun = function () {Clazz.newInstance$(this,arguments)};
-  return decorateFunction(clazzFun, prefix, name, [clazzParent, interfacez]);
+  return decorateFunction(clazzFun, prefix, name, [clazzParent, interfacez], type);
 };
 
 
@@ -974,10 +968,11 @@ var extendObject = function(clazz) {
 
 }
     
-var extendJO = function(c, name, isNumber) {
-  if (name)
-    c.__CLASS_NAME__ = c.prototype.__CLASS_NAME__ = name;
-    
+var extendJO = function(c, name, name$, type, isNumber) {
+  name && (c.__CLASS_NAME__ = c.prototype.__CLASS_NAME__ = name);
+  name$ && (c.__CLASS_NAME$__ = c.prototype.__CLASS_NAME$__ = name$);  // inner static classes use $ not "."
+  (type == 1) && (c.__ANON = c.prototype.__ANON = 1);
+  (type == 2) && (c.__LOCAL = c.prototype.__LOCAL = 1);
   if (supportsNativeObject) {
 
     c.isInstance = function(o) { return Clazz.instanceOf(o, this) };
@@ -1401,8 +1396,8 @@ Clazz.inheritArgs = new (function(){return {"$J2SNOCREATE$":true}})();
 
 var _jsid = 0;
 
-var decorateFunction = Clazz._decorateFunction = function (clazzFun, prefix, name, parentAndInterfaces) {
-  var qName;
+var decorateFunction = Clazz._decorateFunction = function (clazzFun, prefix, name, parentAndInterfaces, type) {
+  var qName, bName;
   if (!prefix) {
     // e.g. Clazz.declareInterface (null, "ICorePlugin", org.eclipse.ui.IPlugin);
     qName = name;
@@ -1417,9 +1412,10 @@ var decorateFunction = Clazz._decorateFunction = function (clazzFun, prefix, nam
   } else {
     // e.g. Clazz.declareInterface (org.eclipse.ui.Plugin, "ICorePlugin", org.eclipse.ui.IPlugin);
     qName = prefix.__CLASS_NAME__ + "." + name;
+    bName = prefix.__CLASS_NAME__ + "$" + name;    
     prefix[name] = clazzFun;
   }
-  extendJO(clazzFun, qName);
+  extendJO(clazzFun, qName, bName, type);
   Clazz.setGlobal(qName, clazzFun);
   for (var i = innerNames.length; --i >= 0;) {
     clazzFun[innerNames[i]] = inF[innerNames[i]];
@@ -1440,6 +1436,7 @@ var excludeSuper = function(o) {
       || o == "$Class$"
       || o == "prototype" 
       || o == "__CLASS_NAME__" 
+      || o == "__CLASS_NAME$__" 
       || o == "superClazz"
       || o == "implementz"
 }
@@ -3062,7 +3059,7 @@ var setJ2STypeclass = function(cl, type, paramCode) {
     isPrimitive: function() { return true },
     type:type, 
     __PARAMCODE:paramCode, 
-    __PRIMITIVE:1
+    __PRIMITIVE:1  // referenced in java.lang.Class
   };
   cl.TYPE.toString = cl.TYPE.getName = cl.TYPE.getTypeName 
     = cl.TYPE.getCanonicalName = cl.TYPE.getSimpleName = function() {return type}
@@ -3071,7 +3068,7 @@ var setJ2STypeclass = function(cl, type, paramCode) {
 var decorateAsNumber = function (clazzFun, qClazzName, type, PARAMCODE) {
   clazzFun.prototype.valueOf=function(){return 0;};
   clazzFun.prototype.__VAL0__ = 1;
-  extendJO(clazzFun, qClazzName, true);
+  extendJO(clazzFun, qClazzName, null, false, true);
   inheritClass(clazzFun, Number);
   implementOf(clazzFun, Comparable);
   setJ2STypeclass(clazzFun, type, PARAMCODE);
@@ -4976,7 +4973,9 @@ return this.key;
 });
 
 declareType(java.lang,"Void");
-java.lang.Void.TYPE=java.lang.Void;
+setJ2STypeclass(java.lang.Void, "void", "V");
+//java.lang.Void.TYPE=java.lang.Void;
+//java.lang.V
 
 Clazz.newInterface$(java.lang.reflect,"GenericDeclaration");
 Clazz.newInterface$(java.lang.reflect,"AnnotatedElement");

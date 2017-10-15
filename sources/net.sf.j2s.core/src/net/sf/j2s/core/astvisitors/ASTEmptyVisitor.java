@@ -238,7 +238,22 @@ public class ASTEmptyVisitor extends ASTVisitor {
 	}
 
 
-
+	/**
+	 * We need to check packages only for local "var" variables, as only those will be 
+	 * references as unqualified names. And the problem is only the same method. 
+	 * 
+	 * For example, 
+	 * 
+	 *  var test = 3
+	 *  
+	 *  x = test.Test_1.getX();
+	 *  
+	 * 
+	 *  
+	 * @param name
+	 * @param checkPackages
+	 * @return
+	 */
 	protected boolean checkKeywordViolation(String name, boolean checkPackages) {
 		return FieldAdapter.checkKeywordViolation(name, checkPackages ? definedPackageNames : null);
 	}

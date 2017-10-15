@@ -42,7 +42,7 @@ import net.sf.j2s.core.adapters.ExtendedAdapter;
  *
  * 2006-12-4
  */
-public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
+public class ASTJ2SDocVisitor extends ASTEmptyVisitor {
 	
 	private boolean isDebugging = false;
 

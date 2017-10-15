@@ -215,7 +215,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 			//visitor.setSupportsObjectStaticFields(objectStaticFields);
 			boolean isDebugging = "debug".equals(getProperty("j2s.compiler.mode"));
 			visitor.setDebugging(isDebugging);
-			dvisitor.setDebugging(isDebugging);
+//			dvisitor.setDebugging(isDebugging);
 			// BH: compression has been deprecated. Use Google Closure Compiler
 			//boolean toCompress = false; //"enable".equals(getProperty(props, "j2s.compiler.allow.compression"))); // BH
 			//visitor.setToCompileVariableName(false);

@@ -18,13 +18,15 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 
 import net.sf.j2s.core.adapters.ExtendedAdapter;
 
 /**
  * 
- * This class now just retrieves all package names
+ * This class now just retrieves all package names that are referenced
+ * without reflection. The only importance of this 
  * 
  * @author zhou renjian         2006-5-2
  * @author Bob Hanson
@@ -33,17 +35,17 @@ import net.sf.j2s.core.adapters.ExtendedAdapter;
 public class DependencyASTVisitor extends ASTEmptyVisitor {
 
 	
-	private boolean isDebugging = false;
-
-	public void setDebugging(boolean isDebugging) {
-		this.isDebugging = isDebugging;
-	}
-
-	public boolean isDebugging() {
-		return isDebugging;
-	}
-
-	private String[] defaultPackageNamesDefined = {"java", "javax", "sun", "jsjava", "jsjavax", "jssun"};
+//	private boolean isDebugging = false;
+//
+//	public void setDebugging(boolean isDebugging) {
+//		this.isDebugging = isDebugging;
+//	}
+//
+//	public boolean isDebugging() {
+//		return isDebugging;
+//	}
+//
+	private final static String[] CORE_PACKAGES = {};//{"java", "javax", "sun", "javajs", "swingjs"};
 
 	private HashSet<String> definedBasePackageNames;
 
@@ -54,8 +56,14 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	public boolean visit(PackageDeclaration node) {
 		//String name = ;
 		//setPackageName(name);
-		addPackage("" + node.getName());
+		addPackage(node.getName().toString());
 		return false;
+	}
+
+	public void endVisit(ImportDeclaration node) {
+		String qnameStr = node.getName().getFullyQualifiedName();
+		if (qnameStr != null && !qnameStr.equals("") && isQualifiedNameOK(qnameStr, node))
+			addPackage(qnameStr);
 	}
 
 	private void addPackage(String name) {
@@ -64,12 +72,39 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			name = name.substring(0, pt);
 		if (definedBasePackageNames == null) {
 			definedBasePackageNames = new HashSet<String>();
-			for (int i = defaultPackageNamesDefined.length; --i >= 0;)
-				definedBasePackageNames.add(defaultPackageNamesDefined[i]);
+			for (int i = CORE_PACKAGES.length; --i >= 0;)
+				definedBasePackageNames.add(CORE_PACKAGES[i]);
 		}
-		definedBasePackageNames.add(name);
+		//definedBasePackageNames.add(name);
 	}
 
+	public boolean isQualifiedNameOK(String qualifiedName, ASTNode node) {
+
+		if (qualifiedName != null && !isClassKnown(qualifiedName) && qualifiedName.indexOf('[') == -1
+				&& !"int".equals(qualifiedName) && !"float".equals(qualifiedName) && !"double".equals(qualifiedName)
+				&& !"long".equals(qualifiedName) && !"short".equals(qualifiedName) && !"byte".equals(qualifiedName)
+				&& !"char".equals(qualifiedName) && !"boolean".equals(qualifiedName) && !"void".equals(qualifiedName)
+				&& !qualifiedName.startsWith("org.w3c.dom.")
+				&& !(allowExtensions && ExtendedAdapter.isHTMLClass(qualifiedName, false))) {
+			ASTNode root = node.getRoot();
+			if (root instanceof CompilationUnit) {
+				CompilationUnit type = (CompilationUnit) root;
+				boolean existedSelf = false;
+				List types = type.types();
+				for (Iterator iter = types.iterator(); iter.hasNext();) {
+					AbstractTypeDeclaration typeDecl = (AbstractTypeDeclaration) iter.next();
+					if (typeDecl.resolveBinding().getQualifiedName().equals(qualifiedName)) {
+						existedSelf = true;
+						break;
+					}
+				}
+				if (!existedSelf) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 //	public static String joinArrayClasses(StringBuffer buf, String[] ss, String last) {
 //		return joinArrayClasses(buf, ss, last, ", ");
 //	}
@@ -252,22 +287,6 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 //		}
 //	}
 
-//	// sgurin - fix for bug
-//	// http://sourceforge.net/tracker/?func=detail&aid=3037341&group_id=155436&atid=795800
-//	// with static imports
-//	public void endVisit(ImportDeclaration node) {
-//		super.endVisit(node);
-//		String qnameStr = node.getName().getFullyQualifiedName();
-//		if (qnameStr != null && !qnameStr.equals("") && isQualifiedNameOK(qnameStr, node)) {
-//		if (node.isStatic() && node.isOnDemand()) {
-//				if (!musts.contains(qnameStr)) {
-//					musts.add(qnameStr);
-//				}
-//			}
-//		addPackage(qnameStr);
-//		}
-//		
-//	}
 	
 //	/**
 //	 * @return Returns the thisClassName.
@@ -506,35 +525,8 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 //	public boolean isNodeInMustPath(ASTNode node) {
 //		return false;
 //	}
-
-	public boolean isQualifiedNameOK(String qualifiedName, ASTNode node) {
-		
-		if (qualifiedName != null && !isClassKnown(qualifiedName) && qualifiedName.indexOf('[') == -1
-				&& !"int".equals(qualifiedName) && !"float".equals(qualifiedName) && !"double".equals(qualifiedName)
-				&& !"long".equals(qualifiedName) && !"short".equals(qualifiedName) && !"byte".equals(qualifiedName)
-				&& !"char".equals(qualifiedName) && !"boolean".equals(qualifiedName) && !"void".equals(qualifiedName)
-				&& !qualifiedName.startsWith("org.w3c.dom.")
-				&& !(allowExtensions && ExtendedAdapter.isHTMLClass(qualifiedName, false))) {
-			ASTNode root = node.getRoot();
-			if (root instanceof CompilationUnit) {
-				CompilationUnit type = (CompilationUnit) root;
-				boolean existedSelf = false;
-				List types = type.types();
-				for (Iterator iter = types.iterator(); iter.hasNext();) {
-					AbstractTypeDeclaration typeDecl = (AbstractTypeDeclaration) iter.next();
-					if (typeDecl.resolveBinding().getQualifiedName().equals(qualifiedName)) {
-						existedSelf = true;
-						break;
-					}
-				}
-				if (!existedSelf) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
+//
+//
 //	protected boolean isSimpleQualified(QualifiedName node) {
 //		Name qualifier = node.getQualifier();
 //		if (qualifier instanceof SimpleName) {

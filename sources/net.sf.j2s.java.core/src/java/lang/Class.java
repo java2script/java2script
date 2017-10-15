@@ -402,7 +402,14 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 *
 	 * @since JDK1.1
 	 */
-	public native boolean isInstance(Object obj);
+	public boolean isInstance(Object obj) {
+		/**
+		 * @j2sNative  return Clazz.instanceof(obj, this.$clazz$);
+		 */
+		{ 
+			return false;
+		}
+	}
 
 	/**
 	 * Determines if the class or interface represented by this {@code Class}
@@ -448,7 +455,15 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @return {@code true} if this object represents an interface;
 	 *         {@code false} otherwise.
 	 */
-	public native boolean isInterface();
+	public boolean isInterface() {
+		/**
+		 * @j2sNative   return !this.$clazz$.$init$;
+		 * 
+		 */
+		{
+			return false;
+		}
+	}
 
 	/**
 	 * Determines if this {@code Class} object represents an array class.
@@ -457,7 +472,14 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 *         {@code false} otherwise.
 	 * @since JDK1.1
 	 */
-	public native boolean isArray();
+	public boolean isArray() {
+		/**
+		 * @j2sNative    return !!this.$clazz$.__ARRAYTYPE;
+		 */
+		{
+		return false;
+		}
+	}
 
 	/**
 	 * Determines if the specified {@code Class} object represents a primitive
@@ -488,7 +510,15 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @see java.lang.Void#TYPE
 	 * @since JDK1.1
 	 */
-	public native boolean isPrimitive();
+	public boolean isPrimitive() {
+		/**
+		 * @j2sNative   return !!this.__PRIMITIVE;
+		 *
+		 */
+		{
+			return true;
+		}
+	}
 
 	/**
 	 * Returns true if this {@code Class} object represents an annotation type.
@@ -613,7 +643,13 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	private transient String name;
 
 	private String getName0() {
-		return $clazz$.__CLASS_NAME__;
+		/**
+		 * @j2sNative return this.$clazz$.__CLASS_NAME$__ || this.$clazz$.__CLASS_NAME__;
+
+		 */
+		{
+			return null;
+		}
 	}
 
 	/**
@@ -1137,39 +1173,39 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 */
 	public native Class<?> getDeclaringClass();
 
-//	/**
-//	 * Returns the immediately enclosing class of the underlying class. If the
-//	 * underlying class is a top level class this method returns {@code null}.
-//	 * 
-//	 * @return the immediately enclosing class of the underlying class
-//	 * @since 1.5
-//	 */
-//	public Class<?> getEnclosingClass() {
-//		// There are five kinds of classes (or interfaces):
-//		// a) Top level classes
-//		// b) Nested classes (static member classes)
-//		// c) Inner classes (non-static member classes)
-//		// d) Local classes (named classes declared within a method)
-//		// e) Anonymous classes
-//
-//		// JVM Spec 4.8.6: A class must have an EnclosingMethod
-//		// attribute if and only if it is a local class or an
-//		// anonymous class.
-//		EnclosingMethodInfo enclosingInfo = getEnclosingMethodInfo();
-//
-//		if (enclosingInfo == null) {
-//			// This is a top level or a nested class or an inner class (a, b, or
-//			// c)
-//			return getDeclaringClass();
-//		} else {
-//			Class<?> enclosingClass = enclosingInfo.getEnclosingClass();
-//			// This is a local class or an anonymous class (d or e)
-//			if (enclosingClass == this || enclosingClass == null)
-//				throw new InternalError("Malformed enclosing method information");
-//			else
-//				return enclosingClass;
-//		}
-//	}
+	// /**
+	// * Returns the immediately enclosing class of the underlying class. If the
+	// * underlying class is a top level class this method returns {@code null}.
+	// *
+	// * @return the immediately enclosing class of the underlying class
+	// * @since 1.5
+	// */
+	// public Class<?> getEnclosingClass() {
+	// // There are five kinds of classes (or interfaces):
+	// // a) Top level classes
+	// // b) Nested classes (static member classes)
+	// // c) Inner classes (non-static member classes)
+	// // d) Local classes (named classes declared within a method)
+	// // e) Anonymous classes
+	//
+	// // JVM Spec 4.8.6: A class must have an EnclosingMethod
+	// // attribute if and only if it is a local class or an
+	// // anonymous class.
+	// EnclosingMethodInfo enclosingInfo = getEnclosingMethodInfo();
+	//
+	// if (enclosingInfo == null) {
+	// // This is a top level or a nested class or an inner class (a, b, or
+	// // c)
+	// return getDeclaringClass();
+	// } else {
+	// Class<?> enclosingClass = enclosingInfo.getEnclosingClass();
+	// // This is a local class or an anonymous class (d or e)
+	// if (enclosingClass == this || enclosingClass == null)
+	// throw new InternalError("Malformed enclosing method information");
+	// else
+	// return enclosingClass;
+	// }
+	// }
 
 	/**
 	 * Returns the simple name of the underlying class as given in the source
@@ -1184,42 +1220,51 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @since 1.5
 	 */
 	public String getSimpleName() {
-		// TODO
-		return $clazz$.__CLASS_NAME__;
-//		if (isArray())
-//			return getComponentType().getSimpleName() + "[]";
-//
-//		String simpleName = getSimpleBinaryName();
-//		if (simpleName == null) { // top level class
-//			simpleName = getName();
-//			return simpleName.substring(simpleName.lastIndexOf(".") + 1); // strip
-//																			// the
-//																			// package
-//																			// name
-//		}
-//		// According to JLS3 "Binary Compatibility" (13.1) the binary
-//		// name of non-package classes (not top level) is the binary
-//		// name of the immediately enclosing class followed by a '$' followed
-//		// by:
-//		// (for nested and inner classes): the simple name.
-//		// (for local classes): 1 or more digits followed by the simple name.
-//		// (for anonymous classes): 1 or more digits.
-//
-//		// Since getSimpleBinaryName() will strip the binary name of
-//		// the immediatly enclosing class, we are now looking at a
-//		// string that matches the regular expression "\$[0-9]*"
-//		// followed by a simple name (considering the simple of an
-//		// anonymous class to be the empty string).
-//
-//		// Remove leading "\$[0-9]*" from the name
-//		int length = simpleName.length();
-//		if (length < 1 || simpleName.charAt(0) != '$')
-//			throw new InternalError("Malformed class name");
-//		int index = 1;
-//		while (index < length && isAsciiDigit(simpleName.charAt(index)))
-//			index++;
-//		// Eventually, this is the empty string iff this is an anonymous class
-//		return simpleName.substring(index);
+		if (isArray())
+			return getComponentType().getSimpleName() + "[]";
+		String name = "";
+		/**
+		 * @j2sNative 
+		 * 
+		 * name = (this.$clazz$.__ANON ? "" : this.$clazz$.__CLASS_NAME__);
+		 */
+		{
+		}
+		return name.substring(name.lastIndexOf(".") + 1);
+
+		// String simpleName = getSimpleBinaryName();
+		// if (simpleName == null) { // top level class
+		// simpleName = getName();
+		// return simpleName.substring(simpleName.lastIndexOf(".") + 1); //
+		// strip
+		// // the
+		// // package
+		// // name
+		// }
+		// // According to JLS3 "Binary Compatibility" (13.1) the binary
+		// // name of non-package classes (not top level) is the binary
+		// // name of the immediately enclosing class followed by a '$' followed
+		// // by:
+		// // (for nested and inner classes): the simple name.
+		// // (for local classes): 1 or more digits followed by the simple name.
+		// // (for anonymous classes): 1 or more digits.
+		//
+		// // Since getSimpleBinaryName() will strip the binary name of
+		// // the immediatly enclosing class, we are now looking at a
+		// // string that matches the regular expression "\$[0-9]*"
+		// // followed by a simple name (considering the simple of an
+		// // anonymous class to be the empty string).
+		//
+		// // Remove leading "\$[0-9]*" from the name
+		// int length = simpleName.length();
+		// if (length < 1 || simpleName.charAt(0) != '$')
+		// throw new InternalError("Malformed class name");
+		// int index = 1;
+		// while (index < length && isAsciiDigit(simpleName.charAt(index)))
+		// index++;
+		// // Eventually, this is the empty string iff this is an anonymous
+		// class
+		// return simpleName.substring(index);
 	}
 
 //	/**
@@ -1241,16 +1286,20 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @since 1.5
 	 */
 	public String getCanonicalName() {
-	    return $clazz$.__CLASS_NAME__;
-//		if (isArray()) {
-//			String canonicalName = getComponentType().getCanonicalName();
-//			if (canonicalName != null)
-//				return canonicalName + "[]";
-//			else
-//				return null;
-//		}
-//		if (isLocalOrAnonymousClass())
-//			return null;
+		if (isArray()) {
+			String canonicalName = getComponentType().getCanonicalName();
+			if (canonicalName != null)
+				return canonicalName + "[]";
+			else
+				return null;
+		}
+		if (isLocalOrAnonymousClass())
+		return null;
+		String name = null;
+		/**
+		 * @j2sNative  name = this.$clazz$.__CLASS_NAME__ || null; 
+		 */
+	    return name;
 ////		Class<?> enclosingClass = getEnclosingClass();
 ////		if (enclosingClass == null) { // top level class
 //			return getName();
@@ -1273,16 +1322,22 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		return "".equals(getSimpleName());
 	}
 
-//	/**
-//	 * Returns {@code true} if and only if the underlying class is a local
-//	 * class.
-//	 *
-//	 * @return {@code true} if and only if this class is a local class.
-//	 * @since 1.5
-//	 */
-//	public boolean isLocalClass() {
+	/**
+	 * Returns {@code true} if and only if the underlying class is a local
+	 * class.
+	 *
+	 * @return {@code true} if and only if this class is a local class.
+	 * @since 1.5
+	 */
+	public boolean isLocalClass() {
+		/**
+		 * @j2sNative   return !!this.$clazz$.__LOCAL;
+		 */
+		{
+		return false;
+		}
 //		return isLocalOrAnonymousClass() && !isAnonymousClass();
-//	}
+	}
 //
 //	/**
 //	 * Returns {@code true} if and only if the underlying class is a member
@@ -1320,7 +1375,12 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		// JVM Spec 4.8.6: A class must have an EnclosingMethod
 		// attribute if and only if it is a local class or an
 		// anonymous class.
+		/**
+		 * @j2sNative   return !!this.$clazz$.__ISANON || !!this.$clazz$.__LOCAL;
+		 */
+		{
 		return false;
+		}
 //		return getEnclosingMethodInfo() != null;
 	}
 

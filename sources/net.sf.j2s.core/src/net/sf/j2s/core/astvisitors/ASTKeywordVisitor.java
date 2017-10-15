@@ -9,7 +9,6 @@
  *     Zhou Renjian - initial API and implementation
  *******************************************************************************/
 package net.sf.j2s.core.astvisitors;
-//LAST PROBLEM
 
 import java.util.Iterator;
 import java.util.List;
@@ -77,7 +76,7 @@ import net.sf.j2s.core.adapters.TypeAdapter;
  * @author Bob Hanson
  *
  */
-public class ASTKeywordVisitor extends ASTEmptyVisitor {
+public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 
 	private final static String CHARCODEAT0 = ".$c()";
 
@@ -953,7 +952,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			buffer.append(j2sGetArrayClass(binding, 1));
 		} else {
 			// BH we are creating a new Class object around this class
-			buffer.append("Clazz.getClass(" + removeBrackets(binding.getQualifiedName()) + ")");
+			buffer.append("Clazz.getClass(" + 
+					getQualifiedStaticName(null, ensureNameIfLocal(binding.getQualifiedName(), binding, node.getParent()), true, true, false) + ")");
 		}
 		return false;
 	}
@@ -1565,35 +1565,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					name = typeBinding.getQualifiedName();
 					if (!isAnonymous)
 						break;
-					if ((name == null || name.length() == 0) && typeBinding.isLocal()) {
-						name = typeBinding.getBinaryName();
-						int idx0 = name.lastIndexOf(".");
-						if (idx0 == -1) {
-							idx0 = 0;
-						}
-						int idx1 = name.indexOf('$', idx0);
-						if (idx1 != -1) {
-							int idx2 = name.indexOf('$', idx1 + 1);
-							String parentAnon = "";
-							if (idx2 == -1) { // maybe the name is already
-												// "$1$2..." for Java5.0+ in
-												// Eclipse 3.2+
-								parent = parent.getParent();
-								while (parent != null) {
-									if (parent instanceof AbstractTypeDeclaration) {
-										break;
-									} else if (parent instanceof AnonymousClassDeclaration) {
-										AnonymousClassDeclaration atype = (AnonymousClassDeclaration) parent;
-										ITypeBinding aTypeBinding = atype.resolveBinding();
-										String aName = aTypeBinding.getBinaryName();
-										parentAnon = aName.substring(aName.indexOf('$')) + parentAnon;
-									}
-									parent = parent.getParent();
-								}
-								name = name.substring(0, idx1) + parentAnon + name.substring(idx1);
-							}
-						}
-					}
+					name = ensureNameIfLocal(name, typeBinding, parent);
 					break;
 				}
 			}
@@ -1605,8 +1577,43 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		buffer.append(".");
 	}
 
+	private String ensureNameIfLocal(String name, ITypeBinding typeBinding, ASTNode parent) {
+		if ((name == null || name.length() == 0) && typeBinding.isLocal()) {
+			name = typeBinding.getBinaryName();
+			int idx0 = name.lastIndexOf(".");
+			if (idx0 == -1) {
+				idx0 = 0;
+			}
+			int idx1 = name.indexOf('$', idx0);
+			if (idx1 != -1) {
+				int idx2 = name.indexOf('$', idx1 + 1);
+				String parentAnon = "";
+				if (idx2 == -1) { // maybe the name is already
+									// "$1$2..." for Java5.0+ in
+									// Eclipse 3.2+
+					parent = parent.getParent();
+					while (parent != null) {
+						if (parent instanceof AbstractTypeDeclaration) {
+							break;
+						} else if (parent instanceof AnonymousClassDeclaration) {
+							AnonymousClassDeclaration atype = (AnonymousClassDeclaration) parent;
+							ITypeBinding aTypeBinding = atype.resolveBinding();
+							String aName = aTypeBinding.getBinaryName();
+							parentAnon = aName.substring(aName.indexOf('$')) + parentAnon;
+						}
+						parent = parent.getParent();
+					}
+					name = name.substring(0, idx1) + parentAnon + name.substring(idx1);
+				}
+			}
+		}
+		return name;
+	}
+
 	/**
 	 * Append a shortened qualified name, possibly using Clazz.load for dynamic loading
+	 * 
+	 * @param packageName
 	 * @param name
 	 * @param isStatic
 	 * @param doCache
@@ -1775,20 +1782,21 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	 * @param methodQualifier
 	 *            SimpleName qualifier in qualifier.methodName()
 	 * @param className
-	 * @param mustEscape
-	 * @param doCache
-	 * @param doAppend
+	 * @param doEscape set true except for static nonprivate field names 
+	 * @param doCache  generally true, but not for initial class definitions or for some nonstatic references
+	 * @param doAppend  true to use buffer.append; 
+	 * @return name wrapped if necessary by nested Class.load() calls 
 	 */
-	protected String getQualifiedStaticName(SimpleName methodQualifier, String className, boolean mustEscape,
+	protected String getQualifiedStaticName(SimpleName methodQualifier, String className, boolean doEscape,
 			boolean doCache, boolean doAppend) {
 		// BH: The idea here is to load these on demand.
 		// It will require synchronous loading,
 		// but it will ensure that a class is only
 		// loaded when it is really needed.
 		className = removeBrackets(className);
-		mustEscape &= (className.indexOf(".") >= 0 && !isClassKnown(className));
+		doEscape &= (className.indexOf(".") >= 0 && !isClassKnown(className));
 		String s = null;
-		if (!mustEscape) {
+		if (!doEscape) {
 			if (methodQualifier != null) {
 				methodQualifier.accept(this);
 				return  null;
