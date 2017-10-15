@@ -13,12 +13,6 @@
  
 LoadClazz = function() {
 
-
-// BH c$ is the ONLY global used in SwingJS now. I do not think it is necessary,
-// but it is created by the compiler, and I have not found a post-compile work-around.
-// It is used as a local variable in class definitions to point to the 
-// current method. See Clazz.p0p and Clazz.pu$h
-
 if (!window["j2s.clazzloaded"])
   window["j2s.clazzloaded"] = false;
 
@@ -1878,10 +1872,10 @@ Clazz.loadClass = function (name, onLoaded, async) {
     // maybe more here
   }
   if (!name)
-    return;
+    return null;
   if (!async)
     return Clazz.load(name);   
-  name && _Loader.loadClass(name, function() {
+  _Loader.loadClass(name, function() {
     var cl = Clazz.allClasses[name];
     cl && cl.$load$ && cl.$load$();
     onLoaded(cl);
