@@ -990,21 +990,6 @@ var extendJO = function(c, name, name$, type, isNumber) {
 
 };
 
-// Deprecated
-// var decorateAsType = function (clazzFun, qClazzName, clazzParent, 
-//     interfacez, parentClazzInstance, inheritClazzFuns, _decorateAsType) {
-//    extendJO(clazzFun, qClazzName);
-//   clazzFun.equals = inF.equals;
-//   clazzFun.getName = inF.getName;
-//   if (inheritClazzFuns)
-//     for (var i = innerNames.length, name; --i >= 0;)
-//      clazzFun[name = innerNames[i]] = inF[name];
-//   inheritClass(clazzFun, clazzParent);
-//   if (interfacez)
-//     implementOf(clazzFun, interfacez);
-//   return clazzFun;
-// };
-
 /**
  * Implementation of Java's keyword "implements".
  * As in JavaScript there are on "implements" keyword implemented, a property
@@ -2254,18 +2239,6 @@ _Loader.setLoadingMode = function (mode, timeLag) {
   return async;
 };
 
-/* private 
-var runtimeLoaded = function () {
-  if (pkgRefCount  || !isClassDefined(runtimeKeyClass))
-    return;
-  var qbs = queueBe4KeyClazz;
-  for (var i = 0; i < qbs.length; i++)
-    _Loader.loadClass(qbs[i][0], qbs[i][1]);
-  queueBe4KeyClazz = [];
-};
-*/
-
-
 /*
  * Load those key *.z.js. This *.z.js will be surely loaded before other 
  * queued *.js.
@@ -2283,98 +2256,6 @@ _Loader.loadZJar = function (zjarPath, keyClass) {
   // BH note: runtimeKeyClass is java.lang.String  
   _Loader.loadClass(keyClass, null, true);
 };
-
-//var NodeMap = {};
-//var _allNodes = [];
-
-/**
- * The method help constructing the multiple-binary class dependency tree.
- */
-/* private 
-var addChildClassNode = function (parent, child, isMust) {
-  var existed = false;
-  var arr;
-  if (isMust) {
-    arr = parent.musts;
-    if (!child.requiredBy)
-      child.requiredBy = parent;
-//    if (!parent.requiresMap){
-//      parent.requires = [];
-//      parent.requiresMap = {};
-//    }
-//    if (!parent.requiresMap[child.name]) {
-//      parent.requiresMap[child.name] = 1;
-//      parent.requires.push[child];
-//    }
-  } else {
-    arr = parent.optionals;
-  }
-  if (!NodeMap[child.name]) {
-    _allNodes.push(child)
-    NodeMap[child.name]=child
-  }
-  for (var i = 0; i < arr.length; i++) {
-    if (arr[i].name == child.name) {
-      existed = true;
-      break;
-    }
-  }
-  if (!existed) {
-    arr.push(child);
-    if (isLoadingEntryClass 
-        && child.name.indexOf("java") != 0 
-        && child.name.indexOf("net.sf.j2s.ajax") != 0) {
-      if (besidesJavaPackage)
-        isLoadingEntryClass = false;
-      besidesJavaPackage = true;
-//    } else if (child.name.indexOf("org.eclipse.swt") == 0 
-//        || child.name.indexOf("$wt") == 0) {
-//      window["swt.lazy.loading.callback"] = swtLazyLoading;
-//      if (needPackage("org.eclipse.swt"))
-//        return _Loader.loadPackage("org.eclipse.swt", function() {addParentClassNode(child, parent)});
-    }
-  }
-  addParentClassNode(child, parent);
-};
-
-/* private 
-var addParentClassNode = function(child, parent) {
-  if (parent.name && parent != clazzTreeRoot && parent != child)
-    for (var i = 0; i < child.parents.length; i++)
-      if (child.parents[i].name == parent.name)
-        return;
-  child.parents.push(parent);
-}
-
-/* private 
-var destroyClassNode = function (node) {
-  var parents = node.parents;
-  if (parents)
-    for (var k = parents.length; --k >= 0;)
-      removeArrayItem(parents[k].musts, node) || removeArrayItem(parents[k].optionals, node);
-};
-
-/* SwingJS does not support unloading classes
-_Loader.unloadClassExt = function (qClazzName) {
-  if (definedClasses)
-    definedClasses[qClazzName] = false;
-  if (classpathMap["#" + qClazzName]) {
-    var pp = classpathMap["#" + qClazzName];
-    classpathMap["#" + qClazzName] = null;
-    var arr = classpathMap["$" + pp];
-    removeArrayItem(arr, qClazzName) && (classpathMap["$" + pp] = arr);
-  }
-  var n = findNode(qClazzName);
-  if (n) {
-    n.status = Node.STATUS_KNOWN;
-    loadedScripts[n.path] = false;
-  }
-  var path = _Loader.getClasspathFor (qClazzName);
-  loadedScripts[path] = false;
-  innerLoadedScripts[path] && (innerLoadedScripts[path] = false);
-  _Loader.onClassUnloaded(qClazzName);
-};
-*/
 
 Clazz.binaryFolders =  _Loader.binaryFolders = [ _Loader.getJ2SLibBase() ];
 
@@ -2407,17 +2288,6 @@ var lastScrollTop = 0;
 var bindingParent = null;
 
 CLPM.DEFAULT_OPACITY = (J2S && J2S._j2sLoadMonitorOpacity ? J2S._j2sLoadMonitorOpacity : 55);
-
-/* public */
-/*CLPM.initialize = function (parent) {
-  bindingParent = parent;
-  if (parent && !attached) {
-    attached = true;
-    //Clazz.addEvent (window, "unload", cleanup);
-    // window.attachEvent ("onunload", cleanup);
-  }
-};
-*/
 
 /* public */
 CLPM.hideMonitor = function () {
@@ -2872,17 +2742,6 @@ Sys.err.write = function (buf, offset, len) {
 Clazz._Loader.registerPackages("java", [ "io", "lang", "lang.reflect", "util" ]);
 
 
-/*
-var sJU = "java.util";
-Clazz._Loader.ignore([
-  "net.sf.j2s.ajax.HttpRequest",
-  sJU + ".MapEntry.Type",
-  "java.lang.Runtime",
-  "java.security.AccessController",
-  "java.security.PrivilegedExceptionAction",
-  sJU + ".concurrent.Executors"
-])
-*/
 if (!window["java.registered"])
  window["java.registered"] = false;
 
@@ -2896,68 +2755,6 @@ if (!window["java.registered"])
       ClazzLoader.loadZJar(J2S._coreFiles[i], ClazzLoader.runtimeKeyClass);
   //}
     
-/*    
-ClazzLoader.jarClasspath (ClazzLoader.getJ2SLibBase() + "java/awt/geom/Point2D.js", [
-  "java.awt.geom.Point2D", 
-  "java.awt.geom.Point2D.Double", 
-  "java.awt.geom.Point2D.Float"  
-  ]);
-
-ClazzLoader.jarClasspath (ClazzLoader.getJ2SLibBase() + "sun/awt/SunHints.js", [
-  "sun.awt.SunHints", 
-  "sun.awt.SunHints.Value", 
-  "sun.awt.SunHints.Key", 
-  "sun.awt.SunHints.LCDContrastKey",
-  "sun.awt.SunHints.SunKey" 
-  ]);
-
-ClazzLoader.jarClasspath (ClazzLoader.getJ2SLibBase() + "javax/swing/text/AbstractDocument.js", [
-  "javax.swing.text.AbstractDocument", 
-  "javax.swing.text.AbstractDocument.UndoRedoDocumentEvent" 
-  ]);
-
-ClazzLoader.jarClasspath (ClazzLoader.getJ2SLibBase() + "javax/swing/UIDefaults.js", [
-  "javax.swing.UIDefaults",
-  "javax.swing.UIDefaults.ActiveValue",
-  "javax.swing.UIDefaults.LazyValue"
-  ]);
-
-ClazzLoader.jarClasspath (ClazzLoader.getJ2SLibBase() + "javax/swing/Popup.js", [
-  "javax.swing.Popup", 
-  "javax.swing.Popup.DefaultFrame",
-  "javax.swing.Popup.HeavyWeightWindow" 
-  ]);
-
-ClazzLoader.jarClasspath (ClazzLoader.getJ2SLibBase() + "javax/swing/text/LayeredHighlighter.js", [
-  "javax.swing.text.LayeredHighlighter", 
-  "javax.swing.text.LayeredHighlighter.LayerPainter" 
-  ]);
-
-ClazzLoader.jarClasspath (ClazzLoader.getJ2SLibBase() + "javax/swing/JComponent.js", [
-  "javax.swing.JComponent", 
-  "javax.swing.JComponent.KeyboardState", 
-  "javax.swing.JComponent.ActionStandin", 
-  "javax.swing.JComponent.IntVector" 
-  ]);
-
-ClazzLoader.jarClasspath (ClazzLoader.getJ2SLibBase() + "sun/util/resources/LocaleData.js", [
-  "sun.util.resources.LocaleData", 
-  "sun.util.resources.LocaleDataResourceBundleControl"
-  ]);
-
-ClazzLoader.jarClasspath (ClazzLoader.getJ2SLibBase() + "java/text/DateFormat.js", [
-  "java.text.DateFormat", 
-  "java.text.DateFormat.Field"
-  ]);
-
-ClazzLoader.jarClasspath (ClazzLoader.getJ2SLibBase() + "javax/sound/sampled/Line.js", [
-  "java.text.Line.Info"
-  ]);
-
-ClazzLoader.jarClasspath (ClazzLoader.getJ2SLibBase() + "javax/sound/sampled/DataLine.js", [
-  "java.text.DataLine.Info"
-  ]);
-*/
 
 }) (Clazz._Loader);
 window["java.registered"] = true;
