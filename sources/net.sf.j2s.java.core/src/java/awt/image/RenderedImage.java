@@ -37,6 +37,7 @@
  ******************************************************************/
 
 package java.awt.image;
+import java.awt.Rectangle;
 import java.util.Vector;
 
 /**
@@ -173,35 +174,35 @@ public interface RenderedImage {
      */
     int getTileGridYOffset();
 
-//    /**
-//     * Returns tile (tileX, tileY).  Note that tileX and tileY are indices
-//     * into the tile array, not pixel locations.  The Raster that is returned
-//     * is live and will be updated if the image is changed.
-//     * @param tileX the X index of the requested tile in the tile array
-//     * @param tileY the Y index of the requested tile in the tile array
-//     * @return the tile given the specified indices.
-//     */
-//   Raster getTile(int tileX, int tileY);
-//
-//    /**
-//     * Returns the image as one large tile (for tile based
-//     * images this will require fetching the whole image
-//     * and copying the image data over).  The Raster returned is
-//     * a copy of the image data and will not be updated if the image
-//     * is changed.
-//     * @return the image as one large tile.
-//     */
-//    Raster getData();
-//
-//    /**
-//     * Computes and returns an arbitrary region of the RenderedImage.
-//     * The Raster returned is a copy of the image data and will not
-//     * be updated if the image is changed.
-//     * @param rect the region of the RenderedImage to be returned.
-//     * @return the region of the <code>RenderedImage</code>
-//     * indicated by the specified <code>Rectangle</code>.
-//     */
-//    Raster getData(Rectangle rect);
+    /**
+     * Returns tile (tileX, tileY).  Note that tileX and tileY are indices
+     * into the tile array, not pixel locations.  The Raster that is returned
+     * is live and will be updated if the image is changed.
+     * @param tileX the X index of the requested tile in the tile array
+     * @param tileY the Y index of the requested tile in the tile array
+     * @return the tile given the specified indices.
+     */
+   Raster getTile(int tileX, int tileY);
+
+    /**
+     * Returns the image as one large tile (for tile based
+     * images this will require fetching the whole image
+     * and copying the image data over).  The Raster returned is
+     * a copy of the image data and will not be updated if the image
+     * is changed.
+     * @return the image as one large tile.
+     */
+    Raster getData();
+
+    /**
+     * Computes and returns an arbitrary region of the RenderedImage.
+     * The Raster returned is a copy of the image data and will not
+     * be updated if the image is changed.
+     * @param rect the region of the RenderedImage to be returned.
+     * @return the region of the <code>RenderedImage</code>
+     * indicated by the specified <code>Rectangle</code>.
+     */
+    Raster getData(Rectangle rect);
 
     /**
      * Computes an arbitrary rectangular region of the RenderedImage
