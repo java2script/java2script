@@ -1051,9 +1051,6 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 		TypeAdapter typeAdapter = ((TypeAdapter) getAdaptable(TypeAdapter.class));
 		ASTNode parent = node.getParent();
-		// buffer.append(">>" + binding.getName() + (innerTypeNode != null) +
-		// (node == innerTypeNode) + " " + node.hashCode() + (innerTypeNode ==
-		// null ? "null" : " " + innerTypeNode.hashCode()) + ">>");
 		if (isAnonymous) {
 			buffer.append("(");
 		} else if (node != innerTypeNode
@@ -1203,7 +1200,6 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			buffer.append(", '");
 			buffer.append(fixNameNoC$(null, superInterface.getQualifiedName()));
 			buffer.append("'");
-			buffer.append("?<<");
 		} else if (superInterfaceTypes != null && superInterfaceTypes.size() > 0) {
 				hasDependents = true;
 				buffer.append(", ");

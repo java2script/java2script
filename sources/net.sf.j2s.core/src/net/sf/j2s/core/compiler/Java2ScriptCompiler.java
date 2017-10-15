@@ -20,7 +20,6 @@ import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 
 import net.sf.j2s.core.astvisitors.ASTKeywordVisitor;
 import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
-import net.sf.j2s.core.astvisitors.DependencyASTVisitor;
 import net.sf.j2s.core.builder.SourceFile;
 import net.sf.j2s.core.builder.SourceFileProxy;
 import net.sf.j2s.core.hotspot.InnerHotspotServer;
@@ -141,11 +140,11 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 			
 			// get all the package names 
 			
-			DependencyASTVisitor dvisitor = null;
+//			DependencyASTVisitor dvisitor = null;
 //			String visitorID = getProperty("j2s.compiler.visitor");
 //			IExtendedVisitor extVisitor = null;
 //			if ("ASTScriptVisitor".equals(visitorID)) {
-				dvisitor = new DependencyASTVisitor();
+//				dvisitor = new DependencyASTVisitor();
 //			} else if ("SWTScriptVisitor".equals(visitorID)) {
 //				dvisitor = new SWTDependencyASTVisitor();
 //			} else {
@@ -160,31 +159,31 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 //					dvisitor = new DependencyASTVisitor();
 //				}
 //			}
-			try {
-				root.accept(dvisitor);
-			} catch (Throwable e) {
-				e.printStackTrace();
-				errorOccurred = true;
-			}
-			if (errorOccurred) {
-				String folderPath = binFolder;
-				String elementName = root.getJavaElement().getElementName();
-				// if (elementName.endsWith(".class") ||
-				// elementName.endsWith(".java")) {
-				// //$NON-NLS-1$//$NON-NLS-2$
-				elementName = elementName.substring(0, elementName.lastIndexOf('.'));
-				// } /* maybe ended with other customized extension
-				String packageName = dvisitor.getPackageName();
-				if (packageName != null) {
-					File folder = new File(folderPath, packageName.replace('.', File.separatorChar));
-					folderPath = folder.getAbsolutePath();
-					File jsFile = new File(folderPath, elementName + ".js"); //$NON-NLS-1$
-					if (jsFile.exists()) {
-						jsFile.delete();
-					}
-				}
-				return;
-			}
+//			try {
+//				root.accept(dvisitor);
+//			} catch (Throwable e) {
+//				e.printStackTrace();
+//				errorOccurred = true;
+//			}
+//			if (errorOccurred) {
+//				String folderPath = binFolder;
+//				String elementName = root.getJavaElement().getElementName();
+//				// if (elementName.endsWith(".class") ||
+//				// elementName.endsWith(".java")) {
+//				// //$NON-NLS-1$//$NON-NLS-2$
+//				elementName = elementName.substring(0, elementName.lastIndexOf('.'));
+//				// } /* maybe ended with other customized extension
+//				String packageName = dvisitor.getPackageName();
+//				if (packageName != null) {
+//					File folder = new File(folderPath, packageName.replace('.', File.separatorChar));
+//					folderPath = folder.getAbsolutePath();
+//					File jsFile = new File(folderPath, elementName + ".js"); //$NON-NLS-1$
+//					if (jsFile.exists()) {
+//						jsFile.delete();
+//					}
+//				}
+//				return;
+//			}
 			// outputs a .jz file??? 
 			//J2SDependencyCompiler.outputJavaScript(dvisitor, root, binFolder);
 
@@ -204,7 +203,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 //					// visitor = new SWTScriptVisitor();
 //				}
 //			}
-			visitor.setPackageNames(dvisitor.getDefinedBasePackages());
+//			visitor.setPackageNames(dvisitor.getDefinedBasePackages());
 			// *.js*;swingjs; etc.
 			ASTKeywordVisitor.setNoQualifiedNamePackages(getProperty("j2s.compiler.nonqualified.classes"));
 			boolean ignoreMethodOverloading = !("enable".equals(getProperty("j2s.compiler.method.overloading")));
