@@ -25,7 +25,7 @@ import swingjs.api.js.DOMNode;
 @SuppressWarnings({"rawtypes", "unchecked", "unused"})
 public class JSSliderUI extends JSLightweightUI implements PropertyChangeListener, ChangeListener {
 
-	private static Class jsqueryUI = swingjs.jquery.JQueryUI.class;
+	private static Object jsqueryUI = new swingjs.jquery.JQueryUI();
 	JSlider jSlider;
 	private int min, max, val, majorSpacing, minorSpacing;
 	protected boolean paintTicks;
@@ -55,6 +55,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	private static boolean cssLoaded = false;
 
 	public JSSliderUI() {
+		
 		if (!cssLoaded) {
 			// this static call allows for the CSS to be loaded only once and only when needed
 			JSUtil.loadStaticResource("swingjs/jquery/jquery-ui-j2sslider.css");

@@ -87,7 +87,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	private final static String[] nonQualifiedClasses = new String[] {
 			// these classes are called from JavaScript or represent JavaScript
 			// functions
-			"swingjs.JSAppletViewer", "swingjs.JSFrameViewer", "java.applet.AppletContext", "java.applet.AppletStub",
+			//??? need qualified names! "swingjs.JSAppletViewer", "swingjs.JSFrameViewer", "java.applet.AppletContext", "java.applet.AppletStub",
 
 			// these classes need no qualification
 			"java.lang.Boolean", "java.lang.Byte", "java.lang.Character", "java.lang.Double", "java.lang.Float",
@@ -1082,10 +1082,10 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	 *            Clazz.arrayClass$; 0: not necessary
 	 * @return JavaScript for array creation
 	 */
-	static String j2sGetArrayClass(ITypeBinding type, int dimFlag) {
+	String j2sGetArrayClass(ITypeBinding type, int dimFlag) {
 		ITypeBinding ebinding = type.getElementType();
 		String params = (ebinding.isPrimitive() ? getPrimitiveTYPE(ebinding.getName())
-				: removeBrackets(ebinding.getQualifiedName()))
+				: getQualifiedStaticName(null, ebinding.getQualifiedName(), true, true, false))
 				+ (dimFlag == 0 ? "" : ", " + dimFlag * type.getDimensions());
 		return (dimFlag > 0 ? "Clazz.arrayClass$(" + params + ")" : " Clazz.newArray$(" + params);
 	}
@@ -1787,7 +1787,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	 * @param doAppend  true to use buffer.append; 
 	 * @return name wrapped if necessary by nested Class.load() calls 
 	 */
-	protected String getQualifiedStaticName(SimpleName methodQualifier, String className, boolean doEscape,
+	protected String getQualifiedStaticName(Name methodQualifier, String className, boolean doEscape,
 			boolean doCache, boolean doAppend) {
 		// BH: The idea here is to load these on demand.
 		// It will require synchronous loading,

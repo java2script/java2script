@@ -244,7 +244,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		return false;
 	}
 
-	public boolean visit(Block node) {
+	public boolean visit(Block node) {		
 		blockLevel++;
 		buffer.append("{\r\n");
 		return super.visit(node); // ASTJ2SDocVisitor
@@ -525,8 +525,9 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	 * 
 	 */
 	public boolean visit(Initializer node) {
-		if (checkj2sIgnore(node))
+		if (checkj2sIgnore(node)) {
 			return false;
+		}
 		node.getBody().accept(this);
 		buffer.append("\r\n");
 		return false;
@@ -666,8 +667,8 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			// "this"
 		} else {
 			isPrivateAndNotStatic = false;
-			if (expression instanceof SimpleName) {
-				getQualifiedStaticName((SimpleName) expression, className, isStatic && !isPrivate, true, true);
+			if (expression instanceof Name) {
+				getQualifiedStaticName((Name) expression, className, isStatic && !isPrivate, true, true);
 			} else {
 				expression.accept(this);
 			}
@@ -1286,6 +1287,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 				BodyDeclaration element = lstStatic.remove(0);
 				if (element instanceof Initializer) {
 					element.accept(this);
+					len = 0;
 				} else {
 					FieldDeclaration field = (FieldDeclaration) element;
 					List<?> fragments = field.fragments();
@@ -1480,7 +1482,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	 * @param isStatic
 	 *            if true, then this is a static field default preparation
 	 */
-	private void addFieldDeclaration(FieldDeclaration node, boolean isStatic) {
+	private void addFieldDeclaration(FieldDeclaration node, boolean isStatic) {		
 		ITypeBinding classBinding = resolveParentBinding(getClassDeclarationFor(node));
 		List<?> fragments = node.fragments();
 		VariableDeclarationFragment identifier = (VariableDeclarationFragment) fragments.get(0);

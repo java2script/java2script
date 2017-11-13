@@ -149,11 +149,12 @@ public class TypeAdapter extends AbstractPluginAdapter {
 		// don't shorten java.lang.ref or java.lang.annotation or java.lang.instrument or java.lang.management
 		// because why? they are discarded ultimately?
 		return (!name.startsWith("java.lang.") 
-				|| name.indexOf('.', 10) > 0 && !Character.isUpperCase(name.charAt(10))
-					|| name.startsWith("java.lang.ref") 
-					|| name.startsWith("java.lang.annotation")
-					|| name.startsWith("java.lang.instrument") 
-					|| name.startsWith("java.lang.management") ? null : name.substring(10));
+				|| name.length() > 10 && !Character.isUpperCase(name.charAt(10))
+					//|| name.startsWith("java.lang.ref") 
+					//|| name.startsWith("java.lang.annotation")
+					//|| name.startsWith("java.lang.instrument") 
+					//|| name.startsWith("java.lang.management")
+					? null : name.substring(10));
 
 // was:
 //		int index = name.indexOf("java.lang.");

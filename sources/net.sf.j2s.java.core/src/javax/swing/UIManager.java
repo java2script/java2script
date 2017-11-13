@@ -165,6 +165,8 @@ import java.util.Locale;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class UIManager
 {
+
+
 //    /**
 //     * This class defines the state managed by the <code>UIManager</code>.  For
 //     * Swing applications the fields in this class could just as well

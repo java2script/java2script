@@ -701,12 +701,12 @@ public abstract class Component
 	 * actually changing
 	 */
 	int getBoundsOp() {
-		assert Thread.holdsLock(getTreeLock());
+		//assert Thread.holdsLock(getTreeLock());
 		return boundsOp;
 	}
 
 	void setBoundsOp(int op) {
-		assert Thread.holdsLock(getTreeLock());
+		//assert Thread.holdsLock(getTreeLock());
 		if (op == ComponentPeer.RESET_OPERATION) {
 			boundsOp = ComponentPeer.DEFAULT_OPERATION;
 		} else if (boundsOp == ComponentPeer.DEFAULT_OPERATION) {
@@ -5235,8 +5235,7 @@ public abstract class Component
 		/**
 		 * @j2sNative
 		 * 
-		 *            return !!this.prototype["coalesceEvents$java.awt.AWTEvent$java.awt.AWTEvent"];
-		 * 
+		 *            return Clazz.getDeclaringClassForMethod$(this, "coalesceEvents$java_awt_AWTEvent$java_awt_AWTEvent") != C$;
 		 */
 		{
 			return false;

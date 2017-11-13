@@ -164,7 +164,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 	 */
 	public JSAppletViewer(Hashtable<String, Object> params) {
 		super(params);
-		System.out.println("JSAppletViewer initializing");
+		System.out.println("JSAppletViewer initializing2");
 		isApplet = true;
 		appletViewer = this;
 		setDisplayParams(params);

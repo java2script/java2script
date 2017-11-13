@@ -295,11 +295,11 @@ class Thread implements Runnable {
 			 *
 			 * 			java.lang.Thread.thisThread = "working";
 			 *            java.lang.Thread.thisThread =
-			 *            Clazz.new(java.lang.Thread.construct$S, ["master"]);
+			 *            Clazz.new(java.lang.Thread.c$$S, ["master"]);
 			 *            var name = J2S._applets["master"]._id; var g =
-			 *            Clazz.new(swingjs.JSThreadGroup.construct$ThreadGroup$S,
+			 *            Clazz.new(swingjs.JSThreadGroup.c$$ThreadGroup$S,
 			 *            [null, name]); java.lang.Thread.thisThread =
-			 *            Clazz.new(javajs.util.JSThread.construct$ThreadGroup$S,
+			 *            Clazz.new(Clazz.loadClass("javajs.util.JSThread").c$$ThreadGroup$S,
 			 *            [g, name]);
 			 * 
 			 */

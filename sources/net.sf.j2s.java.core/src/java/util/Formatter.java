@@ -2976,7 +2976,7 @@ public final class Formatter implements Flushable {
 
                 Flags flags = f.dup().remove(Flags.GROUP);
                 char sign = exp[0];
-                assert(sign == '+' || sign == '-');
+                //assert(sign == '+' || sign == '-');
                 sb.append(sign);
 
                 char[] tmp = new char[exp.length - 1];
@@ -3050,7 +3050,7 @@ public final class Formatter implements Flushable {
 
                     Flags flags = f.dup().remove(Flags.GROUP);
                     char sign = exp[0];
-                    assert(sign == '+' || sign == '-');
+                    //assert(sign == '+' || sign == '-');
                     sb.append(sign);
 
                     char[] tmp = new char[exp.length - 1];
@@ -3546,7 +3546,7 @@ public final class Formatter implements Flushable {
                                  Locale l)
             throws IOException
         {
-            assert(width == -1);
+            //assert(width == -1);
             if (sb == null)
                 sb = new StringBuilder();
             switch (c) {

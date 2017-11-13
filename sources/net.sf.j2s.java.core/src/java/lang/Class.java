@@ -404,7 +404,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 */
 	public boolean isInstance(Object obj) {
 		/**
-		 * @j2sNative  return Clazz.instanceof(obj, this.$clazz$);
+		 * @j2sNative  return Clazz.instanceOf(obj, this.$clazz$);
 		 */
 		{ 
 			return false;
