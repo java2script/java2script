@@ -11,12 +11,6 @@
 package net.sf.j2s.ui.generator;
 
 
-import net.sf.j2s.core.astvisitors.ASTJ2SMapVisitor;
-import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
-import net.sf.j2s.core.astvisitors.ASTVariableVisitor;
-import net.sf.j2s.core.astvisitors.DependencyASTVisitor;
-import net.sf.j2s.core.astvisitors.SWTDependencyASTVisitor;
-import net.sf.j2s.core.astvisitors.SWTScriptVisitor;
 import net.sf.j2s.core.compiler.Java2ScriptCompiler;
 import net.sf.j2s.ui.Java2ScriptUIPlugin;
 import org.eclipse.core.filebuffers.FileBuffers;
@@ -55,7 +49,6 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Text;
