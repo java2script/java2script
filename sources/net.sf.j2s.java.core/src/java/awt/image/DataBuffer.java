@@ -68,7 +68,7 @@ import sun.java2d.StateTrackableDelegate;
  * @see java.awt.image.SampleModel
  */
 public abstract class DataBuffer {
-
+	
     /** Tag for unsigned byte data. */
     public static final int TYPE_BYTE  = 0;
 

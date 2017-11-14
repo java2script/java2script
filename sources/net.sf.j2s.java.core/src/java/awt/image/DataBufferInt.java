@@ -75,7 +75,7 @@ public final class DataBufferInt extends DataBuffer {
 		bankdata = new int[1][];
 		bankdata[0] = data;
 	}
-
+	
 	/**
 	 * Constructs an integer-based <CODE>DataBuffer</CODE> with the specified
 	 * number of banks, all of which are the specified size.

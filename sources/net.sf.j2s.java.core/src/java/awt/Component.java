@@ -5235,7 +5235,7 @@ public abstract class Component
 		/**
 		 * @j2sNative
 		 * 
-		 *            return Clazz.getDeclaringClassForMethod$(this, "coalesceEvents$java_awt_AWTEvent$java_awt_AWTEvent") != C$;
+		 *            return Clazz.getDeclaringClazzForMethod$(this, "coalesceEvents$java_awt_AWTEvent$java_awt_AWTEvent") != C$;
 		 */
 		{
 			return false;
