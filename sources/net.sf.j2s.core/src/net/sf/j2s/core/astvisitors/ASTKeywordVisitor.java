@@ -1940,7 +1940,10 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 				}
 				name = fixName(name);
 				if (name.length() != 0) {
-					buffer.append(name);
+					
+					getQualifiedStaticName(null, name, true,true,true);
+					
+//					buffer.append(name);
 					buffer.append(".");
 					ch = '.';
 				}

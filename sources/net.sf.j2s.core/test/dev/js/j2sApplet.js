@@ -1317,7 +1317,7 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
       if (J2S._mouseOwner && !J2S._mouseOwner.mouseMove) 
         J2S._setMouseOwner(null);
 			if (who.applet._appletPanel)
-				who.applet._appletPanel.startHoverWatcher(false);
+				who.applet._appletPanel.startHoverWatcher$Z(false);
 			//who.isDragging = false;
 			var xym = J2S._jsGetXY(who, ev);
 			if (!xym)
@@ -1335,7 +1335,7 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
       }
       
 			if (who.applet._appletPanel)
-				who.applet._appletPanel.startHoverWatcher(true);
+				who.applet._appletPanel.startHoverWatcher$Z(true);
 			if (ev.buttons === 0 || ev.which === 0) {
 				who.isDragging = false;
 				var xym = J2S._jsGetXY(who, ev);
@@ -1582,14 +1582,14 @@ J2S.Cache.put = function(filename, data) {
 					var cacheName = "cache://DROP_" + file.name;
 					var bytes = J2S._toBytes(evt.target.result);
 					if (!cacheName.endsWith(".spt"))
-						me._appletPanel.cacheFileByName("cache://DROP_*",false);
+						me._appletPanel.cacheFileByName$S$Z("cache://DROP_*",false);
 					if (me._viewType == "JSV" || cacheName.endsWith(".jdx")) // shared by Jmol and JSV
 						J2S.Cache.put(cacheName, bytes);
 					else
-						me._appletPanel.cachePut(cacheName, bytes);
+						me._appletPanel.cachePut$S$O(cacheName, bytes);
 					var xym = J2S._jsGetXY(me._canvas, e);
-					if(xym && (!me._appletPanel.setStatusDragDropped || me._appletPanel.setStatusDragDropped(0, xym[0], xym[1], cacheName))) {
-						me._appletPanel.openFileAsyncSpecial(cacheName, 1);
+					if(xym && (!me._appletPanel.setStatusDragDropped$I$I$I$S || me._appletPanel.setStatusDragDropped$I$I$I$S(0, xym[0], xym[1], cacheName))) {
+						me._appletPanel.openFileAsyncSpecial$S$I(cacheName, 1);
 					}
 				}
 			};
@@ -1950,7 +1950,7 @@ J2S.Cache.put = function(filename, data) {
 				// applet div can be not the same size as the canvas if there
 				// is a border in place.
 				var d = J2S._getElement(this, (this._is2D ? "canvas2d" : "canvas"));
-				this._appletPanel.setScreenDimension(d.width, d.height);
+				this._appletPanel.setScreenDimension$I$I(d.width, d.height);
 		};
 
 		proto._show = function(tf) {
@@ -1966,12 +1966,12 @@ J2S.Cache.put = function(filename, data) {
 
 
 		proto._processGesture = function(touches, frameViewer) {
-      (frameViewer || this._appletPanel).processTwoPointGesture(touches);
+      (frameViewer || this._appletPanel).processTwoPointGesture$FAAA(touches);
 		}
 
 		proto._processEvent = function(type, xym, ev, frameViewer) {
       // xym is [x,y,modifiers,wheelScroll]
-      (frameViewer || this._appletPanel).processMouseEvent(type,xym[0],xym[1],xym[2],System.currentTimeMillis(), ev, xym[3]);
+      (frameViewer || this._appletPanel).processMouseEvent$I$I$I$I$J$O$I(type,xym[0],xym[1],xym[2],System.currentTimeMillis(), ev, xym[3]);
 		}
 
 		proto._resize = function() {
@@ -2001,14 +2001,14 @@ J2S.Cache.put = function(filename, data) {
 		var h = Math.round(container.height());
 		if (applet._is2D && (applet._canvas.width != w || applet._canvas.height != h)) {
 			applet._newCanvas(true);
-			applet._appletPanel.setDisplay(applet._canvas);
+			applet._appletPanel.setDisplay$swingjs_api_js_HTML5Canvas(applet._canvas);
 		}
-		applet._appletPanel.setScreenDimension(w, h);
+		applet._appletPanel.setScreenDimension$I$I(w, h);
     var f = function(){
-      if (applet._appletPanel.paint)
-        applet._appletPanel.paint(null);
+      if (applet._appletPanel.paint$java_awt_Graphics)
+        applet._appletPanel.paint$java_awt_Graphics(null);
       else
-        applet._appletPanel.update(null)
+        applet._appletPanel.update$java_awt_Graphicss(null)
     };
 		if (asNewThread) {
 			(self.requestAnimationFrame || self.setTimeout)(f); // requestAnimationFrame or (MSIE 9) setTimeout

@@ -88,6 +88,7 @@ Clazz.assert = function(clazz, obj, tf, msg) {
 Clazz.load = function(cName, isFinalize) {
   if (!cName)
     return null;
+  // the only missing piece?
   if (isFinalize) {
     var cl = cName;
     // C$.$clinit$ call to finalize all dependencies
@@ -105,6 +106,11 @@ Clazz.load = function(cName, isFinalize) {
     return;
   }
   if (typeof cName == "string") {
+    if (cName.indexOf("Thread.") == 0) {
+      Clazz._4Name("java.lang.Thread", null, null, true)
+    }
+    if (cName.indexOf("Thread") == 0)
+      cName = "java.lang." + cName;
     return Clazz._4Name(cName, null, null, true);
   } 
   var cl = cName;
@@ -473,6 +479,11 @@ var shiftArray = function(a, i0, k) {
 var getParamCode = Clazz._getParamCode = function(cl) {
   cl.$clazz$ && (cl = cl.$clazz$);
   return cl.__PARAMCODE || (cl.__PARAMCODE = cl.__CLASS_NAME__.replace(/java\.lang\./, "").replace(/\./g, '_'));
+}
+
+Clazz.getDeclaringClazzForMethod$ = function(obj, methodName) {
+  var cl = obj.$Class$.$clazz$;
+  return cl && cl[methodName] && cl[methodName].exClazz;
 }
 
 var newTypedA$ = function(baseClass, args, nBits, ndims) {
@@ -1697,27 +1708,28 @@ _Loader.requireLoaderByBase = function (base) {
   return loader;
 };
 
+
 /**
  * Class dependency tree
- */
+ * /
 var clazzTreeRoot = new Node();
 
 /**
  * Used to keep the status whether a given *.js path is loaded or not.
- */
-/* private */
+ * /
+/* private * /
 var loadedScripts = {};
 
 /**
  * Multiple threads are used to speed up *.js loading.
- */
-/* private */
+ * /
+/* private * /
 var inLoadingThreads = 0;
 
 /**
  * Maximum of loading threads
  */
-/* private */
+/* private * /
 var maxLoadingThreads = 6;
 
 var userAgent = navigator.userAgent.toLowerCase ();
@@ -1730,7 +1742,7 @@ var isGecko = (userAgent.indexOf ("gecko") != -1);
  * So just return to single thread loading in Opera!
  *
  * FIXME: This different loading order also causes bugs in single thread!
- */
+ * /
 if (isOpera) {
   maxLoadingThreads = 1;
   var index = userAgent.indexOf ("opera/");
@@ -1744,6 +1756,7 @@ if (isOpera) {
     }
   } 
 }
+ */
 
 /**
  * Try to be compatiable with Clazz system.
@@ -1771,8 +1784,9 @@ var classQueue = [];
 /* private */
 var classpathMap = Clazz.classpathMap = {};
 
-/* private */
+/* private 
 var pkgRefCount = 0;
+*/
 
 /* public */
 _Loader.loadPackageClasspath = function (pkg, base, isIndex, fSuccess, mode, pt) {
@@ -1845,7 +1859,7 @@ _Loader.loadPackageClasspath = function (pkg, base, isIndex, fSuccess, mode, pt)
   if (base) // critical for multiple applets
     map["@" + pkg] = base;
   if (isIndex && !isPkgDeclared && !window[pkg + ".registered"]) {
-    pkgRefCount++;
+    //pkgRefCount++;
     if (pkg == "java")
       pkg = "core" // JSmol -- moves java/package.js to core/package.js
     _Loader.loadClass(pkg + ".package", function () {
@@ -2126,7 +2140,7 @@ Clazz.currentPath= "";
 var loadScript$ = function(file) {
 
   Clazz.currentPath = file;
-  loadedScripts[file] = true;
+  //loadedScripts[file] = true;
   // also remove from queue
   //removeArrayItem(classQueue, file);
 
