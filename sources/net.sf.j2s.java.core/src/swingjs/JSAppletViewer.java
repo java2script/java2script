@@ -527,7 +527,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 				System.out.println(code + " could not be launched");
 				status = APPLET_ERROR;
 			} else if (!(applet instanceof JApplet)) {
-				System.out.println(code + " is not a JApplet!?");
+				JSUtil.alert(code + " is not a JApplet!?");
 				status = APPLET_ERROR;
 			}
 		} catch (InstantiationException e) {
