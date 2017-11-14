@@ -65,6 +65,7 @@ import net.sf.j2s.core.adapters.FinalVariable;
 import net.sf.j2s.core.adapters.J2SMapAdapter;
 import net.sf.j2s.core.adapters.TypeAdapter;
 
+//BH 11/13/17 -- final adjustments allow 
 //BH 9/10/2017 -- adds full byte, short, and int distinction using class-level local fields $b$, $s$, and $i$, which are IntXArray[1].
 
 /**
@@ -85,10 +86,6 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	private static String[] nonQualifiedPackages;
 
 	private final static String[] nonQualifiedClasses = new String[] {
-			// these classes are called from JavaScript or represent JavaScript
-			// functions
-			//??? need qualified names! "swingjs.JSAppletViewer", "swingjs.JSFrameViewer", "java.applet.AppletContext", "java.applet.AppletStub",
-
 			// these classes need no qualification
 			"java.lang.Boolean", "java.lang.Byte", "java.lang.Character", "java.lang.Double", "java.lang.Float",
 			"java.lang.Integer", "java.lang.Long", "java.lang.Math", "java.lang.Number", "java.lang.reflect.Array",
