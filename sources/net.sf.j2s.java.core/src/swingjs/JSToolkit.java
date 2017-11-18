@@ -386,7 +386,7 @@ public class JSToolkit extends SunToolkit {
 		 *            else
 		 *             f();
 		 *             } catch (e) {
-		 *             var s = "JSToolkit.dispatch(" + id +"): " + e + (e.getStackTrace ? e.getStackTrace() : e.stack ? "\n" + e.stack : "");
+		 *             var s = "JSToolkit.dispatch(" + id +"): " + e + "\n" + (e.getStackTrace ? e.getStackTrace() + "\n" : "") + (!!e.stack ? e.stack : "");
 		 *             System.out.println(s);
 		 *             alert(s)}
 		 *            SwingJS.eventID = id0; 

@@ -488,7 +488,8 @@ public class Frame extends Window {
 		// menuBar.addNotify();
 		// p.setMenuBar(menuBar);
 		// }
-		p.setMaximizedBounds(maximizedBounds);
+		if (p != null)
+			p.setMaximizedBounds(maximizedBounds);
 		super.addNotify();
 		// }
 	}
