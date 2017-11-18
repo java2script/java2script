@@ -12,8 +12,11 @@ package net.sf.j2s.core.astvisitors;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -157,6 +160,38 @@ MUST list in the Clazz.load() call.
  */
 public class ASTScriptVisitor extends ASTKeywordVisitor {
 
+	private ArrayList<String> applets, apps; 
+
+	private void addApplication() {
+		if (apps == null)
+			apps = new ArrayList<String>();
+		String name = getPackageName() + "." + getClassName();
+		apps.add(name);
+	}
+
+	private void checkAddApplet(ITypeBinding binding) {
+		if (Modifier.isAbstract(binding.getModifiers()))
+			return;					
+		ITypeBinding b = binding;
+		while ((binding = binding.getSuperclass()) != null) {
+			String name = binding.getQualifiedName();
+			if (!("javax.swing.JApplet".equals(name))) {
+				if (name.startsWith("java.") || name.startsWith("javax"))
+					return;
+				continue;
+			}
+			if (applets == null)
+				applets = new ArrayList<String>();
+			name = b.getQualifiedName();
+			applets.add(name);
+			break;
+		}
+	}
+
+    public ArrayList<String> getAppList(boolean isApplets) {
+    	return (isApplets ? applets : apps);
+    }
+    
 	private void setInnerGlobals(ASTScriptVisitor parent, ASTNode node, String visitorClassName) {
 		innerTypeNode = node;
 		setPackageName(parent.getPackageName());
@@ -168,7 +203,6 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		allowExtensions = parent.allowExtensions;
 		htStaticNames = parent.htStaticNames;
 		staticCount = parent.staticCount;
-
 		
 		setDebugging(parent.isDebugging());
 		// BH abandoning all compiler variable name compressing -- Google
@@ -269,6 +303,10 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		return false;
 	}
 
+	/**
+	 * new Foo()
+	 * 
+	 */
 	public boolean visit(ClassInstanceCreation node) {
 		ITypeBinding binding = node.resolveTypeBinding();
 		if (binding == null)
@@ -360,7 +398,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			else
 				buffer.append(" new ").append(fqName).append("(");
 		} else {
-			open$new(className, ".c$" + getJ2SParamQualifier(null, constructorBinding));
+			open$new(className, ".c$" + getJ2SParamQualifier(null, constructorBinding, null));
 			isDefault = node.arguments().isEmpty();
 			prefix = ",[";
 			postfix = "]";
@@ -374,7 +412,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	public boolean visit(ConstructorInvocation node) {
 		IMethodBinding constructorBinding = node.resolveConstructorBinding();
 		List<?> arguments = node.arguments();
-		String qualifiedParams = getJ2SParamQualifier(null, constructorBinding);
+		String qualifiedParams = getJ2SParamQualifier(null, constructorBinding, null);
 		buffer.append("C$.c$").append(qualifiedParams).append(".apply(this");
 		IMethodBinding methodDeclaration = (constructorBinding == null ? null
 				: constructorBinding.getMethodDeclaration());
@@ -551,6 +589,11 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 		if (mBinding == null || checkj2sIgnore(node) || !checkKeepSpecialClassMethod(node, mBinding, false))
 			return false;
+		
+
+		//TODO:  We will need to alias all generic implementations
+		
+
 		String key = mBinding.getKey();
 		if (key != null)
 			methodDeclareNameStack.push(key);
@@ -564,12 +607,14 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		}
 
 		boolean isConstructor = node.isConstructor();
-		String name = (isConstructor ? "c$" : getJ2SName(node.getName())) + getJ2SParamQualifier(null, mBinding);
-		if (isConstructor && name.equals("c$")
+		String name = getMethodNameOrArrayForDeclaration(node, mBinding, isConstructor);
+		if (isConstructor && name.equals("'c$'")
 				|| mBinding.isVarargs() && mBinding.getParameterTypes().length == 1)
 			haveDefaultConstructor = true; // in case we are not qualifying
 											// names here
-		buffer.append("\r\nClazz.newMethod$(C$, '").append(name).append("', function (");
+		if (name.equals("'main'"))
+			addApplication();
+		buffer.append("\r\nClazz.newMethod$(C$, ").append(name).append(", function (");
 		@SuppressWarnings("unchecked")
 		List<ASTNode> parameters = node.parameters();
 		visitList(parameters, ", ");
@@ -674,7 +719,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			}
 			buffer.append(".");
 		}
-		String j2sParams = getJ2SParamQualifier(className, mBinding);
+		String j2sParams = getJ2SParamQualifier(className, mBinding, null);
 
 		boolean isSpecialMethod = false;
 		String methodName = node.getName().getIdentifier();
@@ -821,7 +866,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 	public boolean visit(SuperMethodInvocation node) {
 		IMethodBinding mBinding = node.resolveMethodBinding();
-		String name = getJ2SName(node.getName()) + getJ2SParamQualifier(null, mBinding);
+		String name = getJ2SName(node.getName()) + getJ2SParamQualifier(null, mBinding, null);
 		// BH if this is a call to super.clone() and there is no superclass, or
 		// the superclass is Object,
 		// then we need to invoke Clazz.clone(this) directly instead of calling
@@ -967,6 +1012,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	 * 
 	 */
 	public boolean visit(TypeDeclaration node) {
+		System.err.println("visit " + node.resolveBinding().getKey());
 		return addClassOrInterface(node, node.resolveBinding(), node.bodyDeclarations(), node.isInterface() ? 'i' : 
 			node.isLocalTypeDeclaration() ? 'l' : 'c');
 	}
@@ -1044,7 +1090,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	private boolean addClassOrInterface(ASTNode node, ITypeBinding binding, List<?> bodyDeclarations, char type) {
 		if (binding == null)
 			return false;
-
+		checkGenericClass(binding, binding);
 		boolean isAnonymous = (type == 'a');
 		boolean isEnum = (type == 'e');
 		boolean isInterface = (type == 'i');
@@ -1083,11 +1129,17 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			buffer.append(ELEMENT_KEY + binding.getName() + "\r\n");
 		}
 
+		// check for a JApplet
+
+		if (isTopLevel && !isEnum) {
+			checkAddApplet(binding);
+		}
+
 		// add the anonymous wrapper if needed
 
 		if (!isTopLevel)
 			addAnonymousFunctionWrapper(true);
-		
+
 		// begin the class or interface definition
 
 		buffer.append("var C$=" + (isInterface ? "Clazz.newInterface$(" : "Clazz.newClass$("));
@@ -1104,15 +1156,14 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 		String oldClassName = null;
 		String fullClassName, defaultPackageName;
-		
-		
+
 		if (isAnonymous) {
 			oldClassName = typeAdapter.getClassName();
-			fullClassName = getAnonymousName(binding);	// P$.Test_Enum$Planet$1
+			fullClassName = getAnonymousName(binding); // P$.Test_Enum$Planet$1
 			defaultPackageName = "null";
 		} else {
 			fullClassName = getFullClassName(); // test.Test_Enum.Planet
-			defaultPackageName =  getPackageName();
+			defaultPackageName = getPackageName();
 		}
 		int pt = fullClassName.lastIndexOf('.');
 		String shortClassName = fullClassName.substring(pt + 1);
@@ -1124,7 +1175,6 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 		String func = "null";
 		String superclassName = null;
-		ITypeBinding superInterface = null;
 		List<?> superInterfaceTypes = null;
 
 		// arg3: class definition function, C$, or null to add the standard
@@ -1136,7 +1186,11 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 				func = "function(){Clazz.newInstance$(this, arguments[0], true);}";
 			superclassName = "" + getSuperclassName(binding);
 			ITypeBinding[] declaredTypes = binding.getInterfaces();
-			superInterface = (declaredTypes == null || declaredTypes.length == 0 ? null : declaredTypes[0]);
+			if (declaredTypes != null && declaredTypes.length > 0) {
+				List<ITypeBinding> types = new ArrayList<ITypeBinding>();
+				types.add(declaredTypes[0]);
+				superInterfaceTypes = types;
+			}
 		} else if (isEnum) {
 			hasDependents = true;
 			superclassName = "Enum";
@@ -1200,30 +1254,45 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 		// arg5: superinterface(s) if not null
 
-		if (superInterface != null) {
+		if (superInterfaceTypes != null && superInterfaceTypes.size() > 0) {
 			hasDependents = true;
-			buffer.append(", '");
-			buffer.append(fixNameNoC$(null, superInterface.getQualifiedName()));
-			buffer.append("'");
-		} else if (superInterfaceTypes != null && superInterfaceTypes.size() > 0) {
-				hasDependents = true;
-				buffer.append(", ");
-				String term = "";
-				if (superInterfaceTypes.size() > 1) {
-					buffer.append("[");
-					term = "]";
-				}
-				String sep = "";
-				for (Iterator<?> iter = superInterfaceTypes.iterator(); iter.hasNext();) {
-					buffer.append(sep);
-					ASTNode element = (ASTNode) iter.next();
-					ITypeBinding sbinding = ((Type) element).resolveBinding();
-					buffer.append("'");
-					buffer.append(sbinding == null ? element : fixNameNoC$(null, sbinding.getQualifiedName()));
-					buffer.append("'");
-					sep = ", ";
-				}
-				buffer.append(term);
+			buffer.append(", ");
+			String term = "";
+			if (superInterfaceTypes.size() > 1) {
+				buffer.append("[");
+				term = "]";
+			}
+			String sep = "";
+			for (Iterator<?> iter = superInterfaceTypes.iterator(); iter.hasNext();) {
+				buffer.append(sep);
+				Object iface = iter.next();
+//				if (iface instanceof Type) {
+//					Type t = (Type) iface;
+//					System.err.println(t.isParameterizedType());
+//					if (t.isParameterizedType()) {
+//						ParameterizedType p = (ParameterizedType) t;
+//
+//						List pp = p.typeArguments();
+//						for (int i = pp.size(); --i >= 0;) {
+//							System.err.println("pi " + pp.get(i));
+//						}
+//
+//						IMethodBinding[] mm = p.resolveBinding().getDeclaredMethods();
+//
+//						for (int i = 0; i < mm.length; i++) {
+//							System.err.println(mm[i].getKey());
+//						}
+//					}
+//
+//				}
+				ITypeBinding ibinding = (iface instanceof Type ? ((Type) iface).resolveBinding()
+						: (ITypeBinding) iface);
+				buffer.append("'");
+				buffer.append(ibinding == null ? iface : fixNameNoC$(null, ibinding.getQualifiedName()));
+				buffer.append("'");
+				sep = ", ";
+			}
+			buffer.append(term);
 		} else {
 			buffer.append(", null");
 		}
@@ -1238,7 +1307,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			while (", null".equals(buffer.substring(i = buffer.length() - 6)))
 				buffer.setLength(i);
 		}
-		
+
 		// close the initializer
 
 		buffer.append(");\r\n");
@@ -1461,7 +1530,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 				anonName = getAnonymousName(anonDeclare.resolveBinding());
 				buffer.append("\r\n");
 			}
-			buffer.append("Clazz.newEnumConst$(vals, C$.c$").append(getJ2SParamQualifier(null, binding))
+			buffer.append("Clazz.newEnumConst$(vals, C$.c$").append(getJ2SParamQualifier(null, binding, null))
 					.append(", \"");
 			enumConst.getName().accept(this);
 			buffer.append("\", " + i);
@@ -1525,7 +1594,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	private void addInnerTypeInstance(ClassInstanceCreation node, String innerName, Expression outerClassExpr,
 			String finals, IMethodBinding methodDeclaration, String superAnonName) {
 		open$new(superAnonName == null ? innerName : superAnonName,
-				methodDeclaration == null ? ".$init$" : ".c$" + getJ2SParamQualifier(null, methodDeclaration));
+				methodDeclaration == null ? ".$init$" : ".c$" + getJ2SParamQualifier(null, methodDeclaration, null));
 
 		// add constructor application arguments: [object, parameters]
 
@@ -1605,7 +1674,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			return;
 		} 
 		buffer.append("C$.superClazz.c$")
-				.append(getJ2SParamQualifier(null, node.resolveConstructorBinding()));
+				.append(getJ2SParamQualifier(null, node.resolveConstructorBinding(), null));
 		buffer.append(".apply(this");
 		addMethodParameterList(node.arguments(), methodDeclaration, true, ", [", "]");
 		buffer.append(");\r\n");
@@ -1735,6 +1804,5 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			elements.add("(function(){" + header + js + "})();\r\n" + trailer);
 		}		
 		return elements;
-	}
-
+	}	
 }

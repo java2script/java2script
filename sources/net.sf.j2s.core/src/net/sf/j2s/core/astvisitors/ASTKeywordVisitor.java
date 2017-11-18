@@ -10,8 +10,12 @@
  *******************************************************************************/
 package net.sf.j2s.core.astvisitors;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -37,6 +41,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
@@ -65,7 +70,7 @@ import net.sf.j2s.core.adapters.FinalVariable;
 import net.sf.j2s.core.adapters.J2SMapAdapter;
 import net.sf.j2s.core.adapters.TypeAdapter;
 
-//BH 11/13/17 -- final adjustments allow 
+//BH 11/18/2017 -- adds full name-qualified support for generics, including generic methods   
 //BH 9/10/2017 -- adds full byte, short, and int distinction using class-level local fields $b$, $s$, and $i$, which are IntXArray[1].
 
 /**
@@ -1046,7 +1051,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	}
 
 	protected static boolean isNumericType(String type) {
-		return (type != null && "int long byte short".indexOf(type) >= 0);
+		return (type != null && type.length() > 1 && "int long byte short".indexOf(type) >= 0);
 	}
 
 	/**
@@ -1088,20 +1093,19 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	}
 
 	protected static String j2sGetParamCode(ITypeBinding binding, boolean addAAA) {
+		
 		String prefix = (binding.getKey().indexOf(":T") >= 0 ? "T" : null);
-		String name = binding.getQualifiedName();
-		String arrays = null;
 
+		String name = binding.getQualifiedName();
+		
+		String arrays = null;
 		int pt = name.indexOf("[");
 		if (pt >= 0) {
 			arrays = name.substring(pt + (name.indexOf("[L") >= 0 ? 1 : 0));
 			name = name.substring(0, pt);
 		}
-		// catching putAll$java_util_Map<? extends K,? extends V>
-		// (java.util.AbstractMap.js)
 
-		// NOTE: If any of these are changed, they must be changed in j2sSwingJS
-		// as well.
+		// NOTE: If any of these are changed, they must be changed in j2sSwingJS as well.
 		// NOTE: These are the same as standard Java Spec, with the exception of
 		// Short, which is "H" instead of "S"
 
@@ -1138,8 +1142,8 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			name = "S";
 			break;
 		default:
-			if (name.length() == 1 && prefix != null)
-				name = prefix + name; // (T,V) --> $TK$TV
+			if (prefix != null)
+				name = prefix + name;
 			name = name.replace("java.lang.", "").replace('.', '_');
 			break;
 		}
@@ -1465,8 +1469,9 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			break;
 		default:
 		case "long":
-			if (!fromIntType || isDiv)
+			if (!fromIntType || isDiv) {
 				more = "|0";
+			}
 			break;
 		case "int":
 			if (op != null && (!isDiv && fromIntType) || fromChar || rightName.equals("short")) {
@@ -1714,54 +1719,6 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		return (name == null ? null : TypeAdapter.assureQualifiedName(thisPackageName, getShortenedQualifiedName(name)));
 	}
 
-	/**
-	 * Determine the qualified parameter suffix for method names, including
-	 * constructors.
-	 * 
-	 * @param nodeName
-	 * @param binding
-	 * 
-	 * @return
-	 */
-	protected String getJ2SParamQualifier(String nodeName, IMethodBinding binding) {
-		// The problem is that System.out and System.err are PrintStreams, and
-		// we
-		// do not intend to change those. So in the case that we just wrote
-		// "System....", we use that instead and do not qualify the name
-		// Note: binding can be null if we have errors in the Java and we are
-		// compiling
-		if (binding == null || nodeName != null && nodeName.startsWith("System."))
-			return "";
-		String methodName = binding.getName();
-		String className = binding.getDeclaringClass().getQualifiedName();
-		if (!isPackageQualified(className) || !isMethodQualified(className, methodName))
-			return "";
-		ITypeBinding[] paramTypes = binding.getMethodDeclaration().getParameterTypes();
-
-		// BH: Note that Map.put$K$V is translated to actual values
-		// if .getMethodDeclaration() is not used.
-		// Without that, it uses the bound parameters such as
-		// String, Object instead of the declared ones, such as $TK$TV
-
-		StringBuffer sbParams = new StringBuffer();
-		int nParams = paramTypes.length;
-		if (nParams == 0 && methodName.equals("length"))
-			return "$"; // so that String implements CharSequence
-		for (int i = 0; i < nParams; i++)
-			sbParams.append("$").append(j2sGetParamCode(paramTypes[i], true));
-		String s = sbParams.toString();
-		// exception for special case: setting static main(String[] args) to
-		// "main", and "main()" to "main$"
-		if ("main".equals(methodName) && isStatic(binding)) {
-			if (s.length() == 0) {
-				s = "$";
-			} else if (s.equals("$SA")) {
-				s = "";
-			}
-		}
-		return s;
-	}
-
 	private IVariableBinding getLeftVariableBinding(Expression left, IBinding leftTypeBinding) {
 		if (left instanceof Name) {
 			if (leftTypeBinding instanceof IVariableBinding) {
@@ -2000,5 +1957,313 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			}
 		}
 	}
+
+	private static Map<String, Map<String, List<String[]>>> genericClassMap = new HashMap<String, Map<String, List<String[]>>>();
+	private static Map<String, Map<String, String>> genericClassTypes = new HashMap<String, Map<String, String>>();
+	
+	/**
+	 * Check a class, interface, or Enum binding for generics. 
+	 * 
+	 * @param topBinding -- the class being declared
+	 * @param binding
+	 * @return  true if this class could have generic replacements
+	 */
+	protected static boolean checkGenericClass(ITypeBinding topBinding, ITypeBinding binding) {
+			//debugListAllOverrides(binding);		
+		if (topBinding == binding) 
+			genericClassMap.put(binding.getKey(), null);
+		// check all superclasses from most super to least super
+		String classKey = binding.getKey();
+		boolean hasGenerics = (binding.isRawType() || binding.getTypeArguments().length > 0);
+		//System.err.println(hasGenerics + " " + binding.getBinaryName() + " " + binding.getKey());
+		ITypeBinding superclass = binding.getSuperclass();
+		if (superclass != null) {// && !genericClassMap.containsKey(superclass.getKey())) {
+			//System.err.println("--superclass--");
+			hasGenerics = checkGenericClass(topBinding, binding.getSuperclass()) || hasGenerics;
+		}
+		// check all interfaces 
+		ITypeBinding[] interfaces = binding.getInterfaces();
+		for (int i = interfaces.length; --i >= 0;)
+			//if (!genericClassMap.containsKey(interfaces[i].getKey())) {
+				//System.err.println("--implements--");
+				hasGenerics = checkGenericClass(topBinding, interfaces[i]) || hasGenerics;
+			//}
+		if (hasGenerics) {
+			//System.err.println(hasGenerics  + " " + binding.getKey() + "\n--class--\n" + binding.toString() + "\n--erasure--\n" + binding.getErasure());
+			//		debugDumpClass(binding);
+			checkMethodsWithGenericParams(topBinding.getKey(), binding);
+		} else {
+			genericClassMap.put(classKey, null);
+		}
+		return hasGenerics;
+	}
+
+	/**
+	 * Tie class type parameters (T, V, etc.) to the bound implemented types for all methods that implement generics
+	 * 
+	 * @param topClassKey
+	 * @param binding
+	 */
+	private static void checkMethodsWithGenericParams(String topClassKey, ITypeBinding binding) {
+		Map<String, String> classTypes = getGenericClassTypes(binding);
+		if (classTypes == null)
+			return;
+		
+		String classKey = binding.getKey();
+		IMethodBinding[] methods = binding.getErasure().getDeclaredMethods();
+		for (int i = methods.length; --i >= 0;) {			
+			IMethodBinding m = methods[i];
+			String methodName = m.getName();
+			ITypeBinding[] params = m.getParameterTypes();
+			if (params.length == 0)
+				continue;
+			String key = m.getKey();
+			if (key.indexOf(";T") >= 0 || key.indexOf("(T") >= 0) {
+				String[] list = new String[params.length];
+				for (int j = list.length; --j >= 0;) {
+					String name = params[j].getName();
+					list[j] = name + "|" + classTypes.get(name) + ";";
+				}
+				addGenericClassMethod(classKey, methodName, list);
+				addGenericClassMethod(topClassKey, methodName, list);				
+			}
+		}
+
+	}
+
+	/**
+	 * Create a map of the class type arguments for an implemented generic class
+	 * 
+	 * @param type
+	 * @return a map {T:"java.lang.String",K:"java.lang.Object"}
+	 */
+	private static Map<String, String> getGenericClassTypes(ITypeBinding type) {
+		String classKey = type.getKey();
+		Map<String, String> classTypes = genericClassTypes.get(classKey); 
+		if (classTypes != null)
+			return classTypes;
+		ITypeBinding[] typeArgs = type.getTypeArguments();
+		ITypeBinding[] typeParams = type.getTypeParameters();
+		boolean isGeneric = (typeParams.length > 0);
+		boolean isExtended = (typeArgs.length > 0 || type.isRawType());
+		//System.err.println("getgenclasstypes " + type.getKey() + " " + isGeneric + " " + isExtended);
+		if (!isGeneric && !isExtended) {
+			ITypeBinding superclass = type.getSuperclass();
+			if (superclass != null)
+			  genericClassTypes.put(classKey, classTypes = genericClassTypes.get(superclass.getKey()));
+			return classTypes;
+		}
+		ITypeBinding[] types = (isGeneric ? typeParams : typeArgs);
+		classTypes = new Hashtable<String, String>();
+		// We have to parse this by hand, because I cannot seem to get access to the
+		// typeParameters of a superclass. Java seems to have erased all that.
+		String erasure = type.getErasure().toString();
+		// abstract class test.Test_GenericExt_T<T extends Map<T,K>, K>
+		erasure = erasure.substring(erasure.indexOf("<") + 1);
+		StringBuffer sb = new StringBuffer(erasure.substring(0, erasure.indexOf(">\n")));
+		for (int n = 0, i = sb.length(); --i >= 0;) {
+			switch (sb.charAt(i)) {
+			case '>':
+				n++;
+				sb.setCharAt(i, ' ');
+				break;
+			case '<':
+				n--;
+				sb.setCharAt(i, ' ');
+				break;
+			case ',':
+				if (n != 0)
+					sb.setCharAt(i, ' ');
+				break;
+			default:
+				break;
+			}
+		}
+		
+		String[] tokens = sb.toString().split(",");
+		//System.err.println("erasure=" + sb +  " " + tokens.length);
+		for (int i = tokens.length; --i >= 0;) {
+			String key = tokens[i].trim();
+			key = key.substring(0, (key + " ").indexOf(" "));
+			String value = (i < types.length ? types[i].getQualifiedName() : "java.lang.Object");
+			//System.err.println("classTypes key value|" + key + "|" + value + "|");
+			classTypes.put(key, value);
+		}
+		return classTypes;
+	}
+
+	/**
+	 * Retrieve a list of generic types such as { ["T|java.lang.String", "V|java.lang.Object"],  ["M|java.lang.String", "N|java.lang.Object"]  } if it exists
+	 * 
+	 * @param methodClass 
+	 * @param methodName
+	 * @return list of generic types for methods with this name
+	 */
+	private static List<String[]> getGenericMethodList(ITypeBinding methodClass, String methodName) {
+		Map<String, List<String[]>> methodList = genericClassMap.get(methodClass.getKey());
+		return (methodList == null ? null : methodList.get(methodName));
+	}
+
+	/**
+	 * add a generic class method to the genericClassMap under the class and method
+	 * 
+	 * @param classKey
+	 * @param methodName
+	 * @param list
+	 */
+	private static void addGenericClassMethod(String classKey, String methodName, String[] list) {
+		
+		//System.err.println("Adding class method " + methodName + " " + list.length + list[0] + " in " + classKey);
+		Map<String, List<String[]>> classMap = genericClassMap.get(classKey);
+		if (classMap == null)
+			genericClassMap.put(classKey, classMap = new Hashtable<String, List<String[]>>());
+		List<String[]> methodList = classMap.get(methodName);
+		if (methodList == null)
+			classMap.put(methodName, methodList = new ArrayList<String[]>());
+		methodList.add(list);
+	}
+
+	/**
+	 * 
+	 * @param node
+	 * @param mBinding
+	 * @param isConstructor
+	 * @return j2s-qualified name or an array of j2s-qualified names
+	 */
+	protected String getMethodNameOrArrayForDeclaration(MethodDeclaration node, IMethodBinding mBinding,
+			boolean isConstructor) {
+		SimpleName nodeName = node.getName();
+		String methodName = (isConstructor ? "c$" : getJ2SName(nodeName));
+		String name = methodName + getJ2SParamQualifier(null, mBinding, null);
+		ITypeBinding methodClass = mBinding.getDeclaringClass();
+		List<String> names = null;
+		//System.err.println("checking methodList for " + nodeName.toString() + " in " + methodClass.getKey());
+		List<String[]> methodList = getGenericMethodList(methodClass, nodeName.toString());
+		if (methodList != null) {
+			//System.err.println("have methodList for " + nodeName + " " +  methodList.size());
+			names = new ArrayList<String>();
+			for (int i = methodList.size(); --i >= 0;) {
+				String params = getJ2SParamQualifier(null, mBinding, methodList.get(i));
+				//System.err.println("params = " + params + "  "+ methodList.get(i)[0]); 
+				if (params != null)
+					names.add(methodName + params);
+			}
+		}
+		if (names == null || names.size() == 0)
+			return "'" + name + "'";
+		name = ",'" + name + "'";
+		for (int i = names.size(); --i >= 0;) {
+			String next = ",'" + names.get(i) + "'";
+			if (name.indexOf(next) < 0)
+				name += next;
+		}
+		return "[" + name.substring(1) + "]";
+	}
+
+	/**
+	 * Determine the qualified parameter suffix for method names, including
+	 * constructors.
+	 * 
+	 * @param nodeName
+	 * @param binding
+	 * @param genericTypes TODO
+	 * @return a fully j2s-qualified method name
+	 */
+	protected static String getJ2SParamQualifier(String nodeName, IMethodBinding binding, 
+			String[] genericTypes) {
+		// The problem is that System.out and System.err are PrintStreams, and
+		// we
+		// do not intend to change those. So in the case that we just wrote
+		// "System....", we use that instead and do not qualify the name
+		// Note: binding can be null if we have errors in the Java and we are
+		// compiling
+		if (binding == null || nodeName != null && nodeName.startsWith("System."))
+			return "";
+		String methodName = binding.getName();
+		String className = binding.getDeclaringClass().getQualifiedName();
+		if (!isPackageQualified(className) || !isMethodQualified(className, methodName))
+			return "";
+		ITypeBinding[] paramTypes = binding.getMethodDeclaration().getParameterTypes();
+
+		// BH: Note that Map.put$K$V is translated to actual values
+		// if .getMethodDeclaration() is not used.
+		// Without that, it uses the bound parameters such as
+		// String, Object instead of the declared ones, such as $TK$TV
+
+		StringBuffer sbParams = new StringBuffer();
+		int nParams = paramTypes.length;
+		if (genericTypes != null && genericTypes.length != nParams)
+			return null;
+		
+		if (nParams == 0 && methodName.equals("length"))
+			return "$"; // so that String implements CharSequence
+		
+		for (int i = 0; i < nParams; i++) {
+			String type = j2sGetParamCode(paramTypes[i], true);
+			String genericType = (genericTypes == null ? null : genericTypes[i]);			
+			if (genericType != null) {
+				//System.err.println("hoping that " + className + "." + methodName + " " + i + " " + genericType + " works for " + paramTypes[i].getQualifiedName());
+				if (genericType.indexOf("|" + paramTypes[i].getQualifiedName() + ";") < 0)
+					return null;
+				type = "T" + genericType.substring(0, genericType.indexOf("|"));
+			}
+			sbParams.append("$").append(type);
+		}
+			
+		String s = sbParams.toString();
+		// exception for special case: setting static main(String[] args) to
+		// "main", and "main()" to "main$"
+		if ("main".equals(methodName) && isStatic(binding)) {
+			if (s.length() == 0) {
+				s = "$";
+			} else if (s.equals("$SA")) {
+				s = "";
+			}
+		}
+		return s;
+	}
+
+
+	///////////////// debugging //////////////////////////
+	
+	
+	static void debugDumpClass(ITypeBinding binding) {
+		ITypeBinding[] lst = binding.getTypeParameters();
+
+		// Check for <T,V> - these are for the generic class defs themselves
+		for (int i = 0; i < lst.length; i++)
+			System.err.println(binding.getKey() + "typeP " + i  + lst[i].getName());
+		
+		// check for <String,Object> for the implemented classes
+		lst = binding.getTypeArguments();
+		for (int i = 0; i < lst.length; i++)
+			System.err.println(binding.getKey() + "typeA " + i + lst[i].getName());
+		
+		IMethodBinding[] methods = binding.getDeclaredMethods();
+		for (int i = methods.length; --i >= 0;) {			
+			IMethodBinding m = methods[i];
+			System.err.println(m.getName() + getJ2SParamQualifier(null, m, null));
+			ITypeBinding[] params = m.getParameterTypes();
+			for (int j = 0; j < params.length; j++)
+				System.err.println("\t" + params[j].getName());
+				
+
+		}		
+	}
+
+	static void debugListAllOverrides(ITypeBinding binding) {
+		IMethodBinding[] jmethods = binding.getDeclaredMethods();
+		for (int j = jmethods.length; --j >= 0;) {
+			IMethodBinding m = jmethods[j];
+			ITypeBinding b = null;
+			while ((b = (b == null ? m.getDeclaringClass() : b.getSuperclass())) != null) {
+				IMethodBinding[] methods = b.getDeclaredMethods();
+				for (int i = methods.length; --i >= 0;)
+					if (m.overrides(methods[i]))
+						System.err.println(">> " + m.getKey() + " overrides " + methods[i].getKey());
+			}
+		}
+	}
+
 
 }

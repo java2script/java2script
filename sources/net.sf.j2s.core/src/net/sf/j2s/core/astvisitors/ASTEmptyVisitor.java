@@ -1,4 +1,7 @@
 /*******************************************************************************
+
+		//TODO:  We will need to alias all generic implementations
+		
  * Copyright (c) 2007 java2script.org and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
