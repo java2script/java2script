@@ -10,13 +10,10 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
@@ -28,7 +25,6 @@ import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 
 import net.sf.j2s.core.astvisitors.ASTKeywordVisitor;
 import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
-import net.sf.j2s.core.astvisitors.GenericsVisitor;
 import net.sf.j2s.core.builder.SourceFile;
 import net.sf.j2s.core.builder.SourceFileProxy;
 import net.sf.j2s.core.hotspot.InnerHotspotServer;
