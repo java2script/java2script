@@ -58,10 +58,11 @@ public abstract class JSThread extends Thread implements JSFunction {
 	@Override
 	public synchronized void start() {
 
+		
 		/**
 		 * @j2sNative
 		 * 
-		 *            swingjs.JSToolkit.dispatch$O$I$I(this, 1, 0);
+		 * 			  Clazz.load("swingjs.JSToolkit").dispatch$O$I$I(this, 1, 0);
 		 * 
 		 */
 		{

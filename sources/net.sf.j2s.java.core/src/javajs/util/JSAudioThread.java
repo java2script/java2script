@@ -1,6 +1,4 @@
-package swingjs;	
-
-import javajs.util.JSThread;
+package javajs.util;	
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
@@ -229,6 +227,31 @@ public class JSAudioThread extends JSThread {
 	protected void doFinally() {
 		if (owner != null)
 			owner.audioThreadExiting();
+	}
+
+	public interface JSAudioThreadOwner {
+
+		/**
+		 * 
+		 * @return true if thread should continue; false if not
+		 * 
+		 */
+		boolean checkSoundStatus();
+
+		/** fill audio buffer
+		 * 
+		 * @return number of bytes to write to audio line
+		 *
+		 */
+		int fillAudioBuffer();
+
+		/**
+		 *  called from the finally clause when complete 
+		 * 
+		 */
+		void audioThreadExiting();
+		
+
 	}
 
 }

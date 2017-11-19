@@ -20,12 +20,15 @@ import javax.swing.event.ChangeListener;
 import sun.swing.DefaultLookup;
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
+import swingjs.jquery.JQueryUI;
 
-//@J2SRequireImport(swingjs.jquery.JQueryUI.class)
 @SuppressWarnings({"rawtypes", "unchecked", "unused"})
 public class JSSliderUI extends JSLightweightUI implements PropertyChangeListener, ChangeListener {
 
-	private static Object jsqueryUI = new swingjs.jquery.JQueryUI();
+	static {
+		Object jqueryui = JQueryUI.class; // loads jQuery.ui
+	}
+
 	JSlider jSlider;
 	private int min, max, val, majorSpacing, minorSpacing;
 	protected boolean paintTicks;

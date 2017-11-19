@@ -7,11 +7,15 @@ import javax.swing.LookAndFeel;
 //import javajs.J2SRequireImport;
 import swingjs.JSUtil;
 import swingjs.api.js.JSSwingMenu;
+import swingjs.jquery.JQueryUI;
 import swingjs.api.js.DOMNode;
 
-//@J2SRequireImport(swingjs.jquery.JQueryUI.class)
 public class JSPopupMenuUI extends JSPanelUI {
 	
+	static {
+		Object jqueryui = JQueryUI.class; // loads jQuery.ui
+	}
+
 	// a frameless independent window
 	
 	static JSSwingMenu j2sSwingMenu;
