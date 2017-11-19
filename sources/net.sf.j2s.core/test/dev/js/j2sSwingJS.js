@@ -5,6 +5,7 @@
 
 // NOTES by Bob Hanson
 
+// BH 11/16/2017 10:52:53 PM adds method name aliasing for generics; adds String.contains$CharSequence(cs)
 // BH 10/14/2017 8:17:57 AM removing all node-based dependency class loading; fix String.initialize with four arguments (arr->byte)
 // BH 10/13/2017 7:03:28 AM fix for String.initialize(bytes) applying bytes as arguments
 // BH 10/12/2017 6:34:01 AM totally re-written class loading using load(); no dependency nodes
@@ -127,7 +128,7 @@ Clazz.new = function(c, args, cl) {
   
   var t0 = (_profileNew ? window.performance.now() : 0);
   
-  if (c.__CLASS_NAME__)
+  if (c.__CLASS_NAME__ && c.c$) 
     c = c.c$;
     
   // an inner class will attach arguments to the arguments returned
@@ -291,26 +292,22 @@ var unwrapArray = function (arr) {
   return arr;
 };
 
-/**
- * Prepare synthetic callback references b$[] for an anonymous inner class.
- * 
- * This implementation takes advantage of the fact that the inheritance of the 
- * outer object is a property of itself.    
- *
- * @param innerObj this object
- * @param args args[0] will be the outer object; args [1...] 
- *  must be shifted back to be actual calling arguments
- *  @author Bob Hanson
- */
 Clazz.newMethod$ = function (clazzThis, funName, funBody, isStatic) {
+  if (funName.constructor == Array) {
+    // If funName is an array, we are setting aliases for generic calls. 
+    // For example: ['compareTo$S', 'compareTo$TK', 'compareTo$TA']
+    // where K and A are generic types that are from a class<K> or class<A> assignment.    
+    for (var i = funName.length; --i >= 0;)
+      Clazz.newMethod$(clazzThis, funName[i], funBody, isStatic);
+    return;
+  }
   Clazz.saemCount0++;
   funBody.exName = funName;
   funBody.exClazz = clazzThis; // make it traceable
   var f;
   if (isStatic || funName == "c$")
-    clazzThis[funName] = clazzThis.prototype[funName] = funBody;
-  else
-    clazzThis.prototype[funName] = funBody;
+    clazzThis[funName] = funBody;
+  clazzThis.prototype[funName] = funBody; // allow static calls as though they were not static
 };                     
 
 var aas = "AAA";
@@ -3937,11 +3934,20 @@ return-1;
 }
 };
 
+
 sp.contentEquals$StringBuffer=function(sb){
 return (this == sb.s);
 };
 
+sp.contains$CharSequence=function(cs){
+if(cs==null)
+  throw new NullPointerException();
+return (this == cs || this.length > cs.length$() && this.indexOf(cs.toString()) > -1);
+};
+
 sp.contentEquals$CharSequence=function(cs){
+if(cs==null)
+  throw new NullPointerException();
 if(this == cs)
  return true;
 if(this.length!=cs.length$())

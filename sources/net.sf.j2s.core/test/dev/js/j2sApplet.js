@@ -1745,6 +1745,7 @@ J2S.Cache.put = function(filename, data) {
 			if(!availableParams || availableParams.indexOf(";" + i.toLowerCase() + ";") >= 0){
 				if (Info[i] == null || i == "language" && !J2S.featureDetection.supportsLocalization())
 					continue;
+//					params.put$TK$TV(i, (Info[i] === true ? Boolean.TRUE: Info[i] === false ? Boolean.FALSE : Info[i]))
 				if (isHashtable)
 					params.put$TK$TV(i, (Info[i] === true ? Boolean.TRUE: Info[i] === false ? Boolean.FALSE : Info[i]))
 				else
