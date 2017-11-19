@@ -12,11 +12,8 @@ package net.sf.j2s.core.astvisitors;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -1012,7 +1009,6 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	 * 
 	 */
 	public boolean visit(TypeDeclaration node) {
-		System.err.println("visit " + node.resolveBinding().getKey());
 		return addClassOrInterface(node, node.resolveBinding(), node.bodyDeclarations(), node.isInterface() ? 'i' : 
 			node.isLocalTypeDeclaration() ? 'l' : 'c');
 	}
@@ -1123,6 +1119,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			staticBuffer.append(tempVisitor.getBuffer().toString());
 			return false;
 		}
+		System.err.println("visit " + binding.getKey());
 		boolean isTopLevel = binding.isTopLevel();
 		if (isTopLevel) {
 			typeAdapter.setClassName(binding.getName());

@@ -2,22 +2,23 @@ package net.sf.j2s.core.compiler;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -40,14 +41,17 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 
 	// BH: added "true".equals(getProperty(props, "j2s.compiler.allow.compression")) to ensure compression only occurs when desired
     static final int JSL_LEVEL = AST.JLS8; // BH can we go to JSL 8? 
-	private static boolean showJ2SSettings = true; // BH adding this
+
+    private static boolean showJ2SSettings = true;
+	private static HashSet<String> copyResources = new HashSet<String>();
+	
 	private static Properties props;
 	private static String htmlTemplate = null;
 
 	public void process(ICompilationUnit sourceUnit, IContainer binaryFolder) {
 		final IProject project = binaryFolder.getProject();
 		
-		
+
 		bhTest(project);
 		
 		/*
@@ -98,12 +102,22 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 
 		if (htmlTemplate == null) {
 			String htmlTemplateFile = getProperty("template.html");
+			//System.err.println("htmltemplate " + htmlTemplateFile);
 			if (htmlTemplateFile == null)
 				htmlTemplateFile = "template.html";
-			file = new File(siteFolder, htmlTemplateFile);
-			if (!file.exists())
-				writeToFile(file, getDefaultHTMLTemplate());
+			//System.err.println("htmltemplate " + htmlTemplateFile);
+			file = new File(prjFolder, htmlTemplateFile);
+			//System.err.println("htmltemplate " + htmlTemplateFile);
+			if (!file.exists()) {
+				String html = getDefaultHTMLTemplate();
+				System.err.println("creating new htmltemplate\n" + html);
+				writeToFile(file, html);
+			}
 			htmlTemplate = getFileContents(file);
+			//System.err.println("htmltemplate:\n" + htmlTemplate);
+
+			if (showJ2SSettings)
+				System.err.println("using HTML template " + file);
 		}
 
 		CompilationUnit root;
@@ -241,8 +255,23 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 				}
 			}
 		}
+		String packageName = visitor.getPackageName();
+		if (packageName != null) {
+			int pt = packageName.indexOf(".");
+			if (pt >= 0)
+				packageName = packageName.substring(0, pt);
+			if (!copyResources.contains(packageName)) {
+				copyResources.add(packageName);
+				File src = new File(prjFolder + "/src", packageName);
+				File dest = new File(j2sPath, packageName);
+				copySiteResources(src, dest);
+			}
+		}
 	}
 
+	/**
+	 * @param project  
+	 */
 	private void bhTest(IProject project) {
 //		IJavaProject jp = JavaCore.create(project);
 //		try {
@@ -264,20 +293,6 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 //			e2.printStackTrace();
 //		}
 //		
-	}
-
-	private void showClass(IType t2c) throws JavaModelException {
-		IMethod[] im = t2c.getMethods();
-		if (im != null)
-		for (int i = 0; i < im.length; i++) {
-			IMethod m = im[i];
-			System.err.print(m.getElementName() + " " + m.getSignature() + " ");
-			String[] mt = m.getParameterTypes();
-			if (mt != null)
-			for (int j = 0; j < mt.length; j++)
-				System.err.print("para " + mt[j]);
-			System.err.println("\n\n");
-		}
 	}
 
 	/**
@@ -748,5 +763,47 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		}
 	}
 
+	private static FileFilter filter = new FileFilter() {
+
+		@Override
+		public boolean accept(File pathname) {
+			return pathname.isDirectory() || !pathname.getName().endsWith(".java");
+		}
+		
+	};
+	
+	private static void copySiteResources(File from, File dest) {
+		copyNonclassFiles(from, dest);
+	}
+
+	private static void copyNonclassFiles(File dir, File target) {
+		if (dir.equals(target))
+			return;
+		File[] files = dir.listFiles(filter);
+		File f = null;
+		if (files != null)
+			try {
+				if (!target.exists())
+					Files.createDirectories(target.toPath());
+				for (int i = 0; i < files.length; i++) {
+					f = files[i];
+					if (f == null) {
+						//
+					} else if (f.isDirectory()) {
+						copyNonclassFiles(f, new File(target, f.getName()));
+					} else {
+							Files.copy(f.toPath(), new File(target, f.getName()).toPath(),
+									StandardCopyOption.REPLACE_EXISTING);
+							System.err.println("copied " + f + " to " + target);
+					}
+				}
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				System.err.println("error copying " + f + " to " + target);
+				e1.printStackTrace();
+			}
+	}
+
 
 }
+

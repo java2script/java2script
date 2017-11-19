@@ -829,12 +829,18 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 					// avoid generate duplicated RadiusData
 					className = typeBinding.getQualifiedName();
 					if (allowExtensions)
-						className = ExtendedAdapter.trimName(className, false); //?? probably should be true
+						className = ExtendedAdapter.trimName(className, false); // ??
+																				// probably
+																				// should
+																				// be
+																				// true
 					if (className.indexOf("java.lang.") == 0) {
 						className = className.substring(10);
 					}
-					if (isStatic(nameBinding))
-						className = getQualifiedStaticName(null, className, true, true, false);				}
+					if (isStatic(nameBinding)) {
+						className = getQualifiedStaticName(null, className, true, true, false);
+					}
+				}
 			}
 		}
 
@@ -1773,9 +1779,15 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			int nclass = 0;
 			for (int i = 0; i < parts.length; i++) {
 				String part = parts[i];
-				if (i == 0 && (part.equals("C$") || part.equals("P$"))) {
-					s += part;
-					continue;
+				if (i == 0) {
+					if (part.equals("C$")) {
+						s += part;
+						continue;
+					}
+					if (part.equals("P$")) {
+						// can't do this with Clazz.load
+						part = getPackageName();
+					}
 				}
 				s += (i == 0 ? "'" : ".");
 				s += part;
@@ -1894,7 +1906,6 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 				}
 				name = fixName(name);
 				if (name.length() != 0) {
-					
 					getQualifiedStaticName(null, name, true,true,true);
 					
 //					buffer.append(name);
