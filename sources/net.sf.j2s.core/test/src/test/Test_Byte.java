@@ -10,6 +10,7 @@ class Test_Byte extends Test_ {
 		d /= 'c';
 		System.out.println(d);
 		assert(d == 3.0/99);
+		System.out.println("Hello, Trai");
 
 		// integer division must be turned back into an integer in JavaScript
 

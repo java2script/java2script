@@ -1,7 +1,12 @@
 package test;
 
-class Test_ {
+class Testx {
+ // example of a second independent top-level class	
+}
+
+abstract class Test_ {
 	
+	private static int i_ = 0;
 	private int t = 0;
 	
 	public void showt() {
@@ -65,3 +70,4 @@ class Test_ {
 	
 	
 }
+

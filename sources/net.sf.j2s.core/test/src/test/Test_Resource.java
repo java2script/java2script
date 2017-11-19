@@ -1,6 +1,5 @@
 package test;
 
-import java.io.IOException;
 import java.util.Properties;
 
 public class Test_Resource extends Test_ {
@@ -12,14 +11,16 @@ public class Test_Resource extends Test_ {
 	public static void main(String[] args) {
 		Properties p = new Properties();
 		try {
-			Class<?> c = test.Test_Resource.class;
+			// check for proper referencing of an interface
+			Class<?> c = Test_Resource.class;
 			p.load(c.getResourceAsStream("test.properties"));
 	        String test = p.getProperty("test");
 	        System.out.println(test);
 	        assert("OK".equals(test));
 	        System.out.println("Test_Resource OK");
-		} catch (IOException e) {
+		} catch (Exception e) {
 			System.out.println(e);
+			assert(false);
 		}
 	}
 

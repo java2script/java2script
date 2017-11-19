@@ -7,14 +7,19 @@ import java.util.NoSuchElementException;
 
 class Test_Anon extends Test_ {
 
-	private static int x = 3;
+	private static boolean b = !(true);
+	private static int x = -(3);
 	private static final Enumeration<?> EMPTY_ENUMERATION = new Enumeration<Object>() {
         public boolean hasMoreElements() {
-            return false;
+            return isAnonymous();
         }
         
         public Object nextElement() {
             throw new NoSuchElementException();
+        }
+        
+        public boolean isAnonymous() {
+        	return this.getClass().isAnonymousClass();
         }
         
     };
@@ -22,7 +27,9 @@ class Test_Anon extends Test_ {
 
   public static void main(String[] args) { 
 	  int z = 3;
-	  assert(!EMPTY_ENUMERATION.hasMoreElements());
+	  boolean a = !(Test_Class.Test_Class_Inner.i == 3);
+	  System.out.println(EMPTY_ENUMERATION.hasMoreElements());
+	  assert(EMPTY_ENUMERATION.hasMoreElements());
 	  Object xx = new MouseListener() {
 
 		int y = 0;

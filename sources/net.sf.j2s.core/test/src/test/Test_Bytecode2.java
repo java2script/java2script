@@ -75,12 +75,12 @@ public class Test_Bytecode2 extends Test_Bytecode {
 //		t0.setX (( new Integer (3)).intValue ());
 		// BC_setX(int) 3
 		
-		t1.setX(new Double(3));
+		t1.setX(new Double(33));
 //    119  invokevirtual test.Test_Bytecode.setX(java.lang.Double) : void [80]
 //  	t0.setX ( new Double (3));
 		// BC_setX(Double) 3.0
 
-
+		System.out.println("Bytecode2 OK");
 		
 	}
 	

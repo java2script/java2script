@@ -21,7 +21,7 @@ public class Test_Bytecode extends Test_ {
 
 	void setX(Double x) {
 		System.out.println("BC_setX(Number) " + x);
-		assert(false);
+		assert(x == 33);
 		// note that in JavaScript, the above construction uses "valueOf" not "toString" for x.
 		// this results in reporting "3" for new Double(3.0) instead of "3.0"
 	}

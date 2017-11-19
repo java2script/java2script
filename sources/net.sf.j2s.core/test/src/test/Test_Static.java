@@ -1,14 +1,25 @@
 package test;
 
-class Test_Static extends Test_ {
+import test.Test_Class.Test_Class_Inner;
+
+class Test_Static extends Test_ implements Test_int3, Test_int2, Test_int1 {
 
 	private static boolean b = false;
 	private final static char c0 = new Character('c');
 	private final static char c2 = '2';
 	private static int y;
 	private static char c = 'c';
+	private static int innerI = Test_Class_Inner.i;
 	static String s;
 	static {
+		
+		
+		System.out.println(Test_int1.int1);
+		System.out.println(Test_int2.int2);
+		System.out.println(Test_int3.int3);
+
+		System.out.println(innerI);
+		assert(innerI == 5);
 		char cc = c2;
 		int x = 3;
 		y = Test_Boolean.i_;

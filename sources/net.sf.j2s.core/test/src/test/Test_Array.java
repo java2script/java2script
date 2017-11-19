@@ -8,6 +8,7 @@ class Test_Array extends Test_ {
   static {
 	  int x = 3;
 	  y = x;
+	  Test_Array[] a = new Test_Array[3];
   }
   
   static Object tType3__ = Array.newInstance(Test_Array[][].class, 3);
