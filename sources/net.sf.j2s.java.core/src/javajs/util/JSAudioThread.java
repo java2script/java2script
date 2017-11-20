@@ -56,7 +56,7 @@ import sun.audio.AudioPlayer;
  */
 public class JSAudioThread extends JSThread {
 	
-	protected JSAudioThreadOwner owner;
+	protected Owner owner;
 	protected boolean done;
 	protected int myBufferLength;
 	protected SourceDataLine line;
@@ -69,7 +69,7 @@ public class JSAudioThread extends JSThread {
 	private int myBufferOffset;
 	private int playCount;
 	
-	public JSAudioThread(JSAudioThreadOwner owner, AudioFormat audioFormat, byte[] audioByteBuffer) {
+	public JSAudioThread(Owner owner, AudioFormat audioFormat, byte[] audioByteBuffer) {
 		this.owner = owner;
 		setFormat(audioFormat);
 		setBuffer(audioByteBuffer);
@@ -85,7 +85,7 @@ public class JSAudioThread extends JSThread {
 	 * @param nChannels
 	 * @param audioByteBuffer
 	 */
-	public JSAudioThread(JSAudioThreadOwner owner, int rate, int bitsPerSample, int nChannels, byte[] audioByteBuffer) {
+	public JSAudioThread(Owner owner, int rate, int bitsPerSample, int nChannels, byte[] audioByteBuffer) {
 		this.owner = owner;
 		setFormat(new AudioFormat(rate, bitsPerSample, nChannels, true, false));
 		setBuffer(audioByteBuffer);
@@ -229,7 +229,7 @@ public class JSAudioThread extends JSThread {
 			owner.audioThreadExiting();
 	}
 
-	public interface JSAudioThreadOwner {
+	public interface Owner {
 
 		/**
 		 * 
