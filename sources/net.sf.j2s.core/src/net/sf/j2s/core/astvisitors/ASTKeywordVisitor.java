@@ -1737,18 +1737,23 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	}
 
 	/**
-	 * Proved access to C$.$clinit$ when a static method is called or a static field is accessed.
+	 * Proved access to C$.$clinit$ when a static method is called or a static
+	 * field is accessed.
 	 * 
 	 * @param methodQualifier
 	 *            SimpleName qualifier in qualifier.methodName()
 	 * @param className
-	 * @param doEscape set true except for static nonprivate field names 
-	 * @param doCache  generally true, but not for initial class definitions or for some nonstatic references
-	 * @param doAppend  true to use buffer.append; 
-	 * @return name wrapped if necessary by nested Class.load() calls 
+	 * @param doEscape
+	 *            set true except for static nonprivate field names
+	 * @param doCache
+	 *            generally true, but not for initial class definitions or for
+	 *            some nonstatic references
+	 * @param doAppend
+	 *            true to use buffer.append;
+	 * @return name wrapped if necessary by nested Class.load() calls
 	 */
-	protected String getQualifiedStaticName(Name methodQualifier, String className, boolean doEscape,
-			boolean doCache, boolean doAppend) {
+	protected String getQualifiedStaticName(Name methodQualifier, String className, boolean doEscape, boolean doCache,
+			boolean doAppend) {
 		// BH: The idea here is to load these on demand.
 		// It will require synchronous loading,
 		// but it will ensure that a class is only
@@ -1759,7 +1764,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		if (!doEscape) {
 			if (methodQualifier != null) {
 				methodQualifier.accept(this);
-				return  null;
+				return null;
 			}
 			s = className;
 			doCache = false;
@@ -1774,38 +1779,37 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		if (s == null) {
 			if (methodQualifier != null)
 				className = fixNameNoC$(null, className);
-			s = "Clazz.load(";
-			String[] parts = className.split("\\.");
-			int nclass = 0;
-			for (int i = 0; i < parts.length; i++) {
-				String part = parts[i];
-				if (i == 0) {
-					if (part.equals("C$")) {
-						s += part;
-						continue;
-					}
-					if (part.equals("P$")) {
-						// can't do this with Clazz.load
-						part = getPackageName();
-					}
-				}
-				s += (i == 0 ? "'" : ".");
-				s += part;
-				if (Character.isUpperCase(part.charAt(0))) {
-					if (nclass > 0)
-						s = "Clazz.load(" + s;
-					if (++nclass == 1 && s.indexOf("'") >= 0)
-						s += "'";
-					s += ")";
-				}
-			}
+			s = getNestedClazzLoads(className);
 			if (n != null)
 				s = "(I$[" + n + "] || (I$[" + n + "]=" + s + "))";
 		}
 		if (doAppend)
 			buffer.append(s);
 		return s;
+	}
 
+	/**
+	 * Nest loads of inner classes pkg.Foo.Bar as Clazz.load(Clazz.load('pkg.Foo').Bar)
+	 * 
+	 * @param className
+	 * @return
+	 */
+	private String getNestedClazzLoads(String className) {		
+		String[] parts = className.split("\\.");
+		String s = parts[0];
+		if (s.equals("P$")) {
+			// can't do this with Clazz.load
+			s = getPackageName();
+		}		
+		int i = 1;
+		// loop through packages and outer Class 
+		while (i < parts.length && (i == 1 || !Character.isUpperCase(parts[i - 1].charAt(0))))
+			s += "." + parts[i++];
+		String ret = "Clazz.load('" + s + "')";
+		// add inner classes 
+		while (i < parts.length)
+			ret +=  "Clazz.load(" + ret + "." + parts[i++] + ")";
+		return ret;
 	}
 
 	private boolean haveDirectStaticAccess(Expression exp) {

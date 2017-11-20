@@ -1245,8 +1245,8 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			if (isAnonymous)
 				getQualifiedStaticName(null, superclassName, true, false, true);
 			else
-				buffer.append("'" + superclassName + "'"); // taken care of by
-															// loading
+				buffer.append(getInnerClassList(superclassName)); 
+			
 		}
 
 		// arg5: superinterface(s) if not null
@@ -1492,6 +1492,30 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			typeAdapter.setClassName(oldClassName);
 		}
 		return false;
+	}
+
+	/**
+	 * For Clazz.newClazz$ we want an array if there is an inner class
+	 * so that the outer class is guarranteed to be loaded first.
+	 * 
+	 * @param className
+	 * @return
+	 */
+	private String getInnerClassList(String className) {
+		
+		String[] parts = className.split("\\.");
+		String s = parts[0];
+		int i = 1;
+		// loop through packages and outer Class 
+		while (i < parts.length && !Character.isUpperCase(parts[i - 1].charAt(0))){
+			s += "." + parts[i++];
+		}
+		String ret = "'" + s + "'";
+		// add inner classes 
+		while (i < parts.length){
+			ret +=  ",'" + s + "." + parts[i++] + "'";
+		}
+		return (ret.indexOf(",") >= 0 ? "[" + ret + "]" : ret);
 	}
 
 	/**
