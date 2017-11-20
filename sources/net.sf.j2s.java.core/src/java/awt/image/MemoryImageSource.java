@@ -475,7 +475,7 @@ public class MemoryImageSource implements ImageProducer {
     	 *
     	 * if (this.pixels.img && this.pixels.img._g) {
     	 *  this.pixels.img._pix = this.pixels;
-    	 *  this.pixels.img._g.drawImage(this.pixels.img, 0, 0, null);
+    	 *  this.pixels.img._g.drawImage$java_awt_Image$I$I$java_awt_image_ImageObserver(this.pixels.img, 0, 0, null);
     	 *  this.pixels.img._pix = null;
     	 * }
     	 */
