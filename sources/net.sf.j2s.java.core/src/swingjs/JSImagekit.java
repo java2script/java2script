@@ -102,10 +102,6 @@ public class JSImagekit implements ImageConsumer {
 		hints = hintflags;
 	}
 
-	/**
-	 * @j2sIgnore
-	 * 
-	 */
 	@Override
 	public void setPixels(int x, int y, int w, int h, ColorModel model,
 			int[] pixels, int off, int scansize) {

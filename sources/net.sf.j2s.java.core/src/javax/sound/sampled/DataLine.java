@@ -28,6 +28,7 @@
 
 package javax.sound.sampled;
 
+
 /**
  * <code>DataLine</code> adds media-related functionality to its
  * superinterface, <code>{@link Line}</code>.  This functionality includes

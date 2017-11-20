@@ -216,7 +216,7 @@ public abstract class DOMNode {
 	  /**
 		 * @j2sNative
 		 * 
-		 *            f = function(ev) {me.handleJSEvent(node, -1, ev)};
+		 *            f = function(ev) {me.handleJSEvent$O$I$O(node, -1, ev)};
 		 */
 		{}
 		JSUtil.getJQuery().$(node).on(event, f);
