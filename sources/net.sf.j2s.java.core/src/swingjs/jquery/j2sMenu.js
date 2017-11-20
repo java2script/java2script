@@ -80,14 +80,14 @@ var bindMenuActionCommands = function(eventType, menu, isBind) {
       if (menu.uiClassID) {
         System.out.println(["menu " + menu.ui.id , " clicked " , event.target.id , event.target.tagName, event.target["data-component"]]);
 				Swing.hideMenus(menu._applet);
-        menu["data-ui"].handleJSEvent(event);
+        menu["data-ui"].handleJSEvent$O$I$O(event);
 			} else if (menu.itemListener) {
-				menu.selected = (menu.btnType == javajs.swing.JMenuItem.TYPE_CHECKBOX ? J2S.$prop(menu.id + "-cb", "checked") : true); 
+				menu.selected = (menu.btnType == 2 /*javajs.swing.JMenuItem.TYPE_CHECKBOX*/ ? J2S.$prop(menu.id + "-cb", "checked") : true); 
 				Swing.hideMenus(menu._applet);
-				menu.itemListener.itemStateChanged({getSource:function(){return menu}});
+				menu.itemListener.itemStateChanged$java_awt_event_ItemEvent({getSource:function(){return menu}});
 			}	else if (menu.actionListener) {
 				Swing.hideMenus(menu._applet);
-				menu.actionListener.actionPerformed({getSource:function(){return menu},getActionCommand:function(){return menu.actionCommand}});
+				menu.actionListener.actionPerformed$java_awt_event_ActionEvent({getSource:function(){return menu},getActionCommand:function(){return menu.actionCommand}});
 			}
 		});
 }

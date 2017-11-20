@@ -91,7 +91,7 @@ $.widget( "ui.j2sslider", $.ui.mouse, {
       // pass event to JSlider in case there is a mouse listener implemented for that
       //InputEvent.BUTTON1 + InputEvent.BUTTON1_DOWN_MASK;
       // same call here as in j2sApplet
-      me.options.jslider.getFrameViewer().processMouseEvent(id,xye.x,xye.y,1040,System.currentTimeMillis(), xye.ev);      
+      me.options.jslider.getFrameViewer().processMouseEvent$I$I$I$I$J$O$I(id,xye.x,xye.y,1040,System.currentTimeMillis(), xye.ev);      
     };
 
     var fDown = function(xye, id) {
