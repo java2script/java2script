@@ -5,6 +5,7 @@
 
 // NOTES by Bob Hanson
 
+// BH 11/19/2017 3:51:55 AM adds Clazz._traceOutput from URL j2strace=xxx where xxx appears in System.out.println
 // BH 11/16/2017 10:52:53 PM adds method name aliasing for generics; adds String.contains$CharSequence(cs)
 // BH 10/14/2017 8:17:57 AM removing all node-based dependency class loading; fix String.initialize with four arguments (arr->byte)
 // BH 10/13/2017 7:03:28 AM fix for String.initialize(bytes) applying bytes as arguments
@@ -102,9 +103,10 @@ Clazz.load = function(cName, isFinalize) {
   }
   if (cName instanceof Array) {
     unwrapArray(cName);
+    var cl = null;
     for (var i = 0; i < cName.length; i++)
-      Clazz.load(cName[i]);
-    return;
+      cl = Clazz.load(cName[i]);
+    return cl;
   }
   if (typeof cName == "string") {
     if (cName.indexOf("Thread.") == 0) {
@@ -120,7 +122,13 @@ Clazz.load = function(cName, isFinalize) {
 }
 
 /**
- *Create a new instance of a class
+ * Create a new instance of a class. 
+ * Accepts:
+ *   a string  Clazz.new("java.util.Hashtable")
+ *   a clazz (has .__CLASS_NAME__ and a default contructor)
+ *   a specific class constructor such as c$$S
+ *   a constructor from a one class (c, anonymous constructor) and a class to create, cl   
+ *   
  */
   
 Clazz.new = function(c, args, cl) {
@@ -130,6 +138,8 @@ Clazz.new = function(c, args, cl) {
   
   if (c.__CLASS_NAME__ && c.c$) 
     c = c.c$;
+  else if (typeof c == "string")
+    return Clazz.new(Clazz.load(c));
     
   // an inner class will attach arguments to the arguments returned
   // Integer will be passed as is here, without c.exClazz, or cl
@@ -548,7 +558,12 @@ Clazz._debugging = (document.location.href.indexOf("j2sdebug") >= 0);
 } catch (e) {
 }
 
-Clazz._traceOutput = null; // will alert in system.out.println with a message
+try {
+ // will alert in system.out.println with a message
+Clazz._traceOutput = 
+(document.location.href.indexOf("j2strace=") >= 0 ? document.location.href.split("j2strace=")[1].split("&")[0] : null)
+} catch (e) {
+}
 
 var __debuggingBH = false;
 
@@ -2709,8 +2724,10 @@ if (("" + s).indexOf("TypeError") >= 0) {
    debugger;
 }
   if (Clazz._nooutput) return;
-  if (Clazz._traceOutput && s && ("" + s).indexOf(Clazz._traceOutput) >= 0)
+  if (Clazz._traceOutput && s && ("" + s).indexOf(Clazz._traceOutput) >= 0) {
     alert(s + "\n\n" + Clazz.getStackTrace());
+    debugger;
+  }
   Con.consoleOutput(typeof s == "undefined" ? "\r\n" : s == null ?  s = "null\r\n" : s + "\r\n");
 };
 

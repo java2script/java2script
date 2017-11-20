@@ -1808,7 +1808,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		String ret = "Clazz.load('" + s + "')";
 		// add inner classes 
 		while (i < parts.length)
-			ret +=  "Clazz.load(" + ret + "." + parts[i++] + ")";
+			ret = "Clazz.load(" + ret + "." + parts[i++] + ")";
 		return ret;
 	}
 

@@ -10654,6 +10654,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js (based on JmolCore.js)
 
+// BH 11/19/2017 3:55:04 AM adding support for swingjs2.js; adds static j2sHeadless=true;
 // BH 10/4/2017 2:25:03 PM adds Clazz.loadClass("javajs.util.Base64")
 // BH 7/18/2017 10:46:44 AM adds J2S._canClickFileReader, fixing J2S.getFileFromDialog for Chrome and Safari
 // BH 7/15/2017 11:04:06 AM drag/up functions not found in draggable (not hoisted)
@@ -11580,7 +11581,7 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 	}
 
 	J2S._registerApplet = function(id, applet) {
-		return window[id] = J2S._applets[id] = J2S._applets[id + "__" + J2S._syncId + "__"] = J2S._applets["master"] = applet;
+		return thisApplet = window[id] = J2S._applets[id] = J2S._applets[id + "__" + J2S._syncId + "__"] = J2S._applets["master"] = applet;
 	} 
 
 	J2S._readyCallback = function (appId,fullId,isReady,javaApplet,javaAppletPanel) {
@@ -12543,37 +12544,29 @@ J2S.Cache.put = function(filename, data) {
 			try {
         if (applet.__Info.main) {
           try{
-            var cl = Clazz._4Name(applet.__Info.main);
+            var cl = Clazz.load(applet.__Info.main);
+            if (cl.j2sHeadless)
+              applet.__Info.headless = true;
           }catch(e) {
             alert ("Java class " +  applet.__Info.main + " was not found.");
             return;
           }
-          cl.$clazz$.main([]);
+        }
+        if (applet.__Info.main && applet.__Info.headless) {
+          cl.main(applet.__Info.args || []);
         } else {
-    			var viewerOptions = Clazz._4Name("java.util.Hashtable").newInstance();
+        	var viewerOptions = Clazz.new(Clazz.load("java.util.Hashtable"));
           viewerOptions.put = viewerOptions.put$TK$TV;
-    			J2S._setAppletParams(applet._availableParams, viewerOptions, applet.__Info, true);
-    			viewerOptions.put("appletReadyCallback","J2S._readyCallback");
-    			viewerOptions.put("applet", true);
-    			viewerOptions.put("name", applet._id);// + "_object");
+        	J2S._setAppletParams(applet._availableParams, viewerOptions, applet.__Info, true);
+        	viewerOptions.put("name", applet._id);// + "_object");
     			viewerOptions.put("syncId", J2S._syncId);
     			if (J2S._isAsync)
     				viewerOptions.put("async", true);
-    			if (applet._color) 
-    				viewerOptions.put("bgcolor", applet._color);
     			if (applet._startupScript)
     				viewerOptions.put("script", applet._startupScript)
-    			if (J2S._syncedApplets.length)
-    				viewerOptions.put("synccallback", "J2S._mySyncCallback");
-    			viewerOptions.put("signedApplet", "true");
     			viewerOptions.put("platform", applet._platform);
-    			if (applet._is2D)
-    				viewerOptions.put("display",applet._id + "_canvas2d");
-    
-    			// viewerOptions.put("repaintManager", "J.render");
-    			viewerOptions.put("documentBase", document.location.href);
-    			var codePath = applet._j2sPath + "/";
-          
+        	viewerOptions.put("documentBase", document.location.href);
+    			var codePath = applet._j2sPath + "/";    
     			if (codePath.indexOf("://") < 0) {
     				var base = document.location.href.split("#")[0].split("?")[0].split("/");
     				if (codePath.indexOf("/") == 0)
@@ -12583,7 +12576,16 @@ J2S.Cache.put = function(filename, data) {
     				codePath = base.join("/");
     			}
     			viewerOptions.put("codePath", codePath);
-  				applet._newApplet(viewerOptions);
+    			viewerOptions.put("appletReadyCallback","J2S._readyCallback");
+    			viewerOptions.put("applet", true);
+    			if (applet._color) 
+    				viewerOptions.put("bgcolor", applet._color);
+    			if (J2S._syncedApplets.length)
+    				viewerOptions.put("synccallback", "J2S._mySyncCallback");
+    			viewerOptions.put("signedApplet", "true");
+    			if (applet._is2D)
+    				viewerOptions.put("display",applet._id + "_canvas2d");
+    			applet._newApplet(viewerOptions);
         }
 			} catch (e) {
 				System.out.println((J2S._isAsync ? "normal async abort from " : "") + e);
@@ -12967,6 +12969,7 @@ J2S._getResourcePath = function(path, isJavaPath) {
 
 // NOTES by Bob Hanson
 
+// BH 11/19/2017 3:51:55 AM adds Clazz._traceOutput from URL j2strace=xxx where xxx appears in System.out.println
 // BH 11/16/2017 10:52:53 PM adds method name aliasing for generics; adds String.contains$CharSequence(cs)
 // BH 10/14/2017 8:17:57 AM removing all node-based dependency class loading; fix String.initialize with four arguments (arr->byte)
 // BH 10/13/2017 7:03:28 AM fix for String.initialize(bytes) applying bytes as arguments
@@ -13064,9 +13067,10 @@ Clazz.load = function(cName, isFinalize) {
   }
   if (cName instanceof Array) {
     unwrapArray(cName);
+    var cl = null;
     for (var i = 0; i < cName.length; i++)
-      Clazz.load(cName[i]);
-    return;
+      cl = Clazz.load(cName[i]);
+    return cl;
   }
   if (typeof cName == "string") {
     if (cName.indexOf("Thread.") == 0) {
@@ -13082,7 +13086,13 @@ Clazz.load = function(cName, isFinalize) {
 }
 
 /**
- *Create a new instance of a class
+ * Create a new instance of a class. 
+ * Accepts:
+ *   a string  Clazz.new("java.util.Hashtable")
+ *   a clazz (has .__CLASS_NAME__ and a default contructor)
+ *   a specific class constructor such as c$$S
+ *   a constructor from a one class (c, anonymous constructor) and a class to create, cl   
+ *   
  */
   
 Clazz.new = function(c, args, cl) {
@@ -13092,6 +13102,8 @@ Clazz.new = function(c, args, cl) {
   
   if (c.__CLASS_NAME__ && c.c$) 
     c = c.c$;
+  else if (typeof c == "string")
+    return Clazz.new(Clazz.load(c));
     
   // an inner class will attach arguments to the arguments returned
   // Integer will be passed as is here, without c.exClazz, or cl
@@ -13510,7 +13522,12 @@ Clazz._debugging = (document.location.href.indexOf("j2sdebug") >= 0);
 } catch (e) {
 }
 
-Clazz._traceOutput = null; // will alert in system.out.println with a message
+try {
+ // will alert in system.out.println with a message
+Clazz._traceOutput = 
+(document.location.href.indexOf("j2strace=") >= 0 ? document.location.href.split("j2strace=")[1].split("&")[0] : null)
+} catch (e) {
+}
 
 var __debuggingBH = false;
 
@@ -15671,8 +15688,10 @@ if (("" + s).indexOf("TypeError") >= 0) {
    debugger;
 }
   if (Clazz._nooutput) return;
-  if (Clazz._traceOutput && s && ("" + s).indexOf(Clazz._traceOutput) >= 0)
+  if (Clazz._traceOutput && s && ("" + s).indexOf(Clazz._traceOutput) >= 0) {
     alert(s + "\n\n" + Clazz.getStackTrace());
+    debugger;
+  }
   Con.consoleOutput(typeof s == "undefined" ? "\r\n" : s == null ?  s = "null\r\n" : s + "\r\n");
 };
 
