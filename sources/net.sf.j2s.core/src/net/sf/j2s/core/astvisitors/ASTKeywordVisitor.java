@@ -1456,7 +1456,6 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 
 		// a = ($b$[0] = a | right, $b$[0])
 
-		//
 		String classIntArray = null;
 		String more = null;
 		boolean fromChar = ("char".equals(rightName));
@@ -1474,6 +1473,8 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			toChar = true;
 			break;
 		default:
+			// double, float
+			break;
 		case "long":
 			if (!fromIntType || isDiv) {
 				more = "|0";
