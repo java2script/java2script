@@ -1579,7 +1579,6 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		IVariableBinding var = identifier.resolveBinding();
 		Type nodeType = (var != null && var.getType().isArray() ? null : node.getType());
 		boolean isFinal = isStatic && isFinal(node);
-
 		for (Iterator<?> iter = fragments.iterator(); iter.hasNext();) {
 			VariableDeclarationFragment fragment = (VariableDeclarationFragment) iter.next();
 			Expression initializer = fragment.getInitializer();

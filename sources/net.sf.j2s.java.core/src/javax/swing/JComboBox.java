@@ -87,8 +87,26 @@ import javax.swing.plaf.ComboBoxUI;
  * @author Arnaud Weber
  * @author Mark Davidson
  */
+
 public class JComboBox extends JComponent
 implements ItemSelectable,ListDataListener,ActionListener {
+	
+	/**
+	 * 
+	 * added to be compatible with Java 7 -- BH 
+	 * 
+	 * @j2sNative
+	 * 
+	 * this.c$$TEA = C$.c$$OA;
+	 * this.prototype.setPrototypeDisplayValue$TE = p$.setPrototypeDisplayValue$O;
+	 * this.prototype.addItem$TE = p$.addItem$O;
+	 * this.prototype.insertItemAt$TE$I =  p$.insertItemAt$O$I;
+	 * 
+	 */
+	static {}
+	
+	
+	
 		/**
      * This protected field is implementation specific. Do not access directly
      * or override. Use the accessor methods instead.
@@ -194,7 +212,7 @@ implements ItemSelectable,ListDataListener,ActionListener {
      * @param items  an array of objects to insert into the combo box
      * @see DefaultComboBoxModel
      */
-    public JComboBox(final Object items[]) {
+    public JComboBox(Object items[]) {
         super();
         setModel(new DefaultComboBoxModel(items));
         initComboBox();
@@ -2394,4 +2412,5 @@ implements ItemSelectable,ListDataListener,ActionListener {
 //        }
 //
 //    } // innerclass AccessibleJComboBox
+    
 }

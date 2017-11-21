@@ -215,7 +215,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			case 's': // $s$
 				added += " = new Int16Array(1)";
 				break;
-			case 'i': // $i$
+			case 'i': // $i$ // abandoned - using |0
 				added += " = new Int32Array(1)";
 				break;
 			default:
@@ -254,8 +254,6 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 
 	public boolean visit(ArrayInitializer node) {
 		// as in: public String[] d = {"1", "2"};
-		// ITypeBinding binding = node.resolveTypeBinding();
-		// int n = binding.getDimensions();
 		buffer.append(j2sGetArrayClass(node.resolveTypeBinding(), -1));
 		buffer.append(", [");
 		@SuppressWarnings("unchecked")
@@ -266,7 +264,6 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(Assignment node) {
-
 		// note that this is not
 		// var x = .....
 		//
@@ -1099,12 +1096,10 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	}
 
 	protected static String j2sGetParamCode(ITypeBinding binding, boolean addAAA) {
-		
 		String prefix = (binding.getKey().indexOf(":T") >= 0 ? "T" : null);
-
-		String name = binding.getQualifiedName();
-		
+		String name = binding.getQualifiedName();		
 		String arrays = null;
+		name = removeBrackets(name);
 		int pt = name.indexOf("[");
 		if (pt >= 0) {
 			arrays = name.substring(pt + (name.indexOf("[L") >= 0 ? 1 : 0));
@@ -1115,7 +1110,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		// NOTE: These are the same as standard Java Spec, with the exception of
 		// Short, which is "H" instead of "S"
 
-		switch (name = removeBrackets(name)) {
+		switch (name) {
 		case "boolean":
 			name = "Z";
 			break;
@@ -1149,7 +1144,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			break;
 		default:
 			if (prefix != null)
-				name = prefix + name;
+				name = prefix + name; // "O";//
 			name = name.replace("java.lang.", "").replace('.', '_');
 			break;
 		}
@@ -1250,11 +1245,12 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			// BH: Question: When does typeBinding == null?
 			// A: when there is a compilation error, I think.
 			// OK, now we have the same situation as any operand.
-			String paramName = (targetType instanceof ITypeBinding ? ((ITypeBinding) targetType).getName()
+			String paramName = (exp.resolveTypeBinding().isArray() ? ";" : targetType instanceof ITypeBinding ? ((ITypeBinding) targetType).getName()
 					: targetType.toString());
 			boolean isNumeric = isNumericType(paramName);
 			if ((isNumeric || paramName.equals("char")) && !isBoxTyped(exp)) {
 				// using operator "m" to limit int application of $i$
+				
 				addPrimitiveTypedExpression(null, null, paramName, op, exp, expTypeBinding.getName(), extendedOperands,
 						false);
 			} else {
@@ -1477,21 +1473,26 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			break;
 		case "long":
 			if (!fromIntType || isDiv) {
-				more = "|0";
+				more = "|0)";
+				addParens = true;
 			}
 			break;
 		case "int":
-			if (op != null && (!isDiv && fromIntType) || fromChar || rightName.equals("short")) {
+			if (op != null && (!isDiv && fromIntType) || fromChar || rightName.equals("short") || right.equals("byte"))
 				break;
-			}
-			//$FALL-THROUGH$
+			more = "|0)";
+			addParens = true;
+			break;
 		case "short":
 			if (right.equals("byte") && !isDiv)
 				break;
 			//$FALL-THROUGH$
 		case "byte":
-			if (!isArray) {
-				classIntArray = "$" + leftName.charAt(0) + "$[0]";
+			if (isArray) {
+				more = "|0)";
+				addParens = true;
+			} else {
+				classIntArray = "$" + leftName.charAt(0) + "$[0]"; //$i$, etc. 
 				staticBuffer.addType(leftName);
 			}
 			break;
@@ -1502,8 +1503,11 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 				buffer.append("(");
 			buffer.append(classIntArray).append(" = ");
 			isArray = true;
+		} else if (more == "|0)") {
+			buffer.append("(");
 		}
 		if (left != null) {
+			// a += b
 			addFieldName(left, assignmentBinding);
 			buffer.append(op);
 			if (isAssignment)
@@ -1518,12 +1522,17 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			buffer.append(")");
 		}
 		if (classIntArray != null) {
+			// this is necessary because in JavaScript, (a=3.5) will be 3.5, not a:
+			// a = new Int8Array(1)
+			// (a[0]=3.4, a[0])
+			//		3
+			// (a[0]=3.4)
+			//		3.4
 			buffer.append(", ").append(classIntArray);
 			if (addParens)
 				buffer.append(")");
 			isArray = wasArray;
-		}
-		if (more != null)
+		} else if (more != null)
 			buffer.append(more);
 	}
 
@@ -1771,7 +1780,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			doCache = false;
 		}
 		Integer n = null;
-		if (doCache) {
+		if (doCache) {			
 			if (className.equals(getFullClassName()))
 				s = "C$"; // anonymous class will be like this
 			else
@@ -2221,7 +2230,16 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 				//System.err.println("hoping that " + className + "." + methodName + " " + i + " " + genericType + " works for " + paramTypes[i].getQualifiedName());
 				if (genericType.indexOf("|" + paramTypes[i].getQualifiedName() + ";") < 0)
 					return null;
-				type = "T" + genericType.substring(0, genericType.indexOf("|"));
+				type = genericType.substring(0, genericType.indexOf("|")); // "O";// 
+				// Originally I was substituting in the generic type T,V,E,etc., but 
+				// this causes a problem when the user is working with a later version of 
+				// Java and subclassing what was originally not a generic class (JComboBox)
+				// but which is now generic (JComboBox<E>). The new version of Java will be
+				// used by the transpiler working on the user's machine, and then we will 
+				// have the problem that the code will have addItem$TE inserted even though 
+				// the version of Java in the SwingJS distribution will be only addItem$O. 
+				// Using Object here because that would be the default for JComboBox<>
+				// and so match that earlier non-generic designation (hopefully).
 			}
 			sbParams.append("$").append(type);
 		}
@@ -2239,6 +2257,29 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		return s;
 	}
 
+
+	public static String removeBrackets(String qName) {
+		if (qName == null || qName.indexOf('<') < 0)
+			return qName;
+		StringBuffer buf = new StringBuffer();
+		int ltCount = 0;
+		char c;
+		for (int i = 0, len = qName.length(); i < len; i++) {
+			switch (c = qName.charAt(i)) {
+			case '<':
+				ltCount++;
+				continue;
+			case '>':
+				ltCount--;
+				continue;
+			default:
+				if (ltCount == 0)
+					buf.append(c);
+				continue;
+			}
+		}
+		return buf.toString().trim();
+	}
 
 	///////////////// debugging //////////////////////////
 	

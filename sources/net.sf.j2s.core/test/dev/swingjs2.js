@@ -12969,7 +12969,8 @@ J2S._getResourcePath = function(path, isJavaPath) {
 
 // NOTES by Bob Hanson
 
-// BH 11/19/2017 3:51:55 AM adds Clazz._traceOutput from URL j2strace=xxx where xxx appears in System.out.println
+// BH 11/20/2017 8:59:46 PM fix for new double[3][3] 
+// BH 11/19/2017 3:51:55 AM adds Clazz._traceOutput from URL j2strace=xxx where xxx appears in System.out.println, String.regionMatches
 // BH 11/16/2017 10:52:53 PM adds method name aliasing for generics; adds String.contains$CharSequence(cs)
 // BH 10/14/2017 8:17:57 AM removing all node-based dependency class loading; fix String.initialize with four arguments (arr->byte)
 // BH 10/13/2017 7:03:28 AM fix for String.initialize(bytes) applying bytes as arguments
@@ -13386,46 +13387,50 @@ Clazz.newArray$ = function(baseClass, paramType, ndims, params) {
     if (isNum)
       ndims = -ndims;
   }
-  if (ndims >= 0) {
+  if (ndims < 0) {
+    params = [-1, params];
+  } else {
     var initValue = null;
-    switch (ndims == 1 ? prim : null) {
-    case "B":
-    case "H": // short
-    case "I":
-    case "L":
-    case "F":
-    case "D":
-      initValue = 0;
-      break;
-    case "C": 
-      initValue = '\0';
-      break;
-    case "Z":
-      initValue = false;
-      break;
+    if (ndims >= 1) {
+      switch (prim) {
+      case "B":
+      case "H": // short
+      case "I":
+      case "L":
+      case "F":
+      case "D":
+        initValue = 0;
+        break;
+      case "C": 
+        initValue = '\0';
+        break;
+      case "Z":
+        initValue = false;
+        break;
+      }
     }
     params.push(initValue);
-  } else {
-    params = [-1, params];
   }
   params.push(paramType);
   var nbits = 0;
-  switch (ndims == -1 || ndims == 1 ? prim : null) {
-  case "B":
-    nbits = 8;
-    break; 
-  case "H":
-    nbits = 16;
-    break;
-  case "I":
-  case "L":
-    nbits = 32;
-    break;
-  case "F":
-  case "D":
-    nbits = 64;
-    break;
-  }  
+  if (ndims != 0) {
+    switch (prim) {
+    case "B":
+      nbits = 8;
+      break; 
+    case "H":
+      nbits = 16;
+      break;
+    case "I":
+    case "L":
+      nbits = 32;
+      break;
+    case "F":
+    case "D":
+      nbits = 64;
+      break;
+    }  
+  }
   return newTypedA$(baseClass, params, nbits, ndims);
 }
 
@@ -16693,17 +16698,12 @@ var regExp=new RegExp(exp,"gm");
 var m=this.match(regExp);
 return m!=null&&m.length!=0;
 };
-sp.regionMatches$Z$I$S$I$I=function(ignoreCase,toffset,
-other,ooffset,len){
 
-if(typeof ignoreCase=="number"
-||(ignoreCase!=true&&ignoreCase!=false)){
-len=ooffset;
-ooffset=other;
-other=toffset;
-toffset=ignoreCase;
-ignoreCase=false;
+sp.regionMatches$I$S$I$I=function(toffset,other,ooffset,len){
+  return this.regionMatches$Z$I$S$I$I(false,toffset,other,ooffset,len);
 }
+
+sp.regionMatches$Z$I$S$I$I=function(ignoreCase,toffset,other,ooffset,len){
 var to=toffset;
 var po=ooffset;
 
@@ -17575,7 +17575,9 @@ Clazz._Error || (Clazz._Error = Error);
 inheritClass(Clazz._Error, Throwable);
 Clazz.newClass$ (java.lang, "Error", function (){return Clazz._Error();}, Throwable);
 
-declareType(java.lang,"Exception",Throwable);
+C$ = declareType(java.lang,"Exception",Throwable);
+m$(C$, "c$", function(){}, 1);
+
 declareType(java.lang,"RuntimeException",Exception);
 declareType(java.lang,"IllegalArgumentException",RuntimeException);
 declareType(java.lang,"LinkageError",Error);
@@ -17927,9 +17929,10 @@ m$(C$, "c$$Class$ClassA$ClassA$I", function(declaringClass,parameterTypes,checke
 Clazz.super(C$, this);
 this.Class_=declaringClass;
 this.parameterTypes=parameterTypes;
+if (parameterTypes != null)
 for (var i = 0; i < parameterTypes.length; i++) {
-  this.signature += "$" + Clazz._getParamCode(parameterTypes[i]);
-}
+   this.signature += "$" + Clazz._getParamCode(parameterTypes[i]);
+} 
 this.constr = this.Class_.$clazz$[this.signature];
 this.exceptionTypes=checkedExceptions;
 this.modifiers=modifiers;
@@ -18167,20 +18170,21 @@ return this.getDeclaringClass().getName().hashCode()^this.getName().hashCode();
 });
 m$(C$,"invoke$O$OA",
 function(receiver,args){
-var name0 = this.getName();
-var name = name0;
+var name = this.getName();
 var types = this.parameterTypes;
-var a = (args ? new Array(args.length) : null);
+var a = (types == null ? null : new Array(args.length));
+
+if (types != null)
 for (var i = 0; i < types.length; i++) {
   var t = types[i];
   var paramCode = Clazz._getParamCode(t);
   a[i] = (t.__PRIMITIVE && args[i].valueOf ? args[i].valueOf() : args[i]);
   name += "$" + paramCode;
 }
-
-var m=this.Class_.$clazz$.prototype[name] || this.Class_.$clazz$[name];
+var c = this.Class_.$clazz$;
+var m=c.prototype[name] || c[name];
 if (m == null)
-  newMethodNotFoundException(this.Class_.$clazz$, name);  
+  newMethodNotFoundException(c, name);  
 return m.apply(receiver,a);
 });
 m$(C$,"toString",

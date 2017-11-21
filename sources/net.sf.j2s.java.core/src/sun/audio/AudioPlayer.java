@@ -2,6 +2,8 @@ package sun.audio;
 
 import javajs.util.JSThread;
 
+import java.io.InputStream;
+
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import swingjs.JSToolkit;
@@ -58,7 +60,9 @@ public class AudioPlayer extends JSThread {
 		
 	}
 
-	public void start(AudioDataStream ads) {
+	public void start(InputStream is) {
+		// TODO -- support standard stream?
+		AudioDataStream ads = (AudioDataStream) is;
 		try {
 			JSToolkit.playAudio(ads.getAudioData().buffer, ads.getAudioData().format);
 		} catch (UnsupportedAudioFileException e) {

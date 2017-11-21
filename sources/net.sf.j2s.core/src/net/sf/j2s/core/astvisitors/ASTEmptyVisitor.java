@@ -168,29 +168,6 @@ public class ASTEmptyVisitor extends ASTVisitor {
 		return false;
 	}
 
-	public static String removeBrackets(String qName) {
-		if (qName == null || qName.indexOf('<') < 0)
-			return qName;
-		StringBuffer buf = new StringBuffer();
-		int ltCount = 0;
-		char c;
-		for (int i = 0, len = qName.length(); i < len; i++) {
-			switch (c = qName.charAt(i)) {
-			case '<':
-				ltCount++;
-				continue;
-			case '>':
-				ltCount--;
-				continue;
-			default:
-				if (ltCount == 0)
-					buf.append(c);
-				continue;
-			}
-		}
-		return buf.toString().trim();
-	}
-
 	/**
 	 * allow @j2sXHTML and @j2sXCSS extensions for Javadoc
 	 * 

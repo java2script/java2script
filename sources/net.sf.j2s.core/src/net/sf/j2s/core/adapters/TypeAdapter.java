@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.WildcardType;
 
 import net.sf.j2s.core.astvisitors.ASTEmptyVisitor;
+import net.sf.j2s.core.astvisitors.ASTKeywordVisitor;
 
 /**
  * 
@@ -70,7 +71,7 @@ public class TypeAdapter extends AbstractPluginAdapter {
 		if (binding == null) {
 			return false;
 		}
-		String bindingName = ASTEmptyVisitor.removeBrackets(binding.getQualifiedName());
+		String bindingName = ASTKeywordVisitor.removeBrackets(binding.getQualifiedName());
 		if (name.equals(bindingName)) {
 			return true;
 		}
@@ -131,8 +132,8 @@ public class TypeAdapter extends AbstractPluginAdapter {
 		if (name == null) 
 			return null;
 		if (!isPackage) {
-			className= ASTEmptyVisitor.removeBrackets(className);
-			name = ASTEmptyVisitor.removeBrackets(name);
+			className= ASTKeywordVisitor.removeBrackets(className);
+			name = ASTKeywordVisitor.removeBrackets(name);
 		}
 		if (className != null) {
 			if (name.equals(className))
