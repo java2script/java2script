@@ -10,6 +10,7 @@ import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
 import java.awt.Image;
 import java.awt.Paint;
+import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.RenderingHints.Key;
@@ -189,8 +190,29 @@ public class JSGraphics2D //extends SunGraphics2D
 	}
 
 	
-	public void drawPolygon(int[] ayPoints, int[] axPoints, int nPoints) {
-		doPoly(ayPoints, axPoints, nPoints, false);
+
+	public void background(Color bgcolor) {
+		backgroundColor = bgcolor;
+		if (bgcolor == null) {
+			/*
+			 * 
+			 * reduce antialiasing, thank you,
+			 * http://www.rgraph.net/docs/howto-get-crisp-lines-with-no-antialias.html
+			 */
+			if (!isShifted)
+				ctx.translate(-0.5, -0.5);
+			isShifted = true;
+			return;
+		}
+		clearRect(0, 0, width, height);
+	}
+
+	public void drawPolygon(Polygon p) {
+		doPoly(p.xpoints, p.ypoints, p.npoints, false);
+	}
+
+	public void drawPolygon(int[] axPoints, int[] ayPoints, int nPoints) {
+		doPoly(axPoints, ayPoints, nPoints, false);
 	}
 
 	/**
@@ -220,25 +242,12 @@ public class JSGraphics2D //extends SunGraphics2D
 		ctx.stroke();
 	}
 
-	public void background(Color bgcolor) {
-		backgroundColor = bgcolor;
-		if (bgcolor == null) {
-			/*
-			 * 
-			 * reduce antialiasing, thank you,
-			 * http://www.rgraph.net/docs/howto-get-crisp-lines-with-no-antialias.html
-			 */
-			if (!isShifted)
-				ctx.translate(-0.5, -0.5);
-			isShifted = true;
-			return;
-		}
-		clearRect(0, 0, width, height);
+	public void fillPolygon(Polygon p) {
+		doPoly(p.xpoints, p.ypoints, p.npoints, true);
 	}
 
-	
-	public void fillPolygon(int[] ayPoints, int[] axPoints, int nPoints) {
-		doPoly(ayPoints, axPoints, nPoints, true);
+	public void fillPolygon(int[] axPoints, int[] ayPoints, int nPoints) {
+		doPoly(axPoints, ayPoints, nPoints, true);
 	}
 
 	

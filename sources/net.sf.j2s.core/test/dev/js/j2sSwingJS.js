@@ -95,19 +95,21 @@ Clazz.load = function(cName, isFinalize) {
   if (isFinalize) {
     var cl = cName;
     // C$.$clinit$ call to finalize all dependencies
-    inheritClass(cl, Clazz.load(cl.$load$[0]));
-    var interfacez = Clazz.load(cl.$load$[1]);
+    var ld = cl.$load$;
+    if (ld == null)
+      return;
+    inheritClass(cl, Clazz.load(ld[0]));
+    var interfacez = Clazz.load(ld[1]);
     if (interfacez != null)
       implementOf(cl, interfacez);
-      delete cl.$load$;      
+    delete cl.$load$;      
     return;
   }
   if (cName instanceof Array) {
-    unwrapArray(cName);
-    var cl = null;
+    var cl1 = null;
     for (var i = 0; i < cName.length; i++)
-      cl = Clazz.load(cName[i]);
-    return cl;
+      cl1 = Clazz.load(cName[i], isFinalize);
+    return cl1;
   }
   if (typeof cName == "string") {
     if (cName.indexOf("Thread.") == 0) {
@@ -117,9 +119,9 @@ Clazz.load = function(cName, isFinalize) {
       cName = "java.lang." + cName;
     return Clazz._4Name(cName, null, null, true);
   } 
-  var cl = cName;
-  cl.$clinit$ && cl.$clinit$();
-  return cl;
+  var cl2 = cName;
+  cl2.$clinit$ && cl2.$clinit$();
+  return cl2;
 }
 
 /**
@@ -147,7 +149,7 @@ Clazz.new = function(c, args, cl) {
   cl = cl || c.exClazz || c;
   cl.$clinit$ && cl.$clinit$();
   var f = new (Function.prototype.bind.apply(cl, arguments));
-  if (args[2] != Clazz.inheritArgs)
+  if (args[2] != inheritArgs)
     c.apply(f, args);
     
   _profileNew && addProfileNew(myclass, window.performance.now() - t0);
@@ -160,7 +162,7 @@ Clazz.getClass = function(cl) {
   // $clazz$ is the unwrapped JavaScript object
   if (cl.$Class$)
     return cl.$Class$;
-  java.lang.Class || Clazz.load("java.lang.Class");
+  java.lang.Class || Clazz.load("java.lang.Class", 0);
   var Class_ = cl.$Class$ = new java.lang.Class();
   Class_.$clazz$ = cl;
   return Class_;
@@ -178,9 +180,9 @@ Clazz.super = function(cl, obj, andInit) {
 
 Clazz.newInstance$ = function (objThis, args, isInner) {
   if (args && ( 
-     args[0] == Clazz.inheritArgs 
-     || args[1] == Clazz.inheritArgs 
-     || args[2] == Clazz.inheritArgs 
+     args[0] == inheritArgs 
+     || args[1] == inheritArgs 
+     || args[2] == inheritArgs 
   )) {
     // Just declaring a class, not creating an instance or doing field preparation.
     // That is, we are just generating the prototypes for this method using new superClass()
@@ -198,10 +200,9 @@ Clazz.newInstance$ = function (objThis, args, isInner) {
   objThis.__JSID__ = ++_jsid;
 
   if (!isInner) {
-    if ((!args || args && args.length == 0) 
-    && objThis.c$) {
+    if (!args && objThis.c$) {
     // allow for direct default call "new foo()" to run with its default constructor
-      objThis.c$.apply(objThis);  
+      objThis.c$.apply(objThis);
     }
     return;
   }
@@ -403,25 +404,37 @@ Clazz.newArray$ = function(baseClass, paramType, ndims, params) {
     //   Array.newInstance(class, length), and 
     //   Array.newInstance(class, [dim1, dim2, dim3....])
     // three-parameter option for (Integer.TYPE, -1, [3, 4, 5])
-    var cl = baseClass;
-    var values = ndims;
-    var ndims = paramType || 0;
+    var cl = arguments[0];
     var baseClass = cl.__BASECLASS || cl;
-    var isNum = (typeof ndims == "number");  
-    if (isNum && ndims >= -1) {
-      return (ndims == -1 ? Clazz.newArray$(baseClass, prim + "A", -1, values) 
-      : Clazz.newArray$(baseClass, prim + "A", (cl.__NDIM || 0) + 1, [ndims]));
+    var haveDims = (typeof arguments[1] == "number");  
+    var vals = arguments[haveDims ? 2 : 1];
+    var ndims = (arguments.length == 1 ? 0 : !haveDims ? vals.length : arguments[1] || 0);
+    if (ndims == 0) {
+      ndims = -1;
+      vals = [];
+    } else if (arguments.length == 2) {
+      //   Array.newInstance(class, length)
+       
+    }
+    if (haveDims && ndims >= -1) {
+      if (ndims == -1) {
+        // new int[] {3, 4, 5};
+        return Clazz.newArray$(baseClass, prim + "A", -1, vals);
+      }
+      // Array.newInstance(int[][].class, 3);  
+      return Clazz.newArray$(baseClass, prim + "A", (cl.__NDIM || 0) + 1, [ndims]);
     }      
+    params = vals;
     paramType = prim;
-    params = (isNum ? values : ndims);
-    ndims = params.length;
-    for (var i = ndims; --i >= 0;) {
+    for (var i = Math.abs(ndims); --i >= 0;) {
       paramType += "A";
-      if (params[i] == null && !isNum)
+      if (!haveDims && params[i] === null)
         params.length--;
     }
-    if (isNum)
-      ndims = -ndims;
+    if (haveDims) {
+      // new int[][] { {0, 1, 2}, {3, 4, 5} , {3, 4, 5} , {3, 4, 5} };
+      return  setArray(vals, baseClass, paramType, -ndims);
+    }
   }
   if (ndims < 0) {
     params = [-1, params];
@@ -470,6 +483,13 @@ Clazz.newArray$ = function(baseClass, paramType, ndims, params) {
   return newTypedA$(baseClass, params, nbits, ndims);
 }
 
+var setArray = function(vals, baseClass, paramType, ndims) {
+  vals.getClass = function () { return Clazz.arrayClass$(baseClass, ndims) };
+  vals.__ARRAYTYPE = paramType; // referenced in java.lang.Class
+  vals.__BASECLASS = baseClass;
+  vals.__NDIM = ndims;
+  return vals;
+}
 
 /**
  * in-place shift of an array by k elements, starting with element i0,
@@ -505,7 +525,7 @@ var newTypedA$ = function(baseClass, args, nBits, ndims) {
   var last = args.length - 1;
   var paramType = args[last];
   var val = args[last - 1];
-  if (last > 2) {
+  if (ndims > 1) {
      // array of arrays
      // Clazz.newA$(3, 5, null, "SAA") // last = 3
     var xargs = new Array(last--); 
@@ -551,11 +571,7 @@ var newTypedA$ = function(baseClass, args, nBits, ndims) {
     }  
     arr.__BYTESIZE = arr.BYTES_PER_ELEMENT || (nBits >> 3);
   }
-  arr.getClass = function () { return Clazz.arrayClass$(baseClass, Math.abs(ndims)) };
-  arr.__ARRAYTYPE = paramType; // referenced in java.lang.Class
-  arr.__BASECLASS = baseClass;
-  arr.__NDIM = ndims;
-  return arr;
+  return setArray(arr, baseClass, paramType, ndims);
 }
 
 try {
@@ -976,7 +992,7 @@ var extendObject = function(clazz) {
   // BH allows @j2sNative access without super constructor
   Clazz.clone = function(me) { 
     return appendMap(me.__ARRAYTYPE ? Clazz.newArray$(me.__BASECLASS, me.__ARRAYTYPE, -1, [-2, me])
-     : new me.constructor(Clazz.inheritArgs), me); 
+     : new me.constructor(inheritArgs), me); 
   }
 /*
  * Methods for thread in Object
@@ -1021,7 +1037,7 @@ var extendJO = function(c, name, name$, type, isNumber) {
  * @param clazzThis the class to implement
  * @param interfacez Array of interfaces
  */
-var implementOf = Clazz._implementOf = function (clazzThis, interfacez) {
+var implementOf = function (clazzThis, interfacez) {
   if (!interfacez)
     return;
   var i;
@@ -1030,14 +1046,14 @@ var implementOf = Clazz._implementOf = function (clazzThis, interfacez) {
     if (arguments.length == 2) {
       if (typeof interfacez == "string") {
         i = interfacez;
-        if (!(interfacez = Clazz.load(interfacez))) {
+        if (!(interfacez = Clazz.load(interfacez, 0))) {
           alert("Missing interface: " + i);
           return;
         }
       }
       if (!(interfacez instanceof Array)) {
         impls.push(interfacez);
-        copyProperties(clazzThis, interfacez);
+        copyProperties(interfacez, clazzThis, true);
         return;
       } 
       i = -1;
@@ -1049,6 +1065,18 @@ var implementOf = Clazz._implementOf = function (clazzThis, interfacez) {
       implementOf(clazzThis, interfacez[i]);
   }
 };
+
+var copyProperties = function(clazzSuper, clazzThis, andProto) {
+    for (var o in clazzSuper) {
+      if (clazzThis[o] == undefined
+      && !excludeSuper(o)
+      && !checkInnerFunction (clazzSuper, o)) {
+        clazzThis[o] = clazzSuper[o];
+        if (andProto)
+          clazzThis.prototype[o] = clazzSuper[o];
+      }
+    }
+}
 
 Clazz.saemCount0 = 0 // methods defined        5400 (Ripple.js)
 Clazz.saemCount1 = 0 // delegates created       937
@@ -1191,16 +1219,6 @@ inF.equals$O = inF.equals;
 for (var i = innerNames.length, name; --i >= 0;)
   Clazz._O[name = innerNames[i]] = Array[name] = inF[name];
 
-/*
- * Copy members of interface
- */
-/* private */
-var copyProperties = function(clazzThis, clazzSuper) {
-  for (var o in clazzSuper)
-    if (!excludeSuper(o)
-        && (typeof clazzSuper[o] != "function" || !checkInnerFunction(clazzSuper, o)))
-      clazzThis[o] = clazzThis.prototype[o] = clazzSuper[o];
-};
 
 /* private */
 var checkInnerFunction = function (hostSuper, funName) {
@@ -1395,17 +1413,18 @@ var unloadedClasses = [];
 
 /**
  * used specifically for declaring prototypes using 
- *  subclass.prototype = new superclass(Clazz.inheritArgs) 
+ *  subclass.prototype = new superclass(inheritArgs) 
  * without  running a constructor or doing field preparation.    
  *  
  */ 
-Clazz.inheritArgs = new (function(){return {"$J2SNOCREATE$":true}})();
+var inheritArgs = new (function(){return {"$J2SNOCREATE$":true}})();
 
 //var _prepOnly = new (function(){return {"$J2SPREPONLY$":true}})();
 
 var _jsid = 0;
 
 var decorateFunction = Clazz._decorateFunction = function (clazzFun, prefix, name, parentAndInterfaces, type) {
+  clazzFun.__NAME__ = name;
   var qName, bName;
   if (!prefix) {
     // e.g. Clazz.declareInterface (null, "ICorePlugin", org.eclipse.ui.IPlugin);
@@ -1426,6 +1445,7 @@ var decorateFunction = Clazz._decorateFunction = function (clazzFun, prefix, nam
   }
   extendJO(clazzFun, qName, bName, type);
   Clazz.setGlobal(qName, clazzFun);
+
   for (var i = innerNames.length; --i >= 0;) {
     clazzFun[innerNames[i]] = inF[innerNames[i]];
   }
@@ -1441,6 +1461,8 @@ var decorateFunction = Clazz._decorateFunction = function (clazzFun, prefix, nam
 var excludeSuper = function(o) {
  return o == "b$"
       || o == "$init$"
+      || o == "$clinit$"
+      || o == "$load$"
       || o == "c$" 
       || o == "$Class$"
       || o == "prototype" 
@@ -1460,19 +1482,14 @@ var excludeSuper = function(o) {
 var inheritClass = function(clazzThis, clazzSuper, objSuper){
   if (clazzSuper) {  
   //var thisClassName = getClassName (clazzThis);
-    for (var o in clazzSuper) {
-      if (clazzThis[o] == undefined
-      && !excludeSuper(o)
-      && !checkInnerFunction (clazzSuper, o))
-        clazzThis[o] = clazzSuper[o];
-    }
+    copyProperties(clazzSuper, clazzThis, false);
     var p = clazzThis.prototype;
     if (unloadedClasses[getClassName(clazzThis, true)]) {
       // Don't change clazzThis.protoype! Keep it!
     } else if (clazzSuper == Number) {
       clazzThis.prototype = new Number ();
     } else {
-      clazzThis.prototype = new clazzSuper (null, Clazz.inheritArgs);     
+      clazzThis.prototype = new clazzSuper (null, inheritArgs);     
     } 
     for (o in p)
       clazzThis.prototype[o] = p[o];
@@ -2112,9 +2129,9 @@ Clazz._4Name = function(clazzName, applet, state, asClazz) {
       clazzName = "java.lang." + clazzName;  
   var isok = Clazz.isClassDefined(clazzName);
   if (isok && asClazz) {
-    var cl = Clazz.allClasses[clazzName];
-    cl.$clinit$ && cl.$clinit$();
-    return cl;
+    var cl1 = Clazz.allClasses[clazzName];
+    cl1.$clinit$ && cl1.$clinit$();
+    return cl1;
   } 
   if (!isok) {
     var name2 = null;
@@ -2671,6 +2688,9 @@ java.lang.System = System = {
     if (key.indexOf(".") > 0) {
       v = null;    
       switch (key) {
+      case "java.awt.printerjob":
+        v = "swingjs.JSPrinterJob";
+        break; 
       case "java.class.version":
         v = "50";
         break;
@@ -4332,41 +4352,6 @@ var ht=this.getTime();
 return parseInt(ht)^parseInt((ht>>32));
 });
 
-// TODO: This is not right. Why here????
-
-/*
-C$=declareType(java.util,"EventObject",null,java.io.Serializable);
-Clazz._setDeclared("java.util.EventObject", java.util.EventObject); 
-
-m$(C$, "c$", function(source){
-this.source=null;
-if(arguments.length > 0  && source!=null)this.source=source;
-else throw new IllegalArgumentException();
-}, 1);
-
-m$(C$,"getSource",
-function(){
-return this.source;
-});
-m$(C$,"toString",
-function(){
-return this.getClass().getName()+"[source="+String.valueOf(this.source)+']';
-});
-Clazz.newInterface$(java.util,"EventListener");
-
-C$=Clazz.newClass$(function(){
-this.listener=null;
-},java.util,"EventListenerProxy",null,java.util.EventListener);
-m$(C$, "c$", function(listener){
-this.listener=listener;
-},1);
-
-m$(C$,"getListener",
-function(){
-return this.listener;
-});
-*/
-
 Clazz.newInterface$(java.util,"Iterator");
 
 Clazz.newInterface$(java.util,"ListIterator",java.util.Iterator);
@@ -5055,7 +5040,7 @@ m$(C$,"newInstance$OA", function(args){
     }
     var instance = Clazz.new(this.constr, a);
   }
-//  var instance=new this.clazz(null, Clazz.inheritArgs);
+//  var instance=new this.clazz(null, inheritArgs);
   if (instance == null)
     newMethodNotFoundException(this.Class_.$clazz$, this.signature);  
   return instance;

@@ -1806,7 +1806,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	}
 
 	/**
-	 * Nest loads of inner classes pkg.Foo.Bar as Clazz.load(Clazz.load('pkg.Foo').Bar)
+	 * Nest loads of inner classes pkg.Foo.Bar as Clazz.load(Clazz.load('pkg.Foo',0).Bar)
 	 * 
 	 * @param className
 	 * @return
@@ -1826,6 +1826,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			s += "." + parts[i++];
 		if (!parts[0].equals("C$"))
 			s = "'"+ s + "'";
+//		int nlast = parts.length;
 		String ret = "Clazz.load(" + s + ")";
 		// add inner classes 
 		while (i < parts.length)

@@ -52,7 +52,7 @@ import javax.print.attribute.PrintJobAttribute;
  *
  * @author  Alan Kaminsky
  */
-public final class JobName extends TextSyntax
+public final class JobName extends TextSyntax	
         implements PrintRequestAttribute, PrintJobAttribute {
 
     private static final long serialVersionUID = 4660359192078689545L;
