@@ -12,7 +12,7 @@ public class Huffman {
 	private boolean[][] encoding;
 
 	public Huffman(double[] huffStats) {
-		TreeSet<Node> nodes = new TreeSet<Node>();
+		TreeSet<Node> nodes = new TreeSet<Node>(); 
 		for (int i=0; i<huffStats.length; i++) {
 			nodes.add(new Node(i,huffStats[i]));
 		}
