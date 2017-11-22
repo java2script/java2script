@@ -1232,7 +1232,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	 * @param op
 	 *            just an identifier of the context: = for assignment, r for
 	 *            return statement, v for variable declaration fragment, p for
-	 *            method parameter
+	 *            method parameter, q for first parameter of indexOf or lastIndexOf, which are officially ints 
 	 */
 	protected void addExpressionAsTargetType(Expression exp, Object targetType, String op, List<?> extendedOperands) {
 		if (targetType == null
@@ -1245,13 +1245,18 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			// BH: Question: When does typeBinding == null?
 			// A: when there is a compilation error, I think.
 			// OK, now we have the same situation as any operand.
+			String rightName = expTypeBinding.getName();
+			if (rightName.equals("char") && op == "q") {
+				boxingNode(exp, false);
+				return;
+			}
 			String paramName = (exp.resolveTypeBinding().isArray() ? ";" : targetType instanceof ITypeBinding ? ((ITypeBinding) targetType).getName()
 					: targetType.toString());
 			boolean isNumeric = isNumericType(paramName);
 			if ((isNumeric || paramName.equals("char")) && !isBoxTyped(exp)) {
 				// using operator "m" to limit int application of $i$
 				
-				addPrimitiveTypedExpression(null, null, paramName, op, exp, expTypeBinding.getName(), extendedOperands,
+				addPrimitiveTypedExpression(null, null, paramName, op, exp, rightName, extendedOperands,
 						false);
 			} else {
 				// char f() { return Character }
@@ -1306,13 +1311,14 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	}
 
 	@SuppressWarnings("null")
-	protected void addMethodArguments(ITypeBinding[] parameterTypes, boolean methodIsVarArgs, List<?> arguments) {
+	protected void addMethodArguments(ITypeBinding[] parameterTypes, boolean methodIsVarArgs, List<?> arguments, boolean isIndexOf) {
 		String post = ", ";
 		int nparam = parameterTypes.length;
 		int argCount = arguments.size();
 		for (int i = 0; i < nparam; i++) {
 			ITypeBinding paramType = parameterTypes[i];
 			Expression arg = (i < argCount ? (Expression) arguments.get(i) : null);
+			String op = (isIndexOf && i == 0 ? "q" : "p");
 			if (i == nparam - 1) {
 				// BH: can't just check for an array; it has to be an array with
 				// the right number of dimensions
@@ -1321,7 +1327,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 						&& !(arg instanceof NullLiteral)) {
 					buffer.append("[");
 					for (int j = i; j < argCount; j++) {
-						addExpressionAsTargetType((Expression) arguments.get(j), paramType, "p", null);
+						addExpressionAsTargetType((Expression) arguments.get(j), paramType, op, null);
 						if (j != argCount - 1) {
 							buffer.append(", ");
 						}
@@ -1331,7 +1337,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 				}
 				post = "";
 			}
-			addExpressionAsTargetType(arg, paramType, "p", null);
+			addExpressionAsTargetType(arg, paramType, op, null);
 			buffer.append(post);
 		}
 	}
@@ -1513,8 +1519,9 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			if (isAssignment)
 				buffer.append("(");
 		}
-		if (!boxingNode(right, fromChar) && fromChar && !toChar)
+		if (!boxingNode(right, fromChar) && fromChar && !toChar) {
 			buffer.append(CHARCODEAT0);
+		}
 		if (extendedOperands != null) {
 			addExtendedOperands(extendedOperands, op, ' ', ' ', false);
 		}
@@ -1689,7 +1696,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 							: name.indexOf("Character") >= 0 ? "char" : name.replace("java.lang.", "").toLowerCase());
 					getBuffer().append("(");
 					element.accept(this);
-					getBuffer().append(toCharCode && name == "char" ? ").$c()" : ")." + name + "Value()");
+					getBuffer().append(toCharCode && name == "char" ? ")" + CHARCODEAT0 : ")." + name + "Value()");
 					return true;
 				}
 			}
@@ -1804,7 +1811,9 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	 * @param className
 	 * @return
 	 */
-	private String getNestedClazzLoads(String className) {		
+	private String getNestedClazzLoads(String className) {
+		//if (className.startsWith("C$."))
+		//  className = getPackageName() + "." + getClassName() + className.substring(2);
 		String[] parts = className.split("\\.");
 		String s = parts[0];
 		if (s.equals("P$")) {
@@ -1815,7 +1824,9 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		// loop through packages and outer Class 
 		while (i < parts.length && (i == 1 || !Character.isUpperCase(parts[i - 1].charAt(0))))
 			s += "." + parts[i++];
-		String ret = "Clazz.load('" + s + "')";
+		if (!parts[0].equals("C$"))
+			s = "'"+ s + "'";
+		String ret = "Clazz.load(" + s + ")";
 		// add inner classes 
 		while (i < parts.length)
 			ret = "Clazz.load(" + ret + "." + parts[i++] + ")";

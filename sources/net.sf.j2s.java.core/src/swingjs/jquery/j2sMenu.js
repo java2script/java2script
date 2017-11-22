@@ -105,7 +105,7 @@ Swing.setMenu = function(menu) {
     menu._visible = false;
     menu._j2sname = menu.id = menu.ui.id + '_' + (++Swing.menuCounter);
     menu.$ulTop = J2S.__$(); // empty jQuery selector
-    var proto = menu.getClass().prototype;
+    var proto = menu.$init$.exClazz.prototype;
     proto._hideJSMenu = function(){Swing.hideMenu(this)};
     proto.dragBind || ( proto.dragBind = function(isBind){} );// J2S._setDraggable(this.$ulTop, true)};
     proto.setContainer || ( proto.setContainer = function(c){ this.$ulTop = c } );

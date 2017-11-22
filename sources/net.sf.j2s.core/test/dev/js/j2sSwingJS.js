@@ -1119,6 +1119,8 @@ var equalsOrExtendsLevel = function (clazzThis, clazzAncestor) {
 Clazz.getInheritedLevel = function (clazzTarget, clazzBase, isTgtStr, isBaseStr) {
   if (clazzTarget === clazzBase)
     return 0;
+  if (clazzBase.$load$)
+    Clazz.load(clazzBase,1);
   if (isTgtStr && ("void" == clazzTarget || "unknown" == clazzTarget))
     return -1;
   if (isBaseStr && ("void" == clazzBase || "unknown" == clazzBase))
@@ -4598,7 +4600,10 @@ TypeError.prototype.getMessage || (TypeError.prototype.getMessage = function(){ 
 Clazz.Error = Error;
 
 var declareType = function(prefix, name, clazzSuper, interfacez) {
-  return Clazz.newClass$(prefix, name, null, clazzSuper, interfacez);
+  var cl = Clazz.newClass$(prefix, name, null, clazzSuper, interfacez);
+  if (clazzSuper)
+    inheritClass(cl, clazzSuper);
+  return cl;
 };
 
 // at least allow Error() by itself to work as before
@@ -5048,10 +5053,7 @@ m$(C$,"newInstance$OA", function(args){
         a[i] = (this.parameterTypes[i].__PRIMITIVE ? args[i].valueOf() : args[i]);
       }
     }
-    var instance = new (Function.prototype.bind.apply(this.Class_.$clazz$, [null, []]));
-    if (instance) {
-      this.constr.apply(instance, a);
-    }
+    var instance = Clazz.new(this.constr, a);
   }
 //  var instance=new this.clazz(null, Clazz.inheritArgs);
   if (instance == null)

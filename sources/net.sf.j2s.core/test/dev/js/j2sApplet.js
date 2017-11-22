@@ -1215,7 +1215,7 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 
 			J2S._setMouseOwner(who, true);
       var ui = ev.target["data-ui"];
-      var handled = (ui && ui.handleJSEvent(who, 501, ev));
+      var handled = (ui && ui.handleJSEvent$O$I$O(who, 501, ev));
       if (checkStopPropagation(ev, ui, handled))
         return true;  
       ui = ev.target["data-component"];
@@ -1245,7 +1245,7 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
         
 			J2S._setMouseOwner(null);
       var ui = ev.target["data-ui"];
-      var handled = (ui && ui.handleJSEvent(who, 502, ev));
+      var handled = (ui && ui.handleJSEvent$O$I$O(who, 502, ev));
       if (checkStopPropagation(ev, ui, handled))
         return true;
       ui || (ui = ev.target["data-component"]);
@@ -1286,7 +1286,7 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
         return true;
       }
       var ui = ev.target["data-ui"];
-      var handled = (ui && ui.handleJSEvent(who, 507, ev));
+      var handled = (ui && ui.handleJSEvent$O$I$O(who, 507, ev));
       if (checkStopPropagation(ev, ui, handled))
         return true;
       ui || (ui = ev.target["data-component"]);

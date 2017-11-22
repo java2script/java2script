@@ -4,6 +4,23 @@ import test.Test_Class.Test_Class_Inner;
 
 class Test_Static extends Test_ implements Test_int3, Test_int2, Test_int1 {
 
+	/**
+	 * Note that a static block in a main class is executed prior to running main().
+	 * So you can set the arguments here as thisApplet.__Info.args, for example. 
+	 * Setting j2sHeadless = true prevents all the AWT/Swing classes from being loaded
+	 * but also means you cannot use them later. It really means headless just like in Java 
+	 * 
+	 * @j2sNative
+	 * 
+	 * j2sHeadless = true;
+	 * 
+	 * thisApplet.__Info.args = ["1","2","3"];
+	 * 
+	 */
+	static {
+		// JS only
+	}
+	
 	private static boolean b = false;
 	private final static char c0 = new Character('c');
 	private final static char c2 = '2';
@@ -36,6 +53,25 @@ class Test_Static extends Test_ implements Test_int3, Test_int2, Test_int1 {
 	
 	@SuppressWarnings("static-access")
 	public static void main(String[] args) {
+		
+		  /**
+		   * @j2sNative
+		   * 
+		   * 	  System.out.println(args);
+		   * 
+		   *   try{
+		   *     afldsjadf.adfadf;
+		   *    
+		   *   } catch(e) {// is being called by Test_.js 
+		   *     if (e.stack.indexOf("Test_.js")) args[1] = 2;
+		   *   }
+	       *
+		   */
+		  {
+			  args = new String[] {"1","2","3"};
+		  }
+		  assert(args[1] == "2");
+
 		assert (y == 3);
 		b = false;
 		new Test_Static().test();

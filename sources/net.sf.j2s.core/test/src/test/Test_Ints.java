@@ -16,6 +16,8 @@ public class Test_Ints extends Test_ {
 		new Test_Ints();
 		new Test_Ints(3,5,6);
 		new Test_Ints(3.5f,5.5f,6.5f);
+		int i = 6;
+		assert(3/(double) i == 0.5);
 		System.out.println("Test_Ints OK");
 	}
 }

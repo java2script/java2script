@@ -7,7 +7,6 @@ public class Test_Enum extends Test_{
 		SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY 
 	}
 
-	
 	Day day;
 
 	public Test_Enum(Day day) {
@@ -52,7 +51,7 @@ public class Test_Enum extends Test_{
 		Test_Enum seventhDay = new Test_Enum(Day.SUNDAY);
 		assert(seventhDay.tellItLikeItIs() == "Weekends are best.");
 		Planet.main(new String[] { "155" });
-		
+		System.out.println("Test_Enum OK");
 	}
 
 	public enum Planet {

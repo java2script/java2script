@@ -401,7 +401,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			postfix = "]";
 		}
 		if (!isDefault)
-			addMethodParameterList(node.arguments(), methodDeclaration, true, prefix, postfix);
+			addMethodParameterList(node.arguments(), methodDeclaration, true, prefix, postfix, false);
 		buffer.append(")");
 		return false;
 	}
@@ -413,7 +413,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		buffer.append("C$.c$").append(qualifiedParams).append(".apply(this");
 		IMethodBinding methodDeclaration = (constructorBinding == null ? null
 				: constructorBinding.getMethodDeclaration());
-		addMethodParameterList(arguments, methodDeclaration, true, ", [", "]");
+		addMethodParameterList(arguments, methodDeclaration, true, ", [", "]", false);
 		buffer.append(");\r\n");
 		return false;
 	}
@@ -720,6 +720,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 		boolean isSpecialMethod = false;
 		String methodName = node.getName().getIdentifier();
+		boolean isIndexOf = false;
 		if (MethodAdapter.isMethodRegistered(methodName)) {
 			String j2sName = MethodAdapter.translate(className, methodName);
 			if (j2sName != null) {
@@ -737,8 +738,10 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 						buffer.append(j2sName);
 						return false;
 					}
-				}
+				} 
 			}
+		} else if (methodName.equals("indexOf") || methodName.equals("lastIndexOf")) {
+			isIndexOf = className.equals("java.lang.String");
 		}
 
 		// record whether this.b$[.....] was used, and if so and it is private,
@@ -762,7 +765,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		} else {
 			buffer.append("(");
 		}
-		addMethodParameterList(node.arguments(), mBinding, false, null, null);
+		addMethodParameterList(node.arguments(), mBinding, false, null, null, isIndexOf);
 		buffer.append(term);
 		return false;
 	}
@@ -873,7 +876,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		} else {
 			buffer.append("C$.superClazz.prototype." + name + ".apply(this, ");
 			buffer.append("[");
-			addMethodParameterList(node.arguments(), mBinding, false, null, null);
+			addMethodParameterList(node.arguments(), mBinding, false, null, null, false);
 			buffer.append("])");
 		}
 
@@ -1555,7 +1558,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 					.append(", \"");
 			enumConst.getName().accept(this);
 			buffer.append("\", " + i);
-			addMethodParameterList(enumConst.arguments(), binding, true, ", [", "]");
+			addMethodParameterList(enumConst.arguments(), binding, true, ", [", "]", false);
 			if (anonName != null)
 				buffer.append(", ").append(anonName);
 			buffer.append(");\r\n");
@@ -1633,7 +1636,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		if (methodDeclaration != null) {
 			List<?> args = node.arguments();
 			addMethodParameterList(args, methodDeclaration, true,
-					args.size() > 0 || methodDeclaration.isVarargs() ? ", " : null, null);
+					args.size() > 0 || methodDeclaration.isVarargs() ? ", " : null, null, false);
 		}
 		buffer.append("]");
 
@@ -1655,9 +1658,10 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	 * @param isConstructor
 	 * @param prefix
 	 * @param suffix
+	 * @param isIndexOf TODO
 	 */
 	private void addMethodParameterList(List<?> arguments, IMethodBinding methodDeclaration, boolean isConstructor,
-			String prefix, String suffix) {
+			String prefix, String suffix, boolean isIndexOf) {
 		if (methodDeclaration == null)
 			return;
 		boolean methodIsVarArgs = methodDeclaration.isVarargs();
@@ -1681,7 +1685,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 				buffer.append(prefix);
 				prefix = null;
 			}
-			addMethodArguments(parameterTypes, methodIsVarArgs, arguments);
+			addMethodArguments(parameterTypes, methodIsVarArgs, arguments, isIndexOf);
 		}
 		if (prefix == null && suffix != null)
 			buffer.append(suffix);
@@ -1696,7 +1700,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		buffer.append("C$.superClazz.c$")
 				.append(getJ2SParamQualifier(null, node.resolveConstructorBinding(), null));
 		buffer.append(".apply(this");
-		addMethodParameterList(node.arguments(), methodDeclaration, true, ", [", "]");
+		addMethodParameterList(node.arguments(), methodDeclaration, true, ", [", "]", false);
 		buffer.append(");\r\n");
 		addCallInit();
 	}

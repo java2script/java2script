@@ -148,7 +148,7 @@ public class StringTokenizer implements Enumeration<Object> {
 	 */
 	public Object nextElement() {
 		return nextToken();
-	}
+	} 
 
 	/**
 	 * Returns the next token in the string as a String.
@@ -157,10 +157,9 @@ public class StringTokenizer implements Enumeration<Object> {
 	 * @exception NoSuchElementException
 	 *                if no tokens remain
 	 */
-	public String nextToken() {
+	public String nextToken() {		
 		int i = position;
 		int length = string.length();
-
 		if (i < length) {
 			if (returnDelimiters) {
 				if (delimiters.indexOf(string.charAt(position), 0) >= 0)

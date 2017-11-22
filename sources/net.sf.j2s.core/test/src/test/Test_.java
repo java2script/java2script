@@ -6,6 +6,9 @@ class Testx {
 
 abstract class Test_ {
 	
+	static boolean j2sHeadless = true;
+
+
 	private static int i_ = 0;
 	private int t = 0;
 	
