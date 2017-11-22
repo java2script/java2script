@@ -176,6 +176,7 @@ public class LinkedHashMap<K,V>
     public LinkedHashMap(int initialCapacity, float loadFactor) {
         super(initialCapacity, loadFactor);
         accessOrder = false;
+        init(); // can't rely on HashMap to do this, because it is before the <clinit>
     }
 
     /**
@@ -188,6 +189,7 @@ public class LinkedHashMap<K,V>
     public LinkedHashMap(int initialCapacity) {
         super(initialCapacity);
         accessOrder = false;
+        init(); // can't rely on HashMap to do this, because it is before the <clinit>
     }
 
     /**
@@ -197,6 +199,7 @@ public class LinkedHashMap<K,V>
     public LinkedHashMap() {
         super();
         accessOrder = false;
+        init(); // can't rely on HashMap to do this, because it is before the <clinit>
     }
 
     /**
@@ -211,6 +214,7 @@ public class LinkedHashMap<K,V>
     public LinkedHashMap(Map<? extends K, ? extends V> m) {
         super(m);
         accessOrder = false;
+        init(); // can't rely on HashMap to do this, because it is before the <clinit>
     }
 
     /**
@@ -229,6 +233,7 @@ public class LinkedHashMap<K,V>
                          boolean accessOrder) {
         super(initialCapacity, loadFactor);
         this.accessOrder = accessOrder;
+        init(); // can't rely on HashMap to do this, because it is before the <clinit>
     }
 
     /**
@@ -237,6 +242,7 @@ public class LinkedHashMap<K,V>
      * the chain.
      */
     void init() {
+    	// actually, this fails if called from HashMap! - BH
         header = new Entry<K,V>(-1, null, null, null);
         header.before = header.after = header;
     }
