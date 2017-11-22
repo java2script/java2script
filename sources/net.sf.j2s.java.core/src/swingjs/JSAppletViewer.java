@@ -444,6 +444,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 																			// was
 																			// used
 				japplet.setVisible(true);
+				japplet.validate(); // one last validation necessary for PolyhedronApplet
 				showAppletStatus("ready");
 				JSUtil.readyCallback(appletName, fullName, applet, this);
 				if (isResizable && !addFrame) {

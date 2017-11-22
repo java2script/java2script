@@ -41,6 +41,8 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
+import java.util.ResourceBundle;
+
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
@@ -53,6 +55,8 @@ import javax.swing.text.NumberFormatter;
 //import java.util.HashMap;
 //import java.util.Map;
 //TODO import javax.swing.text.DateFormatter;
+
+import sun.util.resources.LocaleData;
 
 //
 
@@ -1089,10 +1093,10 @@ public class JSpinner extends JComponent
         // takes a Locale: 4923525
         private static String getDefaultPattern(Locale locale) {
 //            // Get the pattern for the default locale.
-//            ResourceBundle rb = LocaleData.getNumberFormatData(locale);
-//            String[] all = rb.getStringArray("NumberPatterns");
-//            return all[0];
-        	return null;
+            ResourceBundle rb = LocaleData.getNumberFormatData(locale);
+            String[] all = rb.getStringArray("NumberPatterns");
+            return all[0];
+//        	return null;
         }
 
         /**

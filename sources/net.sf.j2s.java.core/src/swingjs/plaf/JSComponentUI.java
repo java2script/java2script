@@ -424,7 +424,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 
 	protected JQueryObject $(DOMNode node) {
 		return JSUtil.getJQuery().$(node);
-	}
+	} 
 
 	public JSComponentUI set(JComponent target) {
 		c = target;
@@ -601,7 +601,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		{
 			handleJSEvent(null, 0, null); // Eclipse reference only; not in JavaScript
 		}
-		$(node).bind(eventList, f);
+		$(node).bind(eventList, f); 
 	}
 
 	/**
