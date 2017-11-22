@@ -232,10 +232,15 @@ public class ASTEmptyVisitor extends ASTVisitor {
 	 *  
 	 * @param name
 	 * @param checkPackages
+	 * @param addName TODO
 	 * @return
 	 */
-	protected boolean checkKeywordViolation(String name, boolean checkPackages) {
-		return FieldAdapter.checkKeywordViolation(name, checkPackages ? definedPackageNames : null);
+	protected void appendValidFieldName$Qualifier(String name, boolean checkPackages, boolean addName) {
+		boolean isViolation = FieldAdapter.checkKeywordViolation(name, checkPackages ? definedPackageNames : null);
+		if (isViolation)
+			buffer.append("$");
+		if (addName)
+			buffer.append(name);
 	}
 
 	protected String getClassName() {
@@ -245,8 +250,8 @@ public class ASTEmptyVisitor extends ASTVisitor {
 		return ((VariableAdapter) getAdaptable(VariableAdapter.class)).getConstantValue(exp);
 	}
 
-	protected String getFieldName(ITypeBinding binding, String name) {
-		return J2SMapAdapter.getFieldName(binding, name);
+	protected String getFieldName$Appended(ITypeBinding binding, String name) {
+		return J2SMapAdapter.getFieldName$Appended(binding, name);
 	}
 
 	protected List<FinalVariable> getVariableList(char fvn) { 

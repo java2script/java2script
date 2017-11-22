@@ -42,32 +42,31 @@ public class J2SMapAdapter extends AbstractPluginAdapter {
 		return binding.getName();
 	}
 
-	public static boolean checkSameName(ITypeBinding binding, String name) {
+	public static boolean checkInheritedMethodNameCollision(ITypeBinding binding, String name) {
 		if (binding != null) {
-			IMethodBinding[] declaredMethods = binding.getDeclaredMethods();
-			for (int i = 0; i < declaredMethods.length; i++) {
-				String methodName = getJ2SMethodName(declaredMethods[i]);
-				if (name.equals(methodName)) {
+			IMethodBinding[] methods = binding.getDeclaredMethods();
+			for (int i = 0; i < methods.length; i++)
+				if (name.equals(getJ2SMethodName(methods[i])))
 					return true;
-				}
-			}
 			ITypeBinding superclass = binding.getSuperclass();
-			if (checkSameName(superclass, name)) {
+			if (checkInheritedMethodNameCollision(superclass, name))
 				return true;
-			}
 			ITypeBinding[] interfaces = binding.getInterfaces();
-			if (interfaces != null) {
-				for (int i = 0; i < interfaces.length; i++) {
-					if (checkSameName(interfaces[i], name)) {
+			if (interfaces != null)
+				for (int i = 0; i < interfaces.length; i++)
+					if (checkInheritedMethodNameCollision(interfaces[i], name))
 						return true;
-					}
-				}
-			}
 		}
 		return false;
 	}
 
-	public static String getFieldName(ITypeBinding binding, String name) {
+	/**
+	 * 
+	 * @param binding
+	 * @param name
+	 * @return
+	 */
+	public static String getFieldName$Appended(ITypeBinding binding, String name) {
 		if (binding != null) {
 			ITypeBinding superclass = binding.getSuperclass();
 			if (superclass != null) {
@@ -79,7 +78,7 @@ public class J2SMapAdapter extends AbstractPluginAdapter {
 						buffer.append("$");
 					}
 				}
-				buffer.append(getFieldName(superclass, name));
+				buffer.append(getFieldName$Appended(superclass, name));
 				return buffer.toString();
 			}
 		}
@@ -137,9 +136,18 @@ public class J2SMapAdapter extends AbstractPluginAdapter {
 		return false;
 	}
 
+	/**
+	 * Check for generic method name conflict with JavaScript methods such as .bind(), .call(), etc. 
+	 * but exclude methods in swingjs.api, because those are meant to be that way.
+	 * 
+	 * @param binding
+	 * @return
+	 */
 	private static String getJ2SMethodName(IMethodBinding binding) {
-		String nameID = binding.getName();
-		return (FieldAdapter.checkKeywordViolation(nameID, null) ? "$" + nameID : nameID);
+		String name = binding.getName();
+		boolean isViolation = (FieldAdapter.checkKeywordViolation(name, null)
+				&& !binding.getDeclaringClass().getQualifiedName().startsWith("swingjs.api"));
+		return (isViolation ? "$" + name : name);
 	}
 
 

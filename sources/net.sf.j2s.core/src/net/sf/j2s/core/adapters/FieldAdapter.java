@@ -80,7 +80,7 @@ public class FieldAdapter extends AbstractPluginAdapter {
 	
 	/**
 	 * Check whether the given QualifiedName is just simple or not.
-	 * The "just simple" means only "*.*" format.
+	 * The "just simple" means foo.bar not just foo?
 	 * 
 	 * @param node
 	 * @return
@@ -92,6 +92,7 @@ public class FieldAdapter extends AbstractPluginAdapter {
 		} else if (qualifier instanceof QualifiedName) {
 			return isSimpleQualified((QualifiedName) qualifier);
 		}
+		System.err.println(">>> FieldAdapter not simple " + node.getFullyQualifiedName());
 		return false;
 	}
 

@@ -838,29 +838,21 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	public boolean visit(SuperFieldAccess node) {
 		ITypeBinding classBinding = resolveParentBinding(getClassDeclarationFor(node));
 		String fieldName = getJ2SName(node.getName());
+		buffer.append("this.");
 		if (isInheritedFieldName(classBinding, fieldName)) {
 			if (classBinding != null) {
 				IVariableBinding[] declaredFields = classBinding.getDeclaredFields();
 				for (int i = 0; i < declaredFields.length; i++) {
 					String superFieldName = getJ2SName(declaredFields[i]);
 					if (fieldName.equals(superFieldName)) {
-						buffer.append("this.");
-						if (checkKeywordViolation(fieldName, false)) {
-							buffer.append('$');
-						}
-						fieldName = getFieldName(classBinding.getSuperclass(), fieldName);
-						buffer.append(fieldName);
+						appendValidFieldName$Qualifier(fieldName, false, false);
+						buffer.append(getFieldName$Appended(classBinding.getSuperclass(), fieldName));
 						return false;
 					}
 				}
 			}
 		}
-		buffer.append("this.");
-		if (checkKeywordViolation(fieldName, false)) {
-			buffer.append('$');
-		}
-		buffer.append(fieldName);
-
+		appendValidFieldName$Qualifier(fieldName, false, true);
 		return false;
 	}
 

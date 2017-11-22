@@ -15797,7 +15797,7 @@ Number.__CLASS_NAME__="Number";
 implementOf(Number,java.io.Serializable);
 Number.equals=Clazz._inF.equals;
 Number.getName=Clazz._inF.getName;
-Number.prototype.compareTo = function(x) { var a = this.valueOf(), b = x.valueOf(); return (a < b ? -1 : a == b ? 0 : 1) };
+Number.prototype.compareTo = Number.prototype.compareTo$TT = function(x) { var a = this.valueOf(), b = x.valueOf(); return (a < b ? -1 : a == b ? 0 : 1) };
 Number.compare = function(a,b) { return (a < b ? -1 : a == b ? 0 : 1) };
 
 var $b$ = new Int8Array(1);
@@ -16481,7 +16481,7 @@ throw e;
 }
 return result;
 }, 1);
-m$(Boolean,"compareTo",
+m$(Boolean,["compareTo","compareToTT"],
 function(b){
 return(b.value==this.value?0:(this.value?1:-1));
 });
@@ -17169,7 +17169,7 @@ return(this.value).charCodeAt(i);
 
 C$.prototype.$c = function(){return this.value.charCodeAt(0)};
 
-m$(C$,"compareTo",
+m$(C$,["compareTo","compareToTT"],
 function(c){
 return(this.value).charCodeAt(0)-(c.value).charCodeAt(0);
 });
@@ -17280,13 +17280,13 @@ m$(java.util.Date,"equals$O",
 function(obj){
 return Clazz.instanceOf(obj,java.util.Date)&&this.getTime()==(obj).getTime();
 });
-m$(java.util.Date,"compareTo",
+m$(java.util.Date,["compareTo","compareToTT"],
 function(anotherDate){
 var thisTime=this.getTime();
 var anotherTime=anotherDate.getTime();
 return(thisTime<anotherTime?-1:(thisTime==anotherTime?0:1));
 });
-m$(java.util.Date,"compareTo",
+m$(java.util.Date,"compareTo$O",
 function(o){
 return this.compareTo(o);
 });

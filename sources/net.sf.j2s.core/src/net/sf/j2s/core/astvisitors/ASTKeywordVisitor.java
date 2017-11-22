@@ -868,6 +868,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(SimpleName node) {
+		// xxx.yyy.zzz...
 		String constValue = getConstantValue(node);
 		if (constValue != null) {
 			buffer.append(constValue);
@@ -884,9 +885,10 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			buffer.append(node);
 			return false;
 		}
-		char ch = (buffer.length() == 0 ? '\0' : buffer.charAt(buffer.length() - 1));
+		char leadingChar = (buffer.length() == 0 ? '\0' : buffer.charAt(buffer.length() - 1));
+		boolean isQualified = (leadingChar == '.');
 		// looking for "." or '"' here.
-		if (ch == '.' && xparent instanceof QualifiedName) {
+		if (isQualified && xparent instanceof QualifiedName) {
 			if (binding != null && binding instanceof IVariableBinding) {
 				IVariableBinding varBinding = (IVariableBinding) binding;
 				ITypeBinding declaringClass = varBinding.getVariableDeclaration().getDeclaringClass();
@@ -903,38 +905,35 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		}
 		if (binding == null) {
 			String name = getShortenedQualifiedName(getJ2SName(node));
-			if (checkKeywordViolation(name, true))
-				buffer.append('$');
-			buffer.append(name);
+			appendValidFieldName$Qualifier(name, true, true);
 			return false;
 		}
 		if (binding instanceof IVariableBinding) {
-			simpleNameInVarBinding(node, ch, (IVariableBinding) binding);
+			simpleNameInVarBinding(node, leadingChar, (IVariableBinding) binding);
 		} else if (binding instanceof IMethodBinding) {
-			simpleNameInMethodBinding(node, ch, (IMethodBinding) binding);
+			simpleNameInMethodBinding(node, isQualified, (IMethodBinding) binding);
 		} else {
 			ITypeBinding typeBinding = node.resolveTypeBinding();
-			String name = (typeBinding == null ? node.getFullyQualifiedName()
-					: fixName(typeBinding.getQualifiedName()));
-			if (checkKeywordViolation(name, false))
-				buffer.append('$');
-			buffer.append(name);
+			// >>Math<<.max
+			appendValidFieldName$Qualifier(typeBinding == null ? node.getFullyQualifiedName()
+					: fixName(typeBinding.getQualifiedName()), false, true);
 		}
 		return false;
 	}
 
 	protected void appendCheckedFieldName(String fieldName, ITypeBinding classBinding, boolean checkPackages) {
-		if (checkKeywordViolation(fieldName, checkPackages))
-			buffer.append("$");
-		if (classBinding != null && J2SMapAdapter.checkSameName(classBinding, fieldName))
-			buffer.append("$");
-		if (classBinding != null && isInheritedFieldName(classBinding, fieldName))
-			fieldName = getFieldName(classBinding, fieldName);
+		appendValidFieldName$Qualifier(fieldName, checkPackages, false);
+		if (classBinding != null) {
+			if (J2SMapAdapter.checkInheritedMethodNameCollision(classBinding, fieldName)) {
+				buffer.append("$");
+			}
+			if (isInheritedFieldName(classBinding, fieldName))
+				fieldName = getFieldName$Appended(classBinding, fieldName);
+		}
 		buffer.append(fieldName);
 	}
 
 	public boolean visit(SimpleType node) {
-
 		ITypeBinding binding = node.resolveBinding();
 		buffer.append(
 				binding == null ? node : fixName(binding.getQualifiedName()));
@@ -1869,9 +1868,10 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		return false;
 	}
 
-	private void simpleNameInMethodBinding(SimpleName node, char ch, IMethodBinding mthBinding) {
-		if (isStatic(mthBinding)) {
-			IMethodBinding variableDeclaration = mthBinding.getMethodDeclaration();
+	private void simpleNameInMethodBinding(SimpleName node, boolean isQualified, IMethodBinding mBinding) {
+		String name = getShortenedQualifiedName(getJ2SName(node));
+		if (isStatic(mBinding)) {
+			IMethodBinding variableDeclaration = mBinding.getMethodDeclaration();
 			ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
 			boolean isClassString = false;
 			if (declaringClass != null) {
@@ -1884,28 +1884,26 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 					}
 				}
 			}
-			String name = getShortenedQualifiedName(getJ2SName(node));
 			if (isClassString && "$valueOf".equals(name))
 				name = "valueOf";
-			buffer.append(name);
 		} else {
 			ASTNode parent = node.getParent();
-			boolean isClassString = false;
+			boolean checkNameViolation = false;
 			if (parent != null && !(parent instanceof FieldAccess)) {
-				IMethodBinding variableDeclaration = mthBinding.getMethodDeclaration();
+				IMethodBinding variableDeclaration = mBinding.getMethodDeclaration();
 				ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
-				if (declaringClass != null && getClassName() != null && ch != '.') {
-					isClassString = "java.lang.String".equals(declaringClass.getQualifiedName());
-					appendClassNameAndDot(parent, declaringClass, Modifier.isPrivate(mthBinding.getModifiers()));
+				if (!isQualified && declaringClass != null && getClassName() != null) {
+					String className = declaringClass.getQualifiedName();
+					checkNameViolation = !("java.lang.String".equals(className)
+							&& "valueOf".equals(name));
+					appendClassNameAndDot(parent, declaringClass, Modifier.isPrivate(mBinding.getModifiers()));
 				}
 			}
 			// String name = node.getFullyQualifiedName();
-			String name = getShortenedQualifiedName(getJ2SName(node));
-			if (!(isClassString && "valueOf".equals(name)) && checkKeywordViolation(name, false)) {
-				buffer.append('$');
-			}
-			buffer.append(name);
+			if (checkNameViolation)
+				appendValidFieldName$Qualifier(name, false, false);
 		}
+		buffer.append(name);
 	}
 
 	private void addFixedQualifierWithDot(ITypeBinding declaringClass) {
