@@ -91,8 +91,7 @@ package java.util;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TreeSet<E> extends AbstractSet<E>
-    implements NavigableSet<E>, Cloneable, java.io.Serializable
-{
+    implements NavigableSet<E>, Cloneable, java.io.Serializable {
     /**
      * The backing map.
      */
@@ -296,7 +295,7 @@ public class TreeSet<E> extends AbstractSet<E>
      *         if any element is null and this set uses natural ordering, or
      *         its comparator does not permit null elements
      */
-    public  boolean addAll(Collection<? extends E> c) {
+    public  boolean addAll(Collection<? extends E> c) { 
         // Use linear-time version if applicable
         if (m.size()==0 && c.size() > 0 &&
             c instanceof SortedSet &&

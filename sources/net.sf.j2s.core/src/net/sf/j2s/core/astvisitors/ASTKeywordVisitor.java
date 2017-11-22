@@ -1096,7 +1096,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	}
 
 	protected static String j2sGetParamCode(ITypeBinding binding, boolean addAAA) {
-		String prefix = (binding.getKey().indexOf(":T") >= 0 ? "T" : null);
+		String prefix = (removeBrackets(binding.getKey()).indexOf(":T") >= 0 ? "T" : null);
 		String name = binding.getQualifiedName();		
 		String arrays = null;
 		name = removeBrackets(name);
@@ -1145,6 +1145,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		default:
 			if (prefix != null)
 				name = prefix + name; // "O";//
+			
 			name = name.replace("java.lang.", "").replace('.', '_');
 			break;
 		}
@@ -2241,7 +2242,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 				//System.err.println("hoping that " + className + "." + methodName + " " + i + " " + genericType + " works for " + paramTypes[i].getQualifiedName());
 				if (genericType.indexOf("|" + paramTypes[i].getQualifiedName() + ";") < 0)
 					return null;
-				type = genericType.substring(0, genericType.indexOf("|")); // "O";// 
+				type = "T" + genericType.substring(0, genericType.indexOf("|")); // "O";//
 				// Originally I was substituting in the generic type T,V,E,etc., but 
 				// this causes a problem when the user is working with a later version of 
 				// Java and subclassing what was originally not a generic class (JComboBox)
