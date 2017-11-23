@@ -74,7 +74,6 @@ import net.sf.j2s.core.adapters.TypeAdapter;
 import net.sf.j2s.core.adapters.VariableAdapter;
 
 // TODO: static calls to static methods do not trigger "musts" dependency
-
 // BH 9/10/2017 -- adds full byte, short, and int distinction using class-level local fields $b$, $s$, and $i$, which are IntXArray[1]. (See ASTKeywordVisitor)
 // BH 9/7/2017 -- primitive casting for *=,/=,+=,-=,&=,|=,^=
 // BH 9/7/2017 -- primitive numeric casting -- (byte) was ignored so that (byte)  0xFF remained 0xFF.
@@ -1142,6 +1141,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		// Clazz.new().
 		// arg4 is the superclass
 		// arg5 is the superinterface(s)
+		// arg6 is the type:  anonymous(1), local(2), or absent
 
 		// arg1: package name or null
 		// arg2: shortened class name in quotes
@@ -1161,19 +1161,19 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		String shortClassName = fullClassName.substring(pt + 1);
 		String packageName = (pt < 0 ? defaultPackageName
 				: TypeAdapter.getShortenedPackageNameFromClassName(thisPackageName, fullClassName));
-		buffer.append(packageName + ", \"" + shortClassName + "\", ");
+		buffer.append(packageName + ", \"" + shortClassName + "\"");
 
 		// set up func, superclass, and superInterface
 
 		String func = "null";
 		String superclassName = null;
 		List<?> superInterfaceTypes = null;
-
 		// arg3: class definition function, C$, or null to add the standard
 		// function at run time
 
 		boolean hasDependents = false;
-		if (isAnonymous) {
+		buffer.append(", ");
+		 if (isAnonymous) {
 			if (!(parent instanceof EnumConstantDeclaration))
 				func = "function(){Clazz.newInstance$(this, arguments[0], true);}";
 			superclassName = "" + getSuperclassName(binding);
@@ -1288,6 +1288,8 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		} else {
 			buffer.append(", null");
 		}
+
+		// arg6: anonymous(1), local(2), or absent
 
 		if (isLocal) {
 			buffer.append(", 2");

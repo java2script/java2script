@@ -196,7 +196,7 @@ public class PDFPrinterJob extends PrinterJob {
 			file = fileChooser.getSelectedFile();
 			print(file.getAbsolutePath());
 		}
-	}
+	}	
 
 	@Override
 	public boolean printDialog() throws HeadlessException {

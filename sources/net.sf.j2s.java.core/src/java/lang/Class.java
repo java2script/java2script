@@ -437,7 +437,9 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 */
 	public boolean isAssignableFrom(Class<?> cls) {
 		/**
-		 * @j2sNative return Clazz.getInheritedLevel (cls, this.$clazz$) >= 0;
+		 * @j2sNative 
+		 * 
+		 * return(Clazz.getInheritedLevel (cls.$clazz$, this.$clazz$) >= 0);
 		 * 
 		 */
 		{
