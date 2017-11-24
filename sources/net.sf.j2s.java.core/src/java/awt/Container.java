@@ -2269,6 +2269,10 @@ public class Container extends JSComponent {
 
             for (int i = 0; i < children.size(); i++) {
                 Component comp = children.get(i);
+                
+                // comp != null && comp.visible && searchNeavyweightChildren != (comp.peer instanceof LightweightPeer)
+                //  &&  comp.contains(x - comp.x, y - comp.y)
+                
                 if (comp != null && comp.visible &&
                     ((!searchHeavyweightChildren &&
                       comp.peer instanceof LightweightPeer) ||

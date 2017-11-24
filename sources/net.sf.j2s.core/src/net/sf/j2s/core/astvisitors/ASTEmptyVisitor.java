@@ -312,10 +312,6 @@ public class ASTEmptyVisitor extends ASTVisitor {
 		return ((VariableAdapter) getAdaptable(VariableAdapter.class)).isToCompileVariableName();
 	}
 
-	protected String listFinalVariables(List<FinalVariable> list, String seperator, String scope) {
-		return ((VariableAdapter) getAdaptable(VariableAdapter.class)).listFinalVariables(list, seperator, scope);
-	}
-	
 	protected void setClassName(String className) {
 		((TypeAdapter) getAdaptable(TypeAdapter.class)).setClassName(className);
 	}

@@ -328,7 +328,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			buffer.append(", ");
 
 			variableAdapter.normalVars = lastNormalVars;
-			String finals = listFinalVariables(visitedVars, ", ",
+			String finals = VariableAdapter.listFinalVariables(visitedVars, ", ",
 					methodDeclareNameStack.size() == 0 ? null : (String) methodDeclareNameStack.peek());
 			IMethodBinding constructorBinding = node.resolveConstructorBinding();
 			IMethodBinding methodDeclaration = (constructorBinding == null ? null

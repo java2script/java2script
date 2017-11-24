@@ -737,10 +737,12 @@ public class JFileChooser extends JComponent {
     public int showDialog(Component parent, String approveButtonText) {
     	switch (dialogType) {
     	case OPEN_DIALOG:
+    		JSUtil.alert("JFileChooser.showDialog OPEN_DIALOG has not been implemented");
+    		JSUtil.notImplemented("JFileChooser.showDialog OPEN_DIALOG has not been implemented");
     		// SwingJS TODO
     		return CANCEL_OPTION;
     	case SAVE_DIALOG:
-    		String name = JSUtil.prompt(dialogTitle, lastFileName);
+    		String name = JSUtil.prompt((dialogTitle == null ? "File to Save?" : dialogTitle), lastFileName);
     		if (name == null)
     			return CANCEL_OPTION;
     		selectedFile = new File(name);

@@ -439,7 +439,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		/**
 		 * @j2sNative 
 		 * 
-		 * return(Clazz.getInheritedLevel (cls.$clazz$, this.$clazz$) >= 0);
+		 * return(Clazz.isInstance(cls.$clazz$, this.$clazz$);
 		 * 
 		 */
 		{

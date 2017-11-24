@@ -359,8 +359,9 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 		 * @j2sNative
 		 * 
 		 * 			this.showAppletStatus("error " + (t.getMessage ?
-		 *            t.getMessage() : t)); t.printStackTrace &&
-		 *            t.printStackTrace();
+		 *            t.getMessage() : t)); 
+		 *            if (t.printStackTrace) t.printStackTrace();
+		 *            else System.out.println(t.stack);
 		 */
 		{
 		}

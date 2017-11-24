@@ -5,7 +5,7 @@
 
 // NOTES by Bob Hanson
 
-// BH 11/23/2017 5:33:01 AM toString not being inheritied from superclass; removes optional "supportsNativeObject" -- this is necessary
+// BH 11/24/2017 7:38:23 AM rewrite of superclass, implements; removes optional "supportsNativeObject" -- this is necessary
 // BH 11/20/2017 8:59:46 PM fix for new double[3][3] 
 // BH 11/19/2017 3:51:55 AM adds Clazz._traceOutput from URL j2strace=xxx where xxx appears in System.out.println, String.regionMatches
 // BH 11/16/2017 10:52:53 PM adds method name aliasing for generics; adds String.contains$CharSequence(cs)
@@ -97,10 +97,7 @@ Clazz.load = function(cName, isFinalize) {
     var cl = cName;
     // C$.$clinit$ call to finalize all dependencies
     var ld = cl.$load$;
-    if (ld == null)
-      return
-    if (ld[0])
-      setSuperclass(cl, Clazz.load(ld[0]));
+    setSuperclass(cl, (ld && ld[0] ? Clazz.load(ld[0]) : null));
     if (ld[1])
       addInterface(cl, ld[1]);
     delete cl.$load$;      
@@ -166,7 +163,7 @@ Clazz.getClass = function(cl) {
     return cl.$Class$;
   java.lang.Class || Clazz.load("java.lang.Class");
   var Class_ = cl.$Class$ = new java.lang.Class();
-  Class_.$clazz$ = cl;
+  Class_.$clazz$ = getClazz(cl) || cl; // for arrays - a bit of a hack
   return Class_;
 }
 
@@ -245,7 +242,7 @@ Clazz.newInstance$ = function (objThis, args, isInner) {
       isNew = true;
     }
     // add all superclass references for outer object
-    var clazz = Clazz.getClazz(outerObj);
+    var clazz = getClazz(outerObj);
     do {
       var key = getClassName(clazz, true);
       if (!isNew && b[key])
@@ -269,44 +266,6 @@ Clazz.defineStatics$ = function(cl, a) {
  }
 }
 
-/**
- * Expand the shortened list of class names.
- * For example:
- * JU.Log, $.Display, $.Decorations
- * will be expanded to 
- * JU.Log, JU.Display, JU.Decorations
- * where "$." stands for the previous class name's package.
- *
- * This method will be used to unwrap the required/optional classes list and 
- * the ignored classes list.
- */
-/* private */
-var unwrapArray = function (arr) {
-  if (!arr || arr.length == 0)
-    return [];
-  var last = null;
-  for (var i = 0; i < arr.length; i++) {
-    var ai = arr[i];
-    if (typeof ai != "string")
-      continue;
-    if (ai.charAt(0) == '$') {
-      if (ai.charAt(1) == '.') {
-        if (!last)
-          continue;
-        var idx = last.lastIndexOf(".");
-        if (idx != -1) {
-          var prefix = last.substring (0, idx);
-          arr[i] = prefix + ai.substring(1);
-        }
-      } else {
-        arr[i] = "org.eclipse.s" + ai.substring (1);
-      }
-    }
-    last = arr[i];
-  }
-  return arr;
-};
-
 Clazz.newMethod$ = function (clazzThis, funName, funBody, isStatic) {
   if (funName.constructor == Array) {
     // If funName is an array, we are setting aliases for generic calls. 
@@ -322,7 +281,7 @@ Clazz.newMethod$ = function (clazzThis, funName, funBody, isStatic) {
   var f;
   if (isStatic || funName == "c$")
     clazzThis[funName] = funBody;
-  clazzThis.prototype[funName] = funBody; // allow static calls as though they were not static
+  return clazzThis.prototype[funName] = funBody; // allow static calls as though they were not static
 };                     
 
 var aas = "AAA";
@@ -483,95 +442,9 @@ Clazz.newArray$ = function(baseClass, paramType, ndims, params) {
   return newTypedA$(baseClass, params, nbits, ndims);
 }
 
-var setArray = function(vals, baseClass, paramType, ndims) {
-  vals.getClass = function () { return Clazz.arrayClass$(baseClass, ndims) };
-  vals.__ARRAYTYPE = paramType; // referenced in java.lang.Class
-  vals.__BASECLASS = baseClass;
-  vals.__NDIM = ndims;
-  return vals;
-}
-
-/**
- * in-place shift of an array by k elements, starting with element i0,
- * resetting its length in case it is arguments (which does not have the
- * .shift() method. Returns a[i0] 
- */
-var shiftArray = function(a, i0, k) {
-  if (a == null || k > a.length)
-    return null;
-  k || (k == 1);
-  i0 || (i0 == 0);
-  var arg = a[i0];
-  for (var i = i0, n = a.length - k; i < n; i++)
-    a[i] = a[i + k];
-  a.length -= k;
-  return arg;
-};
-
-var getParamCode = Clazz._getParamCode = function(cl) {
-  cl.$clazz$ && (cl = cl.$clazz$);
-  return cl.__PARAMCODE || (cl.__PARAMCODE = cl.__CLASS_NAME__.replace(/java\.lang\./, "").replace(/\./g, '_'));
-}
-
 Clazz.getDeclaringClazzForMethod$ = function(obj, methodName) {
   var cl = obj.$Class$.$clazz$;
   return cl && cl[methodName] && cl[methodName].exClazz;
-}
-
-var newTypedA$ = function(baseClass, args, nBits, ndims) {
-  var dim = args[0];
-  if (typeof dim == "string")
-    dim = dim.charCodeAt(0); // int[] a = new int['\3'] ???
-  var last = args.length - 1;
-  var paramType = args[last];
-  var val = args[last - 1];
-  if (ndims > 1) {
-     // array of arrays
-     // Clazz.newA$(3, 5, null, "SAA") // last = 3
-    var xargs = new Array(last--); 
-    for (var i = 0; i <= last; i++)
-      xargs[i] = args[i + 1];
-    // SAA -> SA
-    xargs[last] = paramType.substring(0, paramType.length - 1);    
-    var arr = new Array(dim);
-    for (var i = 0; i < dim; i++)
-      arr[i] = newTypedA$(baseClass, xargs, nBits, ndims - 1); // Call recursively
-  } else {
-    // Clazz.newIntA$(new int[5][]   val = null 
-    // Clazz.newA$(5 ,null, "SA")        new String[5] val = null
-    // Clazz.newA$(-1, ["A","B"], "SA")  new String[]   val = {"A", "B"}
-    // Clazz.newA$(3, 5, 0, "IAA")       new int[3][5] (second pass, so now args = [5, 0, "IA"])
-    if (val == null)
-      nBits = 0;
-    else if (nBits > 0 && dim < 0)
-      dim = val; // because we can initialize an array using new Int32Array([...])
-    if (nBits > 0)
-      ndims = 1;
-    var atype;
-    switch (nBits) {
-    case 8:
-      var arr = new Int8Array(dim);
-      break;
-    case 16:
-      var arr = new Int16Array(dim);
-      break;
-    case 32:
-      var arr = new Int32Array(dim);
-      break;
-    case 64:
-      var arr = new Float64Array(dim);
-      break;
-    default:
-      var arr = (dim < 0 ? val : new Array(dim));
-      nBits = 0;
-      if (dim > 0 && val != null)
-        for (var i = dim; --i >= 0;)
-           arr[i] = val;
-      break;
-    }  
-    arr.__BYTESIZE = arr.BYTES_PER_ELEMENT || (nBits >> 3);
-  }
-  return setArray(arr, baseClass, paramType, ndims);
 }
 
 try {
@@ -717,37 +590,6 @@ Clazz.showDuplicates = function(quiet) {
     alert(s);
 }
 
-/**
- * Return the JavaScript clazz of the given class or object.
- *
- * @param clazzHost given class or object
- * @return class name
- */
-/* public */
-Clazz.getClazz = function (clazzHost) {
-  if (!clazzHost)
-    return Clazz._O;  // null/undefined is always treated as Object
-  if (typeof clazzHost == "function")
-    return clazzHost;
-  var clazzName;
-  if (clazzHost._NULL_) {
-    clazzName = clazzHost.clazzName;
-  } else {
-    switch (typeof clazzHost) {
-    case "string":
-      return String;
-    case "object":
-      if (!clazzHost.__CLASS_NAME__)
-        return (clazzHost.constructor || Clazz._O);
-      clazzName = clazzHost.__CLASS_NAME__;
-    break;
-    default:
-      return clazzHost.constructor;
-    }
-  }
-  return evalType(clazzName, true);
-};
-
 
 ///////////////////// method creation ////////////////////////////////
 
@@ -844,14 +686,7 @@ Clazz.newClass$ = function (prefix, name, clazz, clazzSuper, interfacez, type) {
 
 };
 
-Clazz.cloneFinals = function () {
-  var o = {};
-  var len = arguments.length / 2;
-  for (var i = len; --i >= 0;)
-    o[arguments[i + i]] = arguments[i + i + 1];
-  return o;
-};
-
+/* not clear that this needs to be public */
 Clazz.isClassDefined = function(clazzName) {
   if (!clazzName) 
     return false;    /* consider null or empty name as non-defined class */
@@ -865,6 +700,122 @@ Clazz.isClassDefined = function(clazzName) {
     }
   return (pkg && (Clazz.allClasses[clazzName] = pkg));
 };
+
+/**
+ * Implements Java's keyword "instanceof" in JavaScript's way.
+ * Also alows for obj to be a class itself 
+ *
+ * @param obj the object to be tested
+ * @param clazz the class to be checked
+ * @return whether the object is an instance of the class
+ */
+/* public */
+Clazz.instanceOf = function (obj, clazz) {
+  // allows obj to be a class already, from arrayX.getClass().isInstance(y)
+  // unwrap java.lang.Class to JavaScript clazz using $clazz$
+  if (typeof clazz == "string") {
+    clazz = window[clazz];
+  }
+  if (obj == null || !clazz)
+    return false;
+  obj.$clazz$ && (obj = obj.$clazz$);
+  clazz.$clazz$ && (clazz = clazz.$clazz$);
+  if (obj == clazz)
+    return true;
+  if (obj.__ARRAYTYPE || clazz.__ARRAYTYPE)
+    return (obj.__ARRAYTYPE == clazz.__ARRAYTYPE 
+            || obj.__ARRAYTYPE && clazz.__ARRAYTYPE && obj.__NDIM == clazz.__NDIM 
+               && isInstanceOf(obj.__BASECLASS, clazz.__BASECLASS)); 
+  return (obj instanceof clazz || isInstanceOf(getClassName(obj, true), clazz, true));
+};
+
+///////////////////////// private supporting method creation //////////////////////
+
+var setArray = function(vals, baseClass, paramType, ndims) {
+  vals.getClass = function () { return Clazz.arrayClass$(baseClass, ndims) };
+  vals.__ARRAYTYPE = paramType; // referenced in java.lang.Class
+  vals.__BASECLASS = baseClass;
+  vals.__NDIM = ndims;
+  return vals;
+}
+
+/**
+ * in-place shift of an array by k elements, starting with element i0,
+ * resetting its length in case it is arguments (which does not have the
+ * .shift() method. Returns a[i0] 
+ */
+var shiftArray = function(a, i0, k) {
+  if (a == null || k > a.length)
+    return null;
+  k || (k == 1);
+  i0 || (i0 == 0);
+  var arg = a[i0];
+  for (var i = i0, n = a.length - k; i < n; i++)
+    a[i] = a[i + k];
+  a.length -= k;
+  return arg;
+};
+
+var getParamCode = Clazz._getParamCode = function(cl) {
+  cl.$clazz$ && (cl = cl.$clazz$);
+  return cl.__PARAMCODE || (cl.__PARAMCODE = cl.__CLASS_NAME__.replace(/java\.lang\./, "").replace(/\./g, '_'));
+}
+
+var newTypedA$ = function(baseClass, args, nBits, ndims) {
+  var dim = args[0];
+  if (typeof dim == "string")
+    dim = dim.charCodeAt(0); // int[] a = new int['\3'] ???
+  var last = args.length - 1;
+  var paramType = args[last];
+  var val = args[last - 1];
+  if (ndims > 1) {
+     // array of arrays
+     // Clazz.newA$(3, 5, null, "SAA") // last = 3
+    var xargs = new Array(last--); 
+    for (var i = 0; i <= last; i++)
+      xargs[i] = args[i + 1];
+    // SAA -> SA
+    xargs[last] = paramType.substring(0, paramType.length - 1);    
+    var arr = new Array(dim);
+    for (var i = 0; i < dim; i++)
+      arr[i] = newTypedA$(baseClass, xargs, nBits, ndims - 1); // Call recursively
+  } else {
+    // Clazz.newIntA$(new int[5][]   val = null 
+    // Clazz.newA$(5 ,null, "SA")        new String[5] val = null
+    // Clazz.newA$(-1, ["A","B"], "SA")  new String[]   val = {"A", "B"}
+    // Clazz.newA$(3, 5, 0, "IAA")       new int[3][5] (second pass, so now args = [5, 0, "IA"])
+    if (val == null)
+      nBits = 0;
+    else if (nBits > 0 && dim < 0)
+      dim = val; // because we can initialize an array using new Int32Array([...])
+    if (nBits > 0)
+      ndims = 1;
+    var atype;
+    switch (nBits) {
+    case 8:
+      var arr = new Int8Array(dim);
+      break;
+    case 16:
+      var arr = new Int16Array(dim);
+      break;
+    case 32:
+      var arr = new Int32Array(dim);
+      break;
+    case 64:
+      var arr = new Float64Array(dim);
+      break;
+    default:
+      var arr = (dim < 0 ? val : new Array(dim));
+      nBits = 0;
+      if (dim > 0 && val != null)
+        for (var i = dim; --i >= 0;)
+           arr[i] = val;
+      break;
+    }  
+    arr.__BYTESIZE = arr.BYTES_PER_ELEMENT || (nBits >> 3);
+  }
+  return setArray(arr, baseClass, paramType, ndims);
+}
 
 /**
  * Return the class name of the given class or object.
@@ -933,7 +884,73 @@ var extractClassName = function(clazzStr) {
     : clazzName);
 }
 
-///////////////////////// private supporting method creation //////////////////////
+/**
+ * Expand the shortened list of class names.
+ * For example:
+ * JU.Log, $.Display, $.Decorations
+ * will be expanded to 
+ * JU.Log, JU.Display, JU.Decorations
+ * where "$." stands for the previous class name's package.
+ *
+ * This method will be used to unwrap the required/optional classes list and 
+ * the ignored classes list.
+ */
+/* private */
+var unwrapArray = function (arr) {
+  if (!arr || arr.length == 0)
+    return [];
+  var last = null;
+  for (var i = 0; i < arr.length; i++) {
+    var ai = arr[i];
+    if (typeof ai != "string")
+      continue;
+    if (ai.charAt(0) == '$') {
+      if (ai.charAt(1) == '.') {
+        if (!last)
+          continue;
+        var idx = last.lastIndexOf(".");
+        if (idx != -1) {
+          var prefix = last.substring (0, idx);
+          arr[i] = prefix + ai.substring(1);
+        }
+      } else {
+        arr[i] = "org.eclipse.s" + ai.substring (1);
+      }
+    }
+    last = arr[i];
+  }
+  return arr;
+};
+
+/**
+ * Return the JavaScript clazz of the given class or object.
+ *
+ * @param clazzHost given class or object
+ * @return class name
+ */
+var getClazz = function (clazzHost) {
+  if (!clazzHost)
+    return Clazz._O;  // null/undefined is always treated as Object
+  if (typeof clazzHost == "function")
+    return clazzHost;
+  var clazzName;
+  if (clazzHost._NULL_) {
+    clazzName = clazzHost.clazzName;
+  } else {
+    switch (typeof clazzHost) {
+    case "string":
+      return String;
+    case "object":
+      if (!clazzHost.__CLASS_NAME__)
+        return (clazzHost.constructor || Clazz._O);
+      clazzName = clazzHost.__CLASS_NAME__;
+    break;
+    default:
+      return clazzHost.constructor;
+    }
+  }
+  return evalType(clazzName, true);
+};
 
 var appendMap = function(a, b) {
   if (b)
@@ -1033,14 +1050,11 @@ var extendObjectMethodNames = [
   ];
 
 var extendObject = function(clazz, exclude) {
-  exclude || (exclude = 0);
-  //var limit = (clazz === Array || clazz === Number ? 2 : clazz === String ? 5 : 0);
-  var obj = Clazz._O.prototype;
-  var proto = clazz.prototype;
-  var n = extendObjectMethodNames.length - exclude;
-  for (var i = 0; i < n; i++) {
+  var op =Clazz._O.prototype;
+  var cp = clazz.prototype;
+  for (var i = extendObjectMethodNames.length - (exclude || 0); --i >= 0;) {
     var p = extendObjectMethodNames[i];
-    proto[p] = obj[p];
+    cp[p] = op[p];
   }
 }
 
@@ -1102,14 +1116,16 @@ var extendPrototype = function(clazz, isPrimitive, addAll) {
 Clazz.saemCount0 = 0 // methods defined        5400 (Ripple.js)
 Clazz.saemCount1 = 0 // delegates created       937
 Clazz.saemCount2 = 0 // delegates bound         397
-Clazz.saemCount3 = 0 // getInheritedLevels started      
-Clazz.saemCount4 = 0 // getInheritedLevels checked
+Clazz.saemCount3 = 0 // isInstanceOfs started      
+Clazz.saemCount4 = 0 // isInstanceOfs checked
 
 var NullObject = function () {};
 
 var evalType = function (typeStr, isQualified) {
   if (typeStr == null)
     return null;
+  if (isQualified && window[typeStr])
+    return window[typeStr];
   var idx = typeStr.lastIndexOf(".");
   if (idx >= 0) {
     var pkgName = typeStr.substring (0, idx);
@@ -1142,29 +1158,23 @@ var evalType = function (typeStr, isQualified) {
 };
 
 var equalsOrExtendsLevel = function (clazzThis, clazzAncestor) {
-  if (clazzThis === clazzAncestor)
-    return true;
-  if (clazzThis.implementz) {
-    var impls = clazzThis.implementz;
-    for (var i = impls.length; --i >= 0;)
-      if (equalsOrExtendsLevel(impls[i], clazzAncestor))
-        return true;
+  while (true) {
+    if (clazzThis == null)
+      return false;  
+    if (clazzThis === clazzAncestor)
+      return true;
+    if (clazzThis && clazzThis.implementz) {
+      var impls = clazzThis.implementz;
+      for (var i = impls.length; --i >= 0;)
+        if (equalsOrExtendsLevel(impls[i], clazzAncestor))
+          return true;
+    }
+    clazzThis = clazzThis.superClazz;
   }
   return false;
 };
 
-/////////////////////// inner function support /////////////////////////////////
-
-/**
- * Once there are other methods registered to the Function.prototype, 
- * those method names should be add to the following Array.
- */
-/*
- * static final member of interface may be a class, which may
- * be function.
- */
-
-Clazz.getInheritedLevel = function (clazzTarget, clazzBase, isTgtStr, isBaseStr) {
+var isInstanceOf = function (clazzTarget, clazzBase, isTgtStr, isBaseStr) {
   if (clazzTarget === clazzBase)
     return true;
   if (clazzBase.$load$)
@@ -1186,54 +1196,16 @@ Clazz.getInheritedLevel = function (clazzTarget, clazzBase, isTgtStr, isBaseStr)
       return true;
     }
   }  
-  if (isTgtStr)
-    clazzTarget = evalType(clazzTarget);
-  if (isBaseStr)
-    clazzBase = evalType(clazzBase);
-  if (!clazzBase || !clazzTarget)
-    return false;
-  if (clazzTarget == clazzBase)
-    return true;
-  if (clazzBase === Object || clazzBase === Clazz._O)
-    return true;
-  if (clazzTarget.implementz && equalsOrExtendsLevel(clazzTarget, clazzBase))
-      return true;
-  while (clazzTarget !== clazzBase && (clazzTarget = clazzTarget.superClazz) != null) {
-    //
-  }
-  return (clazzTarget == clazzBase);
+  isTgtStr && (clazzTarget = evalType(clazzTarget));
+  isBaseStr && (clazzBase = evalType(clazzBase));
+  return (clazzBase && clazzTarget && (
+    clazzTarget == clazzBase 
+      || clazzBase === Object 
+      || clazzBase === Clazz._O
+      || equalsOrExtendsLevel(clazzTarget, clazzBase)
+    ));
 };
 
-
-//////////////////////////////// public method execution /////////////////////////
-
-/**
- * Implements Java's keyword "instanceof" in JavaScript's way.
- * Also alows for obj to be a class itself 
- *
- * @param obj the object to be tested
- * @param clazz the class to be checked
- * @return whether the object is an instance of the class
- */
-/* public */
-Clazz.instanceOf = function (obj, clazz) {
-  // allows obj to be a class already, from arrayX.getClass().isInstance(y)
-  // unwrap java.lang.Class to JavaScript clazz using $clazz$
-  if (typeof clazz == "string") {
-    clazz = window[clazz];
-  }
-  if (obj == null || !clazz)
-    return false;
-  obj.$clazz$ && (obj = obj.$clazz$);
-  clazz.$clazz$ && (clazz = clazz.$clazz$);
-  if (obj == clazz)
-    return true;
-  if (obj.__ARRAYTYPE || clazz.__ARRAYTYPE)
-    return (obj.__ARRAYTYPE == clazz.__ARRAYTYPE 
-            || obj.__ARRAYTYPE && clazz.__ARRAYTYPE && obj.__NDIM == clazz.__NDIM 
-               && Clazz.getInheritedLevel(obj.__BASECLASS, clazz.__BASECLASS, true)); 
-  return (obj instanceof clazz || Clazz.getInheritedLevel(getClassName(obj, false), clazz, true));
-};
 
 /////////////////////////// Exception handling ////////////////////////////
 
@@ -1403,7 +1375,7 @@ var inheritArgs = new (function(){return {"$J2SNOCREATE$":true}})();
  */
 var setSuperclass = function(clazzThis, clazzSuper){
 
- clazzThis.superClazz = clazzSuper || null;
+ clazzThis.superClazz = clazzSuper || Clazz._O;
   if (clazzSuper) {  
     copyStatics(clazzSuper, clazzThis, false);
     var p = clazzThis.prototype;
@@ -2716,40 +2688,13 @@ var $b$ = new Int8Array(1);
 var $s$ = new Int16Array(1);
 var $i$ = new Int32Array(1);
 
-m$(Number,"shortValue",
-function(){
-return ($s$[0] = this, $s$[0]);
-});
-
-m$(Number,"byteValue",
-function(){
-return ($b$[0] = this, $b$[0]);
-});
-
-
-m$(Number,"intValue",
-function(){
-return ($i$[0] = this, $i$[0]);
-});
-
-m$(Number,"longValue",
-function(){
-return (this|0);
-});
-
-m$(Number,"floatValue",
-function(){
-return this.valueOf();
-});
-m$(Number,"doubleValue",
-function(){
-return this.valueOf();
-});
-
-m$(Number,"hashCode",
-function(){
-return this.valueOf();
-});
+m$(Number,"shortValue",function(){return ($s$[0] = this, $s$[0]);});
+m$(Number,"byteValue",function(){return ($b$[0] = this, $b$[0]);});
+m$(Number,"intValue",function(){return ($i$[0] = this, $i$[0]);});
+m$(Number,"longValue",function(){return (this|0);});
+m$(Number,"floatValue",function(){return this.valueOf();});
+m$(Number,"doubleValue",function(){return this.valueOf();});
+m$(Number,"hashCode",function(){return this.valueOf();});
 
 Clazz._setDeclared("java.lang.Integer", java.lang.Integer=Integer=function(){
 if (typeof arguments[0] != "object")this.c$(arguments[0]);
@@ -2803,7 +2748,7 @@ Integer.MAX_VALUE=Integer.prototype.MAX_VALUE=0x7fffffff;
 //Integer.TYPE=Integer.prototype.TYPE=Integer;
 
 
-m$(Integer,"bitCount",
+Integer.bitCount = m$(Integer,"bitCount",
 function(i) {
   i = i - ((i >>> 1) & 0x55555555);
   i = (i & 0x33333333) + ((i >>> 2) & 0x33333333);
@@ -2812,9 +2757,8 @@ function(i) {
   i = i + (i >>> 16);
   return i & 0x3f;
 });
-Integer.bitCount=Integer.prototype.bitCount;
 
-m$(Integer,"numberOfLeadingZeros",
+Integer.numberOfLeadingZeros=m$(Integer,"numberOfLeadingZeros",
 function(i) {
  if (i == 0) return 32;
  var n = 1;
@@ -2825,9 +2769,8 @@ function(i) {
  n -= i >>> 31;
  return n;
 });
-Integer.numberOfLeadingZeros=Integer.prototype.numberOfLeadingZeros;
 
-m$(Integer,"numberOfTrailingZeros",
+Integer.numberOfTrailingZeros=m$(Integer,"numberOfTrailingZeros",
 function(i) {
   if (i == 0) return 32;
   var n = 31;
@@ -2837,9 +2780,8 @@ function(i) {
   y = i << 2; if (y != 0) { n = n - 2; i = y; }
   return n - ((i << 1) >>> 31);
 });
-Integer.numberOfTrailingZeros=Integer.prototype.numberOfTrailingZeros;
 
-m$(Integer,"parseIntRadix",
+Integer.parseIntRadix=m$(Integer,"parseIntRadix",
 function(s,radix){
 if(s==null){
 throw Clazz.new(NumberFormatException.c$$S, ["null"]);
@@ -2863,34 +2805,20 @@ throw Clazz.new(NumberFormatException.c$$S, ["Not a Number : "+s]);
 }
 return i;
 });
-Integer.parseIntRadix=Integer.prototype.parseIntRadix;
 
-m$(Integer,"parseInt",
+Integer.parseInt=m$(Integer,"parseInt",
 function(s){
 return Integer.parseIntRadix(s,10);
 });
-Integer.parseInt=Integer.prototype.parseInt;
 
-m$(Integer,"$valueOf",
+Integer.$valueOf=m$(Integer,"$valueOf",
 function(s){
   return Clazz.new(Integer.c$, [s]);
 });
 
-Integer.$valueOf=Integer.prototype.$valueOf;
-
-m$(Integer,"equals",
+Integer.prototype.equals = m$(Integer,"equals$O",
 function(s){
-if(s==null||!Clazz.instanceOf(s,Integer)){
-return false;
-}
-return s.valueOf()==this.valueOf();
-});
-m$(Integer,"equals$O",
-function(s){
-if(s==null||!Clazz.instanceOf(s,Integer)){
-return false;
-}
-return s.valueOf()==this.valueOf();
+return (s instanceof Integer) && s.valueOf()==this.valueOf();
 });
 
 Integer.toHexString=Integer.prototype.toHexString=function(d){
@@ -2954,34 +2882,22 @@ m$(Long, "c$", function(v){
 //Long.MAX_VALUE=Long.prototype.MAX_VALUE=0x7fffffffffffffff;
 //Long.TYPE=Long.prototype.TYPE=Long;
 
-m$(Long,"parseLong",
+Long.parseLong=m$(Long,"parseLong",
 function(s,radix){
  return Integer.parseInt(s, radix || 10);
 });
 
-Long.parseLong=Long.prototype.parseLong;
 
-m$(Long,"$valueOf",
+Long.$valueOf=m$(Long,"$valueOf",
 function(s){
 return Clazz.new(Long.c$, [s]);
 });
 
-Long.$valueOf=Long.prototype.$valueOf;
-m$(Long,"equals",
+Long.prototype.equals = m$(Long,"equals$O",
 function(s){
-if(s==null||!Clazz.instanceOf(s,Long)){
-return false;
-}
-return s.valueOf()==this.valueOf();
+return (s instanceof Long) && s.valueOf()==this.valueOf();
 });
-Long.$valueOf=Long.prototype.$valueOf;
-m$(Long,"equals$O",
-function(s){
-if(s==null||!Clazz.instanceOf(s,Long)){
-return false;
-}
-return s.valueOf()==this.valueOf();
-});
+
 Long.toHexString=Long.prototype.toHexString=function(i){
 return i.toString(16);
 };
@@ -3005,7 +2921,7 @@ if (typeof arguments[0] != "object")this.c$(arguments[0]);
 });
 decorateAsNumber(Short, "Short", "short", "H");
 
-m$(Short, "c$",
+Short.prototype.c$ = m$(Short, "c$",
 function (v) {
  v == null && (v = 0);
  if (typeof v != "number")
@@ -3013,9 +2929,6 @@ function (v) {
  v = v.shortValue();
  this.valueOf = function () {return v;};
 }, 1);
-Short.prototype.c$ = Short.c$;
-
-
 
 Short.toString = Short.prototype.toString = function () {
   if (arguments.length != 0) {
@@ -3030,40 +2943,27 @@ Short.MIN_VALUE = Short.prototype.MIN_VALUE = -32768;
 Short.MAX_VALUE = Short.prototype.MAX_VALUE = 32767;
 //Short.TYPE = Short.prototype.TYPE = Short;
 
-m$(Short, "parseShortRadix",
+Short.parseShortRadix = m$(Short, "parseShortRadix",
 function (s, radix) {
 return Integer.parseIntRadix(s, radix).shortValue();
 });
-Short.parseShortRadix = Short.prototype.parseShortRadix;
 
-m$(Short, "parseShort",
+
+Short.parseShort = m$(Short, "parseShort",
 function (s) {
 return Short.parseShortRadix (s, 10);
 });
 
-Short.parseShort = Short.prototype.parseShort;
-
-m$(Short, "$valueOf",
+Short.$valueOf = m$(Short, "$valueOf",
 function (s) {
   return Clazz.new(Short.c$, [s]);
 });
 
-Short.$valueOf = Short.prototype.$valueOf;
-m$(Short, "equals",
+Short.prototype.$equals = m$(Short, "equals$",
 function (s) {
-if(s == null || !Clazz.instanceOf(s, Short) ){
-  return false;
-}
-return s.valueOf()  == this.valueOf();
+return (s instanceof Short) && s.valueOf() == this.valueOf();
 });
-Short.$valueOf = Short.prototype.$valueOf;
-m$(Short, "equals$O",
-function (s) {
-if(s == null || !Clazz.instanceOf(s, Short) ){
-  return false;
-}
-return s.valueOf()  == this.valueOf();
-});
+
 Short.toHexString = Short.prototype.toHexString = function (i) {
   return i.toString (16);
 };
@@ -3073,6 +2973,7 @@ Short.toOctalString = Short.prototype.toOctalString = function (i) {
 Short.toBinaryString = Short.prototype.toBinaryString = function (i) {
   return i.toString (2);
 };
+
 m$(Short, "decode",
 function(n){
   n = Integer.decodeRaw(n);
@@ -3109,40 +3010,26 @@ Byte.MAX_VALUE=Byte.prototype.MAX_VALUE=127;
 Byte.SIZE=Byte.prototype.SIZE=8;
 //Byte.TYPE=Byte.prototype.TYPE=Byte;
 
-m$(Byte,"parseByteRadix",
+Byte.parseByteRadix=m$(Byte,"parseByteRadix",
 function(s,radix){
  return Integer.parseIntRadix(s, radix).byteValue();
 });
-Byte.parseByteRadix=Byte.prototype.parseByteRadix;
 
-m$(Byte,"parseByte",
+Byte.parseByte=m$(Byte,"parseByte",
 function(s){
 return Byte.parseByte(s,10);
 });
 
-Byte.parseByte=Byte.prototype.parseByte;
-
-m$(Byte, "$valueOf",
+Byte.$valueOf=m$(Byte, "$valueOf",
 function (s) {
   return Clazz.new(Byte.c$, [s]);
 });
 
-Byte.$valueOf=Byte.prototype.$valueOf;
-m$(Byte,"equals",
+Byte.prototype.equals = m$(Byte,"equals$O",
 function(s){
-if(s==null||!Clazz.instanceOf(s,Byte)){
-return false;
-}
-return s.valueOf()==this.valueOf();
+return (s instanceof Byte) && s.valueOf()==this.valueOf();
 });
-Byte.$valueOf=Byte.prototype.$valueOf;
-m$(Byte,"equals$O",
-function(s){
-if(s==null||!Clazz.instanceOf(s,Byte)){
-return false;
-}
-return s.valueOf()==this.valueOf();
-});
+
 Byte.toHexString=Byte.prototype.toHexString=function(i){
 return i.toString(16);
 };
@@ -3152,6 +3039,7 @@ return i.toString(8);
 Byte.toBinaryString=Byte.prototype.toBinaryString=function(i){
 return i.toString(2);
 };
+
 m$(Byte,"decode",
 function(n){
   n = Integer.decodeRaw(n);
@@ -3204,7 +3092,7 @@ Float.POSITIVE_INFINITY=Number.POSITIVE_INFINITY;
 Float.NaN=Number.NaN;
 //Float.TYPE=Float.prototype.TYPE=Float;
 
-m$(Float,"parseFloat",
+Float.parseFloat=m$(Float,"parseFloat",
 function(s){
 if(s==null){
 throw Clazz.new(NumberFormatException.c$$S, ["null"]);
@@ -3216,39 +3104,25 @@ throw Clazz.new(NumberFormatException.c$$S, ["Not a Number : "+s]);
 }
 return floatVal;
 });
-Float.parseFloat=Float.prototype.parseFloat;
 
-m$(Float,"$valueOf",
+Float.$valueOf=m$(Float,"$valueOf",
 function(s){
 return Clazz.new(Float.c$, [s]);
 });
 
-Float.$valueOf=Float.prototype.$valueOf;
-
-m$(Float,"isNaN",
+Float.isNaN=m$(Float,"isNaN",
 function(num){
 return isNaN(arguments.length == 1 ? num : this.valueOf());
 });
-Float.isNaN=Float.prototype.isNaN;
-m$(Float,"isInfinite",
+
+Float.isInfinite=m$(Float,"isInfinite",
 function(num){
 return !Number.isFinite(arguments.length == 1 ? num : this.valueOf());
 });
-Float.isInfinite=Float.prototype.isInfinite;
 
-m$(Float,"equals",
+Float.prototype.equals = m$(Float,"equals$O",
 function(s){
-if(s==null||!Clazz.instanceOf(s,Float)){
-return false;
-}
-return s.valueOf()==this.valueOf();
-});
-m$(Float,"equals$O",
-function(s){
-if(s==null||!Clazz.instanceOf(s,Float)){
-return false;
-}
-return s.valueOf()==this.valueOf();
+return (s instanceof Float) && s.valueOf()==this.valueOf();
 });
 
 Clazz._setDeclared("java.lang.Double", java.lang.Double=Double=function(){
@@ -3279,18 +3153,17 @@ Double.POSITIVE_INFINITY=Number.POSITIVE_INFINITY;
 Double.NaN=Number.NaN;
 //Double.TYPE=Double.prototype.TYPE=Double;
 
-m$(Double,"isNaN",
+Double.isNaN=m$(Double,"isNaN",
 function(num){
 return isNaN(arguments.length == 1 ? num : this.valueOf());
 });
-Double.isNaN=Double.prototype.isNaN;
-m$(Double,"isInfinite",
+
+Double.isInfinite=m$(Double,"isInfinite",
 function(num){
 return!Number.isFinite(arguments.length == 1 ? num : this.valueOf());
 });
-Double.isInfinite=Double.prototype.isInfinite;
 
-m$(Double,"parseDouble",
+Double.parseDouble=m$(Double,"parseDouble",
 function(s){
 if(s==null){
   throw Clazz.new(NumberFormatException.c$$S, ["null"]);
@@ -3302,28 +3175,15 @@ throw Clazz.new(NumberFormatException.c$$S, ["Not a Number : "+s]);
 }
 return doubleVal;
 });
-Double.parseDouble=Double.prototype.parseDouble;
 
-m$(Double,"$valueOf",
+Double.$valueOf=m$(Double,"$valueOf",
 function(v){
 return Clazz.new(Double.c$, [v]);
 });
 
-Double.$valueOf=Double.prototype.$valueOf;
-
-m$(Double,"equals",
+Double.prototype.equals = m$(Double,"equals$O",
 function(s){
-if(s==null||!Clazz.instanceOf(s,Double)){
-return false;
-}
-return s.valueOf()==this.valueOf();
-});
-m$(Double,"equals$O",
-function(s){
-if(s==null||!Clazz.instanceOf(s,Double)){
-return false;
-}
-return s.valueOf()==this.valueOf();
+return (s instanceof Double) && s.valueOf()==this.valueOf();
 });
 
 Clazz._setDeclared("java.lang.Boolean", 
@@ -3367,17 +3227,9 @@ m$(Boolean,"hashCode",
 function(){
 return this.valueOf()?1231:1237;
 });
-m$(Boolean,"equals",
+Boolean.prototype.equals = m$(Boolean,"equals$O",
 function(obj){
-if(Clazz.instanceOf(obj,Boolean)){
-return this.booleanValue()==obj.booleanValue();
-}return false;
-});
-m$(Boolean,"equals$O",
-function(obj){
-if(Clazz.instanceOf(obj,Boolean)){
-return this.booleanValue()==obj.booleanValue();
-}return false;
+return obj instanceof Boolean && this.booleanValue()==obj.booleanValue();
 });
 m$(Boolean,"getBoolean",
 function(name){
@@ -3412,7 +3264,6 @@ return Clazz.new(Boolean.c$, [typeof name == "string" ? name.equalsIgnoreCase$S(
 Boolean.TRUE=Boolean.prototype.TRUE=Clazz.new(Boolean.c$, [true]);
 Boolean.FALSE=Boolean.prototype.FALSE=Clazz.new(Boolean.c$, [false]);
 //Boolean.TYPE=Boolean.prototype.TYPE=Boolean;
-
 
 Clazz._Encoding={
   UTF8:"utf-8",
@@ -4280,11 +4131,15 @@ return this.stackTrace;
 
 m$(C$, 'printStackTrace', function () {
 System.err.println$O (this);
+if (!this.stackTrace){
+  System.err.println(this.stack);
+  return;
+}
 for (var i = 0; i < this.stackTrace.length; i++) {
 var t = this.stackTrace[i];
 var x = t.methodName.indexOf ("(");
 //var n = (x < 0 ? t.methodName : t.methodName.substring (0, x)).replace (/\s+/g, "");
-if (t.nativeClazz == null || Clazz.getInheritedLevel (t.nativeClazz, Throwable) < 0) {
+if (t.nativeClazz == null || isInstanceOf(t.nativeClazz, Throwable) < 0) {
 System.err.println (t);
 }
 }
@@ -5083,3 +4938,12 @@ return null;
 }; // called by external application 
 
 
+/*
+Clazz.cloneFinals = function () {
+  var o = {};
+  var len = arguments.length / 2;
+  for (var i = len; --i >= 0;)
+    o[arguments[i + i]] = arguments[i + i + 1];
+  return o;
+};
+*/

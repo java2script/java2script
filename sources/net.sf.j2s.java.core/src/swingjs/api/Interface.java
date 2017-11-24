@@ -58,6 +58,12 @@ public class Interface {
       	x = y.newInstance();
     } catch (Throwable e) {
       System.out.println("Swingjs.api.Interface Error creating instance for " + name + ": \n" + e);
+      /**
+       * @j2sNative
+       * 
+       * if (e.stack)System.out.println(e.stack);
+       */
+      {}
     } finally {
     	/**
     	 * @j2sNative

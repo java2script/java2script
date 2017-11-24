@@ -194,7 +194,10 @@ public class PDFPrinterJob extends PrinterJob {
 		// Print
 		if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
 			file = fileChooser.getSelectedFile();
-			print(file.getAbsolutePath());
+			String s = file.getAbsolutePath();
+			if (!s.endsWith(".pdf")) // needed for JavaScript
+				s += ".pdf";
+			print(s);
 		}
 	}	
 

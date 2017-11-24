@@ -140,7 +140,7 @@ public class VariableAdapter extends AbstractPluginAdapter {
 	 * @param scope
 	 * @return
 	 */
-	public String listFinalVariables(List<FinalVariable> list, String seperator, String scope) {
+	public static String listFinalVariables(List<FinalVariable> list, String seperator, String scope) {
 		if (list.size() == 0) {
 			return "null";
 		}
