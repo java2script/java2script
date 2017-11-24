@@ -3,7 +3,13 @@ package test;
 import java.lang.reflect.Array;
 
 class Test_Array extends Test_ {
-		
+
+	
+	static int[] i0 = new int[0];
+	
+	  static Object c33def2b = new int[][] { {0, 1, 2}, {3, 4, 5} , {3, 4, 5} , {3, 4, 5} };
+
+	  
  static int y;	
   static {
 	  int x = 3;
@@ -32,6 +38,8 @@ class Test_Array extends Test_ {
   static Object c33_ = new char[3][3][];
   static Object c33def = new int[][] {new int[] {3, 4, 5}, null};
   static Object c33def2 = new int[][] {new int[] {0, 1, 2}, new int[] {3, 4, 5}};
+  static Object c222def = new int[][][] { {{0, 1, 2}, {3, 4, 5}, {0, 1, 2}, {3, 4, 5}, {0, 1, 2}, {3, 4, 5}}, 
+	  {{0, 1, 2}, {3, 4, 5}, {0, 1, 2}, {3, 4, 5}, {0, 1, 2}, {3, 4, 5}} };
 
   public static void main(String[] args) {
 	  
@@ -45,6 +53,7 @@ class Test_Array extends Test_ {
 	  assert((i3 instanceof int[]));
 	  assert((i3b instanceof int[]));
 	  assert((iType3 instanceof int[]));
+	  assert((i3_ instanceof int[][]));
 	  assert((i33 instanceof int[][]));
 	  assert((iType3_ instanceof int[][]));
 	  assert(!(i33 instanceof int[]));

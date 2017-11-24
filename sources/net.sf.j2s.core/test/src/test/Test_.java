@@ -71,6 +71,9 @@ abstract class Test_ {
 	  }
 
 	
+	  public String toString() {
+		  return "testing " + this.getClass().getName();
+	  }
 	
 }
 

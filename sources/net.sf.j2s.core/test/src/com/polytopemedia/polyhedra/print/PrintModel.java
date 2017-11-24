@@ -48,6 +48,7 @@ public class PrintModel {
 					try {
 						job.print(); // BH gnu.jpdf.PrinterJob will request a file name here using JFileChooser.showFileSaveDialog()
 					} catch (Exception ex) {
+						ex.printStackTrace();
 						firePrintingError(ex);
 					}
 				}

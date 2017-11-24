@@ -4,6 +4,9 @@ public class Test_call0 extends Test_ {
 
 	int x, y;
 
+	void init(){
+		// only in Test_Call
+	}
 	void setX(int x) {
 		this.x = x;
 	}
@@ -18,6 +21,11 @@ public class Test_call0 extends Test_ {
 	}
 
 	public Test_call0() {
+		init();
 	};
+	
+	class Call0_inner {
+		
+	}
 
 }

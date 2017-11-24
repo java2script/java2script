@@ -58,10 +58,11 @@ public abstract class JSThread extends Thread implements JSFunction {
 	@Override
 	public synchronized void start() {
 
+		
 		/**
 		 * @j2sNative
 		 * 
-		 *            swingjs.JSToolkit.dispatch$O$I$I(this, 1, 0);
+		 * 			  Clazz.load("swingjs.JSToolkit").dispatch$O$I$I(this, 1, 0);
 		 * 
 		 */
 		{
@@ -199,7 +200,7 @@ public abstract class JSThread extends Thread implements JSFunction {
 		 * @j2sNative
 		 * 
 		 *            setTimeout(
-		 *              function() {java.awt.Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent$java_awt_AWTEvent(new java.awt.event.InvocationEvent(me, r))}, 
+		 *              function() {java.awt.Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent$java_awt_AWTEvent(Clazz.new(java.awt.event.InvocationEvent.c$$O$Runnable,[me, r]))}, 
 		 *              delay);
 		 * 
 		 */

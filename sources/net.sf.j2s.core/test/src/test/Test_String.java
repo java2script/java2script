@@ -1,6 +1,6 @@
 package test;
 
-public class Test_String {
+public class Test_String extends Test_ {
 	
   public static void main(String[] args) {
 	  CharSequence cs = "test";
@@ -10,6 +10,7 @@ public class Test_String {
 	  System.out.println(String.valueOf(1) + "=1");
 	  System.out.println(String.valueOf(1.5) + "=1.5");
 	  System.out.println(String.valueOf(1.5f)+ "=1.5");
+	  System.out.println(new Test_String().toString());
   }
 
 } 

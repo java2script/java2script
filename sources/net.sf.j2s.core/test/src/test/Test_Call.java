@@ -1,12 +1,23 @@
 package test;
 
+import java.util.LinkedHashMap;
 
-public class Test_Call extends Test_call0 {
+public class Test_Call extends Test_call0 implements Comparable<Test_Call>{
 
 	int y = 0;
+
+	private transient Integer icall = null;
 	
+
+	void init() {
+		System.out.println(this instanceof Test_call0);
+		System.out.println(this instanceof Comparable);
+		
+		icall = new Integer(3);		
+	}
 	void setX(int x) {
 		this.x = x;
+		
 	}
 	
 	void setY(int y) {
@@ -20,6 +31,9 @@ public class Test_Call extends Test_call0 {
 	Test_Call() {
 		setX(-1);
 		new Inner1();
+		LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
+		
+
 		assert(x == -1 && y == 100);
 	}
 	
@@ -50,6 +64,11 @@ public class Test_Call extends Test_call0 {
 	public static void main(String[] args) {
 		new Test_Call();
 		System.out.println("Test_Call OK");
+	}
+	@Override
+	public int compareTo(Test_Call o) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 
