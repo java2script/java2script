@@ -2180,7 +2180,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			names = new ArrayList<String>();
 			for (int i = methodList.size(); --i >= 0;) {
 				String params = getJ2SParamQualifier(null, mBinding, methodList.get(i));
-				//System.err.println("params = " + params + "  "+ methodList.get(i)[0]); 
+				//System.err.println("params = " + params + "  "+methodList.get(i).length + "==?==" + mBinding.getParameterTypes().length + " " +  methodList.get(i)[0]); 
 				if (params != null)
 					names.add(methodName + params);
 			}
@@ -2238,19 +2238,22 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			String type = j2sGetParamCode(paramTypes[i], true);
 			String genericType = (genericTypes == null ? null : genericTypes[i]);			
 			if (genericType != null) {
-				//System.err.println("hoping that " + className + "." + methodName + " " + i + " " + genericType + " works for " + paramTypes[i].getQualifiedName());
-				if (genericType.indexOf("|" + paramTypes[i].getQualifiedName() + ";") < 0)
-					return null;
-				type = "T" + genericType.substring(0, genericType.indexOf("|")); // "O";//
-				// Originally I was substituting in the generic type T,V,E,etc., but 
-				// this causes a problem when the user is working with a later version of 
-				// Java and subclassing what was originally not a generic class (JComboBox)
-				// but which is now generic (JComboBox<E>). The new version of Java will be
-				// used by the transpiler working on the user's machine, and then we will 
-				// have the problem that the code will have addItem$TE inserted even though 
-				// the version of Java in the SwingJS distribution will be only addItem$O. 
-				// Using Object here because that would be the default for JComboBox<>
-				// and so match that earlier non-generic designation (hopefully).
+				if (genericType.indexOf("|null") < 0) {
+					//System.err.println("hoping that " + className + "." + methodName + " " + i + " " + genericType + " works for " + paramTypes[i].getQualifiedName() + " " + paramTypes[i].getKey());
+					if (genericType.indexOf("|" + paramTypes[i].getQualifiedName() + ";") < 0)
+						return null;
+					type = "T" + genericType.substring(0, genericType.indexOf("|")); // "O";//
+					// Originally I was substituting in the generic type T,V,E,etc., but 
+					// this causes a problem when the user is working with a later version of 
+					// Java and subclassing what was originally not a generic class (JComboBox)
+					// but which is now generic (JComboBox<E>). The new version of Java will be
+					// used by the transpiler working on the user's machine, and then we will 
+					// have the problem that the code will have addItem$TE inserted even though 
+					// the version of Java in the SwingJS distribution will be only addItem$O. 
+					// Using Object here because that would be the default for
+					// JComboBox<>
+					// and so match that earlier non-generic designation (hopefully).
+				}
 			}
 			sbParams.append("$").append(type);
 		}
