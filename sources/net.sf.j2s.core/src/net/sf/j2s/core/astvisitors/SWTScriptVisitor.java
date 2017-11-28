@@ -37,6 +37,7 @@ import net.sf.j2s.core.adapters.Bindings;
 import net.sf.j2s.core.adapters.ExtendedAdapter;
 import net.sf.j2s.core.adapters.FieldAdapter;
 import net.sf.j2s.core.adapters.TypeAdapter;
+import net.sf.j2s.core.adapters.VariableAdapter;
 
 @Deprecated
 public class SWTScriptVisitor extends ASTScriptVisitor {
@@ -104,7 +105,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 	}
 	
 	public boolean visit(SimpleName node) {
-		String constValue = getConstantValue(node);
+		String constValue = VariableAdapter.getConstantValue(node);
 		if (constValue != null) {
 			buffer.append(constValue);
 			return false;
@@ -132,7 +133,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 	@SuppressWarnings("null")
 	public boolean visit(QualifiedName node) {
 		if (FieldAdapter.isSimpleQualified(node)) {
-			String constValue = getConstantValue(node);
+			String constValue = VariableAdapter.getConstantValue(node);
 			if (constValue != null) {
 				buffer.append(constValue);
 				return false;
@@ -196,12 +197,12 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 						if (name.length() != 0) {
 							if (staticFields) {
 								if (qualifier instanceof SimpleName) {
-									buffer.append(fixName(varBinding.getDeclaringClass().getQualifiedName()));
+									buffer.append(assureQualifiedName(varBinding.getDeclaringClass().getQualifiedName()));
 								} else {
 									buffer.append('(');
 									buffer.append(name);
 									buffer.append(", ");
-									buffer.append(fixName(varBinding.getDeclaringClass().getQualifiedName()));
+									buffer.append(assureQualifiedName(varBinding.getDeclaringClass().getQualifiedName()));
 									buffer.append(')');
 								}
 							} else {
@@ -221,7 +222,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		}
 		if (!qualifierVisited) {
 			if (staticFields) {
-				String name = fixName(varBinding.getDeclaringClass().getQualifiedName());
+				String name = assureQualifiedName(varBinding.getDeclaringClass().getQualifiedName());
 				if (qName instanceof SimpleName) {
 					buffer.append(name);
 				} else {

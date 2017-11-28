@@ -2,6 +2,7 @@ package test;
 
 import java.awt.Component;
 
+import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
@@ -21,11 +22,27 @@ public class Test_Generic_Java8 extends Test_ implements ListCellRenderer {
 		Test_Generic_Java8 test = new Test_Generic_Java8();
 		// calls getListCellRendererComponent$javax_swing_JList$O$I$Z$Z 
 		test.getListCellRendererComponent(null,  null, 0, false, false);
-		
 		ListCellRenderer t = new Test_Generic_Java8();
 		// calls getListCellRendererComponent$javax_swing_JList$TE$I$Z$Z 
 		t.getListCellRendererComponent(null,  null, 0, false, false);
+		class JCombo extends JComboBox {
+			public void test(Object o) {
+				// This next call will be to this.addItem$O in Java6
+				// but to this.addItem$TE in Java8. Since the SwingJS version 
+				// is addItem$O, we need to alias this call to that as 
+				//  (this.addItem$TE || this.addItem$O)(o);
+				//
+				addItem(o);
+				System.out.println("added " + o);
+			}
+		}
+		new JCombo().test(new Object());
+			String s = null;
+			String v = "testing";
+			System.out.println((s == null ? v : s).length());
+		System.out.println("Test_Generic_Java8 OK");
 	}
+	
 	
 	/**
 	 * This method must be bound to both 

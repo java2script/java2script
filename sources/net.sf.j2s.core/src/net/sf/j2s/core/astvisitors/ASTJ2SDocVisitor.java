@@ -262,7 +262,7 @@ public class ASTJ2SDocVisitor extends ASTEmptyVisitor {
 		StringBuffer buf = new StringBuffer();
 		String firstLine = getSource(tagEl, buf, true);
 		buffer.append(prefix);
-		buffer.append(ExtendedAdapter.buildXSource(getFullClassName(), tagEl.getTagName(), firstLine, buf.toString().trim()));
+		buffer.append(ExtendedAdapter.buildXSource(getQualifiedClassName(), tagEl.getTagName(), firstLine, buf.toString().trim()));
 		buffer.append(suffix);
 		return true;
 	}

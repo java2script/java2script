@@ -9,7 +9,7 @@ public abstract class Test_Abstract extends Test_ {
 	static class Test_Abstract_a {
 	
 		void testing() {
-		System.out.println("XX" + a);
+		System.out.println("X??X" + a);
 		}
 	}
 	 

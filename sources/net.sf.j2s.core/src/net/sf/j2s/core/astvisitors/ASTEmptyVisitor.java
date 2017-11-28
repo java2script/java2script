@@ -47,13 +47,11 @@ import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
-import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -104,7 +102,6 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
 import net.sf.j2s.core.adapters.AbstractPluginAdapter;
-import net.sf.j2s.core.adapters.FieldAdapter;
 import net.sf.j2s.core.adapters.FinalVariable;
 import net.sf.j2s.core.adapters.J2SMapAdapter;
 import net.sf.j2s.core.adapters.TypeAdapter;
@@ -218,60 +215,20 @@ public class ASTEmptyVisitor extends ASTVisitor {
 	}
 
 
-	/**
-	 * We need to check packages only for local "var" variables, as only those will be 
-	 * references as unqualified names. And the problem is only the same method. 
-	 * 
-	 * For example, 
-	 * 
-	 *  var test = 3
-	 *  
-	 *  x = test.Test_1.getX();
-	 *  
-	 * 
-	 *  
-	 * @param name
-	 * @param checkPackages
-	 * @param addName TODO
-	 * @return
-	 */
-	protected void appendValidFieldName$Qualifier(String name, boolean checkPackages, boolean addName) {
-		boolean isViolation = FieldAdapter.checkKeywordViolation(name, checkPackages ? definedPackageNames : null);
-		if (isViolation)
-			buffer.append("$");
-		if (addName)
-			buffer.append(name);
-	}
-
-	protected String getClassName() {
+	protected String getUnqualifiedClassName() {
 		return ((TypeAdapter) getAdaptable(TypeAdapter.class)).getClassName();
 	}
-	protected String getConstantValue(Expression exp) {
-		return ((VariableAdapter) getAdaptable(VariableAdapter.class)).getConstantValue(exp);
-	}
 
-	protected String getFieldName$Appended(ITypeBinding binding, String name) {
-		return J2SMapAdapter.getFieldName$Appended(binding, name);
+	protected String getQualifiedClassName() {
+		return ((TypeAdapter) getAdaptable(TypeAdapter.class)).getFullClassName();
 	}
 
 	protected List<FinalVariable> getVariableList(char fvn) { 
 		return ((VariableAdapter) getAdaptable(VariableAdapter.class)).getVariableList(fvn); 
 	}
 
-	protected String getFullClassName() {
-		return ((TypeAdapter) getAdaptable(TypeAdapter.class)).getFullClassName();
-	}
-
 	protected String getIndexedVarName(String name, int i) {
 		return ((VariableAdapter) getAdaptable(VariableAdapter.class)).getIndexedVarName(name, i);
-	}
-
-	protected String getJ2SName(SimpleName node) {
-		return J2SMapAdapter.getJ2SName(node);
-	}
-
-	protected String getJ2SName(IVariableBinding binding) {
-		return J2SMapAdapter.getJ2SName(binding);
 	}
 
 	protected String getNormalVariableName(String name) {

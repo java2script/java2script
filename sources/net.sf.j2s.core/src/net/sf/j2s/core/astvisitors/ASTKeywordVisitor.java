@@ -69,6 +69,7 @@ import net.sf.j2s.core.adapters.FieldAdapter;
 import net.sf.j2s.core.adapters.FinalVariable;
 import net.sf.j2s.core.adapters.J2SMapAdapter;
 import net.sf.j2s.core.adapters.TypeAdapter;
+import net.sf.j2s.core.adapters.VariableAdapter;
 
 //BH 11/18/2017 -- adds full name-qualified support for generics, including generic methods   
 //BH 9/10/2017 -- adds full byte, short, and int distinction using class-level local fields $b$, $s$, and $i$, which are IntXArray[1].
@@ -366,7 +367,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 				if (right instanceof CharacterLiteral) {
 					// ... = 'c'
 					if (leftIsString) {
-						buffer.append(getConstantValue(right));
+						buffer.append(VariableAdapter.getConstantValue(right));
 					} else {
 						buffer.append(0 + ((CharacterLiteral) right).charValue());
 					}
@@ -410,7 +411,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		buffer.append(' ');
 		boolean needCharCode = false;
 		if (right instanceof InfixExpression) {
-			String constValue = getConstantValue(right);
+			String constValue = VariableAdapter.getConstantValue(right);
 			if (constValue == null) {
 				buffer.append("(");
 				boxingNode(right, true);
@@ -587,7 +588,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		Expression right = node.getRightOperand();
 		List<?> extendedOperands = node.extendedOperands();
 
-		String constValue = getConstantValue(node);
+		String constValue = VariableAdapter.getConstantValue(node);
 		if (constValue != null) {
 			buffer.append(constValue);
 			return false;
@@ -773,7 +774,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	 */
 	public boolean visit(PrefixExpression node) {
 		// Q: Can you really have a constant here?
-		String constValue = getConstantValue(node);
+		String constValue = VariableAdapter.getConstantValue(node);
 		if (constValue != null) {
 			buffer.append(constValue);
 			return false;
@@ -787,8 +788,9 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(QualifiedName node) {
+		// page.x =...
 		if (FieldAdapter.isSimpleQualified(node)) {
-			String constValue = getConstantValue(node);
+			String constValue = VariableAdapter.getConstantValue(node);
 			if (constValue != null) {
 				buffer.append(constValue);
 				return false;
@@ -868,75 +870,73 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(SimpleName node) {
+		// var x = ...
+		// this.pages ....
+		buffer.append(getQualifiedSimpleName(node));
+		return false;
+	}
+
+	protected String getQualifiedSimpleName(SimpleName node) {
 		// xxx.yyy.zzz...
-		String constValue = getConstantValue(node);
+		String constValue = VariableAdapter.getConstantValue(node);
 		if (constValue != null) {
-			buffer.append(constValue);
-			return false;
+			return constValue;
 		}
 		IBinding binding = node.resolveBinding();
 		if (allowExtensions && binding instanceof ITypeBinding
-			&& ExtendedAdapter.isHTMLClass(((ITypeBinding) binding).getQualifiedName(), false)) {
-			buffer.append(node.getIdentifier());
-			return false;
+				&& ExtendedAdapter.isHTMLClass(((ITypeBinding) binding).getQualifiedName(), false)) {
+			return node.getIdentifier();
 		}
 		ASTNode xparent = node.getParent();
 		if (xparent == null) {
-			buffer.append(node);
-			return false;
+			return node.toString();
 		}
 		char leadingChar = (buffer.length() == 0 ? '\0' : buffer.charAt(buffer.length() - 1));
 		boolean isQualified = (leadingChar == '.');
 		// looking for "." or '"' here.
 		if (isQualified && xparent instanceof QualifiedName) {
-			if (binding != null && binding instanceof IVariableBinding) {
-				IVariableBinding varBinding = (IVariableBinding) binding;
-				ITypeBinding declaringClass = varBinding.getVariableDeclaration().getDeclaringClass();
-				appendCheckedFieldName(getJ2SName(node), declaringClass, false);
-				return false;
-			}
-			buffer.append(node);
-			return false;
+			if (!(binding instanceof IVariableBinding))
+				return node.toString();
+			IVariableBinding varBinding = (IVariableBinding) binding;
+			ITypeBinding declaringClass = varBinding.getVariableDeclaration().getDeclaringClass();
+			return getCheckedFieldName(J2SMapAdapter.getJ2SName(node), declaringClass, false);
 		}
 		if (xparent instanceof ClassInstanceCreation && !(binding instanceof IVariableBinding)) {
-			String name = (binding == null ? getJ2SName(node) : node.resolveTypeBinding().getQualifiedName());
-			buffer.append(fixName(name));
-			return false;
+			String name = (binding == null ? J2SMapAdapter.getJ2SName(node) : node.resolveTypeBinding().getQualifiedName());
+			return assureQualifiedName(name);
 		}
 		if (binding == null) {
-			String name = getShortenedQualifiedName(getJ2SName(node));
-			appendValidFieldName$Qualifier(name, true, true);
-			return false;
+			String name = getShortenedQualifiedName(J2SMapAdapter.getJ2SName(node));
+			return getValidFieldName$Qualifier(name, true, true);
 		}
-		if (binding instanceof IVariableBinding) {
-			simpleNameInVarBinding(node, leadingChar, (IVariableBinding) binding);
-		} else if (binding instanceof IMethodBinding) {
-			simpleNameInMethodBinding(node, isQualified, (IMethodBinding) binding);
-		} else {
-			ITypeBinding typeBinding = node.resolveTypeBinding();
-			// >>Math<<.max
-			appendValidFieldName$Qualifier(typeBinding == null ? node.getFullyQualifiedName()
-					: fixName(typeBinding.getQualifiedName()), false, true);
-		}
-		return false;
+		if (binding instanceof IVariableBinding)
+			return simpleNameInVarBinding(node, leadingChar, (IVariableBinding) binding);
+		if (binding instanceof IMethodBinding)
+			return simpleNameInMethodBinding(node, isQualified, (IMethodBinding) binding);
+
+		ITypeBinding typeBinding = node.resolveTypeBinding();
+		// >>Math<<.max
+		return getValidFieldName$Qualifier(
+				typeBinding == null ? node.getFullyQualifiedName() : assureQualifiedName(typeBinding.getQualifiedName()), false,
+				true);
 	}
 
-	protected void appendCheckedFieldName(String fieldName, ITypeBinding classBinding, boolean checkPackages) {
-		appendValidFieldName$Qualifier(fieldName, checkPackages, false);
+	protected String getCheckedFieldName(String fieldName, ITypeBinding classBinding, boolean checkPackages) {
+		String name = getValidFieldName$Qualifier(fieldName, checkPackages, false);
 		if (classBinding != null) {
 			if (J2SMapAdapter.checkInheritedMethodNameCollision(classBinding, fieldName)) {
-				buffer.append("$");
+				name += "$";
 			}
 			if (isInheritedFieldName(classBinding, fieldName))
-				fieldName = getFieldName$Appended(classBinding, fieldName);
+				fieldName = J2SMapAdapter.getFieldName$Appended(classBinding, fieldName);
 		}
-		buffer.append(fieldName);
+		return name + fieldName;
 	}
 
 	public boolean visit(SimpleType node) {
 		ITypeBinding binding = node.resolveBinding();
 		buffer.append(
-				binding == null ? node : fixName(binding.getQualifiedName()));
+				binding == null ? node : assureQualifiedName(binding.getQualifiedName()));
 		return false;
 	}
 
@@ -1092,68 +1092,6 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 				: getQualifiedStaticName(null, ebinding.getQualifiedName(), true, true, false))
 				+ (dimFlag == 0 ? "" : ", " + dimFlag * type.getDimensions());
 		return (dimFlag > 0 ? "Clazz.arrayClass$(" + params + ")" : " Clazz.newArray$(" + params);
-	}
-
-	protected static String j2sGetParamCode(ITypeBinding binding, boolean addAAA) {
-		String prefix = (removeBrackets(binding.getKey()).indexOf(":T") >= 0 ? "T" : null);
-		String name = binding.getQualifiedName();		
-		String arrays = null;
-		name = removeBrackets(name);
-		int pt = name.indexOf("[");
-		if (pt >= 0) {
-			arrays = name.substring(pt + (name.indexOf("[L") >= 0 ? 1 : 0));
-			name = name.substring(0, pt);
-		}
-
-		// NOTE: If any of these are changed, they must be changed in j2sSwingJS as well.
-		// NOTE: These are the same as standard Java Spec, with the exception of
-		// Short, which is "H" instead of "S"
-
-		switch (name) {
-		case "boolean":
-			name = "Z";
-			break;
-		case "byte":
-			name = "B";
-			break;
-		case "char":
-			name = "C";
-			break;
-		case "double":
-			name = "D";
-			break;
-		case "float":
-			name = "F";
-			break;
-		case "int":
-			name = "I";
-			break;
-		case "long":
-			name = "J";
-			break;
-		case "short":
-			name = "H"; // differs from Java Spec so we can use S for String
-			break;
-		case "java.lang.Object":
-		case "Object":
-			name = "O";
-			break;
-		case "java.lang.String":
-			name = "S";
-			break;
-		default:
-			if (prefix != null)
-				name = prefix + name; // "O";//
-			
-			name = name.replace("java.lang.", "").replace('.', '_');
-			break;
-		}
-		if (arrays != null) {
-			if (addAAA)
-				arrays = arrays.replaceAll("\\[\\]", "A");
-			name += arrays;
-		}
-		return name;
 	}
 
 	public static void setNoQualifiedNamePackages(String names) {
@@ -1567,8 +1505,9 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 				: code == PrimitiveType.BOOLEAN ? "false" : code == PrimitiveType.CHAR ? "'\\0'" : "0");
 	}
 
-	protected void appendClassNameAndDot(ASTNode parent, ITypeBinding declaringClass, boolean isPrivate) {
+	protected String getClassNameAndDot(ASTNode parent, ITypeBinding declaringClass, boolean isPrivate) {
 		String name = declaringClass.getQualifiedName();
+		String ret = "";
 		int superLevel = 0;
 		ITypeBinding originalType = null;
 		boolean isThis = false;
@@ -1584,7 +1523,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 				superLevel++;
 				if (Bindings.isSuperType(declaringClass, typeBinding)) {
 					if (superLevel == 1) {
-						buffer.append(isPrivate ? "p$." : "this.");
+						ret = (isPrivate ? "p$." : "this.");
 						isThis = true;
 					}
 					name = typeBinding.getQualifiedName();
@@ -1596,10 +1535,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			}
 			parent = parent.getParent();
 		}
-		if (isThis)
-			return;
-		appendSyntheticReference(name);
-		buffer.append(".");
+		return (isThis ? ret : getSyntheticReference(name) + ".");
 	}
 
 	private String ensureNameIfLocal(String name, ITypeBinding typeBinding, ASTNode parent) {
@@ -1645,7 +1581,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	 */
 	protected void appendShortenedQualifiedName(String packageName, String name, boolean isStatic, boolean doCache) {
 		name = removeBrackets(name);
-		String shortName = (doCache ? fixName(name) : fixNameNoC$(packageName, name));
+		String shortName = (doCache ? assureQualifiedName(name) : assureQualifiedNameNoC$(packageName, name));
 		if (isStatic && (shortName.length() < 2 || shortName.charAt(1) != '$')) {
 			if (!doCache || isClassKnown(name))
 				name = shortName;
@@ -1655,9 +1591,9 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		}
 	}
 
-	protected void appendSyntheticReference(String name) {
-		buffer.append("this");
-		buffer.append(b$name = ".b$['" + fixNameNoC$(null, name) + "']");
+	protected String getSyntheticReference(String name) {
+		b$name = ".b$['" + assureQualifiedNameNoC$(null, name) + "']";
+		return "this" + b$name;
 	}
 
 	/**
@@ -1700,7 +1636,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 					return true;
 				}
 			}
-			String constValue = getConstantValue(exp);
+			String constValue = VariableAdapter.getConstantValue(exp);
 			if (constValue != null) {
 				buffer.append(constValue);
 				return false;
@@ -1734,11 +1670,11 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	 * @param name
 	 * @return
 	 */
-	protected String fixNameNoC$(String packageName, String name) {
+	protected String assureQualifiedNameNoC$(String packageName, String name) {
 		return (name == null ? null : TypeAdapter.assureQualifiedName(packageName, TypeAdapter.getShortenedName(null, name, false)));
 	}
 
-	protected String fixName(String name) {
+	protected String assureQualifiedName(String name) {
 		return (name == null ? null : TypeAdapter.assureQualifiedName(thisPackageName, getShortenedQualifiedName(name)));
 	}
 
@@ -1788,14 +1724,14 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		}
 		Integer n = null;
 		if (doCache) {			
-			if (className.equals(getFullClassName()))
+			if (className.equals(getQualifiedClassName()))
 				s = "C$"; // anonymous class will be like this
 			else
 				n = getStaticNameIndex(className);
 		}
 		if (s == null) {
 			if (methodQualifier != null)
-				className = fixNameNoC$(null, className);
+				className = assureQualifiedNameNoC$(null, className);
 			s = getNestedClazzLoads(className);
 			if (n != null)
 				s = "(I$[" + n + "] || (I$[" + n + "]=" + s + "))";
@@ -1869,8 +1805,9 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		return false;
 	}
 
-	private void simpleNameInMethodBinding(SimpleName node, boolean isQualified, IMethodBinding mBinding) {
-		String name = getShortenedQualifiedName(getJ2SName(node));
+	private String simpleNameInMethodBinding(SimpleName node, boolean isQualified, IMethodBinding mBinding) {
+		String name = getShortenedQualifiedName(J2SMapAdapter.getJ2SName(node));
+		String ret = "";
 		if (isStatic(mBinding)) {
 			IMethodBinding variableDeclaration = mBinding.getMethodDeclaration();
 			ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
@@ -1881,8 +1818,11 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 				if (parent instanceof MethodInvocation) {
 					MethodInvocation mthInv = (MethodInvocation) parent;
 					if (mthInv.getExpression() == null) {
-						addFixedQualifierWithDot(declaringClass);
-					}
+						String cname = declaringClass.getQualifiedName();
+						cname = assureQualifiedName(cname);
+						if (cname.length() > 0)
+							ret = cname + ".";
+						}
 				}
 			}
 			if (isClassString && "$valueOf".equals(name))
@@ -1893,31 +1833,23 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			if (parent != null && !(parent instanceof FieldAccess)) {
 				IMethodBinding variableDeclaration = mBinding.getMethodDeclaration();
 				ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
-				if (!isQualified && declaringClass != null && getClassName() != null) {
+				if (!isQualified && declaringClass != null && getUnqualifiedClassName() != null) {
 					String className = declaringClass.getQualifiedName();
 					checkNameViolation = !("java.lang.String".equals(className)
 							&& "valueOf".equals(name));
-					appendClassNameAndDot(parent, declaringClass, Modifier.isPrivate(mBinding.getModifiers()));
+					ret = getClassNameAndDot(parent, declaringClass, Modifier.isPrivate(mBinding.getModifiers()));
 				}
 			}
 			// String name = node.getFullyQualifiedName();
 			if (checkNameViolation)
-				appendValidFieldName$Qualifier(name, false, false);
+				ret += getValidFieldName$Qualifier(name, false, false);
 		}
-		buffer.append(name);
+		return ret + name;
 	}
 
-	private void addFixedQualifierWithDot(ITypeBinding declaringClass) {
-		String name = declaringClass.getQualifiedName();
-		name = fixName(name);
-		if (name.length() != 0) {
-			buffer.append(name);
-			buffer.append(".");
-		}
-	}
-
-	private void simpleNameInVarBinding(SimpleName node, char ch, IVariableBinding varBinding) {
+	private String simpleNameInVarBinding(SimpleName node, char ch, IVariableBinding varBinding) {
 		String name = null;
+		String ret = "";
 		IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
 		ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
 		if (isStatic(varBinding)) {
@@ -1929,20 +1861,17 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 					// with my anonymous class name!
 					name = declaringClass.getBinaryName();
 				}
-				name = fixName(name);
+				name = assureQualifiedName(name);
 				if (name.length() != 0) {
-					getQualifiedStaticName(null, name, true,true,true);
-					
-//					buffer.append(name);
-					buffer.append(".");
+					ret = getQualifiedStaticName(null, name, true,true,false) + ".";
 					ch = '.';
 				}
 			}
 		} else {
 			ASTNode parent = node.getParent();
 			if (parent != null && !(parent instanceof FieldAccess)) {
-				if (declaringClass != null && getClassName() != null && ch != '.') {
-					appendClassNameAndDot(parent, declaringClass, false);
+				if (declaringClass != null && getUnqualifiedClassName() != null && ch != '.') {
+					ret = getClassNameAndDot(parent, declaringClass, false);
 					ch = '.';
 				}
 			}
@@ -1972,8 +1901,9 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 				name = (fieldVar == null ? getNormalVariableName(node.getIdentifier()) : fieldVar);
 		}
 		if (declaringClass != null)
-			name = getJ2SName(node);
-		appendCheckedFieldName(name, declaringClass, ch != '.');
+			name = J2SMapAdapter.getJ2SName(node);
+		ret += getCheckedFieldName(name, declaringClass, ch != '.');
+		return ret;
 	}
 
 	protected void visitList(List<ASTNode> list, String seperator) {
@@ -2169,8 +2099,8 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	protected String getMethodNameOrArrayForDeclaration(MethodDeclaration node, IMethodBinding mBinding,
 			boolean isConstructor) {
 		SimpleName nodeName = node.getName();
-		String methodName = (isConstructor ? "c$" : getJ2SName(nodeName));
-		String name = methodName + getJ2SParamQualifier(null, mBinding, null);
+		String methodName = (isConstructor ? "c$" : J2SMapAdapter.getJ2SName(nodeName));
+		String name = getJ2SQualifiedName(methodName, null, mBinding, null, false);
 		ITypeBinding methodClass = mBinding.getDeclaringClass();
 		List<String> names = null;
 		//System.err.println("checking methodList for " + nodeName.toString() + " in " + methodClass.getKey());
@@ -2179,10 +2109,10 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			//System.err.println("have methodList for " + nodeName + " " +  methodList.size());
 			names = new ArrayList<String>();
 			for (int i = methodList.size(); --i >= 0;) {
-				String params = getJ2SParamQualifier(null, mBinding, methodList.get(i));
+				String pname = getJ2SQualifiedName(methodName, null, mBinding, methodList.get(i), false);
 				//System.err.println("params = " + params + "  "+methodList.get(i).length + "==?==" + mBinding.getParameterTypes().length + " " +  methodList.get(i)[0]); 
-				if (params != null)
-					names.add(methodName + params);
+				if (pname != null)
+					names.add(pname);
 			}
 		}
 		if (names == null || names.size() == 0)
@@ -2202,11 +2132,15 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	 * 
 	 * @param nodeName
 	 * @param binding
-	 * @param genericTypes TODO
+	 * @param genericTypes
+	 *            TODO
+	 * @param isMethodInvoc
+	 *            TODO
+	 * 
 	 * @return a fully j2s-qualified method name
 	 */
-	protected static String getJ2SParamQualifier(String nodeName, IMethodBinding binding, 
-			String[] genericTypes) {
+	protected String getJ2SQualifiedName(String j2sName, String nodeName, IMethodBinding binding,
+			String[] genericTypes, boolean isMethodInvoc) {
 		// The problem is that System.out and System.err are PrintStreams, and
 		// we
 		// do not intend to change those. So in the case that we just wrote
@@ -2214,11 +2148,11 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		// Note: binding can be null if we have errors in the Java and we are
 		// compiling
 		if (binding == null || nodeName != null && nodeName.startsWith("System."))
-			return "";
+			return j2sName;
 		String methodName = binding.getName();
 		String className = binding.getDeclaringClass().getQualifiedName();
 		if (!isPackageQualified(className) || !isMethodQualified(className, methodName))
-			return "";
+			return j2sName;
 		ITypeBinding[] paramTypes = binding.getMethodDeclaration().getParameterTypes();
 
 		// BH: Note that Map.put$K$V is translated to actual values
@@ -2226,39 +2160,15 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		// Without that, it uses the bound parameters such as
 		// String, Object instead of the declared ones, such as $TK$TV
 
-		StringBuffer sbParams = new StringBuffer();
 		int nParams = paramTypes.length;
 		if (genericTypes != null && genericTypes.length != nParams)
 			return null;
-		
+
 		if (nParams == 0 && methodName.equals("length"))
-			return "$"; // so that String implements CharSequence
+			return j2sName + "$"; // so that String implements CharSequence
+
 		
-		for (int i = 0; i < nParams; i++) {
-			String type = j2sGetParamCode(paramTypes[i], true);
-			String genericType = (genericTypes == null ? null : genericTypes[i]);			
-			if (genericType != null) {
-				if (genericType.indexOf("|null") < 0) {
-					//System.err.println("hoping that " + className + "." + methodName + " " + i + " " + genericType + " works for " + paramTypes[i].getQualifiedName() + " " + paramTypes[i].getKey());
-					if (genericType.indexOf("|" + paramTypes[i].getQualifiedName() + ";") < 0)
-						return null;
-					type = "T" + genericType.substring(0, genericType.indexOf("|")); // "O";//
-					// Originally I was substituting in the generic type T,V,E,etc., but 
-					// this causes a problem when the user is working with a later version of 
-					// Java and subclassing what was originally not a generic class (JComboBox)
-					// but which is now generic (JComboBox<E>). The new version of Java will be
-					// used by the transpiler working on the user's machine, and then we will 
-					// have the problem that the code will have addItem$TE inserted even though 
-					// the version of Java in the SwingJS distribution will be only addItem$O. 
-					// Using Object here because that would be the default for
-					// JComboBox<>
-					// and so match that earlier non-generic designation (hopefully).
-				}
-			}
-			sbParams.append("$").append(type);
-		}
-			
-		String s = sbParams.toString();
+		String s = getParamsAsString(nParams, genericTypes, paramTypes, false);
 		// exception for special case: setting static main(String[] args) to
 		// "main", and "main()" to "main$"
 		if ("main".equals(methodName) && isStatic(binding)) {
@@ -2267,8 +2177,127 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			} else if (s.equals("$SA")) {
 				s = "";
 			}
+		} else if (false && isMethodInvoc && s.indexOf("$T") >= 0 && isJava(className) && !isJava(getQualifiedClassName())) {
+			// also add the $O version
+			String generic = getParamsAsString(nParams, genericTypes, paramTypes, true);
+			return "(" + j2sName + s + " || " + j2sName + generic + ")";
+		    // this does not work for two reasons:
+			// 1) sometimes the qualifier, so for t.foo$TA(o),  "t." is outside the scope of these parentheses. 
+			// 2) When selecting functions like this, one needs to use apply, so: ((a$ = expression).foo$TA || a$.foo$O).apply(a$, [o])
+			//
+			// thus, this determination must be made very early.
+			
 		}
-		return s;
+		return  j2sName + s;
+	}
+
+	private boolean isJava(String className) {
+		return className.length() > 5 && "java.javax".contains(className.substring(0, 5));
+	}
+
+	private static String getParamsAsString(int nParams, String[] genericTypes, ITypeBinding[] paramTypes, boolean toObject) {
+		StringBuffer sbParams = new StringBuffer();
+		// if this is a method invocation and has generics, then we alias that
+		for (int i = 0; i < nParams; i++) {
+			String type = j2sGetParamCode(paramTypes[i], true, toObject);
+			if (genericTypes != null) {
+				String genericType = genericTypes[i];
+				if (genericType != null) {
+					if (genericType.indexOf("|null") < 0) {
+						// System.err.println("hoping that " + className + "." +
+						// methodName + " " + i + " " + genericType + " works
+						// for " + paramTypes[i].getQualifiedName() + " " +
+						// paramTypes[i].getKey());
+						if (genericType.indexOf("|" + paramTypes[i].getQualifiedName() + ";") < 0)
+							return null;
+						type = "T" + genericType.substring(0, genericType.indexOf("|")); // "O";//
+						// Originally I was substituting in the generic type
+						// T,V,E,etc., but
+						// this causes a problem when the user is working with a
+						// later version of
+						// Java and subclassing what was originally not a
+						// generic class (JComboBox)
+						// but which is now generic (JComboBox<E>). The new
+						// version of Java will be
+						// used by the transpiler working on the user's machine,
+						// and then we will
+						// have the problem that the code will have addItem$TE
+						// inserted even though
+						// the version of Java in the SwingJS distribution will
+						// be only addItem$O.
+						// Using Object here because that would be the default
+						// for
+						// JComboBox<>
+						// and so match that earlier non-generic designation
+						// (hopefully).
+					}
+				}
+			}
+			sbParams.append("$").append(type);
+		}
+		return sbParams.toString();
+	}
+
+	protected static String j2sGetParamCode(ITypeBinding binding, boolean addAAA, boolean asGenericObject) {
+		String prefix = (removeBrackets(binding.getKey()).indexOf(":T") >= 0 ? "T" : null);
+		String name = binding.getQualifiedName();		
+		String arrays = null;
+		name = removeBrackets(name);
+		int pt = name.indexOf("[");
+		if (pt >= 0) {
+			arrays = name.substring(pt + (name.indexOf("[L") >= 0 ? 1 : 0));
+			name = name.substring(0, pt);
+		}
+
+		// NOTE: If any of these are changed, they must be changed in j2sSwingJS as well.
+		// NOTE: These are the same as standard Java Spec, with the exception of
+		// Short, which is "H" instead of "S"
+
+		switch (name) {
+		case "boolean":
+			name = "Z";
+			break;
+		case "byte":
+			name = "B";
+			break;
+		case "char":
+			name = "C";
+			break;
+		case "double":
+			name = "D";
+			break;
+		case "float":
+			name = "F";
+			break;
+		case "int":
+			name = "I";
+			break;
+		case "long":
+			name = "J";
+			break;
+		case "short":
+			name = "H"; // differs from Java Spec so we can use S for String
+			break;
+		case "java.lang.Object":
+		case "Object":
+			name = "O";
+			break;
+		case "java.lang.String":
+			name = "S";
+			break;
+		default:
+			if (prefix != null)
+				name = (asGenericObject ? "O" : prefix + name); // "O";//
+			
+			name = name.replace("java.lang.", "").replace('.', '_');
+			break;
+		}
+		if (arrays != null) {
+			if (addAAA)
+				arrays = arrays.replaceAll("\\[\\]", "A");
+			name += arrays;
+		}
+		return name;
 	}
 
 
@@ -2298,7 +2327,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	///////////////// debugging //////////////////////////
 	
 	
-	static void debugDumpClass(ITypeBinding binding) {
+	void debugDumpClass(ITypeBinding binding) {
 		ITypeBinding[] lst = binding.getTypeParameters();
 
 		// Check for <T,V> - these are for the generic class defs themselves
@@ -2313,7 +2342,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		IMethodBinding[] methods = binding.getDeclaredMethods();
 		for (int i = methods.length; --i >= 0;) {			
 			IMethodBinding m = methods[i];
-			System.err.println(m.getName() + getJ2SParamQualifier(null, m, null));
+			System.err.println(getJ2SQualifiedName(m.getName(), null, m, null, false));
 			ITypeBinding[] params = m.getParameterTypes();
 			for (int j = 0; j < params.length; j++)
 				System.err.println("\t" + params[j].getName());
@@ -2334,6 +2363,28 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 						System.err.println(">> " + m.getKey() + " overrides " + methods[i].getKey());
 			}
 		}
+	}
+
+	/**
+	 * We need to check packages only for local "var" variables, as only those will be 
+	 * references as unqualified names. And the problem is only the same method. 
+	 * 
+	 * For example, 
+	 * 
+	 *  var test = 3
+	 *  
+	 *  x = test.Test_1.getX();
+	 *  
+	 * 
+	 *  
+	 * @param name
+	 * @param checkPackages
+	 * @param addName TODO
+	 * @return
+	 */
+	protected String getValidFieldName$Qualifier(String name, boolean checkPackages, boolean addName) {
+		boolean isViolation = FieldAdapter.checkKeywordViolation(name, checkPackages ? definedPackageNames : null);
+		return (isViolation ? "$" : "") + (addName ? name : "");
 	}
 
 

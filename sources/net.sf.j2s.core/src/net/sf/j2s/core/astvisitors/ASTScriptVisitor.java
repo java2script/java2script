@@ -69,6 +69,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
 import net.sf.j2s.core.adapters.FinalVariable;
+import net.sf.j2s.core.adapters.J2SMapAdapter;
 import net.sf.j2s.core.adapters.MethodAdapter;
 import net.sf.j2s.core.adapters.TypeAdapter;
 import net.sf.j2s.core.adapters.VariableAdapter;
@@ -161,8 +162,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	private void addApplication() {
 		if (apps == null)
 			apps = new ArrayList<String>();
-		String name = getPackageName() + "." + getClassName();
-		apps.add(name);
+		apps.add(getQualifiedClassName());
 	}
 
 	private void checkAddApplet(ITypeBinding binding) {
@@ -394,7 +394,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			else
 				buffer.append(" new ").append(fqName).append("(");
 		} else {
-			open$new(className, ".c$" + getJ2SParamQualifier(null, constructorBinding, null));
+			openNew(className, constructorBinding); 
 			isDefault = node.arguments().isEmpty();
 			prefix = ",[";
 			postfix = "]";
@@ -408,8 +408,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	public boolean visit(ConstructorInvocation node) {
 		IMethodBinding constructorBinding = node.resolveConstructorBinding();
 		List<?> arguments = node.arguments();
-		String qualifiedParams = getJ2SParamQualifier(null, constructorBinding, null);
-		buffer.append("C$.c$").append(qualifiedParams).append(".apply(this");
+		buffer.append(getJ2SQualifiedName("C$.c$", null, constructorBinding, null, false)).append(".apply(this");
 		IMethodBinding methodDeclaration = (constructorBinding == null ? null
 				: constructorBinding.getMethodDeclaration());
 		addMethodParameterList(arguments, methodDeclaration, true, ", [", "]", false);
@@ -709,14 +708,12 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		} else {
 			isPrivateAndNotStatic = false;
 			if (expression instanceof Name) {
-				getQualifiedStaticName((Name) expression, className, isStatic && !isPrivate, true, true);
+				buffer.append(getQualifiedStaticName((Name) expression, className, isStatic && !isPrivate, true, false));
 			} else {
 				expression.accept(this);
 			}
 			buffer.append(".");
 		}
-		String j2sParams = getJ2SParamQualifier(className, mBinding, null);
-
 		boolean isSpecialMethod = false;
 		String methodName = node.getName().getIdentifier();
 		boolean isIndexOf = false;
@@ -747,8 +744,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		// we need to use it again
 		b$name = null;
 		if (!isSpecialMethod) {
-			node.getName().accept(this);
-			buffer.append(j2sParams);
+			buffer.append(getJ2SQualifiedName(getQualifiedSimpleName(node.getName()), className, mBinding, null, true));
 		}
 		String term = ")";
 		if (isPrivateAndNotStatic) {
@@ -836,28 +832,28 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 	public boolean visit(SuperFieldAccess node) {
 		ITypeBinding classBinding = resolveParentBinding(getClassDeclarationFor(node));
-		String fieldName = getJ2SName(node.getName());
+		String fieldName = J2SMapAdapter.getJ2SName(node.getName());
 		buffer.append("this.");
 		if (isInheritedFieldName(classBinding, fieldName)) {
 			if (classBinding != null) {
 				IVariableBinding[] declaredFields = classBinding.getDeclaredFields();
 				for (int i = 0; i < declaredFields.length; i++) {
-					String superFieldName = getJ2SName(declaredFields[i]);
+					String superFieldName = J2SMapAdapter.getJ2SName(declaredFields[i]);
 					if (fieldName.equals(superFieldName)) {
-						appendValidFieldName$Qualifier(fieldName, false, false);
-						buffer.append(getFieldName$Appended(classBinding.getSuperclass(), fieldName));
+						buffer.append(getValidFieldName$Qualifier(fieldName, false, false));
+						buffer.append(J2SMapAdapter.getFieldName$Appended(classBinding.getSuperclass(), fieldName));
 						return false;
 					}
 				}
 			}
 		}
-		appendValidFieldName$Qualifier(fieldName, false, true);
+		buffer.append(getValidFieldName$Qualifier(fieldName, false, true));
 		return false;
 	}
 
 	public boolean visit(SuperMethodInvocation node) {
 		IMethodBinding mBinding = node.resolveMethodBinding();
-		String name = getJ2SName(node.getName()) + getJ2SParamQualifier(null, mBinding, null);
+		String name =  getJ2SQualifiedName(J2SMapAdapter.getJ2SName(node.getName()), null, mBinding, null, false);
 		// BH if this is a call to super.clone() and there is no superclass, or
 		// the superclass is Object,
 		// then we need to invoke Clazz.clone(this) directly instead of calling
@@ -907,7 +903,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			ASTNode classNode = getClassDeclarationFor(node);
 			if (classNode != null && classNode.getParent() != null // CompilationUnit
 					&& classNode.getParent().getParent() != null) {
-				appendSyntheticReference(node.resolveTypeBinding().getQualifiedName());
+				buffer.append(getSyntheticReference(node.resolveTypeBinding().getQualifiedName()));
 				return false;
 			}
 		}
@@ -1096,7 +1092,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			// definition in the static buffer and return
 			String className;
 			if (parent instanceof TypeDeclarationStatement) {
-				String anonClassName = fixName(binding.isAnonymous() || binding.isLocal() ? binding.getBinaryName()
+				String anonClassName = assureQualifiedName(binding.isAnonymous() || binding.isLocal() ? binding.getBinaryName()
 						: binding.getQualifiedName());
 				className = anonClassName.substring(anonClassName.lastIndexOf('.') + 1);
 			} else {
@@ -1154,7 +1150,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			fullClassName = getAnonymousName(binding); // P$.Test_Enum$Planet$1
 			defaultPackageName = "null";
 		} else {
-			fullClassName = getFullClassName(); // test.Test_Enum.Planet
+			fullClassName = getQualifiedClassName(); // test.Test_Enum.Planet
 			defaultPackageName = getPackageName();
 		}
 		int pt = fullClassName.lastIndexOf('.');
@@ -1280,7 +1276,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 				ITypeBinding ibinding = (iface instanceof Type ? ((Type) iface).resolveBinding()
 						: (ITypeBinding) iface);
 				buffer.append("'");
-				buffer.append(ibinding == null ? iface : fixNameNoC$(null, ibinding.getQualifiedName()));
+				buffer.append(ibinding == null ? iface : assureQualifiedNameNoC$(null, ibinding.getQualifiedName()));
 				buffer.append("'");
 				sep = ", ";
 			}
@@ -1357,7 +1353,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 					for (int j = 0; j < fragments.size(); j++) {
 						VariableDeclarationFragment fragment = (VariableDeclarationFragment) fragments.get(j);
 						Expression initializer = fragment.getInitializer();
-						if (initializer == null || isFinal(element) && getConstantValue(initializer) != null)
+						if (initializer == null || isFinal(element) && VariableAdapter.getConstantValue(initializer) != null)
 							continue;
 						len = 0;
 						buffer.append("C$.");
@@ -1548,7 +1544,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 				anonName = getAnonymousName(anonDeclare.resolveBinding());
 				buffer.append("\r\n");
 			}
-			buffer.append("Clazz.newEnumConst$(vals, C$.c$").append(getJ2SParamQualifier(null, binding, null))
+			buffer.append("Clazz.newEnumConst$(vals, ").append(getJ2SQualifiedName("C$.c$", null, binding, null, false))
 					.append(", \"");
 			enumConst.getName().accept(this);
 			buffer.append("\", " + i);
@@ -1579,11 +1575,11 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		for (Iterator<?> iter = fragments.iterator(); iter.hasNext();) {
 			VariableDeclarationFragment fragment = (VariableDeclarationFragment) iter.next();
 			Expression initializer = fragment.getInitializer();
-			String constantValue = getConstantValue(initializer);
+			String constantValue = VariableAdapter.getConstantValue(initializer);
 			if (isFinal && constantValue != null)
 				continue;
 			buffer.append(isStatic ? "C$." : "this.");
-			appendCheckedFieldName(getJ2SName(fragment.getName()), classBinding, false);
+			buffer.append(getCheckedFieldName(J2SMapAdapter.getJ2SName(fragment.getName()), classBinding, false));
 			buffer.append(" = ");
 			if (isStatic || initializer == null) {
 				appendDefaultValue(nodeType);
@@ -1610,8 +1606,8 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	 */
 	private void addInnerTypeInstance(ClassInstanceCreation node, String innerName, Expression outerClassExpr,
 			String finals, IMethodBinding methodDeclaration, String superAnonName) {
-		open$new(superAnonName == null ? innerName : superAnonName,
-				methodDeclaration == null ? ".$init$" : ".c$" + getJ2SParamQualifier(null, methodDeclaration, null));
+		String  name = (superAnonName == null ? innerName : superAnonName);
+		openNew(name, methodDeclaration);
 
 		// add constructor application arguments: [object, parameters]
 
@@ -1691,8 +1687,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			buffer.append("Clazz.super(C$, this,1);\r\n");
 			return;
 		} 
-		buffer.append("C$.superClazz.c$")
-				.append(getJ2SParamQualifier(null, node.resolveConstructorBinding(), null));
+		buffer.append(getJ2SQualifiedName("C$.superClazz.c$", null, node.resolveConstructorBinding(), null, false));
 		buffer.append(".apply(this");
 		addMethodParameterList(node.arguments(), methodDeclaration, true, ", [", "]", false);
 		buffer.append(");\r\n");
@@ -1735,7 +1730,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		if ((binding.isAnonymous() || binding.isLocal()) && (binaryName = binding.getBinaryName()) == null
 				&& (bindingKey = binding.getKey()) != null)
 			binaryName = bindingKey.substring(1, bindingKey.length() - 1).replace('/', '.');
-		return fixName(binaryName == null ? binding.getQualifiedName() : binaryName);
+		return assureQualifiedName(binaryName == null ? binding.getQualifiedName() : binaryName);
 	}
 
 	private String getSuperClass(ITypeBinding declaringClass) {
@@ -1755,7 +1750,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		if (typeBinding != null) {
 			ITypeBinding superclass = typeBinding.getSuperclass();
 			if (superclass != null) {
-				String clazzName = fixNameNoC$(null, superclass.getQualifiedName());
+				String clazzName = assureQualifiedNameNoC$(null, superclass.getQualifiedName());
 				if (clazzName != null && clazzName.length() != 0 && !"Object".equals(clazzName))
 					return clazzName;
 			}
@@ -1779,16 +1774,17 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	 * @param dotMethodName
 	 * @return true if this is the default constructor
 	 */
-	private void open$new(String className, String dotMethodName) {
+	private void openNew(String className, IMethodBinding mbinding) {
 		buffer.append("Clazz.new(");
-		String name = fixName(className);
-		if (name.equals("C$"))
-			buffer.append("C$");
-		else 
-			getQualifiedStaticName(null, className, true, true, true);
-		boolean isDefault = dotMethodName.equals(".c$");
-		if (!isDefault)
-			buffer.append(dotMethodName);
+		String name = assureQualifiedName(className);
+		if (!name.equals("C$"))
+			name = getQualifiedStaticName(null, className, true, true, false);
+		if (mbinding == null) {
+			buffer.append(name + ".$init$");
+			return;
+		}
+		String qName = getJ2SQualifiedName(name + ".c$", null, mbinding, null, false);
+		buffer.append(qName.endsWith(".c$") ? name : qName);
 	}
 
 	private ITypeBinding resolveParentBinding(ASTNode xparent) {

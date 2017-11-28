@@ -181,7 +181,7 @@ public class VariableAdapter extends AbstractPluginAdapter {
 	 * @param node
 	 * @return
 	 */
-	public String getConstantValue(Expression node) {
+	public static String getConstantValue(Expression node) {
 		if (node == null)
 			return null;
 		Object constValue = node.resolveConstantExpressionValue();
@@ -223,7 +223,7 @@ public class VariableAdapter extends AbstractPluginAdapter {
 		}
 	}
 	
-	private void addChar(char c, StringBuffer buffer) {
+	private static void addChar(char c, StringBuffer buffer) {
 		if (c < 32 || c > 127) {
 			String hexStr = "0000" + Integer.toHexString(c);
 			buffer.append("\\u").append(hexStr.substring(hexStr.length() - 4));
