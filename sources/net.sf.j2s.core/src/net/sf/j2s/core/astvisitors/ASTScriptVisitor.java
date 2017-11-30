@@ -48,6 +48,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -67,6 +68,7 @@ import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
 import net.sf.j2s.core.adapters.FinalVariable;
 import net.sf.j2s.core.adapters.J2SMapAdapter;
@@ -708,8 +710,10 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		} else {
 			isPrivateAndNotStatic = false;
 			if (expression instanceof Name) {
-				buffer.append(getQualifiedStaticName((Name) expression, className, isStatic && !isPrivate, true, false));
+				// this will use visit(QualifiedName) or visit(SimpleName) 
+				getQualifiedStaticName((Name) expression, className, isStatic && !isPrivate, true, true);
 			} else {
+				// (x ? y : z).foo()
 				expression.accept(this);
 			}
 			buffer.append(".");
@@ -743,10 +747,21 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		// record whether this.b$[.....] was used, and if so and it is private,
 		// we need to use it again
 		b$name = null;
-		if (!isSpecialMethod) {
-			buffer.append(getJ2SQualifiedName(getQualifiedSimpleName(node.getName()), className, mBinding, null, true));
-		}
 		String term = ")";
+		if (!isSpecialMethod) {
+			String qname = getJ2SQualifiedName(getQualifiedSimpleName(node.getName()), className, mBinding, null, true);
+			if (qname.indexOf('|') >= 0) {
+				// this is a Java8-compatibility hack. The class is accessing a type-parameterized method which it might not be overriding
+				// and might be nongeneric in Java 6.
+				// this.adItem$TE(o) becomes ((o$=this).addItem$TE || o$.addItem$O).apply(o$,[o]);
+				buffer.insert(pt, "((o$=");
+				buffer.append(qname);
+				buffer.insert(buffer.lastIndexOf(".", buffer.lastIndexOf("|")), ")");
+				qname = ").apply(o$,[";
+				term = "])";
+			}				
+			buffer.append(qname);
+		}
 		if (isPrivateAndNotStatic) {
 			// A call to a private outer-class method from an inner class
 			// requires
@@ -757,9 +772,9 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 				buffer.append(b$name);
 			buffer.append(", [");
 			term = "])";
-		} else {
-			buffer.append("(");
 		}
+		if (term == ")")
+			buffer.append("(");
 		addMethodParameterList(node.arguments(), mBinding, false, null, null, isIndexOf);
 		buffer.append(term);
 		return false;
@@ -1076,11 +1091,12 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	private boolean addClassOrInterface(ASTNode node, ITypeBinding binding, List<?> bodyDeclarations, char type) {
 		if (binding == null)
 			return false;
-		checkGenericClass(binding, binding);
+		boolean isGeneric = checkGenericClass(binding, binding);
 		boolean isAnonymous = (type == 'a');
 		boolean isEnum = (type == 'e');
 		boolean isInterface = (type == 'i');
 		boolean isLocal = (type == 'l');
+		int pt;
 
 		TypeAdapter typeAdapter = ((TypeAdapter) getAdaptable(TypeAdapter.class));
 		ASTNode parent = node.getParent();
@@ -1153,7 +1169,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			fullClassName = getQualifiedClassName(); // test.Test_Enum.Planet
 			defaultPackageName = getPackageName();
 		}
-		int pt = fullClassName.lastIndexOf('.');
+		pt = fullClassName.lastIndexOf('.');
 		String shortClassName = fullClassName.substring(pt + 1);
 		String packageName = (pt < 0 ? defaultPackageName
 				: TypeAdapter.getShortenedPackageNameFromClassName(thisPackageName, fullClassName));
@@ -1254,30 +1270,27 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			for (Iterator<?> iter = superInterfaceTypes.iterator(); iter.hasNext();) {
 				buffer.append(sep);
 				Object iface = iter.next();
-//				if (iface instanceof Type) {
-//					Type t = (Type) iface;
-//					System.err.println(t.isParameterizedType());
-//					if (t.isParameterizedType()) {
-//						ParameterizedType p = (ParameterizedType) t;
-//
-//						List pp = p.typeArguments();
-//						for (int i = pp.size(); --i >= 0;) {
-//							System.err.println("pi " + pp.get(i));
-//						}
-//
-//						IMethodBinding[] mm = p.resolveBinding().getDeclaredMethods();
-//
-//						for (int i = 0; i < mm.length; i++) {
-//							System.err.println(mm[i].getKey());
-//						}
-//					}
-//
-//				}
 				ITypeBinding ibinding = (iface instanceof Type ? ((Type) iface).resolveBinding()
 						: (ITypeBinding) iface);
+				String term1 = "";
+				if (!ibinding.isTopLevel()) {
+					if (sep == "" && term == "") { 
+						buffer.append("[");
+						term = "]";
+					}
+					buffer.append("[");
+					term1 = "]";
+					ITypeBinding b = ibinding;
+					pt = buffer.length();
+					while (!b.isTopLevel()) {
+						b = b.getDeclaringClass();
+						buffer.insert(pt, "'" + assureQualifiedNameNoC$(null, b.getQualifiedName()) + "',");
+					}					
+				}
 				buffer.append("'");
-				buffer.append(ibinding == null ? iface : assureQualifiedNameNoC$(null, ibinding.getQualifiedName()));
+				buffer.append(assureQualifiedNameNoC$(null, ibinding.getQualifiedName()));
 				buffer.append("'");
+				buffer.append(term1);
 				sep = ", ";
 			}
 			buffer.append(term);
@@ -1313,6 +1326,11 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 		// create a list of static fields and initializers
 
+		// add the Java8 compatibility local variable o$
+		
+		if (isGeneric)
+			buffer.append("var o$;");
+
 		// also add the local var p$ short for C$.prototype if we have any
 		// private methods
 
@@ -1340,13 +1358,15 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			}
 		}
 		if (lstStatic.size() > 0 || hasDependents) {
-			int len = buffer.length();
-			buffer.append("\r\nC$.$clinit$ = function() {delete C$.$clinit$;Clazz.load(C$, 1);\r\n");
+			pt = buffer.length();
+			buffer.append("\r\nC$.$clinit$ = function() {Clazz.load(C$, 1)");
 			for (int i = lstStatic.size(); --i >= 0;) {
 				BodyDeclaration element = lstStatic.remove(0);
 				if (element instanceof Initializer) {
 					element.accept(this);
-					len = 0;
+					if (pt != 0)
+						buffer.append(";\r\n");
+					pt = 0;
 				} else {
 					FieldDeclaration field = (FieldDeclaration) element;
 					List<?> fragments = field.fragments();
@@ -1355,7 +1375,9 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 						Expression initializer = fragment.getInitializer();
 						if (initializer == null || isFinal(element) && VariableAdapter.getConstantValue(initializer) != null)
 							continue;
-						len = 0;
+						if (pt != 0)
+							buffer.append(";\r\n");
+						pt = 0;
 						buffer.append("C$.");
 						fragment.getName().accept(this);
 						buffer.append(" = ");
@@ -1364,10 +1386,10 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 					}
 				}
 			}
-			if (len == 0 || hasDependents)
+			if (pt == 0 || hasDependents)
 				buffer.append("};\r\n");
 			else
-				buffer.setLength(len);
+				buffer.setLength(pt);
 		}
 
 		// add all the methods, static first
@@ -1520,9 +1542,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		if (haveDefaultConstructor) {
 			haveDefaultConstructor = false;
 		} else {
-			buffer.append("\r\nClazz.newMethod$(C$, 'c$', function(){");
-			addSuperConstructor(null, null);
-			buffer.append("}, 1);\r\n");
+			buffer.append("\r\nClazz.newMethod$(C$);\r\n");
 		}
 	}
 
@@ -1565,7 +1585,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	 * @param isStatic
 	 *            if true, then this is a static field default preparation
 	 */
-	private void addFieldDeclaration(FieldDeclaration node, boolean isStatic) {		
+	private void addFieldDeclaration(FieldDeclaration node, boolean isStatic) {
 		ITypeBinding classBinding = resolveParentBinding(getClassDeclarationFor(node));
 		List<?> fragments = node.fragments();
 		VariableDeclarationFragment identifier = (VariableDeclarationFragment) fragments.get(0);
@@ -1580,12 +1600,31 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 				continue;
 			buffer.append(isStatic ? "C$." : "this.");
 			buffer.append(getCheckedFieldName(J2SMapAdapter.getJ2SName(fragment.getName()), classBinding, false));
-			buffer.append(" = ");
 			if (isStatic || initializer == null) {
-				appendDefaultValue(nodeType);
+				Code code = (nodeType == null || !nodeType.isPrimitiveType() ? null : ((PrimitiveType) nodeType).getPrimitiveTypeCode());
+				if (isStatic || initializer != null || code != null) {
+					// Actually, we should not initialize nonprimitive fields that aren't initialized in Java.
+					// com.falstad.Diffraction.CrossAperature initialization was failing. Sequence was:
+					
+					// Aperature<init>:      calls setDefaults() (new double[][] lineXLocations)
+					// BlockAperature<init>  sets lineXLocations = null
+					// CrossAperature<init>  needs the defaults set and fails
+
+					// but needed to be:
+					
+					// Aperature<init>:     calls setDefaults() (new double[][] lineXLocations)
+					// BlockAperature<init> defines but does not set lineXLocations
+					// CrossAperature<init> sees the created lineXLocations created in Aperature<init>
+
+					buffer.append(" = ");
+					buffer.append(code == null ? "null"
+						: code == PrimitiveType.BOOLEAN ? "false" : code == PrimitiveType.CHAR ? "'\\0'" : "0");
+				}
 			} else if (constantValue != null) {
+				buffer.append(" = ");
 				buffer.append(constantValue);
 			} else {
+				buffer.append(" = ");
 				initializer.accept(this);
 			}
 			buffer.append(";\r\n");

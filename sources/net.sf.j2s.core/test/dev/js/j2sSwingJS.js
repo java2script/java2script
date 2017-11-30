@@ -96,10 +96,10 @@ Clazz.load = function(cName, isFinalize) {
   if (isFinalize) {
     var cl = cName;
     // C$.$clinit$ call to finalize all dependencies
+    delete cl.$clinit$;
     var ld = cl.$load$;
     setSuperclass(cl, (ld && ld[0] ? Clazz.load(ld[0]) : null));
-    if (ld[1])
-      addInterface(cl, ld[1]);
+    ld[1] && addInterface(cl, ld[1]);
     delete cl.$load$;      
     return;
   }
@@ -267,6 +267,9 @@ Clazz.defineStatics$ = function(cl, a) {
 }
 
 Clazz.newMethod$ = function (clazzThis, funName, funBody, isStatic) {
+  if (arguments.length == 1) {
+    return Clazz.newMethod$(clazzThis, 'c$', function(){Clazz.super(clazzThis, this,1);}, 1);
+  }
   if (funName.constructor == Array) {
     // If funName is an array, we are setting aliases for generic calls. 
     // For example: ['compareTo$S', 'compareTo$TK', 'compareTo$TA']
@@ -1405,8 +1408,16 @@ var setSuperclass = function(clazzThis, clazzSuper){
  */
 var addInterface = function (clazzThis, interfacez) {
   if (interfacez instanceof Array) {
-    for (var i = interfacez.length; --i >= 0;)
-      addInterface(clazzThis, interfacez[i]);  
+    for (var i = interfacez.length; --i >= 0;) {
+      var iface = interfacez[i];
+      if (iface instanceof Array) {
+        var cl;
+        for (var j = 0; j < iface.length; j++)
+          cl = Clazz.load(iface[j]);
+        iface = cl;
+      }
+      addInterface(clazzThis, iface);  
+    }
   }
   if (typeof interfacez == "string") {
     var str = interfacez;

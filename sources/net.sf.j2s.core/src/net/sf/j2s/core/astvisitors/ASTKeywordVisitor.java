@@ -1499,12 +1499,6 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			finalVars.add(f);
 	}
 
-	protected void appendDefaultValue(Type type) {
-		Code code = (type == null || !type.isPrimitiveType() ? null : ((PrimitiveType) type).getPrimitiveTypeCode());
-		buffer.append(code == null ? "null"
-				: code == PrimitiveType.BOOLEAN ? "false" : code == PrimitiveType.CHAR ? "'\\0'" : "0");
-	}
-
 	protected String getClassNameAndDot(ASTNode parent, ITypeBinding declaringClass, boolean isPrivate) {
 		String name = declaringClass.getQualifiedName();
 		String ret = "";
@@ -1694,7 +1688,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	 * field is accessed.
 	 * 
 	 * @param methodQualifier
-	 *            SimpleName qualifier in qualifier.methodName()
+	 *            SimpleName qualifier in qualifier.methodName() method invocation
 	 * @param className
 	 * @param doEscape
 	 *            set true except for static nonprivate field names
@@ -1716,8 +1710,9 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		String s = null;
 		if (!doEscape) {
 			if (methodQualifier != null) {
+				// a method invocation with a Name as qualifier expression
 				methodQualifier.accept(this);
-				return null;
+				return "";
 			}
 			s = className;
 			doCache = false;
@@ -1734,7 +1729,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 				className = assureQualifiedNameNoC$(null, className);
 			s = getNestedClazzLoads(className);
 			if (n != null)
-				s = "(I$[" + n + "] || (I$[" + n + "]=" + s + "))";
+				s = "(I$[" + n + "]||(I$[" + n + "]=" + s + "))";
 		}
 		if (doAppend)
 			buffer.append(s);
@@ -2177,10 +2172,10 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			} else if (s.equals("$SA")) {
 				s = "";
 			}
-		} else if (false && isMethodInvoc && s.indexOf("$T") >= 0 && isJava(className) && !isJava(getQualifiedClassName())) {
+		} else if (isMethodInvoc && s.indexOf("$T") >= 0 && isJava(className) && !isJava(getQualifiedClassName())) {
 			// also add the $O version
 			String generic = getParamsAsString(nParams, genericTypes, paramTypes, true);
-			return "(" + j2sName + s + " || " + j2sName + generic + ")";
+			return j2sName + s + " || o$."  + j2sName.substring(j2sName.lastIndexOf(".") + 1) + generic;
 		    // this does not work for two reasons:
 			// 1) sometimes the qualifier, so for t.foo$TA(o),  "t." is outside the scope of these parentheses. 
 			// 2) When selecting functions like this, one needs to use apply, so: ((a$ = expression).foo$TA || a$.foo$O).apply(a$, [o])
