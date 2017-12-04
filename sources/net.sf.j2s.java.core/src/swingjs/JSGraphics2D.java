@@ -442,6 +442,10 @@ public class JSGraphics2D //extends SunGraphics2D
 		return ret;
 	}
 
+	private Object imageData;
+	private int[] buf8;
+	private int lastx,lasty,nx,ny;
+
 	@SuppressWarnings("unused")
 	public boolean drawImagePriv(Image img, int x, int y, ImageObserver observer) {
 		backgroundPainted = true;
@@ -465,8 +469,14 @@ public class JSGraphics2D //extends SunGraphics2D
 				if ((imgNode = getImageNode(img)) != null)
 					ctx.drawImage(imgNode, x, y, width, height);
 			} else {
-				Object imageData = HTML5CanvasContext2D.getImageData(ctx, x, y, width, height);
-				int[] buf8 = HTML5CanvasContext2D.getBuf8(imageData);
+				if (buf8 == null || x != lastx || y != lasty || nx != width || ny != height) {
+					imageData = HTML5CanvasContext2D.getImageData(ctx, x, y, width, height);
+					buf8 = HTML5CanvasContext2D.getBuf8(imageData);
+					lastx = x;
+					lasty = y;
+					nx = width;
+					ny = height;
+				}
 				for (int pt = 0, i = 0, n = Math.min(buf8.length/4, pixels.length); i < n; i++) {
 					int argb = pixels[i];
 					buf8[pt++] = (argb >> 16) & 0xFF;

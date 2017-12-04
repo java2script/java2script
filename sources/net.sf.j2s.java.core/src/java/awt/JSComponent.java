@@ -202,6 +202,13 @@ public abstract class JSComponent extends Component {
   public boolean isBackgroundPainted;
   
 
+  /**
+   * This method is added to ensure that if a jpanel or other object's background
+   * is painted to, that it becomes transparent -- since the actual painting is
+   * not to this canvas but instead to the JRootPane canvas.
+   *
+   * @param jsg
+   */
 	public void checkBackgroundPainted(JSGraphics2D jsg) {
 		if (jsg == null) {
 			isBackgroundPainted = false;

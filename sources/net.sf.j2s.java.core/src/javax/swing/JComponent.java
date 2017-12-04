@@ -629,7 +629,6 @@ public abstract class JComponent extends Container {
 				// note that this update will fill the component's background, but  
 				// that is not what we are worried about. What we are worried about
 				// is if this method is overridden and is written to.
-				// BH TODO CHECK THIS 
 				isBackgroundPainted = false;
 				ui.update(scratchGraphics, this);
 				// BH TODO CHECK THIS 
@@ -4880,6 +4879,8 @@ public abstract class JComponent extends Container {
 
 	void _paintImmediately(int x, int y, int w, int h) {
 
+		// this method is called on JPanel if the developer uses jpanel.repaint()
+		
 		Graphics g;
 		Container c;
 		// Rectangle b;
@@ -5041,7 +5042,14 @@ public abstract class JComponent extends Container {
 					// SwingJS not clipping for better performance
 					// g.setClip(paintImmediatelyClip.x,paintImmediatelyClip.y,
 					// paintImmediatelyClip.width,paintImmediatelyClip.height);
-					paintingComponent.paint(g);
+					
+					// this sequence assures that if the developer called 
+					// jpanel.repaint() and then draws on the background,
+					// the JPanel's background is made transparent
+					// (so that the underlying JRootPane canvas can show).
+					checkBackgroundPainted(null);
+					paintingComponent.paint(g);					
+					checkBackgroundPainted((JSGraphics2D) (Object) g);
 				}
 			} finally {
 				g.dispose();

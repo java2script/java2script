@@ -2,6 +2,8 @@ package a2s;
 
 import java.awt.Graphics;
 
+import javax.swing.JComponent;
+
 
 public class Canvas extends Panel {
 	
@@ -30,7 +32,7 @@ public class Canvas extends Panel {
 		/**
 		 * @j2sNative
 		 * 
-		 * this.paintComponent && this.paintComponent(g);
+		 * this.paintComponent$java_awt_Graphics && this.paintComponent$java_awt_Graphics(g);
 		 * 
 		 */
 		{}
