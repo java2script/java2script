@@ -159,6 +159,8 @@ MUST list in the Clazz.load() call.
  */
 public class ASTScriptVisitor extends ASTKeywordVisitor {
 
+	private StringBuffer init0Buffer;
+
 	private ArrayList<String> applets, apps; 
 
 	private void addApplication() {
@@ -1422,7 +1424,9 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 		if (!isInterface) {
 
-			// if this is not an interface, generate $init$ method
+			// if this is not an interface, generate $init0$ and $init$ methods
+
+			init0Buffer = new StringBuffer();
 
 			buffer.append("\r\nClazz.newMethod$(C$, '$init$', function () {\r\n");
 			// we include all field definitions here and all nonstatic
@@ -1437,7 +1441,16 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 				}
 			}
 			buffer.append("}, 1);\r\n");
+			
+			if (init0Buffer.length() > 0) {
+				buffer.append("\r\nClazz.newMethod$(C$, '$init0$', function () {\r\n");
+				buffer.append("var c;if((c = C$.superClazz) && (c = c.$init0$))c.apply(this);\r\n");
+				buffer.append(init0Buffer);
+				buffer.append("}, 1);\r\n");				
+			}
 		}
+		
+		
 
 		if (!isAnonymous && !isEnum) {
 
@@ -1598,11 +1611,15 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			String constantValue = VariableAdapter.getConstantValue(initializer);
 			if (isFinal && constantValue != null)
 				continue;
+			int len = buffer.length();
 			buffer.append(isStatic ? "C$." : "this.");
 			buffer.append(getCheckedFieldName(J2SMapAdapter.getJ2SName(fragment.getName()), classBinding, false));
 			if (isStatic || initializer == null) {
 				Code code = (nodeType == null || !nodeType.isPrimitiveType() ? null : ((PrimitiveType) nodeType).getPrimitiveTypeCode());
-				if (isStatic || initializer != null || code != null) {
+				buffer.append(" = ");
+				buffer.append(code == null ? "null" : getPrimitiveDefault(code));
+				buffer.append(";\r\n");
+				if (!isStatic) {
 					// Actually, we should not initialize nonprimitive fields that aren't initialized in Java.
 					// com.falstad.Diffraction.CrossAperature initialization was failing. Sequence was:
 					
@@ -1615,23 +1632,27 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 					// Aperature<init>:     calls setDefaults() (new double[][] lineXLocations)
 					// BlockAperature<init> defines but does not set lineXLocations
 					// CrossAperature<init> sees the created lineXLocations created in Aperature<init>
-
-					buffer.append(" = ");
-					buffer.append(code == null ? "null"
-						: code == PrimitiveType.BOOLEAN ? "false" : code == PrimitiveType.CHAR ? "'\\0'" : "0");
+					// move this to the init0 buffer
+					init0Buffer.append(buffer.substring(len));
+					buffer.setLength(len);
 				}
 			} else if (constantValue != null) {
 				buffer.append(" = ");
 				buffer.append(constantValue);
+				buffer.append(";\r\n");
 			} else {
 				buffer.append(" = ");
 				initializer.accept(this);
+				buffer.append(";\r\n");
 			}
-			buffer.append(";\r\n");
 		}
 	}
 
 	
+	private String getPrimitiveDefault(Code code) {
+		return (code == PrimitiveType.BOOLEAN ? "false" : code == PrimitiveType.CHAR ? "'\\0'" : "0");
+	}
+
 	/**
 	 * 
 	 * generate the Clazz.new(...) call for an inner class.

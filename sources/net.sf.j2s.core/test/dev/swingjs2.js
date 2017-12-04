@@ -13112,8 +13112,10 @@ Clazz.new = function(c, args, cl) {
   cl = cl || c.exClazz || c;
   cl.$clinit$ && cl.$clinit$();
   var f = new (Function.prototype.bind.apply(cl, arguments));
-  if (haveArgs && args[2] != inheritArgs)
+  if (haveArgs && args[2] != inheritArgs) {
+    cl.$init0$ && cl.$init0$.apply(f);
     c.apply(f, args);
+  }
     
   _profileNew && addProfileNew(myclass, window.performance.now() - t0);
 
@@ -14064,6 +14066,9 @@ var finalizeClazz = function(clazz, qname, bname, type, isNumber) {
   (type == 1) && (clazz.__ANON = clazz.prototype.__ANON = 1);
   (type == 2) && (clazz.__LOCAL = clazz.prototype.__LOCAL = 1);
   
+  if (!isNumber && type != 0) {
+    Clazz.newMethod$(clazz, '$init0$', function(){var c;if ((c=clazz.superClazz) && (c = c.$init0$))c.apply(this);}, 1);
+  }
   extendPrototype(clazz);
 
 };
