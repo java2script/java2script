@@ -13109,12 +13109,16 @@ Clazz.new = function(c, args, cl) {
     
   // an inner class will attach arguments to the arguments returned
   // Integer will be passed as is here, without c.exClazz, or cl
+  var clInner = cl;
   cl = cl || c.exClazz || c;
   cl.$clinit$ && cl.$clinit$();
   var f = new (Function.prototype.bind.apply(cl, arguments));
-  if (haveArgs && args[2] != inheritArgs) {
-    cl.$init0$ && cl.$init0$.apply(f);
-    c.apply(f, args);
+  if (args[2] != inheritArgs) {
+//    cl.$init0$ && cl.$init0$.apply(f);
+    if (haveArgs) {
+      c.apply(f, args);
+    }
+    clInner && clInner.$init$.apply(f);
   }
     
   _profileNew && addProfileNew(myclass, window.performance.now() - t0);
@@ -13143,7 +13147,7 @@ Clazz.super = function(cl, obj, andInit) {
   }
 }
 
-Clazz.newInstance$ = function (objThis, args, isInner) {
+Clazz.newInstance$ = function (objThis, args, isInner, clazz) {
   if (args && ( 
      args[0] == inheritArgs 
      || args[1] == inheritArgs 
@@ -13163,6 +13167,8 @@ Clazz.newInstance$ = function (objThis, args, isInner) {
   }
   
   objThis.__JSID__ = ++_jsid;
+
+  clazz && clazz.$init0$ && clazz.$init0$.apply(objThis);
 
   if (!isInner) {
       if ((!args || args.length == 0) && objThis.c$) {
@@ -13234,7 +13240,7 @@ Clazz.defineStatics$ = function(cl, a) {
 
 Clazz.newMethod$ = function (clazzThis, funName, funBody, isStatic) {
   if (arguments.length == 1) {
-    return Clazz.newMethod$(clazzThis, 'c$', function(){Clazz.super(clazzThis, this,1);}, 1);
+    return Clazz.newMethod$(clazzThis, 'c$', function(){Clazz.super(clazzThis, this,1);clazzThis.$init$.apply(this)}, 1);
   }
   if (funName.constructor == Array) {
     // If funName is an array, we are setting aliases for generic calls. 
@@ -13618,7 +13624,7 @@ Clazz.newClass$ = function (prefix, name, clazz, clazzSuper, interfacez, type) {
     var qualifiedName = (prefix ? (prefix.__PKG_NAME__ || prefix.__CLASS_NAME__) + "." : "") + name;
     checkDeclared(qualifiedName, type);
   }
-  clazz || (clazz = function () {Clazz.newInstance$(this,arguments)});  
+  clazz || (clazz = function () {Clazz.newInstance$(this,arguments,0,clazz)});  
   clazz.__NAME__ = name;
   clazz.$load$ = [clazzSuper, interfacez];
   
@@ -14037,6 +14043,7 @@ var extendObject = function(clazz, exclude) {
 var excludeSuper = function(o) {
  return o == "b$"
       || o == "$init$"
+      || o == "$init0$"
       || o == "$clinit$"
       || o == "$load$"
       || o == "c$" 
@@ -14066,9 +14073,8 @@ var finalizeClazz = function(clazz, qname, bname, type, isNumber) {
   (type == 1) && (clazz.__ANON = clazz.prototype.__ANON = 1);
   (type == 2) && (clazz.__LOCAL = clazz.prototype.__LOCAL = 1);
   
-  if (!isNumber && type != 0) {
+  if (!isNumber && type != 0)
     Clazz.newMethod$(clazz, '$init0$', function(){var c;if ((c=clazz.superClazz) && (c = c.$init0$))c.apply(this);}, 1);
-  }
   extendPrototype(clazz);
 
 };

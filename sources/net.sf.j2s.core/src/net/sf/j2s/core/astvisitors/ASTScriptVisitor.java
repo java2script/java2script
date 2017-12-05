@@ -1189,7 +1189,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		buffer.append(", ");
 		 if (isAnonymous) {
 			if (!(parent instanceof EnumConstantDeclaration))
-				func = "function(){Clazz.newInstance$(this, arguments[0], true);}";
+				func = "function(){Clazz.newInstance$(this, arguments[0],1,C$);}";
 			superclassName = "" + getSuperclassName(binding);
 			ITypeBinding[] declaredTypes = binding.getInterfaces();
 			if (declaredTypes != null && declaredTypes.length > 0) {
@@ -1229,10 +1229,9 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 				// directly by the
 				// user using new Foo()
 				if (!isInterface) {
-					buffer.append("Clazz.newInstance$(this, arguments");
-					if (!isTopLevel)
-						buffer.append("[0], " + !isStatic(binding));
-					buffer.append(");\r\n");
+					buffer.append("Clazz.newInstance$(this, arguments")
+						.append(isTopLevel ? ",0"  : "[0]," + !isStatic(binding))
+					    .append(",C$);\r\n");
 				}
 				buffer.append("}");
 			}
@@ -1361,7 +1360,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		}
 		if (lstStatic.size() > 0 || hasDependents) {
 			pt = buffer.length();
-			buffer.append("\r\nC$.$clinit$ = function() {Clazz.load(C$, 1)");
+			buffer.append("\r\nC$.$clinit$ = function() {Clazz.load(C$, 1);");
 			for (int i = lstStatic.size(); --i >= 0;) {
 				BodyDeclaration element = lstStatic.remove(0);
 				if (element instanceof Initializer) {
