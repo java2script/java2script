@@ -95,13 +95,13 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			// these classes need no qualification
 			"java.lang.Boolean", "java.lang.Byte", "java.lang.Character", "java.lang.Double", "java.lang.Float",
 			"java.lang.Integer", "java.lang.Long", "java.lang.Math", "java.lang.Number", "java.lang.reflect.Array",
-			"java.lang.Short", "java.lang.System", "java.lang.String",
+			"java.lang.Short", "java.lang.System", "java.lang.String","java.lang.Void",
 
 			// I have no idea why these are here
 			"java.util.Date", // TODO _- really???
 			"java.util.EventListenerProxy", "java.util.EventObject", };
 
-	private static final String primitiveTypeEquivalents = "Boolean,Byte,Character,Short,Integer,Long,Float,Double,";
+	private static final String primitiveTypeEquivalents = "Boolean,Byte,Character,Short,Integer,Long,Float,Double,Void,";
 
 	private static final String getPrimitiveTYPE(String name) {
 		int pt = primitiveTypeEquivalents.indexOf(name.substring(1)) - 1;
