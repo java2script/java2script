@@ -1421,6 +1421,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 			init0Buffer = new StringBuffer();
 
+			int len = buffer.length();
 			buffer.append("\r\nClazz.newMethod$(C$, '$init$', function () {\r\n");
 			// we include all field definitions here and all nonstatic
 			// initializers
@@ -1436,11 +1437,19 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			buffer.append("}, 1);\r\n");
 			
 			if (init0Buffer.length() > 0) {
+				
+				String buf = buffer.substring(len);
+				buffer.setLength(len);
+				
 				buffer.append("\r\nClazz.newMethod$(C$, '$init0$', function () {\r\n");
 				buffer.append("var c;if((c = C$.superClazz) && (c = c.$init0$))c.apply(this);\r\n");
 				buffer.append(init0Buffer);
-				buffer.append("}, 1);\r\n");				
+				buffer.append("}, 1);\r\n");
+
+				buffer.append(buf);
 			}
+			
+			init0Buffer = null;
 		}
 		
 		
@@ -1605,50 +1614,55 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			if (isFinal && constantValue != null)
 				continue;
 			int len = buffer.length();
-			buffer.append(isStatic ? "C$." : "this.");
-			buffer.append(getCheckedFieldName(J2SMapAdapter.getJ2SName(fragment.getName()), classBinding, false));
+			String prefix = (isStatic ? "C$." : "this.")
+					+ getCheckedFieldName(J2SMapAdapter.getJ2SName(fragment.getName()), classBinding, false);
+			buffer.append(prefix);
 			Code code = (nodeType == null || !nodeType.isPrimitiveType() ? null
 					: ((PrimitiveType) nodeType).getPrimitiveTypeCode());
-			if (isStatic || initializer == null) {
+			int len1 = buffer.length();
+			if (isStatic ? initializer == null : classBinding.getSuperclass() != null) {
+				// Route default for this to the $init0$ buffer
+				// if static and not initialized or nonstatic and there is a superclass
+				
 				buffer.append(" = ");
 				buffer.append(code == null ? "null" : getPrimitiveDefault(code));
 				buffer.append(";\r\n");
-				if (!isStatic) {
-					// Route this to the $init0$ buffer, which will be processed
-					// next here,
-					// but will be executed first:
-					//
-					// $clinit$ -- statics; once only
-					// $init0$ -- from within Clazz.newInstance$, before any
-					// constructors
-					// $init$ -- from the constructor, just after any super()
-					// call or whenever there is no this() call
+//
+				// $clinit$ -- statics; once only
+				// $init0$ -- from within Clazz.newInstance$, before any
+				// constructors
+				// $init$ -- from the constructor, just after any super()
+				// call or whenever there is no this() call
 
-					// (This visit is from within addClassOrInterface.)
-					// We must not initialize fields that aren't initialized in
-					// Java.
-					//
-					// com.falstad.Diffraction.CrossAperature initialization was
-					// failing. Sequence was:
+				// com.falstad.Diffraction.CrossAperature initialization was
+				// failing. Sequence was:
 
-					// Aperature<init>: calls setDefaults() (new double[][]
-					// lineXLocations)
-					// BlockAperature<init> sets lineXLocations = null
-					// CrossAperature<init> needs the defaults set and fails
+				// Aperature<init>: calls setDefaults() (new double[][]
+				// lineXLocations)
+				// BlockAperature<init> sets lineXLocations = null
+				// CrossAperature<init> needs the defaults set and fails
 
-					// but needed to be:
+				// but needed to be:
 
-					// Aperature<init>: calls setDefaults() (new double[][]
-					// lineXLocations)
-					// BlockAperature<init> defines but does not set
-					// lineXLocations
-					// CrossAperature<init> sees the created lineXLocations
-					// created in Aperature<init>
+				// Aperature<init>: calls setDefaults() (new double[][]
+				// lineXLocations)
+				// BlockAperature<init> defines but does not set
+				// lineXLocations
+				// CrossAperature<init> sees the created lineXLocations
+				// created in Aperature<init>
 
-					init0Buffer.append(buffer.substring(len));
+				// if (code != null) // should define all in init0
+				if (isStatic)
+					return;
+				init0Buffer.append(buffer.substring(len));
+				if (initializer == null) {
 					buffer.setLength(len);
+					return;
 				}
-			} else if (constantValue != null) {
+				buffer.setLength(len1);
+			}
+
+			if (constantValue != null) {
 				buffer.append(" = ");
 				buffer.append(constantValue);
 				fixPrimitiveRightSide(code);
