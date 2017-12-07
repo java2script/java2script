@@ -712,7 +712,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		} else {
 			isPrivateAndNotStatic = false;
 			if (expression instanceof Name) {
-				// this will use visit(QualifiedName) or visit(SimpleName) 
+				// this will use visit(QualifiedName) or visit(SimpleName)
 				getQualifiedStaticName((Name) expression, className, isStatic && !isPrivate, true, true);
 			} else {
 				// (x ? y : z).foo()
@@ -740,7 +740,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 						buffer.append(j2sName);
 						return false;
 					}
-				} 
+				}
 			}
 		} else if (methodName.equals("indexOf") || methodName.equals("lastIndexOf")) {
 			isIndexOf = className.equals("java.lang.String");
@@ -748,21 +748,18 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 		// record whether this.b$[.....] was used, and if so and it is private,
 		// we need to use it again
-		b$name = null;
+		b$name = null; 
 		String term = ")";
 		if (!isSpecialMethod) {
 			String qname = getJ2SQualifiedName(getQualifiedSimpleName(node.getName()), className, mBinding, null, true);
 			if (qname.indexOf('|') >= 0) {
-				// this is a Java8-compatibility hack. The class is accessing a type-parameterized method which it might not be overriding
-				// and might be nongeneric in Java 6.
-				// this.adItem$TE(o) becomes ((o$=this).addItem$TE || o$.addItem$O).apply(o$,[o]);
-				buffer.insert(pt, "((o$=");
-				buffer.append(qname);
-				buffer.insert(buffer.lastIndexOf(".", buffer.lastIndexOf("|")), ")");
-				qname = ").apply(o$,[";
+				// foo.xx$T$K || $o$.xx$O$O --> ($o$=foo).($o$.xx$T$K ||
+				// $o$.xx$O$O)
+				postFixGeneric$O(pt, qname, isPrivateAndNotStatic);
 				term = "])";
-			}				
-			buffer.append(qname);
+			} else {
+				buffer.append(qname);
+			}
 		}
 		if (isPrivateAndNotStatic) {
 			// A call to a private outer-class method from an inner class
@@ -1327,11 +1324,8 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 		// create a list of static fields and initializers
 
-		// add the Java8 compatibility local variable o$
+		// add the Java8 compatibility local variable $o$
 		
-		if (isGeneric)
-			buffer.append("var o$;");
-
 		// also add the local var p$ short for C$.prototype if we have any
 		// private methods
 
@@ -1613,31 +1607,51 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			int len = buffer.length();
 			buffer.append(isStatic ? "C$." : "this.");
 			buffer.append(getCheckedFieldName(J2SMapAdapter.getJ2SName(fragment.getName()), classBinding, false));
+			Code code = (nodeType == null || !nodeType.isPrimitiveType() ? null
+					: ((PrimitiveType) nodeType).getPrimitiveTypeCode());
 			if (isStatic || initializer == null) {
-				Code code = (nodeType == null || !nodeType.isPrimitiveType() ? null : ((PrimitiveType) nodeType).getPrimitiveTypeCode());
 				buffer.append(" = ");
 				buffer.append(code == null ? "null" : getPrimitiveDefault(code));
 				buffer.append(";\r\n");
 				if (!isStatic) {
-					// Actually, we should not initialize nonprimitive fields that aren't initialized in Java.
-					// com.falstad.Diffraction.CrossAperature initialization was failing. Sequence was:
-					
-					// Aperature<init>:      calls setDefaults() (new double[][] lineXLocations)
-					// BlockAperature<init>  sets lineXLocations = null
-					// CrossAperature<init>  needs the defaults set and fails
+					// Route this to the $init0$ buffer, which will be processed
+					// next here,
+					// but will be executed first:
+					//
+					// $clinit$ -- statics; once only
+					// $init0$ -- from within Clazz.newInstance$, before any
+					// constructors
+					// $init$ -- from the constructor, just after any super()
+					// call or whenever there is no this() call
+
+					// (This visit is from within addClassOrInterface.)
+					// We must not initialize fields that aren't initialized in
+					// Java.
+					//
+					// com.falstad.Diffraction.CrossAperature initialization was
+					// failing. Sequence was:
+
+					// Aperature<init>: calls setDefaults() (new double[][]
+					// lineXLocations)
+					// BlockAperature<init> sets lineXLocations = null
+					// CrossAperature<init> needs the defaults set and fails
 
 					// but needed to be:
-					
-					// Aperature<init>:     calls setDefaults() (new double[][] lineXLocations)
-					// BlockAperature<init> defines but does not set lineXLocations
-					// CrossAperature<init> sees the created lineXLocations created in Aperature<init>
-					// move this to the init0 buffer
+
+					// Aperature<init>: calls setDefaults() (new double[][]
+					// lineXLocations)
+					// BlockAperature<init> defines but does not set
+					// lineXLocations
+					// CrossAperature<init> sees the created lineXLocations
+					// created in Aperature<init>
+
 					init0Buffer.append(buffer.substring(len));
 					buffer.setLength(len);
 				}
 			} else if (constantValue != null) {
 				buffer.append(" = ");
 				buffer.append(constantValue);
+				fixPrimitiveRightSide(code);
 				buffer.append(";\r\n");
 			} else {
 				buffer.append(" = ");
@@ -1645,11 +1659,6 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 				buffer.append(";\r\n");
 			}
 		}
-	}
-
-	
-	private String getPrimitiveDefault(Code code) {
-		return (code == PrimitiveType.BOOLEAN ? "false" : code == PrimitiveType.CHAR ? "'\\0'" : "0");
 	}
 
 	/**
@@ -1713,6 +1722,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			String prefix, String suffix, boolean isIndexOf) {
 		if (methodDeclaration == null)
 			return;
+
 		boolean methodIsVarArgs = methodDeclaration.isVarargs();
 		int argCount = arguments.size();
 		if (isConstructor && argCount == 0) {

@@ -13126,7 +13126,7 @@ Clazz.new = function(c, args, cl) {
   return f;
 }
 
-Clazz.getClass = function(cl) {
+Clazz.getClass = function(cl, methodList) {
   // $Class$ is the java.lang.Class object wrapper
   // $clazz$ is the unwrapped JavaScript object
   if (cl.$Class$)
@@ -13134,6 +13134,7 @@ Clazz.getClass = function(cl) {
   java.lang.Class || Clazz.load("java.lang.Class");
   var Class_ = cl.$Class$ = new java.lang.Class();
   Class_.$clazz$ = getClazz(cl) || cl; // for arrays - a bit of a hack
+  Class_.$methodList$ = methodList;
   return Class_;
 }
 
@@ -17892,19 +17893,26 @@ m$(C$,"invoke$O$OA",
 function(receiver,args){
 var name = this.getName();
 var types = this.parameterTypes;
-var a = (types == null ? null : new Array(args.length));
-
-if (types != null)
-for (var i = 0; i < types.length; i++) {
-  var t = types[i];
-  var paramCode = Clazz._getParamCode(t);
-  a[i] = (t.__PRIMITIVE && args[i].valueOf ? args[i].valueOf() : args[i]);
-  name += "$" + paramCode;
+var a = null;
+var addParams = !this.isParamQualified;
+if (types != null || !addParams) {
+  a = new Array(args.length);
+  for (var i = 0; i < args.length; i++) {
+    if (addParams) {
+      var t = types[i];
+      a[i] = (t.__PRIMITIVE && args[i].valueOf ? args[i].valueOf() : args[i]);
+      if (addParams)
+        name += "$" + Clazz._getParamCode(t);
+    } else {
+      a[i] = args[i];
+    }
+  }
 }
-var c = this.Class_.$clazz$;
-var m=c.prototype[name] || c[name];
+//var c = this.Class_.$clazz$;
+//var m=c.prototype[name] || c[name];
+var m = receiver[name];
 if (m == null)
-  newMethodNotFoundException(c, name);  
+  newMethodNotFoundException(Clazz.getClass(receiver).$clazz$, name);  
 return m.apply(receiver,a);
 });
 m$(C$,"toString",
