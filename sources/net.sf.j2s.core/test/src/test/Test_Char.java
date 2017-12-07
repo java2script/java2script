@@ -2,12 +2,31 @@ package test;
 
 class Test_Char extends Test_ {
 
+	int iA = 'A';
+	char c = 'C';
+	char ci = 65; 
+	byte bAA = 'A'; 
+	int iAB = 'A' + c; 
+	String s = "test";
+	
 	public static void main(String[] args) {
+		Test_Char t = new Test_Char();
+		assert(t.iA == 65);
+		assert(t.c == 'C');
+		assert(t.ci == 'A');
+		assert(t.bAA == 65);
+		assert(t.iAB == 65 + 67);		
 		Character k = new Character('K');
-		System.out.println("'K'=" + (char) 75 + " Character('K')=" + k);
+		assert(k == (char) 75);
+		
+		char c = 'C';
+		int iA = 'A';
+		byte bAA = 'A';
+		int iAB = 'A' + c;
+		
 		test((char) 75);
 		String s = new String("\ud800\udf84");
-		char c = (char) 0xdf84;
+		c = (char) 0xdf84;
 		int i = (int) c;
 		c = (char) 0xd800df84;
 		assert(i == 57220);
@@ -16,9 +35,6 @@ class Test_Char extends Test_ {
 		assert(getIntFromChar1('c') == 99);
 		assert(getIntFromChar2('c') == 99);
 		
-		assert(new Double(3) > new Double(1));
-		assert(new Double(3) <= new Float(5));
-
 		assert(getCharacterFromChar1('c') == 'c');
 		assert(getCharacterFromChar2('c') == 'c');
 
@@ -103,7 +119,7 @@ class Test_Char extends Test_ {
         assert((byte) b == -1);
         b = 99;
         assert((char) b == 'c');
-        
+
         System.out.println("Test_Char OK");
 	}
 

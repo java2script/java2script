@@ -1,0 +1,11 @@
+###################################
+# License info for electric-hockey
+# Automatically generated on Fri Aug 08 00:08:01 MDT 2008
+###################################
+
+minusBag.gif author=PhET 
+minusDisk.gif author=PhET 
+plusBag.gif author=PhET 
+plusDisk.gif author=PhET 
+puckNegative.gif author=PhET 
+puckPositive.gif author=PhET 

@@ -19,7 +19,7 @@ public class Test_Zipin extends Test_ {
 			System.out.println(ze.getName() + " " + ze.getSize());
 			assert((ze.getName() + " " + ze.getSize()).equals("obj_490758.pmesh 95301"));
 			bis.close();
-			System.out.println("Test_Zipin OK");			
+			System.out.println("Test_Zipin OK");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -1,0 +1,13 @@
+<html>
+<body>
+Messages have the form:
+message := system object action parameterList
+parameterList := parameter +
+parameter := parameterKey = parameterValue
+
+system, object, action, parameterKey are marked with interfaces to encourage reusing defined constants (typically in enums that implement the marker interface).
+This also makes it possible to use autocompletion on these values and to assist in postprocessing (e.g., since we can easily iterate over enum values).
+
+Dynamic strings can still be constructed but must implementing the marker interface.
+</body>
+</html>

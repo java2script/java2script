@@ -228,22 +228,22 @@ public class TypeAdapter extends AbstractPluginAdapter {
 			if (name.equals(thisPackageName))
 				return "P$";
 		}
-		String[] keywords = FieldAdapter.keywords;
 		String[] packages = null;
 		boolean existedKeyword = false;
-		for (int i = 0; i < keywords.length; i++) {
-			if (name.indexOf(keywords[i]) >= 0) {
-				if (packages == null) {
-					packages = name.split("\\.");
-				}
-				for (int j = 0; j < packages.length; j++) {
-					if (keywords[i].equals(packages[j])) {
-						packages[j] = "[\"" + packages[j] + "\"]";
-						existedKeyword = true;
-					}
-				}
-			}
-		}
+//		String[] keywords = FieldAdapter.keywords;
+//		for (int i = 0; i < keywords.length; i++) {
+//			if (name.indexOf(keywords[i]) >= 0) {
+//				if (packages == null) {
+//					packages = name.split("\\.");
+//				}
+//				for (int j = 0; j < packages.length; j++) {
+//					if (keywords[i].equals(packages[j])) {
+//						packages[j] = "[\"" + packages[j] + "\"]";
+//						existedKeyword = true;
+//					}
+//				}
+//			}
+//		}
 		if (existedKeyword) {
 			StringBuffer sb = new StringBuffer();
 			for (int i = 0; i < packages.length; i++) {

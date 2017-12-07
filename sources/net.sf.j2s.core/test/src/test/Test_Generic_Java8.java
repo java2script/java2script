@@ -7,7 +7,8 @@ import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
 public class Test_Generic_Java8 extends Test_ implements ListCellRenderer {
-
+	
+	
 	/**
 	 * Demonstrates the issue with Java8 classes being generic while Java6
 	 * version is not. As long as the transpiler is working in a Java8
@@ -19,6 +20,7 @@ public class Test_Generic_Java8 extends Test_ implements ListCellRenderer {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		
 		Test_Generic_Java8 test = new Test_Generic_Java8();
 		// calls getListCellRendererComponent$javax_swing_JList$O$I$Z$Z 
 		test.getListCellRendererComponent(null,  null, 0, false, false);
@@ -30,7 +32,7 @@ public class Test_Generic_Java8 extends Test_ implements ListCellRenderer {
 				// This next call will be to this.addItem$O in Java6
 				// but to this.addItem$TE in Java8. Since the SwingJS version 
 				// is addItem$O, we need to alias this call to that as 
-				//  (this.addItem$TE || this.addItem$O)(o);
+				//  ((O$ = this).addItem$TE || O$.addItem$O).apply(O$,[o]);
 				//
 				addItem(o);
 				System.out.println("added " + o);
@@ -40,6 +42,7 @@ public class Test_Generic_Java8 extends Test_ implements ListCellRenderer {
 			String s = null;
 			String v = "testing";
 			System.out.println((s == null ? v : s).length());
+			System.out.println((s = v).length());
 		System.out.println("Test_Generic_Java8 OK");
 	}
 	

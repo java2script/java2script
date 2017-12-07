@@ -3,6 +3,7 @@ package test;
 class Test_Precision {
 	
   public static void main(String[] args) {
+	  System.out.println("Test_Precision OK (no asserts excecuted)");
   }
 
 	private static void test(double value, int prec) {

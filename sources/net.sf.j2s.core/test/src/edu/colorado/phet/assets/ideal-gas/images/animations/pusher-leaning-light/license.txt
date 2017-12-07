@@ -1,0 +1,35 @@
+###################################
+# License info for ideal-gas
+# Automatically generated on Fri Aug 08 00:08:01 MDT 2008
+###################################
+
+pusher-leaning-light_0001.png author=PhET 
+pusher-leaning-light_0002.png author=PhET 
+pusher-leaning-light_0003.png author=PhET 
+pusher-leaning-light_0004.png author=PhET 
+pusher-leaning-light_0005.png author=PhET 
+pusher-leaning-light_0006.png author=PhET 
+pusher-leaning-light_0007.png author=PhET 
+pusher-leaning-light_0008.png author=PhET 
+pusher-leaning-light_0009.png author=PhET 
+pusher-leaning-light_0010.png author=PhET 
+pusher-leaning-light_0011.png author=PhET 
+pusher-leaning-light_0012.png author=PhET 
+pusher-leaning-light_0013.png author=PhET 
+pusher-leaning-light_0014.png author=PhET 
+pusher-leaning-light_0015.png author=PhET 
+pusher-leaning-light_0016.png author=PhET 
+pusher-leaning-light_0017.png author=PhET 
+pusher-leaning-light_0018.png author=PhET 
+pusher-leaning-light_0019.png author=PhET 
+pusher-leaning-light_0020.png author=PhET 
+pusher-leaning-light_0021.png author=PhET 
+pusher-leaning-light_0022.png author=PhET 
+pusher-leaning-light_0023.png author=PhET 
+pusher-leaning-light_0024.png author=PhET 
+pusher-leaning-light_0025.png author=PhET 
+pusher-leaning-light_0026.png author=PhET 
+pusher-leaning-light_0027.png author=PhET 
+pusher-leaning-light_0028.png author=PhET 
+pusher-leaning-light_0029.png author=PhET 
+pusher-leaning-light_0030.png author=PhET 

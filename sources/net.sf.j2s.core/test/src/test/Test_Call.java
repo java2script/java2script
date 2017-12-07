@@ -1,7 +1,5 @@
 package test;
 
-import java.util.LinkedHashMap;
-
 public class Test_Call extends Test_call0 implements Comparable<Test_Call>{
 
 	int y = 0;
@@ -10,8 +8,8 @@ public class Test_Call extends Test_call0 implements Comparable<Test_Call>{
 	
 
 	void init() {
-		System.out.println(this instanceof Test_call0);
-		System.out.println(this instanceof Comparable);
+		assert(this instanceof Test_call0);
+		assert(this instanceof Comparable);
 		
 		icall = new Integer(3);		
 	}
@@ -31,9 +29,6 @@ public class Test_Call extends Test_call0 implements Comparable<Test_Call>{
 	Test_Call() {
 		setX(-1);
 		new Inner1();
-		LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
-		
-
 		assert(x == -1 && y == 100);
 	}
 	

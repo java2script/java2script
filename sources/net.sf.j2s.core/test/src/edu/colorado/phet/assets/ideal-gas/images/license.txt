@@ -1,0 +1,49 @@
+###################################
+# License info for ideal-gas
+# Automatically generated on Fri Aug 08 00:08:01 MDT 2008
+###################################
+
+10-nanometer-stick.png author=PhET 
+5-meter-stick.gif author=PhET 
+bicycle-pump.gif author=PhET 
+box.gif author=PhET 
+flames-old.gif author=PhET 
+flames.gif author=PhET 
+handle.gif author=PhET 
+help-item-icon.gif author=PhET 
+hot-air-balloon-flames.gif author=PhET notes=did ron draw this? 
+ice.gif author=PhET notes=did ron draw this?
+knob-and-door.gif author=PhET 
+meter-stick.gif author=PhET 
+molecule.gif author=PhET 
+nanometer-stick.png author=PhET 
+particle-B-xsml.gif author=PhET 
+particle-blue-lrg.gif author=PhET 
+particle-blue-med.gif author=PhET 
+particle-blue-sml.gif author=PhET 
+particle-blue-xsml.gif author=PhET 
+particle-green-lrg.gif author=PhET 
+particle-green-med.gif author=PhET 
+particle-green-sml.gif author=PhET 
+particle-green-xsml.gif author=PhET 
+particle-red-lrg.gif author=PhET 
+particle-red-med.gif author=PhET 
+particle-red-sml.gif author=PhET 
+particle-red-xsml.gif author=PhET 
+pump-base-and-hose.png author=PhET 
+pump-body.gif author=PhET 
+pump-body.png author=PhET 
+pump-handle.png author=PhET 
+pump.gif author=PhET 
+pumpbody.gif author=PhET 
+stove-2-24-03.gif author=PhET 
+stove-and-flames-small.gif author=PhET 
+stove-and-ice-small.gif author=PhET 
+stove-old.gif author=PhET 
+stove-small.gif author=PhET 
+stove.gif author=PhET 
+stove.png author=PhET 
+thermometer.gif author=PhET 
+turnstile-0-deg.gif author=PhET 
+turnstile-45-deg.gif author=PhET 
+wall-handle.gif author=PhET 

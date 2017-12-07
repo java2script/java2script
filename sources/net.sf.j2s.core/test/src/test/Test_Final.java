@@ -7,13 +7,13 @@ public class Test_Final extends Test_ {
 	public Test_Final(int i) {
 		String finalStr = "testing" + TEST++;
 		finalStr2 += "?";
-		Test_8 t = new Test_8() {
-			public void test8b() {
+		Test_Extends_8 t = new Test_Extends_8() {
+			public void test8() {
 				System.out.println("anon Test_8 finalStr is " + finalStr + " " + finalStr2);
 				assert(finalStr.equals("testing" + i) && finalStr2.equals("??"));
 			}
 		};
-		t.test8b();
+		t.test8();
 	}
 
 
