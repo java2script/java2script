@@ -121,10 +121,10 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	 * of bytes
 	 * 
 	 */
-	protected StaticBuffer staticBuffer = new StaticBuffer();
+	protected TrailingBuffer trailingBuffer = new TrailingBuffer();
 
 	/**
-	 * StaticBuffer holds definitions that need to come after all methods are
+	 * TrailingBuffer holds definitions that need to come after all methods are
 	 * defined, with blocks defined just once for any given class.
 	 * 
 	 * The buffer also provides a very efficient way to do byte, short, and int
@@ -179,17 +179,17 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	 * @author Bob Hanson
 	 *
 	 */
-	class StaticBuffer {
+	class TrailingBuffer {
 		private StringBuffer buf;
 		private String added = "";
 
 		boolean hasAssert;
 
-		StaticBuffer() {
+		TrailingBuffer() {
 			buf = new StringBuffer();
 		}
 
-		StaticBuffer append(String s) {
+		TrailingBuffer append(String s) {
 			buf.append(s);
 			return this;
 		}
@@ -1256,7 +1256,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			buffer.append("($p$ = ");
 			addFieldName(left, varBinding);
 			buffer.append(", ");
-			staticBuffer.addType("p");
+			trailingBuffer.addType("p");
 		}
 
 		addFieldName(left, varBinding);
@@ -1526,7 +1526,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 					// byte b = 'c'
 					buffer.insert(buffer.lastIndexOf(" ") + 1, "($b$[0] = ");
 					buffer.append(".$c(), $b$[0])");
-					staticBuffer.addType("b");
+					trailingBuffer.addType("b");
 				} else {
 					// int b = 'c'
 					buffer.append(".$c()");
@@ -1601,7 +1601,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 				addParens = true;
 			} else {
 				classIntArray = "$" + leftName.charAt(0) + "$[0]"; //$i$, etc. 
-				staticBuffer.addType(leftName);
+				trailingBuffer.addType(leftName);
 			}
 			break;
 		}
@@ -2000,18 +2000,17 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		String classKey = binding.getKey();
 		boolean hasGenerics = (binding.isRawType() || binding.getTypeArguments().length > 0);
 		//System.err.println(hasGenerics + " " + binding.getBinaryName() + " " + binding.getKey());
-		ITypeBinding superclass = binding.getSuperclass();
-		if (superclass != null) {// && !genericClassMap.containsKey(superclass.getKey())) {
+		if (hasSuperClass(binding)) {// && !genericClassMap.containsKey(superclass.getKey())) {
 			//System.err.println("--superclass--");
 			hasGenerics = checkGenericClass(topBinding, binding.getSuperclass()) || hasGenerics;
 		}
 		// check all interfaces 
 		ITypeBinding[] interfaces = binding.getInterfaces();
-		for (int i = interfaces.length; --i >= 0;)
+		for (int i = interfaces.length; --i >= 0;) {
 			//if (!genericClassMap.containsKey(interfaces[i].getKey())) {
 				//System.err.println("--implements--");
 				hasGenerics = checkGenericClass(topBinding, interfaces[i]) || hasGenerics;
-			//}
+		}
 		if (hasGenerics) {
 			//System.err.println(hasGenerics  + " " + binding.getKey() + "\n--class--\n" + binding.toString() + "\n--erasure--\n" + binding.getErasure());
 			//		debugDumpClass(binding);
@@ -2032,7 +2031,6 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		Map<String, String> classTypes = getGenericClassTypes(binding);
 		if (classTypes == null)
 			return;
-		
 		String classKey = binding.getKey();
 		IMethodBinding[] methods = binding.getErasure().getDeclaredMethods();
 		for (int i = methods.length; --i >= 0;) {			
@@ -2072,9 +2070,8 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		boolean isExtended = (typeArgs.length > 0 || type.isRawType());
 		//System.err.println("getgenclasstypes " + type.getKey() + " " + isGeneric + " " + isExtended);
 		if (!isGeneric && !isExtended) {
-			ITypeBinding superclass = type.getSuperclass();
-			if (superclass != null)
-			  genericClassTypes.put(classKey, classTypes = genericClassTypes.get(superclass.getKey()));
+			if (hasSuperClass(type))
+			  genericClassTypes.put(classKey, classTypes = genericClassTypes.get(type.getSuperclass().getKey()));
 			return classTypes;
 		}
 		ITypeBinding[] types = (isGeneric ? typeParams : typeArgs);
@@ -2137,7 +2134,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	 */
 	private static void addGenericClassMethod(String classKey, String methodName, String[] list) {
 		
-		//System.err.println("Adding class method " + methodName + " " + list.length + list[0] + " in " + classKey);
+		System.err.println("Adding class method " + methodName + " " + list.length + list[0] + " in " + classKey);
 		Map<String, List<String[]>> classMap = genericClassMap.get(classKey);
 		if (classMap == null)
 			genericClassMap.put(classKey, classMap = new Hashtable<String, List<String[]>>());
@@ -2163,12 +2160,13 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		List<String> names = null;
 		//System.err.println("checking methodList for " + nodeName.toString() + " in " + methodClass.getKey());
 		List<String[]> methodList = getGenericMethodList(methodClass, nodeName.toString());
+		
 		if (methodList != null) {
 			//System.err.println("have methodList for " + nodeName + " " +  methodList.size());
 			names = new ArrayList<String>();
 			for (int i = methodList.size(); --i >= 0;) {
 				String pname = getJ2SQualifiedName(methodName, null, mBinding, methodList.get(i), false);
-				//System.err.println("params = " + params + "  "+methodList.get(i).length + "==?==" + mBinding.getParameterTypes().length + " " +  methodList.get(i)[0]); 
+				//System.err.println("params = " + pname + "  "+methodList.get(i).length + "==?==" + mBinding.getParameterTypes().length + " " +  methodList.get(i)[0]); 
 				if (pname != null)
 					names.add(pname);
 			}
@@ -2238,7 +2236,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			// also add the $O version
 			String generic = getParamsAsString(nParams, genericTypes, paramTypes, true);
 			if (generic != null) {
-				staticBuffer.addType("o");
+				trailingBuffer.addType("o");
 				return j2sName + s + " || $o$." + j2sName.substring(j2sName.lastIndexOf(".") + 1) + generic;
 			}
 			// this does not work for two reasons:
@@ -2273,7 +2271,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		buffer.insert(pt, "(($o$=");
 		buffer.append(qname).append(").apply($o$,[");
 		buffer.insert(buffer.lastIndexOf(".", buffer.lastIndexOf("|")), ")");
-		staticBuffer.addType("o");
+		trailingBuffer.addType("o");
 	}
 
 
@@ -2475,5 +2473,9 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		return (isViolation ? "$" : "") + (addName ? name : "");
 	}
 
+	protected static boolean hasSuperClass(ITypeBinding typeBinding) {
+		ITypeBinding superclass = typeBinding.getSuperclass();
+		return (superclass != null && !"java.lang.Object".equals(superclass.getQualifiedName()));
+	}
 
 }
