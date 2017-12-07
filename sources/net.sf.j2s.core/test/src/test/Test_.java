@@ -11,7 +11,7 @@ abstract class Test_ {
 
 	private static int i_ = 0;
 	private int t = 0;
-	
+	 
 	public void showt() {
 		System.out.println(t);
 	}
@@ -32,7 +32,6 @@ abstract class Test_ {
 	
 	
 	  public static void main(String[] args) {
-		  Test_Abstract.main(args);
 		  Test_Anon.main(args);
 		  Test_Appendable.main(args);
 		  Test_Array.main(args);
@@ -64,6 +63,8 @@ abstract class Test_ {
 		  Test_GenericAnon.main(args);
 		  Test_GenericEABIXY2.main(args);
 		  Test_GenericExt2.main(args);
+		  Test_Init.main(args);
+		  Test_Inner.main(args);
 		  Test_Instance.main(args);
 		  Test_Interface.main(args);
 		  Test_Interface2.main(args);

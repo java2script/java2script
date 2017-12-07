@@ -4,9 +4,20 @@ public class Test_Call extends Test_call0 implements Comparable<Test_Call>{
 
 	int y = 0;
 
+	int testing1;
+	int testing2 = 3;
+	
+	@Override
+	void checkTesting(int pass) {
+		System.out.println("testing:" + testing1 + " " + testing2);
+		assert(testing2 == (pass == 1 ? 0 : 3));
+		if (pass == 1)
+			testing2 = 2;
+	}
+
+	
 	private transient Integer icall = null;
 	
-
 	void init() {
 		assert(this instanceof Test_call0);
 		assert(this instanceof Comparable);
@@ -27,6 +38,8 @@ public class Test_Call extends Test_call0 implements Comparable<Test_Call>{
 	}
 	
 	Test_Call() {
+		super();
+		checkTesting(2);
 		setX(-1);
 		new Inner1();
 		assert(x == -1 && y == 100);
@@ -65,6 +78,5 @@ public class Test_Call extends Test_call0 implements Comparable<Test_Call>{
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
 
 }
