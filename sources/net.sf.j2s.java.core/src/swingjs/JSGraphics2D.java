@@ -708,8 +708,7 @@ public class JSGraphics2D //extends SunGraphics2D
 	}
 
 	public void drawString(String str, float x, float y) {
-		// apply affine transformation first
-		JSUtil.notImplemented(null);
+		ctx.fillText(str, x, y);
 	}
 
 	

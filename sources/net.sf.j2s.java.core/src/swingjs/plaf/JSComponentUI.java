@@ -1271,7 +1271,20 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		return null;
 	}
 
+	public Dimension getMinimumSize(JComponent jc) {
+		return getMinimumSize();
+	}
+	
+	public Dimension getPreferredSize(JComponent jc) {
+		return getPreferredSize();
+	}
+	
+	public Dimension getMaximumSize(JComponent jc) {
+		return getMaximumSize();
+	}
+
 	/**
+	 * 
 	 * Returns <code>true</code> if the specified <i>x,y</i> location is contained
 	 * within the look and feel's defined shape of the specified component.
 	 * <code>x</code> and <code>y</code> are defined to be relative to the

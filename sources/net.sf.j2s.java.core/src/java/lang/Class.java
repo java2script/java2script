@@ -111,6 +111,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		public String __CLASS_NAME__;
 	}
 	private JSClass $clazz$; //  BH SwingJS
+	private String[] $methodList$; // BH SwingJS for proxy interfaces
 	
 //	private static native void registerNatives();
 //
@@ -439,7 +440,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		/**
 		 * @j2sNative 
 		 * 
-		 * return(Clazz.isInstance(cls.$clazz$, this.$clazz$);
+		 * return(Clazz.instanceOf(cls.$clazz$, this.$clazz$));
 		 * 
 		 */
 		{
@@ -1548,12 +1549,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @since JDK1.1
 	 */
 	public Method[] getMethods() throws SecurityException {
-		return null;
-//		// be very careful not to change the stack depth of this
-//		// checkMemberAccess call for security reasons
-//		// see java.lang.SecurityManager.checkMemberAccess
-////		checkMemberAccess(Member.PUBLIC, ClassLoader.getCallerClassLoader());
-//		return copyMethods(privateGetPublicMethods());
+		return /*copyMethods*/(privateGetPublicMethods());
 	}
 
 	/**
@@ -2250,7 +2246,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	      return null;
 	    }
 	    var fileCache = J2S._getSetJavaFileCache(null);
-	    var data = fileCache && fileCache.get(javapath);   
+	    var data = fileCache && fileCache.get$O(javapath);   
 	    if (!data)
 	      data = J2S._getFileData(fname.toString(),null,1,1);
 	    
@@ -2795,24 +2791,30 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	// be propagated to the outside world, but must instead be copied
 	// via ReflectionFactory.copyMethod.
 	private Method[] privateGetPublicMethods() {
-		Method[] ms = new Method[0];
+		Method[] ms;
+		if ($methodList$ != null) {
+			ms = new Method[$methodList$.length];
+			for (int i = ms.length; -- i >= 0;) {
+				ms[i] = new Method(this, $methodList$[i], null, Void.class, null, java.lang.reflect.Modifier.PUBLIC);
+			}
+			return ms;
+		}
+		ms = new Method[0];
 		/**
 		 * @j2sNative
 		 * 
-	    var p = this.prototype;
+		 * 
+	    var p = this.$clazz$.prototype;
 	    for (var attr in p) {
-	      if (typeof p[attr] == "function" && !p[attr].__CLASS_NAME__) {
+	      if (typeof p[attr] == "function" && !p[attr].__CLASS_NAME__ && p[attr] != this.$clazz$[attr] && p[attr].exClazz == this.$clazz$) {
 	        // there are polynormical methods. 
-	        ms.push(new java.lang.reflect.Method (this, attr,
-	            [], java.lang.Void, [], java.lang.reflect.Modifier.PUBLIC));
+	        ms.push(Clazz.new(Clazz.load('java.lang.reflect.Method').c$$Class$S$ClassA$Class$ClassA$I,  [this, attr, [], java.lang.Void, [], 1]));
 	      }
 	    }
-	    p = this;
+	    p = this.$clazz$;
 	    for (var attr in p) {
-	      if (typeof p[attr] == "function" && !p[attr].__CLASS_NAME__) {
-	        ms.push(new java.lang.reflect.Method (this, attr,
-	            [], java.lang.Void, [], java.lang.reflect.Modifier.PUBLIC
-	            | java.lang.reflect.Modifier.STATIC));
+	      if (typeof p[attr] == "function" && !p[attr].__CLASS_NAME__  && p[attr].exClazz == this.$clazz$) {
+	        ms.push(Clazz.new(Clazz.load('java.lang.reflect.Method').c$$Class$S$ClassA$Class$ClassA$I,  [this, attr, [], java.lang.Void, [], 1 | 8]));
 	      }
 	    }
 		 */

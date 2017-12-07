@@ -224,22 +224,12 @@ public class AWTKeyStroke {
 	 * Class constructor.
 	 */
 	private static Constructor getCtor(final Class clazz) {
-		return (Constructor) (Object) clazz;
-//		// Object ctor = AccessController.doPrivileged(new PrivilegedAction() {
-//		// public Object run() {
-//		try {
-//			Constructor ctor = clazz.getDeclaredConstructor((Class[]) null);
-//			// if (ctor != null) {
-//			// ctor.setAccessible(true);
-//			// }
-//			return ctor;
-//			// } catch (SecurityException e) {
-//		} catch (NoSuchMethodException e) {
-//		}
-//		return null;
-//		// }
-//		// });
-//		// return (Constructor)ctor;
+		try {
+			return clazz.getDeclaredConstructor((Class[]) null);
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	private static synchronized AWTKeyStroke getCachedStroke

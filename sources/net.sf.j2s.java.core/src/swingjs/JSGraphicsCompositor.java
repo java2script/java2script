@@ -250,8 +250,11 @@ public class JSGraphicsCompositor {
 		case 'A':
 			Graphics2D g = null;
 			/**
+			 * @j2sNative
+			 * 
 			 * g = dst.getImageGraphic()
 			 */
+			{}
 			g.drawImage(src,
 					((AffineTransformOp) op).getTransform(), null);
 			retBI = dst;

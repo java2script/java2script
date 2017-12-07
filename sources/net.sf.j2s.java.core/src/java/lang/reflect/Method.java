@@ -40,7 +40,7 @@ public final class Method extends AccessibleObject implements GenericDeclaration
      * instantiation of these objects in Java code from the java.lang
      * package via sun.reflect.LangReflectAccess.
      */
-    Method(Class<?> declaringClass,
+    public Method(Class<?> declaringClass,
            String name,
            Class<?>[] parameterTypes,
            Class<?> returnType,
