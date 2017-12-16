@@ -64,7 +64,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import net.sf.j2s.core.adapters.Bindings;
-import net.sf.j2s.core.adapters.ExtendedAdapter;
+//import net.sf.j2s.core.adapters.ExtendedAdapter;
 import net.sf.j2s.core.adapters.FieldAdapter;
 import net.sf.j2s.core.adapters.FinalVariable;
 import net.sf.j2s.core.adapters.J2SMapAdapter;
@@ -800,7 +800,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		Name qualifier = node.getQualifier();
 		if (!checkStaticBinding(varBinding) || qualifier.resolveBinding() instanceof ITypeBinding)
 			varBinding = null;
-		boolean skipQualifier = (allowExtensions && ExtendedAdapter.isHTMLClass(qualifier.toString(), true));
+		boolean skipQualifier = false;//(allowExtensions && ExtendedAdapter.isHTMLClass(qualifier.toString(), true));
 		String className = null;
 		if (!skipQualifier && parent != null && !(parent instanceof QualifiedName)) {
 			while (qualifier instanceof QualifiedName) {
@@ -825,8 +825,8 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 					// RadiusData.EnumType e = RadiusData.EnumType.THREE;
 					// avoid generate duplicated RadiusData
 					className = typeBinding.getQualifiedName();
-					if (allowExtensions)
-						className = ExtendedAdapter.trimName(className, false); // ??
+//					if (allowExtensions)
+//						className = ExtendedAdapter.trimName(className, false); // ??
 																				// probably
 																				// should
 																				// be
@@ -886,10 +886,10 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			return constValue;
 		}
 		IBinding binding = node.resolveBinding();
-		if (allowExtensions && binding instanceof ITypeBinding
-				&& ExtendedAdapter.isHTMLClass(((ITypeBinding) binding).getQualifiedName(), false)) {
-			return node.getIdentifier();
-		}
+//		if (allowExtensions && binding instanceof ITypeBinding
+//				&& ExtendedAdapter.isHTMLClass(((ITypeBinding) binding).getQualifiedName(), false)) {
+//			return node.getIdentifier();
+//		}
 		ASTNode xparent = node.getParent();
 		if (xparent == null) {
 			return node.toString();
@@ -1817,8 +1817,9 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	 */
 	protected boolean checkStaticBinding(IVariableBinding varBinding) {
 		ITypeBinding declaring;
-		return isStatic(varBinding) && (declaring = varBinding.getDeclaringClass()) != null
-				&& (!allowExtensions || !ExtendedAdapter.isHTMLClass(declaring.getQualifiedName(), false));
+		return (isStatic(varBinding) && (declaring = varBinding.getDeclaringClass()) != null
+				//&& (!allowExtensions || !ExtendedAdapter.isHTMLClass(declaring.getQualifiedName(), false))
+				);
 	}
 
 	/**

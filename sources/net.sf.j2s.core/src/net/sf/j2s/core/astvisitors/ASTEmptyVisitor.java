@@ -173,15 +173,15 @@ public class ASTEmptyVisitor extends ASTVisitor {
 	 */
 	protected boolean allowExtensions = false;
 
-	/**
-	 * not implemented 
-	 * 
-	 * @param tf
-	 */
-	public void setAllowExtensions(boolean tf) {
-		allowExtensions = tf;
-	}
-
+//	/**
+//	 * not implemented 
+//	 * 
+//	 * @param tf
+//	 */
+//	public void setAllowExtensions(boolean tf) {
+//		allowExtensions = tf;
+//	}
+//
 
 	
 	protected Map<String, Integer>htStaticNames = new Hashtable<>();

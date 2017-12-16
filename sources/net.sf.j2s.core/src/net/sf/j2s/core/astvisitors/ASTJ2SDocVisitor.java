@@ -32,7 +32,7 @@ import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 
 import net.sf.j2s.core.adapters.Bindings;
-import net.sf.j2s.core.adapters.ExtendedAdapter;
+//import net.sf.j2s.core.adapters.ExtendedAdapter;
 
 /**
  * This level of Visitor focuses on dealing with 
@@ -257,13 +257,13 @@ public class ASTJ2SDocVisitor extends ASTEmptyVisitor {
 	}
 	
 	private boolean addSourceForTagExtended(TagElement tagEl, String prefix, String suffix) {
-		if (tagEl == null)
-			return false;
-		StringBuffer buf = new StringBuffer();
-		String firstLine = getSource(tagEl, buf, true);
-		buffer.append(prefix);
-		buffer.append(ExtendedAdapter.buildXSource(getQualifiedClassName(), tagEl.getTagName(), firstLine, buf.toString().trim()));
-		buffer.append(suffix);
+//		if (tagEl == null)
+//			return false;
+//		StringBuffer buf = new StringBuffer();
+//		String firstLine = getSource(tagEl, buf, true);
+//		buffer.append(prefix);
+//		buffer.append(ExtendedAdapter.buildXSource(getQualifiedClassName(), tagEl.getTagName(), firstLine, buf.toString().trim()));
+//		buffer.append(suffix);
 		return true;
 	}
 	
@@ -352,33 +352,33 @@ public class ASTJ2SDocVisitor extends ASTEmptyVisitor {
 	 */
 	protected boolean checkKeepSpecialClassMethod(BodyDeclaration node, IMethodBinding mBinding, boolean isEnd) {
 		boolean doKeep = true;
-		if (isEnd) {
-			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun"))
-				doKeep = false;
-			String[] pipeMethods = new String[] { "pipeSetup", "pipeThrough", "through", "pipeMonitoring",
-					"pipeMonitoringInterval", "pipeWaitClosingInterval", "setPipeHelper" };
-			for (int i = 0; i < pipeMethods.length; i++) {
-				if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", pipeMethods[i])) {
-					doKeep = false;
-					break;
-				}
-			}
-			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.CompoundPipeSession", "convert"))
-				doKeep = false;
-		} else {
-			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun"))
-				doKeep = false;
-			String[] pipeMethods = new String[] { "pipeSetup", "pipeThrough", "through", "pipeMonitoring",
-					"pipeMonitoringInterval", "pipeWaitClosingInterval", "setPipeHelper" };
-			for (int i = 0; i < pipeMethods.length; i++) {
-				if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", pipeMethods[i])) {
-					doKeep = false;
-					break;
-				}
-			}
-			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.CompoundPipeSession", "convert"))
-				doKeep = false;
-		}
+//		if (isEnd) {
+//			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun"))
+//				doKeep = false;
+//			String[] pipeMethods = new String[] { "pipeSetup", "pipeThrough", "through", "pipeMonitoring",
+//					"pipeMonitoringInterval", "pipeWaitClosingInterval", "setPipeHelper" };
+//			for (int i = 0; i < pipeMethods.length; i++) {
+//				if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", pipeMethods[i])) {
+//					doKeep = false;
+//					break;
+//				}
+//			}
+//			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.CompoundPipeSession", "convert"))
+//				doKeep = false;
+//		} else {
+//			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun"))
+//				doKeep = false;
+//			String[] pipeMethods = new String[] { "pipeSetup", "pipeThrough", "through", "pipeMonitoring",
+//					"pipeMonitoringInterval", "pipeWaitClosingInterval", "setPipeHelper" };
+//			for (int i = 0; i < pipeMethods.length; i++) {
+//				if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", pipeMethods[i])) {
+//					doKeep = false;
+//					break;
+//				}
+//			}
+//			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.CompoundPipeSession", "convert"))
+//				doKeep = false;
+//		}
 		return (doKeep || getJ2STag(node, "@j2sKeep") != null);
 	}
 
