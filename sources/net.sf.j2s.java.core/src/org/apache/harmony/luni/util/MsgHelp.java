@@ -115,7 +115,7 @@ public final class MsgHelp {
 //		/**
 //		 * @j2sNative
 //		 * 
-//		 * Clazz._4Name("java.util.ResourceBundle");
+//		 * Class.forName("java.util.ResourceBundle");
 //		 */
 //		{}
 //		return ResourceBundle.getBundle(resource);

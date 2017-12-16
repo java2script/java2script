@@ -304,10 +304,10 @@ public class ASTEmptyVisitor extends ASTVisitor {
 
 	protected Map<Class<?>, AbstractPluginAdapter> adapterMap = new HashMap<Class<?>, AbstractPluginAdapter>();
 	
-	public AbstractPluginAdapter getAdaptable(Class<?> clazz) {
+	public AbstractPluginAdapter getAdaptable(Class<?> thisClass) {
 		try {
-			AbstractPluginAdapter adapter = adapterMap.get(clazz);
-			return (adapter == null ? (adapter = registerPluginVisitor((AbstractPluginAdapter) clazz.newInstance()))
+			AbstractPluginAdapter adapter = adapterMap.get(thisClass);
+			return (adapter == null ? (adapter = registerPluginVisitor((AbstractPluginAdapter) thisClass.newInstance()))
 					: adapter);
 		} catch (@SuppressWarnings("unused") InstantiationException | IllegalAccessException e) {
 			return null;

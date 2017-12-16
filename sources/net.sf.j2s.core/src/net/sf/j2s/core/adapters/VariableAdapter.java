@@ -128,12 +128,6 @@ public class VariableAdapter extends AbstractPluginAdapter {
 
 	/**
 	 * Generated final variable list for anonymous class creation.
-	 * <ol>
-	 * 	<li>Generate "null" if there are no referenced final variales inside 
-	 * anonymous class</li>
-	 *  <li>Generate "Clazz.cloneFinals (...)" if there are referenced final 
-	 * variable</li>
-	 * </ol>
 	 * 
 	 * @param list
 	 * @param seperator

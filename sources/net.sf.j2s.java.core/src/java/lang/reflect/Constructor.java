@@ -273,10 +273,6 @@ public final class Constructor<T> extends AccessibleObject implements GenericDec
 	 *                if an exception was thrown by the invoked constructor
 	 * @see java.lang.reflect.AccessibleObject
      * 
-     * @j2sNative 
-     * var instance = new this.clazz (Clazz.inheritArgs);
-     * Clazz.instantialize (instance, args);
-     * return instance;
 	 */
 	public T newInstance(Object... args) throws InstantiationException,
 			IllegalAccessException, IllegalArgumentException,

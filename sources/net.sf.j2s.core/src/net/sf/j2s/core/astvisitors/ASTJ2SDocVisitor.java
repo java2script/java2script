@@ -135,11 +135,11 @@ public class ASTJ2SDocVisitor extends ASTEmptyVisitor {
 	 * for example, for classes only:
 	 * 
 	 * @j2sPrefix /-* this is from <@>j2sPrefix added outside of just before
-	 *            Clazz.decorateAsClass() *-/
+	 *            Clazz.newClass() *-/
 	 * 
 	 * 
 	 * @j2sSuffix /-* this is from <@>j2sSuffix added just after
-	 *            Clazz.decorateAsClass() *-/
+	 *            Clazz.newClass() *-/
 	 * @param isExtended if this is j2sXHTML or j2sXCSS
 	 * 
 	 * @return true if javadoc of this sort was found and added to the buffer

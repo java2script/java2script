@@ -238,7 +238,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		ArrayInitializer inode = node.getInitializer();
 		ITypeBinding binding = node.resolveTypeBinding();
 		if (inode == null) {
-			buffer.append(j2sGetArrayClass(binding, 0));
+			buffer.append(clazzArray(binding, 0));
 			buffer.append(", [");
 			List<ASTNode> dim = node.dimensions();
 			visitList(dim, ", ");
@@ -253,7 +253,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 
 	public boolean visit(ArrayInitializer node) {
 		// as in: public String[] d = {"1", "2"};
-		buffer.append(j2sGetArrayClass(node.resolveTypeBinding(), -1));
+		buffer.append(clazzArray(node.resolveTypeBinding(), -1));
 		buffer.append(", [");
 		@SuppressWarnings("unchecked")
 		List<ASTNode> expressions = node.expressions();
@@ -703,7 +703,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		node.getLeftOperand().accept(this);
 		buffer.append(", ");
 		if (right instanceof ArrayType) {
-			buffer.append(j2sGetArrayClass(binding, 1));
+			buffer.append(clazzArray(binding, 1));
 		} else {
 			buffer.append("\"" + removeBrackets(binding.getQualifiedName()) + "\"");
 			// right.accept(this);
@@ -1069,7 +1069,8 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			// adds Integer.TYPE, Float.TYPE, etc.
 			buffer.append(getPrimitiveTYPE(binding.getName()));
 		} else if (type instanceof ArrayType) {
-			buffer.append(j2sGetArrayClass(binding, 1));
+			// int[][].class --> Clazz.array(Integer.TYPE, -2);
+			buffer.append(clazzArray(binding, 1));
 		} else {
 			// BH we are creating a new Class object around this class
 			// if it is an interface, then we explicitly add .$methodList$
@@ -1210,21 +1211,18 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	}
 
 	/**
-	 * Add the Clazz.arrayClass$(class, ndim) call to create a faux class with
-	 * the correct _paramType and __NDIM
 	 *
 	 * @param type
 	 * @param dimFlag
-	 *            -1 : initialized depth; n > 0 uninitialized depth as
-	 *            Clazz.arrayClass$; 0: not necessary
+	 *            -1 : initialized depth; n > 0 uninitialized depth; 0: not necessary
 	 * @return JavaScript for array creation
 	 */
-	String j2sGetArrayClass(ITypeBinding type, int dimFlag) {
+	private String clazzArray(ITypeBinding type, int dimFlag) {
 		ITypeBinding ebinding = type.getElementType();
 		String params = (ebinding.isPrimitive() ? getPrimitiveTYPE(ebinding.getName())
 				: getQualifiedStaticName(null, ebinding.getQualifiedName(), true, true, false))
-				+ (dimFlag == 0 ? "" : ", " + dimFlag * type.getDimensions());
-		return (dimFlag > 0 ? "Clazz.arrayClass$(" + params + ")" : " Clazz.newArray$(" + params);
+				+ (dimFlag == 0 ? "" : ", " + Math.abs(dimFlag) * type.getDimensions() * -1);
+		return "Clazz.array(" + params + (dimFlag > 0 ? ")" : "");
 	}
 
 	public static void setNoQualifiedNamePackages(String names) {
@@ -1816,8 +1814,8 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	 * @return
 	 */
 	protected boolean checkStaticBinding(IVariableBinding varBinding) {
-		ITypeBinding declaring;
-		return (isStatic(varBinding) && (declaring = varBinding.getDeclaringClass()) != null
+//		ITypeBinding declaring;
+		return (isStatic(varBinding) && varBinding.getDeclaringClass() != null
 				//&& (!allowExtensions || !ExtendedAdapter.isHTMLClass(declaring.getQualifiedName(), false))
 				);
 	}
@@ -2190,9 +2188,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	 * @param nodeName
 	 * @param binding
 	 * @param genericTypes
-	 *            TODO
 	 * @param isMethodInvoc
-	 *            TODO
 	 * 
 	 * @return a fully j2s-qualified method name
 	 */
@@ -2466,7 +2462,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	 *  
 	 * @param name
 	 * @param checkPackages
-	 * @param addName TODO
+	 * @param addName
 	 * @return
 	 */
 	protected String getValidFieldName$Qualifier(String name, boolean checkPackages, boolean addName) {

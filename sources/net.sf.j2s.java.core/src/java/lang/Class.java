@@ -257,7 +257,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		/**
 		 * @j2sNative
 		 * 
-		 * return Clazz._4Name(name);
+		 * return Clazz.forName(name, initialize, loader);
 		 */
 		{
 			 return null;

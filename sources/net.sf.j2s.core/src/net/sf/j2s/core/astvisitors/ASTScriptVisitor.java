@@ -90,13 +90,6 @@ import net.sf.j2s.core.adapters.VariableAdapter;
 // BH 8/13/2017 -- includes native code calls in System.err
 // BH 7/31/2017 -- extensively reworked for fully qualified method names and no SAEM
 
-// DONE: type def, including inner classes and anonymous classes
-// DONE: fully encapsulated C$ variable
-// DONE: proper <init> processing
-// DONE: non-final variables for anonymous class definition
-// DONE: array handling in instanceof and reflection
-// DONE: String + double/float/Double/Float --> new Double/Float().toString() 
-// TODO: Q: Good assumption that generic parameterization can be ignored? put<K,V> vs put<K>? 
 /*
  * 
 
@@ -109,42 +102,6 @@ interface Editable {
 
 class EditDialog extends Dialog implements AdjustmentListener, ActionListener, ItemListener {
 ...
-
-TODO #16 when an inner public class is called by another class using instanceOf, that inner class becomes an optional load. 
-but optional loads must still be loaded, and unless declared in package.js, J2S will look for xxx.xxx.Outer/Inner.js
-because the inner classes are not fully declared. 
-
-Solution is to switch to requiring the outer class, not the inner class:
-
-@J2SRequireImport(NumberFormat.class)
-@J2SIgnoreImport(NumberFormat.Field.class)
-public class NumberFormatter extends InternationalFormatter...
-
-
-
-TODO #14 in java.awt.image.Raster, we have a static block that 
-creates new Objects. In that case, we need to add the annotation:
-      
-      @J2SRequireImport({ jsjava.awt.image.SinglePixelPackedSampleModel.class, jssun.awt.image.IntegerInterleavedRaster.class, jssun.awt.image.ByteInterleavedRaster.class })
-      
-      
-TODO #12 Inner classes must not call other inner classes defined after them in a file.
-    This showed up in java.awt.geom.Path2D.Float.CopyIterator, which extends
-    java.awt.geom.Path2D.Iterator. Since the Iterator is in the code after CopyIterator,
-    the reference to java.awt.geom.Path2D.Iterator in
-    
-    c$ = Clazz.decorateAsClass (function () {
-		this.floatCoords = null;
-		Clazz.instantialize (this, arguments);
-	}, java.awt.geom.Path2D.Float, "CopyIterator", java.awt.geom.Path2D.Iterator);
-     
-    is null, and then CopyIterator does not extend Iterator.
-   
-TODO #4 @J2SRequireImport({jsjava.util.PropertyResourceBundle.class})
-
-is required for  public abstract class ResourceBundle because the inner class
-ResourceBundle.Control requires it, but for some reason it is not included in the
-MUST list in the Clazz.load() call.
 
 
  */
@@ -247,7 +204,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		if (isBasePackage()) {
 			buffer.append(name);
 		} else {
-			buffer.append("Clazz.newPackage$(\"").append(name).append("\")");
+			buffer.append("Clazz.newPackage(\"").append(name).append("\")");
 		}
 		buffer.append(",I$=[];\r\n");
 		return false;
@@ -370,11 +327,15 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 					(constructorBinding == null ? null : constructorBinding.getMethodDeclaration()), null);
 			return false;
 		}
+		String className = TypeAdapter.getTypeStringName(node.getType());
+		String fqName = getShortenedQualifiedName(className);
+		if ("Object".equals(fqName)) {
+			buffer.append(" Clazz.new()"); 
+			return false;
+		}
 		String prefix = null, postfix = null;
 		IMethodBinding methodDeclaration = null;
 		IMethodBinding constructorBinding = node.resolveConstructorBinding();
-		String className = TypeAdapter.getTypeStringName(node.getType());
-		String fqName = getShortenedQualifiedName(className);
 		if (constructorBinding != null) {
 			methodDeclaration = constructorBinding.getMethodDeclaration();
 		}
@@ -382,10 +343,6 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		if ("String".equals(fqName)) {
 			// special treatment for String -- see j2sSwingJS.js
 			buffer.append(" String.instantialize(");
-		} else if ("Object".equals(fqName)) {
-			// For discussion, please visit
-			// http://groups.google.com/group/java2script/browse_thread/thread/3d6deb9c3c0a0cda
-			buffer.append(" new Clazz._O("); // BH removing window.JavaObject
 		} else if (noConstructorNames.indexOf(fqName) >= 0) {
 			// look out for java.lang.Integer and the like -- just pass it
 			// directly
@@ -608,7 +565,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 											// names here
 		if (name.equals("'main'"))
 			addApplication();
-		buffer.append("\r\nClazz.newMethod$(C$, ").append(name).append(", function (");
+		buffer.append("\r\nClazz.newMeth(C$, ").append(name).append(", function (");
 		@SuppressWarnings("unchecked")
 		List<ASTNode> parameters = node.parameters();
 		visitList(parameters, ", ");
@@ -721,7 +678,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		if (MethodAdapter.isMethodRegistered(methodName)) {
 			String j2sName = MethodAdapter.translate(className, methodName);
 			if (j2sName != null) {
-				// Array.newInstance --> Clazz.newArray$
+				// Array.newInstance --> Clazz.array
 				if (j2sName.startsWith("Clazz.")) {
 					buffer.setLength(pt);
 					buffer.append(j2sName);
@@ -1057,7 +1014,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	}
 
 	/**
-	 * Add Clazz.newInterface$(...) or Clazz.newClass$(...) for all classes and
+	 * Add Clazz.newInterface(...) or Clazz.newClass(...) for all classes and
 	 * interfaces, including Enum and anonymous.
 	 * 
 	 * If this is an inner class, then iterate, just adding its definition to
@@ -1128,7 +1085,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 		// begin the class or interface definition
 
-		buffer.append("var C$=" + (isInterface ? "Clazz.newInterface$(" : "Clazz.newClass$("));
+		buffer.append("var C$=" + (isInterface ? "Clazz.newInterface(" : "Clazz.newClass("));
 
 		// arg1 is the package name
 		// arg2 is the full class name in quotes
@@ -1170,7 +1127,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		buffer.append(", ");
 		if (isAnonymous) {
 			if (!(parent instanceof EnumConstantDeclaration))
-				func = "function(){Clazz.newInstance$(this, arguments[0],1,C$);}";
+				func = "function(){Clazz.newInstance(this, arguments[0],1,C$);}";
 			superclassName = "" + getSuperclassNameQualified(binding);
 			ITypeBinding[] declaredTypes = binding.getInterfaces();
 			if (declaredTypes != null && declaredTypes.length > 0) {
@@ -1210,7 +1167,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 				// directly by the
 				// user using new Foo()
 				if (!isInterface) {
-					buffer.append("Clazz.newInstance$(this, arguments")
+					buffer.append("Clazz.newInstance(this, arguments")
 							.append(isTopLevel ? ",0" : "[0]," + !isStatic(binding)).append(",C$);\r\n");
 				}
 				buffer.append("}");
@@ -1387,7 +1344,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			init0Buffer = new StringBuffer();
 
 			int len = buffer.length();
-			buffer.append("\r\nClazz.newMethod$(C$, '$init$', function () {\r\n");
+			buffer.append("\r\nClazz.newMeth(C$, '$init$', function () {\r\n");
 			// we include all field definitions here and all nonstatic
 			// initializers
 			for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
@@ -1405,7 +1362,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			if (init0Buffer.length() > 0) {
 				String buf = buffer.substring(len);
 				buffer.setLength(len);
-				buffer.append("\r\nClazz.newMethod$(C$, '$init0$', function () {\r\n");
+				buffer.append("\r\nClazz.newMeth(C$, '$init0$', function () {\r\n");
 				buffer.append("var c;if((c = C$.superClazz) && (c = c.$init0$))c.apply(this);\r\n");
 				buffer.append(init0Buffer);
 				buffer.append("}, 1);\r\n");
@@ -1486,7 +1443,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	}
 
 	/**
-	 * For Clazz.newClazz$ we want an array if there is an inner class
+	 * For Clazz.newClass$ we want an array if there is an inner class
 	 * so that the outer class is guarranteed to be loaded first.
 	 * 
 	 * @param className
@@ -1518,7 +1475,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		if (haveDefaultConstructor) {
 			haveDefaultConstructor = false;
 		} else {
-			buffer.append("\r\nClazz.newMethod$(C$);\r\n");
+			buffer.append("\r\nClazz.newMeth(C$);\r\n");
 		}
 	}
 
@@ -1540,7 +1497,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 				anonName = getAnonymousName(anonDeclare.resolveBinding());
 				buffer.append("\r\n");
 			}
-			buffer.append("Clazz.newEnumConst$(vals, ").append(getJ2SQualifiedName("C$.c$", null, binding, null, false))
+			buffer.append("Clazz.newEnumConst(vals, ").append(getJ2SQualifiedName("C$.c$", null, binding, null, false))
 					.append(", \"");
 			enumConst.getName().accept(this);
 			buffer.append("\", " + i);
@@ -1549,10 +1506,10 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 				buffer.append(", ").append(anonName);
 			buffer.append(");\r\n");
 		}
-		buffer.append("Clazz.newMethod$(C$, 'values', function() { return vals }, 1);\r\n");
+		buffer.append("Clazz.newMeth(C$, 'values', function() { return vals }, 1);\r\n");
 		// this next just ensures we have the valueOf() method in Enum if it
 		// is not already there.
-		buffer.append("Clazz.newMethod$(Enum, 'valueOf$Class$S', function(cl, name) { return cl[name] }, 1);\r\n");
+		buffer.append("Clazz.newMeth(Enum, 'valueOf$Class$S', function(cl, name) { return cl[name] }, 1);\r\n");
 	}
 
 	/**
@@ -1602,7 +1559,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 				buffer.append(";\r\n");
 				//
 				// $clinit$ -- statics; once only
-				// $init0$ -- from within Clazz.newInstance$, before any
+				// $init0$ -- from within Clazz.newInstance, before any
 				// constructors
 				// $init$ -- from the constructor, just after any super()
 				// call or whenever there is no this() call

@@ -678,14 +678,14 @@ public class Proxy implements java.io.Serializable {
     	/**
     	 * @j2sNative
     	 * 
-    	 * cl = Clazz.getClass(Clazz.newClass$(java.lang.reflect, name, null, 'java.lang.reflect.Proxy'));
+    	 * cl = Clazz.getClass(Clazz.newClass(java.lang.reflect, name, null, 'java.lang.reflect.Proxy'));
     	 * 
     	 * var cl$ = cl.$clazz$;
     	 * 
     	 *  cl$.$clinit$ = function() {Clazz.load(cl$, 1);};
-    	 *  Clazz.newMethod$(cl$, '$init$', function () {}, 1);
-    	 *  Clazz.newMethod$(cl$, '$init0$', function () {}, 1);
-    	 *  Clazz.newMethod$(cl$, "c$$reflect_InvocationHandler", function(h) {
+    	 *  Clazz.newMeth(cl$, '$init$', function () {}, 1);
+    	 *  Clazz.newMeth(cl$, '$init0$', function () {}, 1);
+    	 *  Clazz.newMeth(cl$, "c$$reflect_InvocationHandler", function(h) {
     	 *  cl$.superClazz.c$$reflect_InvocationHandler.apply(this, [h]);
 		 *  cl$.$init$.apply(this);
     	 *  }, 1);
