@@ -4,10 +4,10 @@
 //BH fix for String not having .length() or .subSequence()
 //BH fix for not reinitializing correctly
 //BH note that start(groupIndex) is not implemented for groupIndex > 0
-(function(){Clazz.newPackage$("java.util.regex");
+(function(){Clazz.newPackage("java.util.regex");
 
-var C$=Clazz.newClass$(java.util.regex,"Matcher",function(){
-  Clazz.newInstance$(this,arguments);
+var C$=Clazz.newClass(java.util.regex,"Matcher",function(){
+  Clazz.newInstance(this,arguments);
 },null,"java.util.regex.MatchResult");
 
 
@@ -18,28 +18,28 @@ Clazz.load(C$, 1);
 
 (function(){
 
-  var C$=Clazz.newClass$(java.util.regex,"Matcher$1",function(){
-    Clazz.newInstance$(this, arguments[0], true);
+  var C$=Clazz.newClass(java.util.regex,"Matcher$1",function(){
+    Clazz.newInstance(this, arguments[0], true);
   });
   
   C$.$clinit$ = function() {delete C$.$clinit$;Clazz.load(C$, 1);}
 
-  Clazz.newMethod$(C$, "$init$", function() {
+  Clazz.newMeth(C$, "$init$", function() {
       this.grN=0;
   }, 1);
-  Clazz.newMethod$(C$,"toString", function(){
+  Clazz.newMeth(C$,"toString", function(){
     return this.b$["java.util.regex.Matcher"].group(this.grN);
   });
 })();
 
-Clazz.newMethod$(C$, 'c$$java_util_regex_Pattern$CharSequence', function(pat,cs){
+Clazz.newMeth(C$, 'c$$java_util_regex_Pattern$CharSequence', function(pat,cs){
   this.pat=pat;
   this.charSeq=cs;
   this.leftBound=0;
   this.rightBound=this.charSeq.length$();
 }, 1);
 
-Clazz.newMethod$(C$,"reset$CharSequence",function(newSequence){
+Clazz.newMeth(C$,"reset$CharSequence",function(newSequence){
   if(newSequence==null){
     throw new NullPointerException("Empty new sequence!");
   }
@@ -48,7 +48,7 @@ Clazz.newMethod$(C$,"reset$CharSequence",function(newSequence){
   return this.reset();
 });
 
-Clazz.newMethod$(C$,"reset",function(){
+Clazz.newMeth(C$,"reset",function(){
   this.leftBound=0;
   this.rightBound=this.charSeq.length$();
   this.appendPos=0;
@@ -62,7 +62,7 @@ Clazz.newMethod$(C$,"reset",function(){
   return this;
 });
 
-Clazz.newMethod$(C$,"find",function(){
+Clazz.newMeth(C$,"find",function(){
   // 'find next'
   if (this.strString == null)
     this.strString = this.charSeq.toString();
@@ -75,7 +75,7 @@ Clazz.newMethod$(C$,"find",function(){
   return (this.results != null);
 });
 
-Clazz.newMethod$(C$,"find$I",function(startIndex){
+Clazz.newMeth(C$,"find$I",function(startIndex){
   var stringLength=this.charSeq.length$();
   if(startIndex<0||startIndex>stringLength)
     throw new IndexOutOfBoundsException$S("Out of bound "+startIndex);
@@ -84,30 +84,30 @@ Clazz.newMethod$(C$,"find$I",function(startIndex){
   return this.find();
 });
 
-Clazz.newMethod$(C$,"start",function(){
+Clazz.newMeth(C$,"start",function(){
   return this.start$I(0);
 });
 
-Clazz.newMethod$(C$,"start$I",  function(groupIndex){
+Clazz.newMeth(C$,"start$I",  function(groupIndex){
   return this.startImpl$I(groupIndex);
 });
 
-Clazz.newMethod$(C$,"startImpl$I",  function(groupIndex){
+Clazz.newMeth(C$,"startImpl$I",  function(groupIndex){
   // BH SAEM
   // NOTE: TODO groupIndex is not implemented!
   return this.pat.regexp.lastIndex - this.results[0].length;
 });
 
-Clazz.newMethod$(C$,"end",function(){
+Clazz.newMeth(C$,"end",function(){
   return this.end$I(0);
 });
 
-Clazz.newMethod$(C$,"end$I",function(groupIndex){
+Clazz.newMeth(C$,"end$I",function(groupIndex){
   return this.pat.regexp.lastIndex;
 });
 
 
-Clazz.newMethod$(C$,"appendReplacement$StringBuffer$S",function(sb,replacement){
+Clazz.newMeth(C$,"appendReplacement$StringBuffer$S",function(sb,replacement){
   this.processedRepl=this.processReplacement$S(replacement);
   sb.append$S(this.charSeq.subSequence$I$I(this.appendPos,this.start()));
   sb.append$S(this.processedRepl);
@@ -115,7 +115,7 @@ Clazz.newMethod$(C$,"appendReplacement$StringBuffer$S",function(sb,replacement){
   return this;
 });
 
-Clazz.newMethod$(C$,"processReplacement$S",function(replacement){
+Clazz.newMeth(C$,"processReplacement$S",function(replacement){
   if(this.replacement!=null&&this.replacement.equals$O(replacement)){
     if(this.replacementParts==null){
       return this.processedRepl;
@@ -145,7 +145,7 @@ Clazz.newMethod$(C$,"processReplacement$S",function(replacement){
       }else{
         if((repl[index]).charCodeAt(0)==('$').charCodeAt(0)){
           if(this.replacementParts==null){
-            this.replacementParts=Clazz.newArray$(String, 0);
+            this.replacementParts=Clazz.array(String, 0);
           }
           try{
             var gr=Integer.parseInt$S(String.instantialize(repl,++index,1));
@@ -153,7 +153,7 @@ Clazz.newMethod$(C$,"processReplacement$S",function(replacement){
               this.replacementParts[this.replacementParts.length]=res.subSequence$I$I(replacementPos,res.length$());
               replacementPos=res.length$();
             }
-            this.replacementParts[this.replacementParts.length]= Clazz.new(Clazz.incl$("java.util.regex.Matcher$1").c$,[this]);
+            this.replacementParts[this.replacementParts.length]= Clazz.new(Clazz.load("java.util.regex.Matcher$1").c$,[this]);
             var group=this.group(gr);
             replacementPos+=group.length;
             res.append$S(group);
@@ -186,7 +186,7 @@ Clazz.newMethod$(C$,"processReplacement$S",function(replacement){
 });
 
 
-Clazz.newMethod$(C$,"region$I$I",function(leftBound,rightBound){
+Clazz.newMeth(C$,"region$I$I",function(leftBound,rightBound){
   if(leftBound>rightBound||leftBound<0||rightBound<0||leftBound>this.charSeq.length$()||rightBound>this.charSeq.length$()){
     throw Clazz.new(IndexOutOfBoundsException.c$, [leftBound+" is out of bound of "+rightBound]);
   }
@@ -198,11 +198,11 @@ Clazz.newMethod$(C$,"region$I$I",function(leftBound,rightBound){
   return this;
 });
 
-Clazz.newMethod$(C$,"appendTail$StringBuffer",function(sb){
+Clazz.newMeth(C$,"appendTail$StringBuffer",function(sb){
   return sb.append$S(this.charSeq.subSequence(this.appendPos,this.charSeq.length$()));
 },"StringBuffer");
 
-Clazz.newMethod$(C$,"replaceFirst$S",function(replacement){
+Clazz.newMeth(C$,"replaceFirst$S",function(replacement){
   this.reset();
   if(this.find()){
     var sb=new StringBuffer();
@@ -212,7 +212,7 @@ Clazz.newMethod$(C$,"replaceFirst$S",function(replacement){
   return this.charSeq.toString();
 });
 
-Clazz.newMethod$(C$,"replaceAll$S", function(replacement){
+Clazz.newMeth(C$,"replaceAll$S", function(replacement){
   var sb=new StringBuffer();
   this.reset();
   while(this.find()){
@@ -221,22 +221,22 @@ Clazz.newMethod$(C$,"replaceAll$S", function(replacement){
   return this.appendTail$StringBuffer(sb).toString();
 });
 
-Clazz.newMethod$(C$,"pattern",function(){
+Clazz.newMeth(C$,"pattern",function(){
   return this.pat;
 });
 
-Clazz.newMethod$(C$,"group$I",function(groupIndex){
+Clazz.newMeth(C$,"group$I",function(groupIndex){
   if(this.results==null||groupIndex<0||groupIndex>this.results.length){
     return null;
   }
   return this.results[groupIndex];
 });
 
-Clazz.newMethod$(C$,"group",function(){
+Clazz.newMeth(C$,"group",function(){
   return this.group(0);
 });
 
-Clazz.newMethod$(C$,"matches",function(){
+Clazz.newMeth(C$,"matches",function(){
   // UB: the find must match the complete input and not modify the RE object
   var old_lastIndex = this.pat.regexp.lastIndex;
   try {
@@ -249,7 +249,7 @@ Clazz.newMethod$(C$,"matches",function(){
   }
 });
 
-Clazz.newMethod$(C$,"quoteReplacement$S",function(string){
+Clazz.newMeth(C$,"quoteReplacement$S",function(string){
   if(string.indexOf('\\') < 0 && string.indexOf ('$')<0) ; // '))
     return string;
   var res= Clazz.new(StringBuffer, [string.length*2]);
@@ -272,52 +272,52 @@ Clazz.newMethod$(C$,"quoteReplacement$S",function(string){
   return res.toString();
 }, 1);
 
-Clazz.newMethod$(C$,"lookingAt",function(){
+Clazz.newMeth(C$,"lookingAt",function(){
   return false;
 });
 
-Clazz.newMethod$(C$,"groupCount",function(){
+Clazz.newMeth(C$,"groupCount",function(){
   return this.results==null?0:this.results.length;
 });
 
 
-Clazz.newMethod$(C$,"toMatchResult",function(){
+Clazz.newMeth(C$,"toMatchResult",function(){
   return this;
 });
 
-Clazz.newMethod$(C$,"useAnchoringBounds$Z",function(value){
+Clazz.newMeth(C$,"useAnchoringBounds$Z",function(value){
   return this;
 });
 
-Clazz.newMethod$(C$,"hasAnchoringBounds",function(){
+Clazz.newMeth(C$,"hasAnchoringBounds",function(){
   return false;
 });
 
-Clazz.newMethod$(C$,"useTransparentBounds$Z",function(value){
+Clazz.newMeth(C$,"useTransparentBounds$Z",function(value){
   return this;
 });
 
-Clazz.newMethod$(C$,"hasTransparentBounds",function(){
+Clazz.newMeth(C$,"hasTransparentBounds",function(){
   return false;
 });
 
-Clazz.newMethod$(C$,"regionStart",function(){
+Clazz.newMeth(C$,"regionStart",function(){
   return this.leftBound;
 });
 
-Clazz.newMethod$(C$,"regionEnd",function(){
+Clazz.newMeth(C$,"regionEnd",function(){
   return this.rightBound;
 });
 
-Clazz.newMethod$(C$,"requireEnd",function(){
+Clazz.newMeth(C$,"requireEnd",function(){
   return false;
 });
 
-Clazz.newMethod$(C$,"hitEnd",function(){
+Clazz.newMeth(C$,"hitEnd",function(){
   return false;
 });
 
-Clazz.newMethod$(C$,"usePattern$java.util_regex_Pattern",function(pat){
+Clazz.newMeth(C$,"usePattern$java.util_regex_Pattern",function(pat){
   if(pat==null){
     throw new IllegalArgumentException("Empty pattern!");
   }

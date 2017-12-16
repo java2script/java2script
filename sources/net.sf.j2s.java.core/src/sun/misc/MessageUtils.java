@@ -135,18 +135,9 @@ public class MessageUtils {
     // Print a stack trace to stderr
     //
     public static void where() {
-    	/**
-    	 * @j2sNative
-    	 * 
-    	 * System.out.println(Clazz.getStackTrace());
-    	 * 
-    	 */
-    	{
-        Throwable t = new Throwable();
-        StackTraceElement[] es = t.getStackTrace();
-        for (int i = 1; i < es.length; i++)
-            toStderr("\t" + es[i].toString() + "\n");
-    	}
-    }
-
+	    Throwable t = new Throwable();
+	    StackTraceElement[] es = t.getStackTrace();
+	    for (int i = 1; i < es.length; i++)
+	        toStderr("\t" + es[i].toString() + "\n");
+	}
 }

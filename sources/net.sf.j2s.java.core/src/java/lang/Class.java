@@ -924,7 +924,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @since JDK1.1
 	 */
 	public Class<?> getComponentType() {
-		// Array classes have this method added via Clazz.arrayClass$()
+		// Array classes have this method added via Clazz.array()
 		return null;
 	}
 
@@ -2223,7 +2223,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	        var fname = baseFolder;
 	        if (fname.charAt(fname.length - 1) != '/')
 	          fname += "/";
-	        var map = Clazz.allPackage;
+	        var map = Clazz._allPackage;
 	        for (var i = 0; i < pkgs.length - 1; i++) {
 	          if (!(map = map[pkgs[i]]))
 	            break;

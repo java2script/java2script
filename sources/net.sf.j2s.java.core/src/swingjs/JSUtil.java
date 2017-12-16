@@ -273,7 +273,7 @@ public class JSUtil {
 		/**
 		 * @j2sNative
 		 * 
-		 *            return Clazz.getStackTrace(n);
+		 *            return Clazz._getStackTrace(n);
 		 */
 		{
 			return null;
@@ -284,7 +284,7 @@ public class JSUtil {
 		/**
 		 * @j2sNative
 		 * 
-		 *            return Clazz.getStackTrace();
+		 *            return Clazz._getStackTrace();
 		 */
 		{
 			return null;

@@ -1,28 +1,28 @@
 // BH 9/24/2017 4:21:05 PM new syntax for decorateAsClass
 (function() {
-Clazz.newPackage$("java.util.regex");
+Clazz.newPackage("java.util.regex");
 
-var C$=Clazz.newClass$(java.util.regex,"Pattern",function(){
-  Clazz.newInstance$(this,arguments);
+var C$=Clazz.newClass(java.util.regex,"Pattern",function(){
+  Clazz.newInstance(this,arguments);
 });
 
 C$.$clinit$ = function() {delete C$.$clinit$;Clazz.load(C$, 1);}
 
-Clazz.newMethod$(C$,"$init$", function(){
+Clazz.newMeth(C$,"$init$", function(){
   this.$flags=0;
   this.regexp=null;
 }, 1);
 
-Clazz.newMethod$(C$,"$c", function(){
+Clazz.newMeth(C$,"$c", function(){
   C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$(C$,"matcher$CharSequence", function(cs){
+Clazz.newMeth(C$,"matcher$CharSequence", function(cs){
   return Clazz.new(Clazz.load("java.util.regex.Matcher").c$$java_util_regex_Pattern$CharSequence, [this, cs]);
 });
 
-Clazz.newMethod$(C$,"split$CharSequence$I", function(input,limit){
-  var res=Clazz.newArray$(String);
+Clazz.newMeth(C$,"split$CharSequence$I", function(input,limit){
+  var res=Clazz.array(String);
   var mat=this.matcher$CharSequence(input);
   var index=0;
   var curPos=0;
@@ -45,27 +45,27 @@ Clazz.newMethod$(C$,"split$CharSequence$I", function(input,limit){
   return res;
 });
 
-Clazz.newMethod$(C$,"split$CharSequence", function(input){
+Clazz.newMeth(C$,"split$CharSequence", function(input){
   return this.split(input,0);
 });
 
-Clazz.newMethod$(C$,"pattern", function(){
+Clazz.newMeth(C$,"pattern", function(){
   return this.regexp.source;
 });
 
-Clazz.newMethod$(C$,"toString", function(){
+Clazz.newMeth(C$,"toString", function(){
   return this.pattern();
 });
 
-Clazz.newMethod$(C$,"flags", function(){
+Clazz.newMeth(C$,"flags", function(){
   return this.$flags;
 });
 
-Clazz.newMethod$(C$,"compile$S",function(pattern){
+Clazz.newMeth(C$,"compile$S",function(pattern){
   return java.util.regex.Pattern.compile$S$I(pattern,0);
 }, 1);
 
-Clazz.newMethod$(C$,"compile$S$I",function(regex,flags){
+Clazz.newMeth(C$,"compile$S$I",function(regex,flags){
   if((flags!=0)&&((flags|239)!=239)){
     throw new IllegalArgumentException("Illegal flags");
   }
@@ -81,11 +81,11 @@ Clazz.newMethod$(C$,"compile$S$I",function(regex,flags){
   return pattern;
 }, 1);
 
-Clazz.newMethod$(C$,"matches$S$CharSequence",function(regex,input){
+Clazz.newMeth(C$,"matches$S$CharSequence",function(regex,input){
   return java.util.regex.Pattern.compile(regex).matcher(input).matches();
 }, 1);
 
-Clazz.newMethod$(C$,"quote$S",function(s){
+Clazz.newMeth(C$,"quote$S",function(s){
   var sb=new StringBuffer().append("\\Q");
   var apos=0;
   var k;
