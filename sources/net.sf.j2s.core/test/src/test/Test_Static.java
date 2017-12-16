@@ -27,10 +27,7 @@ class Test_Static extends Test_ implements Test_int3, Test_int2, Test_int1 {
 	private static int y;
 	private static char c = 'c';
 	private static int innerI = Test_Class_Inner.i;
-	static String s;
 	static {
-		
-		
 		System.out.println(Test_int1.int1);
 		System.out.println(Test_int2.int2);
 		System.out.println(Test_int3.int3);
@@ -44,7 +41,11 @@ class Test_Static extends Test_ implements Test_int3, Test_int2, Test_int1 {
 		y = Test_Array.y;
 		y = x;
 		Test_Boolean.main(null);
+		t = "setFromStaticInitializer";
+		s = "setFromStaticInitializer";
 	}
+
+	public static String s, t = null;
 
 	private void test1() {};
 	private void test() {
@@ -53,6 +54,9 @@ class Test_Static extends Test_ implements Test_int3, Test_int2, Test_int1 {
 	
 	@SuppressWarnings("static-access")
 	public static void main(String[] args) {
+		
+		assert(t == null);
+		assert s == "setFromStaticInitializer";
 		
 		  /**
 		   * @j2sNative
@@ -78,7 +82,7 @@ class Test_Static extends Test_ implements Test_int3, Test_int2, Test_int1 {
 		new Test_Static().b ^= true;
 		new Test_Static().y++;
 		new Test_Static().s += "test1" + c++ + 3 + 5.5f + c + 5.5;
-		assert (s.equals("nulltest1c35.5d5.5"));
+		assert (s.equals("setFromStaticInitializertest1c35.5d5.5"));
 
 		int i = 3 + y + (new Test_Static().y++);
 

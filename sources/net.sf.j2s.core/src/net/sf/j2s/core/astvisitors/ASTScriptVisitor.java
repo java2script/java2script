@@ -1284,8 +1284,6 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			trailingBuffer = new TrailingBuffer();
 		}
 
-		boolean hasSuperclass = hasSuperClass(binding);
-
 		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			BodyDeclaration element = (BodyDeclaration) iter.next();
 			boolean isField = element instanceof FieldDeclaration;
@@ -1301,8 +1299,9 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			if (isField || element instanceof Initializer) {
 				if ((isInterface || isStatic(element)) && !checkj2sIgnore(element)) {
 					lstStatic.add(element);
-					if (isField && hasSuperclass)
+					if (isField)
 						addFieldDeclaration((FieldDeclaration) element, FIELD_DECL_STATIC_DEFAULTS);
+						
 				}
 			} else if (!havePrivateMethods && element instanceof MethodDeclaration) {
 				if (Modifier.isPrivate(((MethodDeclaration) element).resolveBinding().getModifiers())) {
@@ -1313,18 +1312,17 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		}
 		if (lstStatic.size() > 0 || hasDependents) {
 			pt = buffer.length();
-			buffer.append("\r\nC$.$clinit$ = function() {Clazz.load(C$, 1);\r\n");
 			boolean haveDeclarations = false;
+			buffer.append("\r\nC$.$clinit$ = function() {Clazz.load(C$, 1);\r\n");
 			for (int i = lstStatic.size(); --i >= 0;) {
 				BodyDeclaration element = lstStatic.remove(0);
 				if (element instanceof Initializer) {
 					element.accept(this);
 					buffer.append(";\r\n");
 					haveDeclarations = true;
-					continue;
-				}
-				if (addFieldDeclaration((FieldDeclaration) element, FIELD_DECL_STATIC_NONDEFAULT))
+				} else if (addFieldDeclaration((FieldDeclaration) element, FIELD_DECL_STATIC_NONDEFAULT)) {
 					haveDeclarations = true;
+				}
 			}
 			if (haveDeclarations || hasDependents)
 				buffer.append("}\r\n");
@@ -1542,7 +1540,8 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		for (Iterator<?> iter = fragments.iterator(); iter.hasNext();) {
 			VariableDeclarationFragment fragment = (VariableDeclarationFragment) iter.next();
 			Expression initializer = fragment.getInitializer();
-			if (isFinal &&  VariableAdapter.getConstantValue(initializer) != null)
+			if (isFinal ? VariableAdapter.getConstantValue(initializer) != null
+					: isStatic && initializer == null && !needDefault)
 				continue;
 			int len = buffer.length();
 			String prefix = (isStatic ? "C$." : "this.")
@@ -1550,10 +1549,10 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			buffer.append(prefix);
 			buffer.append(" = ");
 			int len1 = buffer.length();
+			
 			if (initializer == null || needDefault) {
 				// Route default for this to the $init0$ buffer if nonstatic, or straight to the class if static
-				// if static and not initialized or nonstatic and there is a
-				// superclass
+				// if static and not initialized
 
 				buffer.append(code == null ? "null" : getPrimitiveDefault(code));
 				buffer.append(";\r\n");

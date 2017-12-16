@@ -40,13 +40,13 @@ public class JSUtil {
 		J2S = j2sself;
 	}
 
-	public static J2SInterface J2S;
-	private static Hashtable<String, Object> fileCache;
-	private static boolean useCache = true;
 	/**
 	 * Derived from J2S._checkLoad, which can be set in html page
 	 */
 	public static boolean debugging;
+	public static J2SInterface J2S;
+	private static Hashtable<String, Object> fileCache;
+	private static boolean useCache = true;
 
 	
 	private static Map<String, Object> getFileCache() {

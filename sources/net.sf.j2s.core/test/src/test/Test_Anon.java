@@ -9,7 +9,7 @@ class Test_Anon extends Test_ {
 
 	private static boolean b = !(true);
 	private static int x = -(3);
-	private static final Enumeration<?> EMPTY_ENUMERATION = new Enumeration<Object>() {
+	public static final Enumeration<?> EMPTY_ENUMERATION = new Enumeration<Object>() {
         public boolean hasMoreElements() {
             return isAnonymous();
         }
@@ -25,6 +25,8 @@ class Test_Anon extends Test_ {
     };
 
 
+  public Test_Anon() {}
+  
   public static void main(String[] args) { 
 	  int z = 3;
 	  boolean a = !(Test_Class.Test_Class_Inner.i == 3);

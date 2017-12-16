@@ -2,6 +2,8 @@ package test;
 
 @SuppressWarnings("rawtypes")
 class Test_Class extends Test_ {
+	
+	static String s = "test";
 
 	static class Test_Class_Inner {
 		static Integer i = 5;
@@ -95,6 +97,9 @@ class Test_Class extends Test_ {
 
 			new Test_Class().new B().testB();
 			Class<?> cl;
+			ClassLoader loader = test.Test_Anon.class.getClassLoader();
+			Object x = Class.forName("test.Test_Anon", false, loader).getConstructor().newInstance();
+			
 			cl = Class.forName("test.Test_Class");
 			cl.getConstructor(String.class, String.class).newInstance(
 					new Object[] { "test1", "test2" });

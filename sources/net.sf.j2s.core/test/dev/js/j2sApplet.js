@@ -781,7 +781,7 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 		return data.getBytes();
 	// ArrayBuffer assumed here
 	data = new Uint8Array(data);
-  var b = (Clazz.newArray$ ? Clazz.newArray$(Byte.TYPE, data.length) : Clazz.newByteArray(data.length, 0));
+  var b = Clazz.array(Byte.TYPE, data.length);
 	for (var i = data.length; --i >= 0;)
 		b[i] = data[i];
 	return b;
@@ -898,7 +898,7 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
       return Clazz.load("javajs.util.Base64").decodeBase64$S(s.substring(8));
     }
     // not UTF-8
-		var b = (Clazz.newArray$ ? Clazz.newArray$(Byte.TYPE, s.length) : Clazz.newByteArray(s.length, 0));
+		var b = Clazz.array(Byte.TYPE, s.length);
 		for (var i = s.length; --i >= 0;)
 			b[i] = s.charCodeAt(i) & 0xFF;
 		return b;
@@ -1995,7 +1995,7 @@ J2S.Cache.put = function(filename, data) {
 		// false is from Repaintmanager.requestRepaintAndWait()
 		// called from apiPlatform Display.repaint()
 
-		//alert("_repaint " + Clazz.getStackTrace())
+		//alert("_repaint " + Clazz._getStackTrace())
 		if (!applet || !applet._appletPanel)return;
 
 		// asNewThread = false;
