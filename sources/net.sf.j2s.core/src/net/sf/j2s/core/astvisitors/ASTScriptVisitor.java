@@ -70,11 +70,11 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import net.sf.j2s.core.adapters.FinalVariable;
-import net.sf.j2s.core.adapters.J2SMapAdapter;
-import net.sf.j2s.core.adapters.MethodAdapter;
-import net.sf.j2s.core.adapters.TypeAdapter;
-import net.sf.j2s.core.adapters.VariableAdapter;
+import net.sf.j2s.core.astvisitors.adapters.FinalVariable;
+import net.sf.j2s.core.astvisitors.adapters.J2SMapAdapter;
+import net.sf.j2s.core.astvisitors.adapters.MethodAdapter;
+import net.sf.j2s.core.astvisitors.adapters.TypeAdapter;
+import net.sf.j2s.core.astvisitors.adapters.VariableAdapter;
 
 // TODO: static calls to static methods do not trigger "musts" dependency
 // BH 9/10/2017 -- adds full byte, short, and int distinction using class-level local fields $b$, $s$, and $i$, which are IntXArray[1]. (See ASTKeywordVisitor)
@@ -807,11 +807,11 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		// BH if this is a call to super.clone() and there is no superclass, or
 		// the superclass is Object,
 		// then we need to invoke Clazz.clone(this) directly instead of calling
-		// C$.superClazz.clone()
+		// C$.superclazz.clone()
 		if ("clone".equals(name) && getSuperclassNameQualified(mBinding.getDeclaringClass()) == null) {
 			buffer.append("Clazz.clone(this)");
 		} else {
-			buffer.append("C$.superClazz.prototype." + name + ".apply(this, ");
+			buffer.append("C$.superclazz.prototype." + name + ".apply(this, ");
 			buffer.append("[");
 			addMethodParameterList(node.arguments(), mBinding, false, null, null, false);
 			buffer.append("])");
@@ -1361,7 +1361,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 				String buf = buffer.substring(len);
 				buffer.setLength(len);
 				buffer.append("\r\nClazz.newMeth(C$, '$init0$', function () {\r\n");
-				buffer.append("var c;if((c = C$.superClazz) && (c = c.$init0$))c.apply(this);\r\n");
+				buffer.append("var c;if((c = C$.superclazz) && (c = c.$init0$))c.apply(this);\r\n");
 				buffer.append(init0Buffer);
 				buffer.append("}, 1);\r\n");
 				buffer.append(buf);
@@ -1691,7 +1691,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			buffer.append("Clazz.super(C$, this,1);\r\n");
 			return;
 		} 
-		buffer.append(getJ2SQualifiedName("C$.superClazz.c$", null, node.resolveConstructorBinding(), null, false));
+		buffer.append(getJ2SQualifiedName("C$.superclazz.c$", null, node.resolveConstructorBinding(), null, false));
 		buffer.append(".apply(this");
 		addMethodParameterList(node.arguments(), methodDeclaration, true, ", [", "]", false);
 		buffer.append(");\r\n");

@@ -11,7 +11,7 @@
  *       bug "inline method - doesn't handle implicit cast" (see
  *       https://bugs.eclipse.org/bugs/show_bug.cgi?id=24941).
  *******************************************************************************/
-package net.sf.j2s.core.adapters;
+package net.sf.j2s.core.astvisitors.adapters;
 
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;

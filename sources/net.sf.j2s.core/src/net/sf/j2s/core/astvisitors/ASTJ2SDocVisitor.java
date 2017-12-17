@@ -31,8 +31,8 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 
-import net.sf.j2s.core.adapters.Bindings;
-//import net.sf.j2s.core.adapters.ExtendedAdapter;
+import net.sf.j2s.core.astvisitors.adapters.Bindings;
+//import net.sf.j2s.core.astvisitors.adapters.ExtendedAdapter;
 
 /**
  * This level of Visitor focuses on dealing with 

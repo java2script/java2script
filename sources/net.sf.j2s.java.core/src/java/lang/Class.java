@@ -750,7 +750,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		/**
 		 * @j2sNative
 		 * 
-		 * return Clazz.getClass(this.$clazz$.superClazz);
+		 * return Clazz.getClass(this.$clazz$.superclazz);
 		 */
 		{
 		return null;

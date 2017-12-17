@@ -1,0 +1,246 @@
+<project name="JSmol" default="toJs" basedir=".">
+ 
+   <property name="site.path" value="site/swingjs" />
+
+   <target name="toJs" id="toJs">
+  			
+  	<!-- create a NON svn local directory only containing JS files
+  	
+  	<echo>Deleting the site directory.</echo>
+   	 	<delete quiet="true" dir="site" />
+    -->
+   	
+   	<!-- make core files -->
+ 
+   	<echo>creating and compressing core files - warnings are OK; "does not exist" is trouble</echo>
+
+   	<!-- note: any changes in these next sections must be reflected also
+   	             in package.js -->
+   	
+    <property name="javaCoreAppletFiles" value="
+    	java/applet/Applet.js
+    	java/applet/AppletContext.js
+    	java/applet/AppletStub.js
+    	java/awt/ActiveEvent.js
+    	java/awt/Adjustable.js
+    	java/awt/AWTEvent.js
+    	java/awt/AWTEventMulticaster.js
+    	java/awt/BasicStroke.js
+    	java/awt/BorderLayout.js
+    	java/awt/Color.js
+    	java/awt/Component.js
+    	java/awt/ComponentOrientation.js
+    	java/awt/Container.js
+    	java/awt/Dimension.js
+    	java/awt/event/ActionListener.js
+    	java/awt/event/AdjustmentListener.js
+    	java/awt/event/AWTEventListener.js
+    	java/awt/event/ComponentEvent.js
+    	java/awt/event/ComponentListener.js
+    	java/awt/event/ContainerListener.js
+    	java/awt/event/FocusListener.js
+    	java/awt/event/HierarchyBoundsListener.js
+    	java/awt/event/HierarchyListener.js
+    	java/awt/event/InputEvent.js
+    	java/awt/event/InputMethodListener.js
+    	java/awt/event/InvocationEvent.js
+    	java/awt/event/ItemListener.js
+    	java/awt/event/KeyListener.js
+    	java/awt/event/MouseEvent.js
+    	java/awt/event/MouseListener.js
+    	java/awt/event/MouseMotionListener.js
+    	java/awt/event/MouseWheelListener.js
+    	java/awt/event/TextListener.js
+    	java/awt/event/WindowFocusListener.js
+    	java/awt/event/WindowListener.js
+    	java/awt/event/WindowStateListener.js
+    	java/awt/EventDispatchThread.js
+    	java/awt/EventFilter.js
+    	java/awt/EventQueue.js
+    	java/awt/EventQueueItem.js
+    	java/awt/FlowLayout.js
+    	java/awt/Font.js
+    	java/awt/font/FontRenderContext.js
+    	java/awt/FontMetrics.js
+    	java/awt/geom/AffineTransform.js
+    	java/awt/geom/Dimension2D.js
+    	java/awt/geom/Rectangle2D.js
+    	java/awt/geom/RectangularShape.js
+    	java/awt/GraphicsConfiguration.js
+    	java/awt/GraphicsDevice.js
+    	java/awt/GraphicsEnvironment.js
+    	java/awt/image/ImageObserver.js
+    	java/awt/Insets.js
+    	java/awt/ItemSelectable.js
+    	java/awt/JSComponent.js
+    	java/awt/LayoutManager.js
+    	java/awt/LayoutManager2.js
+    	java/awt/LightweightDispatcher.js
+    	java/awt/Paint.js
+    	java/awt/Panel.js
+    	java/awt/peer/ComponentPeer.js
+    	java/awt/peer/ContainerPeer.js
+    	java/awt/peer/LightweightPeer.js
+    	java/awt/Queue.js
+    	java/awt/Rectangle.js
+    	java/awt/RenderingHints.js
+    	java/awt/Shape.js
+    	java/awt/Stroke.js
+    	java/awt/Toolkit.js
+    	java/awt/Transparency.js
+    	java/beans/ChangeListenerMap.js
+    	java/beans/PropertyChangeEvent.js
+    	java/beans/PropertyChangeListener.js
+    	java/beans/PropertyChangeSupport.js
+    	java/lang/AbstractStringBuilder.js
+    	java/lang/Class.js
+    	java/lang/Enum.js
+    	java/lang/StringBuffer.js
+    	java/lang/Thread.js
+    	java/lang/ThreadGroup.js
+    	java/net/URL.js
+    	java/net/URLStreamHandlerFactory.js
+    	java/util/AbstractCollection.js
+    	java/util/AbstractList.js
+    	java/util/AbstractMap.js
+    	java/util/AbstractSet.js
+    	java/util/ArrayList.js
+    	java/util/Arrays.js
+    	java/util/Collections.js
+    	java/util/Dictionary.js
+    	java/util/EventListener.js
+    	java/util/EventObject.js
+    	java/util/HashMap.js
+    	java/util/HashSet.js
+    	java/util/Hashtable.js
+    	java/util/IdentityHashMap.js
+    	java/util/Locale.js
+    	java/util/MapEntry.js
+    	javajs/api/JSFunction.js
+    	javajs/util/AjaxURLStreamHandlerFactory.js
+    	javajs/util/AU.js
+    	javajs/util/JSThread.js
+    	javajs/util/Lst.js
+    	javajs/util/PT.js
+    	javax/swing/AbstractButton.js
+    	javax/swing/ActionMap.js
+    	javax/swing/ArrayTable.js
+    	javax/swing/border/AbstractBorder.js
+    	javax/swing/border/BevelBorder.js
+    	javax/swing/border/Border.js
+    	javax/swing/border/EmptyBorder.js
+    	javax/swing/border/EtchedBorder.js
+    	javax/swing/BorderFactory.js
+    	javax/swing/BoundedRangeModel.js
+    	javax/swing/ButtonModel.js
+    	javax/swing/DefaultBoundedRangeModel.js
+    	javax/swing/DefaultButtonModel.js
+    	javax/swing/event/AncestorListener.js
+    	javax/swing/event/ChangeListener.js
+    	javax/swing/event/EventListenerList.js
+    	javax/swing/JApplet.js
+    	javax/swing/JButton.js
+    	javax/swing/JComponent.js
+    	javax/swing/JLabel.js
+    	javax/swing/JLayeredPane.js
+    	javax/swing/JPanel.js
+    	javax/swing/JRootPane.js
+    	javax/swing/JScrollBar.js
+    	javax/swing/LookAndFeel.js
+    	javax/swing/plaf/ActionMapUIResource.js
+    	javax/swing/plaf/BorderUIResource.js
+    	javax/swing/plaf/ColorUIResource.js
+    	javax/swing/plaf/ComponentUI.js
+    	javax/swing/plaf/DimensionUIResource.js
+    	javax/swing/plaf/FontUIResource.js
+    	javax/swing/plaf/InsetsUIResource.js
+    	javax/swing/plaf/UIResource.js
+    	javax/swing/RepaintManager.js
+    	javax/swing/RootPaneContainer.js
+    	javax/swing/SwingConstants.js
+    	javax/swing/SwingPaintEventDispatcher.js
+    	javax/swing/SwingUtilities.js
+    	javax/swing/UIDefaults.js
+    	javax/swing/UIManager.js
+    	sun/awt/AppContext.js
+    	sun/awt/AWTAutoShutdown.js
+    	sun/awt/ComponentFactory.js
+    	sun/awt/MostRecentKeyValue.js
+    	sun/awt/MostRecentThreadAppContext.js
+    	sun/awt/PaintEventDispatcher.js
+    	sun/awt/PostEventQueue.js
+    	sun/awt/RequestFocusController.js
+    	sun/awt/SunToolkit.js
+    	sun/awt/WindowClosingListener.js
+    	sun/awt/WindowClosingSupport.js
+    	sun/swing/SwingLazyValue.js
+    	swingjs/api/Interface.js
+    	swingjs/api/js/DOMNode.js
+    	swingjs/api/js/HTML5CanvasContext2D.js
+    	swingjs/api/js/JSInterface.js
+    	swingjs/jquery/JQueryUI.js
+    	swingjs/JSApp.js
+    	swingjs/JSAppletThread.js
+    	swingjs/JSAppletViewer.js
+    	swingjs/JSFontMetrics.js
+    	swingjs/JSFrameViewer.js
+    	swingjs/JSGraphics2D.js
+    	swingjs/JSGraphicsConfiguration.js
+    	swingjs/JSGraphicsEnvironment.js
+    	swingjs/JSMouse.js
+    	swingjs/JSNullComponentPeer.js
+    	swingjs/JSScreenDevice.js
+    	swingjs/JSThreadGroup.js
+    	swingjs/JSToolkit.js
+    	swingjs/JSUtil.js
+    	swingjs/plaf/ButtonListener.js
+    	swingjs/plaf/HTML5LookAndFeel.js
+    	swingjs/plaf/JSButtonUI.js
+    	swingjs/plaf/JSComponentUI.js
+    	swingjs/plaf/JSEventHandler.js
+    	swingjs/plaf/JSLabelUI.js
+    	swingjs/plaf/JSLayeredPaneUI.js
+    	swingjs/plaf/JSLightweightUI.js
+    	swingjs/plaf/JSPanelUI.js
+    	swingjs/plaf/JSRootPaneUI.js
+    	swingjs/plaf/JSScrollBarUI.js
+    	swingjs/plaf/JSSliderUI.js
+    	swingjs/plaf/LazyActionMap.js
+    	swingjs/plaf/Resizer.js
+    	" />
+
+   	
+    <antcall target="call-core">
+        <param name="call-core.name" value="applet" />
+        <param name="call-core.list" value="
+         	${javaCoreAppletFiles}
+        	" />
+    </antcall>
+  </target>
+
+
+	  <target name="call-core" id="call-core">
+	   	<echo>......Creating core${call-core.name}.js</echo>
+	   	<concat destfile="${site.path}/js/core/tmp.js">
+	   		<filelist dir="${site.path}/j2s" files="${call-core.list}" />
+	   	</concat> 
+
+	  	<replace dir="${site.path}/js/core" includes="tmp.js" token="Clazz." value="Clazz_"/>
+	  	<replace dir="${site.path}/js/core" includes="tmp.js" token="Clazz__" value="Clazz._"/>
+	   	<echo>......Generating ${site.path}/j2s/core/core${call-core.name}.js</echo> 	
+	   	<concat destfile="${site.path}/j2s/core/core${call-core.name}.js"><filelist dir="${site.path}/js" files="
+	   		core/coretop2.js
+	   		core/tmp.js
+	   		core/corebottom2.js
+	   		" />
+	   	</concat>
+	   	<echo>......Generating ${site.path}/j2s/core/core${call-core.name}.z.js</echo> 	
+	   	<java jar="jars/closure_compiler.jar" fork="true" dir="${site.path}/j2s/core" failonerror="false">
+	   		<arg line="--js core${call-core.name}.js --js_output_file core${call-core.name}.z.js" />
+	    </java>
+	 	<delete quiet="true" file="${site.path}/js/core/tmp.js" />
+	  </target>
+
+		
+	
+</project>

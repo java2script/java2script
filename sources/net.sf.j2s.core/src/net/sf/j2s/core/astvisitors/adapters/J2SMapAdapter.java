@@ -9,7 +9,7 @@
  *     Zhou Renjian - initial API and implementation
  *******************************************************************************/
 
-package net.sf.j2s.core.adapters;
+package net.sf.j2s.core.astvisitors.adapters;
 
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;

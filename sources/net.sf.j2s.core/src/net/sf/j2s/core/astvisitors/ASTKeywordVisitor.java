@@ -63,13 +63,13 @@ import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import net.sf.j2s.core.adapters.Bindings;
-//import net.sf.j2s.core.adapters.ExtendedAdapter;
-import net.sf.j2s.core.adapters.FieldAdapter;
-import net.sf.j2s.core.adapters.FinalVariable;
-import net.sf.j2s.core.adapters.J2SMapAdapter;
-import net.sf.j2s.core.adapters.TypeAdapter;
-import net.sf.j2s.core.adapters.VariableAdapter;
+import net.sf.j2s.core.astvisitors.adapters.Bindings;
+//import net.sf.j2s.core.astvisitors.adapters.ExtendedAdapter;
+import net.sf.j2s.core.astvisitors.adapters.FieldAdapter;
+import net.sf.j2s.core.astvisitors.adapters.FinalVariable;
+import net.sf.j2s.core.astvisitors.adapters.J2SMapAdapter;
+import net.sf.j2s.core.astvisitors.adapters.TypeAdapter;
+import net.sf.j2s.core.astvisitors.adapters.VariableAdapter;
 
 //BH 11/18/2017 -- adds full name-qualified support for generics, including generic methods   
 //BH 9/10/2017 -- adds full byte, short, and int distinction using class-level local fields $b$, $s$, and $i$, which are IntXArray[1].

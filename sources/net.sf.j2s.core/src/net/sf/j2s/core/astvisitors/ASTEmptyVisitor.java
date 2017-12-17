@@ -101,11 +101,11 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
-import net.sf.j2s.core.adapters.AbstractPluginAdapter;
-import net.sf.j2s.core.adapters.FinalVariable;
-import net.sf.j2s.core.adapters.J2SMapAdapter;
-import net.sf.j2s.core.adapters.TypeAdapter;
-import net.sf.j2s.core.adapters.VariableAdapter;
+import net.sf.j2s.core.astvisitors.adapters.AbstractPluginAdapter;
+import net.sf.j2s.core.astvisitors.adapters.FinalVariable;
+import net.sf.j2s.core.astvisitors.adapters.J2SMapAdapter;
+import net.sf.j2s.core.astvisitors.adapters.TypeAdapter;
+import net.sf.j2s.core.astvisitors.adapters.VariableAdapter;
 
 /**
  * This empty visitor just gives a way for debugging. That is to say, in 
