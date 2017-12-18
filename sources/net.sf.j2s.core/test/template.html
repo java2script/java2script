@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html><title>SwingJS test _NAME_</title>
+<html><title>TEST SwingJS test _NAME_</title>
 <head><meta charset="utf-8" />
 <script src="swingjs/swingjs2.js"></script>
 <script>
-if (!self.Clazz)alert('swingjs2.js was not found')
+if (!self.SwingJS)alert('swingjs/swingjs2.js was not found')
 Info = {
   code: _CODE_,
   main: _MAIN_,
 	width: 850,
 	height: 550,
 	serverURL: 'http://chemapps.stolaf.edu/jmol/jsmol/php/jsmol.php',
-	j2sPath: '.',
+	j2sPath: 'swingjs/j2s',
 	console:'sysoutdiv',
 	allowjavascript: true
 }
@@ -22,7 +22,7 @@ SwingJS.getApplet('testApplet', Info)
 </script>
 <div style="position:absolute;left:900px;top:30px;width:600px;height:300px;">
 <div id=sysoutdiv style="border:1px solid green;width:100%;height:95%;overflow:auto"></div>
-This is System.out. <a href="javascript:testApplet._clearConsole()">clear it</a> 
+This is System.out. <a href="javascript:testApplet._clearConsole()">clear it</a>
 </div>
 </body>
 </html>
