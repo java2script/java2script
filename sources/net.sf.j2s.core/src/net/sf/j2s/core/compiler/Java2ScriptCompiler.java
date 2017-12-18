@@ -326,7 +326,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		+"  main: _MAIN_,\n"
 		+"	width: 850,\n"
 		+"	height: 550,\n"
-		+"	serverURL: 'http://chemapps.stolaf.edu/jmol/jsmol/php/jsmol.php',\n"
+		+"	serverURL: 'https://chemapps.stolaf.edu/jmol/jsmol/php/jsmol.php',\n"
 		+"	j2sPath: 'swingjs/j2s',\n"
 		+"	console:'sysoutdiv',\n"
 		+"	allowjavascript: true\n"

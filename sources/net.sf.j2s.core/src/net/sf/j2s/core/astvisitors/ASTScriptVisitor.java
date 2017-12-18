@@ -330,7 +330,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		String className = TypeAdapter.getTypeStringName(node.getType());
 		String fqName = getShortenedQualifiedName(className);
 		if ("Object".equals(fqName)) {
-			buffer.append(" Clazz.new()"); 
+			buffer.append(" Clazz.new_()"); 
 			return false;
 		}
 		String prefix = null, postfix = null;
@@ -1090,7 +1090,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		// arg1 is the package name
 		// arg2 is the full class name in quotes
 		// arg3 is the class definition function, C$, which is called in
-		// Clazz.new().
+		// Clazz.new_().
 		// arg4 is the superclass
 		// arg5 is the superinterface(s)
 		// arg6 is the type: anonymous(1), local(2), or absent
@@ -1441,8 +1441,8 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	}
 
 	/**
-	 * For Clazz.newClass$ we want an array if there is an inner class
-	 * so that the outer class is guarranteed to be loaded first.
+	 * For Clazz.newClass we want an array if there is an inner class
+	 * so that the outer class is guaranteed to be loaded first.
 	 * 
 	 * @param className
 	 * @return
@@ -1598,7 +1598,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 	/**
 	 * 
-	 * generate the Clazz.new(...) call for an inner class.
+	 * generate the Clazz.new_(...) call for an inner class.
 	 * 
 	 * @param node
 	 * @param innerName
@@ -1664,7 +1664,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			// We allow use of a default constructor using new foo().
 			// Here we always add a [] argument to a default constuctor, as null
 			// will indicate
-			// that we did not use Clazz.new and instead called new foo()
+			// that we did not use Clazz.new_ and instead called new foo()
 			// directly.
 			if (prefix != null) {
 				buffer.append(prefix);
@@ -1688,7 +1688,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	private void addSuperConstructor(SuperConstructorInvocation node, IMethodBinding methodDeclaration) {
 		if (node == null) {
 			// default constructor
-			buffer.append("Clazz.super(C$, this,1);\r\n");
+			buffer.append("Clazz.super_(C$, this,1);\r\n");
 			return;
 		} 
 		buffer.append(getJ2SQualifiedName("C$.superclazz.c$", null, node.resolveConstructorBinding(), null, false));
@@ -1772,14 +1772,14 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	}
 
 	/**
-	 * Start a new Clazz.new() call for class creation or inner classes. Uses Clazz.load for dynamic loading
+	 * Start a new Clazz.new_() call for class creation or inner classes. Uses Clazz.load for dynamic loading
 	 * 
 	 * @param className
 	 * @param dotMethodName
 	 * @return true if this is the default constructor
 	 */
 	private void openNew(String className, IMethodBinding mbinding) {
-		buffer.append("Clazz.new(");
+		buffer.append("Clazz.new_(");
 		String name = assureQualifiedName(className);
 		if (!name.equals("C$"))
 			name = getQualifiedStaticName(null, className, true, true, false);

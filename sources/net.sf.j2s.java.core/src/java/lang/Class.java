@@ -1748,7 +1748,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		/**
 		 * @j2sNative
 		 * 
-		 *     return Clazz.new(java.lang.reflect.Method.c$$Class$S$ClassA$Class$ClassA$I, [this, name,
+		 *     return Clazz.new_(java.lang.reflect.Method.c$$Class$S$ClassA$Class$ClassA$I, [this, name,
 		 *     	                    paramTypes, java.lang.Void, [], 0]);
 		 */
 		{
@@ -1816,7 +1816,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		/**
 		 * @j2sNative
 		 * 
-		 * return Clazz.new(java.lang.reflect.Constructor.c$$Class$ClassA$ClassA$I, [this, parameterTypes || [], [], java.lang.reflect.Modifier.PUBLIC]);
+		 * return Clazz.new_(java.lang.reflect.Constructor.c$$Class$ClassA$ClassA$I, [this, parameterTypes || [], [], java.lang.reflect.Modifier.PUBLIC]);
 		 */
 		{
 			return null;
@@ -2192,6 +2192,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 *             If {@code name} is {@code null}
 	 * @since JDK1.1
 	 */
+	
 	public InputStream getResourceAsStream(String name) {
 		// allows an optional second argument to be a base directory in JavaScript
 	    @SuppressWarnings("unused")
@@ -2237,11 +2238,11 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	    try {
 	      if (fname.indexOf(":/") < 0) {
 	        var d = document.location.href.split("?")[0].split("/");
-	        d[d.length - 1] = fname;
-	        fname = d.join("/");
+        	d[d.length - 1] = fname;
+        	fname = d.join("/");
 	      }
-	      Clazz.loadClass("java.net.URL");
-	      url = Clazz.new(java.net.URL.c$$S,[fname]);
+	      Clazz.load("java.net.URL");
+	      url = Clazz.new_(java.net.URL.c$$S,[fname]);
 	    } catch (e) {
 	      return null;
 	    }
@@ -2254,9 +2255,9 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	      return null;
 	            
 	    var bytes = (data.__BYTESIZE == 1 ? data : J2S._strToBytes(data));
-	    Clazz.loadClass("java.io.BufferedInputStream");
-	    Clazz.loadClass("java.io.ByteArrayInputStream");
-	    var is = Clazz.new(java.io.BufferedInputStream.c$$java_io_InputStream, [Clazz.new(java.io.ByteArrayInputStream.c$$BA, [bytes])]); 
+	    Clazz.load("java.io.BufferedInputStream");
+	    Clazz.load("java.io.ByteArrayInputStream");
+	    var is = Clazz.new_(java.io.BufferedInputStream.c$$java_io_InputStream, [Clazz.new_(java.io.ByteArrayInputStream.c$$BA, [bytes])]); 
 	    is.url = url;
 	    url._streamData = is;
 	    return is;
@@ -2808,13 +2809,13 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	    for (var attr in p) {
 	      if (typeof p[attr] == "function" && !p[attr].__CLASS_NAME__ && p[attr] != this.$clazz$[attr] && p[attr].exClazz == this.$clazz$) {
 	        // there are polynormical methods. 
-	        ms.push(Clazz.new(Clazz.load('java.lang.reflect.Method').c$$Class$S$ClassA$Class$ClassA$I,  [this, attr, [], java.lang.Void, [], 1]));
+	        ms.push(Clazz.new_(Clazz.load('java.lang.reflect.Method').c$$Class$S$ClassA$Class$ClassA$I,  [this, attr, [], java.lang.Void, [], 1]));
 	      }
 	    }
 	    p = this.$clazz$;
 	    for (var attr in p) {
 	      if (typeof p[attr] == "function" && !p[attr].__CLASS_NAME__  && p[attr].exClazz == this.$clazz$) {
-	        ms.push(Clazz.new(Clazz.load('java.lang.reflect.Method').c$$Class$S$ClassA$Class$ClassA$I,  [this, attr, [], java.lang.Void, [], 1 | 8]));
+	        ms.push(Clazz.new_(Clazz.load('java.lang.reflect.Method').c$$Class$S$ClassA$Class$ClassA$I,  [this, attr, [], java.lang.Void, [], 1 | 8]));
 	      }
 	    }
 		 */

@@ -18,7 +18,7 @@ Clazz.newMeth(C$,"$c", function(){
 }, 1);
 
 Clazz.newMeth(C$,"matcher$CharSequence", function(cs){
-  return Clazz.new(Clazz.load("java.util.regex.Matcher").c$$java_util_regex_Pattern$CharSequence, [this, cs]);
+  return Clazz.new_(Clazz.load("java.util.regex.Matcher").c$$java_util_regex_Pattern$CharSequence, [this, cs]);
 });
 
 Clazz.newMeth(C$,"split$CharSequence$I", function(input,limit){

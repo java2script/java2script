@@ -207,11 +207,75 @@
     	swingjs/plaf/JSSliderUI.js
     	swingjs/plaf/LazyActionMap.js
     	swingjs/plaf/Resizer.js
+
+    	java/awt/color/ColorSpace.js
+    	java/awt/Cursor.js
+    	java/awt/Dialog.js
+    	java/awt/event/AdjustmentEvent.js
+    	java/awt/event/FocusEvent.js
+    	java/awt/event/ItemEvent.js
+    	java/awt/event/WindowAdapter.js
+    	java/awt/event/WindowEvent.js
+    	java/awt/Frame.js
+    	java/awt/geom/Point2D.js
+    	java/awt/GraphicsCallback.js
+    	java/awt/peer/FramePeer.js
+    	java/awt/peer/WindowPeer.js
+    	java/awt/Point.js
+    	java/awt/Window.js
+    	java/lang/Enum.js
+    	java/util/Random.js
+    	java/util/Vector.js
+    	javax/swing/AbstractListModel.js
+    	javax/swing/AncestorNotifier.js
+    	javax/swing/BoxLayout.js
+    	javax/swing/ButtonGroup.js
+    	javax/swing/ClientPropertyKey.js
+    	javax/swing/ComboBoxModel.js
+    	javax/swing/DefaultComboBoxModel.js
+    	javax/swing/DefaultSingleSelectionModel.js
+    	javax/swing/event/AncestorEvent.js
+    	javax/swing/event/ChangeEvent.js
+    	javax/swing/event/ListDataEvent.js
+    	javax/swing/event/ListDataListener.js
+    	javax/swing/JCheckBox.js
+    	javax/swing/JCheckBoxMenuItem.js
+    	javax/swing/JComboBox.js
+    	javax/swing/JFrame.js
+    	javax/swing/JMenu.js
+    	javax/swing/JMenuBar.js
+    	javax/swing/JMenuItem.js
+    	javax/swing/JPopupMenu.js
+    	javax/swing/JRadioButtonMenuItem.js
+    	javax/swing/JSeparator.js
+    	javax/swing/JToggleButton.js
+    	javax/swing/KeyboardManager.js
+    	javax/swing/ListModel.js
+    	javax/swing/MenuElement.js
+    	javax/swing/MutableComboBoxModel.js
+    	javax/swing/SingleSelectionModel.js
+    	javax/swing/SizeRequirements.js
+    	javax/swing/WindowConstants.js
+    	swingjs/plaf/DefaultMenuLayout.js
+    	swingjs/plaf/JSCheckBoxMenuItemUI.js
+    	swingjs/plaf/JSCheckBoxUI.js
+    	swingjs/plaf/JSComboBoxUI.js
+    	swingjs/plaf/JSFrameUI.js
+    	swingjs/plaf/JSMenuBarUI.js
+    	swingjs/plaf/JSMenuItemUI.js
+    	swingjs/plaf/JSMenuUI.js
+    	swingjs/plaf/JSPopupMenuSeparatorUI.js
+    	swingjs/plaf/JSPopupMenuUI.js
+    	swingjs/plaf/JSRadioButtonMenuItemUI.js
+    	swingjs/plaf/JSRadioButtonUI.js
+    	swingjs/plaf/JSSeparatorUI.js
+    	swingjs/plaf/JSWindowUI.js
+
     	" />
 
    	
     <antcall target="call-core">
-        <param name="call-core.name" value="applet" />
+        <param name="call-core.name" value="swingjs" />
         <param name="call-core.list" value="
          	${javaCoreAppletFiles}
         	" />

@@ -221,7 +221,7 @@ public class File
     }
 
     private String resolve(String path, String child) {
-    	if (!path.endsWith("/"))
+    	if (child.length() > 0 && !path.endsWith("/"))
     			path += "/";
     	return path + child;
 		}
@@ -236,7 +236,7 @@ public class File
      *          If the <code>pathname</code> argument is <code>null</code>
      */
     public File(String pathname) {
-    	this(null, pathname, 0);
+    	this(pathname, "");
 //        if (pathname == null) {
 //            throw new NullPointerException();
 //        }
@@ -277,7 +277,21 @@ public class File
      *          If <code>child</code> is <code>null</code>
      */
     public File(String parent, String child) {
-    	this(parent, child, 0);
+		if (child == null) {
+			throw new NullPointerException();
+		}
+		if (parent != null) {
+			if (parent.equals("")) {
+				this.path = resolve(".", child); // fs.resolve(fs.getDefaultParent(),
+				// fs.normalize(child));
+			} else {
+				this.path = resolve(parent, child);// fs.resolve(fs.normalize(parent),
+				// fs.normalize(child));
+			}
+		} else {
+			this.path = resolve(".", child);// normalize(child);
+		}
+		this.prefixLength = this.path.lastIndexOf("/") + 1; // 1efixLength(this.path);
     }
 
     /**
@@ -306,7 +320,7 @@ public class File
      *          If <code>child</code> is <code>null</code>
      */
     public File(File parent, String child) {
-    	this(parent == null ? null : parent.getPath(), child, 0);
+    	this(parent == null ? null : parent.getPath(), child);
 //        if (child == null) {
 //            throw new NullPointerException();
 //        }
@@ -393,25 +407,6 @@ public class File
 	//
 
 	/* -- Path-component accessors -- */
-
-	public File(String parent, String child, int junk) {
-		if (child == null) {
-			throw new NullPointerException();
-		}
-		if (parent != null) {
-			if (parent.equals("")) {
-				this.path = resolve(".", child); // fs.resolve(fs.getDefaultParent(),
-				// fs.normalize(child));
-			} else {
-				this.path = resolve(parent, child);// fs.resolve(fs.normalize(parent),
-				// fs.normalize(child));
-			}
-		} else {
-			this.path = resolve(".", child);// normalize(child);
-		}
-		this.prefixLength = this.path.lastIndexOf("/") + 1; // 1efixLength(this.path);
-
-	}
 
 		/**
      * Returns the name of the file or directory denoted by this abstract

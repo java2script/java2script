@@ -153,7 +153,7 @@ Clazz.newMeth(C$,"processReplacement$S",function(replacement){
               this.replacementParts[this.replacementParts.length]=res.subSequence$I$I(replacementPos,res.length$());
               replacementPos=res.length$();
             }
-            this.replacementParts[this.replacementParts.length]= Clazz.new(Clazz.load("java.util.regex.Matcher$1").c$,[this]);
+            this.replacementParts[this.replacementParts.length]= Clazz.new_(Clazz.load("java.util.regex.Matcher$1").c$,[this]);
             var group=this.group(gr);
             replacementPos+=group.length;
             res.append$S(group);
@@ -188,7 +188,7 @@ Clazz.newMeth(C$,"processReplacement$S",function(replacement){
 
 Clazz.newMeth(C$,"region$I$I",function(leftBound,rightBound){
   if(leftBound>rightBound||leftBound<0||rightBound<0||leftBound>this.charSeq.length$()||rightBound>this.charSeq.length$()){
-    throw Clazz.new(IndexOutOfBoundsException.c$, [leftBound+" is out of bound of "+rightBound]);
+    throw Clazz.new_(IndexOutOfBoundsException.c$, [leftBound+" is out of bound of "+rightBound]);
   }
   this.leftBound=leftBound;
   this.rightBound=rightBound;
@@ -252,7 +252,7 @@ Clazz.newMeth(C$,"matches",function(){
 Clazz.newMeth(C$,"quoteReplacement$S",function(string){
   if(string.indexOf('\\') < 0 && string.indexOf ('$')<0) ; // '))
     return string;
-  var res= Clazz.new(StringBuffer, [string.length*2]);
+  var res= Clazz.new_(StringBuffer, [string.length*2]);
   var ch;
   var len=string.length;
   for(var i=0;i<len;i++){

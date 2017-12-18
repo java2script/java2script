@@ -1042,7 +1042,7 @@ public final class Array {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			return Clazz.newArray$(componentType, length);
+		 * 			return Clazz.array(componentType, length);
 		 */
 		{
 			return null;
@@ -1064,7 +1064,7 @@ public final class Array {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			return Clazz.newArray$(componentType, dimensions);
+		 * 			return Clazz.array(componentType, dimensions);
 		 * 
 		 */
 
