@@ -1353,7 +1353,6 @@ class DiffractionFrame extends Frame implements ComponentListener,
 		// Lines. Only odd indices used.
 		double lineXLocations[];
 		double lineYLocations[];
-
 		int rectCount;
 		double rects[][];
 

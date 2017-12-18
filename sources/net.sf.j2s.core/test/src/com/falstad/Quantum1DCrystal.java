@@ -56,8 +56,8 @@ import javax.swing.JRadioButtonMenuItem;
 
 import a2s.Applet;
 
-import Jama.Matrix;
-import Jama.EigenvalueDecomposition;
+import gov.nist.jama.Matrix;
+import gov.nist.jama.EigenvalueDecomposition;
 
 class Quantum1DCrystalCanvas extends Canvas {
     Quantum1DCrystalFrame pg;

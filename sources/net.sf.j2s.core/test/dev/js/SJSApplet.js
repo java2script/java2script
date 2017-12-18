@@ -224,7 +224,7 @@ if (typeof(SwingJS) == "undefined") {
 		this._viewerOptions = viewerOptions;
     // for now assigning this._applet here instead of in readyCallback
     Clazz.loadClass("swingjs.JSAppletViewer");
-		this._appletPanel = Clazz.new(swingjs.JSAppletViewer.c$$java_util_Hashtable, [viewerOptions]);
+		this._appletPanel = Clazz.new_(swingjs.JSAppletViewer.c$$java_util_Hashtable, [viewerOptions]);
     this._appletPanel.start();
 	}
 	

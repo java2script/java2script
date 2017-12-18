@@ -12353,17 +12353,19 @@ J2S.Cache.put = function(filename, data) {
     // apps. So this will take some thinking. But the basic idea is that
     // core file to load is 
      
-    type = type.toLowerCase().split(".")[0]; // package name only 
-
-    // return if type is already part of the set.    
-		if (__coreSet.join("").indexOf(type) >= 0) return;
-    
-    // create a concatenated lower-case name for a core file that includes
-    // all Java applets on the page
-    
-		__coreSet.push(type);
-		__coreSet.sort();
-		J2S._coreFiles = [path + "/core/core" + __coreSet.join("") + ".z.js" ];
+    if (type) {
+      type = type.toLowerCase().split(".")[0]; // package name only 
+  
+      // return if type is already part of the set.    
+  		if (__coreSet.join("").indexOf(type) >= 0) return;
+      
+      // create a concatenated lower-case name for a core file that includes
+      // all Java applets on the page
+      
+  		__coreSet.push(type);
+  		__coreSet.sort();
+  		J2S._coreFiles = [path + "/core/core" + __coreSet.join("") + ".z.js" ];
+    }
 		if (more && (more = more.split(" ")))
 			for (var i = 0; i < more.length; i++)
 				if (__coreMore.join("").indexOf(more[i]) < 0)
@@ -12555,7 +12557,7 @@ J2S.Cache.put = function(filename, data) {
         if (applet.__Info.main && applet.__Info.headless) {
           cl.main(applet.__Info.args || []);
         } else {
-        	var viewerOptions = Clazz.new(Clazz.load("java.util.Hashtable"));
+        	var viewerOptions = Clazz.new_(Clazz.load("java.util.Hashtable"));
           viewerOptions.put = viewerOptions.put$TK$TV;
         	J2S._setAppletParams(applet._availableParams, viewerOptions, applet.__Info, true);
         	viewerOptions.put("name", applet._id);// + "_object");
@@ -12858,8 +12860,7 @@ J2S._setDraggable = function(tag, targetOrArray) {
     pageX0 = xy.x;
     pageY0 = xy.y;
 		return false;
-  };
-
+  },
 	drag = function(ev) {
   // we will move the frame's parent node and take the frame along with it
   	if (tag.isDragging && J2S._dmouseOwner == tag) {
@@ -12871,8 +12872,7 @@ J2S._setDraggable = function(tag, targetOrArray) {
   			$(target()).css({ top: y + 'px', left: x + 'px' })
       }
 		}
-	};
-  
+	}, 
 	up = function(ev) {
 	if (J2S._dmouseOwner == tag) {
 			tag.isDragging = false;
@@ -12968,6 +12968,8 @@ J2S._getResourcePath = function(path, isJavaPath) {
 // latest author: Bob Hanson, St. Olaf College, hansonr@stolaf.edu
 
 // NOTES by Bob Hanson
+
+// Google closure compiler cannot handle Clazz.new or Clazz.super
 
 // BH 12/16/2017 5:53:47 PM refactored; removed older unused parts
 // BH 11/16/2017 10:52:53 PM adds method name aliasing for generics; adds String.contains$CharSequence(cs)
@@ -13157,7 +13159,7 @@ Clazz.assert = function(clazz, obj, tf, msg) {
     if (msg == null)
       throw new AssertionError();
     else
-      throw Clazz.new(AssertionError.c$$S, [msg]);
+      throw Clazz.new_(AssertionError.c$$S, [msg]);
   }
 }
 
@@ -13281,14 +13283,14 @@ Clazz.load = function(cName, isFinalize) {
 /**
  * Create a new instance of a class. 
  * Accepts:
- *   a string  Clazz.new("java.util.Hashtable")
+ *   a string  Clazz.new_("java.util.Hashtable")
  *   a clazz (has .__CLASS_NAME__ and a default contructor)
  *   a specific class constructor such as c$$S
  *   a constructor from a one class (c, anonymous constructor) and a class to create, cl   
  *   
  */
   
-Clazz.new = function(c, args, cl) {
+Clazz.new_ = function(c, args, cl) {
   if (!c)
     return new Clazz._O();
   var haveArgs = !!args;
@@ -13299,7 +13301,7 @@ Clazz.new = function(c, args, cl) {
   if (c.__CLASS_NAME__ && c.c$) 
     c = c.c$;
   else if (typeof c == "string")
-    return Clazz.new(Clazz.load(c));
+    return Clazz.new_(Clazz.load(c));
     
   // an inner class will attach arguments to the arguments returned
   // Integer will be passed as is here, without c.exClazz, or cl
@@ -13363,7 +13365,7 @@ Clazz.newClass = function (prefix, name, clazz, clazzSuper, interfacez, type) {
 };
 
 Clazz.newEnumConst = function(vals, c, enumName, enumOrdinal, args, cl) {
-  var o = Clazz.new(c, args, cl);
+  var o = Clazz.new_(c, args, cl);
   o.$name = enumName;
   o.$ordinal = enumOrdinal;
   var clazzEnum = c.exClazz;
@@ -13388,6 +13390,8 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
       return this;
     };
   }
+
+  clazz && clazz.$clinit$ && clazz.$clinit$();
   
   objThis.__JSID__ = ++_jsid;
 
@@ -13443,7 +13447,7 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
       if (!isNew && b[key])
         break;
       b[key] = outerObj; 
-    } while ((clazz = clazz.superClazz));
+    } while ((clazz = clazz.superclazz));
   }
   // add a flag to disallow any other same-class use of this map.
   b["$ " + innerName] = 1;
@@ -13458,7 +13462,7 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
 /**
 		// arg1 is the package name
 		// arg2 is the full class name in quotes
-		// arg3 is the class definition function, C$, which is called in Clazz.new().
+		// arg3 is the class definition function, C$, which is called in Clazz.new_().
 		// arg4 is the superclass
 		// arg5 is the superinterface(s)
 		// arg6 is the type:  anonymous(1), local(2), or absent
@@ -13510,10 +13514,10 @@ Clazz.newPackage = function (pkgName) {
   return Clazz.lastPackage = pkg;
 };
 
-Clazz.super = function(cl, obj, andInit) {
-  if (cl.superClazz && cl.superClazz.c$) {
+Clazz.super_ = Clazz.super = function(cl, obj, andInit) {
+  if (cl.superclazz && cl.superclazz.c$) {
     // added [] here to account for the possibility of vararg default constructor
-    cl.superClazz.c$.apply(obj, [[]]);
+    cl.superclazz.c$.apply(obj, [[]]);
   }
   if (andInit) {
     cl.$init$.apply(obj);
@@ -14066,7 +14070,7 @@ var excludeSuper = function(o) {
       || o == "prototype" 
       || o == "__CLASS_NAME__" 
       || o == "__CLASS_NAME$__" 
-      || o == "superClazz"
+      || o == "superclazz"
       || o == "implementz"
 }
 
@@ -14089,7 +14093,7 @@ var finalizeClazz = function(clazz, qname, bname, type, isNumber) {
   (type == 2) && (clazz.__LOCAL = clazz.prototype.__LOCAL = 1);
   
   if (!isNumber && type != 0)
-    Clazz.newMeth(clazz, '$init0$', function(){var c;if ((c=clazz.superClazz) && (c = c.$init0$))c.apply(this);}, 1);
+    Clazz.newMeth(clazz, '$init0$', function(){var c;if ((c=clazz.superclazz) && (c = c.$init0$))c.apply(this);}, 1);
   extendPrototype(clazz);
 
 };
@@ -14162,7 +14166,7 @@ var equalsOrExtendsLevel = function (clazzThis, clazzAncestor) {
         if (equalsOrExtendsLevel(impls[i], clazzAncestor))
           return true;
     }
-    clazzThis = clazzThis.superClazz;
+    clazzThis = clazzThis.superclazz;
   }
   return false;
 };
@@ -14170,8 +14174,7 @@ var equalsOrExtendsLevel = function (clazzThis, clazzAncestor) {
 var isInstanceOf = function (clazzTarget, clazzBase, isTgtStr, isBaseStr) {
   if (clazzTarget === clazzBase)
     return true;
-  if (clazzBase.$load$)
-    Clazz.load(clazzBase,1);
+  clazzBase.$clinit$ && clazzBase.$clinit$(); 
   if (isTgtStr && ("void" == clazzTarget || "unknown" == clazzTarget))
     return false;
   if (isBaseStr && ("void" == clazzBase || "unknown" == clazzBase))
@@ -14335,7 +14338,7 @@ var inheritArgs = new (function(){return {"$J2SNOCREATE$":true}})();
  */
 var setSuperclass = function(clazzThis, clazzSuper){
 
- clazzThis.superClazz = clazzSuper || Clazz._O;
+ clazzThis.superclazz = clazzSuper || Clazz._O;
   if (clazzSuper) {  
     copyStatics(clazzSuper, clazzThis, false);
     var p = clazzThis.prototype;
@@ -14775,10 +14778,10 @@ _Loader.loadClass = _Loader.prototype.loadClass = function (name, onLoaded, forc
    if (typeof onLoaded == "boolean")
     return evalType(name);
 
-  System.out.println("loadClass " + name)
+  //System.out.println("loadClass " + name)
   var path = _Loader.getClasspathFor(name);
 
-    loadScript(path);//(n, n.path, n.requiredBy, false, onLoaded ? function(_loadClass){ isLoadingEntryClass = bSave; onLoaded()}: null);
+    Clazz.loadScript(path);//(n, n.path, n.requiredBy, false, onLoaded ? function(_loadClass){ isLoadingEntryClass = bSave; onLoaded()}: null);
 }
 
 /* private */
@@ -14887,10 +14890,10 @@ _Loader.getClasspathFor = function (clazz, forRoot, ext) {
  *
  */
 /* public */
-_Loader.onScriptLoading = function (file){window.console.log("onscriptload " + file);};
+_Loader.onScriptLoading = function (file){System.out.println("Classloader.onscriptloading " + file);};
 
 /* public */
-_Loader.onScriptLoaded = function (file, isError){};
+_Loader.onScriptLoaded = function (file, isError, data){};
 
 /* public */
 _Loader.onScriptInitialized = function (file){}; // not implemented
@@ -14979,7 +14982,7 @@ Clazz._4Name = function(clazzName, applet, state, asClazz, initialize) {
 Clazz.currentPath= "";
 
 
-var loadScript = function(file) {
+Clazz.loadScript = function(file) {
 
   Clazz.currentPath = file;
   //loadedScripts[file] = true;
@@ -14995,9 +14998,9 @@ var loadScript = function(file) {
     _Loader.onScriptLoading(file);
     data = J2S._getFileData(file);
     evaluate(file, data);
-    _Loader.onScriptLoaded(file, false);
+    _Loader.onScriptLoaded(file, null, data);
   }catch(e) {
-    _Loader.onScriptLoaded(file, e);
+    _Loader.onScriptLoaded(file, e, data);
     var s = ""+e;
     if (data.indexOf("Error") >= 0)
       s = data;
@@ -15595,16 +15598,11 @@ if (!window["java.registered"])
 
   if (window["java.packaged"]) return;
   window["java.packaged"] = true;
-
-  //if (!J2S._isAsync) {
-    for (var i = 0; i < J2S._coreFiles.length; i++)
-      ClazzLoader.loadZJar(J2S._coreFiles[i], ClazzLoader.runtimeKeyClass);
-  //}
     
 
 }) (Clazz._Loader);
 window["java.registered"] = true;
-  
+
 ///////////////// special definitions of standard Java class methods ///////////
 
 var C$, m$ = Clazz.newMeth;
@@ -15752,11 +15750,11 @@ function(i) {
 Integer.parseIntRadix=m$(Integer,"parseIntRadix",
 function(s,radix){
 if(s==null){
-throw Clazz.new(NumberFormatException.c$$S, ["null"]);
+throw Clazz.new_(NumberFormatException.c$$S, ["null"]);
 }if(radix<2){
-throw Clazz.new(NumberFormatException.c$$S, ["radix "+radix+" less than Character.MIN_RADIX (2)"]);
+throw Clazz.new_(NumberFormatException.c$$S, ["radix "+radix+" less than Character.MIN_RADIX (2)"]);
 }if(radix>36){
-throw Clazz.new(NumberFormatException.c$$S, ["radix "+radix+" greater than Character.MAX_RADIX (16)"]);
+throw Clazz.new_(NumberFormatException.c$$S, ["radix "+radix+" greater than Character.MAX_RADIX (16)"]);
 }
 if (radix == 10) {
   for (var i = s.length; --i >= 0;) {
@@ -15764,12 +15762,12 @@ if (radix == 10) {
     if (c >= 48 && c <= 57) 
       continue;
     if (i > 0 || c != 43 && c != 45)
-      throw Clazz.new(NumberFormatException.c$$S, ["Not a Number : "+s]);
+      throw Clazz.new_(NumberFormatException.c$$S, ["Not a Number : "+s]);
   }
 }
 var i=parseInt(s,radix);
 if(isNaN(i)){
-throw Clazz.new(NumberFormatException.c$$S, ["Not a Number : "+s]);
+throw Clazz.new_(NumberFormatException.c$$S, ["Not a Number : "+s]);
 }
 return i;
 });
@@ -15781,7 +15779,7 @@ return Integer.parseIntRadix(s,10);
 
 Integer.$valueOf=m$(Integer,"$valueOf",
 function(s){
-  return Clazz.new(Integer.c$, [s]);
+  return Clazz.new_(Integer.c$, [s]);
 });
 
 Integer.prototype.equals = m$(Integer,"equals$O",
@@ -15815,8 +15813,8 @@ return (radix == 8 ? parseInt(n, 8) : n);
 m$(Integer,"decode", function(n){
   n = Integer.decodeRaw(n);
   if (isNaN(n) || n < Integer.MIN_VALUE|| n > Integer.MAX_VALUE)
-  throw Clazz.new(NumberFormatException.c$$S,["Invalid Integer"]);
-  return Clazz.new(Integer.c$, [n]);
+  throw Clazz.new_(NumberFormatException.c$$S,["Invalid Integer"]);
+  return Clazz.new_(Integer.c$, [n]);
 }, 1);
 
 m$(Integer,"hashCode",
@@ -15858,7 +15856,7 @@ function(s,radix){
 
 Long.$valueOf=m$(Long,"$valueOf",
 function(s){
-return Clazz.new(Long.c$, [s]);
+return Clazz.new_(Long.c$, [s]);
 });
 
 Long.prototype.equals = m$(Long,"equals$O",
@@ -15880,8 +15878,8 @@ m$(Long,"decode",
 function(n){
   n = Integer.decodeRaw(n);
   if (isNaN(n))
-    throw Clazz.new(NumberFormatException.c$$S, ["Invalid Long"]);
-  return Clazz.new(Long.c$, [n]);
+    throw Clazz.new_(NumberFormatException.c$$S, ["Invalid Long"]);
+  return Clazz.new_(Long.c$, [n]);
 }, 1);
 
 Clazz._setDeclared("java.lang.Short", java.lang.Short = Short = function(){
@@ -15924,7 +15922,7 @@ return Short.parseShortRadix (s, 10);
 
 Short.$valueOf = m$(Short, "$valueOf",
 function (s) {
-  return Clazz.new(Short.c$, [s]);
+  return Clazz.new_(Short.c$, [s]);
 });
 
 Short.prototype.$equals = m$(Short, "equals$",
@@ -15946,8 +15944,8 @@ m$(Short, "decode",
 function(n){
   n = Integer.decodeRaw(n);
   if (isNaN(n) || n < -32768|| n > 32767)
-    throw Clazz.new(NumberFormatException.c$$S, ["Invalid Short"]);
-  return Clazz.new(Short.c$, [n]);
+    throw Clazz.new_(NumberFormatException.c$$S, ["Invalid Short"]);
+  return Clazz.new_(Short.c$, [n]);
 }, 1);
 
 Clazz._setDeclared("java.lang.Byte", java.lang.Byte=Byte=function(){
@@ -15990,7 +15988,7 @@ return Byte.parseByte(s,10);
 
 Byte.$valueOf=m$(Byte, "$valueOf",
 function (s) {
-  return Clazz.new(Byte.c$, [s]);
+  return Clazz.new_(Byte.c$, [s]);
 });
 
 Byte.prototype.equals = m$(Byte,"equals$O",
@@ -16012,8 +16010,8 @@ m$(Byte,"decode",
 function(n){
   n = Integer.decodeRaw(n);
   if (isNaN(n) || n < -128|| n > 127)
-    throw Clazz.new(NumberFormatException.c$$S, ["Invalid Byte"]);
-  return Clazz.new(Byte.c$, [n]);
+    throw Clazz.new_(NumberFormatException.c$$S, ["Invalid Byte"]);
+  return Clazz.new_(Byte.c$, [n]);
 }, 1);
 
 Clazz._floatToString = function(f) {
@@ -16063,19 +16061,19 @@ Float.NaN=Number.NaN;
 Float.parseFloat=m$(Float,"parseFloat",
 function(s){
 if(s==null){
-throw Clazz.new(NumberFormatException.c$$S, ["null"]);
+throw Clazz.new_(NumberFormatException.c$$S, ["null"]);
 }
 if (typeof s == "number")return s;  // important -- typeof NaN is "number" and is OK here
 var floatVal=Number(s);
 if(isNaN(floatVal)){
-throw Clazz.new(NumberFormatException.c$$S, ["Not a Number : "+s]);
+throw Clazz.new_(NumberFormatException.c$$S, ["Not a Number : "+s]);
 }
 return floatVal;
 });
 
 Float.$valueOf=m$(Float,"$valueOf",
 function(s){
-return Clazz.new(Float.c$, [s]);
+return Clazz.new_(Float.c$, [s]);
 });
 
 Float.isNaN=m$(Float,"isNaN",
@@ -16134,19 +16132,19 @@ return!Number.isFinite(arguments.length == 1 ? num : this.valueOf());
 Double.parseDouble=m$(Double,"parseDouble",
 function(s){
 if(s==null){
-  throw Clazz.new(NumberFormatException.c$$S, ["null"]);
+  throw Clazz.new_(NumberFormatException.c$$S, ["null"]);
 }
 if (typeof s == "number")return s;  // important -- typeof NaN is "number" and is OK here
 var doubleVal=Number(s);
 if(isNaN(doubleVal)){
-throw Clazz.new(NumberFormatException.c$$S, ["Not a Number : "+s]);
+throw Clazz.new_(NumberFormatException.c$$S, ["Not a Number : "+s]);
 }
 return doubleVal;
 });
 
 Double.$valueOf=m$(Double,"$valueOf",
 function(v){
-return Clazz.new(Double.c$, [v]);
+return Clazz.new_(Double.c$, [v]);
 });
 
 Double.prototype.equals = m$(Double,"equals$O",
@@ -16226,11 +16224,11 @@ return(typeof name == "string" ? name.equalsIgnoreCase$S("true") : !!name);
 // so instead we have to do a lexical switch from "new Boolean" to "Boolean.from"
 m$(Boolean,"from",
 function(name){
-return Clazz.new(Boolean.c$, [typeof name == "string" ? name.equalsIgnoreCase$S("true") : !!name]);
+return Clazz.new_(Boolean.c$, [typeof name == "string" ? name.equalsIgnoreCase$S("true") : !!name]);
 }, 1);
 
-Boolean.TRUE=Boolean.prototype.TRUE=Clazz.new(Boolean.c$, [true]);
-Boolean.FALSE=Boolean.prototype.FALSE=Clazz.new(Boolean.c$, [false]);
+Boolean.TRUE=Boolean.prototype.TRUE=Clazz.new_(Boolean.c$, [true]);
+Boolean.FALSE=Boolean.prototype.FALSE=Clazz.new_(Boolean.c$, [false]);
 //Boolean.TYPE=Boolean.prototype.TYPE=Boolean;
 
 Clazz._Encoding={
@@ -17081,8 +17079,8 @@ return (this.cause === this ? null : this.cause);
 });
 
 m$(C$, 'initCause$Throwable', function (cause) {
-if (this.cause !== this) throw Clazz.new(IllegalStateException.c$$S,["Can't overwrite cause"]);
-if (cause === this) throw Clazz.new(IllegalArgumentException.c$$S,["Self-causation not permitted"]);
+if (this.cause !== this) throw Clazz.new_(IllegalStateException.c$$S,["Can't overwrite cause"]);
+if (cause === this) throw Clazz.new_(IllegalArgumentException.c$$S,["Self-causation not permitted"]);
 this.cause = cause;
 return this;
 });
@@ -17137,7 +17135,7 @@ while (index < 20 && caller != null) {
   if (superCaller.exClazz != null) {
     nativeClazz = superCaller.exClazz;
   }
-  var st =Clazz.new(StackTraceElement.c$, [
+  var st =Clazz.new_(StackTraceElement.c$, [
     ((nativeClazz != null && nativeClazz.__CLASS_NAME__.length != 0) ?
     nativeClazz.__CLASS_NAME__ : "anonymous"),
     ((superCaller.exName == null) ? "anonymous" : superCaller.exName),
@@ -17147,7 +17145,7 @@ while (index < 20 && caller != null) {
   for (var i = 0; i < callerList.length; i++) {
     if (callerList[i] == superCaller) {
       // ... stack Information lost as recursive invocation existed ...
-      var st =Clazz.new(StackTraceElement.c$, ["lost", "missing", null, -3]);
+      var st =Clazz.new_(StackTraceElement.c$, ["lost", "missing", null, -3]);
       st.nativeClazz = null;
       this.stackTrace.push(st);
       index = 100;
@@ -17165,7 +17163,7 @@ return this;
 
 Clazz.newMeth(C$, 'setStackTrace$StackTraceElementA', function (stackTrace) {
 var defensiveCopy = stackTrace.clone ();
-for (var i = 0; i < defensiveCopy.length; i++) if (defensiveCopy[i] == null) throw Clazz.new(NullPointerException.c$$S,["stackTrace[" + i + "]"]);
+for (var i = 0; i < defensiveCopy.length; i++) if (defensiveCopy[i] == null) throw Clazz.new_(NullPointerException.c$$S,["stackTrace[" + i + "]"]);
 
 this.stackTrace = defensiveCopy;
 });
@@ -17236,7 +17234,7 @@ return this.lineNumber==-2;
 });
 m$(C$,"toString",
 function(){
-var buf=Clazz.new(StringBuilder.c$$I, [80]);
+var buf=Clazz.new_(StringBuilder.c$$I, [80]);
 buf.append$S(this.getClassName());
 buf.append$S('.');
 buf.append$S(this.getMethodName());
@@ -17327,7 +17325,7 @@ declareType(java.lang,"ClassCastException",RuntimeException);
 
 C$=Clazz.newClass(java.lang,"ClassNotFoundException",function(){this.ex=null;},Exception);
 m$(C$, "c$$S$Throwable", function(detailMessage,exception){
-C$.superClazz.c$$S$Throwable.apply(this, arguments);
+C$.superclazz.c$$S$Throwable.apply(this, arguments);
 this.ex=exception;
 }, 1);
 m$(C$,"getException",
@@ -17341,16 +17339,16 @@ return this.ex;
 
 C$=declareType(java.lang,"StringIndexOutOfBoundsException",IndexOutOfBoundsException);
 m$(C$, "c$$I", function(index){
-C$.superClazz.c$$S.apply(this,["String index out of range: "+index]);
+C$.superclazz.c$$S.apply(this,["String index out of range: "+index]);
 }, 1);
 
 C$=Clazz.newClass(java.lang.reflect,"InvocationTargetException",function(){this.target=null;},Exception);
 m$(C$, "c$$Throwable", function(exception){
-C$.superClazz.c$$Throwable.apply(this, arguments);
+C$.superclazz.c$$Throwable.apply(this, arguments);
 this.target=exception;
 }, 1);
 m$(C$, "c$$Throwable$S", function(exception,detailMessage){
-C$.superClazz.c$$S$Throwable.apply(this,[detailMessage,exception]);
+C$.superclazz.c$$S$Throwable.apply(this,[detailMessage,exception]);
 this.target=exception;
 }, 1);
 m$(C$,"getTargetException",
@@ -17364,13 +17362,13 @@ return this.target;
 
 C$=Clazz.newClass(java.lang.reflect,"UndeclaredThrowableException",function(){this.undeclaredThrowable=null;},RuntimeException);
 m$(C$, "c$$Throwable", function(exception){
-C$.superClazz.c$$Throwable.apply(this, arguments);
+C$.superclazz.c$$Throwable.apply(this, arguments);
 this.undeclaredThrowable=exception;
 this.initCause(exception);
 },1);
 
 m$(C$, "c$$Throwable$S", function(exception,detailMessage){
-C$.superClazz.c$$S.apply(this,[detailMessage]);
+C$.superclazz.c$$S.apply(this,[detailMessage]);
 this.undeclaredThrowable=exception;
 this.initCause(exception);
 },1);
@@ -17407,13 +17405,13 @@ this.classname=null;
 },java.io.ObjectStreamException);
 
 m$(C$, "c$$S$S", function(className,detailMessage){
-C$.superClazz.c$$S.apply(this,[detailMessage]);
+C$.superclazz.c$$S.apply(this,[detailMessage]);
 this.classname=className;
 },1);
 
 m$(C$,"getMessage",
 function(){
-var msg=C$.superClazz.getMessage.apply(this, []);
+var msg=C$.superclazz.getMessage.apply(this, []);
 if(this.classname!=null){
 msg=this.classname+';' + ' '+msg;
 }return msg;
@@ -17429,14 +17427,14 @@ this.detail=null;
 },java.io.ObjectStreamException);
 
 m$(C$, "c$$S$Throwable", function(detailMessage, rootCause){
-C$.superClazz.c$$S.apply(this,[detailMessage]);
+C$.superclazz.c$$S.apply(this,[detailMessage]);
 this.detail=rootCause;
 this.initCause(rootCause);
 }, 1);
 
 m$(C$,"getMessage",
 function(){
-var msg=C$.superClazz.getMessage.apply(this);
+var msg=C$.superclazz.getMessage.apply(this);
 return (this.detail ? msg + "; "+this.detail.toString() : msg);
 });
 m$(C$,"getCause",
@@ -17458,7 +17456,7 @@ this.className=null;
 this.key=null;
 },RuntimeException);
 m$(C$, "c$$S$S$S", function(detailMessage,className,resourceName){
-C$.superClazz.c$$S.apply(this,[detailMessage]);
+C$.superclazz.c$$S.apply(this,[detailMessage]);
 this.className=className;
 this.key=resourceName;
 }, 1);
@@ -17618,7 +17616,7 @@ var newMethodNotFoundException = function (clazz, method) {
           + method : "") + " was not found";
   System.out.println(message);
   console.log(message);
-  throw Clazz.new(java.lang.NoSuchMethodException.c$$S, [message]);        
+  throw Clazz.new_(java.lang.NoSuchMethodException.c$$S, [message]);        
 };
 
 C$=Clazz.newClass(java.lang.reflect,"Constructor",function(){
@@ -17717,7 +17715,7 @@ m$(C$,"newInstance$OA", function(args){
         a[i] = (this.parameterTypes[i].__PRIMITIVE ? args[i].valueOf() : args[i]);
       }
     }
-    var instance = Clazz.new(this.constr, a);
+    var instance = Clazz.new_(this.constr, a);
   }
 //  var instance=new this.clazz(null, inheritArgs);
   if (instance == null)
@@ -17901,11 +17899,18 @@ function(){
 return null;
 });
 
-  if (needPackage("core"))
-    _Loader.loadPackage("core");  
+//  if (needPackage("core"))
+  //  _Loader.loadPackage("core");  
+
 
 //Clazz._Loader.loadZJar(Clazz._Loader.getJ2SLibBase() + "core/coreswingjs.z.js", "swingjs.JSUtil");
 
+  //if (!J2S._isAsync) {
+    for (var i = 0; i < J2S._coreFiles.length; i++)
+      Clazz.loadScript(J2S._coreFiles[i]);
+      //ClazzLoader.loadZJar(J2S._coreFiles[i], ClazzLoader.runtimeKeyClass);
+  //}
+  
 
 
 })(Clazz, J2S); // requires JSmolCore.js
@@ -18148,7 +18153,7 @@ if (typeof(SwingJS) == "undefined") {
 		this._viewerOptions = viewerOptions;
     // for now assigning this._applet here instead of in readyCallback
     Clazz.loadClass("swingjs.JSAppletViewer");
-		this._appletPanel = Clazz.new(swingjs.JSAppletViewer.c$$java_util_Hashtable, [viewerOptions]);
+		this._appletPanel = Clazz.new_(swingjs.JSAppletViewer.c$$java_util_Hashtable, [viewerOptions]);
     this._appletPanel.start();
 	}
 	

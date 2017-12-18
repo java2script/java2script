@@ -194,7 +194,7 @@ public class CirSim extends Frame implements ComponentListener, ActionListener,
 	int voltageSourceCount;
 	int circuitMatrixSize, circuitMatrixFullSize;
 	boolean circuitNeedsMap;
-	public boolean useFrame;
+	public boolean useFrame = true;
 	int scopeCount;
 	Scope scopes[];
 	int scopeColCount[];
@@ -2330,7 +2330,8 @@ public class CirSim extends Frame implements ComponentListener, ActionListener,
 				case 0:
 					if (applet == null) {
 						File f = new File(".");
-						url = new URL("file:" + f.getCanonicalPath() + "/" + file);
+						String s = f.getCanonicalPath();
+						url = new URL("file:" + s + "/" + file);
 					} else {
 						// java applet.getDocumentBase() may look like
 						// file:/C:/jmol-dev/workspace/swingjs-near/bin/com.falstad.Circuit.Circuit1469652678726.html

@@ -53,7 +53,7 @@ public class PrintModel {
 					}
 				}
 			});
-		}
+		} 
 	}
 
 	private void firePrintDialogDismissed(PrintModel printModel, PrintableNet printableNet,

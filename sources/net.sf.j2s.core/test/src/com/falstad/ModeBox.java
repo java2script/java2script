@@ -418,6 +418,8 @@ class ModeBoxFrame extends Frame implements ComponentListener, ActionListener,
 
 	boolean shown = false;
 
+	private long lastTime;
+
 	public void triggerShow() {
 		if (!shown)
 			setVisible(true);
@@ -532,31 +534,36 @@ class ModeBoxFrame extends Frame implements ComponentListener, ActionListener,
 		double boxhalfwidth = boxwidth / 2;
 		double boxhalfheight = boxheight / 2;
 		double aratio = view3d.width / (double) view3d.height;
-		for (i = 0; i != gridSizeX; i++)
+		double camx0 = 0;
+		double camz0 = viewDistance;
+		double camx = rotm[0] * camx0 + rotm[2] * camz0;
+		double camy = rotm[5] * camz0;
+		double camz = rotm[6] * camx0 + rotm[8] * camz0;
+		double camvz0 = -1;
+		double r2 = rotm[2] * camvz0;
+		double r5 = rotm[5] * camvz0;
+		double r8 = rotm[8] * camvz0;
+		for (i = 0; i != gridSizeX; i++) {
+			double camvx0 = (2. * i / gridSizeX - 1) * izoom;
+			if (aratio > 1)
+				camvx0 *= aratio;
+			double r35 = rotm[3] * camvx0 + r5;
+			double r02 = rotm[0] * camvx0 + r2;
+			double r68 = rotm[6] * camvx0 + r8;
+			double[][] fi = func[i];
 			for (j = 0; j != gridSizeY; j++) {
-				// calculate camera position and direction
-				double camx0 = 0;
-				double camz0 = viewDistance;
-				double camvx0 = (2 * i / (double) gridSizeX - 1) * izoom;
+				double[] fij = fi[j];
+				// calculate camera position and direction				
 				double camvy0 = (2 * j / (double) gridSizeY - 1) * izoom;
 				// preserve aspect ratio no matter what window dimensions
 				if (aratio < 1)
 					camvy0 /= aratio;
-				else
-					camvx0 *= aratio;
 				// rotate camera with rotation matrix
-				double camvz0 = -1;
-				double camx = rotm[0] * camx0 + rotm[2] * camz0;
-				double camy = rotm[5] * camz0;
-				double camz = rotm[6] * camx0 + rotm[8] * camz0;
-				double camvx = rotm[0] * camvx0 + rotm[1] * camvy0 + rotm[2] * camvz0;
-				double camvy = rotm[3] * camvx0 + rotm[4] * camvy0 + rotm[5] * camvz0;
-				double camvz = rotm[6] * camvx0 + rotm[7] * camvy0 + rotm[8] * camvz0;
+				double camvx = rotm[1] * camvy0 + r02;
+				double camvy = rotm[4] * camvy0 + r35;
+				double camvz = rotm[7] * camvy0 + r68;
 				double camnorm = java.lang.Math.sqrt(camvx * camvx + camvy * camvy
 						+ camvz * camvz);
-				int n;
-				double simpr = 0;
-				double simpg = 0;
 				// number of simpson's rule samples = 14
 				int nmax = 14;
 				// calculate intersections with planes containing box edges
@@ -577,30 +584,33 @@ class ModeBoxFrame extends Frame implements ComponentListener, ActionListener,
 				// sample evenly along intersecting portion
 				double tstep = (maxt - mint) / (sampleCount - 1);
 				double pathlen = (maxt - mint) * camnorm;
+				double m = pathlen / sampleCount;
 				double xmult = maxTerms / boxwidth;
 				double ymult = maxTerms / boxheight;
 				double zmult = maxTerms / 2.;
-				for (n = 0; n < sampleCount; n++) {
-					double t = mint + n * tstep;
-					double xx = camx + camvx * t;
-					double yy = camy + camvy * t;
-					double zz = camz + camvz * t;
+				double xx = camx + camvx * mint;
+				double yy = camy + camvy * mint;
+				double zz = camz + camvz * mint;
+				double dx = camvx * tstep;
+				double dy = camvy * tstep;
+				double dz = camvz * tstep;
+				double simpr = 0;
+				double simpg = 0;
+				for (int n = 0; n < sampleCount; n++, xx += dx, yy += dy, zz += dz) {
 					// find grid element that contains sampled point
 					int xxi = (int) ((xx + boxhalfwidth) * xmult);
 					int yyi = (int) ((yy + boxhalfheight) * ymult);
 					int zzi = (int) ((zz + 1) * zmult);
 					double f = data[xxi][yyi][zzi];
 					if (f < 0) {
-						f = java.lang.Math.abs(f);
-						simpr += sampleMult[n] * f;
+						simpr += sampleMult[n] * -f;
 					} else
 						simpg += sampleMult[n] * f;
 				}
-				simpr *= pathlen / n;
-				simpg *= pathlen / n;
-				func[i][j][0] = simpr;
-				func[i][j][1] = simpg;
+				fij[0] = simpr * m;
+				fij[1] = simpg * m;
 			}
+		}
 	}
 
 	int sign(double x) {
@@ -612,6 +622,19 @@ class ModeBoxFrame extends Frame implements ComponentListener, ActionListener,
 //	}
 
 	public void updateModeBox(Graphics realg) {
+		
+		
+		/**
+		 * @j2sNative
+		 *  document.title = System.currentTimeMillis() - (this.lastTime || 0);
+		 *  this.lastTime = System.currentTimeMillis();
+		 */
+		{
+			System.out.println(System.currentTimeMillis() - this.lastTime);
+			this.lastTime = System.currentTimeMillis();
+			
+		}
+		
 		Graphics g = null;
 		if (winSize == null || winSize.width == 0 || winSize.height == 0)
 			return;
@@ -645,11 +668,11 @@ class ModeBoxFrame extends Frame implements ComponentListener, ActionListener,
 		int winw = view3d.width;
 		int winh = view3d.height;
 		if (modeCount > 0) {
-			for (i = 0; i != gridSizeX; i++)
+			for (i = 0; i != gridSizeX; i++) {
+				int x = i * winw / gridSizeX;
+				int x2 = (i + 1) * winw / gridSizeX;
 				for (j = 0; j != gridSizeY; j++) {
-					int x = i * winw / gridSizeX;
 					int y = j * winh / gridSizeY;
-					int x2 = (i + 1) * winw / gridSizeX;
 					int y2 = (j + 1) * winh / gridSizeY;
 					int colval = 0xFF000000 + (getColorValue(i, j, 0) << 16)
 							| (getColorValue(i, j, 1) << 8);
@@ -663,6 +686,7 @@ class ModeBoxFrame extends Frame implements ComponentListener, ActionListener,
 						g.fillRect(x, y, x2 - x, y2 - y);
 					}
 				}
+			}
 			if (mis) {
 				Image dbimage2 = cv.createImage(imageSource);
 				g.drawImage(dbimage2, 0, 0, null);

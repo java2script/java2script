@@ -217,6 +217,8 @@ class AntennaFrame extends Frame
     AntennaFrame(Antenna a) {
 	super("Antenna Applet");
 	applet = a;
+	if (a == null)
+		useFrame = true;
     }
 
     public void init() {

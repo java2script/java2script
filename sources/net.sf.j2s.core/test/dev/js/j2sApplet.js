@@ -1699,17 +1699,19 @@ J2S.Cache.put = function(filename, data) {
     // apps. So this will take some thinking. But the basic idea is that
     // core file to load is 
      
-    type = type.toLowerCase().split(".")[0]; // package name only 
-
-    // return if type is already part of the set.    
-		if (__coreSet.join("").indexOf(type) >= 0) return;
-    
-    // create a concatenated lower-case name for a core file that includes
-    // all Java applets on the page
-    
-		__coreSet.push(type);
-		__coreSet.sort();
-		J2S._coreFiles = [path + "/core/core" + __coreSet.join("") + ".z.js" ];
+    if (type) {
+      type = type.toLowerCase().split(".")[0]; // package name only 
+  
+      // return if type is already part of the set.    
+  		if (__coreSet.join("").indexOf(type) >= 0) return;
+      
+      // create a concatenated lower-case name for a core file that includes
+      // all Java applets on the page
+      
+  		__coreSet.push(type);
+  		__coreSet.sort();
+  		J2S._coreFiles = [path + "/core/core" + __coreSet.join("") + ".z.js" ];
+    }
 		if (more && (more = more.split(" ")))
 			for (var i = 0; i < more.length; i++)
 				if (__coreMore.join("").indexOf(more[i]) < 0)
@@ -1901,7 +1903,7 @@ J2S.Cache.put = function(filename, data) {
         if (applet.__Info.main && applet.__Info.headless) {
           cl.main(applet.__Info.args || []);
         } else {
-        	var viewerOptions = Clazz.new(Clazz.load("java.util.Hashtable"));
+        	var viewerOptions = Clazz.new_(Clazz.load("java.util.Hashtable"));
           viewerOptions.put = viewerOptions.put$TK$TV;
         	J2S._setAppletParams(applet._availableParams, viewerOptions, applet.__Info, true);
         	viewerOptions.put("name", applet._id);// + "_object");
@@ -2204,8 +2206,7 @@ J2S._setDraggable = function(tag, targetOrArray) {
     pageX0 = xy.x;
     pageY0 = xy.y;
 		return false;
-  };
-
+  },
 	drag = function(ev) {
   // we will move the frame's parent node and take the frame along with it
   	if (tag.isDragging && J2S._dmouseOwner == tag) {
@@ -2217,8 +2218,7 @@ J2S._setDraggable = function(tag, targetOrArray) {
   			$(target()).css({ top: y + 'px', left: x + 'px' })
       }
 		}
-	};
-  
+	}, 
 	up = function(ev) {
 	if (J2S._dmouseOwner == tag) {
 			tag.isDragging = false;
