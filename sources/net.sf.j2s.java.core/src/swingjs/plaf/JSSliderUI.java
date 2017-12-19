@@ -27,6 +27,9 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 
 	static {
 		Object jqueryui = JQueryUI.class; // loads jQuery.ui
+		// this static call allows for the CSS to be loaded only once and only when needed
+		JSUtil.loadStaticResource("swingjs/jquery/jquery-ui-j2sslider.css");
+		JSUtil.loadStaticResource("swingjs/jquery/jquery-ui-j2sslider.js");
 	}
 
 	JSlider jSlider;
@@ -55,16 +58,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	private boolean isVerticalScrollBar;
 	private boolean isInverted;
 	
-	private static boolean cssLoaded = false;
-
-	public JSSliderUI() {
-		
-		if (!cssLoaded) {
-			// this static call allows for the CSS to be loaded only once and only when needed
-			JSUtil.loadStaticResource("swingjs/jquery/jquery-ui-j2sslider.css");
-			JSUtil.loadStaticResource("swingjs/jquery/jquery-ui-j2sslider.js");
-			cssLoaded = true;
-		}
+	public JSSliderUI() {		
 		needPreferred = true;
 		setDoc();
 	}

@@ -1153,6 +1153,11 @@ public class JViewport extends JComponent
      * @param blitPaint the area to blit
      * @return  true if the parameters are modified and we're ready to blit;
      *          false otherwise
+     *          
+     * SwingJS cannot blit, as there is only one canvas for the entire JFrame or JApplet. 
+     *          
+     * @j2sNative
+     * return  false;         
      */
     protected boolean computeBlit(
         int dx,
@@ -1162,6 +1167,7 @@ public class JViewport extends JComponent
         Dimension blitSize,
         Rectangle blitPaint)
     {
+    
         int dxAbs = Math.abs(dx);
         int dyAbs = Math.abs(dy);
         Dimension extentSize = getExtentSize();
