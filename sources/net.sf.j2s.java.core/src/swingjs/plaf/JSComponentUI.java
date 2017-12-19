@@ -1175,6 +1175,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 				System.out.println("JSCUI could not add " + ui.c.getName() + " to "
 						+ c.getName());
 			} else {
+				if (ui.domNode != ui.outerNode && DOMNode.getParent(ui.domNode) == null)
+					ui.outerNode.appendChild(ui.domNode);
 				containerNode.appendChild(ui.outerNode);
 			}
 		}

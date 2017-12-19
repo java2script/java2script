@@ -96,11 +96,13 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			domNode = wrap("div", id + "_wrap",
 					jqSlider = DOMNode.createElement("div", id));
 			$(domNode).addClass("swingjs");
-			setJQuerySliderAndEvents();	
+			setJQuerySliderAndEvents();
+			setTainted();
 		} else if (isChanged) {
 			DOMNode.remove(jqSlider);
 			domNode.appendChild(jqSlider = DOMNode.createElement("div", id));
 			setJQuerySliderAndEvents();	
+			setTainted();
 		  setInnerComponentBounds(jc.getWidth(), jc.getHeight());
 		}
 		setup(isNew || isChanged);
