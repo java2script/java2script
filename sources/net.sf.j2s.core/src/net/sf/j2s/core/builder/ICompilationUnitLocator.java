@@ -20,6 +20,7 @@ import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
  * for clients outside of this package.
  * @since 3.3
  */
+@SuppressWarnings("restriction")
 public interface ICompilationUnitLocator {
 	public ICompilationUnit fromIFile(IFile file);
 }

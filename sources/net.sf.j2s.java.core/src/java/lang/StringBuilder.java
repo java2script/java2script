@@ -351,7 +351,6 @@ public final class StringBuilder extends AbstractStringBuilder implements
      * @return A reference to this object.
      * @see Character#toChars(int)
      * 
-     * @j2sIgnore
      */
     public StringBuilder appendCodePoint(int codePoint) {
         append0(Character.toChars(codePoint));

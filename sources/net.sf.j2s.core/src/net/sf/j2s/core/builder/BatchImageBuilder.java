@@ -10,19 +10,25 @@
  *******************************************************************************/
 package net.sf.j2s.core.builder;
 
-import org.eclipse.core.resources.*;
-import org.eclipse.core.runtime.*;
+import java.util.ArrayList;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceProxy;
+import org.eclipse.core.resources.IResourceProxyVisitor;
+import org.eclipse.core.resources.IResourceVisitor;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.compiler.*;
+import org.eclipse.jdt.core.compiler.CategorizedProblem;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ClassFile;
 import org.eclipse.jdt.internal.compiler.impl.CompilerStats;
 import org.eclipse.jdt.internal.core.util.Messages;
 import org.eclipse.jdt.internal.core.util.Util;
 
-import java.util.*;
-
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({ "rawtypes", "unchecked", "restriction" })
 public class BatchImageBuilder extends AbstractImageBuilder {
 
 	IncrementalImageBuilder incrementalBuilder; // if annotations or secondary types have to be processed after the compile loop
@@ -191,47 +197,65 @@ protected void copyExtraResourcesBack(ClasspathMultiDirectory sourceLocation, fi
 	final boolean isAlsoProject = sourceLocation.sourceFolder.equals(this.javaBuilder.currentProject);
 	sourceLocation.sourceFolder.accept(
 		new IResourceProxyVisitor() {
-			public boolean visit(IResourceProxy proxy) throws CoreException {
-				IResource resource = null;
-				switch(proxy.getType()) {
-					case IResource.FILE :
-						if (org.eclipse.jdt.internal.core.util.Util.isJavaLikeFileName(proxy.getName()) ||
-							org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(proxy.getName())) return false;
-
-						resource = proxy.requestResource();
-						if (BatchImageBuilder.this.javaBuilder.filterExtraResource(resource)) return false;
-						if (exclusionPatterns != null || inclusionPatterns != null)
-							if (Util.isExcluded(resource.getFullPath(), inclusionPatterns, exclusionPatterns, false))
+					public boolean visit(IResourceProxy proxy) throws CoreException {
+						IResource resource = null;
+						switch (proxy.getType()) {
+						case IResource.FILE:
+							if (org.eclipse.jdt.internal.core.util.Util.isJavaLikeFileName(proxy.getName())
+									|| org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(proxy.getName()))
 								return false;
 
-						IPath partialPath = resource.getFullPath().removeFirstSegments(segmentCount);
-						IResource copiedResource = outputFolder.getFile(partialPath);
-						if (copiedResource.exists()) {
-							if (deletedAll) {
-								IResource originalResource = findOriginalResource(partialPath);
-								String id = originalResource.getFullPath().removeFirstSegments(1).toString();
-								createProblemFor(
-									resource,
-									null,
-									Messages.bind(Messages.build_duplicateResource, id),
-									BatchImageBuilder.this.javaBuilder.javaProject.getOption(JavaCore.CORE_JAVA_BUILD_DUPLICATE_RESOURCE, true));
+							resource = proxy.requestResource();
+							if (BatchImageBuilder.this.javaBuilder.filterExtraResource(resource))
 								return false;
+							if (exclusionPatterns != null || inclusionPatterns != null)
+								if (Util.isExcluded(resource.getFullPath(), inclusionPatterns, exclusionPatterns,
+										false))
+									return false;
+
+							IPath partialPath = resource.getFullPath().removeFirstSegments(segmentCount);
+							IResource copiedResource = outputFolder.getFile(partialPath);
+							if (copiedResource.exists()) {
+								if (deletedAll) {
+									IResource originalResource = findOriginalResource(partialPath);
+									String id = originalResource.getFullPath().removeFirstSegments(1).toString();
+									createProblemFor(resource, null,
+											Messages.bind(Messages.build_duplicateResource, id),
+											BatchImageBuilder.this.javaBuilder.javaProject
+													.getOption(JavaCore.CORE_JAVA_BUILD_DUPLICATE_RESOURCE, true));
+									return false;
+								}
+								copiedResource.delete(IResource.FORCE, null); // last
+																				// one
+																				// wins
 							}
-							copiedResource.delete(IResource.FORCE, null); // last one wins
-						}
-						createFolder(partialPath.removeLastSegments(1), outputFolder); // ensure package folder exists
-						copyResource(resource, copiedResource);
-						return false;
-					case IResource.FOLDER :
-						resource = proxy.requestResource();
-						if (BatchImageBuilder.this.javaBuilder.filterExtraResource(resource)) return false;
-						if (isAlsoProject && isExcludedFromProject(resource.getFullPath())) return false; // the sourceFolder == project
-						if (exclusionPatterns != null && inclusionPatterns == null) // must walk children if inclusionPatterns != null
-							if (Util.isExcluded(resource.getFullPath(), null, exclusionPatterns, true))
+							createFolder(partialPath.removeLastSegments(1), outputFolder); // ensure
+																							// package
+																							// folder
+																							// exists
+							copyResource(resource, copiedResource);
+							return false;
+						case IResource.FOLDER:
+							resource = proxy.requestResource();
+							if (BatchImageBuilder.this.javaBuilder.filterExtraResource(resource))
 								return false;
-				}
-				return true;
-			}
+							if (isAlsoProject && isExcludedFromProject(resource.getFullPath()))
+								return false; // the sourceFolder == project
+							if (exclusionPatterns != null && inclusionPatterns == null) // must
+																						// walk
+																						// children
+																						// if
+																						// inclusionPatterns
+																						// !=
+																						// null
+								if (Util.isExcluded(resource.getFullPath(), null, exclusionPatterns, true))
+									return false;
+							break;
+						default:
+							break;
+						}
+						return true;
+					}
 		},
 		IResource.NONE
 	);

@@ -1,0 +1,65 @@
+###################################
+# License info for ideal-gas
+# Automatically generated on Fri Aug 08 00:08:01 MDT 2008
+###################################
+
+pusher-leaning_0001.gif author=PhET 
+pusher-leaning_0001.png author=PhET 
+pusher-leaning_0002.gif author=PhET 
+pusher-leaning_0002.png author=PhET 
+pusher-leaning_0003.gif author=PhET 
+pusher-leaning_0003.png author=PhET 
+pusher-leaning_0004.gif author=PhET 
+pusher-leaning_0004.png author=PhET 
+pusher-leaning_0005.gif author=PhET 
+pusher-leaning_0005.png author=PhET 
+pusher-leaning_0006.gif author=PhET 
+pusher-leaning_0006.png author=PhET 
+pusher-leaning_0007.gif author=PhET 
+pusher-leaning_0007.png author=PhET 
+pusher-leaning_0008.gif author=PhET 
+pusher-leaning_0008.png author=PhET 
+pusher-leaning_0009.gif author=PhET 
+pusher-leaning_0009.png author=PhET 
+pusher-leaning_0010.gif author=PhET 
+pusher-leaning_0010.png author=PhET 
+pusher-leaning_0011.gif author=PhET 
+pusher-leaning_0011.png author=PhET 
+pusher-leaning_0012.gif author=PhET 
+pusher-leaning_0012.png author=PhET 
+pusher-leaning_0013.gif author=PhET 
+pusher-leaning_0013.png author=PhET 
+pusher-leaning_0014.gif author=PhET 
+pusher-leaning_0014.png author=PhET 
+pusher-leaning_0015.gif author=PhET 
+pusher-leaning_0015.png author=PhET 
+pusher-leaning_0016.gif author=PhET 
+pusher-leaning_0016.png author=PhET 
+pusher-leaning_0017.gif author=PhET 
+pusher-leaning_0017.png author=PhET 
+pusher-leaning_0018.gif author=PhET 
+pusher-leaning_0018.png author=PhET 
+pusher-leaning_0019.gif author=PhET 
+pusher-leaning_0019.png author=PhET 
+pusher-leaning_0020.gif author=PhET 
+pusher-leaning_0020.png author=PhET 
+pusher-leaning_0021.gif author=PhET 
+pusher-leaning_0021.png author=PhET 
+pusher-leaning_0022.gif author=PhET 
+pusher-leaning_0022.png author=PhET 
+pusher-leaning_0023.gif author=PhET 
+pusher-leaning_0023.png author=PhET 
+pusher-leaning_0024.gif author=PhET 
+pusher-leaning_0024.png author=PhET 
+pusher-leaning_0025.gif author=PhET 
+pusher-leaning_0025.png author=PhET 
+pusher-leaning_0026.gif author=PhET 
+pusher-leaning_0026.png author=PhET 
+pusher-leaning_0027.gif author=PhET 
+pusher-leaning_0027.png author=PhET 
+pusher-leaning_0028.gif author=PhET 
+pusher-leaning_0028.png author=PhET 
+pusher-leaning_0029.gif author=PhET 
+pusher-leaning_0029.png author=PhET 
+pusher-leaning_0030.gif author=PhET 
+pusher-leaning_0030.png author=PhET 

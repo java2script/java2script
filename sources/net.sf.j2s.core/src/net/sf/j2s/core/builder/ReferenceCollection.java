@@ -14,6 +14,7 @@ package net.sf.j2s.core.builder;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 
+@SuppressWarnings("restriction")
 public class ReferenceCollection {
 
 char[][][] qualifiedNameReferences; // contains no simple names as in just 'a' which is kept in simpleNameReferences instead
@@ -80,6 +81,7 @@ public boolean includes(char[][][] qualifiedNames, char[][] simpleNames) {
 	return includes(qualifiedNames, simpleNames, null);
 }
 
+@SuppressWarnings("null")
 public boolean includes(char[][][] qualifiedNames, char[][] simpleNames, char[][] rootNames) {
 	// if either collection of names is null, it means it contained a well known name so we know it already has a match
 	if (rootNames != null) {

@@ -1,4 +1,7 @@
 /*******************************************************************************
+
+		//TODO:  We will need to alias all generic implementations
+		
  * Copyright (c) 2007 java2script.org and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,7 +14,11 @@
 package net.sf.j2s.core.astvisitors;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
@@ -23,7 +30,9 @@ import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BlockComment;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CastExpression;
@@ -42,6 +51,7 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -83,7 +93,6 @@ import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -92,20 +101,190 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+import net.sf.j2s.core.astvisitors.adapters.AbstractPluginAdapter;
+import net.sf.j2s.core.astvisitors.adapters.FinalVariable;
+import net.sf.j2s.core.astvisitors.adapters.J2SMapAdapter;
+import net.sf.j2s.core.astvisitors.adapters.TypeAdapter;
+import net.sf.j2s.core.astvisitors.adapters.VariableAdapter;
+
 /**
  * This empty visitor just gives a way for debugging. That is to say, in 
  * Eclipse debugging mode, if there are needs to compile these following
  * nodes, you can always modify these methods without restarting Eclipse.
  * 
  * @author zhou renjian
+ * @author Bob Hanson
  */
 public class ASTEmptyVisitor extends ASTVisitor {
 
+	ASTEmptyVisitor() {
+		super();
+	}
+	
+	protected String thisPackageName;
+	
+	public static String[] basePackages =  {
+			"java.lang", 
+			"java.lang.ref", 
+			"java.lang.ref.reflect", 
+			"java.lang.reflect", 
+			"java.lang.annotation",
+			"java.lang.instrument",
+			"java.lang.management",
+			"java.io", 
+			"java.util"
+	};
+ 
+	public boolean isBasePackage() {
+		for (int i = 0; i < basePackages.length; i++)
+			if (basePackages[i].equals(thisPackageName))
+				return true;
+		return false;
+	}
+
+
+	private final static String[] knownClasses = new String[] { 
+			"java.lang.Object", "java.lang.Class", 
+			"java.lang.String",
+			"java.lang.Byte", "java.lang.Character",
+			"java.lang.Short", "java.lang.Long", 
+			"java.lang.Integer", "java.lang.Float", 
+			"java.lang.Double", 
+			"java.io.Serializable", "java.lang.Iterable", 
+			"java.lang.CharSequence", "java.lang.Cloneable",
+			"java.lang.Comparable", "java.lang.Runnable", 
+			"java.util.Comparator", "java.lang.System",
+			"java.lang.ClassLoader",
+			"java.lang.Math", 
+			};
+
+	protected static boolean isClassKnown(String qualifiedName) {
+		for (int i = 0; i < knownClasses.length; i++)
+			if (knownClasses[i].equals(qualifiedName))
+				return true;
+		return false;
+	}
+
 	/**
-	 * Buffer that keep all compiled *.js.
-	 * @see ASTScriptVisitor#laterBuffer
+	 * allow @j2sXHTML and @j2sXCSS extensions for Javadoc
+	 * 
+	 * experimental; not implemented; uses adapters.ExtendedAdapter
+	 * 
 	 */
-	protected StringBuffer buffer = new StringBuffer();
+	protected boolean allowExtensions = false;
+
+//	/**
+//	 * not implemented 
+//	 * 
+//	 * @param tf
+//	 */
+//	public void setAllowExtensions(boolean tf) {
+//		allowExtensions = tf;
+//	}
+//
+
+	
+	protected Map<String, Integer>htStaticNames = new Hashtable<>();
+	protected int[] staticCount = new int[1];
+	
+	/**
+	 * Register a qualified static name as an import var I$[n]
+	 * unless it ends with "Exception". 
+	 * @param name
+	 * @return the next available index for this compilation unit
+	 */
+	protected Integer getStaticNameIndex(String name) {
+		Integer n = htStaticNames.get(name);
+		if (n == null && !name.endsWith("Exception"))
+			htStaticNames.put(name,  n = new Integer(staticCount[0]++));
+		return n;
+	}
+
+	protected HashSet<String> definedPackageNames;
+
+	public void setPackageNames(HashSet<String> definedPackageNames) {
+		this.definedPackageNames = definedPackageNames;
+	}
+
+	protected static boolean isFinal(BodyDeclaration b) {
+		return Modifier.isFinal(b.getModifiers());
+	}
+
+	protected static boolean isStatic(BodyDeclaration b) {
+		return Modifier.isStatic(b.getModifiers());
+	}
+
+
+	protected String getUnqualifiedClassName() {
+		return ((TypeAdapter) getAdaptable(TypeAdapter.class)).getClassName();
+	}
+
+	protected String getQualifiedClassName() {
+		return ((TypeAdapter) getAdaptable(TypeAdapter.class)).getFullClassName();
+	}
+
+	protected List<FinalVariable> getVariableList(char fvn) { 
+		return ((VariableAdapter) getAdaptable(VariableAdapter.class)).getVariableList(fvn); 
+	}
+
+	protected String getIndexedVarName(String name, int i) {
+		return ((VariableAdapter) getAdaptable(VariableAdapter.class)).getIndexedVarName(name, i);
+	}
+
+	protected String getNormalVariableName(String name) {
+		return ((VariableAdapter) getAdaptable(VariableAdapter.class)).getNormalVariableName(name);
+	}
+
+	public String getPackageName() {
+		return thisPackageName;
+	}
+
+	/**
+	 * Shorten fully qualified class names starting with java.lang and will
+	 * replace a class name with C$. Use static getShortenedName(null, name,
+	 * false) if that is not desired.
+	 * 
+	 * 
+	 * @param name
+	 * @return
+	 */
+	protected String getShortenedQualifiedName(String name) {
+		return ((TypeAdapter) getAdaptable(TypeAdapter.class)).getShortenedQualifiedName(name);
+	}
+
+	protected boolean isAnonymousClass() {
+		return ((VariableAdapter) getAdaptable(VariableAdapter.class)).isAnonymousClass;
+	}
+
+	protected boolean isInheritedFieldName(ITypeBinding binding, String name) {
+		return J2SMapAdapter.isInheritedFieldName(binding, name);
+	}
+
+	/**
+	 * compiling of variable names is no longer supported -- use Google Closure Compiler
+	 * @return
+	 */
+	@Deprecated
+	protected boolean isToCompileVariableName() {
+		return ((VariableAdapter) getAdaptable(VariableAdapter.class)).isToCompileVariableName();
+	}
+
+	protected void setClassName(String className) {
+		((TypeAdapter) getAdaptable(TypeAdapter.class)).setClassName(className);
+	}
+
+	protected void setPackageName(String packageName) {
+		thisPackageName = packageName;
+	}
+	
+//	public void setToCompileVariableName(boolean toCompress) {
+//		((ASTVariableAdapter) getAdaptable(ASTVariableAdapter.class)).setToCompileVariableName(toCompress);	
+//	}
+
+	/**
+	 * Buffer that keeps all compiled *.js.
+	 */
+	public StringBuffer buffer = new StringBuffer();
 
 	/**
 	 * Return the buffer. Actually it is returning compiled *.js String
@@ -117,43 +296,32 @@ public class ASTEmptyVisitor extends ASTVisitor {
 
 	/**
 	 * Buffer may be set to other buffer.
-	 * @see ASTScriptVisitor#visit(TypeDeclaration) 
 	 * @param buffer
 	 */
 	public void setBuffer(StringBuffer buffer) {
 		this.buffer = buffer;
 	}
 
-	protected Map visitorMap = new HashMap();
+	protected Map<Class<?>, AbstractPluginAdapter> adapterMap = new HashMap<Class<?>, AbstractPluginAdapter>();
 	
-	public Object getAdaptable(Class clazz) {
-		if (clazz == ASTEmptyVisitor.class) {
-			return this;
-		}
-		Object visitor = visitorMap.get(clazz);
-		if (visitor != null) {
-			return visitor;
-		}
+	public AbstractPluginAdapter getAdaptable(Class<?> thisClass) {
 		try {
-			Object newInstance = clazz.newInstance();
-			if (newInstance instanceof IPluginVisitor) {
-				registerPluginVisitor((IPluginVisitor) newInstance);
-				return newInstance;
-			}
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+			AbstractPluginAdapter adapter = adapterMap.get(thisClass);
+			return (adapter == null ? (adapter = registerPluginVisitor((AbstractPluginAdapter) thisClass.newInstance()))
+					: adapter);
+		} catch (@SuppressWarnings("unused") InstantiationException | IllegalAccessException e) {
+			return null;
 		}
-		return null;
 	}
 
-	public void registerPluginVisitor(IPluginVisitor visitor) {
-		//visitor.setBuffer(buffer);
-		visitor.setVisitor(this);
-		visitorMap.put(visitor.getClass(), visitor);
+	public AbstractPluginAdapter registerPluginVisitor(AbstractPluginAdapter adapter) {
+		adapter.setVisitor(this);
+		adapterMap.put(adapter.getClass(), adapter);
+		return adapter;
 	}
 	
+	protected int lastPos = Integer.MAX_VALUE;
+
 	/*
 	 * The following are empty super.* methods which will be use to help
 	 * developing Java2Script compiler.
@@ -475,6 +643,9 @@ public class ASTEmptyVisitor extends ASTVisitor {
 	}
 
 	public void preVisit(ASTNode node) {
+//		buffer.append(node.getClass().getName());
+		if (!(node instanceof Block))
+			lastPos = node.getStartPosition();
 		super.preVisit(node);
 	}
 

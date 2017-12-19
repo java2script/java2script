@@ -10,28 +10,42 @@
  *******************************************************************************/
 package net.sf.j2s.core.builder;
 
-import org.eclipse.core.resources.*;
-import org.eclipse.core.runtime.*;
+import java.io.ByteArrayInputStream;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Date;
 
-import org.eclipse.jdt.core.*;
-import org.eclipse.jdt.core.compiler.*;
-import org.eclipse.jdt.internal.compiler.*;
-import org.eclipse.jdt.internal.compiler.classfmt.*;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResourceStatus;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IJavaModelMarker;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.CategorizedProblem;
+import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.internal.compiler.ClassFile;
+import org.eclipse.jdt.internal.compiler.CompilationResult;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
-import org.eclipse.jdt.internal.compiler.problem.*;
+import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
 import org.eclipse.jdt.internal.compiler.util.SuffixConstants;
 import org.eclipse.jdt.internal.core.util.Messages;
 import org.eclipse.jdt.internal.core.util.Util;
 
-import java.io.*;
-import java.net.URI;
-import java.util.*;
-
 /**
  * The incremental image builder
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "restriction"})
 public class IncrementalImageBuilder extends AbstractImageBuilder {
 
 protected ArrayList sourceFiles;
@@ -260,22 +274,25 @@ protected void addDependentsOf(IPath path, boolean isStructuralChange, StringSet
 			+ typeName + " in " + packageName); //$NON-NLS-1$
 }
 
-protected boolean checkForClassFileChanges(IResourceDelta binaryDelta, ClasspathMultiDirectory md, int segmentCount) throws CoreException {
-	IResource resource = binaryDelta.getResource();
-	// remember that if inclusion & exclusion patterns change then a full build is done
-	boolean isExcluded = (md.exclusionPatterns != null || md.inclusionPatterns != null)
-		&& Util.isExcluded(resource, md.inclusionPatterns, md.exclusionPatterns);
-	switch(resource.getType()) {
-		case IResource.FOLDER :
+	protected boolean checkForClassFileChanges(IResourceDelta binaryDelta, ClasspathMultiDirectory md, int segmentCount)
+			throws CoreException {
+		IResource resource = binaryDelta.getResource();
+		// remember that if inclusion & exclusion patterns change then a full
+		// build is done
+		boolean isExcluded = (md.exclusionPatterns != null || md.inclusionPatterns != null)
+				&& Util.isExcluded(resource, md.inclusionPatterns, md.exclusionPatterns);
+		switch (resource.getType()) {
+		case IResource.FOLDER:
 			if (isExcluded && md.inclusionPatterns == null)
-		        return true; // no need to go further with this delta since its children cannot be included
+				return true; // no need to go further with this delta since its
+								// children cannot be included
 
 			IResourceDelta[] children = binaryDelta.getAffectedChildren();
 			for (int i = 0, l = children.length; i < l; i++)
 				if (!checkForClassFileChanges(children[i], md, segmentCount))
 					return false;
 			return true;
-		case IResource.FILE :
+		case IResource.FILE:
 			if (!isExcluded && org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(resource.getName())) {
 				// perform full build if a managed class file has been changed
 				IPath typePath = resource.getFullPath().removeFirstSegments(segmentCount).removeFileExtension();
@@ -286,9 +303,12 @@ protected boolean checkForClassFileChanges(IResourceDelta binaryDelta, Classpath
 				}
 				return true;
 			}
+			break;
+		default:
+			break;
+		}
+		return true;
 	}
-	return true;
-}
 
 protected void cleanUp() {
 	super.cleanUp();
@@ -395,74 +415,85 @@ protected boolean findAffectedSourceFiles(IResourceDelta delta, ClasspathLocatio
 	return true;
 }
 
-protected void findAffectedSourceFiles(IResourceDelta binaryDelta, int segmentCount, StringSet structurallyChangedTypes) {
-	// When a package becomes a type or vice versa, expect 2 deltas,
-	// one on the folder & one on the class file
-	IResource resource = binaryDelta.getResource();
-	switch(resource.getType()) {
-		case IResource.FOLDER :
+	protected void findAffectedSourceFiles(IResourceDelta binaryDelta, int segmentCount,
+			StringSet structurallyChangedTypes) {
+		// When a package becomes a type or vice versa, expect 2 deltas,
+		// one on the folder & one on the class file
+		IResource resource = binaryDelta.getResource();
+		switch (resource.getType()) {
+		case IResource.FOLDER:
 			switch (binaryDelta.getKind()) {
-				case IResourceDelta.ADDED :
-				case IResourceDelta.REMOVED :
-					IPath packagePath = resource.getFullPath().removeFirstSegments(segmentCount);
-					String packageName = packagePath.toString();
-					if (binaryDelta.getKind() == IResourceDelta.ADDED) {
-						// see if any known source file is from the same package... classpath already includes new package
-						if (!this.newState.isKnownPackage(packageName)) {
-							if (JavaBuilder.DEBUG)
-								System.out.println("Found added package " + packageName); //$NON-NLS-1$
-							addDependentsOf(packagePath, false);
-							return;
-						}
+			case IResourceDelta.ADDED:
+			case IResourceDelta.REMOVED:
+				IPath packagePath = resource.getFullPath().removeFirstSegments(segmentCount);
+				String packageName = packagePath.toString();
+				if (binaryDelta.getKind() == IResourceDelta.ADDED) {
+					// see if any known source file is from the same package...
+					// classpath already includes new package
+					if (!this.newState.isKnownPackage(packageName)) {
 						if (JavaBuilder.DEBUG)
-							System.out.println("Skipped dependents of added package " + packageName); //$NON-NLS-1$
-					} else {
-						// see if the package still exists on the classpath
-						if (!this.nameEnvironment.isPackage(packageName)) {
-							if (JavaBuilder.DEBUG)
-								System.out.println("Found removed package " + packageName); //$NON-NLS-1$
-							addDependentsOf(packagePath, false);
-							return;
-						}
-						if (JavaBuilder.DEBUG)
-							System.out.println("Skipped dependents of removed package " + packageName); //$NON-NLS-1$
+							System.out.println("Found added package " + packageName); //$NON-NLS-1$
+						addDependentsOf(packagePath, false);
+						return;
 					}
-					//$FALL-THROUGH$ traverse the sub-packages and .class files
-				case IResourceDelta.CHANGED :
-					IResourceDelta[] children = binaryDelta.getAffectedChildren();
-					for (int i = 0, l = children.length; i < l; i++)
-						findAffectedSourceFiles(children[i], segmentCount, structurallyChangedTypes);
+					if (JavaBuilder.DEBUG)
+						System.out.println("Skipped dependents of added package " + packageName); //$NON-NLS-1$
+				} else {
+					// see if the package still exists on the classpath
+					if (!this.nameEnvironment.isPackage(packageName)) {
+						if (JavaBuilder.DEBUG)
+							System.out.println("Found removed package " + packageName); //$NON-NLS-1$
+						addDependentsOf(packagePath, false);
+						return;
+					}
+					if (JavaBuilder.DEBUG)
+						System.out.println("Skipped dependents of removed package " + packageName); //$NON-NLS-1$
+				}
+				//$FALL-THROUGH$ traverse the sub-packages and .class files
+			case IResourceDelta.CHANGED:
+				IResourceDelta[] children = binaryDelta.getAffectedChildren();
+				for (int i = 0, l = children.length; i < l; i++)
+					findAffectedSourceFiles(children[i], segmentCount, structurallyChangedTypes);
+				break;
+			default:
+				break;
 			}
 			return;
-		case IResource.FILE :
+		case IResource.FILE:
 			if (org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(resource.getName())) {
 				IPath typePath = resource.getFullPath().removeFirstSegments(segmentCount).removeFileExtension();
 				switch (binaryDelta.getKind()) {
-					case IResourceDelta.ADDED :
-					case IResourceDelta.REMOVED :
-						if (JavaBuilder.DEBUG)
-							System.out.println("Found added/removed class file " + typePath); //$NON-NLS-1$
-						addDependentsOf(typePath, false);
-						return;
-					case IResourceDelta.CHANGED :
-						if ((binaryDelta.getFlags() & IResourceDelta.CONTENT) == 0)
-							return; // skip it since it really isn't changed
-						if (structurallyChangedTypes != null && !structurallyChangedTypes.includes(typePath.toString()))
-							return; // skip since it wasn't a structural change
-						if (JavaBuilder.DEBUG)
-							System.out.println("Found changed class file " + typePath); //$NON-NLS-1$
-						addDependentsOf(typePath, false);
+				case IResourceDelta.ADDED:
+				case IResourceDelta.REMOVED:
+					if (JavaBuilder.DEBUG)
+						System.out.println("Found added/removed class file " + typePath); //$NON-NLS-1$
+					addDependentsOf(typePath, false);
+					return;
+				case IResourceDelta.CHANGED:
+					if ((binaryDelta.getFlags() & IResourceDelta.CONTENT) == 0)
+						return; // skip it since it really isn't changed
+					if (structurallyChangedTypes != null && !structurallyChangedTypes.includes(typePath.toString()))
+						return; // skip since it wasn't a structural change
+					if (JavaBuilder.DEBUG)
+						System.out.println("Found changed class file " + typePath); //$NON-NLS-1$
+					addDependentsOf(typePath, false);
+					break;
+				default:
+					break;
 				}
 				return;
 			}
+			break;
+		default:
+			break;
+		}
 	}
-}
 
 protected boolean findSourceFiles(IResourceDelta delta) throws CoreException {
 	ArrayList visited = this.makeOutputFolderConsistent ? new ArrayList(this.sourceLocations.length) : null;
 	for (int i = 0, l = this.sourceLocations.length; i < l; i++) {
 		ClasspathMultiDirectory md = this.sourceLocations[i];
-		if (this.makeOutputFolderConsistent && md.hasIndependentOutputFolder && !visited.contains(md.binaryFolder)) {
+		if (visited != null &&  md.hasIndependentOutputFolder && !visited.contains(md.binaryFolder)) {
 			// even a project which acts as its own source folder can have an independent/nested output folder
 			visited.add(md.binaryFolder);
 			IResourceDelta binaryDelta = delta.findMember(md.binaryFolder.getProjectRelativePath());
@@ -512,130 +543,175 @@ protected boolean findSourceFiles(IResourceDelta delta) throws CoreException {
 	return true;
 }
 
-protected boolean findSourceFiles(IResourceDelta sourceDelta, ClasspathMultiDirectory md, int segmentCount) throws CoreException {
-	// When a package becomes a type or vice versa, expect 2 deltas,
-	// one on the folder & one on the source file
-	IResource resource = sourceDelta.getResource();
-	// remember that if inclusion & exclusion patterns change then a full build is done
-	boolean isExcluded = (md.exclusionPatterns != null || md.inclusionPatterns != null)
-		&& Util.isExcluded(resource, md.inclusionPatterns, md.exclusionPatterns);
-	switch(resource.getType()) {
-		case IResource.FOLDER :
+	protected boolean findSourceFiles(IResourceDelta sourceDelta, ClasspathMultiDirectory md, int segmentCount)
+			throws CoreException {
+		// When a package becomes a type or vice versa, expect 2 deltas,
+		// one on the folder & one on the source file
+		IResource resource = sourceDelta.getResource();
+		// remember that if inclusion & exclusion patterns change then a full
+		// build is done
+		boolean isExcluded = (md.exclusionPatterns != null || md.inclusionPatterns != null)
+				&& Util.isExcluded(resource, md.inclusionPatterns, md.exclusionPatterns);
+		switch (resource.getType()) {
+		case IResource.FOLDER:
 			if (isExcluded && md.inclusionPatterns == null)
-		        return true; // no need to go further with this delta since its children cannot be included
+				return true; // no need to go further with this delta since its
+								// children cannot be included
 
 			switch (sourceDelta.getKind()) {
-				case IResourceDelta.ADDED :
-				    if (!isExcluded) {
-						IPath addedPackagePath = resource.getFullPath().removeFirstSegments(segmentCount);
-						createFolder(addedPackagePath, md.binaryFolder); // ensure package exists in the output folder
-						// see if any known source file is from the same package... classpath already includes new package
-						if (this.sourceLocations.length > 1 && this.newState.isKnownPackage(addedPackagePath.toString())) {
-							if (JavaBuilder.DEBUG)
-								System.out.println("Skipped dependents of added package " + addedPackagePath); //$NON-NLS-1$
-						} else {
-							if (JavaBuilder.DEBUG)
-								System.out.println("Found added package " + addedPackagePath); //$NON-NLS-1$
-							addDependentsOf(addedPackagePath, true);
-						}
-				    }
-					//$FALL-THROUGH$ collect all the source files
-				case IResourceDelta.CHANGED :
-					IResourceDelta[] children = sourceDelta.getAffectedChildren();
+			case IResourceDelta.ADDED:
+				if (!isExcluded) {
+					IPath addedPackagePath = resource.getFullPath().removeFirstSegments(segmentCount);
+					createFolder(addedPackagePath, md.binaryFolder); // ensure
+																		// package
+																		// exists
+																		// in
+																		// the
+																		// output
+																		// folder
+					// see if any known source file is from the same package...
+					// classpath already includes new package
+					if (this.sourceLocations.length > 1 && this.newState.isKnownPackage(addedPackagePath.toString())) {
+						if (JavaBuilder.DEBUG)
+							System.out.println("Skipped dependents of added package " + addedPackagePath); //$NON-NLS-1$
+					} else {
+						if (JavaBuilder.DEBUG)
+							System.out.println("Found added package " + addedPackagePath); //$NON-NLS-1$
+						addDependentsOf(addedPackagePath, true);
+					}
+				}
+				//$FALL-THROUGH$ collect all the source files
+			case IResourceDelta.CHANGED:
+				IResourceDelta[] children = sourceDelta.getAffectedChildren();
+				for (int i = 0, l = children.length; i < l; i++)
+					if (!findSourceFiles(children[i], md, segmentCount))
+						return false;
+				return true;
+			case IResourceDelta.REMOVED:
+				if (isExcluded) {
+					// since this folder is excluded then there is nothing to
+					// delete (from this md), but must walk any included
+					// subfolders
+					children = sourceDelta.getAffectedChildren();
 					for (int i = 0, l = children.length; i < l; i++)
 						if (!findSourceFiles(children[i], md, segmentCount))
 							return false;
 					return true;
-				case IResourceDelta.REMOVED :
-				    if (isExcluded) {
-				    	// since this folder is excluded then there is nothing to delete (from this md), but must walk any included subfolders
-						children = sourceDelta.getAffectedChildren();
-						for (int i = 0, l = children.length; i < l; i++)
-							if (!findSourceFiles(children[i], md, segmentCount))
-								return false;
-						return true;
-				    }
-					IPath removedPackagePath = resource.getFullPath().removeFirstSegments(segmentCount);
-					if (this.sourceLocations.length > 1) {
-						for (int i = 0, l = this.sourceLocations.length; i < l; i++) {
-							if (this.sourceLocations[i].sourceFolder.getFolder(removedPackagePath).exists()) {
-								// only a package fragment was removed, same as removing multiple source files
-								if (md.hasIndependentOutputFolder)
-									createFolder(removedPackagePath, md.binaryFolder); // ensure package exists in the output folder
-								IResourceDelta[] removedChildren = sourceDelta.getAffectedChildren();
-								for (int j = 0, m = removedChildren.length; j < m; j++)
-									if (!findSourceFiles(removedChildren[j], md, segmentCount))
-										return false;
-								return true;
-							}
+				}
+				IPath removedPackagePath = resource.getFullPath().removeFirstSegments(segmentCount);
+				if (this.sourceLocations.length > 1) {
+					for (int i = 0, l = this.sourceLocations.length; i < l; i++) {
+						if (this.sourceLocations[i].sourceFolder.getFolder(removedPackagePath).exists()) {
+							// only a package fragment was removed, same as
+							// removing multiple source files
+							if (md.hasIndependentOutputFolder)
+								createFolder(removedPackagePath, md.binaryFolder); // ensure
+																					// package
+																					// exists
+																					// in
+																					// the
+																					// output
+																					// folder
+							IResourceDelta[] removedChildren = sourceDelta.getAffectedChildren();
+							for (int j = 0, m = removedChildren.length; j < m; j++)
+								if (!findSourceFiles(removedChildren[j], md, segmentCount))
+									return false;
+							return true;
 						}
 					}
-					if ((sourceDelta.getFlags() & IResourceDelta.MOVED_TO) != 0) {
-						// same idea as moving a source file
-						// see bug 163200
-						IResource movedFolder = this.javaBuilder.workspaceRoot.getFolder(sourceDelta.getMovedToPath());
-						JavaBuilder.removeProblemsAndTasksFor(movedFolder);
-					}
-					IFolder removedPackageFolder = md.binaryFolder.getFolder(removedPackagePath);
-					if (removedPackageFolder.exists())
-						removedPackageFolder.delete(IResource.FORCE, null);
-					// add dependents even when the package thinks it does not exist to be on the safe side
-					if (JavaBuilder.DEBUG)
-						System.out.println("Found removed package " + removedPackagePath); //$NON-NLS-1$
-					addDependentsOf(removedPackagePath, true);
-					this.newState.removePackage(sourceDelta);
+				}
+				if ((sourceDelta.getFlags() & IResourceDelta.MOVED_TO) != 0) {
+					// same idea as moving a source file
+					// see bug 163200
+					IResource movedFolder = this.javaBuilder.workspaceRoot.getFolder(sourceDelta.getMovedToPath());
+					JavaBuilder.removeProblemsAndTasksFor(movedFolder);
+				}
+				IFolder removedPackageFolder = md.binaryFolder.getFolder(removedPackagePath);
+				if (removedPackageFolder.exists())
+					removedPackageFolder.delete(IResource.FORCE, null);
+				// add dependents even when the package thinks it does not exist
+				// to be on the safe side
+				if (JavaBuilder.DEBUG)
+					System.out.println("Found removed package " + removedPackagePath); //$NON-NLS-1$
+				addDependentsOf(removedPackagePath, true);
+				this.newState.removePackage(sourceDelta);
+				break;
+			default:
+				break;
 			}
 			return true;
-		case IResource.FILE :
-			if (isExcluded) return true;
+		case IResource.FILE:
+			if (isExcluded)
+				return true;
 
 			String resourceName = resource.getName();
 			if (org.eclipse.jdt.internal.core.util.Util.isJavaLikeFileName(resourceName)) {
 				IPath typePath = resource.getFullPath().removeFirstSegments(segmentCount).removeFileExtension();
 				String typeLocator = resource.getProjectRelativePath().toString();
 				switch (sourceDelta.getKind()) {
-					case IResourceDelta.ADDED :
+				case IResourceDelta.ADDED:
+					if (JavaBuilder.DEBUG)
+						System.out.println("Compile this added source file " + typeLocator); //$NON-NLS-1$
+					this.sourceFiles.add(new SourceFile((IFile) resource, md, true));
+					String typeName = typePath.toString();
+					if (!this.newState.isDuplicateLocator(typeName, typeLocator)) { // adding
+																					// dependents
+																					// results
+																					// in
+																					// 2
+																					// duplicate
+																					// errors
 						if (JavaBuilder.DEBUG)
-							System.out.println("Compile this added source file " + typeLocator); //$NON-NLS-1$
-						this.sourceFiles.add(new SourceFile((IFile) resource, md, true));
-						String typeName = typePath.toString();
-						if (!this.newState.isDuplicateLocator(typeName, typeLocator)) { // adding dependents results in 2 duplicate errors
-							if (JavaBuilder.DEBUG)
-								System.out.println("Found added source file " + typeName); //$NON-NLS-1$
-							addDependentsOf(typePath, true);
+							System.out.println("Found added source file " + typeName); //$NON-NLS-1$
+						addDependentsOf(typePath, true);
+					}
+					return true;
+				case IResourceDelta.REMOVED:
+					char[][] definedTypeNames = this.newState.getDefinedTypeNamesFor(typeLocator);
+					if (definedTypeNames == null) { // defined a single type
+													// matching typePath
+						removeClassFile(typePath, md.binaryFolder);
+						if ((sourceDelta.getFlags() & IResourceDelta.MOVED_TO) != 0) {
+							// remove problems and tasks for a compilation unit
+							// that is being moved (to another package or
+							// renamed)
+							// if the target file is a compilation unit, the new
+							// cu will be recompiled
+							// if the target file is a non-java resource, then
+							// markers are removed
+							// see bug 2857
+							IResource movedFile = this.javaBuilder.workspaceRoot.getFile(sourceDelta.getMovedToPath());
+							JavaBuilder.removeProblemsAndTasksFor(movedFile);
 						}
-						return true;
-					case IResourceDelta.REMOVED :
-						char[][] definedTypeNames = this.newState.getDefinedTypeNamesFor(typeLocator);
-						if (definedTypeNames == null) { // defined a single type matching typePath
-							removeClassFile(typePath, md.binaryFolder);
-							if ((sourceDelta.getFlags() & IResourceDelta.MOVED_TO) != 0) {
-								// remove problems and tasks for a compilation unit that is being moved (to another package or renamed)
-								// if the target file is a compilation unit, the new cu will be recompiled
-								// if the target file is a non-java resource, then markers are removed
-								// see bug 2857
-								IResource movedFile = this.javaBuilder.workspaceRoot.getFile(sourceDelta.getMovedToPath());
-								JavaBuilder.removeProblemsAndTasksFor(movedFile);
-							}
-						} else {
-							if (JavaBuilder.DEBUG)
-								System.out.println("Found removed source file " + typePath.toString()); //$NON-NLS-1$
-							addDependentsOf(typePath, true); // add dependents of the source file since it may be involved in a name collision
-							if (definedTypeNames.length > 0) { // skip it if it failed to successfully define a type
-								IPath packagePath = typePath.removeLastSegments(1);
-								for (int i = 0, l = definedTypeNames.length; i < l; i++)
-									removeClassFile(packagePath.append(new String(definedTypeNames[i])), md.binaryFolder);
-							}
-						}
-						this.newState.removeLocator(typeLocator);
-						return true;
-					case IResourceDelta.CHANGED :
-						if ((sourceDelta.getFlags() & IResourceDelta.CONTENT) == 0
-								&& (sourceDelta.getFlags() & IResourceDelta.ENCODING) == 0)
-							return true; // skip it since it really isn't changed
+					} else {
 						if (JavaBuilder.DEBUG)
-							System.out.println("Compile this changed source file " + typeLocator); //$NON-NLS-1$
-						this.sourceFiles.add(new SourceFile((IFile) resource, md, true));
+							System.out.println("Found removed source file " + typePath.toString()); //$NON-NLS-1$
+						addDependentsOf(typePath, true); // add dependents of
+															// the source file
+															// since it may be
+															// involved in a
+															// name collision
+						if (definedTypeNames.length > 0) { // skip it if it
+															// failed to
+															// successfully
+															// define a type
+							IPath packagePath = typePath.removeLastSegments(1);
+							for (int i = 0, l = definedTypeNames.length; i < l; i++)
+								removeClassFile(packagePath.append(new String(definedTypeNames[i])), md.binaryFolder);
+						}
+					}
+					this.newState.removeLocator(typeLocator);
+					return true;
+				case IResourceDelta.CHANGED:
+					if ((sourceDelta.getFlags() & IResourceDelta.CONTENT) == 0
+							&& (sourceDelta.getFlags() & IResourceDelta.ENCODING) == 0)
+						return true; // skip it since it really isn't changed
+					if (JavaBuilder.DEBUG)
+						System.out.println("Compile this changed source file " + typeLocator); //$NON-NLS-1$
+					this.sourceFiles.add(new SourceFile((IFile) resource, md, true));
+					break;
+				default:
+					break;
 				}
 				return true;
 			} else if (org.eclipse.jdt.internal.compiler.util.Util.isClassFileName(resourceName)) {
@@ -650,49 +726,68 @@ protected boolean findSourceFiles(IResourceDelta sourceDelta, ClasspathMultiDire
 				}
 				return true;
 			} else if (md.hasIndependentOutputFolder) {
-				if (this.javaBuilder.filterExtraResource(resource)) return true;
+				if (this.javaBuilder.filterExtraResource(resource))
+					return true;
 
 				// copy all other resource deltas to the output folder
 				IPath resourcePath = resource.getFullPath().removeFirstSegments(segmentCount);
 				IResource outputFile = md.binaryFolder.getFile(resourcePath);
 				switch (sourceDelta.getKind()) {
-					case IResourceDelta.ADDED :
-						if (outputFile.exists()) {
-							if (JavaBuilder.DEBUG)
-								System.out.println("Deleting existing file " + resourcePath); //$NON-NLS-1$
-							outputFile.delete(IResource.FORCE, null);
-						}
+				case IResourceDelta.ADDED:
+					if (outputFile.exists()) {
 						if (JavaBuilder.DEBUG)
-							System.out.println("Copying added file " + resourcePath); //$NON-NLS-1$
-						createFolder(resourcePath.removeLastSegments(1), md.binaryFolder); // ensure package exists in the output folder
-						copyResource(resource, outputFile);
-						return true;
-					case IResourceDelta.REMOVED :
-						if (outputFile.exists()) {
-							if (JavaBuilder.DEBUG)
-								System.out.println("Deleting removed file " + resourcePath); //$NON-NLS-1$
-							outputFile.delete(IResource.FORCE, null);
-						}
-						return true;
-					case IResourceDelta.CHANGED :
-						if ((sourceDelta.getFlags() & IResourceDelta.CONTENT) == 0
-								&& (sourceDelta.getFlags() & IResourceDelta.ENCODING) == 0)
-							return true; // skip it since it really isn't changed
-						if (outputFile.exists()) {
-							if (JavaBuilder.DEBUG)
-								System.out.println("Deleting existing file " + resourcePath); //$NON-NLS-1$
-							outputFile.delete(IResource.FORCE, null);
-						}
+							System.out.println("Deleting existing file " + resourcePath); //$NON-NLS-1$
+						outputFile.delete(IResource.FORCE, null);
+					}
+					if (JavaBuilder.DEBUG)
+						System.out.println("Copying added file " + resourcePath); //$NON-NLS-1$
+					createFolder(resourcePath.removeLastSegments(1), md.binaryFolder); // ensure
+																						// package
+																						// exists
+																						// in
+																						// the
+																						// output
+																						// folder
+					copyResource(resource, outputFile);
+					return true;
+				case IResourceDelta.REMOVED:
+					if (outputFile.exists()) {
 						if (JavaBuilder.DEBUG)
-							System.out.println("Copying changed file " + resourcePath); //$NON-NLS-1$
-						createFolder(resourcePath.removeLastSegments(1), md.binaryFolder); // ensure package exists in the output folder
-						copyResource(resource, outputFile);
+							System.out.println("Deleting removed file " + resourcePath); //$NON-NLS-1$
+						outputFile.delete(IResource.FORCE, null);
+					}
+					return true;
+				case IResourceDelta.CHANGED:
+					if ((sourceDelta.getFlags() & IResourceDelta.CONTENT) == 0
+							&& (sourceDelta.getFlags() & IResourceDelta.ENCODING) == 0)
+						return true; // skip it since it really isn't changed
+					if (outputFile.exists()) {
+						if (JavaBuilder.DEBUG)
+							System.out.println("Deleting existing file " + resourcePath); //$NON-NLS-1$
+						outputFile.delete(IResource.FORCE, null);
+					}
+					if (JavaBuilder.DEBUG)
+						System.out.println("Copying changed file " + resourcePath); //$NON-NLS-1$
+					createFolder(resourcePath.removeLastSegments(1), md.binaryFolder); // ensure
+																						// package
+																						// exists
+																						// in
+																						// the
+																						// output
+																						// folder
+					copyResource(resource, outputFile);
+					break;
+				default:
+					break;
 				}
 				return true;
 			}
+			break;
+		default:
+			break;
+		}
+		return true;
 	}
-	return true;
-}
 
 protected void finishedWith(String sourceLocator, CompilationResult result, char[] mainTypeName, ArrayList definedTypeNames, ArrayList duplicateTypeNames) {
 	char[][] previousTypeNames = this.newState.getDefinedTypeNamesFor(sourceLocator);
@@ -870,7 +965,7 @@ protected void writeClassFileContents(ClassFile classfile, IFile file, String qu
 						try {
 							file.create(new ByteArrayInputStream(bytes), IResource.FORCE | IResource.DERIVED, null);
 							success = true;
-						} catch (CoreException ignored) {
+						} catch (@SuppressWarnings("unused") CoreException ignored) {
 							// ignore the second exception
 						}
 						if (success) return;
@@ -903,7 +998,7 @@ protected boolean writeClassFileCheck(IFile file, String fileName, byte[] newByt
 			addDependentsOf(new Path(fileName), true);
 			this.newState.wasStructurallyChanged(fileName);
 		}
-	} catch (ClassFormatException e) {
+	} catch (@SuppressWarnings("unused") ClassFormatException e) {
 		addDependentsOf(new Path(fileName), true);
 		this.newState.wasStructurallyChanged(fileName);
 	}

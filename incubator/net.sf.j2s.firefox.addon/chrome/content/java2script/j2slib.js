@@ -1,10 +1,10 @@
 window["j2s.addon.loaded"] = true;
 window["j2s.lib.list"] = [
-	/*{ version : "20061113", alias : "1.0.0-m4" },
+	/*{ version : "20061113", alias : "3.1.1-m4" },
 	{ version : "20061215" },*/
 	{ version : "20070206" }/*,
 	{ version : "20070207" },
-	{ version : "20070228", alias : "1.0.0-m5" },
+	{ version : "20070228", alias : "3.1.1-m5" },
 	{ version : "20070307" },*/
 ];
 

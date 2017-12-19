@@ -28,8 +28,7 @@ public class IllegalFormatConversionException extends IllegalFormatException
 
 	private char c;
 
-//	private Class<?> arg;
-	private Class arg;
+	private Class<?> arg;
 
 	/**
 	 * Constructs an IllegalFormatConversionException with the class of the
@@ -40,8 +39,7 @@ public class IllegalFormatConversionException extends IllegalFormatException
 	 * @param arg
 	 *            The corresponding parameter.
 	 */
-//	public IllegalFormatConversionException(char c, Class<?> arg) {
-	public IllegalFormatConversionException(char c, Class arg) {
+	public IllegalFormatConversionException(char c, Class<?> arg) {
 		this.c = c;
 		if (arg == null) {
 			throw new NullPointerException();
@@ -54,8 +52,7 @@ public class IllegalFormatConversionException extends IllegalFormatException
 	 * 
 	 * @return The class of the mismatched parameter.
 	 */
-//	public Class<?> getArgumentClass() {
-	public Class getArgumentClass() {
+	public Class<?> getArgumentClass() {
 		return arg;
 	}
 

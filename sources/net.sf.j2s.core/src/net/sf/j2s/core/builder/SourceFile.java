@@ -19,6 +19,7 @@ import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.jdt.internal.core.util.Util;
 
+@SuppressWarnings("restriction")
 public class SourceFile implements ICompilationUnit {
 
 public IFile resource;
@@ -77,7 +78,7 @@ public char[] getContents() {
 
 	try {
 		return Util.getResourceContentsAsCharArray(this.resource);
-	} catch (CoreException e) {
+	} catch (@SuppressWarnings("unused") CoreException e) {
 		throw new AbortCompilation(true, new MissingSourceFileException(this.resource.getFullPath().toString()));
 	}
 }

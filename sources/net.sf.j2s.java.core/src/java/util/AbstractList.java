@@ -479,7 +479,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
             return true;
         }
 		if (object instanceof List) {
-			List<?> list = (List) object;
+			List<?> list = (List<?>) object;
 			if (list.size() != size()) {
                 return false;
             }

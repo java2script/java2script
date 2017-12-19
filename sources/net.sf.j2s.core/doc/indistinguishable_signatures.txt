@@ -1,0 +1,143 @@
+Methods in java and Swing that are not distinguishable and must be worked around. 
+
+(Color is not on this list)
+
+Duplicates: 15
+    
+6    jsjava.awt.Component.firePropertyChange\String\Number\Number
+2    jsjava.awt.Font.deriveFont\Number
+5    java.lang.StringBuilder.append\Number
+5    java.lang.StringBuilder.insert\Number\Number
+2    java.lang.StringBuffer.append\Number
+4    java.lang.StringBuffer.insert\Number\Number
+2    jsjava.lang.ThreadGroup.enumerate\Array\Boolean
+2    jsjava.lang.ThreadGroup.enumerate\Array\Number\Boolean
+2    jsjava.awt.geom.AffineTransform.construct\Number\Number\Number\Number\Number\Number
+2    jsjava.awt.geom.AffineTransform.construct\Array
+5    jsjava.awt.geom.AffineTransform.transform\Array\Number\Array\Number\Number
+2    jsjava.awt.Point.setLocation\Number\Number
+2    jsjava.awt.image.ColorModel.getDataElements\Array\Number\Object
+2    jsjava.text.NumberFormat.format\Number
+2    jssun.util.calendar.CalendarUtils.floorDivide\Number\Number\Array
+
+In detail:
+
+Duplicates: 15
+    
+6    jsjava.awt.Component.firePropertyChange\String\Number\Number
+
+    public void firePropertyChange(String propertyName, byte oldValue, byte newValue) {
+    public void firePropertyChange(String propertyName, char oldValue, char newValue) {
+    public void firePropertyChange(String propertyName, short oldValue, short newValue) {
+    public void firePropertyChange(String propertyName, long oldValue, long newValue) {
+    public void firePropertyChange(String propertyName, float oldValue, float newValue) {
+    public void firePropertyChange(String propertyName, double oldValue, double newValue) {
+
+
+2    jsjava.awt.Font.deriveFont\Number
+
+    public Font deriveFont(float size){
+    public Font deriveFont(int style){
+
+
+5    java.lang.StringBuilder.append\Number
+
+    public StringBuilder append(char c) {
+    public StringBuilder append(int i) {
+    public StringBuilder append(long lng) {
+    public StringBuilder append(float f) {
+    public StringBuilder append(double d) {
+
+
+5    java.lang.StringBuilder.insert\Number\Number
+
+      public StringBuilder insert(int offset, char c) {
+      public StringBuilder insert(int offset, int i) {
+      public StringBuilder insert(int offset, long l) {
+      public StringBuilder insert(int offset, float f) {
+      public StringBuilder insert(int offset, double d) {
+
+
+2    java.lang.StringBuffer.append\Number
+
+(should be more of these; this is because some have been removed already, I think)
+
+    public synchronized StringBuffer append(char c) {
+    public synchronized StringBuffer append(int i) {
+    public synchronized StringBuffer append(long lng) {
+    public synchronized StringBuffer append(float f) {
+    public synchronized StringBuffer append(double d) {
+
+
+4    java.lang.StringBuffer.insert\Number\Number
+
+    public synchronized StringBuffer insert(int offset, char c) {
+    public StringBuffer insert(int offset, int i) {
+    public StringBuffer insert(int offset, long l) {
+    public StringBuffer insert(int offset, float f) {
+    public StringBuffer insert(int offset, double d) {
+
+
+
+2    jsjava.lang.ThreadGroup.enumerate\Array\Boolean
+
+    public int enumerate(Thread list[], boolean recurse) {
+    public int enumerate(ThreadGroup list[], boolean recurse) {
+
+
+2    jsjava.lang.ThreadGroup.enumerate\Array\Number\Boolean
+
+    private int enumerate(Thread list[], int n, boolean recurse) {
+    private int enumerate(ThreadGroup list[], int n, boolean recurse) {
+
+
+2    jsjava.awt.geom.AffineTransform.construct\Number\Number\Number\Number\Number\Number
+
+    public AffineTransform(float m00, float m10,
+                           float m01, float m11,
+                           float m02, float m12) {
+    public AffineTransform(double m00, double m10,
+                           double m01, double m11,
+                           double m02, double m12) {
+
+
+2    jsjava.awt.geom.AffineTransform.construct\Array
+
+    public AffineTransform(float[] flatmatrix) {
+    public AffineTransform(double[] flatmatrix) {
+
+
+5    jsjava.awt.geom.AffineTransform.transform\Array\Number\Array\Number\Number
+
+    public void transform(Point2D[] ptSrc, int srcOff,
+                          Point2D[] ptDst, int dstOff,
+                          int numPts) {
+    public void transform(float[] srcPts, int srcOff,
+                          float[] dstPts, int dstOff,
+                          int numPts) {
+
+
+2    jsjava.awt.Point.setLocation\Number\Number
+
+    public void setLocation(int x, int y) {
+    public void setLocation(double x, double y) {
+
+
+2    jsjava.awt.image.ColorModel.getDataElements\Array\Number\Object
+
+    public int getDataElement(float[] normComponents, int normOffset) {
+    public int getDataElement(int[] components, int offset) {
+
+
+2    jsjava.text.NumberFormat.format\Number
+
+    public final String format(double number) {
+    public final String format(long number) {
+
+2    jssun.util.calendar.CalendarUtils.floorDivide\Number\Number\Array
+
+  (functions are identical; this is not significant)
+  
+    public static final int floorDivide(int n, int d, int[] r) {
+    public static final int floorDivide(long n, int d, int[] r) {
+

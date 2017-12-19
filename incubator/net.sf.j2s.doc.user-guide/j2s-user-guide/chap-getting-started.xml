@@ -164,7 +164,7 @@ public class HelloWorld {
    </programlisting>
    
    <para>This is aceptable for developing because the Java2Script application will be loaded fast from filesystem. Nevertheless, you should change this if
-   you want to deploy your application to a web server. A common practice is to copy your <filename>eclipse classic helios/plugins/net.sf.j2s.lib_2.0.0/j2slib/</filename>
+   you want to deploy your application to a web server. A common practice is to copy your <filename>eclipse classic helios/plugins/net.sf.j2s.lib_3.1.1/j2slib/</filename>
    folder inside your Java2Script project and configure the application launcher to use a Global .js URL for your j2slib base: </para>
    
     <figure>

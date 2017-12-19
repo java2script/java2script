@@ -13,8 +13,6 @@ package net.sf.j2s.core.builder;
 
 import java.util.Locale;
 import java.util.Map;
-import net.sf.j2s.core.compiler.Java2ScriptCompiler;
-import net.sf.j2s.core.compiler.Java2ScriptImageCompiler;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.compiler.Compiler;
@@ -22,11 +20,14 @@ import org.eclipse.jdt.internal.compiler.DefaultErrorHandlingPolicies;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 
+import net.sf.j2s.core.compiler.Java2ScriptImageCompiler;
+
 /**
  * @author zhou renjian
  *
  * 2006-6-14
  */
+@SuppressWarnings("restriction")
 public class Java2ScriptIncrementalImageBuilder extends IncrementalImageBuilder {
 	/**
 	 * @param javaBuilder
@@ -37,14 +38,14 @@ public class Java2ScriptIncrementalImageBuilder extends IncrementalImageBuilder 
 	
 	protected Compiler newCompiler() {
 		// disable entire javadoc support if not interested in diagnostics
-		Map projectOptions = this.javaBuilder.javaProject.getOptions(true);
-		String option = (String) projectOptions.get(JavaCore.COMPILER_PB_INVALID_JAVADOC);
+		Map<String, String> projectOptions = this.javaBuilder.javaProject.getOptions(true);
+		String option = projectOptions.get(JavaCore.COMPILER_PB_INVALID_JAVADOC);
 		if (option == null || option.equals(JavaCore.IGNORE)) { // TODO (frederic) see why option is null sometimes while running model tests!?
-			option = (String) projectOptions.get(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS);
+			option = projectOptions.get(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS);
 			if (option == null || option.equals(JavaCore.IGNORE)) {
-				option = (String) projectOptions.get(JavaCore.COMPILER_PB_MISSING_JAVADOC_COMMENTS);
+				option = projectOptions.get(JavaCore.COMPILER_PB_MISSING_JAVADOC_COMMENTS);
 				if (option == null || option.equals(JavaCore.IGNORE)) {
-					option = (String) projectOptions.get(JavaCore.COMPILER_PB_UNUSED_IMPORT);
+					option = projectOptions.get(JavaCore.COMPILER_PB_UNUSED_IMPORT);
 					if (option == null || option.equals(JavaCore.IGNORE)) { // Unused import need also to look inside javadoc comment
 						projectOptions.put(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, JavaCore.DISABLED);
 					}

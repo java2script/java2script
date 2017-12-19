@@ -84,6 +84,8 @@ abstract class AbstractStringBuilder {
     }
 
     AbstractStringBuilder(String string) {
+    	if (string == null) // BH added
+    		throw new NullPointerException(); // BH added
         count = string.length();
         shared = false;
         value = new char[count + INITIAL_CAPACITY];
@@ -760,7 +762,6 @@ abstract class AbstractStringBuilder {
      * @see Character
      * @see Character#codePointAt(char[], int, int)
      * @since 1.5
-     * @j2sIgnore
      */
     public int codePointAt(int index) {
         if (index < 0 || index >= count)
@@ -782,7 +783,6 @@ abstract class AbstractStringBuilder {
      * @see Character
      * @see Character#codePointBefore(char[], int, int)
      * @since 1.5
-     * @j2sIgnore
      */
     public int codePointBefore(int index) {
         if (index < 1 || index > count)
@@ -803,7 +803,6 @@ abstract class AbstractStringBuilder {
      *         negative or greater than <code>endIndex</code> or
      *         <code>endIndex</code> is greater than {@link #length()}.
      * @since 1.5
-     * @j2sIgnore
      */
     public int codePointCount(int beginIndex, int endIndex) {
         if (beginIndex < 0 || endIndex > count || beginIndex > endIndex)
@@ -826,7 +825,6 @@ abstract class AbstractStringBuilder {
      *         points before or after <code>index</code> to match
      *         <code>codePointOffset</code>.
      * @since 1.5
-     * @j2sIgnore
      */
     public int offsetByCodePoints(int index, int codePointOffset) {
         return Character.offsetByCodePoints(value, 0, count, index,

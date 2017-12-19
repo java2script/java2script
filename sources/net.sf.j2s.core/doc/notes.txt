@@ -1,0 +1,5 @@
+@J2SRequireImport (xxx.class)
+
+is required when a static reference is made to new xxx() from yyy.
+
+

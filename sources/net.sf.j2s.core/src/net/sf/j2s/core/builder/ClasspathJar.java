@@ -29,7 +29,7 @@ import java.io.*;
 import java.util.*;
 import java.util.zip.*;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({ "rawtypes", "restriction" })
 public class ClasspathJar extends ClasspathLocation {
 
 static class PackageCacheEntry {
@@ -100,7 +100,7 @@ ClasspathJar(IFile resource, AccessRuleSet accessRuleSet, IPath externalAnnotati
 			File localFile = Util.toLocalFile(location, null);
 			this.zipFilename = localFile.getPath();
 		}
-	} catch (CoreException e) {
+	} catch (@SuppressWarnings("unused") CoreException e) {
 		// ignore
 	}
 	this.zipFile = null;
@@ -135,14 +135,14 @@ public void cleanup() {
 		if (this.zipFile != null) {
 			try {
 				this.zipFile.close();
-			} catch(IOException e) { // ignore it
+			} catch(@SuppressWarnings("unused") IOException e) { // ignore it
 			}
 			this.zipFile = null;
 		}
 		if (this.annotationZipFile != null) {
 			try {
 				this.annotationZipFile.close();
-			} catch(IOException e) { // ignore it
+			} catch(@SuppressWarnings("unused") IOException e) { // ignore it
 			}
 			this.annotationZipFile = null;
 		}
@@ -171,7 +171,7 @@ public NameEnvironmentAnswer findClass(String binaryFileName, String qualifiedPa
 			if (this.externalAnnotationPath != null) {
 				try {
 					this.annotationZipFile = reader.setExternalAnnotationProvider(this.externalAnnotationPath, fileNameWithoutExtension, this.annotationZipFile, null);
-				} catch (IOException e) {
+				} catch (@SuppressWarnings("unused") IOException e) {
 					// don't let error on annotations fail class reading
 				}
 			}
@@ -179,8 +179,8 @@ public NameEnvironmentAnswer findClass(String binaryFileName, String qualifiedPa
 				return new NameEnvironmentAnswer(reader, null);
 			return new NameEnvironmentAnswer(reader, this.accessRuleSet.getViolatedRestriction(fileNameWithoutExtension.toCharArray()));
 		}
-	} catch (IOException e) { // treat as if class file is missing
-	} catch (ClassFormatException e) { // treat as if class file is missing
+	} catch (@SuppressWarnings("unused") IOException e) { // treat as if class file is missing
+	} catch (@SuppressWarnings("unused") ClassFormatException e) { // treat as if class file is missing
 	}
 	return null;
 }
@@ -207,7 +207,7 @@ public boolean isPackage(String qualifiedPackageName) {
 			this.closeZipFileAtEnd = true;
 		}
 		this.knownPackageNames = findPackageSet(this);
-	} catch(Exception e) {
+	} catch(@SuppressWarnings("unused") Exception e) {
 		this.knownPackageNames = new SimpleSet(); // assume for this build the zipFile is empty
 	}
 	return this.knownPackageNames.includes(qualifiedPackageName);

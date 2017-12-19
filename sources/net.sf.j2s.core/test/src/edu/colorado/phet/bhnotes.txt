@@ -1,0 +1,10 @@
+
+BH 12/5/2017 7:52:12 PM
+
+revising PhET for swingjs2. 
+
+ -moving assets from src folder to src/edu/colorado/phet
+ -adding GregorianCalendar
+ -adding ExceptionInInitializationError
+ -fixing java.awt.AWTKeyStroke.getCtor(Class)
+ 

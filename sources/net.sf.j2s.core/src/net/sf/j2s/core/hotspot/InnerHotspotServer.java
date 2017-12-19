@@ -11,9 +11,9 @@ import java.util.*;
 public class InnerHotspotServer {
 
     /* Where worker threads stand idle */
-    static Vector threads = new Vector();
+    static Vector<HotspotWorker> threads = new Vector<HotspotWorker>();
 
-    static Vector hotspotItems = new Vector();
+    static Vector<Java2ScriptCompiledItem> hotspotItems = new Vector<Java2ScriptCompiledItem>();
     
     static long latestSessionID = 1;
     
@@ -53,10 +53,10 @@ public class InnerHotspotServer {
     	Java2ScriptCompiledItem item = new Java2ScriptCompiledItem(new Date().getTime(), latestSessionID, name);
     	latestSessionID++;
     	synchronized (hotspotItems) {
-    		List toRemoveList = new ArrayList();
+    		List<Java2ScriptCompiledItem> toRemoveList = new ArrayList<Java2ScriptCompiledItem>();
     		long now = new Date().getTime();
-    		for (Iterator iterator = hotspotItems.iterator(); iterator.hasNext();) {
-    			Java2ScriptCompiledItem i = (Java2ScriptCompiledItem) iterator.next();
+    		for (Iterator<Java2ScriptCompiledItem> iterator = hotspotItems.iterator(); iterator.hasNext();) {
+    			Java2ScriptCompiledItem i = iterator.next();
     			if (i.getTime() < now - 10000) { // 10 seconds delay!
     				toRemoveList.add(i);
     			}
@@ -72,8 +72,8 @@ public class InnerHotspotServer {
     	StringBuffer buf = new StringBuffer();
     	long now = new Date().getTime();
     	synchronized (hotspotItems) {
-    		for (Iterator iterator = hotspotItems.iterator(); iterator.hasNext();) {
-    			Java2ScriptCompiledItem item = (Java2ScriptCompiledItem) iterator.next();
+    		for (Iterator<Java2ScriptCompiledItem> iterator = hotspotItems.iterator(); iterator.hasNext();) {
+    			Java2ScriptCompiledItem item = iterator.next();
     			if ((session > 0 && item.getId() > session) 
     					|| (session <= 0 && item.getTime() >= now - 10000)) { // 10 seconds delay!
     				buf.append(item.getTime());
@@ -130,7 +130,7 @@ public class InnerHotspotServer {
 		}
     }
     
-    private void serverLoop() throws Exception {
+    void serverLoop() throws Exception {
         
         threads.clear();
         /* start worker threads */
@@ -144,7 +144,7 @@ public class InnerHotspotServer {
             Socket s = null;
             try {
                 s = ss.accept();
-            } catch (IOException e) {
+            } catch (@SuppressWarnings("unused") IOException e) {
                 //e.printStackTrace();
             }
             if (s == null) continue;
@@ -155,7 +155,7 @@ public class InnerHotspotServer {
                     ws.setSocket(s);
                     (new Thread(ws, "additional worker")).start();
                 } else {
-                    w = (HotspotWorker) threads.elementAt(0);
+                    w = threads.elementAt(0);
                     threads.removeElementAt(0);
                     w.setSocket(s);
                 }
@@ -165,21 +165,21 @@ public class InnerHotspotServer {
 
 
 	private int tryToGetAPort() throws Exception {
-        int port = 1725;
+        int myport = 1725;
 		int maxTryTimes = 200;
-        ArrayList failedPortList = new ArrayList();
+        ArrayList<?> failedPortList = new ArrayList<Object>();
         
         ss = null;
         int triedTimes = 0;
         while (triedTimes < maxTryTimes) {
             triedTimes ++;
 	        try {
-	            ss = new ServerSocket(port);
+	            ss = new ServerSocket(myport);
 		        break;
-	        } catch (IOException e) {
+	        } catch (@SuppressWarnings("unused") IOException e) {
 	            while (true) {
-		            port = 1024 + Math.round((float) Math.random() * (65535 - 1024));
-		            Integer integerPort = new Integer(port);
+		            myport = 1024 + Math.round((float) Math.random() * (65535 - 1024));
+		            Integer integerPort = new Integer(myport);
 		            if (!failedPortList.contains(integerPort)) {
 		                break;
 		            }
@@ -189,7 +189,7 @@ public class InnerHotspotServer {
         if (triedTimes >= maxTryTimes) {
             throw new Exception("Failed to setup inner Java2Script hotspot HTTP Server!");
         }
-        return port;
+        return myport;
 	}
 }
 

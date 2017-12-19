@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+   <extension
+         id="net.sf.j2s.innerjsresources"
+         name="Inner JS Resources"
+         point="net.sf.j2s.ui.externalResourceProvider">
+      <externalResourceProvider
+            class="net.sf.j2s.lib.providers.JavaRuntimeJSProvider"
+            id="net.sf.j2s.lib.providers.javaRuntimeJS"/>
+      <!--
+      <externalResourceProvider
+            class="net.sf.j2s.lib.providers.JavaSWTJSProvider"
+            id="net.sf.j2s.lib.providers.javaSWTJS"/>
+       -->
+   </extension>
+
+</plugin>

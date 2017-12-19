@@ -545,7 +545,7 @@ return strBuf;
 		char baseChar = 'B';
 		StringBuilder builder = new StringBuilder(1024);
 		/*
-		 * "WLL" is used to mark Simple RPC, 100 is version 1.0.0, 
+		 * "WLL" is used to mark Simple RPC, 100 is version 3.1.1, 
 		 * # is used to mark the the beginning of serialized data  
 		 */
 		builder.append("WLL");
@@ -958,7 +958,7 @@ return strBuf;
 		ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
 		DataOutputStream dos = new DataOutputStream(baos);
 		/*
-		 * "WLL" is used to mark Simple RPC, 100 is version 1.0.0, 
+		 * "WLL" is used to mark Simple RPC, 100 is version 3.1.1, 
 		 * # is used to mark the the beginning of serialized data  
 		 */
 		dos.writeBytes("WLL");

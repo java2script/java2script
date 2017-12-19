@@ -1,0 +1,77 @@
+/*
+ * ClassLoader Summary
+ * 
+ * ClassLoader creates SCRIPT elements and setup class path and onload 
+ * callback to continue class loading.
+ *
+ * In the onload callbacks, _Loader will try to calculate the next-to-be-
+ * load *.js and load it. In *.js, it will contains some codes like
+ * Clazz.load (..., "$wt.widgets.Control", ...);
+ * to provide information to build up the class dependency tree.
+ *
+ * Some known problems of different browsers:
+ * 1. In IE, loading *.js through SCRIPT will first triggers onreadstatechange 
+ * event, and then executes inner *.js source.
+ * 2. In Firefox, loading *.js will first executes *.js source and then 
+ * triggers onload event.
+ * 3. In Opera, similar to IE, but trigger onload event. (TODO: More details 
+ * should be studied. Currently, Opera supports no multiple-thread-loading)
+ * 
+ * For class dependency tree, actually, it is not a tree. It is a reference
+ * net with nodes have n parents and n children. There is a root, which 
+ * ClassLoader knows where to start searching and loading classes, for such
+ * a net. Each node is a class. Each class may require a set of must-classes, 
+ * which must be loaded before itself getting initialized, and also need a set
+ * of optional classes, which also be loaded before being called.
+ *
+ * The class loading status will be in 6 stages.
+ * 1. Unknown, the class is newly introduced by other class.
+ * 2. Known, the class is already mentioned by other class.
+ * 3. Loaded, *.js source is in memory, but may not be initialized yet. It 
+ * requires all its must-classes be intiailized, which is in the next stage.
+ * 4. Musts loaded, all must classes is already loaded and declared.
+ * 5. Delcared, the class is already declared (_Loader#isClassDefined).
+ * 6. Optionals loaded, all optional classes is loaded and declared.
+ *
+ * The ClassLoader tries to load all necessary classes in order, and intialize
+ * them in order. For such job, it will traverse the dependency tree, and try 
+ * to next class to-be-loaded. Sometime, the class dependencies may be in one
+ * or more cycles, which must be broken down so classes is loaded in correct
+ * order.
+ *
+ * Loading order and intializing order is very important for the ClassLoader.
+ * The following technical options are considered:
+ * 1. SCRIPT is loading asynchronously, which means controling order must use
+ * callback methods to continue.
+ * 2. Multiple loading threads are later introduced, which requires the 
+ * ClassLoader should use variables to record the class status.
+ * 3. Different browsers have different loading orders, which means extra tests
+ * should be tested to make sure loading order won't be broken.
+ * 4. Java2Script simulator itself have some loading orders that must be 
+ * honored, which means it should be integrated seamlessly to Clazz system.
+ * 5. Packed *.z.js is introduced to avoid lots of small *.js which requires 
+ * lots of HTTP connections, which means that packed *.z.js should be treated
+ * specially (There will be mappings for such packed classes).
+ * 6. *.js or *.css loading may fail according to network status, which means
+ * another loading try should be performed, so _Loader is more robust.
+ * 7. SWT lazy loading is later introduced, which means that class loading
+ * process may be paused and should be resumed later.
+ *
+ * Some known bugs:
+ * <code>$_L(["$wt.graphics.Drawable","$wt.widgets.Widget"],
+ *  "$wt.widgets.Control", ...</code>
+ * has errors while must classes in different order such as
+ * <code>$_L(["$wt.widgets.Widget", "$wt.graphics.Drawable"],
+ *  "$wt.widgets.Control", ...</code>
+ * has no error.
+ * 
+ * Other maybe bug scenarios:
+ * 1. In <code>_Loader.maxLoadingThreads = 1;</code> single loading thread 
+ * mode, there are no errors, but in default multiple thread loading mode, 
+ * there are errors.
+ * 2. No errors in one browser, but has errors on other browsers (Browser 
+ * script loading order differences).
+ * 3. First time loading has errors, but reloading it gets no errors (Maybe 
+ * HTTP connections timeout, but should not accur in local file system, or it
+ * is a loading bug by using JavaScript timeout thread).
+ */

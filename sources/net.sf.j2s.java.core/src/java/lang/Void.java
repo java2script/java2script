@@ -17,6 +17,8 @@
 
 package java.lang;
 
+//DEPRECATED -- SEE J2SSwingJS.js
+
 //import java.lang.reflect.Method;
 
 /**

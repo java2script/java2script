@@ -38,7 +38,8 @@ public class Java2ScriptCompiledItem {
 	}
 
 	public boolean equals(Object obj) {
-		if (this == obj) return true;
+		if (this == obj)
+			return true;
 		if (obj == null || !(obj instanceof Java2ScriptCompiledItem)) {
 			return false;
 		}
@@ -48,17 +49,15 @@ public class Java2ScriptCompiledItem {
 		}
 		if (name != null) {
 			return name.equals(item.name);
-		} else {
-			return item.name == null;
 		}
+		return item.name == null;
 	}
 
 	public int hashCode() {
 		if (name != null) {
 			return (int) (name.hashCode() + time + id);
-		} else {
-			return (int) (time + id);
 		}
+		return (int) (time + id);
 	}
 	
 }

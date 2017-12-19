@@ -18,12 +18,12 @@
           target: j2s.swt.widget              
          ================================= -->
     <target name="j2s.example.packed" description="Building j2s-swt-*.z.js">
-    	<zip destfile="O:/j2s/j2s-lib-1.0.0-m3-20060809.zip">
+    	<zip destfile="O:/j2s/j2s-lib-3.1.1-m3-20060809.zip">
     		<fileset dir="O:/j2s.sourceforge.net/htdocs">
     			<exclude name="**/.svn"/>
     			<exclude name="**/.swp"/>
     			<exclude name="**/.swo"/>
-    			<include name="j2s-lib-1.0.0-m3/**"/>
+    			<include name="j2s-lib-3.1.1-m3/**"/>
     		</fileset>
     	</zip>
     	<zip destfile="O:/j2s/swt-control-examples-20060809.zip">

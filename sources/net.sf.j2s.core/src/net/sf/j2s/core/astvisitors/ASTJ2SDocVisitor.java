@@ -12,49 +12,42 @@
 package net.sf.j2s.core.astvisitors;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 
+import net.sf.j2s.core.astvisitors.adapters.Bindings;
+//import net.sf.j2s.core.astvisitors.adapters.ExtendedAdapter;
+
 /**
- * This level of Visitor will try to focus on dealing with those
+ * This level of Visitor focuses on dealing with 
  * j2s* Javadoc tags.
  * 
  * @author zhou renjian
  *
  * 2006-12-4
  */
-public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
-	
-	private Javadoc[] nativeJavadoc = null;
-	
-	private ASTNode javadocRoot = null;
+public class ASTJ2SDocVisitor extends ASTEmptyVisitor {
 	
 	private boolean isDebugging = false;
 
-	
+	private ArrayList<Javadoc> rootJavaDocs; 
+
 	public boolean isDebugging() {
 		return isDebugging;
 	}
@@ -64,575 +57,337 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 	}
 
 	public boolean visit(Block node) {
-		blockLevel++;
-		buffer.append("{\r\n");
 		ASTNode parent = node.getParent();
-		if (parent instanceof MethodDeclaration) {
-			MethodDeclaration method = (MethodDeclaration) parent;
-			Javadoc javadoc = method.getJavadoc();
-			/*
-			 * if comment contains "@j2sNative", then output the given native 
-			 * JavaScript codes directly. 
-			 */
-			if (visitNativeJavadoc(javadoc, node, true) == false) {
-				return false;
-			}
-			IMethodBinding methodBinding = method.resolveBinding();
-			if(methodBinding != null){
-				ITypeBinding superclass = methodBinding.getDeclaringClass().getSuperclass();
-				boolean containsSuperPrivateMethod = false; 
-				while (superclass != null) {
-					IMethodBinding[] methods = superclass.getDeclaredMethods();
-					for (int i = 0; i < methods.length; i++) {
-						if (methods[i].getName().equals(methodBinding.getName())
-								&& (methods[i].getModifiers() & Modifier.PRIVATE) != 0) {
-							containsSuperPrivateMethod = true;
-							break;
-						}
-					}
-					if (containsSuperPrivateMethod) {
-						break;
-					}
-					superclass = superclass.getSuperclass();
-				}
-				if (containsSuperPrivateMethod) {
-					buffer.append("var $private = Clazz.checkPrivateMethod (arguments);\r\n");
-					buffer.append("if ($private != null) {\r\n");
-					buffer.append("return $private.apply (this, arguments);\r\n");
-					buffer.append("}\r\n");
-				}
-			}
-		} else if (parent instanceof Initializer) {
-			Initializer initializer = (Initializer) parent;
-			Javadoc javadoc = initializer.getJavadoc();
-			/*
-			 * if comment contains "@j2sNative", then output the given native 
-			 * JavaScript codes directly. 
-			 */
-			if (visitNativeJavadoc(javadoc, node, true) == false) {
-				return false;
-			}
-		}
-		int blockStart = node.getStartPosition();
-		int previousStart = getPreviousStartPosition(node);
-		ASTNode root = node.getRoot();
-		checkJavadocs(root);
-		//for (int i = 0; i < nativeJavadoc.length; i++) {
-		for (int i = nativeJavadoc.length - 1; i >= 0; i--) {
-			Javadoc javadoc = nativeJavadoc[i];
-			int commentStart = javadoc.getStartPosition();
-			if (commentStart > previousStart && commentStart < blockStart) {
-				/*
-				 * if the block's leading comment contains "@j2sNative", 
-				 * then output the given native JavaScript codes directly. 
-				 */
-				if (visitNativeJavadoc(javadoc, node, true) == false) {
-					return false;
-				}
-			}
-		}
-		return super.visit(node);
-	}
-	
-	boolean visitNativeJavadoc(Javadoc javadoc, Block node, boolean superVisit) {
-		if (javadoc != null) {
-			List tags = javadoc.tags();
-			if (tags.size() != 0) {
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					if ("@j2sIgnore".equals(tagEl.getTagName())) {
-						if (superVisit) super.visit(node);
-						return false;
-					}
-				}
-				if (isDebugging()) {
-					for (Iterator iter = tags.iterator(); iter.hasNext();) {
-						TagElement tagEl = (TagElement) iter.next();
-						if ("@j2sDebug".equals(tagEl.getTagName())) {
-							if (superVisit) super.visit(node);
-							visitJavadocJ2SSource(tagEl);
-							return false;
-						}
-					}
-				}
-				boolean toCompileVariableName = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).isToCompileVariableName();
-				
-				if (!toCompileVariableName) {
-					for (Iterator iter = tags.iterator(); iter.hasNext();) {
-						TagElement tagEl = (TagElement) iter.next();
-						if ("@j2sNativeSrc".equals(tagEl.getTagName())) {
-							if (superVisit) super.visit(node);
-							visitJavadocJ2SSource(tagEl);
-							return false;
-						}
-					}
-				}
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					if ("@j2sNative".equals(tagEl.getTagName())) {
-						if (superVisit) super.visit(node);
-						visitJavadocJ2SSource(tagEl);
-						return false;
-					}
-				}
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					if ("@j2sXHTML".equals(tagEl.getTagName()) || "@j2sXCSS".equals(tagEl.getTagName())) {
-						if (superVisit) super.visit(node);
-						visitJavadocXStringSource(tagEl, tagEl.getTagName());
-						return false;
-					}
-				}
-			}
-		}
-		return true;
+		BodyDeclaration dec = (parent instanceof MethodDeclaration && !((MethodDeclaration)parent).isConstructor() 
+				|| parent instanceof Initializer ? (BodyDeclaration) parent : null);
+		/*
+		 * if comment contains "@j2sNative", then output the given native
+		 * JavaScript codes directly.
+		 */
+		Javadoc javadoc = (dec == null ? getBlockJavadoc(node) : dec.getJavadoc());
+		lastPos = node.getStartPosition();
+		return (javadoc != null && addJavadocForBlock(javadoc, node) ? false : super.visit(node));
 	}
 
-	private void visitJavadocJ2SSource(TagElement tagEl) {
-		List fragments = tagEl.fragments();
-		boolean isFirstLine = true;
-		StringBuffer buf = new StringBuffer();
-		for (Iterator iterator = fragments.iterator(); iterator
-				.hasNext();) {
-			TextElement commentEl = (TextElement) iterator.next();
-			String text = commentEl.getText().trim();
-			if (isFirstLine) {
-				if (text.length() == 0) {
-					continue;
+
+	/**
+	 * 
+	 * Check for j2sIgnore, j2sDebug, j2sNative, j2sXHTML, j2sXCSS
+	 * @param javadoc
+	 * @param node
+	 * @return true if code was added
+	 */
+	protected boolean addJavadocForBlock(Javadoc javadoc, Block node) {
+		List<?> tags = (javadoc == null ? null : javadoc.tags());
+		return (tags != null && tags.size() > 0 && (getTag(tags, "@j2sIgnore") != null
+				|| isDebugging() && addSourceForTag(getTag(tags, "@j2sDebug"), "", "")
+				// note that isToCompileVariableName() always returns false
+				//|| !isToCompileVariableName() && (tagEl = getTag(tags, "@j2sNativeSrc", node)) != null  
+				|| addSourceForTag(getTag(tags, "@j2sNative"), "", "")
+				|| allowExtensions && (
+						addSourceForTagExtended(getTag(tags, "@j2sXHTML"), "", "")
+						|| addSourceForTagExtended(getTag(tags, "@j2sXCSS"), "", "")
+				)
+			));
+	}
+
+//	/**
+//	 * Check to see whether there are @j2s* and append sources to buffer -- not necessary
+//	 * 
+//	 * @return true if j2s javadoc was found and added to the buffer 
+//	 */
+//	protected boolean addJ2SourceForMethod(MethodDeclaration node) {
+//		if (node.getJavadoc() == null || node.getJavadoc().tags().size() == 0)
+//			return false;
+//		buffer.append("<<<");
+//		String prefix = "[{\r\n";
+//		String suffix = "\r\n}]";
+//		boolean ret = (isDebugging() && readSources(node, "@j2sDebug", prefix, suffix, false, false)
+//				//|| isToCompileVariableName() && readSources(node, "@j2sNativeSrc", prefix, suffix, false)
+//				|| readSources(node, "@j2sNative", prefix, suffix, false, false)
+//				|| allowExtensions && (
+//					   readSources(node, "@j2sXHTML", prefix, suffix, false, true)
+//				    || readSources(node, "@j2sXCSS", prefix, suffix, false, true)
+//				  )
+//				);
+//		buffer.append("<<<" + ret + "<<<");
+//		return ret;
+//	}
+
+	private TagElement getTag(List<?> tags, String j2sKey) {
+		Iterator<?> iter = tags.iterator();
+		while (iter.hasNext()) {
+			TagElement tagEl = (TagElement) iter.next();
+			if (j2sKey.equals(tagEl.getTagName())) {
+				//if (superNode != null)
+					//super.visit(superNode);
+				return tagEl;
+			}
+		}
+		return null;
+	}
+
+	/*
+	 * Read JavaScript sources from @j2sNative, @j2sPrefix, etc, as well as
+	 * annotations
+	 */
+	/**
+	 * for example, for classes only:
+	 * 
+	 * @j2sPrefix /-* this is from <@>j2sPrefix added outside of just before
+	 *            Clazz.newClass() *-/
+	 * 
+	 * 
+	 * @j2sSuffix /-* this is from <@>j2sSuffix added just after
+	 *            Clazz.newClass() *-/
+	 * @param isExtended if this is j2sXHTML or j2sXCSS
+	 * 
+	 * @return true if javadoc of this sort was found and added to the buffer
+	 */
+	boolean readSources(BodyDeclaration node, String tagName, String prefix, String suffix, boolean allowBoth,
+			boolean isExtended) {
+		boolean haveJ2SJavaDoc = false;
+		Javadoc javadoc = node.getJavadoc();
+		if (javadoc != null && javadoc.tags().size() > 1)
+			haveJ2SJavaDoc = (isExtended ? addSourceForTagExtended(getTag(javadoc.tags(), tagName), prefix, suffix)
+					: addSourceForTag(getTag(javadoc.tags(), tagName), prefix, suffix));
+		// only classes allow both
+		if (haveJ2SJavaDoc && !allowBoth)
+			return haveJ2SJavaDoc;
+
+		// now check annotations (class definitions only)
+
+		List<?> modifiers = node.modifiers();
+		for (Iterator<?> iter = modifiers.iterator(); iter.hasNext();) {
+			Object obj = iter.next();
+			if (!(obj instanceof Annotation))
+				continue;
+			Annotation annotation = (Annotation) obj;
+			String qName = annotation.getTypeName().getFullyQualifiedName();
+			int index = qName.indexOf("J2S");
+			if (index < 0 || !qName.substring(index).replaceFirst("J2S", "@j2s").startsWith(tagName))
+				continue;
+			haveJ2SJavaDoc = true;
+			StringBuffer buf = new StringBuffer();
+			IAnnotationBinding annotationBinding = annotation.resolveAnnotationBinding();
+			if (annotationBinding != null) {
+				IMemberValuePairBinding[] valuePairs = annotationBinding.getAllMemberValuePairs();
+				if (valuePairs != null && valuePairs.length > 0) {
+					for (int i = 0; i < valuePairs.length; i++) {
+						Object value = valuePairs[i].getValue();
+						if (value != null) {
+							if (value instanceof Object[]) {
+								Object[] lines = (Object[]) value;
+								for (int j = 0; j < lines.length; j++) {
+									buf.append(lines[j]);
+									buf.append("\r\n");
+								}
+							} else if (value instanceof String) {
+								buf.append(value);
+								buf.append("\r\n");
+							}
+						}
+					}
 				}
 			}
-			buf.append(text);
-			buf.append("\r\n");
+			buffer.append(prefix).append(buf.toString().trim()).append(suffix);
 		}
+		return haveJ2SJavaDoc;
+	}
+
+	private boolean addSourceForTag(TagElement tag, String prefix, String suffix) {
+		if (tag == null)
+			return false;
+		StringBuffer buf = new StringBuffer();
+		getSource(tag, buf, false);
+		buffer.append(prefix);
 		buffer.append(fixCommentBlock(buf.toString()));
+		buffer.append(suffix);
+		return true;
 	}
 	
-	private void visitJavadocXStringSource(TagElement tagEl, String tagName) {
-		List fragments = tagEl.fragments();
+	private String getSource(TagElement tag, StringBuffer buf, boolean isExtended) {
+		List<?> fragments = tag.fragments();
 		boolean isFirstLine = true;
-		StringBuffer buf = new StringBuffer();
 		String firstLine = null;
-		for (Iterator iterator = fragments.iterator(); iterator
+		for (Iterator<?> iterator = fragments.iterator(); iterator
 				.hasNext();) {
 			TextElement commentEl = (TextElement) iterator.next();
 			String text = commentEl.getText().trim();
-			if (isFirstLine) {
-				if (text.length() == 0) {
+			if (isFirstLine && isExtended) {
+				if (text.length() == 0)
 					continue;
-				}
 				firstLine = text.trim();
 				isFirstLine = false;
 				continue;
-			}
+			} 
 			buf.append(text);
-			buf.append("\r\n");
+			if (isExtended) {
+				buf.append("\r\n");
+			} else if (text.length() != 0) {
+				buf.append(text.endsWith(";") || text.indexOf("//") >= 0 ? "\r\n" : " ");
+				// BH note that all line terminators are removed,
+				// as this causes problems after source cleaning, which may result
+				// in code such as:
+				//
+				// return
+				// x
+				//
+				// but this still does not fix the problem that we can have
+				// x = " 
+				//       "
+				// after source cleaning
+			}
 		}
-		String sources = buf.toString().trim();
-		sources = buildXSource(tagName, firstLine, sources);
-		buffer.append(sources);
+		return firstLine;
 	}
 
-	private Set<String> parseXTag(String sources) {
-		Set<String> vars = new HashSet<String>();
-		String key = "{$";
-		int index = sources.indexOf(key, 0);
-		while (index != -1) {
-			int idx = sources.indexOf("}", index + key.length());
-			if (idx == -1) {
-				break;
-			}
-			String var = sources.substring(index + key.length() - 1, idx); // with prefix $
-			if (var.indexOf(' ') == -1) {
-				vars.add(var);
-			}
-			index = sources.indexOf(key, idx + 1);
-		}
-		key = "<!--";
-		index = sources.indexOf(key, 0);
-		while (index != -1) {
-			int idx = sources.indexOf("-->", index + key.length());
-			if (idx == -1) {
-				break;
-			}
-			String comment = sources.substring(index + key.length(), idx).trim();
-			if (comment.startsWith("$") && comment.indexOf(' ') == -1) {
-				vars.add(comment);
-			}
-			index = sources.indexOf(key, idx + 3); // 3: "-->".length()
-		}
-		key = "id";
-		index = sources.indexOf(key, 0);
-		while (index > 0) {
-			char last = sources.charAt(index - 1);
-			if (!(last == ' ' || last == '\t' || last == '\n' || last == '\r')) {
-				index = sources.indexOf(key, index + key.length());
-				continue;
-			}
-			int idxEqual = index + key.length();
-			do {
-				char c = sources.charAt(idxEqual);
-				if (c == '=') {
-					break;
-				} else if (c == ' ' || c == '\t') {
-					idxEqual++;
-					if (idxEqual == sources.length() - 1) {
-						idxEqual = -1;
-						break;
-					}
-				} else {
-					idxEqual = -1;
-					break;
-				}
-			} while (true);
-			if (idxEqual == -1 || idxEqual == sources.length() - 1) {
-				break;
-			}
-			char quote = 0;
-			int idxQuoteStart = idxEqual + 1;
-			do {
-				char c = sources.charAt(idxQuoteStart);
-				if (c == '\'' || c == '\"') {
-					quote = c;
-					break;
-				} else if (c == ' ' || c == '\t') {
-					idxQuoteStart++;
-					if (idxQuoteStart == sources.length() - 1) {
-						idxQuoteStart = -1;
-						break;
-					}
-				} else {
-					idxQuoteStart = -1;
-					break;
-				}
-			} while (true);
-			if (idxQuoteStart == -1 || idxQuoteStart == sources.length() - 1) {
-				break;
-			}
-			int idxQuoteEnd = sources.indexOf(quote, idxQuoteStart + 1);
-			if (idxQuoteEnd == -1 || idxQuoteEnd == sources.length() - 1) {
-				break;
-			}
-			String idStr = sources.substring(idxQuoteStart + 1, idxQuoteEnd).trim();
-			if (idStr.startsWith("$") && idStr.indexOf(' ') == -1) {
-				vars.add(idStr);
-			}
-			index = sources.indexOf(key, idxQuoteEnd + 1);
-		}
-		return vars;
-	}
-
-	private boolean containsBeginning(Set<String> set, String beginning) {
-		for (String s : set) {
-			if (s.startsWith(beginning)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	private String buildXSource(String tagName, String firstLine, String sources) {
-		if (firstLine != null && sources.length() > 0) {
-			Set<String> xTags = null;
-			StringBuilder builder = new StringBuilder();
-			if ("@j2sXHTML".equals(tagName)) {
-				boolean shouldMergeFirstLine = false;
-				if (firstLine.startsWith("{$") || firstLine.contains("<") || firstLine.contains(">")) {
-					shouldMergeFirstLine = true;
-				}
-				if (shouldMergeFirstLine) {
-					sources = firstLine + "\r\n" + sources;
-					firstLine = "";
-				}
-				xTags = parseXTag(sources);
-				sources = "\"" + sources.replaceAll("\t", "\\\\t").replaceAll("\"", "\\\\\"").replaceAll("\r\n", "\\\\r\\\\n\" +\r\n\"") + "\"";
-				String[] parts = firstLine.split("(,| |\t)+");
-				if (firstLine.length() == 0) {
-					builder.append("Clazz.parseHTML(");
-				} else if (parts == null || parts.length == 1) {
-					if ("return".equals(firstLine)) {
-						builder.append("return Clazz.parseHTML(");
-					} else {
-						builder.append("Clazz.parseHTML(").append(firstLine).append(", ");
-					}
-				} else {
-					String firstVar = parts[0];
-					String leftStr = firstLine.substring(firstVar.length() + 1).replaceAll("^(,| |\t)+", "");
-					if (leftStr.endsWith(",")) {
-						leftStr = leftStr.substring(0, leftStr.length() - 1);
-					}
-					if ("return".equals(firstVar)) {
-						builder.append("return Clazz.parseHTML(").append(leftStr).append(", ");
-					} else {
-						builder.append(firstVar).append(" = Clazz.parseHTML(").append(leftStr).append(", ");
-					}
-				}
-			} else { // @j2sXCSS
-				boolean shouldMergeFirstLine = false;
-				if (firstLine.startsWith(".") || firstLine.contains("#") || firstLine.contains(">") || firstLine.contains("{")) {
-					shouldMergeFirstLine = true;
-				} else if (sources.startsWith("{")) {
-					shouldMergeFirstLine = true;
-				}
-				if (shouldMergeFirstLine) {
-					sources = firstLine + "\r\n" + sources;
-					xTags = parseXTag(sources);
-					builder.append("Clazz.parseCSS(");
-				} else {
-					xTags = parseXTag(sources);
-					if (firstLine.endsWith(",")) {
-						firstLine = firstLine.substring(0, firstLine.length() - 1);
-					}
-					builder.append("Clazz.parseCSS(").append(firstLine).append(", ");
-				}
-				sources = "\"" + sources.replaceAll("\t", "\\\\t").replaceAll("\"", "\\\\\"").replaceAll("\r\n", "\\\\r\\\\n\" +\r\n\"") + "\"";
-			}
-			boolean containsThis = containsBeginning(xTags, "$:") || containsBeginning(xTags, "$."); 
-			boolean containsClass = containsBeginning(xTags, "$/");
-			if (containsThis) {
-				builder.append("this, ");
-			} else if (containsClass) {
-				String fullClassName = null;
-				String packageName = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
-				String className = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getClassName();
-				if (packageName != null && packageName.length() != 0) {
-					fullClassName = packageName + '.' + className;
-				} else {
-					fullClassName = className;
-				}
-				builder.append(fullClassName).append(", ");
-			}
-			boolean localStarted = false;
-			for (String s : xTags) {
-				if (s.startsWith("$~")) {
-					if (!localStarted) {
-						builder.append("{");
-						localStarted = true;
-					} else {
-						builder.append(", ");
-					}
-					String varName = s.substring(2);
-					builder.append(varName).append(": ").append(varName);
-				}
-			}
-			if (localStarted) {
-				builder.append("}, ");
-			}
-			builder.append(sources).append(");\r\n");
-			return builder.toString();
-		}
-		return sources;
-	}
-
-	/*
-	 * Read HTML/CSS sources from @j2sXHTML, @J2SXCSS or others
+	/**
+	 * 
+	 * @param text
+	 * @return
 	 */
-	boolean readStringSources(BodyDeclaration node, String tagName, String prefix, String suffix, boolean both) {
-		boolean existed = false;
-		Javadoc javadoc = node.getJavadoc();
-		if (javadoc != null) {
-			List tags = javadoc.tags();
-			if (tags.size() != 0) {
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					if (tagName.equals(tagEl.getTagName())) {
-						if (tagEl != null) {
-							List fragments = tagEl.fragments();
-							StringBuffer buf = new StringBuffer();
-							boolean isFirstLine = true;
-							String firstLine = null;
-							for (Iterator iterator = fragments.iterator(); iterator
-									.hasNext();) {
-								TextElement commentEl = (TextElement) iterator.next();
-								String text = commentEl.getText().trim();
-								if (isFirstLine) {
-									if (text.length() == 0) {
-										continue;
-									}
-									firstLine = text.trim();
-									isFirstLine = false;
-									continue;
-								}
-								buf.append(text);
-								buf.append("\r\n");
-							}
-							String sources = buf.toString().trim();
-							sources = buildXSource(tagName, firstLine, sources);
-							buffer.append(prefix + sources + suffix);
-							existed = true;
-						}
-					}
-				}
-			}
-		}
-		return existed;
-	}
-	
-	/*
-	 * Read JavaScript sources from @j2sNative, @J2SPrefix or others
-	 */
-	boolean readSources(BodyDeclaration node, String tagName, String prefix, String suffix, boolean both) {
-		boolean existed = false;
-		Javadoc javadoc = node.getJavadoc();
-		if (javadoc != null) {
-			List tags = javadoc.tags();
-			if (tags.size() != 0) {
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					if (tagName.equals(tagEl.getTagName())) {
-						if (tagEl != null) {
-							List fragments = tagEl.fragments();
-							StringBuffer buf = new StringBuffer();
-							boolean isFirstLine = true;
-							for (Iterator iterator = fragments.iterator(); iterator
-									.hasNext();) {
-								TextElement commentEl = (TextElement) iterator.next();
-								String text = commentEl.getText().trim();
-								if (isFirstLine) {
-									isFirstLine = false;
-									if (text.length() == 0) {
-										continue;
-									}
-								}
-								buf.append(text);
-								buf.append("\r\n");
-							}
-							String sources = buf.toString().trim();
-							// embed block comments and Javadoc @
-							sources = sources.replaceAll("(\\/)-\\*|\\*-(\\/)", "$1*$2").replaceAll("<@>", "@");
-							buffer.append(prefix + sources + suffix);
-							existed = true;
-						}
-					}
-				}
-			}
-		}
-		if (existed && !both) {
-			return existed;
-		}
-		List modifiers = node.modifiers();
-		for (Iterator iter = modifiers.iterator(); iter.hasNext();) {
-			Object obj = (Object) iter.next();
-			if (obj instanceof Annotation) {
-				Annotation annotation = (Annotation) obj;
-				String qName = annotation.getTypeName().getFullyQualifiedName();
-				int index = qName.indexOf("J2S");
-				if (index != -1) {
-					String annName = qName.substring(index);
-					annName = annName.replaceFirst("J2S", "@j2s");
-					if (annName.startsWith(tagName)) {
-						StringBuffer buf = new StringBuffer();
-						IAnnotationBinding annotationBinding = annotation.resolveAnnotationBinding();
-						if (annotationBinding != null) {
-							IMemberValuePairBinding[] valuePairs = annotationBinding.getAllMemberValuePairs();
-							if (valuePairs != null && valuePairs.length > 0) {
-								for (int i = 0; i < valuePairs.length; i++) {
-									Object value = valuePairs[i].getValue();
-									if (value != null) {
-										if (value instanceof Object[]) {
-											Object[] lines = (Object[]) value;
-											for (int j = 0; j < lines.length; j++) {
-												buf.append(lines[j]);
-												buf.append("\r\n");
-											}
-										} else if (value instanceof String) {
-											buf.append(value);
-											buf.append("\r\n");
-										}
-									}
-								}
-							}
-						}
-						buffer.append(prefix + buf.toString().trim() + suffix);
-						existed = true;
-					}
-				}
-			}
-		}
-		return existed;
-	}
+	private String fixCommentBlock(String text) {		
+		
+		// /-* comment *-/ becomes /* comment */ and <@> becomes @
 
-	private String fixCommentBlock(String text) {
-		if (text == null || text.length() == 0) {
-			return text;
-		}
-		return Pattern.compile("\\/-\\*(.*)\\*-\\/",
+		return (text == null || text.length() == 0 ?  text : Pattern.compile("\\/-\\*(.*)\\*-\\/",
 				Pattern.MULTILINE | Pattern.DOTALL)
-				.matcher(text).replaceAll("/*$1*/");
+				.matcher(text).replaceAll("/*$1*/").replaceAll("<@>","@"));
 	}
 	
-	private void checkJavadocs(ASTNode root) {
-		if (root != javadocRoot) {
-			nativeJavadoc = null;
-			javadocRoot = root;
-		}
-		if (nativeJavadoc == null) {
-			nativeJavadoc = new Javadoc[0];
-			if (root instanceof CompilationUnit) {
-				CompilationUnit unit = (CompilationUnit) root;
-				List commentList = unit.getCommentList();
-				ArrayList list = new ArrayList();
-				for (Iterator iter = commentList.iterator(); iter.hasNext();) {
+	private boolean addSourceForTagExtended(TagElement tagEl, String prefix, String suffix) {
+//		if (tagEl == null)
+//			return false;
+//		StringBuffer buf = new StringBuffer();
+//		String firstLine = getSource(tagEl, buf, true);
+//		buffer.append(prefix);
+//		buffer.append(ExtendedAdapter.buildXSource(getQualifiedClassName(), tagEl.getTagName(), firstLine, buf.toString().trim()));
+//		buffer.append(suffix);
+		return true;
+	}
+	
+	/**
+	 * Get the nearest Javadoc that is after any other element but before this block.
+	 * 
+	 * @param block
+	 * @return nearest Javadoc or null
+	 */
+	private Javadoc getBlockJavadoc(Block block) {
+		ASTNode root = block.getRoot();
+		Javadoc jd = null;
+		if (root instanceof CompilationUnit) {
+			if (rootJavaDocs == null) {
+				rootJavaDocs = new ArrayList<Javadoc>();
+				List<?> commentList = ((CompilationUnit) root).getCommentList();
+				for (Iterator<?> iter = commentList.iterator(); iter.hasNext();) {
 					Comment comment = (Comment) iter.next();
 					if (comment instanceof Javadoc) {
-						Javadoc javadoc = (Javadoc) comment;
-						List tags = javadoc.tags();
+						List<?> tags = ((Javadoc) comment).tags();
 						if (tags.size() != 0) {
-							for (Iterator itr = tags.iterator(); itr.hasNext();) {
+							for (Iterator<?> itr = tags.iterator(); itr.hasNext();) {
 								TagElement tagEl = (TagElement) itr.next();
 								String tagName = tagEl.getTagName();
-								if ("@j2sIgnore".equals(tagName)
-										|| "@j2sDebug".equals(tagName)
-										|| "@j2sNative".equals(tagName)
-										|| "@j2sNativeSrc".equals(tagName)
-										|| "@j2sXHTML".equals(tagName)
-										|| "@j2sXCSS".equals(tagName)
-										) {
-									list.add(comment);
+								if (tagName != null && tagName.startsWith("@j2s")) {
+									rootJavaDocs.add((Javadoc) comment);
 								}
 							}
 						}
 					}
 				}
-				nativeJavadoc = (Javadoc[]) list.toArray(nativeJavadoc);
+			}
+			// looking for last comment prior to this block starting after all other nodes
+			// we can remove any previous Javadocs in case they are still there 
+			int blockPos = block.getStartPosition();
+			int docPos = 0;
+			while (rootJavaDocs.size() > 0 && (docPos = rootJavaDocs.get(0).getStartPosition()) < blockPos) {
+				jd = rootJavaDocs.remove(0);
+				if (docPos < lastPos)
+					jd = null;  
 			}
 		}
+		return jd;
 	}
 
-	private int getPreviousStartPosition(Block node) {
-		int previousStart = 0;
-		ASTNode blockParent = node.getParent();
-		if (blockParent != null) {
-			if (blockParent instanceof Statement) {
-				Statement sttmt = (Statement) blockParent;
-				previousStart = sttmt.getStartPosition();
-				if (sttmt instanceof Block) {
-					Block parentBlock = (Block) sttmt;
-					for (Iterator iter = parentBlock.statements().iterator(); iter.hasNext();) {
-						Statement element = (Statement) iter.next();
-						if (element == node) {
-							break;
-						}
-						previousStart = element.getStartPosition() + element.getLength();
-					}
-				} else if (sttmt instanceof IfStatement) {
-					IfStatement ifSttmt = (IfStatement) sttmt;
-					if (ifSttmt.getElseStatement() == node) {
-						Statement thenSttmt = ifSttmt.getThenStatement();
-						previousStart = thenSttmt.getStartPosition() + thenSttmt.getLength();
-					}
-				}
-			} else if (blockParent instanceof MethodDeclaration) {
-				MethodDeclaration method = (MethodDeclaration) blockParent;
-				previousStart = method.getStartPosition();
-			} else if (blockParent instanceof Initializer) {
-				Initializer initializer = (Initializer) blockParent;
-				previousStart = initializer.getStartPosition();
-			} else if (blockParent instanceof CatchClause) {
-				CatchClause catchClause = (CatchClause) blockParent;
-				previousStart = catchClause.getStartPosition();
-			}
-		}
-		return previousStart;
+//	private int getPreviousStartPosition(Block node) {
+//		int previousStart = 0;
+//		ASTNode blockParent = node.getParent();
+//		if (blockParent != null) {
+//			if (blockParent instanceof Statement) {
+//				Statement sttmt = (Statement) blockParent;
+//				previousStart = sttmt.getStartPosition();
+//				if (sttmt instanceof Block) {
+//					Block parentBlock = (Block) sttmt;
+//					for (Iterator<?> iter = parentBlock.statements().iterator(); iter.hasNext();) {
+//						Statement element = (Statement) iter.next();
+//						if (element == node) {
+//							break;
+//						}
+//						previousStart = element.getStartPosition() + element.getLength();
+//					}
+//				} else if (sttmt instanceof IfStatement) {
+//					IfStatement ifSttmt = (IfStatement) sttmt;
+//					if (ifSttmt.getElseStatement() == node) {
+//						Statement thenSttmt = ifSttmt.getThenStatement();
+//						previousStart = thenSttmt.getStartPosition() + thenSttmt.getLength();
+//					}
+//				}
+//			} else if (blockParent instanceof MethodDeclaration) {
+//				previousStart = ((MethodDeclaration) blockParent).getStartPosition();
+//			} else if (blockParent instanceof Initializer) {
+//				previousStart = ((Initializer) blockParent).getStartPosition();
+//			} else if (blockParent instanceof CatchClause) {
+//				previousStart = ((CatchClause) blockParent).getStartPosition();
+//			}
+//		}
+//		return previousStart;
+//	}
+
+	/**
+	 * 
+	 * @param node
+	 * @param mBinding
+	 * @param isEnd
+	 * @return true to keep this method
+	 */
+	protected boolean checkKeepSpecialClassMethod(BodyDeclaration node, IMethodBinding mBinding, boolean isEnd) {
+		boolean doKeep = true;
+//		if (isEnd) {
+//			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun"))
+//				doKeep = false;
+//			String[] pipeMethods = new String[] { "pipeSetup", "pipeThrough", "through", "pipeMonitoring",
+//					"pipeMonitoringInterval", "pipeWaitClosingInterval", "setPipeHelper" };
+//			for (int i = 0; i < pipeMethods.length; i++) {
+//				if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", pipeMethods[i])) {
+//					doKeep = false;
+//					break;
+//				}
+//			}
+//			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.CompoundPipeSession", "convert"))
+//				doKeep = false;
+//		} else {
+//			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun"))
+//				doKeep = false;
+//			String[] pipeMethods = new String[] { "pipeSetup", "pipeThrough", "through", "pipeMonitoring",
+//					"pipeMonitoringInterval", "pipeWaitClosingInterval", "setPipeHelper" };
+//			for (int i = 0; i < pipeMethods.length; i++) {
+//				if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", pipeMethods[i])) {
+//					doKeep = false;
+//					break;
+//				}
+//			}
+//			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.CompoundPipeSession", "convert"))
+//				doKeep = false;
+//		}
+		return (doKeep || getJ2STag(node, "@j2sKeep") != null);
+	}
+
+	/**
+	 * @param node
+	 * @return true if we have @j2sIngore for this BodyDeclaration
+	 */
+	protected boolean checkj2sIgnore(BodyDeclaration node) {
+	  return getJ2STag(node, "@j2sIgnore") != null;
 	}
 
 	/**
@@ -644,9 +399,9 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 	protected Object getJ2STag(BodyDeclaration node, String tagName) {
 		Javadoc javadoc = node.getJavadoc();
 		if (javadoc != null) {
-			List tags = javadoc.tags();
+			List<?> tags = javadoc.tags();
 			if (tags.size() != 0) {
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
+				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
 					TagElement tagEl = (TagElement) iter.next();
 					if (tagName.equals(tagEl.getTagName())) {
 						return tagEl;
@@ -654,10 +409,10 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 				}
 			}
 		}
-		List modifiers = node.modifiers();
+		List<?> modifiers = node.modifiers();
 		if (modifiers != null && modifiers.size() > 0) {
-			for (Iterator iter = modifiers.iterator(); iter.hasNext();) {
-				Object obj = (Object) iter.next();
+			for (Iterator<?> iter = modifiers.iterator(); iter.hasNext();) {
+				Object obj = iter.next();
 				if (obj instanceof Annotation) {
 					Annotation annotation = (Annotation) obj;
 					String qName = annotation.getTypeName().getFullyQualifiedName();
@@ -674,34 +429,6 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 		}
 		return null;
 	}
-	
-	/**
-	 * Native method without "j2sDebug" or "j2sNative" tag should be ignored
-	 * directly.
-	 * 
-	 * @param node
-	 * @return
-	 */
-	protected boolean isMethodNativeIgnored(MethodDeclaration node) {
-		if ((node.getModifiers() & Modifier.NATIVE) != 0) {
-			if (isDebugging() && getJ2STag(node, "@j2sDebug") != null) {
-				return false;
-			}
-			if (getJ2STag(node, "@j2sNative") != null) {
-				return false;
-			}
-			if (getJ2STag(node, "@j2sNativeSrc") != null) {
-				return false;
-			}
-			if (getJ2STag(node, "@j2sXHTML") != null) {
-				return false;
-			}
-			if (getJ2STag(node, "@j2sXCSS") != null) {
-				return false;
-			}
-			return true;
-		}
-		return true; // interface!
-	}
+
 
 }

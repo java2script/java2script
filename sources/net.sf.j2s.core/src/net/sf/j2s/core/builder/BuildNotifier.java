@@ -10,14 +10,16 @@
  *******************************************************************************/
 package net.sf.j2s.core.builder;
 
-import org.eclipse.core.resources.*;
-import org.eclipse.core.runtime.*;
-
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.jdt.internal.core.util.Messages;
 
+@SuppressWarnings("restriction")
 public class BuildNotifier {
 
 protected IProgressMonitor monitor;
@@ -44,6 +46,9 @@ public static void resetProblemCounters() {
 	FixedWarningCount = 0;
 }
 
+/**
+ * @param project  
+ */
 public BuildNotifier(IProgressMonitor monitor, IProject project) {
 	this.monitor = monitor;
 	this.cancelling = false;

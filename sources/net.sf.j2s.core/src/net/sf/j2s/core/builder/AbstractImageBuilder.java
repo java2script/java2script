@@ -10,18 +10,49 @@
  *******************************************************************************/
 package net.sf.j2s.core.builder;
 
-import org.eclipse.core.runtime.*;
-import org.eclipse.core.resources.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Map;
 
-import org.eclipse.jdt.core.*;
-import org.eclipse.jdt.core.compiler.*;
-import org.eclipse.jdt.internal.compiler.*;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceProxy;
+import org.eclipse.core.resources.IResourceProxyVisitor;
+import org.eclipse.core.resources.IResourceStatus;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IJavaModelMarker;
+import org.eclipse.jdt.core.IJavaModelStatusConstants;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.CategorizedProblem;
+import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.internal.compiler.AbstractAnnotationProcessorManager;
+import org.eclipse.jdt.internal.compiler.ClassFile;
+import org.eclipse.jdt.internal.compiler.CompilationResult;
 import org.eclipse.jdt.internal.compiler.Compiler;
+import org.eclipse.jdt.internal.compiler.DefaultErrorHandlingPolicies;
+import org.eclipse.jdt.internal.compiler.ICompilerRequestor;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
-import org.eclipse.jdt.internal.compiler.problem.*;
+import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.jdt.internal.compiler.util.SimpleSet;
 import org.eclipse.jdt.internal.compiler.util.SuffixConstants;
 import org.eclipse.jdt.internal.core.JavaModelManager;
@@ -29,15 +60,12 @@ import org.eclipse.jdt.internal.core.PackageFragment;
 import org.eclipse.jdt.internal.core.util.Messages;
 import org.eclipse.jdt.internal.core.util.Util;
 
-import java.io.*;
-import java.util.*;
-
 /**
  * The abstract superclass of Java builders.
  * Provides the building and compilation mechanism
  * in common with the batch and incremental builders.
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({ "restriction" })
 public abstract class AbstractImageBuilder implements ICompilerRequestor, ICompilationUnitLocator {
 
 protected JavaBuilder javaBuilder;
@@ -50,7 +78,7 @@ protected BuildNotifier notifier;
 
 protected Compiler compiler;
 protected WorkQueue workQueue;
-protected ArrayList problemSourceFiles;
+protected ArrayList<SourceFile> problemSourceFiles;
 protected boolean compiledAllAtOnce;
 
 private boolean inCompiler;
@@ -99,7 +127,7 @@ protected AbstractImageBuilder(JavaBuilder javaBuilder, boolean buildStarting, S
 		this.newState = newState == null ? new State(javaBuilder) : newState;
 		this.compiler = newCompiler();
 		this.workQueue = new WorkQueue();
-		this.problemSourceFiles = new ArrayList(3);
+		this.problemSourceFiles = new ArrayList<SourceFile>(3);
 
 		if (this.javaBuilder.participants != null) {
 			for (int i = 0, l = this.javaBuilder.participants.length; i < l; i++) {
@@ -145,8 +173,8 @@ public void acceptResult(CompilationResult result) {
 		String typeLocator = compilationUnit.typeLocator();
 		ClassFile[] classFiles = result.getClassFiles();
 		int length = classFiles.length;
-		ArrayList duplicateTypeNames = null;
-		ArrayList definedTypeNames = new ArrayList(length);
+		ArrayList<char[][]> duplicateTypeNames = null;
+		ArrayList<char[]> definedTypeNames = new ArrayList<char[]>(length);
 		for (int i = 0; i < length; i++) {
 			ClassFile classFile = classFiles[i];
 
@@ -163,13 +191,13 @@ public void acceptResult(CompilationResult result) {
 				String qualifiedTypeName = new String(classFile.fileName()); // the qualified type name "p1/p2/A"
 				if (this.newState.isDuplicateLocator(qualifiedTypeName, typeLocator)) {
 					if (duplicateTypeNames == null)
-						duplicateTypeNames = new ArrayList();
+						duplicateTypeNames = new ArrayList<char[][]>();
 					duplicateTypeNames.add(compoundName);
 					if (mainType == null) {
 						try {
 							mainTypeName = compilationUnit.initialTypeName; // slash separated qualified name "p1/p1/A"
 							mainType = this.javaBuilder.javaProject.findType(mainTypeName.replace('/', '.'));
-						} catch (JavaModelException e) {
+						} catch (@SuppressWarnings("unused") JavaModelException e) {
 							// ignore
 						}
 					}
@@ -206,11 +234,14 @@ public void acceptResult(CompilationResult result) {
 	}
 }
 
+/**
+ * @param classFile  
+ */
 protected void acceptSecondaryType(ClassFile classFile) {
 	// noop
 }
 
-protected void addAllSourceFiles(final ArrayList sourceFiles) throws CoreException {
+protected void addAllSourceFiles(final ArrayList<SourceFile> sourceFiles) throws CoreException {
 	for (int i = 0, l = this.sourceLocations.length; i < l; i++) {
 		final ClasspathMultiDirectory sourceLocation = this.sourceLocations[i];
 		final char[][] exclusionPatterns = sourceLocation.exclusionPatterns;
@@ -221,45 +252,56 @@ protected void addAllSourceFiles(final ArrayList sourceFiles) throws CoreExcepti
 		final boolean isOutputFolder = sourceLocation.sourceFolder.equals(outputFolder);
 		sourceLocation.sourceFolder.accept(
 			new IResourceProxyVisitor() {
-				public boolean visit(IResourceProxy proxy) throws CoreException {
-					switch(proxy.getType()) {
-						case IResource.FILE :
-							if (org.eclipse.jdt.internal.core.util.Util.isJavaLikeFileName(proxy.getName())) {
-								IResource resource = proxy.requestResource();
-								if (exclusionPatterns != null || inclusionPatterns != null)
-									if (Util.isExcluded(resource.getFullPath(), inclusionPatterns, exclusionPatterns, false))
+						public boolean visit(IResourceProxy proxy) throws CoreException {
+							switch (proxy.getType()) {
+							default:
+								break;
+							case IResource.FILE:
+								if (org.eclipse.jdt.internal.core.util.Util.isJavaLikeFileName(proxy.getName())) {
+									IResource resource = proxy.requestResource();
+									if (exclusionPatterns != null || inclusionPatterns != null)
+										if (Util.isExcluded(resource.getFullPath(), inclusionPatterns,
+												exclusionPatterns, false))
+											return false;
+									sourceFiles.add(new SourceFile((IFile) resource, sourceLocation));
+								}
+								return false;
+							case IResource.FOLDER:
+								IPath folderPath = null;
+								if (isAlsoProject)
+									if (isExcludedFromProject(folderPath = proxy.requestFullPath()))
 										return false;
-								sourceFiles.add(new SourceFile((IFile) resource, sourceLocation));
-							}
-							return false;
-						case IResource.FOLDER :
-							IPath folderPath = null;
-							if (isAlsoProject)
-								if (isExcludedFromProject(folderPath = proxy.requestFullPath()))
-									return false;
-							if (exclusionPatterns != null) {
-								if (folderPath == null)
-									folderPath = proxy.requestFullPath();
-								if (Util.isExcluded(folderPath, inclusionPatterns, exclusionPatterns, true)) {
-									// must walk children if inclusionPatterns != null, can skip them if == null
-									// but folder is excluded so do not create it in the output folder
-									return inclusionPatterns != null;
+								if (exclusionPatterns != null) {
+									if (folderPath == null)
+										folderPath = proxy.requestFullPath();
+									if (Util.isExcluded(folderPath, inclusionPatterns, exclusionPatterns, true)) {
+										// must walk children if
+										// inclusionPatterns != null, can skip
+										// them if == null
+										// but folder is excluded so do not
+										// create it in the output folder
+										return inclusionPatterns != null;
+									}
 								}
-							}
-							if (!isOutputFolder) {
-								if (folderPath == null)
-									folderPath = proxy.requestFullPath();
-								String packageName = folderPath.lastSegment();
-								if (packageName.length() > 0) {
-									String sourceLevel = AbstractImageBuilder.this.javaBuilder.javaProject.getOption(JavaCore.COMPILER_SOURCE, true);
-									String complianceLevel = AbstractImageBuilder.this.javaBuilder.javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true);
-									if (JavaConventions.validatePackageName(packageName, sourceLevel, complianceLevel).getSeverity() != IStatus.ERROR)
-										createFolder(folderPath.removeFirstSegments(segmentCount), outputFolder);
+								if (!isOutputFolder) {
+									if (folderPath == null)
+										folderPath = proxy.requestFullPath();
+									String packageName = folderPath.lastSegment();
+									if (packageName.length() > 0) {
+										String sourceLevel = AbstractImageBuilder.this.javaBuilder.javaProject
+												.getOption(JavaCore.COMPILER_SOURCE, true);
+										String complianceLevel = AbstractImageBuilder.this.javaBuilder.javaProject
+												.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+										if (JavaConventions
+												.validatePackageName(packageName, sourceLevel, complianceLevel)
+												.getSeverity() != IStatus.ERROR)
+											createFolder(folderPath.removeFirstSegments(segmentCount), outputFolder);
+									}
 								}
+								break;
 							}
-					}
-					return true;
-				}
+							return true;
+						}
 			},
 			IResource.NONE
 		);
@@ -343,7 +385,7 @@ protected void compile(SourceFile[] units) {
 	}
 }
 
-protected void compile(SourceFile[] units, SourceFile[] additionalUnits, boolean compilingFirstGroup) {
+protected void compile(SourceFile[] units, SourceFile[] additionalUnits, @SuppressWarnings("unused") boolean compilingFirstGroup) {
 	if (units.length == 0) return;
 	this.notifier.aboutToCompile(units[0]); // just to change the message
 
@@ -356,7 +398,7 @@ protected void compile(SourceFile[] units, SourceFile[] additionalUnits, boolean
 		else
 			System.arraycopy(additionalUnits, 0, additionalUnits = new SourceFile[length + toAdd], 0, length);
 		for (int i = 0; i < toAdd; i++)
-			additionalUnits[length + i] = (SourceFile) this.problemSourceFiles.get(i);
+			additionalUnits[length + i] = this.problemSourceFiles.get(i);
 	}
 	String[] initialTypeNames = new String[units.length];
 	for (int i = 0, l = units.length; i < l; i++)
@@ -366,7 +408,7 @@ protected void compile(SourceFile[] units, SourceFile[] additionalUnits, boolean
 	try {
 		this.inCompiler = true;
 		this.compiler.compile(units);
-	} catch (AbortCompilation ignored) {
+	} catch (@SuppressWarnings("unused") AbortCompilation ignored) {
 		// ignore the AbortCompilcation coming from BuildNotifier.checkCancelWithinCompiler()
 		// the Compiler failed after the user has chose to cancel... likely due to an OutOfMemory error
 	} finally {
@@ -420,7 +462,7 @@ protected void createProblemFor(IResource resource, IMember javaElement, String 
 	}
 }
 
-protected void deleteGeneratedFiles(IFile[] deletedGeneratedFiles) {
+protected void deleteGeneratedFiles(@SuppressWarnings("unused") IFile[] deletedGeneratedFiles) {
 	// no op by default
 }
 
@@ -444,7 +486,7 @@ protected SourceFile findSourceFile(IFile file, boolean mustExist) {
 	return new SourceFile(file, md);
 }
 
-protected void finishedWith(String sourceLocator, CompilationResult result, char[] mainTypeName, ArrayList definedTypeNames, ArrayList duplicateTypeNames) {
+protected void finishedWith(String sourceLocator, CompilationResult result, char[] mainTypeName, ArrayList<char[]> definedTypeNames, ArrayList<char[][]> duplicateTypeNames) {
 	if (duplicateTypeNames == null) {
 		this.newState.record(sourceLocator, result.qualifiedReferences, result.simpleNameReferences, result.rootReferences, mainTypeName, definedTypeNames);
 		return;
@@ -453,7 +495,7 @@ protected void finishedWith(String sourceLocator, CompilationResult result, char
 	char[][] simpleRefs = result.simpleNameReferences;
 	// for each duplicate type p1.p2.A, add the type name A (package was already added)
 	next : for (int i = 0, l = duplicateTypeNames.size(); i < l; i++) {
-		char[][] compoundName = (char[][]) duplicateTypeNames.get(i);
+		char[][] compoundName = duplicateTypeNames.get(i);
 		char[] typeName = compoundName[compoundName.length - 1];
 		int sLength = simpleRefs.length;
 		for (int j = 0; j < sLength; j++)
@@ -515,14 +557,14 @@ protected boolean isExcludedFromProject(IPath childPath) throws JavaModelExcepti
 
 protected Compiler newCompiler() {
 	// disable entire javadoc support if not interested in diagnostics
-	Map projectOptions = this.javaBuilder.javaProject.getOptions(true);
-	String option = (String) projectOptions.get(JavaCore.COMPILER_PB_INVALID_JAVADOC);
+	Map<String, String> projectOptions = this.javaBuilder.javaProject.getOptions(true);
+	String option = projectOptions.get(JavaCore.COMPILER_PB_INVALID_JAVADOC);
 	if (option == null || option.equals(JavaCore.IGNORE)) { // TODO (frederic) see why option is null sometimes while running model tests!?
-		option = (String) projectOptions.get(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS);
+		option = projectOptions.get(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS);
 		if (option == null || option.equals(JavaCore.IGNORE)) {
-			option = (String) projectOptions.get(JavaCore.COMPILER_PB_MISSING_JAVADOC_COMMENTS);
+			option = projectOptions.get(JavaCore.COMPILER_PB_MISSING_JAVADOC_COMMENTS);
 			if (option == null || option.equals(JavaCore.IGNORE)) {
-				option = (String) projectOptions.get(JavaCore.COMPILER_PB_UNUSED_IMPORT);
+				option = projectOptions.get(JavaCore.COMPILER_PB_UNUSED_IMPORT);
 				if (option == null || option.equals(JavaCore.IGNORE)) { // Unused import need also to look inside javadoc comment
 					projectOptions.put(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, JavaCore.DISABLED);
 				}
@@ -675,7 +717,7 @@ protected void storeProblemsFor(SourceFile sourceFile, CategorizedProblem[] prob
 	// but still try to compile as many source files as possible to help the case when the base libraries are in source
 	if (!this.keepStoringProblemMarkers) return; // only want the one error recorded on this source file
 
-	HashSet managedMarkerTypes = JavaModelManager.getJavaModelManager().compilationParticipants.managedMarkerTypes();
+	HashSet<?> managedMarkerTypes = JavaModelManager.getJavaModelManager().compilationParticipants.managedMarkerTypes();
 	problems: for (int i = 0, l = problems.length; i < l; i++) {
 		CategorizedProblem problem = problems[i];
 		int id = problem.getID();
@@ -862,6 +904,11 @@ protected char[] writeClassFile(ClassFile classFile, SourceFile compilationUnit,
 	return filePath.lastSegment().toCharArray();
 }
 
+/**
+ * @param qualifiedFileName  
+ * @param isTopLevelType 
+ * @param compilationUnit 
+ */
 protected void writeClassFileContents(ClassFile classFile, IFile file, String qualifiedFileName, boolean isTopLevelType, SourceFile compilationUnit) throws CoreException {
 //	InputStream input = new SequenceInputStream(
 //			new ByteArrayInputStream(classFile.header, 0, classFile.headerOffset),
