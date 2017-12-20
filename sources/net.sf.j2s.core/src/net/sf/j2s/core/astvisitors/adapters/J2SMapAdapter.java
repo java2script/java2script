@@ -145,7 +145,7 @@ public class J2SMapAdapter extends AbstractPluginAdapter {
 	 */
 	private static String getJ2SMethodName(IMethodBinding binding) {
 		String name = binding.getName();
-		boolean isViolation = (FieldAdapter.checkKeywordViolation(name, null)
+		boolean isViolation = (FieldAdapter.checkKeywordViolation(name)
 				&& !binding.getDeclaringClass().getQualifiedName().startsWith("swingjs.api"));
 		return (isViolation ? "$" + name : name);
 	}

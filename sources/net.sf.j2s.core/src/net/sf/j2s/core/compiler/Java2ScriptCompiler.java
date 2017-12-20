@@ -128,10 +128,6 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		root = (CompilationUnit) astParser.createAST(null);
 		ASTScriptVisitor visitor = new ASTScriptVisitor();
 		ASTKeywordVisitor.setNoQualifiedNamePackages(getProperty("j2s.compiler.nonqualified.classes"));
-		boolean ignoreMethodOverloading = !("enable".equals(getProperty("j2s.compiler.method.overloading")));
-		visitor.setSupportsMethodOverloading(!ignoreMethodOverloading);
-		boolean supportsInterfaceCasting = "enable".equals(getProperty("j2s.compiler.interface.casting"));
-		visitor.setSupportsInterfaceCasting(supportsInterfaceCasting);
 		boolean isDebugging = "debug".equals(getProperty("j2s.compiler.mode"));
 		visitor.setDebugging(isDebugging);
 		String j2sPath = siteFolder + "/swingjs/j2s";

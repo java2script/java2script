@@ -30,8 +30,6 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
-
-import net.sf.j2s.core.astvisitors.adapters.Bindings;
 //import net.sf.j2s.core.astvisitors.adapters.ExtendedAdapter;
 
 /**
@@ -44,17 +42,7 @@ import net.sf.j2s.core.astvisitors.adapters.Bindings;
  */
 public class ASTJ2SDocVisitor extends ASTEmptyVisitor {
 	
-	private boolean isDebugging = false;
-
 	private ArrayList<Javadoc> rootJavaDocs; 
-
-	public boolean isDebugging() {
-		return isDebugging;
-	}
-
-	public void setDebugging(boolean isDebugging) {
-		this.isDebugging = isDebugging;
-	}
 
 	public boolean visit(Block node) {
 		ASTNode parent = node.getParent();
@@ -80,14 +68,14 @@ public class ASTJ2SDocVisitor extends ASTEmptyVisitor {
 	protected boolean addJavadocForBlock(Javadoc javadoc, Block node) {
 		List<?> tags = (javadoc == null ? null : javadoc.tags());
 		return (tags != null && tags.size() > 0 && (getTag(tags, "@j2sIgnore") != null
-				|| isDebugging() && addSourceForTag(getTag(tags, "@j2sDebug"), "", "")
+				|| global_j2sFlag_isDebugging && addSourceForTag(getTag(tags, "@j2sDebug"), "", "")
 				// note that isToCompileVariableName() always returns false
 				//|| !isToCompileVariableName() && (tagEl = getTag(tags, "@j2sNativeSrc", node)) != null  
 				|| addSourceForTag(getTag(tags, "@j2sNative"), "", "")
-				|| allowExtensions && (
-						addSourceForTagExtended(getTag(tags, "@j2sXHTML"), "", "")
-						|| addSourceForTagExtended(getTag(tags, "@j2sXCSS"), "", "")
-				)
+			//	|| global_allowExtensions && (
+			//			addSourceForTagExtended(getTag(tags, "@j2sXHTML"), "", "")
+			//			|| addSourceForTagExtended(getTag(tags, "@j2sXCSS"), "", "")
+			//	)
 			));
 	}
 
@@ -149,8 +137,9 @@ public class ASTJ2SDocVisitor extends ASTEmptyVisitor {
 		boolean haveJ2SJavaDoc = false;
 		Javadoc javadoc = node.getJavadoc();
 		if (javadoc != null && javadoc.tags().size() > 1)
-			haveJ2SJavaDoc = (isExtended ? addSourceForTagExtended(getTag(javadoc.tags(), tagName), prefix, suffix)
-					: addSourceForTag(getTag(javadoc.tags(), tagName), prefix, suffix));
+			haveJ2SJavaDoc = 
+			//isExtended ? addSourceForTagExtended(getTag(javadoc.tags(), tagName), prefix, suffix)	: 
+						addSourceForTag(getTag(javadoc.tags(), tagName), prefix, suffix);
 		// only classes allow both
 		if (haveJ2SJavaDoc && !allowBoth)
 			return haveJ2SJavaDoc;
@@ -256,7 +245,7 @@ public class ASTJ2SDocVisitor extends ASTEmptyVisitor {
 				.matcher(text).replaceAll("/*$1*/").replaceAll("<@>","@"));
 	}
 	
-	private boolean addSourceForTagExtended(TagElement tagEl, String prefix, String suffix) {
+//	private boolean addSourceForTagExtended(TagElement tagEl, String prefix, String suffix) {
 //		if (tagEl == null)
 //			return false;
 //		StringBuffer buf = new StringBuffer();
@@ -264,8 +253,8 @@ public class ASTJ2SDocVisitor extends ASTEmptyVisitor {
 //		buffer.append(prefix);
 //		buffer.append(ExtendedAdapter.buildXSource(getQualifiedClassName(), tagEl.getTagName(), firstLine, buf.toString().trim()));
 //		buffer.append(suffix);
-		return true;
-	}
+//		return true;
+//	}
 	
 	/**
 	 * Get the nearest Javadoc that is after any other element but before this block.

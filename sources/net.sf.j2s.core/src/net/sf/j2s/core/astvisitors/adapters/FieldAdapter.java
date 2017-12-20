@@ -69,13 +69,13 @@ public class FieldAdapter extends AbstractPluginAdapter {
 	};
 
 	
-	public static boolean checkKeywordViolation(String name, HashSet<String> definedPackageNames) {
+	public static boolean checkKeywordViolation(String name) {
 		for (int i = 0; i < keywords.length; i++) {
 			if (keywords[i].equals(name)) {
 				return true;
 			}
 		}
-		return (definedPackageNames != null && definedPackageNames.contains(name));		
+		return false;		
 	}
 	
 	/**

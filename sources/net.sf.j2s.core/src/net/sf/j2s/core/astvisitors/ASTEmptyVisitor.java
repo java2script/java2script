@@ -13,8 +13,10 @@
  *******************************************************************************/
 package net.sf.j2s.core.astvisitors;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -117,11 +119,135 @@ import net.sf.j2s.core.astvisitors.adapters.VariableAdapter;
  */
 public class ASTEmptyVisitor extends ASTVisitor {
 
+
+	/**
+	 * includes @j2sDebug blocks; from j2s.compiler.mode=debug in .j2s
+	 * 
+	 */
+	protected boolean global_j2sFlag_isDebugging = false;
+
+	public void setDebugging(boolean isDebugging) {
+		this.global_j2sFlag_isDebugging = isDebugging;
+	}
+
+	/**
+	 * separates top-level classes found in a source file
+	 * 
+	 */
+	private static final String ELEMENT_KEY = "__@J2S_ELEMENT__";
+
+	/**
+	 * Add the top-level class name with the element key.
+	 *
+	 * @param className
+	 */
+	protected void appendElementKey(String className) {
+		buffer.append(ELEMENT_KEY + className + "\r\n");
+	}
+
+	/**
+	 * track the names for I$$[...]
+	 */
+	protected StringBuffer global_includes = new StringBuffer();
+	
+	/**
+	 * map class names to I$$[] index
+	 * 
+	 */
+	protected Map<String, Integer>global_htIncludeNames = new Hashtable<>();
+	
+	/**
+	 * I$$[] index counter
+	 *  
+	 */
+	protected int[] global_includeCount = new int[1];
+	
+	/**
+	 * Register a qualified static name as an import var I$[n] unless it ends
+	 * with "Exception". create loads of inner classes pkg.Foo.Bar as
+	 * Clazz.load(['pkg.Foo','.Bar'])
+	 * 
+	 * If caching, put into the code (I$[n]||$incl$(n)), where n is 
+	 * the index into the I$[] array  
+	 * 
+	 * @param className
+	 * @param doCache
+	 * @return  
+	 */
+	protected String getNestedClazzLoads(String className, boolean doCache) {
+		String[] parts = className.split("\\.");
+		String s = parts[0];
+		if (s.equals("P$")) {
+			// can't do this with Clazz.load
+			s = global_PackageName;
+		}
+		int i = 1;
+		// loop through packages and outer Class
+		while (i < parts.length && (i == 1 || !Character.isUpperCase(parts[i - 1].charAt(0))))
+			s += "." + parts[i++];
+		s = "'" + s + "'";
+		// int nlast = parts.length;
+		if (i < parts.length) {
+			s = "[" + s;
+			while (i < parts.length)
+				s += ",'." + parts[i++] + "'";
+			s += "]";
+		}
+		if (doCache) {
+			Integer n = global_htIncludeNames.get(s);
+			if (n == null && !s.endsWith("Exception'")) {
+				global_htIncludeNames.put(s, n = new Integer(++global_includeCount[0]));
+				global_includes.append(global_includeCount[0] == 1 ? ",I$=[[" : ",").append(s);
+			}
+			if (n != null)
+				return "(I$[" + n + "]||$incl$(" + n + "))";
+
+		}
+		return "Clazz.load(" + s + ")";
+	}
+
+
+
+	/**
+	 * Separate the buffer into a list so that all top-level elements can be in
+	 * their own file (as is done in Java). Provide a common include list
+	 * 
+	 * We do not have to worry about inner classes, as they are never referenced
+	 * directly.
+	 * 
+	 * @return List {elementName, js, elementName, js, ....}
+	 */
+	public List<String> getElementList() {
+		String trailer = "//Created " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + "\n";
+		List<String> elements = new ArrayList<String>();
+		String js = buffer.toString();
+		String[] parts = js.split(ELEMENT_KEY);
+		String header = parts[0];
+		String header_noIncludes = header.replace(",I$=[[]]", "");
+		header = header.replace(",I$=[]", global_includes.length() == 0 ? "" : global_includes.append("]],$incl$=function(i){return I$[i]=Clazz.load(I$[0][i-1])}"));
+		System.err.println(header);
+		for (int i = 1; i < parts.length; i++) {
+			js = parts[i];
+			int pt = js.indexOf("\r\n");
+			elements.add(js.substring(0, pt));
+			js = js.substring(pt + 2);
+			String head = "(function(){" + (js.indexOf("(I$[") < 0 ? header_noIncludes : header);
+			
+			
+			elements.add(head + js + "})();\r\n" + trailer);
+		}
+		return elements;
+	}
+	
 	ASTEmptyVisitor() {
 		super();
 	}
 	
-	protected String thisPackageName;
+	protected String global_PackageName;
+	
+	public String getPackageName() {
+		return global_PackageName;
+	}
 	
 	public static String[] basePackages =  {
 			"java.lang", 
@@ -137,7 +263,7 @@ public class ASTEmptyVisitor extends ASTVisitor {
  
 	public boolean isBasePackage() {
 		for (int i = 0; i < basePackages.length; i++)
-			if (basePackages[i].equals(thisPackageName))
+			if (basePackages[i].equals(global_PackageName))
 				return true;
 		return false;
 	}
@@ -165,13 +291,13 @@ public class ASTEmptyVisitor extends ASTVisitor {
 		return false;
 	}
 
-	/**
-	 * allow @j2sXHTML and @j2sXCSS extensions for Javadoc
-	 * 
-	 * experimental; not implemented; uses adapters.ExtendedAdapter
-	 * 
-	 */
-	protected boolean allowExtensions = false;
+//	/**
+//	 * allow @j2sXHTML and @j2sXCSS extensions for Javadoc
+//	 * 
+//	 * experimental; not implemented; uses adapters.ExtendedAdapter
+//	 * 
+//	 */
+//	protected boolean global_allowExtensions = false;
 
 //	/**
 //	 * not implemented 
@@ -184,27 +310,11 @@ public class ASTEmptyVisitor extends ASTVisitor {
 //
 
 	
-	protected Map<String, Integer>htStaticNames = new Hashtable<>();
-	protected int[] staticCount = new int[1];
-	
-	/**
-	 * Register a qualified static name as an import var I$[n]
-	 * unless it ends with "Exception". 
-	 * @param name
-	 * @return the next available index for this compilation unit
-	 */
-	protected Integer getStaticNameIndex(String name) {
-		Integer n = htStaticNames.get(name);
-		if (n == null && !name.endsWith("Exception"))
-			htStaticNames.put(name,  n = new Integer(staticCount[0]++));
-		return n;
-	}
-
-	protected HashSet<String> definedPackageNames;
-
-	public void setPackageNames(HashSet<String> definedPackageNames) {
-		this.definedPackageNames = definedPackageNames;
-	}
+//	protected HashSet<String> global_definedPackageNames;
+//
+//	public void setPackageNames(HashSet<String> definedPackageNames) {
+//		this.global_definedPackageNames = definedPackageNames;
+//	}
 
 	protected static boolean isFinal(BodyDeclaration b) {
 		return Modifier.isFinal(b.getModifiers());
@@ -233,10 +343,6 @@ public class ASTEmptyVisitor extends ASTVisitor {
 
 	protected String getNormalVariableName(String name) {
 		return ((VariableAdapter) getAdaptable(VariableAdapter.class)).getNormalVariableName(name);
-	}
-
-	public String getPackageName() {
-		return thisPackageName;
 	}
 
 	/**
@@ -273,10 +379,6 @@ public class ASTEmptyVisitor extends ASTVisitor {
 		((TypeAdapter) getAdaptable(TypeAdapter.class)).setClassName(className);
 	}
 
-	protected void setPackageName(String packageName) {
-		thisPackageName = packageName;
-	}
-	
 //	public void setToCompileVariableName(boolean toCompress) {
 //		((ASTVariableAdapter) getAdaptable(ASTVariableAdapter.class)).setToCompileVariableName(toCompress);	
 //	}

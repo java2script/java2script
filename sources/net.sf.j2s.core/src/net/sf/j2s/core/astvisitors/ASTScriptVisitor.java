@@ -9,9 +9,7 @@
  *     Zhou Renjian - initial API and implementation
  *******************************************************************************/
 package net.sf.j2s.core.astvisitors;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -150,24 +148,16 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
     }
     
 	private void setInnerGlobals(ASTScriptVisitor parent, ASTNode node, String visitorClassName) {
+		global_PackageName = parent.global_PackageName;
+		global_htIncludeNames = parent.global_htIncludeNames;
+		global_includeCount = parent.global_includeCount;
+		global_includes = parent.global_includes;		
+		global_j2sFlag_isDebugging = parent.global_j2sFlag_isDebugging;
+		
 		innerTypeNode = node;
-		setPackageName(parent.getPackageName());
 		setClassName(visitorClassName);
 
-		methodOverloadingSupported = parent.methodOverloadingSupported;
-		interfaceCastingSupported = parent.interfaceCastingSupported;
-		definedPackageNames = parent.definedPackageNames;
-		allowExtensions = parent.allowExtensions;
-		htStaticNames = parent.htStaticNames;
-		staticCount = parent.staticCount;
-		
-		setDebugging(parent.isDebugging());
-		// BH abandoning all compiler variable name compressing -- Google
-		// Closure Compiler is way better
-		// ((ASTVariableVisitor)
-		// getAdaptable(ASTVariableVisitor.class)).setToCompileVariableName(
-		// ((ASTVariableVisitor)
-		// parent.getAdaptable(ASTVariableVisitor.class)).isToCompileVariableName());
+
 	}
 
 	/**
@@ -175,31 +165,12 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	 */
 	boolean haveDefaultConstructor;
 
-	protected boolean methodOverloadingSupported = true;
-
-	protected boolean interfaceCastingSupported = false;
-
 	protected ASTNode innerTypeNode;
-
-	public boolean isMethodOverloadingSupported() {
-		return methodOverloadingSupported;
-	}
-
-	public void setSupportsMethodOverloading(boolean recognizeMethodOverloading) {
-		methodOverloadingSupported = recognizeMethodOverloading;
-	}
-
-	public boolean isInterfaceCastingSupported() {
-		return interfaceCastingSupported;
-	}
-
-	public void setSupportsInterfaceCasting(boolean recognizeInterfaceCasting) {
-		interfaceCastingSupported = recognizeInterfaceCasting;
-	}
 
 	public boolean visit(PackageDeclaration node) {
 		String name = node.getName().toString();
-		setPackageName(name);
+		global_PackageName = name;
+		global_includes = new StringBuffer();
 		buffer.append("var P$=");
 		if (isBasePackage()) {
 			buffer.append(name);
@@ -790,14 +761,14 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 				for (int i = 0; i < declaredFields.length; i++) {
 					String superFieldName = J2SMapAdapter.getJ2SName(declaredFields[i]);
 					if (fieldName.equals(superFieldName)) {
-						buffer.append(getValidFieldName$Qualifier(fieldName, false, false));
+						buffer.append(getValidFieldName$Qualifier(fieldName, false));
 						buffer.append(J2SMapAdapter.getFieldName$Appended(classBinding.getSuperclass(), fieldName));
 						return false;
 					}
 				}
 			}
 		}
-		buffer.append(getValidFieldName$Qualifier(fieldName, false, true));
+		buffer.append(getValidFieldName$Qualifier(fieldName, true));
 		return false;
 	}
 
@@ -986,8 +957,6 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 	private static final String noConstructorNames = "Boolean,Byte,Short,Integer,Long,Float,Double";
 
-	private static final String ELEMENT_KEY = "__@J2S_ELEMENT__";
-
 	private static final int FIELD_DECL_STATIC_NONDEFAULT = 1;
 	private static final int FIELD_DECL_STATIC_DEFAULTS   = 2;
 	private static final int FIELD_DECL_NONSTATIC_ALL     = 3;
@@ -1068,8 +1037,9 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		System.err.println("visit " + binding.getKey());
 		boolean isTopLevel = binding.isTopLevel();
 		if (isTopLevel) {
-			typeAdapter.setClassName(binding.getName());
-			buffer.append(ELEMENT_KEY + binding.getName() + "\r\n");
+			String name = binding.getName();
+			typeAdapter.setClassName(name);
+			appendElementKey(name);
 		}
 
 		// check for a JApplet
@@ -1107,12 +1077,12 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			defaultPackageName = "null";
 		} else {
 			fullClassName = getQualifiedClassName(); // test.Test_Enum.Planet
-			defaultPackageName = getPackageName();
+			defaultPackageName = global_PackageName;
 		}
 		pt = fullClassName.lastIndexOf('.');
 		String shortClassName = fullClassName.substring(pt + 1);
 		String packageName = (pt < 0 ? defaultPackageName
-				: TypeAdapter.getShortenedPackageNameFromClassName(thisPackageName, fullClassName));
+				: TypeAdapter.getShortenedPackageNameFromClassName(global_PackageName, fullClassName));
 		buffer.append(packageName + ", \"" + shortClassName + "\"");
 
 		// set up func, superclass, and superInterface
@@ -1545,7 +1515,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 				continue;
 			int len = buffer.length();
 			String prefix = (isStatic ? "C$." : "this.")
-					+ getCheckedFieldName(J2SMapAdapter.getJ2SName(fragment.getName()), classBinding, false);
+					+ getCheckedFieldName(J2SMapAdapter.getJ2SName(fragment.getName()), classBinding);
 			buffer.append(prefix);
 			buffer.append(" = ");
 			int len1 = buffer.length();
@@ -1797,33 +1767,6 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 						: null);
 	}
 
-	/**
-	 * Separate the buffer into a list so that all top-level elements can be in
-	 * their own file (as is done in Java).
-	 * 
-	 * We do not have to worry about inner classes, as they are never referenced
-	 * directly.
-	 * 
-	 * @return List {elementName, js, elementName, js, ....}
-	 */
-	public List<String> getElementList() {
-		String trailer = "//Created " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + "\n";
-		List<String> elements = new ArrayList<String>();
-		String js = buffer.toString();
-		if (js.indexOf("I$") == js.lastIndexOf("I$"))
-			js = js.replace(",I$=[]","");
-		String[] parts = js.split(ELEMENT_KEY);
-		String header = parts[0];
-		for (int i = 1; i < parts.length; i++) {
-			js = parts[i];
-			int pt = js.indexOf("\r\n");
-			elements.add(js.substring(0, pt));
-			js = js.substring(pt + 2);
-			elements.add("(function(){" + header + js + "})();\r\n" + trailer);
-		}		
-		return elements;
-	}
-	
 	protected static boolean isObjectOrNull(ITypeBinding type) {
 		return type == null || "java.lang.Object".equals(type.getQualifiedName());
 	}
