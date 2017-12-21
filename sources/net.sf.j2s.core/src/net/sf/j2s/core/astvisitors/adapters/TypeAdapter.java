@@ -20,7 +20,6 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.WildcardType;
 
-import net.sf.j2s.core.astvisitors.ASTEmptyVisitor;
 import net.sf.j2s.core.astvisitors.ASTKeywordVisitor;
 
 /**

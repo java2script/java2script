@@ -224,22 +224,22 @@ public class Proxy implements java.io.Serializable {
     private final static String proxyClassNamePrefix = "$Proxy";
 
     /** parameter types of a proxy class constructor */
-    private final static Class[] constructorParams =
+    private final static Class<?>[] constructorParams =
         { InvocationHandler.class };
 
     /** maps a class loader to the proxy class cache for that loader */
-    private static Map loaderToCache = new HashMap();
+    private static Map<ClassLoader, Map<Object, Object>> loaderToCache = new HashMap<ClassLoader, Map<Object, Object>>();
 
-    /** marks that a particular proxy class is currently being generated */
-    private static Object pendingGenerationMarker = new Object();
+//    /** marks that a particular proxy class is currently being generated */
+//    private static Object pendingGenerationMarker = new Object();
 
     /** next number to use for generation of unique proxy class names */
     private static long nextUniqueNumber = 0;
     private static Object nextUniqueNumberLock = new Object();
 
     /** set of all generated proxy classes, for isProxyClass implementation */
-    private static Map proxyClasses =
-        Collections.synchronizedMap(new HashMap());
+    private static Map<Class<?>, String> proxyClasses =
+        Collections.synchronizedMap(new HashMap<Class<?>, String>());
 
     /**
      * the invocation handler for this proxy instance.
@@ -250,7 +250,8 @@ public class Proxy implements java.io.Serializable {
     /**
      * Prohibits instantiation.
      */
-    private Proxy() {
+    @SuppressWarnings("unused")
+	private Proxy() {
     }
 
     /**
@@ -338,7 +339,8 @@ public class Proxy implements java.io.Serializable {
      * @throws  NullPointerException if the {@code interfaces} array
      *          argument or any of its elements are {@code null}
      */
-    public static Class<?> getProxyClass(ClassLoader loader,
+    @SuppressWarnings("null")
+	public static Class<?> getProxyClass(ClassLoader loader,
                                          Class<?>... interfaces)
         throws IllegalArgumentException
     {
@@ -346,12 +348,12 @@ public class Proxy implements java.io.Serializable {
             throw new IllegalArgumentException("interface limit exceeded");
         }
 
-        Class proxyClass = null;
+        Class<?> proxyClass = null;
 
         /* collect interface names to use as key for proxy class cache */
         String[] interfaceNames = new String[interfaces.length];
 
-        Set interfaceSet = new HashSet();       // for detecting duplicates
+        Set<Class<?>> interfaceSet = new HashSet<Class<?>>();       // for detecting duplicates
 
         for (int i = 0; i < interfaces.length; i++) {
             /*
@@ -359,7 +361,7 @@ public class Proxy implements java.io.Serializable {
              * interface to the same Class object.
              */
             String interfaceName = interfaces[i].getName();
-            Class interfaceClass = null;
+            Class<?> interfaceClass = null;
             /**
              * @j2sNative
              * 
@@ -411,7 +413,7 @@ public class Proxy implements java.io.Serializable {
         /*
          * Find or create the proxy class cache for the class loader.
          */
-        Map cache;
+        Map<Object, Object> cache;
         /**
          * will be "[object Object]"  as class loaders have not been implemented in SwingJS
          * 
@@ -422,9 +424,9 @@ public class Proxy implements java.io.Serializable {
          */
         {}
         synchronized (loaderToCache) {
-            cache = (Map) loaderToCache.get(loader);
+            cache = (Map<Object, Object>) loaderToCache.get(loader);
             if (cache == null) {
-                cache = new HashMap();
+                cache = new HashMap<Object, Object>();
                 loaderToCache.put(loader, cache);
             }
             /*
@@ -454,7 +456,7 @@ public class Proxy implements java.io.Serializable {
              * from the loaderToCache map.
              */
             do {
-                Object value = cache.get(key);
+//                Object value = cache.get(key);
 //                if (value instanceof Reference) {
 //                    proxyClass = (Class) ((Reference) value).get();
 //                }
@@ -610,13 +612,13 @@ public class Proxy implements java.io.Serializable {
         /*
          * Look up or generate the designated proxy class.
          */
-        Class cl = getProxyClass(loader, interfaces);
+        Class<?> cl = getProxyClass(loader, interfaces);
 
         /*
          * Invoke its constructor with the designated invocation handler.
          */
         try {
-            Constructor cons = cl.getConstructor(constructorParams);
+            Constructor<?> cons = cl.getConstructor(constructorParams);
             return (Object) cons.newInstance(new Object[] { h });
         } catch (NoSuchMethodException e) {
             throw new InternalError(e.toString());
@@ -673,7 +675,7 @@ public class Proxy implements java.io.Serializable {
         return p.h;
     }
 
-	private static Class defineClass0(ClassLoader loader, String name, Class<?>[] interfaces) {
+	private static Class<?> defineClass0(ClassLoader loader, String name, Class<?>[] interfaces) {
     	Class<?> cl = null;
     	/**
     	 * @j2sNative
