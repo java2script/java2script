@@ -57,6 +57,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeLiteral;
@@ -113,7 +114,17 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	private boolean isArray = false;
 	protected int blockLevel = 0;
 	protected int currentBlockForVisit = -1;
+
+	public String parentClassName;
+
+
+	/**
+	 * used in case we are applying a private outer class method
+	 * 
+	 */
 	protected String b$name;
+	
+	
 	protected Stack<String> methodDeclareNameStack = new Stack<String>();
 
 	/**
@@ -979,8 +990,8 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			ASTNode parent = node.getParent();
 			boolean checkNameViolation = false;
 			if (parent != null && !(parent instanceof FieldAccess)) {
-				IMethodBinding variableDeclaration = mBinding.getMethodDeclaration();
-				ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
+				IMethodBinding methodDeclaration = mBinding.getMethodDeclaration();
+				ITypeBinding declaringClass = methodDeclaration.getDeclaringClass();
 				if (!isQualified && declaringClass != null && getUnqualifiedClassName() != null) {
 					String className = declaringClass.getQualifiedName();
 					checkNameViolation = !("java.lang.String".equals(className) && "valueOf".equals(name));
@@ -1015,7 +1026,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 				name = assureQualifiedName(name);
 				if (name.length() != 0) {
 					ret = getQualifiedStaticName(null, name, true, true, false) + ".";
-					ch = '.';
+					//ch = '.';
 				}
 			}
 		} else {
@@ -1023,7 +1034,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			if (parent != null && !(parent instanceof FieldAccess)) {
 				if (declaringClass != null && getUnqualifiedClassName() != null && ch != '.') {
 					ret = getClassNameAndDot(parent, declaringClass, false);
-					ch = '.';
+					//ch = '.';
 				}
 			}
 			String fieldVar = null;
@@ -1067,6 +1078,53 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		buffer.append(node.getEscapedValue());
 		return false;
 	}
+
+	/**
+	 *  SuperFieldAccess:
+     *
+     *[ ClassName . ] super . Identifier
+     *
+	 */
+	public boolean visit(SuperFieldAccess node) {
+		ITypeBinding classBinding = resolveAbstractOrAnonymousBinding(node);
+		String fieldName = J2SMapAdapter.getJ2SName(node.getName());
+		buffer.append("this.");
+		if (isInheritedFieldName(classBinding, fieldName)) {
+			if (classBinding != null) {
+				IVariableBinding[] declaredFields = classBinding.getDeclaredFields();
+				for (int i = 0; i < declaredFields.length; i++) {
+					String superFieldName = J2SMapAdapter.getJ2SName(declaredFields[i]);
+					if (fieldName.equals(superFieldName)) {
+						buffer.append(getValidFieldName$Qualifier(fieldName, false));
+						buffer.append(J2SMapAdapter.getFieldName$Appended(classBinding.getSuperclass(), fieldName));
+						return false;
+					}
+				}
+			}
+		}
+		buffer.append(getValidFieldName$Qualifier(fieldName, true));
+		return false;
+	}
+
+	/**
+	 *   this or ClassName.this   
+	 * 
+	 */
+	public boolean visit(ThisExpression node) {
+		Name className = node.getQualifier();
+		if (className != null) {
+			ASTNode classNode = getAbstractOrAnonymousParentForNode(node);
+			if (classNode != null && classNode.getParent() != null // CompilationUnit
+					&& classNode.getParent().getParent() != null) {
+				// just checking for top level? 
+				buffer.append(getSyntheticReference(node.resolveTypeBinding().getQualifiedName()));
+				return false;
+			}
+		}
+		buffer.append("this");
+		return false;
+	}
+
 
 	public boolean visit(TypeLiteral node) {
 		// Class x = Foo.class
@@ -1670,21 +1728,36 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 			finalVars.add(f);
 	}
 
-	protected String getClassNameAndDot(ASTNode parent, ITypeBinding declaringClass, boolean isPrivate) {
+	/**
+	 * Determine the qualifier for a method or variable. 
+	 * 
+	 * In the case of private methods, this is "p$.";
+	 * for general fields, this will be "this."; for fields in outer classes, we need a synthetic 
+	 * references, this.b$[className] that points to the outer object, which may be one or more levels
+	 * higher than this one. 
+	 * 
+	 * Anonymous inner classes may reference either a superclass method/field or one in its declaring class
+	 * stack.   
+	 *  
+	 * @param node either a method or field or local variable
+	 * @param declaringClass the class that declares this variable
+	 * @param isPrivate
+	 * @return qualifier for method or variable
+	 */
+	protected String getClassNameAndDot(ASTNode node, ITypeBinding declaringClass, boolean isPrivate) {
+		
 		String name = declaringClass.getQualifiedName();
 		String ret = "";
 		int superLevel = 0;
-		ITypeBinding originalType = null;
 		boolean isThis = false;
-		while (parent != null) {
-			boolean isAnonymous = (parent instanceof AnonymousClassDeclaration);
-			ITypeBinding typeBinding = (isAnonymous ? ((AnonymousClassDeclaration) parent).resolveBinding()
-					: parent instanceof AbstractTypeDeclaration ? ((AbstractTypeDeclaration) parent).resolveBinding()
+		
+		// Search parents of this node for an anonymous or abstract class declaration
+		while (node != null) {
+			boolean isAnonymous = (node instanceof AnonymousClassDeclaration);
+			ITypeBinding typeBinding = (isAnonymous ? ((AnonymousClassDeclaration) node).resolveBinding()
+					: node instanceof AbstractTypeDeclaration ? ((AbstractTypeDeclaration) node).resolveBinding()
 							: null);
 			if (typeBinding != null) {
-				if (originalType == null) {
-					originalType = typeBinding;
-				}
 				superLevel++;
 				if (Bindings.isSuperType(declaringClass, typeBinding)) {
 					if (superLevel == 1) {
@@ -1692,13 +1765,12 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 						isThis = true;
 					}
 					name = typeBinding.getQualifiedName();
-					if (!isAnonymous)
-						break;
-					name = ensureNameIfLocal(name, typeBinding, parent);
+					if (isAnonymous)
+						name = ensureNameIfLocal(name, typeBinding, node);
 					break;
 				}
 			}
-			parent = parent.getParent();
+			node = node.getParent();
 		}
 		return (isThis ? ret : getSyntheticReference(name) + ".");
 	}
@@ -1757,8 +1829,8 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		}
 	}
 
-	protected String getSyntheticReference(String name) {
-		b$name = ".b$['" + assureQualifiedNameNoC$(null, name) + "']";
+	protected String getSyntheticReference(String className) {
+		b$name = (className.equals(parentClassName) ? ".this$0" : ".b$['" + assureQualifiedNameNoC$(null, className) + "']");
 		return "this" + b$name;
 	}
 
@@ -2040,6 +2112,22 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 
 	}
 
+	private static ASTNode getAbstractOrAnonymousParentForNode(ASTNode node) {
+		ASTNode parent = node.getParent();
+		while (parent != null && !(parent instanceof AbstractTypeDeclaration)
+				&& !(parent instanceof AnonymousClassDeclaration)) {
+			parent = parent.getParent();
+		}
+		return parent;
+	}
+
+	protected static ITypeBinding resolveAbstractOrAnonymousBinding(ASTNode node) {
+		node = getAbstractOrAnonymousParentForNode(node);
+		return (node instanceof AbstractTypeDeclaration ? ((AbstractTypeDeclaration) node).resolveBinding()
+				: node instanceof AnonymousClassDeclaration ? ((AnonymousClassDeclaration) node).resolveBinding()
+						: null);
+	}
+	
 	/**
 	 * Create a map of the class type arguments for an implemented generic class
 	 * 
