@@ -13157,7 +13157,7 @@ Clazz.assert = function(clazz, obj, tf, msg) {
     }
     Clazz.load("java.lang.AssertionError");
     if (msg == null)
-      throw new AssertionError();
+      throw Clazz.new_(AssertionError.c$);
     else
       throw Clazz.new_(AssertionError.c$$S, [msg]);
   }
@@ -13247,13 +13247,16 @@ Clazz.instanceOf = function (obj, clazz) {
   return (obj instanceof clazz || isInstanceOf(getClassName(obj, true), clazz, true));
 };
 
-Clazz.load = function(cName, isFinalize) {
+/**
+ * Load a class by name or an array representing a nested list of inner classes.
+ * Just finalize this class if from $clinit$. 
+ */
+Clazz.load = function(cName, from$clinit$) {
   if (!cName)
     return null;
-  // the only missing piece?
-  if (isFinalize) {
-    var cl = cName;
+  if (from$clinit$) {
     // C$.$clinit$ call to finalize all dependencies
+    var cl = cName;
     delete cl.$clinit$;
     var ld = cl.$load$;
     setSuperclass(cl, (ld && ld[0] ? Clazz.load(ld[0]) : null));
@@ -13261,23 +13264,28 @@ Clazz.load = function(cName, isFinalize) {
     delete cl.$load$;      
     return;
   }
+  // allow for nested calling: ["foo",".foo_inner1",".foo_inner2"]
   if (cName instanceof Array) {
     var cl1 = null;
-    for (var i = 0; i < cName.length; i++)
-      cl1 = Clazz.load(cName[i]);
+    var name;
+    for (var i = 0; i < cName.length; i++) {
+      var cn = cName[i];
+      cl1 = Clazz.load(name = (cn.indexOf(".") == 0 ? name + cn : cn));
+    }
     return cl1;
   }
-  if (typeof cName == "string") {
-    if (cName.indexOf("Thread.") == 0) {
-      Clazz._4Name("java.lang.Thread", null, null, true)
-    }
-    if (cName.indexOf("Thread") == 0)
-      cName = "java.lang." + cName;
-    return Clazz._4Name(cName, null, null, true);
+  // allow for a clazz itself
+  if (cName.__CLASS_NAME__) {
+    var cl2 = cName;
+    cl2.$clinit$ && cl2.$clinit$();
+    return cl2;
   } 
-  var cl2 = cName;
-  cl2.$clinit$ && cl2.$clinit$();
-  return cl2;
+  // standard load of class by name
+  if (cName.indexOf("Thread.") == 0)
+    Clazz._4Name("java.lang.Thread", null, null, true)
+  if (cName.indexOf("Thread") == 0)
+    cName = "java.lang." + cName;
+  return Clazz._4Name(cName, null, null, true);
 }
 
 /**
@@ -13456,6 +13464,7 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
     outerObj.$b$ = b;
   // final objective: save this map for the inner object
   objThis.b$ = b;
+  objThis.this$0 = outerObj;
 };
 
 
@@ -14060,7 +14069,7 @@ var extendObject = function(clazz, exclude) {
 //};
 
 var excludeSuper = function(o) {
- return o == "b$"
+ return o == "b$" || o == "this$0"
       || o == "$init$"
       || o == "$init0$"
       || o == "$clinit$"
@@ -14346,11 +14355,16 @@ var setSuperclass = function(clazzThis, clazzSuper){
       clazzThis.prototype = new Number();
     } else {
       clazzThis.prototype = new clazzSuper (null, inheritArgs);     
+      if (clazzSuper == Error) {
+        var pp = Throwable.prototype;
+        for (o in pp) {
+          if (!pp.exClazz || pp.exClazz != Clazz._O)
+            clazzThis.prototype[o] = pp[o];
+        }
+      }
     } 
     for (o in p) {
       if (!p[o].exClazz || p[o].exClazz != Clazz._O)
-   //   if (o == "toString")    
-     //   System.out.println(o + " " + clazzThis.__CLASS_NAME__ + " " + clazzSuper.__CLASS_NAME__);    
       clazzThis.prototype[o] = p[o];
     }      
   }
@@ -17270,13 +17284,30 @@ var declareType = function(prefix, name, clazzSuper, interfacez) {
 
 // at least allow Error() by itself to work as before
 Clazz._Error || (Clazz._Error = Error);
-(function(){
- for (var i in Throwable.prototype)
-   Clazz._Error.prototype[i] = Throwable.prototype[i];
-})();
+//setSuperclass(Clazz._Error, Throwable);
 
-setSuperclass(Clazz._Error, Throwable);
-Clazz.newClass(java.lang, "Error", function (){return Clazz._Error();}, Throwable);
+(function() {
+var C$ = Clazz.newClass(java.lang, "Error", function (){
+var err = Clazz._Error();
+return err;
+}, Throwable);
+
+//setSuperclass(java.lang.Error, Throwable);
+//setSuperclass(Clazz._Error, Throwable);
+
+C$.$clinit$ = function() {Clazz.load(C$, 1);
+}
+
+m$(C$, "c$", function() {
+debugger;
+  C$.superclazz.c$.apply(this, []);
+}, 1);
+
+m$(C$, "c$$S", function(detailMessage){
+C$.superclazz.c$$S.apply(this,[detailMessage]);
+},1);
+
+})();
 
 C$ = declareType(java.lang,"Exception",Throwable);
 m$(C$, "c$", function(){}, 1);

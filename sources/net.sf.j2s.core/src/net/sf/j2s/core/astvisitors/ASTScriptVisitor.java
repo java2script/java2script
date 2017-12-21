@@ -9,6 +9,7 @@
  *     Zhou Renjian - initial API and implementation
  *******************************************************************************/
 package net.sf.j2s.core.astvisitors;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -57,7 +58,6 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
-import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
@@ -116,7 +116,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 	private StringBuffer init0Buffer;
 
-	private ArrayList<String> applets, apps; 
+	private ArrayList<String> applets, apps;
 
 	private void addApplication() {
 		if (apps == null)
@@ -126,7 +126,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 	private void checkAddApplet(ITypeBinding binding) {
 		if (Modifier.isAbstract(binding.getModifiers()))
-			return;					
+			return;
 		ITypeBinding b = binding;
 		while ((binding = binding.getSuperclass()) != null) {
 			String name = binding.getQualifiedName();
@@ -143,20 +143,21 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		}
 	}
 
-    public ArrayList<String> getAppList(boolean isApplets) {
-    	return (isApplets ? applets : apps);
-    }
-    
+	public ArrayList<String> getAppList(boolean isApplets) {
+		return (isApplets ? applets : apps);
+	}
+
 	private void setInnerGlobals(ASTScriptVisitor parent, ASTNode node, String visitorClassName) {
 		global_PackageName = parent.global_PackageName;
 		global_htIncludeNames = parent.global_htIncludeNames;
 		global_includeCount = parent.global_includeCount;
-		global_includes = parent.global_includes;		
+		global_includes = parent.global_includes;
 		global_j2sFlag_isDebugging = parent.global_j2sFlag_isDebugging;
 		
+		parentClassName = parent.getQualifiedClassName();
+
 		innerTypeNode = node;
 		setClassName(visitorClassName);
-
 
 	}
 
@@ -206,7 +207,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		return false;
 	}
 
-	public boolean visit(Block node) {		
+	public boolean visit(Block node) {
 		blockLevel++;
 		buffer.append("{\r\n");
 		return super.visit(node); // ASTJ2SDocVisitor
@@ -292,8 +293,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			// inner nonstatic class
 			IMethodBinding constructorBinding = node.resolveConstructorBinding();
 			addInnerTypeInstance(node,
-					(binding.isAnonymous() || binding.isLocal() ? binding.getBinaryName()
-							: binding.getQualifiedName()),
+					(binding.isAnonymous() || binding.isLocal() ? binding.getBinaryName() : binding.getQualifiedName()),
 					node.getExpression(), null,
 					(constructorBinding == null ? null : constructorBinding.getMethodDeclaration()), null);
 			return false;
@@ -301,7 +301,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		String className = TypeAdapter.getTypeStringName(node.getType());
 		String fqName = getShortenedQualifiedName(className);
 		if ("Object".equals(fqName)) {
-			buffer.append(" Clazz.new_()"); 
+			buffer.append(" Clazz.new_()");
 			return false;
 		}
 		String prefix = null, postfix = null;
@@ -326,7 +326,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			else
 				buffer.append(" new ").append(fqName).append("(");
 		} else {
-			openNew(className, constructorBinding); 
+			openNew(className, constructorBinding);
 			isDefault = node.arguments().isEmpty();
 			prefix = ",[";
 			postfix = "]";
@@ -494,7 +494,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	}
 
 	/**
-	 * out: while.... 
+	 * out: while....
 	 * 
 	 */
 	public boolean visit(LabeledStatement node) {
@@ -511,10 +511,8 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 		if (mBinding == null || checkj2sIgnore(node) || !checkKeepSpecialClassMethod(node, mBinding, false))
 			return false;
-		
 
-		//TODO:  We will need to alias all generic implementations
-		
+		// TODO: We will need to alias all generic implementations
 
 		String key = mBinding.getKey();
 		if (key != null)
@@ -530,8 +528,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 		boolean isConstructor = node.isConstructor();
 		String name = getMethodNameOrArrayForDeclaration(node, mBinding, isConstructor);
-		if (isConstructor && name.equals("'c$'")
-				|| mBinding.isVarargs() && mBinding.getParameterTypes().length == 1)
+		if (isConstructor && name.equals("'c$'") || mBinding.isVarargs() && mBinding.getParameterTypes().length == 1)
 			haveDefaultConstructor = true; // in case we are not qualifying
 											// names here
 		if (name.equals("'main'"))
@@ -551,7 +548,8 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 					&& !(firstStatement instanceof ConstructorInvocation)) {
 				buffer.append("{\r\n");
 				IMethodBinding binding = node.resolveBinding();
-				String superclassName = (binding == null ? null : getSuperClassNameNoBrackets(binding.getDeclaringClass()));
+				String superclassName = (binding == null ? null
+						: getSuperClassNameNoBrackets(binding.getDeclaringClass()));
 				if (superclassName == null)
 					addCallInit();
 				else
@@ -671,7 +669,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 		// record whether this.b$[.....] was used, and if so and it is private,
 		// we need to use it again
-		b$name = null; 
+		b$name = null;
 		String term = ")";
 		if (!isSpecialMethod) {
 			String qname = getJ2SQualifiedName(getQualifiedSimpleName(node.getName()), className, mBinding, null, true);
@@ -688,7 +686,6 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			// A call to a private outer-class method from an inner class
 			// requires
 			// this.b$["....."], not just "this"
-			// There is probably a nicer way to do this...
 			buffer.append(".apply(this");
 			if (b$name != null)
 				buffer.append(b$name);
@@ -751,30 +748,9 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		return false;
 	}
 
-	public boolean visit(SuperFieldAccess node) {
-		ITypeBinding classBinding = resolveParentBinding(getClassDeclarationFor(node));
-		String fieldName = J2SMapAdapter.getJ2SName(node.getName());
-		buffer.append("this.");
-		if (isInheritedFieldName(classBinding, fieldName)) {
-			if (classBinding != null) {
-				IVariableBinding[] declaredFields = classBinding.getDeclaredFields();
-				for (int i = 0; i < declaredFields.length; i++) {
-					String superFieldName = J2SMapAdapter.getJ2SName(declaredFields[i]);
-					if (fieldName.equals(superFieldName)) {
-						buffer.append(getValidFieldName$Qualifier(fieldName, false));
-						buffer.append(J2SMapAdapter.getFieldName$Appended(classBinding.getSuperclass(), fieldName));
-						return false;
-					}
-				}
-			}
-		}
-		buffer.append(getValidFieldName$Qualifier(fieldName, true));
-		return false;
-	}
-
 	public boolean visit(SuperMethodInvocation node) {
 		IMethodBinding mBinding = node.resolveMethodBinding();
-		String name =  getJ2SQualifiedName(J2SMapAdapter.getJ2SName(node.getName()), null, mBinding, null, false);
+		String name = getJ2SQualifiedName(J2SMapAdapter.getJ2SName(node.getName()), null, mBinding, null, false);
 		// BH if this is a call to super.clone() and there is no superclass, or
 		// the superclass is Object,
 		// then we need to invoke Clazz.clone(this) directly instead of calling
@@ -815,20 +791,6 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	public boolean visit(SynchronizedStatement node) {
 		// not implemented in JS, as there is only one thread
 		node.getBody().accept(this);
-		return false;
-	}
-
-	public boolean visit(ThisExpression node) {
-		Name qualifier = node.getQualifier();
-		if (qualifier != null) {
-			ASTNode classNode = getClassDeclarationFor(node);
-			if (classNode != null && classNode.getParent() != null // CompilationUnit
-					&& classNode.getParent().getParent() != null) {
-				buffer.append(getSyntheticReference(node.resolveTypeBinding().getQualifiedName()));
-				return false;
-			}
-		}
-		buffer.append("this");
 		return false;
 	}
 
@@ -920,10 +882,10 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	 * 
 	 */
 	public boolean visit(TypeDeclaration node) {
-		return addClassOrInterface(node, node.resolveBinding(), node.bodyDeclarations(), node.isInterface() ? 'i' : 
-			node.isLocalTypeDeclaration() ? 'l' : 'c');
+		return addClassOrInterface(node, node.resolveBinding(), node.bodyDeclarations(),
+				node.isInterface() ? 'i' : node.isLocalTypeDeclaration() ? 'l' : 'c');
 	}
-	
+
 	/**
 	 * <pre>
 	 * VariableDeclarationStatement:
@@ -958,22 +920,22 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	private static final String noConstructorNames = "Boolean,Byte,Short,Integer,Long,Float,Double";
 
 	private static final int FIELD_DECL_STATIC_NONDEFAULT = 1;
-	private static final int FIELD_DECL_STATIC_DEFAULTS   = 2;
-	private static final int FIELD_DECL_NONSTATIC_ALL     = 3;
-	
+	private static final int FIELD_DECL_STATIC_DEFAULTS = 2;
+	private static final int FIELD_DECL_NONSTATIC_ALL = 3;
 
 	private void addAnonymousFunctionWrapper(boolean isOpen) {
-		buffer.append(isOpen ? (buffer.lastIndexOf(")") >= buffer.length() - 3 ? ";" : "") + "\r\n(function(){"
-				: "})()\r\n");
+		buffer.append(
+				isOpen ? (buffer.lastIndexOf(")") >= buffer.length() - 3 ? ";" : "") + "\r\n(function(){" : "})()\r\n");
 	}
 
 	/**
 	 * The call to C$.$init$ from a constructor is made in two cases:
 	 * 
-	 * a) as the second statement in a constructor, when the first line is a super(...) call
+	 * a) as the second statement in a constructor, when the first line is a
+	 * super(...) call
 	 * 
-	 * b) as the first statement in a constructor that does not call super(...) or this(...)
-	 * (because the superclass is Object)
+	 * b) as the first statement in a constructor that does not call super(...)
+	 * or this(...) (because the superclass is Object)
 	 * 
 	 * Note that it is not called when the first statement is this(...).
 	 * 
@@ -1271,7 +1233,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 					lstStatic.add(element);
 					if (isField)
 						addFieldDeclaration((FieldDeclaration) element, FIELD_DECL_STATIC_DEFAULTS);
-						
+
 				}
 			} else if (!havePrivateMethods && element instanceof MethodDeclaration) {
 				if (Modifier.isPrivate(((MethodDeclaration) element).resolveBinding().getModifiers())) {
@@ -1411,32 +1373,32 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	}
 
 	/**
-	 * For Clazz.newClass we want an array if there is an inner class
-	 * so that the outer class is guaranteed to be loaded first.
+	 * For Clazz.newClass we want an array if there is an inner class so that
+	 * the outer class is guaranteed to be loaded first.
 	 * 
 	 * @param className
 	 * @return
 	 */
 	private String getInnerClassList(String className) {
-		
+
 		String[] parts = className.split("\\.");
 		String s = parts[0];
 		int i = 1;
-		// loop through packages and outer Class 
-		while (i < parts.length && !Character.isUpperCase(parts[i - 1].charAt(0))){
+		// loop through packages and outer Class
+		while (i < parts.length && !Character.isUpperCase(parts[i - 1].charAt(0))) {
 			s += "." + parts[i++];
 		}
 		String ret = "'" + s + "'";
-		// add inner classes 
-		while (i < parts.length){
-			ret +=  ",'" + s + "." + parts[i++] + "'";
+		// add inner classes
+		while (i < parts.length) {
+			ret += ",'" + s + "." + parts[i++] + "'";
 		}
 		return (ret.indexOf(",") >= 0 ? "[" + ret + "]" : ret);
 	}
 
 	/**
-     * If there is no Foo() or Foo(xxx... array),
-     * then we need to provide our own constructor.
+	 * If there is no Foo() or Foo(xxx... array), then we need to provide our
+	 * own constructor.
 	 * 
 	 */
 	private void addDefaultConstructor() {
@@ -1485,15 +1447,17 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	 * Handle all field declarations without visit(FieldDeclaration).
 	 * 
 	 * 
-	 * @param field  the field being declared
-	 * @param mode  FIELD_DECL_STATIC_NONDEFAULT static fields into $clinit$ (values)
-	 *              FIELD_DECL_STATIC_DEFAULTS static fields into buffer directly (defaults)
-	 *              FIELD_DECL_NONSTATIC_ALL static variables into $init$ (values) and $init0$ (defaults)
+	 * @param field
+	 *            the field being declared
+	 * @param mode
+	 *            FIELD_DECL_STATIC_NONDEFAULT static fields into $clinit$
+	 *            (values) FIELD_DECL_STATIC_DEFAULTS static fields into buffer
+	 *            directly (defaults) FIELD_DECL_NONSTATIC_ALL static variables
+	 *            into $init$ (values) and $init0$ (defaults)
 	 * @return true if anything was written to the buffer
 	 */
 	private boolean addFieldDeclaration(FieldDeclaration field, int mode) {
-		
-		
+
 		boolean isStatic = (mode == FIELD_DECL_STATIC_NONDEFAULT || mode == FIELD_DECL_STATIC_DEFAULTS);
 		boolean needDefault = (mode == FIELD_DECL_NONSTATIC_ALL || mode == FIELD_DECL_STATIC_DEFAULTS);
 		boolean isFinal = isStatic && isFinal(field);
@@ -1504,8 +1468,8 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		Type nodeType = (var != null && var.getType().isArray() ? null : field.getType());
 		Code code = (nodeType == null || !nodeType.isPrimitiveType() ? null
 				: ((PrimitiveType) nodeType).getPrimitiveTypeCode());
-		ITypeBinding classBinding = resolveParentBinding(getClassDeclarationFor(field));
-		
+		ITypeBinding classBinding = resolveAbstractOrAnonymousBinding(field);
+
 		int len0 = buffer.length();
 		for (Iterator<?> iter = fragments.iterator(); iter.hasNext();) {
 			VariableDeclarationFragment fragment = (VariableDeclarationFragment) iter.next();
@@ -1519,9 +1483,10 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			buffer.append(prefix);
 			buffer.append(" = ");
 			int len1 = buffer.length();
-			
+
 			if (initializer == null || needDefault) {
-				// Route default for this to the $init0$ buffer if nonstatic, or straight to the class if static
+				// Route default for this to the $init0$ buffer if nonstatic, or
+				// straight to the class if static
 				// if static and not initialized
 
 				buffer.append(code == null ? "null" : getPrimitiveDefault(code));
@@ -1550,7 +1515,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 				// CrossAperature<init> sees the created lineXLocations
 				// created in Aperature<init>
 
-				if (isStatic) 		
+				if (isStatic)
 					continue;
 				init0Buffer.append(buffer.substring(len));
 				if (initializer == null) {
@@ -1579,7 +1544,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	 */
 	private void addInnerTypeInstance(ClassInstanceCreation node, String innerName, Expression outerClassExpr,
 			String finals, IMethodBinding methodDeclaration, String superAnonName) {
-		String  name = (superAnonName == null ? innerName : superAnonName);
+		String name = (superAnonName == null ? innerName : superAnonName);
 		openNew(name, methodDeclaration);
 
 		// add constructor application arguments: [object, parameters]
@@ -1621,7 +1586,8 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	 * @param isConstructor
 	 * @param prefix
 	 * @param suffix
-	 * @param isIndexOf TODO
+	 * @param isIndexOf
+	 *            TODO
 	 */
 	private void addMethodParameterList(List<?> arguments, IMethodBinding methodDeclaration, boolean isConstructor,
 			String prefix, String suffix, boolean isIndexOf) {
@@ -1660,7 +1626,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			// default constructor
 			buffer.append("Clazz.super_(C$, this,1);\r\n");
 			return;
-		} 
+		}
 		buffer.append(getJ2SQualifiedName("C$.superclazz.c$", null, node.resolveConstructorBinding(), null, false));
 		buffer.append(".apply(this");
 		addMethodParameterList(node.arguments(), methodDeclaration, true, ", [", "]", false);
@@ -1668,19 +1634,21 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		addCallInit();
 	}
 
-// this test fails for inner Interfaces
-//	private boolean checkInterfaceHasMethods(List<?> nodes) {
-//		for (Iterator<?> iter = nodes.iterator(); iter.hasNext();) {
-//			BodyDeclaration element = (BodyDeclaration) iter.next();
-//			if ((element instanceof Initializer
-//					|| element instanceof FieldDeclaration
-//							&& (isStatic(element) || ((FieldDeclaration) element).fragments().size() > 0)
-//					|| element instanceof MethodDeclaration && isStatic(element)) && !checkj2sIgnore(element))
-//				return true;
-//		}
-//		return false;
-//	}
-	
+	// this test fails for inner Interfaces
+	// private boolean checkInterfaceHasMethods(List<?> nodes) {
+	// for (Iterator<?> iter = nodes.iterator(); iter.hasNext();) {
+	// BodyDeclaration element = (BodyDeclaration) iter.next();
+	// if ((element instanceof Initializer
+	// || element instanceof FieldDeclaration
+	// && (isStatic(element) || ((FieldDeclaration) element).fragments().size()
+	// > 0)
+	// || element instanceof MethodDeclaration && isStatic(element)) &&
+	// !checkj2sIgnore(element))
+	// return true;
+	// }
+	// return false;
+	// }
+
 	private void clearVariables(List<FinalVariable> vars) {
 		for (int i = vars.size(); --i >= 0;) {
 			FinalVariable var = vars.get(i);
@@ -1688,15 +1656,6 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 				vars.remove(i);
 			}
 		}
-	}
-
-	private ASTNode getClassDeclarationFor(ASTNode node) {
-		ASTNode parent = node.getParent();
-		while (parent != null && !(parent instanceof AbstractTypeDeclaration)
-				&& !(parent instanceof AnonymousClassDeclaration)) {
-			parent = parent.getParent();
-		}
-		return parent;
 	}
 
 	private String getAnonymousName(ITypeBinding binding) {
@@ -1742,7 +1701,8 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	}
 
 	/**
-	 * Start a new Clazz.new_() call for class creation or inner classes. Uses Clazz.load for dynamic loading
+	 * Start a new Clazz.new_() call for class creation or inner classes. Uses
+	 * Clazz.load for dynamic loading
 	 * 
 	 * @param className
 	 * @param dotMethodName
@@ -1761,15 +1721,8 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		buffer.append(qName.endsWith(".c$") ? name : qName);
 	}
 
-	private ITypeBinding resolveParentBinding(ASTNode xparent) {
-		return (xparent instanceof AbstractTypeDeclaration ? ((AbstractTypeDeclaration) xparent).resolveBinding()
-				: xparent instanceof AnonymousClassDeclaration ? ((AnonymousClassDeclaration) xparent).resolveBinding()
-						: null);
-	}
-
 	protected static boolean isObjectOrNull(ITypeBinding type) {
 		return type == null || "java.lang.Object".equals(type.getQualifiedName());
 	}
-
 
 }
