@@ -208,7 +208,16 @@ public abstract class Enum<E extends Enum<E>>
      */
     public static <T extends Enum<T>> T valueOf(Class<T> enumType,
                                                 String name) {
-        T result = enumType.enumConstantDirectory().get(name);
+    	
+        T result = null;
+    	/**
+    	 * @j2sNative
+    	 * 
+    	 *    result = enumType.$clazz$[name];
+    	 */
+    	{
+    		result = enumType.enumConstantDirectory().get(name);
+    	}
         if (result != null)
             return result;
         if (name == null)
@@ -243,4 +252,5 @@ public abstract class Enum<E extends Enum<E>>
 	private void readObjectNoData() throws ObjectStreamException {
             throw new InvalidObjectException("can't deserialize enum");
     }
+    
 }

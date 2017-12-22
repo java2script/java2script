@@ -53,7 +53,6 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
-import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
@@ -1256,6 +1255,10 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 					haveDeclarations = true;
 				}
 			}
+			if (isEnum) {
+				addEnumConstants((EnumDeclaration) node);
+				haveDeclarations = true;
+			}
 			if (haveDeclarations || hasDependents)
 				buffer.append("}\r\n");
 			else
@@ -1342,7 +1345,8 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		if (isEnum) {
 			buffer.append(trailingBuffer.getAssertString());
 			addDefaultConstructor();
-			addEnumConstants(((EnumDeclaration) node).enumConstants());
+			buffer.append("var $vals=[];\r\n");
+			buffer.append("Clazz.newMeth(C$, 'values', function() { return $vals }, 1);\r\n");
 		} else {
 			buffer.append(trailingBuffer); // also writes the assert string
 			if (isAnonymous) {
@@ -1414,8 +1418,9 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	 * 
 	 * @param constants
 	 */
-	private void addEnumConstants(List<?> constants) {
-		buffer.append("var vals = [];\r\n");
+	private void addEnumConstants(EnumDeclaration e) {
+		List<?> constants = e.enumConstants();
+		buffer.append("$vals=Clazz.array(C$,[0]);\r\n");
 		for (int i = 0; i < constants.size(); i++) {
 			EnumConstantDeclaration enumConst = (EnumConstantDeclaration) constants.get(i);
 			IMethodBinding binding = enumConst.resolveConstructorBinding();
@@ -1427,7 +1432,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 				anonName = getAnonymousName(anonDeclare.resolveBinding());
 				buffer.append("\r\n");
 			}
-			buffer.append("Clazz.newEnumConst(vals, ").append(getJ2SQualifiedName("C$.c$", null, binding, null, false))
+			buffer.append("Clazz.newEnumConst($vals, ").append(getJ2SQualifiedName("C$.c$", null, binding, null, false))
 					.append(", \"");
 			enumConst.getName().accept(this);
 			buffer.append("\", " + i);
@@ -1436,10 +1441,6 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 				buffer.append(", ").append(anonName);
 			buffer.append(");\r\n");
 		}
-		buffer.append("Clazz.newMeth(C$, 'values', function() { return vals }, 1);\r\n");
-		// this next just ensures we have the valueOf() method in Enum if it
-		// is not already there.
-		buffer.append("Clazz.newMeth(Enum, 'valueOf$Class$S', function(cl, name) { return cl[name] }, 1);\r\n");
 	}
 
 	/**

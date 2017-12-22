@@ -1,5 +1,6 @@
 // j2sApplet.js (based on JmolCore.js)
 
+// BH 12/22/2017 1:18:42 PM adds j2sargs for setting arguments
 // BH 11/19/2017 3:55:04 AM adding support for swingjs2.js; adds static j2sHeadless=true;
 // BH 10/4/2017 2:25:03 PM adds Clazz.loadClass("javajs.util.Base64")
 // BH 7/18/2017 10:46:44 AM adds J2S._canClickFileReader, fixing J2S.getFileFromDialog for Chrome and Safari
@@ -24,7 +25,19 @@
 
 if(typeof(jQuery)=="undefined") alert ("Note -- jQuery is required, but it's not defined.")
 
-self.J2S || (J2S = {});
+self.J2S || (J2S = {
+ getURIField: function(name, def) {
+    try {
+    	var ref = document.location.href.toLowerCase();
+      var i = ref.indexOf(name + "=");
+      if (i >= 0)
+        def = (document.location.href+"&").substring(i + name.length + 1).split("&")[0];
+    } finally {
+      return def;    
+    }
+  }
+
+});
 
 if (!J2S._version)
 J2S = (function(document) {
@@ -45,6 +58,7 @@ J2S = (function(document) {
 			monitorZIndex:z+99999 // way way front
 		}
 	};
+
   
 	var j = {
     
@@ -89,10 +103,8 @@ J2S = (function(document) {
 	var ref = document.location.href.toLowerCase();
   j._debugCode = (ref.indexOf("j2sdebugcode") >= 0);
   j._debugCore = (ref.indexOf("j2sdebugcore") >= 0);
-  var i = ref.indexOf("j2sdebugname=");
-  j._debugName = (i >= 0 ? (document.location.href+"&").substring(i + 13).split("&")[0] : null);
-  var i = ref.indexOf("j2slang=");
-  j._lang = (i >= 0 ? (document.location.href+"&").substring(i + 8).split("&")[0] : null);
+  j._debugName = J2S.getURIField("j2sdebugname", null);
+  j._lang = J2S.getURIField("j2slang", null);
 	j._httpProto = (ref.indexOf("https") == 0 ? "https://" : "http://"); 
 	j._isFile = (ref.indexOf("file:") == 0);
 	if (j._isFile) // ensure no attempt to read XML in local request:
@@ -1886,9 +1898,14 @@ J2S.Cache.put = function(filename, data) {
 
 		proto.__startAppletJS = function(applet) {
 			if (J2S._version.indexOf("$Date: ") == 0)
-				J2S._version = (J2S._version.substring(7) + " -").split(" -")[0] + " (J2S)"
+				J2S._version = (J2S._version.substring(7) + " -").split(" -")[0] + " (J2S)";
 			Clazz.load("java.lang.Class");
 			J2S._registerApplet(applet._id, applet);
+      if (!applet.__Info.args || applet.__Info.args == "?") {
+        var s = J2S.getURIField("j2sargs", null);
+        if (s !== null)
+          applet.__Info.args = decodeURIComponent(s);
+      }
 			try {
         if (applet.__Info.main) {
           try{

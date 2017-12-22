@@ -180,6 +180,7 @@
     	swingjs/api/js/JSInterface.js
     	swingjs/jquery/JQueryUI.js
     	swingjs/JSApp.js
+    	swingjs/JSApplet.js
     	swingjs/JSAppletThread.js
     	swingjs/JSAppletViewer.js
     	swingjs/JSFontMetrics.js
@@ -223,7 +224,6 @@
     	java/awt/peer/WindowPeer.js
     	java/awt/Point.js
     	java/awt/Window.js
-    	java/lang/Enum.js
     	java/util/Random.js
     	java/util/Vector.js
     	javax/swing/AbstractListModel.js

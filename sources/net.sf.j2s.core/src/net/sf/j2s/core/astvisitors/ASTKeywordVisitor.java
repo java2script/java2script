@@ -1280,8 +1280,10 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 	 *            necessary
 	 * @return JavaScript for array creation
 	 */
-	private String clazzArray(ITypeBinding type, int dimFlag) {
+	protected String clazzArray(ITypeBinding type, int dimFlag) {
 		ITypeBinding ebinding = type.getElementType();
+		if (ebinding == null)
+			ebinding = type; // creating for Enum
 		String params = (ebinding.isPrimitive() ? getPrimitiveTYPE(ebinding.getName())
 				: getQualifiedStaticName(null, ebinding.getQualifiedName(), true, true, false))
 				+ (dimFlag == 0 ? "" : ", " + Math.abs(dimFlag) * type.getDimensions() * -1);

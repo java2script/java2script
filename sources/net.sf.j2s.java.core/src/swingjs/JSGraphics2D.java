@@ -256,6 +256,30 @@ public class JSGraphics2D //extends SunGraphics2D
 		ctx.fillRect(x, y, width, height);
 	}
 
+	public void fill3DRect(int x, int y, int width, int height, boolean raised) {
+		Paint p = getPaint();
+		Color c = getColor();
+		Color brighter = c.brighter();
+		Color darker = c.darker();
+
+		if (!raised) {
+			setColor(darker);
+		} else if (p != c) {
+			setColor(c);
+		}
+		fillRect(x + 1, y + 1, width - 2, height - 2);
+		setColor(raised ? brighter : darker);
+		// drawLine(x, y, x, y + height - 1);
+		fillRect(x, y, 1, height);
+		// drawLine(x + 1, y, x + width - 2, y);
+		fillRect(x + 1, y, width - 2, 1);
+		setColor(raised ? darker : brighter);
+		// drawLine(x + 1, y + height - 1, x + width - 1, y + height - 1);
+		fillRect(x + 1, y + height - 1, width - 1, 1);
+		// drawLine(x + width - 1, y, x + width - 1, y + height - 2);
+		fillRect(x + width - 1, y, 1, height - 1);
+		setPaint(p);
+	}
 	
 	public void setFont(Font font) {
 		// this equality check speeds mark/reset significantly

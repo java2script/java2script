@@ -10654,6 +10654,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js (based on JmolCore.js)
 
+// BH 12/22/2017 1:18:42 PM adds j2sargs for setting arguments
 // BH 11/19/2017 3:55:04 AM adding support for swingjs2.js; adds static j2sHeadless=true;
 // BH 10/4/2017 2:25:03 PM adds Clazz.loadClass("javajs.util.Base64")
 // BH 7/18/2017 10:46:44 AM adds J2S._canClickFileReader, fixing J2S.getFileFromDialog for Chrome and Safari
@@ -10678,7 +10679,19 @@ return jQuery;
 
 if(typeof(jQuery)=="undefined") alert ("Note -- jQuery is required, but it's not defined.")
 
-self.J2S || (J2S = {});
+self.J2S || (J2S = {
+ getURIField: function(name, def) {
+    try {
+    	var ref = document.location.href.toLowerCase();
+      var i = ref.indexOf(name + "=");
+      if (i >= 0)
+        def = (document.location.href+"&").substring(i + name.length + 1).split("&")[0];
+    } finally {
+      return def;    
+    }
+  }
+
+});
 
 if (!J2S._version)
 J2S = (function(document) {
@@ -10699,6 +10712,7 @@ J2S = (function(document) {
 			monitorZIndex:z+99999 // way way front
 		}
 	};
+
   
 	var j = {
     
@@ -10743,10 +10757,8 @@ J2S = (function(document) {
 	var ref = document.location.href.toLowerCase();
   j._debugCode = (ref.indexOf("j2sdebugcode") >= 0);
   j._debugCore = (ref.indexOf("j2sdebugcore") >= 0);
-  var i = ref.indexOf("j2sdebugname=");
-  j._debugName = (i >= 0 ? (document.location.href+"&").substring(i + 13).split("&")[0] : null);
-  var i = ref.indexOf("j2slang=");
-  j._lang = (i >= 0 ? (document.location.href+"&").substring(i + 8).split("&")[0] : null);
+  j._debugName = J2S.getURIField("j2sdebugname", null);
+  j._lang = J2S.getURIField("j2slang", null);
 	j._httpProto = (ref.indexOf("https") == 0 ? "https://" : "http://"); 
 	j._isFile = (ref.indexOf("file:") == 0);
 	if (j._isFile) // ensure no attempt to read XML in local request:
@@ -12540,9 +12552,14 @@ J2S.Cache.put = function(filename, data) {
 
 		proto.__startAppletJS = function(applet) {
 			if (J2S._version.indexOf("$Date: ") == 0)
-				J2S._version = (J2S._version.substring(7) + " -").split(" -")[0] + " (J2S)"
+				J2S._version = (J2S._version.substring(7) + " -").split(" -")[0] + " (J2S)";
 			Clazz.load("java.lang.Class");
 			J2S._registerApplet(applet._id, applet);
+      if (!applet.__Info.args || applet.__Info.args == "?") {
+        var s = J2S.getURIField("j2sargs", null);
+        if (s !== null)
+          applet.__Info.args = decodeURIComponent(s);
+      }
 			try {
         if (applet.__Info.main) {
           try{
@@ -13330,13 +13347,14 @@ Clazz.new_ = function(c, args, cl) {
   return f;
 }
 
-Clazz.newClass = function (prefix, name, clazz, clazzSuper, interfacez, type) {
+Clazz.newClass = function (prefix, name, clazz, clazzSuper, interfacez, type) { 
   if (J2S._debugCore) {
     var qualifiedName = (prefix ? (prefix.__PKG_NAME__ || prefix.__CLASS_NAME__) + "." : "") + name;
     checkDeclared(qualifiedName, type);
   }
   clazz || (clazz = function () {Clazz.newInstance(this,arguments,0,clazz)});  
   clazz.__NAME__ = name;
+  prefix.__CLASS_NAME__ && (clazz.$this$0 = prefix.__CLASS_NAME__);
   clazz.$load$ = [clazzSuper, interfacez];
   
   // get qualifed name, and for inner classes, the name to use to refer to this
@@ -13399,14 +13417,13 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
     };
   }
 
-  clazz && clazz.$clinit$ && clazz.$clinit$();
-  
   objThis.__JSID__ = ++_jsid;
 
-  clazz && clazz.$init0$ && clazz.$init0$.apply(objThis);
 
   if (!isInner) {
-      if ((!args || args.length == 0) && objThis.c$) {
+    clazz && clazz.$clinit$ && clazz.$clinit$();  
+    clazz && clazz.$init0$ && clazz.$init0$.apply(objThis);
+    if ((!args || args.length == 0) && objThis.c$) {
     // allow for direct default call "new foo()" to run with its default constructor
       objThis.c$.apply(objThis);
       args && (args[2] = Clazz.inheritArgs)  
@@ -13449,13 +13466,13 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
       isNew = true;
     }
     // add all superclass references for outer object
-    var clazz = getClazz(outerObj);
+    var clazz1 = getClazz(outerObj);
     do {
-      var key = getClassName(clazz, true);
+      var key = getClassName(clazz1, true);
       if (!isNew && b[key])
         break;
       b[key] = outerObj; 
-    } while ((clazz = clazz.superclazz));
+    } while ((clazz1 = clazz1.superclazz));
   }
   // add a flag to disallow any other same-class use of this map.
   b["$ " + innerName] = 1;
@@ -13464,7 +13481,9 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
     outerObj.$b$ = b;
   // final objective: save this map for the inner object
   objThis.b$ = b;
-  objThis.this$0 = outerObj;
+  clazz.$this$0 && (objThis.this$0 = b[clazz.$this$0]);
+  clazz.$clinit$ && clazz.$clinit$();  
+  clazz.$init0$ && clazz.$init0$.apply(objThis);
 };
 
 
@@ -14069,18 +14088,18 @@ var extendObject = function(clazz, exclude) {
 //};
 
 var excludeSuper = function(o) {
- return o == "b$" || o == "this$0"
+ return o == "b$" || o == "$this$0"
       || o == "$init$"
       || o == "$init0$"
       || o == "$clinit$"
       || o == "$load$"
-      || o == "c$" 
       || o == "$Class$"
       || o == "prototype" 
       || o == "__CLASS_NAME__" 
       || o == "__CLASS_NAME$__" 
       || o == "superclazz"
       || o == "implementz"
+      || o.startsWith("c$") 
 }
 
 var copyStatics = function(clazzSuper, clazzThis, andProto) {
@@ -14354,7 +14373,7 @@ var setSuperclass = function(clazzThis, clazzSuper){
     if (clazzSuper == Number) {
       clazzThis.prototype = new Number();
     } else {
-      clazzThis.prototype = new clazzSuper (null, inheritArgs);     
+      clazzThis.prototype = new clazzSuper ([inheritArgs]);     
       if (clazzSuper == Error) {
         var pp = Throwable.prototype;
         for (o in pp) {
@@ -15020,8 +15039,12 @@ Clazz.loadScript = function(file) {
       s = data;
     if (s.indexOf("missing ] after element list")>= 0)
       s = "File not found";
-    doDebugger()
-    alert(s + " loading file " + file);
+    if (file.indexOf("/j2s/core/") >= 0) {
+      System.out.println(s + " loading " + file);
+    } else {
+      doDebugger()
+      alert(s + " loading file " + file);
+    }
   }
 }
 
@@ -17299,7 +17322,6 @@ C$.$clinit$ = function() {Clazz.load(C$, 1);
 }
 
 m$(C$, "c$", function() {
-debugger;
   C$.superclazz.c$.apply(this, []);
 }, 1);
 
