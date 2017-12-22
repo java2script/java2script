@@ -373,7 +373,6 @@ Clazz.newClass = function (prefix, name, clazz, clazzSuper, interfacez, type) {
   }
   clazz || (clazz = function () {Clazz.newInstance(this,arguments,0,clazz)});  
   clazz.__NAME__ = name;
-  prefix.__CLASS_NAME__ && (clazz.$this$0 = prefix.__CLASS_NAME__);
   clazz.$load$ = [clazzSuper, interfacez];
   
   // get qualifed name, and for inner classes, the name to use to refer to this
