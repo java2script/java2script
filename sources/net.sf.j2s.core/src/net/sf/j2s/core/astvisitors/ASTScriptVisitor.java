@@ -838,7 +838,8 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 						}
 						buffer.append(haveType ? " || " : "if (");
 						buffer.append("Clazz.exceptionOf(" + catchEName + ", ");
-						type.accept(this);
+						buffer.append("\"" + removeBrackets(type.resolveBinding().getQualifiedName()) + "\"");
+						//type.accept(this);
 						buffer.append(")");
 						haveType = true;
 					}
