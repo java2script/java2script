@@ -1906,16 +1906,15 @@ J2S.Cache.put = function(filename, data) {
         if (s !== null)
           applet.__Info.args = decodeURIComponent(s);
       }
-			try {
-        if (applet.__Info.main) {
-          try{
-            var cl = Clazz.load(applet.__Info.main);
-            if (cl.j2sHeadless)
-              applet.__Info.headless = true;
-          }catch(e) {
-            alert ("Java class " +  applet.__Info.main + " was not found.");
-            return;
-          }
+      try {
+        var clazz = (applet.__Info.main || applet.__Info.code);
+        try {
+          var cl = Clazz.load(clazz);
+          if (applet.__Info.main && cl.j2sHeadless)
+            applet.__Info.headless = true;
+        }catch(e) {
+          alert ("Java class " +  clazz + " was not found.");
+          return;
         }
         if (applet.__Info.main && applet.__Info.headless) {
           cl.main(applet.__Info.args || []);

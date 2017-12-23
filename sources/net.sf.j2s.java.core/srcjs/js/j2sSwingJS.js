@@ -218,6 +218,8 @@ Clazz.clone = function(me) {
  * @author: sgurin
  */
 Clazz.exceptionOf = function(e, clazz) {
+  if (typeof clazz == "string")
+    clazz = Clazz.load(clazz);
   if(e.__CLASS_NAME__)
     return Clazz.instanceOf(e, clazz);
   if (!e.getMessage) {
@@ -1598,6 +1600,7 @@ Clazz._Loader = Clazz.ClazzLoader = function () {};
 
 ClassLoader = java.lang.ClassLoader = _Loader;
 _Loader.__CLASS_NAME__ = "ClassLoader";
+
 Clazz.allClasses["java.lang.ClassLoader"] = _Loader;
 _Loader.sysLoader = null;
 
@@ -1605,16 +1608,7 @@ _Loader.getSystemClassLoader = function() {
   return (_Loader.sysLoader ? _Loader.sysLoader : (_Loader.sysLoader = new Class().getClassLoader()));
 };
 
-_Loader.prototype.setDefaultAssertionStatus$Z = function(tf) {
-  Clazz.defaultAssertionStatus = tf;
-};
-
 var assertionStatus = {};
-
-_Loader.prototype.clearAssertionStatus = function() {
-  assertionStatus = {};
-  Clazz.defaultAssertionStatus = false;
-}
 
 _Loader.$getClassAssertionStatus = function(clazz) {
   var ret;
@@ -1626,6 +1620,18 @@ _Loader.$getClassAssertionStatus = function(clazz) {
     }
   }
   return (ret === false ? false : ret || Clazz.defaultAssertionStatus);
+}
+
+_Loader.prototype.hashCode = function(){return 1};
+
+
+_Loader.prototype.setDefaultAssertionStatus$Z = function(tf) {
+  Clazz.defaultAssertionStatus = tf;
+};
+
+_Loader.prototype.clearAssertionStatus = function() {
+  assertionStatus = {};
+  Clazz.defaultAssertionStatus = false;
 }
 
 _Loader.prototype.setClassAssertionStatus$S$Z = _Loader.prototype.setPackageAssertionStatus$S$Z = function(clazzName, tf) {
@@ -2862,14 +2868,15 @@ var radix=(n.startsWith("0x", i) ? 16 : n.startsWith("0", i) ? 8 : 10);
 // The general problem with parseInt is that is not strict -- ParseInt("10whatever") == 10.
 // Number is strict, but Number("055") does not work, though ParseInt("055", 8) does.
 // need to make sure negative numbers are negative
+if (n == "")
+ return NaN
 n = Number(n) & 0xFFFFFFFF;
 return (radix == 8 ? parseInt(n, 8) : n);
 }, 1);
 
 m$(Integer,"decode", function(n){
-  n = Integer.decodeRaw(n);
-  if (isNaN(n) || n < Integer.MIN_VALUE|| n > Integer.MAX_VALUE)
-  throw Clazz.new_(NumberFormatException.c$$S,["Invalid Integer"]);
+  if (isNaN(n = Integer.decodeRaw(n)) || n < Integer.MIN_VALUE|| n > Integer.MAX_VALUE)
+    throw Clazz.new_(NumberFormatException.c$$S,["Invalid Integer"]);
   return Clazz.new_(Integer.c$, [n]);
 }, 1);
 
@@ -2932,8 +2939,7 @@ return i.toString(2);
 
 m$(Long,"decode",
 function(n){
-  n = Integer.decodeRaw(n);
-  if (isNaN(n))
+  if (isNaN(n = Integer.decodeRaw(n)))
     throw Clazz.new_(NumberFormatException.c$$S, ["Invalid Long"]);
   return Clazz.new_(Long.c$, [n]);
 }, 1);
@@ -2998,8 +3004,7 @@ Short.toBinaryString = Short.prototype.toBinaryString = function (i) {
 
 m$(Short, "decode",
 function(n){
-  n = Integer.decodeRaw(n);
-  if (isNaN(n) || n < -32768|| n > 32767)
+  if (isNaN(n = Integer.decodeRaw(n)) || n < -32768|| n > 32767)
     throw Clazz.new_(NumberFormatException.c$$S, ["Invalid Short"]);
   return Clazz.new_(Short.c$, [n]);
 }, 1);
@@ -3064,8 +3069,7 @@ return i.toString(2);
 
 m$(Byte,"decode",
 function(n){
-  n = Integer.decodeRaw(n);
-  if (isNaN(n) || n < -128|| n > 127)
+  if (isNaN(n = Integer.decodeRaw(n)) || n < -128|| n > 127)
     throw Clazz.new_(NumberFormatException.c$$S, ["Invalid Byte"]);
   return Clazz.new_(Byte.c$, [n]);
 }, 1);
@@ -4328,6 +4332,17 @@ var declareType = function(prefix, name, clazzSuper, interfacez) {
 Clazz._Error || (Clazz._Error = Error);
 //setSuperclass(Clazz._Error, Throwable);
 
+var setEx = function(C$) {
+ C$.$clinit$ = function() {Clazz.load(C$, 1);}
+ m$(C$, "c$", function() { C$.superclazz.c$.apply(this, []);}, 1);
+ m$(C$, "c$$S", function(detailMessage){C$.superclazz.c$$S.apply(this,[detailMessage]);},1);
+ return C$;
+}
+
+var newEx = function(prefix, name, clazzSuper) {
+  return setEx(declareType(prefix, name, clazzSuper));
+}
+
 (function() {
 var C$ = Clazz.newClass(java.lang, "Error", function (){
 var err = Clazz._Error();
@@ -4337,63 +4352,54 @@ return err;
 //setSuperclass(java.lang.Error, Throwable);
 //setSuperclass(Clazz._Error, Throwable);
 
-C$.$clinit$ = function() {Clazz.load(C$, 1);
-}
-
-m$(C$, "c$", function() {
-  C$.superclazz.c$.apply(this, []);
-}, 1);
-
-m$(C$, "c$$S", function(detailMessage){
-C$.superclazz.c$$S.apply(this,[detailMessage]);
-},1);
+setEx(C$);
 
 })();
 
-C$ = declareType(java.lang,"Exception",Throwable);
+C$ = newEx(java.lang,"Exception",Throwable);
 m$(C$, "c$", function(){}, 1);
 
-declareType(java.lang,"RuntimeException",Exception);
-declareType(java.lang,"IllegalArgumentException",RuntimeException);
-declareType(java.lang,"LinkageError",Error);
-declareType(java.lang,"VirtualMachineError",Error);
-declareType(java.lang,"IncompatibleClassChangeError",LinkageError);
+newEx(java.lang,"RuntimeException",Exception);
+newEx(java.lang,"IllegalArgumentException",RuntimeException);
+newEx(java.lang,"LinkageError",Error);
+newEx(java.lang,"VirtualMachineError",Error);
+newEx(java.lang,"IncompatibleClassChangeError",LinkageError);
 
-declareType(java.lang,"AbstractMethodError",IncompatibleClassChangeError);
-declareType(java.lang,"ArithmeticException",RuntimeException);
-declareType(java.lang,"ArrayStoreException",RuntimeException);
-declareType(java.lang,"ClassCircularityError",LinkageError);
-declareType(java.lang,"ClassFormatError",LinkageError);
-declareType(java.lang,"CloneNotSupportedException",Exception);
-declareType(java.lang,"IllegalAccessError",IncompatibleClassChangeError);
-declareType(java.lang,"IllegalAccessException",Exception);
-declareType(java.lang,"IllegalMonitorStateException",RuntimeException);
-declareType(java.lang,"IllegalStateException",RuntimeException);
-declareType(java.lang,"IllegalThreadStateException",IllegalArgumentException);
-declareType(java.lang,"IndexOutOfBoundsException",RuntimeException);
-declareType(java.lang,"InstantiationError",IncompatibleClassChangeError);
-declareType(java.lang,"InstantiationException",Exception);
-declareType(java.lang,"InternalError",VirtualMachineError);
-declareType(java.lang,"InterruptedException",Exception);
-declareType(java.lang,"NegativeArraySizeException",RuntimeException);
-declareType(java.lang,"NoClassDefFoundError",LinkageError);
-declareType(java.lang,"NoSuchFieldError",IncompatibleClassChangeError);
-declareType(java.lang,"NoSuchFieldException",Exception);
-declareType(java.lang,"NoSuchMethodException",Exception);
-declareType(java.lang,"NoSuchMethodError",IncompatibleClassChangeError);
-declareType(java.lang,"NullPointerException",RuntimeException);
-declareType(java.lang,"NumberFormatException",IllegalArgumentException);
-declareType(java.lang,"OutOfMemoryError",VirtualMachineError);
-declareType(java.lang,"SecurityException",RuntimeException);
-declareType(java.lang,"StackOverflowError",VirtualMachineError);
-declareType(java.lang,"ThreadDeath",Error);
-declareType(java.lang,"UnknownError",VirtualMachineError);
-declareType(java.lang,"UnsatisfiedLinkError",LinkageError);
-declareType(java.lang,"UnsupportedClassVersionError",ClassFormatError);
-declareType(java.lang,"UnsupportedOperationException",RuntimeException);
-declareType(java.lang,"VerifyError",LinkageError);
+newEx(java.lang,"AbstractMethodError",IncompatibleClassChangeError);
+newEx(java.lang,"ArithmeticException",RuntimeException);
+newEx(java.lang,"ArrayStoreException",RuntimeException);
+newEx(java.lang,"ClassCircularityError",LinkageError);
+newEx(java.lang,"ClassFormatError",LinkageError);
+newEx(java.lang,"CloneNotSupportedException",Exception);
+newEx(java.lang,"IllegalAccessError",IncompatibleClassChangeError);
+newEx(java.lang,"IllegalAccessException",Exception);
+newEx(java.lang,"IllegalMonitorStateException",RuntimeException);
+newEx(java.lang,"IllegalStateException",RuntimeException);
+newEx(java.lang,"IllegalThreadStateException",IllegalArgumentException);
+newEx(java.lang,"IndexOutOfBoundsException",RuntimeException);
+newEx(java.lang,"InstantiationError",IncompatibleClassChangeError);
+newEx(java.lang,"InstantiationException",Exception);
+newEx(java.lang,"InternalError",VirtualMachineError);
+newEx(java.lang,"InterruptedException",Exception);
+newEx(java.lang,"NegativeArraySizeException",RuntimeException);
+newEx(java.lang,"NoClassDefFoundError",LinkageError);
+newEx(java.lang,"NoSuchFieldError",IncompatibleClassChangeError);
+newEx(java.lang,"NoSuchFieldException",Exception);
+newEx(java.lang,"NoSuchMethodException",Exception);
+newEx(java.lang,"NoSuchMethodError",IncompatibleClassChangeError);
+newEx(java.lang,"NullPointerException",RuntimeException);
+newEx(java.lang,"NumberFormatException",IllegalArgumentException);
+newEx(java.lang,"OutOfMemoryError",VirtualMachineError);
+newEx(java.lang,"SecurityException",RuntimeException);
+newEx(java.lang,"StackOverflowError",VirtualMachineError);
+newEx(java.lang,"ThreadDeath",Error);
+newEx(java.lang,"UnknownError",VirtualMachineError);
+newEx(java.lang,"UnsatisfiedLinkError",LinkageError);
+newEx(java.lang,"UnsupportedClassVersionError",ClassFormatError);
+newEx(java.lang,"UnsupportedOperationException",RuntimeException);
+newEx(java.lang,"VerifyError",LinkageError);
 
-declareType(java.lang,"ClassCastException",RuntimeException);
+newEx(java.lang,"ClassCastException",RuntimeException);
 
 C$=Clazz.newClass(java.lang,"ClassNotFoundException",function(){this.ex=null;},Exception);
 m$(C$, "c$$S$Throwable", function(detailMessage,exception){
@@ -4409,7 +4415,7 @@ function(){
 return this.ex;
 });
 
-C$=declareType(java.lang,"StringIndexOutOfBoundsException",IndexOutOfBoundsException);
+C$=newEx(java.lang,"StringIndexOutOfBoundsException",IndexOutOfBoundsException);
 m$(C$, "c$$I", function(index){
 C$.superclazz.c$$S.apply(this,["String index out of range: "+index]);
 }, 1);
@@ -4454,19 +4460,19 @@ function(){
 return this.undeclaredThrowable;
 });
 
-declareType(java.io,"IOException",Exception);
-declareType(java.io,"CharConversionException",java.io.IOException);
-declareType(java.io,"EOFException",java.io.IOException);
-declareType(java.io,"FileNotFoundException",java.io.IOException);
-declareType(java.io,"ObjectStreamException",java.io.IOException);
-declareType(java.io,"SyncFailedException",java.io.IOException);
-declareType(java.io,"UnsupportedEncodingException",java.io.IOException);
-declareType(java.io,"UTFDataFormatException",java.io.IOException);
+newEx(java.io,"IOException",Exception);
+newEx(java.io,"CharConversionException",java.io.IOException);
+newEx(java.io,"EOFException",java.io.IOException);
+newEx(java.io,"FileNotFoundException",java.io.IOException);
+newEx(java.io,"ObjectStreamException",java.io.IOException);
+newEx(java.io,"SyncFailedException",java.io.IOException);
+newEx(java.io,"UnsupportedEncodingException",java.io.IOException);
+newEx(java.io,"UTFDataFormatException",java.io.IOException);
 
-declareType(java.io,"InvalidObjectException",java.io.ObjectStreamException);
-declareType(java.io,"NotActiveException",java.io.ObjectStreamException);
-declareType(java.io,"NotSerializableException",java.io.ObjectStreamException);
-declareType(java.io,"StreamCorruptedException",java.io.ObjectStreamException);
+newEx(java.io,"InvalidObjectException",java.io.ObjectStreamException);
+newEx(java.io,"NotActiveException",java.io.ObjectStreamException);
+newEx(java.io,"NotSerializableException",java.io.ObjectStreamException);
+newEx(java.io,"StreamCorruptedException",java.io.ObjectStreamException);
 
 C$=Clazz.newClass(java.io,"InterruptedIOException",function(){
 this.bytesTransferred=0;
@@ -4514,11 +4520,11 @@ function(){
 return this.detail;
 });
 
-declareType(java.util,"EmptyStackException",RuntimeException);
-declareType(java.util,"NoSuchElementException",RuntimeException);
-declareType(java.util,"TooManyListenersException",Exception);
+newEx(java.util,"EmptyStackException",RuntimeException);
+newEx(java.util,"NoSuchElementException",RuntimeException);
+newEx(java.util,"TooManyListenersException",Exception);
 
-C$=declareType(java.util,"ConcurrentModificationException",RuntimeException);
+C$=newEx(java.util,"ConcurrentModificationException",RuntimeException);
 m$(C$, "c$", function(detailMessage, rootCause){
 Clazz.super(C$, this);
 }, 1);
