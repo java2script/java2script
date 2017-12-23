@@ -50,7 +50,6 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.LayoutManager;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
@@ -71,7 +70,6 @@ import java.util.Random;
 import java.util.Vector;
 
 import a2s.Applet;
-
 import a2s.Button;
 import a2s.Canvas;
 import a2s.Checkbox;
@@ -686,11 +684,12 @@ class DiffractionFrame extends Frame implements ComponentListener,
 		boolean hideFunction = dragging && aperture.hideWhileDragging();
 		if (functionChanged) {
 			realg.setColor(cv.getBackground());
-			FontMetrics fm = realg.getFontMetrics();
-			String cs = "Calculating...";
-			realg.fillRect(0, fullWinSize.height - 30, 20 + fm.stringWidth(cs), 30);
-			realg.setColor(Color.white);
-			realg.drawString(cs, 10, fullWinSize.height - 10);
+// BH this does not seem necessary and is not cleared properly and is in the wrong spot
+//			FontMetrics fm = realg.getFontMetrics();
+//			String cs = "Calculating...";
+//			realg.fillRect(0, cv.getHeight() - 30, 20 + fm.stringWidth(cs), 30);
+//			realg.setColor(Color.white);
+//			realg.drawString(cs, 10, cv.getHeight() - 10);
 			computeFunction();
 		}
 
@@ -698,7 +697,6 @@ class DiffractionFrame extends Frame implements ComponentListener,
 		if (winSize == null || winSize.width == 0)
 			return;
 		g = dbimage.getGraphics();
-		g.setColor(cv.getBackground());
 		g.fillRect(0, 0, fullWinSize.width, fullWinSize.height);
 		g.setColor(cv.getForeground());
 

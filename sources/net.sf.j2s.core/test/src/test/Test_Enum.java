@@ -35,10 +35,13 @@ public class Test_Enum extends Test_{
 	}
 
 	public static void main(String[] args) {
-		
-		Day[] d = Day.values();
+		Day[] a = new Day[0];
+ 		Day[] d = Day.values();
 		for (int i = 0; i < d.length; i++)
 			System.out.println(i + " day " + d[i]);
+		System.out.println(d.toString());
+		System.out.println(Enum.valueOf(Day.class, "MONDAY").getClass().getName());
+		assert(Enum.valueOf(Day.class, "MONDAY").ordinal() == 1);
 		
 		Test_Enum firstDay = new Test_Enum(Day.MONDAY);
 		assert(firstDay.tellItLikeItIs() == "Mondays are bad.");

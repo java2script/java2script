@@ -31,12 +31,13 @@ import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
+import javax.swing.JViewport;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 @SuppressWarnings("serial")
-public class Test_Scroll extends JApplet {
+public class Test_Scroll extends JApplet implements ChangeListener {
 
 	static DecimalFormat df = new DecimalFormat("0.00");
 
@@ -153,6 +154,7 @@ public class Test_Scroll extends JApplet {
 		JScrollPane sp = new JScrollPane();
 		sp.getViewport().add(p);
 		getContentPane().add(sp);
+		sp.getViewport().addChangeListener(this);
 
 		mkBar(p, tf, Adjustable.VERTICAL, 20, 200);
 		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200);
@@ -216,6 +218,14 @@ public class Test_Scroll extends JApplet {
 		bar.setOpaque(true);
 		p.add(bar);
 		return bar;
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		// Viewport has scrolled
+		JViewport v = (JViewport) e.getSource();
+		if (v.getViewRect().x > 0)
+			System.out.println("view change: " + v.getViewRect());
 	}
 
 }

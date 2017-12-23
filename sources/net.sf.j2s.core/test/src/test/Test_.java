@@ -12,8 +12,9 @@ abstract class Test_ {
 	private static int i_ = 0;
 	private int t = 0;
 	 
-	public void showt() {
+	public int showt() {
 		System.out.println(t);
+		return t;
 	}
 	static {
 		ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);

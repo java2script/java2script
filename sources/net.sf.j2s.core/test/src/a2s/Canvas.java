@@ -2,6 +2,8 @@ package a2s;
 
 import java.awt.Graphics;
 
+import javax.swing.JComponent;
+
 
 public class Canvas extends Panel {
 	
@@ -15,7 +17,7 @@ public class Canvas extends Panel {
 	//BH AWT called canvas.update(g), but Swing will call canvas.paint(g) instead. 
 	//BH a2s does allow for that, with paint(g) calling update(g) (Opposite of standard Swing).
 		
-	//BH So in the code, and canvas.paint should be renamed something like canvas.paintMe
+	//BH So in the code, canvas.paint should be renamed something like canvas.paintMe
 		
 		
 		update(g);
@@ -30,7 +32,7 @@ public class Canvas extends Panel {
 		/**
 		 * @j2sNative
 		 * 
-		 * this.paintComponent && this.paintComponent(g);
+		 * this.paintComponent$java_awt_Graphics && this.paintComponent$java_awt_Graphics(g);
 		 * 
 		 */
 		{}

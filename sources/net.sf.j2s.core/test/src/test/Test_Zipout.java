@@ -8,9 +8,8 @@ import java.util.zip.ZipOutputStream;
 public class Test_Zipout extends Test_ {
 
 	public static void main(String[] args) {
-
 		try {
-			byte[] bytes = "this is a test".getBytes();
+			byte[] bytes = "this is a test".getBytes(); 
 			OutputStream os = new FileOutputStream("C:/temp/testzip.zip");
 			ZipOutputStream zos = new ZipOutputStream(os);
 			zos.putNextEntry(new ZipEntry("test1"));

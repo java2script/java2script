@@ -16,6 +16,7 @@ class Test_Array extends Test_ {
 	  y = x;
 	  Test_Array[] a = new Test_Array[3];
   }
+  static Object oo = Array.newInstance(Test_Array[].class, 0);
   
   static Object tType3__ = Array.newInstance(Test_Array[][].class, 3);
   static Object oType3__ = Array.newInstance(Object[][].class, 3);

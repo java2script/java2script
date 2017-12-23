@@ -174,7 +174,7 @@ public abstract class JSThread extends Thread implements JSFunction {
 
 	/**
 	 * 
-	 * @param r
+	 * @param r2
 	 * @param state
 	 * @return true if we should interrupt (i.e. JavaScript)
 	 * @throws InterruptedException
