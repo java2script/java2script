@@ -626,7 +626,8 @@ public abstract class JComponent extends Container {
 				isBackgroundPainted = false;
 				ui.update(scratchGraphics, this);
 				// BH TODO CHECK THIS 
-				isBackgroundPainted = ((JSGraphics2D) (Object)scratchGraphics).isBackgroundPainted();
+				JSGraphics2D jsg = getJSGraphic2D(scratchGraphics);		
+				isBackgroundPainted = (jsg != null && jsg.isBackgroundPainted());
 			} finally {
 				scratchGraphics.dispose();
 			}
@@ -725,7 +726,7 @@ public abstract class JComponent extends Container {
 							// if (!printing) {
 							jc.checkBackgroundPainted(null);
 							jc.paint((Graphics) (Object) jsg);
-							jc.checkBackgroundPainted(jsg);
+							jc.checkBackgroundPainted(getJSGraphic2D((Graphics) (Object) jsg));
 							// } else {
 							// if (!getFlag(IS_PRINTING_ALL)) {
 							// comp.print(cg);
@@ -4575,7 +4576,7 @@ public abstract class JComponent extends Container {
 					// (so that the underlying JRootPane canvas can show).
 					checkBackgroundPainted(null);
 					paintingComponent.paint(g);					
-					checkBackgroundPainted((JSGraphics2D) (Object) g);
+					checkBackgroundPainted(getJSGraphic2D(g));
 				}
 			} finally {
 				g.dispose();
@@ -4813,16 +4814,7 @@ public abstract class JComponent extends Container {
 	 */
 	@SuppressWarnings("unused")
 	private void paintComponentSafely(Graphics g) {
-		JSGraphics2D jsg = null;
-		
-		/**
-		 * @j2sNative
-		 * 
-		 * 			jsg = (g.mark ? g : null);
-		 */
-		{
-		}
-
+		JSGraphics2D jsg = getJSGraphic2D(g);		
 		int nSave = (jsg == null ? 0 : jsg.mark());
 		checkBackgroundPainted(null);
 		// note that paintComponent may be overridden.
@@ -4846,19 +4838,8 @@ public abstract class JComponent extends Container {
 	 * 
 	 * @param g
 	 */
-	@SuppressWarnings("unused")
 	private void printComponentSafely(Graphics g) {
-		
-		JSGraphics2D jsg = null;
-		
-		/**
-		 * @j2sNative
-		 * 
-		 * 			jsg = (g.mark ? g : null);
-		 */
-		{
-		}
-
+		JSGraphics2D jsg = getJSGraphic2D(g);		
 		int nSave = (jsg == null ? 0 : jsg.mark());
 		printComponent(g);
 		if (jsg != null)
@@ -4877,18 +4858,8 @@ public abstract class JComponent extends Container {
 	 * 
 	 * @param g
 	 */
-	@SuppressWarnings("unused")
 	private void paintBorderSafely(Graphics g) {
-		JSGraphics2D jsg = null;
-		
-		/**
-		 * @j2sNative
-		 * 
-		 * 			jsg = (g.mark ? g : null);
-		 */
-		{
-		}
-
+		JSGraphics2D jsg = getJSGraphic2D(g);		
 		int nSave = (jsg == null ? 0 : jsg.mark());
 		printBorder(g);
 		if (jsg != null)
@@ -4907,17 +4878,8 @@ public abstract class JComponent extends Container {
 	 * 
 	 * @param g
 	 */
-	@SuppressWarnings("unused")
 	private void printBorderSafely(Graphics g) {
-		JSGraphics2D jsg = null;		
-		/**
-		 * @j2sNative
-		 * 
-		 * 			jsg = (g.mark ? g : null);
-		 */
-		{
-		}
-
+		JSGraphics2D jsg = getJSGraphic2D(g);		
 		int nSave = (jsg == null ? 0 : jsg.mark());
 		printBorder(g);
 		if (jsg != null)

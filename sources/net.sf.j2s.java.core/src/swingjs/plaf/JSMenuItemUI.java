@@ -23,6 +23,7 @@ public class JSMenuItemUI extends JSButtonUI {
 			domNode = createItem("_item", null);
 		}
 		// add code here for adjustments when changes in bounds or other properties occur.
+		DOMNode.setStyles(domNode, "display", jc.isVisible() ? "block" : "none");
 		return domNode;
 	}
 
