@@ -25,10 +25,6 @@
 
 package java.lang;
 
-import java.io.IOException;
-import java.io.InvalidObjectException;
-import java.io.ObjectInputStream;
-import java.io.ObjectStreamException;
 import java.io.Serializable;
 
 /**
@@ -227,30 +223,29 @@ public abstract class Enum<E extends Enum<E>>
     }
 
     /**
-     * @j2sIgnore  BH
      * 
      * enum classes cannot have finalize methods.
      */
     protected final void finalize() { }
 
-    /**
-     * prevent default deserialization
-     * 
-     * @j2sIgnore   BH
-     */
-    private void readObject(ObjectInputStream in) throws IOException,
-        ClassNotFoundException {
-            throw new InvalidObjectException("can't deserialize enum");
-    }
-
-    /**
-     * @j2sIgnore   BH
-     * 
-     * @throws ObjectStreamException
-     */
-    @SuppressWarnings("unused")
-	private void readObjectNoData() throws ObjectStreamException {
-            throw new InvalidObjectException("can't deserialize enum");
-    }
-    
+//    /**
+//     * prevent default deserialization
+//     * 
+//     * @j2sIgnore   BH
+//     */
+//    private void readObject(ObjectInputStream in) throws IOException,
+//        ClassNotFoundException {
+//            throw new InvalidObjectException("can't deserialize enum");
+//    }
+//
+//    /**
+//     * @j2sIgnore   BH
+//     * 
+//     * @throws ObjectStreamException
+//     */
+//    @SuppressWarnings("unused")
+//	private void readObjectNoData() throws ObjectStreamException {
+//            throw new InvalidObjectException("can't deserialize enum");
+//    }
+//    
 }

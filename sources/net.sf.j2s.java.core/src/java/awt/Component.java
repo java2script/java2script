@@ -1875,7 +1875,7 @@ public abstract class Component
 	 */
 	final Point getLocationOnScreen_NoTreeLock() {
 		if (isShowing()) {
-			if (peer instanceof LightweightPeer) {
+			if (isLightweight()) {//peer instanceof LightweightPeer) { // SwingJS will return FALSE 
 				// lightweight component location needs to be translated
 				// relative to a native component.
 				Container host = getNativeContainer();

@@ -890,6 +890,7 @@ public class Window extends Container {
 
         // If first time shown, generate WindowOpened event
         if ((state & OPENED) == 0) {
+            repaint(); // main frame was not showing for Varna PrintTest.
             postWindowEvent(WindowEvent.WINDOW_OPENED);
             state |= OPENED;
         }

@@ -77,7 +77,7 @@ public class PDFPrinterJob extends PrinterJob {
 	public PDFPrinterJob() {
 		attributes = new HashPrintRequestAttributeSet();
 		info = new PDFInfo();
-		pageFormat = new PageFormat(); // default page format.
+		//pageFormat = new PageFormat(); // default page format.
 		setJobName("Java Printing");
 	}
 
@@ -157,7 +157,8 @@ public class PDFPrinterJob extends PrinterJob {
 		for (int pageIndex = 0; pageIndex < pageCount; pageIndex++) {
 			if (pageable != null)
 				pageFormat = pageable.getPageFormat(pageIndex);
-
+			if (pageFormat == null)
+				pageFormat = defaultPage();
 			pdfGraphics = (PDFGraphics) printJob.getGraphics(pageFormat);
 			if (pageable != null)
 				printable = pageable.getPrintable(pageIndex);

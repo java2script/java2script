@@ -1706,7 +1706,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	public void dispose() {
 		isDisposed = true;
 		DOMNode.remove(domNode);
-		DOMNode.remove(outerNode);
+		if (domNode != outerNode)
+			DOMNode.remove(outerNode);
 	}
 
 	/**
@@ -1722,7 +1723,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 			if (ui.containerNode != null)
 				ui.containerNode.appendChild(node);
 		}
-		if (outerNode != null)
+		if (outerNode != null && domNode != outerNode) // menu separators have domNode == outerNode
 			outerNode.appendChild(domNode);
 		isDisposed = false;
 	}
