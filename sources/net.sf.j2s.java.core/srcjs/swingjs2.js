@@ -15855,9 +15855,8 @@ return (radix == 8 ? parseInt(n, 8) : n);
 }, 1);
 
 m$(Integer,"decode", function(n){
-  n = Integer.decodeRaw(n);
-  if (isNaN(n) || n < Integer.MIN_VALUE|| n > Integer.MAX_VALUE)
-  throw Clazz.new_(NumberFormatException.c$$S,["Invalid Integer"]);
+  if (isNaN(n = Integer.decodeRaw(n)) || n < Integer.MIN_VALUE|| n > Integer.MAX_VALUE)
+    throw Clazz.new_(NumberFormatException.c$$S,["Invalid Integer"]);
   return Clazz.new_(Integer.c$, [n]);
 }, 1);
 
@@ -15920,8 +15919,7 @@ return i.toString(2);
 
 m$(Long,"decode",
 function(n){
-  n = Integer.decodeRaw(n);
-  if (isNaN(n))
+  if (isNaN(n = Integer.decodeRaw(n)))
     throw Clazz.new_(NumberFormatException.c$$S, ["Invalid Long"]);
   return Clazz.new_(Long.c$, [n]);
 }, 1);
@@ -15986,8 +15984,7 @@ Short.toBinaryString = Short.prototype.toBinaryString = function (i) {
 
 m$(Short, "decode",
 function(n){
-  n = Integer.decodeRaw(n);
-  if (isNaN(n) || n < -32768|| n > 32767)
+  if (isNaN(n = Integer.decodeRaw(n)) || n < -32768|| n > 32767)
     throw Clazz.new_(NumberFormatException.c$$S, ["Invalid Short"]);
   return Clazz.new_(Short.c$, [n]);
 }, 1);
@@ -16052,8 +16049,7 @@ return i.toString(2);
 
 m$(Byte,"decode",
 function(n){
-  n = Integer.decodeRaw(n);
-  if (isNaN(n) || n < -128|| n > 127)
+  if (isNaN(n = Integer.decodeRaw(n)) || n < -128|| n > 127)
     throw Clazz.new_(NumberFormatException.c$$S, ["Invalid Byte"]);
   return Clazz.new_(Byte.c$, [n]);
 }, 1);
@@ -17320,15 +17316,10 @@ var setEx = function(C$) {
  C$.$clinit$ = function() {Clazz.load(C$, 1);}
  m$(C$, "c$", function() { C$.superclazz.c$.apply(this, []);}, 1);
  m$(C$, "c$$S", function(detailMessage){C$.superclazz.c$$S.apply(this,[detailMessage]);},1);
+ return C$;
 }
 
-var newEx = function(prefix, name, clazzSuper) {
-  var C$ = declareType(prefix, name, clazzSuper);
-  setEx(C$);
-  return C$;
-}
-
-(function() {
+;(function() {
 var C$ = Clazz.newClass(java.lang, "Error", function (){
 var err = Clazz._Error();
 return err;
@@ -17341,7 +17332,11 @@ setEx(C$);
 
 })();
 
-C$ = declareType(java.lang,"Exception",Throwable);
+var newEx = function(prefix, name, clazzSuper) {
+  return setEx(declareType(prefix, name, clazzSuper));
+}
+
+C$ = newEx(java.lang,"Exception",Throwable);
 m$(C$, "c$", function(){}, 1);
 
 newEx(java.lang,"RuntimeException",Exception);

@@ -4339,11 +4339,7 @@ var setEx = function(C$) {
  return C$;
 }
 
-var newEx = function(prefix, name, clazzSuper) {
-  return setEx(declareType(prefix, name, clazzSuper));
-}
-
-(function() {
+;(function() {
 var C$ = Clazz.newClass(java.lang, "Error", function (){
 var err = Clazz._Error();
 return err;
@@ -4355,6 +4351,10 @@ return err;
 setEx(C$);
 
 })();
+
+var newEx = function(prefix, name, clazzSuper) {
+  return setEx(declareType(prefix, name, clazzSuper));
+}
 
 C$ = newEx(java.lang,"Exception",Throwable);
 m$(C$, "c$", function(){}, 1);
