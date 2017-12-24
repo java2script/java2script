@@ -12,11 +12,15 @@
 package net.sf.j2s.core.astvisitors;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -28,6 +32,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 //import net.sf.j2s.core.astvisitors.adapters.ExtendedAdapter;
@@ -37,24 +42,175 @@ import org.eclipse.jdt.core.dom.TextElement;
  * j2s* Javadoc tags.
  * 
  * @author zhou renjian
+ * @author Bob Hanson
  *
  * 2006-12-4
  */
 public class ASTJ2SDocVisitor extends ASTEmptyVisitor {
 	
-	private ArrayList<Javadoc> rootJavaDocs; 
+	protected Map<Integer, Javadoc> global_mapBlockJavadoc;
+	
+	protected class BlockVisitor extends ASTVisitor {
 
+		protected int ptrDoc, ptr, len;
+		private List<ASTNode> list;
+		private int listPtr = 0;
+
+		BlockVisitor(List<ASTNode> list) {
+			this.list = list;
+			ptrDoc = list.get(0).getStartPosition();
+		}
+
+		/**
+		 * Just collect blocks after j2s Javadocs.
+		 * Throws an IndexOfBoundsException when done with scanning.
+		 * 
+		 * Note that this no longer requires that the node be a block,
+		 * because we are processing these BEFORE the node is visited.
+		 * 
+		 */
+		
+		public void preVisit(ASTNode node) throws IndexOutOfBoundsException {
+			int nodePt = node.getStartPosition();
+			// check for too early or too late.
+			if (nodePt < ptrDoc)
+				return;
+			//System.err.println("checking listPtr/size/nodePt/ptDoc " + listPtr + " " + list.size() + " " + nodePt + " " + ptrDoc + " " + node.getClass().getName());
+			//before:
+			//....v
+			//....J...J.J.J.J 
+			//.bbb.Bbb.B.B.B.Bbbbb
+			//after:
+			//........v
+			//....JB..J.J.J.J 
+			//.bbb..bb.B.B.B.Bbbbb
+			while (++listPtr < list.size()) {
+				// check for 
+				//........v
+				//....JB..JJ. 
+				//.bbb.bbb..B				
+				// becoming 
+				//.........v
+				//....JB..xJB   where "x" is ignored 
+				//.bbb..bb...
+
+				ptrDoc = list.get(listPtr).getStartPosition();
+
+				//System.err.println("checking now " + listPtr + " " + nodePt + " " + ptrDoc + " ");
+
+				if (nodePt < ptrDoc)
+					break;
+				list.remove(--listPtr);
+			}
+			if (nodePt < ptrDoc || listPtr == list.size()) {
+				if (!(node instanceof Block))
+					System.err.println("!!Note @j2s node not a block :" + list.get(listPtr - 1));
+				list.add(listPtr, node);
+			}
+			// the following will throw the desired exception when the task is done
+			list.get(++listPtr);
+			
+			//System.err.println("!!Note: j2s doc previsit ok listPtr/ptrDoc/nodePt:" + listPtr + "/" + ptrDoc + "/" + nodePt + " " + node.getClass().getName() + " ");
+			return;
+		}
+	}
+
+	protected void setMapJavaDoc(PackageDeclaration node) {
+		ASTNode root = node.getRoot();
+		global_mapBlockJavadoc = new HashMap<Integer, Javadoc>();
+		// list all @j2s blocks
+		List<ASTNode> list = new ArrayList<ASTNode>();
+		List<?> commentList = ((CompilationUnit) root).getCommentList();
+		for (int i = 0, n = commentList.size(); i < n; i++) {
+			Comment comment = (Comment) commentList.get(i);
+			if (comment instanceof Javadoc) {
+				List<?> tags = ((Javadoc) comment).tags();
+				if (tags.size() != 0) {
+					for (Iterator<?> itr = tags.iterator(); itr.hasNext();) {
+						TagElement tagEl = (TagElement) itr.next();
+						String tagName = tagEl.getTagName();
+						if (tagName == null || !tagName.startsWith("@j2sNative") 
+								&& !tagName.startsWith("@j2sIgnore")
+								&& !tagName.startsWith("@j2sDebug"))
+							continue;
+						// System.err.println(">>" + list.size() + " adding " +
+						// comment.getStartPosition() + " " + comment);
+						list.add(comment);
+						break;
+					}
+				}
+			}
+		}
+		if (list.isEmpty())
+			return;
+
+		// now add all the blocks
+
+		try {
+			root.accept(new BlockVisitor(list));
+		} catch (IndexOutOfBoundsException e) {
+			// normal termination
+		}
+
+		// and link javadoc to its closest block
+
+//		for (int i = 0, n = list.size(); i < n; i++) {
+//			System.err.println(i + "  " + list.get(i).getClass().getName());
+//		}
+
+		for (int i = 0, n = list.size() - 1; i < n;) {
+			Javadoc doc = (Javadoc) list.get(i++);
+			ASTNode item = list.get(i);
+			if (item instanceof Javadoc) {
+				System.err.println("!!Note: @j2s doc ignored because nothing follows it: " + doc.getStartPosition()
+						+ "\r\n" + doc);
+			} else {
+				i++;
+				global_mapBlockJavadoc.put(Integer.valueOf(item.getStartPosition()), doc);
+				if (item instanceof Block)
+					System.err.println("@j2s doc:\r\n" + doc.getStartPosition() + " " + doc + "\nreplaces block: "
+							+ item.getStartPosition() + " " + item.getClass().getName() + "\r\n" + item);
+				else if (item instanceof AbstractTypeDeclaration)
+					System.err.println("@j2s doc:\r\n" + doc.getStartPosition() + " " + doc
+							+ "\nadded before: " + item.getStartPosition() + " " + item.getClass().getName());
+				else
+					System.err
+							.println("@j2s doc:\r\n" + doc.getStartPosition() + " " + doc + "\nadded before: "
+									+ item.getStartPosition() + " " + item.getClass().getName() + "\r\n" + item);
+			}
+		}
+
+	}
+
+
+
+   /**
+    * Only specially process blocks if they are method declarations.
+    * Never process these for constructors.
+    */
 	public boolean visit(Block node) {
 		ASTNode parent = node.getParent();
-		BodyDeclaration dec = (parent instanceof MethodDeclaration && !((MethodDeclaration)parent).isConstructor() 
-				|| parent instanceof Initializer ? (BodyDeclaration) parent : null);
-		/*
-		 * if comment contains "@j2sNative", then output the given native
-		 * JavaScript codes directly.
-		 */
-		Javadoc javadoc = (dec == null ? getBlockJavadoc(node) : dec.getJavadoc());
-		lastPos = node.getStartPosition();
-		return (javadoc != null && addJavadocForBlock(javadoc, node) ? false : super.visit(node));
+		if (parent instanceof MethodDeclaration && !((MethodDeclaration)parent).isConstructor()
+				|| parent instanceof Initializer) {
+			Javadoc javadoc = ((BodyDeclaration) parent).getJavadoc();
+			if (javadoc != null && checkJ2sJavadoc(javadoc, false))
+				return false;			
+		}
+		return super.visit(node);
+	}
+		
+	/**
+	 * check any node other than the package node for @j2sNative or @j2sDebug or @j2sIgnore 
+	 */
+	public boolean preVisit2(ASTNode node) {
+		Javadoc j2sJavadoc;
+		if (	global_mapBlockJavadoc == null 
+				|| node instanceof MethodDeclaration 
+				|| node instanceof Initializer 
+				|| (j2sJavadoc = global_mapBlockJavadoc.remove(Integer.valueOf(node.getStartPosition()))) == null)
+			return true;
+		boolean isBlock = (node instanceof Block);
+		return !checkJ2sJavadoc(j2sJavadoc, isBlock) || !isBlock;
 	}
 
 
@@ -62,16 +218,16 @@ public class ASTJ2SDocVisitor extends ASTEmptyVisitor {
 	 * 
 	 * Check for j2sIgnore, j2sDebug, j2sNative, j2sXHTML, j2sXCSS
 	 * @param javadoc
-	 * @param node
+	 * @param isBlock
 	 * @return true if code was added
 	 */
-	protected boolean addJavadocForBlock(Javadoc javadoc, Block node) {
+	protected boolean checkJ2sJavadoc(Javadoc javadoc, boolean isBlock) {
 		List<?> tags = (javadoc == null ? null : javadoc.tags());
-		return (tags != null && tags.size() > 0 && (getTag(tags, "@j2sIgnore") != null
-				|| global_j2sFlag_isDebugging && addSourceForTag(getTag(tags, "@j2sDebug"), "", "")
-				// note that isToCompileVariableName() always returns false
-				//|| !isToCompileVariableName() && (tagEl = getTag(tags, "@j2sNativeSrc", node)) != null  
-				|| addSourceForTag(getTag(tags, "@j2sNative"), "", "")
+		String prefix = (isBlock ? "{\r\n" : "");
+		String postfix = (isBlock ? "}\r\n" : "\r\n");
+		return (tags != null && tags.size() > 0 && (isBlock && getTag(tags, "@j2sIgnore") != null
+				|| global_j2sFlag_isDebugging && addSourceForTag(getTag(tags, "@j2sDebug"), prefix, postfix)
+				|| addSourceForTag(getTag(tags, "@j2sNative"), prefix, postfix)
 			//	|| global_allowExtensions && (
 			//			addSourceForTagExtended(getTag(tags, "@j2sXHTML"), "", "")
 			//			|| addSourceForTagExtended(getTag(tags, "@j2sXCSS"), "", "")
@@ -115,20 +271,10 @@ public class ASTJ2SDocVisitor extends ASTEmptyVisitor {
 		return null;
 	}
 
-	/*
-	 * Read JavaScript sources from @j2sNative, @j2sPrefix, etc, as well as
-	 * annotations
-	 */
 	/**
-	 * for example, for classes only:
+	 * For classes only, processing the @j2sSuffix directive
 	 * 
-	 * @j2sPrefix /-* this is from <@>j2sPrefix added outside of just before
-	 *            Clazz.newClass() *-/
-	 * 
-	 * 
-	 * @j2sSuffix /-* this is from <@>j2sSuffix added just after
-	 *            Clazz.newClass() *-/
-	 * @param isExtended if this is j2sXHTML or j2sXCSS
+	 * @param isExtended if this is j2sXHTML or j2sXCSS -- no longer supported
 	 * 
 	 * @return true if javadoc of this sort was found and added to the buffer
 	 */
@@ -257,82 +403,6 @@ public class ASTJ2SDocVisitor extends ASTEmptyVisitor {
 //	}
 	
 	/**
-	 * Get the nearest Javadoc that is after any other element but before this block.
-	 * 
-	 * @param block
-	 * @return nearest Javadoc or null
-	 */
-	private Javadoc getBlockJavadoc(Block block) {
-		ASTNode root = block.getRoot();
-		Javadoc jd = null;
-		if (root instanceof CompilationUnit) {
-			if (rootJavaDocs == null) {
-				rootJavaDocs = new ArrayList<Javadoc>();
-				List<?> commentList = ((CompilationUnit) root).getCommentList();
-				for (Iterator<?> iter = commentList.iterator(); iter.hasNext();) {
-					Comment comment = (Comment) iter.next();
-					if (comment instanceof Javadoc) {
-						List<?> tags = ((Javadoc) comment).tags();
-						if (tags.size() != 0) {
-							for (Iterator<?> itr = tags.iterator(); itr.hasNext();) {
-								TagElement tagEl = (TagElement) itr.next();
-								String tagName = tagEl.getTagName();
-								if (tagName != null && tagName.startsWith("@j2s")) {
-									rootJavaDocs.add((Javadoc) comment);
-								}
-							}
-						}
-					}
-				}
-			}
-			// looking for last comment prior to this block starting after all other nodes
-			// we can remove any previous Javadocs in case they are still there 
-			int blockPos = block.getStartPosition();
-			int docPos = 0;
-			while (rootJavaDocs.size() > 0 && (docPos = rootJavaDocs.get(0).getStartPosition()) < blockPos) {
-				jd = rootJavaDocs.remove(0);
-				if (docPos < lastPos)
-					jd = null;  
-			}
-		}
-		return jd;
-	}
-
-//	private int getPreviousStartPosition(Block node) {
-//		int previousStart = 0;
-//		ASTNode blockParent = node.getParent();
-//		if (blockParent != null) {
-//			if (blockParent instanceof Statement) {
-//				Statement sttmt = (Statement) blockParent;
-//				previousStart = sttmt.getStartPosition();
-//				if (sttmt instanceof Block) {
-//					Block parentBlock = (Block) sttmt;
-//					for (Iterator<?> iter = parentBlock.statements().iterator(); iter.hasNext();) {
-//						Statement element = (Statement) iter.next();
-//						if (element == node) {
-//							break;
-//						}
-//						previousStart = element.getStartPosition() + element.getLength();
-//					}
-//				} else if (sttmt instanceof IfStatement) {
-//					IfStatement ifSttmt = (IfStatement) sttmt;
-//					if (ifSttmt.getElseStatement() == node) {
-//						Statement thenSttmt = ifSttmt.getThenStatement();
-//						previousStart = thenSttmt.getStartPosition() + thenSttmt.getLength();
-//					}
-//				}
-//			} else if (blockParent instanceof MethodDeclaration) {
-//				previousStart = ((MethodDeclaration) blockParent).getStartPosition();
-//			} else if (blockParent instanceof Initializer) {
-//				previousStart = ((Initializer) blockParent).getStartPosition();
-//			} else if (blockParent instanceof CatchClause) {
-//				previousStart = ((CatchClause) blockParent).getStartPosition();
-//			}
-//		}
-//		return previousStart;
-//	}
-
-	/**
 	 * 
 	 * @param node
 	 * @param mBinding
@@ -368,7 +438,7 @@ public class ASTJ2SDocVisitor extends ASTEmptyVisitor {
 //			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.CompoundPipeSession", "convert"))
 //				doKeep = false;
 //		}
-		return (doKeep || getJ2STag(node, "@j2sKeep") != null);
+		return (doKeep || getJ2SKeepOrIgnore(node, "@j2sKeep") != null);
 	}
 
 	/**
@@ -376,7 +446,7 @@ public class ASTJ2SDocVisitor extends ASTEmptyVisitor {
 	 * @return true if we have @j2sIngore for this BodyDeclaration
 	 */
 	protected boolean checkj2sIgnore(BodyDeclaration node) {
-	  return getJ2STag(node, "@j2sIgnore") != null;
+	  return getJ2SKeepOrIgnore(node, "@j2sIgnore") != null;
 	}
 
 	/**
@@ -385,7 +455,7 @@ public class ASTJ2SDocVisitor extends ASTEmptyVisitor {
 	 * @param node
 	 * @return
 	 */
-	protected Object getJ2STag(BodyDeclaration node, String tagName) {
+	protected Object getJ2SKeepOrIgnore(BodyDeclaration node, String tagName) {
 		Javadoc javadoc = node.getJavadoc();
 		if (javadoc != null) {
 			List<?> tags = javadoc.tags();
@@ -406,7 +476,7 @@ public class ASTJ2SDocVisitor extends ASTEmptyVisitor {
 					Annotation annotation = (Annotation) obj;
 					String qName = annotation.getTypeName().getFullyQualifiedName();
 					int idx = qName.indexOf("J2S");
-					if (idx != -1) {
+					if (idx >= 0) {
 						String annName = qName.substring(idx);
 						annName = annName.replaceFirst("J2S", "@j2s");
 						if (annName.startsWith(tagName)) {

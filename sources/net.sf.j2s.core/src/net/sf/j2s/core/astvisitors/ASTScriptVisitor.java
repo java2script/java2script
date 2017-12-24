@@ -152,7 +152,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		global_includeCount = parent.global_includeCount;
 		global_includes = parent.global_includes;
 		global_j2sFlag_isDebugging = parent.global_j2sFlag_isDebugging;
-		
+		global_mapBlockJavadoc = parent.global_mapBlockJavadoc;
 		parentClassName = parent.getQualifiedClassName();
 
 		innerTypeNode = node;
@@ -168,6 +168,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	protected ASTNode innerTypeNode;
 
 	public boolean visit(PackageDeclaration node) {
+		setMapJavaDoc(node);
 		String name = node.getName().toString();
 		global_PackageName = name;
 		global_includes = new StringBuffer();
@@ -968,6 +969,8 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		boolean isInterface = (type == 'i');
 		boolean isLocal = (type == 'l');
 		int pt;
+		
+		
 
 		TypeAdapter typeAdapter = ((TypeAdapter) getAdaptable(TypeAdapter.class));
 		ASTNode parent = node.getParent();
@@ -997,6 +1000,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			return false;
 		}
 		System.err.println("visit " + binding.getKey());
+		
 		boolean isTopLevel = binding.isTopLevel();
 		if (isTopLevel) {
 			String name = binding.getName();
@@ -1215,7 +1219,6 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			oldTrailingBuffer = trailingBuffer;
 			trailingBuffer = new TrailingBuffer();
 		}
-
 		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			BodyDeclaration element = (BodyDeclaration) iter.next();
 			boolean isField = element instanceof FieldDeclaration;
@@ -1472,6 +1475,8 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 				: ((PrimitiveType) nodeType).getPrimitiveTypeCode());
 		ITypeBinding classBinding = resolveAbstractOrAnonymousBinding(field);
 
+		if (needDefault)
+			preVisit2(field);
 		int len0 = buffer.length();
 		for (Iterator<?> iter = fragments.iterator(); iter.hasNext();) {
 			VariableDeclarationFragment fragment = (VariableDeclarationFragment) iter.next();

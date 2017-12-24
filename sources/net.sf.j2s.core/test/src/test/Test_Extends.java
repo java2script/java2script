@@ -1,14 +1,5 @@
 package test;
 
-/**
- * 
- * @j2sPrefix
- *   /-* this is from <@>j2sPrefix *-/
- *   
- * 
- * @j2sSuffix
- *   /-* this is from <@>j2sSuffix *-/
- */
 public class Test_Extends extends Test_Extends_6 {
 
 	public Test_Extends this2;
