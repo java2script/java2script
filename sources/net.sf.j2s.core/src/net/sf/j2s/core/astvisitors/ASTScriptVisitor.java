@@ -1465,8 +1465,6 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 		boolean isStatic = (mode == FIELD_DECL_STATIC_NONDEFAULT || mode == FIELD_DECL_STATIC_DEFAULTS);
 		boolean needDefault = (mode == FIELD_DECL_NONSTATIC_ALL || mode == FIELD_DECL_STATIC_DEFAULTS);
-		boolean isFinal = isStatic && isFinal(field);
-
 		List<?> fragments = field.fragments();
 		VariableDeclarationFragment identifier = (VariableDeclarationFragment) fragments.get(0);
 		IVariableBinding var = identifier.resolveBinding();
@@ -1474,14 +1472,16 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		Code code = (nodeType == null || !nodeType.isPrimitiveType() ? null
 				: ((PrimitiveType) nodeType).getPrimitiveTypeCode());
 		ITypeBinding classBinding = resolveAbstractOrAnonymousBinding(field);
-
+		// have to check here for final Object = "foo", as that must not be ignored.
+		boolean checkFinalConstant = (isStatic && Modifier.isFinal(field.getModifiers())
+				&& var != null && !var.getType().getQualifiedName().equals("java.lang.Object"));
 		if (needDefault)
 			preVisit2(field);
 		int len0 = buffer.length();
 		for (Iterator<?> iter = fragments.iterator(); iter.hasNext();) {
 			VariableDeclarationFragment fragment = (VariableDeclarationFragment) iter.next();
 			Expression initializer = fragment.getInitializer();
-			if (isFinal ? VariableAdapter.getConstantValue(initializer) != null
+			if (checkFinalConstant ? VariableAdapter.getConstantValue(initializer) != null
 					: isStatic && initializer == null && !needDefault)
 				continue;
 			int len = buffer.length();

@@ -315,10 +315,6 @@ public class ASTEmptyVisitor extends ASTVisitor {
 //		this.global_definedPackageNames = definedPackageNames;
 //	}
 
-	protected static boolean isFinal(BodyDeclaration b) {
-		return Modifier.isFinal(b.getModifiers());
-	}
-
 	protected static boolean isStatic(BodyDeclaration b) {
 		return Modifier.isStatic(b.getModifiers());
 	}
