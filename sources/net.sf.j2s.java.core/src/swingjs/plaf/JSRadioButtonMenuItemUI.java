@@ -1,5 +1,6 @@
 package swingjs.plaf;
 
+import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 
 public class JSRadioButtonMenuItemUI extends JSRadioButtonUI {
@@ -16,8 +17,8 @@ public class JSRadioButtonMenuItemUI extends JSRadioButtonUI {
 	}
 	
 	@Override
-	protected void installUIImpl() {
-		menuItem = (JMenuItem) c;
-		super.installUIImpl();
+	public void installUI(JComponent jc) {
+		menuItem = (JMenuItem) jc;
+		super.installUI(jc);
 	}
 }

@@ -330,8 +330,8 @@ public class JSTableHeaderUI extends JSLightweightUI {
 	// Installation
 
 	@Override
-	public void installUIImpl() {
-		header = (JTableHeader) c;
+	public void installUI(JComponent jc) {
+		header = (JTableHeader) jc;
 		rendererPane = new CellRendererPane();
 		header.add(rendererPane);
 
@@ -379,7 +379,7 @@ public class JSTableHeaderUI extends JSLightweightUI {
 
 	// Uninstall methods
 
-	public void uninstallUIImpl() {
+	public void uninstallUI(JComponent jc) {
 		uninstallDefaults();
 		uninstallListeners();
 		uninstallKeyboardActions();

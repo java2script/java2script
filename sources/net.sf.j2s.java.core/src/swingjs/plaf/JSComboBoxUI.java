@@ -73,8 +73,8 @@ public class JSComboBoxUI extends JSLightweightUI implements PropertyChangeListe
 	}
 
 	@Override
-	protected void installUIImpl() {
-		comboBox = (JComboBox) c;
+	public void installUI(JComponent jc) {
+		comboBox = (JComboBox) jc;
 		installListeners();
     LookAndFeel.installColorsAndFont(jc,
         "ComboBox.background",
@@ -101,7 +101,7 @@ public class JSComboBoxUI extends JSLightweightUI implements PropertyChangeListe
 	}
 
 	@Override
-	protected void uninstallUIImpl() {
+	public void uninstallUI(JComponent jc) {
     uninstallListeners();
   }
 

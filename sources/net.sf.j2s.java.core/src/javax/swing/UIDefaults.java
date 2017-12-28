@@ -753,7 +753,9 @@ public class UIDefaults extends Hashtable<Object,Object>
      * @return the <code>ComponentUI</code> object
      */
     public ComponentUI getUI(JComponent target) {
-    // SwingJS  
+    	// SwingJS  - note that target here may NOT be a JComponent, 
+    	// as it may be JFrame, JDialog, JWindow, or JPopupMenu.
+    	// Nonetheless, it will be directed correctly
     	return JSToolkit.getComponentUI(target);
     			//        Object cl = get("ClassLoader");
 //        ClassLoader uiClassLoader =

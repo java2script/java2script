@@ -593,7 +593,7 @@ public class AWTKeyStroke {
 			VKCollection vk = vks;
 			/**
 			 * @j2sNative
-			 * var c = java.awt.event.KeyEvent;
+			 * var c = Clazz.load("java.awt.event.KeyEvent");
 			 * for (var k in c)
 			 *   if (k.indexOf("VK_") == 0 && typeof c[k] == "number")
 			 *     vk.put(k, Integer.$valueOf(c[k]));
@@ -621,7 +621,7 @@ public class AWTKeyStroke {
 				/**
 				 * @j2sNative
 				 * 
-				 *            keyCode = java.awt.event.KeyEvent[key];
+				 *            keyCode = Clazz.load("java.awt.event.KeyEvent")[key];
 				 */
 				{
 					keyCode = KeyEvent.class.getField(key).getInt(KeyEvent.class);

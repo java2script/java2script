@@ -3,6 +3,7 @@ package swingjs.plaf;
 
 import java.awt.Dimension;
 
+import javax.swing.JComponent;
 import javax.swing.JRootPane;
 import javax.swing.LookAndFeel;
 import swingjs.api.js.DOMNode;
@@ -22,7 +23,7 @@ public class JSPanelUI extends JSLightweightUI {
 			isContentPane = (root != null && jc == root.getContentPane());
 			domNode = newDOMObject("div", id);
 			if (root != null && root.getGlassPane() == c)
-				DOMNode.setStyles(domNode, "display", "none");
+				DOMNode.setVisible(domNode,  false);
 		}
     return domNode;
 	}
@@ -35,7 +36,7 @@ public class JSPanelUI extends JSLightweightUI {
 	
 
 	@Override
-	protected void installUIImpl() {
+	public void installUI(JComponent jc) {
     LookAndFeel.installColorsAndFont(jc,
         "Panel.background",
         "Panel.foreground",
@@ -43,7 +44,7 @@ public class JSPanelUI extends JSLightweightUI {
 	}
 
 	@Override
-	protected void uninstallUIImpl() {
+	public void uninstallUI(JComponent jc) {
 		// TODO Auto-generated method stub
 		
 	}

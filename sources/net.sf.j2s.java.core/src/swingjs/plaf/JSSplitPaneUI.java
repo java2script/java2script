@@ -212,8 +212,8 @@ public class JSSplitPaneUI extends JSPanelUI {
 	 * Installs the UI.
 	 */
 	@Override
-	public void installUIImpl() {
-		splitPane = (JSplitPane) c;
+	public void installUI(JComponent jc) {
+		splitPane = (JSplitPane) jc;
 		dividerLocationIsSet = false;
 		dividerKeyboardResize = false;
 		keepHidden = false;
@@ -321,7 +321,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 	 * Uninstalls the UI.
 	 */
 	@Override
-	public void uninstallUIImpl() {
+	public void uninstallUI(JComponent jc) {
 		// uninstallKeyboardActions();
 		uninstallListeners();
 		uninstallDefaults();
@@ -1903,7 +1903,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 	//
 	// private Component getFirstAvailableComponent(Component c) {
 	// if (c != null && c instanceof JSplitPane) {
-	// JSplitPane sp = (JSplitPane) c;
+	// JSplitPane sp = (JSplitPane) jc;
 	// Component left = getFirstAvailableComponent(sp.getLeftComponent());
 	// if (left != null) {
 	// c = left;

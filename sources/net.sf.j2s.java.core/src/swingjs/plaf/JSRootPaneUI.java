@@ -1,6 +1,9 @@
 package swingjs.plaf;
 
 import java.awt.Dimension;
+
+import javax.swing.JComponent;
+
 import swingjs.api.js.DOMNode;
 
 public class JSRootPaneUI extends JSLightweightUI {
@@ -26,11 +29,11 @@ public class JSRootPaneUI extends JSLightweightUI {
 	}
 
 	@Override
-	protected void installUIImpl() {
+	public void installUI(JComponent jc) {
 	}
 
 	@Override
-	protected void uninstallUIImpl() {
+	public void uninstallUI(JComponent jc) {
 	}
 
 	@Override

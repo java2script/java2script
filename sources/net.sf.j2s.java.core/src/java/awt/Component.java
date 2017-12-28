@@ -6008,12 +6008,12 @@ public abstract class Component
 				// if our parent is lightweight and we are not
 				// we should call restack on nearest heavyweight
 				// container.
-				if (parentContPeer instanceof LightweightPeer && !(peer instanceof LightweightPeer)) {
-					Container hwParent = getNativeContainer();
-					if (hwParent != null && hwParent.peer != null) {
-						parentContPeer = (ContainerPeer) hwParent.peer;
-					}
-				}
+//				if (parentContPeer instanceof LightweightPeer && !(peer instanceof LightweightPeer)) {
+//					Container hwParent = getNativeContainer();
+//					if (hwParent != null && hwParent.peer != null) {
+//						parentContPeer = (ContainerPeer) hwParent.peer;
+//					}
+//				}
 				// if (parentContPeer.isRestackSupported()) {
 				// parentContPeer.restack();
 				// }
@@ -6024,6 +6024,16 @@ public abstract class Component
 			// }
 
 			isAddNotifyComplete = true;
+			if (visible && peer != null) {// BH added for SwingJS menu in Varna
+				boolean isDisposed = false;
+				/**
+				 * @j2sNative
+				 *   isDisposed = peer.isDisposed;
+				 *   
+				 */
+				if (isDisposed)
+					peer.setVisible(true);
+			}
 
 			if (hierarchyListener != null || (eventMask & AWTEvent.HIERARCHY_EVENT_MASK) != 0
 					|| Toolkit.enabledOnToolkit(AWTEvent.HIERARCHY_EVENT_MASK)) {

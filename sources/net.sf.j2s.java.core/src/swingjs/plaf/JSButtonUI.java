@@ -35,6 +35,7 @@ import java.awt.event.MouseMotionListener;
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
@@ -199,19 +200,19 @@ public class JSButtonUI extends JSLightweightUI {
 	// from BasicButtonUI
 
 	@Override
-	protected void installUIImpl() {
+	public void installUI(JComponent jc) {
 		// response to general button actions 
 		// takes place through the standard Java
 		// pathway involving Component.LightweightDispatcher 
 		// posting to the event queue 
-		button = (AbstractButton) c;
+		button = (AbstractButton) jc;
 		installDefaults(button);
 		installListeners(button);
 		installKeyboardActions(button);
 	}
 
 	@Override
-	protected void uninstallUIImpl() {
+	public void uninstallUI(JComponent jc) {
 		uninstallKeyboardActions(button);
 		uninstallListeners(button);
 		// uninstallDefaults((AbstractButton) c);
@@ -453,7 +454,7 @@ public class JSButtonUI extends JSLightweightUI {
 	//
 	// public void paint(Graphics g, JComponent c)
 	// {
-	// AbstractButton b = (AbstractButton) c;
+	// AbstractButton b = (AbstractButton) jc;
 	// ButtonModel model = b.getModel();
 	//
 	// String text = layout(b, SwingUtilities2.getFontMetrics(b, g),
@@ -487,7 +488,7 @@ public class JSButtonUI extends JSLightweightUI {
 	// }
 	//
 	// protected void paintIcon(Graphics g, JComponent c, Rectangle iconRect){
-	// AbstractButton b = (AbstractButton) c;
+	// AbstractButton b = (AbstractButton) jc;
 	// ButtonModel model = b.getModel();
 	// Icon icon = b.getIcon();
 	// Icon tmpIcon = null;
@@ -555,7 +556,7 @@ public class JSButtonUI extends JSLightweightUI {
 	// */
 	// protected void paintText(Graphics g, JComponent c, Rectangle textRect,
 	// String text) {
-	// AbstractButton b = (AbstractButton) c;
+	// AbstractButton b = (AbstractButton) jc;
 	// ButtonModel model = b.getModel();
 	// FontMetrics fm = SwingUtilities2.getFontMetrics(c, g);
 	// int mnemonicIndex = b.getDisplayedMnemonicIndex();

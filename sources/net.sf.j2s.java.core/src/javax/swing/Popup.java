@@ -112,6 +112,7 @@ public class Popup {
         Component component = getComponent();
 
         if (component != null) {
+        	component.visible = false;
             component.show();
         }
     }

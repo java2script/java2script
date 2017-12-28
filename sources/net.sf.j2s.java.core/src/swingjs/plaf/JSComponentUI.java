@@ -375,17 +375,15 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	 * 
 	 */
 	@Override
-	@Deprecated
-	public void installUI(Component c) {
+	public void installJS() {
 		/**
 		 * @j2sNative
 		 * 
-		 *            c.addChangeListener$javax_swing_event_ChangeListener && c.addChangeListener$javax_swing_event_ChangeListener(this);
+		 *            this.c.addChangeListener$javax_swing_event_ChangeListener && this.c.addChangeListener$javax_swing_event_ChangeListener(this);
 		 */
 		{
 		}
 		c.addPropertyChangeListener(this);
-		// installUIImpl(); done earlier
 	}
 
 	/**
@@ -395,18 +393,15 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	 * 
 	 */
 	@Override
-	@Deprecated
-	public void uninstallUI(Component c) {
+	public void uninstallJS() {
 
 		// window closing will fire this with c == null
-
-		uninstallUIImpl();
 
 		/**
 		 * @j2sNative
 		 * 
-		 *            c && c.removeChangeListener$javax_swing_event_ChangeListener && c.removeChangeListener$javax_swing_event_ChangeListener(this); 
-		 *            c && c.removePropertyChangeListener$java_beans_PropertyChangeListener(this);
+		 *            this.c && this.c.removeChangeListener$javax_swing_event_ChangeListener && this.c.removeChangeListener$javax_swing_event_ChangeListener(this); 
+		 *            this.c && this.c.removePropertyChangeListener$java_beans_PropertyChangeListener(this);
 		 */
 		{
 		}
@@ -416,23 +411,22 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		}
 	}
 
-	protected void installUIImpl() {
-	}
-
-	protected void uninstallUIImpl() {
-	}
-
 	protected JQueryObject $(DOMNode node) {
 		return JSUtil.getJQuery().$(node);
 	} 
 
 	public JSComponentUI set(JComponent target) {
+		// note that in JavaScript, in certain cases 
+		// (JFrame, JWindow, JDialog)
+		// target will not be a JComponent, 
+		// but it will always be a JSComponent, and 
+		// we do not care if it is not a JComponent.
 		c = target;
-		jc = (JComponent) c; // in JavaScript, in certain cases this will not be a
-													// JComponent, but it will always be a JSComponent
+		jc = (JComponent) c; 
 		applet = JSToolkit.getHTML5Applet(c);
 		newID();
-		installUIImpl(); // need to do this immediately, not later
+		installUI(target); // need to do this immediately, not later
+		installJS();
 		if (needPreferred)
 			getHTMLSize();
 		return this;
@@ -779,7 +773,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 			prop = "value";
 			obj = valueNode;
 			if (iconNode != null)
-				DOMNode.setStyles(obj, "display",(text == null ? "none" : "block"));
+				DOMNode.setVisible(obj, text != null);
 		}
 		if (obj != null)
 			setProp(obj, prop, text);
@@ -1434,7 +1428,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		DOMNode node = getOuterNode();
 		if (node == null)
 			node = domNode; // a frame or other window
-		DOMNode.setStyles(node, "display", b ? "block" : "none");
+		DOMNode.setVisible(node,  b);
 		if (b) {
 			if (isDisposed)
 				undisposeUI(node);

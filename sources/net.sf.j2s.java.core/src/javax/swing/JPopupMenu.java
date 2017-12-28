@@ -853,6 +853,8 @@ public class JPopupMenu extends JComponent implements MenuElement {
         this.invoker = invoker;
         if ((oldInvoker != this.invoker) && (ui != null)) {
             ui.uninstallUI(this);
+            ui.uninstallJS();
+            ui.installJS();
             ui.installUI(this);
         }
         invalidate();

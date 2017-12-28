@@ -3456,7 +3456,7 @@ public abstract class JComponent extends Container {
 		// ComponentUI oldUI = ui;
 		ui = newUI;
 		if (ui != null) {
-			ui.installUI(this);
+			ui.installJS(); // not ui.installUI(this), as that is done earlier
 		}
 		//
 		// firePropertyChange("UI", oldUI, newUI);
@@ -3471,6 +3471,7 @@ public abstract class JComponent extends Container {
 	private void uninstallUIAndProperties() {
 		if (ui != null) {
 			ui.uninstallUI(this);
+			ui.uninstallJS();
 			// //clean UIClientPropertyKeys from client properties
 			// if (clientProperties != null) {
 			// synchronized(clientProperties) {

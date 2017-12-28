@@ -33,6 +33,8 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dialog;
 import java.awt.Frame;
+import java.awt.HeadlessException;
+import java.awt.JSComponent;
 import java.awt.Window;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -41,6 +43,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+
 import javax.swing.plaf.OptionPaneUI;
 
 /**
@@ -307,7 +310,7 @@ import javax.swing.plaf.OptionPaneUI;
 public class JOptionPane extends JComponent {
 	/**
 	 * Indicates that the user has not yet selected a value.
-	 */
+	 */ 
 	public static final Object UNINITIALIZED_VALUE = "uninitializedValue";
 
 	//
@@ -381,6 +384,10 @@ public class JOptionPane extends JComponent {
 	public static final String INPUT_VALUE_PROPERTY = "inputValue";
 	/** Bound property name for <code>wantsInput</code>. */
 	public static final String WANTS_INPUT_PROPERTY = "wantsInput";
+
+	private static final int CALLBACK_OPTION = -2;
+
+	private JSComponent.AsynchronousDialogCaller dialogCaller;
 
 	/** Icon used in pane. */
 	transient protected Icon icon;
@@ -475,7 +482,7 @@ public class JOptionPane extends JComponent {
 	 * 
 	 * @param parentComponent
 	 *          the parent <code>Component</code> for the dialog
-	 * @param message
+	 * @param messcage
 	 *          the <code>Object</code> to display
 	 * @param initialSelectionValue
 	 *          the value used to initialize the input field
@@ -830,17 +837,20 @@ public class JOptionPane extends JComponent {
 		int yes = YES_OPTION;
 		int no = NO_OPTION;
 		
-		message = joinMessage(message);
 		String[] options = new String[] {"ok"};
 		switch (optionType) {
 		case OK_CANCEL_OPTION:
-		/**
-		 * @j2sNative
-		 * 
-		 *            return (confirm(message) ? ok : canc);
-		 * 
-		 */
-		{}
+			if (message instanceof String) {
+				/**
+				 * @j2sNative
+				 * 
+				 *            return (confirm(message) ? ok : canc);
+				 * 
+				 */
+				{}				
+			} 
+			
+			options = new String[] {"ok", "cancel"};
 			break;
 		case YES_NO_CANCEL_OPTION:
 			options = new String[] {"yes", "no", "cancel"};
@@ -850,27 +860,19 @@ public class JOptionPane extends JComponent {
 			break;
 		}
 		
-		String ret = null;
-		/**
-		 * @j2sNative
-		 * 
-		 *  var ret = prompt(message, options[0]);
-		 *  return (!ret ? canc : ret.toLowerCase() == "yes" ? yes : no);
-		 * 
-		 */
-		{			
-		}
+//		String ret = null;
+//		/**
+//		 * @j2sNative
+//		 * 
+////		 *  var ret = prompt(message, options[0]);
+//		 *  return (!ret ? canc : ret.toLowerCase() == "yes" ? yes : no);
+//		 * 
+//		 */
+//		{			
+//		}
 
-		/**
-		 * @j2sNative
-		 * 
-		 * 
-		 * 
-		 */
-		{
-			return showOptionDialog(parentComponent, message, title, optionType,
-					messageType, icon, null, null);
-		}
+		return showOptionDialog(parentComponent, message, title, optionType,
+			messageType, icon, null, null);
 	}
 
 	private static Object joinMessage(Object message) {
@@ -942,6 +944,12 @@ public class JOptionPane extends JComponent {
 			Object[] options, Object initialValue) {
 		JOptionPane pane = new JOptionPane(message, messageType, optionType, icon,
 				options, initialValue);
+		JSComponent.AsynchronousDialogCaller dialogCaller = null;
+		/**
+		 * @j2sNative
+		 * 
+		 * dialogCaller = message.dialogCaller;
+		 */
 
 		pane.setInitialValue(initialValue);
 		pane.setComponentOrientation(((parentComponent == null) ? getRootFrame()
@@ -949,25 +957,13 @@ public class JOptionPane extends JComponent {
 
 		int style = styleFromMessageType(messageType);
 		JDialog dialog = pane.createDialog(parentComponent, title, style);
-
+		pane.dialogCaller = dialogCaller;
+		dialog.setDialogCallback(dialogCaller);
 		pane.selectInitialValue();
-		dialog.show();
-		dialog.dispose();
-
-		Object selectedValue = pane.getValue();
-
-		if (selectedValue == null)
-			return CLOSED_OPTION;
-		if (options == null) {
-			if (selectedValue instanceof Integer)
-				return ((Integer) selectedValue).intValue();
-			return CLOSED_OPTION;
-		}
-		for (int counter = 0, maxCounter = options.length; counter < maxCounter; counter++) {
-			if (options[counter].equals(selectedValue))
-				return counter;
-		}
-		return CLOSED_OPTION;
+		
+		dialog.setVisible(true);	// dialog.show() sets up infinite loop	
+		
+		return CALLBACK_OPTION;		
 	}
 
 	/**
@@ -1055,7 +1051,9 @@ public class JOptionPane extends JComponent {
 		Container contentPane = dialog.getContentPane();
 
 		contentPane.setLayout(new BorderLayout());
+		
 		contentPane.add(this, BorderLayout.CENTER);
+		
 		dialog.setResizable(false);
 		if (JDialog.isDefaultLookAndFeelDecorated()) {
 			boolean supportsWindowDecorations = UIManager.getLookAndFeel()
@@ -1099,16 +1097,23 @@ public class JOptionPane extends JComponent {
 				// Let the defaultCloseOperation handle the closing
 				// if the user closed the window without selecting a button
 				// (newValue = null in that case). Otherwise, close the dialog.
-				if (dialog.isVisible()
-						&& event.getSource() == this
-						&& (event.getPropertyName().equals(VALUE_PROPERTY) || event
-								.getPropertyName().equals(INPUT_VALUE_PROPERTY))
-						&& event.getNewValue() != null
-						&& event.getNewValue() != UNINITIALIZED_VALUE) {
-					dialog.setVisible(false);
+				if (dialog.isVisible() && event.getSource() == JOptionPane.this && (event.getPropertyName().equals(VALUE_PROPERTY)
+						|| event.getPropertyName().equals(INPUT_VALUE_PROPERTY))) {
+					Object value = event.getNewValue();
+					if (value != null && value != UNINITIALIZED_VALUE) {
+						dialog.setVisible(false);
+						dialog.dispose();
+					}
+					if (value != UNINITIALIZED_VALUE && dialogCaller != null) {
+						int ret = getReturnIndex(value);
+						dialogCaller.onReturn(ret);
+					}
 				}
 			}
 		});
+		
+		
+		
 	}
 
 	// /**
@@ -1181,7 +1186,8 @@ public class JOptionPane extends JComponent {
 	// }
 	//
 	// /**
-	// * Brings up an internal dialog panel with the options <i>Yes</i>, <i>No</i>
+	// * Brings up an internal dialog panel with the options <i>Yes</i>,
+	// <i>No</i>
 	// * and <i>Cancel</i>; with the title, <b>Select an Option</b>.
 	// *
 	// * @param parentComponent determines the <code>Frame</code> in
@@ -1676,6 +1682,30 @@ public class JOptionPane extends JComponent {
 	//
 	// return iFrame;
 	// }
+
+	protected int getReturnIndex(Object value) {
+		Object selectedValue = getValue();
+		int ret = CLOSED_OPTION;
+
+		if (selectedValue == null) {
+			ret = CLOSED_OPTION;
+		} else if (options == null) {
+			if (selectedValue instanceof Integer) {
+				ret = ((Integer) selectedValue).intValue();
+			} else {
+				ret = CLOSED_OPTION;
+			}
+		} else {
+			for (int counter = 0, maxCounter = options.length; counter < maxCounter; counter++) {
+				if (options[counter].equals(selectedValue)) {
+					ret = counter;
+					break;
+				}
+			}
+		}
+		return ret;
+
+	}
 
 	/**
 	 * Returns the specified component's <code>Frame</code>.
@@ -2624,4 +2654,6 @@ public class JOptionPane extends JComponent {
 	// }
 	//
 	// } // inner class AccessibleJOptionPane
+	
+	
 }

@@ -1,5 +1,6 @@
 package swingjs.plaf;
 
+import javax.swing.JComponent;
 
 public class JSColorChooserUI extends JSDialogUI {
 
@@ -14,15 +15,15 @@ public class JSColorChooserUI extends JSDialogUI {
 	}
 
 	@Override
-	protected void installUIImpl() {
-		super.installUIImpl();
+	public void installUI(JComponent jc) {
+		super.installUI(jc);
 		// LookAndFeel.installColors(c,
 		// "Frame.background",
 		// "Frame.foreground");
 	}
 
 	@Override
-	protected void uninstallUIImpl() {
+	public void uninstallUI(JComponent jc) {
 	}
 
 }

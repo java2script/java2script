@@ -12,6 +12,7 @@ import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.BoundedRangeModel;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JScrollBar;
 import javax.swing.JSlider;
@@ -65,7 +66,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 
 	@Override
 	protected DOMNode updateDOMNode() {
-		JSlider js = (JSlider) c;
+		JSlider js = (JSlider) jc;
 		min = js.getMinimum();
 		max = js.getMaximum();
 		val = js.getValue();
@@ -113,10 +114,10 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	}
 
 	@Override
-	public void installUIImpl() {
-		jSlider = (JSlider) c;
+	public void installUI(JComponent jc) {
+		jSlider = (JSlider) jc;
 		if (isScrollBar)
-			jScrollBar = (JScrollBar) c;
+			jScrollBar = (JScrollBar) jc;
 	}
 	
 	private void setJQuerySliderAndEvents() {

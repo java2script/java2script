@@ -31,6 +31,7 @@ package swingjs.plaf;
 
 import java.awt.Dimension;
 import javax.swing.BoxLayout;
+import javax.swing.JComponent;
 import javax.swing.JMenuBar;
 import javax.swing.LookAndFeel;
 import javax.swing.plaf.UIResource;
@@ -103,8 +104,8 @@ public class JSMenuBarUI extends JSPanelUI {
 //	}
 
 	@Override
-	public void installUIImpl() {
-		menuBar = (JMenuBar) c;
+	public void installUI(JComponent jc) {
+		menuBar = (JMenuBar) jc;
     if (menuBar.getLayout() == null ||
         menuBar.getLayout() instanceof UIResource) {
         menuBar.setLayout(new DefaultMenuLayout(menuBar,BoxLayout.LINE_AXIS));
@@ -117,7 +118,7 @@ public class JSMenuBarUI extends JSPanelUI {
 	}
 
 	@Override
-	protected void uninstallUIImpl() {
+	public void uninstallUI(JComponent jc) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -1,6 +1,8 @@
 package swingjs.plaf;
 
 
+import javax.swing.JComponent;
+
 import swingjs.api.js.DOMNode;
 
 public class JSLayeredPaneUI extends JSLightweightUI {
@@ -19,13 +21,13 @@ public class JSLayeredPaneUI extends JSLightweightUI {
 	}
 
 	@Override
-	protected void installUIImpl() {
+	public void installUI(JComponent jc) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void uninstallUIImpl() {
+	public void uninstallUI(JComponent jc) {
 		// TODO Auto-generated method stub
 		
 	}

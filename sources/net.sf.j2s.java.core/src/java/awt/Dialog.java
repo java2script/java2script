@@ -307,6 +307,12 @@ public class Dialog extends Window {
      */
     transient volatile boolean isInDispose = false;
 
+    private JSComponent.AsynchronousDialogCaller dialogCallback;
+    
+    public void setDialogCallback(JSComponent.AsynchronousDialogCaller callback) {
+    	dialogCallback = callback; 
+    }
+
     private static final String base = "dialog";
     private static int nameCounter = 0;
 
@@ -782,10 +788,11 @@ public class Dialog extends Window {
      * @see       java.awt.Dialog#setModalityType
      */
     public boolean isModal() {
-        return isModal_NoClientCode();
+       return isModal_NoClientCode();
     }
     final boolean isModal_NoClientCode() {
-        return modalityType != ModalityType.MODELESS;
+    	return dialogCallback != null;
+//        return modalityType != ModalityType.MODELESS;
     }
 
     /**
@@ -919,18 +926,18 @@ public class Dialog extends Window {
 			//visible = 
 		  retval = true;
 		  // TODO this was Component.showSAEM,  but now is Window.setVisible
-			super.setVisible(true);
+			super.show();
 
-			// check if this dialog should be modal blocked BEFORE calling
-			// peer.show(),
-			// otherwise, a pair of FOCUS_GAINED and FOCUS_LOST may be mistakenly
-			// generated for the dialog
-			if (!isModal()) {
-				// checkShouldBeBlocked(this);
-			} else {
-				modalDialogs.add(this);
-				modalShow();
-			}
+//			// check if this dialog should be modal blocked BEFORE calling
+//			// peer.show(),
+//			// otherwise, a pair of FOCUS_GAINED and FOCUS_LOST may be mistakenly
+//			// generated for the dialog
+//			if (!isModal()) {
+//				// checkShouldBeBlocked(this);
+//			} else {
+//				modalDialogs.add(this);
+//				modalShow();
+//			}
 
 			if (toFocus != null && time != null && isFocusable() && isEnabled()
 					&& !isModalBlocked()) {
@@ -1054,139 +1061,145 @@ public class Dialog extends Window {
         if (!isModal()) {
             conditionalShow(null, null);
         } else {
-            // Set this variable before calling conditionalShow(). That
-            // way, if the Dialog is hidden right after being shown, we
-            // won't mistakenly block this thread.
-//            keepBlockingEDT = true;
-//            keepBlockingCT = true;
-
-            // Store the app context on which this dialog is being shown.
-            // Event dispatch thread of this app context will be sleeping until
-            // we wake it by any event from hideAndDisposeHandler().
-//            AppContext showAppContext = AppContext.getAppContext();
-
-            Long time = new Long(0);
-            Component predictedFocusOwner = null;
-            try {
-//                predictedFocusOwner = getMostRecentFocusOwner();
-                if (conditionalShow(predictedFocusOwner, time)) {
-                    // We have two mechanisms for blocking: 1. If we're on the
-                    // EventDispatchThread, start a new event pump. 2. If we're
-                    // on any other thread, call wait() on the treelock.
-
-                    modalFilter = ModalEventFilter.createFilterForDialog(this);
-
-                    final Runnable pumpEventsForFilter = new Runnable() {
-                        @Override
-												public void run() {
-                            EventDispatchThread dispatchThread =
-                                (EventDispatchThread)Thread.currentThread();
-                            dispatchThread.pumpEventsForFilter(EventDispatchThread.ANY_EVENT, new Conditional() {
-                                @Override
-																public boolean evaluate() {
-                                    synchronized (getTreeLock()) {
-                                        return windowClosingException == null;
-                                    }
-                                }
-                            }, modalFilter);
-                        }
-                    };
-
-                    // if this dialog is toolkit-modal, the filter should be added
-                    // to all EDTs (for all AppContexts)
-                    if (modalityType == ModalityType.TOOLKIT_MODAL) {
-                    	AppContext appContext = getAppContext();
-//                        Iterator it = AppContext.getAppContexts().iterator();
-//                        while (it.hasNext()) {
-//                            AppContext appContext = (AppContext)it.next();
-//                            if (appContext == showAppContext) {
-//                                continue;
-//                            }
-                            EventQueue eventQueue = (EventQueue)appContext.get(AppContext.EVENT_QUEUE_KEY);
-                            // it may occur that EDT for appContext hasn't been started yet, so
-                            // we post an empty invocation event to trigger EDT initialization
-//                            Runnable createEDT = new Runnable() {
+        	
+        	conditionalShow(null, null); // BH ???
+        	
+//        	
+//        	
+//        	
+//            // Set this variable before calling conditionalShow(). That
+//            // way, if the Dialog is hidden right after being shown, we
+//            // won't mistakenly block this thread.
+////            keepBlockingEDT = true;
+////            keepBlockingCT = true;
+//
+//            // Store the app context on which this dialog is being shown.
+//            // Event dispatch thread of this app context will be sleeping until
+//            // we wake it by any event from hideAndDisposeHandler().
+////            AppContext showAppContext = AppContext.getAppContext();
+//
+//            Long time = new Long(0);
+//            Component predictedFocusOwner = null;
+//            try {
+////                predictedFocusOwner = getMostRecentFocusOwner();
+//                if (conditionalShow(predictedFocusOwner, time)) {
+//                    // We have two mechanisms for blocking: 1. If we're on the
+//                    // EventDispatchThread, start a new event pump. 2. If we're
+//                    // on any other thread, call wait() on the treelock.
+//
+//                    modalFilter = ModalEventFilter.createFilterForDialog(this);
+//
+//                    final Runnable pumpEventsForFilter = new Runnable() {
+//                        @Override
+//												public void run() {
+//                            EventDispatchThread dispatchThread =
+//                                (EventDispatchThread)Thread.currentThread();
+//                            dispatchThread.pumpEventsForFilter(EventDispatchThread.ANY_EVENT, new Conditional() {
 //                                @Override
-//																public void run() {};
-//                            };
-//                            eventQueue.postEvent(new InvocationEvent(this, createEDT));
-                            EventDispatchThread edt = eventQueue.getDispatchThread();
-                            edt.addEventFilter(modalFilter);
+//																public boolean evaluate() {
+//                                    synchronized (getTreeLock()) {
+//                                        return windowClosingException == null;
+//                                    }
+//                                }
+//                            }, modalFilter);
 //                        }
-                    }
-
-                    modalityPushed();
-                    try {
-                        if (EventQueue.isDispatchThread()) {
-                          /*
-                             * dispose SequencedEvent we are dispatching on current
-                             * AppContext, to prevent us from hang.
-                             *
-                             */
-                            // BugId 4531693 (son@sparc.spb.su)
-//                            SequencedEvent currentSequencedEvent = KeyboardFocusManager.
-//                                getCurrentKeyboardFocusManager().getCurrentSequencedEvent();
-//                            if (currentSequencedEvent != null) {
-//                                currentSequencedEvent.dispose();
+//                    };
+//
+//                    // if this dialog is toolkit-modal, the filter should be added
+//                    // to all EDTs (for all AppContexts)
+//                    if (modalityType == ModalityType.TOOLKIT_MODAL) {
+//                    	AppContext appContext = getAppContext();
+////                        Iterator it = AppContext.getAppContexts().iterator();
+////                        while (it.hasNext()) {
+////                            AppContext appContext = (AppContext)it.next();
+////                            if (appContext == showAppContext) {
+////                                continue;
+////                            }
+//                            EventQueue eventQueue = (EventQueue)appContext.get(AppContext.EVENT_QUEUE_KEY);
+//                            // it may occur that EDT for appContext hasn't been started yet, so
+//                            // we post an empty invocation event to trigger EDT initialization
+////                            Runnable createEDT = new Runnable() {
+////                                @Override
+////																public void run() {};
+////                            };
+////                            eventQueue.postEvent(new InvocationEvent(this, createEDT));
+//                            EventDispatchThread edt = eventQueue.getDispatchThread();
+//                            edt.addEventFilter(modalFilter);
+////                        }
+//                    }
+//
+//                    modalityPushed();
+//                    try {
+//                        if (EventQueue.isDispatchThread()) {
+//                          /*
+//                             * dispose SequencedEvent we are dispatching on current
+//                             * AppContext, to prevent us from hang.
+//                             *
+//                             */
+//                            // BugId 4531693 (son@sparc.spb.su)
+////                            SequencedEvent currentSequencedEvent = KeyboardFocusManager.
+////                                getCurrentKeyboardFocusManager().getCurrentSequencedEvent();
+////                            if (currentSequencedEvent != null) {
+////                                currentSequencedEvent.dispose();
+////                            }
+//
+//                            /*
+//                             * Event processing is done inside doPrivileged block so that
+//                             * it wouldn't matter even if user code is on the stack
+//                             * Fix for BugId 6300270
+//                             */
+//
+////                             AccessController.doPrivileged(new PrivilegedAction() {
+//  //                                   public Object run() {
+//                                        pumpEventsForFilter.run();
+//     //                                    return null;
+//      //                               }
+//        //                     });
+//                        } else {
+//                            synchronized (getTreeLock()) {
+//                                Toolkit.getEventQueue().postEvent(new PeerEvent(this,
+//                                                                                pumpEventsForFilter,
+//                                                                                PeerEvent.PRIORITY_EVENT));
+//                                while (windowClosingException == null) {
+//                                    try {
+//                                        getTreeLock().wait();
+//                                    } catch (InterruptedException e) {
+//                                        break;
+//                                    }
+//                                }
 //                            }
-
-                            /*
-                             * Event processing is done inside doPrivileged block so that
-                             * it wouldn't matter even if user code is on the stack
-                             * Fix for BugId 6300270
-                             */
-
-//                             AccessController.doPrivileged(new PrivilegedAction() {
-  //                                   public Object run() {
-                                        pumpEventsForFilter.run();
-     //                                    return null;
-      //                               }
-        //                     });
-                        } else {
-                            synchronized (getTreeLock()) {
-                                Toolkit.getEventQueue().postEvent(new PeerEvent(this,
-                                                                                pumpEventsForFilter,
-                                                                                PeerEvent.PRIORITY_EVENT));
-                                while (windowClosingException == null) {
-                                    try {
-                                        getTreeLock().wait();
-                                    } catch (InterruptedException e) {
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    } finally {
-                        modalityPopped();
-                    }
-
-                    // if this dialog is toolkit-modal, its filter must be removed
-                    // from all EDTs (for all AppContexts)
-                    if (modalityType == ModalityType.TOOLKIT_MODAL) {
-//                        Iterator it = AppContext.getAppContexts().iterator();
-//                        while (it.hasNext()) {
-//                            AppContext appContext = (AppContext)it.next();
-//                            if (appContext == showAppContext) {
-//                                continue;
-//                            }
-                            EventQueue eventQueue = (EventQueue)appContext.get(AppContext.EVENT_QUEUE_KEY);
-                            EventDispatchThread edt = eventQueue.getDispatchThread();
-                            edt.removeEventFilter(modalFilter);
 //                        }
-                    }
-
-                    if (windowClosingException != null) {
-                        windowClosingException.fillInStackTrace();
-                        throw windowClosingException;
-                    }
-                }
-            } finally {
-                if (predictedFocusOwner != null) {
-                    // Restore normal key event dispatching
-//                    KeyboardFocusManager.getCurrentKeyboardFocusManager().
-//                        dequeueKeyEvents(time.get(), predictedFocusOwner);
-                }
-            }
+//                    } finally {
+//                        modalityPopped();
+//                    }
+//
+//                    // if this dialog is toolkit-modal, its filter must be removed
+//                    // from all EDTs (for all AppContexts)
+//                    if (modalityType == ModalityType.TOOLKIT_MODAL) {
+////                        Iterator it = AppContext.getAppContexts().iterator();
+////                        while (it.hasNext()) {
+////                            AppContext appContext = (AppContext)it.next();
+////                            if (appContext == showAppContext) {
+////                                continue;
+////                            }
+//                            EventQueue eventQueue = (EventQueue)appContext.get(AppContext.EVENT_QUEUE_KEY);
+//                            EventDispatchThread edt = eventQueue.getDispatchThread();
+//                            edt.removeEventFilter(modalFilter);
+////                        }
+//                    }
+//
+//                    if (windowClosingException != null) {
+//                        windowClosingException.fillInStackTrace();
+//                        throw windowClosingException;
+//                    }
+//                }
+//            } finally {
+//                if (predictedFocusOwner != null) {
+//                    // Restore normal key event dispatching
+////                    KeyboardFocusManager.getCurrentKeyboardFocusManager().
+////                        dequeueKeyEvents(time.get(), predictedFocusOwner);
+//                }
+//            }
         }
     }
 
@@ -1423,70 +1436,70 @@ public class Dialog extends Window {
      * the windows from the second group.
      */	
     void modalShow() {
-        // find all the dialogs that block this one
-        // IdentityArrayList is used in exactly two places:
-    	  // Window and Dialog. It allows a check for null and also
-    	  // uses object == item instead of object.equals(item)
-    	  // IdentityArrayList<Dialog> blockers = new IdentityArrayList<Dialog>();
-    	ArrayList<Dialog> blockers = new ArrayList<Dialog>();
-        for (Dialog d : modalDialogs) {
-            if (d.shouldBlock(this)) {
-                Window w = d;
-                while ((w != null) && (w != this)) {
-                    w = (Window)(w.getOwner_NoClientCode());
-                }
-                if ((w == this) || !shouldBlock(d) || (modalityType.compareTo(d.getModalityType()) < 0)) {
-                    blockers.add(d);
-                }
-            }
-        }
-
-        // add all blockers' blockers to blockers :)
-        for (int i = 0; i < blockers.size(); i++) {
-            Dialog blocker = blockers.get(i);
-            if (blocker.isModalBlocked()) {
-                Dialog blockerBlocker = blocker.getModalBlocker();
-                if (!blockers.contains(blockerBlocker)) {
-                    blockers.add(i + 1, blockerBlocker);
-                }
-            }
-        }
-
-        if (blockers.size() > 0) {
-            blockers.get(0).blockWindow(this);
-        }
-
-        // find all windows from blockers' hierarchies
-        ArrayList<Window> blockersHierarchies = new ArrayList<Window>(blockers);
-        int k = 0;
-        while (k < blockersHierarchies.size()) {
-            Window w = blockersHierarchies.get(k);
-            Window[] ownedWindows = w.getOwnedWindows_NoClientCode();
-            for (Window win : ownedWindows) {
-                blockersHierarchies.add(win);
-            }
-            k++;
-        }
-
-        java.util.List<Window> toBlock = new LinkedList<Window>();
-        // block all windows from scope of blocking except from blockers' hierarchies
-        ArrayList<Window> unblockedWindows = Window.getAllUnblockedWindows();
-        for (Window w : unblockedWindows) {
-            if (shouldBlock(w) && !blockersHierarchies.contains(w)) {
-                if ((w instanceof Dialog) && ((Dialog)w).isModal_NoClientCode()) {
-                    Dialog wd = (Dialog)w;
-                    if (wd.shouldBlock(this) && (modalDialogs.indexOf(wd) > modalDialogs.indexOf(this))) {
-                        continue;
-                    }
-                }
-                toBlock.add(w);
-            }
-        }
-        blockWindows(toBlock);
-
-        if (!isModalBlocked()) {
-            updateChildrenBlocking();
-        }
+//        // find all the dialogs that block this one
+//        // IdentityArrayList is used in exactly two places:
+//    	  // Window and Dialog. It allows a check for null and also
+//    	  // uses object == item instead of object.equals(item)
+//    	  // IdentityArrayList<Dialog> blockers = new IdentityArrayList<Dialog>();
+//    	ArrayList<Dialog> blockers = new ArrayList<Dialog>();
+//        for (Dialog d : modalDialogs) {
+//            if (d.shouldBlock(this)) {
+//                Window w = d;
+//                while ((w != null) && (w != this)) {
+//                    w = (Window)(w.getOwner_NoClientCode());
+//                }
+//                if ((w == this) || !shouldBlock(d) || (modalityType.compareTo(d.getModalityType()) < 0)) {
+//                    blockers.add(d);
+//                }
+//            }
+//        }
+//
+//        // add all blockers' blockers to blockers :)
+//        for (int i = 0; i < blockers.size(); i++) {
+//            Dialog blocker = blockers.get(i);
+//            if (blocker.isModalBlocked()) {
+//                Dialog blockerBlocker = blocker.getModalBlocker();
+//                if (!blockers.contains(blockerBlocker)) {
+//                    blockers.add(i + 1, blockerBlocker);
+//                }
+//            }
+//        }
+//
+//        if (blockers.size() > 0) {
+//            blockers.get(0).blockWindow(this);
+//        }
+//
+//        // find all windows from blockers' hierarchies
+//        ArrayList<Window> blockersHierarchies = new ArrayList<Window>(blockers);
+//        int k = 0;
+//        while (k < blockersHierarchies.size()) {
+//            Window w = blockersHierarchies.get(k);
+//            Window[] ownedWindows = w.getOwnedWindows_NoClientCode();
+//            for (Window win : ownedWindows) {
+//                blockersHierarchies.add(win);
+//            }
+//            k++;
+//        }
+//
+//        java.util.List<Window> toBlock = new LinkedList<Window>();
+//        // block all windows from scope of blocking except from blockers' hierarchies
+//        ArrayList<Window> unblockedWindows = Window.getAllUnblockedWindows();
+//        for (Window w : unblockedWindows) {
+//            if (shouldBlock(w) && !blockersHierarchies.contains(w)) {
+//                if ((w instanceof Dialog) && ((Dialog)w).isModal_NoClientCode()) {
+//                    Dialog wd = (Dialog)w;
+//                    if (wd.shouldBlock(this) && (modalDialogs.indexOf(wd) > modalDialogs.indexOf(this))) {
+//                        continue;
+//                    }
+//                }
+//                toBlock.add(w);
+//            }
+//        }
+//        blockWindows(toBlock);
+//
+//        if (!isModalBlocked()) {
+//            updateChildrenBlocking();
+//        }
     }
 
     /*

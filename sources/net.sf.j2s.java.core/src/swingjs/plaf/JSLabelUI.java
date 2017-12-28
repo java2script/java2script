@@ -1,6 +1,7 @@
 package swingjs.plaf;
 
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.LookAndFeel;
 
@@ -59,14 +60,14 @@ public class JSLabelUI extends JSLightweightUI {
 	}
 	
 	@Override
-	protected void installUIImpl() {
-		label = (JLabel) c;
+	public void installUI(JComponent jc) {
+		label = (JLabel) jc;
     LookAndFeel.installColorsAndFont(jc, "Label.background", "Label.foreground",
         "Label.font");
 	}
 
 	@Override
-	protected void uninstallUIImpl() {
+	public void uninstallUI(JComponent jc) {
 		// TODO Auto-generated method stub
 		
 	}

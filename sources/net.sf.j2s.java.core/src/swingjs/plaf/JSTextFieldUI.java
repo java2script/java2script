@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.Action;
+import javax.swing.JComponent;
 import javax.swing.JTextField;
 
 import swingjs.api.js.DOMNode;
@@ -52,9 +53,9 @@ public class JSTextFieldUI extends JSTextUI {
 	}
 
 	@Override
-	protected void installUIImpl() {
-		textField = (JTextField) c;
-		super.installUIImpl();
+	public void installUI(JComponent jc) {
+		textField = (JTextField) jc;
+		super.installUI(jc);
 	}
 
 	@Override

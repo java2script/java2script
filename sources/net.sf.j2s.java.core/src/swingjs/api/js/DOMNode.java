@@ -283,4 +283,8 @@ public abstract class DOMNode {
 		{}
 	}
 
+	public static void setVisible(DOMNode node, boolean visible) {
+		setStyles(node, "display", visible ? "block" : "none");
+	}
+
 }

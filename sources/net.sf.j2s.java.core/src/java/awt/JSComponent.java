@@ -48,6 +48,10 @@ import swingjs.api.js.HTML5Canvas;
  */
 public abstract class JSComponent extends Component {
 
+	public interface AsynchronousDialogCaller {
+	    	public void onReturn(int value);
+	}
+
 	/**
 	 * 
 	 * used by SwingJS
@@ -155,7 +159,7 @@ public abstract class JSComponent extends Component {
 		if (ui != null) {
 			// set up the ui as a PropertyChangeListener
 			// and, if applicable, a ChangeListener
-			ui.installUI(this);
+			ui.installJS();
 		}
 	}
 

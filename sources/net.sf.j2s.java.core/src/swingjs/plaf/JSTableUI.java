@@ -1507,7 +1507,7 @@ public class JSTableUI extends JSLightweightUI {
 //Installation
 
   @Override
-	public void installUIImpl() {
+	public void installUI(JComponent jc) {
       table = (JTable)c;
       rendererPane = new CellRendererPane();
       table.add(rendererPane);
@@ -1731,7 +1731,7 @@ public class JSTableUI extends JSLightweightUI {
 //Uninstallation
 
   @Override
-	public void uninstallUIImpl() {
+	public void uninstallUI(JComponent jc) {
       uninstallDefaults();
       uninstallListeners();
       uninstallKeyboardActions();
@@ -2273,7 +2273,7 @@ public class JSTableUI extends JSLightweightUI {
 //       */
 //      protected Transferable createTransferable(JComponent c) {
 //          if (c instanceof JTable) {
-//              JTable table = (JTable) c;
+//              JTable table = (JTable) jc;
 //              int[] rows;
 //              int[] cols;
 //

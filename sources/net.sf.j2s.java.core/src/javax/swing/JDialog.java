@@ -142,6 +142,8 @@ public class JDialog extends Dialog implements WindowConstants,
      */
     private TransferHandler transferHandler;
 
+	public Object optionCaller;
+
     /**
      * Creates a modeless dialog without a title and without a specified
      * <code>Frame</code> owner.  A shared, hidden frame will be
@@ -1214,5 +1216,17 @@ public class JDialog extends Dialog implements WindowConstants,
         ",rootPane=" + rootPaneString +
         ",rootPaneCheckingEnabled=" + rootPaneCheckingEnabledString;
     }
+
+	public int notifyCaller(Object value) {
+		if (optionCaller != null) {
+			/**
+			 * @j2sNative
+			 * 
+			 * caller.onReturn$O(value);
+			 * 
+			 */
+		}
+		return 0;
+	}
 
 }

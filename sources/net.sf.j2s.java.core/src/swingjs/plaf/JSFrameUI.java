@@ -8,6 +8,8 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.WindowEvent;
 import java.awt.peer.FramePeer;
 import java.beans.PropertyChangeEvent;
+
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.LookAndFeel;
 
@@ -172,11 +174,6 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		return false;
 	}
 
-	@Override
-	protected void uninstallUIImpl() {
-		closeFrame();
-	}
-
 	protected void closeFrame() {
 		JSUtil.J2S._jsUnsetMouse(frameNode);
 		$(frameNode).remove();
@@ -190,14 +187,21 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	}
 	
 	@Override
-	protected void installUIImpl() {
-		// problem here with J2S compiler turning JSDialogUI's override to overrideMethod
+	public void installUI(JComponent jc) {
+		// jc is really JFrame, even though JFrame is not a JComponent
 		frame = (JFrame) c;		
-		super.installUIImpl(); // compiler bug will not allow this
+		super.installUI(jc); // compiler bug will not allow this
 		 LookAndFeel.installColors(jc,
 		 "Frame.background",
 		 "Frame.foreground");
 	}
+
+	@Override
+	public void uninstallUI(JComponent jc) {
+		// never called
+		closeFrame();
+	}
+
 
 	@Override
 	public void setTitle(String title) {

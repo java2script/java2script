@@ -4,6 +4,8 @@ import java.util.List;
 
 import java.awt.Window;
 import java.awt.peer.DialogPeer;
+
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.LookAndFeel;
 
@@ -20,7 +22,10 @@ public class JSDialogUI extends JSFrameUI implements DialogPeer {
 	
 	// uses Frame.updateDOMNode()
 	
+	private boolean isModal;
+
 	public JSDialogUI() {
+		isModal = true;
 		z = frameZ + 500;
 		isFrame = true;
 		isDialog = true;
@@ -30,7 +35,7 @@ public class JSDialogUI extends JSFrameUI implements DialogPeer {
 	}
 
 		@Override
-		protected void installUIImpl() {
+		public void installUI(JComponent jc) {
 			frame = (JFrame) c;
 			LookAndFeel.installColors(jc,
 			   "Frame.background",
@@ -38,7 +43,7 @@ public class JSDialogUI extends JSFrameUI implements DialogPeer {
 		}
 	
 	@Override
-	protected void uninstallUIImpl() {
+	public void uninstallUI(JComponent jc) {
 	}
 
 	@Override

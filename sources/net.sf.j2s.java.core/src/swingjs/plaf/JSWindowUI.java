@@ -10,7 +10,9 @@ import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.image.BufferedImage;
 import java.awt.peer.WindowPeer;
+
 import javax.swing.JWindow;
+
 import swingjs.JSAppletViewer;
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
@@ -161,16 +163,6 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 	public void repositionSecurityWarning() {
 		// TODO Auto-generated method stub
 		
-	}
-
-	@Override
-	protected void installUIImpl() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void uninstallUIImpl() {
 	}
 
 	@Override

@@ -29,6 +29,7 @@ import java.awt.image.ImageProducer;
 import java.awt.image.Raster;
 import java.awt.image.RasterOp;
 import java.awt.image.WritableRaster;
+import java.awt.JSComponent;
 import java.awt.peer.DialogPeer;
 import java.awt.peer.FramePeer;
 import java.awt.peer.LightweightPeer;
@@ -300,7 +301,7 @@ public class JSToolkit extends SunToolkit {
 
 	public static JSComponentUI getComponentUI(JComponent target) {
 		JSComponentUI ui = (JSComponentUI) Interface.getInstance("swingjs.plaf.JS"
-				+ ((java.awt.JSComponent) target).getUIClassID(), true);
+				+ ((JSComponent) target).getUIClassID(), true);
 		if (ui != null)
 			ui.set(target);
 		return ui;
