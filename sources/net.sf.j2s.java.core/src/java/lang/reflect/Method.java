@@ -17,6 +17,8 @@ package java.lang.reflect;
 
 import java.lang.annotation.Annotation;
 
+import javax.imageio.metadata.IIOMetadataFormat;
+
 /**
  * This class must be implemented by the VM vendor. This class models a method.
  * Information about the method can be accessed, and the method can be invoked
@@ -357,7 +359,7 @@ public final class Method extends AccessibleObject implements GenericDeclaration
      * 	// should never reach here!
      * }
 	 */
-	public Object invoke(Object receiver, Object args[])
+	public Object invoke(Object receiver, Object... args)
 			throws IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException {
 		return null;
@@ -376,4 +378,5 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 	public String toString() {
 		return null;
 	}
+
 }
