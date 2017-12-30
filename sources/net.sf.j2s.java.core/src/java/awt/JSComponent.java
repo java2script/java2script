@@ -49,7 +49,12 @@ import swingjs.api.js.HTML5Canvas;
 public abstract class JSComponent extends Component {
 
 	public interface AsynchronousDialogCaller {
-	    	public void onReturn(int value);
+	    	public void onDialogReturn(Object value);
+	    	public void onDialogReturn(int value);
+	}
+
+	public interface AsynchronousDialogMessage {
+    	public AsynchronousDialogCaller getCaller(int value);
 	}
 
 	/**

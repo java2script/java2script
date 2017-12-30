@@ -47,6 +47,39 @@ import java.beans.PropertyChangeListener;
 import javax.swing.plaf.OptionPaneUI;
 
 /**
+ * 
+ * Modified for SwingJS by Bob Hanson to allow for asynchronous semi-modal callbacks.
+ * 
+ * For this, one of the two possibilities must be true:
+ * 
+ * 1) The parentComponent implements the method onDialogReturn(int) or onDialogReturn(Object)
+ * 
+ *    (as in JSComponent.AsynchronousDialogCaller)
+ * or
+ * 
+ * 2) the message itself implements getDialogCaller()
+ *  
+ *    (as in JSComponent.AsynchronousDialogMessage)
+ *    
+ * 
+ * If (2) is the case, then the return from getDialogCaller() must be a 
+ *    class that implements the method onDialogReturn(int) or onDialogReturnObject().
+ *    
+ *
+ * Calls to showConfirmDialog or showMessageDialog return via onDialogReturn(int);
+ * calls to showInputDialog return via onDialogReturn(Object).
+ *    
+ *    
+ * The initial call to JOptionPane.getConfirmDialog, getMessageDialog, or getOptionDialog
+ * will return:
+ * 
+ *  a) for an int return, Integer.MIN_VALUE if the caller was found, or -1 (CLOSE_OPTION) if not;
+ *  
+ *  b) for an Object return, JOptionPane.UNINITIAlIZED_VALUE ("uninitializedValue") if the caller was found, or null if not.
+ *  
+ * 
+ * 
+ * 
  * <code>JOptionPane</code> makes it easy to pop up a standard dialog box that
  * prompts users for a value or informs them of something. For information about
  * using <code>JOptionPane</code>, see <a href=
@@ -306,13 +339,12 @@ import javax.swing.plaf.OptionPaneUI;
  * @author James Gosling
  * @author Scott Violet
  */
-@SuppressWarnings({"deprecation"})
 public class JOptionPane extends JComponent {
 	/**
 	 * Indicates that the user has not yet selected a value.
 	 */ 
 	public static final Object UNINITIALIZED_VALUE = "uninitializedValue";
-
+	
 	//
 	// Option types
 	//
@@ -321,7 +353,7 @@ public class JOptionPane extends JComponent {
 	 * Type meaning Look and Feel should not supply any options -- only use the
 	 * options from the <code>JOptionPane</code>.
 	 */
-	public static final int DEFAULT_OPTION = -1;
+	public static final int DEFAULT_OPTION = -1; // "OK"
 	/** Type used for <code>showConfirmDialog</code>. */
 	public static final int YES_NO_OPTION = 0;
 	/** Type used for <code>showConfirmDialog</code>. */
@@ -346,6 +378,12 @@ public class JOptionPane extends JComponent {
 	 * <code>CANCEL_OPTION</code> or <code>NO_OPTION</code>.
 	 */
 	public static final int CLOSED_OPTION = -1;
+
+	/**
+	 *  in JavaScript, the initial return to indicate that the real return will go to caller.onDialogReturn(int)
+	 */
+	public static final int ASYNCHRONOUS_DEFERRED = Integer.MIN_VALUE;
+
 
 	//
 	// Message types. Used by the UI to determine what icon to display,
@@ -385,9 +423,12 @@ public class JOptionPane extends JComponent {
 	/** Bound property name for <code>wantsInput</code>. */
 	public static final String WANTS_INPUT_PROPERTY = "wantsInput";
 
-	private static final int CALLBACK_OPTION = -2;
-
 	private JSComponent.AsynchronousDialogCaller dialogCaller;
+
+	/**
+	 * true for showConfirmDialog
+	 */
+	private boolean isIntReturn = false;
 
 	/** Icon used in pane. */
 	transient protected Icon icon;
@@ -524,95 +565,84 @@ public class JOptionPane extends JComponent {
 
 	/**
 	 * Prompts the user for input in a blocking dialog where the initial
-	 * selection, possible selections, and all other options can be specified. The
-	 * user will able to choose from <code>selectionValues</code>, where
-	 * <code>null</code> implies the user can input whatever they wish, usually by
-	 * means of a <code>JTextField</code>. <code>initialSelectionValue</code> is
-	 * the initial value to prompt the user with. It is up to the UI to decide how
-	 * best to represent the <code>selectionValues</code>, but usually a
-	 * <code>JComboBox</code>, <code>JList</code>, or <code>JTextField</code> will
-	 * be used.
+	 * selection, possible selections, and all other options can be specified.
+	 * The user will able to choose from <code>selectionValues</code>, where
+	 * <code>null</code> implies the user can input whatever they wish, usually
+	 * by means of a <code>JTextField</code>. <code>initialSelectionValue</code>
+	 * is the initial value to prompt the user with. It is up to the UI to
+	 * decide how best to represent the <code>selectionValues</code>, but
+	 * usually a <code>JComboBox</code>, <code>JList</code>, or
+	 * <code>JTextField</code> will be used.
 	 * 
 	 * @param parentComponent
-	 *          the parent <code>Component</code> for the dialog
+	 *            the parent <code>Component</code> for the dialog
 	 * @param message
-	 *          the <code>Object</code> to display
+	 *            the <code>Object</code> to display
 	 * @param title
-	 *          the <code>String</code> to display in the dialog title bar
+	 *            the <code>String</code> to display in the dialog title bar
 	 * @param messageType
-	 *          the type of message to be displayed: <code>ERROR_MESSAGE</code>,
-	 *          <code>INFORMATION_MESSAGE</code>, <code>WARNING_MESSAGE</code>,
-	 *          <code>QUESTION_MESSAGE</code>, or <code>PLAIN_MESSAGE</code>
+	 *            the type of message to be displayed:
+	 *            <code>ERROR_MESSAGE</code>, <code>INFORMATION_MESSAGE</code>,
+	 *            <code>WARNING_MESSAGE</code>, <code>QUESTION_MESSAGE</code>,
+	 *            or <code>PLAIN_MESSAGE</code>
 	 * @param icon
-	 *          the <code>Icon</code> image to display
+	 *            the <code>Icon</code> image to display
 	 * @param selectionValues
-	 *          an array of <code>Object</code>s that gives the possible
-	 *          selections
+	 *            an array of <code>Object</code>s that gives the possible
+	 *            selections
 	 * @param initialSelectionValue
-	 *          the value used to initialize the input field
+	 *            the value used to initialize the input field
 	 * @return user's input, or <code>null</code> meaning the user canceled the
 	 *         input
 	 * @exception HeadlessException
-	 *              if <code>GraphicsEnvironment.isHeadless</code> returns
-	 *              <code>true</code>
+	 *                if <code>GraphicsEnvironment.isHeadless</code> returns
+	 *                <code>true</code>
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
 	@SuppressWarnings("unused")
-	public static Object showInputDialog(Component parentComponent,
-			Object message, String title, int messageType, Icon icon,
-			Object[] selectionValues, Object initialSelectionValue) {
-		
+	public static Object showInputDialog(Component parentComponent, Object message, String title, int messageType,
+			Icon icon, Object[] selectionValues, Object initialSelectionValue) {
+
 		Object value;
 
-		message = joinMessage(message);
+		JSComponent.AsynchronousDialogCaller dialogCaller = getDialogCaller(parentComponent, message, false);
 
-		/**
-		 * 
-		 * Just a simple prompt for SwingJS
-		 * 
-		 * @j2sNative
-		 * 
-		 * value = prompt(message, initialSelectionValue == null ? "" : initialSelectionValue);
-		 * 
-		 */
-		{
-			
-			
-			Runnable r = getRunnable(message);
-			
-			JOptionPane pane = new JOptionPane(message, messageType, OK_CANCEL_OPTION,
-					icon, null, null);
+		if (dialogCaller == null) {
 
-			pane.setWantsInput(true);
-			pane.setSelectionValues(selectionValues);
-			pane.setInitialSelectionValue(initialSelectionValue);
-			pane.setComponentOrientation(((parentComponent == null) ? getRootFrame()
-					: parentComponent).getComponentOrientation());
+			/**
+			 * 
+			 * Just a simple prompt for SwingJS
+			 * 
+			 * @j2sNative
+			 * 
+			 * 			return prompt(message, initialSelectionValue == null ?
+			 *            "" : initialSelectionValue);
+			 * 
+			 */
+			{}
 
-			int style = styleFromMessageType(messageType);
-			JDialog dialog = pane.createDialog(parentComponent, title, style);
-
-			pane.selectInitialValue();
-			dialog.show();
-			dialog.dispose();
-
-			value = pane.getInputValue();
-
-			if (value == UNINITIALIZED_VALUE) {
-				return null;
-			}
 		}
-		return value;
-	}
 
-	private static Runnable getRunnable(Object message) {
-		Runnable r = null;
-		if (message instanceof Object[]) {
-			Object[] m = (Object[]) message;
-			if (m.length > 0 && m[m.length - 1] instanceof Runnable)
-				r = (Runnable) m[m.length - 1];
-		}
-		return r;
+		JOptionPane pane = new JOptionPane(message, messageType, OK_CANCEL_OPTION, icon, null, null);
+		pane.dialogCaller = dialogCaller;
+		pane.isIntReturn = false;
+
+		pane.setWantsInput(true);
+		pane.setSelectionValues(selectionValues);
+		pane.setInitialSelectionValue(initialSelectionValue);
+		pane.setComponentOrientation(
+				((parentComponent == null) ? getRootFrame() : parentComponent).getComponentOrientation());
+
+		int style = styleFromMessageType(messageType);
+		JDialog dialog = pane.createDialog(parentComponent, title, style);
+		dialog.setDialogCallback(dialogCaller);
+
+		pane.selectInitialValue();
+		
+		dialog.setVisible(true); // dialog.show() sets up infinite loop
+
+		return UNINITIALIZED_VALUE;
+
 	}
 
 	/**
@@ -667,44 +697,46 @@ public class JOptionPane extends JComponent {
 	 * Brings up a dialog displaying a message, specifying all parameters.
 	 * 
 	 * @param parentComponent
-	 *          determines the <code>Frame</code> in which the dialog is
-	 *          displayed; if <code>null</code>, or if the
-	 *          <code>parentComponent</code> has no <code>Frame</code>, a default
-	 *          <code>Frame</code> is used
+	 *            determines the <code>Frame</code> in which the dialog is
+	 *            displayed; if <code>null</code>, or if the
+	 *            <code>parentComponent</code> has no <code>Frame</code>, a
+	 *            default <code>Frame</code> is used
 	 * @param message
-	 *          the <code>Object</code> to display
+	 *            the <code>Object</code> to display
 	 * @param title
-	 *          the title string for the dialog
+	 *            the title string for the dialog
 	 * @param messageType
-	 *          the type of message to be displayed: <code>ERROR_MESSAGE</code>,
-	 *          <code>INFORMATION_MESSAGE</code>, <code>WARNING_MESSAGE</code>,
-	 *          <code>QUESTION_MESSAGE</code>, or <code>PLAIN_MESSAGE</code>
+	 *            the type of message to be displayed:
+	 *            <code>ERROR_MESSAGE</code>, <code>INFORMATION_MESSAGE</code>,
+	 *            <code>WARNING_MESSAGE</code>, <code>QUESTION_MESSAGE</code>,
+	 *            or <code>PLAIN_MESSAGE</code>
 	 * @param icon
-	 *          an icon to display in the dialog that helps the user identify the
-	 *          kind of message that is being displayed
+	 *            an icon to display in the dialog that helps the user identify
+	 *            the kind of message that is being displayed
 	 * @exception HeadlessException
-	 *              if <code>GraphicsEnvironment.isHeadless</code> returns
-	 *              <code>true</code>
+	 *                if <code>GraphicsEnvironment.isHeadless</code> returns
+	 *                <code>true</code>
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
-	public static void showMessageDialog(Component parentComponent,
-			Object message, String title, int messageType, Icon icon) {
+	public static void showMessageDialog(Component parentComponent, Object message, String title, int messageType,
+			Icon icon) {
 
-		message = joinMessage(message);
-		/**
-		 * 
-		 * Just a simple alert for SwingJS
-		 * 
-		 * @j2sNative
-		 * 
-		 *  	alert(message);
-		 * 
-		 */
-		{
-			showOptionDialog(parentComponent, message, title, DEFAULT_OPTION,
-					messageType, icon, null, null);
+		JSComponent.AsynchronousDialogCaller dialogCaller = getDialogCaller(parentComponent, message, false);
+
+		if (dialogCaller == null) {
+			/**
+			 * 
+			 * Just a simple alert for SwingJS
+			 * 
+			 * @j2sNative
+			 * 
+			 * 			alert(message);
+			 * 
+			 */
+			{}
+			return;
 		}
-		
+		showOptionDialog(parentComponent, message, title, DEFAULT_OPTION, messageType, icon, null, null);
 	}
 
 	/**
@@ -832,6 +864,9 @@ public class JOptionPane extends JComponent {
 	@SuppressWarnings("unused")
 	public static int showConfirmDialog(Component parentComponent,
 			Object message, String title, int optionType, int messageType, Icon icon) {
+		
+		JSComponent.AsynchronousDialogCaller dialogCaller = getDialogCaller(parentComponent, message, true);
+		
 		int ok = OK_OPTION;
 		int canc = CANCEL_OPTION;
 		int yes = YES_OPTION;
@@ -840,16 +875,15 @@ public class JOptionPane extends JComponent {
 		String[] options = new String[] {"ok"};
 		switch (optionType) {
 		case OK_CANCEL_OPTION:
-			if (message instanceof String) {
+			if (dialogCaller == null) {
 				/**
 				 * @j2sNative
 				 * 
 				 *            return (confirm(message) ? ok : canc);
 				 * 
 				 */
-				{}				
-			} 
-			
+				{}
+			} 			
 			options = new String[] {"ok", "cancel"};
 			break;
 		case YES_NO_CANCEL_OPTION:
@@ -860,32 +894,8 @@ public class JOptionPane extends JComponent {
 			break;
 		}
 		
-//		String ret = null;
-//		/**
-//		 * @j2sNative
-//		 * 
-////		 *  var ret = prompt(message, options[0]);
-//		 *  return (!ret ? canc : ret.toLowerCase() == "yes" ? yes : no);
-//		 * 
-//		 */
-//		{			
-//		}
-
 		return showOptionDialog(parentComponent, message, title, optionType,
 			messageType, icon, null, null);
-	}
-
-	private static Object joinMessage(Object message) {
-		
-		/**
-		 * @j2sNative
-		 * 
-		 *  return (message.join ? message.join("\n\n") : message);
-		 * 
-		 */
-		{
-			return message;
-		}
 	}
 
 	/**
@@ -944,26 +954,37 @@ public class JOptionPane extends JComponent {
 			Object[] options, Object initialValue) {
 		JOptionPane pane = new JOptionPane(message, messageType, optionType, icon,
 				options, initialValue);
-		JSComponent.AsynchronousDialogCaller dialogCaller = null;
-		/**
-		 * @j2sNative
-		 * 
-		 * dialogCaller = message.dialogCaller;
-		 */
-
+		JSComponent.AsynchronousDialogCaller dialogCaller = getDialogCaller(parentComponent, message, true);
+		pane.dialogCaller = dialogCaller;
+		pane.isIntReturn = true;
 		pane.setInitialValue(initialValue);
 		pane.setComponentOrientation(((parentComponent == null) ? getRootFrame()
 				: parentComponent).getComponentOrientation());
 
 		int style = styleFromMessageType(messageType);
 		JDialog dialog = pane.createDialog(parentComponent, title, style);
-		pane.dialogCaller = dialogCaller;
 		dialog.setDialogCallback(dialogCaller);
+
 		pane.selectInitialValue();
 		
 		dialog.setVisible(true);	// dialog.show() sets up infinite loop	
-		
-		return CALLBACK_OPTION;		
+		if (dialogCaller == null) {
+			dialog.dispose();
+			return CLOSED_OPTION;
+		}
+		return ASYNCHRONOUS_DEFERRED;		
+	}
+
+	private static AsynchronousDialogCaller getDialogCaller(Component parentComponent, Object message, boolean isIntReturn) {
+		// checking for message instanceof JSComponent.AsynchronousDialogMessage
+		// but code will not check this, as JSComponent is not part of Java standard
+		JSComponent.AsynchronousDialogCaller dialogCaller = null;
+		/**
+		 * @j2sNative
+		 * 
+		 * dialogCaller = parentComponent && parentComponent[isIntReturn ? "onDialogReturn$I" : "onDialogReturn$O"] && parentComponent || message.getDialogCaller && message.getDialogCaller();
+		 */
+		return dialogCaller;
 	}
 
 	/**
@@ -1104,9 +1125,12 @@ public class JOptionPane extends JComponent {
 						dialog.setVisible(false);
 						dialog.dispose();
 					}
-					if (value != UNINITIALIZED_VALUE && dialogCaller != null) {
-						int ret = getReturnIndex(value);
-						dialogCaller.onReturn(ret);
+					if (dialogCaller != null) {
+						if (isIntReturn) {
+							dialogCaller.onDialogReturn(getReturnIndex(value));
+						} else {
+							dialogCaller.onDialogReturn(value == UNINITIALIZED_VALUE ? null : value);
+						}
 					}
 				}
 			}

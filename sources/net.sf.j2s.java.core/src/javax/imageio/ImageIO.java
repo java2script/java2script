@@ -32,14 +32,13 @@ import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.BufferedInputStream;
-import java.io.OutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
-
-//import javajs.J2SRequireImport;
-import javajs.api.Interface;
+import java.util.HashSet;
+import java.util.Iterator;
 
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
@@ -54,6 +53,9 @@ import javax.imageio.stream.ImageOutputStream;
 //import javax.imageio.spi.ServiceRegistry;
 //import sun.security.action.GetPropertyAction;
 import swingjs.JSUtil;
+import swingjs.image.GifImageWriter;
+import swingjs.image.JpgImageWriter;
+import swingjs.image.PngImageWriter;
 
 /**
  * A class containing static convenience methods for locating
@@ -1464,8 +1466,8 @@ public final class ImageIO {
 	 public static boolean write(RenderedImage im,
 	 String formatName,
 	 ImageOutputStream output) throws IOException {
-			JSUtil.notImplemented("ImageIO.write(RenderedImage, String, ImageOutputStream");
-			return false;
+		 ImageWriter writer = getWriter(formatName);
+			return (writer != null && writer.write(im, null, (OutputStream) (Object) output));
 	 }
 	
 	/**
@@ -1492,8 +1494,8 @@ public final class ImageIO {
 		if (im == null || output == null || formatName == null) {
 			throw new IllegalArgumentException("ImageIO.write(RenderedImage,String,File)");
 		}
-		ImageWriter writer = getWriter(im, formatName);
-		return (writer != null && writer.write(output.getName(), null));
+		ImageWriter writer = getWriter(formatName);
+		return (writer != null && writer.write(im, output.getName(), null));
 	}
 
 	/**
@@ -1528,8 +1530,8 @@ public final class ImageIO {
 		if (im == null || output == null || formatName == null) {
 			throw new IllegalArgumentException("ImageIO.write(RenderedImage,String,OutputStream)");
 		}
-		ImageWriter writer = getWriter(im, formatName);
-		return (writer != null && writer.write(null, output));
+		ImageWriter writer = getWriter(formatName);
+		return (writer != null && writer.write(im, null, output));
 	}
 	
 
@@ -1538,13 +1540,34 @@ public final class ImageIO {
 	 * rendered image and image format or <code>null</code> if there
 	 * is no appropriate writer.
 	 */
-	 private static ImageWriter getWriter(RenderedImage im, String formatName) {
+	 private static ImageWriter getWriter(String formatName) {
 		 try {
-			 return (ImageWriter) Interface.getInstanceWithParams("javax.imageio.ImageWriter", 
-					 new Class<?>[] { RenderedImage.class, String.class }, new Object[] {im, formatName });
+			 return getImageWritersByFormatName(formatName).next();
 		 } catch (Exception e) {
 			 return null;
 		 }
 	 }
-	
+
+	public static Iterator<ImageWriter> getImageWritersByFormatName(String formatName) {
+		if (formatName == null) {
+			throw new IllegalArgumentException("formatName == null!");
+		}
+		HashSet<ImageWriter> set = new HashSet<ImageWriter>();
+		switch (formatName.toLowerCase()) {
+		case "png":
+			set.add(new PngImageWriter());
+			break;
+		case "jpg":
+		case "jpeg":
+			set.add(new JpgImageWriter());
+			break;
+		case "gif":
+			set.add(new GifImageWriter());
+			break;
+		default:
+			break;
+		}		
+        return set.iterator();
+
+	}
 }

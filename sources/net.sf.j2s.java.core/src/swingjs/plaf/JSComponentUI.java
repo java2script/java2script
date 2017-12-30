@@ -1628,6 +1628,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		int h = actualHeight;
 		if (h == 0) {
 			if (isText) {
+				if (c.getFont() == null)
+					return;
 				h = setHTMLSize1(domNode, false, false).height;
 			// for example, a 12-pt font might have a height of 16, and ascent of 13, and descent of 3
 			// adjust down to center only the ascension of the text.

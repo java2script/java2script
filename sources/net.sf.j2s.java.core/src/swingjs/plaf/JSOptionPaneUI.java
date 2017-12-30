@@ -738,12 +738,12 @@ public class JSOptionPaneUI extends JSPanelUI {
                 if (type == JOptionPane.YES_NO_OPTION) {
                     defaultOptions = new ButtonFactory[2];
                     defaultOptions[0] = new ButtonFactory(
-                        "Yes", //UIManager.getString("OptionPane.yesButtonText", l),
+                        UIManager.getString("OptionPane.yesButtonText", l),
                         getMnemonic("OptionPane.yesButtonMnemonic", l),
                         (Icon)DefaultLookup.get(optionPane, this,
                                           "OptionPane.yesIcon"), minimumWidth);
                     defaultOptions[1] = new ButtonFactory(
-                    		"Yes", //UIManager.getString("OptionPane.noButtonText", l),
+                    	UIManager.getString("OptionPane.noButtonText", l),
                         getMnemonic("OptionPane.noButtonMnemonic", l),
                         (Icon)DefaultLookup.get(optionPane, this,
                                           "OptionPane.noIcon"), minimumWidth);
@@ -776,7 +776,7 @@ public class JSOptionPaneUI extends JSPanelUI {
                         getMnemonic("OptionPane.cancelButtonMnemonic", l),
                         (Icon)DefaultLookup.get(optionPane, this,
                                           "OptionPane.cancelIcon"), minimumWidth);
-                } else {
+                } else { // default option
                     defaultOptions = new ButtonFactory[1];
                     defaultOptions[0] = new ButtonFactory(
                         UIManager.getString("OptionPane.okButtonText",l),
