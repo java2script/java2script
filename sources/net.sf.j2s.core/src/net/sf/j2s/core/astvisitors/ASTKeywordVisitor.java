@@ -914,7 +914,7 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		if (xparent == null) {
 			return node.toString();
 		}
-		char leadingChar = (buffer.length() == 0 ? '\0' : buffer.charAt(buffer.length() - 1));
+		char leadingChar = getLastChar();
 		boolean isQualified = (leadingChar == '.');
 		// looking for "." or '"' here.
 		if (isQualified && xparent instanceof QualifiedName) {
@@ -942,6 +942,10 @@ public class ASTKeywordVisitor extends ASTJ2SDocVisitor {
 		// >>Math<<.max
 		return getValidFieldName$Qualifier(typeBinding == null ? node.getFullyQualifiedName()
 				: assureQualifiedName(typeBinding.getQualifiedName()), true);
+	}
+
+	protected char getLastChar() {
+		return (buffer.length() == 0 ? '\0' : buffer.charAt(buffer.length() - 1));
 	}
 
 	protected String getCheckedFieldName(String fieldName, ITypeBinding classBinding) {

@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -52,6 +53,7 @@ import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
@@ -214,6 +216,10 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 	}
 
 	public void endVisit(Block node) {
+		// look for trailing j2sNative block just before the end of a block 
+		Javadoc j2sJavadoc = getJ2sJavadoc(node, false);		
+		if (j2sJavadoc != null)
+			checkJ2sJavadoc(j2sJavadoc, false);
 		buffer.append("}");
 		clearVariables(getVariableList('f'));
 		clearVariables(getVariableList('n'));
@@ -473,9 +479,10 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 		boxingNode(node.getExpression(), false);
 		buffer.append(") ");
 		node.getThenStatement().accept(this);
-		if (node.getElseStatement() != null) {
+		Statement ifElse = node.getElseStatement();
+		if (ifElse != null) {
 			buffer.append(" else ");
-			node.getElseStatement().accept(this);
+			ifElse.accept(this);
 		}
 		return false;
 	}

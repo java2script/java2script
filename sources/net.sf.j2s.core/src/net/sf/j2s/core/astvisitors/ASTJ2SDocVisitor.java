@@ -50,71 +50,6 @@ public class ASTJ2SDocVisitor extends ASTEmptyVisitor {
 	
 	protected Map<Integer, Javadoc> global_mapBlockJavadoc;
 	
-	protected class BlockVisitor extends ASTVisitor {
-
-		protected int ptrDoc, ptr, len;
-		private List<ASTNode> list;
-		private int listPtr = 0;
-
-		BlockVisitor(List<ASTNode> list) {
-			this.list = list;
-			ptrDoc = list.get(0).getStartPosition();
-		}
-
-		/**
-		 * Just collect blocks after j2s Javadocs.
-		 * Throws an IndexOfBoundsException when done with scanning.
-		 * 
-		 * Note that this no longer requires that the node be a block,
-		 * because we are processing these BEFORE the node is visited.
-		 * 
-		 */
-		
-		public void preVisit(ASTNode node) throws IndexOutOfBoundsException {
-			int nodePt = node.getStartPosition();
-			// check for too early or too late.
-			if (nodePt < ptrDoc)
-				return;
-			//System.err.println("checking listPtr/size/nodePt/ptDoc " + listPtr + " " + list.size() + " " + nodePt + " " + ptrDoc + " " + node.getClass().getName());
-			//before:
-			//....v
-			//....J...J.J.J.J 
-			//.bbb.Bbb.B.B.B.Bbbbb
-			//after:
-			//........v
-			//....JB..J.J.J.J 
-			//.bbb..bb.B.B.B.Bbbbb
-			while (++listPtr < list.size()) {
-				// check for 
-				//........v
-				//....JB..JJ. 
-				//.bbb.bbb..B				
-				// becoming 
-				//.........v
-				//....JB..xJB   where "x" is ignored 
-				//.bbb..bb...
-
-				ptrDoc = list.get(listPtr).getStartPosition();
-
-				//System.err.println("checking now " + listPtr + " " + nodePt + " " + ptrDoc + " ");
-
-				if (nodePt < ptrDoc)
-					break;
-				list.remove(--listPtr);
-			}
-			if (nodePt < ptrDoc || listPtr == list.size()) {
-				if (!(node instanceof Block))
-					System.err.println("!!Note @j2s node not a block :" + list.get(listPtr - 1));
-				list.add(listPtr, node);
-			}
-			// the following will throw the desired exception when the task is done
-			list.get(++listPtr);
-			
-			//System.err.println("!!Note: j2s doc previsit ok listPtr/ptrDoc/nodePt:" + listPtr + "/" + ptrDoc + "/" + nodePt + " " + node.getClass().getName() + " ");
-			return;
-		}
-	}
-
 	protected void setMapJavaDoc(PackageDeclaration node) {
 		ASTNode root = node.getRoot();
 		global_mapBlockJavadoc = new HashMap<Integer, Javadoc>();
@@ -155,18 +90,25 @@ public class ASTJ2SDocVisitor extends ASTEmptyVisitor {
 		// and link javadoc to its closest block
 
 //		for (int i = 0, n = list.size(); i < n; i++) {
-//			System.err.println(i + "  " + list.get(i).getClass().getName());
+//			System.err.println(i + "  " + (list.get(i) == null ? null : list.get(i).getClass().getName() + " " + list.get(i).getStartPosition() + (list.get(i).getStartPosition() + list.get(i).getLength())));
 //		}
 
 		for (int i = 0, n = list.size() - 1; i < n;) {
 			Javadoc doc = (Javadoc) list.get(i++);
 			ASTNode item = list.get(i);
+			int factor = 1;
 			if (item instanceof Javadoc) {
 				System.err.println("!!Note: @j2s doc ignored because nothing follows it: " + doc.getStartPosition()
 						+ "\r\n" + doc);
 			} else {
+				if (item == null) {
+					factor = -1;
+					item = list.get(++i);
+				}
 				i++;
-				global_mapBlockJavadoc.put(Integer.valueOf(item.getStartPosition()), doc);
+				int pt = item.getStartPosition() * factor;
+				global_mapBlockJavadoc.put(Integer.valueOf(pt), doc);
+				System.err.println("adding  " + pt + " " + item);
 				if (item instanceof Block)
 					System.err.println("@j2s doc:\r\n" + doc.getStartPosition() + " " + doc + "\nreplaces block: "
 							+ item.getStartPosition() + " " + item.getClass().getName() + "\r\n" + item);
@@ -180,6 +122,101 @@ public class ASTJ2SDocVisitor extends ASTEmptyVisitor {
 			}
 		}
 
+	}
+
+	protected class BlockVisitor extends ASTVisitor {
+
+		protected int ptrDoc0, ptrDoc1, ptr, len;
+		private List<ASTNode> list;
+		private int listPtr = 0;
+		private ASTNode spanNode;
+		private int spanPt1;
+
+		BlockVisitor(List<ASTNode> list) {
+			this.list = list;
+			ptrDoc0 = list.get(0).getStartPosition();
+			ptrDoc1 = ptrDoc0 + list.get(0).getLength() - 1;
+		}
+
+		/**
+		 * Just collect blocks after j2s Javadocs. Throws an
+		 * IndexOfBoundsException when done with scanning.
+		 * 
+		 * Note that this no longer requires that the node be a block, because
+		 * we are processing these BEFORE the node is visited.
+		 * 
+		 */
+
+		public void preVisit(ASTNode node) throws IndexOutOfBoundsException {
+			int nodePt = node.getStartPosition();
+			// check for too early
+			if (nodePt < ptrDoc0) {
+				// check for a spanning node:
+				//   {.... doc....}{....}
+				// where the end of the spanning block is before the 
+				// beginning of the node otherwise associated with this doc
+				if (node instanceof Block && nodePt + (len = node.getLength()) > ptrDoc1) {
+					spanNode = node;
+					spanPt1 = nodePt + len;
+				}
+				return;
+			}
+
+			// We have found a node that is after the doc.
+			
+			// before:
+			// ....v
+			// ....J...J.J.J.J
+			// .bbb.Bbb.B.B.B.Bbbbb
+			// after:
+			// ........v
+			// ....JB..J.J.J.J
+			// .bbb..bb.B.B.B.Bbbbb
+
+			while (++listPtr < list.size()) {
+
+				// But are there some docs between this doc and the node?
+
+				// check for
+				// ........v
+				// ....JB..JJ.
+				// .bbb.bbb..B
+				// becoming
+				// .........v
+				// ....JB..xJB where "x" is ignored
+				// .bbb..bb...
+
+				ptrDoc0 = list.get(listPtr).getStartPosition();
+				ptrDoc1 = ptrDoc0 + list.get(listPtr).getLength() - 1;
+
+				if (nodePt < ptrDoc0) {
+					// have the closest
+					break;
+				}
+				// If so, ignore the earlier block.
+				list.remove(--listPtr);
+			}
+
+			// now ptrDoc0 points to the NEXT doc, or we are done with docs
+			
+			if (nodePt < ptrDoc0 || listPtr == list.size()) {
+				//if (!(node instanceof Block))
+				//	System.err.println("!!Note @j2s node not a block :" + list.get(listPtr - 1));
+				
+				// Do we have a spanning node that should trump this later node?
+				
+				if (spanNode != null && (spanPt1 < nodePt || listPtr == list.size())) {
+					// add a null to indicate that this is a trailing doc, not a leading one
+					list.add(listPtr++, null);
+					node = spanNode;
+				}
+				list.add(listPtr, node);
+			}
+			// the following will throw the desired exception when the task is
+			// done
+			list.get(++listPtr);
+			return;
+		}
 	}
 
 
@@ -204,15 +241,19 @@ public class ASTJ2SDocVisitor extends ASTEmptyVisitor {
 	 */
 	public boolean preVisit2(ASTNode node) {
 		Javadoc j2sJavadoc;
-		if (	global_mapBlockJavadoc == null 
+		if (	global_mapBlockJavadoc == null 	
 				|| node instanceof MethodDeclaration 
 				|| node instanceof Initializer 
-				|| (j2sJavadoc = global_mapBlockJavadoc.remove(Integer.valueOf(node.getStartPosition()))) == null)
+				|| node.getParent().getClass() == org.eclipse.jdt.core.dom.IfStatement.class
+				|| (j2sJavadoc = getJ2sJavadoc(node, true)) == null)
 			return true;
 		boolean isBlock = (node instanceof Block);
 		return !checkJ2sJavadoc(j2sJavadoc, isBlock) || !isBlock;
 	}
 
+	protected Javadoc getJ2sJavadoc(ASTNode node, boolean isPre) {
+		return global_mapBlockJavadoc.remove(Integer.valueOf((isPre ? 1 : -1) * node.getStartPosition()));
+	}
 
 	/**
 	 * 
