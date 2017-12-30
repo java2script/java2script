@@ -188,7 +188,6 @@ public class Test_Bugs extends HashMap {
 		 * 
 		 * debugger;
 		 */
-		{}
 		new SubClass("Hello from SubClass");
 		System.out.println("Done.");
 	}

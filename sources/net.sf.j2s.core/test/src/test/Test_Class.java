@@ -2,6 +2,8 @@ package test;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Hashtable;
 
 @SuppressWarnings("rawtypes")
@@ -24,15 +26,31 @@ class Test_Class extends Test_ {
 		static char c3 = new Character('c');
 	}
 
+	
 	public Test_Class() {
-		System.out.println(true);
-		MouseListener c = new MouseListener() {
+		
+		PropertyChangeListener l = new PropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				// Let the defaultCloseOperation handle the closing
+				// if the user closed the window without selecting a button
+				// (newValue = null in that case). Otherwise, close the dialog.
+				Test_Class x = Test_Class.this;
+				System.out.println(x);
+			}
+		};
 
+		
+		System.out.println(true);
+		final Test_Class me = Test_Class.this;
+		MouseListener c = new MouseListener() {
+			
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				System.out.println("!!!");
 				Test_Class.this.showt(); 
 				showt();				
+				assert(Test_Class.this == me);
 				System.out.println("!!!");
 			}
 

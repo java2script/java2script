@@ -3,40 +3,40 @@ package test;
 /**
  * @j2sNative
  * 
- *  // before class1 - ignored - OK
+ *  // before class1
  * 
  */
 /**
  * @j2sNative 
  * 
- *  // before class2 - OK
+ *  // before class2
  * 
  */
 /**
  *
  * @j2sPrefix
- *   // /-* this is from <@>j2sPrefix *-/ -- no longer supported - OK
+ *   // /-* this is from <@>j2sPrefix *-/ -- no longer supported - unnecessary
  *   
  * 
  * @j2sSuffix
- *   //  /-* this is from <@>j2sSuffix *-/ -- added after last method - OK
+ *   //  /-* this is from <@>j2sSuffix *-/ -- no longer supported - unnecessary
  */
-
+ 
 class Test_Native extends Test_ {
 
 	/**
 	 * @j2sNative
 	 * 
-	 * 	// field declaration in $init$ - OK
+	 * 	// field declaration in $init$
 	 * 
-	 */
+	 */ 
 	int ii;
 
 	
 	/**
 	 * @j2sNative
 	 * 
-	 * 		// static field declaration -- just after class starts, before $clinit$ - OK
+	 * 		// static field declaration -- just after class starts, before $clinit$
 	 * 
 	 */
 	static int iii;
@@ -44,21 +44,7 @@ class Test_Native extends Test_ {
 	/**
 	 * @j2sNative
 	 * 
-	 * 		// initializer -- replaces ii = 1 - OK
-	 * 
-	 *  ii=1;
-	 * 
-	 */
-
-	{
-		ii = 1;
-	}
- 
-	
-	/**
-	 * @j2sNative
-	 * 
-	 * 		 // should replace static block int jk = 0 - OK
+	 * 		 // should replace static block int jk = 0
 	 * 
 	 */
 	static {
@@ -66,6 +52,20 @@ class Test_Native extends Test_ {
 		
 	}
 
+	/**
+	 * @j2sNative
+	 * 
+	 * 		// initializer -- replaces ii = 1
+	 * 
+	 *  ii=1;
+	 * 
+	 */
+
+	{
+		ii = 1; 
+	}
+ 
+	
 	int test = 3;
 
 	public native void testNative();
@@ -75,14 +75,14 @@ class Test_Native extends Test_ {
 	/**
 	 * @j2sNative
 	 * 
-	 * 		//	return /-* testing *-/ and <@>here - OK
+	 * 		//	return /-* testing *-/ and <@>here
 	 *  
 	 */
 	public void test() {
-		/**
+		/** 
 		 * @j2sNative
 		 * 
-		 * 		//	return /-* test2 *-/ and <@>here  not used - whole function is replaced - OK
+		 * 		//	return /-* test2 *-/ and <@>here  not used - whole function is replaced
 	 	 * 
 		 */
 		{
@@ -94,23 +94,23 @@ class Test_Native extends Test_ {
 		/**
 		 * Otherwise the states have not changed
 		 * 
-		 * @j2sNative  // removes block - OK
+		 * @j2sNative  // removes block
 		 * 
 		 * 	
 		 * 
 		 */
 		{
-			new Test_Native().test2(); 
+			int j  = 5; 
 		}
 		/** 
 		 * @j2sNative
 		 * 
-		 *     // before int j=0 - OK
+		 *     // before int j=0
 		 *     
 		 */
 		int  j = 0; 
 		/**
-		 * @j2sIgnore  - OK
+		 * @j2sIgnore
 		 */
 		{
 			j = 3 + ii;		
@@ -118,7 +118,7 @@ class Test_Native extends Test_ {
 		/**
 		 * @j2sNative
 		 * 
-		 * 	j = 1	// ignored because it is not followed by anything - ok 
+		 * 	j = 1	// without braces -- included in next replace 
 		 * 
 		 */
 
@@ -126,34 +126,130 @@ class Test_Native extends Test_ {
 		 * @j2sNative
 		 * 
 		 *  this.ii = -1;
-		 * 	j = 2		// needs {} or it, too, will be ignored - ok
+		 * 	j = 2		//  with braces
 		 * 
 		 */ 
 		{}
+		
 		/**
 		 * @j2sNative
 		 * 
-		 *    // before assert - ok
+		 *  this.ii = -1;
+		 * 	j = 2		//  without braces
+		 * 
+		 */ 
+		/**
+		 * @j2sNative
+		 * 
+		 *    // before assert - no braces
 		 * 
 		 */
 		assert(j == 3 + ii);
 	}
 
 	public static void main(String[] args) {
-		new Test_Native().test2();
-		System.out.println("Test_Native OK");
+//		new Test_Native().test2();
+		
+		/** 
+		 * @j2sNative
+		 *  
+		 *     // before if
+		 * 
+		 */
+		if (Math.random() > 0.5) {
+			
+			System.out.println("else1");
+		
+			/** 
+			 * @j2sNative  
+			 * 
+			 *   // after else1 sysout 
+			 *  
+			 */ 
+			int j = 1;
+			return; 
+			/**
+			 * @j2sNative 
+			 *  
+			 *  // after return but before closing brace
+			 * 
+			 */
+		}
+		
+    	/**
+    	 * 
+    	 * @j2sNative
+    	 * 
+    	 *   /-* comment *-/  
+    	 * 
+    	 */
+
+		System.out.println("Test_Native OK");  
+
+		if (args != null)
+		/**
+		 * @j2sNative
+		 * 
+		 *            // THEN clause
+		 * 
+		 */
+		{
+			System.out.println("NO");
+		} else 
+		/**
+		 * @j2sNative
+		 * 
+		 * 			// ELSE clause
+		 */
+		{
+			
+			System.out.println("NO");
+		}
+		
+		
+		/**
+		 * @j2sNative
+		 * 
+		 *    // before if 
+		 */
+		if (true) {
+			
+			int i = 3;
+			int j = 5;
+			
+			/**
+			 * @j2sNative
+			 * 
+			 *    // in if
+			 */
+
+		}
+
+		/**
+		 * @j2sNative
+		 * 
+		 *    // after if
+		 */
+		
+
+		/**
+		 * @j2sNative
+		 * 
+		 *    // end of method
+		 */
+		
 	}
 
 	/**
 	 * @j2sNative
 	 * 
-	 *    // end of class -- ignored - OK
+	 *    // end of class
 	 */
-
 } 
+
 /**
  * @j2sNative
  * 
- *    // after class -- ignored - OK
+ *    // end of unit
  */
- 
+

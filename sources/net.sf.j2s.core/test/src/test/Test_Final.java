@@ -2,6 +2,9 @@ package test;
 
 public class Test_Final extends Test_ {
 
+	// This one should not be removed
+	public static final Object UNINITIALIZED_VALUE = "uninitializedValue";
+
 	public String finalStr2 = "?";
 	public static int TEST = 0;
 	public Test_Final(int i) {
@@ -15,7 +18,6 @@ public class Test_Final extends Test_ {
 		};
 		t.test8();
 	}
-
 
 	public static void main(String[] args) {
 		ClassLoader.getSystemClassLoader().setClassAssertionStatus("test.Test_Final$1", true);

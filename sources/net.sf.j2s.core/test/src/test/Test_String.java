@@ -3,8 +3,9 @@ package test;
 public class Test_String extends Test_ {
 	
   public static void main(String[] args) {
-	  CharSequence cs = "test";
+
 	  assert("test".length() == 4);
+	  CharSequence cs = "test";
 	  assert(cs.length() == 4);
 	  assert(String.valueOf(true).equals("true"));
 	  assert(String.valueOf(1).equals("1"));

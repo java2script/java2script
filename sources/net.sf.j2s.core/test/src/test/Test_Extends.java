@@ -114,14 +114,6 @@ public class Test_Extends extends Test_Extends_6 {
 	}
 	
     public void x_2b() {
-    	/**
-    	 * 
-    	 * @j2sNative
-    	 * 
-    	 *   /-* comment *-/  
-    	 * 
-    	 */
-    	{}
 		System.out.println("calling x_1 from test_extends.x_2b");
 		x_1();
     }

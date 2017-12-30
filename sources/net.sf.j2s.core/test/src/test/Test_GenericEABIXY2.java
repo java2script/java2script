@@ -32,7 +32,7 @@ class Test_GenericEABIXY2 extends Test_GenericEABIXY {
 		assert(ret == 0);
 		
 		System.out.println("Test_GenericC OK");
-	}
+	} 
 
 
 	/**
@@ -41,8 +41,8 @@ class Test_GenericEABIXY2 extends Test_GenericEABIXY {
 	 */
 	public int compareTo(String s, Integer i) {
 		System.out.println("Test_Generic2#compareTo(String Integer)" + s + "," + i);
-		return 1;
-	}
+		return 1; 
+	} 
 
 	
 	public int show(String s, Integer i) {
