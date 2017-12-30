@@ -41,7 +41,6 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
-import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -217,9 +216,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 	public void endVisit(Block node) {
 		// look for trailing j2sNative block just before the end of a block 
-		Javadoc j2sJavadoc = getJ2sJavadoc(node, false);		
-		if (j2sJavadoc != null)
-			checkJ2sJavadoc(j2sJavadoc, false);
+		getJ2sJavadoc(node, false);	
 		buffer.append("}");
 		clearVariables(getVariableList('f'));
 		clearVariables(getVariableList('n'));
@@ -1372,10 +1369,8 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			}
 		}
 
-		if (!isAnonymous) {
-			readSources((BodyDeclaration) node, "@j2sSuffix", "\r\n", "\r\n", true, false);
-		}
-
+	    getJ2sJavadoc(node, false);
+		
 		if (!isTopLevel) {
 			addAnonymousFunctionWrapper(false);
 		}
