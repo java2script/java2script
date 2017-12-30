@@ -2638,6 +2638,10 @@ Sys.err.printf = Sys.err.printf$S$OA = Sys.err.format = Sys.err.format$S$OA = Sy
 }
 
 Sys.err.println = Sys.err.println$O = Sys.err.println$Z = Sys.err.println$I = Sys.err.println$S = Sys.err.println$C = Sys.err.println = function (s) {
+  if (Clazz._traceOutput && s && ("" + s).indexOf(Clazz._traceOutput) >= 0) {
+    alert(s + "\n\n" + Clazz._getStackTrace());
+    debugger;
+  }
   Con.consoleOutput (typeof s == "undefined" ? "\r\n" : s == null ?  s = "null\r\n" : s + "\r\n", "red");
 };
 
@@ -4294,25 +4298,21 @@ return this.lineNumber==-2;
 });
 m$(C$,"toString",
 function(){
-var buf=Clazz.new_(StringBuilder.c$$I, [80]);
-buf.append$S(this.getClassName());
-buf.append$S('.');
-buf.append$S(this.getMethodName());
+var s = this.getClassName() + "." + this.getMethodName();
 if(this.isNativeMethod()){
-buf.append$S("(Native Method)");
+ s += "(Native Method)";
 }else{
 var fName=this.getFileName();
 if(fName==null){
-buf.append$S("(Unknown Source)");
+ s += "(Unknown Source)";
 }else{
 var lineNum=this.getLineNumber();
-buf.append$S('(');
-buf.append$S(fName);
+s += '(' + fName;
 if(lineNum>=0){
-buf.append$S(':');
-buf.append$I(lineNum);
-}buf.append$(')');
-}}return buf.toString();
+ s += ':' + lineNum;
+}
+ s += ')';
+}}return s;
 });
 
 

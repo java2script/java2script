@@ -107,23 +107,23 @@ Clazz_newMeth(C$, 'stop', function () {
 Clazz_newMeth(C$, 'destroy', function () {
 });
 })();
-//Created 2017-12-24 13:32:22
+//Created 2017-12-29 15:01:02
 (function(){var P$=Clazz_newPackage("java.applet"),I$=[];
 var C$=Clazz_newInterface(P$, "AppletContext");
 })();
-//Created 2017-12-24 13:32:22
+//Created 2017-12-29 15:01:02
 (function(){var P$=Clazz_newPackage("java.applet"),I$=[];
 var C$=Clazz_newInterface(P$, "AppletStub");
 })();
-//Created 2017-12-24 13:32:22
+//Created 2017-12-29 15:01:02
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[];
 var C$=Clazz_newInterface(P$, "ActiveEvent");
 })();
-//Created 2017-12-24 13:32:23
+//Created 2017-12-29 15:01:03
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[];
 var C$=Clazz_newInterface(P$, "Adjustable");
 })();
-//Created 2017-12-24 13:32:23
+//Created 2017-12-29 15:01:03
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[];
 var C$=Clazz_newClass(P$, "AWTEvent", null, 'java.util.EventObject');
 C$.idnum = 0;
@@ -236,7 +236,7 @@ that.bdata = this.bdata;
 Clazz_newMeth(C$, 'dispatched', function () {
 });
 })();
-//Created 2017-12-24 13:32:22
+//Created 2017-12-29 15:01:03
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[];
 var C$=Clazz_newClass(P$, "AWTEventMulticaster", null, null, ['java.awt.event.ComponentListener', 'java.awt.event.ContainerListener', 'java.awt.event.FocusListener', 'java.awt.event.KeyListener', 'java.awt.event.MouseListener', 'java.awt.event.MouseMotionListener', 'java.awt.event.WindowListener', 'java.awt.event.WindowFocusListener', 'java.awt.event.WindowStateListener', 'java.awt.event.ActionListener', 'java.awt.event.ItemListener', 'java.awt.event.AdjustmentListener', 'java.awt.event.TextListener', 'java.awt.event.InputMethodListener', 'java.awt.event.HierarchyListener', 'java.awt.event.HierarchyBoundsListener', 'java.awt.event.MouseWheelListener']);
 var p$=C$.prototype;
@@ -641,7 +641,7 @@ return result;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:22
+//Created 2017-12-29 15:01:03
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[['java.util.Arrays']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "BasicStroke", null, null, ['java.awt.Stroke', 'Cloneable']);
 
@@ -779,7 +779,7 @@ Clazz_newMeth(C$, 'clone', function () {
 return Clazz_new_(C$.c$$F$I$I$F$FA$F,[this.width, this.cap, this.join, this.miterlimit, this.dash, this.dash_phase]);
 });
 })();
-//Created 2017-12-24 13:32:23
+//Created 2017-12-29 15:01:03
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[['java.awt.Dimension']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "BorderLayout", null, null, ['java.awt.LayoutManager2', 'java.io.Serializable']);
 var p$=C$.prototype;
@@ -1091,7 +1091,7 @@ Clazz_newMeth(C$, 'toString', function () {
 return this.getClass().getName() + "[hgap=" + this.hgap + ",vgap=" + this.vgap + "]" ;
 });
 })();
-//Created 2017-12-24 13:32:23
+//Created 2017-12-29 15:01:03
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[['java.awt.ColorPaintContext']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "Color", null, null, 'java.awt.Paint');
 C$.white = null;
@@ -1448,7 +1448,7 @@ return 2;
 return 3;
 }});
 })();
-//Created 2017-12-24 13:32:24
+//Created 2017-12-29 15:01:04
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[['java.util.HashMap','java.awt.ComponentOrientation','sun.awt.AppContext','swingjs.JSToolkit','java.awt.Toolkit','java.awt.Point','java.awt.event.ComponentEvent','java.awt.Dimension','java.awt.Rectangle',['java.awt.Component','.BaselineResizeBehavior'],'java.awt.Cursor','java.awt.event.PaintEvent','java.awt.EventQueue','java.awt.event.MouseWheelEvent','java.awt.AWTEventMulticaster','java.awt.event.ComponentListener','java.awt.event.FocusListener','java.awt.event.HierarchyListener','java.awt.event.HierarchyEvent','java.awt.event.HierarchyBoundsListener','java.awt.event.KeyListener','java.awt.event.MouseListener','java.awt.event.MouseMotionListener','java.awt.event.MouseWheelListener','java.awt.event.InputMethodListener','java.beans.PropertyChangeListener','Boolean','java.beans.PropertyChangeSupport','sun.awt.SunToolkit']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "Component", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -3186,12 +3186,13 @@ if (this.getContainer() != null  && !this.isAddNotifyComplete ) {
 this.getContainer().increaseComponentCount$java_awt_Component(this);
 }if (this.parent != null  && this.parent.peer != null  ) {
 var parentContPeer = this.parent.peer;
-if (Clazz_instanceOf(parentContPeer, "java.awt.peer.LightweightPeer") && !(Clazz_instanceOf(peer, "java.awt.peer.LightweightPeer")) ) {
-var hwParent = this.getNativeContainer();
-if (hwParent != null  && hwParent.peer != null  ) {
-parentContPeer = hwParent.peer;
-}}}this.isAddNotifyComplete = true;
-if (this.hierarchyListener != null  || (this.eventMask & 32768) != 0  || (I$[5]||$incl$(5)).enabledOnToolkit$J(32768) ) {
+}this.isAddNotifyComplete = true;
+if (this.visible && peer != null  ) {
+var isDisposed = false;
+isDisposed = peer.isDisposed;
+
+if (isDisposed) peer.setVisible$Z(true);
+}if (this.hierarchyListener != null  || (this.eventMask & 32768) != 0  || (I$[5]||$incl$(5)).enabledOnToolkit$J(32768) ) {
 var e = Clazz_new_((I$[19]||$incl$(19)).c$$java_awt_Component$I$java_awt_Component$java_awt_Container$J,[this, 1400, this, this.parent, 2 | ((this.isRecursivelyVisible()) ? 4 : 0)]);
 this.dispatchEvent$java_awt_AWTEvent(e);
 }}});
@@ -3587,7 +3588,7 @@ Clazz_newMeth(C$, '$init$', function () {
 Clazz_newMeth(C$);
 })()
 })();
-//Created 2017-12-24 13:40:53
+//Created 2017-12-29 15:01:04
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[['java.util.Locale']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "ComponentOrientation");
 C$.LEFT_TO_RIGHT = null;
@@ -3649,7 +3650,7 @@ this.orientation = value;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:24
+//Created 2017-12-29 15:01:04
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[['java.awt.Component','java.awt.Insets','javajs.util.Lst','java.awt.Toolkit','java.awt.event.ContainerEvent','java.awt.Dimension',['java.awt.GraphicsCallback','.PaintCallback'],['java.awt.GraphicsCallback','.PaintAllCallback'],['java.awt.GraphicsCallback','.PaintHeavyweightComponentsCallback'],'java.awt.AWTEventMulticaster','java.awt.event.ContainerListener',['java.awt.Container','.MouseEventTargetFilter'],'java.awt.LightweightDispatcher','java.awt.event.MouseEvent','java.awt.event.MouseWheelEvent']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "Container", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -4607,7 +4608,7 @@ return (comp.eventMask & 32) != 0 || (comp.eventMask & 16) != 0  || (comp.eventM
 });
 })()
 })();
-//Created 2017-12-24 13:32:24
+//Created 2017-12-29 15:01:04
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[];
 var C$=Clazz_newClass(P$, "Dimension", null, 'java.awt.geom.Dimension2D');
 
@@ -4680,28 +4681,28 @@ Clazz_newMeth(C$, 'toString', function () {
 return this.getClass().getName() + "[width=" + this.width + ",height=" + this.height + "]" ;
 });
 })();
-//Created 2017-12-24 13:32:25
+//Created 2017-12-29 15:01:05
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[];
 var C$=Clazz_newInterface(P$, "ActionListener", null, null, 'java.util.EventListener');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:31
+//Created 2017-12-29 15:01:12
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[];
 var C$=Clazz_newInterface(P$, "AdjustmentListener", null, null, 'java.util.EventListener');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:31
+//Created 2017-12-29 15:01:13
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[];
 var C$=Clazz_newInterface(P$, "AWTEventListener", null, null, 'java.util.EventListener');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:31
+//Created 2017-12-29 15:01:12
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[];
 var C$=Clazz_newClass(P$, "ComponentEvent", null, 'java.awt.AWTEvent');
 
@@ -4747,42 +4748,42 @@ typeStr = "unknown type";
 return typeStr;
 });
 })();
-//Created 2017-12-24 13:32:31
+//Created 2017-12-29 15:01:13
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[];
 var C$=Clazz_newInterface(P$, "ComponentListener", null, null, 'java.util.EventListener');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:31
+//Created 2017-12-29 15:01:13
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[];
 var C$=Clazz_newInterface(P$, "ContainerListener", null, null, 'java.util.EventListener');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:31
+//Created 2017-12-29 15:01:13
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[];
 var C$=Clazz_newInterface(P$, "FocusListener", null, null, 'java.util.EventListener');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:32
+//Created 2017-12-29 15:01:13
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[];
 var C$=Clazz_newInterface(P$, "HierarchyBoundsListener", null, null, 'java.util.EventListener');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:32
+//Created 2017-12-29 15:01:13
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[];
 var C$=Clazz_newInterface(P$, "HierarchyListener", null, null, 'java.util.EventListener');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:32
+//Created 2017-12-29 15:01:13
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[['java.lang.StringBuilder','java.awt.Toolkit']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "InputEvent", null, 'java.awt.event.ComponentEvent');
 
@@ -4887,14 +4888,14 @@ buf.setLength$I(buf.length$() - 1);
 }return buf.toString();
 }, 1);
 })();
-//Created 2017-12-24 13:32:32
+//Created 2017-12-29 15:01:13
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[];
 var C$=Clazz_newInterface(P$, "InputMethodListener", null, null, 'java.util.EventListener');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:32
+//Created 2017-12-29 15:01:13
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[];
 var C$=Clazz_newClass(P$, "InvocationEvent", null, 'java.awt.AWTEvent', 'java.awt.ActiveEvent');
 
@@ -4975,21 +4976,21 @@ return typeStr + ",runnable=" + this.runnable + ",notifier=" + this.notifier + "
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:32
+//Created 2017-12-29 15:01:13
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[];
 var C$=Clazz_newInterface(P$, "ItemListener", null, null, 'java.util.EventListener');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:32
+//Created 2017-12-29 15:01:13
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[];
 var C$=Clazz_newInterface(P$, "KeyListener", null, null, 'java.util.EventListener');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:32
+//Created 2017-12-29 15:01:14
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[['java.awt.Point','java.lang.StringBuilder','java.awt.Toolkit']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "MouseEvent", null, 'java.awt.event.InputEvent');
 var p$=C$.prototype;
@@ -5234,56 +5235,56 @@ this.modifiers = this.modifiers|(32);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:32
+//Created 2017-12-29 15:01:14
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[];
 var C$=Clazz_newInterface(P$, "MouseListener", null, null, 'java.util.EventListener');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:32
+//Created 2017-12-29 15:01:14
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[];
 var C$=Clazz_newInterface(P$, "MouseMotionListener", null, null, 'java.util.EventListener');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:32
+//Created 2017-12-29 15:01:14
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[];
 var C$=Clazz_newInterface(P$, "MouseWheelListener", null, null, 'java.util.EventListener');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:32
+//Created 2017-12-29 15:01:14
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[];
 var C$=Clazz_newInterface(P$, "TextListener", null, null, 'java.util.EventListener');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:32
+//Created 2017-12-29 15:01:14
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[];
 var C$=Clazz_newInterface(P$, "WindowFocusListener", null, null, 'java.util.EventListener');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:33
+//Created 2017-12-29 15:01:15
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[];
 var C$=Clazz_newInterface(P$, "WindowListener", null, null, 'java.util.EventListener');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:33
+//Created 2017-12-29 15:01:15
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[];
 var C$=Clazz_newInterface(P$, "WindowStateListener", null, null, 'java.util.EventListener');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:33
+//Created 2017-12-29 15:01:15
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[['java.awt.Component',['java.awt.EventFilter','.FilterAction'],'sun.awt.SunToolkit','javajs.util.Lst','java.awt.EventDispatchThread$1','swingjs.JSToolkit',['java.awt.EventDispatchThread','.StopDispatchEvent'],'Thread',['java.awt.EventDispatchThread','.HierarchyEventFilter'],'sun.awt.AWTAutoShutdown']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "EventDispatchThread", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -5602,7 +5603,7 @@ Clazz_newMeth(C$);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:25
+//Created 2017-12-29 15:01:05
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[];
 var C$=Clazz_newInterface(P$, "EventFilter");
 ;
@@ -5623,7 +5624,7 @@ var $vals=[];
 Clazz_newMeth(C$, 'values', function() { return $vals }, 1);
 })()
 })();
-//Created 2017-12-24 13:40:55
+//Created 2017-12-29 15:01:05
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[['java.awt.Queue','Thread','sun.awt.SunToolkit','sun.awt.AWTAutoShutdown','java.awt.EventQueueItem','swingjs.JSToolkit','java.awt.Toolkit','sun.awt.AppContext','java.awt.EventDispatchThread','java.awt.event.InvocationEvent','java.lang.Error']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "EventQueue");
 C$.threadInitNumber = 0;
@@ -6098,7 +6099,7 @@ throw e;
 this.initDispatchThread();
 }}});
 })();
-//Created 2017-12-24 13:32:25
+//Created 2017-12-29 15:01:05
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[];
 var C$=Clazz_newClass(P$, "EventQueueItem");
 
@@ -6120,7 +6121,7 @@ this.id = evt.getID();
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:25
+//Created 2017-12-29 15:01:05
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[['java.awt.Dimension']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "FlowLayout", null, null, ['java.awt.LayoutManager', 'java.io.Serializable']);
 var p$=C$.prototype;
@@ -6383,7 +6384,7 @@ break;
 return this.getClass().getName() + "[hgap=" + this.hgap + ",vgap=" + this.vgap + str + "]" ;
 });
 })();
-//Created 2017-12-24 13:32:25
+//Created 2017-12-29 15:01:05
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[['swingjs.JSFontMetrics','java.awt.geom.AffineTransform','swingjs.JSToolkit',['java.text.AttributedCharacterIterator','.Attribute'],'java.awt.font.TextAttribute','javajs.util.SB',['java.awt.geom.Rectangle2D','.Float']]],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "Font");
 
@@ -6636,7 +6637,7 @@ Clazz_newMeth(C$, 'finalize', function () {
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:25
+//Created 2017-12-29 15:01:06
 (function(){var P$=Clazz_newPackage("java.awt.font"),I$=[['java.awt.geom.AffineTransform','java.awt.RenderingHints']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "FontRenderContext");
 
@@ -6753,7 +6754,7 @@ hash = hash+(this.fmHintValue.hashCode());
 }return hash;
 });
 })();
-//Created 2017-12-24 13:32:33
+//Created 2017-12-29 15:01:15
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[['java.awt.font.FontRenderContext']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "FontMetrics");
 C$.DEFAULT_FRC = null;
@@ -6834,7 +6835,7 @@ return this.getClass().getName() + "[font=" + this.getFont() + "ascent=" + this.
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:26
+//Created 2017-12-29 15:01:06
 (function(){var P$=Clazz_newPackage("java.awt.geom"),I$=[['java.lang.InternalError',['java.awt.geom.Point2D','.Double'],['java.awt.geom.Point2D','.Float'],'javajs.util.AU',['java.awt.geom.Path2D','.Double']]],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "AffineTransform", null, null, ['Cloneable', 'java.io.Serializable']);
 var p$=C$.prototype;
@@ -8944,7 +8945,7 @@ return false;
 return ((this.m00 == a.m00 ) && (this.m01 == a.m01 ) && (this.m02 == a.m02 ) && (this.m10 == a.m10 ) && (this.m11 == a.m11 ) && (this.m12 == a.m12 )  );
 });
 })();
-//Created 2017-12-24 13:32:33
+//Created 2017-12-29 15:01:15
 (function(){var P$=Clazz_newPackage("java.awt.geom"),I$=[['java.lang.InternalError']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "Dimension2D", null, null, 'Cloneable');
 
@@ -8974,7 +8975,7 @@ throw e;
 }
 });
 })();
-//Created 2017-12-24 13:32:33
+//Created 2017-12-29 15:01:16
 (function(){var P$=Clazz_newPackage("java.awt.geom"),I$=[[['java.awt.geom.Rectangle2D','.Double'],'java.awt.geom.Rectangle2D','java.awt.geom.RectIterator']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "Rectangle2D", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -9331,7 +9332,7 @@ return this.getClass().getName() + "[x=" + new Double(this.x).toString() + ",y="
 });
 })()
 })();
-//Created 2017-12-24 13:32:34
+//Created 2017-12-29 15:01:17
 (function(){var P$=Clazz_newPackage("java.awt.geom"),I$=[[['java.awt.geom.Rectangle2D','.Double'],'java.awt.Rectangle','java.awt.geom.FlatteningPathIterator','java.lang.InternalError']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "RectangularShape", null, null, ['java.awt.Shape', 'Cloneable']);
 
@@ -9449,7 +9450,7 @@ throw e;
 }
 });
 })();
-//Created 2017-12-24 13:32:35
+//Created 2017-12-29 15:01:17
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[['swingjs.api.Interface','java.awt.image.ColorModel','java.awt.image.WritableRaster','java.lang.Boolean','java.util.Hashtable']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "GraphicsConfiguration");
 
@@ -9514,7 +9515,7 @@ return false;
 });
 C$.$_ASSERT_ENABLED_ = ClassLoader.$getClassAssertionStatus(C$);
 })();
-//Created 2017-12-24 13:32:26
+//Created 2017-12-29 15:47:37
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[['java.awt.DisplayMode',['java.awt.GraphicsDevice','.WindowTranslucency']]],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "GraphicsDevice");
 
@@ -9622,7 +9623,7 @@ var $vals=[];
 Clazz_newMeth(C$, 'values', function() { return $vals }, 1);
 })()
 })();
-//Created 2017-12-24 13:40:55
+//Created 2017-12-29 15:01:06
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[['swingjs.JSUtil']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "GraphicsEnvironment");
 C$.localEnv = null;
@@ -9670,11 +9671,11 @@ Clazz_newMeth(C$, 'getCenterPoint', function () {
 return null;
 });
 })();
-//Created 2017-12-24 13:32:26
+//Created 2017-12-29 15:47:35
 (function(){var P$=Clazz_newPackage("java.awt.image"),I$=[];
 var C$=Clazz_newInterface(P$, "ImageObserver");
 })();
-//Created 2017-12-24 13:32:36
+//Created 2017-12-29 15:01:19
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[['java.lang.InternalError']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "Insets", null, null, ['Cloneable', 'java.io.Serializable']);
 
@@ -9741,13 +9742,15 @@ throw e;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:27
+//Created 2017-12-29 15:01:07
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[];
 var C$=Clazz_newInterface(P$, "ItemSelectable");
 })();
-//Created 2017-12-24 13:32:27
+//Created 2017-12-29 15:01:07
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[['Thread','swingjs.JSFrameViewer','javax.swing.UIManager']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
-var C$=Clazz_newClass(P$, "JSComponent", null, 'java.awt.Component');
+var C$=Clazz_newClass(P$, "JSComponent", function(){
+Clazz_newInstance(this, arguments,0,C$);
+}, 'java.awt.Component');
 C$.incr = 0;
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
@@ -9813,7 +9816,7 @@ return this.uiClassID;
 Clazz_newMeth(C$, 'setUI$javax_swing_plaf_ComponentUI', function (ui) {
 this.ui = ui;
 if (ui != null ) {
-ui.installUI$java_awt_Component(this);
+ui.installJS();
 }});
 
 Clazz_newMeth(C$, 'getUI', function () {
@@ -9831,6 +9834,12 @@ return (this.ui == null  ? null : this.ui == null  ? null : this.peer == null  ?
 
 Clazz_newMeth(C$, 'updateUI', function () {
 if (this.ui == null ) this.setUI$javax_swing_plaf_ComponentUI((I$[3]||$incl$(3)).getUI$java_awt_Component(this));
+});
+
+Clazz_newMeth(C$, 'getJSGraphic2D$java_awt_Graphics', function (g) {
+{
+return (g.mark ? g : null);
+}
 });
 
 Clazz_newMeth(C$, 'checkBackgroundPainted$swingjs_JSGraphics2D', function (jsg) {
@@ -9855,19 +9864,27 @@ return false;
 Clazz_newMeth(C$, 'isBackgroundSet', function () {
 return this.background != null ;
 });
+;
+(function(){var C$=Clazz_newInterface(P$.JSComponent, "AsynchronousDialogCaller", function(){
+});
+})()
+;
+(function(){var C$=Clazz_newInterface(P$.JSComponent, "AsynchronousDialogMessage", function(){
+});
+})()
 })();
-//Created 2017-12-24 13:32:27
+//Created 2017-12-29 15:01:07
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[];
 var C$=Clazz_newInterface(P$, "LayoutManager");
 })();
-//Created 2017-12-24 13:32:27
+//Created 2017-12-29 15:01:07
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[];
 var C$=Clazz_newInterface(P$, "LayoutManager2", null, null, 'java.awt.LayoutManager');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:27
+//Created 2017-12-29 15:01:07
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[['java.awt.Component','java.awt.Insets','javajs.util.Lst','java.awt.Toolkit','java.awt.event.ContainerEvent','java.awt.Dimension',['java.awt.GraphicsCallback','.PaintCallback'],['java.awt.GraphicsCallback','.PaintAllCallback'],['java.awt.GraphicsCallback','.PaintHeavyweightComponentsCallback'],'java.awt.AWTEventMulticaster','java.awt.event.ContainerListener',['java.awt.Container','.MouseEventTargetFilter'],'java.awt.LightweightDispatcher','java.awt.event.MouseEvent','java.awt.event.MouseWheelEvent']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "LightweightDispatcher", null, null, 'java.awt.event.AWTEventListener');
 var p$=C$.prototype;
@@ -10053,14 +10070,14 @@ target.dispatchEvent$java_awt_AWTEvent(retargeted);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:24
+//Created 2017-12-29 15:01:04
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[];
 var C$=Clazz_newInterface(P$, "Paint", null, null, 'java.awt.Transparency');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:27
+//Created 2017-12-29 15:01:08
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[['java.awt.FlowLayout']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "Panel", null, 'java.awt.Container');
 C$.nameCounter = 0;
@@ -10100,25 +10117,25 @@ Clazz_newMeth(C$, 'getOrCreatePeer', function () {
 return (this.ui == null  ? null : this.peer == null  ? (this.peer = this.getToolkit().createPanel$java_awt_Panel(this)) : this.peer);
 });
 })();
-//Created 2017-12-24 13:32:28
+//Created 2017-12-29 15:01:08
 (function(){var P$=Clazz_newPackage("java.awt.peer"),I$=[];
 var C$=Clazz_newInterface(P$, "ComponentPeer");
 })();
-//Created 2017-12-24 13:32:37
+//Created 2017-12-29 15:01:21
 (function(){var P$=Clazz_newPackage("java.awt.peer"),I$=[];
 var C$=Clazz_newInterface(P$, "ContainerPeer", null, null, 'java.awt.peer.ComponentPeer');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:37
+//Created 2017-12-29 15:01:21
 (function(){var P$=Clazz_newPackage("java.awt.peer"),I$=[];
 var C$=Clazz_newInterface(P$, "LightweightPeer", null, null, 'java.awt.peer.ContainerPeer');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:38
+//Created 2017-12-29 15:01:21
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[];
 var C$=Clazz_newClass(P$, "Queue");
 
@@ -10133,7 +10150,7 @@ Clazz_newMeth(C$, '$init$', function () {
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:25
+//Created 2017-12-29 15:01:05
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[['java.awt.Point','java.awt.Dimension',['java.awt.geom.Rectangle2D','.Double'],'java.awt.geom.Rectangle2D']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "Rectangle", null, 'java.awt.geom.Rectangle2D', 'java.awt.Shape');
 var p$=C$.prototype;
@@ -10577,7 +10594,7 @@ Clazz_newMeth(C$, 'toString', function () {
 return this.getClass().getName() + "[x=" + this.x + ",y=" + this.y + ",width=" + this.width + ",height=" + this.height + "]" ;
 });
 })();
-//Created 2017-12-24 13:32:28
+//Created 2017-12-29 15:01:08
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[['java.util.HashMap','java.lang.InternalError',['java.awt.RenderingHints','.SunKey'],['java.awt.RenderingHints','.Value'],['java.awt.RenderingHints','.LCDContrastKey'],'java.util.Collections']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "RenderingHints", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -10966,15 +10983,15 @@ Clazz_newMeth(C$);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:28
+//Created 2017-12-29 15:47:36
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[];
 var C$=Clazz_newInterface(P$, "Shape");
 })();
-//Created 2017-12-24 13:32:28
+//Created 2017-12-29 15:01:09
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[];
 var C$=Clazz_newInterface(P$, "Stroke");
 })();
-//Created 2017-12-24 13:32:28
+//Created 2017-12-29 15:01:09
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[['java.util.HashMap','sun.awt.NullComponentPeer','java.awt.Insets','swingjs.JSToolkit','java.awt.GraphicsEnvironment','java.awt.Cursor',['java.awt.Toolkit','.SelectiveAWTEventListener'],['java.awt.Toolkit','.ToolkitEventMulticaster'],'java.awt.AWTEventMulticaster','java.awt.event.AWTEventListener','java.awt.event.AWTEventListenerProxy','java.util.ArrayList','java.beans.PropertyChangeSupport']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "Toolkit", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -11352,11 +11369,11 @@ Clazz_newMeth(C$);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:28
+//Created 2017-12-29 15:01:09
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[];
 var C$=Clazz_newInterface(P$, "Transparency");
 })();
-//Created 2017-12-24 13:32:28
+//Created 2017-12-29 15:01:09
 (function(){var P$=Clazz_newPackage("java.beans"),I$=[['java.util.HashMap','java.util.ArrayList','java.util.Collections']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "ChangeListenerMap");
 
@@ -11463,7 +11480,7 @@ return listener;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:38
+//Created 2017-12-29 15:01:22
 (function(){var P$=Clazz_newPackage("java.beans"),I$=[];
 var C$=Clazz_newClass(P$, "PropertyChangeEvent", null, 'java.util.EventObject');
 
@@ -11511,14 +11528,14 @@ return this.propagationId;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:38
+//Created 2017-12-29 15:01:22
 (function(){var P$=Clazz_newPackage("java.beans"),I$=[];
 var C$=Clazz_newInterface(P$, "PropertyChangeListener", null, null, 'java.util.EventListener');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:38
+//Created 2017-12-29 15:01:22
 (function(){var P$=Clazz_newPackage("java.beans"),I$=[['java.beans.PropertyChangeListener','java.beans.PropertyChangeListenerProxy',['java.beans.PropertyChangeSupport','.PropertyChangeListenerMap'],'java.beans.PropertyChangeEvent','Boolean','java.beans.IndexedPropertyChangeEvent']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "PropertyChangeSupport", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -11668,7 +11685,7 @@ Clazz_newMeth(C$);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:38
+//Created 2017-12-29 15:01:22
 (function(){var P$=java.lang,I$=[['org.apache.harmony.luni.util.Msg']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(java.lang, "AbstractStringBuilder");
 var p$=C$.prototype;
@@ -12110,7 +12127,7 @@ Clazz_newMeth(C$, 'offsetByCodePoints$I$I', function (index, codePointOffset) {
 return Character.offsetByCodePoints(this.value, 0, this.count, index, codePointOffset);
 });
 })();
-//Created 2017-12-24 13:32:41
+//Created 2017-12-29 15:01:25
 (function(){var P$=java.lang,I$=[['java.lang.reflect.Method','java.util.Arrays','java.lang.reflect.TypeVariable','java.lang.Void','java.lang.Enum','java.util.HashMap']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(java.lang, "Class", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -12639,7 +12656,7 @@ return this.methods;
 });
 })()
 })();
-//Created 2017-12-24 13:40:55
+//Created 2017-12-29 19:24:16
 (function(){var P$=java.lang,I$=[['java.lang.Enum']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(java.lang, "Enum", null, null, ['Comparable', 'java.io.Serializable']);
 
@@ -12713,7 +12730,7 @@ Clazz_newMeth(C$, 'finalize', function () {
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:41:04
+//Created 2017-12-29 15:01:26
 (function(){var P$=java.lang,I$=[];
 var C$=Clazz_newClass(java.lang, "StringBuffer", null, 'AbstractStringBuilder', ['Appendable', 'java.io.Serializable', 'CharSequence']);
 var p$=C$.prototype;
@@ -12971,7 +12988,7 @@ var value = fields.get$S$O("value", null);
 this.set$CA$I(value, count);
 });
 })();
-//Created 2017-12-24 13:32:43
+//Created 2017-12-29 15:01:28
 (function(){var P$=java.lang,I$=[['java.lang.ThreadGroup','swingjs.JSToolkit','java.lang.ThreadDeath','java.lang.NoSuchMethodError','swingjs.JSUtil','java.util.HashMap','Thread.State']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(java.lang, "Thread", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -13403,7 +13420,7 @@ Clazz_newMeth(C$, 'values', function() { return $vals }, 1);
 });
 })()
 })();
-//Created 2017-12-24 13:40:54
+//Created 2017-12-29 15:01:28
 (function(){var P$=java.lang,I$=[['Thread','java.util.Arrays','java.lang.ThreadGroup','java.lang.Thread']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(java.lang, "ThreadGroup", null, null, [['Thread','Thread.UncaughtExceptionHandler']]);
 var p$=C$.prototype;
@@ -13782,7 +13799,7 @@ return this.getClass().getName() + "[name=" + this.getName() + ",maxpri=" + this
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:43
+//Created 2017-12-29 15:01:28
 (function(){var P$=Clazz_newPackage("java.net"),I$=[['java.util.Hashtable','java.net.Parts','javajs.util.AjaxURLConnection','java.lang.Error']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "URL");
 var p$=C$.prototype;
@@ -14083,11 +14100,11 @@ handler = C$.factory.createURLStreamHandler$S(protocol);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:45
+//Created 2017-12-29 15:01:30
 (function(){var P$=Clazz_newPackage("java.net"),I$=[];
 var C$=Clazz_newInterface(P$, "URLStreamHandlerFactory");
 })();
-//Created 2017-12-24 13:32:45
+//Created 2017-12-29 15:01:30
 (function(){var P$=java.util,I$=[['java.lang.reflect.Array','java.lang.StringBuilder']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "AbstractCollection", null, null, 'java.util.Collection');
 
@@ -14234,7 +14251,7 @@ buffer.append$C(']');
 return buffer.toString();
 });
 })();
-//Created 2017-12-24 13:32:46
+//Created 2017-12-29 15:01:32
 (function(){var P$=java.util,I$=[[['java.util.AbstractList','.SubAbstractList','.SubAbstractListIterator'],['java.util.AbstractList','.SimpleListIterator'],['java.util.AbstractList','.FullListIterator'],['java.util.AbstractList','.SubAbstractListRandomAccess'],['java.util.AbstractList','.SubAbstractList']]],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "AbstractList", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -14742,7 +14759,7 @@ Clazz_newMeth(C$);
 Clazz_newMeth(C$);
 })()
 })();
-//Created 2017-12-24 13:32:46
+//Created 2017-12-29 15:01:32
 (function(){var P$=java.util,I$=[['java.util.AbstractMap$1$1','java.util.AbstractSet','java.util.AbstractMap$2$1','java.util.AbstractCollection','java.lang.StringBuilder']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "AbstractMap", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -15163,7 +15180,7 @@ return this.key + "=" + this.value ;
 Clazz_newMeth(C$);
 })()
 })();
-//Created 2017-12-24 13:32:46
+//Created 2017-12-29 15:01:32
 (function(){var P$=java.util,I$=[];
 var C$=Clazz_newClass(P$, "AbstractSet", null, 'java.util.AbstractCollection', 'java.util.Set');
 
@@ -15214,7 +15231,7 @@ result = this.remove$O(it.next()) || result ;
 }return result;
 });
 })();
-//Created 2017-12-24 13:32:47
+//Created 2017-12-29 15:01:32
 (function(){var P$=java.util,I$=[['java.util.Arrays','java.lang.reflect.Array']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "ArrayList", null, 'java.util.AbstractList', ['java.util.List', 'Cloneable', 'java.io.Serializable', 'java.util.RandomAccess']);
 var p$=C$.prototype;
@@ -15604,7 +15621,7 @@ this.array[i] = stream.readObject();
 }
 });
 })();
-//Created 2017-12-24 13:32:47
+//Created 2017-12-29 15:01:32
 (function(){var P$=java.util,I$=[['java.util.Arrays','java.lang.reflect.Array',['java.util.Arrays','.ArrayList'],'java.lang.StringBuilder','java.util.HashSet']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "Arrays", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -17110,7 +17127,7 @@ return this.indexOf$O(o) != -1;
 Clazz_newMeth(C$);
 })()
 })();
-//Created 2017-12-24 13:32:47
+//Created 2017-12-29 15:01:32
 (function(){var P$=java.util,I$=[['java.util.Collections','java.util.Collections$EmptySet$1','java.util.Collections$SingletonSet$1','java.util.Collections$SingletonMap$1$1$1','java.util.Collections$SingletonMap$1$1','java.util.AbstractSet',['java.util.Collections','.SynchronizedList'],['java.util.Collections','.SynchronizedRandomAccessList'],['java.util.Collections','.SynchronizedSet'],['java.util.Collections','.SynchronizedCollection'],'java.util.Collections$UnmodifiableCollection$1','java.util.Collections$UnmodifiableList$1',['java.util.Collections','.UnmodifiableRandomAccessList'],['java.util.Collections','.UnmodifiableList'],['java.util.Collections','.UnmodifiableMap','.UnmodifiableEntrySet','.UnmodifiableMapEntry'],'java.util.Collections$UnmodifiableMap$UnmodifiableEntrySet$1','java.lang.reflect.Array',['java.util.Collections','.UnmodifiableMap','.UnmodifiableEntrySet'],['java.util.Collections','.UnmodifiableSet'],['java.util.Collections','.UnmodifiableCollection'],['java.util.Collections','.CheckedListIterator'],'java.util.Arrays',['java.util.Collections','.CheckedMap','.CheckedEntry'],['java.util.Collections','.CheckedMap','.CheckedEntrySet','.CheckedEntryIterator'],['java.util.Map','.Entry'],['java.util.Collections','.CheckedMap','.CheckedEntrySet'],['java.util.Collections','.EmptyList'],['java.util.Collections','.EmptySet'],['java.util.Collections','.EmptyMap'],'java.util.Collections$1',['java.util.Collections','.CopiesList'],['java.util.Collections','.ReverseComparator'],['java.util.Collections','.ReverseComparatorWithComparator'],'java.util.Random',['java.util.Collections','.SingletonSet'],['java.util.Collections','.SingletonList'],['java.util.Collections','.SingletonMap'],'java.util.ArrayList',['java.util.Collections','.SynchronizedMap'],['java.util.Collections','.SynchronizedSortedMap'],['java.util.Collections','.SynchronizedSortedSet'],['java.util.Collections','.UnmodifiableMap'],['java.util.Collections','.UnmodifiableSortedMap'],['java.util.Collections','.UnmodifiableSortedSet'],['java.util.Collections','.CheckedCollection'],['java.util.Collections','.CheckedMap'],['java.util.Collections','.CheckedRandomAccessList'],['java.util.Collections','.CheckedList'],['java.util.Collections','.CheckedSet'],['java.util.Collections','.CheckedSortedMap'],['java.util.Collections','.CheckedSortedSet']]],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "Collections", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -19881,7 +19898,7 @@ return this.sm.lastKey();
 Clazz_newMeth(C$);
 })()
 })();
-//Created 2017-12-24 13:32:47
+//Created 2017-12-29 15:01:33
 (function(){var P$=java.util,I$=[];
 var C$=Clazz_newClass(P$, "Dictionary");
 
@@ -19892,11 +19909,11 @@ Clazz_newMeth(C$, 'c$', function () {
 C$.$init$.apply(this);
 }, 1);
 })();
-//Created 2017-12-24 13:32:47
+//Created 2017-12-29 15:01:33
 (function(){var P$=java.util,I$=[];
 var C$=Clazz_newInterface(P$, "EventListener");
 })();
-//Created 2017-12-24 13:32:47
+//Created 2017-12-29 15:01:33
 (function(){var P$=java.util,I$=[];
 var C$=Clazz_newClass(P$, "EventObject", null, null, 'java.io.Serializable');
 
@@ -19924,7 +19941,7 @@ Clazz_newMeth(C$, 'toString', function () {
 return this.getClass().getName() + "[source=" + String.valueOf(this.source) + ']' ;
 });
 })();
-//Created 2017-12-24 13:32:48
+//Created 2017-12-29 15:01:33
 (function(){var P$=java.util,I$=[[['java.util.HashMap','.Entry'],['java.util.HashMap','.KeyIterator'],['java.util.HashMap','.ValueIterator'],['java.util.HashMap','.EntryIterator'],['java.util.HashMap','.KeySet'],['java.util.HashMap','.Values'],['java.util.HashMap','.EntrySet']]],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "HashMap", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -20562,7 +20579,7 @@ this.b$['java.util.HashMap'].clear();
 Clazz_newMeth(C$);
 })()
 })();
-//Created 2017-12-24 13:32:48
+//Created 2017-12-29 15:01:34
 (function(){var P$=java.util,I$=[['java.util.HashMap','java.util.LinkedHashMap','java.lang.InternalError']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "HashSet", null, 'java.util.AbstractSet', ['java.util.Set', 'Cloneable', 'java.io.Serializable']);
 C$.PRESENT = null;
@@ -20669,7 +20686,7 @@ this.map.put$TK$TV(e, C$.PRESENT);
 }
 });
 })();
-//Created 2017-12-24 13:32:48
+//Created 2017-12-29 15:01:34
 (function(){var P$=java.util,I$=[['java.util.Hashtable$1',['java.util.Hashtable','.Entry'],'java.util.Arrays',['java.util.Hashtable','.HashEnumerator'],['java.util.Collections','.SynchronizedSet'],['java.util.Hashtable','.HashIterator'],'java.util.Hashtable$2$1','java.util.AbstractSet','java.util.Hashtable$3$1','java.lang.StringBuilder',['java.util.Collections','.SynchronizedCollection'],'java.util.Hashtable$4$1','java.util.AbstractCollection']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "Hashtable", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -21346,7 +21363,7 @@ return result;
 Clazz_newMeth(C$);
 })()
 })();
-//Created 2017-12-24 13:32:48
+//Created 2017-12-29 15:01:34
 (function(){var P$=java.util,I$=[[['java.util.IdentityHashMap','.KeyIterator'],['java.util.IdentityHashMap','.ValueIterator'],['java.util.IdentityHashMap','.EntryIterator'],['java.util.AbstractMap','.SimpleEntry'],'java.lang.reflect.Array','java.lang.InternalError',['java.util.IdentityHashMap','.KeySet'],['java.util.IdentityHashMap','.Values'],['java.util.IdentityHashMap','.EntrySet']]],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "IdentityHashMap", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -22020,7 +22037,7 @@ return a;
 Clazz_newMeth(C$);
 })()
 })();
-//Created 2017-12-24 13:32:48
+//Created 2017-12-29 15:01:34
 (function(){var P$=java.util,I$=[['java.util.HashMap','java.lang.StringBuilder','java.lang.InternalError']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "Locale", null, null, ['Cloneable', 'java.io.Serializable']);
 C$.cache = null;
@@ -22199,7 +22216,7 @@ return this.language == other.language && this.country == other.country  && this
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:49
+//Created 2017-12-29 15:01:35
 (function(){var P$=java.util,I$=[];
 var C$=Clazz_newClass(P$, "MapEntry", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -22277,11 +22294,11 @@ return this.key + "=" + this.value ;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:49
+//Created 2017-12-29 15:01:35
 (function(){var P$=Clazz_newPackage("javajs.api"),I$=[];
 var C$=Clazz_newInterface(P$, "JSFunction");
 })();
-//Created 2017-12-24 13:32:52
+//Created 2017-12-29 15:01:39
 (function(){var P$=Clazz_newPackage("javajs.util"),I$=[['java.util.Hashtable','javajs.util.AjaxURLStreamHandler']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "AjaxURLStreamHandlerFactory", null, null, 'java.net.URLStreamHandlerFactory');
 
@@ -22307,7 +22324,7 @@ if (fac == null ) this.htFactories.put$TK$TV(protocol, fac = Clazz_new_((I$[2]||
 return (fac.protocol == null  ? null : fac);
 });
 })();
-//Created 2017-12-24 13:32:54
+//Created 2017-12-29 15:01:40
 (function(){var P$=Clazz_newPackage("javajs.util"),I$=[['java.lang.reflect.Array','javajs.util.T3','java.util.Arrays','javajs.util.Lst','java.util.Hashtable']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "AU");
 var p$=C$.prototype;
@@ -22664,7 +22681,7 @@ for (var i = b.length; --i >= 0;) { var j = b[i] & 0xFF; if (j >= 0x80) j -= 0x1
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:53
+//Created 2017-12-29 15:01:40
 (function(){var P$=Clazz_newPackage("javajs.util"),I$=[['javajs.util.JSThread$1']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSThread", null, 'Thread', 'javajs.api.JSFunction');
 C$.threadCount = 0;
@@ -22766,7 +22783,7 @@ setTimeout( function() {java.awt.Toolkit.getDefaultToolkit().getSystemEventQueue
 return true;
 });
 })();
-//Created 2017-12-24 13:32:55
+//Created 2017-12-29 15:01:41
 (function(){var P$=Clazz_newPackage("javajs.util"),I$=[];
 var C$=Clazz_newClass(P$, "Lst", null, 'java.util.ArrayList');
 
@@ -22793,7 +22810,7 @@ Clazz_newMeth(C$, 'removeObj$O', function (v) {
 return C$.superclazz.prototype.remove$O.apply(this, [v]);
 });
 })();
-//Created 2017-12-24 13:32:55
+//Created 2017-12-29 15:01:42
 (function(){var P$=Clazz_newPackage("javajs.util"),I$=[['javajs.util.DF','javajs.util.SB','javajs.util.AU']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "PT");
 C$.tensScale = null;
@@ -23743,7 +23760,7 @@ return (pt < 0 ? C$.parseFloat$S(s) : C$.parseFloat$S(s.substring(0, pt)) / C$.p
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:56
+//Created 2017-12-29 15:01:42
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['javax.swing.AbstractAction','javax.swing.UIManager','java.awt.event.ActionListener',['javax.swing.AbstractButton','.ButtonActionPropertyChangeListener'],'javax.swing.SwingUtilities','javax.swing.OverlayLayout','javax.swing.event.ChangeListener','javax.swing.event.ChangeEvent','java.awt.event.ActionEvent','java.awt.event.ItemListener','java.awt.event.ItemEvent',['javax.swing.AbstractButton','.Handler']]],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "AbstractButton", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -24686,7 +24703,7 @@ Clazz_newMeth(C$);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:59
+//Created 2017-12-29 15:01:46
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['javax.swing.ArrayTable','java.util.HashMap']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "ActionMap");
 
@@ -24779,7 +24796,7 @@ keyMap.put$TK$TV(pKeys[counter], pKeys[counter]);
 return keyMap.keySet().toArray();
 });
 })();
-//Created 2017-12-24 13:32:59
+//Created 2017-12-29 15:01:46
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['java.util.Hashtable']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "ArrayTable", null, null, 'Cloneable');
 var p$=C$.prototype;
@@ -24963,7 +24980,7 @@ j = j+(2);
 this.table = array;
 });
 })();
-//Created 2017-12-24 13:32:59
+//Created 2017-12-29 15:01:47
 (function(){var P$=Clazz_newPackage("javax.swing.border"),I$=[['java.awt.Insets','java.awt.Rectangle',['java.awt.Component','.BaselineResizeBehavior']]],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "AbstractBorder", null, null, 'javax.swing.border.Border');
 
@@ -25018,7 +25035,7 @@ return c.getComponentOrientation().isLeftToRight();
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:15
+//Created 2017-12-29 15:02:06
 (function(){var P$=Clazz_newPackage("javax.swing.border"),I$=[['java.awt.Insets']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "BevelBorder", null, 'javax.swing.border.AbstractBorder');
 
@@ -25158,11 +25175,11 @@ g.setColor$java_awt_Color(oldColor);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:15
+//Created 2017-12-29 15:02:07
 (function(){var P$=Clazz_newPackage("javax.swing.border"),I$=[];
 var C$=Clazz_newInterface(P$, "Border");
 })();
-//Created 2017-12-24 13:33:15
+//Created 2017-12-29 15:02:07
 (function(){var P$=Clazz_newPackage("javax.swing.border"),I$=[['java.awt.Insets']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "EmptyBorder", null, 'javax.swing.border.AbstractBorder');
 
@@ -25221,7 +25238,7 @@ return false;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:15
+//Created 2017-12-29 15:02:07
 (function(){var P$=Clazz_newPackage("javax.swing.border"),I$=[['java.awt.Insets']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "EtchedBorder", null, 'javax.swing.border.AbstractBorder');
 
@@ -25304,7 +25321,7 @@ Clazz_newMeth(C$, 'getShadowColor', function () {
 return this.shadow;
 });
 })();
-//Created 2017-12-24 13:33:15
+//Created 2017-12-29 15:02:07
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['javax.swing.border.BevelBorder','javax.swing.border.EtchedBorder','javax.swing.border.EmptyBorder','javax.swing.border.LineBorder','javax.swing.border.TitledBorder','javax.swing.border.CompoundBorder','javax.swing.border.MatteBorder']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "BorderFactory");
 var p$=C$.prototype;
@@ -25443,18 +25460,18 @@ Clazz_newMeth(C$, 'createMatteBorder$I$I$I$I$javax_swing_Icon', function (top, l
 return Clazz_new_((I$[7]||$incl$(7)).c$$I$I$I$I$javax_swing_Icon,[top, left, bottom, right, tileIcon]);
 }, 1);
 })();
-//Created 2017-12-24 13:32:59
+//Created 2017-12-29 15:01:47
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[];
 var C$=Clazz_newInterface(P$, "BoundedRangeModel");
 })();
-//Created 2017-12-24 13:32:59
+//Created 2017-12-29 15:01:47
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[];
 var C$=Clazz_newInterface(P$, "ButtonModel", null, null, 'java.awt.ItemSelectable');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:33:00
+//Created 2017-12-29 15:01:47
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['javax.swing.event.EventListenerList','javax.swing.event.ChangeListener','javax.swing.event.ChangeEvent']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "DefaultBoundedRangeModel", null, null, 'javax.swing.BoundedRangeModel');
 
@@ -25602,7 +25619,7 @@ Clazz_newMeth(C$, 'getListeners$Class', function (listenerType) {
 return this.listenerList.getListeners$Class(listenerType);
 });
 })();
-//Created 2017-12-24 13:33:00
+//Created 2017-12-29 15:01:48
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['javax.swing.event.EventListenerList','javax.swing.UIManager','java.awt.event.ItemEvent','java.awt.EventQueue','java.awt.event.ActionEvent','javax.swing.event.ChangeListener','javax.swing.event.ChangeEvent','java.awt.event.ActionListener','java.awt.event.ItemListener']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "DefaultButtonModel", null, null, 'javax.swing.ButtonModel');
 
@@ -25823,21 +25840,21 @@ Clazz_newMeth(C$, 'setMenuItem$Z', function (menuItem) {
 this.menuItem = menuItem;
 });
 })();
-//Created 2017-12-24 13:33:00
+//Created 2017-12-29 15:01:48
 (function(){var P$=Clazz_newPackage("javax.swing.event"),I$=[];
 var C$=Clazz_newInterface(P$, "AncestorListener", null, null, 'java.util.EventListener');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:33:17
+//Created 2017-12-29 15:02:08
 (function(){var P$=Clazz_newPackage("javax.swing.event"),I$=[];
 var C$=Clazz_newInterface(P$, "ChangeListener", null, null, 'java.util.EventListener');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:33:17
+//Created 2017-12-29 15:02:09
 (function(){var P$=Clazz_newPackage("javax.swing.event"),I$=[];
 var C$=Clazz_newClass(P$, "EventListenerList");
 C$.NULL_ARRAY = null;
@@ -25932,7 +25949,7 @@ return s;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:17
+//Created 2017-12-29 15:02:09
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['java.awt.Color','javax.swing.JComponent','java.awt.BorderLayout','javax.swing.JRootPane','javax.swing.SwingUtilities','javax.swing.RepaintManager']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JApplet", null, 'java.applet.Applet', 'javax.swing.RootPaneContainer');
 var p$=C$.prototype;
@@ -26096,7 +26113,7 @@ var rootPaneCheckingEnabledString = (this.rootPaneCheckingEnabled ? "true" : "fa
 return C$.superclazz.prototype.paramString.apply(this, []) + ",rootPane=" + rootPaneString + ",rootPaneCheckingEnabled=" + rootPaneCheckingEnabledString ;
 });
 })();
-//Created 2017-12-24 13:33:02
+//Created 2017-12-29 15:01:49
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['javax.swing.DefaultButtonModel','javax.swing.SwingUtilities']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JButton", null, 'javax.swing.AbstractButton');
 
@@ -26159,7 +26176,7 @@ var defaultCapableString = (this.defaultCapable ? "true" : "false");
 return C$.superclazz.prototype.paramString.apply(this, []) + ",defaultCapable=" + defaultCapableString ;
 });
 })();
-//Created 2017-12-24 13:33:02
+//Created 2017-12-29 15:01:49
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['javax.swing.SwingUtilities',['javax.swing.JComponent','.IntVector'],'javajs.util.Lst','javax.swing.JComponent','javax.swing.JComponent$1','javax.swing.event.EventListenerList','java.util.HashSet','javax.swing.KeyStroke','java.awt.Rectangle','javax.swing.RepaintManager','sun.font.FontDesignMetrics','java.awt.Insets','javax.swing.ClientPropertyKey',['javax.swing.JComponent','.ActionStandin'],'java.util.Hashtable','javax.swing.KeyboardManager','javax.swing.InputMap','javax.swing.ComponentInputMap','javax.swing.ActionMap',['java.awt.Component','.BaselineResizeBehavior'],'java.util.Locale',['javax.swing.JComponent','.KeyboardState'],'javax.swing.Popup','javax.swing.JToolTip','javax.swing.Autoscroller','javax.swing.ArrayTable','swingjs.JSToolkit','swingjs.JSUtil','javax.swing.AncestorNotifier','javax.swing.event.AncestorListener','java.beans.PropertyChangeListener','javax.swing.JComponent$2','java.util.ArrayList']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JComponent", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -26352,7 +26369,8 @@ var scratchGraphics = (g == null ) ? null : g.create();
 try {
 this.isBackgroundPainted = false;
 this.ui.update$java_awt_Graphics$javax_swing_JComponent(scratchGraphics, this);
-this.isBackgroundPainted = (scratchGraphics).isBackgroundPainted();
+var jsg = this.getJSGraphic2D$java_awt_Graphics(scratchGraphics);
+this.isBackgroundPainted = (jsg != null  && jsg.isBackgroundPainted() );
 } finally {
 scratchGraphics.dispose();
 }
@@ -26381,7 +26399,7 @@ var shouldSetFlagBack = false;
 try {
 jc.checkBackgroundPainted$swingjs_JSGraphics2D(null);
 jc.paint$java_awt_Graphics(jsg);
-jc.checkBackgroundPainted$swingjs_JSGraphics2D(jsg);
+jc.checkBackgroundPainted$swingjs_JSGraphics2D(this.getJSGraphic2D$java_awt_Graphics(jsg));
 } finally {
 jsg.dispose();
 if (shouldSetFlagBack) {
@@ -27182,14 +27200,15 @@ Clazz_newMeth(C$, 'setUI$javax_swing_plaf_ComponentUI', function (newUI) {
 p$.uninstallUIAndProperties.apply(this, []);
 this.ui = newUI;
 if (this.ui != null ) {
-this.ui.installUI$java_awt_Component(this);
+this.ui.installJS();
 }this.revalidate();
 this.repaint();
 });
 
 Clazz_newMeth(C$, 'uninstallUIAndProperties', function () {
 if (this.ui != null ) {
-this.ui.uninstallUI$java_awt_Component(this);
+this.ui.uninstallUI$javax_swing_JComponent(this);
+this.ui.uninstallJS();
 }});
 
 Clazz_newMeth(C$, 'setUIProperty$S$O', function (propertyName, value) {
@@ -27525,7 +27544,7 @@ rm.endPaint();
 } else {
 this.checkBackgroundPainted$swingjs_JSGraphics2D(null);
 paintingComponent.paint$java_awt_Graphics(g);
-this.checkBackgroundPainted$swingjs_JSGraphics2D(g);
+this.checkBackgroundPainted$swingjs_JSGraphics2D(this.getJSGraphic2D$java_awt_Graphics(g));
 }} finally {
 g.dispose();
 }
@@ -27643,10 +27662,7 @@ Clazz_newMeth(C$, 'dndDone', function () {
 });
 
 Clazz_newMeth(C$, 'paintComponentSafely$java_awt_Graphics', function (g) {
-var jsg = null;
-{
-jsg = (g.mark ? g : null);
-}
+var jsg = this.getJSGraphic2D$java_awt_Graphics(g);
 var nSave = (jsg == null  ? 0 : jsg.mark());
 this.checkBackgroundPainted$swingjs_JSGraphics2D(null);
 this.paintComponent$java_awt_Graphics(g);
@@ -27656,30 +27672,21 @@ jsg.reset$I(nSave);
 }});
 
 Clazz_newMeth(C$, 'printComponentSafely$java_awt_Graphics', function (g) {
-var jsg = null;
-{
-jsg = (g.mark ? g : null);
-}
+var jsg = this.getJSGraphic2D$java_awt_Graphics(g);
 var nSave = (jsg == null  ? 0 : jsg.mark());
 this.printComponent$java_awt_Graphics(g);
 if (jsg != null ) jsg.reset$I(nSave);
 });
 
 Clazz_newMeth(C$, 'paintBorderSafely$java_awt_Graphics', function (g) {
-var jsg = null;
-{
-jsg = (g.mark ? g : null);
-}
+var jsg = this.getJSGraphic2D$java_awt_Graphics(g);
 var nSave = (jsg == null  ? 0 : jsg.mark());
 this.printBorder$java_awt_Graphics(g);
 if (jsg != null ) jsg.reset$I(nSave);
 });
 
 Clazz_newMeth(C$, 'printBorderSafely$java_awt_Graphics', function (g) {
-var jsg = null;
-{
-jsg = (g.mark ? g : null);
-}
+var jsg = this.getJSGraphic2D$java_awt_Graphics(g);
 var nSave = (jsg == null  ? 0 : jsg.mark());
 this.printBorder$java_awt_Graphics(g);
 if (jsg != null ) jsg.reset$I(nSave);
@@ -27868,7 +27875,7 @@ return false;
 Clazz_newMeth(C$);
 })()
 })();
-//Created 2017-12-24 13:33:03
+//Created 2017-12-29 15:01:51
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['javax.swing.SwingUtilities','javax.swing.UIManager']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JLabel", null, 'javax.swing.JComponent', 'javax.swing.SwingConstants');
 
@@ -28176,7 +28183,7 @@ if (Clazz_instanceOf(oldC, "javax.swing.JComponent")) {
 (c).putClientProperty$O$O("labeledBy", this);
 }});
 })();
-//Created 2017-12-24 13:33:05
+//Created 2017-12-29 15:01:53
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['java.awt.Component','java.awt.Color','java.util.Hashtable','java.util.ArrayList']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JLayeredPane", null, 'javax.swing.JComponent');
 C$.DEFAULT_LAYER = null;
@@ -28484,7 +28491,7 @@ var optimizedDrawingPossibleString = (this.optimizedDrawingPossible ? "true" : "
 return C$.superclazz.prototype.paramString.apply(this, []) + ",optimizedDrawingPossible=" + optimizedDrawingPossibleString ;
 });
 })();
-//Created 2017-12-24 13:33:05
+//Created 2017-12-29 15:01:53
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['java.awt.FlowLayout']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JPanel", null, 'javax.swing.JComponent');
 
@@ -28514,7 +28521,7 @@ Clazz_newMeth(C$, 'c$', function () {
 C$.c$$Z.apply(this, [true]);
 }, 1);
 })();
-//Created 2017-12-24 13:33:06
+//Created 2017-12-29 15:01:54
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['javax.swing.SwingUtilities','java.awt.Dimension','sun.awt.AppContext','javax.swing.JLayeredPane','javax.swing.JPanel','java.awt.BorderLayout',['javax.swing.JRootPane','.RootLayout']]],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JRootPane", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -28871,7 +28878,7 @@ Clazz_newMeth(C$);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:07
+//Created 2017-12-29 15:01:56
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['javax.swing.DefaultBoundedRangeModel',['javax.swing.JScrollBar','.ModelListener'],'java.awt.event.AdjustmentListener','java.awt.event.AdjustmentEvent','java.awt.Dimension']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JScrollBar", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -29114,7 +29121,7 @@ this.this$0.fireAdjustmentValueChanged$I$I$I$Z.apply(this.this$0, [id, type, val
 Clazz_newMeth(C$);
 })()
 })();
-//Created 2017-12-24 13:33:07
+//Created 2017-12-29 15:01:56
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['javax.swing.UIManager','swingjs.JSUtil','javax.swing.plaf.InputMapUIResource','javax.swing.plaf.ComponentInputMapUIResource','javax.swing.KeyStroke','sun.swing.DefaultLayoutStyle']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "LookAndFeel");
 
@@ -29227,7 +29234,7 @@ return "[" + this.getDescription() + " - " + this.getClass().getName() + "]" ;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:11
+//Created 2017-12-29 15:02:02
 (function(){var P$=Clazz_newPackage("javax.swing.plaf"),I$=[];
 var C$=Clazz_newClass(P$, "ActionMapUIResource", null, 'javax.swing.ActionMap', 'javax.swing.plaf.UIResource');
 
@@ -29241,7 +29248,7 @@ Clazz_newMeth(C$, 'c$', function () {
 Clazz_super_(C$, this,1);
 }, 1);
 })();
-//Created 2017-12-24 13:33:18
+//Created 2017-12-29 15:02:10
 (function(){var P$=Clazz_newPackage("javax.swing.plaf"),I$=[[['javax.swing.plaf.BorderUIResource','.EtchedBorderUIResource'],['javax.swing.plaf.BorderUIResource','.BevelBorderUIResource'],['javax.swing.plaf.BorderUIResource','.LineBorderUIResource'],'java.awt.Color']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "BorderUIResource", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -29501,7 +29508,7 @@ Clazz_newMeth(C$);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:18
+//Created 2017-12-29 15:02:10
 (function(){var P$=Clazz_newPackage("javax.swing.plaf"),I$=[];
 var C$=Clazz_newClass(P$, "ColorUIResource", null, 'java.awt.Color', 'javax.swing.plaf.UIResource');
 
@@ -29536,7 +29543,7 @@ C$.superclazz.c$$I$Z.apply(this, [c.getRGB(), (c.getRGB() & -16777216) != -16777
 C$.$init$.apply(this);
 }, 1);
 })();
-//Created 2017-12-24 13:33:18
+//Created 2017-12-29 15:02:10
 (function(){var P$=Clazz_newPackage("javax.swing.plaf"),I$=[['java.lang.Error',['java.awt.Component','.BaselineResizeBehavior']]],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "ComponentUI", null, null, 'java.awt.peer.ComponentPeer');
 
@@ -29550,10 +29557,16 @@ Clazz_newMeth(C$, 'c$', function () {
 C$.$init$.apply(this);
 }, 1);
 
-Clazz_newMeth(C$, 'installUI$java_awt_Component', function (component) {
+Clazz_newMeth(C$, 'installUI$javax_swing_JComponent', function (component) {
 });
 
-Clazz_newMeth(C$, 'uninstallUI$java_awt_Component', function (c) {
+Clazz_newMeth(C$, 'installJS', function () {
+});
+
+Clazz_newMeth(C$, 'uninstallUI$javax_swing_JComponent', function (c) {
+});
+
+Clazz_newMeth(C$, 'uninstallJS', function () {
 });
 
 Clazz_newMeth(C$, 'paint$java_awt_Graphics$javax_swing_JComponent', function (g, c) {
@@ -29590,7 +29603,7 @@ Clazz_newMeth(C$, 'getBaselineResizeBehavior$javax_swing_JComponent', function (
 return (I$[2]||$incl$(2)).OTHER;
 });
 })();
-//Created 2017-12-24 13:33:19
+//Created 2017-12-29 15:02:11
 (function(){var P$=Clazz_newPackage("javax.swing.plaf"),I$=[];
 var C$=Clazz_newClass(P$, "DimensionUIResource", null, 'java.awt.Dimension', 'javax.swing.plaf.UIResource');
 
@@ -29607,7 +29620,7 @@ C$.$init$.apply(this);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:19
+//Created 2017-12-29 15:02:11
 (function(){var P$=Clazz_newPackage("javax.swing.plaf"),I$=[];
 var C$=Clazz_newClass(P$, "FontUIResource", null, 'java.awt.Font', 'javax.swing.plaf.UIResource');
 
@@ -29629,7 +29642,7 @@ C$.$init$.apply(this);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:19
+//Created 2017-12-29 15:02:11
 (function(){var P$=Clazz_newPackage("javax.swing.plaf"),I$=[];
 var C$=Clazz_newClass(P$, "InsetsUIResource", null, 'java.awt.Insets', 'javax.swing.plaf.UIResource');
 
@@ -29646,11 +29659,11 @@ C$.$init$.apply(this);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:19
+//Created 2017-12-29 15:02:11
 (function(){var P$=Clazz_newPackage("javax.swing.plaf"),I$=[];
 var C$=Clazz_newInterface(P$, "UIResource");
 })();
-//Created 2017-12-24 13:33:21
+//Created 2017-12-29 15:02:14
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['java.util.HashMap','java.awt.Rectangle','sun.awt.AppContext','javax.swing.SwingUtilities',['javax.swing.RepaintManager','.ProcessingRunnable'],'java.util.IdentityHashMap','javajs.util.Lst','java.awt.Toolkit','java.util.HashSet','sun.awt.AWTAccessor','java.lang.StringBuffer','Thread','sun.awt.SunToolkit','java.awt.event.InvocationEvent']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "RepaintManager", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -30150,15 +30163,15 @@ this.this$0.prePaintDirtyRegions();
 Clazz_newMeth(C$);
 })()
 })();
-//Created 2017-12-24 13:33:12
+//Created 2017-12-29 15:02:03
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[];
 var C$=Clazz_newInterface(P$, "RootPaneContainer");
 })();
-//Created 2017-12-24 13:33:13
+//Created 2017-12-29 15:02:03
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[];
 var C$=Clazz_newInterface(P$, "SwingConstants");
 })();
-//Created 2017-12-24 13:33:14
+//Created 2017-12-29 15:02:05
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[];
 var C$=Clazz_newClass(P$, "SwingPaintEventDispatcher", null, 'sun.awt.PaintEventDispatcher');
 C$.ERASE_BACKGROUND = false;
@@ -30190,7 +30203,7 @@ return true;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:14
+//Created 2017-12-29 15:02:05
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['java.awt.Rectangle','java.awt.Point','java.lang.Error','java.awt.event.MouseWheelEvent','javax.swing.event.MenuDragMouseEvent','java.awt.event.MouseEvent','swingjs.api.Interface','java.awt.EventQueue','javax.swing.JComponent','java.awt.event.ActionEvent','swingjs.JSUtil',['javax.swing.SwingUtilities','.SharedOwnerFrame'],'sun.awt.AppContext','Thread']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "SwingUtilities", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -30931,7 +30944,7 @@ Clazz_newMeth(C$, 'dispose', function () {
 });
 })()
 })();
-//Created 2017-12-24 13:33:14
+//Created 2017-12-29 15:02:05
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['javax.swing.LookAndFeel','java.util.Locale','java.util.HashMap','javax.swing.SwingUtilities','java.lang.Error','swingjs.JSToolkit','javax.swing.event.SwingPropertyChangeSupport','java.beans.PropertyChangeListener','java.util.Vector']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "UIDefaults", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -31256,7 +31269,7 @@ return km;
 Clazz_newMeth(C$);
 })()
 })();
-//Created 2017-12-24 13:33:15
+//Created 2017-12-29 15:02:06
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['java.util.ArrayList',['javax.swing.UIManager','.LookAndFeelInfo'],'swingjs.JSUtil','javax.swing.SwingUtilities','java.util.Locale','java.beans.PropertyChangeListener','swingjs.JSToolkit','javax.swing.RepaintManager','sun.awt.PaintEventDispatcher','javax.swing.SwingPaintEventDispatcher']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "UIManager", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -31476,7 +31489,7 @@ Clazz_newMeth(C$);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:15
+//Created 2017-12-29 15:02:06
 (function(){var P$=Clazz_newPackage("sun.awt"),I$=[['java.lang.StringBuffer','java.util.Collections','java.util.IdentityHashMap','java.util.HashMap','java.util.HashSet','Thread','sun.awt.SunToolkit','sun.awt.MostRecentThreadAppContext','sun.awt.MostRecentKeyValue','java.beans.PropertyChangeListener','java.beans.PropertyChangeSupport']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "AppContext");
 C$.EVENT_QUEUE_KEY = null;
@@ -31624,7 +31637,7 @@ return Clazz_array((I$[10]||$incl$(10)), [0]);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:34
+//Created 2017-12-29 15:02:29
 (function(){var P$=Clazz_newPackage("sun.awt"),I$=[['java.util.HashSet','java.util.IdentityHashMap','java.awt.AWTEvent']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "AWTAutoShutdown", null, null, 'Runnable');
 C$.theInstance = null;
@@ -31728,11 +31741,11 @@ aLog.fine$S(key + "->" + this.peerMap.get$O(key) );
 }
 });
 })();
-//Created 2017-12-24 13:33:34
+//Created 2017-12-29 15:02:29
 (function(){var P$=Clazz_newPackage("sun.awt"),I$=[];
 var C$=Clazz_newInterface(P$, "ComponentFactory");
 })();
-//Created 2017-12-24 13:33:34
+//Created 2017-12-29 15:02:29
 (function(){var P$=Clazz_newPackage("sun.awt"),I$=[];
 var C$=Clazz_newClass(P$, "MostRecentKeyValue");
 
@@ -31758,7 +31771,7 @@ this.value = v;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:34
+//Created 2017-12-29 15:02:29
 (function(){var P$=Clazz_newPackage("sun.awt"),I$=[];
 var C$=Clazz_newClass(P$, "MostRecentThreadAppContext");
 
@@ -31779,7 +31792,7 @@ this.appContext = value;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:34
+//Created 2017-12-29 15:02:29
 (function(){var P$=Clazz_newPackage("sun.awt"),I$=[['java.awt.event.PaintEvent','java.awt.Rectangle']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "PaintEventDispatcher");
 C$.dispatcher = null;
@@ -31813,7 +31826,7 @@ return false;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:35
+//Created 2017-12-29 15:02:29
 (function(){var P$=Clazz_newPackage("sun.awt"),I$=[['swingjs.JSUtil','sun.awt.EventQueueItem','sun.awt.SunToolkit']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "PostEventQueue");
 
@@ -31864,11 +31877,11 @@ this.queueTail = item;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:35
+//Created 2017-12-29 15:02:29
 (function(){var P$=Clazz_newPackage("sun.awt"),I$=[];
 var C$=Clazz_newInterface(P$, "RequestFocusController");
 })();
-//Created 2017-12-24 13:33:35
+//Created 2017-12-29 15:02:29
 (function(){var P$=Clazz_newPackage("sun.awt"),I$=[['java.util.HashMap','java.awt.EventQueue','sun.awt.AppContext','sun.awt.PostEventQueue','Thread','sun.awt.AWTAutoShutdown','sun.awt.AWTAccessor','sun.awt.PeerEvent','java.awt.Toolkit','sun.awt.SunToolkit$1','java.awt.Dimension','sun.font.FontDesignMetrics']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "SunToolkit", null, 'java.awt.Toolkit', ['sun.awt.WindowClosingSupport', 'sun.awt.WindowClosingListener', 'sun.awt.ComponentFactory']);
 C$.appContextMap = null;
@@ -32264,15 +32277,15 @@ Clazz_newMeth(C$, 'needUpdateWindow', function () {
 return false;
 });
 })();
-//Created 2017-12-24 13:33:35
+//Created 2017-12-29 15:02:30
 (function(){var P$=Clazz_newPackage("sun.awt"),I$=[];
 var C$=Clazz_newInterface(P$, "WindowClosingListener");
 })();
-//Created 2017-12-24 13:33:35
+//Created 2017-12-29 15:02:30
 (function(){var P$=Clazz_newPackage("sun.awt"),I$=[];
 var C$=Clazz_newInterface(P$, "WindowClosingSupport");
 })();
-//Created 2017-12-24 13:33:35
+//Created 2017-12-29 15:02:30
 (function(){var P$=Clazz_newPackage("sun.swing"),I$=[['java.awt.Color']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "SwingLazyValue", null, null, [['javax.swing.UIDefaults','javax.swing.UIDefaults.LazyValue']]);
 var p$=C$.prototype;
@@ -32349,7 +32362,7 @@ types[i] = args[i].getClass();
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:40
+//Created 2017-12-29 19:24:16
 (function(){var P$=Clazz_newPackage("swingjs.api"),I$=[];
 var C$=Clazz_newClass(P$, "Interface");
 C$.instances = null;
@@ -32400,7 +32413,7 @@ return x;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:44
+//Created 2017-12-29 15:02:40
 (function(){var P$=Clazz_newPackage("swingjs.api.js"),I$=[['swingjs.JSUtil']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "DOMNode");
 
@@ -32553,9 +32566,13 @@ node.tabIndex = i;
 }
 }, 1);
 
+Clazz_newMeth(C$, 'setVisible', function (node, visible) {
+C$.setStyles(node, ["display", visible ? "block" : "none"]);
+}, 1);
+
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:44
+//Created 2017-12-29 15:02:41
 (function(){var P$=Clazz_newPackage("swingjs.api.js"),I$=[];
 var C$=Clazz_newClass(P$, "HTML5CanvasContext2D");
 
@@ -32631,11 +32648,11 @@ ctx.fillStyle = s;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:44
+//Created 2017-12-29 15:02:41
 (function(){var P$=Clazz_newPackage("swingjs.api.js"),I$=[];
 var C$=Clazz_newInterface(P$, "JSInterface");
 })();
-//Created 2017-12-24 13:33:44
+//Created 2017-12-29 15:02:41
 (function(){var P$=Clazz_newPackage("swingjs.jquery"),I$=[];
 var C$=Clazz_newClass(P$, "JQueryUI");
 
@@ -32662,7 +32679,7 @@ Clazz_newMeth(C$, 'c$', function () {
 C$.$init$.apply(this);
 }, 1);
 })();
-//Created 2017-12-24 14:22:10
+//Created 2017-12-29 15:02:41
 (function(){var P$=Clazz_newPackage("swingjs"),I$=[['swingjs.JSUtil','java.util.Locale']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSApp");
 var p$=C$.prototype;
@@ -32741,7 +32758,7 @@ return string.split(key)[0];
 return null;
 });
 })();
-//Created 2017-12-24 13:33:42
+//Created 2017-12-29 15:02:37
 (function(){var P$=Clazz_newPackage("swingjs"),I$=[['swingjs.JSUtil']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSApplet", null, 'javax.swing.JApplet');
 
@@ -32774,7 +32791,7 @@ return theClass;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:42
+//Created 2017-12-29 15:02:37
 (function(){var P$=Clazz_newPackage("swingjs"),I$=[['javax.swing.SwingUtilities','swingjs.JSAppletThread$1']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSAppletThread", null, 'javajs.util.JSThread');
 
@@ -32845,7 +32862,7 @@ Clazz_newMeth(C$, 'doFinally', function () {
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:42
+//Created 2017-12-29 15:02:38
 (function(){var P$=Clazz_newPackage("swingjs"),I$=[['java.net.URL','swingjs.api.Interface','java.awt.Dimension','javajs.util.Lst','java.awt.Insets','swingjs.JSThreadGroup','swingjs.JSAppletThread','sun.awt.SunToolkit','java.awt.Toolkit','swingjs.JSGraphicsConfiguration','sun.applet.AppletEventMulticaster','sun.applet.AppletEvent','javax.swing.JFrame','swingjs.JSUtil','java.awt.Font','javajs.util.PT','swingjs.JSFrameViewer','java.util.ArrayList']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSAppletViewer", null, 'swingjs.JSFrameViewer', ['java.applet.AppletStub', 'java.applet.AppletContext']);
 var p$=C$.prototype;
@@ -33240,7 +33257,7 @@ this.allWindows.get$I(i).dispose();
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:42
+//Created 2017-12-29 15:02:38
 (function(){var P$=Clazz_newPackage("swingjs"),I$=[['swingjs.JSToolkit']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSFontMetrics", null, 'java.awt.FontMetrics');
 
@@ -33313,7 +33330,7 @@ this.fwidths[ch] = (I$[1]||$incl$(1)).getStringWidth$swingjs_api_js_HTML5CanvasC
 return this.fwidths;
 });
 })();
-//Created 2017-12-24 13:33:42
+//Created 2017-12-29 15:02:38
 (function(){var P$=Clazz_newPackage("swingjs"),I$=[['java.awt.Insets','swingjs.JSMouse','swingjs.JSGraphics2D','swingjs.api.js.DOMNode','swingjs.plaf.Resizer']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSFrameViewer", null, 'swingjs.JSApp', 'swingjs.api.js.JSInterface');
 var p$=C$.prototype;
@@ -33491,7 +33508,7 @@ Clazz_newMeth(C$, 'paint$java_awt_Graphics', function (g) {
 this.top.paint$java_awt_Graphics(this.setGraphics$java_awt_Graphics$I$I(g, 0, 0));
 });
 })();
-//Created 2017-12-24 13:33:42
+//Created 2017-12-29 15:02:38
 (function(){var P$=Clazz_newPackage("swingjs"),I$=[['java.awt.RenderingHints','java.util.Hashtable','java.awt.geom.AffineTransform','java.awt.BasicStroke','swingjs.api.js.HTML5CanvasContext2D','swingjs.JSToolkit','swingjs.api.js.DOMNode','swingjs.JSUtil','java.awt.Font','java.awt.Toolkit','java.awt.Rectangle','java.awt.Color']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSGraphics2D", null, null, 'Cloneable');
 var p$=C$.prototype;
@@ -34221,7 +34238,7 @@ this.reset$I(this.initialState);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:43
+//Created 2017-12-29 15:47:38
 (function(){var P$=Clazz_newPackage("swingjs"),I$=[['java.awt.GraphicsEnvironment','swingjs.api.Interface','java.awt.image.ColorModel','java.awt.image.WritableRaster','java.lang.Boolean','java.util.Hashtable','swingjs.JSUtil','java.awt.Rectangle']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSGraphicsConfiguration", null, 'java.awt.GraphicsConfiguration');
 
@@ -34275,7 +34292,7 @@ var d = (I$[7]||$incl$(7)).getJQuery().$(doc);
 return Clazz_new_((I$[8]||$incl$(8)).c$$I$I,[d.width(), d.height()]);
 });
 })();
-//Created 2017-12-24 13:33:43
+//Created 2017-12-29 15:47:36
 (function(){var P$=Clazz_newPackage("swingjs"),I$=[['java.awt.Font','java.awt.Toolkit','swingjs.JSUtil','java.awt.Point','java.awt.GraphicsDevice']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSGraphicsEnvironment", null, 'java.awt.GraphicsEnvironment');
 C$.device = null;
@@ -34329,7 +34346,7 @@ Clazz_newMeth(C$, 'getScreenDevices', function () {
 return Clazz_array((I$[5]||$incl$(5)), -1, [this.getDefaultScreenDevice()]);
 });
 })();
-//Created 2017-12-24 13:33:43
+//Created 2017-12-29 15:47:35
 (function(){var P$=Clazz_newPackage("swingjs"),I$=[['swingjs.JSUtil','swingjs.JSToolkit','java.awt.event.MouseWheelEvent','java.awt.event.MouseEvent','java.awt.Toolkit']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSMouse");
 var p$=C$.prototype;
@@ -34549,7 +34566,7 @@ return ret;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:43
+//Created 2017-12-29 15:02:39
 (function(){var P$=Clazz_newPackage("swingjs"),I$=[];
 var C$=Clazz_newClass(P$, "JSNullComponentPeer", null, null, 'java.awt.peer.LightweightPeer');
 
@@ -34721,7 +34738,7 @@ Clazz_newMeth(C$, 'endLayout', function () {
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:43
+//Created 2017-12-29 15:02:39
 (function(){var P$=Clazz_newPackage("swingjs"),I$=[['java.awt.GraphicsConfiguration','swingjs.JSToolkit']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSScreenDevice", null, 'java.awt.GraphicsDevice');
 
@@ -34752,7 +34769,7 @@ Clazz_newMeth(C$, 'getDefaultConfiguration', function () {
 return (I$[2]||$incl$(2)).getGraphicsConfiguration();
 });
 })();
-//Created 2017-12-24 13:33:44
+//Created 2017-12-29 15:02:40
 (function(){var P$=Clazz_newPackage("swingjs"),I$=[];
 var C$=Clazz_newClass(P$, "JSThreadGroup", null, 'ThreadGroup');
 
@@ -34784,7 +34801,7 @@ return this.html5Applet;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:44
+//Created 2017-12-29 15:02:40
 (function(){var P$=Clazz_newPackage("swingjs"),I$=[['sun.awt.AppContext','swingjs.JSUtil','java.awt.image.ColorModel','javax.swing.UIManager','swingjs.api.Interface','Thread','javajs.util.PT','swingjs.JSNullComponentPeer','java.io.BufferedInputStream','java.io.ByteArrayInputStream','swingjs.JSToolkit$1','swingjs.api.js.DOMNode']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSToolkit", null, 'sun.awt.SunToolkit');
 C$.isMac = false;
@@ -35281,7 +35298,7 @@ job.setAttributes$S$java_awt_JobAttributes$java_awt_PageAttributes(jobtitle, job
 return job;
 });
 })();
-//Created 2017-12-24 13:33:44
+//Created 2017-12-29 15:47:37
 (function(){var P$=Clazz_newPackage("swingjs"),I$=[['java.util.Hashtable','javajs.util.AU','javajs.util.Rdr','java.io.BufferedInputStream','swingjs.api.Interface','javajs.util.PT','Thread','java.util.Locale']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSUtil");
 C$.debugging = false;
@@ -35594,7 +35611,7 @@ return prompt(msg, defaultRet);
 }
 }, 1);
 })();
-//Created 2017-12-24 13:33:44
+//Created 2017-12-29 15:02:40
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[[['swingjs.plaf.ButtonListener','.Actions'],'swingjs.plaf.LazyActionMap','javax.swing.SwingUtilities','javax.swing.plaf.ComponentInputMapUIResource','javax.swing.KeyStroke']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "ButtonListener", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -35778,8 +35795,8 @@ Clazz_newMeth(C$);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:46
-(function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[['javax.swing.UIDefaults','java.awt.Color','javax.swing.plaf.ColorUIResource','javax.swing.plaf.FontUIResource','javax.swing.plaf.InsetsUIResource',['javax.swing.plaf.BorderUIResource','.EtchedBorderUIResource'],'sun.swing.SwingLazyValue','javax.swing.BorderFactory',['javax.swing.DefaultListCellRenderer','.UIResource'],'swingjs.plaf.HTML5LookAndFeel$1',['javax.swing.plaf.BorderUIResource','.EmptyBorderUIResource'],'javax.swing.plaf.DimensionUIResource','java.awt.Dimension',['javax.swing.UIDefaults','.LazyInputMap']]],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
+//Created 2017-12-29 15:02:42
+(function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[['javax.swing.UIDefaults','java.awt.Color','javax.swing.plaf.ColorUIResource','javax.swing.plaf.FontUIResource','javax.swing.plaf.InsetsUIResource',['javax.swing.plaf.BorderUIResource','.EtchedBorderUIResource'],'sun.swing.SwingLazyValue','javax.swing.BorderFactory',['javax.swing.DefaultListCellRenderer','.UIResource'],'swingjs.plaf.HTML5LookAndFeel$1','javax.swing.plaf.DimensionUIResource',['javax.swing.plaf.BorderUIResource','.EmptyBorderUIResource'],'java.awt.Dimension',['javax.swing.UIDefaults','.LazyInputMap']]],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "HTML5LookAndFeel", null, 'javax.swing.LookAndFeel');
 var p$=C$.prototype;
 
@@ -35888,16 +35905,19 @@ return Clazz_new_((I$[9]||$incl$(9)));
 });
 })()
 ), Clazz_new_((I$[10]||$incl$(10)).$init$, [this, null]));
+var optionPaneMinimumSize = Clazz_new_((I$[11]||$incl$(11)).c$$I$I,[262, 90]);
 var zero =  new Integer(0);
-var optionPaneBorder = Clazz_new_((I$[11]||$incl$(11)).c$$I$I$I$I,[10, 10, 12, 10]);
-var toolBarSeparatorSize = Clazz_new_((I$[12]||$incl$(12)).c$$I$I,[10, 10]);
+var zeroBorder = Clazz_new_((I$[7]||$incl$(7)).c$$S$OA,["javax.swing.plaf.BorderUIResource$EmptyBorderUIResource", Clazz_array(java.lang.Object, -1, [zero, zero, zero, zero])]);
+var optionPaneBorder = Clazz_new_((I$[12]||$incl$(12)).c$$I$I$I$I,[10, 10, 12, 10]);
+var optionPaneButtonAreaBorder = Clazz_new_((I$[7]||$incl$(7)).c$$S$OA,["javax.swing.plaf.BorderUIResource$EmptyBorderUIResource", Clazz_array(java.lang.Object, -1, [ new Integer(6), zero, zero, zero])]);
+var toolBarSeparatorSize = Clazz_new_((I$[11]||$incl$(11)).c$$I$I,[10, 10]);
 var tabbedPaneTabInsets = Clazz_new_((I$[5]||$incl$(5)).c$$I$I$I$I,[0, 4, 1, 4]);
 var tabbedPaneTabPadInsets = Clazz_new_((I$[5]||$incl$(5)).c$$I$I$I$I,[2, 2, 2, 1]);
 var tabbedPaneTabAreaInsets = Clazz_new_((I$[5]||$incl$(5)).c$$I$I$I$I,[3, 2, 0, 2]);
 var tabbedPaneContentBorderInsets = Clazz_new_((I$[5]||$incl$(5)).c$$I$I$I$I,[2, 2, 3, 3]);
 var editorMargin = threeInsets;
 var four =  new Integer(4);
-var defaults = Clazz_array(java.lang.Object, -1, ["*.font", dialogPlain12, "*.background", control, "*.foreground", controlText, "Button.background", control, "Button.foreground", controlText, "Button.inactiveForeground", disabledTextColor, "Button.border", buttonBorder, "Button.margin", Clazz_new_((I$[5]||$incl$(5)).c$$I$I$I$I,[2, 14, 2, 14]), "Button.textIconGap", four, "ToggleButton.background", control, "ToggleButton.foreground", controlText, "ToggleButton.highlight", controlLtHighlight, "ToggleButton.border", buttonBorder, "ToggleButton.margin", Clazz_new_((I$[5]||$incl$(5)).c$$I$I$I$I,[2, 14, 2, 14]), "ToggleButton.textIconGap", four, "ToggleButton.textShiftOffset", zero, "RadioButton.background", control, "RadioButton.foreground", controlText, "RadioButton.border", buttonBorder, "RadioButton.margin", twoInsets, "RadioButton.textIconGap", four, "RadioButton.textShiftOffset", zero, "CheckBox.background", control, "CheckBox.foreground", controlText, "CheckBox.border", buttonBorder, "CheckBox.margin", twoInsets, "CheckBox.textIconGap", four, "CheckBox.textShiftOffset", zero, "ColorChooser.background", control, "ColorChooser.foreground", controlText, "ColorChooser.swatchesSwatchSize", Clazz_new_((I$[13]||$incl$(13)).c$$I$I,[10, 10]), "ColorChooser.swatchesRecentSwatchSize", Clazz_new_((I$[13]||$incl$(13)).c$$I$I,[10, 10]), "ColorChooser.swatchesDefaultRecentColor", control, "ComboBox.font", sansSerifPlain12, "ComboBox.background", window, "ComboBox.foreground", textText, "ComboBox.selectionBackground", textHighlight, "ComboBox.selectionForeground", textHighlightText, "ComboBox.disabledBackground", control, "ComboBox.disabledForeground", disabledTextColor, "ComboBox.timeFactor", oneThousand, "ComboBox.isEnterSelectablePopup", Boolean.FALSE, "FileChooser.readOnly", Boolean.FALSE, "Label.font", dialogPlain12, "Label.background", control, "Label.foreground", controlText, "Label.border", null, "List.background", window, "List.foreground", textText, "List.selectionBackground", textHighlight, "List.selectionForeground", textHighlightText, "List.cellRenderer", listCellRendererActiveValue, "List.timeFactor", oneThousand, "List.focusInputMap", Clazz_new_((I$[14]||$incl$(14)).c$$OA,[Clazz_array(java.lang.Object, -1, ["ctrl C", "copy", "ctrl V", "paste", "ctrl X", "cut", "COPY", "copy", "PASTE", "paste", "CUT", "cut", "control INSERT", "copy", "shift INSERT", "paste", "shift DELETE", "cut", "UP", "selectPreviousRow", "KP_UP", "selectPreviousRow", "shift UP", "selectPreviousRowExtendSelection", "shift KP_UP", "selectPreviousRowExtendSelection", "ctrl shift UP", "selectPreviousRowExtendSelection", "ctrl shift KP_UP", "selectPreviousRowExtendSelection", "ctrl UP", "selectPreviousRowChangeLead", "ctrl KP_UP", "selectPreviousRowChangeLead", "DOWN", "selectNextRow", "KP_DOWN", "selectNextRow", "shift DOWN", "selectNextRowExtendSelection", "shift KP_DOWN", "selectNextRowExtendSelection", "ctrl shift DOWN", "selectNextRowExtendSelection", "ctrl shift KP_DOWN", "selectNextRowExtendSelection", "ctrl DOWN", "selectNextRowChangeLead", "ctrl KP_DOWN", "selectNextRowChangeLead", "LEFT", "selectPreviousColumn", "KP_LEFT", "selectPreviousColumn", "shift LEFT", "selectPreviousColumnExtendSelection", "shift KP_LEFT", "selectPreviousColumnExtendSelection", "ctrl shift LEFT", "selectPreviousColumnExtendSelection", "ctrl shift KP_LEFT", "selectPreviousColumnExtendSelection", "ctrl LEFT", "selectPreviousColumnChangeLead", "ctrl KP_LEFT", "selectPreviousColumnChangeLead", "RIGHT", "selectNextColumn", "KP_RIGHT", "selectNextColumn", "shift RIGHT", "selectNextColumnExtendSelection", "shift KP_RIGHT", "selectNextColumnExtendSelection", "ctrl shift RIGHT", "selectNextColumnExtendSelection", "ctrl shift KP_RIGHT", "selectNextColumnExtendSelection", "ctrl RIGHT", "selectNextColumnChangeLead", "ctrl KP_RIGHT", "selectNextColumnChangeLead", "HOME", "selectFirstRow", "shift HOME", "selectFirstRowExtendSelection", "ctrl shift HOME", "selectFirstRowExtendSelection", "ctrl HOME", "selectFirstRowChangeLead", "END", "selectLastRow", "shift END", "selectLastRowExtendSelection", "ctrl shift END", "selectLastRowExtendSelection", "ctrl END", "selectLastRowChangeLead", "PAGE_UP", "scrollUp", "shift PAGE_UP", "scrollUpExtendSelection", "ctrl shift PAGE_UP", "scrollUpExtendSelection", "ctrl PAGE_UP", "scrollUpChangeLead", "PAGE_DOWN", "scrollDown", "shift PAGE_DOWN", "scrollDownExtendSelection", "ctrl shift PAGE_DOWN", "scrollDownExtendSelection", "ctrl PAGE_DOWN", "scrollDownChangeLead", "ctrl A", "selectAll", "ctrl SLASH", "selectAll", "ctrl BACK_SLASH", "clearSelection", "SPACE", "addToSelection", "ctrl SPACE", "toggleAndAnchor", "shift SPACE", "extendTo", "ctrl shift SPACE", "moveSelectionTo"])]), "List.focusInputMap.RightToLeft", Clazz_new_((I$[14]||$incl$(14)).c$$OA,[Clazz_array(java.lang.Object, -1, ["LEFT", "selectNextColumn", "KP_LEFT", "selectNextColumn", "shift LEFT", "selectNextColumnExtendSelection", "shift KP_LEFT", "selectNextColumnExtendSelection", "ctrl shift LEFT", "selectNextColumnExtendSelection", "ctrl shift KP_LEFT", "selectNextColumnExtendSelection", "ctrl LEFT", "selectNextColumnChangeLead", "ctrl KP_LEFT", "selectNextColumnChangeLead", "RIGHT", "selectPreviousColumn", "KP_RIGHT", "selectPreviousColumn", "shift RIGHT", "selectPreviousColumnExtendSelection", "shift KP_RIGHT", "selectPreviousColumnExtendSelection", "ctrl shift RIGHT", "selectPreviousColumnExtendSelection", "ctrl shift KP_RIGHT", "selectPreviousColumnExtendSelection", "ctrl RIGHT", "selectPreviousColumnChangeLead", "ctrl KP_RIGHT", "selectPreviousColumnChangeLead"])]), "MenuBar.font", dialogPlain12, "MenuBar.background", menu, "MenuBar.foreground", menuText, "MenuItem.font", dialogPlain12, "MenuItem.background", menu, "MenuItem.foreground", menuText, "MenuItem.margin", twoInsets, "RadioButtonMenuItem.font", dialogPlain12, "RadioButtonMenuItem.background", menu, "RadioButtonMenuItem.foreground", menuText, "RadioButtonMenuItem.margin", twoInsets, "CheckBoxMenuItem.font", dialogPlain12, "CheckBoxMenuItem.background", menu, "CheckBoxMenuItem.foreground", menuText, "CheckBoxMenuItem.margin", twoInsets, "Menu.background", menu, "Menu.foreground", menuText, "Menu.margin", twoInsets, "PopupMenu.background", menu, "PopupMenu.foreground", menuText, "PopupMenu.consumeEventOnClose", Boolean.FALSE, "OptionPane.background", control, "OptionPane.foreground", controlText, "OptionPane.messageForeground", controlText, "Panel.font", dialogPlain12, "Panel.background", control, "Panel.foreground", textText, "ProgressBar.cellLength",  new Integer(1), "ProgressBar.cellSpacing", zero, "ProgressBar.repaintInterval",  new Integer(50), "ProgressBar.cycleTime",  new Integer(3000), "ProgressBar.horizontalSize", Clazz_new_((I$[12]||$incl$(12)).c$$I$I,[146, 12]), "ProgressBar.verticalSize", Clazz_new_((I$[12]||$incl$(12)).c$$I$I,[12, 146]), "ScrollBar.background", scrollBarTrack, "ScrollBar.foreground", control, "ScrollBar.width",  new Integer(16), "ScrollPane.background", control, "ScrollPane.foreground", controlText, "Viewport.background", control, "Viewport.foreground", textText, "Slider.foreground", control, "Slider.background", control, "Slider.horizontalSize", Clazz_new_((I$[13]||$incl$(13)).c$$I$I,[200, 21]), "Slider.verticalSize", Clazz_new_((I$[13]||$incl$(13)).c$$I$I,[21, 200]), "Slider.minimumHorizontalSize", Clazz_new_((I$[13]||$incl$(13)).c$$I$I,[36, 21]), "Slider.minimumVerticalSize", Clazz_new_((I$[13]||$incl$(13)).c$$I$I,[21, 36]), "Spinner.font", sansSerifPlain12, "Spinner.background", control, "Spinner.foreground", control, "Spinner.arrowButtonSize", Clazz_new_((I$[13]||$incl$(13)).c$$I$I,[16, 5]), "SplitPane.background", control, "SplitPane.dividerSize",  new Integer(7), "SplitPaneDivider.draggingColor", darkGray, "TabbedPane.background", control, "TabbedPane.foreground", controlText, "TabbedPane.selected", null, "TabbedPane.textIconGap", four, "TabbedPane.tabsOverlapBorder", Boolean.FALSE, "TabbedPane.labelShift", new Integer(1), "TabbedPane.selectedLabelShift", new Integer(-1), "TabbedPane.tabInsets", tabbedPaneTabInsets, "TabbedPane.selectedTabPadInsets", tabbedPaneTabPadInsets, "TabbedPane.tabAreaInsets", tabbedPaneTabAreaInsets, "TabbedPane.contentBorderInsets", tabbedPaneContentBorderInsets, "TabbedPane.tabRunOverlay",  new Integer(2), "Table.font", dialogPlain12, "Table.foreground", controlText, "Table.background", window, "Table.selectionForeground", textHighlightText, "Table.selectionBackground", textHighlight, "Table.dropLineColor", controlShadow, "Table.dropLineShortColor", black, "Table.gridColor", gray, "Table.focusCellBackground", window, "Table.focusCellForeground", controlText, "Table.scrollPaneBorder", loweredBevelBorder, "Table.sortIconColor", controlShadow, "TableHeader.font", dialogPlain12, "TableHeader.foreground", controlText, "TableHeader.background", control, "TextField.font", sansSerifPlain12, "TextField.background", window, "TextField.foreground", textText, "TextField.inactiveForeground", disabledTextColor, "TextField.inactiveBackground", control, "TextField.margin", zeroInsets, "FormattedTextField.font", sansSerifPlain12, "FormattedTextField.background", window, "FormattedTextField.foreground", textText, "FormattedTextField.inactiveForeground", disabledTextColor, "FormattedTextField.inactiveBackground", control, "FormattedTextField.caretForeground", textText, "FormattedTextField.margin", zeroInsets, "PasswordField.font", monospacedPlain12, "PasswordField.background", window, "PasswordField.foreground", textText, "PasswordField.inactiveForeground", disabledTextColor, "PasswordField.inactiveBackground", control, "PasswordField.margin", zeroInsets, "PasswordField.echoChar", new Character('*'), "TextArea.font", sansSerifPlain12, "TextArea.background", window, "TextArea.foreground", textText, "TextArea.inactiveForeground", disabledTextColor, "TextArea.margin", zeroInsets, "TextPane.font", serifPlain12, "TextPane.background", white, "TextPane.foreground", textText, "TextPane.inactiveForeground", disabledTextColor, "TextPane.margin", editorMargin, "EditorPane.font", serifPlain12, "EditorPane.background", white, "EditorPane.foreground", textText, "EditorPane.inactiveForeground", disabledTextColor, "EditorPane.margin", editorMargin, "TitledBorder.titleColor", controlText, "TitledBorder.border", etchedBorder, "ToolBar.font", dialogPlain12, "ToolBar.background", control, "ToolBar.foreground", controlText, "ToolBar.shadow", controlShadow, "ToolBar.darkShadow", controlDkShadow, "ToolBar.light", controlHighlight, "ToolBar.highlight", controlLtHighlight, "ToolBar.dockingBackground", control, "ToolBar.dockingForeground", red, "ToolBar.floatingBackground", control, "ToolBar.floatingForeground", darkGray, "ToolBar.border", etchedBorder, "ToolBar.separatorSize", toolBarSeparatorSize, "Tree.paintLines", Boolean.TRUE, "Tree.lineTypeDashed", Boolean.FALSE, "Tree.background", window, "Tree.foreground", textText, "Tree.hash", gray, "Tree.textForeground", textText, "Tree.textBackground", table.get$O("text"), "Tree.selectionForeground", textHighlightText, "Tree.selectionBackground", textHighlight, "Tree.leftChildIndent",  new Integer(7), "Tree.rightChildIndent",  new Integer(13), "Tree.rowHeight",  new Integer(16), "Tree.scrollsOnExpand", Boolean.TRUE, "Tree.timeFactor", oneThousand]);
+var defaults = Clazz_array(java.lang.Object, -1, ["*.font", dialogPlain12, "*.background", control, "*.foreground", controlText, "Button.background", control, "Button.foreground", controlText, "Button.inactiveForeground", disabledTextColor, "Button.border", buttonBorder, "Button.margin", Clazz_new_((I$[5]||$incl$(5)).c$$I$I$I$I,[2, 14, 2, 14]), "Button.textIconGap", four, "ToggleButton.background", control, "ToggleButton.foreground", controlText, "ToggleButton.highlight", controlLtHighlight, "ToggleButton.border", buttonBorder, "ToggleButton.margin", Clazz_new_((I$[5]||$incl$(5)).c$$I$I$I$I,[2, 14, 2, 14]), "ToggleButton.textIconGap", four, "ToggleButton.textShiftOffset", zero, "RadioButton.background", control, "RadioButton.foreground", controlText, "RadioButton.border", buttonBorder, "RadioButton.margin", twoInsets, "RadioButton.textIconGap", four, "RadioButton.textShiftOffset", zero, "CheckBox.background", control, "CheckBox.foreground", controlText, "CheckBox.border", buttonBorder, "CheckBox.margin", twoInsets, "CheckBox.textIconGap", four, "CheckBox.textShiftOffset", zero, "ColorChooser.background", control, "ColorChooser.foreground", controlText, "ColorChooser.swatchesSwatchSize", Clazz_new_((I$[13]||$incl$(13)).c$$I$I,[10, 10]), "ColorChooser.swatchesRecentSwatchSize", Clazz_new_((I$[13]||$incl$(13)).c$$I$I,[10, 10]), "ColorChooser.swatchesDefaultRecentColor", control, "ComboBox.font", sansSerifPlain12, "ComboBox.background", window, "ComboBox.foreground", textText, "ComboBox.selectionBackground", textHighlight, "ComboBox.selectionForeground", textHighlightText, "ComboBox.disabledBackground", control, "ComboBox.disabledForeground", disabledTextColor, "ComboBox.timeFactor", oneThousand, "ComboBox.isEnterSelectablePopup", Boolean.FALSE, "FileChooser.readOnly", Boolean.FALSE, "Label.font", dialogPlain12, "Label.background", control, "Label.foreground", controlText, "Label.border", null, "List.background", window, "List.foreground", textText, "List.selectionBackground", textHighlight, "List.selectionForeground", textHighlightText, "List.cellRenderer", listCellRendererActiveValue, "List.timeFactor", oneThousand, "List.focusInputMap", Clazz_new_((I$[14]||$incl$(14)).c$$OA,[Clazz_array(java.lang.Object, -1, ["ctrl C", "copy", "ctrl V", "paste", "ctrl X", "cut", "COPY", "copy", "PASTE", "paste", "CUT", "cut", "control INSERT", "copy", "shift INSERT", "paste", "shift DELETE", "cut", "UP", "selectPreviousRow", "KP_UP", "selectPreviousRow", "shift UP", "selectPreviousRowExtendSelection", "shift KP_UP", "selectPreviousRowExtendSelection", "ctrl shift UP", "selectPreviousRowExtendSelection", "ctrl shift KP_UP", "selectPreviousRowExtendSelection", "ctrl UP", "selectPreviousRowChangeLead", "ctrl KP_UP", "selectPreviousRowChangeLead", "DOWN", "selectNextRow", "KP_DOWN", "selectNextRow", "shift DOWN", "selectNextRowExtendSelection", "shift KP_DOWN", "selectNextRowExtendSelection", "ctrl shift DOWN", "selectNextRowExtendSelection", "ctrl shift KP_DOWN", "selectNextRowExtendSelection", "ctrl DOWN", "selectNextRowChangeLead", "ctrl KP_DOWN", "selectNextRowChangeLead", "LEFT", "selectPreviousColumn", "KP_LEFT", "selectPreviousColumn", "shift LEFT", "selectPreviousColumnExtendSelection", "shift KP_LEFT", "selectPreviousColumnExtendSelection", "ctrl shift LEFT", "selectPreviousColumnExtendSelection", "ctrl shift KP_LEFT", "selectPreviousColumnExtendSelection", "ctrl LEFT", "selectPreviousColumnChangeLead", "ctrl KP_LEFT", "selectPreviousColumnChangeLead", "RIGHT", "selectNextColumn", "KP_RIGHT", "selectNextColumn", "shift RIGHT", "selectNextColumnExtendSelection", "shift KP_RIGHT", "selectNextColumnExtendSelection", "ctrl shift RIGHT", "selectNextColumnExtendSelection", "ctrl shift KP_RIGHT", "selectNextColumnExtendSelection", "ctrl RIGHT", "selectNextColumnChangeLead", "ctrl KP_RIGHT", "selectNextColumnChangeLead", "HOME", "selectFirstRow", "shift HOME", "selectFirstRowExtendSelection", "ctrl shift HOME", "selectFirstRowExtendSelection", "ctrl HOME", "selectFirstRowChangeLead", "END", "selectLastRow", "shift END", "selectLastRowExtendSelection", "ctrl shift END", "selectLastRowExtendSelection", "ctrl END", "selectLastRowChangeLead", "PAGE_UP", "scrollUp", "shift PAGE_UP", "scrollUpExtendSelection", "ctrl shift PAGE_UP", "scrollUpExtendSelection", "ctrl PAGE_UP", "scrollUpChangeLead", "PAGE_DOWN", "scrollDown", "shift PAGE_DOWN", "scrollDownExtendSelection", "ctrl shift PAGE_DOWN", "scrollDownExtendSelection", "ctrl PAGE_DOWN", "scrollDownChangeLead", "ctrl A", "selectAll", "ctrl SLASH", "selectAll", "ctrl BACK_SLASH", "clearSelection", "SPACE", "addToSelection", "ctrl SPACE", "toggleAndAnchor", "shift SPACE", "extendTo", "ctrl shift SPACE", "moveSelectionTo"])]), "List.focusInputMap.RightToLeft", Clazz_new_((I$[14]||$incl$(14)).c$$OA,[Clazz_array(java.lang.Object, -1, ["LEFT", "selectNextColumn", "KP_LEFT", "selectNextColumn", "shift LEFT", "selectNextColumnExtendSelection", "shift KP_LEFT", "selectNextColumnExtendSelection", "ctrl shift LEFT", "selectNextColumnExtendSelection", "ctrl shift KP_LEFT", "selectNextColumnExtendSelection", "ctrl LEFT", "selectNextColumnChangeLead", "ctrl KP_LEFT", "selectNextColumnChangeLead", "RIGHT", "selectPreviousColumn", "KP_RIGHT", "selectPreviousColumn", "shift RIGHT", "selectPreviousColumnExtendSelection", "shift KP_RIGHT", "selectPreviousColumnExtendSelection", "ctrl shift RIGHT", "selectPreviousColumnExtendSelection", "ctrl shift KP_RIGHT", "selectPreviousColumnExtendSelection", "ctrl RIGHT", "selectPreviousColumnChangeLead", "ctrl KP_RIGHT", "selectPreviousColumnChangeLead"])]), "MenuBar.font", dialogPlain12, "MenuBar.background", menu, "MenuBar.foreground", menuText, "MenuItem.font", dialogPlain12, "MenuItem.background", menu, "MenuItem.foreground", menuText, "MenuItem.margin", twoInsets, "RadioButtonMenuItem.font", dialogPlain12, "RadioButtonMenuItem.background", menu, "RadioButtonMenuItem.foreground", menuText, "RadioButtonMenuItem.margin", twoInsets, "CheckBoxMenuItem.font", dialogPlain12, "CheckBoxMenuItem.background", menu, "CheckBoxMenuItem.foreground", menuText, "CheckBoxMenuItem.margin", twoInsets, "Menu.background", menu, "Menu.foreground", menuText, "Menu.margin", twoInsets, "PopupMenu.background", menu, "PopupMenu.foreground", menuText, "PopupMenu.consumeEventOnClose", Boolean.FALSE, "OptionPane.yesButtonText", "Yes", "OptionPane.noButtonText", "No", "OptionPane.cancelButtonText", "Cancel", "OptionPane.okButtonText", "OK", "OptionPane.font", dialogPlain12, "OptionPane.background", control, "OptionPane.foreground", controlText, "OptionPane.messageForeground", controlText, "OptionPane.border", optionPaneBorder, "OptionPane.messageAreaBorder", zeroBorder, "OptionPane.buttonAreaBorder", optionPaneButtonAreaBorder, "OptionPane.minimumSize", optionPaneMinimumSize, "Panel.font", dialogPlain12, "Panel.background", control, "Panel.foreground", textText, "ProgressBar.cellLength",  new Integer(1), "ProgressBar.cellSpacing", zero, "ProgressBar.repaintInterval",  new Integer(50), "ProgressBar.cycleTime",  new Integer(3000), "ProgressBar.horizontalSize", Clazz_new_((I$[11]||$incl$(11)).c$$I$I,[146, 12]), "ProgressBar.verticalSize", Clazz_new_((I$[11]||$incl$(11)).c$$I$I,[12, 146]), "ScrollBar.background", scrollBarTrack, "ScrollBar.foreground", control, "ScrollBar.width",  new Integer(16), "ScrollPane.background", control, "ScrollPane.foreground", controlText, "Viewport.background", control, "Viewport.foreground", textText, "Slider.foreground", control, "Slider.background", control, "Slider.horizontalSize", Clazz_new_((I$[13]||$incl$(13)).c$$I$I,[200, 21]), "Slider.verticalSize", Clazz_new_((I$[13]||$incl$(13)).c$$I$I,[21, 200]), "Slider.minimumHorizontalSize", Clazz_new_((I$[13]||$incl$(13)).c$$I$I,[36, 21]), "Slider.minimumVerticalSize", Clazz_new_((I$[13]||$incl$(13)).c$$I$I,[21, 36]), "Spinner.font", sansSerifPlain12, "Spinner.background", control, "Spinner.foreground", control, "Spinner.arrowButtonSize", Clazz_new_((I$[13]||$incl$(13)).c$$I$I,[16, 5]), "SplitPane.background", control, "SplitPane.dividerSize",  new Integer(7), "SplitPaneDivider.draggingColor", darkGray, "TabbedPane.background", control, "TabbedPane.foreground", controlText, "TabbedPane.selected", null, "TabbedPane.textIconGap", four, "TabbedPane.tabsOverlapBorder", Boolean.FALSE, "TabbedPane.labelShift", new Integer(1), "TabbedPane.selectedLabelShift", new Integer(-1), "TabbedPane.tabInsets", tabbedPaneTabInsets, "TabbedPane.selectedTabPadInsets", tabbedPaneTabPadInsets, "TabbedPane.tabAreaInsets", tabbedPaneTabAreaInsets, "TabbedPane.contentBorderInsets", tabbedPaneContentBorderInsets, "TabbedPane.tabRunOverlay",  new Integer(2), "Table.font", dialogPlain12, "Table.foreground", controlText, "Table.background", window, "Table.selectionForeground", textHighlightText, "Table.selectionBackground", textHighlight, "Table.dropLineColor", controlShadow, "Table.dropLineShortColor", black, "Table.gridColor", gray, "Table.focusCellBackground", window, "Table.focusCellForeground", controlText, "Table.scrollPaneBorder", loweredBevelBorder, "Table.sortIconColor", controlShadow, "TableHeader.font", dialogPlain12, "TableHeader.foreground", controlText, "TableHeader.background", control, "TextField.font", sansSerifPlain12, "TextField.background", window, "TextField.foreground", textText, "TextField.inactiveForeground", disabledTextColor, "TextField.inactiveBackground", control, "TextField.margin", zeroInsets, "FormattedTextField.font", sansSerifPlain12, "FormattedTextField.background", window, "FormattedTextField.foreground", textText, "FormattedTextField.inactiveForeground", disabledTextColor, "FormattedTextField.inactiveBackground", control, "FormattedTextField.caretForeground", textText, "FormattedTextField.margin", zeroInsets, "PasswordField.font", monospacedPlain12, "PasswordField.background", window, "PasswordField.foreground", textText, "PasswordField.inactiveForeground", disabledTextColor, "PasswordField.inactiveBackground", control, "PasswordField.margin", zeroInsets, "PasswordField.echoChar", new Character('*'), "TextArea.font", sansSerifPlain12, "TextArea.background", window, "TextArea.foreground", textText, "TextArea.inactiveForeground", disabledTextColor, "TextArea.margin", zeroInsets, "TextPane.font", serifPlain12, "TextPane.background", white, "TextPane.foreground", textText, "TextPane.inactiveForeground", disabledTextColor, "TextPane.margin", editorMargin, "EditorPane.font", serifPlain12, "EditorPane.background", white, "EditorPane.foreground", textText, "EditorPane.inactiveForeground", disabledTextColor, "EditorPane.margin", editorMargin, "TitledBorder.titleColor", controlText, "TitledBorder.border", etchedBorder, "ToolBar.font", dialogPlain12, "ToolBar.background", control, "ToolBar.foreground", controlText, "ToolBar.shadow", controlShadow, "ToolBar.darkShadow", controlDkShadow, "ToolBar.light", controlHighlight, "ToolBar.highlight", controlLtHighlight, "ToolBar.dockingBackground", control, "ToolBar.dockingForeground", red, "ToolBar.floatingBackground", control, "ToolBar.floatingForeground", darkGray, "ToolBar.border", etchedBorder, "ToolBar.separatorSize", toolBarSeparatorSize, "Tree.paintLines", Boolean.TRUE, "Tree.lineTypeDashed", Boolean.FALSE, "Tree.background", window, "Tree.foreground", textText, "Tree.hash", gray, "Tree.textForeground", textText, "Tree.textBackground", table.get$O("text"), "Tree.selectionForeground", textHighlightText, "Tree.selectionBackground", textHighlight, "Tree.leftChildIndent",  new Integer(7), "Tree.rightChildIndent",  new Integer(13), "Tree.rowHeight",  new Integer(16), "Tree.scrollsOnExpand", Boolean.TRUE, "Tree.timeFactor", oneThousand]);
 table.putDefaults$OA(defaults);
 });
 
@@ -35921,7 +35941,7 @@ Clazz_newMeth(C$, 'isSupportedLookAndFeel', function () {
 return true;
 });
 })();
-//Created 2017-12-24 13:33:46
+//Created 2017-12-29 15:02:43
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[['swingjs.api.js.DOMNode','javax.swing.BorderFactory','swingjs.plaf.JSComponentUI','swingjs.plaf.ButtonListener','javax.swing.UIManager','javax.swing.LookAndFeel','java.awt.Dimension']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSButtonUI", null, 'swingjs.plaf.JSLightweightUI');
 
@@ -36004,14 +36024,14 @@ return true;
 }return false;
 });
 
-Clazz_newMeth(C$, 'installUIImpl', function () {
-this.button = this.c;
+Clazz_newMeth(C$, 'installUI$javax_swing_JComponent', function (jc) {
+this.button = jc;
 this.installDefaults$javax_swing_AbstractButton(this.button);
 this.installListeners$javax_swing_AbstractButton(this.button);
 this.installKeyboardActions$javax_swing_AbstractButton(this.button);
 });
 
-Clazz_newMeth(C$, 'uninstallUIImpl', function () {
+Clazz_newMeth(C$, 'uninstallUI$javax_swing_JComponent', function (jc) {
 this.uninstallKeyboardActions$javax_swing_AbstractButton(this.button);
 this.uninstallListeners$javax_swing_AbstractButton(this.button);
 });
@@ -36082,7 +36102,7 @@ if (this.isSimpleButton && (this.imageNode == null  || this.button.getText() == 
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:46
+//Created 2017-12-29 15:02:43
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[['java.awt.Color','swingjs.JSUtil','swingjs.api.js.DOMNode','swingjs.JSToolkit','javajs.util.PT','java.awt.Dimension',['java.awt.Component','.BaselineResizeBehavior'],'javax.swing.UIManager','java.awt.Point','java.awt.Toolkit','java.awt.event.FocusEvent']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSComponentUI", null, 'javax.swing.plaf.ComponentUI', ['java.awt.peer.ContainerPeer', 'swingjs.plaf.JSEventHandler', 'java.beans.PropertyChangeListener', 'javax.swing.event.ChangeListener']);
 C$.rootPaneColor = null;
@@ -36196,29 +36216,22 @@ this.document = document; this.body = document.body;
 C$.debugging = (I$[2]||$incl$(2)).debugging;
 });
 
-Clazz_newMeth(C$, 'installUI$java_awt_Component', function (c) {
+Clazz_newMeth(C$, 'installJS', function () {
 {
-c.addChangeListener$javax_swing_event_ChangeListener && c.addChangeListener$javax_swing_event_ChangeListener(this);
+this.c.addChangeListener$javax_swing_event_ChangeListener && this.c.addChangeListener$javax_swing_event_ChangeListener(this);
 }
-c.addPropertyChangeListener$java_beans_PropertyChangeListener(this);
+this.c.addPropertyChangeListener$java_beans_PropertyChangeListener(this);
 });
 
-Clazz_newMeth(C$, 'uninstallUI$java_awt_Component', function (c) {
-this.uninstallUIImpl();
+Clazz_newMeth(C$, 'uninstallJS', function () {
 {
-c && c.removeChangeListener$javax_swing_event_ChangeListener && c.removeChangeListener$javax_swing_event_ChangeListener(this);
-c && c.removePropertyChangeListener$java_beans_PropertyChangeListener(this);
+this.c && this.c.removeChangeListener$javax_swing_event_ChangeListener && this.c.removeChangeListener$javax_swing_event_ChangeListener(this);
+this.c && this.c.removePropertyChangeListener$java_beans_PropertyChangeListener(this);
 }
 if (this.outerNode != null ) {
 (I$[3]||$incl$(3)).remove(this.outerNode);
 this.outerNode = null;
 }});
-
-Clazz_newMeth(C$, 'installUIImpl', function () {
-});
-
-Clazz_newMeth(C$, 'uninstallUIImpl', function () {
-});
 
 Clazz_newMeth(C$, '$$swingjs_api_js_DOMNode', function (node) {
 return (I$[2]||$incl$(2)).getJQuery().$(node);
@@ -36229,7 +36242,8 @@ this.c = target;
 this.jc = this.c;
 this.applet = (I$[4]||$incl$(4)).getHTML5Applet$java_awt_Component(this.c);
 this.newID();
-this.installUIImpl();
+this.installUI$javax_swing_JComponent(target);
+this.installJS();
 if (this.needPreferred) p$.getHTMLSize.apply(this, []);
 return this;
 });
@@ -36392,7 +36406,7 @@ obj = this.textNode;
 } else if (this.valueNode != null ) {
 prop = "value";
 obj = this.valueNode;
-if (this.iconNode != null ) (I$[3]||$incl$(3)).setStyles(obj, ["display", (text == null  ? "none" : "block")]);
+if (this.iconNode != null ) (I$[3]||$incl$(3)).setVisible(obj, text != null );
 }if (obj != null ) this.setProp$swingjs_api_js_DOMNode$S$S(obj, prop, text);
 if (this.centeringNode == null ) {
 p$.setBackgroundFor$swingjs_api_js_DOMNode$java_awt_Color.apply(this, [this.valueNode, this.c.getBackground()]);
@@ -36702,7 +36716,7 @@ return false;
 Clazz_newMeth(C$, 'setVisible$Z', function (b) {
 var node = this.getOuterNode();
 if (node == null ) node = this.domNode;
-(I$[3]||$incl$(3)).setStyles(node, ["display", b ? "block" : "none"]);
+(I$[3]||$incl$(3)).setVisible(node, b);
 if (b) {
 if (this.isDisposed) p$.undisposeUI$swingjs_api_js_DOMNode.apply(this, [node]);
 this.toFront();
@@ -36846,6 +36860,7 @@ var top = 0;
 var h = this.actualHeight;
 if (h == 0) {
 if (isText) {
+if (this.c.getFont() == null ) return;
 h = this.setHTMLSize1$swingjs_api_js_DOMNode$Z$Z(this.domNode, false, false).height;
 h = h-((this.c.getFont().getFontMetrics().getDescent()));
 } else {
@@ -37144,11 +37159,11 @@ Clazz_newMeth(C$, 'setPadding$java_awt_Insets', function (padding) {
 (I$[3]||$incl$(3)).setStyles(this.domNode, ["padding", padding == null  ? "0px" : padding.top + "px " + padding.left + "px " + padding.bottom + "px " + padding.right + "px" ]);
 });
 })();
-//Created 2017-12-24 13:33:47
+//Created 2017-12-29 15:02:44
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[];
 var C$=Clazz_newInterface(P$, "JSEventHandler");
 })();
-//Created 2017-12-24 13:33:47
+//Created 2017-12-29 15:02:44
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[['swingjs.api.js.DOMNode','javax.swing.LookAndFeel']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSLabelUI", null, 'swingjs.plaf.JSLightweightUI');
 
@@ -37191,15 +37206,15 @@ this.setHTMLElementCUI();
 return this.outerNode;
 });
 
-Clazz_newMeth(C$, 'installUIImpl', function () {
-this.label = this.c;
-(I$[2]||$incl$(2)).installColorsAndFont$javax_swing_JComponent$S$S$S(this.jc, "Label.background", "Label.foreground", "Label.font");
+Clazz_newMeth(C$, 'installUI$javax_swing_JComponent', function (jc) {
+this.label = jc;
+(I$[2]||$incl$(2)).installColorsAndFont$javax_swing_JComponent$S$S$S(jc, "Label.background", "Label.foreground", "Label.font");
 });
 
-Clazz_newMeth(C$, 'uninstallUIImpl', function () {
+Clazz_newMeth(C$, 'uninstallUI$javax_swing_JComponent', function (jc) {
 });
 })();
-//Created 2017-12-24 13:33:47
+//Created 2017-12-29 15:02:45
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[];
 var C$=Clazz_newClass(P$, "JSLayeredPaneUI", null, 'swingjs.plaf.JSLightweightUI');
 
@@ -37220,13 +37235,13 @@ this.domNode = this.newDOMObject$S$S$SA("div", this.id, []);
 }return this.domNode;
 });
 
-Clazz_newMeth(C$, 'installUIImpl', function () {
+Clazz_newMeth(C$, 'installUI$javax_swing_JComponent', function (jc) {
 });
 
-Clazz_newMeth(C$, 'uninstallUIImpl', function () {
+Clazz_newMeth(C$, 'uninstallUI$javax_swing_JComponent', function (jc) {
 });
 })();
-//Created 2017-12-24 13:33:47
+//Created 2017-12-29 15:02:45
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[];
 var C$=Clazz_newClass(P$, "JSLightweightUI", null, 'swingjs.plaf.JSComponentUI', 'java.awt.peer.LightweightPeer');
 
@@ -37238,7 +37253,7 @@ Clazz_newMeth(C$, '$init$', function () {
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:48
+//Created 2017-12-29 15:02:45
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[['swingjs.api.js.DOMNode','java.awt.Dimension','javax.swing.LookAndFeel']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSPanelUI", null, 'swingjs.plaf.JSLightweightUI');
 
@@ -37265,7 +37280,7 @@ if (this.domNode == null ) {
 var root = this.jc.getRootPane();
 this.isContentPane = (root != null  && this.jc === root.getContentPane()  );
 this.domNode = this.newDOMObject$S$S$SA("div", this.id, []);
-if (root != null  && root.getGlassPane() === this.c  ) (I$[1]||$incl$(1)).setStyles(this.domNode, ["display", "none"]);
+if (root != null  && root.getGlassPane() === this.c  ) (I$[1]||$incl$(1)).setVisible(this.domNode, false);
 }return this.domNode;
 });
 
@@ -37273,18 +37288,18 @@ Clazz_newMeth(C$, 'setHTMLSize$swingjs_api_js_DOMNode$Z', function (obj, addCSS)
 return Clazz_new_((I$[2]||$incl$(2)).c$$I$I,[this.c.getWidth(), this.c.getHeight()]);
 });
 
-Clazz_newMeth(C$, 'installUIImpl', function () {
-(I$[3]||$incl$(3)).installColorsAndFont$javax_swing_JComponent$S$S$S(this.jc, "Panel.background", "Panel.foreground", "Panel.font");
+Clazz_newMeth(C$, 'installUI$javax_swing_JComponent', function (jc) {
+(I$[3]||$incl$(3)).installColorsAndFont$javax_swing_JComponent$S$S$S(jc, "Panel.background", "Panel.foreground", "Panel.font");
 });
 
-Clazz_newMeth(C$, 'uninstallUIImpl', function () {
+Clazz_newMeth(C$, 'uninstallUI$javax_swing_JComponent', function (jc) {
 });
 
 Clazz_newMeth(C$, 'getPreferredSize', function () {
 return null;
 });
 })();
-//Created 2017-12-24 13:33:48
+//Created 2017-12-29 15:02:46
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[];
 var C$=Clazz_newClass(P$, "JSRootPaneUI", null, 'swingjs.plaf.JSLightweightUI');
 
@@ -37315,10 +37330,10 @@ this.domNode = this.newDOMObject$S$S$SA("div", this.id, []);
 }return this.domNode;
 });
 
-Clazz_newMeth(C$, 'installUIImpl', function () {
+Clazz_newMeth(C$, 'installUI$javax_swing_JComponent', function (jc) {
 });
 
-Clazz_newMeth(C$, 'uninstallUIImpl', function () {
+Clazz_newMeth(C$, 'uninstallUI$javax_swing_JComponent', function (jc) {
 });
 
 Clazz_newMeth(C$, 'getPreferredSize', function () {
@@ -37330,7 +37345,7 @@ var resizer = this.jc.getFrameViewer().getResizer();
 if (resizer != null ) resizer.setPosition$I$I(0, 0);
 });
 })();
-//Created 2017-12-24 13:33:49
+//Created 2017-12-29 15:02:47
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[['swingjs.plaf.JSComponentUI','java.awt.Dimension','swingjs.api.js.DOMNode']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSScrollBarUI", null, 'swingjs.plaf.JSSliderUI');
 
@@ -37370,11 +37385,11 @@ return Clazz_new_((I$[2]||$incl$(2)).c$$I$I,[wh, wh]);
 Clazz_newMeth(C$, 'setVisible$Z', function (b) {
 this.isInvisible = (this.myScrollPaneUI != null  && this.myScrollPaneUI.scrollBarUIDisabled );
 b = (b&&!this.isInvisible);
-(I$[3]||$incl$(3)).setStyles(this.getOuterNode(), ["display", b ? "block" : "none"]);
-(I$[3]||$incl$(3)).setStyles(this.jqSlider, ["display", b ? "block" : "none"]);
+(I$[3]||$incl$(3)).setVisible(this.getOuterNode(), b);
+(I$[3]||$incl$(3)).setVisible(this.jqSlider, b);
 });
 })();
-//Created 2017-12-24 13:33:49
+//Created 2017-12-29 15:02:47
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[['swingjs.jquery.JQueryUI','swingjs.JSUtil','swingjs.api.js.DOMNode','java.awt.Dimension','sun.swing.DefaultLookup']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSSliderUI", null, 'swingjs.plaf.JSLightweightUI', ['java.beans.PropertyChangeListener', 'javax.swing.event.ChangeListener']);
 var p$=C$.prototype;
@@ -37429,7 +37444,7 @@ this.setDoc();
 }, 1);
 
 Clazz_newMeth(C$, 'updateDOMNode', function () {
-var js = this.c;
+var js = this.jc;
 this.min = js.getMinimum();
 this.max = js.getMaximum();
 this.val = js.getValue();
@@ -37469,9 +37484,9 @@ if (this.jc.isOpaque()) this.setBackground$java_awt_Color(this.jc.getBackground(
 return this.domNode;
 });
 
-Clazz_newMeth(C$, 'installUIImpl', function () {
-this.jSlider = this.c;
-if (this.isScrollBar) this.jScrollBar = this.c;
+Clazz_newMeth(C$, 'installUI$javax_swing_JComponent', function (jc) {
+this.jSlider = jc;
+if (this.isScrollBar) this.jScrollBar = jc;
 });
 
 Clazz_newMeth(C$, 'setJQuerySliderAndEvents', function () {
@@ -37647,7 +37662,7 @@ vertDim = Clazz_new_((I$[4]||$incl$(4)).c$$I$I,[21, 200]);
 }return vertDim;
 });
 })();
-//Created 2017-12-24 14:22:10
+//Created 2017-12-29 15:02:48
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[['javax.swing.UIManager','javax.swing.SwingUtilities']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "LazyActionMap", null, 'javax.swing.plaf.ActionMapUIResource');
 var p$=C$.prototype;
@@ -37739,7 +37754,7 @@ loader.$clazz$.loadActionMap$swingjs_plaf_LazyActionMap(this);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:52
+//Created 2017-12-29 15:02:50
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[['swingjs.api.js.DOMNode','swingjs.JSUtil','javajs.api.JSFunction','java.awt.Rectangle','java.awt.Color','java.awt.Dimension']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "Resizer");
 var p$=C$.prototype;
@@ -37831,7 +37846,7 @@ if (!this.enabled) return;
 switch (type) {
 case 501:
 (I$[1]||$incl$(1)).setStyles(this.resizer, ["background-color", "green"]);
-(I$[1]||$incl$(1)).setStyles(this.rubberBand, ["display", "block"]);
+(I$[1]||$incl$(1)).setVisible(this.rubberBand, true);
 (I$[1]||$incl$(1)).setCursor("nwse-resize");
 break;
 case 506:
@@ -37839,7 +37854,7 @@ this.setPosition$I$I(dx, dy);
 break;
 case 502:
 (I$[1]||$incl$(1)).setStyles(this.resizer, ["background-color", "red"]);
-(I$[1]||$incl$(1)).setStyles(this.rubberBand, ["display", "none"]);
+(I$[1]||$incl$(1)).setVisible(this.rubberBand, false);
 (I$[1]||$incl$(1)).setCursor("auto");
 this.fHandleDOMResize$O$I$I(null, dx, dy);
 }
@@ -37879,7 +37894,7 @@ Clazz_newMeth(C$, 'setEnabled$Z', function (b) {
 this.enabled = b;
 });
 })();
-//Created 2017-12-24 13:33:52
+//Created 2017-12-29 15:02:51
 (function(){var P$=Clazz_newPackage("java.awt.color"),I$=[];
 var C$=Clazz_newClass(P$, "ColorSpace");
 C$.sRGBspace = null;
@@ -37996,7 +38011,7 @@ throw Clazz_new_(Clazz_load('java.lang.IllegalArgumentException').c$$S,["Compone
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:29
+//Created 2017-12-29 15:01:09
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[];
 var C$=Clazz_newClass(P$, "Cursor");
 C$.predefined = null;
@@ -38066,8 +38081,8 @@ return this.getClass().getName() + "[" + this.getName() + "]" ;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:24
-(function(){var P$=Clazz_newPackage("java.awt"),I$=[['java.util.ArrayList',['java.awt.Dialog','.ModalityType'],'java.awt.Toolkit','java.awt.Window','java.awt.event.ComponentEvent','java.awt.ModalEventFilter','Thread','java.awt.Dialog$1$1','java.awt.Dialog$1','sun.awt.AppContext','java.awt.EventQueue','sun.awt.PeerEvent','java.util.LinkedList',['java.awt.Dialog','.ModalExclusionType']]],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
+//Created 2017-12-29 15:01:04
+(function(){var P$=Clazz_newPackage("java.awt"),I$=[['java.util.ArrayList',['java.awt.Dialog','.ModalityType'],'java.awt.Toolkit','java.awt.Window','java.awt.event.ComponentEvent',['java.awt.Dialog','.ModalExclusionType']]],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "Dialog", null, 'java.awt.Window');
 C$.modalDialogs = null;
 C$.DEFAULT_MODALITY_TYPE = null;
@@ -38092,6 +38107,7 @@ this.title = null;
 this.modalFilter = null;
 this.isInHide = false;
 this.isInDispose = false;
+this.dialogCallback = null;
 }, 1);
 
 Clazz_newMeth(C$, '$init$', function () {
@@ -38102,6 +38118,10 @@ this.initialized = false;
 this.isInHide = false;
 this.isInDispose = false;
 }, 1);
+
+Clazz_newMeth(C$, 'setDialogCallback$java_awt_JSComponent_AsynchronousDialogCaller', function (callback) {
+this.dialogCallback = callback;
+});
 
 Clazz_newMeth(C$, 'c$$java_awt_Frame', function (owner) {
 C$.c$$java_awt_Frame$S$Z.apply(this, [owner, "", false]);
@@ -38192,7 +38212,7 @@ return this.isModal_NoClientCode();
 });
 
 Clazz_newMeth(C$, 'isModal_NoClientCode', function () {
-return this.modalityType !== (I$[2]||$incl$(2)).MODELESS ;
+return this.dialogCallback != null ;
 });
 
 Clazz_newMeth(C$, 'setModal$Z', function (modal) {
@@ -38239,12 +38259,8 @@ this.toFront();
 retval = false;
 } else {
 retval = true;
-C$.superclazz.prototype.setVisible$Z.apply(this, [true]);
-if (!this.isModal()) {
-} else {
-C$.modalDialogs.add$TE(this);
-this.modalShow();
-}if (toFocus != null  && time != null   && this.isFocusable()  && this.isEnabled()  && !this.isModalBlocked() ) {
+C$.superclazz.prototype.show.apply(this, []);
+if (toFocus != null  && time != null   && this.isFocusable()  && this.isEnabled()  && !this.isModalBlocked() ) {
 }if (this.isModalBlocked()) {
 this.modalBlocker.toFront();
 }for (var i = 0; i < this.ownedWindowList.size(); i++) {
@@ -38275,76 +38291,7 @@ throw Clazz_new_(Clazz_load('java.lang.IllegalStateException').c$$S,["The dialog
 if (!this.isModal()) {
 p$.conditionalShow$java_awt_Component$Long.apply(this, [null, null]);
 } else {
-var time =  new Long(0);
-var predictedFocusOwner = null;
-try {
-if (p$.conditionalShow$java_awt_Component$Long.apply(this, [predictedFocusOwner, time])) {
-this.modalFilter = (I$[6]||$incl$(6)).createFilterForDialog$java_awt_Dialog(this);
-var pumpEventsForFilter = ((
-(function(){var C$=Clazz_newClass(P$, "Dialog$1", function(){Clazz_newInstance(this, arguments[0],1,C$);}, null, 'Runnable', 1);
-
-C$.$clinit$ = function() {Clazz_load(C$, 1);
-}
-
-Clazz_newMeth(C$, '$init$', function () {
-}, 1);
-
-Clazz_newMeth(C$, 'run', function () {
-var dispatchThread = (I$[7]||$incl$(7)).currentThread();
-dispatchThread.pumpEventsForFilter$I$java_awt_Conditional$java_awt_EventFilter(-1, ((
-(function(){var C$=Clazz_newClass(P$, "Dialog$1$1", function(){Clazz_newInstance(this, arguments[0],1,C$);}, null, 'java.awt.Conditional', 1);
-
-C$.$clinit$ = function() {Clazz_load(C$, 1);
-}
-
-Clazz_newMeth(C$, '$init$', function () {
-}, 1);
-
-Clazz_newMeth(C$, 'evaluate', function () {
-{
-return this.b$['java.awt.Dialog'].windowClosingException == null ;
-}});
-})()
-), Clazz_new_((I$[8]||$incl$(8)).$init$, [this, null])), this.b$['java.awt.Dialog'].modalFilter);
-});
-})()
-), Clazz_new_((I$[9]||$incl$(9)).$init$, [this, null]));
-if (this.modalityType === (I$[2]||$incl$(2)).TOOLKIT_MODAL ) {
-var appContext = this.getAppContext();
-var eventQueue = appContext.get$O((I$[10]||$incl$(10)).EVENT_QUEUE_KEY);
-var edt = eventQueue.getDispatchThread();
-edt.addEventFilter$java_awt_EventFilter(this.modalFilter);
-}this.modalityPushed();
-try {
-if ((I$[11]||$incl$(11)).isDispatchThread()) {
-pumpEventsForFilter.run();
-} else {
-{
-(I$[3]||$incl$(3)).getEventQueue().postEvent$java_awt_AWTEvent(Clazz_new_((I$[12]||$incl$(12)).c$$O$Runnable$J,[this, pumpEventsForFilter, 1]));
-while (this.windowClosingException == null ){
-try {
-this.getTreeLock().wait();
-} catch (e) {
-if (Clazz_exceptionOf(e, "java.lang.InterruptedException")){
-break;
-} else {
-throw e;
-}
-}
-}
-}}} finally {
-this.modalityPopped();
-}
-if (this.modalityType === (I$[2]||$incl$(2)).TOOLKIT_MODAL ) {
-var eventQueue = this.appContext.get$O((I$[10]||$incl$(10)).EVENT_QUEUE_KEY);
-var edt = eventQueue.getDispatchThread();
-edt.removeEventFilter$java_awt_EventFilter(this.modalFilter);
-}if (this.windowClosingException != null ) {
-this.windowClosingException.fillInStackTrace();
-throw this.windowClosingException;
-}}} finally {
-if (predictedFocusOwner != null ) {
-}}
+p$.conditionalShow$java_awt_Component$Long.apply(this, [null, null]);
 }});
 
 Clazz_newMeth(C$, 'modalityPushed', function () {
@@ -38427,49 +38374,7 @@ str += ",title=" + this.title;
 });
 
 Clazz_newMeth(C$, 'modalShow', function () {
-var blockers = Clazz_new_((I$[1]||$incl$(1)));
-for (var d, $d = C$.modalDialogs.iterator (); $d.hasNext () && ((d = $d.next ()) || true);) {
-if (d.shouldBlock$java_awt_Window(this)) {
-var w = d;
-while ((w != null ) && (w !== this ) ){
-w = (w.getOwner_NoClientCode());
-}
-if ((w === this ) || !this.shouldBlock$java_awt_Window(d) || (this.modalityType.compareTo$TE(d.getModalityType()) < 0)  ) {
-blockers.add$TE(d);
-}}}
-for (var i = 0; i < blockers.size(); i++) {
-var blocker = blockers.get$I(i);
-if (blocker.isModalBlocked()) {
-var blockerBlocker = blocker.getModalBlocker();
-if (!blockers.contains$O(blockerBlocker)) {
-blockers.add$I$TE(i + 1, blockerBlocker);
-}}}
-if (blockers.size() > 0) {
-blockers.get$I(0).blockWindow$java_awt_Window(this);
-}var blockersHierarchies = Clazz_new_((I$[1]||$incl$(1)).c$$java_util_Collection,[blockers]);
-var k = 0;
-while (k < blockersHierarchies.size()){
-var w = blockersHierarchies.get$I(k);
-var ownedWindows = w.getOwnedWindows_NoClientCode();
-for (var win, $win = 0, $$win = ownedWindows; $win < $$win.length && ((win = $$win[$win]) || true); $win++) {
-blockersHierarchies.add$TE(win);
-}
-k++;
-}
-var toBlock = Clazz_new_((I$[13]||$incl$(13)));
-var unblockedWindows = (I$[4]||$incl$(4)).getAllUnblockedWindows();
-for (var w, $w = unblockedWindows.iterator (); $w.hasNext () && ((w = $w.next ()) || true);) {
-if (this.shouldBlock$java_awt_Window(w) && !blockersHierarchies.contains$O(w) ) {
-if ((Clazz_instanceOf(w, "java.awt.Dialog")) && (w).isModal_NoClientCode() ) {
-var wd = w;
-if (wd.shouldBlock$java_awt_Window(this) && (C$.modalDialogs.indexOf$O(wd) > C$.modalDialogs.indexOf$O(this)) ) {
-continue;
-}}toBlock.add$TE(w);
-}}
-this.blockWindows$java_util_List(toBlock);
-if (!this.isModalBlocked()) {
-this.updateChildrenBlocking();
-}});
+});
 
 Clazz_newMeth(C$, 'modalHide', function () {
 var save = Clazz_new_((I$[1]||$incl$(1)));
@@ -38508,7 +38413,7 @@ switch (this.modalityType) {
 case (I$[2]||$incl$(2)).MODELESS:
 return false;
 case (I$[2]||$incl$(2)).DOCUMENT_MODAL:
-if (w.isModalExcluded$java_awt_Dialog_ModalExclusionType((I$[14]||$incl$(14)).APPLICATION_EXCLUDE)) {
+if (w.isModalExcluded$java_awt_Dialog_ModalExclusionType((I$[6]||$incl$(6)).APPLICATION_EXCLUDE)) {
 var c = this;
 while ((c != null ) && (c !== w ) ){
 c = c.getParent_NoClientCode();
@@ -38517,9 +38422,9 @@ return c === w ;
 } else {
 return this.getDocumentRoot() === w.getDocumentRoot() ;
 }case (I$[2]||$incl$(2)).APPLICATION_MODAL:
-return !w.isModalExcluded$java_awt_Dialog_ModalExclusionType((I$[14]||$incl$(14)).APPLICATION_EXCLUDE) && (this.appContext === w.appContext ) ;
+return !w.isModalExcluded$java_awt_Dialog_ModalExclusionType((I$[6]||$incl$(6)).APPLICATION_EXCLUDE) && (this.appContext === w.appContext ) ;
 case (I$[2]||$incl$(2)).TOOLKIT_MODAL:
-return !w.isModalExcluded$java_awt_Dialog_ModalExclusionType((I$[14]||$incl$(14)).TOOLKIT_EXCLUDE);
+return !w.isModalExcluded$java_awt_Dialog_ModalExclusionType((I$[6]||$incl$(6)).TOOLKIT_EXCLUDE);
 }
 return false;
 });
@@ -38602,7 +38507,7 @@ Clazz_newMeth(C$, 'values', function() { return $vals }, 1);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:40:53
+//Created 2017-12-29 15:01:05
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[];
 var C$=Clazz_newClass(P$, "AdjustmentEvent", null, 'java.awt.AWTEvent');
 
@@ -38683,7 +38588,7 @@ return typeStr + ",adjType=" + adjTypeStr + ",value=" + this.value + ",isAdjusti
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:31
+//Created 2017-12-29 15:01:12
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[['sun.awt.SunToolkit','sun.awt.AppContext']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "FocusEvent", null, 'java.awt.event.ComponentEvent');
 
@@ -38741,7 +38646,7 @@ return typeStr + (this.temporary ? ",temporary" : ",permanent") + ",opposite=" +
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:31
+//Created 2017-12-29 15:01:13
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[];
 var C$=Clazz_newClass(P$, "ItemEvent", null, 'java.awt.AWTEvent');
 
@@ -38801,7 +38706,7 @@ return typeStr + ",item=" + this.item + ",stateChange=" + stateStr ;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:32
+//Created 2017-12-29 15:01:13
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[];
 var C$=Clazz_newClass(P$, "WindowAdapter", null, null, ['java.awt.event.WindowListener', 'java.awt.event.WindowStateListener', 'java.awt.event.WindowFocusListener']);
 
@@ -38843,7 +38748,7 @@ Clazz_newMeth(C$, 'windowLostFocus$java_awt_event_WindowEvent', function (e) {
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:32
+//Created 2017-12-29 15:01:14
 (function(){var P$=Clazz_newPackage("java.awt.event"),I$=[['sun.awt.SunToolkit','sun.awt.AppContext']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "WindowEvent", null, 'java.awt.event.ComponentEvent');
 
@@ -38940,7 +38845,7 @@ return typeStr;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:32
+//Created 2017-12-29 15:01:15
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[['java.awt.Cursor','java.awt.Window']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "Frame", null, 'java.awt.Window');
 C$.$nameCounter = 0;
@@ -39155,7 +39060,7 @@ frames[c++] = w;
 return frames;
 }, 1);
 })();
-//Created 2017-12-24 13:32:26
+//Created 2017-12-29 15:01:06
 (function(){var P$=Clazz_newPackage("java.awt.geom"),I$=[['java.lang.InternalError']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "Point2D", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -39322,7 +39227,7 @@ return "Point2D.Double[" + new Double(this.x).toString() + ", " + new Double(thi
 });
 })()
 })();
-//Created 2017-12-24 13:32:34
+//Created 2017-12-29 15:01:16
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[];
 var C$=Clazz_newClass(P$, "GraphicsCallback", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -39417,21 +39322,21 @@ return C$.instance;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:26
+//Created 2017-12-29 15:01:06
 (function(){var P$=Clazz_newPackage("java.awt.peer"),I$=[];
 var C$=Clazz_newInterface(P$, "FramePeer", null, null, 'java.awt.peer.WindowPeer');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:38
+//Created 2017-12-29 15:01:21
 (function(){var P$=Clazz_newPackage("java.awt.peer"),I$=[];
 var C$=Clazz_newInterface(P$, "WindowPeer", null, null, 'java.awt.peer.ContainerPeer');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:32:38
+//Created 2017-12-29 15:47:35
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[];
 var C$=Clazz_newClass(P$, "Point", null, 'java.awt.geom.Point2D');
 
@@ -39507,7 +39412,7 @@ Clazz_newMeth(C$, 'toString', function () {
 return this.getClass().getName() + "[x=" + this.x + ",y=" + this.y + "]" ;
 });
 })();
-//Created 2017-12-24 13:32:28
+//Created 2017-12-29 15:01:08
 (function(){var P$=Clazz_newPackage("java.awt"),I$=[['java.awt.Color','java.util.Vector','java.awt.Cursor','java.awt.BorderLayout',['java.awt.Dialog','.ModalExclusionType'],'java.util.ArrayList','swingjs.JSUtil','java.awt.Toolkit','java.awt.event.WindowEvent','java.awt.Window$1','java.util.Locale','java.util.Arrays','sun.awt.AppContext','java.awt.AWTEventMulticaster','java.awt.event.WindowListener','java.awt.event.WindowFocusListener','java.awt.event.WindowStateListener','swingjs.JSToolkit','java.awt.ComponentOrientation','java.util.ResourceBundle','java.awt.GraphicsEnvironment','java.awt.Point']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "Window", null, 'java.awt.Container');
 C$.systemSyncLWRequests = false;
@@ -39693,11 +39598,7 @@ if ((child != null ) && child.showWithParent ) {
 child.show();
 child.showWithParent = false;
 }}
-if (!this.isModalBlocked()) {
-this.updateChildrenBlocking();
-} else {
-this.modalBlocker.toFront_NoClientCode();
-}if (Clazz_instanceOf(this, "java.awt.Frame") || Clazz_instanceOf(this, "java.awt.Dialog") ) {
+if (Clazz_instanceOf(this, "java.awt.Frame") || Clazz_instanceOf(this, "java.awt.Dialog") ) {
 C$.updateChildFocusableWindowState$java_awt_Window(this);
 }}this.isInShow = false;
 if ((this.state & 1) == 0) {
@@ -39754,7 +39655,8 @@ Clazz_newMeth(C$, '$init$', function () {
 }, 1);
 
 Clazz_newMeth(C$, 'run', function () {
-(this.$finals.me).getUI().uninstallUI$java_awt_Component(null);
+(this.$finals.me).getUI().uninstallUI$javax_swing_JComponent(null);
+(this.$finals.me).getUI().uninstallJS();
 var ownedWindowArray;
 {
 ownedWindowArray = Clazz_array(java.lang.Object, [this.b$['java.awt.Window'].ownedWindowList.size()]);
@@ -39958,9 +39860,6 @@ if ((this.modalExclusionType != null ) && this.modalExclusionType.compareTo$TE(e
 return true;
 }var owner = this.getOwner_NoClientCode();
 return (owner != null ) && owner.isModalExcluded$java_awt_Dialog_ModalExclusionType(exclusionType) ;
-});
-
-Clazz_newMeth(C$, 'updateChildrenBlocking', function () {
 });
 
 Clazz_newMeth(C$, 'addWindowListener$java_awt_event_WindowListener', function (l) {
@@ -40428,7 +40327,7 @@ Clazz_newMeth(C$, 'getLocationOnWindow', function () {
 return Clazz_new_((I$[22]||$incl$(22)).c$$I$I,[0, 0]);
 });
 })();
-//Created 2017-12-24 13:40:52
+//Created 2017-12-29 15:01:09
 (function(){var P$=java.util,I$=[];
 var C$=Clazz_newClass(P$, "Random", null, null, 'java.io.Serializable');
 
@@ -40529,7 +40428,7 @@ this.seed = (seed ^ 25214903917) & 281474976710655;
 this.haveNextNextGaussian = false;
 });
 })();
-//Created 2017-12-24 13:32:50
+//Created 2017-12-29 15:01:36
 (function(){var P$=java.util,I$=[['java.util.Vector$1','java.util.Arrays',['java.util.Collections','.SynchronizedRandomAccessList'],'java.lang.reflect.Array','java.lang.StringBuffer']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "Vector", null, 'java.util.AbstractList', ['java.util.List', 'java.util.RandomAccess', 'Cloneable', 'java.io.Serializable']);
 var p$=C$.prototype;
@@ -40988,7 +40887,7 @@ stream.defaultWriteObject();
 });
 C$.$_ASSERT_ENABLED_ = ClassLoader.$getClassAssertionStatus(C$);
 })();
-//Created 2017-12-24 13:32:51
+//Created 2017-12-29 15:01:38
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['javax.swing.event.EventListenerList','javax.swing.event.ListDataListener','javax.swing.event.ListDataEvent']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "AbstractListModel", null, null, 'javax.swing.ListModel');
 
@@ -41055,7 +40954,7 @@ return this.listenerList.getListeners$Class(listenerType);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:59
+//Created 2017-12-29 15:01:46
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['javax.swing.event.EventListenerList','javax.swing.event.AncestorListener','javax.swing.event.AncestorEvent']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "AncestorNotifier", null, null, ['java.awt.event.ComponentListener', 'java.beans.PropertyChangeListener']);
 
@@ -41196,7 +41095,7 @@ this.fireAncestorRemoved$javax_swing_JComponent$I$java_awt_Container$java_awt_Co
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:32:59
+//Created 2017-12-29 15:01:46
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['java.awt.AWTError','java.awt.Dimension','javax.swing.SizeRequirements']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "BoxLayout", null, null, 'java.awt.LayoutManager2');
 var p$=C$.prototype;
@@ -41373,7 +41272,7 @@ absoluteAxis = axis;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:00
+//Created 2017-12-29 15:01:47
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['java.util.Vector']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "ButtonGroup");
 
@@ -41448,7 +41347,7 @@ return 0;
 return this.buttons.size();
 }});
 })();
-//Created 2017-12-24 13:33:00
+//Created 2017-12-29 15:01:47
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[];
 var C$=Clazz_newClass(P$, "ClientPropertyKey", null, 'Enum');
 var p$=C$.prototype;
@@ -41474,14 +41373,14 @@ C$.$init$.apply(this);
 var $vals=[];
 Clazz_newMeth(C$, 'values', function() { return $vals }, 1);
 })();
-//Created 2017-12-24 13:40:55
+//Created 2017-12-29 15:01:47
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[];
 var C$=Clazz_newInterface(P$, "ComboBoxModel", null, null, 'javax.swing.ListModel');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:33:00
+//Created 2017-12-29 15:01:47
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['java.util.Vector']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "DefaultComboBoxModel", null, 'javax.swing.AbstractListModel', 'javax.swing.MutableComboBoxModel');
 
@@ -41583,7 +41482,7 @@ this.fireIntervalRemoved$O$I$I(this, firstIndex, lastIndex);
 this.selectedObject = null;
 }});
 })();
-//Created 2017-12-24 13:33:00
+//Created 2017-12-29 15:01:48
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['javax.swing.event.EventListenerList','javax.swing.event.ChangeListener','javax.swing.event.ChangeEvent']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "DefaultSingleSelectionModel", null, null, 'javax.swing.SingleSelectionModel');
 
@@ -41651,7 +41550,7 @@ return this.listenerList.getListeners$Class(listenerType);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:01
+//Created 2017-12-29 15:01:48
 (function(){var P$=Clazz_newPackage("javax.swing.event"),I$=[];
 var C$=Clazz_newClass(P$, "AncestorEvent", null, 'java.awt.AWTEvent');
 
@@ -41688,7 +41587,7 @@ return this.getSource();
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:17
+//Created 2017-12-29 15:02:08
 (function(){var P$=Clazz_newPackage("javax.swing.event"),I$=[];
 var C$=Clazz_newClass(P$, "ChangeEvent", null, 'java.util.EventObject');
 
@@ -41705,7 +41604,7 @@ C$.$init$.apply(this);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:17
+//Created 2017-12-29 15:02:09
 (function(){var P$=Clazz_newPackage("javax.swing.event"),I$=[];
 var C$=Clazz_newClass(P$, "ListDataEvent", null, 'java.util.EventObject');
 
@@ -41748,14 +41647,14 @@ return this.getClass().getName() + "[type=" + this.type + ",index0=" + this.inde
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:17
+//Created 2017-12-29 15:02:09
 (function(){var P$=Clazz_newPackage("javax.swing.event"),I$=[];
 var C$=Clazz_newInterface(P$, "ListDataListener", null, null, 'java.util.EventListener');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:33:17
+//Created 2017-12-29 15:02:09
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[];
 var C$=Clazz_newClass(P$, "JCheckBox", null, 'javax.swing.JToggleButton');
 
@@ -41827,7 +41726,7 @@ Clazz_newMeth(C$, 'paramString', function () {
 return C$.superclazz.prototype.paramString.apply(this, []);
 });
 })();
-//Created 2017-12-24 13:33:02
+//Created 2017-12-29 15:01:50
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[[['javax.swing.JToggleButton','.ToggleButtonModel']]],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JCheckBoxMenuItem", null, 'javax.swing.JMenuItem', 'javax.swing.SwingConstants');
 
@@ -41893,7 +41792,7 @@ Clazz_newMeth(C$, 'shouldUpdateSelectedStateFromAction', function () {
 return true;
 });
 })();
-//Created 2017-12-24 13:33:02
+//Created 2017-12-29 15:01:50
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['javax.swing.AbstractAction','javax.swing.JPopupMenu','javax.swing.DefaultComboBoxModel','javax.swing.JComboBox$1','javax.swing.SwingUtilities','java.awt.event.ItemListener','java.awt.event.ActionListener','javax.swing.event.PopupMenuListener','javax.swing.event.PopupMenuEvent',['javax.swing.JComboBox','.ComboBoxActionPropertyChangeListener'],'java.awt.EventQueue','java.awt.event.ActionEvent','java.awt.event.ItemEvent',['javax.swing.JComboBox','.DefaultKeySelectionManager']]],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JComboBox", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -42519,7 +42418,7 @@ return -1;
 Clazz_newMeth(C$);
 })()
 })();
-//Created 2017-12-24 13:33:03
+//Created 2017-12-29 15:01:50
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['javax.swing.JComponent','javax.swing.UIManager','javax.swing.JRootPane','javax.swing.SwingUtilities','javax.swing.RepaintManager']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JFrame", null, 'java.awt.Frame', ['javax.swing.WindowConstants', 'javax.swing.RootPaneContainer']);
 C$.defaultLookAndFeelDecoratedKey = null;
@@ -42761,7 +42660,7 @@ var rootPaneCheckingEnabledString = (this.rootPaneCheckingEnabled ? "true" : "fa
 return C$.superclazz.prototype.paramString.apply(this, []) + ",defaultCloseOperation=" + defaultCloseOperationString + ",rootPane=" + rootPaneString + ",rootPaneCheckingEnabled=" + rootPaneCheckingEnabledString ;
 });
 })();
-//Created 2017-12-24 13:33:04
+//Created 2017-12-29 15:01:52
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['javax.swing.UIManager','java.awt.Toolkit','java.awt.Rectangle','javax.swing.SwingUtilities','java.awt.Point','javax.swing.JPopupMenu','javax.swing.JMenuItem',['javax.swing.JPopupMenu','.Separator'],'java.lang.Error','java.awt.Component','javax.swing.event.MenuListener','javax.swing.event.MenuEvent',['javax.swing.JMenu','.MenuChangeListener'],['javax.swing.JMenu','.WinListener'],'javax.swing.MenuElement','javax.swing.MenuSelectionManager','java.util.Vector']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JMenu", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -43299,7 +43198,7 @@ this.this$0.setSelected$Z(false);
 Clazz_newMeth(C$);
 })()
 })();
-//Created 2017-12-24 13:33:05
+//Created 2017-12-29 15:01:54
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['javax.swing.DefaultSingleSelectionModel','java.lang.Error','java.awt.Insets','java.util.Vector','javax.swing.MenuElement','javax.swing.KeyboardManager']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JMenuBar", null, 'javax.swing.JComponent', 'javax.swing.MenuElement');
 
@@ -43487,7 +43386,7 @@ C$.superclazz.prototype.removeNotify.apply(this, []);
 (I$[6]||$incl$(6)).getCurrentManager().unregisterMenuBar$javax_swing_JMenuBar(this);
 });
 })();
-//Created 2017-12-24 13:33:05
+//Created 2017-12-29 15:01:54
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['javax.swing.DefaultButtonModel',['javax.swing.JMenuItem','.MenuItemFocusListener'],'javax.swing.UIManager','javax.swing.event.MenuDragMouseEvent','javax.swing.event.MenuKeyEvent','javax.swing.event.MenuDragMouseListener','javax.swing.event.MenuKeyListener','javax.swing.MenuElement']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JMenuItem", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -43809,7 +43708,7 @@ mi.repaint();
 Clazz_newMeth(C$);
 })()
 })();
-//Created 2017-12-24 13:33:06
+//Created 2017-12-29 15:01:54
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['javax.swing.SwingUtilities','Boolean','javax.swing.DefaultSingleSelectionModel','javax.swing.MenuSelectionManager','javax.swing.JMenuItem','java.awt.Point','java.awt.GraphicsEnvironment',['javax.swing.JPopupMenu','.Separator'],'java.util.Vector','javax.swing.event.PopupMenuListener','javax.swing.event.MenuKeyListener','javax.swing.event.PopupMenuEvent','javax.swing.PopupFactory','java.awt.Dimension','java.awt.Insets','javax.swing.event.MenuKeyEvent','javax.swing.MenuElement']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JPopupMenu", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -44110,8 +44009,10 @@ Clazz_newMeth(C$, 'setInvoker$java_awt_Component', function (invoker) {
 var oldInvoker = this.invoker;
 this.invoker = invoker;
 if ((oldInvoker !== this.invoker ) && (this.ui != null ) ) {
-this.ui.uninstallUI$java_awt_Component(this);
-this.ui.installUI$java_awt_Component(this);
+this.ui.uninstallUI$javax_swing_JComponent(this);
+this.ui.uninstallJS();
+this.ui.installJS();
+this.ui.installUI$javax_swing_JComponent(this);
 }this.invalidate();
 });
 
@@ -44311,7 +44212,7 @@ C$.$init$.apply(this);
 }, 1);
 })()
 })();
-//Created 2017-12-24 13:33:06
+//Created 2017-12-29 15:01:55
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[[['javax.swing.JToggleButton','.ToggleButtonModel']]],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JRadioButtonMenuItem", null, 'javax.swing.JMenuItem');
 
@@ -44363,7 +44264,7 @@ Clazz_newMeth(C$, 'shouldUpdateSelectedStateFromAction', function () {
 return true;
 });
 })();
-//Created 2017-12-24 13:33:07
+//Created 2017-12-29 15:01:56
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[];
 var C$=Clazz_newClass(P$, "JSeparator", null, 'javax.swing.JComponent', 'javax.swing.SwingConstants');
 var p$=C$.prototype;
@@ -44427,7 +44328,7 @@ var orientationString = (this.orientation == 0 ? "HORIZONTAL" : "VERTICAL");
 return C$.superclazz.prototype.paramString.apply(this, []) + ",orientation=" + orientationString ;
 });
 })();
-//Created 2017-12-24 13:33:08
+//Created 2017-12-29 15:01:57
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['java.awt.event.ItemEvent','java.awt.EventQueue','java.awt.event.ActionEvent',['javax.swing.JToggleButton','.ToggleButtonModel']]],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JToggleButton", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -44542,7 +44443,7 @@ modifiers = (currentEvent).getModifiers();
 }});
 })()
 })();
-//Created 2017-12-24 13:33:10
+//Created 2017-12-29 15:01:59
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[['java.util.Hashtable','java.util.Vector','Thread',['javax.swing.KeyboardManager','.ComponentKeyStrokePair'],'javax.swing.KeyStroke','javax.swing.JMenuBar']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "KeyboardManager", function(){
 Clazz_newInstance(this, arguments,0,C$);
@@ -44752,26 +44653,26 @@ Clazz_newMeth(C$);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:11
+//Created 2017-12-29 15:02:01
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[];
 var C$=Clazz_newInterface(P$, "ListModel");
 })();
-//Created 2017-12-24 13:33:11
+//Created 2017-12-29 15:02:01
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[];
 var C$=Clazz_newInterface(P$, "MenuElement");
 })();
-//Created 2017-12-24 13:33:11
+//Created 2017-12-29 15:02:02
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[];
 var C$=Clazz_newInterface(P$, "MutableComboBoxModel", null, null, 'javax.swing.ComboBoxModel');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
 }
 })();
-//Created 2017-12-24 13:33:12
+//Created 2017-12-29 15:02:02
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[];
 var C$=Clazz_newInterface(P$, "SingleSelectionModel");
 })();
-//Created 2017-12-24 13:33:13
+//Created 2017-12-29 15:02:04
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[];
 var C$=Clazz_newClass(P$, "SizeRequirements");
 var p$=C$.prototype;
@@ -44945,11 +44846,11 @@ Clazz_newMeth(C$, 'adjustSizes$I$javax_swing_SizeRequirementsA', function (delta
 return Clazz_array(Integer.TYPE, [0]);
 }, 1);
 })();
-//Created 2017-12-24 13:33:13
+//Created 2017-12-29 15:02:04
 (function(){var P$=Clazz_newPackage("javax.swing"),I$=[];
 var C$=Clazz_newInterface(P$, "WindowConstants");
 })();
-//Created 2017-12-24 13:33:15
+//Created 2017-12-29 15:02:06
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[['java.awt.Dimension']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "DefaultMenuLayout", null, 'javax.swing.BoxLayout', 'javax.swing.plaf.UIResource');
 
@@ -44975,7 +44876,7 @@ return C$.superclazz.prototype.preferredLayoutSize$java_awt_Container.apply(this
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:46
+//Created 2017-12-29 15:02:42
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[];
 var C$=Clazz_newClass(P$, "JSCheckBoxMenuItemUI", null, 'swingjs.plaf.JSCheckBoxUI');
 
@@ -44995,12 +44896,12 @@ Clazz_newMeth(C$, 'getPropertyPrefix', function () {
 return "CheckBoxMenuItem.";
 });
 
-Clazz_newMeth(C$, 'installUIImpl', function () {
-this.menuItem = this.c;
-C$.superclazz.prototype.installUIImpl.apply(this, []);
+Clazz_newMeth(C$, 'installUI$javax_swing_JComponent', function (jc) {
+this.menuItem = jc;
+C$.superclazz.prototype.installUI$javax_swing_JComponent.apply(this, [jc]);
 });
 })();
-//Created 2017-12-24 13:33:46
+//Created 2017-12-29 15:02:43
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[];
 var C$=Clazz_newClass(P$, "JSCheckBoxUI", null, 'swingjs.plaf.JSRadioButtonUI');
 
@@ -45020,7 +44921,7 @@ return "CheckBox.";
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:46
+//Created 2017-12-29 15:02:43
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[['swingjs.api.js.DOMNode','javajs.util.PT','swingjs.plaf.JSComponentUI','javax.swing.LookAndFeel','javax.swing.UIManager']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSComboBoxUI", null, 'swingjs.plaf.JSLightweightUI', ['java.beans.PropertyChangeListener', 'java.awt.event.ItemListener', 'javax.swing.event.ListDataListener']);
 var p$=C$.prototype;
@@ -45076,10 +44977,10 @@ this.domNode.appendChild(option);
 }
 });
 
-Clazz_newMeth(C$, 'installUIImpl', function () {
-this.comboBox = this.c;
+Clazz_newMeth(C$, 'installUI$javax_swing_JComponent', function (jc) {
+this.comboBox = jc;
 this.installListeners();
-(I$[4]||$incl$(4)).installColorsAndFont$javax_swing_JComponent$S$S$S(this.jc, "ComboBox.background", "ComboBox.foreground", "ComboBox.font");
+(I$[4]||$incl$(4)).installColorsAndFont$javax_swing_JComponent$S$S$S(jc, "ComboBox.background", "ComboBox.foreground", "ComboBox.font");
 });
 
 Clazz_newMeth(C$, 'getPropertyPrefix', function () {
@@ -45091,7 +44992,7 @@ this.inactiveBackground = (I$[5]||$incl$(5)).getColor$O(pp + "disabledBackground
 this.inactiveForeground = (I$[5]||$incl$(5)).getColor$O(pp + "disabledForeground");
 });
 
-Clazz_newMeth(C$, 'uninstallUIImpl', function () {
+Clazz_newMeth(C$, 'uninstallUI$javax_swing_JComponent', function (jc) {
 this.uninstallListeners();
 });
 
@@ -45140,7 +45041,7 @@ this.revalidate();
 Clazz_newMeth(C$, 'itemStateChanged$java_awt_event_ItemEvent', function (e) {
 });
 })();
-//Created 2017-12-24 13:33:46
+//Created 2017-12-29 15:02:44
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[['swingjs.plaf.JSComponentUI','swingjs.api.js.DOMNode','swingjs.JSUtil','java.awt.Toolkit','java.awt.event.ComponentEvent','java.awt.event.WindowEvent','javax.swing.LookAndFeel','java.awt.Rectangle']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSFrameUI", null, 'swingjs.plaf.JSWindowUI', 'java.awt.peer.FramePeer');
 
@@ -45246,10 +45147,6 @@ return true;
 }}}return false;
 });
 
-Clazz_newMeth(C$, 'uninstallUIImpl', function () {
-this.closeFrame();
-});
-
 Clazz_newMeth(C$, 'closeFrame', function () {
 (I$[3]||$incl$(3)).J2S._jsUnsetMouse(this.frameNode);
 this.$$swingjs_api_js_DOMNode(this.frameNode).remove();
@@ -45261,10 +45158,14 @@ Clazz_newMeth(C$, 'setInnerComponentBounds$I$I', function (width, height) {
 (I$[2]||$incl$(2)).setStyles(this.titleNode, ["width", width + "px", "height", "20px"]);
 });
 
-Clazz_newMeth(C$, 'installUIImpl', function () {
+Clazz_newMeth(C$, 'installUI$javax_swing_JComponent', function (jc) {
 this.frame = this.c;
-C$.superclazz.prototype.installUIImpl.apply(this, []);
-(I$[7]||$incl$(7)).installColors$javax_swing_JComponent$S$S(this.jc, "Frame.background", "Frame.foreground");
+C$.superclazz.prototype.installUI$javax_swing_JComponent.apply(this, [jc]);
+(I$[7]||$incl$(7)).installColors$javax_swing_JComponent$S$S(jc, "Frame.background", "Frame.foreground");
+});
+
+Clazz_newMeth(C$, 'uninstallUI$javax_swing_JComponent', function (jc) {
+this.closeFrame();
 });
 
 Clazz_newMeth(C$, 'setTitle$S', function (title) {
@@ -45310,7 +45211,7 @@ this.jc.getFrameViewer().setResizable$Z(resizable);
 }C$.superclazz.prototype.propertyChange$java_beans_PropertyChangeEvent.apply(this, [e]);
 });
 })();
-//Created 2017-12-24 13:33:47
+//Created 2017-12-29 15:02:44
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[['swingjs.api.js.DOMNode','swingjs.plaf.DefaultMenuLayout','javax.swing.LookAndFeel','java.awt.Dimension']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSMenuBarUI", null, 'swingjs.plaf.JSPanelUI');
 
@@ -45338,14 +45239,14 @@ this.containerNode = this.domNode = this.newDOMObject$S$S$SA("div", this.id, [])
 }return this.domNode;
 });
 
-Clazz_newMeth(C$, 'installUIImpl', function () {
-this.menuBar = this.c;
+Clazz_newMeth(C$, 'installUI$javax_swing_JComponent', function (jc) {
+this.menuBar = jc;
 if (this.menuBar.getLayout() == null  || Clazz_instanceOf(this.menuBar.getLayout(), "javax.swing.plaf.UIResource") ) {
 this.menuBar.setLayout$java_awt_LayoutManager(Clazz_new_((I$[2]||$incl$(2)).c$$java_awt_Container$I,[this.menuBar, 2]));
-}(I$[3]||$incl$(3)).installColorsAndFont$javax_swing_JComponent$S$S$S(this.jc, "MenuBar.background", "MenuBar.foreground", "MenuBar.font");
+}(I$[3]||$incl$(3)).installColorsAndFont$javax_swing_JComponent$S$S$S(jc, "MenuBar.background", "MenuBar.foreground", "MenuBar.font");
 });
 
-Clazz_newMeth(C$, 'uninstallUIImpl', function () {
+Clazz_newMeth(C$, 'uninstallUI$javax_swing_JComponent', function (jc) {
 });
 
 Clazz_newMeth(C$, 'getContainerHeight', function () {
@@ -45357,8 +45258,8 @@ var d = Clazz_new_((I$[4]||$incl$(4)).c$$I$I,[0, 25]);
 return d;
 });
 })();
-//Created 2017-12-24 13:33:48
-(function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[['java.awt.Dimension','javax.swing.LookAndFeel']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
+//Created 2017-12-29 15:02:45
+(function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[['swingjs.api.js.DOMNode','java.awt.Dimension','javax.swing.LookAndFeel']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSMenuItemUI", null, 'swingjs.plaf.JSButtonUI');
 
 C$.$clinit$ = function() {Clazz_load(C$, 1);
@@ -45377,7 +45278,8 @@ this.allowPaintedBackground = false;
 Clazz_newMeth(C$, 'updateDOMNode', function () {
 if (this.domNode == null ) {
 this.domNode = this.createItem$S$swingjs_api_js_DOMNode("_item", null);
-}return this.domNode;
+}(I$[1]||$incl$(1)).setVisible(this.domNode, this.jc.isVisible());
+return this.domNode;
 });
 
 Clazz_newMeth(C$, 'getContainerHeight', function () {
@@ -45385,16 +45287,16 @@ return this.height = 25;
 });
 
 Clazz_newMeth(C$, 'getCSSAdjustment$Z', function (addingCSS) {
-return Clazz_new_((I$[1]||$incl$(1)).c$$I$I,[5, 0]);
+return Clazz_new_((I$[2]||$incl$(2)).c$$I$I,[5, 0]);
 });
 
-Clazz_newMeth(C$, 'installUIImpl', function () {
-this.menuItem = this.c;
-C$.superclazz.prototype.installUIImpl.apply(this, []);
-(I$[2]||$incl$(2)).installColorsAndFont$javax_swing_JComponent$S$S$S(this.jc, "MenuItem.background", "MenuItem.foreground", "MenuItem.font");
+Clazz_newMeth(C$, 'installUI$javax_swing_JComponent', function (jc) {
+this.menuItem = jc;
+C$.superclazz.prototype.installUI$javax_swing_JComponent.apply(this, [jc]);
+(I$[3]||$incl$(3)).installColorsAndFont$javax_swing_JComponent$S$S$S(jc, "MenuItem.background", "MenuItem.foreground", "MenuItem.font");
 });
 })();
-//Created 2017-12-24 13:33:48
+//Created 2017-12-29 15:02:46
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[['swingjs.api.js.DOMNode','java.awt.Component']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSMenuUI", null, 'swingjs.plaf.JSMenuItemUI');
 
@@ -45421,16 +45323,15 @@ this.isMenuItem = !(this.jc).isTopLevelMenu();
 if (this.isMenuItem) {
 this.containerNode = this.domNode = this.createItem$S$swingjs_api_js_DOMNode("_menu", null);
 } else {
-this.domNode = this.newDOMObject$S$S$SA("label", this.id, []);
-this.setCssFont$swingjs_api_js_DOMNode$java_awt_Font((I$[1]||$incl$(1)).setAttr(this.domNode, "innerHTML", this.menuItem.getText()), this.c.getFont());
-this.setDataComponent$swingjs_api_js_DOMNode(this.domNode);
+this.domNode = this.createItem$S$swingjs_api_js_DOMNode("_item", null);
 }}this.setCssFont$swingjs_api_js_DOMNode$java_awt_Font(this.domNode, this.c.getFont());
+(I$[1]||$incl$(1)).setVisible(this.domNode, this.jc.isVisible());
 return this.domNode;
 });
 
-Clazz_newMeth(C$, 'installUIImpl', function () {
-this.jm = this.jc;
-C$.superclazz.prototype.installUIImpl.apply(this, []);
+Clazz_newMeth(C$, 'installUI$javax_swing_JComponent', function (jc) {
+this.jm = jc;
+C$.superclazz.prototype.installUI$javax_swing_JComponent.apply(this, [jc]);
 });
 
 Clazz_newMeth(C$, 'getChildren', function () {
@@ -45441,7 +45342,7 @@ Clazz_newMeth(C$, 'getMaximumSize', function () {
 return this.getPreferredSize();
 });
 })();
-//Created 2017-12-24 13:33:48
+//Created 2017-12-29 15:02:46
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[];
 var C$=Clazz_newClass(P$, "JSPopupMenuSeparatorUI", null, 'swingjs.plaf.JSSeparatorUI');
 
@@ -45458,7 +45359,7 @@ this.isMenuItem = true;
 this.allowPaintedBackground = false;
 }, 1);
 })();
-//Created 2017-12-24 13:33:49
+//Created 2017-12-29 15:02:46
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[['swingjs.jquery.JQueryUI','swingjs.JSUtil','javax.swing.LookAndFeel','swingjs.api.js.DOMNode']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSPopupMenuUI", null, 'swingjs.plaf.JSPanelUI');
 C$.j2sSwingMenu = null;
@@ -45494,11 +45395,11 @@ this.domNode = this.containerNode = this.newDOMObject$S$S$SA("ul", this.id, []);
 }return this.domNode;
 });
 
-Clazz_newMeth(C$, 'installUIImpl', function () {
-(I$[3]||$incl$(3)).installColorsAndFont$javax_swing_JComponent$S$S$S(this.jc, "PopupMenu.background", "PopupMenu.foreground", "PopupMenu.font");
+Clazz_newMeth(C$, 'installUI$javax_swing_JComponent', function (jc) {
+(I$[3]||$incl$(3)).installColorsAndFont$javax_swing_JComponent$S$S$S(jc, "PopupMenu.background", "PopupMenu.foreground", "PopupMenu.font");
 });
 
-Clazz_newMeth(C$, 'uninstallUIImpl', function () {
+Clazz_newMeth(C$, 'uninstallUI$javax_swing_JComponent', function (jc) {
 });
 
 Clazz_newMeth(C$, 'getPopup', function () {
@@ -45507,9 +45408,10 @@ return null;
 
 Clazz_newMeth(C$, 'setVisible$Z', function (b) {
 if (this.menu == null ) {
-this.menu = this.c;
+this.menu = this.jc;
 C$.j2sSwingMenu.setMenu(this.menu);
 }if (b) {
+this.jc.addNotify();
 this.getOuterNode();
 var x = 0;
 var y = 0;
@@ -45532,7 +45434,7 @@ Clazz_newMeth(C$, 'getPreferredSize', function () {
 return null;
 });
 })();
-//Created 2017-12-24 14:22:10
+//Created 2017-12-29 15:02:47
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[];
 var C$=Clazz_newClass(P$, "JSRadioButtonMenuItemUI", null, 'swingjs.plaf.JSRadioButtonUI');
 
@@ -45553,12 +45455,12 @@ Clazz_newMeth(C$, 'getPropertyPrefix', function () {
 return "RadioButtonMenuItem.";
 });
 
-Clazz_newMeth(C$, 'installUIImpl', function () {
-this.menuItem = this.c;
-C$.superclazz.prototype.installUIImpl.apply(this, []);
+Clazz_newMeth(C$, 'installUI$javax_swing_JComponent', function (jc) {
+this.menuItem = jc;
+C$.superclazz.prototype.installUI$javax_swing_JComponent.apply(this, [jc]);
 });
 })();
-//Created 2017-12-24 13:33:49
+//Created 2017-12-29 15:02:47
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[['swingjs.api.js.DOMNode','java.awt.Dimension']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSRadioButtonUI", null, 'swingjs.plaf.JSButtonUI');
 
@@ -45577,7 +45479,7 @@ return "RadioButton.";
 });
 
 Clazz_newMeth(C$, 'updateButton$S', function (myType) {
-var b = this.c;
+var b = this.jc;
 var isNew = false;
 var doAll = false;
 if (this.domNode == null ) {
@@ -45656,7 +45558,7 @@ return 4;
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:49
+//Created 2017-12-29 15:02:47
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[];
 var C$=Clazz_newClass(P$, "JSSeparatorUI", null, 'swingjs.plaf.JSLightweightUI');
 
@@ -45674,7 +45576,7 @@ this.domNode = this.newDOMObject$S$S$SA("label", this.id, []);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:50
+//Created 2017-12-29 15:02:48
 (function(){var P$=Clazz_newPackage("swingjs.plaf"),I$=[['swingjs.JSUtil','swingjs.api.js.DOMNode','java.awt.Toolkit','swingjs.plaf.JSComponentUI','java.awt.Insets']],$incl$=function(i){return I$[i]=Clazz_load(I$[0][i-1])};
 var C$=Clazz_newClass(P$, "JSWindowUI", null, 'swingjs.plaf.JSComponentUI', 'java.awt.peer.WindowPeer');
 
@@ -45778,12 +45680,6 @@ Clazz_newMeth(C$, 'updateWindow$java_awt_image_BufferedImage', function (backBuf
 Clazz_newMeth(C$, 'repositionSecurityWarning', function () {
 });
 
-Clazz_newMeth(C$, 'installUIImpl', function () {
-});
-
-Clazz_newMeth(C$, 'uninstallUIImpl', function () {
-});
-
 Clazz_newMeth(C$, 'dispose', function () {
 (I$[1]||$incl$(1)).J2S._jsUnsetMouse(this.domNode);
 (I$[2]||$incl$(2)).remove(this.outerNode);
@@ -45795,5 +45691,5 @@ return Clazz_new_((I$[5]||$incl$(5)).c$$I$I$I$I,[0, 0, 0, 0]);
 
 Clazz_newMeth(C$);
 })();
-//Created 2017-12-24 13:33:52
+//Created 2017-12-29 15:47:36
 })(Clazz,Clazz.array,Clazz.assert,Clazz.clone,Clazz.exceptionOf,Clazz.forName,Clazz.getClass,Clazz.instanceOf,Clazz.load,Clazz.new_,Clazz.newClass,Clazz.newEnumConst,Clazz.newInstance,Clazz.newInterface,Clazz.newMeth,Clazz.newPackage,Clazz.super_);
