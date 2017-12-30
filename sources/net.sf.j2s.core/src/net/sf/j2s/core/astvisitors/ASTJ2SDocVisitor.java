@@ -188,7 +188,6 @@ public class ASTJ2SDocVisitor extends ASTEmptyVisitor {
 		if (	global_mapBlockJavadoc == null 	
 				|| node instanceof MethodDeclaration 
 				|| node instanceof Initializer 
-				|| node.getParent().getClass() == org.eclipse.jdt.core.dom.IfStatement.class
 				|| (j2sJavadoc = getJ2sJavadoc(node, true)) == null)
 			return true;
 		boolean isBlock = (node instanceof Block);
