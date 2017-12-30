@@ -1,6 +1,9 @@
 package swingjs.plaf;
 
 import javajs.api.JSFunction;
+
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -12,6 +15,7 @@ import java.beans.PropertyChangeEvent;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.LookAndFeel;
+import javax.swing.SwingUtilities;
 
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
@@ -40,6 +44,11 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	private int state;
 	private boolean resizeable;
 	private DOMNode closerWrap;
+	protected boolean isModal;
+	private DOMNode modalNode;
+	protected int zModal;
+
+
 
 	public JSFrameUI() {
 		frameZ += 1000;
@@ -58,11 +67,11 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	@Override
 	protected DOMNode updateDOMNode() {
 		if (domNode == null) {
-			// we have to give it some sort of border, or it blends in with the page too much.
+			// we have to give it some sort of border, or it blends in with the
+			// page too much.
 			// a Windows applet has a sort of fuzzy shadowy border
 			domNode = frameNode = newDOMObject("div", id + "_frame");
-			DOMNode.setStyles(frameNode, "box-shadow",
-					"0px 0px 10px gray", "box-sizing", "content-box");
+			DOMNode.setStyles(frameNode, "box-shadow", "0px 0px 10px gray", "box-sizing", "content-box");
 			setWindowClass(frameNode);
 			int w = c.getWidth();
 			int h = c.getHeight();
@@ -76,37 +85,43 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			setJ2sMouseHandler(frameNode);
 			titleBarNode = newDOMObject("div", id + "_titlebar");
 			DOMNode.setPositionAbsolute(titleBarNode, 0, 0);
-			DOMNode.setStyles(titleBarNode, "background-color", "#E0E0E0", "height",
-					"20px", "font-size", "14px", "font-family", "sans-serif",
-					"font-weight", "bold"// ,
+			DOMNode.setStyles(titleBarNode, "background-color", "#E0E0E0", "height", "20px", "font-size", "14px",
+					"font-family", "sans-serif", "font-weight", "bold"// ,
 			// "border-style", "solid",
 			// "border-width", "1px"
-					);
+			);
 
 			titleNode = newDOMObject("label", id + "_title");
 			DOMNode.setPositionAbsolute(titleNode, 2, 4);
 			DOMNode.setStyles(titleNode, "height", "20px");
-
 
 			closerWrap = newDOMObject("div", id + "_closerwrap");
 			DOMNode.setPositionAbsolute(closerWrap, 0, 0);
 			DOMNode.setStyles(closerWrap, "text-align", "right");
 
 			closerNode = newDOMObject("label", id + "_closer", "innerHTML", "X");
-			DOMNode.setStyles(closerNode, "width", "20px", "height", "20px",
-					"position", "absolute", "text-align", "center", "right", "0px");
-			DOMNode.addJqueryHandledEvent(this, closerNode,
-					"click mouseenter mouseout");
+			DOMNode.setStyles(closerNode, "width", "20px", "height", "20px", "position", "absolute", "text-align",
+					"center", "right", "0px");
+			DOMNode.addJqueryHandledEvent(this, closerNode, "click mouseenter mouseout");
 
 			frameNode.appendChild(titleBarNode);
 
+			if (isModal) {
+				modalNode = DOMNode.createElement("div", id + "_modaldiv");
+				Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+				DOMNode.setStyles(modalNode, "background", toCSSString(new Color(100, 100, 100, 100)));
+				DOMNode.setPositionAbsolute(modalNode, 0, 0);
+				DOMNode.setSize(modalNode, screen.width, screen.height);
+			}
 			// we have to wait until the frame is wrapped.
 			@SuppressWarnings("unused")
 			DOMNode fnode = frameNode;
+			
 			JSFunction fGetFrameParent = null;
 			/**
 			 * @j2sNative var me = this; fGetFrameParent =
-			 *            function(){me.notifyFrameMoved();return $(fnode).parent()}
+			 *            function(){me.notifyFrameMoved();return
+			 *            $(fnode).parent()}
 			 */
 			{
 			}
@@ -116,8 +131,8 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			closerWrap.appendChild(closerNode);
 			Insets s = getInsets();
 			DOMNode.setPositionAbsolute(frameNode, 0, 0);
-			DOMNode.setAttrs(frameNode, "width", "" + frame.getWidth() + s.left
-					+ s.right, "height", "" + frame.getHeight() + s.top + s.bottom);
+			DOMNode.setAttrs(frameNode, "width", "" + frame.getWidth() + s.left + s.right, "height",
+					"" + frame.getHeight() + s.top + s.bottom);
 			containerNode = frameNode;
 		}
 		String strColor = toCSSString(c.getBackground());
@@ -271,5 +286,19 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		super.propertyChange(e);
 	}
 
+
+	@Override
+	public void setVisible(boolean b) {
+	  super.setVisible(b);
+	  if (isModal) {
+		  if (b) {
+			  $(body).after(modalNode);
+			  int z = getZIndex(null) - 1;
+			  DOMNode.setStyles(modalNode, "z-index", "" + z);
+		  }
+		  DOMNode.setVisible(modalNode, b);
+	  }
+		  
+	}
 
 }

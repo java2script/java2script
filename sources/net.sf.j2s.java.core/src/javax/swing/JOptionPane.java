@@ -720,8 +720,7 @@ public class JOptionPane extends JComponent {
 	 */
 	public static void showMessageDialog(Component parentComponent, Object message, String title, int messageType,
 			Icon icon) {
-
-		JSComponent.AsynchronousDialogCaller dialogCaller = getDialogCaller(parentComponent, message, false);
+		JSComponent.AsynchronousDialogCaller dialogCaller = getDialogCaller(parentComponent, message, true);
 
 		if (dialogCaller == null) {
 			/**

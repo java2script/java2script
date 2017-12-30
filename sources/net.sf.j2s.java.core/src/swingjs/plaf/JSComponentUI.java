@@ -1959,21 +1959,22 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 
 	public int getZIndex(String what) {
 		@SuppressWarnings("unused")
-		Component c = this.c;
+		DOMNode node = domNode;
 		int z = 0;
 		/**
-		 * looking for high-level content pane
+		 * looking for high-level content pane or frame
 		 * 
 		 * @j2sNative
 		 * 
 		 *            if (what) return this.applet._z[what];
-		 * 
-		 *            while (c && c.style && c.style["z-index"]) { z =
-		 *            c.style["z-index"]; c = c.parentNode; }
-		 * 
+		 * 			
+		 *            while (node && !node.style["z-index"]) 
+		 *              node = node.parentElement;
+		 * 			  z = parseInt(node.style["z-index"]);
+		 * 			  return(!z || isNaN(z) ? 100000 : z); 
 		 */
 		{
-			return (z == 0 ? 100000 : z);
+			return z;
 		}
 	}
 

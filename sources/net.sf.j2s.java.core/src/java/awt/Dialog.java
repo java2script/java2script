@@ -27,21 +27,13 @@
  */
 package java.awt;
 
-//import java.awt.event.ComponentEvent;
-//import java.awt.event.HierarchyEvent;
-import java.awt.HeadlessException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-
 import java.awt.event.ComponentEvent;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.peer.ComponentPeer;
 import java.awt.peer.DialogPeer;
-import sun.awt.AppContext;
-import sun.awt.PeerEvent;
-//import sun.awt.AppContext;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * A Dialog is a top-level window with a title and a border
@@ -791,8 +783,7 @@ public class Dialog extends Window {
        return isModal_NoClientCode();
     }
     final boolean isModal_NoClientCode() {
-    	return dialogCallback != null;
-//        return modalityType != ModalityType.MODELESS;
+       return modalityType != ModalityType.MODELESS;
     }
 
     /**

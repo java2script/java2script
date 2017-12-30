@@ -172,8 +172,7 @@ public class JSToolkit extends SunToolkit {
 
 	@Override
 	public boolean isModalityTypeSupported(ModalityType modalityType) {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override

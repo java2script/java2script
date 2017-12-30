@@ -22,7 +22,7 @@ public abstract class DOMNode {
 	public abstract Rectangle getBoundingClientRect();
 
 
-	public static DOMNode createElement(String key, String id, Object... attrs) {
+	public static DOMNode createElement(String key, String id) {
 		DOMNode node = null;
 		/**
 		 * adding __CLASS_NAME__ allows a node to be used as a parameter in an overloaded method
@@ -34,7 +34,7 @@ public abstract class DOMNode {
 		 */
 		{
 		}
-		return setAttrs(node, attrs);
+		return node;
 	}
 
 	public static DOMNode createTextNode(String text) {
