@@ -110,7 +110,7 @@ import java.awt.event.WindowListener;
  * @author Scott Violet
  */
 public class JDialog extends Dialog implements WindowConstants,
-                                               RootPaneContainer
+                                               RootPaneContainer//, TransferHandler.HasGetTransferHandler
 {
     /**
      * Key into the AppContext, used to check if should provide decorations
@@ -1216,17 +1216,5 @@ public class JDialog extends Dialog implements WindowConstants,
         ",rootPane=" + rootPaneString +
         ",rootPaneCheckingEnabled=" + rootPaneCheckingEnabledString;
     }
-
-	public int notifyCaller(Object value) {
-		if (optionCaller != null) {
-			/**
-			 * @j2sNative
-			 * 
-			 * caller.onReturn$O(value);
-			 * 
-			 */
-		}
-		return 0;
-	}
 
 }

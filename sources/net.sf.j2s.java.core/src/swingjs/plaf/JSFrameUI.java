@@ -45,7 +45,6 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	private boolean resizeable;
 	private DOMNode closerWrap;
 	protected boolean isModal;
-	private DOMNode modalNode;
 	protected int zModal;
 
 

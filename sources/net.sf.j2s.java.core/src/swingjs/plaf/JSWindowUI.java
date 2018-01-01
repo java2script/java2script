@@ -36,6 +36,12 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 	protected Window window;
 	protected Font font;
 
+	/**
+	 * a translucent screen that prevents events to pass - for JDialog
+	 */
+	protected DOMNode modalNode;
+
+
 	private Graphics2D graphics;
 
 	/*
@@ -169,6 +175,8 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 	public void dispose() {
 		JSUtil.J2S._jsUnsetMouse(domNode);
 		DOMNode.remove(outerNode);
+		if (modalNode != null)
+			DOMNode.remove(modalNode);
 	}
 
 	@Override

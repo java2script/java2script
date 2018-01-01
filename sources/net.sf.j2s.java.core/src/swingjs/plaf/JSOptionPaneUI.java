@@ -1148,39 +1148,41 @@ public class JSOptionPaneUI extends JSPanelUI {
             this.buttonIndex = buttonIndex;
         }
 
-        public void actionPerformed(ActionEvent e) {
-            if (optionPane != null) {
-                int optionType = optionPane.getOptionType();
-                Object[] options = optionPane.getOptions();
+		public void actionPerformed(ActionEvent e) {
+			if (optionPane != null) {
+				int optionType = optionPane.getOptionType();
+				Object[] options = optionPane.getOptions();
 
-                /* If the option pane takes input, then store the input value
-                 * if custom options were specified, if the option type is
-                 * DEFAULT_OPTION, OR if option type is set to a predefined
-                 * one and the user chose the affirmative answer.
-                 */
-                if (inputComponent != null) {
-                    if (options != null ||
-                        optionType == JOptionPane.DEFAULT_OPTION ||
-                        ((optionType == JOptionPane.YES_NO_OPTION ||
-                         optionType == JOptionPane.YES_NO_CANCEL_OPTION ||
-                         optionType == JOptionPane.OK_CANCEL_OPTION) &&
-                         buttonIndex == 0)) {
-                        resetInputValue();
-                    }
-                }
-                if (options == null) {
-                    if (optionType == JOptionPane.OK_CANCEL_OPTION &&
-                        buttonIndex == 1) {
-                        optionPane.setValue(Integer.valueOf(2));
+				/*
+				 * If the option pane takes input, then store the input value if
+				 * custom options were specified, if the option type is
+				 * DEFAULT_OPTION, OR if option type is set to a predefined one
+				 * and the user chose the affirmative answer.
+				 */
+				if (inputComponent != null) {
+					if (options != null || optionType == JOptionPane.DEFAULT_OPTION
+							|| ((optionType == JOptionPane.YES_NO_OPTION
+									|| optionType == JOptionPane.YES_NO_CANCEL_OPTION
+									|| optionType == JOptionPane.OK_CANCEL_OPTION) && buttonIndex == 0)) {
+						resetInputValue();
+					}
+				}
+				if (options == null) {
+					boolean wantsInput = optionPane.getWantsInput();
+					if (optionType == JOptionPane.OK_CANCEL_OPTION && buttonIndex == 1) {
+						if (wantsInput)
+							optionPane.setInputValue(null);
+						else
+							optionPane.setValue(Integer.valueOf(2));
 
-                    } else {
-                        optionPane.setValue(Integer.valueOf(buttonIndex));
-                    }
-                } else {
-                    optionPane.setValue(options[buttonIndex]);
-                }
-            }
-        }
+					} else if (!wantsInput) {
+						optionPane.setValue(Integer.valueOf(buttonIndex));
+					}
+				} else {
+					optionPane.setValue(options[buttonIndex]);
+				}
+			}
+		}
     }
 
 

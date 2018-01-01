@@ -509,7 +509,7 @@ public class JSUtil {
 		 * @j2sNative
 		 * 
 		 * console.log("[JSUtil] " + object);
-		 * alert("[JSUtil] " + object);
+		 * alert(object);
 		 */
 		{
 			System.out.println(object);

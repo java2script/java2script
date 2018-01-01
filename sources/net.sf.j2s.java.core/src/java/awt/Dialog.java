@@ -299,14 +299,15 @@ public class Dialog extends Window {
      */
     transient volatile boolean isInDispose = false;
 
-    private JSComponent.AsynchronousDialogCaller dialogCallback;
-    
-    public void setDialogCallback(JSComponent.AsynchronousDialogCaller callback) {
-    	dialogCallback = callback; 
-    }
-
     private static final String base = "dialog";
     private static int nameCounter = 0;
+
+	/**
+	 *  in JavaScript, the initial return to indicate that the real return will go to caller.onDialogReturn(int)
+	 */
+	public static final int ASYNCHRONOUS_DEFERRED = Integer.MIN_VALUE;
+
+
 
     /*
      * JDK 1.1 serialVersionUID

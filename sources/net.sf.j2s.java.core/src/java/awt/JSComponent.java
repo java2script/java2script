@@ -28,6 +28,8 @@
 package java.awt;
 
 import java.awt.peer.ComponentPeer;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.JComponent;
 import javax.swing.UIDefaults;
@@ -48,13 +50,24 @@ import swingjs.api.js.HTML5Canvas;
  */
 public abstract class JSComponent extends Component {
 
-	public interface AsynchronousDialogCaller {
-	    	public void onDialogReturn(Object value);
-	    	public void onDialogReturn(int value);
-	}
-
-	public interface AsynchronousDialogMessage {
-    	public AsynchronousDialogCaller getCaller(int value);
+	/**
+	 * For modal dialogs, make sure the parent component, if there is one, is a
+	 * PropertyChangeListener for this component (JOptionPane, JFileChooser, or
+	 * JColorChooser)
+	 * 
+	 * @param c
+	 * @param listener
+	 */
+	public static void ensurePropertyChangeListener(Component c, Component listener) {
+		if (listener instanceof PropertyChangeListener) {
+			// BH SwingJS: We remove, then add, the parentComponent.
+			// If it is not really a listener, there will be a notification
+			c.removePropertyChangeListener((PropertyChangeListener) listener);
+			c.addPropertyChangeListener((PropertyChangeListener) listener);
+		} else if (listener != null) {
+			System.err.println(
+					"JSComponent: " + listener + " is not a PropertyChangeListener -- modal dialog will fail.");
+		}
 	}
 
 	/**
@@ -63,31 +76,31 @@ public abstract class JSComponent extends Component {
 	 * 
 	 */
 
-  public String htmlName;
+	public String htmlName;
 	protected int num;
 	private static int incr;
 
 	public boolean isRootPane, isContentPane;
 	public HTML5Canvas canvas;
 	public JSAppletViewer appletViewer = ((JSAppletThread) Thread.currentThread()).appletViewer;
-	private  JSFrameViewer frameViewer;
+	private JSFrameViewer frameViewer;
 
-  public JSComponent() {
-  	super();
-    num = ++incr;
-  }
+	public JSComponent() {
+		super();
+		num = ++incr;
+	}
 
 	/**
 	 * 
 	 * For SwingJS, we have the graphics without needing to get it from a peer.
-	 * Creates a canvas and graphics context for this component's window or applet
-	 * at the Applet or Frame level.
+	 * Creates a canvas and graphics context for this component's window or
+	 * applet at the Applet or Frame level.
 	 * 
 	 */
 	@Override
 	public Graphics getGraphics() {
 		if (width == 0 || height == 0 || !isVisible())
-			return null;		
+			return null;
 		if (frameViewer != null)
 			return frameViewer.getGraphics(0, 0).create();
 		if (parent == null) {
@@ -96,66 +109,58 @@ public abstract class JSComponent extends Component {
 		Graphics g = parent.getGraphics();
 		if (g == null)
 			return null;
-//		if (g instanceof ConstrainableGraphics) {
-//			((ConstrainableGraphics) g).constrain(x, y, width, height);
-//		} else {
-			g.translate(x, (isContentPane ? 0 : y));
-			g.setClip(0, 0, width, height);
-//		}
+		// if (g instanceof ConstrainableGraphics) {
+		// ((ConstrainableGraphics) g).constrain(x, y, width, height);
+		// } else {
+		g.translate(x, (isContentPane ? 0 : y));
+		g.setClip(0, 0, width, height);
+		// }
 		g.setFont(getFont());
 		return g;
 	}
 
-  public JSFrameViewer setFrameViewer(JSFrameViewer viewer) {
-		return frameViewer = (viewer == null ? viewer = new JSFrameViewer()
-				.setForWindow((Container) this) : viewer);
+	public JSFrameViewer setFrameViewer(JSFrameViewer viewer) {
+		return frameViewer = (viewer == null ? viewer = new JSFrameViewer().setForWindow((Container) this) : viewer);
 	}
-	
+
 	private JSFrameViewer topFrameViewer;
-	
-  public JSFrameViewer getFrameViewer() {
-  	JSComponent parent = null;
-  	return (topFrameViewer != null ? topFrameViewer
-  			: frameViewer != null  ? topFrameViewer = frameViewer 
-    		: (parent = getParent()) == null ? null  
-    				: (topFrameViewer = parent.getFrameViewer())); 
-  }
-	
-  public String getHTMLName(String uid) {
-  	return (htmlName == null ? htmlName = appContext.getThreadGroup().getName() 
-  			+ "_" + uid + "_" + num : htmlName);
-  }
+
+	public JSFrameViewer getFrameViewer() {
+		JSComponent parent = null;
+		return (topFrameViewer != null ? topFrameViewer
+				: frameViewer != null ? topFrameViewer = frameViewer
+						: (parent = getParent()) == null ? null : (topFrameViewer = parent.getFrameViewer()));
+	}
+
+	public String getHTMLName(String uid) {
+		return (htmlName == null ? htmlName = appContext.getThreadGroup().getName() + "_" + uid + "_" + num : htmlName);
+	}
 
 	public ComponentUI ui;
-  
-  
-  public String uiClassID = "ComponentUI";
 
-
-  /**
-   * Returns the <code>UIDefaults</code> key used to
-   * look up the name of the <code>swing.plaf.ComponentUI</code>
-   * class that defines the look and feel
-   * for this component.  Most applications will never need to
-   * call this method.  Subclasses of <code>JComponent</code> that support
-   * pluggable look and feel should override this method to
-   * return a <code>UIDefaults</code> key that maps to the
-   * <code>ComponentUI</code> subclass that defines their look and feel.
-   *
-   * @return the <code>UIDefaults</code> key for a
-   *          <code>ComponentUI</code> subclass
-   * @see UIDefaults#getUI
-   * @beaninfo
-   *      expert: true
-   * description: UIClassID
-   */
-	public String getUIClassID() {
-      return uiClassID;
-  }
+	public String uiClassID = "ComponentUI";
 
 	/**
-	 * a version of setUI for objects that are not JComponents
-	 * (JDialog, JFrame, JWindow).
+	 * Returns the <code>UIDefaults</code> key used to look up the name of the
+	 * <code>swing.plaf.ComponentUI</code> class that defines the look and feel
+	 * for this component. Most applications will never need to call this
+	 * method. Subclasses of <code>JComponent</code> that support pluggable look
+	 * and feel should override this method to return a <code>UIDefaults</code>
+	 * key that maps to the <code>ComponentUI</code> subclass that defines their
+	 * look and feel.
+	 *
+	 * @return the <code>UIDefaults</code> key for a <code>ComponentUI</code>
+	 *         subclass
+	 * @see UIDefaults#getUI
+	 * @beaninfo expert: true description: UIClassID
+	 */
+	public String getUIClassID() {
+		return uiClassID;
+	}
+
+	/**
+	 * a version of setUI for objects that are not JComponents (JDialog, JFrame,
+	 * JWindow).
 	 * 
 	 * @param ui
 	 */
@@ -169,47 +174,45 @@ public abstract class JSComponent extends Component {
 	}
 
 	public ComponentUI getUI() {
-  	return ui;
-  }
-	
-	Boolean peerVis;
-	
-  @Override
-	protected void updatePeerVisibility(boolean isVisible) {
-  	// check for visibility set prior to creation of ui.
-    if (getOrCreatePeer() == null)
-    	peerVis = (isVisible ? Boolean.TRUE : Boolean.FALSE);
-    else
-    	updatePeerVisibilityOrig(isVisible);
-  }
+		return ui;
+	}
 
-  /**
+	Boolean peerVis;
+
+	@Override
+	protected void updatePeerVisibility(boolean isVisible) {
+		// check for visibility set prior to creation of ui.
+		if (getOrCreatePeer() == null)
+			peerVis = (isVisible ? Boolean.TRUE : Boolean.FALSE);
+		else
+			updatePeerVisibilityOrig(isVisible);
+	}
+
+	/**
 	 * A peer in SwingJS can only be created after the ui is created.
 	 */
 	@Override
 	protected ComponentPeer getOrCreatePeer() {
-		return (ui == null ? null : ui == null ? null : peer == null ? (peer = getToolkit().createComponent(this)) : peer);
-  }
+		return (ui == null ? null
+				: ui == null ? null : peer == null ? (peer = getToolkit().createComponent(this)) : peer);
+	}
 
-	
-  /**
-   * Run once for every component. Resets the UI property to a value from the current look and
-   * feel.
-   *
-   * @see JComponent#updateUI
-   */
-  public void updateUI() {
-  	if (ui == null)
-      setUI(UIManager.getUI(this));
-  }
-  
-  /**
-   * not totally successful;
-   * triggered for images, background, and fillBox
-   * 
-   */
-  public boolean isBackgroundPainted;
-  
+	/**
+	 * Run once for every component. Resets the UI property to a value from the
+	 * current look and feel.
+	 *
+	 * @see JComponent#updateUI
+	 */
+	public void updateUI() {
+		if (ui == null)
+			setUI(UIManager.getUI(this));
+	}
+
+	/**
+	 * not totally successful; triggered for images, background, and fillBox
+	 * 
+	 */
+	public boolean isBackgroundPainted;
 
 	protected JSGraphics2D getJSGraphic2D(Graphics g) {
 		/**
@@ -218,17 +221,17 @@ public abstract class JSComponent extends Component {
 		 * 			return (g.mark ? g : null);
 		 */
 		{
-			return null; 
+			return null;
 		}
 	}
 
-  /**
-   * This method is added to ensure that if a jpanel or other object's background
-   * is painted to, that it becomes transparent -- since the actual painting is
-   * not to this canvas but instead to the JRootPane canvas.
-   *
-   * @param jsg
-   */
+	/**
+	 * This method is added to ensure that if a jpanel or other object's
+	 * background is painted to, that it becomes transparent -- since the actual
+	 * painting is not to this canvas but instead to the JRootPane canvas.
+	 *
+	 * @param jsg
+	 */
 	public void checkBackgroundPainted(JSGraphics2D jsg) {
 		if (jsg == null) {
 			isBackgroundPainted = false;
@@ -242,20 +245,21 @@ public abstract class JSComponent extends Component {
 			((JComponent) this).getRootPane().getUI().setBackgroundPainted();
 		}
 	}
-	
+
 	public boolean selfOrParentBackgroundPainted() {
 		JSComponent c = this;
 		while (c != null) {
 			if (c.isBackgroundPainted)
-			return true;
+				return true;
 			c = (JSComponent) c.getParent();
 		}
 		return false;
 	}
 
-  @Override
+	@Override
 	public boolean isBackgroundSet() {
-    return background != null;//false;// TODO (background != null && !isBackgroundPainted);
-}
+		return background != null;// false;// TODO (background != null &&
+									// !isBackgroundPainted);
+	}
 
 }

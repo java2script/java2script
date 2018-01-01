@@ -34,7 +34,6 @@ import java.awt.Container;
 import java.awt.Dialog;
 import java.awt.Frame;
 import java.awt.HeadlessException;
-import java.awt.JSComponent;
 import java.awt.Window;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -46,39 +45,66 @@ import java.beans.PropertyChangeListener;
 
 import javax.swing.plaf.OptionPaneUI;
 
+import swingjs.JSUtil;
+
 /**
  * 
- * Modified for SwingJS by Bob Hanson to allow for asynchronous semi-modal callbacks.
+ * Modified for SwingJS by Bob Hanson to allow for HTML5 asynchronous semi-modal callbacks.
  * 
- * For this, one of the two possibilities must be true:
  * 
- * 1) The parentComponent implements the method onDialogReturn(int) or onDialogReturn(Object)
- * 
- *    (as in JSComponent.AsynchronousDialogCaller)
- * or
- * 
- * 2) the message itself implements getDialogCaller()
+ * For this action to work, the parentComponent must implement propertyChangeListener, and
+ * any call to JOptionPanel should allow for asynchronous response.
+ *    
+ * In addition, for compatibility with the Java version, implementation should wrap the call to
+ * getConfirmDialog or getOptionDialog in a method call to handle the Java:
  *  
- *    (as in JSComponent.AsynchronousDialogMessage)
- *    
- * 
- * If (2) is the case, then the return from getDialogCaller() must be a 
- *    class that implements the method onDialogReturn(int) or onDialogReturnObject().
- *    
+ *  onDialogReturn(JOptionPane.showConfirmDialog(parentFrame, messageOrMessagePanel, "title", JOptionPane.OK_CANCEL_OPTION)); 
  *
- * Calls to showConfirmDialog or showMessageDialog return via onDialogReturn(int);
- * calls to showInputDialog return via onDialogReturn(Object).
- *    
- *    
- * The initial call to JOptionPane.getConfirmDialog, getMessageDialog, or getOptionDialog
- * will return:
+ * Then parentFrame.propertyChange(event) should also call onDialogReturn. 
  * 
- *  a) for an int return, Integer.MIN_VALUE if the caller was found, or -1 (CLOSE_OPTION) if not;
+ * This will then work in both Java and JavaScript.
+ * 
+ * Note that there is an int and an Object version of onDialogReturn(). 
+ * 
+ * 
+ * In JavaScript:
+ * 
+ * The initial return from JOptionPane.showConfirmDialog and showMessageDialog will be
+ * Integer.MIN_VALUE if the parent implements PropertyChangeListeneer, or -1 (CLOSE_OPTION) if not.
+ * 
+ * For showOptionDialog, which returns Object, the initial return will be JOptionPane.UNINITIAlIZED_VALUE ("uninitializedValue") 
+ * if the parent implements PropertyChangeListeneer,  or null if not.
+ * 
+ * The second return will be the desired return.
+ * 
+ * In Java:
+ * 
+ * The initial return will be the one and only modal final return. 
+ * 
+ * 
+ * 
+ * For full compatibility, The calling method must not continue beyond this call. 
  *  
- *  b) for an Object return, JOptionPane.UNINITIAlIZED_VALUE ("uninitializedValue") if the caller was found, or null if not.
- *  
+ * All of the standard Java events associated with Components are also available.
+ * 
+ * Certain fall back mechanisms are possible, where onReturn does not exist, but only for the falling cases:
  * 
  * 
+ * For showMessageDialog, for WARNING_MESSAGE and ERROR_MESSAGE, a simple JavaScript alert() is used, returning 0 (OK_OPTION) or -1 (CLOSED_OPTION).
+ * 
+ * For showInputDialog, if the message is a string, a simple JavaScript prompt() with input box is used, returning the entered string or null.
+ * 
+ * For showConfirmDialog, a simple JavaScript confirm() is used, in which case:
+ * 
+ *
+ * for YES_NO_OPTION: YES_OPTION or NO_OPTION
+ * 
+ * for YES_NO_CANCEL_OPTION: YES_OPTION or CANCEL_OPTION
+ * 
+ * for OK_CANCEL_OPTION or any other: OK_OPTION or CANCEL_OPTION
+ * 
+ * Note that you should implement a response for CLOSED_OPTION for showConfirmDialog.
+ * For other dialogs, a null return indicates the dialog was closed, just as for Java.
  * 
  * <code>JOptionPane</code> makes it easy to pop up a standard dialog box that
  * prompts users for a value or informs them of something. For information about
@@ -379,12 +405,6 @@ public class JOptionPane extends JComponent {
 	 */
 	public static final int CLOSED_OPTION = -1;
 
-	/**
-	 *  in JavaScript, the initial return to indicate that the real return will go to caller.onDialogReturn(int)
-	 */
-	public static final int ASYNCHRONOUS_DEFERRED = Integer.MIN_VALUE;
-
-
 	//
 	// Message types. Used by the UI to determine what icon to display,
 	// and possibly what behavior to give based on the type.
@@ -422,14 +442,6 @@ public class JOptionPane extends JComponent {
 	public static final String INPUT_VALUE_PROPERTY = "inputValue";
 	/** Bound property name for <code>wantsInput</code>. */
 	public static final String WANTS_INPUT_PROPERTY = "wantsInput";
-
-	private JSComponent.AsynchronousDialogCaller dialogCaller;
-
-	/**
-	 * true for showConfirmDialog
-	 */
-	private boolean isIntReturn = false;
-
 	/** Icon used in pane. */
 	transient protected Icon icon;
 	/** Message to display. */
@@ -461,6 +473,11 @@ public class JOptionPane extends JComponent {
 	protected transient Object initialSelectionValue;
 	/** If true, a UI widget will be provided to the user to get input. */
 	protected boolean wantsInput;
+
+	// BH SwingJS - we must distinguish public from private static here.
+	private boolean disposeOnHide = true;
+	
+	private static boolean USE_HTML5_MODAL_FOR_WARNINGS_AND_ERRORS = true;
 
 	/**
 	 * Shows a question-message dialog requesting input from the user. The dialog
@@ -510,7 +527,7 @@ public class JOptionPane extends JComponent {
 	 */
 	public static String showInputDialog(Component parentComponent, Object message) {
 		return showInputDialog(parentComponent, message,
-				UIManager.getString("OptionPane.inputDialogTitle", parentComponent),
+				"Input"/*UIManager.getString("OptionPane.inputDialogTitle", parentComponent)*/,
 				QUESTION_MESSAGE);
 	}
 
@@ -532,7 +549,7 @@ public class JOptionPane extends JComponent {
 	public static String showInputDialog(Component parentComponent,
 			Object message, Object initialSelectionValue) {
 		return (String) showInputDialog(parentComponent, message,
-				UIManager.getString("OptionPane.inputDialogTitle", parentComponent),
+				"Input"/*UIManager.getString("OptionPane.inputDialogTitle", parentComponent)*/,
 				QUESTION_MESSAGE, null, null, initialSelectionValue);
 	}
 
@@ -605,27 +622,23 @@ public class JOptionPane extends JComponent {
 
 		Object value;
 
-		JSComponent.AsynchronousDialogCaller dialogCaller = getDialogCaller(parentComponent, message, false);
+		if (!(parentComponent instanceof PropertyChangeListener)) {
+		
+			if (!(message instanceof String)) {
+				warnJSDeveloper();
+				message = "?";
+			}
 
-		if (dialogCaller == null) {
+			if (!(initialSelectionValue instanceof String)) {
+				warnJSDeveloper();
+				initialSelectionValue = (initialSelectionValue == null ? "" : initialSelectionValue.toString());
+			}
 
-			/**
-			 * 
-			 * Just a simple prompt for SwingJS
-			 * 
-			 * @j2sNative
-			 * 
-			 * 			return prompt(message, initialSelectionValue == null ?
-			 *            "" : initialSelectionValue);
-			 * 
-			 */
-			{}
-
+			String jsReturn = JSUtil.prompt((String) message, (String) initialSelectionValue);
+			return (jsReturn == null ? null : jsReturn);
 		}
 
 		JOptionPane pane = new JOptionPane(message, messageType, OK_CANCEL_OPTION, icon, null, null);
-		pane.dialogCaller = dialogCaller;
-		pane.isIntReturn = false;
 
 		pane.setWantsInput(true);
 		pane.setSelectionValues(selectionValues);
@@ -635,7 +648,6 @@ public class JOptionPane extends JComponent {
 
 		int style = styleFromMessageType(messageType);
 		JDialog dialog = pane.createDialog(parentComponent, title, style);
-		dialog.setDialogCallback(dialogCaller);
 
 		pane.selectInitialValue();
 		
@@ -662,7 +674,8 @@ public class JOptionPane extends JComponent {
 	 */
 	public static void showMessageDialog(Component parentComponent, Object message) {
 		showMessageDialog(parentComponent, message,
-				UIManager.getString("OptionPane.messageDialogTitle", parentComponent),
+				//UIManager.getString("OptionPane.messageDialogTitle", parentComponent)
+				"Message",
 				INFORMATION_MESSAGE);
 	}
 
@@ -720,22 +733,22 @@ public class JOptionPane extends JComponent {
 	 */
 	public static void showMessageDialog(Component parentComponent, Object message, String title, int messageType,
 			Icon icon) {
-		JSComponent.AsynchronousDialogCaller dialogCaller = getDialogCaller(parentComponent, message, true);
-
-		if (dialogCaller == null) {
-			/**
-			 * 
-			 * Just a simple alert for SwingJS
-			 * 
-			 * @j2sNative
-			 * 
-			 * 			alert(message);
-			 * 
-			 */
-			{}
+		
+		boolean simplify = USE_HTML5_MODAL_FOR_WARNINGS_AND_ERRORS && (messageType == WARNING_MESSAGE || messageType == ERROR_MESSAGE);
+		boolean isPropertyListener = parentComponent instanceof PropertyChangeListener;
+		
+		if (simplify || !isPropertyListener) {
+			if (!simplify && !(message instanceof String))
+				warnJSDeveloper();
+			String s = getMessageTypeString(messageType, ": ") + (title == "Message" ? "" : title + "\n\n") + (message instanceof String ? "" + message: "?");
+			JSUtil.alert(s);
 			return;
 		}
 		showOptionDialog(parentComponent, message, title, DEFAULT_OPTION, messageType, icon, null, null);
+	}
+
+	private static void warnJSDeveloper() {
+		System.err.println("JOptionPane: Component does not implement PropertyChangeListener.");
 	}
 
 	/**
@@ -757,7 +770,7 @@ public class JOptionPane extends JComponent {
 	 */
 	public static int showConfirmDialog(Component parentComponent, Object message) {
 		return showConfirmDialog(parentComponent, message,
-				UIManager.getString("OptionPane.titleText"), YES_NO_CANCEL_OPTION);
+				"Confirm"/*UIManager.getString("OptionPane.titleText")*/, YES_NO_CANCEL_OPTION);
 	}
 
 	/**
@@ -864,25 +877,9 @@ public class JOptionPane extends JComponent {
 	public static int showConfirmDialog(Component parentComponent,
 			Object message, String title, int optionType, int messageType, Icon icon) {
 		
-		JSComponent.AsynchronousDialogCaller dialogCaller = getDialogCaller(parentComponent, message, true);
-		
-		int ok = OK_OPTION;
-		int canc = CANCEL_OPTION;
-		int yes = YES_OPTION;
-		int no = NO_OPTION;
-		
 		String[] options = new String[] {"ok"};
 		switch (optionType) {
 		case OK_CANCEL_OPTION:
-			if (dialogCaller == null) {
-				/**
-				 * @j2sNative
-				 * 
-				 *            return (confirm(message) ? ok : canc);
-				 * 
-				 */
-				{}
-			} 			
 			options = new String[] {"ok", "cancel"};
 			break;
 		case YES_NO_CANCEL_OPTION:
@@ -892,7 +889,26 @@ public class JOptionPane extends JComponent {
 			options = new String[] {"yes", "no"};
 			break;
 		}
-		
+
+		boolean jsReturn = true;
+
+		if (!(parentComponent instanceof PropertyChangeListener)) {
+			if (!(message instanceof String)) {
+				warnJSDeveloper();
+				message = "?";
+			}			
+			jsReturn = JSUtil.confirm((String) message);
+			switch(optionType) {
+			case OK_CANCEL_OPTION:
+			default:
+				return (jsReturn ? OK_OPTION : CANCEL_OPTION);
+			case YES_NO_CANCEL_OPTION:
+				return (jsReturn ? YES_OPTION : CANCEL_OPTION); // NO not avaiable here
+			case YES_NO_OPTION:
+				return (jsReturn ? YES_OPTION : NO_OPTION);
+			}
+		}
+
 		return showOptionDialog(parentComponent, message, title, optionType,
 			messageType, icon, null, null);
 	}
@@ -951,39 +967,24 @@ public class JOptionPane extends JComponent {
 	public static int showOptionDialog(Component parentComponent, Object message,
 			String title, int optionType, int messageType, Icon icon,
 			Object[] options, Object initialValue) {
+		
+		if (!(parentComponent instanceof PropertyChangeListener)) {
+			warnJSDeveloper();
+			return CANCEL_OPTION;
+		}
+
 		JOptionPane pane = new JOptionPane(message, messageType, optionType, icon,
 				options, initialValue);
-		JSComponent.AsynchronousDialogCaller dialogCaller = getDialogCaller(parentComponent, message, true);
-		pane.dialogCaller = dialogCaller;
-		pane.isIntReturn = true;
 		pane.setInitialValue(initialValue);
 		pane.setComponentOrientation(((parentComponent == null) ? getRootFrame()
 				: parentComponent).getComponentOrientation());
 
 		int style = styleFromMessageType(messageType);
 		JDialog dialog = pane.createDialog(parentComponent, title, style);
-		dialog.setDialogCallback(dialogCaller);
-
 		pane.selectInitialValue();
 		
 		dialog.setVisible(true);	// dialog.show() sets up infinite loop	
-		if (dialogCaller == null) {
-			dialog.dispose();
-			return CLOSED_OPTION;
-		}
-		return ASYNCHRONOUS_DEFERRED;		
-	}
-
-	private static AsynchronousDialogCaller getDialogCaller(Component parentComponent, Object message, boolean isIntReturn) {
-		// checking for message instanceof JSComponent.AsynchronousDialogMessage
-		// but code will not check this, as JSComponent is not part of Java standard
-		JSComponent.AsynchronousDialogCaller dialogCaller = null;
-		/**
-		 * @j2sNative
-		 * 
-		 * dialogCaller = parentComponent && parentComponent[isIntReturn ? "onDialogReturn$I" : "onDialogReturn$O"] && parentComponent || message.getDialogCaller && message.getDialogCaller();
-		 */
-		return dialogCaller;
+		return Dialog.ASYNCHRONOUS_DEFERRED;		
 	}
 
 	/**
@@ -1014,6 +1015,7 @@ public class JOptionPane extends JComponent {
 	 */
 	public JDialog createDialog(Component parentComponent, String title) {
 		int style = styleFromMessageType(getMessageType());
+		disposeOnHide  = false;
 		return createDialog(parentComponent, title, style);
 	}
 
@@ -1090,7 +1092,13 @@ public class JOptionPane extends JComponent {
 
 			@Override
 			public void windowClosing(WindowEvent we) {
-				setValue(null);
+				if (wantsInput) 
+					setInputValue(null);
+				else
+					setValue(Integer.valueOf(CLOSED_OPTION));
+				if (disposeOnHide) {
+				  dialog.dispose();
+				}
 			}
 
 			@Override
@@ -1111,6 +1119,8 @@ public class JOptionPane extends JComponent {
 				setValue(UNINITIALIZED_VALUE);
 			}
 		});
+		ensurePropertyChangeListener(this, parentComponent);
+		
 		addPropertyChangeListener(new PropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
@@ -1120,16 +1130,9 @@ public class JOptionPane extends JComponent {
 				if (dialog.isVisible() && event.getSource() == JOptionPane.this && (event.getPropertyName().equals(VALUE_PROPERTY)
 						|| event.getPropertyName().equals(INPUT_VALUE_PROPERTY))) {
 					Object value = event.getNewValue();
-					if (value != null && value != UNINITIALIZED_VALUE) {
+					if (value != UNINITIALIZED_VALUE) {
 						dialog.setVisible(false);
 						dialog.dispose();
-					}
-					if (dialogCaller != null) {
-						if (isIntReturn) {
-							dialogCaller.onDialogReturn(getReturnIndex(value));
-						} else {
-							dialogCaller.onDialogReturn(value == UNINITIALIZED_VALUE ? null : value);
-						}
 					}
 				}
 			}
@@ -2063,7 +2066,6 @@ public class JOptionPane extends JComponent {
 	 */
 	public void setValue(Object newValue) {
 		Object oldValue = value;
-
 		value = newValue;
 		firePropertyChange(VALUE_PROPERTY, oldValue, value);
 	}
@@ -2559,19 +2561,7 @@ public class JOptionPane extends JComponent {
 		String initialValueString = (initialValue != null ? initialValue.toString()
 				: "");
 		String messageString = (message != null ? message.toString() : "");
-		String messageTypeString;
-		if (messageType == ERROR_MESSAGE) {
-			messageTypeString = "ERROR_MESSAGE";
-		} else if (messageType == INFORMATION_MESSAGE) {
-			messageTypeString = "INFORMATION_MESSAGE";
-		} else if (messageType == WARNING_MESSAGE) {
-			messageTypeString = "WARNING_MESSAGE";
-		} else if (messageType == QUESTION_MESSAGE) {
-			messageTypeString = "QUESTION_MESSAGE";
-		} else if (messageType == PLAIN_MESSAGE) {
-			messageTypeString = "PLAIN_MESSAGE";
-		} else
-			messageTypeString = "";
+		String messageTypeString = getMessageTypeString(messageType, "_MESSAGE");
 		String optionTypeString;
 		if (optionType == DEFAULT_OPTION) {
 			optionTypeString = "DEFAULT_OPTION";
@@ -2589,6 +2579,32 @@ public class JOptionPane extends JComponent {
 				+ initialValueString + ",message=" + messageString + ",messageType="
 				+ messageTypeString + ",optionType=" + optionTypeString
 				+ ",wantsInput=" + wantsInputString;
+	}
+
+	private static String getMessageTypeString(int messageType, String trailer) {
+		String s;
+		switch (messageType) {
+		case ERROR_MESSAGE:
+			s = "ERROR";
+			break;
+		case INFORMATION_MESSAGE:
+			s = (trailer == "_MESSAGE" ? "INFORMATION" : "");
+			break;
+		case WARNING_MESSAGE:
+			s = "WARNING";
+			break;
+		case QUESTION_MESSAGE:
+			s = (trailer == "_MESSAGE" ? "QUESTION" : "");
+			break;
+		case PLAIN_MESSAGE:
+			s = (trailer == "_MESSAGE" ? "PLAIN" : "");
+			break;
+		default:
+			s = "";
+			break;
+
+		}
+		return (s == "" ? "" : s + trailer);
 	}
 
 	// /**
