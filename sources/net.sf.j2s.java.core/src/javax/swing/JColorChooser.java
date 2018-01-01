@@ -40,14 +40,12 @@ import java.awt.Frame;
 //import java.io.ObjectOutputStream;
 
 import java.awt.HeadlessException;
-import java.awt.JSComponent;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.colorchooser.AbstractColorChooserPanel;
@@ -615,10 +613,6 @@ class ColorChooserDialog extends JDialog {
 
         this.chooserPane = chooserPane;
 
-        String okString = "OK";//UIManager.getString("ColorChooser.okText");
-        String cancelString = "Cancel";//UIManager.getString("ColorChooser.cancelText");
-        String resetString = "Reset";//UIManager.getString("ColorChooser.resetText");
-
         Container contentPane = getContentPane();
         contentPane.setLayout(new BorderLayout());
         contentPane.add(chooserPane, BorderLayout.CENTER);
@@ -626,6 +620,11 @@ class ColorChooserDialog extends JDialog {
         /*
          * Create Lower button panel
          */
+
+        String okString = "OK";//UIManager.getString("ColorChooser.okText");
+        String cancelString = "Cancel";//UIManager.getString("ColorChooser.cancelText");
+        String resetString = "Reset";//UIManager.getString("ColorChooser.resetText");
+
         JPanel buttonPane = new JPanel();
         buttonPane.setLayout(new FlowLayout(FlowLayout.CENTER));
         JButton okButton = new JButton(okString);

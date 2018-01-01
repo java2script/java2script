@@ -18,7 +18,7 @@ import javajs.util.Lst;
  * @author Bob Hanson
  *
  */
-public class JTabbedPane extends JPanel {
+public class JComboPane extends JPanel {
 
 	private JPanel pagePanel;
 	private JComboBox tabs;
@@ -27,7 +27,7 @@ public class JTabbedPane extends JPanel {
 	// just faking a JTabbedPane here using a drop-down combo box and a JPanel
 	// This will take considerably more work to make it right in general.
 
-	public JTabbedPane() {
+	public JComboPane() {
 		pagePanel = new JPanel();
 		pagePanel.setLayout(new BoxLayout(pagePanel, BoxLayout.PAGE_AXIS));
 		tabs = new JComboBox();
@@ -68,7 +68,7 @@ public class JTabbedPane extends JPanel {
 		// improperly allowing for multiple instances of a panel
 		Page page = new Page();
 		page.component = panel;
-		page.tab = title;
+		page.tab = (title == null ? "tab" + index : title);
 		panel.setVisible(true);
 		if (index < pages.size()) {
 			pages.get(index).component = panel;

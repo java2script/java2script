@@ -67,7 +67,7 @@ public class JSColorChooserUI extends JSPanelUI
      */
     protected JColorChooser chooser;
 
-    JTabbedPane tabbedPane;
+    JComboPane tabbedPane;
     JPanel singlePanel;
 
     JPanel previewPanelHolder;
@@ -105,7 +105,7 @@ public class JSColorChooserUI extends JSPanelUI
         installDefaults();
         installListeners();
 
-        tabbedPane = new JTabbedPane();
+        tabbedPane = new JComboPane();
         tabbedPane.setName("ColorChooser.tabPane");
         tabbedPane.setInheritsPopupMenu(true);
         singlePanel = new JPanel(new CenterLayout());
@@ -122,8 +122,7 @@ public class JSColorChooserUI extends JSPanelUI
 
         if (DefaultLookup.getBoolean(chooser, this,
                                   "ColorChooser.showPreviewPanelText", true)) {
-            String previewString = UIManager.getString(
-                "ColorChooser.previewText", chooser.getLocale());
+            String previewString = "Preview";//UIManager.getString("ColorChooser.previewText", chooser.getLocale());
             previewPanelHolder.setBorder(new TitledBorder(previewString));
         }
         previewPanelHolder.setInheritsPopupMenu(true);
