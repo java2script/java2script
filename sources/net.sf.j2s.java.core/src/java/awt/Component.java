@@ -1778,14 +1778,17 @@ public abstract class Component
 		if (locale != null) {
 			return locale;
 		}
-		Container parent = this.parent;
-
-		if (parent == null) {
-			throw new IllegalComponentStateException(
-					"This component must have a parent in order to determine its locale");
-		} else {
-			return parent.getLocale();
-		}
+		
+		return Locale.ENGLISH; // Trouble with cell renderers
+//		
+//		Container parent = this.parent;
+//
+//		if (parent == null) {
+//			throw new IllegalComponentStateException(
+//					"This component must have a parent in order to determine its locale");
+//		} else {
+//			return parent.getLocale();
+//		}
 	}
 
 	/**
