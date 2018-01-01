@@ -1123,10 +1123,11 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 		buffer.append(", ");
 
+		boolean hasSuperclass = false;
 		if (superclassName.equals("null")) {
 			buffer.append("null");
 		} else {
-			hasDependents = true;
+			hasDependents = hasSuperclass = true;
 			if (isAnonymous)
 				getQualifiedStaticName(null, superclassName, true, false, true);
 			else
@@ -1300,7 +1301,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			}
 			buffer.append("}, 1);\r\n");
 
-			if (init0Buffer.length() > 0) {
+			if (hasSuperclass || init0Buffer.length() > 0) {
 				String buf = buffer.substring(len);
 				buffer.setLength(len);
 				buffer.append("\r\nClazz.newMeth(C$, '$init0$', function () {\r\n");
