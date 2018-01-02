@@ -1267,14 +1267,17 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		return null;
 	}
 
+	@Deprecated
 	public Dimension getMinimumSize(JComponent jc) {
 		return getMinimumSize();
 	}
 	
+	@Deprecated
 	public Dimension getPreferredSize(JComponent jc) {
 		return getPreferredSize();
 	}
 	
+	@Deprecated
 	public Dimension getMaximumSize(JComponent jc) {
 		return getMaximumSize();
 	}

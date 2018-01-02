@@ -2165,10 +2165,10 @@ J2S._setDraggable = function(tag, targetOrArray) {
     tag._isDragger = false;
 		if (isBind) {
 			$tag.bind('mousemoveoutjsmol touchmoveoutjsmol', function(ev) {
-				drag(ev);
+				drag && drag(ev);
 			});
 			$tag.bind('mouseupoutjsmol touchendoutjsmol', function(ev) {
-				up(ev);
+				up && up(ev);
 			});
 		}
 	};  
@@ -2246,15 +2246,15 @@ J2S._setDraggable = function(tag, targetOrArray) {
 	};
 
 	$tag.bind('mousedown touchstart', function(ev) {
-    return down(ev);
+    return down && down(ev);
 	});
   
 	$tag.bind('mousemove touchmove', function(ev) {
-    return drag(ev);
+    return drag && drag(ev);
 	});
   
 	$tag.bind('mouseup touchend', function(ev) {
-		return up(ev);
+		return up && up(ev);
 	});
 
   dragBind(true);

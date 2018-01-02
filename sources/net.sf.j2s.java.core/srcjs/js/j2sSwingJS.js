@@ -274,6 +274,8 @@ Clazz.instanceOf = function (obj, clazz) {
   }
   if (obj == null || !clazz)
     return false;
+    // check for object being a java.lang.Class and the other not 
+  if (obj.$clazz$ && !clazz.$clazz$) return false;
   obj.$clazz$ && (obj = obj.$clazz$);
   clazz.$clazz$ && (clazz = clazz.$clazz$);
   if (obj == clazz)
@@ -375,7 +377,10 @@ Clazz.newClass = function (prefix, name, clazz, clazzSuper, interfacez, type) {
   }
   clazz || (clazz = function () {Clazz.newInstance(this,arguments,0,clazz)});  
   clazz.__NAME__ = name;
-  prefix.__CLASS_NAME__ && (clazz.$this$0 = prefix.__CLASS_NAME__);
+  // prefix class means this is an inner class, and $this$0 refers to the outer class. 
+  // no prefix class but a super class that is an inner class, then $this$0 refers to its $this$0.  
+  // there can be a conflict here. 
+  prefix.__CLASS_NAME__ && (clazz.$this$0 = prefix.__CLASS_NAME__) || clazzSuper && clazzSuper.$this$0 && (clazz.$this$0 = clazzSuper.$this$0);
   clazz.$load$ = [clazzSuper, interfacez];
   
   // get qualifed name, and for inner classes, the name to use to refer to this
@@ -523,7 +528,7 @@ Clazz.newInterface = function (prefix, name, _null1, _null2, interfacez, _0) {
 
 Clazz.newMeth = function (clazzThis, funName, funBody, isStatic) {
   if (arguments.length == 1) {
-    return Clazz.newMeth(clazzThis, 'c$', function(){Clazz.super(clazzThis, this,1);clazzThis.$init$.apply(this)}, 1);
+    return Clazz.newMeth(clazzThis, 'c$', function(){Clazz.super_(clazzThis, this,1);clazzThis.$init$.apply(this)}, 1);
   }
   if (funName.constructor == Array) {
     // If funName is an array, we are setting aliases for generic calls. 
@@ -563,7 +568,7 @@ Clazz.newPackage = function (pkgName) {
   return Clazz.lastPackage = pkg;
 };
 
-Clazz.super_ = Clazz.super = function(cl, obj, andInit) {
+Clazz.super_ = function(cl, obj, andInit) {
   if (cl.superclazz && cl.superclazz.c$) {
     // added [] here to account for the possibility of vararg default constructor
     cl.superclazz.c$.apply(obj, [[]]);
@@ -1432,6 +1437,7 @@ var addInterface = function (clazzThis, interfacez) {
       }
       addInterface(clazzThis, iface);  
     }
+    return;
   }
   if (typeof interfacez == "string") {
     var str = interfacez;
@@ -2747,7 +2753,7 @@ var setJ2STypeclass = function(cl, type, paramCode) {
 var decorateAsNumber = function (clazz, qClazzName, type, PARAMCODE) {
   clazz.prototype.valueOf=function(){return 0;};
   clazz.prototype.__VAL0__ = 1;
-  finalizeClazz(clazz, qClazzName, null, true);
+  finalizeClazz(clazz, qClazzName, null, 0, true);
   extendPrototype(clazz, true, true);
   setSuperclass(clazz, Number);
   addInterface(clazz, Comparable);
@@ -4526,7 +4532,7 @@ newEx(java.util,"TooManyListenersException",Exception);
 
 C$=newEx(java.util,"ConcurrentModificationException",RuntimeException);
 m$(C$, "c$", function(detailMessage, rootCause){
-Clazz.super(C$, this);
+Clazz.super_(C$, this);
 }, 1);
 
 C$=Clazz.newClass(java.util,"MissingResourceException",function(){
@@ -4707,7 +4713,7 @@ this.constr = null;
 },java.lang.reflect.AccessibleObject,[java.lang.reflect.GenericDeclaration,java.lang.reflect.Member]);
 
 m$(C$, "c$$Class$ClassA$ClassA$I", function(declaringClass,parameterTypes,checkedExceptions,modifiers){
-Clazz.super(C$, this);
+Clazz.super_(C$, this);
 this.Class_=declaringClass;
 this.parameterTypes=parameterTypes;
 if (parameterTypes != null)
@@ -4787,7 +4793,7 @@ return this.getDeclaringClass().getName().hashCode();
 m$(C$,"newInstance$OA", function(args){
   var instance = null;
   if (this.constr) {
-    var a = (args ? new Array(args.length) : null);
+    var a = (args ? new Array(args.length) : []);
     if (args) {
       for (var i = args.length; --i >= 0;) {
         a[i] = (this.parameterTypes[i].__PRIMITIVE ? args[i].valueOf() : args[i]);
@@ -4856,7 +4862,7 @@ this.exceptionTypes=null;
 this.modifiers=0;
 },java.lang.reflect.AccessibleObject,[java.lang.reflect.GenericDeclaration,java.lang.reflect.Member]);
 m$(C$, "c$$Class$S$ClassA$Class$ClassA$I", function(declaringClass,name,parameterTypes,returnType,checkedExceptions,modifiers){
-Clazz.super(C$, this);
+Clazz.super_(C$, this);
 this.Class_=declaringClass;
 this.name=name;
 this.parameterTypes=parameterTypes;
@@ -4967,6 +4973,11 @@ if (types != null || !addParams) {
 }
 //var c = this.Class_.$clazz$;
 //var m=c.prototype[name] || c[name];
+if (receiver.$clazz$) {
+ // receiver is a Class<?> object. We need to instantiate it.
+ // I do not see how this works in Java. 
+ receiver = receiver.newInstance();
+}
 var m = receiver[name];
 if (m == null)
   newMethodNotFoundException(Clazz.getClass(receiver).$clazz$, name);  

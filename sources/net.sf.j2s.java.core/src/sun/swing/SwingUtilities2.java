@@ -1883,4 +1883,9 @@ public class SwingUtilities2 {
                                          boolean three) {
         return liesIn(rect, p, false, false, three);
     }
+
+	public static void compositeRequestFocus(Component editorComponent) {
+		// TODO Auto-generated method stub
+		
+	}
 }
