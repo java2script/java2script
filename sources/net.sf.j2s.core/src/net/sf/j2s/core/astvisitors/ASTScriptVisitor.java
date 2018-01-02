@@ -74,7 +74,8 @@ import net.sf.j2s.core.astvisitors.adapters.MethodAdapter;
 import net.sf.j2s.core.astvisitors.adapters.TypeAdapter;
 import net.sf.j2s.core.astvisitors.adapters.VariableAdapter;
 
-// TODO: static calls to static methods do not trigger "musts" dependency
+// TODO: watch out for this.this$0 not working. inner class that d
+// BH 12/31/2017 -- competely rewritten for no run-time ambiguities
 // BH 9/10/2017 -- adds full byte, short, and int distinction using class-level local fields $b$, $s$, and $i$, which are IntXArray[1]. (See ASTKeywordVisitor)
 // BH 9/7/2017 -- primitive casting for *=,/=,+=,-=,&=,|=,^=
 // BH 9/7/2017 -- primitive numeric casting -- (byte) was ignored so that (byte)  0xFF remained 0xFF.
@@ -88,21 +89,6 @@ import net.sf.j2s.core.astvisitors.adapters.VariableAdapter;
 // BH 8/13/2017 -- includes native code calls in System.err
 // BH 7/31/2017 -- extensively reworked for fully qualified method names and no SAEM
 
-/*
- * 
-
-TODO #24 in a file starting with an interface and also including a class, only the class is found.
-
-interface Editable {
-    EditInfo getEditInfo(int n);
-    void setEditValue(int n, EditInfo ei);
-}
-
-class EditDialog extends Dialog implements AdjustmentListener, ActionListener, ItemListener {
-...
-
-
- */
 
 /**
  * 
@@ -1123,11 +1109,10 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 
 		buffer.append(", ");
 
-		boolean hasSuperclass = false;
 		if (superclassName.equals("null")) {
 			buffer.append("null");
 		} else {
-			hasDependents = hasSuperclass = true;
+			hasDependents = true;
 			if (isAnonymous)
 				getQualifiedStaticName(null, superclassName, true, false, true);
 			else
@@ -1301,7 +1286,7 @@ public class ASTScriptVisitor extends ASTKeywordVisitor {
 			}
 			buffer.append("}, 1);\r\n");
 
-			if (hasSuperclass || init0Buffer.length() > 0) {
+			if (init0Buffer.length() > 0) {
 				String buf = buffer.substring(len);
 				buffer.setLength(len);
 				buffer.append("\r\nClazz.newMeth(C$, '$init0$', function () {\r\n");
