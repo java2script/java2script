@@ -51,10 +51,23 @@ import java.beans.PropertyChangeListener;
 import javax.swing.colorchooser.AbstractColorChooserPanel;
 import javax.swing.colorchooser.ColorSelectionModel;
 import javax.swing.colorchooser.DefaultColorSelectionModel;
+import javax.swing.plaf.UIResource;
 
 import sun.swing.SwingUtilities2;
 
 /**
+ * 
+ * SwingJS note:
+ * 
+ * This class in JavaScript will run a modal dialog that will initially return
+ * an instance of JColorChooser.ASYNCHRONOUS_COLOR, testable as ret instanceof
+ * javax.swing.UIResource if the parent component implements
+ * PropertyChangeListener, or null if not. The final result of color selection
+ * will be returned by a PropertyChangeEvent with propertyName "SelectedColor".
+ * 
+ * The parent component will automatically be registered as a listener for the
+ * created instance of JColorChooser, it is a PropertyChangeListener.
+ * 
  * <code>JColorChooser</code> provides a pane of controls designed to allow a
  * user to manipulate and select a color. For information about using color
  * choosers, see <a href=
@@ -119,9 +132,18 @@ public class JColorChooser extends JComponent {
 	 */
 	public static final String CHOOSER_PANELS_PROPERTY = "chooserPanels";
 
-	public static final Color NOCOLOR = new Color(0, 0, 0, 0);
+	public static final Color NOCOLOR = new ASYNCHRONOUS_COLOR();
+	
+	static class ASYNCHRONOUS_COLOR extends Color implements UIResource {}
 
 	/**
+	 * SwingJS note:
+	 * 
+	 * In JavaScript, the initial return from showDialog will be ASYNCHRONOUS_COLOR, 
+	 * to be ignored, and testable as "implements UIResource"
+	 * 
+	 * 
+	 * 
 	 * Shows a modal color-chooser dialog and blocks until the dialog is hidden.
 	 * If the user presses the "OK" button, then this method hides/disposes the
 	 * dialog and returns the selected color. If the user presses the "Cancel"
@@ -705,7 +727,7 @@ class ColorChooserDialog extends JDialog {
     }
 
 	protected void doCallback(boolean isOK) {
-		firePropertyChange("colorSelected", null, (isOK ? chooserPane.getSelectionModel().getSelectedColor() : null));		
+		firePropertyChange("SelectedColor", null, (isOK ? chooserPane.getSelectionModel().getSelectedColor() : null));		
         hide();
         if (disposeOnHide)
         	dispose();

@@ -57,6 +57,15 @@ import swingjs.JSUtil;
 
 
 /**
+ * SwingJS note: 
+ * 
+ * This class in JavaScript will run a modal dialog that, in some operating systems (such as Windows 10) 
+ * will immediately open up a standard OS File Open dialog. However, the difference is that the return
+ * from showOpenDialog will be NaN (an impossible int value in Java and JavaScript), indicating that the
+ * true result will be returned by a PropertyChangeEvent with propertyName "SelectedFile". 
+ *   
+ * 
+ * 
  * <code>JFileChooser</code> provides a simple mechanism for the user to
  * choose a file.
  * For information about using <code>JFileChooser</code>, see
@@ -764,20 +773,19 @@ public class JFileChooser extends JComponent {
 
 				@Override
 				public void run() {
-					Map<String, byte[]> map = null;
 					/**
 					 * @j2sNative
 					 * 
-					 * map = arguments[0];
+					 * this.b$['javax.swing.JFileChooser'].selectedFile = arguments[0] || null;
 					 * 
 					 * 
 					 */
-					firePropertyChange("fileOpen", null, map);
+					firePropertyChange("SelectedFile", null, selectedFile);
 				}
 				
 			};
-			JSUtil.J2S._getFileFromDialog(/**@j2sNative function(map){r.run(map)}||*/ null, "java.util.Map");			
-			return Dialog.ASYNCHRONOUS_DEFERRED;
+			JSUtil.J2S._getFileFromDialog(/**@j2sNative function(file){r.run(file)}||*/ null, "java.io.File");			
+			return JDialog.ASYNCHRONOUS_INTEGER;
 		case SAVE_DIALOG:
 			String name = JSUtil.prompt((dialogTitle == null ? "File to Save?" : dialogTitle), lastFileName);
 			if (name == null)
@@ -800,7 +808,7 @@ public class JFileChooser extends JComponent {
 			}
 		});
 
-		returnValue = Integer.MIN_VALUE;//ERROR_OPTION;
+		returnValue = JDialog.ASYNCHRONOUS_INTEGER;
 		// rescanCurrentDirectory();
 
 		dialog.setVisible(true);

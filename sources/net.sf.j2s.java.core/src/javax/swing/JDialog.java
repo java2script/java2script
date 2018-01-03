@@ -41,6 +41,8 @@ import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
+import javax.swing.plaf.UIResource;
+
 // BH: Added rootPane.addNotify(); // builds a peer for the root pane
 
 /**
@@ -112,7 +114,9 @@ import java.awt.event.WindowListener;
 public class JDialog extends Dialog implements WindowConstants,
                                                RootPaneContainer//, TransferHandler.HasGetTransferHandler
 {
-    /**
+    public static class AsynchronousObject implements UIResource {}
+
+	/**
      * Key into the AppContext, used to check if should provide decorations
      * by default.
      */
@@ -142,7 +146,27 @@ public class JDialog extends Dialog implements WindowConstants,
      */
     private TransferHandler transferHandler;
 
-	public Object optionCaller;
+	/**
+	 * in JavaScript for JFileChooser and JOptionPane, the initial return will
+	 * be NaN, testable as ret != Math.floor(ret) to indicate that the real
+	 * return will be via a PropertyChangeEvent.
+	 */
+	static int ASYNCHRONOUS_INTEGER; // NOT FINAL because we are changing it in the next block
+
+	static {
+		/**
+		 * @j2sNative
+		 * 
+		 * C$.ASYNCHRONOUS_INTEGER = NaN;
+		 */		
+	}
+
+	/**
+	 * in JavaScript, for JOptionPane.showInput, returns an implementation of
+	 * UIResource, testable as such.
+	 * 
+	 */
+	static Object ASYNCHRONOUS_OBJECT = new JDialog.AsynchronousObject();
 
     /**
      * Creates a modeless dialog without a title and without a specified

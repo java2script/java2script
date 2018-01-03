@@ -49,50 +49,63 @@ import swingjs.JSUtil;
 
 /**
  * 
- * Modified for SwingJS by Bob Hanson to allow for HTML5 asynchronous semi-modal callbacks.
+ * Modified for SwingJS by Bob Hanson to allow for HTML5 asynchronous semi-modal
+ * callbacks.
  * 
  * 
- * For this action to work, the parentComponent must implement propertyChangeListener, and
- * any call to JOptionPanel should allow for asynchronous response.
- *    
- * In addition, for compatibility with the Java version, implementation should wrap the call to
- * getConfirmDialog or getOptionDialog in a method call to handle the Java:
- *  
- *  onDialogReturn(JOptionPane.showConfirmDialog(parentFrame, messageOrMessagePanel, "title", JOptionPane.OK_CANCEL_OPTION)); 
+ * For this action to work, the parentComponent must implement
+ * propertyChangeListener, and any call to JOptionPanel should allow for
+ * asynchronous response.
+ * 
+ * In addition, for compatibility with the Java version, implementation should
+ * wrap the call to getConfirmDialog or getOptionDialog in a method call to
+ * handle the Java:
+ * 
+ * onDialogReturn(JOptionPane.showConfirmDialog(parentFrame,
+ * messageOrMessagePanel, "title", JOptionPane.OK_CANCEL_OPTION));
  *
- * Then parentFrame.propertyChange(event) should also call onDialogReturn. 
+ * Then parentFrame.propertyChange(event) should also call onDialogReturn.
  * 
  * This will then work in both Java and JavaScript.
  * 
- * Note that there is an int and an Object version of onDialogReturn(). 
+ * Note that there is an int and an Object version of onDialogReturn().
  * 
  * 
  * In JavaScript:
  * 
- * The initial return from JOptionPane.showConfirmDialog and showMessageDialog will be
- * Integer.MIN_VALUE if the parent implements PropertyChangeListeneer, or -1 (CLOSE_OPTION) if not.
+ * The initial return from JOptionPane.showConfirmDialog and showMessageDialog
+ * will be NaN, testable as an impossible Java int value using ret !=
+ * Math.floor(ret) if the parent implements PropertyChangeListeneer, or -1
+ * (CLOSE_OPTION) if not.
  * 
- * For showOptionDialog, which returns Object, the initial return will be JOptionPane.UNINITIAlIZED_VALUE ("uninitializedValue") 
- * if the parent implements PropertyChangeListeneer,  or null if not.
+ * For showOptionDialog (which returns Object) or showInputDialog (which returns
+ * String), the initial return will be JDialog.ASYNCHRONOUS_OBJECT, testable as
+ * ((Object) ret) instanceof javax.swing.UIResource if the parent implements
+ * PropertyChangeListeneer, or null if not.
  * 
  * The second return will be the desired return.
  * 
  * In Java:
  * 
- * The initial return will be the one and only modal final return. 
+ * The initial return will be the one and only modal final return.
  * 
  * 
  * 
- * For full compatibility, The calling method must not continue beyond this call. 
- *  
- * All of the standard Java events associated with Components are also available.
+ * For full compatibility, The calling method must not continue beyond this
+ * call.
  * 
- * Certain fall back mechanisms are possible, where onReturn does not exist, but only for the falling cases:
+ * All of the standard Java events associated with Components are also
+ * available.
+ * 
+ * Certain fall back mechanisms are possible, where onReturn does not exist, but
+ * only for the falling cases:
  * 
  * 
- * For showMessageDialog, for WARNING_MESSAGE and ERROR_MESSAGE, a simple JavaScript alert() is used, returning 0 (OK_OPTION) or -1 (CLOSED_OPTION).
+ * For showMessageDialog, for WARNING_MESSAGE and ERROR_MESSAGE, a simple
+ * JavaScript alert() is used, returning 0 (OK_OPTION) or -1 (CLOSED_OPTION).
  * 
- * For showInputDialog, if the message is a string, a simple JavaScript prompt() with input box is used, returning the entered string or null.
+ * For showInputDialog, if the message is a string, a simple JavaScript prompt()
+ * with input box is used, returning the entered string or null.
  * 
  * For showConfirmDialog, a simple JavaScript confirm() is used, in which case:
  * 
@@ -103,8 +116,9 @@ import swingjs.JSUtil;
  * 
  * for OK_CANCEL_OPTION or any other: OK_OPTION or CANCEL_OPTION
  * 
- * Note that you should implement a response for CLOSED_OPTION for showConfirmDialog.
- * For other dialogs, a null return indicates the dialog was closed, just as for Java.
+ * Note that you should implement a response for CLOSED_OPTION for
+ * showConfirmDialog. For other dialogs, a null return indicates the dialog was
+ * closed, just as for Java.
  * 
  * <code>JOptionPane</code> makes it easy to pop up a standard dialog box that
  * prompts users for a value or informs them of something. For information about
@@ -120,7 +134,8 @@ import swingjs.JSUtil;
  * <blockquote>
  * 
  * 
- * <table border=1 summary="Common JOptionPane method names and their descriptions">
+ * <table border=1 summary="Common JOptionPane method names and their
+ * descriptions">
  * <tr>
  * <th>Method Name</th>
  * <th>Description</th>
@@ -173,24 +188,21 @@ import swingjs.JSUtil;
  * <code>ComponentOrientation</code> property. <br clear=all>
  * <p>
  * <b>Parameters:</b><br>
- * The parameters to these methods follow consistent patterns: <blockquote>
- * <dl compact>
+ * The parameters to these methods follow consistent patterns: <blockquote> <dl
+ * compact>
  * <dt>parentComponent
- * <dd>
- * Defines the <code>Component</code> that is to be the parent of this dialog
- * box. It is used in two ways: the <code>Frame</code> that contains it is used
- * as the <code>Frame</code> parent for the dialog box, and its screen
+ * <dd>Defines the <code>Component</code> that is to be the parent of this
+ * dialog box. It is used in two ways: the <code>Frame</code> that contains it
+ * is used as the <code>Frame</code> parent for the dialog box, and its screen
  * coordinates are used in the placement of the dialog box. In general, the
  * dialog box is placed just below the component. This parameter may be
  * <code>null</code>, in which case a default <code>Frame</code> is used as the
  * parent, and the dialog will be centered on the screen (depending on the L&F).
  * <dt><a name=message>message</a>
- * <dd>
- * A descriptive message to be placed in the dialog box. In the most common
+ * <dd>A descriptive message to be placed in the dialog box. In the most common
  * usage, message is just a <code>String</code> or <code>String</code> constant.
  * However, the type of this parameter is actually <code>Object</code>. Its
- * interpretation depends on its type:
- * <dl compact>
+ * interpretation depends on its type: <dl compact>
  * <dt>Object[]
  * <dd>An array of objects is interpreted as a series of messages (one per
  * object) arranged in a vertical stack. The interpretation is recursive -- each
@@ -232,8 +244,7 @@ import swingjs.JSUtil;
  * at the bottom of the dialog box. The usual value for the options parameter is
  * an array of <code>String</code>s. But the parameter type is an array of
  * <code>Objects</code>. A button is created for each object depending on its
- * type:
- * <dl compact>
+ * type: <dl compact>
  * <dt>Component
  * <dd>The component is added to the button row directly.
  * <dt>Icon
@@ -653,7 +664,7 @@ public class JOptionPane extends JComponent {
 		
 		dialog.setVisible(true); // dialog.show() sets up infinite loop
 
-		return UNINITIALIZED_VALUE;
+		return JDialog.ASYNCHRONOUS_OBJECT;
 
 	}
 
@@ -984,7 +995,7 @@ public class JOptionPane extends JComponent {
 		pane.selectInitialValue();
 		
 		dialog.setVisible(true);	// dialog.show() sets up infinite loop	
-		return Dialog.ASYNCHRONOUS_DEFERRED;		
+		return JDialog.ASYNCHRONOUS_INTEGER;		
 	}
 
 	/**
