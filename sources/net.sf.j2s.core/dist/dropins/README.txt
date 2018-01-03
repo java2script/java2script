@@ -1,5 +1,9 @@
 SwingJS distribution README.txt
 
+As of Jan. 2, 2017, all known Java-to-JavaScript issues have been dealt with. 
+Efficient Google Closure Compiler compression is in place. 
+
+
 As of Dec. 17, 2017, SwingJS is fully operational in its "version 2" format,
 which includes fully qualified method, array, and number typing. 
 
@@ -34,7 +38,10 @@ j2s.compiler.status=enable
 
 
 
-A full site with many examples is
+A full site with many examples is at https://chemapps.stolaf.edu/swingjs/site
+
+VARNA development is at https://chemapps.stolaf.edu/swingjs/varna
+ 
 
 
  
