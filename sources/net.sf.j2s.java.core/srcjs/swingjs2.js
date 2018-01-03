@@ -10973,11 +10973,22 @@ J2S = (function(document) {
 
 
 	J2S._clearVars = function() {
+
 		// only on page closing -- appears to improve garbage collection
 
 		delete jQuery;
 		delete $;
 		delete J2S;
+		delete Clazz;
+
+		delete java;
+		delete javajs;
+    delete org;
+    delete com;
+    delete edu;
+
+    // these are for Jmol:
+    
 		delete SwingController;
 		delete J;
 		delete JM;
@@ -10985,10 +10996,6 @@ J2S = (function(document) {
 		delete JSV;
 		delete JU;
 		delete JV;
-		delete java;
-		delete javajs;
-		delete Clazz;
-		delete c$; // used in p0p; could be gotten rid of
 	}
 
 	////////////// feature detection ///////////////
@@ -11452,8 +11459,19 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 		b[i] = data[i];
 	return b;
 	}
-
-  J2S._getFileFromDialog = function(fDone, format) {
+ 
+  /**
+   * fDone: callback function, in the form of fDone(data, fileName).
+   * Note that this can be a Java Runnable.run(), as a j2sNative call can 
+   * still read the arguments.
+   * 
+   * format: "ArrayBuffer" for the raw array, "string" for a string, 
+   *    "java.util.Map" meaning something with a get$TK(key) method that is looking
+   *    for fileName:string and bytes:byte[], or anything else for byte[] directly.       
+   *    
+   * parentDiv: div id in which to insert this div, or null to use body      
+   */  
+  J2S._getFileFromDialog = function(fDone, format, parentDiv) {
     // streamlined file dialog using <input type="file">.click()
     format || (format = "string");
     var id = "filereader" + ("" + Math.random()).split(".")[1]
@@ -11462,18 +11480,30 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
       J2S.$remove(id);
       var reader = new FileReader();
       reader.onloadend =  function(evt) {
+        var data = null;
         if (evt.target.readyState == FileReader.DONE) {
           var data = evt.target.result;
-          if (format != "ArrayBuffer") {
+          switch (format) {
+          case "java.util.Map":
+            var map = Clazz.new_(Clazz.load("java.util.Hashtable"));
+            map.put$TK$TV("fileName", file.name);
+            map.put$TK$TV("bytes", J2S._toBytes(data));
+            fDone(map);
+            return;
+          case "ArrayBuffer":
+            break;
+          case "string":
+            data = String.instantialize(data);
+            break;
+          default:                                                                                  
             data = J2S._toBytes(data);
-            if (format == "string")
-              data = String.instantialize(data);
+            break;
           }
         }
         fDone(data, file.name);
       };
       reader.readAsArrayBuffer(file);
-    } 
+    }; 
     
     // x.click() in any manifestation will not work from Chrome or Safari.
     // These browers require that the user see and click the link.
@@ -11483,8 +11513,22 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
       x.onchange = function(ev){ readFile(this.files[0]) };
       x.click();
     } else {
-			var div = '<div id="ID" style="z-index:1000000;position:absolute;background:#E0E0E0;left:10px;top:10px"><div style="margin:5px 5px 5px 5px;"><input type="file" id="ID_files" /><button id="ID_loadfile">load</button><button id="ID_cancel">cancel</button></div><div>'
-			J2S.$after("body", div.replace(/ID/g, id));
+			var div = ('<div id="ID" style="z-index:1000000;position:absolute;background:#E0E0E0;left:400px;top:400px">'
+                  +'<div id="ID_modalscreen" style="z-index:999999;background:rgba(100,100,100,0.4);position:absolute;left:0px;top:0px;width:'+screen.width+';height:'+screen.height+'"></div>'
+                  +'<div style="margin:5px 5px 5px 5px;">'
+                    +'<input type="file" id="ID_files" />'
+                    +'<button id="ID_loadfile">load</button>'
+                    +'<button id="ID_cancel">cancel</button>'
+                  +'</div>'
+                +'<div>').replace(/ID/g, id);
+      var parent = (!parentDiv || parentDiv == "body" ? parentDiv 
+         : typeof parentDiv == "string" ? "#" + parentDiv 
+         : parentDiv);
+      if (parent == "body") {
+		  	J2S.$after(body, div);
+      } else {
+        J2S.$append(parent, div);
+        }        
   		J2S.$appEvent("#" + id + "_loadfile", null, "click");
   		J2S.$appEvent("#" + id + "_loadfile", null, "click", function(evt) { readFile(J2S.$("#" + id + "_files")[0].files[0]); });
   		J2S.$appEvent("#" + id + "_cancel", null, "click");

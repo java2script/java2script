@@ -1,5 +1,6 @@
 // j2sApplet.js (based on JmolCore.js)
 
+// BH 12/22/2017 1:18:42 PM adds j2sargs for setting arguments
 // BH 11/19/2017 3:55:04 AM adding support for swingjs2.js; adds static j2sHeadless=true;
 // BH 10/4/2017 2:25:03 PM adds Clazz.loadClass("javajs.util.Base64")
 // BH 7/18/2017 10:46:44 AM adds J2S._canClickFileReader, fixing J2S.getFileFromDialog for Chrome and Safari
@@ -24,7 +25,19 @@
 
 if(typeof(jQuery)=="undefined") alert ("Note -- jQuery is required, but it's not defined.")
 
-self.J2S || (J2S = {});
+self.J2S || (J2S = {
+ getURIField: function(name, def) {
+    try {
+    	var ref = document.location.href.toLowerCase();
+      var i = ref.indexOf(name + "=");
+      if (i >= 0)
+        def = (document.location.href+"&").substring(i + name.length + 1).split("&")[0];
+    } finally {
+      return def;    
+    }
+  }
+
+});
 
 if (!J2S._version)
 J2S = (function(document) {
@@ -45,6 +58,7 @@ J2S = (function(document) {
 			monitorZIndex:z+99999 // way way front
 		}
 	};
+
   
 	var j = {
     
@@ -89,10 +103,8 @@ J2S = (function(document) {
 	var ref = document.location.href.toLowerCase();
   j._debugCode = (ref.indexOf("j2sdebugcode") >= 0);
   j._debugCore = (ref.indexOf("j2sdebugcore") >= 0);
-  var i = ref.indexOf("j2sdebugname=");
-  j._debugName = (i >= 0 ? (document.location.href+"&").substring(i + 13).split("&")[0] : null);
-  var i = ref.indexOf("j2slang=");
-  j._lang = (i >= 0 ? (document.location.href+"&").substring(i + 8).split("&")[0] : null);
+  j._debugName = J2S.getURIField("j2sdebugname", null);
+  j._lang = J2S.getURIField("j2slang", null);
 	j._httpProto = (ref.indexOf("https") == 0 ? "https://" : "http://"); 
 	j._isFile = (ref.indexOf("file:") == 0);
 	if (j._isFile) // ensure no attempt to read XML in local request:
@@ -307,11 +319,22 @@ J2S = (function(document) {
 
 
 	J2S._clearVars = function() {
+
 		// only on page closing -- appears to improve garbage collection
 
 		delete jQuery;
 		delete $;
 		delete J2S;
+		delete Clazz;
+
+		delete java;
+		delete javajs;
+    delete org;
+    delete com;
+    delete edu;
+
+    // these are for Jmol:
+    
 		delete SwingController;
 		delete J;
 		delete JM;
@@ -319,10 +342,6 @@ J2S = (function(document) {
 		delete JSV;
 		delete JU;
 		delete JV;
-		delete java;
-		delete javajs;
-		delete Clazz;
-		delete c$; // used in p0p; could be gotten rid of
 	}
 
 	////////////// feature detection ///////////////
@@ -786,8 +805,19 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 		b[i] = data[i];
 	return b;
 	}
-
-  J2S._getFileFromDialog = function(fDone, format) {
+ 
+  /**
+   * fDone: callback function, in the form of fDone(data, fileName).
+   * Note that this can be a Java Runnable.run(), as a j2sNative call can 
+   * still read the arguments.
+   * 
+   * format: "ArrayBuffer" for the raw array, "string" for a string, 
+   *    "java.util.Map" meaning something with a get$TK(key) method that is looking
+   *    for fileName:string and bytes:byte[], or anything else for byte[] directly.       
+   *    
+   * parentDiv: div id in which to insert this div, or null to use body      
+   */  
+  J2S._getFileFromDialog = function(fDone, format, parentDiv) {
     // streamlined file dialog using <input type="file">.click()
     format || (format = "string");
     var id = "filereader" + ("" + Math.random()).split(".")[1]
@@ -796,18 +826,30 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
       J2S.$remove(id);
       var reader = new FileReader();
       reader.onloadend =  function(evt) {
+        var data = null;
         if (evt.target.readyState == FileReader.DONE) {
           var data = evt.target.result;
-          if (format != "ArrayBuffer") {
+          switch (format) {
+          case "java.util.Map":
+            var map = Clazz.new_(Clazz.load("java.util.Hashtable"));
+            map.put$TK$TV("fileName", file.name);
+            map.put$TK$TV("bytes", J2S._toBytes(data));
+            fDone(map);
+            return;
+          case "ArrayBuffer":
+            break;
+          case "string":
+            data = String.instantialize(data);
+            break;
+          default:                                                                                  
             data = J2S._toBytes(data);
-            if (format == "string")
-              data = String.instantialize(data);
+            break;
           }
         }
         fDone(data, file.name);
       };
       reader.readAsArrayBuffer(file);
-    } 
+    }; 
     
     // x.click() in any manifestation will not work from Chrome or Safari.
     // These browers require that the user see and click the link.
@@ -817,8 +859,22 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
       x.onchange = function(ev){ readFile(this.files[0]) };
       x.click();
     } else {
-			var div = '<div id="ID" style="z-index:1000000;position:absolute;background:#E0E0E0;left:10px;top:10px"><div style="margin:5px 5px 5px 5px;"><input type="file" id="ID_files" /><button id="ID_loadfile">load</button><button id="ID_cancel">cancel</button></div><div>'
-			J2S.$after("body", div.replace(/ID/g, id));
+			var div = ('<div id="ID" style="z-index:1000000;position:absolute;background:#E0E0E0;left:400px;top:400px">'
+                  +'<div id="ID_modalscreen" style="z-index:999999;background:rgba(100,100,100,0.4);position:absolute;left:0px;top:0px;width:'+screen.width+';height:'+screen.height+'"></div>'
+                  +'<div style="margin:5px 5px 5px 5px;">'
+                    +'<input type="file" id="ID_files" />'
+                    +'<button id="ID_loadfile">load</button>'
+                    +'<button id="ID_cancel">cancel</button>'
+                  +'</div>'
+                +'<div>').replace(/ID/g, id);
+      var parent = (!parentDiv || parentDiv == "body" ? parentDiv 
+         : typeof parentDiv == "string" ? "#" + parentDiv 
+         : parentDiv);
+      if (parent == "body") {
+		  	J2S.$after(body, div);
+      } else {
+        J2S.$append(parent, div);
+        }        
   		J2S.$appEvent("#" + id + "_loadfile", null, "click");
   		J2S.$appEvent("#" + id + "_loadfile", null, "click", function(evt) { readFile(J2S.$("#" + id + "_files")[0].files[0]); });
   		J2S.$appEvent("#" + id + "_cancel", null, "click");
@@ -1886,19 +1942,23 @@ J2S.Cache.put = function(filename, data) {
 
 		proto.__startAppletJS = function(applet) {
 			if (J2S._version.indexOf("$Date: ") == 0)
-				J2S._version = (J2S._version.substring(7) + " -").split(" -")[0] + " (J2S)"
+				J2S._version = (J2S._version.substring(7) + " -").split(" -")[0] + " (J2S)";
 			Clazz.load("java.lang.Class");
 			J2S._registerApplet(applet._id, applet);
-			try {
-        if (applet.__Info.main) {
-          try{
-            var cl = Clazz.load(applet.__Info.main);
-            if (cl.j2sHeadless)
-              applet.__Info.headless = true;
-          }catch(e) {
-            alert ("Java class " +  applet.__Info.main + " was not found.");
-            return;
-          }
+      if (!applet.__Info.args || applet.__Info.args == "?") {
+        var s = J2S.getURIField("j2sargs", null);
+        if (s !== null)
+          applet.__Info.args = decodeURIComponent(s);
+      }
+      try {
+        var clazz = (applet.__Info.main || applet.__Info.code);
+        try {
+          var cl = Clazz.load(clazz);
+          if (applet.__Info.main && cl.j2sHeadless)
+            applet.__Info.headless = true;
+        }catch(e) {
+          alert ("Java class " +  clazz + " was not found.");
+          return;
         }
         if (applet.__Info.main && applet.__Info.headless) {
           cl.main(applet.__Info.args || []);
@@ -2149,10 +2209,10 @@ J2S._setDraggable = function(tag, targetOrArray) {
     tag._isDragger = false;
 		if (isBind) {
 			$tag.bind('mousemoveoutjsmol touchmoveoutjsmol', function(ev) {
-				drag(ev);
+				drag && drag(ev);
 			});
 			$tag.bind('mouseupoutjsmol touchendoutjsmol', function(ev) {
-				up(ev);
+				up && up(ev);
 			});
 		}
 	};  
@@ -2230,15 +2290,15 @@ J2S._setDraggable = function(tag, targetOrArray) {
 	};
 
 	$tag.bind('mousedown touchstart', function(ev) {
-    return down(ev);
+    return down && down(ev);
 	});
   
 	$tag.bind('mousemove touchmove', function(ev) {
-    return drag(ev);
+    return drag && drag(ev);
 	});
   
 	$tag.bind('mouseup touchend', function(ev) {
-		return up(ev);
+		return up && up(ev);
 	});
 
   dragBind(true);

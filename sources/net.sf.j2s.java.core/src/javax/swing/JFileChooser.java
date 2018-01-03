@@ -44,12 +44,15 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 //import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Map;
 
 import javax.swing.event.EventListenerList;
 import javax.swing.filechooser.FileFilter;
 //import javax.swing.filechooser.FileSystemView;
 import javax.swing.filechooser.FileView;
 
+import javajs.api.JSFunction;
+import swingjs.JSToolkit;
 import swingjs.JSUtil;
 
 
@@ -751,7 +754,30 @@ public class JFileChooser extends JComponent {
 			JSUtil.notImplemented("JFileChooser.CUSTOM_DIALOG");
 			return CANCEL_OPTION;
 		case OPEN_DIALOG:
-			break;
+			if (!(parent instanceof PropertyChangeListener)) {
+				warnJSDeveloper();
+				return CANCEL_OPTION;
+			}
+			removePropertyChangeListener((PropertyChangeListener) parent);
+			addPropertyChangeListener((PropertyChangeListener) parent);
+			Runnable r = new Runnable() {
+
+				@Override
+				public void run() {
+					Map<String, byte[]> map = null;
+					/**
+					 * @j2sNative
+					 * 
+					 * map = arguments[0];
+					 * 
+					 * 
+					 */
+					firePropertyChange("fileOpen", null, map);
+				}
+				
+			};
+			JSUtil.J2S._getFileFromDialog(/**@j2sNative function(map){r.run(map)}||*/ null, "java.util.Map");			
+			return Dialog.ASYNCHRONOUS_DEFERRED;
 		case SAVE_DIALOG:
 			String name = JSUtil.prompt((dialogTitle == null ? "File to Save?" : dialogTitle), lastFileName);
 			if (name == null)
@@ -780,6 +806,10 @@ public class JFileChooser extends JComponent {
 		dialog.setVisible(true);
 		// closeDialog(); // Java only
 	    return returnValue;
+	}
+
+	private static void warnJSDeveloper() {
+		System.err.println("JFileChooser: Component does not implement PropertyChangeListener.");
 	}
 
     private void closeDialog() {
