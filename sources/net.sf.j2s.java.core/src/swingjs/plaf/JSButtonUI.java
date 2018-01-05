@@ -40,6 +40,8 @@ import javax.swing.JMenuItem;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 import javax.swing.plaf.UIResource;
+import javax.swing.table.TableCellRenderer;
+
 import swingjs.api.js.DOMNode;
 
 /**

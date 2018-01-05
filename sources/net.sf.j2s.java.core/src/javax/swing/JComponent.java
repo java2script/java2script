@@ -4568,6 +4568,9 @@ public abstract class JComponent extends Container {
 					}
 				} else {
 					// SwingJS not clipping for better performance
+					g.setClip(paintImmediatelyClip.x, paintImmediatelyClip.y,
+                            paintImmediatelyClip.width, paintImmediatelyClip.height);
+
 					// g.setClip(paintImmediatelyClip.x,paintImmediatelyClip.y,
 					// paintImmediatelyClip.width,paintImmediatelyClip.height);
 					

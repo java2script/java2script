@@ -411,7 +411,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		}
 	}
 
-	protected JQueryObject $(DOMNode node) {
+	protected JQueryObject $(Object node) {
 		return JSUtil.getJQuery().$(node);
 	} 
 

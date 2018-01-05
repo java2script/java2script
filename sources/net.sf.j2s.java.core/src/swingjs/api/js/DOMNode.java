@@ -133,18 +133,12 @@ public abstract class DOMNode {
 
 	
 	public static DOMNode setAttr(DOMNode node, String attr, Object val) {
-		if (val == null) {
-			node.removeAttribute(attr);
-		} else {
-			/**
-			 * @j2sNative
-			 * 
-			 *            node[attr] = (val == "TRUE" ? true : val);
-			 * 
-			 */
-			{
-			}
-		}
+		/**
+		 * @j2sNative
+		 * 
+		 * 			node[attr] = (val == "TRUE" ? true : val);
+		 * 
+		 */
 		return node;
 	}
 

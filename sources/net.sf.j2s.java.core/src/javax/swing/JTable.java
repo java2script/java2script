@@ -5553,31 +5553,32 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 				if ("".equals(s) || constructorClass == String.class) {
 					if (constructorClass == String.class) {
 						value = s;
-						return super.stopCellEditing();					}
+					}
+					return super.stopCellEditing();
 
 				}
 				// SwingUtilities2.checkAccess(constructor.getModifiers());
-				
+
 				boolean haveConstructor = true;
 				/**
 				 * @j2sNative
 				 * 
-				 * haveConstructor = !!constructor.getConstructor;
+				 * 			haveConstructor = !!constructor.getConstructor;
 				 */
-				{}
+				{
+				}
 				if (constructorClass == String.class) {
 					value = s;
 				} else if (haveConstructor) {
-					value = constructorClass.getConstructor(argTypes).newInstance(
-						new Object[] { s });
+					value = constructorClass.getConstructor(argTypes).newInstance(new Object[] { s });
 				} else {
-					  /**
-					   * @j2sNative
-					   * debugger;
-					   */
-						{}
+					/**
+					 * @j2sNative debugger;
+					 */
+					{
+					}
 				}
-				
+
 			} catch (Throwable e) { // BH Throwable here
 				((JComponent) getComponent()).setBorder(new LineBorder(Color.red));
 				return false;

@@ -75,7 +75,6 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
 
 import sun.swing.DefaultLookup;
 import sun.swing.SwingUtilities2;
@@ -94,17 +93,16 @@ public class JSTableUI extends JSPanelUI {
 	protected JTable table, header;
 	private int oldrc;
 	private int oldrh;
-	private JTableHeader tableHeader;
 
 
 	
 	@Override
 	public void endLayout() {
 		super.endLayout();
-		table.setBounds(new Rectangle(table.getWidth(), getContainerHeight()));
-		//isTainted = true;
+		int rc = table.getRowCount();
+		int rh = table.getRowHeight();
+		table.setBounds(new Rectangle(table.getWidth(), rc * rh));
 		setHTMLElement();
-		DOMNode.setStyles(outerNode, "overflow", "unset");
 	}
 
 	protected int getContainerHeight() {
@@ -124,17 +122,6 @@ public class JSTableUI extends JSPanelUI {
 		oldrc = rc;
 
 		Dimension d = getPreferredSize(jc);
-		TableCellRenderer cr = table.getCellRenderer(1, 1);
-		TableModel m = table.getModel();
-		tableHeader = table.getTableHeader();
-		TableColumnModel tcm = table.getColumnModel();
-		TableColumn c1 = tcm.getColumn(0);
-		int cw = c1.getWidth();
-		
-		TableColumnModel hcm = tableHeader.getColumnModel();
-		int thh = tableHeader.getHeight();
-		Object v = m.getValueAt(2, 2);
-		
 		int w = d.width;//tcm.getTotalColumnWidth();
 		int h = d.height;//table.getVisibleRect().height - thh;
 		
@@ -142,23 +129,14 @@ public class JSTableUI extends JSPanelUI {
 		 domNode = newDOMObject("div", id);
 		}
 		if (rebuild)
-			createChildren();
+			children = new Component[table.getRowCount() * table.getColumnCount()];
 		DOMNode.setStyles(domNode, 
 				"width", w + "px", 
 				"height", h + "px"
 				);
-		return setCssFont(domNode, c.getFont());
-	
+		return setCssFont(domNode, c.getFont());	
 	}
 
-
-	private void createChildren() {
-		int nrows = table.getRowCount();
-		int ncols = table.getColumnCount();;
-		children  = new Component[nrows * ncols];
-		// we do not need to fill these, as they may end up being 
-		// all the same object -- a single cell renderer	
-	}
 
 	/**
 	 * Each cell is controlled by a single renderer, but 
@@ -180,16 +158,13 @@ public class JSTableUI extends JSPanelUI {
 		int nrows = table.getRowCount();
 		int ncols = table.getColumnCount();
 		int h = table.getRowHeight();
-		int thh =  table.getTableHeader().getHeight();
-		int th = table.getVisibleRect().height -thh;
+		//int thh =  table.getTableHeader().getHeight();
+		//int th = table.getVisibleRect().height -thh;
 		int[] cw = new int[ncols];
 		for (int col = 0; col < ncols; col++)
 			cw[col] = table.getColumnModel().getColumn(col).getWidth();
-
-		DOMNode.setStyles(outerNode, "overflow", "hidden", "height", th + "px");
-
+		//DOMNode.setStyles(outerNode, "overflow", "hidden", "height", th + "px");
 		$(domNode).empty();
-		JSComponentUI ui;
 		int ty = 0;
 		for (int row = 0; row < nrows; row++) {
 			String rid = id + "_tab_row" + row;
@@ -198,10 +173,7 @@ public class JSTableUI extends JSPanelUI {
 			domNode.appendChild(tr);
 			int tx = 0;
 			for (int col = 0; col < ncols; col++) {
-				DOMNode td = DOMNode.createElement("div", rid + "_col" + col);
-				//DOMNode.setStyles(td, "border", "1px solid black");
-				$(td).addClass("swing-td");
-				DOMNode.setAttrs(td, "data-table-ui", this, "data-row", row, "data-col", col);
+				DOMNode td = CellHolder.getCellNode(this, row, col);
 				DOMNode.setStyles(td, "width", cw[col] + "px");
 				DOMNode.setStyles(td, "height", h + "px");
 				DOMNode.setStyles(td, "left", tx + "px");
@@ -209,14 +181,7 @@ public class JSTableUI extends JSPanelUI {
 				DOMNode.setStyles(td, "position", "absolute");
 				tx += cw[col];
 				tr.appendChild(td);
-				JSComponent c = (JSComponent) getCellComponent(row, col);
-				if (c != null && !(ui = (JSComponentUI) c.getUI()).isNull) {
-					ui.domNode = null;
-					ui.updateDOMNode();
-					td.appendChild(ui.domNode);
-					DOMNode.setStyles(ui.domNode, "width", "unset");
-					DOMNode.setStyles(ui.domNode, "height", "unset");
-				}
+				CellHolder.updateCellNode(td, (JSComponent) getCellComponent(row, col), 0, 0);
 			}
 			ty += h;
 		}
@@ -250,7 +215,7 @@ public class JSTableUI extends JSPanelUI {
 	 * have any questions.
 	 */
 
-	    private static final StringBuilder BASELINE_COMPONENT_KEY =
+		private static final StringBuilder BASELINE_COMPONENT_KEY =
 	        new StringBuilder("Table.baselineComponent");
 
 	//
@@ -2293,6 +2258,8 @@ public class JSTableUI extends JSPanelUI {
 	    }
 
 	    private void paintCell(Graphics g, Rectangle cellRect, int row, int column) {
+	    	
+	    	//System.out.println("paintCell table " + row + " " + column);
 	        if (table.isEditing() && table.getEditingRow()==row &&
 	                                 table.getEditingColumn()==column) {
 	            Component component = table.getEditorComponent();

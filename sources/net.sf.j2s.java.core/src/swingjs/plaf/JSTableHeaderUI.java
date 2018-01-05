@@ -52,16 +52,10 @@ import javax.swing.LookAndFeel;
 import javax.swing.RowSorter;
 import javax.swing.SwingUtilities;
 import javax.swing.event.MouseInputListener;
-import javax.swing.plaf.basic.BasicTableHeaderUI;
-
-import swingjs.plaf.JSComponentUI;
-import swingjs.plaf.HTML5LookAndFeel;
-import swingjs.plaf.JSTableHeaderUI;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
 
 import sun.swing.DefaultLookup;
 import sun.swing.UIAction;
@@ -133,22 +127,11 @@ public class JSTableHeaderUI extends JSLightweightUI {
 		oldrh = rh;
 		oldrc = rc;
 
-		TableModel m = table.getModel();
-		tableHeader = table.getTableHeader();
-		TableColumnModel tcm = table.getColumnModel();
-		TableColumn c1 = tcm.getColumn(0);
-		int cw = c1.getWidth();
-		
-		TableColumnModel hcm = tableHeader.getColumnModel();
 		int thh = tableHeader.getHeight();
-		Object v = m.getValueAt(2, 2);
 		
 		int w = table.getWidth();
-		int h = tableHeader.getHeight();
-
 		if (domNode == null) {
 			domNode = newDOMObject("div", id);
-			
 		}
 		DOMNode.setStyles(domNode, "width", w + "px", "height", thh + "px");
 		
@@ -181,13 +164,8 @@ public class JSTableHeaderUI extends JSLightweightUI {
 		headdiv = DOMNode.createElement("div", rid);
 		DOMNode.setStyles(headdiv, "height", thh + "px");
 		domNode.appendChild(headdiv);
-		int tx = 0;
-		JSComponentUI ui;
-		for (int col = 0; col < ncols; col++) {
-			DOMNode td = DOMNode.createElement("div", rid + "_col" + col);
-			//DOMNode.setStyles(td, "border", "1px solid black");
-			$(td).addClass("swing-td");
-			DOMNode.setAttrs(td, "data-table-ui", this, "data-row", "-1", "data-col", col);
+		for (int col = 0, tx = 0; col < ncols; col++) {
+			DOMNode td = CellHolder.getCellNode(this, -1, col);
 			DOMNode.setStyles(td, "width", cw[col] + "px");
 			DOMNode.setStyles(td, "height", thh + "px");
 			DOMNode.setStyles(td, "left", tx + "px");
@@ -195,18 +173,12 @@ public class JSTableHeaderUI extends JSLightweightUI {
 			DOMNode.setStyles(td, "position", "absolute");
 			tx += cw[col];
 			headdiv.appendChild(td);
-			JSComponent c = (JSComponent) getHeaderRenderer(col);
-			if (c != null && !(ui = (JSComponentUI) c.getUI()).isNull) {
-				c.setSize(cw[col], thh);
-				ui.domNode = null;
-				ui.updateDOMNode();
-				td.appendChild(ui.domNode);
-			}
+			CellHolder.updateCellNode(td, (JSComponent) getHeaderRenderer(col), cw[col], thh);
 		}		
 
 	}
 
-	    private static Cursor resizeCursor = Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR);
+		private static Cursor resizeCursor = Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR);
 
 	//
 	// Instance Variables
@@ -241,6 +213,7 @@ public class JSTableHeaderUI extends JSLightweightUI {
 	                if (ui == null) {
 	                    return;
 	                }
+	                System.out.println("repaintHeader");
 	                th.repaint(th.getHeaderRect(ui.getSelectedColumnIndex()));
 	            }
 	        }
@@ -843,6 +816,7 @@ public class JSTableHeaderUI extends JSLightweightUI {
 	    }
 
 	    private void paintCell(Graphics g, Rectangle cellRect, int columnIndex) {
+            //System.out.println("paintCell header" + columnIndex);
 	        Component component = getHeaderRenderer(columnIndex);
 	        rendererPane.paintComponent(g, component, tableHeader, cellRect.x, cellRect.y,
 	                            cellRect.width, cellRect.height, true);
