@@ -9,7 +9,7 @@
  *     Zhou Renjian - initial API and implementation
  *******************************************************************************/
 
-package net.sf.j2s.core.astvisitors.adapters;
+package net.sf.j2s.core.astvisitors;
 
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -20,8 +20,6 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.WildcardType;
 
-import net.sf.j2s.core.astvisitors.ASTKeywordVisitor;
-
 /**
  * 
  * also used for package declaration names
@@ -30,7 +28,7 @@ import net.sf.j2s.core.astvisitors.ASTKeywordVisitor;
  *
  *         2006-12-3
  */
-public class TypeAdapter extends AbstractPluginAdapter {
+public class TypeAdapter extends VisitorAdapter {
 
 	private String thisClassName = "";
 	private String fullClassName = "";
@@ -70,7 +68,7 @@ public class TypeAdapter extends AbstractPluginAdapter {
 		if (binding == null) {
 			return false;
 		}
-		String bindingName = ASTKeywordVisitor.removeBrackets(binding.getQualifiedName());
+		String bindingName = Java2ScriptVisitor.removeBrackets(binding.getQualifiedName());
 		if (name.equals(bindingName)) {
 			return true;
 		}
@@ -131,8 +129,8 @@ public class TypeAdapter extends AbstractPluginAdapter {
 		if (name == null) 
 			return null;
 		if (!isPackage) {
-			className= ASTKeywordVisitor.removeBrackets(className);
-			name = ASTKeywordVisitor.removeBrackets(name);
+			className= Java2ScriptVisitor.removeBrackets(className);
+			name = Java2ScriptVisitor.removeBrackets(name);
 		}
 		if (className != null) {
 			if (name.equals(className))

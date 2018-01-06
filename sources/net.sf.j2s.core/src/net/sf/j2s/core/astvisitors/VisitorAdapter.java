@@ -9,20 +9,18 @@
  *     Zhou Renjian - initial API and implementation
  *******************************************************************************/
 
-package net.sf.j2s.core.astvisitors.adapters;
-
-import net.sf.j2s.core.astvisitors.ASTEmptyVisitor;
+package net.sf.j2s.core.astvisitors;
 
 /**
  * @author zhou renjian
  *
  * 2006-12-27
  */
-public class AbstractPluginAdapter {
+public class VisitorAdapter {
 
-	protected ASTEmptyVisitor visitor;
+	protected Java2ScriptVisitor visitor;
 	
-	public void setVisitor(ASTEmptyVisitor visitor) {
+	public void setVisitor(Java2ScriptVisitor visitor) {
 		this.visitor = visitor;
 	}
 	

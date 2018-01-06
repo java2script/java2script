@@ -24,8 +24,7 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 
-import net.sf.j2s.core.astvisitors.ASTKeywordVisitor;
-import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
+import net.sf.j2s.core.astvisitors.Java2ScriptVisitor;
 import net.sf.j2s.core.builder.SourceFile;
 import net.sf.j2s.core.builder.SourceFileProxy;
 import net.sf.j2s.core.hotspot.InnerHotspotServer;
@@ -126,8 +125,8 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		astParser.setResolveBindings(true);
 		astParser.setSource(createdUnit);
 		root = (CompilationUnit) astParser.createAST(null);
-		ASTScriptVisitor visitor = new ASTScriptVisitor();
-		ASTKeywordVisitor.setNoQualifiedNamePackages(getProperty("j2s.compiler.nonqualified.classes"));
+		Java2ScriptVisitor visitor = new Java2ScriptVisitor();
+		Java2ScriptVisitor.setNoQualifiedNamePackages(getProperty("j2s.compiler.nonqualified.classes"));
 		boolean isDebugging = "debug".equals(getProperty("j2s.compiler.mode"));
 		visitor.setDebugging(isDebugging);
 		String j2sPath = siteFolder + "/swingjs/j2s";
@@ -243,7 +242,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		return val;
 	}
 
-	public static void outputJavaScript(ASTScriptVisitor visitor, 
+	public static void outputJavaScript(Java2ScriptVisitor visitor, 
 			//DependencyASTVisitor dvisitor, CompilationUnit fRoot,
 			String j2sPath) {
 
