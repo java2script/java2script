@@ -834,8 +834,11 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
             var map = Clazz.new_(Clazz.load("java.util.Hashtable"));
             map.put$TK$TV("fileName", file.name);
             map.put$TK$TV("bytes", J2S._toBytes(data));
-            fDone(map);
-            return;
+            return fDone(map);
+          case "java.io.File":
+            var f = Clazz.new_(Clazz.load("java.io.File").c$$S, [file.name]);
+            f._bytes = J2S._toBytes(data);
+            return fDone(f);
           case "ArrayBuffer":
             break;
           case "string":
@@ -1604,7 +1607,7 @@ J2S.Cache.get = function(filename) {
 J2S.Cache.put = function(filename, data) {
   J2S.Cache.fileCache[filename] = data;
 }
-
+  // dnd 
 	J2S.Cache.setDragDrop = function(me) {
 		J2S.$appEvent(me, "appletdiv", "dragover", function(e) {
 			e = e.originalEvent;
@@ -1636,8 +1639,10 @@ J2S.Cache.put = function(filename, data) {
 			var reader = new FileReader();
 			reader.onloadend = function(evt) {
 				if (evt.target.readyState == FileReader.DONE) {
-					var cacheName = "cache://DROP_" + file.name;
 					var bytes = J2S._toBytes(evt.target.result);
+          // what about a frame?? what about x and y?
+          Clazz.load("swingjs.JSDnD").drop$javax_swing_JComponent$S$BA$I$I(oe.target["data-ui"].jc, file.name, bytes, oe.pageX, oe.pageY);          
+					var cacheName = "cache://DROP_" + file.name;
 					if (!cacheName.endsWith(".spt"))
 						me._appletPanel.cacheFileByName$S$Z("cache://DROP_*",false);
 					if (me._viewType == "JSV" || cacheName.endsWith(".jdx")) // shared by Jmol and JSV
