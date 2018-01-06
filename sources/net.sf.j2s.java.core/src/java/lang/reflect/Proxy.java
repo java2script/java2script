@@ -361,32 +361,7 @@ public class Proxy implements java.io.Serializable {
              * interface to the same Class object.
              */
             String interfaceName = interfaces[i].getName();
-            Class<?> interfaceClass = null;
-            /**
-             * @j2sNative
-             * 
-             *  interfaceClass = Clazz.getClass(interfaces[i]);
-             * 
-             */
-            {}
-//            try {
-//                interfaceClass = Class.forName(interfaceName, false, loader);
-//            } catch (ClassNotFoundException e) {
-//            }
-//            if (interfaceClass != interfaces[i]) {
-//                throw new IllegalArgumentException(
-//                    interfaces[i] + " is not visible from class loader");
-//            }
-//
-//            /*
-//             * Verify that the Class object actually represents an
-//             * interface.
-//             */
-//            if (!interfaceClass.isInterface()) {
-//                throw new IllegalArgumentException(
-//                    interfaceClass.getName() + " is not an interface");
-//            }
-
+            Class<?> interfaceClass =  /** @j2sNative Clazz.getClass(interfaces[i].$clazz$) ||*/ null;
             /*
              * Verify that this interface is not a duplicate.
              */
@@ -422,7 +397,6 @@ public class Proxy implements java.io.Serializable {
          * loader = "" + loader;
          * 
          */
-        {}
         synchronized (loaderToCache) {
             cache = (Map<Object, Object>) loaderToCache.get(loader);
             if (cache == null) {

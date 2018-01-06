@@ -10,3 +10,21 @@
  *******************************************************************************/
 
 package net.sf.j2s.core.astvisitors;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.TagElement;
+import org.eclipse.jdt.core.dom.TextElement;
+
+/**
+ * @author zhou renjian
+ *
+ *         2006-12-3
+ */

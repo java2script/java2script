@@ -4363,6 +4363,7 @@ class LightweightDispatcher implements AWTEventListener {
     private boolean processMouseEvent(MouseEvent e) {
         int id = e.getID();
         Component mouseOver = null;   // sensitive to mouse events
+       
         /**
          * @see swingjs.plaf.JSButtionUI
          * 

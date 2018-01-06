@@ -3831,6 +3831,10 @@ public abstract class Component
 		 * before we notify AWTEventListeners.
 		 */
 
+		// if (e instanceof JSDnD.JSDropTargetEvent) {
+		// ((JSDnD.JSDropFileMouseEvent) e).dispatch();
+		// return;
+		// }
 		// if (e instanceof SunDropTargetEvent) {
 		// ((SunDropTargetEvent)e).dispatch();
 		// return;

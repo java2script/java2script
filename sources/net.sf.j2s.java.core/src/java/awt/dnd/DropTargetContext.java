@@ -62,7 +62,8 @@ public class DropTargetContext implements Serializable {
      * @param dt the DropTarget to associate with
      */
 
-    DropTargetContext(DropTarget dt) {
+    // BH SwingSJ changed to public
+    public DropTargetContext(DropTarget dt) {
         super();
 
         dropTarget = dt;
@@ -261,7 +262,7 @@ public class DropTargetContext implements Serializable {
             throw new InvalidDnDOperationException();
         } else {
             if (transferable == null) {
-                Transferable t = peer.getTransferable();
+                transferable = peer.getTransferable();
                 boolean isLocal = peer.isTransferableJVMLocal();
 //                synchronized (this) {
 //                    if (transferable == null) {
