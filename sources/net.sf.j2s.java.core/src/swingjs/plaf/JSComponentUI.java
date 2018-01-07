@@ -16,6 +16,7 @@ import java.awt.JSComponent;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.dnd.DropTarget;
 import java.awt.event.FocusEvent;
 import java.awt.event.PaintEvent;
 import java.awt.image.ColorModel;
@@ -1128,6 +1129,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		// mark as not tainted
 		// debugDump(divObj);
 		isTainted = false;
+		if (jc.getDropTarget() != null)
+			setDropTarget();
 		return outerNode;
 	}
 
@@ -1546,6 +1549,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	 * used by JSListUI to give it the correct scrollable size for its JViewPort
 	 */
 	protected int jsActualWidth, jsActualHeight;
+
+	private Object dropTarget = this; // unactivated
 
 	protected void setJSDimensions(int width, int height) {
 		if (jsActualWidth > 0)
@@ -2100,6 +2105,26 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		DOMNode.setStyles(domNode, "padding", padding == null ? "0px" : padding.top
 				+ "px " + padding.left + "px " + padding.bottom + "px " + padding.right
 				+ "px");
+	}
+
+	public void addDropTarget(DropTarget t) {
+		// called by DropTarget
+		dropTarget = t;
+		setDropTarget();
+	}
+	
+	public void removeTarget() {
+		// called by DropTarget
+		if (dropTarget == null)
+			return;
+		dropTarget = null;
+		setDropTarget();
+	}
+	
+	private void setDropTarget() {
+		DOMNode node;
+		if (dropTarget != this && ((node = outerNode) != null || (node = domNode) != null))
+			DOMNode.setAttr(node,  "data-dropComponent", jc);
 	}
 
 }

@@ -490,45 +490,25 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	public boolean visit(EnhancedForStatement node) {
 		SimpleName name = node.getParameter().getName();
 		String varName = name.getIdentifier();
-		buffer.append("for (var ");
-		buffer.append(varName);
-		buffer.append(", $");
-		buffer.append(varName);
-		buffer.append(" = ");
+		writeReplaceV("for (var V, $V = ", "V", varName);
 		Expression exp = node.getExpression();
 		ITypeBinding typeBinding = exp.resolveTypeBinding();
 		if (typeBinding.isArray()) {
-			buffer.append("0, $$");
-			buffer.append(varName);
-			buffer.append(" = ");
+			writeReplaceV("0, $$V = ", "V", varName);
 			exp.accept(this);
-			buffer.append("; $");
-			buffer.append(varName);
-			buffer.append(" < $$");
-			buffer.append(varName);
-			buffer.append(".length && ((");
-			buffer.append(varName);
-			buffer.append(" = $$");
-			buffer.append(varName);
-			buffer.append("[$");
-			buffer.append(varName);
-			buffer.append("]) || true); $");
-			buffer.append(varName);
-			buffer.append("++");
+			writeReplaceV("; $V<$$V.length&&((V=$$V[$V]),1);$V++", "V", varName);
 		} else {
 			exp.accept(this);
-			buffer.append(".iterator (); $");
-			buffer.append(varName);
-			buffer.append(".hasNext () && ((");
-			buffer.append(varName);
-			buffer.append(" = $");
-			buffer.append(varName);
-			buffer.append(".next ()) || true);");
+			writeReplaceV(".iterator(); $V.hasNext()&&((V=$V.next()),1);", "V", varName);
 		}
 		buffer.append(") ");
 		node.getBody().accept(this);
 		buffer.append("\r\n");
 		return false;
+	}
+
+	private void writeReplaceV(String template, String v, String varName) {
+		buffer.append(template.replace(v, varName));
 	}
 
 	public boolean visit(EnumDeclaration node) {
@@ -1588,7 +1568,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		for (Iterator<?> iter = fragments.iterator(); iter.hasNext();) {
 			VariableDeclarationFragment fragment = (VariableDeclarationFragment) iter.next();
 			Expression initializer = fragment.getInitializer();
-			if (checkFinalConstant ? getConstantValue(initializer) != null
+			if (checkFinalConstant ? getConstantValue(initializer, false)
 					: isStatic && initializer == null && !needDefault)
 				continue;
 			int len = buffer.length();
@@ -2116,9 +2096,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				if (right instanceof CharacterLiteral) {
 					// ... = 'c'
 					if (leftIsString) {
-						preVisit(right);
-						buffer.append(getConstantValue(right));
+						getConstantValue(right, true);
 					} else {
+						preVisit2(right);
 						buffer.append(0 + ((CharacterLiteral) right).charValue());
 					}
 				} else if (leftIsString) {
@@ -2161,14 +2141,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		buffer.append(' ');
 		boolean needCharCode = false;
 		if (right instanceof InfixExpression) {
-			String constValue = getConstantValue(right);
-			if (constValue == null) {
+			if  (getConstantValue(right, true)) {
+				char c = getLastChar();
+				needCharCode = (c == '\'' || c == '"');			
+			} else  {
 				buffer.append("(");
 				boxingNode(right, true);
 				buffer.append(")");
-			} else {
-				buffer.append(constValue);
-				needCharCode = (constValue.startsWith("'") || constValue.startsWith("\""));
 			}
 		} else if ("char".equals(rightName)) {
 			Object constValue = right.resolveConstantExpressionValue();
@@ -2338,13 +2317,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		Expression right = node.getRightOperand();
 		List<?> extendedOperands = node.extendedOperands();
 
-		String constValue = getConstantValue(node);
-		if (constValue != null) {
-			preVisit(node);
-			buffer.append(constValue);
+		if (getConstantValue(node, true))
 			return false;
-		}
-
 		ITypeBinding expTypeBinding = node.resolveTypeBinding();
 		if (expTypeBinding == null)
 			return false;
@@ -2526,13 +2500,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * </pre>
 	 */
 	public boolean visit(PrefixExpression node) {
-		// Q: Can you really have a constant here?
-		String constValue = getConstantValue(node);
-		if (constValue != null) {
-			preVisit(node);
-			buffer.append(constValue);
+		if (getConstantValue(node, true))
 			return false;
-		}
 		String op = node.getOperator().toString();
 		if ("~".equals(op)) {
 			buffer.append(op);
@@ -2543,14 +2512,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	public boolean visit(QualifiedName node) {
 		// page.x =...
-		if (NameMapper.isJ2SSimpleQualified(node)) {
-			String constValue = getConstantValue(node);
-			if (constValue != null) {
-				preVisit(node);
-				buffer.append(constValue);
-				return false;
-			}
-		}
+		if (NameMapper.isJ2SSimpleQualified(node) && getConstantValue(node, true))
+			return false;
 		IBinding nameBinding = node.resolveBinding();
 		IVariableBinding varBinding = (nameBinding instanceof IVariableBinding ? (IVariableBinding) nameBinding : null);
 		ASTNode parent = node.getParent();
@@ -2630,7 +2593,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	public boolean visit(SimpleName node) {
 		// var x = ...
 		// this.pages ....
-		buffer.append(getQualifiedSimpleName(node));
+		if (!getConstantValue(node, true))
+			buffer.append(getQualifiedSimpleName(node));
 		return false;
 	}
 
@@ -2642,10 +2606,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 */
 	private String getQualifiedSimpleName(SimpleName node) {
 		// xxx.yyy.zzz...
-		String constValue = getConstantValue(node);
-		if (constValue != null) {
-			return constValue;
-		}
 		IBinding binding = node.resolveBinding();
 		// if (allowExtensions && binding instanceof ITypeBinding
 		// && ExtendedAdapter.isHTMLClass(((ITypeBinding)
@@ -3610,14 +3570,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					return true;
 				}
 			}
-			String constValue = getConstantValue(exp);
-			if (constValue != null) {
-				preVisit(exp);
-				exp.accept(this);
-				//buffer.append(constValue);
+			if (getConstantValue(exp, true))
 				return false;
-			}
-
 		}
 		element.accept(this);
 		return false;
@@ -4313,35 +4267,40 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @param node
 	 * @return
 	 */
-	private static String getConstantValue(Expression node) {
+	private boolean getConstantValue(Expression node, boolean andWrite) {
 		if (node == null)
-			return null;
+			return false;
 		Object constValue = node.resolveConstantExpressionValue();
+		StringBuffer sb = null;
 		if (constValue != null && (constValue instanceof Number
 				|| constValue instanceof Character
 				|| constValue instanceof Boolean)) {
-			StringBuffer buffer = new StringBuffer();
+			sb = new StringBuffer();
 			if (constValue instanceof Character) {
-				buffer.append('"');
-				addChar(((Character)constValue).charValue(), buffer);
-				buffer.append('"');
+				sb.append('"');
+				addChar(((Character)constValue).charValue(), sb);
+				sb.append('"');
 			} else {
 				// Number or Boolean
-				buffer.append(constValue);
+				sb.append(constValue);
 			}
-			return buffer.toString();
-		}
+		} else 
 		if (constValue instanceof String) {
-			StringBuffer buffer = new StringBuffer();
+			sb = new StringBuffer();
 			String str = (String) constValue;
 			int length = str.length();
-			buffer.append('"');
+			sb.append('"');
 			for (int i = 0; i < length; i++)
-				addChar(str.charAt(i), buffer);
-			buffer.append('"');
-			return buffer.toString();
+				addChar(str.charAt(i), sb);
+			sb.append('"');
 		}
-		return null;
+		if (sb == null)
+			return false;
+		if (andWrite) {
+			preVisit2(node);
+			buffer.append(sb);
+		}
+		return true;
 	}
 
 	private static void addChar(char c, StringBuffer buffer) {
