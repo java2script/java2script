@@ -425,7 +425,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		c = target;
 		jc = (JComponent) c; 
 		applet = JSToolkit.getHTML5Applet(c);
-		newID();
+		newID(false);
 		installUI(target); // need to do this immediately, not later
 		installJS();
 		if (needPreferred)
@@ -433,9 +433,9 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		return this;
 	}
 
-	protected void newID() {
+	protected void newID(boolean forceNew) {
 		classID = c.getUIClassID();
-		if (id == null) {
+		if (id == null || forceNew) {
 			num = ++incr;
 			id = c.getHTMLName(classID) + "_" + num;
 		}
@@ -444,8 +444,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	public void reInit() {
 		 setTainted();
 		 domNode = null;
-		 id = null;
-		 newID();
+		 newID(true);
 	}
 	
 	// ////////////// user event handling ///////////////////

@@ -17,7 +17,7 @@ public abstract class CellHolder extends JSLightweightUI {
     	return holder.id + "_tab" + (row >= 0 ? "row" + row : "") + "_col" + col;
     }
 
-	static DOMNode getCellNode(JSComponentUI holder, int row, int col) {
+	static DOMNode createCellNode(JSComponentUI holder, int row, int col) {
 		String rcID = getRowColumnID(holder, row, col);
 		DOMNode td = DOMNode.createElement("div", rcID);
 		holder.$(td).addClass("swing-td");
@@ -30,34 +30,19 @@ public abstract class CellHolder extends JSLightweightUI {
 		return holder.$("#" + rcID).get(0);
 	}
 
-    static void updateCellNode(DOMNode td, JSComponent c, int width, int height) {
+    static void updateCellNode(DOMNode td, JSComponent renderer, int width, int height) {
 		JSComponentUI ui;
-		if (c != null && !(ui = (JSComponentUI) c.getUI()).isNull) {
+		if (renderer != null && !(ui = (JSComponentUI) renderer.getUI()).isNull) {
 			if (width > 0) // for table header, to center
-				c.setSize(width, height);
+				renderer.setSize(width, height);
 				
-			
-			ui.domNode = ui.outerNode = null;
+			ui.outerNode = null;
+			ui.reInit();
 			ui.updateDOMNode();
-			DOMNode.setAttr(ui.domNode, "data-source", c); // necessary for Firefox but not Chrome!??
+			DOMNode.setAttr(ui.domNode, "data-source", renderer); // necessary for Firefox but not Chrome!??
 			DOMNode.setAttr(ui.domNode, "data-ui", null); // necessary for Firefox but not Chrome!??
 			DOMNode.setAttr(ui.domNode, "data-component", null); // necessary for Firefox but not Chrome!??
-			ui.newID();
-			
-			
-			
-//			if (c != null && !(ui = (JSComponentUI) c.getUI()).isNull) {
-//				c.setSize(cw[col], thh);
-//				ui.domNode = ui.outerNode = null;
-//				ui.newID();
-//				td.appendChild(ui.updateDOMNode());
-//				ui.domNode = ui.outerNode = null;
-//			}
-//
-			
-			
-			
-			
+			DOMNode.removeAllChildren(td);
 			td.appendChild(ui.domNode);
 			DOMNode.setStyles(ui.domNode, "width", "unset");
 			DOMNode.setStyles(ui.domNode, "height", "unset");

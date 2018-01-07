@@ -38,6 +38,7 @@ import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
+import java.lang.reflect.Constructor;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
@@ -3599,9 +3600,12 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
             editorComp.validate();
             editorComp.repaint();
 
-            setCellEditor(editor);
+            // BH SwingJS - moved these next two lines up so that we have that info in JSTableUI
             setEditingRow(row);
             setEditingColumn(column);
+            setCellEditor(editor);
+//            setEditingRow(row);
+//            setEditingColumn(column);
             editor.addCellEditorListener(this);
 
             return true;
@@ -5534,6 +5538,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
         Class[] argTypes = new Class[]{String.class};
         Class constructorClass;
         Object value;
+		private Constructor constructor;
 
         public GenericEditor() {
             super(new JTextField());
@@ -5554,36 +5559,14 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 					if (constructorClass == String.class) {
 						value = s;
 					}
-					return super.stopCellEditing();
-
-				}
-				// SwingUtilities2.checkAccess(constructor.getModifiers());
-
-				boolean haveConstructor = true;
-				/**
-				 * @j2sNative
-				 * 
-				 * 			haveConstructor = !!constructor.getConstructor;
-				 */
-				{
-				}
-				if (constructorClass == String.class) {
-					value = s;
-				} else if (haveConstructor) {
-					value = constructorClass.getConstructor(argTypes).newInstance(new Object[] { s });
 				} else {
-					/**
-					 * @j2sNative debugger;
-					 */
-					{
-					}
+					value = constructor.newInstance(new Object[] { s });
 				}
-
-			} catch (Throwable e) { // BH Throwable here
+				return super.stopCellEditing();
+			} catch (Exception e) {
 				((JComponent) getComponent()).setBorder(new LineBorder(Color.red));
 				return false;
 			}
-			return super.stopCellEditing();
 		}
 
         @Override
@@ -5603,6 +5586,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
                 }
                 //ReflectUtil.checkPackageAccess(type);
                 //SwingUtilities2.checkAccess(type.getModifiers());
+                constructor = type.getConstructor(argTypes);
                 constructorClass = type;//.getConstructor(argTypes);
             }
             catch (Exception e) {
@@ -5825,7 +5809,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
      */
     public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
         Object value = getValueAt(row, column);
-
+        
         boolean isSelected = false;
         boolean hasFocus = false;
 
@@ -5914,31 +5898,31 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
     public void removeEditor() {
 //        KeyboardFocusManager.getCurrentKeyboardFocusManager().
 //            removePropertyChangeListener("permanentFocusOwner", editorRemover);
-//        editorRemover = null;
-//
-//        TableCellEditor editor = getCellEditor();
-//        if(editor != null) {
-//            editor.removeCellEditorListener(this);
-//            if (editorComp != null) {
+        editorRemover = null;
+
+        TableCellEditor editor = getCellEditor();
+        if(editor != null) {
+            editor.removeCellEditorListener(this);
+            if (editorComp != null) {
 //                Component focusOwner =
 //                        KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
 //                boolean isFocusOwnerInTheTable = focusOwner != null?
 //                        SwingUtilities.isDescendingFrom(focusOwner, this):false;
-//                remove(editorComp);
+                remove(editorComp);
 //                if(isFocusOwnerInTheTable) {
 //                    requestFocusInWindow();
 //                }
-//            }
-//
-//            Rectangle cellRect = getCellRect(editingRow, editingColumn, false);
-//
-//            setCellEditor(null);
-//            setEditingColumn(-1);
-//            setEditingRow(-1);
-//            editorComp = null;
-//
-//            repaint(cellRect);
-//        }
+            }
+
+            Rectangle cellRect = getCellRect(editingRow, editingColumn, false);
+            
+            setCellEditor(null);
+            setEditingColumn(-1);
+            setEditingRow(-1);
+            editorComp = null;
+
+            repaint(cellRect);
+        }
     }
 
 

@@ -151,7 +151,10 @@ public class JSTableUI extends JSPanelUI {
 	 */
 	private JSComponent getCellComponent(int row, int column) {
 	  TableCellRenderer renderer = table.getCellRenderer(row, column);
-		return (JSComponent) table.prepareRenderer(renderer, row, column);
+	  JSComponent c = (JSComponent) table.prepareRenderer(renderer, row, column);
+	  
+	  
+	  return c;
 	}
 
 	protected void addChildrenToDOM(Component[] children) {
@@ -170,25 +173,39 @@ public class JSTableUI extends JSPanelUI {
 			String rid = id + "_tab_row" + row;
 			DOMNode tr = DOMNode.createElement("div", rid);
 			DOMNode.setStyles(tr, "height", h + "px");
-			domNode.appendChild(tr);
 			int tx = 0;
 			for (int col = 0; col < ncols; col++) {
-				DOMNode td = CellHolder.getCellNode(this, row, col);
+				DOMNode td = CellHolder.createCellNode(this, row, col);
 				DOMNode.setStyles(td, "width", cw[col] + "px");
 				DOMNode.setStyles(td, "height", h + "px");
 				DOMNode.setStyles(td, "left", tx + "px");
 				DOMNode.setStyles(td, "top", ty + "px");
 				DOMNode.setStyles(td, "position", "absolute");
 				tx += cw[col];
+				updateCellNode(td, row, col);
 				tr.appendChild(td);
-				CellHolder.updateCellNode(td, (JSComponent) getCellComponent(row, col), 0, 0);
 			}
+			domNode.appendChild(tr);
 			ty += h;
 		}
 
 	}
 
 	
+	private void updateCellNode(DOMNode td, int row, int col) {
+		CellHolder.updateCellNode(td, (JSComponent) getCellComponent(row, col), 0, 0);
+	
+	}
+
+	public void prepareDOMEditor(boolean starting, int row, int column) {
+		if (starting) {
+			DOMNode td = CellHolder.findCellNode(this, row, column);
+		} else {
+			DOMNode td = CellHolder.findCellNode(this, table.getEditingRow(), table.getEditingColumn());
+			updateCellNode(td, row, column);
+		}
+	}
+
   
 	/*
 	 * Copyright 1997-2007 Sun Microsystems, Inc.  All Rights Reserved.
@@ -1268,6 +1285,7 @@ public class JSTableUI extends JSPanelUI {
 	            boolean dragEnabled = table.getDragEnabled();
 
 	            if (!dragEnabled && !isFileList && table.editCellAt(pressedRow, pressedCol, e)) {
+	            	
 	                setDispatchComponent(e);
 	                repostEvent(e);
 	            }
@@ -1416,8 +1434,9 @@ public class JSTableUI extends JSPanelUI {
 	        // PropertyChangeListener
 	        public void propertyChange(PropertyChangeEvent event) {
 	            String changeName = event.getPropertyName();
-
-	            if ("componentOrientation" == changeName) {
+	            if ("tableCellEditor" == changeName) {
+	            	prepareDOMEditor(event.getNewValue() != null, pressedRow, pressedCol);
+	            } else if ("componentOrientation" == changeName) {
 	                InputMap inputMap = getInputMap(
 	                    JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
@@ -1497,10 +1516,10 @@ public class JSTableUI extends JSPanelUI {
 	    }
 
 	//
-	//  Factory methods for the Listeners
+	// Factory methods for the Listeners
 	//
 
-	    private Handler getHandler() {
+		private Handler getHandler() {
 	        if (handler == null) {
 	            handler = new Handler();
 	        }
@@ -2257,22 +2276,17 @@ public class JSTableUI extends JSPanelUI {
 	        }
 	    }
 
-	    private void paintCell(Graphics g, Rectangle cellRect, int row, int column) {
-	    	
-	    	//System.out.println("paintCell table " + row + " " + column);
-	        if (table.isEditing() && table.getEditingRow()==row &&
-	                                 table.getEditingColumn()==column) {
-	            Component component = table.getEditorComponent();
-	            component.setBounds(cellRect);
-	            component.validate();
-	        }
-	        else {
-	            TableCellRenderer renderer = table.getCellRenderer(row, column);
-	            Component component = table.prepareRenderer(renderer, row, column);
-	            rendererPane.paintComponent(g, component, table, cellRect.x, cellRect.y,
-	                                        cellRect.width, cellRect.height, true);
-	        }
-	    }
+	private void paintCell(Graphics g, Rectangle cellRect, int row, int column) {
+		// System.out.println("paintCell table " + row + " " + column);
+		if (table.isEditing() && table.getEditingRow() == row && table.getEditingColumn() == column) {
+			Component component = table.getEditorComponent();
+			component.setBounds(cellRect);
+			component.validate();
+		} else {
+			rendererPane.paintComponent(g, getCellComponent(row, column), table, cellRect.x, cellRect.y, cellRect.width,
+					cellRect.height, true);
+		}
+	}
 
 	    private static int getAdjustedLead(JTable table,
 	                                       boolean row,
