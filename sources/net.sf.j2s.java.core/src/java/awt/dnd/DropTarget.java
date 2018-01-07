@@ -501,6 +501,8 @@ public class DropTarget implements DropTargetListener, Serializable {
         }
 
         //if (peer instanceof DropTargetPeer) {
+        if (peer == null)
+        	peer = componentPeer;
             nativePeer = peer;
             ((DropTargetPeer)peer).addDropTarget(this);
         //} else {
