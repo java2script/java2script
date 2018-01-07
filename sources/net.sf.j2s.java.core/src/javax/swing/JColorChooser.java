@@ -132,7 +132,10 @@ public class JColorChooser extends JComponent {
 	 */
 	public static final String CHOOSER_PANELS_PROPERTY = "chooserPanels";
 
-	public static final Color NOCOLOR = new ASYNCHRONOUS_COLOR();
+	/**
+	 * by implementing UIResource, we indicate that this reply is to be ignored
+	 */
+	public static final Color ASYNC_RETURN = new ASYNCHRONOUS_COLOR();
 	
 	static class ASYNCHRONOUS_COLOR extends Color implements UIResource {}
 
@@ -182,7 +185,7 @@ public class JColorChooser extends JComponent {
 		// ok.getColor()
 		
 		// JavaScript will continue here, returning Color(0, 0, 0, 0) 
-		return NOCOLOR;
+		return ASYNC_RETURN;
 	}
 
 	/**
