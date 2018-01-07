@@ -11819,7 +11819,7 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 		try {
 			if (applet._appletPanel) applet._appletPanel.destroy();
 			applet._applet = null;
-			J2S._unsetMouse(applet._mouseInterface)
+			J2S._jsUnsetMouse(applet._mouseInterface)
 			applet._canvas = null;
 			var n = 0;
 			for (var i = 0; i < J2S._syncedApplets.length; i++) {
@@ -12273,6 +12273,12 @@ J2S.Cache.put = function(filename, data) {
 			var oe = e.originalEvent;
 			oe.stopPropagation();
 			oe.preventDefault();
+      var target = oe.target;
+      var c = target;
+      while (c && !c["data-dropComponent"])
+        c = c.parentElement;
+      if (!c)
+       return;
 			var file = oe.dataTransfer.files[0];
 			if (file == null) {
 				// FF and Chrome will drop an image here
@@ -12293,9 +12299,15 @@ J2S.Cache.put = function(filename, data) {
 			var reader = new FileReader();
 			reader.onloadend = function(evt) {
 				if (evt.target.readyState == FileReader.DONE) {
+          var target = oe.target;
 					var bytes = J2S._toBytes(evt.target.result);
           // what about a frame?? what about x and y?
-          Clazz.load("swingjs.JSDnD").drop$javax_swing_JComponent$S$BA$I$I(oe.target["data-ui"].jc, file.name, bytes, oe.pageX, oe.pageY);          
+          var comp = c["data-dropComponent"];
+          var d = comp.getLocationOnScreen();
+          var x = oe.pageX - d.x;
+          var y = oe.pageY - d.y;
+          Clazz.load("swingjs.JSDnD").drop$javax_swing_JComponent$S$BA$I$I(comp, file.name, bytes, x, y);
+/*                    
 					var cacheName = "cache://DROP_" + file.name;
 					if (!cacheName.endsWith(".spt"))
 						me._appletPanel.cacheFileByName$S$Z("cache://DROP_*",false);
@@ -12307,6 +12319,7 @@ J2S.Cache.put = function(filename, data) {
 					if(xym && (!me._appletPanel.setStatusDragDropped$I$I$I$S || me._appletPanel.setStatusDragDropped$I$I$I$S(0, xym[0], xym[1], cacheName))) {
 						me._appletPanel.openFileAsyncSpecial$S$I(cacheName, 1);
 					}
+*/
 				}
 			};
 			reader.readAsArrayBuffer(file);
@@ -13276,11 +13289,12 @@ Clazz.forName = function(name, initialize, loader) {
 Clazz.getClass = function(cl, methodList) {
   // $Class$ is the java.lang.Class object wrapper
   // $clazz$ is the unwrapped JavaScript object
+  cl = getClazz(cl) || cl;
   if (cl.$Class$)
     return cl.$Class$;
   java.lang.Class || Clazz.load("java.lang.Class");
   var Class_ = cl.$Class$ = new java.lang.Class();
-  Class_.$clazz$ = getClazz(cl) || cl; // for arrays - a bit of a hack
+  Class_.$clazz$ = cl; // for arrays - a bit of a hack
   Class_.$methodList$ = methodList;
   return Class_;
 }

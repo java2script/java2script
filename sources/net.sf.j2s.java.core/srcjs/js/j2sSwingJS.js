@@ -247,11 +247,12 @@ Clazz.forName = function(name, initialize, loader) {
 Clazz.getClass = function(cl, methodList) {
   // $Class$ is the java.lang.Class object wrapper
   // $clazz$ is the unwrapped JavaScript object
+  cl = getClazz(cl) || cl;
   if (cl.$Class$)
     return cl.$Class$;
   java.lang.Class || Clazz.load("java.lang.Class");
   var Class_ = cl.$Class$ = new java.lang.Class();
-  Class_.$clazz$ = getClazz(cl) || cl; // for arrays - a bit of a hack
+  Class_.$clazz$ = cl; // for arrays - a bit of a hack
   Class_.$methodList$ = methodList;
   return Class_;
 }
