@@ -2116,6 +2116,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				if (right instanceof CharacterLiteral) {
 					// ... = 'c'
 					if (leftIsString) {
+						preVisit(right);
 						buffer.append(getConstantValue(right));
 					} else {
 						buffer.append(0 + ((CharacterLiteral) right).charValue());
@@ -2339,6 +2340,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		String constValue = getConstantValue(node);
 		if (constValue != null) {
+			preVisit(node);
 			buffer.append(constValue);
 			return false;
 		}
@@ -2527,6 +2529,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// Q: Can you really have a constant here?
 		String constValue = getConstantValue(node);
 		if (constValue != null) {
+			preVisit(node);
 			buffer.append(constValue);
 			return false;
 		}
@@ -2543,6 +2546,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (NameMapper.isJ2SSimpleQualified(node)) {
 			String constValue = getConstantValue(node);
 			if (constValue != null) {
+				preVisit(node);
 				buffer.append(constValue);
 				return false;
 			}
@@ -3608,7 +3612,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			}
 			String constValue = getConstantValue(exp);
 			if (constValue != null) {
-				buffer.append(constValue);
+				preVisit(exp);
+				exp.accept(this);
+				//buffer.append(constValue);
 				return false;
 			}
 
