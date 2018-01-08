@@ -2512,17 +2512,22 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	public boolean visit(QualifiedName node) {
 		// page.x =...
+		
+		
 		if (NameMapper.isJ2SSimpleQualified(node) && getConstantValue(node, true))
 			return false;
 		IBinding nameBinding = node.resolveBinding();
 		IVariableBinding varBinding = (nameBinding instanceof IVariableBinding ? (IVariableBinding) nameBinding : null);
 		ASTNode parent = node.getParent();
 		Name qualifier = node.getQualifier();
-		if (!checkStaticBinding(varBinding) || qualifier.resolveBinding() instanceof ITypeBinding)
+		boolean skipQualifier = false;
+		if (isStatic(nameBinding) && varBinding != null) {
+			addQualifiedNameFromBinding(varBinding);
+			buffer.append('.');
+			skipQualifier = true;
+		} else if (!checkStaticBinding(varBinding) || qualifier.resolveBinding() instanceof ITypeBinding) {
 			varBinding = null;
-		boolean skipQualifier = false;// (allowExtensions &&
-										// ExtendedAdapter.isHTMLClass(qualifier.toString(),
-										// true));
+		}
 		String className = null;
 		if (!skipQualifier && parent != null && !(parent instanceof QualifiedName)) {
 			while (qualifier instanceof QualifiedName) {
@@ -2558,7 +2563,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						className = className.substring(10);
 					}
 					if (isStatic(nameBinding)) {
-						className = getQualifiedStaticName(null, className, true, true, false);
+						className = getQualifiedStaticName(null, className, true, true, false);						
 					}
 				}
 			}
@@ -2720,7 +2725,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				name = assureQualifiedName(name);
 				if (name.length() != 0) {
 					ret = getQualifiedStaticName(null, name, true, true, false) + ".";
-					//ch = '.';
 				}
 			}
 		} else {
@@ -2728,7 +2732,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			if (parent != null && !(parent instanceof FieldAccess)) {
 				if (declaringClass != null && getUnqualifiedClassName() != null && ch != '.') {
 					ret = getClassNameAndDot(parent, declaringClass, false);
-					//ch = '.';
 				}
 			}
 			String fieldVar = null;
@@ -2758,7 +2761,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 		if (declaringClass != null)
 			name = NameMapper.getJ2SName(node);
-		ret += NameMapper.getJ2SCheckedFieldName(declaringClass, name);//, ch != '.');
+		ret += NameMapper.getJ2SCheckedFieldName(declaringClass, name);
 		return ret;
 	}
 
@@ -4406,6 +4409,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * check any node other than the package node for @j2sNative or @j2sDebug or @j2sIgnore 
 	 */
 	public boolean preVisit2(ASTNode node) {
+		//buffer.append("\nvisiting " + node.getStartPosition() + node.getClass().getName() + "\n");
 		List<Javadoc> j2sJavadoc;
 		if (	global_mapBlockJavadoc == null 	
 				|| node instanceof MethodDeclaration 
@@ -4414,7 +4418,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			return true;
 		boolean isBlock = (node instanceof Block);
 		boolean ret = !NativeDoc.checkJ2sJavadocs(buffer, j2sJavadoc, isBlock, global_j2sFlag_isDebugging) || !isBlock;
-		//buffer.append("visiting " + node.getStartPosition() + " " + isBlock + " " +  ret);
 		return ret;
 	}
 
