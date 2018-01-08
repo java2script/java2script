@@ -5176,10 +5176,16 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				code = Pattern.compile("\\/-\\*(.*)\\*-\\/",
 					Pattern.MULTILINE | Pattern.DOTALL)
 					.matcher(code).replaceAll("/*$1*/").replaceAll("<@>","@").trim();
-			boolean isInline = code.endsWith("||");
+			// use of inline comment
+			// that is, no {...} after it, in the middle of an expression
+			// for example:     int x = /**@j2sNative 32||*/15;
+			// has limitations in that you cannot replace a string by "" or an object by null.
+			// end with || to replace Java value; must not be 0, "", or null
+			// end with & to replace a number with 0.
+			boolean isInline = code.endsWith("||") || code.endsWith("&");
 			buffer.append(isInline ? "" : addPrefix ? "{\r\n" : "\r\n");
 			buffer.append(code);
-			buffer.append(isInline ? "" : addPostfix ? "}\r\n" : "\r\n");
+			buffer.append(isInline ? "" : addPostfix ? "\r\n}\r\n" : "\r\n");
 			return true;
 		}
 		
