@@ -215,50 +215,10 @@ public class TypeAdapter extends VisitorAdapter {
 	 * @param name
 	 * @return
 	 */
-	@SuppressWarnings("null")
 	public static String assureQualifiedName(String thisPackageName, String name) {
-		if (name == null || name.length() == 0)
-			return name;
-		if (thisPackageName != null) {
-			if (name.startsWith(thisPackageName + "."))
-				return "P$." + name.substring(thisPackageName.length() + 1);
-			if (name.equals(thisPackageName))
-				return "P$";
-		}
-		String[] packages = null;
-		boolean existedKeyword = false;
-//		String[] keywords = FieldAdapter.keywords;
-//		for (int i = 0; i < keywords.length; i++) {
-//			if (name.indexOf(keywords[i]) >= 0) {
-//				if (packages == null) {
-//					packages = name.split("\\.");
-//				}
-//				for (int j = 0; j < packages.length; j++) {
-//					if (keywords[i].equals(packages[j])) {
-//						packages[j] = "[\"" + packages[j] + "\"]";
-//						existedKeyword = true;
-//					}
-//				}
-//			}
-//		}
-		if (existedKeyword) {
-			StringBuffer sb = new StringBuffer();
-			for (int i = 0; i < packages.length; i++) {
-				if (packages[i].charAt(0) == '[') {
-					if (i == 0) {
-						sb.append("window");
-					}
-					sb.append(packages[i]);
-				} else {
-					if (i != 0) {
-						sb.append('.');
-					}
-					sb.append(packages[i]);
-				}
-			}
-			return sb.toString();
-		}
-		return name;
+		return (name == null || name.length() == 0 || thisPackageName == null ?
+			name : name.startsWith(thisPackageName + ".") ?  "P$." + name.substring(thisPackageName.length() + 1)
+			: name.equals(thisPackageName) ? "P$" : name);
 	}
 
 }

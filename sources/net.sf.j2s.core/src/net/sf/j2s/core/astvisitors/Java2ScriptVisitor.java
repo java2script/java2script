@@ -1071,7 +1071,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			// definition in the static buffer and return
 			String className;
 			if (parent instanceof TypeDeclarationStatement) {
-				String anonClassName = assureQualifiedName(binding.isAnonymous() || binding.isLocal()
+				String anonClassName = assureQualifiedNameAllowP$(binding.isAnonymous() || binding.isLocal()
 						? binding.getBinaryName() : binding.getQualifiedName());
 				className = anonClassName.substring(anonClassName.lastIndexOf('.') + 1);
 			} else {
@@ -1742,7 +1742,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if ((binding.isAnonymous() || binding.isLocal()) && (binaryName = binding.getBinaryName()) == null
 				&& (bindingKey = binding.getKey()) != null)
 			binaryName = bindingKey.substring(1, bindingKey.length() - 1).replace('/', '.');
-		return assureQualifiedName(binaryName == null ? binding.getQualifiedName() : binaryName);
+		return assureQualifiedNameAllowP$(binaryName == null ? binding.getQualifiedName() : binaryName);
 	}
 
 	private static String getSuperClassNameNoBrackets(ITypeBinding typeBinding) {
@@ -1789,7 +1789,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 */
 	private void openNew(String className, IMethodBinding mbinding) {
 		buffer.append("Clazz.new_(");
-		String name = assureQualifiedName(className);
+		String name = assureQualifiedNameAllowP$(className);
 		if (!name.equals("C$"))
 			name = getQualifiedStaticName(null, className, true, true, false);
 		if (mbinding == null) {
@@ -2269,7 +2269,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		if (varBinding != null) {
 			buffer.append(", ");
-			addQualifiedNameFromBinding(varBinding);
+			addQualifiedNameFromBinding(varBinding, false);
 			buffer.append(')');
 		}
 		buffer.append(".");
@@ -2514,7 +2514,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// page.x =...
 		
 		
-		if (NameMapper.isJ2SSimpleQualified(node) && getConstantValue(node, true))
+		if (/*isSimpleQualified(node) && */ getConstantValue(node, true))
 			return false;
 		IBinding nameBinding = node.resolveBinding();
 		IVariableBinding varBinding = (nameBinding instanceof IVariableBinding ? (IVariableBinding) nameBinding : null);
@@ -2522,7 +2522,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		Name qualifier = node.getQualifier();
 		boolean skipQualifier = false;
 		if (isStatic(nameBinding) && varBinding != null) {
-			addQualifiedNameFromBinding(varBinding);
+			addQualifiedNameFromBinding(varBinding, true);
 			buffer.append('.');
 			skipQualifier = true;
 		} else if (!checkStaticBinding(varBinding) || qualifier.resolveBinding() instanceof ITypeBinding) {
@@ -2572,7 +2572,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (!skipQualifier) {
 			if (varBinding != null) {
 				if (qualifier instanceof SimpleName) {
-					addQualifiedNameFromBinding(varBinding);
+					addQualifiedNameFromBinding(varBinding, false);
 					// buffer.append("<qsn<");
 				} else {
 					buffer.append('(');
@@ -2581,7 +2581,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					else
 						buffer.append(className);
 					buffer.append(", ");
-					addQualifiedNameFromBinding(varBinding);
+					addQualifiedNameFromBinding(varBinding, false);
 					buffer.append(')');
 				}
 			} else if (className == null) {
@@ -2634,7 +2634,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (xparent instanceof ClassInstanceCreation && !(binding instanceof IVariableBinding)) {
 			String name = (binding == null ? NameMapper.getJ2SName(node)
 					: node.resolveTypeBinding().getQualifiedName());
-			return assureQualifiedName(name);
+			return assureQualifiedNameAllowP$(name);
 		}
 		if (binding == null) {
 			String name = getShortenedQualifiedName(NameMapper.getJ2SName(node));
@@ -2648,7 +2648,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		ITypeBinding typeBinding = node.resolveTypeBinding();
 		// >>Math<<.max
 		return NameMapper.getJ2SValidFieldName$Qualifier(typeBinding == null ? node.getFullyQualifiedName()
-				: assureQualifiedName(typeBinding.getQualifiedName()), true);
+				: assureQualifiedNameAllowP$(typeBinding.getQualifiedName()), true);
 	}
 
 	private char getLastChar() {
@@ -2677,7 +2677,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					MethodInvocation mthInv = (MethodInvocation) parent;
 					if (mthInv.getExpression() == null) {
 						String cname = declaringClass.getQualifiedName();
-						cname = assureQualifiedName(cname);
+						cname = assureQualifiedNameAllowP$(cname);
 						if (cname.length() > 0)
 							ret = cname + ".";
 					}
@@ -2722,7 +2722,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				if ((name == null || name.length() == 0) && declaringClass.isAnonymous()) {
 					name = declaringClass.getBinaryName();
 				}
-				name = assureQualifiedName(name);
+				name = assureQualifiedNameAllowP$(name);
 				if (name.length() != 0) {
 					ret = getQualifiedStaticName(null, name, true, true, false) + ".";
 				}
@@ -2759,15 +2759,17 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			if (declaringClass == null)
 				name = (fieldVar == null ? getNormalVariableName(node.getIdentifier()) : fieldVar);
 		}
-		if (declaringClass != null)
+		if (declaringClass != null) {
 			name = NameMapper.getJ2SName(node);
+
+		}
 		ret += NameMapper.getJ2SCheckedFieldName(declaringClass, name);
 		return ret;
 	}
 
 	public boolean visit(SimpleType node) {
 		ITypeBinding binding = node.resolveBinding();
-		buffer.append(binding == null ? node : assureQualifiedName(binding.getQualifiedName()));
+		buffer.append(binding == null ? node : assureQualifiedNameAllowP$(binding.getQualifiedName()));
 		return false;
 	}
 
@@ -3115,7 +3117,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	private void addFieldName(Expression left, IVariableBinding qualifier) {
 		if (qualifier != null) {
-			addQualifiedNameFromBinding(qualifier);
+			addQualifiedNameFromBinding(qualifier, false);
 			buffer.append('.');
 			left = (left instanceof QualifiedName ? ((QualifiedName) left).getName()
 					: left instanceof FieldAccess ? ((FieldAccess) left).getName() : left);
@@ -3412,9 +3414,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * for example: new Test_Static().y++
 	 * 
 	 * @param varBinding
+	 * @param isStatic TODO
 	 */
-	private void addQualifiedNameFromBinding(IVariableBinding varBinding) {
-		appendShortenedQualifiedName(global_PackageName, varBinding.getDeclaringClass().getQualifiedName(),
+	private void addQualifiedNameFromBinding(IVariableBinding varBinding, boolean isStatic) {
+		appendShortenedQualifiedName((isStatic ? null : global_PackageName), varBinding.getDeclaringClass().getQualifiedName(),
 				isStatic(varBinding), true);
 	}
 
@@ -3518,8 +3521,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 */
 	private void appendShortenedQualifiedName(String packageName, String name, boolean isStatic, boolean doCache) {
 		name = removeBrackets(name);
-		String shortName = (doCache ? assureQualifiedName(name) : assureQualifiedNameNoC$(packageName, name));
-		if (isStatic && (shortName.length() < 2 || shortName.charAt(1) != '$')) {
+		String shortName = (doCache ? assureQualifiedNameAllowP$(name) : assureQualifiedNameNoC$(packageName, name));
+		if (isStatic && (shortName.length() < 2 || packageName == null || shortName.charAt(1) != '$')) {
 			if (!doCache || isClassKnown(name))
 				name = shortName;
 			getQualifiedStaticName(null, name, true, doCache, true);
@@ -3614,7 +3617,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		return TypeAdapter.assureQualifiedName(packageName, name);
 	}
 
-	private String assureQualifiedName(String name) {
+	private String assureQualifiedNameAllowP$(String name) {
 		return (name == null ? null
 				: TypeAdapter.assureQualifiedName(global_PackageName, getShortenedQualifiedName(name)));
 	}
@@ -4020,6 +4023,18 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 		return j2sName + s;
 	}
+
+//	/**
+//	 * Check whether the given QualifiedName is just simple or not.
+//	 * abandoned -- guarangteed to be true -- that's the definition
+//	 * 
+//	 * @param node
+//	 * @return
+//	 */
+//	public static boolean isSimpleQualified(QualifiedName node) {
+//		Name qualifier = node.getQualifier();
+//		return (qualifier instanceof SimpleName || isSimpleQualified((QualifiedName) qualifier));
+//	}
 
 	/**
 	 * finish the generic foo || bar fix
@@ -4989,24 +5004,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			return false;
 		}
 
-		/**
-		 * Check whether the given QualifiedName is just simple or not.
-		 * The "just simple" means foo.bar not just foo?
-		 * 
-		 * @param node
-		 * @return
-		 */
-		public static boolean isJ2SSimpleQualified(QualifiedName node) {
-			Name qualifier = node.getQualifier();
-			if (qualifier instanceof SimpleName) {
-				return true;
-			} else if (qualifier instanceof QualifiedName) {
-				return isJ2SSimpleQualified((QualifiedName) qualifier);
-			}
-			System.err.println(">>> FieldAdapter not simple " + node.getFullyQualifiedName());
-			return false;
-		}
-
 		/*
 		 * IE passes the following: 
 		 * public,private,private,static,package,
@@ -5241,5 +5238,16 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 
 
+	}
+	
+	/**
+	 * for debugging --  to System.err.println
+	 */
+	public static void dumpStack() {
+		try{
+			throw new NullPointerException();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
