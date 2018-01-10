@@ -745,7 +745,7 @@ class Thread implements Runnable {
 
     private void start0(){
     	started = true;    	
-    	JSToolkit.dispatch(this, 0, 0);
+    	JSToolkit.dispatch(this, 0, 0); // run the run() method asynchronously
     }
 
     /**
