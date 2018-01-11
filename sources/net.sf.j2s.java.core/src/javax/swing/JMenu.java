@@ -1296,6 +1296,8 @@ public class JMenu extends JMenuItem implements MenuElement
     @Override
 		public void doClick(int pressTime) {
         MenuElement me[] = buildMenuElementArray(this);
+        if (me == null)
+        	return;
         MenuSelectionManager.defaultManager().setSelectedPath(me);
     }
 
@@ -1327,6 +1329,9 @@ public class JMenu extends JMenuItem implements MenuElement
                 MenuElement me[] = new MenuElement[elements.size()];
                 elements.copyInto(me);
                 return me;
+            } else {
+            	// SwingJS - should not be here!
+            	return null;
             }
         }
     }
