@@ -41,7 +41,6 @@
 
 package java.util;
 
-//import javajs.J2SRequireImport;
 import sun.util.calendar.BaseCalendar;
 import sun.util.calendar.CalendarSystem;
 import sun.util.calendar.CalendarUtils;
@@ -153,7 +152,6 @@ import sun.util.calendar.Gregorian;
  * @author David Goldsmith, Mark Davis, Chen-Lieh Huang, Alan Liu
  */
 
-//@J2SRequireImport({ sun.util.calendar.Gregorian.class })
 @SuppressWarnings({"unused"})
 public class SimpleTimeZone extends TimeZone {
 	/**

@@ -28,14 +28,13 @@
 
 package java.awt;
 
-import java.util.Hashtable;
-
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.VolatileImage;
 import java.awt.image.WritableRaster;
-import javajs.J2SIgnoreImport;
+import java.util.Hashtable;
+
 import swingjs.api.Interface;
 
 
@@ -112,7 +111,6 @@ import swingjs.api.Interface;
  *
  */
 
-@J2SIgnoreImport({ WritableRaster.class, ColorModel.class })
 public abstract class GraphicsConfiguration {
 
 //    private static BufferCapabilities defaultBufferCaps;

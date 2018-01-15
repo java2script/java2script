@@ -3,8 +3,6 @@ package javajs.util;
 
 import java.nio.charset.Charset;
 
-import javajs.J2SIgnoreImport;
-
 /**
  * Interesting thing here is that JavaScript is 3x faster than Java in handling strings.
  * 
@@ -14,7 +12,6 @@ import javajs.J2SIgnoreImport;
  * 
  */
 
-@J2SIgnoreImport({java.lang.StringBuilder.class, java.nio.charset.Charset.class})
 public class SB {
   
   private java.lang.StringBuilder sb;

@@ -52,7 +52,6 @@ import java.lang.reflect.InvocationTargetException;
 import javax.swing.event.MenuDragMouseEvent;
 import javax.swing.plaf.UIResource;
 
-import javajs.J2SIgnoreImport;
 import sun.awt.AppContext;
 import sun.swing.UIAction;
 import swingjs.JSAppletViewer;
@@ -64,7 +63,6 @@ import swingjs.api.Interface;
  *
  * @author unknown
  */
-@J2SIgnoreImport({CellRendererPane.class, DefaultCellEditor.class, ImageIcon.class, JMenu.class, })
 @SuppressWarnings({"rawtypes", "deprecation"})
 public class SwingUtilities implements SwingConstants
 {

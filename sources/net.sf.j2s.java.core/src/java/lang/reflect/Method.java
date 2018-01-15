@@ -24,7 +24,6 @@ import javax.imageio.metadata.IIOMetadataFormat;
  * Information about the method can be accessed, and the method can be invoked
  * dynamically.
  * 
- *@//j2sRequireImport java.lang.Void
  */
 public final class Method extends AccessibleObject implements GenericDeclaration, Member {
 

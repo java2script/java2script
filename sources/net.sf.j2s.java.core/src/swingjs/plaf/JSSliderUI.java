@@ -4,8 +4,6 @@ package swingjs.plaf;
 import java.util.Dictionary;
 import java.util.Enumeration;
 
-//import javajs.J2SRequireImport;
-
 import javax.swing.SwingConstants;
 
 import java.awt.Dimension;

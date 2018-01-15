@@ -3,7 +3,6 @@ package javajs.util;
 import java.awt.Toolkit;
 import java.awt.event.InvocationEvent;
 
-//import javajs.J2SRequireImport;
 import javajs.api.JSFunction;
 
 
@@ -21,7 +20,6 @@ import javajs.api.JSFunction;
  * @author Bob Hanson
  * 
  */
-//@J2SRequireImport(swingjs.JSToolkit.class)
 public abstract class JSThread extends Thread implements JSFunction {
 
 	public static final int INIT = 0;

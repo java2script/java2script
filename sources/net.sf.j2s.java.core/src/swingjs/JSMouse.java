@@ -38,9 +38,6 @@ import java.awt.event.MouseWheelEvent;
 /**
  * JavaScript interface from JmolJSmol.js via handleOldJvm10Event (for now)
  * 
- * J2SRequireImport is needed because we want to allow JavaScript access to
- * java.awt.Event constant names
- * 
  */
 
 public class JSMouse {

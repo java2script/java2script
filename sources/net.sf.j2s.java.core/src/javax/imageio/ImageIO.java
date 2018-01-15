@@ -63,7 +63,6 @@ import swingjs.image.PngImageWriter;
  * simple encoding and decoding.
  * 
  */
-//@J2SRequireImport(ImageInputStream.class)
 public final class ImageIO {
 
 	// private static final IIORegistry theRegistry =

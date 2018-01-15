@@ -27,7 +27,6 @@
  */
 package swingjs.plaf;
 
-//import javajs.J2SRequireImport;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -106,7 +105,6 @@ import swingjs.api.js.DOMNode;
  * @author Timothy Prinzing
  * @author Shannon Hickey (drag and drop)
  */
-//@J2SRequireImport({ TextListener.class, JSCaret.class, InputMapUIResource.class, ActionMapUIResource.class })
 public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFactory
 																											// {
 

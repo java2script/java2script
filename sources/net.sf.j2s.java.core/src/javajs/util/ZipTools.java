@@ -32,12 +32,6 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import javajs.J2SIgnoreImport;
-import javajs.api.GenericZipInputStream;
-import javajs.api.GenericZipTools;
-import javajs.api.ZInputStream;
-
 import java.util.Map;
 import java.util.zip.CRC32;
 import java.util.zip.GZIPInputStream;
@@ -45,12 +39,13 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.tools.bzip2.CBZip2InputStreamFactory;
 
-/**
- * Note the JSmol/HTML5 must use its own version of java.util.zip.ZipOutputStream.
- * 
- */
-@J2SIgnoreImport({ java.util.zip.ZipOutputStream.class })
+import javajs.api.GenericZipInputStream;
+import javajs.api.GenericZipTools;
+import javajs.api.Interface;
+import javajs.api.ZInputStream;
+
 public class ZipTools implements GenericZipTools {
 
   public ZipTools() {
@@ -451,6 +446,11 @@ public class ZipTools implements GenericZipTools {
     return bytes;
   }
 
+
+  @Override
+  public InputStream newBZip2InputStream(InputStream is) throws IOException {
+    return new BufferedInputStream(((CBZip2InputStreamFactory) Interface.getInterface("org.apache.tools.bzip2.CBZip2InputStreamFactory")).getStream(is));
+  }
 
 
 }

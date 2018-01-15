@@ -6,7 +6,6 @@ import java.awt.Dimension;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.LookAndFeel;
-//import javajs.J2SRequireImport;
 import swingjs.JSUtil;
 import swingjs.api.js.JSSwingMenu;
 import swingjs.jquery.JQueryUI;

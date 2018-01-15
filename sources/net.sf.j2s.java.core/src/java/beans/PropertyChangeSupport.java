@@ -27,7 +27,6 @@
  */
 package java.beans;
 
-//import javajs.J2SRequireImport;
 
 /**
  * This is a utility class that can be used by beans that support bound
@@ -38,7 +37,6 @@ package java.beans;
  * (and restore) any listeners that are themselves serializable.  Any
  * non-serializable listeners will be skipped during serialization.
  */
-//@J2SRequireImport(PropertyChangeListener.class)
 public class PropertyChangeSupport {
     private PropertyChangeListenerMap map = new PropertyChangeListenerMap();
 

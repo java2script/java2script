@@ -109,7 +109,6 @@ import javajs.util.AU;
  * @author      Animation capabilities inspired by the
  *              MemoryAnimationSource class written by Garth Dickie
  */
-//@J2SRequireImport (java.awt.image.ColorModel.class)
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class MemoryImageSource implements ImageProducer {
     int width;

@@ -31,7 +31,6 @@ package swingjs.plaf;
 //import java.awt.AWTEvent;
 import javax.swing.BorderFactory;
 
-import javajs.J2SIgnoreImport;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -120,7 +119,6 @@ import sun.swing.SwingLazyValue;
  * 
  * @author unattributed
  */
-@J2SIgnoreImport({UIDefaults.class, UIDefaults.ActiveValue.class})
 public class HTML5LookAndFeel extends LookAndFeel {
 	
 	public HTML5LookAndFeel() {

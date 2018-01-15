@@ -31,7 +31,6 @@ import java.lang.reflect.Array;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javajs.J2SIgnoreImport;
 import javajs.api.JSONEncodable;
 
 /**
@@ -41,7 +40,6 @@ import javajs.api.JSONEncodable;
  * 
  */
 
-@J2SIgnoreImport(value = { java.lang.reflect.Array.class })
 public class PT {
 
   public static int parseInt(String str) {

@@ -52,7 +52,6 @@ import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.text.Document;
 
-import javajs.J2SIgnoreImport;
 import javajs.api.JSFunction;
 import javajs.util.PT;
 import sun.awt.AppContext;
@@ -66,7 +65,6 @@ import swingjs.api.js.JQuery;
 import swingjs.plaf.JSComponentUI;
 
 
-@J2SIgnoreImport(URL.class)
 public class JSToolkit extends SunToolkit {
 
 	/**
