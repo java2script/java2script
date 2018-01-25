@@ -1,5 +1,7 @@
 package test;
 
+import javax.swing.LayoutStyle.ComponentPlacement;
+
 @SuppressWarnings("unused")
 public class Test_Enum extends Test_{
 
@@ -112,6 +114,7 @@ public class Test_Enum extends Test_{
 		}
 
 		public static void main(String[] args) {
+			ComponentPlacement style = javax.swing.LayoutStyle.ComponentPlacement.RELATED;
 			if (args.length != 1) {
 				System.err.println("Usage: java Planet <earth_weight>");
 				System.exit(-1);

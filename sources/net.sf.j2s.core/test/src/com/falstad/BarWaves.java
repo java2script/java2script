@@ -1408,8 +1408,6 @@ implements ComponentListener, ActionListener, AdjustmentListener,
 					failed = true;
 				else {
 					b[ii] = (byte) to_ulaw[128 + (int) dy];
-					if (ii < 100)
-						System.out.println(ii + " " + b[ii]);
 				}
 			}
 			sndmin /= scale;

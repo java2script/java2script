@@ -1,7 +1,6 @@
 package com.polytopemedia.polyhedra.nets.split;
 
 import java.awt.print.PageFormat;
-import java.io.ObjectInputStream.GetField;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;

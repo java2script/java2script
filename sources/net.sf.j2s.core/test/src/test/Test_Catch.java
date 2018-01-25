@@ -1,5 +1,7 @@
 package test;
 
+import test.function.Exception1;
+
 public class Test_Catch extends Test_ {
 
 
@@ -7,7 +9,7 @@ public class Test_Catch extends Test_ {
 		try {
 			new Test_Catch();
 		} catch (Exception e) {
-			if (e instanceof function.Exception1) {
+			if (e instanceof Exception1) {
 				
 			}
 		}

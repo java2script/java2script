@@ -54,7 +54,7 @@ class Test_Static extends Test_ implements Test_int3, Test_int2, Test_int1 {
 	
 	@SuppressWarnings("static-access")
 	public static void main(String[] args) {
-		
+
 		assert(t == null);
 		assert s == "setFromStaticInitializer";
 		
@@ -100,3 +100,4 @@ class Test_Static extends Test_ implements Test_int3, Test_int2, Test_int1 {
 	}
 
 }
+

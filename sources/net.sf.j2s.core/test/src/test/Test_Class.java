@@ -8,9 +8,15 @@ import java.util.Hashtable;
 
 @SuppressWarnings("rawtypes")
 class Test_Class extends Test_ {
-
+	
+	int test1 = 0;
+	
 	static String s = "test";
 
+	static {
+		System.out.println(java.lang.Number.class.getSuperclass());
+		System.out.println(java.lang.Object.class.getSuperclass());
+	}
 	private String test = "testing";
 
 	private String getTesting() {
@@ -28,6 +34,7 @@ class Test_Class extends Test_ {
 
 	
 	public Test_Class() {
+	
 		
 		PropertyChangeListener l = new PropertyChangeListener() {
 			@Override
@@ -187,7 +194,7 @@ class Test_Class extends Test_ {
 			String s = new LocalClass().hello();
 			System.out.println(s);
 			assert (s.equals("hello"));
-
+			
 			new Test_Class().new B().testB();
 			Class<?> cl;
 			ClassLoader loader = test.Test_Anon.class.getClassLoader();
