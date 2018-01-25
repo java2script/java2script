@@ -3,6 +3,7 @@ package swingjs;
 import java.applet.Applet;
 import java.applet.AppletContext;
 import java.applet.AppletStub;
+import java.applet.AudioClip;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -582,6 +583,11 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 				allWindows.get(i).dispose();
 			} catch (Throwable e) {
 			}
+	}
+
+	@Override
+	public AudioClip getAudioClip(URL url) {
+		return JSToolkit.getAudioClip(url);
 	}
 
 }

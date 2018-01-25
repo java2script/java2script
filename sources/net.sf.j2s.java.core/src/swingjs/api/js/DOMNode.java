@@ -1,5 +1,6 @@
 package swingjs.api.js;
 
+import java.applet.AudioClip;
 import java.awt.Image;
 import java.awt.Rectangle;
 
@@ -142,12 +143,22 @@ public abstract class DOMNode {
 		return node;
 	}
 
+	/**
+	 * allows for null key to be skipped (used in audio)
+	 * 
+	 * @param node
+	 * @param attr
+	 * @return
+	 */
 	public static DOMNode setAttrs(DOMNode node, Object... attr) {
 		/**
 		 * @j2sNative
 		 * 
 		 *            for (var i = 0; i < attr.length;) { 
-		 *            node[attr[i++]] = attr[i++]; }
+		 *            	var key = attr[i++];
+		 *            	var val = attr[i++];
+		 *            	key && (node[key] = val); 
+		 *            }
 		 * 
 		 */
 		{
@@ -220,9 +231,9 @@ public abstract class DOMNode {
 		return setStyles(node, "z-index", "" + z);
 	}
 
-	public static void playWav(String filePath) {
-		DOMNode.setAttrs(DOMNode.createElement("audio", null), 
-				"controls", "true", "src", filePath).play();
+	public static AudioClip getAudioElement(String filePath, boolean isLoop) {
+		return (AudioClip) DOMNode.setAttrs(DOMNode.createElement("audio", null), 
+				"controls", "true", (isLoop ? "loop" : null), (isLoop ? "true" : null), "src", filePath);
 	}
 
 	public static void setCursor(String c) {

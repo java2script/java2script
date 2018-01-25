@@ -19,38 +19,43 @@ import java.util.EventListener;
 
 import javax.swing.AbstractButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JScrollBar;
 
 
 public class A2SEvent implements Runnable {
 
   private Event e;
-  private Component c;
+  private Object target;
 
-
-	public A2SEvent(Component c, AWTEvent e) {
-		this.c = c;
-  	this.e = A2SEvent.convertToOld(e);
+	public A2SEvent(AWTEvent e) {
+		this.target = e.getSource();
+		this.e = A2SEvent.convertToOld(e);
 	}
 
 
 	@SuppressWarnings("deprecation")
 	@Override
 	public void run() {
-	  Component c = this.c;
 	  Event e = this.e;
+	  Component target = (Component) this.target;
 		
 		/**
 		 * Otherwise the states have not changed
 		 * 
 		 * @j2sNative
 		 * 
-		 * 	setTimeout(function() { c.handleEvent(e);});
+		 * 			setTimeout(function() {
 		 * 
 		 */
-		{
-			c.handleEvent(e);
-		}
+		   target.postEvent(e);
+		/**
+		 * Otherwise the states have not changed
+		 * 
+		 * @j2sNative
+		 * 
+		 * 			});
+		 */
 	}
 
 
@@ -223,21 +228,37 @@ public class A2SEvent implements Runnable {
       return null;
   }
   
-	public static Component addComponent(EventListener listener, Component comp) {
+	public static Component addListener(JComponent container, Component comp) {
+		A2SContainer top = (container == null ? null : ((A2SContainer) container.getTopLevelAncestor()));
+		if (top == null)
+			top = ((A2SContainer) ((JComponent) comp).getTopLevelAncestor());
+		if (top == null)
+			return comp;
+		A2SListener listener = top.getA2SListener();
 		if (comp instanceof AbstractButton) {
-			((AbstractButton) comp).addActionListener((ActionListener) listener);
+			if (!isListener(((AbstractButton) comp).getActionListeners(), listener))
+				((AbstractButton) comp).addActionListener((ActionListener) listener);
 		} else if (comp instanceof TextField) {
-			((TextField) comp).addActionListener((ActionListener) listener);
+			if (!isListener(((TextField) comp).getActionListeners(), listener))
+				((TextField) comp).addActionListener((ActionListener) listener);
 		} else if (comp instanceof JComboBox) {
-			((JComboBox) comp).addActionListener((ActionListener) listener);
+			if (!isListener(((JComboBox) comp).getActionListeners(), listener))
+				((JComboBox) comp).addActionListener((ActionListener) listener);
 		} else if (comp instanceof JScrollBar) {
-			((JScrollBar) comp).addAdjustmentListener((AdjustmentListener) listener);
+			if (!isListener(((JScrollBar) comp).getAdjustmentListeners(), listener))
+				((JScrollBar) comp).addAdjustmentListener((AdjustmentListener) listener);
 		}
 		return comp;
 	}
 
 
-
-
+	private static boolean isListener(EventListener[] listeners, EventListener listener) {
+		if (listener == null)
+			return true;
+		for (int i = listeners.length; --i >= 0;)
+			if (listeners[i] == listener)
+				return true;
+		return false;
+	}
   
 }

@@ -1,5 +1,6 @@
 package swingjs;
 
+import java.applet.AudioClip;
 import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Component;
@@ -691,10 +692,16 @@ public class JSToolkit extends SunToolkit {
 	 * @throws UnsupportedAudioFileException
 	 */
 	public static void playAudio(byte[] data, AudioFormat audioFormat) throws UnsupportedAudioFileException {
-		getAudioPlayer().playAudio(data, audioFormat);
+		getAudioPlayer().getAudio(data, audioFormat).play();
 	}
 	
-	
+	public static AudioClip getAudioClip(URL url) {
+		return getAudioPlayer().getAudioClip(url);
+	}
+
+
+
+
 	/**
 	 * Simple way to play any audio file
 	 * 
@@ -704,7 +711,7 @@ public class JSToolkit extends SunToolkit {
 	 * @throws UnsupportedAudioFileException
 	 */
 	public static void playAudioFile(URL url) throws IOException, UnsupportedAudioFileException {
-		getAudioPlayer().playAudioFileURL(url);
+		getAudioPlayer().getAudioFileFromURL(url).play();
 	}
 
 	public static Line getAudioLine(Line.Info info) {

@@ -736,7 +736,7 @@ public class BS implements Cloneable, JSONEncodable {
      * @j2sNative
      *     if (n == this.words.length) return;
      *     if (n == this.wordsInUse) {
-     *      this.words = Clazz.array(-1, this.words, 0, n);
+     *      this.words = Clazz.newArray$(-1, this.words, 0, n);
      *      return;
      *     }
      */

@@ -276,56 +276,56 @@ public class Applet extends Panel {
         }
     }
 
-//    /**
-//     * Get an audio clip from the given URL.
-//     *
-//     * @param url points to the audio clip
-//     * @return the audio clip at the specified URL.
-//     *
-//     * @since       1.2
-//     */
-//    public final static AudioClip newAudioClip(URL url) {
-//        return new sun.applet.AppletAudioClip(url);
-//    }
+    /**
+     * Get an audio clip from the given URL.
+     *
+     * @param url points to the audio clip
+     * @return the audio clip at the specified URL.
+     *
+     * @since       1.2
+     */
+    public final static AudioClip newAudioClip(URL url) {
+        return new sun.applet.AppletAudioClip(url);
+    }
 
-//    /**
-//     * Returns the <code>AudioClip</code> object specified by the
-//     * <code>URL</code> argument.
-//     * <p>
-//     * This method always returns immediately, whether or not the audio
-//     * clip exists. When this applet attempts to play the audio clip, the
-//     * data will be loaded.
-//     *
-//     * @param   url  an absolute URL giving the location of the audio clip.
-//     * @return  the audio clip at the specified URL.
-//     * @see     java.applet.AudioClip
-//     */
-//    public AudioClip getAudioClip(URL url) {
-//        return getAppletContext().getAudioClip(url);
-//    }
+    /**
+     * Returns the <code>AudioClip</code> object specified by the
+     * <code>URL</code> argument.
+     * <p>
+     * This method always returns immediately, whether or not the audio
+     * clip exists. When this applet attempts to play the audio clip, the
+     * data will be loaded.
+     *
+     * @param   url  an absolute URL giving the location of the audio clip.
+     * @return  the audio clip at the specified URL.
+     * @see     java.applet.AudioClip
+     */
+    public AudioClip getAudioClip(URL url) {
+        return getAppletContext().getAudioClip(url);
+    }
 
-//    /**
-//     * Returns the <code>AudioClip</code> object specified by the
-//     * <code>URL</code> and <code>name</code> arguments.
-//     * <p>
-//     * This method always returns immediately, whether or not the audio
-//     * clip exists. When this applet attempts to play the audio clip, the
-//     * data will be loaded.
-//     *
-//     * @param   url    an absolute URL giving the base location of the
-//     *                 audio clip.
-//     * @param   name   the location of the audio clip, relative to the
-//     *                 <code>url</code> argument.
-//     * @return  the audio clip at the specified URL.
-//     * @see     java.applet.AudioClip
-//     */
-//    public AudioClip getAudioClip(URL url, String name) {
-//        try {
-//            return getAudioClip(new URL(url, name));
-//        } catch (MalformedURLException e) {
-//            return null;
-//        }
-//    }
+    /**
+     * Returns the <code>AudioClip</code> object specified by the
+     * <code>URL</code> and <code>name</code> arguments.
+     * <p>
+     * This method always returns immediately, whether or not the audio
+     * clip exists. When this applet attempts to play the audio clip, the
+     * data will be loaded.
+     *
+     * @param   url    an absolute URL giving the base location of the
+     *                 audio clip.
+     * @param   name   the location of the audio clip, relative to the
+     *                 <code>url</code> argument.
+     * @return  the audio clip at the specified URL.
+     * @see     java.applet.AudioClip
+     */
+    public AudioClip getAudioClip(URL url, String name) {
+        try {
+            return getAudioClip(new URL(url, name));
+        } catch (MalformedURLException e) {
+            return null;
+        }
+    }
 
     /**
      * Returns information about this applet. An applet should override

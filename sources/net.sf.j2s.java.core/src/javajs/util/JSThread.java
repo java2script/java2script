@@ -3,6 +3,7 @@ package javajs.util;
 import java.awt.Toolkit;
 import java.awt.event.InvocationEvent;
 
+//import javajs.J2SRequireImport;
 import javajs.api.JSFunction;
 
 
@@ -20,6 +21,7 @@ import javajs.api.JSFunction;
  * @author Bob Hanson
  * 
  */
+//@J2SRequireImport(swingjs.JSToolkit.class)
 public abstract class JSThread extends Thread implements JSFunction {
 
 	public static final int INIT = 0;
@@ -172,7 +174,7 @@ public abstract class JSThread extends Thread implements JSFunction {
 
 	/**
 	 * 
-	 * @param r
+	 * @param r2
 	 * @param state
 	 * @return true if we should interrupt (i.e. JavaScript)
 	 * @throws InterruptedException
@@ -198,7 +200,7 @@ public abstract class JSThread extends Thread implements JSFunction {
 		 * @j2sNative
 		 * 
 		 *            setTimeout(
-		 *              function() {java.awt.Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent$java_awt_AWTEvent(Clazz.new_(java.awt.event.InvocationEvent.c$$O$Runnable,[me, r]))}, 
+		 *              function() {java.awt.Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent$java_awt_AWTEvent(Clazz.new(java.awt.event.InvocationEvent.c$$O$Runnable,[me, r]))}, 
 		 *              delay);
 		 * 
 		 */

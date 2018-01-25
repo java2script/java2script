@@ -10654,6 +10654,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js (based on JmolCore.js)
 
+// BH 1/8/2018 10:27:46 PM SwingJS2
 // BH 12/22/2017 1:18:42 PM adds j2sargs for setting arguments
 // BH 11/19/2017 3:55:04 AM adding support for swingjs2.js; adds static j2sHeadless=true;
 // BH 10/4/2017 2:25:03 PM adds Clazz.loadClass("javajs.util.Base64")
@@ -13049,6 +13050,7 @@ J2S._getResourcePath = function(path, isJavaPath) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 1/9/2018 8:40:52 AM fully running SwingJS2; adds String.isEmpty()
 // BH 12/16/2017 5:53:47 PM refactored; removed older unused parts
 // BH 11/16/2017 10:52:53 PM adds method name aliasing for generics; adds String.contains$CharSequence(cs)
 // BH 10/14/2017 8:17:57 AM removing all node-based dependency class loading; fix String.initialize with four arguments (arr->byte)
@@ -13408,7 +13410,7 @@ Clazz.new_ = function(c, args, cl) {
     clInner && clInner.$init$.apply(f);
   }
     
-  _profileNew && addProfileNew(myclass, window.performance.now() - t0);
+  _profileNew && addProfileNew(cl, window.performance.now() - t0);
 
   return f;
 }
@@ -16684,7 +16686,7 @@ if(cs=="utf-8"||cs=="utf8"){
 s=Encoding.convert2UTF8(this);
 }
 }
-var arrs=Clazz.array(Byte.TYPE, [s.length]);
+var arrs=[];
 for(var i=0, ii=0;i<s.length;i++){
 var c=s.charCodeAt(i);
 if(c>255){
@@ -16697,7 +16699,7 @@ arrs[ii]=c;
 }
 ii++;
 }
-return arrs;
+return Clazz.array(Byte.TYPE, -1, arrs);
 };
 
 sp.contains$S = function(a) {return this.indexOf(a) >= 0}  // bh added
@@ -16813,6 +16815,9 @@ throw new NullPointerException();
 return this.$concat(s);
 };
 
+sp.isEmpty = function() {
+  return this.valueOf().length == 0;
+}
 sp.$lastIndexOf=sp.lastIndexOf;
 sp.lastIndexOf=function(s,last){
 if(last!=null&&last+this.length<=0){
@@ -18290,7 +18295,7 @@ if (typeof(SwingJS) == "undefined") {
 	}
 	
 	proto._addCoreFiles = function() {
-		J2S._addCoreFile("swingjs", this._j2sPath, this.__Info.preloadCore);
+		J2S._addCoreFile((this.__Info.core || "swingjs"), this._j2sPath, this.__Info.preloadCore);
 		if (J2S._debugCode) {
 		// no min package for that
 			J2S._addExec([this, null, "swingjs.JSAppletViewer", "load " + this.__Info.code]);

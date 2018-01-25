@@ -3642,7 +3642,7 @@ if(cs=="utf-8"||cs=="utf8"){
 s=Encoding.convert2UTF8(this);
 }
 }
-var arrs=Clazz.array(Byte.TYPE, [s.length]);
+var arrs=[];
 for(var i=0, ii=0;i<s.length;i++){
 var c=s.charCodeAt(i);
 if(c>255){
@@ -3655,7 +3655,7 @@ arrs[ii]=c;
 }
 ii++;
 }
-return arrs;
+return Clazz.array(Byte.TYPE, -1, arrs);
 };
 
 sp.contains$S = function(a) {return this.indexOf(a) >= 0}  // bh added

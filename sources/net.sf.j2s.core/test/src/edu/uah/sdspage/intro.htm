@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Simulador de electroforesis  .~AVMB~.</title>
+<link href="../../avmb.css" rel="stylesheet" type="text/css">
+<script language="javascript" type="text/javascript">
+if (document.images)
+{ // pre-carga de imágenes
+var rutaImg = '../../hex/'
+var offImg = new Array(), onImg = new Array()
+offImg['home'] = new Image(52,56);	offImg['home'].src = rutaImg + 'hexhome.gif'
+onImg['home'] = new Image(52,56);	onImg['home'].src = rutaImg + 'hexhome1.gif'
+offImg['doc'] = new Image(34,37);	offImg['doc'].src = rutaImg + 'hexdoc.gif'
+onImg['doc'] = new Image(34,37);	onImg['doc'].src = rutaImg + 'hexdoc1.gif'
+offImg['doc1'] = new Image(34,37);	offImg['doc1'].src = rutaImg + 'hexdoc.gif'
+onImg['doc1'] = new Image(34,37);	onImg['doc1'].src = rutaImg + 'hexdoc1.gif'
+//offImg['doc2'] = new Image(34,37);	offImg['doc2'].src = rutaImg + 'hexdoc.gif'
+//onImg['doc2'] = new Image(34,37);	onImg['doc2'].src = rutaImg + 'hexdoc1.gif'
+offImg['fol'] = new Image(34,37);	offImg['fol'].src = rutaImg + 'hexfolder.gif'
+onImg['fol'] = new Image(34,37);	onImg['fol'].src = rutaImg + 'hexfolder1.gif'
+offImg['fol1'] = new Image(34,37);	offImg['fol1'].src = rutaImg + 'hexfolder.gif'
+onImg['fol1'] = new Image(34,37);	onImg['fol1'].src = rutaImg + 'hexfolder1.gif'
+}
+
+function imgOn(imgName)
+{	if (document.images) document.images[imgName].src=onImg[imgName].src
+}
+function imgOff(imgName)
+{	if (document.images) document.images[imgName].src=offImg[imgName].src
+}
+</script>
+</head>
+<body>
+<h1><a href="../../inicio.htm" target="_top" onMouseOver="imgOn('home')" onMouseOut="imgOff('home')"
+><img src="../../hex/hexhome.gif" alt="P&aacute;gina principal" title="P&aacute;gina principal" 
+name="home" width="52" height="56" border="0" align="left"
+></a>&nbsp;Aula Virtual de Metodolog&iacute;a Bioqu&iacute;mica</h1>
+<h3><a href="../inicio.htm" target="_top" onMouseOver="imgOn('fol')" onMouseOut="imgOff('fol')"
+><img src="../../hex/hexfolder.gif" 
+name="fol" width="34" height="37" border="0" align="left"
+></a> &nbsp;Electroforesis<br>
+  <a href="../prot.htm" target="_top" onMouseOver="imgOn('fol1')" onMouseOut="imgOff('fol1')"
+><img src="../../hex/hexfolder.gif" 
+name="fol1" width="34" height="37" border="0" align="absmiddle"
+></a> Electroforesis de prote&iacute;nas </h3>
+<h2> </h2>
+<h2>Simulaci&oacute;n de electroforesis</h2>
+<h4>&iquest;Qu&eacute; hace este programa Java?</h4>
+<p>Este mini-programa (<i>applet</i>) simula el proceso de electroforesis de las prote&iacute;nas en un gel de poliacrilamida con SDS. Tras la separaci&oacute;n, se puede obtener un gr&aacute;fica con los resultados. En &eacute;sta, se determina la masa molecular experimental de las muestras a partir de su movilidad comparada con la de los patrones.</p>
+<h4>Instrucciones</h4>
+<p>Brevemente: </p>
+<ol>
+<li>
+Elige una velocidad para la animaci&oacute;n (depende de
+tu ordenador)</li>
+
+<li>
+Elige una muestra (Unknown #1...#10).</li>
+
+<li>
+Elige la concentraci&oacute;n de acrilamida en el gel (entre
+7,5% y 15%).</li>
+
+<li>
+Elige 2 o m&aacute;s patrones, marcando las casillas que
+hay junto a sus nombres. Puedes consultar su identidad y propiedades pulsando
+el bot&oacute;n <span class="boton">Protein Info</span>.</li>
+
+<li>
+Elige un voltaje.</li>
+
+<li>
+Pulsa el bot&oacute;n <span class="boton">Add Standard</span> para cargar los patrones
+en el primer pocillo.</li>
+
+<li>
+Pulsa el bot&oacute;n <span class="boton">Add Sample</span> para cargar la muestra
+en el segundo pocillo.</li>
+
+<li>
+Pulsa el bot&oacute;n <span class="boton">Start Run</span> para conectar la corriente
+y comenzar la electroforesis. Antes de que las bandas se salgan por abajo,
+pulsa el bot&oacute;n <span class="boton">Stop Run</span> para pararla.&nbsp;</li>
+</ol>
+<p><a href="electro_how.html" onMouseOver="imgOn('doc')" onMouseOut="imgOff('doc')"
+><img src="../../hex/hexdoc.gif" 
+name="doc" width="34" height="37" hspace="5" border="0" align="left"
+></a> Instrucciones detalladas (tambi&eacute;n pulsando en el bot&oacute;n <span class="boton">How To...</span>)</p>
+<p><a href="electro_def.html" target="_blank" onMouseOver="imgOn('doc1')" onMouseOut="imgOff('doc1')"
+><img src="../../hex/hexdoc.gif" 
+name="doc1" width="34" height="37" hspace="5" border="0" align="left"
+> </a> Definici&oacute;n de terminolog&iacute;a (tambi&eacute;n pulsando en el bot&oacute;n <span class="boton">Definitions</span>)</p>
+<h4>An&aacute;lisis de resultados</h4>
+<ol>
+  <li>Pulsando con el puntero del rat&oacute;n sobre las bandas en el gel podr&aacute;s ver arriba la informaci&oacute;n de cada una. Toma nota de la movilidad (RM, <em>Relative Mobility</em>) de la banda de la muestra problema. Para estimar la masa molecular de la prote&iacute;na problema:</li>
+  <li> Pulsa el bot&oacute;n <span class="boton">Plot Results</span> para mostrar la gr&aacute;fica de calibrado.</li>
+  <li>En esa gr&aacute;fica, mueve el puntero del rat&oacute;n sobre el eje de abscisas; cuando el valor mostrado coincida con la movilidad de la prote&iacute;na problema (anotada antes), pulsa el bot&oacute;n del rat&oacute;n. Se trazar&aacute; la interpolaci&oacute;n y podr&aacute;s leer junto al eje de ordenadas el valor del logaritmo de la masa molecular y en la parte superior esa masa. </li>
+</ol>
+<!--
+<p><a href="" onMouseOver="imgOn('doc2')" onMouseOut="imgOff('doc2')"
+><img src="../../hex/hexdoc.gif" 
+name="doc2" width="34" height="37" border="0" align="absmiddle"
+></a> Instrucciones detalladas (tambi&eacute;n pulsando en el bot&oacute;n <span class="boton">How To...</span>)</p>
+-->
+</body>
+</html>

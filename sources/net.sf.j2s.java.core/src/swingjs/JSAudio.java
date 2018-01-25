@@ -1,10 +1,17 @@
 package swingjs;	
 
+import java.applet.AudioClip;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Hashtable;
 import java.util.Map;
+
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioFormat.Encoding;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.Line;
+import javax.sound.sampled.UnsupportedAudioFileException;
 
 import javajs.api.ResettableStream;
 import javajs.util.BC;
@@ -12,12 +19,6 @@ import javajs.util.Base64;
 import javajs.util.OC;
 import javajs.util.Rdr;
 import swingjs.api.js.DOMNode;
-
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioFormat.Encoding;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.Line;
-import javax.sound.sampled.UnsupportedAudioFileException;
 
 
 
@@ -35,10 +36,87 @@ import javax.sound.sampled.UnsupportedAudioFileException;
  * 
  */
 
-public class JSAudio {
+public class JSAudio implements AudioClip {
+
+	private AudioClip myPlayer;
+	private String myURI;
+
 
 	public JSAudio() {
 		// for reflection
+	}
+
+	public JSAudio(URL url) {
+		try {
+			byte[] bytes = Rdr.getLimitedStreamBytes(url.openStream(), -1);
+			AudioFormat audioFormat = getAudioFormatForStreamOrBytes(null, bytes);
+			String format = (String) audioFormat.getProperty("fileFormat");
+			if (format == null || format == "AU") {
+				bytes = createWaveData(bytes, audioFormat);
+				format = "wav"; // for Chrome: not "wave"
+			}
+			if (bytes == null)
+				return;
+			myURI = getBase64(bytes, format);
+			myPlayer = DOMNode.getAudioElement(myURI, false);			
+		} catch (Exception e) {
+			System.out.println("Exception creating AudioClip for " + url);
+			e.printStackTrace();
+		}
+	}
+
+	public AudioClip getAudioClip(URL url) {
+		JSAudio jsAudio = new JSAudio(url);
+		return jsAudio;
+	}
+
+
+	@Override
+	public void play() {
+		if (this.myPlayer == null)
+			return;
+		/**
+		 * @j2sNative
+		 * 
+		 * this.myPlayer.currentTime = 0;
+		 * 
+		 */
+		myPlayer.play();
+	}
+
+
+	/**
+	 * untested
+	 * 
+	 */
+	@Override
+	public void loop() {
+		if (this.myPlayer == null)
+			return;
+		stop();
+		/**
+		 * @j2sNative
+		 * 
+		 * this.myPlayer.loop = true;
+		 */
+		play();
+	}
+
+
+	@Override
+	public void stop() {
+		if (this.myPlayer == null)
+			return;
+		/**
+		 * @j2sNative
+		 * 
+		 * this.myPlayer.pause();
+		 * this.myPlayer.currentTime = 0;
+		 * 
+		 */
+		{
+			myPlayer.stop();
+		}
 	}
 
 	
@@ -46,10 +124,10 @@ public class JSAudio {
 		return new JSAudioLine(info);
 	}
 	
-	public void playAudioFileURL(URL url) throws IOException, UnsupportedAudioFileException {
+	public AudioClip getAudioFileFromURL(URL url) throws IOException, UnsupportedAudioFileException {
 		if (JSUtil.debugging)
 			System.out.println(url + " AudioFormat:" + getAudioFileFormat(url));
-		playAudioFile(Rdr.getLimitedStreamBytes(url.openStream(), -1), null);
+		return getAudioPlayerForBytes(Rdr.getLimitedStreamBytes(url.openStream(), -1), null);
 	}
  
 	
@@ -68,14 +146,20 @@ public class JSAudio {
 	 *          string xxx to be placed in data:audio/xxx;base64,
 	 * @throws UnsupportedAudioFileException
 	 */
-	public void playAudioFile(byte[] fileData, String fileType)
+	public AudioClip getAudioPlayerForBytes(byte[] fileData, String fileType)
 			throws UnsupportedAudioFileException {
+		AudioFormat format = getFormat(fileData, fileType);
+		return getAudio(fileData, format);
+	}
+
+	private AudioFormat getFormat(byte[] fileData, String fileType) throws UnsupportedAudioFileException {
 		Map<String, Object> props = new Hashtable<String, Object>();
 		if (fileType == null)
 			fileType = getAudioTypeForBytes(fileData);
 		props.put("fileFormat", fileType);
-		playAudio(fileData, new AudioFormat(null, -1, -1, -1, -1, -1, false, props));
+		return new AudioFormat(null, -1, -1, -1, -1, -1, false, props);
 	}
+
 	/**
 	 * 
 	 * play audio from byte data.  
@@ -88,19 +172,23 @@ public class JSAudio {
 	 * @throws UnsupportedAudioFileException 
 	 * @throws IOException
 	 */
-	public boolean playAudio(byte[] data, AudioFormat audioFormat) throws UnsupportedAudioFileException {
+	public AudioClip getAudio(byte[] data, AudioFormat audioFormat) throws UnsupportedAudioFileException {
 		String format = (String) audioFormat.getProperty("fileFormat");
-		if (format == null) {
+		if (format == null || format == "AU") {
 			data = createWaveData(data, audioFormat);
 			format = "wav"; // for Chrome: not "wave"
 		}
 		if (data == null)
-			return false;			
-		DOMNode.playWav("data:audio/" + format.toLowerCase() + ";base64," + Base64.getBase64(data));
-		return true;
+			return null;			
+		return DOMNode.getAudioElement(getBase64(data, format), false);
 	}
 
 	
+	private String getBase64(byte[] data, String format) {
+		return "data:audio/" + format.toLowerCase() + ";base64," + Base64.getBase64(data);
+	}
+
+
 	private final static int FORMAT_UNSUPPORTED = 0;
 	private final static int FORMAT_PCM = 1;
 	private final static int FORMAT_ULAW = 7;
@@ -148,11 +236,12 @@ public class JSAudio {
 
 		// byte[] b;
 		int fmt = FORMAT_UNSUPPORTED;
-
+		int offset = 0;
 		// "PCM ;PCMB;ALAW;ULAW;FLOAT"
 
-		// / 0 15 30 45 60
 		String format = af.getEncoding().toString();
+		//.......0.........1.........2.........3.........4.........5.........6
+		//.......0123456789012345678901234567890123456789012345678901234567890
 		switch ("PCM_SIGNED     PCM_UNSIGNED   PCM_FLOAT      ULAW           ALAW           "
 				.indexOf(format)) {
 		case 0: // PCM_SIGNED
@@ -169,8 +258,12 @@ public class JSAudio {
 			}
 			break;
 		case 45:
-			if (bitsPerSample == 8)
+			// 
+			if (bitsPerSample == 8) {
 				fmt = FORMAT_ULAW;
+				if (isAU(data))
+					offset = BC.bytesToInt(data, 4, true);
+			}
 			break;
 		}
 		if (fmt == FORMAT_UNSUPPORTED)
@@ -190,13 +283,12 @@ public class JSAudio {
 		out.writeShort((short) 1); // 22 - mono or stereo? 1
 		out.writeInt(spsec); // 24 - samples per second
 		out.writeInt(bytesPerSecond); // 28 - bytes per second
-		out.writeShort((short) bytesPerSample); // 32 - # of bytes in one
-																						// sample (2)
-		out.writeShort((short) (bitsPerSample)); // 34 - how many bits in a
+		out.writeShort((short) bytesPerSample); // 32 - # of bytes in one sample (2)
+		out.writeShort((short) (bitsPerSample)); // 34 - how many bits in a sample
 																							// sample (16)
 		out.append("data"); // 36 - "data"
-		out.writeInt(data.length); // 40 - how big is this data chunk
-		out.write(data, 0, data.length); // 44 - the actual data itself
+		out.writeInt(data.length - offset); // 40 - how big is this data chunk
+		out.write(data, offset, data.length - offset); // 44 - the actual data itself
 		out.closeChannel();
 		return out.toByteArray();
 	}
@@ -295,6 +387,24 @@ public class JSAudio {
 				// doubtful that Java can read these.
 			} else if (fmt == "OGG") {
 				// same deal
+			} else if (fmt == "AU") {
+				// based on http://www.topherlee.com/software/pcm-tut-wavformat.html
+				if (stream != null) {
+					header = new byte[24];
+					stream.read(header);
+				}
+				sampleSizeInBits = 8;
+				int pt = BC.bytesToInt(header, 4, true);
+				int length = BC.bytesToInt(header, 8, true);
+				int enc = BC.bytesToInt(header, 12, true);
+				frameRate = sampleRate = BC.bytesToInt(header, 16, true);
+				channels = BC.bytesToInt(header, 20, true);
+				frameSize = channels * sampleSizeInBits / 8;
+				bigEndian = true;
+				if (enc != 1) {
+					System.out.println("AU audio encoding " + enc + " not supported");
+				}
+				encoding = Encoding.ULAW;
 			} else if (fmt == "WAV") {
 				// based on http://www.topherlee.com/software/pcm-tut-wavformat.html
 				if (stream != null) {
@@ -342,6 +452,8 @@ public class JSAudio {
 			return "MP3";
 		if (isOGG(b))
 			return "OGG";
+		if (isAU(b))
+			return "AU";
 		throw new UnsupportedAudioFileException();
 	}
 
@@ -361,5 +473,11 @@ public class JSAudio {
 		return b[0] == 0x52 && b[1] == 0x49 && b[2] == 0x46 && b[3] == 0x46
 			  && b[8] == 0x57 && b[9] == 0x41 && b[10] == 0x56 && b[11] == 0x45;
 	}
+
+	private static boolean isAU(byte[] b) {
+		// ".snd"
+		return b[0] == 0x2E && b[1] == 0x73 && b[2] == 0x6E && b[3] == 0x64;
+	}
+
 
 }

@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import javajs.J2SIgnoreImport;
 import javajs.api.BytePoster;
 import javajs.api.GenericOutputChannel;
 import javajs.api.js.J2SObjectInterface;
@@ -43,6 +44,7 @@ import javajs.api.js.J2SObjectInterface;
  *  
  */
 
+@J2SIgnoreImport({ java.io.FileOutputStream.class })
 public class OC extends OutputStream implements GenericOutputChannel {
  
   private BytePoster bytePoster; // only necessary for writing to http:// or https://
@@ -365,9 +367,9 @@ public class OC extends OutputStream implements GenericOutputChannel {
   }
 
   public final static String[] urlPrefixes = { "http:", "https:", "sftp:", "ftp:",
-  "cache://", "file:" };
+  "file:" };
   // note that SFTP is not supported
-  public final static int URL_LOCAL = 5;
+  public final static int URL_LOCAL = 4;
 
   public static boolean isRemote(String fileName) {
     if (fileName == null)

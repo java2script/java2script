@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
+import javajs.J2SIgnoreImport;
+
+
 
 /**
  * a very simple JSON parser for JSON objects that are compatible with JavaScript
@@ -20,6 +23,7 @@ import java.util.Map;
  *  @author Bob Hanson
  *  
  */
+@J2SIgnoreImport({ HashMap.class })
 public class JSJSONParser {
 
   private String str;

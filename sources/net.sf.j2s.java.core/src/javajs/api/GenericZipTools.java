@@ -41,8 +41,5 @@ public interface GenericZipTools {
   public String cacheZipContents(BufferedInputStream bis, String shortName,
                                  Map<String, Object> cache, boolean asByteArray);
 
-  public BufferedInputStream getUnGzippedInputStream(byte[] bytes);
-
-  public InputStream newBZip2InputStream(InputStream bis) throws IOException;
-
+  BufferedInputStream getUnGzippedInputStream(byte[] bytes);
 }

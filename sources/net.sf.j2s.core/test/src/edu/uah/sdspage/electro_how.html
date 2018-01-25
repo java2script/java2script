@@ -1,0 +1,228 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Simulador de electroforesis  .~AVMB~.</title>
+<link href="../../avmb.css" rel="stylesheet" type="text/css">
+<script language="javascript" type="text/javascript">
+if (document.images)
+{ // pre-carga de imágenes
+var rutaImg = '../../hex/'
+var offImg = new Array(), onImg = new Array()
+//offImg['home'] = new Image(52,56);	offImg['home'].src = rutaImg + 'hexhome.gif'
+//onImg['home'] = new Image(52,56);	onImg['home'].src = rutaImg + 'hexhome1.gif'
+offImg['fol'] = new Image(34,37);	offImg['fol'].src = rutaImg + 'hexfolder.gif'
+onImg['fol'] = new Image(34,37);	onImg['fol'].src = rutaImg + 'hexfolder1.gif'
+offImg['left'] = new Image(34,37);	offImg['left'].src = rutaImg + 'hexleft.gif'
+onImg['left'] = new Image(34,37);	onImg['left'].src = rutaImg + 'hexleft1.gif'
+}
+
+function imgOn(imgName)
+{	if (document.images) document.images[imgName].src=onImg[imgName].src
+}
+function imgOff(imgName)
+{	if (document.images) document.images[imgName].src=offImg[imgName].src
+}
+
+function regresar()
+{	if (self!=top) { location.href="intro.htm" }
+	else { location.href="inicio.htm" }
+}
+</script>
+</head>
+<body>
+<h1>&nbsp;Aula Virtual de Metodolog&iacute;a Bioqu&iacute;mica</h1>
+<h3><a href="javascript:regresar()" onMouseOver="imgOn('fol')" onMouseOut="imgOff('fol')"
+><img src="../../hex/hexfolder.gif" 
+name="fol" width="34" height="37" border="0" align="left"
+></a> &nbsp;Simulaci&oacute;n de electroforesis</h3>
+<h2>Instrucciones detalladas</h2>
+
+<h4>Controles generales:</h4>
+
+<table BORDER=0 CELLSPACING=3 CELLPADDING=0 >
+<tr>
+<td COLSPAN="2">
+<hr WIDTH="100%"></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><img SRC="ayuda/how-to.gif" height=23 width=65></td>
+
+<td>Abre esta p&aacute;gina de informaci&oacute;n detallada.</td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+<hr WIDTH="100%"></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><img SRC="ayuda/set-par.gif" height=23 width=100></td>
+
+<td>Muestra en la mitad izquierda los controles de ajuste de par&aacute;metros.</td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+<hr WIDTH="100%"></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><img SRC="ayuda/plot.gif" height=23 width=81></td>
+
+<td>Muestra en la mitad izquierda la gr&aacute;fica de movilidad frente
+a tama&ntilde;o.</td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+<hr WIDTH="100%"></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><img SRC="ayuda/simul.gif" height=23 width=73></td>
+
+<td>Muestra en la mitad derecha la simulaci&oacute;n del gel.</td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+<hr WIDTH="100%"></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><img SRC="ayuda/pr-info.gif" height=23 width=76></td>
+
+<td>Muestra en la mitad derecha la informaci&oacute;n detallada de las
+prote&iacute;nas.</td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+<hr WIDTH="100%"></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><img SRC="ayuda/defin.gif" height=23 width=73></td>
+
+<td>Abre una p&aacute;gina con definiciones de t&eacute;rminos relacionados
+con la electroforesis.</td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+<hr WIDTH="100%"></td>
+</tr>
+</table>
+
+<h4>
+Procedimiento:</h4>
+
+<table BORDER=0 CELLSPACING=3 CELLPADDING=0 >
+<tr>
+<td COLSPAN="2">
+<hr WIDTH="100%"></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><img SRC="ayuda/speed.gif" height=31 width=209></td>
+
+<td>1. Elige una velocidad para la animaci&oacute;n (para que se vea de
+forma c&oacute;moda en el ordenador que est&eacute;s usando)</td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+<hr WIDTH="100%"></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><img SRC="ayuda/unknown.gif" height=43 width=124></td>
+
+<td>2. Elige una muestra</td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+<hr WIDTH="100%"></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><img SRC="ayuda/acryl.gif" height=49 width=125></td>
+
+<td>3. Elige la concentraci&oacute;n de acrilamida en el gel</td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+<hr WIDTH="100%"></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><img SRC="ayuda/standards.gif" height=92 width=204></td>
+
+<td>4. Elige 2 o m&aacute;s patrones, marcando las casillas que hay junto
+a sus nombres. Puedes consultar su identidad y propiedades pulsando el
+bot&oacute;n 'Protein Info'.</td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+<hr WIDTH="100%"></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><img SRC="ayuda/voltage.gif" height=32 width=229></td>
+
+<td>5. Elige un voltaje</td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+<hr WIDTH="100%"></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><img SRC="ayuda/add-std.gif" height=33 width=121></td>
+
+<td>6. Pulsa el bot&oacute;n para cargar los patrones en el primer pocillo.</td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+<hr WIDTH="100%"></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><img SRC="ayuda/add-spl.gif" height=32 width=120></td>
+
+<td>7. Pulsa el bot&oacute;n para cargar la muestra en el segundo pocillo.</td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+<hr WIDTH="100%"></td>
+</tr>
+
+<tr>
+<td ALIGN=CENTER><img SRC="ayuda/run.gif" height=36 width=248></td>
+
+<td>8. Pulsa los botones para conectar la corriente y comenzar la electroforesis,
+y para detenerla antes de que las bandas se salgan por abajo.</td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+<hr WIDTH="100%"></td>
+</tr>
+</table>
+
+<div align="center"><a href="javascript:regresar()" onMouseOver="imgOn('left')" onMouseOut="imgOff('left')"
+><img src="../../hex/hexleft.gif" 
+name="left" width="34" height="37" border="0" align="absmiddle"
+></a> Regresar
+</div>
+</body>
+</html>

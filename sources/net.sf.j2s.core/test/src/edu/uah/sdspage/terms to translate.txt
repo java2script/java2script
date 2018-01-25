@@ -1,0 +1,153 @@
+
+--------
+
+How to...
+	Ayuda
+
+Set Parameters
+	Parámetros
+
+Plot Results
+	Gráfica
+
+Simulation
+	Simulación
+
+Protein Info
+	Info. proteínas
+
+Definitions
+	Definiciones
+
+---------
+
+ELECTROPHORESIS PARAMETERS
+	PARÁMETROS DE LA ELECTROFORESIS
+
+Animation Speed
+	Velocidad de animación
+
+Slow
+	Lenta
+
+Moderate
+	Media
+
+Fast
+	Rápida
+
+Unknown Proteins
+	Proteínas problema
+
+% Acrylamide
+	% acrilamida
+
+Unknown #
+	Muestra n°
+
+Standards
+	Patrones
+
+Voltage
+	Voltaje
+
+Add Standard
+	Añadir patrón
+
+Add Sample
+	Añadir muestra
+
+Start Run
+	Comenzar
+
+Stop Run
+	Detener
+
+--------
+
+PROTEIN DATA
+	DATOS DE LAS PROTEÍNAS
+
+Identifier
+	Identificador
+
+Protein Name
+	Nombre de la proteína
+
+Abbreviation
+	Abreviatura
+
+Molecular Wt
+	Masa molecular
+
+Log Mol Wt
+	log(Mr)
+
+---------
+
+ELECTROPHORESIS CELL
+	CUBETA DE ELECTROFORESIS
+
+------------
+
+Plot of Log MW as f(Relative Migration)
+	Gráfica log(Mr) - avance
+
+L o g  M W
+	l o g  Mr
+
+Relative Migration
+	Avance relativo
+
+Experimental MW
+	Mr experimental
+
+------------
+
+MW
+	Masa molecular
+
+mm travel
+	mm recorridos
+
+RM
+	Avance relativo
+
+Dye
+	Colorante
+
+Slope
+	Pendiente
+
+y intercept
+	Ordenada en origen
+
+r
+	r
+
+r Squared
+	cuadrado de r
+
+------------
+
+beta-Galactosidase
+	beta-galactosidasa
+
+Ovalbumin
+	ovoalbúmina
+
+Triose Phosphate Isomerase
+	triosa-fosfato-isomerasa
+
+Myoglobin
+	mioglobina
+
+Lysozyme
+	lisozima
+
+Trypsin Inhibitor
+	inhibidor de tripsina
+
+---------------
+	
+
