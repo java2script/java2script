@@ -1,1 +1,0 @@
-(function(Clazz,Clazz_array,Clazz_assert,Clazz_clone,Clazz_exceptionOf,Clazz_forName,Clazz_getClass,Clazz_instanceOf,Clazz_load,Clazz_new_,Clazz_newClass,Clazz_newEnumConst,Clazz_newInstance,Clazz_newInterface,Clazz_newMeth,Clazz_newPackage,Clazz_super_){
