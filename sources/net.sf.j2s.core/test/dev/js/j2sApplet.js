@@ -1,5 +1,6 @@
 // j2sApplet.js (based on JmolCore.js)
 
+// BH 1/8/2018 10:27:46 PM SwingJS2
 // BH 12/22/2017 1:18:42 PM adds j2sargs for setting arguments
 // BH 11/19/2017 3:55:04 AM adding support for swingjs2.js; adds static j2sHeadless=true;
 // BH 10/4/2017 2:25:03 PM adds Clazz.loadClass("javajs.util.Base64")
@@ -84,6 +85,7 @@ J2S = (function(document) {
 		_z:getZOrders(z),
 		db: {
 			_DirectDatabaseCalls:{
+        "chemapps.stolaf.edu" : null
 				// these sites are known to implement access-control-allow-origin * 
 			}
 		},
@@ -640,11 +642,11 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 		return true;  
 	}
 
-	J2S._binaryTypes = [".gz",".jpg",".jpeg",".gif",".png",".zip",".jmol",".bin",".smol",".spartan",".mrc",".pse", ".map", ".omap", 
-  ".dcd",".mp3",".ogg", ".wav"];
+	J2S._binaryTypes = [".gz<",".jpg<",".jpeg<",".gif<",".png<",".zip<",".jmol<",".bin<",".smol<",".spartan<",".mrc<",".pse<", ".map<", ".omap<", 
+  ".dcd<",".mp3<",".ogg<", ".wav<", ".au<"];
 
 	J2S._isBinaryUrl = function(url) {
-    url = url.toLowerCase();
+    url = url.toLowerCase() + "<";
 		for (var i = J2S._binaryTypes.length; --i >= 0;)
 			if (url.indexOf(J2S._binaryTypes[i]) >= 0) return true;
 		return false;
@@ -834,8 +836,11 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
             var map = Clazz.new_(Clazz.load("java.util.Hashtable"));
             map.put$TK$TV("fileName", file.name);
             map.put$TK$TV("bytes", J2S._toBytes(data));
-            fDone(map);
-            return;
+            return fDone(map);
+          case "java.io.File":
+            var f = Clazz.new_(Clazz.load("java.io.File").c$$S, [file.name]);
+            f._bytes = J2S._toBytes(data);
+            return fDone(f);
           case "ArrayBuffer":
             break;
           case "string":
@@ -1162,7 +1167,7 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 		try {
 			if (applet._appletPanel) applet._appletPanel.destroy();
 			applet._applet = null;
-			J2S._unsetMouse(applet._mouseInterface)
+			J2S._jsUnsetMouse(applet._mouseInterface)
 			applet._canvas = null;
 			var n = 0;
 			for (var i = 0; i < J2S._syncedApplets.length; i++) {
@@ -1604,7 +1609,7 @@ J2S.Cache.get = function(filename) {
 J2S.Cache.put = function(filename, data) {
   J2S.Cache.fileCache[filename] = data;
 }
-
+  // dnd 
 	J2S.Cache.setDragDrop = function(me) {
 		J2S.$appEvent(me, "appletdiv", "dragover", function(e) {
 			e = e.originalEvent;
@@ -1616,6 +1621,12 @@ J2S.Cache.put = function(filename, data) {
 			var oe = e.originalEvent;
 			oe.stopPropagation();
 			oe.preventDefault();
+      var target = oe.target;
+      var c = target;
+      while (c && !c["data-dropComponent"])
+        c = c.parentElement;
+      if (!c)
+       return;
 			var file = oe.dataTransfer.files[0];
 			if (file == null) {
 				// FF and Chrome will drop an image here
@@ -1636,8 +1647,16 @@ J2S.Cache.put = function(filename, data) {
 			var reader = new FileReader();
 			reader.onloadend = function(evt) {
 				if (evt.target.readyState == FileReader.DONE) {
-					var cacheName = "cache://DROP_" + file.name;
+          var target = oe.target;
 					var bytes = J2S._toBytes(evt.target.result);
+          // what about a frame?? what about x and y?
+          var comp = c["data-dropComponent"];
+          var d = comp.getLocationOnScreen();
+          var x = oe.pageX - d.x;
+          var y = oe.pageY - d.y;
+          Clazz.load("swingjs.JSDnD").drop$javax_swing_JComponent$S$BA$I$I(comp, file.name, bytes, x, y);
+/*                    
+					var cacheName = "cache://DROP_" + file.name;
 					if (!cacheName.endsWith(".spt"))
 						me._appletPanel.cacheFileByName$S$Z("cache://DROP_*",false);
 					if (me._viewType == "JSV" || cacheName.endsWith(".jdx")) // shared by Jmol and JSV
@@ -1648,6 +1667,7 @@ J2S.Cache.put = function(filename, data) {
 					if(xym && (!me._appletPanel.setStatusDragDropped$I$I$I$S || me._appletPanel.setStatusDragDropped$I$I$I$S(0, xym[0], xym[1], cacheName))) {
 						me._appletPanel.openFileAsyncSpecial$S$I(cacheName, 1);
 					}
+*/
 				}
 			};
 			reader.readAsArrayBuffer(file);
@@ -1983,6 +2003,9 @@ J2S.Cache.put = function(filename, data) {
     					base[base.length - 1] = codePath;
     				codePath = base.join("/");
     			}
+          if (applet.__Info.code)
+            codePath += applet.__Info.code.replace(/\./g,"/");
+          codePath = codePath.substring(0, codePath.lastIndexOf("/") + 1);
     			viewerOptions.put("codePath", codePath);
     			viewerOptions.put("appletReadyCallback","J2S._readyCallback");
     			viewerOptions.put("applet", true);

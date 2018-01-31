@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 1/9/2018 8:40:52 AM fully running SwingJS2; adds String.isEmpty()
 // BH 12/16/2017 5:53:47 PM refactored; removed older unused parts
 // BH 11/16/2017 10:52:53 PM adds method name aliasing for generics; adds String.contains$CharSequence(cs)
 // BH 10/14/2017 8:17:57 AM removing all node-based dependency class loading; fix String.initialize with four arguments (arr->byte)
@@ -48,11 +49,13 @@ window["j2s.clazzloaded"] = true;
 /*Class = */ Clazz = {
   _isQuiet: false,
   _debugging: false,
+  _loadcore: true,
   _nooutput: 0
 };
 
 ;(function(Clazz, J2S) {
 
+Clazz.ClassFilesLoaded = [];
 
 Clazz.popup = Clazz.log = Clazz.error = window.alert;
 
@@ -247,11 +250,12 @@ Clazz.forName = function(name, initialize, loader) {
 Clazz.getClass = function(cl, methodList) {
   // $Class$ is the java.lang.Class object wrapper
   // $clazz$ is the unwrapped JavaScript object
+  cl = getClazz(cl) || cl;
   if (cl.$Class$)
     return cl.$Class$;
   java.lang.Class || Clazz.load("java.lang.Class");
   var Class_ = cl.$Class$ = new java.lang.Class();
-  Class_.$clazz$ = getClazz(cl) || cl; // for arrays - a bit of a hack
+  Class_.$clazz$ = cl; // for arrays - a bit of a hack
   Class_.$methodList$ = methodList;
   return Class_;
 }
@@ -365,7 +369,7 @@ Clazz.new_ = function(c, args, cl) {
     clInner && clInner.$init$.apply(f);
   }
     
-  _profileNew && addProfileNew(myclass, window.performance.now() - t0);
+  _profileNew && addProfileNew(cl, window.performance.now() - t0);
 
   return f;
 }
@@ -630,6 +634,7 @@ var arrayClass = function(baseClass, ndim) {
 
 try {
 Clazz._debugging = (document.location.href.indexOf("j2sdebug") >= 0);
+Clazz._loadcore = (document.location.href.indexOf("j2snocore") < 0);
 } catch (e) {
 }
 
@@ -1578,23 +1583,6 @@ Clazz._setDeclared = function(name, func) {
  */
 
 
-/**
- * Class dependency tree node
- */
-/* private */
-var Node = function () {
-  this.parents = [];
-  this.musts = [];
-  this.optionals = [];
-  this.declaration = null;
-  this.name = null; // id
-  this.path = null;
-//  this.requires = null;
-//  this.requiresMap = null;
-  this.onLoaded = null;
-  this.status = 0;
-  this.random = 0.13412;
-};
 
 
 /**
@@ -1658,32 +1646,7 @@ _Loader.doTODO = function() {
    f();
     }
 }
- 
-_Loader.updateNodeForFunctionDecoration = function(qName) {
-
-  var node = findNode(qName);
-  if (node && node.status == Node.STATUS_KNOWN) {
-    if (node.musts.length == 0 && node.optionals.length == 0) {
-      var f = function() { updateNode(node) };
-      _Loader._TODO.push(f);
-    } else {
-      window.setTimeout(f, 1); 
-    }
-  }
-}
-
-Node.prototype.toString = function() {
-  return this.name || this.path || "ClazzNode";
-}
-
-Node.STATUS_UNKNOWN = 0;
-Node.STATUS_KNOWN = 1;
-Node.STATUS_CONTENT_LOADED = 2;
-Node.STATUS_MUSTS_LOADED = 3;
-Node.STATUS_DECLARED = 4;
-Node.STATUS_LOAD_COMPLETE = 5;
-
-             
+              
 var loaders = [];
 
 /* public */
@@ -1835,7 +1798,7 @@ Clazz.loadClass = function (name, onLoaded, async) {
  */
 /* public */
 _Loader.loadClass = _Loader.prototype.loadClass = function (name, onLoaded, forced, async, mode) {
-
+ 
   mode || (mode = 0); // BH: not implemented
   (async == null) && (async = false);
   
@@ -1844,7 +1807,7 @@ _Loader.loadClass = _Loader.prototype.loadClass = function (name, onLoaded, forc
 
   //System.out.println("loadClass " + name)
   var path = _Loader.getClasspathFor(name);
-
+  Clazz.ClassFilesLoaded.push(name.replace(/\./g,"/") + ".js");
     Clazz.loadScript(path);//(n, n.path, n.requiredBy, false, onLoaded ? function(_loadClass){ isLoadingEntryClass = bSave; onLoaded()}: null);
 }
 
@@ -2032,7 +1995,7 @@ Clazz._4Name = function(clazzName, applet, state, asClazz, initialize) {
   var cl = evalType(clazzName);
   if (!cl){
     alert(clazzName + " could not be loaded");
-    debugger;
+    doDebugger();
   }
   Clazz.allClasses[clazzName] = cl;
   if (initialize !== false)
@@ -3641,7 +3604,7 @@ if(cs=="utf-8"||cs=="utf8"){
 s=Encoding.convert2UTF8(this);
 }
 }
-var arrs=Clazz.array(Byte.TYPE, [s.length]);
+var arrs=[];
 for(var i=0, ii=0;i<s.length;i++){
 var c=s.charCodeAt(i);
 if(c>255){
@@ -3654,7 +3617,7 @@ arrs[ii]=c;
 }
 ii++;
 }
-return arrs;
+return Clazz.array(Byte.TYPE, -1, arrs);
 };
 
 sp.contains$S = function(a) {return this.indexOf(a) >= 0}  // bh added
@@ -3770,6 +3733,9 @@ throw new NullPointerException();
 return this.$concat(s);
 };
 
+sp.isEmpty = function() {
+  return this.valueOf().length == 0;
+}
 sp.$lastIndexOf=sp.lastIndexOf;
 sp.lastIndexOf=function(s,last){
 if(last!=null&&last+this.length<=0){
@@ -4995,6 +4961,7 @@ return null;
 //Clazz._Loader.loadZJar(Clazz._Loader.getJ2SLibBase() + "core/coreswingjs.z.js", "swingjs.JSUtil");
 
   //if (!J2S._isAsync) {
+  if (Clazz._loadcore)
     for (var i = 0; i < J2S._coreFiles.length; i++)
       Clazz.loadScript(J2S._coreFiles[i]);
       //ClazzLoader.loadZJar(J2S._coreFiles[i], ClazzLoader.runtimeKeyClass);

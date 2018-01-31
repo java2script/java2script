@@ -10654,6 +10654,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js (based on JmolCore.js)
 
+// BH 1/8/2018 10:27:46 PM SwingJS2
 // BH 12/22/2017 1:18:42 PM adds j2sargs for setting arguments
 // BH 11/19/2017 3:55:04 AM adding support for swingjs2.js; adds static j2sHeadless=true;
 // BH 10/4/2017 2:25:03 PM adds Clazz.loadClass("javajs.util.Base64")
@@ -10738,6 +10739,7 @@ J2S = (function(document) {
 		_z:getZOrders(z),
 		db: {
 			_DirectDatabaseCalls:{
+        "chemapps.stolaf.edu" : null
 				// these sites are known to implement access-control-allow-origin * 
 			}
 		},
@@ -11294,11 +11296,11 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 		return true;  
 	}
 
-	J2S._binaryTypes = [".gz",".jpg",".jpeg",".gif",".png",".zip",".jmol",".bin",".smol",".spartan",".mrc",".pse", ".map", ".omap", 
-  ".dcd",".mp3",".ogg", ".wav"];
+	J2S._binaryTypes = [".gz<",".jpg<",".jpeg<",".gif<",".png<",".zip<",".jmol<",".bin<",".smol<",".spartan<",".mrc<",".pse<", ".map<", ".omap<", 
+  ".dcd<",".mp3<",".ogg<", ".wav<", ".au<"];
 
 	J2S._isBinaryUrl = function(url) {
-    url = url.toLowerCase();
+    url = url.toLowerCase() + "<";
 		for (var i = J2S._binaryTypes.length; --i >= 0;)
 			if (url.indexOf(J2S._binaryTypes[i]) >= 0) return true;
 		return false;
@@ -11488,8 +11490,11 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
             var map = Clazz.new_(Clazz.load("java.util.Hashtable"));
             map.put$TK$TV("fileName", file.name);
             map.put$TK$TV("bytes", J2S._toBytes(data));
-            fDone(map);
-            return;
+            return fDone(map);
+          case "java.io.File":
+            var f = Clazz.new_(Clazz.load("java.io.File").c$$S, [file.name]);
+            f._bytes = J2S._toBytes(data);
+            return fDone(f);
           case "ArrayBuffer":
             break;
           case "string":
@@ -11816,7 +11821,7 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 		try {
 			if (applet._appletPanel) applet._appletPanel.destroy();
 			applet._applet = null;
-			J2S._unsetMouse(applet._mouseInterface)
+			J2S._jsUnsetMouse(applet._mouseInterface)
 			applet._canvas = null;
 			var n = 0;
 			for (var i = 0; i < J2S._syncedApplets.length; i++) {
@@ -12258,7 +12263,7 @@ J2S.Cache.get = function(filename) {
 J2S.Cache.put = function(filename, data) {
   J2S.Cache.fileCache[filename] = data;
 }
-
+  // dnd 
 	J2S.Cache.setDragDrop = function(me) {
 		J2S.$appEvent(me, "appletdiv", "dragover", function(e) {
 			e = e.originalEvent;
@@ -12270,6 +12275,12 @@ J2S.Cache.put = function(filename, data) {
 			var oe = e.originalEvent;
 			oe.stopPropagation();
 			oe.preventDefault();
+      var target = oe.target;
+      var c = target;
+      while (c && !c["data-dropComponent"])
+        c = c.parentElement;
+      if (!c)
+       return;
 			var file = oe.dataTransfer.files[0];
 			if (file == null) {
 				// FF and Chrome will drop an image here
@@ -12290,8 +12301,16 @@ J2S.Cache.put = function(filename, data) {
 			var reader = new FileReader();
 			reader.onloadend = function(evt) {
 				if (evt.target.readyState == FileReader.DONE) {
-					var cacheName = "cache://DROP_" + file.name;
+          var target = oe.target;
 					var bytes = J2S._toBytes(evt.target.result);
+          // what about a frame?? what about x and y?
+          var comp = c["data-dropComponent"];
+          var d = comp.getLocationOnScreen();
+          var x = oe.pageX - d.x;
+          var y = oe.pageY - d.y;
+          Clazz.load("swingjs.JSDnD").drop$javax_swing_JComponent$S$BA$I$I(comp, file.name, bytes, x, y);
+/*                    
+					var cacheName = "cache://DROP_" + file.name;
 					if (!cacheName.endsWith(".spt"))
 						me._appletPanel.cacheFileByName$S$Z("cache://DROP_*",false);
 					if (me._viewType == "JSV" || cacheName.endsWith(".jdx")) // shared by Jmol and JSV
@@ -12302,6 +12321,7 @@ J2S.Cache.put = function(filename, data) {
 					if(xym && (!me._appletPanel.setStatusDragDropped$I$I$I$S || me._appletPanel.setStatusDragDropped$I$I$I$S(0, xym[0], xym[1], cacheName))) {
 						me._appletPanel.openFileAsyncSpecial$S$I(cacheName, 1);
 					}
+*/
 				}
 			};
 			reader.readAsArrayBuffer(file);
@@ -12637,6 +12657,9 @@ J2S.Cache.put = function(filename, data) {
     					base[base.length - 1] = codePath;
     				codePath = base.join("/");
     			}
+          if (applet.__Info.code)
+            codePath += applet.__Info.code.replace(/\./g,"/");
+          codePath = codePath.substring(0, codePath.lastIndexOf("/") + 1);
     			viewerOptions.put("codePath", codePath);
     			viewerOptions.put("appletReadyCallback","J2S._readyCallback");
     			viewerOptions.put("applet", true);
@@ -13031,6 +13054,7 @@ J2S._getResourcePath = function(path, isJavaPath) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 1/9/2018 8:40:52 AM fully running SwingJS2; adds String.isEmpty()
 // BH 12/16/2017 5:53:47 PM refactored; removed older unused parts
 // BH 11/16/2017 10:52:53 PM adds method name aliasing for generics; adds String.contains$CharSequence(cs)
 // BH 10/14/2017 8:17:57 AM removing all node-based dependency class loading; fix String.initialize with four arguments (arr->byte)
@@ -13072,11 +13096,13 @@ window["j2s.clazzloaded"] = true;
 /*Class = */ Clazz = {
   _isQuiet: false,
   _debugging: false,
+  _loadcore: true,
   _nooutput: 0
 };
 
 ;(function(Clazz, J2S) {
 
+Clazz.ClassFilesLoaded = [];
 
 Clazz.popup = Clazz.log = Clazz.error = window.alert;
 
@@ -13271,11 +13297,12 @@ Clazz.forName = function(name, initialize, loader) {
 Clazz.getClass = function(cl, methodList) {
   // $Class$ is the java.lang.Class object wrapper
   // $clazz$ is the unwrapped JavaScript object
+  cl = getClazz(cl) || cl;
   if (cl.$Class$)
     return cl.$Class$;
   java.lang.Class || Clazz.load("java.lang.Class");
   var Class_ = cl.$Class$ = new java.lang.Class();
-  Class_.$clazz$ = getClazz(cl) || cl; // for arrays - a bit of a hack
+  Class_.$clazz$ = cl; // for arrays - a bit of a hack
   Class_.$methodList$ = methodList;
   return Class_;
 }
@@ -13389,7 +13416,7 @@ Clazz.new_ = function(c, args, cl) {
     clInner && clInner.$init$.apply(f);
   }
     
-  _profileNew && addProfileNew(myclass, window.performance.now() - t0);
+  _profileNew && addProfileNew(cl, window.performance.now() - t0);
 
   return f;
 }
@@ -13654,6 +13681,7 @@ var arrayClass = function(baseClass, ndim) {
 
 try {
 Clazz._debugging = (document.location.href.indexOf("j2sdebug") >= 0);
+Clazz._loadcore = (document.location.href.indexOf("j2snocore") < 0);
 } catch (e) {
 }
 
@@ -14602,23 +14630,6 @@ Clazz._setDeclared = function(name, func) {
  */
 
 
-/**
- * Class dependency tree node
- */
-/* private */
-var Node = function () {
-  this.parents = [];
-  this.musts = [];
-  this.optionals = [];
-  this.declaration = null;
-  this.name = null; // id
-  this.path = null;
-//  this.requires = null;
-//  this.requiresMap = null;
-  this.onLoaded = null;
-  this.status = 0;
-  this.random = 0.13412;
-};
 
 
 /**
@@ -14682,32 +14693,7 @@ _Loader.doTODO = function() {
    f();
     }
 }
- 
-_Loader.updateNodeForFunctionDecoration = function(qName) {
-
-  var node = findNode(qName);
-  if (node && node.status == Node.STATUS_KNOWN) {
-    if (node.musts.length == 0 && node.optionals.length == 0) {
-      var f = function() { updateNode(node) };
-      _Loader._TODO.push(f);
-    } else {
-      window.setTimeout(f, 1); 
-    }
-  }
-}
-
-Node.prototype.toString = function() {
-  return this.name || this.path || "ClazzNode";
-}
-
-Node.STATUS_UNKNOWN = 0;
-Node.STATUS_KNOWN = 1;
-Node.STATUS_CONTENT_LOADED = 2;
-Node.STATUS_MUSTS_LOADED = 3;
-Node.STATUS_DECLARED = 4;
-Node.STATUS_LOAD_COMPLETE = 5;
-
-             
+              
 var loaders = [];
 
 /* public */
@@ -14859,7 +14845,7 @@ Clazz.loadClass = function (name, onLoaded, async) {
  */
 /* public */
 _Loader.loadClass = _Loader.prototype.loadClass = function (name, onLoaded, forced, async, mode) {
-
+ 
   mode || (mode = 0); // BH: not implemented
   (async == null) && (async = false);
   
@@ -14868,7 +14854,7 @@ _Loader.loadClass = _Loader.prototype.loadClass = function (name, onLoaded, forc
 
   //System.out.println("loadClass " + name)
   var path = _Loader.getClasspathFor(name);
-
+  Clazz.ClassFilesLoaded.push(name.replace(/\./g,"/") + ".js");
     Clazz.loadScript(path);//(n, n.path, n.requiredBy, false, onLoaded ? function(_loadClass){ isLoadingEntryClass = bSave; onLoaded()}: null);
 }
 
@@ -15056,7 +15042,7 @@ Clazz._4Name = function(clazzName, applet, state, asClazz, initialize) {
   var cl = evalType(clazzName);
   if (!cl){
     alert(clazzName + " could not be loaded");
-    debugger;
+    doDebugger();
   }
   Clazz.allClasses[clazzName] = cl;
   if (initialize !== false)
@@ -16665,7 +16651,7 @@ if(cs=="utf-8"||cs=="utf8"){
 s=Encoding.convert2UTF8(this);
 }
 }
-var arrs=Clazz.array(Byte.TYPE, [s.length]);
+var arrs=[];
 for(var i=0, ii=0;i<s.length;i++){
 var c=s.charCodeAt(i);
 if(c>255){
@@ -16678,7 +16664,7 @@ arrs[ii]=c;
 }
 ii++;
 }
-return arrs;
+return Clazz.array(Byte.TYPE, -1, arrs);
 };
 
 sp.contains$S = function(a) {return this.indexOf(a) >= 0}  // bh added
@@ -16794,6 +16780,9 @@ throw new NullPointerException();
 return this.$concat(s);
 };
 
+sp.isEmpty = function() {
+  return this.valueOf().length == 0;
+}
 sp.$lastIndexOf=sp.lastIndexOf;
 sp.lastIndexOf=function(s,last){
 if(last!=null&&last+this.length<=0){
@@ -18019,6 +18008,7 @@ return null;
 //Clazz._Loader.loadZJar(Clazz._Loader.getJ2SLibBase() + "core/coreswingjs.z.js", "swingjs.JSUtil");
 
   //if (!J2S._isAsync) {
+  if (Clazz._loadcore)
     for (var i = 0; i < J2S._coreFiles.length; i++)
       Clazz.loadScript(J2S._coreFiles[i]);
       //ClazzLoader.loadZJar(J2S._coreFiles[i], ClazzLoader.runtimeKeyClass);
@@ -18271,7 +18261,7 @@ if (typeof(SwingJS) == "undefined") {
 	}
 	
 	proto._addCoreFiles = function() {
-		J2S._addCoreFile("swingjs", this._j2sPath, this.__Info.preloadCore);
+		J2S._addCoreFile((this.__Info.core || "swingjs"), this._j2sPath, this.__Info.preloadCore);
 		if (J2S._debugCode) {
 		// no min package for that
 			J2S._addExec([this, null, "swingjs.JSAppletViewer", "load " + this.__Info.code]);
