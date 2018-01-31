@@ -6,5 +6,7 @@ or adapting/fixing the runtime JavaScript files.
 Do not run any of the Java or compiled JavaScript here. This project just creates the 
 files needed by other projects.
 
+See https://github.com/BobHanson/SwingJS-Examples for examples.
+
 hansonr@stolaf.edu
   
