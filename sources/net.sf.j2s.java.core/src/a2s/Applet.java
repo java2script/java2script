@@ -2,6 +2,8 @@ package a2s;
 
 import java.awt.Graphics;
 import java.awt.HeadlessException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import javax.swing.JApplet;
 import javax.swing.JPanel;
@@ -57,4 +59,23 @@ public class Applet extends JApplet implements A2SContainer {
 		System.out.println("paintMe has not been implemented!");
 	}
 
+	
+	/**
+	 * fix for applet running in Eclipse, which unfortunately uses /bin/ for the codeBase
+	 * 
+	 */
+	@Override
+	public URL getCodeBase() {
+		String codeBase = super.getCodeBase().toString();
+		if (codeBase.endsWith("/bin/"))  {
+			String appletPath = this.getClass().getName();
+			codeBase += appletPath.substring(0, appletPath.lastIndexOf(".") + 1).replace('.', '/');
+		}
+		try {
+			return new URL(codeBase);
+		} catch (MalformedURLException e) {
+			return null;
+		}
+		
+	}
 }
