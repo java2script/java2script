@@ -97,12 +97,11 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 
 		if (htmlTemplate == null) {
 			String htmlTemplateFile = getProperty("template.html");
-			//System.err.println("htmltemplate " + htmlTemplateFile);
+			//System.err.println("prop htmltemplate " + htmlTemplateFile);
 			if (htmlTemplateFile == null)
 				htmlTemplateFile = "template.html";
-			//System.err.println("htmltemplate " + htmlTemplateFile);
 			file = new File(prjFolder, htmlTemplateFile);
-			//System.err.println("htmltemplate " + htmlTemplateFile);
+			//System.err.println("using htmltemplate " + htmlTemplateFile);
 			if (!file.exists()) {
 				String html = getDefaultHTMLTemplate();
 				System.err.println("creating new htmltemplate\n" + html);
@@ -328,10 +327,11 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		+"}\n"
 		+"</script>\n</head>\n<body>\n<script>\n"
 		+"SwingJS.getApplet('testApplet', Info)\n"
+		+"getClassList = function(){J2S._saveFile('_j2sclasslist.txt', Clazz.ClassFilesLoaded.sort().join('\\n'))}\n"
 		+"</script>\n"
 		+"<div style=\"position:absolute;left:900px;top:30px;width:600px;height:300px;\">\n"
 		+"<div id=sysoutdiv style=\"border:1px solid green;width:100%;height:95%;overflow:auto\"></div>\n"
-		+"This is System.out. <a href=\"javascript:testApplet._clearConsole()\">clear it</a> \n"
+		+"This is System.out. <a href=\"javascript:testApplet._clearConsole()\">clear it</a> <br>Add ?j2snocore to URL to see full class list; ?j2sdebug to use uncompressed j2s/core files <br><a href=\"javascript:getClassList()\">get _j2sClassList.txt</a>\n"
 		+"</div>\n"
 		+"</body>\n"
 		+"</html>\n";
