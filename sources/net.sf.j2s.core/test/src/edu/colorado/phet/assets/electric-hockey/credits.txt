@@ -1,1 +1,0 @@
-phet-credits lead-design=Michael Dubson software-development=Michael Dubson, Sam Reid interviews=Wendy Adams, Danielle Harlow

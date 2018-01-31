@@ -1,7 +1,0 @@
-###################################
-# License info for electric-hockey
-# Automatically generated on Fri Aug 08 00:08:01 MDT 2008
-###################################
-
-cork.wav
-tada.WAV 
