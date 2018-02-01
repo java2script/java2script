@@ -139,7 +139,7 @@ final public class AU {
     /**
      * @j2sNative
      * 
-     *     if (Clazz.array && newLength < oldLength) return Clazz.array(-1, array, 0, newLength);
+     *     if (newLength < oldLength) return Clazz.array(-1, array, 0, newLength);
      */
     {}
     Object t = newInstanceO(array, newLength);
@@ -181,7 +181,7 @@ final public class AU {
     /**
      * @j2sNative
      * 
-     *     if (Clazz.array && newLength < oldLength) return Clazz.array(-1, array, 0, newLength);
+     *     if (newLength < oldLength) return Clazz.array(-1, array, 0, newLength);
      */
     {}
     String[] t = new String[newLength];
@@ -220,7 +220,7 @@ final public class AU {
     /**
      * @j2sNative
      * 
-     *     if (Clazz.array && newLength < oldLength) return Clazz.array(-1, array, 0, newLength);
+     *     if (newLength < oldLength) return Clazz.array(-1, array, 0, newLength);
      */
     {}
     float[] t = new float[newLength];
@@ -237,7 +237,7 @@ final public class AU {
     /**
      * @j2sNative
      * 
-     *     if (Clazz.array && newLength < oldLength) return Clazz.array(-1, array, 0, newLength);
+     *     if (newLength < oldLength) return Clazz.array(-1, array, 0, newLength);
      */
     {}
     int[] t = new int[newLength];
@@ -265,7 +265,7 @@ final public class AU {
     /**
      * @j2sNative
      * 
-     * if (Clazz.array) return Clazz.array(-1, array, i0, n);
+     * return Clazz.array(-1, array, i0, n);
      * 
      */
     {
@@ -282,7 +282,7 @@ final public class AU {
     /**
      * @j2sNative
      * 
-     * if (Clazz.array) return Clazz.array(-1, array, i0, n).reverse();
+     * return Clazz.array(-1, array, i0, n).reverse();
      */
     {
     }
@@ -300,7 +300,7 @@ final public class AU {
     /**
      * @j2sNative
      * 
-     *     if (Clazz.array && newLength < oldLength) return Clazz.array(-1, array, 0, newLength);
+     *     if (newLength < oldLength) return Clazz.array(-1, array, 0, newLength);
      */
     {}
     short[] t = new short[newLength];
@@ -317,7 +317,7 @@ final public class AU {
     /**
      * @j2sNative
      * 
-     *     if (Clazz.array && newLength < oldLength) return Clazz.array(-1, array, 0, newLength);
+     *     if (newLength < oldLength) return Clazz.array(-1, array, 0, newLength);
      */
     {}
     byte[] t = new byte[newLength];
@@ -334,7 +334,7 @@ final public class AU {
     /**
      * @j2sNative
      * 
-     *     if (Clazz.array && newLength < oldLength) return Clazz.array(-1, array, 0, newLength);
+     *     if (newLength < oldLength) return Clazz.array(-1, array, 0, newLength);
      */
     {}
     boolean[] t = new boolean[newLength];

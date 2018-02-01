@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2/1/2018 12:14:20 AM fix for new int[128][] not nulls
 // BH 1/9/2018 8:40:52 AM fully running SwingJS2; adds String.isEmpty()
 // BH 12/16/2017 5:53:47 PM refactored; removed older unused parts
 // BH 11/16/2017 10:52:53 PM adds method name aliasing for generics; adds String.contains$CharSequence(cs)
@@ -94,6 +95,7 @@ Clazz.array = function(baseClass, paramType, ndims, params) {
     return a;
   }
   var prim = Clazz._getParamCode(baseClass);
+  var dofill = true;
   if (arguments.length < 4) {
     // one-parameter option just for convenience, same as array(String, 0)
     // two-parameter options for standard new foo[n], 
@@ -122,10 +124,13 @@ Clazz.array = function(baseClass, paramType, ndims, params) {
     }      
     params = vals;
     paramType = prim;
+    
     for (var i = Math.abs(ndims); --i >= 0;) {
       paramType += "A";
-      if (!haveDims && params[i] === null)
+      if (!haveDims && params[i] === null) {
         params.length--;
+        dofill = false;
+      }
     }
     if (haveDims) {
       // new int[][] { {0, 1, 2}, {3, 4, 5} , {3, 4, 5} , {3, 4, 5} };
@@ -136,7 +141,7 @@ Clazz.array = function(baseClass, paramType, ndims, params) {
     params = [-1, params];
   } else {
     var initValue = null;
-    if (ndims >= 1) {
+    if (ndims >= 1 && dofill) {
       switch (prim) {
       case "B":
       case "H": // short
@@ -176,7 +181,7 @@ Clazz.array = function(baseClass, paramType, ndims, params) {
       break;
     }  
   }
-  return newTypedA(baseClass, params, nbits, ndims);
+  return newTypedA(baseClass, params, nbits, (dofill ? ndims : -ndims));
 }
 
 Clazz.assert = function(clazz, obj, tf, msg) {
@@ -791,6 +796,7 @@ Clazz.isClassDefined = function(clazzName) {
 ///////////////////////// private supporting method creation //////////////////////
 
 var setArray = function(vals, baseClass, paramType, ndims) {
+  ndims = Math.abs(ndims);
   vals.getClass = function () { return arrayClass(baseClass, ndims) };
   vals.__ARRAYTYPE = paramType; // referenced in java.lang.Class
   vals.__BASECLASS = baseClass;

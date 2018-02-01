@@ -2989,6 +2989,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		return "Clazz.array(" + params + (dimFlag > 0 ? ")" : "");
 	}
 
+	/**
+	 * .j2s option  j2s.compiler.nonqualified.classes
+	 * 
+	 * @param names  semicolon-separated list. For example, org.jmol.api.js;jspecview.api.js
+	 */
 	public static void setNoQualifiedNamePackages(String names) {
 		names = defaultNonQualified + (names == null ? "" : names);
 		nonQualifiedPackages = names.split(";");
@@ -3356,7 +3361,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			addParens = true;
 			break;
 		case "short":
-			if (right.equals("byte") && !isDiv)
+			if ((rightName.equals("short") || rightName.equals("byte")) && !isDiv)
 				break;
 			//$FALL-THROUGH$
 		case "byte":

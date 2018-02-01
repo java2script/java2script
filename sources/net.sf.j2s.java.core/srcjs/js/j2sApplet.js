@@ -85,8 +85,25 @@ J2S = (function(document) {
 		_z:getZOrders(z),
 		db: {
 			_DirectDatabaseCalls:{
-        "chemapps.stolaf.edu" : null
-				// these sites are known to implement access-control-allow-origin * 
+				// these sites are known to implement access-control-allow-origin *
+        // null here means no conversion necessary 
+        "chemapps.stolaf.edu" : null,
+				"cactus.nci.nih.gov": null,
+        ".x3dna.org": null,
+        "rruff.geo.arizona.edu": null, 
+        ".rcsb.org": null, 
+				"ftp.wwpdb.org": null,
+				"pdbe.org": null, 
+				"materialsproject.org": null, 
+				".ebi.ac.uk": null, 
+				"pubchem.ncbi.nlm.nih.gov":null,
+				"www.nmrdb.org/tools/jmol/predict.php":null,
+				"$": "https://cactus.nci.nih.gov/chemical/structure/%FILENCI/file?format=sdf&get3d=True",
+				"$$": "https://cactus.nci.nih.gov/chemical/structure/%FILENCI/file?format=sdf",
+				"=": "https://files.rcsb.org/download/%FILE.pdb",
+				"*": "https://www.ebi.ac.uk/pdbe/entry-files/download/%FILE.cif",
+				"==": "https://files.rcsb.org/ligands/download/%FILE.cif",
+				":": "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/%FILE/SDF?record_type=3d"
 			}
 		},
 		_debugAlert: false,
@@ -642,11 +659,11 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 		return true;  
 	}
 
-	J2S._binaryTypes = [".gz<",".jpg<",".jpeg<",".gif<",".png<",".zip<",".jmol<",".bin<",".smol<",".spartan<",".mrc<",".pse<", ".map<", ".omap<", 
-  ".dcd<",".mp3<",".ogg<", ".wav<", ".au<"];
+	J2S._binaryTypes = [".uk/pdbe/densities/",".bcif?",".au?",".mmtf?",".gz?",".jpg?",".jpeg?",".gif?",".png?",".zip?",".jmol?",".bin?",".smol?",".spartan?",".mrc?",".pse?", ".map?", ".omap?", 
+  ".dcd?",".mp3?",".ogg?", ".wav?", ".au?"];
 
 	J2S._isBinaryUrl = function(url) {
-    url = url.toLowerCase() + "<";
+    url = url.toLowerCase() + "?";
 		for (var i = J2S._binaryTypes.length; --i >= 0;)
 			if (url.indexOf(J2S._binaryTypes[i]) >= 0) return true;
 		return false;
@@ -703,7 +720,7 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 			isBinary = false;
 		}
 		isBinary && (isBinary = J2S._canSyncBinary(true));
-		return (isBinary ? J2S._strToBytes(data) : (self.JU || javajs.util).SB.newS(data));
+		return (isBinary ? J2S._strToBytes(data) : (self.JU || javajs.util).SB.newS$S(data));
 	}
 	
 	J2S._xhrReturn = function(xhr){
