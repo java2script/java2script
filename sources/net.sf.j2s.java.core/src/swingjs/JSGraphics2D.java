@@ -31,7 +31,6 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javajs.J2SIgnoreImport;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Canvas;
 import swingjs.api.js.HTML5CanvasContext2D;
@@ -39,15 +38,9 @@ import swingjs.api.js.HTML5CanvasContext2D;
 /**
  * generic 2D drawing methods -- JavaScript version
  * 
- * guessing a lot here -- just getting something out; converted from JSpecView
- * 
- * but see sun.java2d.SunGraphics2D.java for insight into the issues of full
- * implementation
- * 
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-@J2SIgnoreImport(java.awt.AlphaComposite.class)
 @SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public class JSGraphics2D //extends SunGraphics2D 
 	implements Cloneable {
@@ -256,6 +249,30 @@ public class JSGraphics2D //extends SunGraphics2D
 		ctx.fillRect(x, y, width, height);
 	}
 
+	public void fill3DRect(int x, int y, int width, int height, boolean raised) {
+		Paint p = getPaint();
+		Color c = getColor();
+		Color brighter = c.brighter();
+		Color darker = c.darker();
+
+		if (!raised) {
+			setColor(darker);
+		} else if (p != c) {
+			setColor(c);
+		}
+		fillRect(x + 1, y + 1, width - 2, height - 2);
+		setColor(raised ? brighter : darker);
+		// drawLine(x, y, x, y + height - 1);
+		fillRect(x, y, 1, height);
+		// drawLine(x + 1, y, x + width - 2, y);
+		fillRect(x + 1, y, width - 2, 1);
+		setColor(raised ? darker : brighter);
+		// drawLine(x + 1, y + height - 1, x + width - 1, y + height - 1);
+		fillRect(x + 1, y + height - 1, width - 1, 1);
+		// drawLine(x + width - 1, y, x + width - 1, y + height - 2);
+		fillRect(x + width - 1, y, 1, height - 1);
+		setPaint(p);
+	}
 	
 	public void setFont(Font font) {
 		// this equality check speeds mark/reset significantly

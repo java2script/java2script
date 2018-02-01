@@ -10654,6 +10654,8 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sApplet.js (based on JmolCore.js)
 
+// BH 1/8/2018 10:27:46 PM SwingJS2
+// BH 12/22/2017 1:18:42 PM adds j2sargs for setting arguments
 // BH 11/19/2017 3:55:04 AM adding support for swingjs2.js; adds static j2sHeadless=true;
 // BH 10/4/2017 2:25:03 PM adds Clazz.loadClass("javajs.util.Base64")
 // BH 7/18/2017 10:46:44 AM adds J2S._canClickFileReader, fixing J2S.getFileFromDialog for Chrome and Safari
@@ -10678,7 +10680,19 @@ return jQuery;
 
 if(typeof(jQuery)=="undefined") alert ("Note -- jQuery is required, but it's not defined.")
 
-self.J2S || (J2S = {});
+self.J2S || (J2S = {
+ getURIField: function(name, def) {
+    try {
+    	var ref = document.location.href.toLowerCase();
+      var i = ref.indexOf(name + "=");
+      if (i >= 0)
+        def = (document.location.href+"&").substring(i + name.length + 1).split("&")[0];
+    } finally {
+      return def;    
+    }
+  }
+
+});
 
 if (!J2S._version)
 J2S = (function(document) {
@@ -10699,6 +10713,7 @@ J2S = (function(document) {
 			monitorZIndex:z+99999 // way way front
 		}
 	};
+
   
 	var j = {
     
@@ -10724,6 +10739,7 @@ J2S = (function(document) {
 		_z:getZOrders(z),
 		db: {
 			_DirectDatabaseCalls:{
+        "chemapps.stolaf.edu" : null
 				// these sites are known to implement access-control-allow-origin * 
 			}
 		},
@@ -10743,10 +10759,8 @@ J2S = (function(document) {
 	var ref = document.location.href.toLowerCase();
   j._debugCode = (ref.indexOf("j2sdebugcode") >= 0);
   j._debugCore = (ref.indexOf("j2sdebugcore") >= 0);
-  var i = ref.indexOf("j2sdebugname=");
-  j._debugName = (i >= 0 ? (document.location.href+"&").substring(i + 13).split("&")[0] : null);
-  var i = ref.indexOf("j2slang=");
-  j._lang = (i >= 0 ? (document.location.href+"&").substring(i + 8).split("&")[0] : null);
+  j._debugName = J2S.getURIField("j2sdebugname", null);
+  j._lang = J2S.getURIField("j2slang", null);
 	j._httpProto = (ref.indexOf("https") == 0 ? "https://" : "http://"); 
 	j._isFile = (ref.indexOf("file:") == 0);
 	if (j._isFile) // ensure no attempt to read XML in local request:
@@ -10961,11 +10975,22 @@ J2S = (function(document) {
 
 
 	J2S._clearVars = function() {
+
 		// only on page closing -- appears to improve garbage collection
 
 		delete jQuery;
 		delete $;
 		delete J2S;
+		delete Clazz;
+
+		delete java;
+		delete javajs;
+    delete org;
+    delete com;
+    delete edu;
+
+    // these are for Jmol:
+    
 		delete SwingController;
 		delete J;
 		delete JM;
@@ -10973,10 +10998,6 @@ J2S = (function(document) {
 		delete JSV;
 		delete JU;
 		delete JV;
-		delete java;
-		delete javajs;
-		delete Clazz;
-		delete c$; // used in p0p; could be gotten rid of
 	}
 
 	////////////// feature detection ///////////////
@@ -11275,11 +11296,11 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 		return true;  
 	}
 
-	J2S._binaryTypes = [".gz",".jpg",".jpeg",".gif",".png",".zip",".jmol",".bin",".smol",".spartan",".mrc",".pse", ".map", ".omap", 
-  ".dcd",".mp3",".ogg", ".wav"];
+	J2S._binaryTypes = [".gz<",".jpg<",".jpeg<",".gif<",".png<",".zip<",".jmol<",".bin<",".smol<",".spartan<",".mrc<",".pse<", ".map<", ".omap<", 
+  ".dcd<",".mp3<",".ogg<", ".wav<", ".au<"];
 
 	J2S._isBinaryUrl = function(url) {
-    url = url.toLowerCase();
+    url = url.toLowerCase() + "<";
 		for (var i = J2S._binaryTypes.length; --i >= 0;)
 			if (url.indexOf(J2S._binaryTypes[i]) >= 0) return true;
 		return false;
@@ -11440,8 +11461,19 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 		b[i] = data[i];
 	return b;
 	}
-
-  J2S._getFileFromDialog = function(fDone, format) {
+ 
+  /**
+   * fDone: callback function, in the form of fDone(data, fileName).
+   * Note that this can be a Java Runnable.run(), as a j2sNative call can 
+   * still read the arguments.
+   * 
+   * format: "ArrayBuffer" for the raw array, "string" for a string, 
+   *    "java.util.Map" meaning something with a get$TK(key) method that is looking
+   *    for fileName:string and bytes:byte[], or anything else for byte[] directly.       
+   *    
+   * parentDiv: div id in which to insert this div, or null to use body      
+   */  
+  J2S._getFileFromDialog = function(fDone, format, parentDiv) {
     // streamlined file dialog using <input type="file">.click()
     format || (format = "string");
     var id = "filereader" + ("" + Math.random()).split(".")[1]
@@ -11450,18 +11482,33 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
       J2S.$remove(id);
       var reader = new FileReader();
       reader.onloadend =  function(evt) {
+        var data = null;
         if (evt.target.readyState == FileReader.DONE) {
           var data = evt.target.result;
-          if (format != "ArrayBuffer") {
+          switch (format) {
+          case "java.util.Map":
+            var map = Clazz.new_(Clazz.load("java.util.Hashtable"));
+            map.put$TK$TV("fileName", file.name);
+            map.put$TK$TV("bytes", J2S._toBytes(data));
+            return fDone(map);
+          case "java.io.File":
+            var f = Clazz.new_(Clazz.load("java.io.File").c$$S, [file.name]);
+            f._bytes = J2S._toBytes(data);
+            return fDone(f);
+          case "ArrayBuffer":
+            break;
+          case "string":
+            data = String.instantialize(data);
+            break;
+          default:                                                                                  
             data = J2S._toBytes(data);
-            if (format == "string")
-              data = String.instantialize(data);
+            break;
           }
         }
         fDone(data, file.name);
       };
       reader.readAsArrayBuffer(file);
-    } 
+    }; 
     
     // x.click() in any manifestation will not work from Chrome or Safari.
     // These browers require that the user see and click the link.
@@ -11471,8 +11518,22 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
       x.onchange = function(ev){ readFile(this.files[0]) };
       x.click();
     } else {
-			var div = '<div id="ID" style="z-index:1000000;position:absolute;background:#E0E0E0;left:10px;top:10px"><div style="margin:5px 5px 5px 5px;"><input type="file" id="ID_files" /><button id="ID_loadfile">load</button><button id="ID_cancel">cancel</button></div><div>'
-			J2S.$after("body", div.replace(/ID/g, id));
+			var div = ('<div id="ID" style="z-index:1000000;position:absolute;background:#E0E0E0;left:400px;top:400px">'
+                  +'<div id="ID_modalscreen" style="z-index:999999;background:rgba(100,100,100,0.4);position:absolute;left:0px;top:0px;width:'+screen.width+';height:'+screen.height+'"></div>'
+                  +'<div style="margin:5px 5px 5px 5px;">'
+                    +'<input type="file" id="ID_files" />'
+                    +'<button id="ID_loadfile">load</button>'
+                    +'<button id="ID_cancel">cancel</button>'
+                  +'</div>'
+                +'<div>').replace(/ID/g, id);
+      var parent = (!parentDiv || parentDiv == "body" ? parentDiv 
+         : typeof parentDiv == "string" ? "#" + parentDiv 
+         : parentDiv);
+      if (parent == "body") {
+		  	J2S.$after(body, div);
+      } else {
+        J2S.$append(parent, div);
+        }        
   		J2S.$appEvent("#" + id + "_loadfile", null, "click");
   		J2S.$appEvent("#" + id + "_loadfile", null, "click", function(evt) { readFile(J2S.$("#" + id + "_files")[0].files[0]); });
   		J2S.$appEvent("#" + id + "_cancel", null, "click");
@@ -11760,7 +11821,7 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 		try {
 			if (applet._appletPanel) applet._appletPanel.destroy();
 			applet._applet = null;
-			J2S._unsetMouse(applet._mouseInterface)
+			J2S._jsUnsetMouse(applet._mouseInterface)
 			applet._canvas = null;
 			var n = 0;
 			for (var i = 0; i < J2S._syncedApplets.length; i++) {
@@ -12202,7 +12263,7 @@ J2S.Cache.get = function(filename) {
 J2S.Cache.put = function(filename, data) {
   J2S.Cache.fileCache[filename] = data;
 }
-
+  // dnd 
 	J2S.Cache.setDragDrop = function(me) {
 		J2S.$appEvent(me, "appletdiv", "dragover", function(e) {
 			e = e.originalEvent;
@@ -12214,6 +12275,12 @@ J2S.Cache.put = function(filename, data) {
 			var oe = e.originalEvent;
 			oe.stopPropagation();
 			oe.preventDefault();
+      var target = oe.target;
+      var c = target;
+      while (c && !c["data-dropComponent"])
+        c = c.parentElement;
+      if (!c)
+       return;
 			var file = oe.dataTransfer.files[0];
 			if (file == null) {
 				// FF and Chrome will drop an image here
@@ -12234,8 +12301,16 @@ J2S.Cache.put = function(filename, data) {
 			var reader = new FileReader();
 			reader.onloadend = function(evt) {
 				if (evt.target.readyState == FileReader.DONE) {
-					var cacheName = "cache://DROP_" + file.name;
+          var target = oe.target;
 					var bytes = J2S._toBytes(evt.target.result);
+          // what about a frame?? what about x and y?
+          var comp = c["data-dropComponent"];
+          var d = comp.getLocationOnScreen();
+          var x = oe.pageX - d.x;
+          var y = oe.pageY - d.y;
+          Clazz.load("swingjs.JSDnD").drop$javax_swing_JComponent$S$BA$I$I(comp, file.name, bytes, x, y);
+/*                    
+					var cacheName = "cache://DROP_" + file.name;
 					if (!cacheName.endsWith(".spt"))
 						me._appletPanel.cacheFileByName$S$Z("cache://DROP_*",false);
 					if (me._viewType == "JSV" || cacheName.endsWith(".jdx")) // shared by Jmol and JSV
@@ -12246,6 +12321,7 @@ J2S.Cache.put = function(filename, data) {
 					if(xym && (!me._appletPanel.setStatusDragDropped$I$I$I$S || me._appletPanel.setStatusDragDropped$I$I$I$S(0, xym[0], xym[1], cacheName))) {
 						me._appletPanel.openFileAsyncSpecial$S$I(cacheName, 1);
 					}
+*/
 				}
 			};
 			reader.readAsArrayBuffer(file);
@@ -12540,19 +12616,23 @@ J2S.Cache.put = function(filename, data) {
 
 		proto.__startAppletJS = function(applet) {
 			if (J2S._version.indexOf("$Date: ") == 0)
-				J2S._version = (J2S._version.substring(7) + " -").split(" -")[0] + " (J2S)"
+				J2S._version = (J2S._version.substring(7) + " -").split(" -")[0] + " (J2S)";
 			Clazz.load("java.lang.Class");
 			J2S._registerApplet(applet._id, applet);
-			try {
-        if (applet.__Info.main) {
-          try{
-            var cl = Clazz.load(applet.__Info.main);
-            if (cl.j2sHeadless)
-              applet.__Info.headless = true;
-          }catch(e) {
-            alert ("Java class " +  applet.__Info.main + " was not found.");
-            return;
-          }
+      if (!applet.__Info.args || applet.__Info.args == "?") {
+        var s = J2S.getURIField("j2sargs", null);
+        if (s !== null)
+          applet.__Info.args = decodeURIComponent(s);
+      }
+      try {
+        var clazz = (applet.__Info.main || applet.__Info.code);
+        try {
+          var cl = Clazz.load(clazz);
+          if (applet.__Info.main && cl.j2sHeadless)
+            applet.__Info.headless = true;
+        }catch(e) {
+          alert ("Java class " +  clazz + " was not found.");
+          return;
         }
         if (applet.__Info.main && applet.__Info.headless) {
           cl.main(applet.__Info.args || []);
@@ -12577,6 +12657,9 @@ J2S.Cache.put = function(filename, data) {
     					base[base.length - 1] = codePath;
     				codePath = base.join("/");
     			}
+          if (applet.__Info.code)
+            codePath += applet.__Info.code.replace(/\./g,"/");
+          codePath = codePath.substring(0, codePath.lastIndexOf("/") + 1);
     			viewerOptions.put("codePath", codePath);
     			viewerOptions.put("appletReadyCallback","J2S._readyCallback");
     			viewerOptions.put("applet", true);
@@ -12803,10 +12886,10 @@ J2S._setDraggable = function(tag, targetOrArray) {
     tag._isDragger = false;
 		if (isBind) {
 			$tag.bind('mousemoveoutjsmol touchmoveoutjsmol', function(ev) {
-				drag(ev);
+				drag && drag(ev);
 			});
 			$tag.bind('mouseupoutjsmol touchendoutjsmol', function(ev) {
-				up(ev);
+				up && up(ev);
 			});
 		}
 	};  
@@ -12884,15 +12967,15 @@ J2S._setDraggable = function(tag, targetOrArray) {
 	};
 
 	$tag.bind('mousedown touchstart', function(ev) {
-    return down(ev);
+    return down && down(ev);
 	});
   
 	$tag.bind('mousemove touchmove', function(ev) {
-    return drag(ev);
+    return drag && drag(ev);
 	});
   
 	$tag.bind('mouseup touchend', function(ev) {
-		return up(ev);
+		return up && up(ev);
 	});
 
   dragBind(true);
@@ -12971,6 +13054,7 @@ J2S._getResourcePath = function(path, isJavaPath) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 1/9/2018 8:40:52 AM fully running SwingJS2; adds String.isEmpty()
 // BH 12/16/2017 5:53:47 PM refactored; removed older unused parts
 // BH 11/16/2017 10:52:53 PM adds method name aliasing for generics; adds String.contains$CharSequence(cs)
 // BH 10/14/2017 8:17:57 AM removing all node-based dependency class loading; fix String.initialize with four arguments (arr->byte)
@@ -13012,11 +13096,13 @@ window["j2s.clazzloaded"] = true;
 /*Class = */ Clazz = {
   _isQuiet: false,
   _debugging: false,
+  _loadcore: true,
   _nooutput: 0
 };
 
 ;(function(Clazz, J2S) {
 
+Clazz.ClassFilesLoaded = [];
 
 Clazz.popup = Clazz.log = Clazz.error = window.alert;
 
@@ -13157,7 +13243,7 @@ Clazz.assert = function(clazz, obj, tf, msg) {
     }
     Clazz.load("java.lang.AssertionError");
     if (msg == null)
-      throw new AssertionError();
+      throw Clazz.new_(AssertionError.c$);
     else
       throw Clazz.new_(AssertionError.c$$S, [msg]);
   }
@@ -13182,6 +13268,8 @@ Clazz.clone = function(me) {
  * @author: sgurin
  */
 Clazz.exceptionOf = function(e, clazz) {
+  if (typeof clazz == "string")
+    clazz = Clazz.load(clazz);
   if(e.__CLASS_NAME__)
     return Clazz.instanceOf(e, clazz);
   if (!e.getMessage) {
@@ -13209,11 +13297,12 @@ Clazz.forName = function(name, initialize, loader) {
 Clazz.getClass = function(cl, methodList) {
   // $Class$ is the java.lang.Class object wrapper
   // $clazz$ is the unwrapped JavaScript object
+  cl = getClazz(cl) || cl;
   if (cl.$Class$)
     return cl.$Class$;
   java.lang.Class || Clazz.load("java.lang.Class");
   var Class_ = cl.$Class$ = new java.lang.Class();
-  Class_.$clazz$ = getClazz(cl) || cl; // for arrays - a bit of a hack
+  Class_.$clazz$ = cl; // for arrays - a bit of a hack
   Class_.$methodList$ = methodList;
   return Class_;
 }
@@ -13236,6 +13325,8 @@ Clazz.instanceOf = function (obj, clazz) {
   }
   if (obj == null || !clazz)
     return false;
+    // check for object being a java.lang.Class and the other not 
+  if (obj.$clazz$ && !clazz.$clazz$) return false;
   obj.$clazz$ && (obj = obj.$clazz$);
   clazz.$clazz$ && (clazz = clazz.$clazz$);
   if (obj == clazz)
@@ -13247,13 +13338,16 @@ Clazz.instanceOf = function (obj, clazz) {
   return (obj instanceof clazz || isInstanceOf(getClassName(obj, true), clazz, true));
 };
 
-Clazz.load = function(cName, isFinalize) {
+/**
+ * Load a class by name or an array representing a nested list of inner classes.
+ * Just finalize this class if from $clinit$. 
+ */
+Clazz.load = function(cName, from$clinit$) {
   if (!cName)
     return null;
-  // the only missing piece?
-  if (isFinalize) {
-    var cl = cName;
+  if (from$clinit$) {
     // C$.$clinit$ call to finalize all dependencies
+    var cl = cName;
     delete cl.$clinit$;
     var ld = cl.$load$;
     setSuperclass(cl, (ld && ld[0] ? Clazz.load(ld[0]) : null));
@@ -13261,23 +13355,28 @@ Clazz.load = function(cName, isFinalize) {
     delete cl.$load$;      
     return;
   }
+  // allow for nested calling: ["foo",".foo_inner1",".foo_inner2"]
   if (cName instanceof Array) {
     var cl1 = null;
-    for (var i = 0; i < cName.length; i++)
-      cl1 = Clazz.load(cName[i]);
+    var name;
+    for (var i = 0; i < cName.length; i++) {
+      var cn = cName[i];
+      cl1 = Clazz.load(name = (cn.indexOf(".") == 0 ? name + cn : cn));
+    }
     return cl1;
   }
-  if (typeof cName == "string") {
-    if (cName.indexOf("Thread.") == 0) {
-      Clazz._4Name("java.lang.Thread", null, null, true)
-    }
-    if (cName.indexOf("Thread") == 0)
-      cName = "java.lang." + cName;
-    return Clazz._4Name(cName, null, null, true);
+  // allow for a clazz itself
+  if (cName.__CLASS_NAME__) {
+    var cl2 = cName;
+    cl2.$clinit$ && cl2.$clinit$();
+    return cl2;
   } 
-  var cl2 = cName;
-  cl2.$clinit$ && cl2.$clinit$();
-  return cl2;
+  // standard load of class by name
+  if (cName.indexOf("Thread.") == 0)
+    Clazz._4Name("java.lang.Thread", null, null, true)
+  if (cName.indexOf("Thread") == 0)
+    cName = "java.lang." + cName;
+  return Clazz._4Name(cName, null, null, true);
 }
 
 /**
@@ -13317,18 +13416,22 @@ Clazz.new_ = function(c, args, cl) {
     clInner && clInner.$init$.apply(f);
   }
     
-  _profileNew && addProfileNew(myclass, window.performance.now() - t0);
+  _profileNew && addProfileNew(cl, window.performance.now() - t0);
 
   return f;
 }
 
-Clazz.newClass = function (prefix, name, clazz, clazzSuper, interfacez, type) {
+Clazz.newClass = function (prefix, name, clazz, clazzSuper, interfacez, type) { 
   if (J2S._debugCore) {
     var qualifiedName = (prefix ? (prefix.__PKG_NAME__ || prefix.__CLASS_NAME__) + "." : "") + name;
     checkDeclared(qualifiedName, type);
   }
   clazz || (clazz = function () {Clazz.newInstance(this,arguments,0,clazz)});  
   clazz.__NAME__ = name;
+  // prefix class means this is an inner class, and $this$0 refers to the outer class. 
+  // no prefix class but a super class that is an inner class, then $this$0 refers to its $this$0.  
+  // there can be a conflict here. 
+  prefix.__CLASS_NAME__ && (clazz.$this$0 = prefix.__CLASS_NAME__) || clazzSuper && clazzSuper.$this$0 && (clazz.$this$0 = clazzSuper.$this$0);
   clazz.$load$ = [clazzSuper, interfacez];
   
   // get qualifed name, and for inner classes, the name to use to refer to this
@@ -13391,14 +13494,13 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
     };
   }
 
-  clazz && clazz.$clinit$ && clazz.$clinit$();
-  
   objThis.__JSID__ = ++_jsid;
 
-  clazz && clazz.$init0$ && clazz.$init0$.apply(objThis);
 
   if (!isInner) {
-      if ((!args || args.length == 0) && objThis.c$) {
+    clazz && clazz.$clinit$ && clazz.$clinit$();  
+    clazz && clazz.$init0$ && clazz.$init0$.apply(objThis);
+    if ((!args || args.length == 0) && objThis.c$) {
     // allow for direct default call "new foo()" to run with its default constructor
       objThis.c$.apply(objThis);
       args && (args[2] = Clazz.inheritArgs)  
@@ -13441,13 +13543,13 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
       isNew = true;
     }
     // add all superclass references for outer object
-    var clazz = getClazz(outerObj);
+    var clazz1 = getClazz(outerObj);
     do {
-      var key = getClassName(clazz, true);
+      var key = getClassName(clazz1, true);
       if (!isNew && b[key])
         break;
       b[key] = outerObj; 
-    } while ((clazz = clazz.superclazz));
+    } while ((clazz1 = clazz1.superclazz));
   }
   // add a flag to disallow any other same-class use of this map.
   b["$ " + innerName] = 1;
@@ -13456,6 +13558,9 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
     outerObj.$b$ = b;
   // final objective: save this map for the inner object
   objThis.b$ = b;
+  clazz.$this$0 && (objThis.this$0 = b[clazz.$this$0]);
+  clazz.$clinit$ && clazz.$clinit$();  
+  clazz.$init0$ && clazz.$init0$.apply(objThis);
 };
 
 
@@ -13474,7 +13579,7 @@ Clazz.newInterface = function (prefix, name, _null1, _null2, interfacez, _0) {
 
 Clazz.newMeth = function (clazzThis, funName, funBody, isStatic) {
   if (arguments.length == 1) {
-    return Clazz.newMeth(clazzThis, 'c$', function(){Clazz.super(clazzThis, this,1);clazzThis.$init$.apply(this)}, 1);
+    return Clazz.newMeth(clazzThis, 'c$', function(){Clazz.super_(clazzThis, this,1);clazzThis.$init$.apply(this)}, 1);
   }
   if (funName.constructor == Array) {
     // If funName is an array, we are setting aliases for generic calls. 
@@ -13514,7 +13619,7 @@ Clazz.newPackage = function (pkgName) {
   return Clazz.lastPackage = pkg;
 };
 
-Clazz.super_ = Clazz.super = function(cl, obj, andInit) {
+Clazz.super_ = function(cl, obj, andInit) {
   if (cl.superclazz && cl.superclazz.c$) {
     // added [] here to account for the possibility of vararg default constructor
     cl.superclazz.c$.apply(obj, [[]]);
@@ -13576,6 +13681,7 @@ var arrayClass = function(baseClass, ndim) {
 
 try {
 Clazz._debugging = (document.location.href.indexOf("j2sdebug") >= 0);
+Clazz._loadcore = (document.location.href.indexOf("j2snocore") < 0);
 } catch (e) {
 }
 
@@ -14060,18 +14166,18 @@ var extendObject = function(clazz, exclude) {
 //};
 
 var excludeSuper = function(o) {
- return o == "b$"
+ return o == "b$" || o == "$this$0"
       || o == "$init$"
       || o == "$init0$"
       || o == "$clinit$"
       || o == "$load$"
-      || o == "c$" 
       || o == "$Class$"
       || o == "prototype" 
       || o == "__CLASS_NAME__" 
       || o == "__CLASS_NAME$__" 
       || o == "superclazz"
       || o == "implementz"
+      || o.startsWith("c$") 
 }
 
 var copyStatics = function(clazzSuper, clazzThis, andProto) {
@@ -14345,12 +14451,17 @@ var setSuperclass = function(clazzThis, clazzSuper){
     if (clazzSuper == Number) {
       clazzThis.prototype = new Number();
     } else {
-      clazzThis.prototype = new clazzSuper (null, inheritArgs);     
+      clazzThis.prototype = new clazzSuper ([inheritArgs]);     
+      if (clazzSuper == Error) {
+        var pp = Throwable.prototype;
+        for (o in pp) {
+          if (!pp.exClazz || pp.exClazz != Clazz._O)
+            clazzThis.prototype[o] = pp[o];
+        }
+      }
     } 
     for (o in p) {
       if (!p[o].exClazz || p[o].exClazz != Clazz._O)
-   //   if (o == "toString")    
-     //   System.out.println(o + " " + clazzThis.__CLASS_NAME__ + " " + clazzSuper.__CLASS_NAME__);    
       clazzThis.prototype[o] = p[o];
     }      
   }
@@ -14378,6 +14489,7 @@ var addInterface = function (clazzThis, interfacez) {
       }
       addInterface(clazzThis, iface);  
     }
+    return;
   }
   if (typeof interfacez == "string") {
     var str = interfacez;
@@ -14518,23 +14630,6 @@ Clazz._setDeclared = function(name, func) {
  */
 
 
-/**
- * Class dependency tree node
- */
-/* private */
-var Node = function () {
-  this.parents = [];
-  this.musts = [];
-  this.optionals = [];
-  this.declaration = null;
-  this.name = null; // id
-  this.path = null;
-//  this.requires = null;
-//  this.requiresMap = null;
-  this.onLoaded = null;
-  this.status = 0;
-  this.random = 0.13412;
-};
 
 
 /**
@@ -14546,6 +14641,7 @@ Clazz._Loader = Clazz.ClazzLoader = function () {};
 
 ClassLoader = java.lang.ClassLoader = _Loader;
 _Loader.__CLASS_NAME__ = "ClassLoader";
+
 Clazz.allClasses["java.lang.ClassLoader"] = _Loader;
 _Loader.sysLoader = null;
 
@@ -14553,16 +14649,7 @@ _Loader.getSystemClassLoader = function() {
   return (_Loader.sysLoader ? _Loader.sysLoader : (_Loader.sysLoader = new Class().getClassLoader()));
 };
 
-_Loader.prototype.setDefaultAssertionStatus$Z = function(tf) {
-  Clazz.defaultAssertionStatus = tf;
-};
-
 var assertionStatus = {};
-
-_Loader.prototype.clearAssertionStatus = function() {
-  assertionStatus = {};
-  Clazz.defaultAssertionStatus = false;
-}
 
 _Loader.$getClassAssertionStatus = function(clazz) {
   var ret;
@@ -14574,6 +14661,18 @@ _Loader.$getClassAssertionStatus = function(clazz) {
     }
   }
   return (ret === false ? false : ret || Clazz.defaultAssertionStatus);
+}
+
+_Loader.prototype.hashCode = function(){return 1};
+
+
+_Loader.prototype.setDefaultAssertionStatus$Z = function(tf) {
+  Clazz.defaultAssertionStatus = tf;
+};
+
+_Loader.prototype.clearAssertionStatus = function() {
+  assertionStatus = {};
+  Clazz.defaultAssertionStatus = false;
 }
 
 _Loader.prototype.setClassAssertionStatus$S$Z = _Loader.prototype.setPackageAssertionStatus$S$Z = function(clazzName, tf) {
@@ -14594,32 +14693,7 @@ _Loader.doTODO = function() {
    f();
     }
 }
- 
-_Loader.updateNodeForFunctionDecoration = function(qName) {
-
-  var node = findNode(qName);
-  if (node && node.status == Node.STATUS_KNOWN) {
-    if (node.musts.length == 0 && node.optionals.length == 0) {
-      var f = function() { updateNode(node) };
-      _Loader._TODO.push(f);
-    } else {
-      window.setTimeout(f, 1); 
-    }
-  }
-}
-
-Node.prototype.toString = function() {
-  return this.name || this.path || "ClazzNode";
-}
-
-Node.STATUS_UNKNOWN = 0;
-Node.STATUS_KNOWN = 1;
-Node.STATUS_CONTENT_LOADED = 2;
-Node.STATUS_MUSTS_LOADED = 3;
-Node.STATUS_DECLARED = 4;
-Node.STATUS_LOAD_COMPLETE = 5;
-
-             
+              
 var loaders = [];
 
 /* public */
@@ -14771,7 +14845,7 @@ Clazz.loadClass = function (name, onLoaded, async) {
  */
 /* public */
 _Loader.loadClass = _Loader.prototype.loadClass = function (name, onLoaded, forced, async, mode) {
-
+ 
   mode || (mode = 0); // BH: not implemented
   (async == null) && (async = false);
   
@@ -14780,7 +14854,7 @@ _Loader.loadClass = _Loader.prototype.loadClass = function (name, onLoaded, forc
 
   //System.out.println("loadClass " + name)
   var path = _Loader.getClasspathFor(name);
-
+  Clazz.ClassFilesLoaded.push(name.replace(/\./g,"/") + ".js");
     Clazz.loadScript(path);//(n, n.path, n.requiredBy, false, onLoaded ? function(_loadClass){ isLoadingEntryClass = bSave; onLoaded()}: null);
 }
 
@@ -14968,7 +15042,7 @@ Clazz._4Name = function(clazzName, applet, state, asClazz, initialize) {
   var cl = evalType(clazzName);
   if (!cl){
     alert(clazzName + " could not be loaded");
-    debugger;
+    doDebugger();
   }
   Clazz.allClasses[clazzName] = cl;
   if (initialize !== false)
@@ -15006,8 +15080,12 @@ Clazz.loadScript = function(file) {
       s = data;
     if (s.indexOf("missing ] after element list")>= 0)
       s = "File not found";
-    doDebugger()
-    alert(s + " loading file " + file);
+    if (file.indexOf("/j2s/core/") >= 0) {
+      System.out.println(s + " loading " + file);
+    } else {
+      doDebugger()
+      alert(s + " loading file " + file);
+    }
   }
 }
 
@@ -15576,6 +15654,10 @@ Sys.err.printf = Sys.err.printf$S$OA = Sys.err.format = Sys.err.format$S$OA = Sy
 }
 
 Sys.err.println = Sys.err.println$O = Sys.err.println$Z = Sys.err.println$I = Sys.err.println$S = Sys.err.println$C = Sys.err.println = function (s) {
+  if (Clazz._traceOutput && s && ("" + s).indexOf(Clazz._traceOutput) >= 0) {
+    alert(s + "\n\n" + Clazz._getStackTrace());
+    debugger;
+  }
   Con.consoleOutput (typeof s == "undefined" ? "\r\n" : s == null ?  s = "null\r\n" : s + "\r\n", "red");
 };
 
@@ -15681,7 +15763,7 @@ var setJ2STypeclass = function(cl, type, paramCode) {
 var decorateAsNumber = function (clazz, qClazzName, type, PARAMCODE) {
   clazz.prototype.valueOf=function(){return 0;};
   clazz.prototype.__VAL0__ = 1;
-  finalizeClazz(clazz, qClazzName, null, true);
+  finalizeClazz(clazz, qClazzName, null, 0, true);
   extendPrototype(clazz, true, true);
   setSuperclass(clazz, Number);
   addInterface(clazz, Comparable);
@@ -15806,14 +15888,15 @@ var radix=(n.startsWith("0x", i) ? 16 : n.startsWith("0", i) ? 8 : 10);
 // The general problem with parseInt is that is not strict -- ParseInt("10whatever") == 10.
 // Number is strict, but Number("055") does not work, though ParseInt("055", 8) does.
 // need to make sure negative numbers are negative
+if (n == "")
+ return NaN
 n = Number(n) & 0xFFFFFFFF;
 return (radix == 8 ? parseInt(n, 8) : n);
 }, 1);
 
 m$(Integer,"decode", function(n){
-  n = Integer.decodeRaw(n);
-  if (isNaN(n) || n < Integer.MIN_VALUE|| n > Integer.MAX_VALUE)
-  throw Clazz.new_(NumberFormatException.c$$S,["Invalid Integer"]);
+  if (isNaN(n = Integer.decodeRaw(n)) || n < Integer.MIN_VALUE|| n > Integer.MAX_VALUE)
+    throw Clazz.new_(NumberFormatException.c$$S,["Invalid Integer"]);
   return Clazz.new_(Integer.c$, [n]);
 }, 1);
 
@@ -15876,8 +15959,7 @@ return i.toString(2);
 
 m$(Long,"decode",
 function(n){
-  n = Integer.decodeRaw(n);
-  if (isNaN(n))
+  if (isNaN(n = Integer.decodeRaw(n)))
     throw Clazz.new_(NumberFormatException.c$$S, ["Invalid Long"]);
   return Clazz.new_(Long.c$, [n]);
 }, 1);
@@ -15942,8 +16024,7 @@ Short.toBinaryString = Short.prototype.toBinaryString = function (i) {
 
 m$(Short, "decode",
 function(n){
-  n = Integer.decodeRaw(n);
-  if (isNaN(n) || n < -32768|| n > 32767)
+  if (isNaN(n = Integer.decodeRaw(n)) || n < -32768|| n > 32767)
     throw Clazz.new_(NumberFormatException.c$$S, ["Invalid Short"]);
   return Clazz.new_(Short.c$, [n]);
 }, 1);
@@ -16008,8 +16089,7 @@ return i.toString(2);
 
 m$(Byte,"decode",
 function(n){
-  n = Integer.decodeRaw(n);
-  if (isNaN(n) || n < -128|| n > 127)
+  if (isNaN(n = Integer.decodeRaw(n)) || n < -128|| n > 127)
     throw Clazz.new_(NumberFormatException.c$$S, ["Invalid Byte"]);
   return Clazz.new_(Byte.c$, [n]);
 }, 1);
@@ -16571,7 +16651,7 @@ if(cs=="utf-8"||cs=="utf8"){
 s=Encoding.convert2UTF8(this);
 }
 }
-var arrs=Clazz.array(Byte.TYPE, [s.length]);
+var arrs=[];
 for(var i=0, ii=0;i<s.length;i++){
 var c=s.charCodeAt(i);
 if(c>255){
@@ -16584,7 +16664,7 @@ arrs[ii]=c;
 }
 ii++;
 }
-return arrs;
+return Clazz.array(Byte.TYPE, -1, arrs);
 };
 
 sp.contains$S = function(a) {return this.indexOf(a) >= 0}  // bh added
@@ -16700,6 +16780,9 @@ throw new NullPointerException();
 return this.$concat(s);
 };
 
+sp.isEmpty = function() {
+  return this.valueOf().length == 0;
+}
 sp.$lastIndexOf=sp.lastIndexOf;
 sp.lastIndexOf=function(s,last){
 if(last!=null&&last+this.length<=0){
@@ -17234,25 +17317,21 @@ return this.lineNumber==-2;
 });
 m$(C$,"toString",
 function(){
-var buf=Clazz.new_(StringBuilder.c$$I, [80]);
-buf.append$S(this.getClassName());
-buf.append$S('.');
-buf.append$S(this.getMethodName());
+var s = this.getClassName() + "." + this.getMethodName();
 if(this.isNativeMethod()){
-buf.append$S("(Native Method)");
+ s += "(Native Method)";
 }else{
 var fName=this.getFileName();
 if(fName==null){
-buf.append$S("(Unknown Source)");
+ s += "(Unknown Source)";
 }else{
 var lineNum=this.getLineNumber();
-buf.append$S('(');
-buf.append$S(fName);
+s += '(' + fName;
 if(lineNum>=0){
-buf.append$S(':');
-buf.append$I(lineNum);
-}buf.append$(')');
-}}return buf.toString();
+ s += ':' + lineNum;
+}
+ s += ')';
+}}return s;
 });
 
 
@@ -17270,58 +17349,76 @@ var declareType = function(prefix, name, clazzSuper, interfacez) {
 
 // at least allow Error() by itself to work as before
 Clazz._Error || (Clazz._Error = Error);
-(function(){
- for (var i in Throwable.prototype)
-   Clazz._Error.prototype[i] = Throwable.prototype[i];
+//setSuperclass(Clazz._Error, Throwable);
+
+var setEx = function(C$) {
+ C$.$clinit$ = function() {Clazz.load(C$, 1);}
+ m$(C$, "c$", function() { C$.superclazz.c$.apply(this, []);}, 1);
+ m$(C$, "c$$S", function(detailMessage){C$.superclazz.c$$S.apply(this,[detailMessage]);},1);
+ return C$;
+}
+
+;(function() {
+var C$ = Clazz.newClass(java.lang, "Error", function (){
+var err = Clazz._Error();
+return err;
+}, Throwable);
+
+//setSuperclass(java.lang.Error, Throwable);
+//setSuperclass(Clazz._Error, Throwable);
+
+setEx(C$);
+
 })();
 
-setSuperclass(Clazz._Error, Throwable);
-Clazz.newClass(java.lang, "Error", function (){return Clazz._Error();}, Throwable);
+var newEx = function(prefix, name, clazzSuper) {
+  return setEx(declareType(prefix, name, clazzSuper));
+}
 
-C$ = declareType(java.lang,"Exception",Throwable);
+C$ = newEx(java.lang,"Exception",Throwable);
 m$(C$, "c$", function(){}, 1);
 
-declareType(java.lang,"RuntimeException",Exception);
-declareType(java.lang,"IllegalArgumentException",RuntimeException);
-declareType(java.lang,"LinkageError",Error);
-declareType(java.lang,"VirtualMachineError",Error);
-declareType(java.lang,"IncompatibleClassChangeError",LinkageError);
+newEx(java.lang,"RuntimeException",Exception);
+newEx(java.lang,"IllegalArgumentException",RuntimeException);
+newEx(java.lang,"LinkageError",Error);
+newEx(java.lang,"VirtualMachineError",Error);
+newEx(java.lang,"IncompatibleClassChangeError",LinkageError);
 
-declareType(java.lang,"AbstractMethodError",IncompatibleClassChangeError);
-declareType(java.lang,"ArithmeticException",RuntimeException);
-declareType(java.lang,"ArrayStoreException",RuntimeException);
-declareType(java.lang,"ClassCircularityError",LinkageError);
-declareType(java.lang,"ClassFormatError",LinkageError);
-declareType(java.lang,"CloneNotSupportedException",Exception);
-declareType(java.lang,"IllegalAccessError",IncompatibleClassChangeError);
-declareType(java.lang,"IllegalAccessException",Exception);
-declareType(java.lang,"IllegalMonitorStateException",RuntimeException);
-declareType(java.lang,"IllegalStateException",RuntimeException);
-declareType(java.lang,"IllegalThreadStateException",IllegalArgumentException);
-declareType(java.lang,"IndexOutOfBoundsException",RuntimeException);
-declareType(java.lang,"InstantiationError",IncompatibleClassChangeError);
-declareType(java.lang,"InstantiationException",Exception);
-declareType(java.lang,"InternalError",VirtualMachineError);
-declareType(java.lang,"InterruptedException",Exception);
-declareType(java.lang,"NegativeArraySizeException",RuntimeException);
-declareType(java.lang,"NoClassDefFoundError",LinkageError);
-declareType(java.lang,"NoSuchFieldError",IncompatibleClassChangeError);
-declareType(java.lang,"NoSuchFieldException",Exception);
-declareType(java.lang,"NoSuchMethodException",Exception);
-declareType(java.lang,"NoSuchMethodError",IncompatibleClassChangeError);
-declareType(java.lang,"NullPointerException",RuntimeException);
-declareType(java.lang,"NumberFormatException",IllegalArgumentException);
-declareType(java.lang,"OutOfMemoryError",VirtualMachineError);
-declareType(java.lang,"SecurityException",RuntimeException);
-declareType(java.lang,"StackOverflowError",VirtualMachineError);
-declareType(java.lang,"ThreadDeath",Error);
-declareType(java.lang,"UnknownError",VirtualMachineError);
-declareType(java.lang,"UnsatisfiedLinkError",LinkageError);
-declareType(java.lang,"UnsupportedClassVersionError",ClassFormatError);
-declareType(java.lang,"UnsupportedOperationException",RuntimeException);
-declareType(java.lang,"VerifyError",LinkageError);
+newEx(java.lang,"AbstractMethodError",IncompatibleClassChangeError);
+newEx(java.lang,"ArithmeticException",RuntimeException);
+newEx(java.lang,"ArrayStoreException",RuntimeException);
+newEx(java.lang,"ClassCircularityError",LinkageError);
+newEx(java.lang,"ClassFormatError",LinkageError);
+newEx(java.lang,"CloneNotSupportedException",Exception);
+newEx(java.lang,"IllegalAccessError",IncompatibleClassChangeError);
+newEx(java.lang,"IllegalAccessException",Exception);
+newEx(java.lang,"IllegalMonitorStateException",RuntimeException);
+newEx(java.lang,"IllegalStateException",RuntimeException);
+newEx(java.lang,"IllegalThreadStateException",IllegalArgumentException);
+newEx(java.lang,"IndexOutOfBoundsException",RuntimeException);
+newEx(java.lang,"InstantiationError",IncompatibleClassChangeError);
+newEx(java.lang,"InstantiationException",Exception);
+newEx(java.lang,"InternalError",VirtualMachineError);
+newEx(java.lang,"InterruptedException",Exception);
+newEx(java.lang,"NegativeArraySizeException",RuntimeException);
+newEx(java.lang,"NoClassDefFoundError",LinkageError);
+newEx(java.lang,"NoSuchFieldError",IncompatibleClassChangeError);
+newEx(java.lang,"NoSuchFieldException",Exception);
+newEx(java.lang,"NoSuchMethodException",Exception);
+newEx(java.lang,"NoSuchMethodError",IncompatibleClassChangeError);
+newEx(java.lang,"NullPointerException",RuntimeException);
+newEx(java.lang,"NumberFormatException",IllegalArgumentException);
+newEx(java.lang,"OutOfMemoryError",VirtualMachineError);
+newEx(java.lang,"SecurityException",RuntimeException);
+newEx(java.lang,"StackOverflowError",VirtualMachineError);
+newEx(java.lang,"ThreadDeath",Error);
+newEx(java.lang,"UnknownError",VirtualMachineError);
+newEx(java.lang,"UnsatisfiedLinkError",LinkageError);
+newEx(java.lang,"UnsupportedClassVersionError",ClassFormatError);
+newEx(java.lang,"UnsupportedOperationException",RuntimeException);
+newEx(java.lang,"VerifyError",LinkageError);
 
-declareType(java.lang,"ClassCastException",RuntimeException);
+newEx(java.lang,"ClassCastException",RuntimeException);
 
 C$=Clazz.newClass(java.lang,"ClassNotFoundException",function(){this.ex=null;},Exception);
 m$(C$, "c$$S$Throwable", function(detailMessage,exception){
@@ -17337,7 +17434,7 @@ function(){
 return this.ex;
 });
 
-C$=declareType(java.lang,"StringIndexOutOfBoundsException",IndexOutOfBoundsException);
+C$=newEx(java.lang,"StringIndexOutOfBoundsException",IndexOutOfBoundsException);
 m$(C$, "c$$I", function(index){
 C$.superclazz.c$$S.apply(this,["String index out of range: "+index]);
 }, 1);
@@ -17382,19 +17479,19 @@ function(){
 return this.undeclaredThrowable;
 });
 
-declareType(java.io,"IOException",Exception);
-declareType(java.io,"CharConversionException",java.io.IOException);
-declareType(java.io,"EOFException",java.io.IOException);
-declareType(java.io,"FileNotFoundException",java.io.IOException);
-declareType(java.io,"ObjectStreamException",java.io.IOException);
-declareType(java.io,"SyncFailedException",java.io.IOException);
-declareType(java.io,"UnsupportedEncodingException",java.io.IOException);
-declareType(java.io,"UTFDataFormatException",java.io.IOException);
+newEx(java.io,"IOException",Exception);
+newEx(java.io,"CharConversionException",java.io.IOException);
+newEx(java.io,"EOFException",java.io.IOException);
+newEx(java.io,"FileNotFoundException",java.io.IOException);
+newEx(java.io,"ObjectStreamException",java.io.IOException);
+newEx(java.io,"SyncFailedException",java.io.IOException);
+newEx(java.io,"UnsupportedEncodingException",java.io.IOException);
+newEx(java.io,"UTFDataFormatException",java.io.IOException);
 
-declareType(java.io,"InvalidObjectException",java.io.ObjectStreamException);
-declareType(java.io,"NotActiveException",java.io.ObjectStreamException);
-declareType(java.io,"NotSerializableException",java.io.ObjectStreamException);
-declareType(java.io,"StreamCorruptedException",java.io.ObjectStreamException);
+newEx(java.io,"InvalidObjectException",java.io.ObjectStreamException);
+newEx(java.io,"NotActiveException",java.io.ObjectStreamException);
+newEx(java.io,"NotSerializableException",java.io.ObjectStreamException);
+newEx(java.io,"StreamCorruptedException",java.io.ObjectStreamException);
 
 C$=Clazz.newClass(java.io,"InterruptedIOException",function(){
 this.bytesTransferred=0;
@@ -17442,13 +17539,13 @@ function(){
 return this.detail;
 });
 
-declareType(java.util,"EmptyStackException",RuntimeException);
-declareType(java.util,"NoSuchElementException",RuntimeException);
-declareType(java.util,"TooManyListenersException",Exception);
+newEx(java.util,"EmptyStackException",RuntimeException);
+newEx(java.util,"NoSuchElementException",RuntimeException);
+newEx(java.util,"TooManyListenersException",Exception);
 
-C$=declareType(java.util,"ConcurrentModificationException",RuntimeException);
+C$=newEx(java.util,"ConcurrentModificationException",RuntimeException);
 m$(C$, "c$", function(detailMessage, rootCause){
-Clazz.super(C$, this);
+Clazz.super_(C$, this);
 }, 1);
 
 C$=Clazz.newClass(java.util,"MissingResourceException",function(){
@@ -17629,7 +17726,7 @@ this.constr = null;
 },java.lang.reflect.AccessibleObject,[java.lang.reflect.GenericDeclaration,java.lang.reflect.Member]);
 
 m$(C$, "c$$Class$ClassA$ClassA$I", function(declaringClass,parameterTypes,checkedExceptions,modifiers){
-Clazz.super(C$, this);
+Clazz.super_(C$, this);
 this.Class_=declaringClass;
 this.parameterTypes=parameterTypes;
 if (parameterTypes != null)
@@ -17709,7 +17806,7 @@ return this.getDeclaringClass().getName().hashCode();
 m$(C$,"newInstance$OA", function(args){
   var instance = null;
   if (this.constr) {
-    var a = (args ? new Array(args.length) : null);
+    var a = (args ? new Array(args.length) : []);
     if (args) {
       for (var i = args.length; --i >= 0;) {
         a[i] = (this.parameterTypes[i].__PRIMITIVE ? args[i].valueOf() : args[i]);
@@ -17778,7 +17875,7 @@ this.exceptionTypes=null;
 this.modifiers=0;
 },java.lang.reflect.AccessibleObject,[java.lang.reflect.GenericDeclaration,java.lang.reflect.Member]);
 m$(C$, "c$$Class$S$ClassA$Class$ClassA$I", function(declaringClass,name,parameterTypes,returnType,checkedExceptions,modifiers){
-Clazz.super(C$, this);
+Clazz.super_(C$, this);
 this.Class_=declaringClass;
 this.name=name;
 this.parameterTypes=parameterTypes;
@@ -17889,6 +17986,11 @@ if (types != null || !addParams) {
 }
 //var c = this.Class_.$clazz$;
 //var m=c.prototype[name] || c[name];
+if (receiver.$clazz$) {
+ // receiver is a Class<?> object. We need to instantiate it.
+ // I do not see how this works in Java. 
+ receiver = receiver.newInstance();
+}
 var m = receiver[name];
 if (m == null)
   newMethodNotFoundException(Clazz.getClass(receiver).$clazz$, name);  
@@ -17906,6 +18008,7 @@ return null;
 //Clazz._Loader.loadZJar(Clazz._Loader.getJ2SLibBase() + "core/coreswingjs.z.js", "swingjs.JSUtil");
 
   //if (!J2S._isAsync) {
+  if (Clazz._loadcore)
     for (var i = 0; i < J2S._coreFiles.length; i++)
       Clazz.loadScript(J2S._coreFiles[i]);
       //ClazzLoader.loadZJar(J2S._coreFiles[i], ClazzLoader.runtimeKeyClass);
@@ -18158,7 +18261,7 @@ if (typeof(SwingJS) == "undefined") {
 	}
 	
 	proto._addCoreFiles = function() {
-		J2S._addCoreFile("swingjs", this._j2sPath, this.__Info.preloadCore);
+		J2S._addCoreFile((this.__Info.core || "swingjs"), this._j2sPath, this.__Info.preloadCore);
 		if (J2S._debugCode) {
 		// no min package for that
 			J2S._addExec([this, null, "swingjs.JSAppletViewer", "load " + this.__Info.code]);

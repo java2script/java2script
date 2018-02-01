@@ -4,17 +4,15 @@ import java.util.List;
 
 import java.awt.Window;
 import java.awt.peer.DialogPeer;
+
+import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.LookAndFeel;
 
 
 public class JSDialogUI extends JSFrameUI implements DialogPeer {
 
-	// These dialogs are not modal. 
-	// Someday, perhaps, HTML5 will implement broadly the <dialog> element,
-	// but for now that is not the case, and we can only do modal dialogs
-	// using alert(), prompt(), and confirm(). For these we use JOptionPane
-	// and no peer or ui.
 	//
 	// a frame without min/max buttons
 	
@@ -22,6 +20,7 @@ public class JSDialogUI extends JSFrameUI implements DialogPeer {
 	
 	public JSDialogUI() {
 		z = frameZ + 500;
+		zModal = z - 1;
 		isFrame = true;
 		isDialog = true;
 		defaultWidth = 500;
@@ -30,15 +29,16 @@ public class JSDialogUI extends JSFrameUI implements DialogPeer {
 	}
 
 		@Override
-		protected void installUIImpl() {
+		public void installUI(JComponent jc) {
 			frame = (JFrame) c;
+			isModal = ((JDialog) c).isModal();
 			LookAndFeel.installColors(jc,
 			   "Frame.background",
 			   "Frame.foreground");
 		}
 	
 	@Override
-	protected void uninstallUIImpl() {
+	public void uninstallUI(JComponent jc) {
 	}
 
 	@Override

@@ -16,6 +16,7 @@ import java.util.Properties;
 public class JSPrintJob extends PDFJob {
 
 	private String fileName;
+	private String jobTitle;
 	private JobAttributes jobAttributes;
 	private PageAttributes pageAttributes;
 	private Properties properties;
@@ -46,10 +47,12 @@ public class JSPrintJob extends PDFJob {
 	}
 
 	private void setFile(String jobtitle) {
-		fileName = jobtitle;
+		fileName = jobTitle = jobtitle;
+		if (fileName != null && !fileName.endsWith(".pdf"))
+			fileName += ".pdf";
 		try {
 			// coerce jsjava to java
-			os = (java.io.OutputStream) (Object) (jobtitle == null ? new ByteArrayOutputStream() : new FileOutputStream(jobtitle));
+			os = (java.io.OutputStream) (Object) (fileName == null ? new ByteArrayOutputStream() : new FileOutputStream(fileName));
 		} catch (FileNotFoundException e) {
 		}
 	}

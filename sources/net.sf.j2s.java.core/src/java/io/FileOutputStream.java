@@ -64,7 +64,7 @@ public class FileOutputStream extends OutputStream {
 	//
 	// private volatile boolean closed = false;
 
-	private OC out;
+	protected OC out;
 
 	/**
 	 * Creates an output file stream to write to the file with the specified

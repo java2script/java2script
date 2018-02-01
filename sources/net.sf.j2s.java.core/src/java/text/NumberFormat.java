@@ -49,7 +49,6 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map;
 
-//import javajs.J2SRequireImport;
 import java.util.ResourceBundle;
 //import java.util.concurrent.atomic.AtomicInteger;
 //import java.util.concurrent.atomic.AtomicLong;
@@ -179,7 +178,6 @@ import sun.util.resources.LocaleData;
  * @author       Mark Davis
  * @author       Helena Shih
  */
-//@J2SRequireImport(LocaleData.class)
 public abstract class NumberFormat extends Format  {
 
     /**

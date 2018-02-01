@@ -46,7 +46,7 @@ import javax.swing.plaf.UIResource;
  * For examples and information on using tabbed panes see
  * <a href="http://java.sun.com/docs/books/tutorial/uiswing/components/tabbedpane.html">How to Use Tabbed Panes</a>,
  * a section in <em>The Java Tutorial</em>.
- * <p>
+ * <p>object
  * Tabs/components are added to a <code>TabbedPane</code> object by using the
  * <code>addTab</code> and <code>insertTab</code> methods.
  * A tab is represented by an index corresponding

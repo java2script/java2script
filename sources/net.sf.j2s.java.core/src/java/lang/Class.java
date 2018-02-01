@@ -750,7 +750,10 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		/**
 		 * @j2sNative
 		 * 
-		 * return Clazz.getClass(this.$clazz$.superclazz);
+		 * if (this.$clazz$ == java.lang.Object) return null;
+		 * 
+		 * 
+		 * return Clazz.getClass(this.$clazz$.superclazz || java.lang.Object);
 		 */
 		{
 		return null;
@@ -3259,6 +3262,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		return enumConstantDirectory;
 	}
 
+	
 	private volatile transient Map<String, T> enumConstantDirectory = null;
 
 	/**
@@ -3392,4 +3396,26 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 //	AnnotationType getAnnotationType() {
 //		return annotationType;
 //	}
+	
+	@Override
+	public int hashCode() {
+		String name = null;
+		/**
+		 * @j2sNative
+		 * 
+		 * name = this.$clazz$.__CLASS_NAME__ || this.$clazz$.toString();
+		 */
+		return name.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		/**
+		 * @j2sNative
+		 * 
+		 * return o.__CLASS_NAME__ == "java.lang.Class" && o.$clazz$ == this.$clazz$; 
+		 * 
+		 */
+		return false;
+	}
 }

@@ -42,16 +42,16 @@ public class AjaxURLConnection extends URLConnection {
    */
   @SuppressWarnings("null")
   private Object doAjax(boolean isBinary) {
-    J2SObjectInterface jmol = null;
+    J2SObjectInterface j2s = null;
     /**
      * @j2sNative
      * 
-     *            jmol = J2S || Jmol;
+     *            j2s = J2S;
      * 
      */
     {
     }
-    return jmol._doAjax(url, postOut, bytesOut, isBinary);
+    return j2s._doAjax(url, postOut, bytesOut, isBinary);
   }
 
   @Override

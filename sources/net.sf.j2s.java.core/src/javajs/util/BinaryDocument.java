@@ -270,14 +270,17 @@ public class BinaryDocument extends BC implements GenericBinaryDocument {
      * 
      * @j2sNative
      * 
-     * this.readByteArray(this.t8, 0, 8);
-     * return this.bytesToDoubleToFloat(this.t8, 0, this.isBigEndian);
-     *  
+     * 
      */
     {
       nBytes += 8;
-      return (isBigEndian ? ioReadDouble() : Double.longBitsToDouble(readLELong()));  
+      if (true)
+        return (isBigEndian ? ioReadDouble()
+            : Double.longBitsToDouble(readLELong()));
     }
+    // this is the JavaScript-only part
+    this.readByteArray(this.t8, 0, 8);
+    return bytesToDoubleToFloat(this.t8, 0, this.isBigEndian);
   }
   
   private double ioReadDouble() throws IOException {

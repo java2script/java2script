@@ -2,7 +2,6 @@ package a2s;
 
 import javax.swing.JComboBox;
 
-
 public class Choice extends JComboBox {
 
 	public void select(int index) {
@@ -20,6 +19,5 @@ public class Choice extends JComboBox {
 	public String getItem(int n) {
 		return (String)getItemAt(n);
 	}
-
 	
 }

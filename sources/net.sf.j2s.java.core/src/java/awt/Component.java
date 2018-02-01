@@ -1778,14 +1778,17 @@ public abstract class Component
 		if (locale != null) {
 			return locale;
 		}
-		Container parent = this.parent;
-
-		if (parent == null) {
-			throw new IllegalComponentStateException(
-					"This component must have a parent in order to determine its locale");
-		} else {
-			return parent.getLocale();
-		}
+		
+		return Locale.ENGLISH; // Trouble with cell renderers
+//		
+//		Container parent = this.parent;
+//
+//		if (parent == null) {
+//			throw new IllegalComponentStateException(
+//					"This component must have a parent in order to determine its locale");
+//		} else {
+//			return parent.getLocale();
+//		}
 	}
 
 	/**
@@ -1875,7 +1878,7 @@ public abstract class Component
 	 */
 	final Point getLocationOnScreen_NoTreeLock() {
 		if (isShowing()) {
-			if (peer instanceof LightweightPeer) {
+			if (isLightweight()) {//peer instanceof LightweightPeer) { // SwingJS will return FALSE 
 				// lightweight component location needs to be translated
 				// relative to a native component.
 				Container host = getNativeContainer();
@@ -3828,6 +3831,10 @@ public abstract class Component
 		 * before we notify AWTEventListeners.
 		 */
 
+		// if (e instanceof JSDnD.JSDropTargetEvent) {
+		// ((JSDnD.JSDropFileMouseEvent) e).dispatch();
+		// return;
+		// }
 		// if (e instanceof SunDropTargetEvent) {
 		// ((SunDropTargetEvent)e).dispatch();
 		// return;
@@ -6008,12 +6015,12 @@ public abstract class Component
 				// if our parent is lightweight and we are not
 				// we should call restack on nearest heavyweight
 				// container.
-				if (parentContPeer instanceof LightweightPeer && !(peer instanceof LightweightPeer)) {
-					Container hwParent = getNativeContainer();
-					if (hwParent != null && hwParent.peer != null) {
-						parentContPeer = (ContainerPeer) hwParent.peer;
-					}
-				}
+//				if (parentContPeer instanceof LightweightPeer && !(peer instanceof LightweightPeer)) {
+//					Container hwParent = getNativeContainer();
+//					if (hwParent != null && hwParent.peer != null) {
+//						parentContPeer = (ContainerPeer) hwParent.peer;
+//					}
+//				}
 				// if (parentContPeer.isRestackSupported()) {
 				// parentContPeer.restack();
 				// }
@@ -6024,6 +6031,16 @@ public abstract class Component
 			// }
 
 			isAddNotifyComplete = true;
+			if (visible && peer != null) {// BH added for SwingJS menu in Varna
+				boolean isDisposed = false;
+				/**
+				 * @j2sNative
+				 *   isDisposed = peer.isDisposed;
+				 *   
+				 */
+				if (isDisposed)
+					peer.setVisible(true);
+			}
 
 			if (hierarchyListener != null || (eventMask & AWTEvent.HIERARCHY_EVENT_MASK) != 0
 					|| Toolkit.enabledOnToolkit(AWTEvent.HIERARCHY_EVENT_MASK)) {

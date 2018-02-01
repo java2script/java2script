@@ -27,7 +27,7 @@
 package swingjs;
 
 import java.awt.event.InputEvent;
-
+import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Event;
@@ -37,9 +37,6 @@ import java.awt.event.MouseWheelEvent;
 
 /**
  * JavaScript interface from JmolJSmol.js via handleOldJvm10Event (for now)
- * 
- * J2SRequireImport is needed because we want to allow JavaScript access to
- * java.awt.Event constant names
  * 
  */
 
@@ -296,6 +293,7 @@ public class JSMouse {
 				count, popupTrigger, button);
 		}
 		byte[] bdata = new byte[0];
+		e.setBData(bdata);
 		Object jqevent = this.jqevent;
 		Component c = null;
 		/**
@@ -303,11 +301,7 @@ public class JSMouse {
 		 * 
 		 * bdata.jqevent = jqevent;
 		 * c = jqevent.target["data-component"];
-		 * e.setBData$java_awt_AWTEvent$BA(e, bdata); 
 		 */
-		{
-			System.out.println(jqevent);
-		}
 		
 		// the key here is that if we have a data-component, we must go directly to its
 		// container and dispatch the event; if we go through the event queue, any e.consume()

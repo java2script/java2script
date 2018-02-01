@@ -25,7 +25,6 @@
 
 package sun.awt.image;
 
-//import javajs.J2SRequireImport;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.DataBuffer;
@@ -47,7 +46,6 @@ import sun.java2d.StateTrackableDelegate;
  * associated DataBuffer so that it can be updated when the data is changed.
  */
 
-//@J2SRequireImport (sun.awt.image.DataStealer.class)
 public class SunWritableRaster extends WritableRaster {
 	private static DataStealer stealer;
 

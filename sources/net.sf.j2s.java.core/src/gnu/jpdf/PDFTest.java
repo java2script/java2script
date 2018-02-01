@@ -59,10 +59,16 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.Scrollable;
 
 /*
+ * 
+ * Note that this package does not use PDFPrinterJob, just the simpler PDFJob.    
+ * 
+ * 
  * SwingJS note: This took an afternoon to integrate into SwingJS -- we were just missing
  * a few classes, which were easy enough to get from GrepCode (OpenJDK), and in SwingJS, 
  * for performance reasons, we do not implement OutputStream.write(byte[]), and we have 
  * a better way to get a FontMetrics. Other than that, flawless! 
+ * 
+ * 
  * 
  * Thank you, GNU Java PDF team!!!
  * 
@@ -139,6 +145,8 @@ public class PDFTest extends JFrame implements ActionListener
       System.exit(1);
     }
 
+	System.out.println("GNU JPDF creating " + file);
+	
     // Handle window closing
     addWindowListener(new WindowAdapter() {
         public void windowClosing(WindowEvent e) {

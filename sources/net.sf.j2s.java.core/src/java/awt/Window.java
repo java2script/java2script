@@ -875,13 +875,14 @@ public class Window extends Container {
                     child.showWithParent = false;
                 }       // endif
             }   // endfor
-            if (!isModalBlocked()) {
-                updateChildrenBlocking();
-            } else {
-                // fix for 6532736: after this window is shown, its blocker
-                // should be raised to front
-                modalBlocker.toFront_NoClientCode();
-            }
+//            if (!isModalBlocked()) {
+//                updateChildrenBlocking();
+//            } else 
+//            {
+//                // fix for 6532736: after this window is shown, its blocker
+//                // should be raised to front
+//                modalBlocker.toFront_NoClientCode();
+//            }
             if (this instanceof Frame || this instanceof Dialog) {
                 updateChildFocusableWindowState(this);
             }
@@ -890,6 +891,7 @@ public class Window extends Container {
 
         // If first time shown, generate WindowOpened event
         if ((state & OPENED) == 0) {
+            repaint(); // main frame was not showing for Varna PrintTest.
             postWindowEvent(WindowEvent.WINDOW_OPENED);
             state |= OPENED;
         }
@@ -996,7 +998,9 @@ public class Window extends Container {
 			@Override
 			public void run() {
 
+				// Though Window is not a JComponent, we still treat it as such.
 				((JComponent) me).getUI().uninstallUI(null);
+				((JComponent) me).getUI().uninstallJS();
 
 				// Check if this window is the fullscreen window for the
 				// device. Exit the fullscreen mode prior to disposing
@@ -1539,7 +1543,7 @@ public class Window extends Container {
         return (owner != null) && owner.isModalExcluded(exclusionType);
     }
 
-    void updateChildrenBlocking() {
+//    void updateChildrenBlocking() {
 //        Vector<Window> childHierarchy = new Vector<Window>();
 //        Window[] ownedWindows = getOwnedWindows();
 //        for (int i = 0; i < ownedWindows.length; i++) {
@@ -1561,7 +1565,7 @@ public class Window extends Container {
 //            }
 //            k++;
 //        }
-    }
+//    }
 
     /**
      * Adds the specified window listener to receive window events from

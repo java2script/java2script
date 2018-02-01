@@ -48,10 +48,9 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 //import java.util.Currency;
 import java.util.Hashtable;
-
-//import javajs.J2SRequireImport;
 import java.util.Locale;
 import java.util.ResourceBundle;
+
 //import java.util.concurrent.atomic.AtomicInteger;
 //import java.util.concurrent.atomic.AtomicLong;
 import sun.util.resources.LocaleData;
@@ -377,7 +376,6 @@ import sun.util.resources.LocaleData;
  * @author       Mark Davis
  * @author       Alan Liu
  */
-//@J2SRequireImport(DecimalFormatSymbols.class)
 public class DecimalFormat extends NumberFormat {
 
     /**

@@ -77,7 +77,7 @@ public class PDFPrinterJob extends PrinterJob {
 	public PDFPrinterJob() {
 		attributes = new HashPrintRequestAttributeSet();
 		info = new PDFInfo();
-		pageFormat = new PageFormat(); // default page format.
+		//pageFormat = new PageFormat(); // default page format.
 		setJobName("Java Printing");
 	}
 
@@ -144,6 +144,8 @@ public class PDFPrinterJob extends PrinterJob {
 			System.err.println("Error!! - Invalid output file path: " + pathname);
 		}
 
+		System.out.println("GNU JPDF creating " + file);
+		
 		PDFGraphics pdfGraphics = null;
 		printJob = new PDFJob(fileOutputStream);
 
@@ -151,17 +153,21 @@ public class PDFPrinterJob extends PrinterJob {
 			printJob.getPDFDocument().setPDFInfo(info);
 		}
 
-		pageCount = pageable.getNumberOfPages();
+		pageCount = (pageable == null ? 1 : pageable.getNumberOfPages());
 		for (int pageIndex = 0; pageIndex < pageCount; pageIndex++) {
-			pageFormat = pageable.getPageFormat(pageIndex);
-
+			if (pageable != null)
+				pageFormat = pageable.getPageFormat(pageIndex);
+			if (pageFormat == null)
+				pageFormat = defaultPage();
 			pdfGraphics = (PDFGraphics) printJob.getGraphics(pageFormat);
-			printable = pageable.getPrintable(pageIndex);
+			if (pageable != null)
+				printable = pageable.getPrintable(pageIndex);
 			printable.print(pdfGraphics, pageFormat, pageIndex);
 			pdfGraphics.dispose();
 		}
-
 		printJob.end();
+		
+		System.out.println("GNU JPDF created: " + file);
 
 	}
 

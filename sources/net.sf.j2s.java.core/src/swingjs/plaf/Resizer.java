@@ -117,7 +117,7 @@ public class Resizer {
 		switch (type) {
 		case MouseEvent.MOUSE_PRESSED:
 			DOMNode.setStyles(resizer, "background-color", "green");
-			DOMNode.setStyles(rubberBand, "display", "block");
+			DOMNode.setVisible(rubberBand, true);
 			DOMNode.setCursor("nwse-resize");
 			// set cursor to dragging
 			break;
@@ -126,7 +126,7 @@ public class Resizer {
 			break;
 		case MouseEvent.MOUSE_RELEASED:
 			DOMNode.setStyles(resizer, "background-color", "red");
-			DOMNode.setStyles(rubberBand, "display", "none");
+			DOMNode.setVisible(rubberBand, false);
 			DOMNode.setCursor("auto");
 			fHandleDOMResize(null, dx, dy);
 		}

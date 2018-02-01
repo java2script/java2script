@@ -51,8 +51,6 @@ import java.util.ListResourceBundle;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-//import javajs.J2SRequireImport;
-
 //import sun.util.LocaleDataMetaInfo;
 
 /**
@@ -63,7 +61,6 @@ import java.util.ResourceBundle;
  * @author Mark Davis
  */
 
-//@J2SRequireImport(ListResourceBundle.class)
 public class LocaleData {
 
 //    private static final String localeDataJarName = "localedata.jar";

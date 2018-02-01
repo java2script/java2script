@@ -16,6 +16,7 @@ import java.awt.JSComponent;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.dnd.DropTarget;
 import java.awt.event.FocusEvent;
 import java.awt.event.PaintEvent;
 import java.awt.image.ColorModel;
@@ -375,17 +376,15 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	 * 
 	 */
 	@Override
-	@Deprecated
-	public void installUI(Component c) {
+	public void installJS() {
 		/**
 		 * @j2sNative
 		 * 
-		 *            c.addChangeListener$javax_swing_event_ChangeListener && c.addChangeListener$javax_swing_event_ChangeListener(this);
+		 *            this.c.addChangeListener$javax_swing_event_ChangeListener && this.c.addChangeListener$javax_swing_event_ChangeListener(this);
 		 */
 		{
 		}
 		c.addPropertyChangeListener(this);
-		// installUIImpl(); done earlier
 	}
 
 	/**
@@ -395,18 +394,15 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	 * 
 	 */
 	@Override
-	@Deprecated
-	public void uninstallUI(Component c) {
+	public void uninstallJS() {
 
 		// window closing will fire this with c == null
-
-		uninstallUIImpl();
 
 		/**
 		 * @j2sNative
 		 * 
-		 *            c && c.removeChangeListener$javax_swing_event_ChangeListener && c.removeChangeListener$javax_swing_event_ChangeListener(this); 
-		 *            c && c.removePropertyChangeListener$java_beans_PropertyChangeListener(this);
+		 *            this.c && this.c.removeChangeListener$javax_swing_event_ChangeListener && this.c.removeChangeListener$javax_swing_event_ChangeListener(this); 
+		 *            this.c && this.c.removePropertyChangeListener$java_beans_PropertyChangeListener(this);
 		 */
 		{
 		}
@@ -416,31 +412,30 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		}
 	}
 
-	protected void installUIImpl() {
-	}
-
-	protected void uninstallUIImpl() {
-	}
-
-	protected JQueryObject $(DOMNode node) {
+	protected JQueryObject $(Object node) {
 		return JSUtil.getJQuery().$(node);
 	} 
 
 	public JSComponentUI set(JComponent target) {
+		// note that in JavaScript, in certain cases 
+		// (JFrame, JWindow, JDialog)
+		// target will not be a JComponent, 
+		// but it will always be a JSComponent, and 
+		// we do not care if it is not a JComponent.
 		c = target;
-		jc = (JComponent) c; // in JavaScript, in certain cases this will not be a
-													// JComponent, but it will always be a JSComponent
+		jc = (JComponent) c; 
 		applet = JSToolkit.getHTML5Applet(c);
-		newID();
-		installUIImpl(); // need to do this immediately, not later
+		newID(false);
+		installUI(target); // need to do this immediately, not later
+		installJS();
 		if (needPreferred)
 			getHTMLSize();
 		return this;
 	}
 
-	protected void newID() {
+	protected void newID(boolean forceNew) {
 		classID = c.getUIClassID();
-		if (id == null) {
+		if (id == null || forceNew) {
 			num = ++incr;
 			id = c.getHTMLName(classID) + "_" + num;
 		}
@@ -449,8 +444,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	public void reInit() {
 		 setTainted();
 		 domNode = null;
-		 id = null;
-		 newID();
+		 newID(true);
 	}
 	
 	// ////////////// user event handling ///////////////////
@@ -779,7 +773,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 			prop = "value";
 			obj = valueNode;
 			if (iconNode != null)
-				DOMNode.setStyles(obj, "display",(text == null ? "none" : "block"));
+				DOMNode.setVisible(obj, text != null);
 		}
 		if (obj != null)
 			setProp(obj, prop, text);
@@ -1134,6 +1128,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		// mark as not tainted
 		// debugDump(divObj);
 		isTainted = false;
+		if (jc.getDropTarget() != null)
+			setDropTarget();
 		return outerNode;
 	}
 
@@ -1175,6 +1171,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 				System.out.println("JSCUI could not add " + ui.c.getName() + " to "
 						+ c.getName());
 			} else {
+				if (ui.domNode != ui.outerNode && DOMNode.getParent(ui.domNode) == null)
+					ui.outerNode.appendChild(ui.domNode);
 				containerNode.appendChild(ui.outerNode);
 			}
 		}
@@ -1271,14 +1269,17 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		return null;
 	}
 
+	@Deprecated
 	public Dimension getMinimumSize(JComponent jc) {
 		return getMinimumSize();
 	}
 	
+	@Deprecated
 	public Dimension getPreferredSize(JComponent jc) {
 		return getPreferredSize();
 	}
 	
+	@Deprecated
 	public Dimension getMaximumSize(JComponent jc) {
 		return getMaximumSize();
 	}
@@ -1432,7 +1433,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		DOMNode node = getOuterNode();
 		if (node == null)
 			node = domNode; // a frame or other window
-		DOMNode.setStyles(node, "display", b ? "block" : "none");
+		DOMNode.setVisible(node,  b);
 		if (b) {
 			if (isDisposed)
 				undisposeUI(node);
@@ -1548,6 +1549,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	 */
 	protected int jsActualWidth, jsActualHeight;
 
+	private Object dropTarget = this; // unactivated
+
 	protected void setJSDimensions(int width, int height) {
 		if (jsActualWidth > 0)
 			width = jsActualWidth;
@@ -1632,6 +1635,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		int h = actualHeight;
 		if (h == 0) {
 			if (isText) {
+				if (c.getFont() == null)
+					return;
 				h = setHTMLSize1(domNode, false, false).height;
 			// for example, a 12-pt font might have a height of 16, and ascent of 13, and descent of 3
 			// adjust down to center only the ascension of the text.
@@ -1704,7 +1709,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	public void dispose() {
 		isDisposed = true;
 		DOMNode.remove(domNode);
-		DOMNode.remove(outerNode);
+		if (domNode != outerNode)
+			DOMNode.remove(outerNode);
 	}
 
 	/**
@@ -1720,7 +1726,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 			if (ui.containerNode != null)
 				ui.containerNode.appendChild(node);
 		}
-		if (outerNode != null)
+		if (outerNode != null && domNode != outerNode) // menu separators have domNode == outerNode
 			outerNode.appendChild(domNode);
 		isDisposed = false;
 	}
@@ -1960,21 +1966,22 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 
 	public int getZIndex(String what) {
 		@SuppressWarnings("unused")
-		Component c = this.c;
+		DOMNode node = domNode;
 		int z = 0;
 		/**
-		 * looking for high-level content pane
+		 * looking for high-level content pane or frame
 		 * 
 		 * @j2sNative
 		 * 
 		 *            if (what) return this.applet._z[what];
-		 * 
-		 *            while (c && c.style && c.style["z-index"]) { z =
-		 *            c.style["z-index"]; c = c.parentNode; }
-		 * 
+		 * 			
+		 *            while (node && !node.style["z-index"]) 
+		 *              node = node.parentElement;
+		 * 			  z = parseInt(node.style["z-index"]);
+		 * 			  return(!z || isNaN(z) ? 100000 : z); 
 		 */
 		{
-			return (z == 0 ? 100000 : z);
+			return z;
 		}
 	}
 
@@ -2097,6 +2104,26 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		DOMNode.setStyles(domNode, "padding", padding == null ? "0px" : padding.top
 				+ "px " + padding.left + "px " + padding.bottom + "px " + padding.right
 				+ "px");
+	}
+
+	public void addDropTarget(DropTarget t) {
+		// called by DropTarget
+		dropTarget = t;
+		setDropTarget();
+	}
+	
+	public void removeTarget() {
+		// called by DropTarget
+		if (dropTarget == null)
+			return;
+		dropTarget = null;
+		setDropTarget();
+	}
+	
+	private void setDropTarget() {
+		DOMNode node;
+		if (dropTarget != this && ((node = outerNode) != null || (node = domNode) != null))
+			DOMNode.setAttr(node,  "data-dropComponent", jc);
 	}
 
 }

@@ -10,7 +10,9 @@ import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.image.BufferedImage;
 import java.awt.peer.WindowPeer;
+
 import javax.swing.JWindow;
+
 import swingjs.JSAppletViewer;
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
@@ -33,6 +35,12 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 	protected boolean isFrame, isDialog;
 	protected Window window;
 	protected Font font;
+
+	/**
+	 * a translucent screen that prevents events to pass - for JDialog
+	 */
+	protected DOMNode modalNode;
+
 
 	private Graphics2D graphics;
 
@@ -164,19 +172,11 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 	}
 
 	@Override
-	protected void installUIImpl() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void uninstallUIImpl() {
-	}
-
-	@Override
 	public void dispose() {
 		JSUtil.J2S._jsUnsetMouse(domNode);
 		DOMNode.remove(outerNode);
+		if (modalNode != null)
+			DOMNode.remove(modalNode);
 	}
 
 	@Override

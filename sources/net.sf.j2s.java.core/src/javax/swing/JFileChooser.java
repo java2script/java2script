@@ -38,20 +38,34 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 //import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Map;
 
 import javax.swing.event.EventListenerList;
 import javax.swing.filechooser.FileFilter;
 //import javax.swing.filechooser.FileSystemView;
 import javax.swing.filechooser.FileView;
 
+import javajs.api.JSFunction;
+import swingjs.JSToolkit;
 import swingjs.JSUtil;
 
 
 /**
+ * SwingJS note: 
+ * 
+ * This class in JavaScript will run a modal dialog that, in some operating systems (such as Windows 10) 
+ * will immediately open up a standard OS File Open dialog. However, the difference is that the return
+ * from showOpenDialog will be NaN (an impossible int value in Java and JavaScript), indicating that the
+ * true result will be returned by a PropertyChangeEvent with propertyName "SelectedFile". 
+ *   
+ * 
+ * 
  * <code>JFileChooser</code> provides a simple mechanism for the user to
  * choose a file.
  * For information about using <code>JFileChooser</code>, see
@@ -287,6 +301,18 @@ public class JFileChooser extends JComponent {
     private File[] selectedFiles;
 
 		private String lastFileName = "";
+
+		private int opensaveType = CUSTOM_DIALOG; // added in case user sets the "accept" button text on a file open/save
+		
+		/**
+		 * called by JSFileChooserUI
+		 * 
+		 * @return
+		 */
+		public int getOpenSaveType() {
+			return opensaveType;
+		}
+		
 
     // *************************************
     // ***** JFileChooser Constructors *****
@@ -680,104 +706,132 @@ public class JFileChooser extends JComponent {
         return showDialog(parent, null);
     }
 
-    /**
-     * Pops a custom file chooser dialog with a custom approve button.
-     * For example, the following code
-     * pops up a file chooser with a "Run Application" button
-     * (instead of the normal "Save" or "Open" button):
-     * <pre>
-     * filechooser.showDialog(parentFrame, "Run Application");
-     * </pre>
-     *
-     * Alternatively, the following code does the same thing:
-     * <pre>
-     *    JFileChooser chooser = new JFileChooser(null);
-     *    chooser.setApproveButtonText("Run Application");
-     *    chooser.showDialog(parentFrame, null);
-     * </pre>
-     *
-     * <!--PENDING(jeff) - the following method should be added to the api:
-     *      showDialog(Component parent);-->
-     * <!--PENDING(kwalrath) - should specify modality and what
-     *      "depends" means.-->
-     *
-     * <p>
-     *
-     * The <code>parent</code> argument determines two things:
-     * the frame on which the open dialog depends and
-     * the component whose position the look and feel
-     * should consider when placing the dialog.  If the parent
-     * is a <code>Frame</code> object (such as a <code>JFrame</code>)
-     * then the dialog depends on the frame and
-     * the look and feel positions the dialog
-     * relative to the frame (for example, centered over the frame).
-     * If the parent is a component, then the dialog
-     * depends on the frame containing the component,
-     * and is positioned relative to the component
-     * (for example, centered over the component).
-     * If the parent is <code>null</code>, then the dialog depends on
-     * no visible window, and it's placed in a
-     * look-and-feel-dependent position
-     * such as the center of the screen.
-     *
-     * @param   parent  the parent component of the dialog;
-     *                  can be <code>null</code>
-     * @param   approveButtonText the text of the <code>ApproveButton</code>
-     * @return  the return state of the file chooser on popdown:
-     * <ul>
-     * <li>JFileChooser.CANCEL_OPTION
-     * <li>JFileChooser.APPROVE_OPTION
-     * <li>JFileCHooser.ERROR_OPTION if an error occurs or the
-     *                  dialog is dismissed
-     * </ul>
-     * @exception HeadlessException if GraphicsEnvironment.isHeadless()
-     * returns true.
-     * @see java.awt.GraphicsEnvironment#isHeadless
-     */
-    public int showDialog(Component parent, String approveButtonText) {
-    	switch (dialogType) {
-    	case OPEN_DIALOG:
-    		JSUtil.alert("JFileChooser.showDialog OPEN_DIALOG has not been implemented");
-    		JSUtil.notImplemented("JFileChooser.showDialog OPEN_DIALOG has not been implemented");
-    		// SwingJS TODO
-    		return CANCEL_OPTION;
-    	case SAVE_DIALOG:
-    		String name = JSUtil.prompt((dialogTitle == null ? "File to Save?" : dialogTitle), lastFileName);
-    		if (name == null)
-    			return CANCEL_OPTION;
-    		selectedFile = new File(name);
-    		return APPROVE_OPTION;
-    	case CUSTOM_DIALOG:
-    		JSUtil.notImplemented("JFileChooser.CUSTOM_DIALOG");
-    		return CANCEL_OPTION;
-    	}
-    	return CANCEL_OPTION;
+	/**
+	 * Pops a custom file chooser dialog with a custom approve button. For
+	 * example, the following code pops up a file chooser with a "Run
+	 * Application" button (instead of the normal "Save" or "Open" button):
+	 * 
+	 * <pre>
+	 * filechooser.showDialog(parentFrame, "Run Application");
+	 * </pre>
+	 *
+	 * Alternatively, the following code does the same thing:
+	 * 
+	 * <pre>
+	 * JFileChooser chooser = new JFileChooser(null);
+	 * chooser.setApproveButtonText("Run Application");
+	 * chooser.showDialog(parentFrame, null);
+	 * </pre>
+	 *
+	 * <!--PENDING(jeff) - the following method should be added to the api:
+	 * showDialog(Component parent);--> <!--PENDING(kwalrath) - should specify
+	 * modality and what "depends" means.-->
+	 *
+	 * <p>
+	 *
+	 * The <code>parent</code> argument determines two things: the frame on
+	 * which the open dialog depends and the component whose position the look
+	 * and feel should consider when placing the dialog. If the parent is a
+	 * <code>Frame</code> object (such as a <code>JFrame</code>) then the dialog
+	 * depends on the frame and the look and feel positions the dialog relative
+	 * to the frame (for example, centered over the frame). If the parent is a
+	 * component, then the dialog depends on the frame containing the component,
+	 * and is positioned relative to the component (for example, centered over
+	 * the component). If the parent is <code>null</code>, then the dialog
+	 * depends on no visible window, and it's placed in a
+	 * look-and-feel-dependent position such as the center of the screen.
+	 *
+	 * @param parent
+	 *            the parent component of the dialog; can be <code>null</code>
+	 * @param approveButtonText
+	 *            the text of the <code>ApproveButton</code>
+	 * @return the return state of the file chooser on popdown:
+	 *         <ul>
+	 *         <li>JFileChooser.CANCEL_OPTION
+	 *         <li>JFileChooser.APPROVE_OPTION
+	 *         <li>JFileCHooser.ERROR_OPTION if an error occurs or the dialog is
+	 *         dismissed
+	 *         </ul>
+	 * @exception HeadlessException
+	 *                if GraphicsEnvironment.isHeadless() returns true.
+	 * @see java.awt.GraphicsEnvironment#isHeadless
+	 */
+	public int showDialog(Component parent, String approveButtonText) {
 
-//    	
-//    	
-//    	
-//        if(approveButtonText != null) {
-//            setApproveButtonText(approveButtonText);
-//            setDialogType(CUSTOM_DIALOG);
-//        }
-//        dialog = createDialog(parent);
-//        dialog.addWindowListener(new WindowAdapter() {
-//            @Override
-//						public void windowClosing(WindowEvent e) {
-//                returnValue = CANCEL_OPTION;
-//            }
-//        });
-//        returnValue = ERROR_OPTION;
-//        rescanCurrentDirectory();
-//
-//        dialog.show();
-//        firePropertyChange("JFileChooserDialogIsClosingProperty", dialog, null);
-//        dialog.dispose();
-//        dialog = null;
-//        return returnValue;
-    }
+		switch (dialogType) {
+		case CUSTOM_DIALOG:
+			JSUtil.notImplemented("JFileChooser.CUSTOM_DIALOG");
+			return CANCEL_OPTION;
+		case OPEN_DIALOG:
+			if (!(parent instanceof PropertyChangeListener)) {
+				warnJSDeveloper();
+				return CANCEL_OPTION;
+			}
+			removePropertyChangeListener((PropertyChangeListener) parent);
+			addPropertyChangeListener((PropertyChangeListener) parent);
+			Runnable r = new Runnable() {
 
-    /**
+				@Override
+				public void run() {
+					/**
+					 * @j2sNative
+					 * 
+					 * this.b$['javax.swing.JFileChooser'].selectedFile = arguments[0] || null;
+					 * 
+					 * 
+					 */
+					firePropertyChange("SelectedFile", null, selectedFile);
+				}
+				
+			};
+			JSUtil.J2S._getFileFromDialog(/**@j2sNative function(file){r.run(file)}||*/ null, "java.io.File");			
+			return JDialog.ASYNCHRONOUS_INTEGER;
+		case SAVE_DIALOG:
+			String name = JSUtil.prompt((dialogTitle == null ? "File to Save?" : dialogTitle), lastFileName);
+			if (name == null)
+				return CANCEL_OPTION;
+			selectedFile = new File(name);
+			closeDialog();
+			return APPROVE_OPTION;
+		}
+
+		if (approveButtonText != null) {
+			setApproveButtonText(approveButtonText);
+			setDialogType(CUSTOM_DIALOG);
+		}
+		dialog = createDialog(parent);
+		dialog.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				returnValue = CANCEL_OPTION;
+				closeDialog();
+			}
+		});
+
+		returnValue = JDialog.ASYNCHRONOUS_INTEGER;
+		// rescanCurrentDirectory();
+
+		dialog.setVisible(true);
+		// closeDialog(); // Java only
+	    return returnValue;
+	}
+
+	private static void warnJSDeveloper() {
+		System.err.println("JFileChooser: Component does not implement PropertyChangeListener.");
+	}
+
+    private void closeDialog() {
+		firePropertyChange("SelectedFile", null, selectedFile);
+		if (dialog != null) {
+			firePropertyChange("JFileChooserDialogIsClosingProperty", dialog, null);
+			dialog.dispose();
+			dialog = null;
+		}
+	}
+		
+
+
+	/**
      * Creates and returns a new <code>JDialog</code> wrapping
      * <code>this</code> centered on the <code>parent</code>
      * in the <code>parent</code>'s frame.
@@ -831,7 +885,6 @@ public class JFileChooser extends JComponent {
         }
         dialog.pack();
         dialog.setLocationRelativeTo(parent);
-
         return dialog;
     }
 
@@ -941,12 +994,15 @@ public class JFileChooser extends JComponent {
      */
     // PENDING(jeff) - fire button text change property
     public void setDialogType(int dialogType) {
+
         if(this.dialogType == dialogType) {
             return;
         }
         if(!(dialogType == OPEN_DIALOG || dialogType == SAVE_DIALOG || dialogType == CUSTOM_DIALOG)) {
             throw new IllegalArgumentException("Incorrect Dialog Type: " + dialogType);
         }
+        if (dialogType != CUSTOM_DIALOG)
+        	opensaveType = dialogType;
         int oldValue = this.dialogType;
         this.dialogType = dialogType;
         if(dialogType == OPEN_DIALOG || dialogType == SAVE_DIALOG) {

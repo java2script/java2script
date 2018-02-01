@@ -27,7 +27,6 @@
  */
 package swingjs.plaf;
 
-//import javajs.J2SRequireImport;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -106,14 +105,13 @@ import swingjs.api.js.DOMNode;
  * @author Timothy Prinzing
  * @author Shannon Hickey (drag and drop)
  */
-//@J2SRequireImport({ TextListener.class, JSCaret.class, InputMapUIResource.class, ActionMapUIResource.class })
 public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFactory
 																											// {
 
 	private String inactiveBackgroundColor;
 
 	protected String getComponentText() {
-		JTextComponent jtc = (JTextComponent) c;
+		JTextComponent jtc = (JTextComponent) jc;
 		return (jtc.getDocument() == null ? null : (currentText = ((JTextComponent) c).getText()));
 	}
 
@@ -213,7 +211,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
 		//System.out.println("Handling for " + id + " " + eventType + " "	+ jQueryEvent);
-		JTextComponent t = (JTextComponent) c;
+		JTextComponent t = (JTextComponent) jc;
 		return (t.isEditable() ? textListener.handleJSTextEvent(this, eventType, jQueryEvent) : false);
 	}
 
@@ -605,9 +603,9 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	 * @see ComponentUI#installUI
 	 */
 	@Override
-	protected void installUIImpl() {
+	public void installUI(JComponent jc) {
 		isToolbarFixed = false;
-		editor = (JTextComponent) c;
+		editor = (JTextComponent) jc;
 		textListener = new TextListener(this, editor);
 
 		// install defaults
@@ -659,7 +657,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	 * @see ComponentUI#uninstallUI
 	 */
 	@Override
-	public void uninstallUIImpl() {
+	public void uninstallUI(JComponent jc) {
 		// detach from the model
 		// editor.removePropertyChangeListener(updateHandler);
 		// editor.getDocument().removeDocumentListener(updateHandler);

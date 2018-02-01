@@ -114,7 +114,13 @@ public abstract class ComponentUI implements ComponentPeer {
      * @see javax.swing.JComponent#setUI
      * @see javax.swing.JComponent#updateUI
      */
-    public void installUI(Component component) {
+    public void installUI(JComponent component) {
+    }
+
+    /**
+     * additional aspects needed to fully install a JavaScript component
+     */
+    public void installJS() {
     }
 
     /**
@@ -142,7 +148,13 @@ public abstract class ComponentUI implements ComponentPeer {
      * @see #installUI
      * @see javax.swing.JComponent#updateUI
      */
-    public void uninstallUI(Component c) {
+    public void uninstallUI(JComponent c) {
+    }
+
+    /**
+     * additional aspects needed to fully uninstall a JavaScript component
+     */
+    public void uninstallJS() {
     }
 
     /**

@@ -42,6 +42,8 @@ public class PDFFont extends PDFObject implements Serializable
    * The package name was changed to gnu.pdf.  
    * The formatting was changed a little bit
    * It is still licensed under the LGPL.
+   * 
+   * BH SwingJS: Java "serif" added 2017.12.23
    */
   
   /**
@@ -94,10 +96,10 @@ public class PDFFont extends PDFObject implements Serializable
     String f = font.toLowerCase();
     
     // default PDF Font name
-//    this.font = base14[0][1];
-//    this.javaFont = base14[0][0];
-    this.font = font;
-    this.javaFont = "/" + font;
+    this.font = base14[0][1];
+    this.javaFont = base14[0][0];
+//    this.font = font;
+//    this.javaFont = "/" + font;
     
     // attempt to translate the font name from Java to PDF
     for(int i=0;i<base14.length;i++) {
@@ -198,7 +200,7 @@ public class PDFFont extends PDFObject implements Serializable
 		// ITALIC                  
 		// BOLD+ITALIC
 		{
-			"arial",
+			"arial",    // default
 			"/Helvetica",
 			"/Helvetica-Bold",
 			"/Helvetica-Oblique",
@@ -217,6 +219,12 @@ public class PDFFont extends PDFObject implements Serializable
 			"/Courier-BoldOblique" },
 		{
 			"timesroman",
+			"/Times-Roman",
+			"/Times-Bold",
+			"/Times-Italic",
+			"/Times-BoldItalic" },
+		{
+			"serif",  // BH added
 			"/Times-Roman",
 			"/Times-Bold",
 			"/Times-Italic",

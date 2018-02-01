@@ -64,7 +64,7 @@ class DefaultPreviewPanel extends JPanel {
 
     private int textGap = 5;
 //    private Font font = new Font(Font.DIALOG, Font.PLAIN, 12);
-    private String sampleText = UIManager.getString("ColorChooser.sampleText");
+    private String sampleText = "Sample Text";//UIManager.getString("ColorChooser.sampleText");
 
     private int swatchWidth = 50;
 
@@ -87,7 +87,7 @@ class DefaultPreviewPanel extends JPanel {
         int height = fm.getHeight();
         int width = fm.stringWidth(sampleText);
 
-        int y = height*3 + textGap*3;
+        int y = height*5 + textGap*2; // BH was 3 and 2, but that was 10 pixels short
         int x = squareSize * 3 + squareGap*2 + swatchWidth + width + textGap*3;
         return new Dimension( x,y );
     }

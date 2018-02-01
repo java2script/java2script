@@ -974,7 +974,7 @@ public class JSListUI extends JSLightweightUI {
 	 * @see #installKeyboardActions
 	 */
 	public void installUI(JComponent c) {
-		list = (JList) c;
+		list = (JList) jc;
 
 		layoutOrientation = list.getLayoutOrientation();
 
@@ -2862,7 +2862,7 @@ public class JSListUI extends JSLightweightUI {
 	// @Override
 	// protected Transferable createTransferable(JComponent c) {
 	// if (c instanceof JList) {
-	// JList list = (JList) c;
+	// JList list = (JList) jc;
 	// Object[] values = list.getSelectedValues();
 	//
 	// if (values == null || values.length == 0) {

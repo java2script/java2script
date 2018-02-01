@@ -42,7 +42,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
-import javajs.J2SIgnoreImport;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -222,7 +221,6 @@ import swingjs.api.JSMinimalAbstractDocument;
  *
  * @author  Timothy Prinzing
  */
-@J2SIgnoreImport({StyledEditorKit.class})
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class JEditorPane extends JTextComponent {
 

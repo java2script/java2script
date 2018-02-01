@@ -41,7 +41,6 @@ import java.util.Vector;
 
 import sun.awt.image.OffScreenImageSource;
 import swingjs.JSGraphics2D;
-import swingjs.JSImage;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Canvas;
 
@@ -116,13 +115,13 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 */
 	public static final int TYPE_INT_ARGB = 2;
 
-	// /**
-	// * Represents an image with 8-bit RGBA color components packed into
-	// * integer pixels. The image has a <code>DirectColorModel</code>
-	// * with alpha. The color data in this image is considered to be
-	// * premultiplied with alpha.
-	// */
-	// public static final int TYPE_INT_ARGB_PRE = 3;
+	 /**
+	 * Represents an image with 8-bit RGBA color components packed into
+	 * integer pixels. The image has a <code>DirectColorModel</code>
+	 * with alpha. The color data in this image is considered to be
+	 * premultiplied with alpha.
+	 */
+	 public static final int TYPE_INT_ARGB_PRE = 3;
 	//
 	// /**
 	// * Represents an image with 8-bit RGB color components, corresponding
@@ -327,6 +326,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		}
 			break;
 
+		case TYPE_INT_ARGB_PRE:
 		case TYPE_INT_ARGB: {
 			colorModel = ColorModel.getRGBdefault();
 			raster = colorModel.createCompatibleWritableRaster(width, height);
@@ -891,8 +891,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @see #setRGB(int, int, int, int, int[], int, int)
 	 */
 	public int getRGB(int x, int y) {
-		if ((_imgNode != null || _g != null) && !_havePix) 
-		  ((JSImage) this).setPixels();
+		checkHavePixels();
 		if (_pix == null)
 			_pix = _pixSaved;
 		return _pix[y * this.width + x];
@@ -901,11 +900,12 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	/**
 	 * Returns an array of integer pixels in the default RGB color model
 	 * (TYPE_INT_ARGB) and default sRGB color space, from a portion of the image
-	 * data. Color conversion takes place if the default model does not match the
-	 * image <code>ColorModel</code>. There are only 8-bits of precision for each
-	 * color component in the returned data when using this method. With a
+	 * data. Color conversion takes place if the default model does not match
+	 * the image <code>ColorModel</code>. There are only 8-bits of precision for
+	 * each color component in the returned data when using this method. With a
 	 * specified coordinate (x,&nbsp;y) in the image, the ARGB pixel can be
-	 * accessed in this way: </p>
+	 * accessed in this way:
+	 * </p>
 	 * 
 	 * <pre>
 	 * pixel = rgbArray[offset + (y - startY) * scansize + (x - startX)];
@@ -917,34 +917,46 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * not in bounds. However, explicit bounds checking is not guaranteed.
 	 * 
 	 * @param startX
-	 *          the starting X coordinate
+	 *            the starting X coordinate
 	 * @param startY
-	 *          the starting Y coordinate
+	 *            the starting Y coordinate
 	 * @param w
-	 *          width of region
+	 *            width of region
 	 * @param h
-	 *          height of region
+	 *            height of region
 	 * @param rgbArray
-	 *          if not <code>null</code>, the rgb pixels are written here
+	 *            if not <code>null</code>, the rgb pixels are written here
 	 * @param offset
-	 *          offset into the <code>rgbArray</code>
+	 *            offset into the <code>rgbArray</code>
 	 * @param scansize
-	 *          scanline stride for the <code>rgbArray</code>
+	 *            scanline stride for the <code>rgbArray</code>
 	 * @return array of RGB pixels.
 	 * @see #setRGB(int, int, int)
 	 * @see #setRGB(int, int, int, int, int[], int, int)
 	 */
-	public int[] getRGB(int startX, int startY, int w, int h,
-			int[] rgbArray, int offset, int scansize) {
-		if ((_imgNode != null || _g != null) && !_havePix) 
-			  ((JSImage) this).setPixels();
-			if (_pix == null)
-				_pix = _pixSaved;
-			return getRangeRGB(startX, startY, w, h, rgbArray, offset, scansize);
+	public int[] getRGB(int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize) {
+		checkHavePixels();
+		if (_pix == null)
+			_pix = _pixSaved;
+		return getRangeRGB(startX, startY, w, h, rgbArray, offset, scansize);
+	}
+
+	/**
+	 * 
+	 * @return true if pixels had to be set
+	 */
+	private boolean checkHavePixels() {
+		if ((_imgNode != null || _g != null) && !_havePix) {
+			setPixels();
+			return true;
+		}
+		return false;
 	}
 
 	public int[] getRangeRGB(int startX, int startY, int w, int h,
 			int[] rgbArray, int offset, int scansize) {
+		if (_pix == null && _pixSaved == null)
+			checkHavePixels();
 		int[] pixels = (_pix == null ? _pixSaved : _pix);
 		for (int y = startY, yoff=offset; y < startY + h; y++, yoff += scansize)
 			for (int off = yoff, x = startX; x < startX + w; x++)
@@ -973,10 +985,8 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @see #getRGB(int, int, int, int, int[], int, int)
 	 */
 	public synchronized void setRGB(int x, int y, int rgb) {
-		if ((_imgNode != null || _g != null) && !_havePix) {
-		  ((JSImage) this).setPixels();
+		if (checkHavePixels())
 		  _imgNode = null;
-		}
 		int[] pixels = (_pix == null ? _pixSaved : _pix);
 		pixels[y * this.width + x] = rgb;
 	}
@@ -1021,10 +1031,8 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 */
 	public void setRGB(int startX, int startY, int w, int h, int[] rgbArray,
 			int offset, int scansize) {
-		if ((_imgNode != null || _g != null) && !_havePix) {
-			  ((JSImage) this).setPixels();
+		if (checkHavePixels())
 			  _imgNode = null;
-			}
 		int[] pixels = (_pix == null ? _pixSaved : _pix);
 		int width = this.width;
 		for (int y = startY, yoff = offset; y < startY + h; y++, yoff += scansize) 
@@ -1438,10 +1446,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 						.getSampleModelTranslateY()));
 
 		Object tdata = null;
-		
-		if ((_imgNode != null || _g != null) && !_havePix) 
-		  ((JSImage) this).setPixels();
-
+		checkHavePixels();
 		for (int i = startY; i < startY + height; i++) {
 			tdata = raster.getDataElements(startX, i, width, 1, tdata);
 			wr.setDataElements(startX, i, width, 1, tdata);

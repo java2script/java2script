@@ -149,7 +149,6 @@ import java.util.Map;
  * @see Raster
  * @see DataBuffer
  */
-//no! don't do this! @J2SRequireImport(DirectColorModel.class)
 @SuppressWarnings({"rawtypes"})
 public abstract class ColorModel implements Transparency{
 //    private long pData;         // Placeholder for data for native functions

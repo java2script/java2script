@@ -2,11 +2,10 @@ package swingjs.plaf;
 
 import java.awt.Component;
 import java.awt.Dimension;
+
+import javax.swing.JComponent;
 import javax.swing.JMenu;
 import swingjs.api.js.DOMNode;
-//import javajs.J2SRequireImport;
-
-//@J2SRequireImport(swingjs.jquery.JQueryUI.class)
 public class JSMenuUI extends JSMenuItemUI {
 
 	private JMenu jm;
@@ -23,21 +22,24 @@ public class JSMenuUI extends JSMenuItemUI {
 			if (isMenuItem) {
 				containerNode = domNode = createItem("_menu", null);
 			} else {
-				domNode = newDOMObject("label", id);
-				// TODO implement icons for menuBar?
-				setCssFont(DOMNode.setAttr(domNode, "innerHTML", menuItem.getText()),
-						c.getFont());
-				setDataComponent(domNode);
+//				DOMNode labelNode = newDOMObject("label", id);
+				domNode = createItem("_item", null);
+//
+//				// TODO implement icons for menuBar?
+//				setCssFont(DOMNode.setAttr(labelNode, "innerHTML", menuItem.getText()),
+//						c.getFont());
+//				setDataComponent(labelNode);
 			}
 		}
 		setCssFont(domNode, c.getFont());
+		DOMNode.setVisible(domNode, jc.isVisible());
 		return domNode;
 	}
 
 	@Override
-	protected void installUIImpl() {
+	public void installUI(JComponent jc) {
 		jm = (JMenu) jc;
-		super.installUIImpl();
+		super.installUI(jc);
 	}
 
 	@Override

@@ -90,8 +90,8 @@ public abstract class AWTEvent extends EventObject {
 
 	private static int idnum; // SwingJS for testing
 
-    private byte bdata[];
-
+    byte bdata[];
+    
     /**
      * The event's id.
      * @serial
@@ -289,12 +289,12 @@ public abstract class AWTEvent extends EventObject {
 	// });
 	// }
 
-	public byte[] getBData(AWTEvent ev) {
-		return ev.bdata;
+	public byte[] getBData() {
+		return bdata;
 	}
 
-	public void setBData(AWTEvent ev, byte[] bdata) {
-		ev.bdata = bdata;
+	public void setBData(byte[] bdata) {
+		this.bdata = bdata;
 	}
 
 //    private static synchronized Field get_InputEvent_CanAccessSystemClipboard() {

@@ -105,7 +105,7 @@ class DefaultRGBChooserPanel extends AbstractColorChooserPanel implements Change
 
     @Override
 		public String getDisplayName() {
-        return UIManager.getString("ColorChooser.rgbNameText");
+        return "RGB";//UIManager.getString("ColorChooser.rgbNameText");
     }
 
     /**
@@ -183,9 +183,9 @@ class DefaultRGBChooserPanel extends AbstractColorChooserPanel implements Change
     @Override
 		protected void buildChooser() {
 
-        String redString = UIManager.getString("ColorChooser.rgbRedText");
-        String greenString = UIManager.getString("ColorChooser.rgbGreenText");
-        String blueString = UIManager.getString("ColorChooser.rgbBlueText");
+        String redString = "Red";//UIManager.getString("ColorChooser.rgbRedText");
+        String greenString = "Green";//UIManager.getString("ColorChooser.rgbGreenText");
+        String blueString = "Blue";//UIManager.getString("ColorChooser.rgbBlueText");
 
         setLayout( new BorderLayout() );
         Color color = getColorFromModel();

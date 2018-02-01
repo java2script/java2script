@@ -1,9 +1,9 @@
 package a2s;
 
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
 
 import javax.swing.JButton;
-
 
 public class Button extends JButton {
 
@@ -21,5 +21,10 @@ public class Button extends JButton {
 	public Insets getMargin() {
 		return awtInsets;
 	}
+
+    protected void fireActionPerformed(ActionEvent event) {
+    	A2SEvent.addListener(null, this);
+    	super.fireActionPerformed(event);
+    }
 
 }

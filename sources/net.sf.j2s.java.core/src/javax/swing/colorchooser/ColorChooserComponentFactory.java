@@ -54,9 +54,10 @@ public class ColorChooserComponentFactory {
 
 
     public static AbstractColorChooserPanel[] getDefaultChooserPanels() {
-        AbstractColorChooserPanel[] choosers = { //new DefaultSwatchChooserPanel(),
+        AbstractColorChooserPanel[] choosers = { new DefaultSwatchChooserPanel(),
                                                  //null,/*new DefaultHSBChooserPanel(),*/
-                                                 new DefaultRGBChooserPanel() };
+                                                 new DefaultRGBChooserPanel() 
+                                                 };
         return choosers;
     }
 

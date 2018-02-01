@@ -30,6 +30,8 @@ package swingjs.plaf;
 
 import java.awt.Dimension;
 import java.beans.PropertyChangeListener;
+
+import javax.swing.JComponent;
 import javax.swing.JViewport;
 import javax.swing.event.ChangeListener;
 import swingjs.api.js.DOMNode;
@@ -55,12 +57,12 @@ ChangeListener {
 	}
 
 	@Override
-	protected void installUIImpl() {
-		viewport = (JViewport) c;
+	public void installUI(JComponent jc) {
+		viewport = (JViewport) jc;
 	}
 
 	@Override
-	protected void uninstallUIImpl() {
+	public void uninstallUI(JComponent jc) {
 	}
 	
 	@Override

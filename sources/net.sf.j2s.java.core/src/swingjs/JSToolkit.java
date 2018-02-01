@@ -1,5 +1,6 @@
 package swingjs;
 
+import java.applet.AudioClip;
 import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Component;
@@ -29,6 +30,7 @@ import java.awt.image.ImageProducer;
 import java.awt.image.Raster;
 import java.awt.image.RasterOp;
 import java.awt.image.WritableRaster;
+import java.awt.JSComponent;
 import java.awt.peer.DialogPeer;
 import java.awt.peer.FramePeer;
 import java.awt.peer.LightweightPeer;
@@ -51,7 +53,6 @@ import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.text.Document;
 
-import javajs.J2SIgnoreImport;
 import javajs.api.JSFunction;
 import javajs.util.PT;
 import sun.awt.AppContext;
@@ -65,7 +66,6 @@ import swingjs.api.js.JQuery;
 import swingjs.plaf.JSComponentUI;
 
 
-@J2SIgnoreImport(URL.class)
 public class JSToolkit extends SunToolkit {
 
 	/**
@@ -171,8 +171,7 @@ public class JSToolkit extends SunToolkit {
 
 	@Override
 	public boolean isModalityTypeSupported(ModalityType modalityType) {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override
@@ -300,7 +299,7 @@ public class JSToolkit extends SunToolkit {
 
 	public static JSComponentUI getComponentUI(JComponent target) {
 		JSComponentUI ui = (JSComponentUI) Interface.getInstance("swingjs.plaf.JS"
-				+ ((java.awt.JSComponent) target).getUIClassID(), true);
+				+ ((JSComponent) target).getUIClassID(), true);
 		if (ui != null)
 			ui.set(target);
 		return ui;
@@ -693,10 +692,16 @@ public class JSToolkit extends SunToolkit {
 	 * @throws UnsupportedAudioFileException
 	 */
 	public static void playAudio(byte[] data, AudioFormat audioFormat) throws UnsupportedAudioFileException {
-		getAudioPlayer().playAudio(data, audioFormat);
+		getAudioPlayer().getAudio(data, audioFormat).play();
 	}
 	
-	
+	public static AudioClip getAudioClip(URL url) {
+		return getAudioPlayer().getAudioClip(url);
+	}
+
+
+
+
 	/**
 	 * Simple way to play any audio file
 	 * 
@@ -706,7 +711,7 @@ public class JSToolkit extends SunToolkit {
 	 * @throws UnsupportedAudioFileException
 	 */
 	public static void playAudioFile(URL url) throws IOException, UnsupportedAudioFileException {
-		getAudioPlayer().playAudioFileURL(url);
+		getAudioPlayer().getAudioFileFromURL(url).play();
 	}
 
 	public static Line getAudioLine(Line.Info info) {

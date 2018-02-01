@@ -818,7 +818,7 @@ public class BS implements Cloneable, JSONEncodable {
        * 
        * @j2sNative
        * 
-       *   bs.words = Clazz.newArray(-1, bitsetToCopy.words, 0, bs.wordsInUse = wordCount);
+       *   bs.words = Clazz.array(-1, bitsetToCopy.words, 0, bs.wordsInUse = wordCount);
        * 
        */
       {

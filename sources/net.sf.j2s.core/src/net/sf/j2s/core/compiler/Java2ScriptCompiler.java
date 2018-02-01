@@ -24,8 +24,7 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 
-import net.sf.j2s.core.astvisitors.ASTKeywordVisitor;
-import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
+import net.sf.j2s.core.astvisitors.Java2ScriptVisitor;
 import net.sf.j2s.core.builder.SourceFile;
 import net.sf.j2s.core.builder.SourceFileProxy;
 import net.sf.j2s.core.hotspot.InnerHotspotServer;
@@ -98,12 +97,11 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 
 		if (htmlTemplate == null) {
 			String htmlTemplateFile = getProperty("template.html");
-			//System.err.println("htmltemplate " + htmlTemplateFile);
+			//System.err.println("prop htmltemplate " + htmlTemplateFile);
 			if (htmlTemplateFile == null)
 				htmlTemplateFile = "template.html";
-			//System.err.println("htmltemplate " + htmlTemplateFile);
 			file = new File(prjFolder, htmlTemplateFile);
-			//System.err.println("htmltemplate " + htmlTemplateFile);
+			//System.err.println("using htmltemplate " + htmlTemplateFile);
 			if (!file.exists()) {
 				String html = getDefaultHTMLTemplate();
 				System.err.println("creating new htmltemplate\n" + html);
@@ -126,12 +124,8 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		astParser.setResolveBindings(true);
 		astParser.setSource(createdUnit);
 		root = (CompilationUnit) astParser.createAST(null);
-		ASTScriptVisitor visitor = new ASTScriptVisitor();
-		ASTKeywordVisitor.setNoQualifiedNamePackages(getProperty("j2s.compiler.nonqualified.classes"));
-		boolean ignoreMethodOverloading = !("enable".equals(getProperty("j2s.compiler.method.overloading")));
-		visitor.setSupportsMethodOverloading(!ignoreMethodOverloading);
-		boolean supportsInterfaceCasting = "enable".equals(getProperty("j2s.compiler.interface.casting"));
-		visitor.setSupportsInterfaceCasting(supportsInterfaceCasting);
+		Java2ScriptVisitor visitor = new Java2ScriptVisitor();
+		Java2ScriptVisitor.setNoQualifiedNamePackages(getProperty("j2s.compiler.nonqualified.classes"));
 		boolean isDebugging = "debug".equals(getProperty("j2s.compiler.mode"));
 		visitor.setDebugging(isDebugging);
 		String j2sPath = siteFolder + "/swingjs/j2s";
@@ -247,7 +241,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		return val;
 	}
 
-	public static void outputJavaScript(ASTScriptVisitor visitor, 
+	public static void outputJavaScript(Java2ScriptVisitor visitor, 
 			//DependencyASTVisitor dvisitor, CompilationUnit fRoot,
 			String j2sPath) {
 
@@ -333,10 +327,11 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		+"}\n"
 		+"</script>\n</head>\n<body>\n<script>\n"
 		+"SwingJS.getApplet('testApplet', Info)\n"
+		+"getClassList = function(){J2S._saveFile('_j2sclasslist.txt', Clazz.ClassFilesLoaded.sort().join('\\n'))}\n"
 		+"</script>\n"
 		+"<div style=\"position:absolute;left:900px;top:30px;width:600px;height:300px;\">\n"
 		+"<div id=sysoutdiv style=\"border:1px solid green;width:100%;height:95%;overflow:auto\"></div>\n"
-		+"This is System.out. <a href=\"javascript:testApplet._clearConsole()\">clear it</a> \n"
+		+"This is System.out. <a href=\"javascript:testApplet._clearConsole()\">clear it</a> <br>Add ?j2snocore to URL to see full class list; ?j2sdebug to use uncompressed j2s/core files <br><a href=\"javascript:getClassList()\">get _j2sClassList.txt</a>\n"
 		+"</div>\n"
 		+"</body>\n"
 		+"</html>\n";

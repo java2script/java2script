@@ -5,6 +5,8 @@ import java.awt.event.KeyEvent;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import javax.swing.JComponent;
 import javax.swing.JSpinner;
 import javax.swing.LookAndFeel;
 import javax.swing.Timer;
@@ -165,8 +167,8 @@ public class JSSpinnerUI extends JSLightweightUI {
 	}
 	
 	@Override
-	protected void installUIImpl() {
-		spinner = (JSpinner) c;
+	public void installUI(JComponent jc) {
+		spinner = (JSpinner) jc;
 //    "Spinner.font", ControlFont,
 //    "Spinner.ancestorInputMap",
 //       new UIDefaults.LazyInputMap(new Object[] {
@@ -176,7 +178,7 @@ public class JSSpinnerUI extends JSLightweightUI {
 //                  "KP_DOWN", "decrement",
 //       }),
     LookAndFeel.installColorsAndFont(jc, "Spinner.background", "Spinner.foreground", "Spinner.font");
-    super.installUIImpl();
+    super.installUI(jc);
 	}
 
 

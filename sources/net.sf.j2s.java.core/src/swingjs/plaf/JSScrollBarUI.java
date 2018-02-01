@@ -45,8 +45,8 @@ public class JSScrollBarUI extends JSSliderUI {
 	public void setVisible(boolean b) {
 		isInvisible = (myScrollPaneUI != null && myScrollPaneUI.scrollBarUIDisabled);
 		b &= !isInvisible;
-		DOMNode.setStyles(getOuterNode(), "display", b ? "block" : "none");
-		DOMNode.setStyles(jqSlider, "display", b ? "block" : "none");
+		DOMNode.setVisible(getOuterNode(), b);
+		DOMNode.setVisible(jqSlider, b);
 	}
 	
 

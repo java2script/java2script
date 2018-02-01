@@ -101,7 +101,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 	}
 
 	// @Override
-	// protected void uninstallUIImpl() {
+	// public void uninstallUI(JComponent jc) {
 	// viewport.removeChangeListener(this);
 	// viewport.removePropertyChangeListener(this);
 	// JScrollBar hscrollbar = scrollpane.getHorizontalScrollBar();
@@ -320,7 +320,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 	}
 
 	@Override
-	public void installUIImpl() {
+	public void installUI(JComponent jc) {
 		scrollpane = (JScrollPane) jc;
 		installDefaults(scrollpane);
 		installListeners(scrollpane);
@@ -373,7 +373,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 	}
 
 	@Override
-	public void uninstallUIImpl() {
+	public void uninstallUI(JComponent jc) {
 		uninstallDefaults(scrollpane);
 		uninstallListeners(scrollpane);
 		uninstallKeyboardActions(scrollpane);
@@ -978,10 +978,9 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 				"overflow-y",
 				getScrollBarPolicyCSS(scrollpane.getVerticalScrollBarPolicy()));
 		if (horizBarUI != null)
-			DOMNode.setStyles(horizBarUI.jqSlider, "display", "none");
+			DOMNode.setVisible(horizBarUI.jqSlider, false);
 		if (vertBarUI != null)
-			DOMNode.setStyles(vertBarUI.jqSlider, "display", "none");
-		// }
+			DOMNode.setVisible(vertBarUI.jqSlider, false);
 	}
 
 	class Handler implements ChangeListener, PropertyChangeListener {// ,

@@ -274,7 +274,7 @@ public class OutputStreamWriter extends Writer {
     @Override
 		public void close() throws IOException {
     	  flush();
-        writer.close();
+    	  stream.close();
     }
     
     /** Added for SwingJS

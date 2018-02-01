@@ -1,18 +1,22 @@
 package javax.imageio;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Hashtable;
+import java.util.Locale;
 import java.util.Map;
 
-import swingjs.JSToolkit;
-import swingjs.JSUtil;
-import swingjs.api.Interface;
+import javax.imageio.metadata.IIOMetadata;
+
 import javajs.api.GenericImageEncoder;
 import javajs.util.OC;
 import javajs.util.PT;
-import java.awt.image.RenderedImage;
-import java.io.OutputStream;
+import swingjs.JSToolkit;
+import swingjs.JSUtil;
+import swingjs.api.Interface;
 
 /**
  * SwingJS implementation using output channels (javajs.util.OC)
@@ -24,11 +28,19 @@ import java.io.OutputStream;
  * @see javax.imageio.spi.ImageWriterSpi
  *
  */
-public class ImageWriter {
+public abstract class ImageWriter {
 
-	private Map<String, Object> params = new Hashtable<String, Object>();
+    public abstract void write(IIOMetadata streamMetadata,
+            IIOImage image,
+            ImageWriteParam param) throws IOException;
 
-	private final static String VALID_FORMATS = ";PNG;GIF;JPEG;JPG;JPG64;";
+    public abstract ImageWriteParam getDefaultWriteParam();
+    
+
+	protected Map<String, Object> params = new Hashtable<String, Object>();
+
+
+	protected Locale locale;
 
 	/**
 	 * Create an ImageWriter that will be set with "image" and "type" later
@@ -38,19 +50,63 @@ public class ImageWriter {
 	 // allows passing a Hashtable with all information at once.
 	}
 	
-	public ImageWriter(RenderedImage im, String formatName) throws IIOException { //implements ImageTranscoder {
-		if (im == null || formatName == null || !PT.isOneOf(formatName.toUpperCase(), VALID_FORMATS))
-			throw new IIOException("Invalid format");
-		params.put("image", (BufferedImage) im);
-		params.put("type", formatName);
+	public void setImage(RenderedImage im) {
+		params.put("image", (BufferedImage) im);		
 	}
 
-	public boolean write(String fileName, OutputStream out) {
+
+	protected void setMetaData(Object streamMetadata) {
+		// not implemented
+	}
+
+	protected boolean write(RenderedImage im, String fileName, OutputStream out) {
+		try {
+			if (out == null && fileName != null)
+				out = new OC().setParams(null, fileName, false, null);
+			setOutput(out);
+			write(null, new IIOImage(im, null, null), null);
+		} catch (IOException e) {
+			return false;
+		}
+		return true;
+	}
+	
+	public void setOutput(Object out) {
+		OC outputChannel = null;
+    	if (out instanceof OC) {
+    		outputChannel = (OC) out;
+    	} else if (out instanceof FileOutputStream){
+    		/**
+    		 * @j2sNative
+    		 * outputChannel = out.out;
+    		 */
+    		{}
+    	} else {
+    		outputChannel = new OC().setParams(null, null, false, (OutputStream) out);
+    	}    	
+		params.put("outputChannel", outputChannel);
+    }
+
+	protected void write(IIOImage image) throws IOException {
+		params.put("image", image.image);
+		try {
+			writeImage(params);
+		} catch (Exception e) {
+			if (e instanceof IOException)
+				throw new IOException(((IOException) e).getMessage());
+			e.printStackTrace();
+		}
+	}
+
+	protected boolean writeToFileOrStream(String fileName, OutputStream out) {
+		OC outputChannel = (OC) params.get("outputChannel");
 		if (out != null) {
-			OC outputChannel = new OC();
+			outputChannel = new OC();
 			outputChannel.setParams(null, fileName, false, out);
 			params.put("outputChannel", outputChannel);
 		}
+		if (outputChannel != null)
+			fileName = outputChannel.getFileName();
 		try {
 			Object o = writeImage(params);
 			if (o instanceof String) {
@@ -195,5 +251,9 @@ public class ImageWriter {
 		return (errRet[0] == null);
 	}
 
+    public Locale getLocale() {
+        return locale;
+    }
+    
 
 }

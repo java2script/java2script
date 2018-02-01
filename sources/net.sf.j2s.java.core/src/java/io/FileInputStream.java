@@ -129,16 +129,16 @@ class FileInputStream extends InputStream
      */
     public FileInputStream(File file) throws FileNotFoundException {
         String name = (file != null ? file.getPath() : null);
-        SecurityManager security = System.getSecurityManager();
-        if (security != null) {
-            security.checkRead(name);
-        }
+//        SecurityManager security = System.getSecurityManager();
+//        if (security != null) {
+//            security.checkRead(name);
+//        }
         if (name == null) {
             throw new NullPointerException();
         }
         fd = new FileDescriptor();
         fd.incrementAndGetUseCount();
-        open(name);
+        open(file);
     }
 
     /**
@@ -179,13 +179,22 @@ class FileInputStream extends InputStream
     }
 
     /**
+     * SwingJS: Allows for drag-drop dnd to pre-load he bytes into a swingjs.JSFileBytes object.
      * Opens the specified file for reading.
      * @param name the name of the file
      */
-    private void open(String name) throws FileNotFoundException {
-    	is = new ByteArrayInputStream(JSUtil.getFileAsBytes(name));    	
+	private void open(File file) throws FileNotFoundException {
+    	is = new ByteArrayInputStream(JSUtil.getFileAsBytes(file));    	
     }
 
+//    /**
+//     * Opens the specified file for reading.
+//     * @param name the name of the file
+//     */
+//    private void open(String name) throws FileNotFoundException {
+//    	is = new ByteArrayInputStream(JSUtil.getFileAsBytes(name));    	
+//    }
+//
     /**
      * Reads a byte of data from this input stream. This method blocks
      * if no input is yet available.

@@ -154,7 +154,7 @@ public class JSToolBarUI extends JSPanelUI {
 
   public void installUI( JComponent c )
   {
-      toolBar = (JToolBar) c;
+      toolBar = (JToolBar) jc;
 
       // Set defaults
       installDefaults();

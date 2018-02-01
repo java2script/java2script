@@ -121,6 +121,7 @@ abstract class GraphicsCallback extends SunGraphicsCallback {
         @Override
 				public void run(Component comp, Graphics cg) {
         	if (comp.isLightweight()) {
+        		// never true in SwingJS
 //            if (comp.peer instanceof LightweightPeer) {
                 comp.paintHeavyweightComponents(cg);
             } else {

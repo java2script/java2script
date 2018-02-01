@@ -2,9 +2,10 @@ package swingjs.plaf;
 
 
 import java.awt.Dimension;
+
+import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.LookAndFeel;
-//import javajs.J2SRequireImport;
 import swingjs.JSUtil;
 import swingjs.api.js.JSSwingMenu;
 import swingjs.jquery.JQueryUI;
@@ -46,7 +47,7 @@ public class JSPopupMenuUI extends JSPanelUI {
 	}
 
 	@Override
-	protected void installUIImpl() {
+	public void installUI(JComponent jc) {
     LookAndFeel.installColorsAndFont(jc,
         "PopupMenu.background",
         "PopupMenu.foreground",
@@ -54,7 +55,7 @@ public class JSPopupMenuUI extends JSPanelUI {
 	}
 
 	@Override
-	protected void uninstallUIImpl() {
+	public void uninstallUI(JComponent jc) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -75,10 +76,12 @@ public class JSPopupMenuUI extends JSPanelUI {
 	public void setVisible(boolean b) {
 		if (menu == null) {
 			// important to do this here, not earlier?
-			menu = (JPopupMenu) c;
+			menu = (JPopupMenu) jc;
 			j2sSwingMenu.setMenu(menu);
 		}
 		if (b) {
+			jc.addNotify();
+//			jc.repackContainer();
 			getOuterNode();
 			int x = 0, y = 0;
 			

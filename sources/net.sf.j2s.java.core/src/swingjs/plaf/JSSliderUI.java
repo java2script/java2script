@@ -4,14 +4,13 @@ package swingjs.plaf;
 import java.util.Dictionary;
 import java.util.Enumeration;
 
-//import javajs.J2SRequireImport;
-
 import javax.swing.SwingConstants;
 
 import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.BoundedRangeModel;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JScrollBar;
 import javax.swing.JSlider;
@@ -27,6 +26,9 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 
 	static {
 		Object jqueryui = JQueryUI.class; // loads jQuery.ui
+		// this static call allows for the CSS to be loaded only once and only when needed
+		JSUtil.loadStaticResource("swingjs/jquery/jquery-ui-j2sslider.css");
+		JSUtil.loadStaticResource("swingjs/jquery/jquery-ui-j2sslider.js");
 	}
 
 	JSlider jSlider;
@@ -55,23 +57,14 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	private boolean isVerticalScrollBar;
 	private boolean isInverted;
 	
-	private static boolean cssLoaded = false;
-
-	public JSSliderUI() {
-		
-		if (!cssLoaded) {
-			// this static call allows for the CSS to be loaded only once and only when needed
-			JSUtil.loadStaticResource("swingjs/jquery/jquery-ui-j2sslider.css");
-			JSUtil.loadStaticResource("swingjs/jquery/jquery-ui-j2sslider.js");
-			cssLoaded = true;
-		}
+	public JSSliderUI() {		
 		needPreferred = true;
 		setDoc();
 	}
 
 	@Override
 	protected DOMNode updateDOMNode() {
-		JSlider js = (JSlider) c;
+		JSlider js = (JSlider) jc;
 		min = js.getMinimum();
 		max = js.getMaximum();
 		val = js.getValue();
@@ -102,11 +95,13 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			domNode = wrap("div", id + "_wrap",
 					jqSlider = DOMNode.createElement("div", id));
 			$(domNode).addClass("swingjs");
-			setJQuerySliderAndEvents();	
+			setJQuerySliderAndEvents();
+			setTainted();
 		} else if (isChanged) {
 			DOMNode.remove(jqSlider);
 			domNode.appendChild(jqSlider = DOMNode.createElement("div", id));
 			setJQuerySliderAndEvents();	
+			setTainted();
 		  setInnerComponentBounds(jc.getWidth(), jc.getHeight());
 		}
 		setup(isNew || isChanged);
@@ -117,10 +112,10 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	}
 
 	@Override
-	public void installUIImpl() {
-		jSlider = (JSlider) c;
+	public void installUI(JComponent jc) {
+		jSlider = (JSlider) jc;
 		if (isScrollBar)
-			jScrollBar = (JScrollBar) c;
+			jScrollBar = (JScrollBar) jc;
 	}
 	
 	private void setJQuerySliderAndEvents() {

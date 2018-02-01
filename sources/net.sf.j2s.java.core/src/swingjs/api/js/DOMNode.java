@@ -1,5 +1,6 @@
 package swingjs.api.js;
 
+import java.applet.AudioClip;
 import java.awt.Image;
 import java.awt.Rectangle;
 
@@ -22,7 +23,7 @@ public abstract class DOMNode {
 	public abstract Rectangle getBoundingClientRect();
 
 
-	public static DOMNode createElement(String key, String id, Object... attrs) {
+	public static DOMNode createElement(String key, String id) {
 		DOMNode node = null;
 		/**
 		 * adding __CLASS_NAME__ allows a node to be used as a parameter in an overloaded method
@@ -34,7 +35,7 @@ public abstract class DOMNode {
 		 */
 		{
 		}
-		return setAttrs(node, attrs);
+		return node;
 	}
 
 	public static DOMNode createTextNode(String text) {
@@ -133,27 +134,31 @@ public abstract class DOMNode {
 
 	
 	public static DOMNode setAttr(DOMNode node, String attr, Object val) {
-		if (val == null) {
-			node.removeAttribute(attr);
-		} else {
-			/**
-			 * @j2sNative
-			 * 
-			 *            node[attr] = (val == "TRUE" ? true : val);
-			 * 
-			 */
-			{
-			}
-		}
+		/**
+		 * @j2sNative
+		 * 
+		 * 			node[attr] = (val == "TRUE" ? true : val);
+		 * 
+		 */
 		return node;
 	}
 
+	/**
+	 * allows for null key to be skipped (used in audio)
+	 * 
+	 * @param node
+	 * @param attr
+	 * @return
+	 */
 	public static DOMNode setAttrs(DOMNode node, Object... attr) {
 		/**
 		 * @j2sNative
 		 * 
 		 *            for (var i = 0; i < attr.length;) { 
-		 *            node[attr[i++]] = attr[i++]; }
+		 *            	var key = attr[i++];
+		 *            	var val = attr[i++];
+		 *            	key && (node[key] = val); 
+		 *            }
 		 * 
 		 */
 		{
@@ -226,9 +231,9 @@ public abstract class DOMNode {
 		return setStyles(node, "z-index", "" + z);
 	}
 
-	public static void playWav(String filePath) {
-		DOMNode.setAttrs(DOMNode.createElement("audio", null), 
-				"controls", "true", "src", filePath).play();
+	public static AudioClip getAudioElement(String filePath, boolean isLoop) {
+		return (AudioClip) DOMNode.setAttrs(DOMNode.createElement("audio", null), 
+				"controls", "true", (isLoop ? "loop" : null), (isLoop ? "true" : null), "src", filePath);
 	}
 
 	public static void setCursor(String c) {
@@ -281,6 +286,10 @@ public abstract class DOMNode {
 		 * node.tabIndex = i;
 		 */
 		{}
+	}
+
+	public static void setVisible(DOMNode node, boolean visible) {
+		setStyles(node, "display", visible ? "block" : "none");
 	}
 
 }

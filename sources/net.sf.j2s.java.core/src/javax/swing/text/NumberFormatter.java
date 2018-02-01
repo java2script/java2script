@@ -37,10 +37,6 @@ import java.text.ParseException;
 import java.util.Iterator;
 import java.util.Map;
 
-import javajs.J2SIgnoreImport;
-//import javajs.J2SRequireImport;
-
-
 /**
  * <code>NumberFormatter</code> subclasses <code>InternationalFormatter</code>
  * adding special behavior for numbers. Among the specializations are
@@ -103,9 +99,6 @@ import javajs.J2SIgnoreImport;
  * @since 1.4
  */
 
-// SwingJS J2S bug #16 NumberFormat.js includes the inner public class NumberFormat.Field, which is called here by instanceOf 
-//@J2SRequireImport(NumberFormat.class)
-//@J2SIgnoreImport(NumberFormat.Field.class)
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class NumberFormatter extends InternationalFormatter {
     /** The special characters from the Format instance. */

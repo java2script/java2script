@@ -31,7 +31,6 @@ package swingjs.plaf;
 //import java.awt.AWTEvent;
 import javax.swing.BorderFactory;
 
-import javajs.J2SIgnoreImport;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -120,7 +119,6 @@ import sun.swing.SwingLazyValue;
  * 
  * @author unattributed
  */
-@J2SIgnoreImport({UIDefaults.class, UIDefaults.ActiveValue.class})
 public class HTML5LookAndFeel extends LookAndFeel {
 	
 	public HTML5LookAndFeel() {
@@ -699,18 +697,18 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		//
 		// // *** OptionPane value objects
 		//
-		// Object optionPaneMinimumSize = new DimensionUIResource(262, 90);
+		Object optionPaneMinimumSize = new DimensionUIResource(262, 90);
 		//
 		Integer zero = new Integer(0);
-		// Object zeroBorder = new SwingLazyValue(
-		// "javax.swing.plaf.BorderUIResource$EmptyBorderUIResource",
-		// new Object[] {zero, zero, zero, zero});
+		 Object zeroBorder = new SwingLazyValue(
+		 "javax.swing.plaf.BorderUIResource$EmptyBorderUIResource",
+		 new Object[] {zero, zero, zero, zero});
 		//
 		Object optionPaneBorder = new javax.swing.plaf.BorderUIResource.EmptyBorderUIResource(10, 10, 12, 10);
 		//
-		// Object optionPaneButtonAreaBorder = new SwingLazyValue(
-		// "javax.swing.plaf.BorderUIResource$EmptyBorderUIResource",
-		// new Object[] {new Integer(6), zero, zero, zero});
+		 Object optionPaneButtonAreaBorder = new SwingLazyValue(
+		 "javax.swing.plaf.BorderUIResource$EmptyBorderUIResource",
+		 new Object[] {new Integer(6), zero, zero, zero});
 		//
 		//
 		// // *** ProgessBar value objects
@@ -1296,15 +1294,19 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// You can additionaly define OptionPane.messageFont which will
 				// dictate the fonts used for the message, and
 				// OptionPane.buttonFont, which defines the font for the buttons.
-				// "OptionPane.font", dialogPlain12,
+				"OptionPane.yesButtonText", "Yes",
+				"OptionPane.noButtonText", "No",
+				"OptionPane.cancelButtonText", "Cancel",
+				"OptionPane.okButtonText", "OK",
+				 "OptionPane.font", dialogPlain12,
 			  "OptionPane.background", control,
 			  "OptionPane.foreground", controlText,
 				"OptionPane.messageForeground",
 				controlText,
-				// "OptionPane.border", optionPaneBorder,
-				// "OptionPane.messageAreaBorder", zeroBorder,
-				// "OptionPane.buttonAreaBorder", optionPaneButtonAreaBorder,
-				// "OptionPane.minimumSize", optionPaneMinimumSize,
+				 "OptionPane.border", optionPaneBorder,
+				 "OptionPane.messageAreaBorder", zeroBorder,
+				 "OptionPane.buttonAreaBorder", optionPaneButtonAreaBorder,
+				 "OptionPane.minimumSize", optionPaneMinimumSize,
 				// "OptionPane.errorIcon", SwingUtilities2.makeIcon(getClass(),
 				// HTML5LookAndFeel.class,
 				// "icons/Error.gif"),
@@ -2431,7 +2433,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 	// Object c = me.getSource();
 	// JComponent src = null;
 	// if(c instanceof JComponent) {
-	// src = (JComponent) c;
+	// src = (JComponent) jc;
 	// } else if(c instanceof BasicSplitPaneDivider) {
 	// // Special case - if user clicks on divider we must
 	// // invoke popup from the SplitPane

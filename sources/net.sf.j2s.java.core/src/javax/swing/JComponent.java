@@ -65,6 +65,7 @@ import javax.swing.TransferHandler.DropLocation;
 import javax.swing.border.AbstractBorder;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.event.EventListenerList;
@@ -169,11 +170,6 @@ import swingjs.plaf.JSComponentUI;
 @SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public abstract class JComponent extends Container {
 
-	// /**
-	// * @see #readObject
-	// */
-	// private static final Hashtable readObjectCallbacks = new Hashtable(1);
-	//
 	/**
 	 * Keys to use for forward focus traversal when the JComponent is managing
 	 * focus.
@@ -339,8 +335,6 @@ public abstract class JComponent extends Container {
 
 	/** ActionMap. */
 	private ActionMap actionMap;
-
-	private static Autoscroller autoscroller;
 
 	/** Key used to store the default locale in an AppContext **/
 	private static final String defaultLocale = "JComponent.defaultLocale";
@@ -632,7 +626,8 @@ public abstract class JComponent extends Container {
 				isBackgroundPainted = false;
 				ui.update(scratchGraphics, this);
 				// BH TODO CHECK THIS 
-				isBackgroundPainted = ((JSGraphics2D) (Object)scratchGraphics).isBackgroundPainted();
+				JSGraphics2D jsg = getJSGraphic2D(scratchGraphics);		
+				isBackgroundPainted = (jsg != null && jsg.isBackgroundPainted());
 			} finally {
 				scratchGraphics.dispose();
 			}
@@ -731,7 +726,7 @@ public abstract class JComponent extends Container {
 							// if (!printing) {
 							jc.checkBackgroundPainted(null);
 							jc.paint((Graphics) (Object) jsg);
-							jc.checkBackgroundPainted(jsg);
+							jc.checkBackgroundPainted(getJSGraphic2D((Graphics) (Object) jsg));
 							// } else {
 							// if (!getFlag(IS_PRINTING_ALL)) {
 							// comp.print(cg);
@@ -955,6 +950,7 @@ public abstract class JComponent extends Container {
 	}
 
 	private void adjustPaintFlags() {
+		
 		JComponent jparent = null;
 		Container parent;
 		for (parent = getParent(); parent != null; parent = parent.getParent()) {
@@ -1049,85 +1045,6 @@ public abstract class JComponent extends Container {
 			firePropertyChange("paintingForPrint", true, false);
 		}
 	}
-
-	/**
-	 * In SwingJS we have only one canvas's context2d object, with one 
-	 * save/restore. We add the methods mark() and reset() to track the
-	 * use of g.create() to make sure that the proper number of dispose()
-	 * are generated. It is no problem that we run dispose() on the original
-	 * graphic or on a derivative graphic, as the key information is kept with 
-	 * the canvas, not the graphic itself.
-	 * 
-	 * @author Bob Hanson hansonr@stolaf.edu
-	 * 
-	 * @param g
-	 */
-	private void paintComponentSafely(Graphics g) {
-		JSGraphics2D jsg = (JSGraphics2D) (Object) g;
-		int nSave = jsg.mark();
-		checkBackgroundPainted(null);
-		// note that paintComponent may be overridden.
-		paintComponent(g);
-		checkBackgroundPainted(jsg);
-		jsg.reset(nSave);
-	}
-
-	/**
-	 * In SwingJS we have only one canvas's context2d object, with one 
-	 * save/restore. We add the methods mark() and reset() to track the
-	 * use of g.create() to make sure that the proper number of dispose()
-	 * are generated. It is no problem that we run dispose() on the original
-	 * graphic or on a derivative graphic, as the key information is kept with 
-	 * the canvas, not the graphic itself.
-	 * 
-	 * @author Bob Hanson hansonr@stolaf.edu
-	 * 
-	 * @param g
-	 */
-	private void printComponentSafely(Graphics g) {
-		int nSave = ((JSGraphics2D) (Object) g).mark();
-		printComponent(g);
-		((JSGraphics2D) (Object) g).reset(nSave);
-	}
-
-	/**
-	 * In SwingJS we have only one canvas's context2d object, with one 
-	 * save/restore. We add the methods mark() and reset() to track the
-	 * use of g.create() to make sure that the proper number of dispose()
-	 * are generated. It is no problem that we run dispose() on the original
-	 * graphic or on a derivative graphic, as the key information is kept with 
-	 * the canvas, not the graphic itself.
-	 * 
-	 * @author Bob Hanson hansonr@stolaf.edu
-	 * 
-	 * @param g
-	 */
-	private void paintBorderSafely(Graphics g) {
-		int nSave = ((JSGraphics2D) (Object) g).mark();
-		printBorder(g);
-		((JSGraphics2D) (Object) g).reset(nSave);
-	}
-
-	/**
-	 * In SwingJS we have only one canvas's context2d object, with one 
-	 * save/restore. We add the methods mark() and reset() to track the
-	 * use of g.create() to make sure that the proper number of dispose()
-	 * are generated. It is no problem that we run dispose() on the original
-	 * graphic or on a derivative graphic, as the key information is kept with 
-	 * the canvas, not the graphic itself.
-	 * 
-	 * @author Bob Hanson hansonr@stolaf.edu
-	 * 
-	 * @param g
-	 */
-	private void printBorderSafely(Graphics g) {
-		int nSave = ((JSGraphics2D) (Object) g).mark();
-		printBorder(g);
-		((JSGraphics2D) (Object) g).reset(nSave);
-		// TODO Auto-generated method stub
-		
-	}
-
 
 	/**
 	 * This is invoked during a printing operation. This is implemented to invoke
@@ -3042,29 +2959,17 @@ public abstract class JComponent extends Container {
 	 * @beaninfo expert: true description: Determines if this component
 	 *           automatically scrolls its contents when dragged.
 	 */
-	@SuppressWarnings("static-access")
 	public void setAutoscrolls(boolean autoscrolls) {
 		setFlag(AUTOSCROLLS_SET, true);
 		if (this.autoscrolls != autoscrolls) {
 			this.autoscrolls = autoscrolls;
 			if (autoscrolls) {
-				// SwingJS if we left all this static, we would alwayas require an
-				// instance of
-				// autoscroller, even if it was never used, which is a waste of
-				// resources.
-				getAutoscroller();
 				enableEvents(AWTEvent.MOUSE_EVENT_MASK);
 				enableEvents(AWTEvent.MOUSE_MOTION_EVENT_MASK);
 			} else {
-				getAutoscroller().stop(this);
+				Autoscroller.stop(this);
 			}
 		}
-	}
-
-	private static Autoscroller getAutoscroller() {
-		 return (autoscroller == null?
-			 autoscroller = (Autoscroller) JSUtil.getInstance("javax.swing.Autoscroller") : autoscroller);
-		 
 	}
 
 	/**
@@ -3085,16 +2990,15 @@ public abstract class JComponent extends Container {
 	 * description of this method.
 	 * 
 	 * @param e
-	 *          the mouse event
+	 *            the mouse event
 	 * @see java.awt.Component#processMouseEvent
 	 * @since 1.5
 	 */
-	@SuppressWarnings("static-access")
 	@Override
 	protected void processMouseEvent(MouseEvent e) {
-	  if (autoscrolls && e.getID() == MouseEvent.MOUSE_RELEASED) {
-	  	getAutoscroller().stop(this);
-    }
+		if (autoscrolls && e.getID() == MouseEvent.MOUSE_RELEASED) {
+			Autoscroller.stop(this);
+		}
 		super.processMouseEvent(e);
 	}
 
@@ -3105,19 +3009,18 @@ public abstract class JComponent extends Container {
 	 *          the <code>MouseEvent</code>
 	 * @see MouseEvent
 	 */
-	@SuppressWarnings("static-access")
 	@Override
 	protected void processMouseMotionEvent(MouseEvent e) {
 		boolean dispatch = true;
 		if (autoscrolls && e.getID() == MouseEvent.MOUSE_DRAGGED) {
 			// We don't want to do the drags when the mouse moves if we're
 			// autoscrolling. It makes it feel spastic.
-			dispatch = !getAutoscroller().isRunning(this);
-			getAutoscroller().processMouseDragged(e);
+			dispatch = !Autoscroller.isRunning(this);
+			Autoscroller.processMouseDragged(e);
 		}
 		if (dispatch) {
 			super.processMouseMotionEvent(e);
-		}
+		}		
 	}
 
 	// Inner classes can't get at this method from a super class
@@ -3136,12 +3039,6 @@ public abstract class JComponent extends Container {
 		setFlag(CREATED_DOUBLE_BUFFER, newValue);
 	}
 
-	/**
-	 * Returns true if the <code>RepaintManager</code> created the double buffer
-	 * image from the component.
-	 * 
-	 * @return true if this component had a double buffer image, false otherwise
-	 */
 	boolean getCreatedDoubleBuffer() {
 		return getFlag(CREATED_DOUBLE_BUFFER);
 	}
@@ -3158,6 +3055,7 @@ public abstract class JComponent extends Container {
 		private final Action action;
 
 		ActionStandin(ActionListener actionListener, String command) {
+			
 			this.actionListener = actionListener;
 			if (actionListener instanceof Action) {
 				this.action = (Action) actionListener;
@@ -3259,6 +3157,7 @@ public abstract class JComponent extends Container {
 	}
 
 	static class KeyboardState {
+		
 		private static final Object keyCodesKey = JComponent.KeyboardState.class;
 
 		// Get the array of key codes from the AppContext.
@@ -3337,13 +3236,14 @@ public abstract class JComponent extends Container {
 				return false;
 			}
 		}
+		
 	}
 
 	static final sun.awt.RequestFocusController focusController = new sun.awt.RequestFocusController() {
+
 		@Override
-		public boolean acceptRequestFocus(Component from, Component to,
-				boolean temporary, boolean focusedWindowChangeAllowed,
-				sun.awt.CausedFocusEvent.Cause cause) {
+		public boolean acceptRequestFocus(Component from, Component to, boolean temporary,
+				boolean focusedWindowChangeAllowed, sun.awt.CausedFocusEvent.Cause cause) {
 			if ((to == null) || !(to instanceof JComponent)) {
 				return true;
 			}
@@ -3363,8 +3263,7 @@ public abstract class JComponent extends Container {
 			if (iv == null) {
 				return true;
 			} else {
-				Object currentSource = SwingUtilities
-						.appContextGet(INPUT_VERIFIER_SOURCE_KEY);
+				Object currentSource = SwingUtilities.appContextGet(INPUT_VERIFIER_SOURCE_KEY);
 				if (currentSource == jFocusOwner) {
 					// We're currently calling into the InputVerifier
 					// for this component, so allow the focus change.
@@ -3380,8 +3279,7 @@ public abstract class JComponent extends Container {
 						// we ensure that if the InputVerifier for
 						// currentSource does a requestFocus, we don't
 						// try and run the InputVerifier again.
-						SwingUtilities.appContextPut(INPUT_VERIFIER_SOURCE_KEY,
-								currentSource);
+						SwingUtilities.appContextPut(INPUT_VERIFIER_SOURCE_KEY, currentSource);
 					} else {
 						SwingUtilities.appContextRemove(INPUT_VERIFIER_SOURCE_KEY);
 					}
@@ -3390,397 +3288,22 @@ public abstract class JComponent extends Container {
 		}
 	};
 
-	/*
-	 * --- Accessibility Support ---
+	/**
+	 * Returns the titled border text
+	 *
+	 * @return the titled border text, if supported, of the object; otherwise,
+	 *         null
+	 * @since 1.4
 	 */
-
-	// /**
-	// * @deprecated As of JDK version 1.1,
-	// * replaced by <code>java.awt.Component.setEnabled(boolean)</code>.
-	// */
-	// @Deprecated
-	// public void enable() {
-	// if (isEnabled() != true) {
-	// super.enable();
-	// // if (accessibleContext != null) {
-	// // accessibleContext.firePropertyChange(
-	// // AccessibleContext.ACCESSIBLE_STATE_PROPERTY,
-	// // null, AccessibleState.ENABLED);
-	// // }
-	// }
-	// }
-
-	// /**
-	// * @deprecated As of JDK version 1.1,
-	// * replaced by <code>java.awt.Component.setEnabled(boolean)</code>.
-	// */
-	// @Deprecated
-	// public void disable() {
-	// if (isEnabled() != false) {
-	// super.disable();
-	// // if (accessibleContext != null) {
-	// // accessibleContext.firePropertyChange(
-	// // AccessibleContext.ACCESSIBLE_STATE_PROPERTY,
-	// // AccessibleState.ENABLED, null);
-	// // }
-	// }
-	// }
-
-	// /**
-	// * The <code>AccessibleContext</code> associated with this
-	// * <code>JComponent</code>.
-	// */
-	// protected AccessibleContext accessibleContext = null;
-	//
-	// /**
-	// * Returns the <code>AccessibleContext</code> associated with this
-	// * <code>JComponent</code>. The method implemented by this base
-	// * class returns null. Classes that extend <code>JComponent</code>
-	// * should implement this method to return the
-	// * <code>AccessibleContext</code> associated with the subclass.
-	// *
-	// * @return the <code>AccessibleContext</code> of this
-	// * <code>JComponent</code>
-	// */
-	// public AccessibleContext getAccessibleContext() {
-	// return accessibleContext;
-	// }
-	//
-	// /**
-	// * Inner class of JComponent used to provide default support for
-	// * accessibility. This class is not meant to be used directly by
-	// * application developers, but is instead meant only to be
-	// * subclassed by component developers.
-	// * <p>
-	// * <strong>Warning:</strong>
-	// * Serialized objects of this class will not be compatible with
-	// * future Swing releases. The current serialization support is
-	// * appropriate for short term storage or RMI between applications running
-	// * the same version of Swing. As of 1.4, support for long term storage
-	// * of all JavaBeans<sup><font size="-2">TM</font></sup>
-	// * has been added to the <code>java.beans</code> package.
-	// * Please see {@link java.beans.XMLEncoder}.
-	// */
-	// public abstract class AccessibleJComponent extends AccessibleAWTContainer
-	// /* implements Accessible */ExtendedComponent
-	// {
-	// /**
-	// * Though the class is abstract, this should be called by
-	// * all sub-classes.
-	// */
-	// protected AccessibleJComponent() {
-	// super();
-	// }
-	//
-	// protected ContainerListener accessibleContainerHandler = null;
-	// protected FocusListener accessibleFocusHandler = null;
-	//
-	// /**
-	// * Fire PropertyChange listener, if one is registered,
-	// * when children added/removed.
-	// */
-	// protected class AccessibleContainerHandler
-	// implements ContainerListener {
-	// public void componentAdded(ContainerEvent e) {
-	// Component c = e.getChild();
-	// if (c != null && c instanceof Accessible) {
-	// AccessibleJComponent.this.firePropertyChange(
-	// AccessibleContext.ACCESSIBLE_CHILD_PROPERTY,
-	// null, ((Accessible) c).getAccessibleContext());
-	// }
-	// }
-	// public void componentRemoved(ContainerEvent e) {
-	// Component c = e.getChild();
-	// if (c != null && c instanceof Accessible) {
-	// AccessibleJComponent.this.firePropertyChange(
-	// AccessibleContext.ACCESSIBLE_CHILD_PROPERTY,
-	// ((Accessible) c).getAccessibleContext(), null);
-	// }
-	// }
-	// }
-	//
-	// /**
-	// * Fire PropertyChange listener, if one is registered,
-	// * when focus events happen
-	// * @since 1.3
-	// */
-	// protected class AccessibleFocusHandler implements FocusListener {
-	// public void focusGained(FocusEvent event) {
-	// if (accessibleContext != null) {
-	// accessibleContext.firePropertyChange(
-	// AccessibleContext.ACCESSIBLE_STATE_PROPERTY,
-	// null, AccessibleState.FOCUSED);
-	// }
-	// }
-	// public void focusLost(FocusEvent event) {
-	// if (accessibleContext != null) {
-	// accessibleContext.firePropertyChange(
-	// AccessibleContext.ACCESSIBLE_STATE_PROPERTY,
-	// AccessibleState.FOCUSED, null);
-	// }
-	// }
-	// } // inner class AccessibleFocusHandler
-	//
-	//
-	// /**
-	// * Adds a PropertyChangeListener to the listener list.
-	// *
-	// * @param listener the PropertyChangeListener to be added
-	// */
-	// public void addPropertyChangeListener(PropertyChangeListener listener) {
-	// if (accessibleFocusHandler == null) {
-	// accessibleFocusHandler = new AccessibleFocusHandler();
-	// JComponent.this.addFocusListener(accessibleFocusHandler);
-	// }
-	// if (accessibleContainerHandler == null) {
-	// accessibleContainerHandler = new AccessibleContainerHandler();
-	// JComponent.this.addContainerListener(accessibleContainerHandler);
-	// }
-	// super.addPropertyChangeListener(listener);
-	// }
-	//
-	// /**
-	// * Removes a PropertyChangeListener from the listener list.
-	// * This removes a PropertyChangeListener that was registered
-	// * for all properties.
-	// *
-	// * @param listener the PropertyChangeListener to be removed
-	// */
-	// public void removePropertyChangeListener(PropertyChangeListener listener) {
-	// if (accessibleFocusHandler != null) {
-	// JComponent.this.removeFocusListener(accessibleFocusHandler);
-	// accessibleFocusHandler = null;
-	// }
-	// super.removePropertyChangeListener(listener);
-	// }
-	//
-	//
-	//
-	// /**
-	// * Recursively search through the border hierarchy (if it exists)
-	// * for a TitledBorder with a non-null title. This does a depth
-	// * first search on first the inside borders then the outside borders.
-	// * The assumption is that titles make really pretty inside borders
-	// * but not very pretty outside borders in compound border situations.
-	// * It's rather arbitrary, but hopefully decent UI programmers will
-	// * not create multiple titled borders for the same component.
-	// */
-	// protected String getBorderTitle(Border b) {
-	// String s;
-	// if (b instanceof TitledBorder) {
-	// return ((TitledBorder) b).getTitle();
-	// } else if (b instanceof CompoundBorder) {
-	// s = getBorderTitle(((CompoundBorder) b).getInsideBorder());
-	// if (s == null) {
-	// s = getBorderTitle(((CompoundBorder) b).getOutsideBorder());
-	// }
-	// return s;
-	// } else {
-	// return null;
-	// }
-	// }
-	//
-	// // AccessibleContext methods
-	// //
-	// /**
-	// * Gets the accessible name of this object. This should almost never
-	// * return java.awt.Component.getName(), as that generally isn't
-	// * a localized name, and doesn't have meaning for the user. If the
-	// * object is fundamentally a text object (such as a menu item), the
-	// * accessible name should be the text of the object (for example,
-	// * "save").
-	// * If the object has a tooltip, the tooltip text may also be an
-	// * appropriate String to return.
-	// *
-	// * @return the localized name of the object -- can be null if this
-	// * object does not have a name
-	// * @see AccessibleContext#setAccessibleName
-	// */
-	// public String getAccessibleName() {
-	// String name = accessibleName;
-	//
-	// // fallback to the client name property
-	// //
-	// if (name == null) {
-	// name =
-	// (String)getClientProperty(AccessibleContext.ACCESSIBLE_NAME_PROPERTY);
-	// }
-	//
-	// // fallback to the titled border if it exists
-	// //
-	// if (name == null) {
-	// name = getBorderTitle(getBorder());
-	// }
-	//
-	// // fallback to the label labeling us if it exists
-	// //
-	// if (name == null) {
-	// Object o = getClientProperty(JLabel.LABELED_BY_PROPERTY);
-	// if (o instanceof Accessible) {
-	// AccessibleContext ac = ((Accessible) o).getAccessibleContext();
-	// if (ac != null) {
-	// name = ac.getAccessibleName();
-	// }
-	// }
-	// }
-	// return name;
-	// }
-	//
-	// /**
-	// * Gets the accessible description of this object. This should be
-	// * a concise, localized description of what this object is - what
-	// * is its meaning to the user. If the object has a tooltip, the
-	// * tooltip text may be an appropriate string to return, assuming
-	// * it contains a concise description of the object (instead of just
-	// * the name of the object - for example a "Save" icon on a toolbar that
-	// * had "save" as the tooltip text shouldn't return the tooltip
-	// * text as the description, but something like "Saves the current
-	// * text document" instead).
-	// *
-	// * @return the localized description of the object -- can be null if
-	// * this object does not have a description
-	// * @see AccessibleContext#setAccessibleDescription
-	// */
-	// public String getAccessibleDescription() {
-	// String description = accessibleDescription;
-	//
-	// // fallback to the client description property
-	// //
-	// if (description == null) {
-	// description =
-	// (String)getClientProperty(AccessibleContext.ACCESSIBLE_DESCRIPTION_PROPERTY);
-	// }
-	//
-	// // fallback to the tool tip text if it exists
-	// //
-	// if (description == null) {
-	// try {
-	// description = getToolTipText();
-	// } catch (Exception e) {
-	// // Just in case the subclass overrode the
-	// // getToolTipText method and actually
-	// // requires a MouseEvent.
-	// // [[[FIXME: WDW - we probably should require this
-	// // method to take a MouseEvent and just pass it on
-	// // to getToolTipText. The swing-feedback traffic
-	// // leads me to believe getToolTipText might change,
-	// // though, so I was hesitant to make this change at
-	// // this time.]]]
-	// }
-	// }
-	//
-	// // fallback to the label labeling us if it exists
-	// //
-	// if (description == null) {
-	// Object o = getClientProperty(JLabel.LABELED_BY_PROPERTY);
-	// if (o instanceof Accessible) {
-	// AccessibleContext ac = ((Accessible) o).getAccessibleContext();
-	// if (ac != null) {
-	// description = ac.getAccessibleDescription();
-	// }
-	// }
-	// }
-	//
-	// return description;
-	// }
-	//
-	// /**
-	// * Gets the role of this object.
-	// *
-	// * @return an instance of AccessibleRole describing the role of the
-	// * object
-	// * @see AccessibleRole
-	// */
-	// public AccessibleRole getAccessibleRole() {
-	// return AccessibleRole.SWING_COMPONENT;
-	// }
-	//
-	// /**
-	// * Gets the state of this object.
-	// *
-	// * @return an instance of AccessibleStateSet containing the current
-	// * state set of the object
-	// * @see AccessibleState
-	// */
-	// public AccessibleStateSet getAccessibleStateSet() {
-	// AccessibleStateSet states = super.getAccessibleStateSet();
-	// if (JComponent.this.isOpaque()) {
-	// states.add(AccessibleState.OPAQUE);
-	// }
-	// return states;
-	// }
-	//
-	// /**
-	// * Returns the number of accessible children in the object. If all
-	// * of the children of this object implement Accessible, than this
-	// * method should return the number of children of this object.
-	// *
-	// * @return the number of accessible children in the object.
-	// */
-	// public int getAccessibleChildrenCount() {
-	// return super.getAccessibleChildrenCount();
-	// }
-	//
-	// /**
-	// * Returns the nth Accessible child of the object.
-	// *
-	// * @param i zero-based index of child
-	// * @return the nth Accessible child of the object
-	// */
-	// public Accessible getAccessibleChild(int i) {
-	// return super.getAccessibleChild(i);
-	// }
-	//
-	// // ----- AccessibleExtendedComponent
-	//
-	// /**
-	// * Returns the AccessibleExtendedComponent
-	// *
-	// * @return the AccessibleExtendedComponent
-	// */
-	// AccessibleExtendedComponent getAccessibleExtendedComponent() {
-	// return this;
-	// }
-	//
-	// /**
-	// * Returns the tool tip text
-	// *
-	// * @return the tool tip text, if supported, of the object;
-	// * otherwise, null
-	// * @since 1.4
-	// */
-	// public String getToolTipText() {
-	// return JComponent.this.getToolTipText();
-	// }
-	//
-// /**
-// * Returns the titled border text
-// *
-// * @return the titled border text, if supported, of the object;
-// * otherwise, null
-// * @since 1.4
-// */
-// public String getTitledBorderText() {
-// Border border = JComponent.this.getBorder();
-// if (border instanceof TitledBorder) {
-// return ((TitledBorder)border).getTitle();
-// } else {
-// return null;
-// }
-// }
-	//
-	// /**
-	// * Returns key bindings associated with this object
-	// *
-	// * @return the key bindings, if supported, of the object;
-	// * otherwise, null
-	// * @see AccessibleKeyBinding
-	// * @since 1.4
-	// */
-	// public AccessibleKeyBinding getAccessibleKeyBinding() {
-	// return null;
-	// }
-	// } // inner class AccessibleJComponent
+	public String getTitledBorderText() {
+		
+		Border border = JComponent.this.getBorder();
+		if (border instanceof TitledBorder) {
+			return ((TitledBorder) border).getTitle();
+		} else {
+			return null;
+		}
+	}
 
 	/**
 	 * Returns an <code>ArrayTable</code> used for key/value "client properties"
@@ -3914,6 +3437,7 @@ public abstract class JComponent extends Container {
 	 */
 	@Override
 	public void setUI(ComponentUI newUI) {
+		
 		/*
 		 * We do not check that the UI instance is different before allowing the
 		 * switch in order to enable the same UI instance *with different default
@@ -3932,7 +3456,7 @@ public abstract class JComponent extends Container {
 		// ComponentUI oldUI = ui;
 		ui = newUI;
 		if (ui != null) {
-			ui.installUI(this);
+			ui.installJS(); // not ui.installUI(this), as that is done earlier
 		}
 		//
 		// firePropertyChange("UI", oldUI, newUI);
@@ -3947,6 +3471,7 @@ public abstract class JComponent extends Container {
 	private void uninstallUIAndProperties() {
 		if (ui != null) {
 			ui.uninstallUI(this);
+			ui.uninstallJS();
 			// //clean UIClientPropertyKeys from client properties
 			// if (clientProperties != null) {
 			// synchronized(clientProperties) {
@@ -3976,7 +3501,8 @@ public abstract class JComponent extends Container {
 	 * 
 	 * @param value Object containing the property value
 	 */
-	void setUIProperty(String propertyName, Object value) {
+	void setUIProperty(String propertyName, Object value) {	
+		
 		if (propertyName == "opaque") {
 			if (!getFlag(OPAQUE_SET)) {
 				setOpaque(((Boolean) value).booleanValue());
@@ -4035,6 +3561,7 @@ public abstract class JComponent extends Container {
 	@Override
 	public void setFocusTraversalKeys(int id,
 			Set<? extends AWTKeyStroke> keystrokes) {
+
 		// if (id == KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS) {
 		// setFlag(FOCUS_TRAVERSAL_KEYS_FORWARD_SET,true);
 		// } else if (id == KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS) {
@@ -4055,6 +3582,7 @@ public abstract class JComponent extends Container {
 	 * @return true if this component is lightweight
 	 */
 	public static boolean isLightweightComponent(Component c) {
+
 		/**
 		 * @j2sNative
 		 * 
@@ -4063,8 +3591,8 @@ public abstract class JComponent extends Container {
 		{
 			return !(c instanceof JApplet || c instanceof JFrame
 					|| c instanceof JWindow || c instanceof JDialog);
-
 		}
+	
 		// return c.getPeer() instanceof LightweightPeer;
 	}
 
@@ -4644,7 +4172,7 @@ public abstract class JComponent extends Container {
 			setCreatedDoubleBuffer(false);
 		}
 	  if (autoscrolls) {
-	  	getAutoscroller().stop(this);
+	  	Autoscroller.stop(this);
 	  }
 	}
 
@@ -5040,6 +4568,9 @@ public abstract class JComponent extends Container {
 					}
 				} else {
 					// SwingJS not clipping for better performance
+					g.setClip(paintImmediatelyClip.x, paintImmediatelyClip.y,
+                            paintImmediatelyClip.width, paintImmediatelyClip.height);
+
 					// g.setClip(paintImmediatelyClip.x,paintImmediatelyClip.y,
 					// paintImmediatelyClip.width,paintImmediatelyClip.height);
 					
@@ -5049,7 +4580,7 @@ public abstract class JComponent extends Container {
 					// (so that the underlying JRootPane canvas can show).
 					checkBackgroundPainted(null);
 					paintingComponent.paint(g);					
-					checkBackgroundPainted((JSGraphics2D) (Object) g);
+					checkBackgroundPainted(getJSGraphic2D(g));
 				}
 			} finally {
 				g.dispose();
@@ -5272,5 +4803,93 @@ public abstract class JComponent extends Container {
 		// TODO Auto-generated method stub
 		
 	}
+
+	/*
+	 * In SwingJS we have only one canvas's context2d object, with one
+	 * save/restore. We add the methods mark() and reset() to track the use of
+	 * g.create() to make sure that the proper number of dispose() are
+	 * generated. It is no problem that we run dispose() on the original graphic
+	 * or on a derivative graphic, as the key information is kept with the
+	 * canvas, not the graphic itself.
+	 * 
+	 * @author Bob Hanson hansonr@stolaf.edu
+	 * 
+	 * @param g
+	 */
+	@SuppressWarnings("unused")
+	private void paintComponentSafely(Graphics g) {
+		JSGraphics2D jsg = getJSGraphic2D(g);		
+		int nSave = (jsg == null ? 0 : jsg.mark());
+		checkBackgroundPainted(null);
+		// note that paintComponent may be overridden.
+		paintComponent(g);
+		if (jsg != null) {
+			checkBackgroundPainted(jsg);
+			jsg.reset(nSave);
+		}
+
+	}
+
+	/**
+	 * In SwingJS we have only one canvas's context2d object, with one 
+	 * save/restore. We add the methods mark() and reset() to track the
+	 * use of g.create() to make sure that the proper number of dispose()
+	 * are generated. It is no problem that we run dispose() on the original
+	 * graphic or on a derivative graphic, as the key information is kept with 
+	 * the canvas, not the graphic itself.
+	 * 
+	 * @author Bob Hanson hansonr@stolaf.edu
+	 * 
+	 * @param g
+	 */
+	private void printComponentSafely(Graphics g) {
+		JSGraphics2D jsg = getJSGraphic2D(g);		
+		int nSave = (jsg == null ? 0 : jsg.mark());
+		printComponent(g);
+		if (jsg != null)
+			jsg.reset(nSave);
+	}
+
+	/**
+	 * In SwingJS we have only one canvas's context2d object, with one 
+	 * save/restore. We add the methods mark() and reset() to track the
+	 * use of g.create() to make sure that the proper number of dispose()
+	 * are generated. It is no problem that we run dispose() on the original
+	 * graphic or on a derivative graphic, as the key information is kept with 
+	 * the canvas, not the graphic itself.
+	 * 
+	 * @author Bob Hanson hansonr@stolaf.edu
+	 * 
+	 * @param g
+	 */
+	private void paintBorderSafely(Graphics g) {
+		JSGraphics2D jsg = getJSGraphic2D(g);		
+		int nSave = (jsg == null ? 0 : jsg.mark());
+		printBorder(g);
+		if (jsg != null)
+			jsg.reset(nSave);
+	}
+
+	/**
+	 * In SwingJS we have only one canvas's context2d object, with one 
+	 * save/restore. We add the methods mark() and reset() to track the
+	 * use of g.create() to make sure that the proper number of dispose()
+	 * are generated. It is no problem that we run dispose() on the original
+	 * graphic or on a derivative graphic, as the key information is kept with 
+	 * the canvas, not the graphic itself.
+	 * 
+	 * @author Bob Hanson hansonr@stolaf.edu
+	 * 
+	 * @param g
+	 */
+	private void printBorderSafely(Graphics g) {
+		JSGraphics2D jsg = getJSGraphic2D(g);		
+		int nSave = (jsg == null ? 0 : jsg.mark());
+		printBorder(g);
+		if (jsg != null)
+			jsg.reset(nSave);
+	}
+
+
 
 }

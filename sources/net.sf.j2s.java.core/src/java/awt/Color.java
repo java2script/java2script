@@ -785,12 +785,13 @@ public class Color implements Paint /*, java.io.Serializable*/ {
      * @since    JDK1.0
      */
     public static Color getColor(String nm, Color v) {
-        Integer intval = Integer.getInteger(nm);
-        if (intval == null) {
-            return v;
-        }
-        int i = intval.intValue();
-        return new Color((i >> 16) & 0xFF, (i >> 8) & 0xFF, i & 0xFF);
+    	// SwingJS does not support System.getProperty for colors.
+    	try {
+    		int i = Integer.decode(nm);
+        	return new Color((i >> 16) & 0xFF, (i >> 8) & 0xFF, i & 0xFF);
+    	} catch (NumberFormatException e) {
+    		return v;
+    	}
     }
 
     /**

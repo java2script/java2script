@@ -45,13 +45,13 @@ import java.awt.Image;
  * @since       JDK1.0
  */
 public interface AppletContext {
-//    /**
-//     * Creates an audio clip.
-//     *
-//     * @param   url   an absolute URL giving the location of the audio clip.
-//     * @return  the audio clip at the specified URL.
-//     */
-//    AudioClip getAudioClip(URL url);
+    /**
+     * Creates an audio clip.
+     *
+     * @param   url   an absolute URL giving the location of the audio clip.
+     * @return  the audio clip at the specified URL.
+     */
+    AudioClip getAudioClip(URL url);
 
     /**
      * Returns an <code>Image</code> object that can then be painted on

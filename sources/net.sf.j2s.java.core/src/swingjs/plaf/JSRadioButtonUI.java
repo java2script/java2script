@@ -30,7 +30,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 	 * @return
 	 */
 	protected DOMNode updateButton(String myType) {
-		JRadioButton b = (JRadioButton) c;
+		JRadioButton b = (JRadioButton) jc;
 		boolean isNew = false;
 		boolean doAll = false;
 		if (domNode == null) {

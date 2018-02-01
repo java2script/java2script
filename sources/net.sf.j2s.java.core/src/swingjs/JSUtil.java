@@ -2,6 +2,7 @@ package swingjs;
 
 import java.awt.Container;
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -68,10 +69,17 @@ public class JSUtil {
 	 * 
 	 * It will not be cached, but it might come from a cache;
 	 * 
-	 * @param uri
+	 * @param uriOrJSFile
 	 * @return
 	 */
-	private static Object getFileContents(String uri) {
+	@SuppressWarnings("unused")
+	private static Object getFileContents(Object uriOrJSFile) {
+		if (uriOrJSFile instanceof File) {
+		  byte[] bytes = /** @j2sNative uriOrJSFile.bytes ||*/ null;
+		  if (bytes != null)
+			  return bytes;
+		}
+		String uri = uriOrJSFile.toString();
 		Object data = getCachedFileData(uri);
 		if (data == null)  
 		/**
@@ -110,8 +118,8 @@ public class JSUtil {
 	 * @param filename
 	 * @return
 	 */
-	public static byte[] getFileAsBytes(String filename) {
-		Object data = getFileContents(filename);
+	public static byte[] getFileAsBytes(Object file) {
+		Object data = getFileContents(file);
 		byte[] b = null;
 		if (AU.isAB(data))
 			b = (byte[]) data;
@@ -509,7 +517,7 @@ public class JSUtil {
 		 * @j2sNative
 		 * 
 		 * console.log("[JSUtil] " + object);
-		 * alert("[JSUtil] " + object);
+		 * alert(object);
 		 */
 		{
 			System.out.println(object);
@@ -545,8 +553,5 @@ public class JSUtil {
 			return null;
 		}
 	}
-
-
-
 
 }
