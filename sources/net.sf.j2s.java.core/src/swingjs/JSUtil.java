@@ -11,6 +11,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import javajs.util.AU;
+import javajs.util.AjaxURLConnection;
 import javajs.util.PT;
 import javajs.util.Rdr;
 import javajs.util.SB;
@@ -81,19 +82,19 @@ public class JSUtil {
 		}
 		String uri = uriOrJSFile.toString();
 		Object data = getCachedFileData(uri);
-		if (data == null)  
-		/**
-		 * @j2sNative
-		 * 
-		 */
-		{
+		if (data == null)  	{
+
 			// for reference -- not used in JavaScript
+			
+			/**
+			 * @j2sNative
+			 * 
+			 */
 			try {
-				data = Rdr.streamToUTF8String(new BufferedInputStream((InputStream) new URL(uri).getContent()));
+				data = Rdr.streamToUTF8String((BufferedInputStream) new URL(uri).getContent());
 			} catch (Exception e) {
 			}
-		}
-		else {
+			// bypasses AjaxURLConnection
 			data = JSUtil.J2S._getFileData(uri, null, false, false);
 		}
 		return data;
@@ -465,28 +466,13 @@ public class JSUtil {
 		return new Locale(language, country, variant);
 	}
 
-	@SuppressWarnings("unused")
 	public static BufferedInputStream getURLInputStream(URL url, boolean andDelete) {
-		
-		BufferedInputStream bis = null;
-		/**
-		 * @j2sNative
-		 * 
-		 * bis = url._streamData;
-		 * if (andDelete)
-		 *   url._streamData = null;
-		 * 
-		 */
-		{}
-		
-		if (bis == null)
-			try {
-				return (BufferedInputStream) (Object) url.openStream();
-			} catch (IOException e) {
-				return null;
-			}
-		((java.io.BufferedInputStream) (Object) bis).resetStream();
-		return bis;
+		try {
+			BufferedInputStream bis = AjaxURLConnection.getAttachedStreamData(url, andDelete);
+			return  (bis == null ?  (BufferedInputStream) url.openStream() : bis);
+		} catch (IOException e) {
+		}
+		return null;
 	}
 
 	public static void showWebPage(URL url, Object target) {

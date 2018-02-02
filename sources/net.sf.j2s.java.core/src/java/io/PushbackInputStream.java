@@ -104,6 +104,16 @@ class PushbackInputStream extends FilterInputStream {
         this.pos = size;
     }
 
+//    /**
+//     * BH: Added to allow full reset of a bundled stream
+//     */
+//    @Override
+//    public void resetStream() {
+//      in.resetStream();
+//      this.pos = 0;
+//    }
+//
+
     /**
      * Creates a <code>PushbackInputStream</code>
      * and saves its  argument, the input stream

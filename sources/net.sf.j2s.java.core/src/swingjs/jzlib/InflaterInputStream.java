@@ -76,6 +76,16 @@ public class InflaterInputStream extends FilterInputStream {
 
   private byte[] byte1 = new byte[1];
 
+  
+//  /**
+//   * BH: Addeed to allow full reset of a bundled stream
+//   */
+//  @Override
+//  public void resetStream() {
+//    in.resetStream();
+//  }
+//
+
   @Override
   public int read() throws IOException {
     if (closed) {
@@ -89,6 +99,7 @@ public class InflaterInputStream extends FilterInputStream {
     return readInf(b, off, len);
   }
 
+  
   protected int readInf(byte[] b, int off, int len) throws IOException {
     if (closed) {
       throw new IOException("Stream closed");
