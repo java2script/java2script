@@ -2050,10 +2050,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			left.accept(this);
 			switch (op) {
 			case "|=":
-				buffer.append("||");
+				buffer.append("|"); // surprise! | not ||
 				break;
 			case "&=":
-				buffer.append("&&");
+				buffer.append("&"); // & not &&
 				break;
 			default:
 			case "^=":
