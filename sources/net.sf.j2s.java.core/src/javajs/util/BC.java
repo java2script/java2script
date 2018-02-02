@@ -66,7 +66,7 @@ public class BC {
      *       if (o.fracIEEE == null)
      *         o.setFracIEEE();
      *       var m = ((x & 0x7F800000) >> 23);
-     *       return ((x & 0x80000000) == 0 ? 1 : -1) * o.shiftIEEE((x & 0x7FFFFF) | 0x800000, m - 149);
+     *       return ((x & 0x80000000) == 0 ? 1 : -1) * o.shiftIEEE$D$I((x & 0x7FFFFF) | 0x800000, m - 149);
      *  
      */
     {
@@ -96,7 +96,6 @@ public class BC {
         
       /**
        * @j2sNative
-       *       var o = javajs.util.BC;
        *       var b1, b2, b3, b4, b5;
        *       
        *       if (isBigEndian) {
@@ -115,8 +114,8 @@ public class BC {
        *       var s = ((b1 & 0x80) == 0 ? 1 : -1);
        *       var e = (((b1 & 0x7F) << 4) | (b2 >> 4)) - 1026;
        *       b2 = (b2 & 0xF) | 0x10;
-       *       return s * (o.shiftIEEE(b2, e) + o.shiftIEEE(b3, e - 8) + o.shiftIEEE(b4, e - 16)
-       *         + o.shiftIEEE(b5, e - 24));
+       *       return s * (C$.shiftIEEE$D$I(b2, e) +C$.shiftIEEE$D$I(b3, e - 8) + C$.shiftIEEE$D$I(b4, e - 16)
+       *         + C$.shiftIEEE$D$I(b5, e - 24));
        */
       {
         double d;
