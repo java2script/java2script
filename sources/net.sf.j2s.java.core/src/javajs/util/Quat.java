@@ -524,7 +524,7 @@ public class Quat {
    * @return 0 <= angle <= 180 in degrees
    */
   public float getTheta() {
-    return (float) (Math.acos(Math.abs(q0)) * (2 * 180 / Math.PI));
+    return (float) (Math.acos(Math.abs(q0)) * 2 * 180 / Math.PI);
   }
 
   public float getThetaRadians() {

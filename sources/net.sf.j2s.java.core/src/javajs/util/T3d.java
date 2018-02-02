@@ -16,6 +16,8 @@
 */
 package javajs.util;
 
+import java.io.Serializable;
+
 /**
  * A generic 3 element tuple that is represented by double precision floating
  * point x,y and z coordinates.
@@ -26,10 +28,9 @@ package javajs.util;
  * 
  * additions by Bob Hanson hansonr@stolaf.edu 9/30/2012
  * for unique constructor and method names
- * for the optimization of compiled JavaScript using Java2Script.
- *
+ * for the optimization of compiled JavaScript using Java2Script
  */
-public abstract class T3d {
+public abstract class T3d implements Serializable {
   /**
    * The x coordinate.
    */

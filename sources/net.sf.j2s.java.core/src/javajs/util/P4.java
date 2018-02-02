@@ -28,11 +28,14 @@ package javajs.util;
  * 
  * additions by Bob Hanson hansonr@stolaf.edu 9/30/2012
  * for unique constructor and method names
- * for the optimization of compiled JavaScript using Java2Script.
- *
+ * for the optimization of compiled JavaScript using Java2Script
  */
 public class P4 extends T4 {
 
+  public P4() {
+    // skip T4() constructor
+  }
+  
   public static P4 new4(float x, float y, float z, float w) {
     P4 pt = new P4();
     pt.set4(x, y, z, w);

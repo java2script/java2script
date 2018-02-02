@@ -73,7 +73,7 @@ public class DF {
       if (decimalDigits > formattingStrings.length)
         decimalDigits = formattingStrings.length;
       if (value == 0)
-        return formattingStrings[decimalDigits] + "E+0";
+        return formattingStrings[decimalDigits - 1] + "E+0";
       //scientific notation
       n = 0;
       double d;
@@ -87,9 +87,19 @@ public class DF {
       String s = ("" + d).toUpperCase();
       int i = s.indexOf("E");
       n = PT.parseInt(s.substring(i + 1)) + n;
-      return (i < 0 ? "" + value : formatDecimal(PT.parseFloat(s.substring(
-          0, i)), decimalDigits - 1)
-          + "E" + (n >= 0 ? "+" : "") + n);
+      String sf;
+      if (i < 0) {
+        sf = "" + value;
+      } else {
+        float f = PT.parseFloat(s.substring(0, i));
+        if (f == 10 || f == -10) {
+          //d = 9.99999997465; n = -6 --> 10.00000E-5
+          f /= 10;
+          n += (n < 0 ? 1 : -1);          
+        }
+        sf = formatDecimal(f, decimalDigits - 1);
+      }
+      return sf  + "E" + (n >= 0 ? "+" : "") + n;
     }
   
     if (decimalDigits >= formattingStrings.length)

@@ -43,7 +43,6 @@ import java.util.Map;
 import javajs.api.Interface;
 
 
-import javajs.J2SIgnoreImport;
 import javajs.api.GenericCifDataParser;
 import javajs.api.GenericLineReader;
 import javajs.api.GenericZipTools;
@@ -62,8 +61,27 @@ import javajs.api.GenericZipTools;
  * 
  * 
  */
-@J2SIgnoreImport(BufferedWriter.class)
 public class Rdr implements GenericLineReader {
+
+  public static class StreamReader extends BufferedReader {
+
+    private BufferedInputStream stream;
+
+    public StreamReader(BufferedInputStream bis, String charSet) throws UnsupportedEncodingException {
+      super(new InputStreamReader(bis, (charSet == null ? "UTF-8" : charSet)));
+      stream = bis;
+    }
+    
+    public BufferedInputStream getStream() {
+      try {
+        stream.reset();
+      } catch (IOException e) {
+        // ignore
+      }
+      return stream;
+    }
+
+  }
 
   BufferedReader reader;
 
@@ -126,7 +144,7 @@ public class Rdr implements GenericLineReader {
       throws IOException {
     // could also just make sure we have a buffered input stream here.
     if (getUTFEncodingForStream(bis) == Encoding.NONE)
-      return new BufferedReader(new InputStreamReader(bis, (charSet == null ? "UTF-8" : charSet)));
+      return new StreamReader(bis, (charSet == null ? "UTF-8" : charSet));
     byte[] bytes = getLimitedStreamBytes(bis, -1);
     bis.close();
     return getBR(charSet == null ? fixUTF(bytes) : new String(bytes, charSet));
@@ -217,9 +235,18 @@ public class Rdr implements GenericLineReader {
         && (bytes[7] & 0xFF) == 0xE1);
   }
 
+  public static boolean isBZip2S(InputStream is) {
+    return isBZip2B(getMagic(is, 3));
+  }
+
   public static boolean isGzipS(InputStream is) {
     return isGzipB(getMagic(is, 2));
   }
+
+  public static boolean isBZip2B(byte[] bytes) {    
+    return (bytes != null && bytes.length >= 3  // BZh
+        && (bytes[0] & 0xFF) == 0x42 && (bytes[1] & 0xFF) == 0x5A  && (bytes[2] & 0xFF) == 0x68);
+}
 
   public static boolean isGzipB(byte[] bytes) {    
       return (bytes != null && bytes.length >= 2 
@@ -236,12 +263,16 @@ public class Rdr implements GenericLineReader {
   }
 
   public static boolean isMessagePackS(InputStream is) {
-    return isMessagePackB(getMagic(is, 1));
+    return isMessagePackB(getMagic(is, 2));
   }
 
   public static boolean isMessagePackB(byte[] bytes) {
-    // look for 'map' start
-    return (bytes != null && bytes.length >= 1 && (bytes[0] & 0xFF) == 0xDE);
+    // look for 'map' start, but PNG files start with 0x89, which is
+    // the MessagePack start for a 9-member map, so in that case we have
+    // to check that the next byte is not "P" as in <89>PNG
+    int b;
+    
+    return (bytes != null && bytes.length >= 1 && (((b = bytes[0] & 0xFF)) == 0xDE || (b & 0xE0) == 0x80 && bytes[1] != 0x50));
   }
 
   public static boolean isPngZipStream(InputStream is) {
@@ -253,6 +284,11 @@ public class Rdr implements GenericLineReader {
     return (bytes[50] == 0 && bytes[51] == 0x50 && bytes[52] == 0x4E && bytes[53] == 0x47 && bytes[54] == 0x4A);
   }
 
+  /**
+   * Check for a ZIP input stream - starting with "PK<03><04>"
+   * @param is
+   * @return true if a ZIP stream
+   */
   public static boolean isZipS(InputStream is) {
     return isZipB(getMagic(is, 4));
   }
@@ -328,6 +364,14 @@ public class Rdr implements GenericLineReader {
       bis = new BufferedInputStream(jzt.newGZIPInputStream(bis));
     return bis;
   }
+
+  public static BufferedInputStream getUnzippedInputStreamBZip2(GenericZipTools jzt,
+                                                                BufferedInputStream bis) throws IOException  {
+    while (isBZip2S(bis))
+      bis = new BufferedInputStream(jzt.newBZip2InputStream(bis));
+    return bis;
+  }
+
 
   /**
    * Allow for base64-encoding check.

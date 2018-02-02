@@ -15,6 +15,8 @@ public interface GenericZipTools {
 
   public InputStream newGZIPInputStream(InputStream bis) throws IOException;
 
+  public InputStream newBZip2InputStream(InputStream bis) throws IOException;
+
   public Object getZipFileDirectory(BufferedInputStream bis,
                                           String[] subFileList, int listPtr, boolean asBufferedInputStream);
 

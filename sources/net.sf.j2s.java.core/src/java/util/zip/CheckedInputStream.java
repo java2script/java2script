@@ -58,7 +58,7 @@ class CheckedInputStream extends FilterInputStream {
      * @return the byte read, or -1 if the end of the stream is reached.
      * @exception IOException if an I/O error has occurred
      */
-    public int readByteAsInt() throws IOException {
+    public int read() throws IOException {
         int b = in.read();
         if (b != -1) {
             cksum.updateByteAsInt(b);

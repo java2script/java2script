@@ -235,7 +235,6 @@ final public class Measure {
   }
   
   /**
-   * if vAC is dispensible vNorm can be vAC
    * @param pointA
    * @param pointB
    * @param pointC

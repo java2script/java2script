@@ -35,6 +35,9 @@ public class AjaxURLConnection extends URLConnection {
    * the method is "private", but in JavaScript that can still be overloaded.
    * Just set something to org.jmol.awtjs.JmolURLConnection.prototype.doAjax
    * 
+   * 
+   * @param isBinary 
+   * 
    * @return file data as a javajs.util.SB or byte[] depending upon the file
    *         type.
    * 
@@ -82,7 +85,7 @@ public class AjaxURLConnection extends URLConnection {
 				: bis
 		);
 	}
-  @SuppressWarnings("unused")
+  @SuppressWarnings({ "unused", "null" })
 	/**
 	 * J2S will attach a BufferedInputStream to any URL that is 
 	 * retrieved using a ClassLoader. This improves performance by
@@ -108,7 +111,7 @@ public class AjaxURLConnection extends URLConnection {
 		{
 		}
 		if (bis != null)
-			((ResettableStream) (Object) bis).resetStream();
+			((ResettableStream) bis).resetStream();
 		return bis;
 	}
 

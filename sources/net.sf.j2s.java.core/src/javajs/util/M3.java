@@ -27,13 +27,17 @@ import java.io.Serializable;
  * 
  *         additions by Bob Hanson hansonr@stolaf.edu 9/30/2012 for unique
  *         constructor and method names for the optimization of compiled
- *         JavaScript using Java2Script.
- *
+ *         JavaScript using Java2Script
  *         
  *         
  */
-@SuppressWarnings("serial")
 public class M3 extends M34 implements Serializable {
+
+  /**
+   * Constructs and initializes a Matrix3f to all zeros.
+   */
+  public M3() {
+  }
 
   /**
    * Constructs and initializes a Matrix3f from the specified 9 element array.

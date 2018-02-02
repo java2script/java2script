@@ -93,4 +93,9 @@ class CompoundDocDirEntry {
     //System.out.println(entryName + " type " + entryType);
     return true;
   }
+  
+  @Override
+  public String toString() {
+    return entryName + " " + lenStream;
+  }
 }

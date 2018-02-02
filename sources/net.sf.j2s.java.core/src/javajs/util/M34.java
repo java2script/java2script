@@ -7,8 +7,7 @@ package javajs.util;
  * 
  *         additions by Bob Hanson hansonr@stolaf.edu 9/30/2012 for unique
  *         constructor and method names for the optimization of compiled
- *         JavaScript using Java2Script.
- * and for subclassing to M3 and M4
+ *         JavaScript using Java2Script and for subclassing to M3 and M4
  * 
  */
 public abstract class M34 {

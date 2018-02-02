@@ -32,12 +32,6 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import javajs.J2SIgnoreImport;
-import javajs.api.GenericZipInputStream;
-import javajs.api.GenericZipTools;
-import javajs.api.ZInputStream;
-
 import java.util.Map;
 import java.util.zip.CRC32;
 import java.util.zip.GZIPInputStream;
@@ -45,12 +39,18 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import javajs.api.GenericZipInputStream;
+import javajs.api.GenericZipTools;
+import javajs.api.Interface;
+import javajs.api.ZInputStream;
+
+import org.apache.tools.bzip2.CBZip2InputStreamFactory;
+
 
 /**
  * Note the JSmol/HTML5 must use its own version of java.util.zip.ZipOutputStream.
  * 
  */
-@J2SIgnoreImport({ java.util.zip.ZipOutputStream.class })
 public class ZipTools implements GenericZipTools {
 
   public ZipTools() {
@@ -62,6 +62,7 @@ public class ZipTools implements GenericZipTools {
     return newZIS(is);
   }
 
+  @SuppressWarnings("resource")
   private static ZInputStream newZIS(InputStream is) {
     return (is instanceof ZInputStream ? (ZInputStream) is
         : is instanceof BufferedInputStream ? new GenericZipInputStream(is)
@@ -286,6 +287,11 @@ public class ZipTools implements GenericZipTools {
   }
 
   @Override
+  public InputStream newBZip2InputStream(InputStream is) throws IOException {
+    return new BufferedInputStream(((CBZip2InputStreamFactory) Interface.getInterface("org.apache.tools.bzip2.CBZip2InputStreamFactory")).getStream(is));
+  }
+
+  @Override
   public BufferedInputStream getUnGzippedInputStream(byte[] bytes) {
     try {
       return Rdr.getUnzippedInputStream(this, Rdr.getBIS(bytes));
@@ -306,16 +312,16 @@ public class ZipTools implements GenericZipTools {
 
   @Override
   public Object getZipOutputStream(Object bos) {
-    /**
-     * @j2sNative
-     * 
-     *            return javajs.api.Interface.getInterface(
-     *            "java.util.zip.ZipOutputStream").setZOS(bos);
-     * 
-     */
-    {
+//    /**
+//     * @j2sNative
+//     * 
+//     *            return javajs.api.Interface.getInterface(
+//     *            "java.util.zip.ZipOutputStream").setZOS(bos);
+//     * 
+//     */
+//    {
       return new ZipOutputStream((OutputStream) bos);
-    }
+//    }
   }
 
   @Override
@@ -353,9 +359,9 @@ public class ZipTools implements GenericZipTools {
       bdata.clear();
       bdata.put("_ERROR_", e.getMessage());
     }
-	}
+  }
 
-	@Override
+  @Override
   public String cacheZipContents(BufferedInputStream bis,
                                         String fileName,
                                         Map<String, Object> cache, 
@@ -419,9 +425,9 @@ public class ZipTools implements GenericZipTools {
       return null;
     System.out.println("ZipTools cached " + n + " bytes from " + fileName);
     return listing.toString();
-	}
+  }
 
-	private static byte[] getPngImageBytes(BufferedInputStream bis) {
+  private static byte[] getPngImageBytes(BufferedInputStream bis) {
     try {
       if (Rdr.isPngZipStream(bis)) {
         int pt_count[] = new int[2];

@@ -88,10 +88,6 @@ public class DeflaterOutputStream extends FilterOutputStream {
 		this.close_out = close_out;
 	}
 
-	public void writeByteAsInt(int b) throws IOException {
-		write(b);
-	}
-
 	public void write(int b) throws IOException {
 		buf1[0] = (byte) (b & 0xff);
 		write(buf1, 0, 1);

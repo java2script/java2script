@@ -30,8 +30,7 @@ package javajs.util;
  * 
  * additions by Bob Hanson hansonr@stolaf.edu 9/30/2012
  * for unique constructor and method names
- * for the optimization of compiled JavaScript using Java2Script.
- *
+ * for the optimization of compiled JavaScript using Java2Script
  */
 public class V3d extends T3d {
 

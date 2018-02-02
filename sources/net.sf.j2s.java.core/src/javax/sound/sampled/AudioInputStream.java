@@ -199,7 +199,7 @@ public class AudioInputStream extends InputStream {
 	 * @see #read(byte[])
 	 * @see #available <p>
 	 */
-	public int readByteAsInt() throws IOException {
+	public int read() throws IOException {
 		if (frameSize != 1) {
 			throw new IOException("cannot read a single byte if frame size > 1");
 		}
@@ -325,12 +325,6 @@ public class AudioInputStream extends InputStream {
 		}
 		return bytesRead;
 	}
-
-	@Override
-	public int read() throws IOException {
-		return readByteAsInt();
-	}
-
 
 	/**
 	 * Skips over and discards a specified number of bytes from this audio input

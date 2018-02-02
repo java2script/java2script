@@ -28,12 +28,15 @@ package javajs.util;
  * 
  * additions by Bob Hanson hansonr@stolaf.edu 9/30/2012
  * for unique constructor and method names
- * for the optimization of compiled JavaScript using Java2Script.
- *
+ * for the optimization of compiled JavaScript using Java2Script
  * 
  */
 public class P3 extends T3 {
 
+  public P3() {
+    // ignore T3
+  }
+  
   public static P3 newP(T3 t) {
     P3 p = new P3();
     p.x = t.x;

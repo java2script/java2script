@@ -109,15 +109,12 @@ public class ProgressMonitorInputStream extends FilterInputStream
     }
 
 
-    @Override
-    public int read() throws IOException {
-    	return readByteAsInt();
-    }
     /**
      * Overrides <code>FilterInputStream.read</code>
      * to update the progress monitor after the read.
      */
-		public int readByteAsInt() throws IOException {
+    @Override
+		public int read() throws IOException {
         int c = in.read();
         if (c >= 0) monitor.setProgress(++nread);
         if (monitor.isCanceled()) {

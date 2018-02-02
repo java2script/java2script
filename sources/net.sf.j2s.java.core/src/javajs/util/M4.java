@@ -23,8 +23,7 @@ package javajs.util;
  * 
  *         additions by Bob Hanson hansonr@stolaf.edu 9/30/2012 for unique
  *         constructor and method names for the optimization of compiled
- *         JavaScript using Java2Script.
- *
+ *         JavaScript using Java2Script
  */
 public class M4 extends M34 {
 
@@ -63,6 +62,9 @@ public class M4 extends M34 {
    */
   public float m33 = 0;
 
+  /**
+   * all zeros
+   */
   public M4() {
   }
   /**
