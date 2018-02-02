@@ -19,6 +19,7 @@ public interface JSInterface {
   void setScreenDimension(int width, int height);
   boolean setStatusDragDropped(int mode, int x, int y, String fileName);
 	void startHoverWatcher(boolean enable);
+	void update();
 
 	// these are not general methods
 //Object getGLmolView();

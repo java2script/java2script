@@ -262,6 +262,7 @@ public class BinaryDocument extends BC implements GenericBinaryDocument {
     return intToFloat(readInt());
   }
 
+  @SuppressWarnings("unused")
   @Override
   public double readDouble() throws IOException {
     /**

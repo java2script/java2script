@@ -10739,8 +10739,25 @@ J2S = (function(document) {
 		_z:getZOrders(z),
 		db: {
 			_DirectDatabaseCalls:{
-        "chemapps.stolaf.edu" : null
-				// these sites are known to implement access-control-allow-origin * 
+				// these sites are known to implement access-control-allow-origin *
+        // null here means no conversion necessary 
+        "chemapps.stolaf.edu" : null,
+				"cactus.nci.nih.gov": null,
+        ".x3dna.org": null,
+        "rruff.geo.arizona.edu": null, 
+        ".rcsb.org": null, 
+				"ftp.wwpdb.org": null,
+				"pdbe.org": null, 
+				"materialsproject.org": null, 
+				".ebi.ac.uk": null, 
+				"pubchem.ncbi.nlm.nih.gov":null,
+				"www.nmrdb.org/tools/jmol/predict.php":null,
+				"$": "https://cactus.nci.nih.gov/chemical/structure/%FILENCI/file?format=sdf&get3d=True",
+				"$$": "https://cactus.nci.nih.gov/chemical/structure/%FILENCI/file?format=sdf",
+				"=": "https://files.rcsb.org/download/%FILE.pdb",
+				"*": "https://www.ebi.ac.uk/pdbe/entry-files/download/%FILE.cif",
+				"==": "https://files.rcsb.org/ligands/download/%FILE.cif",
+				":": "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/%FILE/SDF?record_type=3d"
 			}
 		},
 		_debugAlert: false,
@@ -11296,11 +11313,11 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 		return true;  
 	}
 
-	J2S._binaryTypes = [".gz<",".jpg<",".jpeg<",".gif<",".png<",".zip<",".jmol<",".bin<",".smol<",".spartan<",".mrc<",".pse<", ".map<", ".omap<", 
-  ".dcd<",".mp3<",".ogg<", ".wav<", ".au<"];
+	J2S._binaryTypes = [".uk/pdbe/densities/",".bcif?",".au?",".mmtf?",".gz?",".jpg?",".jpeg?",".gif?",".png?",".zip?",".jmol?",".bin?",".smol?",".spartan?",".mrc?",".pse?", ".map?", ".omap?", 
+  ".dcd?",".mp3?",".ogg?", ".wav?", ".au?"];
 
 	J2S._isBinaryUrl = function(url) {
-    url = url.toLowerCase() + "<";
+    url = url.toLowerCase() + "?";
 		for (var i = J2S._binaryTypes.length; --i >= 0;)
 			if (url.indexOf(J2S._binaryTypes[i]) >= 0) return true;
 		return false;
@@ -11357,7 +11374,7 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 			isBinary = false;
 		}
 		isBinary && (isBinary = J2S._canSyncBinary(true));
-		return (isBinary ? J2S._strToBytes(data) : (self.JU || javajs.util).SB.newS(data));
+		return (isBinary ? J2S._strToBytes(data) : (self.JU || javajs.util).SB.newS$S(data));
 	}
 	
 	J2S._xhrReturn = function(xhr){
@@ -13054,6 +13071,7 @@ J2S._getResourcePath = function(path, isJavaPath) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2/1/2018 12:14:20 AM fix for new int[128][] not nulls
 // BH 1/9/2018 8:40:52 AM fully running SwingJS2; adds String.isEmpty()
 // BH 12/16/2017 5:53:47 PM refactored; removed older unused parts
 // BH 11/16/2017 10:52:53 PM adds method name aliasing for generics; adds String.contains$CharSequence(cs)
@@ -13141,6 +13159,7 @@ Clazz.array = function(baseClass, paramType, ndims, params) {
     return a;
   }
   var prim = Clazz._getParamCode(baseClass);
+  var dofill = true;
   if (arguments.length < 4) {
     // one-parameter option just for convenience, same as array(String, 0)
     // two-parameter options for standard new foo[n], 
@@ -13169,10 +13188,13 @@ Clazz.array = function(baseClass, paramType, ndims, params) {
     }      
     params = vals;
     paramType = prim;
+    
     for (var i = Math.abs(ndims); --i >= 0;) {
       paramType += "A";
-      if (!haveDims && params[i] === null)
+      if (!haveDims && params[i] === null) {
         params.length--;
+        dofill = false;
+      }
     }
     if (haveDims) {
       // new int[][] { {0, 1, 2}, {3, 4, 5} , {3, 4, 5} , {3, 4, 5} };
@@ -13183,7 +13205,7 @@ Clazz.array = function(baseClass, paramType, ndims, params) {
     params = [-1, params];
   } else {
     var initValue = null;
-    if (ndims >= 1) {
+    if (ndims >= 1 && dofill) {
       switch (prim) {
       case "B":
       case "H": // short
@@ -13223,7 +13245,7 @@ Clazz.array = function(baseClass, paramType, ndims, params) {
       break;
     }  
   }
-  return newTypedA(baseClass, params, nbits, ndims);
+  return newTypedA(baseClass, params, nbits, (dofill ? ndims : -ndims));
 }
 
 Clazz.assert = function(clazz, obj, tf, msg) {
@@ -13838,6 +13860,7 @@ Clazz.isClassDefined = function(clazzName) {
 ///////////////////////// private supporting method creation //////////////////////
 
 var setArray = function(vals, baseClass, paramType, ndims) {
+  ndims = Math.abs(ndims);
   vals.getClass = function () { return arrayClass(baseClass, ndims) };
   vals.__ARRAYTYPE = paramType; // referenced in java.lang.Class
   vals.__BASECLASS = baseClass;
@@ -16291,7 +16314,7 @@ throw e;
 }
 return result;
 }, 1);
-m$(Boolean,["compareTo","compareToTT"],
+m$(Boolean,["compareTo","compareTo$TT"],
 function(b){
 return(b.value==this.value?0:(this.value?1:-1));
 });
@@ -16668,7 +16691,7 @@ return Clazz.array(Byte.TYPE, -1, arrs);
 };
 
 sp.contains$S = function(a) {return this.indexOf(a) >= 0}  // bh added
-sp.compareTo$S = function(a){return this > a ? 1 : this < a ? -1 : 0} // bh added
+sp.compareTo$S = sp.compareTo$TT = function(a){return this > a ? 1 : this < a ? -1 : 0} // bh added
 
 
 
@@ -16981,7 +17004,7 @@ return(this.value).charCodeAt(i);
 
 C$.prototype.$c = function(){return this.value.charCodeAt(0)};
 
-m$(C$,["compareTo","compareToTT"],
+m$(C$,["compareTo","compareTo$TT"],
 function(c){
 return(this.value).charCodeAt(0)-(c.value).charCodeAt(0);
 });
@@ -17092,7 +17115,7 @@ m$(java.util.Date,"equals$O",
 function(obj){
 return Clazz.instanceOf(obj,java.util.Date)&&this.getTime()==(obj).getTime();
 });
-m$(java.util.Date,["compareTo","compareToTT"],
+m$(java.util.Date,["compareTo","compareTo$TT"],
 function(anotherDate){
 var thisTime=this.getTime();
 var anotherTime=anotherDate.getTime();

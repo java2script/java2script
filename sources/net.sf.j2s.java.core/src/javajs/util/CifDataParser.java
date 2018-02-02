@@ -658,10 +658,10 @@ public class CifDataParser implements GenericCifDataParser {
   public String fixKey(String key) {
     // PRELIMINARY -- BilBao _magnetic
     // PRELIMINARY -- Jana2006
-    return (PT.rep(
+    return (
         key.startsWith("_magnetic") ? key.substring(9) 
             : key.startsWith("_jana") ? key.substring(5) 
-            : key, ".", "_").toLowerCase());
+            : key).replace('.', '_').toLowerCase();
   }
 
   //////////////////// private methods ////////////////////

@@ -16,6 +16,8 @@
 */
 package javajs.util;
 
+import java.io.Serializable;
+
 import javajs.api.JSONEncodable;
 
 /**
@@ -28,12 +30,14 @@ import javajs.api.JSONEncodable;
  * 
  * additions by Bob Hanson hansonr@stolaf.edu 9/30/2012
  * for unique constructor and method names
- * for the optimization of compiled JavaScript using Java2Script.
- *
+ * for the optimization of compiled JavaScript using Java2Script
  */
-public abstract class T3 implements JSONEncodable {
+public abstract class T3 implements JSONEncodable, Serializable {
 
   public float x, y, z;
+
+  public T3() {
+  }
 
   /**
    * Sets the value of this tuple to the specified xyz coordinates.
@@ -296,7 +300,7 @@ public abstract class T3 implements JSONEncodable {
     return (int) (bits ^ (bits >> 32));
   }
 
-  static int floatToIntBits(float x) {
+  public static int floatToIntBits(float x) {
     return (x == 0 ? 0 : Float.floatToIntBits(x));
   }
 

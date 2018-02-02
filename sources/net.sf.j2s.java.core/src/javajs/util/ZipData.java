@@ -3,9 +3,6 @@
  * $Date$
  * $Revision$
  *
- * Some portions of this file have been modified by Robert Hanson hansonr.at.stolaf.edu 2012-2017
- * for use in SwingJS via transpilation into JavaScript using Java2Script.
- *
  * Copyright (C) 2006  The Jmol Development Team
  *
  * Contact: jmol-developers@lists.sf.net

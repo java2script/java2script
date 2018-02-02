@@ -1,5 +1,7 @@
 package javajs.util;
 
+import java.io.BufferedInputStream;
+import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -91,6 +93,17 @@ public class MessagePackReader {
     doc = binaryDoc;
   }
 
+  public MessagePackReader() {
+    // for reflection
+  }
+  
+  public Map<String, Object> getMapForStream(BufferedInputStream is) throws Exception {
+    doc = new BinaryDocument().setStream(is, true);
+    Map<String, Object> map = readMap();
+    is.close();
+    return map;
+  }
+  
   @SuppressWarnings("unchecked")
   public Map<String, Object> readMap() throws Exception {
     return (Map<String, Object>) getNext(null, 0);

@@ -3250,7 +3250,7 @@ throw e;
 }
 return result;
 }, 1);
-m$(Boolean,["compareTo","compareToTT"],
+m$(Boolean,["compareTo","compareTo$TT"],
 function(b){
 return(b.value==this.value?0:(this.value?1:-1));
 });
@@ -3627,7 +3627,7 @@ return Clazz.array(Byte.TYPE, -1, arrs);
 };
 
 sp.contains$S = function(a) {return this.indexOf(a) >= 0}  // bh added
-sp.compareTo$S = function(a){return this > a ? 1 : this < a ? -1 : 0} // bh added
+sp.compareTo$S = sp.compareTo$TT = function(a){return this > a ? 1 : this < a ? -1 : 0} // bh added
 
 
 
@@ -3940,7 +3940,7 @@ return(this.value).charCodeAt(i);
 
 C$.prototype.$c = function(){return this.value.charCodeAt(0)};
 
-m$(C$,["compareTo","compareToTT"],
+m$(C$,["compareTo","compareTo$TT"],
 function(c){
 return(this.value).charCodeAt(0)-(c.value).charCodeAt(0);
 });
@@ -4051,7 +4051,7 @@ m$(java.util.Date,"equals$O",
 function(obj){
 return Clazz.instanceOf(obj,java.util.Date)&&this.getTime()==(obj).getTime();
 });
-m$(java.util.Date,["compareTo","compareToTT"],
+m$(java.util.Date,["compareTo","compareTo$TT"],
 function(anotherDate){
 var thisTime=this.getTime();
 var anotherTime=anotherDate.getTime();

@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import javajs.J2SIgnoreImport;
 import javajs.api.BytePoster;
 import javajs.api.GenericOutputChannel;
 import javajs.api.js.J2SObjectInterface;
@@ -44,7 +43,6 @@ import javajs.api.js.J2SObjectInterface;
  *  
  */
 
-@J2SIgnoreImport({ java.io.FileOutputStream.class })
 public class OC extends OutputStream implements GenericOutputChannel {
  
   private BytePoster bytePoster; // only necessary for writing to http:// or https://
@@ -84,7 +82,7 @@ public class OC extends OutputStream implements GenericOutputChannel {
     this.fileName = fileName;
     this.os = os;
     isLocalFile = (fileName != null && !isRemote(fileName));
-    if (asWriter && !isBase64 && os != null)
+    if (asWriter && !isBase64 && os != null) 
     	bw = Rdr.getBufferedWriter(os, null);
     return this;
   }
