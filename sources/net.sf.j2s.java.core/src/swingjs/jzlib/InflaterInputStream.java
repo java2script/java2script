@@ -76,10 +76,6 @@ public class InflaterInputStream extends FilterInputStream {
 
   private byte[] byte1 = new byte[1];
 
-  public int readByteAsInt() throws IOException {
-	  return read();
-  }
-  
   @Override
   public int read() throws IOException {
     if (closed) {

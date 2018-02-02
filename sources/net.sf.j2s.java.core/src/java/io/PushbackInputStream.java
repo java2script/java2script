@@ -104,22 +104,18 @@ class PushbackInputStream extends FilterInputStream {
         this.pos = size;
     }
 
-//    /**
-//     * Creates a <code>PushbackInputStream</code>
-//     * and saves its  argument, the input stream
-//     * <code>in</code>, for later use. Initially,
-//     * there is no pushed-back byte  (the field
-//     * <code>pushBack</code> is initialized to
-//     * <code>-1</code>).
-//     *
-//     * @param   in   the input stream from which bytes will be read.
-//     */
-//    public PushbackInputStream(InputStream in) {
-//        this(in, 1);
-//    }
-
-    public int readByteAsInt() throws IOException {
-    	return read();
+    /**
+     * Creates a <code>PushbackInputStream</code>
+     * and saves its  argument, the input stream
+     * <code>in</code>, for later use. Initially,
+     * there is no pushed-back byte  (the field
+     * <code>pushBack</code> is initialized to
+     * <code>-1</code>).
+     *
+     * @param   in   the input stream from which bytes will be read.
+     */
+    public PushbackInputStream(InputStream in) {
+        this(in, 1);
     }
 
     /**
@@ -140,7 +136,7 @@ class PushbackInputStream extends FilterInputStream {
      * @exception  IOException  if this input stream has been closed by
      *             invoking its {@link #close()} method,
      *             or an I/O error occurs.
-     * @see        java.io.InputStream#readByteAsInt()
+     * @see        java.io.InputStream#read()
      */
     public int read() throws IOException {
         ensureOpen();

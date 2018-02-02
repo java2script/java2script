@@ -266,24 +266,24 @@ public class CBZip2InputStream extends InputStream implements BZip2Constants {
                 throw new IOException("Empty InputStream");
             }
         } else {
-            int magic0 = readByteAsInt();
+            int magic0 = read();
             if (magic0 == -1) {
                 return false;
             }
-            int magic1 = readByteAsInt();
+            int magic1 = read();
             if (magic0 != 'B' || magic1 != 'Z') {
                 throw new IOException("Garbage after a valid BZip2 stream");
             }
         }
 
-        int magic2 = readByteAsInt();
+        int magic2 = read();
         if (magic2 != 'h') {
             throw new IOException(isFirstStream
                     ? "Stream is not in the BZip2 format"
                     : "Garbage after a valid BZip2 stream");
         }
 
-        int blockSize = readByteAsInt();
+        int blockSize = read();
         if ((blockSize < '1') || (blockSize > '9')) {
             throw new IOException("Stream is not BZip2 formatted: illegal "
                                   + "blocksize " + (char) blockSize);
@@ -295,17 +295,6 @@ public class CBZip2InputStream extends InputStream implements BZip2Constants {
         this.computedCombinedCRC = 0;
 
         return true;
-    }
-
-    public synchronized int readByteAsInt() throws IOException {
-      /**
-       * @j2sNative
-       * 
-       * return(this.in.readByteAsInt());
-       */
-      {
-        return in.read();
-      }
     }
 
   private void initBlock() throws IOException {
@@ -424,7 +413,7 @@ public class CBZip2InputStream extends InputStream implements BZip2Constants {
         if (bsLiveShadow < n) {
             final InputStream inShadow = this.in;
             do {
-                int thech = readByteAsInt();//inShadow.read();
+                int thech = read();//inShadow.read();
 
                 if (thech < 0) {
                     throw new IOException("unexpected end of stream");
@@ -446,7 +435,7 @@ public class CBZip2InputStream extends InputStream implements BZip2Constants {
         int bsBuffShadow = this.bsBuff;
 
         if (bsLiveShadow < 1) {
-            int thech = readByteAsInt();
+            int thech = read();
 
             if (thech < 0) {
                 throw new IOException("unexpected end of stream");
@@ -705,7 +694,7 @@ public class CBZip2InputStream extends InputStream implements BZip2Constants {
           // Inlined:
           // int zvec = bsR(zn);
           while (bsLiveShadow < zn) {
-            final int thech = readByteAsInt();//inShadow.read();
+            final int thech = read();//inShadow.read();
             if (thech < 0)
               throw new IOException("unexpected end of stream");
 
@@ -719,7 +708,7 @@ public class CBZip2InputStream extends InputStream implements BZip2Constants {
           while (zvec > limit_zt[zn]) {
             zn++;
             while (bsLiveShadow < 1) {
-              final int thech = readByteAsInt();//inShadow.read();
+              final int thech = read();//inShadow.read();
               if (thech < 0)
                 throw new IOException("unexpected end of stream");
               bsBuffShadow = (bsBuffShadow << 8) | thech;
@@ -782,7 +771,7 @@ public class CBZip2InputStream extends InputStream implements BZip2Constants {
         // Inlined:
         // int zvec = bsR(zn);
         while (bsLiveShadow < zn) {
-          final int thech = readByteAsInt();//inShadow.read();
+          final int thech = read();//inShadow.read();
           if (thech < 0)
             throw new IOException("unexpected end of stream");
           bsBuffShadow = (bsBuffShadow << 8) | thech;
@@ -795,7 +784,7 @@ public class CBZip2InputStream extends InputStream implements BZip2Constants {
         while (zvec > limit_zt[zn]) {
           zn++;
           while (bsLiveShadow < 1) {
-            final int thech = readByteAsInt();//inShadow.read();
+            final int thech = read();//inShadow.read();
             if (thech <0) 
               throw new IOException("unexpected end of stream");
               bsBuffShadow = (bsBuffShadow << 8) | thech;
@@ -827,7 +816,7 @@ public class CBZip2InputStream extends InputStream implements BZip2Constants {
     while (zvec > limit_zt[zn]) {
       zn++;
       while (bsLiveShadow < 1) {
-        final int thech = readByteAsInt();//inShadow.read();
+        final int thech = read();//inShadow.read();
 
         if (thech < 0)
           throw new IOException("unexpected end of stream");

@@ -124,17 +124,12 @@ public class ByteArrayOutputStream extends OutputStream {
     }
 
 
-	@Override
-	public void write(int oneByte) throws IOException {
-		writeByteAsInt(oneByte);
-	}
-
     /**
      * Writes the specified byte to this byte array output stream.
      *
      * @param   b   the byte to be written.
      */
-    public synchronized void writeByteAsInt(int b) {
+    public synchronized void write(int b) {
         ensureCapacity(count + 1);
         buf[count] = (byte) b;
         count += 1;
