@@ -133,6 +133,7 @@ public class A2SEvent implements Runnable {
                              getOldEventKey(ke),
                              (ke.getModifiers() & ~InputEvent.BUTTON1_MASK));
 
+        case MouseEvent.MOUSE_CLICKED:
         case MouseEvent.MOUSE_PRESSED:
         case MouseEvent.MOUSE_RELEASED:
         case MouseEvent.MOUSE_MOVED:
