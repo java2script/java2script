@@ -233,7 +233,10 @@ public class A2SEvent implements Runnable {
 		if (top == null)
 			top = ((A2SContainer) ((JComponent) comp).getTopLevelAncestor());
 		if (top == null)
-			return comp;
+			if (comp instanceof A2SContainer)
+				top = (A2SContainer) comp;
+			else
+				return comp;
 		A2SListener listener = top.getA2SListener();
 		if (comp instanceof AbstractButton) {
 			if (!isListener(((AbstractButton) comp).getActionListeners(), listener))
