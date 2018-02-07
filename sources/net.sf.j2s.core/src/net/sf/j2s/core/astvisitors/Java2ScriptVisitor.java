@@ -221,23 +221,24 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		apps.add(getQualifiedClassName());
 	}
 
-	private void checkAddApplet(ITypeBinding binding) {
+	private boolean checkAddApplet(ITypeBinding binding) {
 		if (Modifier.isAbstract(binding.getModifiers()))
-			return;
+			return false;
 		ITypeBinding b = binding;
 		while ((binding = binding.getSuperclass()) != null) {
 			String name = binding.getQualifiedName();
 			if (!("javax.swing.JApplet".equals(name))) {
 				if (name.startsWith("java.") || name.startsWith("javax"))
-					return;
+					return false;
 				continue;
 			}
 			if (applets == null)
 				applets = new ArrayList<String>();
 			name = b.getQualifiedName();
 			applets.add(name);
-			break;
+			return true;
 		}
+		return false;
 	}
 
 	public ArrayList<String> getAppList(boolean isApplets) {
@@ -264,6 +265,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	boolean haveDefaultConstructor;
 
 	private ASTNode innerTypeNode;
+
+	private boolean isUserApplet;
 
 	public boolean visit(PackageDeclaration node) {
 		setMapJavaDoc(node);
@@ -613,16 +616,18 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (key != null)
 			methodDeclareNameStack.push(key);
 
-		boolean isStatic = isStatic(node);
-		boolean isNative = Modifier.isNative(node.getModifiers());
-
+		int mods = node.getModifiers();
+		boolean isNative = Modifier.isNative(mods);
+		
 		if (node.getBody() == null && !isNative) {
 			// Abstract method
 			return false;
 		}
 
+		boolean isStatic = Modifier.isStatic(mods);
 		boolean isConstructor = node.isConstructor();
-		String name = getMethodNameOrArrayForDeclaration(node, mBinding, isConstructor);
+		boolean addUnqualified = isUserApplet && !isConstructor && !isStatic && Modifier.isPublic(mods);
+		String name = getMethodNameOrArrayForDeclaration(node, mBinding, isConstructor, addUnqualified);
 		if (isConstructor && name.equals("'c$'") || mBinding.isVarargs() && mBinding.getParameterTypes().length == 1)
 			haveDefaultConstructor = true; // in case we are not qualifying
 											// names here
@@ -1100,7 +1105,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// check for a JApplet
 
 		if (isTopLevel && !isEnum) {
-			checkAddApplet(binding);
+			isUserApplet = checkAddApplet(binding);
 		}
 
 		// add the anonymous wrapper if needed
@@ -3927,10 +3932,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @return j2s-qualified name or an array of j2s-qualified names
 	 */
 	private String getMethodNameOrArrayForDeclaration(MethodDeclaration node, IMethodBinding mBinding,
-			boolean isConstructor) {
+			boolean isConstructor, boolean addUnqualified) {
 		SimpleName nodeName = node.getName();
 		String methodName = (isConstructor ? "c$" : NameMapper.getJ2SName(nodeName));
-		String name = getJ2SQualifiedName(methodName, null, mBinding, null, false);
+		String qname = getJ2SQualifiedName(methodName, null, mBinding, null, false);
 		ITypeBinding methodClass = mBinding.getDeclaringClass();
 		List<String> names = null;
 		// System.err.println("checking methodList for " + nodeName.toString() +
@@ -3950,16 +3955,19 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				if (pname != null)
 					names.add(pname);
 			}
+		} else if (addUnqualified && !methodName.equals(qname)) {
+			names = new ArrayList<String>();
+			names.add(methodName);
 		}
 		if (names == null || names.size() == 0)
-			return "'" + name + "'";
-		name = ",'" + name + "'";
+			return "'" + qname + "'";
+		qname = ",'" + qname + "'";
 		for (int i = names.size(); --i >= 0;) {
 			String next = ",'" + names.get(i) + "'";
-			if (name.indexOf(next) < 0)
-				name += next;
+			if (qname.indexOf(next) < 0)
+				qname += next;
 		}
-		return "[" + name.substring(1) + "]";
+		return "[" + qname.substring(1) + "]";
 	}
 
 	/**
