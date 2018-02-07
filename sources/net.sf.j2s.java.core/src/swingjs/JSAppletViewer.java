@@ -233,7 +233,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 		final Dimension currentSize = new Dimension(currentAppletSize.width, currentAppletSize.height);
 		currentAppletSize.width = width;
 		currentAppletSize.height = height;
-		japplet.setBounds(0, 0, getWidth(), getHeight());
+		japplet.setBounds(0, 0, width, height);
 		japplet.getRootPane().setBounds(0, 0, getWidth(), getHeight());
 		japplet.getContentPane().setBounds(0, 0, getWidth(), getHeight());
 		((JComponent) japplet.getContentPane()).revalidate();
