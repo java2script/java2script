@@ -106,7 +106,15 @@ public class JSToolkit extends SunToolkit {
 				AppContext.EVENT_QUEUE_KEY));
 	}
 
+	/**
+	 * From System.exit()
+	 */
 	public static void exit() {
+		/**
+		 * @j2sNative
+		 * 
+		 * Thread.thisThread.group.systemExited = true;
+		 */
 		JSUtil.getAppletViewer().exit();
 	}
 
@@ -345,6 +353,7 @@ public class JSToolkit extends SunToolkit {
 		/**
 		 * @j2sNative
 		 * 
+		 * 
 		 *            f = function()
 		 *            {
 		 *            if
@@ -373,7 +382,9 @@ public class JSToolkit extends SunToolkit {
 		/**
 		 * @j2sNative
 		 * 
-		 *            var thread = java.lang.Thread.thisThread;
+		 *            var thread = Thread.thisThread;
+		 *            if (thread.group.systemExited)
+		 *            	return;
 		 *            var thread0 = thread;
 		 *            var id0 = SwingJS.eventID || 0;
 		 *            var ff = function(_JSToolkit_setTimeout) {
@@ -387,9 +398,10 @@ public class JSToolkit extends SunToolkit {
 		 *             } catch (e) {
 		 *             var s = "JSToolkit.dispatch(" + id +"): " + e + "\n" + (e.getStackTrace ? e.getStackTrace() + "\n" : "") + (!!e.stack ? e.stack : "");
 		 *             System.out.println(s);
-		 *             alert(s)}
+		 *             alert(s);
+		 *             }
 		 *            SwingJS.eventID = id0; 
-		 *            java.lang.Thread.thisThread = thread0; 
+		 *            Thread.thisThread = thread0; 
 		 *            };
 		 *            return (msDelay == -1 ? ff() : setTimeout(ff, msDelay));
 		 * 
@@ -413,7 +425,9 @@ public class JSToolkit extends SunToolkit {
 		/**
 		 * @j2sNative
 		 * 
-		 *            var thread = java.lang.Thread.thisThread;
+		 *            var thread = Thread.thisThread;
+		 *            if (thread.group.systemExited)
+		 *            	return;
 		 *            var thread0 = thread;
 		 *            (function(_JSToolkit_setTimeout) {
 		 *              var id0 = SwingJS.eventID || 0;
@@ -424,7 +438,7 @@ public class JSToolkit extends SunToolkit {
 		 *              else
 		 *                f();
 		 *              SwingJS.eventID = id0;
-		 *              java.lang.Thread.thisThread = thread0; 
+		 *              Thread.thisThread = thread0; 
 		 *            })();
 		 * 
 		 * 
