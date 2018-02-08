@@ -133,7 +133,9 @@ public class JApplet extends Applet implements /* Accessible ,*/
      */
     public JApplet() {
     	setFrameViewer(appletViewer);
+		uiClassID = "AppletUI";
     	setJApplet();
+        updateUI();
     }
 
 
@@ -594,6 +596,12 @@ public class JApplet extends Applet implements /* Accessible ,*/
     }
 
 
+	@Override
+	public void addNotify() {
+		super.addNotify();
+		getLayeredPane().isFramedApplet = true;
+		
+	}
 
 /////////////////
 // Accessibility support

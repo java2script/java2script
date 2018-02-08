@@ -545,9 +545,9 @@ public class JSToolkit extends SunToolkit {
 		if (ui == null) {
 			
 			String s = c.getClass().getName();
-			if (!PT.isOneOf(s, ";javax.swing.Box.Filler;swingjs.JSApplet;")) 
+			if (!PT.isOneOf(s, ";javax.swing.Box.Filler;")) 
 				System.out.println("[JSToolkit] Component " + s  
-					+ " has no corresponding JSComponentUI.");
+					+ " has no corresponding JSComponentUI, class " + c.getClass().getName());
 			// Coerce JSComponentUI for this peer.
 			// This is a JavaScript-only trick that would be
 			// problematic in Java as well as in JavaScript.

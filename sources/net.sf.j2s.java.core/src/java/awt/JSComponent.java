@@ -76,6 +76,8 @@ public abstract class JSComponent extends Component {
 	 * 
 	 */
 
+	public boolean isFramedApplet;
+
 	public String htmlName;
 	protected int num;
 	private static int incr;

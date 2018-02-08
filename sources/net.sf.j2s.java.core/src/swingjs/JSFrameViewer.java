@@ -174,10 +174,13 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 
 	private static int canvasCount;
 
+	private Container topApp;
 	public Graphics getGraphics(int wNew, int hNew) {
 		if (wNew == 0 && top != null) {
-			wNew = Math.max (0, ((RootPaneContainer)top).getContentPane().getWidth());
-			hNew = Math.max (0, ((RootPaneContainer)top).getContentPane().getHeight());
+			if (topApp == null)
+				topApp = top;
+			wNew = Math.max (0, ((RootPaneContainer)topApp).getContentPane().getWidth());
+			hNew = Math.max (0, ((RootPaneContainer)topApp).getContentPane().getHeight());
 		}
 		int wOld = 0, hOld = 0;
 		/**
@@ -191,7 +194,7 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 		}
 		if (wNew >= 0
 				&& hNew >= 0
-				&& (wOld != wNew || hOld != hNew || canvas == null || jsgraphics == null)) {
+				&& (wOld != wNew || hOld != hNew || canvas == null || 	jsgraphics == null)) {
 			jsgraphics = new JSGraphics2D(canvas = newCanvas(wNew, hNew));
 			//top.repaint(0, 0, wNew, hNew);
 		}
@@ -202,10 +205,29 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 	public HTML5Canvas newCanvas(int width, int height) {
 		if (isApplet) {
 			// applets create their own canvas
-			canvas = html5Applet._getHtml5Canvas();
-			return canvas;
+			HTML5Canvas c = html5Applet._getHtml5Canvas();
+			if (c != null) {
+				return canvas = c;
+			}
 		}
-		JRootPane root = (JRootPane) (top.getComponentCount() > 0 ? top.getComponent(0) : null);
+		if (topApp ==  null)
+			topApp = top;
+		JRootPane root = (JRootPane) (topApp.getComponentCount() > 0 ? topApp.getComponent(0) : null);
+		Container userFramedApplet = null, app = null;
+		if (root != null && root.getContentPane().getComponentCount() > 0) {
+			// check for applet in a frame
+			boolean appletInFrame = false;
+			app = (Container) root.getContentPane().getComponent(0);
+			/**
+			 * @j2sNative
+			 * 
+			 * appletInFrame = (app.uiClassID == "AppletUI");
+			 */
+			if (appletInFrame) {
+				userFramedApplet = app;
+				root = (JRootPane) userFramedApplet.getComponent(0);				
+			}
+		}
 		DOMNode parent = (root == null ? null : ((JSComponentUI) root.getUI()).domNode);
 		if (parent != null)
 			DOMNode.remove(canvas);
@@ -213,6 +235,13 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 		System.out.println("JSFrameViewer creating new canvas " + canvasId + ": "
 				+ width + "  " + height);
 		canvas = (HTML5Canvas) DOMNode.createElement("canvas", canvasId);
+		if (userFramedApplet != null) {
+			JSFrameViewer appViewer = 
+			userFramedApplet.getFrameViewer();
+			appViewer.setDisplay(canvas);
+			appViewer.topApp = app;
+			
+		}
 		int iTop = (root == null ? 0 : root.getContentPane().getY()); 
 		DOMNode.setPositionAbsolute(canvas, iTop, 0);
 		DOMNode.setStyles(canvas, "width", width + "px", "height", height + "px");
