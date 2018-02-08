@@ -7,6 +7,8 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+
+// BH 2/7/2018 7:47:07 PM adds System.out.flush and System.err.flush
 // BH 2/1/2018 12:14:20 AM fix for new int[128][] not nulls
 // BH 1/9/2018 8:40:52 AM fully running SwingJS2; adds String.isEmpty()
 // BH 12/16/2017 5:53:47 PM refactored; removed older unused parts
@@ -2511,7 +2513,10 @@ java.lang.System = System = {
   currentTimeMillis : function () {
     return new Date ().getTime ();
   },
-  exit : function() { swingjs.JSToolkit && swingjs.JSToolkit.exit() },
+  exit : function() {
+  debugger 
+  swingjs.JSToolkit && swingjs.JSToolkit.exit() 
+  },
   gc : function() {}, // bh
   getProperties : function () {
     return System.props;
@@ -2584,6 +2589,8 @@ Sys.out.printf = Sys.out.printf$S$OA = Sys.out.format = Sys.out.format$S$OA = fu
 
 Sys.out.println = Sys.out.println$O = Sys.out.println$Z = Sys.out.println$I = Sys.out.println$S = Sys.out.println$C = Sys.out.println = function(s) {
 
+Sys.out.flush = function() {}
+
 if (("" + s).indexOf("TypeError") >= 0) {
    debugger;
 }
@@ -2625,6 +2632,8 @@ Sys.err.println$F = Sys.err.println$D = function(f) {var s = "" + f; Sys.err.pri
 Sys.err.write = function (buf, offset, len) {
   Sys.err.print(String.instantialize(buf).substring(offset, offset+len));
 };
+
+Sys.err.flush = function() {}
 
 })(Clazz.Console, System);
 

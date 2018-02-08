@@ -1,4 +1,4 @@
-// j2sApplet.js (based on JmolCore.js)
+// j2sCore.js (based on JmolCore.js)
 
 // BH 1/8/2018 10:27:46 PM SwingJS2
 // BH 12/22/2017 1:18:42 PM adds j2sargs for setting arguments
