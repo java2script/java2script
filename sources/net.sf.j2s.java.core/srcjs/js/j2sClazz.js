@@ -8,6 +8,7 @@
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
 
+// BH 2/13/2018 6:24:44 AM adds String.copyValueOf (two forms)
 // BH 2/7/2018 7:47:07 PM adds System.out.flush and System.err.flush
 // BH 2/1/2018 12:14:20 AM fix for new int[128][] not nulls
 // BH 1/9/2018 8:40:52 AM fully running SwingJS2; adds String.isEmpty()
@@ -3638,8 +3639,6 @@ return Clazz.array(Byte.TYPE, -1, arrs);
 sp.contains$S = function(a) {return this.indexOf(a) >= 0}  // bh added
 sp.compareTo$S = sp.compareTo$TT = function(a){return this > a ? 1 : this < a ? -1 : 0} // bh added
 
-
-
 sp.toCharArray=function(){
 var result=new Array(this.length);
 for(var i=0;i<this.length;i++){
@@ -3904,6 +3903,16 @@ default:
 }
 
 })(Clazz._Encoding);
+
+String.copyValueOf$CA$I$I = function(data,offset,count) {
+ var s = "";
+ for (var pt = offset, n = offset+count;pt < n;pt++)s += data[pt];
+ return s;
+}
+String.copyValueOf$CA = function(data) {
+ return sp.copyValueOf$CA$I$I(data, 0, data.length);
+}
+ 
 
 C$=Clazz.newClass(java.lang,"Character",function(){
 if (typeof arguments[0] != "object")this.c$(arguments[0]);
