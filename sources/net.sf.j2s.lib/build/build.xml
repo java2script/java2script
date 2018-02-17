@@ -39,7 +39,7 @@
          - - - - - - - - - - - - - - - - - -->
     <target name="j2s.pack.core">
     	<!-- This SmartJSCompressor will pack Class.js and ClassExt.js together -->
-        <java classname="net.sf.j2s.lib.build.SmartJSCompressor">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.SmartJSCompressor">
     		<arg value="${j2s.core.src}/java/lang/Class.js"/>
         	<arg value="${j2s.core.bin}/java/lang/Class.js"/>
         	
@@ -52,7 +52,7 @@
         	</classpath>
        	</java>
 
-        <java classname="net.sf.j2s.lib.build.SmartJSCompressor">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.SmartJSCompressor">
     		<arg value="${j2s.core.src}/java/lang/ClassLoader.js"/>
    			<arg value="${j2s.core.bin}/java/lang/ClassLoader.js"/>
         	
@@ -65,7 +65,7 @@
         	</classpath>
        	</java>
 
-        <java classname="net.sf.j2s.lib.build.SmartJSCompressor">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.SmartJSCompressor">
     		<arg value="${j2s.core.src}/java/lang/ClassLoaderProgressMonitor.js"/>
    			<arg value="${j2s.core.bin}/java/lang/ClassLoaderProgressMonitor.js"/>
         	
@@ -78,7 +78,7 @@
         	</classpath>
        	</java>
     	
-        <java classname="net.sf.j2s.lib.build.SmartJSCompressor">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.SmartJSCompressor">
     		<arg value="${j2s.core.src}/java/lang/Console.js"/>
     		<arg value="${j2s.core.bin}/java/lang/Console.js"/>
         	
@@ -90,7 +90,7 @@
         		<pathelement path="${j2s.lib.project}/bin"/>
         	</classpath>
        	</java>
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="none"/>
         	<arg value="${j2s.lib.dist}/j2slib.z.js"/>
         	
@@ -105,7 +105,7 @@
 	    		<pathelement path="${j2s.lib.project}/bin"/>
 	    	</classpath>
 	    </java>
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="none"/>
         	<arg value="${j2s.lib.dist}/j2slib.src.z.js"/>
         	
@@ -122,7 +122,7 @@
 	    	</classpath>
 	    </java>
 
-        <java classname="net.sf.j2s.lib.build.SmartJSCompressor">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.SmartJSCompressor">
     		<arg value="${j2s.core.src}/java/package.js"/>
    			<arg value="${j2s.core.bin}/java/package.js"/>
         	
@@ -135,7 +135,7 @@
 
     	<mkdir dir="${j2s.core.bin}/org/eclipse/swt/"/>
 
-        <java classname="net.sf.j2s.lib.build.SmartJSCompressor">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.SmartJSCompressor">
     		<arg value="${j2s.swt.bin}/org/eclipse/swt/package.js"/>
    			<arg value="${j2s.core.bin}/org/eclipse/swt/package.js"/>
         	
@@ -145,7 +145,7 @@
         		<pathelement path="${j2s.lib.project}/bin"/>
         	</classpath>
        	</java>
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="none"/>
         	<arg value="${j2s.lib.dist}/j2slib.swt.z.js"/>
         	
@@ -166,7 +166,7 @@
     	<!--<delete file="${j2s.core.bin}/org/eclipse/swt/package.js" quiet="true"/>-->
 
     	<!-- j2slibcore.z.js does not contains Console -->
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="none"/>
         	<arg value="${j2s.lib.dist}/j2slibcore.z.js"/>
         	
@@ -185,7 +185,7 @@
           target: j2s.pack.common                      
          - - - - - - - - - - - - - - - - - -->
     <target name="j2s.pack.common" depends="j2s.pack.prepare">
-        <java classname="net.sf.j2s.lib.build.J2SConcat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.J2SConcat">
         	<arg value="true"/>
         	<arg value="${j2s.core.bin}/java/core.z.js"/>
         	
@@ -375,7 +375,7 @@
         	</classpath>
         </java>
 
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="true"/>
         	<arg value="${j2s.core.bin}/org/apache/harmony/luni/util/Msg.z.js"/>
         	<arg value="${j2s.core.bin}"/>
@@ -387,7 +387,7 @@
 	    </java>
 
     	
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="true"/>
         	<arg value="${j2s.core.bin}/java/lang/StringBuilder.z.js"/>
         	<arg value="${j2s.core.bin}"/>
@@ -510,7 +510,7 @@
     	
     	<delete file="${j2s.ajax.bin}/net/sf/j2s/ajax/HttpRequest.js" quiet="true"/>
         	
-        <java classname="net.sf.j2s.lib.build.RegExCompress">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.RegExCompress">
         	<arg value="false"/>
 
     		<arg value="${j2s.ajax.project}/j2sajax/HttpRequest.js"/>
@@ -543,7 +543,7 @@
           target: pack.swt.css                     
          - - - - - - - - - - - - - - - - - -->
     <target name="pack.swt.css">
-        <java classname="net.sf.j2s.lib.build.PackCSSIntoJS">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.PackCSSIntoJS">
         	<arg value="${j2s.swt.bin}/"/>
         	
         	<classpath>
@@ -567,7 +567,7 @@
           target: pack.swt.basic              
          ================================= -->
     <target name="pack.swt.basic" description="Building j2s-swt-*.z.js">
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/basic.z.js"/>
         	
@@ -715,7 +715,7 @@
           target: pack.swt.more              
          ================================= -->
     <target name="pack.swt.more" description="Building j2s-swt-*.z.js">
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/more.z.js"/>
         	
@@ -746,7 +746,7 @@
 	    </java>
 
     	
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/SWT.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
@@ -759,7 +759,7 @@
 	    	</classpath>
 	    </java>
     	
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/layout/RowLayout.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
@@ -772,7 +772,7 @@
 	    </java>
 
     	
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/layout/FormLayout.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
@@ -785,7 +785,7 @@
 	    	</classpath>
 	    </java>
     	
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/Tree.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
@@ -799,7 +799,7 @@
 	    </java>
 
     	
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/ToolBar.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
@@ -812,7 +812,7 @@
 	    </java>
 
     	
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/Table.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
@@ -826,7 +826,7 @@
 	    	</classpath>
 	    </java>
 
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/custom/SashForm.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
@@ -842,7 +842,7 @@
 	    </java>
 
 
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/custom/CTabFolder.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
@@ -861,7 +861,7 @@
 	    </java>
 
     	
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/custom/CLabel.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
@@ -874,7 +874,7 @@
 	    </java>
 
     	
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/custom/CBanner.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
@@ -887,7 +887,7 @@
 	    </java>
 
     	
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/custom/ViewForm.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
@@ -900,7 +900,7 @@
 	    </java>
 
 
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/Slider.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
@@ -913,7 +913,7 @@
 	    </java>
 
     	
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/Scale.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
@@ -925,7 +925,7 @@
 	    	</classpath>
 	    </java>
 
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/CoolBar.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
@@ -938,7 +938,7 @@
 	    </java>
 
     	
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/graphics/Font.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
@@ -959,7 +959,7 @@
           target: pack.swt.shell              
          ================================= -->
     <target name="pack.swt.shell" description="Building j2s-swt-*.z.js">
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/Shell.z.js"/>
         	
@@ -991,7 +991,7 @@
           target: pack.swt.dnd              
          ================================= -->
     <target name="pack.swt.dnd" description="Building j2s-swt-*.z.js">
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/dnd.z.js"/>
         	
@@ -1027,7 +1027,7 @@
           target: pack.jface.viewer             
          ================================= -->
     <target name="pack.jface.viewer" description="Building jface/viewers.interfaces.z.js">
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="false"/>
         	<arg value="${j2s.jface.bin}/org/eclipse/jface/viewers.interfaces.z.js"/>
         	
@@ -1081,7 +1081,7 @@
           target: pack.jface.resource             
          ================================= -->
     <target name="pack.jface.resource" description="Building jface/resource.z.js">
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="false"/>
         	<arg value="${j2s.jface.bin}/org/eclipse/jface/resource.z.js"/>
         	
@@ -1124,7 +1124,7 @@
           target: pack.jface.util             
          ================================= -->
     <target name="pack.jface.util" description="Building jface/util.z.js">
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="false"/>
         	<arg value="${j2s.jface.bin}/org/eclipse/jface/util.z.js"/>
         	
@@ -1151,7 +1151,7 @@
           target: pack.jface.window             
          ================================= -->
     <target name="pack.jface.window" description="Building jface/window.z.js">
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        <java failonerror="true" classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="false"/>
         	<arg value="${j2s.jface.bin}/org/eclipse/jface/window.z.js"/>
         	

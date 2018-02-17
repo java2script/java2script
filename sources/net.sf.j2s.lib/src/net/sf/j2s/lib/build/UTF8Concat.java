@@ -79,7 +79,7 @@ public class UTF8Concat {
 				//*/
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
-				return;
+				System.exit(1);
 			}
 		}
 		try {
@@ -98,6 +98,7 @@ public class UTF8Concat {
 			fos.close();
 		} catch (IOException e) {
 			e.printStackTrace();
+			System.exit(1);
 		}
 
 	}
