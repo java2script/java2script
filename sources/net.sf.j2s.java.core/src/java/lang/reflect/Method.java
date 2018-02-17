@@ -17,22 +17,23 @@ package java.lang.reflect;
 
 import java.lang.annotation.Annotation;
 
+import javax.imageio.metadata.IIOMetadataFormat;
+
 /**
  * This class must be implemented by the VM vendor. This class models a method.
  * Information about the method can be accessed, and the method can be invoked
  * dynamically.
  * 
- * @j2sRequireImport java.lang.Void
  */
 public final class Method extends AccessibleObject implements GenericDeclaration, Member {
 
-	private Class		clazz;
+	private Class<?>		clazz;
     // This is guaranteed to be interned by the VM in the 1.4
     // reflection implementation
     private String		name;
-    private Class		returnType;
-    private Class[]		parameterTypes;
-    private Class[]		exceptionTypes;
+    private Class<?>		returnType;
+    private Class<?>[]		parameterTypes;
+    private Class<?>[]		exceptionTypes;
     private int			modifiers;
     
     /**
@@ -40,11 +41,11 @@ public final class Method extends AccessibleObject implements GenericDeclaration
      * instantiation of these objects in Java code from the java.lang
      * package via sun.reflect.LangReflectAccess.
      */
-    Method(Class declaringClass,
+    public Method(Class<?> declaringClass,
            String name,
-           Class[] parameterTypes,
-           Class returnType,
-           Class[] checkedExceptions,
+           Class<?>[] parameterTypes,
+           Class<?> returnType,
+           Class<?>[] checkedExceptions,
            int modifiers)
     {
         this.clazz = declaringClass;
@@ -203,8 +204,8 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 		    if ((getDeclaringClass() == other.getDeclaringClass())
 			&& (getName() == other.getName())) {
 			/* Avoid unnecessary cloning */
-			Class[] params1 = parameterTypes;
-			Class[] params2 = other.parameterTypes;
+			Class<?>[] params1 = parameterTypes;
+			Class<?>[] params2 = other.parameterTypes;
 			if (params1.length == params2.length) {
 			    for (int i = 0; i < params1.length; i++) {
 				if (params1[i] != params2[i])
@@ -357,7 +358,7 @@ public final class Method extends AccessibleObject implements GenericDeclaration
      * 	// should never reach here!
      * }
 	 */
-	public Object invoke(Object receiver, Object args[])
+	public Object invoke(Object receiver, Object... args)
 			throws IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException {
 		return null;
@@ -376,4 +377,5 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 	public String toString() {
 		return null;
 	}
+
 }

@@ -68,7 +68,7 @@ public final class StrictMath {
 	 * @return the argument if it is positive, otherwise the negation of the
 	 *         argument.
 	 * 
-	 * @j2sIgnore
+	 * @j2sNative return Math.abs (f);
 	 */
 	public static float abs(float f) {
 		int bits = Float.floatToIntBits(f);
@@ -84,7 +84,6 @@ public final class StrictMath {
 	 * @return the argument if it is positive, otherwise the negation of the
 	 *         argument.
 	 * 
-	 * @j2sIgnore
 	 */
 	public static int abs(int i) {
 		return i >= 0 ? i : -i;
@@ -98,7 +97,6 @@ public final class StrictMath {
 	 * @return the argument if it is positive, otherwise the negation of the
 	 *         argument.
 	 * 
-	 * @j2sIgnore
 	 */
 	public static long abs(long l) {
 		return l >= 0 ? l : -l;
@@ -245,6 +243,8 @@ public final class StrictMath {
      *            a double number
      * @return the sqrt(<i>x</i><sup>2</sup>+<i>y</i><sup>2</sup>) value
      *         of the arguments.
+     *         
+     * @j2sNative return Math.sqrt(x * x + y * y);
      */
     public static native double hypot(double x, double y);
 
@@ -291,6 +291,8 @@ public final class StrictMath {
      * @param d
      *            the value to compute the ln(1+d) of
      * @return the natural logarithm of the sum of the argument and 1.
+     * 
+     * @j2sNative return Math.log(d + 1);
      */
     public static native double log1p(double d);
 
@@ -331,7 +333,7 @@ public final class StrictMath {
 	 *            the second argument
 	 * @return the larger of f1 and f2.
 	 * 
-	 * @j2sIgnore
+	 * @j2sNative return Math.max (f1, f2);
 	 */
 	public static float max(float f1, float f2) {
 		if (f1 > f2)
@@ -358,7 +360,7 @@ public final class StrictMath {
 	 *            the second argument
 	 * @return the larger of i1 and i2.
 	 * 
-	 * @j2sIgnore
+	 * @j2sNative return Math.max (i1, i2);
 	 */
 	public static int max(int i1, int i2) {
 		return i1 > i2 ? i1 : i2;
@@ -374,7 +376,7 @@ public final class StrictMath {
 	 *            the second argument
 	 * @return the larger of l1 and l2.
 	 * 
-	 * @j2sIgnore
+	 * @j2sNative return Math.max (l1, l2);
 	 */
 	public static long max(long l1, long l2) {
 		return l1 > l2 ? l1 : l2;
@@ -417,7 +419,7 @@ public final class StrictMath {
 	 *            the second argument
 	 * @return the smaller of f1 and f2.
 	 * 
-	 * @j2sIgnore
+	 * @j2sNative return Math.min (f1, f2);
 	 */
 	public static float min(float f1, float f2) {
 		if (f1 > f2)
@@ -444,7 +446,7 @@ public final class StrictMath {
 	 *            the second argument
 	 * @return the smaller of i1 and i2.
 	 * 
-	 * @j2sIgnore
+	 * @j2sNative return Math.min (i1, i2);
 	 */
 	public static int min(int i1, int i2) {
 		return i1 < i2 ? i1 : i2;
@@ -460,7 +462,7 @@ public final class StrictMath {
 	 *            the second argument
 	 * @return the smaller of l1 and l2.
 	 * 
-	 * @j2sIgnore
+	 * @j2sNative return Math.min (l1, l2);
 	 */
 	public static long min(long l1, long l2) {
 		return l1 < l2 ? l1 : l2;
@@ -528,7 +530,7 @@ public final class StrictMath {
 	 *            the value to be converted
 	 * @return the closest integer to the argument.
 	 * 
-	 * @j2sIgnore
+	 * @j2sNative return Math.round (f);
 	 */
 	public static int round(float f) {
 		// check for NaN
@@ -670,7 +672,7 @@ public final class StrictMath {
      *            the floating-point value to compute ulp of
      * @return the size of a ulp of the argument.
      * 
-     * @j2sIgnore
+     * @j2sIgnore  ulp
      */
     public static double ulp(double d) {
         // special cases
@@ -692,7 +694,7 @@ public final class StrictMath {
      *            the floating-point value to compute ulp of
      * @return the size of a ulp of the argument.
      * 
-     * @j2sIgnore
+     * @j2sIgnore ulp
      */
     public static float ulp(float f) {
         // special cases

@@ -374,4 +374,13 @@ public class BufferedInputStream extends FilterInputStream {
         }
         return read + in.skip(amount - read);
     }
+
+//    /**
+//     * BH: Addeed to allow full reset of a bundled stream
+//     */
+//    @Override
+//    public void resetStream() {
+//      markpos = pos = count = 0;
+//      in.resetStream();
+//    }
 }

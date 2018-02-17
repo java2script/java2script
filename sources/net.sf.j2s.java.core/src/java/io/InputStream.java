@@ -210,4 +210,12 @@ public abstract class InputStream extends Object implements Closeable {
 		}
 		return skipped;
 	}
+	
+//    /**
+//     * BH: Allows resetting of the underlying stream (buffered only)
+//     */
+//    public void resetStream() {
+//    }
+//
+
 }

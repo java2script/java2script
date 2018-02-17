@@ -17,15 +17,10 @@
 
 package org.apache.harmony.luni.util;
 
-
-import java.util.Locale;
-import java.util.ResourceBundle;
-
 /**
  * This class contains helper methods for loading resource bundles and
  * formatting external message strings.
  * 
- * @j2sRequireImport java.util.ResourceBundle
  */
 
 public final class MsgHelp {
@@ -96,28 +91,34 @@ public final class MsgHelp {
 		return answer.toString();
 	}
 
-	/**
-	 * Changes the locale of the messages.
-	 * 
-	 * @param locale
-	 *            Locale the locale to change to.
-	 */
-	static public ResourceBundle setLocale(final Locale locale,
-			final String resource) {
-		/*
-		try {
-			final ClassLoader loader = VM.bootCallerClassLoader();
-			return (ResourceBundle) AccessController
-					.doPrivileged(new PrivilegedAction<Object>() {
-						public Object run() {
-							return ResourceBundle.getBundle(resource, locale,
-									loader != null ? loader : ClassLoader.getSystemClassLoader());
-						}
-					});
-		} catch (MissingResourceException e) {
-		}
-		*/
-		return ResourceBundle.getBundle(resource);
-		//return null;
-	}
+//	/**
+//	 * Changes the locale of the messages.
+//	 * 
+//	 * @param locale
+//	 *            Locale the locale to change to.
+//	 */
+//	static public ResourceBundle setLocale(final Locale locale,
+//			final String resource) {
+//		/*
+//		try {
+//			final ClassLoader loader = VM.bootCallerClassLoader();
+//			return (ResourceBundle) AccessController
+//					.doPrivileged(new PrivilegedAction<Object>() {
+//						public Object run() {
+//							return ResourceBundle.getBundle(resource, locale,
+//									loader != null ? loader : ClassLoader.getSystemClassLoader());
+//						}
+//					});
+//		} catch (MissingResourceException e) {
+//		}
+//		*/
+//		/**
+//		 * @j2sNative
+//		 * 
+//		 * Class.forName("java.util.ResourceBundle");
+//		 */
+//		{}
+//		return ResourceBundle.getBundle(resource);
+//		//return null;
+//	}
 }

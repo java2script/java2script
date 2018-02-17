@@ -30,22 +30,18 @@ public class MessageFormat {
     	this.pattern = pattern;
     }
 
-    /**
-     * @j2sNativeSrc
-     * return pattern.replace (/\{(\d+)\}/g, function ($0, $1) {
-     * 	var i = parseInt ($1);
-     * 	if (args == null) return null;
-     *  return args[i];
-     * });
-     * @j2sNative
-     * return a.replace (/\{(\d+)\}/g, function ($0, $1) {
-     * 	var i = parseInt ($1);
-     * 	if (b == null) return null;
-     *  return b[i];
-     * });
-     */ 
     public static String format(String pattern, Object[] args) {
+        /**
+         * @j2sNative
+         * return pattern.replace (/\{(\d+)\}/g, function ($0, $1) {
+         * 	var i = parseInt ($1);
+         * 	if (args == null) return null;
+         *  return args[i];
+         * });
+         */ 
+    	{
     	return pattern;
+         }
     }
     
     public final String format (Object obj) {

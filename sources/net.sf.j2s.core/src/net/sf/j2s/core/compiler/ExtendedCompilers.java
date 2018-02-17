@@ -13,9 +13,10 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 
+@SuppressWarnings("restriction")
 public class ExtendedCompilers {
 
-	public static Map compilers = new HashMap();
+	public static Map<String, IExtendedCompiler> compilers = new HashMap<String, IExtendedCompiler> ();
 
 	private static boolean isExtensionPointsChecked = false;
 
@@ -48,7 +49,7 @@ public class ExtendedCompilers {
 							Object callback = element
 									.createExecutableExtension("class");
 							if (callback instanceof IExtendedCompiler) {
-								compilers.put(id.trim(), callback);
+								compilers.put(id.trim(), (IExtendedCompiler) callback);
 							}
 						} catch (CoreException e) {
 							e.printStackTrace();
@@ -68,7 +69,7 @@ public class ExtendedCompilers {
 
 	public static IExtendedCompiler deregister(String compilerID) {
 		if (compilerID != null && compilerID.trim().length() != 0) {
-			return (IExtendedCompiler) compilers.remove(compilerID);
+			return compilers.remove(compilerID);
 		}
 		return null;
 	}
@@ -77,8 +78,8 @@ public class ExtendedCompilers {
 			IContainer binFolder) {
 		checkExtensionPoints();
 		if (!compilers.isEmpty()) {
-			for (Iterator iter = compilers.values().iterator(); iter.hasNext();) {
-				IExtendedCompiler compiler = (IExtendedCompiler) iter.next();
+			for (Iterator<IExtendedCompiler> iter = compilers.values().iterator(); iter.hasNext();) {
+				IExtendedCompiler compiler = iter.next();
 				try {
 					compiler.process(sourceUnit, binFolder);
 				} catch (Throwable e) {

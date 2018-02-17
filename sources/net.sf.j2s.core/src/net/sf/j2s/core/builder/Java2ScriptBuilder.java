@@ -18,4 +18,5 @@ package net.sf.j2s.core.builder;
  * 2006-6-14
  */
 public class Java2ScriptBuilder extends JavaBuilder {
+	//
 }

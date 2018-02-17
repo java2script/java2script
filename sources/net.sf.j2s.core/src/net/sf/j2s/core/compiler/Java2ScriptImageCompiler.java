@@ -38,21 +38,24 @@ import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
  *
  * 2006-6-14
  */
+@SuppressWarnings("restriction")
 public class Java2ScriptImageCompiler extends Compiler {
 	
-	protected List sourceUnits;
+	protected List<Object> sourceUnits;
 	protected IContainer binaryFolder;
 	
+	@SuppressWarnings("deprecation")
 	public Java2ScriptImageCompiler(INameEnvironment environment,
-			IErrorHandlingPolicy policy, Map settings,
+			IErrorHandlingPolicy policy, @SuppressWarnings("rawtypes") Map settings,
 			ICompilerRequestor requestor, IProblemFactory problemFactory,
 			boolean parseLiteralExpressionsAsConstants) {
 		super(environment, policy, settings, requestor, problemFactory,
 				parseLiteralExpressionsAsConstants);
 	}
 
+	@SuppressWarnings({ "deprecation", "unchecked" })
 	public Java2ScriptImageCompiler(INameEnvironment environment,
-			IErrorHandlingPolicy policy, Map settings,
+			IErrorHandlingPolicy policy, @SuppressWarnings("rawtypes") Map settings,
 			ICompilerRequestor requestor, IProblemFactory problemFactory) {
 		super(environment, policy, settings, requestor, problemFactory);
 	}
@@ -64,6 +67,7 @@ public class Java2ScriptImageCompiler extends Compiler {
 		super(environment, policy, options, requestor, problemFactory, out, progress);
 	}
 
+	@SuppressWarnings("deprecation")
 	public Java2ScriptImageCompiler(INameEnvironment environment, IErrorHandlingPolicy policy, CompilerOptions options, ICompilerRequestor requestor, IProblemFactory problemFactory, PrintWriter out) {
 		super(environment, policy, options, requestor, problemFactory, out);
 	}
@@ -75,7 +79,7 @@ public class Java2ScriptImageCompiler extends Compiler {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.compiler.Compiler#compile(org.eclipse.jdt.internal.compiler.env.ICompilationUnit[])
 	 */
-	public void compile(ICompilationUnit[] sourceUnits) {
+	public void compile(ICompilationUnit[] thisSourceUnits) {
 		binaryFolder = null;
 		INameEnvironment nameEnv = this.lookupEnvironment.nameEnvironment;
 		if (nameEnv instanceof NameEnvironment) {
@@ -90,8 +94,8 @@ public class Java2ScriptImageCompiler extends Compiler {
 				}
 			}
 		}
-		this.sourceUnits = new ArrayList();
-		super.compile(sourceUnits);
+		this.sourceUnits = new ArrayList<Object>();
+		super.compile(thisSourceUnits);
 	}
 	
 	protected void addCompilationUnit(ICompilationUnit sourceUnit,

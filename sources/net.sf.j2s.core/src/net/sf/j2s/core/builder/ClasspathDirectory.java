@@ -13,9 +13,11 @@ package net.sf.j2s.core.builder;
 import java.io.IOException;
 import java.util.zip.ZipFile;
 
-import org.eclipse.core.resources.*;
-import org.eclipse.core.runtime.*;
-
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException;
 import org.eclipse.jdt.internal.compiler.env.AccessRuleSet;
@@ -24,6 +26,7 @@ import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
 import org.eclipse.jdt.internal.compiler.util.SuffixConstants;
 import org.eclipse.jdt.internal.core.util.Util;
 
+@SuppressWarnings("restriction")
 public class ClasspathDirectory extends ClasspathLocation {
 
 IContainer binaryFolder; // includes .class files for a single directory
@@ -47,7 +50,7 @@ public void cleanup() {
 	if (this.annotationZipFile != null) {
 		try {
 			this.annotationZipFile.close();
-		} catch(IOException e) { // ignore it
+		} catch(@SuppressWarnings("unused") IOException e) { // ignore it
 		}
 		this.annotationZipFile = null;
 	}
@@ -76,14 +79,14 @@ String[] directoryList(String qualifiedPackageName) {
 			this.directoryCache.put(qualifiedPackageName, dirList);
 			return dirList;
 		}
-	} catch(CoreException ignored) {
+	} catch(@SuppressWarnings("unused") CoreException ignored) {
 		// ignore
 	}
 	this.directoryCache.put(qualifiedPackageName, this.missingPackageHolder);
 	return null;
 }
 
-boolean doesFileExist(String fileName, String qualifiedPackageName, String qualifiedFullName) {
+boolean doesFileExist(String fileName, String qualifiedPackageName, @SuppressWarnings("unused") String qualifiedFullName) {
 	String[] dirList = directoryList(qualifiedPackageName);
 	if (dirList == null) return false; // most common case
 
@@ -110,11 +113,11 @@ public NameEnvironmentAnswer findClass(String binaryFileName, String qualifiedPa
 	ClassFileReader reader = null;
 	try {
 		reader = Util.newClassFileReader(this.binaryFolder.getFile(new Path(qualifiedBinaryFileName)));
-	} catch (CoreException e) {
+	} catch (@SuppressWarnings("unused") CoreException e) {
 		return null;
-	} catch (ClassFormatException e) {
+	} catch (@SuppressWarnings("unused") ClassFormatException e) {
 		return null;
-	} catch (IOException e) {
+	} catch (@SuppressWarnings("unused") IOException e) {
 		return null;
 	}
 	if (reader != null) {
@@ -122,7 +125,7 @@ public NameEnvironmentAnswer findClass(String binaryFileName, String qualifiedPa
 		if (this.externalAnnotationPath != null) {
 			try {
 				this.annotationZipFile = reader.setExternalAnnotationProvider(this.externalAnnotationPath, fileNameWithoutExtension, this.annotationZipFile, null);
-			} catch (IOException e) {
+			} catch (@SuppressWarnings("unused") IOException e) {
 				// don't let error on annotations fail class reading
 			}
 		}
@@ -141,6 +144,9 @@ public int hashCode() {
 	return this.binaryFolder == null ? super.hashCode() : this.binaryFolder.hashCode();
 }
 
+/**
+ * @param resource  
+ */
 protected boolean isExcluded(IResource resource) {
 	return false;
 }

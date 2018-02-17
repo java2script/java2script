@@ -109,7 +109,7 @@ public class AccessibleObject implements AnnotatedElement {
         return null;
     }
 
-	static Object[] marshallArguments(Class[] parameterTypes, Object[] args)
+	static Object[] marshallArguments(@SuppressWarnings("rawtypes") Class[] parameterTypes, Object[] args)
 			throws IllegalArgumentException {
 		return null;
 	}
@@ -144,22 +144,22 @@ public class AccessibleObject implements AnnotatedElement {
 		return 0.0D;
 	}
 
-	native Class[] getParameterTypesImpl();
+	native Class<?>[] getParameterTypesImpl();
 
 	native int getModifiers();
 
-	native Class[] getExceptionTypesImpl();
+	native Class<?>[] getExceptionTypesImpl();
 
 	native String getSignature();
 
-	native boolean checkAccessibility(Class senderClass, Object receiver);
+	native boolean checkAccessibility(Class<?> senderClass, Object receiver);
 
-	static native void initializeClass(Class clazz);
+	static native void initializeClass(Class<?> clazz);
 
 	/**
 	 * Answer the class at depth. Notes: 1) This method operates on the defining
 	 * classes of methods on stack. NOT the classes of receivers. 2) The item at
 	 * index zero describes the caller of this method.
 	 */
-	static final native Class getStackClass(int depth);
+	static final native Class<?> getStackClass(int depth);
 }

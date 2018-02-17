@@ -92,14 +92,9 @@ public final class StringBuffer extends AbstractStringBuilder implements
      *         <code>null</code>.
      * @since 1.5
      * 
-     * @j2sNative
-     * if (cs == null) {
-     * 	throw new NullPointerException();
-     * }
-     * Clazz.superConstructor(this, StringBuffer, [cs.toString()]);
      */
     public StringBuffer(CharSequence cs) {
-        super(cs.toString());
+        super(cs == null ? null : cs.toString());
     }
 
     /**
@@ -142,7 +137,6 @@ public final class StringBuffer extends AbstractStringBuilder implements
      * @param f the float
      * @return this StringBuffer
      * 
-     * @j2sIgnore
      */
     public StringBuffer append(float f) {
         return append(Float.toString(f));
@@ -155,7 +149,6 @@ public final class StringBuffer extends AbstractStringBuilder implements
      * @param value the integer
      * @return this StringBuffer
      * 
-     * @j2sIgnore
      */
     public StringBuffer append(int i) {
         return append(Integer.toString(i));
@@ -168,7 +161,6 @@ public final class StringBuffer extends AbstractStringBuilder implements
      * @param l the long
      * @return this StringBuffer
      * 
-     * @j2sIgnore
      */
     public StringBuffer append(long l) {
         return append(Long.toString(l));

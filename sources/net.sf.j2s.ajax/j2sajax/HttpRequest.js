@@ -72,7 +72,7 @@ c$.prototype.open = function (method, url, async, user, password) {
 	this.transport.open (method, url, async, user, password);
 	//try {
 	//	if (ClassLoader != null && ClassLoader.isGecko) {
-	//		this.transport.setRequestHeader ("User-Agent", "Java2Script/2.0.0");
+	//		this.transport.setRequestHeader ("User-Agent", "Java2Script/3.1.1");
 	//	}
 	//} catch (e) {
 	//}

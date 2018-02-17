@@ -60,7 +60,7 @@
 			</run>
 		</builder>
 	</extension>
-
+<!-- no longer used BH 12/17
  <extension
        id="InternalASTScriptVisitor"
        name="InternalASTScriptVisitor"
@@ -72,5 +72,5 @@
           class="net.sf.j2s.core.compiler.SWTExtendedVisitor"
           id="SWTASTScriptVisitor"/>
  </extension>
-
+-->
 </plugin>

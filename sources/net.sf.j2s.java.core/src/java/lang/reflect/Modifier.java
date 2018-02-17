@@ -273,10 +273,8 @@ public class Modifier {
 
 		if (sb.length > 0)	/* join the array */
 		/**
-		 * @j2sNativeSrc
-		 * return sb.join (" ");
 		 * @j2sNative
-		 * return a.join (" ");
+		 * return sb.join (" ");
 		 */
 		{
 		    return sb.toString();

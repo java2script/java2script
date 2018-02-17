@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.*;
 import org.eclipse.jdt.internal.compiler.env.AccessRuleSet;
 import org.eclipse.jdt.internal.compiler.env.NameEnvironmentAnswer;
 
+@SuppressWarnings("restriction")
 public abstract class ClasspathLocation {
 
 static ClasspathLocation forSourceFolder(IContainer sourceFolder, IContainer outputFolder, char[][] inclusionPatterns, char[][] exclusionPatterns, boolean ignoreOptionalProblems) {

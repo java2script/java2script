@@ -1,0 +1,1 @@
+plugins no longer work in Eclipse; you have to use dropins. 

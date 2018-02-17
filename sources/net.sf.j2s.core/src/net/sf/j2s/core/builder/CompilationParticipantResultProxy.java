@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.compiler.CategorizedProblem;
  * @author zhou renjian
  *
  */
+@SuppressWarnings("unused")
 public class CompilationParticipantResultProxy extends CompilationParticipantResult {
 	
 	private CompilationParticipantResult context;

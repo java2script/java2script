@@ -12,6 +12,7 @@ package net.sf.j2s.core.builder;
 
 import org.eclipse.jdt.internal.compiler.util.SimpleSet;
 
+@SuppressWarnings("restriction")
 public class WorkQueue {
 
 private SimpleSet needsCompileList;
