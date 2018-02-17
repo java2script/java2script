@@ -13,6 +13,7 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.Window;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLStreamHandlerFactory;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import javax.imageio.ImageIO;
 import javax.swing.JApplet;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -233,7 +235,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 		final Dimension currentSize = new Dimension(currentAppletSize.width, currentAppletSize.height);
 		currentAppletSize.width = width;
 		currentAppletSize.height = height;
-		japplet.setBounds(0, 0, getWidth(), getHeight());
+		japplet.setBounds(0, 0, width, height);
 		japplet.getRootPane().setBounds(0, 0, getWidth(), getHeight());
 		japplet.getContentPane().setBounds(0, 0, getWidth(), getHeight());
 		((JComponent) japplet.getContentPane()).revalidate();
@@ -301,8 +303,11 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 
 	@Override
 	public Image getImage(URL url) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return ImageIO.read(url);
+		} catch (Throwable t) {
+			return null;
+		}
 	}
 
 	@Override

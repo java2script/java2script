@@ -1104,8 +1104,7 @@ public/* SwingJS final */class URL {// implements Serializable {
 	 * @throws IOException
 	 */
 	public Object getContent() throws IOException {
-		BufferedInputStream bis = AjaxURLConnection
-				.getAttachedStreamData((java.net.URL) (Object) this);
+		BufferedInputStream bis = AjaxURLConnection.getAttachedStreamData(this, false);
 		return (bis == null ? openConnection().getInputStream() : bis);
 	}
 

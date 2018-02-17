@@ -204,7 +204,7 @@ class Thread implements Runnable {
      * Thread ID
      */
     private long tid;
-
+    
     /* For generating thread ID */
     private static long threadSeqNumber;
 		public static Thread thisThread;
@@ -277,7 +277,7 @@ class Thread implements Runnable {
 		public static Thread currentThread() {
     	/**
     	 * @j2sNative
-    	 *if (java.lang.Thread.thisThread == "working")
+    	 *if (java.lang.Thread.thisThread === "working")
     	 *  return null;
     	 * 
     	 * 

@@ -213,13 +213,13 @@ public class ByteArrayInputStream extends InputStream {
 		return pos - temp;
 	}
 	
-    /**
-     * BH: Allows resetting of the stream when a new InputStreamReader is invoked
-     */
-    @Override
-    public void resetStream() {
-      mark = pos = 0;
-    }
-
+//    /**
+//     * BH: Allows resetting of the stream when a new InputStreamReader is invoked
+//     */
+//    @Override
+//    public void resetStream() {
+//      mark = pos = 0;
+//    }
+//
 
 }

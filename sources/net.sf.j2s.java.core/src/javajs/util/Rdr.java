@@ -199,14 +199,14 @@ public class Rdr implements GenericLineReader {
   
 
   private static Encoding getUTFEncodingForStream(BufferedInputStream is) throws IOException {
-    /**
-     * @j2sNative
-     * 
-     *  is.resetStream();
-     * 
-     */
-    {
-    }
+//    /**
+//     * @j2sNative
+//     * 
+//     *  is.resetStream();
+//     * 
+//     */
+//    {
+//    }
     byte[] abMagic = new byte[4];
     abMagic[3] = 1;
     try{
@@ -302,15 +302,15 @@ public class Rdr implements GenericLineReader {
   }
 
   public static byte[] getMagic(InputStream is, int n) {
-    byte[] abMagic = new byte[n];    
-    /**
-     * @j2sNative
-     * 
-     * is.resetStream();
-     * 
-     */
-    {
-    }
+    byte[] abMagic = new byte[n];
+//    /**
+//     * @j2sNative
+//     * 
+//     * is.resetStream();
+//     * 
+//     */
+//    {
+//    }
     try {
       is.mark(n + 1);
       is.read(abMagic, 0, n);
@@ -349,6 +349,14 @@ public class Rdr implements GenericLineReader {
   public static BufferedReader getBR(String string) {
     return new BufferedReader(new StringReader(string));
   }
+
+  
+	public static BufferedInputStream toBIS(Object o) {
+		return (AU.isAB(o) ? getBIS((byte[]) o)
+				: o instanceof SB ? getBIS(Rdr.getBytesFromSB((SB) o))
+						: o instanceof String ? getBIS(((String) o).getBytes()) : null);
+	}
+
 
   /**
    * Drill down into a GZIP stack until no more layers.

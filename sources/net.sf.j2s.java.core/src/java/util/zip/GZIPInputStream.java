@@ -80,6 +80,21 @@ class GZIPInputStream extends InflaterInputStream {
         readHeader(in);
     }
 
+//	/**
+//	 * BH: Addeed to allow full reset of a bundled stream
+//	 */
+//	@Override
+//	public void resetStream() {
+//		in.resetStream();
+//		inflater = new Inflater().init(0, true);
+//		try {
+//			readHeader(in);
+//		} catch (IOException e) {
+//			// ignore
+//		}
+//	}
+//
+
 //    /**
 //     * Creates a new input stream with a default buffer size.
 //     * @param in the input stream
@@ -295,4 +310,6 @@ class GZIPInputStream extends InflaterInputStream {
             n -= len;
         }
     }
+    
+
 }

@@ -280,6 +280,22 @@
          	${javaCoreAppletFiles}
         	" />
     </antcall>
+   	
+   	<echo>creating swingjs2.js</echo>
+   	<concat destfile="srcjs/swingjs2.js">
+	   	<filelist dir="srcjs/js" files="jquery.js,j2sJQueryExt.js,j2sApplet.js,j2sClazz.js,SwingJSApplet.js" />
+   	</concat>
+
+   	<echo>copying srcjs files into site</echo>
+    <copy todir="site/swingjs/js">
+      <fileset dir="srcjs"/>
+    </copy>
+   		
+   	<echo>TODO: Could delete demo html files? </echo>
+   	
+   	<echo>creating SwingJS-site.zip </echo>
+   	<zip destfile="SwingJS-site.zip" basedir="site" />
+   	
   </target>
 
 

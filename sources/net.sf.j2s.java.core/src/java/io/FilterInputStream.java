@@ -177,6 +177,16 @@ public class FilterInputStream extends InputStream {
 		in.reset();
 	}
 
+//	  /**
+//	   * BH: Added to allow full reset of a bundled stream
+//	   */
+//	  @Override
+//	  public void resetStream() {
+//	    in.resetStream();
+//	  }
+//
+
+	
 	/**
 	 * Skips <code>count</code> number of bytes in this InputStream.
 	 * Subsequent <code>read()</code>'s will not return these bytes unless

@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
-import javajs.api.ResettableStream;
 import javajs.api.js.J2SObjectInterface;
 
 /**
@@ -74,48 +73,44 @@ public class AjaxURLConnection extends URLConnection {
 
 	@Override
 	public InputStream getInputStream() {
-		BufferedInputStream bis = getAttachedStreamData(url);
-		if (bis != null)
-			return bis;
-		Object o = doAjax(true);
-		return (
-				AU.isAB(o) ? Rdr.getBIS((byte[]) o) 
-				: o instanceof SB ? Rdr.getBIS(Rdr.getBytesFromSB((SB) o)) 
-				: o instanceof String ? Rdr.getBIS(((String) o).getBytes()) 
-				: bis
-		);
+		BufferedInputStream is = getAttachedStreamData(url, false);
+		return (is == null ? attachStreamData(url, doAjax(true)) : is);
 	}
-  @SuppressWarnings({ "unused", "null" })
+
 	/**
-	 * J2S will attach a BufferedInputStream to any URL that is 
+	 * J2S will attach the data (String, SB, or byte[]) to any URL that is 
 	 * retrieved using a ClassLoader. This improves performance by
 	 * not going back to the server every time a second time, since
 	 * the first time in Java is usually just to see if it exists. 
 	 * 
-	 * This stream can be re-used, but it has to be reset. Java for some 
-	 * reason does not allow  a BufferedInputStream to fully reset its 
-	 * inner streams. We enable that by force-casting the stream as a 
-	 * javax.io stream and then applying resetStream() to that. 
-	 * 
-	 * 
 	 * @param url
-	 * @return
+	 * @return String, SB, or byte[]
 	 */
-	public static BufferedInputStream getAttachedStreamData(URL url) {
-		BufferedInputStream bis = null;
+	public static BufferedInputStream getAttachedStreamData(URL url, boolean andDelete) {
+	
+		Object data = null;
 		/**
 		 * @j2sNative
 		 * 
-		 *            bis = url._streamData;
+		 *       data = url._streamData;
+		 *       if (andDelete) url._streamData = null;
 		 */
 		{
 		}
-		if (bis != null)
-			((ResettableStream) bis).resetStream();
-		return bis;
+		return (data == null ? null : Rdr.toBIS(data));
 	}
 
-	/**
+   public static BufferedInputStream attachStreamData(URL url, Object o) {
+	   /**
+	    * @j2sNative
+	    * 
+	    *   url._streamData = o;
+	    */
+	   
+	    return (o == null ? null : Rdr.toBIS(o));
+  }
+
+  /**
    * @return javajs.util.SB or byte[], depending upon the file type
    */
   public Object getContents() {

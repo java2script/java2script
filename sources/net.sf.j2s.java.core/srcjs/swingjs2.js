@@ -10652,7 +10652,7 @@ return jQuery;
 		};
 	};
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
-// j2sApplet.js (based on JmolCore.js)
+// j2sCore.js (based on JmolCore.js)
 
 // BH 1/8/2018 10:27:46 PM SwingJS2
 // BH 12/22/2017 1:18:42 PM adds j2sargs for setting arguments
@@ -13071,6 +13071,9 @@ J2S._getResourcePath = function(path, isJavaPath) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+
+// BH 2/13/2018 6:24:44 AM adds String.copyValueOf (two forms)
+// BH 2/7/2018 7:47:07 PM adds System.out.flush and System.err.flush
 // BH 2/1/2018 12:14:20 AM fix for new int[128][] not nulls
 // BH 1/9/2018 8:40:52 AM fully running SwingJS2; adds String.isEmpty()
 // BH 12/16/2017 5:53:47 PM refactored; removed older unused parts
@@ -15575,7 +15578,10 @@ java.lang.System = System = {
   currentTimeMillis : function () {
     return new Date ().getTime ();
   },
-  exit : function() { swingjs.JSToolkit && swingjs.JSToolkit.exit() },
+  exit : function() {
+  debugger 
+  swingjs.JSToolkit && swingjs.JSToolkit.exit() 
+  },
   gc : function() {}, // bh
   getProperties : function () {
     return System.props;
@@ -15648,6 +15654,8 @@ Sys.out.printf = Sys.out.printf$S$OA = Sys.out.format = Sys.out.format$S$OA = fu
 
 Sys.out.println = Sys.out.println$O = Sys.out.println$Z = Sys.out.println$I = Sys.out.println$S = Sys.out.println$C = Sys.out.println = function(s) {
 
+Sys.out.flush = function() {}
+
 if (("" + s).indexOf("TypeError") >= 0) {
    debugger;
 }
@@ -15689,6 +15697,8 @@ Sys.err.println$F = Sys.err.println$D = function(f) {var s = "" + f; Sys.err.pri
 Sys.err.write = function (buf, offset, len) {
   Sys.err.print(String.instantialize(buf).substring(offset, offset+len));
 };
+
+Sys.err.flush = function() {}
 
 })(Clazz.Console, System);
 
@@ -16693,8 +16703,6 @@ return Clazz.array(Byte.TYPE, -1, arrs);
 sp.contains$S = function(a) {return this.indexOf(a) >= 0}  // bh added
 sp.compareTo$S = sp.compareTo$TT = function(a){return this > a ? 1 : this < a ? -1 : 0} // bh added
 
-
-
 sp.toCharArray=function(){
 var result=new Array(this.length);
 for(var i=0;i<this.length;i++){
@@ -16959,6 +16967,16 @@ default:
 }
 
 })(Clazz._Encoding);
+
+String.copyValueOf$CA$I$I = function(data,offset,count) {
+ var s = "";
+ for (var pt = offset, n = offset+count;pt < n;pt++)s += data[pt];
+ return s;
+}
+String.copyValueOf$CA = function(data) {
+ return sp.copyValueOf$CA$I$I(data, 0, data.length);
+}
+ 
 
 C$=Clazz.newClass(java.lang,"Character",function(){
 if (typeof arguments[0] != "object")this.c$(arguments[0]);
@@ -18053,7 +18071,7 @@ Clazz.cloneFinals = function () {
   return o;
 };
 */
-// SJSApplet.js
+// SwingJSApplet.js
 
 // generic SwingJS Applet
 

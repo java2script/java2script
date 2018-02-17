@@ -1,4 +1,4 @@
-// SJSApplet.js
+// SwingJSApplet.js
 
 // generic SwingJS Applet
 

@@ -92,6 +92,16 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
     this.zc = charset;
   }
 
+//  /**
+//   * BH: Addeed to allow full reset of a bundled stream
+//   */
+//  @Override
+//  public void resetStream() {
+//    in.resetStream();
+//    inflater =  newInflater();
+//  }
+//
+
   private static Inflater newInflater() {
     return (Inflater) new Inflater().init(0, true);
   }

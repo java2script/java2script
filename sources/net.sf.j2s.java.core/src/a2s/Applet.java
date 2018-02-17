@@ -55,8 +55,13 @@ public class Applet extends JApplet implements A2SContainer {
 //	public void init() {
 //	}
 
+	private boolean paintMeNotified;
+	
 	protected void paintMe(Graphics g) {
-		System.out.println("paintMe has not been implemented!");
+		if (!paintMeNotified) {
+			System.out.println("paintMe has not been implemented for " + this);
+			paintMeNotified = true;
+		}
 	}
 
 	

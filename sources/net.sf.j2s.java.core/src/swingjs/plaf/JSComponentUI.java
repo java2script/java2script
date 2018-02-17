@@ -1103,8 +1103,9 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 				if (jc.getFrameViewer().isApplet) {
 					// If the applet's root pane, we insert it into the applet's content
 					// layer div
-					swingjs.JSToolkit.getHTML5Applet(jc)._getContentLayer()
-							.appendChild(outerNode);
+					DOMNode cdiv = swingjs.JSToolkit.getHTML5Applet(jc)._getContentLayer();
+					if (cdiv != null)
+							cdiv.appendChild(outerNode);
 //				} else {
 					// BH: pretty sure this next is totally unnecessary; would never run?
 					// This is the root pane of a JFrame, JDialog, JWindow, etc.
