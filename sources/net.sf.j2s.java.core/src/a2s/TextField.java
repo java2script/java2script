@@ -30,16 +30,17 @@ public class TextField extends JTextField {
 
 			@Override
 			public void insertUpdate(DocumentEvent e) {
+				textListener.textValueChanged(new TextEvent(this, 0));
 			}
 
 			@Override
 			public void removeUpdate(DocumentEvent e) {
-				// TODO Auto-generated method stub
-
+				textListener.textValueChanged(new TextEvent(this, 0));
 			}
 
 			@Override
 			public void changedUpdate(DocumentEvent e) {
+				// not what you think. -- only when the style changes
 				textListener.textValueChanged(new TextEvent(this, 0));
 			}
 		});
