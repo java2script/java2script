@@ -8,6 +8,7 @@
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
 
+// BH 2/20/2018 12:59:28 AM adds Character.isISOControl
 // BH 2/13/2018 6:24:44 AM adds String.copyValueOf (two forms)
 // BH 2/7/2018 7:47:07 PM adds System.out.flush and System.err.flush
 // BH 2/1/2018 12:14:20 AM fix for new int[128][] not nulls
@@ -3975,38 +3976,56 @@ function(c){
 c = c.charCodeAt(0);
 return (48 <= c && c <= 57);
 }, 1);
-m$(C$,"isUpperCase",
+
+m$(C$,"isISOControl",
 function(c){
-c = c.charCodeAt(0);
-return (65 <= c && c <= 90);
+if (typeof c == "string")
+  c = c.charCodeAt(0);
+return (c < 0x1F || 0x7F <= c && c <= 0x9F);
 }, 1);
-m$(C$,"isLowerCase",
-function(c){
-c = c.charCodeAt(0);
-return (97 <= c && c <= 122);
-}, 1);
-m$(C$,"isWhitespace",
-function(c){
-c = (c).charCodeAt(0);
-return (c >= 0x1c && c <= 0x20 || c >= 0x9 && c <= 0xd || c == 0x1680
-  || c >= 0x2000 && c != 0x2007 && (c <= 0x200b || c == 0x2028 || c == 0x2029 || c == 0x3000));
-}, 1);
+
 m$(C$,"isLetter",
 function(c){
-c = c.charCodeAt(0);
+if (typeof c == "string")
+  c = c.charCodeAt(0);
 return (65 <= c && c <= 90 || 97 <= c && c <= 122);
 }, 1);
 m$(C$,"isLetterOrDigit",
 function(c){
-c = c.charCodeAt(0);
+if (typeof c == "string")
+  c = c.charCodeAt(0);
 return (65 <= c && c <= 90 || 97 <= c && c <= 122 || 48 <= c && c <= 57);
+}, 1);
+m$(C$,"isLowerCase",
+function(c){
+if (typeof c == "string")
+    c = c.charCodeAt(0);
+return (97 <= c && c <= 122);
+}, 1);
+m$(C$,"isSpace",
+function(c){
+ var i = c.charCodeAt(0);
+ return (i==0x20||i==0x9||i==0xA||i==0xC||i==0xD);
 }, 1);
 m$(C$,"isSpaceChar",
 function(c){
- var i = c.charCodeAt(0);
+ var i = (typeof c == "string" ? c.charCodeAt(0) : c);
 if(i==0x20||i==0xa0||i==0x1680)return true;
 if(i<0x2000)return false;
 return i<=0x200b||i==0x2028||i==0x2029||i==0x202f||i==0x3000;
+}, 1);
+m$(C$,"isUpperCase",
+function(c){
+if (typeof c == "string")
+  c = c.charCodeAt(0);
+return (65 <= c && c <= 90);
+}, 1);
+m$(C$,"isWhitespace",
+function(c){
+if (typeof c == "string")
+ c = c.charCodeAt(0);
+return (c >= 0x1c && c <= 0x20 || c >= 0x9 && c <= 0xd || c == 0x1680
+  || c >= 0x2000 && c != 0x2007 && (c <= 0x200b || c == 0x2028 || c == 0x2029 || c == 0x3000));
 }, 1);
 m$(C$,"digit",
 function(c,radix){

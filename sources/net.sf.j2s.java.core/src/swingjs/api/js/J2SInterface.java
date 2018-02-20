@@ -56,6 +56,7 @@ public interface J2SInterface {
 	 * @return
 	 */
 	String _getDefaultLanguage(boolean isAll);
-
+	
+	int _getKeyModifiers(Object jQueryEvent);
 }
 
