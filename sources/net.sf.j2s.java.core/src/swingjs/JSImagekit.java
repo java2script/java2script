@@ -105,14 +105,22 @@ public class JSImagekit implements ImageConsumer {
 	@Override
 	public void setPixels(int x, int y, int w, int h, ColorModel model,
 			int[] pixels, int off, int scansize) {
-		colorModel = model;
-		width = w;
-		height = h;
-		this.x = x;
-		this.y = y;
-		this.off = off;
-		this.scansize = scansize;
-		this.pixels = pixels;
+        if(this.pixels == null) {
+            colorModel = model;
+            this.pixels  = new int[width*height];
+        }
+        for(int n=0, j = y; n<h; n++, j++) {
+          for(int m=0, i = x; m<w; m++, i++) {
+             int k = i+j*width;
+             this.pixels[k] = pixels[ (j-y)*scansize+(i-x)+off];
+          }
+        }
+
+//		this.x = x;
+//		this.y = y;
+//		this.off = off;
+//		this.scansize = scansize;
+//		this.pixels = pixels;
 	}
 
 	@Override

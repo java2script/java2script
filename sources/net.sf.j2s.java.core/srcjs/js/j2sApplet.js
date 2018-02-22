@@ -1,6 +1,5 @@
 // j2sCore.js (based on JmolCore.js)
 
-// BH 2/20/2018 12:08:08 AM adds J2S._getKeyModifiers
 // BH 1/8/2018 10:27:46 PM SwingJS2
 // BH 12/22/2017 1:18:42 PM adds j2sargs for setting arguments
 // BH 11/19/2017 3:55:04 AM adding support for swingjs2.js; adds static j2sHeadless=true;

@@ -10654,7 +10654,6 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sCore.js (based on JmolCore.js)
 
-// BH 2/20/2018 12:08:08 AM adds J2S._getKeyModifiers
 // BH 1/8/2018 10:27:46 PM SwingJS2
 // BH 12/22/2017 1:18:42 PM adds j2sargs for setting arguments
 // BH 11/19/2017 3:55:04 AM adding support for swingjs2.js; adds static j2sHeadless=true;
@@ -13077,7 +13076,7 @@ J2S._getResourcePath = function(path, isJavaPath) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
-
+// BH 2/22/2018 12:34:07 AM array.clone() fix
 // BH 2/20/2018 12:59:28 AM adds Character.isISOControl
 // BH 2/13/2018 6:24:44 AM adds String.copyValueOf (two forms)
 // BH 2/7/2018 7:47:07 PM adds System.out.flush and System.err.flush
@@ -13283,7 +13282,7 @@ Clazz.assert = function(clazz, obj, tf, msg) {
 
 Clazz.clone = function(me) { 
   // BH allows @j2sNative access without super constructor
-  return appendMap(me.__ARRAYTYPE ? Clazz.array(me.__BASECLASS, me.__ARRAYTYPE, -1, [-2, me])
+  return appendMap(me.__ARRAYTYPE ? Clazz.array(me.__BASECLASS, me.__ARRAYTYPE, -1, me)
    : new me.constructor(inheritArgs), me); 
 }
 

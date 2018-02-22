@@ -837,6 +837,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 *         .
 	 */
 	public WritableRaster getRaster() {
+		checkHavePixels();
 		return raster;
 	}
 
@@ -1702,6 +1703,13 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	  _pix = toIntARGB(data);
 		_imgNode = canvas;
 		((DataBufferInt) raster.getDataBuffer()).data = _pix;
+		/**
+		 * in case this is a sun.awt.image.IntegerComponentRaster
+		 * @j2sNative
+		 * 
+		 * 	this.raster.data = this._pix;
+		 * 
+		 */
 		_havePix = true;
 	}
 
