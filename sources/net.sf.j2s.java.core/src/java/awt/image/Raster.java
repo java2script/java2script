@@ -125,6 +125,12 @@ import sun.awt.image.SunWritableRaster;
 
 public class Raster {
 
+	private BufferedImage image;
+
+	public void setImage(BufferedImage image) {
+		this.image = image;
+	}
+
     /**
      * The SampleModel that describes how pixels from this Raster
      * are stored in the DataBuffer.

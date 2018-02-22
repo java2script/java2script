@@ -322,6 +322,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 					0x0 // Alpha
 			);
 			raster = colorModel.createCompatibleWritableRaster(width, height);
+			raster.setImage(this);
 			_pix = ((DataBufferInt) raster.getDataBuffer()).data;
 		}
 			break;
@@ -330,6 +331,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		case TYPE_INT_ARGB: {
 			colorModel = ColorModel.getRGBdefault();
 			raster = colorModel.createCompatibleWritableRaster(width, height);
+			raster.setImage(this);
 			_pix = ((DataBufferInt) raster.getDataBuffer()).data;
 		}
 			break;
@@ -631,6 +633,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 
 		colorModel = cm;
 		this.raster = raster;
+		raster.setImage(this);
 		_pix = ((DataBufferInt) raster.getDataBuffer()).data;
 		this.properties = properties;
 		// int numBands = raster.getNumBands();
@@ -837,7 +840,6 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 *         .
 	 */
 	public WritableRaster getRaster() {
-		checkHavePixels();
 		return raster;
 	}
 
@@ -946,7 +948,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * 
 	 * @return true if pixels had to be set
 	 */
-	private boolean checkHavePixels() {
+	public boolean checkHavePixels() {
 		if ((_imgNode != null || _g != null) && !_havePix) {
 			setPixels();
 			return true;
