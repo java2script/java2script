@@ -388,7 +388,7 @@ public class JSGraphics2D //extends SunGraphics2D
 	private DOMNode getImageNode(Image img) {
 		backgroundPainted = true;
 		DOMNode imgNode = DOMNode.getImageNode(img);
-		return (imgNode == null ? JSToolkit.getCompositor().createImageNode(img) : imgNode);
+		return (imgNode == null ? JSGraphicsCompositor.createImageNode(img) : imgNode);
 	}
 
 	private void observe(Image img, ImageObserver observer, boolean isOK) {
@@ -840,12 +840,15 @@ public class JSGraphics2D //extends SunGraphics2D
 
 	
 	public void setPaintMode() {
+		setComposite(AlphaComposite.SrcOver);
 		JSUtil.notImplemented(null);
 	}
 
 	
-	public void setXORMode(Color c1) {
-		JSUtil.notImplemented(null);
+	public void setXORMode(Color c) {
+		if (c == null)
+			throw new IllegalArgumentException("null XORColor");
+		setComposite(AlphaComposite.Xor);
 	}
 
 	public Rectangle getClipBounds() {
@@ -884,7 +887,7 @@ public class JSGraphics2D //extends SunGraphics2D
 		boolean isValid = (comp == null || currentComposite == null ||
 				(comp instanceof AlphaComposite)
 				   && (newRule = ((AlphaComposite) comp).getRule()) != currentComposite.getRule());
-		if (isValid && JSToolkit.setGraphicsCompositeAlpha(this, newRule)) {
+		if (isValid && JSGraphicsCompositor.setGraphicsCompositeAlpha(this, newRule)) {
 			currentComposite = (AlphaComposite) comp;
 		}
 		setAlpha(comp == null ? 1 : ((AlphaComposite) comp).getAlpha());
@@ -896,7 +899,7 @@ public class JSGraphics2D //extends SunGraphics2D
 	
 	
 	public void drawImage(BufferedImage img, BufferedImageOp op, int x, int y) {
-		JSToolkit.drawImageOp(this, img, op, x, y);
+		JSGraphicsCompositor.drawImageOp(this, img, op, x, y);
 	}
 
 	public void setAlpha(float f) {

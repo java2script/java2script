@@ -14,6 +14,7 @@ import java.awt.FontMetrics;
 import java.awt.Frame;
 import java.awt.GraphicsConfiguration;
 import java.awt.Image;
+import java.awt.JSComponent;
 import java.awt.JobAttributes;
 import java.awt.PageAttributes;
 import java.awt.PrintJob;
@@ -22,15 +23,9 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.InvalidDnDOperationException;
 import java.awt.dnd.peer.DragSourceContextPeer;
-import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
 import java.awt.image.ColorModel;
 import java.awt.image.ImageObserver;
 import java.awt.image.ImageProducer;
-import java.awt.image.Raster;
-import java.awt.image.RasterOp;
-import java.awt.image.WritableRaster;
-import java.awt.JSComponent;
 import java.awt.peer.DialogPeer;
 import java.awt.peer.FramePeer;
 import java.awt.peer.LightweightPeer;
@@ -661,32 +656,6 @@ public class JSToolkit extends SunToolkit {
 		};
 		dispatch(r, 50, 0);
 		return true;
-	}
-
-	private static JSGraphicsCompositor compositor;
-
-  static JSGraphicsCompositor getCompositor() {
-		return (compositor == null ? compositor = (JSGraphicsCompositor) Interface
-				.getInstance("swingjs.JSGraphicsCompositor", false) : compositor);
-	}
-
-	public static boolean setGraphicsCompositeAlpha(JSGraphics2D g, int rule) {
-		return getCompositor().setGraphicsCompositeAlpha(g, rule);
-	}
-
-	public static boolean drawImageOp(JSGraphics2D g,
-			BufferedImage img, BufferedImageOp op, int x, int y) {
-		return getCompositor().drawImageOp(g, img, op, x, y);
-	}
-
-	public static WritableRaster filterRaster(Raster src, WritableRaster dst,
-			RasterOp op) {
-		return getCompositor().filterRaster(src, dst, op);
-	}
-
-	public static BufferedImage filterImage(BufferedImage src, BufferedImage dst,
-			BufferedImageOp op) {
-		return getCompositor().filterImage(src, dst, op);
 	}
 
 	private static JSAudio audioPlayer;

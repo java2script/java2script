@@ -76,6 +76,7 @@ public abstract class JSComponent extends Component {
 	 * 
 	 */
 
+	protected boolean isAppletFrame;
 	public boolean isFramedApplet;
 
 	public String htmlName;

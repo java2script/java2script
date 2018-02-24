@@ -39,6 +39,7 @@ import sun.awt.image.BufImgSurfaceData;
 //import sun.java2d.loops.XORComposite;
 import sun.java2d.loops.CompositeType;
 //import sun.java2d.loops.Blit;
+import sun.java2d.loops.XORComposite;
 
 @SuppressWarnings({"unused"})
 public class SunCompositeContext implements CompositeContext {
@@ -62,20 +63,20 @@ public class SunCompositeContext implements CompositeContext {
         this.comptype = CompositeType.forAlphaComposite(ac);
     }
 
-// SwingJS not supported    public SunCompositeContext(XORComposite xc,
-//                               ColorModel s, ColorModel d)
-//    {
-//        if (s == null) {
-//            throw new NullPointerException("Source color model cannot be null");
-//        }
-//        if (d == null) {
-//            throw new NullPointerException("Destination color model cannot be null");
-//        }
-//        srcCM = s;
-//        dstCM = d;
-//        this.composite = xc;
-//        this.comptype = CompositeType.Xor;
-//    }
+    public SunCompositeContext(XORComposite xc,
+                               ColorModel s, ColorModel d)
+    {
+        if (s == null) {
+            throw new NullPointerException("Source color model cannot be null");
+        }
+        if (d == null) {
+            throw new NullPointerException("Destination color model cannot be null");
+        }
+        srcCM = s;
+        dstCM = d;
+        this.composite = xc;
+        this.comptype = CompositeType.Xor;
+    }
 
     /**
      * Release resources allocated for context.

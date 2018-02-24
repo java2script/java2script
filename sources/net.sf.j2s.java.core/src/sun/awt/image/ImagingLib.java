@@ -34,7 +34,7 @@ import java.awt.image.Raster;
 import java.awt.image.RasterOp;
 import java.awt.image.WritableRaster;
 
-import swingjs.JSToolkit;
+import swingjs.JSGraphicsCompositor;
 
 /**
  * This class provides a hook to access platform-specific
@@ -153,7 +153,7 @@ public class ImagingLib {
     if (dst == null) {
         dst = op.createCompatibleDestRaster(src);
     }
-    	return JSToolkit.filterRaster(src, dst, op);
+    	return JSGraphicsCompositor.filterRaster(src, dst, op);
 ////        if (useLib == false) {
 ////            return null;
 ////        }
@@ -234,7 +234,7 @@ public class ImagingLib {
             dst = op.createCompatibleDestImage(src, null);
         }
         
-        return JSToolkit.filterImage(src, dst, op);
+        return JSGraphicsCompositor.filterImage(src, dst, op);
 
 //        BufferedImage retBI = null;
 //        switch (getNativeOpIndex(op.getClass())) {
