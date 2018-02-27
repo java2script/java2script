@@ -769,6 +769,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		if (textNode != null) {
 			prop = "innerHTML";
 			obj = textNode;
+			text = PT.rep(text, "<", "&lt;");
 		} else if (valueNode != null) {
 			prop = "value";
 			obj = valueNode;

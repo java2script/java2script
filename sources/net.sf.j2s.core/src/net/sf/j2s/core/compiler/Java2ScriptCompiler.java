@@ -382,6 +382,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		if (dir.equals(target))
 			return;
 		File[] files = dir.listFiles(filter);
+		System.out.println("copy nonclassFiles " + dir + " to " + target + " [" + (files != null ? files.length : "") + "]");
 		File f = null;
 		if (files != null)
 			try {
@@ -396,7 +397,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 					} else {
 							Files.copy(f.toPath(), new File(target, f.getName()).toPath(),
 									StandardCopyOption.REPLACE_EXISTING);
-							System.err.println("copied " + f + " to " + target);
+							System.  err.println("copied " + f + " to " + target);
 					}
 				}
 			} catch (IOException e1) {

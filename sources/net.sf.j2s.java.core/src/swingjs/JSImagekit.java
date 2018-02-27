@@ -225,8 +225,8 @@ public class JSImagekit implements ImageConsumer {
 		return ((b[pt] & 0xFF) << 8) + (b[pt + 1] & 0xFF);
 	}
 
-	private static int getSourceType(byte[] b) {
-		return ((b[0] & 0xFF) == 0x89 && b[1] == 'P' && b[2] == 'N' && b[3] == 'G' ? PNG 
+	public static int getSourceType(byte[] b) {
+		return (b == null ? UNK : (b[0] & 0xFF) == 0x89 && b[1] == 'P' && b[2] == 'N' && b[3] == 'G' ? PNG 
 			  : (b[0] & 0xFF) == 0xFF && (b[1] & 0xFF) == 0xD8 ? JPG // FFD8
 			  : b[0] == 'G' && b[1] == 'I' && b[2] == 'F' ? GIF
 				: b[0] == 'B' && b[1] == 'M' ? BMP 
