@@ -67,7 +67,6 @@ import java.util.Vector;
 
 import sun.awt.AppContext;
 import sun.awt.SunToolkit;
-import swingjs.JSImagekit;
 import swingjs.JSToolkit;
 
 /**
