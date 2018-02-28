@@ -841,7 +841,6 @@ public class JSGraphics2D //extends SunGraphics2D
 	
 	public void setPaintMode() {
 		setComposite(AlphaComposite.SrcOver);
-		JSUtil.notImplemented(null);
 	}
 
 	
