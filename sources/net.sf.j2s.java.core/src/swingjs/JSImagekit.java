@@ -105,14 +105,22 @@ public class JSImagekit implements ImageConsumer {
 	@Override
 	public void setPixels(int x, int y, int w, int h, ColorModel model,
 			int[] pixels, int off, int scansize) {
-		colorModel = model;
-		width = w;
-		height = h;
-		this.x = x;
-		this.y = y;
-		this.off = off;
-		this.scansize = scansize;
-		this.pixels = pixels;
+        if(this.pixels == null) {
+            colorModel = model;
+            this.pixels  = new int[width*height];
+        }
+        for(int n=0, j = y; n<h; n++, j++) {
+          for(int m=0, i = x; m<w; m++, i++) {
+             int k = i+j*width;
+             this.pixels[k] = pixels[ (j-y)*scansize+(i-x)+off];
+          }
+        }
+
+//		this.x = x;
+//		this.y = y;
+//		this.off = off;
+//		this.scansize = scansize;
+//		this.pixels = pixels;
 	}
 
 	@Override
@@ -217,8 +225,8 @@ public class JSImagekit implements ImageConsumer {
 		return ((b[pt] & 0xFF) << 8) + (b[pt + 1] & 0xFF);
 	}
 
-	private static int getSourceType(byte[] b) {
-		return ((b[0] & 0xFF) == 0x89 && b[1] == 'P' && b[2] == 'N' && b[3] == 'G' ? PNG 
+	public static int getSourceType(byte[] b) {
+		return (b == null ? UNK : (b[0] & 0xFF) == 0x89 && b[1] == 'P' && b[2] == 'N' && b[3] == 'G' ? PNG 
 			  : (b[0] & 0xFF) == 0xFF && (b[1] & 0xFF) == 0xD8 ? JPG // FFD8
 			  : b[0] == 'G' && b[1] == 'I' && b[2] == 'F' ? GIF
 				: b[0] == 'B' && b[1] == 'M' ? BMP 

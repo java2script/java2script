@@ -49,7 +49,13 @@ public class Checkbox extends JCheckBox {
 
 	public void setState(boolean b) {
 		setSelected(b);
-	}
+	}   
+	
+	public void setCheckboxGroup(CheckboxGroup group) throws HeadlessException {
+            if (group != null)
+            	group.add(this);
+    }
+    
 
     protected void fireActionPerformed(ActionEvent event) {
     	A2SEvent.addListener(null, this);

@@ -28,7 +28,6 @@
 package java.awt;
 
 import java.awt.peer.ComponentPeer;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.JComponent;
@@ -49,6 +48,22 @@ import swingjs.api.js.HTML5Canvas;
  * 
  */
 public abstract class JSComponent extends Component {
+
+	/**
+	 * overridden in Applet
+	 * 
+	 * SwingJS Applet repurposes resize(width, height) to call
+	 * J2S.Applet.prototype._resizeApplet in order to take care
+	 * of all the HTML5 business associated with this applet. 
+	 * 
+	 * 
+	 * @param width
+	 * @param height
+	 */
+	@SuppressWarnings("deprecation")
+	public void resizeOriginal(int width, int height) {
+		resize(width, height);
+	}
 
 	/**
 	 * For modal dialogs, make sure the parent component, if there is one, is a
@@ -76,6 +91,7 @@ public abstract class JSComponent extends Component {
 	 * 
 	 */
 
+	protected boolean isAppletFrame;
 	public boolean isFramedApplet;
 
 	public String htmlName;

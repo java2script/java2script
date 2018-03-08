@@ -33,6 +33,9 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -51,6 +54,7 @@ import javax.swing.text.EditorKit;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.TextAction;
 import swingjs.JSToolkit;
+import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 
 /**
@@ -206,13 +210,57 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	/**
 	 * called by JSComponentUI.bindJSEvents
 	 * 
-	 * @return handled
+	 * @return handled 
+	 * 
+	 * 
 	 */
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
-		//System.out.println("Handling for " + id + " " + eventType + " "	+ jQueryEvent);
+		// System.out.println("Handling for " + id + " " + eventType + " " +
+		// jQueryEvent);
 		JTextComponent t = (JTextComponent) jc;
-		return (t.isEditable() ? textListener.handleJSTextEvent(this, eventType, jQueryEvent) : false);
+		if (!t.isEditable())
+			return false;
+		switch (eventType) {
+		case KeyEvent.KEY_PRESSED:
+			// note that events are bundled here into one eventType
+			int keyCode = 0;
+			int modifiers = JSUtil.J2S._getKeyModifiers(jQueryEvent);
+			char keyChar = '\0';
+			String type = null;
+			/**
+			 * @j2sNative
+			 * 
+			 * keyCode = jQueryEvent.keyCode;
+			 * keyChar = jQueryEvent.key;
+			 * type = jQueryEvent.type;
+			 * 
+			 */
+			switch (type) {
+			case "keydown":
+				eventType = KeyEvent.KEY_PRESSED;
+				break;
+			case "keypress":
+				eventType = KeyEvent.KEY_TYPED;
+				break;
+			case "keyup":
+				eventType = KeyEvent.KEY_RELEASED;
+				break;				
+			}
+			KeyEvent keyEvent = new KeyEvent(jc, eventType, System.currentTimeMillis(), modifiers, keyCode, keyChar);
+			jc.dispatchEvent(keyEvent);
+			if (keyEvent.isConsumed()) {
+				/**
+				 * @j2sNative
+				 * 
+				 * jQueryEvent.preventDefault();
+				 * jQueryEvent.stopPropagation();
+				 */
+				return true;
+			}
+			break;
+		}
+		return textListener.handleJSTextEvent(this, eventType, jQueryEvent);
 	}
 
 	/**
@@ -2761,6 +2809,5 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		// In addition, if color == null, then no text is shown		
 		return (!editor.isEnabled() ? editor.getDisabledTextColor() : !editor.isEditable() ? inactiveForeground : fg);
 	}
-
 
 }

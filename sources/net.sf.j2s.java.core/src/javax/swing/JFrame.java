@@ -150,6 +150,14 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 	 */
 	protected JRootPane rootPane;
 
+    public void add(Component comp, Object constraints) {
+    	if (comp instanceof JApplet) {
+    		isAppletFrame = true;
+    		((JApplet) comp).getLayeredPane().isFramedApplet = true;
+    	}
+    	super.add(comp, constraints);
+     }
+
 	/**
 	 * If true then calls to <code>add</code> and <code>setLayout</code> will be
 	 * forwarded to the <code>contentPane</code>. This is initially false, but is

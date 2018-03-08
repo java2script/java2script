@@ -1811,7 +1811,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	private final static String CHARCODEAT0 = ".$c()";
 
-	private final static String defaultNonQualified = "javajs.api.js;swingjs.api.js;swingjs.JSToolkit;";
+	private final static String defaultNonQualified = "javajs.api.js;swingjs.api.js;swingjs.JSToolkit;netscape;";
 
 	private static String[] nonQualifiedPackages;
 

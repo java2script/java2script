@@ -36,6 +36,10 @@ import java.awt.Image;
 import java.awt.Panel;
 import java.util.Locale;
 
+import swingjs.JSToolkit;
+import swingjs.JSUtil;
+import swingjs.api.js.HTML5Applet;
+
 /**
  * An applet is a small program that is intended not to be run on
  * its own, but rather to be embedded inside another application.
@@ -50,6 +54,19 @@ import java.util.Locale;
  * @since       JDK1.0
  */
 public class Applet extends Panel {
+
+	static {
+		
+		/**
+		 * SwingJS providing unqualified resize(w,h) as a convenience only
+		 * 
+		 * @j2sNative
+		 * 
+		 * C$.prototype.resize = C$.prototype.resize$I$I;  
+		 *  
+		 */
+
+	}
 
     /**
      * Constructs a new Applet.
@@ -200,9 +217,18 @@ public class Applet extends Panel {
      * @param   width    the new requested width for the applet.
      * @param   height   the new requested height for the applet.
      */
-    @SuppressWarnings("deprecation")
 	@Override
-		public void resize(int width, int height) {
+	public void resize(int width, int height) {
+		if (appletViewer == null) {
+	    	resizeOriginal(width, height);
+		} else {
+			// use J2S.Applet._resizeApplet.
+			appletViewer.html5Applet._resizeApplet(new int[] {width, height});
+		}
+    }
+	
+    @SuppressWarnings("deprecation")
+    public void resizeOriginal(int width, int height) {
         Dimension d = size();
         if ((d.width != width) || (d.height != height)) {
             super.resize(width, height);
@@ -210,9 +236,9 @@ public class Applet extends Panel {
                 stub.appletResize(width, height);
             }
         }
-    }
+	}
 
-    /**
+	/**
      * Requests that this applet be resized.
      *
      * @param   d   an object giving the new width and height.

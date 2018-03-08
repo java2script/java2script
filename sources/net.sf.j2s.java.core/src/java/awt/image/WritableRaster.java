@@ -50,7 +50,7 @@ import java.awt.Point;
  * in the Raster class.
  */
 public class WritableRaster extends Raster {
-
+	
 	public void setParams(SampleModel model,
 			DataBuffer dataBuffer, Point origin) {
 		// for subclasses IntegerInterleaved and ByteInterleaved 

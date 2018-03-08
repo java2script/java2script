@@ -3516,6 +3516,9 @@ public abstract class Component
 	 * @since JDK1.0
 	 */
 	public int checkImage(Image image, int width, int height, ImageObserver observer) {
+		// all SwingJS images are loaded synchronously.
+		return ImageObserver.ALLBITS | ImageObserver.HEIGHT | ImageObserver.WIDTH;
+		
 		// ComponentPeer peer = this.peer;
 		// if (peer instanceof LightweightPeer) {
 		// return (parent != null)
@@ -3526,7 +3529,6 @@ public abstract class Component
 		// ? peer.checkImage(image, width, height, observer)
 		// : getToolkit().checkImage(image, width, height, observer);
 		// }
-		return 0;
 	}
 
 	// /**
