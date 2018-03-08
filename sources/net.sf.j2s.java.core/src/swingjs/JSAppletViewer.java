@@ -410,7 +410,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 				}
 				System.out.println("JSAppletViewer init");
 				japplet.setFont(new Font(Font.DIALOG, Font.PLAIN, 12));
-				japplet.resizeOriginal(defaultAppletSize.width, defaultAppletSize.height);
+				japplet.resizeHTML(defaultAppletSize.width, defaultAppletSize.height);
 				japplet.init();
 				// Need the default(fallback) font to be created in this
 				// AppContext

@@ -148,7 +148,7 @@ public class Resizer {
 		if (jframe == null) {
 			rootPane.getGraphics().setColor(Color.WHITE);
 			rootPane.getGraphics().fillRect(0, 0, r.width, r.height);
-			((JApplet) rootPane.getParent()).resize(r.width, r.height);
+			((JApplet) rootPane.getParent()).resizeHTML(r.width, r.height);
 		} else {
 			jframe.setPreferredSize(new Dimension(r.width, r.height));
 			jframe.invalidate();
