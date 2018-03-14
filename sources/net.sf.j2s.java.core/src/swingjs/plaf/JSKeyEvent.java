@@ -8,6 +8,34 @@ import javax.swing.JComponent;
 @SuppressWarnings({"serial", "unused"})
 public class JSKeyEvent extends KeyEvent {
 
+
+//Alphanumeric keys
+//    VK_0, VK_1, ..., VK_9, VK_A, VK_B, ..., VK_Z 
+//Java: pressed/typed/released  (typed has charCode 0; pressed has UCASE keyCode but true-case keyChar
+//JavaScript: down/pressed/up   
+
+//Control keys
+//    VK_ENTER, VK_BACKSPACE, VK_TAB, VK_ESCAPE
+//Java: pressed/typed/released  (typed has charCode 0; pressed has UCASE keyCode but true-case keyChar
+//JavaScript: down/pressed/up   
+	
+//Function keys
+//    VK_F1, VK_F2, VK_F3, VK_F4 VK_F5, VK_F6, VK_F7, VK_F8, VK_F9, VK_F10, VK_F11, VK_F12,
+//    VK_SCROLL_LOCK, VK_PRINTSCREEN, VK_PAUSE,
+//    VK_DELETE, VK_INSERT,
+//    VK_PAGE_UP, VK_PAGE_DOWN, VK_HOME, VK_END 
+//Java: pressed/released only, with keyChar 0xFFFF
+//   DEL: adds 0 127 typed
+//   INS: code is 155
+//JavaScript: down/pressed/up; only up for printScreen
+//   DEL: code is 46
+//   INS: code is 45
+
+//Arrow keys
+//    VK_LEFT, VK_RIGHT, VK_UP, VK_DOWN 
+//Java: pressed/released   38/0xFFFF
+//JavaScript: down/pressed/up  38/"ArrowUp"
+
 	Object jqEvent;
 
 	public JSKeyEvent(JComponent source, Object jQueryEvent) {

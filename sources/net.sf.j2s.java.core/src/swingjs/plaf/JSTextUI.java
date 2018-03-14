@@ -241,7 +241,34 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 				eventType = KeyEvent.KEY_PRESSED;
 				break;
 			case "keypress":
+				// igonred by Java for 
+				
+				
+//				Control keys
+//			    VK_ENTER, VK_BACKSPACE, VK_TAB, VK_ESCAPE 
+//			Function keys
+//			    VK_F1, VK_F2, VK_F3, VK_F4 VK_F5, VK_F6, VK_F7, VK_F8, VK_F9, VK_F10, VK_F11, VK_F12,
+//			    VK_SCROLL_LOCK, VK_PRINTSCREEN, VK_PAUSE,
+//			    VK_DELETE, VK_INSERT,
+//			    VK_PAGE_UP, VK_PAGE_DOWN, VK_HOME, VK_END 
+//			Java: pressed/released only, with keyChar 0xFFFF
+//			   DEL: adds 0 127 typed
+//			   INS: code is 155
+//			JavaScript: down/pressed/up; but only up for printScreen
+//			   PRINTSCREEN code is 44
+//			   INS: code is 45
+//			   DEL: code is 46
+//
+//			Arrow keys
+//			    VK_LEFT, VK_RIGHT, VK_UP, VK_DOWN 
+//			Java: pressed/released   38/0xFFFF
+//				
+//				
+				
+				// TODO: generate this for BACKSPACE and what other keys?
 				eventType = KeyEvent.KEY_TYPED;
+				keyChar = (char) keyCode;
+				keyCode = KeyEvent.VK_UNDEFINED;
 				break;
 			case "keyup":
 				eventType = KeyEvent.KEY_RELEASED;

@@ -591,6 +591,7 @@ public class AWTKeyStroke {
 		if (vks == null) {
 			vks = new VKCollection();
 			VKCollection vk = vks;
+			// TODO: THIS IS NOT GOING TO WORK ANYMORE -- WE DO NOT CREATE THE VK_ names
 			/**
 			 * @j2sNative
 			 * var c = Clazz.load("java.awt.event.KeyEvent");
