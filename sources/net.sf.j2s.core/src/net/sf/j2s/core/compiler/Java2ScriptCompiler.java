@@ -369,6 +369,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 
 		@Override
 		public boolean accept(File pathname) {
+			//System.out.println("accept " + pathname + " " +pathname.isDirectory()); 
 			return pathname.isDirectory() || !pathname.getName().endsWith(".java");
 		}
 		
@@ -382,7 +383,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		if (dir.equals(target))
 			return;
 		File[] files = dir.listFiles(filter);
-		System.out.println("copy nonclassFiles " + dir + " to " + target + " [" + (files != null ? files.length : "") + "]");
+		System.err.println("copy nonclassFiles " + dir + " to " + target + " [" + (files != null ? files.length : "") + "]");
 		File f = null;
 		if (files != null)
 			try {
