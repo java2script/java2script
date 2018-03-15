@@ -123,19 +123,32 @@ Adding more Java classes
 ------------------------
 
 If you find you are missing a Java class, please contact me (Bob Hanson) at hansonr@stolaf.edu.
-You can try adding these yourself by **temporarily** adding one or more of the 
-Java classes found at http://grepcode.com to the proper package in your project. For example, java/awt. 
+You can try adding these yourself by **temporarily** adding one or more of the Java classes found 
+at http://grepcode.com to the proper package in your project. For example, java/awt. 
+
 If you do that, be sure to use the OpenJDK version. Most of the code in the SwingJS project started with 
 Java 6-b14 or 6-b27. Build your project, then delete these Java files, because you do not necessarily 
 want your Java code using that version, just JavaScript.    
 
+
+----------------
+Working projects
+----------------
+
 A full site with many examples is at https://chemapps.stolaf.edu/swingjs/site
+
+Falstad applets are in https://github.com/BobHanson/SwingJS-Examples
+and appear at https://chemapps.stolaf.edu/swingjs/site
 
 VARNA development is at https://github.com/BobHanson/VARNA
 working site is https://chemapps.stolaf.edu/swingjs/varna
  
 Physlets development is at https://github.com/BobHanson/Physlets-SwingJS
 working site is https://chemapps.stolaf.edu/swingjs/physlets
+
+Phet applets have not been put on GitHub yet.
+
+
 
 As of Feb. 17, 2018, we are actively converting a variety of functioning Java applets. 
 
