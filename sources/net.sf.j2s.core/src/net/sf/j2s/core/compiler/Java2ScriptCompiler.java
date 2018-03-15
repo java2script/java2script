@@ -310,8 +310,10 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 	 * @return default template with _NAME_, _CODE_, and _MAIN_ to fill in.
 	 */
 	private String getDefaultHTMLTemplate() {
-		String ret = "<!DOCTYPE html>\n<html><title>SwingJS test _NAME_</title>\n"
-		+"<head><meta charset=\"utf-8\" />\n"
+		String ret = "<!DOCTYPE html>\n<html>\n"
+		+"<head>\n"
+		+"<title>SwingJS test _NAME_</title>"
+		+"<meta charset=\"utf-8\" />\n"
 		+"<script src=\"swingjs/swingjs2.js\"></script>\n"
 		+"<script>\n"
 		+"if (!self.SwingJS)alert('swingjs2.js was not found. It needs to be in swingjs folder in the same directory as ' + document.location.href)\n"
@@ -320,6 +322,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		+"  main: _MAIN_,\n"
 		+"	width: 850,\n"
 		+"	height: 550,\n"
+		+"  readyFunction: null,\n"
 		+"	serverURL: 'https://chemapps.stolaf.edu/jmol/jsmol/php/jsmol.php',\n"
 		+"	j2sPath: 'swingjs/j2s',\n"
 		+"	console:'sysoutdiv',\n"
@@ -330,7 +333,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		+"getClassList = function(){J2S._saveFile('_j2sclasslist.txt', Clazz.ClassFilesLoaded.sort().join('\\n'))}\n"
 		+"</script>\n"
 		+"<div style=\"position:absolute;left:900px;top:30px;width:600px;height:300px;\">\n"
-		+"<div id=sysoutdiv style=\"border:1px solid green;width:100%;height:95%;overflow:auto\"></div>\n"
+		+"<div id=\"sysoutdiv\" style=\"border:1px solid green;width:100%;height:95%;overflow:auto\"></div>\n"
 		+"This is System.out. <a href=\"javascript:testApplet._clearConsole()\">clear it</a> <br>Add ?j2snocore to URL to see full class list; ?j2sdebug to use uncompressed j2s/core files <br><a href=\"javascript:getClassList()\">get _j2sClassList.txt</a>\n"
 		+"</div>\n"
 		+"</body>\n"
@@ -366,6 +369,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 
 		@Override
 		public boolean accept(File pathname) {
+			//System.out.println("accept " + pathname + " " +pathname.isDirectory()); 
 			return pathname.isDirectory() || !pathname.getName().endsWith(".java");
 		}
 		
@@ -379,6 +383,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		if (dir.equals(target))
 			return;
 		File[] files = dir.listFiles(filter);
+		System.err.println("copy nonclassFiles " + dir + " to " + target + " [" + (files != null ? files.length : "") + "]");
 		File f = null;
 		if (files != null)
 			try {
@@ -393,7 +398,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 					} else {
 							Files.copy(f.toPath(), new File(target, f.getName()).toPath(),
 									StandardCopyOption.REPLACE_EXISTING);
-							System.err.println("copied " + f + " to " + target);
+							System.  err.println("copied " + f + " to " + target);
 					}
 				}
 			} catch (IOException e1) {

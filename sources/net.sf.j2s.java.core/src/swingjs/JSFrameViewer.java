@@ -141,7 +141,7 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 		setGraphics((Graphics) (Object)(jsgraphics = null), width, height);
 		//resize(width, height);
 		if (top != null)
-			top.resize(width, height);
+			top.resizeOriginal(width, height);
 	}
 
 	/**

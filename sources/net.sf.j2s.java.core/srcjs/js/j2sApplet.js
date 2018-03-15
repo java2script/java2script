@@ -1,5 +1,6 @@
 // j2sCore.js (based on JmolCore.js)
 
+// BH 2/20/2018 12:08:08 AM adds J2S._getKeyModifiers
 // BH 1/8/2018 10:27:46 PM SwingJS2
 // BH 12/22/2017 1:18:42 PM adds j2sargs for setting arguments
 // BH 11/19/2017 3:55:04 AM adding support for swingjs2.js; adds static j2sHeadless=true;
@@ -1481,6 +1482,11 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 			modifiers = (1<<2)|(1<<12);//InputEvent.BUTTON3 + InputEvent.BUTTON3_DOWN_MASK;
 			break;
 		}
+    return modifiers | J2S._getKeyModifiers(ev);
+  }
+  
+  J2S._getKeyModifiers = function(ev) {
+    var modifiers = 0;
 		if (ev.shiftKey)
 			modifiers |= (1<<0)|(1<<6); //InputEvent.SHIFT_MASK + InputEvent.SHIFT_DOWN_MASK;
 		if (ev.ctrlKey)

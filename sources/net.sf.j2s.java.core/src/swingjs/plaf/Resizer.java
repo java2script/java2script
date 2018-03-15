@@ -8,6 +8,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.JSComponent;
 import java.awt.Rectangle;
+
+import javax.swing.JApplet;
 import javax.swing.JFrame;
 import javax.swing.JRootPane;
 import javax.swing.RootPaneContainer;
@@ -146,8 +148,7 @@ public class Resizer {
 		if (jframe == null) {
 			rootPane.getGraphics().setColor(Color.WHITE);
 			rootPane.getGraphics().fillRect(0, 0, r.width, r.height);
-			rootPane.appletViewer.html5Applet._resizeApplet(new int[] { r.width,
-					r.height });
+			((JApplet) rootPane.getParent()).resizeHTML(r.width, r.height);
 		} else {
 			jframe.setPreferredSize(new Dimension(r.width, r.height));
 			jframe.invalidate();

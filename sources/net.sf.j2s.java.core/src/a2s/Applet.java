@@ -8,7 +8,6 @@ import java.net.URL;
 import javax.swing.JApplet;
 import javax.swing.JPanel;
 
-@SuppressWarnings("serial")
 public class Applet extends JApplet implements A2SContainer {
 
 	
@@ -23,18 +22,14 @@ public class Applet extends JApplet implements A2SContainer {
 	 			super.paintComponent(g);
 				// System.out.println("init " + this.getSize());
 				try {
+					// The content pane's paintComponent method has not been overridden. 
+					// There may be no problem, but it also could mean that the applet
+					// is not painting properly. 
 					if (this.getWidth() > 0)
-						paintMe(g);
+						paintComponent_(g);
 				} catch (Throwable e) {
-					System.out.println(e);
+					System.out.println("There was a problem in Applet.paintComponent(g) " + e);
 					e.printStackTrace();
-					/**
-					 * @j2sNative
-					 * 
-					 * 			debugger;
-					 */
-					{
-					}
 				}
 			}
 		});    	
@@ -57,9 +52,9 @@ public class Applet extends JApplet implements A2SContainer {
 
 	private boolean paintMeNotified;
 	
-	protected void paintMe(Graphics g) {
+	protected void paintComponent_(Graphics g) {
 		if (!paintMeNotified) {
-			System.out.println("paintMe has not been implemented for " + this);
+			System.out.println("JComponent.paintComponent(g) has not been overridden (including a super.paintComponent(g)) \nfor the " + this.getClass().getName() + " AWT applet.\nThis many be no problem, or it may mean the applet is not displaying properly.\n See https://docs.oracle.com/javase/tutorial/uiswing/painting/refining.html\n and https://docs.oracle.com/javase/tutorial/uiswing/painting/closer.html");
 			paintMeNotified = true;
 		}
 	}

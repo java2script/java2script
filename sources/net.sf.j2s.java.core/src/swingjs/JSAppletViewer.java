@@ -13,7 +13,6 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.Window;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLStreamHandlerFactory;
@@ -411,7 +410,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 				}
 				System.out.println("JSAppletViewer init");
 				japplet.setFont(new Font(Font.DIALOG, Font.PLAIN, 12));
-				japplet.resize(defaultAppletSize);
+				japplet.resizeOriginal(defaultAppletSize.width, defaultAppletSize.height);
 				japplet.init();
 				// Need the default(fallback) font to be created in this
 				// AppContext
@@ -430,7 +429,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 				japplet.getRootPane().addNotify();
 				// force peer creation now
 				System.out.println("JSAppletViewer start" + currentAppletSize);
-				japplet.resize(currentAppletSize);
+				japplet.resizeOriginal(currentAppletSize.width, currentAppletSize.height);
 				japplet.start();
 				// japplet.repaint();
 				status = APPLET_START;

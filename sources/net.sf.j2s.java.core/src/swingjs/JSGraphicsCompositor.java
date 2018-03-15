@@ -37,7 +37,7 @@ public class JSGraphicsCompositor {
 	 * @param alphaRule
 	 * @return
 	 */
-	public boolean setGraphicsCompositeAlpha(JSGraphics2D g, int alphaRule) {
+	public static boolean setGraphicsCompositeAlpha(JSGraphics2D g, int alphaRule) {
 		// source-over This is the default setting and draws new shapes on top of
 		// the existing canvas content.
 		// source-in The new shape is drawn only where both the new shape and the
@@ -66,7 +66,7 @@ public class JSGraphicsCompositor {
 		String s = null;
 		switch (alphaRule) {
 		default:
-		case AlphaComposite.SRC_OVER:
+		case AlphaComposite.SRC_OVER: // the default
 			s = "source-over";
 			break;
 		case AlphaComposite.SRC_IN:
@@ -114,7 +114,7 @@ public class JSGraphicsCompositor {
 	 * @param y
 	 * @return
 	 */
-	public boolean drawImageOp(JSGraphics2D g, BufferedImage img,
+	public static boolean drawImageOp(JSGraphics2D g, BufferedImage img,
 			BufferedImageOp op, int x, int y) {
 		int type = 0;
 		/**
@@ -159,7 +159,7 @@ public class JSGraphicsCompositor {
 		return false;
 	}
 
-	public WritableRaster filterRaster(Raster src, WritableRaster dst, RasterOp op) {
+	public static WritableRaster filterRaster(Raster src, WritableRaster dst, RasterOp op) {
 		// Create the destination tile
 		if (dst == null) {
 			dst = op.createCompatibleDestRaster(src);
@@ -213,25 +213,25 @@ public class JSGraphicsCompositor {
 		return retRaster;
 	}
 
-	private int convolveRaster(Raster src, WritableRaster dst, Kernel kernel,
+	private static int convolveRaster(Raster src, WritableRaster dst, Kernel kernel,
 			int edgeCondition) {
 		// SwingJS TODO
 		return 0;
 	}
 
-	private int transformRaster(Raster src, WritableRaster dst, double[] matrix,
+	private static int transformRaster(Raster src, WritableRaster dst, double[] matrix,
 			int interpolationType) {
 		// SwingJS TODO
 		return 0;
 	}
 
-	private int lookupByteRaster(Raster src, WritableRaster dst, byte[][] table) {
+	private static int lookupByteRaster(Raster src, WritableRaster dst, byte[][] table) {
 		// SwingJS TODO
 		return 0;
 	}
 
 	@SuppressWarnings("null")
-	public BufferedImage filterImage(BufferedImage src, BufferedImage dst,
+	public static BufferedImage filterImage(BufferedImage src, BufferedImage dst,
 			BufferedImageOp op) {
 		BufferedImage retBI = null;
 		int type = 0;
@@ -289,13 +289,13 @@ public class JSGraphicsCompositor {
 		return retBI;
 	}
 
-	private int convolveBI(BufferedImage src, BufferedImage dst, Kernel kernel,
+	private static int convolveBI(BufferedImage src, BufferedImage dst, Kernel kernel,
 			int edgeCondition) {
 		// SwingJS TODO
 		return 0;
 	}
 
-	private int lookupByteBI(BufferedImage src, BufferedImage dst, byte[][] table) {
+	private static int lookupByteBI(BufferedImage src, BufferedImage dst, byte[][] table) {
 		// SwingJS TODO
 		return 0;
 	}
@@ -313,7 +313,7 @@ public class JSGraphicsCompositor {
 	 * @param img
 	 * @return
 	 */
-	public DOMNode createImageNode(Image img) {
+	public static DOMNode createImageNode(Image img) {
 	  DOMNode imgNode = null;
 	  /**
 	   * @j2sNative

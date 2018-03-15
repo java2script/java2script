@@ -33,6 +33,9 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -51,6 +54,7 @@ import javax.swing.text.EditorKit;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.TextAction;
 import swingjs.JSToolkit;
+import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 
 /**
@@ -206,13 +210,84 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	/**
 	 * called by JSComponentUI.bindJSEvents
 	 * 
-	 * @return handled
+	 * @return handled 
+	 * 
+	 * 
 	 */
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
-		//System.out.println("Handling for " + id + " " + eventType + " "	+ jQueryEvent);
+		// System.out.println("Handling for " + id + " " + eventType + " " +
+		// jQueryEvent);
 		JTextComponent t = (JTextComponent) jc;
-		return (t.isEditable() ? textListener.handleJSTextEvent(this, eventType, jQueryEvent) : false);
+		if (!t.isEditable())
+			return false;
+		switch (eventType) {
+		case KeyEvent.KEY_PRESSED:
+			// note that events are bundled here into one eventType
+			int keyCode = 0;
+			int modifiers = JSUtil.J2S._getKeyModifiers(jQueryEvent);
+			char keyChar = '\0';
+			String type = null;
+			/**
+			 * @j2sNative
+			 * 
+			 * keyCode = jQueryEvent.keyCode;
+			 * keyChar = jQueryEvent.key;
+			 * type = jQueryEvent.type;
+			 * 
+			 */
+			switch (type) {
+			case "keydown":
+				eventType = KeyEvent.KEY_PRESSED;
+				break;
+			case "keypress":
+				// igonred by Java for 
+				
+				
+//				Control keys
+//			    VK_ENTER, VK_BACKSPACE, VK_TAB, VK_ESCAPE 
+//			Function keys
+//			    VK_F1, VK_F2, VK_F3, VK_F4 VK_F5, VK_F6, VK_F7, VK_F8, VK_F9, VK_F10, VK_F11, VK_F12,
+//			    VK_SCROLL_LOCK, VK_PRINTSCREEN, VK_PAUSE,
+//			    VK_DELETE, VK_INSERT,
+//			    VK_PAGE_UP, VK_PAGE_DOWN, VK_HOME, VK_END 
+//			Java: pressed/released only, with keyChar 0xFFFF
+//			   DEL: adds 0 127 typed
+//			   INS: code is 155
+//			JavaScript: down/pressed/up; but only up for printScreen
+//			   PRINTSCREEN code is 44
+//			   INS: code is 45
+//			   DEL: code is 46
+//
+//			Arrow keys
+//			    VK_LEFT, VK_RIGHT, VK_UP, VK_DOWN 
+//			Java: pressed/released   38/0xFFFF
+//				
+//				
+				
+				// TODO: generate this for BACKSPACE and what other keys?
+				eventType = KeyEvent.KEY_TYPED;
+				keyChar = (char) keyCode;
+				keyCode = KeyEvent.VK_UNDEFINED;
+				break;
+			case "keyup":
+				eventType = KeyEvent.KEY_RELEASED;
+				break;				
+			}
+			KeyEvent keyEvent = new KeyEvent(jc, eventType, System.currentTimeMillis(), modifiers, keyCode, keyChar);
+			jc.dispatchEvent(keyEvent);
+			if (keyEvent.isConsumed()) {
+				/**
+				 * @j2sNative
+				 * 
+				 * jQueryEvent.preventDefault();
+				 * jQueryEvent.stopPropagation();
+				 */
+				return true;
+			}
+			break;
+		}
+		return textListener.handleJSTextEvent(this, eventType, jQueryEvent);
 	}
 
 	/**
@@ -2761,6 +2836,5 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		// In addition, if color == null, then no text is shown		
 		return (!editor.isEnabled() ? editor.getDisabledTextColor() : !editor.isEditable() ? inactiveForeground : fg);
 	}
-
 
 }
