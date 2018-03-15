@@ -109,7 +109,7 @@ Java project *except* final static constants. SwingJS does not recreate those by
 Testing the JavaScript version of your project
 ----------------------------------------------
 
-The J2S transpiler will automatically set up for you in site/ a sample HTML papge for any class that subclasses
+The J2S transpiler will automatically set up for you in site/ a sample HTML page for any class that subclasses
 JApplet or contains a public void main(String[] args) method. You will want to associate those files with 
 an external HTML browser. We recommend Firefox. 
 
