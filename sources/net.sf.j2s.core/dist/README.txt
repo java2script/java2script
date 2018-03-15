@@ -48,8 +48,8 @@ Creating a new J2S/SwingJS project
 ----------------------------------
 
 Create an Eclipse Java project for your work, if you have not done so already.
-If your source code is not all already in src/, navigate to the project...properties...Java Build Path...source
-and add all the source directories you need.
+If your source code is not all already in src/, navigate to the project...properties...
+Java Build Path...source and add all the source directories you need.
 
 Note that your project must not include any Jar file based dependencies. 
 All source code must be available. (Source code from decompiling .class files will work.)
@@ -85,7 +85,7 @@ j2s.compiler.status=enable
 2. Edit the .project file to indicate that the j2s transpiler is to be used 
 rather than the standard Java compiler by changing the buildSpec buildCommand from
 
-org.eclipse.jdt.core.javabuilder
+	org.eclipse.jdt.core.javabuilder
 
 to 
 
@@ -109,12 +109,13 @@ Java project *except* final static constants. SwingJS does not recreate those by
 Testing the JavaScript version of your project
 ----------------------------------------------
 
-The J2S transpiler will automatically set up for you in site/ a sample HTML page for any class that subclasses
-JApplet or contains a public void main(String[] args) method. You will want to associate those files with 
-an external HTML browser. We recommend Firefox. 
+The J2S transpiler will automatically set up for you in site/ a sample HTML page for any class 
+that subclasses JApplet or contains a public void main(String[] args) method. You will want to 
+associate those files with  an external HTML browser. We recommend Firefox. 
 
-Since you will be running AJAX locally within these browsers, you may need to enable local file reading in your
-browser. Instructions for doing that can be found at http://wiki.jmol.org/index.php/Troubleshooting/Local_Files 
+Since you will be running AJAX locally within these browsers, you may need to enable local 
+file reading in your browser. Instructions for doing that can be found at 
+http://wiki.jmol.org/index.php/Troubleshooting/Local_Files 
 
 
 ------------------------
@@ -123,10 +124,10 @@ Adding more Java classes
 
 If you find you are missing a Java class, please contact me (Bob Hanson) at hansonr@stolaf.edu.
 You can try adding these yourself by **temporarily** adding one or more of the 
-Java classes found at http://grepcode.com to the proper package. If you do that, be sure
-to use the OpenJDK version. Most of the code in the SwingJS project started with Java 6-b14 or 6-b27.
-Build your project, then delete these Java files, because you do not necessarily want your Java
-code using that version, just JavaScript.    
+Java classes found at http://grepcode.com to the proper package in your project. For example, java/awt. 
+If you do that, be sure to use the OpenJDK version. Most of the code in the SwingJS project started with 
+Java 6-b14 or 6-b27. Build your project, then delete these Java files, because you do not necessarily 
+want your Java code using that version, just JavaScript.    
 
 A full site with many examples is at https://chemapps.stolaf.edu/swingjs/site
 
