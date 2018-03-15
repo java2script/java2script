@@ -1,4 +1,6 @@
-SwingJS distribution README.txt
+SwingJS distribution README.txt  
+
+3/15/2018  Bob Hanson hansonr@stolaf.edu
 
 SwingJS has been successfully tested in Eclipse Neon and Oxygen on Mac and Windows platforms.
 (No reason to believe it would not also work for Linux; just haven't tried that recently.)
@@ -7,15 +9,18 @@ INSTALLATION INSTRUCTIONS
 
 Eclipse Neon or higher is necessary.
 
-1. net.sf.j2s.core_3.1.1.jar should be copied to the eclipse/dropins
-directory **AS net.sf.j2s.core.jar dropping the version info**
-because otherwise Eclipse will not recognize an update. 
+1. net.sf.j2s.core.jar should be copied from 
 
-We do not know why this is necessary, but it appears to be. If you leave
-the version in the name, Eclipse will not be able to replace it with a 
-newer version later. From what we can tell.
+https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/dropins/net.sf.j2s.core.jar?raw=true
 
-On Mac systems, this directory is
+to your eclipse/dropins directory.
+
+Do not use net.sf.j2s.core_x.x.x.jar for this, as, if you do that, some versions of Eclipse will have to be 
+entirely reinstalled every time you change versions. We do not know why this is necessary, 
+but it appears to be. If you leave the version in the name, Eclipse will not be able to replace it with a 
+newer version later. From what we can tell. So just always use dist/dropins/net.sf.j2s.core.jar. 
+
+On Mac systems, the Eclipse directory is
 
 /Applications/Eclipse.app/Contents/Eclipse/dropins
 
