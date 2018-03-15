@@ -15,21 +15,31 @@
 package netscape.javascript;
 
 import java.applet.Applet;
+import java.applet.AppletContext;
 
 /**
- * Stub for the JSException. This is part of the Applet
- * LiveConnect simulation.
- *
- * TODO: we have to evaluate if it is possible to use plugin.jar from jdk
+ * 
+ * BH: Adapted for SwingJS: 
+ * 
+ * getWindow(applet) returns a JSObject with this.obj = applet.getAppletContext().html5Applet._window
+ * 
+ * Object returns are one of [null, Boolean, Double, String, JSObject (from "object" type)]
+ * 
+ * 
+ * Stub for the JSException. This is part of the Applet LiveConnect simulation.
  *
  * @version $Revision: 9837 $
  * @author Ronald Brill
  */
 public class JSObject {
 
+	@SuppressWarnings("unused")
+	private Object obj; // html5Applet._window, for instance;
+	
+	public JSObject() {
+	}
+
 	/**
-	 * Empty stub.
-	 *
 	 * @param jsFuncName
 	 *            the paramString
 	 * @param params
@@ -38,15 +48,19 @@ public class JSObject {
 	 * @throws JSException
 	 *             in case or error
 	 */
-	public Object call(final String jsFuncName, final Object[] params) throws JSException {
-
+	public Object call(String jsFuncName, Object[] params) throws JSException {
 		Object ret = null;
 		try {
+			if (params == null)
+				params = new Object[0];
+			for (int i = params.length; --i >= 0;) {
+				params[i] = unfixObject(params[i]);
+			}
+				
 			/**
 			 * @j2sNative
 			 * 
-			 * 
-			 * 			ret = self[jsFuncName].apply(null, params);
+			 * 			ret = this.obj[jsFuncName].apply(this.obj, params);
 			 * 
 			 */
 		} catch (Throwable t) {
@@ -55,9 +69,35 @@ public class JSObject {
 		return fixObject(ret);
 	}
 
+	private Object unfixObject(Object o) {
+		Object ret = o;
+		if (o == null) {
+			return null;
+		} else if (o instanceof Number) {
+			/**
+			 * @j2sNative
+			 * 
+			 * return o.doubleValue();
+			 */
+		} else if (o instanceof Boolean) {
+			/**
+			 * @j2sNative
+			 * 
+			 * return o.BooleanValue();
+			 */
+		} else if (o instanceof JSObject) {
+			return ((JSObject) o).obj;
+		}
+		return ret;
+		
+	}
+	
     @SuppressWarnings("null")
 	private Object fixObject(Object ret) {
-        String type = null;
+    	if (ret == null)
+    		return  null;
+
+    	String type = null;
     	/**
     	 * @j2sNative
     	 * 
@@ -70,12 +110,13 @@ public class JSObject {
         case "boolean":
         	return Boolean.valueOf("" + ret);
         default:
-    		return ret;
+        	JSObject jsobject = new JSObject();
+        	jsobject.obj = ret;
+        	return jsobject;
         }
 	}
 
 	/**
-     * Empty stub.
      *
      * @param paramString the paramString
      * @return result Object
@@ -88,7 +129,7 @@ public class JSObject {
 			 * @j2sNative
 			 * 
 			 * 
-			 * 			ret = eval(params);
+			 * 			ret = this.obj.eval(params);
 			 * 
 			 */
 		} catch (Throwable t) {
@@ -110,7 +151,7 @@ public class JSObject {
 			 * @j2sNative
 			 * 
 			 * 
-			 * 			ret = self[name];
+			 * 			ret = this.obj[name];
 			 * 
 			 */
 		} catch (Throwable t) {
@@ -124,13 +165,13 @@ public class JSObject {
      * @param value the paramObject
      * @throws JSException in case or error
      */
-    public void setMember(final String name, final Object value) throws JSException {
+    public void setMember(String name,  Object value) throws JSException {
 		try {
 			/**
 			 * @j2sNative
 			 * 
 			 * 
-			 * 			self[name] = value;
+			 * 			this.obj[name] = value;
 			 * 
 			 */
 		} catch (Throwable t) {
@@ -143,13 +184,13 @@ public class JSObject {
      * @param paramString the paramString
      * @throws JSException in case or error
      */
-    public void removeMember(final String name) throws JSException {
+    public void removeMember(String name) throws JSException {
 		try {
 			/**
 			 * @j2sNative
 			 * 
 			 * 
-			 * 			delete self[name];
+			 * 			delete this.obj[name];
 			 * 
 			 */
 		} catch (Throwable t) {
@@ -158,43 +199,57 @@ public class JSObject {
     }
 
     /**
-     * Empty stub.
      *
-     * @param paramInt the paramInt
+     * @param index
      * @return result Object
      * @throws JSException in case or error
      */
-    public Object getSlot(final int paramInt) throws JSException {
-        throw new RuntimeException("Not yet implemented (netscape.javascript.JSObject.getSlot(int)).");
+    public Object getSlot(int index) throws JSException {
+      Object ret = null;
+		try {
+      /**
+       * @j2sNative
+       * 
+       * return this.obj[index];
+       * 
+       */
+      return fixObject(ret);
+		} catch (Throwable t) {
+			throw new JSException("" + t + " getSlot");
+		}
+    }
+
+    /**
+     *
+     * @param index the paramInt
+     * @param val the paramObject
+     * @throws JSException in case or error
+     */
+    public void setSlot(int index, Object val) throws JSException {
+		try {
+        /**
+         * @j2sNative
+         * 
+         *  this.obj[index] = val;
+         * 
+         */
+		} catch (Throwable t) {
+			throw new JSException("" + t + " setSlot");
+		}
     }
 
     /**
      * Empty stub.
      *
-     * @param paramInt the paramInt
-     * @param paramObject the paramObject
-     * @throws JSException in case or error
-     */
-    public void setSlot(final int paramInt, final Object paramObject) throws JSException {
-        throw new RuntimeException("Not yet implemented (netscape.javascript.JSObject.setSlot(int, Object)).");
-    }
-
-    /**
-     * Empty stub.
-     *
-     * @param paramApplet the paramApplet
+     * @param applet the paramApplet
      * @return result Object
      * @throws JSException in case or error
      */
-    public static JSObject getWindow(Applet paramApplet) throws JSException {
-    	/**
-    	 * @j2sNative
-    	 * 
-    	 *  return self;
-    	 *  
-    	 */
-    	{
-    	return null;
-    	}
+    public static JSObject getWindow(Applet applet) throws JSException {
+    	JSObject jsobject = new JSObject();
+		@SuppressWarnings("unused")
+		AppletContext context = applet.getAppletContext();
+		jsobject.obj = /** @j2sNative context.html5Applet._window || */ null;
+		return jsobject;
     }
 }
