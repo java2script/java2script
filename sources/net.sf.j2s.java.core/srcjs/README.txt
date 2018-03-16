@@ -17,5 +17,3 @@ js/make.bat  a script that concatenates the *.js files in the right order to mak
 js/core/  a folder used by build_core_applet.xml to create Google closure-compiled swingjs/j2s/core files.
   
 
-
-When build_core_applet.xml runs, all files 
