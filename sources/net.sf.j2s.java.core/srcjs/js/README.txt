@@ -1,7 +1,7 @@
 This directory contains:
 
 
-js/*.js  a set of files needed for all SwingJS pagees
+js/*.js  a set of files needed for all SwingJS pages
 
 js/make.bat  a script that concatenates the *.js files in the right order to make swingjs2.js
 
