@@ -19,7 +19,7 @@ import javax.swing.JComponent;
 @SuppressWarnings({"serial", "unused"})
 public class JSKeyEvent extends KeyEvent {
 
-	public static JSKeyEvent newJSKeyEvent(JComponent source, Object jQueryEvent) {
+	public static JSKeyEvent newJSKeyEvent(JComponent source, Object jQueryEvent, boolean isList) {
 
 		// JavaScript: keydown      keypress    keyup
 		// Java:       KEY_PRESSED  KEY_TYPED*  KEY_RELEASED
@@ -37,7 +37,7 @@ public class JSKeyEvent extends KeyEvent {
 		 * 			evType = ev.type; jskey = ev.key; 
 		 * 			jskeyCode = ev.keyCode || ev.which;
 		 *          jskeyLocation = ev.originalEvent.location || 0; 
-		 * 			if (evType == "keypress")
+		 * 			if (isList && evType == "keypress")
 		 *            ev.originalEvent.preventDefault();
 		 */
 
