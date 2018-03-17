@@ -81,13 +81,8 @@ public class JSKeyEvent extends KeyEvent {
 		
 		id = (evType == "keydown" ? KEY_PRESSED : evType == "keypress" ? KEY_TYPED  : evType == "keyup" ? KEY_RELEASED : 0);
 		keyCode = getJavaKeyCode(jskeyCode, jskey);
-		boolean noKey = checkNoKey(keyCode, jskey);
-		if (noKey) {
-			ignore = (id == KEY_TYPED);
-		    keyChar = (ignore ? (char) keyCode : CHAR_UNDEFINED);
-		} else {
-			keyChar = getKeyChar(keyCode, jskey);
-		}
+		keyChar = getJavaKeyChar(keyCode, jskey);
+		ignore = (keyChar == CHAR_UNDEFINED && id == KEY_TYPED);
 		if (id == KEY_TYPED)
 			keyCode = 0;
 	}
@@ -96,6 +91,9 @@ public class JSKeyEvent extends KeyEvent {
 		
 		// see https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
 			
+		// enter is special
+		if (jskeyCode == 13)
+			return VK_ENTER;
 		if (jskeyCode <= 40) {
 			// 0-40 is same
 			return jskeyCode;
@@ -105,16 +103,15 @@ public class JSKeyEvent extends KeyEvent {
 			return (jskeyCode >= 96 && jskeyCode <= 105 ? jskeyCode :  0 + jskey.toUpperCase().charAt(0));
 		}
 		switch (jskeyCode) {
-		
 		case 91: // META
-			return 157; 
+			return VK_META; 
 		case 93: // CONTEXT_MENU
-			return 525;
+			return VK_CONTEXT_MENU;
 		case 144: // NUM_LOCK
 		case 145: // SCROLL_LOCK
 			return jskeyCode;
 		case 244: // Kanji
-			return 25;
+			return VK_KANJI;
 		}
 		
 		String keyName = "VK_" + jskey.toUpperCase();
@@ -129,38 +126,38 @@ public class JSKeyEvent extends KeyEvent {
 		return jskeyCode;
 	}
 
-	private static char getKeyChar(int jskeyCode, String jskey) {
+	private static char getJavaKeyChar(int jsKeyCode, String jskey) {
 		if (jskey.length() == 1)
 			return jskey.charAt(0);
-		switch (jskeyCode) {
+		// valid Java characters that are named in JavaScript
+		switch (jsKeyCode) {
+		case 13:
+			jsKeyCode = VK_ENTER;
+			// fall through
 		case VK_ENTER:
-			return '\n';
 		case VK_BACK_SPACE:
-			return '\b';
 		case VK_TAB:
-			return '\t';
 		case VK_DELETE:
-			return (char) 127;
 		case VK_ESCAPE:
-			return (char) 27;
+			return (char) jsKeyCode;
 		default:
 			return '\uFFFF';
 		}
 	}
 
-	private static boolean checkNoKey(int keyCode, String jskey) {
-		switch (keyCode) {
+	private static boolean hasKeyChar(int javaKeyCode, String jskey) {
+		switch (javaKeyCode) {
 		case VK_ENTER:
-		case VK_TAB:
 		case VK_BACK_SPACE:
+		case VK_TAB:
 		case VK_DELETE:
 		case VK_ESCAPE:
-		case VK_CANCEL: // untested
-		case VK_CLEAR:  // untested
-			return false;
+			return true;
+		default:
+			// otherwise only single-char jskeys have characters in Java
+			return (jskey.length() == 1);
 		}
-		// otherwise only single-char jskeys have characters in Java
-		return (jskey.length() > 1);
+		
 	}
 
 	private static int getModifiers(boolean shift, boolean ctrl, boolean alt, boolean meta, boolean altGraph) {
