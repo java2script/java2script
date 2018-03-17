@@ -590,7 +590,9 @@ public class AWTKeyStroke {
 		return (vks == null ? (vks = new VKCollection()) : vks);
 	}
 
-	
+	public static void addKeyCode(String key, int keyCode) {
+		getVKCollection().put(key,  Integer.valueOf(keyCode));
+	}
 	
 	
 	/**
@@ -600,29 +602,10 @@ public class AWTKeyStroke {
 	 */
 	public static int getVKValue(String key) {
 		VKCollection vkCollect = getVKCollection();
-
 		Integer value = vkCollect.findCode(key);
-
 		if (value == null) {
-			int keyCode = 0;
-			final String errmsg = "String formatted incorrectly";
-
-			try {
-				/**
-				 * @j2sNative
-				 * 
-				 *            keyCode = Clazz.load("java.awt.event.KeyEvent")[key];
-				 */
-				{
-					keyCode = KeyEvent.class.getField(key).getInt(KeyEvent.class);
-				}
-			} catch (NoSuchFieldException nsfe) {
-				throw new IllegalArgumentException(errmsg);
-			} catch (IllegalAccessException iae) {
-				throw new IllegalArgumentException(errmsg);
-			}
-			value = Integer.valueOf(keyCode);
-			vkCollect.put(key, value);
+			vkCollect.put(key, Integer.valueOf(-1));
+			throw new IllegalArgumentException("String formatted incorrectly");
 		}
 		return value.intValue();
 	}
