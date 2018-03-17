@@ -8,94 +8,75 @@ import javax.swing.JComponent;
 
 /**
  * Handle the conversion between JavaScript and Java key events.
+ *
+ * used by plaf/JSListUI and plaf/JSTextUI; should be implemented for all
+ * components?
  * 
  * @author Bob Hanson
+ * @author Trai Nguyen
  *
  */
 @SuppressWarnings({"serial", "unused"})
 public class JSKeyEvent extends KeyEvent {
 
-	// used currently only by plaf/JSListUI
+	public static JSKeyEvent newJSKeyEvent(JComponent source, Object jQueryEvent) {
 
+		// JavaScript: keydown      keypress    keyup
+		// Java:       KEY_PRESSED  KEY_TYPED*  KEY_RELEASED
+		// Java        code/char     0/char       code/char
+		//
+		// *KEY_TYPED only when keyChar not CHAR_UNDEFINED (0xFFFF)
 
-//Alphanumeric keys
-//    VK_0, VK_1, ..., VK_9, VK_A, VK_B, ..., VK_Z 
-//Java: pressed/typed/released  (typed has charCode 0; pressed has UCASE keyCode but true-case keyChar
-//JavaScript: down/pressed/up   
+		String evType = null, jskey = null;
+		int jskeyCode = 0, jskeyLocation = 0;
+		Object ev = jQueryEvent;
 
-//Control keys
-//    VK_ENTER, VK_BACKSPACE, VK_TAB, VK_ESCAPE
-//Java: pressed/typed/released  (typed has charCode 0; pressed has UCASE keyCode but true-case keyChar
-//JavaScript: down/pressed/up   
+		/**
+		 * @j2sNative
+		 * 
+		 * 			evType = ev.type; jskey = ev.key; 
+		 * 			jskeyCode = ev.keyCode || ev.which;
+		 *          jskeyLocation = ev.originalEvent.location || 0; 
+		 * 			if (evType == "keypress")
+		 *            ev.originalEvent.preventDefault();
+		 */
+
+		int id = (evType == "keydown" ? KEY_PRESSED
+				: evType == "keypress" ? KEY_TYPED 
+				: evType == "keyup" ? KEY_RELEASED 
+				: 0);
+		int keyCode = getJavaKeyCode(jskeyCode, jskey);
+		char keyChar = getJavaKeyChar(keyCode, jskey);
+		return (id == 0 || keyChar == CHAR_UNDEFINED && id == KEY_TYPED ? null
+				: new JSKeyEvent(source, jQueryEvent, id, 
+						(id == KEY_TYPED ? JSKeyEvent.VK_UNDEFINED : keyCode),
+						keyChar,
+						(id == KEY_TYPED ? KEY_LOCATION_UNKNOWN : jskeyLocation + 1))
+				);
+	}
 	
-//Function keys
-//    VK_F1, VK_F2, VK_F3, VK_F4 VK_F5, VK_F6, VK_F7, VK_F8, VK_F9, VK_F10, VK_F11, VK_F12,
-//    VK_SCROLL_LOCK, VK_PRINTSCREEN, VK_PAUSE,
-//    VK_DELETE, VK_INSERT,
-//    VK_PAGE_UP, VK_PAGE_DOWN, VK_HOME, VK_END 
-//Java: pressed/released only, with keyChar 0xFFFF
-//   DEL: adds 0 127 typed
-//   INS: code is 155
-//JavaScript: down/pressed/up; only up for printScreen
-//   DEL: code is 46
-//   INS: code is 45
-
-//Arrow keys
-//    VK_LEFT, VK_RIGHT, VK_UP, VK_DOWN 
-//Java: pressed/released   38/0xFFFF
-//JavaScript: down/pressed/up  38/"ArrowUp"
-
-	Object jqEvent;
-	private boolean ignore;
-
-	public JSKeyEvent(JComponent source, Object jQueryEvent) {
-		super();
-		this.source = source;
-		when = System.currentTimeMillis();
-		keyLocation = KeyEvent.KEY_LOCATION_UNKNOWN;
-		Object ev = this.jqEvent = jQueryEvent;
-		// JavaScript information:
-		String evType = null;
-		String jskey = "";
-		int jskeyCode = 0;
+	private JSKeyEvent(JComponent source, Object ev, int id, int keyCode, char keyChar, int location) {
+		super(source, id, System.currentTimeMillis(), 0, keyCode, keyChar, location);
 		boolean shift = false, ctrl = false, meta = false, alt = false, altGraph = false;
 		/**
 		 * @j2sNative
 		 * 
-		 *            evType = ev.type;
-		 *			  jskey = ev.key;
-		 *            jskeyCode = ev.keyCode || ev.which;
-		 *            if (evType == "keypress")
-		 *              ev.originalEvent.preventDefault();
 		 *            shift = ev.shiftKey;
 		 *            ctrl = ev.ctrlKey;
 		 *            alt = ev.altKey;
 		 *            meta = ev.metaKey;
 		 *            altGraph = ev.altGraphKey;
 		 */
-
 		modifiers = JSKeyEvent.getModifiers(shift, ctrl, alt, meta, altGraph);
-
-		// JavaScript: keydown      keypress   keyup
-		// Java:       KEY_PRESSED  KEY_TYPED  KEY_RELEASED
-		
-		id = (evType == "keydown" ? KEY_PRESSED : evType == "keypress" ? KEY_TYPED  : evType == "keyup" ? KEY_RELEASED : 0);
-		keyCode = getJavaKeyCode(jskeyCode, jskey);
-		keyChar = getJavaKeyChar(keyCode, jskey);
-		ignore = (keyChar == CHAR_UNDEFINED && id == KEY_TYPED);
-		if (id == KEY_TYPED)
-			keyCode = 0;
 	}
 
 	private static int getJavaKeyCode(int jskeyCode, String jskey) {
-		
 		// see https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
-			
-		// enter is special
-		if (jskeyCode == 13)
-			return VK_ENTER;
 		if (jskeyCode <= 40) {
-			// 0-40 is same
+			// enter is special
+			if (jskeyCode == 13)
+				return VK_ENTER;
+			// other 0-40 is same
 			return jskeyCode;
 		}
 		if (jskey.length() == 1) {
@@ -113,7 +94,6 @@ public class JSKeyEvent extends KeyEvent {
 		case 244: // Kanji
 			return VK_KANJI;
 		}
-		
 		String keyName = "VK_" + jskey.toUpperCase();
 		try {
 			// get the Java code from AWTKeyStroke by name, if possible
@@ -176,74 +156,6 @@ public class JSKeyEvent extends KeyEvent {
 		
 		// TODO Auto-generated method stub
 		return 0;
-	}
-
-	public JSKeyEvent(JComponent jc, int eventType, long currentTimeMillis, int modifiers, int keyCode, char keyChar,
-			Object jQueryEvent) {
-		
-//		switch (eventType) {
-//		case KeyEvent.KEY_PRESSED:
-//			// note that events are bundled here into one eventType
-//			int keyCode = 0;
-//			int modifiers = JSUtil.J2S._getKeyModifiers(jQueryEvent);
-//			char keyChar = '\0';
-//			String type = null;
-//			/**
-//			 * @j2sNative
-//			 * 
-//			 * keyCode = jQueryEvent.keyCode;
-//			 * keyChar = jQueryEvent.key;
-//			 * type = jQueryEvent.type;
-//			 * 
-//			 */
-//			switch (type) {
-//			case "keydown":
-//				eventType = KeyEvent.KEY_PRESSED;
-//				break;
-//			case "keypress":
-//				// igonred by Java for 
-//				
-//				
-////				Control keys
-////			    VK_ENTER, VK_BACKSPACE, VK_TAB, VK_ESCAPE 
-////			Function keys
-////			    VK_F1, VK_F2, VK_F3, VK_F4 VK_F5, VK_F6, VK_F7, VK_F8, VK_F9, VK_F10, VK_F11, VK_F12,
-////			    VK_SCROLL_LOCK, VK_PRINTSCREEN, VK_PAUSE,
-////			    VK_DELETE, VK_INSERT,
-////			    VK_PAGE_UP, VK_PAGE_DOWN, VK_HOME, VK_END 
-////			Java: pressed/released only, with keyChar 0xFFFF
-////			   DEL: adds 0 127 typed
-////			   INS: code is 155
-////			JavaScript: down/pressed/up; but only up for printScreen
-////			   PRINTSCREEN code is 44
-////			   INS: code is 45
-////			   DEL: code is 46
-////
-////			Arrow keys
-////			    VK_LEFT, VK_RIGHT, VK_UP, VK_DOWN 
-////			Java: pressed/released   38/0xFFFF
-////				
-////				
-//				
-//				// TODO: generate this for BACKSPACE and what other keys?
-//				eventType = KeyEvent.KEY_TYPED;
-//				keyChar = (char) keyCode;
-//				keyCode = KeyEvent.VK_UNDEFINED;
-//				break;
-//			case "keyup":
-//				eventType = KeyEvent.KEY_RELEASED;
-//				break;				
-//			}
-
-		
-		super(jc, eventType, currentTimeMillis, modifiers, keyCode, keyChar);
-		jqEvent = jQueryEvent;
-		// TODO Auto-generated constructor stub
-	}
-
-	public boolean doIgnore() {
-		// some TYPE events are ignored
-		return ignore;
 	}
 
 }
