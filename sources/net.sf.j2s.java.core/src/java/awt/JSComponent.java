@@ -54,7 +54,8 @@ public abstract class JSComponent extends Component {
 	 * 
 	 * SwingJS Applet repurposes resize(width, height) to call
 	 * J2S.Applet.prototype._resizeApplet in order to take care
-	 * of all the HTML5 business associated with this applet. 
+	 * of all the HTML5 business associated with this applet, and
+	 * it overrides resizeOriginal as well 
 	 * 
 	 * 
 	 * @param width
@@ -62,6 +63,7 @@ public abstract class JSComponent extends Component {
 	 */
 	@SuppressWarnings("deprecation")
 	public void resizeOriginal(int width, int height) {
+		// o
 		resize(width, height);
 	}
 

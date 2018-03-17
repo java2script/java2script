@@ -1625,6 +1625,11 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		  default:
 		  	return;
 			}
+			// edu_northwestern_physics_groups_atomic_applet_Mirror_applet.html
+			// seems to work OK here because the absolute is being removed
+			// there was a problem with Applet.init() not having the right width/height initialization
+			// but now it seems OK. This issue is most certainly the issue that in applet start up
+			// an initial paint shows checkboxes lower than they should be.
 			DOMNode.setStyles(centeringNode, "position", "absolute", "left", left + "px");			
 		}
 	}

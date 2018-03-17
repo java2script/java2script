@@ -219,14 +219,16 @@ public class Applet extends Panel {
      */
 	@Override
 	public void resize(int width, int height) {
-		if (appletViewer == null) {
+		// no resizing if we have a stub -- embedded in a page
+		if (stub == null)
 	    	resizeOriginal(width, height);
-		} else {
-			// use J2S.Applet._resizeApplet.
-			appletViewer.html5Applet._resizeApplet(new int[] {width, height});
-		}
     }
-	
+
+	public void resizeHTML(int width, int height) {
+		if (appletViewer != null)
+			appletViewer.html5Applet._resizeApplet(new int[] {width, height});
+    }
+
     @SuppressWarnings("deprecation")
     public void resizeOriginal(int width, int height) {
         Dimension d = size();

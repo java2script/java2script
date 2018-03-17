@@ -34,7 +34,6 @@ import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -53,8 +52,9 @@ import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.EditorKit;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.TextAction;
+
+import swingjs.JSKeyEvent;
 import swingjs.JSToolkit;
-import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 
 /**
@@ -224,30 +224,9 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		switch (eventType) {
 		case KeyEvent.KEY_PRESSED:
 			// note that events are bundled here into one eventType
-			int keyCode = 0;
-			int modifiers = JSUtil.J2S._getKeyModifiers(jQueryEvent);
-			char keyChar = '\0';
-			String type = null;
-			/**
-			 * @j2sNative
-			 * 
-			 * keyCode = jQueryEvent.keyCode;
-			 * keyChar = jQueryEvent.key;
-			 * type = jQueryEvent.type;
-			 * 
-			 */
-			switch (type) {
-			case "keydown":
-				eventType = KeyEvent.KEY_PRESSED;
-				break;
-			case "keypress":
-				eventType = KeyEvent.KEY_TYPED;
-				break;
-			case "keyup":
-				eventType = KeyEvent.KEY_RELEASED;
-				break;				
-			}
-			KeyEvent keyEvent = new KeyEvent(jc, eventType, System.currentTimeMillis(), modifiers, keyCode, keyChar);
+			JSKeyEvent keyEvent = JSKeyEvent.newJSKeyEvent(jc, jQueryEvent);
+			if (keyEvent == null)
+				return true;
 			jc.dispatchEvent(keyEvent);
 			if (keyEvent.isConsumed()) {
 				/**

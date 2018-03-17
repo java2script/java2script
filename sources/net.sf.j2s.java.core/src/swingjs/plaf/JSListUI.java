@@ -70,6 +70,7 @@ import javax.swing.text.Position;
 import sun.swing.DefaultLookup;
 import sun.swing.SwingUtilities2;
 import sun.swing.UIAction;
+import swingjs.JSKeyEvent;
 import swingjs.JSUtil;
 //import java.awt.datatransfer.Transferable;
 //import javax.swing.BorderFactory;
@@ -137,7 +138,9 @@ public class JSListUI extends JSLightweightUI {
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
 		switch (eventType) {
 		case KeyEvent.KEY_PRESSED:
-			jc.dispatchEvent(new JSKeyEvent(jc, jQueryEvent));
+			JSKeyEvent keyEvent = JSKeyEvent.newJSKeyEvent(jc, jQueryEvent);
+			if (keyEvent != null)
+				jc.dispatchEvent(keyEvent);
 			break;
 		}
 		return true;
