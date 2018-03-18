@@ -25,7 +25,9 @@ See https://github.com/BobHanson/java2script/tree/master/dist and the README fil
 # History
 
 https://sourceforge.net/projects/j2s (last updated 6/2010)
+
 https://github.com/java2script/java2script (stable master)
+
 https://github.com/BobHanson/java2script (development master)
 
 
