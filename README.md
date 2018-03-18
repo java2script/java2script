@@ -32,6 +32,8 @@ https://github.com/BobHanson/java2script (development master)
 
 Current development "Version 3 development master" involving a completely rewritten transpiler (2017) that nearly perfectly emulates the Java Virtual Machine, including fully qualified methods, compile-time method binding, generic methods and classes, Java reflection for efficient modular just-in-time class loading, Java Swing components, modal and nonmodel dialogs, audio, jpdf, the AWT event thread, and many other added packages. Java applications and applets can both be run in JavaScript in a browser. 
 
+Version 3 also implements real-time creation of HTML test files for immediate JavaScript testing of any changes made to the Java code. Basically, when the source file is saveed in Eclipse, the JavaScript updates automatically, and a reload of the page in the browser shows the changes directly. This makes for very easy side-by-side Java and JavaScript debugging. 
+
 Unlike Version 2, Version 3 requires minimal reworking of Java classes - primarily just for performance and threading* reasons, maximizing JavaScript performance without compromising any Java performance and making Java-to-JavaScript conversion almost trivial. (Of course, we are still finding occasional bugs in the transpiler and run-time "JavaScript-JVM.") 
 
 *Note that java2script/SwingJS cannot not support Thread.wait(), Thread.notify(), or Thread.sleep(). Nonetheless, in all cases we have found simple state-based alternatives that essentially reproduce this behavior in JavaScript using javax.Swing.Timer. These methods work equally well in Java and JavaScript, requiring just a bit of redesign of Java methods.
