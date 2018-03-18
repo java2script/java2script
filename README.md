@@ -63,7 +63,7 @@ and https://chemapps.stolaf.edu/jmol/jsmol
 
 https://sourceforge.net/projects/j2s (last updated 6/2010)
 
-Initially developed by Josson Smith (email?) and Zhou Renjian (zhourenjian@gmail.com, 2005-2017),
+Initially developed by Zhou Renjian (aka "Josson Smith", zhourenjian@gmail.com, 2005-2017),
 Soheil Hassas Yeganeh (soheil.h.y@gmail.com, 2006), Sal Ferro (svferro@gmail.com, 2006), Sebastian Gurin (sgurin@softpoint.org, 2008), 
 and others. The project was a "proof-in-concept" that saw limited actual application.
 
