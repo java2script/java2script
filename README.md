@@ -30,8 +30,9 @@ See https://github.com/BobHanson/java2script/tree/master/dist and the README fil
 
 https://github.com/BobHanson/java2script (development master)
 
-Current development "Version 3.0 development master" involving a completely rewritten transpiler (2017) that nearly perfectly emulates the Java Virtual Machine, including Swing, modal and nonmodel dialogs, audio, jpdf, the AWT event thread, and many other added packages.
+Current development "Version 3 development master" involving a completely rewritten transpiler (2017) that nearly perfectly emulates the Java Virtual Machine, including fully qualified methods, compile-time method binding, generic methods and classes, Java reflection for efficient modular just-in-time class loading, Java Swing components, modal and nonmodel dialogs, audio, jpdf, the AWT event thread, and many other added packages. Java applications and applets can both be run in JavaScript in a browser. 
 
+Unlike Version 2, Version 3 requires minimal reworking of Java classes - primarily just for performance reasons, maximizing JavaScript performance without compromising any Java performance and making Java-to-JavaScript conversion almost trivial. (Of course, we are still finding occasional bugs in the transpiler and run-time "JavaScript-JVM.") 
 
 Examples include:
 
@@ -45,21 +46,23 @@ Varna https://github.com/BobHanson/VARNA and https://chemapps.stolaf.edu/swingjs
 
 https://github.com/java2script/java2script (stable master)
 
-Ported from SourceForge by Zhou Renjian, developed further by Zhou Renjian and Udo Borkowski as "Version 2.0". 
-
+Ported from SourceForge by Zhou Renjian, developed further by Zhou Renjian and Udo Borkowski (primariy) as "Version 2.0".
+ 
 Extensively used by Bob Hanson in 2012-2016 for the conversion of Jmol/java to JSmol/javascript (http://jmol.sourceforge.net/), leading to extensive distribution and widespread use on the web. As of 3/2018, still the
 only known widely-available java2sript application. 
 
 Developed further in 2016 by zhou Renjian, Udo Borkowski, Bob Hanson, Andrew Raduege, Nadia El Mouldi, and Paul Falstad (http://www.falstad.com) for the first round of post-JSmol application of java2script, adding javax.swing classes and
 dubbed "SwingJS". Used by Bob Hanson during 11/2016 for conversion of the PhET gas applications applets.
 
-Currently synchronized with https://github.com/BobHanson/java2script as the stable master version.
+Version 2 allowed extensive development of JavaScript versions of Java applets, including JSmol, Falstad applets, and PhET applets.
+However, this version did not produce "fully qualified" method signatures, resulting in error-prone and performance-reducing run-time binding of methods. Java class loading procedures were not consistent with the seqence of events used by the Java class loader, and parameter and array typing was minimal. Thus, while functional, Version 2 was not fully generalizable and required extensive reworking of Java code to be "java2script compliant." 
+
+Synchronized with https://github.com/BobHanson/java2script as the stable master version in 2018.
 
 Examples can be found at https://chemapps.stolaf.edu/swingjs/phet/site/swingjs/examples
 and https://chemapps.stolaf.edu/jmol/jsmol
   
 # History - 2005-2010
-
 
 https://sourceforge.net/projects/j2s (last updated 6/2010)
 
