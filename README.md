@@ -41,7 +41,7 @@ Jmol-SwingJS  https://github.com/BobHanson/Jmol-SwingJS (code only)
 
 Varna https://github.com/BobHanson/VARNA and https://chemapps.stolaf.edu/swingjs/varna 
 
-# History - 2006-2016
+# History - 2010-2016
 
 https://github.com/java2script/java2script (stable master)
 
