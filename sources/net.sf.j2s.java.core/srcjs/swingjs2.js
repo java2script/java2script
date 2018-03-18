@@ -10654,6 +10654,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sCore.js (based on JmolCore.js)
 
+// BH 3/16/2018 5:25:09 AM fixes for dragging on phones
 // BH 2/20/2018 12:08:08 AM adds J2S._getKeyModifiers
 // BH 1/8/2018 10:27:46 PM SwingJS2
 // BH 12/22/2017 1:18:42 PM adds j2sargs for setting arguments
@@ -11941,8 +11942,11 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 
 		J2S.$bind(who, 'mousedown touchstart', function(ev) {    
       
+      
    //   System.out.println(["j2sApplet DOWN",ev.type,doIgnore(ev),ev.target.id,ev.target.getAttribute("role"),ev.target["data-ui"]]);
       
+      lastDragx = lastDragy = 99999;
+        
       if (doIgnore(ev))
         return true;
 
@@ -12126,6 +12130,9 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 	var getMouseModifiers = function(ev) {
 		var modifiers = 0;
 		switch (ev.button) {
+    default:
+      ev.button = 0;
+      // fall through
 		case 0:
 			modifiers = (1<<4)|(1<<10);//InputEvent.BUTTON1 + InputEvent.BUTTON1_DOWN_MASK;
 			break;
@@ -12215,6 +12222,9 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 		return true;
 	}
 
+  var lastDragx = 99999;
+  var lastDragy = 99999;
+  
 	J2S._drag = function(who, ev) {
     
 		ev.stopPropagation();
@@ -12226,7 +12236,12 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 		var xym = J2S._jsGetXY(who, ev);
 		if(!xym) return false;
     
-		if (!who.isDragging)
+    if (lastDragx == xym[0] && lastDragy == xym[1])
+      return false;
+    lastDragx = xym[0];
+    lastDragy = xym[1];
+    
+    if (!who.isDragging)
 			xym[2] = 0;
 
     var ui = ev.target["data-ui"];

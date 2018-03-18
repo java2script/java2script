@@ -3941,7 +3941,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// System.err.println("checking methodList for " + nodeName.toString() +
 		// " in " + methodClass.getKey());
 		List<String[]> methodList = getGenericMethodList(methodClass, nodeName.toString());
-
 		if (methodList != null) {
 			// System.err.println("have methodList for " + nodeName + " " +
 			// methodList.size());
@@ -3955,7 +3954,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				if (pname != null)
 					names.add(pname);
 			}
-		} else if (addUnqualified && !methodName.equals(qname)) {
+		} else if (addUnqualified && !methodName.equals(qname) && !classHasMethod(methodClass, methodName)) {
 			names = new ArrayList<String>();
 			names.add(methodName);
 		}
@@ -3968,6 +3967,20 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				qname += next;
 		}
 		return "[" + qname.substring(1) + "]";
+	}
+
+	private static boolean classHasMethod(ITypeBinding methodClass, String methodName) {
+		while (methodClass != null) {
+			IMethodBinding[] methods = methodClass.getDeclaredMethods();
+			for (int i = methods.length; --i >= 0;) {
+				IMethodBinding m = methods[i];
+				if (m.getName().equals(methodName) && m.getParameterTypes().length == 0
+						&& !Modifier.isPrivate(m.getModifiers()))
+					return true;
+			}
+			methodClass = methodClass.getSuperclass();
+		}
+		return false;
 	}
 
 	/**
