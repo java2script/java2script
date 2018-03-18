@@ -4,8 +4,8 @@
 These notes are for Java developers who want to convert their Java applets or Java applications to 
 JavaScript, allowing continued one-source development of both Java and JavaScript. SwingJS is not
 a one-time "port" to JavaScript. It is a system that allows real-time Java-to-JavaScript conversion
-within Eclipse, with immediate JavaScript testing and debugging, but continued Java development. 
-The outcome is a set of Java .class files and their equivalent .js files. 
+within Eclipse, with immediate JavaScript testing and debugging in a browser based on code development
+in Java. Using the java2script/SwingJS Eclipse plug-in, both Java .class files and their equivalent .js files are created simultaneously. 
 
 Developers of java2script/SwingJS itself should read README-developers.md
 
