@@ -25,7 +25,7 @@ automated production of browser-ready JavaScript versions of Java applications a
 
 See https://github.com/BobHanson/java2script/tree/master/dist and the README file in that directory.
 
-# History
+# History - 2017-
 
 
 https://github.com/BobHanson/java2script (development master)
@@ -41,13 +41,13 @@ Jmol-SwingJS  https://github.com/BobHanson/Jmol-SwingJS (code only)
 
 Varna https://github.com/BobHanson/VARNA and https://chemapps.stolaf.edu/swingjs/varna 
 
-
+# History - 2006-2016
 
 https://github.com/java2script/java2script (stable master)
 
 Ported from SourceForge by Zhou Renjian, developed further by Zhou Renjian and Udo Borkowski as "Version 2.0". 
 
-Extensively used by Bob Hanson in 2012-2017 for the conversion of Jmol/java to JSmol/javascript (http://jmol.sourceforge.net/), leading to extensive distribution and widespread use on the web. As of 3/2018, still the
+Extensively used by Bob Hanson in 2012-2016 for the conversion of Jmol/java to JSmol/javascript (http://jmol.sourceforge.net/), leading to extensive distribution and widespread use on the web. As of 3/2018, still the
 only known widely-available java2sript application. 
 
 Developed further in 2016 by zhou Renjian, Udo Borkowski, Bob Hanson, Andrew Raduege, Nadia El Mouldi, and Paul Falstad (http://www.falstad.com) for the first round of post-JSmol application of java2script, adding javax.swing classes and
@@ -58,6 +58,8 @@ Currently synchronized with https://github.com/BobHanson/java2script as the stab
 Examples can be found at https://chemapps.stolaf.edu/swingjs/phet/site/swingjs/examples
 and https://chemapps.stolaf.edu/jmol/jsmol
   
+# History - 2005-2010
+
 
 https://sourceforge.net/projects/j2s (last updated 6/2010)
 
