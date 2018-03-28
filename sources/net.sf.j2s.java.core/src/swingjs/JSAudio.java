@@ -13,7 +13,6 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.Line;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import javajs.api.ResettableStream;
 import javajs.util.BC;
 import javajs.util.Base64;
 import javajs.util.OC;
@@ -370,10 +369,9 @@ public class JSAudio implements AudioClip {
 
 		Map<String, Object> props = new Hashtable<String, Object>();
 		String fmt = (stream == null ? getAudioTypeForBytes(header) : getAudioTypeForStream(stream));
-		ResettableStream jsstream = (ResettableStream) stream;
 		props.put("fileFormat", fmt);
 		if (stream != null)
-			jsstream.resetStream();
+			stream.reset();
 		Encoding encoding = null;
 		float sampleRate = -1;
 		int sampleSizeInBits = -1;
@@ -423,7 +421,7 @@ public class JSAudio implements AudioClip {
 		} catch (Throwable e) {
 		} finally {
 			if (stream != null)
-				jsstream.resetStream();
+				stream.reset();
 		}
 		return new AudioFormat(encoding, sampleRate, sampleSizeInBits, channels,
 				frameSize, frameRate, bigEndian, props);
@@ -431,15 +429,14 @@ public class JSAudio implements AudioClip {
 
 
 	private static String getAudioTypeForStream(ByteArrayInputStream stream) throws UnsupportedAudioFileException {
-		ResettableStream jsstream = (ResettableStream) (Object) stream;
-		jsstream.resetStream();
+		stream.reset();
 		byte[] b = new byte[12];
 		try {
 			stream.read(b);
 		} catch (IOException e) {
 			// no problem
 		}
-		jsstream.resetStream();
+		stream.reset();
 		return getAudioTypeForBytes(b);
 	}
 

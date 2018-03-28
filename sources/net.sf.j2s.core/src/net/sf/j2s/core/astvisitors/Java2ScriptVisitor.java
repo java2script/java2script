@@ -122,6 +122,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// BH 3/27/2018 -- fix for anonymous inner classes of inner classes not having this.this$0
 // BH 1/5/2018 --  @j2sKeep removed; refactored into one class
 
 // BH 12/31/2017 -- competely rewritten for no run-time ambiguities
@@ -252,7 +253,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		global_includes = parent.global_includes;
 		global_j2sFlag_isDebugging = parent.global_j2sFlag_isDebugging;
 		global_mapBlockJavadoc = parent.global_mapBlockJavadoc;
-		parentClassName = parent.getQualifiedClassName();
+		this$0Name = parent.getQualifiedClassName();
 
 		innerTypeNode = node;
 		setClassName(visitorClassName);
@@ -1076,7 +1077,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			// definition in the static buffer and return
 			String className;
 			if (parent instanceof TypeDeclarationStatement) {
-				String anonClassName = assureQualifiedNameAllowP$(binding.isAnonymous() || binding.isLocal()
+				String anonClassName = assureQualifiedNameAllowP$(isAnonymous|| binding.isLocal()
 						? binding.getBinaryName() : binding.getQualifiedName());
 				className = anonClassName.substring(anonClassName.lastIndexOf('.') + 1);
 			} else {
@@ -1089,6 +1090,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				tempVisitor = new Java2ScriptVisitor(); // Default visitor
 			}
 			tempVisitor.setInnerGlobals(this, node, className);
+				
 			node.accept(tempVisitor);
 			trailingBuffer.append(tempVisitor.buffer.toString());
 			return false;
@@ -1130,11 +1132,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		String oldClassName = null;
 		String fullClassName, defaultPackageName;
-
+		String this$0Name0 = this$0Name;
 		if (isAnonymous) {
 			oldClassName = typeAdapter.getClassName();
 			fullClassName = getAnonymousName(binding); // P$.Test_Enum$Planet$1
 			defaultPackageName = "null";
+			// anonymous classes reference their package, not their outer class in Clazz.newClass,
+			// so clazz.$this$0 is not assigned.
+			this$0Name = null;
 		} else {
 			fullClassName = getQualifiedClassName(); // test.Test_Enum.Planet
 			defaultPackageName = global_PackageName;
@@ -1468,6 +1473,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (isAnonymous) {
 			buffer.append(")");
 			typeAdapter.setClassName(oldClassName);
+			this$0Name = this$0Name0;
 		}
 		return false;
 	}
@@ -1838,7 +1844,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private int blockLevel = 0;
 	private int currentBlockForVisit = -1;
 
-	public String parentClassName;
+	public String this$0Name;
 
 
 	/**
@@ -3542,7 +3548,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	private String getSyntheticReference(String className) {
-		b$name = (className.equals(parentClassName) ? ".this$0" : ".b$['" + assureQualifiedNameNoC$(null, className) + "']");
+		b$name = (className.equals(this$0Name) ? ".this$0" : ".b$['" + assureQualifiedNameNoC$(null, className) + "']");
 		return "this" + b$name;
 	}
 
