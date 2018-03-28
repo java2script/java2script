@@ -22,6 +22,10 @@ created automatically anytime you do any building of your project.
 
 1. Copy net.sf.j2s.core.jar from 
 
+https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/dropins
+
+specifically:
+
 https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/dropins/net.sf.j2s.core.jar?raw=true
 
 into your eclipse/dropins directory.
