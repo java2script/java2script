@@ -13,17 +13,17 @@
     <header class="navbar">
       <div >
         <nav class="">
-            <a class="css-logo" href={{ "/" | relative_url }}><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48c3ZnIHZpZXdCb3g9IjEwMCAxMDAgNjQgNjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3QgeD0iMTAwIiB5PSIxMDAiIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgc3R5bGU9ImZpbGw6IGdvbGQ7Ii8+PHRleHQgc3R5bGU9ImZpbGw6ICMyOTI5Mjk7IGZvbnQ6IGJvbGQgMzZweCBzYW5zLXNlcmlmOyBsZXR0ZXItc3BhY2luZzogLTEuOHB4OyIgeD0iMTE1IiB5PSIxNTMiPmoyczwvdGV4dD48L3N2Zz4=" alt="Java2Script Logo"></a>
-            <a class="css-j2s" href={{ "/" | relative_url }}>Java2Script</a>
-            <a class="css-docs" href={{ "/index.html#docs" | relative_url }}>Docs</a>
-            <a class="css-quickstart" href={{ "/quickstart.html" | relative_url }}>Quick Start</a>
-            <a class="css-community" href={{ "/community.html" | relative_url }}>Community</a>
+            <a class="css-logo" href="{{ "/" | relative_url }}"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48c3ZnIHZpZXdCb3g9IjEwMCAxMDAgNjQgNjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3QgeD0iMTAwIiB5PSIxMDAiIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgc3R5bGU9ImZpbGw6IGdvbGQ7Ii8+PHRleHQgc3R5bGU9ImZpbGw6ICMyOTI5Mjk7IGZvbnQ6IGJvbGQgMzZweCBzYW5zLXNlcmlmOyBsZXR0ZXItc3BhY2luZzogLTEuOHB4OyIgeD0iMTE1IiB5PSIxNTMiPmoyczwvdGV4dD48L3N2Zz4=" alt="Java2Script Logo"></a>
+            <a class="css-j2s" href="{{ "/" | relative_url }}">Java2Script</a>
+            <a class="css-docs" href="{{ "/index.html#docs" | relative_url }}">Docs</a>
+            <a class="css-quickstart" href="{{ "/quickstart.html" | relative_url }}">Quick Start</a>
+            <a class="css-community" href="{{ "/community.html" | relative_url }}">Community</a>
         </a>
         </nav>
       <div>
     </header>
     <section class="page-header main">
-      <h1 class="project-name"><a href="{{ site.url | relative_url}}">{{ site.title | default: site.github.repository_name }}</a></h1>
+      <h1 class="project-name"><a href="{{ "/" | relative_url }}">{{ site.title | default: site.github.repository_name }}</a></h1>
       <h2 class="project-tagline">{{ site.description | default: site.github.project_tagline }}</h2>
       {% if site.github.is_project_page %}
         <a href="{{ site.github.repository_url }}" class="btn">View on GitHub</a>
