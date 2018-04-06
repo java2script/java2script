@@ -2,3 +2,5 @@ tests/net.sf.j2s.test.junit/bin/*
 */*/bin
 sources/net.sf.j2s.lib/j2slib
 /.project
+docs/_site
+.jekyll-metadata

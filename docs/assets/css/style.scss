@@ -1,0 +1,81 @@
+---
+---
+
+h1.project-name > a {
+    color: gold
+}
+
+/*When there is not enough room hide the "Java2Script" link (icon link still available) */
+@media screen and (max-width: 400px) {
+    .navbar a.css-j2s {
+        display: none;
+    }
+}
+
+/* The navigation bar */
+.navbar {
+    overflow: hidden;
+    background-color: #333;
+    position: fixed; /* Set the navbar to fixed position */
+    top: 0; /* Position the navbar at the top left of the page */
+    left: 0;
+    width: 100%; /* Full width */
+    min-width: 400px;
+}
+
+/* Links inside the navbar */
+.navbar a {
+    float: left;
+    display: block;
+    color: #f2f2f2;
+    text-align: center;
+    padding-left: 10px;
+    padding-right: 4px;
+    margin-left: auto;
+    margin-right: auto;
+    text-decoration: none;
+    line-height: 50px; /* center vertically (equal to height) */
+}
+
+/* Change background on mouse-over */
+.navbar a:hover {
+    color: gold;
+}
+
+.navbar div {
+    height: 50px;
+}
+
+/* center nav items vertically (equal to height) */
+.navbar a {
+    line-height: 50px;
+    height: 50px
+}
+
+a.css-logo {
+}
+
+.css-logo img {
+    margin-top: 10px;
+    height: 30px;
+    width: 30px;
+}
+
+a.css-j2s {
+    padding-left: 0;
+    color: gold;
+}
+
+/* Main content */
+.main {
+    margin-top: 50px; /* Add a top margin to avoid content overlay */
+}
+
+@import "{{ site.theme }}";
+
+.project-tagline {
+    /* use color opacity because "raw" opacity text is displayed on top of navigation bar */
+    color: rgba(255,255,255,0.7);
+    opacity: 1;
+}
+
