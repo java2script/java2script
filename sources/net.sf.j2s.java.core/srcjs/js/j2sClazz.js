@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 4/16/2018 6:14:10 PM msie flag in monitor
 // BH 2/22/2018 12:34:07 AM array.clone() fix
 // BH 2/20/2018 12:59:28 AM adds Character.isISOControl
 // BH 2/13/2018 6:24:44 AM adds String.copyValueOf (two forms)
@@ -2236,8 +2237,7 @@ var setAlpha = function (alpha) {
     fadeOutTimer = null;
   }
   fadeAlpha = alpha;
-  var ua = navigator.userAgent.toLowerCase();
-  monitorEl.style.filter = "Alpha(Opacity=" + alpha + ")";
+  //monitorEl.style.filter = "Alpha(Opacity=" + alpha + ")";
   monitorEl.style.opacity = alpha / 100.0;
 };
 /* private */ 
