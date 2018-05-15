@@ -117,6 +117,7 @@
     	java/util/Locale.js
     	java/util/MapEntry.js
     	javajs/api/JSFunction.js
+    	javajs/util/AjaxURLConnection.js
     	javajs/util/AjaxURLStreamHandlerFactory.js
     	javajs/util/AU.js
     	javajs/util/JSThread.js
