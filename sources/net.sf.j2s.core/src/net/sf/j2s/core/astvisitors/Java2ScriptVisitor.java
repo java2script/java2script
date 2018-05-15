@@ -2185,7 +2185,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	/**
-	 * We must fix 
+	 * We must fix
 	 * 
 	 * this.ctype[low++] = (this.ctype[low++]|(4)|0);
 	 * 
@@ -2201,22 +2201,25 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @return
 	 */
 	private boolean fixAssignArray(int ptArray, int ptArray2, boolean wasArray) {
-		
+
 		if (ptArray >= 0) {
- 			trailingBuffer.addType("j");
-			String left = buffer.substring(ptArray, ptArray2); // zzz[xxx] 
-			String right = buffer.substring(ptArray2);
-			buffer.setLength(ptArray);
+			String left = buffer.substring(ptArray, ptArray2); // zzz[xxx]
 			int ptIndex = left.indexOf("[") + 1;
-			String left0 = left.substring(0, ptIndex);
-			buffer.append(left0);
-			buffer.append("$j$=");
-			buffer.append(left.substring(ptIndex));
-			ptIndex = right.indexOf(left);
-			buffer.append(right.substring(0, ptIndex));
-			buffer.append(left0);
-			buffer.append("$j$]");
-			buffer.append(right.substring(ptIndex + left.length()));
+			if (left.length() - ptIndex >= 4) {
+				// at least as long as zzz[i++]
+				String right = buffer.substring(ptArray2);
+				trailingBuffer.addType("j");
+				buffer.setLength(ptArray);
+				String left0 = left.substring(0, ptIndex);
+				buffer.append(left0);
+				buffer.append("$j$=");
+				buffer.append(left.substring(ptIndex));
+				ptIndex = right.indexOf(left);
+				buffer.append(right.substring(0, ptIndex));
+				buffer.append(left0);
+				buffer.append("$j$]");
+				buffer.append(right.substring(ptIndex + left.length()));
+			}
 			isArray = wasArray;
 		}
 		return false;
