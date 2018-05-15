@@ -122,6 +122,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// BH 5/15/2018 -- fix for a[pt++] |= 3  incrementing pt twice (see test/Test_Or.java)
 // BH 3/27/2018 -- fix for anonymous inner classes of inner classes not having this.this$0
 // BH 1/5/2018 --  @j2sKeep removed; refactored into one class
 
@@ -1961,6 +1962,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				break;
 			default:
 			case 'p': // $p$
+			case 'j': // $j$
 				break;
 			}
 			added += ";\r\n";
@@ -2054,9 +2056,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			return false;
 		}
 
+		int ptArray = (isArray ? buffer.length() : -1);
+		left.accept(this);		
+		int ptArray2 = (isArray ? buffer.length() : -1);
+
 		if ("boolean".equals(leftName)) {
 			// |=, &=, ^=
-			left.accept(this);
 			buffer.append(" = (");
 			left.accept(this);
 			switch (op) {
@@ -2079,20 +2084,15 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				right.accept(this);
 			}
 			buffer.append(")");
-			isArray = wasArray;
-			return false;
-
+			return fixAssignArray(ptArray, ptArray2, wasArray);
 		}
-
-		left.accept(this);
 
 		if (!("char".equals(leftName))) {
 			if (isNumericType(leftName)) {
 				// byte|short|int|long += ...
 				buffer.append(" = ");
 				addPrimitiveTypedExpression(left, toBinding, leftName, opType, right, rightName, null, true);
-				isArray = wasArray;
-				return false;
+				return fixAssignArray(ptArray, ptArray2, wasArray);
 			}
 			// not char x ....
 			// not boolean x....
@@ -2131,8 +2131,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			if (needParenthesis) {
 				buffer.append(")");
 			}
-			isArray = wasArray;
-			return false;
+			return fixAssignArray(ptArray, ptArray2, wasArray);
 		}
 
 		// char left op right where op is not just "="
@@ -2182,7 +2181,44 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (needCharCode)
 			buffer.append(CHARCODEAT0);
 		buffer.append(')');
-		isArray = wasArray;
+		return fixAssignArray(ptArray, ptArray2, wasArray);
+	}
+
+	/**
+	 * We must fix 
+	 * 
+	 * this.ctype[low++] = (this.ctype[low++]|(4)|0);
+	 * 
+	 * to read
+	 * 
+	 * this.ctype[$j$=low++] = (this.ctype[$j$]|(4)|0);
+	 * 
+	 * so that the index does not get operated upon twice.
+	 * 
+	 * @param ptArray
+	 * @param ptArray2
+	 * @param wasArray
+	 * @return
+	 */
+	private boolean fixAssignArray(int ptArray, int ptArray2, boolean wasArray) {
+		
+		if (ptArray >= 0) {
+ 			trailingBuffer.addType("j");
+			String left = buffer.substring(ptArray, ptArray2); // zzz[xxx] 
+			String right = buffer.substring(ptArray2);
+			buffer.setLength(ptArray);
+			int ptIndex = left.indexOf("[") + 1;
+			String left0 = left.substring(0, ptIndex);
+			buffer.append(left0);
+			buffer.append("$j$=");
+			buffer.append(left.substring(ptIndex));
+			ptIndex = right.indexOf(left);
+			buffer.append(right.substring(0, ptIndex));
+			buffer.append(left0);
+			buffer.append("$j$]");
+			buffer.append(right.substring(ptIndex + left.length()));
+			isArray = wasArray;
+		}
 		return false;
 	}
 
