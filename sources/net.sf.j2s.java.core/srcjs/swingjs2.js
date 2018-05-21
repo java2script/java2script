@@ -13092,6 +13092,7 @@ J2S._getResourcePath = function(path, isJavaPath) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 5/19/2018 8:22:25 PM fix for new int[] {'a'}
 // BH 4/16/2018 6:14:10 PM msie flag in monitor
 // BH 2/22/2018 12:34:07 AM array.clone() fix
 // BH 2/20/2018 12:59:28 AM adds Character.isISOControl
@@ -13938,10 +13939,14 @@ var newTypedA = function(baseClass, args, nBits, ndims) {
     // Clazz.newA(5 ,null, "SA")        new String[5] val = null
     // Clazz.newA(-1, ["A","B"], "SA")  new String[]   val = {"A", "B"}
     // Clazz.newA(3, 5, 0, "IAA")       new int[3][5] (second pass, so now args = [5, 0, "IA"])
-    if (val == null)
+    if (val == null) {
       nBits = 0;
-    else if (nBits > 0 && dim < 0)
+    } else if (nBits > 0 && dim < 0) {
+      // make sure this is not a character
+      for (var i = val.length; --i >= 0;)
+        val[i].charAt && (val[i] = val[i].charAt(0));
       dim = val; // because we can initialize an array using new Int32Array([...])
+    }
     if (nBits > 0)
       ndims = 1;
     var atype;
@@ -18114,7 +18119,7 @@ Clazz.cloneFinals = function () {
 // SwingJSApplet.js
 
 // generic SwingJS Applet
-
+// BH 3/14/2018 8:42:33 PM adds applet._window for JSObject
 // BH 12/18/2016 8:09:56 AM added SwingJS.Loaded and SwingJS.isLoaded
 // BH 7/24/2015 9:09:39 AM allows setting Info.resourcePath
 // BH 4/28/2015 10:15:32 PM adds getAppletHtml 
@@ -18150,6 +18155,7 @@ if (typeof(SwingJS) == "undefined") {
 		this._appletType = "SwingJS._Applet" + (Info.isSigned ? " (signed)" : "");
 		this._isJava = true;
 		this._availableParams = null; // all allowed
+    this._window = window;
 		if (checkOnly)
 			return this;
 		this._isSigned = Info.isSigned;

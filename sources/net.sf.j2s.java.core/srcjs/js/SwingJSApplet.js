@@ -1,7 +1,7 @@
 // SwingJSApplet.js
 
 // generic SwingJS Applet
-
+// BH 3/14/2018 8:42:33 PM adds applet._window for JSObject
 // BH 12/18/2016 8:09:56 AM added SwingJS.Loaded and SwingJS.isLoaded
 // BH 7/24/2015 9:09:39 AM allows setting Info.resourcePath
 // BH 4/28/2015 10:15:32 PM adds getAppletHtml 
@@ -37,6 +37,7 @@ if (typeof(SwingJS) == "undefined") {
 		this._appletType = "SwingJS._Applet" + (Info.isSigned ? " (signed)" : "");
 		this._isJava = true;
 		this._availableParams = null; // all allowed
+    this._window = window;
 		if (checkOnly)
 			return this;
 		this._isSigned = Info.isSigned;
