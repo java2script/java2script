@@ -2039,7 +2039,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			// Static def new Test_Static().y++;
 			ASTNode parent = node.getParent();
 			needNewStaticParenthesis = (!haveDirectStaticAccess(left)) && !(parent instanceof Statement);
-			buffer.append("/*ass need " + needNewStaticParenthesis + "*/");
+			// ever true? buffer.append("/*ass need " + needNewStaticParenthesis + "*/");
 			if (needNewStaticParenthesis) {
 				buffer.append("(");
 			}
@@ -2204,11 +2204,21 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			if (ptIndex2 - ptIndex1 > 3) {
 				// at least as long as zzz[i++]
 				String right = buffer.substring(ptArray2);
-				buffer.setLength(ptArray + ptIndex1);
+				buffer.setLength(ptArray); 
+				String name = left.substring(0, ptIndex1);
+				if (name.indexOf("(") >= 0) {
+					// test/Test_Static: getByteArray()[p++] += (byte) ++p;
+					// ($j$=C$.getByteArray())[$k$=p++]=($j$[$k$]+((++p|0))|0);
+			      buffer.append("($j$=" + name + ")");
+			      name = "$j$";
+			      trailingBuffer.addType("j");
+				} else {
+				  buffer.append(name);
+				}
 				String newRight = addArrayTemps(leftArray);
 				int ptIndex3 = right.indexOf(left);
 				buffer.append(right.substring(0, ptIndex3));
-				buffer.append(left.substring(0,  ptIndex1));
+				buffer.append(name);
 				buffer.append(newRight);
 				buffer.append(right.substring(ptIndex3 + left.length()));
 			}
@@ -2219,7 +2229,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	private String addArrayTemps(ArrayAccess leftArray) {
 		String right = "";
-		char c = 'j';
+		char c = 'k';
 		String left = "";
 		while (leftArray != null) {
 			Expression exp = leftArray.getIndex();
