@@ -7,13 +7,6 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
-// BH 5/19/2018 8:22:25 PM fix for new int[] {'a'}
-// BH 4/16/2018 6:14:10 PM msie flag in monitor
-// BH 2/22/2018 12:34:07 AM array.clone() fix
-// BH 2/20/2018 12:59:28 AM adds Character.isISOControl
-// BH 2/13/2018 6:24:44 AM adds String.copyValueOf (two forms)
-// BH 2/7/2018 7:47:07 PM adds System.out.flush and System.err.flush
-// BH 2/1/2018 12:14:20 AM fix for new int[128][] not nulls
 // BH 1/9/2018 8:40:52 AM fully running SwingJS2; adds String.isEmpty()
 // BH 12/16/2017 5:53:47 PM refactored; removed older unused parts
 // BH 11/16/2017 10:52:53 PM adds method name aliasing for generics; adds String.contains$CharSequence(cs)
@@ -101,7 +94,6 @@ Clazz.array = function(baseClass, paramType, ndims, params) {
     return a;
   }
   var prim = Clazz._getParamCode(baseClass);
-  var dofill = true;
   if (arguments.length < 4) {
     // one-parameter option just for convenience, same as array(String, 0)
     // two-parameter options for standard new foo[n], 
@@ -130,13 +122,10 @@ Clazz.array = function(baseClass, paramType, ndims, params) {
     }      
     params = vals;
     paramType = prim;
-    
     for (var i = Math.abs(ndims); --i >= 0;) {
       paramType += "A";
-      if (!haveDims && params[i] === null) {
+      if (!haveDims && params[i] === null)
         params.length--;
-        dofill = false;
-      }
     }
     if (haveDims) {
       // new int[][] { {0, 1, 2}, {3, 4, 5} , {3, 4, 5} , {3, 4, 5} };
@@ -147,7 +136,7 @@ Clazz.array = function(baseClass, paramType, ndims, params) {
     params = [-1, params];
   } else {
     var initValue = null;
-    if (ndims >= 1 && dofill) {
+    if (ndims >= 1) {
       switch (prim) {
       case "B":
       case "H": // short
@@ -187,7 +176,7 @@ Clazz.array = function(baseClass, paramType, ndims, params) {
       break;
     }  
   }
-  return newTypedA(baseClass, params, nbits, (dofill ? ndims : -ndims));
+  return newTypedA(baseClass, params, nbits, ndims);
 }
 
 Clazz.assert = function(clazz, obj, tf, msg) {
@@ -215,7 +204,7 @@ Clazz.assert = function(clazz, obj, tf, msg) {
 
 Clazz.clone = function(me) { 
   // BH allows @j2sNative access without super constructor
-  return appendMap(me.__ARRAYTYPE ? Clazz.array(me.__BASECLASS, me.__ARRAYTYPE, -1, me)
+  return appendMap(me.__ARRAYTYPE ? Clazz.array(me.__BASECLASS, me.__ARRAYTYPE, -1, [-2, me])
    : new me.constructor(inheritArgs), me); 
 }
 
@@ -802,7 +791,6 @@ Clazz.isClassDefined = function(clazzName) {
 ///////////////////////// private supporting method creation //////////////////////
 
 var setArray = function(vals, baseClass, paramType, ndims) {
-  ndims = Math.abs(ndims);
   vals.getClass = function () { return arrayClass(baseClass, ndims) };
   vals.__ARRAYTYPE = paramType; // referenced in java.lang.Class
   vals.__BASECLASS = baseClass;
@@ -854,14 +842,10 @@ var newTypedA = function(baseClass, args, nBits, ndims) {
     // Clazz.newA(5 ,null, "SA")        new String[5] val = null
     // Clazz.newA(-1, ["A","B"], "SA")  new String[]   val = {"A", "B"}
     // Clazz.newA(3, 5, 0, "IAA")       new int[3][5] (second pass, so now args = [5, 0, "IA"])
-    if (val == null) {
+    if (val == null)
       nBits = 0;
-    } else if (nBits > 0 && dim < 0) {
-      // make sure this is not a character
-      for (var i = val.length; --i >= 0;)
-        val[i].charAt && (val[i] = val[i].charAt(0));
+    else if (nBits > 0 && dim < 0)
       dim = val; // because we can initialize an array using new Int32Array([...])
-    }
     if (nBits > 0)
       ndims = 1;
     var atype;
@@ -2242,7 +2226,8 @@ var setAlpha = function (alpha) {
     fadeOutTimer = null;
   }
   fadeAlpha = alpha;
-  //monitorEl.style.filter = "Alpha(Opacity=" + alpha + ")";
+  var ua = navigator.userAgent.toLowerCase();
+  monitorEl.style.filter = "Alpha(Opacity=" + alpha + ")";
   monitorEl.style.opacity = alpha / 100.0;
 };
 /* private */ 
@@ -2520,10 +2505,7 @@ java.lang.System = System = {
   currentTimeMillis : function () {
     return new Date ().getTime ();
   },
-  exit : function() {
-  debugger 
-  swingjs.JSToolkit && swingjs.JSToolkit.exit() 
-  },
+  exit : function() { swingjs.JSToolkit && swingjs.JSToolkit.exit() },
   gc : function() {}, // bh
   getProperties : function () {
     return System.props;
@@ -2596,8 +2578,6 @@ Sys.out.printf = Sys.out.printf$S$OA = Sys.out.format = Sys.out.format$S$OA = fu
 
 Sys.out.println = Sys.out.println$O = Sys.out.println$Z = Sys.out.println$I = Sys.out.println$S = Sys.out.println$C = Sys.out.println = function(s) {
 
-Sys.out.flush = function() {}
-
 if (("" + s).indexOf("TypeError") >= 0) {
    debugger;
 }
@@ -2639,8 +2619,6 @@ Sys.err.println$F = Sys.err.println$D = function(f) {var s = "" + f; Sys.err.pri
 Sys.err.write = function (buf, offset, len) {
   Sys.err.print(String.instantialize(buf).substring(offset, offset+len));
 };
-
-Sys.err.flush = function() {}
 
 })(Clazz.Console, System);
 
@@ -3266,7 +3244,7 @@ throw e;
 }
 return result;
 }, 1);
-m$(Boolean,["compareTo","compareTo$TT"],
+m$(Boolean,["compareTo","compareToTT"],
 function(b){
 return(b.value==this.value?0:(this.value?1:-1));
 });
@@ -3643,7 +3621,9 @@ return Clazz.array(Byte.TYPE, -1, arrs);
 };
 
 sp.contains$S = function(a) {return this.indexOf(a) >= 0}  // bh added
-sp.compareTo$S = sp.compareTo$TT = function(a){return this > a ? 1 : this < a ? -1 : 0} // bh added
+sp.compareTo$S = function(a){return this > a ? 1 : this < a ? -1 : 0} // bh added
+
+
 
 sp.toCharArray=function(){
 var result=new Array(this.length);
@@ -3910,16 +3890,6 @@ default:
 
 })(Clazz._Encoding);
 
-String.copyValueOf$CA$I$I = function(data,offset,count) {
- var s = "";
- for (var pt = offset, n = offset+count;pt < n;pt++)s += data[pt];
- return s;
-}
-String.copyValueOf$CA = function(data) {
- return sp.copyValueOf$CA$I$I(data, 0, data.length);
-}
- 
-
 C$=Clazz.newClass(java.lang,"Character",function(){
 if (typeof arguments[0] != "object")this.c$(arguments[0]);
 },null,[java.io.Serializable,Comparable]);
@@ -3964,7 +3934,7 @@ return(this.value).charCodeAt(i);
 
 C$.prototype.$c = function(){return this.value.charCodeAt(0)};
 
-m$(C$,["compareTo","compareTo$TT"],
+m$(C$,["compareTo","compareToTT"],
 function(c){
 return(this.value).charCodeAt(0)-(c.value).charCodeAt(0);
 });
@@ -3981,56 +3951,38 @@ function(c){
 c = c.charCodeAt(0);
 return (48 <= c && c <= 57);
 }, 1);
-
-m$(C$,"isISOControl",
+m$(C$,"isUpperCase",
 function(c){
-if (typeof c == "string")
-  c = c.charCodeAt(0);
-return (c < 0x1F || 0x7F <= c && c <= 0x9F);
+c = c.charCodeAt(0);
+return (65 <= c && c <= 90);
 }, 1);
-
+m$(C$,"isLowerCase",
+function(c){
+c = c.charCodeAt(0);
+return (97 <= c && c <= 122);
+}, 1);
+m$(C$,"isWhitespace",
+function(c){
+c = (c).charCodeAt(0);
+return (c >= 0x1c && c <= 0x20 || c >= 0x9 && c <= 0xd || c == 0x1680
+  || c >= 0x2000 && c != 0x2007 && (c <= 0x200b || c == 0x2028 || c == 0x2029 || c == 0x3000));
+}, 1);
 m$(C$,"isLetter",
 function(c){
-if (typeof c == "string")
-  c = c.charCodeAt(0);
+c = c.charCodeAt(0);
 return (65 <= c && c <= 90 || 97 <= c && c <= 122);
 }, 1);
 m$(C$,"isLetterOrDigit",
 function(c){
-if (typeof c == "string")
-  c = c.charCodeAt(0);
+c = c.charCodeAt(0);
 return (65 <= c && c <= 90 || 97 <= c && c <= 122 || 48 <= c && c <= 57);
-}, 1);
-m$(C$,"isLowerCase",
-function(c){
-if (typeof c == "string")
-    c = c.charCodeAt(0);
-return (97 <= c && c <= 122);
-}, 1);
-m$(C$,"isSpace",
-function(c){
- var i = c.charCodeAt(0);
- return (i==0x20||i==0x9||i==0xA||i==0xC||i==0xD);
 }, 1);
 m$(C$,"isSpaceChar",
 function(c){
- var i = (typeof c == "string" ? c.charCodeAt(0) : c);
+ var i = c.charCodeAt(0);
 if(i==0x20||i==0xa0||i==0x1680)return true;
 if(i<0x2000)return false;
 return i<=0x200b||i==0x2028||i==0x2029||i==0x202f||i==0x3000;
-}, 1);
-m$(C$,"isUpperCase",
-function(c){
-if (typeof c == "string")
-  c = c.charCodeAt(0);
-return (65 <= c && c <= 90);
-}, 1);
-m$(C$,"isWhitespace",
-function(c){
-if (typeof c == "string")
- c = c.charCodeAt(0);
-return (c >= 0x1c && c <= 0x20 || c >= 0x9 && c <= 0xd || c == 0x1680
-  || c >= 0x2000 && c != 0x2007 && (c <= 0x200b || c == 0x2028 || c == 0x2029 || c == 0x3000));
 }, 1);
 m$(C$,"digit",
 function(c,radix){
@@ -4093,7 +4045,7 @@ m$(java.util.Date,"equals$O",
 function(obj){
 return Clazz.instanceOf(obj,java.util.Date)&&this.getTime()==(obj).getTime();
 });
-m$(java.util.Date,["compareTo","compareTo$TT"],
+m$(java.util.Date,["compareTo","compareToTT"],
 function(anotherDate){
 var thisTime=this.getTime();
 var anotherTime=anotherDate.getTime();
