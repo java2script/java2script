@@ -145,6 +145,8 @@ public class JSGraphics2D //extends SunGraphics2D
 	}
 
 	private void doCirc(int left, int top, int diameter, boolean fill) {
+		if (diameter <= 0)
+			return;
 		double r = diameter / 2f;
 		ctx.beginPath();
 		ctx.arc(left + r, top + r, r, 0, 2 * Math.PI, false);
@@ -157,7 +159,7 @@ public class JSGraphics2D //extends SunGraphics2D
 
 	private void doArc(double x, double y, double width, double height, double startAngle,
 			double arcAngle, boolean fill) {
-		if (width < 0 || height < 0)
+		if (width <= 0 || height <= 0)
 			return;
 //		boolean doClose = (arcAngle - startAngle == 360);
 		ctx.save();
