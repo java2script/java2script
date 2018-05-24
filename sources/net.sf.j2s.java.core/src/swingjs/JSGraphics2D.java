@@ -157,6 +157,8 @@ public class JSGraphics2D //extends SunGraphics2D
 
 	private void doArc(double x, double y, double width, double height, double startAngle,
 			double arcAngle, boolean fill) {
+		if (width < 0 || height < 0)
+			return;
 //		boolean doClose = (arcAngle - startAngle == 360);
 		ctx.save();
 		{
@@ -230,6 +232,8 @@ public class JSGraphics2D //extends SunGraphics2D
 
 	
 	public void drawRect(int x, int y, int width, int height) {
+		if (width <= 0 || height <= 0)
+			return;
 		ctx.beginPath();
 		ctx.rect(x, y, width, height);
 		ctx.stroke();
@@ -245,11 +249,15 @@ public class JSGraphics2D //extends SunGraphics2D
 
 	
 	public void fillRect(int x, int y, int width, int height) {
+		if (width <= 0 || height <= 0)
+			return;
 		backgroundPainted = true;
 		ctx.fillRect(x, y, width, height);
 	}
 
 	public void fill3DRect(int x, int y, int width, int height, boolean raised) {
+		if (width <= 0 || height <= 0)
+			return;
 		Paint p = getPaint();
 		Color c = getColor();
 		Color brighter = c.brighter();
@@ -374,6 +382,8 @@ public class JSGraphics2D //extends SunGraphics2D
 	
 	public boolean drawImage(Image img, int x, int y, int width, int height,
 			ImageObserver observer) {
+		if (width <= 0 || height <= 0)
+			return true;
 		backgroundPainted = true;
 		if (img != null) {
 			DOMNode imgNode = getImageNode(img);
@@ -406,6 +416,8 @@ public class JSGraphics2D //extends SunGraphics2D
 	
 	public boolean drawImage(Image img, int x, int y, int width, int height,
 			Color bgcolor, ImageObserver observer) {
+		if (width <= 0 || height <= 0)
+			return false;
 		backgroundPainted = true;
 		JSUtil.notImplemented(null);
 		return drawImage(img, x, y, width, height, observer);
