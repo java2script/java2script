@@ -128,6 +128,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		Java2ScriptVisitor.setNoQualifiedNamePackages(getProperty("j2s.compiler.nonqualified.classes"));
 		boolean isDebugging = "debug".equals(getProperty("j2s.compiler.mode"));
 		visitor.setDebugging(isDebugging);
+		visitor.setClassReplacements(getProperty("j2s.class.replacements"));
 		String j2sPath = siteFolder + "/swingjs/j2s";
 		try {
 

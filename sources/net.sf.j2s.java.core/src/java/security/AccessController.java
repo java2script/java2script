@@ -8,6 +8,13 @@ public class AccessController implements AccessControlContext {
 		return action.run();
 	}
 
+	public static void doPrivileged(PrivilegedExceptionAction<Void> privilegedExceptionAction) {
+		try {
+			privilegedExceptionAction.run();
+		} catch (Exception e) {
+		}		
+	}
+
 	public static AccessControlContext getContext() {
 		return new AccessController();
 	}

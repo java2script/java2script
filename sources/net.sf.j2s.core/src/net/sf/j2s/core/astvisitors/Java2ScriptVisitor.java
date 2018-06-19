@@ -1452,7 +1452,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			buffer.append("var $vals=[];\r\n");
 			// implicit Enum methods added as trailer
 			buffer.append("Clazz.newMeth(C$, 'values', function() { return $vals }, 1);\r\n");			
-			buffer.append("Clazz.newMeth(C$, 'valueOf$S, '$valueOf$S', function(name) { for (var val in $vals){ if ($vals[val].$name == name) return $vals[val]} return null }, 1);\r\n");
+			buffer.append("Clazz.newMeth(C$, '$valueOf$S', function(name) { for (var val in $vals){ if ($vals[val].$name == name) return $vals[val]} return null }, 1);\r\n");
 		} else {
 			buffer.append(trailingBuffer); // also writes the assert string
 			if (isAnonymous) {
@@ -4655,6 +4655,53 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	
+
+	private static Map<String, String> htClassReplacements;
+	private static List<String> lstPackageReplacements;
+	
+	// j2s.class.replacements=org.apache.log4j.*:jalview.jslogger.;
+	public void setClassReplacements(String keyValues) {
+		if (keyValues == null || htClassReplacements != null)
+			return;
+		htClassReplacements = new Hashtable<String, String>();
+		lstPackageReplacements = new ArrayList<String>();
+		String[] pairs = keyValues.split(";");
+		for (int i = pairs.length; --i >= 0;) {
+			pairs[i] = pairs[i].trim();
+			if (pairs[i].length() == 0)
+				continue;
+			String[] kv = pairs[i].split("->");
+			htClassReplacements.put(kv[0], kv[1]);
+			if (kv[0].endsWith("."))
+				lstPackageReplacements.add(kv[0]);
+			System.err.println("class replacement " + kv[0] + " --> " + kv[1]);
+		}
+	}
+
+	
+	private String checkClassReplacement(String className) {
+		if (htClassReplacements != null) {
+			String rep = htClassReplacements.get(className);
+			if (rep == null && lstPackageReplacements != null) {
+				for (int i = lstPackageReplacements.size(); --i >= 0;) {
+					rep = lstPackageReplacements.get(i);
+					if (className.startsWith(rep)) {
+						rep = htClassReplacements.get(rep) + className.substring(rep.length());
+						break;
+					}
+					if (i == 0)
+						rep = null;
+				}
+				
+			}
+			if (rep != null) {
+				System.out.println(className + " -> " + rep);
+				return rep;
+			}
+		}
+		return className;
+	}
+
 	/**
 	 * tracks file byte pointers for @j2sNative, @j2sIgnore
 	 */
@@ -4716,7 +4763,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// loop through packages and outer Class
 		while (i < parts.length && (i == 1 || !Character.isUpperCase(parts[i - 1].charAt(0))))
 			s += "." + parts[i++];
-		s = "'" + s + "'";
+		s = "'" + checkClassReplacement(s) + "'";
 		// int nlast = parts.length;
 		if (i < parts.length) {
 			s = "[" + s;
