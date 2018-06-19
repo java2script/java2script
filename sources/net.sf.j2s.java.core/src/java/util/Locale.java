@@ -239,7 +239,7 @@ public final class Locale implements Cloneable, Serializable {
 //
 //    /** Useful constant for country.
 //     */
-//    static public final Locale UK = createSingleton("en_GB_", "en", "GB");
+   static public final Locale UK = createSingleton("en_GB_", "en", "US"); // SwingJS j2s sorry!
 //
 //    /** Useful constant for country.
 //     */
