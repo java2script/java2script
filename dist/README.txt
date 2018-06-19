@@ -63,7 +63,7 @@ All of the JavaScript produced will be in the project site/ directory.
 You must prepopulate this site with all the JavaScript required by the 
 JavaScript version of the JVM. The most recent version of site/ is at
 
-https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.java.core/SwingJS-site.zip?raw=true
+https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.java.core/dist/SwingJS-site.zip?raw=true
 
 Occasional additions to the java.* classes are made to the above-mentioned zip file.
 
