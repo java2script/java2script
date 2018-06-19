@@ -1450,7 +1450,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			buffer.append(trailingBuffer.getAssertString());
 			addDefaultConstructor();
 			buffer.append("var $vals=[];\r\n");
-			buffer.append("Clazz.newMeth(C$, 'values', function() { return $vals }, 1);\r\n");
+			// implicit Enum methods added as trailer
+			buffer.append("Clazz.newMeth(C$, 'values', function() { return $vals }, 1);\r\n");			
+			buffer.append("Clazz.newMeth(C$, 'valueOf$S, '$valueOf$S', function(name) { for (var val in $vals){ if ($vals[val].$name == name) return $vals[val]} return null }, 1);\r\n");
 		} else {
 			buffer.append(trailingBuffer); // also writes the assert string
 			if (isAnonymous) {
