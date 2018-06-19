@@ -13092,6 +13092,7 @@ J2S._getResourcePath = function(path, isJavaPath) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 6/19/2018 8:49:57 AM fix for checkDeclared
 // BH 5/19/2018 8:22:25 PM fix for new int[] {'a'}
 // BH 4/16/2018 6:14:10 PM msie flag in monitor
 // BH 2/22/2018 12:34:07 AM array.clone() fix
@@ -13860,11 +13861,10 @@ var _declared = {};
 
 var checkDeclared = function(name, type) {
   if (J2S._debugName && name.toLowerCase() == J2S._debugName)doDebugger();
-  if (_declared[name] == type) {
+  if (_declared[name] != null && _declared[name] == type) {
     var s = (type === 0 ? "interface" : "class") +" " + name + " is defined twice. A prior core file has probably needed to load a class that is in the current core file. Check to make sure that package.js declares the first class read in jarClassPath or that BuildCompress has included all necessary files."
     System.out.println(s);
-    if (J2S._debugCore)
-      doDebugger();
+//    if (J2S._debugCore)    doDebugger();
     }
   _declared[name] = type;
 }
@@ -16191,8 +16191,8 @@ return new Int32Array(a.buffer)[0];
 }
 
 Float.serialVersionUID=Float.prototype.serialVersionUID=-2671257302660747028;
-Float.MIN_VALUE=Float.prototype.MIN_VALUE=3.4028235e+38;
-Float.MAX_VALUE=Float.prototype.MAX_VALUE=1.4e-45;
+Float.MIN_VALUE=Float.prototype.MIN_VALUE=1.4e-45;
+Float.MAX_VALUE=Float.prototype.MAX_VALUE=3.4028235e+38;
 Float.NEGATIVE_INFINITY=Number.NEGATIVE_INFINITY;
 Float.POSITIVE_INFINITY=Number.POSITIVE_INFINITY;
 Float.NaN=Number.NaN;
