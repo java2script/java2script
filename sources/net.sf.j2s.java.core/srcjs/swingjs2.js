@@ -10654,6 +10654,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sCore.js (based on JmolCore.js)
 
+// BH 6/20/2018 11:26:09 PM fix for menu bar not closable
 // BH 3/16/2018 5:25:09 AM fixes for dragging on phones
 // BH 2/20/2018 12:08:08 AM adds J2S._getKeyModifiers
 // BH 1/8/2018 10:27:46 PM SwingJS2
@@ -11977,7 +11978,8 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
         return true;
         
       if (ev.target.getAttribute("role")) { // JSButtonUI adds role=menucloser to icon and text
-        (ev.target._menu || ev.target.parentElement._menu)._hideJSMenu()
+        var m = (ev.target._menu || ev.target.parentElement._menu);
+        m && m._hideJSMenu();
       }
         
 			J2S._setMouseOwner(null);
