@@ -13092,6 +13092,7 @@ J2S._getResourcePath = function(path, isJavaPath) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 6/20/2018 6:00:23 AM missing printStackTrace(PrintStream)
 // BH 6/19/2018 8:49:57 AM fix for checkDeclared
 // BH 5/19/2018 8:22:25 PM fix for new int[] {'a'}
 // BH 4/16/2018 6:14:10 PM msie flag in monitor
@@ -13327,6 +13328,7 @@ Clazz.exceptionOf = function(e, clazz) {
   }
   if (!e.printStackTrace) {
     e.printStackTrace = function(){};
+    e.printStackTrace$java_io_PrintStream = function(){};
     //alert(e + " try/catch path:" + Clazz._getStackTrace(-10));
   }
   if(clazz == Error) {
@@ -17272,7 +17274,7 @@ if (!this.stackTrace){
 }
 for (var i = 0; i < this.stackTrace.length; i++) {
 var t = this.stackTrace[i];
-var x = t.methodName.indexOf ("(");
+//var x = t.methodName.indexOf ("(");
 //var n = (x < 0 ? t.methodName : t.methodName.substring (0, x)).replace (/\s+/g, "");
 if (t.nativeClazz == null || isInstanceOf(t.nativeClazz, Throwable) < 0) {
 System.err.println (t);
@@ -17280,6 +17282,21 @@ System.err.println (t);
 }
 // from a JavaScript error 
 this.stack && System.err.println(this.stack);
+});
+
+m$(C$, 'printStackTrace$java_io_PrintStream', function (stream) {
+  if (!this.stackTrace){
+    stream.println$S(this.stack);
+    return;
+  }
+  for (var i = 0; i < this.stackTrace.length; i++) {
+    var t = this.stackTrace[i];
+    //var x = t.methodName.indexOf ("(");
+    //var n = (x < 0 ? t.methodName : t.methodName.substring (0, x)).replace (/\s+/g, "");
+    if (t.nativeClazz == null || isInstanceOf(t.nativeClazz, Throwable) < 0) {
+      stream.println$O(t);
+    }
+  }
 });
 
 Clazz.newMeth(C$, 'printStackTrace$java_io_PrintStream', function (s) {
