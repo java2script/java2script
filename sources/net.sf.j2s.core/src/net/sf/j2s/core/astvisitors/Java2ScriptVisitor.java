@@ -122,6 +122,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// BH 6/19/2018 -- adds .j2s j2s.class.replacements=org.apache.log4j.->jalview.javascript.log4j.;
 // BH 5/15/2018 -- fix for a[pt++] |= 3  incrementing pt twice and disregarding a[][] (see test/Test_Or.java)
 // BH 3/27/2018 -- fix for anonymous inner classes of inner classes not having this.this$0
 // BH 1/5/2018 --  @j2sKeep removed; refactored into one class
@@ -4361,9 +4362,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			name = "S";
 			break;
 		default:
-			if (prefix != null)
+			if (prefix == null)
+				name = checkClassReplacement(name);
+			else
 				name = (asGenericObject ? "O" : prefix + name); // "O";//
-
 			name = name.replace("java.lang.", "").replace('.', '_');
 			break;
 		}
@@ -4659,9 +4661,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private static Map<String, String> htClassReplacements;
 	private static List<String> lstPackageReplacements;
 	
-	// j2s.class.replacements=org.apache.log4j.*:jalview.jslogger.;
-	public void setClassReplacements(String keyValues) {
-		if (keyValues == null || htClassReplacements != null)
+	public static void setClassReplacements(String keyValues) {
+		// j2s.class.replacements=org.apache.log4j.*:jalview.jslogger.;
+		htClassReplacements = null;
+		if (keyValues == null)
 			return;
 		htClassReplacements = new Hashtable<String, String>();
 		lstPackageReplacements = new ArrayList<String>();
@@ -4679,7 +4682,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	
-	private String checkClassReplacement(String className) {
+	private static String checkClassReplacement(String className) {
 		if (htClassReplacements != null) {
 			String rep = htClassReplacements.get(className);
 			if (rep == null && lstPackageReplacements != null) {
