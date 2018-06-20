@@ -568,9 +568,9 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		// "javax.swing.plaf.basic.BasicBorders",
 		// "getInternalFrameBorder");
 		//
-		// Object blackLineBorder = new SwingLazyValue(
-		// "javax.swing.plaf.BorderUIResource",
-		// "getBlackLineBorderUIResource");
+		 Object blackLineBorder = new SwingLazyValue(
+		 "javax.swing.plaf.BorderUIResource",
+		 "getBlackLineBorderUIResource");
 		// Object focusCellHighlightBorder = new SwingLazyValue(
 		// "javax.swing.plaf.BorderUIResource$LineBorderUIResource",
 		// null,
@@ -1927,10 +1927,10 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// }),
 
 				// *** ToolTips
-				// "ToolTip.font", sansSerifPlain12,
-				// "ToolTip.background", table.get("info"),
-				// "ToolTip.foreground", table.get("infoText"),
-				// "ToolTip.border", blackLineBorder,
+				 "ToolTip.font", sansSerifPlain12,
+				 "ToolTip.background", table.get("info"),
+				 "ToolTip.foreground", table.get("infoText"),
+				 "ToolTip.border", blackLineBorder,
 				// ToolTips also support backgroundInactive, borderInactive,
 				// and foregroundInactive
 
