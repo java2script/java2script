@@ -13092,6 +13092,8 @@ J2S._getResourcePath = function(path, isJavaPath) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 6/20/2018 6:00:23 AM missing printStackTrace(PrintStream)
+// BH 6/19/2018 8:49:57 AM fix for checkDeclared
 // BH 5/19/2018 8:22:25 PM fix for new int[] {'a'}
 // BH 4/16/2018 6:14:10 PM msie flag in monitor
 // BH 2/22/2018 12:34:07 AM array.clone() fix
@@ -13326,6 +13328,7 @@ Clazz.exceptionOf = function(e, clazz) {
   }
   if (!e.printStackTrace) {
     e.printStackTrace = function(){};
+    e.printStackTrace$java_io_PrintStream = function(){};
     //alert(e + " try/catch path:" + Clazz._getStackTrace(-10));
   }
   if(clazz == Error) {
@@ -13860,11 +13863,10 @@ var _declared = {};
 
 var checkDeclared = function(name, type) {
   if (J2S._debugName && name.toLowerCase() == J2S._debugName)doDebugger();
-  if (_declared[name] == type) {
+  if (_declared[name] != null && _declared[name] == type) {
     var s = (type === 0 ? "interface" : "class") +" " + name + " is defined twice. A prior core file has probably needed to load a class that is in the current core file. Check to make sure that package.js declares the first class read in jarClassPath or that BuildCompress has included all necessary files."
     System.out.println(s);
-    if (J2S._debugCore)
-      doDebugger();
+//    if (J2S._debugCore)    doDebugger();
     }
   _declared[name] = type;
 }
@@ -16191,8 +16193,8 @@ return new Int32Array(a.buffer)[0];
 }
 
 Float.serialVersionUID=Float.prototype.serialVersionUID=-2671257302660747028;
-Float.MIN_VALUE=Float.prototype.MIN_VALUE=3.4028235e+38;
-Float.MAX_VALUE=Float.prototype.MAX_VALUE=1.4e-45;
+Float.MIN_VALUE=Float.prototype.MIN_VALUE=1.4e-45;
+Float.MAX_VALUE=Float.prototype.MAX_VALUE=3.4028235e+38;
 Float.NEGATIVE_INFINITY=Number.NEGATIVE_INFINITY;
 Float.POSITIVE_INFINITY=Number.POSITIVE_INFINITY;
 Float.NaN=Number.NaN;
@@ -17272,7 +17274,7 @@ if (!this.stackTrace){
 }
 for (var i = 0; i < this.stackTrace.length; i++) {
 var t = this.stackTrace[i];
-var x = t.methodName.indexOf ("(");
+//var x = t.methodName.indexOf ("(");
 //var n = (x < 0 ? t.methodName : t.methodName.substring (0, x)).replace (/\s+/g, "");
 if (t.nativeClazz == null || isInstanceOf(t.nativeClazz, Throwable) < 0) {
 System.err.println (t);
@@ -17280,6 +17282,21 @@ System.err.println (t);
 }
 // from a JavaScript error 
 this.stack && System.err.println(this.stack);
+});
+
+m$(C$, 'printStackTrace$java_io_PrintStream', function (stream) {
+  if (!this.stackTrace){
+    stream.println$S(this.stack);
+    return;
+  }
+  for (var i = 0; i < this.stackTrace.length; i++) {
+    var t = this.stackTrace[i];
+    //var x = t.methodName.indexOf ("(");
+    //var n = (x < 0 ? t.methodName : t.methodName.substring (0, x)).replace (/\s+/g, "");
+    if (t.nativeClazz == null || isInstanceOf(t.nativeClazz, Throwable) < 0) {
+      stream.println$O(t);
+    }
+  }
 });
 
 Clazz.newMeth(C$, 'printStackTrace$java_io_PrintStream', function (s) {

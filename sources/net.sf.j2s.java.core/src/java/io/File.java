@@ -138,7 +138,7 @@ public class File
 //    /**
 //     * The FileSystem object representing the platform's local file system.
 //     */
-//    static private FileSystem fs = FileSystem.getFileSystem();
+    static private FileSystem fs = FileSystem.getFileSystem();
 
     /**
      * This abstract pathname's normalized pathname string.  A normalized
@@ -171,7 +171,7 @@ public class File
      *
      * @see     java.lang.System#getProperty(java.lang.String)
      */
-    public static final char separatorChar = '/';// SwingJS was fs.getSeparator();
+    public static final char separatorChar = fs.getSeparator();
 
     /**
      * The system-dependent default name-separator character, represented as a

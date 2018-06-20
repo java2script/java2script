@@ -29,6 +29,10 @@ public class TextArea extends JScrollPane {
 		setViewportView(ta = new JTextArea(text, rows, cols));
 		awtDefaults();
 	}
+	
+	public void setCaretPosition(int pos) {
+		ta.setCaretPosition(pos);
+	}
 
 	void awtDefaults() {
 		// setAutoscrolls(true);
