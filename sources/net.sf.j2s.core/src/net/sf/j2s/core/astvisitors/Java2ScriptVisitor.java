@@ -122,6 +122,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// BH 6/20/2018 -- fixes for (int var : new int[] {3,4,5}) becoming for var var
 // BH 6/19/2018 -- adds .j2s j2s.class.replacements=org.apache.log4j.->jalview.javascript.log4j.;
 // BH 5/15/2018 -- fix for a[pt++] |= 3  incrementing pt twice and disregarding a[][] (see test/Test_Or.java)
 // BH 3/27/2018 -- fix for anonymous inner classes of inner classes not having this.this$0
@@ -494,8 +495,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	public boolean visit(EnhancedForStatement node) {
-		SimpleName name = node.getParameter().getName();
-		String varName = name.getIdentifier();
+		String varName = getQualifiedSimpleName(node.getParameter().getName());
 		writeReplaceV("for (var V, $V = ", "V", varName);
 		Expression exp = node.getExpression();
 		ITypeBinding typeBinding = exp.resolveTypeBinding();

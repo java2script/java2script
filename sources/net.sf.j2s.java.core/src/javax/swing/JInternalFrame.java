@@ -239,8 +239,8 @@ public class JInternalFrame extends JComponent
             AppContext.getAppContext().put(PROPERTY_CHANGE_LISTENER_KEY,
                 focusListener);
 
-            KeyboardFocusManager.getCurrentKeyboardFocusManager().
-                addPropertyChangeListener(focusListener);
+//            KeyboardFocusManager.getCurrentKeyboardFocusManager().
+//                addPropertyChangeListener(focusListener);
         }
     }
 
