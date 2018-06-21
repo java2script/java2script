@@ -1,4 +1,4 @@
-// j2sSwingJS.js 
+// j2sClazz.js 
 // NOTE: updates to this file should be copies to j2sjmol.js
 
 // latest author: Bob Hanson, St. Olaf College, hansonr@stolaf.edu
@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 6/21/2018 1:08:58 PM missing mysterious Integer.objectValue() 
 // BH 6/20/2018 6:00:23 AM missing printStackTrace(PrintStream)
 // BH 6/19/2018 8:49:57 AM fix for checkDeclared
 // BH 5/19/2018 8:22:25 PM fix for new int[] {'a'}
@@ -2768,6 +2769,7 @@ m$(Integer, "c$", function(v){
  this.valueOf=function(){return v;};
 }, 1);
 
+
 Integer.MIN_VALUE=Integer.prototype.MIN_VALUE=-0x80000000;
 Integer.MAX_VALUE=Integer.prototype.MAX_VALUE=0x7fffffff;
 //Integer.TYPE=Integer.prototype.TYPE=Integer;
@@ -3215,6 +3217,14 @@ Clazz._setDeclared("java.lang.Boolean",
 Boolean = java.lang.Boolean = Boolean || function(){
 if (typeof arguments[0] != "object")this.c$(arguments[0]);
 });
+
+Integer.prototype.objectValue = 
+Short.prototype.objectValue = 
+Long.prototype.objectValue =  
+Float.prototype.objectValue = 
+Double.prototype.objectValue =  function() {return this.valueOf()};
+
+
 
 //if (supportsNativeObject) {
   extendObject(Boolean);

@@ -179,7 +179,7 @@ Clazz.newMeth(C$,"processReplacement$S",function(replacement){
       index++;
     }
     if(this.replacementParts!=null&&replacementPos!=res.length$()){
-      this.replacementParts[this.replacementParts.length]=res.subSequence(replacementPos,res.length$());
+      this.replacementParts[this.replacementParts.length]=res.subSequence$I$I(replacementPos,res.length$());
     }
     return res.toString();
   }
@@ -199,7 +199,7 @@ Clazz.newMeth(C$,"region$I$I",function(leftBound,rightBound){
 });
 
 Clazz.newMeth(C$,"appendTail$StringBuffer",function(sb){
-  return sb.append$S(this.charSeq.subSequence(this.appendPos,this.charSeq.length$()));
+  return sb.append$S(this.charSeq.subSequence$I$I(this.appendPos,this.charSeq.length$()));
 },"StringBuffer");
 
 Clazz.newMeth(C$,"replaceFirst$S",function(replacement){
