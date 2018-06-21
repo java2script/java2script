@@ -783,7 +783,9 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 				text = PT.rep(text.substring(6, text.length() - 7), "</br>", "");
 				text = PT.rep(text,  "</html>", "");
 				text = PT.rep(text, "href=", "target=_blank href=");
-				System.out.println(text);
+				text = PT.rep(text, "href=", "target=_blank href=");
+				// Jalview hack
+				text = PT.rep(text, "width: 350; text-align: justify; word-wrap: break-word;", "width: 350px; word-wrap: break-word;");
 			}
 		}
 		DOMNode obj = null;
