@@ -1,57 +1,42 @@
 package swingjs.plaf;
 
-
-import java.awt.Dimension;
-
 import javax.swing.JComponent;
-import javax.swing.JRootPane;
+import javax.swing.JToolTip;
 import javax.swing.LookAndFeel;
-import swingjs.api.js.DOMNode;
 
-public class JSToolTipUI extends JSLightweightUI {
+public class JSToolTipUI extends JSLabelUI {
 
-	int frameZ = 10000;
+	// TODO: allow generic tool tip, not just text
+	
 	public JSToolTipUI() {
-		isContainer = true;
-		setDoc();
+		super();
+		allowTextAlignment = false;
 	}
 	
-	@Override
-	protected DOMNode updateDOMNode() {
-		if (domNode == null) {
-			JRootPane root = jc.getRootPane();
-			//isContentPane = (root != null && jc == root.getContentPane());
-			domNode = newDOMObject("div", id);
-			DOMNode.setVisible(domNode,  false);
-		}
-    return domNode;
-	}
+	protected JToolTip toolTip;
 
 	@Override
-  protected Dimension setHTMLSize(DOMNode obj, boolean addCSS) {
-		// SwingJS for now: just designated container width/height 
-		return new Dimension(c.getWidth(), c.getHeight());
+	protected void getIconAndText() {		
+		icon = null;
+		gap = 0;
+		text = toolTip.getTipText();
 	}
-	
 
 	@Override
 	public void installUI(JComponent jc) {
-    LookAndFeel.installColorsAndFont(jc,
-        "Panel.background",
-        "Panel.foreground",
-        "Panel.font");
+		toolTip = (JToolTip) jc;		
+		LookAndFeel.installColorsAndFont(jc, "ToolTip.background", "ToolTip.foreground",
+        "Tooltip.font");
 	}
+
 
 	@Override
 	public void uninstallUI(JComponent jc) {
+		System.out.println("Uninstalling ToolTipUI");
+		// should remove dom node?
 		// TODO Auto-generated method stub
 		
 	}
-
-	@Override
-	public Dimension getPreferredSize() {
-  	return null;
-  }
 
 
 }

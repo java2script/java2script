@@ -8,13 +8,18 @@ import javax.swing.LookAndFeel;
 import swingjs.api.js.DOMNode;
 
 /**
- * A JavaScript equivalent for a label.  
+ * A JavaScript equivalent for a label.
+ * 
+ *   Also used for ToolTip
  * 
  * @author Bob Hanson
  *
  */
 public class JSLabelUI extends JSLightweightUI {
 	private JLabel label;
+	protected ImageIcon icon;
+	protected int gap;
+	protected String text;
 
 	public JSLabelUI() {
 		setDoc();
@@ -33,8 +38,8 @@ public class JSLabelUI extends JSLightweightUI {
 			centeringNode.appendChild(textNode);
 			domNode.appendChild(centeringNode);
 		}
-		setIconAndText("label", (ImageIcon) label.getIcon(),
-				label.getIconTextGap(), label.getText());
+		getIconAndText(); // could be ToolTip
+		setIconAndText("label", icon, gap, text);
 		DOMNode.setStyles(domNode, "position", "absolute", "width", c.getWidth()
 				+ "px", "height", c.getHeight() + "px");
 		if (actualHeight > 0)
@@ -49,6 +54,13 @@ public class JSLabelUI extends JSLightweightUI {
 		return domNode;
 
 	}
+
+	protected void getIconAndText() {		
+		icon = (ImageIcon) label.getIcon();
+		gap = label.getIconTextGap();
+		text = label.getText();
+	}
+
 
 	/**
 	 * adding in outer styles for text alignment of a label

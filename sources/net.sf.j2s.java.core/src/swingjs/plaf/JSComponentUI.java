@@ -350,6 +350,12 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	private boolean canAlignText;
 	private boolean canAlignIcon;
 
+	/**
+	 * set false for tool tip or other non-label object that has text
+	 * 
+	 */
+	protected boolean allowTextAlignment = true;
+
 	public JSComponentUI() {
 		setDoc();
 	}
@@ -756,13 +762,14 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 				iconHeight = icon.getIconHeight();
 			}
 		}
+		boolean isHTML = false;
 		if (text == null || text.length() == 0) {
 			text = "";
 			if (icon != null)
 				canAlignIcon = true;
 		} else {
 			if (icon == null) {
-				canAlignText = true;
+				canAlignText = allowTextAlignment;
 			} else {
 				//vCenter(imageNode, 10); // perhaps? Not sure if this is a good idea
 				if (gap == Integer.MAX_VALUE)
@@ -771,15 +778,20 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 					DOMNode.addHorizontalGap(iconNode, gap);
 			}
 			if (text.indexOf("<html>") == 0) {
+				isHTML = true;
 				// PhET uses <html> in labels and uses </br>
 				text = PT.rep(text.substring(6, text.length() - 7), "</br>", "");
+				text = PT.rep(text,  "</html>", "");
+				text = PT.rep(text, "href=", "target=_blank href=");
+				System.out.println(text);
 			}
 		}
 		DOMNode obj = null;
 		if (textNode != null) {
 			prop = "innerHTML";
 			obj = textNode;
-			text = PT.rep(text, "<", "&lt;");
+			if (!isHTML)
+				text = PT.rep(text, "<", "&lt;");
 		} else if (valueNode != null) {
 			prop = "value";
 			obj = valueNode;
