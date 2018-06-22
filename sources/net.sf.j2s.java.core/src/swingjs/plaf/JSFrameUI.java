@@ -47,6 +47,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	protected boolean isModal;
 	protected int zModal;
 
+	protected boolean isInternalFrame;
 
 
 	public JSFrameUI() {
