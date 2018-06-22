@@ -3972,6 +3972,7 @@ public class Container extends JSComponent {
 //        return super.getOpaqueShape();
 //    }
 
+
 //    final void recursiveSubtractAndApplyShape(Region shape) {
 //        recursiveSubtractAndApplyShape(shape, getTopmostComponentIndex(), getBottommostComponentIndex());
 //    }

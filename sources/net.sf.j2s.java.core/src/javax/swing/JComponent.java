@@ -216,7 +216,7 @@ public abstract class JComponent extends Container {
 	/** A list of event listeners for this component. */
 	protected EventListenerList listenerList = new EventListenerList();
 
-	private transient ArrayTable clientProperties;
+	protected transient ArrayTable clientProperties;
 	// private VetoableChangeSupport vetoableChangeSupport;
 	/**
 	 * Whether or not autoscroll has been enabled.
@@ -3331,19 +3331,21 @@ public abstract class JComponent extends Container {
 	 * @return the value of this property or <code>null</code>
 	 * @see #putClientProperty
 	 */
-	public final Object getClientProperty(Object key) {
+	public /* SwingJS final*/ Object getClientProperty(Object key) {
+		// moved to java.awt.JSComponent
+		return super.getClientProperty(key);
 		// if (key == SwingUtilities2.AA_TEXT_PROPERTY_KEY) {
 		// return aaTextInfo;
 		// } else if (key == SwingUtilities2.COMPONENT_UI_PROPERTY_KEY) {
 		// return ui;
 		// }
-		if (clientProperties == null) {
-			return null;
-		} else {
-			synchronized (clientProperties) {
-				return clientProperties.get(key);
-			}
-		}
+//		if (clientProperties == null) {
+//			return null;
+//		} else {
+//			synchronized (clientProperties) {
+//				return clientProperties.get(key);
+//			}
+//		}
 	}
 
 	/**

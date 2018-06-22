@@ -1199,7 +1199,7 @@ public class Window extends Container {
      * @return    the warning string for this window.
      * @see       java.lang.SecurityManager#checkTopLevelWindow(java.lang.Object)
      */
-    public final String getWarningString() {
+    public String getWarningString() {
         return warningString;
     }
 
@@ -2243,7 +2243,7 @@ public class Window extends Container {
      * @see Container#getFocusTraversalPolicy
      * @since 1.4
      */
-    public final void setFocusCycleRoot(boolean focusCycleRoot) {
+    public void setFocusCycleRoot(boolean focusCycleRoot) {
     }
 
     /**
@@ -2257,7 +2257,7 @@ public class Window extends Container {
      * @since 1.4
      */
     @Override
-		public final boolean isFocusCycleRoot() {
+		public boolean isFocusCycleRoot() {
         return true;
     }
 
@@ -2270,7 +2270,7 @@ public class Window extends Container {
      * @since 1.4
      */
     @Override
-		public final Container getFocusCycleRootAncestor() {
+		public Container getFocusCycleRootAncestor() {
         return null;
     }
 
