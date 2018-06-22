@@ -111,22 +111,12 @@ import sun.swing.SwingUtilities2;
  *      description: A frame container which is contained within
  *                   another window.
  */
-public class JSInternalFrame extends JFrame 
+public class JInternalFrame extends JFrame 
 	implements
         //Accessible, 
         WindowConstants,
         RootPaneContainer
 {
-
-	private class JSInternalPanel extends JPanel {
-		
-		private JInternalFrame frame;
-		
-		public JInternalFrame getFrame() {
-			return frame;
-		}
-
-	}
 	
 	/**
      * @see #getUIClassID
@@ -195,7 +185,7 @@ public class JSInternalFrame extends JFrame
      * The icon that is displayed when this internal frame is iconified.
      * @see #iconable
      */
-    protected JSDesktopIcon desktopIcon;
+    protected JDesktopIcon desktopIcon;
 
     private Cursor lastCursor;
 
@@ -277,9 +267,9 @@ public class JSInternalFrame extends JFrame
         if (component != null) {
             Component parent = component;
             while (parent != null && !(parent instanceof Window)) {
-                if (parent instanceof JSInternalFrame) {
+                if (parent instanceof JInternalFrame) {
                     // Update lastFocusOwner for parent.
-                    ((JSInternalFrame)parent).setLastFocusOwner(component);
+                    ((JInternalFrame)parent).setLastFocusOwner(component);
                 }
                 parent = parent.getParent();
             }
@@ -290,7 +280,7 @@ public class JSInternalFrame extends JFrame
      * Creates a non-resizable, non-closable, non-maximizable,
      * non-iconifiable <code>JInternalFrame</code> with no title.
      */
-    public JSInternalFrame() {
+    public JInternalFrame() {
         this("", false, false, false, false);
     }
 
@@ -303,7 +293,7 @@ public class JSInternalFrame extends JFrame
      * @param title  the non-<code>null</code> <code>String</code>
      *     to display in the title bar
      */
-    public JSInternalFrame(String title) {
+    public JInternalFrame(String title) {
         this(title, false, false, false, false);
     }
 
@@ -315,7 +305,7 @@ public class JSInternalFrame extends JFrame
      * @param title      the <code>String</code> to display in the title bar
      * @param resizable  if <code>true</code>, the internal frame can be resized
      */
-    public JSInternalFrame(String title, boolean resizable) {
+    public JInternalFrame(String title, boolean resizable) {
         this(title, resizable, false, false, false);
     }
 
@@ -328,7 +318,7 @@ public class JSInternalFrame extends JFrame
      * @param resizable  if <code>true</code>, the internal frame can be resized
      * @param closable   if <code>true</code>, the internal frame can be closed
      */
-    public JSInternalFrame(String title, boolean resizable, boolean closable) {
+    public JInternalFrame(String title, boolean resizable, boolean closable) {
         this(title, resizable, closable, false, false);
     }
 
@@ -342,7 +332,7 @@ public class JSInternalFrame extends JFrame
      * @param closable    if <code>true</code>, the internal frame can be closed
      * @param maximizable if <code>true</code>, the internal frame can be maximized
      */
-    public JSInternalFrame(String title, boolean resizable, boolean closable,
+    public JInternalFrame(String title, boolean resizable, boolean closable,
                           boolean maximizable) {
         this(title, resizable, closable, maximizable, false);
     }
@@ -358,7 +348,7 @@ public class JSInternalFrame extends JFrame
      * @param maximizable if <code>true</code>, the internal frame can be maximized
      * @param iconifiable if <code>true</code>, the internal frame can be iconified
      */
-    public JSInternalFrame(String title, boolean resizable, boolean closable,
+    public JInternalFrame(String title, boolean resizable, boolean closable,
                                 boolean maximizable, boolean iconifiable) {
     	super("title", null, "InternalFrameUI");
         this.resizable = resizable;
@@ -367,7 +357,7 @@ public class JSInternalFrame extends JFrame
         isMaximum = false;
         this.iconable = iconifiable;
         isIcon = false;
-        desktopIcon = new JSDesktopIcon(this);
+        desktopIcon = new JDesktopIcon(this);
         addPropertyChangeListenerIfNecessary();
     }
 
@@ -995,8 +985,8 @@ public class JSInternalFrame extends JFrame
      *           bound: true
      *     description: The icon shown when this internal frame is minimized.
      */
-    public void setDesktopIcon(JSDesktopIcon d) {
-        JSDesktopIcon oldValue = getDesktopIcon();
+    public void setDesktopIcon(JDesktopIcon d) {
+        JDesktopIcon oldValue = getDesktopIcon();
         desktopIcon = d;
         firePropertyChange("desktopIcon", oldValue, d);
     }
@@ -1008,7 +998,7 @@ public class JSInternalFrame extends JFrame
      * @return the <code>JDesktopIcon</code> displayed on the desktop
      * @see #setDesktopIcon
      */
-    public JSDesktopIcon getDesktopIcon() {
+    public JDesktopIcon getDesktopIcon() {
         return desktopIcon;
     }
 
@@ -1885,9 +1875,9 @@ public class JSInternalFrame extends JFrame
      *
      * @author David Kloba
      */
-    static public class JSDesktopIcon extends JComponent //implements Accessible
+    static public class JDesktopIcon extends JComponent //implements Accessible
     {
-        JSInternalFrame internalFrame;
+        JInternalFrame internalFrame;
 
         /**
          * Creates an icon for an internal frame.
@@ -1895,7 +1885,7 @@ public class JSInternalFrame extends JFrame
          * @param f  the <code>JInternalFrame</code>
          *              for which the icon is created
          */
-        public JSDesktopIcon(JSInternalFrame f) {
+        public JDesktopIcon(JInternalFrame f) {
             setVisible(false);
             setInternalFrame(f);
             updateUI();
@@ -1928,7 +1918,7 @@ public class JSInternalFrame extends JFrame
          * @return the <code>JInternalFrame</code> with which this icon
          *              is associated
          */
-        public JSInternalFrame getInternalFrame() {
+        public JInternalFrame getInternalFrame() {
             return internalFrame;
         }
 
@@ -1939,7 +1929,7 @@ public class JSInternalFrame extends JFrame
          * @param f  the <code>JInternalFrame</code> with which this icon
          *              is associated
          */
-        public void setInternalFrame(JSInternalFrame f) {
+        public void setInternalFrame(JInternalFrame f) {
             internalFrame = f;
         }
 

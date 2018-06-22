@@ -26,7 +26,7 @@ package javax.swing.event;
 
 import java.awt.AWTEvent;
 import javax.swing.JInternalFrame;
-import javax.swing.JSInternalFrame;
+//import javax.swing.JSInternalFrame;
 
 /**
  * An <code>AWTEvent</code> that adds support for
@@ -141,9 +141,9 @@ public class InternalFrameEvent extends AWTEvent {
         super(source, id);
     }
 
-    public InternalFrameEvent(JSInternalFrame source, int id) {
-        super(source, id);
-    }
+//    public InternalFrameEvent(JSInternalFrame source, int id) {
+//        super(source, id);
+//    }
 
     /**
      * Returns a parameter string identifying this event.
