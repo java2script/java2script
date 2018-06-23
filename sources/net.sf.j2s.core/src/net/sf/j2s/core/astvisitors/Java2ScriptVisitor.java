@@ -122,6 +122,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// BH 6/23/2018 -- synchronized(a = new Object()) {...} ---> if(!(a = new Object()) {throw new NullPointerException()}else{...}
 // BH 6/21/2018 -- CharSequence.subSequence() should be defined both subSequence$I$I and subSequence
 // BH 6/20/2018 -- fixes for (int var : new int[] {3,4,5}) becoming for var var
 // BH 6/19/2018 -- adds .j2s j2s.class.replacements=org.apache.log4j.->jalview.javascript.log4j.;
@@ -909,7 +910,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	public boolean visit(SynchronizedStatement node) {
-		// not implemented in JS, as there is only one thread
+		// we wrap this with a simple if() statement, 
+		// checking that it is not null
+		buffer.append("if(!(");
+		node.getExpression().accept(this);
+		buffer.append("){throw new NullPointerException()}else");
 		node.getBody().accept(this);
 		return false;
 	}
