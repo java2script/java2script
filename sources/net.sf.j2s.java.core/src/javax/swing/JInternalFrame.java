@@ -400,8 +400,8 @@ public class JInternalFrame extends JFrame
      * @see JComponent#updateUI
      */
     public void updateUI() {
-        setUI((InternalFrameUI)UIManager.getUI(this));
-        invalidate();
+    	super.updateUI();
+    	invalidate();
         if (desktopIcon != null) {
             desktopIcon.updateUIWhenHidden();
         }
@@ -420,23 +420,6 @@ public class JInternalFrame extends JFrame
                 SwingUtilities.updateComponentTreeUI(children[i]);
             }
         }
-    }
-
-
-    /**
-     * Returns the name of the look-and-feel
-     * class that renders this component.
-     *
-     * @return the string "InternalFrameUI"
-     *
-     * @see JComponent#getUIClassID
-     * @see UIDefaults#getUI
-     *
-     * @beaninfo
-     *     description: UIClassID
-     */
-    public String getUIClassID() {
-        return uiClassID;
     }
 
 
@@ -1605,7 +1588,13 @@ public class JInternalFrame extends JFrame
         return null;
     }
 
-//    /**
+    @Override
+    protected Container getContainer() {
+    	// needed for addNotify
+        return getParent();
+    }
+
+    //    /**
 //     * See <code>readObject</code> and <code>writeObject</code>
 //     * in <code>JComponent</code> for more
 //     * information about serialization in Swing.
@@ -1701,20 +1690,17 @@ public class JInternalFrame extends JFrame
 //
     // ======= begin optimized frame dragging defence code ==============
 
-    boolean isDragging = false;
-    boolean danger = false;
-
     /**
      * Overridden to allow optimized painting when the
      * internal frame is being dragged.
      */
     protected void paintComponent(Graphics g) {
-      if (isDragging) {
-        //         System.out.println("ouch");
-         danger = true;
-      }
-
-      super.paint(g); // was paintComponent
+      
+     // we need to bypass JComponent
+    	
+      paintContainer(g);
+      
+      //super.paint(g); 
    }
 
     // ======= end optimized frame dragging defence code ==============
@@ -1946,6 +1932,8 @@ public class JInternalFrame extends JFrame
             return null;
         }
 
+        String uiClassID = "DesktopIconUI";
+        
         /**
          * Notification from the <code>UIManager</code> that the look and feel
          * has changed.
@@ -1955,8 +1943,7 @@ public class JInternalFrame extends JFrame
          * @see JComponent#updateUI
          */
         public void updateUI() {
-            boolean hadUI = (ui != null);
-            setUI((DesktopIconUI)UIManager.getUI(this));
+            super.updateUI();
             invalidate();
 
             Dimension r = getPreferredSize();
@@ -1973,8 +1960,7 @@ public class JInternalFrame extends JFrame
          */
         void updateUIWhenHidden() {
             /* Update this UI and any associated internal frame */
-            setUI((DesktopIconUI)UIManager.getUI(this));
-
+        	super.updateUI();
             Dimension r = getPreferredSize();
             setSize(r.width, r.height);
 
@@ -1987,17 +1973,6 @@ public class JInternalFrame extends JFrame
             }
         }
 
-        /**
-         * Returns the name of the look-and-feel
-         * class that renders this component.
-         *
-         * @return the string "DesktopIconUI"
-         * @see JComponent#getUIClassID
-         * @see UIDefaults#getUI
-         */
-        public String getUIClassID() {
-            return "DesktopIconUI";
-        }
 //        ////////////////
 //        // Serialization support
 //        ////////////////

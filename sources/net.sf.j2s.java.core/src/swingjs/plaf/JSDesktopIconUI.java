@@ -23,7 +23,7 @@ public class JSDesktopIconUI extends JSPanelUI {
 	}
 	
 	@Override
-	protected DOMNode updateDOMNode() {
+	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			JRootPane root = jc.getRootPane();
 			isContentPane = (root != null && jc == root.getContentPane());

@@ -65,7 +65,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	// }
 
 	@Override
-	protected DOMNode updateDOMNode() {
+	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			// we have to give it some sort of border, or it blends in with the
 			// page too much.

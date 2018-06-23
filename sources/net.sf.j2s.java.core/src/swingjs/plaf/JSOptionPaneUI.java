@@ -57,7 +57,7 @@ public class JSOptionPaneUI extends JSPanelUI {
 	}
 	
 	@Override
-	protected DOMNode updateDOMNode() {
+	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			domNode = super.updateDOMNode();
 		}

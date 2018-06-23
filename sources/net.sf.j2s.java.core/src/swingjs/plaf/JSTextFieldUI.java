@@ -23,7 +23,7 @@ public class JSTextFieldUI extends JSTextUI {
 	private JTextField textField;
 
 	@Override
-	protected DOMNode updateDOMNode() {
+	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			allowPaintedBackground = false;
 			// no textNode here, because in input does not have that.

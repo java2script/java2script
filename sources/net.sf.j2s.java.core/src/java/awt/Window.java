@@ -147,7 +147,7 @@ import swingjs.JSUtil;
  * @since       JDK1.0
  */
 @SuppressWarnings({"unchecked", "deprecation"})
-public class Window extends Container {
+public class Window extends JComponent {
 
     /**
      * This represents the warning message that is
@@ -667,6 +667,7 @@ public class Window extends Container {
 			parent.addNotify();
 		getOrCreatePeer();
 		JSUtil.getAppletViewer().addWindow(this);
+		// to JComponent now
 		super.addNotify();
 	}
 
@@ -814,6 +815,14 @@ public class Window extends Container {
 //        }
     }
 
+    @Override
+ 	public void paint(Graphics g) {
+    	// SwingJS added when Window was moved to 
+    	// subclass JComponent. 
+    	
+       paintContainer(g); 
+     }
+
     /**
      * Shows or hides this {@code Window} depending on the value of parameter
      * {@code b}.
@@ -835,9 +844,13 @@ public class Window extends Container {
      */
     @Override
 		public void setVisible(boolean b) {
-        super.setVisible(b);
-        if (b)
+    	// this is Component's not JComponent's
+    	if (b) {
+    		show();
         	repaint(); // BH SwingJS needs this, because there is no system event set to do this.
+    	} else {
+    		hide();
+    	}
     }
 
     /**
@@ -1783,7 +1796,7 @@ public class Window extends Container {
 
     // REMIND: remove when filtering is handled at lower level
     @Override
-		boolean eventEnabled(AWTEvent e) {
+		protected boolean eventEnabled(AWTEvent e) {
         switch(e.id) {
           case WindowEvent.WINDOW_OPENED:
           case WindowEvent.WINDOW_CLOSING:
@@ -2494,7 +2507,7 @@ public class Window extends Container {
      * @param e the event
      */
     @Override
-		void dispatchEventImpl(AWTEvent e) {
+		protected void dispatchEventImpl(AWTEvent e) {
         if (e.getID() == ComponentEvent.COMPONENT_RESIZED) {
             invalidate();
             validate();
@@ -3082,8 +3095,7 @@ public class Window extends Container {
      * Verifies that it is focusable and as container it can container focus owner.
      * @since 1.5
      */
-    @Override
-		boolean canContainFocusOwner(Component focusOwnerCandidate) {
+		protected boolean canContainFocusOwner(Component focusOwnerCandidate) {
         return super.canContainFocusOwner(focusOwnerCandidate) && isFocusableWindow();
     }
 
@@ -3344,7 +3356,7 @@ public class Window extends Container {
     @SuppressWarnings("unused")
 		private transient boolean opaque = true;
 
-    void setOpaque(boolean opaque) {
+    public void setOpaque(boolean opaque) {
         synchronized (getTreeLock()) {
         	//TODO ?
 //            GraphicsConfiguration gc = getGraphicsConfiguration();
@@ -3453,7 +3465,7 @@ public class Window extends Container {
 
     // A window has a parent, but it does NOT have a container
     @Override
-    final Container getContainer() {
+    protected Container getContainer() {
         return null;
     }
 

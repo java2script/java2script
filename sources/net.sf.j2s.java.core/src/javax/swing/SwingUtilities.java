@@ -1876,15 +1876,15 @@ public class SwingUtilities implements SwingConstants
     // REMIND(aim): phase out use of 4 methods below since they
     // are just private covers for AWT methods (?)
 
-    static Object appContextGet(Object key) {
+    public static Object appContextGet(Object key) {
         return AppContext.getAppContext().get(key);
     }
 
-    static void appContextPut(Object key, Object value) {
+    public static void appContextPut(Object key, Object value) {
         AppContext.getAppContext().put(key, value);
     }
 
-    static void appContextRemove(Object key) {
+    public static void appContextRemove(Object key) {
         AppContext.getAppContext().remove(key);
     }
 

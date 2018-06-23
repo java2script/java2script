@@ -240,20 +240,9 @@ public class JDesktopPane extends JLayeredPane //implements Accessible
      * @see JComponent#updateUI
      */
     public void updateUI() {
-        setUI((DesktopPaneUI)UIManager.getUI(this));
+    	super.updateUI();
     }
 
-
-    /**
-     * Returns the name of the L&F class that renders this component.
-     *
-     * @return the string "DesktopPaneUI"
-     * @see JComponent#getUIClassID
-     * @see UIDefaults#getUI
-     */
-    public String getUIClassID() {
-        return uiClassID;
-    }
 
     /**
      * Returns all <code>JInternalFrames</code> currently displayed in the

@@ -25,7 +25,7 @@ public class JSSpinnerUI extends JSLightweightUI {
 	private DOMNode dn, up, dnNode, upNode;
 	
 	@Override
-	protected DOMNode updateDOMNode() {
+	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 
 			domNode = newDOMObject("div", id);

@@ -4818,7 +4818,6 @@ public abstract class JComponent extends Container {
 	 * 
 	 * @param g
 	 */
-	@SuppressWarnings("unused")
 	private void paintComponentSafely(Graphics g) {
 		JSGraphics2D jsg = getJSGraphic2D(g);		
 		int nSave = (jsg == null ? 0 : jsg.mark());

@@ -3,9 +3,9 @@
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -17,9 +17,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
@@ -35,15 +35,8 @@
 
 
 package java.util.concurrent;
-import java.util.AbstractQueue;
-import java.util.Collection;
-import java.util.ConcurrentModificationException;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.PriorityQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.*;
+import java.util.*;
 
 /**
  * An unbounded {@linkplain BlockingQueue blocking queue} of
@@ -72,8 +65,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * @param <E> the type of elements held in this collection
  */
 
-public class DelayQueue<E extends Delayed> extends AbstractQueue<E> {
-//    implements BlockingQueue<E> {
+public class DelayQueue<E extends Delayed> extends AbstractQueue<E>
+    implements BlockingQueue<E> {
 
     private transient final ReentrantLock lock = new ReentrantLock();
     private transient final Condition available = lock.newCondition();
@@ -186,8 +179,7 @@ public class DelayQueue<E extends Delayed> extends AbstractQueue<E> {
      * @return the head of this queue
      * @throws InterruptedException {@inheritDoc}
      */
-    @SuppressWarnings("unused")
-	public E take() throws InterruptedException {
+    public E take() throws InterruptedException {
         final ReentrantLock lock = this.lock;
         lock.lockInterruptibly();
         try {
@@ -493,16 +485,14 @@ public class DelayQueue<E extends Delayed> extends AbstractQueue<E> {
             return cursor < array.length;
         }
 
-        @SuppressWarnings("unchecked")
-		public E next() {
+        public E next() {
             if (cursor >= array.length)
                 throw new NoSuchElementException();
             lastRet = cursor;
             return (E)array[cursor++];
         }
 
-        @SuppressWarnings("rawtypes")
-		public void remove() {
+        public void remove() {
             if (lastRet < 0)
                 throw new IllegalStateException();
             Object x = array[lastRet];

@@ -26,7 +26,7 @@ public class JSLabelUI extends JSLightweightUI {
 	}
 
 	@Override
-	protected DOMNode updateDOMNode() {
+	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			domNode = newDOMObject("label", id);
 			textNode = newDOMObject("span", id + "_text");

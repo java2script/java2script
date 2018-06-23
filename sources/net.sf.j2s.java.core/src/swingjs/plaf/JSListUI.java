@@ -118,7 +118,7 @@ public class JSListUI extends JSLightweightUI {
 	private DOMNode listNode;
 
 	@Override
-	protected DOMNode updateDOMNode() {
+	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			domNode = focusNode = enableNode = newDOMObject("div", id);
 			DOMNode.seTabIndex(domNode, 1);

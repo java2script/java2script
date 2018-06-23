@@ -183,7 +183,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	@Override
 	public void setDraggable(JSFunction f) {
 		// SplitPaneDivider
-		draggable = true;
+		draggable = true; // never actually used
 		JSUtil.J2S._setDraggable(updateDOMNode(), f);
 	}
 	
@@ -868,7 +868,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	 * 
 	 * @return the DOM element's node and, if the DOM element already exists,
 	 */
-	protected DOMNode updateDOMNode() {
+	public DOMNode updateDOMNode() {
 		String msg = "Swingjs WARNING: default JSComponentUI is being used for "
 				+ getClass().getName();
 		if (debugging && createMsgs.indexOf(msg) < 0) {
@@ -1145,7 +1145,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 			}
 			addChildrenToDOM(children);
 
-			if (isWindow) {
+			if (isWindow && jc.getUIClassID() != "InternalFrameUI") {
 				DOMNode.remove(outerNode);
 				$(body).append(outerNode);
 			}
@@ -1840,7 +1840,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 			curs = "default";
 			break;
 		}
-		DOMNode.setStyles(getOuterNode(), "cursor", curs);
+		DOMNode.setStyles(setHTMLElement(), "cursor", curs);
 		setWaitImage(curs == "wait");
 	}
 

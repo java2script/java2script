@@ -34,9 +34,6 @@
  */
 
 package java.util.concurrent.locks;
-import java.util.concurrent.*;
-import sun.misc.Unsafe;
-
 
 /**
  * Basic thread blocking primitives for creating locks and other
@@ -120,21 +117,21 @@ import sun.misc.Unsafe;
 public class LockSupport {
     private LockSupport() {} // Cannot be instantiated.
 
-    // Hotspot implementation via intrinsics API
-    private static final Unsafe unsafe = Unsafe.getUnsafe();
-    private static final long parkBlockerOffset;
+//    // Hotspot implementation via intrinsics API
+//    private static final Unsafe unsafe = Unsafe.getUnsafe();
+//    private static final long parkBlockerOffset;
+//
+//    static {
+//        try {
+//            parkBlockerOffset = unsafe.objectFieldOffset
+//                (java.lang.Thread.class.getDeclaredField("parkBlocker"));
+//        } catch (Exception ex) { throw new Error(ex); }
+//    }
 
-    static {
-        try {
-            parkBlockerOffset = unsafe.objectFieldOffset
-                (java.lang.Thread.class.getDeclaredField("parkBlocker"));
-        } catch (Exception ex) { throw new Error(ex); }
-    }
-
-    private static void setBlocker(Thread t, Object arg) {
-        // Even though volatile, hotspot doesn't need a write barrier here.
-        unsafe.putObject(t, parkBlockerOffset, arg);
-    }
+//    private static void setBlocker(Thread t, Object arg) {
+//        // Even though volatile, hotspot doesn't need a write barrier here.
+//        unsafe.putObject(t, parkBlockerOffset, arg);
+//    }
 
     /**
      * Makes available the permit for the given thread, if it
@@ -148,8 +145,8 @@ public class LockSupport {
      *        this operation has no effect
      */
     public static void unpark(Thread thread) {
-        if (thread != null)
-            unsafe.unpark(thread);
+//        if (thread != null)
+//            unsafe.unpark(thread);
     }
 
     /**
@@ -181,10 +178,10 @@ public class LockSupport {
      * @since 1.6
      */
     public static void park(Object blocker) {
-        Thread t = Thread.currentThread();
-        setBlocker(t, blocker);
-        unsafe.park(false, 0L);
-        setBlocker(t, null);
+//        Thread t = Thread.currentThread();
+//        setBlocker(t, blocker);
+//        unsafe.park(false, 0L);
+//        setBlocker(t, null);
     }
 
     /**
@@ -220,12 +217,12 @@ public class LockSupport {
      * @since 1.6
      */
     public static void parkNanos(Object blocker, long nanos) {
-        if (nanos > 0) {
-            Thread t = Thread.currentThread();
-            setBlocker(t, blocker);
-            unsafe.park(false, nanos);
-            setBlocker(t, null);
-        }
+//        if (nanos > 0) {
+//            Thread t = Thread.currentThread();
+//            setBlocker(t, blocker);
+//            unsafe.park(false, nanos);
+//            setBlocker(t, null);
+//        }
     }
 
     /**
@@ -262,10 +259,10 @@ public class LockSupport {
      * @since 1.6
      */
     public static void parkUntil(Object blocker, long deadline) {
-        Thread t = Thread.currentThread();
-        setBlocker(t, blocker);
-        unsafe.park(true, deadline);
-        setBlocker(t, null);
+//        Thread t = Thread.currentThread();
+//        setBlocker(t, blocker);
+//        unsafe.park(true, deadline);
+//        setBlocker(t, null);
     }
 
     /**
@@ -279,7 +276,8 @@ public class LockSupport {
      * @since 1.6
      */
     public static Object getBlocker(Thread t) {
-        return unsafe.getObjectVolatile(t, parkBlockerOffset);
+//        return unsafe.getObjectVolatile(t, parkBlockerOffset);
+    	return Integer.valueOf(0);
     }
 
     /**
@@ -308,7 +306,7 @@ public class LockSupport {
      * for example, the interrupt status of the thread upon return.
      */
     public static void park() {
-        unsafe.park(false, 0L);
+  //      unsafe.park(false, 0L);
     }
 
     /**
@@ -341,8 +339,8 @@ public class LockSupport {
      * @param nanos the maximum number of nanoseconds to wait
      */
     public static void parkNanos(long nanos) {
-        if (nanos > 0)
-            unsafe.park(false, nanos);
+//        if (nanos > 0)
+//            unsafe.park(false, nanos);
     }
 
     /**
@@ -376,6 +374,6 @@ public class LockSupport {
      *        to wait until
      */
     public static void parkUntil(long deadline) {
-        unsafe.park(true, deadline);
+   //     unsafe.park(true, deadline);
     }
 }
