@@ -10,6 +10,7 @@ import swingjs.api.js.DOMNode;
 
 public class JSMenuItemUI extends JSButtonUI {
 	
+
 	/**
 	 * Just a simple menu item -- not radio or checkbox
 	 */
@@ -45,6 +46,18 @@ public class JSMenuItemUI extends JSButtonUI {
 		super.installUI(jc);
     LookAndFeel.installColorsAndFont(jc, "MenuItem.background", "MenuItem.foreground",
         "MenuItem.font");		
+	}
+
+	
+	@Override
+	protected void enableNode(DOMNode node, boolean b) {
+		if (node == null)
+			return;
+		if (b) {
+			$(node).removeClass("ui-menu-disabled ui-state-disabled");
+		} else {
+			$(node).addClass("ui-menu-disabled ui-state-disabled");			
+		}
 	}
 
 }
