@@ -568,9 +568,9 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		// "javax.swing.plaf.basic.BasicBorders",
 		// "getInternalFrameBorder");
 		//
-		// Object blackLineBorder = new SwingLazyValue(
-		// "javax.swing.plaf.BorderUIResource",
-		// "getBlackLineBorderUIResource");
+		 Object blackLineBorder = new SwingLazyValue(
+		 "javax.swing.plaf.BorderUIResource",
+		 "getBlackLineBorderUIResource");
 		// Object focusCellHighlightBorder = new SwingLazyValue(
 		// "javax.swing.plaf.BorderUIResource$LineBorderUIResource",
 		// null,
@@ -990,15 +990,15 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// "ctrl SPACE", "showSystemMenu",
 				// "ESCAPE", "hideSystemMenu"},
 				//
-				// "InternalFrameTitlePane.iconifyButtonOpacity", Boolean.TRUE,
-				// "InternalFrameTitlePane.maximizeButtonOpacity", Boolean.TRUE,
-				// "InternalFrameTitlePane.closeButtonOpacity", Boolean.TRUE,
+				"InternalFrameTitlePane.iconifyButtonOpacity", Boolean.TRUE,
+				"InternalFrameTitlePane.maximizeButtonOpacity", Boolean.TRUE,
+				"InternalFrameTitlePane.closeButtonOpacity", Boolean.TRUE,
 
-				// "DesktopIcon.border", internalFrameBorder,
-				//
-				// "Desktop.minOnScreenInsets", threeInsets,
-				// "Desktop.background", table.get("desktop"),
-				// "Desktop.ancestorInputMap",
+				//"DesktopIcon.border", internalFrameBorder,
+				
+				"Desktop.minOnScreenInsets", threeInsets,
+				"Desktop.background", table.get("desktop"),
+				"Desktop.ancestorInputMap",
 				// new UIDefaults.LazyInputMap(new Object[] {
 				// "ctrl F5", "restore",
 				// "ctrl F4", "close",
@@ -1927,10 +1927,10 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// }),
 
 				// *** ToolTips
-				// "ToolTip.font", sansSerifPlain12,
-				// "ToolTip.background", table.get("info"),
-				// "ToolTip.foreground", table.get("infoText"),
-				// "ToolTip.border", blackLineBorder,
+				 "ToolTip.font", sansSerifPlain12,
+				 "ToolTip.background", table.get("info"),
+				 "ToolTip.foreground", table.get("infoText"),
+				 "ToolTip.border", blackLineBorder,
 				// ToolTips also support backgroundInactive, borderInactive,
 				// and foregroundInactive
 

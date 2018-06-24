@@ -112,7 +112,7 @@ public class JSTableUI extends JSPanelUI {
 
 
 	@Override
-	protected DOMNode updateDOMNode() {
+	public DOMNode updateDOMNode() {
 		int rc = table.getRowCount();
 		int rh = table.getRowHeight();
 		

@@ -16,7 +16,7 @@ public class JSMenuUI extends JSMenuItemUI {
 	}
 
 	@Override
-	protected DOMNode updateDOMNode() {
+	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			isMenuItem = !((JMenu) jc).isTopLevelMenu();
 			if (isMenuItem) {

@@ -122,6 +122,10 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// BH 6/23/2018 -- synchronized(a = new Object()) {...} ---> if(!(a = new Object()) {throw new NullPointerException()}else{...}
+// BH 6/21/2018 -- CharSequence.subSequence() should be defined both subSequence$I$I and subSequence
+// BH 6/20/2018 -- fixes for (int var : new int[] {3,4,5}) becoming for var var
+// BH 6/19/2018 -- adds .j2s j2s.class.replacements=org.apache.log4j.->jalview.javascript.log4j.;
 // BH 5/15/2018 -- fix for a[pt++] |= 3  incrementing pt twice and disregarding a[][] (see test/Test_Or.java)
 // BH 3/27/2018 -- fix for anonymous inner classes of inner classes not having this.this$0
 // BH 1/5/2018 --  @j2sKeep removed; refactored into one class
@@ -337,8 +341,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// look for trailing j2sNative block just before the end of a block 
 		getJ2sJavadoc(node, false);	
 		buffer.append("}");
-		clearVariables(getVariableList('f'));
-		clearVariables(getVariableList('n'));
+		clearVariables('f');
+		clearVariables('n');
 		blockLevel--;
 		super.endVisit(node);
 	}
@@ -494,8 +498,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	public boolean visit(EnhancedForStatement node) {
 		SimpleName name = node.getParameter().getName();
-		String varName = name.getIdentifier();
-		writeReplaceV("for (var V, $V = ", "V", varName);
+		String varName = getQualifiedSimpleName(name);
+		buffer.append("for (var ");
+		acceptVariableFinal(name, 1);
+		writeReplaceV(", $V = ", "V", varName);
 		Expression exp = node.getExpression();
 		ITypeBinding typeBinding = exp.resolveTypeBinding();
 		if (typeBinding.isArray()) {
@@ -671,8 +677,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				buffer.append("alert('native method must be replaced! " + key + "');\r\n");
 				log("native: " + key);
 			}
-			// didn't we just find out that there was nothing to do?
-			// addNativeJavadoc(node.getJavadoc(), null);
 			buffer.append("}\r\n");
 			// clearVariables(getVariableList('n'));
 			// blockLevel--;
@@ -688,16 +692,33 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	public void endVisit(MethodDeclaration node) {
 		if (NativeDoc.checkj2sIgnore(node))
 			return;
+		removeVariableFinals(node);
+		super.endVisit(node);
+	}
+
+	private void acceptVariableFinal(SimpleName name, int offset) {
+		IBinding binding = name.resolveBinding();
+		if (binding != null) {
+			String identifier = name.getIdentifier();
+			int level = blockLevel + offset;
+			VariableAdapter.FinalVariable f = new VariableAdapter.FinalVariable(level, identifier,
+					methodDeclareNameStack.size() == 0 ? null : methodDeclareNameStack.peek());
+			addVariable(f, identifier, binding);
+			//buffer.append("/*blockLevel " + blockLevel + " level " + level + "*/");
+		}
+		name.accept(this);
+	}
+
+	private void removeVariableFinals(MethodDeclaration node) {
 		IMethodBinding mBinding = node.resolveBinding();
 		if (mBinding != null)
 			methodDeclareNameStack.pop();
+		@SuppressWarnings("unchecked")
+		List<SingleVariableDeclaration> parameters = node.parameters();
+		String methodSig = (mBinding == null ? null : mBinding.getKey());
 		List<VariableAdapter.FinalVariable> finalVars = getVariableList('f');
 		List<VariableAdapter.FinalVariable> visitedVars = getVariableList('v');
 		List<VariableAdapter.FinalVariable> normalVars = getVariableList('n');
-		@SuppressWarnings("unchecked")
-		List<SingleVariableDeclaration> parameters = node.parameters();
-		IMethodBinding resolveBinding = node.resolveBinding();
-		String methodSig = (resolveBinding == null ? null : resolveBinding.getKey());
 		for (int i = parameters.size() - 1; i >= 0; i--) {
 			SingleVariableDeclaration varDecl = parameters.get(i);
 			SimpleName name = varDecl.getName();
@@ -707,13 +728,26 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				VariableAdapter.FinalVariable f = new VariableAdapter.FinalVariable(blockLevel + 1, identifier, methodSig);
 				f.toVariableName = identifier;
 				normalVars.remove(f);
+				//buffer.append("/*remNorm " + f.variableName + "/to/" + f.toVariableName + "*/");
 				if (Modifier.isFinal(binding.getModifiers())) {
 					finalVars.remove(f);
+					//buffer.append("/*remFinal " + f.variableName + "/to/" + f.toVariableName + "*/");
 				}
 				visitedVars.remove(f);
+				//buffer.append("/*remVis " + f.variableName + "/to/" + f.toVariableName + "*/");
 			}
 		}
-		super.endVisit(node);
+	}
+
+	private void clearVariables(char nf) {
+		List<VariableAdapter.FinalVariable> vars = getVariableList(nf);
+		for (int i = vars.size(); --i >= 0;) {
+			VariableAdapter.FinalVariable var = vars.get(i);
+			if (var.blockLevel >= blockLevel) {
+				vars.remove(i);
+				//buffer.append("/*remVar " + nf + " " + var.toVariableName + " */");
+			}
+		}
 	}
 
 	public boolean visit(MethodInvocation node) {
@@ -816,21 +850,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		super.endVisit(node);
 	}
 
+	/**
+	 * method parameters or catch variables
+	 */
 	public boolean visit(SingleVariableDeclaration node) {
 		SimpleName name = node.getName();
-		IBinding binding = name.resolveBinding();
-		if (binding != null) {
-			String identifier = name.getIdentifier();
-			VariableAdapter.FinalVariable f = null;
-			if (methodDeclareNameStack.size() == 0) {
-				f = new VariableAdapter.FinalVariable(blockLevel + 1, identifier, null);
-			} else {
-				String methodSig = methodDeclareNameStack.peek();
-				f = new VariableAdapter.FinalVariable(blockLevel + 1, identifier, methodSig);
-			}
-			addVariable(f, identifier, binding);
-		}
-		name.accept(this);
+		acceptVariableFinal(name, 1);
 		return false;
 	}
 
@@ -885,7 +910,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	public boolean visit(SynchronizedStatement node) {
-		// not implemented in JS, as there is only one thread
+		// we wrap this with a simple if() statement, 
+		// checking that it is not null
+		buffer.append("if(!(");
+		node.getExpression().accept(this);
+		buffer.append("){throw new NullPointerException()}else");
 		node.getBody().accept(this);
 		return false;
 	}
@@ -1450,7 +1479,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			buffer.append(trailingBuffer.getAssertString());
 			addDefaultConstructor();
 			buffer.append("var $vals=[];\r\n");
-			buffer.append("Clazz.newMeth(C$, 'values', function() { return $vals }, 1);\r\n");
+			// implicit Enum methods added as trailer
+			buffer.append("Clazz.newMeth(C$, 'values', function() { return $vals }, 1);\r\n");			
+			buffer.append("Clazz.newMeth(C$, '$valueOf$S', function(name) { for (var val in $vals){ if ($vals[val].$name == name) return $vals[val]} return null }, 1);\r\n");
 		} else {
 			buffer.append(trailingBuffer); // also writes the assert string
 			if (isAnonymous) {
@@ -1738,15 +1769,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		addMethodParameterList(node.arguments(), methodDeclaration, true, ", [", "]", false);
 		buffer.append(");\r\n");
 		addCallInit();
-	}
-
-	private void clearVariables(List<VariableAdapter.FinalVariable> vars) {
-		for (int i = vars.size(); --i >= 0;) {
-			VariableAdapter.FinalVariable var = vars.get(i);
-			if (var.blockLevel >= blockLevel) {
-				vars.remove(i);
-			}
-		}
 	}
 
 	private String getAnonymousName(ITypeBinding binding) {
@@ -2823,12 +2845,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					if (currentBlockForVisit != -1) {
 						List<VariableAdapter.FinalVariable> finalVars = getVariableList('f');
 						List<VariableAdapter.FinalVariable> visitedVars = getVariableList('v');
-						int size = finalVars.size();
-						for (int i = 0; i < size; i++) {
+						String vname = varBinding.getName();
+						for (int i = 0, size = finalVars.size(); i < size; i++) {
 							VariableAdapter.FinalVariable vv = finalVars.get(size - i - 1);
-							if (vv.variableName.equals(varBinding.getName()) && vv.blockLevel <= currentBlockForVisit) {
+							if (vv.blockLevel <= currentBlockForVisit && vv.variableName.equals(vname)) {
 								if (!visitedVars.contains(vv)) {
 									visitedVars.add(vv);
+									//buffer.append("/* current " + currentBlockForVisit + " vlevel " + vv.blockLevel + " " + vv.variableName + "*/");	
 								}
 								fieldVar = vv.toVariableName;
 							}
@@ -2951,11 +2974,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		IBinding binding = name.resolveBinding();
 		if (binding == null)
 			return false;
-		String identifier = name.getIdentifier();
-		VariableAdapter.FinalVariable f = new VariableAdapter.FinalVariable(blockLevel, identifier,
-				methodDeclareNameStack.size() == 0 ? null : (String) methodDeclareNameStack.peek());
-		addVariable(f, identifier, binding);
-		name.accept(this);
+		acceptVariableFinal(name, 0);
 		Expression right = node.getInitializer();
 		ITypeBinding rightBinding = (right == null ? null : right.resolveTypeBinding());
 		if (rightBinding == null)
@@ -3605,8 +3624,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		List<VariableAdapter.FinalVariable> normalVars = getVariableList('n');
 		f.toVariableName = identifier;
 		normalVars.add(f);
-		if (Modifier.isFinal(binding.getModifiers()))
+		//buffer.append("/*addVar n " + identifier + " */");
+		if (Modifier.isFinal(binding.getModifiers())) {
 			finalVars.add(f);
+			//buffer.append("/*addVar f " + identifier + " */");
+		}
 	}
 
 	/**
@@ -4106,6 +4128,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			boolean isConstructor, boolean addUnqualified) {
 		SimpleName nodeName = node.getName();
 		String methodName = (isConstructor ? "c$" : NameMapper.getJ2SName(nodeName));
+		if (methodName.equals("subSequence$I$I")) {
+			// for StringBuffer and StringBuilder to be like String
+			return "['subSequence','subSequence$I$I']";
+		}
 		String qname = getJ2SQualifiedName(methodName, null, mBinding, null, false);
 		ITypeBinding methodClass = mBinding.getDeclaringClass();
 		List<String> names = null;
@@ -4359,9 +4385,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			name = "S";
 			break;
 		default:
-			if (prefix != null)
+			if (prefix == null)
+				name = checkClassReplacement(name);
+			else
 				name = (asGenericObject ? "O" : prefix + name); // "O";//
-
 			name = name.replace("java.lang.", "").replace('.', '_');
 			break;
 		}
@@ -4653,6 +4680,54 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	
+
+	private static Map<String, String> htClassReplacements;
+	private static List<String> lstPackageReplacements;
+	
+	public static void setClassReplacements(String keyValues) {
+		// j2s.class.replacements=org.apache.log4j.*:jalview.jslogger.;
+		htClassReplacements = null;
+		if (keyValues == null)
+			return;
+		htClassReplacements = new Hashtable<String, String>();
+		lstPackageReplacements = new ArrayList<String>();
+		String[] pairs = keyValues.split(";");
+		for (int i = pairs.length; --i >= 0;) {
+			pairs[i] = pairs[i].trim();
+			if (pairs[i].length() == 0)
+				continue;
+			String[] kv = pairs[i].split("->");
+			htClassReplacements.put(kv[0], kv[1]);
+			if (kv[0].endsWith("."))
+				lstPackageReplacements.add(kv[0]);
+			System.err.println("class replacement " + kv[0] + " --> " + kv[1]);
+		}
+	}
+
+	
+	private static String checkClassReplacement(String className) {
+		if (htClassReplacements != null) {
+			String rep = htClassReplacements.get(className);
+			if (rep == null && lstPackageReplacements != null) {
+				for (int i = lstPackageReplacements.size(); --i >= 0;) {
+					rep = lstPackageReplacements.get(i);
+					if (className.startsWith(rep)) {
+						rep = htClassReplacements.get(rep) + className.substring(rep.length());
+						break;
+					}
+					if (i == 0)
+						rep = null;
+				}
+				
+			}
+			if (rep != null) {
+				System.out.println(className + " -> " + rep);
+				return rep;
+			}
+		}
+		return className;
+	}
+
 	/**
 	 * tracks file byte pointers for @j2sNative, @j2sIgnore
 	 */
@@ -4714,7 +4789,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// loop through packages and outer Class
 		while (i < parts.length && (i == 1 || !Character.isUpperCase(parts[i - 1].charAt(0))))
 			s += "." + parts[i++];
-		s = "'" + s + "'";
+		s = "'" + checkClassReplacement(s) + "'";
 		// int nlast = parts.length;
 		if (i < parts.length) {
 			s = "[" + s;

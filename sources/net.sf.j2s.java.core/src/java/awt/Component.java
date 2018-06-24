@@ -65,6 +65,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
 
+import javax.swing.JInternalFrame;
+
 import sun.awt.AppContext;
 import sun.awt.SunToolkit;
 import swingjs.JSToolkit;
@@ -174,7 +176,7 @@ public abstract class Component
 	 * 
 	 * @see #getParent
 	 */
-	transient Container parent;
+	protected transient Container parent;
 
 	/**
 	 * The <code>AppContext</code> of the component. Applets/Plugin may change
@@ -208,7 +210,7 @@ public abstract class Component
 	 * @serial
 	 * @see #getSize
 	 */
-	int width;
+	protected int width;
 
 	/**
 	 * The height of the component.
@@ -216,7 +218,7 @@ public abstract class Component
 	 * @serial
 	 * @see #getSize
 	 */
-	int height;
+	protected int height;
 
 	/**
 	 * The foreground color for this component. <code>foreground</code> can be
@@ -262,7 +264,7 @@ public abstract class Component
 	 * @see #getCursor
 	 * @see #setCursor
 	 */
-	Cursor cursor;
+	protected Cursor cursor;
 
 	/**
 	 * The locale for the component.
@@ -271,7 +273,7 @@ public abstract class Component
 	 * @see #getLocale
 	 * @see #setLocale
 	 */
-	Locale locale;
+	protected Locale locale;
 
 	/**
 	 * True when the object is visible. An object that is not visible is not
@@ -450,8 +452,8 @@ public abstract class Component
 	 * @serial
 	 * @see #dispatchEvent
 	 */
-	boolean newEventsOnly = false;
-	transient ComponentListener componentListener;
+	protected boolean newEventsOnly = false;
+	protected transient ComponentListener componentListener;
 	transient FocusListener focusListener;
 	transient HierarchyListener hierarchyListener;
 	transient HierarchyBoundsListener hierarchyBoundsListener;
@@ -461,7 +463,7 @@ public abstract class Component
 	transient MouseWheelListener mouseWheelListener;
 	transient InputMethodListener inputMethodListener;
 
-	transient RuntimeException windowClosingException = null;
+	protected transient RuntimeException windowClosingException = null;
 
 	/** Internal, constants for serialization */
 	final static String actionListenerK = "actionL";
@@ -495,7 +497,7 @@ public abstract class Component
 	 * @see #enableInputMethods
 	 * @see AWTEvent
 	 */
-	long eventMask = AWTEvent.INPUT_METHODS_ENABLED_MASK;
+	protected long eventMask = AWTEvent.INPUT_METHODS_ENABLED_MASK;
 
 	/**
 	 * Static properties for incremental drawing.
@@ -581,7 +583,7 @@ public abstract class Component
 	// return acc;
 	// }
 	//
-	boolean isPacked = false;
+	protected boolean isPacked = false;
 
 	/**
 	 * Pseudoparameter for direct Geometry API (setLocation, setBounds setSize
@@ -1134,7 +1136,7 @@ public abstract class Component
 		return isVisible_NoClientCode();
 	}
 
-	final boolean isVisible_NoClientCode() {
+	protected final boolean isVisible_NoClientCode() {
 		return visible;
 	}
 
@@ -2117,7 +2119,7 @@ public abstract class Component
 				// windows here as it is done from peer or native code when
 				// the window is really resized or moved, otherwise some
 				// events may be sent twice
-				if (this instanceof Window) {
+				if (this instanceof Window && !(this  instanceof JInternalFrame)) {
 					needNotify = false;
 				}
 				// }
@@ -2744,7 +2746,7 @@ public abstract class Component
 	/**
 	 * Invalidates the component unless it is already invalid.
 	 */
-	final void invalidateIfValid() {
+	protected final void invalidateIfValid() {
 		if (isValid()) {
 			invalidate();
 		}
@@ -2859,6 +2861,8 @@ public abstract class Component
 	 * Updates the cursor. May not be invoked from the native message pump.
 	 */
 	final void updateCursorImmediately() {
+		// this is the key method that updates a JComponent if there is 
+		// no layout manager -- for example, for a JDesktop. 
 		JSToolkit.setCursor(cursor);
 		// TODO
 		// if (peer instanceof LightweightPeer) {
@@ -2871,7 +2875,7 @@ public abstract class Component
 		// cPeer.updateCursorImmediately();
 		// }
 		// } else if (peer != null) {
-		// peer.updateCursorImmediately();
+		 peer.updateCursorImmediately();
 		// }
 	}
 

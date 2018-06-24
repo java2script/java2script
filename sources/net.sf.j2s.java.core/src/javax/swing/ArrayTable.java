@@ -43,7 +43,7 @@ import java.util.Hashtable;
  * @author Scott Violet
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-class ArrayTable implements Cloneable {
+public class ArrayTable implements Cloneable { // public needed for JSComponent
     // Our field for storage
     private Object table = null;
     private static final int ARRAY_BOUNDARY = 8;

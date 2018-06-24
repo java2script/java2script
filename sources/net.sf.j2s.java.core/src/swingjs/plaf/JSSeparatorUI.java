@@ -33,7 +33,7 @@ import swingjs.api.js.DOMNode;
 public class JSSeparatorUI extends JSLightweightUI {
 
 	@Override
-	protected DOMNode updateDOMNode() {
+	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			domNode = newDOMObject("label", id);
 		}

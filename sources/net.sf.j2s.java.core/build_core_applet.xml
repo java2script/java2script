@@ -294,8 +294,8 @@
    		
    	<echo>TODO: Could delete demo html files? </echo>
    	
-   	<echo>creating SwingJS-site.zip </echo>
-   	<zip destfile="SwingJS-site.zip" basedir="site" />
+   	<echo>creating dist/SwingJS-site.zip </echo>
+   	<zip destfile="dist/SwingJS-site.zip" basedir="site" />
    	
   </target>
 

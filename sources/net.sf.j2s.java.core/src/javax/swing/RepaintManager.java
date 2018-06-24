@@ -847,7 +847,7 @@ public class RepaintManager {
 				int localBoundsW = dirtyComponent.getWidth();
 				SwingUtilities.computeIntersection(0, 0, localBoundsW, localBoundsH,
 						rect);
-				if (dirtyComponent instanceof JComponent) {
+				if (dirtyComponent instanceof JComponent && ! (dirtyComponent instanceof Window)) {
 					((JComponent) dirtyComponent).paintImmediately(rect.x, rect.y,
 							rect.width, rect.height);
 				} else if (dirtyComponent.isShowing()) {
@@ -859,7 +859,7 @@ public class RepaintManager {
 					if (g != null) {
 						// SwingJS not clipping, for performance g.setClip(rect.x, rect.y, rect.width, rect.height);
 						try {
-							((Container) dirtyComponent).paint(g); // SwingJS
+							((Container) dirtyComponent).paintContainer(g); // SwingJS
 						} finally {
 							g.dispose();
 						}

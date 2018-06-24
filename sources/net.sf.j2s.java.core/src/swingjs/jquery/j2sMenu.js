@@ -188,7 +188,6 @@ Swing.showMenu = function(menu, x, y) {
  
   for (var i in menu._applet._menus)
     Swing.hideMenu(menu._applet._menus[i], true);  
-  System.out.println("showing " +menu.id)
   if (J2S._showMenuCallback)
 		J2S._showMenuCallback(menu, x, y);
   var wasTainted = menu._tainted;
@@ -238,9 +237,6 @@ Swing.showMenu = function(menu, x, y) {
 Swing.hideMenu = function(menu, force) {
   // called internally often -- even on mouse moves
 	if (menu._visible === false && !force) return;
-
-System.out.println("hiding " +menu.id)
-
 	//menu.$ulTop.unbind('clickoutjsmol');
 	menu.dragBind(false);
 	menu.$ulTop.hide();

@@ -47,7 +47,7 @@ ChangeListener {
 	JViewport viewport;
 
 	@Override
-	protected DOMNode updateDOMNode() {
+	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			domNode = newDOMObject("div", id);
 			ignoreAllMouseEvents(domNode);

@@ -116,7 +116,7 @@ public class JSTableHeaderUI extends JSLightweightUI {
 	
 
 	@Override
-	protected DOMNode updateDOMNode() {
+	public DOMNode updateDOMNode() {
 		
 		table = tableHeader.getTable();
 		int rc = table.getRowCount();

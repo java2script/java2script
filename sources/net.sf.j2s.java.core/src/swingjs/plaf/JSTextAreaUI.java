@@ -21,7 +21,7 @@ public class JSTextAreaUI extends JSTextUI {
 	protected DOMNode domBtn;
 
 	@Override
-	protected DOMNode updateDOMNode() {
+	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			allowPaintedBackground = false;
 			domBtn = focusNode = enableNode = textNode = valueNode = domNode = newDOMObject("textarea", id);

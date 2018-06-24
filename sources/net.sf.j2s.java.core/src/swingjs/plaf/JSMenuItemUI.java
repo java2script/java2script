@@ -20,7 +20,7 @@ public class JSMenuItemUI extends JSButtonUI {
 	}
 
 	@Override
-	protected DOMNode updateDOMNode() {
+	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			domNode = createItem("_item", null);
 		}

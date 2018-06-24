@@ -63,7 +63,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	}
 
 	@Override
-	protected DOMNode updateDOMNode() {
+	public DOMNode updateDOMNode() {
 		JSlider js = (JSlider) jc;
 		min = js.getMinimum();
 		max = js.getMaximum();

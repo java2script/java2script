@@ -3,9 +3,9 @@
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -17,9 +17,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
@@ -331,13 +331,12 @@ public enum TimeUnit {
      * @throws InterruptedException if interrupted while waiting.
      * @see Thread#join(long, int)
      */
-    @SuppressWarnings("unused")
-	public void timedJoin(Thread thread, long timeout)
+    public void timedJoin(Thread thread, long timeout)
     throws InterruptedException {
         if (timeout > 0) {
             long ms = toMillis(timeout);
             int ns = excessNanos(timeout, ms);
-            //thread.join(ms, ns);
+            thread.join(ms, ns);
         }
     }
 
@@ -350,12 +349,11 @@ public enum TimeUnit {
      * @throws InterruptedException if interrupted while sleeping.
      * @see Thread#sleep
      */
-    @SuppressWarnings("unused")
-	public void sleep(long timeout) throws InterruptedException {
+    public void sleep(long timeout) throws InterruptedException {
         if (timeout > 0) {
             long ms = toMillis(timeout);
             int ns = excessNanos(timeout, ms);
-            //Thread.sleep(ms, ns);
+            Thread.sleep(ms, ns);
         }
     }
 

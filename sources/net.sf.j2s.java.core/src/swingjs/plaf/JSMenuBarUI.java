@@ -63,7 +63,7 @@ public class JSMenuBarUI extends JSPanelUI {
 	}
 	
 	@Override
-	protected DOMNode updateDOMNode() {
+	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			containerNode = domNode = newDOMObject("div", id);
 			DOMNode.setPositionAbsolute(domNode, 0, 0); // after title bar

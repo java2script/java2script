@@ -1,4 +1,4 @@
-// j2sSwingJS.js 
+// j2sClazz.js 
 // NOTE: updates to this file should be copies to j2sjmol.js
 
 // latest author: Bob Hanson, St. Olaf College, hansonr@stolaf.edu
@@ -7,6 +7,9 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 6/21/2018 1:08:58 PM missing mysterious Integer.objectValue() 
+// BH 6/20/2018 6:00:23 AM missing printStackTrace(PrintStream)
+// BH 6/19/2018 8:49:57 AM fix for checkDeclared
 // BH 5/19/2018 8:22:25 PM fix for new int[] {'a'}
 // BH 4/16/2018 6:14:10 PM msie flag in monitor
 // BH 2/22/2018 12:34:07 AM array.clone() fix
@@ -241,6 +244,7 @@ Clazz.exceptionOf = function(e, clazz) {
   }
   if (!e.printStackTrace) {
     e.printStackTrace = function(){};
+    e.printStackTrace$java_io_PrintStream = function(){};
     //alert(e + " try/catch path:" + Clazz._getStackTrace(-10));
   }
   if(clazz == Error) {
@@ -775,12 +779,11 @@ var _declared = {};
 
 var checkDeclared = function(name, type) {
   if (J2S._debugName && name.toLowerCase() == J2S._debugName)doDebugger();
-  if (_declared[name] == type) {
-    var s = (type === 0 ? "interface" : "class") +" " + name + " is defined twice. A prior core file has probably needed to load a class that is in the current core file. Check to make sure that package.js declares the first class read in jarClassPath or that BuildCompress has included all necessary files."
-    System.out.println(s);
-    if (J2S._debugCore)
-      doDebugger();
-    }
+//  if (_declared[name] != null && _declared[name] == type) {
+//    var s = (type === 0 ? "interface" : "class") +" " + name + " is defined twice. A prior core file has probably needed to load a class that is in the current core file. Check to make sure that package.js declares the first class read in jarClassPath or that BuildCompress has included all necessary files."
+//    System.out.println(s);
+//    if (J2S._debugCore)    doDebugger();
+//    }
   _declared[name] = type;
 }
 
@@ -2766,6 +2769,7 @@ m$(Integer, "c$", function(v){
  this.valueOf=function(){return v;};
 }, 1);
 
+
 Integer.MIN_VALUE=Integer.prototype.MIN_VALUE=-0x80000000;
 Integer.MAX_VALUE=Integer.prototype.MAX_VALUE=0x7fffffff;
 //Integer.TYPE=Integer.prototype.TYPE=Integer;
@@ -2804,24 +2808,26 @@ function(i) {
   return n - ((i << 1) >>> 31);
 });
 
+var radixChar = "0123456789abcdefghijklmnopqrstuvwxyz";
+
 Integer.parseIntRadix=m$(Integer,"parseIntRadix",
 function(s,radix){
-if(s==null){
+if(s==null || s.length == 0){
 throw Clazz.new_(NumberFormatException.c$$S, ["null"]);
 }if(radix<2){
 throw Clazz.new_(NumberFormatException.c$$S, ["radix "+radix+" less than Character.MIN_RADIX (2)"]);
 }if(radix>36){
 throw Clazz.new_(NumberFormatException.c$$S, ["radix "+radix+" greater than Character.MAX_RADIX (16)"]);
 }
-if (radix == 10) {
-  for (var i = s.length; --i >= 0;) {
-    var c = s.charCodeAt(i);
-    if (c >= 48 && c <= 57) 
-      continue;
-    if (i > 0 || c != 43 && c != 45)
-      throw Clazz.new_(NumberFormatException.c$$S, ["Not a Number : "+s]);
-  }
+s = s.toLowerCase();
+var c = s.charAt(0);
+var i0 = (c == '+' || c == '-' ? 1 : 0);
+for (var i = s.length; --i >= i0;) {
+    var n = radixChar.indexOf(s.charAt(i));
+    if (n < 0 || n >= radix)
+     throw Clazz.new_(NumberFormatException.c$$S, ["Not a Number : "+s]);
 }
+
 var i=parseInt(s,radix);
 if(isNaN(i)){
 throw Clazz.new_(NumberFormatException.c$$S, ["Not a Number : "+s]);
@@ -2830,8 +2836,8 @@ return i;
 });
 
 Integer.parseInt=m$(Integer,"parseInt",
-function(s){
-return Integer.parseIntRadix(s,10);
+function(s,radix){
+return Integer.parseIntRadix(s, radix || 10);
 });
 
 Integer.$valueOf=m$(Integer,"$valueOf",
@@ -3106,8 +3112,8 @@ return new Int32Array(a.buffer)[0];
 }
 
 Float.serialVersionUID=Float.prototype.serialVersionUID=-2671257302660747028;
-Float.MIN_VALUE=Float.prototype.MIN_VALUE=3.4028235e+38;
-Float.MAX_VALUE=Float.prototype.MAX_VALUE=1.4e-45;
+Float.MIN_VALUE=Float.prototype.MIN_VALUE=1.4e-45;
+Float.MAX_VALUE=Float.prototype.MAX_VALUE=3.4028235e+38;
 Float.NEGATIVE_INFINITY=Number.NEGATIVE_INFINITY;
 Float.POSITIVE_INFINITY=Number.POSITIVE_INFINITY;
 Float.NaN=Number.NaN;
@@ -3211,6 +3217,14 @@ Clazz._setDeclared("java.lang.Boolean",
 Boolean = java.lang.Boolean = Boolean || function(){
 if (typeof arguments[0] != "object")this.c$(arguments[0]);
 });
+
+Integer.prototype.objectValue = 
+Short.prototype.objectValue = 
+Long.prototype.objectValue =  
+Float.prototype.objectValue = 
+Double.prototype.objectValue =  function() {return this.valueOf()};
+
+
 
 //if (supportsNativeObject) {
   extendObject(Boolean);
@@ -4187,7 +4201,7 @@ if (!this.stackTrace){
 }
 for (var i = 0; i < this.stackTrace.length; i++) {
 var t = this.stackTrace[i];
-var x = t.methodName.indexOf ("(");
+//var x = t.methodName.indexOf ("(");
 //var n = (x < 0 ? t.methodName : t.methodName.substring (0, x)).replace (/\s+/g, "");
 if (t.nativeClazz == null || isInstanceOf(t.nativeClazz, Throwable) < 0) {
 System.err.println (t);
@@ -4195,6 +4209,21 @@ System.err.println (t);
 }
 // from a JavaScript error 
 this.stack && System.err.println(this.stack);
+});
+
+m$(C$, 'printStackTrace$java_io_PrintStream', function (stream) {
+  if (!this.stackTrace){
+    stream.println$S(this.stack);
+    return;
+  }
+  for (var i = 0; i < this.stackTrace.length; i++) {
+    var t = this.stackTrace[i];
+    //var x = t.methodName.indexOf ("(");
+    //var n = (x < 0 ? t.methodName : t.methodName.substring (0, x)).replace (/\s+/g, "");
+    if (t.nativeClazz == null || isInstanceOf(t.nativeClazz, Throwable) < 0) {
+      stream.println$O(t);
+    }
+  }
 });
 
 Clazz.newMeth(C$, 'printStackTrace$java_io_PrintStream', function (s) {
@@ -4458,19 +4487,19 @@ function(){
 return this.target;
 });
 
-C$=Clazz.newClass(java.lang.reflect,"UndeclaredThrowableException",function(){this.undeclaredThrowable=null;},RuntimeException);
+;(function(){
+var C$=Clazz.newClass(java.lang.reflect,"UndeclaredThrowableException",function(){this.undeclaredThrowable=null;},RuntimeException);
 m$(C$, "c$$Throwable", function(exception){
+Clazz.super_(C$, this);
 C$.superclazz.c$$Throwable.apply(this, arguments);
 this.undeclaredThrowable=exception;
 this.initCause(exception);
 },1);
-
 m$(C$, "c$$Throwable$S", function(exception,detailMessage){
 C$.superclazz.c$$S.apply(this,[detailMessage]);
 this.undeclaredThrowable=exception;
 this.initCause(exception);
 },1);
-
 m$(C$,"getUndeclaredThrowable",
 function(){
 return this.undeclaredThrowable;
@@ -4479,6 +4508,7 @@ m$(C$,"getCause",
 function(){
 return this.undeclaredThrowable;
 });
+})();
 
 newEx(java.io,"IOException",Exception);
 newEx(java.io,"CharConversionException",java.io.IOException);
@@ -4544,16 +4574,24 @@ newEx(java.util,"EmptyStackException",RuntimeException);
 newEx(java.util,"NoSuchElementException",RuntimeException);
 newEx(java.util,"TooManyListenersException",Exception);
 
-C$=newEx(java.util,"ConcurrentModificationException",RuntimeException);
+
+;(function(){
+var C$=newEx(java.util,"ConcurrentModificationException",RuntimeException);
 m$(C$, "c$", function(detailMessage, rootCause){
 Clazz.super_(C$, this);
 }, 1);
+})();
 
-C$=Clazz.newClass(java.util,"MissingResourceException",function(){
+;(function(){
+var C$=Clazz.newClass(java.util,"MissingResourceException",function(){
 this.className=null;
 this.key=null;
 },RuntimeException);
+C$.$clinit$ = function() {
+Clazz.load(C$, 1);
+}
 m$(C$, "c$$S$S$S", function(detailMessage,className,resourceName){
+Clazz.super_(C$, this);
 C$.superclazz.c$$S.apply(this,[detailMessage]);
 this.className=className;
 this.key=resourceName;
@@ -4566,6 +4604,7 @@ m$(C$,"getKey",
 function(){
 return this.key;
 });
+})();
 
 declareType(java.lang,"Void");
 setJ2STypeclass(java.lang.Void, "void", "V");
@@ -4717,7 +4756,8 @@ var newMethodNotFoundException = function (clazz, method) {
   throw Clazz.new_(java.lang.NoSuchMethodException.c$$S, [message]);        
 };
 
-C$=Clazz.newClass(java.lang.reflect,"Constructor",function(){
+;(function(){
+var C$=Clazz.newClass(java.lang.reflect,"Constructor",function(){
 this.Class_=null;
 this.parameterTypes=null;
 this.exceptionTypes=null;
@@ -4725,7 +4765,6 @@ this.modifiers=0;
 this.signature="c$";
 this.constr = null;
 },java.lang.reflect.AccessibleObject,[java.lang.reflect.GenericDeclaration,java.lang.reflect.Member]);
-
 m$(C$, "c$$Class$ClassA$ClassA$I", function(declaringClass,parameterTypes,checkedExceptions,modifiers){
 Clazz.super_(C$, this);
 this.Class_=declaringClass;
@@ -4824,6 +4863,7 @@ m$(C$,"toString",
 function(){
 return null;
 });
+})();
 
 C$=declareType(java.lang.reflect,"Field",java.lang.reflect.AccessibleObject,java.lang.reflect.Member);
 m$(C$,"isSynthetic",
@@ -4867,7 +4907,8 @@ function(){
 return null;
 });
 
-C$=Clazz.newClass(java.lang.reflect,"Method",function(){
+;(function(){
+var C$=Clazz.newClass(java.lang.reflect,"Method",function(){
 this.Class_=null;
 this.name=null;
 this.returnType=null;
@@ -5001,6 +5042,7 @@ m$(C$,"toString",
 function(){
 return null;
 });
+})();
 
 //  if (needPackage("core"))
   //  _Loader.loadPackage("core");  
