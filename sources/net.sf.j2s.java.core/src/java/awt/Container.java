@@ -1649,6 +1649,10 @@ public class Container extends JSComponent {
     @Override
 		@Deprecated
     public Dimension preferredSize() {
+    	return preferredSizeContainer();
+    }
+
+    protected Dimension preferredSizeContainer() {
         /* Avoid grabbing the lock if a reasonable cached size value
          * is available.
          */
@@ -1662,9 +1666,9 @@ public class Container extends JSComponent {
             }
         }
         return (dim == null ? null : new Dimension(dim));
-    }
+	}
 
-    /**
+	/**
      * Returns the minimum size of this container.  If the minimum size has
      * not been set explicitly by {@link Component#setMinimumSize(Dimension)}
      * and this {@code Container} has a {@code non-null} {@link LayoutManager},
@@ -1858,12 +1862,7 @@ public class Container extends JSComponent {
      */
     @Override
 		public void update(Graphics g) {
-        if (isShowing()) {
-//            if (! (peer instanceof LightweightPeer)) {
-                g.clearRect(0, 0, width, height);
-//            }
-            paint(g);
-        }
+    		updateContainer(g);
     }
 
 //    /**
@@ -1901,7 +1900,17 @@ public class Container extends JSComponent {
 //        }
 //    }
 
-    /**
+    protected void updateContainer(Graphics g) {
+		
+        if (isShowing()) {
+//            if (! (peer instanceof LightweightPeer)) {
+                g.clearRect(0, 0, width, height);
+//            }
+            paint(g);
+        }
+	}
+
+	/**
      * Paints each of the components in this container.
      * @param     g   the graphics context.
      * @see       Component#paint
