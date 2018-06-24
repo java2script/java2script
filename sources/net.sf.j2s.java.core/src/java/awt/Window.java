@@ -62,6 +62,13 @@ import swingjs.JSToolkit;
 import swingjs.JSUtil;
 
 /**
+ * 
+ * SWINGJS NOTE! As of 6/23/2018 java.awt.Window has been moved to
+ * subclass JComponent. It is fair to say that there will be issues
+ * with this, but the reason was to allow JInternalFrame to subclass JFrame
+ * instead of duplicating in code all of its functionality.
+ * 
+ * 
  * A <code>Window</code> object is a top-level window with no borders and no
  * menubar.
  * The default layout for a window is <code>BorderLayout</code>.
@@ -3353,10 +3360,14 @@ public class Window extends JComponent {
     }
 */
 
-    @SuppressWarnings("unused")
-		private transient boolean opaque = true;
+	private boolean opaque = true;
 
-    public void setOpaque(boolean opaque) {
+	public boolean isOpaque() {
+		// SwingJS
+		return opaque;
+	}
+
+		public void setOpaque(boolean opaque) {
         synchronized (getTreeLock()) {
         	//TODO ?
 //            GraphicsConfiguration gc = getGraphicsConfiguration();

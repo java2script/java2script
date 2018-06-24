@@ -914,7 +914,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// checking that it is not null
 		buffer.append("if(!(");
 		node.getExpression().accept(this);
-		buffer.append("){throw new NullPointerException()}else");
+		buffer.append(")){throw new NullPointerException()}else");
 		node.getBody().accept(this);
 		return false;
 	}

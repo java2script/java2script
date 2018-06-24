@@ -998,7 +998,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				
 				"Desktop.minOnScreenInsets", threeInsets,
 				"Desktop.background", table.get("desktop"),
-				"Desktop.ancestorInputMap",
+				//"Desktop.ancestorInputMap",
 				// new UIDefaults.LazyInputMap(new Object[] {
 				// "ctrl F5", "restore",
 				// "ctrl F4", "close",
