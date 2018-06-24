@@ -100,7 +100,7 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
     private KeyListener accessibilityKeyListener = null;
 
     // PENDING(ges)
-    protected boolean lightWeightPopupEnabled = true;
+    protected boolean lightWeightPopupEnabled = false; // BH 2018 true;
     protected boolean heavyWeightPopupEnabled = false;
 
     ToolTipManager() {
@@ -311,7 +311,7 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 
             PopupFactory popupFactory = PopupFactory.getSharedInstance();
 
-            if (lightWeightPopupEnabled) {
+            if (false && lightWeightPopupEnabled) { // BH 2018 
         int y = getPopupFitHeight(popupRect, insideComponent);
         int x = getPopupFitWidth(popupRect,insideComponent);
         if (x>0 || y>0) {
@@ -321,7 +321,7 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
         }
             }
             else {
-                popupFactory.setPopupType(PopupFactory.MEDIUM_WEIGHT_POPUP);
+                popupFactory.setPopupType(PopupFactory.HEAVY_WEIGHT_POPUP);//PopupFactory.MEDIUM_WEIGHT_POPUP);
             }
         tipWindow = popupFactory.getPopup(insideComponent, tip,
                           location.x,

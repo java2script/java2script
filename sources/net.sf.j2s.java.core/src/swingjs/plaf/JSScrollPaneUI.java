@@ -54,7 +54,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 	private JSScrollBarUI vertBarUI;
 
 	@Override
-	protected DOMNode updateDOMNode() {
+	public DOMNode updateDOMNode() {
 		isContainer = true;
 		if (domNode == null) {
 			domNode = newDOMObject("div", id);

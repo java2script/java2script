@@ -11,7 +11,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 //	private static Map<ButtonGroup, String> groupNames;
 
 	@Override
-	protected DOMNode updateDOMNode() {
+	public DOMNode updateDOMNode() {
 		return updateButton("radio");
 	}
 

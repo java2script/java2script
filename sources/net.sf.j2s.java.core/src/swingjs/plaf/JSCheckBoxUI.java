@@ -10,7 +10,7 @@ import swingjs.api.js.DOMNode;
 public class JSCheckBoxUI extends JSRadioButtonUI {
 
 	@Override
-	protected DOMNode updateDOMNode() {
+	public DOMNode updateDOMNode() {
 		return updateButton("checkBox");
 	}
 

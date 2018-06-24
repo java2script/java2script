@@ -8,6 +8,7 @@ import java.util.Hashtable;
 import javax.swing.JApplet;
 import javax.swing.JRootPane;
 import javax.swing.RootPaneContainer;
+import javax.swing.plaf.ComponentUI;
 
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Canvas;
@@ -240,11 +241,16 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 			userFramedApplet.getFrameViewer();
 			appViewer.setDisplay(canvas);
 			appViewer.topApp = app;
-			
 		}
 		int iTop = (root == null ? 0 : root.getContentPane().getY()); 
 		DOMNode.setPositionAbsolute(canvas, iTop, 0);
 		DOMNode.setStyles(canvas, "width", width + "px", "height", height + "px");
+		if (width > 0) {
+			// ensures one last update for a frame
+			JSComponentUI ui = (JSComponentUI) root.getParent().getUI();
+			if (ui != null)
+				ui.updateDOMNode();	
+		}
 		if (resizer != null)
 			resizer.setPosition(0, 0);
 			

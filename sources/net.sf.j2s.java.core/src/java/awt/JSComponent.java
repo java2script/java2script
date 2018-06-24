@@ -30,6 +30,7 @@ package java.awt;
 import java.awt.peer.ComponentPeer;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.ArrayTable;
 import javax.swing.JComponent;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
@@ -280,6 +281,18 @@ public abstract class JSComponent extends Component {
 	public boolean isBackgroundSet() {
 		return background != null;// false;// TODO (background != null &&
 									// !isBackgroundPainted);
+	}
+
+	protected transient ArrayTable clientProperties;
+
+	public Object getClientProperty(Object key) {
+		if (clientProperties == null) {
+			return null;
+		} else {
+			synchronized (clientProperties) {
+				return clientProperties.get(key);
+			}
+		}
 	}
 
 }

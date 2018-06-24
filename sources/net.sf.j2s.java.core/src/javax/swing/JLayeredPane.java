@@ -399,16 +399,21 @@ public class JLayeredPane extends JComponent /* implements Accessible */ {
      * @param c  the Component to check
      * @return an int specifying the component's current layer
      */
-    public int getLayer(Component c) {
+    public static int getLayer(Component c) {
         Integer i;
-        if(c instanceof JComponent)
-            i = (Integer)((JComponent)c).getClientProperty(LAYER_PROPERTY);
-        else
-            i = (Integer)getComponentToLayer().get((Component)c);
-
-        if(i == null)
-            return DEFAULT_LAYER.intValue();
-        return i.intValue();
+        if((i = (Integer)((JComponent) c).getClientProperty(LAYER_PROPERTY)) != null)
+            return i.intValue();
+        return DEFAULT_LAYER.intValue();
+//
+//        Integer i;
+//        if(c instanceof JComponent)
+//            i = (Integer)((JComponent)c).getClientProperty(LAYER_PROPERTY);
+//        else
+//            i = (Integer)getComponentToLayer().get((Component)c);
+//
+//        if(i == null)
+//            return DEFAULT_LAYER.intValue();
+//        return i.intValue();
     }
 
     /**

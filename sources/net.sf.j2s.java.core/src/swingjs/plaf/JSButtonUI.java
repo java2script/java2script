@@ -82,7 +82,7 @@ public class JSButtonUI extends JSLightweightUI {
 	private boolean isSimpleButton;
 	
 	@Override
-	protected DOMNode updateDOMNode() {
+	public DOMNode updateDOMNode() {
 		isSimpleButton = true;
 		allowPaintedBackground = false;
 		// all subclasses will have their own version of this.

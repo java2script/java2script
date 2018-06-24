@@ -71,7 +71,7 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 	}
 
 	@Override
-	protected DOMNode updateDOMNode() {
+	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			containerNode = domNode = newDOMObject("div", id);
 			setWindowClass(domNode);

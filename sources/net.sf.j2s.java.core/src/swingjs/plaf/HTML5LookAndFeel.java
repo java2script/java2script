@@ -990,15 +990,15 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// "ctrl SPACE", "showSystemMenu",
 				// "ESCAPE", "hideSystemMenu"},
 				//
-				// "InternalFrameTitlePane.iconifyButtonOpacity", Boolean.TRUE,
-				// "InternalFrameTitlePane.maximizeButtonOpacity", Boolean.TRUE,
-				// "InternalFrameTitlePane.closeButtonOpacity", Boolean.TRUE,
+				"InternalFrameTitlePane.iconifyButtonOpacity", Boolean.TRUE,
+				"InternalFrameTitlePane.maximizeButtonOpacity", Boolean.TRUE,
+				"InternalFrameTitlePane.closeButtonOpacity", Boolean.TRUE,
 
-				// "DesktopIcon.border", internalFrameBorder,
-				//
-				// "Desktop.minOnScreenInsets", threeInsets,
-				// "Desktop.background", table.get("desktop"),
-				// "Desktop.ancestorInputMap",
+				//"DesktopIcon.border", internalFrameBorder,
+				
+				"Desktop.minOnScreenInsets", threeInsets,
+				"Desktop.background", table.get("desktop"),
+				"Desktop.ancestorInputMap",
 				// new UIDefaults.LazyInputMap(new Object[] {
 				// "ctrl F5", "restore",
 				// "ctrl F4", "close",

@@ -428,7 +428,7 @@ public class Container extends JSComponent {
      * Checks that the component is not a Window instance.
      */
     private void checkNotAWindow(Component comp){
-        if (comp instanceof Window) {
+        if (comp instanceof Window && ((JSComponent) comp).getUIClassID() != "InternalFrameUI") {
             throw new IllegalArgumentException("adding a window to a container");
         }
     }
@@ -537,7 +537,7 @@ public class Container extends JSComponent {
      * its FTP allows component to be focus owner
      * @since 1.5
      */
-    boolean canContainFocusOwner(Component focusOwnerCandidate) {
+    protected boolean canContainFocusOwner(Component focusOwnerCandidate) {
         if (!(isEnabled() && isDisplayable()
               && isVisible() && isFocusable()))
         {
@@ -1373,6 +1373,7 @@ public class Container extends JSComponent {
     }
 
     @Override
+	protected
 		final int createHierarchyEvents(int id, Component changed,
         Container changedParent, long changeFlags, boolean enabledOnToolkit)
     {
@@ -1810,7 +1811,16 @@ public class Container extends JSComponent {
      * 
      */
     @Override
-		public void paint(Graphics g) {
+	public void paint(Graphics g) {
+      paintContainer(g);
+    }
+
+    public void paintContainer(Graphics g) {
+    	// SwingJS: split off here so that 
+    	// the new JComponent-subclassed Window can 
+    	// hit this one directly instead of JComponent.paint()
+    	
+    
     	// SwingJS : The developer should override paint() to draw;
     	//this method will take care of all buttons, in case the
     	//paintComponent(g) method for them has been overridden.
@@ -1833,7 +1843,7 @@ public class Container extends JSComponent {
             GraphicsCallback.PaintCallback.getInstance().
                 runComponents(children.toArray(EMPTY_ARRAY), g, SunGraphicsCallback.LIGHTWEIGHTS);
 //        }
-    }
+	}
 
     /**
      * Updates the container.  This forwards the update to any lightweight
@@ -2066,6 +2076,7 @@ public class Container extends JSComponent {
 
     // REMIND: remove when filtering is done at lower level
     @Override
+	protected
 		boolean eventEnabled(AWTEvent e) {
         int id = e.getID();
 
@@ -2145,6 +2156,7 @@ public class Container extends JSComponent {
      * @param e the event
      */
     @Override
+	protected
 		void dispatchEventImpl(AWTEvent e) {
         if ((dispatcher != null) && dispatcher.dispatchEvent(e)) {
             // event was sent to a lightweight component.  The
@@ -3198,7 +3210,7 @@ public class Container extends JSComponent {
     }
 
     @Override
-		void clearCurrentFocusCycleRootOnHide() {
+    protected void clearCurrentFocusCycleRootOnHide() {
 //        KeyboardFocusManager kfm =
 //            KeyboardFocusManager.getCurrentKeyboardFocusManager();
 //        Container cont = kfm.getCurrentFocusCycleRoot();
@@ -3971,6 +3983,7 @@ public class Container extends JSComponent {
 //        }
 //        return super.getOpaqueShape();
 //    }
+
 
 //    final void recursiveSubtractAndApplyShape(Region shape) {
 //        recursiveSubtractAndApplyShape(shape, getTopmostComponentIndex(), getBottommostComponentIndex());

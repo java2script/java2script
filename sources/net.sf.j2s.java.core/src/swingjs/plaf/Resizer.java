@@ -40,7 +40,7 @@ public class Resizer {
 			rootNode = viewer.getDiv("appletdiv");
 		} else {
 			jframe = (JFrame) rpc;
-			rootNode = ((JSComponentUI) jframe.getUI()).domNode;
+			rootNode = ((JSComponentUI) jframe.getUI()).getDOMNode();
 		}
 		return (rootNode == null ? null : this);
 	}

@@ -35,22 +35,24 @@ import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Canvas;
 import swingjs.api.js.HTML5CanvasContext2D;
 
+// BH 6/2018 adds g.copyArea(x,y,width,height,dx,dy)
+
 /**
  * generic 2D drawing methods -- JavaScript version
  * 
  * @author Bob Hanson hansonr@stolaf.edu
  */
 
-@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
-public class JSGraphics2D //extends SunGraphics2D 
-	implements Cloneable {
+@SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
+public class JSGraphics2D // extends SunGraphics2D
+		implements Cloneable {
 
 	private boolean backgroundPainted;
-	
-  public int constrainX;
-  public int constrainY;
 
-  private int width;
+	public int constrainX;
+	public int constrainY;
+
+	private int width;
 	private int height;
 	private HTML5Canvas canvas;
 
@@ -59,15 +61,15 @@ public class JSGraphics2D //extends SunGraphics2D
 
 	private BasicStroke currentStroke;
 	private Shape currentClip;
-	
+
 	private AlphaComposite currentComposite;
 	private int initialState;
-	
-  //public int strokeState;
-  //public int transformState;
-  //public int clipState;
 
-  //public Color foregroundColor;
+	// public int strokeState;
+	// public int transformState;
+	// public int clipState;
+
+	// public Color foregroundColor;
 	boolean isShifted;// private, but only JavaScript
 	private Font font;
 
@@ -77,20 +79,20 @@ public class JSGraphics2D //extends SunGraphics2D
 
 	private Color backgroundColor;
 
-	//private Color currentColor;
+	// private Color currentColor;
 
-	public JSGraphics2D(Object canvas) { // this must be Object, because we are passing an actual HTML5 canvas
+	public JSGraphics2D(Object canvas) { // this must be Object, because we are
+											// passing an actual HTML5 canvas
 		hints = new RenderingHints(new Hashtable());
 		this.canvas = (HTML5Canvas) canvas;
 		ctx = this.canvas.getContext("2d");
 		transform = new AffineTransform();
-		setStroke(new BasicStroke());	
+		setStroke(new BasicStroke());
 		/**
 		 * @j2sNative
 		 * 
-		 *            this.gc = SwingJS;
-		 *            this.width = canvas.width;
-		 *            this.height = canvas.height;
+		 * 			this.gc = SwingJS; this.width = canvas.width; this.height
+		 *            = canvas.height;
 		 * 
 		 */
 		{
@@ -100,12 +102,11 @@ public class JSGraphics2D //extends SunGraphics2D
 	/**
 	 * the SwingJS object
 	 */
-	
+
 	public GraphicsConfiguration getDeviceConfiguration() {
 		return gc;
 	}
 
-	
 	public void drawLine(int x0, int y0, int x1, int y1) {
 		boolean inPath = this.inPath;
 		if (!inPath)
@@ -116,7 +117,6 @@ public class JSGraphics2D //extends SunGraphics2D
 			ctx.stroke();
 	}
 
-	
 	public void drawOval(int left, int top, int width, int height) {
 		if (width == height)
 			doCirc(left, top, width, false);
@@ -124,7 +124,6 @@ public class JSGraphics2D //extends SunGraphics2D
 			doArc(left, top, width, height, 0, 360, false);
 	}
 
-	
 	public void fillOval(int left, int top, int width, int height) {
 		if (width == height)
 			doCirc(left, top, width, true);
@@ -132,15 +131,11 @@ public class JSGraphics2D //extends SunGraphics2D
 			doArc(left, top, width, height, 0, 360, true);
 	}
 
-	
-	public void drawArc(int x, int y, int width, int height, int startAngle,
-			int arcAngle) {
+	public void drawArc(int x, int y, int width, int height, int startAngle, int arcAngle) {
 		doArc(x, y, width, height, startAngle, arcAngle, false);
 	}
 
-	
-	public void fillArc(int centerX, int centerY, int width, int height, int startAngle,
-			int arcAngle) {
+	public void fillArc(int centerX, int centerY, int width, int height, int startAngle, int arcAngle) {
 		doArc(centerX, centerY, width, height, startAngle, arcAngle, true);
 	}
 
@@ -157,23 +152,23 @@ public class JSGraphics2D //extends SunGraphics2D
 			ctx.stroke();
 	}
 
-	private void doArc(double x, double y, double width, double height, double startAngle,
-			double arcAngle, boolean fill) {
+	private void doArc(double x, double y, double width, double height, double startAngle, double arcAngle,
+			boolean fill) {
 		if (width <= 0 || height <= 0)
 			return;
-//		boolean doClose = (arcAngle - startAngle == 360);
+		// boolean doClose = (arcAngle - startAngle == 360);
 		ctx.save();
 		{
-		    if (arcAngle < 0) {
-			startAngle += arcAngle;
-			arcAngle = -arcAngle;
-		    }
-		ctx.translate(x, y);
-		ctx.scale(width / 2, height / 2);
-		ctx.beginPath();
-		ctx.arc(1, 1, 1, toRad (360 - startAngle), toRad (360 - arcAngle - startAngle), true);
-		if (fill)
-		    ctx.lineTo(1, 1);
+			if (arcAngle < 0) {
+				startAngle += arcAngle;
+				arcAngle = -arcAngle;
+			}
+			ctx.translate(x, y);
+			ctx.scale(width / 2, height / 2);
+			ctx.beginPath();
+			ctx.arc(1, 1, 1, toRad(360 - startAngle), toRad(360 - arcAngle - startAngle), true);
+			if (fill)
+				ctx.lineTo(1, 1);
 		}
 		ctx.restore();
 		if (fill)
@@ -186,15 +181,14 @@ public class JSGraphics2D //extends SunGraphics2D
 		return a * (Math.PI / 180);
 	}
 
-	
-
 	public void background(Color bgcolor) {
 		backgroundColor = bgcolor;
 		if (bgcolor == null) {
 			/*
 			 * 
 			 * reduce antialiasing, thank you,
-			 * http://www.rgraph.net/docs/howto-get-crisp-lines-with-no-antialias.html
+			 * http://www.rgraph.net/docs/howto-get-crisp-lines-with-no-
+			 * antialias.html
 			 */
 			if (!isShifted)
 				ctx.translate(-0.5, -0.5);
@@ -218,8 +212,7 @@ public class JSGraphics2D //extends SunGraphics2D
 	 * @param nPoints
 	 * @param doFill
 	 */
-	private void doPoly(int[] axPoints, int[] ayPoints, int nPoints,
-			boolean doFill) {
+	private void doPoly(int[] axPoints, int[] ayPoints, int nPoints, boolean doFill) {
 		ctx.beginPath();
 		ctx.moveTo(axPoints[0], ayPoints[0]);
 		for (int i = 1; i < nPoints; i++)
@@ -232,7 +225,6 @@ public class JSGraphics2D //extends SunGraphics2D
 		}
 	}
 
-	
 	public void drawRect(int x, int y, int width, int height) {
 		if (width <= 0 || height <= 0)
 			return;
@@ -249,7 +241,6 @@ public class JSGraphics2D //extends SunGraphics2D
 		doPoly(axPoints, ayPoints, nPoints, true);
 	}
 
-	
 	public void fillRect(int x, int y, int width, int height) {
 		if (width <= 0 || height <= 0)
 			return;
@@ -283,14 +274,14 @@ public class JSGraphics2D //extends SunGraphics2D
 		fillRect(x + width - 1, y, 1, height - 1);
 		setPaint(p);
 	}
-	
+
 	public void setFont(Font font) {
 		// this equality check speeds mark/reset significantly
 		if (font == this.font)
 			return;
 		this.font = font;
 		if (font != null)
-			HTML5CanvasContext2D.setFont(ctx, JSToolkit.getCanvasFont(font));		
+			HTML5CanvasContext2D.setFont(ctx, JSToolkit.getCanvasFont(font));
 	}
 
 	public void setStrokeBold(boolean tf) {
@@ -322,14 +313,12 @@ public class JSGraphics2D //extends SunGraphics2D
 		ctx.lineTo(x2, y2);
 	}
 
-	
 	public void clip(Shape s) {
 		doShape(s);
 		currentClip = s;
 		ctx.clip();
 	}
 
-	
 	public void draw(Shape s) {
 		doShape(s);
 		ctx.stroke();
@@ -363,27 +352,23 @@ public class JSGraphics2D //extends SunGraphics2D
 		// then fill or stroke or clip
 	}
 
-	
 	public void fill(Shape s) {
 		if (doShape(s) == Path2D.WIND_EVEN_ODD)
 		/**
 		 * @j2sNative
 		 * 
-		 *            this.ctx.fill("evenodd");
+		 * 			this.ctx.fill("evenodd");
 		 */
 		{
 		} else
 			ctx.fill();
 	}
 
-	
 	public boolean drawImage(Image img, int x, int y, ImageObserver observer) {
-	  return drawImagePriv(img, x, y, observer);
+		return drawImagePriv(img, x, y, observer);
 	}
 
-	
-	public boolean drawImage(Image img, int x, int y, int width, int height,
-			ImageObserver observer) {
+	public boolean drawImage(Image img, int x, int y, int width, int height, ImageObserver observer) {
 		if (width <= 0 || height <= 0)
 			return true;
 		backgroundPainted = true;
@@ -404,20 +389,16 @@ public class JSGraphics2D //extends SunGraphics2D
 	}
 
 	private void observe(Image img, ImageObserver observer, boolean isOK) {
-		observer.imageUpdate(img, (isOK ? 0 : ImageObserver.ABORT	| ImageObserver.ERROR), -1, -1, -1, -1);
+		observer.imageUpdate(img, (isOK ? 0 : ImageObserver.ABORT | ImageObserver.ERROR), -1, -1, -1, -1);
 	}
 
-	
-	public boolean drawImage(Image img, int x, int y, Color bgcolor,
-			ImageObserver observer) {
+	public boolean drawImage(Image img, int x, int y, Color bgcolor, ImageObserver observer) {
 		backgroundPainted = true;
 		JSUtil.notImplemented(null);
 		return drawImage(img, x, y, observer);
 	}
 
-	
-	public boolean drawImage(Image img, int x, int y, int width, int height,
-			Color bgcolor, ImageObserver observer) {
+	public boolean drawImage(Image img, int x, int y, int width, int height, Color bgcolor, ImageObserver observer) {
 		if (width <= 0 || height <= 0)
 			return false;
 		backgroundPainted = true;
@@ -426,46 +407,41 @@ public class JSGraphics2D //extends SunGraphics2D
 	}
 
 	@SuppressWarnings("unused")
-	
-	public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2,
-			int sx1, int sy1, int sx2, int sy2, ImageObserver observer) {
+
+	public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2,
+			ImageObserver observer) {
 		backgroundPainted = true;
 		if (img != null) {
 			byte[] bytes = null;
-		  DOMNode imgNode = getImageNode(img);
-		  if (imgNode != null)
-					HTML5CanvasContext2D.stretchImage(ctx, imgNode, sx1, sy1, sx2 - sx1, sy2
-							- sy1, dx1, dy1, dx2 - dx1, dy2 - dy1);				
+			DOMNode imgNode = getImageNode(img);
+			if (imgNode != null)
+				HTML5CanvasContext2D.stretchImage(ctx, imgNode, sx1, sy1, sx2 - sx1, sy2 - sy1, dx1, dy1, dx2 - dx1,
+						dy2 - dy1);
 			if (observer != null)
 				observe(img, observer, imgNode != null);
 		}
 		return true;
 	}
 
-	
-	public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2,
-			int sx1, int sy1, int sx2, int sy2, Color bgcolor, ImageObserver observer) {
+	public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2,
+			Color bgcolor, ImageObserver observer) {
 		JSUtil.notImplemented(null);
 		return drawImage(img, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, observer);
 	}
 
-	
 	public boolean drawImage(Image img, AffineTransform xform, ImageObserver obs) {
 		return drawImageXT(img, xform, obs);
 	}
 
-	
 	public void drawRenderedImage(RenderedImage img, AffineTransform xform) {
 		drawImageXT((Image) img, xform, null);
 	}
 
-	
 	public void drawRenderableImage(RenderableImage img, AffineTransform xform) {
 		drawImageXT((Image) img, xform, null);
 	}
 
-	private boolean drawImageXT(Image img, AffineTransform xform,
-			ImageObserver obs) {
+	private boolean drawImageXT(Image img, AffineTransform xform, ImageObserver obs) {
 		ctx.save();
 		transformCTX(xform);
 		boolean ret = drawImagePriv(img, 0, 0, obs);
@@ -475,27 +451,26 @@ public class JSGraphics2D //extends SunGraphics2D
 
 	private Object imageData;
 	private int[] buf8;
-	private int lastx,lasty,nx,ny;
+	private int lastx, lasty, nx, ny;
 
 	@SuppressWarnings("unused")
 	public boolean drawImagePriv(Image img, int x, int y, ImageObserver observer) {
 		backgroundPainted = true;
 		if (img != null) {
 			int[] pixels = null;
-			boolean isRGB = false; // usually RGBA 
+			boolean isRGB = false; // usually RGBA
 			/**
 			 * @j2sNative
 			 * 
-			 * pixels = img._pix;
-			 * isRGB = (img.imageType == 1);
+			 * 			pixels = img._pix; isRGB = (img.imageType == 1);
 			 *
 			 */
 			{
-				
+
 			}
 			DOMNode imgNode = null;
-			int width = ((BufferedImage)img).getRaster().getWidth();
-			int height = ((BufferedImage)img).getRaster().getHeight();
+			int width = ((BufferedImage) img).getRaster().getWidth();
+			int height = ((BufferedImage) img).getRaster().getHeight();
 			if (pixels == null) {
 				if ((imgNode = getImageNode(img)) != null)
 					ctx.drawImage(imgNode, x, y, width, height);
@@ -508,14 +483,14 @@ public class JSGraphics2D //extends SunGraphics2D
 					nx = width;
 					ny = height;
 				}
-				for (int pt = 0, i = 0, n = Math.min(buf8.length/4, pixels.length); i < n; i++) {
+				for (int pt = 0, i = 0, n = Math.min(buf8.length / 4, pixels.length); i < n; i++) {
 					int argb = pixels[i];
 					buf8[pt++] = (argb >> 16) & 0xFF;
 					buf8[pt++] = (argb >> 8) & 0xFF;
 					buf8[pt++] = argb & 0xFF;
 					buf8[pt++] = (isRGB ? 0xFF : (argb >> 24) & 0xFF);
 				}
-				HTML5CanvasContext2D.putImageData(ctx, imageData, x, y);				
+				HTML5CanvasContext2D.putImageData(ctx, imageData, x, y);
 			}
 			if (observer != null)
 				observe(img, observer, imgNode != null);
@@ -523,19 +498,17 @@ public class JSGraphics2D //extends SunGraphics2D
 		return true;
 	}
 
-	
 	public boolean hit(Rectangle rect, Shape s, boolean onStroke) {
 		JSUtil.notImplemented(null);
 		return false;
 	}
 
-	
 	public Stroke getStroke() {
 		return currentStroke;
 	}
 
 	@SuppressWarnings("unused")
-	
+
 	public void setStroke(Stroke s) {
 		if (!(s instanceof BasicStroke))
 			return;
@@ -573,84 +546,70 @@ public class JSGraphics2D //extends SunGraphics2D
 		/**
 		 * @j2sNative
 		 * 
-		 *            this.ctx.lineCap = lineCap; this.ctx.lineJoin = lineJoin; if
-		 *            (miterLimit >= 0) this.ctx.miterLimit = miterLimit;
+		 * 			this.ctx.lineCap = lineCap; this.ctx.lineJoin = lineJoin;
+		 *            if (miterLimit >= 0) this.ctx.miterLimit = miterLimit;
 		 */
 		{
 		}
 		// SwingJS TODO more here
 	}
 
-	
 	public void setRenderingHint(Key hintKey, Object hintValue) {
 		hints.put(hintKey, hintValue);
 	}
 
-	
 	public Object getRenderingHint(Key hintKey) {
 		return hints.get(hintKey);
 	}
 
-	
 	public void setRenderingHints(Map<?, ?> hints) {
 		this.hints = new RenderingHints((Map<Key, ?>) hints);
 	}
 
-	
 	public void addRenderingHints(Map<?, ?> hints) {
 		for (Entry<?, ?> e : hints.entrySet())
 			this.hints.put(e.getKey(), e.getValue());
 	}
 
-	
 	public RenderingHints getRenderingHints() {
 		return hints;
 	}
 
-	
 	public void setBackground(Color color) {
 		background(color);
 	}
 
-	
 	public Color getBackground() {
 		return backgroundColor;
 	}
 
-	
 	public Color getColor() {
 		return foregroundColor;
 	}
 
-	
 	public void setColor(Color c) {
 		foregroundColor = c;
 		setGraphicsColor(c);
 	}
 
-	
 	public void setPaint(Paint paint) {
 		setColor((Color) paint);
 	}
 
-	
 	public Font getFont() {
 		if (font == null)
 			font = new Font("Arial", Font.PLAIN, 12);
 		return font;
 	}
 
-	
 	public FontMetrics getFontMetrics() {
 		return getFontMetrics(getFont());
 	}
 
-	
 	public FontMetrics getFontMetrics(Font f) {
 		return Toolkit.getDefaultToolkit().getFontMetrics(f);
 	}
 
-	
 	public void clipRect(int x, int y, int width, int height) {
 		// SwingJS -- this is not quite right. Should ADD this to the clipping
 		// region
@@ -676,7 +635,6 @@ public class JSGraphics2D //extends SunGraphics2D
 			currentClip = new Rectangle(x, y, width, height);
 	}
 
-	
 	public void setClip(Shape clip) {
 		currentClip = clip;
 		ctx.beginPath();
@@ -684,7 +642,6 @@ public class JSGraphics2D //extends SunGraphics2D
 		ctx.clip();
 	}
 
-	
 	public void clearRect(int x, int y, int width, int height) {
 		ctx.clearRect(x, y, width, height);
 		setGraphicsColor(backgroundColor == null ? Color.WHITE : backgroundColor);
@@ -698,7 +655,11 @@ public class JSGraphics2D //extends SunGraphics2D
 		HTML5CanvasContext2D.setColor(ctx, JSToolkit.getCSSColor(c));
 	}
 
-	
+	public void copyArea(int x, int y, int width, int height, int dx, int dy) {
+		HTML5CanvasContext2D.putImageData(ctx, HTML5CanvasContext2D.getImageData(ctx, x, y, width, height), x + dx,
+				y + dy);
+	}
+
 	public void drawPolyline(int[] xPoints, int[] yPoints, int nPoints) {
 		if (nPoints < 2)
 			return;
@@ -709,31 +670,20 @@ public class JSGraphics2D //extends SunGraphics2D
 		ctx.stroke();
 	}
 
-	
-	public void copyArea(int x, int y, int width, int height, int dx, int dy) {
-		JSUtil.notImplemented(null);
-	}
-
-	
-	public void drawRoundRect(int x, int y, int width, int height, int arcWidth,
-			int arcHeight) {
+	public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
 		JSUtil.notImplemented(null);
 		drawRect(x, y, width, height);
 	}
 
-	
-	public void fillRoundRect(int x, int y, int width, int height, int arcWidth,
-			int arcHeight) {
+	public void fillRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
 		JSUtil.notImplemented(null);
 		fillRect(x, y, width, height);
 	}
 
-	
 	public Shape getClip() {
 		return currentClip == null ? getClipBoundsImpl() : currentClip;
 	}
 
-	
 	public void drawString(String s, int x, int y) {
 		ctx.fillText(s, x, y);
 	}
@@ -742,40 +692,32 @@ public class JSGraphics2D //extends SunGraphics2D
 		ctx.fillText(str, x, y);
 	}
 
-	
 	public void drawString(AttributedCharacterIterator iterator, int x, int y) {
 		JSUtil.notImplemented(null);
 	}
 
-	
-	public void drawString(AttributedCharacterIterator iterator,
-			float x, float y) {
+	public void drawString(AttributedCharacterIterator iterator, float x, float y) {
 		JSUtil.notImplemented(null);
 	}
 
-	
 	public void translate(double tx, double ty) {
 		JSUtil.notImplemented(null);
 	}
 
-	
 	public void shear(double shx, double shy) {
 		JSUtil.notImplemented(null);
 	}
 
-	
 	public void translate(int x, int y) {
 		ctx.translate(x, y);
 		transform.translate(x, y);
 	}
-	
-	
+
 	public void rotate(double radians) {
 		ctx.rotate(radians);
 		transform.rotate(radians);
 	}
 
-	
 	public void rotate(double theta, double x, double y) {
 		ctx.translate(x, y);
 		ctx.rotate(theta);
@@ -783,7 +725,6 @@ public class JSGraphics2D //extends SunGraphics2D
 		transform.rotate(theta, x, y);
 	}
 
-	
 	public void scale(double sx, double sy) {
 		ctx.scale(sx, sy);
 		transform.scale(sx, sy);
@@ -793,19 +734,21 @@ public class JSGraphics2D //extends SunGraphics2D
 	 * concatenates the given transform matrix to the current transform
 	 * 
 	 */
-	
-	public void	 transform(AffineTransform t) {
+
+	public void transform(AffineTransform t) {
 		transformCTX(t);
-	  transform.concatenate(t);
+		transform.concatenate(t);
 	}
 
 	private void transformCTX(AffineTransform t) {
 		/**
 		 * @j2sNative
 		 * 
-		 * this.ctx.transform (t.m00, t.m10, t.m01, t.m11, t.m02, t.m12);
+		 * 			this.ctx.transform (t.m00, t.m10, t.m01, t.m11, t.m02,
+		 *            t.m12);
 		 */
-		{}
+		{
+		}
 	}
 
 	/**
@@ -826,38 +769,35 @@ public class JSGraphics2D //extends SunGraphics2D
 		transform.setTransform(t);
 	}
 
-  /**
-   * Returns a copy of the current transform
-   */
-	
+	/**
+	 * Returns a copy of the current transform
+	 */
+
 	public AffineTransform getTransform() {
 		return (AffineTransform) transform.clone();
 	}
 
-//  /**
-//   * Returns the current Transform ignoring the "constrain"
-//   * rectangle.
-//   */
-//  public AffineTransform cloneTransform() {
-//  	return (AffineTransform) transform.clone();
-//  }
-//
-	
+	// /**
+	// * Returns the current Transform ignoring the "constrain"
+	// * rectangle.
+	// */
+	// public AffineTransform cloneTransform() {
+	// return (AffineTransform) transform.clone();
+	// }
+	//
+
 	public Paint getPaint() {
 		return getColor();
 	}
 
-	
 	public FontRenderContext getFontRenderContext() {
 		return getFontMetrics(getFont()).getFontRenderContext();
 	}
 
-	
 	public void setPaintMode() {
 		setComposite(AlphaComposite.SrcOver);
 	}
 
-	
 	public void setXORMode(Color c) {
 		if (c == null)
 			throw new IllegalArgumentException("null XORColor");
@@ -867,7 +807,7 @@ public class JSGraphics2D //extends SunGraphics2D
 	public Rectangle getClipBounds() {
 		return getClipBounds(null);
 	}
-	
+
 	public Rectangle getClipBounds(Rectangle r) {
 		Rectangle clipRect = getClipBoundsImpl();
 		if (r == null) {
@@ -888,18 +828,14 @@ public class JSGraphics2D //extends SunGraphics2D
 		return currentClip.getBounds();
 	}
 
-	
-	
-	
 	public void setComposite(Composite comp) {
 		// this equality check speeds mark/reset significantly
 		if (comp == this.currentComposite)
 			return;
 		// alpha composite only here
 		int newRule = 0;
-		boolean isValid = (comp == null || currentComposite == null ||
-				(comp instanceof AlphaComposite)
-				   && (newRule = ((AlphaComposite) comp).getRule()) != currentComposite.getRule());
+		boolean isValid = (comp == null || currentComposite == null || (comp instanceof AlphaComposite)
+				&& (newRule = ((AlphaComposite) comp).getRule()) != currentComposite.getRule());
 		if (isValid && JSGraphicsCompositor.setGraphicsCompositeAlpha(this, newRule)) {
 			currentComposite = (AlphaComposite) comp;
 		}
@@ -909,8 +845,7 @@ public class JSGraphics2D //extends SunGraphics2D
 	public Composite getComposite() {
 		return currentComposite;
 	}
-	
-	
+
 	public void drawImage(BufferedImage img, BufferedImageOp op, int x, int y) {
 		JSGraphicsCompositor.drawImageOp(this, img, op, x, y);
 	}
@@ -919,9 +854,10 @@ public class JSGraphics2D //extends SunGraphics2D
 		/**
 		 * @j2sNative
 		 *
-		 * this.ctx.globalAlpha = f;
+		 * 			this.ctx.globalAlpha = f;
 		 */
-		{}		
+		{
+		}
 	}
 
 	public HTML5Canvas getCanvas() {
@@ -936,9 +872,9 @@ public class JSGraphics2D //extends SunGraphics2D
 	public boolean isBackgroundPainted() {
 		return backgroundPainted;
 	}
-	
+
 	/////////////// saving of the state ////////////////
-	
+
 	private final static int SAVE_ALPHA = 0;
 	private final static int SAVE_COMPOSITE = 1;
 	private final static int SAVE_STROKE = 2;
@@ -947,11 +883,10 @@ public class JSGraphics2D //extends SunGraphics2D
 	private final static int SAVE_CLIP = 5;
 	private final static int SAVE_BACKGROUND_PAINTED = 6;
 	private final static int SAVE_MAX = 7;
-	
 
 	/**
-	 * creates a save object to extend the capabilities of context2d.save()
-	 * that brings that into line with Java's graphics2d .create()
+	 * creates a save object to extend the capabilities of context2d.save() that
+	 * brings that into line with Java's graphics2d .create()
 	 * 
 	 * in development -- we need to identify all differences
 	 * 
@@ -961,15 +896,16 @@ public class JSGraphics2D //extends SunGraphics2D
 	public int mark() {
 		ctx.save();
 		Object[] map = new Object[SAVE_MAX];
-		
+
 		float alpha = 0;
 		/**
 		 * @j2sNative
 		 * 
-		 * alpha = this.ctx.globalAlpha;
+		 * 			alpha = this.ctx.globalAlpha;
 		 * 
 		 */
-		{}
+		{
+		}
 		map[SAVE_ALPHA] = Float.valueOf(alpha);
 		map[SAVE_COMPOSITE] = currentComposite;
 		map[SAVE_STROKE] = currentStroke;
@@ -983,6 +919,7 @@ public class JSGraphics2D //extends SunGraphics2D
 
 	/**
 	 * try to equate g.dispose() with ctx.restore().
+	 * 
 	 * @param n0
 	 */
 	public void reset(int n0) {
@@ -1017,7 +954,6 @@ public class JSGraphics2D //extends SunGraphics2D
 		return (Graphics) clone();
 	}
 
-	
 	@Override
 	public Object clone() {
 		int n = mark();
@@ -1027,7 +963,7 @@ public class JSGraphics2D //extends SunGraphics2D
 		 * 
 		 * @j2sNative
 		 * 
-		 *            g = Clazz.clone(this);
+		 * 			g = Clazz.clone(this);
 		 * 
 		 */
 		{
@@ -1037,10 +973,10 @@ public class JSGraphics2D //extends SunGraphics2D
 			g.hints = (RenderingHints) hints.clone();
 		}
 		/*
-		 * FontInfos are re-used, so must be cloned too, if they are valid, and be
-		 * nulled out if invalid. The implied trade-off is that there is more to be
-		 * gained from re-using these objects than is lost by having to clone them
-		 * when the SG2D is cloned.
+		 * FontInfos are re-used, so must be cloned too, if they are valid, and
+		 * be nulled out if invalid. The implied trade-off is that there is more
+		 * to be gained from re-using these objects than is lost by having to
+		 * clone them when the SG2D is cloned.
 		 */
 		// if (this.fontInfo != null) {
 		// if (this.validFontInfo) {
@@ -1060,10 +996,8 @@ public class JSGraphics2D //extends SunGraphics2D
 		return g;
 	}
 
-	
 	public void dispose() {
 		reset(initialState);
 	}
-
 
 }

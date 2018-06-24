@@ -22,7 +22,7 @@ System.out.println("JSTabbedPaneUI SURRAGATE -- NOT IMPLEMENTED YET! ");
 	}
 	
 	@Override
-	protected DOMNode updateDOMNode() {
+	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			JRootPane root = jc.getRootPane();
 			isContentPane = (root != null && jc == root.getContentPane());

@@ -260,12 +260,16 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 	 * 
 	 */
 	public JFrame(String title, GraphicsConfiguration gc) {
+		this(title, gc, "FrameUI");
+	}
+	
+	public JFrame(String title, GraphicsConfiguration gc, String uiid) {
 		initTitleGC(title, gc);
 		enableEvents(AWTEvent.KEY_EVENT_MASK | AWTEvent.WINDOW_EVENT_MASK);
 		setLocale(JComponent.getDefaultLocale());
-		uiClassID = "FrameUI";
+		uiClassID = uiid;
 		setRootPane(createRootPane());
-    rootPane.setFrameViewer(setFrameViewer(null));
+		rootPane.setFrameViewer(setFrameViewer(null));
 		setBackground(UIManager.getColor("control"));
 		setRootPaneCheckingEnabled(true);
 		if (JFrame.isDefaultLookAndFeelDecorated()) {
