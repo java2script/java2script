@@ -4130,7 +4130,8 @@ public abstract class Component
 																		// source
 						newY, // y relative to new source
 						e.getXOnScreen(), e.getYOnScreen(), e.getClickCount(), e.isPopupTrigger(), e.getScrollType(),
-						e.getScrollAmount(), e.getWheelRotation());
+						e.getScrollAmount(), e.getWheelRotation(),
+                        e.getPreciseWheelRotation());
 				((AWTEvent) e).copyPrivateDataInto(newMWE);
 				// When dispatching a wheel event to
 				// ancestor, there is no need trying to find descendant
