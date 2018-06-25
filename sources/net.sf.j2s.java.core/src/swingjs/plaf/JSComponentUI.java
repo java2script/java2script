@@ -1492,6 +1492,16 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	protected void enableNode(DOMNode node, boolean b) {
 		if (node == null)
 			return;
+		
+		if (isMenuItem) {
+			if (b) {
+				$(node).removeClass("ui-menu-disabled ui-state-disabled");
+			} else {
+				$(node).addClass("ui-menu-disabled ui-state-disabled");			
+			}
+			return;
+		}
+		
 		DOMNode.setAttr(node, "disabled", (b ? null : "TRUE"));
 		String pp = getPropertyPrefix();
 		if (!b && inactiveForeground == colorUNKNOWN)
