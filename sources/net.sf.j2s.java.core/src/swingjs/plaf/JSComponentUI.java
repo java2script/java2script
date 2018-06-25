@@ -1489,7 +1489,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 
 	private boolean enabled = true;
 	
-	private void enableNode(DOMNode node, boolean b) {
+	protected void enableNode(DOMNode node, boolean b) {
 		if (node == null)
 			return;
 		DOMNode.setAttr(node, "disabled", (b ? null : "TRUE"));

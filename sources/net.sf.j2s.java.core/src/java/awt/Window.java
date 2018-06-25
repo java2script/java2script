@@ -830,6 +830,23 @@ public class Window extends JComponent {
        paintContainer(g); 
      }
 
+    @Override
+		public void update(Graphics g) {
+    		updateContainer(g);
+    }
+
+	@Override
+	public void printAll(Graphics g) {
+		// untested
+		super.printAll(g);
+	}
+		
+	@Override
+	public Dimension getPreferredSize() {
+		return preferredSizeContainer();
+	}
+	
+	
     /**
      * Shows or hides this {@code Window} depending on the value of parameter
      * {@code b}.

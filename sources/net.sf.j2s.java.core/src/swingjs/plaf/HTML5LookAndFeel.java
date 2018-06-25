@@ -376,7 +376,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		"window", "#FFFFFF", /* Default color for the interior of windows */
 		"windowBorder", "#000000", /* ??? */
 		"windowText", "#333333", /* ??? */
-		"menu", "#C0C0C0", /* Background color for menus */
+		"menu", "#EEEEEE",//"#C0C0C0", /* Background color for menus */
 		"menuText", "#333333", /* Text color for menus */
 		"text", "#C0C0C0", /* Text background color */
 		"textText", "#333333", /* Text foreground color */
