@@ -925,12 +925,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			String expr = buffer.substring(pt, buffer.length());
 			buffer.setLength(pt);
 			// ignore (treeLock())
-			if (e instanceof MethodInvocation && expr.indexOf(".getTreeLock()") >= 0) {
-				return false;
+			if (!(e instanceof MethodInvocation && expr.indexOf(".getTreeLock()") >= 0)) {
+				buffer.append("(");
+				buffer.append(expr);
+				buffer.append(");\r\n");
 			}
-			buffer.append("(");
-			buffer.append(expr);
-			buffer.append(");\n");
 		}
 		node.getBody().accept(this);
 		return false;
