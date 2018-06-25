@@ -1796,8 +1796,8 @@ public class Collections {
 	 *            the element
 	 * @return a Set containing the element
 	 */
-	public static <E> Set<E> singleton(E object) {
-		return new SingletonSet<E>(object);
+	public static <T> Set<T> singleton(T object) {
+		return new SingletonSet<T>(object);
 	}
 
 	/**
@@ -1808,8 +1808,8 @@ public class Collections {
 	 *            the element
 	 * @return a List containing the element
 	 */
-	public static <E> List<E> singletonList(E object) {
-		return new SingletonList<E>(object);
+	public static <T> List<T> singletonList(T object) {
+		return new SingletonList<T>(object);
 	}
 
 	/**
