@@ -122,6 +122,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// BH 6/24/2018 -- synchronized(a = new Object()) {...} ---> ...; only if an assignment or not a simple function call to Object.getTreeLock()
 // BH 6/23/2018 -- synchronized(a = new Object()) {...} ---> if(!(a = new Object()) {throw new NullPointerException()}else{...}
 // BH 6/21/2018 -- CharSequence.subSequence() should be defined both subSequence$I$I and subSequence
 // BH 6/20/2018 -- fixes for (int var : new int[] {3,4,5}) becoming for var var
@@ -910,11 +911,30 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	public boolean visit(SynchronizedStatement node) {
-		// we wrap this with a simple if() statement, 
-		// checking that it is not null
-		buffer.append("if(!(");
-		node.getExpression().accept(this);
-		buffer.append(")){throw new NullPointerException()}else");
+		// we could wrap this with a simple if() statement, 
+		// checking that it is not null, but that seems to me
+		// to be unnecessary. When would one ever intentionally
+		// produce a null pointer exception from synchronized(...)?
+		
+		Expression e = node.getExpression();
+		if (e instanceof Name 
+				|| e instanceof TypeLiteral
+				|| e instanceof ThisExpression)
+			return false;
+		buffer.append("/*sync " + e.getClass().getName() + "*/");		
+		// get actual JavaScript code
+		int pt = buffer.length();
+		e.accept(this);
+		String expr = buffer.substring(pt, buffer.length());
+		buffer.setLength(pt);
+		// ignore (treeLock())
+		if (e instanceof MethodInvocation && expr.indexOf(".getTreeLock()") >= 0){
+			MethodInvocation m = (MethodInvocation) e;
+			m.getExpression().getName();
+			return false;
+		}
+		buffer.append(expr);
+		buffer.append(";");
 		node.getBody().accept(this);
 		return false;
 	}
