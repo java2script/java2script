@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 6/25/2018 10:23:24 AM really fixing new int[] {'a'} using .$c() see Test_Byte.java
 // BH 6/21/2018 1:08:58 PM missing mysterious Integer.objectValue() 
 // BH 6/20/2018 6:00:23 AM missing printStackTrace(PrintStream)
 // BH 6/19/2018 8:49:57 AM fix for checkDeclared
@@ -862,7 +863,7 @@ var newTypedA = function(baseClass, args, nBits, ndims) {
     } else if (nBits > 0 && dim < 0) {
       // make sure this is not a character
       for (var i = val.length; --i >= 0;)
-        val[i].charAt && (val[i] = val[i].charAt(0));
+        val[i].charAt && (val[i] = val[i].$c());
       dim = val; // because we can initialize an array using new Int32Array([...])
     }
     if (nBits > 0)
@@ -2429,7 +2430,7 @@ Con.consoleOutput = function (s, color) {
     switch (s.charAt(s.length - 1)) {
     case '\n':
     case '\r':
-      s = (s.length > 1 ? s.substring (0, s.length - (s.charAt (s.length - 2) == '\r' ? 2 : 1)) : "");
+      s = (s.length > 1 ? s.substring (0, s.length - (s.charAt(s.length - 2) == '\r' ? 2 : 1)) : "");
       willMeetLineBreak = true;
       break;
     }

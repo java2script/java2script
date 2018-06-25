@@ -911,30 +911,27 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	public boolean visit(SynchronizedStatement node) {
-		// we could wrap this with a simple if() statement, 
+		// we could wrap this with a simple if() statement,
 		// checking that it is not null, but that seems to me
 		// to be unnecessary. When would one ever intentionally
 		// produce a null pointer exception from synchronized(...)?
-		
+
 		Expression e = node.getExpression();
-		if (e instanceof Name 
-				|| e instanceof TypeLiteral
-				|| e instanceof ThisExpression)
-			return false;
-		buffer.append("/*sync " + e.getClass().getName() + "*/");		
-		// get actual JavaScript code
-		int pt = buffer.length();
-		e.accept(this);
-		String expr = buffer.substring(pt, buffer.length());
-		buffer.setLength(pt);
-		// ignore (treeLock())
-		if (e instanceof MethodInvocation && expr.indexOf(".getTreeLock()") >= 0){
-			MethodInvocation m = (MethodInvocation) e;
-			m.getExpression().getName();
-			return false;
+		if (!(e instanceof Name || e instanceof TypeLiteral || e instanceof ThisExpression)) {
+			buffer.append("/*sync " + e.getClass().getName() + "*/");
+			// get actual JavaScript code
+			int pt = buffer.length();
+			e.accept(this);
+			String expr = buffer.substring(pt, buffer.length());
+			buffer.setLength(pt);
+			// ignore (treeLock())
+			if (e instanceof MethodInvocation && expr.indexOf(".getTreeLock()") >= 0) {
+				return false;
+			}
+			buffer.append("(");
+			buffer.append(expr);
+			buffer.append(");\n");
 		}
-		buffer.append(expr);
-		buffer.append(";");
 		node.getBody().accept(this);
 		return false;
 	}
