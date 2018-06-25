@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 6/25/2018 12:10:25 PM Character.toTitleCase, isTitleCase as ...UpperCase
 // BH 6/25/2018 10:23:24 AM really fixing new int[] {'a'} using .$c() see Test_Byte.java
 // BH 6/21/2018 1:08:58 PM missing mysterious Integer.objectValue() 
 // BH 6/20/2018 6:00:23 AM missing printStackTrace(PrintStream)
@@ -3987,6 +3988,10 @@ m$(C$,"toLowerCase",
 function(c){
 return(""+c).toLowerCase().charAt(0);
 }, 1);
+m$(C$,"toTitleCase",
+function(c){
+  return C$.toUpperCase(c);
+}, 1);
 m$(C$,"toUpperCase",
 function(c){
 return(""+c).toUpperCase().charAt(0);
@@ -4033,6 +4038,10 @@ function(c){
 if(i==0x20||i==0xa0||i==0x1680)return true;
 if(i<0x2000)return false;
 return i<=0x200b||i==0x2028||i==0x2029||i==0x202f||i==0x3000;
+}, 1);
+m$(C$,"isTitleCase",
+function(c){
+  return C$.isUpperCase(c);
 }, 1);
 m$(C$,"isUpperCase",
 function(c){
