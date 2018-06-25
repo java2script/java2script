@@ -13094,6 +13094,7 @@ J2S._getResourcePath = function(path, isJavaPath) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 6/25/2018 3:06:30 PM adds String.concat$S
 // BH 6/25/2018 12:10:25 PM Character.toTitleCase, isTitleCase as ...UpperCase
 // BH 6/25/2018 10:23:24 AM really fixing new int[] {'a'} using .$c() see Test_Byte.java
 // BH 6/21/2018 1:08:58 PM missing mysterious Integer.objectValue() 
@@ -16849,7 +16850,7 @@ dst[dstBegin+i]=this.charAt(srcBegin+i);
 };
 
 sp.$concat=sp.concat;
-sp.concat=function(s){
+sp.concat = sp.concat$S = function(s){
 if(s==null){
 throw new NullPointerException();
 }
