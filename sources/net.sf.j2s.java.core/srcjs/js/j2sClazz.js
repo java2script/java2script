@@ -3990,7 +3990,7 @@ return(""+c).toLowerCase().charAt(0);
 }, 1);
 m$(C$,"toTitleCase",
 function(c){
-  return C$.toUpperCase(c);
+  return Character.toUpperCase(c);
 }, 1);
 m$(C$,"toUpperCase",
 function(c){
@@ -4041,7 +4041,7 @@ return i<=0x200b||i==0x2028||i==0x2029||i==0x202f||i==0x3000;
 }, 1);
 m$(C$,"isTitleCase",
 function(c){
-  return C$.isUpperCase(c);
+  return Character.isUpperCase(c);
 }, 1);
 m$(C$,"isUpperCase",
 function(c){
