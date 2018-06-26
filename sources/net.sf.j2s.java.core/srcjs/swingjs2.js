@@ -15976,6 +15976,12 @@ function(){
 return this.valueOf();
 });
 
+m$(Integer,"signum",
+function(){
+return Math.signum(this.valueOf());
+});
+
+
 // Note that Long is problematic in JavaScript 
 
 Clazz._setDeclared("java.lang.Long", java.lang.Long=Long=function(){

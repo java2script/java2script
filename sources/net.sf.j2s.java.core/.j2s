@@ -1,7 +1,7 @@
 j2s.compiler.status=enable
 
 #output file name for logging methods declared - delete the file to regenerate a listing 
-j2s.log.methods.declared=methodsDeclared.csv
+#j2s.log.methods.declared=methodsDeclared.csv
 
 #output file name for logging methods called - delete the file to regenerate a listing
 #j2s.log.methods.called=methodsCalled.csv

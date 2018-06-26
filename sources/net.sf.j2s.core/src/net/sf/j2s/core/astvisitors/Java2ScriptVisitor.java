@@ -4733,7 +4733,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			return;
 		}
 		String myName = fixLogName(getQualifiedClassName());
-		lstMethodsDeclared.add(myName + "." + name.substring(1, name.length() - 1));
+		if (name.startsWith("'"))	
+			name = name.substring(1, name.length() - 1);
+		System.err.println(name);
+		lstMethodsDeclared.add(myName + "." + name);
 	}
 
 	private void logMethodCalled(String name) {
