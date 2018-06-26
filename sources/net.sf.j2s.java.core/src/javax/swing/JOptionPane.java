@@ -32,8 +32,11 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dialog;
+import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.HeadlessException;
+import java.awt.KeyboardFocusManager;
+import java.awt.Point;
 import java.awt.Window;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -43,6 +46,8 @@ import java.awt.event.WindowListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
 import javax.swing.plaf.OptionPaneUI;
 
 import swingjs.JSUtil;
@@ -379,9 +384,9 @@ import swingjs.JSUtil;
 public class JOptionPane extends JComponent {
 	/**
 	 * Indicates that the user has not yet selected a value.
-	 */ 
+	 */
 	public static final Object UNINITIALIZED_VALUE = "uninitializedValue";
-	
+
 	//
 	// Option types
 	//
@@ -464,8 +469,9 @@ public class JOptionPane extends JComponent {
 	/** Message type. */
 	protected int messageType;
 	/**
-	 * Option type, one of <code>DEFAULT_OPTION</code>, <code>YES_NO_OPTION</code>
-	 * , <code>YES_NO_CANCEL_OPTION</code> or <code>OK_CANCEL_OPTION</code>.
+	 * Option type, one of <code>DEFAULT_OPTION</code>,
+	 * <code>YES_NO_OPTION</code> , <code>YES_NO_CANCEL_OPTION</code> or
+	 * <code>OK_CANCEL_OPTION</code>.
 	 */
 	protected int optionType;
 	/**
@@ -474,8 +480,8 @@ public class JOptionPane extends JComponent {
 	 */
 	transient protected Object value;
 	/**
-	 * Array of values the user can choose from. Look and feel will provide the UI
-	 * component to choose this from.
+	 * Array of values the user can choose from. Look and feel will provide the
+	 * UI component to choose this from.
 	 */
 	protected transient Object[] selectionValues;
 	/** Value the user has input. */
@@ -487,18 +493,19 @@ public class JOptionPane extends JComponent {
 
 	// BH SwingJS - we must distinguish public from private static here.
 	private boolean disposeOnHide = true;
-	
+
 	private static boolean USE_HTML5_MODAL_FOR_WARNINGS_AND_ERRORS = true;
 
 	/**
-	 * Shows a question-message dialog requesting input from the user. The dialog
-	 * uses the default frame, which usually means it is centered on the screen.
+	 * Shows a question-message dialog requesting input from the user. The
+	 * dialog uses the default frame, which usually means it is centered on the
+	 * screen.
 	 * 
 	 * @param message
-	 *          the <code>Object</code> to display
+	 *            the <code>Object</code> to display
 	 * @exception HeadlessException
-	 *              if <code>GraphicsEnvironment.isHeadless</code> returns
-	 *              <code>true</code>
+	 *                if <code>GraphicsEnvironment.isHeadless</code> returns
+	 *                <code>true</code>
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
 	public static String showInputDialog(Object message) {
@@ -511,57 +518,59 @@ public class JOptionPane extends JComponent {
 	 * uses the default frame, which usually means it is centered on the screen.
 	 * 
 	 * @param message
-	 *          the <code>Object</code> to display
+	 *            the <code>Object</code> to display
 	 * @param initialSelectionValue
-	 *          the value used to initialize the input field
+	 *            the value used to initialize the input field
 	 * @since 1.4
 	 */
-	public static String showInputDialog(Object message,
-			Object initialSelectionValue) {
+	public static String showInputDialog(Object message, Object initialSelectionValue) {
 		return showInputDialog(null, message, initialSelectionValue);
 	}
 
 	/**
-	 * Shows a question-message dialog requesting input from the user parented to
-	 * <code>parentComponent</code>. The dialog is displayed on top of the
+	 * Shows a question-message dialog requesting input from the user parented
+	 * to <code>parentComponent</code>. The dialog is displayed on top of the
 	 * <code>Component</code>'s frame, and is usually positioned below the
 	 * <code>Component</code>.
 	 * 
 	 * @param parentComponent
-	 *          the parent <code>Component</code> for the dialog
+	 *            the parent <code>Component</code> for the dialog
 	 * @param message
-	 *          the <code>Object</code> to display
+	 *            the <code>Object</code> to display
 	 * @exception HeadlessException
-	 *              if <code>GraphicsEnvironment.isHeadless</code> returns
-	 *              <code>true</code>
+	 *                if <code>GraphicsEnvironment.isHeadless</code> returns
+	 *                <code>true</code>
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
 	public static String showInputDialog(Component parentComponent, Object message) {
 		return showInputDialog(parentComponent, message,
-				"Input"/*UIManager.getString("OptionPane.inputDialogTitle", parentComponent)*/,
-				QUESTION_MESSAGE);
+				"Input"/*
+						 * UIManager.getString("OptionPane.inputDialogTitle",
+						 * parentComponent)
+						 */, QUESTION_MESSAGE);
 	}
 
 	/**
-	 * Shows a question-message dialog requesting input from the user and parented
-	 * to <code>parentComponent</code>. The input value will be initialized to
-	 * <code>initialSelectionValue</code>. The dialog is displayed on top of the
-	 * <code>Component</code>'s frame, and is usually positioned below the
-	 * <code>Component</code>.
+	 * Shows a question-message dialog requesting input from the user and
+	 * parented to <code>parentComponent</code>. The input value will be
+	 * initialized to <code>initialSelectionValue</code>. The dialog is
+	 * displayed on top of the <code>Component</code>'s frame, and is usually
+	 * positioned below the <code>Component</code>.
 	 * 
 	 * @param parentComponent
-	 *          the parent <code>Component</code> for the dialog
+	 *            the parent <code>Component</code> for the dialog
 	 * @param messcage
-	 *          the <code>Object</code> to display
+	 *            the <code>Object</code> to display
 	 * @param initialSelectionValue
-	 *          the value used to initialize the input field
+	 *            the value used to initialize the input field
 	 * @since 1.4
 	 */
-	public static String showInputDialog(Component parentComponent,
-			Object message, Object initialSelectionValue) {
+	public static String showInputDialog(Component parentComponent, Object message, Object initialSelectionValue) {
 		return (String) showInputDialog(parentComponent, message,
-				"Input"/*UIManager.getString("OptionPane.inputDialogTitle", parentComponent)*/,
-				QUESTION_MESSAGE, null, null, initialSelectionValue);
+				"Input"/*
+						 * UIManager.getString("OptionPane.inputDialogTitle",
+						 * parentComponent)
+						 */, QUESTION_MESSAGE, null, null, initialSelectionValue);
 	}
 
 	/**
@@ -570,25 +579,23 @@ public class JOptionPane extends JComponent {
 	 * <code>title</code> and message type <code>messageType</code>.
 	 * 
 	 * @param parentComponent
-	 *          the parent <code>Component</code> for the dialog
+	 *            the parent <code>Component</code> for the dialog
 	 * @param message
-	 *          the <code>Object</code> to display
+	 *            the <code>Object</code> to display
 	 * @param title
-	 *          the <code>String</code> to display in the dialog title bar
+	 *            the <code>String</code> to display in the dialog title bar
 	 * @param messageType
-	 *          the type of message that is to be displayed:
-	 *          <code>ERROR_MESSAGE</code>, <code>INFORMATION_MESSAGE</code>,
-	 *          <code>WARNING_MESSAGE</code>, <code>QUESTION_MESSAGE</code>, or
-	 *          <code>PLAIN_MESSAGE</code>
+	 *            the type of message that is to be displayed:
+	 *            <code>ERROR_MESSAGE</code>, <code>INFORMATION_MESSAGE</code>,
+	 *            <code>WARNING_MESSAGE</code>, <code>QUESTION_MESSAGE</code>,
+	 *            or <code>PLAIN_MESSAGE</code>
 	 * @exception HeadlessException
-	 *              if <code>GraphicsEnvironment.isHeadless</code> returns
-	 *              <code>true</code>
+	 *                if <code>GraphicsEnvironment.isHeadless</code> returns
+	 *                <code>true</code>
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
-	public static String showInputDialog(Component parentComponent,
-			Object message, String title, int messageType) {
-		return (String) showInputDialog(parentComponent, message, title,
-				messageType, null, null, null);
+	public static String showInputDialog(Component parentComponent, Object message, String title, int messageType) {
+		return (String) showInputDialog(parentComponent, message, title, messageType, null, null, null);
 	}
 
 	/**
@@ -634,7 +641,7 @@ public class JOptionPane extends JComponent {
 		Object value;
 
 		if (!(parentComponent instanceof PropertyChangeListener)) {
-		
+
 			if (!(message instanceof String)) {
 				warnJSDeveloper();
 				message = "?";
@@ -661,7 +668,7 @@ public class JOptionPane extends JComponent {
 		JDialog dialog = pane.createDialog(parentComponent, title, style);
 
 		pane.selectInitialValue();
-		
+
 		dialog.setVisible(true); // dialog.show() sets up infinite loop
 
 		return JDialog.ASYNCHRONOUS_OBJECT;
@@ -672,48 +679,48 @@ public class JOptionPane extends JComponent {
 	 * Brings up an information-message dialog titled "Message".
 	 * 
 	 * @param parentComponent
-	 *          determines the <code>Frame</code> in which the dialog is
-	 *          displayed; if <code>null</code>, or if the
-	 *          <code>parentComponent</code> has no <code>Frame</code>, a default
-	 *          <code>Frame</code> is used
+	 *            determines the <code>Frame</code> in which the dialog is
+	 *            displayed; if <code>null</code>, or if the
+	 *            <code>parentComponent</code> has no <code>Frame</code>, a
+	 *            default <code>Frame</code> is used
 	 * @param message
-	 *          the <code>Object</code> to display
+	 *            the <code>Object</code> to display
 	 * @exception HeadlessException
-	 *              if <code>GraphicsEnvironment.isHeadless</code> returns
-	 *              <code>true</code>
+	 *                if <code>GraphicsEnvironment.isHeadless</code> returns
+	 *                <code>true</code>
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
 	public static void showMessageDialog(Component parentComponent, Object message) {
 		showMessageDialog(parentComponent, message,
-				//UIManager.getString("OptionPane.messageDialogTitle", parentComponent)
-				"Message",
-				INFORMATION_MESSAGE);
+				// UIManager.getString("OptionPane.messageDialogTitle",
+				// parentComponent)
+				"Message", INFORMATION_MESSAGE);
 	}
 
 	/**
-	 * Brings up a dialog that displays a message using a default icon determined
-	 * by the <code>messageType</code> parameter.
+	 * Brings up a dialog that displays a message using a default icon
+	 * determined by the <code>messageType</code> parameter.
 	 * 
 	 * @param parentComponent
-	 *          determines the <code>Frame</code> in which the dialog is
-	 *          displayed; if <code>null</code>, or if the
-	 *          <code>parentComponent</code> has no <code>Frame</code>, a default
-	 *          <code>Frame</code> is used
+	 *            determines the <code>Frame</code> in which the dialog is
+	 *            displayed; if <code>null</code>, or if the
+	 *            <code>parentComponent</code> has no <code>Frame</code>, a
+	 *            default <code>Frame</code> is used
 	 * @param message
-	 *          the <code>Object</code> to display
+	 *            the <code>Object</code> to display
 	 * @param title
-	 *          the title string for the dialog
+	 *            the title string for the dialog
 	 * @param messageType
-	 *          the type of message to be displayed: <code>ERROR_MESSAGE</code>,
-	 *          <code>INFORMATION_MESSAGE</code>, <code>WARNING_MESSAGE</code>,
-	 *          <code>QUESTION_MESSAGE</code>, or <code>PLAIN_MESSAGE</code>
+	 *            the type of message to be displayed:
+	 *            <code>ERROR_MESSAGE</code>, <code>INFORMATION_MESSAGE</code>,
+	 *            <code>WARNING_MESSAGE</code>, <code>QUESTION_MESSAGE</code>,
+	 *            or <code>PLAIN_MESSAGE</code>
 	 * @exception HeadlessException
-	 *              if <code>GraphicsEnvironment.isHeadless</code> returns
-	 *              <code>true</code>
+	 *                if <code>GraphicsEnvironment.isHeadless</code> returns
+	 *                <code>true</code>
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
-	public static void showMessageDialog(Component parentComponent,
-			Object message, String title, int messageType) {
+	public static void showMessageDialog(Component parentComponent, Object message, String title, int messageType) {
 		showMessageDialog(parentComponent, message, title, messageType, null);
 	}
 
@@ -744,14 +751,16 @@ public class JOptionPane extends JComponent {
 	 */
 	public static void showMessageDialog(Component parentComponent, Object message, String title, int messageType,
 			Icon icon) {
-		
-		boolean simplify = USE_HTML5_MODAL_FOR_WARNINGS_AND_ERRORS && (messageType == WARNING_MESSAGE || messageType == ERROR_MESSAGE);
+
+		boolean simplify = USE_HTML5_MODAL_FOR_WARNINGS_AND_ERRORS
+				&& (messageType == WARNING_MESSAGE || messageType == ERROR_MESSAGE);
 		boolean isPropertyListener = parentComponent instanceof PropertyChangeListener;
-		
+
 		if (simplify || !isPropertyListener) {
 			if (!simplify && !(message instanceof String))
 				warnJSDeveloper();
-			String s = getMessageTypeString(messageType, ": ") + (title == "Message" ? "" : title + "\n\n") + (message instanceof String ? "" + message: "?");
+			String s = getMessageTypeString(messageType, ": ") + (title == "Message" ? "" : title + "\n\n")
+					+ (message instanceof String ? "" + message : "?");
 			JSUtil.alert(s);
 			return;
 		}
@@ -767,21 +776,21 @@ public class JOptionPane extends JComponent {
 	 * <i>Cancel</i>; with the title, <b>Select an Option</b>.
 	 * 
 	 * @param parentComponent
-	 *          determines the <code>Frame</code> in which the dialog is
-	 *          displayed; if <code>null</code>, or if the
-	 *          <code>parentComponent</code> has no <code>Frame</code>, a default
-	 *          <code>Frame</code> is used
+	 *            determines the <code>Frame</code> in which the dialog is
+	 *            displayed; if <code>null</code>, or if the
+	 *            <code>parentComponent</code> has no <code>Frame</code>, a
+	 *            default <code>Frame</code> is used
 	 * @param message
-	 *          the <code>Object</code> to display
+	 *            the <code>Object</code> to display
 	 * @return an integer indicating the option selected by the user
 	 * @exception HeadlessException
-	 *              if <code>GraphicsEnvironment.isHeadless</code> returns
-	 *              <code>true</code>
+	 *                if <code>GraphicsEnvironment.isHeadless</code> returns
+	 *                <code>true</code>
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
 	public static int showConfirmDialog(Component parentComponent, Object message) {
 		return showConfirmDialog(parentComponent, message,
-				"Confirm"/*UIManager.getString("OptionPane.titleText")*/, YES_NO_CANCEL_OPTION);
+				"Confirm"/* UIManager.getString("OptionPane.titleText") */, YES_NO_CANCEL_OPTION);
 	}
 
 	/**
@@ -789,28 +798,26 @@ public class JOptionPane extends JComponent {
 	 * <code>optionType</code> parameter.
 	 * 
 	 * @param parentComponent
-	 *          determines the <code>Frame</code> in which the dialog is
-	 *          displayed; if <code>null</code>, or if the
-	 *          <code>parentComponent</code> has no <code>Frame</code>, a default
-	 *          <code>Frame</code> is used
+	 *            determines the <code>Frame</code> in which the dialog is
+	 *            displayed; if <code>null</code>, or if the
+	 *            <code>parentComponent</code> has no <code>Frame</code>, a
+	 *            default <code>Frame</code> is used
 	 * @param message
-	 *          the <code>Object</code> to display
+	 *            the <code>Object</code> to display
 	 * @param title
-	 *          the title string for the dialog
+	 *            the title string for the dialog
 	 * @param optionType
-	 *          an int designating the options available on the dialog:
-	 *          <code>YES_NO_OPTION</code>, <code>YES_NO_CANCEL_OPTION</code>, or
-	 *          <code>OK_CANCEL_OPTION</code>
+	 *            an int designating the options available on the dialog:
+	 *            <code>YES_NO_OPTION</code>, <code>YES_NO_CANCEL_OPTION</code>,
+	 *            or <code>OK_CANCEL_OPTION</code>
 	 * @return an int indicating the option selected by the user
 	 * @exception HeadlessException
-	 *              if <code>GraphicsEnvironment.isHeadless</code> returns
-	 *              <code>true</code>
+	 *                if <code>GraphicsEnvironment.isHeadless</code> returns
+	 *                <code>true</code>
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
-	public static int showConfirmDialog(Component parentComponent,
-			Object message, String title, int optionType) {
-		return showConfirmDialog(parentComponent, message, title, optionType,
-				QUESTION_MESSAGE);
+	public static int showConfirmDialog(Component parentComponent, Object message, String title, int optionType) {
+		return showConfirmDialog(parentComponent, message, title, optionType, QUESTION_MESSAGE);
 	}
 
 	/**
@@ -821,34 +828,33 @@ public class JOptionPane extends JComponent {
 	 * Feel.
 	 * 
 	 * @param parentComponent
-	 *          determines the <code>Frame</code> in which the dialog is
-	 *          displayed; if <code>null</code>, or if the
-	 *          <code>parentComponent</code> has no <code>Frame</code>, a default
-	 *          <code>Frame</code> is used.
+	 *            determines the <code>Frame</code> in which the dialog is
+	 *            displayed; if <code>null</code>, or if the
+	 *            <code>parentComponent</code> has no <code>Frame</code>, a
+	 *            default <code>Frame</code> is used.
 	 * @param message
-	 *          the <code>Object</code> to display
+	 *            the <code>Object</code> to display
 	 * @param title
-	 *          the title string for the dialog
+	 *            the title string for the dialog
 	 * @param optionType
-	 *          an integer designating the options available on the dialog:
-	 *          <code>YES_NO_OPTION</code>, <code>YES_NO_CANCEL_OPTION</code>, or
-	 *          <code>OK_CANCEL_OPTION</code>
+	 *            an integer designating the options available on the dialog:
+	 *            <code>YES_NO_OPTION</code>, <code>YES_NO_CANCEL_OPTION</code>,
+	 *            or <code>OK_CANCEL_OPTION</code>
 	 * @param messageType
-	 *          an integer designating the kind of message this is; primarily used
-	 *          to determine the icon from the pluggable Look and Feel:
-	 *          <code>ERROR_MESSAGE</code>, <code>INFORMATION_MESSAGE</code>,
-	 *          <code>WARNING_MESSAGE</code>, <code>QUESTION_MESSAGE</code>, or
-	 *          <code>PLAIN_MESSAGE</code>
+	 *            an integer designating the kind of message this is; primarily
+	 *            used to determine the icon from the pluggable Look and Feel:
+	 *            <code>ERROR_MESSAGE</code>, <code>INFORMATION_MESSAGE</code>,
+	 *            <code>WARNING_MESSAGE</code>, <code>QUESTION_MESSAGE</code>,
+	 *            or <code>PLAIN_MESSAGE</code>
 	 * @return an integer indicating the option selected by the user
 	 * @exception HeadlessException
-	 *              if <code>GraphicsEnvironment.isHeadless</code> returns
-	 *              <code>true</code>
+	 *                if <code>GraphicsEnvironment.isHeadless</code> returns
+	 *                <code>true</code>
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
-	public static int showConfirmDialog(Component parentComponent,
-			Object message, String title, int optionType, int messageType) {
-		return showConfirmDialog(parentComponent, message, title, optionType,
-				messageType, null);
+	public static int showConfirmDialog(Component parentComponent, Object message, String title, int optionType,
+			int messageType) {
+		return showConfirmDialog(parentComponent, message, title, optionType, messageType, null);
 	}
 
 	/**
@@ -858,46 +864,46 @@ public class JOptionPane extends JComponent {
 	 * icon from the look and feel.
 	 * 
 	 * @param parentComponent
-	 *          determines the <code>Frame</code> in which the dialog is
-	 *          displayed; if <code>null</code>, or if the
-	 *          <code>parentComponent</code> has no <code>Frame</code>, a default
-	 *          <code>Frame</code> is used
+	 *            determines the <code>Frame</code> in which the dialog is
+	 *            displayed; if <code>null</code>, or if the
+	 *            <code>parentComponent</code> has no <code>Frame</code>, a
+	 *            default <code>Frame</code> is used
 	 * @param message
-	 *          the Object to display
+	 *            the Object to display
 	 * @param title
-	 *          the title string for the dialog
+	 *            the title string for the dialog
 	 * @param optionType
-	 *          an int designating the options available on the dialog:
-	 *          <code>YES_NO_OPTION</code>, <code>YES_NO_CANCEL_OPTION</code>, or
-	 *          <code>OK_CANCEL_OPTION</code>
+	 *            an int designating the options available on the dialog:
+	 *            <code>YES_NO_OPTION</code>, <code>YES_NO_CANCEL_OPTION</code>,
+	 *            or <code>OK_CANCEL_OPTION</code>
 	 * @param messageType
-	 *          an int designating the kind of message this is, primarily used to
-	 *          determine the icon from the pluggable Look and Feel:
-	 *          <code>ERROR_MESSAGE</code>, <code>INFORMATION_MESSAGE</code>,
-	 *          <code>WARNING_MESSAGE</code>, <code>QUESTION_MESSAGE</code>, or
-	 *          <code>PLAIN_MESSAGE</code>
+	 *            an int designating the kind of message this is, primarily used
+	 *            to determine the icon from the pluggable Look and Feel:
+	 *            <code>ERROR_MESSAGE</code>, <code>INFORMATION_MESSAGE</code>,
+	 *            <code>WARNING_MESSAGE</code>, <code>QUESTION_MESSAGE</code>,
+	 *            or <code>PLAIN_MESSAGE</code>
 	 * @param icon
-	 *          the icon to display in the dialog
+	 *            the icon to display in the dialog
 	 * @return an int indicating the option selected by the user
 	 * @exception HeadlessException
-	 *              if <code>GraphicsEnvironment.isHeadless</code> returns
-	 *              <code>true</code>
+	 *                if <code>GraphicsEnvironment.isHeadless</code> returns
+	 *                <code>true</code>
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
 	@SuppressWarnings("unused")
-	public static int showConfirmDialog(Component parentComponent,
-			Object message, String title, int optionType, int messageType, Icon icon) {
-		
-		String[] options = new String[] {"ok"};
+	public static int showConfirmDialog(Component parentComponent, Object message, String title, int optionType,
+			int messageType, Icon icon) {
+
+		String[] options = new String[] { "ok" };
 		switch (optionType) {
 		case OK_CANCEL_OPTION:
-			options = new String[] {"ok", "cancel"};
+			options = new String[] { "ok", "cancel" };
 			break;
 		case YES_NO_CANCEL_OPTION:
-			options = new String[] {"yes", "no", "cancel"};
+			options = new String[] { "yes", "no", "cancel" };
 			break;
 		case YES_NO_OPTION:
-			options = new String[] {"yes", "no"};
+			options = new String[] { "yes", "no" };
 			break;
 		}
 
@@ -907,21 +913,21 @@ public class JOptionPane extends JComponent {
 			if (!(message instanceof String)) {
 				warnJSDeveloper();
 				message = "?";
-			}			
+			}
 			jsReturn = JSUtil.confirm((String) message);
-			switch(optionType) {
+			switch (optionType) {
 			case OK_CANCEL_OPTION:
 			default:
 				return (jsReturn ? OK_OPTION : CANCEL_OPTION);
 			case YES_NO_CANCEL_OPTION:
-				return (jsReturn ? YES_OPTION : CANCEL_OPTION); // NO not avaiable here
+				return (jsReturn ? YES_OPTION : CANCEL_OPTION); // NO not
+																// avaiable here
 			case YES_NO_OPTION:
 				return (jsReturn ? YES_OPTION : NO_OPTION);
 			}
 		}
 
-		return showOptionDialog(parentComponent, message, title, optionType,
-			messageType, icon, null, null);
+		return showOptionDialog(parentComponent, message, title, optionType, messageType, icon, null, null);
 	}
 
 	/**
@@ -930,72 +936,71 @@ public class JOptionPane extends JComponent {
 	 * choices is determined by the <code>optionType</code> parameter.
 	 * <p>
 	 * If <code>optionType</code> is <code>YES_NO_OPTION</code>, or
-	 * <code>YES_NO_CANCEL_OPTION</code> and the <code>options</code> parameter is
-	 * <code>null</code>, then the options are supplied by the look and feel.
+	 * <code>YES_NO_CANCEL_OPTION</code> and the <code>options</code> parameter
+	 * is <code>null</code>, then the options are supplied by the look and feel.
 	 * <p>
 	 * The <code>messageType</code> parameter is primarily used to supply a
 	 * default icon from the look and feel.
 	 * 
 	 * @param parentComponent
-	 *          determines the <code>Frame</code> in which the dialog is
-	 *          displayed; if <code>null</code>, or if the
-	 *          <code>parentComponent</code> has no <code>Frame</code>, a default
-	 *          <code>Frame</code> is used
+	 *            determines the <code>Frame</code> in which the dialog is
+	 *            displayed; if <code>null</code>, or if the
+	 *            <code>parentComponent</code> has no <code>Frame</code>, a
+	 *            default <code>Frame</code> is used
 	 * @param message
-	 *          the <code>Object</code> to display
+	 *            the <code>Object</code> to display
 	 * @param title
-	 *          the title string for the dialog
+	 *            the title string for the dialog
 	 * @param optionType
-	 *          an integer designating the options available on the dialog:
-	 *          <code>DEFAULT_OPTION</code>, <code>YES_NO_OPTION</code>,
-	 *          <code>YES_NO_CANCEL_OPTION</code>, or
-	 *          <code>OK_CANCEL_OPTION</code>
+	 *            an integer designating the options available on the dialog:
+	 *            <code>DEFAULT_OPTION</code>, <code>YES_NO_OPTION</code>,
+	 *            <code>YES_NO_CANCEL_OPTION</code>, or
+	 *            <code>OK_CANCEL_OPTION</code>
 	 * @param messageType
-	 *          an integer designating the kind of message this is, primarily used
-	 *          to determine the icon from the pluggable Look and Feel:
-	 *          <code>ERROR_MESSAGE</code>, <code>INFORMATION_MESSAGE</code>,
-	 *          <code>WARNING_MESSAGE</code>, <code>QUESTION_MESSAGE</code>, or
-	 *          <code>PLAIN_MESSAGE</code>
+	 *            an integer designating the kind of message this is, primarily
+	 *            used to determine the icon from the pluggable Look and Feel:
+	 *            <code>ERROR_MESSAGE</code>, <code>INFORMATION_MESSAGE</code>,
+	 *            <code>WARNING_MESSAGE</code>, <code>QUESTION_MESSAGE</code>,
+	 *            or <code>PLAIN_MESSAGE</code>
 	 * @param icon
-	 *          the icon to display in the dialog
+	 *            the icon to display in the dialog
 	 * @param options
-	 *          an array of objects indicating the possible choices the user can
-	 *          make; if the objects are components, they are rendered properly;
-	 *          non-<code>String</code> objects are rendered using their
-	 *          <code>toString</code> methods; if this parameter is
-	 *          <code>null</code>, the options are determined by the Look and Feel
+	 *            an array of objects indicating the possible choices the user
+	 *            can make; if the objects are components, they are rendered
+	 *            properly; non-<code>String</code> objects are rendered using
+	 *            their <code>toString</code> methods; if this parameter is
+	 *            <code>null</code>, the options are determined by the Look and
+	 *            Feel
 	 * @param initialValue
-	 *          the object that represents the default selection for the dialog;
-	 *          only meaningful if <code>options</code> is used; can be
-	 *          <code>null</code>
+	 *            the object that represents the default selection for the
+	 *            dialog; only meaningful if <code>options</code> is used; can
+	 *            be <code>null</code>
 	 * @return an integer indicating the option chosen by the user, or
 	 *         <code>CLOSED_OPTION</code> if the user closed the dialog
 	 * @exception HeadlessException
-	 *              if <code>GraphicsEnvironment.isHeadless</code> returns
-	 *              <code>true</code>
+	 *                if <code>GraphicsEnvironment.isHeadless</code> returns
+	 *                <code>true</code>
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
-	public static int showOptionDialog(Component parentComponent, Object message,
-			String title, int optionType, int messageType, Icon icon,
-			Object[] options, Object initialValue) {
-		
+	public static int showOptionDialog(Component parentComponent, Object message, String title, int optionType,
+			int messageType, Icon icon, Object[] options, Object initialValue) {
+
 		if (!(parentComponent instanceof PropertyChangeListener)) {
 			warnJSDeveloper();
 			return CANCEL_OPTION;
 		}
 
-		JOptionPane pane = new JOptionPane(message, messageType, optionType, icon,
-				options, initialValue);
+		JOptionPane pane = new JOptionPane(message, messageType, optionType, icon, options, initialValue);
 		pane.setInitialValue(initialValue);
-		pane.setComponentOrientation(((parentComponent == null) ? getRootFrame()
-				: parentComponent).getComponentOrientation());
+		pane.setComponentOrientation(
+				((parentComponent == null) ? getRootFrame() : parentComponent).getComponentOrientation());
 
 		int style = styleFromMessageType(messageType);
 		JDialog dialog = pane.createDialog(parentComponent, title, style);
 		pane.selectInitialValue();
-		
-		dialog.setVisible(true);	// dialog.show() sets up infinite loop	
-		return JDialog.ASYNCHRONOUS_INTEGER;		
+
+		dialog.setVisible(true); // dialog.show() sets up infinite loop
+		return JDialog.ASYNCHRONOUS_INTEGER;
 	}
 
 	/**
@@ -1007,47 +1012,47 @@ public class JOptionPane extends JComponent {
 	 * <code>setResizable</code> on the <code>JDialog</code> instance to change
 	 * this property. The returned <code>JDialog</code> will be set up such that
 	 * once it is closed, or the user clicks on one of the buttons, the
-	 * optionpane's value property will be set accordingly and the dialog will be
-	 * closed. Each time the dialog is made visible, it will reset the option
+	 * optionpane's value property will be set accordingly and the dialog will
+	 * be closed. Each time the dialog is made visible, it will reset the option
 	 * pane's value property to <code>JOptionPane.UNINITIALIZED_VALUE</code> to
 	 * ensure the user's subsequent action closes the dialog properly.
 	 * 
 	 * @param parentComponent
-	 *          determines the frame in which the dialog is displayed; if the
-	 *          <code>parentComponent</code> has no <code>Frame</code>, a default
-	 *          <code>Frame</code> is used
+	 *            determines the frame in which the dialog is displayed; if the
+	 *            <code>parentComponent</code> has no <code>Frame</code>, a
+	 *            default <code>Frame</code> is used
 	 * @param title
-	 *          the title string for the dialog
+	 *            the title string for the dialog
 	 * @return a new <code>JDialog</code> containing this instance
 	 * @exception HeadlessException
-	 *              if <code>GraphicsEnvironment.isHeadless</code> returns
-	 *              <code>true</code>
+	 *                if <code>GraphicsEnvironment.isHeadless</code> returns
+	 *                <code>true</code>
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
 	public JDialog createDialog(Component parentComponent, String title) {
 		int style = styleFromMessageType(getMessageType());
-		disposeOnHide  = false;
+		disposeOnHide = false;
 		return createDialog(parentComponent, title, style);
 	}
 
 	/**
 	 * Creates and returns a new parentless <code>JDialog</code> with the
-	 * specified title. The returned <code>JDialog</code> will not be resizable by
-	 * the user, however programs can invoke <code>setResizable</code> on the
+	 * specified title. The returned <code>JDialog</code> will not be resizable
+	 * by the user, however programs can invoke <code>setResizable</code> on the
 	 * <code>JDialog</code> instance to change this property. The returned
 	 * <code>JDialog</code> will be set up such that once it is closed, or the
-	 * user clicks on one of the buttons, the optionpane's value property will be
-	 * set accordingly and the dialog will be closed. Each time the dialog is made
-	 * visible, it will reset the option pane's value property to
+	 * user clicks on one of the buttons, the optionpane's value property will
+	 * be set accordingly and the dialog will be closed. Each time the dialog is
+	 * made visible, it will reset the option pane's value property to
 	 * <code>JOptionPane.UNINITIALIZED_VALUE</code> to ensure the user's
 	 * subsequent action closes the dialog properly.
 	 * 
 	 * @param title
-	 *          the title string for the dialog
+	 *            the title string for the dialog
 	 * @return a new <code>JDialog</code> containing this instance
 	 * @exception HeadlessException
-	 *              if <code>GraphicsEnvironment.isHeadless</code> returns
-	 *              <code>true</code>
+	 *                if <code>GraphicsEnvironment.isHeadless</code> returns
+	 *                <code>true</code>
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 * @since 1.6
 	 */
@@ -1058,8 +1063,7 @@ public class JOptionPane extends JComponent {
 		return dialog;
 	}
 
-	private JDialog createDialog(Component parentComponent, String title,
-			int style) {
+	private JDialog createDialog(Component parentComponent, String title, int style) {
 
 		final JDialog dialog;
 
@@ -1078,19 +1082,17 @@ public class JOptionPane extends JComponent {
 		return dialog;
 	}
 
-	private void initDialog(final JDialog dialog, int style,
-			Component parentComponent) {
+	private void initDialog(final JDialog dialog, int style, Component parentComponent) {
 		dialog.setComponentOrientation(this.getComponentOrientation());
 		Container contentPane = dialog.getContentPane();
 
 		contentPane.setLayout(new BorderLayout());
-		
+
 		contentPane.add(this, BorderLayout.CENTER);
-		
+
 		dialog.setResizable(false);
 		if (JDialog.isDefaultLookAndFeelDecorated()) {
-			boolean supportsWindowDecorations = UIManager.getLookAndFeel()
-					.getSupportsWindowDecorations();
+			boolean supportsWindowDecorations = UIManager.getLookAndFeel().getSupportsWindowDecorations();
 			if (supportsWindowDecorations) {
 				dialog.setUndecorated(true);
 				getRootPane().setWindowDecorationStyle(style);
@@ -1103,12 +1105,12 @@ public class JOptionPane extends JComponent {
 
 			@Override
 			public void windowClosing(WindowEvent we) {
-				if (wantsInput) 
+				if (wantsInput)
 					setInputValue(null);
 				else
 					setValue(Integer.valueOf(CLOSED_OPTION));
 				if (disposeOnHide) {
-				  dialog.dispose();
+					dialog.dispose();
 				}
 			}
 
@@ -1131,15 +1133,16 @@ public class JOptionPane extends JComponent {
 			}
 		});
 		ensurePropertyChangeListener(this, parentComponent);
-		
+
 		addPropertyChangeListener(new PropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				// Let the defaultCloseOperation handle the closing
 				// if the user closed the window without selecting a button
 				// (newValue = null in that case). Otherwise, close the dialog.
-				if (dialog.isVisible() && event.getSource() == JOptionPane.this && (event.getPropertyName().equals(VALUE_PROPERTY)
-						|| event.getPropertyName().equals(INPUT_VALUE_PROPERTY))) {
+				if (dialog.isVisible() && event.getSource() == JOptionPane.this
+						&& (event.getPropertyName().equals(VALUE_PROPERTY)
+								|| event.getPropertyName().equals(INPUT_VALUE_PROPERTY))) {
 					Object value = event.getNewValue();
 					if (value != UNINITIALIZED_VALUE) {
 						dialog.setVisible(false);
@@ -1148,9 +1151,7 @@ public class JOptionPane extends JComponent {
 				}
 			}
 		});
-		
-		
-		
+
 	}
 
 	// /**
@@ -1188,12 +1189,11 @@ public class JOptionPane extends JComponent {
 	// * <code>QUESTION_MESSAGE</code>,
 	// * or <code>PLAIN_MESSAGE</code>
 	// */
-	// public static void showInternalMessageDialog(Component parentComponent,
-	// Object message, String title,
-	// int messageType) {
-	// showInternalMessageDialog(parentComponent, message, title,
-	// messageType,null);
-	// }
+	public static void showInternalMessageDialog(Component parentComponent, Object message, String title,
+			int messageType) {
+		showInternalMessageDialog(parentComponent, message, title, messageType, null);
+	}
+
 	//
 	// /**
 	// * Brings up an internal dialog panel displaying a message,
@@ -1214,13 +1214,11 @@ public class JOptionPane extends JComponent {
 	// * @param icon an icon to display in the dialog that helps the user
 	// * identify the kind of message that is being displayed
 	// */
-	// public static void showInternalMessageDialog(Component parentComponent,
-	// Object message,
-	// String title, int messageType,
-	// Icon icon){
-	// showInternalOptionDialog(parentComponent, message, title, DEFAULT_OPTION,
-	// messageType, icon, null, null);
-	// }
+	public static void showInternalMessageDialog(Component parentComponent, Object message, String title,
+			int messageType, Icon icon) {
+		showInternalOptionDialog(parentComponent, message, title, DEFAULT_OPTION, messageType, icon, null, null);
+	}
+
 	//
 	// /**
 	// * Brings up an internal dialog panel with the options <i>Yes</i>,
@@ -1234,12 +1232,11 @@ public class JOptionPane extends JComponent {
 	// * @param message the <code>Object</code> to display
 	// * @return an integer indicating the option selected by the user
 	// */
-	// public static int showInternalConfirmDialog(Component parentComponent,
-	// Object message) {
-	// return showInternalConfirmDialog(parentComponent, message,
-	// UIManager.getString("OptionPane.titleText"),
-	// YES_NO_CANCEL_OPTION);
-	// }
+	public static int showInternalConfirmDialog(Component parentComponent, Object message) {
+		return showInternalConfirmDialog(parentComponent, message, UIManager.getString("OptionPane.titleText"),
+				YES_NO_CANCEL_OPTION);
+	}
+
 	//
 	// /**
 	// * Brings up a internal dialog panel where the number of choices
@@ -1261,13 +1258,11 @@ public class JOptionPane extends JComponent {
 	// * or <code>YES_NO_CANCEL_OPTION</code>
 	// * @return an integer indicating the option selected by the user
 	// */
-	// public static int showInternalConfirmDialog(Component parentComponent,
-	// Object message, String title,
-	// int optionType) {
-	// return showInternalConfirmDialog(parentComponent, message, title,
-	// optionType,
-	// QUESTION_MESSAGE);
-	// }
+	public static int showInternalConfirmDialog(Component parentComponent, Object message, String title,
+			int optionType) {
+		return showInternalConfirmDialog(parentComponent, message, title, optionType, QUESTION_MESSAGE);
+	}
+
 	//
 	// /**
 	// * Brings up an internal dialog panel where the number of choices
@@ -1298,14 +1293,11 @@ public class JOptionPane extends JComponent {
 	// * or <code>PLAIN_MESSAGE</code>
 	// * @return an integer indicating the option selected by the user
 	// */
-	// public static int showInternalConfirmDialog(Component parentComponent,
-	// Object message,
-	// String title, int optionType,
-	// int messageType) {
-	// return showInternalConfirmDialog(parentComponent, message, title,
-	// optionType,
-	// messageType, null);
-	// }
+	public static int showInternalConfirmDialog(Component parentComponent, Object message, String title, int optionType,
+			int messageType) {
+		return showInternalConfirmDialog(parentComponent, message, title, optionType, messageType, null);
+	}
+
 	//
 	// /**
 	// * Brings up an internal dialog panel with a specified icon, where
@@ -1338,14 +1330,11 @@ public class JOptionPane extends JComponent {
 	// * @param icon the icon to display in the dialog
 	// * @return an integer indicating the option selected by the user
 	// */
-	// public static int showInternalConfirmDialog(Component parentComponent,
-	// Object message,
-	// String title, int optionType,
-	// int messageType, Icon icon) {
-	// return showInternalOptionDialog(parentComponent, message, title,
-	// optionType,
-	// messageType, icon, null, null);
-	// }
+	public static int showInternalConfirmDialog(Component parentComponent, Object message, String title, int optionType,
+			int messageType, Icon icon) {
+		return showInternalOptionDialog(parentComponent, message, title, optionType, messageType, icon, null, null);
+	}
+
 	//
 	// /**
 	// * Brings up an internal dialog panel with a specified icon, where
@@ -1394,85 +1383,78 @@ public class JOptionPane extends JComponent {
 	// * @return an integer indicating the option chosen by the user,
 	// * or <code>CLOSED_OPTION</code> if the user closed the Dialog
 	// */
-	// public static int showInternalOptionDialog(Component parentComponent,
-	// Object message,
-	// String title, int optionType,
-	// int messageType, Icon icon,
-	// Object[] options, Object initialValue) {
-	// JOptionPane pane = new JOptionPane(message, messageType,
-	// optionType, icon, options, initialValue);
-	// pane.putClientProperty(PopupFactory_FORCE_HEAVYWEIGHT_POPUP,
-	// Boolean.TRUE);
-	// // Component fo = KeyboardFocusManager.getCurrentKeyboardFocusManager().
-	// // getFocusOwner();
-	// //
-	// pane.setInitialValue(initialValue);
-	//
-	// JInternalFrame dialog =
-	// pane.createInternalFrame(parentComponent, title);
-	// pane.selectInitialValue();
-	// dialog.setVisible(true);
-	//
-	// /* Since all input will be blocked until this dialog is dismissed,
-	// * make sure its parent containers are visible first (this component
-	// * is tested below). This is necessary for JApplets, because
-	// * because an applet normally isn't made visible until after its
-	// * start() method returns -- if this method is called from start(),
-	// * the applet will appear to hang while an invisible modal frame
-	// * waits for input.
-	// */
-	// if (dialog.isVisible() && !dialog.isShowing()) {
-	// Container parent = dialog.getParent();
-	// while (parent != null) {
-	// if (parent.isVisible() == false) {
-	// parent.setVisible(true);
-	// }
-	// parent = parent.getParent();
-	// }
-	// }
-	//
-	// // Use reflection to get Container.startLWModal.
-	// try {
-	// Object obj;
-	// obj = AccessController.doPrivileged(new ModalPrivilegedAction(
-	// Container.class, "startLWModal"));
-	// if (obj != null) {
-	// ((Method)obj).invoke(dialog, (Object[])null);
-	// }
-	// } catch (IllegalAccessException ex) {
-	// } catch (IllegalArgumentException ex) {
-	// } catch (InvocationTargetException ex) {
-	// }
-	//
-	// if (parentComponent instanceof JInternalFrame) {
-	// try {
-	// ((JInternalFrame)parentComponent).setSelected(true);
-	// } catch (java.beans.PropertyVetoException e) {
-	// }
-	// }
-	//
-	// Object selectedValue = pane.getValue();
-	//
-	// if (fo != null && fo.isShowing()) {
-	// fo.requestFocus();
-	// }
-	// if (selectedValue == null) {
-	// return CLOSED_OPTION;
-	// }
-	// if (options == null) {
-	// if (selectedValue instanceof Integer) {
-	// return ((Integer)selectedValue).intValue();
-	// }
-	// return CLOSED_OPTION;
-	// }
-	// for(int counter = 0, maxCounter = options.length;
-	// counter < maxCounter; counter++) {
-	// if (options[counter].equals(selectedValue)) {
-	// return counter;
-	// }
-	// }
-	// return CLOSED_OPTION;
-	// }
+	public static int showInternalOptionDialog(Component parentComponent, Object message, String title, int optionType,
+			int messageType, Icon icon, Object[] options, Object initialValue) {
+		JOptionPane pane = new JOptionPane(message, messageType, optionType, icon, options, initialValue);
+		pane.putClientProperty(ClientPropertyKey.PopupFactory_FORCE_HEAVYWEIGHT_POPUP, Boolean.TRUE);
+		Component fo = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+		//
+		pane.setInitialValue(initialValue);
+
+		JInternalFrame dialog = pane.createInternalFrame(parentComponent, title);
+		pane.selectInitialValue();
+		dialog.setVisible(true);
+
+		/*
+		 * Since all input will be blocked until this dialog is dismissed, make
+		 * sure its parent containers are visible first (this component is
+		 * tested below). This is necessary for JApplets, because because an
+		 * applet normally isn't made visible until after its start() method
+		 * returns -- if this method is called from start(), the applet will
+		 * appear to hang while an invisible modal frame waits for input.
+		 */
+		if (dialog.isVisible() && !dialog.isShowing()) {
+			Container parent = dialog.getParent();
+			while (parent != null) {
+				if (parent.isVisible() == false) {
+					parent.setVisible(true);
+				}
+				parent = parent.getParent();
+			}
+		}
+
+		// // Use reflection to get Container.startLWModal.
+		// try {
+		// Object obj;
+		// obj = AccessController.doPrivileged(new ModalPrivilegedAction(
+		// Container.class, "startLWModal"));
+		// if (obj != null) {
+		// ((Method)obj).invoke(dialog, (Object[])null);
+		// }
+		// } catch (IllegalAccessException ex) {
+		// } catch (IllegalArgumentException ex) {
+		// } catch (InvocationTargetException ex) {
+		// }
+
+		if (parentComponent instanceof JInternalFrame) {
+			try {
+				((JInternalFrame) parentComponent).setSelected(true);
+			} catch (java.beans.PropertyVetoException e) {
+			}
+		}
+
+		Object selectedValue = pane.getValue();
+
+		if (fo != null && fo.isShowing()) {
+			fo.requestFocus();
+		}
+		if (selectedValue == null) {
+			return CLOSED_OPTION;
+		}
+		if (options == null) {
+			if (selectedValue instanceof Integer) {
+				return ((Integer) selectedValue).intValue();
+			}
+			return CLOSED_OPTION;
+		}
+		for (int counter = 0, maxCounter = options.length; counter < maxCounter; counter++) {
+			if (options[counter].equals(selectedValue)) {
+				return counter;
+			}
+		}
+		return CLOSED_OPTION;
+	}
+
 	//
 	// /**
 	// * Shows an internal question-message dialog requesting input from
@@ -1484,12 +1466,11 @@ public class JOptionPane extends JComponent {
 	// * for the dialog
 	// * @param message the <code>Object</code> to display
 	// */
-	// public static String showInternalInputDialog(Component parentComponent,
-	// Object message) {
-	// return showInternalInputDialog(parentComponent, message, UIManager.
-	// getString("OptionPane.inputDialogTitle", parentComponent),
-	// QUESTION_MESSAGE);
-	// }
+	public static String showInternalInputDialog(Component parentComponent, Object message) {
+		return showInternalInputDialog(parentComponent, message,
+				UIManager.getString("OptionPane.inputDialogTitle", parentComponent), QUESTION_MESSAGE);
+	}
+
 	//
 	// /**
 	// * Shows an internal dialog requesting input from the user parented
@@ -1504,11 +1485,11 @@ public class JOptionPane extends JComponent {
 	// * ERROR_MESSAGE, INFORMATION_MESSAGE, WARNING_MESSAGE,
 	// * QUESTION_MESSAGE, or PLAIN_MESSAGE
 	// */
-	// public static String showInternalInputDialog(Component parentComponent,
-	// Object message, String title, int messageType) {
-	// return (String)showInternalInputDialog(parentComponent, message, title,
-	// messageType, null, null, null);
-	// }
+	public static String showInternalInputDialog(Component parentComponent, Object message, String title,
+			int messageType) {
+		return (String) showInternalInputDialog(parentComponent, message, title, messageType, null, null, null);
+	}
+
 	//
 	// /**
 	// * Prompts the user for input in a blocking internal dialog where
@@ -1539,74 +1520,72 @@ public class JOptionPane extends JComponent {
 	// * @return user's input, or <code>null</code> meaning the user
 	// * canceled the input
 	// */
-	// public static Object showInternalInputDialog(Component parentComponent,
-	// Object message, String title, int messageType, Icon icon,
-	// Object[] selectionValues, Object initialSelectionValue) {
-	// JOptionPane pane = new JOptionPane(message, messageType,
-	// OK_CANCEL_OPTION, icon, null, null);
-	// pane.putClientProperty(PopupFactory_FORCE_HEAVYWEIGHT_POPUP,
-	// Boolean.TRUE);
-	// Component fo = KeyboardFocusManager.getCurrentKeyboardFocusManager().
-	// getFocusOwner();
-	//
-	// pane.setWantsInput(true);
-	// pane.setSelectionValues(selectionValues);
-	// pane.setInitialSelectionValue(initialSelectionValue);
-	//
-	// JInternalFrame dialog =
-	// pane.createInternalFrame(parentComponent, title);
-	//
-	// pane.selectInitialValue();
-	// dialog.setVisible(true);
-	//
-	// /* Since all input will be blocked until this dialog is dismissed,
-	// * make sure its parent containers are visible first (this component
-	// * is tested below). This is necessary for JApplets, because
-	// * because an applet normally isn't made visible until after its
-	// * start() method returns -- if this method is called from start(),
-	// * the applet will appear to hang while an invisible modal frame
-	// * waits for input.
-	// */
-	// if (dialog.isVisible() && !dialog.isShowing()) {
-	// Container parent = dialog.getParent();
-	// while (parent != null) {
-	// if (parent.isVisible() == false) {
-	// parent.setVisible(true);
-	// }
-	// parent = parent.getParent();
-	// }
-	// }
-	//
-	// // Use reflection to get Container.startLWModal.
-	// try {
-	// Object obj;
-	// obj = AccessController.doPrivileged(new ModalPrivilegedAction(
-	// Container.class, "startLWModal"));
-	// if (obj != null) {
-	// ((Method)obj).invoke(dialog, (Object[])null);
-	// }
-	// } catch (IllegalAccessException ex) {
-	// } catch (IllegalArgumentException ex) {
-	// } catch (InvocationTargetException ex) {
-	// }
-	//
-	// if (parentComponent instanceof JInternalFrame) {
-	// try {
-	// ((JInternalFrame)parentComponent).setSelected(true);
-	// } catch (java.beans.PropertyVetoException e) {
-	// }
-	// }
-	//
-	// if (fo != null && fo.isShowing()) {
-	// fo.requestFocus();
-	// }
-	// Object value = pane.getInputValue();
-	//
-	// if (value == UNINITIALIZED_VALUE) {
-	// return null;
-	// }
-	// return value;
-	// }
+	public static Object showInternalInputDialog(Component parentComponent, Object message, String title,
+			int messageType, Icon icon, Object[] selectionValues, Object initialSelectionValue) {
+		JOptionPane pane = new JOptionPane(message, messageType, OK_CANCEL_OPTION, icon, null, null);
+		pane.putClientProperty(ClientPropertyKey.PopupFactory_FORCE_HEAVYWEIGHT_POPUP, Boolean.TRUE);
+		Component fo = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+
+		pane.setWantsInput(true);
+		pane.setSelectionValues(selectionValues);
+		pane.setInitialSelectionValue(initialSelectionValue);
+
+		JInternalFrame dialog = pane.createInternalFrame(parentComponent, title);
+
+		pane.selectInitialValue();
+		dialog.setVisible(true);
+
+		/*
+		 * Since all input will be blocked until this dialog is dismissed, make
+		 * sure its parent containers are visible first (this component is
+		 * tested below). This is necessary for JApplets, because because an
+		 * applet normally isn't made visible until after its start() method
+		 * returns -- if this method is called from start(), the applet will
+		 * appear to hang while an invisible modal frame waits for input.
+		 */
+		if (dialog.isVisible() && !dialog.isShowing()) {
+			Container parent = dialog.getParent();
+			while (parent != null) {
+				if (parent.isVisible() == false) {
+					parent.setVisible(true);
+				}
+				parent = parent.getParent();
+			}
+		}
+
+		dialog.show();
+
+		// // Use reflection to get Container.startLWModal.
+		// try {
+		// Object obj;
+		// obj = AccessController.doPrivileged(new ModalPrivilegedAction(
+		// Container.class, "startLWModal"));
+		// if (obj != null) {
+		// ((Method)obj).invoke(dialog, (Object[])null);
+		// }
+		// } catch (IllegalAccessException ex) {
+		// } catch (IllegalArgumentException ex) {
+		// } catch (InvocationTargetException ex) {
+		// }
+		//
+		if (parentComponent instanceof JInternalFrame) {
+			try {
+				((JInternalFrame) parentComponent).setSelected(true);
+			} catch (java.beans.PropertyVetoException e) {
+			}
+		}
+
+		if (fo != null && fo.isShowing()) {
+			fo.requestFocus();
+		}
+		Object value = pane.getInputValue();
+
+		if (value == UNINITIALIZED_VALUE) {
+			return null;
+		}
+		return value;
+	}
+
 	//
 	// /**
 	// * Creates and returns an instance of <code>JInternalFrame</code>.
@@ -1628,97 +1607,88 @@ public class JOptionPane extends JComponent {
 	// * @exception RuntimeException if <code>parentComponent</code> does
 	// * not have a valid parent
 	// */
-	// public JInternalFrame createInternalFrame(Component parentComponent,
-	// String title) {
-	// Container parent =
-	// JOptionPane.getDesktopPaneForComponent(parentComponent);
-	//
-	// if (parent == null && (parentComponent == null ||
-	// (parent = parentComponent.getParent()) == null)) {
-	// throw new RuntimeException("JOptionPane: parentComponent does " +
-	// "not have a valid parent");
-	// }
-	//
-	// // Option dialogs should be closable only
-	// final JInternalFrame iFrame = new JInternalFrame(title, false, true,
-	// false, false);
-	//
-	// iFrame.putClientProperty("JInternalFrame.frameType", "optionDialog");
-	// iFrame.putClientProperty("JInternalFrame.messageType",
-	// new Integer(getMessageType()));
-	//
-	// iFrame.addInternalFrameListener(new InternalFrameAdapter() {
-	// public void internalFrameClosing(InternalFrameEvent e) {
-	// if (getValue() == UNINITIALIZED_VALUE) {
-	// setValue(null);
-	// }
-	// }
-	// });
-	// addPropertyChangeListener(new PropertyChangeListener() {
-	// public void propertyChange(PropertyChangeEvent event) {
-	// // Let the defaultCloseOperation handle the closing
-	// // if the user closed the iframe without selecting a button
-	// // (newValue = null in that case). Otherwise, close the dialog.
-	// if (iFrame.isVisible() &&
-	// event.getSource() == JOptionPane.this &&
-	// event.getPropertyName().equals(VALUE_PROPERTY)) {
-	// // Use reflection to get Container.stopLWModal().
-	// try {
-	// Object obj;
-	// obj = AccessController.doPrivileged(
-	// new ModalPrivilegedAction(
-	// Container.class, "stopLWModal"));
-	// if (obj != null) {
-	// ((Method)obj).invoke(iFrame, (Object[])null);
-	// }
-	// } catch (IllegalAccessException ex) {
-	// } catch (IllegalArgumentException ex) {
-	// } catch (InvocationTargetException ex) {
-	// }
-	//
-	// try {
-	// iFrame.setClosed(true);
-	// }
-	// catch (java.beans.PropertyVetoException e) {
-	// }
-	//
-	// iFrame.setVisible(false);
-	// }
-	// }
-	// });
-	// iFrame.getContentPane().add(this, BorderLayout.CENTER);
-	// if (parent instanceof JDesktopPane) {
-	// parent.add(iFrame, JLayeredPane.MODAL_LAYER);
-	// } else {
-	// parent.add(iFrame, BorderLayout.CENTER);
-	// }
-	// Dimension iFrameSize = iFrame.getPreferredSize();
-	// Dimension rootSize = parent.getSize();
-	// Dimension parentSize = parentComponent.getSize();
-	//
-	// iFrame.setBounds((rootSize.width - iFrameSize.width) / 2,
-	// (rootSize.height - iFrameSize.height) / 2,
-	// iFrameSize.width, iFrameSize.height);
-	// // We want dialog centered relative to its parent component
-	// Point iFrameCoord =
-	// SwingUtilities.convertPoint(parentComponent, 0, 0, parent);
-	// int x = (parentSize.width - iFrameSize.width) / 2 + iFrameCoord.x;
-	// int y = (parentSize.height - iFrameSize.height) / 2 + iFrameCoord.y;
-	//
-	// // If possible, dialog should be fully visible
-	// int ovrx = x + iFrameSize.width - rootSize.width;
-	// int ovry = y + iFrameSize.height - rootSize.height;
-	// x = Math.max((ovrx > 0? x - ovrx: x), 0);
-	// y = Math.max((ovry > 0? y - ovry: y), 0);
-	// iFrame.setBounds(x, y, iFrameSize.width, iFrameSize.height);
-	//
-	// parent.validate();
-	// try {
-	// iFrame.setSelected(true);
-	// } catch (java.beans.PropertyVetoException e) {}
-	//
-	// return iFrame;
-	// }
+	public JInternalFrame createInternalFrame(Component parentComponent, String title) {
+		Container parent = JOptionPane.getDesktopPaneForComponent(parentComponent);
+
+		if (parent == null && (parentComponent == null || (parent = parentComponent.getParent()) == null)) {
+			throw new RuntimeException("JOptionPane: parentComponent does " + "not have a valid parent");
+		}
+
+		// Option dialogs should be closable only
+		final JInternalFrame iFrame = new JInternalFrame(title, false, true, false, false);
+
+		iFrame.putClientProperty("JInternalFrame.frameType", "optionDialog");
+		iFrame.putClientProperty("JInternalFrame.messageType", new Integer(getMessageType()));
+
+		iFrame.addInternalFrameListener(new InternalFrameAdapter() {
+			public void internalFrameClosing(InternalFrameEvent e) {
+				if (getValue() == UNINITIALIZED_VALUE) {
+					setValue(null);
+				}
+			}
+		});
+		addPropertyChangeListener(new PropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				// Let the defaultCloseOperation handle the closing
+				// if the user closed the iframe without selecting a button
+				// (newValue = null in that case). Otherwise, close the dialog.
+				if (iFrame.isVisible() && event.getSource() == JOptionPane.this
+						&& event.getPropertyName().equals(VALUE_PROPERTY)) {
+					// Use reflection to get Container.stopLWModal().
+					// try {
+					// Object obj;
+					// obj = AccessController.doPrivileged(
+					// new ModalPrivilegedAction(
+					// Container.class, "stopLWModal"));
+					// if (obj != null) {
+					// ((Method)obj).invoke(iFrame, (Object[])null);
+					// }
+					// } catch (IllegalAccessException ex) {
+					// } catch (IllegalArgumentException ex) {
+					// } catch (InvocationTargetException ex) {
+					// }
+
+					try {
+						iFrame.setClosed(true);
+					} catch (java.beans.PropertyVetoException e) {
+					}
+
+					iFrame.setVisible(false);
+				}
+			}
+		});
+		iFrame.getContentPane().add(this, BorderLayout.CENTER);
+		if (parent instanceof JDesktopPane) {
+			parent.add(iFrame, JLayeredPane.MODAL_LAYER);
+		} else {
+			parent.add(iFrame, BorderLayout.CENTER);
+		}
+		Dimension iFrameSize = iFrame.getPreferredSize();
+		Dimension rootSize = parent.getSize();
+		Dimension parentSize = parentComponent.getSize();
+
+		iFrame.setBounds((rootSize.width - iFrameSize.width) / 2, (rootSize.height - iFrameSize.height) / 2,
+				iFrameSize.width, iFrameSize.height);
+		// We want dialog centered relative to its parent component
+		Point iFrameCoord = SwingUtilities.convertPoint(parentComponent, 0, 0, parent);
+		int x = (parentSize.width - iFrameSize.width) / 2 + iFrameCoord.x;
+		int y = (parentSize.height - iFrameSize.height) / 2 + iFrameCoord.y;
+
+		// If possible, dialog should be fully visible
+		int ovrx = x + iFrameSize.width - rootSize.width;
+		int ovry = y + iFrameSize.height - rootSize.height;
+		x = Math.max((ovrx > 0 ? x - ovrx : x), 0);
+		y = Math.max((ovry > 0 ? y - ovry : y), 0);
+		iFrame.setBounds(x, y, iFrameSize.width, iFrameSize.height);
+
+		parent.validate();
+		try {
+			iFrame.setSelected(true);
+		} catch (java.beans.PropertyVetoException e) {
+		}
+
+		return iFrame;
+	}
 
 	protected int getReturnIndex(Object value) {
 		Object selectedValue = getValue();
@@ -1748,13 +1718,13 @@ public class JOptionPane extends JComponent {
 	 * Returns the specified component's <code>Frame</code>.
 	 * 
 	 * @param parentComponent
-	 *          the <code>Component</code> to check for a <code>Frame</code>
+	 *            the <code>Component</code> to check for a <code>Frame</code>
 	 * @return the <code>Frame</code> that contains the component, or
-	 *         <code>getRootFrame</code> if the component is <code>null</code>, or
-	 *         does not have a valid <code>Frame</code> parent
+	 *         <code>getRootFrame</code> if the component is <code>null</code>,
+	 *         or does not have a valid <code>Frame</code> parent
 	 * @exception HeadlessException
-	 *              if <code>GraphicsEnvironment.isHeadless</code> returns
-	 *              <code>true</code>
+	 *                if <code>GraphicsEnvironment.isHeadless</code> returns
+	 *                <code>true</code>
 	 * @see #getRootFrame
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
@@ -1771,15 +1741,15 @@ public class JOptionPane extends JComponent {
 	 * <code>Dialog</code>.
 	 * 
 	 * @param parentComponent
-	 *          the <code>Component</code> to check for a <code>Frame</code> or
-	 *          <code>Dialog</code>
+	 *            the <code>Component</code> to check for a <code>Frame</code>
+	 *            or <code>Dialog</code>
 	 * @return the <code>Frame</code> or <code>Dialog</code> that contains the
 	 *         component, or the default frame if the component is
 	 *         <code>null</code>, or does not have a valid <code>Frame</code> or
 	 *         <code>Dialog</code> parent
 	 * @exception HeadlessException
-	 *              if <code>GraphicsEnvironment.isHeadless</code> returns
-	 *              <code>true</code>
+	 *                if <code>GraphicsEnvironment.isHeadless</code> returns
+	 *                <code>true</code>
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
 	static Window getWindowForComponent(Component parentComponent) {
@@ -1800,25 +1770,25 @@ public class JOptionPane extends JComponent {
 	// * or does not have an ancestor that is a
 	// * <code>JInternalFrame</code>
 	// */
-	// public static JDesktopPane getDesktopPaneForComponent(Component
-	// parentComponent) {
-	// if(parentComponent == null)
-	// return null;
-	// if(parentComponent instanceof JDesktopPane)
-	// return (JDesktopPane)parentComponent;
-	// return getDesktopPaneForComponent(parentComponent.getParent());
-	// }
+	public static JDesktopPane getDesktopPaneForComponent(Component parentComponent) {
+		if (parentComponent == null)
+			return null;
+		if (parentComponent instanceof JDesktopPane)
+			return (JDesktopPane) parentComponent;
+		return getDesktopPaneForComponent(parentComponent.getParent());
+	}
+
 	//
 	private static final Object sharedFrameKey = JOptionPane.class;
 
 	/**
 	 * Sets the frame to use for class methods in which a frame is not provided.
 	 * <p>
-	 * <strong>Note:</strong> It is recommended that rather than using this method
-	 * you supply a valid parent.
+	 * <strong>Note:</strong> It is recommended that rather than using this
+	 * method you supply a valid parent.
 	 * 
 	 * @param newRootFrame
-	 *          the default <code>Frame</code> to use
+	 *            the default <code>Frame</code> to use
 	 */
 	public static void setRootFrame(Frame newRootFrame) {
 		if (newRootFrame != null) {
@@ -1834,8 +1804,8 @@ public class JOptionPane extends JComponent {
 	 * 
 	 * @return the default <code>Frame</code> to use
 	 * @exception HeadlessException
-	 *              if <code>GraphicsEnvironment.isHeadless</code> returns
-	 *              <code>true</code>
+	 *                if <code>GraphicsEnvironment.isHeadless</code> returns
+	 *                <code>true</code>
 	 * @see #setRootFrame
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
@@ -1857,10 +1827,11 @@ public class JOptionPane extends JComponent {
 
 	/**
 	 * Creates a instance of <code>JOptionPane</code> to display a message using
-	 * the plain-message message type and the default options delivered by the UI.
+	 * the plain-message message type and the default options delivered by the
+	 * UI.
 	 * 
 	 * @param message
-	 *          the <code>Object</code> to display
+	 *            the <code>Object</code> to display
 	 */
 	public JOptionPane(Object message) {
 		this(message, PLAIN_MESSAGE);
@@ -1871,11 +1842,12 @@ public class JOptionPane extends JComponent {
 	 * the specified message type and the default options,
 	 * 
 	 * @param message
-	 *          the <code>Object</code> to display
+	 *            the <code>Object</code> to display
 	 * @param messageType
-	 *          the type of message to be displayed: <code>ERROR_MESSAGE</code>,
-	 *          <code>INFORMATION_MESSAGE</code>, <code>WARNING_MESSAGE</code>,
-	 *          <code>QUESTION_MESSAGE</code>, or <code>PLAIN_MESSAGE</code>
+	 *            the type of message to be displayed:
+	 *            <code>ERROR_MESSAGE</code>, <code>INFORMATION_MESSAGE</code>,
+	 *            <code>WARNING_MESSAGE</code>, <code>QUESTION_MESSAGE</code>,
+	 *            or <code>PLAIN_MESSAGE</code>
 	 */
 	public JOptionPane(Object message, int messageType) {
 		this(message, messageType, DEFAULT_OPTION);
@@ -1886,15 +1858,17 @@ public class JOptionPane extends JComponent {
 	 * the specified message type and options.
 	 * 
 	 * @param message
-	 *          the <code>Object</code> to display
+	 *            the <code>Object</code> to display
 	 * @param messageType
-	 *          the type of message to be displayed: <code>ERROR_MESSAGE</code>,
-	 *          <code>INFORMATION_MESSAGE</code>, <code>WARNING_MESSAGE</code>,
-	 *          <code>QUESTION_MESSAGE</code>, or <code>PLAIN_MESSAGE</code>
+	 *            the type of message to be displayed:
+	 *            <code>ERROR_MESSAGE</code>, <code>INFORMATION_MESSAGE</code>,
+	 *            <code>WARNING_MESSAGE</code>, <code>QUESTION_MESSAGE</code>,
+	 *            or <code>PLAIN_MESSAGE</code>
 	 * @param optionType
-	 *          the options to display in the pane: <code>DEFAULT_OPTION</code>,
-	 *          <code>YES_NO_OPTION</code>, <code>YES_NO_CANCEL_OPTION</code>,
-	 *          <code>OK_CANCEL_OPTION</code>
+	 *            the options to display in the pane:
+	 *            <code>DEFAULT_OPTION</code>, <code>YES_NO_OPTION</code>,
+	 *            <code>YES_NO_CANCEL_OPTION</code>,
+	 *            <code>OK_CANCEL_OPTION</code>
 	 */
 	public JOptionPane(Object message, int messageType, int optionType) {
 		this(message, messageType, optionType, null);
@@ -1905,17 +1879,19 @@ public class JOptionPane extends JComponent {
 	 * the specified message type, options, and icon.
 	 * 
 	 * @param message
-	 *          the <code>Object</code> to display
+	 *            the <code>Object</code> to display
 	 * @param messageType
-	 *          the type of message to be displayed: <code>ERROR_MESSAGE</code>,
-	 *          <code>INFORMATION_MESSAGE</code>, <code>WARNING_MESSAGE</code>,
-	 *          <code>QUESTION_MESSAGE</code>, or <code>PLAIN_MESSAGE</code>
+	 *            the type of message to be displayed:
+	 *            <code>ERROR_MESSAGE</code>, <code>INFORMATION_MESSAGE</code>,
+	 *            <code>WARNING_MESSAGE</code>, <code>QUESTION_MESSAGE</code>,
+	 *            or <code>PLAIN_MESSAGE</code>
 	 * @param optionType
-	 *          the options to display in the pane: <code>DEFAULT_OPTION</code>,
-	 *          <code>YES_NO_OPTION</code>, <code>YES_NO_CANCEL_OPTION</code>,
-	 *          <code>OK_CANCEL_OPTION</code>
+	 *            the options to display in the pane:
+	 *            <code>DEFAULT_OPTION</code>, <code>YES_NO_OPTION</code>,
+	 *            <code>YES_NO_CANCEL_OPTION</code>,
+	 *            <code>OK_CANCEL_OPTION</code>
 	 * @param icon
-	 *          the <code>Icon</code> image to display
+	 *            the <code>Icon</code> image to display
 	 */
 	public JOptionPane(Object message, int messageType, int optionType, Icon icon) {
 		this(message, messageType, optionType, icon, null);
@@ -1927,58 +1903,61 @@ public class JOptionPane extends JComponent {
 	 * initially selected.
 	 * <p>
 	 * The options objects should contain either instances of
-	 * <code>Component</code>s, (which are added directly) or <code>Strings</code>
-	 * (which are wrapped in a <code>JButton</code>). If you provide
-	 * <code>Component</code>s, you must ensure that when the
-	 * <code>Component</code> is clicked it messages <code>setValue</code> in the
-	 * created <code>JOptionPane</code>.
+	 * <code>Component</code>s, (which are added directly) or
+	 * <code>Strings</code> (which are wrapped in a <code>JButton</code>). If
+	 * you provide <code>Component</code>s, you must ensure that when the
+	 * <code>Component</code> is clicked it messages <code>setValue</code> in
+	 * the created <code>JOptionPane</code>.
 	 * 
 	 * @param message
-	 *          the <code>Object</code> to display
+	 *            the <code>Object</code> to display
 	 * @param messageType
-	 *          the type of message to be displayed: <code>ERROR_MESSAGE</code>,
-	 *          <code>INFORMATION_MESSAGE</code>, <code>WARNING_MESSAGE</code>,
-	 *          <code>QUESTION_MESSAGE</code>, or <code>PLAIN_MESSAGE</code>
+	 *            the type of message to be displayed:
+	 *            <code>ERROR_MESSAGE</code>, <code>INFORMATION_MESSAGE</code>,
+	 *            <code>WARNING_MESSAGE</code>, <code>QUESTION_MESSAGE</code>,
+	 *            or <code>PLAIN_MESSAGE</code>
 	 * @param optionType
-	 *          the options to display in the pane: <code>DEFAULT_OPTION</code>,
-	 *          <code>YES_NO_OPTION</code>, <code>YES_NO_CANCEL_OPTION</code>,
-	 *          <code>OK_CANCEL_OPTION</code>
+	 *            the options to display in the pane:
+	 *            <code>DEFAULT_OPTION</code>, <code>YES_NO_OPTION</code>,
+	 *            <code>YES_NO_CANCEL_OPTION</code>,
+	 *            <code>OK_CANCEL_OPTION</code>
 	 * @param icon
-	 *          the <code>Icon</code> image to display
+	 *            the <code>Icon</code> image to display
 	 * @param options
-	 *          the choices the user can select
+	 *            the choices the user can select
 	 */
-	public JOptionPane(Object message, int messageType, int optionType,
-			Icon icon, Object[] options) {
+	public JOptionPane(Object message, int messageType, int optionType, Icon icon, Object[] options) {
 		this(message, messageType, optionType, icon, options, null);
 	}
 
 	/**
 	 * Creates an instance of <code>JOptionPane</code> to display a message with
-	 * the specified message type, icon, and options, with the initially-selected
-	 * option specified.
+	 * the specified message type, icon, and options, with the
+	 * initially-selected option specified.
 	 * 
 	 * @param message
-	 *          the <code>Object</code> to display
+	 *            the <code>Object</code> to display
 	 * @param messageType
-	 *          the type of message to be displayed: <code>ERROR_MESSAGE</code>,
-	 *          <code>INFORMATION_MESSAGE</code>, <code>WARNING_MESSAGE</code>,
-	 *          <code>QUESTION_MESSAGE</code>, or <code>PLAIN_MESSAGE</code>
+	 *            the type of message to be displayed:
+	 *            <code>ERROR_MESSAGE</code>, <code>INFORMATION_MESSAGE</code>,
+	 *            <code>WARNING_MESSAGE</code>, <code>QUESTION_MESSAGE</code>,
+	 *            or <code>PLAIN_MESSAGE</code>
 	 * @param optionType
-	 *          the options to display in the pane: <code>DEFAULT_OPTION</code>,
-	 *          <code>YES_NO_OPTION</code>, <code>YES_NO_CANCEL_OPTION</code>,
-	 *          <code>OK_CANCEL_OPTION</code>
+	 *            the options to display in the pane:
+	 *            <code>DEFAULT_OPTION</code>, <code>YES_NO_OPTION</code>,
+	 *            <code>YES_NO_CANCEL_OPTION</code>,
+	 *            <code>OK_CANCEL_OPTION</code>
 	 * @param icon
-	 *          the Icon image to display
+	 *            the Icon image to display
 	 * @param options
-	 *          the choices the user can select
+	 *            the choices the user can select
 	 * @param initialValue
-	 *          the choice that is initially selected; if <code>null</code>, then
-	 *          nothing will be initially selected; only meaningful if
-	 *          <code>options</code> is used
+	 *            the choice that is initially selected; if <code>null</code>,
+	 *            then nothing will be initially selected; only meaningful if
+	 *            <code>options</code> is used
 	 */
-	public JOptionPane(Object message, int messageType, int optionType,
-			Icon icon, Object[] options, Object initialValue) {
+	public JOptionPane(Object message, int messageType, int optionType, Icon icon, Object[] options,
+			Object initialValue) {
 
 		this.message = message;
 		this.options = options;
@@ -1996,7 +1975,7 @@ public class JOptionPane extends JComponent {
 	 * Sets the UI object which implements the L&F for this component.
 	 * 
 	 * @param ui
-	 *          the <code>OptionPaneUI</code> L&F object
+	 *            the <code>OptionPaneUI</code> L&F object
 	 * @see UIDefaults#getUI
 	 * @beaninfo bound: true hidden: true description: The UI object that
 	 *           implements the optionpane's LookAndFeel
@@ -2012,11 +1991,11 @@ public class JOptionPane extends JComponent {
 	 * Sets the option pane's message-object.
 	 * 
 	 * @param newMessage
-	 *          the <code>Object</code> to display
+	 *            the <code>Object</code> to display
 	 * @see #getMessage
 	 * 
-	 * @beaninfo preferred: true bound: true description: The optionpane's message
-	 *           object.
+	 * @beaninfo preferred: true bound: true description: The optionpane's
+	 *           message object.
 	 */
 	public void setMessage(Object newMessage) {
 		Object oldMessage = message;
@@ -2037,11 +2016,11 @@ public class JOptionPane extends JComponent {
 	}
 
 	/**
-	 * Sets the icon to display. If non-<code>null</code>, the look and feel does
-	 * not provide an icon.
+	 * Sets the icon to display. If non-<code>null</code>, the look and feel
+	 * does not provide an icon.
 	 * 
 	 * @param newIcon
-	 *          the <code>Icon</code> to display
+	 *            the <code>Icon</code> to display
 	 * 
 	 * @see #getIcon
 	 * @beaninfo preferred: true bound: true description: The option pane's type
@@ -2069,11 +2048,11 @@ public class JOptionPane extends JComponent {
 	 * Sets the value the user has chosen.
 	 * 
 	 * @param newValue
-	 *          the chosen value
+	 *            the chosen value
 	 * 
 	 * @see #getValue
-	 * @beaninfo preferred: true bound: true description: The option pane's value
-	 *           object.
+	 * @beaninfo preferred: true bound: true description: The option pane's
+	 *           value object.
 	 */
 	public void setValue(Object newValue) {
 		Object oldValue = value;
@@ -2089,8 +2068,8 @@ public class JOptionPane extends JComponent {
 	 * 
 	 * @return the <code>Object</code> chosen by the user,
 	 *         <code>UNINITIALIZED_VALUE</code> if the user has not yet made a
-	 *         choice, or <code>null</code> if the user closed the window without
-	 *         making a choice
+	 *         choice, or <code>null</code> if the user closed the window
+	 *         without making a choice
 	 * 
 	 * @see #setValue
 	 */
@@ -2100,13 +2079,13 @@ public class JOptionPane extends JComponent {
 
 	/**
 	 * Sets the options this pane displays. If an element in
-	 * <code>newOptions</code> is a <code>Component</code> it is added directly to
-	 * the pane, otherwise a button is created for the element.
+	 * <code>newOptions</code> is a <code>Component</code> it is added directly
+	 * to the pane, otherwise a button is created for the element.
 	 * 
 	 * @param newOptions
-	 *          an array of <code>Objects</code> that create the buttons the user
-	 *          can click on, or arbitrary <code>Components</code> to add to the
-	 *          pane
+	 *            an array of <code>Objects</code> that create the buttons the
+	 *            user can click on, or arbitrary <code>Components</code> to add
+	 *            to the pane
 	 * 
 	 * @see #getOptions
 	 * @beaninfo bound: true description: The option pane's options objects.
@@ -2137,11 +2116,12 @@ public class JOptionPane extends JComponent {
 	}
 
 	/**
-	 * Sets the initial value that is to be enabled -- the <code>Component</code>
-	 * that has the focus when the pane is initially displayed.
+	 * Sets the initial value that is to be enabled -- the
+	 * <code>Component</code> that has the focus when the pane is initially
+	 * displayed.
 	 * 
 	 * @param newInitialValue
-	 *          the <code>Object</code> that gets the initial keyboard focus
+	 *            the <code>Object</code> that gets the initial keyboard focus
 	 * 
 	 * @see #getInitialValue
 	 * @beaninfo preferred: true bound: true description: The option pane's
@@ -2171,22 +2151,21 @@ public class JOptionPane extends JComponent {
 	 * potentially how to lay out the <code>parentComponent</code>.
 	 * 
 	 * @param newType
-	 *          an integer specifying the kind of message to display:
-	 *          <code>ERROR_MESSAGE</code>, <code>INFORMATION_MESSAGE</code>,
-	 *          <code>WARNING_MESSAGE</code>, <code>QUESTION_MESSAGE</code>, or
-	 *          <code>PLAIN_MESSAGE</code>
+	 *            an integer specifying the kind of message to display:
+	 *            <code>ERROR_MESSAGE</code>, <code>INFORMATION_MESSAGE</code>,
+	 *            <code>WARNING_MESSAGE</code>, <code>QUESTION_MESSAGE</code>,
+	 *            or <code>PLAIN_MESSAGE</code>
 	 * @exception RuntimeException
-	 *              if <code>newType</code> is not one of the legal values listed
-	 *              above
+	 *                if <code>newType</code> is not one of the legal values
+	 *                listed above
 	 * 
 	 * @see #getMessageType
 	 * @beaninfo preferred: true bound: true description: The option pane's
 	 *           message type.
 	 */
 	public void setMessageType(int newType) {
-		if (newType != ERROR_MESSAGE && newType != INFORMATION_MESSAGE
-				&& newType != WARNING_MESSAGE && newType != QUESTION_MESSAGE
-				&& newType != PLAIN_MESSAGE)
+		if (newType != ERROR_MESSAGE && newType != INFORMATION_MESSAGE && newType != WARNING_MESSAGE
+				&& newType != QUESTION_MESSAGE && newType != PLAIN_MESSAGE)
 			throw new RuntimeException(
 					"JOptionPane: type must be one of JOptionPane.ERROR_MESSAGE, JOptionPane.INFORMATION_MESSAGE, JOptionPane.WARNING_MESSAGE, JOptionPane.QUESTION_MESSAGE or JOptionPane.PLAIN_MESSAGE");
 
@@ -2212,22 +2191,22 @@ public class JOptionPane extends JComponent {
 	 * to determine what buttons to show (unless options are supplied).
 	 * 
 	 * @param newType
-	 *          an integer specifying the options the L&F is to display:
-	 *          <code>DEFAULT_OPTION</code>, <code>YES_NO_OPTION</code>,
-	 *          <code>YES_NO_CANCEL_OPTION</code>, or
-	 *          <code>OK_CANCEL_OPTION</code>
+	 *            an integer specifying the options the L&F is to display:
+	 *            <code>DEFAULT_OPTION</code>, <code>YES_NO_OPTION</code>,
+	 *            <code>YES_NO_CANCEL_OPTION</code>, or
+	 *            <code>OK_CANCEL_OPTION</code>
 	 * @exception RuntimeException
-	 *              if <code>newType</code> is not one of the legal values listed
-	 *              above
+	 *                if <code>newType</code> is not one of the legal values
+	 *                listed above
 	 * 
 	 * @see #getOptionType
 	 * @see #setOptions
-	 * @beaninfo preferred: true bound: true description: The option pane's option
-	 *           type.
+	 * @beaninfo preferred: true bound: true description: The option pane's
+	 *           option type.
 	 */
 	public void setOptionType(int newType) {
-		if (newType != DEFAULT_OPTION && newType != YES_NO_OPTION
-				&& newType != YES_NO_CANCEL_OPTION && newType != OK_CANCEL_OPTION)
+		if (newType != DEFAULT_OPTION && newType != YES_NO_OPTION && newType != YES_NO_CANCEL_OPTION
+				&& newType != OK_CANCEL_OPTION)
 			throw new RuntimeException(
 					"JOptionPane: option type must be one of JOptionPane.DEFAULT_OPTION, JOptionPane.YES_NO_OPTION, JOptionPane.YES_NO_CANCEL_OPTION or JOptionPane.OK_CANCEL_OPTION");
 
@@ -2250,9 +2229,9 @@ public class JOptionPane extends JComponent {
 
 	/**
 	 * Sets the input selection values for a pane that provides the user with a
-	 * list of items to choose from. (The UI provides a widget for choosing one of
-	 * the values.) A <code>null</code> value implies the user can input whatever
-	 * they wish, usually by means of a <code>JTextField</code>.
+	 * list of items to choose from. (The UI provides a widget for choosing one
+	 * of the values.) A <code>null</code> value implies the user can input
+	 * whatever they wish, usually by means of a <code>JTextField</code>.
 	 * <p>
 	 * Sets <code>wantsInput</code> to true. Use
 	 * <code>setInitialSelectionValue</code> to specify the initially-chosen
@@ -2260,8 +2239,9 @@ public class JOptionPane extends JComponent {
 	 * the value the user has selected.
 	 * 
 	 * @param newValues
-	 *          an array of <code>Objects</code> the user to be displayed (usually
-	 *          in a list or combo-box) from which the user can make a selection
+	 *            an array of <code>Objects</code> the user to be displayed
+	 *            (usually in a list or combo-box) from which the user can make
+	 *            a selection
 	 * @see #setWantsInput
 	 * @see #setInitialSelectionValue
 	 * @see #getSelectionValues
@@ -2291,7 +2271,7 @@ public class JOptionPane extends JComponent {
 	 * Only used if <code>wantsInput</code> is true.
 	 * 
 	 * @param newValue
-	 *          the initially selected value
+	 *            the initially selected value
 	 * @see #setSelectionValues
 	 * @see #getInitialSelectionValue
 	 * @beaninfo bound: true description: The option pane's initial selection
@@ -2301,8 +2281,7 @@ public class JOptionPane extends JComponent {
 		Object oldValue = initialSelectionValue;
 
 		initialSelectionValue = newValue;
-		firePropertyChange(INITIAL_SELECTION_VALUE_PROPERTY, oldValue,
-				newValue);
+		firePropertyChange(INITIAL_SELECTION_VALUE_PROPERTY, oldValue, newValue);
 	}
 
 	/**
@@ -2326,14 +2305,14 @@ public class JOptionPane extends JComponent {
 	 * <code>setInitialSelectionValue</code>.
 	 * 
 	 * @param newValue
-	 *          the <code>Object</code> used to set the value that the user
-	 *          specified (usually in a text field)
+	 *            the <code>Object</code> used to set the value that the user
+	 *            specified (usually in a text field)
 	 * @see #setSelectionValues
 	 * @see #setInitialSelectionValue
 	 * @see #setWantsInput
 	 * @see #getInputValue
-	 * @beaninfo preferred: true bound: true description: The option pane's input
-	 *           value object.
+	 * @beaninfo preferred: true bound: true description: The option pane's
+	 *           input value object.
 	 */
 	public void setInputValue(Object newValue) {
 		Object oldValue = inputValue;
@@ -2560,17 +2539,17 @@ public class JOptionPane extends JComponent {
 
 	/**
 	 * Returns a string representation of this <code>JOptionPane</code>. This
-	 * method is intended to be used only for debugging purposes, and the content
-	 * and format of the returned string may vary between implementations. The
-	 * returned string may be empty but may not be <code>null</code>.
+	 * method is intended to be used only for debugging purposes, and the
+	 * content and format of the returned string may vary between
+	 * implementations. The returned string may be empty but may not be
+	 * <code>null</code>.
 	 * 
 	 * @return a string representation of this <code>JOptionPane</code>
 	 */
 	@Override
 	protected String paramString() {
 		String iconString = (icon != null ? icon.toString() : "");
-		String initialValueString = (initialValue != null ? initialValue.toString()
-				: "");
+		String initialValueString = (initialValue != null ? initialValue.toString() : "");
 		String messageString = (message != null ? message.toString() : "");
 		String messageTypeString = getMessageTypeString(messageType, "_MESSAGE");
 		String optionTypeString;
@@ -2586,9 +2565,8 @@ public class JOptionPane extends JComponent {
 			optionTypeString = "";
 		String wantsInputString = (wantsInput ? "true" : "false");
 
-		return super.paramString() + ",icon=" + iconString + ",initialValue="
-				+ initialValueString + ",message=" + messageString + ",messageType="
-				+ messageTypeString + ",optionType=" + optionTypeString
+		return super.paramString() + ",icon=" + iconString + ",initialValue=" + initialValueString + ",message="
+				+ messageString + ",messageType=" + messageTypeString + ",optionType=" + optionTypeString
 				+ ",wantsInput=" + wantsInputString;
 	}
 
@@ -2621,7 +2599,8 @@ public class JOptionPane extends JComponent {
 	// /**
 	// * Retrieves a method from the provided class and makes it accessible.
 	// */
-	// private static class ModalPrivilegedAction {//implements PrivilegedAction {
+	// private static class ModalPrivilegedAction {//implements PrivilegedAction
+	// {
 	// private Class clazz;
 	// private String methodName;
 	//
@@ -2650,7 +2629,8 @@ public class JOptionPane extends JComponent {
 	// /**
 	// * Returns the <code>AccessibleContext</code> associated with this
 	// JOptionPane.
-	// * For option panes, the <code>AccessibleContext</code> takes the form of an
+	// * For option panes, the <code>AccessibleContext</code> takes the form of
+	// an
 	// * <code>AccessibleJOptionPane</code>.
 	// * A new <code>AccessibleJOptionPane</code> instance is created if
 	// necessary.
@@ -2704,6 +2684,5 @@ public class JOptionPane extends JComponent {
 	// }
 	//
 	// } // inner class AccessibleJOptionPane
-	
-	
+
 }
