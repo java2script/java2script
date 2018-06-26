@@ -4735,7 +4735,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		String myName = fixLogName(getQualifiedClassName());
 		if (name.startsWith("'"))	
 			name = name.substring(1, name.length() - 1);
-		System.err.println(name);
 		lstMethodsDeclared.add(myName + "." + name);
 	}
 
