@@ -1,7 +1,12 @@
-j2s.compiler.status=enable
+#j2s configuration file
+ 
+#uncomment j2s.* lines to process
+
+#enable the Java2Script transpiler
+#j2s.compiler.status=enable
 
 #output file name for logging methods declared - delete the file to regenerate a listing 
-j2s.log.methods.declared=methodsDeclared.csv
+#j2s.log.methods.declared=methodsDeclared.csv
 
 #output file name for logging methods called - delete the file to regenerate a listing
 #j2s.log.methods.called=methodsCalled.csv
@@ -13,4 +18,7 @@ j2s.log.methods.declared=methodsDeclared.csv
 
 #a semicolon-separated list of package-level file paths to be excluded
 #j2s.excluded.paths=test;testng
+
+#destination directory for all JavaScript
+j2s.site.directory=site
 

@@ -122,6 +122,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// BH 6/26/2018 -- method logging via j2s.log.methods.called and j2s.log.methods.declared
 // BH 6/24/2018 -- synchronized(a = new Object()) {...} ---> ...; only if an assignment or not a simple function call to Object.getTreeLock()
 // BH 6/23/2018 -- synchronized(a = new Object()) {...} ---> if(!(a = new Object()) {throw new NullPointerException()}else{...}
 // BH 6/21/2018 -- CharSequence.subSequence() should be defined both subSequence$I$I and subSequence
@@ -257,7 +258,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		global_htIncludeNames = parent.global_htIncludeNames;
 		global_includeCount = parent.global_includeCount;
 		global_includes = parent.global_includes;
-		global_j2sFlag_isDebugging = parent.global_j2sFlag_isDebugging;
 		global_mapBlockJavadoc = parent.global_mapBlockJavadoc;
 		this$0Name = parent.getQualifiedClassName();
 
@@ -642,6 +642,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 											// names here
 		if (name.equals("'main'"))
 			addApplication();
+		if (lstMethodsDeclared != null && !Modifier.isPrivate(mods))
+			logMethodDeclared(name);
 		buffer.append("\r\nClazz.newMeth(C$, ").append(name).append(", function (");
 		@SuppressWarnings("unchecked")
 		List<ASTNode> parameters = node.parameters();
@@ -759,8 +761,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		boolean isPrivateAndNotStatic = isPrivate && !isStatic;
 		Expression expression = node.getExpression();
 		int pt = buffer.length();
+		boolean doLog = (!isPrivate && htMethodsCalled != null);
 		if (expression == null) {
 			// "this"
+			doLog = false;
 		} else {
 			isPrivateAndNotStatic = false;
 			if (expression instanceof Name) {
@@ -772,6 +776,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			}
 			buffer.append(".");
 		}
+		int ptLog = (doLog ? buffer.length() : 0);
 		boolean isSpecialMethod = false;
 		String methodName = node.getName().getIdentifier();
 		boolean isIndexOf = false;
@@ -783,12 +788,15 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					buffer.setLength(pt);
 					buffer.append(j2sName);
 					isSpecialMethod = true;
+					doLog = false;
 				} else if (node.arguments().size() == 0 || methodName.equals("split") || methodName.equals("replace")) {
 					if (j2sName.startsWith("~")) {
 						buffer.append('$');
 						buffer.append(j2sName.substring(1));
 						isSpecialMethod = true;
 					} else {
+						if (doLog && j2sName.startsWith("C$."))
+							doLog = false;
 						buffer.append(j2sName);
 						return false;
 					}
@@ -812,6 +820,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			} else {
 				buffer.append(qname);
 			}
+		}
+		if (doLog) {
+			String name = className + "." + buffer.substring(ptLog);
+			logMethodCalled(name);
 		}
 		if (isPrivateAndNotStatic) {
 			// A call to a private outer-class method from an inner class
@@ -3013,6 +3025,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @param isPost
 	 * @return
 	 */
+	@SuppressWarnings({ "null" })
 	private boolean addPrePost(Expression node, Expression left, String op, boolean isPost) {
 		ASTNode parent = node.getParent();
 		ITypeBinding leftTypeBinding = left.resolveTypeBinding();
@@ -4689,13 +4702,54 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * includes @j2sDebug blocks; from j2s.compiler.mode=debug in .j2s
 	 * 
 	 */
-	private boolean global_j2sFlag_isDebugging = false;
+	private static boolean global_j2sFlag_isDebugging = false;
 
-	public void setDebugging(boolean isDebugging) {
-		this.global_j2sFlag_isDebugging = isDebugging;
+	public static void setDebugging(boolean isDebugging) {
+		global_j2sFlag_isDebugging = isDebugging;
 	}
 
+	private static List<String> lstMethodsDeclared;
+
+	private static Map<String, String> htMethodsCalled;
+
+	private static boolean logAllCalls;
+
+	public static void setLogging(List<String> lstMethodsDeclared, Map<String, String> htMethodsCalled,
+			boolean logAllCalls) {
+		Java2ScriptVisitor.lstMethodsDeclared = lstMethodsDeclared;
+		Java2ScriptVisitor.htMethodsCalled = htMethodsCalled;
+		Java2ScriptVisitor.logAllCalls = logAllCalls;
+		if (lstMethodsDeclared != null)
+			lstMethodsDeclared.clear();
+		if (logAllCalls)
+			htMethodsCalled.clear();
+	}
 	
+	private void logMethodDeclared(String name) {
+		if (name.startsWith("[")) {
+			String[] names = name.substring(0,  name.length() - 1).split(",");
+			for (int i = 0; i < names.length; i++)
+				logMethodDeclared(names[i]);
+			return;
+		}
+		String myName = fixLogName(getQualifiedClassName());
+		lstMethodsDeclared.add(myName + "." + name.substring(1, name.length() - 1));
+	}
+
+	private void logMethodCalled(String name) {
+		name = fixLogName(name);
+		String myName = fixLogName(getQualifiedClassName());
+		if (logAllCalls)
+			htMethodsCalled.put(name + "," + myName,  "-");
+		else
+			htMethodsCalled.put(name,  myName);
+	}
+
+	private String fixLogName(String name) {
+		name = checkClassReplacement(name);
+		int pt = name.indexOf("<");
+		return (pt > 0 ? name.substring(0,  pt) : name);
+	}
 
 	private static Map<String, String> htClassReplacements;
 	private static List<String> lstPackageReplacements;
@@ -5538,4 +5592,5 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			e.printStackTrace();
 		}
 	}
+
 }
