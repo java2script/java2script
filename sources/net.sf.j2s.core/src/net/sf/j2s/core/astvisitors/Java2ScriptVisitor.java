@@ -122,6 +122,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// BH 6/27/2018 -- fix for a[Integer] not becoming a[Integer.valueOf]
 // BH 6/26/2018 -- method logging via j2s.log.methods.called and j2s.log.methods.declared
 // BH 6/24/2018 -- synchronized(a = new Object()) {...} ---> ...; only if an assignment or not a simple function call to Object.getTreeLock()
 // BH 6/23/2018 -- synchronized(a = new Object()) {...} ---> if(!(a = new Object()) {throw new NullPointerException()}else{...}
@@ -3395,8 +3396,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		switch (name) {
 		case "char":
 		case "Character":
+		case "Byte":
+		case "Short":
+		case "Integer":
+		case "Long":
 			addOperand(exp, false);
-			break;
+			break;			
 		default:
 		case "String":
 			exp.accept(this);
