@@ -30,12 +30,16 @@ package java.awt;
 
 import javajs.util.SB;
 import swingjs.JSFontMetrics;
+import swingjs.JSLineMetrics;
 import swingjs.JSToolkit;
 import java.text.AttributedCharacterIterator.Attribute;
 //import java.util.Hashtable;
 //import java.util.Locale;
-
+import java.text.CharacterIterator;
+import java.util.Hashtable;
+import java.util.Map;
 import java.awt.font.FontRenderContext;
+import java.awt.font.LineMetrics;
 import java.awt.font.TextAttribute;
 import java.awt.geom.AffineTransform;
 //import sun.font.AttributeValues;
@@ -2655,4 +2659,32 @@ public class Font
          * trigger object finalization.
          */
      }
+
+     private Map<String, LineMetrics> mapLineMetrics;
+     private LineMetrics getLineMetrics(String s) {
+   	  if (mapLineMetrics == null)
+   		  mapLineMetrics = new Hashtable<String, LineMetrics>();
+   	  LineMetrics lm = mapLineMetrics.get(s);
+   	  return (lm == null ? new JSLineMetrics(this, s) : lm);
+     }
+     
+	public LineMetrics getLineMetrics(CharacterIterator ci, int beginIndex, int limit, Object object) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public LineMetrics getLineMetrics(char[] chars, int beginIndex, int limit, Object object) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public LineMetrics getLineMetrics(String str, int beginIndex, int limit, Object object) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public LineMetrics getLineMetrics(String str, Object object) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

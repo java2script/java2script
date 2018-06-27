@@ -283,16 +283,4 @@ public abstract class JSComponent extends Component {
 									// !isBackgroundPainted);
 	}
 
-	protected transient ArrayTable clientProperties;
-
-	public Object getClientProperty(Object key) {
-		if (clientProperties == null) {
-			return null;
-		} else {
-			synchronized (clientProperties) {
-				return clientProperties.get(key);
-			}
-		}
-	}
-
 }

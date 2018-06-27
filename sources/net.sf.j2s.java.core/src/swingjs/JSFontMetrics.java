@@ -2,6 +2,9 @@ package swingjs;
 
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.font.LineMetrics;
+import java.text.CharacterIterator;
 
 public class JSFontMetrics extends FontMetrics {
 	
@@ -112,5 +115,73 @@ public class JSFontMetrics extends FontMetrics {
 		}
 		return fwidths;
 	}
+
+	
+    /**
+     * Returns the {@link LineMetrics} object for the specified
+     * <code>String</code> in the specified {@link Graphics} context.
+     * @param str the specified <code>String</code>
+     * @param context the specified <code>Graphics</code> context
+     * @return a <code>LineMetrics</code> object created with the
+     * specified <code>String</code> and <code>Graphics</code> context.
+     * @see java.awt.Font#getLineMetrics(String, FontRenderContext)
+     */
+    public LineMetrics getLineMetrics( String str, Graphics context) {
+        return font.getLineMetrics(str, null);
+    }
+
+    /**
+     * Returns the {@link LineMetrics} object for the specified
+     * <code>String</code> in the specified {@link Graphics} context.
+     * @param str the specified <code>String</code>
+     * @param beginIndex the initial offset of <code>str</code>
+     * @param limit the end offset of <code>str</code>
+     * @param context the specified <code>Graphics</code> context
+     * @return a <code>LineMetrics</code> object created with the
+     * specified <code>String</code> and <code>Graphics</code> context.
+     * @see java.awt.Font#getLineMetrics(String, int, int, FontRenderContext)
+     */
+    public LineMetrics getLineMetrics( String str,
+                                            int beginIndex, int limit,
+                                            Graphics context) {
+        return font.getLineMetrics(str, beginIndex, limit, null);
+    }
+
+    /**
+     * Returns the {@link LineMetrics} object for the specified
+     * character array in the specified {@link Graphics} context.
+     * @param chars the specified character array
+     * @param beginIndex the initial offset of <code>chars</code>
+     * @param limit the end offset of <code>chars</code>
+     * @param context the specified <code>Graphics</code> context
+     * @return a <code>LineMetrics</code> object created with the
+     * specified character array and <code>Graphics</code> context.
+     * @see java.awt.Font#getLineMetrics(char[], int, int, FontRenderContext)
+     */
+    public LineMetrics getLineMetrics(char [] chars,
+                                            int beginIndex, int limit,
+                                            Graphics context) {
+        return font.getLineMetrics(
+                                chars, beginIndex, limit, null);
+    }
+
+    /**
+     * Returns the {@link LineMetrics} object for the specified
+     * {@link CharacterIterator} in the specified {@link Graphics}
+     * context.
+     * @param ci the specified <code>CharacterIterator</code>
+     * @param beginIndex the initial offset in <code>ci</code>
+     * @param limit the end index of <code>ci</code>
+     * @param context the specified <code>Graphics</code> context
+     * @return a <code>LineMetrics</code> object created with the
+     * specified arguments.
+     * @see java.awt.Font#getLineMetrics(CharacterIterator, int, int, FontRenderContext)
+     */
+    public LineMetrics getLineMetrics(CharacterIterator ci,
+                                            int beginIndex, int limit,
+                                            Graphics context) {
+        return font.getLineMetrics(ci, beginIndex, limit, null);
+    }
+
 
 }
