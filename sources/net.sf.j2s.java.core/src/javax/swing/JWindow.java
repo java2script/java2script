@@ -39,6 +39,9 @@ import java.awt.LayoutManager;
 import java.awt.Window;
 import java.awt.event.WindowListener;
 
+import swingjs.JSUtil;
+import swingjs.plaf.JSComponentUI;
+
 
 // 
 
@@ -264,11 +267,11 @@ public class JWindow extends Window implements RootPaneContainer {
 	protected void windowInit() {
 		setLocale(JComponent.getDefaultLocale());
 		setRootPane(createRootPane());
-    rootPane.setFrameViewer(setFrameViewer(null));
+		rootPane.setFrameViewer(setFrameViewer(null));
 		setRootPaneCheckingEnabled(true);
 		uiClassID = "WindowUI";
 		updateUI();
-    addNotify(); // BH added; applet will not do this automatically
+		addNotify(); // BH added; applet will not do this automatically
 		rootPane.addNotify(); // builds a peer for the root pane
 	}
 

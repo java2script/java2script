@@ -43,6 +43,9 @@ import java.awt.event.WindowListener;
 
 import javax.swing.plaf.UIResource;
 
+import swingjs.JSUtil;
+import swingjs.plaf.JSComponentUI;
+
 // BH: Added rootPane.addNotify(); // builds a peer for the root pane
 
 /**

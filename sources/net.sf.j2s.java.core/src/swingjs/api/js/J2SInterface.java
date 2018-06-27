@@ -31,6 +31,8 @@ public interface J2SInterface {
 	Object _getFileData(String fileName, Object fSuccess, boolean doProcess, boolean isBinary);
 
 	void _setDraggable(DOMNode tagNode, Object targetNodeOrFDown);
+	
+	void _setDragDropTarget(Object domNode);
 
 	int _setWindowZIndex(DOMNode domNode, int pos);
 

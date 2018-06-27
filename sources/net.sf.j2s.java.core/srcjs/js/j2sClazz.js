@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 6/27/2018 3:11:50 PM fix for class String not indicating its name 
 // BH 6/25/2018 3:06:30 PM adds String.concat$S
 // BH 6/25/2018 12:10:25 PM Character.toTitleCase, isTitleCase as ...UpperCase
 // BH 6/25/2018 10:23:24 AM really fixing new int[] {'a'} using .$c() see Test_Byte.java

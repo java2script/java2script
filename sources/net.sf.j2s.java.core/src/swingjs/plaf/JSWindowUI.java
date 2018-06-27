@@ -82,6 +82,7 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 	protected void setWindowClass(DOMNode windowNode) {
 		DOMNode.setZ(windowNode, z);
 		$(windowNode).addClass("swingjs-window");
+		JSUtil.J2S._setDragDropTarget(windowNode);
 	}
 
 	@Override

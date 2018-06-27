@@ -59,7 +59,8 @@ import sun.swing.SwingUtilities2;
  * 
  * SwingJS note:
  * 
- * This class in JavaScript will run a modal dialog that will initially return
+ * This class in JavaScript will run a modal dialog that will initially
+ *  return
  * an instance of JColorChooser.ASYNCHRONOUS_COLOR, testable as ret instanceof
  * javax.swing.UIResource if the parent component implements
  * PropertyChangeListener, or null if not. The final result of color selection

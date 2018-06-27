@@ -1,5 +1,6 @@
 // j2sCore.js (based on JmolCore.js)
 
+// BH 6/27/2018 12:45:44 PM adds DND for frames
 // BH 6/20/2018 11:26:09 PM fix for menu bar not closable
 // BH 3/16/2018 5:25:09 AM fixes for dragging on phones
 // BH 2/20/2018 12:08:08 AM adds J2S._getKeyModifiers
@@ -1649,15 +1650,17 @@ J2S.Cache.get = function(filename) {
 J2S.Cache.put = function(filename, data) {
   J2S.Cache.fileCache[filename] = data;
 }
-  // dnd 
-	J2S.Cache.setDragDrop = function(me) {
-		J2S.$appEvent(me, "appletdiv", "dragover", function(e) {
+  // dnd  _setDragDrop for swingjs.api.J2S called from swingjs.JSFrameViewer
+	J2S._setDragDropTarget = J2S.Cache.setDragDrop = function(me, div) {
+    // me can be just a div id
+    div || (div = null); 
+		J2S.$appEvent(me, div, "dragover", function(e) {
 			e = e.originalEvent;
 			e.stopPropagation();
 			e.preventDefault();
 			e.dataTransfer.dropEffect = 'copy';
 		});
-		J2S.$appEvent(me, "appletdiv", "drop", function(e) {
+		J2S.$appEvent(me, div, "drop", function(e) {
 			var oe = e.originalEvent;
 			oe.stopPropagation();
 			oe.preventDefault();
@@ -1670,7 +1673,8 @@ J2S.Cache.put = function(filename, data) {
 			var file = oe.dataTransfer.files[0];
 			if (file == null) {
 				// FF and Chrome will drop an image here
-				// but it will be only a URL, not an actual file. 
+				// but it will be only a URL, not an actual file.
+        // this bit is designed just for Jmol 
 				try {
 				  file = "" + oe.dataTransfer.getData("text");
 				  if (file.indexOf("file:/") == 0 || file.indexOf("http:/") == 0 || file.indexOf("https:/") == 0) {
