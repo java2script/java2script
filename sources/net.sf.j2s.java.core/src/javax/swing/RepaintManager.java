@@ -350,7 +350,7 @@ public class RepaintManager {
 				//System.out.println("RM noParent");
 				return;
 			}
-			if ((c instanceof JComponent) && (((JComponent) c).isValidateRoot())) {
+			if (isStandardJComponent(c) && (((JComponent) c).isValidateRoot())) {
 				validateRoot = c;
 				break;
 			}
@@ -410,6 +410,17 @@ public class RepaintManager {
 		// Queue a Runnable to invoke paintDirtyRegions and
 		// validateInvalidComponents.
 		scheduleProcessingRunnable(root);
+	}
+
+	/**
+	 * The deal here is that I added Window to subclass JComponent so that 
+	 * JInternalFrame could subclass Frame and still be a JComponent
+	 * 
+	 * @param c
+	 * @return
+	 */
+	private boolean isStandardJComponent(Component c) {
+		return (c instanceof JComponent && !(c instanceof Window));
 	}
 
 	/**
@@ -847,7 +858,7 @@ public class RepaintManager {
 				int localBoundsW = dirtyComponent.getWidth();
 				SwingUtilities.computeIntersection(0, 0, localBoundsW, localBoundsH,
 						rect);
-				if (dirtyComponent instanceof JComponent && ! (dirtyComponent instanceof Window)) {
+				if (isStandardJComponent(dirtyComponent)) {
 					((JComponent) dirtyComponent).paintImmediately(rect.x, rect.y,
 							rect.width, rect.height);
 				} else if (dirtyComponent.isShowing()) {
@@ -896,7 +907,7 @@ public class RepaintManager {
 		for (int i = roots.size() - 1; i >= index; i--) {
 			Component c = roots.get(i);
 			for (;;) {
-				if (c == root || c == null || !(c instanceof JComponent)) {
+				if (c == root || c == null || !isStandardJComponent(c)) {
 					break;
 				}
 				c = c.getParent();
@@ -939,7 +950,7 @@ public class RepaintManager {
 		}
 
 		for (;;) {
-			if (!(component instanceof JComponent))
+			if (!isStandardJComponent(component))
 				break;
 
 			parent = component.getParent();

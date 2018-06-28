@@ -962,6 +962,8 @@ public abstract class Component
 
 	public GraphicsConfiguration graphicsConfig;
 
+	protected boolean isWindow;
+
 	/**
 	 * Gets the <code>GraphicsConfiguration</code> associated with this
 	 * <code>Component</code>. If the <code>Component</code> has not been
@@ -1559,7 +1561,7 @@ public abstract class Component
 			}
 		}
 		Container parent = this.parent;
-		if (parent != null) {
+		if (!isWindow && parent != null) {
 			parent.invalidate();
 		}
 		// }

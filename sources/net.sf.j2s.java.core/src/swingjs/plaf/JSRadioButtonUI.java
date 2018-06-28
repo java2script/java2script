@@ -48,22 +48,23 @@ public class JSRadioButtonUI extends JSButtonUI {
 //				if (isNew)
 //					groupNames.put(bg, name);
 //			}
-			domBtn = enableNode = newDOMObject("input", id, "type", myType, "name",
+			domBtn = newDOMObject("input", id, "type", myType, "name",
 					name);
 			iconNode = newDOMObject("span", id + "_icon");
 			textNode = newDOMObject("label", id + "l1");
-			label = newDOMObject("label", id + "l2", "htmlFor", id);
-			setDataComponent(label);
+			btnLabel = newDOMObject("label", id + "l2", "htmlFor", id);
+			enableNodes = new DOMNode[] { domBtn, btnLabel };
+			setDataComponent(btnLabel);
 			setDataComponent(iconNode); // needed for mac safari/chrome
 			setDataComponent(domBtn);
 			setDataComponent(textNode); // needed for mac safari/chrome
 			setEnabled(c.isEnabled());
 			if (isMenuItem) {
-				domNode = createItem("_item", label);
+				domNode = createItem("_item", btnLabel);
 			} else {
 				domNode = newDOMObject("div", id + "_0");
 				centeringNode = newDOMObject("div", id + "_ctr");
-				centeringNode.appendChild(label);
+				centeringNode.appendChild(btnLabel);
 				domNode.appendChild(centeringNode);
 			}
 		}
@@ -104,17 +105,17 @@ public class JSRadioButtonUI extends JSButtonUI {
 			DOMNode.setPositionAbsolute(domBtn, Integer.MIN_VALUE, 0);
 			DOMNode.setPositionAbsolute(iconNode, Integer.MIN_VALUE, 0);
 			DOMNode.setPositionAbsolute(textNode, Integer.MIN_VALUE, 0);
-			DOMNode.setPositionAbsolute(label, Integer.MIN_VALUE, 0);
+			DOMNode.setPositionAbsolute(btnLabel, Integer.MIN_VALUE, 0);
 
 			// (Re)create label.
 		}
-		label.appendChild(iconNode);
-		label.appendChild(domBtn);
-		label.appendChild(textNode);
+		btnLabel.appendChild(iconNode);
+		btnLabel.appendChild(domBtn);
+		btnLabel.appendChild(textNode);
 		if (doAll && !isMenuItem)
 			DOMNode.setPositionAbsolute(domNode, Integer.MIN_VALUE, 0);
 		if (!isMenuItem) {
-			DOMNode.setSize(label, dobj.width, dobj.height);
+			DOMNode.setSize(btnLabel, dobj.width, dobj.height);
 			DOMNode.setSize(centeringNode, dobj.width, dobj.height);
 		}
 		return domNode;
@@ -124,7 +125,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 	protected Dimension setHTMLSize(DOMNode obj, boolean addCSS) {
 		// "absolute" is required for positioning of button, but must not be there
 		// for setting the size.
-		DOMNode.setStyles(label, "position", null, "width", null, "height", null);
+		DOMNode.setStyles(btnLabel, "position", null, "width", null, "height", null);
 		DOMNode.setStyles(domBtn, "position", null, "width", null, "height", null);
 		DOMNode
 				.setStyles(textNode, "position", null, "width", null, "height", null);
@@ -135,10 +136,10 @@ public class JSRadioButtonUI extends JSButtonUI {
 			d = setHTMLSize1(obj, addCSS, false);
 			DOMNode.setPositionAbsolute(domBtn, Integer.MIN_VALUE, 0);
 			DOMNode.setPositionAbsolute(textNode, Integer.MIN_VALUE, 0);
-			DOMNode.setPositionAbsolute(label, Integer.MIN_VALUE, 0);
+			DOMNode.setPositionAbsolute(btnLabel, Integer.MIN_VALUE, 0);
 			if (centeringNode != null)
 				DOMNode.setPositionAbsolute(centeringNode, Integer.MIN_VALUE, 0);
-			DOMNode.setStyles(label, "width", d.width + "px", "height", d.height
+			DOMNode.setStyles(btnLabel, "width", d.width + "px", "height", d.height
 					+ "px");
 		}
 		return d;

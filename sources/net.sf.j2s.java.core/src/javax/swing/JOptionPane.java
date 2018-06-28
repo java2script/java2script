@@ -644,7 +644,7 @@ public class JOptionPane extends JComponent {
 
 			if (!(message instanceof String)) {
 				warnJSDeveloper();
-				message = "?";
+				message = "non-string messages require a PropertyChangeListener in SwingJS";
 			}
 
 			if (!(initialSelectionValue instanceof String)) {

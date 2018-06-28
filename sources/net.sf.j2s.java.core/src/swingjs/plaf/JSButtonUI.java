@@ -74,8 +74,8 @@ public class JSButtonUI extends JSLightweightUI {
 	/**
 	 * a wrapper if this is not a menu item
 	 */
-	protected DOMNode label; 
-  protected DOMNode itemNode;
+	protected DOMNode btnLabel; 
+    protected DOMNode itemNode;
 	protected JMenuItem menuItem;
 	protected AbstractButton button;
 
