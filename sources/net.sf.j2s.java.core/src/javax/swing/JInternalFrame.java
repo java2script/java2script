@@ -1695,13 +1695,25 @@ public class JInternalFrame extends JFrame
      * internal frame is being dragged.
      */
     protected void paintComponent(Graphics g) {
-      
-     // we need to bypass JComponent
+
+     // this is not called, I think.
     	
       paintContainer(g);
       
       //super.paint(g); 
    }
+    
+	@Override
+	public void paint(Graphics g) {
+		
+		// The problem is that painting is from a dirty region request on the desktop
+		// we need to swith to the correct graphics. 
+		// Could this be a problem with printing? 
+		
+		super.paint(getRootPane().getGraphics());
+	}
+
+		//boolean isJComponent;
 
     // ======= end optimized frame dragging defence code ==============
 

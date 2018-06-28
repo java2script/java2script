@@ -175,7 +175,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 
 		  		 */
 		  		{}
-					frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+		  		frameCloserAction();
 					return true;		  		
 		  	} else if (type.equals("mouseout")) {
 			  	DOMNode.setStyles(closerNode, "background-color", toCSSString(c.getBackground()));
@@ -187,6 +187,11 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		  }			
 		}
 		return false;
+	}
+
+	
+	protected void frameCloserAction() {
+  		frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
 	}
 
 	protected void closeFrame() {
