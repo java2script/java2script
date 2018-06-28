@@ -88,11 +88,6 @@ import java.util.TreeSet;
  */
 public class JDesktopPane extends JLayeredPane //implements Accessible
 {
-    /**
-     * @see #getUIClassID
-     * @see #readObject
-     */
-    private static final String uiClassID = "DesktopPaneUI";
 
     transient DesktopManager desktopManager;
 
@@ -126,7 +121,8 @@ public class JDesktopPane extends JLayeredPane //implements Accessible
      * Creates a new <code>JDesktopPane</code>.
      */
     public JDesktopPane() {
-        setUIProperty("opaque", Boolean.TRUE);
+    	super();
+        initLayeredPane();
         
 //        SwingJS - no focus
 //        setFocusCycleRoot(true);
@@ -144,8 +140,13 @@ public class JDesktopPane extends JLayeredPane //implements Accessible
 //                return comp;
 //            }
 //        });
-        updateUI();
     }
+
+	protected void initLayeredPane() {
+        uiClassID = "DesktopPaneUI";
+		updateUI();
+		setLayout(null);
+	}
 
     /**
      * Returns the L&F object that renders this component.

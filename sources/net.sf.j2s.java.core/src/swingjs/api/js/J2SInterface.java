@@ -1,5 +1,6 @@
 package swingjs.api.js;
 
+import java.awt.JSComponent;
 import java.util.Hashtable;
 
 import javajs.api.JSFunction;
@@ -32,7 +33,7 @@ public interface J2SInterface {
 
 	void _setDraggable(DOMNode tagNode, Object targetNodeOrFDown);
 	
-	void _setDragDropTarget(Object domNode);
+	void _setDragDropTarget(JSComponent target, DOMNode node, boolean adding);
 
 	int _setWindowZIndex(DOMNode domNode, int pos);
 

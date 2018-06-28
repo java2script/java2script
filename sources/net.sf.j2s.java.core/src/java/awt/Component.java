@@ -915,6 +915,7 @@ public abstract class Component
 		DropTarget old;
 
 		if ((old = dropTarget) != null) {
+			getOrCreatePeer();
 			if (peer != null)
 				dropTarget.removeNotify(peer);
 

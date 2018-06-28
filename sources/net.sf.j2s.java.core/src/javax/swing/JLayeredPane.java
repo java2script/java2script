@@ -192,12 +192,17 @@ public class JLayeredPane extends JComponent /* implements Accessible */ {
 //////////////////////////////////////////////////////////////////////////////
     /** Create a new JLayeredPane */
     public JLayeredPane() {
-        setLayout(null);
-        uiClassID = "LayeredPaneUI";
-        updateUI();
+    	super();
+        initLayeredPane();
     }
 
-    private void validateOptimizedDrawing() {
+	protected void initLayeredPane() {
+        uiClassID = "LayeredPaneUI";
+		updateUI();
+		setLayout(null);
+	}
+
+	private void validateOptimizedDrawing() {
         boolean layeredComponentFound = false;
         synchronized(getTreeLock()) {
             Integer layer = null;

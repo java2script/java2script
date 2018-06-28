@@ -11,7 +11,6 @@ public class JSDesktopPaneUI extends JSPanelUI {
 		super.updateDOMNode();
 		if (isNew) {
 			$(domNode).addClass("swingjs-desktop");
-			JSUtil.J2S._setDragDropTarget(domNode);
 		}		
 		return domNode;
 	}
