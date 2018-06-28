@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 6/28/2018 7:34:58 AM fix for Array.clone not copying array in the case of objects
 // BH 6/27/2018 3:11:50 PM fix for class String not indicating its name 
 // BH 6/25/2018 3:06:30 PM adds String.concat$S
 // BH 6/25/2018 12:10:25 PM Character.toTitleCase, isTitleCase as ...UpperCase
@@ -85,7 +86,7 @@ Clazz._assertFunction = null;
 
 //////// 16 methods called from code created by the transpiler ////////
 
-Clazz.array = function(baseClass, paramType, ndims, params) {
+Clazz.array = function(baseClass, paramType, ndims, params, isClone) {
   // int[][].class Clazz.array(Integer.TYPE, -2)
   // new int[] {3, 4, 5} Clazz.array(Integer.TYPE, -1, [3, 4, 5])    
   // new int[][]{new int[] {3, 4, 5}, {new int[] {3, 4, 5}} 
@@ -194,7 +195,7 @@ Clazz.array = function(baseClass, paramType, ndims, params) {
       break;
     }  
   }
-  return newTypedA(baseClass, params, nbits, (dofill ? ndims : -ndims));
+  return newTypedA(baseClass, params, nbits, (dofill ? ndims : -ndims), isClone);
 }
 
 Clazz.assert = function(clazz, obj, tf, msg) {
@@ -222,7 +223,7 @@ Clazz.assert = function(clazz, obj, tf, msg) {
 
 Clazz.clone = function(me) { 
   // BH allows @j2sNative access without super constructor
-  return appendMap(me.__ARRAYTYPE ? Clazz.array(me.__BASECLASS, me.__ARRAYTYPE, -1, me)
+  return appendMap(me.__ARRAYTYPE ? Clazz.array(me.__BASECLASS, me.__ARRAYTYPE, -1, me, true)
    : new me.constructor(inheritArgs), me); 
 }
 
@@ -839,7 +840,7 @@ var getParamCode = Clazz._getParamCode = function(cl) {
   return cl.__PARAMCODE || (cl.__PARAMCODE = cl.__CLASS_NAME__.replace(/java\.lang\./, "").replace(/\./g, '_'));
 }
 
-var newTypedA = function(baseClass, args, nBits, ndims) {
+var newTypedA = function(baseClass, args, nBits, ndims, isClone) {
   var dim = args[0];
   if (typeof dim == "string")
     dim = dim.charCodeAt(0); // int[] a = new int['\3'] ???
@@ -886,7 +887,7 @@ var newTypedA = function(baseClass, args, nBits, ndims) {
       var arr = new Float64Array(dim);
       break;
     default:
-      var arr = (dim < 0 ? val : new Array(dim));
+      var arr = (isClone ? new Array(dim = val.length) : dim < 0 ? val : new Array(dim));
       nBits = 0;
       if (dim > 0 && val != null)
         for (var i = dim; --i >= 0;)
