@@ -7,7 +7,8 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
-// BH 6/28/2018 7:34:58 AM fix for Array.clone not copying array in the case of objects
+// BH 6/29/2018 10:13:51 AM array.equals$O, fixes array.clone
+// BH 6/28/2018 7:34:58 AM fix for array.clone not copying array in the case of objects
 // BH 6/27/2018 3:11:50 PM fix for class String not indicating its name 
 // BH 6/25/2018 3:06:30 PM adds String.concat$S
 // BH 6/25/2018 12:10:25 PM Character.toTitleCase, isTitleCase as ...UpperCase
@@ -101,12 +102,9 @@ Clazz.array = function(baseClass, paramType, ndims, params, isClone) {
     // four-parameter option from JU.AU.arrayCopyObject;
     // truncate array using slice
     // Clazz.array(-1, array, ifirst, ilast+1)
-    var b = arguments[1];
-    var a = b.slice(arguments[2], arguments[3]);
-    a.__BYTESIZE = b.__BYTESIZE;
-    a.__ARRAYTYPE = b.__ARRAYTYPE;
-    a.__BASECLASS = b.__BASECLASS;
-    return a;
+    var a = arguments[1];
+    var b = a.slice(arguments[2], arguments[3]);
+    return copyArrayProps(a, b);
   }
   var prim = Clazz._getParamCode(baseClass);
   var dofill = true;
@@ -608,8 +606,7 @@ var aas = "AAA";
 /**
  * Create an array class placeholder for reflection
  */
- 
- 
+
 var arrayClass = function(baseClass, ndim) {
   ndim || (ndim = 1);
   var stub = Clazz._getParamCode(baseClass);
@@ -809,9 +806,31 @@ Clazz.isClassDefined = function(clazzName) {
 
 ///////////////////////// private supporting method creation //////////////////////
 
-var setArray = function(vals, baseClass, paramType, ndims) {
+     
+ var copyArrayProps = function(a, b) {
+    b.__BYTESIZE = a.__BYTESIZE;
+    b.__ARRAYTYPE = a.__ARRAYTYPE;
+    b.__BASECLASS = a.__BASECLASS;
+    b.__NDIMS = a.__NDIMS;
+    b.getClass = a.getClass; 
+    b.equals$O = a.equals$O;
+ }
+ 
+ var setArray = function(vals, baseClass, paramType, ndims) {
   ndims = Math.abs(ndims);
-  vals.getClass = function () { return arrayClass(baseClass, ndims) };
+  vals.getClass = function () { return arrayClass(this.__BASECLASS, this.__NDIMS) };
+  vals.equals$O = function (a) { 
+    if (a.__ARRAYTYPE != this.__ARRAYTYPE || a.length != this.length)
+      return false;
+    if (a.length > 0 && typeof a[0] == "object")
+      for (var i = a.length; --i >= 0;)
+        if ((a[i] == null) != (this[i] == null) || a[i] != null 
+          && (a[i].equals$O && !a[i].equals$O(this[i]) 
+            || a.equals && !a[i].equals(this[i]) || a[i] !== this[i]))
+          return false;
+    return true;  
+  }; 
+  
   vals.__ARRAYTYPE = paramType; // referenced in java.lang.Class
   vals.__BASECLASS = baseClass;
   vals.__NDIM = ndims;
@@ -887,11 +906,16 @@ var newTypedA = function(baseClass, args, nBits, ndims, isClone) {
       var arr = new Float64Array(dim);
       break;
     default:
-      var arr = (isClone ? new Array(dim = val.length) : dim < 0 ? val : new Array(dim));
       nBits = 0;
-      if (dim > 0 && val != null)
-        for (var i = dim; --i >= 0;)
-           arr[i] = val;
+      var arr;
+      if (isClone) {
+        arr = new Array(dim = val.length);
+      } else {
+        arr = (dim < 0 ? val : new Array(dim));
+        if (dim > 0 && val != null)
+          for (var i = dim; --i >= 0;)
+             arr[i] = val;
+      }
       break;
     }  
     arr.__BYTESIZE = arr.BYTES_PER_ELEMENT || (nBits >> 3);

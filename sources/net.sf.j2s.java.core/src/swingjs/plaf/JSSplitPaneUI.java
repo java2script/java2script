@@ -84,13 +84,13 @@ public class JSSplitPaneUI extends JSPanelUI {
 	protected void fHandleDrag(int dx, int dy, int type) {
 		switch (type) {
 		case MouseEvent.MOUSE_PRESSED:
-			DOMNode.setCursor("nwse-resize");
+			DOMNode.setCursor("nwse-resize", null);
 			// set cursor to dragging
 			break;
 		case MouseEvent.MOUSE_DRAGGED:
 			break;
 		case MouseEvent.MOUSE_RELEASED:
-			DOMNode.setCursor(null);
+			DOMNode.setCursor(null, null);
 			break;
 		}
 	}	

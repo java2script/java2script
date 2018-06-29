@@ -30,6 +30,7 @@ import java.beans.PropertyChangeListener;
 import java.util.EventObject;
 
 import javax.swing.AbstractButton;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.SwingConstants;
@@ -744,10 +745,10 @@ public class JSComponentUI extends ComponentUI
 		}
 		if (prop == "icon") {
 			if (iconNode != null) {
-				// note that we use AbstratButton cast here just because
+				// note that we use AbstractButton cast here just because
 				// it has a getIcon() method. JavaScript will not care if
 				// it is really a JLabel or JOptionPane, which also have icons
-				ImageIcon icon = (ImageIcon) ((AbstractButton) c).getIcon();
+				ImageIcon icon = getIcon(c, null);
 				if (icon == null ? currentIcon != null : !icon.equals(currentIcon))
 					setIconAndText(prop, icon, currentGap, currentText);
 			}
@@ -761,21 +762,29 @@ public class JSComponentUI extends ComponentUI
 			System.out.println("JSComponentUI: unrecognized prop: " + this.id + " " + prop);
 	}
 
-	protected void setIconAndText(String prop, ImageIcon icon, int gap, String text) {
+	private ImageIcon getIcon(JSComponent c, Icon icon) {
+		return (c == null || icon == null 
+				&& (icon  = ((AbstractButton) c).getIcon()) == null ?
+			null : (icon instanceof ImageIcon) ? (ImageIcon) icon :
+				JSToolkit.paintImageForIcon(jc, icon));
+	}
+
+	protected void setIconAndText(String prop, Icon icon, int gap, String text) {
 
 		// TODO add textPosition
 
 		actualWidth = actualHeight = 0;
-		currentIcon = icon;
 		currentText = text;
 		currentGap = gap;
 		canAlignText = false;
 		canAlignIcon = false;
+		currentIcon = null;
 		imageNode = null;
 		if (iconNode != null) {
+			currentIcon = getIcon(jc, icon);
 			DOMNode.setAttr(iconNode, "innerHTML", "");
 			if (icon != null) {
-				imageNode = DOMNode.getImageNode(icon.getImage());
+				imageNode = DOMNode.getImageNode(currentIcon.getImage());
 				DOMNode.setStyles(imageNode, "vertical-align", "middle"); // else
 																			// this
 																			// will

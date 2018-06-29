@@ -1665,6 +1665,20 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		return colorModel.getTransparency();
 	}
 
+	
+	/**
+	 * Set the underlying graphics object coming from painting this image
+	 * 
+	 * 
+	 */
+	
+	public void setImageFromHTML5Canvas(JSGraphics2D g) {
+		this._g = g;
+		width = raster.width;
+		height = raster.height;
+		setPixels();
+	}
+	
 	/**
 	 * Extract the int[] data from this image by installing it in a canvas.
 	 * Note that if if img.complete == false, then this will result in a

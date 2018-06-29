@@ -1,6 +1,7 @@
 package swingjs.api.js;
 
 import java.applet.AudioClip;
+import java.awt.Component;
 import java.awt.Image;
 import java.awt.Rectangle;
 
@@ -236,11 +237,11 @@ public abstract class DOMNode {
 				"controls", "true", (isLoop ? "loop" : null), (isLoop ? "true" : null), "src", filePath);
 	}
 
-	public static void setCursor(String c) {
+	public static void setCursor(String c, Component comp) {
 		/**
 		 * @j2sNative
 		 * 
-		 * document.body.style.cursor = c;
+		 * if (comp && comp.ui) { comp.ui.getDOMNode().style.cursor = c } else { document.body.style.cursor = c } 
 		 * 
 		 */
 		{}

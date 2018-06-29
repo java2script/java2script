@@ -1,5 +1,6 @@
-// j2sCore.js (based on JmolCore.js)
+// j2sCore.js (based on JmolCore.js
 
+// BH 6/29/2018 9:48:13 AM fixes key info for mouse move
 // BH 6/27/2018 12:45:44 PM adds DND for frames
 // BH 6/20/2018 11:26:09 PM fix for menu bar not closable
 // BH 3/16/2018 5:25:09 AM fixes for dragging on phones
@@ -1591,7 +1592,7 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
     lastDragy = xym[1];
     
     if (!who.isDragging)
-			xym[2] = 0;
+			xym[2] = J2S._getKeyModifiers(ev);
 
     var ui = ev.target["data-ui"];
     //if (who.isdragging && (!ui || !ui.handleJSEvent(who, 506, ev))) {}

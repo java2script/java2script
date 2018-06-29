@@ -2,12 +2,23 @@ package swingjs;
 
 import java.util.Hashtable;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+
 import javajs.img.BMPDecoder;
 import javajs.util.AU;
+
+import java.awt.Component;
+import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.ImageConsumer;
+import java.awt.image.WritableRaster;
+
 import swingjs.api.Interface;
+import swingjs.api.js.DOMNode;
+import swingjs.api.js.HTML5Canvas;
 
 /**
  * An image consumer for off-line images.
@@ -80,6 +91,7 @@ public class JSImagekit implements ImageConsumer {
 	public Image getCreatedImage() {
 		return jsimage;
 	}
+
 
 	@Override
 	public void setDimensions(int width, int height) {
@@ -231,6 +243,36 @@ public class JSImagekit implements ImageConsumer {
 			  : b[0] == 'G' && b[1] == 'I' && b[2] == 'F' ? GIF
 				: b[0] == 'B' && b[1] == 'M' ? BMP 
 				: UNK);
+	}
+
+
+	/**
+	 * Create an ImageIcon by painting from an Icon to an HTML5 canvas, and then
+	 * using that as the basis for an image. 
+	 * 
+	 * @param c
+	 * @param icon
+	 * @return
+	 */
+	public static ImageIcon createImageIcon(Component c, Icon icon) {
+		int width = icon.getIconWidth();
+		int height = icon.getIconHeight();
+		HTML5Canvas canvas = (HTML5Canvas) DOMNode.createElement("canvas", "tmpIcon");
+		DOMNode.setStyles(canvas, "width", width + "px", "height", height + "px");
+		/**
+		 * @j2sNative
+		 * 
+		 * canvas.width = width;
+		 * canvas.height = height;
+		 * 
+		 */
+		JSGraphics2D g = new JSGraphics2D(canvas);
+		// A JSGraphics2D is not a real Graphics object - must coerce 
+		icon.paintIcon(c, (Graphics)(Object) g, 0, 0);
+		ColorModel cm = ColorModel.getRGBdefault();
+		BufferedImage img = new BufferedImage(cm, cm.createCompatibleWritableRaster(width, height), false, null);
+		img.setImageFromHTML5Canvas(g);
+		return new ImageIcon(img, "paintedIcon");
 	}
 
 	
