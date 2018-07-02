@@ -110,7 +110,7 @@ public class JSSAXParser implements Parser, XMLReader {
 	}
 
 	private DOMNode parseXML(String data) {
-		return JSUtil.getJQuery().parseXML(removeProcessing(data));
+		return JSUtil.jQuery.parseXML(removeProcessing(data));
 	}
 
 	/**

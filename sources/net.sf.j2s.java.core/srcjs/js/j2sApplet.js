@@ -1,5 +1,6 @@
 // j2sCore.js (based on JmolCore.js
 
+// BH 7/1/2018 7:25:25 AM fixes drag-drop for first call in Firefox/win
 // BH 6/29/2018 9:48:13 AM fixes key info for mouse move
 // BH 6/27/2018 12:45:44 PM adds DND for frames
 // BH 6/20/2018 11:26:09 PM fix for menu bar not closable
@@ -1674,8 +1675,14 @@ J2S.Cache.put = function(filename, data) {
 		});
 		J2S.$appEvent(me, node, "drop", function(e) {
 			var oe = e.originalEvent;
-			oe.stopPropagation();
-			oe.preventDefault();
+      try {
+      	var file = oe.dataTransfer.files[0];
+      } catch (e){
+        return;
+      } finally {
+  			oe.stopPropagation();
+	   		oe.preventDefault();
+      }      
       var target = oe.target;
       var c = target;
       var comp; 
@@ -1686,7 +1693,6 @@ J2S.Cache.put = function(filename, data) {
       var d = comp.getLocationOnScreen();
       var x = oe.pageX - d.x;
       var y = oe.pageY - d.y;
-			var file = oe.dataTransfer.files[0];
 			if (file == null) {
 				// FF and Chrome will drop an image here
 				// but it will be only a URL, not an actual file.

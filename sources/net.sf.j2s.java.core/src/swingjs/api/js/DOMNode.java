@@ -9,13 +9,12 @@ import swingjs.JSUtil;
 
 public abstract class DOMNode {
 
+
 	public abstract void appendChild(DOMNode node);
 
 	public abstract boolean hasFocus();
 
 	public abstract boolean play();
-
-	public abstract DOMNode removeChild(DOMNode nocde);
 
 	public abstract DOMNode removeAttribute(String attr);
 	
@@ -63,29 +62,36 @@ public abstract class DOMNode {
 			return null;
 		}
 	}
+	
+	/**
+	 * 
+	 * @param node
+	 * @param container
+	 * @return parent if container is null, or container if it is not null
+	 */
+	public static DOMNode transferTo(DOMNode node, DOMNode container) {
+		if (node == null)
+			return null;
+		DOMNode p = getParent(node);
+		try {
+			JSUtil.jQuery.$(node).detach();
+		} catch (Throwable e) {
+			// ignore
+		}
+		 if (container == null)
+		 	return p; 
+		 JSUtil.jQuery.$(container).append(node);
+		return container;
+	}
 
 	/**
 	 * remove this node and return its parent
 	 * @param node
 	 * @return parent or null
 	 */
-	public static DOMNode remove(DOMNode node) {
-		if (node == null)
-			return null;
-		/**
-		 * @j2sNative
-		 * 
-		 * try {
-		 *   var p = node.parentElement;
-		 *   p.removeChild(node);
-		 *   $(body).remove(node);
-		 * } catch(e) {
-		 * };
-		 * return p;
-		 */
-		{
-			return null;
-		}
+	public static void remove(DOMNode node) {
+		if (node != null)		
+			JSUtil.jQuery.$(node).remove();
 	}
 	
 	/**
@@ -225,7 +231,7 @@ public abstract class DOMNode {
 		 *            f = function(ev) {me.handleJSEvent$O$I$O(node, -1, ev)};
 		 */
 		{}
-		JSUtil.getJQuery().$(node).on(event, f);
+		JSUtil.jQuery.$(node).on(event, f);
 	}
 
 	public static DOMNode setZ(DOMNode node, int z) {
@@ -270,16 +276,6 @@ public abstract class DOMNode {
 		domNode.appendChild(label);
 	}
 
-	public static void removeAllChildren(DOMNode node) {
-		/**
-		 * @j2sNative
-		 * 
-		 *            while (node.hasChildNodes()) {
-		 *            node.removeChild(node.lastChild); }
-		 */
-		{}
-	}
-
 	public static void seTabIndex(DOMNode node, int i) {
 		/**
 		 * @j2sNative
@@ -291,6 +287,16 @@ public abstract class DOMNode {
 
 	public static void setVisible(DOMNode node, boolean visible) {
 		setStyles(node, "display", visible ? "block" : "none");
+	}
+
+	public static int getHeight(DOMNode node) {
+		// TODO Auto-generated method stub
+		return JSUtil.jQuery.$(node).height();
+	}
+
+	public static int getWidth(DOMNode node) {
+		// TODO Auto-generated method stub
+		return JSUtil.jQuery.$(node).width();
 	}
 
 }

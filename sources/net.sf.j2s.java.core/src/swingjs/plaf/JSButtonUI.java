@@ -37,10 +37,11 @@ import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
+import javax.swing.JTable;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
+import javax.swing.plaf.TableUI;
 import javax.swing.plaf.UIResource;
-import javax.swing.table.TableCellRenderer;
 
 import swingjs.api.js.DOMNode;
 
@@ -74,12 +75,12 @@ public class JSButtonUI extends JSLightweightUI {
 	/**
 	 * a wrapper if this is not a menu item
 	 */
-	protected DOMNode btnLabel; 
     protected DOMNode itemNode;
 	protected JMenuItem menuItem;
 	protected AbstractButton button;
-
+	
 	private boolean isSimpleButton;
+	private ButtonListener listener;
 	
 	@Override
 	public DOMNode updateDOMNode() {
@@ -185,10 +186,11 @@ public class JSButtonUI extends JSLightweightUI {
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
 		// from menus only - action is on mouse-up
+		// other controls use a ButtonListener
 		if (debugging)
 				System.out.println("JSButtonUI handleJSEvent for " + ((JSComponentUI)target).id);
   	// checkbox or radio menuitem handle themselves
-		if (menuItem != null && domBtn == null) {			
+		if (menuItem != null && radioBtn == null) {			
 		 switch (eventType) {
 		 case MouseEvent.MOUSE_RELEASED:
 				menuItem.doClick(0);
@@ -217,11 +219,12 @@ public class JSButtonUI extends JSLightweightUI {
 	public void uninstallUI(JComponent jc) {
 		uninstallKeyboardActions(button);
 		uninstallListeners(button);
+			
 		// uninstallDefaults((AbstractButton) c);
 	}
 
-	protected void installListeners(AbstractButton b) {
-		ButtonListener listener = new ButtonListener(this, isMenuItem);
+	protected void installListeners(AbstractButton b) {	
+		listener = new ButtonListener(this, isMenuItem);
 		if (listener != null) {
 			b.addMouseListener(listener);
 			b.addMouseMotionListener(listener);
@@ -312,6 +315,7 @@ public class JSButtonUI extends JSLightweightUI {
 	 * The value of this comes from the defaults table.
 	 */
 	protected int defaultTextShiftOffset;
+	
 
 	@Override
 	protected String getPropertyPrefix() {

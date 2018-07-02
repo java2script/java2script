@@ -33,10 +33,12 @@ import javax.swing.AbstractButton;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.MouseInputListener;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.UIResource;
 
@@ -147,6 +149,20 @@ public class JSComponentUI extends ComponentUI
 	protected JComponent jc;
 
 	/**
+	 * TableCellRenderers will not have parents; here we point to the table so 
+	 * that we can send the coordinates to the retrieve the row and cell
+	 *  
+	 */
+	protected  JComponent targetParent;
+	
+	public JComponent getTargetParent() {
+		return targetParent;
+	}
+
+	//MouseInputListener mouseInputListener;
+	
+
+	/**
 	 * The outermost div holding a component -- left, top, and for a container
 	 * width and height
 	 * 
@@ -198,11 +214,17 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	/**
-	 * The HTML5 input element being pressed, if the control subclasses
-	 * JSButtonUI.
+	 * The HTML5 input element being pressed, if the control 
+	 * is a radio or checkbox button.
 	 * 
 	 */
-	protected DOMNode domBtn;
+	protected DOMNode radioBtn;
+
+	/**
+	 * the "FOR" label for a radio button
+	 * 
+	 */
+	protected DOMNode btnLabel; 
 
 	/**
 	 * a component or subcomponent that can be enabled/disabled
@@ -765,7 +787,7 @@ public class JSComponentUI extends ComponentUI
 	private ImageIcon getIcon(JSComponent c, Icon icon) {
 		return (c == null || icon == null 
 				&& (icon  = ((AbstractButton) c).getIcon()) == null ?
-			null : (icon instanceof ImageIcon) ? (ImageIcon) icon :
+			null : icon.getIconWidth() <= 0 || icon.getIconHeight() <= 0 ? null : (icon instanceof ImageIcon) ? (ImageIcon) icon :
 				JSToolkit.paintImageForIcon(jc, icon));
 	}
 
@@ -781,9 +803,9 @@ public class JSComponentUI extends ComponentUI
 		currentIcon = null;
 		imageNode = null;
 		if (iconNode != null) {
-			currentIcon = getIcon(jc, icon);
-			DOMNode.setAttr(iconNode, "innerHTML", "");
-			if (icon != null) {
+			icon = currentIcon = getIcon(jc, icon);
+			$(iconNode).empty();
+			if (currentIcon != null) {
 				imageNode = DOMNode.getImageNode(currentIcon.getImage());
 				DOMNode.setStyles(imageNode, "vertical-align", "middle"); // else
 																			// this
@@ -996,7 +1018,7 @@ public class JSComponentUI extends ComponentUI
 		} else {
 			// determine the natural size of this object
 			// save the parent node -- we will need to reset that.
-			parentNode = DOMNode.remove(node);
+			parentNode = DOMNode.transferTo(node, null);
 
 			// remove position, width, and height, because those are what we are
 			// setting here
@@ -1184,8 +1206,7 @@ public class JSComponentUI extends ComponentUI
 			addChildrenToDOM(children);
 
 			if (isWindow && jc.getUIClassID() != "InternalFrameUI") {
-				DOMNode.remove(outerNode);
-				$(body).append(outerNode);
+				DOMNode.transferTo(outerNode, body);
 			}
 		}
 
@@ -1248,25 +1269,6 @@ public class JSComponentUI extends ComponentUI
 		return height = c.getHeight();
 	}
 
-	/**
-	 * getPreferredSize reports to a LayoutManager what the size is for this
-	 * component will be when placed in the DOM.
-	 * 
-	 * It is only called if the user has not already set the preferred size of
-	 * the component.
-	 * 
-	 * Later, the LayoutManager will make a call to setBounds in order to
-	 * complete the transaction, after taking everything into consideration.
-	 * 
-	 */
-	@Override
-	public Dimension getPreferredSize() {
-		Dimension d = getHTMLSize();
-		if (debugging)
-			System.out.println("CUI >> getPrefSize >> " + d + " for " + this.id);
-		return d;
-	}
-
 	private Dimension getHTMLSize() {
 		return setHTMLSize(updateDOMNode(), false);
 	}
@@ -1317,11 +1319,44 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public Dimension getMinimumSize() {
-		return getPreferredSize();
+		return  getMinimumSize(jc);
 	}
 
 	@Override
 	public Dimension getMaximumSize() {
+		return getMaximumSize(jc);
+	}
+
+	/**
+	 * getPreferredSize reports to a LayoutManager what the size is for this
+	 * component will be when placed in the DOM.
+	 * 
+	 * It is only called if the user has not already set the preferred size of
+	 * the component.
+	 * 
+	 * Later, the LayoutManager will make a call to setBounds in order to
+	 * complete the transaction, after taking everything into consideration.
+	 * 
+	 */
+	@Override
+	public Dimension getPreferredSize() {
+		return getPreferredSize(jc);
+	}
+
+	
+	
+	public Dimension getMinimumSize(JComponent jc) {
+		return getPreferredSize(jc);
+	}
+
+	public Dimension getPreferredSize(JComponent jc) {
+		Dimension d = getHTMLSize();
+		if (debugging)
+			System.out.println("CUI >> getPrefSize >> " + d + " for " + this.id);
+		return d;
+	}
+
+	public Dimension getMaximumSize(JComponent jc) {
 		if (isToolbarFixed) {
 			Container parent = jc.getParent();
 			String parentClass = (parent == null ? null : parent.getUIClassID());
@@ -1329,21 +1364,6 @@ public class JSComponentUI extends ComponentUI
 				return getPreferredSize();
 		}
 		return null;
-	}
-
-	@Deprecated
-	public Dimension getMinimumSize(JComponent jc) {
-		return getMinimumSize();
-	}
-
-	@Deprecated
-	public Dimension getPreferredSize(JComponent jc) {
-		return getPreferredSize();
-	}
-
-	@Deprecated
-	public Dimension getMaximumSize(JComponent jc) {
-		return getMaximumSize();
 	}
 
 	/**
@@ -1652,22 +1672,7 @@ public class JSComponentUI extends ComponentUI
 		if (this.c.getWidth() == 0)
 			return;
 		int type = ((AbstractButton) c).getHorizontalAlignment();
-		String prop = null;
-		switch (type) {
-		case SwingConstants.RIGHT:
-		case SwingConstants.TRAILING:
-			prop = "right";
-			break;
-		case SwingConstants.LEFT:
-		case SwingConstants.LEADING:
-			prop = "left";
-			break;
-		case SwingConstants.CENTER:
-			prop = "center";
-			break;
-		default:
-			return;
-		}
+		String prop = getCSSTextAlignment(type);
 		// the centeringNode is not visible. It is a div that allows us to
 		// position the text and icon of the image based on its preferred size
 		// in the
@@ -1701,6 +1706,24 @@ public class JSComponentUI extends ComponentUI
 			// an initial paint shows checkboxes lower than they should be.
 			DOMNode.setStyles(centeringNode, "position", "absolute", "left", left + "px");
 		}
+	}
+
+	protected String getCSSTextAlignment(int type) {
+		String prop = null;
+		switch (type) {
+		case SwingConstants.RIGHT:
+		case SwingConstants.TRAILING:
+			prop = "right";
+			break;
+		case SwingConstants.LEFT:
+		case SwingConstants.LEADING:
+			prop = "left";
+			break;
+		case SwingConstants.CENTER:
+			prop = "center";
+			break;
+		}
+		return prop;
 	}
 
 	protected void setVerticalAlignment(boolean isText) {
@@ -2200,6 +2223,11 @@ public class JSComponentUI extends ComponentUI
 		if (dropTarget == this)
 			return;
 		JSUtil.J2S._setDragDropTarget(c, getDOMNode(), dropTarget != null);
+	}
+
+	public void setTargetParent(JComponent targetParent, MouseInputListener mouseInputListener) {
+		this.targetParent = targetParent;
+		//this.mouseInputListener = mouseInputListener;
 	}
 
 }

@@ -120,7 +120,7 @@ public class JSToolkit extends SunToolkit {
 	@Override
 	protected int getScreenWidth() {
 		@SuppressWarnings("unused")
-		JQuery jq = JSUtil.getJQuery();
+		JQuery jq = JSUtil.jQuery;
 		int w = 0;
 		/**
 		 * @j2sNative
@@ -136,7 +136,7 @@ public class JSToolkit extends SunToolkit {
 	@Override
 	protected int getScreenHeight() {
 		@SuppressWarnings("unused")
-		JQuery jq = JSUtil.getJQuery();
+		JQuery jq = JSUtil.jQuery;
 		int h = 0;
 		/**
 		 * @j2sNative

@@ -4811,6 +4811,8 @@ this.constr = null;
 m$(C$, "c$$Class$ClassA$ClassA$I", function(declaringClass,parameterTypes,checkedExceptions,modifiers){
 Clazz.super_(C$, this);
 this.Class_=declaringClass;
+if (";Integer;Long;Short;Byte;Float;Double;".indexOf(";" + this.Class_.getName() + ";") >= 0)
+ parameterTypes = null;
 this.parameterTypes=parameterTypes;
 if (parameterTypes != null)
 for (var i = 0; i < parameterTypes.length; i++) {
