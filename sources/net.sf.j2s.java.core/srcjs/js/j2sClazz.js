@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 7/2/2018 12:50:55 PM Character.objectValue(), for enhanced FOR in transpiler
 // BH 6/29/2018 10:13:51 AM array.equals$O, fixes array.clone
 // BH 6/28/2018 7:34:58 AM fix for array.clone not copying array in the case of objects
 // BH 6/27/2018 3:11:50 PM fix for class String not indicating its name 
@@ -3253,14 +3254,6 @@ Boolean = java.lang.Boolean = Boolean || function(){
 if (typeof arguments[0] != "object")this.c$(arguments[0]);
 });
 
-Integer.prototype.objectValue = 
-Short.prototype.objectValue = 
-Long.prototype.objectValue =  
-Float.prototype.objectValue = 
-Double.prototype.objectValue =  function() {return this.valueOf()};
-
-
-
 //if (supportsNativeObject) {
   extendObject(Boolean);
 //}
@@ -3975,6 +3968,7 @@ if (typeof arguments[0] != "object")this.c$(arguments[0]);
 Clazz._setDeclared("java.lang.Character", java.lang.Character); 
 setJ2STypeclass(Character, "char", "C");
 
+
 m$(C$,"getName",
 function(){
 return "?";
@@ -4121,6 +4115,16 @@ return String.valueOf(c);
 m$(C$,"charCount", function(codePoint){
   return codePoint >= 0x010000 ? 2 : 1;
 }, 1);
+
+
+Integer.prototype.objectValue = 
+Short.prototype.objectValue = 
+Long.prototype.objectValue =  
+Float.prototype.objectValue = 
+Double.prototype.objectValue =  function() {return this.valueOf()};
+Character.prototype.objectValue = function() { return this.value }
+
+
 
 // TODO: Only asking for problems declaring Date. This is not necessary
 

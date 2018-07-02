@@ -501,18 +501,25 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	public boolean visit(EnhancedForStatement node) {
 		SimpleName name = node.getParameter().getName();
 		String varName = getQualifiedSimpleName(name);
+		ITypeBinding vtype = name.resolveTypeBinding();
 		buffer.append("for (var ");
 		acceptVariableFinal(name, 1);
-		writeReplaceV(", $V = ", "V", varName);
+		writeReplaceV(", $V = ", "V", varName, null, null);
 		Expression exp = node.getExpression();
-		ITypeBinding typeBinding = exp.resolveTypeBinding();
-		if (typeBinding.isArray()) {
-			writeReplaceV("0, $$V = ", "V", varName);
+		ITypeBinding eType =  exp.resolveTypeBinding();
+		ITypeBinding arrayType =eType.getComponentType();
+		
+		if (arrayType == null) {
 			exp.accept(this);
-			writeReplaceV("; $V<$$V.length&&((V=$$V[$V]),1);$V++", "V", varName);
+			writeReplaceV(".iterator(); $V.hasNext()&&((V=", "V", varName, null, null);			
+			writeReplaceV("($V.next())", "V", varName, vtype, eType);			
+			writeReplaceV("),1);", "V", varName, null, null);
 		} else {
+			writeReplaceV("0, $$V = ", "V", varName, null, null);
 			exp.accept(this);
-			writeReplaceV(".iterator(); $V.hasNext()&&((V=$V.next()),1);", "V", varName);
+			writeReplaceV("; $V<$$V.length&&((V=", "V", varName, null, null);
+			writeReplaceV("($$V[$V])", "V", varName, vtype, arrayType);
+			writeReplaceV("),1);$V++", "V", varName, null, null);
 		}
 		buffer.append(") ");
 		node.getBody().accept(this);
@@ -520,8 +527,33 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		return false;
 	}
 
-	private void writeReplaceV(String template, String v, String varName) {
-		buffer.append(template.replace(v, varName));
+	/**
+	 * allow for primitive boxing or unboxing. See test.Test_Chars.java
+	 * @param template
+	 * @param v
+	 * @param varName
+	 * @param vType
+	 * @param eType
+	 */
+	private void writeReplaceV(String template, String v, String varName, ITypeBinding vType, ITypeBinding eType) {
+		String s = template.replace(v, varName);
+		if (vType != eType) {
+			if (!eType.isPrimitive()) {
+				// So we know the expression is boxed -- Character, for example
+				// Character does not use .objectValue, but we implement it here
+				s += ".objectValue()";
+				if (vType.getName().equals("int"))
+					s += CHARCODEAT0;
+			} else if (!vType.isPrimitive()) {
+				// So we know the expression is unboxed -- char, for example
+				// but it could be Character to int
+				s = "new " + getPrimitiveTYPE(eType.getName()) + s;
+			} else {
+				// this is a conversion of an char[] to an int -- the only possibility allowed, I think
+				s += CHARCODEAT0;
+			}
+		}
+		buffer.append(s);
 	}
 
 	public boolean visit(EnumDeclaration node) {
@@ -1889,7 +1921,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private static final String getPrimitiveTYPE(String name) {
 		int pt = primitiveTypeEquivalents.indexOf(name.substring(1)) - 1;
 		String type = primitiveTypeEquivalents.substring(pt);
-		return type.substring(0, type.indexOf(",")) + ".TYPE";
+		return type.substring(0, type.indexOf(","));
 	}
 
 	private boolean isArray = false;
@@ -2704,7 +2736,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			if (varBinding != null) {
 				if (qualifier instanceof SimpleName) {
 					addQualifiedNameFromBinding(varBinding, false);
-					// buffer.append("<qsn<");
 				} else {
 					buffer.append('(');
 					if (className == null)
@@ -2963,7 +2994,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		ITypeBinding binding = type.resolveBinding();
 		if (type.isPrimitiveType()) {
 			// adds Integer.TYPE, Float.TYPE, etc.
-			buffer.append(getPrimitiveTYPE(binding.getName()));
+			buffer.append(getPrimitiveTYPE(binding.getName()) + ".TYPE");
 		} else if (type instanceof ArrayType) {
 			buffer.append(clazzArray(binding, ARRAY_CLASS_LITERAL));
 		} else {
@@ -3216,7 +3247,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		ITypeBinding ebinding = type.getElementType();
 		if (ebinding == null)
 			ebinding = type; // creating for Enum
-		String params = (ebinding.isPrimitive() ? getPrimitiveTYPE(ebinding.getName())
+		String params = (ebinding.isPrimitive() ? getPrimitiveTYPE(ebinding.getName()) + ".TYPE"
 				: getQualifiedStaticName(null, ebinding.getQualifiedName(), true, true, false))
 				+ (dimFlag == ARRAY_DIM_ONLY ? "" : ", " + (Math.abs(dimFlag) * type.getDimensions() * -1));
 		return "Clazz.array(" + params + (dimFlag > 0 ? ")" : "");
