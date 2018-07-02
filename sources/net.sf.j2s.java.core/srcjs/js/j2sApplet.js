@@ -1,5 +1,6 @@
 // j2sCore.js (based on JmolCore.js
 
+// BH 7/2/2018 10:00:49 PM fix logic for FileReader for Chrome
 // BH 7/1/2018 7:25:25 AM fixes drag-drop for first call in Firefox/win
 // BH 6/29/2018 9:48:13 AM fixes key info for mouse move
 // BH 6/27/2018 12:45:44 PM adds DND for frames
@@ -895,11 +896,11 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
                     +'<button id="ID_cancel">cancel</button>'
                   +'</div>'
                 +'<div>').replace(/ID/g, id);
-      var parent = (!parentDiv || parentDiv == "body" ? parentDiv 
+      var parent = (!parentDiv | parentDiv == "body" ? "body" 
          : typeof parentDiv == "string" ? "#" + parentDiv 
          : parentDiv);
       if (parent == "body") {
-		  	J2S.$after(body, div);
+		  	J2S.$after(document.body, div);
       } else {
         J2S.$append(parent, div);
         }        

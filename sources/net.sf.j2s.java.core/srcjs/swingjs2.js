@@ -10654,6 +10654,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sCore.js (based on JmolCore.js
 
+// BH 7/2/2018 10:00:49 PM fix logic for FileReader for Chrome
 // BH 7/1/2018 7:25:25 AM fixes drag-drop for first call in Firefox/win
 // BH 6/29/2018 9:48:13 AM fixes key info for mouse move
 // BH 6/27/2018 12:45:44 PM adds DND for frames
@@ -11549,11 +11550,11 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
                     +'<button id="ID_cancel">cancel</button>'
                   +'</div>'
                 +'<div>').replace(/ID/g, id);
-      var parent = (!parentDiv || parentDiv == "body" ? parentDiv 
+      var parent = (!parentDiv | parentDiv == "body" ? "body" 
          : typeof parentDiv == "string" ? "#" + parentDiv 
          : parentDiv);
       if (parent == "body") {
-		  	J2S.$after(body, div);
+		  	J2S.$after(document.body, div);
       } else {
         J2S.$append(parent, div);
         }        
@@ -13091,14 +13092,14 @@ J2S._getResourcePath = function(path, isJavaPath) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
-// BH 7/2/2018 12:50:55 PM Character.objectValue(), for enhanced FOR in transpiler
+// BH 7/2/2018 12:50:55 PM Character.prototype.objectValue() and Character.prototype.intValue(), for enhanced FOR in transpiler
 // BH 6/29/2018 10:13:51 AM array.equals$O, fixes array.clone
 // BH 6/28/2018 7:34:58 AM fix for array.clone not copying array in the case of objects
 // BH 6/27/2018 3:11:50 PM fix for class String not indicating its name 
 // BH 6/25/2018 3:06:30 PM adds String.concat$S
 // BH 6/25/2018 12:10:25 PM Character.toTitleCase, isTitleCase as ...UpperCase
 // BH 6/25/2018 10:23:24 AM really fixing new int[] {'a'} using .$c() see Test_Byte.java
-// BH 6/21/2018 1:08:58 PM missing mysterious Integer.objectValue() 
+// BH 6/21/2018 1:08:58 PM missing mysterious Integer.prototype.objectValue() 
 // BH 6/20/2018 6:00:23 AM missing printStackTrace(PrintStream)
 // BH 6/19/2018 8:49:57 AM fix for checkDeclared
 // BH 5/19/2018 8:22:25 PM fix for new int[] {'a'}
@@ -17206,8 +17207,8 @@ Short.prototype.objectValue =
 Long.prototype.objectValue =  
 Float.prototype.objectValue = 
 Double.prototype.objectValue =  function() {return this.valueOf()};
-Character.prototype.objectValue = function() { return this.value }
-
+Character.prototype.objectValue = function() { return this.value };
+Character.prototype.intValue  = function() { return this.value.codePointAt(0) };
 
 
 // TODO: Only asking for problems declaring Date. This is not necessary
