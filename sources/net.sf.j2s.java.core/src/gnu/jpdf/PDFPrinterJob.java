@@ -125,9 +125,9 @@ public class PDFPrinterJob extends PrinterJob {
 	 * Prints a set of pages.
 	 * 
 	 * @param pathname
-	 *          the full path for the output PDF file.
+	 *            the full path for the output PDF file.
 	 * @exception PrinterException
-	 *              an error in the print system caused the job to be aborted.
+	 *                an error in the print system caused the job to be aborted.
 	 * @see Book
 	 * @see Pageable
 	 * @see Printable
@@ -145,7 +145,7 @@ public class PDFPrinterJob extends PrinterJob {
 		}
 
 		System.out.println("GNU JPDF creating " + file);
-		
+
 		PDFGraphics pdfGraphics = null;
 		printJob = new PDFJob(fileOutputStream);
 
@@ -153,8 +153,11 @@ public class PDFPrinterJob extends PrinterJob {
 			printJob.getPDFDocument().setPDFInfo(info);
 		}
 
-		pageCount = (pageable == null ? 1 : pageable.getNumberOfPages());
-		for (int pageIndex = 0; pageIndex < pageCount; pageIndex++) {
+		// BH 2018 allows for unknown number of pages and a return of NO_SUCH_PAGE from the 
+		// project to stop sending pages. 
+		pageCount = (pageable == null ? Pageable.UNKNOWN_NUMBER_OF_PAGES : pageable.getNumberOfPages());
+
+		for (int pageIndex = 0; pageCount < 0 || pageIndex < pageCount; pageIndex++) {
 			if (pageable != null)
 				pageFormat = pageable.getPageFormat(pageIndex);
 			if (pageFormat == null)
@@ -162,11 +165,12 @@ public class PDFPrinterJob extends PrinterJob {
 			pdfGraphics = (PDFGraphics) printJob.getGraphics(pageFormat);
 			if (pageable != null)
 				printable = pageable.getPrintable(pageIndex);
-			printable.print(pdfGraphics, pageFormat, pageIndex);
+			if (printable.print(pdfGraphics, pageFormat, pageIndex) == Printable.NO_SUCH_PAGE)
+			   pageCount = 0;
 			pdfGraphics.dispose();
 		}
 		printJob.end();
-		
+
 		System.out.println("GNU JPDF created: " + file);
 
 	}
