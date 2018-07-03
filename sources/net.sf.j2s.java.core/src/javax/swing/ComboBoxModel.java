@@ -38,7 +38,7 @@ package javax.swing;
  *
  * @author Arnaud Weber
  */
-public interface ComboBoxModel extends ListModel {
+public interface ComboBoxModel<E> extends ListModel<E> {
 
   /**
    * Set the selected item. The implementation of this  method should notify

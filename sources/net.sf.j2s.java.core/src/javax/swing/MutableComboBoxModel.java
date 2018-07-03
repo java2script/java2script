@@ -33,7 +33,7 @@ package javax.swing;
  * @author Tom Santos
  */
 
-public interface MutableComboBoxModel extends ComboBoxModel {
+public interface MutableComboBoxModel<E> extends ComboBoxModel<E> {
 
     /**
      * Adds an item at the end of the model. The implementation of this method
@@ -42,7 +42,7 @@ public interface MutableComboBoxModel extends ComboBoxModel {
      *
      * @param obj the <code>Object</code> to be added
      */
-    public void addElement( Object obj );
+    public void addElement(E obj );
 
     /**
      * Removes an item from the model. The implementation of this method should
@@ -61,7 +61,7 @@ public interface MutableComboBoxModel extends ComboBoxModel {
      * @param obj  the <code>Object</code> to be added
      * @param index  location to add the object
      */
-    public void insertElementAt( Object obj, int index );
+    public void insertElementAt(E obj, int index );
 
     /**
      * Removes an item at a specific index. The implementation of this method
