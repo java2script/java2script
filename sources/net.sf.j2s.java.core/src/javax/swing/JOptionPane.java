@@ -1387,7 +1387,7 @@ public class JOptionPane extends JComponent {
 			int messageType, Icon icon, Object[] options, Object initialValue) {
 		JOptionPane pane = new JOptionPane(message, messageType, optionType, icon, options, initialValue);
 		pane.putClientProperty(ClientPropertyKey.PopupFactory_FORCE_HEAVYWEIGHT_POPUP, Boolean.TRUE);
-		Component fo = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+		//Component fo = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
 		//
 		pane.setInitialValue(initialValue);
 
@@ -1435,9 +1435,9 @@ public class JOptionPane extends JComponent {
 
 		Object selectedValue = pane.getValue();
 
-		if (fo != null && fo.isShowing()) {
-			fo.requestFocus();
-		}
+//		if (fo != null && fo.isShowing()) {
+//			fo.requestFocus();
+//		}
 		if (selectedValue == null) {
 			return CLOSED_OPTION;
 		}
@@ -1524,7 +1524,8 @@ public class JOptionPane extends JComponent {
 			int messageType, Icon icon, Object[] selectionValues, Object initialSelectionValue) {
 		JOptionPane pane = new JOptionPane(message, messageType, OK_CANCEL_OPTION, icon, null, null);
 		pane.putClientProperty(ClientPropertyKey.PopupFactory_FORCE_HEAVYWEIGHT_POPUP, Boolean.TRUE);
-		Component fo = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+		
+	//	Component fo = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
 
 		pane.setWantsInput(true);
 		pane.setSelectionValues(selectionValues);
@@ -1575,9 +1576,9 @@ public class JOptionPane extends JComponent {
 			}
 		}
 
-		if (fo != null && fo.isShowing()) {
-			fo.requestFocus();
-		}
+//		if (fo != null && fo.isShowing()) {
+//			fo.requestFocus();
+//		}
 		Object value = pane.getInputValue();
 
 		if (value == UNINITIALIZED_VALUE) {
