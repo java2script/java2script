@@ -122,6 +122,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// BH 7/3/2018 -- adds effectively final -- FINAL keyword no longer necessary  
 // BH 6/27/2018 -- fix for a[Integer] not becoming a[Integer.valueOf]
 // BH 6/26/2018 -- method logging via j2s.log.methods.called and j2s.log.methods.declared
 // BH 6/24/2018 -- synchronized(a = new Object()) {...} ---> ...; only if an assignment or not a simple function call to Object.getTreeLock()
@@ -745,10 +746,21 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			int level = blockLevel + offset;
 			VariableAdapter.FinalVariable f = new VariableAdapter.FinalVariable(level, identifier,
 					methodDeclareNameStack.size() == 0 ? null : methodDeclareNameStack.peek());
-			addVariable(f, identifier, binding);
+			List<VariableAdapter.FinalVariable> finalVars = getVariableList('f');
+			List<VariableAdapter.FinalVariable> normalVars = getVariableList('n');
+			f.toVariableName = identifier;
+			normalVars.add(f);			
+			if (isFinalOrEffectivelyFinal(binding)) {
+				finalVars.add(f);
+			}
 			//buffer.append("/*blockLevel " + blockLevel + " level " + level + "*/");
 		}
 		name.accept(this);
+	}
+
+	private static boolean isFinalOrEffectivelyFinal(IBinding binding) {
+		return Modifier.isFinal(binding.getModifiers()) 
+				|| binding instanceof IVariableBinding && ((IVariableBinding)binding).isEffectivelyFinal();
 	}
 
 	private void removeVariableFinals(MethodDeclaration node) {
@@ -771,7 +783,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				f.toVariableName = identifier;
 				normalVars.remove(f);
 				//buffer.append("/*remNorm " + f.variableName + "/to/" + f.toVariableName + "*/");
-				if (Modifier.isFinal(binding.getModifiers())) {
+				if (isFinalOrEffectivelyFinal(binding)) {
 					finalVars.remove(f);
 					//buffer.append("/*remFinal " + f.variableName + "/to/" + f.toVariableName + "*/");
 				}
@@ -1670,7 +1682,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				: ((PrimitiveType) nodeType).getPrimitiveTypeCode());
 		ITypeBinding classBinding = resolveAbstractOrAnonymousBinding(field);
 		// have to check here for final Object = "foo", as that must not be ignored.
-		boolean checkFinalConstant = (isStatic && Modifier.isFinal(field.getModifiers())
+		boolean checkFinalConstant = (isStatic && Modifier.isFinal(field.getModifiers())				
 				&& var != null && !var.getType().getQualifiedName().equals("java.lang.Object"));
 		if (needDefault)
 			preVisit2(field);
@@ -2903,7 +2915,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				}
 			}
 			String fieldVar = null;
-			if (isAnonymousClass() && Modifier.isFinal(varBinding.getModifiers())
+			if (isAnonymousClass() && isFinalOrEffectivelyFinal(varBinding)
 					&& varBinding.getDeclaringMethod() != null) {
 				String key = varBinding.getDeclaringMethod().getKey();
 				if (methodDeclareNameStack.size() == 0 || !key.equals(methodDeclareNameStack.peek())) {
@@ -3036,6 +3048,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	public boolean visit(VariableDeclarationFragment node) {
+		
+		
+		
 		SimpleName name = node.getName();
 		IBinding binding = name.resolveBinding();
 		if (binding == null)
@@ -3688,18 +3703,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private void addQualifiedNameFromBinding(IVariableBinding varBinding, boolean isStatic) {
 		appendShortenedQualifiedName((isStatic ? null : global_PackageName), varBinding.getDeclaringClass().getQualifiedName(),
 				isStatic(varBinding), true);
-	}
-
-	private void addVariable(VariableAdapter.FinalVariable f, String identifier, IBinding binding) {
-		List<VariableAdapter.FinalVariable> finalVars = getVariableList('f');
-		List<VariableAdapter.FinalVariable> normalVars = getVariableList('n');
-		f.toVariableName = identifier;
-		normalVars.add(f);
-		//buffer.append("/*addVar n " + identifier + " */");
-		if (Modifier.isFinal(binding.getModifiers())) {
-			finalVars.add(f);
-			//buffer.append("/*addVar f " + identifier + " */");
-		}
 	}
 
 	/**
