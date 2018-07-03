@@ -1343,20 +1343,20 @@ public class JSComponentUI extends ComponentUI
 		return getPreferredSize(jc);
 	}
 
+	// the following are likely to be called in the original BasicXXXUI classes
 	
-	
-	public Dimension getMinimumSize(JComponent jc) {
+	Dimension getMinimumSize(JComponent jc) {
 		return getPreferredSize(jc);
 	}
 
-	public Dimension getPreferredSize(JComponent jc) {
+	Dimension getPreferredSize(JComponent jc) {
 		Dimension d = getHTMLSize();
 		if (debugging)
 			System.out.println("CUI >> getPrefSize >> " + d + " for " + this.id);
 		return d;
 	}
 
-	public Dimension getMaximumSize(JComponent jc) {
+	Dimension getMaximumSize(JComponent jc) {
 		if (isToolbarFixed) {
 			Container parent = jc.getParent();
 			String parentClass = (parent == null ? null : parent.getUIClassID());
@@ -1825,8 +1825,9 @@ public class JSComponentUI extends ComponentUI
 			if (ui.containerNode != null)
 				ui.containerNode.appendChild(node);
 		}
-		if (outerNode != null && domNode != outerNode) // menu separators have
-														// domNode == outerNode
+		// menu separators have domNode == outerNode
+		// cell renderers will set their domNode to null;
+		if (outerNode != null && domNode != null && domNode != outerNode) 
 			outerNode.appendChild(domNode);
 		isDisposed = false;
 	}

@@ -14221,7 +14221,7 @@ var minimalObjNames = [ "equals", "equals$O", "hashCode" /*"toString",*/  ];
   addProto(proto, "finalize", function () {});
   addProto(proto, "notify", function () {});
   addProto(proto, "notifyAll", function () {});
-  addProto(proto, "wait", function () {});
+  addProto(proto, "wait", function () {alert("Object.wait was called!" + arguments.callee.caller.toString()});
   addProto(proto, "to$tring", Object.prototype.toString);
   addProto(proto, "toString", function () { return (this.__CLASS_NAME__ ? "[" + this.__CLASS_NAME__ + " object]" : this.to$tring.apply(this, arguments)); });
 

@@ -37,24 +37,15 @@
 </head>
 <body>
 <div class="select-editable">
-    <select id=selector onchange="this.nextElementSibling.value=this.value">
-        <option style="height:1px" value=""></option>
-        <option value="115x175 mm">115x175 mm</option>
-        <option value="120x160 mm">120x160 mm</option>
-        <option value="120x287 mm">120x287 mm</option>
+    <select id=selector onchange="this.nextElementSibling.value=this.value" onmousemove="document.getElementById('info').innerHTML=event.x + this">
+        <option style="height:1px" value="" onmousemove="document.getElementById('info').innerHTML=event.x + this"></option>
+        <option value="115x175 mm" onmouseEnter="alert(1)" onmousemove="document.getElementById('info').innerHTML=event.x + this">115x175 mm</option>
+        <option value="120x160 mm" onmousemove="document.getElementById('info').innerHTML=event.x + this">120x160 mm</option>
+        <option value="120x287 mm" onmousemove="document.getElementById('info').innerHTML=event.x + this">120x287 mm</option>
     </select>
-    <input type="text" name="format" value="" />
+    <input type="text" name="format" value="" onkeyup="this.previousElementSibling.options[0].value=this.previousElementSibling.options[0].innerHTML=this.value"/>
 </div>
-
-<br>
-<h3> Using HTML5 </h3>
-<input list="browsers" name="browser">
-<datalist id="browsers">
-  <option value="Internet Explorer">
-  <option value="Firefox">
-  <option value="Chrome">
-  <option value="Opera">
-</datalist>
+<div id=info style="position:absolute;left:300px;top:0px"></div>
 
 </body>  
 </html>
