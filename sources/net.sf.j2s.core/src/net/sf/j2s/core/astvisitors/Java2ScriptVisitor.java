@@ -529,6 +529,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	/**
 	 * allow for primitive boxing or unboxing. See test.Test_Chars.java
+	 * 
 	 * @param template
 	 * @param v
 	 * @param varName
@@ -538,19 +539,24 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private void writeReplaceV(String template, String v, String varName, ITypeBinding vType, ITypeBinding eType) {
 		String s = template.replace(v, varName);
 		if (vType != eType) {
-			if (!eType.isPrimitive()) {
-				// So we know the expression is boxed -- Character, for example
-				// Character does not use .objectValue, but we implement it here
-				s += ".objectValue()";
-				if (vType.getName().equals("int"))
+			if (vType.isPrimitive()) {
+				if (eType.isPrimitive()) {
+					// this is a conversion of an char[] to an int -- the only
+					// possibility allowed, I think
 					s += CHARCODEAT0;
-			} else if (!vType.isPrimitive()) {
+				} else {
+					// So we know the expression is boxed -- Character, for
+					// example
+					// Character does not use .objectValue, but we implement it
+					// here
+					if (vType.getName().equals("int"))
+						s += ".intValue()";
+					else
+						s += ".objectValue()";
+				}
+			} else if (eType.isPrimitive()) {
 				// So we know the expression is unboxed -- char, for example
-				// but it could be Character to int
 				s = "new " + getPrimitiveTYPE(eType.getName()) + s;
-			} else {
-				// this is a conversion of an char[] to an int -- the only possibility allowed, I think
-				s += CHARCODEAT0;
 			}
 		}
 		buffer.append(s);
