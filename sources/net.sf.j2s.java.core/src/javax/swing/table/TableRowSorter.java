@@ -27,7 +27,6 @@
  */
 package javax.swing.table;
 
-//import java.text.Collator;
 import java.util.Comparator;
 
 import javax.swing.DefaultRowSorter;
@@ -131,11 +130,11 @@ import javax.swing.DefaultRowSorter;
  */
 @SuppressWarnings({"rawtypes"})
 public class TableRowSorter<M extends TableModel> extends DefaultRowSorter<M, Integer> {
-//    /**
-//     * Comparator that uses compareTo on the contents.
-//     */
-//    private static final Comparator COMPARABLE_COMPARATOR =
-//            new ComparableComparator();
+    /**
+     * Comparator that uses compareTo on the contents.
+     */
+    private static Comparator COMPARABLE_COMPARATOR;
+    private static Comparator STRING_COMPARATOR;
 
     /**
      * Underlying model.
@@ -222,16 +221,18 @@ public class TableRowSorter<M extends TableModel> extends DefaultRowSorter<M, In
         if (comparator != null) {
             return comparator;
         }
-        return null;
-// SwingJS  ignore
-//        Class columnClass = getModel().getColumnClass(column);
-//        if (columnClass == String.class) {
-//            return Collator.getInstance();
-//        }
-//        if (Comparable.class.isAssignableFrom(columnClass)) {
-//            return COMPARABLE_COMPARATOR;
-//        }
-//        return Collator.getInstance();
+        Class columnClass = getModel().getColumnClass(column);
+        if (columnClass == String.class) {
+        	if (STRING_COMPARATOR == null)
+        		STRING_COMPARATOR =  new StringComparator();
+            return STRING_COMPARATOR;//Collator.getInstance();
+        }
+        if (Comparable.class.isAssignableFrom(columnClass)) {
+        	if (COMPARABLE_COMPARATOR == null)
+        		COMPARABLE_COMPARATOR =  new ComparableComparator();
+            return COMPARABLE_COMPARATOR;
+        }
+        return null;//Collator.getInstance();
     }
 
     /**
@@ -311,10 +312,17 @@ public class TableRowSorter<M extends TableModel> extends DefaultRowSorter<M, In
         }
     }
 
-//	private static class ComparableComparator implements Comparator {
-//        @Override
-//        public int compare(Object o1, Object o2) {
-//            return ((Comparable)o1).compareTo(o2);
-//        }
-//    }
+	private static class StringComparator implements Comparator {
+        @Override
+        public int compare(Object o1, Object o2) {
+            return ((String)o1).compareTo((String)o2);
+        }
+    }
+
+	private static class ComparableComparator implements Comparator {
+        @Override
+        public int compare(Object o1, Object o2) {
+            return ((Comparable)o1).compareTo(o2);
+        }
+    }
 }
