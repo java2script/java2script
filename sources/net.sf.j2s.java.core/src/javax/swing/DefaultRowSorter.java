@@ -985,17 +985,8 @@ public abstract class DefaultRowSorter<M, I> extends RowSorter<M> {
                     result = 1;
                 } else {
                 		Comparator c = sortComparators[counter];
-                		// BH ??????? BH
-                		/**
-                		 *  @j2sNative
-                		 *  
-                		 *  result = (c != null ? c.compare$O$O(v1, v2) : typeof c == "object" ? 
-                		 *    ((v1 = v1.toString()) < (v2 = v2.toString) ? -1 : v1 == v2 ? 0 : 1)
-                		 *    : (v1 < v2 ? -1 : v1 == v2 ? 0 : 1));   
-                		 */
-                		{
-                			result = c.compare(v1, v2);
-                		}
+                		// problem here is that comparators are T, but here we have I
+             			result = (/** @j2sNative  c.compare$O$O ? c.compare$O$O(v1,v2) : */ c.compare(v1, v2));
                 }
                 if (sortOrder == SortOrder.DESCENDING) {
                     result *= -1;

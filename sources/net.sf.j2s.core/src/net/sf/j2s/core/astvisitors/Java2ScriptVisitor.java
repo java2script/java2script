@@ -122,6 +122,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// BH 7/3/2018 -- adds tryWithResource
 // BH 7/3/2018 -- adds effectively final -- FINAL keyword no longer necessary  
 // BH 6/27/2018 -- fix for a[Integer] not becoming a[Integer.valueOf]
 // BH 6/26/2018 -- method logging via j2s.log.methods.called and j2s.log.methods.declared
@@ -1005,10 +1006,20 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		return false;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public boolean visit(TryStatement node) {
 		buffer.append("try ");
+		List<VariableDeclarationExpression> resources = node.resources();
+		int pt = (resources == null || resources.size() == 0 ? -1 : buffer.length() + 1);
 		node.getBody().accept(this);
+		if (pt >= 0) {
+			String buf = buffer.substring(pt);
+			buffer.setLength(pt);
+			for (int i = 0; i  < resources.size(); i++) {
+			   resources.get(i).accept(this);	
+			}			
+			buffer.append(buf);			
+		}
 		List<CatchClause> catchClauses = node.catchClauses();
 		int size = catchClauses.size();
 		if (size > 0) {
