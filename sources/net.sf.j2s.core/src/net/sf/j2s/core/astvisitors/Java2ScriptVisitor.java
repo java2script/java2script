@@ -122,6 +122,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// BH 7/5/2018 -- fixes int | char
 // BH 7/3/2018 -- adds tryWithResource
 // BH 7/3/2018 -- adds effectively final -- FINAL keyword no longer necessary  
 // BH 6/27/2018 -- fix for a[Integer] not becoming a[Integer.valueOf]
@@ -2526,8 +2527,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			return false;
 		String leftName = leftTypeBinding.getName();
 		String rightName = rightTypeBinding.getName();
-		if ("/".equals(operator) && leftTypeBinding.isPrimitive() && isIntegerType(leftName)
-				&& isIntegerType(rightName)) {
+		boolean leftIsInt = leftTypeBinding.isPrimitive() && isIntegerType(leftName);
+		boolean rightIsInt = rightTypeBinding.isPrimitive() && isIntegerType(rightName);
+		if ("/".equals(operator) && leftIsInt && rightIsInt) {
 			// left and right are one of byte, short, int, or long
 			// division must take care of this.
 			addPrimitiveTypedExpression(left, null, leftName, operator, right, rightName, extendedOperands, false);
@@ -2535,7 +2537,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 
 		boolean toBoolean = "boolean".equals(expTypeName);
-
+		
 		char pre = ' ';
 		char post = ' ';
 		if (isBitwise && toBoolean) {
@@ -2544,7 +2546,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			buffer.append("!!(");
 		}
 
-		boolean isDirect = isBitwise && !toBoolean;
+		boolean isDirect = isBitwise && !toBoolean && leftIsInt && rightIsInt;
 		if (isDirect || isComparison) {
 
 			// we do not have to do a full conversion
@@ -2585,8 +2587,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			}
 		}
 
+		boolean isToStringLeft = isToString && !isBitwise;
+		boolean isToStringRight = isToString && !isBitwise;
+		
+		//String s = "e";
+		//s += 'c' | 'd';
+		
 		// left
-		addOperand(left, isToString);
+		addOperand(left, isToString && !isBitwise);
 		buffer.append(' ');
 		// op
 		buffer.append(operator);
@@ -2596,7 +2604,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 		buffer.append(' ');
 		// right
-		addOperand(right, isToString);
+		addOperand(right, isToString && !isBitwise);
 
 		// The extended operands is the preferred way of representing deeply
 		// nested expressions of the form L op R op R2 op R3... where the same
