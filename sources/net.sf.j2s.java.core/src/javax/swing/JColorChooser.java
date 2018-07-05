@@ -64,10 +64,12 @@ import sun.swing.SwingUtilities2;
  * an instance of JColorChooser.ASYNCHRONOUS_COLOR, testable as ret instanceof
  * javax.swing.UIResource if the parent component implements
  * PropertyChangeListener, or null if not. The final result of color selection
- * will be returned by a PropertyChangeEvent with propertyName "SelectedColor".
+ * will be returned by a PropertyChangeEvent with propertyName "SelectedColor"
+ * if there are no ok/cancel action listeners defined.
  * 
  * The parent component will automatically be registered as a listener for the
- * created instance of JColorChooser, it is a PropertyChangeListener.
+ * created instance of JColorChooser, it is a PropertyChangeListener only when
+ * no action listener is indicated.
  * 
  * <code>JColorChooser</code> provides a pane of controls designed to allow a
  * user to manipulate and select a color. For information about using color
@@ -109,6 +111,7 @@ import sun.swing.SwingUtilities2;
  * @author Steve Wilson
  */
 public class JColorChooser extends JComponent {
+
 
 	private ColorSelectionModel selectionModel;
 
@@ -223,7 +226,6 @@ public class JColorChooser extends JComponent {
 	
 	private static JDialog createDialog(Component c, String title, boolean modal, JColorChooser chooserPane,
 			ActionListener okListener, ActionListener cancelListener, boolean disposeOnHide) {
-
 		Window window = JOptionPane.getWindowForComponent(c);
 		ColorChooserDialog dialog;
 		if (window instanceof Frame) {
@@ -627,15 +629,20 @@ class ColorChooserDialog extends JDialog {
 		initColorChooserDialog(c, chooserPane, okListener, cancelListener);
 	}
 
+	private boolean haveActionListener;
+
+
 	protected void initColorChooserDialog(Component c, JColorChooser chooserPane,
         ActionListener okListener, ActionListener cancelListener) {
         //setResizable(false);
+		haveActionListener = (okListener != null || cancelListener != null);
 
 		if (!(c instanceof PropertyChangeListener)) {
 			System.out.println("JColorChooser: no onDialogReturn(Object) found in component " + c);
 		}
 
-		ensurePropertyChangeListener(this, c);
+		if (okListener == null && cancelListener == null) 
+			ensurePropertyChangeListener(this, c);
 
         this.chooserPane = chooserPane;
 
@@ -731,7 +738,8 @@ class ColorChooserDialog extends JDialog {
     }
 
 	protected void doCallback(boolean isOK) {
-		firePropertyChange("SelectedColor", null, (isOK ? chooserPane.getSelectionModel().getSelectedColor() : null));		
+		if (!haveActionListener)
+			firePropertyChange("SelectedColor", null, (isOK ? chooserPane.getSelectionModel().getSelectedColor() : null));		
         hide();
         if (disposeOnHide)
         	dispose();
