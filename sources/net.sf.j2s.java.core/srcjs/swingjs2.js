@@ -13092,6 +13092,8 @@ J2S._getResourcePath = function(path, isJavaPath) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 7/6/2018 adds J2S.stack to stack traces
+// BH 7/5/2018 2:57:51 PM array.equals$O, for simple arrays
 // BH 7/2/2018 12:50:55 PM Character.prototype.objectValue() and Character.prototype.intValue(), for enhanced FOR in transpiler
 // BH 6/29/2018 10:13:51 AM array.equals$O, fixes array.clone
 // BH 6/28/2018 7:34:58 AM fix for array.clone not copying array in the case of objects
@@ -13908,12 +13910,19 @@ Clazz.isClassDefined = function(clazzName) {
   vals.equals$O = function (a) { 
     if (a.__ARRAYTYPE != this.__ARRAYTYPE || a.length != this.length)
       return false;
-    if (a.length > 0 && typeof a[0] == "object")
+    if (a.length == 0)
+    	return true;
+    if (typeof a[0] == "object") {
       for (var i = a.length; --i >= 0;)
         if ((a[i] == null) != (this[i] == null) || a[i] != null 
           && (a[i].equals$O && !a[i].equals$O(this[i]) 
             || a.equals && !a[i].equals(this[i]) || a[i] !== this[i]))
           return false;
+    } else {
+    	for (var i = a.length; --i >= 0;)
+            if (a[i] !== this[i])
+              return false;
+    }
     return true;  
   }; 
   
@@ -14460,35 +14469,82 @@ var _isNPEExceptionPredicate;
   };
 })();
 
-/**
- * BH need to limit this, as JavaScript call stack may be recursive
- */ 
+var getArgs = function(c) {
+    var s = "";
+    var args = c.arguments;
+    for (var j = 0; j < args.length; j++) {
+      var sa = (args[j] instanceof Object ? args[j].toString() : "" + args[j]);
+      if (sa.length > 60)
+        sa = sa.substring(0, 60) + "...";
+      s += " args[" + j + "]=" + sa.replace(/\s+/g," ") + "\n";
+    }
+    return s;
+}
+
+var getSig = function(c, withParams) {
+	var sig = (c.toString ? c.toString().substring(0, c.toString().indexOf("{")) : "<native method>");
+    sig = " " + (c.exName ? c.exClazz.__CLASS_NAME__ + "." + c.exName  + sig.replace(/function /,""): sig) + "\n";
+    if (withParams)
+    	sig += getArgs(c);
+    return sig;
+}
+
+Clazz._showStack = function(n) {
+  if (!Clazz._stack)
+	 return;
+  n && n < Clazz.stack.length || (n = Clazz._stack.length);
+  if (!n)
+	return;
+  for (var i = 0; i < n; i++) {
+	console.log("" + i + ":" + getSig(Clazz._stack[i], true));
+  }	
+  return "";
+}
+
+ 
 Clazz._getStackTrace = function(n) {
+	  Clazz._stack = [];
+  //  need to limit this, as JavaScript call stack may be recursive
   n || (n = 25);
-  // updateNode and updateParents cause infinite loop here
-  var s = "\n";
-  var c = arguments.callee;
   var showParams = (n < 0);
   if (showParams)
     n = -n;
+  // updateNode and updateParents cause infinite loop here
+  var estack = [];
+  try {
+	    Clazz.failnow();
+	  } catch (e) {
+		  estack = e.stack.split("\n").reverse();
+		  estack.pop();
+	  }
+  var s = "\n";
+  var c = arguments.callee;
   for (var i = 0; i < n; i++) {
     if (!(c = c.caller))
       break;
-    var sig = (c.toString ? c.toString().substring(0, c.toString().indexOf("{")) : "<native method>");
-    s += i + " " + (c.exName ? (c.overrider ? c.overrider.__CLASS_NAME__ + "."  : "") + c.exName  + sig.replace(/function /,""): sig) + "\n";
+    var sig = getSig(c, false);
+    if (s.indexOf(sig) >= 0) {
+    	s += "...";
+    	break;
+    } else {
+    	Clazz._stack.push(c);
+    	s += "" + i + sig;
+        s += estack.pop() + "\n\n";
+    }
     if (c == c.caller) {
       s += "<recursing>\n";
       break;
     }
     if (showParams) {
-      var args = c.arguments;
-      for (var j = 0; j < args.length; j++) {
-        var sa = (args[j] instanceof Object ? args[j].toString() : "" + args[j]);
-        if (sa.length > 60)
-          sa = sa.substring(0, 60) + "...";
-        s += " args[" + j + "]=" + sa.replace(/\s+/g," ") + "\n";
-      }
+      s += getArgs(c);
     }
+  }
+  
+  s += estack.join("\n");
+  if (Clazz._stack.length) {
+	  s += "\nsee Clazz._stack";
+	  console.log("Clazz._stack = " + Clazz._stack);
+	  console.log("Use Clazz.showStack() or Clazz.showStack(n) to show parameters");
   }
   return s;
 }
@@ -15170,8 +15226,9 @@ Clazz.loadScript = function(file) {
     if (file.indexOf("/j2s/core/") >= 0) {
       System.out.println(s + " loading " + file);
     } else {
+     alert(s + " loading file " + file + "\n\n" + e.stack);
       doDebugger()
-      alert(s + " loading file " + file);
+    
     }
   }
 }
