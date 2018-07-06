@@ -529,7 +529,8 @@ public ICompilationUnit fromIFile(IFile file) {
 protected void initializeAnnotationProcessorManager(Compiler newCompiler) {
 	AbstractAnnotationProcessorManager annotationManager = JavaModelManager.getJavaModelManager().createAnnotationProcessorManager();
 	if (annotationManager != null) {
-		annotationManager.configureFromPlatform(newCompiler, this, this.javaBuilder.javaProject);
+		// BH added , true for photon
+		annotationManager.configureFromPlatform(newCompiler, this, this.javaBuilder.javaProject, true);
 		annotationManager.setErr(new PrintWriter(System.err));
 		annotationManager.setOut(new PrintWriter(System.out));
 	}

@@ -42,6 +42,9 @@ import java.awt.LayoutManager;
 import java.awt.event.WindowEvent;
 //
 
+import swingjs.JSUtil;
+import swingjs.plaf.JSComponentUI;
+
 //BH: Added rootPane.addNotify(); // builds a peer for the root pane
 
 /**

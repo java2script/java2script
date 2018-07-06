@@ -227,8 +227,7 @@ public class JSUtil {
 			path = path.substring(0, path.lastIndexOf("/") + 1) + "images/";
 			css = PT.rep(css, "images/", path);
 		}
-		JQuery jq = JSUtil.getJQuery();
-	jq.$("head").append(jq.$("<style type='text/css'>" + css + "</style>"));
+		JSUtil.jQuery.$("head").append(JSUtil.jQuery.$("<style type='text/css'>" + css + "</style>"));
 	return css;
 	}
 
@@ -266,6 +265,8 @@ public class JSUtil {
 	 * @return an object with $ as a method
 	 */
 	public static JQuery getJQuery() {
+		if (jQuery != null)
+			return jQuery;
 		/**
 		 * @j2sNative
 		 * 
@@ -277,6 +278,8 @@ public class JSUtil {
 			return null;
 		}
 	}
+	
+	public static JQuery jQuery = getJQuery();
 
 	public static String getStackTrace(int n) {
 		/**

@@ -86,6 +86,7 @@ public class SwingLazyValue implements UIDefaults.LazyValue {
                 return constructor.newInstance(args);
             }
         } catch (Exception e) {
+        	System.out.println("Error in sun.swing.SwingLazyValue.createValue for " + className);
             // Ideally we would throw an exception, unfortunately
             // often times there are errors as an initial look and
             // feel is loaded before one can be switched. Perhaps a

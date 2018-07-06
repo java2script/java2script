@@ -49,7 +49,7 @@ import javax.swing.event.ListDataListener;
  *
  * @author Hans Muller
  */
-public abstract class AbstractListModel implements ListModel
+public abstract class AbstractListModel<E> implements ListModel<E>
 {
     protected EventListenerList listenerList = new EventListenerList();
 
@@ -95,7 +95,6 @@ public abstract class AbstractListModel implements ListModel
         return (ListDataListener[])listenerList.getListeners(
                 ListDataListener.class);
     }
-
 
     /**
      * <code>AbstractListModel</code> subclasses must call this method

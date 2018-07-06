@@ -1000,4 +1000,5 @@ public class JSGraphics2D // extends SunGraphics2D
 		reset(initialState);
 	}
 
+
 }

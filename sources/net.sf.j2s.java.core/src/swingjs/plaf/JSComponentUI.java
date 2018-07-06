@@ -17,6 +17,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.dnd.DropTarget;
+import java.awt.dnd.peer.DropTargetPeer;
 import java.awt.event.FocusEvent;
 import java.awt.event.PaintEvent;
 import java.awt.image.ColorModel;
@@ -29,12 +30,15 @@ import java.beans.PropertyChangeListener;
 import java.util.EventObject;
 
 import javax.swing.AbstractButton;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.MouseInputListener;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.UIResource;
 
@@ -98,10 +102,16 @@ import swingjs.api.js.JQueryObject;
  * @author Bob Hanson
  * 
  */
-public class JSComponentUI extends ComponentUI implements ContainerPeer,
-		JSEventHandler, PropertyChangeListener, ChangeListener {
+public class JSComponentUI extends ComponentUI
+		implements ContainerPeer, JSEventHandler, PropertyChangeListener, ChangeListener, DropTargetPeer {
 
-	private static final Color rootPaneColor = new Color(238, 238, 238); // EE EE EE; look and feel "control"
+	private static final Color rootPaneColor = new Color(238, 238, 238); // EE
+																			// EE
+																			// EE;
+																			// look
+																			// and
+																			// feel
+																			// "control"
 
 	/**
 	 * provides a unique id for any component; set on instantiation
@@ -109,8 +119,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	protected static int incr;
 
 	/**
-	 * Set this during run time using swingjs.plaf.JSComponentUI.borderTest = true
-	 * to debug alignments
+	 * Set this during run time using swingjs.plaf.JSComponentUI.borderTest =
+	 * true to debug alignments
 	 */
 	private static boolean borderTest;
 
@@ -139,11 +149,25 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	protected JComponent jc;
 
 	/**
+	 * TableCellRenderers will not have parents; here we point to the table so 
+	 * that we can send the coordinates to the retrieve the row and cell
+	 *  
+	 */
+	protected  JComponent targetParent;
+	
+	public JComponent getTargetParent() {
+		return targetParent;
+	}
+
+	//MouseInputListener mouseInputListener;
+	
+
+	/**
 	 * The outermost div holding a component -- left, top, and for a container
 	 * width and height
 	 * 
-	 * Note that all controls have an associated outerNode div. Specifically, menu
-	 * items will be surrounded by an li element, not a div.
+	 * Note that all controls have an associated outerNode div. Specifically,
+	 * menu items will be surrounded by an li element, not a div.
 	 * 
 	 * This must be set up here, nowhere else.
 	 * 
@@ -151,20 +175,22 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	protected DOMNode outerNode;
 
 	/**
-	 * inner node for JButtonUI that needs to be cleared prior to calculating preferred size
+	 * inner node for JButtonUI that needs to be cleared prior to calculating
+	 * preferred size
 	 * 
 	 */
 	protected DOMNode innerNode;
-	
+
 	/**
-	 * the main HTML5 element for the component, possibly containing others, such
-	 * as radio button with its label.
+	 * the main HTML5 element for the component, possibly containing others,
+	 * such as radio button with its label.
 	 * 
 	 */
 	public DOMNode domNode;
 
 	/**
-	 * An inner div that allows vertical centering for a JLabel or AbstractButton
+	 * An inner div that allows vertical centering for a JLabel or
+	 * AbstractButton
 	 */
 	protected DOMNode centeringNode;
 
@@ -179,22 +205,26 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	 * 
 	 */
 	protected boolean draggable;
-	
+
 	@Override
 	public void setDraggable(JSFunction f) {
 		// SplitPaneDivider
 		draggable = true; // never actually used
 		JSUtil.J2S._setDraggable(updateDOMNode(), f);
 	}
-	
-
 
 	/**
-	 * The HTML5 input element being pressed, if the control subclasses
-	 * JSButtonUI.
+	 * The HTML5 input element being pressed, if the control 
+	 * is a radio or checkbox button.
 	 * 
 	 */
-	protected DOMNode domBtn;
+	protected DOMNode radioBtn;
+
+	/**
+	 * the "FOR" label for a radio button
+	 * 
+	 */
+	protected DOMNode btnLabel; 
 
 	/**
 	 * a component or subcomponent that can be enabled/disabled
@@ -258,12 +288,13 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	// private boolean zeroWidth;
 
 	/**
-	 * indicates that in a toolbar, this component should use its preferred size for min and max
+	 * indicates that in a toolbar, this component should use its preferred size
+	 * for min and max
 	 * 
 	 */
-	
+
 	protected boolean isToolbarFixed = true;
-	
+
 	/**
 	 * indicates that we need a new outerNode
 	 * 
@@ -278,7 +309,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 
 	/**
 	 * Indicates that we do not need an outerNode and that we should be applying
-	 * any positioning to the node itself. All menu items will have this set true.
+	 * any positioning to the node itself. All menu items will have this set
+	 * true.
 	 */
 
 	protected boolean isMenuItem = false;
@@ -333,8 +365,9 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 
 	protected DOMNode body;
 	private DOMNode document;
-	protected HTML5Applet applet; // used in getting z value, setting frame mouse
-																// actions
+	protected HTML5Applet applet; // used in getting z value, setting frame
+									// mouse
+									// actions
 
 	protected boolean needPreferred;
 
@@ -364,7 +397,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		/**
 		 * @j2sNative
 		 * 
-		 *            this.document = document; this.body = document.body;
+		 * 			this.document = document; this.body = document.body;
 		 * 
 		 * 
 		 */
@@ -386,7 +419,9 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		/**
 		 * @j2sNative
 		 * 
-		 *            this.c.addChangeListener$javax_swing_event_ChangeListener && this.c.addChangeListener$javax_swing_event_ChangeListener(this);
+		 * 			this.c.addChangeListener$javax_swing_event_ChangeListener
+		 *            &&
+		 *            this.c.addChangeListener$javax_swing_event_ChangeListener(this);
 		 */
 		{
 		}
@@ -396,7 +431,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	/**
 	 * Called upon disposal of Window, JPopupMenu, and JComponent.
 	 * 
-	 * Subclasses should not implement this method; use uninstallUIImpl() instead
+	 * Subclasses should not implement this method; use uninstallUIImpl()
+	 * instead
 	 * 
 	 */
 	@Override
@@ -407,8 +443,12 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		/**
 		 * @j2sNative
 		 * 
-		 *            this.c && this.c.removeChangeListener$javax_swing_event_ChangeListener && this.c.removeChangeListener$javax_swing_event_ChangeListener(this); 
-		 *            this.c && this.c.removePropertyChangeListener$java_beans_PropertyChangeListener(this);
+		 * 			this.c &&
+		 *            this.c.removeChangeListener$javax_swing_event_ChangeListener
+		 *            &&
+		 *            this.c.removeChangeListener$javax_swing_event_ChangeListener(this);
+		 *            this.c &&
+		 *            this.c.removePropertyChangeListener$java_beans_PropertyChangeListener(this);
 		 */
 		{
 		}
@@ -420,16 +460,16 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 
 	protected JQueryObject $(Object node) {
 		return JSUtil.getJQuery().$(node);
-	} 
+	}
 
 	public JSComponentUI set(JComponent target) {
-		// note that in JavaScript, in certain cases 
+		// note that in JavaScript, in certain cases
 		// (JFrame, JWindow, JDialog)
-		// target will not be a JComponent, 
-		// but it will always be a JSComponent, and 
+		// target will not be a JComponent,
+		// but it will always be a JSComponent, and
 		// we do not care if it is not a JComponent.
 		c = target;
-		jc = (JComponent) c; 
+		jc = (JComponent) c;
 		applet = JSToolkit.getHTML5Applet(c);
 		newID(false);
 		installUI(target); // need to do this immediately, not later
@@ -448,25 +488,26 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	}
 
 	public void reInit() {
-		 setTainted();
-		 domNode = null;
-		 newID(true);
+		setTainted();
+		domNode = null;
+		newID(true);
 	}
-	
+
 	// ////////////// user event handling ///////////////////
 
 	/**
-	 * When a user clicks a component in SwingJS, jQuery catches it, and a message
-	 * is sent to javax.swing.LightweightDispatcher (in Component.js) to be
-	 * processed. If this were actual Java, we would have to determine if a
+	 * When a user clicks a component in SwingJS, jQuery catches it, and a
+	 * message is sent to javax.swing.LightweightDispatcher (in Component.js) to
+	 * be processed. If this were actual Java, we would have to determine if a
 	 * component's button was clicked by running through all the buttons on the
 	 * component's "native container" and checking whether the click was within
 	 * the component's boundaries.
 	 * 
-	 * By setting the data-component attribute of a DOM element, we are indicating
-	 * to the LightweightDispatcher that we already know what button was clicked;
-	 * it is not necessary to check x and y for that. This ensures perfect
-	 * correspondence between a clicked button and its handling by SwingJS.
+	 * By setting the data-component attribute of a DOM element, we are
+	 * indicating to the LightweightDispatcher that we already know what button
+	 * was clicked; it is not necessary to check x and y for that. This ensures
+	 * perfect correspondence between a clicked button and its handling by
+	 * SwingJS.
 	 * 
 	 * The action will be handled by a standard Java MouseListener
 	 * 
@@ -477,9 +518,9 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	}
 
 	/**
-	 * Indicate to J2S to completely ignore all mouse events for this control. It
-	 * will be handled by the control directly using a jQuery callback that is
-	 * generated by updateDOMNode. Used by JSComboBoxUI and JSSliderUI.
+	 * Indicate to J2S to completely ignore all mouse events for this control.
+	 * It will be handled by the control directly using a jQuery callback that
+	 * is generated by updateDOMNode. Used by JSComboBoxUI and JSSliderUI.
 	 * 
 	 * @param node
 	 */
@@ -494,9 +535,9 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	 * 
 	 * JSComboBoxUI, JSFrameUI, and JSTextUI set jqevent.target["data-ui"] to
 	 * point to themselves. This allows the control to bypass the Java dispatch
-	 * system entirely and just come here for processing. This method is used for
-	 * specific operations, including JFrame closing, JComboBox selection, and
-	 * JSText action handling so that those can be handled specially.
+	 * system entirely and just come here for processing. This method is used
+	 * for specific operations, including JFrame closing, JComboBox selection,
+	 * and JSText action handling so that those can be handled specially.
 	 * 
 	 * This connection is set up in JSComponentUI.setDataUI() and handled by
 	 * overriding JSComponentUI.handleJSEvent().
@@ -511,38 +552,40 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	 * handle an event set up by adding the data-ui attribute to a DOM node.
 	 * 
 	 * @param target
-	 *          a DOMNode
+	 *            a DOMNode
 	 * @param eventType
-	 *          a MouseEvent id, including 501, 502, 503, or 506 (pressed,
-	 *          released, moved, and dragged, respectively)
+	 *            a MouseEvent id, including 501, 502, 503, or 506 (pressed,
+	 *            released, moved, and dragged, respectively)
 	 * @param jQueryEvent
 	 * @return false to prevent the default process
 	 */
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
-		// System.out.println(id + " handling event " + eventType + jQueryEvent);
+		// System.out.println(id + " handling event " + eventType +
+		// jQueryEvent);
 		return true;
 	}
 
 	/**
 	 * Used by JSFrameUI to indicate that it is to be the "currentTarget" for
-	 * mouse clicks that target one of its buttons. The DOM attributes applet and
-	 * _frameViewer will be set for the node, making it consistent with handling
-	 * for Jmol's applet canvas element.
+	 * mouse clicks that target one of its buttons. The DOM attributes applet
+	 * and _frameViewer will be set for the node, making it consistent with
+	 * handling for Jmol's applet canvas element.
 	 * 
 	 * @param node
 	 * @param isFrame
 	 */
 	protected void setJ2sMouseHandler(DOMNode frameNode) {
-		DOMNode.setAttrs(frameNode, "applet", applet, "_frameViewer",
-				jc.getFrameViewer());
+		DOMNode.setAttrs(frameNode, "applet", applet, "_frameViewer", jc.getFrameViewer());
 		JSUtil.J2S._jsSetMouse(frameNode, true);
 	}
 
 	public static JSComponentUI focusedUI;
+
 	JSComponentUI getFocusedUI() {
 		return focusedUI;
 	}
+
 	/**
 	 * Add the $().focus() and $().blur() events to a DOM button
 	 * 
@@ -555,7 +598,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		/**
 		 * @j2sNative
 		 * 
-		 *            node.focus(function() {me.notifyFocus$Z(true)});
+		 * 			node.focus(function() {me.notifyFocus$Z(true)});
 		 *            node.blur(function() {me.notifyFocus$Z(false)});
 		 */
 		{
@@ -573,17 +616,16 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	 * 
 	 * 
 	 * @param node
-	 *          the JavaScript element that is being triggered
+	 *            the JavaScript element that is being triggered
 	 * @param eventList
-	 *          one or more JavaScript event names to pass, separated by space
+	 *            one or more JavaScript event names to pass, separated by space
 	 * @param eventID
-	 *          an integer event type to return; can be anything, but Event.XXXX
-	 *          is recommended
+	 *            an integer event type to return; can be anything, but
+	 *            Event.XXXX is recommended
 	 * @param andSetCSS
-	 *          TODO
+	 *            TODO
 	 */
-	protected void bindJSEvents(DOMNode node, String eventList, int eventID,
-			boolean andSetCSS) {
+	protected void bindJSEvents(DOMNode node, String eventList, int eventID, boolean andSetCSS) {
 		JSFunction f = null;
 		@SuppressWarnings("unused")
 		JSEventHandler me = this;
@@ -596,12 +638,14 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		/**
 		 * @j2sNative
 		 * 
-		 *            f = function(event) { me.handleJSEvent$O$I$O(node, eventID, event) }
+		 * 			f = function(event) { me.handleJSEvent$O$I$O(node,
+		 *            eventID, event) }
 		 */
 		{
-			handleJSEvent(null, 0, null); // Eclipse reference only; not in JavaScript
+			handleJSEvent(null, 0, null); // Eclipse reference only; not in
+											// JavaScript
 		}
-		$(node).bind(eventList, f); 
+		$(node).bind(eventList, f);
 	}
 
 	/**
@@ -616,7 +660,6 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		if (andFocusOut)
 			addJQueryFocusCallbacks();
 	}
-
 
 	/**
 	 * Cause a new event to be scheduled for the rebuilding of this Swing
@@ -648,7 +691,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		if (debugging) 
+		if (debugging)
 			System.out.println(id + " stateChange " + dumpEvent(e));
 	}
 
@@ -683,7 +726,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 
 	protected void propertyChangedCUI(String prop) {
 		// don't want to update a menu until we have to, after its place is set
-		// and we know it is not a JMenuBar menu 
+		// and we know it is not a JMenuBar menu
 		if (!isMenu)
 			updateDOMNode();
 		if (prop == "preferredSize") {
@@ -724,10 +767,10 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		}
 		if (prop == "icon") {
 			if (iconNode != null) {
-				// note that we use AbstratButton cast here just because
+				// note that we use AbstractButton cast here just because
 				// it has a getIcon() method. JavaScript will not care if
 				// it is really a JLabel or JOptionPane, which also have icons
-				ImageIcon icon = (ImageIcon) ((AbstractButton) c).getIcon();
+				ImageIcon icon = getIcon(c, null);
 				if (icon == null ? currentIcon != null : !icon.equals(currentIcon))
 					setIconAndText(prop, icon, currentGap, currentText);
 			}
@@ -741,23 +784,34 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 			System.out.println("JSComponentUI: unrecognized prop: " + this.id + " " + prop);
 	}
 
-	protected void setIconAndText(String prop, ImageIcon icon, int gap,
-			String text) {
+	private ImageIcon getIcon(JSComponent c, Icon icon) {
+		return (c == null || icon == null 
+				&& (icon  = ((AbstractButton) c).getIcon()) == null ?
+			null : icon.getIconWidth() <= 0 || icon.getIconHeight() <= 0 ? null : (icon instanceof ImageIcon) ? (ImageIcon) icon :
+				JSToolkit.paintImageForIcon(jc, icon));
+	}
+
+	protected void setIconAndText(String prop, Icon icon, int gap, String text) {
 
 		// TODO add textPosition
 
 		actualWidth = actualHeight = 0;
-		currentIcon = icon;
 		currentText = text;
 		currentGap = gap;
 		canAlignText = false;
 		canAlignIcon = false;
+		currentIcon = null;
 		imageNode = null;
 		if (iconNode != null) {
-			DOMNode.setAttr(iconNode, "innerHTML", "");
-			if (icon != null) {
-				imageNode = DOMNode.getImageNode(icon.getImage());
-				DOMNode.setStyles(imageNode,  "vertical-align", "middle"); // else this will be "baseline"
+			icon = currentIcon = getIcon(jc, icon);
+			$(iconNode).empty();
+			if (currentIcon != null) {
+				imageNode = DOMNode.getImageNode(currentIcon.getImage());
+				DOMNode.setStyles(imageNode, "vertical-align", "middle"); // else
+																			// this
+																			// will
+																			// be
+																			// "baseline"
 				iconNode.appendChild(imageNode);
 				iconHeight = icon.getIconHeight();
 			}
@@ -771,7 +825,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 			if (icon == null) {
 				canAlignText = allowTextAlignment;
 			} else {
-				//vCenter(imageNode, 10); // perhaps? Not sure if this is a good idea
+				// vCenter(imageNode, 10); // perhaps? Not sure if this is a
+				// good idea
 				if (gap == Integer.MAX_VALUE)
 					gap = getDefaultIconTextGap();
 				if (gap != 0 && text != null)
@@ -781,11 +836,12 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 				isHTML = true;
 				// PhET uses <html> in labels and uses </br>
 				text = PT.rep(text.substring(6, text.length() - 7), "</br>", "");
-				text = PT.rep(text,  "</html>", "");
+				text = PT.rep(text, "</html>", "");
 				text = PT.rep(text, "href=", "target=_blank href=");
 				text = PT.rep(text, "href=", "target=_blank href=");
 				// Jalview hack
-				text = PT.rep(text, "width: 350; text-align: justify; word-wrap: break-word;", "width: 350px; word-wrap: break-word;");
+				text = PT.rep(text, "width: 350; text-align: justify; word-wrap: break-word;",
+						"width: 350px; word-wrap: break-word;");
 			}
 		}
 		DOMNode obj = null;
@@ -808,7 +864,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		} else {
 			// label
 			setCssFont(centeringNode, c.getFont());
-			// added to make sure that the displayed element does not wrap with this new text
+			// added to make sure that the displayed element does not wrap with
+			// this new text
 		}
 		if (!boundsSet)
 			setHTMLSize(domNode, true);
@@ -840,28 +897,28 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	private boolean isDisposed;
 
 	/**
-	 * Calculated by temporarily setting the node on the page and measuring its dimensions.
+	 * Calculated by temporarily setting the node on the page and measuring its
+	 * dimensions.
 	 * 
 	 */
 	protected int actualHeight, actualWidth;
 
 	/**
-	 * can be set false to never draw a background, primarily because Mac OS will
-	 * paint a non-rectangular object.
+	 * can be set false to never draw a background, primarily because Mac OS
+	 * will paint a non-rectangular object.
 	 * 
-	 *  (textfield, textarea, button, combobox, menuitem)
+	 * (textfield, textarea, button, combobox, menuitem)
 	 */
 	protected boolean allowPaintedBackground = true;
-	
-  public void setAllowPaintedBackground(boolean TF) {
-  	allowPaintedBackground = TF;
-  }
+
+	public void setAllowPaintedBackground(boolean TF) {
+		allowPaintedBackground = TF;
+	}
 
 	@Override
 	public DOMNode getDOMNode() {
 		return updateDOMNode();
 	}
-
 
 	/**
 	 * Create or recreate the inner DOM element for this Swing component.
@@ -869,15 +926,13 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	 * @return the DOM element's node and, if the DOM element already exists,
 	 */
 	public DOMNode updateDOMNode() {
-		String msg = "Swingjs WARNING: default JSComponentUI is being used for "
-				+ getClass().getName();
+		String msg = "Swingjs WARNING: default JSComponentUI.updateDOMNode() is being used for " + getClass().getName();
 		if (debugging && createMsgs.indexOf(msg) < 0) {
 			createMsgs += msg;
 			JSUtil.alert(msg);
 		}
 		System.out.println(msg);
-		return (domNode == null ? domNode = DOMNode.createElement("div", id)
-				: domNode);
+		return (domNode == null ? domNode = DOMNode.createElement("div", id) : domNode);
 	}
 
 	protected DOMNode setCssFont(DOMNode obj, Font font) {
@@ -886,15 +941,14 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 			String name = font.getFamily();
 			if (name == "Dialog" || name == "SansSerif")
 				name = "Arial";
-			DOMNode.setStyles(obj, "font-family", name, "font-size", font.getSize()
-					+ "px", "font-style", ((istyle & Font.ITALIC) == 0 ? "normal"
-					: "italic"), "font-weight", ((istyle & Font.BOLD) == 0 ? "normal"
-					: "bold"));
+			DOMNode.setStyles(obj, "font-family", name, "font-size", font.getSize() + "px", "font-style",
+					((istyle & Font.ITALIC) == 0 ? "normal" : "italic"), "font-weight",
+					((istyle & Font.BOLD) == 0 ? "normal" : "bold"));
 		}
-		
-//		if (c.isBackgroundSet())
-//		setBackground(c.getBackground());
-//		setForeground(c.getForeground());
+
+		// if (c.isBackgroundSet())
+		// setBackground(c.getBackground());
+		// setForeground(c.getForeground());
 		enabled = !c.isEnabled();
 		setEnabled(c.isEnabled());
 		return obj;
@@ -922,8 +976,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	}
 
 	protected static void vCenter(DOMNode obj, int offset) {
-		DOMNode.setStyles(obj, "top", "50%", "transform", "translateY(" + offset
-				+ "%)");
+		DOMNode.setStyles(obj, "top", "50%", "transform", "translateY(" + offset + "%)");
 	}
 
 	/**
@@ -945,8 +998,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	 * @param usePreferred
 	 * @return
 	 */
-	protected Dimension setHTMLSize1(DOMNode node, boolean addCSS,
-			boolean usePreferred) {
+	protected Dimension setHTMLSize1(DOMNode node, boolean addCSS, boolean usePreferred) {
 		if (node == null)
 			return null;
 		addCSS &= !isMenuItem;
@@ -966,7 +1018,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		} else {
 			// determine the natural size of this object
 			// save the parent node -- we will need to reset that.
-			parentNode = DOMNode.remove(node);
+			parentNode = DOMNode.transferTo(node, null);
 
 			// remove position, width, and height, because those are what we are
 			// setting here
@@ -975,10 +1027,10 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 			/**
 			 * @j2sNative
 			 * 
-			 *            w0 = node.style.width; h0 = node.style.height; position =
-			 *            node.style.position;
+			 * 			w0 = node.style.width; h0 = node.style.height;
+			 *            position = node.style.position;
 			 * 
-			 *            if (node == this.centeringNode && this.innerNode) { 
+			 *            if (node == this.centeringNode && this.innerNode) {
 			 *            w0i = this.innerNode.style.width; h0i =
 			 *            this.innerNode.style.height; }
 			 */
@@ -996,17 +1048,20 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 				div = wrap("div", id + "_temp", node);
 			DOMNode.setPositionAbsolute(div, Integer.MIN_VALUE, 0);
 
-			// process of discovering width and height is facilitated using jQuery
+			// process of discovering width and height is facilitated using
+			// jQuery
 			// and appending to document.body.
 			// By using .after() we avoid CSS changes in the BODY element.
 			// but this almost certainly has issues with zooming
 
 			$(body).after(div);
-			//DOMNode test = (jc.uiClassID == "LabelUI" ? node : div);
+			// DOMNode test = (jc.uiClassID == "LabelUI" ? node : div);
 			Rectangle r = div.getBoundingClientRect();
 			// From the DOM; Will be Rectangle2D.double, actually.
-			// This is preferable to $(text).width() because that is rounded DOWN.
-			// This showed up in Chrome, where a value of 70.22 for w caused a "Step"
+			// This is preferable to $(text).width() because that is rounded
+			// DOWN.
+			// This showed up in Chrome, where a value of 70.22 for w caused a
+			// "Step"
 			// button to be wrapped.
 			w = (int) Math.max(0, Math.ceil(r.width));
 			h = (int) Math.max(0, Math.ceil(r.height));
@@ -1014,7 +1069,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 				actualWidth = w;
 				actualHeight = h;
 			}
-			// h = preferredHeight;// (iconHeight > 0 ? iconHeight : centerHeight);
+			// h = preferredHeight;// (iconHeight > 0 ? iconHeight :
+			// centerHeight);
 			// TODO what if centerHeight is > prefHeight?
 			$(div).detach();
 		}
@@ -1034,10 +1090,9 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 			DOMNode.setStyles(node, "position", null);
 			// check to reset width/height after getPreferredSize
 			if (w0 != null) {
-				DOMNode
-						.setStyles(node, "width", w0, "height", h0, "position", position);
+				DOMNode.setStyles(node, "width", w0, "height", h0, "position", position);
 			}
-			
+
 		}
 		if (w0i != null) {
 			DOMNode.setStyles(innerNode, "width", w0i, "height", h0i);
@@ -1047,10 +1102,11 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		return size;
 	}
 
-
 	/**
 	 * allows for can be overloaded to allow some special adjustments
-	 * @param addingCSS TODO
+	 * 
+	 * @param addingCSS
+	 *            TODO
 	 * 
 	 * @return
 	 */
@@ -1062,8 +1118,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	 * Creates the DOM node and inserts it into the tree at the correct place,
 	 * iterating through all children if this is a container.
 	 * 
-	 * Overridden for JSLabelUI, JSViewportUI, and JWindowUI, though both of those
-	 * classes do setHTMLElementCUI() first; they just append to it.
+	 * Overridden for JSLabelUI, JSViewportUI, and JWindowUI, though both of
+	 * those classes do setHTMLElementCUI() first; they just append to it.
 	 * 
 	 * 
 	 * 
@@ -1075,11 +1131,12 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	}
 
 	/**
-	 * When something has occurred that needs rebuilding of the internal structure
-	 * of the node, isTainted will be set. Only then will this method be executed.
+	 * When something has occurred that needs rebuilding of the internal
+	 * structure of the node, isTainted will be set. Only then will this method
+	 * be executed.
 	 * 
-	 * @return the outer node for this component's DOM tree, containing all child
-	 *         elements needed to implement it.
+	 * @return the outer node for this component's DOM tree, containing all
+	 *         child elements needed to implement it.
 	 */
 	protected DOMNode setHTMLElementCUI() {
 		if (!isTainted)
@@ -1102,7 +1159,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		/**
 		 * @j2sNative
 		 * 
-		 *            this.outerNode.setAttribute("name", this.jc.__CLASS_NAME__);
+		 * 			this.outerNode.setAttribute("name",
+		 *            this.jc.__CLASS_NAME__);
 		 */
 		{
 		}
@@ -1126,36 +1184,38 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 			}
 			if (isRootPane) {
 				if (jc.getFrameViewer().isApplet) {
-					// If the applet's root pane, we insert it into the applet's content
+					// If the applet's root pane, we insert it into the applet's
+					// content
 					// layer div
 					DOMNode cdiv = swingjs.JSToolkit.getHTML5Applet(jc)._getContentLayer();
 					if (cdiv != null)
-							cdiv.appendChild(outerNode);
-//				} else {
-					// BH: pretty sure this next is totally unnecessary; would never run?
+						cdiv.appendChild(outerNode);
+					// } else {
+					// BH: pretty sure this next is totally unnecessary; would
+					// never run?
 					// This is the root pane of a JFrame, JDialog, JWindow, etc.
 					// we insert the canvas for the frame into this content pane
-					//HTML5Canvas canvas = jc.getFrameViewer().canvas;
-					//if (DOMNode.getAttr(canvas, "_installed") != null) {
-					//	outerNode.appendChild(canvas);
-					//	DOMNode.setAttr(canvas, "_installed", "1");
-					///}
+					// HTML5Canvas canvas = jc.getFrameViewer().canvas;
+					// if (DOMNode.getAttr(canvas, "_installed") != null) {
+					// outerNode.appendChild(canvas);
+					// DOMNode.setAttr(canvas, "_installed", "1");
+					/// }
 				}
-				DOMNode.setStyles(outerNode, "overflow","hidden");
+				DOMNode.setStyles(outerNode, "overflow", "hidden");
 			}
 			addChildrenToDOM(children);
 
 			if (isWindow && jc.getUIClassID() != "InternalFrameUI") {
-				DOMNode.remove(outerNode);
-				$(body).append(outerNode);
+				DOMNode.transferTo(outerNode, body);
 			}
 		}
 
 		// mark as not tainted
 		// debugDump(divObj);
 		isTainted = false;
-		if (jc.getDropTarget() != null)
-			setDropTarget();
+		// if (jc.getDropTarget() != null) {
+		// addDropTarget();
+		// }
 		return outerNode;
 	}
 
@@ -1169,13 +1229,11 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		if (outerNode != null && !isMenuItem) {
 			// Considering the possibility of the parent being created
 			// before children are formed. So here we can add them later.
-			if (parent == null && jc.getParent() != null
-					&& (parent = (JSComponentUI) jc.getParent().getUI()) != null
+			if (parent == null && jc.getParent() != null && (parent = (JSComponentUI) jc.getParent().getUI()) != null
 					&& parent.outerNode != null)
 				parent.outerNode.appendChild(outerNode);
 			DOMNode.setPositionAbsolute(outerNode, Integer.MIN_VALUE, 0);
-			DOMNode.setStyles(outerNode, "left", (x = c.getX()) + "px", "top",
-					(y = c.getY()) + "px");
+			DOMNode.setStyles(outerNode, "left", (x = c.getX()) + "px", "top", (y = c.getY()) + "px");
 		}
 	}
 
@@ -1194,8 +1252,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 			}
 			ui.parent = this;
 			if (ui.getOuterNode() == null) {
-				System.out.println("JSCUI could not add " + ui.c.getName() + " to "
-						+ c.getName());
+				System.out.println("JSCUI could not add " + ui.c.getName() + " to " + c.getName());
 			} else {
 				if (ui.domNode != ui.outerNode && DOMNode.getParent(ui.domNode) == null)
 					ui.outerNode.appendChild(ui.domNode);
@@ -1212,25 +1269,6 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		return height = c.getHeight();
 	}
 
-	/**
-	 * getPreferredSize reports to a LayoutManager what the size is for this
-	 * component will be when placed in the DOM.
-	 * 
-	 * It is only called if the user has not already set the preferred size of the
-	 * component.
-	 * 
-	 * Later, the LayoutManager will make a call to setBounds in order to complete
-	 * the transaction, after taking everything into consideration.
-	 * 
-	 */
-	@Override
-	public Dimension getPreferredSize() {
-		Dimension d = getHTMLSize();
-		if (debugging)
-			System.out.println("CUI >> getPrefSize >> " + d + " for " + this.id);
-		return d;
-	}
-
 	private Dimension getHTMLSize() {
 		return setHTMLSize(updateDOMNode(), false);
 	}
@@ -1245,9 +1283,9 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		}
 		setHTMLElement();
 		if (c.isOpaque() && allowPaintedBackground) {
-				g.setColor(c.getBackground());
-    		g.fillRect(0, 0, c.getWidth(), c.getHeight());
-    		setBackgroundPainted();
+			g.setColor(c.getBackground());
+			g.fillRect(0, 0, c.getWidth(), c.getHeight());
+			setBackgroundPainted();
 		}
 		paint(g, c);
 	}
@@ -1264,9 +1302,9 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		// are BEHIND the button. We will need to paint onto the
 		// glass pane for this to work, and then also manage
 		// mouse clicks and key clicks with that in mind.
-		
+
 		// used by JSListUI
-		
+
 	}
 
 	@Override
@@ -1281,11 +1319,44 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 
 	@Override
 	public Dimension getMinimumSize() {
-		return getPreferredSize();
+		return  getMinimumSize(jc);
 	}
 
 	@Override
 	public Dimension getMaximumSize() {
+		return getMaximumSize(jc);
+	}
+
+	/**
+	 * getPreferredSize reports to a LayoutManager what the size is for this
+	 * component will be when placed in the DOM.
+	 * 
+	 * It is only called if the user has not already set the preferred size of
+	 * the component.
+	 * 
+	 * Later, the LayoutManager will make a call to setBounds in order to
+	 * complete the transaction, after taking everything into consideration.
+	 * 
+	 */
+	@Override
+	public Dimension getPreferredSize() {
+		return getPreferredSize(jc);
+	}
+
+	// the following are likely to be called in the original BasicXXXUI classes
+	
+	Dimension getMinimumSize(JComponent jc) {
+		return getPreferredSize(jc);
+	}
+
+	Dimension getPreferredSize(JComponent jc) {
+		Dimension d = getHTMLSize();
+		if (debugging)
+			System.out.println("CUI >> getPrefSize >> " + d + " for " + this.id);
+		return d;
+	}
+
+	Dimension getMaximumSize(JComponent jc) {
 		if (isToolbarFixed) {
 			Container parent = jc.getParent();
 			String parentClass = (parent == null ? null : parent.getUIClassID());
@@ -1295,39 +1366,24 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		return null;
 	}
 
-	@Deprecated
-	public Dimension getMinimumSize(JComponent jc) {
-		return getMinimumSize();
-	}
-	
-	@Deprecated
-	public Dimension getPreferredSize(JComponent jc) {
-		return getPreferredSize();
-	}
-	
-	@Deprecated
-	public Dimension getMaximumSize(JComponent jc) {
-		return getMaximumSize();
-	}
-
 	/**
 	 * 
-	 * Returns <code>true</code> if the specified <i>x,y</i> location is contained
-	 * within the look and feel's defined shape of the specified component.
-	 * <code>x</code> and <code>y</code> are defined to be relative to the
-	 * coordinate system of the specified component. Although a component's
-	 * <code>bounds</code> is constrained to a rectangle, this method provides the
-	 * means for defining a non-rectangular shape within those bounds for the
-	 * purpose of hit detection.
+	 * Returns <code>true</code> if the specified <i>x,y</i> location is
+	 * contained within the look and feel's defined shape of the specified
+	 * component. <code>x</code> and <code>y</code> are defined to be relative
+	 * to the coordinate system of the specified component. Although a
+	 * component's <code>bounds</code> is constrained to a rectangle, this
+	 * method provides the means for defining a non-rectangular shape within
+	 * those bounds for the purpose of hit detection.
 	 * 
 	 * @param c
-	 *          the component where the <i>x,y</i> location is being queried; this
-	 *          argument is often ignored, but might be used if the UI object is
-	 *          stateless and shared by multiple components
+	 *            the component where the <i>x,y</i> location is being queried;
+	 *            this argument is often ignored, but might be used if the UI
+	 *            object is stateless and shared by multiple components
 	 * @param x
-	 *          the <i>x</i> coordinate of the point
+	 *            the <i>x</i> coordinate of the point
 	 * @param y
-	 *          the <i>y</i> coordinate of the point
+	 *            the <i>y</i> coordinate of the point
 	 * 
 	 * @see javax.swing.JComponent#contains
 	 * @see java.awt.Component#contains
@@ -1342,10 +1398,10 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	 * Returns an instance of the UI delegate for the specified component. Each
 	 * subclass must provide its own static <code>createUI</code> method that
 	 * returns an instance of that UI delegate subclass. If the UI delegate
-	 * subclass is stateless, it may return an instance that is shared by multiple
-	 * components. If the UI delegate is stateful, then it should return a new
-	 * instance per component. The default implementation of this method throws an
-	 * error, as it should never be invoked.
+	 * subclass is stateless, it may return an instance that is shared by
+	 * multiple components. If the UI delegate is stateful, then it should
+	 * return a new instance per component. The default implementation of this
+	 * method throws an error, as it should never be invoked.
 	 */
 	public static ComponentUI createUI(JComponent c) {
 		// SwingJS so, actually, we don't do this. This class is NOT stateless.
@@ -1374,15 +1430,15 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	 * override appropriately.
 	 * 
 	 * @param c
-	 *          <code>JComponent</code> baseline is being requested for
+	 *            <code>JComponent</code> baseline is being requested for
 	 * @param width
-	 *          the width to get the baseline for
+	 *            the width to get the baseline for
 	 * @param height
-	 *          the height to get the baseline for
+	 *            the height to get the baseline for
 	 * @throws NullPointerException
-	 *           if <code>c</code> is <code>null</code>
+	 *             if <code>c</code> is <code>null</code>
 	 * @throws IllegalArgumentException
-	 *           if width or height is &lt; 0
+	 *             if width or height is &lt; 0
 	 * @return baseline or a value &lt; 0 indicating there is no reasonable
 	 *         baseline
 	 * @see javax.swing.JComponent#getBaseline(int,int)
@@ -1400,19 +1456,19 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	}
 
 	/**
-	 * Returns an enum indicating how the baseline of he component changes as the
-	 * size changes. This method is primarily meant for layout managers and GUI
-	 * builders.
+	 * Returns an enum indicating how the baseline of he component changes as
+	 * the size changes. This method is primarily meant for layout managers and
+	 * GUI builders.
 	 * <p>
 	 * This method returns <code>BaselineResizeBehavior.OTHER</code>. Subclasses
 	 * that support a baseline should override appropriately.
 	 * 
 	 * @param c
-	 *          <code>JComponent</code> to return baseline resize behavior for
+	 *            <code>JComponent</code> to return baseline resize behavior for
 	 * @return an enum indicating how the baseline changes as the component size
 	 *         changes
 	 * @throws NullPointerException
-	 *           if <code>c</code> is <code>null</code>
+	 *             if <code>c</code> is <code>null</code>
 	 * @see javax.swing.JComponent#getBaseline(int, int)
 	 * @since 1.6
 	 */
@@ -1430,8 +1486,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	 * @return texat
 	 */
 	public String getJSTextValue() {
-		return (String) DOMNode.getAttr(domNode, valueNode == null ? "innerHTML"
-				: "value");
+		return (String) DOMNode.getAttr(domNode, valueNode == null ? "innerHTML" : "value");
 	}
 
 	DOMNode getOuterNode() {
@@ -1459,7 +1514,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		DOMNode node = getOuterNode();
 		if (node == null)
 			node = domNode; // a frame or other window
-		DOMNode.setVisible(node,  b);
+		DOMNode.setVisible(node, b);
 		if (b) {
 			if (isDisposed)
 				undisposeUI(node);
@@ -1488,10 +1543,20 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	protected Color inactiveForeground = colorUNKNOWN, inactiveBackground = colorUNKNOWN;
 
 	private boolean enabled = true;
-	
+
 	protected void enableNode(DOMNode node, boolean b) {
 		if (node == null)
 			return;
+
+		if (isMenuItem) {
+			if (b) {
+				$(node).removeClass("ui-menu-disabled ui-state-disabled");
+			} else {
+				$(node).addClass("ui-menu-disabled ui-state-disabled");
+			}
+			return;
+		}
+
 		DOMNode.setAttr(node, "disabled", (b ? null : "TRUE"));
 		String pp = getPropertyPrefix();
 		if (!b && inactiveForeground == colorUNKNOWN)
@@ -1503,15 +1568,15 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		Color fg = c.getForeground();
 		setForeground(b ? fg : getInactiveTextColor(fg));
 	}
-	
+
 	protected Color getInactiveTextColor(Color fg) {
 		// overridden in JSTextUI to include consideration of editable
 		return (inactiveForeground == null ? fg : inactiveForeground);
 	}
-	
+
 	protected void getDisabledColors(String pp) {
 		inactiveBackground = UIManager.getColor(pp + "inactiveBackground");
-		inactiveForeground = UIManager.getColor(pp + "inactiveForeground");		
+		inactiveForeground = UIManager.getColor(pp + "inactiveForeground");
 	}
 
 	@Override
@@ -1525,8 +1590,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 			boundsSet = true;
 		}
 		if (debugging)
-			System.out.println("CUI << SetBounds >> [" + x + " " + y + " " + width
-					+ " " + height + "] op=" + op + " for " + this.id);
+			System.out.println("CUI << SetBounds >> [" + x + " " + y + " " + width + " " + height + "] op=" + op
+					+ " for " + this.id);
 		// Note that this.x and this.y are never used. Tney are frame-referenced
 		switch (op) {
 		case SET_BOUNDS:
@@ -1561,13 +1626,12 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		this.width = width;
 		this.height = height;
 		if (debugging)
-			System.out.println(id + " setBounds " + x + " " + y + " " + this.width
-					+ " " + this.height + " op=" + op + " createDOM?"
-					+ (domNode == null));
+			System.out.println(id + " setBounds " + x + " " + y + " " + this.width + " " + this.height + " op=" + op
+					+ " createDOM?" + (domNode == null));
 		if (domNode == null)
 			updateDOMNode();
 		setJSDimensions(width + size.width, height + size.height);
-	  setInnerComponentBounds(width, height);
+		setInnerComponentBounds(width, height);
 	}
 
 	/**
@@ -1590,8 +1654,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	protected void setInnerComponentBounds(int width, int height) {
 		setAlignment();
 		if (debugging)
-			System.out.println("CUI reshapeMe: need to reshape " + id + " w:"
-					+ this.width + "->" + width + " h:" + this.height + "->" + height);
+			System.out.println("CUI reshapeMe: need to reshape " + id + " w:" + this.width + "->" + width + " h:"
+					+ this.height + "->" + height);
 	}
 
 	private void setAlignment() {
@@ -1608,27 +1672,11 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		if (this.c.getWidth() == 0)
 			return;
 		int type = ((AbstractButton) c).getHorizontalAlignment();
-		String prop = null;
-		switch (type) {
-		case SwingConstants.RIGHT:
-		case SwingConstants.TRAILING:
-			prop = "right";
-			break;
-		case SwingConstants.LEFT:
-		case SwingConstants.LEADING:
-			prop = "left";
-			break;
-		case SwingConstants.CENTER:
-			prop = "center";
-			break;
-	  default:
-	  	return;
-		}
-		// the centeringNode is not visible. It is a div that allows us to 
+		String prop = getCSSTextAlignment(type);
+		// the centeringNode is not visible. It is a div that allows us to
 		// position the text and icon of the image based on its preferred size
-		// in the 
-		DOMNode.setStyles(domNode, "width", c.getWidth() + "px", "text-align",
-					textAlign = prop);
+		// in the
+		DOMNode.setStyles(domNode, "width", c.getWidth() + "px", "text-align", textAlign = prop);
 		if (jc.uiClassID == "LabelUI" && centeringNode != null) {
 			int left = 0;
 			int w = actualWidth;
@@ -1646,16 +1694,36 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 			case SwingConstants.CENTER:
 				left = (c.getWidth() - w) / 2;
 				break;
-		  default:
-		  	return;
+			default:
+				return;
 			}
 			// edu_northwestern_physics_groups_atomic_applet_Mirror_applet.html
 			// seems to work OK here because the absolute is being removed
-			// there was a problem with Applet.init() not having the right width/height initialization
-			// but now it seems OK. This issue is most certainly the issue that in applet start up
+			// there was a problem with Applet.init() not having the right
+			// width/height initialization
+			// but now it seems OK. This issue is most certainly the issue that
+			// in applet start up
 			// an initial paint shows checkboxes lower than they should be.
-			DOMNode.setStyles(centeringNode, "position", "absolute", "left", left + "px");			
+			DOMNode.setStyles(centeringNode, "position", "absolute", "left", left + "px");
 		}
+	}
+
+	protected String getCSSTextAlignment(int type) {
+		String prop = null;
+		switch (type) {
+		case SwingConstants.RIGHT:
+		case SwingConstants.TRAILING:
+			prop = "right";
+			break;
+		case SwingConstants.LEFT:
+		case SwingConstants.LEADING:
+			prop = "left";
+			break;
+		case SwingConstants.CENTER:
+			prop = "center";
+			break;
+		}
+		return prop;
 	}
 
 	protected void setVerticalAlignment(boolean isText) {
@@ -1669,12 +1737,13 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 				if (c.getFont() == null)
 					return;
 				h = setHTMLSize1(domNode, false, false).height;
-			// for example, a 12-pt font might have a height of 16, and ascent of 13, and descent of 3
-			// adjust down to center only the ascension of the text.
+				// for example, a 12-pt font might have a height of 16, and
+				// ascent of 13, and descent of 3
+				// adjust down to center only the ascension of the text.
 				h -= (c.getFont().getFontMetrics().getDescent());
 			} else {
 				h = iconHeight;
-			}				
+			}
 		}
 		switch (type) {
 		case SwingConstants.TOP:
@@ -1690,7 +1759,6 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		}
 		DOMNode.setStyles(centeringNode, "position", "absolute", "top", top + "px");
 	}
-
 
 	@Override
 	public void handleEvent(AWTEvent e) {
@@ -1757,7 +1825,9 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 			if (ui.containerNode != null)
 				ui.containerNode.appendChild(node);
 		}
-		if (outerNode != null && domNode != outerNode) // menu separators have domNode == outerNode
+		// menu separators have domNode == outerNode
+		// cell renderers will set their domNode to null;
+		if (outerNode != null && domNode != null && domNode != outerNode) 
 			outerNode.appendChild(domNode);
 		isDisposed = false;
 	}
@@ -1765,8 +1835,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	@Override
 	public void setForeground(Color color) {
 		if (domNode != null)
-			DOMNode.setStyles(domNode, "color", (color == null ? "rgba(0,0,0,0)" :
-					JSToolkit.getCSSColor(color == null ? Color.black : color)));
+			DOMNode.setStyles(domNode, "color",
+					(color == null ? "rgba(0,0,0,0)" : JSToolkit.getCSSColor(color == null ? Color.black : color)));
 	}
 
 	@Override
@@ -1775,12 +1845,12 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	}
 
 	private void setBackgroundFor(DOMNode node, Color color) {
-		// Don't allow color for Menu and MenuItem. This is taken care of by jQuery 
+		// Don't allow color for Menu and MenuItem. This is taken care of by
+		// jQuery
 		if (node == null || isMenuItem)
 			return;
-		//if (color == null) // from paintComponentSafely
-		DOMNode.setStyles(node, "background-color",
-				JSToolkit.getCSSColor(color == null ? rootPaneColor : color));
+		// if (color == null) // from paintComponentSafely
+		DOMNode.setStyles(node, "background-color", JSToolkit.getCSSColor(color == null ? rootPaneColor : color));
 		if (allowPaintedBackground && jc.selfOrParentBackgroundPainted())
 			setTransparent(node);
 		else
@@ -1789,6 +1859,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 
 	/**
 	 * If a control is transparent, then set that in HTML for its node
+	 * 
 	 * @param node
 	 */
 	private void checkTransparent(DOMNode node) {
@@ -1802,10 +1873,9 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	}
 
 	@Override
-	public void setBackgroundPainted(){
+	public void setBackgroundPainted() {
 		setTransparent(domNode);
 	}
-	
 
 	private void setTransparent(DOMNode node) {
 		DOMNode.setStyles(node, "background", "transparent");
@@ -1852,7 +1922,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 			/**
 			 * @j2sNative
 			 * 
-			 *            path = this.applet._j2sPath;
+			 * 			path = this.applet._j2sPath;
 			 * 
 			 */
 			{
@@ -1869,8 +1939,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	}
 
 	@Override
-	public boolean requestFocus(Component lightweightChild, boolean temporary,
-			boolean focusedWindowChangeAllowed, long time, Cause cause) {
+	public boolean requestFocus(Component lightweightChild, boolean temporary, boolean focusedWindowChangeAllowed,
+			long time, Cause cause) {
 		if (focusNode == null)
 			return false;
 		$(focusNode).focus();
@@ -1965,17 +2035,16 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	}
 
 	public boolean hasFocus() {
-		return focusNode != null
-				&& focusNode == DOMNode.getAttr(document, "activeElement");
+		return focusNode != null && focusNode == DOMNode.getAttr(document, "activeElement");
 	}
 
 	public void notifyFocus(boolean focusGained) {
 		// unfortunately, this will be TOO LATE
 
-		AWTEvent e = new FocusEvent(c, focusGained ? FocusEvent.FOCUS_GAINED
-				: FocusEvent.FOCUS_LOST);
+		AWTEvent e = new FocusEvent(c, focusGained ? FocusEvent.FOCUS_GAINED : FocusEvent.FOCUS_LOST);
 		if (focusGained) {
-			// The problem here is that we are getting an activate signal too early, 
+			// The problem here is that we are getting an activate signal too
+			// early,
 			// before focus has been obtained.
 			focusedUI = this;
 			Toolkit.getEventQueue().postEvent(e);
@@ -1984,14 +2053,15 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 			/**
 			 * @j2xxsNative
 			 * 
-			 *              this.c.processEvent(e);
+			 * 				this.c.processEvent(e);
 			 * 
 			 */
 			{
-				// We must be certain that the lost message arrives before the gained.
+				// We must be certain that the lost message arrives before the
+				// gained.
 				Toolkit.getEventQueue().dispatchEventAndWait(e, c);
 			}
-			
+
 		}
 	}
 
@@ -2004,12 +2074,11 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		 * 
 		 * @j2sNative
 		 * 
-		 *            if (what) return this.applet._z[what];
-		 * 			
-		 *            while (node && !node.style["z-index"]) 
-		 *              node = node.parentElement;
-		 * 			  z = parseInt(node.style["z-index"]);
-		 * 			  return(!z || isNaN(z) ? 100000 : z); 
+		 * 			if (what) return this.applet._z[what];
+		 * 
+		 *            while (node && !node.style["z-index"]) node =
+		 *            node.parentElement; z = parseInt(node.style["z-index"]);
+		 *            return(!z || isNaN(z) ? 100000 : z);
 		 */
 		{
 			return z;
@@ -2063,8 +2132,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		if (opacity == 255)
 			return "#" + toRGBHexString(c);
 		int rgb = c.getRGB();
-		return "rgba(" + ((rgb >> 16) & 0xFF) + "," + ((rgb >> 8) & 0xff) + ","
-				+ (rgb & 0xff) + "," + opacity / 255f + ")";
+		return "rgba(" + ((rgb >> 16) & 0xFF) + "," + ((rgb >> 8) & 0xff) + "," + (rgb & 0xff) + "," + opacity / 255f
+				+ ")";
 	}
 
 	public static String toRGBHexString(Color c) {
@@ -2081,8 +2150,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	}
 
 	/**
-	 * We allow here for an off-screen graphic for which the paint operation also
-	 * sets its location.
+	 * We allow here for an off-screen graphic for which the paint operation
+	 * also sets its location.
 	 * 
 	 * Called from edu.colorado.phet.common.phetgraphics.view.
 	 * 
@@ -2090,15 +2159,14 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	 * @param owner
 	 * @param g
 	 */
-	public static void updateSceneGraph(JComponent comp, JComponent owner,
-			JSGraphics2D g) {
+	public static void updateSceneGraph(JComponent comp, JComponent owner, JSGraphics2D g) {
 
 		DOMNode node = ((JSComponentUI) comp.ui).outerNode;
 		int x = 0, y = 0;
 		/**
 		 * @j2sNative
 		 * 
-		 *            x = g.$transform.m02; y = g.$transform.m12;
+		 * 			x = g.$transform.m02; y = g.$transform.m12;
 		 * 
 		 *            if (x == node.lastSceneX && y == node.lastSceneY) return;
 		 *            node.lastSceneX = x; node.lastSceneY = y;
@@ -2111,15 +2179,14 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		/**
 		 * @j2sNative
 		 * 
-		 *            if (node.parentElement == null)
+		 * 			if (node.parentElement == null)
 		 *            owner.ui.outerNode.appendChild(node);
 		 * 
 		 */
 		{
 		}
 	}
-	
-	
+
 	/**
 	 * prefix for the HTML5LookAndFeal
 	 * 
@@ -2132,29 +2199,36 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 
 	protected void setPadding(Insets padding) {
 		// JTextField and JButton
-		DOMNode.setStyles(domNode, "padding", padding == null ? "0px" : padding.top
-				+ "px " + padding.left + "px " + padding.bottom + "px " + padding.right
-				+ "px");
+		DOMNode.setStyles(domNode, "padding", padding == null ? "0px"
+				: padding.top + "px " + padding.left + "px " + padding.bottom + "px " + padding.right + "px");
 	}
 
 	public void addDropTarget(DropTarget t) {
 		// called by DropTarget
-		dropTarget = t;
-		setDropTarget();
-	}
-	
-	public void removeTarget() {
-		// called by DropTarget
-		if (dropTarget == null)
+		if (dropTarget == t)
 			return;
-		dropTarget = null;
-		setDropTarget();
+		dropTarget = t;
+		setDropTarget(true);
 	}
-	
-	private void setDropTarget() {
-		DOMNode node;
-		if (dropTarget != this && ((node = outerNode) != null || (node = domNode) != null))
-			DOMNode.setAttr(node,  "data-dropComponent", jc);
+
+	@Override
+	public void removeDropTarget(DropTarget t) {
+		// called by DropTarget
+		if (dropTarget != t)
+			return;
+		setDropTarget(false);
+		dropTarget = null;
+	}
+
+	private void setDropTarget(boolean adding) {
+		if (dropTarget == this)
+			return;
+		JSUtil.J2S._setDragDropTarget(c, getDOMNode(), dropTarget != null);
+	}
+
+	public void setTargetParent(JComponent targetParent, MouseInputListener mouseInputListener) {
+		this.targetParent = targetParent;
+		//this.mouseInputListener = mouseInputListener;
 	}
 
 }

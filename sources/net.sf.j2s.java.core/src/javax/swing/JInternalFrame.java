@@ -118,12 +118,6 @@ public class JInternalFrame extends JFrame
         RootPaneContainer
 {
 	
-	/**
-     * @see #getUIClassID
-     * @see #readObject
-     */
-    private static final String uiClassID = "InternalFrameUI";
-
     /**
      * The <code>JRootPane</code> instance that manages the
      * content pane
@@ -350,7 +344,7 @@ public class JInternalFrame extends JFrame
      */
     public JInternalFrame(String title, boolean resizable, boolean closable,
                                 boolean maximizable, boolean iconifiable) {
-    	super("title", null, "InternalFrameUI");
+    	super(title, null, "InternalFrameUI");
         this.resizable = resizable;
         this.closable = closable;
         this.maximizable = maximizable;
@@ -1521,6 +1515,7 @@ public class JInternalFrame extends JFrame
      */
     public void toFront() {
         moveToFront();
+        super.toFront(); // Window
     }
 
     /**
@@ -1534,6 +1529,7 @@ public class JInternalFrame extends JFrame
      */
     public void toBack() {
         moveToBack();
+        super.toBack();
     }
 
     /**
@@ -1695,13 +1691,25 @@ public class JInternalFrame extends JFrame
      * internal frame is being dragged.
      */
     protected void paintComponent(Graphics g) {
-      
-     // we need to bypass JComponent
+
+     // this is not called, I think.
     	
       paintContainer(g);
       
       //super.paint(g); 
    }
+    
+	@Override
+	public void paint(Graphics g) {
+		
+		// The problem is that painting is from a dirty region request on the desktop
+		// we need to swith to the correct graphics. 
+		// Could this be a problem with printing? 
+		
+		super.paint(getRootPane().getGraphics());
+	}
+
+		//boolean isJComponent;
 
     // ======= end optimized frame dragging defence code ==============
 
@@ -1872,31 +1880,33 @@ public class JInternalFrame extends JFrame
          *              for which the icon is created
          */
         public JDesktopIcon(JInternalFrame f) {
+        	super();
+        	uiClassID = "DesktopIconUI"; 
             setVisible(false);
             setInternalFrame(f);
             updateUI();
         }
 
-        /**
-         * Returns the look-and-feel object that renders this component.
-         *
-         * @return the <code>DesktopIconUI</code> object that renders
-         *              this component
-         */
-        public DesktopIconUI getUI() {
-            return (DesktopIconUI)ui;
-        }
-
-        /**
-         * Sets the look-and-feel object that renders this component.
-         *
-         * @param ui  the <code>DesktopIconUI</code> look-and-feel object
-         * @see UIDefaults#getUI
-         */
-        public void setUI(DesktopIconUI ui) {
-            super.setUI(ui);
-        }
-
+//        /**
+//         * Returns the look-and-feel object that renders this component.
+//         *
+//         * @return the <code>DesktopIconUI</code> object that renders
+//         *              this component
+//         */
+//        public DesktopIconUI getUI() {
+//            return (DesktopIconUI)ui;
+//        }
+//
+//        /**
+//         * Sets the look-and-feel object that renders this component.
+//         *
+//         * @param ui  the <code>DesktopIconUI</code> look-and-feel object
+//         * @see UIDefaults#getUI
+//         */
+//        public void setUI(DesktopIconUI ui) {
+//            super.setUI(ui);
+//        }
+//
         /**
          * Returns the <code>JInternalFrame</code> that this
          * <code>DesktopIcon</code> is associated with.
@@ -1931,9 +1941,7 @@ public class JInternalFrame extends JFrame
                 return getInternalFrame().getDesktopPane();
             return null;
         }
-
-        String uiClassID = "DesktopIconUI";
-        
+       
         /**
          * Notification from the <code>UIManager</code> that the look and feel
          * has changed.

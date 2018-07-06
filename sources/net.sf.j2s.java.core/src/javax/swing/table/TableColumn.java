@@ -820,6 +820,7 @@ public class TableColumn extends Object  {
             }
         };
         label.setHorizontalAlignment(JLabel.CENTER);
+        label.setOpaque(false);
         return label;
     }
 

@@ -7,7 +7,16 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
-// BH 6/21/2018 1:08:58 PM missing mysterious Integer.objectValue() 
+// BH 7/6/2018 adds J2S.stack to stack traces
+// BH 7/5/2018 2:57:51 PM array.equals$O, for simple arrays
+// BH 7/2/2018 12:50:55 PM Character.prototype.objectValue() and Character.prototype.intValue(), for enhanced FOR in transpiler
+// BH 6/29/2018 10:13:51 AM array.equals$O, fixes array.clone
+// BH 6/28/2018 7:34:58 AM fix for array.clone not copying array in the case of objects
+// BH 6/27/2018 3:11:50 PM fix for class String not indicating its name 
+// BH 6/25/2018 3:06:30 PM adds String.concat$S
+// BH 6/25/2018 12:10:25 PM Character.toTitleCase, isTitleCase as ...UpperCase
+// BH 6/25/2018 10:23:24 AM really fixing new int[] {'a'} using .$c() see Test_Byte.java
+// BH 6/21/2018 1:08:58 PM missing mysterious Integer.prototype.objectValue() 
 // BH 6/20/2018 6:00:23 AM missing printStackTrace(PrintStream)
 // BH 6/19/2018 8:49:57 AM fix for checkDeclared
 // BH 5/19/2018 8:22:25 PM fix for new int[] {'a'}
@@ -81,7 +90,7 @@ Clazz._assertFunction = null;
 
 //////// 16 methods called from code created by the transpiler ////////
 
-Clazz.array = function(baseClass, paramType, ndims, params) {
+Clazz.array = function(baseClass, paramType, ndims, params, isClone) {
   // int[][].class Clazz.array(Integer.TYPE, -2)
   // new int[] {3, 4, 5} Clazz.array(Integer.TYPE, -1, [3, 4, 5])    
   // new int[][]{new int[] {3, 4, 5}, {new int[] {3, 4, 5}} 
@@ -96,12 +105,9 @@ Clazz.array = function(baseClass, paramType, ndims, params) {
     // four-parameter option from JU.AU.arrayCopyObject;
     // truncate array using slice
     // Clazz.array(-1, array, ifirst, ilast+1)
-    var b = arguments[1];
-    var a = b.slice(arguments[2], arguments[3]);
-    a.__BYTESIZE = b.__BYTESIZE;
-    a.__ARRAYTYPE = b.__ARRAYTYPE;
-    a.__BASECLASS = b.__BASECLASS;
-    return a;
+    var a = arguments[1];
+    var b = a.slice(arguments[2], arguments[3]);
+    return copyArrayProps(a, b);
   }
   var prim = Clazz._getParamCode(baseClass);
   var dofill = true;
@@ -190,7 +196,7 @@ Clazz.array = function(baseClass, paramType, ndims, params) {
       break;
     }  
   }
-  return newTypedA(baseClass, params, nbits, (dofill ? ndims : -ndims));
+  return newTypedA(baseClass, params, nbits, (dofill ? ndims : -ndims), isClone);
 }
 
 Clazz.assert = function(clazz, obj, tf, msg) {
@@ -218,7 +224,7 @@ Clazz.assert = function(clazz, obj, tf, msg) {
 
 Clazz.clone = function(me) { 
   // BH allows @j2sNative access without super constructor
-  return appendMap(me.__ARRAYTYPE ? Clazz.array(me.__BASECLASS, me.__ARRAYTYPE, -1, me)
+  return appendMap(me.__ARRAYTYPE ? Clazz.array(me.__BASECLASS, me.__ARRAYTYPE, -1, me, true)
    : new me.constructor(inheritArgs), me); 
 }
 
@@ -603,8 +609,7 @@ var aas = "AAA";
 /**
  * Create an array class placeholder for reflection
  */
- 
- 
+
 var arrayClass = function(baseClass, ndim) {
   ndim || (ndim = 1);
   var stub = Clazz._getParamCode(baseClass);
@@ -804,9 +809,38 @@ Clazz.isClassDefined = function(clazzName) {
 
 ///////////////////////// private supporting method creation //////////////////////
 
-var setArray = function(vals, baseClass, paramType, ndims) {
+     
+ var copyArrayProps = function(a, b) {
+    b.__BYTESIZE = a.__BYTESIZE;
+    b.__ARRAYTYPE = a.__ARRAYTYPE;
+    b.__BASECLASS = a.__BASECLASS;
+    b.__NDIMS = a.__NDIMS;
+    b.getClass = a.getClass; 
+    b.equals$O = a.equals$O;
+ }
+ 
+ var setArray = function(vals, baseClass, paramType, ndims) {
   ndims = Math.abs(ndims);
-  vals.getClass = function () { return arrayClass(baseClass, ndims) };
+  vals.getClass = function () { return arrayClass(this.__BASECLASS, this.__NDIMS) };
+  vals.equals$O = function (a) { 
+    if (a.__ARRAYTYPE != this.__ARRAYTYPE || a.length != this.length)
+      return false;
+    if (a.length == 0)
+    	return true;
+    if (typeof a[0] == "object") {
+      for (var i = a.length; --i >= 0;)
+        if ((a[i] == null) != (this[i] == null) || a[i] != null 
+          && (a[i].equals$O && !a[i].equals$O(this[i]) 
+            || a.equals && !a[i].equals(this[i]) || a[i] !== this[i]))
+          return false;
+    } else {
+    	for (var i = a.length; --i >= 0;)
+            if (a[i] !== this[i])
+              return false;
+    }
+    return true;  
+  }; 
+  
   vals.__ARRAYTYPE = paramType; // referenced in java.lang.Class
   vals.__BASECLASS = baseClass;
   vals.__NDIM = ndims;
@@ -835,7 +869,7 @@ var getParamCode = Clazz._getParamCode = function(cl) {
   return cl.__PARAMCODE || (cl.__PARAMCODE = cl.__CLASS_NAME__.replace(/java\.lang\./, "").replace(/\./g, '_'));
 }
 
-var newTypedA = function(baseClass, args, nBits, ndims) {
+var newTypedA = function(baseClass, args, nBits, ndims, isClone) {
   var dim = args[0];
   if (typeof dim == "string")
     dim = dim.charCodeAt(0); // int[] a = new int['\3'] ???
@@ -862,7 +896,7 @@ var newTypedA = function(baseClass, args, nBits, ndims) {
     } else if (nBits > 0 && dim < 0) {
       // make sure this is not a character
       for (var i = val.length; --i >= 0;)
-        val[i].charAt && (val[i] = val[i].charAt(0));
+        val[i].charAt && (val[i] = val[i].$c());
       dim = val; // because we can initialize an array using new Int32Array([...])
     }
     if (nBits > 0)
@@ -882,11 +916,16 @@ var newTypedA = function(baseClass, args, nBits, ndims) {
       var arr = new Float64Array(dim);
       break;
     default:
-      var arr = (dim < 0 ? val : new Array(dim));
       nBits = 0;
-      if (dim > 0 && val != null)
-        for (var i = dim; --i >= 0;)
-           arr[i] = val;
+      var arr;
+      if (isClone) {
+        arr = new Array(dim = val.length);
+      } else {
+        arr = (dim < 0 ? val : new Array(dim));
+        if (dim > 0 && val != null)
+          for (var i = dim; --i >= 0;)
+             arr[i] = val;
+      }
       break;
     }  
     arr.__BYTESIZE = arr.BYTES_PER_ELEMENT || (nBits >> 3);
@@ -1106,7 +1145,7 @@ var minimalObjNames = [ "equals", "equals$O", "hashCode" /*"toString",*/  ];
   addProto(proto, "finalize", function () {});
   addProto(proto, "notify", function () {});
   addProto(proto, "notifyAll", function () {});
-  addProto(proto, "wait", function () {});
+  addProto(proto, "wait", function () {alert("Object.wait was called!" + arguments.callee.caller.toString())});
   addProto(proto, "to$tring", Object.prototype.toString);
   addProto(proto, "toString", function () { return (this.__CLASS_NAME__ ? "[" + this.__CLASS_NAME__ + " object]" : this.to$tring.apply(this, arguments)); });
 
@@ -1345,35 +1384,82 @@ var _isNPEExceptionPredicate;
   };
 })();
 
-/**
- * BH need to limit this, as JavaScript call stack may be recursive
- */ 
+var getArgs = function(c) {
+    var s = "";
+    var args = c.arguments;
+    for (var j = 0; j < args.length; j++) {
+      var sa = (args[j] instanceof Object ? args[j].toString() : "" + args[j]);
+      if (sa.length > 60)
+        sa = sa.substring(0, 60) + "...";
+      s += " args[" + j + "]=" + sa.replace(/\s+/g," ") + "\n";
+    }
+    return s;
+}
+
+var getSig = function(c, withParams) {
+	var sig = (c.toString ? c.toString().substring(0, c.toString().indexOf("{")) : "<native method>");
+    sig = " " + (c.exName ? c.exClazz.__CLASS_NAME__ + "." + c.exName  + sig.replace(/function /,""): sig) + "\n";
+    if (withParams)
+    	sig += getArgs(c);
+    return sig;
+}
+
+Clazz._showStack = function(n) {
+  if (!Clazz._stack)
+	 return;
+  n && n < Clazz.stack.length || (n = Clazz._stack.length);
+  if (!n)
+	return;
+  for (var i = 0; i < n; i++) {
+	console.log("" + i + ":" + getSig(Clazz._stack[i], true));
+  }	
+  return "";
+}
+
+ 
 Clazz._getStackTrace = function(n) {
+	  Clazz._stack = [];
+  //  need to limit this, as JavaScript call stack may be recursive
   n || (n = 25);
-  // updateNode and updateParents cause infinite loop here
-  var s = "\n";
-  var c = arguments.callee;
   var showParams = (n < 0);
   if (showParams)
     n = -n;
+  // updateNode and updateParents cause infinite loop here
+  var estack = [];
+  try {
+	    Clazz.failnow();
+	  } catch (e) {
+		  estack = e.stack.split("\n").reverse();
+		  estack.pop();
+	  }
+  var s = "\n";
+  var c = arguments.callee;
   for (var i = 0; i < n; i++) {
     if (!(c = c.caller))
       break;
-    var sig = (c.toString ? c.toString().substring(0, c.toString().indexOf("{")) : "<native method>");
-    s += i + " " + (c.exName ? (c.overrider ? c.overrider.__CLASS_NAME__ + "."  : "") + c.exName  + sig.replace(/function /,""): sig) + "\n";
+    var sig = getSig(c, false);
+    if (s.indexOf(sig) >= 0) {
+    	s += "...";
+    	break;
+    } else {
+    	Clazz._stack.push(c);
+    	s += "" + i + sig;
+        s += estack.pop() + "\n\n";
+    }
     if (c == c.caller) {
       s += "<recursing>\n";
       break;
     }
     if (showParams) {
-      var args = c.arguments;
-      for (var j = 0; j < args.length; j++) {
-        var sa = (args[j] instanceof Object ? args[j].toString() : "" + args[j]);
-        if (sa.length > 60)
-          sa = sa.substring(0, 60) + "...";
-        s += " args[" + j + "]=" + sa.replace(/\s+/g," ") + "\n";
-      }
+      s += getArgs(c);
     }
+  }
+  
+  s += estack.join("\n");
+  if (Clazz._stack.length) {
+	  s += "\nsee Clazz._stack";
+	  console.log("Clazz._stack = " + Clazz._stack);
+	  console.log("Use Clazz.showStack() or Clazz.showStack(n) to show parameters");
   }
   return s;
 }
@@ -2055,8 +2141,9 @@ Clazz.loadScript = function(file) {
     if (file.indexOf("/j2s/core/") >= 0) {
       System.out.println(s + " loading " + file);
     } else {
+     alert(s + " loading file " + file + "\n\n" + e.stack);
       doDebugger()
-      alert(s + " loading file " + file);
+    
     }
   }
 }
@@ -2429,7 +2516,7 @@ Con.consoleOutput = function (s, color) {
     switch (s.charAt(s.length - 1)) {
     case '\n':
     case '\r':
-      s = (s.length > 1 ? s.substring (0, s.length - (s.charAt (s.length - 2) == '\r' ? 2 : 1)) : "");
+      s = (s.length > 1 ? s.substring (0, s.length - (s.charAt(s.length - 2) == '\r' ? 2 : 1)) : "");
       willMeetLineBreak = true;
       break;
     }
@@ -2886,6 +2973,12 @@ function(){
 return this.valueOf();
 });
 
+m$(Integer,"signum",
+function(){
+return Math.signum(this.valueOf());
+});
+
+
 // Note that Long is problematic in JavaScript 
 
 Clazz._setDeclared("java.lang.Long", java.lang.Long=Long=function(){
@@ -3217,14 +3310,6 @@ Clazz._setDeclared("java.lang.Boolean",
 Boolean = java.lang.Boolean = Boolean || function(){
 if (typeof arguments[0] != "object")this.c$(arguments[0]);
 });
-
-Integer.prototype.objectValue = 
-Short.prototype.objectValue = 
-Long.prototype.objectValue =  
-Float.prototype.objectValue = 
-Double.prototype.objectValue =  function() {return this.valueOf()};
-
-
 
 //if (supportsNativeObject) {
   extendObject(Boolean);
@@ -3760,7 +3845,7 @@ dst[dstBegin+i]=this.charAt(srcBegin+i);
 };
 
 sp.$concat=sp.concat;
-sp.concat=function(s){
+sp.concat = sp.concat$S = function(s){
 if(s==null){
 throw new NullPointerException();
 }
@@ -3940,6 +4025,7 @@ if (typeof arguments[0] != "object")this.c$(arguments[0]);
 Clazz._setDeclared("java.lang.Character", java.lang.Character); 
 setJ2STypeclass(Character, "char", "C");
 
+
 m$(C$,"getName",
 function(){
 return "?";
@@ -3985,6 +4071,10 @@ return(this.value).charCodeAt(0)-(c.value).charCodeAt(0);
 m$(C$,"toLowerCase",
 function(c){
 return(""+c).toLowerCase().charAt(0);
+}, 1);
+m$(C$,"toTitleCase",
+function(c){
+  return Character.toUpperCase(c);
 }, 1);
 m$(C$,"toUpperCase",
 function(c){
@@ -4033,6 +4123,10 @@ if(i==0x20||i==0xa0||i==0x1680)return true;
 if(i<0x2000)return false;
 return i<=0x200b||i==0x2028||i==0x2029||i==0x202f||i==0x3000;
 }, 1);
+m$(C$,"isTitleCase",
+function(c){
+  return Character.isUpperCase(c);
+}, 1);
 m$(C$,"isUpperCase",
 function(c){
 if (typeof c == "string")
@@ -4078,6 +4172,16 @@ return String.valueOf(c);
 m$(C$,"charCount", function(codePoint){
   return codePoint >= 0x010000 ? 2 : 1;
 }, 1);
+
+
+Integer.prototype.objectValue = 
+Short.prototype.objectValue = 
+Long.prototype.objectValue =  
+Float.prototype.objectValue = 
+Double.prototype.objectValue =  function() {return this.valueOf()};
+Character.prototype.objectValue = function() { return this.value };
+Character.prototype.intValue  = function() { return this.value.codePointAt(0) };
+
 
 // TODO: Only asking for problems declaring Date. This is not necessary
 
@@ -4768,6 +4872,8 @@ this.constr = null;
 m$(C$, "c$$Class$ClassA$ClassA$I", function(declaringClass,parameterTypes,checkedExceptions,modifiers){
 Clazz.super_(C$, this);
 this.Class_=declaringClass;
+if (";Integer;Long;Short;Byte;Float;Double;".indexOf(";" + this.Class_.getName() + ";") >= 0)
+ parameterTypes = null;
 this.parameterTypes=parameterTypes;
 if (parameterTypes != null)
 for (var i = 0; i < parameterTypes.length; i++) {

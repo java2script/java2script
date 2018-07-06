@@ -1,5 +1,6 @@
 Notes
 =====
+updaetd 6/28/18 -- arrays do not inherit Object
 updated 2/26/18
 updated 6/5/17 -- reserved package name "window"
 updated 3/11/17 -- myClass.getField
@@ -7,7 +8,7 @@ updated 3/7/17 -- overloading of JSplitPane.setDividerLocation
 updated 3/2/17 -- more indication of classes not implemented (KeyListener)
 
 =============================================================================
-SwingJS and JDK 1.6
+SwingJS and JDK 1.6+
 =============================================================================
 
 SwingJS implements a wide range of the Java language in JavaScript. The base
@@ -56,10 +57,19 @@ Threads
 Although there is only a single thread in JavaScript, meaning Thread.wait(), Thread.sleep(int) and 
 Thread.notify() cannot be reproduced, we have found that this is not a serious limitation. 
 For example, javax.swing.Timer() works perfectly in JavaScript. All it means is that threads 
-that use sleep(int) or notify() must be refectored to allow Timer-like callbacks. That is, 
+that use sleep(int) or notify() must be refactored to allow Timer-like callbacks. That is, 
 they must allow full exit and re-entry of Thread.run(), not the typical while/sleep motif. 
 
 The key is to create a state-based run() that can be exited and re-entered in JavaScript.
+
+
+Modal Dialogs
+-------------
+
+Although true modal dialogs are not possible with only one thread, a functional equivalent -- 
+asynchronous modal dialogs -- is relatively easy to set up. All the JOptionPane dialogs will
+return PropertyChangeEvents to signal that they have been disposed of and containing the results. 
+More on this later....
 
 
 
@@ -163,13 +173,14 @@ JTabbedPane (in development, NEM)
 MINOR ISSUES--required some rewriting/refactoring by Bob and Udo  
 ================================================================
 
-java.util.BitSet must be 16-bit
+java.util.BitSet is implemented using 16-bit integers, not 32
 Thread.currentThread() == dispatchThread
 
 
 MINOR ISSUES--requiring some rewriting/refactoring outside of SwingJS  
 =====================================================================
 
+array.equals(Object) not present -- arrays do not subclass Object
 ArrayIndexOutOfBounds
 java.awt.Color
 native methods
@@ -195,8 +206,9 @@ MAJOR ISSUES--to be resolved by implementers
 fonts
 specific AWT components not implemented
 threads
+modal dialogs
 image loading
-no BigInteger; no BigDecimal
+no BigInteger; no BigDecimal 
 no format internationalization
 no winding rules
 text-related field implementation
@@ -219,6 +231,12 @@ as it is used to key for AppContexts. We will see if that use useful or not.
 
 PROGRESS
 ========
+
+6/28/2018
+
+Major bug fixing session in Dundee, Scotland, is finding subtle issues and some missing
+classes, mostly because this group is using Java 7+. Generally running very well.
+
 
 2/26/2018
 

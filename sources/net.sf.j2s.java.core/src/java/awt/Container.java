@@ -33,6 +33,8 @@ import java.awt.KeyboardFocusManager;
 import java.util.EventListener;
 import java.util.Set;
 
+import javax.swing.table.TableCellRenderer;
+
 import javajs.util.Lst;
 
 
@@ -51,6 +53,9 @@ import java.awt.peer.LightweightPeer;
 import java.beans.PropertyChangeListener;
 import sun.awt.AppContext;
 import sun.awt.SunGraphicsCallback;
+import swingjs.plaf.JSButtonUI;
+import swingjs.plaf.JSComponentUI;
+import swingjs.plaf.JSTableUI;
 
 
 /**
@@ -4700,15 +4705,20 @@ class LightweightDispatcher implements AWTEventListener {
         }
 
         int x = e.getX(), y = e.getY();
-        Component component;
-
-        for(component = target;
+        Component component = target;
+        if (target.parent == null) {
+        	component = ((JSComponentUI) ((JSComponent) target).getUI()).getTargetParent();
+        	if (component != null)
+        		target = component;
+        } 
+    	// SwingJS - TableCellRenderers do not have parents
+        for(;
             component != null && component != nativeContainer;            		
             component = component.getParent()) {
-            x -= component.x;
-            y -= component.y;
-            if (((JSComponent) component).uiClassID == "PopupMenuUI")
-            	break; // SwingJS not to worry
+	            x -= component.x;
+	            y -= component.y;
+	            if (((JSComponent) component).uiClassID == "PopupMenuUI")
+	            	break; // SwingJS not to worry
         }
         MouseEvent retargeted;
         if (component != null) {
@@ -4733,7 +4743,8 @@ class LightweightDispatcher implements AWTEventListener {
                                        e.isPopupTrigger(),
                                        ((MouseWheelEvent)e).getScrollType(),
                                        ((MouseWheelEvent)e).getScrollAmount(),
-                                       ((MouseWheelEvent)e).getWheelRotation());
+                                       ((MouseWheelEvent)e).getWheelRotation(),
+                                       ((MouseWheelEvent)e).getPreciseWheelRotation());
             }
             else {
                 retargeted = new MouseEvent(target,

@@ -48,23 +48,27 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Enumeration;
 
+import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.CellEditor;
 import javax.swing.CellRendererPane;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.InputMap;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.LookAndFeel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.TransferHandler;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
+import javax.swing.JTable.BooleanRenderer;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.MouseInputListener;
@@ -99,9 +103,9 @@ public class JSTableUI extends JSPanelUI {
 	@Override
 	public void endLayout() {
 		super.endLayout();
-		int rc = table.getRowCount();
-		int rh = table.getRowHeight();
-		table.setBounds(new Rectangle(table.getWidth(), rc * rh));
+//		int rc = table.getRowCount();
+//		int rh = table.getRowHeight();
+//		table.setBounds(new Rectangle(table.getWidth(), rc * rh));
 		setHTMLElement();
 	}
 
@@ -139,22 +143,20 @@ public class JSTableUI extends JSPanelUI {
 
 
 	/**
-	 * Each cell is controlled by a single renderer, but 
-	 * each renderer may control any number of cells in any number
-	 * of tables. So in this case there is no 1:1 mapping of 
-	 * component and ui. But we do have the table/row/col to distinguish
-	 * them.
-	 *  
+	 * Each cell is controlled by a single renderer, but each renderer may
+	 * control any number of cells in any number of tables. So in this case
+	 * there is no 1:1 mapping of component and ui. But we do have the
+	 * table/row/col to distinguish them.
+	 * 
 	 * @param row
 	 * @param column
 	 * @return
 	 */
 	private JSComponent getCellComponent(int row, int column) {
-	  TableCellRenderer renderer = table.getCellRenderer(row, column);
-	  JSComponent c = (JSComponent) table.prepareRenderer(renderer, row, column);
-	  
-	  
-	  return c;
+		TableCellRenderer renderer = table.getCellRenderer(row, column);
+		JSComponent c = (JSComponent) table.prepareRenderer(renderer, row, column);
+		((JSComponentUI) c.getUI()).setTargetParent(table, mouseInputListener);
+		return c;
 	}
 
 	protected void addChildrenToDOM(Component[] children) {
@@ -175,12 +177,8 @@ public class JSTableUI extends JSPanelUI {
 			DOMNode.setStyles(tr, "height", h + "px");
 			int tx = 0;
 			for (int col = 0; col < ncols; col++) {
-				DOMNode td = CellHolder.createCellNode(this, row, col);
-				DOMNode.setStyles(td, "width", cw[col] + "px");
-				DOMNode.setStyles(td, "height", h + "px");
-				DOMNode.setStyles(td, "left", tx + "px");
-				DOMNode.setStyles(td, "top", ty + "px");
-				DOMNode.setStyles(td, "position", "absolute");
+				TableCellRenderer renderer = table.getCellRenderer(row, col);
+				DOMNode td = CellHolder.createCellNode(this, row, col, tx, ty, cw[col], h); 
 				tx += cw[col];
 				updateCellNode(td, row, col);
 				tr.appendChild(td);
@@ -191,7 +189,7 @@ public class JSTableUI extends JSPanelUI {
 
 	}
 
-	
+
 	private void updateCellNode(DOMNode td, int row, int col) {
 		CellHolder.updateCellNode(td, (JSComponent) getCellComponent(row, col), 0, 0);
 	
@@ -244,7 +242,7 @@ public class JSTableUI extends JSPanelUI {
 	    // Listeners that are attached to the JTable
 	    protected KeyListener keyListener;
 	    protected FocusListener focusListener;
-	    protected MouseInputListener mouseInputListener;
+	    MouseInputListener mouseInputListener;
 
 	    private Handler handler;
 
@@ -1882,11 +1880,11 @@ public class JSTableUI extends JSPanelUI {
 	     * row height times the number of rows.
 	     * The minimum width is the sum of the minimum widths of each column.
 	     */
-	    public Dimension getMinimumSize(JComponent c) {
+	    public Dimension getMinimumSize() {
 	        long width = 0;
-	        Enumeration enumeration = table.getColumnModel().getColumns();
+	        Enumeration<TableColumn>  enumeration = table.getColumnModel().getColumns();
 	        while (enumeration.hasMoreElements()) {
-	            TableColumn aColumn = (TableColumn)enumeration.nextElement();
+	            TableColumn aColumn = enumeration.nextElement();
 	            width = width + aColumn.getMinWidth();
 	        }
 	        return createTableSize(width);
@@ -1899,9 +1897,9 @@ public class JSTableUI extends JSPanelUI {
 	     */
 	    public Dimension getPreferredSize(JComponent c) {
 	        long width = 0;
-	        Enumeration enumeration = table.getColumnModel().getColumns();
+	        Enumeration<TableColumn> enumeration = table.getColumnModel().getColumns();
 	        while (enumeration.hasMoreElements()) {
-	            TableColumn aColumn = (TableColumn)enumeration.nextElement();
+	            TableColumn aColumn = enumeration.nextElement();
 	            width = width + aColumn.getPreferredWidth();
 	        }
 	        return createTableSize(width);
@@ -1914,9 +1912,9 @@ public class JSTableUI extends JSPanelUI {
 	     */
 	    public Dimension getMaximumSize(JComponent c) {
 	        long width = 0;
-	        Enumeration enumeration = table.getColumnModel().getColumns();
+	        Enumeration<TableColumn>  enumeration = table.getColumnModel().getColumns();
 	        while (enumeration.hasMoreElements()) {
-	            TableColumn aColumn = (TableColumn)enumeration.nextElement();
+	            TableColumn aColumn = enumeration.nextElement();
 	            width = width + aColumn.getMaxWidth();
 	        }
 	        return createTableSize(width);
@@ -2092,28 +2090,28 @@ public class JSTableUI extends JSPanelUI {
 //
 //	        return rect;
 //	    }
-
-	    private Rectangle extendRect(Rectangle rect, boolean horizontal) {
-	        if (rect == null) {
-	            return rect;
-	        }
-
-	        if (horizontal) {
-	            rect.x = 0;
-	            rect.width = table.getWidth();
-	        } else {
-	            rect.y = 0;
-
-	            if (table.getRowCount() != 0) {
-	                Rectangle lastRect = table.getCellRect(table.getRowCount() - 1, 0, true);
-	                rect.height = lastRect.y + lastRect.height;
-	            } else {
-	                rect.height = table.getHeight();
-	            }
-	        }
-
-	        return rect;
-	    }
+//
+//	    private Rectangle extendRect(Rectangle rect, boolean horizontal) {
+//	        if (rect == null) {
+//	            return rect;
+//	        }
+//
+//	        if (horizontal) {
+//	            rect.x = 0;
+//	            rect.width = table.getWidth();
+//	        } else {
+//	            rect.y = 0;
+//
+//	            if (table.getRowCount() != 0) {
+//	                Rectangle lastRect = table.getCellRect(table.getRowCount() - 1, 0, true);
+//	                rect.height = lastRect.y + lastRect.height;
+//	            } else {
+//	                rect.height = table.getHeight();
+//	            }
+//	        }
+//
+//	        return rect;
+//	    }
 
 	    /*
 	     * Paints the grid lines within <I>aRect</I>, using the grid

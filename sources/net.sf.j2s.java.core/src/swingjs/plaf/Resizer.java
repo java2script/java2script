@@ -1,22 +1,20 @@
 package swingjs.plaf;
 
-import java.awt.event.MouseEvent;
-
-import javajs.api.JSFunction;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.JSComponent;
 import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
 
 import javax.swing.JApplet;
 import javax.swing.JFrame;
 import javax.swing.JRootPane;
 import javax.swing.RootPaneContainer;
+
+import javajs.api.JSFunction;
 import swingjs.JSFrameViewer;
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
-import swingjs.api.js.JQueryObject;
 
 public class Resizer {
 
@@ -49,12 +47,12 @@ public class Resizer {
 		if (resizer == null) 
 			createAndShowResizer();
 		else
-			$(resizer).show();
+			JSUtil.jQuery.$(resizer).show();
 		setPosition(0, 0);
 	}
 
 	public void hide() {
-		$(resizer).hide();		
+		JSUtil.jQuery.$(resizer).hide();		
 	}
 	
 	public void setMin(int min) {
@@ -66,20 +64,11 @@ public class Resizer {
 		String id = rootPane.htmlName + "_resizer";
 		resizer = DOMNode.createElement("div", id);
 		DOMNode.setSize(resizer, 10, 10);
-		DOMNode.setStyles(resizer, 
-				"background-color", "red", 
-				"opacity", "0", 
-				"cursor", "nwse-resize"
-		);
-		$(resizer).addClass("swingjs-resizer");
+		DOMNode.setStyles(resizer, "background-color", "red", "opacity", "0", "cursor", "nwse-resize");
+		JSUtil.jQuery.$(resizer).addClass("swingjs-resizer");
 		rubberBand = DOMNode.createElement("div", id + "_rb");
-		DOMNode.setStyles(rubberBand, 
-				"border", "1px dashed #FF00FF",
-				"z-index", "100000",
-				"position", "absolute", 
-				"left", "0px", 
-				"top", "0px",
-				"display", "none");
+		DOMNode.setStyles(rubberBand, "border", "1px dashed #FF00FF", "z-index", "100000", "position", "absolute",
+				"left", "0px", "top", "0px", "display", "none");
 		rootNode.appendChild(resizer);
 		rootNode.appendChild(rubberBand);
 		JSFunction fHandleResizer = null, fHandleDOMResize = null;
@@ -87,15 +76,16 @@ public class Resizer {
 		/**
 		 * @j2sNative
 		 * 
-		 *            fHandleResizer = function(xyev,type){me.fHandleResizer$I$I$I(
-		 *            xyev.dx, xyev.dy,type)}; 
+		 * 			fHandleResizer =
+		 *            function(xyev,type){me.fHandleResizer$I$I$I( xyev.dx,
+		 *            xyev.dy,type)};
 		 * 
 		 */
 		{
 		}
 		// set to track size changes
 		JSUtil.J2S._setDraggable(resizer, new JSFunction[] { fHandleResizer });
-		$(rootNode).resize(fHandleDOMResize);
+		JSUtil.jQuery.$(rootNode).resize(fHandleDOMResize);
 	}
 
 	public void setPosition(int dw, int dh) {
@@ -120,7 +110,7 @@ public class Resizer {
 		case MouseEvent.MOUSE_PRESSED:
 			DOMNode.setStyles(resizer, "background-color", "green");
 			DOMNode.setVisible(rubberBand, true);
-			DOMNode.setCursor("nwse-resize");
+			DOMNode.setCursor("nwse-resize", null);
 			// set cursor to dragging
 			break;
 		case MouseEvent.MOUSE_DRAGGED:
@@ -129,7 +119,7 @@ public class Resizer {
 		case MouseEvent.MOUSE_RELEASED:
 			DOMNode.setStyles(resizer, "background-color", "red");
 			DOMNode.setVisible(rubberBand, false);
-			DOMNode.setCursor("auto");
+			DOMNode.setCursor("auto", null);
 			fHandleDOMResize(null, dx, dy);
 		}
 	}
@@ -158,10 +148,6 @@ public class Resizer {
 		setPosition(0, 0);
 		// Toolkit.getEventQueue().postEvent(new ComponentEvent(f,
 		// ComponentEvent.COMPONENT_RESIZED));
-	}
-
-	private JQueryObject $(DOMNode node) {
-		return JSUtil.getJQuery().$(node);
 	}
 
   private Rectangle getFrameOffset(int dw, int dh) {

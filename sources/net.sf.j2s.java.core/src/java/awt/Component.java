@@ -915,6 +915,7 @@ public abstract class Component
 		DropTarget old;
 
 		if ((old = dropTarget) != null) {
+			getOrCreatePeer();
 			if (peer != null)
 				dropTarget.removeNotify(peer);
 
@@ -960,6 +961,8 @@ public abstract class Component
 	}
 
 	public GraphicsConfiguration graphicsConfig;
+
+	protected boolean isWindow;
 
 	/**
 	 * Gets the <code>GraphicsConfiguration</code> associated with this
@@ -1558,7 +1561,7 @@ public abstract class Component
 			}
 		}
 		Container parent = this.parent;
-		if (parent != null) {
+		if (!isWindow && parent != null) {
 			parent.invalidate();
 		}
 		// }
@@ -2863,7 +2866,7 @@ public abstract class Component
 	final void updateCursorImmediately() {
 		// this is the key method that updates a JComponent if there is 
 		// no layout manager -- for example, for a JDesktop. 
-		JSToolkit.setCursor(cursor);
+		JSToolkit.setCursor(this, cursor);
 		// TODO
 		// if (peer instanceof LightweightPeer) {
 		// Container nativeContainer = getNativeContainer();
@@ -4130,7 +4133,8 @@ public abstract class Component
 																		// source
 						newY, // y relative to new source
 						e.getXOnScreen(), e.getYOnScreen(), e.getClickCount(), e.isPopupTrigger(), e.getScrollType(),
-						e.getScrollAmount(), e.getWheelRotation());
+						e.getScrollAmount(), e.getWheelRotation(),
+                        e.getPreciseWheelRotation());
 				((AWTEvent) e).copyPrivateDataInto(newMWE);
 				// When dispatching a wheel event to
 				// ancestor, there is no need trying to find descendant
