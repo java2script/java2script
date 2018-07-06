@@ -1,5 +1,9 @@
-// j2sCore.js (based on JmolCore.js)
+// j2sCore.js (based on JmolCore.js
 
+// BH 7/2/2018 10:00:49 PM fix logic for FileReader for Chrome
+// BH 7/1/2018 7:25:25 AM fixes drag-drop for first call in Firefox/win
+// BH 6/29/2018 9:48:13 AM fixes key info for mouse move
+// BH 6/27/2018 12:45:44 PM adds DND for frames
 // BH 6/20/2018 11:26:09 PM fix for menu bar not closable
 // BH 3/16/2018 5:25:09 AM fixes for dragging on phones
 // BH 2/20/2018 12:08:08 AM adds J2S._getKeyModifiers
@@ -892,11 +896,11 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
                     +'<button id="ID_cancel">cancel</button>'
                   +'</div>'
                 +'<div>').replace(/ID/g, id);
-      var parent = (!parentDiv || parentDiv == "body" ? parentDiv 
+      var parent = (!parentDiv | parentDiv == "body" ? "body" 
          : typeof parentDiv == "string" ? "#" + parentDiv 
          : parentDiv);
       if (parent == "body") {
-		  	J2S.$after(body, div);
+		  	J2S.$after(document.body, div);
       } else {
         J2S.$append(parent, div);
         }        
@@ -1590,7 +1594,7 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
     lastDragy = xym[1];
     
     if (!who.isDragging)
-			xym[2] = 0;
+			xym[2] = J2S._getKeyModifiers(ev);
 
     var ui = ev.target["data-ui"];
     //if (who.isdragging && (!ui || !ui.handleJSEvent(who, 506, ev))) {}
@@ -1649,39 +1653,51 @@ J2S.Cache.get = function(filename) {
 J2S.Cache.put = function(filename, data) {
   J2S.Cache.fileCache[filename] = data;
 }
-  // dnd 
-	J2S.Cache.setDragDrop = function(me) {
-		J2S.$appEvent(me, "appletdiv", "dragover", function(e) {
+  // dnd  _setDragDrop for swingjs.api.J2S called JSComponentUI
+	J2S._setDragDropTarget = J2S.Cache.setDragDrop = function(me, node, adding) {
+    if (adding === false) {
+			node["data-dropComponent"] = null;
+   		J2S.$appEvent(node, null, "dragover", null);
+   		J2S.$appEvent(node, null, "drop", null);
+      return;
+    }
+    if (adding === true) {
+			node["data-dropComponent"] = me;
+      me = node;
+      node = null;
+    }
+    // me can be the node if node is null
+    node || (node = null); 
+		J2S.$appEvent(me, node, "dragover", function(e) {
 			e = e.originalEvent;
 			e.stopPropagation();
 			e.preventDefault();
 			e.dataTransfer.dropEffect = 'copy';
 		});
-		J2S.$appEvent(me, "appletdiv", "drop", function(e) {
+		J2S.$appEvent(me, node, "drop", function(e) {
 			var oe = e.originalEvent;
-			oe.stopPropagation();
-			oe.preventDefault();
+      try {
+      	var file = oe.dataTransfer.files[0];
+      } catch (e){
+        return;
+      } finally {
+  			oe.stopPropagation();
+	   		oe.preventDefault();
+      }      
       var target = oe.target;
       var c = target;
-      while (c && !c["data-dropComponent"])
+      var comp; 
+      while (c && !(comp =  c["data-dropComponent"]))
         c = c.parentElement;
-      if (!c)
+      if (!comp)
        return;
-			var file = oe.dataTransfer.files[0];
+      var d = comp.getLocationOnScreen();
+      var x = oe.pageX - d.x;
+      var y = oe.pageY - d.y;
 			if (file == null) {
 				// FF and Chrome will drop an image here
-				// but it will be only a URL, not an actual file. 
-				try {
-				  file = "" + oe.dataTransfer.getData("text");
-				  if (file.indexOf("file:/") == 0 || file.indexOf("http:/") == 0 || file.indexOf("https:/") == 0) {
-				  	me._scriptLoad(file);
-				  	return;
-			  	}
-				} catch(e) {
-				  return;
-				}
-			  // some other format
-			  return;
+				// but it will be only a URL, not an actual file.
+        Clazz.load("swingjs.JSDnD").drop$javax_swing_JComponent$S$BA$I$I(comp, "" + oe.dataTransfer.getData("text"), null, x, y);
 			}
 			// MSIE will drop an image this way, though, and load it!
 			var reader = new FileReader();
@@ -1689,25 +1705,7 @@ J2S.Cache.put = function(filename, data) {
 				if (evt.target.readyState == FileReader.DONE) {
           var target = oe.target;
 					var bytes = J2S._toBytes(evt.target.result);
-          // what about a frame?? what about x and y?
-          var comp = c["data-dropComponent"];
-          var d = comp.getLocationOnScreen();
-          var x = oe.pageX - d.x;
-          var y = oe.pageY - d.y;
           Clazz.load("swingjs.JSDnD").drop$javax_swing_JComponent$S$BA$I$I(comp, file.name, bytes, x, y);
-/*                    
-					var cacheName = "cache://DROP_" + file.name;
-					if (!cacheName.endsWith(".spt"))
-						me._appletPanel.cacheFileByName$S$Z("cache://DROP_*",false);
-					if (me._viewType == "JSV" || cacheName.endsWith(".jdx")) // shared by Jmol and JSV
-						J2S.Cache.put(cacheName, bytes);
-					else
-						me._appletPanel.cachePut$S$O(cacheName, bytes);
-					var xym = J2S._jsGetXY(me._canvas, e);
-					if(xym && (!me._appletPanel.setStatusDragDropped$I$I$I$S || me._appletPanel.setStatusDragDropped$I$I$I$S(0, xym[0], xym[1], cacheName))) {
-						me._appletPanel.openFileAsyncSpecial$S$I(cacheName, 1);
-					}
-*/
 				}
 			};
 			reader.readAsArrayBuffer(file);

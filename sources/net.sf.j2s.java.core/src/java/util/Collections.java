@@ -15,6 +15,9 @@
  *  limitations under the License.
  */
 
+// BH SwingJS: This class needs to be checked for consistency with Oracle Java 7 
+// generics T vs E, for example.
+
 package java.util;
 
 import java.io.IOException;
@@ -22,7 +25,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 
-// BH: private superclasses must precede their subclasses because J2S keeps these in the same file. 
 
 /**
  * Collections contains static methods which operate on Collection classes.
@@ -197,12 +199,12 @@ public class Collections {
 		}
 	}
 
-	private static final class SingletonSet<E> extends AbstractSet<E> implements Serializable {
+	private static final class SingletonSet<T> extends AbstractSet<T> implements Serializable {
 		private static final long serialVersionUID = 3193687207550431679L;
 
-		final E element;
+		final T element;
 
-		SingletonSet(E object) {
+		SingletonSet(T object) {
 			element = object;
 		}
 
@@ -217,15 +219,15 @@ public class Collections {
 		}
 
 		@Override
-		public Iterator<E> iterator() {
-			return new Iterator<E>() {
+		public Iterator<T> iterator() {
+			return new Iterator<T>() {
 				boolean hasNext = true;
 
 				public boolean hasNext() {
 					return hasNext;
 				}
 
-				public E next() {
+				public T next() {
 					if (hasNext) {
 						hasNext = false;
 						return element;
@@ -240,12 +242,12 @@ public class Collections {
 		}
 	}
 
-	private static final class SingletonList<E> extends AbstractList<E> implements Serializable {
+	private static final class SingletonList<T> extends AbstractList<T> implements Serializable {
 		private static final long serialVersionUID = 3093736618740652951L;
 
-		final E element;
+		final T element;
 
-		SingletonList(E object) {
+		SingletonList(T object) {
 			element = object;
 		}
 
@@ -255,7 +257,7 @@ public class Collections {
 		}
 
 		@Override
-		public E get(int location) {
+		public T get(int location) {
 			if (location == 0) {
 				return element;
 			}
@@ -1794,8 +1796,8 @@ public class Collections {
 	 *            the element
 	 * @return a Set containing the element
 	 */
-	public static <E> Set<E> singleton(E object) {
-		return new SingletonSet<E>(object);
+	public static <T> Set<T> singleton(T object) {
+		return new SingletonSet<T>(object);
 	}
 
 	/**
@@ -1806,8 +1808,8 @@ public class Collections {
 	 *            the element
 	 * @return a List containing the element
 	 */
-	public static <E> List<E> singletonList(E object) {
-		return new SingletonList<E>(object);
+	public static <T> List<T> singletonList(T object) {
+		return new SingletonList<T>(object);
 	}
 
 	/**

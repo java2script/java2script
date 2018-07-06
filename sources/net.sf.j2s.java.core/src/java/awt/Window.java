@@ -473,7 +473,7 @@ public class Window extends JComponent {
     public Window(Window owner, GraphicsConfiguration gc) {
     	// everything will pass through here, even Window(gc);
     	// We just adjust for the 1-parameter issue here
-    	initWinGC(owner, gc);
+    	initWinGC(owner, gc);   	
     }
 
 	/**
@@ -484,7 +484,8 @@ public class Window extends JComponent {
 	 * @param gc
 	 */
 	protected void initWinGC(Window owner, GraphicsConfiguration gc) {
-   	setAppContext();
+		setAppContext();
+   		isWindow = true;
 		parent = owner;
 		if (owner != null)
 			owner.addOwnedWindow(this);

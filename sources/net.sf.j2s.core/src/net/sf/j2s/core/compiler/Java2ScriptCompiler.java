@@ -12,8 +12,9 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.eclipse.core.resources.IContainer;
@@ -42,13 +43,17 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
     static final int JSL_LEVEL = AST.JLS8; // BH can we go to JSL 8? 
 
     private static boolean showJ2SSettings = true;
+    
+    // We copy all non .java files from any directory from which we loaded a java file into the site directory
 	private static HashSet<String> copyResources = new HashSet<String>();
+	private static Map<String,String>htMethodsCalled;
+	private static List<String>lstMethodsDeclared;
 	
 	private static Properties props;
 	private static String htmlTemplate = null;
 
 	public void process(ICompilationUnit sourceUnit, IContainer binaryFolder) {
-		final IProject project = binaryFolder.getProject();		
+		final IProject project = binaryFolder.getProject();
 		/*
 		 * 
 		 * synchronized (project) { if
@@ -60,8 +65,8 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		 * (CoreException e) { e.printStackTrace(); } } }).start(); return; } }
 		 * } //
 		 */
-		String prjFolder = project.getLocation().toOSString();
-		File file = new File(prjFolder, ".j2s"); //$NON-NLS-1$
+		String projectFolder = project.getLocation().toOSString();
+		File file = new File(projectFolder, ".j2s"); //$NON-NLS-1$
 		if (!file.exists()) {
 			/*
 			 * w The file .j2s is a marker for Java2Script to compile JavaScript
@@ -84,69 +89,116 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 			e1.printStackTrace();
 		}
 
-		// BH: j2s.resources.list and j2s.abandoned.resources.list do not allow
-		// for reflection
+		String siteFolder = getProperty("j2s.site.directory");
+		if (siteFolder == null)
+			siteFolder = "site";
+		siteFolder = projectFolder + "/" + siteFolder;
+		String j2sPath = siteFolder + "/swingjs/j2s";
 
-		// String binFolder = binaryFolder.getLocation().toOSString();
-		String siteFolder = prjFolder + "/site";
-		if ("true".equals(getProperty("j2s.save.resource.lists"))) {
-			saveResourceLists(sourceUnit, binaryFolder);
+		// method declarations and invocations are only logged
+		// when the designated files are deleted prior to building
+
+		String logDeclared = getProperty("j2s.log.methods.declared");
+		if (logDeclared != null) {
+			if (!(file = new File(projectFolder, logDeclared)).exists()) {
+				lstMethodsDeclared = new ArrayList<String>();
+				System.err.println("logging methods declared to " + file);
+			}
+			logDeclared = projectFolder + "/" + logDeclared;
+		}
+		boolean logAllCalls = false;
+
+		String logCalled = getProperty("j2s.log.methods.called");
+		if (logCalled != null) {
+			if (!(file = new File(projectFolder, logCalled)).exists()) {
+				htMethodsCalled = new Hashtable<String, String>();
+				System.err.println("logging methods called to " + file);
+			}
+			logCalled = projectFolder + "/" + logCalled;
+			logAllCalls = "true".equals(getProperty("j2s.log.all.calls"));
 		}
 
-		// get the HTML template
+		String excludedPaths = getProperty("j2s.excluded.paths");
+
+		List<String> lstExcludedPaths = null;
+
+		if (excludedPaths != null) {
+			lstExcludedPaths = new ArrayList<String>();
+			String[] paths = excludedPaths.split(";");
+			for (int i = 0; i < paths.length; i++)
+				if (paths[i].trim().length() > 0)
+					lstExcludedPaths.add(paths[i].trim() + "/");
+			if (lstExcludedPaths.size() == 0)
+				lstExcludedPaths = null;
+		}
+
+		String nonqualifiedClasses = getProperty("j2s.compiler.nonqualified.classes");
+
+		// includes @j2sDebug blocks
+		boolean isDebugging = "debug".equals(getProperty("j2s.compiler.mode"));
+
+		String classReplacements = getProperty("j2s.class.replacements");
+
+		String htmlTemplateFile = getProperty("j2s.template.html");
+		if (htmlTemplateFile == null)
+			htmlTemplateFile = "template.html";
 
 		if (htmlTemplate == null) {
-			String htmlTemplateFile = getProperty("template.html");
-			//System.err.println("prop htmltemplate " + htmlTemplateFile);
-			if (htmlTemplateFile == null)
-				htmlTemplateFile = "template.html";
-			file = new File(prjFolder, htmlTemplateFile);
-			//System.err.println("using htmltemplate " + htmlTemplateFile);
+			file = new File(projectFolder, htmlTemplateFile);
 			if (!file.exists()) {
 				String html = getDefaultHTMLTemplate();
 				System.err.println("creating new htmltemplate\n" + html);
 				writeToFile(file, html);
 			}
 			htmlTemplate = getFileContents(file);
-			//System.err.println("htmltemplate:\n" + htmlTemplate);
-
 			if (showJ2SSettings)
 				System.err.println("using HTML template " + file);
 		}
+
+		Java2ScriptVisitor.setNoQualifiedNamePackages(nonqualifiedClasses);
+		Java2ScriptVisitor.setDebugging(isDebugging);
+		Java2ScriptVisitor.setClassReplacements(classReplacements);
+		Java2ScriptVisitor.setLogging(lstMethodsDeclared, htMethodsCalled, logAllCalls);
 
 		CompilationUnit root;
 		ASTParser astParser = ASTParser.newParser(JSL_LEVEL);
 		if (!(sourceUnit instanceof SourceFile))
 			return;
 		SourceFile unitSource = (SourceFile) sourceUnit;
+		
+		String fileName = new String(sourceUnit.getFileName());
+		if (lstExcludedPaths != null) {
+			for (int i = lstExcludedPaths.size(); --i >= 0;)
+				if (fileName.startsWith(lstExcludedPaths.get(i)))
+					return;
+		}
+		
 		org.eclipse.jdt.core.ICompilationUnit createdUnit = JavaCore
 				.createCompilationUnitFrom(new SourceFileProxy(unitSource).getResource());
 		astParser.setResolveBindings(true);
 		astParser.setSource(createdUnit);
 		root = (CompilationUnit) astParser.createAST(null);
 		Java2ScriptVisitor visitor = new Java2ScriptVisitor();
-		Java2ScriptVisitor.setNoQualifiedNamePackages(getProperty("j2s.compiler.nonqualified.classes"));
-		boolean isDebugging = "debug".equals(getProperty("j2s.compiler.mode"));
-		visitor.setDebugging(isDebugging);
-		Java2ScriptVisitor.setClassReplacements(getProperty("j2s.class.replacements"));
-		String j2sPath = siteFolder + "/swingjs/j2s";
+
 		try {
 
 			// transpile the code
-			
+
 			root.accept(visitor);
-			
+
 			// generate the .js file(s) in the site directory
 			
 			outputJavaScript(visitor, j2sPath);
 			
-			// add the HTML files in the site directory
+			logMethods(logCalled, logDeclared, logAllCalls);
 			
+			// add the HTML files in the site directory
+
 			addHTML(visitor.getAppList(true), siteFolder, htmlTemplate, true);
 			addHTML(visitor.getAppList(false), siteFolder, htmlTemplate, false);
 		} catch (Throwable e) {
 			e.printStackTrace();
-			// find the file and delete it.  
+			// find the file and delete it.
 			String filePath = j2sPath;
 			String rootName = root.getJavaElement().getElementName();
 			rootName = rootName.substring(0, rootName.lastIndexOf('.'));
@@ -167,73 +219,107 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 				packageName = packageName.substring(0, pt);
 			if (!copyResources.contains(packageName)) {
 				copyResources.add(packageName);
-				File src = new File(prjFolder + "/src", packageName);
+				File src = new File(projectFolder + "/src", packageName);
 				File dest = new File(j2sPath, packageName);
 				copySiteResources(src, dest);
 			}
 		}
 	}
 
-	/**
-	 *  untested
-	 *   
-	 * @param sourceUnit
-	 * @param binaryFolder
-	 */
-	@Deprecated
-	private void saveResourceLists(ICompilationUnit sourceUnit, IContainer binaryFolder) {
-	
-		String resPaths = getProperty("j2s.resources.list");
-		String abandonedPaths = getProperty("j2s.abandoned.resources.list");
-	
-		List<String> abandonedList = new ArrayList<String>();
-		List<String> list = new ArrayList<String>();
-		if (resPaths != null && resPaths.trim().length() > 0) {
-			String[] splits = resPaths.split(",");
-			for (int i = 0; i < splits.length; i++) {
-				list.add(splits[i]);
+	private static void logMethods(String logCalled, String logDeclared, boolean doAppend) {
+		if (htMethodsCalled != null)
+			try {
+				File file = new File(logCalled);
+				file.createNewFile();
+				FileOutputStream fos = new FileOutputStream(file, doAppend);
+				for (String key : htMethodsCalled.keySet()) {
+					String val = htMethodsCalled.get(key);
+					fos.write(key.getBytes());
+					if (!val.equals("-")) {
+						fos.write(',');
+						fos.write(val.getBytes());
+					}
+					fos.write('\n');
+				}
+				fos.close();
+			} catch (Exception e) {
+				System.err.println("Cannot log to " + logCalled);
 			}
-		}
-		if (abandonedPaths != null && abandonedPaths.trim().length() > 0) {
-			String[] splits = abandonedPaths.split(",");
-			// list = Arrays.asList(splits);
-			for (int i = 0; i < splits.length; i++) {
-				abandonedList.add(splits[i]);
+		if (lstMethodsDeclared != null)
+			try {
+				File file = new File(logDeclared);
+				file.createNewFile();
+				FileOutputStream fos = new FileOutputStream(file, true);
+				for (int i = 0, n = lstMethodsDeclared.size(); i < n; i++) {
+					fos.write(lstMethodsDeclared.get(i).getBytes());
+					fos.write('\n');
+				}
+				fos.close();
+			} catch (Exception e) {
+				System.err.println("Cannot log to " + logDeclared);
 			}
-		}
-		if (sourceUnit instanceof SourceFile) {
-			SourceFile unitSource = (SourceFile) sourceUnit;
-			String fileName = new String(unitSource.getFileName());
-			int idx = fileName.lastIndexOf('/');
-			String className = fileName.substring(idx + 1, fileName.lastIndexOf('.'));
-			StringBuffer path = new StringBuffer();
-			char[][] pkgs = unitSource.getPackageName();
-			for (int j = 0; j < pkgs.length; j++) {
-				path.append(new String(pkgs[j]));
-				path.append("/");
-			}
-			path.append(className);
-			path.append(".js");
-			String jsPath = binaryFolder.getProjectRelativePath().toPortableString() + "/" + path.toString();
-			if (!list.contains(jsPath) && !abandonedList.contains(jsPath)) {
-				list.add(jsPath);
-			}
-		}
-		StringBuffer buf = new StringBuffer();
-		for (Iterator<String> iter = list.iterator(); iter.hasNext();) {
-			String path = iter.next();
-			buf.append(path);
-			if (iter.hasNext()) {
-				buf.append(",");
-			}
-		}
-		//	try {
-		//		props.store(new FileOutputStream(file), "Java2Script Configuration");
-		//	} catch (IOException e) {
-		//		e.printStackTrace();
-		//	}
-		//
 	}
+
+//	/**
+//	 *  untested
+//	 *   
+//	 * @param sourceUnit
+//	 * @param binaryFolder
+//	 */
+//	@Deprecated
+//	private void saveResourceLists(ICompilationUnit sourceUnit, IContainer binaryFolder) {
+//	
+//		String resPaths = getProperty("j2s.resources.list");
+//		String abandonedPaths = getProperty("j2s.abandoned.resources.list");
+//	
+//		List<String> abandonedList = new ArrayList<String>();
+//		List<String> list = new ArrayList<String>();
+//		if (resPaths != null && resPaths.trim().length() > 0) {
+//			String[] splits = resPaths.split(",");
+//			for (int i = 0; i < splits.length; i++) {
+//				list.add(splits[i]);
+//			}
+//		}
+//		if (abandonedPaths != null && abandonedPaths.trim().length() > 0) {
+//			String[] splits = abandonedPaths.split(",");
+//			// list = Arrays.asList(splits);
+//			for (int i = 0; i < splits.length; i++) {
+//				abandonedList.add(splits[i]);
+//			}
+//		}
+//		if (sourceUnit instanceof SourceFile) {
+//			SourceFile unitSource = (SourceFile) sourceUnit;
+//			String fileName = new String(unitSource.getFileName());
+//			int idx = fileName.lastIndexOf('/');
+//			String className = fileName.substring(idx + 1, fileName.lastIndexOf('.'));
+//			StringBuffer path = new StringBuffer();
+//			char[][] pkgs = unitSource.getPackageName();
+//			for (int j = 0; j < pkgs.length; j++) {
+//				path.append(new String(pkgs[j]));
+//				path.append("/");
+//			}
+//			path.append(className);
+//			path.append(".js");
+//			String jsPath = binaryFolder.getProjectRelativePath().toPortableString() + "/" + path.toString();
+//			if (!list.contains(jsPath) && !abandonedList.contains(jsPath)) {
+//				list.add(jsPath);
+//			}
+//		}
+//		StringBuffer buf = new StringBuffer();
+//		for (Iterator<String> iter = list.iterator(); iter.hasNext();) {
+//			String path = iter.next();
+//			buf.append(path);
+//			if (iter.hasNext()) {
+//				buf.append(",");
+//			}
+//		}
+//		//	try {
+//		//		props.store(new FileOutputStream(file), "Java2Script Configuration");
+//		//	} catch (IOException e) {
+//		//		e.printStackTrace();
+//		//	}
+//		//
+//	}
 
 	private static String getProperty(String key) {
 		String val = props.getProperty(key);

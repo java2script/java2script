@@ -243,8 +243,6 @@ public class ButtonListener implements MouseListener, MouseMotionListener,
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		//AbstractButton b = (AbstractButton) e.getSource();
-		//System.out.println("The button was clicked: " + b.htmlName);
 	}
 
 	@Override
@@ -315,30 +313,6 @@ public class ButtonListener implements MouseListener, MouseMotionListener,
 		}
 	}
 
-	/**
-	 * Just ensure the button is in sync by forcing the 
-	 * HTML5 DOM button to the same setting as Java. 
-	 * 
-	 * @param m
-	 * 
-	 * @return true
-	 */
-	boolean verifyButtonClick(AbstractButton b) {
-		ButtonModel m = b.getModel();
-		DOMNode btn = ui.domBtn;
-		// BH: I don't know that this is necessary anymore
-		boolean state = m.isSelected();// && !ui.isRadio;
-		/**
-		 * @j2sNative
-		 * 
-		 *            setTimeout(function(){btn && (btn.checked = state)}, 0);
-		 */
-		{
-		  System.out.println("" + btn + state);
-		}
-		return true;
-	}
-
 	@Override
 	public void mouseEntered(MouseEvent e) {
 		AbstractButton b = (AbstractButton) e.getSource();
@@ -358,6 +332,30 @@ public class ButtonListener implements MouseListener, MouseMotionListener,
 			model.setRollover(false);
 		}
 		model.setArmed(false);
+	}
+
+	/**
+	 * Just ensure the button is in sync by forcing the 
+	 * HTML5 DOM button to the same setting as Java. 
+	 * 
+	 * @param m
+	 * 
+	 * @return true
+	 */
+	boolean verifyButtonClick(AbstractButton b) {
+		ButtonModel m = b.getModel();
+		DOMNode btn = ui.radioBtn;
+		// BH: I don't know that this is necessary anymore
+		boolean state = m.isSelected();// && !ui.isRadio;
+		/**
+		 * @j2sNative
+		 * 
+		 *            setTimeout(function(){btn && (btn.checked = state)}, 0);
+		 */
+		{
+		  System.out.println("" + btn + state);
+		}
+		return true;
 	}
 
 	/**

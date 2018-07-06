@@ -763,12 +763,17 @@ public class JFileChooser extends JComponent {
 			JSUtil.notImplemented("JFileChooser.CUSTOM_DIALOG");
 			return CANCEL_OPTION;
 		case OPEN_DIALOG:
-			if (!(parent instanceof PropertyChangeListener)) {
+			if (!(parent instanceof PropertyChangeListener) && !(this instanceof PropertyChangeListener)) {
 				warnJSDeveloper();
 				return CANCEL_OPTION;
 			}
-			removePropertyChangeListener((PropertyChangeListener) parent);
-			addPropertyChangeListener((PropertyChangeListener) parent);
+			if (this instanceof PropertyChangeListener) {
+				removePropertyChangeListener((PropertyChangeListener) this);
+				addPropertyChangeListener((PropertyChangeListener) this);
+			} else {
+				removePropertyChangeListener((PropertyChangeListener) parent);
+				addPropertyChangeListener((PropertyChangeListener) parent);
+			}
 			Runnable r = new Runnable() {
 
 				@Override
@@ -817,7 +822,7 @@ public class JFileChooser extends JComponent {
 	}
 
 	private static void warnJSDeveloper() {
-		System.err.println("JFileChooser: Component does not implement PropertyChangeListener.");
+		System.err.println("JFileChooser: Neither component nor this implements PropertyChangeListener.");
 	}
 
     private void closeDialog() {

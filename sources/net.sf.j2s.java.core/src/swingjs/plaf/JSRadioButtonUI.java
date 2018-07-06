@@ -4,14 +4,17 @@ import java.awt.Dimension;
 import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
 import javax.swing.JRadioButton;
+
 import swingjs.api.js.DOMNode;
 
 public class JSRadioButtonUI extends JSButtonUI {
 
 //	private static Map<ButtonGroup, String> groupNames;
 
+
 	@Override
 	public DOMNode updateDOMNode() {
+		
 		return updateButton("radio");
 	}
 
@@ -48,27 +51,28 @@ public class JSRadioButtonUI extends JSButtonUI {
 //				if (isNew)
 //					groupNames.put(bg, name);
 //			}
-			domBtn = enableNode = newDOMObject("input", id, "type", myType, "name",
+			radioBtn = newDOMObject("input", id, "type", myType, "name",
 					name);
 			iconNode = newDOMObject("span", id + "_icon");
 			textNode = newDOMObject("label", id + "l1");
-			label = newDOMObject("label", id + "l2", "htmlFor", id);
-			setDataComponent(label);
+			btnLabel = newDOMObject("label", id + "l2", "htmlFor", id);
+			enableNodes = new DOMNode[] { radioBtn, btnLabel };
+			setDataComponent(btnLabel);
 			setDataComponent(iconNode); // needed for mac safari/chrome
-			setDataComponent(domBtn);
+			setDataComponent(radioBtn);
 			setDataComponent(textNode); // needed for mac safari/chrome
-			setEnabled(c.isEnabled());
+			setEnabled(c.isEnabled()); 
 			if (isMenuItem) {
-				domNode = createItem("_item", label);
+				domNode = createItem("_item", btnLabel);
 			} else {
 				domNode = newDOMObject("div", id + "_0");
 				centeringNode = newDOMObject("div", id + "_ctr");
-				centeringNode.appendChild(label);
+				centeringNode.appendChild(btnLabel);
 				domNode.appendChild(centeringNode);
 			}
 		}
 		if (b.isSelected() || isNew)
-			DOMNode.setAttr(domBtn, "checked", "true");
+			DOMNode.setAttr(radioBtn, "checked", "true");
 		setCssFont(textNode, c.getFont());
 
 		setIconAndText("radio", (ImageIcon) button.getIcon(),
@@ -80,41 +84,41 @@ public class JSRadioButtonUI extends JSButtonUI {
 		// is there, it messes up the width and height calculation.
 		DOMNode.setStyles(centeringNode, "position", null);
 		DOMNode.setStyles(iconNode, "position", null);
-		DOMNode.setStyles(domBtn, "position", null);
+		DOMNode.setStyles(radioBtn, "position", null);
 		DOMNode.setStyles(textNode, "position", null);
 		Dimension dobj = null;
 		if (!isMenuItem) {
 			// We need the width of the text to position the button.
 			// But we need to slightly underestimate it so that the
 			// width of label + button does not go over the total calculated width
-			int wBtn = setHTMLSize1(domBtn, false, false).width - 1;
+			int wBtn = setHTMLSize1(radioBtn, false, false).width - 1;
 			int wIcon = Math.max(0, setHTMLSize1(iconNode, false, false).width - 1);
 			// Now wrap the two with a div and get its dimensions
 			// and then put them back into the wrapper.
-			dobj = setHTMLSize1(wrap("div", "", iconNode, domBtn, textNode), false,
+			dobj = setHTMLSize1(wrap("div", "", iconNode, radioBtn, textNode), false,
 					false);
 			// set the offset of the text based on the icon and radio button size
 			DOMNode.setStyles(textNode, "left", wBtn + wIcon + "px");
       // TODO add textPosition here
-			vCenter(domBtn, -75);
+			vCenter(radioBtn, -75);
 			vCenter(iconNode, -15);
 			vCenter(textNode, -50);
 
 			// make everything absolute to pass sizing info to all
-			DOMNode.setPositionAbsolute(domBtn, Integer.MIN_VALUE, 0);
+			DOMNode.setPositionAbsolute(radioBtn, Integer.MIN_VALUE, 0);
 			DOMNode.setPositionAbsolute(iconNode, Integer.MIN_VALUE, 0);
 			DOMNode.setPositionAbsolute(textNode, Integer.MIN_VALUE, 0);
-			DOMNode.setPositionAbsolute(label, Integer.MIN_VALUE, 0);
+			DOMNode.setPositionAbsolute(btnLabel, Integer.MIN_VALUE, 0);
 
 			// (Re)create label.
 		}
-		label.appendChild(iconNode);
-		label.appendChild(domBtn);
-		label.appendChild(textNode);
+		btnLabel.appendChild(iconNode);
+		btnLabel.appendChild(radioBtn);
+		btnLabel.appendChild(textNode);
 		if (doAll && !isMenuItem)
 			DOMNode.setPositionAbsolute(domNode, Integer.MIN_VALUE, 0);
 		if (!isMenuItem) {
-			DOMNode.setSize(label, dobj.width, dobj.height);
+			DOMNode.setSize(btnLabel, dobj.width, dobj.height);
 			DOMNode.setSize(centeringNode, dobj.width, dobj.height);
 		}
 		return domNode;
@@ -124,8 +128,8 @@ public class JSRadioButtonUI extends JSButtonUI {
 	protected Dimension setHTMLSize(DOMNode obj, boolean addCSS) {
 		// "absolute" is required for positioning of button, but must not be there
 		// for setting the size.
-		DOMNode.setStyles(label, "position", null, "width", null, "height", null);
-		DOMNode.setStyles(domBtn, "position", null, "width", null, "height", null);
+		DOMNode.setStyles(btnLabel, "position", null, "width", null, "height", null);
+		DOMNode.setStyles(radioBtn, "position", null, "width", null, "height", null);
 		DOMNode
 				.setStyles(textNode, "position", null, "width", null, "height", null);
 		Dimension d;
@@ -133,18 +137,19 @@ public class JSRadioButtonUI extends JSButtonUI {
 			d = new Dimension(20, 20);
 		} else {
 			d = setHTMLSize1(obj, addCSS, false);
-			DOMNode.setPositionAbsolute(domBtn, Integer.MIN_VALUE, 0);
+			DOMNode.setPositionAbsolute(radioBtn, Integer.MIN_VALUE, 0);
 			DOMNode.setPositionAbsolute(textNode, Integer.MIN_VALUE, 0);
-			DOMNode.setPositionAbsolute(label, Integer.MIN_VALUE, 0);
+			DOMNode.setPositionAbsolute(btnLabel, Integer.MIN_VALUE, 0);
 			if (centeringNode != null)
 				DOMNode.setPositionAbsolute(centeringNode, Integer.MIN_VALUE, 0);
-			DOMNode.setStyles(label, "width", d.width + "px", "height", d.height
+			DOMNode.setStyles(btnLabel, "width", d.width + "px", "height", d.height
 					+ "px");
 		}
 		return d;
 	}
 
 	public void handleDOMEvent(Object e) {
+		// not implemented -- see ButtonListener
 		((AbstractButton) c).doClick(0);
 	}
 

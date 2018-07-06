@@ -3,6 +3,8 @@ package swingjs.plaf;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 
+import swingjs.api.js.DOMNode;
+
 public class JSCheckBoxMenuItemUI extends JSCheckBoxUI {
 
 	public JSCheckBoxMenuItemUI() {
@@ -20,4 +22,5 @@ public class JSCheckBoxMenuItemUI extends JSCheckBoxUI {
 		menuItem = (JMenuItem) jc;
 		super.installUI(jc);
 	}
+	
 }

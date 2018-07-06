@@ -37,8 +37,8 @@ import java.util.Vector;
  */
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class DefaultComboBoxModel extends AbstractListModel implements MutableComboBoxModel {
-    Vector objects;
+public class DefaultComboBoxModel<E> extends AbstractListModel<E> implements MutableComboBoxModel<E> {
+    Vector<E> objects;
     Object selectedObject;
 
     /**
@@ -54,7 +54,7 @@ public class DefaultComboBoxModel extends AbstractListModel implements MutableCo
      *
      * @param items  an array of Object objects
      */
-    public DefaultComboBoxModel(final Object items[]) {
+    public DefaultComboBoxModel(final E items[]) {
         objects = new Vector();
         objects.ensureCapacity( items.length );
 
@@ -73,7 +73,7 @@ public class DefaultComboBoxModel extends AbstractListModel implements MutableCo
      *
      * @param v  a Vector object ...
      */
-    public DefaultComboBoxModel(Vector<?> v) {
+    public DefaultComboBoxModel(Vector<E> v) {
         objects = v;
 
         if ( getSize() > 0 ) {
@@ -110,7 +110,7 @@ public class DefaultComboBoxModel extends AbstractListModel implements MutableCo
 
     // implements javax.swing.ListModel
     @Override
-		public Object getElementAt(int index) {
+		public E getElementAt(int index) {
         if ( index >= 0 && index < objects.size() )
             return objects.elementAt(index);
         else
@@ -130,7 +130,7 @@ public class DefaultComboBoxModel extends AbstractListModel implements MutableCo
 
     // implements javax.swing.MutableComboBoxModel
     @Override
-		public void addElement(Object anObject) {
+		public void addElement(E anObject) {
         objects.addElement(anObject);
         fireIntervalAdded(this,objects.size()-1, objects.size()-1);
         if ( objects.size() == 1 && selectedObject == null && anObject != null ) {
@@ -140,7 +140,7 @@ public class DefaultComboBoxModel extends AbstractListModel implements MutableCo
 
     // implements javax.swing.MutableComboBoxModel
     @Override
-		public void insertElementAt(Object anObject,int index) {
+		public void insertElementAt(E anObject,int index) {
         objects.insertElementAt(anObject,index);
         fireIntervalAdded(this, index, index);
     }

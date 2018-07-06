@@ -4,15 +4,15 @@ import java.io.File;
 
 public class JSFileBytes extends File {
 	
-	private byte[] bytes;
+	private byte[] _bytes;
 
 	public JSFileBytes(String name, byte[] data) {
 		super(name);
-		bytes = data;		
+		_bytes = data;		
 	}
 	
 	public byte[] getData() {
-		return bytes;
+		return _bytes;
 	}
  
 }

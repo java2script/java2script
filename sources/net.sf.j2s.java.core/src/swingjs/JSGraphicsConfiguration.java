@@ -89,7 +89,7 @@ public class JSGraphicsConfiguration extends GraphicsConfiguration {
 		 *  doc = document;
 		 */
 		{}
-		JQueryObject d = JSUtil.getJQuery().$(doc);
+		JQueryObject d = JSUtil.jQuery.$(doc);
 		return new Rectangle(d.width(), d.height());
 	}
 }

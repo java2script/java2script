@@ -72,7 +72,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			// a Windows applet has a sort of fuzzy shadowy border
 			domNode = frameNode = newDOMObject("div", id + "_frame");
 			DOMNode.setStyles(frameNode, "box-shadow", "0px 0px 10px gray", "box-sizing", "content-box");
-			setWindowClass(frameNode);
+			setWindowClass();
 			int w = c.getWidth();
 			int h = c.getHeight();
 			if (w == 0)
@@ -117,14 +117,21 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			@SuppressWarnings("unused")
 			DOMNode fnode = frameNode;
 			
-			JSFunction fGetFrameParent = null;
+			JSFunction fGetFrameParent = null; 
 			/**
 			 * @j2sNative var me = this; fGetFrameParent =
-			 *            function(){me.notifyFrameMoved();return
-			 *            $(fnode).parent()}
+			 *            
+			 *            function(x, y) {
+			 *            if (arguments.length == 0) {  
+			 *              return $(fnode).parent();
+			 *            }
+			 *            var xy = me.getMoveCoords$I$I(x, y);
+			 *            $($(fnode).parent()).css({ top: xy[1] + 'px', left: xy[0] + 'px' });
+			 *            me.notifyFrameMoved();
+			 *            return null;
+			 *            };
 			 */
-			{
-			}
+			
 			JSUtil.J2S._setDraggable(titleBarNode, fGetFrameParent);
 			titleBarNode.appendChild(titleNode);
 			titleBarNode.appendChild(closerWrap);
@@ -143,6 +150,10 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		setInnerComponentBounds(width, height);
 		setTitle(frame.getTitle());
 		return domNode;
+	}
+
+	public int[] getMoveCoords(int x, int y) {
+		return new int[] {x, y};
 	}
 
 	public void notifyFrameMoved() {
@@ -175,7 +186,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 
 		  		 */
 		  		{}
-					frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+		  		frameCloserAction();
 					return true;		  		
 		  	} else if (type.equals("mouseout")) {
 			  	DOMNode.setStyles(closerNode, "background-color", toCSSString(c.getBackground()));
@@ -187,6 +198,11 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		  }			
 		}
 		return false;
+	}
+
+	
+	protected void frameCloserAction() {
+  		frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
 	}
 
 	protected void closeFrame() {

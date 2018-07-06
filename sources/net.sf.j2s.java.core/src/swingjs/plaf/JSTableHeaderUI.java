@@ -165,12 +165,7 @@ public class JSTableHeaderUI extends JSLightweightUI {
 		DOMNode.setStyles(headdiv, "height", thh + "px");
 		domNode.appendChild(headdiv);
 		for (int col = 0, tx = 0; col < ncols; col++) {
-			DOMNode td = CellHolder.createCellNode(this, -1, col);
-			DOMNode.setStyles(td, "width", cw[col] + "px");
-			DOMNode.setStyles(td, "height", thh + "px");
-			DOMNode.setStyles(td, "left", tx + "px");
-			DOMNode.setStyles(td, "top", 0 + "px");
-			DOMNode.setStyles(td, "position", "absolute");
+			DOMNode td = CellHolder.createCellNode(this, -1, col, tx, 0, cw[col], thh);
 			tx += cw[col];
 			headdiv.appendChild(td);
 			CellHolder.updateCellNode(td, (JSComponent) getHeaderRenderer(col), cw[col], thh);

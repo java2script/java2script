@@ -134,6 +134,9 @@ public class MouseWheelEvent extends MouseEvent {
      * @see #getWheelRotation
      */
     int wheelRotation;
+    
+    double preciseWheelRotation;
+    
 
     /*
      * serialVersionUID
@@ -179,7 +182,6 @@ public class MouseWheelEvent extends MouseEvent {
     public MouseWheelEvent (Component source, int id, long when, int modifiers,
                       int x, int y, int clickCount, boolean popupTrigger,
                       int scrollType, int scrollAmount, int wheelRotation) {
-
         this(source, id, when, modifiers, x, y, 0, 0, clickCount,
              popupTrigger, scrollType, scrollAmount, wheelRotation);
     }
@@ -226,14 +228,23 @@ public class MouseWheelEvent extends MouseEvent {
     public MouseWheelEvent (Component source, int id, long when, int modifiers,
                             int x, int y, int xAbs, int yAbs, int clickCount, boolean popupTrigger,
                             int scrollType, int scrollAmount, int wheelRotation) {
-
+    	this(source, id, when, modifiers, x, y, xAbs, yAbs, clickCount, popupTrigger, 
+    				scrollType, scrollAmount, wheelRotation, wheelRotation);
+    }
+    
+    public MouseWheelEvent (Component source, int id, long when, int modifiers,
+            int x, int y, int xAbs, int yAbs, int clickCount, boolean popupTrigger,
+            int scrollType, int scrollAmount, int wheelRotation, double preciseWheelRotation) {
+    	// ala Java 7    	
         super(source, id, when, modifiers, x, y, xAbs, yAbs, clickCount,
               popupTrigger, MouseEvent.NOBUTTON);
 
         this.scrollType = scrollType;
         this.scrollAmount = scrollAmount;
         this.wheelRotation = wheelRotation;
+        this.preciseWheelRotation = preciseWheelRotation;
     }
+
 
     /**
      * Returns the type of scrolling that should take place in response to this
@@ -279,6 +290,11 @@ public class MouseWheelEvent extends MouseEvent {
      */
     public int getWheelRotation() {
         return wheelRotation;
+    }
+
+    public double getPreciseWheelRotation() {
+    	// SwingJS no different here
+        return preciseWheelRotation; 
     }
 
     /**

@@ -646,15 +646,46 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	private transient String name;
 
 	private String getName0() {
-		/**
-		 * @j2sNative return this.$clazz$.__CLASS_NAME$__ || this.$clazz$.__CLASS_NAME__;
+		String code = "";
 
+		/**
+		 * @j2sNative
+		 * 
+		 * 			code = this.$clazz$.__CLASS_NAME$__ ||
+		 *            this.$clazz$.__CLASS_NAME__; 
+		 *            
+		 *            if (code) return code;
+		 * 
+		 *            code = this.$clazz$.__PARAMCODE;
+		 * 
 		 */
-		{
+
+		switch (code) {
+		case "S":
+			code = "String";
+			break;
+		case "I":
+			code = "Integer";
+			break;
+		case "H":
+			code = "Short";
+			break;
+		case "B":
+			code = "Byte";
+			break;
+		case "L":
+			code = "Long";
+			break;
+		case "C":
+			code = "Character";
+			break;
+		default:
 			return null;
 		}
-	}
+		return "java.lang." + code;
 
+	}
+	
 	/**
 	 * Returns the class loader for the class. Some implementations may use null
 	 * to represent the bootstrap class loader. This method will return null in

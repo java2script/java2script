@@ -41,7 +41,7 @@ import javax.swing.event.ListDataListener;
  * @author Hans Muller
  * @see JList
  */
-public interface ListModel
+public interface ListModel<E>
 {
   /**
    * Returns the length of the list.
@@ -54,7 +54,7 @@ public interface ListModel
    * @param index the requested index
    * @return the value at <code>index</code>
    */
-  Object getElementAt(int index);
+  E getElementAt(int index);
 
   /**
    * Adds a listener to the list that's notified each time a change

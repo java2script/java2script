@@ -42,6 +42,8 @@ import java.util.Properties;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.Line;
 import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
@@ -118,7 +120,7 @@ public class JSToolkit extends SunToolkit {
 	@Override
 	protected int getScreenWidth() {
 		@SuppressWarnings("unused")
-		JQuery jq = JSUtil.getJQuery();
+		JQuery jq = JSUtil.jQuery;
 		int w = 0;
 		/**
 		 * @j2sNative
@@ -134,7 +136,7 @@ public class JSToolkit extends SunToolkit {
 	@Override
 	protected int getScreenHeight() {
 		@SuppressWarnings("unused")
-		JQuery jq = JSUtil.getJQuery();
+		JQuery jq = JSUtil.jQuery;
 		int h = 0;
 		/**
 		 * @j2sNative
@@ -605,6 +607,10 @@ public class JSToolkit extends SunToolkit {
 		return kit.getCreatedImage();
 	}
 
+	public ImageIcon createImageIcon(Component c, Icon icon) {
+		return getImagekit().createImageIcon(c, icon);
+	}
+	
 	@Override
 	public Image createImage(String filename) {
 		return getImagekit().createImageFromBytes(JSUtil.getSignedStreamBytes(new BufferedInputStream ( new ByteArrayInputStream(JSUtil.getFileAsBytes(filename)))), 0, -1, filename);
@@ -748,7 +754,7 @@ public class JSToolkit extends SunToolkit {
 		return null;
 	}
 
-	public static void setCursor(Cursor c) {
+	public static void setCursor(Component comp, Cursor c) {
 		String curs = null;
     switch(c == null ? Cursor.DEFAULT_CURSOR : c.getType()) {
     case Cursor.CROSSHAIR_CURSOR: 
@@ -787,7 +793,8 @@ public class JSToolkit extends SunToolkit {
       curs = "default";
       break;
     }		
-		DOMNode.setCursor(curs);
+		DOMNode.setCursor(curs, comp);
+		
 	}
 
 	
@@ -931,6 +938,10 @@ public class JSToolkit extends SunToolkit {
 		JSPrintJob job = (JSPrintJob) JSUtil.getInstance("swingjs.JSPrintJob");
 		job.setAttributes(jobtitle, jobAttributes, pageAttributes);
 		return (PrintJob) (Object) job;
+	}
+
+	public static ImageIcon paintImageForIcon(JComponent c, Icon icon) {
+		return JSImagekit.createImageIcon(c, icon);
 	}
 
 }

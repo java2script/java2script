@@ -122,6 +122,11 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// BH 7/5/2018 -- fixes int | char
+// BH 7/3/2018 -- adds tryWithResource
+// BH 7/3/2018 -- adds effectively final -- FINAL keyword no longer necessary  
+// BH 6/27/2018 -- fix for a[Integer] not becoming a[Integer.valueOf]
+// BH 6/26/2018 -- method logging via j2s.log.methods.called and j2s.log.methods.declared
 // BH 6/24/2018 -- synchronized(a = new Object()) {...} ---> ...; only if an assignment or not a simple function call to Object.getTreeLock()
 // BH 6/23/2018 -- synchronized(a = new Object()) {...} ---> if(!(a = new Object()) {throw new NullPointerException()}else{...}
 // BH 6/21/2018 -- CharSequence.subSequence() should be defined both subSequence$I$I and subSequence
@@ -257,7 +262,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		global_htIncludeNames = parent.global_htIncludeNames;
 		global_includeCount = parent.global_includeCount;
 		global_includes = parent.global_includes;
-		global_j2sFlag_isDebugging = parent.global_j2sFlag_isDebugging;
 		global_mapBlockJavadoc = parent.global_mapBlockJavadoc;
 		this$0Name = parent.getQualifiedClassName();
 
@@ -500,18 +504,25 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	public boolean visit(EnhancedForStatement node) {
 		SimpleName name = node.getParameter().getName();
 		String varName = getQualifiedSimpleName(name);
+		ITypeBinding vtype = name.resolveTypeBinding();
 		buffer.append("for (var ");
 		acceptVariableFinal(name, 1);
-		writeReplaceV(", $V = ", "V", varName);
+		writeReplaceV(", $V = ", "V", varName, null, null);
 		Expression exp = node.getExpression();
-		ITypeBinding typeBinding = exp.resolveTypeBinding();
-		if (typeBinding.isArray()) {
-			writeReplaceV("0, $$V = ", "V", varName);
+		ITypeBinding eType =  exp.resolveTypeBinding();
+		ITypeBinding arrayType =eType.getComponentType();
+		
+		if (arrayType == null) {
 			exp.accept(this);
-			writeReplaceV("; $V<$$V.length&&((V=$$V[$V]),1);$V++", "V", varName);
+			writeReplaceV(".iterator(); $V.hasNext()&&((V=", "V", varName, null, null);			
+			writeReplaceV("($V.next())", "V", varName, vtype, eType);			
+			writeReplaceV("),1);", "V", varName, null, null);
 		} else {
+			writeReplaceV("0, $$V = ", "V", varName, null, null);
 			exp.accept(this);
-			writeReplaceV(".iterator(); $V.hasNext()&&((V=$V.next()),1);", "V", varName);
+			writeReplaceV("; $V<$$V.length&&((V=", "V", varName, null, null);
+			writeReplaceV("($$V[$V])", "V", varName, vtype, arrayType);
+			writeReplaceV("),1);$V++", "V", varName, null, null);
 		}
 		buffer.append(") ");
 		node.getBody().accept(this);
@@ -519,8 +530,39 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		return false;
 	}
 
-	private void writeReplaceV(String template, String v, String varName) {
-		buffer.append(template.replace(v, varName));
+	/**
+	 * allow for primitive boxing or unboxing. See test.Test_Chars.java
+	 * 
+	 * @param template
+	 * @param v
+	 * @param varName
+	 * @param vType
+	 * @param eType
+	 */
+	private void writeReplaceV(String template, String v, String varName, ITypeBinding vType, ITypeBinding eType) {
+		String s = template.replace(v, varName);
+		if (vType != eType) {
+			if (vType.isPrimitive()) {
+				if (eType.isPrimitive()) {
+					// this is a conversion of an char[] to an int -- the only
+					// possibility allowed, I think
+					s += CHARCODEAT0;
+				} else {
+					// So we know the expression is boxed -- Character, for
+					// example
+					// Character does not use .objectValue, but we implement it
+					// here
+					if (vType.getName().equals("int"))
+						s += ".intValue()";
+					else
+						s += ".objectValue()";
+				}
+			} else if (eType.isPrimitive()) {
+				// So we know the expression is unboxed -- char, for example
+				s = "new " + getPrimitiveTYPE(eType.getName()) + s;
+			}
+		}
+		buffer.append(s);
 	}
 
 	public boolean visit(EnumDeclaration node) {
@@ -642,6 +684,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 											// names here
 		if (name.equals("'main'"))
 			addApplication();
+		if (lstMethodsDeclared != null && !Modifier.isPrivate(mods))
+			logMethodDeclared(name);
 		buffer.append("\r\nClazz.newMeth(C$, ").append(name).append(", function (");
 		@SuppressWarnings("unchecked")
 		List<ASTNode> parameters = node.parameters();
@@ -704,10 +748,21 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			int level = blockLevel + offset;
 			VariableAdapter.FinalVariable f = new VariableAdapter.FinalVariable(level, identifier,
 					methodDeclareNameStack.size() == 0 ? null : methodDeclareNameStack.peek());
-			addVariable(f, identifier, binding);
+			List<VariableAdapter.FinalVariable> finalVars = getVariableList('f');
+			List<VariableAdapter.FinalVariable> normalVars = getVariableList('n');
+			f.toVariableName = identifier;
+			normalVars.add(f);			
+			if (isFinalOrEffectivelyFinal(binding)) {
+				finalVars.add(f);
+			}
 			//buffer.append("/*blockLevel " + blockLevel + " level " + level + "*/");
 		}
 		name.accept(this);
+	}
+
+	private static boolean isFinalOrEffectivelyFinal(IBinding binding) {
+		return Modifier.isFinal(binding.getModifiers()) 
+				|| binding instanceof IVariableBinding && ((IVariableBinding)binding).isEffectivelyFinal();
 	}
 
 	private void removeVariableFinals(MethodDeclaration node) {
@@ -730,7 +785,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				f.toVariableName = identifier;
 				normalVars.remove(f);
 				//buffer.append("/*remNorm " + f.variableName + "/to/" + f.toVariableName + "*/");
-				if (Modifier.isFinal(binding.getModifiers())) {
+				if (isFinalOrEffectivelyFinal(binding)) {
 					finalVars.remove(f);
 					//buffer.append("/*remFinal " + f.variableName + "/to/" + f.toVariableName + "*/");
 				}
@@ -759,8 +814,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		boolean isPrivateAndNotStatic = isPrivate && !isStatic;
 		Expression expression = node.getExpression();
 		int pt = buffer.length();
+		boolean doLog = (!isPrivate && htMethodsCalled != null);
 		if (expression == null) {
 			// "this"
+			doLog = false;
 		} else {
 			isPrivateAndNotStatic = false;
 			if (expression instanceof Name) {
@@ -772,6 +829,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			}
 			buffer.append(".");
 		}
+		int ptLog = (doLog ? buffer.length() : 0);
 		boolean isSpecialMethod = false;
 		String methodName = node.getName().getIdentifier();
 		boolean isIndexOf = false;
@@ -783,12 +841,15 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					buffer.setLength(pt);
 					buffer.append(j2sName);
 					isSpecialMethod = true;
+					doLog = false;
 				} else if (node.arguments().size() == 0 || methodName.equals("split") || methodName.equals("replace")) {
 					if (j2sName.startsWith("~")) {
 						buffer.append('$');
 						buffer.append(j2sName.substring(1));
 						isSpecialMethod = true;
 					} else {
+						if (doLog && j2sName.startsWith("C$."))
+							doLog = false;
 						buffer.append(j2sName);
 						return false;
 					}
@@ -812,6 +873,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			} else {
 				buffer.append(qname);
 			}
+		}
+		if (doLog) {
+			String name = className + "." + buffer.substring(ptLog);
+			logMethodCalled(name);
 		}
 		if (isPrivateAndNotStatic) {
 			// A call to a private outer-class method from an inner class
@@ -911,30 +976,26 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	public boolean visit(SynchronizedStatement node) {
-		// we could wrap this with a simple if() statement, 
+		// we could wrap this with a simple if() statement,
 		// checking that it is not null, but that seems to me
 		// to be unnecessary. When would one ever intentionally
 		// produce a null pointer exception from synchronized(...)?
-		
+
 		Expression e = node.getExpression();
-		if (e instanceof Name 
-				|| e instanceof TypeLiteral
-				|| e instanceof ThisExpression)
-			return false;
-		buffer.append("/*sync " + e.getClass().getName() + "*/");		
-		// get actual JavaScript code
-		int pt = buffer.length();
-		e.accept(this);
-		String expr = buffer.substring(pt, buffer.length());
-		buffer.setLength(pt);
-		// ignore (treeLock())
-		if (e instanceof MethodInvocation && expr.indexOf(".getTreeLock()") >= 0){
-			MethodInvocation m = (MethodInvocation) e;
-			m.getExpression().getName();
-			return false;
+		if (!(e instanceof Name || e instanceof TypeLiteral || e instanceof ThisExpression)) {
+			buffer.append("/*sync " + e.getClass().getName() + "*/");
+			// get actual JavaScript code
+			int pt = buffer.length();
+			e.accept(this);
+			String expr = buffer.substring(pt, buffer.length());
+			buffer.setLength(pt);
+			// ignore (treeLock())
+			if (!(e instanceof MethodInvocation && expr.indexOf(".getTreeLock()") >= 0)) {
+				buffer.append("(");
+				buffer.append(expr);
+				buffer.append(");\r\n");
+			}
 		}
-		buffer.append(expr);
-		buffer.append(";");
 		node.getBody().accept(this);
 		return false;
 	}
@@ -946,10 +1007,20 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		return false;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "null" })
 	public boolean visit(TryStatement node) {
 		buffer.append("try ");
+		List<VariableDeclarationExpression> resources = node.resources();
+		int pt = (resources == null || resources.size() == 0 ? -1 : buffer.length() + 1);
 		node.getBody().accept(this);
+		if (pt >= 0) {
+			String buf = buffer.substring(pt);
+			buffer.setLength(pt);
+			for (int i = 0; i  < resources.size(); i++) {
+			   resources.get(i).accept(this);	
+			}			
+			buffer.append(buf);			
+		}
 		List<CatchClause> catchClauses = node.catchClauses();
 		int size = catchClauses.size();
 		if (size > 0) {
@@ -1623,7 +1694,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				: ((PrimitiveType) nodeType).getPrimitiveTypeCode());
 		ITypeBinding classBinding = resolveAbstractOrAnonymousBinding(field);
 		// have to check here for final Object = "foo", as that must not be ignored.
-		boolean checkFinalConstant = (isStatic && Modifier.isFinal(field.getModifiers())
+		boolean checkFinalConstant = (isStatic && Modifier.isFinal(field.getModifiers())				
 				&& var != null && !var.getType().getQualifiedName().equals("java.lang.Object"));
 		if (needDefault)
 			preVisit2(field);
@@ -1880,7 +1951,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private static final String getPrimitiveTYPE(String name) {
 		int pt = primitiveTypeEquivalents.indexOf(name.substring(1)) - 1;
 		String type = primitiveTypeEquivalents.substring(pt);
-		return type.substring(0, type.indexOf(",")) + ".TYPE";
+		return type.substring(0, type.indexOf(","));
 	}
 
 	private boolean isArray = false;
@@ -2456,8 +2527,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			return false;
 		String leftName = leftTypeBinding.getName();
 		String rightName = rightTypeBinding.getName();
-		if ("/".equals(operator) && leftTypeBinding.isPrimitive() && isIntegerType(leftName)
-				&& isIntegerType(rightName)) {
+		boolean leftIsInt = leftTypeBinding.isPrimitive() && isIntegerType(leftName);
+		boolean rightIsInt = rightTypeBinding.isPrimitive() && isIntegerType(rightName);
+		if ("/".equals(operator) && leftIsInt && rightIsInt) {
 			// left and right are one of byte, short, int, or long
 			// division must take care of this.
 			addPrimitiveTypedExpression(left, null, leftName, operator, right, rightName, extendedOperands, false);
@@ -2465,7 +2537,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 
 		boolean toBoolean = "boolean".equals(expTypeName);
-
+		
 		char pre = ' ';
 		char post = ' ';
 		if (isBitwise && toBoolean) {
@@ -2474,7 +2546,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			buffer.append("!!(");
 		}
 
-		boolean isDirect = isBitwise && !toBoolean;
+		boolean isDirect = isBitwise && !toBoolean && leftIsInt && rightIsInt;
 		if (isDirect || isComparison) {
 
 			// we do not have to do a full conversion
@@ -2515,8 +2587,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			}
 		}
 
+		boolean isToStringLeft = isToString && !isBitwise;
+		boolean isToStringRight = isToString && !isBitwise;
+		
+		//String s = "e";
+		//s += 'c' | 'd';
+		
 		// left
-		addOperand(left, isToString);
+		addOperand(left, isToString && !isBitwise);
 		buffer.append(' ');
 		// op
 		buffer.append(operator);
@@ -2526,7 +2604,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 		buffer.append(' ');
 		// right
-		addOperand(right, isToString);
+		addOperand(right, isToString && !isBitwise);
 
 		// The extended operands is the preferred way of representing deeply
 		// nested expressions of the form L op R op R2 op R3... where the same
@@ -2695,7 +2773,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			if (varBinding != null) {
 				if (qualifier instanceof SimpleName) {
 					addQualifiedNameFromBinding(varBinding, false);
-					// buffer.append("<qsn<");
 				} else {
 					buffer.append('(');
 					if (className == null)
@@ -2857,7 +2934,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				}
 			}
 			String fieldVar = null;
-			if (isAnonymousClass() && Modifier.isFinal(varBinding.getModifiers())
+			if (isAnonymousClass() && isFinalOrEffectivelyFinal(varBinding)
 					&& varBinding.getDeclaringMethod() != null) {
 				String key = varBinding.getDeclaringMethod().getKey();
 				if (methodDeclareNameStack.size() == 0 || !key.equals(methodDeclareNameStack.peek())) {
@@ -2954,7 +3031,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		ITypeBinding binding = type.resolveBinding();
 		if (type.isPrimitiveType()) {
 			// adds Integer.TYPE, Float.TYPE, etc.
-			buffer.append(getPrimitiveTYPE(binding.getName()));
+			buffer.append(getPrimitiveTYPE(binding.getName()) + ".TYPE");
 		} else if (type instanceof ArrayType) {
 			buffer.append(clazzArray(binding, ARRAY_CLASS_LITERAL));
 		} else {
@@ -2990,6 +3067,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	public boolean visit(VariableDeclarationFragment node) {
+		
+		
+		
 		SimpleName name = node.getName();
 		IBinding binding = name.resolveBinding();
 		if (binding == null)
@@ -3017,6 +3097,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @param isPost
 	 * @return
 	 */
+	@SuppressWarnings({ "null" })
 	private boolean addPrePost(Expression node, Expression left, String op, boolean isPost) {
 		ASTNode parent = node.getParent();
 		ITypeBinding leftTypeBinding = left.resolveTypeBinding();
@@ -3206,7 +3287,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		ITypeBinding ebinding = type.getElementType();
 		if (ebinding == null)
 			ebinding = type; // creating for Enum
-		String params = (ebinding.isPrimitive() ? getPrimitiveTYPE(ebinding.getName())
+		String params = (ebinding.isPrimitive() ? getPrimitiveTYPE(ebinding.getName()) + ".TYPE"
 				: getQualifiedStaticName(null, ebinding.getQualifiedName(), true, true, false))
 				+ (dimFlag == ARRAY_DIM_ONLY ? "" : ", " + (Math.abs(dimFlag) * type.getDimensions() * -1));
 		return "Clazz.array(" + params + (dimFlag > 0 ? ")" : "");
@@ -3386,8 +3467,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		switch (name) {
 		case "char":
 		case "Character":
+		case "Byte":
+		case "Short":
+		case "Integer":
+		case "Long":
 			addOperand(exp, false);
-			break;
+			break;			
 		default:
 		case "String":
 			exp.accept(this);
@@ -3637,18 +3722,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private void addQualifiedNameFromBinding(IVariableBinding varBinding, boolean isStatic) {
 		appendShortenedQualifiedName((isStatic ? null : global_PackageName), varBinding.getDeclaringClass().getQualifiedName(),
 				isStatic(varBinding), true);
-	}
-
-	private void addVariable(VariableAdapter.FinalVariable f, String identifier, IBinding binding) {
-		List<VariableAdapter.FinalVariable> finalVars = getVariableList('f');
-		List<VariableAdapter.FinalVariable> normalVars = getVariableList('n');
-		f.toVariableName = identifier;
-		normalVars.add(f);
-		//buffer.append("/*addVar n " + identifier + " */");
-		if (Modifier.isFinal(binding.getModifiers())) {
-			finalVars.add(f);
-			//buffer.append("/*addVar f " + identifier + " */");
-		}
 	}
 
 	/**
@@ -4693,13 +4766,56 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * includes @j2sDebug blocks; from j2s.compiler.mode=debug in .j2s
 	 * 
 	 */
-	private boolean global_j2sFlag_isDebugging = false;
+	private static boolean global_j2sFlag_isDebugging = false;
 
-	public void setDebugging(boolean isDebugging) {
-		this.global_j2sFlag_isDebugging = isDebugging;
+	public static void setDebugging(boolean isDebugging) {
+		global_j2sFlag_isDebugging = isDebugging;
 	}
 
+	private static List<String> lstMethodsDeclared;
+
+	private static Map<String, String> htMethodsCalled;
+
+	private static boolean logAllCalls;
+
+	public static void setLogging(List<String> lstMethodsDeclared, Map<String, String> htMethodsCalled,
+			boolean logAllCalls) {
+		Java2ScriptVisitor.lstMethodsDeclared = lstMethodsDeclared;
+		Java2ScriptVisitor.htMethodsCalled = htMethodsCalled;
+		Java2ScriptVisitor.logAllCalls = logAllCalls;
+		if (lstMethodsDeclared != null)
+			lstMethodsDeclared.clear();
+		if (logAllCalls)
+			htMethodsCalled.clear();
+	}
 	
+	private void logMethodDeclared(String name) {
+		if (name.startsWith("[")) {
+			String[] names = name.substring(0,  name.length() - 1).split(",");
+			for (int i = 0; i < names.length; i++)
+				logMethodDeclared(names[i]);
+			return;
+		}
+		String myName = fixLogName(getQualifiedClassName());
+		if (name.startsWith("'"))	
+			name = name.substring(1, name.length() - 1);
+		lstMethodsDeclared.add(myName + "." + name);
+	}
+
+	private void logMethodCalled(String name) {
+		name = fixLogName(name);
+		String myName = fixLogName(getQualifiedClassName());
+		if (logAllCalls)
+			htMethodsCalled.put(name + "," + myName,  "-");
+		else
+			htMethodsCalled.put(name,  myName);
+	}
+
+	private String fixLogName(String name) {
+		name = checkClassReplacement(name);
+		int pt = name.indexOf("<");
+		return (pt > 0 ? name.substring(0,  pt) : name);
+	}
 
 	private static Map<String, String> htClassReplacements;
 	private static List<String> lstPackageReplacements;
@@ -5542,4 +5658,5 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			e.printStackTrace();
 		}
 	}
+
 }

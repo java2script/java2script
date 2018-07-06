@@ -169,11 +169,12 @@ public NameEnvironmentAnswer findClass(String binaryFileName, String qualifiedPa
 		if (reader != null) {
 			String fileNameWithoutExtension = qualifiedBinaryFileName.substring(0, qualifiedBinaryFileName.length() - SuffixConstants.SUFFIX_CLASS.length);
 			if (this.externalAnnotationPath != null) {
-				try {
-					this.annotationZipFile = reader.setExternalAnnotationProvider(this.externalAnnotationPath, fileNameWithoutExtension, this.annotationZipFile, null);
-				} catch (@SuppressWarnings("unused") IOException e) {
-					// don't let error on annotations fail class reading
-				}
+				// photon doesn't allow this
+//				try {
+//					this.annotationZipFile = reader.setExternalAnnotationProvider(this.externalAnnotationPath, fileNameWithoutExtension, this.annotationZipFile, null);
+//				} catch (@SuppressWarnings("unused") IOException e) {
+//					// don't let error on annotations fail class reading
+//				}
 			}
 			if (this.accessRuleSet == null)
 				return new NameEnvironmentAnswer(reader, null);
