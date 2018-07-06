@@ -118,12 +118,6 @@ public class JInternalFrame extends JFrame
         RootPaneContainer
 {
 	
-	/**
-     * @see #getUIClassID
-     * @see #readObject
-     */
-    private static final String uiClassID = "InternalFrameUI";
-
     /**
      * The <code>JRootPane</code> instance that manages the
      * content pane
@@ -1885,7 +1879,7 @@ public class JInternalFrame extends JFrame
          */
         public JDesktopIcon(JInternalFrame f) {
         	super();
-        	uiClassID = "DesktopIcon"; 
+        	uiClassID = "DesktopIconUI"; 
             setVisible(false);
             setInternalFrame(f);
             updateUI();
@@ -1945,9 +1939,7 @@ public class JInternalFrame extends JFrame
                 return getInternalFrame().getDesktopPane();
             return null;
         }
-
-        String uiClassID = "DesktopIconUI";
-        
+       
         /**
          * Notification from the <code>UIManager</code> that the look and feel
          * has changed.
