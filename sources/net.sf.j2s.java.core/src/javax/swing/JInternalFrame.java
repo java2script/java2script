@@ -1515,6 +1515,7 @@ public class JInternalFrame extends JFrame
      */
     public void toFront() {
         moveToFront();
+        super.toFront(); // Window
     }
 
     /**
@@ -1528,6 +1529,7 @@ public class JInternalFrame extends JFrame
      */
     public void toBack() {
         moveToBack();
+        super.toBack();
     }
 
     /**

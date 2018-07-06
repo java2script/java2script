@@ -49,5 +49,7 @@ public interface JQueryObject {
 
 	public abstract void detach(); // like remove(), but does not change event settings
 
+	public abstract DOMNode parent();
+
 	
 }
