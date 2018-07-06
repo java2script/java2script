@@ -350,7 +350,7 @@ public class JInternalFrame extends JFrame
      */
     public JInternalFrame(String title, boolean resizable, boolean closable,
                                 boolean maximizable, boolean iconifiable) {
-    	super("title", null, "InternalFrameUI");
+    	super(title, null, "InternalFrameUI");
         this.resizable = resizable;
         this.closable = closable;
         this.maximizable = maximizable;
@@ -1884,31 +1884,33 @@ public class JInternalFrame extends JFrame
          *              for which the icon is created
          */
         public JDesktopIcon(JInternalFrame f) {
+        	super();
+        	uiClassID = "DesktopIcon"; 
             setVisible(false);
             setInternalFrame(f);
             updateUI();
         }
 
-        /**
-         * Returns the look-and-feel object that renders this component.
-         *
-         * @return the <code>DesktopIconUI</code> object that renders
-         *              this component
-         */
-        public DesktopIconUI getUI() {
-            return (DesktopIconUI)ui;
-        }
-
-        /**
-         * Sets the look-and-feel object that renders this component.
-         *
-         * @param ui  the <code>DesktopIconUI</code> look-and-feel object
-         * @see UIDefaults#getUI
-         */
-        public void setUI(DesktopIconUI ui) {
-            super.setUI(ui);
-        }
-
+//        /**
+//         * Returns the look-and-feel object that renders this component.
+//         *
+//         * @return the <code>DesktopIconUI</code> object that renders
+//         *              this component
+//         */
+//        public DesktopIconUI getUI() {
+//            return (DesktopIconUI)ui;
+//        }
+//
+//        /**
+//         * Sets the look-and-feel object that renders this component.
+//         *
+//         * @param ui  the <code>DesktopIconUI</code> look-and-feel object
+//         * @see UIDefaults#getUI
+//         */
+//        public void setUI(DesktopIconUI ui) {
+//            super.setUI(ui);
+//        }
+//
         /**
          * Returns the <code>JInternalFrame</code> that this
          * <code>DesktopIcon</code> is associated with.

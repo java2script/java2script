@@ -27,6 +27,7 @@
  */
 package javax.swing.table;
 
+import java.text.Collator;
 import java.util.Comparator;
 
 import javax.swing.DefaultRowSorter;
@@ -232,7 +233,7 @@ public class TableRowSorter<M extends TableModel> extends DefaultRowSorter<M, In
         		COMPARABLE_COMPARATOR =  new ComparableComparator();
             return COMPARABLE_COMPARATOR;
         }
-        return null;//Collator.getInstance();
+        return null;//class is not comparable - don't sort //sCollator.getInstance();
     }
 
     /**

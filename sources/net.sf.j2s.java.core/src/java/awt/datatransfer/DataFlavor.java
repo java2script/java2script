@@ -34,8 +34,8 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+//import java.io.ObjectInput;
+//import java.io.ObjectOutput;
 import java.io.OptionalDataException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -112,9 +112,9 @@ import sun.awt.datatransfer.DataTransferer;
  * @author Jeff Dunn
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class DataFlavor implements Externalizable, Cloneable {
+public class DataFlavor implements /*Externalizable,*/ Cloneable {
 
-	private static final long serialVersionUID = 8367026044764648243L;
+//	private static final long serialVersionUID = 8367026044764648243L;
 	private static final Class ioInputStreamClass = java.io.InputStream.class;
 
 	/**
@@ -1304,52 +1304,52 @@ public class DataFlavor implements Externalizable, Cloneable {
 		return (DataTransferer.isFlavorCharsetTextType(this) || DataTransferer.isFlavorNoncharsetTextType(this));
 	}
 
-	/**
-	 * Serializes this <code>DataFlavor</code>.
-	 */
-
-	public synchronized void writeExternal(ObjectOutput os) throws IOException {
-		if (mimeType != null) {
-			mimeType.setParameter("humanPresentableName", humanPresentableName);
-			os.writeObject(mimeType);
-			mimeType.removeParameter("humanPresentableName");
-		} else {
-			os.writeObject(null);
-		}
-
-		os.writeObject(representationClass);
-	}
-
-	/**
-	 * Restores this <code>DataFlavor</code> from a Serialized state.
-	 */
-
-	public synchronized void readExternal(ObjectInput is) throws IOException, ClassNotFoundException {
-		String rcn = null;
-		mimeType = (MimeType) is.readObject();
-
-		if (mimeType != null) {
-			humanPresentableName = mimeType.getParameter("humanPresentableName");
-			mimeType.removeParameter("humanPresentableName");
-			rcn = mimeType.getParameter("class");
-			if (rcn == null) {
-				throw new IOException("no class parameter specified in: " + mimeType);
-			}
-		}
-
-		try {
-			representationClass = (Class) is.readObject();
-		} catch (OptionalDataException ode) {
-			if (!ode.eof || ode.length != 0) {
-				throw ode;
-			}
-			// Ensure backward compatibility.
-			// Old versions didn't write the representation class to the stream.
-			if (rcn != null) {
-				representationClass = DataFlavor.tryToLoadClass(rcn, getClass().getClassLoader());
-			}
-		}
-	}
+//	/**
+//	 * Serializes this <code>DataFlavor</code>.
+//	 */
+//
+//	public synchronized void writeExternal(ObjectOutput os) throws IOException {
+//		if (mimeType != null) {
+//			mimeType.setParameter("humanPresentableName", humanPresentableName);
+//			os.writeObject(mimeType);
+//			mimeType.removeParameter("humanPresentableName");
+//		} else {
+//			os.writeObject(null);
+//		}
+//
+//		os.writeObject(representationClass);
+//	}
+//
+//	/**
+//	 * Restores this <code>DataFlavor</code> from a Serialized state.
+//	 */
+//
+//	public synchronized void readExternal(ObjectInput is) throws IOException, ClassNotFoundException {
+//		String rcn = null;
+//		mimeType = (MimeType) is.readObject();
+//
+//		if (mimeType != null) {
+//			humanPresentableName = mimeType.getParameter("humanPresentableName");
+//			mimeType.removeParameter("humanPresentableName");
+//			rcn = mimeType.getParameter("class");
+//			if (rcn == null) {
+//				throw new IOException("no class parameter specified in: " + mimeType);
+//			}
+//		}
+//
+//		try {
+//			representationClass = (Class) is.readObject();
+//		} catch (OptionalDataException ode) {
+//			if (!ode.eof || ode.length != 0) {
+//				throw ode;
+//			}
+//			// Ensure backward compatibility.
+//			// Old versions didn't write the representation class to the stream.
+//			if (rcn != null) {
+//				representationClass = DataFlavor.tryToLoadClass(rcn, getClass().getClassLoader());
+//			}
+//		}
+//	}
 
 	/**
 	 * Returns a clone of this <code>DataFlavor</code>.

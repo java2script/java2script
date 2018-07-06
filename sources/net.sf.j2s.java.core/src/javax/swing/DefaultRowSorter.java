@@ -484,7 +484,7 @@ public abstract class DefaultRowSorter<M, I> extends RowSorter<M> {
             if (keys.size() > getMaxSortKeys()) {
                 keys = keys.subList(0, getMaxSortKeys());
             }
-            setSortKeys(keys);
+            setSortKeys(keys); // BH 2018  this carries out a sort
         }
     }
 
@@ -985,11 +985,11 @@ public abstract class DefaultRowSorter<M, I> extends RowSorter<M> {
                     result = 1;
                 } else {
                 		Comparator c = sortComparators[counter];
-                		// problem here is that comparators are T, but here we have I
-             			result = (/** @j2sNative  c.compare$O$O ? c.compare$O$O(v1,v2) : */ c.compare(v1, v2));
+                		// BH 2018 problem here is that comparators are T, but here we have I
+             			result = (/** @j2sNative c == null ? 0 :  c.compare$O$O ? c.compare$O$O(v1,v2) : */ c.compare(v1, v2));
                 }
                 if (sortOrder == SortOrder.DESCENDING) {
-                    result *= -1;
+                    result = -result;
                 }
             }
             if (result != 0) {

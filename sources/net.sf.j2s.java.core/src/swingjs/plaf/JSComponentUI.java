@@ -926,7 +926,7 @@ public class JSComponentUI extends ComponentUI
 	 * @return the DOM element's node and, if the DOM element already exists,
 	 */
 	public DOMNode updateDOMNode() {
-		String msg = "Swingjs WARNING: default JSComponentUI is being used for " + getClass().getName();
+		String msg = "Swingjs WARNING: default JSComponentUI.updateDOMNode() is being used for " + getClass().getName();
 		if (debugging && createMsgs.indexOf(msg) < 0) {
 			createMsgs += msg;
 			JSUtil.alert(msg);
