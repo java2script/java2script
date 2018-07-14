@@ -17,7 +17,6 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 	private boolean isCleanBuild;
 
 	public Java2ScriptCompilationParticipant() {
-		super();
 		System.out.println("CompilationParticipant started");
 	}
 
@@ -161,6 +160,5 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 	 */
 	public void reconcile(ReconcileContext context) {
 		// fired whenever a source file is changed -- before it is saved
-		super.reconcile(context);
 	}
 }
