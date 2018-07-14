@@ -44,18 +44,18 @@ public class Java2ScriptCompiler {
 	// BH: added "true".equals(getProperty(props,
 	// "j2s.compiler.allow.compression")) to ensure compression only occurs when
 	// desired
-	static final int JSL_LEVEL = AST.JLS8; // BH can we go to JSL 8?
+	private static final int JSL_LEVEL = AST.JLS8; // BH can we go to JSL 8?
 
-	private static boolean showJ2SSettings = true;
+	private boolean showJ2SSettings = true;
 
 	// We copy all non .java files from any directory from which we loaded a
 	// java file into the site directory
-	private final static HashSet<String> copyResources = new HashSet<String>();
-	private static Map<String, String> htMethodsCalled;
-	private static List<String> lstMethodsDeclared;
+	private final HashSet<String> copyResources = new HashSet<String>();
+	private Map<String, String> htMethodsCalled;
+	private List<String> lstMethodsDeclared;
 
-	private static Properties props;
-	private static String htmlTemplate = null;
+	private Properties props;
+	private String htmlTemplate = null;
 
 	private String projectFolder;
 
@@ -95,26 +95,27 @@ public class Java2ScriptCompiler {
 		isCleanBuild = isClean;
 		htmlTemplate = null;
 		if (isClean) {
-			// we can make these nonstatic if this works			
 			copyResources.clear();
 			lstMethodsDeclared = null;
 			htMethodsCalled = null;
 		}
 	}
 
-	/**
-	 * old way from original builder
-	 * 
-	 */
-	public void process(ICompilationUnit sourceUnit, IContainer binaryFolder) {
-		if (!(sourceUnit instanceof SourceFile))
-			return;
-		if (!initializeProject(binaryFolder.getProject(), false))
-			return;
-		compileToJavaScript(((SourceFile) sourceUnit).resource);
-	}
+//	/**
+//	 * old way from original builder
+//	 * 
+//	 */
+//	public void process(ICompilationUnit sourceUnit, IContainer binaryFolder) {
+//		if (!(sourceUnit instanceof SourceFile))
+//			return;
+//		if (!initializeProject(binaryFolder.getProject(), false))
+//			return;
+//		compileToJavaScript(((SourceFile) sourceUnit).resource);
+//	}
 
 	/**
+	 * from Java2ScriptCompilationParticipant.java
+	 * 
 	 * get all necessary .j2s params for a build
 	 * 
 	 * @param project
@@ -222,6 +223,8 @@ public class Java2ScriptCompiler {
 	}
 
 	/**
+	 * from Java2ScriptCompilationParticipant.java
+	 * 
 	 * process the source file into JavaScript using the JDT abstract syntax
 	 * tree parser and visitor
 	 * 
@@ -292,7 +295,7 @@ public class Java2ScriptCompiler {
 		}
 	}
 
-	private static void logMethods(String logCalled, String logDeclared, boolean doAppend) {
+	private void logMethods(String logCalled, String logDeclared, boolean doAppend) {
 		if (htMethodsCalled != null)
 			try {
 				File file = new File(logCalled);
@@ -326,14 +329,14 @@ public class Java2ScriptCompiler {
 			}
 	}
 
-	private static String getProperty(String key) {
+	private String getProperty(String key) {
 		String val = props.getProperty(key);
 		if (showJ2SSettings)
 			System.err.println(key + " = " + val);
 		return val;
 	}
 
-	public static void outputJavaScript(Java2ScriptVisitor visitor,
+	public void outputJavaScript(Java2ScriptVisitor visitor,
 			// DependencyASTVisitor dvisitor, CompilationUnit fRoot,
 			String j2sPath) {
 
@@ -351,7 +354,7 @@ public class Java2ScriptCompiler {
 		showJ2SSettings = false; // just once per compilation run
 	}
 
-	private static void createJSFile(String j2sPath, String packageName, String elementName, String js) {
+	private void createJSFile(String j2sPath, String packageName, String elementName, String js) {
 		if (packageName != null) {
 			File folder = new File(j2sPath, packageName.replace('.', File.separatorChar));
 			j2sPath = folder.getAbsolutePath();
@@ -385,7 +388,7 @@ public class Java2ScriptCompiler {
 		return null;
 	}
 
-	private static void writeToFile(File file, String data) {
+	private void writeToFile(File file, String data) {
 		if (data == null)
 			return;
 		try {
@@ -429,7 +432,7 @@ public class Java2ScriptCompiler {
 	 * @param template
 	 * @param isApplet
 	 */
-	private static void addHTML(ArrayList<String> appList, String siteFolder, String template, boolean isApplet) {
+	private void addHTML(ArrayList<String> appList, String siteFolder, String template, boolean isApplet) {
 		if (appList == null || template == null)
 			return;
 		for (int i = appList.size(); --i >= 0;) {
@@ -445,7 +448,7 @@ public class Java2ScriptCompiler {
 		}
 	}
 
-	private static FileFilter filter = new FileFilter() {
+	private FileFilter filter = new FileFilter() {
 
 		@Override
 		public boolean accept(File pathname) {
@@ -454,11 +457,11 @@ public class Java2ScriptCompiler {
 
 	};
 
-	private static void copySiteResources(File from, File dest) {
+	private void copySiteResources(File from, File dest) {
 		copyNonclassFiles(from, dest);
 	}
 
-	private static void copyNonclassFiles(File dir, File target) {
+	private void copyNonclassFiles(File dir, File target) {
 		if (dir.equals(target))
 			return;
 		File[] files = dir.listFiles(filter);

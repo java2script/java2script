@@ -1,5 +1,9 @@
 Notes
 =====
+
+update 7/14/2018 -- 3.2.1 removes Java2ScriptJavaBuilder; uses CompilationParticipant instead
+                 -- note that this change requires that the .project builder be set back to org.eclipse.jdt.core.javabuilder
+                 
 updated 9/5/17 -- merge with net.sf.j2s.java.core
 
 updated 6/5/17 -- reserved package name "window"

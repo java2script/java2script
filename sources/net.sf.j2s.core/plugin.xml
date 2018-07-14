@@ -13,4 +13,6 @@
       </compilationParticipant>
    </extension>
 
+<!-- 3.2.1 now does not use a special builder. This is just for legacy code -->
+
 </plugin>

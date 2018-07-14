@@ -122,6 +122,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+import net.sf.j2s.core.CorePlugin;
+
 // BH 7/5/2018 -- fixes int | char
 // BH 7/3/2018 -- adds tryWithResource
 // BH 7/3/2018 -- adds effectively final -- FINAL keyword no longer necessary  
@@ -4708,9 +4710,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			// normal termination from item after last j2sjavadoc
 		}
 
-		for (int i = 0, n = list.size(); i < n; i++) {
-			System.err.println(i + "  " + (list.get(i) == null ? null : list.get(i).getClass().getName() + " " + list.get(i).getStartPosition() + "..." + (list.get(i).getStartPosition() + list.get(i).getLength())));
-		}
+//		for (int i = 0, n = list.size(); i < n; i++) {
+//			System.err.println(i + "  " + (list.get(i) == null ? null : list.get(i).getClass().getName() + " " + list.get(i).getStartPosition() + "..." + (list.get(i).getStartPosition() + list.get(i).getLength())));
+//		}
 
 		// and link javadoc to its closest block
 
@@ -4731,7 +4733,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				List<Javadoc> docs = global_mapBlockJavadoc.get(pt);
 				if (docs == null)
 					global_mapBlockJavadoc.put(pt, docs = new ArrayList<Javadoc>());
-				System.err.println(pt + " " + item.getClass().getName() + " " + doc);				
+				//System.err.println(pt + " " + item.getClass().getName() + " " + doc);				
 				docs.add(doc);
 			}
 		}
@@ -4754,7 +4756,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	private List<Javadoc> getJ2sJavadoc(ASTNode node, boolean isPre) {
-		List<Javadoc> docs = global_mapBlockJavadoc.remove(Integer.valueOf((isPre ? 1 : -1) * node.getStartPosition()));
+		// global_mapBlockJavadoc will be null for a no-package class like VARNA.java
+		List<Javadoc> docs = (global_mapBlockJavadoc == null ? null : global_mapBlockJavadoc.remove(Integer.valueOf((isPre ? 1 : -1) * node.getStartPosition())));
 		if (!isPre && docs != null)
 			NativeDoc.checkJ2sJavadocs(buffer, docs, false, global_j2sFlag_isDebugging);
 		return docs;
@@ -4960,7 +4963,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @return List {elementName, js, elementName, js, ....}
 	 */
 	public List<String> getElementList() {
-		String trailer = "//Created " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " j2s ver. " + ver + "\n";
+		String trailer = "//Created " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " net.sf.j2s.core.jar v. " + CorePlugin.VERSION + "\n";
 		List<String> elements = new ArrayList<String>();
 		String js = buffer.toString();
 		String eq = "="; // because we might be operating on this file

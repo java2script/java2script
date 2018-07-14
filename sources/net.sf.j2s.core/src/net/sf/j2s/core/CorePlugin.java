@@ -7,11 +7,19 @@ import org.osgi.framework.BundleContext;
 
 /**
  * The main plugin class to be used in the desktop.
+ * 
  */
 public class CorePlugin extends Plugin {
 
 	//The shared instance.
 	private static CorePlugin plugin;
+	
+	/**
+	 * Note that Eclipse must be started with the -clean flag if it is to 
+	 * register the bundle version properly. So we use VERSION here instead.
+	 * 
+	 */
+	public static String VERSION = "3.2.1";
 	
 	/**
 	 * The constructor.
@@ -25,7 +33,7 @@ public class CorePlugin extends Plugin {
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-		System.out.println("Java2Script CorePlugin started");
+		System.out.println("net.sf.j2s.core." + context.getBundle().getVersion() + "/" + VERSION + " started");
 //		if (!InnerHotspotServer.isServerStarted()) {
 //			InnerHotspotServer.getSingletonServer().startServer();
 //		}
