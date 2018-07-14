@@ -122,6 +122,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+import net.sf.j2s.core.CorePlugin;
+
 // BH 7/5/2018 -- fixes int | char
 // BH 7/3/2018 -- adds tryWithResource
 // BH 7/3/2018 -- adds effectively final -- FINAL keyword no longer necessary  
@@ -1216,7 +1218,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			trailingBuffer.append(tempVisitor.buffer.toString());
 			return false;
 		}
-		System.err.println("visit " + binding.getKey());
+		//System.err.println("visit " + binding.getKey());
 		
 		boolean isTopLevel = binding.isTopLevel();
 		if (isTopLevel) {
@@ -4708,9 +4710,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			// normal termination from item after last j2sjavadoc
 		}
 
-		for (int i = 0, n = list.size(); i < n; i++) {
-			System.err.println(i + "  " + (list.get(i) == null ? null : list.get(i).getClass().getName() + " " + list.get(i).getStartPosition() + "..." + (list.get(i).getStartPosition() + list.get(i).getLength())));
-		}
+//		for (int i = 0, n = list.size(); i < n; i++) {
+//			System.err.println(i + "  " + (list.get(i) == null ? null : list.get(i).getClass().getName() + " " + list.get(i).getStartPosition() + "..." + (list.get(i).getStartPosition() + list.get(i).getLength())));
+//		}
 
 		// and link javadoc to its closest block
 
@@ -4731,7 +4733,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				List<Javadoc> docs = global_mapBlockJavadoc.get(pt);
 				if (docs == null)
 					global_mapBlockJavadoc.put(pt, docs = new ArrayList<Javadoc>());
-				System.err.println(pt + " " + item.getClass().getName() + " " + doc);				
+				//System.err.println(pt + " " + item.getClass().getName() + " " + doc);				
 				docs.add(doc);
 			}
 		}
@@ -4754,7 +4756,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	private List<Javadoc> getJ2sJavadoc(ASTNode node, boolean isPre) {
-		List<Javadoc> docs = global_mapBlockJavadoc.remove(Integer.valueOf((isPre ? 1 : -1) * node.getStartPosition()));
+		// global_mapBlockJavadoc will be null for a no-package class like VARNA.java
+		List<Javadoc> docs = (global_mapBlockJavadoc == null ? null : global_mapBlockJavadoc.remove(Integer.valueOf((isPre ? 1 : -1) * node.getStartPosition())));
 		if (!isPre && docs != null)
 			NativeDoc.checkJ2sJavadocs(buffer, docs, false, global_j2sFlag_isDebugging);
 		return docs;
@@ -4856,7 +4859,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				}
 				
 			}
-			if (rep != null) {
+			if (rep != null) { 
 				System.out.println(className + " -> " + rep);
 				return rep;
 			}
@@ -4880,9 +4883,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * Add the top-level class name with the element key.
 	 *
 	 * @param className
-	 */
-	private void appendElementKey(String className) {
-		buffer.append(ELEMENT_KEY + className + "\r\n");
+	 */ 
+	private void appendElementKey(String className) { 
+		buffer.append(ELEMENT_KEY + ("=" + className) + "\r\n");
 	}
 
 	/**
@@ -4901,6 +4904,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 *  
 	 */
 	private int[] global_includeCount = new int[1];
+
+	private String ver = "??";
 	
 	/**
 	 * Register a qualified static name as an import var I$[n] unless it ends
@@ -4958,22 +4963,22 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @return List {elementName, js, elementName, js, ....}
 	 */
 	public List<String> getElementList() {
-		String trailer = "//Created " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + "\n";
+		String trailer = "//Created " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " net.sf.j2s.core.jar v. " + CorePlugin.VERSION + "\n";
 		List<String> elements = new ArrayList<String>();
 		String js = buffer.toString();
-		String[] parts = js.split(ELEMENT_KEY);
+		String eq = "="; // because we might be operating on this file
+		String[] parts = js.split(ELEMENT_KEY + eq);
 		String header = parts[0];
 		String header_noIncludes = header.replace(",I$=[[]]", "");
 		header = header.replace(",I$=[]", global_includes.length() == 0 ? "" : global_includes.append("]],$incl$=function(i){return I$[i]=Clazz.load(I$[0][i-1])}"));
-		System.err.println(header);
+		//System.err.println(header);
 		for (int i = 1; i < parts.length; i++) {
 			js = parts[i];
 			int pt = js.indexOf("\r\n");
-			elements.add(js.substring(0, pt));
+			String name = js.substring(0, pt); 
+			elements.add(name);
 			js = js.substring(pt + 2);
-			String head = "(function(){" + (js.indexOf("(I$[") < 0 ? header_noIncludes : header);
-			
-			
+			String head = "(function(){" + (js.indexOf("(I$[") < 0 ? header_noIncludes : header);			
 			elements.add(head + js + "})();\r\n" + trailer);
 		}
 		return elements;

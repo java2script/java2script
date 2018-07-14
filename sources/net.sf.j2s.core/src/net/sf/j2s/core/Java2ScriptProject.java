@@ -31,6 +31,7 @@ public class Java2ScriptProject {
 	 */
 	public static boolean hasJava2ScriptNature(IProject project) { 
 		try {
+			System.out.println("Java2ScriptProject hasNature " + project.hasNature("net.sf.j2s.java2scriptnature"));
 			return project.hasNature("net.sf.j2s.java2scriptnature");
 		} catch (@SuppressWarnings("unused") CoreException e) {
 			if (ExternalJavaProject.EXTERNAL_PROJECT_NAME.equals(project.getName()))
