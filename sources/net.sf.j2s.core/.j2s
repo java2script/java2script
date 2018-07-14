@@ -1,9 +1,16 @@
 #j2s configuration file
  
-#uncomment j2s.* lines to process
+#enable the Java2Script transpiler -- comment out to disable
+j2s.compiler.status=enable
 
-#enable the Java2Script transpiler
-#j2s.compiler.status=enable
+
+#destination directory for all JavaScript
+j2s.site.directory=site
+
+#uncomment j2s.* lines to process:
+
+#a semicolon-separated list of package-level file paths to be excluded
+#j2s.excluded.paths=test;testng
 
 #output file name for logging methods declared - delete the file to regenerate a listing 
 #j2s.log.methods.declared=methodsDeclared.csv
@@ -15,10 +22,4 @@
 #otherwise, only the first call to a method will be logged 
 #output will be comma-separated: called method,caller class 
 #j2s.log.all.calls=true
-
-#a semicolon-separated list of package-level file paths to be excluded
-#j2s.excluded.paths=test;testng
-
-#destination directory for all JavaScript
-j2s.site.directory=site
 

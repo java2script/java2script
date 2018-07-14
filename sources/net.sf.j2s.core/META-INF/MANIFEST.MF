@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Java2Script Core
 Bundle-SymbolicName: net.sf.j2s.core;singleton:=true
-Bundle-Version: 3.1.1
+Bundle-Version: 3.2.1
 Bundle-Activator: net.sf.j2s.core.CorePlugin
 Bundle-Vendor: j2s.sourceforge.net
 Require-Bundle: org.eclipse.core.runtime,
@@ -11,5 +11,4 @@ Require-Bundle: org.eclipse.core.runtime,
 Eclipse-AutoStart: true
 Export-Package: net.sf.j2s.core.astvisitors,
  net.sf.j2s.core.compiler,
- net.sf.j2s.core.hotspot,
  net.sf.j2s.core
