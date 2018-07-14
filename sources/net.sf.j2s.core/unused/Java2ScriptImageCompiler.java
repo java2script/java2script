@@ -16,11 +16,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.j2s.core.builder.ClasspathDirectory;
-import net.sf.j2s.core.builder.ClasspathDirectoryProxy;
-import net.sf.j2s.core.builder.ClasspathLocation;
-import net.sf.j2s.core.builder.NameEnvironment;
-import net.sf.j2s.core.builder.NameEnvironmentProxy;
+//import net.sf.j2s.core.builder.ClasspathDirectory;
+//import net.sf.j2s.core.builder.ClasspathDirectoryProxy;
+//import net.sf.j2s.core.builder.ClasspathLocation;
+//import net.sf.j2s.core.builder.NameEnvironment;
+//import net.sf.j2s.core.builder.NameEnvironmentProxy;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.jdt.core.compiler.CompilationProgress;
@@ -32,6 +32,9 @@ import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.jdt.internal.core.builder.ClasspathDirectory;
+import org.eclipse.jdt.internal.core.builder.ClasspathLocation;
+import org.eclipse.jdt.internal.core.builder.NameEnvironment;
 
 /**
  * @author zhou renjian
@@ -88,7 +91,7 @@ public class Java2ScriptImageCompiler extends Compiler {
 			for (int j = 0; j < binaryLocations.length; j++) {
 				if (binaryLocations[j].isOutputFolder()) {
 					if (binaryLocations[j] instanceof ClasspathDirectory) {
-						binaryFolder = new ClasspathDirectoryProxy((ClasspathDirectory) binaryLocations[j]).getBinaryFolder();
+						binaryFolder = new ClasspathDirectory((ClasspathDirectory) binaryLocations[j]).getBinaryFolder();
 						break;
 					}
 				}

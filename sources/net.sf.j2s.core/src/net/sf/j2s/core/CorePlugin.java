@@ -1,6 +1,6 @@
 package net.sf.j2s.core;
 
-import net.sf.j2s.core.hotspot.InnerHotspotServer;
+//import net.sf.j2s.core.hotspot.InnerHotspotServer;
 
 import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;
@@ -25,9 +25,10 @@ public class CorePlugin extends Plugin {
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-		if (!InnerHotspotServer.isServerStarted()) {
-			InnerHotspotServer.getSingletonServer().startServer();
-		}
+		System.out.println("Java2Script CorePlugin started");
+//		if (!InnerHotspotServer.isServerStarted()) {
+//			InnerHotspotServer.getSingletonServer().startServer();
+//		}
 	}
 
 	/**
@@ -36,9 +37,9 @@ public class CorePlugin extends Plugin {
 	public void stop(BundleContext context) throws Exception {
 		super.stop(context);
 		plugin = null;
-		if (InnerHotspotServer.isServerStarted()) {
-			InnerHotspotServer.getSingletonServer().stopServer();
-		}
+//		if (InnerHotspotServer.isServerStarted()) {
+//			InnerHotspotServer.getSingletonServer().stopServer();
+//		}
 	}
 
 	/**
