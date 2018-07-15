@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
@@ -27,6 +28,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.core.builder.SourceFile;
 
+import net.sf.j2s.core.CorePlugin;
 import net.sf.j2s.core.astvisitors.Java2ScriptVisitor;
 //import net.sf.j2s.core.builder.SourceFile;
 //import net.sf.j2s.core.builder.SourceFileProxy;
@@ -44,7 +46,7 @@ public class Java2ScriptCompiler {
 	// BH: added "true".equals(getProperty(props,
 	// "j2s.compiler.allow.compression")) to ensure compression only occurs when
 	// desired
-	private static final int JSL_LEVEL = AST.JLS8; // BH can we go to JSL 8?
+	private static final int JSL_LEVEL = AST.JLS8; // not handling lampda functions
 
 	private boolean showJ2SSettings = true;
 
@@ -75,7 +77,7 @@ public class Java2ScriptCompiler {
 
 	private boolean isCleanBuild;
 
-	private boolean isCompilationParticipant;
+	boolean isCompilationParticipant;
 
 	public static boolean isActive(IProject project) {
 		return new File(project.getProject().getLocation().toOSString(), ".J2S").exists();
@@ -126,21 +128,22 @@ public class Java2ScriptCompiler {
 	public boolean initializeProject(IProject project, boolean isCompilationParticipant) {
 		this.isCompilationParticipant = isCompilationParticipant;
 		if (!isActive(project)) {
-			/*
-			 * The file .j2s is a marker for Java2Script to compile JavaScript
-			 */
+			// the file .j2s does not exist in the project directory -- skip this project
 			return false;
 		}
 		projectFolder = project.getLocation().toOSString();
 		props = new Properties();
 		try {
-			props.load(new FileInputStream(new File(projectFolder, ".j2s")));
+			File j2sFile = new File(projectFolder, ".j2s");
+			props.load(new FileInputStream(j2sFile));
 			String status = getProperty("j2s.compiler.status");
-			if (!"enable".equals(status)) {
-				/*
-				 * Not enabled!
-				 */
+			if (!"enable".equals(status) && !"enabled".equals(status)) {
+				if (getFileContents(j2sFile).trim().length() == 0) {
+				  writeToFile(j2sFile, getDefaultJ2SFile());
+				} else {
+				 // not enabled
 				return false;
+				}
 			}
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
@@ -192,8 +195,10 @@ public class Java2ScriptCompiler {
 				lstExcludedPaths = null;
 		}
 
-		String nonqualifiedClasses = getProperty("j2s.compiler.nonqualified.classes");
-
+		String nonqualifiedPackages = getProperty("j2s.compiler.nonqualified.packages");
+		if (nonqualifiedPackages == null) // older version of the name
+			nonqualifiedPackages = getProperty("j2s.compiler.nonqualified.classes");
+		
 		// includes @j2sDebug blocks
 		boolean isDebugging = "debug".equals(getProperty("j2s.compiler.mode"));
 
@@ -215,7 +220,7 @@ public class Java2ScriptCompiler {
 				System.err.println("using HTML template " + file);
 		}
 
-		Java2ScriptVisitor.setNoQualifiedNamePackages(nonqualifiedClasses);
+		Java2ScriptVisitor.setNoQualifiedNamePackages(nonqualifiedPackages);
 		Java2ScriptVisitor.setDebugging(isDebugging);
 		Java2ScriptVisitor.setClassReplacements(classReplacements);
 		Java2ScriptVisitor.setLogging(lstMethodsDeclared, htMethodsCalled, logAllCalls);
@@ -230,7 +235,7 @@ public class Java2ScriptCompiler {
 	 * 
 	 * @param javaSource
 	 */
-	public void compileToJavaScript(IFile javaSource) {
+	public boolean compileToJavaScript(IFile javaSource) {
 
 		CompilationUnit root;
 		ASTParser astParser = ASTParser.newParser(JSL_LEVEL);
@@ -239,7 +244,7 @@ public class Java2ScriptCompiler {
 		if (lstExcludedPaths != null) {
 			for (int i = lstExcludedPaths.size(); --i >= 0;)
 				if (fileName.startsWith(lstExcludedPaths.get(i)))
-					return;
+					return true;
 		}
 
 		org.eclipse.jdt.core.ICompilationUnit createdUnit = JavaCore.createCompilationUnitFrom(javaSource);
@@ -280,6 +285,7 @@ public class Java2ScriptCompiler {
 					jsFile.delete();
 				}
 			}
+			return false;
 		}
 		String packageName = visitor.getPackageName();
 		if (packageName != null) {
@@ -293,6 +299,7 @@ public class Java2ScriptCompiler {
 				copySiteResources(src, dest);
 			}
 		}
+		return true;
 	}
 
 	private void logMethods(String logCalled, String logDeclared, boolean doAppend) {
@@ -398,8 +405,66 @@ public class Java2ScriptCompiler {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
+    }
 
+	/**
+	 * The default .j2s file. Replaces .j2s only if it is found but is empty.
+	 * 
+	 * 
+	 * 
+	 */
+	
+	private String getDefaultJ2SFile() {
+
+		return "#j2s default configuration file created by net.sf.java2script_" 
+        + CorePlugin.VERSION + " " + new Date() + "\n\n" +
+        "#enable the Java2Script transpiler -- comment out to disable\n" + 
+		"j2s.compiler.status=enable\n" + 
+		"\n" + 
+		"\n" + 
+		"# destination directory for all JavaScript\n" + 
+		"j2s.site.directory=site\n" + 
+		"\n" + 
+		"# uncomment j2s.* lines to process:\n" + 
+		"\n" + 
+		"# a semicolon-separated list of package-level file paths to be excluded\n" + 
+		"#j2s.excluded.paths=test;testng\n" + 
+		"\n" + 
+		"# output file name for logging methods declared - delete the file to regenerate a listing \n" + 
+		"#j2s.log.methods.declared=methodsDeclared.csv\n" + 
+		"\n" + 
+		"#output file name for logging methods called - delete the file to regenerate a listing\n" + 
+		"#j2s.log.methods.called=methodsCalled.csv\n" + 
+		"\n" + 
+		"#if set, every instance of methods called will be logged\n" + 
+		"#otherwise, only the first call to a method will be logged \n" + 
+		"#output will be comma-separated: called method,caller class \n" + 
+		"#j2s.log.all.calls=true\n" + 
+		"\n" + 
+		"# a semicolon-separated list of packages that contain classes for which the method names\n" + 
+		"# in their classes should not be \"qualified\" to indicate their parameter types. \n" + 
+		"# This option is useful if you have an API interface in Java that refers to JavaScript \n" + 
+		"# methods such as calling window or jQuery functions or the methods in Clazz or J2S. \n" + 
+		"# The classes must not have any methods that are overloaded - with the\n" + 
+		"# same name but different paramater type, as JavaScript will only see the last one.\n" + 
+		"#j2s.compiler.nonqualified.packages=org.jmol.api.js;jspecview.api.js\n" + 
+		"\n" + 
+		"# uncomment to add debugging output. Start eclipse with the -consoleLog option to see output.\n" + 
+		"#j2s.compiler.mode=debug\n" + 
+		"\n" + 
+		"# a semicolon-separated list of from->to listings of package (foo.) or class (foo.bar) \n" + 
+		"# replacements to be made. This option allows for having one class or package used in Java\n" + 
+		"# and another used in JavaScript. Take care with this. All methods in both packages must\n" + 
+		"# have exactly the same parameter signature. We use it in Jalview to provide a minimal\n" + 
+		"# JavaScript implementation of a large third-party library while still using that library's\n" + 
+		"# jar file in Java.\n" + 
+		"#j2s.class.replacements=org.apache.log4j.->jalview.javascript.log4j.\n" + 
+		"\n" + 
+		"# uncomment and change if you do not want to use the template.html file created for you\n" + 
+		"# in your project directory. A default template file will be created by the transpiler \n" + 
+		"# directory if there is none there already.\n" + 
+		"#j2s.template.html=template.html\n";
+	}
 	/**
 	 * The default template file. The user can specify another in the .j2s file
 	 * using template.html=.....
@@ -407,20 +472,38 @@ public class Java2ScriptCompiler {
 	 * @return default template with _NAME_, _CODE_, and _MAIN_ to fill in.
 	 */
 	private String getDefaultHTMLTemplate() {
-		String ret = "<!DOCTYPE html>\n<html>\n" + "<head>\n" + "<title>SwingJS test _NAME_</title>"
-				+ "<meta charset=\"utf-8\" />\n" + "<script src=\"swingjs/swingjs2.js\"></script>\n" + "<script>\n"
-				+ "if (!self.SwingJS)alert('swingjs2.js was not found. It needs to be in swingjs folder in the same directory as ' + document.location.href)\n"
-				+ "Info = {\n" + "  code: _CODE_,\n" + "  main: _MAIN_,\n" + "	width: 850,\n" + "	height: 550,\n"
-				+ "  readyFunction: null,\n"
-				+ "	serverURL: 'https://chemapps.stolaf.edu/jmol/jsmol/php/jsmol.php',\n"
-				+ "	j2sPath: 'swingjs/j2s',\n" + "	console:'sysoutdiv',\n" + "	allowjavascript: true\n" + "}\n"
-				+ "</script>\n</head>\n<body>\n<script>\n" + "SwingJS.getApplet('testApplet', Info)\n"
-				+ "getClassList = function(){J2S._saveFile('_j2sclasslist.txt', Clazz.ClassFilesLoaded.sort().join('\\n'))}\n"
-				+ "</script>\n" + "<div style=\"position:absolute;left:900px;top:30px;width:600px;height:300px;\">\n"
-				+ "<div id=\"sysoutdiv\" style=\"border:1px solid green;width:100%;height:95%;overflow:auto\"></div>\n"
-				+ "This is System.out. <a href=\"javascript:testApplet._clearConsole()\">clear it</a> <br>Add ?j2snocore to URL to see full class list; ?j2sdebug to use uncompressed j2s/core files <br><a href=\"javascript:getClassList()\">get _j2sClassList.txt</a>\n"
-				+ "</div>\n" + "</body>\n" + "</html>\n";
-		return ret;
+		return "<!DOCTYPE html>\n" + 
+				"<html>\n" + 
+				"<head>\n" + 
+				"<title>SwingJS test _NAME_</title><meta charset=\"utf-8\" />\n" + 
+				"<script src=\"swingjs/swingjs2.js\"></script>\n" + 
+				"<script>\n" + 
+				"if (!self.SwingJS)alert('swingjs2.js was not found. It needs to be in swingjs folder in the same directory as ' + document.location.href)\n" + 
+				"Info = {\n" + 
+				"  code: _CODE_,\n" + 
+				"  main: _MAIN_,\n" + 
+				"  core: \"NONE\",\n" + 
+				"	width: 850,\n" + 
+				"	height: 550,\n" + 
+				"  readyFunction: null,\n" + 
+				"	serverURL: 'https://chemapps.stolaf.edu/jmol/jsmol/php/jsmol.php',\n" + 
+				"	j2sPath: 'swingjs/j2s',\n" + 
+				"	console:'sysoutdiv',\n" + 
+				"	allowjavascript: true\n" + 
+				"}\n" + 
+				"</script>\n" + 
+				"</head>\n" + 
+				"<body>\n" + 
+				"<script>\n" + 
+				"SwingJS.getApplet('testApplet', Info)\n" + 
+				"getClassList = function(){J2S._saveFile('_j2sclasslist.txt', Clazz.ClassFilesLoaded.sort().join('\\n'))}\n" + 
+				"</script>\n" + 
+				"<div style=\"position:absolute;left:900px;top:30px;width:600px;height:300px;\">\n" + 
+				"<div id=\"sysoutdiv\" style=\"border:1px solid green;width:100%;height:95%;overflow:auto\"></div>\n" + 
+				"This is System.out. <a href=\"javascript:testApplet._clearConsole()\">clear it</a> <br>Add ?j2snocore to URL to see full class list; ?j2sdebug to use uncompressed j2s/core files <br><a href=\"javascript:getClassList()\">get _j2sClassList.txt</a>\n" + 
+				"</div>\n" + 
+				"</body>\n" + 
+				"</html>\n";
 	}
 
 	/**
@@ -465,10 +548,8 @@ public class Java2ScriptCompiler {
 		if (dir.equals(target))
 			return;
 		File[] files = dir.listFiles(filter);
-		System.err.println(
-				"copy nonclassFiles " + dir + " to " + target + " [" + (files != null ? "" + files.length : "") + "]");
 		File f = null;
-		if (files != null)
+		if (files != null) 
 			try {
 				if (!target.exists())
 					Files.createDirectories(target.toPath());
@@ -481,7 +562,7 @@ public class Java2ScriptCompiler {
 					} else {
 						Files.copy(f.toPath(), new File(target, f.getName()).toPath(),
 								StandardCopyOption.REPLACE_EXISTING);
-						System.err.println("copied " + f + " to " + target);
+						System.err.println("copied to site: " + f.toPath());
 					}
 				}
 			} catch (IOException e1) {

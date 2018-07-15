@@ -1,8 +1,37 @@
-SwingJS distribution README.txt  
+SwingJS distribution 
 
-3/15/2018  Bob Hanson hansonr@stolaf.edu
+https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/dropins/README.txt
 
-SwingJS has been successfully tested in Eclipse Neon and Oxygen on Mac and Windows platforms.
+7/15/2018 Bob Hanson hansonr@stolaf.edu
+
+net.sf.j2s.core_3.2.1.jar replaces net.sf.j2s.core_3.1.1.jar
+ 
+These versions differ only in their internal workings relative to Eclipse. 
+Most importantly, the requirement that the .project file be changed to 
+indicate a customized Java builder is dropped in version 3.2.1, which just uses
+the standard Eclipse java builder, org.eclipse.jdt.core.javabuilder. 
+
+Thus, to get started, all you need are:
+
+1) the latest transpiler from 
+
+https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/dropins
+
+2) the latest JavaScript-site.zip from 
+
+https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.java.core/dist
+
+3) an empty .j2s file in your project directory. (The v.3.2.1 transpiler will fill this in with
+a default .j2s configuration when it runs the first time.)
+
+
+NOTE! If you are updating to 3.2.1 from 3.1.1, be sure to open your .project file and change the 
+builder name from net.sf.j2s.core.java2scriptbuilder back to org.eclipse.jdt.core.javabuilder
+or your project will no longer compile.
+
+Comments below have been adjusted for these differences.
+
+SwingJS has been successfully tested in Eclipse version Neon-Photon on Mac and Windows platforms.
 (No reason to believe it would not also work for Linux; just haven't tried that recently.)
  
 INSTALLATION INSTRUCTIONS
@@ -13,8 +42,13 @@ Eclipse Neon or higher is necessary.
 Installing the Java2Script transpiler as an Eclipse plug-in
 -----------------------------------------------------------
 
-The Java2Script transpiler for SwingJS is in net.sf.j2s.core.jar. It parses the .java code and 
-creates .js files that match the standard .class files created by the Eclipse Java compiler.
+The Java2Script transpiler for SwingJS is net.sf.j2s.core.jar. It rides along with the 
+Eclipse Java compiler as a "CompilationParticipant" 
+
+https://help.eclipse.org/photon/index.jsp?topic=/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/core/compiler/CompilationParticipant.html
+
+listening for updates to the source files and converting them on the fly to .js files
+that match the standard .class files created by the Eclipse Java compiler itself.
 
 Note that both Java .class files (in bin/) and JavaScript .js files (in site/swingjs/j2s) are
 created automatically anytime you do any building of your project. 
@@ -30,17 +64,29 @@ https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dis
 
 into your eclipse/dropins directory.
 
-Do not use net.sf.j2s.core_x.x.x.jar for this, as, if you do that, some versions of Eclipse will have to be 
+Also provided in that directory is a ver/ directory with previous core files. 
+It is recommended that you not use them. If you do, be sure to remove their _x.x.x version
+signature from their file name, or some versions of Eclipse will have to be 
 entirely reinstalled every time you change versions. We do not know why this is necessary, 
-but it appears to be. If you leave the version in the name, Eclipse will not be able to replace it with a 
-newer version later. From what we can tell. So just always use dist/dropins/net.sf.j2s.core.jar. 
+but it appears to be. This is an Eclipse bug. So just always use dist/dropins/net.sf.j2s.core.jar. 
 
-On Mac systems, the Eclipse directory is
+On Mac systems, the Eclipse directory is generally
 
 /Applications/Eclipse.app/Contents/Eclipse/dropins
 
 2. Restart Eclipse and check for the presence of the plug-in at
    help...about Eclipse...installation details...Plug-ins...(wait several seconds for tabulation)
+
+   Note relating to updating to 3.2.1 from 3.1.1 version of Java2Script:
+
+      If the version on this readout does not match the version that is 
+      reported at the end of each .js file created:
+
+         //Created 2018-07-15 04:35:10 net.sf.j2s.core.jar v. 3.2.1
+
+      then there is no real problem, but you can correct that by restarting 
+      Eclipse once with the -clean flag. 
+
    
 search for "j2s" to find j2s.sourceforge.net Java2Script Core
 
@@ -67,7 +113,7 @@ All of the JavaScript produced will be in the project site/ directory.
 You must prepopulate this site with all the JavaScript required by the 
 JavaScript version of the JVM. The most recent version of site/ is at
 
-https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.java.core/SwingJS-site.zip?raw=true
+https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.java.core/dist/SwingJS-site.zip?raw=true
 
 Occasional additions to the java.* classes are made to the above-mentioned zip file.
 
