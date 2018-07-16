@@ -126,6 +126,9 @@ import org.eclipse.jdt.core.dom.WildcardType;
 
 import net.sf.j2s.core.CorePlugin;
 
+
+// BH 7/15/2018 -- adds Java 8 lambda expressions
+// BH 7/14/2018 -- removes java2scriptbuilder; uses CompilationParticipant instead
 // BH 7/5/2018 -- fixes int | char
 // BH 7/3/2018 -- adds tryWithResource
 // BH 7/3/2018 -- adds effectively final -- FINAL keyword no longer necessary  
@@ -623,7 +626,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 //		     [ Javadoc ] { ExtendedModifier } Identifier
 //		         [ ( [ Expression { , Expression } ] ) ]
 //		         [ AnonymousClassDeclaration ]
-		return super.visit(node);
+		return true;
 	}
 
 	public boolean visit(ExpressionStatement node) {
@@ -2749,7 +2752,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		ITypeBinding binding = node.resolveTypeBinding();
 		if (binding != null)
 			buffer.append("null");
-		return false;
+		return true;
 	}
 
 	public boolean visit(ParenthesizedExpression node) {
@@ -2791,7 +2794,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		String op = node.getOperator().toString();
 		if ("~".equals(op)) {
 			buffer.append(op);
-			return false;
+			return true;
 		}
 		return addPrePost(node, node.getOperand(), node.getOperator().toString(), false);
 	}

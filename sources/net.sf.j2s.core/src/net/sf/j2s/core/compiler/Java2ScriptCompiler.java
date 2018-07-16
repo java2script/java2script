@@ -80,7 +80,11 @@ public class Java2ScriptCompiler {
 	boolean isCompilationParticipant;
 
 	public static boolean isActive(IProject project) {
-		return new File(project.getProject().getLocation().toOSString(), ".J2S").exists();
+		try {
+			return new File(project.getProject().getLocation().toOSString(), ".J2S").exists();
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 	public Java2ScriptCompiler() {
