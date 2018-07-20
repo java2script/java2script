@@ -6,6 +6,7 @@ The seed Eclipse project site/ directory for all SwingJS projects can be found a
 
 https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.java.core/SwingJS-site.zip?raw=true
 
+this file is old. See dist/dropins/README.txt
 
 Known issues: 2/2018
 

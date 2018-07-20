@@ -395,7 +395,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		AnonymousClassDeclaration anonDeclare = node.getAnonymousClassDeclaration();
 		if (anonDeclare != null) {
 			String anonClassName = getAnonymousName(binding);
-			processNewAnnonInstance(node, anonDeclare, binding, anonClassName, NOT_LAMBDA);
+			processNewAnonInstance(node, anonDeclare, binding, anonClassName, NOT_LAMBDA);
 			return false;
 		}
 
@@ -465,7 +465,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @param anonClassName
 	 * @param isLambda
 	 */
-	private void processNewAnnonInstance(ASTNode node, ASTNode anonDeclare, ITypeBinding binding, String anonClassName,
+	private void processNewAnonInstance(ASTNode node, ASTNode anonDeclare, ITypeBinding binding, String anonClassName,
 			int lambdaType) {
 		boolean isLambda = (lambdaType != NOT_LAMBDA);
 		VariableAdapter variableAdapter = (VariableAdapter) getAdaptable(VariableAdapter.class);
@@ -2989,7 +2989,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 		if (binding == null) {
 			String name = getShortenedQualifiedName(NameMapper.getJ2SName(node));
-			return NameMapper.getJ2SValidFieldName$Qualifier(name, true);
+			return NameMapper.get$QualifiedJ2SFieldName(name, true);
 		}
 		if (binding instanceof IVariableBinding)
 			return simpleNameInVarBinding(node, leadingChar, (IVariableBinding) binding);
@@ -2998,7 +2998,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		ITypeBinding typeBinding = node.resolveTypeBinding();
 		// >>Math<<.max
-		return NameMapper.getJ2SValidFieldName$Qualifier(typeBinding == null ? node.getFullyQualifiedName()
+		return NameMapper.get$QualifiedJ2SFieldName(typeBinding == null ? node.getFullyQualifiedName()
 				: assureQualifiedNameAllowP$(typeBinding.getQualifiedName()), true);
 	}
 
@@ -3049,7 +3049,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				}
 			}
 			if (checkNameViolation)
-				ret += NameMapper.getJ2SValidFieldName$Qualifier(name, false);
+				ret += NameMapper.get$QualifiedJ2SFieldName(name, false);
 		}
 		return ret + name;
 	}
@@ -3147,14 +3147,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				for (int i = 0; i < declaredFields.length; i++) {
 					String superFieldName = NameMapper.getJ2SVariableName(declaredFields[i]);
 					if (fieldName.equals(superFieldName)) {
-						buffer.append(NameMapper.getJ2SValidFieldName$Qualifier(fieldName, false));
+						buffer.append(NameMapper.get$QualifiedJ2SFieldName(fieldName, false));
 						buffer.append(NameMapper.getJ2SFieldName$Appended(classBinding.getSuperclass(), fieldName));
 						return false;
 					}
 				}
 			}
 		}
-		buffer.append(NameMapper.getJ2SValidFieldName$Qualifier(fieldName, true));
+		buffer.append(NameMapper.get$QualifiedJ2SFieldName(fieldName, true));
 		return false;
 	}
 
@@ -4368,7 +4368,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private String getMethodNameOrArrayForDeclaration(IMethodBinding mBinding, boolean isConstructor,
 			boolean addUnqualified, boolean isLambda) {
 		String nodeName = mBinding.getName();
-		String methodName = (isConstructor ? "c$" : NameMapper.getJ2SMethodName(mBinding));
+		String methodName = (isConstructor ? "c$" : NameMapper.get$QualifiedJ2SMethodName(mBinding));
 		if (methodName.equals("subSequence$I$I")) {
 			// for StringBuffer and StringBuilder to be like String
 			return "['subSequence','subSequence$I$I']";
@@ -5332,7 +5332,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			if (binding != null) {
 				IMethodBinding[] methods = binding.getDeclaredMethods();
 				for (int i = 0; i < methods.length; i++)
-					if (name.equals(getJ2SMethodName(methods[i])))
+					if (name.equals(get$QualifiedJ2SMethodName(methods[i])))
 						return true;
 				ITypeBinding superclass = binding.getSuperclass();
 				if (checkJ2SInheritedMethodNameCollision(superclass, name))
@@ -5347,7 +5347,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 
 		protected static String getJ2SCheckedFieldName(ITypeBinding classBinding, String fieldName) {
-			String name = getJ2SValidFieldName$Qualifier(fieldName, false);
+			String name = get$QualifiedJ2SFieldName(fieldName, false);
 			if (classBinding != null) {
 				if (checkJ2SInheritedMethodNameCollision(classBinding, fieldName)) {
 					name += "$";
@@ -5366,7 +5366,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				return getJ2SVariableName((IVariableBinding) binding);
 			}
 			if (binding instanceof IMethodBinding) {
-				return getJ2SMethodName((IMethodBinding) binding);
+				return get$QualifiedJ2SMethodName((IMethodBinding) binding);
 			}
 			String nameID = node.getIdentifier();
 			return nameID;
@@ -5388,7 +5388,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		 * @param addName
 		 * @return
 		 */
-		protected static String getJ2SValidFieldName$Qualifier(String name, boolean addName) {
+		protected static String get$QualifiedJ2SFieldName(String name, boolean addName) {
 			boolean isViolation = checkJ2SKeywordViolation(name);
 			return (isViolation ? "$" : "") + (addName ? name : "");
 		}
@@ -5431,7 +5431,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		 * @param binding
 		 * @return
 		 */
-		static String getJ2SMethodName(IMethodBinding binding) {
+		static String get$QualifiedJ2SMethodName(IMethodBinding binding) {
 			String name = binding.getName();
 			boolean isViolation = (checkJ2SKeywordViolation(name)
 					&& !binding.getDeclaringClass().getQualifiedName().startsWith("swingjs.api"));
@@ -5517,7 +5517,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				"c$", "apply", "arguments", "bind", "call", "caller", "watch", "unwatch", "valueOf", "isPrototypeOf",
 				"isGenerator", "prototype" };
 
-		public static boolean checkJ2SKeywordViolation(String name) {
+		static boolean checkJ2SKeywordViolation(String name) {
 			for (int i = 0; i < keywords.length; i++) {
 				if (keywords[i].equals(name)) {
 					return true;
@@ -5735,7 +5735,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		node.getExpression().accept(this);
 		buffer.append(";");
 		ITypeBinding binding = node.resolveTypeBinding();
-		processNewAnnonInstance(node, null, binding, null, LAMBDA_METHOD);
+		processNewAnonInstance(node, null, binding, null, LAMBDA_METHOD);
 		addAnonymousFunctionWrapper(false);
 		return false;
 	}
@@ -5748,7 +5748,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	public boolean visit(CreationReference node) {
 		// see http://www.baeldung.com/java-8-double-colon-operator
 		ITypeBinding binding = node.resolveTypeBinding();
-		processNewAnnonInstance(node, null, binding, null, LAMBDA_CREATION);
+		processNewAnonInstance(node, null, binding, null, LAMBDA_CREATION);
 		return false;
 	}
 
@@ -5761,7 +5761,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// new runnable() { public xxx singleMethod() { Body })
 
 		ITypeBinding binding = node.resolveTypeBinding();
-		processNewAnnonInstance(node, null, binding, null, LAMBDA_EXPRESSION);
+		processNewAnonInstance(node, null, binding, null, LAMBDA_EXPRESSION);
 		return false;
 	}
 
