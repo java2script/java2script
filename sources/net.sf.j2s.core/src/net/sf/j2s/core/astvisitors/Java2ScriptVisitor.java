@@ -5730,13 +5730,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * c = new Test()::test2;
 	 */
 	public boolean visit(ExpressionMethodReference node) {
-		addAnonymousFunctionWrapper(true);
-		buffer.append("var $this$=");
-		node.getExpression().accept(this);
-		buffer.append(";");
+		buffer.append("(function($this$){");
 		ITypeBinding binding = node.resolveTypeBinding();
 		processNewAnonInstance(node, null, binding, null, LAMBDA_METHOD);
-		addAnonymousFunctionWrapper(false);
+		buffer.append("})(");
+		node.getExpression().accept(this);
+		buffer.append(")");
 		return false;
 	}
 
@@ -5805,7 +5804,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			buffer.append("/*lambdaM*/");
 			// Function<Object,Test> iaCreator2= Test::new;
 			ExpressionMethodReference node = (ExpressionMethodReference) lnode;
-//			mBinding = node.resolveMethodBinding();
 			String name = getMethodNameOrArrayForDeclaration(mBinding, false, false, true);
 			processMethodDeclaration(mBinding, name, null, null, false, false, true);
 			removeVariableFinals(mBinding, null);
