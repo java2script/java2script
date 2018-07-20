@@ -79,6 +79,8 @@ public class Java2ScriptCompiler {
 
 	boolean isCompilationParticipant;
 
+	private ASTParser astParser;
+
 	public static boolean isActive(IProject project) {
 		try {
 			return new File(project.getProject().getLocation().toOSString(), ".J2S").exists();
@@ -105,6 +107,7 @@ public class Java2ScriptCompiler {
 			lstMethodsDeclared = null;
 			htMethodsCalled = null;
 		}
+
 	}
 
 //	/**
@@ -228,6 +231,9 @@ public class Java2ScriptCompiler {
 		Java2ScriptVisitor.setDebugging(isDebugging);
 		Java2ScriptVisitor.setClassReplacements(classReplacements);
 		Java2ScriptVisitor.setLogging(lstMethodsDeclared, htMethodsCalled, logAllCalls);
+		
+		astParser = ASTParser.newParser(JSL_LEVEL);
+	
 		return true;
 	}
 
@@ -241,20 +247,17 @@ public class Java2ScriptCompiler {
 	 */
 	public boolean compileToJavaScript(IFile javaSource) {
 
-		CompilationUnit root;
-		ASTParser astParser = ASTParser.newParser(JSL_LEVEL);
-
 		String fileName = new String(javaSource.getName());
 		if (lstExcludedPaths != null) {
 			for (int i = lstExcludedPaths.size(); --i >= 0;)
 				if (fileName.startsWith(lstExcludedPaths.get(i)))
 					return true;
 		}
-
 		org.eclipse.jdt.core.ICompilationUnit createdUnit = JavaCore.createCompilationUnitFrom(javaSource);
-		astParser.setResolveBindings(true);
 		astParser.setSource(createdUnit);
-		root = (CompilationUnit) astParser.createAST(null);
+		// note: next call must come before each createAST call
+		astParser.setResolveBindings(true); 
+		CompilationUnit root = (CompilationUnit) astParser.createAST(null);
 		Java2ScriptVisitor visitor = new Java2ScriptVisitor();
 
 		try {

@@ -108,6 +108,12 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 			j2sCompiler.initializeProject(project.getProject(), true);
 			for (int i = 0; i < javaFiles.length; i++) {
 				System.out.println("transpiling " + javaFiles[i]);
+// trying to keep the progess monitor running - didn't work
+//				try {
+//					Thread.currentThread().sleep(1);
+//				} catch (InterruptedException e) {
+//					// ignore
+//				}
 				if (!j2sCompiler.compileToJavaScript(javaFiles[i].getFile())) {
 					System.out.println("Error processing " + javaFiles[i].getFile());
 					break;

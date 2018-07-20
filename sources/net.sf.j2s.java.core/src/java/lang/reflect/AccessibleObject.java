@@ -144,22 +144,22 @@ public class AccessibleObject implements AnnotatedElement {
 		return 0.0D;
 	}
 
-	native Class<?>[] getParameterTypesImpl();
+	/*native*/ Class<?>[] getParameterTypesImpl() {return null;}
 
-	native int getModifiers();
+	/*native*/ int getModifiers() {return Member.PUBLIC;}
 
-	native Class<?>[] getExceptionTypesImpl();
+	/*native*/ Class<?>[] getExceptionTypesImpl(){return null;}
 
-	native String getSignature();
+	/*native*/ String getSignature() {return "__FIELD__";}
 
-	native boolean checkAccessibility(Class<?> senderClass, Object receiver);
+	/*native*/ boolean checkAccessibility(Class<?> senderClass, Object receiver) {return true;}
 
-	static native void initializeClass(Class<?> clazz);
+	static /*native*/ void initializeClass(Class<?> clazz) {}
 
 	/**
 	 * Answer the class at depth. Notes: 1) This method operates on the defining
 	 * classes of methods on stack. NOT the classes of receivers. 2) The item at
 	 * index zero describes the caller of this method.
 	 */
-	static final native Class<?> getStackClass(int depth);
+	static final /*native*/ Class<?> getStackClass(int depth) {return null;};
 }

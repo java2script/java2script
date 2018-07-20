@@ -31,7 +31,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.GenericSignatureFormatError;
 //import java.lang.reflect.GenericSignatureFormatError;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 //import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
@@ -460,7 +462,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 */
 	public boolean isInterface() {
 		/**
-		 * @j2sNative   return !this.$clazz$.$init$;
+		 * @j2sNative   return this.$clazz$.$isInterface;
 		 * 
 		 */
 		{
@@ -989,7 +991,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @since JDK1.1
 	 */
 	public int getModifiers() {
-		return java.lang.reflect.Modifier.PUBLIC; 
+		return Modifier.PUBLIC | (isEnum() ? Modifier.ENUM : isInterface() ? Modifier.INTERFACE : 0); 
 	}
 
 	/**
@@ -1841,24 +1843,17 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 *
 	 * @since JDK1.1
 	 */
+	@SuppressWarnings("unchecked")
 	public Constructor<T> getConstructor(Class<?>... parameterTypes) throws NoSuchMethodException, SecurityException {
 		// be very careful not to change the stack depth of this
 		// checkMemberAccess call for security reasons
 		// see java.lang.SecurityManager.checkMemberAccess
 //		checkMemberAccess(Member.PUBLIC, ClassLoader.getCallerClassLoader());
-		
-		/**
-		 * @j2sNative
-		 * 
-		 * return Clazz.new_(java.lang.reflect.Constructor.c$$Class$ClassA$ClassA$I, [this, parameterTypes || [], [], java.lang.reflect.Modifier.PUBLIC]);
-		 */
-		{
-			return null;
-		}
-//
-//		
-//		return getConstructor0(parameterTypes, Member.PUBLIC);
-//
+		Class<?>[] x = parameterTypes;
+		if (parameterTypes == null)
+			parameterTypes = new Class<?>[0];
+		return new Constructor(this, parameterTypes, new Class<?>[0], Member.PUBLIC);
+//	return getConstructor0(parameterTypes, Member.PUBLIC);
 	}
 
 	/**
@@ -3173,10 +3168,18 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @since 1.5
 	 */
 	public boolean isEnum() {
-		// An enum must both directly extend java.lang.Enum and have
-		// the ENUM bit set; classes for specialized enum constants
-		// don't do the former.
-		return (this.getModifiers() & ENUM) != 0 && this.getSuperclass() == java.lang.Enum.class;
+		/**
+		 * @j2sNative   return this.$clazz$.$isEnum;
+		 * 
+		 */
+		{
+			return false;
+		}
+//		// An enum must both directly extend java.lang.Enum and have
+//		// the ENUM bit set; classes for specialized enum constants
+//		// don't do the former.
+//		return //getModifiers() & Modifier.ENUM) != 0 && 
+//				this.getSuperclass() == java.lang.Enum.class;
 	}
 
 //	// Fetches the factory for reflective objects
@@ -3233,8 +3236,9 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @since 1.5
 	 */
 	public T[] getEnumConstants() {
-		T[] values = getEnumConstantsShared();
-		return (values != null) ? values.clone() : null;
+		return getEnumConstantsShared();
+		// java2script - we do not clone
+//		return (values != null) ? values.clone() : null;
 	}
 
 	/**
@@ -3242,30 +3246,29 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * not represent an enum type; identical to getEnumConstantsShared except
 	 * that the result is uncloned, cached, and shared by all callers.
 	 */
-	@SuppressWarnings("unchecked")
 	T[] getEnumConstantsShared() {
 		if (enumConstants == null) {
-			if (!isEnum())
-				return null;
-			try {
-				final Method values = getMethod("values");
+			if (isEnum())
+			   enumConstants = /** @j2sNative this.$clazz$.values();*/ null;
+//			try {
+//				final Method values = getMethod("values");
 //				java.security.AccessController.doPrivileged(new java.security.PrivilegedAction() {
 //					public Object run() {
 //						values.setAccessible(true);
 //						return null;
 //					}
 //				});
-				enumConstants = (T[]) values.invoke(null, null); // BH  added ", null"
-			}
-			// These can happen when users concoct enum-like classes
-			// that don't comply with the enum spec.
-			catch (InvocationTargetException ex) {
-				return null;
-			} catch (NoSuchMethodException ex) {
-				return null;
-			} catch (IllegalAccessException ex) {
-				return null;
-			}
+////				enumConstants = (T[]) values.invoke(null, null); // BH  added ", null"
+//			}
+//			// These can happen when users concoct enum-like classes
+//			// that don't comply with the enum spec.
+//			catch (InvocationTargetException ex) {
+//				return null;
+//			} catch (NoSuchMethodException ex) {
+//				return null;
+//			} catch (IllegalAccessException ex) {
+//				return null;
+//			}
 		}
 		return enumConstants;
 	}
