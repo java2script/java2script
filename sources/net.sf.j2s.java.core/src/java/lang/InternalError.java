@@ -1,44 +1,90 @@
-/* Copyright 1998, 2002 The Apache Software Foundation or its licensors, as applicable
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *     http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*
+ * Copyright (c) 1994, 2011, Oracle and/or its affiliates. All rights reserved.
+ * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
  */
 
 package java.lang;
 
-
 /**
- * This error is thrown when the VM notices that it has gotten into a state
- * which it does not understand.
+ * Thrown to indicate some unexpected internal error has occurred in
+ * the Java Virtual Machine.
+ *
+ * @author  unascribed
+ * @since   JDK1.0
  */
 public class InternalError extends VirtualMachineError {
-
     private static final long serialVersionUID = -9062593416125562365L;
 
     /**
-	 * Constructs a new instance of this class with its walkback filled in.
-	 */
-	public InternalError() {
-		super();
-	}
+     * Constructs an <code>InternalError</code> with no detail message.
+     */
+    public InternalError() {
+        super();
+    }
 
-	/**
-	 * Constructs a new instance of this class with its walkback and message
-	 * filled in.
-	 * 
-	 * @param detailMessage
-	 *            String The detail message for the exception.
-	 */
-	public InternalError(String detailMessage) {
-		super(detailMessage);
-	}
+    /**
+     * Constructs an <code>InternalError</code> with the specified
+     * detail message.
+     *
+     * @param   message   the detail message.
+     */
+    public InternalError(String message) {
+        super(message);
+    }
+
+
+    /**
+     * Constructs an {@code InternalError} with the specified detail
+     * message and cause.  <p>Note that the detail message associated
+     * with {@code cause} is <i>not</i> automatically incorporated in
+     * this error's detail message.
+     *
+     * @param  message the detail message (which is saved for later retrieval
+     *         by the {@link #getMessage()} method).
+     * @param  cause the cause (which is saved for later retrieval by the
+     *         {@link #getCause()} method).  (A {@code null} value is
+     *         permitted, and indicates that the cause is nonexistent or
+     *         unknown.)
+     * @since  1.8
+     */
+    public InternalError(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    /**
+     * Constructs an {@code InternalError} with the specified cause
+     * and a detail message of {@code (cause==null ? null :
+     * cause.toString())} (which typically contains the class and
+     * detail message of {@code cause}).
+     *
+     * @param  cause the cause (which is saved for later retrieval by the
+     *         {@link #getCause()} method).  (A {@code null} value is
+     *         permitted, and indicates that the cause is nonexistent or
+     *         unknown.)
+     * @since  1.8
+     */
+    public InternalError(Throwable cause) {
+        super(cause);
+    }
+
 }

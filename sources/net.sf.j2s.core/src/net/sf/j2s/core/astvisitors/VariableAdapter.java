@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2007 java2script.org and others.
  * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * are made available under the terms of the Eclipse License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
@@ -16,14 +16,12 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Final variables inside anonymous class is a big thing for Java2Script
- * compiler. 
  * 
  * @author zhou renjian
  *
  * 2006-12-3
  */
-public class VariableAdapter extends VisitorAdapter {
+class VariableAdapter extends VisitorAdapter {
 	
 	/**
 	 * FinalVariable that is used to record variable state, which will provide
@@ -33,29 +31,29 @@ public class VariableAdapter extends VisitorAdapter {
 	 *
 	 * 2006-12-6
 	 */
-	public static class FinalVariable {
+	static class FinalVariable {
 
 		/**
 		 * Level of the block
 		 */
-		public int blockLevel;
+		int blockLevel;
 		
 		/**
 		 * Final variable may be in a very deep anonymous class 
 		 */
-		public String methodScope;
+		String methodScope;
 		
 		/**
 		 * Variable name that is defined in Java sources
 		 */
-		public String variableName;
+		String variableName;
 		
 		/**
 		 * Variable name that is to be generated in the compiled *.js
 		 */
-		public String toVariableName;
+		String toVariableName;
 		
-		public FinalVariable(int blockLevel, String variableName, String methodScope) {
+		FinalVariable(int blockLevel, String variableName, String methodScope) {
 			super();
 			this.blockLevel = blockLevel;
 			this.variableName = variableName;
@@ -111,25 +109,37 @@ public class VariableAdapter extends VisitorAdapter {
 	 * Final variables only make senses (need "this.$finals[...]") inside anonymous
 	 * class.
 	 */
-	public boolean isAnonymousClass = true;
+	boolean isAnonymousClass = true;
 
 	/**
 	 * List of variables that are declared as final.
 	 */
-	public List<FinalVariable> finalVars = new ArrayList<FinalVariable>();
+	List<FinalVariable> finalVars = new ArrayList<FinalVariable>();
 	
 	/**
 	 * Normal (non-final) variables may be affected by final variable names.
 	 */
-	public List<FinalVariable> normalVars = new ArrayList<FinalVariable>();
+	List<FinalVariable> normalVars = new ArrayList<FinalVariable>();
 
 	/**
 	 * Only those final variables that are referenced inside anonymous class
 	 * need to be passed into anonymous class.
 	 */
-	public List<FinalVariable> visitedVars = new ArrayList<FinalVariable>();
+	List<FinalVariable> visitedVars = new ArrayList<FinalVariable>();
 	
-	public String getNormalVariableName(String name) {
+	List<FinalVariable> getVariableList(char fvn) {
+		switch (fvn) {
+		case 'f':
+			return finalVars;
+		case 'v':
+			return visitedVars;
+		default:
+		case 'n':
+			return normalVars;
+		}
+	}	
+
+	String getNormalVariableName(String name) {
 		for (int i = normalVars.size() - 1; i >= 0; i--) {
 			String var =  normalVars.get(i).variableName;
 			if (name.equals(var))
@@ -146,7 +156,7 @@ public class VariableAdapter extends VisitorAdapter {
 	 * @param scope
 	 * @return
 	 */
-	public static String listFinalVariables(List<FinalVariable> list, String seperator, String scope) {
+	static String listFinalVariables(List<FinalVariable> list, String seperator, String scope) {
 		if (list.size() == 0) {
 			return "null";
 		}
@@ -158,9 +168,8 @@ public class VariableAdapter extends VisitorAdapter {
 			if (fv.toVariableName != null) {
 				name = fv.toVariableName;
 			}
-			//buf.append("\"");
+			name = Java2ScriptVisitor.NameMapper.get$QualifiedJ2SFieldName(name, true);
 			buf.append(name);
-			//buf.append("\": ");
 			buf.append(": ");
 			String methodScope = fv.methodScope;
 			if (methodScope == null && scope == null) {
@@ -180,14 +189,4 @@ public class VariableAdapter extends VisitorAdapter {
 		return buf.toString();
 	}
 
-	public List<FinalVariable> getVariableList(char fvn) {
-		switch (fvn) {
-		case 'f':
-			return finalVars;
-		case 'v':
-			return visitedVars;
-		default:
-			return normalVars;
-		}
-	}	
 }

@@ -13092,6 +13092,12 @@ J2S._getResourcePath = function(path, isJavaPath) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
+//       It is possible that these might be loaded dynamically.
+
+// BH 7/20/2018 removes def of Closeable, DataInput, DataOutput, Iterable, Comparator
+// BH 7/19/2018 removes Constructor, Method, and Field code here -- now in their .js files 
+// BH 7/18/2018 adds Java 8 default interface method support
 // BH 7/6/2018 adds J2S.stack to stack traces
 // BH 7/5/2018 2:57:51 PM array.equals$O, for simple arrays
 // BH 7/2/2018 12:50:55 PM Character.prototype.objectValue() and Character.prototype.intValue(), for enhanced FOR in transpiler
@@ -13492,7 +13498,7 @@ Clazz.newClass = function (prefix, name, clazz, clazzSuper, interfacez, type) {
   // there can be a conflict here. 
   prefix.__CLASS_NAME__ && (clazz.$this$0 = prefix.__CLASS_NAME__) || clazzSuper && clazzSuper.$this$0 && (clazz.$this$0 = clazzSuper.$this$0);
   clazz.$load$ = [clazzSuper, interfacez];
-  
+  clazz.$isEnum = clazzSuper == 'Enum';
   // get qualifed name, and for inner classes, the name to use to refer to this
   // class in the synthetic reference array b$[].
 
@@ -13530,6 +13536,7 @@ Clazz.newEnumConst = function(vals, c, enumName, enumOrdinal, args, cl) {
   var o = Clazz.new_(c, args, cl);
   o.$name = enumName;
   o.$ordinal = enumOrdinal;
+  o.$isEnumConst = true;
   var clazzEnum = c.exClazz;
   vals.push(clazzEnum[enumName] = clazzEnum.prototype[enumName] = o);
 }
@@ -13554,7 +13561,6 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
   }
 
   objThis.__JSID__ = ++_jsid;
-
 
   if (!isInner) {
     clazz && clazz.$clinit$ && clazz.$clinit$();  
@@ -13633,12 +13639,15 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
 */
 
 Clazz.newInterface = function (prefix, name, _null1, _null2, interfacez, _0) {
-  return Clazz.newClass(prefix, name, function(){}, null, [null, interfacez], 0);
+  return Clazz.newClass(prefix, name, function(){}, null, interfacez, 0);
 };
 
 Clazz.newMeth = function (clazzThis, funName, funBody, isStatic) {
   if (arguments.length == 1) {
-    return Clazz.newMeth(clazzThis, 'c$', function(){Clazz.super_(clazzThis, this,1);clazzThis.$init$.apply(this)}, 1);
+    return Clazz.newMeth(clazzThis, 'c$', function(){
+    	Clazz.super_(clazzThis, this,1);
+    	clazzThis.$init$.apply(this);
+    	}, 1);
   }
   if (funName.constructor == Array) {
     // If funName is an array, we are setting aliases for generic calls. 
@@ -13654,6 +13663,8 @@ Clazz.newMeth = function (clazzThis, funName, funBody, isStatic) {
   var f;
   if (isStatic || funName == "c$")
     clazzThis[funName] = funBody;
+  if (clazzThis.$isInterface)
+	  clazzThis.$hasJava8Defaults = true;
   return clazzThis.prototype[funName] = funBody; // allow static calls as though they were not static
 };                     
 
@@ -14276,27 +14287,35 @@ var excludeSuper = function(o) {
       || o.startsWith("c$") 
 }
 
-var copyStatics = function(clazzSuper, clazzThis, andProto) {
-  for (var o in clazzSuper) {
+var copyStatics = function(clazzFrom, clazzThis, isInterface) {
+  for (var o in clazzFrom) {
     if (clazzThis[o] == undefined && !excludeSuper(o)) {
-      clazzThis[o] = clazzSuper[o];
-      if (andProto)
-        clazzThis.prototype[o] = clazzSuper[o];
+      clazzThis[o] = clazzFrom[o];
+      if (isInterface)
+        clazzThis.prototype[o] = clazzFrom[o];
     }
+  }
+  if (isInterface) {
+	  for (var o in clazzFrom.prototype) {
+	    if (clazzThis.prototype[o] == undefined && !excludeSuper(o)) {
+	        clazzThis.prototype[o] = clazzFrom.prototype[o];
+	    }
+	  }	  
   }
 }
 
 var finalizeClazz = function(clazz, qname, bname, type, isNumber) {
-  
+  clazz.$isInterface = (type == 0);
   qname && (clazz.__CLASS_NAME__ = clazz.prototype.__CLASS_NAME__ = qname);
   bname && (clazz.__CLASS_NAME$__ = clazz.prototype.__CLASS_NAME$__ = bname);  // inner static classes use $ not "."
   
-  (type == 1) && (clazz.__ANON = clazz.prototype.__ANON = 1);
+  (type == 1) && (clazz.__ANON = clazz.prototype.__ANON = 1); 
   (type == 2) && (clazz.__LOCAL = clazz.prototype.__LOCAL = 1);
   
   if (!isNumber && type != 0)
     Clazz.newMeth(clazz, '$init0$', function(){var c;if ((c=clazz.superclazz) && (c = c.$init0$))c.apply(this);}, 1);
-  extendPrototype(clazz);
+  if (isNumber || type != 0)
+	  extendPrototype(clazz);
 
 };
 
@@ -14634,6 +14653,7 @@ var addInterface = function (clazzThis, interfacez) {
     }
     return;
   }
+  // not an array...
   if (typeof interfacez == "string") {
     var str = interfacez;
     if (!(interfacez = Clazz.load(interfacez))) {
@@ -14641,10 +14661,10 @@ var addInterface = function (clazzThis, interfacez) {
       return;
     }
   }
-  var impls = clazzThis.implementz || (clazzThis.implementz = []);
-  impls.push(interfacez);
+  (clazzThis.implementz || (clazzThis.implementz = [])).push(interfacez);
   copyStatics(interfacez, clazzThis, true);
 };
+
 
 ////////////////////////// default package declarations ////////////////////////
 
@@ -14677,19 +14697,26 @@ Clazz.newPackage("java.util");
 Clazz.newPackage("java.security");
 
 
-Clazz.newInterface(java.io,"Closeable");
-Clazz.newInterface(java.io,"DataInput");
-Clazz.newInterface(java.io,"DataOutput");
+// NOTE: Any changes to this list must also be 
+//       accounted for in net.sf.j2s.core.astvisitors.Java2ScriptVisitor.knownClasses
 Clazz.newInterface(java.io,"Externalizable");
 Clazz.newInterface(java.io,"Flushable");
 Clazz.newInterface(java.io,"Serializable");
-Clazz.newInterface(java.lang,"Iterable");
-Clazz.newInterface(java.lang,"CharSequence");
 Clazz.newInterface(java.lang,"Cloneable");
 Clazz.newInterface(java.lang,"Appendable");
 Clazz.newInterface(java.lang,"Comparable");
 Clazz.newInterface(java.lang,"Runnable");
-Clazz.newInterface(java.util,"Comparator");
+Clazz.newInterface(java.lang,"CharSequence");
+// NOTE! Java 8 implementation of CharSequence adds function/stream methods that are not provided here.
+// namely: java.util.function.Supplier in CharSequence.chars and .codePoints
+// also various iterator methods
+
+//Clazz.newInterface(java.io,"Closeable");
+//Clazz.newInterface(java.io,"DataInput");
+//Clazz.newInterface(java.io,"DataOutput");
+//Clazz.newInterface(java.lang,"Iterable");
+//Clazz.newInterface(java.util,"Comparator");
+
 
 //////// (int) conversions //////////
 
@@ -16827,7 +16854,7 @@ return Clazz.array(Byte.TYPE, -1, arrs);
 };
 
 sp.contains$S = function(a) {return this.indexOf(a) >= 0}  // bh added
-sp.compareTo$S = sp.compareTo$TT = function(a){return this > a ? 1 : this < a ? -1 : 0} // bh added
+sp.compareTo = sp.compareTo$S = sp.compareTo$TT = function(a){return this > a ? 1 : this < a ? -1 : 0} // bh added
 
 sp.toCharArray=function(){
 var result=new Array(this.length);
@@ -17312,6 +17339,8 @@ var ht=this.getTime();
 return parseInt(ht)^parseInt((ht>>32));
 });
 
+/*
+ Java8 classes have default methods
 Clazz.newInterface(java.util,"Iterator");
 
 Clazz.newInterface(java.util,"ListIterator",java.util.Iterator);
@@ -17326,6 +17355,7 @@ Clazz.newInterface(java.util,"List",java.util.Collection);
 
 Clazz.newInterface(java.util,"Queue",java.util.Collection);
 Clazz.newInterface(java.util,"RandomAccess");
+*/
 
 var C$ = Clazz.newClass(java.lang, "Throwable", function () {
 Clazz.newInstance(this, arguments);
@@ -17945,295 +17975,8 @@ var newMethodNotFoundException = function (clazz, method) {
   throw Clazz.new_(java.lang.NoSuchMethodException.c$$S, [message]);        
 };
 
-;(function(){
-var C$=Clazz.newClass(java.lang.reflect,"Constructor",function(){
-this.Class_=null;
-this.parameterTypes=null;
-this.exceptionTypes=null;
-this.modifiers=0;
-this.signature="c$";
-this.constr = null;
-},java.lang.reflect.AccessibleObject,[java.lang.reflect.GenericDeclaration,java.lang.reflect.Member]);
-m$(C$, "c$$Class$ClassA$ClassA$I", function(declaringClass,parameterTypes,checkedExceptions,modifiers){
-Clazz.super_(C$, this);
-this.Class_=declaringClass;
-if (";Integer;Long;Short;Byte;Float;Double;".indexOf(";" + this.Class_.getName() + ";") >= 0)
- parameterTypes = null;
-this.parameterTypes=parameterTypes;
-if (parameterTypes != null)
-for (var i = 0; i < parameterTypes.length; i++) {
-   this.signature += "$" + Clazz._getParamCode(parameterTypes[i]);
-} 
-this.constr = this.Class_.$clazz$[this.signature];
-this.exceptionTypes=checkedExceptions;
-this.modifiers=modifiers;
-}, 1);
-m$(C$,"getTypeParameters",
-function(){
-return null;
-});
-m$(C$,"toGenericString",
-function(){
-return null;
-});
-m$(C$,"getGenericParameterTypes",
-function(){
-return null;
-});
-m$(C$,"getGenericExceptionTypes",
-function(){
-return null;
-});
-m$(C$,"getParameterAnnotations",
-function(){
-return null;
-});
-m$(C$,"isVarArgs",
-function(){
-return false;
-});
-m$(C$,"isSynthetic",
-function(){
-return false;
-});
-m$(C$,"equals$O",
-function(object){
-if(object!=null&&Clazz.instanceOf(object,java.lang.reflect.Constructor)){
-var other=object;
-if(this.getDeclaringClass()===other.getDeclaringClass()){
-var params1=this.parameterTypes;
-var params2=other.parameterTypes;
-if(params1.length==params2.length){
-for(var i=0;i<params1.length;i++){
-if(params1[i]!==params2[i])return false;
-}
-return true;
-}}}return false;
-});
-m$(C$,"getDeclaringClass",
-function(){
-return this.Class_;
-});
-m$(C$,"getExceptionTypes",
-function(){
-return this.exceptionTypes;
-});
-m$(C$,"getModifiers",
-function(){
-return this.modifiers;
-});
-m$(C$,"getName",
-function(){
-return this.getDeclaringClass().getName();
-});
-m$(C$,"getParameterTypes",
-function(){
-return this.parameterTypes;
-});
-m$(C$,"hashCode",
-function(){
-return this.getDeclaringClass().getName().hashCode();
-});
-m$(C$,"newInstance$OA", function(args){
-  var instance = null;
-  if (this.constr) {
-    var a = (args ? new Array(args.length) : []);
-    if (args) {
-      for (var i = args.length; --i >= 0;) {
-        a[i] = (this.parameterTypes[i].__PRIMITIVE ? args[i].valueOf() : args[i]);
-      }
-    }
-    var instance = Clazz.new_(this.constr, a);
-  }
-//  var instance=new this.clazz(null, inheritArgs);
-  if (instance == null)
-    newMethodNotFoundException(this.Class_.$clazz$, this.signature);  
-  return instance;
-});
-m$(C$,"toString",
-function(){
-return null;
-});
-})();
+// Constructor, Field, Method all moved back to their original class js; no need to have those here
 
-C$=declareType(java.lang.reflect,"Field",java.lang.reflect.AccessibleObject,java.lang.reflect.Member);
-m$(C$,"isSynthetic",
-function(){
-return false;
-});
-m$(C$,"toGenericString",
-function(){
-return null;
-});
-m$(C$,"isEnumConstant",
-function(){
-return false;
-});
-m$(C$,"getGenericType",
-function(){
-return null;
-});
-m$(C$,"equals$O",
-function(object){
-return false;
-});
-m$(C$,"getDeclaringClass",
-function(){
-return null;
-});
-m$(C$,"getName",
-function(){
-return null;
-});
-m$(C$,"getType",
-function(){
-return null;
-});
-m$(C$,"hashCode",
-function(){
-return 0;
-});
-m$(C$,"toString",
-function(){
-return null;
-});
-
-;(function(){
-var C$=Clazz.newClass(java.lang.reflect,"Method",function(){
-this.Class_=null;
-this.name=null;
-this.returnType=null;
-this.parameterTypes=null;
-this.exceptionTypes=null;
-this.modifiers=0;
-},java.lang.reflect.AccessibleObject,[java.lang.reflect.GenericDeclaration,java.lang.reflect.Member]);
-m$(C$, "c$$Class$S$ClassA$Class$ClassA$I", function(declaringClass,name,parameterTypes,returnType,checkedExceptions,modifiers){
-Clazz.super_(C$, this);
-this.Class_=declaringClass;
-this.name=name;
-this.parameterTypes=parameterTypes;
-this.returnType=returnType;
-this.exceptionTypes=checkedExceptions;
-this.modifiers=modifiers;
-}, 1);
-m$(C$,"getTypeParameters",
-function(){
-return null;
-});
-m$(C$,"toGenericString",
-function(){
-return null;
-});
-m$(C$,"getGenericParameterTypes",
-function(){
-return null;
-});
-m$(C$,"getGenericExceptionTypes",
-function(){
-return null;
-});
-m$(C$,"getGenericReturnType",
-function(){
-return null;
-});
-m$(C$,"getParameterAnnotations",
-function(){
-return null;
-});
-m$(C$,"isVarArgs",
-function(){
-return false;
-});
-m$(C$,"isBridge",
-function(){
-return false;
-});
-m$(C$,"isSynthetic",
-function(){
-return false;
-});
-m$(C$,"getDefaultValue",
-function(){
-return null;
-});
-m$(C$,"equals$O",
-function(object){
-if(object!=null&&Clazz.instanceOf(object,java.lang.reflect.Method)){
-var other=object;
-if((this.getDeclaringClass()===other.getDeclaringClass())&&(this.getName()===other.getName())){
-var params1=this.parameterTypes;
-var params2=other.parameterTypes;
-if(params1.length==params2.length){
-for(var i=0;i<params1.length;i++){
-if(params1[i]!==params2[i])return false;
-}
-return true;
-}}}return false;
-});
-m$(C$,"getDeclaringClass",
-function(){
-return this.Class_;
-});
-m$(C$,"getExceptionTypes",
-function(){
-return this.exceptionTypes;
-});
-m$(C$,"getModifiers",
-function(){
-return this.modifiers;
-});
-m$(C$,"getName",
-function(){
-return this.name;
-});
-m$(C$,"getParameterTypes",
-function(){
-return this.parameterTypes; 
-});
-m$(C$,"getReturnType",
-function(){
-return this.returnType;
-});
-m$(C$,"hashCode",
-function(){
-return this.getDeclaringClass().getName().hashCode()^this.getName().hashCode();
-});
-m$(C$,"invoke$O$OA",
-function(receiver,args){
-var name = this.getName();
-var types = this.parameterTypes;
-var a = null;
-var addParams = !this.isParamQualified;
-if (types != null || !addParams) {
-  a = new Array(args.length);
-  for (var i = 0; i < args.length; i++) {
-    if (addParams) {
-      var t = types[i];
-      a[i] = (t.__PRIMITIVE && args[i].valueOf ? args[i].valueOf() : args[i]);
-      if (addParams)
-        name += "$" + Clazz._getParamCode(t);
-    } else {
-      a[i] = args[i];
-    }
-  }
-}
-//var c = this.Class_.$clazz$;
-//var m=c.prototype[name] || c[name];
-if (receiver.$clazz$) {
- // receiver is a Class<?> object. We need to instantiate it.
- // I do not see how this works in Java. 
- receiver = receiver.newInstance();
-}
-var m = receiver[name];
-if (m == null)
-  newMethodNotFoundException(Clazz.getClass(receiver).$clazz$, name);  
-return m.apply(receiver,a);
-});
-m$(C$,"toString",
-function(){
-return null;
-});
-})();
 
 //  if (needPackage("core"))
   //  _Loader.loadPackage("core");  
@@ -18250,20 +17993,10 @@ return null;
   
 
 
-})(Clazz, J2S); // requires JSmolCore.js
-
+})(Clazz, J2S); 
 }; // called by external application 
 
 
-/*
-Clazz.cloneFinals = function () {
-  var o = {};
-  var len = arguments.length / 2;
-  for (var i = len; --i >= 0;)
-    o[arguments[i + i]] = arguments[i + i + 1];
-  return o;
-};
-*/
 // SwingJSApplet.js
 
 // generic SwingJS Applet

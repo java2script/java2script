@@ -1,371 +1,469 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
+ * Copyright (c) 1997, 2013, Oracle and/or its affiliates. All rights reserved.
+ * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
  */
 
 package java.util;
 
-
-import java.lang.reflect.Array;
-
 /**
- * AbstractCollection is an abstract implementation of the Collection interface.
- * This implementation does not support adding. A subclass must implement the
- * abstract methods iterator() and size().
+ * This class provides a skeletal implementation of the <tt>Collection</tt>
+ * interface, to minimize the effort required to implement this interface. <p>
+ *
+ * To implement an unmodifiable collection, the programmer needs only to
+ * extend this class and provide implementations for the <tt>iterator</tt> and
+ * <tt>size</tt> methods.  (The iterator returned by the <tt>iterator</tt>
+ * method must implement <tt>hasNext</tt> and <tt>next</tt>.)<p>
+ *
+ * To implement a modifiable collection, the programmer must additionally
+ * override this class's <tt>add</tt> method (which otherwise throws an
+ * <tt>UnsupportedOperationException</tt>), and the iterator returned by the
+ * <tt>iterator</tt> method must additionally implement its <tt>remove</tt>
+ * method.<p>
+ *
+ * The programmer should generally provide a void (no argument) and
+ * <tt>Collection</tt> constructor, as per the recommendation in the
+ * <tt>Collection</tt> interface specification.<p>
+ *
+ * The documentation for each non-abstract method in this class describes its
+ * implementation in detail.  Each of these methods may be overridden if
+ * the collection being implemented admits a more efficient implementation.<p>
+ *
+ * This class is a member of the
+ * <a href="{@docRoot}/../technotes/guides/collections/index.html">
+ * Java Collections Framework</a>.
+ *
+ * @author  Josh Bloch
+ * @author  Neal Gafter
+ * @see Collection
  * @since 1.2
  */
+
 public abstract class AbstractCollection<E> implements Collection<E> {
+    /**
+     * Sole constructor.  (For invocation by subclass constructors, typically
+     * implicit.)
+     */
+    protected AbstractCollection() {
+    }
 
-	/**
-	 * Constructs a new instance of this AbstractCollection.
-	 */
-	protected AbstractCollection() {
-		super();
-	}
+    // Query Operations
 
     /**
-     * If the specified element is not contained within this collection, and
-     * addition of this element succeeds, then true will be returned. If the
-     * specified element is already contained within this collection, or
-     * duplication is not permitted, false will be returned. Different
-     * implementations may add specific limitations on this method to filter
-     * permitted elements. For example, in some implementation, null element may
-     * be denied, and NullPointerException will be thrown out. These limitations
-     * should be explicitly documented by specific collection implementation.
-     * 
-     * Add operation is not supported in this implementation, and
-     * UnsupportedOperationException will always be thrown out.
-     * 
-     * @param object
-     *            the element to be added.
-     * @return true if the collection is changed successfully after invoking
-     *         this method. Otherwise, false.
-     * @throws UnsupportedOperationException
-     *                if add operation is not supported by this class.
-     * @throws NullPointerException
-     *                if null is used to invoke this method, and null is not
-     *                permitted by this collection.
-     * @throws ClassCastException
-     *                if the class type of the specified element is not
-     *                compatible with the permitted class type.
-     * @throws IllegalArgumentException
-     *                if limitations of this collection prevent the specified
-     *                element from being added
+     * Returns an iterator over the elements contained in this collection.
+     *
+     * @return an iterator over the elements contained in this collection
      */
-	public boolean add(E object) {
-		throw new UnsupportedOperationException();
-	}
+    public abstract Iterator<E> iterator();
 
-	/**
-	 * Adds the objects in the specified Collection to this Collection.
-	 * 
-	 * @param collection
-	 *            the Collection of objects
-	 * @return true if this Collection is modified, false otherwise
-	 * 
-	 * @throws UnsupportedOperationException
-	 *                when adding to this Collection is not supported
-	 * @throws NullPointerException
-	 *                if null is used to invoke this method
-	 */
-	public boolean addAll(Collection<? extends E> collection) {
-		boolean result = false;
-		Iterator<? extends E> it = collection.iterator();
-		while (it.hasNext()) {
-            if (add(it.next())) {
-                result = true;
+    public abstract int size();
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation returns <tt>size() == 0</tt>.
+     */
+    public boolean isEmpty() {
+        return size() == 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation iterates over the elements in the collection,
+     * checking each element in turn for equality with the specified element.
+     *
+     * @throws ClassCastException   {@inheritDoc}
+     * @throws NullPointerException {@inheritDoc}
+     */
+    public boolean contains(Object o) {
+        Iterator<E> it = iterator();
+        if (o==null) {
+            while (it.hasNext())
+                if (it.next()==null)
+                    return true;
+        } else {
+            while (it.hasNext())
+                if (o.equals(it.next()))
+                    return true;
+        }
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation returns an array containing all the elements
+     * returned by this collection's iterator, in the same order, stored in
+     * consecutive elements of the array, starting with index {@code 0}.
+     * The length of the returned array is equal to the number of elements
+     * returned by the iterator, even if the size of this collection changes
+     * during iteration, as might happen if the collection permits
+     * concurrent modification during iteration.  The {@code size} method is
+     * called only as an optimization hint; the correct result is returned
+     * even if the iterator returns a different number of elements.
+     *
+     * <p>This method is equivalent to:
+     *
+     *  <pre> {@code
+     * List<E> list = new ArrayList<E>(size());
+     * for (E e : this)
+     *     list.add(e);
+     * return list.toArray();
+     * }</pre>
+     */
+    public Object[] toArray() {
+        // Estimate size of array; be prepared to see more or fewer elements
+        Object[] r = new Object[size()];
+        Iterator<E> it = iterator();
+        for (int i = 0; i < r.length; i++) {
+            if (! it.hasNext()) // fewer elements than expected
+                return Arrays.copyOf(r, i);
+            r[i] = it.next();
+        }
+        return it.hasNext() ? finishToArray(r, it) : r;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation returns an array containing all the elements
+     * returned by this collection's iterator in the same order, stored in
+     * consecutive elements of the array, starting with index {@code 0}.
+     * If the number of elements returned by the iterator is too large to
+     * fit into the specified array, then the elements are returned in a
+     * newly allocated array with length equal to the number of elements
+     * returned by the iterator, even if the size of this collection
+     * changes during iteration, as might happen if the collection permits
+     * concurrent modification during iteration.  The {@code size} method is
+     * called only as an optimization hint; the correct result is returned
+     * even if the iterator returns a different number of elements.
+     *
+     * <p>This method is equivalent to:
+     *
+     *  <pre> {@code
+     * List<E> list = new ArrayList<E>(size());
+     * for (E e : this)
+     *     list.add(e);
+     * return list.toArray(a);
+     * }</pre>
+     *
+     * @throws ArrayStoreException  {@inheritDoc}
+     * @throws NullPointerException {@inheritDoc}
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T[] toArray(T[] a) {
+        // Estimate size of array; be prepared to see more or fewer elements
+        int size = size();
+        T[] r = a.length >= size ? a :
+                  (T[])java.lang.reflect.Array
+                  .newInstance(a.getClass().getComponentType(), size);
+        Iterator<E> it = iterator();
+
+        for (int i = 0; i < r.length; i++) {
+            if (! it.hasNext()) { // fewer elements than expected
+                if (a == r) {
+                    r[i] = null; // null-terminate
+                } else if (a.length < i) {
+                    return Arrays.copyOf(r, i);
+                } else {
+                    System.arraycopy(r, 0, a, 0, i);
+                    if (a.length > i) {
+                        a[i] = null;
+                    }
+                }
+                return a;
+            }
+            r[i] = (T)it.next();
+        }
+        // more elements than expected
+        return it.hasNext() ? finishToArray(r, it) : r;
+    }
+
+    /**
+     * The maximum size of array to allocate.
+     * Some VMs reserve some header words in an array.
+     * Attempts to allocate larger arrays may result in
+     * OutOfMemoryError: Requested array size exceeds VM limit
+     */
+    private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+
+    /**
+     * Reallocates the array being used within toArray when the iterator
+     * returned more elements than expected, and finishes filling it from
+     * the iterator.
+     *
+     * @param r the array, replete with previously stored elements
+     * @param it the in-progress iterator over this collection
+     * @return array containing the elements in the given array, plus any
+     *         further elements returned by the iterator, trimmed to size
+     */
+    @SuppressWarnings("unchecked")
+    private static <T> T[] finishToArray(T[] r, Iterator<?> it) {
+        int i = r.length;
+        while (it.hasNext()) {
+            int cap = r.length;
+            if (i == cap) {
+                int newCap = cap + (cap >> 1) + 1;
+                // overflow-conscious code
+                if (newCap - MAX_ARRAY_SIZE > 0)
+                    newCap = hugeCapacity(cap + 1);
+                r = Arrays.copyOf(r, newCap);
+            }
+            r[i++] = (T)it.next();
+        }
+        // trim if overallocated
+        return (i == r.length) ? r : Arrays.copyOf(r, i);
+    }
+
+    private static int hugeCapacity(int minCapacity) {
+        if (minCapacity < 0) // overflow
+            throw new OutOfMemoryError
+                ("Required array size too large");
+        return (minCapacity > MAX_ARRAY_SIZE) ?
+            Integer.MAX_VALUE :
+            MAX_ARRAY_SIZE;
+    }
+
+    // Modification Operations
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation always throws an
+     * <tt>UnsupportedOperationException</tt>.
+     *
+     * @throws UnsupportedOperationException {@inheritDoc}
+     * @throws ClassCastException            {@inheritDoc}
+     * @throws NullPointerException          {@inheritDoc}
+     * @throws IllegalArgumentException      {@inheritDoc}
+     * @throws IllegalStateException         {@inheritDoc}
+     */
+    public boolean add(E e) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation iterates over the collection looking for the
+     * specified element.  If it finds the element, it removes the element
+     * from the collection using the iterator's remove method.
+     *
+     * <p>Note that this implementation throws an
+     * <tt>UnsupportedOperationException</tt> if the iterator returned by this
+     * collection's iterator method does not implement the <tt>remove</tt>
+     * method and this collection contains the specified object.
+     *
+     * @throws UnsupportedOperationException {@inheritDoc}
+     * @throws ClassCastException            {@inheritDoc}
+     * @throws NullPointerException          {@inheritDoc}
+     */
+    public boolean remove(Object o) {
+        Iterator<E> it = iterator();
+        if (o==null) {
+            while (it.hasNext()) {
+                if (it.next()==null) {
+                    it.remove();
+                    return true;
+                }
+            }
+        } else {
+            while (it.hasNext()) {
+                if (o.equals(it.next())) {
+                    it.remove();
+                    return true;
+                }
             }
         }
-		return result;
-	}
+        return false;
+    }
+
+
+    // Bulk Operations
 
     /**
-     * Removes all the elements in this collection. This collection will be 
-     * cleared up after this operation. The operation iterates over the 
-     * collection, removes every element using Iterator.remove method.
-     * 
-     * UnsupportedOperationException will be thrown out if the iterator returned
-     * by this collection does not implement the remove method and the collection
-     * is not zero length.
-     * 
-     * @throws UnsupportedOperationException 
-     *                  if this operation is not implemented.
+     * {@inheritDoc}
+     *
+     * <p>This implementation iterates over the specified collection,
+     * checking each element returned by the iterator in turn to see
+     * if it's contained in this collection.  If all elements are so
+     * contained <tt>true</tt> is returned, otherwise <tt>false</tt>.
+     *
+     * @throws ClassCastException            {@inheritDoc}
+     * @throws NullPointerException          {@inheritDoc}
+     * @see #contains(Object)
      */
-	public void clear() {
-		Iterator<E> it = iterator();
-		while (it.hasNext()) {
-			it.next();
-			it.remove();
-		}
-	}
-
-	/**
-	 * Searches this Collection for the specified object.
-	 * 
-	 * @param object
-	 *            the object to search for
-	 * @return true if <code>object</code> is an element of this Collection,
-	 *         false otherwise
-	 */
-	public boolean contains(Object object) {
-		Iterator<E> it = iterator();
-		if (object != null) {
-			while (it.hasNext()) {
-                if (object.equals(it.next())) {
-                    return true;
-                }
-            }
-		} else {
-			while (it.hasNext()) {
-                if (it.next() == null) {
-                    return true;
-                }
-            }
-		}
-		return false;
-	}
-
-	/**
-	 * Searches this Collection for all objects in the specified Collection.
-	 * 
-	 * @param collection
-	 *            the Collection of objects
-	 * @return true if all objects in the specified Collection are elements of
-	 *         this Collection, false otherwise
-     * @throws NullPointerException
-     *                if null is used to invoke this method
-	 */
-	public boolean containsAll(Collection<?> collection) {
-		Iterator<?> it = collection.iterator();
-		while (it.hasNext()) {
-            if (!contains(it.next())) {
+    public boolean containsAll(Collection<?> c) {
+        for (Object e : c)
+            if (!contains(e))
                 return false;
-            }
-        }
-		return true;
-	}
+        return true;
+    }
 
     /**
-     * Returns true if the collection has no element, otherwise false.
-     * 
-     * @return true if the collection has no element.
+     * {@inheritDoc}
+     *
+     * <p>This implementation iterates over the specified collection, and adds
+     * each object returned by the iterator to this collection, in turn.
+     *
+     * <p>Note that this implementation will throw an
+     * <tt>UnsupportedOperationException</tt> unless <tt>add</tt> is
+     * overridden (assuming the specified collection is non-empty).
+     *
+     * @throws UnsupportedOperationException {@inheritDoc}
+     * @throws ClassCastException            {@inheritDoc}
+     * @throws NullPointerException          {@inheritDoc}
+     * @throws IllegalArgumentException      {@inheritDoc}
+     * @throws IllegalStateException         {@inheritDoc}
+     *
+     * @see #add(Object)
      */
-	public boolean isEmpty() {
-		return size() == 0;
-	}
+    public boolean addAll(Collection<? extends E> c) {
+        boolean modified = false;
+        for (E e : c)
+            if (add(e))
+                modified = true;
+        return modified;
+    }
 
-	/**
-	 * Answers an Iterator on the elements of this Collection. A subclass must
-	 * implement the abstract methods iterator() and size().
-	 * 
-	 * @return an Iterator on the elements of this Collection
-	 * 
-	 * @see Iterator
-	 */
-	public abstract Iterator<E> iterator();
-
-	/**
-	 * Removes the first occurrence of the specified object from this
-	 * Collection. This operation traverses over the collection, looking
-     * for the specified object. Once the object is found, the object will
-     * be removed from the collection using the iterator's remove method. 
-     * 
-     * This collection will throw an UnsupportedOperationException if the 
-     * iterator returned does not implement remove method, and the specified
-     * object is in this collection.
-	 * 
-	 * @param object
-	 *            the object to remove
-	 * @return true if this Collection is modified, false otherwise
-	 * 
-	 * @throws UnsupportedOperationException
-	 *                when removing from this Collection is not supported
-	 */
-	public boolean remove(Object object) {
-		Iterator<?> it = iterator();
-		if (object != null) {
-			while (it.hasNext()) {
-				if (object.equals(it.next())) {
-					it.remove();
-					return true;
-				}
-			}
-		} else {
-			while (it.hasNext()) {
-				if (it.next() == null) {
-					it.remove();
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Removes all occurrences in this Collection of each object in the
-	 * specified Collection. This operation traverses over the collection
-     * itself, to verify whether each element is contained in the specified 
-     * collection. The object will be removed from the collection itself using 
-     * the iterator's remove method if it is contained in the specified 
-     * collection. 
-     * 
-     * This collection will throw an UnsupportedOperationException if the 
-     * iterator returned does not implement remove method, and the element 
-     * in the specified collection is contained in this collection.
-	 * 
-	 * @param collection
-	 *            the Collection of objects to remove
-	 * @return true if this Collection is modified, false otherwise
-	 * 
-	 * @throws UnsupportedOperationException
-	 *                when removing from this Collection is not supported
-     * @throws NullPointerException
-     *                if null is used to invoke this method
-	 */
-	public boolean removeAll(Collection<?> collection) {
-		boolean result = false;
-		Iterator<?> it = iterator();
-		while (it.hasNext()) {
-			if (collection.contains(it.next())) {
-				it.remove();
-				result = true;
-			}
-		}
-		return result;
-	}
-
-	/**
-	 * Removes all objects from this Collection that are not contained in the
-	 * specified Collection. This operation traverses over the collection
-     * itself, to verify whether any element is contained in the specified 
-     * collection. The object will be removed from the collection itself using 
-     * the iterator's remove method if it is not contained in the specified 
-     * collection. 
-     * 
-     * This collection will throw an UnsupportedOperationException if the 
-     * iterator returned does not implement remove method, and the collection
-     * itself does contain elements which do not exist in the specified collection.
-	 * 
-	 * @param collection
-	 *            the Collection of objects to retain
-	 * @return true if this Collection is modified, false otherwise
-	 * 
-	 * @throws UnsupportedOperationException
-	 *                when removing from this Collection is not supported
-     * @throws NullPointerException
-     *                if null is used to invoke this method
-	 */
-	public boolean retainAll(Collection<?> collection) {
-		boolean result = false;
-		Iterator<?> it = iterator();
-		while (it.hasNext()) {
-			if (!collection.contains(it.next())) {
-				it.remove();
-				result = true;
-			}
-		}
-		return result;
-	}
-
-	/**
-	 * Answers the number of elements in this Collection.
-	 * 
-	 * @return the number of elements in this Collection
-	 */
-	public abstract int size();
-
-	/**
-	 * Answers a new array containing all elements contained in this Collection.
-     * All the elements in the array will not be referenced by the collection.
-     * The elements in the returned array will be sorted to the same order as 
-     * those returned by the iterator of this collection itself if the collection  
-     * guarantees the order. 
-	 * 
-	 * @return an array of the elements from this Collection
-	 */
-	public Object[] toArray() {
-		int size = size(), index = 0;
-		Iterator<?> it = iterator();
-		Object[] array = new Object[size];
-		while (index < size) {
-            array[index++] = it.next();
-        }
-		return array;
-	}
-
-	/**
-	 * Answers an array containing all elements contained in this Collection. If
-	 * the specified array is large enough to hold the elements, the specified
-	 * array is used, otherwise an array of the same type is created. If the
-	 * specified array is used and is larger than this Collection, the array
-	 * element following the collection elements is set to null.
-	 * 
-	 * @param contents
-	 *            the array
-	 * @return an array of the elements from this Collection
-	 * 
-	 * @throws ArrayStoreException
-	 *                when the type of an element in this Collection cannot be
-	 *                stored in the type of the specified array
-     * @throws NullPointerException
-     *                if null is used to invoke this method
-	 */
-	@SuppressWarnings("unchecked")
-    public <T> T[] toArray(T[] contents) {
-		int size = size(), index = 0;
-		if (size > contents.length) {
-            Class<?> ct = contents.getClass().getComponentType();
-			contents = (T[])Array.newInstance(ct, size);
-        }
-		for (E entry: this) {
-			contents[index++] = (T)entry;
-        }
-		if (index < contents.length) {
-			contents[index] = null;
-        }
-		return contents;
-	}
-
-	/**
-	 * Answers the string representation of this Collection. The presentation
-     * has a specific format. It is enclosed by square brackets ("[]"). Elements
-     * are separated by ', ' (comma and space).
-	 * 
-	 * @return the string representation of this Collection
-	 */
-	@Override
-    public String toString() {
-		if (isEmpty()) {
-            return "[]"; //$NON-NLS-1$
-        }
-
-		StringBuilder buffer = new StringBuilder(size() * 16);
-		buffer.append('[');
-		Iterator<?> it = iterator();
-		while (it.hasNext()) {
-			Object next = it.next();
-			if (next != this) {
-				buffer.append(next);
-			} else {
-				buffer.append("(this Collection)"); //$NON-NLS-1$
-			}
-            if(it.hasNext()) {
-                buffer.append(", "); //$NON-NLS-1$
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation iterates over this collection, checking each
+     * element returned by the iterator in turn to see if it's contained
+     * in the specified collection.  If it's so contained, it's removed from
+     * this collection with the iterator's <tt>remove</tt> method.
+     *
+     * <p>Note that this implementation will throw an
+     * <tt>UnsupportedOperationException</tt> if the iterator returned by the
+     * <tt>iterator</tt> method does not implement the <tt>remove</tt> method
+     * and this collection contains one or more elements in common with the
+     * specified collection.
+     *
+     * @throws UnsupportedOperationException {@inheritDoc}
+     * @throws ClassCastException            {@inheritDoc}
+     * @throws NullPointerException          {@inheritDoc}
+     *
+     * @see #remove(Object)
+     * @see #contains(Object)
+     */
+    public boolean removeAll(Collection<?> c) {
+        Objects.requireNonNull(c);
+        boolean modified = false;
+        Iterator<?> it = iterator();
+        while (it.hasNext()) {
+            if (c.contains(it.next())) {
+                it.remove();
+                modified = true;
             }
-		}
-		buffer.append(']');
-		return buffer.toString();
-	}
+        }
+        return modified;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation iterates over this collection, checking each
+     * element returned by the iterator in turn to see if it's contained
+     * in the specified collection.  If it's not so contained, it's removed
+     * from this collection with the iterator's <tt>remove</tt> method.
+     *
+     * <p>Note that this implementation will throw an
+     * <tt>UnsupportedOperationException</tt> if the iterator returned by the
+     * <tt>iterator</tt> method does not implement the <tt>remove</tt> method
+     * and this collection contains one or more elements not present in the
+     * specified collection.
+     *
+     * @throws UnsupportedOperationException {@inheritDoc}
+     * @throws ClassCastException            {@inheritDoc}
+     * @throws NullPointerException          {@inheritDoc}
+     *
+     * @see #remove(Object)
+     * @see #contains(Object)
+     */
+    public boolean retainAll(Collection<?> c) {
+        Objects.requireNonNull(c);
+        boolean modified = false;
+        Iterator<E> it = iterator();
+        while (it.hasNext()) {
+            if (!c.contains(it.next())) {
+                it.remove();
+                modified = true;
+            }
+        }
+        return modified;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation iterates over this collection, removing each
+     * element using the <tt>Iterator.remove</tt> operation.  Most
+     * implementations will probably choose to override this method for
+     * efficiency.
+     *
+     * <p>Note that this implementation will throw an
+     * <tt>UnsupportedOperationException</tt> if the iterator returned by this
+     * collection's <tt>iterator</tt> method does not implement the
+     * <tt>remove</tt> method and this collection is non-empty.
+     *
+     * @throws UnsupportedOperationException {@inheritDoc}
+     */
+    public void clear() {
+        Iterator<E> it = iterator();
+        while (it.hasNext()) {
+            it.next();
+            it.remove();
+        }
+    }
+
+
+    //  String conversion
+
+    /**
+     * Returns a string representation of this collection.  The string
+     * representation consists of a list of the collection's elements in the
+     * order they are returned by its iterator, enclosed in square brackets
+     * (<tt>"[]"</tt>).  Adjacent elements are separated by the characters
+     * <tt>", "</tt> (comma and space).  Elements are converted to strings as
+     * by {@link String#valueOf(Object)}.
+     *
+     * @return a string representation of this collection
+     */
+    public String toString() {
+        Iterator<E> it = iterator();
+        if (! it.hasNext())
+            return "[]";
+
+        StringBuilder sb = new StringBuilder();
+        sb.append('[');
+        for (;;) {
+            E e = it.next();
+            sb.append(e == this ? "(this Collection)" : e);
+            if (! it.hasNext())
+                return sb.append(']').toString();
+            sb.append(',').append(' ');
+        }
+    }
+
 }

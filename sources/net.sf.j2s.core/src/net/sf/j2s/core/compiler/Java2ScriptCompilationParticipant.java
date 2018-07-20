@@ -17,7 +17,6 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 	private boolean isCleanBuild;
 
 	public Java2ScriptCompilationParticipant() {
-		super();
 		System.out.println("CompilationParticipant started");
 	}
 
@@ -109,7 +108,16 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 			j2sCompiler.initializeProject(project.getProject(), true);
 			for (int i = 0; i < javaFiles.length; i++) {
 				System.out.println("transpiling " + javaFiles[i]);
-				j2sCompiler.compileToJavaScript(javaFiles[i].getFile());
+// trying to keep the progess monitor running - didn't work
+//				try {
+//					Thread.currentThread().sleep(1);
+//				} catch (InterruptedException e) {
+//					// ignore
+//				}
+				if (!j2sCompiler.compileToJavaScript(javaFiles[i].getFile())) {
+					System.out.println("Error processing " + javaFiles[i].getFile());
+					break;
+				}
 			}
 			javaFiles = null;
 			System.out.println("build finished " + project.getProject().getLocation());
@@ -161,6 +169,5 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 	 */
 	public void reconcile(ReconcileContext context) {
 		// fired whenever a source file is changed -- before it is saved
-		super.reconcile(context);
 	}
 }

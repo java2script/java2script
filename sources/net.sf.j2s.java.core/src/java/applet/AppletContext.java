@@ -31,7 +31,7 @@ package java.applet;
 import java.net.URL;
 import java.util.Enumeration;
 
-import java.awt.Image;
+import java.awt.Image; 
 
 /**
  * This interface corresponds to an applet's environment: the
