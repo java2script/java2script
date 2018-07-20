@@ -666,6 +666,6 @@ public final class Field extends AccessibleObject implements Member {
 	 * @return a printable representation for the receiver
 	 */
 	public String toString() {
-		return null;
+		return "_FIELD_";
 	}
 }

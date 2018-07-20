@@ -61,7 +61,7 @@ public class Modifier {
     
     static final int ANNOTATION = 0x2000;
     
-    static final int ENUM = 0x4000;
+    public static final int ENUM = 0x4000;
      
 	public Modifier() {
 	}

@@ -10,6 +10,16 @@
    	 	<delete quiet="true" dir="site" />
     -->
    	
+   	<echo>creating swingjs2.js</echo>
+   	<concat destfile="srcjs/swingjs2.js">
+	   	<filelist dir="srcjs/js" files="jquery.js,j2sJQueryExt.js,j2sApplet.js,j2sClazz.js,SwingJSApplet.js" />
+   	</concat>
+
+   	<echo>copying srcjs files into site</echo>
+    <copy todir="site/swingjs">
+      <fileset dir="srcjs"/>
+    </copy>
+   		
    	<!-- make core files -->
  
    	<echo>creating and compressing core files - warnings are OK; "does not exist" is trouble</echo>
@@ -282,16 +292,6 @@
         	" />
     </antcall>
    	
-   	<echo>creating swingjs2.js</echo>
-   	<concat destfile="srcjs/swingjs2.js">
-	   	<filelist dir="srcjs/js" files="jquery.js,j2sJQueryExt.js,j2sApplet.js,j2sClazz.js,SwingJSApplet.js" />
-   	</concat>
-
-   	<echo>copying srcjs files into site</echo>
-    <copy todir="site/swingjs">
-      <fileset dir="srcjs"/>
-    </copy>
-   		
    	<echo>TODO: Could delete demo html files? </echo>
    	
    	<echo>creating dist/SwingJS-site.zip </echo>
