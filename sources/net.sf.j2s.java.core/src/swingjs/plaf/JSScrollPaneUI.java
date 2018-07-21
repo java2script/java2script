@@ -205,34 +205,39 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 	
 
 	/**
-	 * SwingJS: we need to make the scrollbar run the height of the text, not the size of the textarea itself 
+	 * SwingJS: we need to make the scrollbar run the height of the text, not the
+	 * size of the textarea itself
 	 */
 	private void checkTextAreaHeight() {
 		haveTextArea = false;
 		JViewport vp = scrollpane.getViewport();
 		if (vp == null)
 			return;
+		JComponent sc = (JComponent) vp.getView();
+		int totalHeight = sc.getBounds().height;
+		int totalWidth = sc.getBounds().width; 
+		int viewHeight = vp.getHeight();
+		int viewWidth = vp.getWidth();
 		JScrollBar vsb = scrollpane.getVerticalScrollBar();
 		JScrollBar hsb = scrollpane.getHorizontalScrollBar();
+		if (sc != null && sc.getUI() != null && sc.getUIClassID() == "TextAreaUI") {
+			haveTextArea = true;
+			if (textAreaSize == null)
+				textAreaSize = new Dimension();
+			((JSTextAreaUI) sc.getUI()).getTextAreaTextSize(textAreaSize);
+
+			boolean overHeight = textAreaSize.height > totalHeight;
+			boolean overWidth = textAreaSize.width > totalWidth;
+			if (vsb == null || !overHeight)
+				textAreaSize.height = totalHeight;
+			if (hsb == null || !overWidth)
+				textAreaSize.width = totalWidth;
+			sc.setSize(textAreaSize);
+		}
 		if (vsb != null)
-			((JSScrollBarUI) vsb.getUI()).setScrollPaneCSS();
+			((JSScrollBarUI) vsb.getUI()).setScrollPaneCSS(viewHeight * 1f / totalHeight);
 		if (hsb != null)
-			((JSScrollBarUI) hsb.getUI()).setScrollPaneCSS();
-		JComponent sc = (JComponent) vp.getView();
-		if (sc == null || sc.getUI() == null || sc.getUIClassID() != "TextAreaUI")
-			return;
-		haveTextArea = true;
-		if (textAreaSize == null)
-			textAreaSize = new Dimension();
-		((JSTextAreaUI) sc.getUI()).getTextAreaTextSize(textAreaSize);
-		
-		boolean overHeight = textAreaSize.height > sc.getBounds().height; 
-		boolean overWidth = textAreaSize.width > sc.getBounds().width; 
-		if (vsb == null || !overHeight)
-			textAreaSize.height = sc.getHeight();
-		if (hsb == null || !overWidth)
-			textAreaSize.width = sc.getWidth();
-		sc.setSize(textAreaSize);
+			((JSScrollBarUI) hsb.getUI()).setScrollPaneCSS(viewWidth * 1f / totalWidth);
 	}
 
 	/**

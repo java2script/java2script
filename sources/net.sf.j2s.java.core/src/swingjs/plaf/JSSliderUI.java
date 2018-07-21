@@ -128,6 +128,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		 *            slider.j2sslider(
 		 *             { orientation: me.orientation, 
 		 *               jslider: me.c,
+		 *               isScrollBar: me.isScrollPaneScrollBar,
 		 *               range: false, 
 		 *               min: me.min,
 		 *               max: me.max,
@@ -326,7 +327,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		if (!isHoriz && !isScrollPaneScrollBar)
 			DOMNode.setStyles(sliderTrack, "height", length + "px");
 		if (isScrollPaneScrollBar)
-			setScrollPaneCSS();
+			setScrollPaneCSS(0);
 		setHTMLSize(domNode, false);
 	}
 
@@ -372,19 +373,24 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 				DOMNode.setStyles(sliderTrack, "height", (height - 20) + "px");
 			}
 			if (isScrollPaneScrollBar)
-				setScrollPaneCSS();
+				setScrollPaneCSS(0);
 
 		}
 	}
 
-	void setScrollPaneCSS() {
+	private int handleSize = 0;
+	
+	void setScrollPaneCSS(float handleSize) {
 		isScrollPaneScrollBar = true;
+		if (handleSize > 0) {
+			setSliderAttr("handleSize", handleSize);
+		}
 		if (orientation == "vertical") {
 			DOMNode.setStyles(sliderTrack, "left", "0px", "width", "12px");
-			DOMNode.setStyles(sliderHandle, "left", "-1px");
+			DOMNode.setStyles(sliderHandle, "left", "-1px", "margin-bottom", "0px");
 		} else {
 			DOMNode.setStyles(sliderTrack, "top", "0px", "height", "12px");
-			DOMNode.setStyles(sliderHandle, "top", "-1px");
+			DOMNode.setStyles(sliderHandle, "top", "-1px", "margin-left", "0px");
 		}
 	}
 
