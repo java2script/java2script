@@ -435,8 +435,11 @@ abstract class ReferencePipeline<P_IN, P_OUT>
         // super type of U an ArrayStoreException will be thrown.
         @SuppressWarnings("rawtypes")
         IntFunction rawGenerator = (IntFunction) generator;
-        return (A[]) Nodes.flatten(evaluateToArrayNode(rawGenerator), rawGenerator)
-                              .asArray(rawGenerator);
+        // using extra temporary variable 'node' with explicit type 'Node<A>' required as Eclipse 4.7.3a reports error
+        // 'The method flatten(Node<T>, IntFunction<T[]>) in the type Nodes is not applicable for the arguments (Node, IntFunction)'
+        // when directly using 'evaluateToArrayNode(rawGenerator)' in call to 'Nodes.flatten'. 
+        Node<A> node = evaluateToArrayNode(rawGenerator); 
+        return (A[]) Nodes.flatten(node, rawGenerator).asArray(rawGenerator);
     }
 
     @Override
