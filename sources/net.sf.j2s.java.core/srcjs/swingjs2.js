@@ -13440,7 +13440,11 @@ if (!J2S._version)
 // TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
 //       It is possible that these might be loaded dynamically.
 
+<<<<<<< HEAD
 // BH 7/22/2018 adds System.getProperty("java.vendor") == "SwingJS/OpenJDK"
+=======
+// BH 7/22/2018 adds System.getProperty("java.vendor") == "OpenJDK"
+>>>>>>> branch 'yadav1' of https://github.com/BobHanson/java2script.git
 // BH 7/22/2018 adds Math.IEEEremainder
 // BH 7/20/2018 removes def of Closeable, DataInput, DataOutput, Iterable, Comparator
 // BH 7/19/2018 removes Constructor, Method, and Field code here -- now in their .js files 
@@ -16093,7 +16097,11 @@ java.lang.System = System = {
         v = "50";
         break;
       case "java.vendor":
+<<<<<<< HEAD
     	v = "SwingJS/OpenJDK";
+=======
+    	v = "OpenJDK";
+>>>>>>> branch 'yadav1' of https://github.com/BobHanson/java2script.git
       case "java.version":
         v = "1.6-1.8";
         break;
