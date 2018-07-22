@@ -40,8 +40,6 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	
 	protected String orientation;
 	
-	boolean isScrollPaneScrollBar; // vertical scrollbars on scroll panes are inverted
-	
 	protected DOMNode jqSlider;
 	private int z0 = Integer.MIN_VALUE;
 	private BoundedRangeModel model;
@@ -218,7 +216,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		}
 	}
 
-	private void setSliderAttr(String key, float val) {
+	protected void setSliderAttr(String key, float val) {
 		Object slider = $(jqSlider);
 		/**
 		 * @j2sNative
@@ -269,7 +267,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 				DOMNode node = DOMNode.createElement("div", id + "_t" + i);
 				$(node).addClass("swingjs");
 				$(node).addClass(tickClass);
-				boolean isMajor = (i % check == 0);
+				boolean isMajor = (i % check == 0); 
 				float frac = (isHoriz == isInverted ? 1 - fracSpacing * i : fracSpacing
 						* i);
 				String spt = (frac * length + margin) + "px";
@@ -324,10 +322,9 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		} else {
 			DOMNode.setStyles(sliderTrack, isHoriz ? "top" : "left", barPlace + "%");
 		}
-		if (!isHoriz && !isScrollPaneScrollBar)
+		if (!isHoriz && !isScrollBar)
 			DOMNode.setStyles(sliderTrack, "height", length + "px");
-		if (isScrollPaneScrollBar)
-			setScrollPaneCSS(0);
+		setScrollBarExtentAndCSS();
 		setHTMLSize(domNode, false);
 	}
 
@@ -353,14 +350,12 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		// from Java
-		//isTainted = true;
-				int v;
+		int v;
 		if ((v = jSlider.getMinimum()) != min)
 			setSliderAttr("min", min = v);
 		if ((v = jSlider.getMaximum()) != max)
-			setSliderAttr("max", max = v);		
-		if ((v = jSlider.getValue()) != val) 
+			setSliderAttr("max", max = v);
+		if ((v = jSlider.getValue()) != val)
 			setSliderAttr("value", val = v);
 		setup(false);
 	}
@@ -371,27 +366,16 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		if (!paintTicks && !paintLabels) {
 			if (orientation == "vertical") {
 				DOMNode.setStyles(sliderTrack, "height", (height - 20) + "px");
+			} else if (isScrollBar) {
+				DOMNode.setStyles(sliderTrack, "width", (width - 20) + "px");
 			}
-			if (isScrollPaneScrollBar)
-				setScrollPaneCSS(0);
+			setScrollBarExtentAndCSS();
 
 		}
 	}
 
-	private int handleSize = 0;
-	
-	void setScrollPaneCSS(float handleSize) {
-		isScrollPaneScrollBar = true;
-		if (handleSize > 0) {
-			setSliderAttr("handleSize", handleSize);
-		}
-		if (orientation == "vertical") {
-			DOMNode.setStyles(sliderTrack, "left", "0px", "width", "12px");
-			DOMNode.setStyles(sliderHandle, "left", "-1px", "margin-bottom", "0px");
-		} else {
-			DOMNode.setStyles(sliderTrack, "top", "0px", "height", "12px");
-			DOMNode.setStyles(sliderHandle, "top", "-1px", "margin-left", "0px");
-		}
+	void setScrollBarExtentAndCSS() {
+		// ScrollBar subclass only
 	}
 
 

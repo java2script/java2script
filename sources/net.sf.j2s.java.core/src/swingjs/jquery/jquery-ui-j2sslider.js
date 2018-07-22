@@ -628,7 +628,7 @@
 								if (val <= this._valueMin()) {
 									return this._valueMin();
 								}
-								var max = this._valueMax() * (1-this.handleFraction);
+								var max = (this._valueMax() - this._valueMin()) * (1-this.handleFraction) + this._valueMin();
 								if (val >= max) {
 									return max;
 								}

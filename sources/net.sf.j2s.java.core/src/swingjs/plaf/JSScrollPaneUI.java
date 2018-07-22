@@ -193,6 +193,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 	@Override
 	public void paint(Graphics g, JComponent c) {
 		checkTextAreaHeight();
+// unnecessary		updateScrollBarExtents();
 		Border vpBorder = scrollpane.getViewportBorder();
 		if (vpBorder != null) {
 			Rectangle r = scrollpane.getViewportBorderBounds();
@@ -200,7 +201,24 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 		}
 	}
 
-	private boolean haveTextArea = false;
+//	private void updateScrollBarExtents() {
+//		JViewport vp = scrollpane.getViewport();
+//		if (vp == null)
+//			return;
+//		JComponent sc = (JComponent) vp.getView();
+//		JScrollBar vsb = scrollpane.getVerticalScrollBar();
+//		JScrollBar hsb = scrollpane.getHorizontalScrollBar();
+//		if (vsb != null) {
+//			vsb.setVisibleAmount(vp.getHeight());
+//			((JSScrollBarUI) vsb.getUI()).setScrollBarExtentAndCSS();
+//		}
+//		if (hsb != null) {
+//			vsb.setVisibleAmount(vp.getWidth());
+//			((JSScrollBarUI) hsb.getUI()).setScrollBarExtentAndCSS();
+//		}
+//	}
+
+
 	private Dimension textAreaSize;
 	
 
@@ -209,19 +227,15 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 	 * size of the textarea itself
 	 */
 	private void checkTextAreaHeight() {
-		haveTextArea = false;
 		JViewport vp = scrollpane.getViewport();
 		if (vp == null)
 			return;
 		JComponent sc = (JComponent) vp.getView();
-		int totalHeight = sc.getBounds().height;
-		int totalWidth = sc.getBounds().width; 
-		int viewHeight = vp.getHeight();
-		int viewWidth = vp.getWidth();
-		JScrollBar vsb = scrollpane.getVerticalScrollBar();
-		JScrollBar hsb = scrollpane.getHorizontalScrollBar();
 		if (sc != null && sc.getUI() != null && sc.getUIClassID() == "TextAreaUI") {
-			haveTextArea = true;
+			int totalHeight = sc.getBounds().height;
+			int totalWidth = sc.getBounds().width; 
+			JScrollBar vsb = scrollpane.getVerticalScrollBar();
+			JScrollBar hsb = scrollpane.getHorizontalScrollBar();
 			if (textAreaSize == null)
 				textAreaSize = new Dimension();
 			((JSTextAreaUI) sc.getUI()).getTextAreaTextSize(textAreaSize);
@@ -234,10 +248,6 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 				textAreaSize.width = totalWidth;
 			sc.setSize(textAreaSize);
 		}
-		if (vsb != null)
-			((JSScrollBarUI) vsb.getUI()).setScrollPaneCSS(viewHeight * 1f / totalHeight);
-		if (hsb != null)
-			((JSScrollBarUI) hsb.getUI()).setScrollPaneCSS(viewWidth * 1f / totalWidth);
 	}
 
 	/**
@@ -764,11 +774,9 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 		if (sb != null) {
 			if (isVertical) {
 				vertBarUI = (JSScrollBarUI) sb.getUI();
-				vertBarUI.isScrollPaneScrollBar = true;
 				vertBarUI.myScrollPaneUI = this;
 			} else {
 				horizBarUI = (JSScrollBarUI) sb.getUI();
-				horizBarUI.isScrollPaneScrollBar = true;
 				horizBarUI.myScrollPaneUI = this;
 			}
 
@@ -1158,6 +1166,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 		//
 		@Override
 		public void stateChanged(ChangeEvent e) {
+			textAreaSize = null;
 			JViewport viewport = scrollpane.getViewport();
 			if (viewport != null) {
 				if (e.getSource() == viewport) {
@@ -1181,6 +1190,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 			Point p = viewport.getViewPosition();
 			p.y = model.getValue();
 			viewport.setViewPosition(p);
+			scrollpane.getVerticalScrollBar().setVisibleAmount(viewport.getHeight());
 		}
 
 		private void hsbStateChanged(JViewport viewport, ChangeEvent e) {
@@ -1215,6 +1225,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 					}
 				}
 			}
+			scrollpane.getHorizontalScrollBar().setVisibleAmount(viewport.getWidth());
 			viewport.setViewPosition(p);
 		}
 
