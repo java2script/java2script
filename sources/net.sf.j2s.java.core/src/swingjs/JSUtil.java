@@ -169,7 +169,7 @@ public class JSUtil {
 				+ (ok ? "" + sdata.length() : sdata) + "]");
 		return (!ok ? null : !doProcess ? sdata
 				: path.endsWith(".css") ? JSUtil.processCSS(sdata, path) : path
-						.endsWith(".js") ? JSUtil.processJS(sdata) : sdata);
+						.endsWith(".js") ? JSUtil.processJS(sdata, resourceName) : sdata);
 	}
 
 	static void cacheFileData(String path, Object data) {		
@@ -231,11 +231,13 @@ public class JSUtil {
 	return css;
 	}
 
-	static String processJS(String js) {
+	static String processJS(String js, String resourceName) {
 	try {
 		/**
 		 * @j2sNative
 		 * 
+		 * 
+		 * if (js.indexOf(";//# sourceURL=") < 0) js += ";//# sourceURL=" + thisApplet._j2sPath + "/" + resourceName;
 		 * eval(js);
 		 * 
 		 */

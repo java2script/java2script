@@ -18,21 +18,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
-import org.eclipse.jdt.internal.core.builder.SourceFile;
 
 import net.sf.j2s.core.CorePlugin;
 import net.sf.j2s.core.astvisitors.Java2ScriptVisitor;
-//import net.sf.j2s.core.builder.SourceFile;
-//import net.sf.j2s.core.builder.SourceFileProxy;
-//import net.sf.j2s.core.hotspot.InnerHotspotServer;
 
 /**
  * The main (and currently only operational) Java2Script compiler.
@@ -42,7 +36,11 @@ import net.sf.j2s.core.astvisitors.Java2ScriptVisitor;
  */
 @SuppressWarnings("restriction")
 public class Java2ScriptCompiler {
-
+	/**
+	 * The name of the J2S options file, aka as the "Dot-j2s" file.
+	 */
+	public static final String J2S_OPTIONS_FILE_NAME = ".j2s";
+	
 	// BH: added "true".equals(getProperty(props,
 	// "j2s.compiler.allow.compression")) to ensure compression only occurs when
 	// desired
@@ -83,8 +81,8 @@ public class Java2ScriptCompiler {
 
 	public static boolean isActive(IProject project) {
 		try {
-			return new File(project.getProject().getLocation().toOSString(), ".J2S").exists();
-		} catch (Exception e) {
+			return new File(project.getProject().getLocation().toOSString(), J2S_OPTIONS_FILE_NAME).exists();
+		} catch (@SuppressWarnings("unused") Exception e) {
 			return false;
 		}
 	}
@@ -141,7 +139,7 @@ public class Java2ScriptCompiler {
 		projectFolder = project.getLocation().toOSString();
 		props = new Properties();
 		try {
-			File j2sFile = new File(projectFolder, ".j2s");
+			File j2sFile = new File(projectFolder, J2S_OPTIONS_FILE_NAME);
 			props.load(new FileInputStream(j2sFile));
 			String status = getProperty("j2s.compiler.status");
 			if (!"enable".equals(status) && !"enabled".equals(status)) {
