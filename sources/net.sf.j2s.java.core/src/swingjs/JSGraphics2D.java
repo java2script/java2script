@@ -248,7 +248,15 @@ public class JSGraphics2D // extends SunGraphics2D
 		ctx.fillRect(x, y, width, height);
 	}
 
+	public void draw3DRect(int x, int y, int width, int height, boolean raised) {
+		do3DRect(x, y, width, height, raised, false);
+	}
+
 	public void fill3DRect(int x, int y, int width, int height, boolean raised) {
+		do3DRect(x, y, width, height, raised, true);
+	}
+
+	private void do3DRect(int x, int y, int width2, int height2, boolean raised, boolean isFill) {
 		if (width <= 0 || height <= 0)
 			return;
 		Paint p = getPaint();
@@ -261,7 +269,9 @@ public class JSGraphics2D // extends SunGraphics2D
 		} else if (p != c) {
 			setColor(c);
 		}
-		fillRect(x + 1, y + 1, width - 2, height - 2);
+		if (isFill) {
+			fillRect(x + 1, y + 1, width - 2, height - 2);
+		}
 		setColor(raised ? brighter : darker);
 		// drawLine(x, y, x, y + height - 1);
 		fillRect(x, y, 1, height);
