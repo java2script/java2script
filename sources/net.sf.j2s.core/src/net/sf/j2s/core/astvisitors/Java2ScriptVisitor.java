@@ -2583,22 +2583,22 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// access expressions: qualified names, this expressions, and super
 		// field access expressions. The following guidelines help with correct
 		// usage:
-		// •An expression like "foo.this" can only be represented as a this
+		// - An expression like "foo.this" can only be represented as a this
 		// expression (ThisExpression) containing a simple name. "this" is a
 		// keyword, and therefore invalid as an identifier.
-		// •An expression like "this.foo" can only be represented as a field
+		// - An expression like "this.foo" can only be represented as a field
 		// access expression (FieldAccess) containing a this expression and a
 		// simple name. Again, this is because "this" is a keyword, and
 		// therefore invalid as an identifier.
-		// •An expression with "super" can only be represented as a super field
+		// - An expression with "super" can only be represented as a super field
 		// access expression (SuperFieldAccess). "super" is a also keyword, and
 		// therefore invalid as an identifier.
-		// •An expression like "foo.bar" can be represented either as a
+		// - An expression like "foo.bar" can be represented either as a
 		// qualified name (QualifiedName) or as a field access expression
 		// (FieldAccess) containing simple names. Either is acceptable, and
 		// there is no way to choose between them without information about what
 		// the names resolve to (ASTParser may return either).
-		// •Other expressions ending in an identifier, such as "foo().bar" can
+		// - Other expressions ending in an identifier, such as "foo().bar" can
 		// only be represented as field access expressions (FieldAccess).
 
 		IVariableBinding varBinding = node.resolveFieldBinding();
@@ -3792,7 +3792,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			break;
 		case "int":
 			if (op != null && (!isDiv && fromIntType) || fromChar || rightName.equals("short")
-					|| right.equals("byte")) {
+					|| rightName.equals("byte")) {
 				left = null;
 				break;
 			}
