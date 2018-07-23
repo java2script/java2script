@@ -10,6 +10,7 @@
 // TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
 //       It is possible that these might be loaded dynamically.
 
+// BH 7/22/2018 adds Boolean.prototype.objectValue()
 // BH 7/22/2018 adds System.getProperty("java.vendor") == "SwingJS/OpenJDK"
 // BH 7/22/2018 adds Math.IEEEremainder
 // BH 7/20/2018 removes def of Closeable, DataInput, DataOutput, Iterable, Comparator
@@ -4223,6 +4224,7 @@ Float.prototype.objectValue =
 Double.prototype.objectValue =  function() {return this.valueOf()};
 Character.prototype.objectValue = function() { return this.value };
 Character.prototype.intValue  = function() { return this.value.codePointAt(0) };
+Boolean.prototype.objectValue = function() { return this.toBoolean() };
 
 
 // TODO: Only asking for problems declaring Date. This is not necessary
