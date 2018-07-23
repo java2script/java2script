@@ -130,6 +130,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
 
 import net.sf.j2s.core.CorePlugin;
 
+// BH 7/22/2018 -- fixes improper use of charCodeAt() to replace charCode().$c() when not java.lang.String.charAt
 // BH 7/20/2018 -- removes qualifications for single-abstract method overrides
 // BH 7/19/2018 -- fixes Enum.Enum
 // BH 7/18/2018 -- addw Java 8 try without catch or finally
@@ -1661,14 +1662,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						// methods are not to be qualified
 						
 						for (int i = unqualifiedMethods.size(); --i >= 0;) {
-							//buffer.append(">>" + method.getKey() + " " + unqualifiedMethods.get(i).getKey() + "<<\r\n");
 							if (method.overrides(unqualifiedMethods.get(i))) {
 								dontQualifyMethod = true;
 							    break;
 							}
 						}
 					}
-					//buffer.append("<<" + dontQualifyMethod + "<<");
 					element.accept(this);
 					dontQualifyMethod = dontQualifyCurrent;
 				}
@@ -2346,7 +2345,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			left.accept(this);
 		int ptArray2 = (isArray ? buffer.length() : -1);
 		if (!"char".equals(leftName)) {
-			if (isIntegerType(leftName) || "booelean".equals(leftName)) {
+			if (isIntegerType(leftName) || "boolean".equals(leftName)) {
 				// can't just use a |= b because that ends up as 1 or 0, not true or false.
 				// byte|short|int|long += ...
 				if (!addPrimitiveTypedExpression(left, toBinding, leftName, opType, right, rightName, null, true))
@@ -2997,7 +2996,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			return simpleNameInMethodBinding(node, isQualified, (IMethodBinding) binding);
 
 		ITypeBinding typeBinding = node.resolveTypeBinding();
-		// >>Math<<.max
 		return NameMapper.get$QualifiedJ2SFieldName(typeBinding == null ? node.getFullyQualifiedName()
 				: assureQualifiedNameAllowP$(typeBinding.getQualifiedName()), true);
 	}
@@ -3476,9 +3474,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (right instanceof MethodInvocation) {
 			// if possible, just replace "charAt" with "charCodeAt"
 			MethodInvocation m = (MethodInvocation) right;
-			if ("charAt".equals(m.getName().toString())) {
+			if (m.resolveMethodBinding().getKey().equals("Ljava/lang/String;.charAt(I)C")) {
 				if ((pt = buffer.indexOf(".charAt", pt)) >= 0) {
-					charCodeAt0 = "Code" + buffer.substring(pt + 5); // At....
+					charCodeAt0 = "Code" + buffer.substring(pt + 5);
 					buffer.setLength(pt + 5);
 				}
 			}
