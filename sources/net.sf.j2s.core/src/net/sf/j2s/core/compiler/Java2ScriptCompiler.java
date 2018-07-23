@@ -44,8 +44,7 @@ public class Java2ScriptCompiler {
 	// BH: added "true".equals(getProperty(props,
 	// "j2s.compiler.allow.compression")) to ensure compression only occurs when
 	// desired
-	private static final int JSL_LEVEL = AST.JLS8; // not handling lampda functions
-
+	private static final int JSL_LEVEL = AST.JLS8; // deprecation just because Java has moved on
 	private boolean showJ2SSettings = true;
 
 	// We copy all non .java files from any directory from which we loaded a

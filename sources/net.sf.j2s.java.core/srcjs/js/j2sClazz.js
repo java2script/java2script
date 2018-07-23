@@ -10,6 +10,8 @@
 // TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
 //       It is possible that these might be loaded dynamically.
 
+// BH 7/22/2018 adds System.getProperty("java.vendor") == "SwingJS/OpenJDK"
+// BH 7/22/2018 adds Math.IEEEremainder
 // BH 7/20/2018 removes def of Closeable, DataInput, DataOutput, Iterable, Comparator
 // BH 7/19/2018 removes Constructor, Method, and Field code here -- now in their .js files 
 // BH 7/18/2018 adds Java 8 default interface method support
@@ -2660,8 +2662,10 @@ java.lang.System = System = {
       case "java.class.version":
         v = "50";
         break;
+      case "java.vendor":
+    	v = "SwingJS/OpenJDK";
       case "java.version":
-        v = "1.6";
+        v = "1.6-1.8";
         break;
       case "file.separator":
       case "path.separator":
@@ -2808,7 +2812,18 @@ Math.nextAfter||(Math.nextAfter=function(start,direction){return 0});
 Math.nextUp||(Math.nextUp=function(d){return 0});
 Math.ulp||(Math.ulp=function(d){return 0});
 Math.getExponent||(Math.getExponent=function(d){return 0});
-Math.getIEEEremainder||(Math.getIEEEremainder=function(f1,f2){return 0});
+Math.IEEEremainder||(Math.IEEEremainder=function (x, y) {
+		if (y == 0  || Double.isNaN(x)  || Double.isInfinite(y) && !Double.isInfinite(x)  ) return NaN;
+		var modxy = x % y;
+		if (modxy == 0 ) return modxy;
+		var rem = modxy - (Math.abs(y) * Math.signum(x));
+		if (Math.abs(rem) == Math.abs(modxy) ) {
+		 var div = x / y;
+		 return (Math.abs(Math.round(div)) > Math.abs(div)  ? rem : modxy);
+		}
+		return (Math.abs(rem) < Math.abs(modxy)  ? rem : modxy);
+		});
+
 //end datatype reliant math declarations
 
 Clazz._setDeclared("java.lang.Number", java.lang.Number=Number);
