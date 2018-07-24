@@ -33,11 +33,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.DefaultKeyboardFocusManager;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Window;
+import java.awt.event.KeyEvent;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
@@ -308,7 +310,8 @@ public final class AWTAccessor {
     /* The java.awt.Component class accessor object.
      */
     private static ComponentAccessor componentAccessor;
-//    private static KeyboardFocusManagerAccessor kfmAccessor;
+
+    private static KeyboardFocusManagerAccessor kfmAccessor;
     /*
      * The java.awt.Window class accessor object.
      */
@@ -328,7 +331,40 @@ public final class AWTAccessor {
 //    private static MenuItemAccessor menuItemAccessor;
 //    private static MenuAccessor menuAccessor;
 //    private static ClientPropertyKeyAccessor clientPropertyKeyAccessor;
-//    private static DefaultKeyboardFocusManagerAccessor defaultKeyboardFocusManagerAccessor;
+
+
+	/**
+	 * Set an accessor object for the java.awt.DefaultKeyboardFocusManager class.
+	 */
+	public static void setDefaultKeyboardFocusManagerAccessor(DefaultKeyboardFocusManagerAccessor dkfma) {
+		defaultKeyboardFocusManagerAccessor = dkfma;
+	}    
+    private static DefaultKeyboardFocusManagerAccessor defaultKeyboardFocusManagerAccessor;
+
+    /**
+     * An accessor for the DefaultKeyboardFocusManager class
+     */
+    public interface DefaultKeyboardFocusManagerAccessor {
+        public void consumeNextKeyTyped(DefaultKeyboardFocusManager dkfm, KeyEvent e);
+    }
+
+    
+    /*
+     * Set an accessor object for the java.awt.KeyboardFocusManager class.
+     */
+    public static void setKeyboardFocusManagerAccessor(KeyboardFocusManagerAccessor kfma) {
+        kfmAccessor = kfma;
+    }
+
+    /*
+     * Retrieve the accessor object for the java.awt.KeyboardFocusManager class.
+     */
+    public static KeyboardFocusManagerAccessor getKeyboardFocusManagerAccessor() {
+//        if (kfmAccessor == null) {
+//            unsafe.ensureClassInitialized(KeyboardFocusManager.class);
+//        }
+        return kfmAccessor;
+    }
 
     /**
      * Set an accessor object for the java.awt.Window class.

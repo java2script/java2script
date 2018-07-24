@@ -130,7 +130,7 @@ public class Container extends JSComponent {
      * @see #getFocusTraversalPolicy
      * @since 1.4
      */
-//    private transient FocusTraversalPolicy focusTraversalPolicy;
+    private transient FocusTraversalPolicy focusTraversalPolicy;
 
     /**
      * Indicates whether this Component is the root of a focus traversal cycle.
@@ -3083,14 +3083,14 @@ public class Container extends JSComponent {
      * @since 1.4
      */
     public Set<AWTKeyStroke> getFocusTraversalKeys(int id) {
-//        if (id < 0 || id >= KeyboardFocusManager.TRAVERSAL_KEY_LENGTH) {
-//            throw new IllegalArgumentException("invalid focus traversal key identifier");
-//        }
-//
-//        // Don't call super.getFocusTraversalKey. The Component parameter check
-//        // does not allow DOWN_CYCLE_TRAVERSAL_KEY, but we do.
-//        return getFocusTraversalKeys_NoIDCheck(id);
-    	return null;
+        if (id < 0 || id >= KeyboardFocusManager.TRAVERSAL_KEY_LENGTH) {
+            throw new IllegalArgumentException("invalid focus traversal key identifier");
+        }
+
+        // Don't call super.getFocusTraversalKey. The Component parameter check
+        // does not allow DOWN_CYCLE_TRAVERSAL_KEY, but we do.
+        return getFocusTraversalKeys_NoIDCheck(id);
+//    	return null;
     }
 
     /**
@@ -3114,12 +3114,12 @@ public class Container extends JSComponent {
      * @since 1.4
      */
     public boolean areFocusTraversalKeysSet(int id) {
-//        if (id < 0 || id >= KeyboardFocusManager.TRAVERSAL_KEY_LENGTH) {
-//            throw new IllegalArgumentException("invalid focus traversal key identifier");
-//        }
-//
-//        return (focusTraversalKeys != null && focusTraversalKeys[id] != null);
-    	return false;
+        if (id < 0 || id >= KeyboardFocusManager.TRAVERSAL_KEY_LENGTH) {
+            throw new IllegalArgumentException("invalid focus traversal key identifier");
+        }
+
+        return (focusTraversalKeys != null && focusTraversalKeys[id] != null);
+//    	return false;
     }
 
     /**
@@ -3147,40 +3147,40 @@ public class Container extends JSComponent {
         }
     }
 
-//    private Container findTraversalRoot() {
-//        // I potentially have two roots, myself and my root parent
-//        // If I am the current root, then use me
-//        // If none of my parents are roots, then use me
-//        // If my root parent is the current root, then use my root parent
-//        // If neither I nor my root parent is the current root, then
-//        // use my root parent (a guess)
-//
-//        Container currentFocusCycleRoot = KeyboardFocusManager.
-//            getCurrentKeyboardFocusManager().getCurrentFocusCycleRoot();
-//        Container root;
-//
-//        if (currentFocusCycleRoot == this) {
-//            root = this;
-//        } else {
-//            root = getFocusCycleRootAncestor();
-//            if (root == null) {
-//                root = this;
-//            }
-//        }
-//
-//        if (root != currentFocusCycleRoot) {
-//            KeyboardFocusManager.getCurrentKeyboardFocusManager().
-//                setGlobalCurrentFocusCycleRoot(root);
-//        }
-//        return root;
-//    }
+    private Container findTraversalRoot() {
+        // I potentially have two roots, myself and my root parent
+        // If I am the current root, then use me
+        // If none of my parents are roots, then use me
+        // If my root parent is the current root, then use my root parent
+        // If neither I nor my root parent is the current root, then
+        // use my root parent (a guess)
+
+        Container currentFocusCycleRoot = KeyboardFocusManager.
+            getCurrentKeyboardFocusManager().getCurrentFocusCycleRoot();
+        Container root;
+
+        if (currentFocusCycleRoot == this) {
+            root = this;
+        } else {
+            root = getFocusCycleRootAncestor();
+            if (root == null) {
+                root = this;
+            }
+        }
+
+        if (root != currentFocusCycleRoot) {
+            KeyboardFocusManager.getCurrentKeyboardFocusManager().
+                setGlobalCurrentFocusCycleRoot(root);
+        }
+        return root;
+    }
 
     @Override
 		final boolean containsFocus() {
-//        final Component focusOwner = KeyboardFocusManager.
-//            getCurrentKeyboardFocusManager().getFocusOwner();
-//        return isParentOf(focusOwner);
-    	return false;
+        final Component focusOwner = KeyboardFocusManager.
+            getCurrentKeyboardFocusManager().getFocusOwner();
+        return isParentOf(focusOwner);
+//    	return false;
     }
 
     /**
@@ -3199,28 +3199,28 @@ public class Container extends JSComponent {
     }
 
     void clearMostRecentFocusOwnerOnHide() {
-//        boolean reset = false;
-//        Window window = null;
-//
-//        synchronized (getTreeLock()) {
-//            window = getContainingWindow();
-//            if (window != null) {
-//                Component comp = KeyboardFocusManager.getMostRecentFocusOwner(window);
-//                reset = ((comp == this) || isParentOf(comp));
-//                // This synchronized should always be the second in a pair
-//                // (tree lock, KeyboardFocusManager.class)
-//                synchronized(KeyboardFocusManager.class) {
-//                    Component storedComp = window.getTemporaryLostComponent();
-//                    if (isParentOf(storedComp) || storedComp == this) {
-//                        window.setTemporaryLostComponent(null);
-//                    }
-//                }
-//            }
-//        }
-//
-//        if (reset) {
-//            KeyboardFocusManager.setMostRecentFocusOwner(window, null);
-//        }
+        boolean reset = false;
+        Window window = null;
+
+        synchronized (getTreeLock()) {
+            window = getContainingWindow();
+            if (window != null) {
+                Component comp = KeyboardFocusManager.getMostRecentFocusOwner(window);
+                reset = ((comp == this) || isParentOf(comp));
+                // This synchronized should always be the second in a pair
+                // (tree lock, KeyboardFocusManager.class)
+                synchronized(KeyboardFocusManager.class) {
+                    Component storedComp = window.getTemporaryLostComponent();
+                    if (isParentOf(storedComp) || storedComp == this) {
+                        window.setTemporaryLostComponent(null);
+                    }
+                }
+            }
+        }
+
+        if (reset) {
+            KeyboardFocusManager.setMostRecentFocusOwner(window, null);
+        }
     }
 
     @Override
@@ -3243,116 +3243,116 @@ public class Container extends JSComponent {
     	return null;
     }
 
-//    /**
-//     * Sets the focus traversal policy that will manage keyboard traversal of
-//     * this Container's children, if this Container is a focus cycle root. If
-//     * the argument is null, this Container inherits its policy from its focus-
-//     * cycle-root ancestor. If the argument is non-null, this policy will be
-//     * inherited by all focus-cycle-root children that have no keyboard-
-//     * traversal policy of their own (as will, recursively, their focus-cycle-
-//     * root children).
-//     * <p>
-//     * If this Container is not a focus cycle root, the policy will be
-//     * remembered, but will not be used or inherited by this or any other
-//     * Containers until this Container is made a focus cycle root.
-//     *
-//     * @param policy the new focus traversal policy for this Container
-//     * @see #getFocusTraversalPolicy
-//     * @see #setFocusCycleRoot
-//     * @see #isFocusCycleRoot
-//     * @since 1.4
-//     * @beaninfo
-//     *       bound: true
-//     */
-//    public void setFocusTraversalPolicy(FocusTraversalPolicy policy) {
-//        FocusTraversalPolicy oldPolicy;
-//        synchronized (this) {
-//            oldPolicy = this.focusTraversalPolicy;
-//            this.focusTraversalPolicy = policy;
-//        }
-//        firePropertyChange("focusTraversalPolicy", oldPolicy, policy);
-//    }
+    /**
+     * Sets the focus traversal policy that will manage keyboard traversal of
+     * this Container's children, if this Container is a focus cycle root. If
+     * the argument is null, this Container inherits its policy from its focus-
+     * cycle-root ancestor. If the argument is non-null, this policy will be
+     * inherited by all focus-cycle-root children that have no keyboard-
+     * traversal policy of their own (as will, recursively, their focus-cycle-
+     * root children).
+     * <p>
+     * If this Container is not a focus cycle root, the policy will be
+     * remembered, but will not be used or inherited by this or any other
+     * Containers until this Container is made a focus cycle root.
+     *
+     * @param policy the new focus traversal policy for this Container
+     * @see #getFocusTraversalPolicy
+     * @see #setFocusCycleRoot
+     * @see #isFocusCycleRoot
+     * @since 1.4
+     * @beaninfo
+     *       bound: true
+     */
+    public void setFocusTraversalPolicy(FocusTraversalPolicy policy) {
+        FocusTraversalPolicy oldPolicy;
+        synchronized (this) {
+            oldPolicy = this.focusTraversalPolicy;
+            this.focusTraversalPolicy = policy;
+        }
+        firePropertyChange("focusTraversalPolicy", oldPolicy, policy);
+    }
 
-//    /**
-//     * Returns the focus traversal policy that will manage keyboard traversal
-//     * of this Container's children, or null if this Container is not a focus
-//     * cycle root. If no traversal policy has been explicitly set for this
-//     * Container, then this Container's focus-cycle-root ancestor's policy is
-//     * returned.
-//     *
-//     * @return this Container's focus traversal policy, or null if this
-//     *         Container is not a focus cycle root.
-//     * @see #setFocusTraversalPolicy
-//     * @see #setFocusCycleRoot
-//     * @see #isFocusCycleRoot
-//     * @since 1.4
-//     */
-//    public FocusTraversalPolicy getFocusTraversalPolicy() {
-//        if (!isFocusTraversalPolicyProvider() && !isFocusCycleRoot()) {
-//            return null;
-//        }
-//
-//        FocusTraversalPolicy policy = this.focusTraversalPolicy;
-//        if (policy != null) {
-//            return policy;
-//        }
-//
-//        Container rootAncestor = getFocusCycleRootAncestor();
-//        if (rootAncestor != null) {
-//            return rootAncestor.getFocusTraversalPolicy();
-//        } else {
-//            return KeyboardFocusManager.getCurrentKeyboardFocusManager().
-//                getDefaultFocusTraversalPolicy();
-//        }
-//    }
-//
-//    /**
-//     * Returns whether the focus traversal policy has been explicitly set for
-//     * this Container. If this method returns <code>false</code>, this
-//     * Container will inherit its focus traversal policy from an ancestor.
-//     *
-//     * @return <code>true</code> if the focus traversal policy has been
-//     *         explicitly set for this Container; <code>false</code> otherwise.
-//     * @since 1.4
-//     */
-//    public boolean isFocusTraversalPolicySet() {
-//        return (focusTraversalPolicy != null);
-//    }
-//
-//    /**
-//     * Sets whether this Container is the root of a focus traversal cycle. Once
-//     * focus enters a traversal cycle, typically it cannot leave it via focus
-//     * traversal unless one of the up- or down-cycle keys is pressed. Normal
-//     * traversal is limited to this Container, and all of this Container's
-//     * descendants that are not descendants of inferior focus cycle roots. Note
-//     * that a FocusTraversalPolicy may bend these restrictions, however. For
-//     * example, ContainerOrderFocusTraversalPolicy supports implicit down-cycle
-//     * traversal.
-//     * <p>
-//     * The alternative way to specify the traversal order of this Container's
-//     * children is to make this Container a
-//     * <a href="doc-files/FocusSpec.html#FocusTraversalPolicyProviders">focus traversal policy provider</a>.
-//     *
-//     * @param focusCycleRoot indicates whether this Container is the root of a
-//     *        focus traversal cycle
-//     * @see #isFocusCycleRoot()
-//     * @see #setFocusTraversalPolicy
-//     * @see #getFocusTraversalPolicy
-//     * @see ContainerOrderFocusTraversalPolicy
-//     * @see #setFocusTraversalPolicyProvider
-//     * @since 1.4
-//     * @beaninfo
-//     *       bound: true
-//     */
-//    public void setFocusCycleRoot(boolean focusCycleRoot) {
-//        boolean oldFocusCycleRoot;
-//        synchronized (this) {
-//            oldFocusCycleRoot = this.focusCycleRoot;
-//            this.focusCycleRoot = focusCycleRoot;
-//        }
-//        firePropertyChange("focusCycleRoot", oldFocusCycleRoot,
-//                           focusCycleRoot);
-//    }
+    /**
+     * Returns the focus traversal policy that will manage keyboard traversal
+     * of this Container's children, or null if this Container is not a focus
+     * cycle root. If no traversal policy has been explicitly set for this
+     * Container, then this Container's focus-cycle-root ancestor's policy is
+     * returned.
+     *
+     * @return this Container's focus traversal policy, or null if this
+     *         Container is not a focus cycle root.
+     * @see #setFocusTraversalPolicy
+     * @see #setFocusCycleRoot
+     * @see #isFocusCycleRoot
+     * @since 1.4
+     */
+    public FocusTraversalPolicy getFocusTraversalPolicy() {
+        if (!isFocusTraversalPolicyProvider() && !isFocusCycleRoot()) {
+            return null;
+        }
+
+        FocusTraversalPolicy policy = this.focusTraversalPolicy;
+        if (policy != null) {
+            return policy;
+        }
+
+        Container rootAncestor = getFocusCycleRootAncestor();
+        if (rootAncestor != null) {
+            return rootAncestor.getFocusTraversalPolicy();
+        } else {
+            return KeyboardFocusManager.getCurrentKeyboardFocusManager().
+                getDefaultFocusTraversalPolicy();
+        }
+    }
+
+    /**
+     * Returns whether the focus traversal policy has been explicitly set for
+     * this Container. If this method returns <code>false</code>, this
+     * Container will inherit its focus traversal policy from an ancestor.
+     *
+     * @return <code>true</code> if the focus traversal policy has been
+     *         explicitly set for this Container; <code>false</code> otherwise.
+     * @since 1.4
+     */
+    public boolean isFocusTraversalPolicySet() {
+        return (focusTraversalPolicy != null);
+    }
+
+    /**
+     * Sets whether this Container is the root of a focus traversal cycle. Once
+     * focus enters a traversal cycle, typically it cannot leave it via focus
+     * traversal unless one of the up- or down-cycle keys is pressed. Normal
+     * traversal is limited to this Container, and all of this Container's
+     * descendants that are not descendants of inferior focus cycle roots. Note
+     * that a FocusTraversalPolicy may bend these restrictions, however. For
+     * example, ContainerOrderFocusTraversalPolicy supports implicit down-cycle
+     * traversal.
+     * <p>
+     * The alternative way to specify the traversal order of this Container's
+     * children is to make this Container a
+     * <a href="doc-files/FocusSpec.html#FocusTraversalPolicyProviders">focus traversal policy provider</a>.
+     *
+     * @param focusCycleRoot indicates whether this Container is the root of a
+     *        focus traversal cycle
+     * @see #isFocusCycleRoot()
+     * @see #setFocusTraversalPolicy
+     * @see #getFocusTraversalPolicy
+     * @see ContainerOrderFocusTraversalPolicy
+     * @see #setFocusTraversalPolicyProvider
+     * @since 1.4
+     * @beaninfo
+     *       bound: true
+     */
+    public void setFocusCycleRoot(boolean focusCycleRoot) {
+        boolean oldFocusCycleRoot;
+        synchronized (this) {
+            oldFocusCycleRoot = this.focusCycleRoot;
+            this.focusCycleRoot = focusCycleRoot;
+        }
+        firePropertyChange("focusCycleRoot", oldFocusCycleRoot,
+                           focusCycleRoot);
+    }
 
     /**
      * Returns whether this Container is the root of a focus traversal cycle.

@@ -27,7 +27,7 @@ package java.util.stream;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
-import sun.util.logging.PlatformLogger;
+//import sun.util.logging.PlatformLogger;
 
 /**
  * Utility class for detecting inadvertent uses of boxing in
@@ -64,6 +64,6 @@ final class Tripwire {
      * {@link PlatformLogger}
      */
     static void trip(Class<?> trippingClass, String msg) {
-        PlatformLogger.getLogger(trippingClass.getName()).warning(msg, trippingClass.getName());
+//        PlatformLogger.getLogger(trippingClass.getName()).warning(msg, trippingClass.getName());
     }
 }

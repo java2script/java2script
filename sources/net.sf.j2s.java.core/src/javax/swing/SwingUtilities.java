@@ -31,12 +31,14 @@ import java.applet.Applet;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
+import java.awt.FontMetrics;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.HeadlessException;
 import java.awt.IllegalComponentStateException;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
@@ -51,8 +53,10 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.event.MenuDragMouseEvent;
 import javax.swing.plaf.UIResource;
+import javax.swing.text.View;
 
 import sun.awt.AppContext;
+import sun.swing.SwingUtilities2;
 import sun.swing.UIAction;
 import swingjs.JSAppletViewer;
 import swingjs.JSUtil;
@@ -832,300 +836,300 @@ public class SwingUtilities implements SwingConstants
 //        return SwingUtilities2.stringWidth(null, fm, str);
 //    }
 //
-//    /**
-//     * Compute and return the location of the icons origin, the
-//     * location of origin of the text baseline, and a possibly clipped
-//     * version of the compound labels string.  Locations are computed
-//     * relative to the viewR rectangle.
-//     * The JComponents orientation (LEADING/TRAILING) will also be taken
-//     * into account and translated into LEFT/RIGHT values accordingly.
-//     */
-//    public static String layoutCompoundLabel(JComponent c,
-//                                             FontMetrics fm,
-//                                             String text,
-//                                             Icon icon,
-//                                             int verticalAlignment,
-//                                             int horizontalAlignment,
-//                                             int verticalTextPosition,
-//                                             int horizontalTextPosition,
-//                                             Rectangle viewR,
-//                                             Rectangle iconR,
-//                                             Rectangle textR,
-//                                             int textIconGap)
-//    {
-//        boolean orientationIsLeftToRight = true;
-//        int     hAlign = horizontalAlignment;
-//        int     hTextPos = horizontalTextPosition;
-//
-//        if (c != null) {
-//            if (!(c.getComponentOrientation().isLeftToRight())) {
-//                orientationIsLeftToRight = false;
-//            }
-//        }
-//
-//        // Translate LEADING/TRAILING values in horizontalAlignment
-//        // to LEFT/RIGHT values depending on the components orientation
-//        switch (horizontalAlignment) {
-//        case LEADING:
-//            hAlign = (orientationIsLeftToRight) ? LEFT : RIGHT;
-//            break;
-//        case TRAILING:
-//            hAlign = (orientationIsLeftToRight) ? RIGHT : LEFT;
-//            break;
-//        }
-//
-//        // Translate LEADING/TRAILING values in horizontalTextPosition
-//        // to LEFT/RIGHT values depending on the components orientation
-//        switch (horizontalTextPosition) {
-//        case LEADING:
-//            hTextPos = (orientationIsLeftToRight) ? LEFT : RIGHT;
-//            break;
-//        case TRAILING:
-//            hTextPos = (orientationIsLeftToRight) ? RIGHT : LEFT;
-//            break;
-//        }
-//
-//        return layoutCompoundLabelImpl(c,
-//                                       fm,
-//                                       text,
-//                                       icon,
-//                                       verticalAlignment,
-//                                       hAlign,
-//                                       verticalTextPosition,
-//                                       hTextPos,
-//                                       viewR,
-//                                       iconR,
-//                                       textR,
-//                                       textIconGap);
-//    }
-//
-//    /**
-//     * Compute and return the location of the icons origin, the
-//     * location of origin of the text baseline, and a possibly clipped
-//     * version of the compound labels string.  Locations are computed
-//     * relative to the viewR rectangle.
-//     * This layoutCompoundLabel() does not know how to handle LEADING/TRAILING
-//     * values in horizontalTextPosition (they will default to RIGHT) and in
-//     * horizontalAlignment (they will default to CENTER).
-//     * Use the other version of layoutCompoundLabel() instead.
-//     */
-//    public static String layoutCompoundLabel(
-//        FontMetrics fm,
-//        String text,
-//        Icon icon,
-//        int verticalAlignment,
-//        int horizontalAlignment,
-//        int verticalTextPosition,
-//        int horizontalTextPosition,
-//        Rectangle viewR,
-//        Rectangle iconR,
-//        Rectangle textR,
-//        int textIconGap)
-//    {
-//        return layoutCompoundLabelImpl(null, fm, text, icon,
-//                                       verticalAlignment,
-//                                       horizontalAlignment,
-//                                       verticalTextPosition,
-//                                       horizontalTextPosition,
-//                                       viewR, iconR, textR, textIconGap);
-//    }
-//
-//    /**
-//     * Compute and return the location of the icons origin, the
-//     * location of origin of the text baseline, and a possibly clipped
-//     * version of the compound labels string.  Locations are computed
-//     * relative to the viewR rectangle.
-//     * This layoutCompoundLabel() does not know how to handle LEADING/TRAILING
-//     * values in horizontalTextPosition (they will default to RIGHT) and in
-//     * horizontalAlignment (they will default to CENTER).
-//     * Use the other version of layoutCompoundLabel() instead.
-//     */
-//    private static String layoutCompoundLabelImpl(
-//        JComponent c,
-//        FontMetrics fm,
-//        String text,
-//        Icon icon,
-//        int verticalAlignment,
-//        int horizontalAlignment,
-//        int verticalTextPosition,
-//        int horizontalTextPosition,
-//        Rectangle viewR,
-//        Rectangle iconR,
-//        Rectangle textR,
-//        int textIconGap)
-//    {
-//        /* Initialize the icon bounds rectangle iconR.
-//         */
-//
-//        if (icon != null) {
-//            iconR.width = icon.getIconWidth();
-//            iconR.height = icon.getIconHeight();
-//        }
-//        else {
-//            iconR.width = iconR.height = 0;
-//        }
-//
-//        /* Initialize the text bounds rectangle textR.  If a null
-//         * or and empty String was specified we substitute "" here
-//         * and use 0,0,0,0 for textR.
-//         */
-//
-//        boolean textIsEmpty = (text == null) || text.equals("");
-//        int lsb = 0;
-//        int rsb = 0;
-//        /* Unless both text and icon are non-null, we effectively ignore
-//         * the value of textIconGap.
-//         */
-//        int gap;
-//
-//        View v = null;
-//        if (textIsEmpty) {
-//            textR.width = textR.height = 0;
-//            text = "";
-//            gap = 0;
-//        }
-//        else {
-//            int availTextWidth;
-//            gap = (icon == null) ? 0 : textIconGap;
-//
-//            if (horizontalTextPosition == CENTER) {
-//                availTextWidth = viewR.width;
-//            }
-//            else {
-//                availTextWidth = viewR.width - (iconR.width + gap);
-//            }
-//            v = (c != null) ? (View) c.getClientProperty("html") : null;
-//            if (v != null) {
-//                textR.width = Math.min(availTextWidth,
-//                                       (int) v.getPreferredSpan(View.X_AXIS));
-//                textR.height = (int) v.getPreferredSpan(View.Y_AXIS);
-//            } else {
-//                textR.width = SwingUtilities2.stringWidth(c, fm, text);
-//
-//                // Take into account the left and right side bearings.
-//                // This gives more space than it is actually needed,
-//                // but there are two reasons:
-//                // 1. If we set the width to the actual bounds,
-//                //    all callers would have to account for the bearings
-//                //    themselves. NOTE: all pref size calculations don't do it.
-//                // 2. You can do a drawString at the returned location
-//                //    and the text won't be clipped.
-//                lsb = SwingUtilities2.getLeftSideBearing(c, fm, text);
-//                if (lsb < 0) {
-//                    textR.width -= lsb;
-//                }
-//                rsb = SwingUtilities2.getRightSideBearing(c, fm, text);
-//                if (rsb > 0) {
-//                    textR.width += rsb;
-//                }
-//
-//                if (textR.width > availTextWidth) {
-//                    text = SwingUtilities2.clipString(c, fm, text,
-//                                                      availTextWidth);
-//                    textR.width = SwingUtilities2.stringWidth(c, fm, text);
-//                }
-//                textR.height = fm.getHeight();
-//            }
-//        }
-//
-//
-//        /* Compute textR.x,y given the verticalTextPosition and
-//         * horizontalTextPosition properties
-//         */
-//
-//        if (verticalTextPosition == TOP) {
-//            if (horizontalTextPosition != CENTER) {
-//                textR.y = 0;
-//            }
-//            else {
-//                textR.y = -(textR.height + gap);
-//            }
-//        }
-//        else if (verticalTextPosition == CENTER) {
-//            textR.y = (iconR.height / 2) - (textR.height / 2);
-//        }
-//        else { // (verticalTextPosition == BOTTOM)
-//            if (horizontalTextPosition != CENTER) {
-//                textR.y = iconR.height - textR.height;
-//            }
-//            else {
-//                textR.y = (iconR.height + gap);
-//            }
-//        }
-//
-//        if (horizontalTextPosition == LEFT) {
-//            textR.x = -(textR.width + gap);
-//        }
-//        else if (horizontalTextPosition == CENTER) {
-//            textR.x = (iconR.width / 2) - (textR.width / 2);
-//        }
-//        else { // (horizontalTextPosition == RIGHT)
-//            textR.x = (iconR.width + gap);
-//        }
-//
-//        // WARNING: DefaultTreeCellEditor uses a shortened version of
-//        // this algorithm to position it's Icon. If you change how this
-//        // is calculated, be sure and update DefaultTreeCellEditor too.
-//
-//        /* labelR is the rectangle that contains iconR and textR.
-//         * Move it to its proper position given the labelAlignment
-//         * properties.
-//         *
-//         * To avoid actually allocating a Rectangle, Rectangle.union
-//         * has been inlined below.
-//         */
-//        int labelR_x = Math.min(iconR.x, textR.x);
-//        int labelR_width = Math.max(iconR.x + iconR.width,
-//                                    textR.x + textR.width) - labelR_x;
-//        int labelR_y = Math.min(iconR.y, textR.y);
-//        int labelR_height = Math.max(iconR.y + iconR.height,
-//                                     textR.y + textR.height) - labelR_y;
-//
-//        int dx, dy;
-//
-//        if (verticalAlignment == TOP) {
-//            dy = viewR.y - labelR_y;
-//        }
-//        else if (verticalAlignment == CENTER) {
-//            dy = (viewR.y + (viewR.height / 2)) - (labelR_y + (labelR_height / 2));
-//        }
-//        else { // (verticalAlignment == BOTTOM)
-//            dy = (viewR.y + viewR.height) - (labelR_y + labelR_height);
-//        }
-//
-//        if (horizontalAlignment == LEFT) {
-//            dx = viewR.x - labelR_x;
-//        }
-//        else if (horizontalAlignment == RIGHT) {
-//            dx = (viewR.x + viewR.width) - (labelR_x + labelR_width);
-//        }
-//        else { // (horizontalAlignment == CENTER)
-//            dx = (viewR.x + (viewR.width / 2)) -
-//                 (labelR_x + (labelR_width / 2));
-//        }
-//
-//        /* Translate textR and glypyR by dx,dy.
-//         */
-//
-//        textR.x += dx;
-//        textR.y += dy;
-//
-//        iconR.x += dx;
-//        iconR.y += dy;
-//
-//        if (lsb < 0) {
-//            // lsb is negative. Shift the x location so that the text is
-//            // visually drawn at the right location.
-//            textR.x -= lsb;
-//
-//            textR.width += lsb;
-//        }
-//        if (rsb > 0) {
-//            textR.width -= rsb;
-//        }
-//
-//        return text;
-//    }
+    /**
+     * Compute and return the location of the icons origin, the
+     * location of origin of the text baseline, and a possibly clipped
+     * version of the compound labels string.  Locations are computed
+     * relative to the viewR rectangle.
+     * The JComponents orientation (LEADING/TRAILING) will also be taken
+     * into account and translated into LEFT/RIGHT values accordingly.
+     */
+    public static String layoutCompoundLabel(JComponent c,
+                                             FontMetrics fm,
+                                             String text,
+                                             Icon icon,
+                                             int verticalAlignment,
+                                             int horizontalAlignment,
+                                             int verticalTextPosition,
+                                             int horizontalTextPosition,
+                                             Rectangle viewR,
+                                             Rectangle iconR,
+                                             Rectangle textR,
+                                             int textIconGap)
+    {
+        boolean orientationIsLeftToRight = true;
+        int     hAlign = horizontalAlignment;
+        int     hTextPos = horizontalTextPosition;
+
+        if (c != null) {
+            if (!(c.getComponentOrientation().isLeftToRight())) {
+                orientationIsLeftToRight = false;
+            }
+        }
+
+        // Translate LEADING/TRAILING values in horizontalAlignment
+        // to LEFT/RIGHT values depending on the components orientation
+        switch (horizontalAlignment) {
+        case LEADING:
+            hAlign = (orientationIsLeftToRight) ? LEFT : RIGHT;
+            break;
+        case TRAILING:
+            hAlign = (orientationIsLeftToRight) ? RIGHT : LEFT;
+            break;
+        }
+
+        // Translate LEADING/TRAILING values in horizontalTextPosition
+        // to LEFT/RIGHT values depending on the components orientation
+        switch (horizontalTextPosition) {
+        case LEADING:
+            hTextPos = (orientationIsLeftToRight) ? LEFT : RIGHT;
+            break;
+        case TRAILING:
+            hTextPos = (orientationIsLeftToRight) ? RIGHT : LEFT;
+            break;
+        }
+
+        return layoutCompoundLabelImpl(c,
+                                       fm,
+                                       text,
+                                       icon,
+                                       verticalAlignment,
+                                       hAlign,
+                                       verticalTextPosition,
+                                       hTextPos,
+                                       viewR,
+                                       iconR,
+                                       textR,
+                                       textIconGap);
+    }
+
+    /**
+     * Compute and return the location of the icons origin, the
+     * location of origin of the text baseline, and a possibly clipped
+     * version of the compound labels string.  Locations are computed
+     * relative to the viewR rectangle.
+     * This layoutCompoundLabel() does not know how to handle LEADING/TRAILING
+     * values in horizontalTextPosition (they will default to RIGHT) and in
+     * horizontalAlignment (they will default to CENTER).
+     * Use the other version of layoutCompoundLabel() instead.
+     */
+    public static String layoutCompoundLabel(
+        FontMetrics fm,
+        String text,
+        Icon icon,
+        int verticalAlignment,
+        int horizontalAlignment,
+        int verticalTextPosition,
+        int horizontalTextPosition,
+        Rectangle viewR,
+        Rectangle iconR,
+        Rectangle textR,
+        int textIconGap)
+    {
+        return layoutCompoundLabelImpl(null, fm, text, icon,
+                                       verticalAlignment,
+                                       horizontalAlignment,
+                                       verticalTextPosition,
+                                       horizontalTextPosition,
+                                       viewR, iconR, textR, textIconGap);
+    }
+
+    /**
+     * Compute and return the location of the icons origin, the
+     * location of origin of the text baseline, and a possibly clipped
+     * version of the compound labels string.  Locations are computed
+     * relative to the viewR rectangle.
+     * This layoutCompoundLabel() does not know how to handle LEADING/TRAILING
+     * values in horizontalTextPosition (they will default to RIGHT) and in
+     * horizontalAlignment (they will default to CENTER).
+     * Use the other version of layoutCompoundLabel() instead.
+     */
+    private static String layoutCompoundLabelImpl(
+        JComponent c,
+        FontMetrics fm,
+        String text,
+        Icon icon,
+        int verticalAlignment,
+        int horizontalAlignment,
+        int verticalTextPosition,
+        int horizontalTextPosition,
+        Rectangle viewR,
+        Rectangle iconR,
+        Rectangle textR,
+        int textIconGap)
+    {
+        /* Initialize the icon bounds rectangle iconR.
+         */
+
+        if (icon != null) {
+            iconR.width = icon.getIconWidth();
+            iconR.height = icon.getIconHeight();
+        }
+        else {
+            iconR.width = iconR.height = 0;
+        }
+
+        /* Initialize the text bounds rectangle textR.  If a null
+         * or and empty String was specified we substitute "" here
+         * and use 0,0,0,0 for textR.
+         */
+
+        boolean textIsEmpty = (text == null) || text.equals("");
+        int lsb = 0;
+        int rsb = 0;
+        /* Unless both text and icon are non-null, we effectively ignore
+         * the value of textIconGap.
+         */
+        int gap;
+
+        View v = null;
+        if (textIsEmpty) {
+            textR.width = textR.height = 0;
+            text = "";
+            gap = 0;
+        }
+        else {
+            int availTextWidth;
+            gap = (icon == null) ? 0 : textIconGap;
+
+            if (horizontalTextPosition == CENTER) {
+                availTextWidth = viewR.width;
+            }
+            else {
+                availTextWidth = viewR.width - (iconR.width + gap);
+            }
+            v = (c != null) ? (View) c.getClientProperty("html") : null;
+            if (v != null) {
+                textR.width = Math.min(availTextWidth,
+                                       (int) v.getPreferredSpan(View.X_AXIS));
+                textR.height = (int) v.getPreferredSpan(View.Y_AXIS);
+            } else {
+                textR.width = SwingUtilities2.stringWidth(c, fm, text);
+
+                // Take into account the left and right side bearings.
+                // This gives more space than it is actually needed,
+                // but there are two reasons:
+                // 1. If we set the width to the actual bounds,
+                //    all callers would have to account for the bearings
+                //    themselves. NOTE: all pref size calculations don't do it.
+                // 2. You can do a drawString at the returned location
+                //    and the text won't be clipped.
+                lsb = SwingUtilities2.getLeftSideBearing(c, fm, text);
+                if (lsb < 0) {
+                    textR.width -= lsb;
+                }
+                rsb = SwingUtilities2.getRightSideBearing(c, fm, text);
+                if (rsb > 0) {
+                    textR.width += rsb;
+                }
+
+                if (textR.width > availTextWidth) {
+                    text = SwingUtilities2.clipString(c, fm, text,
+                                                      availTextWidth);
+                    textR.width = SwingUtilities2.stringWidth(c, fm, text);
+                }
+                textR.height = fm.getHeight();
+            }
+        }
+
+
+        /* Compute textR.x,y given the verticalTextPosition and
+         * horizontalTextPosition properties
+         */
+
+        if (verticalTextPosition == TOP) {
+            if (horizontalTextPosition != CENTER) {
+                textR.y = 0;
+            }
+            else {
+                textR.y = -(textR.height + gap);
+            }
+        }
+        else if (verticalTextPosition == CENTER) {
+            textR.y = (iconR.height / 2) - (textR.height / 2);
+        }
+        else { // (verticalTextPosition == BOTTOM)
+            if (horizontalTextPosition != CENTER) {
+                textR.y = iconR.height - textR.height;
+            }
+            else {
+                textR.y = (iconR.height + gap);
+            }
+        }
+
+        if (horizontalTextPosition == LEFT) {
+            textR.x = -(textR.width + gap);
+        }
+        else if (horizontalTextPosition == CENTER) {
+            textR.x = (iconR.width / 2) - (textR.width / 2);
+        }
+        else { // (horizontalTextPosition == RIGHT)
+            textR.x = (iconR.width + gap);
+        }
+
+        // WARNING: DefaultTreeCellEditor uses a shortened version of
+        // this algorithm to position it's Icon. If you change how this
+        // is calculated, be sure and update DefaultTreeCellEditor too.
+
+        /* labelR is the rectangle that contains iconR and textR.
+         * Move it to its proper position given the labelAlignment
+         * properties.
+         *
+         * To avoid actually allocating a Rectangle, Rectangle.union
+         * has been inlined below.
+         */
+        int labelR_x = Math.min(iconR.x, textR.x);
+        int labelR_width = Math.max(iconR.x + iconR.width,
+                                    textR.x + textR.width) - labelR_x;
+        int labelR_y = Math.min(iconR.y, textR.y);
+        int labelR_height = Math.max(iconR.y + iconR.height,
+                                     textR.y + textR.height) - labelR_y;
+
+        int dx, dy;
+
+        if (verticalAlignment == TOP) {
+            dy = viewR.y - labelR_y;
+        }
+        else if (verticalAlignment == CENTER) {
+            dy = (viewR.y + (viewR.height / 2)) - (labelR_y + (labelR_height / 2));
+        }
+        else { // (verticalAlignment == BOTTOM)
+            dy = (viewR.y + viewR.height) - (labelR_y + labelR_height);
+        }
+
+        if (horizontalAlignment == LEFT) {
+            dx = viewR.x - labelR_x;
+        }
+        else if (horizontalAlignment == RIGHT) {
+            dx = (viewR.x + viewR.width) - (labelR_x + labelR_width);
+        }
+        else { // (horizontalAlignment == CENTER)
+            dx = (viewR.x + (viewR.width / 2)) -
+                 (labelR_x + (labelR_width / 2));
+        }
+
+        /* Translate textR and glypyR by dx,dy.
+         */
+
+        textR.x += dx;
+        textR.y += dy;
+
+        iconR.x += dx;
+        iconR.y += dy;
+
+        if (lsb < 0) {
+            // lsb is negative. Shift the x location so that the text is
+            // visually drawn at the right location.
+            textR.x -= lsb;
+
+            textR.width += lsb;
+        }
+        if (rsb > 0) {
+            textR.width -= rsb;
+        }
+
+        return text;
+    }
 
 
     /**
@@ -1472,36 +1476,36 @@ public class SwingUtilities implements SwingConstants
 //        return c.getAccessibleContext().getAccessibleChild(i);
 //    }
 //
-//    /**
-//     * Return the child <code>Component</code> of the specified
-//     * <code>Component</code> that is the focus owner, if any.
-//     *
-//     * @param c the root of the <code>Component</code> hierarchy to
-//     *        search for the focus owner
-//     * @return the focus owner, or <code>null</code> if there is no focus
-//     *         owner, or if the focus owner is not <code>comp</code>, or a
-//     *         descendant of <code>comp</code>
-//     *
-//     * @see java.awt.KeyboardFocusManager#getFocusOwner
-//     * @deprecated As of 1.4, replaced by
-//     *   <code>KeyboardFocusManager.getFocusOwner()</code>.
-//     */
-//    @Deprecated
-//    public static Component findFocusOwner(Component c) {
-//        Component focusOwner = KeyboardFocusManager.
-//            getCurrentKeyboardFocusManager().getFocusOwner();
-//
-//        // verify focusOwner is a descendant of c
-//        for (Component temp = focusOwner; temp != null;
-//             temp = (temp instanceof Window) ? null : temp.getParent())
-//        {
-//            if (temp == c) {
-//                return focusOwner;
-//            }
-//        }
-//
-//        return null;
-//    }
+    /**
+     * Return the child <code>Component</code> of the specified
+     * <code>Component</code> that is the focus owner, if any.
+     *
+     * @param c the root of the <code>Component</code> hierarchy to
+     *        search for the focus owner
+     * @return the focus owner, or <code>null</code> if there is no focus
+     *         owner, or if the focus owner is not <code>comp</code>, or a
+     *         descendant of <code>comp</code>
+     *
+     * @see java.awt.KeyboardFocusManager#getFocusOwner
+     * @deprecated As of 1.4, replaced by
+     *   <code>KeyboardFocusManager.getFocusOwner()</code>.
+     */
+    @Deprecated
+    public static Component findFocusOwner(Component c) {
+        Component focusOwner = KeyboardFocusManager.
+            getCurrentKeyboardFocusManager().getFocusOwner();
+
+        // verify focusOwner is a descendant of c
+        for (Component temp = focusOwner; temp != null;
+             temp = (temp instanceof Window) ? null : temp.getParent())
+        {
+            if (temp == c) {
+                return focusOwner;
+            }
+        }
+
+        return null;
+    }
 
     /**
      * If c is a JRootPane descendant return its JRootPane ancestor.

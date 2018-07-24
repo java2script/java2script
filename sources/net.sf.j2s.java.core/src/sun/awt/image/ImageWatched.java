@@ -93,20 +93,21 @@ public abstract class ImageWatched {
      * to an ImageObserver.
      */
     public static class WeakLink extends Link {
-        private WeakReference<ImageObserver> myref;
+//        private WeakReference<ImageObserver> myref;
+        private ImageObserver myref;
         private Link next;
 
         public WeakLink(ImageObserver obs, Link next) {
-            myref = new WeakReference<ImageObserver>(obs);
+            myref = obs;//new WeakReference<ImageObserver>(obs);
             this.next = next;
         }
 
         public boolean isWatcher(ImageObserver iw) {
-            return (myref.get() == iw || next.isWatcher(iw));
+            return (myref/*.get()*/ == iw || next.isWatcher(iw));
         }
 
         public Link removeWatcher(ImageObserver iw) {
-            ImageObserver myiw = myref.get();
+            ImageObserver myiw = myref;//.get();
             if (myiw == null) {
                 // Remove me from the chain, but continue recursion.
                 return next.removeWatcher(iw);
@@ -128,14 +129,14 @@ public abstract class ImageWatched {
         {
             // Note tail recursion because items are added LIFO.
             boolean ret = next.newInfo(img, info, x, y, w, h);
-            ImageObserver myiw = myref.get();
+            ImageObserver myiw = myref;//.get();
             if (myiw == null) {
                 // My referent is null so we must prune in a second pass.
                 ret = true;
             } else if (myiw.imageUpdate(img, info, x, y, w, h) == false) {
                 // My referent has lost interest so clear it and ask
                 // for a pruning pass to remove it later.
-                myref.clear();
+                myref = null;//.clear();
                 ret = true;
             }
             return ret;
