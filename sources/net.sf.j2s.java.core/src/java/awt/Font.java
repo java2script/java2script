@@ -1161,6 +1161,7 @@ public class Font
     	  return (family == null ? family = JSToolkit.getFontFamily(this) : family);
 //        return getFamily_NoClientCode();
     }
+
 //    // NOTE: This method is called by privileged threads.
 //    //       We implement this functionality in a package-private
 //    //       method to insure that it cannot be overridden by client
@@ -1196,17 +1197,50 @@ public class Font
 //        return getFont2D().getFamilyName(l);
 //    }
 //
-//    /**
-//     * Returns the postscript name of this <code>Font</code>.
-//     * Use <code>getFamily</code> to get the family name of the font.
-//     * Use <code>getFontName</code> to get the font face name of the font.
-//     * @return a <code>String</code> representing the postscript name of
-//     *          this <code>Font</code>.
-//     * @since 1.2
-//     */
-//    public String getPSName() {
-//        return getFont2D().getPostscriptName();
-//    }
+	/**
+	 * Returns the postscript name of this <code>Font</code>. Use
+	 * <code>getFamily</code> to get the family name of the font. Use
+	 * <code>getFontName</code> to get the font face name of the font.
+	 * 
+	 * @return a <code>String</code> representing the postscript name of this
+	 *         <code>Font</code>.
+	 * @since 1.2
+	 */
+	public String getPSName() {
+
+//    	Serif	Serif.plain	Serif.bold	Serif.italic
+//    	SansSerif	SansSerif.plain	SansSerif.bold	SansSerif.italic
+//    	TimesRoman	Serif.plain	Serif.bold	Serif.italic
+//    	Helvetica	SansSerif.plain	SansSerif.bold	SansSerif.italic
+//    	Courier	Monospaced.plain	Monospaced.bold	Monospaced.italic
+//    	Monospaced	Monospaced.plain	Monospaced.bold	Monospaced.italic
+//    	Dialog	Dialog.plain	Dialog.bold	Dialog.italic
+//    	DialogInput	DialogInput.plain	DialogInput.bold	DialogInput.italic
+
+		switch (name) {
+		case "TimesRoman":
+			name = SERIF;
+			break;
+		case "Helvetica":
+			name = SANS_SERIF;
+			break;
+		case "Courier":
+			name = MONOSPACED;
+			break;
+		default:
+		case MONOSPACED:
+		case SERIF:
+		case SANS_SERIF:
+		case DIALOG:
+		case DIALOG_INPUT:
+			break;
+		}
+		return name + 	(isPlain()? ".plain" 
+			: "." 
+			+ (isBold() ? "bold" : "")
+			+ (isItalic() ? "italic" : "")
+			);
+	}
 
     /**
      * Returns the logical name of this <code>Font</code>.

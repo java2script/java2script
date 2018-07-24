@@ -10,6 +10,10 @@
 // TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
 //       It is possible that these might be loaded dynamically.
 
+// BH 7/23/2018 fixes __NDIM in array classes written as "__NDIMS"
+// BH 7/23/2018 adds Character.$valueOf
+// BH 7/22/2018 adds Swing.CASE_INSENSITIVE_ORDER comparator
+// BH 7/22/2018 adds Boolean.prototype.objectValue()
 // BH 7/22/2018 adds System.getProperty("java.vendor") == "SwingJS/OpenJDK"
 // BH 7/22/2018 adds Math.IEEEremainder
 // BH 7/20/2018 removes def of Closeable, DataInput, DataOutput, Iterable, Comparator
@@ -827,14 +831,14 @@ Clazz.isClassDefined = function(clazzName) {
     b.__BYTESIZE = a.__BYTESIZE;
     b.__ARRAYTYPE = a.__ARRAYTYPE;
     b.__BASECLASS = a.__BASECLASS;
-    b.__NDIMS = a.__NDIMS;
+    b.__NDIM = a.__NDIM;
     b.getClass = a.getClass; 
     b.equals$O = a.equals$O;
  }
  
  var setArray = function(vals, baseClass, paramType, ndims) {
   ndims = Math.abs(ndims);
-  vals.getClass = function () { return arrayClass(this.__BASECLASS, this.__NDIMS) };
+  vals.getClass = function () { return arrayClass(this.__BASECLASS, this.__NDIM) };
   vals.equals$O = function (a) { 
     if (a.__ARRAYTYPE != this.__ARRAYTYPE || a.length != this.length)
       return false;
@@ -3545,7 +3549,24 @@ if (!String.format)
   return f.format$S$OA.apply(f,arguments).toString();
  };
 
+ 
+ String.CASE_INSENSITIVE_ORDER = {
+	 compare: function(s1, s2){
+		 if(s1==null || s2 == null)
+			 throw new NullPointerException();
+		 if(s1==s2) return 0;
+		 var s1=s1.toUpperCase();
+		 var s2=s2.toUpperCase();
+		 if(s1==s2) return 0;
+		 var s1=s1.toLowerCase();
+		 var s2=s2.toLowerCase();
+		 return (s1==s2 ? 0 : s1 > s2 ? 1 : -1);
+	 }
+ } 
+ 
 ;(function(sp) {
+
+sp.compareToIgnoreCase$S = function(str) { return String.CASE_INSENSITIVE_ORDER.compare(this, str);}
 
 sp.$replace=function(c1,c2){
   if (c1 == c2 || this.indexOf (c1) < 0) return "" + this;
@@ -3819,26 +3840,6 @@ sp.subSequence$I$I=function(beginIndex,endIndex){
 return this.substring(beginIndex,endIndex);
 };
 
-sp.compareToIgnoreCase$S=function(str){
-if(str==null){
-throw new NullPointerException();
-}
-var s1=this.toUpperCase();
-var s2=str.toUpperCase();
-if(s1==s2){
-return 0;
-}else{
-var s1=this.toLowerCase();
-var s2=str.toLowerCase();
-if(s1==s2){
-return 0;
-}else if(s1>s2){
-return 1;
-}else{
-return-1;
-}
-}
-};
 
 
 sp.contentEquals$StringBuffer=function(sb){
@@ -4073,6 +4074,8 @@ function(){
 return "?";
 }, 1);
 
+Character.$valueOf=m$(Character,"$valueOf",function(c){return Clazz.new_(Character.c$, [c]);});
+
 m$(C$,"c$",
 function(value){
 this.value=value;
@@ -4223,6 +4226,7 @@ Float.prototype.objectValue =
 Double.prototype.objectValue =  function() {return this.valueOf()};
 Character.prototype.objectValue = function() { return this.value };
 Character.prototype.intValue  = function() { return this.value.codePointAt(0) };
+Boolean.prototype.objectValue = function() { return this.toBoolean() };
 
 
 // TODO: Only asking for problems declaring Date. This is not necessary
