@@ -646,6 +646,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 
 	// cache the name to reduce the number of calls into the VM
 	private transient String name;
+	private Field[] fields;
 
 	private String getName0() {
 		String code = "";
@@ -1534,12 +1535,15 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @since JDK1.1
 	 */
 	public Field[] getFields() throws SecurityException {
-		return null;
-//		// be very careful not to change the stack depth of this
-//		// checkMemberAccess call for security reasons
-//		// see java.lang.SecurityManager.checkMemberAccess
-////		checkMemberAccess(Member.PUBLIC, ClassLoader.getCallerClassLoader());
-//		return copyFields(privateGetPublicFields(null));
+		if (fields != null)
+			return fields;
+	    fields = new Field[0];
+		int _static = Modifier.STATIC;
+		Object cl = /** @j2sNative this.$clazz$ || */null;
+		Object proto = /** @j2sNative cl.prototype || */null;
+		addFields(proto, this.fields, 0);
+		addFields(cl, this.fields, _static);
+		return fields;
 	}
 
 	/**
@@ -1686,10 +1690,13 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @since JDK1.1
 	 */
 	public Field getField(String name) throws NoSuchFieldException, SecurityException {
-		// TODO
-		{
-			return  null;
+		getFields(); 
+		for (int i = fields.length; --i >= 0;) {
+			if (fields[i].jsName == name)
+				return fields[i];
 		}
+		throw new NoSuchFieldException("field " + name);
+		
 //		// be very careful not to change the stack depth of this
 //		// checkMemberAccess call for security reasons
 //		// see java.lang.SecurityManager.checkMemberAccess
@@ -1701,6 +1708,46 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 //		return field;
 	}
 
+	private void addFields(Object c, Field[] f, int modifiers) {
+		String m = null;
+		/**
+		 * @j2sNative
+		 * 
+		 * 			for (m in c) { 
+		 *            if (!modifiers && this.$clazz$[m])
+		 *              continue; 
+		 *            if (this.excludeField$S(m)) continue; 
+		 *            var o = c[m]; 
+		 *            switch (typeof o) {
+		 *             case "object": if (o.__CLASS_NAME__) continue; 
+		 *             case "number": case "boolean": case "string":
+		 */
+		 
+		addField(f, m, modifiers); 
+		
+		/**
+		  * @j2sNative
+		  *               break; 
+		  *            }
+		  *           }
+		  */
+
+	}
+
+	private boolean excludeField(String name) {
+		return (name == "prototype" || name.startsWith("__"));
+	} 
+
+	private void addField(Field[] fields, String m, int modifiers) {
+
+		@SuppressWarnings("unused")
+		Field f = new Field(this, m, modifiers);
+		/**
+		 * @j2sNative
+		 * 
+		 * 			fields.push(f);
+		 */
+	}
 	/**
 	 * Returns a {@code Method} object that reflects the specified public member
 	 * method of the class or interface represented by this {@code Class}
@@ -1781,15 +1828,32 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		// see java.lang.SecurityManager.checkMemberAccess
 //		checkMemberAccess(Member.PUBLIC, ClassLoader.getCallerClassLoader());
 		
-		/**
-		 * @j2sNative
-		 * 
-		 *     return Clazz.new_(java.lang.reflect.Method.c$$Class$S$ClassA$Class$ClassA$I, [this, name,
-		 *     	                    paramTypes, java.lang.Void, [], 0]);
-		 */
-		{
-			return null;
+		// note that we cannot check the method at this time, as it could be an interface, 
+		// and interfaces will not have elaborated methods.
+		
+		Method m = new Method(this, name, paramTypes, null, null, 0);
+		if (!isInterface()) {
+			Object o = null;
+			String qname = name + argumentTypesToString(paramTypes);
+			/**
+			 * @j2sNative
+			 * 
+			 * o = this.$clazz$;
+			 * o = o[qname] || o.prototype && o.prototype[qname];
+			 */
+			if (o == null)
+			  throw new NoSuchMethodException(getName() + "." + qname);
 		}
+		return m;
+//		/**
+//		 * @j2sNative
+//		 * 
+//		 *     return Clazz.new_(Clazz.load('java.lang.reflect.Method').c$$Class$S$ClassA$Class$ClassA$I, [this, name,
+//		 *     	                    paramTypes, java.lang.Void, [], 0]);
+//		 */
+//		{
+//			return null;
+//		}
 //
 //
 //		
@@ -3094,6 +3158,20 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 //		return buf.toString();
 //	}
 
+	/**
+	 * Java2Script style here
+	 * 
+	 * @param parameterTypes
+	 * @return
+	 */
+	public static String argumentTypesToString(Class<?>[] parameterTypes) {
+		String s = "";
+		if (parameterTypes != null)
+			for (int i = 0; i < parameterTypes.length; i++)
+				s += "$" + /** @j2sNative Clazz._getParamCode(parameterTypes[i]) || */null;
+		return s;
+	}
+	
 //	/** use serialVersionUID from JDK 1.1 for interoperability */
 	private static final long serialVersionUID = 3206093459760846163L;
 //
@@ -3452,4 +3530,20 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		 */
 		return false;
 	}
+
+	/**
+	 * A SwingJS method for Constructor and Method
+	 * 
+	 * @param parameterTypes
+	 * @param args
+	 * @return
+	 */
+	public static Object[] getArgumentArray(Class<?>[] types, Object[] args, boolean isProxy) {
+		Object[] a = new Object[args == null ? 0 : args.length];
+		if (args != null && (types != null || isProxy))
+		      for (int i = args.length; --i >= 0;)
+		    	  a[i] = (isProxy ? args[i] : /** @j2sNative (types[i].__PRIMITIVE && args[i].valueOf ? args[i].valueOf() : args[i]) || */ null);
+		return a;
+	}
+
 }

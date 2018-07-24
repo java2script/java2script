@@ -17,8 +17,6 @@ package java.lang.reflect;
 
 import java.lang.annotation.Annotation;
 
-import javax.imageio.metadata.IIOMetadataFormat;
-
 /**
  * This class must be implemented by the VM vendor. This class models a method.
  * Information about the method can be accessed, and the method can be invoked
@@ -27,6 +25,7 @@ import javax.imageio.metadata.IIOMetadataFormat;
  */
 public final class Method extends AccessibleObject implements GenericDeclaration, Member {
 
+	private Object signature;
 	private Class<?> Class_;
 	// This is guaranteed to be interned by the VM in the 1.4
 	// reflection implementation
@@ -35,7 +34,8 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 	private Class<?>[] parameterTypes;
 	private Class<?>[] exceptionTypes;
 	private int modifiers = Member.PUBLIC;
-
+    boolean isProxy;
+    
 	/**
 	 * Package-private constructor used by ReflectAccess to enable instantiation of
 	 * these objects in Java code from the java.lang package via
@@ -49,6 +49,77 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 		this.returnType = returnType;
 		this.exceptionTypes = checkedExceptions;
 		this.modifiers = modifiers;
+		this.signature = name + Class.argumentTypesToString(parameterTypes);
+	}
+
+	/**
+	 * Return the result of dynamically invoking the modelled method. This
+	 * reproduces the effect of
+	 * <code>receiver.methodName(arg1, arg2, ... , argN)</code> This method performs
+	 * the following:
+	 * <ul>
+	 * <li>If the modelled method is static, the receiver argument is ignored.</li>
+	 * <li>Otherwise, if the receiver is null, a NullPointerException is
+	 * thrown.</li> If the receiver is not an instance of the declaring class of the
+	 * method, an IllegalArgumentException is thrown.
+	 * <li>If this Method object is enforcing access control (see AccessibleObject)
+	 * and the modelled method is not accessible from the current context, an
+	 * IllegalAccessException is thrown.</li>
+	 * <li>If the number of arguments passed and the number of parameters do not
+	 * match, an IllegalArgumentException is thrown.</li>
+	 * <li>For each argument passed:
+	 * <ul>
+	 * <li>If the corresponding parameter type is a base type, the argument is
+	 * unwrapped. If the unwrapping fails, an IllegalArgumentException is
+	 * thrown.</li>
+	 * <li>If the resulting argument cannot be converted to the parameter type via a
+	 * widening conversion, an IllegalArgumentException is thrown.</li>
+	 * </ul>
+	 * <li>If the modelled method is static, it is invoked directly. If it is
+	 * non-static, the modelled method and the receiver are then used to perform a
+	 * standard dynamic method lookup. The resulting method is then invoked.</li>
+	 * <li>If an exception is thrown during the invocation it is caught and wrapped
+	 * in an InvocationTargetException. This exception is then thrown.</li>
+	 * <li>If the invocation completes normally, the return value is itself
+	 * returned. If the method is declared to return a base type, the return value
+	 * is first wrapped. If the return type is void, null is returned.</li>
+	 * </ul>
+	 * 
+	 * @param receiver The object on which to call the modelled method
+	 * @param args     the arguments to the method
+	 * @return the new, initialized, object
+	 * @exception java.lang.NullPointerException if the receiver is null for a
+	 *            non-static method
+	 * @exception java.lang.IllegalAccessException if the modelled method is not
+	 *            accessible
+	 * @exception java.lang.IllegalArgumentException if an incorrect number of
+	 *            arguments are passed, the receiver is incompatible with the
+	 *            declaring class, or an argument could not be converted by a
+	 *            widening conversion
+	 * @exception java.lang.reflect.InvocationTargetException if an exception was
+	 *            thrown by the invoked method
+	 * @see java.lang.reflect.AccessibleObject
+	 * 
+	 */
+	@SuppressWarnings("unused")
+	public Object invoke(Object receiver, Object... args)
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+
+		// proxy does 
+		Object[] a = Class.getArgumentArray(parameterTypes, args, isProxy);
+		Object c = (isProxy ? receiver : this.Class_);
+		/** 
+		 * @j2sNative
+		 * 
+		 * if (!this.isProxy) c = c.$clazz$;
+		 * var m= c[this.signature] || c.prototype && c.prototype[this.signature];
+		 * if (m != null)
+		 *   return m.apply(receiver,a);
+		 */
+
+		  String message = "Method " + getDeclaringClass().getName()
+				  + "." + signature + " was not found";
+		  throw new IllegalArgumentException(message);  
 	}
 
 	public TypeVariable<Method>[] getTypeParameters() {
@@ -285,93 +356,6 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 	 */
 	public int hashCode() {
 		return getDeclaringClass().getName().hashCode() ^ getName().hashCode();
-	}
-
-	/**
-	 * Return the result of dynamically invoking the modelled method. This
-	 * reproduces the effect of
-	 * <code>receiver.methodName(arg1, arg2, ... , argN)</code> This method performs
-	 * the following:
-	 * <ul>
-	 * <li>If the modelled method is static, the receiver argument is ignored.</li>
-	 * <li>Otherwise, if the receiver is null, a NullPointerException is
-	 * thrown.</li> If the receiver is not an instance of the declaring class of the
-	 * method, an IllegalArgumentException is thrown.
-	 * <li>If this Method object is enforcing access control (see AccessibleObject)
-	 * and the modelled method is not accessible from the current context, an
-	 * IllegalAccessException is thrown.</li>
-	 * <li>If the number of arguments passed and the number of parameters do not
-	 * match, an IllegalArgumentException is thrown.</li>
-	 * <li>For each argument passed:
-	 * <ul>
-	 * <li>If the corresponding parameter type is a base type, the argument is
-	 * unwrapped. If the unwrapping fails, an IllegalArgumentException is
-	 * thrown.</li>
-	 * <li>If the resulting argument cannot be converted to the parameter type via a
-	 * widening conversion, an IllegalArgumentException is thrown.</li>
-	 * </ul>
-	 * <li>If the modelled method is static, it is invoked directly. If it is
-	 * non-static, the modelled method and the receiver are then used to perform a
-	 * standard dynamic method lookup. The resulting method is then invoked.</li>
-	 * <li>If an exception is thrown during the invocation it is caught and wrapped
-	 * in an InvocationTargetException. This exception is then thrown.</li>
-	 * <li>If the invocation completes normally, the return value is itself
-	 * returned. If the method is declared to return a base type, the return value
-	 * is first wrapped. If the return type is void, null is returned.</li>
-	 * </ul>
-	 * 
-	 * @param receiver The object on which to call the modelled method
-	 * @param args     the arguments to the method
-	 * @return the new, initialized, object
-	 * @exception java.lang.NullPointerException if the receiver is null for a
-	 *            non-static method
-	 * @exception java.lang.IllegalAccessException if the modelled method is not
-	 *            accessible
-	 * @exception java.lang.IllegalArgumentException if an incorrect number of
-	 *            arguments are passed, the receiver is incompatible with the
-	 *            declaring class, or an argument could not be converted by a
-	 *            widening conversion
-	 * @exception java.lang.reflect.InvocationTargetException if an exception was
-	 *            thrown by the invoked method
-	 * @see java.lang.reflect.AccessibleObject
-	 * 
-	 * @j2sNative var m = this.clazz.prototype[this.getName ()]; if (m == null) { m
-	 *            = this.clazz[this.getName ()]; } if (m != null) { return
-	 *            m.apply(receiver,args); } else { // should never reach here! }
-	 */
-	public Object invoke(Object receiver, Object... args)
-			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		/**
-		 * @j2sNative
-		 * 
-		 * 
-		var name = this.getName();
-		var types = this.parameterTypes;
-		var a = null;
-		var addParams = !this.isParamQualified;
-		if (types != null || !addParams) {
-		  a = new Array(args.length);
-		  for (var i = 0; i < args.length; i++) {
-		    if (addParams) {
-		      var t = types[i];
-		      a[i] = (t.__PRIMITIVE && args[i].valueOf ? args[i].valueOf() : args[i]);
-		      if (addParams)
-		        name += "$" + Clazz._getParamCode(t);
-		    } else {
-		      a[i] = args[i];
-		    }
-		  }
-		}
-		var c = this.Class_.$clazz$;
-		var m=c.prototype[name] || c[name];
-		if (m == null)
-		  newMethodNotFoundException(c.$clazz$, name);  
-		return m.apply(receiver,a);
-		 */
-
-		{
-			return null;
-		}
 	}
 
 	/**

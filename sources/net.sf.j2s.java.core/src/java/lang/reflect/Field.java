@@ -20,291 +20,405 @@ package java.lang.reflect;
  * Information about the field can be accessed, and the field's value can be
  * accessed dynamically.
  * 
+ * SwingJS does not track Field information such as declaring class or original
+ * unqualified name. It is presumed the developer knows or can infer that.
+ * 
  */
 public final class Field extends AccessibleObject implements Member {
 
-    public boolean isSynthetic() {
-        return false;
-    }
+	public String jsName;
+	private Class<?> Class_;
+	private int modifiers;
+	boolean isStatic;
+	
+	public Field(Class<?> cl, String name, int modifiers) {
+		jsName = name;
+		Class_ = cl;
+		this.modifiers = modifiers;
+		isStatic = (modifiers == Modifier.STATIC);
+	}
 
-    /**
-     * <p>
-     * Returns the String representation of the field's declaration, including
-     * the type parameters.
-     * </p>
-     * 
-     * @return An instance of String.
-     * @since 1.5
-     */
-    public String toGenericString() {
-        return null;
-    }
+	@Override
+	public boolean isAccessible() {
+		// SwingJS
+		return true;
+	}
 
-    /**
-     * <p>
-     * Indicates whether or not this field is an enumeration constant.
-     * </p>
-     * 
-     * @return A value of <code>true</code> if this field is an enumeration
-     *         constant, otherwise <code>false</code>.
-     * @since 1.5
-     */
-    public boolean isEnumConstant() {
-        return false;
-    }
-
-    /**
-     * <p>
-     * Gets the declared type of this field.
-     * </p>
-     * 
-     * @return An instance of {@link Type}.
-     * @throws GenericSignatureFormatError if the generic method signature is
-     *         invalid.
-     * @throws TypeNotPresentException if the component type points to a missing
-     *         type.
-     * @throws MalformedParameterizedTypeException if the component type points
-     *         to a type that can't be instantiated for some reason.
-     * @since 1.5
-     */
-    public Type getGenericType() {
-        return null;
-    }
-    
-	/**
-     * Compares the specified object to this Field and answer if they are equal.
-     * The object must be an instance of Field with the same defining class and
-     * name.
-     * 
-     * @param object the object to compare
-     * @return true if the specified object is equal to this Field, false
-     *         otherwise
-     * @see #hashCode
-     */
-	public boolean equals(Object object) {
+	public boolean isSynthetic() {
 		return false;
 	}
 
 	/**
-	 * Return the value of the field in the specified object. This reproduces
-	 * the effect of <code>object.fieldName</code>
 	 * <p>
-	 * If the modelled field is static, the object argument is ignored.
-	 * Otherwise, if the object is null, a NullPointerException is thrown. If
-	 * the object is not an instance of the declaring class of the method, an
-	 * IllegalArgumentException is thrown.
+	 * Returns the String representation of the field's declaration, including the
+	 * type parameters.
+	 * </p>
+	 * 
+	 * @return An instance of String.
+	 * @since 1.5
+	 */
+	public String toGenericString() {
+		return null;
+	}
+
+	/**
 	 * <p>
-	 * If this Field object is enforcing access control (see AccessibleObject)
-	 * and the modelled field is not accessible from the current context, an
+	 * Indicates whether or not this field is an enumeration constant.
+	 * </p>
+	 * 
+	 * @return A value of <code>true</code> if this field is an enumeration
+	 *         constant, otherwise <code>false</code>.
+	 * @since 1.5
+	 */
+	public boolean isEnumConstant() {
+		return false;
+	}
+
+	/**
+	 * <p>
+	 * Gets the declared type of this field.
+	 * </p>
+	 * 
+	 * @return An instance of {@link Type}.
+	 * @throws GenericSignatureFormatError         if the generic method signature
+	 *                                             is invalid.
+	 * @throws TypeNotPresentException             if the component type points to a
+	 *                                             missing type.
+	 * @throws MalformedParameterizedTypeException if the component type points to a
+	 *                                             type that can't be instantiated
+	 *                                             for some reason.
+	 * @since 1.5
+	 */
+	public Type getGenericType() {
+		return null;
+	}
+
+	/**
+	 * Compares the specified object to this Field and answer if they are equal. The
+	 * object must be an instance of Field with the same defining class and name.
+	 * 
+	 * @param object the object to compare
+	 * @return true if the specified object is equal to this Field, false otherwise
+	 * @see #hashCode
+	 */
+	public boolean equals(Object object) {
+		if (object == null)
+			return false;
+		Object o = getObj(object);
+;
+		/**
+		 * @j2sNative
+		 * 
+		 * o = o[this.jsName];
+		 * if (typeof o == "number" || typeof o == "boolean") return false;
+		 */
+		return object.equals(o);
+	}
+
+	/**
+	 * Return the value of the field in the specified object. This reproduces the
+	 * effect of <code>object.fieldName</code>
+	 * <p>
+	 * If the modelled field is static, the object argument is ignored. Otherwise,
+	 * if the object is null, a NullPointerException is thrown. If the object is not
+	 * an instance of the declaring class of the method, an IllegalArgumentException
+	 * is thrown.
+	 * <p>
+	 * If this Field object is enforcing access control (see AccessibleObject) and
+	 * the modelled field is not accessible from the current context, an
 	 * IllegalAccessException is thrown.
 	 * <p>
-	 * The value of the field is returned. If the type of this field is a base
-	 * type, the field value is automatically wrapped.
+	 * The value of the field is returned. If the type of this field is a base type,
+	 * the field value is automatically wrapped.
 	 * 
-	 * @param object
-	 *            the object to access
+	 * @param object the object to access
 	 * @return the field value, possibly wrapped
-	 * @throws NullPointerException
-	 *             if the object is null and the field is non-static
-	 * @throws IllegalArgumentException
-	 *             if the object is not compatible with the declaring class
-	 * @throws IllegalAccessException
-	 *             if modelled field is not accessible
+	 * @throws NullPointerException     if the object is null and the field is
+	 *                                  non-static
+	 * @throws IllegalArgumentException if the object is not compatible with the
+	 *                                  declaring class
+	 * @throws IllegalAccessException   if modelled field is not accessible
 	 */
-	public native Object get(Object object) throws IllegalAccessException,
-			IllegalArgumentException;
+	public Object get(Object object) throws IllegalAccessException, IllegalArgumentException {
+		object = getObj(object);
+
+		/**
+		 * @j2sNative 
+		 * 
+		 * object = object[this.jsName];
+		 * if (typeof object == "number") return (object == object|0 ?  new Integer(object) : new Double(object));
+		 * if (typeof object == "boolean") return new Boolean(object);
+		 * 
+		 * if (typeof object != "undefined")
+		 *   return object;
+		 */
+		throw new NullPointerException();
+	}
+
+	Object getObj(Object object) {
+		/**
+		 * @j2sNative
+		 * 
+		 * 			return (object == null || this.isStatic ? this.Class_.$clazz$ : object);
+		 */
+		{
+			return null;
+		}
+	}
 
 	/**
 	 * Return the value of the field in the specified object as a boolean. This
 	 * reproduces the effect of <code>object.fieldName</code>
 	 * <p>
-	 * If the modelled field is static, the object argument is ignored.
-	 * Otherwise, if the object is null, a NullPointerException is thrown. If
-	 * the object is not an instance of the declaring class of the method, an
-	 * IllegalArgumentException is thrown.
+	 * If the modelled field is static, the object argument is ignored. Otherwise,
+	 * if the object is null, a NullPointerException is thrown. If the object is not
+	 * an instance of the declaring class of the method, an IllegalArgumentException
+	 * is thrown.
 	 * <p>
-	 * If this Field object is enforcing access control (see AccessibleObject)
-	 * and the modelled field is not accessible from the current context, an
+	 * If this Field object is enforcing access control (see AccessibleObject) and
+	 * the modelled field is not accessible from the current context, an
 	 * IllegalAccessException is thrown.
 	 * 
-	 * @param object
-	 *            the object to access
+	 * @param object the object to access
 	 * @return the field value
-	 * @throws NullPointerException
-	 *             if the object is null and the field is non-static
-	 * @throws IllegalArgumentException
-	 *             if the object is not compatible with the declaring class
-	 * @throws IllegalAccessException
-	 *             if modelled field is not accessible
+	 * @throws NullPointerException     if the object is null and the field is
+	 *                                  non-static
+	 * @throws IllegalArgumentException if the object is not compatible with the
+	 *                                  declaring class
+	 * @throws IllegalAccessException   if modelled field is not accessible
 	 */
-	public native boolean getBoolean(Object object)
-			throws IllegalAccessException, IllegalArgumentException;
+	public boolean getBoolean(Object object) throws IllegalAccessException, IllegalArgumentException {
+		object = getObj(object);
+		/**
+		 * @j2sNative
+		 * 
+		 * 			return !!object[this.jsName];
+		 * 
+		 */
+		{
+			return false;
+		}
+	}
 
 	/**
 	 * Return the value of the field in the specified object as a byte. This
 	 * reproduces the effect of <code>object.fieldName</code>
 	 * <p>
-	 * If the modelled field is static, the object argument is ignored.
-	 * Otherwise, if the object is null, a NullPointerException is thrown. If
-	 * the object is not an instance of the declaring class of the method, an
-	 * IllegalArgumentException is thrown.
+	 * If the modelled field is static, the object argument is ignored. Otherwise,
+	 * if the object is null, a NullPointerException is thrown. If the object is not
+	 * an instance of the declaring class of the method, an IllegalArgumentException
+	 * is thrown.
 	 * <p>
-	 * If this Field object is enforcing access control (see AccessibleObject)
-	 * and the modelled field is not accessible from the current context, an
+	 * If this Field object is enforcing access control (see AccessibleObject) and
+	 * the modelled field is not accessible from the current context, an
 	 * IllegalAccessException is thrown.
 	 * 
-	 * @param object
-	 *            the object to access
+	 * @param object the object to access
 	 * @return the field value
-	 * @throws NullPointerException
-	 *             if the object is null and the field is non-static
-	 * @throws IllegalArgumentException
-	 *             if the object is not compatible with the declaring class
-	 * @throws IllegalAccessException
-	 *             if modelled field is not accessible
+	 * @throws NullPointerException     if the object is null and the field is
+	 *                                  non-static
+	 * @throws IllegalArgumentException if the object is not compatible with the
+	 *                                  declaring class
+	 * @throws IllegalAccessException   if modelled field is not accessible
 	 */
-	public native byte getByte(Object object) throws IllegalAccessException,
-			IllegalArgumentException;
+	public byte getByte(Object object) throws IllegalAccessException, IllegalArgumentException {
+		object = getObj(object);
+		/**
+		 * @j2sNative
+		 * 
+		 * 			return object[this.jsName]|0;
+		 * 
+		 */
+		{
+			return 0;
+		}
+
+	}
 
 	/**
 	 * Return the value of the field in the specified object as a char. This
 	 * reproduces the effect of <code>object.fieldName</code>
 	 * <p>
-	 * If the modelled field is static, the object argument is ignored.
-	 * Otherwise, if the object is null, a NullPointerException is thrown. If
-	 * the object is not an instance of the declaring class of the method, an
-	 * IllegalArgumentException is thrown.
+	 * If the modelled field is static, the object argument is ignored. Otherwise,
+	 * if the object is null, a NullPointerException is thrown. If the object is not
+	 * an instance of the declaring class of the method, an IllegalArgumentException
+	 * is thrown.
 	 * <p>
-	 * If this Field object is enforcing access control (see AccessibleObject)
-	 * and the modelled field is not accessible from the current context, an
+	 * If this Field object is enforcing access control (see AccessibleObject) and
+	 * the modelled field is not accessible from the current context, an
 	 * IllegalAccessException is thrown.
 	 * 
-	 * @param object
-	 *            the object to access
+	 * @param object the object to access
 	 * @return the field value
-	 * @throws NullPointerException
-	 *             if the object is null and the field is non-static
-	 * @throws IllegalArgumentException
-	 *             if the object is not compatible with the declaring class
-	 * @throws IllegalAccessException
-	 *             if modelled field is not accessible
+	 * @throws NullPointerException     if the object is null and the field is
+	 *                                  non-static
+	 * @throws IllegalArgumentException if the object is not compatible with the
+	 *                                  declaring class
+	 * @throws IllegalAccessException   if modelled field is not accessible
 	 */
-	public native char getChar(Object object) throws IllegalAccessException,
-			IllegalArgumentException;
+	public char getChar(Object object) throws IllegalAccessException, IllegalArgumentException {
+		object = getObj(object);
+		/**
+		 * @j2sNative
+		 * 
+		 * 			return object[this.jsName];
+		 * 
+		 */
+		{
+			return 0;
+		}
+
+		
+	}
 
 	/**
-	 * Return the {@link Class} associated with the class that defined this
-	 * field.
+	 * Return the {@link Class} associated with the class that defined this field.
 	 * 
 	 * @return the declaring class
 	 */
 	public Class<?> getDeclaringClass() {
-		return null;
+		return Class_;
 	}
 
 	/**
 	 * Return the value of the field in the specified object as a double. This
 	 * reproduces the effect of <code>object.fieldName</code>
 	 * <p>
-	 * If the modelled field is static, the object argument is ignored.
-	 * Otherwise, if the object is null, a NullPointerException is thrown. If
-	 * the object is not an instance of the declaring class of the method, an
-	 * IllegalArgumentException is thrown.
+	 * If the modelled field is static, the object argument is ignored. Otherwise,
+	 * if the object is null, a NullPointerException is thrown. If the object is not
+	 * an instance of the declaring class of the method, an IllegalArgumentException
+	 * is thrown.
 	 * <p>
-	 * If this Field object is enforcing access control (see AccessibleObject)
-	 * and the modelled field is not accessible from the current context, an
+	 * If this Field object is enforcing access control (see AccessibleObject) and
+	 * the modelled field is not accessible from the current context, an
 	 * IllegalAccessException is thrown.
 	 * 
-	 * @param object
-	 *            the object to access
+	 * @param object the object to access
 	 * @return the field value
-	 * @throws NullPointerException
-	 *             if the object is null and the field is non-static
-	 * @throws IllegalArgumentException
-	 *             if the object is not compatible with the declaring class
-	 * @throws IllegalAccessException
-	 *             if modelled field is not accessible
+	 * @throws NullPointerException     if the object is null and the field is
+	 *                                  non-static
+	 * @throws IllegalArgumentException if the object is not compatible with the
+	 *                                  declaring class
+	 * @throws IllegalAccessException   if modelled field is not accessible
 	 */
-	public native double getDouble(Object object)
-			throws IllegalAccessException, IllegalArgumentException;
+	public double getDouble(Object object) throws IllegalAccessException, IllegalArgumentException {
+		object = getObj(object);
+		/**
+		 * @j2sNative
+		 * 
+		 * 			return object[this.jsName];
+		 * 
+		 */
+		{
+			return 0;
+		}
+
+	}
 
 	/**
 	 * Return the value of the field in the specified object as a float. This
 	 * reproduces the effect of <code>object.fieldName</code>
 	 * <p>
-	 * If the modelled field is static, the object argument is ignored.
-	 * Otherwise, if the object is null, a NullPointerException is thrown. If
-	 * the object is not an instance of the declaring class of the method, an
-	 * IllegalArgumentException is thrown.
+	 * If the modelled field is static, the object argument is ignored. Otherwise,
+	 * if the object is null, a NullPointerException is thrown. If the object is not
+	 * an instance of the declaring class of the method, an IllegalArgumentException
+	 * is thrown.
 	 * <p>
-	 * If this Field object is enforcing access control (see AccessibleObject)
-	 * and the modelled field is not accessible from the current context, an
+	 * If this Field object is enforcing access control (see AccessibleObject) and
+	 * the modelled field is not accessible from the current context, an
 	 * IllegalAccessException is thrown.
 	 * 
-	 * @param object
-	 *            the object to access
+	 * @param object the object to access
 	 * @return the field value
-	 * @throws NullPointerException
-	 *             if the object is null and the field is non-static
-	 * @throws IllegalArgumentException
-	 *             if the object is not compatible with the declaring class
-	 * @throws IllegalAccessException
-	 *             if modelled field is not accessible
+	 * @throws NullPointerException     if the object is null and the field is
+	 *                                  non-static
+	 * @throws IllegalArgumentException if the object is not compatible with the
+	 *                                  declaring class
+	 * @throws IllegalAccessException   if modelled field is not accessible
 	 */
-	public native float getFloat(Object object) throws IllegalAccessException,
-			IllegalArgumentException;
+	public float getFloat(Object object) throws IllegalAccessException, IllegalArgumentException {
+		object = getObj(object);
+		/**
+		 * @j2sNative
+		 * 
+		 * 			return object[this.jsName];
+		 * 
+		 */
+		{
+			return 0;
+		}
+
+	}
 
 	/**
 	 * Return the value of the field in the specified object as an int. This
 	 * reproduces the effect of <code>object.fieldName</code>
 	 * <p>
-	 * If the modelled field is static, the object argument is ignored.
-	 * Otherwise, if the object is null, a NullPointerException is thrown. If
-	 * the object is not an instance of the declaring class of the method, an
-	 * IllegalArgumentException is thrown.
+	 * If the modelled field is static, the object argument is ignored. Otherwise,
+	 * if the object is null, a NullPointerException is thrown. If the object is not
+	 * an instance of the declaring class of the method, an IllegalArgumentException
+	 * is thrown.
 	 * <p>
-	 * If this Field object is enforcing access control (see AccessibleObject)
-	 * and the modelled field is not accessible from the current context, an
+	 * If this Field object is enforcing access control (see AccessibleObject) and
+	 * the modelled field is not accessible from the current context, an
 	 * IllegalAccessException is thrown.
 	 * 
-	 * @param object
-	 *            the object to access
+	 * @param object the object to access
 	 * @return the field value
-	 * @throws NullPointerException
-	 *             if the object is null and the field is non-static
-	 * @throws IllegalArgumentException
-	 *             if the object is not compatible with the declaring class
-	 * @throws IllegalAccessException
-	 *             if modelled field is not accessible
+	 * @throws NullPointerException     if the object is null and the field is
+	 *                                  non-static
+	 * @throws IllegalArgumentException if the object is not compatible with the
+	 *                                  declaring class
+	 * @throws IllegalAccessException   if modelled field is not accessible
 	 */
-	public native int getInt(Object object) throws IllegalAccessException,
-			IllegalArgumentException;
+	public int getInt(Object object) throws IllegalAccessException, IllegalArgumentException {
+		object = getObj(object);
+		/**
+		 * @j2sNative
+		 * 
+		 * 			return object[this.jsName]|0;
+		 * 
+		 */
+		{
+			return 0;
+		}
+
+	}
 
 	/**
 	 * Return the value of the field in the specified object as a long. This
 	 * reproduces the effect of <code>object.fieldName</code>
 	 * <p>
-	 * If the modelled field is static, the object argument is ignored.
-	 * Otherwise, if the object is null, a NullPointerException is thrown. If
-	 * the object is not an instance of the declaring class of the method, an
-	 * IllegalArgumentException is thrown.
+	 * If the modelled field is static, the object argument is ignored. Otherwise,
+	 * if the object is null, a NullPointerException is thrown. If the object is not
+	 * an instance of the declaring class of the method, an IllegalArgumentException
+	 * is thrown.
 	 * <p>
-	 * If this Field object is enforcing access control (see AccessibleObject)
-	 * and the modelled field is not accessible from the current context, an
+	 * If this Field object is enforcing access control (see AccessibleObject) and
+	 * the modelled field is not accessible from the current context, an
 	 * IllegalAccessException is thrown.
 	 * 
-	 * @param object
-	 *            the object to access
+	 * @param object the object to access
 	 * @return the field value
-	 * @throws NullPointerException
-	 *             if the object is null and the field is non-static
-	 * @throws IllegalArgumentException
-	 *             if the object is not compatible with the declaring class
-	 * @throws IllegalAccessException
-	 *             if modelled field is not accessible
+	 * @throws NullPointerException     if the object is null and the field is
+	 *                                  non-static
+	 * @throws IllegalArgumentException if the object is not compatible with the
+	 *                                  declaring class
+	 * @throws IllegalAccessException   if modelled field is not accessible
 	 */
-	public native long getLong(Object object) throws IllegalAccessException,
-			IllegalArgumentException;
+	public long getLong(Object object) throws IllegalAccessException, IllegalArgumentException {
+		object = getObj(object);
+		/**
+		 * @j2sNative
+		 * 
+		 * 			return object[this.jsName]|0;
+		 * 
+		 */
+		{
+			return 0;
+		}
+
+	}
 
 	/**
 	 * Return the modifiers for the modelled field. The Modifier class should be
@@ -313,7 +427,7 @@ public final class Field extends AccessibleObject implements Member {
 	 * @return the modifiers
 	 * @see java.lang.reflect.Modifier
 	 */
-	public native int getModifiers();
+	public int getModifiers() {return modifiers;}
 
 	/**
 	 * Return the name of the modelled field.
@@ -321,37 +435,48 @@ public final class Field extends AccessibleObject implements Member {
 	 * @return the name
 	 */
 	public String getName() {
-		return null;
+		return jsName;
 	}
 
 	/**
 	 * Return the value of the field in the specified object as a short. This
 	 * reproduces the effect of <code>object.fieldName</code>
 	 * <p>
-	 * If the modelled field is static, the object argument is ignored.
-	 * Otherwise, if the object is null, a NullPointerException is thrown. If
-	 * the object is not an instance of the declaring class of the method, an
-	 * IllegalArgumentException is thrown.
+	 * If the modelled field is static, the object argument is ignored. Otherwise,
+	 * if the object is null, a NullPointerException is thrown. If the object is not
+	 * an instance of the declaring class of the method, an IllegalArgumentException
+	 * is thrown.
 	 * <p>
-	 * If this Field object is enforcing access control (see AccessibleObject)
-	 * and the modelled field is not accessible from the current context, an
+	 * If this Field object is enforcing access control (see AccessibleObject) and
+	 * the modelled field is not accessible from the current context, an
 	 * IllegalAccessException is thrown.
 	 * <p>
 	 * 
-	 * @param object
-	 *            the object to access
+	 * @param object the object to access
 	 * @return the field value
-	 * @throws NullPointerException
-	 *             if the object is null and the field is non-static
-	 * @throws IllegalArgumentException
-	 *             if the object is not compatible with the declaring class
-	 * @throws IllegalAccessException
-	 *             if modelled field is not accessible
+	 * @throws NullPointerException     if the object is null and the field is
+	 *                                  non-static
+	 * @throws IllegalArgumentException if the object is not compatible with the
+	 *                                  declaring class
+	 * @throws IllegalAccessException   if modelled field is not accessible
 	 */
-	public native short getShort(Object object) throws IllegalAccessException,
-			IllegalArgumentException;
+	public short getShort(Object object) throws IllegalAccessException, IllegalArgumentException {
+		object = getObj(object);
+		/**
+		 * @j2sNative
+		 * 
+		 * 			return object[this.jsName]|0;
+		 * 
+		 */
+		{
+			return 0;
+		}
 
-	native String getSignature();
+	}
+
+	String getSignature() {
+		return jsName;
+	}
 
 	/**
 	 * Return the {@link Class} associated with the type of this field.
@@ -363,8 +488,8 @@ public final class Field extends AccessibleObject implements Member {
 	}
 
 	/**
-	 * Answers an integer hash code for the receiver. Objects which are equal
-	 * answer the same value for this method.
+	 * Answers an integer hash code for the receiver. Objects which are equal answer
+	 * the same value for this method.
 	 * <p>
 	 * The hash code for a Field is the hash code of the field's name.
 	 * 
@@ -376,276 +501,313 @@ public final class Field extends AccessibleObject implements Member {
 	}
 
 	/**
-	 * Set the value of the field in the specified object to the boolean value.
-	 * This reproduces the effect of <code>object.fieldName = value</code>
+	 * Set the value of the field in the specified object to the boolean value. This
+	 * reproduces the effect of <code>object.fieldName = value</code>
 	 * <p>
-	 * If the modelled field is static, the object argument is ignored.
-	 * Otherwise, if the object is null, a NullPointerException is thrown. If
-	 * the object is not an instance of the declaring class of the method, an
-	 * IllegalArgumentException is thrown.
+	 * If the modelled field is static, the object argument is ignored. Otherwise,
+	 * if the object is null, a NullPointerException is thrown. If the object is not
+	 * an instance of the declaring class of the method, an IllegalArgumentException
+	 * is thrown.
 	 * <p>
-	 * If this Field object is enforcing access control (see AccessibleObject)
-	 * and the modelled field is not accessible from the current context, an
+	 * If this Field object is enforcing access control (see AccessibleObject) and
+	 * the modelled field is not accessible from the current context, an
 	 * IllegalAccessException is thrown.
 	 * <p>
-	 * If the field type is a base type, the value is automatically unwrapped.
-	 * If the unwrap fails, an IllegalArgumentException is thrown. If the value
-	 * cannot be converted to the field type via a widening conversion, an
+	 * If the field type is a base type, the value is automatically unwrapped. If
+	 * the unwrap fails, an IllegalArgumentException is thrown. If the value cannot
+	 * be converted to the field type via a widening conversion, an
 	 * IllegalArgumentException is thrown.
 	 * 
-	 * @param object
-	 *            the object to access
-	 * @param value
-	 *            the new value
-	 * @throws NullPointerException
-	 *             if the object is null and the field is non-static
-	 * @throws IllegalArgumentException
-	 *             if the object is not compatible with the declaring class
-	 * @throws IllegalAccessException
-	 *             if modelled field is not accessible
+	 * @param object the object to access
+	 * @param value  the new value
+	 * @throws NullPointerException     if the object is null and the field is
+	 *                                  non-static
+	 * @throws IllegalArgumentException if the object is not compatible with the
+	 *                                  declaring class
+	 * @throws IllegalAccessException   if modelled field is not accessible
 	 */
-	public native void set(Object object, Object value)
-			throws IllegalAccessException, IllegalArgumentException;
+	public void set(Object object, Object value) throws IllegalAccessException, IllegalArgumentException {
+		object = getObj(object);
+		/**
+		 * @j2sNative
+		 * 
+		 * 			object[this.jsName] = value;
+		 * 
+		 */
+		
+	}
 
 	/**
-	 * Set the value of the field in the specified object to the boolean value.
-	 * This reproduces the effect of <code>object.fieldName = value</code>
+	 * Set the value of the field in the specified object to the boolean value. This
+	 * reproduces the effect of <code>object.fieldName = value</code>
 	 * <p>
-	 * If the modelled field is static, the object argument is ignored.
-	 * Otherwise, if the object is null, a NullPointerException is thrown. If
-	 * the object is not an instance of the declaring class of the method, an
-	 * IllegalArgumentException is thrown.
+	 * If the modelled field is static, the object argument is ignored. Otherwise,
+	 * if the object is null, a NullPointerException is thrown. If the object is not
+	 * an instance of the declaring class of the method, an IllegalArgumentException
+	 * is thrown.
 	 * <p>
-	 * If this Field object is enforcing access control (see AccessibleObject)
-	 * and the modelled field is not accessible from the current context, an
+	 * If this Field object is enforcing access control (see AccessibleObject) and
+	 * the modelled field is not accessible from the current context, an
 	 * IllegalAccessException is thrown.
 	 * <p>
-	 * If the value cannot be converted to the field type via a widening
-	 * conversion, an IllegalArgumentException is thrown.
+	 * If the value cannot be converted to the field type via a widening conversion,
+	 * an IllegalArgumentException is thrown.
 	 * 
-	 * @param object
-	 *            the object to access
-	 * @param value
-	 *            the new value
-	 * @throws NullPointerException
-	 *             if the object is null and the field is non-static
-	 * @throws IllegalArgumentException
-	 *             if the object is not compatible with the declaring class
-	 * @throws IllegalAccessException
-	 *             if modelled field is not accessible
+	 * @param object the object to access
+	 * @param value  the new value
+	 * @throws NullPointerException     if the object is null and the field is
+	 *                                  non-static
+	 * @throws IllegalArgumentException if the object is not compatible with the
+	 *                                  declaring class
+	 * @throws IllegalAccessException   if modelled field is not accessible
 	 */
-	public native void setBoolean(Object object, boolean value)
-			throws IllegalAccessException, IllegalArgumentException;
+	public void setBoolean(Object object, boolean value) throws IllegalAccessException, IllegalArgumentException {
+		object = getObj(object);
+		/**
+		 * @j2sNative
+		 * 
+		 * 			object[this.jsName] = value;
+		 * 
+		 */
+	}
 
 	/**
-	 * Set the value of the field in the specified object to the byte value.
-	 * This reproduces the effect of <code>object.fieldName = value</code>
+	 * Set the value of the field in the specified object to the byte value. This
+	 * reproduces the effect of <code>object.fieldName = value</code>
 	 * <p>
-	 * If the modelled field is static, the object argument is ignored.
-	 * Otherwise, if the object is null, a NullPointerException is thrown. If
-	 * the object is not an instance of the declaring class of the method, an
-	 * IllegalArgumentException is thrown.
+	 * If the modelled field is static, the object argument is ignored. Otherwise,
+	 * if the object is null, a NullPointerException is thrown. If the object is not
+	 * an instance of the declaring class of the method, an IllegalArgumentException
+	 * is thrown.
 	 * <p>
-	 * If this Field object is enforcing access control (see AccessibleObject)
-	 * and the modelled field is not accessible from the current context, an
+	 * If this Field object is enforcing access control (see AccessibleObject) and
+	 * the modelled field is not accessible from the current context, an
 	 * IllegalAccessException is thrown.
 	 * <p>
-	 * If the value cannot be converted to the field type via a widening
-	 * conversion, an IllegalArgumentException is thrown.
+	 * If the value cannot be converted to the field type via a widening conversion,
+	 * an IllegalArgumentException is thrown.
 	 * 
-	 * @param object
-	 *            the object to access
-	 * @param value
-	 *            the new value
-	 * @throws NullPointerException
-	 *             if the object is null and the field is non-static
-	 * @throws IllegalArgumentException
-	 *             if the object is not compatible with the declaring class
-	 * @throws IllegalAccessException
-	 *             if modelled field is not accessible
+	 * @param object the object to access
+	 * @param value  the new value
+	 * @throws NullPointerException     if the object is null and the field is
+	 *                                  non-static
+	 * @throws IllegalArgumentException if the object is not compatible with the
+	 *                                  declaring class
+	 * @throws IllegalAccessException   if modelled field is not accessible
 	 */
-	public native void setByte(Object object, byte value)
-			throws IllegalAccessException, IllegalArgumentException;
+	public void setByte(Object object, byte value) throws IllegalAccessException, IllegalArgumentException {
+		object = getObj(object);
+		/**
+		 * @j2sNative
+		 * 
+		 * 			object[this.jsName] = value;
+		 * 
+		 */
+	}
 
 	/**
-	 * Set the value of the field in the specified object to the char value.
-	 * This reproduces the effect of <code>object.fieldName = value</code>
+	 * Set the value of the field in the specified object to the char value. This
+	 * reproduces the effect of <code>object.fieldName = value</code>
 	 * <p>
-	 * If the modelled field is static, the object argument is ignored.
-	 * Otherwise, if the object is null, a NullPointerException is thrown. If
-	 * the object is not an instance of the declaring class of the method, an
-	 * IllegalArgumentException is thrown.
+	 * If the modelled field is static, the object argument is ignored. Otherwise,
+	 * if the object is null, a NullPointerException is thrown. If the object is not
+	 * an instance of the declaring class of the method, an IllegalArgumentException
+	 * is thrown.
 	 * <p>
-	 * If this Field object is enforcing access control (see AccessibleObject)
-	 * and the modelled field is not accessible from the current context, an
+	 * If this Field object is enforcing access control (see AccessibleObject) and
+	 * the modelled field is not accessible from the current context, an
 	 * IllegalAccessException is thrown.
 	 * <p>
-	 * If the value cannot be converted to the field type via a widening
-	 * conversion, an IllegalArgumentException is thrown.
+	 * If the value cannot be converted to the field type via a widening conversion,
+	 * an IllegalArgumentException is thrown.
 	 * 
-	 * @param object
-	 *            the object to access
-	 * @param value
-	 *            the new value
-	 * @throws NullPointerException
-	 *             if the object is null and the field is non-static
-	 * @throws IllegalArgumentException
-	 *             if the object is not compatible with the declaring class
-	 * @throws IllegalAccessException
-	 *             if modelled field is not accessible
+	 * @param object the object to access
+	 * @param value  the new value
+	 * @throws NullPointerException     if the object is null and the field is
+	 *                                  non-static
+	 * @throws IllegalArgumentException if the object is not compatible with the
+	 *                                  declaring class
+	 * @throws IllegalAccessException   if modelled field is not accessible
 	 */
-	public native void setChar(Object object, char value)
-			throws IllegalAccessException, IllegalArgumentException;
+	public void setChar(Object object, char value) throws IllegalAccessException, IllegalArgumentException {
+		object = getObj(object);
+		/**
+		 * @j2sNative
+		 * 
+		 * 			object[this.jsName] = value;
+		 * 
+		 */
+	}
 
 	/**
-	 * Set the value of the field in the specified object to the double value.
-	 * This reproduces the effect of <code>object.fieldName = value</code>
+	 * Set the value of the field in the specified object to the double value. This
+	 * reproduces the effect of <code>object.fieldName = value</code>
 	 * <p>
-	 * If the modelled field is static, the object argument is ignored.
-	 * Otherwise, if the object is null, a NullPointerException is thrown. If
-	 * the object is not an instance of the declaring class of the method, an
-	 * IllegalArgumentException is thrown.
+	 * If the modelled field is static, the object argument is ignored. Otherwise,
+	 * if the object is null, a NullPointerException is thrown. If the object is not
+	 * an instance of the declaring class of the method, an IllegalArgumentException
+	 * is thrown.
 	 * <p>
-	 * If this Field object is enforcing access control (see AccessibleObject)
-	 * and the modelled field is not accessible from the current context, an
+	 * If this Field object is enforcing access control (see AccessibleObject) and
+	 * the modelled field is not accessible from the current context, an
 	 * IllegalAccessException is thrown.
 	 * <p>
-	 * If the value cannot be converted to the field type via a widening
-	 * conversion, an IllegalArgumentException is thrown.
+	 * If the value cannot be converted to the field type via a widening conversion,
+	 * an IllegalArgumentException is thrown.
 	 * 
-	 * @param object
-	 *            the object to access
-	 * @param value
-	 *            the new value
-	 * @throws NullPointerException
-	 *             if the object is null and the field is non-static
-	 * @throws IllegalArgumentException
-	 *             if the object is not compatible with the declaring class
-	 * @throws IllegalAccessException
-	 *             if modelled field is not accessible
+	 * @param object the object to access
+	 * @param value  the new value
+	 * @throws NullPointerException     if the object is null and the field is
+	 *                                  non-static
+	 * @throws IllegalArgumentException if the object is not compatible with the
+	 *                                  declaring class
+	 * @throws IllegalAccessException   if modelled field is not accessible
 	 */
-	public native void setDouble(Object object, double value)
-			throws IllegalAccessException, IllegalArgumentException;
+	public void setDouble(Object object, double value) throws IllegalAccessException, IllegalArgumentException {
+		object = getObj(object);
+		/**
+		 * @j2sNative
+		 * 
+		 * 			object[this.jsName] = value;
+		 * 
+		 */
+	}
 
 	/**
-	 * Set the value of the field in the specified object to the float value.
-	 * This reproduces the effect of <code>object.fieldName = value</code>
+	 * Set the value of the field in the specified object to the float value. This
+	 * reproduces the effect of <code>object.fieldName = value</code>
 	 * <p>
-	 * If the modelled field is static, the object argument is ignored.
-	 * Otherwise, if the object is null, a NullPointerException is thrown. If
-	 * the object is not an instance of the declaring class of the method, an
-	 * IllegalArgumentException is thrown.
+	 * If the modelled field is static, the object argument is ignored. Otherwise,
+	 * if the object is null, a NullPointerException is thrown. If the object is not
+	 * an instance of the declaring class of the method, an IllegalArgumentException
+	 * is thrown.
 	 * <p>
-	 * If this Field object is enforcing access control (see AccessibleObject)
-	 * and the modelled field is not accessible from the current context, an
+	 * If this Field object is enforcing access control (see AccessibleObject) and
+	 * the modelled field is not accessible from the current context, an
 	 * IllegalAccessException is thrown.
 	 * <p>
-	 * If the value cannot be converted to the field type via a widening
-	 * conversion, an IllegalArgumentException is thrown.
+	 * If the value cannot be converted to the field type via a widening conversion,
+	 * an IllegalArgumentException is thrown.
 	 * 
-	 * @param object
-	 *            the object to access
-	 * @param value
-	 *            the new value
-	 * @throws NullPointerException
-	 *             if the object is null and the field is non-static
-	 * @throws IllegalArgumentException
-	 *             if the object is not compatible with the declaring class
-	 * @throws IllegalAccessException
-	 *             if modelled field is not accessible
+	 * @param object the object to access
+	 * @param value  the new value
+	 * @throws NullPointerException     if the object is null and the field is
+	 *                                  non-static
+	 * @throws IllegalArgumentException if the object is not compatible with the
+	 *                                  declaring class
+	 * @throws IllegalAccessException   if modelled field is not accessible
 	 */
-	public native void setFloat(Object object, float value)
-			throws IllegalAccessException, IllegalArgumentException;
+	public void setFloat(Object object, float value) throws IllegalAccessException, IllegalArgumentException {
+		object = getObj(object);
+		/**
+		 * @j2sNative
+		 * 
+		 * 			object[this.jsName] = value;
+		 * 
+		 */
+	}
 
 	/**
 	 * Set the value of the field in the specified object to the int value. This
 	 * reproduces the effect of <code>object.fieldName = value</code>
 	 * <p>
-	 * If the modelled field is static, the object argument is ignored.
-	 * Otherwise, if the object is null, a NullPointerException is thrown. If
-	 * the object is not an instance of the declaring class of the method, an
-	 * IllegalArgumentException is thrown.
+	 * If the modelled field is static, the object argument is ignored. Otherwise,
+	 * if the object is null, a NullPointerException is thrown. If the object is not
+	 * an instance of the declaring class of the method, an IllegalArgumentException
+	 * is thrown.
 	 * <p>
-	 * If this Field object is enforcing access control (see AccessibleObject)
-	 * and the modelled field is not accessible from the current context, an
+	 * If this Field object is enforcing access control (see AccessibleObject) and
+	 * the modelled field is not accessible from the current context, an
 	 * IllegalAccessException is thrown.
 	 * <p>
-	 * If the value cannot be converted to the field type via a widening
-	 * conversion, an IllegalArgumentException is thrown.
+	 * If the value cannot be converted to the field type via a widening conversion,
+	 * an IllegalArgumentException is thrown.
 	 * 
-	 * @param object
-	 *            the object to access
-	 * @param value
-	 *            the new value
-	 * @throws NullPointerException
-	 *             if the object is null and the field is non-static
-	 * @throws IllegalArgumentException
-	 *             if the object is not compatible with the declaring class
-	 * @throws IllegalAccessException
-	 *             if modelled field is not accessible
+	 * @param object the object to access
+	 * @param value  the new value
+	 * @throws NullPointerException     if the object is null and the field is
+	 *                                  non-static
+	 * @throws IllegalArgumentException if the object is not compatible with the
+	 *                                  declaring class
+	 * @throws IllegalAccessException   if modelled field is not accessible
 	 */
-	public native void setInt(Object object, int value)
-			throws IllegalAccessException, IllegalArgumentException;
+	public void setInt(Object object, int value) throws IllegalAccessException, IllegalArgumentException {
+		object = getObj(object);
+		/**
+		 * @j2sNative
+		 * 
+		 * 			object[this.jsName] = value;
+		 * 
+		 */
+	}
 
 	/**
-	 * Set the value of the field in the specified object to the long value.
-	 * This reproduces the effect of <code>object.fieldName = value</code>
+	 * Set the value of the field in the specified object to the long value. This
+	 * reproduces the effect of <code>object.fieldName = value</code>
 	 * <p>
-	 * If the modelled field is static, the object argument is ignored.
-	 * Otherwise, if the object is null, a NullPointerException is thrown. If
-	 * the object is not an instance of the declaring class of the method, an
-	 * IllegalArgumentException is thrown.
+	 * If the modelled field is static, the object argument is ignored. Otherwise,
+	 * if the object is null, a NullPointerException is thrown. If the object is not
+	 * an instance of the declaring class of the method, an IllegalArgumentException
+	 * is thrown.
 	 * <p>
-	 * If this Field object is enforcing access control (see AccessibleObject)
-	 * and the modelled field is not accessible from the current context, an
+	 * If this Field object is enforcing access control (see AccessibleObject) and
+	 * the modelled field is not accessible from the current context, an
 	 * IllegalAccessException is thrown.
 	 * <p>
-	 * If the value cannot be converted to the field type via a widening
-	 * conversion, an IllegalArgumentException is thrown.
+	 * If the value cannot be converted to the field type via a widening conversion,
+	 * an IllegalArgumentException is thrown.
 	 * 
-	 * @param object
-	 *            the object to access
-	 * @param value
-	 *            the new value
-	 * @throws NullPointerException
-	 *             if the object is null and the field is non-static
-	 * @throws IllegalArgumentException
-	 *             if the object is not compatible with the declaring class
-	 * @throws IllegalAccessException
-	 *             if modelled field is not accessible
+	 * @param object the object to access
+	 * @param value  the new value
+	 * @throws NullPointerException     if the object is null and the field is
+	 *                                  non-static
+	 * @throws IllegalArgumentException if the object is not compatible with the
+	 *                                  declaring class
+	 * @throws IllegalAccessException   if modelled field is not accessible
 	 */
-	public native void setLong(Object object, long value)
-			throws IllegalAccessException, IllegalArgumentException;
+	public void setLong(Object object, long value) throws IllegalAccessException, IllegalArgumentException {
+		object = getObj(object);
+		/**
+		 * @j2sNative
+		 * 
+		 * 			object[this.jsName] = value;
+		 * 
+		 */
+	}
 
 	/**
-	 * Set the value of the field in the specified object to the short value.
-	 * This reproduces the effect of <code>object.fieldName = value</code>
+	 * Set the value of the field in the specified object to the short value. This
+	 * reproduces the effect of <code>object.fieldName = value</code>
 	 * <p>
-	 * If the modelled field is static, the object argument is ignored.
-	 * Otherwise, if the object is null, a NullPointerException is thrown. If
-	 * the object is not an instance of the declaring class of the method, an
-	 * IllegalArgumentException is thrown.
+	 * If the modelled field is static, the object argument is ignored. Otherwise,
+	 * if the object is null, a NullPointerException is thrown. If the object is not
+	 * an instance of the declaring class of the method, an IllegalArgumentException
+	 * is thrown.
 	 * <p>
-	 * If this Field object is enforcing access control (see AccessibleObject)
-	 * and the modelled field is not accessible from the current context, an
+	 * If this Field object is enforcing access control (see AccessibleObject) and
+	 * the modelled field is not accessible from the current context, an
 	 * IllegalAccessException is thrown.
 	 * <p>
-	 * If the value cannot be converted to the field type via a widening
-	 * conversion, an IllegalArgumentException is thrown.
+	 * If the value cannot be converted to the field type via a widening conversion,
+	 * an IllegalArgumentException is thrown.
 	 * 
-	 * @param object
-	 *            the object to access
-	 * @param value
-	 *            the new value
-	 * @throws NullPointerException
-	 *             if the object is null and the field is non-static
-	 * @throws IllegalArgumentException
-	 *             if the object is not compatible with the declaring class
-	 * @throws IllegalAccessException
-	 *             if modelled field is not accessible
+	 * @param object the object to access
+	 * @param value  the new value
+	 * @throws NullPointerException     if the object is null and the field is
+	 *                                  non-static
+	 * @throws IllegalArgumentException if the object is not compatible with the
+	 *                                  declaring class
+	 * @throws IllegalAccessException   if modelled field is not accessible
 	 */
-	public native void setShort(Object object, short value)
-			throws IllegalAccessException, IllegalArgumentException;
+	public void setShort(Object object, short value) throws IllegalAccessException, IllegalArgumentException {
+		object = getObj(object);
+		/**
+		 * @j2sNative
+		 * 
+		 * 			object[this.jsName] = value;
+		 * 
+		 */
+	}
 
 	/**
 	 * Answers a string containing a concise, human-readable description of the
@@ -666,6 +828,6 @@ public final class Field extends AccessibleObject implements Member {
 	 * @return a printable representation for the receiver
 	 */
 	public String toString() {
-		return "_FIELD_";
+		return "[field: " + jsName + "]";
 	}
 }

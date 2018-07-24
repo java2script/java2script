@@ -682,11 +682,12 @@ public class Proxy implements java.io.Serializable {
     @SuppressWarnings("unused")
 	private static void setJSPrototype(Class<?> cl, Method m) {
 		String mname = m.getName();
+		// SwingJS transfers the invocation to a temporary method, then invokes it
 		/**
 		 * @j2sNative
 		 * 
 		 * m.Class_ = cl;
-		 * m.isParamQualified = true;
+		 * m.isProxy = true;
 		 * cl.$clazz$.prototype[mname] = function() {
 		 *   var args = new Array(arguments.length);
 		 *   for (var k = arguments.length; --k >= 0;)args[k] = arguments[k];

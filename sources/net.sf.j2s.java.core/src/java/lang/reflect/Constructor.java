@@ -43,20 +43,67 @@ public final class Constructor<T> extends AccessibleObject implements GenericDec
 		this.parameterTypes = parameterTypes;
 		this.exceptionTypes = checkedExceptions;
 		this.modifiers = modifiers;
-		this.signature = "c$";
 		// all of the SwingJS primitive classes run without parameterization
 		if (";Integer;Long;Short;Byte;Float;Double;".indexOf(";" + declaringClass.getName() + ";") >= 0)
 			parameterTypes = null;
 		this.parameterTypes = parameterTypes;
-		if (parameterTypes != null) {
-			for (int i = 0; i < parameterTypes.length; i++) {
-				String code = /** j2sNative Clazz._getParamCode(parameterTypes[i]) || */
-						null;
-				this.signature += "$" + code;
-			}
+		this.signature = "c$" + Class.argumentTypesToString(parameterTypes);
+ 		constr = /** @j2sNative this.Class_.$clazz$[this.signature] || */ null;
+	}
+
+	/**
+	 * Return a new instance of the declaring class, initialized by dynamically
+	 * invoking the modelled constructor. This reproduces the effect of
+	 * <code>new declaringClass(arg1, arg2, ... , argN)</code> This method performs
+	 * the following:
+	 * <ul>
+	 * <li>A new instance of the declaring class is created. If the declaring class
+	 * cannot be instantiated (i.e. abstract class, an interface, an array type, or
+	 * a base type) then an InstantiationException is thrown.</li>
+	 * <li>If this Constructor object is enforcing access control (see
+	 * AccessibleObject) and the modelled constructor is not accessible from the
+	 * current context, an IllegalAccessException is thrown.</li>
+	 * <li>If the number of arguments passed and the number of parameters do not
+	 * match, an IllegalArgumentException is thrown.</li>
+	 * <li>For each argument passed:
+	 * <ul>
+	 * <li>If the corresponding parameter type is a base type, the argument is
+	 * unwrapped. If the unwrapping fails, an IllegalArgumentException is
+	 * thrown.</li>
+	 * <li>If the resulting argument cannot be converted to the parameter type via a
+	 * widening conversion, an IllegalArgumentException is thrown.</li>
+	 * </ul>
+	 * <li>The modelled constructor is then invoked. If an exception is thrown
+	 * during the invocation, it is caught and wrapped in an
+	 * InvocationTargetException. This exception is then thrown. If the invocation
+	 * completes normally, the newly initialized object is returned.
+	 * </ul>
+	 * 
+	 * @param args the arguments to the constructor
+	 * @return the new, initialized, object
+	 * @exception java.lang.InstantiationException if the class cannot be
+	 *            instantiated
+	 * @exception java.lang.IllegalAccessException if the modelled constructor is
+	 *            not accessible
+	 * @exception java.lang.IllegalArgumentException if an incorrect number of
+	 *            arguments are passed, or an argument could not be converted by a
+	 *            widening conversion
+	 * @exception java.lang.reflect.InvocationTargetException if an exception was
+	 *            thrown by the invoked constructor
+	 * @see java.lang.reflect.AccessibleObject
+	 * 
+	 */
+	@SuppressWarnings("unused")
+	public T newInstance(Object... args)
+			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		if (this.constr != null) {
+			Object[] a = Class.getArgumentArray(parameterTypes, args, false);
+			T instance = /** @j2sNative Clazz.new_(this.constr, a) || */ null;
+			if (instance != null)
+				return instance;
 		}
-		constr = /** @j2sNative this.Class_.$clazz$[this.signature] || */
-				null;
+		String message = "Constructor " + getDeclaringClass().getName() + "." + signature + " was not found";
+		throw new IllegalArgumentException(message);
 	}
 
 	public TypeVariable<Constructor<T>>[] getTypeParameters() {
@@ -241,72 +288,6 @@ public final class Constructor<T> extends AccessibleObject implements GenericDec
 	 */
 	public int hashCode() {
 		return getDeclaringClass().getName().hashCode();
-	}
-
-	/**
-	 * Return a new instance of the declaring class, initialized by dynamically
-	 * invoking the modelled constructor. This reproduces the effect of
-	 * <code>new declaringClass(arg1, arg2, ... , argN)</code> This method performs
-	 * the following:
-	 * <ul>
-	 * <li>A new instance of the declaring class is created. If the declaring class
-	 * cannot be instantiated (i.e. abstract class, an interface, an array type, or
-	 * a base type) then an InstantiationException is thrown.</li>
-	 * <li>If this Constructor object is enforcing access control (see
-	 * AccessibleObject) and the modelled constructor is not accessible from the
-	 * current context, an IllegalAccessException is thrown.</li>
-	 * <li>If the number of arguments passed and the number of parameters do not
-	 * match, an IllegalArgumentException is thrown.</li>
-	 * <li>For each argument passed:
-	 * <ul>
-	 * <li>If the corresponding parameter type is a base type, the argument is
-	 * unwrapped. If the unwrapping fails, an IllegalArgumentException is
-	 * thrown.</li>
-	 * <li>If the resulting argument cannot be converted to the parameter type via a
-	 * widening conversion, an IllegalArgumentException is thrown.</li>
-	 * </ul>
-	 * <li>The modelled constructor is then invoked. If an exception is thrown
-	 * during the invocation, it is caught and wrapped in an
-	 * InvocationTargetException. This exception is then thrown. If the invocation
-	 * completes normally, the newly initialized object is returned.
-	 * </ul>
-	 * 
-	 * @param args the arguments to the constructor
-	 * @return the new, initialized, object
-	 * @exception java.lang.InstantiationException if the class cannot be
-	 *            instantiated
-	 * @exception java.lang.IllegalAccessException if the modelled constructor is
-	 *            not accessible
-	 * @exception java.lang.IllegalArgumentException if an incorrect number of
-	 *            arguments are passed, or an argument could not be converted by a
-	 *            widening conversion
-	 * @exception java.lang.reflect.InvocationTargetException if an exception was
-	 *            thrown by the invoked constructor
-	 * @see java.lang.reflect.AccessibleObject
-	 * 
-	 */
-	public T newInstance(Object... args)
-			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		/**
-		 * @j2sNative
-		 * 
-		 *   var instance = null;
-		 *   if (this.constr) {
-		 *     var a = (args ? new Array(args.length) : []);
-		 *     if (args) {
-		 *       for (var i = args.length; --i >= 0;) {
-		 *         a[i] = (this.parameterTypes[i].__PRIMITIVE ? args[i].valueOf() : args[i]);
-		 *       }
-		 *     }
-		 *     var instance = Clazz.new_(this.constr, a);
-		 *   }
-		 *   if (instance == null)
-		 *     newMethodNotFoundException(this.Class_.$clazz$, this.signature);  
-		 *   return instance;
-		 */
-		{
-			return null;
-		}
 	}
 
 	/**
