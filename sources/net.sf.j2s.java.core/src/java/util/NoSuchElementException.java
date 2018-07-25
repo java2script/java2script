@@ -1,48 +1,59 @@
-/* Copyright 1998, 2002 The Apache Software Foundation or its licensors, as applicable
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *     http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*
+ * Copyright (c) 1994, 2012, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.util;
 
-
 /**
- * This runtime exception is thrown when trying to retrieve an element past the
- * end of an Enumeration, or the first or last element from an empty Vector.
- * 
- * @see Enumeration
- * @see java.lang.RuntimeException
+ * Thrown by various accessor methods to indicate that the element being requested
+ * does not exist.
+ *
+ * @author  unascribed
+ * @see     java.util.Enumeration#nextElement()
+ * @see     java.util.Iterator#next()
+ * @since   JDK1.0
  */
-public class NoSuchElementException extends RuntimeException {
+public
+class NoSuchElementException extends RuntimeException {
+    private static final long serialVersionUID = 6769829250639411880L;
 
-	private static final long serialVersionUID = 6769829250639411880L;
+    /**
+     * Constructs a <code>NoSuchElementException</code> with <tt>null</tt>
+     * as its error message string.
+     */
+    public NoSuchElementException() {
+        super();
+    }
 
-	/**
-	 * Constructs a new instance of this class with its walkback filled in.
-	 */
-	public NoSuchElementException() {
-		super();
-	}
-
-	/**
-	 * Constructs a new instance of this class with its walkback and message
-	 * filled in.
-	 * 
-	 * @param detailMessage
-	 *            String The detail message for the exception.
-	 */
-	public NoSuchElementException(String detailMessage) {
-		super(detailMessage);
-	}
-
+    /**
+     * Constructs a <code>NoSuchElementException</code>, saving a reference
+     * to the error message string <tt>s</tt> for later retrieval by the
+     * <tt>getMessage</tt> method.
+     *
+     * @param   s   the detail message.
+     */
+    public NoSuchElementException(String s) {
+        super(s);
+    }
 }

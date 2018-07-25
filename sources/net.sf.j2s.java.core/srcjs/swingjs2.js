@@ -13440,6 +13440,7 @@ if (!J2S._version)
 // TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
 //       It is possible that these might be loaded dynamically.
 
+// BH 7/25/2018 adds bit twiddles to Integer
 // BH 7/23/2018 fixes __NDIM in array classes written as "__NDIMS"
 // BH 7/23/2018 adds Character.$valueOf
 // BH 7/22/2018 adds Swing.CASE_INSENSITIVE_ORDER comparator
@@ -16337,39 +16338,87 @@ Integer.MIN_VALUE=Integer.prototype.MIN_VALUE=-0x80000000;
 Integer.MAX_VALUE=Integer.prototype.MAX_VALUE=0x7fffffff;
 //Integer.TYPE=Integer.prototype.TYPE=Integer;
 
+Integer.highestOneBit = m$(Integer,"highestOneBit",
+	function(i) { 
+	    i |= (i >>  1);
+	    i |= (i >>  2);
+	    i |= (i >>  4);
+	    i |= (i >>  8);
+	    i |= (i >> 16);
+	    return i - (i >>> 1);
+	});
+
+Integer.lowestOneBit = m$(Integer,"lowestOneBit",
+		function(i) { return i & -i;});
+
+Integer.rotateLeft = m$(Integer,"rotateLeft",
+		function(i, distance) { return (i << distance) | (i >>> -distance); });
+
+Integer.rotateRight = m$(Integer,"rotateRight",
+		function(i, distance) { return (i >>> distance) | (i << -distance); });
+
+Integer.reverse = m$(Integer,"reverse",
+	function(i) { 
+	    i = (i & 0x55555555) << 1 | (i >>> 1) & 0x55555555;
+	    i = (i & 0x33333333) << 2 | (i >>> 2) & 0x33333333;
+	    i = (i & 0x0f0f0f0f) << 4 | (i >>> 4) & 0x0f0f0f0f;
+	    i = (i << 24) | ((i & 0xff00) << 8) |
+	        ((i >>> 8) & 0xff00) | (i >>> 24);
+    return i;});
+
+Integer.signum = m$(Integer,"signum",
+		function(i){ return (i >> 31) | (-i >>> 31); });
+
+Integer.reverseBytes = m$(Integer,"reverseBytes",
+	function(i) { 
+		return ((i >>> 24)           ) |
+	           ((i >>   8) &   0xFF00) |
+	           ((i <<   8) & 0xFF0000) |
+	           ((i << 24));
+	});
+
+Integer.min = m$(Integer,"min",
+		function(a,b) { return Math.min(a,b); });
+
+Integer.max = m$(Integer,"max",
+		function(a,b) { return Math.max(a,b); });
+
+
+Integer.sum = m$(Integer,"sum",
+		function(a,b) { return a + b; });
 
 Integer.bitCount = m$(Integer,"bitCount",
-function(i) {
-  i = i - ((i >>> 1) & 0x55555555);
-  i = (i & 0x33333333) + ((i >>> 2) & 0x33333333);
-  i = (i + (i >>> 4)) & 0x0f0f0f0f;
-  i = i + (i >>> 8);
-  i = i + (i >>> 16);
-  return i & 0x3f;
-});
+	function(i) {
+	  i = i - ((i >>> 1) & 0x55555555);
+	  i = (i & 0x33333333) + ((i >>> 2) & 0x33333333);
+	  i = (i + (i >>> 4)) & 0x0f0f0f0f;
+	  i = i + (i >>> 8);
+	  i = i + (i >>> 16);
+	  return i & 0x3f;
+	});
 
 Integer.numberOfLeadingZeros=m$(Integer,"numberOfLeadingZeros",
-function(i) {
- if (i == 0) return 32;
- var n = 1;
- if (i >>> 16 == 0) { n += 16; i <<= 16; }
- if (i >>> 24 == 0) { n +=  8; i <<=  8; }
- if (i >>> 28 == 0) { n +=  4; i <<=  4; }
- if (i >>> 30 == 0) { n +=  2; i <<=  2; }
- n -= i >>> 31;
- return n;
-});
+	function(i) {
+	 if (i == 0) return 32;
+	 var n = 1;
+	 if (i >>> 16 == 0) { n += 16; i <<= 16; }
+	 if (i >>> 24 == 0) { n +=  8; i <<=  8; }
+	 if (i >>> 28 == 0) { n +=  4; i <<=  4; }
+	 if (i >>> 30 == 0) { n +=  2; i <<=  2; }
+	 n -= i >>> 31;
+	 return n;
+	});
 
 Integer.numberOfTrailingZeros=m$(Integer,"numberOfTrailingZeros",
-function(i) {
-  if (i == 0) return 32;
-  var n = 31;
-  var y = i <<16; if (y != 0) { n = n -16; i = y; }
-  y = i << 8; if (y != 0) { n = n - 8; i = y; }
-  y = i << 4; if (y != 0) { n = n - 4; i = y; }
-  y = i << 2; if (y != 0) { n = n - 2; i = y; }
-  return n - ((i << 1) >>> 31);
-});
+	function(i) {
+	  if (i == 0) return 32;
+	  var n = 31;
+	  var y = i <<16; if (y != 0) { n = n -16; i = y; }
+	  y = i << 8; if (y != 0) { n = n - 8; i = y; }
+	  y = i << 4; if (y != 0) { n = n - 4; i = y; }
+	  y = i << 2; if (y != 0) { n = n - 2; i = y; }
+	  return n - ((i << 1) >>> 31);
+	});
 
 var radixChar = "0123456789abcdefghijklmnopqrstuvwxyz";
 
@@ -16447,11 +16496,6 @@ m$(Integer,"decode", function(n){
 m$(Integer,"hashCode",
 function(){
 return this.valueOf();
-});
-
-m$(Integer,"signum",
-function(){
-return Math.signum(this.valueOf());
 });
 
 

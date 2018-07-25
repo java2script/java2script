@@ -1,6 +1,7 @@
 Notes
 =====
-updaetd 6/28/18 -- arrays do not inherit Object
+updated 7/24/18 -- most classes replaced with https://github.com/frohoff/jdk8u-jdk
+updated 6/28/18 -- arrays do not inherit Object
 updated 2/26/18
 updated 6/5/17 -- reserved package name "window"
 updated 3/11/17 -- myClass.getField

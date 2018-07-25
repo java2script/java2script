@@ -1,7 +1,4 @@
 /*
- * Some portions of this file have been modified by Robert Hanson hansonr.at.stolaf.edu 2012-2017
- * for use in SwingJS via transpilation into JavaScript using Java2Script.
- *
  * Copyright (c) 1998, 2006, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -43,7 +40,10 @@
 
 package java.awt.font;
 
+import java.awt.Graphics2D;
 import java.awt.Font;
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
 /**
@@ -150,38 +150,38 @@ public abstract class GraphicAttribute {
                                         getAdvance(), ascent+getDescent());
     }
 
-//    /**
-//     * Return a {@link java.awt.Shape} that represents the region that
-//     * this <code>GraphicAttribute</code> renders.  This is used when a
-//     * {@link TextLayout} is requested to return the outline of the text.
-//     * The (untransformed) shape must not extend outside the rectangular
-//     * bounds returned by <code>getBounds</code>.
-//     * The default implementation returns the rectangle returned by
-//     * {@link #getBounds}, transformed by the provided {@link AffineTransform}
-//     * if present.
-//     * @param tx an optional {@link AffineTransform} to apply to the
-//     *   outline of this <code>GraphicAttribute</code>. This can be null.
-//     * @return a <code>Shape</code> representing this graphic attribute,
-//     *   suitable for stroking or filling.
-//     * @since 1.6
-//     */
-//    public Shape getOutline(AffineTransform tx) {
-//        Shape b = getBounds();
-//        if (tx != null) {
-//            b = tx.createTransformedShape(b);
-//        }
-//        return b;
-//    }
-//
-//    /**
-//     * Renders this <code>GraphicAttribute</code> at the specified
-//     * location.
-//     * @param graphics the {@link Graphics2D} into which to render the
-//     * graphic
-//     * @param x the user-space X coordinate where the graphic is rendered
-//     * @param y the user-space Y coordinate where the graphic is rendered
-//     */
-//    public abstract void draw(Graphics2D graphics, float x, float y);
+    /**
+     * Return a {@link java.awt.Shape} that represents the region that
+     * this <code>GraphicAttribute</code> renders.  This is used when a
+     * {@link TextLayout} is requested to return the outline of the text.
+     * The (untransformed) shape must not extend outside the rectangular
+     * bounds returned by <code>getBounds</code>.
+     * The default implementation returns the rectangle returned by
+     * {@link #getBounds}, transformed by the provided {@link AffineTransform}
+     * if present.
+     * @param tx an optional {@link AffineTransform} to apply to the
+     *   outline of this <code>GraphicAttribute</code>. This can be null.
+     * @return a <code>Shape</code> representing this graphic attribute,
+     *   suitable for stroking or filling.
+     * @since 1.6
+     */
+    public Shape getOutline(AffineTransform tx) {
+        Shape b = getBounds();
+        if (tx != null) {
+            b = tx.createTransformedShape(b);
+        }
+        return b;
+    }
+
+    /**
+     * Renders this <code>GraphicAttribute</code> at the specified
+     * location.
+     * @param graphics the {@link Graphics2D} into which to render the
+     * graphic
+     * @param x the user-space X coordinate where the graphic is rendered
+     * @param y the user-space Y coordinate where the graphic is rendered
+     */
+    public abstract void draw(Graphics2D graphics, float x, float y);
 
     /**
      * Returns the alignment of this <code>GraphicAttribute</code>.
@@ -194,28 +194,28 @@ public abstract class GraphicAttribute {
         return fAlignment;
     }
 
-//    /**
-//     * Returns the justification information for this
-//     * <code>GraphicAttribute</code>.  Subclasses
-//     * can override this method to provide different justification
-//     * information.
-//     * @return a {@link GlyphJustificationInfo} object that contains the
-//     * justification information for this <code>GraphicAttribute</code>.
-//     */
-//    public GlyphJustificationInfo getJustificationInfo() {
-//
-//        // should we cache this?
-//        float advance = getAdvance();
-//
-//        return new GlyphJustificationInfo(
-//                                     advance,   // weight
-//                                     false,     // growAbsorb
-//                                     2,         // growPriority
-//                                     advance/3, // growLeftLimit
-//                                     advance/3, // growRightLimit
-//                                     false,     // shrinkAbsorb
-//                                     1,         // shrinkPriority
-//                                     0,         // shrinkLeftLimit
-//                                     0);        // shrinkRightLimit
-//    }
+    /**
+     * Returns the justification information for this
+     * <code>GraphicAttribute</code>.  Subclasses
+     * can override this method to provide different justification
+     * information.
+     * @return a {@link GlyphJustificationInfo} object that contains the
+     * justification information for this <code>GraphicAttribute</code>.
+     */
+    public GlyphJustificationInfo getJustificationInfo() {
+
+        // should we cache this?
+        float advance = getAdvance();
+
+        return new GlyphJustificationInfo(
+                                     advance,   // weight
+                                     false,     // growAbsorb
+                                     2,         // growPriority
+                                     advance/3, // growLeftLimit
+                                     advance/3, // growRightLimit
+                                     false,     // shrinkAbsorb
+                                     1,         // shrinkPriority
+                                     0,         // shrinkLeftLimit
+                                     0);        // shrinkRightLimit
+    }
 }

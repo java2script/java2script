@@ -2139,54 +2139,54 @@ public class Window extends JComponent {
     }
 
 
-//    /**
-//     * Returns the child Component of this Window that has focus if this Window
-//     * is focused; returns null otherwise.
-//     *
-//     * @return the child Component with focus, or null if this Window is not
-//     *         focused
-//     * @see #getMostRecentFocusOwner
-//     * @see #isFocused
-//     */
-//    public Component getFocusOwner() {
-//        return (isFocused())
-//            ? KeyboardFocusManager.getCurrentKeyboardFocusManager().
-//                  getFocusOwner()
-//            : null;
-//    }
+    /**
+     * Returns the child Component of this Window that has focus if this Window
+     * is focused; returns null otherwise.
+     *
+     * @return the child Component with focus, or null if this Window is not
+     *         focused
+     * @see #getMostRecentFocusOwner
+     * @see #isFocused
+     */
+    public Component getFocusOwner() {
+        return (isFocused())
+            ? KeyboardFocusManager.getCurrentKeyboardFocusManager().
+                  getFocusOwner()
+            : null;
+    }
 
-//    /**
-//     * Returns the child Component of this Window that will receive the focus
-//     * when this Window is focused. If this Window is currently focused, this
-//     * method returns the same Component as <code>getFocusOwner()</code>. If
-//     * this Window is not focused, then the child Component that most recently
-//     * requested focus will be returned. If no child Component has ever
-//     * requested focus, and this is a focusable Window, then this Window's
-//     * initial focusable Component is returned. If no child Component has ever
-//     * requested focus, and this is a non-focusable Window, null is returned.
-//     *
-//     * @return the child Component that will receive focus when this Window is
-//     *         focused
-//     * @see #getFocusOwner
-//     * @see #isFocused
-//     * @see #isFocusableWindow
-//     * @since 1.4
-//     */
-//    public Component getMostRecentFocusOwner() {
-//        if (isFocused()) {
-//            return getFocusOwner();
-//        } else {
-//            Component mostRecent =
-//                KeyboardFocusManager.getMostRecentFocusOwner(this);
-//            if (mostRecent != null) {
-//                return mostRecent;
-//            } else {
-//                return (isFocusableWindow())
-//                    ? getFocusTraversalPolicy().getInitialComponent(this)
-//                    : null;
-//            }
-//        }
-//    }
+    /**
+     * Returns the child Component of this Window that will receive the focus
+     * when this Window is focused. If this Window is currently focused, this
+     * method returns the same Component as <code>getFocusOwner()</code>. If
+     * this Window is not focused, then the child Component that most recently
+     * requested focus will be returned. If no child Component has ever
+     * requested focus, and this is a focusable Window, then this Window's
+     * initial focusable Component is returned. If no child Component has ever
+     * requested focus, and this is a non-focusable Window, null is returned.
+     *
+     * @return the child Component that will receive focus when this Window is
+     *         focused
+     * @see #getFocusOwner
+     * @see #isFocused
+     * @see #isFocusableWindow
+     * @since 1.4
+     */
+    public Component getMostRecentFocusOwner() {
+        if (isFocused()) {
+            return getFocusOwner();
+        } else {
+            Component mostRecent =
+                KeyboardFocusManager.getMostRecentFocusOwner(this);
+            if (mostRecent != null) {
+                return mostRecent;
+            } else {
+                return (isFocusableWindow())
+                    ? getFocusTraversalPolicy().getInitialComponent(this)
+                    : null;
+            }
+        }
+    }
 
     /**
      * Returns whether this Window is active. Only a Frame or a Dialog may be
@@ -2200,9 +2200,8 @@ public class Window extends JComponent {
      * @since 1.4
      */
     public boolean isActive() {
-    		return false;
-//        return (KeyboardFocusManager.getCurrentKeyboardFocusManager().
-  //              getActiveWindow() == this);
+        return (KeyboardFocusManager.getCurrentKeyboardFocusManager().
+                getActiveWindow() == this);
     }
 
     /**
@@ -2219,9 +2218,9 @@ public class Window extends JComponent {
      * @since 1.4
      */
     public boolean isFocused() {
-    	return JSToolkit.isFocused(this);
-//        return (KeyboardFocusManager.getCurrentKeyboardFocusManager().
-//                getGlobalFocusedWindow() == this);
+//    	return JSToolkit.isFocused(this);
+        return (KeyboardFocusManager.getCurrentKeyboardFocusManager().
+                getGlobalFocusedWindow() == this);
     }
 
     /**
@@ -2253,22 +2252,22 @@ public class Window extends JComponent {
      */
     @Override
 		public Set<AWTKeyStroke> getFocusTraversalKeys(int id) {
-    	return null;
-//        if (id < 0 || id >= KeyboardFocusManager.TRAVERSAL_KEY_LENGTH) {
-//            throw new IllegalArgumentException("invalid focus traversal key identifier");
-//        }
-//
-//        // Okay to return Set directly because it is an unmodifiable view
-//        Set keystrokes = (focusTraversalKeys != null)
-//            ? focusTraversalKeys[id]
-//            : null;
-//
-//        if (keystrokes != null) {
-//            return keystrokes;
-//        } else {
-//            return KeyboardFocusManager.getCurrentKeyboardFocusManager().
-//                getDefaultFocusTraversalKeys(id);
-//        }
+//    	return null;
+        if (id < 0 || id >= KeyboardFocusManager.TRAVERSAL_KEY_LENGTH) {
+            throw new IllegalArgumentException("invalid focus traversal key identifier");
+        }
+
+        // Okay to return Set directly because it is an unmodifiable view
+        Set keystrokes = (focusTraversalKeys != null)
+            ? focusTraversalKeys[id]
+            : null;
+
+        if (keystrokes != null) {
+            return keystrokes;
+        } else {
+            return KeyboardFocusManager.getCurrentKeyboardFocusManager().
+                getDefaultFocusTraversalKeys(id);
+        }
     }
 
     /**
@@ -2344,11 +2343,11 @@ public class Window extends JComponent {
             return true;
         }
 
-        // A Window must have at least one Component in its root focus
-        // traversal cycle to be focusable.
-//        if (getFocusTraversalPolicy().getDefaultComponent(this) == null) {
-//            return false;
-//        }
+//         A Window must have at least one Component in its root focus
+//         traversal cycle to be focusable.
+        if (getFocusTraversalPolicy().getDefaultComponent(this) == null) {
+            return false;
+        }
 
         // A Window's nearest owning Frame or Dialog must be showing on the
         // screen.

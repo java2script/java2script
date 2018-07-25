@@ -1,561 +1,1227 @@
 /*
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
+ * Copyright (c) 1995, 2013, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.util;
+import java.io.*;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.DoubleConsumer;
+import java.util.function.IntConsumer;
+import java.util.function.LongConsumer;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+import java.util.stream.StreamSupport;
 
-
-import java.io.Serializable;
+import sun.misc.Unsafe;
 
 /**
- * This class provides methods that generates pseudo-random numbers of different
- * types, such as int, long, double and float using either
- * 
- * @see Properties
- * @see PropertyResourceBundle
+ * An instance of this class is used to generate a stream of
+ * pseudorandom numbers. The class uses a 48-bit seed, which is
+ * modified using a linear congruential formula. (See Donald Knuth,
+ * <i>The Art of Computer Programming, Volume 2</i>, Section 3.2.1.)
+ * <p>
+ * If two instances of {@code Random} are created with the same
+ * seed, and the same sequence of method calls is made for each, they
+ * will generate and return identical sequences of numbers. In order to
+ * guarantee this property, particular algorithms are specified for the
+ * class {@code Random}. Java implementations must use all the algorithms
+ * shown here for the class {@code Random}, for the sake of absolute
+ * portability of Java code. However, subclasses of class {@code Random}
+ * are permitted to use other algorithms, so long as they adhere to the
+ * general contracts for all the methods.
+ * <p>
+ * The algorithms implemented by class {@code Random} use a
+ * {@code protected} utility method that on each invocation can supply
+ * up to 32 pseudorandomly generated bits.
+ * <p>
+ * Many applications will find the method {@link Math#random} simpler to use.
+ *
+ * <p>Instances of {@code java.util.Random} are threadsafe.
+ * However, the concurrent use of the same {@code java.util.Random}
+ * instance across threads may encounter contention and consequent
+ * poor performance. Consider instead using
+ * {@link java.util.concurrent.ThreadLocalRandom} in multithreaded
+ * designs.
+ *
+ * <p>Instances of {@code java.util.Random} are not cryptographically
+ * secure.  Consider instead using {@link java.security.SecureRandom} to
+ * get a cryptographically secure pseudo-random number generator for use
+ * by security-sensitive applications.
+ *
+ * @author  Frank Yellin
+ * @since   1.0
  */
-public class Random implements Serializable {
-	
-	private static final long serialVersionUID = 3905348978240129619L;
+public
+class Random implements java.io.Serializable {
+    /** use serialVersionUID from JDK 1.1 for interoperability */
+    static final long serialVersionUID = 3905348978240129619L;
 
-	static final long multiplier = 0x5deece66dL;
+    /**
+     * The internal state associated with this pseudorandom number generator.
+     * (The specs for the methods in this class describe the ongoing
+     * computation of this value.)
+     */
+    private final AtomicLong seed;
 
-	/**
-	 * The boolean value indicating if the second Gaussian number is available.
-	 * 
-	 * @serial
-	 */
-	boolean haveNextNextGaussian = false;
+    private static final long multiplier = 0x5DEECE66DL;
+    private static final long addend = 0xBL;
+    private static final long mask = (1L << 48) - 1;
 
-	/**
-	 * @serial It is associated with the internal state of this generator.
-	 */
-	long seed;
+    private static final double DOUBLE_UNIT = 0x1.0p-53; // 1.0 / (1L << 53)
 
-	/**
-	 * The second Gaussian generated number.
-	 * 
-	 * @serial
-	 */
-	double nextNextGaussian = 0;
+    // IllegalArgumentException messages
+    static final String BadBound = "bound must be positive";
+    static final String BadRange = "bound must be greater than origin";
+    static final String BadSize  = "size must be non-negative";
 
-	/**
-	 * Construct a random generator with the current time of day in milliseconds
-	 * as the initial state.
-	 * 
-	 * @see #setSeed
-	 */
-	public Random() {
-		setSeed(System.currentTimeMillis());
-	}
+    /**
+     * Creates a new random number generator. This constructor sets
+     * the seed of the random number generator to a value very likely
+     * to be distinct from any other invocation of this constructor.
+     */
+    public Random() {
+        this(seedUniquifier() ^ System.nanoTime());
+    }
 
-	/**
-	 * Construct a random generator with the given <code>seed</code> as the
-	 * initial state.
-	 * 
-	 * @param seed
-	 *            the seed that will determine the initial state of this random
-	 *            number generator
-	 * 
-	 * @see #setSeed
-	 */
-	public Random(long seed) {
-		setSeed(seed);
-	}
+    private static long seedUniquifier() {
+        // L'Ecuyer, "Tables of Linear Congruential Generators of
+        // Different Sizes and Good Lattice Structure", 1999
+        for (;;) {
+            long current = seedUniquifier.get();
+            long next = current * 181783497276652981L;
+            if (seedUniquifier.compareAndSet(current, next))
+                return next;
+        }
+    }
 
-	/**
-	 * Answers a pseudo-random uniformly distributed <code>int</code> value of
-	 * the number of bits specified by the argument <code>bits</code> as
-	 * described by Donald E. Knuth in <i>The Art of Computer Programming,
-	 * Volume 2: Seminumerical Algorithms</i>, section 3.2.1.
-	 * 
-	 * @return int a pseudo-random generated int number
-	 * @param bits
-	 *            number of bits of the returned value
-	 * 
-	 * @see #nextBytes
-	 * @see #nextDouble
-	 * @see #nextFloat
-	 * @see #nextInt()
-	 * @see #nextInt(int)
-	 * @see #nextGaussian
-	 * @see #nextLong
-	 */
-	protected synchronized int next(int bits) {
-		seed = (seed * multiplier + 0xbL) & ((1L << 48) - 1);
-		return (int) (seed >>> (48 - bits));
-	}
+    private static final AtomicLong seedUniquifier
+        = new AtomicLong(8682522807148012L);
 
-	/**
-	 * Answers the next pseudo-random, uniformly distributed boolean value
-	 * generated by this generator.
-	 * 
-	 * @return boolean a pseudo-random, uniformly distributed boolean value
-	 * 
-	 * @j2sNative
-     * return Math.random () > 0.5;
-	 */
-	public boolean nextBoolean() {
-		return next(1) != 0;
-	}
+    /**
+     * Creates a new random number generator using a single {@code long} seed.
+     * The seed is the initial value of the internal state of the pseudorandom
+     * number generator which is maintained by method {@link #nextItem}.
+     *
+     * <p>The invocation {@code new Random(seed)} is equivalent to:
+     *  <pre> {@code
+     * Random rnd = new Random();
+     * rnd.setSeed(seed);}</pre>
+     *
+     * @param seed the initial seed
+     * @see   #setSeed(long)
+     */
+    public Random(long seed) {
+        if (getClass() == Random.class)
+            this.seed = new AtomicLong(initialScramble(seed));
+        else {
+            // subclass might have overriden setSeed
+            this.seed = new AtomicLong();
+            setSeed(seed);
+        }
+    }
 
-	/**
-	 * Modifies the byte array by a random sequence of bytes generated by this
-	 * random number generator.
-	 * 
-	 * @param buf
-	 *            non-null array to contain the new random bytes
-	 * 
-	 * @see #next
-	 * 
-     * @j2sNative
-     * for (var i = 0; i < bytes.length; i++) {
-     * bytes[i] = Math.round (0x100 * Math.random ()); 
-     * }
-	 */
-	public void nextBytes(byte[] buf) {
-		int rand = 0, count = 0, loop = 0;
-		while (count < buf.length) {
-			if (loop == 0) {
-				rand = nextInt();
-				loop = 3;
-			} else {
-                loop--;
+    private static long initialScramble(long seed) {
+        return (seed ^ multiplier) & mask;
+    }
+
+    /**
+     * Sets the seed of this random number generator using a single
+     * {@code long} seed. The general contract of {@code setSeed} is
+     * that it alters the state of this random number generator object
+     * so as to be in exactly the same state as if it had just been
+     * created with the argument {@code seed} as a seed. The method
+     * {@code setSeed} is implemented by class {@code Random} by
+     * atomically updating the seed to
+     *  <pre>{@code (seed ^ 0x5DEECE66DL) & ((1L << 48) - 1)}</pre>
+     * and clearing the {@code haveNextNextGaussian} flag used by {@link
+     * #nextGaussian}.
+     *
+     * <p>The implementation of {@code setSeed} by class {@code Random}
+     * happens to use only 48 bits of the given seed. In general, however,
+     * an overriding method may use all 64 bits of the {@code long}
+     * argument as a seed value.
+     *
+     * @param seed the initial seed
+     */
+    synchronized public void setSeed(long seed) {
+        this.seed.set(initialScramble(seed));
+        haveNextNextGaussian = false;
+    }
+
+    /**
+     * Generates the next pseudorandom number. Subclasses should
+     * override this, as this is used by all other methods.
+     *
+     * <p>The general contract of {@code next} is that it returns an
+     * {@code int} value and if the argument {@code bits} is between
+     * {@code 1} and {@code 32} (inclusive), then that many low-order
+     * bits of the returned value will be (approximately) independently
+     * chosen bit values, each of which is (approximately) equally
+     * likely to be {@code 0} or {@code 1}. The method {@code next} is
+     * implemented by class {@code Random} by atomically updating the seed to
+     *  <pre>{@code (seed * 0x5DEECE66DL + 0xBL) & ((1L << 48) - 1)}</pre>
+     * and returning
+     *  <pre>{@code (int)(seed >>> (48 - bits))}.</pre>
+     *
+     * This is a linear congruential pseudorandom number generator, as
+     * defined by D. H. Lehmer and described by Donald E. Knuth in
+     * <i>The Art of Computer Programming,</i> Volume 3:
+     * <i>Seminumerical Algorithms</i>, section 3.2.1.
+     *
+     * @param  bits random bits
+     * @return the next pseudorandom value from this random number
+     *         generator's sequence
+     * @since  1.1
+     */
+    protected int next(int bits) {
+        long oldseed, nextseed;
+        AtomicLong seed = this.seed;
+        do {
+            oldseed = seed.get();
+            nextseed = (oldseed * multiplier + addend) & mask;
+        } while (!seed.compareAndSet(oldseed, nextseed));
+        return (int)(nextseed >>> (48 - bits));
+    }
+
+    /**
+     * Generates random bytes and places them into a user-supplied
+     * byte array.  The number of random bytes produced is equal to
+     * the length of the byte array.
+     *
+     * <p>The method {@code nextBytes} is implemented by class {@code Random}
+     * as if by:
+     *  <pre> {@code
+     * public void nextBytes(byte[] bytes) {
+     *   for (int i = 0; i < bytes.length; )
+     *     for (int rnd = nextInt(), n = Math.min(bytes.length - i, 4);
+     *          n-- > 0; rnd >>= 8)
+     *       bytes[i++] = (byte)rnd;
+     * }}</pre>
+     *
+     * @param  bytes the byte array to fill with random bytes
+     * @throws NullPointerException if the byte array is null
+     * @since  1.1
+     */
+    public void nextBytes(byte[] bytes) {
+        for (int i = 0, len = bytes.length; i < len; )
+            for (int rnd = nextInt(),
+                     n = Math.min(len - i, Integer.SIZE/Byte.SIZE);
+                 n-- > 0; rnd >>= Byte.SIZE)
+                bytes[i++] = (byte)rnd;
+    }
+
+    /**
+     * The form of nextLong used by LongStream Spliterators.  If
+     * origin is greater than bound, acts as unbounded form of
+     * nextLong, else as bounded form.
+     *
+     * @param origin the least value, unless greater than bound
+     * @param bound the upper bound (exclusive), must not equal origin
+     * @return a pseudorandom value
+     */
+    final long internalNextLong(long origin, long bound) {
+        long r = nextLong();
+        if (origin < bound) {
+            long n = bound - origin, m = n - 1;
+            if ((n & m) == 0L)  // power of two
+                r = (r & m) + origin;
+            else if (n > 0L) {  // reject over-represented candidates
+                for (long u = r >>> 1;            // ensure nonnegative
+                     u + m - (r = u % n) < 0L;    // rejection check
+                     u = nextLong() >>> 1) // retry
+                    ;
+                r += origin;
             }
-			buf[count++] = (byte) rand;
-			rand >>= 8;
-		}
-	}
+            else {              // range not representable as long
+                while (r < origin || r >= bound)
+                    r = nextLong();
+            }
+        }
+        return r;
+    }
 
-	/**
-	 * Generates a normally distributed random double number between 0.0
-	 * inclusively and 1.0 exclusively.
-	 * 
-	 * @return double
-	 * 
-	 * @see #nextFloat
-	 * 
-     * @j2sNative
-     * return Math.random ();
-	 */
-	public double nextDouble() {
-		return ((((long) next(26) << 27) + next(27)) / (double) (1L << 53));
-	}
+    /**
+     * The form of nextInt used by IntStream Spliterators.
+     * For the unbounded case: uses nextInt().
+     * For the bounded case with representable range: uses nextInt(int bound)
+     * For the bounded case with unrepresentable range: uses nextInt()
+     *
+     * @param origin the least value, unless greater than bound
+     * @param bound the upper bound (exclusive), must not equal origin
+     * @return a pseudorandom value
+     */
+    final int internalNextInt(int origin, int bound) {
+        if (origin < bound) {
+            int n = bound - origin;
+            if (n > 0) {
+                return nextInt(n) + origin;
+            }
+            else {  // range not representable as int
+                int r;
+                do {
+                    r = nextInt();
+                } while (r < origin || r >= bound);
+                return r;
+            }
+        }
+        else {
+            return nextInt();
+        }
+    }
 
-	/**
-	 * Generates a normally distributed random float number between 0.0
-	 * inclusively and 1.0 exclusively.
-	 * 
-	 * @return float a random float number between 0.0 and 1.0
-	 * 
-	 * @see #nextDouble
-	 * 
-     * @j2sNative
-     * return Math.random ();
-	 */
-	public float nextFloat() {
-		return (next(24) / 16777216f);
-	}
+    /**
+     * The form of nextDouble used by DoubleStream Spliterators.
+     *
+     * @param origin the least value, unless greater than bound
+     * @param bound the upper bound (exclusive), must not equal origin
+     * @return a pseudorandom value
+     */
+    final double internalNextDouble(double origin, double bound) {
+        double r = nextDouble();
+        if (origin < bound) {
+            r = r * (bound - origin) + origin;
+            if (r >= bound) // correct for rounding
+                r = Double.longBitsToDouble(Double.doubleToLongBits(bound) - 1);
+        }
+        return r;
+    }
 
-	/**
-	 * pseudo-randomly generates (approximately) a normally distributed
-	 * <code>double</code> value with mean 0.0 and a standard deviation value
-	 * of <code>1.0</code> using the <i>polar method<i> of G. E. P. Box, M.
-	 * E. Muller, and G. Marsaglia, as described by Donald E. Knuth in <i>The
-	 * Art of Computer Programming, Volume 2: Seminumerical Algorithms</i>,
-	 * section 3.4.1, subsection C, algorithm P
-	 * 
-	 * @return double
-	 * 
-	 * @see #nextDouble
-	 */
-	public synchronized double nextGaussian() {
-		if (haveNextNextGaussian) { // if X1 has been returned, return the
-									// second Gaussian
-			haveNextNextGaussian = false;
-			return nextNextGaussian;
-		}
-		
-		double v1, v2, s;
-		do {
-			v1 = 2 * nextDouble() - 1; // Generates two independent random
-										// variables U1, U2
-			v2 = 2 * nextDouble() - 1;
-			s = v1 * v1 + v2 * v2;
-		} while (s >= 1);
-		double norm = Math.sqrt(-2 * Math.log(s) / s);
-		nextNextGaussian = v2 * norm; // should that not be norm instead
-										// of multiplier ?
-		haveNextNextGaussian = true;
-		return v1 * norm; // should that not be norm instead of multiplier
-							// ?
-	}
+    /**
+     * Returns the next pseudorandom, uniformly distributed {@code int}
+     * value from this random number generator's sequence. The general
+     * contract of {@code nextInt} is that one {@code int} value is
+     * pseudorandomly generated and returned. All 2<sup>32</sup> possible
+     * {@code int} values are produced with (approximately) equal probability.
+     *
+     * <p>The method {@code nextInt} is implemented by class {@code Random}
+     * as if by:
+     *  <pre> {@code
+     * public int nextInt() {
+     *   return next(32);
+     * }}</pre>
+     *
+     * @return the next pseudorandom, uniformly distributed {@code int}
+     *         value from this random number generator's sequence
+     */
+    public int nextInt() {
+        return next(32);
+    }
 
-	/**
-	 * Generates a uniformly distributed 32-bit <code>int</code> value from
-	 * the this random number sequence.
-	 * 
-	 * @return int uniformly distributed <code>int</code> value
-	 * 
-	 * @see java.lang.Integer#MAX_VALUE
-	 * @see java.lang.Integer#MIN_VALUE
-	 * @see #next
-	 * @see #nextLong
-	 * 
-     * @j2sNative
-     * return Math.ceil (0xffff * Math.random ()) - 0x8000;
-	 */
-	public int nextInt() {
-		return next(32);
-	}
+    /**
+     * Returns a pseudorandom, uniformly distributed {@code int} value
+     * between 0 (inclusive) and the specified value (exclusive), drawn from
+     * this random number generator's sequence.  The general contract of
+     * {@code nextInt} is that one {@code int} value in the specified range
+     * is pseudorandomly generated and returned.  All {@code bound} possible
+     * {@code int} values are produced with (approximately) equal
+     * probability.  The method {@code nextInt(int bound)} is implemented by
+     * class {@code Random} as if by:
+     *  <pre> {@code
+     * public int nextInt(int bound) {
+     *   if (bound <= 0)
+     *     throw new IllegalArgumentException("bound must be positive");
+     *
+     *   if ((bound & -bound) == bound)  // i.e., bound is a power of 2
+     *     return (int)((bound * (long)next(31)) >> 31);
+     *
+     *   int bits, val;
+     *   do {
+     *       bits = next(31);
+     *       val = bits % bound;
+     *   } while (bits - val + (bound-1) < 0);
+     *   return val;
+     * }}</pre>
+     *
+     * <p>The hedge "approximately" is used in the foregoing description only
+     * because the next method is only approximately an unbiased source of
+     * independently chosen bits.  If it were a perfect source of randomly
+     * chosen bits, then the algorithm shown would choose {@code int}
+     * values from the stated range with perfect uniformity.
+     * <p>
+     * The algorithm is slightly tricky.  It rejects values that would result
+     * in an uneven distribution (due to the fact that 2^31 is not divisible
+     * by n). The probability of a value being rejected depends on n.  The
+     * worst case is n=2^30+1, for which the probability of a reject is 1/2,
+     * and the expected number of iterations before the loop terminates is 2.
+     * <p>
+     * The algorithm treats the case where n is a power of two specially: it
+     * returns the correct number of high-order bits from the underlying
+     * pseudo-random number generator.  In the absence of special treatment,
+     * the correct number of <i>low-order</i> bits would be returned.  Linear
+     * congruential pseudo-random number generators such as the one
+     * implemented by this class are known to have short periods in the
+     * sequence of values of their low-order bits.  Thus, this special case
+     * greatly increases the length of the sequence of values returned by
+     * successive calls to this method if n is a small power of two.
+     *
+     * @param bound the upper bound (exclusive).  Must be positive.
+     * @return the next pseudorandom, uniformly distributed {@code int}
+     *         value between zero (inclusive) and {@code bound} (exclusive)
+     *         from this random number generator's sequence
+     * @throws IllegalArgumentException if bound is not positive
+     * @since 1.2
+     */
+    public int nextInt(int bound) {
+        if (bound <= 0)
+            throw new IllegalArgumentException(BadBound);
 
-	/**
-	 * Returns to the caller a new pseudo-random integer value which is uniformly
-	 * distributed between 0 (inclusively) and the value of <code>n</code>
-	 * (exclusively).
-	 * 
-	 * @return int
-	 * @param n
-	 *            int
-	 */
-	public int nextInt(int n) {
-		/**
-		 * @j2sNative
-		 * 
-		 */
-		if (n > 0) {
-			n = Math.min(n, 31);
-			return (int) Math.floor((2 << (n - 1)) * Math.random());
-//			
-//			if ((n & -n) == n) {
-//                return (int) ((n * (long) next(31)) >> 31);
-//            }
-//			int bits, val;
-//			do {
-//				bits = next(31);
-//				val = bits % n;
-//			} while (bits - val + (n - 1) < 0);
-//			return val;
-		}
-		throw new IllegalArgumentException();
-	}
+        int r = next(31);
+        int m = bound - 1;
+        if ((bound & m) == 0)  // i.e., bound is a power of 2
+            r = (int)((bound * (long)r) >> 31);
+        else {
+            for (int u = r;
+                 u - (r = u % bound) + m < 0;
+                 u = next(31))
+                ;
+        }
+        return r;
+    }
 
-	/**
-	 * Generates a uniformly distributed 64-bit <code>int</code> value from
-	 * the this random number sequence.
-	 * 
-	 * @return 64-bit <code>int</code> random number
-	 * 
-	 * @see java.lang.Integer#MAX_VALUE
-	 * @see java.lang.Integer#MIN_VALUE
-	 * @see #next
-	 * @see #nextInt()
-	 * @see #nextInt(int)
-	 * 
-	 * @j2sNative
-     * return Math.ceil (0xffffffff * Math.random ()) - 0x80000000;
-	 */
-	public long nextLong() {
-		return ((long) next(32) << 32) + next(32);
-	}
+    /**
+     * Returns the next pseudorandom, uniformly distributed {@code long}
+     * value from this random number generator's sequence. The general
+     * contract of {@code nextLong} is that one {@code long} value is
+     * pseudorandomly generated and returned.
+     *
+     * <p>The method {@code nextLong} is implemented by class {@code Random}
+     * as if by:
+     *  <pre> {@code
+     * public long nextLong() {
+     *   return ((long)next(32) << 32) + next(32);
+     * }}</pre>
+     *
+     * Because class {@code Random} uses a seed with only 48 bits,
+     * this algorithm will not return all possible {@code long} values.
+     *
+     * @return the next pseudorandom, uniformly distributed {@code long}
+     *         value from this random number generator's sequence
+     */
+    public long nextLong() {
+        // it's okay that the bottom word remains signed.
+        return ((long)(next(32)) << 32) + next(32);
+    }
 
-	/**
-	 * Modifies the seed using linear congruential formula presented in <i>The
-	 * Art of Computer Programming, Volume 2</i>, Section 3.2.1.
-	 * 
-	 * @param seed
-	 *            the seed that alters the state of the random number generator
-	 * 
-	 * @see #next
-	 * @see #Random()
-	 * @see #Random(long)
-	 */
-	public synchronized void setSeed(long seed) {
-		/**
-		 * @j2sNative
-		 * 
-		 * Math.seedrandom(seed);
-		 */
-//		
-//		this.seed = (seed ^ multiplier) & ((1L << 48) - 1);
-//		haveNextNextGaussian = false;
-		
-	}
+    /**
+     * Returns the next pseudorandom, uniformly distributed
+     * {@code boolean} value from this random number generator's
+     * sequence. The general contract of {@code nextBoolean} is that one
+     * {@code boolean} value is pseudorandomly generated and returned.  The
+     * values {@code true} and {@code false} are produced with
+     * (approximately) equal probability.
+     *
+     * <p>The method {@code nextBoolean} is implemented by class {@code Random}
+     * as if by:
+     *  <pre> {@code
+     * public boolean nextBoolean() {
+     *   return next(1) != 0;
+     * }}</pre>
+     *
+     * @return the next pseudorandom, uniformly distributed
+     *         {@code boolean} value from this random number generator's
+     *         sequence
+     * @since 1.2
+     */
+    public boolean nextBoolean() {
+        return next(1) != 0;
+    }
 
-static {
-//seedrandom.js
-//Author: David Bau 3/11/2010
-//
-//Defines a method Math.seedrandom() that, when called, substitutes
-//an explicitly seeded RC4-based algorithm for Math.random().  Also
-//supports automatic seeding from local or network sources of entropy.
-//
-//Usage:
-//
-//<script src=http://davidbau.com/encode/seedrandom-min.js></script>
-//
-//Math.seedrandom('yipee'); Sets Math.random to a function that is
-//                          initialized using the given explicit seed.
-//
-//Math.seedrandom();        Sets Math.random to a function that is
-//                          seeded using the current time, dom state,
-//                          and other accumulated local entropy.
-//                          The generated seed string is returned.
-//
-//Math.seedrandom('yowza', true);
-//                          Seeds using the given explicit seed mixed
-//                          together with accumulated entropy.
-//
-//<script src="http://bit.ly/srandom-512"></script>
-//                          Seeds using physical random bits downloaded
-//                          from random.org.
-//
-//Examples:
-//
-//Math.seedrandom("hello");            // Use "hello" as the seed.
-//document.write(Math.random());       // Always 0.5463663768140734
-//document.write(Math.random());       // Always 0.43973793770592234
-//var rng1 = Math.random;              // Remember the current prng.
-//
-//var autoseed = Math.seedrandom();    // New prng with an automatic seed.
-//document.write(Math.random());       // Pretty much unpredictable.
-//
-//Math.random = rng1;                  // Continue "hello" prng sequence.
-//document.write(Math.random());       // Always 0.554769432473455
-//
-//Math.seedrandom(autoseed);           // Restart at the previous seed.
-//document.write(Math.random());       // Repeat the 'unpredictable' value.
-//
-//Notes:
-//
-//Each time seedrandom('arg') is called, entropy from the passed seed
-//is accumulated in a pool to help generate future seeds for the
-//zero-argument form of Math.seedrandom, so entropy can be injected over
-//time by calling seedrandom with explicit data repeatedly.
-//
-//On speed - This javascript implementation of Math.random() is about
-//3-10x slower than the built-in Math.random() because it is not native
-//code, but this is typically fast enough anyway.  Seeding is more expensive,
-//especially if you use auto-seeding.  Some details (timings on Chrome 4):
-//
-//Our Math.random()            - avg less than 0.002 milliseconds per call
-//seedrandom('explicit')       - avg less than 0.5 milliseconds per call
-//seedrandom('explicit', true) - avg less than 2 milliseconds per call
-//seedrandom()                 - avg about 38 milliseconds per call
-//
-//LICENSE (BSD):
-//
-//Copyright 2010 David Bau, all rights reserved.
-//
-//Redistribution and use in source and binary forms, with or without
-//modification, are permitted provided that the following conditions are met:
-//
-//1. Redistributions of source code must retain the above copyright
-//   notice, this list of conditions and the following disclaimer.
-//
-//2. Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimer in the
-//   documentation and/or other materials provided with the distribution.
-//
-//3. Neither the name of this module nor the names of its contributors may
-//   be used to endorse or promote products derived from this software
-//   without specific prior written permission.
-//
-//THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-//"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-//LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-//A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-//OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-//SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-//LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-//DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-//THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-//(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-//OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
+    /**
+     * Returns the next pseudorandom, uniformly distributed {@code float}
+     * value between {@code 0.0} and {@code 1.0} from this random
+     * number generator's sequence.
+     *
+     * <p>The general contract of {@code nextFloat} is that one
+     * {@code float} value, chosen (approximately) uniformly from the
+     * range {@code 0.0f} (inclusive) to {@code 1.0f} (exclusive), is
+     * pseudorandomly generated and returned. All 2<sup>24</sup> possible
+     * {@code float} values of the form <i>m&nbsp;x&nbsp;</i>2<sup>-24</sup>,
+     * where <i>m</i> is a positive integer less than 2<sup>24</sup>, are
+     * produced with (approximately) equal probability.
+     *
+     * <p>The method {@code nextFloat} is implemented by class {@code Random}
+     * as if by:
+     *  <pre> {@code
+     * public float nextFloat() {
+     *   return next(24) / ((float)(1 << 24));
+     * }}</pre>
+     *
+     * <p>The hedge "approximately" is used in the foregoing description only
+     * because the next method is only approximately an unbiased source of
+     * independently chosen bits. If it were a perfect source of randomly
+     * chosen bits, then the algorithm shown would choose {@code float}
+     * values from the stated range with perfect uniformity.<p>
+     * [In early versions of Java, the result was incorrectly calculated as:
+     *  <pre> {@code
+     *   return next(30) / ((float)(1 << 30));}</pre>
+     * This might seem to be equivalent, if not better, but in fact it
+     * introduced a slight nonuniformity because of the bias in the rounding
+     * of floating-point numbers: it was slightly more likely that the
+     * low-order bit of the significand would be 0 than that it would be 1.]
+     *
+     * @return the next pseudorandom, uniformly distributed {@code float}
+     *         value between {@code 0.0} and {@code 1.0} from this
+     *         random number generator's sequence
+     */
+    public float nextFloat() {
+        return next(24) / ((float)(1 << 24));
+    }
 
-/**
- * @j2sNative
-	(function (pool, math, width, chunks, significance, overflow, startdenom) {
-	var copyright = "Copyright 2010 David Bau, all rights reserved. (BSD)"
-	//
-	// seedrandom()
-	// This is the seedrandom function described above.
-	//
-	math['seedrandom'] = function seedrandom(seed, use_entropy) {
-	  var key = [];
-	  var arc4;
+    /**
+     * Returns the next pseudorandom, uniformly distributed
+     * {@code double} value between {@code 0.0} and
+     * {@code 1.0} from this random number generator's sequence.
+     *
+     * <p>The general contract of {@code nextDouble} is that one
+     * {@code double} value, chosen (approximately) uniformly from the
+     * range {@code 0.0d} (inclusive) to {@code 1.0d} (exclusive), is
+     * pseudorandomly generated and returned.
+     *
+     * <p>The method {@code nextDouble} is implemented by class {@code Random}
+     * as if by:
+     *  <pre> {@code
+     * public double nextDouble() {
+     *   return (((long)next(26) << 27) + next(27))
+     *     / (double)(1L << 53);
+     * }}</pre>
+     *
+     * <p>The hedge "approximately" is used in the foregoing description only
+     * because the {@code next} method is only approximately an unbiased
+     * source of independently chosen bits. If it were a perfect source of
+     * randomly chosen bits, then the algorithm shown would choose
+     * {@code double} values from the stated range with perfect uniformity.
+     * <p>[In early versions of Java, the result was incorrectly calculated as:
+     *  <pre> {@code
+     *   return (((long)next(27) << 27) + next(27))
+     *     / (double)(1L << 54);}</pre>
+     * This might seem to be equivalent, if not better, but in fact it
+     * introduced a large nonuniformity because of the bias in the rounding
+     * of floating-point numbers: it was three times as likely that the
+     * low-order bit of the significand would be 0 than that it would be 1!
+     * This nonuniformity probably doesn't matter much in practice, but we
+     * strive for perfection.]
+     *
+     * @return the next pseudorandom, uniformly distributed {@code double}
+     *         value between {@code 0.0} and {@code 1.0} from this
+     *         random number generator's sequence
+     * @see Math#random
+     */
+    public double nextDouble() {
+        return (((long)(next(26)) << 27) + next(27)) * DOUBLE_UNIT;
+    }
 
-	  // Flatten the seed string or build one from local entropy if needed.
-	  seed = mixkey(flatten(
-	    use_entropy ? [seed, pool] :
-	    arguments.length ? seed :
-	    [new Date().getTime(), pool, window], 3), key);
+    private double nextNextGaussian;
+    private boolean haveNextNextGaussian = false;
 
-	  // Use the seed to initialize an ARC4 generator.
-	  arc4 = new ARC4(key);
+    /**
+     * Returns the next pseudorandom, Gaussian ("normally") distributed
+     * {@code double} value with mean {@code 0.0} and standard
+     * deviation {@code 1.0} from this random number generator's sequence.
+     * <p>
+     * The general contract of {@code nextGaussian} is that one
+     * {@code double} value, chosen from (approximately) the usual
+     * normal distribution with mean {@code 0.0} and standard deviation
+     * {@code 1.0}, is pseudorandomly generated and returned.
+     *
+     * <p>The method {@code nextGaussian} is implemented by class
+     * {@code Random} as if by a threadsafe version of the following:
+     *  <pre> {@code
+     * private double nextNextGaussian;
+     * private boolean haveNextNextGaussian = false;
+     *
+     * public double nextGaussian() {
+     *   if (haveNextNextGaussian) {
+     *     haveNextNextGaussian = false;
+     *     return nextNextGaussian;
+     *   } else {
+     *     double v1, v2, s;
+     *     do {
+     *       v1 = 2 * nextDouble() - 1;   // between -1.0 and 1.0
+     *       v2 = 2 * nextDouble() - 1;   // between -1.0 and 1.0
+     *       s = v1 * v1 + v2 * v2;
+     *     } while (s >= 1 || s == 0);
+     *     double multiplier = StrictMath.sqrt(-2 * StrictMath.log(s)/s);
+     *     nextNextGaussian = v2 * multiplier;
+     *     haveNextNextGaussian = true;
+     *     return v1 * multiplier;
+     *   }
+     * }}</pre>
+     * This uses the <i>polar method</i> of G. E. P. Box, M. E. Muller, and
+     * G. Marsaglia, as described by Donald E. Knuth in <i>The Art of
+     * Computer Programming</i>, Volume 3: <i>Seminumerical Algorithms</i>,
+     * section 3.4.1, subsection C, algorithm P. Note that it generates two
+     * independent values at the cost of only one call to {@code StrictMath.log}
+     * and one call to {@code StrictMath.sqrt}.
+     *
+     * @return the next pseudorandom, Gaussian ("normally") distributed
+     *         {@code double} value with mean {@code 0.0} and
+     *         standard deviation {@code 1.0} from this random number
+     *         generator's sequence
+     */
+    synchronized public double nextGaussian() {
+        // See Knuth, ACP, Section 3.4.1 Algorithm C.
+        if (haveNextNextGaussian) {
+            haveNextNextGaussian = false;
+            return nextNextGaussian;
+        } else {
+            double v1, v2, s;
+            do {
+                v1 = 2 * nextDouble() - 1; // between -1 and 1
+                v2 = 2 * nextDouble() - 1; // between -1 and 1
+                s = v1 * v1 + v2 * v2;
+            } while (s >= 1 || s == 0);
+            double multiplier = StrictMath.sqrt(-2 * StrictMath.log(s)/s);
+            nextNextGaussian = v2 * multiplier;
+            haveNextNextGaussian = true;
+            return v1 * multiplier;
+        }
+    }
 
-	  // Mix the randomness into accumulated entropy.
-	  mixkey(arc4.S, pool);
+    // stream methods, coded in a way intended to better isolate for
+    // maintenance purposes the small differences across forms.
 
-	  // Override Math.random
+    /**
+     * Returns a stream producing the given {@code streamSize} number of
+     * pseudorandom {@code int} values.
+     *
+     * <p>A pseudorandom {@code int} value is generated as if it's the result of
+     * calling the method {@link #nextInt()}.
+     *
+     * @param streamSize the number of values to generate
+     * @return a stream of pseudorandom {@code int} values
+     * @throws IllegalArgumentException if {@code streamSize} is
+     *         less than zero
+     * @since 1.8
+     */
+    public IntStream ints(long streamSize) {
+        if (streamSize < 0L)
+            throw new IllegalArgumentException(BadSize);
+        return StreamSupport.intStream
+                (new RandomIntsSpliterator
+                         (this, 0L, streamSize, Integer.MAX_VALUE, 0),
+                 false);
+    }
 
-	  // This function returns a random double in [0, 1) that contains
-	  // randomness in every bit of the mantissa of the IEEE 754 value.
+    /**
+     * Returns an effectively unlimited stream of pseudorandom {@code int}
+     * values.
+     *
+     * <p>A pseudorandom {@code int} value is generated as if it's the result of
+     * calling the method {@link #nextInt()}.
+     *
+     * @implNote This method is implemented to be equivalent to {@code
+     * ints(Long.MAX_VALUE)}.
+     *
+     * @return a stream of pseudorandom {@code int} values
+     * @since 1.8
+     */
+    public IntStream ints() {
+        return StreamSupport.intStream
+                (new RandomIntsSpliterator
+                         (this, 0L, Long.MAX_VALUE, Integer.MAX_VALUE, 0),
+                 false);
+    }
 
-	  math['random'] = function random() {  // Closure to return a random double:
-	    var n = arc4.g(chunks);             // Start with a numerator n < 2 ^ 48
-	    var d = startdenom;                 //   and denominator d = 2 ^ 48.
-	    var x = 0;                          //   and no 'extra last byte'.
-	    while (n < significance) {          // Fill up all significant digits by
-	      n = (n + x) * width;              //   shifting numerator and
-	      d *= width;                       //   denominator and generating a
-	      x = arc4.g(1);                    //   new least-significant-byte.
-	    }
-	    while (n >= overflow) {             // To avoid rounding up, before adding
-	      n /= 2;                           //   last byte, shift everything
-	      d /= 2;                           //   right using integer math until
-	      x >>>= 1;                         //   we have exactly the desired bits.
-	    }
-	    return (n + x) / d;                 // Form the number within [0, 1).
-	  };
+    /**
+     * Returns a stream producing the given {@code streamSize} number
+     * of pseudorandom {@code int} values, each conforming to the given
+     * origin (inclusive) and bound (exclusive).
+     *
+     * <p>A pseudorandom {@code int} value is generated as if it's the result of
+     * calling the following method with the origin and bound:
+     * <pre> {@code
+     * int nextInt(int origin, int bound) {
+     *   int n = bound - origin;
+     *   if (n > 0) {
+     *     return nextInt(n) + origin;
+     *   }
+     *   else {  // range not representable as int
+     *     int r;
+     *     do {
+     *       r = nextInt();
+     *     } while (r < origin || r >= bound);
+     *     return r;
+     *   }
+     * }}</pre>
+     *
+     * @param streamSize the number of values to generate
+     * @param randomNumberOrigin the origin (inclusive) of each random value
+     * @param randomNumberBound the bound (exclusive) of each random value
+     * @return a stream of pseudorandom {@code int} values,
+     *         each with the given origin (inclusive) and bound (exclusive)
+     * @throws IllegalArgumentException if {@code streamSize} is
+     *         less than zero, or {@code randomNumberOrigin}
+     *         is greater than or equal to {@code randomNumberBound}
+     * @since 1.8
+     */
+    public IntStream ints(long streamSize, int randomNumberOrigin,
+                          int randomNumberBound) {
+        if (streamSize < 0L)
+            throw new IllegalArgumentException(BadSize);
+        if (randomNumberOrigin >= randomNumberBound)
+            throw new IllegalArgumentException(BadRange);
+        return StreamSupport.intStream
+                (new RandomIntsSpliterator
+                         (this, 0L, streamSize, randomNumberOrigin, randomNumberBound),
+                 false);
+    }
 
-	  // Return the seed that was used
-	  return seed;
-	};
+    /**
+     * Returns an effectively unlimited stream of pseudorandom {@code
+     * int} values, each conforming to the given origin (inclusive) and bound
+     * (exclusive).
+     *
+     * <p>A pseudorandom {@code int} value is generated as if it's the result of
+     * calling the following method with the origin and bound:
+     * <pre> {@code
+     * int nextInt(int origin, int bound) {
+     *   int n = bound - origin;
+     *   if (n > 0) {
+     *     return nextInt(n) + origin;
+     *   }
+     *   else {  // range not representable as int
+     *     int r;
+     *     do {
+     *       r = nextInt();
+     *     } while (r < origin || r >= bound);
+     *     return r;
+     *   }
+     * }}</pre>
+     *
+     * @implNote This method is implemented to be equivalent to {@code
+     * ints(Long.MAX_VALUE, randomNumberOrigin, randomNumberBound)}.
+     *
+     * @param randomNumberOrigin the origin (inclusive) of each random value
+     * @param randomNumberBound the bound (exclusive) of each random value
+     * @return a stream of pseudorandom {@code int} values,
+     *         each with the given origin (inclusive) and bound (exclusive)
+     * @throws IllegalArgumentException if {@code randomNumberOrigin}
+     *         is greater than or equal to {@code randomNumberBound}
+     * @since 1.8
+     */
+    public IntStream ints(int randomNumberOrigin, int randomNumberBound) {
+        if (randomNumberOrigin >= randomNumberBound)
+            throw new IllegalArgumentException(BadRange);
+        return StreamSupport.intStream
+                (new RandomIntsSpliterator
+                         (this, 0L, Long.MAX_VALUE, randomNumberOrigin, randomNumberBound),
+                 false);
+    }
 
-	//
-	// ARC4
-	//
-	// An ARC4 implementation.  The constructor takes a key in the form of
-	// an array of at most (width) integers that should be 0 <= x < (width).
-	//
-	// The g(count) method returns a pseudorandom integer that concatenates
-	// the next (count) outputs from ARC4.  Its return value is a number x
-	// that is in the range 0 <= x < (width ^ count).
-	//
-	function ARC4(key) {
-	  var t, u, me = this, keylen = key.length;
-	  var i = 0, j = me.i = me.j = me.m = 0;
-	  me.S = [];
-	  me.c = [];
+    /**
+     * Returns a stream producing the given {@code streamSize} number of
+     * pseudorandom {@code long} values.
+     *
+     * <p>A pseudorandom {@code long} value is generated as if it's the result
+     * of calling the method {@link #nextLong()}.
+     *
+     * @param streamSize the number of values to generate
+     * @return a stream of pseudorandom {@code long} values
+     * @throws IllegalArgumentException if {@code streamSize} is
+     *         less than zero
+     * @since 1.8
+     */
+    public LongStream longs(long streamSize) {
+        if (streamSize < 0L)
+            throw new IllegalArgumentException(BadSize);
+        return StreamSupport.longStream
+                (new RandomLongsSpliterator
+                         (this, 0L, streamSize, Long.MAX_VALUE, 0L),
+                 false);
+    }
 
-	  // The empty key [] is treated as [0].
-	  if (!keylen) { key = [keylen++]; }
+    /**
+     * Returns an effectively unlimited stream of pseudorandom {@code long}
+     * values.
+     *
+     * <p>A pseudorandom {@code long} value is generated as if it's the result
+     * of calling the method {@link #nextLong()}.
+     *
+     * @implNote This method is implemented to be equivalent to {@code
+     * longs(Long.MAX_VALUE)}.
+     *
+     * @return a stream of pseudorandom {@code long} values
+     * @since 1.8
+     */
+    public LongStream longs() {
+        return StreamSupport.longStream
+                (new RandomLongsSpliterator
+                         (this, 0L, Long.MAX_VALUE, Long.MAX_VALUE, 0L),
+                 false);
+    }
 
-	  // Set up S using the standard key scheduling algorithm.
-	  while (i < width) { me.S[i] = i++; }
-	  for (i = 0; i < width; i++) {
-	    t = me.S[i];
-	    j = lowbits(j + t + key[i % keylen]);
-	    u = me.S[j];
-	    me.S[i] = u;
-	    me.S[j] = t;
-	  }
+    /**
+     * Returns a stream producing the given {@code streamSize} number of
+     * pseudorandom {@code long}, each conforming to the given origin
+     * (inclusive) and bound (exclusive).
+     *
+     * <p>A pseudorandom {@code long} value is generated as if it's the result
+     * of calling the following method with the origin and bound:
+     * <pre> {@code
+     * long nextLong(long origin, long bound) {
+     *   long r = nextLong();
+     *   long n = bound - origin, m = n - 1;
+     *   if ((n & m) == 0L)  // power of two
+     *     r = (r & m) + origin;
+     *   else if (n > 0L) {  // reject over-represented candidates
+     *     for (long u = r >>> 1;            // ensure nonnegative
+     *          u + m - (r = u % n) < 0L;    // rejection check
+     *          u = nextLong() >>> 1) // retry
+     *         ;
+     *     r += origin;
+     *   }
+     *   else {              // range not representable as long
+     *     while (r < origin || r >= bound)
+     *       r = nextLong();
+     *   }
+     *   return r;
+     * }}</pre>
+     *
+     * @param streamSize the number of values to generate
+     * @param randomNumberOrigin the origin (inclusive) of each random value
+     * @param randomNumberBound the bound (exclusive) of each random value
+     * @return a stream of pseudorandom {@code long} values,
+     *         each with the given origin (inclusive) and bound (exclusive)
+     * @throws IllegalArgumentException if {@code streamSize} is
+     *         less than zero, or {@code randomNumberOrigin}
+     *         is greater than or equal to {@code randomNumberBound}
+     * @since 1.8
+     */
+    public LongStream longs(long streamSize, long randomNumberOrigin,
+                            long randomNumberBound) {
+        if (streamSize < 0L)
+            throw new IllegalArgumentException(BadSize);
+        if (randomNumberOrigin >= randomNumberBound)
+            throw new IllegalArgumentException(BadRange);
+        return StreamSupport.longStream
+                (new RandomLongsSpliterator
+                         (this, 0L, streamSize, randomNumberOrigin, randomNumberBound),
+                 false);
+    }
 
-	  // The "g" method returns the next (count) outputs as one number.
-	  me.g = function getnext(count) {
-	    var s = me.S;
-	    var i = lowbits(me.i + 1); var t = s[i];
-	    var j = lowbits(me.j + t); var u = s[j];
-	    s[i] = u;
-	    s[j] = t;
-	    var r = s[lowbits(t + u)];
-	    while (--count) {
-	      i = lowbits(i + 1); t = s[i];
-	      j = lowbits(j + t); u = s[j];
-	      s[i] = u;
-	      s[j] = t;
-	      r = r * width + s[lowbits(t + u)];
-	    }
-	    me.i = i;
-	    me.j = j;
-	    return r;
-	  };
-	  // For robust unpredictability discard an initial batch of values.
-	  // See http://www.rsa.com/rsalabs/node.asp?id=2009
-	  me.g(width);
-	}
+    /**
+     * Returns an effectively unlimited stream of pseudorandom {@code
+     * long} values, each conforming to the given origin (inclusive) and bound
+     * (exclusive).
+     *
+     * <p>A pseudorandom {@code long} value is generated as if it's the result
+     * of calling the following method with the origin and bound:
+     * <pre> {@code
+     * long nextLong(long origin, long bound) {
+     *   long r = nextLong();
+     *   long n = bound - origin, m = n - 1;
+     *   if ((n & m) == 0L)  // power of two
+     *     r = (r & m) + origin;
+     *   else if (n > 0L) {  // reject over-represented candidates
+     *     for (long u = r >>> 1;            // ensure nonnegative
+     *          u + m - (r = u % n) < 0L;    // rejection check
+     *          u = nextLong() >>> 1) // retry
+     *         ;
+     *     r += origin;
+     *   }
+     *   else {              // range not representable as long
+     *     while (r < origin || r >= bound)
+     *       r = nextLong();
+     *   }
+     *   return r;
+     * }}</pre>
+     *
+     * @implNote This method is implemented to be equivalent to {@code
+     * longs(Long.MAX_VALUE, randomNumberOrigin, randomNumberBound)}.
+     *
+     * @param randomNumberOrigin the origin (inclusive) of each random value
+     * @param randomNumberBound the bound (exclusive) of each random value
+     * @return a stream of pseudorandom {@code long} values,
+     *         each with the given origin (inclusive) and bound (exclusive)
+     * @throws IllegalArgumentException if {@code randomNumberOrigin}
+     *         is greater than or equal to {@code randomNumberBound}
+     * @since 1.8
+     */
+    public LongStream longs(long randomNumberOrigin, long randomNumberBound) {
+        if (randomNumberOrigin >= randomNumberBound)
+            throw new IllegalArgumentException(BadRange);
+        return StreamSupport.longStream
+                (new RandomLongsSpliterator
+                         (this, 0L, Long.MAX_VALUE, randomNumberOrigin, randomNumberBound),
+                 false);
+    }
 
-	//
-	// flatten()
-	// Converts an object tree to nested arrays of strings.
-	//
-	function flatten(obj, depth, result, prop) {
-	  result = [];
-	  if (depth && typeof(obj) == 'object') {
-	    for (prop in obj) {
-	      if (prop.indexOf('S') < 5) {    // Avoid FF3 bug (local/sessionStorage)
-	        try { result.push(flatten(obj[prop], depth - 1)); } catch (e) {}
-	      }
-	    }
-	  }
-	  return result.length ? result : '' + obj;
-	}
+    /**
+     * Returns a stream producing the given {@code streamSize} number of
+     * pseudorandom {@code double} values, each between zero
+     * (inclusive) and one (exclusive).
+     *
+     * <p>A pseudorandom {@code double} value is generated as if it's the result
+     * of calling the method {@link #nextDouble()}.
+     *
+     * @param streamSize the number of values to generate
+     * @return a stream of {@code double} values
+     * @throws IllegalArgumentException if {@code streamSize} is
+     *         less than zero
+     * @since 1.8
+     */
+    public DoubleStream doubles(long streamSize) {
+        if (streamSize < 0L)
+            throw new IllegalArgumentException(BadSize);
+        return StreamSupport.doubleStream
+                (new RandomDoublesSpliterator
+                         (this, 0L, streamSize, Double.MAX_VALUE, 0.0),
+                 false);
+    }
 
-	//
-	// mixkey()
-	// Mixes a string seed into a key that is an array of integers, and
-	// returns a shortened string seed that is equivalent to the result key.
-	//
-	function mixkey(seed, key, smear, j) {
-	  seed += '';                         // Ensure the seed is a string
-	  smear = 0;
-	  for (j = 0; j < seed.length; j++) {
-	    key[lowbits(j)] =
-	      lowbits((smear ^= key[lowbits(j)] * 19) + seed.charCodeAt(j));
-	  }
-	  seed = '';
-	  for (j in key) { seed += String.fromCharCode(key[j]); }
-	  return seed;
-	}
+    /**
+     * Returns an effectively unlimited stream of pseudorandom {@code
+     * double} values, each between zero (inclusive) and one
+     * (exclusive).
+     *
+     * <p>A pseudorandom {@code double} value is generated as if it's the result
+     * of calling the method {@link #nextDouble()}.
+     *
+     * @implNote This method is implemented to be equivalent to {@code
+     * doubles(Long.MAX_VALUE)}.
+     *
+     * @return a stream of pseudorandom {@code double} values
+     * @since 1.8
+     */
+    public DoubleStream doubles() {
+        return StreamSupport.doubleStream
+                (new RandomDoublesSpliterator
+                         (this, 0L, Long.MAX_VALUE, Double.MAX_VALUE, 0.0),
+                 false);
+    }
 
-	//
-	// lowbits()
-	// A quick "n mod width" for width a power of 2.
-	//
-	function lowbits(n) { return n & (width - 1); }
+    /**
+     * Returns a stream producing the given {@code streamSize} number of
+     * pseudorandom {@code double} values, each conforming to the given origin
+     * (inclusive) and bound (exclusive).
+     *
+     * <p>A pseudorandom {@code double} value is generated as if it's the result
+     * of calling the following method with the origin and bound:
+     * <pre> {@code
+     * double nextDouble(double origin, double bound) {
+     *   double r = nextDouble();
+     *   r = r * (bound - origin) + origin;
+     *   if (r >= bound) // correct for rounding
+     *     r = Math.nextDown(bound);
+     *   return r;
+     * }}</pre>
+     *
+     * @param streamSize the number of values to generate
+     * @param randomNumberOrigin the origin (inclusive) of each random value
+     * @param randomNumberBound the bound (exclusive) of each random value
+     * @return a stream of pseudorandom {@code double} values,
+     *         each with the given origin (inclusive) and bound (exclusive)
+     * @throws IllegalArgumentException if {@code streamSize} is
+     *         less than zero
+     * @throws IllegalArgumentException if {@code randomNumberOrigin}
+     *         is greater than or equal to {@code randomNumberBound}
+     * @since 1.8
+     */
+    public DoubleStream doubles(long streamSize, double randomNumberOrigin,
+                                double randomNumberBound) {
+        if (streamSize < 0L)
+            throw new IllegalArgumentException(BadSize);
+        if (!(randomNumberOrigin < randomNumberBound))
+            throw new IllegalArgumentException(BadRange);
+        return StreamSupport.doubleStream
+                (new RandomDoublesSpliterator
+                         (this, 0L, streamSize, randomNumberOrigin, randomNumberBound),
+                 false);
+    }
 
-	//
-	// The following constants are related to IEEE 754 limits.
-	//
-	startdenom = math.pow(width, chunks);
-	significance = math.pow(2, significance);
-	overflow = significance * 2;
+    /**
+     * Returns an effectively unlimited stream of pseudorandom {@code
+     * double} values, each conforming to the given origin (inclusive) and bound
+     * (exclusive).
+     *
+     * <p>A pseudorandom {@code double} value is generated as if it's the result
+     * of calling the following method with the origin and bound:
+     * <pre> {@code
+     * double nextDouble(double origin, double bound) {
+     *   double r = nextDouble();
+     *   r = r * (bound - origin) + origin;
+     *   if (r >= bound) // correct for rounding
+     *     r = Math.nextDown(bound);
+     *   return r;
+     * }}</pre>
+     *
+     * @implNote This method is implemented to be equivalent to {@code
+     * doubles(Long.MAX_VALUE, randomNumberOrigin, randomNumberBound)}.
+     *
+     * @param randomNumberOrigin the origin (inclusive) of each random value
+     * @param randomNumberBound the bound (exclusive) of each random value
+     * @return a stream of pseudorandom {@code double} values,
+     *         each with the given origin (inclusive) and bound (exclusive)
+     * @throws IllegalArgumentException if {@code randomNumberOrigin}
+     *         is greater than or equal to {@code randomNumberBound}
+     * @since 1.8
+     */
+    public DoubleStream doubles(double randomNumberOrigin, double randomNumberBound) {
+        if (!(randomNumberOrigin < randomNumberBound))
+            throw new IllegalArgumentException(BadRange);
+        return StreamSupport.doubleStream
+                (new RandomDoublesSpliterator
+                         (this, 0L, Long.MAX_VALUE, randomNumberOrigin, randomNumberBound),
+                 false);
+    }
 
-	//
-	// When seedrandom.js is loaded, we immediately mix a few bits
-	// from the built-in RNG into the entropy pool.  Because we do
-	// not want to intefere with determinstic PRNG state later,
-	// seedrandom will not call math.random on its own again after
-	// initialization.
-	//
-	mixkey(math.random(), pool);
+    /**
+     * Spliterator for int streams.  We multiplex the four int
+     * versions into one class by treating a bound less than origin as
+     * unbounded, and also by treating "infinite" as equivalent to
+     * Long.MAX_VALUE. For splits, it uses the standard divide-by-two
+     * approach. The long and double versions of this class are
+     * identical except for types.
+     */
+    static final class RandomIntsSpliterator implements Spliterator.OfInt {
+        final Random rng;
+        long index;
+        final long fence;
+        final int origin;
+        final int bound;
+        RandomIntsSpliterator(Random rng, long index, long fence,
+                              int origin, int bound) {
+            this.rng = rng; this.index = index; this.fence = fence;
+            this.origin = origin; this.bound = bound;
+        }
 
-	// End anonymous scope, and pass initial values.
-	})(
-	  [],   // pool: entropy pool starts empty
-	  Math, // math: package containing random, pow, and seedrandom
-	  256,  // width: each RC4 output is 0 <= x < 256
-	  6,    // chunks: at least six RC4 outputs for each double
-	  52    // significance: there are 52 significant digits in a double
-	);
- */
+        public RandomIntsSpliterator trySplit() {
+            long i = index, m = (i + fence) >>> 1;
+            return (m <= i) ? null :
+                   new RandomIntsSpliterator(rng, i, index = m, origin, bound);
+        }
 
+        public long estimateSize() {
+            return fence - index;
+        }
 
-}
+        public int characteristics() {
+            return (Spliterator.SIZED | Spliterator.SUBSIZED |
+                    Spliterator.NONNULL | Spliterator.IMMUTABLE);
+        }
 
+        public boolean tryAdvance(IntConsumer consumer) {
+            if (consumer == null) throw new NullPointerException();
+            long i = index, f = fence;
+            if (i < f) {
+                consumer.accept(rng.internalNextInt(origin, bound));
+                index = i + 1;
+                return true;
+            }
+            return false;
+        }
+
+        public void forEachRemaining(IntConsumer consumer) {
+            if (consumer == null) throw new NullPointerException();
+            long i = index, f = fence;
+            if (i < f) {
+                index = f;
+                Random r = rng;
+                int o = origin, b = bound;
+                do {
+                    consumer.accept(r.internalNextInt(o, b));
+                } while (++i < f);
+            }
+        }
+    }
+
+    /**
+     * Spliterator for long streams.
+     */
+    static final class RandomLongsSpliterator implements Spliterator.OfLong {
+        final Random rng;
+        long index;
+        final long fence;
+        final long origin;
+        final long bound;
+        RandomLongsSpliterator(Random rng, long index, long fence,
+                               long origin, long bound) {
+            this.rng = rng; this.index = index; this.fence = fence;
+            this.origin = origin; this.bound = bound;
+        }
+
+        public RandomLongsSpliterator trySplit() {
+            long i = index, m = (i + fence) >>> 1;
+            return (m <= i) ? null :
+                   new RandomLongsSpliterator(rng, i, index = m, origin, bound);
+        }
+
+        public long estimateSize() {
+            return fence - index;
+        }
+
+        public int characteristics() {
+            return (Spliterator.SIZED | Spliterator.SUBSIZED |
+                    Spliterator.NONNULL | Spliterator.IMMUTABLE);
+        }
+
+        public boolean tryAdvance(LongConsumer consumer) {
+            if (consumer == null) throw new NullPointerException();
+            long i = index, f = fence;
+            if (i < f) {
+                consumer.accept(rng.internalNextLong(origin, bound));
+                index = i + 1;
+                return true;
+            }
+            return false;
+        }
+
+        public void forEachRemaining(LongConsumer consumer) {
+            if (consumer == null) throw new NullPointerException();
+            long i = index, f = fence;
+            if (i < f) {
+                index = f;
+                Random r = rng;
+                long o = origin, b = bound;
+                do {
+                    consumer.accept(r.internalNextLong(o, b));
+                } while (++i < f);
+            }
+        }
+
+    }
+
+    /**
+     * Spliterator for double streams.
+     */
+    static final class RandomDoublesSpliterator implements Spliterator.OfDouble {
+        final Random rng;
+        long index;
+        final long fence;
+        final double origin;
+        final double bound;
+        RandomDoublesSpliterator(Random rng, long index, long fence,
+                                 double origin, double bound) {
+            this.rng = rng; this.index = index; this.fence = fence;
+            this.origin = origin; this.bound = bound;
+        }
+
+        public RandomDoublesSpliterator trySplit() {
+            long i = index, m = (i + fence) >>> 1;
+            return (m <= i) ? null :
+                   new RandomDoublesSpliterator(rng, i, index = m, origin, bound);
+        }
+
+        public long estimateSize() {
+            return fence - index;
+        }
+
+        public int characteristics() {
+            return (Spliterator.SIZED | Spliterator.SUBSIZED |
+                    Spliterator.NONNULL | Spliterator.IMMUTABLE);
+        }
+
+        public boolean tryAdvance(DoubleConsumer consumer) {
+            if (consumer == null) throw new NullPointerException();
+            long i = index, f = fence;
+            if (i < f) {
+                consumer.accept(rng.internalNextDouble(origin, bound));
+                index = i + 1;
+                return true;
+            }
+            return false;
+        }
+
+        public void forEachRemaining(DoubleConsumer consumer) {
+            if (consumer == null) throw new NullPointerException();
+            long i = index, f = fence;
+            if (i < f) {
+                index = f;
+                Random r = rng;
+                double o = origin, b = bound;
+                do {
+                    consumer.accept(r.internalNextDouble(o, b));
+                } while (++i < f);
+            }
+        }
+    }
+
+    /**
+     * Serializable fields for Random.
+     *
+     * @serialField    seed long
+     *              seed for random computations
+     * @serialField    nextNextGaussian double
+     *              next Gaussian to be returned
+     * @serialField      haveNextNextGaussian boolean
+     *              nextNextGaussian is valid
+     */
+    private static final ObjectStreamField[] serialPersistentFields = {
+        new ObjectStreamField("seed", Long.TYPE),
+        new ObjectStreamField("nextNextGaussian", Double.TYPE),
+        new ObjectStreamField("haveNextNextGaussian", Boolean.TYPE)
+    };
+
+    /**
+     * Reconstitute the {@code Random} instance from a stream (that is,
+     * deserialize it).
+     */
+    private void readObject(java.io.ObjectInputStream s)
+        throws java.io.IOException, ClassNotFoundException {
+
+        ObjectInputStream.GetField fields = s.readFields();
+
+        // The seed is read in as {@code long} for
+        // historical reasons, but it is converted to an AtomicLong.
+        long seedVal = fields.get("seed", -1L);
+        if (seedVal < 0)
+          throw new java.io.StreamCorruptedException(
+                              "Random: invalid seed");
+        resetSeed(seedVal);
+        nextNextGaussian = fields.get("nextNextGaussian", 0.0);
+        haveNextNextGaussian = fields.get("haveNextNextGaussian", false);
+    }
+
+    /**
+     * Save the {@code Random} instance to a stream.
+     */
+    synchronized private void writeObject(ObjectOutputStream s)
+        throws IOException {
+
+        // set the values of the Serializable fields
+        ObjectOutputStream.PutField fields = s.putFields();
+
+        // The seed is serialized as a long for historical reasons.
+        fields.put("seed", seed.get());
+        fields.put("nextNextGaussian", nextNextGaussian);
+        fields.put("haveNextNextGaussian", haveNextNextGaussian);
+
+        // save them
+        s.writeFields();
+    }
+
+    // Support for resetting seed while deserializing
+    private static final Unsafe unsafe = Unsafe.getUnsafe();
+    private static final long seedOffset;
+    static {
+        try {
+            seedOffset = unsafe.objectFieldOffset
+                (Random.class.getDeclaredField("seed"));
+        } catch (Exception ex) { throw new Error(ex); }
+    }
+    private void resetSeed(long seedVal) {
+        unsafe.putObjectVolatile(this, seedOffset, new AtomicLong(seedVal));
+    }
 }
