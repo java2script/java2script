@@ -1,84 +1,84 @@
-/* Copyright 2006 The Apache Software Foundation or its licensors, as applicable
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *     http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*
+ * Copyright (c) 2003, 2012, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.util;
 
-import java.io.Serializable;
-
 /**
- * The unchecked exception will be thrown out when the parameter is incompatible
- * with the corresponding format specifier.
+ * Unchecked exception thrown when the argument corresponding to the format
+ * specifier is of an incompatible type.
+ *
+ * <p> Unless otherwise specified, passing a <tt>null</tt> argument to any
+ * method or constructor in this class will cause a {@link
+ * NullPointerException} to be thrown.
+ *
  * @since 1.5
  */
-public class IllegalFormatConversionException extends IllegalFormatException
-		implements Serializable {
-	private static final long serialVersionUID = 17000126L;
+public class IllegalFormatConversionException extends IllegalFormatException {
 
-	private char c;
+    private static final long serialVersionUID = 17000126L;
 
-	private Class<?> arg;
+    private char c;
+    private Class<?> arg;
 
-	/**
-	 * Constructs an IllegalFormatConversionException with the class of the
-	 * mismatched conversion and corresponding parameter.
-	 * 
-	 * @param c
-	 *            The class of the mismatched conversion.
-	 * @param arg
-	 *            The corresponding parameter.
-	 */
-	public IllegalFormatConversionException(char c, Class<?> arg) {
-		this.c = c;
-		if (arg == null) {
-			throw new NullPointerException();
-		}
-		this.arg = arg;
-	}
+    /**
+     * Constructs an instance of this class with the mismatched conversion and
+     * the corresponding argument class.
+     *
+     * @param  c
+     *         Inapplicable conversion
+     *
+     * @param  arg
+     *         Class of the mismatched argument
+     */
+    public IllegalFormatConversionException(char c, Class<?> arg) {
+        if (arg == null)
+            throw new NullPointerException();
+        this.c = c;
+        this.arg = arg;
+    }
 
-	/**
-	 * Return the class of the mismatched parameter.
-	 * 
-	 * @return The class of the mismatched parameter.
-	 */
-	public Class<?> getArgumentClass() {
-		return arg;
-	}
+    /**
+     * Returns the inapplicable conversion.
+     *
+     * @return  The inapplicable conversion
+     */
+    public char getConversion() {
+        return c;
+    }
 
-	/**
-	 * Return the incompatible conversion.
-	 * 
-	 * @return The incompatible conversion.
-	 */
-	public char getConversion() {
-		return c;
-	}
+    /**
+     * Returns the class of the mismatched argument.
+     *
+     * @return   The class of the mismatched argument
+     */
+    public Class<?> getArgumentClass() {
+        return arg;
+    }
 
-	/**
-	 * Return the message string of the IllegalFormatConversionException.
-	 * 
-	 * @return The message string of the IllegalFormatConversionException.
-	 */
-	public String getMessage() {
-		/*
-		StringBuilder buffer = new StringBuilder();
-		buffer.append(c);
-		buffer.append(" is incompatible with ");
-		buffer.append(arg.getName());
-		return buffer.toString();
-		*/
-		return "" + c + " is incompatible with " + arg.getName();
-	}
-
+    // javadoc inherited from Throwable.java
+    public String getMessage() {
+        return String.format("%c != %s", c, arg.getName());
+    }
 }

@@ -39,9 +39,12 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.font.FontRenderContext;
 import java.awt.font.LineBreakMeasurer;
+import java.awt.font.TextHitInfo;
+import java.awt.font.TextLayout;
 import java.text.AttributedString;
 import java.util.Locale;
 import javax.swing.JComponent;
@@ -611,61 +614,61 @@ public class SwingUtilities2 {
      */
     public static void drawStringUnderlineCharAt(JComponent c,Graphics g,
                            String text, int underlinedIndex, int x,int y) {
-//        if (text == null || text.length() <= 0) {
-//            return;
-//        }
-//        SwingUtilities2.drawString(c, g, text, x, y);
-//        int textLength = text.length();
-//        if (underlinedIndex >= 0 && underlinedIndex < textLength ) {
-//            int underlineRectY = y;
-//            int underlineRectHeight = 1;
-//            int underlineRectX = 0;
-//            int underlineRectWidth = 0;
-//            boolean isPrinting = isPrinting(g);
-//            boolean needsTextLayout = isPrinting;
-//            if (!needsTextLayout) {
-//                synchronized (charsBufferLock) {
-//                    if (charsBuffer == null || charsBuffer.length < textLength) {
-//                        charsBuffer = text.toCharArray();
-//                    } else {
-//                        text.getChars(0, textLength, charsBuffer, 0);
-//                    }
-//                    needsTextLayout =
-//                        isComplexLayout(charsBuffer, 0, textLength);
-//                }
-//            }
-//            if (!needsTextLayout) {
-//                FontMetrics fm = g.getFontMetrics();
-//                underlineRectX = x +
-//                    SwingUtilities2.stringWidth(c,fm,
-//                                        text.substring(0,underlinedIndex));
-//                underlineRectWidth = fm.charWidth(text.
-//                                                  charAt(underlinedIndex));
-//            } else {
-//                Graphics2D g2d = getGraphics2D(g);
-//                if (g2d != null) {
-//                    TextLayout layout =
-//                        new TextLayout(text, g2d.getFont(),
-//                                       g2d.getFontRenderContext());
-//                    if (isPrinting) {
-//                        float screenWidth = (float)g2d.getFont().
-//                            getStringBounds(text, DEFAULT_FRC).getWidth();
-//                        layout = layout.getJustifiedLayout(screenWidth);
-//                    }
-//                    TextHitInfo leading =
-//                        TextHitInfo.leading(underlinedIndex);
-//                    TextHitInfo trailing =
-//                        TextHitInfo.trailing(underlinedIndex);
-//                    Shape shape =
-//                        layout.getVisualHighlightShape(leading, trailing);
-//                    Rectangle rect = shape.getBounds();
-//                    underlineRectX = x + rect.x;
-//                    underlineRectWidth = rect.width;
-//                }
-//            }
-//            g.fillRect(underlineRectX, underlineRectY + 1,
-//                       underlineRectWidth, underlineRectHeight);
-//        }
+        if (text == null || text.length() <= 0) {
+            return;
+        }
+        SwingUtilities2.drawString(c, g, text, x, y);
+        int textLength = text.length();
+        if (underlinedIndex >= 0 && underlinedIndex < textLength ) {
+            int underlineRectY = y;
+            int underlineRectHeight = 1;
+            int underlineRectX = 0;
+            int underlineRectWidth = 0;
+            boolean isPrinting = isPrinting(g);
+            boolean needsTextLayout = isPrinting;
+            if (!needsTextLayout) {
+                synchronized (charsBufferLock) {
+                    if (charsBuffer == null || charsBuffer.length < textLength) {
+                        charsBuffer = text.toCharArray();
+                    } else {
+                        text.getChars(0, textLength, charsBuffer, 0);
+                    }
+                    needsTextLayout =
+                        isComplexLayout(charsBuffer, 0, textLength);
+                }
+            }
+            if (!needsTextLayout) {
+                FontMetrics fm = g.getFontMetrics();
+                underlineRectX = x +
+                    SwingUtilities2.stringWidth(c,fm,
+                                        text.substring(0,underlinedIndex));
+                underlineRectWidth = fm.charWidth(text.
+                                                  charAt(underlinedIndex));
+            } else {
+                Graphics2D g2d = getGraphics2D(g);
+                if (g2d != null) {
+                    TextLayout layout =
+                        new TextLayout(text, g2d.getFont(),
+                                       g2d.getFontRenderContext());
+                    if (isPrinting) {
+                        float screenWidth = (float)g2d.getFont().
+                            getStringBounds(text, DEFAULT_FRC).getWidth();
+                        layout = layout.getJustifiedLayout(screenWidth);
+                    }
+                    TextHitInfo leading =
+                        TextHitInfo.leading(underlinedIndex);
+                    TextHitInfo trailing =
+                        TextHitInfo.trailing(underlinedIndex);
+                    Shape shape =
+                        layout.getVisualHighlightShape(leading, trailing);
+                    Rectangle rect = shape.getBounds();
+                    underlineRectX = x + rect.x;
+                    underlineRectWidth = rect.width;
+                }
+            }
+            g.fillRect(underlineRectX, underlineRectY + 1,
+                       underlineRectWidth, underlineRectHeight);
+        }
     }
 
 

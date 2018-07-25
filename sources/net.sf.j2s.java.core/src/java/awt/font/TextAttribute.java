@@ -1,8 +1,5 @@
 /*
- * Some portions of this file have been modified by Robert Hanson hansonr.at.stolaf.edu 2012-2017
- * for use in SwingJS via transpilation into JavaScript using Java2Script.
- *
- * Copyright (c) 1997, 2006, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -69,7 +66,7 @@ import java.util.HashMap;
  *   <LI>a description of the effect.
  * </UL>
  * <p>
- * <H4>Values</H4>
+ * <H3>Values</H3>
  * <UL>
  *   <LI>The values of attributes must always be immutable.
  *   <LI>Where value limitations are given, any value outside of that
@@ -99,11 +96,10 @@ import java.util.HashMap;
  *
  * <h4>Summary of attributes</h4>
  * <p>
- * <font size="-1">
- * <table align="center" border="0" cellspacing="0" cellpadding="2" width="%95"
+ * <table style="float:center" border="0" cellspacing="0" cellpadding="2" width="%95"
  *     summary="Key, value type, principal constants, and default value
  *     behavior of all TextAttributes">
- * <tr bgcolor="#ccccff">
+ * <tr style="background-color:#ccccff">
  * <th valign="TOP" align="CENTER">Key</th>
  * <th valign="TOP" align="CENTER">Value Type</th>
  * <th valign="TOP" align="CENTER">Principal Constants</th>
@@ -113,12 +109,12 @@ import java.util.HashMap;
  * <td valign="TOP">{@link #FAMILY}</td>
  * <td valign="TOP">String</td>
  * <td valign="TOP">See Font {@link java.awt.Font#DIALOG DIALOG},
-{@link java.awt.Font#DIALOG_INPUT DIALOG_INPUT},<br> {@link java.awt.Font#SERIF SERIF},
-{@link java.awt.Font#SANS_SERIF SANS_SERIF}, and {@link java.awt.Font#MONOSPACED MONOSPACED}.
-</td>
+ * {@link java.awt.Font#DIALOG_INPUT DIALOG_INPUT},<br> {@link java.awt.Font#SERIF SERIF},
+ * {@link java.awt.Font#SANS_SERIF SANS_SERIF}, and {@link java.awt.Font#MONOSPACED MONOSPACED}.
+ * </td>
  * <td valign="TOP">"Default" (use platform default)</td>
  * </tr>
- * <tr bgcolor="#eeeeff">
+ * <tr style="background-color:#eeeeff">
  * <td valign="TOP">{@link #WEIGHT}</td>
  * <td valign="TOP">Number</td>
  * <td valign="TOP">WEIGHT_REGULAR, WEIGHT_BOLD</td>
@@ -130,7 +126,7 @@ import java.util.HashMap;
  * <td valign="TOP">WIDTH_CONDENSED, WIDTH_REGULAR,<br>WIDTH_EXTENDED</td>
  * <td valign="TOP">WIDTH_REGULAR</td>
  * </tr>
- * <tr bgcolor="#eeeeff">
+ * <tr style="background-color:#eeeeff">
  * <td valign="TOP">{@link #POSTURE}</td>
  * <td valign="TOP">Number</td>
  * <td valign="TOP">POSTURE_REGULAR, POSTURE_OBLIQUE</td>
@@ -142,7 +138,7 @@ import java.util.HashMap;
  * <td valign="TOP">none</td>
  * <td valign="TOP">12.0</td>
  * </tr>
- * <tr bgcolor="#eeeeff">
+ * <tr style="background-color:#eeeeff">
  * <td valign="TOP">{@link #TRANSFORM}</td>
  * <td valign="TOP">{@link TransformAttribute}</td>
  * <td valign="TOP">See TransformAttribute {@link TransformAttribute#IDENTITY IDENTITY}</td>
@@ -154,7 +150,7 @@ import java.util.HashMap;
  * <td valign="TOP">SUPERSCRIPT_SUPER, SUPERSCRIPT_SUB</td>
  * <td valign="TOP">0 (use the standard glyphs and metrics)</td>
  * </tr>
- * <tr bgcolor="#eeeeff">
+ * <tr style="background-color:#eeeeff">
  * <td valign="TOP">{@link #FONT}</td>
  * <td valign="TOP">{@link java.awt.Font}</td>
  * <td valign="TOP">none</td>
@@ -166,7 +162,7 @@ import java.util.HashMap;
  * <td valign="TOP">none</td>
  * <td valign="TOP">null (draw text using font glyphs)</td>
  * </tr>
- * <tr bgcolor="#eeeeff">
+ * <tr style="background-color:#eeeeff">
  * <td valign="TOP">{@link #FOREGROUND}</td>
  * <td valign="TOP">{@link java.awt.Paint}</td>
  * <td valign="TOP">none</td>
@@ -178,7 +174,7 @@ import java.util.HashMap;
  * <td valign="TOP">none</td>
  * <td valign="TOP">null (do not render background)</td>
  * </tr>
- * <tr bgcolor="#eeeeff">
+ * <tr style="background-color:#eeeeff">
  * <td valign="TOP">{@link #UNDERLINE}</td>
  * <td valign="TOP">Integer</td>
  * <td valign="TOP">UNDERLINE_ON</td>
@@ -190,7 +186,7 @@ import java.util.HashMap;
  * <td valign="TOP">STRIKETHROUGH_ON</td>
  * <td valign="TOP">false (do not render strikethrough)</td>
  * </tr>
- * <tr bgcolor="#eeeeff">
+ * <tr style="background-color:#eeeeff">
  * <td valign="TOP">{@link #RUN_DIRECTION}</td>
  * <td valign="TOP">Boolean</td>
  * <td valign="TOP">RUN_DIRECTION_LTR<br>RUN_DIRECTION_RTL</td>
@@ -202,7 +198,7 @@ import java.util.HashMap;
  * <td valign="TOP">none</td>
  * <td valign="TOP">0 (use base line direction)</td>
  * </tr>
- * <tr bgcolor="#eeeeff">
+ * <tr style="background-color:#eeeeff">
  * <td valign="TOP">{@link #JUSTIFICATION}</td>
  * <td valign="TOP">Number</td>
  * <td valign="TOP">JUSTIFICATION_FULL</td>
@@ -214,7 +210,7 @@ import java.util.HashMap;
  * <td valign="TOP">(see class)</td>
  * <td valign="TOP">null (do not apply input highlighting)</td>
  * </tr>
- * <tr bgcolor="#eeeeff">
+ * <tr style="background-color:#eeeeff">
  * <td valign="TOP">{@link #INPUT_METHOD_UNDERLINE}</td>
  * <td valign="TOP">Integer</td>
  * <td valign="TOP">UNDERLINE_LOW_ONE_PIXEL,<br>UNDERLINE_LOW_TWO_PIXEL</td>
@@ -226,7 +222,7 @@ import java.util.HashMap;
  * <td valign="TOP">SWAP_COLORS_ON</td>
  * <td valign="TOP">false (do not swap colors)</td>
  * </tr>
- * <tr bgcolor="#eeeeff">
+ * <tr style="background-color:#eeeeff">
  * <td valign="TOP">{@link #NUMERIC_SHAPING}</td>
  * <td valign="TOP">{@link java.awt.font.NumericShaper}</td>
  * <td valign="TOP">none</td>
@@ -238,7 +234,7 @@ import java.util.HashMap;
  * <td valign="TOP">KERNING_ON</td>
  * <td valign="TOP">0 (do not request kerning)</td>
  * </tr>
- * <tr bgcolor="#eeeeff">
+ * <tr style="background-color:#eeeeff">
  * <td valign="TOP">{@link #LIGATURES}</td>
  * <td valign="TOP">Integer</td>
  * <td valign="TOP">LIGATURES_ON</td>
@@ -251,17 +247,16 @@ import java.util.HashMap;
  * <td valign="TOP">0 (do not add tracking)</td>
  * </tr>
  * </table>
- * </font>
  *
  * @see java.awt.Font
  * @see java.awt.font.TextLayout
  * @see java.text.AttributedCharacterIterator
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
 public final class TextAttribute extends Attribute {
 
     // table of all instances in this class, used by readResolve
-    private static final Map instanceMap = new HashMap(29);
+    private static final Map<String, TextAttribute>
+            instanceMap = new HashMap<String, TextAttribute>(29);
 
     /**
      * Constructs a <code>TextAttribute</code> with the specified name.
@@ -278,14 +273,13 @@ public final class TextAttribute extends Attribute {
     /**
      * Resolves instances being deserialized to the predefined constants.
      */
-    @Override
-		protected Object readResolve() throws InvalidObjectException {
+    protected Object readResolve() throws InvalidObjectException {
         if (this.getClass() != TextAttribute.class) {
             throw new InvalidObjectException(
                 "subclass didn't correctly implement readResolve");
         }
 
-        TextAttribute instance = (TextAttribute) instanceMap.get(getName());
+        TextAttribute instance = instanceMap.get(getName());
         if (instance != null) {
             return instance;
         } else {

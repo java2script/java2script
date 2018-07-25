@@ -176,7 +176,12 @@ public final class AWTAccessor {
         /**
          * Requests that this Component get the input focus, providing the cause
          */
-        void requestFocus(Component comp, CausedFocusEvent.Cause cause);
+        boolean requestFocus(Component comp, CausedFocusEvent.Cause cause);
+
+        /*
+         * Determines if the component can gain focus.
+         */
+        boolean canBeFocusOwner(Component comp);
 
         /**
          * Returns whether the component is visible without invoking

@@ -25,7 +25,8 @@
 
 package swingjs.plaf;
 
-// see https://docs.oracle.com/javase/tutorial/uiswing/examples/components/index.html#TabbedPaneDemo
+
+//see https://docs.oracle.com/javase/tutorial/uiswing/examples/components/index.html#TabbedPaneDemo
 
 import java.awt.Color;
 import java.awt.Component;
@@ -91,6 +92,8 @@ import swingjs.api.js.DOMNode;
 
 /**
  * A Basic L&F implementation of TabbedPaneUI.
+ * 
+ * SwingJS uses this for everything except drawing the labels
  *
  * @author Amy Fowler
  * @author Philip Milne
@@ -1122,6 +1125,7 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
 
         g.setFont(font);
 
+        System.out.println("painting tab text " + tabPlacement + " " + title + " "+ textRect);
         View v = getTextViewForTab(tabIndex);
         if (v != null) {
             // html

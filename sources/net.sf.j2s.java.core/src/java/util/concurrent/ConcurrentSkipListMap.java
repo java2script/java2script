@@ -399,7 +399,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
     static final class Node<K,V> {
         final K key;
         volatile Object value;
-        volatile Node<K,V> next;
+        volatile Node<K,V> next_;
 
         /**
          * Creates a new regular node.
@@ -407,7 +407,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
         Node(K key, Object value, Node<K,V> next) {
             this.key = key;
             this.value = value;
-            this.next = next;
+            this.next_ = next;
         }
 
         /**
@@ -420,7 +420,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
         Node(Node<K,V> next) {
             this.key = null;
             this.value = this;
-            this.next = next;
+            this.next_ = next;
         }
 
         /** Updater for casNext */
@@ -490,11 +490,11 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
              * help-out stages per call tends to minimize CAS
              * interference among helping threads.
              */
-            if (f == next && this == b.next) {
+            if (f == next_ && this == b.next_) {
                 if (f == null || f.value != f) // not already marked
                     appendMarker(f);
                 else
-                    b.casNext(this, f.next);
+                    b.casNext(this, f.next_);
             }
         }
 
@@ -773,12 +773,12 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
     private Node<K,V> findNode(Comparable<? super K> key) {
         for (;;) {
             Node<K,V> b = findPredecessor(key);
-            Node<K,V> n = b.next;
+            Node<K,V> n = b.next_;
             for (;;) {
                 if (n == null)
                     return null;
-                Node<K,V> f = n.next;
-                if (n != b.next)                // inconsistent read
+                Node<K,V> f = n.next_;
+                if (n != b.next_)                // inconsistent read
                     break;
                 Object v = n.value;
                 if (v == null) {                // n is deleted
@@ -842,7 +842,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
         }
 
         // Traverse nexts
-        for (n = q.node.next;  n != null; n = n.next) {
+        for (n = q.node.next_;  n != null; n = n.next_) {
             if ((k = n.key) != null) {
                 if ((c = key.compareTo(k)) == 0) {
                     Object v = n.value;
@@ -890,11 +890,11 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
         Comparable<? super K> key = comparable(kkey);
         for (;;) {
             Node<K,V> b = findPredecessor(key);
-            Node<K,V> n = b.next;
+            Node<K,V> n = b.next_;
             for (;;) {
                 if (n != null) {
-                    Node<K,V> f = n.next;
-                    if (n != b.next)               // inconsistent read
+                    Node<K,V> f = n.next_;
+                    if (n != b.next_)               // inconsistent read
                         break;;
                     Object v = n.value;
                     if (v == null) {               // n is deleted
@@ -1089,12 +1089,12 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
         Comparable<? super K> key = comparable(okey);
         for (;;) {
             Node<K,V> b = findPredecessor(key);
-            Node<K,V> n = b.next;
+            Node<K,V> n = b.next_;
             for (;;) {
                 if (n == null)
                     return null;
-                Node<K,V> f = n.next;
-                if (n != b.next)                    // inconsistent read
+                Node<K,V> f = n.next_;
+                if (n != b.next_)                    // inconsistent read
                     break;
                 Object v = n.value;
                 if (v == null) {                    // n is deleted
@@ -1171,12 +1171,12 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
     Node<K,V> findFirst() {
         for (;;) {
             Node<K,V> b = head.node;
-            Node<K,V> n = b.next;
+            Node<K,V> n = b.next_;
             if (n == null)
                 return null;
             if (n.value != null)
                 return n;
-            n.helpDelete(b, n.next);
+            n.helpDelete(b, n.next_);
         }
     }
 
@@ -1187,11 +1187,11 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
     Map.Entry<K,V> doRemoveFirstEntry() {
         for (;;) {
             Node<K,V> b = head.node;
-            Node<K,V> n = b.next;
+            Node<K,V> n = b.next_;
             if (n == null)
                 return null;
-            Node<K,V> f = n.next;
-            if (n != b.next)
+            Node<K,V> f = n.next_;
+            if (n != b.next_)
                 continue;
             Object v = n.value;
             if (v == null) {
@@ -1253,12 +1253,12 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
                 q = d;
             } else {
                 Node<K,V> b = q.node;
-                Node<K,V> n = b.next;
+                Node<K,V> n = b.next_;
                 for (;;) {
                     if (n == null)
                         return (b.isBaseHeader())? null : b;
-                    Node<K,V> f = n.next;            // inconsistent read
-                    if (n != b.next)
+                    Node<K,V> f = n.next_;            // inconsistent read
+                    if (n != b.next_)
                         break;
                     Object v = n.value;
                     if (v == null) {                 // n is deleted
@@ -1293,7 +1293,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
                         break;    // must restart
                     }
                     // proceed as far across as possible without overshooting
-                    if (r.node.next != null) {
+                    if (r.node.next_ != null) {
                         q = r;
                         continue;
                     }
@@ -1314,7 +1314,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
     Map.Entry<K,V> doRemoveLastEntry() {
         for (;;) {
             Node<K,V> b = findPredecessorOfLast();
-            Node<K,V> n = b.next;
+            Node<K,V> n = b.next_;
             if (n == null) {
                 if (b.isBaseHeader())               // empty
                     return null;
@@ -1322,8 +1322,8 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
                     continue; // all b's successors are deleted; retry
             }
             for (;;) {
-                Node<K,V> f = n.next;
-                if (n != b.next)                    // inconsistent read
+                Node<K,V> f = n.next_;
+                if (n != b.next_)                    // inconsistent read
                     break;
                 Object v = n.value;
                 if (v == null) {                    // n is deleted
@@ -1371,12 +1371,12 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
         Comparable<? super K> key = comparable(kkey);
         for (;;) {
             Node<K,V> b = findPredecessor(key);
-            Node<K,V> n = b.next;
+            Node<K,V> n = b.next_;
             for (;;) {
                 if (n == null)
                     return ((rel & LT) == 0 || b.isBaseHeader())? null : b;
-                Node<K,V> f = n.next;
-                if (n != b.next)                  // inconsistent read
+                Node<K,V> f = n.next_;
+                if (n != b.next_)                  // inconsistent read
                     break;
                 Object v = n.value;
                 if (v == null) {                  // n is deleted
@@ -1526,7 +1526,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
             if (k == null || v == null)
                 throw new NullPointerException();
             Node<K,V> z = new Node<K,V>(k, v, null);
-            basepred.next = z;
+            basepred.next_ = z;
             basepred = z;
             if (j > 0) {
                 Index<K,V> idx = null;
@@ -1563,7 +1563,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
         s.defaultWriteObject();
 
         // Write out keys and values (alternating)
-        for (Node<K,V> n = findFirst(); n != null; n = n.next) {
+        for (Node<K,V> n = findFirst(); n != null; n = n.next_) {
             V v = n.getValidValue();
             if (v != null) {
                 s.writeObject(n.key);
@@ -1614,7 +1614,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
             int j = randomLevel();
             if (j > h.level) j = h.level + 1;
             Node<K,V> z = new Node<K,V>(key, val, null);
-            basepred.next = z;
+            basepred.next_ = z;
             basepred = z;
             if (j > 0) {
                 Index<K,V> idx = null;
@@ -1714,7 +1714,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
     public boolean containsValue(Object value) {
         if (value == null)
             throw new NullPointerException();
-        for (Node<K,V> n = findFirst(); n != null; n = n.next) {
+        for (Node<K,V> n = findFirst(); n != null; n = n.next_) {
             V v = n.getValidValue();
             if (v != null && value.equals(v))
                 return true;
@@ -1740,7 +1740,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
      */
     public int size() {
         long count = 0;
-        for (Node<K,V> n = findFirst(); n != null; n = n.next) {
+        for (Node<K,V> n = findFirst(); n != null; n = n.next_) {
             if (n.getValidValue() != null)
                 ++count;
         }
@@ -2264,7 +2264,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
                 throw new NoSuchElementException();
             lastReturned = next;
             for (;;) {
-                next = next.next;
+                next = next.next_;
                 if (next == null)
                     break;
                 Object x = next.value;
@@ -2790,7 +2790,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
             long count = 0;
             for (ConcurrentSkipListMap.Node<K,V> n = loNode();
                  isBeforeEnd(n);
-                 n = n.next) {
+                 n = n.next_) {
                 if (n.getValidValue() != null)
                     ++count;
             }
@@ -2806,7 +2806,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
                 throw new NullPointerException();
             for (ConcurrentSkipListMap.Node<K,V> n = loNode();
                  isBeforeEnd(n);
-                 n = n.next) {
+                 n = n.next_) {
                 V v = n.getValidValue();
                 if (v != null && value.equals(v))
                     return true;
@@ -2817,7 +2817,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
         public void clear() {
             for (ConcurrentSkipListMap.Node<K,V> n = loNode();
                  isBeforeEnd(n);
-                 n = n.next) {
+                 n = n.next_) {
                 if (n.getValidValue() != null)
                     m.remove(n.key);
             }
@@ -3076,7 +3076,7 @@ public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
 
             private void ascend() {
                 for (;;) {
-                    next = next.next;
+                    next = next.next_;
                     if (next == null)
                         break;
                     Object x = next.value;

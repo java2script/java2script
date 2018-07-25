@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 2006, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1998, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -89,9 +89,9 @@ package java.util;
  * @since   1.2
  */
 
-@SuppressWarnings({"rawtypes", "unchecked"})
 public class TreeSet<E> extends AbstractSet<E>
-    implements NavigableSet<E>, Cloneable, java.io.Serializable {
+    implements NavigableSet<E>, Cloneable, java.io.Serializable
+{
     /**
      * The backing map.
      */
@@ -138,7 +138,7 @@ public class TreeSet<E> extends AbstractSet<E>
      *        ordering} of the elements will be used.
      */
     public TreeSet(Comparator<? super E> comparator) {
-        this(new TreeMap<E,Object>(comparator));
+        this(new TreeMap<>(comparator));
     }
 
     /**
@@ -195,7 +195,7 @@ public class TreeSet<E> extends AbstractSet<E>
      * @since 1.6
      */
     public NavigableSet<E> descendingSet() {
-        return new TreeSet(m.descendingMap());
+        return new TreeSet<>(m.descendingMap());
     }
 
     /**
@@ -295,14 +295,14 @@ public class TreeSet<E> extends AbstractSet<E>
      *         if any element is null and this set uses natural ordering, or
      *         its comparator does not permit null elements
      */
-    public  boolean addAll(Collection<? extends E> c) { 
+    public  boolean addAll(Collection<? extends E> c) {
         // Use linear-time version if applicable
         if (m.size()==0 && c.size() > 0 &&
             c instanceof SortedSet &&
             m instanceof TreeMap) {
             SortedSet<? extends E> set = (SortedSet<? extends E>) c;
             TreeMap<E,Object> map = (TreeMap<E, Object>) m;
-            Comparator<? super E> cc = (Comparator<? super E>) set.comparator();
+            Comparator<?> cc = set.comparator();
             Comparator<? super E> mc = map.comparator();
             if (cc==mc || (cc != null && cc.equals(mc))) {
                 map.addAllForTreeSet(set, PRESENT);
@@ -322,7 +322,7 @@ public class TreeSet<E> extends AbstractSet<E>
      */
     public NavigableSet<E> subSet(E fromElement, boolean fromInclusive,
                                   E toElement,   boolean toInclusive) {
-        return new TreeSet<E>(m.subMap(fromElement, fromInclusive,
+        return new TreeSet<>(m.subMap(fromElement, fromInclusive,
                                        toElement,   toInclusive));
     }
 
@@ -335,7 +335,7 @@ public class TreeSet<E> extends AbstractSet<E>
      * @since 1.6
      */
     public NavigableSet<E> headSet(E toElement, boolean inclusive) {
-        return new TreeSet<E>(m.headMap(toElement, inclusive));
+        return new TreeSet<>(m.headMap(toElement, inclusive));
     }
 
     /**
@@ -347,7 +347,7 @@ public class TreeSet<E> extends AbstractSet<E>
      * @since 1.6
      */
     public NavigableSet<E> tailSet(E fromElement, boolean inclusive) {
-        return new TreeSet<E>(m.tailMap(fromElement, inclusive));
+        return new TreeSet<>(m.tailMap(fromElement, inclusive));
     }
 
     /**
@@ -452,7 +452,7 @@ public class TreeSet<E> extends AbstractSet<E>
      */
     public E pollFirst() {
         Map.Entry<E,?> e = m.pollFirstEntry();
-        return (e == null)? null : e.getKey();
+        return (e == null) ? null : e.getKey();
     }
 
     /**
@@ -460,7 +460,7 @@ public class TreeSet<E> extends AbstractSet<E>
      */
     public E pollLast() {
         Map.Entry<E,?> e = m.pollLastEntry();
-        return (e == null)? null : e.getKey();
+        return (e == null) ? null : e.getKey();
     }
 
     /**
@@ -469,15 +469,16 @@ public class TreeSet<E> extends AbstractSet<E>
      *
      * @return a shallow copy of this set
      */
+    @SuppressWarnings("unchecked")
     public Object clone() {
-        TreeSet<E> clone = null;
+        TreeSet<E> clone;
         try {
             clone = (TreeSet<E>) super.clone();
         } catch (CloneNotSupportedException e) {
-            throw new InternalError();
+            throw new InternalError(e);
         }
 
-        clone.m = new TreeMap<E,Object>(m);
+        clone.m = new TreeMap<>(m);
         return clone;
     }
 
@@ -505,8 +506,8 @@ public class TreeSet<E> extends AbstractSet<E>
         s.writeInt(m.size());
 
         // Write out all elements in the proper order.
-        for (Iterator i=m.keySet().iterator(); i.hasNext(); )
-            s.writeObject(i.next());
+        for (E e : m.keySet())
+            s.writeObject(e);
     }
 
     /**
@@ -519,20 +520,40 @@ public class TreeSet<E> extends AbstractSet<E>
         s.defaultReadObject();
 
         // Read in Comparator
-        Comparator<? super E> c = (Comparator<? super E>) s.readObject();
+        @SuppressWarnings("unchecked")
+            Comparator<? super E> c = (Comparator<? super E>) s.readObject();
 
         // Create backing TreeMap
-        TreeMap<E,Object> tm;
-        if (c==null)
-            tm = new TreeMap<E,Object>();
-        else
-            tm = new TreeMap<E,Object>(c);
+        TreeMap<E,Object> tm = new TreeMap<>(c);
         m = tm;
 
         // Read in size
         int size = s.readInt();
 
         tm.readTreeSet(size, s, PRESENT);
+    }
+
+    /**
+     * Creates a <em><a href="Spliterator.html#binding">late-binding</a></em>
+     * and <em>fail-fast</em> {@link Spliterator} over the elements in this
+     * set.
+     *
+     * <p>The {@code Spliterator} reports {@link Spliterator#SIZED},
+     * {@link Spliterator#DISTINCT}, {@link Spliterator#SORTED}, and
+     * {@link Spliterator#ORDERED}.  Overriding implementations should document
+     * the reporting of additional characteristic values.
+     *
+     * <p>The spliterator's comparator (see
+     * {@link java.util.Spliterator#getComparator()}) is {@code null} if
+     * the tree set's comparator (see {@link #comparator()}) is {@code null}.
+     * Otherwise, the spliterator's comparator is the same as or imposes the
+     * same total ordering as the tree set's comparator.
+     *
+     * @return a {@code Spliterator} over the elements in this set
+     * @since 1.8
+     */
+    public Spliterator<E> spliterator() {
+        return TreeMap.keySpliteratorFor(m);
     }
 
     private static final long serialVersionUID = -2479143000061671589L;

@@ -30,7 +30,7 @@
  *
  * Written by Doug Lea and Josh Bloch with assistance from members of JCP
  * JSR-166 Expert Group and released to the public domain, as explained at
- * http://creativecommons.org/licenses/publicdomain
+ * http://creativecommons.org/publicdomain/zero/1.0/
  */
 
 package java.util;
@@ -192,7 +192,7 @@ public interface NavigableSet<E> extends SortedSet<E> {
      * Returns a view of the portion of this set whose elements range from
      * {@code fromElement} to {@code toElement}.  If {@code fromElement} and
      * {@code toElement} are equal, the returned set is empty unless {@code
-     * fromExclusive} and {@code toExclusive} are both true.  The returned set
+     * fromInclusive} and {@code toInclusive} are both true.  The returned set
      * is backed by this set, so changes in the returned set are reflected in
      * this set, and vice-versa.  The returned set supports all optional set
      * operations that this set supports.
@@ -303,7 +303,7 @@ public interface NavigableSet<E> extends SortedSet<E> {
      * @throws ClassCastException       {@inheritDoc}
      * @throws NullPointerException     {@inheritDoc}
      * @throws IllegalArgumentException {@inheritDoc}
-na     */
+     */
     SortedSet<E> headSet(E toElement);
 
     /**

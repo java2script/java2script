@@ -228,12 +228,12 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
         final K key;
         final int hash;
         volatile V value;
-        final HashEntry<K,V> next;
+        final HashEntry<K,V> nextEntry;
 
         HashEntry(K key, int hash, HashEntry<K,V> next, V value) {
             this.key = key;
             this.hash = hash;
-            this.next = next;
+            this.nextEntry = next;
             this.value = value;
         }
 
@@ -386,7 +386,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
                             return v;
                         return readValueUnderLock(e); // recheck
                     }
-                    e = e.next;
+                    e = e.nextEntry;
                 }
             }
             return null;
@@ -398,7 +398,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
                 while (e != null) {
                     if (e.hash == hash && key.equals(e.key))
                         return true;
-                    e = e.next;
+                    e = e.nextEntry;
                 }
             }
             return false;
@@ -409,7 +409,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
                 HashEntry<K,V>[] tab = table;
                 int len = tab.length;
                 for (int i = 0 ; i < len; i++) {
-                    for (HashEntry<K,V> e = tab[i]; e != null; e = e.next) {
+                    for (HashEntry<K,V> e = tab[i]; e != null; e = e.nextEntry) {
                         V v = e.value;
                         if (v == null) // recheck
                             v = readValueUnderLock(e);
@@ -426,7 +426,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
             try {
                 HashEntry<K,V> e = getFirst(hash);
                 while (e != null && (e.hash != hash || !key.equals(e.key)))
-                    e = e.next;
+                    e = e.nextEntry;
 
                 boolean replaced = false;
                 if (e != null && oldValue.equals(e.value)) {
@@ -444,7 +444,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
             try {
                 HashEntry<K,V> e = getFirst(hash);
                 while (e != null && (e.hash != hash || !key.equals(e.key)))
-                    e = e.next;
+                    e = e.nextEntry;
 
                 V oldValue = null;
                 if (e != null) {
@@ -469,7 +469,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
                 HashEntry<K,V> first = tab[index];
                 HashEntry<K,V> e = first;
                 while (e != null && (e.hash != hash || !key.equals(e.key)))
-                    e = e.next;
+                    e = e.nextEntry;
 
                 V oldValue;
                 if (e != null) {
@@ -518,7 +518,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
                 HashEntry<K,V> e = oldTable[i];
 
                 if (e != null) {
-                    HashEntry<K,V> next = e.next;
+                    HashEntry<K,V> next = e.nextEntry;
                     int idx = e.hash & sizeMask;
 
                     //  Single node on list
@@ -531,7 +531,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
                         int lastIdx = idx;
                         for (HashEntry<K,V> last = next;
                              last != null;
-                             last = last.next) {
+                             last = last.nextEntry) {
                             int k = last.hash & sizeMask;
                             if (k != lastIdx) {
                                 lastIdx = k;
@@ -541,7 +541,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
                         newTable[lastIdx] = lastRun;
 
                         // Clone all remaining nodes
-                        for (HashEntry<K,V> p = e; p != lastRun; p = p.next) {
+                        for (HashEntry<K,V> p = e; p != lastRun; p = p.nextEntry) {
                             int k = p.hash & sizeMask;
                             HashEntry<K,V> n = newTable[k];
                             newTable[k] = new HashEntry<K,V>(p.key, p.hash,
@@ -565,7 +565,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
                 HashEntry<K,V> first = tab[index];
                 HashEntry<K,V> e = first;
                 while (e != null && (e.hash != hash || !key.equals(e.key)))
-                    e = e.next;
+                    e = e.nextEntry;
 
                 V oldValue = null;
                 if (e != null) {
@@ -576,8 +576,8 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
                         // in list, but all preceding ones need to be
                         // cloned.
                         ++modCount;
-                        HashEntry<K,V> newFirst = e.next;
-                        for (HashEntry<K,V> p = first; p != e; p = p.next)
+                        HashEntry<K,V> newFirst = e.nextEntry;
+                        for (HashEntry<K,V> p = first; p != e; p = p.nextEntry)
                             newFirst = new HashEntry<K,V>(p.key, p.hash,
                                                           newFirst, p.value);
                         tab[index] = newFirst;
@@ -1115,7 +1115,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
         public boolean hasMoreElements() { return hasNext(); }
 
         final void advance() {
-            if (nextEntry != null && (nextEntry = nextEntry.next) != null)
+            if (nextEntry != null && (nextEntry = nextEntry.nextEntry) != null)
                 return;
 
             while (nextTableIndex >= 0) {
@@ -1297,7 +1297,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
             try {
                 HashEntry<K,V>[] tab = seg.table;
                 for (int i = 0; i < tab.length; ++i) {
-                    for (HashEntry<K,V> e = tab[i]; e != null; e = e.next) {
+                    for (HashEntry<K,V> e = tab[i]; e != null; e = e.nextEntry) {
                         s.writeObject(e.key);
                         s.writeObject(e.value);
                     }

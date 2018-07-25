@@ -472,7 +472,7 @@ public class CardLayout implements LayoutManager2,
      * currently visible card is the first one, this method flips to the
      * last card in the layout.
      * @param     parent   the parent container in which to do the layout
-     * @see       java.awt.CardLayout#next
+     * @see       java.awt.CardLayout#nextItem
      */
     public void previous(Container parent) {
         synchronized (parent.getTreeLock()) {

@@ -23,20 +23,24 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.InvalidDnDOperationException;
 import java.awt.dnd.peer.DragSourceContextPeer;
+import java.awt.im.InputMethodHighlight;
 import java.awt.image.ColorModel;
 import java.awt.image.ImageObserver;
 import java.awt.image.ImageProducer;
 import java.awt.peer.DialogPeer;
 import java.awt.peer.FramePeer;
+import java.awt.peer.KeyboardFocusManagerPeer;
 import java.awt.peer.LightweightPeer;
 import java.awt.peer.WindowPeer;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.text.AttributedCharacterIterator.Attribute;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.sound.sampled.AudioFormat;
@@ -53,6 +57,7 @@ import javax.swing.text.Document;
 import javajs.api.JSFunction;
 import javajs.util.PT;
 import sun.awt.AppContext;
+import sun.awt.KeyboardFocusManagerPeerProvider;
 import sun.awt.SunToolkit;
 import swingjs.api.Interface;
 import swingjs.api.JSFileHandler;
@@ -63,7 +68,7 @@ import swingjs.api.js.JQuery;
 import swingjs.plaf.JSComponentUI;
 
 
-public class JSToolkit extends SunToolkit {
+public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerProvider {
 
 	/**
 	 * for JSMouse only
@@ -942,6 +947,21 @@ public class JSToolkit extends SunToolkit {
 
 	public static ImageIcon paintImageForIcon(JComponent c, Icon icon) {
 		return JSImagekit.createImageIcon(c, icon);
+	}
+
+	@Override
+	public Map<? extends Attribute, ?> mapInputMethodHighlight(InputMethodHighlight hl) {
+		// Java 7
+		return null;
+	}
+
+	private KeyboardFocusManagerPeer focusManager;
+	
+	@Override
+	public KeyboardFocusManagerPeer getKeyboardFocusManagerPeer() {
+		if (focusManager == null)
+			focusManager = new JSFocusManager();
+		return focusManager;
 	}
 
 }

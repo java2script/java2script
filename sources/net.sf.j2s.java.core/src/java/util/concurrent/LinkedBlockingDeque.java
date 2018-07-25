@@ -88,11 +88,11 @@ public class LinkedBlockingDeque<E>
     static final class Node<E> {
         E item;
         Node<E> prev;
-        Node<E> next;
+        Node<E> next_;
         Node(E x, Node<E> p, Node<E> n) {
             item = x;
             prev = p;
-            next = n;
+            next_ = n;
         }
     }
 
@@ -180,7 +180,7 @@ public class LinkedBlockingDeque<E>
         if (first == null)
             first = x;
         else
-            l.next = x;
+            l.next_ = x;
         notEmpty.signal();
         return true;
     }
@@ -192,7 +192,7 @@ public class LinkedBlockingDeque<E>
         Node<E> f = first;
         if (f == null)
             return null;
-        Node<E> n = f.next;
+        Node<E> n = f.next_;
         first = n;
         if (n == null)
             last = null;
@@ -215,7 +215,7 @@ public class LinkedBlockingDeque<E>
         if (p == null)
             first = null;
         else
-            p.next = null;
+            p.next_ = null;
         --count;
         notFull.signal();
         return l.item;
@@ -226,7 +226,7 @@ public class LinkedBlockingDeque<E>
      */
     private void unlink(Node<E> x) {
         Node<E> p = x.prev;
-        Node<E> n = x.next;
+        Node<E> n = x.next_;
         if (p == null) {
             if (n == null)
                 first = last = null;
@@ -235,10 +235,10 @@ public class LinkedBlockingDeque<E>
                 first = n;
             }
         } else if (n == null) {
-            p.next = null;
+            p.next_ = null;
             last = p;
         } else {
-            p.next = n;
+            p.next_ = n;
             n.prev = p;
         }
         --count;
@@ -501,7 +501,7 @@ public class LinkedBlockingDeque<E>
         if (o == null) return false;
         lock.lock();
         try {
-            for (Node<E> p = first; p != null; p = p.next) {
+            for (Node<E> p = first; p != null; p = p.next_) {
                 if (o.equals(p.item)) {
                     unlink(p);
                     return true;
@@ -648,7 +648,7 @@ public class LinkedBlockingDeque<E>
             throw new IllegalArgumentException();
         lock.lock();
         try {
-            for (Node<E> p = first; p != null; p = p.next)
+            for (Node<E> p = first; p != null; p = p.next_)
                 c.add(p.item);
             int n = count;
             count = 0;
@@ -677,7 +677,7 @@ public class LinkedBlockingDeque<E>
             while (n < maxElements && first != null) {
                 c.add(first.item);
                 first.prev = null;
-                first = first.next;
+                first = first.next_;
                 --count;
                 ++n;
             }
@@ -753,7 +753,7 @@ public class LinkedBlockingDeque<E>
         if (o == null) return false;
         lock.lock();
         try {
-            for (Node<E> p = first; p != null; p = p.next)
+            for (Node<E> p = first; p != null; p = p.next_)
                 if (o.equals(p.item))
                     return true;
             return false;
@@ -769,7 +769,7 @@ public class LinkedBlockingDeque<E>
     boolean removeNode(Node<E> e) {
         lock.lock();
         try {
-            for (Node<E> p = first; p != null; p = p.next) {
+            for (Node<E> p = first; p != null; p = p.next_) {
                 if (p == e) {
                     unlink(p);
                     return true;
@@ -799,7 +799,7 @@ public class LinkedBlockingDeque<E>
         try {
             Object[] a = new Object[count];
             int k = 0;
-            for (Node<E> p = first; p != null; p = p.next)
+            for (Node<E> p = first; p != null; p = p.next_)
                 a[k++] = p.item;
             return a;
         } finally {
@@ -853,7 +853,7 @@ public class LinkedBlockingDeque<E>
                     );
 
             int k = 0;
-            for (Node<E> p = first; p != null; p = p.next)
+            for (Node<E> p = first; p != null; p = p.next_)
                 a[k++] = (T)p.item;
             if (a.length > k)
                 a[k] = null;
@@ -980,7 +980,7 @@ public class LinkedBlockingDeque<E>
             final ReentrantLock lock = LinkedBlockingDeque.this.lock;
             lock.lock();
             try {
-                next = (next == null)? first : next.next;
+                next = (next == null)? first : next.next_;
                 nextItem = (next == null)? null : next.item;
             } finally {
                 lock.unlock();
@@ -1018,7 +1018,7 @@ public class LinkedBlockingDeque<E>
             // Write out capacity and any hidden stuff
             s.defaultWriteObject();
             // Write out all elements in the proper order.
-            for (Node<E> p = first; p != null; p = p.next)
+            for (Node<E> p = first; p != null; p = p.next_)
                 s.writeObject(p.item);
             // Use trailing null as sentinel
             s.writeObject(null);

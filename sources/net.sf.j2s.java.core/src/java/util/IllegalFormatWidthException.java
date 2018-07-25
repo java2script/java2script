@@ -1,58 +1,62 @@
-/* Copyright 2006 The Apache Software Foundation or its licensors, as applicable
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *     http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*
+ * Copyright (c) 2003, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.util;
 
 /**
- * 
- * The unchecked exception will be thrown out when the width is a negative other
- * than -1, or the conversion does not support a width or other cases when the
- * width is not supported.
- * 
+ * Unchecked exception thrown when the format width is a negative value other
+ * than <tt>-1</tt> or is otherwise unsupported.
+ *
+ * @since 1.5
  */
 public class IllegalFormatWidthException extends IllegalFormatException {
 
-	private static final long serialVersionUID = 16660902L;
+    private static final long serialVersionUID = 16660902L;
 
-	private int w;
+    private int w;
 
-	/**
-	 * Constructs a IllegalFormatWidthException with specified width.
-	 * 
-	 * @param w
-	 *            The width.
-	 */
-	public IllegalFormatWidthException(int w) {
-		this.w = w;
-	}
+    /**
+     * Constructs an instance of this class with the specified width.
+     *
+     * @param  w
+     *         The width
+     */
+    public IllegalFormatWidthException(int w) {
+        this.w = w;
+    }
 
-	/**
-	 * Returns the width associated with the exception.
-	 * 
-	 * @return the width.
-	 */
-	public int getWidth() {
-		return w;
-	}
+    /**
+     * Returns the width
+     *
+     * @return  The width
+     */
+    public int getWidth() {
+        return w;
+    }
 
-	/**
-	 * Returns the message of the exception.
-	 * 
-	 * @return The message of the exception.
-	 */
-	public String getMessage() {
-		return String.valueOf(w);
-	}
+    public String getMessage() {
+        return Integer.toString(w);
+    }
 }

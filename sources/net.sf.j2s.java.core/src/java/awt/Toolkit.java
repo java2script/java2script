@@ -32,6 +32,7 @@ import java.awt.AWTPermission;
 import java.awt.HeadlessException;
 import java.awt.TextComponent;
 import java.net.URL;
+import java.text.AttributedCharacterIterator.Attribute;
 import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.HashMap;
@@ -61,6 +62,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.PaintEvent;
 import java.awt.event.TextEvent;
 import java.awt.event.WindowEvent;
+import java.awt.im.InputMethodHighlight;
 import java.awt.image.ColorModel;
 import java.awt.image.ImageObserver;
 import java.awt.image.ImageProducer;
@@ -2301,6 +2303,7 @@ public abstract class Toolkit {
             return new PropertyChangeSupport(toolkit);
 //        }
     }
+	public abstract Map<? extends Attribute, ?> mapInputMethodHighlight(InputMethodHighlight hl);
 
 //    private static class DesktopPropertyChangeSupport extends PropertyChangeSupport {
 //        private static final StringBuilder PROP_CHANGE_SUPPORT_KEY =
