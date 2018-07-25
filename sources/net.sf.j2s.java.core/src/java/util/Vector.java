@@ -1,33 +1,30 @@
 /*
- * Copyright (c) 1994, 2017, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * Copyright (c) 1994, 2013, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.util;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.StreamCorruptedException;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
@@ -1062,29 +1059,6 @@ public class Vector<E>
     }
 
     /**
-     * Loads a {@code Vector} instance from a stream
-     * (that is, deserializes it).
-     * This method performs checks to ensure the consistency
-     * of the fields.
-     *
-     * @param in the stream
-     * @throws java.io.IOException if an I/O error occurs
-     * @throws ClassNotFoundException if the stream contains data
-     *         of a non-existing class
-     */
-    private void readObject(ObjectInputStream in)
-            throws IOException, ClassNotFoundException {
-        ObjectInputStream.GetField gfields = in.readFields();
-        int count = gfields.get("elementCount", 0);
-        Object[] data = (Object[])gfields.get("elementData", null);
-        if (count < 0 || data == null || count > data.length) {
-            throw new StreamCorruptedException("Inconsistent vector internals");
-        }
-        elementCount = count;
-        elementData = data.clone();
-    }
-
-    /**
      * Save the state of the {@code Vector} instance to a stream (that
      * is, serialize it).
      * This method performs synchronization to ensure the consistency
@@ -1107,7 +1081,7 @@ public class Vector<E>
      * Returns a list iterator over the elements in this list (in proper
      * sequence), starting at the specified position in the list.
      * The specified index indicates the first element that would be
-     * returned by an initial call to {@link ListIterator#next next}.
+     * returned by an initial call to {@link ListIterator#nextItem next}.
      * An initial call to {@link ListIterator#previous previous} would
      * return the element with the specified index minus one.
      *

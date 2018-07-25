@@ -94,7 +94,7 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
     static class Node<E> {
         /** The item, volatile to ensure barrier separating write and read */
         volatile E item;
-        Node<E> next;
+        Node<E> next_;
         Node(E x) { item = x; }
     }
 
@@ -154,7 +154,7 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
      * @param x the item
      */
     private void insert(E x) {
-        last = last.next = new Node<E>(x);
+        last = last.next_ = new Node<E>(x);
     }
 
     /**
@@ -162,7 +162,7 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
      * @return the node
      */
     private E extract() {
-        Node<E> first = head.next;
+        Node<E> first = head.next_;
         head = first;
         E x = first.item;
         first.item = null;
@@ -464,7 +464,7 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
         final ReentrantLock takeLock = this.takeLock;
         takeLock.lock();
         try {
-            Node<E> first = head.next;
+            Node<E> first = head.next_;
             if (first == null)
                 return null;
             else
@@ -491,18 +491,18 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
         fullyLock();
         try {
             Node<E> trail = head;
-            Node<E> p = head.next;
+            Node<E> p = head.next_;
             while (p != null) {
                 if (o.equals(p.item)) {
                     removed = true;
                     break;
                 }
                 trail = p;
-                p = p.next;
+                p = p.next_;
             }
             if (removed) {
                 p.item = null;
-                trail.next = p.next;
+                trail.next_ = p.next_;
                 if (last == p)
                     last = trail;
                 if (count.getAndDecrement() == capacity)
@@ -533,7 +533,7 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
             int size = count.get();
             Object[] a = new Object[size];
             int k = 0;
-            for (Node<E> p = head.next; p != null; p = p.next)
+            for (Node<E> p = head.next_; p != null; p = p.next_)
                 a[k++] = p.item;
             return a;
         } finally {
@@ -586,7 +586,7 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
                     (a.getClass().getComponentType(), size);
 
             int k = 0;
-            for (Node p = head.next; p != null; p = p.next)
+            for (Node p = head.next_; p != null; p = p.next_)
                 a[k++] = (T)p.item;
             if (a.length > k)
                 a[k] = null;
@@ -612,7 +612,7 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
     public void clear() {
         fullyLock();
         try {
-            head.next = null;
+            head.next_ = null;
             assert head.item == null;
             last = head;
             if (count.getAndSet(0) == capacity)
@@ -636,8 +636,8 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
         Node<E> first;
         fullyLock();
         try {
-            first = head.next;
-            head.next = null;
+            first = head.next_;
+            head.next_ = null;
             assert head.item == null;
             last = head;
             if (count.getAndSet(0) == capacity)
@@ -647,7 +647,7 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
         }
         // Transfer the elements outside of locks
         int n = 0;
-        for (Node<E> p = first; p != null; p = p.next) {
+        for (Node<E> p = first; p != null; p = p.next_) {
             c.add(p.item);
             p.item = null;
             ++n;
@@ -669,15 +669,15 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
         fullyLock();
         try {
             int n = 0;
-            Node<E> p = head.next;
+            Node<E> p = head.next_;
             while (p != null && n < maxElements) {
                 c.add(p.item);
                 p.item = null;
-                p = p.next;
+                p = p.next_;
                 ++n;
             }
             if (n != 0) {
-                head.next = p;
+                head.next_ = p;
                 assert head.item == null;
                 if (p == null)
                     last = head;
@@ -720,7 +720,7 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
             putLock.lock();
             takeLock.lock();
             try {
-                current = head.next;
+                current = head.next_;
                 if (current != null)
                     currentElement = current.item;
             } finally {
@@ -743,7 +743,7 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
                     throw new NoSuchElementException();
                 E x = currentElement;
                 lastRet = current;
-                current = current.next;
+                current = current.next_;
                 if (current != null)
                     currentElement = current.item;
                 return x;
@@ -764,14 +764,14 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
                 Node<E> node = lastRet;
                 lastRet = null;
                 Node<E> trail = head;
-                Node<E> p = head.next;
+                Node<E> p = head.next_;
                 while (p != null && p != node) {
                     trail = p;
-                    p = p.next;
+                    p = p.next_;
                 }
                 if (p == node) {
                     p.item = null;
-                    trail.next = p.next;
+                    trail.next_ = p.next_;
                     if (last == p)
                         last = trail;
                     int c = count.getAndDecrement();
@@ -802,7 +802,7 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
             s.defaultWriteObject();
 
             // Write out all elements in the proper order.
-            for (Node<E> p = head.next; p != null; p = p.next)
+            for (Node<E> p = head.next_; p != null; p = p.next_)
                 s.writeObject(p.item);
 
             // Use trailing null as sentinel

@@ -29,6 +29,9 @@
 package java.awt;
 
 import javajs.util.SB;
+import sun.font.AttributeMap;
+import sun.font.AttributeValues;
+import sun.font.Font2DHandle;
 import swingjs.JSFontMetrics;
 import swingjs.JSLineMetrics;
 import swingjs.JSToolkit;
@@ -42,7 +45,8 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.LineMetrics;
 import java.awt.font.TextAttribute;
 import java.awt.geom.AffineTransform;
-//import sun.font.AttributeValues;
+import sun.font.AttributeValues;
+import static sun.font.EAttribute.*;
 import java.awt.geom.Rectangle2D;
 
 /**
@@ -376,16 +380,16 @@ public class Font
      */
 //    private transient FontPeer peer;
 //    private transient long pData;       // native JDK1.1 font pointer
-//    private transient Font2DHandle font2DHandle;
+    private transient Font2DHandle font2DHandle;
 
-//    private transient AttributeValues values;
+    private transient AttributeValues values;
     private transient boolean hasLayoutAttributes;
 
-//    /*
-//     * If the origin of a Font is a created font then this attribute
-//     * must be set on all derived fonts too.
-//     */
-//    private transient boolean createdFont = false;
+    /*
+     * If the origin of a Font is a created font then this attribute
+     * must be set on all derived fonts too.
+     */
+    private transient boolean createdFont = false;
 
     /*
      * This is true if the font transform is not identity.  It
@@ -427,35 +431,36 @@ public class Font
 //        return peer;
 //    }
 
-//    /**
-//     * Return the AttributeValues object associated with this
-//     * font.  Most of the time, the internal object is null.
-//     * If required, it will be created from the 'standard'
-//     * state on the font.  Only non-default values will be
-//     * set in the AttributeValues object.
-//     *
-//     * <p>Since the AttributeValues object is mutable, and it
-//     * is cached in the font, care must be taken to ensure that
-//     * it is not mutated.
-//     */
-//    private AttributeValues getAttributeValues() {
-//        if (values == null) {
-//            values = new AttributeValues();
-//            values.setFamily(name);
-//            values.setSize(pointSize); // expects the float value.
-//
-//            if ((style & BOLD) != 0) {
-//                values.setWeight(2); // WEIGHT_BOLD
-//            }
-//
-//            if ((style & ITALIC) != 0) {
-//                values.setPosture(.2f); // POSTURE_OBLIQUE
-//            }
-//            values.defineAll(PRIMARY_MASK); // for streaming compatibility
-//        }
-//
-//        return values;
-//    }
+    /**
+     * Return the AttributeValues object associated with this
+     * font.  Most of the time, the internal object is null.
+     * If required, it will be created from the 'standard'
+     * state on the font.  Only non-default values will be
+     * set in the AttributeValues object.
+     *
+     * <p>Since the AttributeValues object is mutable, and it
+     * is cached in the font, care must be taken to ensure that
+     * it is not mutated.
+     */
+    private AttributeValues getAttributeValues() {
+        if (values == null) {
+            initMasks();
+            values = new AttributeValues();
+            values.setFamily(name);
+            values.setSize(pointSize); // expects the float value.
+
+            if ((style & BOLD) != 0) {
+                values.setWeight(2); // WEIGHT_BOLD
+            }
+
+            if ((style & ITALIC) != 0) {
+                values.setPosture(.2f); // POSTURE_OBLIQUE
+            }
+            values.defineAll(PRIMARY_MASK); // for streaming compatibility
+        }
+
+        return values;
+    }
 //
 //    private Font2D getFont2D() {
 //    	// TODO
@@ -592,82 +597,84 @@ public class Font
 //        this.pointSize = 1f;
 //    }
 
-//    /* This constructor is used when one font is derived from another.
-//     * Fonts created from a stream will use the same font2D instance as the
-//     * parent. They can be distinguished because the "created" argument
-//     * will be "true". Since there is no way to recreate these fonts they
-//     * need to have the handle to the underlying font2D passed in.
-//     * "created" is also true when a special composite is referenced by the
-//     * handle for essentially the same reasons.
-//     * But when deriving a font in these cases two particular attributes
-//     * need special attention: family/face and style.
-//     * The "composites" in these cases need to be recreated with optimal
-//     * fonts for the new values of family and style.
-//     * For fonts created with createFont() these are treated differently.
-//     * JDK can often synthesise a different style (bold from plain
-//     * for example). For fonts created with "createFont" this is a reasonable
-//     * solution but its also possible (although rare) to derive a font with a
-//     * different family attribute. In this case JDK needs
-//     * to break the tie with the original Font2D and find a new Font.
-//     * The oldName and oldStyle are supplied so they can be compared with
-//     * what the Font2D and the values. To speed things along :
-//     * oldName == null will be interpreted as the name is unchanged.
-//     * oldStyle = -1 will be interpreted as the style is unchanged.
-//     * In these cases there is no need to interrogate "values".
-//     */
-//    private Font(AttributeValues values, String oldName, int oldStyle,
-//                 boolean created, Font2DHandle handle) {
-//
-//        this.createdFont = created;
-//        if (created) {
-//            this.font2DHandle = handle;
-//
-//            String newName = null;
-//            if (oldName != null) {
-//                newName = values.getFamily();
-//                if (oldName.equals(newName)) newName = null;
-//            }
-//            int newStyle = 0;
-//            if (oldStyle == -1) {
-//                newStyle = -1;
-//            } else {
-//                if (values.getWeight() >= 2f)   newStyle  = BOLD;
-//                if (values.getPosture() >= .2f) newStyle |= ITALIC;
-//                if (oldStyle == newStyle)       newStyle  = -1;
-//            }
-////            if (handle.font2D instanceof CompositeFont) {
-////                if (newStyle != -1 || newName != null) {
-////                    this.font2DHandle =
-////                        FontManager.getNewComposite(newName, newStyle, handle);
-////                }
-////            } else 
-//            	
-//            	if (newName != null) {
-//                this.createdFont = false;
-//                this.font2DHandle = null;
-//            }
-//        }
-//        initFromValues(values);
-//    }
+    /* This constructor is used when one font is derived from another.
+     * Fonts created from a stream will use the same font2D instance as the
+     * parent. They can be distinguished because the "created" argument
+     * will be "true". Since there is no way to recreate these fonts they
+     * need to have the handle to the underlying font2D passed in.
+     * "created" is also true when a special composite is referenced by the
+     * handle for essentially the same reasons.
+     * But when deriving a font in these cases two particular attributes
+     * need special attention: family/face and style.
+     * The "composites" in these cases need to be recreated with optimal
+     * fonts for the new values of family and style.
+     * For fonts created with createFont() these are treated differently.
+     * JDK can often synthesise a different style (bold from plain
+     * for example). For fonts created with "createFont" this is a reasonable
+     * solution but its also possible (although rare) to derive a font with a
+     * different family attribute. In this case JDK needs
+     * to break the tie with the original Font2D and find a new Font.
+     * The oldName and oldStyle are supplied so they can be compared with
+     * what the Font2D and the values. To speed things along :
+     * oldName == null will be interpreted as the name is unchanged.
+     * oldStyle = -1 will be interpreted as the style is unchanged.
+     * In these cases there is no need to interrogate "values".
+     */
+    private Font(AttributeValues values, String oldName, int oldStyle,
+                 boolean created, Font2DHandle handle) {
 
-//    /**
-//     * Creates a new <code>Font</code> with the specified attributes.
-//     * Only keys defined in {@link java.awt.font.TextAttribute TextAttribute}
-//     * are recognized.  In addition the FONT attribute is
-//     *  not recognized by this constructor
-//     * (see {@link #getAvailableAttributes}). Only attributes that have
-//     * values of valid types will affect the new <code>Font</code>.
-//     * <p>
-//     * If <code>attributes</code> is <code>null</code>, a new
-//     * <code>Font</code> is initialized with default values.
-//     * @see java.awt.font.TextAttribute
-//     * @param attributes the attributes to assign to the new
-//     *          <code>Font</code>, or <code>null</code>
-//     */
-//    public Font(Map<? extends Attribute, ?> attributes) {
-//        initFromValues(AttributeValues.fromMap(attributes, RECOGNIZED_MASK));
-//    }
+        this.createdFont = created;
+        if (created) {
+            this.font2DHandle = handle;
 
+            String newName = null;
+            if (oldName != null) {
+                newName = values.getFamily();
+                if (oldName.equals(newName)) newName = null;
+            }
+            int newStyle = 0;
+            if (oldStyle == -1) {
+                newStyle = -1;
+            } else {
+                if (values.getWeight() >= 2f)   newStyle  = BOLD;
+                if (values.getPosture() >= .2f) newStyle |= ITALIC;
+                if (oldStyle == newStyle)       newStyle  = -1;
+            }
+//            if (handle.font2D instanceof CompositeFont) {
+//                if (newStyle != -1 || newName != null) {
+//                    this.font2DHandle =
+//                        FontManager.getNewComposite(newName, newStyle, handle);
+//                }
+//            } else 
+            	
+            	if (newName != null) {
+                this.createdFont = false;
+                this.font2DHandle = null;
+            }
+        }
+        initFromValues(values);
+    }
+
+    /**
+     * Creates a new <code>Font</code> with the specified attributes.
+     * Only keys defined in {@link java.awt.font.TextAttribute TextAttribute}
+     * are recognized.  In addition the FONT attribute is
+     *  not recognized by this constructor
+     * (see {@link #getAvailableAttributes}). Only attributes that have
+     * values of valid types will affect the new <code>Font</code>.
+     * <p>
+     * If <code>attributes</code> is <code>null</code>, a new
+     * <code>Font</code> is initialized with default values.
+     * @see java.awt.font.TextAttribute
+     * @param attributes the attributes to assign to the new
+     *          <code>Font</code>, or <code>null</code>
+     */
+    public Font(Map<? extends Attribute, ?> attributes) {
+        initFromValues(AttributeValues.fromMap(attributes, RECOGNIZED_MASK));
+    }
+
+    
+    
     /**
      * Creates a new <code>Font</code> from the specified <code>font</code>.
      * This constructor is intended for use by subclasses.
@@ -676,121 +683,136 @@ public class Font
      * @since 1.6
      */
     protected Font(Font font) {
-//        if (font.values != null) {
-//            initFromValues(font.getAttributeValues().clone());
-//        } else {
+        if (font.values != null) {
+            initFromValues(font.getAttributeValues().clone());
+        } else {
             this.name = font.name;
             this.style = font.style;
             this.size = font.size;
             this.pointSize = font.pointSize;
-//        }
+        }
 //        this.font2DHandle = font.font2DHandle;
 //        this.createdFont = font.createdFont;
     }
 
-//    /**
-//     * Font recognizes all attributes except FONT.
-//     */
-//    private static final int RECOGNIZED_MASK = AttributeValues.MASK_ALL
-//        & ~AttributeValues.getMask(EFONT);
-//
-    /**
-     * These attributes are considered primary by the FONT attribute.
-     */
-//    private static final int PRIMARY_MASK =
-//        AttributeValues.getMask(EFAMILY, EWEIGHT, EWIDTH, EPOSTURE, ESIZE,
-//                                ETRANSFORM, ESUPERSCRIPT, ETRACKING);
-//
-//    /**
-//     * These attributes are considered secondary by the FONT attribute.
-//     */
-//    private static final int SECONDARY_MASK =
-//        RECOGNIZED_MASK & ~PRIMARY_MASK;
-//
-//    /**
-//     * These attributes are handled by layout.
-//     */
-//    private static final int LAYOUT_MASK =
-//        AttributeValues.getMask(ECHAR_REPLACEMENT, EFOREGROUND, EBACKGROUND,
-//                                EUNDERLINE, ESTRIKETHROUGH, ERUN_DIRECTION,
-//                                EBIDI_EMBEDDING, EJUSTIFICATION,
-//                                EINPUT_METHOD_HIGHLIGHT, EINPUT_METHOD_UNDERLINE,
-//                                ESWAP_COLORS, ENUMERIC_SHAPING, EKERNING,
-//                                ELIGATURES, ETRACKING);
-//
-//    private static final int EXTRA_MASK =
-//            AttributeValues.getMask(ETRANSFORM, ESUPERSCRIPT, EWIDTH);
-//
-//    /**
-//     * Initialize the standard Font fields from the values object.
-//     */
-//    private void initFromValues(AttributeValues values) {
-//        this.values = values;
-//        values.defineAll(PRIMARY_MASK); // for 1.5 streaming compatibility
-//
-//        this.name = values.getFamily();
-//        this.pointSize = values.getSize();
-//        this.size = (int)(values.getSize() + 0.5);
-//        if (values.getWeight() >= 2f) this.style |= BOLD; // not == 2f
-//        if (values.getPosture() >= .2f) this.style |= ITALIC; // not  == .2f
-//
-//        this.nonIdentityTx = values.anyNonDefault(EXTRA_MASK);
-//        this.hasLayoutAttributes =  values.anyNonDefault(LAYOUT_MASK);
-//    }
+    // SwingJS dynamic masks
+    
+    private static boolean haveMasks;
 
-//    /**
-//     * Returns a <code>Font</code> appropriate to the attributes.
-//     * If <code>attributes</code>contains a <code>FONT</code> attribute
-//     * with a valid <code>Font</code> as its value, it will be
-//     * merged with any remaining attributes.  See
-//     * {@link java.awt.font.TextAttribute#FONT} for more
-//     * information.
-//     *
-//     * @param attributes the attributes to assign to the new
-//     *          <code>Font</code>
-//     * @return a new <code>Font</code> created with the specified
-//     *          attributes
-//     * @throws NullPointerException if <code>attributes</code> is null.
-//     * @since 1.2
-//     * @see java.awt.font.TextAttribute
-//     */
-//    public static Font getFont(Map<? extends Attribute, ?> attributes) {
-//        // optimize for two cases:
-//        // 1) FONT attribute, and nothing else
-//        // 2) attributes, but no FONT
-//
-//        // avoid turning the attributemap into a regular map for no reason
-//        if (attributes instanceof AttributeMap &&
-//            ((AttributeMap)attributes).getValues() != null) {
-//            AttributeValues values = ((AttributeMap)attributes).getValues();
-//            if (values.isNonDefault(EFONT)) {
-//                Font font = values.getFont();
-//                if (!values.anyDefined(SECONDARY_MASK)) {
-//                    return font;
-//                }
-//                // merge
-//                values = font.getAttributeValues().clone();
-//                values.merge(attributes, SECONDARY_MASK);
-//                return new Font(values, font.name, font.style,
-//                                font.createdFont, font.font2DHandle);
-//            }
-//            return new Font(attributes);
-//        }
-//
-//        Font font = (Font)attributes.get(TextAttribute.FONT);
-//        if (font != null) {
-//            if (attributes.size() > 1) { // oh well, check for anything else
-//                AttributeValues values = font.getAttributeValues().clone();
-//                values.merge(attributes, SECONDARY_MASK);
-//                return new Font(values, font.name, font.style,
-//                                font.createdFont, font.font2DHandle);
-//            }
-//
-//            return font;
-//        }
-//
-//        return new Font(attributes);
-//    }
+    private static int RECOGNIZED_MASK, PRIMARY_MASK, SECONDARY_MASK, LAYOUT_MASK, EXTRA_MASK;
+
+    private final static void initMasks() {
+    	if (haveMasks)
+    		return;
+    	
+    	RECOGNIZED_MASK = AttributeValues.MASK_ALL
+                & ~AttributeValues.getMask(EFONT);
+
+            /**
+             * These attributes are considered primary by the FONT attribute.
+             */
+            PRIMARY_MASK =
+                AttributeValues.getMask(EFAMILY, EWEIGHT, EWIDTH, EPOSTURE, ESIZE,
+                                        ETRANSFORM, ESUPERSCRIPT, ETRACKING);
+
+            /**
+             * These attributes are considered secondary by the FONT attribute.
+             */
+            SECONDARY_MASK =
+                RECOGNIZED_MASK & ~PRIMARY_MASK;
+
+            /**
+             * These attributes are handled by layout.
+             */
+            LAYOUT_MASK =
+                AttributeValues.getMask(ECHAR_REPLACEMENT, EFOREGROUND, EBACKGROUND,
+                                        EUNDERLINE, ESTRIKETHROUGH, ERUN_DIRECTION,
+                                        EBIDI_EMBEDDING, EJUSTIFICATION,
+                                        EINPUT_METHOD_HIGHLIGHT, EINPUT_METHOD_UNDERLINE,
+                                        ESWAP_COLORS, ENUMERIC_SHAPING, EKERNING,
+                                        ELIGATURES, ETRACKING);
+
+            EXTRA_MASK =
+                    AttributeValues.getMask(ETRANSFORM, ESUPERSCRIPT, EWIDTH);
+          
+            haveMasks = true;
+     }
+    /**
+     * Font recognizes all attributes except FONT.
+     */
+    /**
+     * Initialize the standard Font fields from the values object.
+     */
+    private void initFromValues(AttributeValues values) {
+        this.values = values;
+        initMasks();
+        values.defineAll(PRIMARY_MASK); // for 1.5 streaming compatibility
+
+        this.name = values.getFamily();
+        this.pointSize = values.getSize();
+        this.size = (int)(values.getSize() + 0.5);
+        if (values.getWeight() >= 2f) this.style |= BOLD; // not == 2f
+        if (values.getPosture() >= .2f) this.style |= ITALIC; // not  == .2f
+
+        this.nonIdentityTx = values.anyNonDefault(EXTRA_MASK);
+        this.hasLayoutAttributes =  values.anyNonDefault(LAYOUT_MASK);
+    }
+
+    /**
+     * Returns a <code>Font</code> appropriate to the attributes.
+     * If <code>attributes</code>contains a <code>FONT</code> attribute
+     * with a valid <code>Font</code> as its value, it will be
+     * merged with any remaining attributes.  See
+     * {@link java.awt.font.TextAttribute#FONT} for more
+     * information.
+     *
+     * @param attributes the attributes to assign to the new
+     *          <code>Font</code>
+     * @return a new <code>Font</code> created with the specified
+     *          attributes
+     * @throws NullPointerException if <code>attributes</code> is null.
+     * @since 1.2
+     * @see java.awt.font.TextAttribute
+     */
+    public static Font getFont(Map<? extends Attribute, ?> attributes) {
+        // optimize for two cases:
+        // 1) FONT attribute, and nothing else
+        // 2) attributes, but no FONT
+
+    	initMasks();
+    	
+        // avoid turning the attributemap into a regular map for no reason
+        if (attributes instanceof AttributeMap &&
+            ((AttributeMap)attributes).getValues() != null) {
+            AttributeValues values = ((AttributeMap)attributes).getValues();
+            if (values.isNonDefault(EFONT)) {
+                Font font = values.getFont();
+                if (!values.anyDefined(SECONDARY_MASK)) {
+                    return font;
+                }
+                // merge
+                values = font.getAttributeValues().clone();
+                values.merge(attributes, SECONDARY_MASK);
+                return new Font(values, font.name, font.style,
+                                font.createdFont, font.font2DHandle);
+            }
+            return new Font(attributes);
+        }
+
+        Font font = (Font)attributes.get(TextAttribute.FONT);
+        if (font != null) {
+            if (attributes.size() > 1) { // oh well, check for anything else
+                AttributeValues values = font.getAttributeValues().clone();
+                values.merge(attributes, SECONDARY_MASK);
+                return new Font(values, font.name, font.style,
+                                font.createdFont, font.font2DHandle);
+            }
+
+            return font;
+        }
+
+        return new Font(attributes);
+    }
 
 //    /**
 //     * Used with the byte count tracker for fonts created from streams.
@@ -1819,16 +1841,16 @@ public class Font
 //        return getFont2D().getBaselineFor(c);
 //    }
 //
-//    /**
-//     * Returns a map of font attributes available in this
-//     * <code>Font</code>.  Attributes include things like ligatures and
-//     * glyph substitution.
-//     * @return the attributes map of this <code>Font</code>.
-//     */
-//    public Map<TextAttribute,?> getAttributes(){
-//        return new AttributeMap(getAttributeValues());
-//    }
-//
+    /**
+     * Returns a map of font attributes available in this
+     * <code>Font</code>.  Attributes include things like ligatures and
+     * glyph substitution.
+     * @return the attributes map of this <code>Font</code>.
+     */
+    public Map<TextAttribute,?> getAttributes(){
+        return new AttributeMap(getAttributeValues());
+    }
+
     /**
      * Returns the keys of all the attributes supported by this
      * <code>Font</code>.  These attributes can be used to derive other
@@ -2721,4 +2743,5 @@ public class Font
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 }

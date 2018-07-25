@@ -306,13 +306,13 @@ public class WeakHashMap<K,V>
 //                Entry<K,V> prev = table[i];
 //                Entry<K,V> p = prev;
 //                while (p != null) {
-//                    Entry<K,V> next = p.next;
+//                    Entry<K,V> next = p.next_;
 //                    if (p == e) {
 //                        if (prev == e)
 //                            table[i] = next;
 //                        else
-//                            prev.next = next;
-//                        // Must not null out e.next;
+//                            prev.next_ = next;
+//                        // Must not null out e.next_;
 //                        // stale entries may be in use by a HashIterator
 //                        e.value = null; // Help GC
 //                        size--;
@@ -382,7 +382,7 @@ public class WeakHashMap<K,V>
 //        while (e != null) {
 //            if (e.hash == h && eq(k, e.get()))
 //                return e.value;
-//            e = e.next;
+//            e = e.next_;
 //        }
 //        return null;
 //    }
@@ -410,7 +410,7 @@ public class WeakHashMap<K,V>
 //        int index = indexFor(h, tab.length);
 //        Entry<K,V> e = tab[index];
 //        while (e != null && !(e.hash == h && eq(k, e.get())))
-//            e = e.next;
+//            e = e.next_;
 //        return e;
 //    }
 //
@@ -432,7 +432,7 @@ public class WeakHashMap<K,V>
 //        Entry<K,V>[] tab = getTable();
 //        int i = indexFor(h, tab.length);
 //
-//        for (Entry<K,V> e = tab[i]; e != null; e = e.next) {
+//        for (Entry<K,V> e = tab[i]; e != null; e = e.next_) {
 //            if (h == e.hash && eq(k, e.get())) {
 //                V oldValue = e.value;
 //                if (value != oldValue)
@@ -495,15 +495,15 @@ public class WeakHashMap<K,V>
 //            Entry<K,V> e = src[j];
 //            src[j] = null;
 //            while (e != null) {
-//                Entry<K,V> next = e.next;
+//                Entry<K,V> next = e.next_;
 //                Object key = e.get();
 //                if (key == null) {
-//                    e.next = null;  // Help GC
+//                    e.next_ = null;  // Help GC
 //                    e.value = null; //  "   "
 //                    size--;
 //                } else {
 //                    int i = indexFor(e.hash, dest.length);
-//                    e.next = dest[i];
+//                    e.next_ = dest[i];
 //                    dest[i] = e;
 //                }
 //                e = next;
@@ -584,7 +584,7 @@ public class WeakHashMap<K,V>
 //                if (prev == e)
 //                    tab[i] = next;
 //                else
-//                    prev.next = next;
+//                    prev.next_ = next;
 //                return e.value;
 //            }
 //            prev = e;
@@ -607,14 +607,14 @@ public class WeakHashMap<K,V>
 //        Entry<K,V> e = prev;
 //
 //        while (e != null) {
-//            Entry<K,V> next = e.next;
+//            Entry<K,V> next = e.next_;
 //            if (h == e.hash && e.equals(entry)) {
 //                modCount++;
 //                size--;
 //                if (prev == e)
 //                    tab[i] = next;
 //                else
-//                    prev.next = next;
+//                    prev.next_ = next;
 //                return true;
 //            }
 //            prev = e;
@@ -659,7 +659,7 @@ public class WeakHashMap<K,V>
 //
 //        Entry<K,V>[] tab = getTable();
 //        for (int i = tab.length; i-- > 0;)
-//            for (Entry<K,V> e = tab[i]; e != null; e = e.next)
+//            for (Entry<K,V> e = tab[i]; e != null; e = e.next_)
 //                if (value.equals(e.value))
 //                    return true;
 //        return false;
@@ -671,7 +671,7 @@ public class WeakHashMap<K,V>
 //    private boolean containsNullValue() {
 //        Entry<K,V>[] tab = getTable();
 //        for (int i = tab.length; i-- > 0;)
-//            for (Entry<K,V> e = tab[i]; e != null; e = e.next)
+//            for (Entry<K,V> e = tab[i]; e != null; e = e.next_)
 //                if (e.value==null)
 //                    return true;
 //        return false;
@@ -695,7 +695,7 @@ public class WeakHashMap<K,V>
 //            super(key, queue);
 //            this.value = value;
 //            this.hash  = hash;
-//            this.next  = next;
+//            this.next_  = next;
 //        }
 //
 //        @SuppressWarnings("unchecked")
@@ -778,7 +778,7 @@ public class WeakHashMap<K,V>
 //                }
 //                nextKey = e.get(); // hold on to key in strong ref
 //                if (nextKey == null)
-//                    entry = entry.next;
+//                    entry = entry.next_;
 //            }
 //            return true;
 //        }
@@ -791,7 +791,7 @@ public class WeakHashMap<K,V>
 //                throw new NoSuchElementException();
 //
 //            lastReturned = entry;
-//            entry = entry.next;
+//            entry = entry.next_;
 //            currentKey = nextKey;
 //            nextKey = null;
 //            return lastReturned;

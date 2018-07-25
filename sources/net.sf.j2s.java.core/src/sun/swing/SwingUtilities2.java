@@ -39,8 +39,13 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.font.FontRenderContext;
+import java.awt.font.LineBreakMeasurer;
+import java.awt.font.TextHitInfo;
+import java.awt.font.TextLayout;
+import java.text.AttributedString;
 import java.util.Locale;
 import javax.swing.JComponent;
 import javax.swing.JList;
@@ -186,23 +191,23 @@ public class SwingUtilities2 {
 //        "UNTRUSTED_CLIPBOARD_ACCESS_KEY";
 
     //all access to  charsBuffer is to be synchronized on charsBufferLock
-//    private static final int CHAR_BUFFER_SIZE = 100;
-//    private static final Object charsBufferLock = new Object();
-//    private static char[] charsBuffer = new char[CHAR_BUFFER_SIZE];
+    private static final int CHAR_BUFFER_SIZE = 100;
+    private static final Object charsBufferLock = new Object();
+    private static char[] charsBuffer = new char[CHAR_BUFFER_SIZE];
 
-//    /**
-//     * checks whether TextLayout is required to handle characters.
-//     *
-//     * @param text characters to be tested
-//     * @param start start
-//     * @param limit limit
-//     * @return <tt>true</tt>  if TextLayout is required
-//     *         <tt>false</tt> if TextLayout is not required
-//     */
-//    public static final boolean isComplexLayout(char[] text, int start, int limit) {
-//    	return false;
-////        return FontManager.isComplexText(text, start, limit);
-//    }
+    /**
+     * checks whether TextLayout is required to handle characters.
+     *
+     * @param text characters to be tested
+     * @param start start
+     * @param limit limit
+     * @return <tt>true</tt>  if TextLayout is required
+     *         <tt>false</tt> if TextLayout is not required
+     */
+    public static final boolean isComplexLayout(char[] text, int start, int limit) {
+    	return false;
+//        return FontManager.isComplexText(text, start, limit);
+    }
 
     //
     // WARNING WARNING WARNING WARNING WARNING WARNING
@@ -432,83 +437,83 @@ public class SwingUtilities2 {
         return fm.stringWidth(string);
     }
 
-//
-//    /**
-//     * Clips the passed in String to the space provided.
-//     *
-//     * @param c JComponent that will display the string, may be null
-//     * @param fm FontMetrics used to measure the String width
-//     * @param string String to display
-//     * @param availTextWidth Amount of space that the string can be drawn in
-//     * @return Clipped string that can fit in the provided space.
-//     */
-//    public static String clipStringIfNecessary(JComponent c, FontMetrics fm,
-//                                               String string,
-//                                               int availTextWidth) {
-//        if ((string == null) || (string.equals("")))  {
-//            return "";
-//        }
-//        int textWidth = SwingUtilities2.stringWidth(c, fm, string);
-//        if (textWidth > availTextWidth) {
-//            return SwingUtilities2.clipString(c, fm, string, availTextWidth);
-//        }
-//        return string;
-//    }
-//
 
-//    /**
-//     * Clips the passed in String to the space provided.  NOTE: this assumes
-//     * the string does not fit in the available space.
-//     *
-//     * @param c JComponent that will display the string, may be null
-//     * @param fm FontMetrics used to measure the String width
-//     * @param string String to display
-//     * @param availTextWidth Amount of space that the string can be drawn in
-//     * @return Clipped string that can fit in the provided space.
-//     */
-//    public static String clipString(JComponent c, FontMetrics fm,
-//                                    String string, int availTextWidth) {
-//        // c may be null here.
-//        String clipString = "...";
-//        int stringLength = string.length();
-//        availTextWidth -= SwingUtilities2.stringWidth(c, fm, clipString);
-//        if (availTextWidth <= 0) {
-//            //can not fit any characters
-//            return clipString;
-//        }
-//
-//        boolean needsTextLayout = false;
-//
-//        synchronized (charsBufferLock) {
-//            if (charsBuffer == null || charsBuffer.length < stringLength) {
-//                charsBuffer  = string.toCharArray();
-//            } else {
-//                string.getChars(0, stringLength, charsBuffer, 0);
-//            }
-//            needsTextLayout =
-//                isComplexLayout(charsBuffer, 0, stringLength);
-//            if (!needsTextLayout) {
-//                int width = 0;
-//                for (int nChars = 0; nChars < stringLength; nChars++) {
-//                    width += fm.charWidth(charsBuffer[nChars]);
-//                    if (width > availTextWidth) {
-//                        string = string.substring(0, nChars);
-//                        break;
-//                    }
-//                }
-//            }
-//        }
-//        if (needsTextLayout) {
-//            FontRenderContext frc = getFontRenderContext(c, fm);
-//            AttributedString aString = new AttributedString(string);
-//            LineBreakMeasurer measurer =
-//                new LineBreakMeasurer(aString.getIterator(), frc);
-//            int nChars = measurer.nextOffset(availTextWidth);
-//            string = string.substring(0, nChars);
-//
-//        }
-//        return string + clipString;
-//    }
+    /**
+     * Clips the passed in String to the space provided.
+     *
+     * @param c JComponent that will display the string, may be null
+     * @param fm FontMetrics used to measure the String width
+     * @param string String to display
+     * @param availTextWidth Amount of space that the string can be drawn in
+     * @return Clipped string that can fit in the provided space.
+     */
+    public static String clipStringIfNecessary(JComponent c, FontMetrics fm,
+                                               String string,
+                                               int availTextWidth) {
+        if ((string == null) || (string.equals("")))  {
+            return "";
+        }
+        int textWidth = SwingUtilities2.stringWidth(c, fm, string);
+        if (textWidth > availTextWidth) {
+            return SwingUtilities2.clipString(c, fm, string, availTextWidth);
+        }
+        return string;
+    }
+
+
+    /**
+     * Clips the passed in String to the space provided.  NOTE: this assumes
+     * the string does not fit in the available space.
+     *
+     * @param c JComponent that will display the string, may be null
+     * @param fm FontMetrics used to measure the String width
+     * @param string String to display
+     * @param availTextWidth Amount of space that the string can be drawn in
+     * @return Clipped string that can fit in the provided space.
+     */
+    public static String clipString(JComponent c, FontMetrics fm,
+                                    String string, int availTextWidth) {
+        // c may be null here.
+        String clipString = "...";
+        int stringLength = string.length();
+        availTextWidth -= SwingUtilities2.stringWidth(c, fm, clipString);
+        if (availTextWidth <= 0) {
+            //can not fit any characters
+            return clipString;
+        }
+
+        boolean needsTextLayout = false;
+
+        synchronized (charsBufferLock) {
+            if (charsBuffer == null || charsBuffer.length < stringLength) {
+                charsBuffer  = string.toCharArray();
+            } else {
+                string.getChars(0, stringLength, charsBuffer, 0);
+            }
+            needsTextLayout =
+                isComplexLayout(charsBuffer, 0, stringLength);
+            if (!needsTextLayout) {
+                int width = 0;
+                for (int nChars = 0; nChars < stringLength; nChars++) {
+                    width += fm.charWidth(charsBuffer[nChars]);
+                    if (width > availTextWidth) {
+                        string = string.substring(0, nChars);
+                        break;
+                    }
+                }
+            }
+        }
+        if (needsTextLayout) {
+            FontRenderContext frc = getFontRenderContext(c, fm);
+            AttributedString aString = new AttributedString(string);
+            LineBreakMeasurer measurer =
+                new LineBreakMeasurer(aString.getIterator(), frc);
+            int nChars = measurer.nextOffset(availTextWidth);
+            string = string.substring(0, nChars);
+
+        }
+        return string + clipString;
+    }
 
 
     /**
@@ -596,75 +601,75 @@ public class SwingUtilities2 {
     }
 
 
-//    /**
-//     * Draws the string at the specified location underlining the specified
-//     * character.
-//     *
-//     * @param c JComponent that will display the string, may be null
-//     * @param g Graphics to draw the text to
-//     * @param text String to display
-//     * @param underlinedIndex Index of a character in the string to underline
-//     * @param x X coordinate to draw the text at
-//     * @param y Y coordinate to draw the text at
-//     */
-//    public static void drawStringUnderlineCharAt(JComponent c,Graphics g,
-//                           String text, int underlinedIndex, int x,int y) {
-//        if (text == null || text.length() <= 0) {
-//            return;
-//        }
-//        SwingUtilities2.drawString(c, g, text, x, y);
-//        int textLength = text.length();
-//        if (underlinedIndex >= 0 && underlinedIndex < textLength ) {
-//            int underlineRectY = y;
-//            int underlineRectHeight = 1;
-//            int underlineRectX = 0;
-//            int underlineRectWidth = 0;
-//            boolean isPrinting = isPrinting(g);
-//            boolean needsTextLayout = isPrinting;
-//            if (!needsTextLayout) {
-//                synchronized (charsBufferLock) {
-//                    if (charsBuffer == null || charsBuffer.length < textLength) {
-//                        charsBuffer = text.toCharArray();
-//                    } else {
-//                        text.getChars(0, textLength, charsBuffer, 0);
-//                    }
-//                    needsTextLayout =
-//                        isComplexLayout(charsBuffer, 0, textLength);
-//                }
-//            }
-//            if (!needsTextLayout) {
-//                FontMetrics fm = g.getFontMetrics();
-//                underlineRectX = x +
-//                    SwingUtilities2.stringWidth(c,fm,
-//                                        text.substring(0,underlinedIndex));
-//                underlineRectWidth = fm.charWidth(text.
-//                                                  charAt(underlinedIndex));
-//            } else {
-//                Graphics2D g2d = getGraphics2D(g);
-//                if (g2d != null) {
-//                    TextLayout layout =
-//                        new TextLayout(text, g2d.getFont(),
-//                                       g2d.getFontRenderContext());
-//                    if (isPrinting) {
-//                        float screenWidth = (float)g2d.getFont().
-//                            getStringBounds(text, DEFAULT_FRC).getWidth();
-//                        layout = layout.getJustifiedLayout(screenWidth);
-//                    }
-//                    TextHitInfo leading =
-//                        TextHitInfo.leading(underlinedIndex);
-//                    TextHitInfo trailing =
-//                        TextHitInfo.trailing(underlinedIndex);
-//                    Shape shape =
-//                        layout.getVisualHighlightShape(leading, trailing);
-//                    Rectangle rect = shape.getBounds();
-//                    underlineRectX = x + rect.x;
-//                    underlineRectWidth = rect.width;
-//                }
-//            }
-//            g.fillRect(underlineRectX, underlineRectY + 1,
-//                       underlineRectWidth, underlineRectHeight);
-//        }
-//    }
+    /**
+     * Draws the string at the specified location underlining the specified
+     * character.
+     *
+     * @param c JComponent that will display the string, may be null
+     * @param g Graphics to draw the text to
+     * @param text String to display
+     * @param underlinedIndex Index of a character in the string to underline
+     * @param x X coordinate to draw the text at
+     * @param y Y coordinate to draw the text at
+     */
+    public static void drawStringUnderlineCharAt(JComponent c,Graphics g,
+                           String text, int underlinedIndex, int x,int y) {
+        if (text == null || text.length() <= 0) {
+            return;
+        }
+        SwingUtilities2.drawString(c, g, text, x, y);
+        int textLength = text.length();
+        if (underlinedIndex >= 0 && underlinedIndex < textLength ) {
+            int underlineRectY = y;
+            int underlineRectHeight = 1;
+            int underlineRectX = 0;
+            int underlineRectWidth = 0;
+            boolean isPrinting = isPrinting(g);
+            boolean needsTextLayout = isPrinting;
+            if (!needsTextLayout) {
+                synchronized (charsBufferLock) {
+                    if (charsBuffer == null || charsBuffer.length < textLength) {
+                        charsBuffer = text.toCharArray();
+                    } else {
+                        text.getChars(0, textLength, charsBuffer, 0);
+                    }
+                    needsTextLayout =
+                        isComplexLayout(charsBuffer, 0, textLength);
+                }
+            }
+            if (!needsTextLayout) {
+                FontMetrics fm = g.getFontMetrics();
+                underlineRectX = x +
+                    SwingUtilities2.stringWidth(c,fm,
+                                        text.substring(0,underlinedIndex));
+                underlineRectWidth = fm.charWidth(text.
+                                                  charAt(underlinedIndex));
+            } else {
+                Graphics2D g2d = getGraphics2D(g);
+                if (g2d != null) {
+                    TextLayout layout =
+                        new TextLayout(text, g2d.getFont(),
+                                       g2d.getFontRenderContext());
+                    if (isPrinting) {
+                        float screenWidth = (float)g2d.getFont().
+                            getStringBounds(text, DEFAULT_FRC).getWidth();
+                        layout = layout.getJustifiedLayout(screenWidth);
+                    }
+                    TextHitInfo leading =
+                        TextHitInfo.leading(underlinedIndex);
+                    TextHitInfo trailing =
+                        TextHitInfo.trailing(underlinedIndex);
+                    Shape shape =
+                        layout.getVisualHighlightShape(leading, trailing);
+                    Rectangle rect = shape.getBounds();
+                    underlineRectX = x + rect.x;
+                    underlineRectWidth = rect.width;
+                }
+            }
+            g.fillRect(underlineRectX, underlineRectY + 1,
+                       underlineRectWidth, underlineRectHeight);
+        }
+    }
 
 
     /**
@@ -985,33 +990,33 @@ public class SwingUtilities2 {
         }
     }
 
-//    /*
-//     * Returns FontRenderContext associated with Component.
-//     * FontRenderContext from Component.getFontMetrics is associated
-//     * with the component.
-//     *
-//     * Uses Component.getFontMetrics to get the FontRenderContext from.
-//     * see JComponent.getFontMetrics and TextLayoutStrategy.java
-//     */
-//    public static FontRenderContext getFontRenderContext(Component c) {
-//        //assert c != null;
-//        if (c == null) {
-//            return DEFAULT_FRC;
-//        } else {
-//            return c.getFontMetrics(c.getFont()).getFontRenderContext();
-//        }
-//    }
+    /*
+     * Returns FontRenderContext associated with Component.
+     * FontRenderContext from Component.getFontMetrics is associated
+     * with the component.
+     *
+     * Uses Component.getFontMetrics to get the FontRenderContext from.
+     * see JComponent.getFontMetrics and TextLayoutStrategy.java
+     */
+    public static FontRenderContext getFontRenderContext(Component c) {
+        //assert c != null;
+        if (c == null) {
+            return DEFAULT_FRC;
+        } else {
+            return c.getFontMetrics(c.getFont()).getFontRenderContext();
+        }
+    }
 
-//    /**
-//     * A convenience method to get FontRenderContext.
-//     * Returns the FontRenderContext for the passed in FontMetrics or
-//     * for the passed in Component if FontMetrics is null
-//     */
-//    private static FontRenderContext getFontRenderContext(Component c, FontMetrics fm) {
-//        //assert fm != null || c!= null;
-//        return (fm != null) ? fm.getFontRenderContext()
-//            : getFontRenderContext(c);
-//    }
+    /**
+     * A convenience method to get FontRenderContext.
+     * Returns the FontRenderContext for the passed in FontMetrics or
+     * for the passed in Component if FontMetrics is null
+     */
+    private static FontRenderContext getFontRenderContext(Component c, FontMetrics fm) {
+        //assert fm != null || c!= null;
+        return (fm != null) ? fm.getFontRenderContext()
+            : getFontRenderContext(c);
+    }
 
 //    /*
 //     * This method is to be used only for JComponent.getFontMetrics.
@@ -1630,25 +1635,25 @@ public class SwingUtilities2 {
 //        return null;
 //    }
 //
-//    /**
-//     * Change focus to the visible component in {@code JTabbedPane}.
-//     * This is not a general-purpose method and is here only to permit
-//     * sharing code.
-//     */
-//    public static boolean tabbedPaneChangeFocusTo(Component comp) {
-//        if (comp != null) {
-//            if (comp.isFocusTraversable()) {
-//                SwingUtilities2.compositeRequestFocus(comp);
-//                return true;
-//            } else if (comp instanceof JComponent
-//                       && ((JComponent)comp).requestDefaultFocus()) {
-//
-//                 return true;
-//            }
-//        }
-//
-//        return false;
-//    }
+    /**
+     * Change focus to the visible component in {@code JTabbedPane}.
+     * This is not a general-purpose method and is here only to permit
+     * sharing code.
+     */
+    public static boolean tabbedPaneChangeFocusTo(Component comp) {
+        if (comp != null) {
+            if (comp.isFocusTraversable()) {
+                SwingUtilities2.compositeRequestFocus(comp);
+                return true;
+            } else if (comp instanceof JComponent
+                       && ((JComponent)comp).requestDefaultFocus()) {
+
+                 return true;
+            }
+        }
+
+        return false;
+    }
 
 //    /**
 //     * Submits a value-returning task for execution on the EDT and

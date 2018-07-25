@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2006, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2000, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,7 +24,11 @@
  */
 
 package java.util;
-import java.io.IOException;
+
+import java.lang.reflect.Array;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 /**
  * This class implements the <tt>Map</tt> interface with a hash table, using
@@ -69,7 +73,7 @@ import java.io.IOException;
  * maximum size and the number of buckets is unspecified.
  *
  * <p>If the size of the map (the number of key-value mappings) sufficiently
- * exceeds the expected maximum size, the number of buckets is increased
+ * exceeds the expected maximum size, the number of buckets is increased.
  * Increasing the number of buckets ("rehashing") may be fairly expensive, so
  * it pays to create identity hash maps with a sufficiently large expected
  * maximum size.  On the other hand, iteration over collection views requires
@@ -131,7 +135,6 @@ import java.io.IOException;
  * @since   1.4
  */
 
-@SuppressWarnings({"rawtypes", "unchecked"})
 public class IdentityHashMap<K,V>
     extends AbstractMap<K,V>
     implements Map<K,V>, java.io.Serializable, Cloneable
@@ -156,35 +159,34 @@ public class IdentityHashMap<K,V>
      * The maximum capacity, used if a higher value is implicitly specified
      * by either of the constructors with arguments.
      * MUST be a power of two <= 1<<29.
+     *
+     * In fact, the map can hold no more than MAXIMUM_CAPACITY-1 items
+     * because it has to have at least one slot with the key == null
+     * in order to avoid infinite loops in get(), put(), remove()
      */
     private static final int MAXIMUM_CAPACITY = 1 << 29;
 
     /**
      * The table, resized as necessary. Length MUST always be a power of two.
      */
-    private transient Object[] table;
+    transient Object[] table; // non-private to simplify nested class access
 
     /**
      * The number of key-value mappings contained in this identity hash map.
      *
      * @serial
      */
-    private int size;
+    int size;
 
     /**
      * The number of modifications, to support fast-fail iterators
      */
-    private transient volatile int modCount;
-
-    /**
-     * The next size value at which to resize (capacity * load factor).
-     */
-    private transient int threshold;
+    transient int modCount;
 
     /**
      * Value representing null keys inside tables.
      */
-    private static final Object NULL_KEY = new Object();
+    static final Object NULL_KEY = new Object();
 
     /**
      * Use NULL_KEY for key if it is null.
@@ -196,7 +198,7 @@ public class IdentityHashMap<K,V>
     /**
      * Returns internal representation of null key back to caller as null.
      */
-    private static Object unmaskNull(Object key) {
+    static final Object unmaskNull(Object key) {
         return (key == NULL_KEY ? null : key);
     }
 
@@ -225,27 +227,18 @@ public class IdentityHashMap<K,V>
     }
 
     /**
-     * Returns the appropriate capacity for the specified expected maximum
-     * size.  Returns the smallest power of two between MINIMUM_CAPACITY
-     * and MAXIMUM_CAPACITY, inclusive, that is greater than
-     * (3 * expectedMaxSize)/2, if such a number exists.  Otherwise
-     * returns MAXIMUM_CAPACITY.  If (3 * expectedMaxSize)/2 is negative, it
-     * is assumed that overflow has occurred, and MAXIMUM_CAPACITY is returned.
+     * Returns the appropriate capacity for the given expected maximum size.
+     * Returns the smallest power of two between MINIMUM_CAPACITY and
+     * MAXIMUM_CAPACITY, inclusive, that is greater than (3 *
+     * expectedMaxSize)/2, if such a number exists.  Otherwise returns
+     * MAXIMUM_CAPACITY.
      */
-    private int capacity(int expectedMaxSize) {
-        // Compute min capacity for expectedMaxSize given a load factor of 2/3
-        int minCapacity = (3 * expectedMaxSize)/2;
-
-        // Compute the appropriate capacity
-        int result;
-        if (minCapacity > MAXIMUM_CAPACITY || minCapacity < 0) {
-            result = MAXIMUM_CAPACITY;
-        } else {
-            result = MINIMUM_CAPACITY;
-            while (result < minCapacity)
-                result <<= 1;
-        }
-        return result;
+    private static int capacity(int expectedMaxSize) {
+        // assert expectedMaxSize >= 0;
+        return
+            (expectedMaxSize > MAXIMUM_CAPACITY / 3) ? MAXIMUM_CAPACITY :
+            (expectedMaxSize <= 2 * MINIMUM_CAPACITY / 3) ? MINIMUM_CAPACITY :
+            Integer.highestOneBit(expectedMaxSize + (expectedMaxSize << 1));
     }
 
     /**
@@ -258,7 +251,6 @@ public class IdentityHashMap<K,V>
         // assert initCapacity >= MINIMUM_CAPACITY;
         // assert initCapacity <= MAXIMUM_CAPACITY;
 
-        threshold = (initCapacity * 2)/3;
         table = new Object[2 * initCapacity];
     }
 
@@ -328,6 +320,7 @@ public class IdentityHashMap<K,V>
      *
      * @see #put(Object, Object)
      */
+    @SuppressWarnings("unchecked")
     public V get(Object key) {
         Object k = maskNull(key);
         Object[] tab = table;
@@ -424,51 +417,58 @@ public class IdentityHashMap<K,V>
      * @see     #containsKey(Object)
      */
     public V put(K key, V value) {
-        Object k = maskNull(key);
-        Object[] tab = table;
-        int len = tab.length;
-        int i = hash(k, len);
+        final Object k = maskNull(key);
 
-        Object item;
-        while ( (item = tab[i]) != null) {
-            if (item == k) {
-                V oldValue = (V) tab[i + 1];
-                tab[i + 1] = value;
-                return oldValue;
+        retryAfterResize: for (;;) {
+            final Object[] tab = table;
+            final int len = tab.length;
+            int i = hash(k, len);
+
+            for (Object item; (item = tab[i]) != null;
+                 i = nextKeyIndex(i, len)) {
+                if (item == k) {
+                    @SuppressWarnings("unchecked")
+                        V oldValue = (V) tab[i + 1];
+                    tab[i + 1] = value;
+                    return oldValue;
+                }
             }
-            i = nextKeyIndex(i, len);
-        }
 
-        modCount++;
-        tab[i] = k;
-        tab[i + 1] = value;
-        if (++size >= threshold)
-            resize(len); // len == 2 * current capacity.
-        return null;
+            final int s = size + 1;
+            // Use optimized form of 3 * s.
+            // Next capacity is len, 2 * current capacity.
+            if (s + (s << 1) > len && resize(len))
+                continue retryAfterResize;
+
+            modCount++;
+            tab[i] = k;
+            tab[i + 1] = value;
+            size = s;
+            return null;
+        }
     }
 
     /**
-     * Resize the table to hold given capacity.
+     * Resizes the table if necessary to hold given capacity.
      *
      * @param newCapacity the new capacity, must be a power of two.
+     * @return whether a resize did in fact take place
      */
-    private void resize(int newCapacity) {
+    private boolean resize(int newCapacity) {
         // assert (newCapacity & -newCapacity) == newCapacity; // power of 2
         int newLength = newCapacity * 2;
 
         Object[] oldTable = table;
         int oldLength = oldTable.length;
-        if (oldLength == 2*MAXIMUM_CAPACITY) { // can't expand any further
-            if (threshold == MAXIMUM_CAPACITY-1)
+        if (oldLength == 2 * MAXIMUM_CAPACITY) { // can't expand any further
+            if (size == MAXIMUM_CAPACITY - 1)
                 throw new IllegalStateException("Capacity exhausted.");
-            threshold = MAXIMUM_CAPACITY-1;  // Gigantic map!
-            return;
+            return false;
         }
         if (oldLength >= newLength)
-            return;
+            return false;
 
         Object[] newTable = new Object[newLength];
-        threshold = newLength / 3;
 
         for (int j = 0; j < oldLength; j += 2) {
             Object key = oldTable[j];
@@ -484,6 +484,7 @@ public class IdentityHashMap<K,V>
             }
         }
         table = newTable;
+        return true;
     }
 
     /**
@@ -498,8 +499,8 @@ public class IdentityHashMap<K,V>
         int n = m.size();
         if (n == 0)
             return;
-        if (n > threshold) // conservatively pre-expand
-            resize(capacity(n));
+        if (n > size)
+            resize(capacity(n)); // conservatively pre-expand
 
         for (Entry<? extends K, ? extends V> e : m.entrySet())
             put(e.getKey(), e.getValue());
@@ -525,7 +526,8 @@ public class IdentityHashMap<K,V>
             if (item == k) {
                 modCount++;
                 size--;
-                V oldValue = (V) tab[i + 1];
+                @SuppressWarnings("unchecked")
+                    V oldValue = (V) tab[i + 1];
                 tab[i + 1] = null;
                 tab[i] = null;
                 closeDeletion(i);
@@ -535,7 +537,6 @@ public class IdentityHashMap<K,V>
                 return null;
             i = nextKeyIndex(i, len);
         }
-
     }
 
     /**
@@ -639,7 +640,7 @@ public class IdentityHashMap<K,V>
         if (o == this) {
             return true;
         } else if (o instanceof IdentityHashMap) {
-            IdentityHashMap m = (IdentityHashMap) o;
+            IdentityHashMap<?,?> m = (IdentityHashMap<?,?>) o;
             if (m.size() != size)
                 return false;
 
@@ -651,7 +652,7 @@ public class IdentityHashMap<K,V>
             }
             return true;
         } else if (o instanceof Map) {
-            Map m = (Map)o;
+            Map<?,?> m = (Map<?,?>)o;
             return entrySet().equals(m.entrySet());
         } else {
             return false;  // o is not a Map
@@ -699,12 +700,12 @@ public class IdentityHashMap<K,V>
      */
     public Object clone() {
         try {
-            IdentityHashMap<K,V> m = (IdentityHashMap<K,V>) super.clone();
+            IdentityHashMap<?,?> m = (IdentityHashMap<?,?>) super.clone();
             m.entrySet = null;
-            m.table = (Object[])table.clone();
+            m.table = table.clone();
             return m;
         } catch (CloneNotSupportedException e) {
-            throw new InternalError();
+            throw new InternalError(e);
         }
     }
 
@@ -749,7 +750,6 @@ public class IdentityHashMap<K,V>
             expectedModCount = ++modCount;
             int deletedSlot = lastReturnedIndex;
             lastReturnedIndex = -1;
-            size--;
             // back up index to revisit new contents after deletion
             index = deletedSlot;
             indexValid = false;
@@ -770,7 +770,7 @@ public class IdentityHashMap<K,V>
             int len = tab.length;
 
             int d = deletedSlot;
-            K key = (K) tab[d];
+            Object key = tab[d];
             tab[d] = null;        // vacate the slot
             tab[d + 1] = null;
 
@@ -781,6 +781,8 @@ public class IdentityHashMap<K,V>
                 expectedModCount = modCount;
                 return;
             }
+
+            size--;
 
             Object item;
             for (int i = nextKeyIndex(d, len); (item = tab[i]) != null;
@@ -818,82 +820,98 @@ public class IdentityHashMap<K,V>
     }
 
     private class KeyIterator extends IdentityHashMapIterator<K> {
+        @SuppressWarnings("unchecked")
         public K next() {
             return (K) unmaskNull(traversalTable[nextIndex()]);
         }
     }
 
     private class ValueIterator extends IdentityHashMapIterator<V> {
+        @SuppressWarnings("unchecked")
         public V next() {
             return (V) traversalTable[nextIndex() + 1];
         }
     }
 
-    /**
-     * Since we don't use Entry objects, we use the Iterator
-     * itself as an entry.
-     */
     private class EntryIterator
         extends IdentityHashMapIterator<Map.Entry<K,V>>
-        implements Map.Entry<K,V>
     {
+        private Entry lastReturnedEntry;
+
         public Map.Entry<K,V> next() {
-            nextIndex();
-            return this;
+            lastReturnedEntry = new Entry(nextIndex());
+            return lastReturnedEntry;
         }
 
-        public K getKey() {
-            // Provide a better exception than out of bounds index
-            if (lastReturnedIndex < 0)
-                throw new IllegalStateException("Entry was removed");
-
-            return (K) unmaskNull(traversalTable[lastReturnedIndex]);
+        public void remove() {
+            lastReturnedIndex =
+                ((null == lastReturnedEntry) ? -1 : lastReturnedEntry.index);
+            super.remove();
+            lastReturnedEntry.index = lastReturnedIndex;
+            lastReturnedEntry = null;
         }
 
-        public V getValue() {
-            // Provide a better exception than out of bounds index
-            if (lastReturnedIndex < 0)
-                throw new IllegalStateException("Entry was removed");
+        private class Entry implements Map.Entry<K,V> {
+            private int index;
 
-            return (V) traversalTable[lastReturnedIndex+1];
-        }
+            private Entry(int index) {
+                this.index = index;
+            }
 
-        public V setValue(V value) {
-            // It would be mean-spirited to proceed here if remove() called
-            if (lastReturnedIndex < 0)
-                throw new IllegalStateException("Entry was removed");
-            V oldValue = (V) traversalTable[lastReturnedIndex+1];
-            traversalTable[lastReturnedIndex+1] = value;
-            // if shadowing, force into main table
-            if (traversalTable != IdentityHashMap.this.table)
-                put((K) traversalTable[lastReturnedIndex], value);
-            return oldValue;
-        }
+            @SuppressWarnings("unchecked")
+            public K getKey() {
+                checkIndexForEntryUse();
+                return (K) unmaskNull(traversalTable[index]);
+            }
 
-        public boolean equals(Object o) {
-            if (lastReturnedIndex < 0)
-                return super.equals(o);
+            @SuppressWarnings("unchecked")
+            public V getValue() {
+                checkIndexForEntryUse();
+                return (V) traversalTable[index+1];
+            }
 
-            if (!(o instanceof Map.Entry))
-                return false;
-            Map.Entry e = (Map.Entry)o;
-            return e.getKey()   == getKey() &&
-                   e.getValue() == getValue();
-        }
+            @SuppressWarnings("unchecked")
+            public V setValue(V value) {
+                checkIndexForEntryUse();
+                V oldValue = (V) traversalTable[index+1];
+                traversalTable[index+1] = value;
+                // if shadowing, force into main table
+                if (traversalTable != IdentityHashMap.this.table)
+                    put((K) traversalTable[index], value);
+                return oldValue;
+            }
 
-        public int hashCode() {
-            if (lastReturnedIndex < 0)
-                return super.hashCode();
+            public boolean equals(Object o) {
+                if (index < 0)
+                    return super.equals(o);
 
-            return System.identityHashCode(getKey()) ^
-                   System.identityHashCode(getValue());
-        }
+                if (!(o instanceof Map.Entry))
+                    return false;
+                Map.Entry<?,?> e = (Map.Entry<?,?>)o;
+                return (e.getKey() == unmaskNull(traversalTable[index]) &&
+                       e.getValue() == traversalTable[index+1]);
+            }
 
-        public String toString() {
-            if (lastReturnedIndex < 0)
-                return super.toString();
+            public int hashCode() {
+                if (lastReturnedIndex < 0)
+                    return super.hashCode();
 
-            return getKey() + "=" + getValue();
+                return (System.identityHashCode(unmaskNull(traversalTable[index])) ^
+                       System.identityHashCode(traversalTable[index+1]));
+            }
+
+            public String toString() {
+                if (index < 0)
+                    return super.toString();
+
+                return (unmaskNull(traversalTable[index]) + "="
+                        + traversalTable[index+1]);
+            }
+
+            private void checkIndexForEntryUse() {
+                if (index < 0)
+                    throw new IllegalStateException("Entry was removed");
+            }
         }
     }
 
@@ -904,7 +922,7 @@ public class IdentityHashMap<K,V>
      * view the first time this view is requested.  The view is stateless,
      * so there's no reason to create more than one.
      */
-    private transient Set<Map.Entry<K,V>> entrySet = null;
+    private transient Set<Map.Entry<K,V>> entrySet;
 
     /**
      * Returns an identity-based set view of the keys contained in this map.
@@ -973,8 +991,9 @@ public class IdentityHashMap<K,V>
          * behavior when c is a smaller "normal" (non-identity-based) Set.
          */
         public boolean removeAll(Collection<?> c) {
+            Objects.requireNonNull(c);
             boolean modified = false;
-            for (Iterator i = iterator(); i.hasNext(); ) {
+            for (Iterator<K> i = iterator(); i.hasNext(); ) {
                 if (c.contains(i.next())) {
                     i.remove();
                     modified = true;
@@ -990,6 +1009,41 @@ public class IdentityHashMap<K,V>
             for (K key : this)
                 result += System.identityHashCode(key);
             return result;
+        }
+        public Object[] toArray() {
+            return toArray(new Object[0]);
+        }
+        @SuppressWarnings("unchecked")
+        public <T> T[] toArray(T[] a) {
+            int expectedModCount = modCount;
+            int size = size();
+            if (a.length < size)
+                a = (T[]) Array.newInstance(a.getClass().getComponentType(), size);
+            Object[] tab = table;
+            int ti = 0;
+            for (int si = 0; si < tab.length; si += 2) {
+                Object key;
+                if ((key = tab[si]) != null) { // key present ?
+                    // more elements than expected -> concurrent modification from other thread
+                    if (ti >= size) {
+                        throw new ConcurrentModificationException();
+                    }
+                    a[ti++] = (T) unmaskNull(key); // unmask key
+                }
+            }
+            // fewer elements than expected or concurrent modification from other thread detected
+            if (ti < size || expectedModCount != modCount) {
+                throw new ConcurrentModificationException();
+            }
+            // final null marker as per spec
+            if (ti < a.length) {
+                a[ti] = null;
+            }
+            return a;
+        }
+
+        public Spliterator<K> spliterator() {
+            return new KeySpliterator<>(IdentityHashMap.this, 0, -1, 0, 0);
         }
     }
 
@@ -1032,7 +1086,7 @@ public class IdentityHashMap<K,V>
             return containsValue(o);
         }
         public boolean remove(Object o) {
-            for (Iterator i = iterator(); i.hasNext(); ) {
+            for (Iterator<V> i = iterator(); i.hasNext(); ) {
                 if (i.next() == o) {
                     i.remove();
                     return true;
@@ -1042,6 +1096,40 @@ public class IdentityHashMap<K,V>
         }
         public void clear() {
             IdentityHashMap.this.clear();
+        }
+        public Object[] toArray() {
+            return toArray(new Object[0]);
+        }
+        @SuppressWarnings("unchecked")
+        public <T> T[] toArray(T[] a) {
+            int expectedModCount = modCount;
+            int size = size();
+            if (a.length < size)
+                a = (T[]) Array.newInstance(a.getClass().getComponentType(), size);
+            Object[] tab = table;
+            int ti = 0;
+            for (int si = 0; si < tab.length; si += 2) {
+                if (tab[si] != null) { // key present ?
+                    // more elements than expected -> concurrent modification from other thread
+                    if (ti >= size) {
+                        throw new ConcurrentModificationException();
+                    }
+                    a[ti++] = (T) tab[si+1]; // copy value
+                }
+            }
+            // fewer elements than expected or concurrent modification from other thread detected
+            if (ti < size || expectedModCount != modCount) {
+                throw new ConcurrentModificationException();
+            }
+            // final null marker as per spec
+            if (ti < a.length) {
+                a[ti] = null;
+            }
+            return a;
+        }
+
+        public Spliterator<V> spliterator() {
+            return new ValueSpliterator<>(IdentityHashMap.this, 0, -1, 0, 0);
         }
     }
 
@@ -1098,13 +1186,13 @@ public class IdentityHashMap<K,V>
         public boolean contains(Object o) {
             if (!(o instanceof Map.Entry))
                 return false;
-            Map.Entry entry = (Map.Entry)o;
+            Map.Entry<?,?> entry = (Map.Entry<?,?>)o;
             return containsMapping(entry.getKey(), entry.getValue());
         }
         public boolean remove(Object o) {
             if (!(o instanceof Map.Entry))
                 return false;
-            Map.Entry entry = (Map.Entry)o;
+            Map.Entry<?,?> entry = (Map.Entry<?,?>)o;
             return removeMapping(entry.getKey(), entry.getValue());
         }
         public int size() {
@@ -1119,8 +1207,9 @@ public class IdentityHashMap<K,V>
          * behavior when c is a smaller "normal" (non-identity-based) Set.
          */
         public boolean removeAll(Collection<?> c) {
+            Objects.requireNonNull(c);
             boolean modified = false;
-            for (Iterator i = iterator(); i.hasNext(); ) {
+            for (Iterator<Map.Entry<K,V>> i = iterator(); i.hasNext(); ) {
                 if (c.contains(i.next())) {
                     i.remove();
                     modified = true;
@@ -1130,25 +1219,40 @@ public class IdentityHashMap<K,V>
         }
 
         public Object[] toArray() {
-            int size = size();
-            Object[] result = new Object[size];
-            Iterator<Map.Entry<K,V>> it = iterator();
-            for (int i = 0; i < size; i++)
-                result[i] = new AbstractMap.SimpleEntry<K,V>(it.next());
-            return result;
+            return toArray(new Object[0]);
         }
 
+        @SuppressWarnings("unchecked")
         public <T> T[] toArray(T[] a) {
+            int expectedModCount = modCount;
             int size = size();
             if (a.length < size)
-                a = (T[])java.lang.reflect.Array
-                    .newInstance(a.getClass().getComponentType(), size);
-            Iterator<Map.Entry<K,V>> it = iterator();
-            for (int i = 0; i < size; i++)
-                a[i] = (T) new AbstractMap.SimpleEntry<K,V>(it.next());
-            if (a.length > size)
-                a[size] = null;
+                a = (T[]) Array.newInstance(a.getClass().getComponentType(), size);
+            Object[] tab = table;
+            int ti = 0;
+            for (int si = 0; si < tab.length; si += 2) {
+                Object key;
+                if ((key = tab[si]) != null) { // key present ?
+                    // more elements than expected -> concurrent modification from other thread
+                    if (ti >= size) {
+                        throw new ConcurrentModificationException();
+                    }
+                    a[ti++] = (T) new AbstractMap.SimpleEntry<>(unmaskNull(key), tab[si + 1]);
+                }
+            }
+            // fewer elements than expected or concurrent modification from other thread detected
+            if (ti < size || expectedModCount != modCount) {
+                throw new ConcurrentModificationException();
+            }
+            // final null marker as per spec
+            if (ti < a.length) {
+                a[ti] = null;
+            }
             return a;
+        }
+
+        public Spliterator<Map.Entry<K,V>> spliterator() {
+            return new EntrySpliterator<>(IdentityHashMap.this, 0, -1, 0, 0);
         }
     }
 
@@ -1156,8 +1260,8 @@ public class IdentityHashMap<K,V>
     private static final long serialVersionUID = 8188218128353913216L;
 
     /**
-     * Save the state of the <tt>IdentityHashMap</tt> instance to a stream
-     * (i.e., serialize it).
+     * Saves the state of the <tt>IdentityHashMap</tt> instance to a stream
+     * (i.e., serializes it).
      *
      * @serialData The <i>size</i> of the HashMap (the number of key-value
      *          mappings) (<tt>int</tt>), followed by the key (Object) and
@@ -1185,8 +1289,8 @@ public class IdentityHashMap<K,V>
     }
 
     /**
-     * Reconstitute the <tt>IdentityHashMap</tt> instance from a stream (i.e.,
-     * deserialize it).
+     * Reconstitutes the <tt>IdentityHashMap</tt> instance from a stream (i.e.,
+     * deserializes it).
      */
     private void readObject(java.io.ObjectInputStream s)
         throws java.io.IOException, ClassNotFoundException  {
@@ -1195,14 +1299,17 @@ public class IdentityHashMap<K,V>
 
         // Read in size (number of Mappings)
         int size = s.readInt();
-
-        // Allow for 33% growth (i.e., capacity is >= 2* size()).
-        init(capacity((size*4)/3));
+        if (size < 0)
+            throw new java.io.StreamCorruptedException
+                ("Illegal mappings count: " + size);
+        init(capacity(size));
 
         // Read the keys and values, and put the mappings in the table
         for (int i=0; i<size; i++) {
-            K key = (K) s.readObject();
-            V value = (V) s.readObject();
+            @SuppressWarnings("unchecked")
+                K key = (K) s.readObject();
+            @SuppressWarnings("unchecked")
+                V value = (V) s.readObject();
             putForCreate(key, value);
         }
     }
@@ -1212,9 +1319,9 @@ public class IdentityHashMap<K,V>
      * update modCount, etc.
      */
     private void putForCreate(K key, V value)
-        throws IOException
+        throws java.io.StreamCorruptedException
     {
-        K k = (K)maskNull(key);
+        Object k = maskNull(key);
         Object[] tab = table;
         int len = tab.length;
         int i = hash(k, len);
@@ -1228,4 +1335,261 @@ public class IdentityHashMap<K,V>
         tab[i] = k;
         tab[i + 1] = value;
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void forEach(BiConsumer<? super K, ? super V> action) {
+        Objects.requireNonNull(action);
+        int expectedModCount = modCount;
+
+        Object[] t = table;
+        for (int index = 0; index < t.length; index += 2) {
+            Object k = t[index];
+            if (k != null) {
+                action.accept((K) unmaskNull(k), (V) t[index + 1]);
+            }
+
+            if (modCount != expectedModCount) {
+                throw new ConcurrentModificationException();
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
+        Objects.requireNonNull(function);
+        int expectedModCount = modCount;
+
+        Object[] t = table;
+        for (int index = 0; index < t.length; index += 2) {
+            Object k = t[index];
+            if (k != null) {
+                t[index + 1] = function.apply((K) unmaskNull(k), (V) t[index + 1]);
+            }
+
+            if (modCount != expectedModCount) {
+                throw new ConcurrentModificationException();
+            }
+        }
+    }
+
+    /**
+     * Similar form as array-based Spliterators, but skips blank elements,
+     * and guestimates size as decreasing by half per split.
+     */
+    static class IdentityHashMapSpliterator<K,V> {
+        final IdentityHashMap<K,V> map;
+        int index;             // current index, modified on advance/split
+        int fence;             // -1 until first use; then one past last index
+        int est;               // size estimate
+        int expectedModCount;  // initialized when fence set
+
+        IdentityHashMapSpliterator(IdentityHashMap<K,V> map, int origin,
+                                   int fence, int est, int expectedModCount) {
+            this.map = map;
+            this.index = origin;
+            this.fence = fence;
+            this.est = est;
+            this.expectedModCount = expectedModCount;
+        }
+
+        final int getFence() { // initialize fence and size on first use
+            int hi;
+            if ((hi = fence) < 0) {
+                est = map.size;
+                expectedModCount = map.modCount;
+                hi = fence = map.table.length;
+            }
+            return hi;
+        }
+
+        public final long estimateSize() {
+            getFence(); // force init
+            return (long) est;
+        }
+    }
+
+    static final class KeySpliterator<K,V>
+        extends IdentityHashMapSpliterator<K,V>
+        implements Spliterator<K> {
+        KeySpliterator(IdentityHashMap<K,V> map, int origin, int fence, int est,
+                       int expectedModCount) {
+            super(map, origin, fence, est, expectedModCount);
+        }
+
+        public KeySpliterator<K,V> trySplit() {
+            int hi = getFence(), lo = index, mid = ((lo + hi) >>> 1) & ~1;
+            return (lo >= mid) ? null :
+                new KeySpliterator<K,V>(map, lo, index = mid, est >>>= 1,
+                                        expectedModCount);
+        }
+
+        @SuppressWarnings("unchecked")
+        public void forEachRemaining(Consumer<? super K> action) {
+            if (action == null)
+                throw new NullPointerException();
+            int i, hi, mc; Object key;
+            IdentityHashMap<K,V> m; Object[] a;
+            if ((m = map) != null && (a = m.table) != null &&
+                (i = index) >= 0 && (index = hi = getFence()) <= a.length) {
+                for (; i < hi; i += 2) {
+                    if ((key = a[i]) != null)
+                        action.accept((K)unmaskNull(key));
+                }
+                if (m.modCount == expectedModCount)
+                    return;
+            }
+            throw new ConcurrentModificationException();
+        }
+
+        @SuppressWarnings("unchecked")
+        public boolean tryAdvance(Consumer<? super K> action) {
+            if (action == null)
+                throw new NullPointerException();
+            Object[] a = map.table;
+            int hi = getFence();
+            while (index < hi) {
+                Object key = a[index];
+                index += 2;
+                if (key != null) {
+                    action.accept((K)unmaskNull(key));
+                    if (map.modCount != expectedModCount)
+                        throw new ConcurrentModificationException();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public int characteristics() {
+            return (fence < 0 || est == map.size ? SIZED : 0) | Spliterator.DISTINCT;
+        }
+    }
+
+    static final class ValueSpliterator<K,V>
+        extends IdentityHashMapSpliterator<K,V>
+        implements Spliterator<V> {
+        ValueSpliterator(IdentityHashMap<K,V> m, int origin, int fence, int est,
+                         int expectedModCount) {
+            super(m, origin, fence, est, expectedModCount);
+        }
+
+        public ValueSpliterator<K,V> trySplit() {
+            int hi = getFence(), lo = index, mid = ((lo + hi) >>> 1) & ~1;
+            return (lo >= mid) ? null :
+                new ValueSpliterator<K,V>(map, lo, index = mid, est >>>= 1,
+                                          expectedModCount);
+        }
+
+        public void forEachRemaining(Consumer<? super V> action) {
+            if (action == null)
+                throw new NullPointerException();
+            int i, hi, mc;
+            IdentityHashMap<K,V> m; Object[] a;
+            if ((m = map) != null && (a = m.table) != null &&
+                (i = index) >= 0 && (index = hi = getFence()) <= a.length) {
+                for (; i < hi; i += 2) {
+                    if (a[i] != null) {
+                        @SuppressWarnings("unchecked") V v = (V)a[i+1];
+                        action.accept(v);
+                    }
+                }
+                if (m.modCount == expectedModCount)
+                    return;
+            }
+            throw new ConcurrentModificationException();
+        }
+
+        public boolean tryAdvance(Consumer<? super V> action) {
+            if (action == null)
+                throw new NullPointerException();
+            Object[] a = map.table;
+            int hi = getFence();
+            while (index < hi) {
+                Object key = a[index];
+                @SuppressWarnings("unchecked") V v = (V)a[index+1];
+                index += 2;
+                if (key != null) {
+                    action.accept(v);
+                    if (map.modCount != expectedModCount)
+                        throw new ConcurrentModificationException();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public int characteristics() {
+            return (fence < 0 || est == map.size ? SIZED : 0);
+        }
+
+    }
+
+    static final class EntrySpliterator<K,V>
+        extends IdentityHashMapSpliterator<K,V>
+        implements Spliterator<Map.Entry<K,V>> {
+        EntrySpliterator(IdentityHashMap<K,V> m, int origin, int fence, int est,
+                         int expectedModCount) {
+            super(m, origin, fence, est, expectedModCount);
+        }
+
+        public EntrySpliterator<K,V> trySplit() {
+            int hi = getFence(), lo = index, mid = ((lo + hi) >>> 1) & ~1;
+            return (lo >= mid) ? null :
+                new EntrySpliterator<K,V>(map, lo, index = mid, est >>>= 1,
+                                          expectedModCount);
+        }
+
+        public void forEachRemaining(Consumer<? super Map.Entry<K, V>> action) {
+            if (action == null)
+                throw new NullPointerException();
+            int i, hi, mc;
+            IdentityHashMap<K,V> m; Object[] a;
+            if ((m = map) != null && (a = m.table) != null &&
+                (i = index) >= 0 && (index = hi = getFence()) <= a.length) {
+                for (; i < hi; i += 2) {
+                    Object key = a[i];
+                    if (key != null) {
+                        @SuppressWarnings("unchecked") K k =
+                            (K)unmaskNull(key);
+                        @SuppressWarnings("unchecked") V v = (V)a[i+1];
+                        action.accept
+                            (new AbstractMap.SimpleImmutableEntry<K,V>(k, v));
+
+                    }
+                }
+                if (m.modCount == expectedModCount)
+                    return;
+            }
+            throw new ConcurrentModificationException();
+        }
+
+        public boolean tryAdvance(Consumer<? super Map.Entry<K,V>> action) {
+            if (action == null)
+                throw new NullPointerException();
+            Object[] a = map.table;
+            int hi = getFence();
+            while (index < hi) {
+                Object key = a[index];
+                @SuppressWarnings("unchecked") V v = (V)a[index+1];
+                index += 2;
+                if (key != null) {
+                    @SuppressWarnings("unchecked") K k =
+                        (K)unmaskNull(key);
+                    action.accept
+                        (new AbstractMap.SimpleImmutableEntry<K,V>(k, v));
+                    if (map.modCount != expectedModCount)
+                        throw new ConcurrentModificationException();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public int characteristics() {
+            return (fence < 0 || est == map.size ? SIZED : 0) | Spliterator.DISTINCT;
+        }
+    }
+
 }

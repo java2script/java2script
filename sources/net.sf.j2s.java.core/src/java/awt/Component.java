@@ -27,6 +27,7 @@
  */
 package java.awt;
 
+import java.applet.Applet;
 import java.awt.dnd.DropTarget;
 import java.awt.event.ActionEvent;
 import java.awt.event.AdjustmentEvent;
@@ -59,15 +60,21 @@ import java.awt.peer.ContainerPeer;
 import java.awt.peer.LightweightPeer;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.Collections;
 import java.util.EventListener;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
+import java.util.logging.Level;
 
 import javax.swing.JInternalFrame;
 
 import sun.awt.AppContext;
+import sun.awt.CausedFocusEvent;
+import sun.awt.RequestFocusController;
 import sun.awt.SunToolkit;
 import swingjs.JSToolkit;
 
@@ -367,14 +374,14 @@ public abstract class Component
 	 * @see #getFocusTraversalKeys
 	 * @since 1.4
 	 */
-	// Set[] focusTraversalKeys;
+	 public Set[] focusTraversalKeys;
 
-	// private static final String[] focusTraversalKeyPropertyNames = {
-	// "forwardFocusTraversalKeys",
-	// "backwardFocusTraversalKeys",
-	// "upCycleFocusTraversalKeys",
-	// "downCycleFocusTraversalKeys"
-	// };
+	 private static final String[] focusTraversalKeyPropertyNames = {
+	 "forwardFocusTraversalKeys",
+	 "backwardFocusTraversalKeys",
+	 "upCycleFocusTraversalKeys",
+	 "downCycleFocusTraversalKeys"
+	 };
 
 	/**
 	 * Indicates whether focus traversal keys are enabled for this Component.
@@ -809,9 +816,9 @@ public abstract class Component
 		setAppContext();
 	}
 
-	// void initializeFocusTraversalKeys() {
-	// focusTraversalKeys = new Set[3];
-	// }
+	 void initializeFocusTraversalKeys() {
+	 focusTraversalKeys = new Set[3];
+	 }
 
 	protected void setAppContext() {
 		appContext = AppContext.getAppContext();
@@ -6248,202 +6255,243 @@ public abstract class Component
 	final boolean isFocusTraversableOverridden() {
 		return (isFocusTraversableOverridden != FOCUS_TRAVERSABLE_DEFAULT);
 	}
-	//
-	// /**
-	// * Sets the focus traversal keys for a given traversal operation for this
-	// * Component.
-	// * <p>
-	// * The default values for a Component's focus traversal keys are
-	// * implementation-dependent. Sun recommends that all implementations for a
-	// * particular native platform use the same default values. The
-	// * recommendations for Windows and Unix are listed below. These
-	// * recommendations are used in the Sun AWT implementations.
-	// *
-	// * <table border=1 summary="Recommended default values for a Component's
-	// focus traversal keys">
-	// * <tr>
-	// * <th>Identifier</th>
-	// * <th>Meaning</th>
-	// * <th>Default</th>
-	// * </tr>
-	// * <tr>
-	// * <td>KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS</td>
-	// * <td>Normal forward keyboard traversal</td>
-	// * <td>TAB on KEY_PRESSED, CTRL-TAB on KEY_PRESSED</td>
-	// * </tr>
-	// * <tr>
-	// * <td>KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS</td>
-	// * <td>Normal reverse keyboard traversal</td>
-	// * <td>SHIFT-TAB on KEY_PRESSED, CTRL-SHIFT-TAB on KEY_PRESSED</td>
-	// * </tr>
-	// * <tr>
-	// * <td>KeyboardFocusManager.UP_CYCLE_TRAVERSAL_KEYS</td>
-	// * <td>Go up one focus traversal cycle</td>
-	// * <td>none</td>
-	// * </tr>
-	// * </table>
-	// *
-	// * To disable a traversal key, use an empty Set; Collections.EMPTY_SET is
-	// * recommended.
-	// * <p>
-	// * Using the AWTKeyStroke API, client code can specify on which of two
-	// * specific KeyEvents, KEY_PRESSED or KEY_RELEASED, the focus traversal
-	// * operation will occur. Regardless of which KeyEvent is specified,
-	// * however, all KeyEvents related to the focus traversal key, including
-	// the
-	// * associated KEY_TYPED event, will be consumed, and will not be
-	// dispatched
-	// * to any Component. It is a runtime error to specify a KEY_TYPED event as
-	// * mapping to a focus traversal operation, or to map the same event to
-	// * multiple default focus traversal operations.
-	// * <p>
-	// * If a value of null is specified for the Set, this Component inherits
-	// the
-	// * Set from its parent. If all ancestors of this Component have null
-	// * specified for the Set, then the current KeyboardFocusManager's default
-	// * Set is used.
-	// *
-	// * @param id one of KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS,
-	// * KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, or
-	// * KeyboardFocusManager.UP_CYCLE_TRAVERSAL_KEYS
-	// * @param keystrokes the Set of AWTKeyStroke for the specified operation
-	// * @see #getFocusTraversalKeys
-	// * @see KeyboardFocusManager#FORWARD_TRAVERSAL_KEYS
-	// * @see KeyboardFocusManager#BACKWARD_TRAVERSAL_KEYS
-	// * @see KeyboardFocusManager#UP_CYCLE_TRAVERSAL_KEYS
-	// * @throws IllegalArgumentException if id is not one of
-	// * KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS,
-	// * KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, or
-	// * KeyboardFocusManager.UP_CYCLE_TRAVERSAL_KEYS, or if keystrokes
-	// * contains null, or if any Object in keystrokes is not an
-	// * AWTKeyStroke, or if any keystroke represents a KEY_TYPED event,
-	// * or if any keystroke already maps to another focus traversal
-	// * operation for this Component
-	// * @since 1.4
-	// * @beaninfo
-	// * bound: true
-	// */
-	// public void setFocusTraversalKeys(int id,
-	// Set<? extends AWTKeyStroke> keystrokes)
-	// {
-	// if (id < 0 || id >= KeyboardFocusManager.TRAVERSAL_KEY_LENGTH - 1) {
-	// throw new IllegalArgumentException("invalid focus traversal key
-	// identifier");
-	// }
-	//
-	// setFocusTraversalKeys_NoIDCheck(id, keystrokes);
-	// }
+	
+	 /**
+	 * Sets the focus traversal keys for a given traversal operation for this
+	 * Component.
+	 * <p>
+	 * The default values for a Component's focus traversal keys are
+	 * implementation-dependent. Sun recommends that all implementations for a
+	 * particular native platform use the same default values. The
+	 * recommendations for Windows and Unix are listed below. These
+	 * recommendations are used in the Sun AWT implementations.
+	 *
+	 * <table border=1 summary="Recommended default values for a Component's
+	 focus traversal keys">
+	 * <tr>
+	 * <th>Identifier</th>
+	 * <th>Meaning</th>
+	 * <th>Default</th>
+	 * </tr>
+	 * <tr>
+	 * <td>KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS</td>
+	 * <td>Normal forward keyboard traversal</td>
+	 * <td>TAB on KEY_PRESSED, CTRL-TAB on KEY_PRESSED</td>
+	 * </tr>
+	 * <tr>
+	 * <td>KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS</td>
+	 * <td>Normal reverse keyboard traversal</td>
+	 * <td>SHIFT-TAB on KEY_PRESSED, CTRL-SHIFT-TAB on KEY_PRESSED</td>
+	 * </tr>
+	 * <tr>
+	 * <td>KeyboardFocusManager.UP_CYCLE_TRAVERSAL_KEYS</td>
+	 * <td>Go up one focus traversal cycle</td>
+	 * <td>none</td>
+	 * </tr>
+	 * </table>
+	 *
+	 * To disable a traversal key, use an empty Set; Collections.EMPTY_SET is
+	 * recommended.
+	 * <p>
+	 * Using the AWTKeyStroke API, client code can specify on which of two
+	 * specific KeyEvents, KEY_PRESSED or KEY_RELEASED, the focus traversal
+	 * operation will occur. Regardless of which KeyEvent is specified,
+	 * however, all KeyEvents related to the focus traversal key, including
+	 the
+	 * associated KEY_TYPED event, will be consumed, and will not be
+	 dispatched
+	 * to any Component. It is a runtime error to specify a KEY_TYPED event as
+	 * mapping to a focus traversal operation, or to map the same event to
+	 * multiple default focus traversal operations.
+	 * <p>
+	 * If a value of null is specified for the Set, this Component inherits
+	 the
+	 * Set from its parent. If all ancestors of this Component have null
+	 * specified for the Set, then the current KeyboardFocusManager's default
+	 * Set is used.
+	 *
+	 * @param id one of KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS,
+	 * KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, or
+	 * KeyboardFocusManager.UP_CYCLE_TRAVERSAL_KEYS
+	 * @param keystrokes the Set of AWTKeyStroke for the specified operation
+	 * @see #getFocusTraversalKeys
+	 * @see KeyboardFocusManager#FORWARD_TRAVERSAL_KEYS
+	 * @see KeyboardFocusManager#BACKWARD_TRAVERSAL_KEYS
+	 * @see KeyboardFocusManager#UP_CYCLE_TRAVERSAL_KEYS
+	 * @throws IllegalArgumentException if id is not one of
+	 * KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS,
+	 * KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, or
+	 * KeyboardFocusManager.UP_CYCLE_TRAVERSAL_KEYS, or if keystrokes
+	 * contains null, or if any Object in keystrokes is not an
+	 * AWTKeyStroke, or if any keystroke represents a KEY_TYPED event,
+	 * or if any keystroke already maps to another focus traversal
+	 * operation for this Component
+	 * @since 1.4
+	 * @beaninfo
+	 * bound: true
+	 */
+	 public void setFocusTraversalKeys(int id,
+	 Set<? extends AWTKeyStroke> keystrokes)
+	 {
+	 if (id < 0 || id >= KeyboardFocusManager.TRAVERSAL_KEY_LENGTH - 1) {
+	 throw new IllegalArgumentException("invalid focus traversal key identifier");
+	 }
+	
+	 setFocusTraversalKeys_NoIDCheck(id, keystrokes);
+	 }
 
-	// /**
-	// * Returns the Set of focus traversal keys for a given traversal operation
-	// * for this Component. (See
-	// * <code>setFocusTraversalKeys</code> for a full description of each key.)
-	// * <p>
-	// * If a Set of traversal keys has not been explicitly defined for this
-	// * Component, then this Component's parent's Set is returned. If no Set
-	// * has been explicitly defined for any of this Component's ancestors, then
-	// * the current KeyboardFocusManager's default Set is returned.
-	// *
-	// * @param id one of KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS,
-	// * KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, or
-	// * KeyboardFocusManager.UP_CYCLE_TRAVERSAL_KEYS
-	// * @return the Set of AWTKeyStrokes for the specified operation. The Set
-	// * will be unmodifiable, and may be empty. null will never be
-	// * returned.
-	// * @see #setFocusTraversalKeys
-	// * @see KeyboardFocusManager#FORWARD_TRAVERSAL_KEYS
-	// * @see KeyboardFocusManager#BACKWARD_TRAVERSAL_KEYS
-	// * @see KeyboardFocusManager#UP_CYCLE_TRAVERSAL_KEYS
-	// * @throws IllegalArgumentException if id is not one of
-	// * KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS,
-	// * KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, or
-	// * KeyboardFocusManager.UP_CYCLE_TRAVERSAL_KEYS
-	// * @since 1.4
-	// */
-	// public Set<AWTKeyStroke> getFocusTraversalKeys(int id) {
-	// if (id < 0 || id >= KeyboardFocusManager.TRAVERSAL_KEY_LENGTH - 1) {
-	// throw new IllegalArgumentException("invalid focus traversal key
-	// identifier");
-	// }
-	//
-	// return getFocusTraversalKeys_NoIDCheck(id);
-	// }
+	 /**
+	 * Returns the Set of focus traversal keys for a given traversal operation
+	 * for this Component. (See
+	 * <code>setFocusTraversalKeys</code> for a full description of each key.)
+	 * <p>
+	 * If a Set of traversal keys has not been explicitly defined for this
+	 * Component, then this Component's parent's Set is returned. If no Set
+	 * has been explicitly defined for any of this Component's ancestors, then
+	 * the current KeyboardFocusManager's default Set is returned.
+	 *
+	 * @param id one of KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS,
+	 * KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, or
+	 * KeyboardFocusManager.UP_CYCLE_TRAVERSAL_KEYS
+	 * @return the Set of AWTKeyStrokes for the specified operation. The Set
+	 * will be unmodifiable, and may be empty. null will never be
+	 * returned.
+	 * @see #setFocusTraversalKeys
+	 * @see KeyboardFocusManager#FORWARD_TRAVERSAL_KEYS
+	 * @see KeyboardFocusManager#BACKWARD_TRAVERSAL_KEYS
+	 * @see KeyboardFocusManager#UP_CYCLE_TRAVERSAL_KEYS
+	 * @throws IllegalArgumentException if id is not one of
+	 * KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS,
+	 * KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, or
+	 * KeyboardFocusManager.UP_CYCLE_TRAVERSAL_KEYS
+	 * @since 1.4
+	 */
+	 public Set<AWTKeyStroke> getFocusTraversalKeys(int id) {
+	 if (id < 0 || id >= KeyboardFocusManager.TRAVERSAL_KEY_LENGTH - 1) {
+	 throw new IllegalArgumentException("invalid focus traversal key identifier");
+	 }
+	
+	 return getFocusTraversalKeys_NoIDCheck(id);
+	 }
 
-	// final Set getFocusTraversalKeys_NoIDCheck(int id) {
-	// // Okay to return Set directly because it is an unmodifiable view
-	// Set keystrokes = (focusTraversalKeys != null)
-	// ? focusTraversalKeys[id]
-	// : null;
-	//
-	// if (keystrokes != null) {
-	// return keystrokes;
-	// } else {
-	// Container parent = this.parent;
-	// if (parent != null) {
-	// return parent.getFocusTraversalKeys(id);
-	// } else {
-	// return KeyboardFocusManager.getCurrentKeyboardFocusManager().
-	// getDefaultFocusTraversalKeys(id);
-	// }
-	// }
-	// }
+	// We define these methods so that Container does not need to repeat this
+	// code. Container cannot call super.<method> because Container allows
+	// DOWN_CYCLE_TRAVERSAL_KEY while Component does not. The Component method
+	// would erroneously generate an IllegalArgumentException for
+	// DOWN_CYCLE_TRAVERSAL_KEY.
+	final void setFocusTraversalKeys_NoIDCheck(int id, Set<? extends AWTKeyStroke> keystrokes) {
+		Set<AWTKeyStroke> oldKeys;
 
-	// /**
-	// * Returns whether the Set of focus traversal keys for the given focus
-	// * traversal operation has been explicitly defined for this Component. If
-	// * this method returns <code>false</code>, this Component is inheriting
-	// the
-	// * Set from an ancestor, or from the current KeyboardFocusManager.
-	// *
-	// * @param id one of KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS,
-	// * KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, or
-	// * KeyboardFocusManager.UP_CYCLE_TRAVERSAL_KEYS
-	// * @return <code>true</code> if the the Set of focus traversal keys for
-	// the
-	// * given focus traversal operation has been explicitly defined for
-	// * this Component; <code>false</code> otherwise.
-	// * @throws IllegalArgumentException if id is not one of
-	// * KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS,
-	// * KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, or
-	// * KeyboardFocusManager.UP_CYCLE_TRAVERSAL_KEYS
-	// * @since 1.4
-	// */
-	// public boolean areFocusTraversalKeysSet(int id) {
-	// if (id < 0 || id >= KeyboardFocusManager.TRAVERSAL_KEY_LENGTH - 1) {
-	// throw new IllegalArgumentException("invalid focus traversal key
-	// identifier");
-	// }
-	//
-	// return (focusTraversalKeys != null && focusTraversalKeys[id] != null);
-	// }
+		synchronized (this) {
+			if (focusTraversalKeys == null) {
+				initializeFocusTraversalKeys();
+			}
 
-	// /**
-	// * Sets whether focus traversal keys are enabled for this Component.
-	// * Components for which focus traversal keys are disabled receive key
-	// * events for focus traversal keys. Components for which focus traversal
-	// * keys are enabled do not see these events; instead, the events are
-	// * automatically converted to traversal operations.
-	// *
-	// * @param focusTraversalKeysEnabled whether focus traversal keys are
-	// * enabled for this Component
-	// * @see #getFocusTraversalKeysEnabled
-	// * @see #setFocusTraversalKeys
-	// * @see #getFocusTraversalKeys
-	// * @since 1.4
-	// * @beaninfo
-	// * bound: true
-	// */
-	// public void setFocusTraversalKeysEnabled(boolean
-	// focusTraversalKeysEnabled) {
-	// boolean oldFocusTraversalKeysEnabled;
-	// synchronized (this) {
-	// oldFocusTraversalKeysEnabled = this.focusTraversalKeysEnabled;
-	// this.focusTraversalKeysEnabled = focusTraversalKeysEnabled;
-	// }
-	// firePropertyChange("focusTraversalKeysEnabled",
-	// oldFocusTraversalKeysEnabled,
-	// focusTraversalKeysEnabled);
-	// }
+			if (keystrokes != null) {
+				for (AWTKeyStroke keystroke : keystrokes) {
+
+					if (keystroke == null) {
+						throw new IllegalArgumentException("cannot set null focus traversal key");
+					}
+
+					if (keystroke.getKeyChar() != KeyEvent.CHAR_UNDEFINED) {
+						throw new IllegalArgumentException("focus traversal keys cannot map to KEY_TYPED events");
+					}
+
+					for (int i = 0; i < focusTraversalKeys.length; i++) {
+						if (i == id) {
+							continue;
+						}
+
+						if (getFocusTraversalKeys_NoIDCheck(i).contains(keystroke)) {
+							throw new IllegalArgumentException("focus traversal keys must be unique for a Component");
+						}
+					}
+				}
+			}
+
+			oldKeys = focusTraversalKeys[id];
+			focusTraversalKeys[id] = (keystrokes != null)
+					? Collections.unmodifiableSet(new HashSet<AWTKeyStroke>(keystrokes))
+					: null;
+		}
+
+		firePropertyChange(focusTraversalKeyPropertyNames[id], oldKeys, keystrokes);
+	}
+	 final Set getFocusTraversalKeys_NoIDCheck(int id) {
+	 // Okay to return Set directly because it is an unmodifiable view
+	 Set keystrokes = (focusTraversalKeys != null)
+	 ? focusTraversalKeys[id]
+	 : null;
+	
+	 if (keystrokes != null) {
+	 return keystrokes;
+	 } else {
+	 Container parent = this.parent;
+	 if (parent != null) {
+	 return parent.getFocusTraversalKeys(id);
+	 } else {
+	 return KeyboardFocusManager.getCurrentKeyboardFocusManager().
+	 getDefaultFocusTraversalKeys(id);
+	 }
+	 }
+	 }
+
+	 /**
+	 * Returns whether the Set of focus traversal keys for the given focus
+	 * traversal operation has been explicitly defined for this Component. If
+	 * this method returns <code>false</code>, this Component is inheriting
+	 the
+	 * Set from an ancestor, or from the current KeyboardFocusManager.
+	 *
+	 * @param id one of KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS,
+	 * KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, or
+	 * KeyboardFocusManager.UP_CYCLE_TRAVERSAL_KEYS
+	 * @return <code>true</code> if the the Set of focus traversal keys for
+	 the
+	 * given focus traversal operation has been explicitly defined for
+	 * this Component; <code>false</code> otherwise.
+	 * @throws IllegalArgumentException if id is not one of
+	 * KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS,
+	 * KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, or
+	 * KeyboardFocusManager.UP_CYCLE_TRAVERSAL_KEYS
+	 * @since 1.4
+	 */
+	 public boolean areFocusTraversalKeysSet(int id) {
+	 if (id < 0 || id >= KeyboardFocusManager.TRAVERSAL_KEY_LENGTH - 1) {
+	 throw new IllegalArgumentException("invalid focus traversal key identifier");
+	 }
+	
+	 return (focusTraversalKeys != null && focusTraversalKeys[id] != null);
+	 }
+
+	 /**
+	 * Sets whether focus traversal keys are enabled for this Component.
+	 * Components for which focus traversal keys are disabled receive key
+	 * events for focus traversal keys. Components for which focus traversal
+	 * keys are enabled do not see these events; instead, the events are
+	 * automatically converted to traversal operations.
+	 *
+	 * @param focusTraversalKeysEnabled whether focus traversal keys are
+	 * enabled for this Component
+	 * @see #getFocusTraversalKeysEnabled
+	 * @see #setFocusTraversalKeys
+	 * @see #getFocusTraversalKeys
+	 * @since 1.4
+	 * @beaninfo
+	 * bound: true
+	 */
+	 public void setFocusTraversalKeysEnabled(boolean
+	 focusTraversalKeysEnabled) {
+	 boolean oldFocusTraversalKeysEnabled;
+	 synchronized (this) {
+	 oldFocusTraversalKeysEnabled = this.focusTraversalKeysEnabled;
+	 this.focusTraversalKeysEnabled = focusTraversalKeysEnabled;
+	 }
+	 firePropertyChange("focusTraversalKeysEnabled",
+	 oldFocusTraversalKeysEnabled,
+	 focusTraversalKeysEnabled);
+	 }
 
 	/**
 	 * Returns whether focus traversal keys are enabled for this Component.
@@ -6496,14 +6544,14 @@ public abstract class Component
 	 * @since JDK1.0
 	 */
 	public void requestFocus() {
-		JSToolkit.requestFocus(this);
-		// requestFocusHelper(false, true);
+		//JSToolkit.requestFocus(this);
+		requestFocusHelper(false, true);
 	}
 
-	// void requestFocus(CausedFocusEvent.Cause cause) {
-	// requestFocusHelper(false, true, cause);
-	// }
-	//
+	 void requestFocus(CausedFocusEvent.Cause cause) {
+	 requestFocusHelper(false, true, cause);
+	 }
+	
 	/**
 	 * Requests that this <code>Component</code> get the input focus, and that
 	 * this <code>Component</code>'s top-level ancestor become the focused
@@ -6563,13 +6611,13 @@ public abstract class Component
 	 * @since 1.4
 	 */
 	protected boolean requestFocus(boolean temporary) {
-		return JSToolkit.requestFocus(this);
-		// return requestFocusHelper(temporary, true);
+//		return JSToolkit.requestFocus(this);
+		return requestFocusHelper(temporary, true);
 	}
 
-	// boolean requestFocus(boolean temporary, CausedFocusEvent.Cause cause) {
-	// return requestFocusHelper(temporary, true, cause);
-	// }
+	 boolean requestFocus(boolean temporary, CausedFocusEvent.Cause cause) {
+	 return requestFocusHelper(temporary, true, cause);
+	 }
 	/**
 	 * Requests that this Component get the input focus, if this Component's
 	 * top-level ancestor is already the focused Window. This component must be
@@ -6618,252 +6666,250 @@ public abstract class Component
 		// return requestFocusHelper(false, false);
 	}
 
-	// boolean requestFocusInWindow(CausedFocusEvent.Cause cause) {
-	// return requestFocusHelper(false, false, cause);
-	// }
-	//
-	// /**
-	// * Requests that this <code>Component</code> get the input focus,
-	// * if this <code>Component</code>'s top-level ancestor is already
-	// * the focused <code>Window</code>. This component must be
-	// * displayable, focusable, visible and all of its ancestors (with
-	// * the exception of the top-level Window) must be visible for the
-	// * request to be granted. Every effort will be made to honor the
-	// * request; however, in some cases it may be impossible to do
-	// * so. Developers must never assume that this component is the
-	// * focus owner until this component receives a FOCUS_GAINED event.
-	// * <p>
-	// * This method returns a boolean value. If <code>false</code> is returned,
-	// * the request is <b>guaranteed to fail</b>. If <code>true</code> is
-	// * returned, the request will succeed <b>unless</b> it is vetoed, or an
-	// * extraordinary event, such as disposal of the component's peer, occurs
-	// * before the request can be granted by the native windowing system.
-	// Again,
-	// * while a return value of <code>true</code> indicates that the request is
-	// * likely to succeed, developers must never assume that this component is
-	// * the focus owner until this component receives a FOCUS_GAINED event.
-	// * <p>
-	// * This method cannot be used to set the focus owner to no component at
-	// * all. Use <code>KeyboardFocusManager.clearGlobalFocusOwner</code>
-	// * instead.
-	// * <p>
-	// * The focus behavior of this method can be implemented uniformly across
-	// * platforms, and thus developers are strongly encouraged to use this
-	// * method over <code>requestFocus</code> when possible. Code which relies
-	// * on <code>requestFocus</code> may exhibit different focus behavior on
-	// * different platforms.
-	// * <p>
-	// * Every effort will be made to ensure that <code>FocusEvent</code>s
-	// * generated as a
-	// * result of this request will have the specified temporary value.
-	// However,
-	// * because specifying an arbitrary temporary state may not be
-	// implementable
-	// * on all native windowing systems, correct behavior for this method can
-	// be
-	// * guaranteed only for lightweight components. This method is not intended
-	// * for general use, but exists instead as a hook for lightweight component
-	// * libraries, such as Swing.
-	// *
-	// * <p>Note: Not all focus transfers result from invoking this method. As
-	// * such, a component may receive focus without this or any of the other
-	// * {@code requestFocus} methods of {@code Component} being invoked.
-	// *
-	// * @param temporary true if the focus change is temporary,
-	// * such as when the window loses the focus; for
-	// * more information on temporary focus changes see the
-	// *<a href="../../java/awt/doc-files/FocusSpec.html">Focus
-	// Specification</a>
-	// * @return <code>false</code> if the focus change request is guaranteed to
-	// * fail; <code>true</code> if it is likely to succeed
-	// * @see #requestFocus
-	// * @see java.awt.event.FocusEvent
-	// * @see #addFocusListener
-	// * @see #isFocusable
-	// * @see #isDisplayable
-	// * @see KeyboardFocusManager#clearGlobalFocusOwner
-	// * @since 1.4
-	// */
+	 boolean requestFocusInWindow(CausedFocusEvent.Cause cause) {
+	 return requestFocusHelper(false, false, cause);
+	 }
+	
+	 /**
+	 * Requests that this <code>Component</code> get the input focus,
+	 * if this <code>Component</code>'s top-level ancestor is already
+	 * the focused <code>Window</code>. This component must be
+	 * displayable, focusable, visible and all of its ancestors (with
+	 * the exception of the top-level Window) must be visible for the
+	 * request to be granted. Every effort will be made to honor the
+	 * request; however, in some cases it may be impossible to do
+	 * so. Developers must never assume that this component is the
+	 * focus owner until this component receives a FOCUS_GAINED event.
+	 * <p>
+	 * This method returns a boolean value. If <code>false</code> is returned,
+	 * the request is <b>guaranteed to fail</b>. If <code>true</code> is
+	 * returned, the request will succeed <b>unless</b> it is vetoed, or an
+	 * extraordinary event, such as disposal of the component's peer, occurs
+	 * before the request can be granted by the native windowing system.
+	 Again,
+	 * while a return value of <code>true</code> indicates that the request is
+	 * likely to succeed, developers must never assume that this component is
+	 * the focus owner until this component receives a FOCUS_GAINED event.
+	 * <p>
+	 * This method cannot be used to set the focus owner to no component at
+	 * all. Use <code>KeyboardFocusManager.clearGlobalFocusOwner</code>
+	 * instead.
+	 * <p>
+	 * The focus behavior of this method can be implemented uniformly across
+	 * platforms, and thus developers are strongly encouraged to use this
+	 * method over <code>requestFocus</code> when possible. Code which relies
+	 * on <code>requestFocus</code> may exhibit different focus behavior on
+	 * different platforms.
+	 * <p>
+	 * Every effort will be made to ensure that <code>FocusEvent</code>s
+	 * generated as a
+	 * result of this request will have the specified temporary value.
+	 However,
+	 * because specifying an arbitrary temporary state may not be
+	 implementable
+	 * on all native windowing systems, correct behavior for this method can
+	 be
+	 * guaranteed only for lightweight components. This method is not intended
+	 * for general use, but exists instead as a hook for lightweight component
+	 * libraries, such as Swing.
+	 *
+	 * <p>Note: Not all focus transfers result from invoking this method. As
+	 * such, a component may receive focus without this or any of the other
+	 * {@code requestFocus} methods of {@code Component} being invoked.
+	 *
+	 * @param temporary true if the focus change is temporary,
+	 * such as when the window loses the focus; for
+	 * more information on temporary focus changes see the
+	 *<a href="../../java/awt/doc-files/FocusSpec.html">Focus
+	 Specification</a>
+	 * @return <code>false</code> if the focus change request is guaranteed to
+	 * fail; <code>true</code> if it is likely to succeed
+	 * @see #requestFocus
+	 * @see java.awt.event.FocusEvent
+	 * @see #addFocusListener
+	 * @see #isFocusable
+	 * @see #isDisplayable
+	 * @see KeyboardFocusManager#clearGlobalFocusOwner
+	 * @since 1.4
+	 */
 	protected boolean requestFocusInWindow(boolean temporary) {
-		return JSToolkit.requestFocus(this);
-		// return requestFocusHelper(temporary, false);
+		//return JSToolkit.requestFocus(this);
+	  return requestFocusHelper(temporary, false);
 	}
 
-	// boolean requestFocusInWindow(boolean temporary, CausedFocusEvent.Cause
-	// cause) {
-	// return requestFocusHelper(temporary, false, cause);
-	// }
-	//
-	// final boolean requestFocusHelper(boolean temporary,
-	// boolean focusedWindowChangeAllowed) {
-	// return requestFocusHelper(temporary, focusedWindowChangeAllowed,
-	// CausedFocusEvent.Cause.UNKNOWN);
-	// }
-	//
-	// final boolean requestFocusHelper(boolean temporary,
-	// boolean focusedWindowChangeAllowed,
-	// CausedFocusEvent.Cause cause)
-	// {
-	// if (!isRequestFocusAccepted(temporary, focusedWindowChangeAllowed,
-	// cause)) {
-	// if (focusLog.isLoggable(Level.FINEST)) {
-	// focusLog.log(Level.FINEST, "requestFocus is not accepted");
-	// }
-	// return false;
-	// }
-	//
-	// // Update most-recent map
-	// KeyboardFocusManager.setMostRecentFocusOwner(this);
-	//
-	// Component window = this;
-	// while ( (window != null) && !(window instanceof Window)) {
-	// if (!window.isVisible()) {
-	// if (focusLog.isLoggable(Level.FINEST)) {
-	// focusLog.log(Level.FINEST, "component is recurively invisible");
-	// }
-	// return false;
-	// }
-	// window = window.parent;
-	// }
-	//
-	// ComponentPeer peer = this.peer;
-	// Component heavyweight = (peer instanceof LightweightPeer)
-	// ? getNativeContainer() : this;
-	// if (heavyweight == null || !heavyweight.isVisible()) {
-	// if (focusLog.isLoggable(Level.FINEST)) {
-	// focusLog.log(Level.FINEST, "Component is not a part of visible
-	// hierarchy");
-	// }
-	// return false;
-	// }
-	// peer = heavyweight.peer;
-	// if (peer == null) {
-	// if (focusLog.isLoggable(Level.FINEST)) {
-	// focusLog.log(Level.FINEST, "Peer is null");
-	// }
-	// return false;
-	// }
-	//
-	// // Focus this Component
-	// long time = EventQueue.getMostRecentEventTime();
-	// boolean success = peer.requestFocus
-	// (this, temporary, focusedWindowChangeAllowed, time, cause);
-	// if (!success) {
-	// KeyboardFocusManager.getCurrentKeyboardFocusManager
-	// (appContext).dequeueKeyEvents(time, this);
-	// if (focusLog.isLoggable(Level.FINEST)) {
-	// focusLog.log(Level.FINEST, "Peer request failed");
-	// }
-	// } else {
-	// if (focusLog.isLoggable(Level.FINEST)) {
-	// focusLog.log(Level.FINEST, "Pass for " + this);
-	// }
-	// }
-	// return success;
-	// }
-	//
-	// private boolean isRequestFocusAccepted(boolean temporary,
-	// boolean focusedWindowChangeAllowed,
-	// CausedFocusEvent.Cause cause)
-	// {
-	// if (!isFocusable() || !isVisible()) {
-	// if (focusLog.isLoggable(Level.FINEST)) {
-	// focusLog.log(Level.FINEST, "Not focusable or not visible");
-	// }
-	// return false;
-	// }
-	//
-	// ComponentPeer peer = this.peer;
-	// if (peer == null) {
-	// if (focusLog.isLoggable(Level.FINEST)) {
-	// focusLog.log(Level.FINEST, "peer is null");
-	// }
-	// return false;
-	// }
-	//
-	// Window window = getContainingWindow();
-	// if (window == null || !((Window)window).isFocusableWindow()) {
-	// if (focusLog.isLoggable(Level.FINEST)) {
-	// focusLog.log(Level.FINEST, "Component doesn't have toplevel");
-	// }
-	// return false;
-	// }
-	//
-	// // We have passed all regular checks for focus request,
-	// // now let's call RequestFocusController and see what it says.
-	// Component focusOwner =
-	// KeyboardFocusManager.getMostRecentFocusOwner(window);
-	// if (focusOwner == null) {
-	// // sometimes most recent focus owner may be null, but focus owner is not
-	// // e.g. we reset most recent focus owner if user removes focus owner
-	// focusOwner =
-	// KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
-	// if (focusOwner != null && focusOwner.getContainingWindow() != window) {
-	// focusOwner = null;
-	// }
-	// }
-	//
-	// if (focusOwner == this || focusOwner == null) {
-	// // Controller is supposed to verify focus transfers and for this it
-	// // should know both from and to components. And it shouldn't verify
-	// // transfers from when these components are equal.
-	// if (focusLog.isLoggable(Level.FINEST)) {
-	// focusLog.log(Level.FINEST, "focus owner is null or this");
-	// }
-	// return true;
-	// }
-	//
-	// if (CausedFocusEvent.Cause.ACTIVATION == cause) {
-	// // we shouldn't call RequestFocusController in case we are
-	// // in activation. We do request focus on component which
-	// // has got temporary focus lost and then on component which is
-	// // most recent focus owner. But most recent focus owner can be
-	// // changed by requestFocsuXXX() call only, so this transfer has
-	// // been already approved.
-	// if (focusLog.isLoggable(Level.FINEST)) {
-	// focusLog.log(Level.FINEST, "cause is activation");
-	// }
-	// return true;
-	// }
-	//
-	// boolean ret =
-	// Component.requestFocusController.acceptRequestFocus(focusOwner,
-	// this,
-	// temporary,
-	// focusedWindowChangeAllowed,
-	// cause);
-	// if (focusLog.isLoggable(Level.FINEST)) {
-	// focusLog.log(Level.FINEST, "RequestFocusController returns {0}", ret);
-	// }
-	//
-	// return ret;
-	// }
+	 boolean requestFocusInWindow(boolean temporary, CausedFocusEvent.Cause
+	 cause) {
+	 return requestFocusHelper(temporary, false, cause);
+	 }
+	
+	 final boolean requestFocusHelper(boolean temporary,
+	 boolean focusedWindowChangeAllowed) {
+	 return requestFocusHelper(temporary, focusedWindowChangeAllowed,
+	 CausedFocusEvent.Cause.UNKNOWN);
+	 }
+	
+	 final boolean requestFocusHelper(boolean temporary,
+	 boolean focusedWindowChangeAllowed,
+	 CausedFocusEvent.Cause cause)
+	 {
+	 if (!isRequestFocusAccepted(temporary, focusedWindowChangeAllowed,
+	 cause)) {
+//	 if (focusLog.isLoggable(Level.FINEST)) {
+//	 focusLog.log(Level.FINEST, "requestFocus is not accepted");
+//	 }
+	 return false;
+	 }
+	
+	 // Update most-recent map
+	 KeyboardFocusManager.setMostRecentFocusOwner(this);
+	
+	 Component window = this;
+	 while ( (window != null) && !(window instanceof Window)) {
+	 if (!window.isVisible()) {
+//	 if (focusLog.isLoggable(Level.FINEST)) {
+//	 focusLog.log(Level.FINEST, "component is recurively invisible");
+//	 }
+	 return false;
+	 }
+	 window = window.parent;
+	 }
+	
+	 ComponentPeer peer = this.peer;
+	 Component heavyweight = (peer instanceof LightweightPeer)
+	 ? getNativeContainer() : this;
+	 if (heavyweight == null || !heavyweight.isVisible()) {
+//	 if (focusLog.isLoggable(Level.FINEST)) {
+//	 focusLog.log(Level.FINEST, "Component is not a part of visible	 hierarchy");
+//	 }
+	 return false;
+	 }
+	 peer = heavyweight.peer;
+	 if (peer == null) {
+//	 if (focusLog.isLoggable(Level.FINEST)) {
+//	 focusLog.log(Level.FINEST, "Peer is null");
+//	 }
+	 return false;
+	 }
+	
+	 // Focus this Component
+	 long time = EventQueue.getMostRecentEventTime();
+	 boolean success = peer.requestFocus
+	 (this, temporary, focusedWindowChangeAllowed, time, cause);
+	 if (!success) {
+	 KeyboardFocusManager.getCurrentKeyboardFocusManager
+	 (appContext).dequeueKeyEvents(time, this);
+//	 if (focusLog.isLoggable(Level.FINEST)) {
+//	 focusLog.log(Level.FINEST, "Peer request failed");
+//	 }
+	 } else {
+//	 if (focusLog.isLoggable(Level.FINEST)) {
+//	 focusLog.log(Level.FINEST, "Pass for " + this);
+//	 }
+	 }
+	 return success;
+	 }
+	
+	 private boolean isRequestFocusAccepted(boolean temporary,
+	 boolean focusedWindowChangeAllowed,
+	 CausedFocusEvent.Cause cause)
+	 {
+	 if (!isFocusable() || !isVisible()) {
+//	 if (focusLog.isLoggable(Level.FINEST)) {
+//	 focusLog.log(Level.FINEST, "Not focusable or not visible");
+//	 }
+	 return false;
+	 }
+	
+	 ComponentPeer peer = this.peer;
+	 if (peer == null) {
+//	 if (focusLog.isLoggable(Level.FINEST)) {
+//	 focusLog.log(Level.FINEST, "peer is null");
+//	 }
+	 return false;
+	 }
+	
+	 Window window = getContainingWindow();
+	 if (window == null || !((Window)window).isFocusableWindow()) {
+//	 if (focusLog.isLoggable(Level.FINEST)) {
+//	 focusLog.log(Level.FINEST, "Component doesn't have toplevel");
+//	 }
+	 return false;
+	 }
+	
+	 // We have passed all regular checks for focus request,
+	 // now let's call RequestFocusController and see what it says.
+	 Component focusOwner =
+	 KeyboardFocusManager.getMostRecentFocusOwner(window);
+	 if (focusOwner == null) {
+	 // sometimes most recent focus owner may be null, but focus owner is not
+	 // e.g. we reset most recent focus owner if user removes focus owner
+	 focusOwner =
+	 KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+	 if (focusOwner != null && focusOwner.getContainingWindow() != window) {
+	 focusOwner = null;
+	 }
+	 }
+	
+	 if (focusOwner == this || focusOwner == null) {
+	 // Controller is supposed to verify focus transfers and for this it
+	 // should know both from and to components. And it shouldn't verify
+	 // transfers from when these components are equal.
+//	 if (focusLog.isLoggable(Level.FINEST)) {
+//	 focusLog.log(Level.FINEST, "focus owner is null or this");
+//	 }
+	 return true;
+	 }
+	
+	 if (CausedFocusEvent.Cause.ACTIVATION == cause) {
+	 // we shouldn't call RequestFocusController in case we are
+	 // in activation. We do request focus on component which
+	 // has got temporary focus lost and then on component which is
+	 // most recent focus owner. But most recent focus owner can be
+	 // changed by requestFocsuXXX() call only, so this transfer has
+	 // been already approved.
+//	 if (focusLog.isLoggable(Level.FINEST)) {
+//	 focusLog.log(Level.FINEST, "cause is activation");
+//	 }
+	 return true;
+	 }
+	
+	 boolean ret = requestFocusController.acceptRequestFocus(focusOwner,
+	 this,
+	 temporary,
+	 focusedWindowChangeAllowed,
+	 cause);
+//	 if (focusLog.isLoggable(Level.FINEST)) {
+//	 focusLog.log(Level.FINEST, "RequestFocusController returns {0}", ret);
+//	 }
+	
+	 return ret;
+	 }
 
-	// private static RequestFocusController requestFocusController = new
-	// DummyRequestFocusController();
+	 private static RequestFocusController requestFocusController = new
+	 DummyRequestFocusController();
 
-	// // Swing access this method through reflection to implement
-	// InputVerifier's functionality.
-	// // Perhaps, we should make this method public (later ;)
-	// private static class DummyRequestFocusController implements
-	// RequestFocusController {
-	// public boolean acceptRequestFocus(Component from, Component to,
-	// boolean temporary, boolean focusedWindowChangeAllowed,
-	// CausedFocusEvent.Cause cause)
-	// {
-	// return true;
-	// }
-	// };
-	//
-	// synchronized static void setRequestFocusController(RequestFocusController
-	// requestController)
-	// {
-	// if (requestController == null) {
-	// requestFocusController = new DummyRequestFocusController();
-	// } else {
-	// requestFocusController = requestController;
-	// }
-	// }
+	 // Swing access this method through reflection to implement
+	 // InputVerifier's functionality.
+	 // Perhaps, we should make this method public (later ;)
+	 private static class DummyRequestFocusController implements
+	 RequestFocusController {
+	 public boolean acceptRequestFocus(Component from, Component to,
+	 boolean temporary, boolean focusedWindowChangeAllowed,
+	 CausedFocusEvent.Cause cause)
+	 {
+	 return true;
+	 }
+	 };
+	
+	 synchronized static void setRequestFocusController(RequestFocusController
+	 requestController)
+	 {
+	 if (requestController == null) {
+	 requestFocusController = new DummyRequestFocusController();
+	 } else {
+	 requestFocusController = requestController;
+	 }
+	 }
 
 	/**
 	 * Returns the Container which is the focus cycle root of this Component's
@@ -6908,181 +6954,172 @@ public abstract class Component
 		Container rootAncestor = getFocusCycleRootAncestor();
 		return (rootAncestor == container);
 	}
-	//
-	// Container getTraversalRoot() {
-	// return getFocusCycleRootAncestor();
-	// }
-	//
-	// /**
-	// * Transfers the focus to the next component, as though this Component
-	// were
-	// * the focus owner.
-	// * @see #requestFocus()
-	// * @since JDK1.1
-	// */
-	// public void transferFocus() {
-	// nextFocus();
-	// }
-	//
-	// /**
-	// * @deprecated As of JDK version 1.1,
-	// * replaced by transferFocus().
-	// */
-	// @Deprecated
-	// public void nextFocus() {
-	// transferFocus(false);
-	// }
+	
+	 Container getTraversalRoot() {
+	 return getFocusCycleRootAncestor();
+	 }
+	
+	 /**
+	 * Transfers the focus to the next component, as though this Component
+	 were
+	 * the focus owner.
+	 * @see #requestFocus()
+	 * @since JDK1.1
+	 */
+	 public void transferFocus() {
+	 nextFocus();
+	 }
+	
+	 /**
+	 * @deprecated As of JDK version 1.1,
+	 * replaced by transferFocus().
+	 */
+	 @Deprecated
+	 public void nextFocus() {
+	 transferFocus(false);
+	 }
 
-	// boolean transferFocus(boolean clearOnFailure) {
-	// if (focusLog.isLoggable(Level.FINER)) {
-	// focusLog.finer("clearOnFailure = " + clearOnFailure);
-	// }
-	// Component toFocus = getNextFocusCandidate();
-	// boolean res = false;
-	// if (toFocus != null && !toFocus.isFocusOwner() && toFocus != this) {
-	// res =
-	// toFocus.requestFocusInWindow(CausedFocusEvent.Cause.TRAVERSAL_FORWARD);
-	// }
-	// if (clearOnFailure && !res) {
-	// if (focusLog.isLoggable(Level.FINER)) {
-	// focusLog.finer("clear global focus owner");
-	// }
-	// KeyboardFocusManager.getCurrentKeyboardFocusManager().clearGlobalFocusOwner();
-	// }
-	// if (focusLog.isLoggable(Level.FINER)) {
-	// focusLog.finer("returning result: " + res);
-	// }
-	// return res;
-	// }
-	//
-	// final Component getNextFocusCandidate() {
-	// Container rootAncestor = getTraversalRoot();
-	// Component comp = this;
-	// while (rootAncestor != null &&
-	// !(rootAncestor.isShowing() && rootAncestor.canBeFocusOwner()))
-	// {
-	// comp = rootAncestor;
-	// rootAncestor = comp.getFocusCycleRootAncestor();
-	// }
-	// if (focusLog.isLoggable(Level.FINER)) {
-	// focusLog.finer("comp = " + comp + ", root = " + rootAncestor);
-	// }
-	// Component candidate = null;
-	// if (rootAncestor != null) {
-	// FocusTraversalPolicy policy = rootAncestor.getFocusTraversalPolicy();
-	// Component toFocus = policy.getComponentAfter(rootAncestor, comp);
-	// if (focusLog.isLoggable(Level.FINER)) {
-	// focusLog.finer("component after is " + toFocus);
-	// }
-	// if (toFocus == null) {
-	// toFocus = policy.getDefaultComponent(rootAncestor);
-	// if (focusLog.isLoggable(Level.FINER)) {
-	// focusLog.finer("default component is " + toFocus);
-	// }
-	// }
-	// if (toFocus == null) {
-	// Applet applet = EmbeddedFrame.getAppletIfAncestorOf(this);
-	// if (applet != null) {
-	// toFocus = applet;
-	// }
-	// }
-	// candidate = toFocus;
-	// }
-	// if (focusLog.isLoggable(Level.FINER)) {
-	// focusLog.finer("Focus transfer candidate: " + candidate);
-	// }
-	// return candidate;
-	// }
-	//
-	// /**
-	// * Transfers the focus to the previous component, as though this Component
-	// * were the focus owner.
-	// * @see #requestFocus()
-	// * @since 1.4
-	// */
-	// public void transferFocusBackward() {
-	// transferFocusBackward(false);
-	// }
-	//
-	// boolean transferFocusBackward(boolean clearOnFailure) {
-	// Container rootAncestor = getTraversalRoot();
-	// Component comp = this;
-	// while (rootAncestor != null &&
-	// !(rootAncestor.isShowing() && rootAncestor.canBeFocusOwner()))
-	// {
-	// comp = rootAncestor;
-	// rootAncestor = comp.getFocusCycleRootAncestor();
-	// }
-	// boolean res = false;
-	// if (rootAncestor != null) {
-	// FocusTraversalPolicy policy = rootAncestor.getFocusTraversalPolicy();
-	// Component toFocus = policy.getComponentBefore(rootAncestor, comp);
-	// if (toFocus == null) {
-	// toFocus = policy.getDefaultComponent(rootAncestor);
-	// }
-	// if (toFocus != null) {
-	// res =
-	// toFocus.requestFocusInWindow(CausedFocusEvent.Cause.TRAVERSAL_BACKWARD);
-	// }
-	// }
-	// if (!res) {
-	// if (focusLog.isLoggable(Level.FINER)) {
-	// focusLog.finer("clear global focus owner");
-	// }
-	// KeyboardFocusManager.getCurrentKeyboardFocusManager().clearGlobalFocusOwner();
-	// }
-	// if (focusLog.isLoggable(Level.FINER)) {
-	// focusLog.finer("returning result: " + res);
-	// }
-	// return res;
-	// }
-	//
-	// /**
-	// * Transfers the focus up one focus traversal cycle. Typically, the focus
-	// * owner is set to this Component's focus cycle root, and the current
-	// focus
-	// * cycle root is set to the new focus owner's focus cycle root. If,
-	// * however, this Component's focus cycle root is a Window, then the focus
-	// * owner is set to the focus cycle root's default Component to focus, and
-	// * the current focus cycle root is unchanged.
-	// *
-	// * @see #requestFocus()
-	// * @see Container#isFocusCycleRoot()
-	// * @see Container#setFocusCycleRoot(boolean)
-	// * @since 1.4
-	// */
-	// public void transferFocusUpCycle() {
-	// Container rootAncestor;
-	// for (rootAncestor = getFocusCycleRootAncestor();
-	// rootAncestor != null && !(rootAncestor.isShowing() &&
-	// rootAncestor.isFocusable() &&
-	// rootAncestor.isEnabled());
-	// rootAncestor = rootAncestor.getFocusCycleRootAncestor()) {
-	// }
-	//
-	// if (rootAncestor != null) {
-	// Container rootAncestorRootAncestor =
-	// rootAncestor.getFocusCycleRootAncestor();
-	// KeyboardFocusManager.getCurrentKeyboardFocusManager().
-	// setGlobalCurrentFocusCycleRoot(
-	// (rootAncestorRootAncestor != null)
-	// ? rootAncestorRootAncestor
-	// : rootAncestor);
-	// rootAncestor.requestFocus(CausedFocusEvent.Cause.TRAVERSAL_UP);
-	// } else {
-	// Window window = getContainingWindow();
-	//
-	// if (window != null) {
-	// Component toFocus = window.getFocusTraversalPolicy().
-	// getDefaultComponent(window);
-	// if (toFocus != null) {
-	// KeyboardFocusManager.getCurrentKeyboardFocusManager().
-	// setGlobalCurrentFocusCycleRoot(window);
-	// toFocus.requestFocus(CausedFocusEvent.Cause.TRAVERSAL_UP);
-	// }
-	// }
-	// }
-	// }
+	 boolean transferFocus(boolean clearOnFailure) {
+//	 if (focusLog.isLoggable(Level.FINER)) {
+//	 focusLog.finer("clearOnFailure = " + clearOnFailure);
+//	 }
+	 Component toFocus = getNextFocusCandidate();
+	 boolean res = false;
+	 if (toFocus != null && !toFocus.isFocusOwner() && toFocus != this) {
+	 res =
+	 toFocus.requestFocusInWindow(CausedFocusEvent.Cause.TRAVERSAL_FORWARD);
+	 }
+	 if (clearOnFailure && !res) {
+//	 if (focusLog.isLoggable(Level.FINER)) {
+//	 focusLog.finer("clear global focus owner");
+//	 }
+	 KeyboardFocusManager.getCurrentKeyboardFocusManager().clearGlobalFocusOwner();
+	 }
+//	 if (focusLog.isLoggable(Level.FINER)) {
+//	 focusLog.finer("returning result: " + res);
+//	 }
+	 return res;
+	 }
+	
+	 final Component getNextFocusCandidate() {
+	 Container rootAncestor = getTraversalRoot();
+	 Component comp = this;
+	 while (rootAncestor != null &&
+	 !(rootAncestor.isShowing() && rootAncestor.canBeFocusOwner()))
+	 {
+	 comp = rootAncestor;
+	 rootAncestor = comp.getFocusCycleRootAncestor();
+	 }
+//	 if (focusLog.isLoggable(Level.FINER)) {
+//	 focusLog.finer("comp = " + comp + ", root = " + rootAncestor);
+//	 }
+	 Component candidate = null;
+	 if (rootAncestor != null) {
+	 FocusTraversalPolicy policy = rootAncestor.getFocusTraversalPolicy();
+	 Component toFocus = policy.getComponentAfter(rootAncestor, comp);
+//	 if (focusLog.isLoggable(Level.FINER)) {
+//	 focusLog.finer("component after is " + toFocus);
+//	 }
+	 if (toFocus == null) {
+	 toFocus = policy.getDefaultComponent(rootAncestor);
+//	 if (focusLog.isLoggable(Level.FINER)) {
+//	 focusLog.finer("default component is " + toFocus);
+//	 }
+	 }
+	 if (toFocus == null) {
+//SWINGJS TODO	 Applet applet = EmbeddedFrame.getAppletIfAncestorOf(this);
+//	 if (applet != null) {
+//	 toFocus = applet;
+//	 }
+	 }
+	 candidate = toFocus;
+	 }
+//	 if (focusLog.isLoggable(Level.FINER)) {
+//	 focusLog.finer("Focus transfer candidate: " + candidate);
+//	 }
+	 return candidate;
+	 }
+	
+	 /**
+	 * Transfers the focus to the previous component, as though this Component
+	 * were the focus owner.
+	 * @see #requestFocus()
+	 * @since 1.4
+	 */
+	 public void transferFocusBackward() {
+	 transferFocusBackward(false);
+	 }
+	
+	 boolean transferFocusBackward(boolean clearOnFailure) {
+	 Container rootAncestor = getTraversalRoot();
+	 Component comp = this;
+	 while (rootAncestor != null &&
+	 !(rootAncestor.isShowing() && rootAncestor.canBeFocusOwner()))
+	 {
+	 comp = rootAncestor;
+	 rootAncestor = comp.getFocusCycleRootAncestor();
+	 }
+	 boolean res = false;
+	 if (rootAncestor != null) {
+	 FocusTraversalPolicy policy = rootAncestor.getFocusTraversalPolicy();
+	 Component toFocus = policy.getComponentBefore(rootAncestor, comp);
+	 if (toFocus == null) {
+	 toFocus = policy.getDefaultComponent(rootAncestor);
+	 }
+	 if (toFocus != null) {
+	 res =
+	 toFocus.requestFocusInWindow(CausedFocusEvent.Cause.TRAVERSAL_BACKWARD);
+	 }
+	 }
+	 if (!res) {
+//	 if (focusLog.isLoggable(Level.FINER)) {
+//	 focusLog.finer("clear global focus owner");
+//	 }
+	 KeyboardFocusManager.getCurrentKeyboardFocusManager().clearGlobalFocusOwner();
+	 }
+//	 if (focusLog.isLoggable(Level.FINER)) {
+//	 focusLog.finer("returning result: " + res);
+//	 }
+	 return res;
+	 }
+	
+	/**
+	 * Transfers the focus up one focus traversal cycle. Typically, the focus owner
+	 * is set to this Component's focus cycle root, and the current focus cycle root
+	 * is set to the new focus owner's focus cycle root. If, however, this
+	 * Component's focus cycle root is a Window, then the focus owner is set to the
+	 * focus cycle root's default Component to focus, and the current focus cycle
+	 * root is unchanged.
+	 *
+	 * @see #requestFocus()
+	 * @see Container#isFocusCycleRoot()
+	 * @see Container#setFocusCycleRoot(boolean)
+	 * @since 1.4
+	 */
+	public void transferFocusUpCycle() {
+		Container rootAncestor;
+		for (rootAncestor = getFocusCycleRootAncestor(); rootAncestor != null
+				&& !(rootAncestor.isShowing() && rootAncestor.isFocusable()
+						&& rootAncestor.isEnabled()); rootAncestor = rootAncestor.getFocusCycleRootAncestor()) {
+		}
+
+		if (rootAncestor != null) {
+			Container rootAncestorRootAncestor = rootAncestor.getFocusCycleRootAncestor();
+			KeyboardFocusManager.getCurrentKeyboardFocusManager().setGlobalCurrentFocusCycleRoot(
+					(rootAncestorRootAncestor != null) ? rootAncestorRootAncestor : rootAncestor);
+			rootAncestor.requestFocus(CausedFocusEvent.Cause.TRAVERSAL_UP);
+		} else {
+			Window window = getContainingWindow();
+
+			if (window != null) {
+				Component toFocus = window.getFocusTraversalPolicy().getDefaultComponent(window);
+				if (toFocus != null) {
+					KeyboardFocusManager.getCurrentKeyboardFocusManager().setGlobalCurrentFocusCycleRoot(window);
+					toFocus.requestFocus(CausedFocusEvent.Cause.TRAVERSAL_UP);
+				}
+			}
+		}
+	}
 
 	/**
 	 * Returns <code>true</code> if this <code>Component</code> is the focus
@@ -7094,9 +7131,9 @@ public abstract class Component
 	 * @since 1.2
 	 */
 	public boolean hasFocus() {
-		return JSToolkit.hasFocus(this);
-		// return (KeyboardFocusManager.getCurrentKeyboardFocusManager().
-		// getFocusOwner() == this);
+//		return JSToolkit.hasFocus(this);
+		 return (KeyboardFocusManager.getCurrentKeyboardFocusManager().
+		 getFocusOwner() == this);
 	}
 
 	/**
