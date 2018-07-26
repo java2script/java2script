@@ -10,6 +10,10 @@
 // TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
 //       It is possible that these might be loaded dynamically.
 
+// BH 7/26/2018 fix for Array.getComponentType() only returning the base element type
+// BH 7/26/2018 private methods moved to p$<n>, not loaded into prototype
+// BH 7/26/2018 fix for inner classes that extend other object having incorrect object references
+//              when the outer class and the superclass both extend the same class (Test_Call)
 // BH 7/25/2018 adds bit twiddles to Integer
 // BH 7/23/2018 fixes __NDIM in array classes written as "__NDIMS"
 // BH 7/23/2018 adds Character.$valueOf
@@ -514,6 +518,8 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
   var b = outerObj.$b$;
   var isNew = false;
   var innerName = getClassName(objThis, true);
+  var clazz1 = getClazz(outerObj);
+  var clazz2 = (clazz.superclazz == clazz1 ? null : clazz.superclazz || null);
   if (!b) {
     b = outerObj.b$;
     // Inner class of an inner class must inherit all outer object references. Note that this 
@@ -530,7 +536,6 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
       isNew = true;
     }
     // add all superclass references for outer object
-    var clazz1 = getClazz(outerObj);
     do {
       var key = getClassName(clazz1, true);
       if (!isNew && b[key])
@@ -543,6 +548,19 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
   // it is new, save this map with the OUTER object as $b$
   if (isNew)
     outerObj.$b$ = b;
+
+  if (clazz2) {
+	// we have an inner object that subclasses a different object
+	// clone the map and overwrite with the correct values
+      b = appendMap({},b);
+    do {
+      var key = getClassName(clazz2, true);
+      b[key] = objThis; 
+    } while ((clazz2 = clazz2.superclazz));
+  }
+  
+
+
   // final objective: save this map for the inner object
   objThis.b$ = b;
   clazz.$this$0 && (objThis.this$0 = b[clazz.$this$0]);
@@ -564,7 +582,8 @@ Clazz.newInterface = function (prefix, name, _null1, _null2, interfacez, _0) {
   return Clazz.newClass(prefix, name, function(){}, null, interfacez, 0);
 };
 
-Clazz.newMeth = function (clazzThis, funName, funBody, isStatic) {
+Clazz.newMeth = function (clazzThis, funName, funBody, modifiers) {
+	// modifiers: 1: static, 2: native, p3 -- private holder
   if (arguments.length == 1) {
     return Clazz.newMeth(clazzThis, 'c$', function(){
     	Clazz.super_(clazzThis, this,1);
@@ -576,18 +595,25 @@ Clazz.newMeth = function (clazzThis, funName, funBody, isStatic) {
     // For example: ['compareTo$S', 'compareTo$TK', 'compareTo$TA']
     // where K and A are generic types that are from a class<K> or class<A> assignment.    
     for (var i = funName.length; --i >= 0;)
-      Clazz.newMeth(clazzThis, funName[i], funBody, isStatic);
+      Clazz.newMeth(clazzThis, funName[i], funBody, modifiers);
     return;
   }
+  var isStatic = (modifiers == 1 || modifiers == 2);
+  var isPrivate = (typeof modifiers == "object");
   Clazz.saemCount0++;
   funBody.exName = funName; // mark it as one of our methods
   funBody.exClazz = clazzThis; // make it traceable
+  funBody.isPrivate = isPrivate;
   var f;
   if (isStatic || funName == "c$")
     clazzThis[funName] = funBody;
   if (clazzThis.$isInterface)
 	  clazzThis.$hasJava8Defaults = true;
-  return clazzThis.prototype[funName] = funBody; // allow static calls as though they were not static
+  if (isPrivate && modifiers)
+	  modifiers[funName] = funBody;
+  else 
+	  clazzThis.prototype[funName] = funBody;
+  return funBody; // allow static calls as though they were not static
 };                     
 
 Clazz.newPackage = function (pkgName) {

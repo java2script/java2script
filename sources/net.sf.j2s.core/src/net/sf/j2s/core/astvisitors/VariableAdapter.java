@@ -168,7 +168,7 @@ class VariableAdapter extends VisitorAdapter {
 			if (fv.toVariableName != null) {
 				name = fv.toVariableName;
 			}
-			name = Java2ScriptVisitor.NameMapper.get$QualifiedJ2SFieldName(name, true);
+			name = Java2ScriptVisitor.NameMapper.getJ2S$JavaScriptCollisionName(name, true, null);
 			buf.append(name);
 			buf.append(": ");
 			String methodScope = fv.methodScope;

@@ -11,6 +11,9 @@
 
 package net.sf.j2s.core.astvisitors;
 
+import java.util.Hashtable;
+import java.util.Map;
+
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ParameterizedType;
@@ -25,30 +28,29 @@ import org.eclipse.jdt.core.dom.WildcardType;
  * also used for package declaration names
  * 
  * @author zhou renjian
- *
- *         2006-12-3
+ * @author Bob Hanson
+ * 
  */
 public class TypeAdapter extends VisitorAdapter {
 
 	private String thisClassName = "";
-	private String fullClassName = "";
-	private String thisPackageName;
 
 	public String getClassName() {
 		return thisClassName;
 	}
 
-	public void setClassName(String className) {
-		thisClassName = className;
-		thisPackageName = visitor.getPackageName();
-		fullClassName = (thisPackageName == null || thisPackageName.length() == 0 
-				|| "java.lang".equals(thisPackageName)
-				|| thisClassName.startsWith("C$")
-				? thisClassName : thisPackageName + '.' + thisClassName);
-	}
+	private String fullClassName = "";
 
+	
 	public String getFullClassName() {
 		return fullClassName;
+	}
+
+	void setClassName(String className) {
+		thisClassName = className;
+		String thisPackageName = visitor.getPackageName();
+		fullClassName = (thisPackageName == null || thisPackageName.length() == 0 || "java.lang".equals(thisPackageName)
+				|| thisClassName.startsWith("C$") ? thisClassName : thisPackageName + '.' + thisClassName);
 	}
 
 	/**
