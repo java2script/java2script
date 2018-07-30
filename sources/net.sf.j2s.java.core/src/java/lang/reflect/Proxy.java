@@ -672,32 +672,27 @@ public class Proxy implements java.io.Serializable {
     	for (int i = 0; i < interfaces.length; i++) {
     		Method[] methods = interfaces[i].getDeclaredMethods();
     		for (int j = 0; j < methods.length; j++) {
-    			setJSPrototype(cl, methods[j]);
+    			setJSPrototype(cl, methods[j], false);
     		}
-    		
+    		if (methods.length == 1) 
+    			setJSPrototype(cl, methods[0], true);    		
     	}
 		return cl;
     }
 
     @SuppressWarnings("unused")
-	private static void setJSPrototype(Class<?> cl, Method m) {
+	private static void setJSPrototype(Class<?> cl, Method m, boolean isFunctionalInterfaceMethod) {
 		String mname = m.getName();
+		
 		// SwingJS transfers the invocation to a temporary method, then invokes it
 		/**
 		 * @j2sNative
 		 * 
-		 * m.Class_ = cl;
-		 * m.isProxy = true;
-		 * cl.$clazz$.prototype[mname] = function() {
-		 *   var args = new Array(arguments.length);
-		 *   for (var k = arguments.length; --k >= 0;)args[k] = arguments[k];
-		 *   this.h.invoke$O$reflect_Method$OA(this, m, args);
-		 * } 
+		 * 			if (isFunctionalInterfaceMethod) { mname = mname.split("$")[0] + "$"; }
+		 *            m.Class_ = cl; m.isProxy = true; cl.$clazz$.prototype[mname] =
+		 *            function() { var args = new Array(arguments.length); for (var k =
+		 *            arguments.length; --k >= 0;)args[k] = arguments[k];
+		 *            this.h.invoke$O$reflect_Method$OA(this, m, args); }
 		 */
-		{
-			
-		}
-		
-		
 	}
 }
