@@ -199,10 +199,13 @@ public class Java2ScriptCompiler {
 				lstExcludedPaths = null;
 		}
 
-		String nonqualifiedPackages = getProperty("j2s.compiler.nonqualified.packages");
-		if (nonqualifiedPackages == null) // older version of the name
-			nonqualifiedPackages = getProperty("j2s.compiler.nonqualified.classes");
-		
+		String prop = getProperty("j2s.compiler.nonqualified.packages");
+		// older version of the name
+		String nonqualifiedPackages = getProperty("j2s.compiler.nonqualified.classes");
+		nonqualifiedPackages = (prop == null ? "" : prop)
+			+ (nonqualifiedPackages == null ? "" : (prop == null ? "" : ";") + nonqualifiedPackages);
+	    if (nonqualifiedPackages.length() == 0)
+	    	nonqualifiedPackages = null;
 		// includes @j2sDebug blocks
 		boolean isDebugging = "debug".equals(getProperty("j2s.compiler.mode"));
 
@@ -224,10 +227,11 @@ public class Java2ScriptCompiler {
 				System.err.println("using HTML template " + file);
 		}
 
-		Java2ScriptVisitor.setNoQualifiedNamePackages(nonqualifiedPackages);
 		Java2ScriptVisitor.setDebugging(isDebugging);
-		Java2ScriptVisitor.setClassReplacements(classReplacements);
 		Java2ScriptVisitor.setLogging(lstMethodsDeclared, htMethodsCalled, logAllCalls);
+
+		Java2ScriptVisitor.NameMapper.setNonQualifiedNamePackages(nonqualifiedPackages);
+		Java2ScriptVisitor.NameMapper.setClassReplacements(classReplacements);
 		
 		astParser = ASTParser.newParser(JSL_LEVEL);
 	

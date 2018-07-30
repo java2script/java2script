@@ -19,7 +19,7 @@ public class CorePlugin extends Plugin {
 	 * register the bundle version properly. So we use VERSION here instead.
 	 * 
 	 */
-	public static String VERSION = "3.2.1.03";
+	public static String VERSION = "3.2.2.01";
 	
 	/**
 	 * The constructor.

@@ -28,7 +28,7 @@ Clazz.load(C$, 1);
       this.grN=0;
   }, 1);
   Clazz.newMeth(C$,"toString", function(){
-    return this.b$["java.util.regex.Matcher"].group(this.grN);
+    return this.b$["java.util.regex.Matcher"].group$I(this.grN);
   });
 })();
 
@@ -45,10 +45,10 @@ Clazz.newMeth(C$,"reset$CharSequence",function(newSequence){
   }
   this.charSeq=newSequence;
   this.strString = null;
-  return this.reset();
+  return this.reset$();
 });
 
-Clazz.newMeth(C$,"reset",function(){
+Clazz.newMeth(C$,"reset$",function(){
   this.leftBound=0;
   this.rightBound=this.charSeq.length$();
   this.appendPos=0;
@@ -62,7 +62,7 @@ Clazz.newMeth(C$,"reset",function(){
   return this;
 });
 
-Clazz.newMeth(C$,"find",function(){
+Clazz.newMeth(C$,"find$",function(){
   // 'find next'
   if (this.strString == null)
     this.strString = this.charSeq.toString();
@@ -81,10 +81,10 @@ Clazz.newMeth(C$,"find$I",function(startIndex){
     throw new IndexOutOfBoundsException$S("Out of bound "+startIndex);
   this.leftBound = startIndex;
   this.rightBound = stringLength;
-  return this.find();
+  return this.find$();
 });
 
-Clazz.newMeth(C$,"start",function(){
+Clazz.newMeth(C$,"start$",function(){
   return this.start$I(0);
 });
 
@@ -98,7 +98,7 @@ Clazz.newMeth(C$,"startImpl$I",  function(groupIndex){
   return this.pat.regexp.lastIndex - this.results[0].length;
 });
 
-Clazz.newMeth(C$,"end",function(){
+Clazz.newMeth(C$,"end$",function(){
   return this.end$I(0);
 });
 
@@ -109,9 +109,9 @@ Clazz.newMeth(C$,"end$I",function(groupIndex){
 
 Clazz.newMeth(C$,"appendReplacement$StringBuffer$S",function(sb,replacement){
   this.processedRepl=this.processReplacement$S(replacement);
-  sb.append$S(this.charSeq.subSequence$I$I(this.appendPos,this.start()));
+  sb.append$S(this.charSeq.subSequence$I$I(this.appendPos,this.start$()));
   sb.append$S(this.processedRepl);
-  this.appendPos=this.end();
+  this.appendPos=this.end$();
   return this;
 });
 
@@ -154,7 +154,7 @@ Clazz.newMeth(C$,"processReplacement$S",function(replacement){
               replacementPos=res.length$();
             }
             this.replacementParts[this.replacementParts.length]= Clazz.new_(Clazz.load("java.util.regex.Matcher$1").c$,[this]);
-            var group=this.group(gr);
+            var group=this.group$I(gr);
             replacementPos+=group.length;
             res.append$S(group);
           }catch(e$$){
@@ -203,8 +203,8 @@ Clazz.newMeth(C$,"appendTail$StringBuffer",function(sb){
 },"StringBuffer");
 
 Clazz.newMeth(C$,"replaceFirst$S",function(replacement){
-  this.reset();
-  if(this.find()){
+  this.reset$();
+  if(this.find$()){
     var sb=new StringBuffer();
     this.appendReplacement$StringBuffer$S(sb,replacement);
     return this.appendTail$StringBuffer(sb).toString();
@@ -214,14 +214,14 @@ Clazz.newMeth(C$,"replaceFirst$S",function(replacement){
 
 Clazz.newMeth(C$,"replaceAll$S", function(replacement){
   var sb=new StringBuffer();
-  this.reset();
-  while(this.find()){
-    this.appendReplacement(sb,replacement);
+  this.reset$();
+  while(this.find$()){
+    this.appendReplacement$StringBuffer$S(sb,replacement);
   }
   return this.appendTail$StringBuffer(sb).toString();
 });
 
-Clazz.newMeth(C$,"pattern",function(){
+Clazz.newMeth(C$,"pattern$",function(){
   return this.pat;
 });
 
@@ -232,15 +232,15 @@ Clazz.newMeth(C$,"group$I",function(groupIndex){
   return this.results[groupIndex];
 });
 
-Clazz.newMeth(C$,"group",function(){
-  return this.group(0);
+Clazz.newMeth(C$,"group$",function(){
+  return this.group$I(0);
 });
 
-Clazz.newMeth(C$,"matches",function(){
+Clazz.newMeth(C$,"matches$",function(){
   // UB: the find must match the complete input and not modify the RE object
   var old_lastIndex = this.pat.regexp.lastIndex;
   try {
-    this.find();
+    this.find$();
     var r = this.results;
     return r && r.length > 0 && r[0].length === r.input.length;
   } finally {
@@ -272,16 +272,16 @@ Clazz.newMeth(C$,"quoteReplacement$S",function(string){
   return res.toString();
 }, 1);
 
-Clazz.newMeth(C$,"lookingAt",function(){
+Clazz.newMeth(C$,"lookingAt$",function(){
   return false;
 });
 
-Clazz.newMeth(C$,"groupCount",function(){
+Clazz.newMeth(C$,"groupCount$",function(){
   return this.results==null?0:this.results.length;
 });
 
 
-Clazz.newMeth(C$,"toMatchResult",function(){
+Clazz.newMeth(C$,"toMatchResult$",function(){
   return this;
 });
 
@@ -289,7 +289,7 @@ Clazz.newMeth(C$,"useAnchoringBounds$Z",function(value){
   return this;
 });
 
-Clazz.newMeth(C$,"hasAnchoringBounds",function(){
+Clazz.newMeth(C$,"hasAnchoringBounds$",function(){
   return false;
 });
 
@@ -297,23 +297,23 @@ Clazz.newMeth(C$,"useTransparentBounds$Z",function(value){
   return this;
 });
 
-Clazz.newMeth(C$,"hasTransparentBounds",function(){
+Clazz.newMeth(C$,"hasTransparentBounds$",function(){
   return false;
 });
 
-Clazz.newMeth(C$,"regionStart",function(){
+Clazz.newMeth(C$,"regionStart$",function(){
   return this.leftBound;
 });
 
-Clazz.newMeth(C$,"regionEnd",function(){
+Clazz.newMeth(C$,"regionEnd$",function(){
   return this.rightBound;
 });
 
-Clazz.newMeth(C$,"requireEnd",function(){
+Clazz.newMeth(C$,"requireEnd$",function(){
   return false;
 });
 
-Clazz.newMeth(C$,"hitEnd",function(){
+Clazz.newMeth(C$,"hitEnd$",function(){
   return false;
 });
 

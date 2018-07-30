@@ -12,6 +12,7 @@ package net.sf.j2s.core.astvisitors;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -118,6 +120,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
+import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -128,6 +131,10 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
 import net.sf.j2s.core.CorePlugin;
+import net.sf.j2s.core.astvisitors.VariableAdapter.FinalVariable;
+
+
+// BH 7/29/2018 -- java.util.stream.Collectors is returning java.util.Collectionthis.b$['java.util.Collection'].add
 
 // BH 7/25/2018 -- allows for direct private function calls in inner and anonymous classes using var p$, p$$, p$$$, etc
 // BH 7/22/2018 -- fixes improper use of charCodeAt() to replace charCode().$c() when not java.lang.String.charAt
@@ -175,7 +182,7 @@ import net.sf.j2s.core.CorePlugin;
  */
 public class Java2ScriptVisitor extends ASTVisitor {
 
-	private static final String VERSION = "3.2.1.01";
+	private static final String VERSION = CorePlugin.VERSION;
 
 	private static final int NOT_LAMBDA = 0;
 	private static final int LAMBDA_METHOD = 1;
@@ -199,6 +206,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	private String getQualifiedClassName() {
 		return getTypeAdapter().getFullClassName();
+	}
+
+	private ITypeBinding getTypeBinding() {
+		return getTypeAdapter().getTypeBinding();
 	}
 
 	/**
@@ -296,7 +307,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	private boolean isUserApplet;
 
-	private boolean dontQualifyMethod;
+	private boolean addUnqualifiedMethod;
 
 	public boolean visit(CompilationUnit node) {
 		resetPrivateVars();
@@ -375,12 +386,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	public boolean visit(BreakStatement node) {
 		buffer.append("break");
-		SimpleName label = node.getLabel();
-		if (label != null) {
-			buffer.append(' ');
-			label.accept(this);
-		}
-		buffer.append(";\r\n");
+		addLabel(node.getLabel(), false);
 		return false;
 	}
 
@@ -480,7 +486,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		List<VariableAdapter.FinalVariable> visitedVars = variableAdapter.visitedVars = new ArrayList<VariableAdapter.FinalVariable>();
 		currentBlockForVisit = blockLevel;
 		variableAdapter.normalVars = new ArrayList<VariableAdapter.FinalVariable>();
-		methodDeclareNameStack.push(binding.getKey());
+		methodStackForFinals.push(binding.getKey());
 		if (isLambda) {
 			addClassOrInterface(node, binding, null, 'm');
 			// lambda methods must access the expression object for later .apply($this$,[t])
@@ -493,11 +499,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			anonDeclare.accept(this);
 			buffer.append(", ");
 		}
-		methodDeclareNameStack.pop();
+		methodStackForFinals.pop();
 
 		variableAdapter.normalVars = lastNormalVars;
-		String finals = VariableAdapter.listFinalVariables(visitedVars, ", ",
-				methodDeclareNameStack.size() == 0 ? null : (String) methodDeclareNameStack.peek());
+		String finals = listFinalVariables(visitedVars, ", ",
+				methodStackForFinals.size() == 0 ? null : (String) methodStackForFinals.peek());
 		IMethodBinding constructorBinding, methodDeclaration;
 		String superclassName;
 		if (isLambda) {
@@ -535,7 +541,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	public boolean visit(ConstructorInvocation node) {
 		IMethodBinding constructorBinding = node.resolveConstructorBinding();
 		List<?> arguments = node.arguments();
-		buffer.append(getJ2SQualifiedName("C$.c$", null, constructorBinding, null, false)).append(".apply(this");
+		buffer.append(getJ2SFullyQualifiedMethodName("C$.c$", null, constructorBinding, null, false)).append(".apply(this");
 		IMethodBinding methodDeclaration = (constructorBinding == null ? null
 				: constructorBinding.getMethodDeclaration());
 		addMethodParameterList(arguments, methodDeclaration, true, ", [", "]", false);
@@ -545,13 +551,25 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	public boolean visit(ContinueStatement node) {
 		buffer.append("continue");
-		SimpleName label = node.getLabel();
+		addLabel(node.getLabel(), false);
+		return false;
+	}
+
+	/**
+	 * break foo; continue foo;  foo: for/while/do
+	 * 
+	 * $var: ....
+	 * 
+	 * @param label
+	 * @param isDefining
+	 */
+	private void addLabel(SimpleName label, boolean isDefining) {
 		if (label != null) {
 			buffer.append(' ');
-			label.accept(this);
+			buffer.append(NameMapper.getJ2S$JavaScriptCollisionName(label.getIdentifier(), false, null));
+			buffer.append(label);
 		}
-		buffer.append(";\r\n");
-		return false;
+		buffer.append(isDefining ? " : " : ";\r\n");
 	}
 
 	public boolean visit(DoStatement node) {
@@ -569,11 +587,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	public boolean visit(EnhancedForStatement node) {
+		// for (Integer v : ...)
 		SimpleName name = node.getParameter().getName();
-		String varName = getQualifiedSimpleNameForInvocation(name);
 		ITypeBinding vtype = name.resolveTypeBinding();
 		buffer.append("for (var ");
-		acceptVariableFinal(name, 1);
+		int pt = buffer.length();
+		name.accept(this);
+		String varName = buffer.substring(pt);
+		setVariableFinal(name, 1);
 		writeReplaceV(", $V = ", "V", varName, null, null);
 		Expression exp = node.getExpression();
 		ITypeBinding eType = exp.resolveTypeBinding();
@@ -581,8 +602,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		if (arrayType == null) {
 			exp.accept(this);
-			writeReplaceV(".iterator(); $V.hasNext()&&((V=", "V", varName, null, null);
-			writeReplaceV("($V.next())", "V", varName, vtype, eType);
+			writeReplaceV(".iterator$(); $V.hasNext$()&&((V=", "V", varName, null, null);
+			writeReplaceV("($V.next$())", "V", varName, vtype, eType);
 			writeReplaceV("),1);", "V", varName, null, null);
 		} else {
 			writeReplaceV("0, $$V = ", "V", varName, null, null);
@@ -598,6 +619,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	/**
+	 * For enhanced FOR only.
+	 * 
 	 * allow for primitive boxing or unboxing. See test.Test_Chars.java
 	 * 
 	 * @param template
@@ -620,9 +643,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					// Character does not use .objectValue, but we implement it
 					// here
 					if (vType.getName().equals("int"))
-						s += ".intValue()";
+						s += ".intValue$()";
 					else
-						s += ".objectValue()";
+						s += ".objectValue$()";
 				}
 			} else if (eType.isPrimitive()) {
 				// So we know the expression is unboxed -- char, for example
@@ -713,19 +736,248 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	/**
-	 * out: while....
+	 * out: while/for/do...
 	 * 
 	 */
 	public boolean visit(LabeledStatement node) {
-
-		buffer.append(node.getLabel());
-		buffer.append(" : ");
+		addLabel(node.getLabel(), true);
 		node.getBody().accept(this);
 		return false;
 	}
 
-	private void addMethodInvocation(SimpleName nodeName, List arguments, IMethodBinding mBinding,
-			Expression expression, boolean isLambda) {
+	public boolean visit(MethodDeclaration node) {
+		IMethodBinding mBinding = node.resolveBinding();
+		if (mBinding == null || NativeDoc.checkj2sIgnore(node))
+			return false;
+		boolean isConstructor = node.isConstructor();
+		@SuppressWarnings("unchecked")
+		List<ASTNode> parameters = node.parameters();
+		processMethodDeclaration(mBinding, parameters, node.getBody(), isConstructor, false);
+		return false;
+	}
+
+	/**
+	 * Called by visit(MethodDeclaration) as well as addLambdaMethod().
+	 * 
+	 * @param mBinding
+	 * @param parameters
+	 * @param body
+	 * @param isConstructor
+	 * @param isLambda
+	 */
+	private void processMethodDeclaration(IMethodBinding mBinding, List<ASTNode> parameters, ASTNode body,
+			boolean isConstructor, boolean isLambda) {
+		int mods = mBinding.getModifiers();	
+		boolean isNative = Modifier.isNative(mods);
+		if (body == null && !isNative && !isLambda) {
+			// Abstract method
+			return;
+		}
+		boolean isPublic = Modifier.isPublic(mods);
+		boolean isPrivate = !isPublic && !isConstructor && isPrivate(mBinding);
+		boolean isStatic = isStatic(mBinding);
+		boolean addUnqualified = !isLambda && (
+			addUnqualifiedMethod // method call to lambda
+			|| isUserApplet && !isConstructor 
+				&& !isStatic && isPublic
+				// public applet methods could never be overloaded in 
+				// JavaScript anyway. 
+			);
+		String name = getJ2SMethodNameOrArrayForDeclaration(mBinding, isConstructor, addUnqualified);
+		boolean isMain = isStatic && isPublic && mBinding.getName().equals("main")
+				&& mBinding.getKey().endsWith(";.main([Ljava/lang/String;)V");
+		if (isMain) {
+			addApplication();
+		}
+		if (lstMethodsDeclared != null && !isPrivate)
+			logMethodDeclared(name);
+
+		
+		String key = mBinding.getKey();
+		methodStackForFinals.push(key);
+		try {
+			ITypeBinding mClass = mBinding.getDeclaringClass();
+			if (isConstructor && name.equals("'c$'")
+					|| mBinding.isVarargs() && mBinding.getParameterTypes().length == 1)
+				haveDefaultConstructor = true; // in case we are not qualifying
+												// names here
+			buffer.append("\r\nClazz.newMeth(C$, ").append(name).append(", function (");
+			if (parameters == null)
+				// lambda method
+				buffer.append("t");
+			else
+				visitList(parameters, ", ");
+			buffer.append(") ");
+			if (isLambda) {
+				if (body instanceof Block) {
+					body.accept(this);
+				} else {
+					// there may be no return, but we still want to do this
+					buffer.append("{\r\nreturn ");
+					if (body == null)
+						return;
+					body.accept(this);
+					buffer.append(";\r\n}");
+				}
+			} else if (isConstructor) {
+				// BH @j2sIgnoreSuperConstructor removed from options
+				// as it is too risky to do this -- lose all initialization.
+				@SuppressWarnings("unchecked")
+				List<ASTNode> statements = ((Block) body).statements();
+				ASTNode firstStatement;
+				if (statements.size() == 0
+						|| !((firstStatement = statements.get(0)) instanceof SuperConstructorInvocation)
+								&& !(firstStatement instanceof ConstructorInvocation)) {
+					buffer.append("{\r\n");
+					String superclassName = getSuperClassNameNoBrackets(mClass);
+					if (superclassName == null)
+						addCallInit();
+					else
+						addSuperConstructor(null, null);
+					blockLevel++;
+					visitList(statements, "");
+					endVisit((Block) body);
+				} else {
+					body.accept(this);
+				}
+			} else if (body == null) {
+				// not a constructor and no body -- native
+				buffer.append("{\r\n");
+				if (isNative) {
+					buffer.append("alert('native method must be replaced! " + key + "');\r\n");
+					log("native: " + key);
+				}
+				buffer.append("}\r\n");
+			} else {
+				body.accept(this);
+			}
+			if (isStatic || isConstructor)
+				buffer.append(", ").append(isNative ? 2 : 1);
+			else if (isPrivate)
+				buffer.append(", " + getPrivateVar(mClass));
+			buffer.append(");\r\n");
+		} finally {
+			methodStackForFinals.pop();
+			removeVariableFinals(mBinding, parameters);
+		}
+	}
+
+	private void setVariableFinal(SimpleName name, int offset) {
+		IBinding binding = name.resolveBinding();
+		if (binding != null) {
+			String identifier = name.getIdentifier();
+			int level = blockLevel + offset;
+			VariableAdapter.FinalVariable f = new VariableAdapter.FinalVariable(level, identifier,
+					methodStackForFinals.size() == 0 ? null : methodStackForFinals.peek());
+			List<VariableAdapter.FinalVariable> finalVars = getVariableList('f');
+			List<VariableAdapter.FinalVariable> normalVars = getVariableList('n');
+			f.toVariableName = identifier;
+			f.prefixedName = NameMapper.getJ2SPrefixedFieldName(getTypeBinding(), identifier);
+			normalVars.add(f);
+			if (isFinalOrEffectivelyFinal(binding)) {
+				finalVars.add(f);
+			}
+		}
+	}
+
+	/**
+	 * Generated final variable list for anonymous class creation.
+	 * 
+	 * @param list
+	 * @param seperator
+	 * @param scope
+	 * @return
+	 */
+	private static String listFinalVariables(List<FinalVariable> list, String seperator, String scope) {
+		if (list.size() == 0) {
+			return "null";
+		}
+		StringBuffer buf = new StringBuffer();
+		buf.append("{");
+		for (Iterator<FinalVariable> iter = list.iterator(); iter.hasNext();) {
+			FinalVariable fv = iter.next();
+			String name = fv.prefixedName;
+//			fv.variableName;
+//			if (fv.toVariableName != null) {
+//				name = fv.toVariableName;
+//			}
+			
+			//name = Java2ScriptVisitor.NameMapper.getJ2S$JavaScriptCollisionName(name, true, null);
+//			buf.append("/*>>"+fv.variableName + " " + fv.toVariableName + " " + name + "*/");
+			buf.append(name);
+			buf.append(": ");
+			String methodScope = fv.methodScope;
+			if (methodScope == null ? scope == null	: methodScope.equals(scope)) {
+				buf.append(name);
+			} else {
+				buf.append("this.$finals." + name);
+			}
+			if (iter.hasNext()) {
+				buf.append(seperator);
+			}
+		}
+		buf.append("}");
+		return buf.toString();
+	}
+
+	private static boolean isFinalOrEffectivelyFinal(IBinding binding) {
+		return Modifier.isFinal(binding.getModifiers())
+				|| binding instanceof IVariableBinding && ((IVariableBinding) binding).isEffectivelyFinal();
+	}
+
+	private void removeVariableFinals(IMethodBinding mBinding, List<ASTNode> parameters) {
+		if (parameters == null)
+			return;
+		String methodSig = mBinding.getKey();
+		List<VariableAdapter.FinalVariable> finalVars = getVariableList('f');
+		List<VariableAdapter.FinalVariable> visitedVars = getVariableList('v');
+		List<VariableAdapter.FinalVariable> normalVars = getVariableList('n');
+		for (int i = parameters.size() - 1; i >= 0; i--) {
+			SimpleName name = ((VariableDeclaration) parameters.get(i)).getName();
+			IBinding binding = name.resolveBinding();
+			if (binding != null) {
+				String identifier = name.getIdentifier();
+				VariableAdapter.FinalVariable f = new VariableAdapter.FinalVariable(blockLevel + 1, identifier,
+						methodSig);
+				f.toVariableName = identifier;
+				f.prefixedName = NameMapper.getJ2SPrefixedFieldName(getTypeBinding(), identifier);
+				normalVars.remove(f);
+				if (isFinalOrEffectivelyFinal(binding)) {
+					finalVars.remove(f);
+				}
+				visitedVars.remove(f);
+			}
+		}
+	}
+
+	private void clearVariables(char nf) {
+		List<VariableAdapter.FinalVariable> vars = getVariableList(nf);
+		for (int i = vars.size(); --i >= 0;) {
+			VariableAdapter.FinalVariable var = vars.get(i);
+			if (var.blockLevel >= blockLevel) {
+				vars.remove(i);
+			}
+		}
+	}
+
+	public boolean visit(MethodInvocation node) {
+		Expression expression = node.getExpression();
+		IMethodBinding mBinding = node.resolveMethodBinding();
+		addMethodInvocation(node.getName(), node.arguments(), mBinding, expression);
+		return false;
+	}
+
+	/**
+	 * Called by visit(MethodDeclaration) as well as addLambdaMethod().
+	 * 
+	 * @param node
+	 * @param arguments
+	 * @param mBinding
+	 * @param expression
+	 */
+	private void addMethodInvocation(SimpleName node, List arguments, IMethodBinding mBinding,
+			Expression expression) {
+		boolean isLambda = (node == null);
 		String methodName = mBinding.getName();
 		ITypeBinding declaringClass = mBinding.getDeclaringClass();
 		String className = declaringClass.getQualifiedName();
@@ -734,11 +986,16 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		boolean isPrivateAndNotStatic = isPrivate && !isStatic;
 		String privateVar = (isPrivateAndNotStatic ? getPrivateVar(declaringClass) : null);
 		boolean doLog = (!isPrivate && htMethodsCalled != null);
-		String bname = (isStatic || expression != null || isLambda ? null : getThisRefOrSyntheticReference(nodeName, declaringClass, null));
-
-		// add the qualifier
+		String bname = (isStatic 
+				|| expression != null 
+				|| isLambda 
+				|| declaringClass.isAssignmentCompatible(getTypeBinding()) 
+				? null
+				: getThisRefOrSyntheticReference(node, declaringClass, null));
 		
-        int pt = buffer.length();
+		// add the qualifier
+
+		int pt = buffer.length();
 		if (isPrivateAndNotStatic) {
 			// note that the following expression will not work if the method is private:
 			// (b ? classA : classB).method()
@@ -747,67 +1004,61 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			buffer.append(".");
 		} else if (isLambda) {
 			doLog = false;
+			buffer.append("$this$.");
 		} else {
 			if (expression == null) {
-				//"this"
-				bname = null;
 				doLog = false;
+				if (bname != null) {
+					buffer.append(bname);
+					buffer.append(".");
+				} else if (!isStatic) {
+					buffer.append("this.");
+				} else {
+					// this will be C$., I think.
+				}
 			} else {
 				addMethodExpression(expression, className, bname, isStatic && !isPrivate);
 				buffer.append(".");
 			}
 		}
-		
 		// keep a pointer, because we may rewrite this
-		
 		int ptLog = (doLog ? buffer.length() : 0);
-		
-		boolean is$pecialMethod = false;
+
+		// check for special Clazz.array or Clazz.forName
+		// as well as special treatment for String.indexOf and String.lastIndexOf
+
+		boolean isSpecialMethod = false;
 		boolean isIndexOf = false;
-		
 		if (!isLambda && !isPrivateAndNotStatic) {
-			if (NameMapper.isJ2SMethodRegistered(methodName)) {
-				// first check -- some simple name like slice or split -- not considering class
-				// name
-				String j2sName = NameMapper.j2sMap(className, methodName);
-				if (j2sName != null) {
-					// Array.newInstance --> Clazz.array
-					if (j2sName.startsWith("Clazz.")) {
-						buffer.setLength(pt);
-						buffer.append(j2sName);
-						is$pecialMethod = true;
-						doLog = false;
-					} else if (arguments.size() == 0 || methodName.equals("split") || methodName.equals("replace")) {
-						if (j2sName.startsWith("~")) {
-							buffer.append('$');
-							buffer.append(j2sName.substring(1));
-							is$pecialMethod = true;
-						} else {
-							if (j2sName.startsWith("C$.")) {
-								doLog = false;
-								bname = null;
-							}
-							buffer.append(j2sName);
-							return;
-						}
-					}
-				}
-			} else if (methodName.equals("indexOf") || methodName.equals("lastIndexOf")) {
-				isIndexOf = className.equals("java.lang.String");
+			String j2sName = NameMapper.j2sMapClazzMethod(className + "." + methodName);
+			if (j2sName != null) {
+				isSpecialMethod = true;
+				// overwrite qualifier
+				doLog = false;
+				buffer.setLength(pt);
+				buffer.append(j2sName);
+				bname = null;
+			} else if (className.equals("java.lang.String")
+					&& (methodName.equals("indexOf") || methodName.equals("lastIndexOf"))) {
+				// indicate to boxer method to use method "q" not "p" here. Can't remember
+				// why. Something about fixing characters...
+				isIndexOf = true;
 			}
 		}
-		
+
+		// have xxxx.
+
 		// now get the method name
-		
+
 		// record whether this.b$[.....] was used, and if so and it is private,
 		// we need to use it again
 		String term = ")";
-		if (is$pecialMethod) {
-			bname = null;
-		} else {
-			String j2sName = (isLambda ? "$this$." + methodName : getQualifiedSimpleNameForInvocation(nodeName));			
-			// next call sets b$name
-			String qname = getJ2SQualifiedName(j2sName, className, mBinding, null, true);
+		if (!isSpecialMethod) {
+			// TODO: for now we are just returning name$ for all lambda methods
+			// note that simpleNameInMethod can return C$.xxxx
+			String j2sName = simpleNameInMethodBinding(node, true, mBinding, expression == null);
+			String qname = getJ2SFullyQualifiedMethodName(j2sName, className, mBinding, null, true);
+			//System.out.println(">>" + nodeName + " " + j2sName + "  "+ qname + "<<");
 			if (qname.indexOf('|') >= 0) {
 				// foo.xx$T$K || $o$.xx$O$O --> ($o$=foo).($o$.xx$T$K ||
 				// $o$.xx$O$O)
@@ -817,24 +1068,24 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			} else {
 				buffer.append(qname);
 			}
-		}
-		if (doLog) {
-			String name = className + "." + buffer.substring(ptLog);
-			logMethodCalled(name);
-		}
-		if (isLambda) {
-			buffer.append(".apply($this$, [t])");
-			return;
-		}		
-		if (isPrivateAndNotStatic || bname != null) {
-			// A call to a private outer-class method from an inner class
-			// requires
-			// this.b$["....."], not just "this"
+			if (doLog) {
+				String name = className + "." + buffer.substring(ptLog);
+				logMethodCalled(name);
+			}
+			if (isLambda) {
+				buffer.append(".apply($this$, [t])");
+				return;
+			}
+			if (isPrivateAndNotStatic || bname != null) {
+				// A call to a private outer-class method from an inner class
+				// requires
+				// this.b$["....."], not just "this"
 
-			buffer.append(".apply(");
-			addMethodExpression(expression, className, bname, false);
-			buffer.append(", [");
-			term = "])";
+				buffer.append(".apply(");
+				addMethodExpression(expression, className, bname, false);
+				buffer.append(", [");
+				term = "])";
+			}
 		}
 		if (term == ")")
 			buffer.append("(");
@@ -852,184 +1103,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			// (x ? y : z).foo()
 			expression.accept(this);
 		}
-	}
-
-	public boolean visit(MethodDeclaration node) {
-
-
-		IMethodBinding mBinding = node.resolveBinding();
-
-		if (mBinding == null || NativeDoc.checkj2sIgnore(node))
-			return false;
-
-		boolean isConstructor = node.isConstructor();
-		int mods = node.getModifiers();
-		boolean isNative = Modifier.isNative(mods);
-		Block body = node.getBody();
-
-		if (body == null && !isNative) {
-			// Abstract method
-			return false;
-		}
-
-		boolean isStatic = isStatic(node);
-		boolean isPrivate = !isConstructor && isPrivate(mBinding);
-		boolean addUnqualified = (dontQualifyMethod
-				|| isUserApplet && !isConstructor && !isStatic && Modifier.isPublic(mods));
-		String name = getMethodNameOrArrayForDeclaration(mBinding, isConstructor, addUnqualified, false);
-		if (isStatic && name.equals("'main'"))
-			addApplication();
-		if (lstMethodsDeclared != null && !isPrivate)
-			logMethodDeclared(name);
-		@SuppressWarnings("unchecked")
-		List<ASTNode> parameters = node.parameters();
-		int pt = methodDeclareNameStack.size();
-		processMethodDeclaration(mBinding, name, parameters, body, isConstructor, isNative, isPrivate, false);
-		if (pt < methodDeclareNameStack.size())
-			removeVariableFinals(node.resolveBinding(), node.parameters());
-		return false;
-	}
-
-	private void processMethodDeclaration(IMethodBinding mBinding, String name, List<ASTNode> parameters, ASTNode body,
-			boolean isConstructor, boolean isNative, boolean isPrivate, boolean isLambda) {
-		String key = mBinding.getKey();
-		if (key != null)
-			methodDeclareNameStack.push(key);
-		boolean isStatic = isStatic(mBinding);
-		ITypeBinding mClass = mBinding.getDeclaringClass();
-		if (isConstructor && name.equals("'c$'") || mBinding.isVarargs() && mBinding.getParameterTypes().length == 1)
-			haveDefaultConstructor = true; // in case we are not qualifying
-											// names here
-		buffer.append("\r\nClazz.newMeth(C$, ").append(name).append(", function (");
-		if (parameters == null)
-			// lambda method
-			buffer.append("t");
-		else
-			visitList(parameters, ", ");
-		buffer.append(") ");
-		if (isLambda) {
-			if (body instanceof Block) {
-				body.accept(this);
-			} else {
-				// there may be no return, but we still want to do this
-				buffer.append("{\r\nreturn ");
-				if (body == null)
-					return;
-				body.accept(this);
-				buffer.append(";\r\n}");
-			}
-		} else if (isConstructor) {
-			// BH @j2sIgnoreSuperConstructor removed from options
-			// as it is too risky to do this -- lose all initialization.
-			@SuppressWarnings("unchecked")
-			List<ASTNode> statements = ((Block) body).statements();
-			ASTNode firstStatement;
-			if (statements.size() == 0 || !((firstStatement = statements.get(0)) instanceof SuperConstructorInvocation)
-					&& !(firstStatement instanceof ConstructorInvocation)) {
-				buffer.append("{\r\n");
-				String superclassName = getSuperClassNameNoBrackets(mClass);
-				if (superclassName == null)
-					addCallInit();
-				else
-					addSuperConstructor(null, null);
-				blockLevel++;
-				visitList(statements, "");
-				endVisit((Block) body);
-			} else {
-				body.accept(this);
-			}
-		} else if (body == null) {
-			// not a constructor and no body -- native
-			buffer.append("{\r\n");
-			if (isNative) {
-				buffer.append("alert('native method must be replaced! " + key + "');\r\n");
-				log("native: " + key);
-			}
-			buffer.append("}\r\n");
-		} else {
-			body.accept(this);
-		}
-		if (isStatic || isConstructor)
-			buffer.append(", ").append(isNative ? 2 : 1);
-		else if (isPrivate)
-			buffer.append(", " + getPrivateVar(mClass));
-		buffer.append(");\r\n");
-	}
-
-	private void acceptVariableFinal(SimpleName name, int offset) {
-		IBinding binding = name.resolveBinding();
-		if (binding != null) {
-			String identifier = name.getIdentifier();
-			int level = blockLevel + offset;
-			VariableAdapter.FinalVariable f = new VariableAdapter.FinalVariable(level, identifier,
-					methodDeclareNameStack.size() == 0 ? null : methodDeclareNameStack.peek());
-			List<VariableAdapter.FinalVariable> finalVars = getVariableList('f');
-			List<VariableAdapter.FinalVariable> normalVars = getVariableList('n');
-			f.toVariableName = identifier;
-			normalVars.add(f);
-			if (isFinalOrEffectivelyFinal(binding)) {
-				finalVars.add(f);
-			}
-			// buffer.append("/*blockLevel " + blockLevel + " level " + level + "*/");
-		}
-		name.accept(this);
-	}
-
-	private static boolean isFinalOrEffectivelyFinal(IBinding binding) {
-		return Modifier.isFinal(binding.getModifiers())
-				|| binding instanceof IVariableBinding && ((IVariableBinding) binding).isEffectivelyFinal();
-	}
-
-	private void removeVariableFinals(IMethodBinding mBinding, List<ASTNode> parameters) {
-//		List<SingleVariableDeclaration> parameters = node.parameters();
-//		IMethodBinding mBinding = node.resolveBinding();
-		if (mBinding != null)
-			methodDeclareNameStack.pop();
-		if (parameters == null)
-			return;
-		String methodSig = (mBinding == null ? null : mBinding.getKey());
-		List<VariableAdapter.FinalVariable> finalVars = getVariableList('f');
-		List<VariableAdapter.FinalVariable> visitedVars = getVariableList('v');
-		List<VariableAdapter.FinalVariable> normalVars = getVariableList('n');
-		for (int i = parameters.size() - 1; i >= 0; i--) {
-			SimpleName name = ((VariableDeclaration) parameters.get(i)).getName();
-			IBinding binding = name.resolveBinding();
-			if (binding != null) {
-				String identifier = name.getIdentifier();
-				VariableAdapter.FinalVariable f = new VariableAdapter.FinalVariable(blockLevel + 1, identifier,
-						methodSig);
-				f.toVariableName = identifier;
-				normalVars.remove(f);
-				// buffer.append("/*remNorm " + f.variableName + "/to/" + f.toVariableName +
-				// "*/");
-				if (isFinalOrEffectivelyFinal(binding)) {
-					finalVars.remove(f);
-					// buffer.append("/*remFinal " + f.variableName + "/to/" + f.toVariableName +
-					// "*/");
-				}
-				visitedVars.remove(f);
-				// buffer.append("/*remVis " + f.variableName + "/to/" + f.toVariableName +
-				// "*/");
-			}
-		}
-	}
-
-	private void clearVariables(char nf) {
-		List<VariableAdapter.FinalVariable> vars = getVariableList(nf);
-		for (int i = vars.size(); --i >= 0;) {
-			VariableAdapter.FinalVariable var = vars.get(i);
-			if (var.blockLevel >= blockLevel) {
-				vars.remove(i);
-				// buffer.append("/*remVar " + nf + " " + var.toVariableName + " */");
-			}
-		}
-	}
-
-	public boolean visit(MethodInvocation node) {
-		Expression expression = node.getExpression();
-		IMethodBinding mBinding = node.resolveMethodBinding();
-		addMethodInvocation(node.getName(), node.arguments(), mBinding, expression, false);
-		return false;
 	}
 
 	public boolean visit(ReturnStatement node) {
@@ -1054,7 +1127,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 */
 	public boolean visit(SingleVariableDeclaration node) {
 		SimpleName name = node.getName();
-		acceptVariableFinal(name, 1);
+		name.accept(this);
+		setVariableFinal(name, 1);
 		return false;
 	}
 
@@ -1070,7 +1144,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	public boolean visit(SuperMethodInvocation node) {
 		IMethodBinding mBinding = node.resolveMethodBinding();
-		String name = getJ2SQualifiedName(NameMapper.getJ2S$QualifiedMethodName(node.getName()), null, mBinding, null, false);
+		String name = getJ2SFullyQualifiedMethodName(NameMapper.getJ2S$JavaScriptCollisionMethodName(mBinding), null, mBinding, null, false);
 		// BH if this is a call to super.clone() and there is no superclass, or
 		// the superclass is Object,
 		// then we need to invoke Clazz.clone(this) directly instead of calling
@@ -1326,10 +1400,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		TypeAdapter typeAdapter = ((TypeAdapter) getAdaptable(TypeAdapter.class));
 		String oldClassName = typeAdapter.getClassName();
+		ITypeBinding oldBinding = typeAdapter.getTypeBinding();
 		boolean isTopLevel = (!isLambda && binding.isTopLevel());
 		if (isTopLevel) {
 			appendElementKey(binding.getName());
-			typeAdapter.setClassName(binding.getName());
+			typeAdapter.setClassName(binding.getName(), binding);
 			if (isClass)
 				isUserApplet = checkAddApplet(binding);
 		} else if (isAnonymous) {
@@ -1360,11 +1435,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					tempVisitor = new Java2ScriptVisitor(); // Default visitor
 				}
 				tempVisitor.setInnerGlobals(this, node);
-				tempVisitor.getTypeAdapter().setClassName(className); // sets className only
+				tempVisitor.getTypeAdapter().setClassName(className, binding); // sets className only
 				node.accept(tempVisitor);
 				trailingBuffer.append(tempVisitor.buffer.toString());
 
-				typeAdapter.setClassName(oldClassName); // done - return old values
+				typeAdapter.setClassName(oldClassName, oldBinding); // done - return old values
 
 				return false;
 			}
@@ -1385,7 +1460,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// Clazz.new_().
 		// arg4 is the superclass
 		// arg5 is the superinterface(s)
-		// arg6 is the type: anonymous(1), local(2), or absent
+		// arg6 is the type: anonymous(1), local(2), or "p$<n>" (p$1, p$2, etc.) if private and not static
 
 		// arg1: package name or null
 		// arg2: shortened class name in quotes
@@ -1626,7 +1701,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 
 		if (isAnonymous) {
-			typeAdapter.setClassName(shortClassName);
+			typeAdapter.setClassName(shortClassName, binding);
 		}
 
 		if (!isInterface) {
@@ -1674,7 +1749,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 				ASTNode element = (ASTNode) iter.next();
 				if (element instanceof MethodDeclaration) {
-					boolean dontQualifyCurrent = dontQualifyMethod;
+					boolean addUnqualifiedCurrent = addUnqualifiedMethod;
 					IMethodBinding method = ((MethodDeclaration) element).resolveBinding();
 					if (unqualifiedMethods != null) {
 						// check for all methods that override a functional interface abstract method,
@@ -1683,13 +1758,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 						for (int i = unqualifiedMethods.size(); --i >= 0;) {
 							if (method.overrides(unqualifiedMethods.get(i))) {
-								dontQualifyMethod = true;
+								addUnqualifiedMethod = true;
 								break;
 							}
 						}
 					}
 					element.accept(this);
-					dontQualifyMethod = dontQualifyCurrent;
+					addUnqualifiedMethod = addUnqualifiedCurrent;
 				}
 			}
 		}
@@ -1728,7 +1803,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				if (isEnum) {
 					buffer.append("var $vals=[];\r\n");
 					// implicit Enum methods added as trailer
-					buffer.append("Clazz.newMeth(C$, 'values', function() { return $vals }, 1);\r\n");
+					buffer.append("Clazz.newMeth(C$, 'values$', function() { return $vals }, 1);\r\n");
 					buffer.append(
 							"Clazz.newMeth(C$, '$valueOf$S', function(name) { for (var val in $vals){ if ($vals[val].$name == name) return $vals[val]} return null }, 1);\r\n");
 				} 
@@ -1742,7 +1817,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			if (isAnonymous) {
 				buffer.append(")");
 				this$0Name = this$0Name0;
-				typeAdapter.setClassName(oldClassName);
+				typeAdapter.setClassName(oldClassName, oldBinding);
 			}
 		}
 		return false;
@@ -1751,7 +1826,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	/**
 	 * Collect all names of all functional interface abstract methods that this
-	 * class might refer to so that they can be unqualified. This is not perfect, as
+	 * class might refer to so that their unqualified. This is not perfect, as
 	 * it is possible to have implementations of specific subtypes of parameterized
 	 * methods. However, it will have to do for now.
 	 * 
@@ -1816,7 +1891,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	/**
-	 * Add all the Enum constants, and create C$.values() and Enum.valueOf
+	 * Add all the Enum constants, and create C$.values$() and Enum.valueOf
 	 * 
 	 * @param constants
 	 */
@@ -1835,7 +1910,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				anonName = getAnonymousName(anonDeclare.resolveBinding());
 				buffer.append("\r\n");
 			}
-			buffer.append("Clazz.newEnumConst($vals, ").append(getJ2SQualifiedName("C$.c$", null, binding, null, false))
+			buffer.append("Clazz.newEnumConst($vals, ").append(getJ2SFullyQualifiedMethodName("C$.c$", null, binding, null, false))
 					.append(", \"");
 			enumConst.getName().accept(this);
 			buffer.append("\", " + i);
@@ -1882,8 +1957,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					: isStatic && initializer == null && !needDefault)
 				continue;
 			int len = buffer.length();
-
-//_2 prepend $ here//	
 
 			String prefix = (isStatic ? "C$." : "this.") + NameMapper.getJ2SPrefixedFieldName(classBinding,
 					fragment.resolveBinding().getName());
@@ -2035,7 +2108,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			buffer.append("Clazz.super_(C$, this,1);\r\n");
 			return;
 		}
-		buffer.append(getJ2SQualifiedName("C$.superclazz.c$", null, node.resolveConstructorBinding(), null, false));
+		buffer.append(getJ2SFullyQualifiedMethodName("C$.superclazz.c$", null, node.resolveConstructorBinding(), null, false));
 		buffer.append(".apply(this");
 		addMethodParameterList(node.arguments(), methodDeclaration, true, ", [", "]", false);
 		buffer.append(");\r\n");
@@ -2102,7 +2175,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			buffer.append(name + ".$init$");
 			return;
 		}
-		String qName = getJ2SQualifiedName(name + ".c$", null, mbinding, null, false);
+		String qName = getJ2SFullyQualifiedMethodName(name + ".c$", null, mbinding, null, false);
 		buffer.append(qName.endsWith(".c$") ? name : qName);
 	}
 
@@ -2112,20 +2185,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	private final static String CHARCODEAT0 = ".$c()";
 
-	private final static String defaultNonQualified = "javajs.api.js;swingjs.api.js;swingjs.JSToolkit;netscape;";
-
-	private static String[] nonQualifiedPackages;
-
-	private final static String[] nonQualifiedClasses = new String[] {
-			// these classes need no qualification
-			"java.lang.Boolean", "java.lang.Byte", "java.lang.Character", "java.lang.Double", "java.lang.Float",
-			"java.lang.Integer", "java.lang.Long", "java.lang.Math", "java.lang.Number", "java.lang.reflect.Array",
-			"java.lang.Short", "java.lang.System", "java.lang.String", "java.lang.Void",
-
-			// I have no idea why these are here
-			"java.util.Date", // TODO _- really???
-			"java.util.EventListenerProxy", "java.util.EventObject" };
-
+	
 	private static final String primitiveTypeEquivalents = "Boolean,Byte,Character,Short,Integer,Long,Float,Double,Void,";
 
 	private static final String getPrimitiveTYPE(String name) {
@@ -2140,7 +2200,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	public String this$0Name;
 
-	private Stack<String> methodDeclareNameStack = new Stack<String>();
+	private Stack<String> methodStackForFinals = new Stack<String>();
 
 	/**
 	 * holds all static field definitions for insertion at the end of the class def
@@ -2220,7 +2280,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 
 		String getAssertString() {
-			return (hasAssert ? "C$.$_ASSERT_ENABLED_ = ClassLoader.$getClassAssertionStatus(C$);\r\n" : "");
+			return (hasAssert ? "C$.$_ASSERT_ENABLED_ = ClassLoader.getClassAssertionStatus$(C$);\r\n" : "");
 		}
 
 		public String toString() {
@@ -2322,7 +2382,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			// Static def new Test_Static().y++;
 			ASTNode parent = node.getParent();
 			needNewStaticParenthesis = (!haveDirectStaticAccess(left)) && !(parent instanceof Statement);
-			// ever true? buffer.append("/*ass need " + needNewStaticParenthesis + "*/");
 			if (needNewStaticParenthesis) {
 				buffer.append("(");
 			}
@@ -2428,7 +2487,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		boolean needCharCode = false;
 		if (right instanceof InfixExpression) {
 			if (getConstantValue(right, true)) {
-				char c = getLastChar();
+				char c = getLastCharInBuffer();
 				needCharCode = (c == '\'' || c == '"');
 			} else {
 				buffer.append("(");
@@ -2972,7 +3031,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	/**
-	 * also sets b$name
+	 * From visit(SimpleName) and visit(EnhancedFor) only. 
 	 * 
 	 * @param node
 	 * @return
@@ -2985,89 +3044,111 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// binding).getQualifiedName(), false)) {
 		// return node.getIdentifier();
 		// }
-		ASTNode xparent = node.getParent();
-		if (xparent == null) {
-			return node.toString();
+		ASTNode parent = node.getParent();
+		if (parent == null) { // lambda
+			return node + "$/*???lambda node?*/";
 		}
-		char leadingChar = getLastChar();
+		char leadingChar = getLastCharInBuffer();
 		boolean isQualified = (leadingChar == '.');
 		// looking for "." or '"' here.
-		if (isQualified && xparent instanceof QualifiedName) {
+		if (isQualified && parent instanceof QualifiedName) {
 			if (!(binding instanceof IVariableBinding))
-				return node.toString();
+				return node + "/*???why?*/";
 			IVariableBinding varBinding = (IVariableBinding) binding;
 			ITypeBinding declaringClass = varBinding.getVariableDeclaration().getDeclaringClass();
 			return NameMapper.getJ2SPrefixedFieldName(declaringClass, binding.getName());
 		}
-		if (xparent instanceof ClassInstanceCreation && !(binding instanceof IVariableBinding)) {
-			String name = (binding == null ? NameMapper.getJ2S$QualifiedMethodName(node)
+		if (parent instanceof ClassInstanceCreation && !(binding instanceof IVariableBinding)) {
+			String name = (binding == null ? node.getIdentifier()
 					: node.resolveTypeBinding().getQualifiedName());
 			return assureQualifiedNameAllowP$(name);
 		}
-		if (binding == null) {
-			String name = getShortenedQualifiedName(NameMapper.getJ2S$QualifiedMethodName(node));
-			return NameMapper.getJ2S$JavaScriptCollisionName(name, true, null);
-		}
 		if (binding instanceof IVariableBinding)
 			return simpleNameInVarBinding(node, leadingChar, (IVariableBinding) binding);
-		if (binding instanceof IMethodBinding)
-			return simpleNameInMethodBinding(node, isQualified, (IMethodBinding) binding);
+	
+		
+		if (binding == null) {
+			// standard java.lang.String...//
+			dumpStack("simple node null binding " + node);
+			buffer.append("/*label " + node + "*/");
+			String name = getShortenedQualifiedName(node.getIdentifier());
+			return NameMapper.getJ2S$JavaScriptCollisionName(name, true, null); // was true
+		}
 
+		if (binding instanceof IMethodBinding) {
+// Why here ? Arises when a lambda expression is used as a method parameter,
+// in the one case we have, as a parameter to a constructor in java.util.stream.Collectors:
+// In this case, "add" is the name:
+//
+//		              return new CollectorImpl<>(collectionFactory, 
+//			                       Collection<T>::add,
+//		                           (r1, r2) -> { r1.addAll(r2); return r1; },
+//                                 CH_ID);
+//		    }
+// ...			
+//	        CollectorImpl(
+//  			Supplier<A> supplier,
+//              BiConsumer<A, T> accumulator,
+//              BinaryOperator<A> combiner,
+//              Set<Characteristics> characteristics
+//          ) {
+//              this(supplier, accumulator, combiner, castingIdentity(), characteristics);
+//          }			
+  			return simpleNameInMethodBinding(node, isQualified, (IMethodBinding) binding, false);
+		}
+
+		
+		// static reference such as java.lang.String
 		ITypeBinding typeBinding = node.resolveTypeBinding();
+		//dumpStack("simple name type" + (typeBinding == null ? "?" + node.getFullyQualifiedName() : typeBinding.getQualifiedName()));
 		return NameMapper.getJ2S$JavaScriptCollisionName(typeBinding == null ? node.getFullyQualifiedName()
 				: assureQualifiedNameAllowP$(typeBinding.getQualifiedName()), true, null);
 	}
 
-	private char getLastChar() {
+	private char getLastCharInBuffer() {
 		return (buffer.length() == 0 ? '\0' : buffer.charAt(buffer.length() - 1));
 	}
 
 	/**
-	 * TODO: This complicated method needs documenting
+	 * Return a qualifier.name or C$.name
+	 * 
+	 * Only called by 
 	 * 
 	 * @param node
 	 * @param isQualified
 	 * @param mBinding
+	 * @param expression
 	 * @return
 	 */
-	private String simpleNameInMethodBinding(SimpleName node, boolean isQualified, IMethodBinding mBinding) {
-		String name = getShortenedQualifiedName(NameMapper.getJ2S$QualifiedMethodName(node));
-		String ret = "";
-		if (isStatic(mBinding)) {
-			IMethodBinding variableDeclaration = mBinding.getMethodDeclaration();
-			ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
-			boolean isClassString = false;
-			if (declaringClass != null) {
-				isClassString = "java.lang.String".equals(declaringClass.getQualifiedName());
-				ASTNode parent = node.getParent();
-				if (parent instanceof MethodInvocation) {
-					MethodInvocation mthInv = (MethodInvocation) parent;
-					if (mthInv.getExpression() == null) {
-						String cname = declaringClass.getQualifiedName();
-						cname = assureQualifiedNameAllowP$(cname);
-						if (cname.length() > 0)
-							ret = cname + ".";
-					}
-				}
-			}
-			if (isClassString && "$valueOf".equals(name))
-				name = "valueOf";
-		} else {
-			ASTNode parent = node.getParent();
-			boolean checkNameViolation = false;
-			if (parent != null && !(parent instanceof FieldAccess)) {
-				IMethodBinding methodDeclaration = mBinding.getMethodDeclaration();
-				ITypeBinding declaringClass = methodDeclaration.getDeclaringClass();
-				if (!isQualified && declaringClass != null && getUnqualifiedClassName() != null) {
-					String className = declaringClass.getQualifiedName();
-					checkNameViolation = !("java.lang.String".equals(className) && "valueOf".equals(name));
-					ret = getClassNameAndDot(parent, declaringClass, isPrivate(mBinding), true);
-				}
-			}
-			if (checkNameViolation)
-				ret += NameMapper.getJ2S$JavaScriptCollisionName(name, false, mBinding);
+	private String simpleNameInMethodBinding(SimpleName node, boolean isQualified, IMethodBinding mBinding,
+			boolean hasNullExpression) {
+		ITypeBinding declaringClass = mBinding.getMethodDeclaration().getDeclaringClass();
+		String name = getShortenedQualifiedName(NameMapper.getJ2S$JavaScriptCollisionMethodName(mBinding));
+		if (node == null) {
+			// lambda::method needs to be qualified here only if it is a functional interface method
+			// otherwise it will be qualified in getQualifiedSimpleNameForinvocation
+			return (mBinding.getDeclaringClass().getFunctionalInterfaceMethod() == null
+					? name : name + "$");
 		}
-		return ret + name;
+		String classDot = "";
+		boolean checkNameViolation = false;
+		ASTNode parent;
+		if (isStatic(mBinding)) {
+			if (declaringClass != null) {
+				if (hasNullExpression) {
+					// could be C$. or P$.
+					String cname = assureQualifiedNameAllowP$(declaringClass.getQualifiedName());
+					if (cname.length() > 0)
+						classDot = cname + ".";
+				}
+			}
+		} else if ((parent = node.getParent()) != null && !(parent instanceof FieldAccess)) {
+			if (!isQualified && declaringClass != null && getUnqualifiedClassName() != null) {
+				checkNameViolation = true;
+				classDot = getClassNameAndDot(parent, declaringClass, isPrivate(mBinding), true);
+			}
+		}
+		return classDot + (checkNameViolation ? NameMapper.getJ2S$JavaScriptCollisionName(name, true, mBinding) : name);
 	}
 
 	/**
@@ -3104,10 +3185,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			String fieldVar = null;
 			if (isAnonymousClass() && isFinalOrEffectivelyFinal(varBinding)
 					&& varBinding.getDeclaringMethod() != null) {
-
 				String key = varBinding.getDeclaringMethod().getKey();
-				if (methodDeclareNameStack.size() == 0 || !key.equals(methodDeclareNameStack.peek())) {
-					buffer.append("this.$finals.");
+				if (methodStackForFinals.size() == 0 || !key.equals(methodStackForFinals.peek())) {
+					ret = "this.$finals.";
 					if (currentBlockForVisit != -1) {
 						List<VariableAdapter.FinalVariable> finalVars = getVariableList('f');
 						List<VariableAdapter.FinalVariable> visitedVars = getVariableList('v');
@@ -3124,9 +3204,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					}
 				}
 			}
-
 			if (declaringClass == null)
 				name = (fieldVar == null ? getNormalVariableName(node.getIdentifier()) : fieldVar);
+			//buffer.append("/*<<fieldvar="+fieldVar+" " + (declaringClass == null) + " " + name + ">>*/");
 		}
 		if (declaringClass != null) 
 			name = varBinding.getName();
@@ -3141,10 +3221,15 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	public boolean visit(StringLiteral node) {
-		buffer.append(node.getEscapedValue());
+		buffer.append(node.getEscapedValue().replace("\\u000a", "\\n"));
 		return false;
 	}
 
+	
+	public boolean visit(TypeMethodReference node) {
+		System.out.println("<<<TypeMethodRef: " + node.resolveTypeBinding().getName() + "/" + node.resolveMethodBinding() + ">>>");		
+		return true;
+	}
 	/**
 	 * SuperFieldAccess:
 	 *
@@ -3159,7 +3244,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		buffer.append("this.");
 		String newName = (classBinding == null ? null : NameMapper.getJ2S$SuperFieldNameOrNull(classBinding, fieldName));
-		buffer.append(newName == null ? NameMapper.getJ2S$JavaScriptCollisionName(fieldName, true, null) : newName);
+		buffer.append(newName == null ? NameMapper.getJ2S$JavaScriptCollisionName(fieldName, false, null) + fieldName : newName);
 		return false;
 	}
 
@@ -3214,7 +3299,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		for (int i = 0; i < methods.length; i++) {
 			if (i > 0)
 				buffer.append(",");
-			String name = getJ2SQualifiedName(methods[i].getName(), null, methods[i], null, true);
+			String name = getJ2SFullyQualifiedMethodName(NameMapper.getJ2S$JavaScriptCollisionMethodName(methods[i]), null, methods[i], null, true);
 			buffer.append("'").append(name).append("'");
 		}
 		buffer.append("]");
@@ -3233,7 +3318,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		IBinding binding = name.resolveBinding();
 		if (binding == null)
 			return false;
-		acceptVariableFinal(name, 0);
+		name.accept(this);
+		setVariableFinal(name, 0);
 		Expression right = node.getInitializer();
 		ITypeBinding rightBinding = (right == null ? null : right.resolveTypeBinding());
 		if (rightBinding == null)
@@ -3384,40 +3470,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		return exp.resolveBoxing() || exp.resolveUnboxing();
 	}
 
-	private final static boolean isMethodQualified(String className, String methodName,
-			IMethodBinding functionalInterfaceMethod) {
-		if (functionalInterfaceMethod != null && methodName.equals(functionalInterfaceMethod.getName()))
-			return false;
-		for (int i = nonQualifiedClasses.length; --i >= 0;) {
-			String s = nonQualifiedClasses[i];
-			if (className.equals(s)) {
-				// leave selected String methods the same
-				return (className.equals("java.lang.String")
-						&& "charAt,codePointAt,format,getBytes,substring,indexOf,lastIndexOf,toUpperCase,toLowerCase,trim,valueOf"
-								.indexOf(methodName) < 0);
-			}
-		}
-		return true;
-	}
-
 	private static boolean isIntegerType(String type) {
 		return (type != null && type.length() > 1 && "int long byte short".indexOf(type) >= 0);
-	}
-
-	/**
-	 * Check to see if this class is in a package for which we exclude parameter
-	 * qualification
-	 * 
-	 * @param className
-	 * @return
-	 */
-	public static boolean isPackageQualified(String className) {
-		for (int i = nonQualifiedPackages.length; --i >= 0;) {
-			String s = nonQualifiedPackages[i];
-			if (s.length() > 0 && (s.startsWith(".") ? className.contains(s) : className.startsWith(s)))
-				return false;
-		}
-		return true;
 	}
 
 	static boolean isPrivate(IBinding b) {
@@ -3461,23 +3515,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				: getQualifiedStaticName(null, ebinding.getQualifiedName(), true, true, null))
 				+ (dimFlag == ARRAY_DIM_ONLY ? "" : ", " + (Math.abs(dimFlag) * type.getDimensions() * -1));
 		return "Clazz.array(" + params + (dimFlag > 0 ? ")" : "");
-	}
-
-	/**
-	 * .j2s option j2s.compiler.nonqualified.classes
-	 * 
-	 * @param names semicolon-separated list. For example,
-	 *              org.jmol.api.js;jspecview.api.js
-	 */
-	public static void setNoQualifiedNamePackages(String names) {
-		names = defaultNonQualified + (names == null ? "" : names);
-		nonQualifiedPackages = names.split(";");
-		for (int i = nonQualifiedPackages.length; --i >= 0;) {
-			String s = nonQualifiedPackages[i];
-			if (s.startsWith("*."))
-				nonQualifiedPackages[i] = s.substring(1);
-			nonQualifiedPackages[i] = (s.endsWith("*") ? s.substring(0, s.length() - 1) : s + ".");
-		}
 	}
 
 	////////////////////////////////
@@ -3897,20 +3934,23 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	/**
 	 * Determine the qualifier for a method or variable.
 	 * 
-	 * In the case of private nonstatic methods, this is "p$."; for general fields, this will
-	 * be "this."; for fields in outer classes, we need a synthetic references,
+	 * In the case of private nonstatic methods, this is "p$<n>".
+	 * 
+	 * For general fields, this will be "this.".
+	 * 
+	 * For fields in outer classes, we need a synthetic references,
 	 * this.b$[className] that points to the outer object, which may be one or more
 	 * levels higher than this one.
 	 * 
 	 * Anonymous inner classes may reference either a superclass method/field or one
 	 * in its declaring class stack.
 	 * 
-	 * @param node           either a method or field or local variable
-	 * @param declaringClass the class that declares this variable
-	 * @param isPrivate
+	 * @param node                  either a method or field or local variable
+	 * @param declaringClass        the class that declares this variable
+	 * @param isPrivateAndNotStatic
 	 * @return qualifier for method or variable
 	 */
-	private String getClassNameAndDot(ASTNode node, ITypeBinding declaringClass, boolean isPrivate, boolean isMethod) {
+	private String getClassNameAndDot(ASTNode node, ITypeBinding declaringClass, boolean isPrivateAndNotStatic, boolean isMethod) {
 
 		String name = declaringClass.getQualifiedName();
 		String ret = "";
@@ -3927,7 +3967,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				// is anonymous or abstract class declaration
 				superLevel++;
 				if (isSuperType(declaringClass, typeBinding)) {
-					if (isMethod && isPrivate) {
+					if (isPrivateAndNotStatic) {
 						ret = getPrivateVar(declaringClass) + ".";
 						isThis = true;
 					} else if (superLevel == 1) {
@@ -4046,7 +4086,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 							: name.indexOf("Character") >= 0 ? "char" : name.replace("java.lang.", "").toLowerCase());
 					buffer.append("(");
 					element.accept(this);
-					buffer.append(toCharCode && name == "char" ? ")" + CHARCODEAT0 : ")." + name + "Value()");
+					buffer.append(toCharCode && name == "char" ? ")" + CHARCODEAT0 : ")." + name + "Value$()");
 					return true;
 				}
 			}
@@ -4388,20 +4428,24 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	/**
 	 * 
+	 * This is the method used to get the name or names to write into the method
+	 * declaration Clazz.newMeth(...). Bracketed returns tell Clazz to create
+	 * multiple aliases for the same method. 
+	 * 
 	 * @param node
 	 * @param mBinding
 	 * @param isConstructor
 	 * @return j2s-qualified name or an array of j2s-qualified names
 	 */
-	private String getMethodNameOrArrayForDeclaration(IMethodBinding mBinding, boolean isConstructor,
-			boolean addUnqualified, boolean isLambda) {
+	private String getJ2SMethodNameOrArrayForDeclaration(IMethodBinding mBinding, boolean isConstructor,
+			boolean addUnqualified) {
 		String nodeName = mBinding.getName();
-		String methodName = (isConstructor ? "c$" : NameMapper.getJ2S$CollisionMethodName(mBinding));
+		String methodName = (isConstructor ? "c$" : NameMapper.getJ2S$JavaScriptCollisionMethodName(mBinding));
 		if (methodName.equals("subSequence$I$I")) {
-			// for StringBuffer and StringBuilder to be like String
+			// hack for StringBuffer and StringBuilder to be like String
 			return "['subSequence','subSequence$I$I']";
 		}
-		String qname = getJ2SQualifiedName(methodName, null, mBinding, null, false);
+		String qname = getJ2SFullyQualifiedMethodName(methodName, null, mBinding, null, false);
 		ITypeBinding methodClass = mBinding.getDeclaringClass();
 		List<String> names = null;
 		// System.err.println("checking methodList for " + nodeName.toString() +
@@ -4412,19 +4456,19 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			// methodList.size());
 			names = new ArrayList<String>();
 			for (int i = methodList.size(); --i >= 0;) {
-				String pname = getJ2SQualifiedName(methodName, null, mBinding, methodList.get(i), false);
+				String pname = getJ2SFullyQualifiedMethodName(methodName, null, mBinding, methodList.get(i), false);
 				// System.err.println("params = " + pname + "
 				// "+methodList.get(i).length + "==?==" +
 				// mBinding.getParameterTypes().length + " " +
 				// methodList.get(i)[0]);
 				if (pname != null)
 					names.add(pname);
-				if (addUnqualified)
-					names.add(methodName);
+				if (addUnqualified) 
+					names.add(ensureMethod$Name(methodName, mBinding, methodClass.getQualifiedName()));
 			}
 		} else if (addUnqualified && !methodName.equals(qname) && !classHasMethod(methodClass, methodName)) {
 			names = new ArrayList<String>();
-			names.add(methodName);
+			names.add(methodName + (methodName.indexOf("$") >= 0 ? "" : "$"));
 		}
 		if (names == null || names.size() == 0)
 			return "'" + qname + "'";
@@ -4451,17 +4495,20 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	/**
+	 * This is the principle method for returning a fully qualified method name. 
+	 * 
 	 * Determine the qualified parameter suffix for method names, including
-	 * constructors.
+	 * constructors. Now returns name$ for all unparameterized methods not 
+	 * explicitly excluded. 
 	 * 
 	 * @param nodeName
-	 * @param binding
-	 * @param genericTypes
+	 * @param mBinding
+	 * @param genericTypes only in the case of method declarations, where we are trying to match generic methods
 	 * @param isMethodInvoc
 	 * 
 	 * @return a fully j2s-qualified method name
 	 */
-	private String getJ2SQualifiedName(String j2sName, String nodeName, IMethodBinding binding, String[] genericTypes,
+	private String getJ2SFullyQualifiedMethodName(String j2sName, String nodeName, IMethodBinding mBinding, String[] genericTypes,
 			boolean isMethodInvoc) {
 		// The problem is that System.out and System.err are PrintStreams, and
 		// we
@@ -4469,38 +4516,48 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// "System....", we use that instead and do not qualify the name
 		// Note: binding can be null if we have errors in the Java and we are
 		// compiling
-		if (binding == null || nodeName != null && nodeName.startsWith("System."))
+		if (mBinding == null || nodeName != null && nodeName.startsWith("System."))
 			return j2sName;
-		String methodName = binding.getName();
-		ITypeBinding declaringClass = binding.getDeclaringClass();
+		String methodName = mBinding.getName();
+		ITypeBinding declaringClass = mBinding.getDeclaringClass();
 		String className = declaringClass.getQualifiedName();
-		if (!isPackageQualified(className)
-				|| !isMethodQualified(className, methodName, declaringClass.getFunctionalInterfaceMethod()))
+		if (NameMapper.isMethodNonqualified(className, methodName))
 			return j2sName;
-		ITypeBinding[] paramTypes = binding.getMethodDeclaration().getParameterTypes();
-
-		// BH: Note that Map.put$K$V is translated to actual values
+		
+	
+		// BH: Note in the next statement, that Map.put$K$V is translated to actual values
 		// if .getMethodDeclaration() is not used.
 		// Without that, it uses the bound parameters such as
 		// String, Object instead of the declared ones, such as $TK$TV
+
+		ITypeBinding[] paramTypes = mBinding.getMethodDeclaration().getParameterTypes();
 
 		int nParams = paramTypes.length;
 		if (genericTypes != null && genericTypes.length != nParams)
 			return null;
 
-		if (nParams == 0 && methodName.equals("length"))
-			return j2sName + "$"; // so that String implements CharSequence
+		// xxx() adds $ to become xxx$() iff it is NOT
+		// - (private and not static)
+		// - toString or hashCode
+		// - already qualified with $
+		
+//		buffer.append("/*" + j2sName + " " + isPrivate(mBinding) + " " + isStatic(mBinding) + " " 
+//		+ (isPrivate(mBinding) && !isStatic(mBinding) 
+//				|| NameMapper.fieldNameCoversMethod(j2sName) 
+//				|| j2sName.indexOf("$") >= 0 ? "" : "$") + "*/");
+		// skipping C$.
+		if (nParams == 0)
+			return ensureMethod$Name(j2sName, mBinding, null); 
+
+		// functional interface methods are qualified only by "$", not their parameters.
+		// This is not ideal.
+		
+		IMethodBinding fm = declaringClass.getFunctionalInterfaceMethod();
+		if (fm != null && methodName.equals(fm.getName()))
+			return ensureMethod$Name(j2sName, mBinding, null);
 
 		String s = getParamsAsString(nParams, genericTypes, paramTypes, false);
-		// exception for special case: setting static main(String[] args) to
-		// "main", and "main()" to "main$"
-		if ("main".equals(methodName) && isStatic(binding)) {
-			if (s.length() == 0) {
-				s = "$";
-			} else if (s.equals("$SA")) {
-				s = "";
-			}
-		} else if (isMethodInvoc && s.indexOf("$T") >= 0 && isJava(className) && !isJava(getQualifiedClassName())) {
+		if (isMethodInvoc && s.indexOf("$T") >= 0 && isJava(className) && !isJava(getQualifiedClassName())) {
 			// also add the $O version
 			String generic = getParamsAsString(nParams, genericTypes, paramTypes, true);
 			if (generic != null) {
@@ -4530,6 +4587,17 @@ public class Java2ScriptVisitor extends ASTVisitor {
 //		Name qualifier = node.getQualifier();
 //		return (qualifier instanceof SimpleName || isSimpleQualified((QualifiedName) qualifier));
 //	}
+
+	private static String ensureMethod$Name(String j2sName, IMethodBinding mBinding, String className) {
+		if(isPrivate(mBinding) && !isStatic(mBinding) 
+				|| NameMapper.fieldNameCoversMethod(j2sName) 
+				|| j2sName.indexOf("$", 2) >= 0
+				|| j2sName.equals("c$") 
+				|| className != null 
+						&& NameMapper.isMethodNonqualified(className, mBinding.getName()))
+		    return j2sName;
+		return j2sName + "$";
+	}
 
 	/**
 	 * finish the generic foo || bar fix
@@ -4655,7 +4723,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			break;
 		default:
 			if (prefix == null)
-				name = checkClassReplacement(name);
+				name = NameMapper.checkClassReplacement(name);
 			else
 				name = (asGenericObject ? "O" : prefix + name); // "O";//
 			name = name.replace("java.lang.", "").replace('.', '_');
@@ -4709,7 +4777,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		IMethodBinding[] methods = binding.getDeclaredMethods();
 		for (int i = methods.length; --i >= 0;) {
 			IMethodBinding m = methods[i];
-			System.err.println(getJ2SQualifiedName(m.getName(), null, m, null, false));
+			System.err.println(getJ2SFullyQualifiedMethodName(m.getName(), null, m, null, false));
 			ITypeBinding[] params = m.getParameterTypes();
 			for (int j = 0; j < params.length; j++)
 				System.err.println("\t" + params[j].getName());
@@ -4726,7 +4794,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				IMethodBinding[] methods = b.getDeclaredMethods();
 				for (int i = methods.length; --i >= 0;)
 					if (m.overrides(methods[i]))
-						System.err.println(">> " + m.getKey() + " overrides " + methods[i].getKey());
+						System.err.println("!! " + m.getKey() + " overrides " + methods[i].getKey());
 			}
 		}
 	}
@@ -4984,55 +5052,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	private String fixLogName(String name) {
-		name = checkClassReplacement(name);
+		name = NameMapper.checkClassReplacement(name);
 		int pt = name.indexOf("<");
 		return (pt > 0 ? name.substring(0, pt) : name);
-	}
-
-	private static Map<String, String> htClassReplacements;
-	private static List<String> lstPackageReplacements;
-
-	public static void setClassReplacements(String keyValues) {
-		// j2s.class.replacements=org.apache.log4j.*:jalview.jslogger.;
-		htClassReplacements = null;
-		if (keyValues == null)
-			return;
-		htClassReplacements = new Hashtable<String, String>();
-		lstPackageReplacements = new ArrayList<String>();
-		String[] pairs = keyValues.split(";");
-		for (int i = pairs.length; --i >= 0;) {
-			pairs[i] = pairs[i].trim();
-			if (pairs[i].length() == 0)
-				continue;
-			String[] kv = pairs[i].split("->");
-			htClassReplacements.put(kv[0], kv[1]);
-			if (kv[0].endsWith("."))
-				lstPackageReplacements.add(kv[0]);
-			System.err.println("class replacement " + kv[0] + " --> " + kv[1]);
-		}
-	}
-
-	private static String checkClassReplacement(String className) {
-		if (htClassReplacements != null) {
-			String rep = htClassReplacements.get(className);
-			if (rep == null && lstPackageReplacements != null) {
-				for (int i = lstPackageReplacements.size(); --i >= 0;) {
-					rep = lstPackageReplacements.get(i);
-					if (className.startsWith(rep)) {
-						rep = htClassReplacements.get(rep) + className.substring(rep.length());
-						break;
-					}
-					if (i == 0)
-						rep = null;
-				}
-
-			}
-			if (rep != null) {
-				System.out.println(className + " -> " + rep);
-				return rep;
-			}
-		}
-		return className;
 	}
 
 	/**
@@ -5097,7 +5119,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// loop through packages and outer Class
 		while (i < parts.length && (i == 1 || !Character.isUpperCase(parts[i - 1].charAt(0))))
 			s += "." + parts[i++];
-		s = "'" + checkClassReplacement(s) + "'";
+		s = "'" + NameMapper.checkClassReplacement(s) + "'";
 		// int nlast = parts.length;
 		if (i < parts.length) {
 			s = "[" + s;
@@ -5128,7 +5150,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @return List {elementName, js, elementName, js, ....}
 	 */
 	public List<String> getElementList() {
-		String trailer = "//Created " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())
+		String trailer = ";Clazz.setTVer('"+VERSION+"');//Created " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())
 				+ " Jav2ScriptVisitor version " + VERSION + " net.sf.j2s.core.jar version " + CorePlugin.VERSION + "\n";
 		List<String> elements = new ArrayList<String>();
 		String js = buffer.toString();
@@ -5265,274 +5287,144 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 */
 	public static class NameMapper {
 
-		private static Set<String> methodSet;
-		private static Map<String, String> pmMap;
-		private static final String PACKAGE_PREFIX;
-		private static String[] mapDocument;
-		private static String[] mapNode;
-		private static String[] mapNodeList;
-		private static String[] mapNamedNodeMap;
-		private static String[] mapCharacterData;
-		private static String[] mapAttr;
-		private static String[] mapElement;
-		private static String[] mapDocumentType;
-		private static String[] mapNotation;
-		private static String[] mapEntity;
-		private static String[] mapProcessingInstruction;
+		private static Map<String, String> htClassReplacements;
+		private static List<String> lstPackageReplacements;
 
-		public static boolean isJ2SMethodRegistered(String methodName) {
-			return methodSet.contains(methodName);
-		}
-
-		public static String j2sMap(String className, String methodName) {
-			return pmMap.get(className + "." + methodName);
-		}
-
-		static {
-			PACKAGE_PREFIX = "org.w3c.dom.";
-
-			mapDocument = new String[] { "Document", "doctype", "implementation", "documentElement" };
-			mapNode = new String[] { "Node", "nodeName", "nodeValue", "nodeType", "parentNode", "childNodes",
-					"firstChild", "lastChild", "previousSibling", "nextSibling", "attributes", "ownerDocument",
-					"namespaceURI", "prefix", "localName" };
-			mapNodeList = new String[] { "NodeList", "length" };
-			mapNamedNodeMap = new String[] { "NamedNodeMap", "length" };
-			mapCharacterData = new String[] { "CharacterData", "data", "length" };
-			mapAttr = new String[] { "Attr", "name", "specified", "value", "ownerElement", };
-			mapElement = new String[] { "Element", "tagName" };
-			mapDocumentType = new String[] { "DocumentType", "name", "entities", "notations", "publicId", "systemId",
-					"internalSubset" };
-			mapNotation = new String[] { "Notation", "publicId", "systemId" };
-			mapEntity = new String[] { "Entity", "publicId", "systemId", "notationName" };
-			mapProcessingInstruction = new String[] { "ProcessingInstruction", "target", "data" };
-
-			init();
-		}
-
-		private static void init() {
-			pmMap = new HashMap<String, String>();
-			methodSet = new HashSet<String>();
-			register("java.lang.Class", "forName", "Clazz.forName");
-			register("java.lang.reflect.Array", "newInstance", "Clazz.array");
-//			register("java.lang.String", "length", "length"); // BH no -- we need String to implement CharSequence. Both will be length$()
-//			register("java.lang.CharSequence", "length", "length");//sgurin: fix for bug: CharSequence cs = "123"; cs.length();
-			register("java.lang.String", "replace", "~replace");
-			register("java.lang.String", "split", "~plit");
-			registerAllMaps();
-		}
-
-		private static void register(String className, String methodName, String propertyName) {
-			pmMap.put(className + "." + methodName, propertyName);
-			methodSet.add(methodName);
-		}
-
-		private static void registerMap(String[] map) {
-			for (int i = 1; i < map.length; i++) {
-				register(PACKAGE_PREFIX + map[0], "get" + map[i].substring(0, 1).toUpperCase() + map[i].substring(1),
-						map[i]);
+		public static void setClassReplacements(String keyValues) {
+			// j2s.class.replacements=org.apache.log4j.*:jalview.jslogger.;
+			htClassReplacements = null;
+			if (keyValues == null)
+				return;
+			htClassReplacements = new Hashtable<String, String>();
+			lstPackageReplacements = new ArrayList<String>();
+			String[] pairs = keyValues.split(";");
+			for (int i = pairs.length; --i >= 0;) {
+				pairs[i] = pairs[i].trim();
+				if (pairs[i].length() == 0)
+					continue;
+				String[] kv = pairs[i].split("->");
+				htClassReplacements.put(kv[0], kv[1]);
+				if (kv[0].endsWith("."))
+					lstPackageReplacements.add(kv[0]);
+				System.err.println("class replacement " + kv[0] + " --> " + kv[1]);
 			}
 		}
 
-		private static void registerAllMaps() {
-			registerMap(mapDocument);
-			registerMap(mapNode);
-			registerMap(mapNodeList);
-			registerMap(mapNamedNodeMap);
-			registerMap(mapCharacterData);
-			registerMap(mapAttr);
-			registerMap(mapElement);
-			registerMap(mapDocumentType);
-			registerMap(mapNotation);
-			registerMap(mapEntity);
-			registerMap(mapProcessingInstruction);
-		}
-
-		/**
-		 * Look for field name also a non-private method name somewhere in the stacks.
-		 * Method name is first adjusted by "$..." if it is a JavaScript name collision.
-		 * 
-		 * @param binding
-		 * @param name
-		 * @param isPrivate
-		 * @return
-		 */
-		public static boolean checkJ2SInheritedMethodNameCollision(ITypeBinding binding, String name) {
-			if (binding != null) {
-				IMethodBinding[] methods = binding.getDeclaredMethods();
-				for (int i = 0; i < methods.length; i++)
-					if (name.equals(getJ2S$CollisionMethodName(methods[i])))
-						return (!isPrivate(methods[i]));
-				ITypeBinding superclass = binding.getSuperclass();
-				if (checkJ2SInheritedMethodNameCollision(superclass, name))
-					return true;
-				ITypeBinding[] interfaces = binding.getInterfaces();
-				if (interfaces != null)
-					for (int i = 0; i < interfaces.length; i++)
-						if (checkJ2SInheritedMethodNameCollision(interfaces[i], name))
-							return true;
-			}
-			return false;
-		}
-
-		/**
-		 * Prepend a $ to a field name if there is a JavaScript keyword collision,
-		 * another if there is method collision and n more if there are collisions with
-		 * higher-level field names
-		 * 
-		 * @param classBinding
-		 * @param fieldName
-		 * @param isPrivate
-		 * @return
-		 */
-		protected static String getJ2SPrefixedFieldName(ITypeBinding classBinding, String fieldName) {
-			StringBuffer ret = new StringBuffer(getJ2S$JavaScriptCollisionName(fieldName, false, null));
-			if (classBinding != null) {
-				if (checkJ2SInheritedMethodNameCollision(classBinding, fieldName))
-					ret.append("$");
-				if (isJ2SInheritedFieldName(classBinding, fieldName))
-					return getJ2S$$InheritedFieldName(classBinding, fieldName, ret).toString();
-			}
-			return ret.append(fieldName).toString();
-		}
-
-		/**
-		 * Get the qualified name for a super.xxxx reference. Here we need only go one
-		 * level deep
-		 * 
-		 * @param classBinding
-		 * @param fieldName
-		 * @return
-		 */
-		static String getJ2S$SuperFieldNameOrNull(ITypeBinding classBinding, String fieldName) {
-			String ret = null;
-			if (NameMapper.isJ2SInheritedFieldName(classBinding, fieldName)) {
-				IVariableBinding[] declaredFields = classBinding.getDeclaredFields();
-				for (int i = 0; i < declaredFields.length; i++) {
-					if (fieldName.equals(declaredFields[i].getName())) {
-						ret = getJ2S$JavaScriptCollisionName(fieldName, false, null)
-								+ getJ2S$$InheritedFieldName(classBinding.getSuperclass(), fieldName, new StringBuffer());
-						break;
-					}
-				}
-			}
-			return ret;
-		}
-
-		/**
-		 * Prefix field name with as many $ as necessary to make it inheritance-unique
-		 * 
-		 * @param binding
-		 * @param name
-		 * @return
-		 */
-		protected static StringBuffer getJ2S$$InheritedFieldName(ITypeBinding binding, String name, StringBuffer buf) {
-			if (binding != null) {
-				ITypeBinding superclass = binding.getSuperclass();
-				if (superclass != null) {
-					IVariableBinding[] declaredFields = superclass.getDeclaredFields();
-					for (int i = 0; i < declaredFields.length; i++) {
-						if (name.equals(declaredFields[i].getName())) {
-							buf.append("$");
+		static String checkClassReplacement(String className) {
+			if (htClassReplacements != null) {
+				String rep = htClassReplacements.get(className);
+				if (rep == null && lstPackageReplacements != null) {
+					for (int i = lstPackageReplacements.size(); --i >= 0;) {
+						rep = lstPackageReplacements.get(i);
+						if (className.startsWith(rep)) {
+							rep = htClassReplacements.get(rep) + className.substring(rep.length());
 							break;
 						}
+						if (i == 0)
+							rep = null;
 					}
-					return getJ2S$$InheritedFieldName(superclass, name, buf);
+
+				}
+				if (rep != null) {
+					System.out.println(className + " -> " + rep);
+					return rep;
 				}
 			}
-			return buf.append(name);
+			return className;
 		}
 
 		/**
-		 * Get name() or $name(), if it needs method qualification
-		 * @param node
-		 * @return
+		 * classes and packages that do not accept $ in
+		 * their method names
+		 * 
 		 */
-		public static String getJ2S$QualifiedMethodName(SimpleName node) {
-			IBinding binding = node.resolveBinding();
-			return (binding instanceof IMethodBinding ? getJ2S$CollisionMethodName((IMethodBinding) binding)
-							: node.getIdentifier());
+		private final static String defaultNonQualified
+				// Math and Date both are minor extensions
+				// of JavaScript, so they are not qualified
+				= "java.lang.Math;"
+				+ "java.util.Date;"
+				// swingjs.api.js and javajs.api.js contain
+				// interfaces to JavaScript methods and so 
+				// are not parameterized.
+				+ "*.api.js;"
+				+ "swingjs.JSToolkit;"
+				// netscape.JSObject interface includes 8 methods
+				// that do not need to be parameterized.
+				+ "netscape.*;";
+
+		private static String[] nonQualifiedPackages;
+
+				
+		/**
+		 * .j2s option j2s.compiler.nonqualified.packages/classes
+		 * 
+		 * @param names semicolon-separated list. For example,
+		 *              org.jmol.api.js;jspecview.api.js
+		 */
+		public static void setNonQualifiedNamePackages(String names) {
+			names = defaultNonQualified + (names == null ? "" : names);
+			nonQualifiedPackages = names.replace(";;", ";").trim().split(";");
+			for (int i = nonQualifiedPackages.length; --i >= 0;) {
+				String s = nonQualifiedPackages[i];
+				if (s.length() == 0)
+					continue;
+				if (s.startsWith("*."))
+					s = s.substring(1);
+				if (s.endsWith("."))
+					s = s.substring(0, s.length() - 1);
+				nonQualifiedPackages[i] = (s.endsWith("*") ? s.substring(0, s.length() - 1) : s + ".").trim();
+			}
 		}
 
 		/**
+		 * Check to see if this class is in a package for which we exclude parameter
+		 * qualification
 		 * 
-		 * @param binding
+		 * @param className
 		 * @return
 		 */
-		static String getJ2S$CollisionMethodName(IMethodBinding binding) {
-			return getJ2S$JavaScriptCollisionName(binding.getName(), true, binding);
-		}
-
-		/**
-		 * Prepend a $ if the name is a JavaScript keyword such as "var" or "for".
-		 * 
-		 * For example,
-		 * 
-		 * var test = 3
-		 * 
-		 * x = test.Test_1.getX();
-		 * 
-		 * Check for generic method name conflict with JavaScript methods such as
-		 * .bind(), .call(), etc. but exclude methods in swingjs.api, because those are
-		 * meant to be that way.
-		 * 
-		 * @param name
-		 * @param addName
-		 * @param isMethod TODO
-		 * @return
-		 */
-		protected static String getJ2S$JavaScriptCollisionName(String name, boolean addName, IMethodBinding binding) {
-			boolean isViolation = checkJ2SKeywordViolation(name)
-					&& (binding == null || !binding.getDeclaringClass().getQualifiedName().startsWith("swingjs.api"));
-			return (isViolation ? "$" : "") + (addName ? name : "");
-		}
-		
-		/**
-		 * Check whether the given field name is already defined in super types or not.
-		 * 
-		 * The algorithm: 1. Check binding self class/interface fields 2. Check binding
-		 * super class 3. Check binding interfaces
-		 * 
-		 * @param binding
-		 * @param name
-		 * @return
-		 */
-		public static boolean isJ2SInheritedFieldName(ITypeBinding binding, String name) {
-			if ("serialVersionUID".equals(name)) {
-				/*
-				 * Just ignore this field: serialVersionUID. Currently Java2Script does not
-				 * support Java serialization but support Java2Script's own Simple RPC
-				 * serialization, which does not care about serialVersionID.
-				 */
-				return false;
-			}
-			if (binding == null) {
-				return false;
-			}
-			ITypeBinding superclass = binding.getSuperclass();
-			IVariableBinding[] declaredFields = null;
-			if (superclass != null) {
-				declaredFields = superclass.getDeclaredFields();
-			} else { // Interface
-				declaredFields = binding.getDeclaredFields();
-			}
-			for (int i = 0; i < declaredFields.length; i++) {
-				if (name.equals(declaredFields[i].getName())) {
+		private static boolean isPackageOrClassNonqualified(String className) {
+			className += ".";
+			for (int i = nonQualifiedPackages.length; --i >= 0;) {
+				String s = nonQualifiedPackages[i];
+				if (s.length() > 0 && s.startsWith(".") ? className.contains(s) : className.startsWith(s)) {
 					return true;
-				}
-			}
-			if (isJ2SInheritedFieldName(superclass, name)) {
-				return true;
-			}
-			ITypeBinding[] interfaces = binding.getInterfaces();
-			if (interfaces != null) {
-				for (int i = 0; i < interfaces.length; i++) {
-					if (isJ2SInheritedFieldName(interfaces[i], name)) {
-						return true;
-					}
 				}
 			}
 			return false;
 		}
+
+		// These methods are already in JavaScript and work fine:
+		private final static String JAVASCRIPT_STRING_METHODS 
+		        = "charAt,codePointAt,substring,indexOf,lastIndexOf,"
+		        		+ "toUpperCase,toLowerCase,trim";
+
+		static boolean isMethodNonqualified(String className, String methodName) {
+			if (NameMapper.isPackageOrClassNonqualified(className))
+				return true;
+			return (className.equals("java.lang.String") 
+					&& JAVASCRIPT_STRING_METHODS.indexOf(methodName) >= 0);
+		}
+		
+		private final static String[] mapToClazz = {
+			"java.lang.Class.forName", "Clazz.forName",
+			"java.lang.reflect.Array.newInstance", "Clazz.array"
+		};
+
+		/**
+		 * Check for special direct Clazz method calls, avoiding loading the entire class.
+		 * @param fullName
+		 * @return
+		 */
+		static String j2sMapClazzMethod(String fullName) {
+			fullName = fullName.intern();
+			for (int i = 0; i < mapToClazz.length; i += 2) {
+				if (mapToClazz[i] == fullName)
+					return mapToClazz[i + 1];
+			}
+			return null;
+		}
+
 
 		/*
 		 * IE passes the following: public,private,private,static,package,
@@ -5564,7 +5456,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				"c$", "apply", "arguments", "bind", "call", "caller", "watch", "unwatch", "valueOf", "isPrototypeOf",
 				"isGenerator", "prototype" };
 
-		static boolean checkJ2SKeywordViolation(String name) {
+		private static boolean checkJ2SKeywordViolation(String name) {
 			for (int i = 0; i < keywords.length; i++) {
 				if (keywords[i].equals(name)) {
 					return true;
@@ -5572,6 +5464,254 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			}
 			return false;
 		}
+
+		
+		/**
+		 * Append a $ if the name is a JavaScript keyword such as "var" or "for".
+		 * 
+		 * For example,
+		 * 
+		 * var test = 3
+		 * 
+		 * x = test.Test_1.getX();
+		 * 
+		 * 
+		 * Check for generic method name conflict with JavaScript methods such as
+		 * .bind(), .call(), etc. but exclude methods in swingjs.api.js, because those are
+		 * meant to be that way.
+		 * 
+		 * @param name
+		 * @param addName
+		 * @param binding   when null, this is for a field; when not null, this is for a method
+		 * @return
+		 */
+		static String getJ2S$JavaScriptCollisionName(String name, boolean addName, IMethodBinding binding) {
+			boolean isViolation = (name.indexOf("$") < 0
+					&& (binding == null || binding.getParameterTypes().length == 0) 
+					&& checkJ2SKeywordViolation(name));
+			return (addName ? name : "") + (isViolation ? "$" : "");
+		}
+		
+		/**
+		 * Convenience method for general use with Java methods only.
+		 * 
+		 * @param binding
+		 * @return
+		 */
+		static String getJ2S$JavaScriptCollisionMethodName(IMethodBinding binding) {
+			return getJ2S$JavaScriptCollisionName(binding.getName(), true, binding);
+		}
+
+
+		/**
+		 * Prepend a $ to a field name if there is a JavaScript keyword collision, and n
+		 * more if there are collisions with higher-level field names.
+		 * 
+		 * This method no longer checks for field-method collisions.
+		 * 
+		 * @param classBinding
+		 * @param fieldName
+		 * @param isPrivate
+		 * @return
+		 */
+		static String getJ2SPrefixedFieldName(ITypeBinding classBinding, String fieldName) {
+			StringBuffer ret = new StringBuffer(getJ2S$JavaScriptCollisionName(fieldName, false, null));
+			if (classBinding != null && isJ2SInheritedFieldName(classBinding, fieldName))
+					return getJ2S$$InheritedFieldName(classBinding, fieldName, newFieldNameBuf(fieldName, ret)).toString();
+			return ret.append(fieldName).toString();
+		}
+
+		/**
+		 * Get the qualified name for a super.xxxx reference. Here we need only go one
+		 * level deep
+		 * 
+		 * @param classBinding
+		 * @param fieldName
+		 * @return
+		 */
+		static String getJ2S$SuperFieldNameOrNull(ITypeBinding classBinding, String fieldName) {
+			String ret = null;
+			if (classBinding != null && NameMapper.isJ2SInheritedFieldName(classBinding, fieldName)) {
+				IVariableBinding[] declaredFields = classBinding.getDeclaredFields();
+				for (int i = 0; i < declaredFields.length; i++) {
+					if (fieldName.equals(declaredFields[i].getName())) {
+						ret = getJ2S$JavaScriptCollisionName(fieldName, false, null) + getJ2S$$InheritedFieldName(
+								classBinding.getSuperclass(), fieldName, newFieldNameBuf(fieldName, null));
+						break;
+					}
+				}
+			}
+			return ret;
+		}
+
+		/**
+		 * Initializer for the $$$... buffer that is prepended to all field names
+		 * 
+		 * @param fieldName
+		 * @param buf
+		 * @return
+		 */
+		private static StringBuffer newFieldNameBuf(String fieldName, StringBuffer buf) {
+			if (buf == null)
+				buf = new StringBuffer();
+			if (fieldNameCoversMethod(fieldName))
+				buf.append("$");
+			return buf;
+		}
+
+		/**
+		 * Field names that override just a few generic method names
+		 * need at least one "$";
+		 * 
+		 * @param fieldName
+		 * @return
+		 */
+		static boolean fieldNameCoversMethod(String fieldName) {
+			return fieldName.equals("toString"); 
+		}
+
+		/**
+		 * Prefix field name with as many $ as necessary to make it inheritance-unique
+		 * 
+		 * @param binding
+		 * @param name
+		 * @return
+		 */
+		static StringBuffer getJ2S$$InheritedFieldName(ITypeBinding binding, String name, StringBuffer buf) {
+			if (binding != null) {
+				ITypeBinding superclass = binding.getSuperclass();
+				if (superclass != null) {
+					IVariableBinding[] declaredFields = superclass.getDeclaredFields();
+					for (int i = 0; i < declaredFields.length; i++) {
+						if (name.equals(declaredFields[i].getName())) {
+							buf.append("$");
+							break;
+						}
+					}
+					return getJ2S$$InheritedFieldName(superclass, name, buf);
+				}
+			}
+			return buf.append(name);
+		}
+
+		/**
+		 * Check whether the given field name is already defined in super types or not.
+		 * 
+		 * The algorithm: 1. Check binding self class/interface fields 2. Check binding
+		 * super class 3. Check binding interfaces
+		 * 
+		 * @param binding
+		 * @param name
+		 * @return
+		 */
+		private static boolean isJ2SInheritedFieldName(ITypeBinding binding, String name) {
+			if ("serialVersionUID".equals(name)) {
+				/*
+				 * Just ignore this field: serialVersionUID. Currently Java2Script does not
+				 * support Java serialization but support Java2Script's own Simple RPC
+				 * serialization, which does not care about serialVersionID.
+				 */
+				return false;
+			}
+			ITypeBinding superclass = binding.getSuperclass();
+			IVariableBinding[] declaredFields = null;
+			if (superclass == null) {
+				// interface
+				declaredFields = binding.getDeclaredFields();
+			} else { 
+				declaredFields = superclass.getDeclaredFields();
+			}
+			for (int i = 0; i < declaredFields.length; i++) {
+				if (name.equals(declaredFields[i].getName())) {
+					return true;
+				}
+			}
+			if (superclass != null && isJ2SInheritedFieldName(superclass, name)) {
+				return true;
+			}
+			ITypeBinding[] interfaces = binding.getInterfaces();
+			if (interfaces != null) {
+				for (int i = 0; i < interfaces.length; i++) {
+					if (isJ2SInheritedFieldName(interfaces[i], name)) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+//		private static void registerMap(String[] map) {
+//			for (int i = 1; i < map.length; i++) {
+//				register(PACKAGE_PREFIX + map[0], "get" + map[i].substring(0, 1).toUpperCase() + map[i].substring(1),
+//						map[i]);
+//			}
+//		}
+
+		// Note: This was for the experimental HTML version of Java2Script
+		//
+//					PACKAGE_PREFIX = "org.w3c.dom.";
+//					mapDocument = new String[] { "Document", "doctype", "implementation", "documentElement" };
+//					mapNode = new String[] { "Node", "nodeName", "nodeValue", "nodeType", "parentNode", "childNodes",
+//							"firstChild", "lastChild", "previousSibling", "nextSibling", "attributes", "ownerDocument",
+//							"namespaceURI", "prefix", "localName" };
+//					mapNodeList = new String[] { "NodeList", "length" };
+//					mapNamedNodeMap = new String[] { "NamedNodeMap", "length" };
+//					mapCharacterData = new String[] { "CharacterData", "data", "length" };
+//					mapAttr = new String[] { "Attr", "name", "specified", "value", "ownerElement", };
+//					mapElement = new String[] { "Element", "tagName" };
+//					mapDocumentType = new String[] { "DocumentType", "name", "entities", "notations", "publicId", "systemId",
+//							"internalSubset" };
+//					mapNotation = new String[] { "Notation", "publicId", "systemId" };
+//					mapEntity = new String[] { "Entity", "publicId", "systemId", "notationName" };
+//					mapProcessingInstruction = new String[] { "ProcessingInstruction", "target", "data" };
+
+//		private static void registerAllMaps() {
+//			registerMap(mapDocument);
+//			registerMap(mapNode);
+//			registerMap(mapNodeList);
+//			registerMap(mapNamedNodeMap);
+//			registerMap(mapCharacterData);
+//			registerMap(mapAttr);
+//			registerMap(mapElement);
+//			registerMap(mapDocumentType);
+//			registerMap(mapNotation);
+//			registerMap(mapEntity);
+//			registerMap(mapProcessingInstruction);
+//		}
+
+//		/**
+//		 * Look for field name also a non-private method name somewhere in the stacks.
+//		 * Method name is first adjusted by "$..." if it is a JavaScript name collision.
+//		 * 
+//		 * @param binding
+//		 * @param name
+//		 * @param isPrivate
+//		 * @return
+//		 */
+//		private static boolean checkJ2SInheritedMethodNameCollision(ITypeBinding binding, String name) {
+//			if (binding != null) {
+//				IMethodBinding[] methods = binding.getDeclaredMethods();
+//				for (int i = 0; i < methods.length; i++) {
+//					if (methods[i].getParameterTypes().length > 0 || isPrivate(methods[i]))
+//						continue;
+//					String name1 = getJ2S$CollisionMethodName(methods[i]);
+//					if (name.equals(name1))
+//						return true;
+//					
+//				}
+//				ITypeBinding superclass = binding.getSuperclass();
+//				if (checkJ2SInheritedMethodNameCollision(superclass, name))
+//					return true;
+//				ITypeBinding[] interfaces = binding.getInterfaces();
+//				if (interfaces != null)
+//					for (int i = 0; i < interfaces.length; i++) {
+//						if (checkJ2SInheritedMethodNameCollision(interfaces[i], name)) {
+//							return true;
+//						}
+//					}
+//			}
+//			return false;
+//		}
 
 	}
 
@@ -5759,10 +5899,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	/**
 	 * for debugging -- to System.err.println
+	 * @param msg 
 	 */
-	public static void dumpStack() {
+	public static void dumpStack(String msg) {
 		try {
-			throw new NullPointerException();
+			throw new NullPointerException("Why am I here? " + msg);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -5824,19 +5965,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			mBinding = node.resolveMethodBinding();
 			@SuppressWarnings("unchecked")
 			List<ASTNode> params = node.parameters();
-			String name = getMethodNameOrArrayForDeclaration(mBinding, false, false, true);
-			ASTNode body = node.getBody();
-			processMethodDeclaration(mBinding, name, params, body, false, false, false, true);
-			removeVariableFinals(mBinding, params);
+			processMethodDeclaration(mBinding, params, node.getBody(), false, true);
 		} else if (lnode instanceof CreationReference) {
 			buffer.append("/*lambdaC*/");
 			// Function<Integer, int[]> iaCreator = int[]::new
 			CreationReference node = (CreationReference) lnode;
 			Type ctype = node.getType();
 			ITypeBinding tbinding = ctype.resolveBinding();
-			String name = getMethodNameOrArrayForDeclaration(mBinding, false, false, true);
-			processMethodDeclaration(mBinding, name, null, null, false, false, false, true);
-			removeVariableFinals(mBinding, null);
+			processMethodDeclaration(mBinding, null, null, false, true);
 			buffer.append(clazzArray(tbinding, ARRAY_DIM_ONLY));
 			buffer.append(", [t.intValue()");
 			if (ctype instanceof ArrayType) {
@@ -5850,10 +5986,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			buffer.append("/*lambdaM*/");
 			// Function<Object,Test> iaCreator2= Test::new;
 			ExpressionMethodReference node = (ExpressionMethodReference) lnode;
-			String name = getMethodNameOrArrayForDeclaration(mBinding, false, false, true);
-			processMethodDeclaration(mBinding, name, null, null, false, false, false, true);
-			removeVariableFinals(mBinding, null);
-			addMethodInvocation(null, null, node.resolveMethodBinding(), null, true);
+			processMethodDeclaration(mBinding, null, null, false, true);
+			addMethodInvocation(null, null, node.resolveMethodBinding(), null);
 			buffer.append("});\r\n");
 		}
 
@@ -5874,24 +6008,38 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private static Map<String, String> classToPrivateVar = new Hashtable<String, String>();
 	
 	private static String privateVarString = "";
-
+	
 	/**
 	 * p$1, p$2, etc. 
 	 * 
 	 * @param binding
 	 * @return
 	 */
-	private static String getPrivateVar(ITypeBinding binding) {
-		String key = normalizeKey(binding.getKey());
+	private static String getPrivateVar(IBinding binding) {
+		
+		String key = binding.getKey();
+		if (!classToPrivateVar.containsKey(key))
+			key = normalizeKey(binding.getKey());
 		String p$ = classToPrivateVar.get(key);
 		if (p$ == null) {
 			
-			System.out.println("adding " + p$ + " for " + key);
+//			System.out.println("adding " + p$ + " for " + key);
 
 			classToPrivateVar.put(key, p$ = "p$" + (++privateVarCount));
+			classToPrivateVar.put(binding.getKey(), p$);
 			privateVarString += "," + p$ + "={}";
 		}
 		return p$;
+	}
+
+	/**
+	 * Test to see if an invocation is the same as a declaration using cached normalized keys
+	 * @param a
+	 * @param b
+	 * @return
+	 */
+	private static boolean areEqual(IBinding a, IBinding b) {
+		return getPrivateVar(a).equals(getPrivateVar(b));
 	}
 
 	private static String normalizeKey(String key) {
@@ -5903,7 +6051,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			return key;
 		int left = key.indexOf("<") + 1;
 		int pt;
-		System.out.println("normalizing " + key);
+//		System.out.println("normalizing " + key);
 		while (left > 0 && (pt = key.indexOf(":")) >= 0 &&  pt > left) {
 			//Ltest/Test_GenericIMV_AB<Ltest/Test_GenericIMV_AB;:TA;Ltest/Test_GenericIMV_AB;:TB;>;
 			//                         ^                        ^       
@@ -5917,7 +6065,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			//                            ^                        ^
 			//Ltest/Test_GenericIMV_AB<TA;TB;>;
 		}
-		System.out.println("normalized  " + key);
+//		System.out.println("normalized  " + key);
 		return key;
 	}
 
@@ -5926,6 +6074,5 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		privateVarString = "";
 		classToPrivateVar.clear();
 	}
-
-
+	
 }

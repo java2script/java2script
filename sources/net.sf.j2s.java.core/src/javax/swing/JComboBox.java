@@ -98,9 +98,9 @@ implements ItemSelectable,ListDataListener,ActionListener {
 	 * @j2sNative
 	 * 
 	 * this.c$$TEA = C$.c$$OA;
-	 * this.prototype.setPrototypeDisplayValue$TE = p$.setPrototypeDisplayValue$O;
-	 * this.prototype.addItem$TE = p$.addItem$O;
-	 * this.prototype.insertItemAt$TE$I =  p$.insertItemAt$O$I;
+	 * this.prototype.setPrototypeDisplayValue$TE = this.prototype.setPrototypeDisplayValue$O;
+	 * this.prototype.addItem$TE = this.prototype.addItem$O;
+	 * this.prototype.insertItemAt$TE$I =  this.prototype.insertItemAt$O$I;
 	 * 
 	 */
 	static {}

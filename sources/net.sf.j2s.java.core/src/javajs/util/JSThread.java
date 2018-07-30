@@ -22,7 +22,7 @@ import javajs.api.JSFunction;
  * 
  */
 //@J2SRequireImport(swingjs.JSToolkit.class)
-public abstract class JSThread extends Thread implements JSFunction {
+public abstract class JSThread extends Thread {
 
 	public static final int INIT = 0;
 	public static final int LOOP = 1;

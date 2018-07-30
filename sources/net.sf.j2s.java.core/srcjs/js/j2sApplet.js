@@ -748,6 +748,10 @@ if (!J2S._version)
 	J2S._getFileData = function(fileName, fSuccess, doProcess, isBinary) {
 		// swingjs.api.J2SInterface
 		// use host-server PHP relay if not from this host
+		if (fileName.indexOf("https://./") == 0)
+			fileName = fileName.substring(10);
+		else if (fileName.indexOf("http://./") == 0)
+			fileName = fileName.substring(9);
 		isBinary = (isBinary || J2S._isBinaryUrl(fileName));
 		var isPDB = (fileName.indexOf("pdb.gz") >= 0 && fileName
 				.indexOf("//www.rcsb.org/pdb/files/") >= 0);
@@ -763,6 +767,7 @@ if (!J2S._version)
 			fileName = "file://" + fileName.substring(5); // / fixes IE
 															// problem
 		var isFile = (fileName.indexOf("file://") == 0);
+		
 		var isMyHost = (fileName.indexOf("://") < 0 || fileName
 				.indexOf(document.location.protocol) == 0
 				&& fileName.indexOf(document.location.host) >= 0);
@@ -2282,7 +2287,7 @@ if (!J2S._version)
 					return;
 				}
 				if (applet.__Info.main && applet.__Info.headless) {
-					cl.main(applet.__Info.args || []);
+					cl.main$SA(applet.__Info.args || []);
 				} else {
 					var viewerOptions = Clazz.new_(Clazz
 							.load("java.util.Hashtable"));
@@ -2325,7 +2330,7 @@ if (!J2S._version)
 						viewerOptions.put("display", applet._id + "_canvas2d");
 					var w = applet.__Info.width;
 					var h = applet.__Info.height;
-					if (applet._canvas && w > 0 && h > 0 && (w != applet._canvas.width
+					if (w > 0 && h > 0 && (w != applet._canvas.width
 							|| h != applet._canvas.height)) {
 						// developer has used static { thisApplet.__Info.width=...}
 						J2S.$(applet, "appletdiv").width(w).height(h);
@@ -2336,7 +2341,7 @@ if (!J2S._version)
 			} catch (e) {
 				System.out.println((J2S._isAsync ? "normal async abort from "
 						: "")
-						+ e);
+						+ e + (e.stack ? "\n" + e.stack : ""));
 				return;
 			}
 

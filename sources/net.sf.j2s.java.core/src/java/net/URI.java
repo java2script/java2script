@@ -2685,7 +2685,7 @@ public final class URI
     	/**
     	 * @j2sNative
     	 * 
-    	 * return EncodeURI(s);
+    	 * return encodeURI(s);
     	 */
     	{
     		return s;

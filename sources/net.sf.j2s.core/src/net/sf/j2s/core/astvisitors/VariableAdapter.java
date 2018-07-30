@@ -52,6 +52,12 @@ class VariableAdapter extends VisitorAdapter {
 		 * Variable name that is to be generated in the compiled *.js
 		 */
 		String toVariableName;
+
+		/**
+		 * $name, if required
+		 * 
+		 */
+	    String prefixedName;
 		
 		FinalVariable(int blockLevel, String variableName, String methodScope) {
 			super();
@@ -146,47 +152,6 @@ class VariableAdapter extends VisitorAdapter {
 				return var;
 		}
 		return name;
-	}
-
-	/**
-	 * Generated final variable list for anonymous class creation.
-	 * 
-	 * @param list
-	 * @param seperator
-	 * @param scope
-	 * @return
-	 */
-	static String listFinalVariables(List<FinalVariable> list, String seperator, String scope) {
-		if (list.size() == 0) {
-			return "null";
-		}
-		StringBuffer buf = new StringBuffer();
-		buf.append("{");
-		for (Iterator<FinalVariable> iter = list.iterator(); iter.hasNext();) {
-			FinalVariable fv = iter.next();
-			String name = fv.variableName;
-			if (fv.toVariableName != null) {
-				name = fv.toVariableName;
-			}
-			name = Java2ScriptVisitor.NameMapper.getJ2S$JavaScriptCollisionName(name, true, null);
-			buf.append(name);
-			buf.append(": ");
-			String methodScope = fv.methodScope;
-			if (methodScope == null && scope == null) {
-				buf.append(name);
-			} else if (methodScope == null || scope == null) {
-				buf.append("this.$finals." + name);
-			} else if (methodScope.equals(scope)) {
-				buf.append(name);
-			} else {
-				buf.append("this.$finals." + name);
-			}
-			if (iter.hasNext()) {
-				buf.append(seperator);
-			}
-		}
-		buf.append("}");
-		return buf.toString();
 	}
 
 }

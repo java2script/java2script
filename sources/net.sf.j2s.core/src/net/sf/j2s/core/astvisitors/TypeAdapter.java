@@ -11,9 +11,6 @@
 
 package net.sf.j2s.core.astvisitors;
 
-import java.util.Hashtable;
-import java.util.Map;
-
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ParameterizedType;
@@ -39,14 +36,20 @@ public class TypeAdapter extends VisitorAdapter {
 		return thisClassName;
 	}
 
+	private ITypeBinding binding;
+
+	public ITypeBinding getTypeBinding() {
+		return binding;
+	}
+
 	private String fullClassName = "";
 
-	
 	public String getFullClassName() {
 		return fullClassName;
 	}
 
-	void setClassName(String className) {
+	void setClassName(String className, ITypeBinding binding) {
+		this.binding = binding;
 		thisClassName = className;
 		String thisPackageName = visitor.getPackageName();
 		fullClassName = (thisPackageName == null || thisPackageName.length() == 0 || "java.lang".equals(thisPackageName)
@@ -54,12 +57,10 @@ public class TypeAdapter extends VisitorAdapter {
 	}
 
 	/**
-	 * Check whether the class represented by the given name is inherited from
-	 * the given type binding.
+	 * Check whether the class represented by the given name is inherited from the
+	 * given type binding.
 	 * 
-	 * The algorithm:
-	 * 1. Check binding self class name
-	 * 2. Check binding super class
+	 * The algorithm: 1. Check binding self class name 2. Check binding super class
 	 * 3. Check binding interfaces
 	 * 
 	 * @param binding
@@ -97,25 +98,23 @@ public class TypeAdapter extends VisitorAdapter {
 	 * @return
 	 */
 	static public String getShortenedPackageNameFromClassName(String thisPackageName, String fullName) {
-		return assureQualifiedName(thisPackageName, getShortenedName(null, fullName.substring(0, fullName.lastIndexOf('.')), true));
+		return assureQualifiedName(thisPackageName,
+				getShortenedName(null, fullName.substring(0, fullName.lastIndexOf('.')), true));
 	}
 
 	/**
-	 * Shorten fully qualified class names starting with java.lang and
-	 * will replace a class name with C$.
-	 * Use static getShortenedName(null, name, false) if that is not desired.
+	 * Shorten fully qualified class names starting with java.lang and will replace
+	 * a class name with C$. Use static getShortenedName(null, name, false) if that
+	 * is not desired.
 	 * 
-	 * Here are the situations: 
-	 * 1. Remove "java.lang." in most cases 
-	 * 2. "org.eclipse.swt.SWT" to "$WT" 
-	 * 3. "org.eclipse.swt.internal.browser.OS" to "O$" 
-	 * 4. "org.eclipse.swt." to "$wt."
-	 * 5. current class name to C$
+	 * Here are the situations: 1. Remove "java.lang." in most cases 2.
+	 * "org.eclipse.swt.SWT" to "$WT" 3. "org.eclipse.swt.internal.browser.OS" to
+	 * "O$" 4. "org.eclipse.swt." to "$wt." 5. current class name to C$
 	 * 
 	 * @param name
 	 * @return
 	 */
-	public String getShortenedQualifiedName(String name) {		
+	public String getShortenedQualifiedName(String name) {
 		return getShortenedName(fullClassName, name, false);
 	}
 
@@ -128,10 +127,10 @@ public class TypeAdapter extends VisitorAdapter {
 	 * @return
 	 */
 	static public String getShortenedName(String className, String name, boolean isPackage) {
-		if (name == null) 
+		if (name == null)
 			return null;
 		if (!isPackage) {
-			className= Java2ScriptVisitor.removeBrackets(className);
+			className = Java2ScriptVisitor.removeBrackets(className);
 			name = Java2ScriptVisitor.removeBrackets(name);
 		}
 		if (className != null) {
@@ -140,21 +139,23 @@ public class TypeAdapter extends VisitorAdapter {
 			if (name.startsWith(className + "."))
 				return "C$." + name.substring(className.length() + 1);
 		}
-		String name1 = shortenJavaLang(name);
-		return (name1 == null ? shortenSWTName(name, isPackage) : name1);
+		return shortenJavaLang(name);
+//		String name1 = shortenJavaLang(name);
+//		return (name1 == null ? shortenSWTName(name, isPackage) : name1);
 	}
 
 	static private String shortenJavaLang(String name) {
 		// shorten java.lang.XXX.YYY but not java.lang.xxx.ZZZ
-		// don't shorten java.lang.ref or java.lang.annotation or java.lang.instrument or java.lang.management
+		// don't shorten java.lang.ref or java.lang.annotation or java.lang.instrument
+		// or java.lang.management
 		// because why? they are discarded ultimately?
-		return (!name.startsWith("java.lang.") 
-				|| name.length() > 10 && !Character.isUpperCase(name.charAt(10))
-					//|| name.startsWith("java.lang.ref") 
-					//|| name.startsWith("java.lang.annotation")
-					//|| name.startsWith("java.lang.instrument") 
-					//|| name.startsWith("java.lang.management")
-					? null : name.substring(10));
+		return (!name.startsWith("java.lang.") || name.length() > 10 && !Character.isUpperCase(name.charAt(10))
+				// || name.startsWith("java.lang.ref")
+				// || name.startsWith("java.lang.annotation")
+				// || name.startsWith("java.lang.instrument")
+				// || name.startsWith("java.lang.management")
+				? name
+				: name.substring(10));
 
 // was:
 //		int index = name.indexOf("java.lang.");
@@ -169,58 +170,63 @@ public class TypeAdapter extends VisitorAdapter {
 
 	}
 
-	static private String shortenSWTName(String name, boolean isPackage) {		
-		if (name.indexOf(".swt.") < 0 && (isPackage || name.indexOf(".j2s.") < 0)) 
-			return name;
-		String name1;
-		return ((name1 = checkAbbrClassName(name, "org.eclipse.swt.SWT", "$WT")) != null
-			 || (name1 = checkAbbrClassName(name, "org.eclipse.swt.internal.browser.OS", "O$")) != null
-			 || !isPackage && (
-					   (name1 = checkAbbrClassName(name, "net.sf.j2s.html.", "")) != null
-					|| (name1 = checkAbbrClassName(name, "org.eclipse.swt.internal.xhtml.", "")) != null
-				)
-			 || (name1 = checkAbbrClassName(name, "org.eclipse.swt", "$wt")) != null // important to be last 
-			 ? name1 : name);
-	}
+//	static private String shortenSWTName(String name, boolean isPackage) {		
+//		if (name.indexOf(".swt.") < 0 && (isPackage || name.indexOf(".j2s.") < 0)) 
+//			return name;
+//		String name1;
+//		return ((name1 = checkAbbrClassName(name, "org.eclipse.swt.SWT", "$WT")) != null
+//			 || (name1 = checkAbbrClassName(name, "org.eclipse.swt.internal.browser.OS", "O$")) != null
+//			 || !isPackage && (
+//					   (name1 = checkAbbrClassName(name, "net.sf.j2s.html.", "")) != null
+//					|| (name1 = checkAbbrClassName(name, "org.eclipse.swt.internal.xhtml.", "")) != null
+//				)
+//			 || (name1 = checkAbbrClassName(name, "org.eclipse.swt", "$wt")) != null // important to be last 
+//			 ? name1 : name);
+//	}
+//
+//	static private String checkAbbrClassName(String name, String prefix, String abbr) {
+//		int pt;
+//		return (name.startsWith(prefix) && (
+//					(pt = prefix.length()) == 0 
+//					|| name.length() == pt 
+//					|| name.charAt(pt) == '.'
+//				) 
+//			? abbr + name.substring(pt) 
+//			: null);
+//	}
 
-	static private String checkAbbrClassName(String name, String prefix, String abbr) {
-		int pt;
-		return (name.startsWith(prefix) && (
-					(pt = prefix.length()) == 0 
-					|| name.length() == pt 
-					|| name.charAt(pt) == '.'
-				) 
-			? abbr + name.substring(pt) 
-			: null);
-	}
-
+	/**
+	 * From ClassInstanceCreation
+	 * 
+	 * @param type
+	 * @return
+	 */
 	static public String getTypeStringName(Type type) {
 		if (type instanceof QualifiedType) {
 			QualifiedType qualType = (QualifiedType) type;
 			return getTypeStringName(qualType.getQualifier()) + "." + qualType.getName().getIdentifier();
-		} 
+		}
 		if (type instanceof SimpleType) {
 			ITypeBinding binding = ((SimpleType) type).resolveBinding();
-			return (binding == null ? null  : binding.getQualifiedName());
+			return (binding == null ? null : binding.getQualifiedName());
 		}
 		return (type == null || type instanceof PrimitiveType || type instanceof WildcardType ? null
 				: type instanceof ArrayType ? getTypeStringName(((ArrayType) type).getElementType())
-				: type instanceof ParameterizedType ? getTypeStringName(((ParameterizedType) type).getType())
-						: null);
+						: type instanceof ParameterizedType ? getTypeStringName(((ParameterizedType) type).getType())
+								: null);
 	}
 
 	/**
 	 * may return P$
 	 * 
-	 * @param thisPackageName
-	 *            null to not allow P$
+	 * @param thisPackageName null to not allow P$
 	 * @param name
 	 * @return
 	 */
 	public static String assureQualifiedName(String thisPackageName, String name) {
-		return (name == null || name.length() == 0 || thisPackageName == null ?
-			name : name.startsWith(thisPackageName + ".") ?  "P$." + name.substring(thisPackageName.length() + 1)
-			: name.equals(thisPackageName) ? "P$" : name);
+		return (name == null || name.length() == 0 || thisPackageName == null ? name
+				: name.startsWith(thisPackageName + ".") ? "P$." + name.substring(thisPackageName.length() + 1)
+						: name.equals(thisPackageName) ? "P$" : name);
 	}
 
 }
