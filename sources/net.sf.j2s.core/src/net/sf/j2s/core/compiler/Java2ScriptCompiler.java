@@ -20,6 +20,7 @@ import java.util.Properties;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -34,7 +35,6 @@ import net.sf.j2s.core.astvisitors.Java2ScriptVisitor;
  * @author Bob Hanson
  *
  */
-@SuppressWarnings("restriction")
 public class Java2ScriptCompiler {
 	/**
 	 * The name of the J2S options file, aka as the "Dot-j2s" file.
@@ -78,7 +78,9 @@ public class Java2ScriptCompiler {
 
 	private ASTParser astParser;
 
-	public static boolean isActive(IProject project) {
+	private IJavaProject project;
+
+	public static boolean isActive(IJavaProject project) {
 		try {
 			return new File(project.getProject().getLocation().toOSString(), J2S_OPTIONS_FILE_NAME).exists();
 		} catch (@SuppressWarnings("unused") Exception e) {
@@ -129,13 +131,14 @@ public class Java2ScriptCompiler {
 	 * @return true if this is a j2s project and is enabled
 	 * 
 	 */
-	public boolean initializeProject(IProject project, boolean isCompilationParticipant) {
+	public boolean initializeProject(IJavaProject project, boolean isCompilationParticipant) {
+		this.project = project;
 		this.isCompilationParticipant = isCompilationParticipant;
 		if (!isActive(project)) {
 			// the file .j2s does not exist in the project directory -- skip this project
 			return false;
 		}
-		projectFolder = project.getLocation().toOSString();
+		projectFolder = project.getProject().getLocation().toOSString();
 		props = new Properties();
 		try {
 			File j2sFile = new File(projectFolder, J2S_OPTIONS_FILE_NAME);
@@ -259,7 +262,7 @@ public class Java2ScriptCompiler {
 		// note: next call must come before each createAST call
 		astParser.setResolveBindings(true); 
 		CompilationUnit root = (CompilationUnit) astParser.createAST(null);
-		Java2ScriptVisitor visitor = new Java2ScriptVisitor();
+		Java2ScriptVisitor visitor = new Java2ScriptVisitor(project);
 
 		try {
 
