@@ -13445,6 +13445,7 @@ if (!J2S._version)
 // TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
 //       It is possible that these might be loaded dynamically.
 
+// BH 8/1/2018  3.2.2 adds default interface methods as C$.$defaults$
 // BH 7/28/2018 3.2.2 upgrade to all-qualified methods. 
 // BH 7/28/2018 adds Character.getName(codepoint)
 // BH 7/26/2018 fix for Array.getComponentType() only returning the base element type
@@ -13720,17 +13721,19 @@ Clazz.exceptionOf = function(e, clazz) {
   if(e.__CLASS_NAME__)
     return Clazz.instanceOf(e, clazz);
   if (!e.getMessage) {
-    e.getMessage = function() {return "" + this};
+    e.getMessage = function() {return "" + e};
   }
   if (!e.printStackTrace$) {
-    e.printStackTrace$ = function(){};
-    e.printStackTrace$java_io_PrintStream = function(){};
+    e.printStackTrace$ = function(){System.err.println$S(e + "\n" + this.stack)};
+    e.printStackTrace$java_io_PrintStream = function(stream){
+    	stream.println$S(e + "\n" + e.stack);
+    };
     //alert(e + " try/catch path:" + Clazz._getStackTrace(-10));
   }
   if(clazz == Error) {
     if (("" + e).indexOf("Error") < 0)
       return false;
-    System.out.println (Clazz._getStackTrace());
+    System.err.println$O(Clazz._getStackTrace());
     return true;
     // everything here is a Java Exception, not a Java Error
   }
@@ -13875,11 +13878,14 @@ Clazz.newClass = function (prefix, name, clazz, clazzSuper, interfacez, type) {
     checkDeclared(qualifiedName, type);
   }
   clazz || (clazz = function () {Clazz.newInstance(this,arguments,0,clazz)});  
+  
   clazz.__NAME__ = name;
   // prefix class means this is an inner class, and $this$0 refers to the outer class. 
   // no prefix class but a super class that is an inner class, then $this$0 refers to its $this$0.  
   // there can be a conflict here. 
   prefix.__CLASS_NAME__ && (clazz.$this$0 = prefix.__CLASS_NAME__) || clazzSuper && clazzSuper.$this$0 && (clazz.$this$0 = clazzSuper.$this$0);
+
+  
   clazz.$load$ = [clazzSuper, interfacez];
   clazz.$isEnum = clazzSuper == 'Enum';
   // get qualifed name, and for inner classes, the name to use to refer to this
@@ -14040,6 +14046,10 @@ Clazz.newInterface = function (prefix, name, _null1, _null2, interfacez, _0) {
 };
 
 Clazz.newMeth = function (clazzThis, funName, funBody, modifiers) {
+
+	  if (!__allowOverwriteClass && clazzThis.prototype[funName]) 
+		  return;
+	  
 	// modifiers: 1: static, 2: native, p3 -- private holder
   if (arguments.length == 1) {
     return Clazz.newMeth(clazzThis, 'c$', function(){
@@ -14055,6 +14065,7 @@ Clazz.newMeth = function (clazzThis, funName, funBody, modifiers) {
       Clazz.newMeth(clazzThis, funName[i], funBody, modifiers);
     return;
   }
+  
   var isStatic = (modifiers == 1 || modifiers == 2);
   var isPrivate = (typeof modifiers == "object");
   Clazz.saemCount0++;
@@ -14303,6 +14314,7 @@ Clazz.isClassDefined = function(clazzName) {
     b.__NDIM = a.__NDIM;
     b.getClass$ = a.getClass$; 
     b.equals$O = a.equals$O;
+    return b;
  }
  
  var setArray = function(vals, baseClass, paramType, ndims) {
@@ -14693,9 +14705,14 @@ var copyStatics = function(clazzFrom, clazzThis, isInterface) {
 	    if (clazzThis.prototype[o] == undefined && !excludeSuper(o)) {
 	        clazzThis.prototype[o] = clazzFrom.prototype[o];
 	    }
-	  }	  
+	  }
+	  __allowOverwriteClass = false;
+	  if (clazzFrom.$defaults$)
+		  clazzFrom.$defaults$(clazzThis);
+	  __allowOverwriteClass = true;
   }
 }
+
 
 var finalizeClazz = function(clazz, qname, bname, type, isNumber) {
   clazz.$isInterface = (type == 0);
@@ -15080,14 +15097,14 @@ var needPackage = function(pkg) {
 
 Clazz.newPackage("java.io");
 //Clazz.newPackage("java.lang");
-Clazz.newPackage("java.lang.annotation");
-Clazz.newPackage("java.lang.instrument");
-Clazz.newPackage("java.lang.management");
+//Clazz.newPackage("java.lang.annotation");
+//Clazz.newPackage("java.lang.instrument");
+//Clazz.newPackage("java.lang.management");
 Clazz.newPackage("java.lang.reflect");
-Clazz.newPackage("java.lang.ref");
-java.lang.ref.reflect = java.lang.reflect;
+//Clazz.newPackage("java.lang.ref");
+///*???*/java.lang.ref.reflect = java.lang.reflect;
 Clazz.newPackage("java.util");
-Clazz.newPackage("java.security");
+//Clazz.newPackage("java.security");
 
 
 // NOTE: Any changes to this list must also be 
@@ -15099,16 +15116,156 @@ Clazz.newInterface(java.lang,"Cloneable");
 Clazz.newInterface(java.lang,"Appendable");
 Clazz.newInterface(java.lang,"Comparable");
 Clazz.newInterface(java.lang,"Runnable");
-Clazz.newInterface(java.lang,"CharSequence");
-// NOTE! Java 8 implementation of CharSequence adds function/stream methods that are not provided here.
-// namely: java.util.function.Supplier in CharSequence.chars and .codePoints
-// also various iterator methods
+
 
 //Clazz.newInterface(java.io,"Closeable");
 //Clazz.newInterface(java.io,"DataInput");
 //Clazz.newInterface(java.io,"DataOutput");
 //Clazz.newInterface(java.lang,"Iterable");
 //Clazz.newInterface(java.util,"Comparator");
+
+(function(){var P$=java.lang,I$=[['java.util.stream.StreamSupport','java.util.Spliterators','java.lang.CharSequence$1CharIterator','java.lang.CharSequence$1CodePointIterator']],$incl$=function(i){return I$[i]=Clazz.load(I$[0][i-1])};
+var C$=Clazz.newInterface(java.lang, "CharSequence");
+C$.$defaults = function(C$) {
+var me;
+
+Clazz.newMeth(C$, 'chars$', function () {
+me = this;
+return (I$[1]||$incl$(1)).intStream$java_util_function_Supplier$I$Z(((
+(function(){var C$=Clazz.newClass(P$, "CharSequence$lambda1", function(){Clazz.newInstance(this, arguments[0],1,C$);}, null, 'java.util.function.Supplier', 1);
+
+C$.$clinit$ = function() {Clazz.load(C$, 1);
+}
+
+Clazz.newMeth(C$, '$init$', function () {
+	this.b$ = {CharSequence: me};
+}, 1);
+/*lambdaE*/
+Clazz.newMeth(C$, 'get$', function () {
+return (I$[2]||$incl$(2))
+.spliterator$java_util_PrimitiveIterator_OfInt$J$I(
+		Clazz.new_((I$[3]||$incl$(3)), [this, null]), 
+		this.b$['CharSequence'].length$(), 16);
+});
+})()
+), Clazz.new_(CharSequence$lambda1.$init$, [this, null])), 16464, false);
+});
+
+Clazz.newMeth(C$, 'codePoints$', function () {
+me = this;
+return (I$[1]||$incl$(1)).intStream$java_util_function_Supplier$I$Z(((
+(function(){var C$=Clazz.newClass(P$, "CharSequence$lambda2", function(){Clazz.newInstance(this, arguments[0],1,C$);}, null, 'java.util.function.Supplier', 1);
+
+C$.$clinit$ = function() {Clazz.load(C$, 1);
+}
+
+Clazz.newMeth(C$, '$init$', function () {
+	this.b$ = {CharSequence: me};
+}, 1);
+/*lambdaE*/
+Clazz.newMeth(C$, 'get$', function () {
+return (I$[2]||$incl$(2)).spliteratorUnknownSize$java_util_PrimitiveIterator_OfInt$I(Clazz.new_((I$[4]||$incl$(4)), [this, null]), 16);
+});
+})()
+), Clazz.new_(CharSequence$lambda2.$init$, [this, null])), 16, false);
+});
+;
+(function(){var C$=Clazz.newClass(P$, "CharSequence$1CharIterator", function(){
+Clazz.newInstance(this, arguments[0],true,C$);
+}, null, [['java.util.PrimitiveIterator','java.util.PrimitiveIterator.OfInt']], 2);
+
+C$.$clinit$ = function() {Clazz.load(C$, 1);
+}
+
+Clazz.newMeth(C$, '$init0$', function () {
+var c;if((c = C$.superclazz) && (c = c.$init0$))c.apply(this);
+this.cur = 0;
+}, 1);
+
+Clazz.newMeth(C$, '$init$', function () {
+this.cur = 0;
+}, 1);
+
+Clazz.newMeth(C$, 'hasNext$', function () {
+return this.cur < this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []);
+});
+
+Clazz.newMeth(C$, 'nextInt$', function () {
+if (this.hasNext$()) {
+return this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [this.cur++]).$c();
+} else {
+throw Clazz.new_(Clazz.load('java.util.NoSuchElementException'));
+}});
+
+Clazz.newMeth(C$, ['forEachRemaining$java_util_function_IntConsumer','forEachRemaining$TT_CONS'], function (block) {
+for (; this.cur < this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []); this.cur++) {
+block.accept$(this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [this.cur]).$c());
+}
+});
+
+Clazz.newMeth(C$);
+})()
+;
+(function(){var C$=Clazz.newClass(P$, "CharSequence$1CodePointIterator", function(){
+Clazz.newInstance(this, arguments[0],true,C$);
+}, null, [['java.util.PrimitiveIterator','java.util.PrimitiveIterator.OfInt']], 2);
+
+C$.$clinit$ = function() {Clazz.load(C$, 1);
+}
+
+Clazz.newMeth(C$, '$init0$', function () {
+var c;if((c = C$.superclazz) && (c = c.$init0$))c.apply(this);
+this.cur = 0;
+}, 1);
+
+Clazz.newMeth(C$, '$init$', function () {
+this.cur = 0;
+}, 1);
+
+Clazz.newMeth(C$, ['forEachRemaining$java_util_function_IntConsumer','forEachRemaining$TT_CONS'], function (block) {
+var length = this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []);
+var i = this.cur;
+try {
+while (i < length){
+var c1 = this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [i++]);
+if (!Character.isHighSurrogate$C(c1) || i >= length ) {
+block.accept$(c1.$c());
+} else {
+var c2 = this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [i]);
+if (Character.isLowSurrogate$C(c2)) {
+i++;
+block.accept$(Character.toCodePoint$C$C(c1, c2));
+} else {
+block.accept$(c1.$c());
+}}}
+} finally {
+this.cur=i;
+}
+});
+
+Clazz.newMeth(C$, 'hasNext$', function () {
+return this.cur < this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []);
+});
+
+Clazz.newMeth(C$, 'nextInt$', function () {
+var length = this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []);
+if (this.cur >= length) {
+throw Clazz.new_(Clazz.load('java.util.NoSuchElementException'));
+}var c1 = this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [this.cur++]);
+if (Character.isHighSurrogate$C(c1) && this.cur < length ) {
+var c2 = this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [this.cur]);
+if (Character.isLowSurrogate$C(c2)) {
+this.cur++;
+return Character.toCodePoint$C$C(c1, c2);
+}}return c1.$c();
+});
+
+Clazz.newMeth(C$);
+})()
+};
+
+})();
+
 
 
 //////// (int) conversions //////////
@@ -16116,7 +16273,7 @@ java.lang.System = System = {
   },
   exit$ : function() {
   debugger 
-  swingjs.JSToolkit && swingjs.JSToolkit.exit() 
+  swingjs.JSToolkit && swingjs.JSToolkit.exit$() 
   },
   gc$ : function() {}, // bh
   getProperties$ : function () {
@@ -16184,7 +16341,7 @@ Sys.out = new Clazz._O ();
 Sys.out.__CLASS_NAME__ = "java.io.PrintStream";
 
 
-Sys.out.print = Sys.out.print$S = function (s) { 
+Sys.out.print = Sys.out.print$O = Sys.out.print$Z = Sys.out.print$I = Sys.out.print$S = Sys.out.print$C = Sys.out.print = function (s) { 
   Con.consoleOutput (s);
 };
 
@@ -16410,9 +16567,6 @@ m$(Integer,"reverse$I",
 	        ((i >>> 8) & 0xff00) | (i >>> 24);
     return i;}, 1);
 
-m$(Integer,"signum$",
-		function(i){ return (i >> 31) | (-i >>> 31); }, 1);
-
 Integer.reverseBytes = m$(Integer,"reverseBytes$I",
 	function(i) { 
 		return ((i >>> 24)           ) |
@@ -16420,6 +16574,9 @@ Integer.reverseBytes = m$(Integer,"reverseBytes$I",
 	           ((i <<   8) & 0xFF0000) |
 	           ((i << 24));
 	}, 1);
+
+m$(Integer,"signum$",
+		function(i){ return (i >> 31) | (-i >>> 31); }, 1);
 
 m$(Integer,"min$I$I",
 		function(a,b) { return Math.min(a,b); }, 1);
@@ -16559,7 +16716,7 @@ return"class java.lang.Long";
 return""+this.valueOf();
 };
 
-m$(Long, ["c$", "c$$S", "c$$L"], function(v){
+m$(Long, ["c$", "c$$S", "c$$J"], function(v){
   v == null && (v = 0);
   v = (typeof v == "number" ? Math.round(v) : Integer.parseIntRadix$S$I(v, 10));
   this.valueOf=function(){return v;};
@@ -16574,8 +16731,7 @@ function(s,radix){
  return Integer.parseIntRadix$S$I(s, radix || 10);
 }, 1);
 
-
-m$(Long,["valueOf$S","valueOf$L","valueOf$S$I"],
+m$(Long,["valueOf$S","valueOf$J","valueOf$S$I"],
 function(s, radix){
 return Clazz.new_(Long.c$, [s, radix|10]);
 }, 1);
@@ -16585,13 +16741,13 @@ function(s){
 return (s instanceof Long) && s.valueOf()==this.valueOf();
 }, 1);
 
-Long.toHexString$L=function(i){
+Long.toHexString$J=function(i){
 return i.toString(16);
 };
-Long.toOctalString$L=function(i){
+Long.toOctalString$J=function(i){
 return i.toString(8);
 };
-Long.toBinaryString$L=function(i){
+Long.toBinaryString$J=function(i){
 return i.toString(2);
 };
 
@@ -16601,6 +16757,15 @@ function(n){
     throw Clazz.new_(NumberFormatException.c$$S, ["Invalid Long"]);
   return Clazz.new_(Long.c$, [n]);
 }, 1);
+
+// Java 8
+
+Long.min$J$J = Integer.min$I$I;
+Long.max$J$J = Integer.max$I$I;
+Long.sum$J$J = Integer.sum$I$I;
+
+
+
 
 Clazz._setDeclared("java.lang.Short", java.lang.Short = Short = function(){
 if (typeof arguments[0] != "object")this.c$(arguments[0]);
@@ -16758,6 +16923,12 @@ Float.floatToIntBits$F = function(f) {
 var a = Clazz._a32 || (Clazz._a32 = new Float32Array(1));
 a[0] = f;
 return new Int32Array(a.buffer)[0]; 
+}
+
+Float.intBitsToFloat$I = function(i) {
+	var a = Clazz._i32 || (Clazz._i32 = new Int32Array(1));
+	a[0] = i;
+	return new Float32Array(a.buffer)[0]; 
 }
 
 Float.serialVersionUID=Float.prototype.serialVersionUID=-2671257302660747028;
@@ -17024,34 +17195,15 @@ arrs[offset+i-startIdx]=String.fromCharCode(c1)+String.fromCharCode(c2)+String.f
 return arrs.join('');
 };
 
-if(String.prototype.replace$==null){
+if(!String.__PARAMCODE){
+
+String.__PARAMCODE = "S";
 
 Clazz._setDeclared("java.lang.String", java.lang.String=String);
 
-
-// These methods are already in JavaScript and work fine:
-//private final static String JAVASCRIPT_STRING_METHODS 
-//        = "charAt,codePointAt,substring,indexOf,lastIndexOf,"
-//        		+ "toUpperCase,toLowerCase,trim";
-
-
-//if(supportsNativeObject){
-  extendObject(String, EXT_NO_TOSTRING);
-//}
-
-// Actually, String does not implement CharSequence because it does not
-// implement getSubsequence() or length(). Any use of CharSequence that
-// utilizes either of these methods must explicitly check for typeof x.length
-// or existance of x.subSequence.  
-// classes affected include:
-//   java.io.CharArrayWriter,StringWriter,Writer
-//   java.lang.AbstractStringBuilder
-//   java.util.regex.Matcher,Pattern
+extendObject(String, EXT_NO_TOSTRING);
  
 addInterface(String,[java.io.Serializable,CharSequence,Comparable]);
-
-String.__PARAMCODE = "S";
-//String.getName=objMethods.getName;
 
 String.serialVersionUID=String.prototype.serialVersionUID=-6849794470754667710;
 
@@ -17079,22 +17231,12 @@ String.format$S$OA = function(format, args) {
 	 }
  } 
  
+CharSequence.$defaults(String);
+ 
 ;(function(sp) {
 
 sp.compareToIgnoreCase$S = function(str) { return String.CASE_INSENSITIVE_ORDER.compare(this, str);}
 
-sp.replace$=function(c1,c2){
-  if (c1 == c2 || this.indexOf (c1) < 0) return "" + this;
-  if (c1.length == 1) {
-    if ("\\$.*+|?^{}()[]".indexOf(c1) >= 0)   
-      c1 = "\\" + c1;
-  } else {    
-    c1=c1.replace(/([\\\$\.\*\+\|\?\^\{\}\(\)\[\]])/g,function($0,$1){
-      return "\\"+$1;
-    });
-  }
-  return this.replace(new RegExp(c1,"gm"),c2);
-};
 sp.generateExpFunction$S=function(str){
 var arr=[];
 var orders=[];
@@ -17145,7 +17287,20 @@ eval(funStr)
 return f;
 };
 
-sp.replaceAll$S$S=function(exp,str){
+sp.replace$=function(c1,c2){
+  if (c1 == c2 || this.indexOf (c1) < 0) return "" + this;
+  if (c1.length == 1) {
+    if ("\\$.*+|?^{}()[]".indexOf(c1) >= 0)   
+      c1 = "\\" + c1;
+  } else {    
+    c1=c1.replace(/([\\\$\.\*\+\|\?\^\{\}\(\)\[\]])/g,function($0,$1){
+      return "\\"+$1;
+    });
+  }
+  return this.replace(new RegExp(c1,"gm"),c2);
+};
+
+sp.replaceAll$CharSequence$CharSequence=function(exp,str){
 var regExp=new RegExp(exp,"gm");
 return this.replace(regExp,str);
 };
@@ -17274,10 +17429,33 @@ this.hash=h;
 return h;
 };
 
-sp.getBytes$=function(){
-if(arguments.length==4){
-return this.getChars(arguments[0],arguments[1],arguments[2],arguments[3]);
-}
+sp.getChars$I$I$CA$I=function(srcBegin,srcEnd,dst,dstBegin){
+	getChars(this, srcBegin, srcEnd, dst, dstBegin, false);
+};
+
+sp.getChars$I$I$BA$I=function(srcBegin,srcEnd,dst,dstBegin){
+	getChars(this, srcBegin, srcEnd, dst, dstBegin, true);
+};
+
+var getChars = function(s, srcBegin,srcEnd,dst,dstBegin, asBytes){
+	if(srcBegin<0){
+	throw new StringIndexOutOfBoundsException(srcBegin);
+	}
+	if(srcEnd>s.length){
+	throw new StringIndexOutOfBoundsException(srcEnd);
+	}
+	if(srcBegin>srcEnd){
+	throw new StringIndexOutOfBoundsException(srcEnd-srcBegin);
+	}
+	if(dst==null){
+	throw new NullPointerException();
+	}
+	for(var i=0;i<srcEnd-srcBegin;i++){
+		dst[dstBegin+i]=(asBytes ? s.charCodeAt(srcBegin+i) : s.charAt(srcBegin+i));
+	}
+};
+
+sp.getBytes$=sp.getBytes$S=sp.getBytes$java_nio_charset_Charset=function(){
 var s=this;
 if(arguments.length==1){
 var cs=arguments[0].toString().toLowerCase();
@@ -17348,6 +17526,13 @@ sp.subSequence$I$I=function(beginIndex,endIndex){
 return this.substring(beginIndex,endIndex);
 };
 
+sp.contentEquals$CharSequence=function(cs){
+if (typeof cs == "string")
+	return this == cs;
+
+return (this == sb.s);
+};
+
 sp.contentEquals$StringBuffer=function(sb){
 return (this == sb.s);
 };
@@ -17375,24 +17560,6 @@ while(n-- >= 0){
 return true;
 };
 
-sp.getChars$I$I$CA$I = sp.getChars=function(srcBegin,srcEnd,dst,dstBegin){
-if(srcBegin<0){
-throw new StringIndexOutOfBoundsException(srcBegin);
-}
-if(srcEnd>this.length){
-throw new StringIndexOutOfBoundsException(srcEnd);
-}
-if(srcBegin>srcEnd){
-throw new StringIndexOutOfBoundsException(srcEnd-srcBegin);
-}
-if(dst==null){
-throw new NullPointerException();
-}
-for(var i=0;i<srcEnd-srcBegin;i++){
-dst[dstBegin+i]=this.charAt(srcBegin+i);
-}
-};
-
 sp.concat$S = function(s){
 if(s==null){
 throw new NullPointerException();
@@ -17408,9 +17575,9 @@ if(last!=null&&last+this.length<=0){
 return-1;
 }
 if(last!=null){
-return this.lastIndexOf$(s,last);
+return this.lastIndexOf(s,last);
 }else{
-return this.lastIndexOf$(s);
+return this.lastIndexOf(s);
 }
 };
 
@@ -17428,15 +17595,25 @@ String.copyValueOf$S=String.copyValueOf$S$I$I=sp.copyValueOf=function(){
 
 sp.$c = function(){return this.charCodeAt(0)};
 
-sp.codePointAt || (sp.codePointAt = sp.charCodeAt); // MSIE only
-
-sp.codePointAt$I = sp.codePointAt;
+// covers for same functions in JavaScript
+sp.codePointAt$I = (sp.codePointAt || sp.charCodeAt); // MSIE only
+sp.charCodeAt$I = sp.charCodeAt;
+sp.charAt$I = sp.charAt;
+sp.substring$I = sp.substring$I$I = sp.subSequence$I$I = sp.substring;
+sp.indexOf$S = sp.indexOf$I = sp.indexOf$I$I = sp.indexOf$S$I = sp.indexOf;
+sp.lastIndexOf$S = sp.lastIndexOf$S$I = sp.lastIndexOf$C = sp.lastIndexOf$C$I = sp.lastIndexOf;
+sp.replace$C$C = sp.replace$CharSequence$CharSequence = sp.replace;
+sp.toUpperCase$ = sp.toUpperCase$java_util_locale = sp.toUpperCase;
+sp.toLowerCase$ = sp.toLowerCase$java_util_locale = sp.toLowerCase;
+sp.trim$ = sp.trim;
 
 sp.length$ = function() {return this.length};
 
-sp.subSequence$I$I = sp.substring;
+//sp.chars$ = CharSequence.prototype.chars$;
+//sp.codePoints$ = CharSequence.prototype.codePoints$;
 
-sp.toString=function(){return this.valueOf();};
+// toString is always unqualified, and it is unnecessary for String
+
 
 })(String.prototype);
 
@@ -17735,7 +17912,7 @@ m$(C$,"charCount$I", function(codePoint){
 Integer.compare$I$I = 
 Byte.compare$B$B =
 Short.compare$H$H =
-Long.compare$L$L =
+Long.compare$J$J =
 Float.compare$F$F =
 Double.compare$D$D = function(a,b) { return (a < b ? -1 : a == b ? 0 : 1) };
 
@@ -17763,24 +17940,25 @@ m$(java.util.Date, "c$", function(t) {
   this.setTime(t || System.currentTimeMillis())
 }, 1);
 
-m$(java.util.Date,"clone",
+m$(java.util.Date,"clone$",
 function(){
 return new Date(this.getTime());
 });
 
-m$(java.util.Date,"before",
+m$(java.util.Date,"before$java_util_Date",
 function(when){
 return this.getTime()<when.getTime();
 });
-m$(java.util.Date,"after",
+m$(java.util.Date,"after$java_util_Date",
 function(when){
 return this.getTime()>when.getTime();
 });
-m$(java.util.Date,"equals",
+
+m$(java.util.Date,"equals$O",
 function(obj){
 return Clazz.instanceOf(obj,java.util.Date)&&this.getTime()==(obj).getTime();
 });
-m$(java.util.Date,["compareTo","compareTo$","compareTo$TT","compareTo$O"],
+m$(java.util.Date,["compareTo","compareTo$java_util_Date","compareTo$","compareTo$TT","compareTo$O"],
 function(anotherDate){
 var thisTime=this.getTime();
 var anotherTime=anotherDate.getTime();
@@ -17791,6 +17969,37 @@ function(){
 var ht=this.getTime();
 return parseInt(ht)^parseInt((ht>>32));
 });
+
+var notImplemented = function(why) {return function() {System.err.println(why + " has not been implemented.")}};
+
+;(function(dp){
+dp.from$java_time_Instant = notImplemented("Date.from(java.time.Instant)");
+dp.setInstant$ = notImplemented("Date.toInstant()");
+
+dp.getDate$ = dp.getDate;
+dp.getDay$ = dp.getDay;
+dp.getHours$ = dp.getHours;
+dp.getMinutes$ = dp.getMinutes;
+dp.getMonth$ = dp.getMonth;
+dp.getSeconds$ = dp.getSeconds;
+dp.getTime$ = dp.getTime;
+dp.getTimeZoneOffset$ = dp.getTimeZoneOffset;
+dp.getYear$ = dp.getYear;
+dp.parse$S = dp.parse;
+dp.setDate$I = dp.setDate;
+dp.setHours$I = dp.setHours;
+dp.setMinutes$I = dp.setMinutes;
+dp.setMonth$I = dp.setMonth;
+dp.setSeconds$I = dp.setSeconds;
+dp.setTime$J = dp.setTime;
+dp.setYear$I = dp.setYear;
+dp.toGMTString$ = dp.toGMTString;
+dp.toLocaleString$ = dp.toLocaleDateString;
+dp.UTC$ = dp.UTC;
+
+
+	
+})(Date.prototype);
 
 /*
  Java8 classes have default methods
@@ -17866,44 +18075,27 @@ return this.stackTrace;
 });
 
 m$(C$, 'printStackTrace$', function () {
-System.err.println$O (this);
-if (!this.stackTrace){
-  System.err.println$O(this.stack);
+	printStackTrace(this, System.err.println$O);
+});
+
+var printStackTrace = function(e, f) {
+f("" + e);
+if (!e.stackTrace){
+  f(e.stack);
   return;
 }
-for (var i = 0; i < this.stackTrace.length; i++) {
-var t = this.stackTrace[i];
-//var x = t.methodName.indexOf ("(");
-//var n = (x < 0 ? t.methodName : t.methodName.substring (0, x)).replace (/\s+/g, "");
+for (var i = 0; i < e.stackTrace.length; i++) {
+var t = e.stackTrace[i];
 if (t.nativeClazz == null || isInstanceOf(t.nativeClazz, Throwable) < 0) {
-System.err.println$O(t);
+ f(t);
 }
 }
 // from a JavaScript error 
-this.stack && System.err.println$O(this.stack);
-});
+e.stack && f(e.stack);
+}
 
-m$(C$, 'printStackTrace$java_io_PrintStream', function (stream) {
-  if (!this.stackTrace){
-    stream.println$S(this.stack);
-    return;
-  }
-  for (var i = 0; i < this.stackTrace.length; i++) {
-    var t = this.stackTrace[i];
-    //var x = t.methodName.indexOf ("(");
-    //var n = (x < 0 ? t.methodName : t.methodName.substring (0, x)).replace (/\s+/g, "");
-    if (t.nativeClazz == null || isInstanceOf(t.nativeClazz, Throwable) < 0) {
-      stream.println$O(t);
-    }
-  }
-});
-
-Clazz.newMeth(C$, 'printStackTrace$java_io_PrintStream', function (s) {
-this.printStackTrace$();
-});
-
-Clazz.newMeth(C$, 'printStackTrace$java_io_PrintWriter', function (s) {
-this.printStackTrace$();
+m$(C$, ['printStackTrace$java_io_PrintStream','printStackTrace$java_io_PrintWriter'], function (stream) {
+  printStackTrace(this, stream.println$O);
 });
 
 Clazz.newMeth(C$, 'fillInStackTrace$', function () {
@@ -18438,12 +18630,11 @@ var newMethodNotFoundException = function (clazz, method) {
 //Clazz._Loader.loadZJar(Clazz._Loader.getJ2SLibBase() + "core/coreswingjs.z.js", "swingjs.JSUtil");
 
   //if (!J2S._isAsync) {
-  if (Clazz._loadcore)
-    for (var i = 0; i < J2S._coreFiles.length; i++)
-      Clazz.loadScript(J2S._coreFiles[i]);
-      //ClazzLoader.loadZJar(J2S._coreFiles[i], ClazzLoader.runtimeKeyClass);
-  //}
-  
+  if (!Clazz._loadcore || J2S._coreFiles.length == 0) {
+	System.out.println("Clazz: No core files to load -- check Info.core"); 
+  }
+  for (var i = 0; i < J2S._coreFiles.length; i++)
+	Clazz.loadScript(J2S._coreFiles[i]);
 
 
 })(Clazz, J2S); 
@@ -18682,7 +18873,8 @@ if (typeof(SwingJS) == "undefined") {
 	}
 	
 	proto._addCoreFiles = function() {
-		J2S._addCoreFile((this.__Info.core || "swingjs"), this._j2sPath, this.__Info.preloadCore);
+		if (this.__Info.core != "NONE" && this.__Info.core != "none")
+			J2S._addCoreFile((this.__Info.core || "swingjs"), this._j2sPath, this.__Info.preloadCore);
 		if (J2S._debugCode) {
 		// no min package for that
 			J2S._addExec([this, null, "swingjs.JSAppletViewer", "load " + this.__Info.code]);

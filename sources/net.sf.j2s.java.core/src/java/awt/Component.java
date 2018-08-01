@@ -7013,12 +7013,12 @@ public abstract class Component
 //	 focusLog.finer("default component is " + toFocus);
 //	 }
 	 }
-	 if (toFocus == null) {
+//	 if (toFocus == null) {
 //SWINGJS TODO	 Applet applet = EmbeddedFrame.getAppletIfAncestorOf(this);
 //	 if (applet != null) {
 //	 toFocus = applet;
 //	 }
-	 }
+//	 }
 	 candidate = toFocus;
 	 }
 //	 if (focusLog.isLoggable(Level.FINER)) {
