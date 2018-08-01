@@ -31,7 +31,7 @@ class VariableAdapter extends VisitorAdapter {
 	 *
 	 * 2006-12-6
 	 */
-	static class FinalVariable {
+	static class LocalVariable {
 
 		/**
 		 * Level of the block
@@ -59,7 +59,7 @@ class VariableAdapter extends VisitorAdapter {
 		 */
 	    String prefixedName;
 		
-		FinalVariable(int blockLevel, String variableName, String methodScope) {
+		LocalVariable(int blockLevel, String variableName, String methodScope) {
 			super();
 			this.blockLevel = blockLevel;
 			this.variableName = variableName;
@@ -67,7 +67,7 @@ class VariableAdapter extends VisitorAdapter {
 		}
 		
 		public String toString() {
-			return variableName + ":" + variableName;
+			return variableName + ":" + variableName + "[" + blockLevel + "," + methodScope + "]";
 		}
 
 		public int hashCode() {
@@ -88,7 +88,7 @@ class VariableAdapter extends VisitorAdapter {
 				return true;
 			if (obj == null || getClass() != obj.getClass())
 				return false;
-			final FinalVariable other = (FinalVariable) obj;
+			final LocalVariable other = (LocalVariable) obj;
 			if (blockLevel != other.blockLevel)
 				return false;
 			if (methodScope == null) {
@@ -110,30 +110,32 @@ class VariableAdapter extends VisitorAdapter {
 		}
 		
 	}
-	
+
+	public VariableAdapter() {
+	}
 	/**
 	 * Final variables only make senses (need "this.$finals[...]") inside anonymous
 	 * class.
 	 */
-	boolean isAnonymousClass = true;
+	boolean isAnonymousOrLocalClass = true;
 
 	/**
 	 * List of variables that are declared as final.
 	 */
-	List<FinalVariable> finalVars = new ArrayList<FinalVariable>();
+	List<LocalVariable> finalVars = new ArrayList<LocalVariable>();
 	
 	/**
 	 * Normal (non-final) variables may be affected by final variable names.
 	 */
-	List<FinalVariable> normalVars = new ArrayList<FinalVariable>();
+	List<LocalVariable> normalVars = new ArrayList<LocalVariable>();
 
 	/**
 	 * Only those final variables that are referenced inside anonymous class
 	 * need to be passed into anonymous class.
 	 */
-	List<FinalVariable> visitedVars = new ArrayList<FinalVariable>();
+	List<LocalVariable> visitedVars = new ArrayList<LocalVariable>();
 	
-	List<FinalVariable> getVariableList(char fvn) {
+	List<LocalVariable> getVariableList(char fvn) {
 		switch (fvn) {
 		case 'f':
 			return finalVars;

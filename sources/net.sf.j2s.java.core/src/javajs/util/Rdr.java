@@ -199,14 +199,6 @@ public class Rdr implements GenericLineReader {
   
 
   private static Encoding getUTFEncodingForStream(BufferedInputStream is) throws IOException {
-//    /**
-//     * @j2sNative
-//     * 
-//     *  is.resetStream();
-//     * 
-//     */
-//    {
-//    }
     byte[] abMagic = new byte[4];
     abMagic[3] = 1;
     try{
@@ -303,14 +295,6 @@ public class Rdr implements GenericLineReader {
 
   public static byte[] getMagic(InputStream is, int n) {
     byte[] abMagic = new byte[n];
-//    /**
-//     * @j2sNative
-//     * 
-//     * is.resetStream();
-//     * 
-//     */
-//    {
-//    }
     try {
       is.mark(n + 1);
       is.read(abMagic, 0, n);
@@ -595,18 +579,11 @@ public class Rdr implements GenericLineReader {
   }
 
 	public static BufferedWriter getBufferedWriter(OutputStream os, String charSetName) {
-		OutputStreamWriter osw = (OutputStreamWriter) Interface.getInstanceWithParams("java.io.OutputStreamWriter", 
-				new Class<?>[] { java.io.OutputStream.class, String.class }, 
-				new Object[] { os, charSetName == null ? "UTF-8" : charSetName }
-		);
-		/**
-		 * @j2sNative
-		 * return osw.getBufferedWriter();
-		 * 
-		 */
-		{
-			return new BufferedWriter(osw);
-		}
+		OutputStreamWriter osw = (OutputStreamWriter) Interface.getInstanceWithParams("java.io.OutputStreamWriter",
+				new Class<?>[] { java.io.OutputStream.class, String.class },
+				new Object[] { os, charSetName == null ? "UTF-8" : charSetName });
+
+		return new BufferedWriter(osw);
 	}
 
   

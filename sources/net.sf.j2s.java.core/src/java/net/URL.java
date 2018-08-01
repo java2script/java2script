@@ -234,6 +234,8 @@ public/* SwingJS final */class URL {// implements Serializable {
 	 */
 	transient URLStreamHandler handler;
 
+	public Object _streamData; // SwingJS - set in javajs.util.AjaxURLConnection
+	
 	/*
 	 * Our hash code.
 	 * 

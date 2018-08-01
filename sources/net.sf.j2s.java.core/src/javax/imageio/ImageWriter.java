@@ -80,7 +80,6 @@ public abstract class ImageWriter {
     		 * @j2sNative
     		 * outputChannel = out.out;
     		 */
-    		{}
     	} else {
     		outputChannel = new OC().setParams(null, null, false, (OutputStream) out);
     	}    	

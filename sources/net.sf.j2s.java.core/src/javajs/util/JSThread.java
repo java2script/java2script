@@ -30,7 +30,7 @@ public abstract class JSThread extends Thread {
 	
 	public static int threadCount = 0;
 
-	protected boolean isJS;
+	protected boolean isJS = /** @j2sNative true || */false;
 	
 	public JSThread() {
 		this(null, "JSThread-" + (++threadCount));
@@ -42,13 +42,7 @@ public abstract class JSThread extends Thread {
 	
 	public JSThread(ThreadGroup group, String name) {
 		super(group, name);
-		/**
-		 * @j2sNative
-		 * 
-		 * this.isJS = true;
-		 */
-		{}
-	}
+		}
 
 	@Override
 	public void run() {
@@ -201,7 +195,7 @@ public abstract class JSThread extends Thread {
 		 * 
 		 *            setTimeout(
 		 *              function() {
-		 *              java.awt.Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent$java_awt_AWTEvent(
+		 *              java.awt.Toolkit.getDefaultToolkit$().getSystemEventQueue$().postEvent$java_awt_AWTEvent(
 		 *              Clazz.new_(java.awt.event.InvocationEvent.c$$O$Runnable,[me, r]))}, 
 		 *              delay);
 		 * 

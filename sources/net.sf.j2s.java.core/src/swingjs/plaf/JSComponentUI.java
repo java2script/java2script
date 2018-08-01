@@ -703,8 +703,8 @@ public class JSComponentUI extends ComponentUI
 			/**
 			 * @j2sNative
 			 * 
-			 * 			parentui = this.jc.parent && this.jc.parent.getUI &&
-			 *            this.jc.parent.getUI();
+			 * 			parentui = this.jc.parent && this.jc.parent.getUI$ &&
+			 *            this.jc.parent.getUI$();
 			 */
 			if (parentui != null)
 				parentui.setTainted();

@@ -5256,14 +5256,7 @@ public abstract class Component
 	 * @return
 	 */
 	private boolean checkCoelescence() {
-		/**
-		 * @j2sNative
-		 * 
-		 *   return this.coalesceEvents$java_awt_AWTEvent$java_awt_AWTEvent.exClazz != C$;
-		 */
-		{
-			return false;
-		}
+		return /** @j2sNative this.coalesceEvents$java_awt_AWTEvent$java_awt_AWTEvent.exClazz != C$ || */ false;
 	}
 
 
@@ -6049,13 +6042,7 @@ public abstract class Component
 
 			isAddNotifyComplete = true;
 			if (visible && peer != null) {// BH added for SwingJS menu in Varna
-				boolean isDisposed = false;
-				/**
-				 * @j2sNative
-				 *   isDisposed = peer.isDisposed;
-				 *   
-				 */
-				if (isDisposed)
+				if (/** @j2sNative peer.isDisposed && */ true)
 					peer.setVisible(true);
 			}
 

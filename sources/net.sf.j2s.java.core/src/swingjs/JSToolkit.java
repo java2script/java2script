@@ -88,7 +88,7 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	
 
 	/*
-	 * NOTE: This class is constructed from java.awt.Toolkit.getDefaultToolkit()
+	 * NOTE: This class is constructed from java.awt.Toolkit.getDefaultToolkit$()
 	 * 
 	 */
 
@@ -328,10 +328,10 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		 * @j2sNative
 		 * 
 		 *            System.out.println("JST dispatchSystemEvent " +
-		 *            runnable.run.toString()); f =
+		 *            runnable.run$.toString()); f =
 		 *            function(_JSToolkit_dispatchSystemEvent) {
 		 *            System.out.println("JST running " +
-		 *            runnable.run.toString());runnable.run()};
+		 *            runnable.run$.toString());runnable.run$()};
 		 */
 		{
 		}
@@ -348,10 +348,6 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		JSFunction f = null;
 		int id = ++dispatchID;
 		
-//		 *            System.out.println("JST dispatchAWTEvent andWait=" + andWait +
-//		 *            "," + event + " src=" + src); 
-//		 *            System.out.println("JST dispatching AWTEvent " + event); 
-
 		/**
 		 * @j2sNative
 		 * 
@@ -359,7 +355,7 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		 *            f = function()
 		 *            {
 		 *            if
-		 *            (src == null) event.dispatch(); else src.dispatchEvent$java_awt_AWTEvent(event);
+		 *            (src == null) event.dispatch$(); else src.dispatchEvent$java_awt_AWTEvent(event);
 		 *            };
 		 * 
 		 */
@@ -393,12 +389,13 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		 *            SwingJS.eventID = id;
 		 *            java.lang.Thread.thisThread = thread; 
 		 *            try {
-		 *            if (f.run)
-		 *             f.run();
+		 *            if (f.run$)
+		 *             f.run$();
 		 *            else
 		 *             f();
 		 *             } catch (e) {
-		 *             var s = "JSToolkit.dispatch(" + id +"): " + e + "\n" + (e.getStackTrace ? e.getStackTrace() + "\n" : "") + (!!e.stack ? e.stack : "");
+		 *             var s = "JSToolkit.dispatch$I(" + id +"): " 
+		 *               + e + "\n" + (e.getStackTrace$ ? e.getStackTrac$e() + "\n" : "") + (!!e.stack ? e.stack : "");
 		 *             System.out.println(s);
 		 *             alert(s);
 		 *             }
@@ -480,7 +477,7 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		/**
 		 * @j2sNative
 		 * 
-		 * c.getUI && c.getUI() && c.getUI().setTainted(); 
+		 * c.getUI$ && c.getUI$() && c.getUI$().setTainted$(); 
 		 * 
 		 */
 		{}
@@ -539,7 +536,7 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		/**
 		 * @j2sNative
 		 * 
-		 *            ui = c.getUI && c.getUI();
+		 *            ui = c.getUI$ && c.getUI$();
 		 */
 		{
 			ui = (JSComponentUI) ((JComponent) c).getUI();

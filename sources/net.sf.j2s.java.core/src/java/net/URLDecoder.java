@@ -45,13 +45,9 @@ public class URLDecoder {
 	 * @return java.lang.String The decoded version.
 	 * 
 	 * @deprecated use URLDecoder#decode(String, String) instead
-	 * 
-	 * @j2sNative
-	 * return decodeURIComponent(arguments[0]);
 	 */
 	public static String decode(String s) {
-		// return Util.decode(s, true);
-		return null;
+	    return (/** @j2sNative 1?decodeURIComponent(s):*/null);
 	}
 
 	/**
@@ -74,51 +70,47 @@ public class URLDecoder {
 	 */
 	public static String decode(String s, String enc)
 			throws UnsupportedEncodingException {
-
-		if (enc == null) {
-			throw new NullPointerException();
-		}
-
-		/**
-		 * @j2sNative
-		 * return decodeURIComponent(arguments[0]);
-		 */ {}
-		/*
-		// If the given encoding is an empty string throw an exception.
-        if (enc.length() == 0) {
-            throw new UnsupportedEncodingException(Msg
-                    .getString("K00a5", "enc")); //$NON-NLS-1$
-        }
-
-		StringBuffer result = new StringBuffer(s.length());
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		for (int i = 0; i < s.length();) {
-			char c = s.charAt(i);
-			if (c == '+')
-				result.append(' ');
-			else if (c == '%') {
-				out.reset();
-				do {
-					if (i + 2 >= s.length())
-						throw new IllegalArgumentException(Msg.getString(
-								"K01fe", i));
-					int d1 = Character.digit(s.charAt(i + 1), 16);
-					int d2 = Character.digit(s.charAt(i + 2), 16);
-					if (d1 == -1 || d2 == -1)
-						throw new IllegalArgumentException(Msg.getString(
-								"K01ff", s.substring(i, i + 3), String
-										.valueOf(i)));
-					out.write((byte) ((d1 << 4) + d2));
-					i += 3;
-				} while (i < s.length() && s.charAt(i) == '%');
-				result.append(out.toString(enc));
-				continue;
-			} else
-				result.append(c);
-			i++;
-		}
-		return result.toString();
-		*/
-		return null;
+		return (/** @j2sNative 1?decodeURIComponent(s):*/null);
+		//
+//		if (enc == null) {
+//			throw new NullPointerException();
+//		}
+//
+//		// If the given encoding is an empty string throw an exception.
+//        if (enc.length() == 0) {
+//            throw new UnsupportedEncodingException(Msg
+//                    .getString("K00a5", "enc")); //$NON-NLS-1$
+//        }
+//
+//		StringBuffer result = new StringBuffer(s.length());
+//		ByteArrayOutputStream out = new ByteArrayOutputStream();
+//		for (int i = 0; i < s.length();) {
+//			char c = s.charAt(i);
+//			if (c == '+')
+//				result.append(' ');
+//			else if (c == '%') {
+//				out.reset();
+//				do {
+//					if (i + 2 >= s.length())
+//						throw new IllegalArgumentException(Msg.getString(
+//								"K01fe", i));
+//					int d1 = Character.digit(s.charAt(i + 1), 16);
+//					int d2 = Character.digit(s.charAt(i + 2), 16);
+//					if (d1 == -1 || d2 == -1)
+//						throw new IllegalArgumentException(Msg.getString(
+//								"K01ff", s.substring(i, i + 3), String
+//										.valueOf(i)));
+//					out.write((byte) ((d1 << 4) + d2));
+//					i += 3;
+//				} while (i < s.length() && s.charAt(i) == '%');
+//				result.append(out.toString(enc));
+//				continue;
+//			} else
+//				result.append(c);
+//			i++;
+//		}
+//		return result.toString();
+//		*/
+//		return null;
 	}
 }

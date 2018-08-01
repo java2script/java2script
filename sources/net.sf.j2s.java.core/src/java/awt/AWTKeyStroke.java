@@ -844,7 +844,6 @@ class VKCollection {
 		 *     } catch (e) {}
 		 *   }
 		 */
-
 		
 	}
 

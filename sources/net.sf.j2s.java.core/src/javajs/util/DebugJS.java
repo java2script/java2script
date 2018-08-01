@@ -13,7 +13,7 @@ public class DebugJS {
 //	 */
 //		 public static void _(String msg) {
 //		/**
-//		 * @j2sNative
+//		 * xxxxj2sNative
 //		 * 
 //		 * if (Clazz._debugging) {
 //		 * 

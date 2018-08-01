@@ -51,28 +51,27 @@ public class URLEncoder {
 	 * 
 	 * @deprecated use URLEncoder#encode(String, String) instead
 	 * 
-	 * @j2sNative
-	 * return encodeURIComponent(arguments[0]);
 	 */
 	public static String encode(String s) {
-		StringBuffer buf = new StringBuffer();
-		for (int i = 0; i < s.length(); i++) {
-			char ch = s.charAt(i);
-			if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
-					|| (ch >= '0' && ch <= '9') || ".-*_".indexOf(ch) > -1)
-				buf.append(ch);
-			else if (ch == ' ')
-				buf.append('+');
-			else {
-				byte[] bytes = new String(new char[] { ch }).getBytes();
-				for (int j = 0; j < bytes.length; j++) {
-					buf.append('%');
-					buf.append(digits.charAt((bytes[j] & 0xf0) >> 4));
-					buf.append(digits.charAt(bytes[j] & 0xf));
-				}
-			}
-		}
-		return buf.toString();
+		return (/** @j2sNative 1?encodeURIComponent(s):*/null);
+//		StringBuffer buf = new StringBuffer();
+//		for (int i = 0; i < s.length(); i++) {
+//			char ch = s.charAt(i);
+//			if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
+//					|| (ch >= '0' && ch <= '9') || ".-*_".indexOf(ch) > -1)
+//				buf.append(ch);
+//			else if (ch == ' ')
+//				buf.append('+');
+//			else {
+//				byte[] bytes = new String(new char[] { ch }).getBytes();
+//				for (int j = 0; j < bytes.length; j++) {
+//					buf.append('%');
+//					buf.append(digits.charAt((bytes[j] & 0xf0) >> 4));
+//					buf.append(digits.charAt(bytes[j] & 0xf));
+//				}
+//			}
+//		}
+//		return buf.toString();
 	}
 
 	/**
@@ -92,42 +91,41 @@ public class URLEncoder {
 	 * @param s
 	 *            java.lang.String the converted string
 	 * 
-	 * @j2sNative
-	 * return encodeURIComponent(arguments[0]);
 	 */
 	public static String encode(String s, String enc)
 			throws UnsupportedEncodingException {
-		if (enc == null) {
-			throw new NullPointerException();
-		}
-		// check for UnsupportedEncodingException
-		"".getBytes(enc);
-
-		StringBuffer buf = new StringBuffer();
-		int start = -1;
-		for (int i = 0; i < s.length(); i++) {
-			char ch = s.charAt(i);
-			if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
-					|| (ch >= '0' && ch <= '9') || " .-*_".indexOf(ch) > -1) {
-				if (start >= 0) {
-					convert(s.substring(start, i), buf, enc);
-					start = -1;
-				}
-				if (ch != ' ') {
-					buf.append(ch);
-				} else {
-					buf.append('+');
-				}
-			} else {
-				if (start < 0) {
-					start = i;
-				}
-			}
-		}
-		if (start >= 0) {
-			convert(s.substring(start, s.length()), buf, enc);
-		}
-		return buf.toString();
+		return (/** @j2sNative 1?encodeURIComponent(s):*/null);
+//		if (enc == null) {
+//			throw new NullPointerException();
+//		}
+//		// check for UnsupportedEncodingException
+//		"".getBytes(enc);
+//
+//		StringBuffer buf = new StringBuffer();
+//		int start = -1;
+//		for (int i = 0; i < s.length(); i++) {
+//			char ch = s.charAt(i);
+//			if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
+//					|| (ch >= '0' && ch <= '9') || " .-*_".indexOf(ch) > -1) {
+//				if (start >= 0) {
+//					convert(s.substring(start, i), buf, enc);
+//					start = -1;
+//				}
+//				if (ch != ' ') {
+//					buf.append(ch);
+//				} else {
+//					buf.append('+');
+//				}
+//			} else {
+//				if (start < 0) {
+//					start = i;
+//				}
+//			}
+//		}
+//		if (start >= 0) {
+//			convert(s.substring(start, s.length()), buf, enc);
+//		}
+//		return buf.toString();
 	}
 
 	/**

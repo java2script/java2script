@@ -407,14 +407,7 @@ private float leading;
     @Override
 		public int charWidth(char ch) {
         // default metrics for compatibility with legacy code
-    	String s = "";
-    	/**
-    	 * @j2sNative
-    	 * 
-    	 * s = "" + ch;
-    	 */
-    	{}
-    	return stringWidth(s);
+    	return stringWidth("" + ch);
 //        float w;
 //        if (ch < 0x100) {
 //            w = getLatinCharWidth(ch);
@@ -471,52 +464,22 @@ private float leading;
 //        return (int) (0.5 + width);
     }
 
-    @Override
-		public int charsWidth(char data[], int off, int len) {
+	@Override
+	public int charsWidth(char data[], int off, int len) {
 
-        float width = 0;
-//        String s = "";
-//        /**
-//         * @j2sNative
-//         * 
-//         *  var s = "";
-//         *	for (var i = 0; i < len; i++)
-//         *   s += data[i + off];
-//         *   return this.stringWidth(s);
-//         *
-//         */
-//        {
-//        	
-//        }
-//        if (font.hasLayoutAttributes()) {
-//            if (len == 0) {
-//                return 0;
-//            }
-//            String str = new String(data, off, len);
-//            width = new TextLayout(str, font, frc).getAdvance();
-//        } else {
-            /* Explicit test needed to satisfy superclass spec */
-            if (len < 0) {
-                throw new IndexOutOfBoundsException("len="+len);
-            }
-            int limit = off + len;
-            for (int i=off; i < limit; i++) {
-                char ch = data[i];
-                width += stringWidth("" + ch);
-//                if (ch < 0x100) {
-//                    width += getLatinCharWidth(ch);
-//                } else if (FontUtilities.isNonSimpleChar(ch)) {
-//                    String str = new String(data, off, len);
-//                    width = new TextLayout(str, font, frc).getAdvance();
-//                    break;
-//                } else {
-//                    width += handleCharWidth(ch);
-//                }
-            }
-//        }
+		float width = 0;
+		/* Explicit test needed to satisfy superclass spec */
+		if (len < 0) {
+			throw new IndexOutOfBoundsException("len=" + len);
+		}
+		int limit = off + len;
+		for (int i = off; i < limit; i++) {
+			char ch = data[i];
+			width += stringWidth("" + ch);
+		}
 
-        return (int) (0.5 + width);
-    }
+		return (int) (0.5 + width);
+	}
 
     /**
      * Gets the advance widths of the first 256 characters in the

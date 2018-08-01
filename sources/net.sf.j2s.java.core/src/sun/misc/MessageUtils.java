@@ -99,12 +99,7 @@ public class MessageUtils {
      *  @param msg   message to print
      */
     public static void toStderr(String msg) {
-    	/**
-    	 * @j2sNative
-    	 * 
-    	 * System.out.println(msg);
-    	 */
-    	{}
+    	System.err.println(msg);
     }
 
     /**
@@ -113,12 +108,7 @@ public class MessageUtils {
      *  @param msg   message to print
      */
     public static void toStdout(String msg) {
-    	/**
-    	 * @j2sNative
-    	 * 
-    	 * System.out.println(msg);
-    	 */
-    	{}
+    	System.out.println(msg);
     }
 
 

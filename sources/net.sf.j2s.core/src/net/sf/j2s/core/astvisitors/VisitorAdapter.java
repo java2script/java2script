@@ -20,8 +20,9 @@ public class VisitorAdapter {
 
 	protected Java2ScriptVisitor visitor;
 	
-	public void setVisitor(Java2ScriptVisitor visitor) {
+	public VisitorAdapter setVisitor(Java2ScriptVisitor visitor) {
 		this.visitor = visitor;
+		return this;
 	}
 	
 }

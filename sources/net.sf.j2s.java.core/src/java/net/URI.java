@@ -2619,12 +2619,8 @@ public final class URI
 
     private static void appendEncoded(StringBuffer sb, char c) {
     	
-    	/**
-    	 * @j2sNative
-    	 * 
-    	 * sb.append$C(c);
-    	 */
-    	{
+    	sb.append(c);
+//    	{
 //        ByteBuffer bb = null;
 //        try {
 //            bb = ThreadLocalCoders.encoderFor("UTF-8")
@@ -2639,7 +2635,7 @@ public final class URI
 //            else
 //                sb.append((char)b);
 //        }
-    	}
+//   	}
     }
 
     // Quote any characters in s that are not permitted
@@ -2682,15 +2678,8 @@ public final class URI
     // assuming that s is otherwise legal
     //
     private static String encode(String s) {
-    	/**
-    	 * @j2sNative
-    	 * 
-    	 * return encodeURI(s);
-    	 */
-    	{
-    		return s;
-    	}
     	// assume UTF-8
+    	return (/**  @j2sNative 1?encodeURI(s):*/null);
 //        int n = s.length();
 //        if (n == 0)
 //            return s;
@@ -2748,17 +2737,7 @@ public final class URI
     //            with a scope_id
     //
     private static String decode(String s) {
-        if (s == null)
-            return s;
-        {
-        	/**
-        	 * @j2sNative
-        	 * 
-        	 * return decodeURI(s);
-        	 */
-        	{
-        	return s;
-        	}
+        return (/** @j2sNative s!=null?decodeURI(s):*/null);
 //        int n = s.length();
 //        if (n == 0)
 //            return s;
@@ -2812,7 +2791,6 @@ public final class URI
 //        }
 //
 //        return sb.toString();
-        }
     }
 
 

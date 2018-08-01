@@ -555,14 +555,7 @@ abstract public class TimeZone implements Cloneable {
 	}
 
 	private static int getTimeZoneOffsetMillis() {
-		/**
-		 * @j2sNative
-		 * 
-		 * return -(new Date()).getTimezoneOffset() * 60000;
-		 */
-		{
-			return 0;
-		}
+		return /** @j2sNative 1?-(new Date()).getTimezoneOffset() * 60000 : */0;
 	}
 
 //    private static boolean hasPermission() {

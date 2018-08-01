@@ -24,17 +24,13 @@ public class Canvas extends Panel {
 	}
 
 	private boolean notified;
+	@SuppressWarnings("unused")
 	@Override
 	public void update(Graphics g) {
 		if (!notified)
 			System.out.println("neither paint(g) nor update(g) is implemented for " + this);
 		notified = true;
-		/**
-		 * @j2sNative
-		 * 
-		 * this.paintComponent$java_awt_Graphics && this.paintComponent$java_awt_Graphics(g);
-		 * 
-		 */
-		{}
+		if (/** @j2sNative this.paintComponent$java_awt_Graphics || */false)
+			paintComponent(g);
 	}
 }
