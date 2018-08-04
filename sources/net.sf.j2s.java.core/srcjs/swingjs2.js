@@ -12562,7 +12562,7 @@ if (!J2S._version)
 				c = c.parentElement;
 			if (!comp)
 				return;
-			var d = comp.getLocationOnScreen();
+			var d = comp.getLocationOnScreen$();
 			var x = oe.pageX - d.x;
 			var y = oe.pageY - d.y;
 			if (file == null) {
@@ -12761,6 +12761,12 @@ if (!J2S._version)
 			}
 	}
 
+	// See SwingJSApplet.js 
+	// The original Jmol "applet" was created as an 
+	// extension to a canvas. We still do that even
+	// though it doesn't make a lot of sense. Nonetheless,
+	// this canvas is used for the main canvas for 
+	// a SwingJS applet.
 	J2S._jsSetPrototype = function(proto) {
 		proto._init = function() {
 			this._setupJS();
@@ -12822,18 +12828,19 @@ if (!J2S._version)
 			var container = J2S.$(this, "appletdiv");
 			// if (doReplace) {
 
-			try {
-				container[0].removeChild(this._canvas);
-				if (this._canvas.frontLayer)
-					container[0].removeChild(this._canvas.frontLayer);
-				if (this._canvas.rearLayer)
-					container[0].removeChild(this._canvas.rearLayer);
-				if (this._canvas.contentLayer)
-					container[0].removeChild(this._canvas.contentLayer);
-				J2S._jsUnsetMouse(this._mouseInterface);
-			} catch (e) {
+			if (this._canvas) {
+				try {
+					container[0].removeChild(this._canvas);
+					if (this._canvas.frontLayer)
+						container[0].removeChild(this._canvas.frontLayer);
+					if (this._canvas.rearLayer)
+						container[0].removeChild(this._canvas.rearLayer);
+					if (this._canvas.contentLayer)
+						container[0].removeChild(this._canvas.contentLayer);
+					J2S._jsUnsetMouse(this._mouseInterface);
+				} catch (e) {
+				}
 			}
-			// }
 			var w = Math.round(container.width());
 			var h = Math.round(container.height());
 			var canvas = document.createElement('canvas');
@@ -13028,15 +13035,6 @@ if (!J2S._version)
 		proto._canScript = function(script) {
 			return true
 		};
-		proto.equals = function(a) {
-			return this == a
-		};
-		proto.clone = function() {
-			return this
-		};
-		proto.hashCode = function() {
-			return parseInt(this._uniqueId)
-		};
 
 		proto._processGesture = function(touches, frameViewer) {
 			(frameViewer || this._appletPanel)
@@ -13046,7 +13044,7 @@ if (!J2S._version)
 		proto._processEvent = function(type, xym, ev, frameViewer) {
 			// xym is [x,y,modifiers,wheelScroll]
 			(frameViewer || this._appletPanel).processMouseEvent$I$I$I$I$J$O$I(
-					type, xym[0], xym[1], xym[2], System.currentTimeMillis(),
+					type, xym[0], xym[1], xym[2], System.currentTimeMillis$(),
 					ev, xym[3]);
 		}
 
@@ -13424,8 +13422,8 @@ if (!J2S._version)
 	J2S._getResourcePath = function(path, isJavaPath) {
 		if (!path || path.indexOf("https:/") != 0
 				&& path.indexOf("https:/") != 0 && path.indexOf("file:/") != 0) {
-			var applet = J2S._applets[java.lang.Thread.currentThread()
-					.getName()];
+			var applet = J2S._applets[java.lang.Thread.currentThread$()
+					.getName$()];
 			path = (!isJavaPath && applet.__Info.resourcePath || applet.__Info.j2sPath)
 					+ "/" + (path || "");
 		}
@@ -13445,6 +13443,7 @@ if (!J2S._version)
 // TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
 //       It is possible that these might be loaded dynamically.
 
+// BH 8/4/2018  3.2.2 cleans up String $-qualified methods headless and javax tests pass
 // BH 8/1/2018  3.2.2 adds default interface methods as C$.$defaults$
 // BH 7/28/2018 3.2.2 upgrade to all-qualified methods. 
 // BH 7/28/2018 adds Character.getName(codepoint)
@@ -14651,7 +14650,7 @@ objMethods.equals$O = objMethods.equals;
 
 var extendObjectMethodNames = [
   // all 
-  "getClass$", "clone$", "finalize$", "notify$", "notifyAll$", "wait$", 
+  "equals$O", "getClass$", "clone$", "finalize$", "notify$", "notifyAll$", "wait$", 
   // not Number, Array
   "hashCode$", 
   // not String
@@ -15299,7 +15298,7 @@ var setAType = function (IntXArray, nBytes, atype) {
     IntXArray.prototype.sort = Array.prototype.sort
   if (!IntXArray.prototype.slice)
     IntXArray.prototype.slice = function() {return arraySlice.apply(this, arguments)};
-  IntXArray.prototype.clone = function() {
+  IntXArray.prototype.clone$ = function() {
     var a = this.slice(); 
     a.__BYTESIZE = 1;
     a.__ARRAYTYPE = this.__ARRAYTYPE; 
@@ -16890,9 +16889,21 @@ function(n){
 }, 1);
 
 Clazz._floatToString = function(f) {
- var s = ""+f
- if (s.indexOf(".") < 0 && s.indexOf("e") < 0 && s.indexOf("Inf") < 0)
-    s += ".0";
+ var check57 = (Math.abs(f) >= 1e-6 && Math.abs(f) < 1e-3);
+ if (check57)
+	 f/=1e7;
+ var s = (""+f).replace('e','E');
+ if (s.indexOf(".") < 0 && s.indexOf("Inf") < 0 && s.indexOf("NaN") < 0) {
+   if(s.indexOf('E') < 0)
+	    s += ".0"; 
+   else {
+	   s = s.replace('E', '.0E');
+   }
+ } 
+ if (check57) {
+	   s = s.substring(0, s.length - 2) + (parseInt(s.substring(s.length - 2)) - 7);
+	   s = s.replace(".0000000000000001",".0");
+ }
  return s;
 }
 
@@ -16908,7 +16919,7 @@ m$(Float, ["c$", "c$$S", "c$$F", "c$$D"], function(v){
  this.valueOf=function(){return v;}
 }, 1);
 
-Float.toString=Float.prototype.toString=function(){
+Float.toString$F=Float.prototype.toString=function(){
 if(arguments.length!=0){
 return Clazz._floatToString(arguments[0]);
 }else if(this===Float){
@@ -16976,7 +16987,7 @@ Clazz._setDeclared("java.lang.Double", java.lang.Double=Double=function(){
 if (typeof arguments[0] != "object")this.c$(arguments[0]);
 });
 decorateAsNumber(Double,"Double", "double", "D");
-Double.toString=Double.prototype.toString=function(){
+Double.toString$D=Double.prototype.toString=function(){
 if(arguments.length!=0){
 return Clazz._floatToString(arguments[0]);
 }else if(this===Double){
@@ -17502,7 +17513,10 @@ result[i]=this.charAt(i);
 }
 return result;
 };
-String.valueOf$=function(o){
+String.valueOf$ = String.valueOf$Z = String.valueOf$C = String.valueOf$CA 
+				= String.valueOf$CA$I$I = String.valueOf$D = String.valueOf$F 
+				= String.valueOf$I = String.valueOf$J = String.valueOf$O = 
+function(o){
 if(o=="undefined"){
 return String.valueOf();
 }
@@ -17526,15 +17540,8 @@ sp.subSequence$I$I=function(beginIndex,endIndex){
 return this.substring(beginIndex,endIndex);
 };
 
-sp.contentEquals$CharSequence=function(cs){
-if (typeof cs == "string")
-	return this == cs;
-
-return (this == sb.s);
-};
-
-sp.contentEquals$StringBuffer=function(sb){
-return (this == sb.s);
+sp.contentEquals$CharSequence=sp.contentEquals$StringBuffer=function(cs){
+	return cs && (cs.toString() == this);
 };
 
 sp.contains$CharSequence=function(cs){
@@ -17570,16 +17577,27 @@ return this.concat(s);
 sp.isEmpty$ = function() {
   return this.valueOf().length == 0;
 }
-sp.lastIndexOf$S$I=function(s,last){
-if(last!=null&&last+this.length<=0){
-return-1;
-}
-if(last!=null){
-return this.lastIndexOf(s,last);
-}else{
-return this.lastIndexOf(s);
-}
+
+sp.indexOf$S = sp.indexOf$S$I = sp.indexOf;
+sp.lastIndexOf$S = sp.lastIndexOf;
+
+sp.indexOf$I = function(c){
+	return this.indexOf(typeof c == "string" ? c : String.fromCodePoint(c));
 };
+
+sp.indexOf$I$I = function(c, first) {
+	return this.indexOf(typeof c == "string" ? c : String.fromCodePoint(c), first);
+}
+
+sp.lastIndexOf$S = sp.lastIndexOf$S$I = sp.lastIndexOf;
+
+sp.lastIndexOf$I = function(c){
+	return this.lastIndexOf(typeof c == "string" ? c : String.fromCodePoint(c));
+};
+
+sp.lastIndexOf$I$I = function(c, last) {
+	return this.lastIndexOf(typeof c == "string" ? c : String.fromCodePoint(c), last);
+}
 
 sp.intern$=function(){
 return this.valueOf();
@@ -17600,9 +17618,7 @@ sp.codePointAt$I = (sp.codePointAt || sp.charCodeAt); // MSIE only
 sp.charCodeAt$I = sp.charCodeAt;
 sp.charAt$I = sp.charAt;
 sp.substring$I = sp.substring$I$I = sp.subSequence$I$I = sp.substring;
-sp.indexOf$S = sp.indexOf$I = sp.indexOf$I$I = sp.indexOf$S$I = sp.indexOf;
-sp.lastIndexOf$S = sp.lastIndexOf$S$I = sp.lastIndexOf$C = sp.lastIndexOf$C$I = sp.lastIndexOf;
-sp.replace$C$C = sp.replace$CharSequence$CharSequence = sp.replace;
+sp.replace$C$C = sp.replace$CharSequence$CharSequence = sp.replace$;
 sp.toUpperCase$ = sp.toUpperCase$java_util_locale = sp.toUpperCase;
 sp.toLowerCase$ = sp.toLowerCase$java_util_locale = sp.toLowerCase;
 sp.trim$ = sp.trim;
@@ -17937,7 +17953,7 @@ Date.__CLASS_NAME__="Date";
 addInterface(Date,[java.io.Serializable,java.lang.Comparable]);
 
 m$(java.util.Date, "c$", function(t) {
-  this.setTime(t || System.currentTimeMillis())
+  this.setTime$J(t || System.currentTimeMillis$())
 }, 1);
 
 m$(java.util.Date,"clone$",
@@ -18139,7 +18155,7 @@ return this;
 });
 
 Clazz.newMeth(C$, 'setStackTrace$StackTraceElementA', function (stackTrace) {
-var defensiveCopy = stackTrace.clone ();
+var defensiveCopy = stackTrace.clone$();
 for (var i = 0; i < defensiveCopy.length; i++) if (defensiveCopy[i] == null) throw Clazz.new_(NullPointerException.c$$S,["stackTrace[" + i + "]"]);
 
 this.stackTrace = defensiveCopy;
@@ -18643,6 +18659,7 @@ var newMethodNotFoundException = function (clazz, method) {
 
 // SwingJSApplet.js
 
+// BH 8/1/2018 $-qualified Java methods
 // generic SwingJS Applet
 // BH 3/14/2018 8:42:33 PM adds applet._window for JSObject
 // BH 12/18/2016 8:09:56 AM added SwingJS.Loaded and SwingJS.isLoaded
@@ -18869,7 +18886,7 @@ if (typeof(SwingJS) == "undefined") {
     // for now assigning this._applet here instead of in readyCallback
     Clazz.loadClass("swingjs.JSAppletViewer");
 		this._appletPanel = Clazz.new_(swingjs.JSAppletViewer.c$$java_util_Hashtable, [viewerOptions]);
-    this._appletPanel.start();
+    this._appletPanel.start$();
 	}
 	
 	proto._addCoreFiles = function() {
