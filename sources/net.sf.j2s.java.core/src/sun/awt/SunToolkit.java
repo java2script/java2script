@@ -1155,12 +1155,11 @@ public abstract class SunToolkit extends Toolkit implements
 	 */
 	public static Locale getStartupLocale() {
 		if (startupLocale == null) {
-			// SwingJS TODO -- set startup locale
+			startupLocale = Locale.US;
+			// SwingJS TODO -- set startup locale using navigator.language, e.g. "en-US"
 			/**
 			 * @j2sNative
 			 */
-			{
-			}
 			// String language, region, country, variant;
 			// language = (String) AccessController.doPrivileged(
 			// new GetPropertyAction("user.language", "en"));

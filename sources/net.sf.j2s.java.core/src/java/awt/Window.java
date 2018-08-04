@@ -1200,12 +1200,12 @@ public class Window extends JComponent {
             }catch(SecurityException e) {
             }
         }
-        if (visible) {
+//        if (visible) {
 //            WindowPeer peer = (WindowPeer)this.peer;
 //            if (peer != null) {
 //                peer.toBack();
 //            }
-        }
+//       }
     }
 
     /**

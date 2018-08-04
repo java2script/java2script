@@ -340,7 +340,7 @@ public class JSListUI extends JSLightweightUI {
 		/**
 		 * @j2sNative
 		 * 
-		 *            rendererComponent.ui.reInit();
+		 *            rendererComponent.ui.reInit$();
 		 */
 		{}
 

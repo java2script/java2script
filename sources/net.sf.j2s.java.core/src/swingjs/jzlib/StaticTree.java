@@ -30,6 +30,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * This program is based on zlib-1.1.3, so all credit should go authors
  * Jean-loup Gailly(jloup@gzip.org) and Mark Adler(madler@alumni.caltech.edu)
  * and contributors of zlib.
+ * 
+ * BH 2018.07.04: short[] to int[]
  */
 
 package swingjs.jzlib;
@@ -46,7 +48,7 @@ final class StaticTree{
   // Bit length codes must not exceed MAX_BL_BITS bits
   static final int MAX_BL_BITS=7; 
 
-  static final short[] static_ltree = {
+  static final int[] static_ltree = {
     12,  8, 140,  8,  76,  8, 204,  8,  44,  8,
     172,  8, 108,  8, 236,  8,  28,  8, 156,  8,
     92,  8, 220,  8,  60,  8, 188,  8, 124,  8,
@@ -107,7 +109,7 @@ final class StaticTree{
     163,  8,  99,  8, 227,  8
   };
 
-  static final short[] static_dtree = {
+  static final int[] static_dtree = {
     0, 5, 16, 5,  8, 5, 24, 5,  4, 5,
     20, 5, 12, 5, 28, 5,  2, 5, 18, 5,
     10, 5, 26, 5,  6, 5, 22, 5, 14, 5,
@@ -128,13 +130,13 @@ final class StaticTree{
     new StaticTree(null, Tree.extra_blbits,
 		   0, BL_CODES, MAX_BL_BITS);
 
-  short[] static_tree;     // static tree or null
+  int[] static_tree;     // static tree or null
   int[] extra_bits;        // extra bits for each code or null
   int extra_base;          // base index for extra_bits
   int elems;               // max number of elements in the tree
   int max_length;          // max bit length for the codes
 
-  private StaticTree(short[] static_tree,
+  private StaticTree(int[] static_tree,
                      int[] extra_bits,
                      int extra_base,
                      int elems,

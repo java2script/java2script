@@ -1,0 +1,4 @@
+C:\Users\RM\workspace4\j2stest\test.txt
+ d  c  b  a
+e =    +2.7183
+$(6,217.58)

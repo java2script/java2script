@@ -192,10 +192,10 @@ public final class AppContext {
      */
      static int numAppContexts = 0;
 
-//    /*
-//     * The context ClassLoader that was used to create this AppContext.
-//     */
-//    private final ClassLoader contextClassLoader;
+    /*
+     * The context ClassLoader that was used to create this AppContext.
+     */
+    private final ClassLoader contextClassLoader;
 
     /**
      * Constructor for AppContext.  This method is <i>not</i> public,
@@ -216,12 +216,7 @@ public final class AppContext {
         this.threadGroup = threadGroup;
         threadGroup2appContext.put(threadGroup, this);
 
-        /**
-         * @j2sNative
-         * 
-         * this.contextClassLoader = this;
-         * 
-         */
+        contextClassLoader = /** @j2sNative this || */ null;
 //        this.contextClassLoader =
 //            (ClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
 //                    public Object run() {
@@ -683,15 +678,15 @@ public final class AppContext {
         return threadGroup;
     }
 
-//    /**
-//     * Returns the context ClassLoader that was used to create this
-//     * AppContext.
-//     *
-//     * @see java.lang.Thread#getContextClassLoader
-//     */
-//    public ClassLoader getContextClassLoader() {
-//        return contextClassLoader;
-//    }
+    /**
+     * Returns the context ClassLoader that was used to create this
+     * AppContext.
+     *
+     * @see java.lang.Thread#getContextClassLoader
+     */
+    public ClassLoader getContextClassLoader() {
+        return contextClassLoader;
+    }
 
     /**
      * Returns a string representation of this AppContext.

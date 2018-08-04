@@ -95,17 +95,9 @@ class EventDispatchThread extends JSThread {
 				pumpOneEventForFilters(myid);
 			}
 		};
-		JSFunction f = null;
 		JSThread me = this;
+		JSFunction f = /** @j2sNative  function() {r.run$();me.run1$I(mode)} || */ null; 		
 		int mode = LOOP;
-		/**
-		 * @j2sNative
-		 * 
-		 *            f = function() {r.run();me.run1$I(mode)};
-		 * 
-		 */
-		{
-		}
 		JSToolkit.dispatch(f, 0, 0);
 		// handling sleepAndReturn myself
 		// and once through only
@@ -287,17 +279,8 @@ class EventDispatchThread extends JSThread {
 	 */
 	@SuppressWarnings("unused")
 	protected void dispatchAndReturn(Runnable r, int mode) {
-		JSFunction f = null;
 		JSThread me = this;
-		/**
-		 * @j2sNative
-		 * 
-		 *            f = function() {r.run();me.run1$I(mode)
-		 *            };
-		 * 
-		 */
-		{
-		}
+		JSFunction f = /** @j2sNative function() {r.run$();me.run1$I(mode)}|| */ null;
 		JSToolkit.dispatch(f, 0, 0);
 	}
 

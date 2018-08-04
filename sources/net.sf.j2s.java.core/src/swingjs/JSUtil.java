@@ -1,6 +1,7 @@
 package swingjs;
 
 import java.awt.Container;
+import java.awt.Toolkit;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -284,25 +285,11 @@ public class JSUtil {
 	public static JQuery jQuery = getJQuery();
 
 	public static String getStackTrace(int n) {
-		/**
-		 * @j2sNative
-		 * 
-		 *            return Clazz._getStackTrace(n);
-		 */
-		{
-			return null;
-		}
+		return /** @j2sNative Clazz._getStackTrace(n) || */null;
 	}
 
 	public static String getStackTrace() {
-		/**
-		 * @j2sNative
-		 * 
-		 *            return Clazz._getStackTrace();
-		 */
-		{
-			return null;
-		}
+		return /** @j2sNative Clazz._getStackTrace() || */null;
 	}
 
 	/**
@@ -391,46 +378,26 @@ public class JSUtil {
 	}
 
 	/**
-	 * All classes created by Clazz have static class loaders
-	 * which are just minimal objects in Clazz var inF.
+	 * All classes created by Clazz have static class loaders which are just minimal
+	 * objects in Clazz var inF.
 	 * 
 	 * @param name
 	 * @return the object as a stream
 	 */
-	@SuppressWarnings("null")
 	public static InputStream getResourceAsStream(String name) {
-		ClassLoader cl = null;
-		/**
-		 * @j2sNative
-		 * 
-		 * cl = swingjs.JSUtil.getClassLoader();
-		 * 
-		 */
-		{} 		
-		return cl.getResourceAsStream(name);
+		return Toolkit.getDefaultToolkit().getClass().getClassLoader().getResourceAsStream(name);
 	}
 
 	/**
-		 * All classes created by Clazz have static class loaders
-		 * which are just minimal objects in Clazz var inF.
-		 * 
-		 * @param name
-		 * @return a URL for this object
-		 */
-		@SuppressWarnings("null")
-		public static URL getResource(String name) {
-			ClassLoader cl = null;
-			/**
-			 * @j2sNative
-			 * 
-			 * cl = swingjs.JSUtil.getClassLoader();
-			 * 
-			 */
-			{
-			//	cl = Toolkit.getDefaultToolkit().getClass().getClassLoader();
-			} 
-			return cl.getResource(name);    
-	  }
+	 * All classes created by Clazz have static class loaders which are just minimal
+	 * objects in Clazz var inF.
+	 * 
+	 * @param name
+	 * @return a URL for this object
+	 */
+	public static URL getResource(String name) {
+		return Toolkit.getDefaultToolkit().getClass().getClassLoader().getResource(name);
+	}
 
 	/**
 	 * Get a default Locale. Called by Locale.getDefault(), but also
@@ -487,8 +454,6 @@ public class JSUtil {
 			 * 			if (target) window.open(url.toString(), target); else
 			 *            window.open(url.toString());
 			 */
-		  {}
-	
 	  }
 
 	/**

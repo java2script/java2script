@@ -37,18 +37,7 @@ public class Frame extends JFrame implements A2SContainer {
 
 	@Override
 	public void remove(int i) {
-		/**
-		 * SwingJ has a somewhat reduced method set; we just use
-		 * this interface to add ones we feel we need.
-		 * 
-		 * @j2sNative
-		 * 
-		 * this.removeInt(i);
-		 * 
-		 */
-		{
-			super.remove(i);
-		}
+		super.remove(i);
 	}
 	
 	public void setMenuBar(MenuBar m) {

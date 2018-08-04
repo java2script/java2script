@@ -27,16 +27,7 @@ public class JSGraphicsEnvironment extends GraphicsEnvironment {
 
 	@Override
 	public Graphics2D createGraphics(BufferedImage img) {
-	  /**
-	   * @j2sNative
-	   *   return img.getImageGraphic().create();
-	   */
-	  //Graphics2D g =  (Graphics2D) img.getImageGraphic().create();
-	  //if (img.getTransparency() == Transparency.OPAQUE) 
-	  	//g.setBackground(Color.WHITE);
-		{
-			return null;
-		}
+		return (Graphics2D) img.getImageGraphic().create();
 	}
 
 	private static Font[] availableFonts;

@@ -218,13 +218,7 @@ public class OutputStreamWriter extends Writer {
      */
     @Override
 		public void write(int c) throws IOException {
-    	char ch = '\0';
-    	/**
-    	 * @j2sNative
-    	 * 
-    	 * ch = String.fromCodePoint(c);
-    	 */
-        writer.write(ch);
+        writer.write(c);
     }
 
     /**
@@ -277,11 +271,4 @@ public class OutputStreamWriter extends Writer {
     	  stream.close();
     }
     
-    /** Added for SwingJS
-     * 
-     */
-    public BufferedWriter getBufferedWriter() {
-  	  return (BufferedWriter) Interface.getInstanceWithParams("java.io.BufferedWriter", 
-          new Class<?>[] { java.io.OutputStreamWriter.class }, new Object[] { this });    	
-    }
 }

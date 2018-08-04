@@ -380,7 +380,7 @@ public abstract class AbstractButton extends JComponent implements ItemSelectabl
     	 * focusedUI = document.activeElement && document.activeElement.ui;  
     	 * 
     	 */
-    	{}
+    	
     	if (focusedUI != null && focusedUI != this.ui) {
     		focusedUI.notifyFocus(false);
     		((JSComponentUI) ui).notifyFocus(true);

@@ -1734,7 +1734,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 
 	}
 
-	private boolean excludeField(String name) {
+	boolean excludeField(String name) { 
 		return (name == "prototype" || name.startsWith("__"));
 	} 
 
@@ -3327,7 +3327,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	T[] getEnumConstantsShared() {
 		if (enumConstants == null) {
 			if (isEnum())
-			   enumConstants = /** @j2sNative this.$clazz$.values();*/ null;
+			   enumConstants = /** @j2sNative this.$clazz$.values$() || */ null;
 //			try {
 //				final Method values = getMethod("values");
 //				java.security.AccessController.doPrivileged(new java.security.PrivilegedAction() {
@@ -3542,7 +3542,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		Object[] a = new Object[args == null ? 0 : args.length];
 		if (args != null && (types != null || isProxy))
 		      for (int i = args.length; --i >= 0;)
-		    	  a[i] = (isProxy ? args[i] : /** @j2sNative (types[i].__PRIMITIVE && args[i].valueOf ? args[i].valueOf() : args[i]) || */ null);
+		    	  a[i] = (isProxy ? args[i] : /** @j2sNative (types[i].__PRIMITIVE && args[i].valueOf$ ? args[i].valueOf$() : args[i]) || */ null);
 		return a;
 	}
 

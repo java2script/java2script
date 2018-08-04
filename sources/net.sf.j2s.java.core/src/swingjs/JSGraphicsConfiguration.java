@@ -82,13 +82,7 @@ public class JSGraphicsConfiguration extends GraphicsConfiguration {
 
 	@Override
 	public Rectangle getBounds() {
-		DOMNode doc = null;
-		/**
-		 * @j2sNative
-		 * 
-		 *  doc = document;
-		 */
-		{}
+		DOMNode doc = /** @j2sNative document || */ null;
 		JQueryObject d = JSUtil.jQuery.$(doc);
 		return new Rectangle(d.width(), d.height());
 	}

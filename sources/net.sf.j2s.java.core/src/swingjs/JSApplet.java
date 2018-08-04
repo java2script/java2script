@@ -24,7 +24,7 @@ public class JSApplet extends JApplet {
 	  /**
 	   * @j2sNative
 	   * 
-	   * setTimeout(function(){theClass.$clazz$.main.call(null, args || []);},1);
+	   * setTimeout(function(){theClass.$clazz$.main$SA.call(null, args || []);},1);
 	   * 
 	   */
 		{

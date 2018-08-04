@@ -269,11 +269,11 @@ final public class AU {
      * 
      */
     {
+        n -= i0;
+        int[] t = new int[n];
+        System.arraycopy(array, i0, t, 0, n);
+        return t;
     }
-    n -= i0;
-    int[] t = new int[n];
-    System.arraycopy(array, i0, t, 0, n);
-    return t;
   }
 
   public static int[] arrayCopyRangeRevI(int[] array, int i0, int n) {
@@ -285,13 +285,13 @@ final public class AU {
      * return Clazz.array(-1, array, i0, n).reverse();
      */
     {
+        int[] t = arrayCopyRangeI(array, i0, n);
+        if (n < 0)
+          n = array.length;
+        for (int i = n / 2; --i >= 0;)
+          swapInt(t, i, n - 1 - i);
+        return t;
     }
-    int[] t = arrayCopyRangeI(array, i0, n);
-    if (n < 0)
-      n = array.length;
-    for (int i = n / 2; --i >= 0;)
-      swapInt(t, i, n - 1 - i);
-    return t;
   }
 
   public static short[] arrayCopyShort(short[] array, int newLength) {

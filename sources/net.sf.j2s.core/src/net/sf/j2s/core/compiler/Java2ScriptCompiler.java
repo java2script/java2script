@@ -20,6 +20,7 @@ import java.util.Properties;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -34,7 +35,6 @@ import net.sf.j2s.core.astvisitors.Java2ScriptVisitor;
  * @author Bob Hanson
  *
  */
-@SuppressWarnings("restriction")
 public class Java2ScriptCompiler {
 	/**
 	 * The name of the J2S options file, aka as the "Dot-j2s" file.
@@ -78,7 +78,9 @@ public class Java2ScriptCompiler {
 
 	private ASTParser astParser;
 
-	public static boolean isActive(IProject project) {
+	private IJavaProject project;
+
+	public static boolean isActive(IJavaProject project) {
 		try {
 			return new File(project.getProject().getLocation().toOSString(), J2S_OPTIONS_FILE_NAME).exists();
 		} catch (@SuppressWarnings("unused") Exception e) {
@@ -129,13 +131,14 @@ public class Java2ScriptCompiler {
 	 * @return true if this is a j2s project and is enabled
 	 * 
 	 */
-	public boolean initializeProject(IProject project, boolean isCompilationParticipant) {
+	public boolean initializeProject(IJavaProject project, boolean isCompilationParticipant) {
+		this.project = project;
 		this.isCompilationParticipant = isCompilationParticipant;
 		if (!isActive(project)) {
 			// the file .j2s does not exist in the project directory -- skip this project
 			return false;
 		}
-		projectFolder = project.getLocation().toOSString();
+		projectFolder = project.getProject().getLocation().toOSString();
 		props = new Properties();
 		try {
 			File j2sFile = new File(projectFolder, J2S_OPTIONS_FILE_NAME);
@@ -199,10 +202,13 @@ public class Java2ScriptCompiler {
 				lstExcludedPaths = null;
 		}
 
-		String nonqualifiedPackages = getProperty("j2s.compiler.nonqualified.packages");
-		if (nonqualifiedPackages == null) // older version of the name
-			nonqualifiedPackages = getProperty("j2s.compiler.nonqualified.classes");
-		
+		String prop = getProperty("j2s.compiler.nonqualified.packages");
+		// older version of the name
+		String nonqualifiedPackages = getProperty("j2s.compiler.nonqualified.classes");
+		nonqualifiedPackages = (prop == null ? "" : prop)
+			+ (nonqualifiedPackages == null ? "" : (prop == null ? "" : ";") + nonqualifiedPackages);
+	    if (nonqualifiedPackages.length() == 0)
+	    	nonqualifiedPackages = null;
 		// includes @j2sDebug blocks
 		boolean isDebugging = "debug".equals(getProperty("j2s.compiler.mode"));
 
@@ -224,10 +230,11 @@ public class Java2ScriptCompiler {
 				System.err.println("using HTML template " + file);
 		}
 
-		Java2ScriptVisitor.setNoQualifiedNamePackages(nonqualifiedPackages);
 		Java2ScriptVisitor.setDebugging(isDebugging);
-		Java2ScriptVisitor.setClassReplacements(classReplacements);
 		Java2ScriptVisitor.setLogging(lstMethodsDeclared, htMethodsCalled, logAllCalls);
+
+		Java2ScriptVisitor.NameMapper.setNonQualifiedNamePackages(nonqualifiedPackages);
+		Java2ScriptVisitor.NameMapper.setClassReplacements(classReplacements);
 		
 		astParser = ASTParser.newParser(JSL_LEVEL);
 	
@@ -255,7 +262,9 @@ public class Java2ScriptCompiler {
 		// note: next call must come before each createAST call
 		astParser.setResolveBindings(true); 
 		CompilationUnit root = (CompilationUnit) astParser.createAST(null);
-		Java2ScriptVisitor visitor = new Java2ScriptVisitor();
+		// If the Java2ScriptVisitor is ever extended, it is important to set the project.
+		// Java2ScriptVisitor#addClassOrInterface uses getClass().newInstance().setproject(project). 
+		Java2ScriptVisitor visitor = new Java2ScriptVisitor().setProject(project);
 
 		try {
 
@@ -279,7 +288,7 @@ public class Java2ScriptCompiler {
 			String filePath = j2sPath;
 			String rootName = root.getJavaElement().getElementName();
 			rootName = rootName.substring(0, rootName.lastIndexOf('.'));
-			String packageName = visitor.getPackageName();
+			String packageName = visitor.getMyPackageName();
 			if (packageName != null) {
 				File folder = new File(filePath, packageName.replace('.', File.separatorChar));
 				filePath = folder.getAbsolutePath();
@@ -291,7 +300,7 @@ public class Java2ScriptCompiler {
 			}
 			return false;
 		}
-		String packageName = visitor.getPackageName();
+		String packageName = visitor.getMyPackageName();
 		if (packageName != null) {
 			int pt = packageName.indexOf(".");
 			if (pt >= 0)
@@ -356,7 +365,7 @@ public class Java2ScriptCompiler {
 
 		// BH all compression is deprecated --- use Google Closure Compiler
 
-		String packageName = visitor.getPackageName();
+		String packageName = visitor.getMyPackageName();
 		for (int i = 0; i < elements.size();) {
 			String elementName = elements.get(i++);
 			String element = elements.get(i++);
