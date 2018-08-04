@@ -106,10 +106,6 @@ public interface ListCellRenderer
      * @see ListSelectionModel
      * @see ListModel
      */
-    JComponent getListCellRendererComponent(
-        JList list,
-        Object value,
-        int index,
-        boolean isSelected,
-        boolean cellHasFocus);
+
+	JComponent getListCellRendererComponent(JList jList, Object value, int i, boolean b, boolean c);
 }

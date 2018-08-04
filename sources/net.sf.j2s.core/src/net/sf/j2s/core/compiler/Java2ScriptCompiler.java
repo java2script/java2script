@@ -262,7 +262,9 @@ public class Java2ScriptCompiler {
 		// note: next call must come before each createAST call
 		astParser.setResolveBindings(true); 
 		CompilationUnit root = (CompilationUnit) astParser.createAST(null);
-		Java2ScriptVisitor visitor = new Java2ScriptVisitor(project);
+		// If the Java2ScriptVisitor is ever extended, it is important to set the project.
+		// Java2ScriptVisitor#addClassOrInterface uses getClass().newInstance().setproject(project). 
+		Java2ScriptVisitor visitor = new Java2ScriptVisitor().setProject(project);
 
 		try {
 
@@ -286,7 +288,7 @@ public class Java2ScriptCompiler {
 			String filePath = j2sPath;
 			String rootName = root.getJavaElement().getElementName();
 			rootName = rootName.substring(0, rootName.lastIndexOf('.'));
-			String packageName = visitor.getPackageName();
+			String packageName = visitor.getMyPackageName();
 			if (packageName != null) {
 				File folder = new File(filePath, packageName.replace('.', File.separatorChar));
 				filePath = folder.getAbsolutePath();
@@ -298,7 +300,7 @@ public class Java2ScriptCompiler {
 			}
 			return false;
 		}
-		String packageName = visitor.getPackageName();
+		String packageName = visitor.getMyPackageName();
 		if (packageName != null) {
 			int pt = packageName.indexOf(".");
 			if (pt >= 0)
@@ -363,7 +365,7 @@ public class Java2ScriptCompiler {
 
 		// BH all compression is deprecated --- use Google Closure Compiler
 
-		String packageName = visitor.getPackageName();
+		String packageName = visitor.getMyPackageName();
 		for (int i = 0; i < elements.size();) {
 			String elementName = elements.get(i++);
 			String element = elements.get(i++);

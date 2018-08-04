@@ -236,7 +236,7 @@ public abstract class JSComponent extends Component {
 	public boolean isBackgroundPainted;
 
 	protected JSGraphics2D getJSGraphic2D(Graphics g) {
-		return (/** @j2sNative g.mark ? g : */ null);
+		return (/** @j2sNative g.mark$ ? g : */ null);
 	}
 
 	/**

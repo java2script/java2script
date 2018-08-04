@@ -30,6 +30,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * This program is based on zlib-1.1.3, so all credit should go authors
  * Jean-loup Gailly(jloup@gzip.org) and Mark Adler(madler@alumni.caltech.edu)
  * and contributors of zlib.
+ * 
+ * BH 2018.07.04: short[] to int[]
  */
 
 package swingjs.jzlib;
@@ -149,7 +151,7 @@ final class Tree{
     return ((dist) < 256 ? _dist_code[dist] : _dist_code[256 + ((dist) >>> 7)]);
   }
 
-  short[] dyn_tree; // the dynamic tree
+  int[] dyn_tree; // the dynamic tree
   int max_code; // largest code with non zero frequency
   StaticTree stat_desc; // the corresponding static tree
 
@@ -162,8 +164,8 @@ final class Tree{
   //     The length opt_len is updated; static_len is also updated if stree is
   //     not null.
   void gen_bitlen(Deflate s) {
-    short[] tree = dyn_tree;
-    short[] stree = stat_desc.static_tree;
+    int[] tree = dyn_tree;
+    int[] stree = stat_desc.static_tree;
     int[] extra = stat_desc.extra_bits;
     int base = stat_desc.extra_base;
     int max_length = stat_desc.max_length;
@@ -171,7 +173,7 @@ final class Tree{
     int n, m; // iterate over the tree elements
     int bits; // bit length
     int xbits; // extra bits
-    short f; // frequency
+    int f; // frequency
     int overflow = 0; // number of elements with bit length too large
 
     for (bits = 0; bits <= MAX_BITS; bits++)
@@ -188,7 +190,7 @@ final class Tree{
         bits = max_length;
         overflow++;
       }
-      tree[n * 2 + 1] = (short) bits;
+      tree[n * 2 + 1] = bits;
       // We overwrite tree[n*2+1] which is no longer needed
 
       if (n > max_code)
@@ -228,7 +230,7 @@ final class Tree{
           continue;
         if (tree[m * 2 + 1] != bits) {
           s.opt_len += ((long) bits - (long) tree[m * 2 + 1]) * tree[m * 2];
-          tree[m * 2 + 1] = (short) bits;
+          tree[m * 2 + 1] = (int) bits;
         }
         n--;
       }
@@ -242,8 +244,8 @@ final class Tree{
   //     and corresponding code. The length opt_len is updated; static_len is
   //     also updated if stree is not null. The field max_code is set.
   void build_tree(Deflate s) {
-    short[] tree = dyn_tree;
-    short[] stree = stat_desc.static_tree;
+    int[] tree = dyn_tree;
+    int[] stree = stat_desc.static_tree;
     int elems = stat_desc.elems;
     int n, m; // iterate over heap elements
     int max_code = -1; // largest code with non zero frequency
@@ -300,9 +302,9 @@ final class Tree{
       s.heap[--s.heap_max] = m;
 
       // Create a new node father of n and m
-      tree[node * 2] = (short) (tree[n * 2] + tree[m * 2]);
+      tree[node * 2] = (int) (tree[n * 2] + tree[m * 2]);
       s.depth[node] = (byte) (Math.max(s.depth[n], s.depth[m]) + 1);
-      tree[n * 2 + 1] = tree[m * 2 + 1] = (short) node;
+      tree[n * 2 + 1] = tree[m * 2 + 1] = (int) node;
 
       // and insert the new node in the heap
       s.heap[1] = node++;
@@ -326,13 +328,13 @@ final class Tree{
   // the given tree and the field len is set for all tree elements.
   // OUT assertion: the field code is set for all tree elements of non
   //     zero code length.
-  static short[] next_code = new short[MAX_BITS + 1]; // next code value for each bit length
+  static int[] next_code = new int[MAX_BITS + 1]; // next code value for each bit length
 
-  synchronized static void gen_codes(short[] tree, // the tree to decorate
+  synchronized static void gen_codes(int[] tree, // the tree to decorate
                                      int max_code, // largest code with non zero frequency
-                                     short[] bl_count // number of codes at each bit length
+                                     int[] bl_count // number of codes at each bit length
   ) {
-    short code = 0; // running code value
+    int code = 0; // running code value
     int bits; // bit index
     int n; // code index
 
@@ -340,7 +342,7 @@ final class Tree{
     // without bit reversal.
     next_code[0] = 0;
     for (bits = 1; bits <= MAX_BITS; bits++) {
-      next_code[bits] = code = (short) ((code + bl_count[bits - 1]) << 1);
+      next_code[bits] = code = (int) ((code + bl_count[bits - 1]) << 1);
     }
 
     // Check that the bit counts in bl_count are consistent. The last code
@@ -354,7 +356,7 @@ final class Tree{
       if (len == 0)
         continue;
       // Now reverse the bits
-      tree[n * 2] = (short) (bi_reverse(next_code[len]++, len));
+      tree[n * 2] = (bi_reverse(next_code[len]++, len));
     }
   }
 

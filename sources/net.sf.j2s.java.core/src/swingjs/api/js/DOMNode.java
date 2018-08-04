@@ -3,7 +3,10 @@ package swingjs.api.js;
 import java.applet.AudioClip;
 import java.awt.Component;
 import java.awt.Image;
+import java.awt.JSComponent;
 import java.awt.Rectangle;
+
+import javax.swing.plaf.ComponentUI;
 
 import swingjs.JSUtil;
 
@@ -239,18 +242,27 @@ public abstract class DOMNode {
 	}
 
 	public static AudioClip getAudioElement(String filePath, boolean isLoop) {
-		return (AudioClip) DOMNode.setAttrs(DOMNode.createElement("audio", null), 
+		AudioClip clip = (AudioClip) DOMNode.setAttrs(DOMNode.createElement("audio", null), 
 				"controls", "true", (isLoop ? "loop" : null), (isLoop ? "true" : null), "src", filePath);
+		// alias the actual audio element methods to SwingJS-qualified methods.
+		/**
+		 * @j2sNative
+		 *  clip.play$ = clip.play;
+		 *  clip.stop$ = clip.stop;
+		 *  clip.loop$ = clip.loop;
+		 */
+		return clip;
 	}
 
 	public static void setCursor(String c, Component comp) {
+		ComponentUI ui = (comp == null ? null : ((JSComponent) comp).getUI());
+		DOMNode node = (ui == null ? null : ui.getDOMNode());
 		/**
 		 * @j2sNative
 		 * 
-		 * if (comp && comp.ui) { comp.ui.getDOMNode().style.cursor = c } else { document.body.style.cursor = c } 
+		 * if (node == null) {document.body.style.cursor = c} else {  node.style.cursor = c }
 		 * 
 		 */
-		{}
 	}
 
 	public static DOMNode getImageNode(Image img) {

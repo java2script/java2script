@@ -21,7 +21,7 @@ import java.util.List;
  *
  * 2006-12-3
  */
-class VariableAdapter extends VisitorAdapter {
+class VariableAdapter {
 	
 	/**
 	 * FinalVariable that is used to record variable state, which will provide
@@ -122,7 +122,7 @@ class VariableAdapter extends VisitorAdapter {
 	/**
 	 * List of variables that are declared as final.
 	 */
-	List<LocalVariable> finalVars = new ArrayList<LocalVariable>();
+	List<LocalVariable> global_finalVars = new ArrayList<LocalVariable>();
 	
 	/**
 	 * Normal (non-final) variables may be affected by final variable names.
@@ -138,7 +138,7 @@ class VariableAdapter extends VisitorAdapter {
 	List<LocalVariable> getVariableList(char fvn) {
 		switch (fvn) {
 		case 'f':
-			return finalVars;
+			return global_finalVars;
 		case 'v':
 			return visitedVars;
 		default:
