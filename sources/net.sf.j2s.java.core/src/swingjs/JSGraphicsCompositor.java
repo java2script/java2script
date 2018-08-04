@@ -248,13 +248,7 @@ public class JSGraphicsCompositor {
 			retBI = op.filter(src, dst);
 			break;
 		case 'A':
-			Graphics2D g = null;
-			/**
-			 * @j2sNative
-			 * 
-			 * g = dst.getImageGraphic()
-			 */
-			{}
+			Graphics2D g = dst.getImageGraphic();
 			g.drawImage(src,
 					((AffineTransformOp) op).getTransform(), null);
 			retBI = dst;
@@ -323,6 +317,8 @@ public class JSGraphicsCompositor {
 	   */
 	  {}
 		if (imgNode == null && img instanceof BufferedImage) {
+			int w = ((JSImage)img).getWidth();
+			int h = ((JSImage)img).getHeight();
 		  /**
 		   * @j2sNative
 		   * 
@@ -332,8 +328,8 @@ public class JSGraphicsCompositor {
 		   *   canvas = img._canvas;
 		   * }
 		   * imgNode = canvas;
-		   * imgNode.style.width = img.getWidth() + "px";
-		   * imgNode.style.height = img.getHeight()	 	+ "px";
+		   * imgNode.style.width = w + "px";
+		   * imgNode.style.height = h + "px";
 		   * 
 		   */
 		  {}

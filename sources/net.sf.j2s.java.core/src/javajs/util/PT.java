@@ -313,18 +313,7 @@ public class PT {
   }
 
   public static int parseIntRadix(String s, int i) throws NumberFormatException {
-    /**
-     * 
-     * JavaScript uses parseIntRadix
-     * 
-     * @j2sNative
-     * 
-     *    return Integer.parseIntRadix(s, i);
-     *    
-     */
-    {
       return Integer.parseInt(s, i);
-    }
   }
 
   public static String[] getTokens(String line) {
@@ -427,7 +416,7 @@ public class PT {
 
 //  public static double dVal(String s) throws NumberFormatException {
 //    /**
-//     * @j2sNative
+//     * xxxxj2sNative
 //     * 
 //     * if(s==null)
 //     *   throw new NumberFormatException("null");
@@ -444,7 +433,7 @@ public class PT {
 //
 //  public static float fVal(String s) throws NumberFormatException {
 //    /**
-//     * @j2sNative
+//     * xxxxj2sNative
 //     * 
 //     * return this.dVal(s);
 //     */
@@ -796,7 +785,7 @@ public class PT {
 //     * Note that info will be a primitive in JavaScript
 //     * but a wrapped primitive in Java.
 //     * 
-//     * @j2sNative
+//     * xxxxj2sNative
 //     * 
 //     *            return info[i];
 //     */

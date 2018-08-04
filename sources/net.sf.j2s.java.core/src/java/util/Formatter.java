@@ -4203,6 +4203,26 @@ public final class Formatter implements Flushable {
 		public FormattedFloatingDecimal(double value, int prec, int type) {
 			str = "" + value;
 			getString(type, value, prec);
+			if (checkRoundHalfDown(value)) {
+				str = "" + value;
+				getString(type, value + value/1e10, prec);
+				 
+			};
+		}
+
+		private boolean checkRoundHalfDown(double value) {
+			
+			/**
+			 * @j2sNative
+			 * var v = ("" + value).split('e')[0];
+			 * var pt = v.length;
+			 * var d;
+			 * while (--pt > 0 && ((d=v[pt]) == '0' || d=='.')){}
+			 * return (pt >= 0 && v[pt] == "5" && parseFloat(this.str) < value);
+			 */
+			{
+			return false;
+			}
 		}
 
 		private void getString(int type, double value, int prec) {
@@ -4222,6 +4242,7 @@ public final class Formatter implements Flushable {
 			 */
 			{
 			}
+			
 
 			exp = getExp(sNoRound);
 			expr = getExp(sRound);
@@ -4238,8 +4259,15 @@ public final class Formatter implements Flushable {
 				if (expr < -4 || exp >= prec)
 					type = SCIENTIFIC;
 			}
+			
+//			---- 12345.0
+//			String.format difference 'g' : 1.2345E-6 prec=4
+//			in Java: 1.235e-06 in JavaScript: 1.234e-06
+
 			if (type == DECIMAL_FLOAT) {
 				/**
+				 * 
+				 * 
 				 * @j2sNative 
 				 * 
 				 *            sRound = value.toFixed(); sNoRound = value.toFixed(prec);
@@ -4270,9 +4298,10 @@ public final class Formatter implements Flushable {
 				
 				// scientific(x,prec-1) as fixed. We take into consideration 
 				// that sRound may have been truncated.
-				
-				int ndig = pt - (value < 0 ? 2 : 1);
+				int ndig = Math.max(1, pt - (value < 0 ? 2 : 1));
 				ndig = Math.max(0, ndig - 1 - exp); // g
+
+				// but in JavaScript we have round half even, and we want round half up!
 				/**
 				 * @j2sNative 
 				 * 

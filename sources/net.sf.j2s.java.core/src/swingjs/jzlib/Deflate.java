@@ -30,6 +30,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * This program is based on zlib-1.1.3, so all credit should go authors
  * Jean-loup Gailly(jloup@gzip.org) and Mark Adler(madler@alumni.caltech.edu)
  * and contributors of zlib.
+ * 
+ * BH 2018.07.04: short[] to int[]
  */
 
 package swingjs.jzlib;
@@ -195,12 +197,12 @@ public final class Deflate /*implements Cloneable*/{
   // Actual size of window: 2*wSize, except when the user input buffer
   // is directly used as sliding window.
 
-  short[] prev;
+  int[] prev;
   // Link to older string with same hash index. To limit the size of this
   // array to 64K, this link is maintained only for the last 32K strings.
   // An index in this array is thus a window index modulo 32K.
 
-  short[] head; // Heads of the hash chains or NIL.
+  int[] head; // Heads of the hash chains or NIL.
 
   int ins_h; // hash index of string to be inserted
   int hash_size; // number of elements in hash table
@@ -251,16 +253,16 @@ public final class Deflate /*implements Cloneable*/{
   // Stop searching when current match exceeds this
   int nice_match;
 
-  short[] dyn_ltree; // literal and length tree
-  short[] dyn_dtree; // distance tree
-  short[] bl_tree; // Huffman tree for bit lengths
+  int[] dyn_ltree; // literal and length tree
+  int[] dyn_dtree; // distance tree
+  int[] bl_tree; // Huffman tree for bit lengths
 
   Tree l_desc = new Tree(); // desc for literal tree
   Tree d_desc = new Tree(); // desc for distance tree
   Tree bl_desc = new Tree(); // desc for bit length tree
 
   // number of codes at each bit length for an optimal tree
-  short[] bl_count = new short[MAX_BITS + 1];
+  int[] bl_count = new int[MAX_BITS + 1];
 
   // heap used to build the Huffman trees
   int[] heap = new int[2 * L_CODES + 1];
@@ -309,7 +311,7 @@ public final class Deflate /*implements Cloneable*/{
 
   // Output buffer. bits are inserted starting at the bottom (least
   // significant bits).
-  short bi_buf;
+  int bi_buf;
 
   // Number of valid bits in bi_buf.  All bits above the last valid bit
   // are always zero.
@@ -319,9 +321,9 @@ public final class Deflate /*implements Cloneable*/{
 
   Deflate(ZStream strm) {
     this.strm = strm;
-    dyn_ltree = new short[HEAP_SIZE * 2];
-    dyn_dtree = new short[(2 * D_CODES + 1) * 2]; // distance tree
-    bl_tree = new short[(2 * BL_CODES + 1) * 2]; // Huffman tree for bit lengths
+    dyn_ltree = new int[HEAP_SIZE * 2];
+    dyn_dtree = new int[(2 * D_CODES + 1) * 2]; // distance tree
+    bl_tree = new int[(2 * BL_CODES + 1) * 2]; // Huffman tree for bit lengths
   }
 
   int deflateInit(int level) {
@@ -397,7 +399,7 @@ public final class Deflate /*implements Cloneable*/{
   // exchanging a node with the smallest of its two sons if necessary, stopping
   // when the heap property is re-established (each father smaller than its
   // two sons).
-  void pqdownheap(short[] tree, // the tree to restore
+  void pqdownheap(int[] tree, // the tree to restore
                   int k // node to move down
   ) {
     int v = heap[k];
@@ -420,15 +422,15 @@ public final class Deflate /*implements Cloneable*/{
     heap[k] = v;
   }
 
-  static boolean smaller(short[] tree, int n, int m, byte[] depth) {
-    short tn2 = tree[n * 2];
-    short tm2 = tree[m * 2];
+  static boolean smaller(int[] tree, int n, int m, byte[] depth) {
+    int tn2 = tree[n * 2];
+    int tm2 = tree[m * 2];
     return (tn2 < tm2 || (tn2 == tm2 && depth[n] <= depth[m]));
   }
 
   // Scan a literal or distance tree to determine the frequencies of the codes
   // in the bit length tree.
-  void scan_tree(short[] tree,// the tree to be scanned
+  void scan_tree(int[] tree,// the tree to be scanned
                  int max_code // and its largest code of non zero frequency
   ) {
     int n; // iterates over all tree elements
@@ -443,7 +445,7 @@ public final class Deflate /*implements Cloneable*/{
       max_count = 138;
       min_count = 3;
     }
-    tree[(max_code + 1) * 2 + 1] = (short) 0xffff; // guard
+    tree[(max_code + 1) * 2 + 1] = (int) 0xffff; // guard
 
     for (n = 0; n <= max_code; n++) {
       curlen = nextlen;
@@ -521,7 +523,7 @@ public final class Deflate /*implements Cloneable*/{
 
   // Send a literal or distance tree in compressed form, using the codes in
   // bl_tree.
-  void send_tree(short[] tree,// the tree to be sent
+  void send_tree(int[] tree,// the tree to be sent
                  int max_code // and its largest code of non zero frequency
   ) {
     int n; // iterates over all tree elements
@@ -598,12 +600,12 @@ public final class Deflate /*implements Cloneable*/{
     put_byteB((byte) (w >>> 8));
   }
 
-  final void putShortMSB(int b) {
+  final void putintMSB(int b) {
     put_byteB((byte) (b >> 8));
     put_byteB((byte) (b));
   }
 
-  final void send_code(int c, short[] tree) {
+  final void send_code(int c, int[] tree) {
     int c2 = c * 2;
     send_bits((tree[c2] & 0xffff), (tree[c2 + 1] & 0xffff));
   }
@@ -615,7 +617,7 @@ public final class Deflate /*implements Cloneable*/{
       //      bi_buf |= (val << bi_valid);
       bi_buf |= ((val << bi_valid) & 0xffff);
       put_short(bi_buf);
-      bi_buf = (short) ((val >>> (Buf_size - bi_valid)) & 0xffff);
+      bi_buf = (int) ((val >>> (Buf_size - bi_valid)) & 0xffff);
       bi_valid += len - Buf_size;
     } else {
       //      bi_buf |= (value) << bi_valid;
@@ -694,7 +696,7 @@ public final class Deflate /*implements Cloneable*/{
   }
 
   // Send the block data compressed using the given Huffman trees
-  void compress_block(short[] ltree, short[] dtree) {
+  void compress_block(int[] ltree, int[] dtree) {
     int dist; // distance of matched string
     int lc; // match length or unmatched char (if dist == 0)
     int lx = 0; // running index in l_buf
@@ -991,14 +993,14 @@ public final class Deflate /*implements Cloneable*/{
         p = n;
         do {
           m = (head[--p] & 0xffff);
-          head[p] = (m >= w_size ? (short) (m - w_size) : 0);
+          head[p] = (m >= w_size ? (int) (m - w_size) : 0);
         } while (--n != 0);
 
         n = w_size;
         p = n;
         do {
           m = (prev[--p] & 0xffff);
-          prev[p] = (m >= w_size ? (short) (m - w_size) : 0);
+          prev[p] = (m >= w_size ? (int) (m - w_size) : 0);
           // If n is not on any hash chain, prev[n] is garbage but
           // its value will never be used.
         } while (--n != 0);
@@ -1036,10 +1038,10 @@ public final class Deflate /*implements Cloneable*/{
   // Compress as much as possible from the input stream, return the current
   // block state.
   // This function does not perform lazy evaluation of matches and inserts
-  // new strings in the dictionary only for unmatched strings or for short
+  // new strings in the dictionary only for unmatched strings or for int
   // matches. It is used only for the fast compression options.
   int deflate_fast(int flush) {
-    //    short hash_head = 0; // head of the hash chain
+    //    int hash_head = 0; // head of the hash chain
     int hash_head = 0; // head of the hash chain
     boolean bflush; // set if current block must be flushed
 
@@ -1066,7 +1068,7 @@ public final class Deflate /*implements Cloneable*/{
         //	prev[strstart&w_mask]=hash_head=head[ins_h];
         hash_head = (head[ins_h] & 0xffff);
         prev[strstart & w_mask] = head[ins_h];
-        head[ins_h] = (short) strstart;
+        head[ins_h] = (int) strstart;
       }
 
       // Find the longest match, discarding those <= prev_length.
@@ -1102,7 +1104,7 @@ public final class Deflate /*implements Cloneable*/{
             //	    prev[strstart&w_mask]=hash_head=head[ins_h];
             hash_head = (head[ins_h] & 0xffff);
             prev[strstart & w_mask] = head[ins_h];
-            head[ins_h] = (short) strstart;
+            head[ins_h] = (int) strstart;
 
             // strstart never exceeds WSIZE-MAX_MATCH, so there are
             // always MIN_MATCH bytes ahead.
@@ -1146,7 +1148,7 @@ public final class Deflate /*implements Cloneable*/{
   // evaluation for matches: a match is finally adopted only if there is
   // no better match at the next window position.
   int deflate_slow(int flush) {
-    //    short hash_head = 0;    // head of hash chain
+    //    int hash_head = 0;    // head of hash chain
     int hash_head = 0; // head of hash chain
     boolean bflush; // set if current block must be flushed
 
@@ -1175,7 +1177,7 @@ public final class Deflate /*implements Cloneable*/{
         //	prev[strstart&w_mask]=hash_head=head[ins_h];
         hash_head = (head[ins_h] & 0xffff);
         prev[strstart & w_mask] = head[ins_h];
-        head[ins_h] = (short) strstart;
+        head[ins_h] = (int) strstart;
       }
 
       // Find the longest match, discarding those <= prev_length.
@@ -1228,7 +1230,7 @@ public final class Deflate /*implements Cloneable*/{
             //prev[strstart&w_mask]=hash_head=head[ins_h];
             hash_head = (head[ins_h] & 0xffff);
             prev[strstart & w_mask] = head[ins_h];
-            head[ins_h] = (short) strstart;
+            head[ins_h] = (int) strstart;
           }
         } while (--prev_length != 0);
         match_available = 0;
@@ -1407,8 +1409,8 @@ public final class Deflate /*implements Cloneable*/{
     hash_shift = ((hash_bits + MIN_MATCH - 1) / MIN_MATCH);
 
     window = new byte[w_size * 2];
-    prev = new short[w_size];
-    head = new short[hash_size];
+    prev = new int[w_size];
+    head = new int[hash_size];
 
     lit_bufsize = 1 << (memLevel + 6); // 16K elements by default
 
@@ -1520,7 +1522,7 @@ public final class Deflate /*implements Cloneable*/{
       ins_h = (((ins_h) << hash_shift) ^ (window[(n) + (MIN_MATCH - 1)] & 0xff))
           & hash_mask;
       prev[n & w_mask] = head[ins_h];
-      head[ins_h] = (short) n;
+      head[ins_h] = (int) n;
     }
     return Z_OK;
   }
@@ -1563,13 +1565,13 @@ public final class Deflate /*implements Cloneable*/{
         header += 31 - (header % 31);
 
         status = BUSY_STATE;
-        putShortMSB(header);
+        putintMSB(header);
 
         // Save the adler32 of the preset dictionary:
         if (strstart != 0) {
           long adler = strm.checksum.getValue();
-          putShortMSB((int) (adler >>> 16));
-          putShortMSB((int) (adler & 0xffff));
+          putintMSB((int) (adler >>> 16));
+          putintMSB((int) (adler & 0xffff));
         }
         strm.checksum.reset();
       }
@@ -1677,8 +1679,8 @@ public final class Deflate /*implements Cloneable*/{
     } else {
       // Write the zlib trailer (adler32)
       long adler = strm.checksum.getValue();
-      putShortMSB((int) (adler >>> 16));
-      putShortMSB((int) (adler & 0xffff));
+      putintMSB((int) (adler >>> 16));
+      putintMSB((int) (adler & 0xffff));
     }
 
     strm.flush_pending();
@@ -1767,8 +1769,8 @@ public final class Deflate /*implements Cloneable*/{
   //    System.arraycopy(buf, 0, foo, 0, foo.length);
   //    return foo;
   //  }
-  //  private short[] dupS(short[] buf){
-  //    short[] foo = new short[buf.length];
+  //  private int[] dupS(int[] buf){
+  //    int[] foo = new int[buf.length];
   //    System.arraycopy(buf, 0, foo, 0, foo.length);
   //    return foo;
   //  }

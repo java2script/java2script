@@ -127,7 +127,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			 *            }
 			 *            var xy = me.getMoveCoords$I$I(x, y);
 			 *            $($(fnode).parent()).css({ top: xy[1] + 'px', left: xy[0] + 'px' });
-			 *            me.notifyFrameMoved();
+			 *            me.notifyFrameMoved$();
 			 *            return null;
 			 *            };
 			 */

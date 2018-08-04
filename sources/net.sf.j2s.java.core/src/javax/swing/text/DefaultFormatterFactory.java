@@ -183,7 +183,6 @@ public class DefaultFormatterFactory extends JFormattedTextField.AbstractFormatt
     	 * editFormat || (editFormat = null);
     	 * nullFormat || (nullFormat = null);
     	 */
-    	{}
     	set(defaultFormat, displayFormat, editFormat, nullFormat);
     }
 

@@ -668,82 +668,75 @@ public class JPopupMenu extends JComponent implements MenuElement {
         }
     }
 
-    /**
-     * Sets the visibility of the popup menu.
-     *
-     * @param b true to make the popup visible, or false to
-     *          hide it
-     * @beaninfo
-     *           bound: true
-     *     description: Makes the popup visible
-     */
-    @Override
-		public void setVisible(boolean b) {
+	/**
+	 * Sets the visibility of the popup menu.
+	 *
+	 * @param b true to make the popup visible, or false to hide it
+	 * @beaninfo bound: true description: Makes the popup visible
+	 */
+	@Override
+	public void setVisible(boolean b) {
 //        if (DEBUG) {
 //            System.out.println("JPopupMenu.setVisible " + b);
 //        }
 
-        // Is it a no-op?
-        if (b == isVisible())
-            return;
+		// Is it a no-op?
+		if (b == isVisible())
+			return;
 
-        this.getUI().setVisible(true);
-      	/**
-      	 * @j2sNative
-      	 * 
-      	 * 
-      	 */
-      	{
-      	
+		this.getUI().setVisible(true);
+		/**
+		 * @j2sNative
+		 * 
+		 * 
+		 */
+		{
+			// not implemented in SwingJS 
+			
+			// if closing, first close all Submenus
+			if (b == false) {
 
-        // if closing, first close all Submenus
-        if (b == false) {
-        	
+				// 4234793: This is a workaround because JPopupMenu.firePopupMenuCanceled is
+				// a protected method and cannot be called from BasicPopupMenuUI directly
+				// The real solution could be to make
+				// firePopupMenuCanceled public and call it directly.
+				Boolean doCanceled = (Boolean) getClientProperty("JPopupMenu.firePopupMenuCanceled");
+				if (doCanceled != null && doCanceled == Boolean.TRUE) {
+					putClientProperty("JPopupMenu.firePopupMenuCanceled", Boolean.FALSE);
+					firePopupMenuCanceled();
+				}
+				getSelectionModel().clearSelection();
 
-            // 4234793: This is a workaround because JPopupMenu.firePopupMenuCanceled is
-            // a protected method and cannot be called from BasicPopupMenuUI directly
-            // The real solution could be to make
-            // firePopupMenuCanceled public and call it directly.
-            Boolean doCanceled = (Boolean)getClientProperty("JPopupMenu.firePopupMenuCanceled");
-            if (doCanceled != null && doCanceled == Boolean.TRUE) {
-                putClientProperty("JPopupMenu.firePopupMenuCanceled", Boolean.FALSE);
-                firePopupMenuCanceled();
-            }
-            getSelectionModel().clearSelection();
+			} else {
+				// This is a popup menu with MenuElement children,
+				// set selection path before popping up!
+				if (isPopupMenu()) {
+					MenuElement me[] = new MenuElement[1];
+					me[0] = (MenuElement) this;
+					MenuSelectionManager.defaultManager().setSelectedPath(me);
+				}
+			}
 
-        } else {
-            // This is a popup menu with MenuElement children,
-            // set selection path before popping up!
-            if (isPopupMenu()) {
-                MenuElement me[] = new MenuElement[1];
-                me[0] = (MenuElement) this;
-                MenuSelectionManager.defaultManager().setSelectedPath(me);
-            }
-        }
+			if (b) {
+				firePopupMenuWillBecomeVisible();
+				popup = getPopup();
+				firePropertyChange("visible", Boolean.FALSE, Boolean.TRUE);
 
-        if(b) {
-            firePopupMenuWillBecomeVisible();
-            popup = getPopup();
-            firePropertyChange("visible", Boolean.FALSE, Boolean.TRUE);
+			} else if (popup != null) {
+				firePopupMenuWillBecomeInvisible();
+				popup.hide();
+				popup = null;
+				firePropertyChange("visible", Boolean.TRUE, Boolean.FALSE);
+				// 4694797: When popup menu is made invisible, selected path
+				// should be cleared
+				if (isPopupMenu()) {
+					MenuSelectionManager.defaultManager().clearSelectedPath();
+				}
+			}
 
+		}
 
-        } else if(popup != null) {
-            firePopupMenuWillBecomeInvisible();
-            popup.hide();
-            popup = null;
-            firePropertyChange("visible", Boolean.TRUE, Boolean.FALSE);
-            // 4694797: When popup menu is made invisible, selected path
-            // should be cleared
-            if (isPopupMenu()) {
-                MenuSelectionManager.defaultManager().clearSelectedPath();
-            }
-        }
-        
-    		
-    	}
-    	
-
-    }
+	}
 
     /**
      * Returns a <code>Popup</code> instance from the

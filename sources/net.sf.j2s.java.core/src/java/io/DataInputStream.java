@@ -162,17 +162,14 @@ public class DataInputStream extends FilterInputStream implements DataInput {
 	 */
 	@Override
 	public final int read(byte b[], int off, int len) throws IOException {
-		/**
-		 * @j2sNative
-		 * 
-		 * 			if (arguments.length == 1) { off = 0; len = b.length; }
-		 */
-		{
-		}
-
 		return in.read(b, off, len);
 	}
 
+	@Override
+	public int read(byte[] b) throws IOException {
+		return in.read(b, 0, b.length);
+	}
+	
 	// /**
 	// * See the general contract of the <code>readFully</code> method of
 	// * <code>DataInput</code>.
@@ -348,15 +345,8 @@ public class DataInputStream extends FilterInputStream implements DataInput {
 		int ch2 = in.read();
 		if ((ch1 | ch2) < 0)
 			throw new EOFException();
-		short n = (short) ((ch1 << 8) + (ch2 << 0));
-		/**
-		 * @j2sNative
-		 *
-		 * 			return (n > 0x7FFF ? n - 0x10000 : n);
-		 */
-		{
-			return n;
-		}
+//		@SuppressWarnings("unused")
+		return (short) ((ch1 << 8) + (ch2 << 0));	
 	}
 
 	/**
@@ -436,15 +426,7 @@ public class DataInputStream extends FilterInputStream implements DataInput {
 		int ch4 = in.read();
 		if ((ch1 | ch2 | ch3 | ch4) < 0)
 			throw new EOFException();
-		int n = ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + (ch4 << 0));
-		/**
-		 * @j2sNative
-		 * 
-		 * 			return (n > 0x7FFFFFFF ? n - 0x100000000 : n);
-		 */
-		{
-			return n;
-		}
+		return ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + (ch4 << 0)) | 0;
 	}
 
 	private byte readBuffer[] = new byte[8];

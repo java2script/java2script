@@ -251,7 +251,7 @@ class Random implements java.io.Serializable {
                 for (long u = r >>> 1;            // ensure nonnegative
                      u + m - (r = u % n) < 0L;    // rejection check
                      u = nextLong() >>> 1) // retry
-                    ;
+                {}
                 r += origin;
             }
             else {              // range not representable as long
@@ -395,7 +395,7 @@ class Random implements java.io.Serializable {
             for (int u = r;
                  u - (r = u % bound) + m < 0;
                  u = next(31))
-                ;
+            {}
         }
         return r;
     }
@@ -789,7 +789,7 @@ class Random implements java.io.Serializable {
      *     for (long u = r >>> 1;            // ensure nonnegative
      *          u + m - (r = u % n) < 0L;    // rejection check
      *          u = nextLong() >>> 1) // retry
-     *         ;
+     *         {}
      *     r += origin;
      *   }
      *   else {              // range not representable as long
@@ -838,7 +838,7 @@ class Random implements java.io.Serializable {
      *     for (long u = r >>> 1;            // ensure nonnegative
      *          u + m - (r = u % n) < 0L;    // rejection check
      *          u = nextLong() >>> 1) // retry
-     *         ;
+     *         {}
      *     r += origin;
      *   }
      *   else {              // range not representable as long

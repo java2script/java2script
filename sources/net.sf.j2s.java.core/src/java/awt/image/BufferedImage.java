@@ -83,7 +83,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	protected boolean _havePix;
 	protected Object _canvas; // created in setRGB
 	private int[] _pixSaved;
-	private JSGraphics2D _g; // a JSGraphics2D instance
+    JSGraphics2D _g; // a JSGraphics2D instance
 	//private static int rangeIndex;
 
 	/**
@@ -1687,14 +1687,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 */
 	@SuppressWarnings("unused")
 	public void setPixels() {
-		DOMNode canvas = null;
-		/**
-		 * @j2sNative
-		 * 
-		 * if (this._g)
-		 *   canvas = this._g.canvas;
-		 */
-		{}
+		DOMNode canvas = (_g == null ? null : /** @j2sNative this._g.canvas || */null);
 		if (canvas == null)
 			canvas = DOMNode.createElement("canvas", null);
 		int w = width;
@@ -1719,13 +1712,6 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	  _pix = toIntARGB(data);
 		_imgNode = canvas;
 		((DataBufferInt) raster.getDataBuffer()).data = _pix;
-		/**
-		 * in case this is a sun.awt.image.IntegerComponentRaster
-		 * @j2sNative
-		 * 
-		 * 	this.raster.data = this._pix;
-		 * 
-		 */
 		_havePix = true;
 	}
 
@@ -1761,17 +1747,19 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
    * @author Bob Hanson
    * @return a JSGraphics2D object
    */
+	@SuppressWarnings("unused")
 	public Graphics2D getImageGraphic() {
 		if (_g == null) {
 			HTML5Canvas canvas = (HTML5Canvas) DOMNode.createElement("canvas", "img" + System.currentTimeMillis());
+			int w = getWidth();
+			int h = getHeight();
 			/**
 			 * @j2sNative
 			 * 
-			 * canvas.width = this.getWidth();
-			 * canvas.height = this.getHeight();
+			 * canvas.width = w;
+			 * canvas.height = h;
 			 * 	
 			 */
-			{}
 			 _canvas = canvas;
 			Object pix =  _pix;
 			_g = new JSGraphics2D(canvas);

@@ -748,6 +748,10 @@ if (!J2S._version)
 	J2S._getFileData = function(fileName, fSuccess, doProcess, isBinary) {
 		// swingjs.api.J2SInterface
 		// use host-server PHP relay if not from this host
+		if (fileName.indexOf("https://./") == 0)
+			fileName = fileName.substring(10);
+		else if (fileName.indexOf("http://./") == 0)
+			fileName = fileName.substring(9);
 		isBinary = (isBinary || J2S._isBinaryUrl(fileName));
 		var isPDB = (fileName.indexOf("pdb.gz") >= 0 && fileName
 				.indexOf("//www.rcsb.org/pdb/files/") >= 0);
@@ -763,6 +767,7 @@ if (!J2S._version)
 			fileName = "file://" + fileName.substring(5); // / fixes IE
 															// problem
 		var isFile = (fileName.indexOf("file://") == 0);
+		
 		var isMyHost = (fileName.indexOf("://") < 0 || fileName
 				.indexOf(document.location.protocol) == 0
 				&& fileName.indexOf(document.location.host) >= 0);
@@ -1903,7 +1908,7 @@ if (!J2S._version)
 				c = c.parentElement;
 			if (!comp)
 				return;
-			var d = comp.getLocationOnScreen();
+			var d = comp.getLocationOnScreen$();
 			var x = oe.pageX - d.x;
 			var y = oe.pageY - d.y;
 			if (file == null) {
@@ -2102,6 +2107,12 @@ if (!J2S._version)
 			}
 	}
 
+	// See SwingJSApplet.js 
+	// The original Jmol "applet" was created as an 
+	// extension to a canvas. We still do that even
+	// though it doesn't make a lot of sense. Nonetheless,
+	// this canvas is used for the main canvas for 
+	// a SwingJS applet.
 	J2S._jsSetPrototype = function(proto) {
 		proto._init = function() {
 			this._setupJS();
@@ -2163,18 +2174,19 @@ if (!J2S._version)
 			var container = J2S.$(this, "appletdiv");
 			// if (doReplace) {
 
-			try {
-				container[0].removeChild(this._canvas);
-				if (this._canvas.frontLayer)
-					container[0].removeChild(this._canvas.frontLayer);
-				if (this._canvas.rearLayer)
-					container[0].removeChild(this._canvas.rearLayer);
-				if (this._canvas.contentLayer)
-					container[0].removeChild(this._canvas.contentLayer);
-				J2S._jsUnsetMouse(this._mouseInterface);
-			} catch (e) {
+			if (this._canvas) {
+				try {
+					container[0].removeChild(this._canvas);
+					if (this._canvas.frontLayer)
+						container[0].removeChild(this._canvas.frontLayer);
+					if (this._canvas.rearLayer)
+						container[0].removeChild(this._canvas.rearLayer);
+					if (this._canvas.contentLayer)
+						container[0].removeChild(this._canvas.contentLayer);
+					J2S._jsUnsetMouse(this._mouseInterface);
+				} catch (e) {
+				}
 			}
-			// }
 			var w = Math.round(container.width());
 			var h = Math.round(container.height());
 			var canvas = document.createElement('canvas');
@@ -2282,7 +2294,7 @@ if (!J2S._version)
 					return;
 				}
 				if (applet.__Info.main && applet.__Info.headless) {
-					cl.main(applet.__Info.args || []);
+					cl.main$SA(applet.__Info.args || []);
 				} else {
 					var viewerOptions = Clazz.new_(Clazz
 							.load("java.util.Hashtable"));
@@ -2325,7 +2337,7 @@ if (!J2S._version)
 						viewerOptions.put("display", applet._id + "_canvas2d");
 					var w = applet.__Info.width;
 					var h = applet.__Info.height;
-					if (applet._canvas && w > 0 && h > 0 && (w != applet._canvas.width
+					if (w > 0 && h > 0 && (w != applet._canvas.width
 							|| h != applet._canvas.height)) {
 						// developer has used static { thisApplet.__Info.width=...}
 						J2S.$(applet, "appletdiv").width(w).height(h);
@@ -2336,7 +2348,7 @@ if (!J2S._version)
 			} catch (e) {
 				System.out.println((J2S._isAsync ? "normal async abort from "
 						: "")
-						+ e);
+						+ e + (e.stack ? "\n" + e.stack : ""));
 				return;
 			}
 
@@ -2369,15 +2381,6 @@ if (!J2S._version)
 		proto._canScript = function(script) {
 			return true
 		};
-		proto.equals = function(a) {
-			return this == a
-		};
-		proto.clone = function() {
-			return this
-		};
-		proto.hashCode = function() {
-			return parseInt(this._uniqueId)
-		};
 
 		proto._processGesture = function(touches, frameViewer) {
 			(frameViewer || this._appletPanel)
@@ -2387,7 +2390,7 @@ if (!J2S._version)
 		proto._processEvent = function(type, xym, ev, frameViewer) {
 			// xym is [x,y,modifiers,wheelScroll]
 			(frameViewer || this._appletPanel).processMouseEvent$I$I$I$I$J$O$I(
-					type, xym[0], xym[1], xym[2], System.currentTimeMillis(),
+					type, xym[0], xym[1], xym[2], System.currentTimeMillis$(),
 					ev, xym[3]);
 		}
 
@@ -2765,8 +2768,8 @@ if (!J2S._version)
 	J2S._getResourcePath = function(path, isJavaPath) {
 		if (!path || path.indexOf("https:/") != 0
 				&& path.indexOf("https:/") != 0 && path.indexOf("file:/") != 0) {
-			var applet = J2S._applets[java.lang.Thread.currentThread()
-					.getName()];
+			var applet = J2S._applets[java.lang.Thread.currentThread$()
+					.getName$()];
 			path = (!isJavaPath && applet.__Info.resourcePath || applet.__Info.j2sPath)
 					+ "/" + (path || "");
 		}

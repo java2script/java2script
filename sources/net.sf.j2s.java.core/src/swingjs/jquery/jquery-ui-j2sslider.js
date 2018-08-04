@@ -120,10 +120,10 @@
 									// InputEvent.BUTTON1 +
 									// InputEvent.BUTTON1_DOWN_MASK;
 									// same call here as in j2sApplet
-									me.options.jslider.getFrameViewer()
+									me.options.jslider.getFrameViewer$()
 											.processMouseEvent$I$I$I$I$J$O$I(
 													id, xye.x, xye.y, 1040,
-													System.currentTimeMillis(),
+													System.currentTimeMillis$(),
 													xye.ev);
 								};
 

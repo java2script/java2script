@@ -113,7 +113,7 @@ public final class MsgHelp {
 //		}
 //		*/
 //		/**
-//		 * @j2sNative
+//		 * xxxxj2sNative
 //		 * 
 //		 * Class.forName("java.util.ResourceBundle");
 //		 */

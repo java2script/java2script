@@ -273,11 +273,12 @@ public abstract class SunGraphics2D
     }
     
     protected Object clone0() {
+    	// SunGraphics2D is never called; see swingjs.JSGraphics2D
 //        try {
 //          SunGraphics2D g;
 //        	/**
 //        	 * avoid super call to Object.clone();
-//        	 * @j2sNative
+//        	 * xxxxj2sNative
 //        	 * 
 //        	 * g = Clazz.clone(this);
 //        	 * 

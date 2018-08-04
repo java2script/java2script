@@ -44,15 +44,7 @@ public class AjaxURLConnection extends URLConnection {
    */
   @SuppressWarnings("null")
   private Object doAjax(boolean isBinary) {
-    J2SObjectInterface j2s = null;
-    /**
-     * @j2sNative
-     * 
-     *            j2s = J2S;
-     * 
-     */
-    {
-    }
+    J2SObjectInterface j2s = /** @j2sNative J2S || */ null;
     return j2s._doAjax(url, postOut, bytesOut, isBinary);
   }
 
@@ -95,8 +87,6 @@ public class AjaxURLConnection extends URLConnection {
 		 *       data = url._streamData;
 		 *       if (andDelete) url._streamData = null;
 		 */
-		{
-		}
 		return (data == null ? null : Rdr.toBIS(data));
 	}
 

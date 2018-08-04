@@ -35,7 +35,7 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 	 * @return whether this participant is active for a given project
 	 */
 	public boolean isActive(IJavaProject project) {
-		boolean isj2s = Java2ScriptCompiler.isActive(project.getProject());
+ 		boolean isj2s = Java2ScriptCompiler.isActive(project);
 		System.out.println("isActive " + isj2s + " " + project.getProject().getLocation());
 		return isj2s;
 	}
@@ -105,7 +105,7 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 			System.out.println("building JavaScript " + project.getProject().getLocation());
 			Java2ScriptCompiler j2sCompiler = new Java2ScriptCompiler();
 			j2sCompiler.startBuild(isCleanBuild);
-			j2sCompiler.initializeProject(project.getProject(), true);
+			j2sCompiler.initializeProject(project, true);
 			for (int i = 0; i < javaFiles.length; i++) {
 				System.out.println("transpiling " + javaFiles[i]);
 // trying to keep the progess monitor running - didn't work

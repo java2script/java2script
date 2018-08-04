@@ -30,12 +30,14 @@ package java.awt.image;
 
 import java.awt.image.ImageConsumer;
 import java.awt.image.ImageProducer;
+import java.awt.Graphics;
 import java.awt.image.ColorModel;
 import java.util.Hashtable;
 import java.util.Vector;
 import java.util.Enumeration;
 
 import javajs.util.AU;
+import swingjs.JSGraphics2D;
 
 /**
  * This class is an implementation of the ImageProducer interface which
@@ -114,7 +116,7 @@ public class MemoryImageSource implements ImageProducer {
     int width;
     int height;
     ColorModel model;
-    Object pixels;
+    Object pixels; // could be byte[] or int[]
     int pixeloffset;
     int pixelscan;
     Hashtable properties;
@@ -459,27 +461,20 @@ public class MemoryImageSource implements ImageProducer {
      * @see #setAnimated
      * @see #setFullBufferUpdates
      */
-    public synchronized void newPixels(int x, int y, int w, int h,
+    @SuppressWarnings({ "unused", "null" })
+	public synchronized void newPixels(int x, int y, int w, int h,
                                        boolean framenotify) {
-    	/**
-    	 * 
-    	 * We allow here for the possibility of using g.getGraphics()
-    	 * on a memory image source. Java does not allow this, and 
-    	 * perhaps SwingJS should not as well, but for now we allow it.
-    	 * 
-    	 * Standard buffered images will have ._pix, and they will
-    	 * have ._g after image.getGraphics()
-    	 * 
-    	 * @j2sNative
-    	 *
-    	 * if (this.pixels.img && this.pixels.img._g) {
-    	 *  this.pixels.img._pix = this.pixels;
-    	 *  this.pixels.img._g.drawImage$java_awt_Image$I$I$java_awt_image_ImageObserver(this.pixels.img, 0, 0, null);
-    	 *  this.pixels.img._pix = null;
-    	 * }
-    	 */
-    	{}
-        if (animating) {
+    	
+    	Object pixels = this.pixels;
+    	BufferedImage img = /** @j2sNative pixels.img || */ null;
+    	JSGraphics2D g = (img == null ? null : img._g);
+    	if (img != null && g != null) {
+    		img._pix = (int[]) pixels;
+       	    g.drawImage(img, 0, 0, null);
+        	img._pix = null;
+    	}
+
+    	if (animating) {
             if (fullbuffers) {
                 x = y = 0;
                 w = width;

@@ -453,7 +453,7 @@ public class RepaintManager {
 			return;
 
 //		/**
-//		 * @j2sNative
+//		 * xxxj2sNative
 //		 * 
 //		 * var g = c.getGraphics();
 //		 * if (g == null || g.gc == null)return;

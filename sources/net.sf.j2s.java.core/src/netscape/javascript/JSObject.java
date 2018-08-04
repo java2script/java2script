@@ -77,13 +77,13 @@ public class JSObject {
 			/**
 			 * @j2sNative
 			 * 
-			 * return o.doubleValue();
+			 * return o.doubleValue$();
 			 */
 		} else if (o instanceof Boolean) {
 			/**
 			 * @j2sNative
 			 * 
-			 * return o.BooleanValue();
+			 * return o.BooleanValue$();
 			 */
 		} else if (o instanceof JSObject) {
 			return ((JSObject) o).obj;

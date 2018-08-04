@@ -1,5 +1,6 @@
 // SwingJSApplet.js
 
+// BH 8/1/2018 $-qualified Java methods
 // generic SwingJS Applet
 // BH 3/14/2018 8:42:33 PM adds applet._window for JSObject
 // BH 12/18/2016 8:09:56 AM added SwingJS.Loaded and SwingJS.isLoaded
@@ -226,11 +227,12 @@ if (typeof(SwingJS) == "undefined") {
     // for now assigning this._applet here instead of in readyCallback
     Clazz.loadClass("swingjs.JSAppletViewer");
 		this._appletPanel = Clazz.new_(swingjs.JSAppletViewer.c$$java_util_Hashtable, [viewerOptions]);
-    this._appletPanel.start();
+    this._appletPanel.start$();
 	}
 	
 	proto._addCoreFiles = function() {
-		J2S._addCoreFile((this.__Info.core || "swingjs"), this._j2sPath, this.__Info.preloadCore);
+		if (this.__Info.core != "NONE" && this.__Info.core != "none")
+			J2S._addCoreFile((this.__Info.core || "swingjs"), this._j2sPath, this.__Info.preloadCore);
 		if (J2S._debugCode) {
 		// no min package for that
 			J2S._addExec([this, null, "swingjs.JSAppletViewer", "load " + this.__Info.code]);

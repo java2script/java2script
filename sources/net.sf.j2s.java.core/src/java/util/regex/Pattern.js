@@ -46,18 +46,18 @@ Clazz.newMeth(C$,"split$CharSequence$I", function(input,limit){
 });
 
 Clazz.newMeth(C$,"split$CharSequence", function(input){
-  return this.split(input,0);
+  return this.split$CharSequence$I(input,0);
 });
 
-Clazz.newMeth(C$,"pattern", function(){
+Clazz.newMeth(C$,"pattern$", function(){
   return this.regexp.source;
 });
 
 Clazz.newMeth(C$,"toString", function(){
-  return this.pattern();
+  return this.pattern$();
 });
 
-Clazz.newMeth(C$,"flags", function(){
+Clazz.newMeth(C$,"flags$", function(){
   return this.$flags;
 });
 

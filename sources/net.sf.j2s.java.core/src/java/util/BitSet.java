@@ -709,30 +709,24 @@ public class BitSet implements Cloneable, JSONEncodable {
   @Override
   public Object clone() {
     if (!sizeIsSticky && wordsInUse != words.length)
-      setLength(wordsInUse);
+    	words = Arrays.copyOf(words, wordsInUse);
     return copy(this);
   }
 
-  /**
-   * Attempts to reduce internal storage used for the bits in this bit set.
-   * Calling this method may, but is not required to, affect the value returned
-   * by a subsequent call to the {@link #size()} method.
-   * @param n 
-   */
-  private void setLength(int n) {
-    /**
-     * @j2sNative
-     *     if (n == this.words.length) return;
-     *     if (n == this.wordsInUse) {
-     *      this.words = Clazz.array(-1, this.words, 0, n);
-     *      return;
-     *     }
-     */
-    {}
-    int[] a = new int[n];
-    System.arraycopy(words, 0, a, 0, wordsInUse);
-    words = a;    
-  }
+	/**
+	 * Attempts to reduce internal storage used for the bits in this bit set.
+	 * Calling this method may, but is not required to, affect the value returned by
+	 * a subsequent call to the {@link #size()} method.
+	 * 
+	 * @param n
+	 */
+	private void setLength(int n) {
+		if (n == words.length)
+			return;
+		int[] a = new int[n];
+		System.arraycopy(words, 0, a, 0, wordsInUse);
+		words = a;
+	}
 
   /**
    * Returns a string representation of this bit set. For every index for which
@@ -775,48 +769,23 @@ public class BitSet implements Cloneable, JSONEncodable {
   
   private final static int[] emptyBitmap = new int[0];
 
-  /**
-   * fast copy
-   * 
-   * @param bitsetToCopy
-   * @return bs
-   */
-  public static BitSet copy(BitSet bitsetToCopy) {
-    BitSet bs;
-    /**
-     * Clazz.clone will copy wordsInUse and sizeIsSticky, 
-     * but just a pointer to the words array.
-     * 
-     * @j2sNative
-     * 
-     *            bs = Clazz.clone(bitsetToCopy);
-     * 
-     */
-    {
-      bs = new BitSet();
-    }
-    int wordCount = bitsetToCopy.wordsInUse;
-    if (wordCount == 0) {
-      bs.words = emptyBitmap;
-    } else {
-      
-      /**
-       * Clazz.clone will copy wordsInUse and sizeIsSticky, 
-       * but just a pointer to the words array.
-       * 
-       * @j2sNative
-       * 
-       *   bs.words = Clazz.array(-1, bitsetToCopy.words, 0, bs.wordsInUse = wordCount);
-       * 
-       */
-      {
-        bs.words = new int[bs.wordsInUse = wordCount];
-        System.arraycopy(bitsetToCopy.words, 0, bs.words, 0, wordCount);
-      }
-
-    }
-    return bs;
-  }
+	/**
+	 * fast copy
+	 * 
+	 * @param bitsetToCopy
+	 * @return bs
+	 */
+	public static BitSet copy(BitSet bitsetToCopy) {
+		BitSet bs = new BitSet();
+		int wordCount = bitsetToCopy.wordsInUse;
+		if (wordCount == 0) {
+			bs.words = emptyBitmap;
+		} else {
+			bs.words = new int[bs.wordsInUse = wordCount];
+			System.arraycopy(bitsetToCopy.words, 0, bs.words, 0, wordCount);
+		}
+		return bs;
+	}
 
   /**
    * 

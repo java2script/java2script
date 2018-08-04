@@ -25,7 +25,8 @@ import java.lang.annotation.Annotation;
  */
 public final class Method extends AccessibleObject implements GenericDeclaration, Member {
 
-	private Object signature;
+	
+	private String signature;
 	private Class<?> Class_;
 	// This is guaranteed to be interned by the VM in the 1.4
 	// reflection implementation
@@ -346,6 +347,12 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 		return returnType;
 	}
 
+
+	@Override
+	public String getSignature() {
+		return (String) signature;
+	}
+	
 	/**
 	 * Answers an integer hash code for the receiver. Objects which are equal answer
 	 * the same value for this method. The hash code for a Method is the hash code

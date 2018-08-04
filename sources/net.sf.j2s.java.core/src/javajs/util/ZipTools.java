@@ -313,7 +313,7 @@ public class ZipTools implements GenericZipTools {
   @Override
   public Object getZipOutputStream(Object bos) {
 //    /**
-//     * @j2sNative
+//     * xxxxj2sNative
 //     * 
 //     *            return javajs.api.Interface.getInterface(
 //     *            "java.util.zip.ZipOutputStream").setZOS(bos);
