@@ -1908,7 +1908,7 @@ if (!J2S._version)
 				c = c.parentElement;
 			if (!comp)
 				return;
-			var d = comp.getLocationOnScreen();
+			var d = comp.getLocationOnScreen$();
 			var x = oe.pageX - d.x;
 			var y = oe.pageY - d.y;
 			if (file == null) {

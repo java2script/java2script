@@ -2,6 +2,19 @@ SwingJS distribution
 
 https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/dropins/README.txt
 
+8/6/2018 Bob Hanson hansonr@stolaf.edu
+
+Java2Script 3.2.2.03 introduces and checks more Java 8 capabilities. 
+Use
+
+  eclipsec -clean  
+
+to update to new versions of the transpiler. Otherwise although the transpiler is updated, it will
+report out an incorrect version number. This can be checked on the last line of every JS file created:
+
+Clazz.setTVer('3.2.2.03');//Created 2018-08-06 17:25:47 Java2ScriptVisitor version 3.2.2.03 net.sf.j2s.core.jar version 3.2.2.03
+
+
 7/20/2018 Bob Hanson hansonr@stolaf.edu
 
 The base Java version is Java 6. However, many of the functionalities of Java 7 and Java 8 are included. 
