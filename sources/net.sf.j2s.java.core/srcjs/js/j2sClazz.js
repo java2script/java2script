@@ -10,6 +10,7 @@
 // TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
 //       It is possible that these might be loaded dynamically.
 
+// BH 8/5/2018  3.2.2 adds Clazz.newLambda(...)
 // BH 8/4/2018  3.2.2 cleans up String $-qualified methods headless and javax tests pass
 // BH 8/1/2018  3.2.2 adds default interface methods as C$.$defaults$
 // BH 7/28/2018 3.2.2 upgrade to all-qualified methods. 
@@ -610,6 +611,60 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
 Clazz.newInterface = function (prefix, name, _null1, _null2, interfacez, _0) {
   return Clazz.newClass(prefix, name, function(){}, null, interfacez, 0);
 };
+
+var lambdaCache = {};
+
+Clazz.newLambda = function(fc, m, isFunc) {
+	var key = (fc.__CLASS_NAME__ || fc) + "." + m + "." + isFunc;
+	var ret = lambdaCache[key];
+	if (ret)
+		return ret;
+    // creates a new functional interface
+	// fc is either an executable method from i -> fc() or a class or object from Class::meth
+	// meth is the method name
+	// isFunct == true for Function; false for Consumer
+	var fAction, fAfter;
+	if (m) { // Lambda_M
+		var g = fc[m];
+		var f = g||fc.prototype[m];
+		fAction = function(t) {return f.apply(f == g ? fc : t,[t])};		
+	} else { // Lambda_E
+		fAction = fc;
+	}	
+	if (isFunc) {
+		fAfter = function(t) { fAction(t); after.apply$(t); };
+	} else {
+		fAfter = function(t) { fAction(t); after.accept$(t); };
+	}
+	
+	var andThen = function(after) { 
+		if (!after) throw new NullPointerException(); 
+		return fAfter(t);
+	};		
+
+	if (isFunc) {
+		ret = {
+			apply$: fAction, 
+			andThen$java_util_function_Function: andThen, 
+			compose$java_util_function_Function: function(before) {
+				if (!before) throw new NullPointerException(); 
+				return function(t) { fAction(before.apply$(t)); };		
+			},
+			identity$: function(t) { return t},
+			__CLASS_NAME__:"java_util_function_Function"
+		};
+		
+		
+	} else {
+		ret =  {accept$: fAction, 
+				andThen$java_util_function_Consumer: andThen,
+				__CLASS_NAME__:"java_util_function_Consumer"
+		};
+	}
+	return lambdaCache[key] = ret;
+};
+
+
 
 Clazz.newMeth = function (clazzThis, funName, funBody, modifiers) {
 
@@ -5222,5 +5277,4 @@ var newMethodNotFoundException = function (clazz, method) {
 
 })(Clazz, J2S); 
 }; // called by external application 
-
 
