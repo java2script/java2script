@@ -33,6 +33,17 @@ class Test_ {
 	private int test3() {
 		// Some random tests
 
+		{
+			long j = 1;
+			int i = 3;
+			j &= ~(1L << i);
+			j = 1L << i;
+			j = 1L << 3;
+			j &= 1L << i;
+			j = ~i;
+			j = ~(1L << i);
+		}
+
 		System.out.println("abcde".indexOf(99));
 		assert ("test".contentEquals(new StringBuffer("test")));
 		int i = "test\2".charAt(4);
