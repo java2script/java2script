@@ -5,7 +5,7 @@
  	<extension
          point="org.eclipse.jdt.core.compilationParticipant">
       <compilationParticipant
-            class="net.sf.j2s.core.compiler.Java2ScriptCompilationParticipant"
+            class="net.sf.j2s.core.Java2ScriptCompilationParticipant"
             createsProblems="false"
             id="Java2Script CompilationParticipant"
             modifiesEnvironment="false"
@@ -13,6 +13,5 @@
       </compilationParticipant>
    </extension>
 
-<!-- 3.2.1 now does not use a special builder. This is just for legacy code -->
 
 </plugin>

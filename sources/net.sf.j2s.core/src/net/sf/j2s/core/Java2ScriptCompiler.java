@@ -1,4 +1,4 @@
-package net.sf.j2s.core.compiler;
+package net.sf.j2s.core;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -25,9 +25,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-
-import net.sf.j2s.core.CorePlugin;
-import net.sf.j2s.core.astvisitors.Java2ScriptVisitor;
 
 /**
  * The main (and currently only operational) Java2Script compiler.

@@ -10,6 +10,7 @@
 // TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
 //       It is possible that these might be loaded dynamically.
 
+// BH 8/6/2018  3.2.2 adds ?j2squiet option
 // BH 8/5/2018  3.2.2 adds Clazz.newLambda(...)
 // BH 8/4/2018  3.2.2 cleans up String $-qualified methods headless and javax tests pass
 // BH 8/1/2018  3.2.2 adds default interface methods as C$.$defaults$
@@ -101,6 +102,7 @@ window["j2s.clazzloaded"] = true;
 try {
 	Clazz._debugging = (document.location.href.indexOf("j2sdebug") >= 0);
 	Clazz._loadcore = (document.location.href.indexOf("j2snocore") < 0);
+	Clazz._quiet = (document.location.href.indexOf("j2squiet") >= 0);
 } catch (e) {}
 
 try {
@@ -614,16 +616,16 @@ Clazz.newInterface = function (prefix, name, _null1, _null2, interfacez, _0) {
 
 var lambdaCache = {};
 
-Clazz.newLambda = function(fc, m, isFunc) {
-	var key = (fc.__CLASS_NAME__ || fc) + "." + m + "." + isFunc;
+Clazz.newLambda = function(fc, m, lambdaType) {
+	var key = (fc.__CLASS_NAME__ || fc) + "." + (m||0) + "." + lambdaType;
 	var ret = lambdaCache[key];
 	if (ret)
 		return ret;
     // creates a new functional interface
 	// fc is either an executable method from i -> fc() or a class or object from Class::meth
-	// meth is the method name
-	// isFunct == true for Function; false for Consumer
-	var fAction, fAfter;
+	// m is the method name
+	// lambdaTypeis 'F', 'C', or 'P' (Function, Consumer, or Predicate)
+	var fAction;
 	if (m) { // Lambda_M
 		var g = fc[m];
 		var f = g||fc.prototype[m];
@@ -631,36 +633,53 @@ Clazz.newLambda = function(fc, m, isFunc) {
 	} else { // Lambda_E
 		fAction = fc;
 	}	
-	if (isFunc) {
-		fAfter = function(t) { fAction(t); after.apply$(t); };
-	} else {
-		fAfter = function(t) { fAction(t); after.accept$(t); };
+	switch(lambdaType) {
+	case 'C':
+		ret =  {accept$: fAction, 
+				andThen$java_util_function_Function: function(after) { 
+					if (!after) throw new NullPointerException(); 
+					return function(t) { fAction(t); after.accept$(t);}
+				}, 
+			__CLASS_NAME__:"java_util_function_Consumer"
+		};
+		break;
+	case 'F':
+		ret = {
+				apply$: fAction, 
+				andThen$java_util_function_Function: function(after) { 
+					if (!after) throw new NullPointerException(); 
+					return function(t) { return after.apply$(fAction(t));}
+				}, 
+				compose$java_util_function_Function: function(before) {
+					if (!before) throw new NullPointerException(); 
+					return function(t) { return fAction(before.apply$(t));}		
+				},
+				identity$: function(t) { return t},
+				__CLASS_NAME__:"java_util_function_Function"
+			};
+		break;
+	case 'P':
+		ret =  {test$: fAction, 
+			and$java_util_function_predicate: function(other) {
+				if (!other) throw new NullPointerException(); 
+				return function(t) { return fAction(t) && other.test$(t);}
+			},
+			or$java_util_function_predicate: function(other) {
+				if (!other) throw new NullPointerException(); 
+				return function(t) { return fAction(t) || other.test$(t);}
+			},
+			negate$: function() {
+				return function(t) { return !fAction(t) }	
+			},
+			isEqual$O: function(target) {
+				return function(t) { return (target == null) == (t == null)
+					&& (t == null  || t.equals$O(target));}
+			},
+			__CLASS_NAME__:"java_util_function_Predicate"
+		};
+		break;
 	}
 	
-	var andThen = function(after) { 
-		if (!after) throw new NullPointerException(); 
-		return fAfter(t);
-	};		
-
-	if (isFunc) {
-		ret = {
-			apply$: fAction, 
-			andThen$java_util_function_Function: andThen, 
-			compose$java_util_function_Function: function(before) {
-				if (!before) throw new NullPointerException(); 
-				return function(t) { fAction(before.apply$(t)); };		
-			},
-			identity$: function(t) { return t},
-			__CLASS_NAME__:"java_util_function_Function"
-		};
-		
-		
-	} else {
-		ret =  {accept$: fAction, 
-				andThen$java_util_function_Consumer: andThen,
-				__CLASS_NAME__:"java_util_function_Consumer"
-		};
-	}
 	return lambdaCache[key] = ret;
 };
 
@@ -2305,7 +2324,7 @@ _Loader.getClasspathFor = function (clazz, forRoot, ext) {
  *
  */
 /* public */
-_Loader.onScriptLoading = function (file){System.out.println("Classloader.onscriptloading " + file);};
+_Loader.onScriptLoading = function (file){Clazz._quiet || System.out.println("Classloader.onscriptloading " + file);};
 
 /* public */
 _Loader.onScriptLoaded = function (file, isError, data){};
@@ -2970,9 +2989,9 @@ Sys.out.printf = Sys.out.printf$S$OA = Sys.out.format = Sys.out.format$S$OA = fu
   Sys.out.print(String.format$S$OA.apply(null, arguments));
 }
 
-Sys.out.println = Sys.out.println$O = Sys.out.println$Z = Sys.out.println$I = Sys.out.println$S = Sys.out.println$C = Sys.out.println = function(s) {
-
 Sys.out.flush$ = function() {}
+
+Sys.out.println = Sys.out.println$O = Sys.out.println$Z = Sys.out.println$I = Sys.out.println$S = Sys.out.println$C = Sys.out.println = function(s) {
 
 if (("" + s).indexOf("TypeError") >= 0) {
    debugger;
@@ -5269,7 +5288,7 @@ var newMethodNotFoundException = function (clazz, method) {
 
   //if (!J2S._isAsync) {
   if (!Clazz._loadcore || J2S._coreFiles.length == 0) {
-	System.out.println("Clazz: No core files to load -- check Info.core"); 
+	if (!Clazz._quiet)System.out.println("Clazz: No core files to load -- check Info.core"); 
   }
   for (var i = 0; i < J2S._coreFiles.length; i++)
 	Clazz.loadScript(J2S._coreFiles[i]);
