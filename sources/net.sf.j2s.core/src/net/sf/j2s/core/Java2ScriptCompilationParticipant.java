@@ -1,4 +1,4 @@
-package net.sf.j2s.core.compiler;
+package net.sf.j2s.core;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.compiler.BuildContext;

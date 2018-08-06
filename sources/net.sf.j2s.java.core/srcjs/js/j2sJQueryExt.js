@@ -125,8 +125,8 @@
 			return {
 				// synchronous or asynchronous binary transfer only
 				send: function( headers, complete ) {        
-					var xhr = s.xhr();
-					console.log("xhr.open binary async=" + s.async + " url=" + s.url);
+					var xhr = s.xhr();// BH SwingJS adds quiet option
+					self.Clazz&&Clazz._quiet||console.log("xhr.open binary async=" + s.async + " url=" + s.url);
 					xhr.open( s.type, s.url, s.async );					
 					var isOK = false;
 					try {

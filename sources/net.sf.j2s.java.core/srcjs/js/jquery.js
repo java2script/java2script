@@ -9644,7 +9644,8 @@ if ( xhrSupported ) {
 						id = ++xhrId;
 
 					// Open the socket
-					console.log("xhr.open async=" + options.async + " url=" + options.url);
+					// BH 2018 quiet option
+					self.Clazz&&Clazz._quiet || console.log("xhr.open async=" + options.async + " url=" + options.url);
 					xhr.open( options.type, options.url, options.async, options.username, options.password );
 
 					// Apply custom fields if provided
