@@ -12462,6 +12462,8 @@ if (!J2S._version)
 			xym[2] = J2S._getKeyModifiers(ev);
 
 		var ui = ev.target["data-ui"];
+		
+		
 		// if (who.isdragging && (!ui || !ui.handleJSEvent(who, 506, ev))) {}
 		who.applet._processEvent((who.isDragging ? 506 : 503), xym, ev,
 				who._frameViewer); // MouseEvent.MOUSE_DRAGGED :
@@ -12996,7 +12998,7 @@ if (!J2S._version)
 					if (w > 0 && h > 0 && (!applet._canvas || w != applet._canvas.width
 							|| h != applet._canvas.height)) {
 						// developer has used static { thisApplet.__Info.width=...}
-						J2S.$(applet, "appletdiv").width(w).height(h);
+						J2S.$(applet, "appletinfotablediv").width(w).height(h);
 						applet._newCanvas(true);
 					}
 					applet._newApplet(viewerOptions);
@@ -13446,7 +13448,7 @@ if (!J2S._version)
 //       It is possible that these might be loaded dynamically.
 
 // BH 8/6/2018  3.2.2 sets user.home to be "https://./"
-// BH 8/6/2018  3.2.2 adds ?j2squiet option
+// BH 8/6/2018  3.2.2 adds ?j2sverbose option -- lists all files loaded; sets Clazz._quiet = false
 // BH 8/5/2018  3.2.2 adds Clazz.newLambda(...)
 // BH 8/4/2018  3.2.2 cleans up String $-qualified methods headless and javax tests pass
 // BH 8/1/2018  3.2.2 adds default interface methods as C$.$defaults$
@@ -13525,11 +13527,11 @@ window["j2s.clazzloaded"] = true;
  */
 /* static */
 /*Class = */ Clazz = {
-  _isQuiet: false,
+  _isQuiet: true,
   _debugging: false,
   _loadcore: true,
   _nooutput: 0,
-  _VERSION: "3.2.2.01",
+  _VERSION: "3.2.2.03",
   _VERSION_T: "unknown",
 };
 
@@ -13538,7 +13540,7 @@ window["j2s.clazzloaded"] = true;
 try {
 	Clazz._debugging = (document.location.href.indexOf("j2sdebug") >= 0);
 	Clazz._loadcore = (document.location.href.indexOf("j2snocore") < 0);
-	Clazz._quiet = (document.location.href.indexOf("j2squiet") >= 0);
+	Clazz._quiet = (document.location.href.indexOf("j2sverbose") < 0);
 } catch (e) {}
 
 try {

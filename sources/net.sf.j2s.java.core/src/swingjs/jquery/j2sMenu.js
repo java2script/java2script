@@ -217,13 +217,13 @@ Swing.showMenu = function(menu, x, y) {
     menu.$ulTop.find("[role=menuitem]").each(function(){
       var node = this;
       node.applet = menu._applet;
-      node._frameViewer = menu.invoker.getFrameViewer();
+      node._frameViewer = menu.invoker.getFrameViewer$();
       node._menu = menu;
       J2S._jsSetMouse(node, true);
     });
   }
 	menu._visible = true;
-	menu.timestamp = System.currentTimeMillis();
+	menu.timestamp = System.currentTimeMillis$();
 	menu.dragBind(true);
 	menu.$ulTop.unbind('clickoutjsmol mousemoveoutjsmol');
   if (!J2S._persistentMenu)
