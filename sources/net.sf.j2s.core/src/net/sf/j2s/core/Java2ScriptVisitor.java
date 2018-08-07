@@ -133,6 +133,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// BH 8/6/2018  -- additional Java 8 fixes; enum $valueOf$S to valueOf$S
 // BH 8/1/2018  -- adds interface default methods as C$.$defaults$(C$)
 // BH 7/29/2018 -- java.util.stream.Collectors is returning java.util.Collectionthis.b$['java.util.Collection'].add
 
@@ -2093,7 +2094,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					// implicit Enum methods added as trailer
 					buffer.append("Clazz.newMeth(C$, 'values$', function() { return $vals }, 1);\r\n");
 					buffer.append(
-							"Clazz.newMeth(C$, '$valueOf$S', function(name) { for (var val in $vals){ if ($vals[val].$name == name) return $vals[val]} return null }, 1);\r\n");
+							"Clazz.newMeth(C$, 'valueOf$S', function(name) { for (var val in $vals){ if ($vals[val].$name == name) return $vals[val]} return null }, 1);\r\n");
 				}
 			}
 		}

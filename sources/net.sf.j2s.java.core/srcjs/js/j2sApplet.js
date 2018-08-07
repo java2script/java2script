@@ -1,5 +1,6 @@
 // j2sCore.js (based on JmolCore.js
 
+// BH 8/6/2018 fix for Java Application start-up when not headless in Java 8
 // BH 7/21/2018 fix for static{thisApplet.__Info.width=300} not working
 // BH 7/2/2018 10:00:49 PM fix logic for FileReader for Chrome
 // BH 7/1/2018 7:25:25 AM fixes drag-drop for first call in Firefox/win
@@ -2337,7 +2338,7 @@ if (!J2S._version)
 						viewerOptions.put("display", applet._id + "_canvas2d");
 					var w = applet.__Info.width;
 					var h = applet.__Info.height;
-					if (w > 0 && h > 0 && (w != applet._canvas.width
+					if (w > 0 && h > 0 && (!applet._canvas || w != applet._canvas.width
 							|| h != applet._canvas.height)) {
 						// developer has used static { thisApplet.__Info.width=...}
 						J2S.$(applet, "appletdiv").width(w).height(h);
