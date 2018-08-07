@@ -10,6 +10,7 @@
 // TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
 //       It is possible that these might be loaded dynamically.
 
+// BH 8/6/2018  3.2.2 sets user.home to be "https://./"
 // BH 8/6/2018  3.2.2 adds ?j2squiet option
 // BH 8/5/2018  3.2.2 adds Clazz.newLambda(...)
 // BH 8/4/2018  3.2.2 cleans up String $-qualified methods headless and javax tests pass
@@ -954,12 +955,15 @@ Clazz.isClassDefined = function(clazzName) {
     b.__NDIM = a.__NDIM;
     b.getClass$ = a.getClass$; 
     b.equals$O = a.equals$O;
+    b.hashCode$ = a.hashCode$;
     return b;
  }
  
  var setArray = function(vals, baseClass, paramType, ndims) {
   ndims = Math.abs(ndims);
   vals.getClass$ = function () { return arrayClass(this.__BASECLASS, this.__NDIM) };
+  vals.hashCode$ = function() {return this.toString().hashCode$()}
+
   vals.equals$O = function (a) { 
     if (a.__ARRAYTYPE != this.__ARRAYTYPE || a.length != this.length)
       return false;
@@ -2934,6 +2938,8 @@ java.lang.System = System = {
       case "java.class.version":
         v = "50";
         break;
+      case "user.home":
+    	v = "https:/./";
       case "java.vendor":
     	v = "SwingJS/OpenJDK";
       case "java.version":
@@ -2976,6 +2982,7 @@ java.lang.System = System = {
 ;(function(Con, Sys) {
 
 Sys.getProperty$S = Sys.getProperty$S$S;
+Sys.exit$I = Sys.exit$;
 
 Sys.out = new Clazz._O ();
 Sys.out.__CLASS_NAME__ = "java.io.PrintStream";
@@ -3156,7 +3163,7 @@ var decorateAsNumber = function (clazz, qClazzName, type, PARAMCODE) {
 
 decorateAsNumber(Integer, "Integer", "int", "I");
 
-Integer.toString=Integer.prototype.toString=function(){
+Integer.toString=Integer.toString$I=Integer.prototype.toString=function(){
   if(arguments.length!=0){
     return "" + arguments[0];
   } 
@@ -3347,7 +3354,7 @@ if (typeof arguments[0] != "object")this.c$(arguments[0]);
 });
 
 decorateAsNumber(Long, "Long", "long", "L");
-Long.toString=Long.prototype.toString=function(){
+Long.toString=Long.toString$J=Long.prototype.toString=function(){
 if(arguments.length!=0){
 return""+arguments[0];
 }else if(this===Long){
@@ -3483,7 +3490,7 @@ this.valueOf=function(){return v;};
 this.byteValue = function(){return v};
 }, 1);
 
-Byte.toString=Byte.prototype.toString=function(){
+Byte.toString=Byte.toString$B=Byte.prototype.toString=function(){
 if(arguments.length!=0){
 return""+arguments[0];
 }else if(this===Byte){
@@ -3560,7 +3567,7 @@ m$(Float, ["c$", "c$$S", "c$$F", "c$$D"], function(v){
  this.valueOf=function(){return v;}
 }, 1);
 
-Float.toString$F=Float.prototype.toString=function(){
+Float.toString=Float.toString$F=Float.prototype.toString=function(){
 if(arguments.length!=0){
 return Clazz._floatToString(arguments[0]);
 }else if(this===Float){
@@ -3628,7 +3635,7 @@ Clazz._setDeclared("java.lang.Double", java.lang.Double=Double=function(){
 if (typeof arguments[0] != "object")this.c$(arguments[0]);
 });
 decorateAsNumber(Double,"Double", "double", "D");
-Double.toString$D=Double.prototype.toString=function(){
+Double.toString=Double.toString$D=Double.prototype.toString=function(){
 if(arguments.length!=0){
 return Clazz._floatToString(arguments[0]);
 }else if(this===Double){
@@ -3657,6 +3664,7 @@ function(num){
 return isNaN(arguments.length == 1 ? num : this.valueOf());
 });
 
+Float.prototype.hashCode$ = Double.prototype.hashCode$ = function() {("" + this.valueOf()).hashCode$()}
 Double.isInfinite$D = m$(Double,"isInfinite$",
 function(num){
 return!Number.isFinite(arguments.length == 1 ? num : this.valueOf());
@@ -3952,7 +3960,7 @@ sp.replace$=function(c1,c2){
   return this.replace(new RegExp(c1,"gm"),c2);
 };
 
-sp.replaceAll$CharSequence$CharSequence=function(exp,str){
+sp.replaceAll$S$S=sp.replaceAll$CharSequence$CharSequence=function(exp,str){
 var regExp=new RegExp(exp,"gm");
 return this.replace(regExp,str);
 };
