@@ -1390,7 +1390,7 @@ public abstract class DefaultRowSorter<M, I> extends RowSorter<M> {
      */
     // NOTE: this class is static so that it can be placed in an array
     private static class Row implements Comparable<Row> {
-        private DefaultRowSorter sorter;
+        DefaultRowSorter sorter; 
         int modelIndex;
 
         public Row(DefaultRowSorter sorter, int index) {
