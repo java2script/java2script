@@ -6324,8 +6324,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			// end with 0 && to replace a number with 0.
 			// end with null && to replace anything with null
 			// end with 1?xxx: to replace anything with xxx
+			// /** @j2sNatve ! */true
+			// (/** @j2sNative 1?x: */y)
+			// /** @j2sNative true || */javaOnly()
 
-			boolean isInline = code.endsWith("|") || code.endsWith("&") || code.endsWith(":");
+			boolean isInline = code.endsWith("|") || code.endsWith("&") || code.endsWith(":") || code.endsWith("!");
 			buffer.append(isInline ? "" : addPrefix ? "{\r\n" : "\r\n");
 			buffer.append(code);
 			buffer.append(isInline ? "" : addPostfix ? "\r\n}\r\n" : "\r\n");
