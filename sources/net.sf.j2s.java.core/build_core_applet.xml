@@ -292,11 +292,10 @@
         	" />
     </antcall>
    	
-   	<echo>TODO: Could delete demo html files? </echo>
-   	
    	<echo>creating dist/SwingJS-site.zip </echo>
    	<zip destfile="dist/SwingJS-site.zip" basedir="site" >
    		<exclude name="swingjs/j2s/test/**"/>
+   		<exclude name="*.html"/>
    	</zip>
    	
   </target>

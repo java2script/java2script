@@ -395,7 +395,7 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		 *             f();
 		 *             } catch (e) {
 		 *             var s = "JSToolkit.dispatch$I(" + id +"): " 
-		 *               + e + "\n" + (e.getStackTrace$ ? e.getStackTrac$e() + "\n" : "") + (!!e.stack ? e.stack : "");
+		 *               + e + "\n" + (e.getStackTrace$ ? e.getStackTrace$() + "\n" : "") + (!!e.stack ? e.stack : "");
 		 *             System.out.println(s);
 		 *             alert(s);
 		 *             }

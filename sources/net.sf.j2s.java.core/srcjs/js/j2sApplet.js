@@ -1807,6 +1807,8 @@ if (!J2S._version)
 			xym[2] = J2S._getKeyModifiers(ev);
 
 		var ui = ev.target["data-ui"];
+		
+		
 		// if (who.isdragging && (!ui || !ui.handleJSEvent(who, 506, ev))) {}
 		who.applet._processEvent((who.isDragging ? 506 : 503), xym, ev,
 				who._frameViewer); // MouseEvent.MOUSE_DRAGGED :
@@ -2341,7 +2343,7 @@ if (!J2S._version)
 					if (w > 0 && h > 0 && (!applet._canvas || w != applet._canvas.width
 							|| h != applet._canvas.height)) {
 						// developer has used static { thisApplet.__Info.width=...}
-						J2S.$(applet, "appletdiv").width(w).height(h);
+						J2S.$(applet, "appletinfotablediv").width(w).height(h);
 						applet._newCanvas(true);
 					}
 					applet._newApplet(viewerOptions);
