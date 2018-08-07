@@ -2939,9 +2939,11 @@ java.lang.System = System = {
         v = "50";
         break;
       case "user.home":
-    	v = "https:/./";
+    	v = "https://./";
+    	break;
       case "java.vendor":
     	v = "SwingJS/OpenJDK";
+    	break;
       case "java.version":
         v = "1.6-1.8";
         break;
