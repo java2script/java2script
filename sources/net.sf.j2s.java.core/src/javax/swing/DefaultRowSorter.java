@@ -126,7 +126,7 @@ public abstract class DefaultRowSorter<M, I> extends RowSorter<M> {
     /**
      * model -> view (JTable)
      */
-    private int[] modelToView;
+    private int[] modelToView; 
 
     /**
      * Comparators specified by column.
@@ -986,7 +986,8 @@ public abstract class DefaultRowSorter<M, I> extends RowSorter<M> {
                 } else {
                 		Comparator c = sortComparators[counter];
                 		// BH 2018 problem here is that comparators are T, but here we have I
-             			result = (/** @j2sNative c == null ? 0 :  c.compare$O$O ? c.compare$O$O(v1,v2) : */ c.compare(v1, v2));
+//             			result = (/** @j2sNative c == null ? 0 :  c.compare$O$O ? c.compare$O$O(v1,v2) : */ c.compare(v1, v2));
+             			result = c.compare(v1, v2);
                 }
                 if (sortOrder == SortOrder.DESCENDING) {
                     result = -result;
@@ -1390,12 +1391,12 @@ public abstract class DefaultRowSorter<M, I> extends RowSorter<M> {
      */
     // NOTE: this class is static so that it can be placed in an array
     private static class Row implements Comparable<Row> {
-        DefaultRowSorter sorter; 
+        private DefaultRowSorter sorter; 
         int modelIndex;
 
         public Row(DefaultRowSorter sorter, int index) {
             this.sorter = sorter;
-            modelIndex = index;
+            modelIndex = index; 
         }
 
         @Override

@@ -1083,7 +1083,8 @@ public class JSComponentUI extends ComponentUI
 			DOMNode.setSize(node, size.width, size.height);
 			if (node == centeringNode) {
 				// also set domNode?
-				DOMNode.setPositionAbsolute(parentNode, Integer.MIN_VALUE, 0);
+//				DOMNode.setPositionAbsolute(parentNode, Integer.MIN_VALUE, 0);
+				DOMNode.setStyles(node, "position", null);
 				DOMNode.setSize(parentNode, size.width, size.height);
 			}
 		} else {
@@ -1697,14 +1698,15 @@ public class JSComponentUI extends ComponentUI
 			default:
 				return;
 			}
+			// Problem:
 			// edu_northwestern_physics_groups_atomic_applet_Mirror_applet.html
-			// seems to work OK here because the absolute is being removed
-			// there was a problem with Applet.init() not having the right
-			// width/height initialization
-			// but now it seems OK. This issue is most certainly the issue that
-			// in applet start up
 			// an initial paint shows checkboxes lower than they should be.
-			DOMNode.setStyles(centeringNode, "position", "absolute", "left", left + "px");
+			// JalView panel checkboxes too low. 
+			// Solution: remove all setting of position:absolute for centeringNode 
+			// EXCEPT just before size testing with body.append(). 
+			DOMNode.setStyles(centeringNode, 
+//					"position", "absolute", 
+					"left", left + "px");
 		}
 	}
 
@@ -1757,7 +1759,7 @@ public class JSComponentUI extends ComponentUI
 		default:
 			return;
 		}
-		DOMNode.setStyles(centeringNode, "position", "absolute", "top", top + "px");
+		DOMNode.setStyles(centeringNode, /*"position", "absolute", */"top", top + "px");
 	}
 
 	@Override
