@@ -228,7 +228,7 @@ Swing.showMenu = function(menu, x, y) {
 	menu.$ulTop.unbind('clickoutjsmol mousemoveoutjsmol');
   if (!J2S._persistentMenu)
   	menu.$ulTop.bind('clickoutjsmol mousemoveoutjsmol', function(evspecial, target, ev) {
-	  if (System.currentTimeMillis() - menu.timestamp > 1000)
+	  if (System.currentTimeMillis$() - menu.timestamp > 1000)
 		  Swing.hideMenu(menu);
 	});
 	menu.$ulTop.bind("contextmenu", function() {return false;});
