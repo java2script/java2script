@@ -80,7 +80,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 
 		// Get the dimensions of the radio button by itself.
 
-		// We have to remove any position:abolute because if that
+		// We have to remove any position:absolute because if that
 		// is there, it messes up the width and height calculation.
 		DOMNode.setStyles(centeringNode, "position", null);
 		DOMNode.setStyles(iconNode, "position", null);
@@ -140,8 +140,8 @@ public class JSRadioButtonUI extends JSButtonUI {
 			DOMNode.setPositionAbsolute(radioBtn, Integer.MIN_VALUE, 0);
 			DOMNode.setPositionAbsolute(textNode, Integer.MIN_VALUE, 0);
 			DOMNode.setPositionAbsolute(btnLabel, Integer.MIN_VALUE, 0);
-			if (centeringNode != null)
-				DOMNode.setPositionAbsolute(centeringNode, Integer.MIN_VALUE, 0);
+//			if (centeringNode != null) problems with vertical offset
+//				DOMNode.setPositionAbsolute(centeringNode, Integer.MIN_VALUE, 0);
 			DOMNode.setStyles(btnLabel, "width", d.width + "px", "height", d.height
 					+ "px");
 		}

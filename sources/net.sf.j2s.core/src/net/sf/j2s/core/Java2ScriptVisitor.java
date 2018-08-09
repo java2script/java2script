@@ -98,6 +98,9 @@ import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
+
+import sun.security.ssl.KerberosClientKeyExchange;
+
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -132,6 +135,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
+
+// TODO DefaultRowSorter final method changes this.sorter.compare to p$1.compare???
 
 // BH 8/6/2018  -- additional Java 8 fixes; enum $valueOf$S to valueOf$S
 // BH 8/1/2018  -- adds interface default methods as C$.$defaults$(C$)
@@ -589,10 +594,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			return getClassJavaNameForClass(qualType.getQualifier()) + "."
 					+ qualType.getName().getIdentifier();
 		}
-		if (type instanceof NameQualifiedType) {
-			NameQualifiedType nType = (NameQualifiedType) type;
-			return  nType.getQualifier() + "." + nType.getName().getIdentifier();
-		}
+//		if (type instanceof NameQualifiedType) {
+//			NameQualifiedType nType = (NameQualifiedType) type;
+//			return  getClassJavaNameForClass(nType.getQualifier()) + "." + nType.getName().getIdentifier();
+//		}
 		
 		if (type instanceof ArrayType)
 			return getClassJavaNameForClass(((ArrayType) type).getElementType());
@@ -1173,13 +1178,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// I have not found a way to do this with lambda expressions.
 		//
 		boolean isStatic = isStatic(mBinding);// || expression != null && isStatic(expression.resolveTypeBinding()));
-		if (!isStatic && expression instanceof Name) {
-			IBinding binding = ((Name) expression).resolveBinding();
-			// no, because sometimes these are not fully qualified className =
-			// expression.toString();
-			// because System.out is the name of a static field, not a class
-			isStatic |= isStatic(binding);
-		}
+//		if (!isStatic && expression instanceof Name) {
+//			IBinding binding = ((Name) expression).resolveBinding();
+//			// no, because sometimes these are not fully qualified className =
+//			// expression.toString();
+//			// because System.out is the name of a static field, not a class
+//			isStatic |= isStatic(binding);
+//		}
 		boolean isPrivate = isPrivate(mBinding);
 		boolean isPrivateAndNotStatic = isPrivate && !isStatic;
 		String privateVar = (isPrivateAndNotStatic ? getPrivateVar(declaringClass, false) : null);
@@ -6326,7 +6331,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			// end with 1?xxx: to replace anything with xxx
 			// /** @j2sNatve ! */true
 			// (/** @j2sNative 1?x: */y)
-			// /** @j2sNative true || */javaOnly()
+			// /** @j2sNative true || */()
 
 			boolean isInline = code.endsWith("|") || code.endsWith("&") || code.endsWith(":") || code.endsWith("!");
 			buffer.append(isInline ? "" : addPrefix ? "{\r\n" : "\r\n");
@@ -6627,8 +6632,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @param binding
 	 * @return
 	 */
-	private static String getPrivateVar(IBinding binding, boolean isClassCompare) {
-		String key = binding.getKey(), key0 = null;
+	private String getPrivateVar(IBinding binding, boolean isClassCompare) {
+		String key = binding.getKey(), key0 = null, key1 = null;
 		if (isClassCompare)
 			key = "_" + key;
 		String p$ = classToPrivateVar.get(key);
@@ -6636,12 +6641,24 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			key0 = key;
 			p$ = classToPrivateVar.get(key = (isClassCompare ? "_" : "") + getNormalizedKey(binding));
 		}
+		if (p$ == null && !isClassCompare && key.indexOf("[") >= 0) {
+			key1 = key;
+			p$ = classToPrivateVar.get(key = key.substring(0, key.indexOf("[") + 1) + "]");
+		}
 		if (p$ == null) {
 			classToPrivateVar.put(key, p$ = "p$" + (isClassCompare ? ++privateClassCount : ++privateVarCount));
 			classToPrivateVar.put(key0, p$);
-			if (!isClassCompare)
+			if (!isClassCompare) {
+				if (key1 != null)
+					classToPrivateVar.put(key1, p$);
+//				System.out.println("adding " + p$ + " " + key + " " + key0 + " " + key1);
 				privateVarString += "," + p$ + "={}";
+			}
 		}
+//		if (!isClassCompare) {
+//			System.out.println(buffer.substring(buffer.length() - 20)); 
+//			System.out.println(">>" + p$ + " " + key + " " + key0 + " " + key1 + "<<");
+//		}
 		return p$;
 	}
 
@@ -6653,7 +6670,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @param b
 	 * @return
 	 */
-	private static boolean areEqual(IBinding a, IBinding b) {
+	private boolean areEqual(IBinding a, IBinding b) {
 		return getPrivateVar(a, true).equals(getPrivateVar(b, true));
 	}
 
