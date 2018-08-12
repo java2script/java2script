@@ -184,7 +184,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		 */
 		{}
 		
-		jSlider.setValue(val = (value));
+		jSlider.setValue(val = Math.round(value));
 	}
 
 	@Override
