@@ -10655,6 +10655,9 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sCore.js (based on JmolCore.js
 
+// BH 8/12/2018 adding J2S.onClazzLoaded(i,msg) hook for customization
+//   for example, the developer can look for i=1 (pre-core) and add core files selectively
+//   or set System.$props["user.home"] to a desired directory before (i=1) or just after (i=2) core file loading
 // BH 8/6/2018 fix for Java Application start-up when not headless in Java 8
 // BH 7/21/2018 fix for static{thisApplet.__Info.width=300} not working
 // BH 7/2/2018 10:00:49 PM fix logic for FileReader for Chrome
@@ -10706,6 +10709,8 @@ self.J2S
 			}
 
 		});
+
+J2S.onClazzLoaded || (J2S.onClazzLoaded = function(i, msg) {console.log([i,msg])});
 
 if (!J2S._version)
 	J2S = (function(document) {
@@ -13447,6 +13452,7 @@ if (!J2S._version)
 // TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
 //       It is possible that these might be loaded dynamically.
 
+// BH 8/12/2018 3.2.2 adding J2S.onClazzLoaded hook for Clazz loaded
 // BH 8/11/2018 3.2.2 Clazz.newLambda removed
 // BH 8/9/2018  3.2.2 adds newLambda(...'S')
 // BH 8/6/2018  3.2.2 sets user.home to be "https://./"
@@ -19047,8 +19053,12 @@ var newMethodNotFoundException = function (clazz, method) {
   if (!Clazz._loadcore || J2S._coreFiles.length == 0) {
 	if (!Clazz._quiet)System.out.println("Clazz: No core files to load -- check Info.core"); 
   }
-  for (var i = 0; i < J2S._coreFiles.length; i++)
+  
+  J2S.onClazzLoaded && J2S.onClazzLoaded(1, "Clazz loaded; loading J2S._coreFiles " + J2S._coreFiles.length);
+  for (var i = 0; i < J2S._coreFiles.length; i++) {
 	Clazz.loadScript(J2S._coreFiles[i]);
+  }
+  J2S.onClazzLoaded && J2S.onClazzLoaded(2, "Clazz loaded; core files loaded");
 
 
 })(Clazz, J2S); 

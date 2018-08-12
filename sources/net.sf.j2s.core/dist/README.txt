@@ -1,11 +1,17 @@
-SwingJS distribution 
+This is the main README file for the Java2Script/SwingJS distribution 
 
-https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/dropins/README.txt
+https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/README.txt
 
-8/6/2018 Bob Hanson hansonr@stolaf.edu
+8/12/2018 Bob Hanson hansonr@stolaf.edu
 
-Java2Script 3.2.2.03 introduces and checks more Java 8 capabilities. 
-Use
+The dist/dropins folder has been renamed dist/swingjs
+
+  https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/swingjs
+
+It holds the key files that are needed for a J2S project (see below).
+
+ 
+Java2Script 3.2.2.03 introduces and checks more Java 8 capabilities. Use
 
   eclipsec -clean  
 
@@ -26,21 +32,23 @@ This includes
  java.util.stream.*
  default methods in interfaces
 
-All projects compiled under 3.1.1 need to be recompiled using the Java2Script 3.2.1 transpiler, as
+All projects compiled under 3.1.1 need to be recompiled using the Java2Script 3.2.x transpiler, as
 described below. Note that if you use /** @j2sNative */ calls to interface methods that are singlets,
-you no longer need to add qualifications (such as $O) to them. It should be no problem to leave them
+those methods all take just $ as a qualifier. It should be no problem to leave them
 qualified, though, as the transpiler creates qualified and unqualified aliases. 
 
-There are situations where this use of unqualified method names can run into problems. For example, in 
-java.util.stream.ReferencePipeline, there are three different declarations of the functional interface
-method "accept". They were just for erro reporting and have been removed. 
+There are occasional situations where this use of $-unqualified method names can run into problems. 
+For example, in java.util.stream.ReferencePipeline, there are three different default declarations 
+of the functional interface method "accept". They are just for error reporting and have been removed. 
 My guess that this is a rarity, but I am not sure.
-
 
 SwingJS has been successfully tested in Eclipse version Neon-Photon on Mac and Windows platforms.
 (No reason to believe it would not also work for Linux; just haven't tried that recently.)
 Java 8 is the target Java version for transpilation. Please report any missing classes or strange
 errors.
+
+
+3/15/2018  Bob Hanson hansonr@stolaf.edu
 
 net.sf.j2s.core_3.2.1.jar replaces net.sf.j2s.core_3.1.1.jar
  
@@ -51,19 +59,14 @@ the standard Eclipse java builder, org.eclipse.jdt.core.javabuilder.
 
 For v. 3.2.1, to get started with SwingJS, all you need are:
 
-1) the latest transpiler from 
+1) the latest transpiler (net.sf.j2s.core.jar) and run-time (Swingjs-site.zip) from 
 
-https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/dropins
+https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/swingjs
 
-2) the latest JavaScript-site.zip from 
+2) an empty .j2s file in your project directory. (The Java2Script transpiler will fill this in with
+a default .j2s configuration when it runs the first time. Or, you could use the one in /dist to start)
 
-https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.java.core/dist
-
-3) an empty .j2s file in your project directory. (The v.3.2.1 transpiler will fill this in with
-a default .j2s configuration when it runs the first time.)
-
-
-NOTE! If you are updating to 3.2.1 from 3.1.1, be sure to open your .project file and change the 
+NOTE! If you are updating to 3.2.x from 3.1.1, be sure to open your .project file and change the 
 builder name from net.sf.j2s.core.java2scriptbuilder back to org.eclipse.jdt.core.javabuilder
 or your project will no longer compile.
 
@@ -89,22 +92,48 @@ that match the standard .class files created by the Eclipse Java compiler itself
 Note that both Java .class files (in bin/) and JavaScript .js files (in site/swingjs/j2s) are
 created automatically anytime you do any building of your project. 
 
+The easiest thing to do is to copy the contents of the dist/ directory 
+
+https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist
+
+into your project directory. It contains the following directories:
+
+swingjs/
+ -- contains the necessary Eclipse drop-in as well as the run-time
+ -- ver/ subfolder holds older versions
+tools/
+ -- contains ant-contrib.jar, used by build-site.xml
+libjs/
+ -- empty; reserved for foo.zip equivalents of dependency foo.jar files
+ -- these will be unzipped into site/ by build-site.xml
+resources/
+ -- empty; reserved for non-java resources your program might need
+ -- these will go into site/swingjs/j2s by build-site.xml
+
+and files:
+
+.j2s           -- a starter j2s configuration file
+build-site.xml -- run this to build the site/ directory before or after you 
+                  update your Java code. 
+ 
+
+The following instructions include instructions for doing some of this manually:
 
 1. Copy net.sf.j2s.core.jar from 
 
-https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/dropins
+https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/swingjs
 
 specifically:
 
-https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/dropins/net.sf.j2s.core.jar?raw=true
+https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/swingjs/net.sf.j2s.core.jar?raw=true
 
 into your eclipse/dropins directory.
 
 Also provided in that directory is a ver/ directory with previous core files. 
-It is recommended that you not use them. If you do, be sure to remove their _x.x.x version
-signature from their file name, or some versions of Eclipse will have to be 
-entirely reinstalled every time you change versions. We do not know why this is necessary, 
-but it appears to be. This is an Eclipse bug. So just always use dist/dropins/net.sf.j2s.core.jar. 
+These files have names that are purposely unversioned because some versions of Eclipse 
+will have to be entirely reinstalled every time you change versions if the names are different
+from version to version. We do not know why this is necessary, but it appears to be. 
+This is an Eclipse bug. So just always use dist/swingjs/net.sf.j2s.core.jar. 
 
 On Mac systems, the Eclipse directory is generally
 
@@ -117,7 +146,7 @@ Search for "j2s" to find j2s.sourceforge.net Java2Script Core
 
 If that is not there, you don't have net.sf.j2s.core.jar in the proper directory.
 
-   Note relating to updating to 3.2.1 from 3.1.1 version of Java2Script:
+   Note relating to updating to 3.2.x from 3.1.1 version of Java2Script:
 
       If the version on this readout does not match the version that is 
       reported at the end of each .js file created:
@@ -127,8 +156,7 @@ If that is not there, you don't have net.sf.j2s.core.jar in the proper directory
       then there is no real problem, but you can correct that by restarting 
       Eclipse once with the -clean flag. 
 
-   
-
+  
 ----------------------------------
 Creating a new J2S/SwingJS project
 ----------------------------------
@@ -145,11 +173,17 @@ All source code must be available. (Source code from decompiling .class files wi
 Installing the SwingJS JavaScript version of the Java Virtual Machine 
 ---------------------------------------------------------------------
 
+Chrome users should consider using WebServer for Chrome to serve local files. It is very
+simple to set up. 
+
+https://chrome.google.com/webstore/detail/web-server-for-chrome/ofhbbkphhbklhfoeikjpcbhemlocgigb?hl=en
+
+
 All of the JavaScript produced will be in the project site/ directory. 
 You must prepopulate this site with all the JavaScript required by the 
 JavaScript version of the JVM. The most recent version of site/ is at
 
-https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.java.core/dist/SwingJS-site.zip?raw=true
+https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/swingjs/SwingJS-site.zip?raw=true
 
 Occasional additions to the java.* classes are made to the above-mentioned zip file.
 
@@ -211,6 +245,13 @@ Info = {
 	allowjavascript: true
 }
 
+You can add 
+
+    core: "NONE",
+
+to that to prevent the use of core/coreswingjs.z.js and make life easier for yourself
+while debugging.
+
 These Info key/value pairs are equivalent to Java applet parameters. Use Info.args for the main(args[])
 parameters. For instance:
 
@@ -239,10 +280,11 @@ If you do that, be sure to use the OpenJDK version. For example:
 
 http://hg.openjdk.java.net/jdk8/jdk8/jdk/file/687fd7c7986d/src/share/classes
 
-Most of the code in the SwingJS project started with 
-Java 6-b14 or 6-b27. Build your project, then delete these Java files, because, should this file be added
-to an updated verison of SwingJS, you should probably use the one provided, not your own. Your choice.
+Most of the code in the SwingJS project started with Java 6-b14 or 6-b27. The goal is to 
+move these all to Java8 OpenJDK versions. 
 
+Build your project, then delete these Java files, because, should this file be added
+to an updated version of SwingJS, you should probably use the one provided, not your own. Your choice.
 
 ----------------
 Working projects
