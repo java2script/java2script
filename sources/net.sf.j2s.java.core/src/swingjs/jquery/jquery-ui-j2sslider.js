@@ -628,7 +628,7 @@
 								if (val <= this._valueMin()) {
 									return this._valueMin();
 								}
-								var max = (this._valueMax() - this._valueMin()) * (1-this.handleFraction) + this._valueMin();
+								var max = Math.round((this._valueMax() - this._valueMin()) * (1-this.handleFraction) + this._valueMin());
 								if (val >= max) {
 									return max;
 								}
@@ -646,7 +646,8 @@
 								// floats, round
 								// the final value to 5 digits after the decimal
 								// point (see #4124)
-								return parseFloat(alignValue.toFixed(5));
+
+								return Math.round(alignValue);// parseFloat(alignValue.toFixed(5));
 							},
 
 							_valueMin : function() {
