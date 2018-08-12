@@ -10,6 +10,8 @@
 // TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
 //       It is possible that these might be loaded dynamically.
 
+// BH 8/11/2018 3.2.2 Clazz.newLambda removed
+// BH 8/9/2018  3.2.2 adds newLambda(...'S')
 // BH 8/6/2018  3.2.2 sets user.home to be "https://./"
 // BH 8/6/2018  3.2.2 adds ?j2sverbose option -- lists all files loaded; sets Clazz._quiet = false
 // BH 8/5/2018  3.2.2 adds Clazz.newLambda(...)
@@ -400,6 +402,8 @@ Clazz.load = function(cName, from$clinit$) {
   return Clazz._4Name(cName, null, null, true);
 }
 
+Clazz._newCount = 0;
+
 /**
  * Create a new instance of a class. 
  * Accepts:
@@ -415,6 +419,8 @@ Clazz.new_ = function(c, args, cl) {
     return new Clazz._O();
   var haveArgs = !!args;
   args || (args = [[]]);
+  
+  Clazz._newCount++;
   
   var t0 = (_profileNew ? window.performance.now() : 0);
   
@@ -544,7 +550,7 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
       (of$ ? appendMap(appendMap({}, of$), finalVars) : finalVars)
       : of$ ? of$ : null);
   }
-  if (!outerObj || !objThis || !outerObj.__CLASS_NAME__)
+  if (!outerObj || !objThis)// could be String implementing CharSequence || !outerObj.__CLASS_NAME__)
     return;
   // BH: For efficiency: Save the b$ array with the OUTER class as $b$, 
   // as its keys are properties of it and can be used again.
@@ -552,7 +558,6 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
   var isNew = false;
   var innerName = getClassName(objThis, true);
   var clazz1 = getClazz(outerObj);
-  var clazz2 = (clazz.superclazz == clazz1 ? null : clazz.superclazz || null);
   if (!b) {
     b = outerObj.b$;
     // Inner class of an inner class must inherit all outer object references. Note that this 
@@ -569,36 +574,50 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
       isNew = true;
     }
     // add all superclass references for outer object
-    do {
-      var key = getClassName(clazz1, true);
-      if (!isNew && b[key])
-        break;
-      b[key] = outerObj; 
-    } while ((clazz1 = clazz1.superclazz));
+    addB$Keys(clazz1, isNew, b, outerObj, objThis);
   }
+  var clazz2 = (clazz.superclazz == clazz1 ? null : clazz.superclazz || null);
+  if (clazz2) {
+		// we have an inner object that subclasses a different object
+		// clone the map and overwrite with the correct values
+      b = appendMap({},b);
+	  addB$Keys(clazz2, true, b, objThis, objThis);
+  }
+  
+  // final objective: save this map for the inner object
   // add a flag to disallow any other same-class use of this map.
   b["$ " + innerName] = 1;
   // it is new, save this map with the OUTER object as $b$
   if (isNew)
     outerObj.$b$ = b;
-
-  if (clazz2) {
-	// we have an inner object that subclasses a different object
-	// clone the map and overwrite with the correct values
-      b = appendMap({},b);
-    do {
-      var key = getClassName(clazz2, true);
-      b[key] = objThis; 
-    } while ((clazz2 = clazz2.superclazz));
-  }
-  
-
-
-  // final objective: save this map for the inner object
   objThis.b$ = b;
   clazz.$this$0 && (objThis.this$0 = b[clazz.$this$0]);
   clazz.$clinit$ && clazz.$clinit$();  
   clazz.$init0$ && clazz.$init0$.apply(objThis);
+};
+
+
+var addB$Keys = function(clazz, isNew, b, outerObj, objThis) {
+  var cl = clazz;
+  do {
+    var key = getClassName(cl, true);
+    if (!isNew && b[key])
+      break;
+    b[key] = outerObj; 
+    if (key.indexOf("java.lang.") == 0)
+    	b[key.substring(10)] = outerObj;
+  } while ((cl = cl.superclazz));
+  if (cl != clazz && clazz.implementz) {
+  	var impl = clazz.implementz;
+  	for (var i = impl.length; --i >= 0;) {
+      var key = getClassName(impl[i], true);
+      if (isNew || !b[key]) {
+        b[key] = objThis; 
+	    if (key.indexOf("java.lang.") == 0)
+	    	b[key.substring(10)] = outerObj;
+      }
+  	}
+  }
 };
 
 
@@ -615,76 +634,85 @@ Clazz.newInterface = function (prefix, name, _null1, _null2, interfacez, _0) {
   return Clazz.newClass(prefix, name, function(){}, null, interfacez, 0);
 };
 
-var lambdaCache = {};
+// An interesting idea, but too complicated, and probably not that effective anyway.
+//var lambdaCache = {};
+//Clazz.newLambda = function(fc, m, lambdaType) {
+//	var key = (fc.__CLASS_NAME__ || fc) + "." + (m||0) + "." + lambdaType;
+//	var ret = lambdaCache[key];
+//	if (ret)
+//		return ret;
+//    // creates a new functional interface
+//	// fc is either an executable method from i -> fc() or a class or object from Class::meth
+//	// m is the method name
+//	// lambdaType is 'S', 'F', 'C', or 'P' (Supplier, Function, Consumer, or Predicate)
+//	// note that we should be taking into account Boolean,Int,Double,Long here, and
+//	// we are not fully elaborating the classes. For example getClass() does not work here.
+//	var fAction;
+//	if (m) { // Lambda_M
+//		var g = fc[m];
+//		var f = g||fc.prototype[m];
+//		fAction = function(t) {return f.apply(f == g ? fc : t,[t])};		
+//	} else { // Lambda_E, Lambda_S, Lambda_C, Lambda_T
+//		fAction = fc;
+//	}	
+//	switch(lambdaType) {
+//	case 'S': 
+//		ret =  {get$: fAction,
+//			__CLASS_NAME__:"java_util_function_Supplier"
+//		};
+//		// this is a rough-in
+//		ret.getAsBoolean$ = ret.getAsDouble$ = ret.getAsInt$ = ret.getAsLong$ = ret.get$;
+//		break;
+//	case 'C':
+//		ret =  {accept$: fAction, 
+//				andThen$java_util_function_Function: function(after) { 
+//					if (!after) throw new NullPointerException(); 
+//					return function(t,u) { fAction(t,u); after.accept$(t,u);}
+//				}, 
+//			__CLASS_NAME__:"java_util_function_Consumer"
+//		};
+//		break;
+//	case 'F':
+//		ret = {
+//				apply$: fAction, 
+//				andThen$java_util_function_Function: function(after) { 
+//					if (!after) throw new NullPointerException(); 
+//					return function(t,u) { return after.apply$(fAction(t,u));}
+//				}, 
+//				compose$java_util_function_Function: function(before) {
+//					if (!before) throw new NullPointerException(); 
+//					return function(t,u) { return fAction(before.apply$(t,u));}		
+//				},
+//				identity$: function(t) { return t},
+//				__CLASS_NAME__:"java_util_function_Function"
+//			};
+//		break;
+//	case 'P':
+//		ret =  {test$: fAction, 
+//			and$java_util_function_predicate: function(other) {
+//				if (!other) throw new NullPointerException(); 
+//				return function(t,u) { return fAction(t,u) && other.test$(t,u);}
+//			},
+//			or$java_util_function_predicate: function(other) {
+//				if (!other) throw new NullPointerException(); 
+//				return function(t,u) { return fAction(t,u) || other.test$(t,u);}
+//			},
+//			negate$: function() {
+//				return function(t,u) { return !fAction(t,u) }	
+//			},
+//			isEqual$O: function(target) {
+//				return function(t) { return (target == null) == (t == null)
+//					&& (t == null  || t.equals$O(target));}
+//			},
+//			__CLASS_NAME__:"java_util_function_Predicate"
+//		};
+//		break;
+//	}
+//	
+//	return lambdaCache[key] = ret;
+//};
 
-Clazz.newLambda = function(fc, m, lambdaType) {
-	var key = (fc.__CLASS_NAME__ || fc) + "." + (m||0) + "." + lambdaType;
-	var ret = lambdaCache[key];
-	if (ret)
-		return ret;
-    // creates a new functional interface
-	// fc is either an executable method from i -> fc() or a class or object from Class::meth
-	// m is the method name
-	// lambdaTypeis 'F', 'C', or 'P' (Function, Consumer, or Predicate)
-	var fAction;
-	if (m) { // Lambda_M
-		var g = fc[m];
-		var f = g||fc.prototype[m];
-		fAction = function(t) {return f.apply(f == g ? fc : t,[t])};		
-	} else { // Lambda_E
-		fAction = fc;
-	}	
-	switch(lambdaType) {
-	case 'C':
-		ret =  {accept$: fAction, 
-				andThen$java_util_function_Function: function(after) { 
-					if (!after) throw new NullPointerException(); 
-					return function(t) { fAction(t); after.accept$(t);}
-				}, 
-			__CLASS_NAME__:"java_util_function_Consumer"
-		};
-		break;
-	case 'F':
-		ret = {
-				apply$: fAction, 
-				andThen$java_util_function_Function: function(after) { 
-					if (!after) throw new NullPointerException(); 
-					return function(t) { return after.apply$(fAction(t));}
-				}, 
-				compose$java_util_function_Function: function(before) {
-					if (!before) throw new NullPointerException(); 
-					return function(t) { return fAction(before.apply$(t));}		
-				},
-				identity$: function(t) { return t},
-				__CLASS_NAME__:"java_util_function_Function"
-			};
-		break;
-	case 'P':
-		ret =  {test$: fAction, 
-			and$java_util_function_predicate: function(other) {
-				if (!other) throw new NullPointerException(); 
-				return function(t) { return fAction(t) && other.test$(t);}
-			},
-			or$java_util_function_predicate: function(other) {
-				if (!other) throw new NullPointerException(); 
-				return function(t) { return fAction(t) || other.test$(t);}
-			},
-			negate$: function() {
-				return function(t) { return !fAction(t) }	
-			},
-			isEqual$O: function(target) {
-				return function(t) { return (target == null) == (t == null)
-					&& (t == null  || t.equals$O(target));}
-			},
-			__CLASS_NAME__:"java_util_function_Predicate"
-		};
-		break;
-	}
-	
-	return lambdaCache[key] = ret;
-};
-
-
+var __allowOverwriteClass = true;
 
 Clazz.newMeth = function (clazzThis, funName, funBody, modifiers) {
 
@@ -1768,52 +1796,193 @@ Clazz.newInterface(java.lang,"Runnable");
 //Clazz.newInterface(java.lang,"Iterable");
 //Clazz.newInterface(java.util,"Comparator");
 
-(function(){var P$=java.lang,I$=[['java.util.stream.StreamSupport','java.util.Spliterators','java.lang.CharSequence$1CharIterator','java.lang.CharSequence$1CodePointIterator']],$incl$=function(i){return I$[i]=Clazz.load(I$[0][i-1])};
-var C$=Clazz.newInterface(java.lang, "CharSequence");
-C$.$defaults = function(C$) {
-var me;
+// TODO note that we are adding me = this, this.b$ = {CharSequence: me}, and this.b$['CharSequence'].length$()
+// This is a hack, just to get started, not desirable long term. 
+
+//(function(){var P$=java.lang,I$=[[0,'java.util.stream.StreamSupport','java.util.Spliterators']],$I$=function(i){return I$[i]||(I$[i]=Clazz.load(I$[0][i]))};
+//var C$=Clazz.newInterface(P$, "CharSequence");
+//var me;
+//
+//C$.$defaults$ = function(C$){
+//
+//// not quite...
+//	Clazz.newMeth(C$, 'chars$', function () {
+//		return $I$(1).intStream$java_util_function_Supplier$I$Z(
+//				Clazz.newLambda(
+//						function(){
+//							{ return($I$(2).spliterator$java_util_PrimitiveIterator_OfInt$J$I(
+//									Clazz.new_(CharSequence$1CharIterator.$init$, [b$['CharSequence'], {CharSequence:this.$finals.CharSequence}]), 
+//									b$['CharSequence'].length$(), 
+//									16));
+//							}
+//						},0,'S'), 16464, false);
+//		});
+//
+//	
+////	
+////Clazz.newMeth(C$, 'chars$', function () {
+////	me = this;
+////return $I$(1).intStream$java_util_function_Supplier$I$Z(((P$.CharSequence$lambda1||
+////(function(){var C$=Clazz.newClass(P$, "CharSequence$lambda1", function(){Clazz.newInstance(this, arguments[0],1,C$);}, null, 'java.util.function.Supplier', 1);
+////
+////C$.$clinit$ = function() {Clazz.load(C$, 1);
+////}
+////
+////Clazz.newMeth(C$, '$init$', function () {
+////	this.b$ = {CharSequence: me};
+////}, 1);
+/////*lambda_E*/
+////Clazz.newMeth(C$, 'get$', function () { return($I$(2).spliterator$java_util_PrimitiveIterator_OfInt$J$I(Clazz.new_(CharSequence$1CharIterator.$init$, [this, null]), this.b$['CharSequence'].length$(), 16));});
+////})()
+////), Clazz.new_(CharSequence$lambda1.$init$, [this, null])), 16464, false);
+////});
+//
+//Clazz.newMeth(C$, 'codePoints$', function () {
+//me = this;
+//return $I$(1).intStream$java_util_function_Supplier$I$Z(((P$.CharSequence$lambda2||
+//(function(){var C$=Clazz.newClass(P$, "CharSequence$lambda2", function(){Clazz.newInstance(this, arguments[0],1,C$);}, null, 'java.util.function.Supplier', 1);
+//
+//C$.$clinit$ = function() {Clazz.load(C$, 1);
+//}
+//
+//Clazz.newMeth(C$, '$init$', function () {
+//	this.b$ = {CharSequence: me};
+//}, 1);
+///*lambda_E*/
+//Clazz.newMeth(C$, 'get$', function () { return($I$(2).spliteratorUnknownSize$java_util_PrimitiveIterator_OfInt$I(Clazz.new_(CharSequence$1CodePointIterator.$init$, [this, null]), 16));});
+//})()
+//), Clazz.new_(CharSequence$lambda2.$init$, [this, null])), 16, false);
+//});
+//};;
+//(function(){var C$=Clazz.newClass(P$, "CharSequence$1CharIterator", function(){
+//Clazz.newInstance(this, arguments[0],true,C$);
+//}, null, [['java.util.PrimitiveIterator','java.util.PrimitiveIterator.OfInt']], 2);
+//
+//C$.$clinit$ = function() {Clazz.load(C$, 1);
+//}
+//
+//Clazz.newMeth(C$, '$init0$', function () {
+//var c;if((c = C$.superclazz) && (c = c.$init0$))c.apply(this);
+//this.cur = 0;
+//}, 1);
+//
+//Clazz.newMeth(C$, '$init$', function () {
+//this.cur = 0;
+//}, 1);
+//
+//Clazz.newMeth(C$, 'hasNext$', function () {
+//return this.cur < this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []);
+//});
+//
+//Clazz.newMeth(C$, 'nextInt$', function () {
+//if (this.hasNext$()) {
+//return this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [this.cur++]).$c();
+//} else {
+//throw Clazz.new_(Clazz.load('java.util.NoSuchElementException'));
+//}});
+//
+//Clazz.newMeth(C$, ['forEachRemaining$java_util_function_IntConsumer','forEachRemaining$TT_CONS'], function (block) {
+//for (; this.cur < this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []); this.cur++) {
+//block.accept$(this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [this.cur]).$c());
+//}
+//});
+//
+//Clazz.newMeth(C$);
+//})()
+//;
+//(function(){var C$=Clazz.newClass(P$, "CharSequence$1CodePointIterator", function(){
+//Clazz.newInstance(this, arguments[0],true,C$);
+//}, null, [['java.util.PrimitiveIterator','java.util.PrimitiveIterator.OfInt']], 2);
+//
+//C$.$clinit$ = function() {Clazz.load(C$, 1);
+//}
+//
+//Clazz.newMeth(C$, '$init0$', function () {
+//var c;if((c = C$.superclazz) && (c = c.$init0$))c.apply(this);
+//this.cur = 0;
+//}, 1);
+//
+//Clazz.newMeth(C$, '$init$', function () {
+//this.cur = 0;
+//}, 1);
+//
+//Clazz.newMeth(C$, ['forEachRemaining$java_util_function_IntConsumer','forEachRemaining$TT_CONS'], function (block) {
+//var length = this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []);
+//var i = this.cur;
+//try {
+//while (i < length){
+//var c1 = this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [i++]);
+//if (!Character.isHighSurrogate$C(c1) || i >= length ) {
+//block.accept$(c1.$c());
+//} else {
+//var c2 = this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [i]);
+//if (Character.isLowSurrogate$C(c2)) {
+//i++;
+//block.accept$(Character.toCodePoint$C$C(c1, c2));
+//} else {
+//block.accept$(c1.$c());
+//}}}
+//} finally {
+//this.cur=i;
+//}
+//});
+//
+//Clazz.newMeth(C$, 'hasNext$', function () {
+//return this.cur < this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []);
+//});
+//
+//Clazz.newMeth(C$, 'nextInt$', function () {
+//var length = this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []);
+//if (this.cur >= length) {
+//throw Clazz.new_(Clazz.load('java.util.NoSuchElementException'));
+//}var c1 = this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [this.cur++]);
+//if (Character.isHighSurrogate$C(c1) && this.cur < length ) {
+//var c2 = this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [this.cur]);
+//if (Character.isLowSurrogate$C(c2)) {
+//this.cur++;
+//return Character.toCodePoint$C$C(c1, c2);
+//}}return c1.$c();
+//});
+//
+//Clazz.newMeth(C$);
+//})()
+//})();
+//;Clazz.setTVer('3.2.2.03');//Created 2018-08-09 18:57:20 Java2ScriptVisitor version 3.2.2.03 net.sf.j2s.core.jar version 3.2.2.03
+
+(function(){var P$=java.lang,I$=[[0,'java.util.stream.StreamSupport','java.util.Spliterators','java.lang.CharSequence$lambda1','java.lang.CharSequence$lambda2']],$I$=function(i){return I$[i]||(I$[i]=Clazz.load(I$[0][i]))};
+var C$=Clazz.newInterface(P$, "CharSequence");
+C$.$defaults$ = function(C$){
 
 Clazz.newMeth(C$, 'chars$', function () {
-me = this;
-return (I$[1]||$incl$(1)).intStream$java_util_function_Supplier$I$Z(((
+return $I$(1).intStream$java_util_function_Supplier$I$Z(((P$.CharSequence$lambda1||
 (function(){var C$=Clazz.newClass(P$, "CharSequence$lambda1", function(){Clazz.newInstance(this, arguments[0],1,C$);}, null, 'java.util.function.Supplier', 1);
 
 C$.$clinit$ = function() {Clazz.load(C$, 1);
 }
 
 Clazz.newMeth(C$, '$init$', function () {
-	this.b$ = {CharSequence: me};
 }, 1);
-/*lambdaE*/
-Clazz.newMeth(C$, 'get$', function () {
-return (I$[2]||$incl$(2))
-.spliterator$java_util_PrimitiveIterator_OfInt$J$I(
-		Clazz.new_((I$[3]||$incl$(3)), [this, null]), 
-		this.b$['CharSequence'].length$(), 16);
-});
+/*lambda_E*/
+Clazz.newMeth(C$, 'get$', function () { return($I$(2).spliterator$java_util_PrimitiveIterator_OfInt$J$I(Clazz.new_(CharSequence$1CharIterator.$init$, [this, null]), this.b$['CharSequence'].length$(), 16));});
 })()
-), Clazz.new_(CharSequence$lambda1.$init$, [this, null])), 16464, false);
+), Clazz.new_($I$(3).$init$, [this, null])), 16464, false);
 });
 
 Clazz.newMeth(C$, 'codePoints$', function () {
-me = this;
-return (I$[1]||$incl$(1)).intStream$java_util_function_Supplier$I$Z(((
+return $I$(1).intStream$java_util_function_Supplier$I$Z(((P$.CharSequence$lambda2||
 (function(){var C$=Clazz.newClass(P$, "CharSequence$lambda2", function(){Clazz.newInstance(this, arguments[0],1,C$);}, null, 'java.util.function.Supplier', 1);
 
 C$.$clinit$ = function() {Clazz.load(C$, 1);
 }
 
 Clazz.newMeth(C$, '$init$', function () {
-	this.b$ = {CharSequence: me};
 }, 1);
-/*lambdaE*/
-Clazz.newMeth(C$, 'get$', function () {
-return (I$[2]||$incl$(2)).spliteratorUnknownSize$java_util_PrimitiveIterator_OfInt$I(Clazz.new_((I$[4]||$incl$(4)), [this, null]), 16);
-});
+/*lambda_E*/
+Clazz.newMeth(C$, 'get$', function () { return($I$(2).spliteratorUnknownSize$java_util_PrimitiveIterator_OfInt$I(Clazz.new_(CharSequence$1CodePointIterator.$init$, [this, null]), 16));});
 })()
-), Clazz.new_(CharSequence$lambda2.$init$, [this, null])), 16, false);
+), Clazz.new_($I$(4).$init$, [this, null])), 16, false);
 });
-;
+};;
 (function(){var C$=Clazz.newClass(P$, "CharSequence$1CharIterator", function(){
 Clazz.newInstance(this, arguments[0],true,C$);
 }, null, [['java.util.PrimitiveIterator','java.util.PrimitiveIterator.OfInt']], 2);
@@ -1831,7 +2000,7 @@ this.cur = 0;
 }, 1);
 
 Clazz.newMeth(C$, 'hasNext$', function () {
-return this.cur < this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []);
+return this.cur < this.b$['CharSequence'].length$();
 });
 
 Clazz.newMeth(C$, 'nextInt$', function () {
@@ -1842,8 +2011,8 @@ throw Clazz.new_(Clazz.load('java.util.NoSuchElementException'));
 }});
 
 Clazz.newMeth(C$, ['forEachRemaining$java_util_function_IntConsumer','forEachRemaining$TT_CONS'], function (block) {
-for (; this.cur < this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []); this.cur++) {
-block.accept$(this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [this.cur]).$c());
+for (; this.cur < this.b$['CharSequence'].length$(); this.cur++) {
+block.accept$(this.b$['CharSequence'].charAt$I(this.cur).$c());
 }
 });
 
@@ -1867,15 +2036,15 @@ this.cur = 0;
 }, 1);
 
 Clazz.newMeth(C$, ['forEachRemaining$java_util_function_IntConsumer','forEachRemaining$TT_CONS'], function (block) {
-var length = this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []);
+var length = this.b$['CharSequence'].length$();
 var i = this.cur;
 try {
 while (i < length){
-var c1 = this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [i++]);
+var c1 = this.b$['CharSequence'].charAt$I(i++);
 if (!Character.isHighSurrogate$C(c1) || i >= length ) {
 block.accept$(c1.$c());
 } else {
-var c2 = this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [i]);
+var c2 = this.b$['CharSequence'].charAt$I(i);
 if (Character.isLowSurrogate$C(c2)) {
 i++;
 block.accept$(Character.toCodePoint$C$C(c1, c2));
@@ -1888,11 +2057,11 @@ this.cur=i;
 });
 
 Clazz.newMeth(C$, 'hasNext$', function () {
-return this.cur < this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []);
+return this.cur < this.b$['CharSequence'].length$();
 });
 
 Clazz.newMeth(C$, 'nextInt$', function () {
-var length = this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []);
+var length = this.b$['CharSequence'].length$();
 if (this.cur >= length) {
 throw Clazz.new_(Clazz.load('java.util.NoSuchElementException'));
 }var c1 = this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [this.cur++]);
@@ -1906,10 +2075,151 @@ return Character.toCodePoint$C$C(c1, c2);
 
 Clazz.newMeth(C$);
 })()
-};
-
 })();
 
+
+//(function(){var P$=java.lang,I$=[['java.util.stream.StreamSupport','java.util.Spliterators','java.lang.CharSequence$1CharIterator','java.lang.CharSequence$1CodePointIterator']],$incl$=function(i){return I$[i]=Clazz.load(I$[0][i-1])};
+//var C$=Clazz.newInterface(java.lang, "CharSequence");
+//C$.$defaults = function(C$) {
+//var me;
+//
+//Clazz.newMeth(C$, 'chars$', function () {
+//me = this;
+//return (I$[1]||$incl$(1)).intStream$java_util_function_Supplier$I$Z(((
+//(function(){var C$=Clazz.newClass(P$, "CharSequence$lambda1", function(){Clazz.newInstance(this, arguments[0],1,C$);}, null, 'java.util.function.Supplier', 1);
+//
+//C$.$clinit$ = function() {Clazz.load(C$, 1);
+//}
+//
+//Clazz.newMeth(C$, '$init$', function () {
+//	this.b$ = {CharSequence: me};
+//}, 1);
+///*lambdaE*/
+//Clazz.newMeth(C$, 'get$', function () {
+//return (I$[2]||$incl$(2))
+//.spliterator$java_util_PrimitiveIterator_OfInt$J$I(
+//		Clazz.new_((I$[3]||$incl$(3)), [this, null]), 
+//		this.b$['CharSequence'].length$(), 16);
+//});
+//})()
+//), Clazz.new_(CharSequence$lambda1.$init$, [this, null])), 16464, false);
+//});
+//
+//Clazz.newMeth(C$, 'codePoints$', function () {
+//me = this;
+//return (I$[1]||$incl$(1)).intStream$java_util_function_Supplier$I$Z(((
+//(function(){var C$=Clazz.newClass(P$, "CharSequence$lambda2", function(){Clazz.newInstance(this, arguments[0],1,C$);}, null, 'java.util.function.Supplier', 1);
+//
+//C$.$clinit$ = function() {Clazz.load(C$, 1);
+//}
+//
+//Clazz.newMeth(C$, '$init$', function () {
+//	this.b$ = {CharSequence: me};
+//}, 1);
+///*lambdaE*/
+//Clazz.newMeth(C$, 'get$', function () {
+//return (I$[2]||$incl$(2)).spliteratorUnknownSize$java_util_PrimitiveIterator_OfInt$I(Clazz.new_((I$[4]||$incl$(4)), [this, null]), 16);
+//});
+//})()
+//), Clazz.new_(CharSequence$lambda2.$init$, [this, null])), 16, false);
+//});
+//;
+//(function(){var C$=Clazz.newClass(P$, "CharSequence$1CharIterator", function(){
+//Clazz.newInstance(this, arguments[0],true,C$);
+//}, null, [['java.util.PrimitiveIterator','java.util.PrimitiveIterator.OfInt']], 2);
+//
+//C$.$clinit$ = function() {Clazz.load(C$, 1);
+//}
+//
+//Clazz.newMeth(C$, '$init0$', function () {
+//var c;if((c = C$.superclazz) && (c = c.$init0$))c.apply(this);
+//this.cur = 0;
+//}, 1);
+//
+//Clazz.newMeth(C$, '$init$', function () {
+//this.cur = 0;
+//}, 1);
+//
+//Clazz.newMeth(C$, 'hasNext$', function () {
+//return this.cur < this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []);
+//});
+//
+//Clazz.newMeth(C$, 'nextInt$', function () {
+//if (this.hasNext$()) {
+//return this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [this.cur++]).$c();
+//} else {
+//throw Clazz.new_(Clazz.load('java.util.NoSuchElementException'));
+//}});
+//
+//Clazz.newMeth(C$, ['forEachRemaining$java_util_function_IntConsumer','forEachRemaining$TT_CONS'], function (block) {
+//for (; this.cur < this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []); this.cur++) {
+//block.accept$(this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [this.cur]).$c());
+//}
+//});
+//
+//Clazz.newMeth(C$);
+//})()
+//;
+//(function(){var C$=Clazz.newClass(P$, "CharSequence$1CodePointIterator", function(){
+//Clazz.newInstance(this, arguments[0],true,C$);
+//}, null, [['java.util.PrimitiveIterator','java.util.PrimitiveIterator.OfInt']], 2);
+//
+//C$.$clinit$ = function() {Clazz.load(C$, 1);
+//}
+//
+//Clazz.newMeth(C$, '$init0$', function () {
+//var c;if((c = C$.superclazz) && (c = c.$init0$))c.apply(this);
+//this.cur = 0;
+//}, 1);
+//
+//Clazz.newMeth(C$, '$init$', function () {
+//this.cur = 0;
+//}, 1);
+//
+//Clazz.newMeth(C$, ['forEachRemaining$java_util_function_IntConsumer','forEachRemaining$TT_CONS'], function (block) {
+//var length = this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []);
+//var i = this.cur;
+//try {
+//while (i < length){
+//var c1 = this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [i++]);
+//if (!Character.isHighSurrogate$C(c1) || i >= length ) {
+//block.accept$(c1.$c());
+//} else {
+//var c2 = this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [i]);
+//if (Character.isLowSurrogate$C(c2)) {
+//i++;
+//block.accept$(Character.toCodePoint$C$C(c1, c2));
+//} else {
+//block.accept$(c1.$c());
+//}}}
+//} finally {
+//this.cur=i;
+//}
+//});
+//
+//Clazz.newMeth(C$, 'hasNext$', function () {
+//return this.cur < this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []);
+//});
+//
+//Clazz.newMeth(C$, 'nextInt$', function () {
+//var length = this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []);
+//if (this.cur >= length) {
+//throw Clazz.new_(Clazz.load('java.util.NoSuchElementException'));
+//}var c1 = this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [this.cur++]);
+//if (Character.isHighSurrogate$C(c1) && this.cur < length ) {
+//var c2 = this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [this.cur]);
+//if (Character.isLowSurrogate$C(c2)) {
+//this.cur++;
+//return Character.toCodePoint$C$C(c1, c2);
+//}}return c1.$c();
+//});
+//
+//Clazz.newMeth(C$);
+//})()
+//};
+//
+//})();
+//
 
 
 //////// (int) conversions //////////
@@ -2990,7 +3300,7 @@ Sys.out = new Clazz._O ();
 Sys.out.__CLASS_NAME__ = "java.io.PrintStream";
 
 
-Sys.out.print = Sys.out.print$O = Sys.out.print$Z = Sys.out.print$I = Sys.out.print$S = Sys.out.print$C = Sys.out.print = function (s) { 
+Sys.out.print = Sys.out.print$O = Sys.out.print$Z = Sys.out.print$I = Sys.out.println$J = Sys.out.print$S = Sys.out.print$C = Sys.out.print = function (s) { 
   Con.consoleOutput (s);
 };
 
@@ -3000,7 +3310,7 @@ Sys.out.printf = Sys.out.printf$S$OA = Sys.out.format = Sys.out.format$S$OA = fu
 
 Sys.out.flush$ = function() {}
 
-Sys.out.println = Sys.out.println$O = Sys.out.println$Z = Sys.out.println$I = Sys.out.println$S = Sys.out.println$C = Sys.out.println = function(s) {
+Sys.out.println = Sys.out.println$O = Sys.out.println$Z = Sys.out.println$I = Sys.out.println$J = Sys.out.println$S = Sys.out.println$C = Sys.out.println = function(s) {
 
 if (("" + s).indexOf("TypeError") >= 0) {
    debugger;
@@ -3893,7 +4203,7 @@ String.format$S$OA = function(format, args) {
 	 }
  } 
  
-CharSequence.$defaults(String);
+CharSequence.$defaults$(String);
  
 ;(function(sp) {
 

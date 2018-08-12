@@ -15,6 +15,12 @@ class Test_Byte extends Test_ {
 		System.out.println(i3/5);
 		
 
+		byte b1 = 30;
+		
+		int ib = i3 | b1;
+		
+		assert(ib == 31);
+		
 		// integer division must be turned back into an integer in JavaScript
 
 		di /= 'c';

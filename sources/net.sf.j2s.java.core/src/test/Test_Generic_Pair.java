@@ -10,6 +10,11 @@ public class Test_Generic_Pair<K, V> {
 		this.value = value;
 	}
 
+	public static Test_Generic_Pair test1(Test_Generic_Pair pair) {
+		System.out.println("Test_Generic_Pair " + pair);
+		return pair;
+	}
+
 	public void setKey(K key) {
 		this.key = key;
 	}
