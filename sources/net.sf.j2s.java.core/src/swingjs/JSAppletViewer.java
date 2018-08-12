@@ -529,6 +529,8 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 			}
 			if (code == null)
 				code = "swingjs.JSApplet";
+			else if (code.indexOf(".") < 0)
+				code = "_." + code;
 			top = applet = japplet = (JApplet) JSUtil.getInstance(code);
 			if (applet == null) {
 				System.out.println(code + " could not be launched");
