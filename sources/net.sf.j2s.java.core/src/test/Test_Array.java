@@ -47,7 +47,9 @@ class Test_Array extends Test_ {
       Class<?> c = i3.getClass().getComponentType();
       int[] i3b = (int[]) Array.newInstance(c, 5);
       
- 
+      int hc = i3.hashCode();
+      
+      System.out.println(hc);
       assert(i3.getClass().getComponentType().getName() == "int");
       assert(i33.getClass().getComponentType().getName() == "[I");
       assert(i33.getClass().getComponentType().getName() == "[I");
