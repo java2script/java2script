@@ -1,5 +1,8 @@
 // j2sCore.js (based on JmolCore.js
 
+// BH 8/12/2018 adding J2S.onClazzLoaded(i,msg) hook for customization
+//   for example, the developer can look for i=1 (pre-core) and add core files selectively
+//   or set System.$props["user.home"] to a desired directory before (i=1) or just after (i=2) core file loading
 // BH 8/6/2018 fix for Java Application start-up when not headless in Java 8
 // BH 7/21/2018 fix for static{thisApplet.__Info.width=300} not working
 // BH 7/2/2018 10:00:49 PM fix logic for FileReader for Chrome
@@ -51,6 +54,8 @@ self.J2S
 			}
 
 		});
+
+J2S.onClazzLoaded || (J2S.onClazzLoaded = function(i, msg) {console.log([i,msg])});
 
 if (!J2S._version)
 	J2S = (function(document) {

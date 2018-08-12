@@ -10,6 +10,7 @@
 // TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
 //       It is possible that these might be loaded dynamically.
 
+// BH 8/12/2018 3.2.2 adding J2S.onClazzLoaded hook for Clazz loaded
 // BH 8/11/2018 3.2.2 Clazz.newLambda removed
 // BH 8/9/2018  3.2.2 adds newLambda(...'S')
 // BH 8/6/2018  3.2.2 sets user.home to be "https://./"
@@ -5610,8 +5611,12 @@ var newMethodNotFoundException = function (clazz, method) {
   if (!Clazz._loadcore || J2S._coreFiles.length == 0) {
 	if (!Clazz._quiet)System.out.println("Clazz: No core files to load -- check Info.core"); 
   }
-  for (var i = 0; i < J2S._coreFiles.length; i++)
+  
+  J2S.onClazzLoaded && J2S.onClazzLoaded(1, "Clazz loaded; loading J2S._coreFiles " + J2S._coreFiles.length);
+  for (var i = 0; i < J2S._coreFiles.length; i++) {
 	Clazz.loadScript(J2S._coreFiles[i]);
+  }
+  J2S.onClazzLoaded && J2S.onClazzLoaded(2, "Clazz loaded; core files loaded");
 
 
 })(Clazz, J2S); 
