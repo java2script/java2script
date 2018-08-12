@@ -12949,7 +12949,17 @@ if (!J2S._version)
 			try {
 				var clazz = (applet.__Info.main || applet.__Info.code);
 				try {
+					if (clazz.indexOf(".") < 0) {
+						clazz = "_." + clazz;
+						if (applet.__Info.main)
+							applet.__Info.main = clazz;
+						else
+							applet.__Info.code = clazz;
+					}
+					
 					var cl = Clazz.load(clazz);
+					if (clazz.indexOf("_.") == 0)
+						window[clazz.substring(2)] = cl;
 					if (applet.__Info.main && cl.j2sHeadless)
 						applet.__Info.headless = true;
 				} catch (e) {
