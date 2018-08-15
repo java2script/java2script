@@ -19,8 +19,13 @@ public class CorePlugin extends Plugin {
 	 * register the bundle version properly. So we use VERSION here instead.
 	 * 
 	 */
-	public static String VERSION = "3.2.2.03";
+	public static String VERSION = "3.2.2.04";
 	
+	// 3.1.1 last Zhou Renjian unqualified name version
+	// 3.2.1.01 original SwingJS version through 2017 adds $-signatures for methods
+	// 3.2.2.02 adds $-qualified names for all methods
+	// 3.2.2.03 adds Java 8 function and stream
+	// 3.2.2.04 adds support for window-level applets, such as JmolApplet    
 	/**
 	 * The constructor.
 	 */

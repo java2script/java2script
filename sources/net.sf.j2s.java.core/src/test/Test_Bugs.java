@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 
 class A {
-	
+
 	class A1 {
 		private void init() {
 			System.out.println("class A1 init");
