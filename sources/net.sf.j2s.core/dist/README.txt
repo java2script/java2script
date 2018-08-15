@@ -2,6 +2,37 @@ This is the main README file for the Java2Script/SwingJS distribution
 
 https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/README.txt
 
+8/14/2018 Bob Hanson hansonr@stolaf.edu
+
+- allows for no-package applets and applications (which is quite common in the Java applet world).
+
+- totally refactored, streamlined Java-to-JavaScript class name conversion, including the "j2s/_" (single underscore) package, which contains (originally) package-less applets and applications. All Java2ScriptVisitor  "getFinal..." methods return JavaScript-ready names that are intended for immediate appending to the output buffer. Prior to that moment, all class names are maintained as their Java values.
+
+- more efficient anonymous class creation (including lambda methods, constructors, and expressions).
+
+- full support for method-local named classes.
+
+- full, efficient support for default interface methods.
+
+- fully qualified methods [ excluding Math.* and *.toString() ], so no conflict with any standard JavaScript objects.
+
+- bullet-proof "final or effectively final" variables.
+
+- strongly anonymous-function scoped for "private" methods.
+
+- corrects several issues with java.util.function.* and java.util.stream.*.
+
+- adds ?j2sverbose option (former standard logging all class loading), with the default being "quiet" mode, which gives no indication of file loading. (Also settable as J2S._quiet = [true|false]
+
+- adds hooks into Clazz object loading, allowing page intervention just after Clazz itself has been loaded, but the core files have not been loaded, and also just after core files have been loaded. This could be useful for customization of the loading process -- for example, dynamically settable core file configuration.
+
+- adds System.getProperty("user.home"), which defaults to https://./ (which isn't a standard protocol, but is passed through the Java system and interpreted in JavaScript as the document base).
+
+- reorganizes java2script project files for better version control.
+
+- adds {project}/resources/ and {project}/libjs as standard places for non-Java resources and zip-equivalents of JAR files that are automatically copied into the {project}/site directory.
+
+
 8/12/2018 Bob Hanson hansonr@stolaf.edu
 
 The dist/dropins folder has been renamed dist/swingjs
