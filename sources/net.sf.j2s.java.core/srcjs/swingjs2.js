@@ -13462,6 +13462,7 @@ if (!J2S._version)
 // TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
 //       It is possible that these might be loaded dynamically.
 
+// BH 8/13/2018 3.2.2.04 $finals to $finals$ -- basically variables are $xxx, methods are xxx$, and special values are $xxx$
 // BH 8/12/2018 3.2.2 adding J2S.onClazzLoaded hook for Clazz loaded
 // BH 8/11/2018 3.2.2 Clazz.newLambda removed
 // BH 8/9/2018  3.2.2 adds newLambda(...'S')
@@ -13995,11 +13996,11 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
   // args[2-n] = actual arguments
   var outerObj = shiftArray(args, 0, 1);  
   var finalVars = shiftArray(args, 0, 1);
-  var haveFinals = (finalVars || outerObj && outerObj.$finals);
+  var haveFinals = (finalVars || outerObj && outerObj.$finals$);
   if (haveFinals) {
-    // f$ is short for the once-chosen "$finals"
-    var of$ = outerObj.$finals;
-    objThis.$finals = (finalVars ? 
+    // f$ is short for the once-chosen "$finals$"
+    var of$ = outerObj.$finals$;
+    objThis.$finals$ = (finalVars ? 
       (of$ ? appendMap(appendMap({}, of$), finalVars) : finalVars)
       : of$ ? of$ : null);
   }
@@ -15264,7 +15265,7 @@ Clazz.newInterface(java.lang,"Runnable");
 //				Clazz.newLambda(
 //						function(){
 //							{ return($I$(2).spliterator$java_util_PrimitiveIterator_OfInt$J$I(
-//									Clazz.new_(CharSequence$1CharIterator.$init$, [b$['CharSequence'], {CharSequence:this.$finals.CharSequence}]), 
+//									Clazz.new_(CharSequence$1CharIterator.$init$, [b$['CharSequence'], {CharSequence:this.$finals$.CharSequence}]), 
 //									b$['CharSequence'].length$(), 
 //									16));
 //							}

@@ -324,7 +324,7 @@ public class JSGraphicsCompositor {
 		   * 
 		   * var canvas = img._canvas;
 		   * if (canvas == null) {
-		   *   img.getGraphics();
+		   *   img.getGraphics$();
 		   *   canvas = img._canvas;
 		   * }
 		   * imgNode = canvas;
