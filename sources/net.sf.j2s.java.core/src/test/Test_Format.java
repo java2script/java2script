@@ -5,6 +5,12 @@ public class Test_Format extends Test_ {
 
 		String s;
 		
+		s = String.format("%s %d", "testing", 3);
+		assert(s.equals("testing 3"));
+		
+        assert(String.format("%s %d-%d", "testing", 3, 4).equals("testing 3-4"));
+
+
 		s = test(100 * Math.pow(10, -6), 2);
 		System.out.println(s);
 		assert s.equals("prec=2 0.00 0.00010 1.00e-04");
