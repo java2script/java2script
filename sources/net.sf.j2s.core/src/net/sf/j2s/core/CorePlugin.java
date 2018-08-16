@@ -20,12 +20,12 @@ public class CorePlugin extends Plugin {
 	 * 
 	 */
 	public static String VERSION = "3.2.2.04";
-	
-	// 3.1.1 last Zhou Renjian unqualified name version
-	// 3.2.1.01 original SwingJS version through 2017 adds $-signatures for methods
-	// 3.2.2.02 adds $-qualified names for all methods
+	// 3.2.2.04 2018.08.15 fixing Java->JavaScript "getFinal" code for class names.
+	// 3.2.2.04 adds support for window-level applets, such as JmolApplet
 	// 3.2.2.03 adds Java 8 function and stream
-	// 3.2.2.04 adds support for window-level applets, such as JmolApplet    
+	// 3.2.2.02 adds $-qualified names for all methods
+	// 3.2.1.01 original SwingJS version through 2017 adds $-signatures for methods
+	// 3.1.1 last Zhou Renjian unqualified name version
 	/**
 	 * The constructor.
 	 */

@@ -10,6 +10,7 @@
 // TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
 //       It is possible that these might be loaded dynamically.
 
+// BH 8/16/2018 3.2.2.04 fixes Character.toTitleCase$C, [Integer,Long,Short,Byte].toString(i,radix)
 // BH 8/13/2018 3.2.2.04 $finals to $finals$ -- basically variables are $xxx, methods are xxx$, and special values are $xxx$
 // BH 8/12/2018 3.2.2 adding J2S.onClazzLoaded hook for Clazz loaded
 // BH 8/11/2018 3.2.2 Clazz.newLambda removed
@@ -98,7 +99,7 @@ window["j2s.clazzloaded"] = true;
   _debugging: false,
   _loadcore: true,
   _nooutput: 0,
-  _VERSION: "3.2.2.03",
+  _VERSION_R: "3.2.2.05",
   _VERSION_T: "unknown",
 };
 
@@ -3477,14 +3478,15 @@ var decorateAsNumber = function (clazz, qClazzName, type, PARAMCODE) {
 
 decorateAsNumber(Integer, "Integer", "int", "I");
 
-Integer.toString=Integer.toString$I=Integer.prototype.toString=function(){
-  if(arguments.length!=0){
-    return "" + arguments[0];
-  } 
-  if(this===Integer){
-    return "class java.lang.Integer";
-  }
-  return "" + this.valueOf();
+Integer.toString=Integer.toString$I=Integer.toString$I$I=Integer.prototype.toString=function(i,radix){
+	switch(arguments.length) {
+	case 2:
+		return i.toString(radix);
+	case 1:
+		return "" +i;
+	case 0:
+		return (this===Integer ? "class java.lang.Integer" : ""+this.valueOf());
+	}
 };
 
 m$(Integer, ["c$", "c$$S", "c$$I"], function(v){
@@ -3668,13 +3670,15 @@ if (typeof arguments[0] != "object")this.c$(arguments[0]);
 });
 
 decorateAsNumber(Long, "Long", "long", "L");
-Long.toString=Long.toString$J=Long.prototype.toString=function(){
-if(arguments.length!=0){
-return""+arguments[0];
-}else if(this===Long){
-return"class java.lang.Long";
-}
-return""+this.valueOf();
+Long.toString=Long.toString$J=Long.toString$J$I = Long.prototype.toString=function(i, radix){
+	switch(arguments.length) {
+	case 2:
+		return i.toString(radix);
+	case 1:
+		return "" +i;
+	case 0:
+		return (this===Long ? "class java.lang.Long" : ""+this.valueOf());
+	}
 };
 
 m$(Long, ["c$", "c$$S", "c$$J"], function(v){
@@ -3742,13 +3746,15 @@ function (v,radix) {
  this.valueOf = function () {return v;};
 }, 1);
 
-Short.toString = Short.prototype.toString = function () {
-  if (arguments.length != 0) {
-    return "" + arguments[0];
-  } else if (this === Short) {
-    return "class java.lang.Short"; // Short.class.toString
-  }
-  return "" + this.valueOf();
+Short.toString = Short.toString$H = Short.toString$H$I = Short.prototype.toString = function (i,radix) {
+	switch(arguments.length) {
+	case 2:
+		return i.toString(radix);
+	case 1:
+		return "" +i;
+	case 0:
+		return (this===Short ? "class java.lang.Short" : ""+this.valueOf());
+	}
 };
 
 Short.MIN_VALUE = Short.prototype.MIN_VALUE = -32768;
@@ -3804,13 +3810,15 @@ this.valueOf=function(){return v;};
 this.byteValue = function(){return v};
 }, 1);
 
-Byte.toString=Byte.toString$B=Byte.prototype.toString=function(){
-if(arguments.length!=0){
-return""+arguments[0];
-}else if(this===Byte){
-return"class java.lang.Byte";
-}
-return""+this.valueOf();
+Byte.toString=Byte.toString$B=Byte.toString$B$I=Byte.prototype.toString=function(i,radix){
+	switch(arguments.length) {
+	case 2:
+		return i.toString(radix);
+	case 1:
+		return "" +i;
+	case 0:
+		return (this===Byte ? "class java.lang.Byte" : ""+this.valueOf());
+	}
 };
 
 Byte.serialVersionUID=Byte.prototype.serialVersionUID=-7183698231559129828;
@@ -4788,7 +4796,7 @@ return(""+c).toLowerCase().charAt(0);
 }, 1);
 m$(C$,"toTitleCase$C",
 function(c){
-  return Character.toUpperCase(c);
+  return Character.toUpperCase$C(c);
 }, 1);
 m$(C$,"toUpperCase$C",
 function(c){
