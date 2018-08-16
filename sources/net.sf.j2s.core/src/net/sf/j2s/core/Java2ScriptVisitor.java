@@ -526,7 +526,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	private void addConstructor(Type type, IMethodBinding constructorMethodBinding, List<?> arguments,
 			int lambdaArity) {
-		String javaClassName = getClassJavaNameForClass(type);
+		String javaClassName = getClassJavaNameForType(type);
 		if ("java.lang.Object".equals(javaClassName)) {
 			buffer.append(" Clazz.new_()");
 			return;
@@ -603,19 +603,19 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @param type
 	 * @return
 	 */
-	private String getClassJavaNameForClass(Type type) {
+	private String getClassJavaNameForType(Type type) {
 		if (type instanceof QualifiedType) {
 			QualifiedType qualType = (QualifiedType) type;
-			return getClassJavaNameForClass(qualType.getQualifier()) + "." + qualType.getName().getIdentifier();
+			return getClassJavaNameForType(qualType.getQualifier()) + "." + qualType.getName().getIdentifier();
 		}
 //		if (type instanceof NameQualifiedType) {
 //			NameQualifiedType nType = (NameQualifiedType) type;
 //			return  getClassJavaNameForClass(nType.getQualifier()) + "." + nType.getName().getIdentifier();
 //		}
 		if (type instanceof ArrayType)
-			return getClassJavaNameForClass(((ArrayType) type).getElementType());
+			return getClassJavaNameForType(((ArrayType) type).getElementType());
 		if (type instanceof ParameterizedType)
-			return getClassJavaNameForClass(((ParameterizedType) type).getType());
+			return getClassJavaNameForType(((ParameterizedType) type).getType());
 		if (type instanceof SimpleType) {
 			ITypeBinding binding = ((SimpleType) type).resolveBinding();
 			return getJavaClassNameQualified(binding);
@@ -1515,7 +1515,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						}
 						buffer.append(haveType ? " || " : "if (");
 						buffer.append("Clazz.exceptionOf(" + catchEName + ",\"");
-						type.accept(this);
+						buffer.append(getFinalJ2SClassName(getClassJavaNameForType(type), FINAL_RAW));
 						buffer.append("\")");
 						haveType = true;
 					}
