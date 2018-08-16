@@ -4796,7 +4796,7 @@ return(""+c).toLowerCase().charAt(0);
 }, 1);
 m$(C$,"toTitleCase$C",
 function(c){
-  return Character.toUpperCase(c);
+  return Character.toUpperCase$C(c);
 }, 1);
 m$(C$,"toUpperCase$C",
 function(c){
