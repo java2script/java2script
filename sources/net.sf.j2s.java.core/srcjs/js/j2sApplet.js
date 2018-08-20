@@ -2321,6 +2321,7 @@ if (!J2S._version)
 							viewerOptions, applet.__Info, true);
 					viewerOptions.put("name", applet._id);// + "_object");
 					viewerOptions.put("syncId", J2S._syncId);
+					viewerOptions.put("fullName", applet._id + "__" + J2S._syncId + "__");
 					if (J2S._isAsync)
 						viewerOptions.put("async", true);
 					if (applet._startupScript)
