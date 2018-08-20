@@ -155,6 +155,8 @@ public class File
      */
     private transient int prefixLength;
 
+	private long lastModified;
+
     /**
      * Returns the length of this abstract pathname's prefix.
      * For use by FileSystem classes.
@@ -1178,46 +1180,49 @@ public class File
 //        return files.toArray(new File[files.size()]);
 //    }
 //
-//    /**
-//     * Creates the directory named by this abstract pathname.
-//     *
-//     * @return  <code>true</code> if and only if the directory was
-//     *          created; <code>false</code> otherwise
-//     *
-//     * @throws  SecurityException
-//     *          If a security manager exists and its <code>{@link
-//     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
-//     *          method does not permit the named directory to be created
-//     */
-//    public boolean mkdir() {
+    /**
+     * Creates the directory named by this abstract pathname.
+     *
+     * @return  <code>true</code> if and only if the directory was
+     *          created; <code>false</code> otherwise
+     *
+     * @throws  SecurityException
+     *          If a security manager exists and its <code>{@link
+     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
+     *          method does not permit the named directory to be created
+     */
+    public boolean mkdir() {
+    	return true;
 //        SecurityManager security = System.getSecurityManager();
 //        if (security != null) {
 //            security.checkWrite(path);
 //        }
 //        return fs.createDirectory(this);
-//    }
-//
-//    /**
-//     * Creates the directory named by this abstract pathname, including any
-//     * necessary but nonexistent parent directories.  Note that if this
-//     * operation fails it may have succeeded in creating some of the necessary
-//     * parent directories.
-//     *
-//     * @return  <code>true</code> if and only if the directory was created,
-//     *          along with all necessary parent directories; <code>false</code>
-//     *          otherwise
-//     *
-//     * @throws  SecurityException
-//     *          If a security manager exists and its <code>{@link
-//     *          java.lang.SecurityManager#checkRead(java.lang.String)}</code>
-//     *          method does not permit verification of the existence of the
-//     *          named directory and all necessary parent directories; or if
-//     *          the <code>{@link
-//     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
-//     *          method does not permit the named directory and all necessary
-//     *          parent directories to be created
-//     */
-//    public boolean mkdirs() {
+    }
+
+    /**
+     * Creates the directory named by this abstract pathname, including any
+     * necessary but nonexistent parent directories.  Note that if this
+     * operation fails it may have succeeded in creating some of the necessary
+     * parent directories.
+     *
+     * @return  <code>true</code> if and only if the directory was created,
+     *          along with all necessary parent directories; <code>false</code>
+     *          otherwise
+     *
+     * @throws  SecurityException
+     *          If a security manager exists and its <code>{@link
+     *          java.lang.SecurityManager#checkRead(java.lang.String)}</code>
+     *          method does not permit verification of the existence of the
+     *          named directory and all necessary parent directories; or if
+     *          the <code>{@link
+     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
+     *          method does not permit the named directory and all necessary
+     *          parent directories to be created
+     */
+    public boolean mkdirs() {
+    	return true;
+//    	
 //        if (exists()) {
 //            return false;
 //        }
@@ -1234,326 +1239,334 @@ public class File
 //        File parent = canonFile.getParentFile();
 //        return (parent != null && (parent.mkdirs() || parent.exists()) &&
 //                canonFile.mkdir());
-//    }
+    }
+
+    /**
+     * Renames the file denoted by this abstract pathname.
+     *
+     * <p> Many aspects of the behavior of this method are inherently
+     * platform-dependent: The rename operation might not be able to move a
+     * file from one filesystem to another, it might not be atomic, and it
+     * might not succeed if a file with the destination abstract pathname
+     * already exists.  The return value should always be checked to make sure
+     * that the rename operation was successful.
+     *
+     * @param  dest  The new abstract pathname for the named file
+     *
+     * @return  <code>true</code> if and only if the renaming succeeded;
+     *          <code>false</code> otherwise
+     *
+     * @throws  SecurityException
+     *          If a security manager exists and its <code>{@link
+     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
+     *          method denies write access to either the old or new pathnames
+     *
+     * @throws  NullPointerException
+     *          If parameter <code>dest</code> is <code>null</code>
+     */
+    public boolean renameTo(File dest) {
+    	this.path = dest.path;
+    	return true;
 //
-//    /**
-//     * Renames the file denoted by this abstract pathname.
-//     *
-//     * <p> Many aspects of the behavior of this method are inherently
-//     * platform-dependent: The rename operation might not be able to move a
-//     * file from one filesystem to another, it might not be atomic, and it
-//     * might not succeed if a file with the destination abstract pathname
-//     * already exists.  The return value should always be checked to make sure
-//     * that the rename operation was successful.
-//     *
-//     * @param  dest  The new abstract pathname for the named file
-//     *
-//     * @return  <code>true</code> if and only if the renaming succeeded;
-//     *          <code>false</code> otherwise
-//     *
-//     * @throws  SecurityException
-//     *          If a security manager exists and its <code>{@link
-//     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
-//     *          method denies write access to either the old or new pathnames
-//     *
-//     * @throws  NullPointerException
-//     *          If parameter <code>dest</code> is <code>null</code>
-//     */
-//    public boolean renameTo(File dest) {
 //        SecurityManager security = System.getSecurityManager();
 //        if (security != null) {
 //            security.checkWrite(path);
 //            security.checkWrite(dest.path);
 //        }
 //        return fs.rename(this, dest);
-//    }
-//
-//    /**
-//     * Sets the last-modified time of the file or directory named by this
-//     * abstract pathname.
-//     *
-//     * <p> All platforms support file-modification times to the nearest second,
-//     * but some provide more precision.  The argument will be truncated to fit
-//     * the supported precision.  If the operation succeeds and no intervening
-//     * operations on the file take place, then the next invocation of the
-//     * <code>{@link #lastModified}</code> method will return the (possibly
-//     * truncated) <code>time</code> argument that was passed to this method.
-//     *
-//     * @param  time  The new last-modified time, measured in milliseconds since
-//     *               the epoch (00:00:00 GMT, January 1, 1970)
-//     *
-//     * @return <code>true</code> if and only if the operation succeeded;
-//     *          <code>false</code> otherwise
-//     *
-//     * @throws  IllegalArgumentException  If the argument is negative
-//     *
-//     * @throws  SecurityException
-//     *          If a security manager exists and its <code>{@link
-//     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
-//     *          method denies write access to the named file
-//     *
-//     * @since 1.2
-//     */
-//    public boolean setLastModified(long time) {
+    }
+
+    /**
+     * Sets the last-modified time of the file or directory named by this
+     * abstract pathname.
+     *
+     * <p> All platforms support file-modification times to the nearest second,
+     * but some provide more precision.  The argument will be truncated to fit
+     * the supported precision.  If the operation succeeds and no intervening
+     * operations on the file take place, then the next invocation of the
+     * <code>{@link #lastModified}</code> method will return the (possibly
+     * truncated) <code>time</code> argument that was passed to this method.
+     *
+     * @param  time  The new last-modified time, measured in milliseconds since
+     *               the epoch (00:00:00 GMT, January 1, 1970)
+     *
+     * @return <code>true</code> if and only if the operation succeeded;
+     *          <code>false</code> otherwise
+     *
+     * @throws  IllegalArgumentException  If the argument is negative
+     *
+     * @throws  SecurityException
+     *          If a security manager exists and its <code>{@link
+     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
+     *          method denies write access to the named file
+     *
+     * @since 1.2
+     */
+    public boolean setLastModified(long time) {
+    	lastModified = time;
+    	return true;
 //        if (time < 0) throw new IllegalArgumentException("Negative time");
 //        SecurityManager security = System.getSecurityManager();
 //        if (security != null) {
 //            security.checkWrite(path);
 //        }
 //        return fs.setLastModifiedTime(this, time);
-//    }
-//
-//    /**
-//     * Marks the file or directory named by this abstract pathname so that
-//     * only read operations are allowed.  After invoking this method the file
-//     * or directory is guaranteed not to change until it is either deleted or
-//     * marked to allow write access.  Whether or not a read-only file or
-//     * directory may be deleted depends upon the underlying system.
-//     *
-//     * @return <code>true</code> if and only if the operation succeeded;
-//     *          <code>false</code> otherwise
-//     *
-//     * @throws  SecurityException
-//     *          If a security manager exists and its <code>{@link
-//     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
-//     *          method denies write access to the named file
-//     *
-//     * @since 1.2
-//     */
-//    public boolean setReadOnly() {
+    }
+
+    /**
+     * Marks the file or directory named by this abstract pathname so that
+     * only read operations are allowed.  After invoking this method the file
+     * or directory is guaranteed not to change until it is either deleted or
+     * marked to allow write access.  Whether or not a read-only file or
+     * directory may be deleted depends upon the underlying system.
+     *
+     * @return <code>true</code> if and only if the operation succeeded;
+     *          <code>false</code> otherwise
+     *
+     * @throws  SecurityException
+     *          If a security manager exists and its <code>{@link
+     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
+     *          method denies write access to the named file
+     *
+     * @since 1.2
+     */
+    public boolean setReadOnly() {
+    	return true;
 //        SecurityManager security = System.getSecurityManager();
 //        if (security != null) {
 //            security.checkWrite(path);
 //        }
 //        return fs.setReadOnly(this);
-//    }
-//
-//   /**
-//     * Sets the owner's or everybody's write permission for this abstract
-//     * pathname.
-//     *
-//     * @param   writable
-//     *          If <code>true</code>, sets the access permission to allow write
-//     *          operations; if <code>false</code> to disallow write operations
-//     *
-//     * @param   ownerOnly
-//     *          If <code>true</code>, the write permission applies only to the
-//     *          owner's write permission; otherwise, it applies to everybody.  If
-//     *          the underlying file system can not distinguish the owner's write
-//     *          permission from that of others, then the permission will apply to
-//     *          everybody, regardless of this value.
-//     *
-//     * @return  <code>true</code> if and only if the operation succeeded. The
-//     *          operation will fail if the user does not have permission to change
-//     *          the access permissions of this abstract pathname.
-//     *
-//     * @throws  SecurityException
-//     *          If a security manager exists and its <code>{@link
-//     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
-//     *          method denies write access to the named file
-//     *
-//     * @since 1.6
-//     */
-//    public boolean setWritable(boolean writable, boolean ownerOnly) {
+    }
+
+   /**
+     * Sets the owner's or everybody's write permission for this abstract
+     * pathname.
+     *
+     * @param   writable
+     *          If <code>true</code>, sets the access permission to allow write
+     *          operations; if <code>false</code> to disallow write operations
+     *
+     * @param   ownerOnly
+     *          If <code>true</code>, the write permission applies only to the
+     *          owner's write permission; otherwise, it applies to everybody.  If
+     *          the underlying file system can not distinguish the owner's write
+     *          permission from that of others, then the permission will apply to
+     *          everybody, regardless of this value.
+     *
+     * @return  <code>true</code> if and only if the operation succeeded. The
+     *          operation will fail if the user does not have permission to change
+     *          the access permissions of this abstract pathname.
+     *
+     * @throws  SecurityException
+     *          If a security manager exists and its <code>{@link
+     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
+     *          method denies write access to the named file
+     *
+     * @since 1.6
+     */
+    public boolean setWritable(boolean writable, boolean ownerOnly) {
 //        SecurityManager security = System.getSecurityManager();
 //        if (security != null) {
 //            security.checkWrite(path);
 //        }
 //        return fs.setPermission(this, FileSystem.ACCESS_WRITE, writable, ownerOnly);
-//    }
-//
-//    /**
-//     * A convenience method to set the owner's write permission for this abstract
-//     * pathname.
-//     *
-//     * <p> An invocation of this method of the form <tt>file.setWritable(arg)</tt>
-//     * behaves in exactly the same way as the invocation
-//     *
-//     * <pre>
-//     *     file.setWritable(arg, true) </pre>
-//     *
-//     * @param   writable
-//     *          If <code>true</code>, sets the access permission to allow write
-//     *          operations; if <code>false</code> to disallow write operations
-//     *
-//     * @return  <code>true</code> if and only if the operation succeeded.  The
-//     *          operation will fail if the user does not have permission to
-//     *          change the access permissions of this abstract pathname.
-//     *
-//     * @throws  SecurityException
-//     *          If a security manager exists and its <code>{@link
-//     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
-//     *          method denies write access to the file
-//     *
-//     * @since 1.6
-//     */
-//    public boolean setWritable(boolean writable) {
-//        return setWritable(writable, true);
-//    }
-//
-//    /**
-//     * Sets the owner's or everybody's read permission for this abstract
-//     * pathname.
-//     *
-//     * @param   readable
-//     *          If <code>true</code>, sets the access permission to allow read
-//     *          operations; if <code>false</code> to disallow read operations
-//     *
-//     * @param   ownerOnly
-//     *          If <code>true</code>, the read permission applies only to the
-//     *          owner's read permission; otherwise, it applies to everybody.  If
-//     *          the underlying file system can not distinguish the owner's read
-//     *          permission from that of others, then the permission will apply to
-//     *          everybody, regardless of this value.
-//     *
-//     * @return  <code>true</code> if and only if the operation succeeded.  The
-//     *          operation will fail if the user does not have permission to
-//     *          change the access permissions of this abstract pathname.  If
-//     *          <code>readable</code> is <code>false</code> and the underlying
-//     *          file system does not implement a read permission, then the
-//     *          operation will fail.
-//     *
-//     * @throws  SecurityException
-//     *          If a security manager exists and its <code>{@link
-//     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
-//     *          method denies write access to the file
-//     *
-//     * @since 1.6
-//     */
-//    public boolean setReadable(boolean readable, boolean ownerOnly) {
+    	return true;
+    }
+
+    /**
+     * A convenience method to set the owner's write permission for this abstract
+     * pathname.
+     *
+     * <p> An invocation of this method of the form <tt>file.setWritable(arg)</tt>
+     * behaves in exactly the same way as the invocation
+     *
+     * <pre>
+     *     file.setWritable(arg, true) </pre>
+     *
+     * @param   writable
+     *          If <code>true</code>, sets the access permission to allow write
+     *          operations; if <code>false</code> to disallow write operations
+     *
+     * @return  <code>true</code> if and only if the operation succeeded.  The
+     *          operation will fail if the user does not have permission to
+     *          change the access permissions of this abstract pathname.
+     *
+     * @throws  SecurityException
+     *          If a security manager exists and its <code>{@link
+     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
+     *          method denies write access to the file
+     *
+     * @since 1.6
+     */
+    public boolean setWritable(boolean writable) {
+        return setWritable(writable, true);
+    }
+
+    /**
+     * Sets the owner's or everybody's read permission for this abstract
+     * pathname.
+     *
+     * @param   readable
+     *          If <code>true</code>, sets the access permission to allow read
+     *          operations; if <code>false</code> to disallow read operations
+     *
+     * @param   ownerOnly
+     *          If <code>true</code>, the read permission applies only to the
+     *          owner's read permission; otherwise, it applies to everybody.  If
+     *          the underlying file system can not distinguish the owner's read
+     *          permission from that of others, then the permission will apply to
+     *          everybody, regardless of this value.
+     *
+     * @return  <code>true</code> if and only if the operation succeeded.  The
+     *          operation will fail if the user does not have permission to
+     *          change the access permissions of this abstract pathname.  If
+     *          <code>readable</code> is <code>false</code> and the underlying
+     *          file system does not implement a read permission, then the
+     *          operation will fail.
+     *
+     * @throws  SecurityException
+     *          If a security manager exists and its <code>{@link
+     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
+     *          method denies write access to the file
+     *
+     * @since 1.6
+     */
+    public boolean setReadable(boolean readable, boolean ownerOnly) {
+    	return true;
 //        SecurityManager security = System.getSecurityManager();
 //        if (security != null) {
 //            security.checkWrite(path);
 //        }
 //        return fs.setPermission(this, FileSystem.ACCESS_READ, readable, ownerOnly);
-//    }
-//
-//    /**
-//     * A convenience method to set the owner's read permission for this abstract
-//     * pathname.
-//     *
-//     * <p>An invocation of this method of the form <tt>file.setReadable(arg)</tt>
-//     * behaves in exactly the same way as the invocation
-//     *
-//     * <pre>
-//     *     file.setReadable(arg, true) </pre>
-//     *
-//     * @param  readable
-//     *          If <code>true</code>, sets the access permission to allow read
-//     *          operations; if <code>false</code> to disallow read operations
-//     *
-//     * @return  <code>true</code> if and only if the operation succeeded.  The
-//     *          operation will fail if the user does not have permission to
-//     *          change the access permissions of this abstract pathname.  If
-//     *          <code>readable</code> is <code>false</code> and the underlying
-//     *          file system does not implement a read permission, then the
-//     *          operation will fail.
-//     *
-//     * @throws  SecurityException
-//     *          If a security manager exists and its <code>{@link
-//     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
-//     *          method denies write access to the file
-//     *
-//     * @since 1.6
-//     */
-//    public boolean setReadable(boolean readable) {
-//    	return false;
+    }
+
+    /**
+     * A convenience method to set the owner's read permission for this abstract
+     * pathname.
+     *
+     * <p>An invocation of this method of the form <tt>file.setReadable(arg)</tt>
+     * behaves in exactly the same way as the invocation
+     *
+     * <pre>
+     *     file.setReadable(arg, true) </pre>
+     *
+     * @param  readable
+     *          If <code>true</code>, sets the access permission to allow read
+     *          operations; if <code>false</code> to disallow read operations
+     *
+     * @return  <code>true</code> if and only if the operation succeeded.  The
+     *          operation will fail if the user does not have permission to
+     *          change the access permissions of this abstract pathname.  If
+     *          <code>readable</code> is <code>false</code> and the underlying
+     *          file system does not implement a read permission, then the
+     *          operation will fail.
+     *
+     * @throws  SecurityException
+     *          If a security manager exists and its <code>{@link
+     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
+     *          method denies write access to the file
+     *
+     * @since 1.6
+     */
+    public boolean setReadable(boolean readable) {
+    	return true;
 //        return setReadable(readable, true);
-//    }
-//
-//    /**
-//     * Sets the owner's or everybody's execute permission for this abstract
-//     * pathname.
-//     *
-//     * @param   executable
-//     *          If <code>true</code>, sets the access permission to allow execute
-//     *          operations; if <code>false</code> to disallow execute operations
-//     *
-//     * @param   ownerOnly
-//     *          If <code>true</code>, the execute permission applies only to the
-//     *          owner's execute permission; otherwise, it applies to everybody.
-//     *          If the underlying file system can not distinguish the owner's
-//     *          execute permission from that of others, then the permission will
-//     *          apply to everybody, regardless of this value.
-//     *
-//     * @return  <code>true</code> if and only if the operation succeeded.  The
-//     *          operation will fail if the user does not have permission to
-//     *          change the access permissions of this abstract pathname.  If
-//     *          <code>executable</code> is <code>false</code> and the underlying
-//     *          file system does not implement an execute permission, then the
-//     *          operation will fail.
-//     *
-//     * @throws  SecurityException
-//     *          If a security manager exists and its <code>{@link
-//     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
-//     *          method denies write access to the file
-//     *
-//     * @since 1.6
-//     */
-//    public boolean setExecutable(boolean executable, boolean ownerOnly) {
-//    	return false;
-////        SecurityManager security = System.getSecurityManager();
-////        if (security != null) {
-////            security.checkWrite(path);
-////        }
-////        return fs.setPermission(this, FileSystem.ACCESS_EXECUTE, executable, ownerOnly);
-//    }
-//
-//    /**
-//     * A convenience method to set the owner's execute permission for this abstract
-//     * pathname.
-//     *
-//     * <p>An invocation of this method of the form <tt>file.setExcutable(arg)</tt>
-//     * behaves in exactly the same way as the invocation
-//     *
-//     * <pre>
-//     *     file.setExecutable(arg, true) </pre>
-//     *
-//     * @param   executable
-//     *          If <code>true</code>, sets the access permission to allow execute
-//     *          operations; if <code>false</code> to disallow execute operations
-//     *
-//     * @return   <code>true</code> if and only if the operation succeeded.  The
-//     *           operation will fail if the user does not have permission to
-//     *           change the access permissions of this abstract pathname.  If
-//     *           <code>executable</code> is <code>false</code> and the underlying
-//     *           file system does not implement an excute permission, then the
-//     *           operation will fail.
-//     *
-//     * @throws  SecurityException
-//     *          If a security manager exists and its <code>{@link
-//     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
-//     *          method denies write access to the file
-//     *
-//     * @since 1.6
-//     */
-//    public boolean setExecutable(boolean executable) {
-//    	return false;
-////        return setExecutable(executable, true);
-//    }
-//
-//    /**
-//     * Tests whether the application can execute the file denoted by this
-//     * abstract pathname.
-//     *
-//     * @return  <code>true</code> if and only if the abstract pathname exists
-//     *          <em>and</em> the application is allowed to execute the file
-//     *
-//     * @throws  SecurityException
-//     *          If a security manager exists and its <code>{@link
-//     *          java.lang.SecurityManager#checkExec(java.lang.String)}</code>
-//     *          method denies execute access to the file
-//     *
-//     * @since 1.6
-//     */
-//    public boolean canExecute() {
-//    	return false;
-////        SecurityManager security = System.getSecurityManager();
-////        if (security != null) {
-////            security.checkExec(path);
-////        }
-////        return fs.checkAccess(this, FileSystem.ACCESS_EXECUTE);
-//    }
+    }
+
+    /**
+     * Sets the owner's or everybody's execute permission for this abstract
+     * pathname.
+     *
+     * @param   executable
+     *          If <code>true</code>, sets the access permission to allow execute
+     *          operations; if <code>false</code> to disallow execute operations
+     *
+     * @param   ownerOnly
+     *          If <code>true</code>, the execute permission applies only to the
+     *          owner's execute permission; otherwise, it applies to everybody.
+     *          If the underlying file system can not distinguish the owner's
+     *          execute permission from that of others, then the permission will
+     *          apply to everybody, regardless of this value.
+     *
+     * @return  <code>true</code> if and only if the operation succeeded.  The
+     *          operation will fail if the user does not have permission to
+     *          change the access permissions of this abstract pathname.  If
+     *          <code>executable</code> is <code>false</code> and the underlying
+     *          file system does not implement an execute permission, then the
+     *          operation will fail.
+     *
+     * @throws  SecurityException
+     *          If a security manager exists and its <code>{@link
+     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
+     *          method denies write access to the file
+     *
+     * @since 1.6
+     */
+    public boolean setExecutable(boolean executable, boolean ownerOnly) {
+    	return false;
+//        SecurityManager security = System.getSecurityManager();
+//        if (security != null) {
+//            security.checkWrite(path);
+//        }
+//        return fs.setPermission(this, FileSystem.ACCESS_EXECUTE, executable, ownerOnly);
+    }
+
+    /**
+     * A convenience method to set the owner's execute permission for this abstract
+     * pathname.
+     *
+     * <p>An invocation of this method of the form <tt>file.setExcutable(arg)</tt>
+     * behaves in exactly the same way as the invocation
+     *
+     * <pre>
+     *     file.setExecutable(arg, true) </pre>
+     *
+     * @param   executable
+     *          If <code>true</code>, sets the access permission to allow execute
+     *          operations; if <code>false</code> to disallow execute operations
+     *
+     * @return   <code>true</code> if and only if the operation succeeded.  The
+     *           operation will fail if the user does not have permission to
+     *           change the access permissions of this abstract pathname.  If
+     *           <code>executable</code> is <code>false</code> and the underlying
+     *           file system does not implement an excute permission, then the
+     *           operation will fail.
+     *
+     * @throws  SecurityException
+     *          If a security manager exists and its <code>{@link
+     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
+     *          method denies write access to the file
+     *
+     * @since 1.6
+     */
+    public boolean setExecutable(boolean executable) {
+    	return false;
+//        return setExecutable(executable, true);
+    }
+
+    /**
+     * Tests whether the application can execute the file denoted by this
+     * abstract pathname.
+     *
+     * @return  <code>true</code> if and only if the abstract pathname exists
+     *          <em>and</em> the application is allowed to execute the file
+     *
+     * @throws  SecurityException
+     *          If a security manager exists and its <code>{@link
+     *          java.lang.SecurityManager#checkExec(java.lang.String)}</code>
+     *          method denies execute access to the file
+     *
+     * @since 1.6
+     */
+    public boolean canExecute() {
+    	return false;
+//        SecurityManager security = System.getSecurityManager();
+//        if (security != null) {
+//            security.checkExec(path);
+//        }
+//        return fs.checkAccess(this, FileSystem.ACCESS_EXECUTE);
+    }
 //
 //
 //    /* -- Filesystem interface -- */

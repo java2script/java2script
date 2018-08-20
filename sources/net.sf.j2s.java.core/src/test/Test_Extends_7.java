@@ -1,7 +1,10 @@
 package test;
 
-public class Test_Extends_7 extends Test_Extends_8 {
+public abstract class Test_Extends_7 extends Test_Extends_8 {
 
+	Test_Extends_7() {
+		super();
+	}
 //  Java Sequence is:
 // 
 //	7.0 main
@@ -31,8 +34,8 @@ public class Test_Extends_7 extends Test_Extends_8 {
 		System.out.println("7.3 construct float[]");
 	}
 
-	public static void main(String[] args) {
-	  System.out.println("7.0 main");
-		new Test_Extends_7();
-	}
+//	public static void main(String[] args) {
+//	  System.out.println("7.0 main");
+//		new Test_Extends_7();
+//	}
 }

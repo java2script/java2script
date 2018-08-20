@@ -1,13 +1,13 @@
 package test;
 
-abstract public class Test_Extends_8 extends Test_Extends_9 {
+public class Test_Extends_8b extends Test_Extends_8 {
 
-	public int i0 = 8;
+	int i0 = -8;
 	
-	public Test_Extends_8() {
+	public Test_Extends_8b() {
 		super();
-		System.out.println("Test_Extends_8 contructor i0 super.i0 " + i0 + " " + super.i0);
-		  assert((i0 + " " + super.i0).equals("8 0"));
+		System.out.println("Test_Extend_8b i0 super.i0 " + i0 + " " + super.i0);
+		  assert((i0 + " " + super.i0).equals("-8 8"));
 	}
 	
 	{
@@ -20,12 +20,17 @@ abstract public class Test_Extends_8 extends Test_Extends_9 {
 	}
 
 
-	abstract void getSuper0();
-	
 	public void test8(){
 		System.out.println("Test_Extends_8.test8()");
-		System.out.println("Test_Extends_8.test8() " + i0 + " " + super.i0);
-		  assert((i0 + " " + super.i0).equals("8 0"));
+		System.out.println(i0 + " " + super.i0);
+		  assert((i0 + " " + super.i0).equals("8 8"));
+	}
+
+
+	@Override
+	void getSuper0() {
+		// TODO Auto-generated method stub
+		
 	};
 
 //	public Test_8(){
