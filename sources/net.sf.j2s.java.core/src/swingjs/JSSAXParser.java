@@ -152,6 +152,13 @@ public class JSSAXParser implements Parser, XMLReader {
 
   private boolean ver2;
   
+  
+  /**
+   * early Jmol method allowing reading data from an XHTML document
+   * 
+   * @param doc
+   * @throws SAXException
+   */
 	private void parseDocument(DOMNode doc) throws SAXException {
 		if (docHandler == null && contentHandler == null)
 			contentHandler = new JSSAXContentHandler();
