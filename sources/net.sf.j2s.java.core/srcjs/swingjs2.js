@@ -13462,11 +13462,8 @@ if (!J2S._version)
 // TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
 //       It is possible that these might be loaded dynamically.
 
-<<<<<<< HEAD
-// BH 8/20/2017 3.2.2.04 adds character.isJavaIdentifierPart$C
-=======
->>>>>>> branch 'yadav1' of https://github.com/BobHanson/java2script.git
-// BH 8/19/2017 3.2.2.04 fixes Enum .name being .$name
+// BH 8/20/2018 3.2.2.04 adds character.isJavaIdentifierPart$C and several Character...$I equivalents
+// BH 8/19/2018 3.2.2.04 fixes Enum .name being .$name
 // BH 8/16/2018 3.2.2.04 fixes Character.toTitleCase$C, [Integer,Long,Short,Byte].toString(i,radix)
 // BH 8/13/2018 3.2.2.04 $finals to $finals$ -- basically variables are $xxx, methods are xxx$, and special values are $xxx$
 // BH 8/12/2018 3.2.2 adding J2S.onClazzLoaded hook for Clazz loaded
