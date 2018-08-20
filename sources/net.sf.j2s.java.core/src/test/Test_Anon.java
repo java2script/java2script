@@ -28,7 +28,7 @@ class Test_Anon extends Test_ {
   public Test_Anon() {}
   
   public static void main(String[] args) { 
-	  int z = 3;
+	  int z = x;
 	  boolean a = !(Test_Class.Test_Class_Inner.i == 3);
 	  System.out.println(EMPTY_ENUMERATION.hasMoreElements());
 	  assert(EMPTY_ENUMERATION.hasMoreElements());

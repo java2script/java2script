@@ -36,7 +36,7 @@ package java.awt.geom;
  */
 
 @SuppressWarnings("serial")
-public class NoninvertibleTransformException extends java.lang.Exception {
+public class NoninvertibleTransformException extends Exception {
     /**
      * Constructs an instance of
      * <code>NoninvertibleTransformException</code>

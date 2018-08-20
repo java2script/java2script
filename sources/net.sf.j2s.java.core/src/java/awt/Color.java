@@ -821,6 +821,8 @@ public class Color implements Paint /*, java.io.Serializable*/ {
         return new Color((i >> 16) & 0xFF, (i >> 8) & 0xFF, (i >> 0) & 0xFF);
     }
 
+    
+    
     /**
      * Converts the components of a color, as specified by the HSB
      * model, to an equivalent set of values for the default RGB model.
@@ -854,7 +856,7 @@ public class Color implements Paint /*, java.io.Serializable*/ {
             r = g = b = (int) (brightness * 255.0f + 0.5f);
         } else {
             float h = (hue - (float)Math.floor(hue)) * 6.0f;
-            float f = h - (float)java.lang.Math.floor(h);
+            float f = h - (float)Math.floor(h);
             float p = brightness * (1.0f - saturation);
             float q = brightness * (1.0f - saturation * f);
             float t = brightness * (1.0f - (saturation * (1.0f - f)));

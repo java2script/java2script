@@ -10,6 +10,7 @@
 // TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
 //       It is possible that these might be loaded dynamically.
 
+// BH 8/19/2017 3.2.2.04 fixes Enum .name being .$name
 // BH 8/16/2018 3.2.2.04 fixes Character.toTitleCase$C, [Integer,Long,Short,Byte].toString(i,radix)
 // BH 8/13/2018 3.2.2.04 $finals to $finals$ -- basically variables are $xxx, methods are xxx$, and special values are $xxx$
 // BH 8/12/2018 3.2.2 adding J2S.onClazzLoaded hook for Clazz loaded
@@ -502,7 +503,7 @@ Clazz.newClass = function (prefix, name, clazz, clazzSuper, interfacez, type) {
 
 Clazz.newEnumConst = function(vals, c, enumName, enumOrdinal, args, cl) {
   var o = Clazz.new_(c, args, cl);
-  o.name = enumName;
+  o.name = o.$name = enumName;
   o.ordinal = enumOrdinal;
   o.$isEnumConst = true;
   var clazzEnum = c.exClazz;
