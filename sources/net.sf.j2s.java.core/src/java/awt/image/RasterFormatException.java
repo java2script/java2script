@@ -34,7 +34,7 @@ package java.awt.image;
  * invalid layout information in the {@link Raster}.
  */
 @SuppressWarnings("serial")
-public class RasterFormatException extends java.lang.RuntimeException {
+public class RasterFormatException extends RuntimeException {
 
     /**
      * Constructs a new <code>RasterFormatException</code> with the

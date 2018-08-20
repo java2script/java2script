@@ -99,7 +99,7 @@ class Test_ {
 		Test_Double.main(args);
 		Test_Enum.main(args);
 		Test_Extends_6.main(args);
-		Test_Extends_7.main(args);
+//		Test_Extends_7.main(args);
 		// Test_Extends_JButton.main(args);
 		Test_Extends.main(args);
 		Test_Final.main(args);

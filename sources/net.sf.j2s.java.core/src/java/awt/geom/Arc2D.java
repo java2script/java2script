@@ -1462,6 +1462,8 @@ public abstract class Arc2D extends RectangularShape {
      */
     @Override
 		public int hashCode() {
+    	// note that java.lang. is required here because
+    	// "Double" refers to something else.
         long bits = java.lang.Double.doubleToLongBits(getX());
         bits += java.lang.Double.doubleToLongBits(getY()) * 37;
         bits += java.lang.Double.doubleToLongBits(getWidth()) * 43;

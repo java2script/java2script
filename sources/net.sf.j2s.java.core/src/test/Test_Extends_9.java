@@ -2,6 +2,9 @@ package test;
 
 abstract public class Test_Extends_9 extends Test_ {
 
+	public int i0 = 0; 
+	
+
 	{
 	  System.out.println("9.1 init");
 	}

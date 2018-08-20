@@ -6,7 +6,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Hashtable;
 
-@SuppressWarnings("rawtypes")
 class Test_Class2 extends Test_ {
 
 	static String s = "test";
