@@ -35,7 +35,7 @@ package java.awt.image;
  * process the image.
  */
 @SuppressWarnings("serial")
-public class ImagingOpException extends java.lang.RuntimeException {
+public class ImagingOpException extends RuntimeException {
 
     /**
      * Constructs an <code>ImagingOpException</code> object with the

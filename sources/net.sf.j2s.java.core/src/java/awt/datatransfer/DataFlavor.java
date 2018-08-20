@@ -165,7 +165,7 @@ public class DataFlavor implements /*Externalizable,*/ Cloneable {
 	 *     mimeType           = "application/x-java-serialized-object"
 	 * </pre>
 	 */
-	public static final DataFlavor stringFlavor = createConstant(java.lang.String.class, "Unicode String");
+	public static final DataFlavor stringFlavor = createConstant(String.class, "Unicode String");
 
 	/**
 	 * The <code>DataFlavor</code> representing a Java Image class, where:
