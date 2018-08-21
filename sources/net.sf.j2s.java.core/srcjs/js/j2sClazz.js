@@ -10,6 +10,7 @@
 // TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
 //       It is possible that these might be loaded dynamically.
 
+// BH 8/21/2018 3.2.2.04 fixes ?j2strace=xxx  message; sets user.home to https://./, not https://.//
 // BH 8/20/2018 3.2.2.04 adds character.isJavaIdentifierPart$C and several Character...$I equivalents, fixes newEnumConst(), System.getBoolean$S
 // BH 8/19/2018 3.2.2.04 fixes Enum .name being .$name
 // BH 8/16/2018 3.2.2.04 fixes Character.toTitleCase$C, [Integer,Long,Short,Byte].toString(i,radix)
@@ -17,7 +18,7 @@
 // BH 8/12/2018 3.2.2 adding J2S.onClazzLoaded hook for Clazz loaded
 // BH 8/11/2018 3.2.2 Clazz.newLambda removed
 // BH 8/9/2018  3.2.2 adds newLambda(...'S')
-// BH 8/6/2018  3.2.2 sets user.home to be "https://./"
+// BH 8/6/2018  3.2.2 sets user.home to be "https://.//"
 // BH 8/6/2018  3.2.2 adds ?j2sverbose option -- lists all files loaded; sets Clazz._quiet = false
 // BH 8/5/2018  3.2.2 adds Clazz.newLambda(...)
 // BH 8/4/2018  3.2.2 cleans up String $-qualified methods headless and javax tests pass
@@ -1596,7 +1597,7 @@ var getSig = function(c, withParams) {
 Clazz._showStack = function(n) {
   if (!Clazz._stack)
 	 return;
-  n && n < Clazz.stack.length || (n = Clazz._stack.length);
+  n && n < Clazz._stack.length || (n = Clazz._stack.length);
   if (!n)
 	return;
   for (var i = 0; i < n; i++) {
@@ -1648,7 +1649,7 @@ Clazz._getStackTrace = function(n) {
   if (Clazz._stack.length) {
 	  s += "\nsee Clazz._stack";
 	  console.log("Clazz._stack = " + Clazz._stack);
-	  console.log("Use Clazz.showStack() or Clazz.showStack(n) to show parameters");
+	  console.log("Use Clazz._showStack() or Clazz._showStack(n) to show parameters");
   }
   return s;
 }
@@ -3252,7 +3253,7 @@ java.lang.System = System = {
         v = "50";
         break;
       case "user.home":
-    	v = "https://./";
+    	v = "https://.";
     	break;
       case "java.vendor":
     	v = "SwingJS/OpenJDK";
