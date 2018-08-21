@@ -12976,6 +12976,7 @@ if (!J2S._version)
 							viewerOptions, applet.__Info, true);
 					viewerOptions.put("name", applet._id);// + "_object");
 					viewerOptions.put("syncId", J2S._syncId);
+					viewerOptions.put("fullName", applet._id + "__" + J2S._syncId + "__");
 					if (J2S._isAsync)
 						viewerOptions.put("async", true);
 					if (applet._startupScript)
@@ -13462,7 +13463,7 @@ if (!J2S._version)
 // TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
 //       It is possible that these might be loaded dynamically.
 
-// BH 8/20/2018 3.2.2.04 adds character.isJavaIdentifierPart$C and several Character...$I equivalents
+// BH 8/20/2018 3.2.2.04 adds character.isJavaIdentifierPart$C and several Character...$I equivalents, fixes newEnumConst(), System.getBoolean$S
 // BH 8/19/2018 3.2.2.04 fixes Enum .name being .$name
 // BH 8/16/2018 3.2.2.04 fixes Character.toTitleCase$C, [Integer,Long,Short,Byte].toString(i,radix)
 // BH 8/13/2018 3.2.2.04 $finals to $finals$ -- basically variables are $xxx, methods are xxx$, and special values are $xxx$
@@ -13955,14 +13956,12 @@ Clazz.newClass = function (prefix, name, clazz, clazzSuper, interfacez, type) {
 };
 
 Clazz.newEnumConst = function(vals, c, enumName, enumOrdinal, args, cl) {
-  var o = Clazz.new_(c, args, cl);
-  o.name = o.$name = enumName;
-  o.ordinal = enumOrdinal;
-  o.$isEnumConst = true;
-  var clazzEnum = c.exClazz;
-  vals.push(clazzEnum[enumName] = clazzEnum.prototype[enumName] = o);
-}
-    
+	  var clazzEnum = c.exClazz;
+	  var e = clazzEnum.$init$$ || (clazzEnum.$init$$ = clazzEnum.$init$);
+	  clazzEnum.$init$ = function() {e.apply(this); this.name = this.$name = enumName; this.ordinal = enumOrdinal;this.$isEnumConst = true;}
+	  vals.push(clazzEnum[enumName] = clazzEnum.prototype[enumName] = Clazz.new_(c, args, cl));
+	}
+	        
 Clazz.newInstance = function (objThis, args, isInner, clazz) {
   if (args && ( 
      args[0] == inheritArgs 
@@ -17516,7 +17515,7 @@ m$(Boolean,"getBoolean$S",
 function(name){
 var result=false;
 try{
-result=Boolean.toBoolean(System.getProperty(name));
+result=Boolean.toBoolean(System.getProperty$S(name));
 }catch(e){
 if(Clazz.instanceOf(e,IllegalArgumentException)){
 }else if(Clazz.instanceOf(e,NullPointerException)){
@@ -17936,8 +17935,9 @@ var result=new Array(this.length);
 for(var i=0;i<this.length;i++){
 result[i]=this.charAt(i);
 }
-return result;
+return Clazz.array(Character.TYPE, -1, result);
 };
+
 String.valueOf$ = String.valueOf$Z = String.valueOf$C = String.valueOf$CA 
 				= String.valueOf$CA$I$I = String.valueOf$D = String.valueOf$F 
 				= String.valueOf$I = String.valueOf$J = String.valueOf$O = 
@@ -18704,8 +18704,8 @@ if(lineNum>=0){
 });
 
 
-TypeError.prototype.getMessage$ || (TypeError.prototype.getMessage$ = function(){ return (this.message || this.toString()) + (this.getStackTrace ? this.getStackTrace$() : Clazz._getStackTrace$())});
-
+TypeError.prototype.getMessage$ || (TypeError.prototype.getMessage$ = function(){ return (this.stack ? this.stack : this.message || this.toString()) + (this.getStackTrace ? this.getStackTrace$() : Clazz._getStackTrace())});
+TypeError.prototype.printStackTrace$ = function(){System.out.println(this + "\n" + this.stack)}
 
 Clazz.Error = Error;
 
