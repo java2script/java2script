@@ -2802,23 +2802,22 @@ public abstract class JComponent extends Container {
 	 * >How to Use Tool Tips</a> in <em>The Java Tutorial</em> for further
 	 * documentation.
 	 * 
-	 * @param text
-	 *          the string to display; if the text is <code>null</code>, the tool
-	 *          tip is turned off for this component
+	 * @param text the string to display; if the text is <code>null</code>, the tool
+	 *             tip is turned off for this component
 	 * @see #TOOL_TIP_TEXT_KEY
 	 * @beaninfo preferred: true description: The text to display in a tool tip.
 	 */
 	public void setToolTipText(String text) {
-		// String oldText = getToolTipText();
+		String oldText = getToolTipText();
 		putClientProperty(TOOL_TIP_TEXT_KEY, text);
-		// ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
-		// if (text != null) {
-		// if (oldText == null) {
-		// toolTipManager.registerComponent(this);
-		// }
-		// } else {
-		// toolTipManager.unregisterComponent(this);
-		// }
+		ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
+		if (text != null) {
+			if (oldText == null) {
+				toolTipManager.registerComponent(this);
+			}
+		} else {
+			toolTipManager.unregisterComponent(this);
+		}
 	}
 
 	/**

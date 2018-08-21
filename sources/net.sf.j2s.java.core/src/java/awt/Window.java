@@ -55,11 +55,14 @@ import javax.swing.JComponent;
 import javax.swing.JLayeredPane;
 import javax.swing.JRootPane;
 import javax.swing.RootPaneContainer;
+import javax.swing.plaf.ComponentUI;
+
 import sun.awt.AppContext;
 import swingjs.JSToolkit;
 //import java.util.concurrent.atomic.AtomicBoolean;
 //import java.util.logging.Logger;
 import swingjs.JSUtil;
+import swingjs.plaf.JSComponentUI;
 
 /**
  * 
@@ -1037,9 +1040,11 @@ public class Window extends JComponent {
 			public void run() {
 
 				// Though Window is not a JComponent, we still treat it as such.
-				((JComponent) me).getUI().uninstallUI(null);
-				((JComponent) me).getUI().uninstallJS();
-
+				ComponentUI ui = ((JComponent) me).getUI();
+				if (ui != null) {
+					ui.uninstallUI(null);
+					ui.uninstallJS();
+				}
 				// Check if this window is the fullscreen window for the
 				// device. Exit the fullscreen mode prior to disposing
 				// of the window if that's the case.

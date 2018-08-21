@@ -3,7 +3,11 @@ package swingjs.plaf;
 import java.awt.Dimension;
 import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JRadioButton;
+import javax.swing.JToggleButton;
+import javax.swing.SwingConstants;
 
 import swingjs.api.js.DOMNode;
 
@@ -11,6 +15,8 @@ public class JSRadioButtonUI extends JSButtonUI {
 
 //	private static Map<ButtonGroup, String> groupNames;
 
+	// TODO: The icon of a radio or checkbox REPLACES the input box. 
+	
 
 	@Override
 	public DOMNode updateDOMNode() {
@@ -27,13 +33,13 @@ public class JSRadioButtonUI extends JSButtonUI {
 	 * 
 	 * updateDomNode for radio and checkbox, menuitems or not
 	 * 
-	 * @param myType
-	 *          "radio" or "checkbox"
+	 * @param myType "radio" or "checkbox"
 	 * 
 	 * @return
 	 */
 	protected DOMNode updateButton(String myType) {
-		JRadioButton b = (JRadioButton) jc;
+		JToggleButton b = (JToggleButton) jc;
+
 		boolean isNew = false;
 		boolean doAll = false;
 		if (domNode == null) {
@@ -51,8 +57,8 @@ public class JSRadioButtonUI extends JSButtonUI {
 //				if (isNew)
 //					groupNames.put(bg, name);
 //			}
-			radioBtn = newDOMObject("input", id, "type", myType, "name",
-					name);
+
+			radioBtn = newDOMObject("input", id, "type", myType, "name", name);
 			iconNode = newDOMObject("span", id + "_icon");
 			textNode = newDOMObject("label", id + "l1");
 			btnLabel = newDOMObject("label", id + "l2", "htmlFor", id);
@@ -61,7 +67,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 			setDataComponent(iconNode); // needed for mac safari/chrome
 			setDataComponent(radioBtn);
 			setDataComponent(textNode); // needed for mac safari/chrome
-			setEnabled(c.isEnabled()); 
+			setEnabled(c.isEnabled());
 			if (isMenuItem) {
 				domNode = createItem("_item", btnLabel);
 			} else {
@@ -75,8 +81,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 			DOMNode.setAttr(radioBtn, "checked", "true");
 		setCssFont(textNode, c.getFont());
 
-		setIconAndText("radio", (ImageIcon) button.getIcon(),
-				button.getIconTextGap(), button.getText());
+		setIconAndText("radio", (ImageIcon) null/* button.getIcon() */, button.getIconTextGap(), button.getText());
 
 		// Get the dimensions of the radio button by itself.
 
@@ -93,13 +98,57 @@ public class JSRadioButtonUI extends JSButtonUI {
 			// width of label + button does not go over the total calculated width
 			int wBtn = setHTMLSize1(radioBtn, false, false).width - 1;
 			int wIcon = Math.max(0, setHTMLSize1(iconNode, false, false).width - 1);
+			int wText = setHTMLSize1(textNode, false, false).width - 1;
 			// Now wrap the two with a div and get its dimensions
 			// and then put them back into the wrapper.
-			dobj = setHTMLSize1(wrap("div", "", iconNode, radioBtn, textNode), false,
-					false);
+			dobj = setHTMLSize1(wrap("div", "", iconNode, radioBtn, textNode), false, false);
 			// set the offset of the text based on the icon and radio button size
-			DOMNode.setStyles(textNode, "left", wBtn + wIcon + "px");
-      // TODO add textPosition here
+
+			// horizontalTextAlignment "trailing" == left-to-right
+			//
+			// [btn] text
+			//
+			// domNode
+			// centeringNode
+			// btnLabel l2
+			// iconNode
+			// imageNode
+			// input
+			// textLabel l1
+			//
+			// horizontalTextAlignment "leading" == left-to-right:
+			//
+			// text [btn]
+			//
+			//
+			int pos = b.getHorizontalTextPosition();
+			boolean ltr = jc.getComponentOrientation().isLeftToRight();
+			DOMNode.setStyles(textNode, "left", null, "right", null);
+			DOMNode.setStyles(radioBtn, "left", null, "right", null);
+			DOMNode.setStyles(centeringNode, "text-align", null, "left", null, "right", null);
+			DOMNode.setStyles(btnLabel, "text-align", null, "left", null, "right", null);
+			String lr = (ltr ? "left" : "right");
+			DOMNode.setStyles(centeringNode, lr, "0px", "text-align",lr);
+			DOMNode.setStyles(btnLabel, "text-align", lr, lr, "0px");
+			if (ltr) {
+				if (pos == SwingConstants.RIGHT || pos == SwingConstants.TRAILING) {
+					DOMNode.setStyles(textNode, lr, (wBtn + wIcon) + "px");
+					DOMNode.setStyles(radioBtn, lr, "0px");
+				} else {
+					DOMNode.setStyles(textNode, lr, "0px");
+					DOMNode.setStyles(radioBtn, lr, wText + "px");
+				}
+			} else {
+				if (pos == SwingConstants.RIGHT || pos == SwingConstants.LEADING) {
+					DOMNode.setStyles(textNode, lr, "0px");
+					DOMNode.setStyles(radioBtn, lr, wText + "px");
+				} else {
+					DOMNode.setStyles(textNode, lr, (wBtn + wIcon) + "px");
+					DOMNode.setStyles(radioBtn, lr, "0px");
+				}
+			}
+
+			// TODO add textPosition here
 			vCenter(radioBtn, -75);
 			vCenter(iconNode, -15);
 			vCenter(textNode, -50);
@@ -112,9 +161,9 @@ public class JSRadioButtonUI extends JSButtonUI {
 
 			// (Re)create label.
 		}
-		btnLabel.appendChild(iconNode);
-		btnLabel.appendChild(radioBtn);
 		btnLabel.appendChild(textNode);
+		btnLabel.appendChild(radioBtn);
+//			btnLabel.appendChild(iconNode);
 		if (doAll && !isMenuItem)
 			DOMNode.setPositionAbsolute(domNode, Integer.MIN_VALUE, 0);
 		if (!isMenuItem) {
@@ -123,7 +172,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 		}
 		return domNode;
 	}
-
+	
 	@Override
 	protected Dimension setHTMLSize(DOMNode obj, boolean addCSS) {
 		// "absolute" is required for positioning of button, but must not be there

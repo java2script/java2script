@@ -119,11 +119,12 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			
 			JSFunction fGetFrameParent = null; 
 			/**
-			 * @j2sNative var me = this; fGetFrameParent =
-			 *            
-			 *            function(x, y) {
-			 *            if (arguments.length == 0) {  
-			 *              return $(fnode).parent();
+			 * @j2sNative var me = this; fGetFrameParent = function(x, y) {
+			 * 
+			 *            if (arguments.length == 1) {
+			 *  	         if (x == 501)
+			 *      	        me.jc.toFront$();  
+			 *          	 return $(fnode).parent();
 			 *            }
 			 *            var xy = me.getMoveCoords$I$I(x, y);
 			 *            $($(fnode).parent()).css({ top: xy[1] + 'px', left: xy[0] + 'px' });

@@ -32,8 +32,11 @@ import java.util.EventObject;
 import javax.swing.AbstractButton;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
@@ -784,100 +787,6 @@ public class JSComponentUI extends ComponentUI
 			System.out.println("JSComponentUI: unrecognized prop: " + this.id + " " + prop);
 	}
 
-	private ImageIcon getIcon(JSComponent c, Icon icon) {
-		return (c == null || icon == null 
-				&& (icon  = ((AbstractButton) c).getIcon()) == null ?
-			null : icon.getIconWidth() <= 0 || icon.getIconHeight() <= 0 ? null : (icon instanceof ImageIcon) ? (ImageIcon) icon :
-				JSToolkit.paintImageForIcon(jc, icon));
-	}
-
-	protected void setIconAndText(String prop, Icon icon, int gap, String text) {
-
-		// TODO add textPosition
-
-		actualWidth = actualHeight = 0;
-		currentText = text;
-		currentGap = gap;
-		canAlignText = false;
-		canAlignIcon = false;
-		currentIcon = null;
-		imageNode = null;
-		if (iconNode != null) {
-			icon = currentIcon = getIcon(jc, icon);
-			$(iconNode).empty();
-			if (currentIcon != null) {
-				imageNode = DOMNode.getImageNode(currentIcon.getImage());
-				DOMNode.setStyles(imageNode, "vertical-align", "middle"); // else
-																			// this
-																			// will
-																			// be
-																			// "baseline"
-				iconNode.appendChild(imageNode);
-				iconHeight = icon.getIconHeight();
-			}
-		}
-		boolean isHTML = false;
-		if (text == null || text.length() == 0) {
-			text = "";
-			if (icon != null)
-				canAlignIcon = true;
-		} else {
-			if (icon == null) {
-				canAlignText = allowTextAlignment;
-			} else {
-				// vCenter(imageNode, 10); // perhaps? Not sure if this is a
-				// good idea
-				if (gap == Integer.MAX_VALUE)
-					gap = getDefaultIconTextGap();
-				if (gap != 0 && text != null)
-					DOMNode.addHorizontalGap(iconNode, gap);
-			}
-			if (text.indexOf("<html>") == 0) {
-				isHTML = true;
-				// PhET uses <html> in labels and uses </br>
-				text = PT.rep(text.substring(6, text.length() - 7), "</br>", "");
-				text = PT.rep(text, "</html>", "");
-				text = PT.rep(text, "href=", "target=_blank href=");
-				text = PT.rep(text, "href=", "target=_blank href=");
-				// Jalview hack
-				text = PT.rep(text, "width: 350; text-align: justify; word-wrap: break-word;",
-						"width: 350px; word-wrap: break-word;");
-			}
-		}
-		DOMNode obj = null;
-		if (textNode != null) {
-			prop = "innerHTML";
-			obj = textNode;
-			if (!isHTML)
-				text = PT.rep(text, "<", "&lt;");
-		} else if (valueNode != null) {
-			prop = "value";
-			obj = valueNode;
-			if (iconNode != null)
-				DOMNode.setVisible(obj, text != null);
-		}
-		if (obj != null)
-			setProp(obj, prop, text);
-		if (centeringNode == null) {
-			// button
-			setBackgroundFor(valueNode, c.getBackground());
-		} else {
-			// label
-			setCssFont(centeringNode, c.getFont());
-			// added to make sure that the displayed element does not wrap with
-			// this new text
-		}
-		if (!boundsSet)
-			setHTMLSize(domNode, true);
-		if (centeringNode != null)
-			setAlignment();
-		if (debugging)
-			System.out.println("JSComponentUI: setting " + id + " " + prop);
-	}
-
-	protected int getDefaultIconTextGap() {
-		return 0;
-	}
 
 	private String createMsgs = "";
 
@@ -1659,26 +1568,123 @@ public class JSComponentUI extends ComponentUI
 					+ this.height + "->" + height);
 	}
 
+	private ImageIcon getIcon(JSComponent c, Icon icon) {
+		return (c == null || icon == null 
+				&& (icon  = ((AbstractButton) c).getIcon()) == null ?
+			null : icon.getIconWidth() <= 0 || icon.getIconHeight() <= 0 ? null : (icon instanceof ImageIcon) ? (ImageIcon) icon :
+				JSToolkit.paintImageForIcon(jc, icon));
+	}
+
+	
+	protected void setIconAndText(String prop, Icon icon, int gap, String text) {
+
+		// TODO so, actually, icons replace the checkbox or radio button, they do not complement them
+
+		actualWidth = actualHeight = 0;
+		currentText = text;
+		currentGap = gap;
+		canAlignText = false;
+		canAlignIcon = false;
+		currentIcon = null;
+		imageNode = null;
+		if (iconNode != null) {
+			icon = currentIcon = getIcon(jc, icon);
+			$(iconNode).empty();
+			if (currentIcon != null) {
+				imageNode = DOMNode.getImageNode(currentIcon.getImage());
+				DOMNode.setStyles(imageNode, "vertical-align", "middle"); // else
+																			// this
+																			// will
+																			// be
+																			// "baseline"
+				iconNode.appendChild(imageNode);
+				iconHeight = icon.getIconHeight();
+			}
+		}
+		boolean isHTML = false;
+		if (text == null || text.length() == 0) {
+			text = "";
+			if (icon != null)
+				canAlignIcon = true;
+		} else {
+			if (icon == null) {
+				canAlignText = allowTextAlignment;
+			} else {
+				// vCenter(imageNode, 10); // perhaps? Not sure if this is a
+				// good idea
+				if (gap == Integer.MAX_VALUE)
+					gap = getDefaultIconTextGap();
+				if (gap != 0 && text != null)
+					DOMNode.addHorizontalGap(iconNode, gap);
+			}
+			if (text.indexOf("<html>") == 0) {
+				isHTML = true;
+				// PhET uses <html> in labels and uses </br>
+				text = PT.rep(text.substring(6, text.length() - 7), "</br>", "");
+				text = PT.rep(text, "</html>", "");
+				text = PT.rep(text, "href=", "target=_blank href=");
+				text = PT.rep(text, "href=", "target=_blank href=");
+				// Jalview hack
+				text = PT.rep(text, "width: 350; text-align: justify; word-wrap: break-word;",
+						"width: 350px; word-wrap: break-word;");
+			}
+		}
+		DOMNode obj = null;
+		if (textNode != null) {
+			prop = "innerHTML";
+			obj = textNode;
+			if (!isHTML)
+				text = PT.rep(text, "<", "&lt;");
+		} else if (valueNode != null) {
+			prop = "value";
+			obj = valueNode;
+			if (iconNode != null)
+				DOMNode.setVisible(obj, text != null);
+		}
+		if (obj != null)
+			setProp(obj, prop, text);
+		if (centeringNode == null) {
+			// button
+			setBackgroundFor(valueNode, c.getBackground());
+		} else {
+			// label
+			setCssFont(centeringNode, c.getFont());
+			// added to make sure that the displayed element does not wrap with
+			// this new text
+		}
+		if (!boundsSet)
+			setHTMLSize(domNode, true);
+		if (centeringNode != null)
+			setAlignment();
+		if (debugging)
+			System.out.println("JSComponentUI: setting " + id + " " + prop);
+	}
+
+	protected int getDefaultIconTextGap() {
+		return 0;
+	}
+
 	private void setAlignment() {
 		if (canAlignText) {
 			setVerticalAlignment(true);
-			setTextAlignment();
+			setOverallAlignment();
 		} else if (canAlignIcon) {
 			setVerticalAlignment(false);
-			setTextAlignment();
+			setOverallAlignment();
 		}
 	}
 
-	private void setTextAlignment() {
+	private void setOverallAlignment() {
 		if (this.c.getWidth() == 0)
 			return;
+		// OK, this is the alignment of the component, not the text
 		int type = ((AbstractButton) c).getHorizontalAlignment();
 		String prop = getCSSTextAlignment(type);
 		// the centeringNode is not visible. It is a div that allows us to
 		// position the text and icon of the image based on its preferred size
 		// in the
-		DOMNode.setStyles(domNode, "width", c.getWidth() + "px", "text-align", textAlign = prop);
-		if (jc.uiClassID == "LabelUI" && centeringNode != null) {
+		if (jc.uiClassID == "LabelUI" && 
+				centeringNode != null) {
 			int left = 0;
 			int w = actualWidth;
 			if (w == 0)
@@ -1696,8 +1702,10 @@ public class JSComponentUI extends ComponentUI
 				left = (c.getWidth() - w) / 2;
 				break;
 			default:
+				DOMNode.setStyles(domNode, "width", c.getWidth() + "px", "text-align", textAlign = prop);
 				return;
 			}
+			DOMNode.setStyles(domNode, "width", c.getWidth() + "px", "text-align", textAlign = prop);
 			// Problem:
 			// edu_northwestern_physics_groups_atomic_applet_Mirror_applet.html
 			// an initial paint shows checkboxes lower than they should be.
@@ -1710,6 +1718,7 @@ public class JSComponentUI extends ComponentUI
 		}
 	}
 
+	
 	protected String getCSSTextAlignment(int type) {
 		String prop = null;
 		switch (type) {

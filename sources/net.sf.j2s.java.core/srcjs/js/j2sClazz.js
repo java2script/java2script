@@ -10,7 +10,7 @@
 // TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
 //       It is possible that these might be loaded dynamically.
 
-// BH 8/21/2018 3.2.2.04 fixes ?j2strace=xxx  message; sets user.home to https://./, not https://.//
+// BH 8/21/2018 3.2.2.04 fixes ?j2strace=xxx  message; sets user.home to https://./, not https://.//; Boolean upgrade and fix
 // BH 8/20/2018 3.2.2.04 adds character.isJavaIdentifierPart$C and several Character...$I equivalents, fixes newEnumConst(), System.getBoolean$S
 // BH 8/19/2018 3.2.2.04 fixes Enum .name being .$name
 // BH 8/16/2018 3.2.2.04 fixes Character.toTitleCase$C, [Integer,Long,Short,Byte].toString(i,radix)
@@ -4035,65 +4035,67 @@ function(s){
   this.valueOf=function(){return b;};
 }, 1);
 
-m$(Boolean,"parseBoolean$S",
-function(s){
-return Boolean.toBoolean(s);
-}, 1);
-m$(Boolean,["booleanValue","booleanValue$"],
-function(){
-return this.valueOf();
-});
-m$(Boolean,["valueOf$S","valueOf$Z"],function(b){
-return((typeof b == "string"? "true".equalsIgnoreCase$S(b) : b)?Boolean.TRUE:Boolean.FALSE);
-}, 1);
+m$(Boolean,["booleanValue","booleanValue$"], function(){ return this.valueOf(); });
 
-m$(Boolean,"toString",
-function(){
-return this.valueOf()?"true":"false";
-});
-m$(Boolean,"hashCode$",
-function(){
-return this.valueOf()?1231:1237;
-});
-Boolean.prototype.equals = m$(Boolean,"equals$O",
-function(obj){
-return obj instanceof Boolean && this.booleanValue()==obj.booleanValue();
-});
-m$(Boolean,"getBoolean$S",
-function(name){
-var result=false;
-try{
-result=Boolean.toBoolean(System.getProperty$S(name));
-}catch(e){
-if(Clazz.instanceOf(e,IllegalArgumentException)){
-}else if(Clazz.instanceOf(e,NullPointerException)){
-}else{
-throw e;
-}
-}
-return result;
-}, 1);
+m$(Boolean,"compare$Z$Z", function(a,b){return(a == b ? 0 : a ? 1 : -1);}, 1);
+
 m$(Boolean,["compareTo$Boolean","compareTo$TT"],
-function(b){
-return(b.value==this.value?0:(this.value?1:-1));
-});
+		function(b){
+		return(b.valueOf() == this.valueOf() ? 0 : this.valueOf() ? 1 : -1);
+		});
 
-// added methods toBoolean and from
+Boolean.prototype.equals = m$(Boolean,"equals$O",
+		function(obj){
+		return obj instanceof Boolean && this.booleanValue()==obj.booleanValue();
+		});
+
+m$(Boolean,"getBoolean$S",
+		function(name){
+		var result=false;
+		try{
+		result=Boolean.toBoolean(System.getProperty$S(name));
+		}catch(e){
+		if(Clazz.instanceOf(e,IllegalArgumentException)){
+		}else if(Clazz.instanceOf(e,NullPointerException)){
+		}else{
+		throw e;
+		}
+		}
+		return result;
+		}, 1);
+
+m$(Boolean,"hashCode$", function(){ return this.valueOf()?1231:1237;});
+m$(Boolean,"hashCode$Z", function(b){ return b?1231:1237;}, 1);
+
+m$(Boolean,"logicalAnd$Z$Z", function(a,b){return(a && b);}, 1);
+m$(Boolean,"logicalOr$Z$Z", function(a,b){return(a || b);}, 1);
+m$(Boolean,"logicalXor$Z$Z", function(a,b){return !!(a ^ b);}, 1);
+
+m$(Boolean,"parseBoolean$S", function(s){return Boolean.toBoolean(s);}, 1);
+
+m$(Boolean,"toString",function(){return this.valueOf()?"true":"false";});
+m$(Boolean,"toString$Z",function(b){return "" + b;}, 1);
+
+m$(Boolean,"valueOf$S",function(s){	return("true".equalsIgnoreCase$S(s)?Boolean.TRUE:Boolean.FALSE);}, 1);
+m$(Boolean,"valueOf$Z",function(b){ return(b?Boolean.TRUE:Boolean.FALSE);}, 1);
+
+//the need is to have new Boolean(string), but that won't work with native Boolean
+//so instead we have to do a lexical switch from "new Boolean" to "Boolean.from"
+//note no $ here
+
 m$(Boolean,"toBoolean",
 function(name){
 return(typeof name == "string" ? name.equalsIgnoreCase$S("true") : !!name);
 }, 1);
 
-// the need is to have new Boolean(string), but that won't work with native Boolean
-// so instead we have to do a lexical switch from "new Boolean" to "Boolean.from"
 m$(Boolean,"from",
 function(name){
-return Clazz.new_(Boolean.c$, [typeof name == "string" ? name.equalsIgnoreCase$S("true") : !!name]);
+return Clazz.new_(Boolean.c$, [Boolean.toBoolean(name)]);
 }, 1);
 
 Boolean.TRUE=Boolean.prototype.TRUE=Clazz.new_(Boolean.c$, [true]);
 Boolean.FALSE=Boolean.prototype.FALSE=Clazz.new_(Boolean.c$, [false]);
-//Boolean.TYPE=Boolean.prototype.TYPE=Boolean;
+
 
 Clazz._Encoding={
   UTF8:"utf-8",

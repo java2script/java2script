@@ -161,21 +161,29 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		});
 
 		JPanel p = new JPanel();
+		
+		p.setToolTipText("this is the panel");
 		// p.setLayout(new GridLayout(2, 2, 2, 2));
 		JScrollPane sp = new JScrollPane();
 		sp.getViewport().add(p);
 		getContentPane().add(sp);
 		sp.getViewport().addChangeListener(this);
 		hsb = sp.getHorizontalScrollBar();
+		button2.setToolTipText("this is hsb");
 
-		mkBar(p, tf, Adjustable.VERTICAL, 20, 200);
-		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200);
+		mkBar(p, tf, Adjustable.VERTICAL, 20, 200).setToolTipText("this is scrollbar 1");
+		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200).setToolTipText("this is slider 2");
+
 		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200).setInverted(true);
 		p.add(label);
+		label.setToolTipText("this is label");
 		p.add(tf);
+		tf.setToolTipText("this is tf");
 		p.add(button);
 		p.add(button2);
 		p.add(button3);
+		button2.setToolTipText("this is Button 2");
+		button3.setToolTipText("this is Button 3");
 		mkBar(p, tf, Adjustable.HORIZONTAL, 100, 20);
 		mkSlider(p, tf, Adjustable.HORIZONTAL, 100, 20);
 		mkSlider(p, tf, Adjustable.HORIZONTAL, 100, 20).setInverted(true);

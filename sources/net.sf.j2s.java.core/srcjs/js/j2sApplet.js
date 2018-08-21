@@ -2663,7 +2663,7 @@ if (!J2S._version)
 			if (fDown) {
 				fDown(xy, 501);
 			} else if (target) {
-				var o = $(target()).position();
+				var o = $(target(501)).position();
 				xy = {
 					x : o.left,
 					y : o.top
@@ -2687,7 +2687,7 @@ if (!J2S._version)
 						ev : ev
 					}, 506);
 				} else if (target) {
-					$(target()).css({
+					$(target(506)).css({
 						top : y + 'px',
 						left : x + 'px'
 					})

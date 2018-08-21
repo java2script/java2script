@@ -377,7 +377,7 @@ public class JLayeredPane extends JComponent /* implements Accessible */ {
         layerObj = getObjectForLayer(layer);
 
         if(layer == getLayer(c) && position == getPosition(c)) {
-                repaint(c.getBounds());
+            //SwingJS - not necessary    repaint(c.getBounds());
             return;
         }
 
@@ -388,14 +388,14 @@ public class JLayeredPane extends JComponent /* implements Accessible */ {
             getComponentToLayer().put((Component)c, layerObj);
 
         if(c.getParent() == null || c.getParent() != this) {
-            repaint(c.getBounds());
+            //SwingJS not necessary repaint(c.getBounds());
             return;
         }
 
         int index = insertIndexForLayer(c, layer, position);
 
         setComponentZOrder(c, index);
-        repaint(c.getBounds());
+        // SwingJS not necessary repaint(c.getBounds());
     }
 
     /**
