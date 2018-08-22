@@ -301,12 +301,12 @@ public class OC extends OutputStream implements GenericOutputChannel {
       return (sb == null ? null : sb.toString());
     }
     closed = true;
-    J2SObjectInterface jmol = null;
+    J2SObjectInterface J2S = null;
     Object _function = null;
     /**
      * @j2sNative
      * 
-     *            jmol = self.J2S || Jmol; _function = (typeof this.fileName == "function" ?
+     *            J2S = self.J2S || self.Jmol; _function = (typeof this.fileName == "function" ?
      *            this.fileName : null);
      * 
      */
@@ -318,12 +318,12 @@ public class OC extends OutputStream implements GenericOutputChannel {
         return ret;
       }
     }
-    if (jmol != null) {
+    if (J2S != null) {
       Object data = (sb == null ? toByteArray() : sb.toString());
       if (_function == null)
-        jmol._doAjax(fileName, null, data, sb == null);
+        J2S.doAjax(fileName, null, data, sb == null);
       else
-        jmol._apply(_function, data);
+        J2S.applyFunc(_function, data);
     }
     return null;
   }

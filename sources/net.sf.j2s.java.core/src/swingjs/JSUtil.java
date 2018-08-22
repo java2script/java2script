@@ -53,9 +53,9 @@ public class JSUtil {
 
 	
 	private static Map<String, Object> getFileCache() {
-		if (JSUtil.fileCache == null && (JSUtil.fileCache = JSUtil.J2S._getSetJavaFileCache(null)) == null) {
+		if (JSUtil.fileCache == null && (JSUtil.fileCache = JSUtil.J2S.getSetJavaFileCache(null)) == null) {
 			JSUtil.fileCache = new Hashtable<String, Object>();
-			JSUtil.J2S._getSetJavaFileCache(JSUtil.fileCache);
+			JSUtil.J2S.getSetJavaFileCache(JSUtil.fileCache);
 		}
 		return JSUtil.fileCache;
 	}
@@ -96,7 +96,7 @@ public class JSUtil {
 			} catch (Exception e) {
 			}
 			// bypasses AjaxURLConnection
-			data = JSUtil.J2S._getFileData(uri, null, false, false);
+			data = JSUtil.J2S.getFileData(uri, null, false, false);
 		}
 		return data;
 	}
@@ -138,7 +138,7 @@ public class JSUtil {
 	}
 
 	public static boolean haveCachedResource(String resourceName, boolean isJavaPath) {
-		String path = JSUtil.J2S._getResourcePath(resourceName, isJavaPath);
+		String path = JSUtil.J2S.getResourcePath(resourceName, isJavaPath);
 		return (path != null && getCachedFileData(path) != null);
 	}
 
@@ -156,12 +156,12 @@ public class JSUtil {
 	public static String getJavaResource(String resourceName, boolean isJavaPath,
 			boolean doCache, boolean doProcess) {
 		System.out.println("JSUtil getting Java resource " + resourceName);
-		String path = J2S._getResourcePath(resourceName, isJavaPath);
+		String path = J2S.getResourcePath(resourceName, isJavaPath);
 		if (path == null)
 			return null;
 		Object data = getCachedFileData(path);
 		if (data == null
-				&& (data = J2S._getFileData(path, null, false, false)) != null
+				&& (data = J2S.getFileData(path, null, false, false)) != null
 				&& useCache && doCache)
 			JSUtil.cacheFileData(path, data);
 		String sdata = JSUtil.ensureString(data);
@@ -191,7 +191,7 @@ public class JSUtil {
 		String fileList = "";
 		try {
 			BufferedInputStream bis = new BufferedInputStream(cl.getResourceAsStream(zipFileName));
-			String prefix = J2S._getResourcePath(null, true); // will end with /
+			String prefix = J2S.getResourcePath(null, true); // will end with /
 			fileList = JSUtil.getZipTools().cacheZipContentsStatic(bis, prefix, mapByteData, false);
 		} catch (Exception e) {
 			System.out.println("JSUtil could not cache files from " + zipFileName);
@@ -216,9 +216,9 @@ public class JSUtil {
 	 */
 	public static String loadStaticResource(String file) {
 		String s = "alert('" + file + "' was not found)";
-		if (!J2S._isResourceLoaded(file, false)) {
+		if (!J2S.isResourceLoaded(file, false)) {
 			s = getJavaResource(file, true, false, true);
-			J2S._isResourceLoaded(file, true);
+			J2S.isResourceLoaded(file, true);
 		}
 		return s;
 	}
@@ -354,7 +354,7 @@ public class JSUtil {
 	public static void readyCallback(String aname, String fname, Container applet,
 			JSAppletViewer appletPanel) {
 		try {
-			J2S._readyCallback(aname, fname, true, applet, appletPanel);
+			J2S.readyCallback(aname, fname, true, applet, appletPanel);
 		} catch (Throwable e) {
 			System.out.println("JSUtil Error running readyCallback method for " + fname + " -- check your page JavaScript");
 		}
@@ -374,7 +374,7 @@ public class JSUtil {
 	}
 
 	public static void saveFile(String fileName, Object data, String mimeType, String encoding) {
-		J2S._saveFile(fileName, data, mimeType, encoding);
+		J2S.saveFile(fileName, data, mimeType, encoding);
 	}
 
 	/**
@@ -415,7 +415,7 @@ public class JSUtil {
 	public static Locale getDefaultLocale(String language) {
 		String region, country, variant;
 		if (language == null)
-			language = J2S._getDefaultLanguage(true);
+			language = J2S.getDefaultLanguage(true);
 		language = language.replace('-','_');
 		if (language == null || language.length() == 0 || language.equalsIgnoreCase("en"))
 			language = "en_US";

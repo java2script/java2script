@@ -184,7 +184,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 
 		threadGroup = new JSThreadGroup(appletName);
 		myThread = new JSAppletThread(this, threadGroup, appletName);
-//		JSToolkit.J2S._setAppletThread(appletName, myThread);
+//		JSToolkit.J2S.setAppletThread(appletName, myThread);
 		java.lang.Thread.thisThread = (java.lang.Thread) ((Object) myThread);
 		
 		appContext = JSToolkit.createNewAppContext();

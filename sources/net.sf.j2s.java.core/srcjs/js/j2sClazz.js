@@ -2748,7 +2748,7 @@ Clazz.loadScript = function(file) {
   var data = "";
   try{
     _Loader.onScriptLoading(file);
-    data = J2S._getFileData(file);
+    data = J2S.getFileData(file);
     evaluate(file, data);
     _Loader.onScriptLoaded(file, null, data);
   }catch(e) {
@@ -4746,7 +4746,7 @@ m$(C$,"getName$I",
 function(codePoint){
 	if (!unicode_txt) {
 		try {
-			unicode_txt = J2S._getFileData(ClassLoader.getClasspathFor("java.lang",1)  + "org/unicode/public/unidata/NamesList.txt");
+			unicode_txt = J2S.getFileData(ClassLoader.getClasspathFor("java.lang",1)  + "org/unicode/public/unidata/NamesList.txt");
 		} catch (e) {
 			return "??";
 		}

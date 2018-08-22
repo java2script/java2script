@@ -53,6 +53,8 @@ import swingjs.JSToolkit;
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Applet;
+import swingjs.api.js.J2SInterface;
+import swingjs.api.js.JQuery;
 import swingjs.api.js.JQueryObject;
 
 /**
@@ -108,22 +110,17 @@ import swingjs.api.js.JQueryObject;
 public class JSComponentUI extends ComponentUI
 		implements ContainerPeer, JSEventHandler, PropertyChangeListener, ChangeListener, DropTargetPeer {
 
-	private static final Color rootPaneColor = new Color(238, 238, 238); // EE
-																			// EE
-																			// EE;
-																			// look
-																			// and
-																			// feel
-																			// "control"
+	private static final Color rootPaneColor = new Color(238, 238, 238);
 
+	final J2SInterface J2S = JSUtil.J2S;
 	/**
 	 * provides a unique id for any component; set on instantiation
 	 */
 	protected static int incr;
 
 	/**
-	 * Set this during run time using swingjs.plaf.JSComponentUI.borderTest =
-	 * true to debug alignments
+	 * Set this during run time using swingjs.plaf.JSComponentUI.borderTest = true
+	 * to debug alignments
 	 */
 	private static boolean borderTest;
 
@@ -152,25 +149,24 @@ public class JSComponentUI extends ComponentUI
 	protected JComponent jc;
 
 	/**
-	 * TableCellRenderers will not have parents; here we point to the table so 
-	 * that we can send the coordinates to the retrieve the row and cell
-	 *  
+	 * TableCellRenderers will not have parents; here we point to the table so that
+	 * we can send the coordinates to the retrieve the row and cell
+	 * 
 	 */
-	protected  JComponent targetParent;
-	
+	protected JComponent targetParent;
+
 	public JComponent getTargetParent() {
 		return targetParent;
 	}
 
-	//MouseInputListener mouseInputListener;
-	
+	// MouseInputListener mouseInputListener;
 
 	/**
-	 * The outermost div holding a component -- left, top, and for a container
-	 * width and height
+	 * The outermost div holding a component -- left, top, and for a container width
+	 * and height
 	 * 
-	 * Note that all controls have an associated outerNode div. Specifically,
-	 * menu items will be surrounded by an li element, not a div.
+	 * Note that all controls have an associated outerNode div. Specifically, menu
+	 * items will be surrounded by an li element, not a div.
 	 * 
 	 * This must be set up here, nowhere else.
 	 * 
@@ -185,15 +181,14 @@ public class JSComponentUI extends ComponentUI
 	protected DOMNode innerNode;
 
 	/**
-	 * the main HTML5 element for the component, possibly containing others,
-	 * such as radio button with its label.
+	 * the main HTML5 element for the component, possibly containing others, such as
+	 * radio button with its label.
 	 * 
 	 */
 	public DOMNode domNode;
 
 	/**
-	 * An inner div that allows vertical centering for a JLabel or
-	 * AbstractButton
+	 * An inner div that allows vertical centering for a JLabel or AbstractButton
 	 */
 	protected DOMNode centeringNode;
 
@@ -213,12 +208,12 @@ public class JSComponentUI extends ComponentUI
 	public void setDraggable(JSFunction f) {
 		// SplitPaneDivider
 		draggable = true; // never actually used
-		JSUtil.J2S._setDraggable(updateDOMNode(), f);
+		J2S.setDraggable(updateDOMNode(), f);
 	}
 
 	/**
-	 * The HTML5 input element being pressed, if the control 
-	 * is a radio or checkbox button.
+	 * The HTML5 input element being pressed, if the control is a radio or checkbox
+	 * button.
 	 * 
 	 */
 	protected DOMNode radioBtn;
@@ -227,7 +222,7 @@ public class JSComponentUI extends ComponentUI
 	 * the "FOR" label for a radio button
 	 * 
 	 */
-	protected DOMNode btnLabel; 
+	protected DOMNode btnLabel;
 
 	/**
 	 * a component or subcomponent that can be enabled/disabled
@@ -291,8 +286,8 @@ public class JSComponentUI extends ComponentUI
 	// private boolean zeroWidth;
 
 	/**
-	 * indicates that in a toolbar, this component should use its preferred size
-	 * for min and max
+	 * indicates that in a toolbar, this component should use its preferred size for
+	 * min and max
 	 * 
 	 */
 
@@ -311,9 +306,8 @@ public class JSComponentUI extends ComponentUI
 	protected boolean boundsSet = false;
 
 	/**
-	 * Indicates that we do not need an outerNode and that we should be applying
-	 * any positioning to the node itself. All menu items will have this set
-	 * true.
+	 * Indicates that we do not need an outerNode and that we should be applying any
+	 * positioning to the node itself. All menu items will have this set true.
 	 */
 
 	protected boolean isMenuItem = false;
@@ -392,6 +386,8 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected boolean allowTextAlignment = true;
 
+	private JQuery jquery = JSUtil.getJQuery();
+
 	public JSComponentUI() {
 		setDoc();
 	}
@@ -422,8 +418,7 @@ public class JSComponentUI extends ComponentUI
 		/**
 		 * @j2sNative
 		 * 
-		 * 			this.c.addChangeListener$javax_swing_event_ChangeListener
-		 *            &&
+		 * 			this.c.addChangeListener$javax_swing_event_ChangeListener &&
 		 *            this.c.addChangeListener$javax_swing_event_ChangeListener(this);
 		 */
 		{
@@ -434,8 +429,7 @@ public class JSComponentUI extends ComponentUI
 	/**
 	 * Called upon disposal of Window, JPopupMenu, and JComponent.
 	 * 
-	 * Subclasses should not implement this method; use uninstallUIImpl()
-	 * instead
+	 * Subclasses should not implement this method; use uninstallUIImpl() instead
 	 * 
 	 */
 	@Override
@@ -447,8 +441,7 @@ public class JSComponentUI extends ComponentUI
 		 * @j2sNative
 		 * 
 		 * 			this.c &&
-		 *            this.c.removeChangeListener$javax_swing_event_ChangeListener
-		 *            &&
+		 *            this.c.removeChangeListener$javax_swing_event_ChangeListener &&
 		 *            this.c.removeChangeListener$javax_swing_event_ChangeListener(this);
 		 *            this.c &&
 		 *            this.c.removePropertyChangeListener$java_beans_PropertyChangeListener(this);
@@ -462,7 +455,7 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	protected JQueryObject $(Object node) {
-		return JSUtil.getJQuery().$(node);
+		return jquery.$(node);
 	}
 
 	public JSComponentUI set(JComponent target) {
@@ -499,18 +492,17 @@ public class JSComponentUI extends ComponentUI
 	// ////////////// user event handling ///////////////////
 
 	/**
-	 * When a user clicks a component in SwingJS, jQuery catches it, and a
-	 * message is sent to javax.swing.LightweightDispatcher (in Component.js) to
-	 * be processed. If this were actual Java, we would have to determine if a
+	 * When a user clicks a component in SwingJS, jQuery catches it, and a message
+	 * is sent to javax.swing.LightweightDispatcher (in Component.js) to be
+	 * processed. If this were actual Java, we would have to determine if a
 	 * component's button was clicked by running through all the buttons on the
-	 * component's "native container" and checking whether the click was within
-	 * the component's boundaries.
+	 * component's "native container" and checking whether the click was within the
+	 * component's boundaries.
 	 * 
-	 * By setting the data-component attribute of a DOM element, we are
-	 * indicating to the LightweightDispatcher that we already know what button
-	 * was clicked; it is not necessary to check x and y for that. This ensures
-	 * perfect correspondence between a clicked button and its handling by
-	 * SwingJS.
+	 * By setting the data-component attribute of a DOM element, we are indicating
+	 * to the LightweightDispatcher that we already know what button was clicked; it
+	 * is not necessary to check x and y for that. This ensures perfect
+	 * correspondence between a clicked button and its handling by SwingJS.
 	 * 
 	 * The action will be handled by a standard Java MouseListener
 	 * 
@@ -521,9 +513,9 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	/**
-	 * Indicate to J2S to completely ignore all mouse events for this control.
-	 * It will be handled by the control directly using a jQuery callback that
-	 * is generated by updateDOMNode. Used by JSComboBoxUI and JSSliderUI.
+	 * Indicate to J2S to completely ignore all mouse events for this control. It
+	 * will be handled by the control directly using a jQuery callback that is
+	 * generated by updateDOMNode. Used by JSComboBoxUI and JSSliderUI.
 	 * 
 	 * @param node
 	 */
@@ -536,11 +528,11 @@ public class JSComponentUI extends ComponentUI
 	 * attribute of a jQuery event target and, if found, reroute the event to
 	 * handleJSEvent, bypassing the standard LightweightDispatcher business.
 	 * 
-	 * JSComboBoxUI, JSFrameUI, and JSTextUI set jqevent.target["data-ui"] to
-	 * point to themselves. This allows the control to bypass the Java dispatch
-	 * system entirely and just come here for processing. This method is used
-	 * for specific operations, including JFrame closing, JComboBox selection,
-	 * and JSText action handling so that those can be handled specially.
+	 * JSComboBoxUI, JSFrameUI, and JSTextUI set jqevent.target["data-ui"] to point
+	 * to themselves. This allows the control to bypass the Java dispatch system
+	 * entirely and just come here for processing. This method is used for specific
+	 * operations, including JFrame closing, JComboBox selection, and JSText action
+	 * handling so that those can be handled specially.
 	 * 
 	 * This connection is set up in JSComponentUI.setDataUI() and handled by
 	 * overriding JSComponentUI.handleJSEvent().
@@ -554,11 +546,9 @@ public class JSComponentUI extends ComponentUI
 	/**
 	 * handle an event set up by adding the data-ui attribute to a DOM node.
 	 * 
-	 * @param target
-	 *            a DOMNode
-	 * @param eventType
-	 *            a MouseEvent id, including 501, 502, 503, or 506 (pressed,
-	 *            released, moved, and dragged, respectively)
+	 * @param target      a DOMNode
+	 * @param eventType   a MouseEvent id, including 501, 502, 503, or 506 (pressed,
+	 *                    released, moved, and dragged, respectively)
 	 * @param jQueryEvent
 	 * @return false to prevent the default process
 	 */
@@ -570,17 +560,17 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	/**
-	 * Used by JSFrameUI to indicate that it is to be the "currentTarget" for
-	 * mouse clicks that target one of its buttons. The DOM attributes applet
-	 * and _frameViewer will be set for the node, making it consistent with
-	 * handling for Jmol's applet canvas element.
+	 * Used by JSFrameUI to indicate that it is to be the "currentTarget" for mouse
+	 * clicks that target one of its buttons. The DOM attributes applet and
+	 * _frameViewer will be set for the node, making it consistent with handling for
+	 * Jmol's applet canvas element.
 	 * 
 	 * @param node
 	 * @param isFrame
 	 */
 	protected void setJ2sMouseHandler(DOMNode frameNode) {
 		DOMNode.setAttrs(frameNode, "applet", applet, "_frameViewer", jc.getFrameViewer());
-		JSUtil.J2S._jsSetMouse(frameNode, true);
+		J2S.setMouse(frameNode, true);
 	}
 
 	public static JSComponentUI focusedUI;
@@ -618,15 +608,12 @@ public class JSComponentUI extends ComponentUI
 	 * method to work.
 	 * 
 	 * 
-	 * @param node
-	 *            the JavaScript element that is being triggered
-	 * @param eventList
-	 *            one or more JavaScript event names to pass, separated by space
-	 * @param eventID
-	 *            an integer event type to return; can be anything, but
-	 *            Event.XXXX is recommended
-	 * @param andSetCSS
-	 *            TODO
+	 * @param node      the JavaScript element that is being triggered
+	 * @param eventList one or more JavaScript event names to pass, separated by
+	 *                  space
+	 * @param eventID   an integer event type to return; can be anything, but
+	 *                  Event.XXXX is recommended
+	 * @param andSetCSS TODO
 	 */
 	protected void bindJSEvents(DOMNode node, String eventList, int eventID, boolean andSetCSS) {
 		JSFunction f = null;
@@ -641,8 +628,8 @@ public class JSComponentUI extends ComponentUI
 		/**
 		 * @j2sNative
 		 * 
-		 * 			f = function(event) { me.handleJSEvent$O$I$O(node,
-		 *            eventID, event) }
+		 * 			f = function(event) { me.handleJSEvent$O$I$O(node, eventID, event)
+		 *            }
 		 */
 		{
 			handleJSEvent(null, 0, null); // Eclipse reference only; not in
@@ -671,13 +658,13 @@ public class JSComponentUI extends ComponentUI
 	 * For example, an item is added to a JComboBox, perhaps due to the user
 	 * selecting an option that changes a JComboBox contents.
 	 * 
-	 * We need to add that change to the DOM, so we make JSComboBoxUI a listener
-	 * for that event. JSComboBoxUI calls revalidate(), which calls
-	 * JComponent.revalidate(). JComponent.revalidate() first calls setTainted()
-	 * and then sets up a paint request.
+	 * We need to add that change to the DOM, so we make JSComboBoxUI a listener for
+	 * that event. JSComboBoxUI calls revalidate(), which calls
+	 * JComponent.revalidate(). JComponent.revalidate() first calls setTainted() and
+	 * then sets up a paint request.
 	 * 
-	 * This is just a convenience method that lets us trap with debugging when
-	 * this is occurring from this package.
+	 * This is just a convenience method that lets us trap with debugging when this
+	 * is occurring from this package.
 	 * 
 	 */
 	protected void revalidate() {
@@ -787,20 +774,18 @@ public class JSComponentUI extends ComponentUI
 			System.out.println("JSComponentUI: unrecognized prop: " + this.id + " " + prop);
 	}
 
-
 	private String createMsgs = "";
 
 	/**
-	 * set to TRUE by Container.validateTree at the beginning of its laying out
-	 * and FALSE when that is complete.
+	 * set to TRUE by Container.validateTree at the beginning of its laying out and
+	 * FALSE when that is complete.
 	 * 
 	 */
 	@SuppressWarnings("unused")
 	private boolean layingOut;
 
 	/**
-	 * has been disposed; will need to reattach it if it ever becomes visible
-	 * again.
+	 * has been disposed; will need to reattach it if it ever becomes visible again.
 	 * 
 	 */
 	private boolean isDisposed;
@@ -813,8 +798,8 @@ public class JSComponentUI extends ComponentUI
 	protected int actualHeight, actualWidth;
 
 	/**
-	 * can be set false to never draw a background, primarily because Mac OS
-	 * will paint a non-rectangular object.
+	 * can be set false to never draw a background, primarily because Mac OS will
+	 * paint a non-rectangular object.
 	 * 
 	 * (textfield, textarea, button, combobox, menuitem)
 	 */
@@ -936,12 +921,11 @@ public class JSComponentUI extends ComponentUI
 			/**
 			 * @j2sNative
 			 * 
-			 * 			w0 = node.style.width; h0 = node.style.height;
-			 *            position = node.style.position;
+			 * 			w0 = node.style.width; h0 = node.style.height; position =
+			 *            node.style.position;
 			 * 
-			 *            if (node == this.centeringNode && this.innerNode) {
-			 *            w0i = this.innerNode.style.width; h0i =
-			 *            this.innerNode.style.height; }
+			 *            if (node == this.centeringNode && this.innerNode) { w0i =
+			 *            this.innerNode.style.width; h0i = this.innerNode.style.height; }
 			 */
 			{
 				w0 = w0i = "";
@@ -1015,8 +999,7 @@ public class JSComponentUI extends ComponentUI
 	/**
 	 * allows for can be overloaded to allow some special adjustments
 	 * 
-	 * @param addingCSS
-	 *            TODO
+	 * @param addingCSS TODO
 	 * 
 	 * @return
 	 */
@@ -1028,8 +1011,8 @@ public class JSComponentUI extends ComponentUI
 	 * Creates the DOM node and inserts it into the tree at the correct place,
 	 * iterating through all children if this is a container.
 	 * 
-	 * Overridden for JSLabelUI, JSViewportUI, and JWindowUI, though both of
-	 * those classes do setHTMLElementCUI() first; they just append to it.
+	 * Overridden for JSLabelUI, JSViewportUI, and JWindowUI, though both of those
+	 * classes do setHTMLElementCUI() first; they just append to it.
 	 * 
 	 * 
 	 * 
@@ -1041,12 +1024,11 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	/**
-	 * When something has occurred that needs rebuilding of the internal
-	 * structure of the node, isTainted will be set. Only then will this method
-	 * be executed.
+	 * When something has occurred that needs rebuilding of the internal structure
+	 * of the node, isTainted will be set. Only then will this method be executed.
 	 * 
-	 * @return the outer node for this component's DOM tree, containing all
-	 *         child elements needed to implement it.
+	 * @return the outer node for this component's DOM tree, containing all child
+	 *         elements needed to implement it.
 	 */
 	protected DOMNode setHTMLElementCUI() {
 		if (!isTainted)
@@ -1069,8 +1051,7 @@ public class JSComponentUI extends ComponentUI
 		/**
 		 * @j2sNative
 		 * 
-		 * 			this.outerNode.setAttribute("name",
-		 *            this.jc.__CLASS_NAME__);
+		 * 			this.outerNode.setAttribute("name", this.jc.__CLASS_NAME__);
 		 */
 		{
 		}
@@ -1229,7 +1210,7 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public Dimension getMinimumSize() {
-		return  getMinimumSize(jc);
+		return getMinimumSize(jc);
 	}
 
 	@Override
@@ -1241,11 +1222,11 @@ public class JSComponentUI extends ComponentUI
 	 * getPreferredSize reports to a LayoutManager what the size is for this
 	 * component will be when placed in the DOM.
 	 * 
-	 * It is only called if the user has not already set the preferred size of
-	 * the component.
+	 * It is only called if the user has not already set the preferred size of the
+	 * component.
 	 * 
-	 * Later, the LayoutManager will make a call to setBounds in order to
-	 * complete the transaction, after taking everything into consideration.
+	 * Later, the LayoutManager will make a call to setBounds in order to complete
+	 * the transaction, after taking everything into consideration.
 	 * 
 	 */
 	@Override
@@ -1254,7 +1235,7 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	// the following are likely to be called in the original BasicXXXUI classes
-	
+
 	Dimension getMinimumSize(JComponent jc) {
 		return getPreferredSize(jc);
 	}
@@ -1278,22 +1259,19 @@ public class JSComponentUI extends ComponentUI
 
 	/**
 	 * 
-	 * Returns <code>true</code> if the specified <i>x,y</i> location is
-	 * contained within the look and feel's defined shape of the specified
-	 * component. <code>x</code> and <code>y</code> are defined to be relative
-	 * to the coordinate system of the specified component. Although a
-	 * component's <code>bounds</code> is constrained to a rectangle, this
-	 * method provides the means for defining a non-rectangular shape within
-	 * those bounds for the purpose of hit detection.
+	 * Returns <code>true</code> if the specified <i>x,y</i> location is contained
+	 * within the look and feel's defined shape of the specified component.
+	 * <code>x</code> and <code>y</code> are defined to be relative to the
+	 * coordinate system of the specified component. Although a component's
+	 * <code>bounds</code> is constrained to a rectangle, this method provides the
+	 * means for defining a non-rectangular shape within those bounds for the
+	 * purpose of hit detection.
 	 * 
-	 * @param c
-	 *            the component where the <i>x,y</i> location is being queried;
-	 *            this argument is often ignored, but might be used if the UI
-	 *            object is stateless and shared by multiple components
-	 * @param x
-	 *            the <i>x</i> coordinate of the point
-	 * @param y
-	 *            the <i>y</i> coordinate of the point
+	 * @param c the component where the <i>x,y</i> location is being queried; this
+	 *          argument is often ignored, but might be used if the UI object is
+	 *          stateless and shared by multiple components
+	 * @param x the <i>x</i> coordinate of the point
+	 * @param y the <i>y</i> coordinate of the point
 	 * 
 	 * @see javax.swing.JComponent#contains
 	 * @see java.awt.Component#contains
@@ -1307,11 +1285,11 @@ public class JSComponentUI extends ComponentUI
 	/**
 	 * Returns an instance of the UI delegate for the specified component. Each
 	 * subclass must provide its own static <code>createUI</code> method that
-	 * returns an instance of that UI delegate subclass. If the UI delegate
-	 * subclass is stateless, it may return an instance that is shared by
-	 * multiple components. If the UI delegate is stateful, then it should
-	 * return a new instance per component. The default implementation of this
-	 * method throws an error, as it should never be invoked.
+	 * returns an instance of that UI delegate subclass. If the UI delegate subclass
+	 * is stateless, it may return an instance that is shared by multiple
+	 * components. If the UI delegate is stateful, then it should return a new
+	 * instance per component. The default implementation of this method throws an
+	 * error, as it should never be invoked.
 	 */
 	public static ComponentUI createUI(JComponent c) {
 		// SwingJS so, actually, we don't do this. This class is NOT stateless.
@@ -1329,28 +1307,21 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	/**
-	 * Returns the baseline. The baseline is measured from the top of the
-	 * component. This method is primarily meant for <code>LayoutManager</code>s
-	 * to align components along their baseline. A return value less than 0
-	 * indicates this component does not have a reasonable baseline and that
-	 * <code>LayoutManager</code>s should not align this component on its
-	 * baseline.
+	 * Returns the baseline. The baseline is measured from the top of the component.
+	 * This method is primarily meant for <code>LayoutManager</code>s to align
+	 * components along their baseline. A return value less than 0 indicates this
+	 * component does not have a reasonable baseline and that
+	 * <code>LayoutManager</code>s should not align this component on its baseline.
 	 * <p>
 	 * This method returns -1. Subclasses that have a meaningful baseline should
 	 * override appropriately.
 	 * 
-	 * @param c
-	 *            <code>JComponent</code> baseline is being requested for
-	 * @param width
-	 *            the width to get the baseline for
-	 * @param height
-	 *            the height to get the baseline for
-	 * @throws NullPointerException
-	 *             if <code>c</code> is <code>null</code>
-	 * @throws IllegalArgumentException
-	 *             if width or height is &lt; 0
-	 * @return baseline or a value &lt; 0 indicating there is no reasonable
-	 *         baseline
+	 * @param c      <code>JComponent</code> baseline is being requested for
+	 * @param width  the width to get the baseline for
+	 * @param height the height to get the baseline for
+	 * @throws NullPointerException     if <code>c</code> is <code>null</code>
+	 * @throws IllegalArgumentException if width or height is &lt; 0
+	 * @return baseline or a value &lt; 0 indicating there is no reasonable baseline
 	 * @see javax.swing.JComponent#getBaseline(int,int)
 	 * @since 1.6
 	 */
@@ -1366,19 +1337,17 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	/**
-	 * Returns an enum indicating how the baseline of he component changes as
-	 * the size changes. This method is primarily meant for layout managers and
-	 * GUI builders.
+	 * Returns an enum indicating how the baseline of he component changes as the
+	 * size changes. This method is primarily meant for layout managers and GUI
+	 * builders.
 	 * <p>
 	 * This method returns <code>BaselineResizeBehavior.OTHER</code>. Subclasses
 	 * that support a baseline should override appropriately.
 	 * 
-	 * @param c
-	 *            <code>JComponent</code> to return baseline resize behavior for
+	 * @param c <code>JComponent</code> to return baseline resize behavior for
 	 * @return an enum indicating how the baseline changes as the component size
 	 *         changes
-	 * @throws NullPointerException
-	 *             if <code>c</code> is <code>null</code>
+	 * @throws NullPointerException if <code>c</code> is <code>null</code>
 	 * @see javax.swing.JComponent#getBaseline(int, int)
 	 * @since 1.6
 	 */
@@ -1569,16 +1538,15 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	private ImageIcon getIcon(JSComponent c, Icon icon) {
-		return (c == null || icon == null 
-				&& (icon  = ((AbstractButton) c).getIcon()) == null ?
-			null : icon.getIconWidth() <= 0 || icon.getIconHeight() <= 0 ? null : (icon instanceof ImageIcon) ? (ImageIcon) icon :
-				JSToolkit.paintImageForIcon(jc, icon));
+		return (c == null || icon == null && (icon = ((AbstractButton) c).getIcon()) == null ? null
+				: icon.getIconWidth() <= 0 || icon.getIconHeight() <= 0 ? null
+						: (icon instanceof ImageIcon) ? (ImageIcon) icon : JSToolkit.paintImageForIcon(jc, icon));
 	}
 
-	
 	protected void setIconAndText(String prop, Icon icon, int gap, String text) {
 
-		// TODO so, actually, icons replace the checkbox or radio button, they do not complement them
+		// TODO so, actually, icons replace the checkbox or radio button, they do not
+		// complement them
 
 		actualWidth = actualHeight = 0;
 		currentText = text;
@@ -1683,8 +1651,7 @@ public class JSComponentUI extends ComponentUI
 		// the centeringNode is not visible. It is a div that allows us to
 		// position the text and icon of the image based on its preferred size
 		// in the
-		if (jc.uiClassID == "LabelUI" && 
-				centeringNode != null) {
+		if (jc.uiClassID == "LabelUI" && centeringNode != null) {
 			int left = 0;
 			int w = actualWidth;
 			if (w == 0)
@@ -1709,16 +1676,15 @@ public class JSComponentUI extends ComponentUI
 			// Problem:
 			// edu_northwestern_physics_groups_atomic_applet_Mirror_applet.html
 			// an initial paint shows checkboxes lower than they should be.
-			// JalView panel checkboxes too low. 
-			// Solution: remove all setting of position:absolute for centeringNode 
-			// EXCEPT just before size testing with body.append(). 
-			DOMNode.setStyles(centeringNode, 
+			// JalView panel checkboxes too low.
+			// Solution: remove all setting of position:absolute for centeringNode
+			// EXCEPT just before size testing with body.append().
+			DOMNode.setStyles(centeringNode,
 //					"position", "absolute", 
 					"left", left + "px");
 		}
 	}
 
-	
 	protected String getCSSTextAlignment(int type) {
 		String prop = null;
 		switch (type) {
@@ -1768,7 +1734,7 @@ public class JSComponentUI extends ComponentUI
 		default:
 			return;
 		}
-		DOMNode.setStyles(centeringNode, /*"position", "absolute", */"top", top + "px");
+		DOMNode.setStyles(centeringNode, /* "position", "absolute", */"top", top + "px");
 	}
 
 	@Override
@@ -1825,8 +1791,8 @@ public class JSComponentUI extends ComponentUI
 
 	/**
 	 * 
-	 * This control has been added back to some other node after being disposed
-	 * of. So now we need to undo that.
+	 * This control has been added back to some other node after being disposed of.
+	 * So now we need to undo that.
 	 * 
 	 * @param node
 	 */
@@ -1838,7 +1804,7 @@ public class JSComponentUI extends ComponentUI
 		}
 		// menu separators have domNode == outerNode
 		// cell renderers will set their domNode to null;
-		if (outerNode != null && domNode != null && domNode != outerNode) 
+		if (outerNode != null && domNode != null && domNode != outerNode)
 			outerNode.appendChild(domNode);
 		isDisposed = false;
 	}
@@ -2087,9 +2053,9 @@ public class JSComponentUI extends ComponentUI
 		 * 
 		 * 			if (what) return this.applet._z[what];
 		 * 
-		 *            while (node && !node.style["z-index"]) node =
-		 *            node.parentElement; z = parseInt(node.style["z-index"]);
-		 *            return(!z || isNaN(z) ? 100000 : z);
+		 *            while (node && !node.style["z-index"]) node = node.parentElement;
+		 *            z = parseInt(node.style["z-index"]); return(!z || isNaN(z) ?
+		 *            100000 : z);
 		 */
 		{
 			return z;
@@ -2161,8 +2127,8 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	/**
-	 * We allow here for an off-screen graphic for which the paint operation
-	 * also sets its location.
+	 * We allow here for an off-screen graphic for which the paint operation also
+	 * sets its location.
 	 * 
 	 * Called from edu.colorado.phet.common.phetgraphics.view.
 	 * 
@@ -2234,12 +2200,12 @@ public class JSComponentUI extends ComponentUI
 	private void setDropTarget(boolean adding) {
 		if (dropTarget == this)
 			return;
-		JSUtil.J2S._setDragDropTarget(c, getDOMNode(), dropTarget != null);
+		J2S.setDragDropTarget(c, getDOMNode(), dropTarget != null);
 	}
 
 	public void setTargetParent(JComponent targetParent, MouseInputListener mouseInputListener) {
 		this.targetParent = targetParent;
-		//this.mouseInputListener = mouseInputListener;
+		// this.mouseInputListener = mouseInputListener;
 	}
 
 }

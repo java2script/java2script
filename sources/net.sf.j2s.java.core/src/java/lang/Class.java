@@ -2339,10 +2339,10 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	    } catch (e) {
 	      return null;
 	    }
-	    var fileCache = J2S._getSetJavaFileCache(null);
+	    var fileCache = J2S.getSetJavaFileCache(null);
 	    var data = fileCache && fileCache.get$O(javapath);   
 	    if (!data)
-	      data = J2S._getFileData(fname.toString(),null,1,1);
+	      data = J2S.getFileData(fname.toString(),null,1,1);
 	    
 	    if (data == null || data == "error" || data.indexOf && data.indexOf("[Exception") == 0)
 	      return null;

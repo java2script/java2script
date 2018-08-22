@@ -27,7 +27,7 @@ public class JSPopupMenuUI extends JSPanelUI {
 		
 		if (j2sSwingMenu == null) {
 			JSUtil.loadStaticResource("swingjs/jquery/j2sMenu.js");
-			j2sSwingMenu = JSUtil.J2S._getSwing();
+			j2sSwingMenu = J2S.getSwing();
 		}
 		isContainer = true;	
 		isMenuItem = true;
@@ -66,12 +66,6 @@ public class JSPopupMenuUI extends JSPanelUI {
 	}
 
 
-	/**
-	 * j2s bug in this particular method makes this Clazz.overrideMethod, 
-	 * but it cannot override if it has a super call,
-	 * so I avoid the super call by duplicating the code from JSComponentUI
-	 * 
-	 */
 	@Override
 	public void setVisible(boolean b) {
 		if (menu == null) {

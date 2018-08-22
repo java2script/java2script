@@ -182,6 +182,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		p.add(button);
 		p.add(button2);
 		p.add(button3);
+		p.setBackground(Color.blue);
 		button2.setToolTipText("this is Button 2");
 		button3.setToolTipText("this is Button 3");
 		mkBar(p, tf, Adjustable.HORIZONTAL, 100, 20);

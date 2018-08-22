@@ -169,7 +169,7 @@ public class JSButtonUI extends JSLightweightUI {
 		}
 		// j2sMenu.js will set the mouse-up event for the <a> tag with the
 		// role=menuitem
-		// attribute via j2sApplet._jsSetMouse().
+		// attribute via j2sApplet.setMouse().
 		// That event will then fire handleJSEvent
 		setDataUI(aNode);
 		setDataComponent(aNode);

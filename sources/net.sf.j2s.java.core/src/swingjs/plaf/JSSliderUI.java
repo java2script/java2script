@@ -208,7 +208,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		//DOMNode.setZ(sliderTrack, z++);
 		//DOMNode.setZ(sliderHandle, z++);
 		// mark the handle and track with the "swingjs-ui" class
-		// so as to ignore all mouse/touch events from Jmol._jsSetMouse();
+		// so as to ignore all mouse/touch events from Jmol.setMouse();
 		if (isNew) {
 			ignoreAllMouseEvents(sliderHandle);
 			ignoreAllMouseEvents(sliderTrack);

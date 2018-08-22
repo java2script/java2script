@@ -10624,7 +10624,7 @@ return jQuery;
 				}
 			},
 			teardown: function(){
-				self.J2S && J2S._setMouseOwner(null);
+				self.J2S && J2S.setMouseOwner(null);
 				elems = elems.not( this );
 				if ( elems.length === 0 ) {
 					$(doc).unbind( event_namespaced );
@@ -10643,7 +10643,7 @@ return jQuery;
 		};
 		function handle_event( event) {
 			$(elems).each(function(){
-				self.J2S && (outside_event_name.indexOf("mouseup") >= 0 || outside_event_name.indexOf("touchend") >= 0) && J2S._setMouseOwner(null);
+				self.J2S && (outside_event_name.indexOf("mouseup") >= 0 || outside_event_name.indexOf("touchend") >= 0) && J2S.setMouseOwner(null);
 				var elem = $(this);
 				if ( this !== event.target && !elem.has(event.target).length ) {
 					//BH: adds event to pass that along to our handler as well.
@@ -10666,7 +10666,7 @@ return jQuery;
 // BH 6/27/2018 12:45:44 PM adds DND for frames
 // BH 6/20/2018 11:26:09 PM fix for menu bar not closable
 // BH 3/16/2018 5:25:09 AM fixes for dragging on phones
-// BH 2/20/2018 12:08:08 AM adds J2S._getKeyModifiers
+// BH 2/20/2018 12:08:08 AM adds J2S.getKeyModifiers
 // BH 1/8/2018 10:27:46 PM SwingJS2
 // BH 12/22/2017 1:18:42 PM adds j2sargs for setting arguments
 // BH 11/19/2017 3:55:04 AM adding support for swingjs2.js; adds static j2sHeadless=true;
@@ -11175,7 +11175,7 @@ if (!J2S._version)
 
 	})(document, window);
 
-	J2S._getDefaultLanguage = function(isAll) {
+	J2S.getDefaultLanguage = function(isAll) {
 		return (isAll ? J2S.featureDetection.getDefaultLanguage() : J2S._lang)
 	};
 
@@ -11309,7 +11309,7 @@ if (!J2S._version)
 		return fSuccess;
 	}
 
-	J2S._getSetJavaFileCache = function(cache) {
+	J2S.getSetJavaFileCache = function(cache) {
 		// called by swingjs.JSUtil
 		return (cache == null ? J2S._javaFileCache
 				: (J2S._javaFileCache = cache));
@@ -11398,7 +11398,7 @@ if (!J2S._version)
 			".bin?", ".smol?", ".spartan?", ".mrc?", ".pse?", ".map?",
 			".omap?", ".dcd?", ".mp3?", ".ogg?", ".wav?", ".au?" ];
 
-	J2S._isBinaryUrl = function(url) {
+	J2S.isBinaryUrl = function(url) {
 		url = url.toLowerCase() + "?";
 		for (var i = J2S._binaryTypes.length; --i >= 0;)
 			if (url.indexOf(J2S._binaryTypes[i]) >= 0)
@@ -11406,14 +11406,14 @@ if (!J2S._version)
 		return false;
 	}
 
-	J2S._getFileData = function(fileName, fSuccess, doProcess, isBinary) {
+	J2S.getFileData = function(fileName, fSuccess, doProcess, isBinary) {
 		// swingjs.api.J2SInterface
 		// use host-server PHP relay if not from this host
 		if (fileName.indexOf("https://./") == 0)
 			fileName = fileName.substring(10);
 		else if (fileName.indexOf("http://./") == 0)
 			fileName = fileName.substring(9);
-		isBinary = (isBinary || J2S._isBinaryUrl(fileName));
+		isBinary = (isBinary || J2S.isBinaryUrl(fileName));
 		var isPDB = (fileName.indexOf("pdb.gz") >= 0 && fileName
 				.indexOf("//www.rcsb.org/pdb/files/") >= 0);
 		var asBase64 = (isBinary && !J2S._canSyncBinary(isPDB));
@@ -11522,7 +11522,7 @@ if (!J2S._version)
 		return name.substring(0, Math.min(name.length, 3));
 	};
 
-	J2S._getZ = function(applet, what) {
+	J2S.getZ = function(applet, what) {
 		return applet && applet._z && applet._z[what] || J2S._z[what];
 	}
 
@@ -11530,7 +11530,7 @@ if (!J2S._version)
 		return applet && applet._z && ++applet._z[what] || ++J2S._z[what];
 	}
 
-	J2S._loadFileAsynchronously = function(fileLoadThread, applet, fileName,
+	J2S.loadFileAsynchronously = function(fileLoadThread, applet, fileName,
 			appData) {
 		if (fileName.indexOf("?") != 0) {
 			// LOAD ASYNC command
@@ -11544,7 +11544,7 @@ if (!J2S._version)
 			fSuccess = J2S._checkCache(applet, fileName, fSuccess);
 			if (fileName.indexOf("|") >= 0)
 				fileName = fileName.split("|")[0];
-			return (fSuccess == null ? null : J2S._getFileData(fileName,
+			return (fSuccess == null ? null : J2S.getFileData(fileName,
 					fSuccess));
 		}
 		// we actually cannot suggest a fileName, I believe.
@@ -11554,7 +11554,7 @@ if (!J2S._version)
 					null, appData);
 		if (!applet._localReader) {
 			var div = '<div id="ID" style="z-index:'
-					+ J2S._getZ(applet, "fileOpener")
+					+ J2S.getZ(applet, "fileOpener")
 					+ ';position:absolute;background:#E0E0E0;left:10px;top:10px"><div style="margin:5px 5px 5px 5px;"><input type="file" id="ID_files" /><button id="ID_loadfile">load</button><button id="ID_cancel">cancel</button></div><div>'
 			J2S.$after("#" + applet._id + "_appletdiv", div.replace(/ID/g,
 					applet._id + "_localReader"));
@@ -11617,7 +11617,7 @@ if (!J2S._version)
 	 * 
 	 * parentDiv: div id in which to insert this div, or null to use body
 	 */
-	J2S._getFileFromDialog = function(fDone, format, parentDiv) {
+	J2S.getFileFromDialog = function(fDone, format, parentDiv) {
 		// streamlined file dialog using <input type="file">.click()
 		format || (format = "string");
 		var id = "filereader" + ("" + Math.random()).split(".")[1]
@@ -11698,21 +11698,21 @@ if (!J2S._version)
 		}
 	}
 
-	J2S._doAjax = function(url, postOut, dataOut) {
+	J2S.doAjax = function(url, postOut, dataOut) {
 		// called by org.J2S.awtjs2d.JmolURLConnection.doAjax()
 		url = url.toString();
 
 		if (dataOut != null)
-			return J2S._saveFile(url, dataOut);
+			return J2S.saveFile(url, dataOut);
 		if (postOut)
 			url += "?POST?" + postOut;
-		return J2S._getFileData(url, null, true);
+		return J2S.getFileData(url, null, true);
 	}
 
 	// J2S._localFileSaveFunction -- // do something local here; Maybe try the
 	// FileSave interface? return true if successful
 
-	J2S._saveFile = function(filename, data, mimetype, encoding) {
+	J2S.saveFile = function(filename, data, mimetype, encoding) {
 		if (J2S._localFileSaveFunction
 				&& J2S._localFileSaveFunction(filename, data))
 			return "OK";
@@ -11786,12 +11786,12 @@ if (!J2S._version)
 
 	// //////////// applet start-up functionality //////////////
 
-	J2S._findApplet = function(name) {
+	J2S.findApplet = function(name) {
 		// swingjs.api.J2SInterface
 		return J2S._applets[name.split("_object")[0]];
 	}
 
-	J2S._getJavaVersion = function() {
+	J2S.getJavaVersion = function() {
 		// swingjs.api.J2SInterface
 		return J2S._version;
 	}
@@ -11812,20 +11812,20 @@ if (!J2S._version)
 				+ "__" + J2S._syncId + "__"] = J2S._applets["master"] = applet;
 	}
 
-	J2S._readyCallback = function(appId, fullId, isReady, javaApplet,
+	J2S.readyCallback = function(appId, fullId, isReady, javaApplet,
 			javaAppletPanel) {
 		// swingjs.api.J2SInterface
 		appId = appId.split("_object")[0];
 		var applet = J2S._applets[appId];
 		isReady = (isReady.booleanValue ? isReady.booleanValue() : isReady);
 		// necessary for MSIE in strict mode -- apparently, we can't call
-		// J2S._readyCallback, but we can call J2S._readyCallback. Go figure...
+		// J2S.readyCallback, but we can call J2S.readyCallback. Go figure...
 		if (isReady) {
 			// when leaving page, Java applet may be dead
 			applet._appletPanel = (javaAppletPanel || javaApplet);
 			applet._applet = javaApplet;
 		}
-		J2S._track(applet._readyCallback(appId, fullId, isReady));
+		J2S._track(applet.readyCallback(appId, fullId, isReady));
 	}
 
 	J2S._getWrapper = function(applet, isHeader) {
@@ -11862,10 +11862,10 @@ if (!J2S._version)
 				var play = "<image id=\"ID_coverclickgo\" src=\""
 						+ applet._j2sPath
 						+ "/img/play_make_live.jpg\" style=\"width:25px;height:25px;position:absolute;bottom:10px;left:10px;"
-						+ "z-index:" + J2S._getZ(applet, "coverImage")
+						+ "z-index:" + J2S.getZ(applet, "coverImage")
 						+ ";opacity:0.5;\"" + more + " />"
 				img = "<div id=\"ID_coverdiv\" style=\"background-color:red;z-index:"
-						+ J2S._getZ(applet, "coverImage")
+						+ J2S.getZ(applet, "coverImage")
 						+ ";width:100%;height:100%;display:inline;position:absolute;top:0px;left:0px\"><image id=\"ID_coverimage\" src=\""
 						+ applet._coverImage
 						+ "\" style=\"width:100%;height:100%\""
@@ -11879,7 +11879,7 @@ if (!J2S._version)
 			s = "\
 ...<div id=\"ID_appletinfotablediv\" style=\"width:Wpx;height:Hpx;position:relative;font-size:14px;text-align:left\">IMG\
 ......<div id=\"ID_appletdiv\" style=\"z-index:"
-					+ J2S._getZ(applet, "header")
+					+ J2S.getZ(applet, "header")
 					+ ";width:100%;height:100%;position:absolute;top:0px;left:0px;"
 					+ css + ">";
 			var height = applet._height;
@@ -11915,11 +11915,11 @@ if (!J2S._version)
 		obj._id = id;
 		obj.__Info = {};
 		Info.z && Info.zIndexBase
-				&& (J2S._z = J2S._getZOrders(Info.zIndexBase));
+				&& (J2S._z = J2S.getZOrders(Info.zIndexBase));
 		for ( var i in Info)
 			obj.__Info[i] = Info[i];
 		(obj._z = Info.z) || Info.zIndexBase
-				&& (obj._z = obj.__Info.z = J2S._getZOrders(Info.zIndexBase));
+				&& (obj._z = obj.__Info.z = J2S.getZOrders(Info.zIndexBase));
 		obj._width = Info.width;
 		obj._height = Info.height;
 		obj._noscript = !obj._isJava && Info.noscript;
@@ -12027,7 +12027,7 @@ if (!J2S._version)
 			if (applet._appletPanel)
 				applet._appletPanel.destroy();
 			applet._applet = null;
-			J2S._jsUnsetMouse(applet._mouseInterface)
+			J2S.unsetMouse(applet._mouseInterface)
 			applet._canvas = null;
 			var n = 0;
 			for (var i = 0; i < J2S._syncedApplets.length; i++) {
@@ -12112,7 +12112,7 @@ if (!J2S._version)
 
 	// ////////////////// mouse events //////////////////////
 
-	J2S._jsSetMouse = function(who, isSwingJS) {
+	J2S.setMouse = function(who, isSwingJS) {
 		// swingjs.api.J2SInterface
 
 		var doIgnore = function(ev) {
@@ -12139,7 +12139,7 @@ if (!J2S._version)
 			if (doIgnore(ev))
 				return true;
 
-			J2S._setMouseOwner(who, true);
+			J2S.setMouseOwner(who, true, ev.target);
 			var ui = ev.target["data-ui"];
 			var handled = (ui && ui.handleJSEvent$O$I$O(who, 501, ev));
 			if (checkStopPropagation(ev, ui, handled))
@@ -12154,7 +12154,7 @@ if (!J2S._version)
 				if (ev.button != 2 && J2S.Swing && J2S.Swing.hideMenus)
 					J2S.Swing.hideMenus(who.applet);
 				if (who._frameViewer && who._frameViewer.isFrame)
-					J2S._setWindowZIndex(who._frameViewer.top.ui.domNode,
+					J2S.setWindowZIndex(who._frameViewer.top.ui.domNode,
 							Integer.MAX_VALUE);
 				who.applet._processEvent(501, xym, ev, who._frameViewer); // MouseEvent.MOUSE_PRESSED
 			}
@@ -12173,7 +12173,11 @@ if (!J2S._version)
 				m && m._hideJSMenu();
 			}
 
-			J2S._setMouseOwner(null);
+			if (J2S._mouseOwner) {
+				who = J2S._mouseOwner;
+				ev._mouseTarget = J2S._mouseTarget;
+			}
+			J2S.setMouseOwner(null);
 			var ui = ev.target["data-ui"];
 			var handled = (ui && ui.handleJSEvent$O$I$O(who, 502, ev));
 			if (checkStopPropagation(ev, ui, handled))
@@ -12182,7 +12186,7 @@ if (!J2S._version)
 			who.isDragging = false;
 			if (ev.type == "touchend" && J2S._gestureUpdate(who, ev))
 				return !!ui;
-			var xym = J2S._jsGetXY(who, ev);
+			var xym = J2S._jsGetXY(who, ev, 1);
 			if (xym)
 				who.applet._processEvent(502, xym, ev, who._frameViewer);// MouseEvent.MOUSE_RELEASED
 			return !!ui;
@@ -12252,8 +12256,8 @@ if (!J2S._version)
 				return true;
 			}
 
-			if (J2S._mouseOwner && !J2S._mouseOwner.mouseMove)
-				J2S._setMouseOwner(null);
+			if (J2S._mouseOwner && !J2S._mouseOwner.isDragging)
+				J2S.setMouseOwner(null);
 			if (who.applet._appletPanel)
 				who.applet._appletPanel.startHoverWatcher$Z(false);
 			// who.isDragging = false;
@@ -12307,15 +12311,13 @@ if (!J2S._version)
 		J2S.$bind('body', 'mouseup touchend', function(ev) {
 			if (doIgnore(ev))
 				return true;
-			if (who.applet)
-				who.isDragging = false;
-			J2S._setMouseOwner(null);
+			J2S.setMouseOwner(null);
 			return true;
 		});
 
 	}
 
-	J2S._jsUnsetMouse = function(who) {
+	J2S.unsetMouse = function(who) {
 		if (!who)
 			return;
 		// swingjs.api.J2SInterface
@@ -12325,39 +12327,46 @@ if (!J2S._version)
 						who,
 						'mousedown touchstart mousemove touchmove mouseup touchend DOMMouseScroll mousewheel contextmenu mouseout mouseenter mousemoveoutjsmol',
 						null);
-		J2S._setMouseOwner(null);
+		J2S.setMouseOwner(null);
 	}
 
-	J2S._setMouseOwner = function(who, tf) {
-		if (who == null || tf)
+	J2S.setMouseOwner = function(who, doSet, target) {
+		// called for mousedown, mouseup, mouseexit, jsUnsetMouse, 
+		// and outsideEvent.teardown, outsideEvent.mouseUp
+		if (!who && J2S._mouseOwner)
+			J2S._mouseOwner.isDragging = false;
+		if (!who || doSet)
 			J2S._mouseOwner = who;
 		else if (J2S._mouseOwner == who)
-			J2S._mouseOwner = null;
+			J2S._mouseOwner = who = null;
+		if (target || !who)
+			J2S._mouseTarget = target || null;
 	}
 
-	var getMouseModifiers = function(ev) {
+	var getMouseModifiers = function(ev, isUp) {
+		// isUp needed to properly not assign the InputEvent.ButtonX_DOWN_MASK for an UP operation
 		var modifiers = 0;
 		switch (ev.button) {
 		default:
 			ev.button = 0;
 			// fall through
 		case 0:
-			modifiers = (1 << 4) | (1 << 10);// InputEvent.BUTTON1 +
+			modifiers = (1 << 4) | (isUp ? 0 : (1 << 10));// InputEvent.BUTTON1 +
 												// InputEvent.BUTTON1_DOWN_MASK;
 			break;
 		case 1:
-			modifiers = (1 << 3) | (1 << 11);// InputEvent.BUTTON2 +
+			modifiers = (1 << 3) | (isUp ? 0 : (1 << 11));// InputEvent.BUTTON2 +
 												// InputEvent.BUTTON2_DOWN_MASK;
 			break;
 		case 2:
-			modifiers = (1 << 2) | (1 << 12);// InputEvent.BUTTON3 +
+			modifiers = (1 << 2) | (isUp ? 0 : (1 << 12));// InputEvent.BUTTON3 +
 												// InputEvent.BUTTON3_DOWN_MASK;
 			break;
 		}
-		return modifiers | J2S._getKeyModifiers(ev);
+		return modifiers | J2S.getKeyModifiers(ev);
 	}
 
-	J2S._getKeyModifiers = function(ev) {
+	J2S.getKeyModifiers = function(ev) {
 		var modifiers = 0;
 		if (ev.shiftKey)
 			modifiers |= (1 << 0) | (1 << 6); // InputEvent.SHIFT_MASK +
@@ -12377,7 +12386,7 @@ if (!J2S._version)
 		return modifiers;
 	}
 
-	J2S._jsGetXY = function(who, ev) {
+	J2S._jsGetXY = function(who, ev, isUp) {
 		if (!who.applet._ready || J2S._touching && ev.type.indexOf("touch") < 0)
 			return false;
 		// ev.preventDefault(); // removed 5/9/2015 -- caused loss of focus on
@@ -12402,7 +12411,7 @@ if (!J2S._version)
 		}
 		// System.out.println([x,y,getMouseModifiers(ev)])
 		return (x == undefined ? null : [ Math.round(x), Math.round(y),
-				getMouseModifiers(ev) ]);
+				getMouseModifiers(ev, isUp) ]);
 	}
 
 	J2S._gestureUpdate = function(who, ev) {
@@ -12463,14 +12472,14 @@ if (!J2S._version)
 		lastDragx = xym[0];
 		lastDragy = xym[1];
 
-		if (!who.isDragging)
-			xym[2] = J2S._getKeyModifiers(ev);
+//		if (!who.isDragging)
+//			xym[2] = J2S.getKeyModifiers(ev);
 
 		var ui = ev.target["data-ui"];
 		
 		
 		// if (who.isdragging && (!ui || !ui.handleJSEvent(who, 506, ev))) {}
-		who.applet._processEvent((who.isDragging ? 506 : 503), xym, ev,
+		who.applet._processEvent(506/*(who.isDragging ? 506 : 503)*/, xym, ev,
 				who._frameViewer); // MouseEvent.MOUSE_DRAGGED :
 									// MouseEvent.MOUSE_MOVED
 		ui || (ui = ev.target["data-component"]);
@@ -12534,7 +12543,7 @@ if (!J2S._version)
 		J2S.Cache.fileCache[filename] = data;
 	}
 	// dnd _setDragDrop for swingjs.api.J2S called JSComponentUI
-	J2S._setDragDropTarget = J2S.Cache.setDragDrop = function(me, node, adding) {
+	J2S.setDragDropTarget = J2S.Cache.setDragDrop = function(me, node, adding) {
 		if (adding === false) {
 			node["data-dropComponent"] = null;
 			J2S.$appEvent(node, null, "dragover", null);
@@ -12828,8 +12837,8 @@ if (!J2S._version)
 		proto._getContentLayer = function() {
 			return J2S.$(this, "contentLayer")[0]
 		};
-		proto._repaintNow = function() {
-			J2S._repaint(this, false)
+		proto.repaintNow = function() {
+			J2S.repaint(this, false)
 		};
 		// //////
 
@@ -12846,7 +12855,7 @@ if (!J2S._version)
 						container[0].removeChild(this._canvas.rearLayer);
 					if (this._canvas.contentLayer)
 						container[0].removeChild(this._canvas.contentLayer);
-					J2S._jsUnsetMouse(this._mouseInterface);
+					J2S.unsetMouse(this._mouseInterface);
 				} catch (e) {
 				}
 			}
@@ -12862,7 +12871,7 @@ if (!J2S._version)
 			canvas.id = this._id + "_canvas2d";
 			container.append(canvas);
 			J2S._$(canvas.id).css({
-				"z-index" : J2S._getZ(this, "main")
+				"z-index" : J2S.getZ(this, "main")
 			});
 			if (this._isLayered) {
 				var content = document.createElement("div");
@@ -12870,7 +12879,7 @@ if (!J2S._version)
 				content.id = this._id + "_contentLayer";
 				container.append(content);
 				J2S._$(content.id).css({
-					zIndex : J2S._getZ(this, "content"),
+					zIndex : J2S.getZ(this, "content"),
 					position : "absolute",
 					left : "0px",
 					top : "0px",
@@ -12888,7 +12897,7 @@ if (!J2S._version)
 			} else {
 				this._mouseInterface = canvas;
 			}
-			J2S._jsSetMouse(this._mouseInterface, this._isSwing);
+			J2S.setMouse(this._mouseInterface, this._isSwing);
 		}
 
 		proto._getLayer = function(name, container, w, h, isOpaque) {
@@ -12903,7 +12912,7 @@ if (!J2S._version)
 			c.applet = this;
 			J2S._$(c.id).css({
 				background : (isOpaque ? "rgb(0,0,0,1)" : "rgb(0,0,0,0.001)"),
-				"z-index" : J2S._getZ(this, name),
+				"z-index" : J2S.getZ(this, name),
 				position : "absolute",
 				left : "0px",
 				top : "0px",
@@ -12917,7 +12926,7 @@ if (!J2S._version)
 				base : this._j2sPath + "/",
 				alias : ".",
 				console : this._console,
-				monitorZIndex : J2S._getZ(this, "monitorZIndex")
+				monitorZIndex : J2S.getZ(this, "monitorZIndex")
 			};
 			var isFirst = (__execStack.length == 0);
 			if (isFirst)
@@ -12999,7 +13008,7 @@ if (!J2S._version)
 							codePath.lastIndexOf("/") + 1);
 					viewerOptions.put("codePath", codePath);
 					viewerOptions.put("appletReadyCallback",
-							"J2S._readyCallback");
+							"J2S.readyCallback");
 					viewerOptions.put("applet", true);
 					if (applet._color)
 						viewerOptions.put("bgcolor", applet._color);
@@ -13049,7 +13058,7 @@ if (!J2S._version)
 			J2S.$setVisible(J2S.$(this, "appletdiv"), tf);
 			if (tf && !this._isSwing) // SwingJS applets will handle their own
 										// repainting
-				J2S._repaint(this, true);
+				J2S.repaint(this, true);
 		};
 
 		proto._canScript = function(script) {
@@ -13075,7 +13084,7 @@ if (!J2S._version)
 				clearTimeout(J2S[s]);
 			var me = this;
 			J2S[s] = setTimeout(function() {
-				J2S._repaint(me, true);
+				J2S.repaint(me, true);
 				J2S[s] = null
 			}, 100);
 		}
@@ -13083,13 +13092,13 @@ if (!J2S._version)
 		return proto;
 	};
 
-	J2S._repaint = function(applet, asNewThread) {
+	J2S.repaint = function(applet, asNewThread) {
 		// JmolObjectInterface
 		// asNewThread: true is from RepaintManager.repaintNow()
 		// false is from Repaintmanager.requestRepaintAndWait()
 		// called from apiPlatform Display.repaint()
 
-		// alert("_repaint " + Clazz._getStackTrace())
+		// alert("repaint " + Clazz._getStackTrace())
 		if (!applet || !applet._appletPanel)
 			return;
 
@@ -13121,15 +13130,15 @@ if (!J2S._version)
 	}
 
 	/**
-	 * _loadImage is called for asynchronous image loading. If bytes are not
+	 * loadImage is called for asynchronous image loading. If bytes are not
 	 * null, they are from a ZIP file. They are processed sychronously here
 	 * using an image data URI. Can all browsers handle MB of data in data URI?
 	 * 
 	 */
-	J2S._loadImage = function(platform, echoName, path, bytes, fOnload, image) {
+	J2S.loadImage = function(platform, echoName, path, bytes, fOnload, image) {
 		// JmolObjectInterface
 		var id = "echo_" + echoName + path + (bytes ? "_" + bytes.length : "");
-		var canvas = J2S._getHiddenCanvas(platform.vwr.html5Applet, id, 0, 0,
+		var canvas = J2S.getHiddenCanvas(platform.vwr.html5Applet, id, 0, 0,
 				false, true);
 		// System.out.println(["JSmol.js loadImage ",id,path,canvas,image])
 		if (canvas == null) {
@@ -13137,14 +13146,14 @@ if (!J2S._version)
 				image = new Image();
 				if (bytes == null) {
 					image.onload = function() {
-						J2S._loadImage(platform, echoName, path, null, fOnload,
+						J2S.loadImage(platform, echoName, path, null, fOnload,
 								image)
 					};
 					image.src = path;
 					return null;
 				} else {
 					System.out
-							.println("Jsmol.js J2S._loadImage using data URI for "
+							.println("Jsmol.js J2S.loadImage using data URI for "
 									+ id)
 				}
 				image.src = (typeof bytes == "string" ? bytes : "data:"
@@ -13159,23 +13168,23 @@ if (!J2S._version)
 				width /= 2;
 				height /= 2;
 			}
-			canvas = J2S._getHiddenCanvas(platform.vwr.html5Applet, id, width,
+			canvas = J2S.getHiddenCanvas(platform.vwr.html5Applet, id, width,
 					height, true, false);
 			canvas.imageWidth = width;
 			canvas.imageHeight = height;
 			canvas.id = id;
 			canvas.image = image;
-			J2S._setCanvasImage(canvas, width, height);
+			J2S.setCanvasImage(canvas, width, height);
 			// return a null canvas and the error in path if there is a problem
 		} else {
-			System.out.println("J2S._loadImage reading cached image for " + id)
+			System.out.println("J2S.loadImage reading cached image for " + id)
 		}
 		return (bytes == null ? fOnload(canvas, path) : canvas);
 	};
 
 	J2S._canvasCache = {};
 
-	J2S._getHiddenCanvas = function(applet, id, width, height, forceNew,
+	J2S.getHiddenCanvas = function(applet, id, width, height, forceNew,
 			checkOnly) {
 		id = applet._id + "_" + id;
 		var d = J2S._canvasCache[id];
@@ -13195,7 +13204,7 @@ if (!J2S._version)
 		return d;
 	}
 
-	J2S._setCanvasImage = function(canvas, width, height) {
+	J2S.setCanvasImage = function(canvas, width, height) {
 		// called from org.J2S.awtjs2d.Platform
 		canvas.buf32 = null;
 		canvas.width = width;
@@ -13204,24 +13213,24 @@ if (!J2S._version)
 				canvas.image.width, canvas.image.height, 0, 0, width, height);
 	};
 
-	J2S._apply = function(f, a) {
+	J2S.applyFunc = function(f, a) {
 		// J2SObjectInterface
 		return f(a);
 	}
 
-	J2S._setDraggable = function(tag, targetOrArray) {
+	J2S.setDraggable = function(tag, targetOrArray) {
 
 		// draggable tag object; target is itself
 
-		// J2S._setDraggable(tag)
-		// J2S._setDraggable(tag, true)
+		// J2S.setDraggable(tag)
+		// J2S.setDraggable(tag, true)
 
 		// draggable tag object that controls another target,
 		// either given as a DOM element or jQuery selector or function
 		// returning such
 
-		// J2S._setDraggable(tag, target)
-		// J2S._setDraggable(tag, fTarget)
+		// J2S.setDraggable(tag, target)
+		// J2S.setDraggable(tag, fTarget)
 
 		// draggable tag object simply loades/reports mouse position as
 		// fDown({x:x,y:y,dx:dx,dy:dy,ev:ev}) should fill x and y with starting
@@ -13229,12 +13238,12 @@ if (!J2S._version)
 		// fDrag(xy) and fUp(xy) will get {x:x,y:y,dx:dx,dy:dy,ev:ev} to use as
 		// desired
 
-		// J2S._setDraggable(tag, [fAll])
-		// J2S._setDraggable(tag, [fDown, fDrag, fUp])
+		// J2S.setDraggable(tag, [fAll])
+		// J2S.setDraggable(tag, [fDown, fDrag, fUp])
 
 		// unbind tag
 
-		// J2S._setDraggable(tag, false)
+		// J2S.setDraggable(tag, false)
 
 		// draggable frames by their titles.
 		// activation of dragging with a mouse down action
@@ -13242,7 +13251,7 @@ if (!J2S._version)
 		// until the mouse is released.
 		// uses jQuery outside events - v1.1 - 3/16/2010 (see j2sJQueryExt.js)
 
-		// J2S._setDraggable(titlebar, frame.outerNode), for example, is issued
+		// J2S.setDraggable(titlebar, frame.outerNode), for example, is issued
 		// in swingjs.plaf.JSFrameUI.js
 
 		var drag, up;
@@ -13277,20 +13286,20 @@ if (!J2S._version)
 			return;
 		}
 		if (targetOrArray instanceof Array) {
-			// J2S._setDraggable(tag, [fAll])
-			// J2S._setDraggable(tag, [fDown, fDrag, fUp])
+			// J2S.setDraggable(tag, [fAll])
+			// J2S.setDraggable(tag, [fDown, fDrag, fUp])
 			fDown = targetOrArray[0];
 			fDrag = targetOrArray[1] || fDown;
 			fUp = targetOrArray[2] || fDown;
 		} else {
-			// J2S._setDraggable(tag)
-			// J2S._setDraggable(tag, true)
-			// J2S._setDraggable(tag, target)
-			// J2S._setDraggable(tag, fTarget)
+			// J2S.setDraggable(tag)
+			// J2S.setDraggable(tag, true)
+			// J2S.setDraggable(tag, target)
+			// J2S.setDraggable(tag, fTarget)
 			target = (targetOrArray !== true && targetOrArray || tag);
 			// allow for a function to return the target
 			// this allows the target to be created after the call to
-			// J2S._setDraggable()
+			// J2S.setDraggable()
 			if (!(typeof target == "function")) {
 				var t = target;
 				target = function() {
@@ -13380,7 +13389,7 @@ if (!J2S._version)
 
 	}
 
-	J2S._setWindowZIndex = function(node, z) {
+	J2S.setWindowZIndex = function(node, z) {
 		// on frame show or mouse-down, create a stack of frames and sort by
 		// z-order
 		if (!node)
@@ -13421,7 +13430,7 @@ if (!J2S._version)
 		menuCounter : 0
 	};
 
-	J2S._getSwing = function() {
+	J2S.getSwing = function() {
 		return J2S.Swing
 	}
 
@@ -13431,15 +13440,15 @@ if (!J2S._version)
 
 	J2S.Loaded = {};
 
-	J2S._isResourceLoaded = function(resource, done) {
-		path = J2S._getResourcePath(resource, true);
+	J2S.isResourceLoaded = function(resource, done) {
+		path = J2S.getResourcePath(resource, true);
 		var r = J2S.Loaded[resource];
 		if (done)
 			J2S.Loaded[resource] = 1;
 		return r;
 	}
 
-	J2S._getResourcePath = function(path, isJavaPath) {
+	J2S.getResourcePath = function(path, isJavaPath) {
 		if (!path || path.indexOf("https:/") != 0
 				&& path.indexOf("https:/") != 0 && path.indexOf("file:/") != 0) {
 			var applet = J2S._applets[java.lang.Thread.currentThread$()
@@ -16201,7 +16210,7 @@ Clazz.loadScript = function(file) {
   var data = "";
   try{
     _Loader.onScriptLoading(file);
-    data = J2S._getFileData(file);
+    data = J2S.getFileData(file);
     evaluate(file, data);
     _Loader.onScriptLoaded(file, null, data);
   }catch(e) {
@@ -18199,7 +18208,7 @@ m$(C$,"getName$I",
 function(codePoint){
 	if (!unicode_txt) {
 		try {
-			unicode_txt = J2S._getFileData(ClassLoader.getClasspathFor("java.lang",1)  + "org/unicode/public/unidata/NamesList.txt");
+			unicode_txt = J2S.getFileData(ClassLoader.getClasspathFor("java.lang",1)  + "org/unicode/public/unidata/NamesList.txt");
 		} catch (e) {
 			return "??";
 		}
@@ -19285,7 +19294,7 @@ if (typeof(SwingJS) == "undefined") {
 		p._showInfo = proto._showInfo;	
 ///		p._search = proto._search;
 		p._getName = proto._getName;
-		p._readyCallback = proto._readyCallback;
+		p.readyCallback = proto.readyCallback;
 	}
 
 	Applet._createApplet = function(applet, Info, params) {
@@ -19386,7 +19395,7 @@ if (typeof(SwingJS) == "undefined") {
 		}
 
 		params.loadInline = (Info.inlineModel ? sterilizeInline(Info.inlineModel) : "");
-		params.appletReadyCallback = "J2S._readyCallback";
+		params.appletReadyCallback = "J2S.readyCallback";
 		if (J2S._syncedApplets.length)
 			params.synccallback = "J2S._mySyncCallback";
 		params.java_arguments = "-Xmx" + Math.round(Info.memoryLimit || this._memoryLimit) + "m";
@@ -19400,7 +19409,7 @@ if (typeof(SwingJS) == "undefined") {
    // applet-dependent
 	}
 
-	proto._readyCallback = function(id, fullid, isReady) {
+	proto.readyCallback = function(id, fullid, isReady) {
 		if (!isReady)
 			return; // ignore -- page is closing
 		J2S._setDestroy(this);
@@ -19486,7 +19495,7 @@ if (typeof(SwingJS) == "undefined") {
 		this._containerWidth = sz[0];
 		this._containerHeight = sz[1];
 		if (this._is2D)
-			J2S._repaint(this, true);
+			J2S.repaint(this, true);
 	}
 
 	proto._cover = function (doCover) {

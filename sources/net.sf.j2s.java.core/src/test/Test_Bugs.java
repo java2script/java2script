@@ -101,9 +101,6 @@ public class Test_Bugs extends HashMap {
 
 		System.out.println(d.getYear());
 
-		// J2SObjectInterface j2s = null;
-		// j2s._doAjax(null, null, null, false);
-
 		boolean b1 = Float.isNaN(3);
 
 		for (Integer i : new int[] { 1, 2, 3 })

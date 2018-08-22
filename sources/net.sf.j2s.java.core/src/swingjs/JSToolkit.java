@@ -728,7 +728,7 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	   * 
 	   */
 		{}
-		JSUtil.J2S._getFileFromDialog(f, type);
+		JSUtil.J2S.getFileFromDialog(f, type);
 	}
 
 	public static void killDispatched(int html5Id) {

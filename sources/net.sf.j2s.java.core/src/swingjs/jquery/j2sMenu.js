@@ -8,7 +8,7 @@
 
 ;(function(Swing) {
 
-if (J2S._isResourceLoaded("swingjs/jquery/j2sMenu.js", true))return;
+if (J2S.isResourceLoaded("swingjs/jquery/j2sMenu.js", true))return;
 
 ;(function(jQuery) {
 
@@ -87,7 +87,7 @@ Swing.menuCounter = 0;
 Swing.menuInitialized = 0;
 
 Swing.__getMenuStyle = function(applet) { return '\
-	.swingjsPopupMenu{font-family:Arial,sans-serif;font-size:11px;position:absolute;z-index:'+J2S._getZ(applet, "menu")+'}\
+	.swingjsPopupMenu{font-family:Arial,sans-serif;font-size:11px;position:absolute;z-index:'+J2S.getZ(applet, "menu")+'}\
 	.swingjsPopupMenu,.swingjsPopupMenu .ui-corner-all{border-radius:5px}\
 	.swingjsPopupMenu,.swingjsPopupMenu .ui-widget-content{border:1px solid #a6c9e2;background-color:#fcfdfd;color:#222}\
 	.swingjsPopupMenu a{color:#222;font-size:10px;}\
@@ -156,7 +156,7 @@ Swing.setMenu = function(menu) {
     menu.$ulTop = J2S.__$(); // empty jQuery selector
     var proto = menu.$init$.exClazz.prototype;
     proto._hideJSMenu = function(){Swing.hideMenu(this)};
-    proto.dragBind || ( proto.dragBind = function(isBind){} );// J2S._setDraggable(this.$ulTop, true)};
+    proto.dragBind || ( proto.dragBind = function(isBind){} );
     proto.setContainer || ( proto.setContainer = function(c){ this.$ulTop = c } );
     proto.setPosition || ( proto.setPosition = function(x,y) {
       this.$ulTop.css({left:x+"px",top:(y+8)+"px",position:"absolute"});
@@ -219,7 +219,7 @@ Swing.showMenu = function(menu, x, y) {
       node.applet = menu._applet;
       node._frameViewer = menu.invoker.getFrameViewer$();
       node._menu = menu;
-      J2S._jsSetMouse(node, true);
+      J2S.setMouse(node, true);
     });
   }
 	menu._visible = true;
@@ -252,7 +252,7 @@ Swing.disposeMenu = function(menu) {
   if (menu.uiClassID) {      
     menu.$ulTop.find("[role=menuitem]").each(function(){
       this.applet = menu.ui.applet;
-      J2S._jsSetMouse(this, false);
+      J2S.setMouse(this, false);
     });
   } else {
    	Swing.bindMenuActionCommands(menu, false);

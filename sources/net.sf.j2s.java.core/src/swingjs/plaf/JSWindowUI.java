@@ -101,13 +101,13 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 	public void toFront() {
 		if (debugging)
 			System.out.println("window to front for " + id);
-		z = JSUtil.J2S._setWindowZIndex(domNode, Integer.MAX_VALUE);
+		z = J2S.setWindowZIndex(domNode, Integer.MAX_VALUE);
 	}
 
 	@Override
 	public void toBack() {
 		System.out.println("window to back for " + id);
-		z = JSUtil.J2S._setWindowZIndex(domNode, Integer.MIN_VALUE);
+		z = J2S.setWindowZIndex(domNode, Integer.MIN_VALUE);
 		
 	}
 
@@ -173,7 +173,7 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 
 	@Override
 	public void dispose() {
-		JSUtil.J2S._jsUnsetMouse(domNode);
+		J2S.unsetMouse(domNode);
 		DOMNode.remove(outerNode);
 		if (modalNode != null)
 			DOMNode.remove(modalNode);

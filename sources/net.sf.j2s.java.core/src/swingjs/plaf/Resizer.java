@@ -84,7 +84,7 @@ public class Resizer {
 		{
 		}
 		// set to track size changes
-		JSUtil.J2S._setDraggable(resizer, new JSFunction[] { fHandleResizer });
+		JSUtil.J2S.setDraggable(resizer, new JSFunction[] { fHandleResizer });
 		JSUtil.jQuery.$(rootNode).resize(fHandleDOMResize);
 	}
 

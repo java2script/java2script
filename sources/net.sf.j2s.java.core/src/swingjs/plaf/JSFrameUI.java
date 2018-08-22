@@ -133,7 +133,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			 *            };
 			 */
 			
-			JSUtil.J2S._setDraggable(titleBarNode, fGetFrameParent);
+			J2S.setDraggable(titleBarNode, fGetFrameParent);
 			titleBarNode.appendChild(titleNode);
 			titleBarNode.appendChild(closerWrap);
 			closerWrap.appendChild(closerNode);
@@ -180,13 +180,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		  	if (type == "click") {
 		  		@SuppressWarnings("unused")
 					DOMNode tbar = titleBarNode;
-		  		/**
-		  		 * @j2sNative  
-		  		 * 
-		  		 * 					J2S._setDraggable(tbar, false);
-
-		  		 */
-		  		{}
+		  		J2S.setDraggable(tbar, false);
 		  		frameCloserAction();
 					return true;		  		
 		  	} else if (type.equals("mouseout")) {
@@ -207,7 +201,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	}
 
 	protected void closeFrame() {
-		JSUtil.J2S._jsUnsetMouse(frameNode);
+		J2S.unsetMouse(frameNode);
 		$(frameNode).remove();
 		$(outerNode).remove();
 	}
