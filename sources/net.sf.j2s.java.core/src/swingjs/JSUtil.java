@@ -114,7 +114,7 @@ public class JSUtil {
 	}
 
 	/**
-	 * Regardless of how returned by Jmol._getFileContents(), 
+	 * Regardless of how returned by Jmol.getFileContents(), 
 	 * this method ensures that we get signed bytes.
 	 * 
 	 * @param filename

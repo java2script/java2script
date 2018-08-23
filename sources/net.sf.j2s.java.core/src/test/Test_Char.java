@@ -8,7 +8,9 @@ class Test_Char extends Test_ {
 	char c = 'C';
 	char ci = 65; 
 	byte bAA = 'A'; 
-	int iAB = 'A' + c; 
+	int iAB = 'A' + c;
+	char uc = 0xACEA;
+	
 	static String s = "test";
 	
     public static final char separatorChar = '/';

@@ -32,10 +32,10 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-//import java.nio.charset.Charset;
-//import java.nio.charset.CharsetEncoder;
-//import sun.nio.cs.StreamEncoder;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
 
+import sun.nio.cs.StreamEncoder;
 import swingjs.api.Interface;
 
 
@@ -85,7 +85,7 @@ import swingjs.api.Interface;
 
 public class OutputStreamWriter extends Writer {
 	
-    //private final StreamEncoder se;
+    private final StreamEncoder se;
 
     private String charsetName;
 		private OutputStream stream;
@@ -111,7 +111,7 @@ public class OutputStreamWriter extends Writer {
         this.stream = out;
         setCharset(charsetName);
 
-        //se = StreamEncoder.forOutputStreamWriter(out, this, charsetName);
+        se = StreamEncoder.forOutputStreamWriter(out, this, charsetName);
     }
 
     private void setCharset(String charsetName) throws UnsupportedEncodingException {
@@ -132,49 +132,49 @@ public class OutputStreamWriter extends Writer {
         super(out);
         this.stream = out;
         try {
-					setCharset(null);
-				} catch (UnsupportedEncodingException e) {
-					// won't happen
-				}
+            se = StreamEncoder.forOutputStreamWriter(out, this, (String)null);
+        } catch (UnsupportedEncodingException e) {
+            throw new Error(e);
+        }
     }
 
-//    /**
-//     * Creates an OutputStreamWriter that uses the given charset. </p>
-//     *
-//     * @param  out
-//     *         An OutputStream
-//     *
-//     * @param  cs
-//     *         A charset
-//     *
-//     * @since 1.4
-//     * @spec JSR-51
-//     */
-//    public OutputStreamWriter(OutputStream out, Charset cs) {
-//        super(out);
-//        if (cs == null)
-//            throw new NullPointerException("charset");
-//        se = StreamEncoder.forOutputStreamWriter(out, this, cs);
-//    }
+    /**
+     * Creates an OutputStreamWriter that uses the given charset. </p>
+     *
+     * @param  out
+     *         An OutputStream
+     *
+     * @param  cs
+     *         A charset
+     *
+     * @since 1.4
+     * @spec JSR-51
+     */
+    public OutputStreamWriter(OutputStream out, Charset cs) {
+        super(out);
+        if (cs == null)
+            throw new NullPointerException("charset");
+        se = StreamEncoder.forOutputStreamWriter(out, this, cs);
+    }
 
-//    /**
-//     * Creates an OutputStreamWriter that uses the given charset encoder.  </p>
-//     *
-//     * @param  out
-//     *         An OutputStream
-//     *
-//     * @param  enc
-//     *         A charset encoder
-//     *
-//     * @since 1.4
-//     * @spec JSR-51
-//     */
-//    public OutputStreamWriter(OutputStream out, CharsetEncoder enc) {
-//        super(out);
-//        if (enc == null)
-//            throw new NullPointerException("charset encoder");
-//        se = StreamEncoder.forOutputStreamWriter(out, this, enc);
-//    }
+    /**
+     * Creates an OutputStreamWriter that uses the given charset encoder.  </p>
+     *
+     * @param  out
+     *         An OutputStream
+     *
+     * @param  enc
+     *         A charset encoder
+     *
+     * @since 1.4
+     * @spec JSR-51
+     */
+    public OutputStreamWriter(OutputStream out, CharsetEncoder enc) {
+        super(out);
+        if (enc == null)
+            throw new NullPointerException("charset encoder");
+        se = StreamEncoder.forOutputStreamWriter(out, this, enc);
+    }
 
     /**
      * Returns the name of the character encoding being used by this stream.

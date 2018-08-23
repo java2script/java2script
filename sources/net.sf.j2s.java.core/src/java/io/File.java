@@ -32,6 +32,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.AccessControlException;
 import java.util.ArrayList;
+import java.util.Random;
+
+import swingjs.JSTempFile;
 
 
 
@@ -134,6 +137,9 @@ import java.util.ArrayList;
 public class File
     implements Comparable<File>
 {
+	
+	
+	protected int _bytes; // filled in by SwingJS ajax call
 //
 //    /**
 //     * The FileSystem object representing the platform's local file system.
@@ -227,7 +233,7 @@ public class File
     private String resolve(String path, String child) {
     	if (child.length() > 0 && !path.endsWith("/"))
     			path += "/";
-    	return path + child;
+    	return path + child; 
 		}
 
 		/**
@@ -868,83 +874,87 @@ public class File
 //        return fs.getLastModifiedTime(this);
 //    }
 //
-//    /**
-//     * Returns the length of the file denoted by this abstract pathname.
-//     * The return value is unspecified if this pathname denotes a directory.
-//     *
-//     * @return  The length, in bytes, of the file denoted by this abstract
-//     *          pathname, or <code>0L</code> if the file does not exist.  Some
-//     *          operating systems may return <code>0L</code> for pathnames
-//     *          denoting system-dependent entities such as devices or pipes.
-//     *
-//     * @throws  SecurityException
-//     *          If a security manager exists and its <code>{@link
-//     *          java.lang.SecurityManager#checkRead(java.lang.String)}</code>
-//     *          method denies read access to the file
-//     */
-//    public long length() {
+    /**
+     * Returns the length of the file denoted by this abstract pathname.
+     * The return value is unspecified if this pathname denotes a directory.
+     *
+     * @return  The length, in bytes, of the file denoted by this abstract
+     *          pathname, or <code>0L</code> if the file does not exist.  Some
+     *          operating systems may return <code>0L</code> for pathnames
+     *          denoting system-dependent entities such as devices or pipes.
+     *
+     * @throws  SecurityException
+     *          If a security manager exists and its <code>{@link
+     *          java.lang.SecurityManager#checkRead(java.lang.String)}</code>
+     *          method denies read access to the file
+     */
+    public long length() {
 //        SecurityManager security = System.getSecurityManager();
 //        if (security != null) {
 //            security.checkRead(path);
 //        }
 //        return fs.getLength(this);
-//    }
-//
-//
-//    /* -- File operations -- */
-//
-//    /**
-//     * Atomically creates a new, empty file named by this abstract pathname if
-//     * and only if a file with this name does not yet exist.  The check for the
-//     * existence of the file and the creation of the file if it does not exist
-//     * are a single operation that is atomic with respect to all other
-//     * filesystem activities that might affect the file.
-//     * <P>
-//     * Note: this method should <i>not</i> be used for file-locking, as
-//     * the resulting protocol cannot be made to work reliably. The
-//     * {@link java.nio.channels.FileLock FileLock}
-//     * facility should be used instead.
-//     *
-//     * @return  <code>true</code> if the named file does not exist and was
-//     *          successfully created; <code>false</code> if the named file
-//     *          already exists
-//     *
-//     * @throws  IOException
-//     *          If an I/O error occurred
-//     *
-//     * @throws  SecurityException
-//     *          If a security manager exists and its <code>{@link
-//     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
-//     *          method denies write access to the file
-//     *
-//     * @since 1.2
-//     */
-//    public boolean createNewFile() throws IOException {
+    	return (/** @j2sNative this._bytes ? this._bytes.length : */0);
+    	
+    }
+
+
+    /* -- File operations -- */
+
+    /**
+     * Atomically creates a new, empty file named by this abstract pathname if
+     * and only if a file with this name does not yet exist.  The check for the
+     * existence of the file and the creation of the file if it does not exist
+     * are a single operation that is atomic with respect to all other
+     * filesystem activities that might affect the file.
+     * <P>
+     * Note: this method should <i>not</i> be used for file-locking, as
+     * the resulting protocol cannot be made to work reliably. The
+     * {@link java.nio.channels.FileLock FileLock}
+     * facility should be used instead.
+     *
+     * @return  <code>true</code> if the named file does not exist and was
+     *          successfully created; <code>false</code> if the named file
+     *          already exists
+     *
+     * @throws  IOException
+     *          If an I/O error occurred
+     *
+     * @throws  SecurityException
+     *          If a security manager exists and its <code>{@link
+     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
+     *          method denies write access to the file
+     *
+     * @since 1.2
+     */
+    public boolean createNewFile() throws IOException {
+    	return true;
 //        SecurityManager security = System.getSecurityManager();
 //        if (security != null) security.checkWrite(path);
 //        return fs.createFileExclusively(path, false);
-//    }
-//
-//    /**
-//     * Deletes the file or directory denoted by this abstract pathname.  If
-//     * this pathname denotes a directory, then the directory must be empty in
-//     * order to be deleted.
-//     *
-//     * @return  <code>true</code> if and only if the file or directory is
-//     *          successfully deleted; <code>false</code> otherwise
-//     *
-//     * @throws  SecurityException
-//     *          If a security manager exists and its <code>{@link
-//     *          java.lang.SecurityManager#checkDelete}</code> method denies
-//     *          delete access to the file
-//     */
-//    public boolean delete() {
+    }
+
+    /**
+     * Deletes the file or directory denoted by this abstract pathname.  If
+     * this pathname denotes a directory, then the directory must be empty in
+     * order to be deleted.
+     *
+     * @return  <code>true</code> if and only if the file or directory is
+     *          successfully deleted; <code>false</code> otherwise
+     *
+     * @throws  SecurityException
+     *          If a security manager exists and its <code>{@link
+     *          java.lang.SecurityManager#checkDelete}</code> method denies
+     *          delete access to the file
+     */
+    public boolean delete() {
+    	return true;
 //        SecurityManager security = System.getSecurityManager();
 //        if (security != null) {
 //            security.checkDelete(path);
 //        }
 //        return fs.delete(this);
-//    }
+    }
 //
 //    /**
 //     * Requests that the file or directory denoted by this abstract
@@ -973,13 +983,13 @@ public class File
 //     *
 //     * @since 1.2
 //     */
-//    public void deleteOnExit() {
+    public void deleteOnExit() {
 //        SecurityManager security = System.getSecurityManager();
 //        if (security != null) {
-//            security.checkDelete(path);
+//            security.checkDelete(path); 
 //        }
 //        DeleteOnExitHook.add(path);
-//    }
+    }
 //
     /**
      * Returns an array of strings naming the files and directories in the
@@ -1723,25 +1733,26 @@ public class File
 ////    private static class LazyInitialization {
 ////        static final SecureRandom random = new SecureRandom();
 ////
-////        static final String temporaryDirectory = temporaryDirectory();
-////        static String temporaryDirectory() {
-////            return fs.normalize(
-////                AccessController.doPrivileged(
-////                    new GetPropertyAction("java.io.tmpdir")));
-////        }
+        static final String temporaryDirectory = temporaryDirectory();
+        static String temporaryDirectory() {
+        	return "/TEMP/";
+//            return fs.normalize(
+//                AccessController.doPrivileged(
+//                    new GetPropertyAction("java.io.tmpdir")));
+        }
 ////    }
 //
-//    private static File generateFile(String prefix, String suffix, File dir)
-//        throws IOException
-//    {
-//        long n = LazyInitialization.random.nextLong();
-//        if (n == Long.MIN_VALUE) {
-//            n = 0;      // corner case
-//        } else {
-//            n = Math.abs(n);
-//        }
-//        return new File(dir, prefix + Long.toString(n) + suffix);
-//    }
+    private static File generateFile(String prefix, String suffix, File dir)
+        throws IOException
+    {
+        long n = new Random().nextLong();
+        if (n == Long.MIN_VALUE) {
+            n = 0;      // corner case
+        } else {
+            n = Math.abs(n);
+        }
+        return new JSTempFile(dir, prefix + Long.toString(n) + suffix);
+    }
 //
 //    private static boolean checkAndCreate(String filename, SecurityManager sm,
 //                                          boolean restrictive)
@@ -1760,138 +1771,138 @@ public class File
 //        return fs.createFileExclusively(filename, restrictive);
 //    }
 //    
-//    // The resulting temporary file may have more restrictive access permission
-//    // on some platforms, if restrictive is true.
-//    private static File createTempFile0(String prefix, String suffix,
-//                                        File directory, boolean restrictive)
-//        throws IOException
-//    {
-//        if (prefix == null) throw new NullPointerException();
-//        if (prefix.length() < 3)
-//            throw new IllegalArgumentException("Prefix string too short");
-//        String s = (suffix == null) ? ".tmp" : suffix;
-//        if (directory == null) {
-//            String tmpDir = LazyInitialization.temporaryDirectory();
-//            directory = new File(tmpDir, fs.prefixLength(tmpDir));
-//        }
+    // The resulting temporary file may have more restrictive access permission
+    // on some platforms, if restrictive is true.
+    private static File createTempFile0(String prefix, String suffix,
+                                        File directory, boolean restrictive)
+        throws IOException
+    {
+        if (prefix == null) throw new NullPointerException();
+        if (prefix.length() < 3)
+            throw new IllegalArgumentException("Prefix string too short");
+        String s = (suffix == null) ? ".tmp" : suffix;
+        if (directory == null) {
+            String tmpDir = temporaryDirectory();
+            directory = new File(tmpDir);//, fs.prefixLength(tmpDir));
+        }
 //        SecurityManager sm = System.getSecurityManager();
-//        File f;
+        File f;
 //        do {
-//            f = generateFile(prefix, s, directory);
+            f = generateFile(prefix, s, directory);
 //        } while (!checkAndCreate(f.getPath(), sm, restrictive));
-//        return f;
-//    }
-//
-//    /**
-//     * <p> Creates a new empty file in the specified directory, using the
-//     * given prefix and suffix strings to generate its name.  If this method
-//     * returns successfully then it is guaranteed that:
-//     *
-//     * <ol>
-//     * <li> The file denoted by the returned abstract pathname did not exist
-//     *      before this method was invoked, and
-//     * <li> Neither this method nor any of its variants will return the same
-//     *      abstract pathname again in the current invocation of the virtual
-//     *      machine.
-//     * </ol>
-//     *
-//     * This method provides only part of a temporary-file facility.  To arrange
-//     * for a file created by this method to be deleted automatically, use the
-//     * <code>{@link #deleteOnExit}</code> method.
-//     *
-//     * <p> The <code>prefix</code> argument must be at least three characters
-//     * long.  It is recommended that the prefix be a short, meaningful string
-//     * such as <code>"hjb"</code> or <code>"mail"</code>.  The
-//     * <code>suffix</code> argument may be <code>null</code>, in which case the
-//     * suffix <code>".tmp"</code> will be used.
-//     *
-//     * <p> To create the new file, the prefix and the suffix may first be
-//     * adjusted to fit the limitations of the underlying platform.  If the
-//     * prefix is too long then it will be truncated, but its first three
-//     * characters will always be preserved.  If the suffix is too long then it
-//     * too will be truncated, but if it begins with a period character
-//     * (<code>'.'</code>) then the period and the first three characters
-//     * following it will always be preserved.  Once these adjustments have been
-//     * made the name of the new file will be generated by concatenating the
-//     * prefix, five or more internally-generated characters, and the suffix.
-//     *
-//     * <p> If the <code>directory</code> argument is <code>null</code> then the
-//     * system-dependent default temporary-file directory will be used.  The
-//     * default temporary-file directory is specified by the system property
-//     * <code>java.io.tmpdir</code>.  On UNIX systems the default value of this
-//     * property is typically <code>"/tmp"</code> or <code>"/var/tmp"</code>; on
-//     * Microsoft Windows systems it is typically <code>"C:\\WINNT\\TEMP"</code>.  A different
-//     * value may be given to this system property when the Java virtual machine
-//     * is invoked, but programmatic changes to this property are not guaranteed
-//     * to have any effect upon the temporary directory used by this method.
-//     *
-//     * @param  prefix     The prefix string to be used in generating the file's
-//     *                    name; must be at least three characters long
-//     *
-//     * @param  suffix     The suffix string to be used in generating the file's
-//     *                    name; may be <code>null</code>, in which case the
-//     *                    suffix <code>".tmp"</code> will be used
-//     *
-//     * @param  directory  The directory in which the file is to be created, or
-//     *                    <code>null</code> if the default temporary-file
-//     *                    directory is to be used
-//     *
-//     * @return  An abstract pathname denoting a newly-created empty file
-//     *
-//     * @throws  IllegalArgumentException
-//     *          If the <code>prefix</code> argument contains fewer than three
-//     *          characters
-//     *
-//     * @throws  IOException  If a file could not be created
-//     *
-//     * @throws  SecurityException
-//     *          If a security manager exists and its <code>{@link
-//     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
-//     *          method does not allow a file to be created
-//     *
-//     * @since 1.2
-//     */
-//    public static File createTempFile(String prefix, String suffix,
-//                                      File directory)
-//        throws IOException
-//    {
-//        return createTempFile0(prefix, suffix, directory, false);
-//    }
-//
-//    /**
-//     * Creates an empty file in the default temporary-file directory, using
-//     * the given prefix and suffix to generate its name.  Invoking this method
-//     * is equivalent to invoking <code>{@link #createTempFile(java.lang.String,
-//     * java.lang.String, java.io.File)
-//     * createTempFile(prefix,&nbsp;suffix,&nbsp;null)}</code>.
-//     *
-//     * @param  prefix     The prefix string to be used in generating the file's
-//     *                    name; must be at least three characters long
-//     *
-//     * @param  suffix     The suffix string to be used in generating the file's
-//     *                    name; may be <code>null</code>, in which case the
-//     *                    suffix <code>".tmp"</code> will be used
-//     *
-//     * @return  An abstract pathname denoting a newly-created empty file
-//     *
-//     * @throws  IllegalArgumentException
-//     *          If the <code>prefix</code> argument contains fewer than three
-//     *          characters
-//     *
-//     * @throws  IOException  If a file could not be created
-//     *
-//     * @throws  SecurityException
-//     *          If a security manager exists and its <code>{@link
-//     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
-//     *          method does not allow a file to be created
-//     *
-//     * @since 1.2
-//     */
-//    public static File createTempFile(String prefix, String suffix)
-//        throws IOException
-//    {
-//        return createTempFile0(prefix, suffix, null, false);
-//    }
+        return f;
+    }
+
+    /**
+     * <p> Creates a new empty file in the specified directory, using the
+     * given prefix and suffix strings to generate its name.  If this method
+     * returns successfully then it is guaranteed that:
+     *
+     * <ol>
+     * <li> The file denoted by the returned abstract pathname did not exist
+     *      before this method was invoked, and
+     * <li> Neither this method nor any of its variants will return the same
+     *      abstract pathname again in the current invocation of the virtual
+     *      machine.
+     * </ol>
+     *
+     * This method provides only part of a temporary-file facility.  To arrange
+     * for a file created by this method to be deleted automatically, use the
+     * <code>{@link #deleteOnExit}</code> method.
+     *
+     * <p> The <code>prefix</code> argument must be at least three characters
+     * long.  It is recommended that the prefix be a short, meaningful string
+     * such as <code>"hjb"</code> or <code>"mail"</code>.  The
+     * <code>suffix</code> argument may be <code>null</code>, in which case the
+     * suffix <code>".tmp"</code> will be used.
+     *
+     * <p> To create the new file, the prefix and the suffix may first be
+     * adjusted to fit the limitations of the underlying platform.  If the
+     * prefix is too long then it will be truncated, but its first three
+     * characters will always be preserved.  If the suffix is too long then it
+     * too will be truncated, but if it begins with a period character
+     * (<code>'.'</code>) then the period and the first three characters
+     * following it will always be preserved.  Once these adjustments have been
+     * made the name of the new file will be generated by concatenating the
+     * prefix, five or more internally-generated characters, and the suffix.
+     *
+     * <p> If the <code>directory</code> argument is <code>null</code> then the
+     * system-dependent default temporary-file directory will be used.  The
+     * default temporary-file directory is specified by the system property
+     * <code>java.io.tmpdir</code>.  On UNIX systems the default value of this
+     * property is typically <code>"/tmp"</code> or <code>"/var/tmp"</code>; on
+     * Microsoft Windows systems it is typically <code>"C:\\WINNT\\TEMP"</code>.  A different
+     * value may be given to this system property when the Java virtual machine
+     * is invoked, but programmatic changes to this property are not guaranteed
+     * to have any effect upon the temporary directory used by this method.
+     *
+     * @param  prefix     The prefix string to be used in generating the file's
+     *                    name; must be at least three characters long
+     *
+     * @param  suffix     The suffix string to be used in generating the file's
+     *                    name; may be <code>null</code>, in which case the
+     *                    suffix <code>".tmp"</code> will be used
+     *
+     * @param  directory  The directory in which the file is to be created, or
+     *                    <code>null</code> if the default temporary-file
+     *                    directory is to be used
+     *
+     * @return  An abstract pathname denoting a newly-created empty file
+     *
+     * @throws  IllegalArgumentException
+     *          If the <code>prefix</code> argument contains fewer than three
+     *          characters
+     *
+     * @throws  IOException  If a file could not be created
+     *
+     * @throws  SecurityException
+     *          If a security manager exists and its <code>{@link
+     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
+     *          method does not allow a file to be created
+     *
+     * @since 1.2
+     */
+    public static File createTempFile(String prefix, String suffix,
+                                      File directory)
+        throws IOException
+    {
+        return createTempFile0(prefix, suffix, directory, false);
+    }
+
+    /**
+     * Creates an empty file in the default temporary-file directory, using
+     * the given prefix and suffix to generate its name.  Invoking this method
+     * is equivalent to invoking <code>{@link #createTempFile(java.lang.String,
+     * java.lang.String, java.io.File)
+     * createTempFile(prefix,&nbsp;suffix,&nbsp;null)}</code>.
+     *
+     * @param  prefix     The prefix string to be used in generating the file's
+     *                    name; must be at least three characters long
+     *
+     * @param  suffix     The suffix string to be used in generating the file's
+     *                    name; may be <code>null</code>, in which case the
+     *                    suffix <code>".tmp"</code> will be used
+     *
+     * @return  An abstract pathname denoting a newly-created empty file
+     *
+     * @throws  IllegalArgumentException
+     *          If the <code>prefix</code> argument contains fewer than three
+     *          characters
+     *
+     * @throws  IOException  If a file could not be created
+     *
+     * @throws  SecurityException
+     *          If a security manager exists and its <code>{@link
+     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
+     *          method does not allow a file to be created
+     *
+     * @since 1.2
+     */
+    public static File createTempFile(String prefix, String suffix)
+        throws IOException
+    {
+        return createTempFile0(prefix, suffix, null, false);
+    }
 
 
     /* -- Basic infrastructure -- */
