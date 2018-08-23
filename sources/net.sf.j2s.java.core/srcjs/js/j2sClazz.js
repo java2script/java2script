@@ -4445,7 +4445,7 @@ var s=this;
 if(arguments.length==1){
 var cs=arguments[0].toString().toLowerCase();
 var charset=[
-"utf-8","UTF8","us-ascii","iso-8859-1","8859_1","gb2312","gb18030","gbk"
+"utf-8","utf8","us-ascii","iso-8859-1","8859_1","gb2312","gb18030","gbk"
 ];
 var existed=false;
 for(var i=0;i<charset.length;i++){
