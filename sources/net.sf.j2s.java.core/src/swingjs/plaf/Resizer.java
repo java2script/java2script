@@ -5,9 +5,11 @@ import java.awt.Dimension;
 import java.awt.JSComponent;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyVetoException;
 
 import javax.swing.JApplet;
 import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
 import javax.swing.JRootPane;
 import javax.swing.RootPaneContainer;
 
@@ -143,7 +145,14 @@ public class Resizer {
 			jframe.setPreferredSize(new Dimension(r.width, r.height));
 			jframe.invalidate();
 			jframe.repackContainer();
-			jframe.toFront();
+			if (jframe instanceof JInternalFrame) {
+				try {
+					((JInternalFrame) jframe).setSelected(true);
+				} catch (PropertyVetoException e) {
+				}
+			} else {
+				jframe.toFront();
+			}
 		}
 		setPosition(0, 0);
 		// Toolkit.getEventQueue().postEvent(new ComponentEvent(f,

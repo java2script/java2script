@@ -48,6 +48,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public final class FileDescriptor {
 
+	File _file;
+	
     private int fd = -1;
     private long handle = -1;
 
@@ -185,6 +187,9 @@ public final class FileDescriptor {
      * needed to make closeAll simpler.
      */
     synchronized void attach(Closeable c) {
+
+    	_file = (/**  @j2sNative c._file || */null);
+    	
         if (parent == null) {
             // first caller gets to do this
             parent = c;

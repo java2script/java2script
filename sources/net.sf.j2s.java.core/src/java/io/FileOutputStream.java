@@ -28,7 +28,8 @@ package java.io;
 import java.nio.channels.FileChannel;
 import sun.nio.ch.FileChannelImpl;
 import swingjs.JSFileChannel;
-
+import swingjs.JSTempFile;
+import javajs.util.OC;
 
 /**
  * A file output stream is an output stream for writing data to a
@@ -53,7 +54,8 @@ import swingjs.JSFileChannel;
 public
 class FileOutputStream extends OutputStream
 {
-    /**
+
+	/**
      * The system dependent file descriptor.
      */
     private final FileDescriptor fd;
@@ -63,6 +65,7 @@ class FileOutputStream extends OutputStream
      */
     private final boolean append;
 
+	protected OC out;
     /**
      * The associated channel, initialized lazily.
      */
@@ -77,7 +80,22 @@ class FileOutputStream extends OutputStream
     private final Object closeLock = new Object();
     private volatile boolean closed = false;
 
+    /**
+     * may be null
+     * 
+     */
 	private File _file; // SwingJS
+
+	public File _getFile() {
+    	return _file;
+    }
+
+	public byte[] _bytes;
+	
+    public byte[] _getBytes() {
+    	return _bytes;
+    }
+
 
     /**
      * Creates a file output stream to write to the file with the
@@ -193,16 +211,19 @@ class FileOutputStream extends OutputStream
      * @see        java.lang.SecurityException
      * @see        java.lang.SecurityManager#checkWrite(java.lang.String)
      * @since 1.4
+	 * 
+	 *        Swingjs: Utilizes javajs.util.OC simple output channel
+	 * 
      */
     public FileOutputStream(File file, boolean append)
         throws FileNotFoundException
     {
     	this._file = file;
         String name = (file != null ? file.getPath() : null);
-        SecurityManager security = System.getSecurityManager();
-        if (security != null) {
-            security.checkWrite(name);
-        }
+//        SecurityManager security = System.getSecurityManager();
+//        if (security != null) {
+//            security.checkWrite(name);
+//        }
         if (name == null) {
             throw new NullPointerException();
         }
@@ -245,14 +266,16 @@ class FileOutputStream extends OutputStream
         if (fdObj == null) {
             throw new NullPointerException();
         }
-        if (security != null) {
-            security.checkWrite(fdObj);
-        }
+//        if (security != null) {
+//            security.checkWrite(fdObj);
+//        }
         this.fd = fdObj;
         this.append = false;
         this.path = null;
 
         fd.attach(this);
+// SwingJS old:		this(new File("output"), false);
+
     }
 
     /**
@@ -260,8 +283,18 @@ class FileOutputStream extends OutputStream
      * @param name name of file to be opened
      * @param append whether the file is to be opened in append mode
      */
-    private native void open0(String name, boolean append)
-        throws FileNotFoundException;
+    private void open0(String name, boolean append) 
+        throws FileNotFoundException {
+    		out = new OC();
+    		ByteArrayOutputStream bos = null;
+    		// append is an interesting option here! -- temp files?
+    		if (append && _file != null && _file._bytes != null) {
+    			bos = new ByteArrayOutputStream();
+    			bos.write(_file._bytes, 0, _file._bytes.length);
+    		}
+    		out.setParams(null, name, false, bos);
+    		out.setTemp(_file != null && _file instanceof JSTempFile);
+        }
 
     // wrap native call to allow instrumentation
     /**
@@ -281,7 +314,9 @@ class FileOutputStream extends OutputStream
      * @param   append   {@code true} if the write operation first
      *     advances the position to the end of file
      */
-    private native void write(int b, boolean append) throws IOException;
+	private void writeBytes(byte b[], int off, int len) throws IOException {
+		out.write(b, off, len);
+	}
 
     /**
      * Writes the specified byte to this file output stream. Implements
@@ -291,30 +326,18 @@ class FileOutputStream extends OutputStream
      * @exception  IOException  if an I/O error occurs.
      */
     public void write(int b) throws IOException {
-        write(b, append);
+		out.writeByteAsInt(b);
     }
 
     /**
-     * Writes a sub array as a sequence of bytes.
-     * @param b the data to be written
-     * @param off the start offset in the data
-     * @param len the number of bytes that are written
-     * @param append {@code true} to first advance the position to the
-     *     end of file
-     * @exception IOException If an I/O error has occurred.
-     */
-    private native void writeBytes(byte b[], int off, int len, boolean append)
-        throws IOException;
-
-    /**
-     * Writes <code>b.length</code> bytes from the specified byte array
-     * to this file output stream.
+	 * Writes <code>b.length</code> bytes from the specified byte array to this
+	 * file output stream.
      *
      * @param      b   the data.
      * @exception  IOException  if an I/O error occurs.
      */
     public void write(byte b[]) throws IOException {
-        writeBytes(b, 0, b.length, append);
+		writeBytes(b, 0, b.length);
     }
 
     /**
@@ -327,7 +350,7 @@ class FileOutputStream extends OutputStream
      * @exception  IOException  if an I/O error occurs.
      */
     public void write(byte b[], int off, int len) throws IOException {
-        writeBytes(b, off, len, append);
+		writeBytes(b, off, len);
     }
 
     /**
@@ -344,6 +367,12 @@ class FileOutputStream extends OutputStream
      * @spec JSR-51
      */
     public void close() throws IOException {
+    	out.closeChannel();
+    	_bytes = out.toByteArray();
+    	if (_file != null)
+    		_file._bytes = _bytes;
+    	if (_file instanceof JSTempFile)
+    		((JSTempFile) _file).cacheBytes();
         synchronized (closeLock) {
             if (closed) {
                 return;
@@ -361,7 +390,7 @@ class FileOutputStream extends OutputStream
            }
         });
     }
-
+    
     /**
      * Returns the file descriptor associated with this stream.
      *
@@ -397,14 +426,13 @@ class FileOutputStream extends OutputStream
      * @spec JSR-51
      */
     public FileChannel getChannel() {
-        synchronized (this) {
+//        synchronized (this) {
             if (channel == null) {
-                channel = JSFileChannel.open(fd, path, false, true, append, this);
+                channel = JSFileChannel.open(fd, path, false, true, append, null);
             }
             return channel;
-        }
-    }
-
+    //    }
+	}
     /**
      * Cleans up the connection to the file, and ensures that the
      * <code>close</code> method of this file output stream is
@@ -428,7 +456,9 @@ class FileOutputStream extends OutputStream
         }
     }
 
-    private native void close0() throws IOException;
+    private void close0() throws IOException {
+    	out.closeChannel();
+    }
 
 //    private static native void initIDs();
 

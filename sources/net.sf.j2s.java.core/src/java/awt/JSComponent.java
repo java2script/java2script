@@ -29,6 +29,7 @@ package java.awt;
 
 import java.awt.peer.ComponentPeer;
 import java.beans.PropertyChangeListener;
+import java.util.Arrays;
 
 import javax.swing.ArrayTable;
 import javax.swing.JComponent;
@@ -40,7 +41,9 @@ import swingjs.JSAppletThread;
 import swingjs.JSAppletViewer;
 import swingjs.JSFrameViewer;
 import swingjs.JSGraphics2D;
+import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Canvas;
+import swingjs.plaf.JSComponentUI;
 
 /*
  * A class to support swingJS for selected AWT and Swing components
@@ -276,4 +279,23 @@ public abstract class JSComponent extends Component {
 									// !isBackgroundPainted);
 	}
 
+	protected void updateUIZOrder(JSComponent[] components) {
+		if (uiClassID != "DesktopPaneUI")
+			return;
+		// set the n by their position in the component list using the 
+		// same z orders that are already there - probably something like 
+		// 10000, 11000, 12000
+    	int n = components.length;
+    	if (n < 2)
+    		return;
+    	int[] zorders = new int[n];
+        for (int i = 0; i < n; i++)
+            zorders[i] = ((JSComponentUI) components[i].getUI()).getZIndex(null);
+        Arrays.sort(zorders);
+        for (int i = 0; i < n; i++)
+        	((JSComponentUI) components[i].getUI()).setZOrder(zorders[n - 1 - i]);
+	}
+
+	
+	
 }

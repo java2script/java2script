@@ -29,6 +29,8 @@ import java.nio.channels.FileChannel;
 //import sun.nio.ch.FileChannelImpl;
 
 import swingjs.JSFileChannel;
+import swingjs.JSTempFile;
+import swingjs.JSUtil;
 
 
 /**
@@ -53,6 +55,7 @@ class FileInputStream extends InputStream
     /* File Descriptor - handle to the open file */
     private final FileDescriptor fd;
 
+    private ByteArrayInputStream is;
     /**
      * The path of the referenced file
      * (null if the stream is created with a file descriptor)
@@ -61,7 +64,7 @@ class FileInputStream extends InputStream
 
     private FileChannel channel = null;
 
-    private final Object closeLock = new Object();
+//    private final Object closeLock = new Object();
     private volatile boolean closed = false;
 
     /**
@@ -92,7 +95,9 @@ class FileInputStream extends InputStream
      * @see        java.lang.SecurityManager#checkRead(java.lang.String)
      */
     public FileInputStream(String name) throws FileNotFoundException {
-        this(name != null ? new File(name) : null);
+        this((File) (name == null ? null 
+        		: name.startsWith(File.temporaryDirectory) ? new JSTempFile(name) 
+        				: new File(name)));
     }
 
     /**
@@ -124,10 +129,10 @@ class FileInputStream extends InputStream
      */
     public FileInputStream(File file) throws FileNotFoundException {
         String name = (file != null ? file.getPath() : null);
-        SecurityManager security = System.getSecurityManager();
-        if (security != null) {
-            security.checkRead(name);
-        }
+//        SecurityManager security = System.getSecurityManager();
+//        if (security != null) {
+//            security.checkRead(name);
+//        }
         if (name == null) {
             throw new NullPointerException();
         }
@@ -137,7 +142,7 @@ class FileInputStream extends InputStream
         fd = new FileDescriptor();
         fd.attach(this);
         path = name;
-        open(name);
+        open(file);
     }
 
     /**
@@ -186,17 +191,20 @@ class FileInputStream extends InputStream
      * Opens the specified file for reading.
      * @param name the name of the file
      */
-    private native void open0(String name) throws FileNotFoundException;
-
-    // wrap native call to allow instrumentation
-    /**
-     * Opens the specified file for reading.
-     * @param name the name of the file
-     */
-    private void open(String name) throws FileNotFoundException {
-        open0(name);
+	private void open(File file) throws FileNotFoundException {
+		byte[] bytes = JSUtil.getFileAsBytes(file);
+		file._bytes = bytes;
+    	is = new ByteArrayInputStream(bytes);    	
     }
 
+//    /**
+//     * Opens the specified file for reading.
+//     * @param name the name of the file
+//     */
+//    private void open(String name) throws FileNotFoundException {
+//    	is = new ByteArrayInputStream(JSUtil.getFileAsBytes(name));    	
+//    }
+//
     /**
      * Reads a byte of data from this input stream. This method blocks
      * if no input is yet available.
@@ -206,10 +214,8 @@ class FileInputStream extends InputStream
      * @exception  IOException  if an I/O error occurs.
      */
     public int read() throws IOException {
-        return read0();
+      return is.read();	
     }
-
-    private native int read0() throws IOException;
 
     /**
      * Reads a subarray as a sequence of bytes.
@@ -218,7 +224,9 @@ class FileInputStream extends InputStream
      * @param len the number of bytes that are written
      * @exception IOException If an I/O error has occurred.
      */
-    private native int readBytes(byte b[], int off, int len) throws IOException;
+    private int readBytes(byte b[], int off, int len) throws IOException {
+        return is.read(b, off, len);	    	
+    }
 
     /**
      * Reads up to <code>b.length</code> bytes of data from this input
@@ -270,8 +278,8 @@ class FileInputStream extends InputStream
      * forwards, it returns a positive value. If it skips backwards, it
      * returns a negative value.
      *
-     * <p>This method may skip more bytes than what are remaining in the
-     * backing file. This produces no exception and the number of bytes skipped
+     * <p>This method may skip more bytes than are remaining in the backing
+     * file. This produces no exception and the number of bytes skipped
      * may include some number of bytes that were beyond the EOF of the
      * backing file. Attempting to read from the stream after skipping past
      * the end will result in -1 indicating the end of the file.
@@ -281,7 +289,10 @@ class FileInputStream extends InputStream
      * @exception  IOException  if n is negative, if the stream does not
      *             support seek, or if an I/O error occurs.
      */
-    public native long skip(long n) throws IOException;
+    public long skip(long n) throws IOException {
+        return is.skip(n);    	
+    	
+    }
 
     /**
      * Returns an estimate of the number of remaining bytes that can be read (or
@@ -300,7 +311,9 @@ class FileInputStream extends InputStream
      * @exception  IOException  if this file input stream has been closed by calling
      *             {@code close} or an I/O error occurs.
      */
-    public native int available() throws IOException;
+    public int available() throws IOException {
+    	return is.available();    	
+    }
 
     /**
      * Closes this file input stream and releases any system resources
@@ -315,12 +328,13 @@ class FileInputStream extends InputStream
      * @spec JSR-51
      */
     public void close() throws IOException {
-        synchronized (closeLock) {
+//        synchronized (closeLock) {
             if (closed) {
                 return;
             }
+            is.close();
             closed = true;
-        }
+//        }
         if (channel != null) {
            channel.close();
         }
@@ -377,10 +391,6 @@ class FileInputStream extends InputStream
     private static native void initIDs();
 
     private native void close0() throws IOException;
-
-    static {
-        initIDs();
-    }
 
     /**
      * Ensures that the <code>close</code> method of this file input stream is

@@ -136,7 +136,7 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 	 */
 	private static final Object defaultLookAndFeelDecoratedKey = new Object(); // JFrame.defaultLookAndFeelDecorated
 
-	private int defaultCloseOperation = HIDE_ON_CLOSE;
+	protected int defaultCloseOperation = HIDE_ON_CLOSE;
 
 	/**
 	 * The <code>TransferHandler</code> for this frame.

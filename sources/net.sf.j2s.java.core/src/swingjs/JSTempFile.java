@@ -11,10 +11,18 @@ public class JSTempFile extends File {
 		
 	}
 
+	public JSTempFile(String name) {
+		super(name);
+	}
+
 	@Override
     public void deleteOnExit() {
 		// maybe unnecessary?
   }
+
+	public void cacheBytes() {
+		JSUtil.cacheFileData(path, _bytes);
+	}
 
 
 }

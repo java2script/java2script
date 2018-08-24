@@ -139,7 +139,7 @@ public class File
 {
 	
 	
-	protected int _bytes; // filled in by SwingJS ajax call
+	protected byte[] _bytes; // filled in by SwingJS ajax call
 //
 //    /**
 //     * The FileSystem object representing the platform's local file system.
@@ -153,7 +153,7 @@ public class File
      *
      * @serial
      */
-    private String path;
+    protected String path;
 
     /**
      * The length of this abstract pathname's prefix, or zero if it has no
@@ -1733,13 +1733,13 @@ public class File
 ////    private static class LazyInitialization {
 ////        static final SecureRandom random = new SecureRandom();
 ////
-        static final String temporaryDirectory = temporaryDirectory();
-        static String temporaryDirectory() {
-        	return "/TEMP/";
+        static final String temporaryDirectory = "/TEMP/";//temporaryDirectory();
+//        static String temporaryDirectory() {
+//        	return "/TEMP/";
 //            return fs.normalize(
 //                AccessController.doPrivileged(
 //                    new GetPropertyAction("java.io.tmpdir")));
-        }
+//        }
 ////    }
 //
     private static File generateFile(String prefix, String suffix, File dir)
@@ -1781,10 +1781,12 @@ public class File
         if (prefix.length() < 3)
             throw new IllegalArgumentException("Prefix string too short");
         String s = (suffix == null) ? ".tmp" : suffix;
-        if (directory == null) {
-            String tmpDir = temporaryDirectory();
-            directory = new File(tmpDir);//, fs.prefixLength(tmpDir));
-        }
+        directory = new File(temporaryDirectory + (directory == null ? "" : directory));
+        // we ensure that there is a clear marker for a temporary directory in SwingJS
+//        if (directory == null) {
+//            String tmpDir = temporaryDirectory();
+//            directory = new File(tmpDir);//, fs.prefixLength(tmpDir));
+//        }
 //        SecurityManager sm = System.getSecurityManager();
         File f;
 //        do {

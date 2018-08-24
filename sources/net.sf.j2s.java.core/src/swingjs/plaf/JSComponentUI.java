@@ -2208,4 +2208,10 @@ public class JSComponentUI extends ComponentUI
 		// this.mouseInputListener = mouseInputListener;
 	}
 
+	public void setZOrder(int z) {
+		DOMNode.setPositionAbsolute(domNode, Integer.MIN_VALUE, 0);
+		DOMNode.setZ(domNode, z);
+		DOMNode.setZ(outerNode, z);// saves it
+	}
+
 }

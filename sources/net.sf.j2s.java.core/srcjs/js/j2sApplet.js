@@ -1501,9 +1501,9 @@ if (!J2S._version)
 			if (xym) {
 				if (ev.button != 2 && J2S.Swing && J2S.Swing.hideMenus)
 					J2S.Swing.hideMenus(who.applet);
-				if (who._frameViewer && who._frameViewer.isFrame)
-					J2S.setWindowZIndex(who._frameViewer.top.ui.domNode,
-							Integer.MAX_VALUE);
+//				if (who._frameViewer && who._frameViewer.isFrame)
+//					J2S.setWindowZIndex(who._frameViewer.top.ui.domNode,
+//							Integer.MAX_VALUE);
 				who.applet._processEvent(501, xym, ev, who._frameViewer); // MouseEvent.MOUSE_PRESSED
 			}
 			return !!ui;
@@ -1827,7 +1827,7 @@ if (!J2S._version)
 		
 		
 		// if (who.isdragging && (!ui || !ui.handleJSEvent(who, 506, ev))) {}
-		who.applet._processEvent(506/*(who.isDragging ? 506 : 503)*/, xym, ev,
+		who.applet._processEvent((who.isDragging ? 506 : 503), xym, ev,
 				who._frameViewer); // MouseEvent.MOUSE_DRAGGED :
 									// MouseEvent.MOUSE_MOVED
 		ui || (ui = ev.target["data-component"]);

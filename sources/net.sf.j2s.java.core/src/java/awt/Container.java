@@ -33,6 +33,7 @@ import java.awt.KeyboardFocusManager;
 import java.util.EventListener;
 import java.util.Set;
 
+import javax.swing.JInternalFrame;
 import javax.swing.table.TableCellRenderer;
 
 import javajs.util.Lst;
@@ -51,8 +52,11 @@ import java.awt.peer.ComponentPeer;
 import java.awt.peer.ContainerPeer;
 import java.awt.peer.LightweightPeer;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyVetoException;
+
 import sun.awt.AppContext;
 import sun.awt.SunGraphicsCallback;
+import swingjs.JSFrameViewer;
 import swingjs.plaf.JSButtonUI;
 import swingjs.plaf.JSComponentUI;
 import swingjs.plaf.JSTableUI;
@@ -720,10 +724,13 @@ public class Container extends JSComponent {
                  // this is actually a Z-order changing.
                  comp.mixOnZOrderChanging(oldZindex, index);
              }
+             
+             updateUIZOrder((JSComponent[]) getComponents());
+             
          }
     }
 
-    /**
+	/**
      * Traverses the tree of components and reparents children heavyweight component
      * to new heavyweight parent.
      * @since 1.5
@@ -4413,6 +4420,7 @@ class LightweightDispatcher implements AWTEventListener {
             case MouseEvent.MOUSE_EXITED:
                 break;
             case MouseEvent.MOUSE_PRESSED:
+            	checkInternalFrameMouseDown((JSComponent) e.getSource());
                 retargetMouseEvent(mouseEventTarget, id, e);
                 break;
         case MouseEvent.MOUSE_RELEASED:
@@ -4495,7 +4503,16 @@ class LightweightDispatcher implements AWTEventListener {
 //        return e.isConsumed();
 //    }
 
-    /*
+    public void checkInternalFrameMouseDown(JSComponent c) {
+    	JSFrameViewer fv = c.getFrameViewer();
+    	if (fv.top.uiClassID == "InternalFrameUI")
+			try {
+				((JInternalFrame) fv.top).setSelected(true);
+			} catch (PropertyVetoException e) {
+			}
+	}
+
+	/*
      * Generates enter/exit events as mouse moves over lw components
      * @param targetOver        Target mouse is over (including native container)
      * @param e                 Mouse event in native container

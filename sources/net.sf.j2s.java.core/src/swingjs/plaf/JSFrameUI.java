@@ -59,6 +59,11 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		setDoc();
 	}
 
+	
+	protected void selected() {
+		((JFrame) jc).toFront();
+	}
+	
 	// public void notifyFrameMoved() {
 	// Toolkit.getEventQueue().postEvent(new ComponentEvent(frame,
 	// ComponentEvent.COMPONENT_MOVED));
@@ -123,7 +128,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			 * 
 			 *            if (arguments.length == 1) {
 			 *  	         if (x == 501)
-			 *      	        me.jc.toFront$();  
+			 *      	        me.selected$();  
 			 *          	 return $(fnode).parent();
 			 *            }
 			 *            var xy = me.getMoveCoords$I$I(x, y);
@@ -214,9 +219,9 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	
 	@Override
 	public void installUI(JComponent jc) {
+		super.installUI(jc); 
 		// jc is really JFrame, even though JFrame is not a JComponent
 		frame = (JFrame) c;		
-		super.installUI(jc); // compiler bug will not allow this
 		 LookAndFeel.installColors(jc,
 		 "Frame.background",
 		 "Frame.foreground");
