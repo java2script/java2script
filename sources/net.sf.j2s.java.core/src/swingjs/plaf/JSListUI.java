@@ -121,7 +121,7 @@ public class JSListUI extends JSLightweightUI {
 	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			domNode = focusNode = enableNode = newDOMObject("div", id);
-			DOMNode.seTabIndex(domNode, 1);
+			DOMNode.setAttrInt(domNode, "tabIndex", 1);
 			listNode = newDOMObject("div", id + "_inner");
 			domNode.appendChild(listNode);
 			// tell j2sApplet.js that we will handle all the mouse clicks here
@@ -353,7 +353,7 @@ public class JSListUI extends JSLightweightUI {
 		JQueryObject jnode = $((DOMNode) (Object) ("#" + myid));
 		if (((DOMNode[]) (Object) jnode)[0] == null) {
 			DOMNode div = newDOMObject("div", myid);
-			DOMNode.setPositionAbsolute(div, top, left);
+			DOMNode.setTopLeftAbsolute(div, top, left);
 			div.appendChild(node);
 			listNode.appendChild(div);
 		} else {

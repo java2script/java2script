@@ -293,4 +293,5 @@
 			});
 		};
 	};
+	// note - click is for dragging the resizer
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");

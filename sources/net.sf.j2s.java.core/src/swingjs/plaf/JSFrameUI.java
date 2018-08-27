@@ -86,10 +86,10 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 				h = defaultHeight;
 			DOMNode.setSize(frameNode, w, h);
 			DOMNode.setAttr(frameNode, "ui", this);
-			DOMNode.setPositionAbsolute(frameNode, 0, 0);
+			DOMNode.setTopLeftAbsolute(frameNode, 0, 0);
 			setJ2sMouseHandler(frameNode);
 			titleBarNode = newDOMObject("div", id + "_titlebar");
-			DOMNode.setPositionAbsolute(titleBarNode, 0, 0);
+			DOMNode.setTopLeftAbsolute(titleBarNode, 0, 0);
 			DOMNode.setStyles(titleBarNode, "background-color", "#E0E0E0", "height", "20px", "font-size", "14px",
 					"font-family", "sans-serif", "font-weight", "bold"// ,
 			// "border-style", "solid",
@@ -97,11 +97,11 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			);
 
 			titleNode = newDOMObject("label", id + "_title");
-			DOMNode.setPositionAbsolute(titleNode, 2, 4);
+			DOMNode.setTopLeftAbsolute(titleNode, 2, 4);
 			DOMNode.setStyles(titleNode, "height", "20px");
 
 			closerWrap = newDOMObject("div", id + "_closerwrap");
-			DOMNode.setPositionAbsolute(closerWrap, 0, 0);
+			DOMNode.setTopLeftAbsolute(closerWrap, 0, 0);
 			DOMNode.setStyles(closerWrap, "text-align", "right");
 
 			closerNode = newDOMObject("label", id + "_closer", "innerHTML", "X");
@@ -115,7 +115,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 				modalNode = DOMNode.createElement("div", id + "_modaldiv");
 				Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 				DOMNode.setStyles(modalNode, "background", toCSSString(new Color(100, 100, 100, 100)));
-				DOMNode.setPositionAbsolute(modalNode, 0, 0);
+				DOMNode.setTopLeftAbsolute(modalNode, 0, 0);
 				DOMNode.setSize(modalNode, screen.width, screen.height);
 			}
 			// we have to wait until the frame is wrapped.
@@ -143,7 +143,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			titleBarNode.appendChild(closerWrap);
 			closerWrap.appendChild(closerNode);
 			Insets s = getInsets();
-			DOMNode.setPositionAbsolute(frameNode, 0, 0);
+			DOMNode.setTopLeftAbsolute(frameNode, 0, 0);
 			DOMNode.setAttrs(frameNode, "width", "" + frame.getWidth() + s.left + s.right, "height",
 					"" + frame.getHeight() + s.top + s.bottom);
 			containerNode = frameNode;

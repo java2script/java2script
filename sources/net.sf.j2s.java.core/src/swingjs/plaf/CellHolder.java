@@ -56,20 +56,20 @@ public abstract class CellHolder extends JSLightweightUI {
 			if (renderer instanceof AbstractButton) {
 				if (renderer instanceof BooleanRenderer) {
 					DOMNode.setStyles(ui.centeringNode,  "width", "100%", "height", "100%");
-					DOMNode.setStyles(ui.btnLabel, "width", "100%", "height", "100%");
-					DOMNode.setStyles(ui.radioBtn, "position", "absolute", "width", "14px", "height", "14px", "top", (height/2) + "px");
+					DOMNode.setStyles(ui.buttonNode, "width", "100%", "height", "100%");
+					DOMNode.setStyles(ui.actionNode, "position", "absolute", "width", "14px", "height", "14px", "top", (height/2) + "px");
 					int textAlign = ((BooleanRenderer) renderer).getHorizontalAlignment();
 					switch (textAlign) {
 					case SwingConstants.RIGHT:
 					case SwingConstants.TRAILING:
-						DOMNode.setStyles(ui.radioBtn, "left", width + "px", "transform", "translate(-18.5px,-10px)");
+						DOMNode.setStyles(ui.actionNode, "left", width + "px", "transform", "translate(-18.5px,-10px)");
 						break;
 					case SwingConstants.LEFT:
 					case SwingConstants.LEADING:
-						DOMNode.setStyles(ui.radioBtn, "left", "0px", "top", "transform", "translate(-2.5px,-10px)");
+						DOMNode.setStyles(ui.actionNode, "left", "0px", "top", "transform", "translate(-2.5px,-10px)");
 						break;
 					case SwingConstants.CENTER:
-						DOMNode.setStyles(ui.radioBtn, "left",(width/2)+"px","transform", "translate(-10.5px,-10px)");
+						DOMNode.setStyles(ui.actionNode, "left",(width/2)+"px","transform", "translate(-10.5px,-10px)");
 						break;				
 					}
 				}

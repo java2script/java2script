@@ -299,7 +299,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 					top = (int) (px - label.getHeight() / 2);
 					left = 28;
 				}
-				DOMNode.setPositionAbsolute(labelNode, top, left);
+				DOMNode.setTopLeftAbsolute(labelNode, top, left);
 				domNode.appendChild(labelNode);
 			}
 		}

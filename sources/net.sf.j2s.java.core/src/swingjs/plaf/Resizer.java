@@ -32,8 +32,8 @@ public class Resizer {
 	public Resizer() {
 	}
 
-	public Resizer set(JSFrameViewer viewer) {
-		rpc = (RootPaneContainer) viewer.top;
+	public Resizer set(JSFrameViewer viewer, RootPaneContainer top) {
+		rpc = top;
 		rootPane = rpc.getRootPane();
 		titleHeight = viewer.getInsets().top; // 20px
 		if (viewer.isApplet) {
@@ -92,7 +92,7 @@ public class Resizer {
 
 	public void setPosition(int dw, int dh) {
 		Rectangle r = getFrameOffset(dw, dh);
-		DOMNode.setPositionAbsolute(resizer, r.height + offsety, r.width + offsetx);
+		DOMNode.setTopLeftAbsolute(resizer, r.height + offsety, r.width + offsetx);
 		DOMNode.setSize(rubberBand, r.width, r.height);
 	}
 	
@@ -135,7 +135,7 @@ public class Resizer {
 			r = getFrameOffset(dw, dh);
 		} else {
 			// from some DOM event
-			DOMNode.getRectangle(rootNode, r = new Rectangle());
+			DOMNode.getCSSRectangle(rootNode, r = new Rectangle());
 		}
 		if (jframe == null) {
 			rootPane.getGraphics().setColor(Color.WHITE);

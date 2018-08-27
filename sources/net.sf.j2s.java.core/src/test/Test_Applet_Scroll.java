@@ -17,6 +17,9 @@ import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.text.DecimalFormat;
@@ -39,7 +42,7 @@ import javax.swing.plaf.ViewportUI;
 
 public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 
-	static {
+	static {MouseEvent m;
 		/**
 		 * @j2sNative
 		 * 
@@ -122,6 +125,40 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 			}
 		});
 		final JToggleButton button2 = new JToggleButton("btn2");
+		button2.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				System.out.println("in button2");
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				System.out.println("out button2");
+				
+			}
+			
+		});
 		// BasicToggleButtonUI us; just using this to get access to code for
 		// BasicToggleButtonUI
 		setSize(button2, 80, 20);
@@ -134,6 +171,21 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 				label.setText("btn2");
 				// repaint();
 			}
+		});
+		
+		button2.addMouseMotionListener(new MouseMotionListener() {
+
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				System.out.println("btn2 DRAG " + e);
+			}
+
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
 		});
 
 		// the first two buttons act like radio buttons; only one is ever ON
@@ -161,6 +213,44 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		});
 
 		JPanel p = new JPanel();
+		
+		p.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+				System.out.println("in panel");
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+				System.out.println("out panel");
+			}
+		
+			
+		});
 		
 		p.setToolTipText("this is the panel");
 		// p.setLayout(new GridLayout(2, 2, 2, 2));
