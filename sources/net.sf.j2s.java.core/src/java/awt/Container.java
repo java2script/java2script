@@ -4386,23 +4386,27 @@ class LightweightDispatcher implements AWTEventListener {
 	 */
 	private boolean processMouseEvent(MouseEvent e) {
 		int id = e.getID();
-		// see swingjs.plaf.JSButtionUI
-		Component mouseOver = /** @j2sNative e.bdata.jqevent && e.bdata.jqevent.target["data-component"] || */
-				null;
 
-		// sensitive to mouse events
+		Component mouseOver = mouseEventTarget;
+		if (id != 505) {
+			// see swingjs.plaf.JSButtionUI
+			mouseOver = (/** @j2sNative e.bdata.jqevent && e.bdata.jqevent.target["data-component"] || */null);
 
-		if (mouseOver == null)
-			mouseOver = (id == MouseEvent.MOUSE_EXITED ? targetLastEntered
-					: nativeContainer.getMouseEventTarget(e.getX(), e.getY(), Container.INCLUDE_SELF));
+			// sensitive to mouse events
 
-		// >>>>??trackMouseEnterExit(mouseOver, e);
+			if (mouseOver == null)
+				mouseOver = (id == MouseEvent.MOUSE_EXITED ? targetLastEntered
+						: nativeContainer.getMouseEventTarget(e.getX(), e.getY(), Container.INCLUDE_SELF));
 
-		// 4508327 : MOUSE_CLICKED should only go to the recipient of
-		// the accompanying MOUSE_PRESSED, so don't reset mouseEventTarget on a
-		// MOUSE_CLICKED.
-		if (!isMouseGrab(e) && id != MouseEvent.MOUSE_CLICKED) {
-			mouseEventTarget = (mouseOver != nativeContainer) ? mouseOver : null;
+			// >>>>??trackMouseEnterExit(mouseOver, e);
+
+			// 4508327 : MOUSE_CLICKED should only go to the recipient of
+			// the accompanying MOUSE_PRESSED, so don't reset mouseEventTarget on a
+			// MOUSE_CLICKED.
+			if (!isMouseGrab(e) && id != MouseEvent.MOUSE_CLICKED) {
+				mouseEventTarget = (mouseOver != nativeContainer) ? mouseOver : null;
+			}
+
 		}
 
 		if (mouseEventTarget != null) {

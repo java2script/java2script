@@ -12128,7 +12128,7 @@ if (!J2S._version)
 
 		var doIgnore = function(ev) {
 			return (J2S._dmouseOwner || !ev.target || ("" + ev.target.className)
-					.indexOf("swingjs-ui") >= 0)
+					.indexOf("swingjs-ui") >= 0  || ev.target.tagName == "CANVAS")
 		};
 
 		var checkStopPropagation = function(ev, ui, handled) {
@@ -12142,16 +12142,18 @@ if (!J2S._version)
 
 
 		J2S.traceMouse = function(what,ev) {
-			System.out.println(["tracemouse " + what 
-				,"who", J2S._mouseOwner && J2S._mouseOwner.id
-				,"dragging", J2S._mouseOwner && J2S._mouseOwner.isDragging
-				,"type",ev.type
-				,"doignore",doIgnore(ev)
-				,"target.id",ev.target.id
-				,"role",ev.target.getAttribute("role")
-				,"data-ui",ev.target["data-ui"]
-				,"data-component",ev.target["data-component"]
-			]);
+			System.out.println(["tracemouse:" + what 
+				,"type:",ev.type
+				,"target.id:",ev.target.id
+				,"relatedtarget.id:",ev.originalEvent.relatedTarget && ev.originalEvent.relatedTarget.id
+				,"who:", who.id
+				,"dragging:", J2S._mouseOwner && J2S._mouseOwner.isDragging
+				,"doignore:",doIgnore(ev)
+				,"role:",ev.target.getAttribute("role")
+				,"data-ui:",ev.target["data-ui"]
+				,"data-component:",ev.target["data-component"]
+				,"mouseOwner:",J2S._mouseOwner && J2S._mouseOwner.id
+			].join().replace(":,",":"));
 		}
 
 		J2S.$bind(who, 'mousedown touchstart', function(ev) {
@@ -12292,7 +12294,9 @@ if (!J2S._version)
 		});
 
 		J2S.$bind(who, 'mouseout', function(ev) {
-			
+
+			J2S._currentTarget = null;
+
 			if (J2S._traceMouse)
 				J2S.traceMouse("OUT", ev);
 
@@ -12301,7 +12305,7 @@ if (!J2S._version)
 			if (ev.target.getAttribute("role")) {
 				return true;
 			}
-
+			
 			if (J2S._mouseOwner && !J2S._mouseOwner.isDragging)
 				J2S.setMouseOwner(null);
 			if (who.applet._appletPanel)
@@ -12315,6 +12319,9 @@ if (!J2S._version)
 
 		J2S.$bind(who, 'mouseover', function(ev) {
 
+			if (J2S._currentTarget == ev.target)
+				return true;
+			J2S._currentTarget = ev.target;
 			if (J2S._traceMouse)
 				J2S.traceMouse("ENTER", ev);
 
@@ -12348,7 +12355,7 @@ if (!J2S._version)
 			return true;
 		});
 
-		if (who.applet._is2D) {
+		if (who.applet._is2D && !who.applet._isApp) {
 			J2S.$resize(function() {
 				if (!who.applet)
 					return;
@@ -12792,13 +12799,15 @@ if (!J2S._version)
 		this._isLayered = Info._isLayered || false; // JSV or SwingJS are
 													// layered
 		this._isSwing = Info._isSwing || false;
+		this._isApp = !!Info._main;
 		this._isJSV = Info._isJSV || false;
 		this._isAstex = Info._isAstex || false;
 		this._platform = Info._platform || "";
 		if (checkOnly)
 			return this;
 		window[id] = this;
-		this._createCanvas(id, Info);
+		if (!this._isApp)
+			this._createCanvas(id, Info);
 		if (!this._isJNLP && (!J2S._document || this._deferApplet))
 			return this;
 		this._init();
@@ -12998,7 +13007,7 @@ if (!J2S._version)
 				if (s !== null)
 					applet.__Info.args = decodeURIComponent(s);
 			}
-			var isApp = !!applet.__Info.main; 
+			var isApp = applet._isApp = !!applet.__Info.main; 
 			try {
 				var clazz = (applet.__Info.main || applet.__Info.code);
 				try {
@@ -13153,7 +13162,7 @@ if (!J2S._version)
 		var container = J2S.$(applet, "appletdiv");
 		var w = Math.round(container.width());
 		var h = Math.round(container.height());
-		if (applet._is2D
+		if (applet._is2D && !applet._isApp
 				&& (applet._canvas.width != w || applet._canvas.height != h)) {
 			applet._newCanvas(true);
 			applet._appletPanel
