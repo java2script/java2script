@@ -33,6 +33,7 @@ import java.util.Arrays;
 
 import javax.swing.ArrayTable;
 import javax.swing.JComponent;
+import javax.swing.RootPaneContainer;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
@@ -114,6 +115,8 @@ public abstract class JSComponent extends Component {
 		num = ++incr;
 	}
 
+	public HTML5Canvas _canvas;
+	
 	/**
 	 * 
 	 * For SwingJS, we have the graphics without needing to get it from a peer.
@@ -126,7 +129,7 @@ public abstract class JSComponent extends Component {
 		if (width == 0 || height == 0 || !isVisible())
 			return null;
 		if (frameViewer != null)
-			return frameViewer.getGraphics(0, 0).create();
+			return frameViewer.getGraphics().create();
 		if (parent == null) {
 			return null;
 		}
@@ -144,7 +147,8 @@ public abstract class JSComponent extends Component {
 	}
 
 	public JSFrameViewer setFrameViewer(JSFrameViewer viewer) {
-		return frameViewer = (viewer == null ? viewer = new JSFrameViewer().setForWindow((Container) this) : viewer);
+		// JApplet, JDialog, JFrame (including JInternalFrame), JRootPane, JWindow
+		return frameViewer = (viewer == null ? viewer = new JSFrameViewer().setForWindow((RootPaneContainer) this) : viewer);
 	}
 
 	private JSFrameViewer topFrameViewer;
@@ -297,5 +301,21 @@ public abstract class JSComponent extends Component {
 	}
 
 	
-	
+  @Override
+  protected void invalidateComp() {
+	  super.invalidateComp();
+	  if (ui != null)
+		  ((JSComponentUI)ui).invalidate();
+	  
+  }
+  
+  @Override
+  public void validateComponent() {
+	  boolean wasValid = isValid();
+	  super.validateComponent();
+	  if (ui != null && !wasValid)
+		  ((JSComponentUI)ui).endValidate();
+	  
+  }
+
 }

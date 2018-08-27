@@ -23,6 +23,7 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.InvalidDnDOperationException;
 import java.awt.dnd.peer.DragSourceContextPeer;
+import java.awt.event.MouseEvent;
 import java.awt.im.InputMethodHighlight;
 import java.awt.image.ColorModel;
 import java.awt.image.ImageObserver;
@@ -361,10 +362,11 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		 */
 		{
 		}
+		int ms = (event.getID() >= MouseEvent.MOUSE_FIRST && event.getID() <= MouseEvent.MOUSE_LAST ? -1 : 0);
 		if (andWait)
 			invokeAndWait(f, id);
 		else
-			dispatch(f, 0, id);
+			dispatch(f, ms, id);
 	}
 
 	/**

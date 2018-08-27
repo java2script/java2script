@@ -1,6 +1,7 @@
 package swingjs;
 
 import java.awt.Container;
+import java.awt.JSComponent;
 import java.awt.Toolkit;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -351,7 +352,7 @@ public class JSUtil {
 		return ((JSAppletThread) Thread.currentThread()).appletViewer;
 	}
 
-	public static void readyCallback(String aname, String fname, Container applet,
+	public static void readyCallback(String aname, String fname, JSComponent applet,
 			JSAppletViewer appletPanel) {
 		try {
 			J2S.readyCallback(aname, fname, true, applet, appletPanel);

@@ -27,18 +27,6 @@
  */
 package java.awt;
 
-import java.awt.ContainerOrderFocusTraversalPolicy;
-import java.awt.HeadlessException;
-import java.awt.KeyboardFocusManager;
-import java.util.EventListener;
-import java.util.Set;
-
-import javax.swing.JInternalFrame;
-import javax.swing.table.TableCellRenderer;
-
-import javajs.util.Lst;
-
-
 import java.awt.event.AWTEventListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ContainerEvent;
@@ -53,13 +41,16 @@ import java.awt.peer.ContainerPeer;
 import java.awt.peer.LightweightPeer;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
+import java.util.EventListener;
+import java.util.Set;
 
+import javax.swing.JInternalFrame;
+
+import javajs.util.Lst;
 import sun.awt.AppContext;
 import sun.awt.SunGraphicsCallback;
 import swingjs.JSFrameViewer;
-import swingjs.plaf.JSButtonUI;
 import swingjs.plaf.JSComponentUI;
-import swingjs.plaf.JSTableUI;
 
 
 /**
@@ -1595,7 +1586,7 @@ public class Container extends JSComponent {
      * Recursively descends the container tree and invalidates all
      * contained components.
      */
-    void invalidateTree() {
+    public void invalidateTree() { // SwingJS -- need this public for ToolTipManager PopupFactory
         synchronized (getTreeLock()) {
             for (int i = 0; i < children.size(); i++) {
                 Component comp = children.get(i);
@@ -4387,79 +4378,85 @@ class LightweightDispatcher implements AWTEventListener {
                               | InputEvent.BUTTON3_DOWN_MASK)) != 0);
     }
 
-    /**
-     * This method attempts to distribute a mouse event to a lightweight
-     * component.  It tries to avoid doing any unnecessary probes down
-     * into the component tree to minimize the overhead of determining
-     * where to route the event, since mouse movement events tend to
-     * come in large and frequent amounts.
-     */
-    private boolean processMouseEvent(MouseEvent e) {
-        int id = e.getID();
-        // see swingjs.plaf.JSButtionUI
-        Component mouseOver = /** @j2sNative e.bdata.jqevent && e.bdata.jqevent.target["data-component"] || */ null;  
-                
-        // sensitive to mouse events
-       
-        if (mouseOver == null) 
-            mouseOver = nativeContainer.getMouseEventTarget(e.getX(), e.getY(),
-                                                Container.INCLUDE_SELF);
+	/**
+	 * This method attempts to distribute a mouse event to a lightweight component.
+	 * It tries to avoid doing any unnecessary probes down into the component tree
+	 * to minimize the overhead of determining where to route the event, since mouse
+	 * movement events tend to come in large and frequent amounts.
+	 */
+	private boolean processMouseEvent(MouseEvent e) {
+		int id = e.getID();
+		// see swingjs.plaf.JSButtionUI
+		Component mouseOver = /** @j2sNative e.bdata.jqevent && e.bdata.jqevent.target["data-component"] || */
+				null;
 
-        trackMouseEnterExit(mouseOver, e);
+		// sensitive to mouse events
 
-    // 4508327 : MOUSE_CLICKED should only go to the recipient of
-    // the accompanying MOUSE_PRESSED, so don't reset mouseEventTarget on a
-    // MOUSE_CLICKED.
-    if (!isMouseGrab(e) && id != MouseEvent.MOUSE_CLICKED) {
-            mouseEventTarget = (mouseOver != nativeContainer) ? mouseOver: null;
-        }
+		if (mouseOver == null)
+			mouseOver = (id == MouseEvent.MOUSE_EXITED ? targetLastEntered
+					: nativeContainer.getMouseEventTarget(e.getX(), e.getY(), Container.INCLUDE_SELF));
 
-        if (mouseEventTarget != null) {
-            switch (id) {
-            case MouseEvent.MOUSE_ENTERED:
-            case MouseEvent.MOUSE_EXITED:
-                break;
-            case MouseEvent.MOUSE_PRESSED:
-            	checkInternalFrameMouseDown((JSComponent) e.getSource());
-                retargetMouseEvent(mouseEventTarget, id, e);
-                break;
-        case MouseEvent.MOUSE_RELEASED:
-            retargetMouseEvent(mouseEventTarget, id, e);
-        break;
-        case MouseEvent.MOUSE_CLICKED:
-        // 4508327: MOUSE_CLICKED should never be dispatched to a Component
-        // other than that which received the MOUSE_PRESSED event.  If the
-        // mouse is now over a different Component, don't dispatch the event.
-        // The previous fix for a similar problem was associated with bug
-        // 4155217.
-        if (mouseOver == mouseEventTarget) {
-            retargetMouseEvent(mouseOver, id, e);
-        }
-        break;
-            case MouseEvent.MOUSE_MOVED:
-                retargetMouseEvent(mouseEventTarget, id, e);
-                break;
-        case MouseEvent.MOUSE_DRAGGED:
-            if (isMouseGrab(e)) {
-                retargetMouseEvent(mouseEventTarget, id, e);
-            }
-                break;
-        case MouseEvent.MOUSE_WHEEL:
-            // This may send it somewhere that doesn't have MouseWheelEvents
-            // enabled.  In this case, Component.dispatchEventImpl() will
-            // retarget the event to a parent that DOES have the events enabled.
+		// >>>>??trackMouseEnterExit(mouseOver, e);
+
+		// 4508327 : MOUSE_CLICKED should only go to the recipient of
+		// the accompanying MOUSE_PRESSED, so don't reset mouseEventTarget on a
+		// MOUSE_CLICKED.
+		if (!isMouseGrab(e) && id != MouseEvent.MOUSE_CLICKED) {
+			mouseEventTarget = (mouseOver != nativeContainer) ? mouseOver : null;
+		}
+
+		if (mouseEventTarget != null) {
+			switch (id) {
+			case MouseEvent.MOUSE_PRESSED:
+				checkInternalFrameMouseDown((JSComponent) e.getSource());
+				retargetMouseEvent(mouseEventTarget, id, e);
+				break;
+			case MouseEvent.MOUSE_RELEASED:
+				retargetMouseEvent(mouseEventTarget, id, e);
+				break;
+			case MouseEvent.MOUSE_CLICKED:
+				// 4508327: MOUSE_CLICKED should never be dispatched to a Component
+				// other than that which received the MOUSE_PRESSED event. If the
+				// mouse is now over a different Component, don't dispatch the event.
+				// The previous fix for a similar problem was associated with bug
+				// 4155217.
+				if (mouseOver == mouseEventTarget) {
+					retargetMouseEvent(mouseOver, id, e);
+				}
+				break;
+			case MouseEvent.MOUSE_ENTERED:
+				targetLastEntered = mouseEventTarget;
+				System.out.println("LWD entered " + mouseEventTarget);
+				retargetMouseEvent(mouseEventTarget, id, e);
+				break;
+			case MouseEvent.MOUSE_EXITED:
+				System.out.println("LWD exited " + mouseEventTarget);
+				retargetMouseEvent(mouseEventTarget, id, e);
+				break;
+			case MouseEvent.MOUSE_MOVED:
+				retargetMouseEvent(mouseEventTarget, id, e);
+				break;
+			case MouseEvent.MOUSE_DRAGGED:
+				if (isMouseGrab(e)) {
+					retargetMouseEvent(mouseEventTarget, id, e);
+				}
+				break;
+			case MouseEvent.MOUSE_WHEEL:
+				// This may send it somewhere that doesn't have MouseWheelEvents
+				// enabled. In this case, Component.dispatchEventImpl() will
+				// retarget the event to a parent that DOES have the events enabled.
 //            if (eventLog.isLoggable(Level.FINEST) && (mouseOver != null)) {
 //                eventLog.log(Level.FINEST, "retargeting mouse wheel to " +
 //                             mouseOver.getName() + ", " +
 //                             mouseOver.getClass());
 //            }
-            retargetMouseEvent(mouseOver, id, e);
-        break;
-            }
-            e.consume();
-    }
-    return e.isConsumed();
-    }
+				retargetMouseEvent(mouseOver, id, e);
+				break;
+			}
+			e.consume();
+		}
+		return e.isConsumed();
+	}
 
 //    private boolean processDropTargetEvent(SunDropTargetEvent e) {
 //        int id = e.getID();
@@ -4505,9 +4502,10 @@ class LightweightDispatcher implements AWTEventListener {
 
     public void checkInternalFrameMouseDown(JSComponent c) {
     	JSFrameViewer fv = c.getFrameViewer();
-    	if (fv.top.uiClassID == "InternalFrameUI")
+    	JSComponent top = fv.getTopComponent();
+    	if (top.uiClassID == "InternalFrameUI")
 			try {
-				((JInternalFrame) fv.top).setSelected(true);
+				((JInternalFrame) top).setSelected(true);
 			} catch (PropertyVetoException e) {
 			}
 	}
@@ -4695,43 +4693,40 @@ class LightweightDispatcher implements AWTEventListener {
         Component targetOver =
             nativeContainer.getMouseEventTarget(me.getX(), me.getY(),
                                                 Container.INCLUDE_SELF);
-        trackMouseEnterExit(targetOver, me);
+        //>>>??trackMouseEnterExit(targetOver, me);
     }
 
-    /**
-     * Sends a mouse event to the current mouse event recipient using
-     * the given event (sent to the windowed host) as a srcEvent.  If
-     * the mouse event target is still in the component tree, the
-     * coordinates of the event are translated to those of the target.
-     * If the target has been removed, we don't bother to send the
-     * message.
-     * 
-     * Except for SwingJS we are using the parent frame as the native container,
-     * and the PopupMenu does not have that as a parent. 
-     */
-    void retargetMouseEvent(Component target, int id, MouseEvent e) {
-        if (target == null) {
-            return; // mouse is over another hw component or target is disabled
-        }
+	/**
+	 * Sends a mouse event to the current mouse event recipient using the given
+	 * event (sent to the windowed host) as a srcEvent. If the mouse event target is
+	 * still in the component tree, the coordinates of the event are translated to
+	 * those of the target. If the target has been removed, we don't bother to send
+	 * the message.
+	 * 
+	 * Except for SwingJS we are using the parent frame as the native container, and
+	 * the PopupMenu does not have that as a parent.
+	 */
+	void retargetMouseEvent(Component target, int id, MouseEvent e) {
+		if (target == null) {
+			return; // mouse is over another hw component or target is disabled
+		}
 
-        int x = e.getX(), y = e.getY();
-        Component component = target;
-        if (target.parent == null) {
-        	component = ((JSComponentUI) ((JSComponent) target).getUI()).getTargetParent();
-        	if (component != null)
-        		target = component;
-        } 
-    	// SwingJS - TableCellRenderers do not have parents
-        for(;
-            component != null && component != nativeContainer;            		
-            component = component.getParent()) {
-	            x -= component.x;
-	            y -= component.y;
-	            if (((JSComponent) component).uiClassID == "PopupMenuUI")
-	            	break; // SwingJS not to worry
-        }
-        MouseEvent retargeted;
-        if (component != null) {
+		int x = e.getX(), y = e.getY();
+		Component component = target;
+		if (target.parent == null) {
+			component = ((JSComponentUI) ((JSComponent) target).getUI()).getTargetParent();
+			if (component != null)
+				target = component;
+		}
+		// SwingJS - TableCellRenderers do not have parents
+		for (; component != null && component != nativeContainer; component = component.getParent()) {
+			x -= component.x;
+			y -= component.y;
+			if (((JSComponent) component).uiClassID == "PopupMenuUI")
+				break; // SwingJS not to worry
+		}
+		MouseEvent retargeted;
+		if (component != null) {
 //            if (e instanceof SunDropTargetEvent) {
 //                retargeted = new SunDropTargetEvent(target,
 //                                                    id,
@@ -4740,56 +4735,36 @@ class LightweightDispatcher implements AWTEventListener {
 //                                                    ((SunDropTargetEvent)e).getDispatcher());
 //            } else 
 //            	
-            	if (id == MouseEvent.MOUSE_WHEEL) {
-                retargeted = new MouseWheelEvent(target,
-                                      id,
-                                       e.getWhen(),
-                                       e.getModifiersEx() | e.getModifiers(),
-                                       x,
-                                       y,
-                                       e.getXOnScreen(),
-                                       e.getYOnScreen(),
-                                       e.getClickCount(),
-                                       e.isPopupTrigger(),
-                                       ((MouseWheelEvent)e).getScrollType(),
-                                       ((MouseWheelEvent)e).getScrollAmount(),
-                                       ((MouseWheelEvent)e).getWheelRotation(),
-                                       ((MouseWheelEvent)e).getPreciseWheelRotation());
-            }
-            else {
-                retargeted = new MouseEvent(target,
-                                            id,
-                                            e.getWhen(),
-                                            e.getModifiersEx() | e.getModifiers(),
-                                            x,
-                                            y,
-                                            e.getXOnScreen(),
-                                            e.getYOnScreen(),
-                                            e.getClickCount(),
-                                            e.isPopupTrigger(),
-                                            e.getButton());
-            }
+			if (id == MouseEvent.MOUSE_WHEEL) {
+				retargeted = new MouseWheelEvent(target, id, e.getWhen(), e.getModifiersEx() | e.getModifiers(), x, y,
+						e.getXOnScreen(), e.getYOnScreen(), e.getClickCount(), e.isPopupTrigger(),
+						((MouseWheelEvent) e).getScrollType(), ((MouseWheelEvent) e).getScrollAmount(),
+						((MouseWheelEvent) e).getWheelRotation(), ((MouseWheelEvent) e).getPreciseWheelRotation());
+			} else {
+				retargeted = new MouseEvent(target, id, e.getWhen(), e.getModifiersEx() | e.getModifiers(), x, y,
+						e.getXOnScreen(), e.getYOnScreen(), e.getClickCount(), e.isPopupTrigger(), e.getButton());
+			}
 
-            ((AWTEvent)e).copyPrivateDataInto(retargeted);
+			((AWTEvent) e).copyPrivateDataInto(retargeted);
 
-            if (target == nativeContainer) {
-                // avoid recursively calling LightweightDispatcher...
-                ((Container)target).dispatchEventToSelf(retargeted);
-            } else {
-                //assert AppContext.getAppContext() == target.appContext;
+			if (target == nativeContainer) {
+				// avoid recursively calling LightweightDispatcher...
+				((Container) target).dispatchEventToSelf(retargeted);
+			} else {
+				// assert AppContext.getAppContext() == target.appContext;
 
-                if (nativeContainer.modalComp != null) {
-                    if (((Container)nativeContainer.modalComp).isAncestorOf(target)) {
-                        target.dispatchEvent(retargeted);
-                    } else {
-                        e.consume();
-                    }
-                } else {
-                    target.dispatchEvent(retargeted);
-                }
-            }
-        }
-    }
+				if (nativeContainer.modalComp != null) {
+					if (((Container) nativeContainer.modalComp).isAncestorOf(target)) {
+						target.dispatchEvent(retargeted);
+					} else {
+						e.consume();
+					}
+				} else {
+					target.dispatchEvent(retargeted);
+				}
+			}
+		}
+	}
 
     // --- member variables -------------------------------
 

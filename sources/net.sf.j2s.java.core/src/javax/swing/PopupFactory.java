@@ -161,6 +161,8 @@ public class PopupFactory {
         return popupType;
     }
 
+    
+    private static Popup lastToolTipPopUp;
     /**
      * Creates a <code>Popup</code> for the Component <code>owner</code>
      * containing the Component <code>contents</code>. <code>owner</code>
@@ -186,7 +188,14 @@ public class PopupFactory {
             throw new IllegalArgumentException(
                           "Popup.getPopup must be passed non-null contents");
         }
-
+        boolean isToolTip = (contents instanceof JToolTip);
+//        if (isToolTip && lastToolTipPopUp != null) {
+//        	// SwingJS
+//        	lastToolTipPopUp.reset(owner, contents, x, y);
+//        	((Container)lastToolTipPopUp.getComponent()).invalidateTree(); 
+//        	return lastToolTipPopUp;
+//        	
+//        }
         int popupType = getPopupType(owner, contents, x, y);
         Popup popup = getPopup(owner, contents, x, y, popupType);
 
@@ -194,6 +203,12 @@ public class PopupFactory {
             // Didn't fit, force to heavy.
             popup = getPopup(owner, contents, x, y, HEAVY_WEIGHT_POPUP);
         }
+// SwingJS -- this did not work -- tooltip window removeNotify hides rootpane, layerpane, and contentpane
+        
+        if (isToolTip && lastToolTipPopUp != null) {
+        	((JSComponent) popup.getComponent())._canvas = ((JSComponent) lastToolTipPopUp.getComponent())._canvas;
+        }
+    	lastToolTipPopUp = popup;
         return popup;
     }
 

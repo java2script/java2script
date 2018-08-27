@@ -344,7 +344,7 @@ public class ButtonListener implements MouseListener, MouseMotionListener,
 	 */
 	boolean verifyButtonClick(AbstractButton b) {
 		ButtonModel m = b.getModel();
-		DOMNode btn = ui.radioBtn;
+		DOMNode btn = ui.actionNode;
 		// BH: I don't know that this is necessary anymore
 		boolean state = m.isSelected();// && !ui.isRadio;
 		/**
