@@ -337,6 +337,23 @@ public class JDesktopPane extends JLayeredPane //implements Accessible
 
         return results;
     }
+    
+	public Component add(Component c) {
+		super.add(c);
+		if (c instanceof JInternalFrame) {
+			JInternalFrame f = (JInternalFrame) c;
+			f.setDesktop(this);
+			if (f.isSelected()) {
+				try {
+					// toggle selected, as now the frame has a desktop
+					f.setSelected(false);
+					f.setSelected(true);
+				} catch (PropertyVetoException e) {
+				}
+			}
+		}
+		return c;
+	}
 
     private List<JInternalFrame> getFrames() {
         Component c;

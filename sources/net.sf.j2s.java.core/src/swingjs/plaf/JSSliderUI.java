@@ -208,7 +208,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		//DOMNode.setZ(sliderTrack, z++);
 		//DOMNode.setZ(sliderHandle, z++);
 		// mark the handle and track with the "swingjs-ui" class
-		// so as to ignore all mouse/touch events from Jmol._jsSetMouse();
+		// so as to ignore all mouse/touch events from Jmol.setMouse();
 		if (isNew) {
 			ignoreAllMouseEvents(sliderHandle);
 			ignoreAllMouseEvents(sliderTrack);
@@ -299,7 +299,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 					top = (int) (px - label.getHeight() / 2);
 					left = 28;
 				}
-				DOMNode.setPositionAbsolute(labelNode, top, left);
+				DOMNode.setTopLeftAbsolute(labelNode, top, left);
 				domNode.appendChild(labelNode);
 			}
 		}

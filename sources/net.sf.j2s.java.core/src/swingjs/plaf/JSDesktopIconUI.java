@@ -15,7 +15,7 @@ public class JSDesktopIconUI extends JSPanelUI {
 		isContainer = true;
 		
 		
-		System.out.println("JSSDesktopIconUI SURRAGATE -- NOT IMPLEMENTED YET! ");		
+		System.out.println("JSDesktopIconUI SURRAGATE -- NOT IMPLEMENTED YET! ");		
 		
 		
 		

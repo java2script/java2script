@@ -5,9 +5,11 @@ import java.awt.Dimension;
 import java.awt.JSComponent;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyVetoException;
 
 import javax.swing.JApplet;
 import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
 import javax.swing.JRootPane;
 import javax.swing.RootPaneContainer;
 
@@ -30,8 +32,8 @@ public class Resizer {
 	public Resizer() {
 	}
 
-	public Resizer set(JSFrameViewer viewer) {
-		rpc = (RootPaneContainer) viewer.top;
+	public Resizer set(JSFrameViewer viewer, RootPaneContainer top) {
+		rpc = top;
 		rootPane = rpc.getRootPane();
 		titleHeight = viewer.getInsets().top; // 20px
 		if (viewer.isApplet) {
@@ -84,13 +86,13 @@ public class Resizer {
 		{
 		}
 		// set to track size changes
-		JSUtil.J2S._setDraggable(resizer, new JSFunction[] { fHandleResizer });
+		JSUtil.J2S.setDraggable(resizer, new JSFunction[] { fHandleResizer });
 		JSUtil.jQuery.$(rootNode).resize(fHandleDOMResize);
 	}
 
 	public void setPosition(int dw, int dh) {
 		Rectangle r = getFrameOffset(dw, dh);
-		DOMNode.setPositionAbsolute(resizer, r.height + offsety, r.width + offsetx);
+		DOMNode.setTopLeftAbsolute(resizer, r.height + offsety, r.width + offsetx);
 		DOMNode.setSize(rubberBand, r.width, r.height);
 	}
 	
@@ -133,7 +135,7 @@ public class Resizer {
 			r = getFrameOffset(dw, dh);
 		} else {
 			// from some DOM event
-			DOMNode.getRectangle(rootNode, r = new Rectangle());
+			DOMNode.getCSSRectangle(rootNode, r = new Rectangle());
 		}
 		if (jframe == null) {
 			rootPane.getGraphics().setColor(Color.WHITE);
@@ -143,7 +145,14 @@ public class Resizer {
 			jframe.setPreferredSize(new Dimension(r.width, r.height));
 			jframe.invalidate();
 			jframe.repackContainer();
-			jframe.toFront();
+			if (jframe instanceof JInternalFrame) {
+				try {
+					((JInternalFrame) jframe).setSelected(true);
+				} catch (PropertyVetoException e) {
+				}
+			} else {
+				jframe.toFront();
+			}
 		}
 		setPosition(0, 0);
 		// Toolkit.getEventQueue().postEvent(new ComponentEvent(f,

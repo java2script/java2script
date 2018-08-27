@@ -10,7 +10,7 @@
 
 (function(jQuery) {
 
-if (J2S._isResourceLoaded("swingjs/jquery/j2sjquery-ui.js", true))return;
+if (J2S.isResourceLoaded("swingjs/jquery/j2sjquery-ui.js", true))return;
 
 if (!jQuery.ui)
 try{

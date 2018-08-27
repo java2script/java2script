@@ -59,6 +59,11 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		setDoc();
 	}
 
+	
+	protected void selected() {
+		((JFrame) jc).toFront();
+	}
+	
 	// public void notifyFrameMoved() {
 	// Toolkit.getEventQueue().postEvent(new ComponentEvent(frame,
 	// ComponentEvent.COMPONENT_MOVED));
@@ -81,10 +86,10 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 				h = defaultHeight;
 			DOMNode.setSize(frameNode, w, h);
 			DOMNode.setAttr(frameNode, "ui", this);
-			DOMNode.setPositionAbsolute(frameNode, 0, 0);
+			DOMNode.setTopLeftAbsolute(frameNode, 0, 0);
 			setJ2sMouseHandler(frameNode);
 			titleBarNode = newDOMObject("div", id + "_titlebar");
-			DOMNode.setPositionAbsolute(titleBarNode, 0, 0);
+			DOMNode.setTopLeftAbsolute(titleBarNode, 0, 0);
 			DOMNode.setStyles(titleBarNode, "background-color", "#E0E0E0", "height", "20px", "font-size", "14px",
 					"font-family", "sans-serif", "font-weight", "bold"// ,
 			// "border-style", "solid",
@@ -92,11 +97,11 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			);
 
 			titleNode = newDOMObject("label", id + "_title");
-			DOMNode.setPositionAbsolute(titleNode, 2, 4);
+			DOMNode.setTopLeftAbsolute(titleNode, 2, 4);
 			DOMNode.setStyles(titleNode, "height", "20px");
 
 			closerWrap = newDOMObject("div", id + "_closerwrap");
-			DOMNode.setPositionAbsolute(closerWrap, 0, 0);
+			DOMNode.setTopLeftAbsolute(closerWrap, 0, 0);
 			DOMNode.setStyles(closerWrap, "text-align", "right");
 
 			closerNode = newDOMObject("label", id + "_closer", "innerHTML", "X");
@@ -110,7 +115,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 				modalNode = DOMNode.createElement("div", id + "_modaldiv");
 				Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 				DOMNode.setStyles(modalNode, "background", toCSSString(new Color(100, 100, 100, 100)));
-				DOMNode.setPositionAbsolute(modalNode, 0, 0);
+				DOMNode.setTopLeftAbsolute(modalNode, 0, 0);
 				DOMNode.setSize(modalNode, screen.width, screen.height);
 			}
 			// we have to wait until the frame is wrapped.
@@ -119,11 +124,12 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			
 			JSFunction fGetFrameParent = null; 
 			/**
-			 * @j2sNative var me = this; fGetFrameParent =
-			 *            
-			 *            function(x, y) {
-			 *            if (arguments.length == 0) {  
-			 *              return $(fnode).parent();
+			 * @j2sNative var me = this; fGetFrameParent = function(x, y) {
+			 * 
+			 *            if (arguments.length == 1) {
+			 *  	         if (x == 501)
+			 *      	        me.selected$();  
+			 *          	 return $(fnode).parent();
 			 *            }
 			 *            var xy = me.getMoveCoords$I$I(x, y);
 			 *            $($(fnode).parent()).css({ top: xy[1] + 'px', left: xy[0] + 'px' });
@@ -132,12 +138,12 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			 *            };
 			 */
 			
-			JSUtil.J2S._setDraggable(titleBarNode, fGetFrameParent);
+			J2S.setDraggable(titleBarNode, fGetFrameParent);
 			titleBarNode.appendChild(titleNode);
 			titleBarNode.appendChild(closerWrap);
 			closerWrap.appendChild(closerNode);
 			Insets s = getInsets();
-			DOMNode.setPositionAbsolute(frameNode, 0, 0);
+			DOMNode.setTopLeftAbsolute(frameNode, 0, 0);
 			DOMNode.setAttrs(frameNode, "width", "" + frame.getWidth() + s.left + s.right, "height",
 					"" + frame.getHeight() + s.top + s.bottom);
 			containerNode = frameNode;
@@ -179,13 +185,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		  	if (type == "click") {
 		  		@SuppressWarnings("unused")
 					DOMNode tbar = titleBarNode;
-		  		/**
-		  		 * @j2sNative  
-		  		 * 
-		  		 * 					J2S._setDraggable(tbar, false);
-
-		  		 */
-		  		{}
+		  		J2S.setDraggable(tbar, false);
 		  		frameCloserAction();
 					return true;		  		
 		  	} else if (type.equals("mouseout")) {
@@ -206,7 +206,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	}
 
 	protected void closeFrame() {
-		JSUtil.J2S._jsUnsetMouse(frameNode);
+		J2S.unsetMouse(frameNode);
 		$(frameNode).remove();
 		$(outerNode).remove();
 	}
@@ -219,9 +219,9 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	
 	@Override
 	public void installUI(JComponent jc) {
+		super.installUI(jc); 
 		// jc is really JFrame, even though JFrame is not a JComponent
 		frame = (JFrame) c;		
-		super.installUI(jc); // compiler bug will not allow this
 		 LookAndFeel.installColors(jc,
 		 "Frame.background",
 		 "Frame.foreground");

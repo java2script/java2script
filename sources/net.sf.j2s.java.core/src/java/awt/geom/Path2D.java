@@ -143,10 +143,6 @@ public abstract class Path2D implements Shape, Cloneable {
     abstract int rectCrossings(double rxmin, double rymin,
                                double rxmax, double rymax);
 
-    /**
-     * SwingJS j2s compiler error requires that inner classes be declared prior to use
-     *      *
-     */
     static abstract class Iterator implements PathIterator {
       int typeIdx;
       int pointIdx;

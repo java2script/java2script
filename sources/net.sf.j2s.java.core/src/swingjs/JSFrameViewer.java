@@ -1,14 +1,15 @@
 package swingjs;
 
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Insets;
+import java.awt.JSComponent;
 import java.util.Hashtable;
 
 import javax.swing.JApplet;
 import javax.swing.JRootPane;
 import javax.swing.RootPaneContainer;
-import javax.swing.plaf.ComponentUI;
 
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Canvas;
@@ -17,10 +18,11 @@ import swingjs.plaf.JSComponentUI;
 import swingjs.plaf.Resizer;
 
 /**
- * JSFrameViewer 
+ * JSFrameViewer
  * 
- * SwingJS class to support an independent Window, either from using Main() 
- * or one created from a JApplet. Each viewer has an independent mouse event processor. 
+ * SwingJS class to support an independent Window, either from using Main() or
+ * one created from a JApplet. Each viewer has an independent mouse event
+ * processor.
  *
  * This "Panel" is never viewed.
  * 
@@ -31,11 +33,14 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 
 	protected JSGraphics2D jsgraphics;
 
-	public Container top; // JApplet or JFrame
+	protected RootPaneContainer top; // JApplet or JFrame, also a JSComponent
+
+	public JSComponent getTopComponent() {
+		return (JSComponent) top;
+	}
 
 	public JSAppletViewer appletViewer;
 	public Resizer resizer;
-  
 
 	protected Insets insets;
 
@@ -46,40 +51,35 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 	public JSFrameViewer(Hashtable<String, Object> params) {
 		super(params);
 	}
-	
+
 	public JSFrameViewer() {
 		super();
 	}
 
-	public JSFrameViewer setForWindow(Container window) {
+	public JSFrameViewer setForWindow(RootPaneContainer c) {
+		// JApplet, JDialog, JFrame (including JInternalFrame), JRootPane, JWindow
 		isFrame = true;
-		appletViewer = window.appletViewer;
-		this.top = window;
-		applet = window;
-		this.fullName = appletViewer.fullName;
+		top = c;
+		appletViewer = ((JSComponent)top).appletViewer;
+		if (c instanceof JApplet)
+			applet = (JApplet) c;
+		fullName = appletViewer.fullName;
 		canvas = null;
 		jsgraphics = null;
 		insets = new Insets(20, 0, 0, 0);
-		getGraphics(0, 0);
+		getGraphics(0, 0, c);
 		return this;
 	}
-	
-	
-	public Container getTop() {
-		return top;
-	}
-	
+
 	public Object display;
-	
-	public Container applet;  // really just for JSmolCore 
-	public JApplet japplet;
-	              // SwingJS core library uses.
+
+	public JApplet applet;
 
 	protected JSMouse mouse;
 
 	public HTML5Canvas canvas;
 
-  // ///////// javajs.api.JSInterface ///////////
+	// ///////// javajs.api.JSInterface ///////////
 	//
 	// methods called by page JavaScript
 	//
@@ -112,13 +112,12 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 	}
 
 	@Override
-	public boolean processMouseEvent(int id, int x, int y, int modifiers,
-			long time, Object jqevent, int scroll) {
+	public boolean processMouseEvent(int id, int x, int y, int modifiers, long time, Object jqevent, int scroll) {
 		getMouse().processEvent(id, x, y, modifiers, time, jqevent, scroll);
 		return false;
 	}
 
-	private JSMouse getMouse() {	
+	private JSMouse getMouse() {
 		return (mouse == null ? mouse = new JSMouse(this) : mouse);
 	}
 
@@ -127,7 +126,7 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 		getMouse().processTwoPointGesture(touches);
 	}
 
-	/** 
+	/**
 	 * Page can define a canvas to use or to clear it with null
 	 */
 	@Override
@@ -136,13 +135,11 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 		jsgraphics = null;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void setScreenDimension(int width, int height) {
-		setGraphics((Graphics) (Object)(jsgraphics = null), width, height);
-		//resize(width, height);
+		setGraphics((Graphics) (Object) (jsgraphics = null), width, height, top);
 		if (top != null)
-			top.resizeOriginal(width, height);
+			((JSComponent) top).resizeOriginal(width, height);
 	}
 
 	/**
@@ -151,10 +148,9 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 	 * @param g
 	 * @return
 	 */
-	protected Graphics setGraphics(Graphics g, int width, int height) {
-		return (g == null ? getGraphics(width, height) : g);
+	protected Graphics setGraphics(Graphics g, int width, int height, RootPaneContainer window) {
+		return (g == null ? getGraphics(width, height, window) : g);
 	}
-		
 
 	@Override
 	public boolean setStatusDragDropped(int mode, int x, int y, String fileName) {
@@ -167,43 +163,47 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 		// TODO Auto-generated method stub
 
 	}
-	
-	
+
+	public Graphics getGraphics() {
+		return getGraphics(0, 0, top);
+	}
+
 	public String frameID;
 
 	private String canvasId;
 
 	private static int canvasCount;
+	
+	private static HTML5Canvas canvas00;
 
-	private Container topApp;
-	public Graphics getGraphics(int wNew, int hNew) {
-		if (wNew == 0 && top != null) {
-			if (topApp == null)
-				topApp = top;
-			wNew = Math.max (0, ((RootPaneContainer)topApp).getContentPane().getWidth());
-			hNew = Math.max (0, ((RootPaneContainer)topApp).getContentPane().getHeight());
+	
+	public Graphics getGraphics(int wNew, int hNew, RootPaneContainer window) {
+		if (window == null) // from, for example, a resize of the browser page
+			window = top;
+		// technically, a JApplet is not a Window, but it is a Container and it is a
+		// RootPaneContainer
+		JSComponent c = (JSComponent) window; // will be null from j2sApplet.js
+		if (wNew == 0) {
+			wNew = Math.max(0, window.getContentPane().getWidth());
+			hNew = Math.max(0, window.getContentPane().getHeight());
 		}
 		int wOld = 0, hOld = 0;
-		/**
-		 * @j2sNative
-		 * 
-		 *            wOld = (this.canvas == null ? 0 : this.canvas.width); hOld =
-		 *            (this.canvas == null ? 0 : this.canvas.height)
-		 * 
-		 */
-		{
+		if (c._canvas != null) {
+			/**
+			 * @j2sNative
+			 * 
+			 * 			wOld = c._canvas.width; hOld = c._canvas.height;
+			 * 
+			 */
 		}
-		if (wNew >= 0
-				&& hNew >= 0
-				&& (wOld != wNew || hOld != hNew || canvas == null || 	jsgraphics == null)) {
-			jsgraphics = new JSGraphics2D(canvas = newCanvas(wNew, hNew));
-			//top.repaint(0, 0, wNew, hNew);
+		if (wNew >= 0 && hNew >= 0 && (wOld != wNew || hOld != hNew || c._canvas == null || jsgraphics == null)) {
+			jsgraphics = new JSGraphics2D(c._canvas = newCanvas(wNew, hNew, window));
 		}
-		return (Graphics)(Object)jsgraphics;
+		// coerse jsgraphics to Graphics
+		return (Graphics) (Object) jsgraphics;
 	}
 
-
-	public HTML5Canvas newCanvas(int width, int height) {
+	private HTML5Canvas newCanvas(int width, int height, RootPaneContainer window) {
 		if (isApplet) {
 			// applets create their own canvas
 			HTML5Canvas c = html5Applet._getHtml5Canvas();
@@ -211,51 +211,46 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 				return canvas = c;
 			}
 		}
-		if (topApp ==  null)
-			topApp = top;
-		JRootPane root = (JRootPane) (topApp.getComponentCount() > 0 ? topApp.getComponent(0) : null);
-		Container userFramedApplet = null, app = null;
-		if (root != null && root.getContentPane().getComponentCount() > 0) {
-			// check for applet in a frame
-			boolean appletInFrame = false;
-			app = (Container) root.getContentPane().getComponent(0);
-			/**
-			 * @j2sNative
-			 * 
-			 * appletInFrame = (app.uiClassID == "AppletUI");
-			 */
-			if (appletInFrame) {
-				userFramedApplet = app;
-				root = (JRootPane) userFramedApplet.getComponent(0);				
-			}
+		if (width == 0 || height == 0) {
+			width = height = 0;
+			if (canvas00 != null)
+				return canvas00;
 		}
-		DOMNode parent = (root == null ? null : ((JSComponentUI) root.getUI()).domNode);
-		if (parent != null)
+		JApplet userFramedApplet = null;
+		JRootPane root = (JRootPane) window.getRootPane();
+		Container contentPane = window.getContentPane();
+		if (contentPane.getComponentCount() > 0) {
+			// check for applet in a frame, and if present, switch to its root pane
+			Component app = contentPane.getComponent(0);
+			if (app instanceof JApplet)
+				root = (userFramedApplet = (JApplet) app).getRootPane();
+		}
+		DOMNode rootNode = (root == null ? null : ((JSComponentUI) root.getUI()).domNode);
+		if (rootNode != null)
 			DOMNode.remove(canvas);
 		display = canvasId = appletViewer.appletName + "_canvas" + ++canvasCount;
-		System.out.println("JSFrameViewer creating new canvas " + canvasId + ": "
-				+ width + "  " + height);
 		canvas = (HTML5Canvas) DOMNode.createElement("canvas", canvasId);
 		if (userFramedApplet != null) {
-			JSFrameViewer appViewer = 
-			userFramedApplet.getFrameViewer();
+			JSFrameViewer appViewer = userFramedApplet.getFrameViewer();
 			appViewer.setDisplay(canvas);
-			appViewer.topApp = app;
 		}
-		int iTop = (root == null ? 0 : root.getContentPane().getY()); 
-		DOMNode.setPositionAbsolute(canvas, iTop, 0);
+		int iTop = (root == null ? 0 : root.getContentPane().getY());
+		DOMNode.setTopLeftAbsolute(canvas, iTop, 0);
 		DOMNode.setStyles(canvas, "width", width + "px", "height", height + "px");
 		if (width > 0) {
+			System.out.println("JSFrameViewer creating new canvas " + canvasId + ": " + width + "  " + height);
 			// ensures one last update for a frame
 			JSComponentUI ui = (JSComponentUI) root.getParent().getUI();
 			if (ui != null)
-				ui.updateDOMNode();	
-		}
-		if (resizer != null)
-			resizer.setPosition(0, 0);
-			
-		if (parent != null) {
-			parent.appendChild(canvas);
+				ui.updateDOMNode();
+			if (resizer != null)
+				resizer.setPosition(0, 0);
+
+			if (rootNode != null) {
+				rootNode.appendChild(canvas);
+			}
+		} else {
+			canvas00 = canvas;
 		}
 		// this next call to j2sApplet binds mouse actions to this canvas. When the
 		// content pane is created, this canvas will be placed appropriately and used
@@ -263,9 +258,8 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 		/**
 		 * @j2sNative
 		 * 
-		 *            this.canvas.width = width; this.canvas.height = height;
+		 * 			this.canvas.width = width; this.canvas.height = height;
 		 */
-		{}	
 		return canvas;
 	}
 
@@ -280,11 +274,11 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 		else if (resizable && newResizer() != null)
 			resizer.setPosition(0, 0);
 	}
-	
+
 	public boolean isResizable() {
 		// default is for a frame to be resizable, but we can override this either
-		// by setting JFrame.setResizable(false). 
-		
+		// by setting JFrame.setResizable(false).
+
 		return resizable && (!appletViewer.haveResizable || appletViewer.isResizable);
 	}
 
@@ -293,7 +287,7 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 	}
 
 	private Resizer newResizer() {
-		resizer = new Resizer().set(this);
+		resizer = new Resizer().set(this, top);
 		if (resizer != null)
 			resizer.show();
 		return resizer;
@@ -303,7 +297,7 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 		/**
 		 * @j2sNative
 		 * 
-		 * return J2S.$(this.html5Applet, id)[0];
+		 * 			return J2S.$(this.html5Applet, id)[0];
 		 */
 		{
 			return null;
@@ -314,7 +308,7 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 		// Note that the applet "Panel" is never painted.
 		// This class simply maintains valuable information for applet loading.
 		// Here we go straight to the contentPane and paint that.
-		top.paint(setGraphics(g, 0, 0));
+		((JSComponent)top).paint(setGraphics(g, 0, 0, null));
 	}
 
 

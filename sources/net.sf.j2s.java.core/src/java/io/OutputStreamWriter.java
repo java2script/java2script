@@ -35,9 +35,9 @@ import java.io.UnsupportedEncodingException;
 //import java.nio.charset.Charset;
 //import java.nio.charset.CharsetEncoder;
 //import sun.nio.cs.StreamEncoder;
+import java.nio.charset.CharsetEncoder;
 
 import swingjs.api.Interface;
-
 
 /**
  * An OutputStreamWriter is a bridge from character streams to byte streams:
@@ -157,26 +157,26 @@ public class OutputStreamWriter extends Writer {
 //        se = StreamEncoder.forOutputStreamWriter(out, this, cs);
 //    }
 
-//    /**
-//     * Creates an OutputStreamWriter that uses the given charset encoder.  </p>
-//     *
-//     * @param  out
-//     *         An OutputStream
-//     *
-//     * @param  enc
-//     *         A charset encoder
-//     *
-//     * @since 1.4
-//     * @spec JSR-51
-//     */
-//    public OutputStreamWriter(OutputStream out, CharsetEncoder enc) {
-//        super(out);
+    /**
+     * Creates an OutputStreamWriter that uses the given charset encoder.  </p>
+     *
+     * @param  out
+     *         An OutputStream
+     *
+     * @param  enc
+     *         A charset encoder
+     *
+     * @since 1.4
+     * @spec JSR-51
+     */
+    public OutputStreamWriter(OutputStream out, CharsetEncoder enc) {
+        super(out);
 //        if (enc == null)
 //            throw new NullPointerException("charset encoder");
 //        se = StreamEncoder.forOutputStreamWriter(out, this, enc);
-//    }
+    }
 
-    /**
+	/**
      * Returns the name of the character encoding being used by this stream.
      *
      * <p> If the encoding has an historical name then that name is returned;

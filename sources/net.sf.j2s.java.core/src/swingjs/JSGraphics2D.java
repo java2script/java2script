@@ -91,8 +91,8 @@ public class JSGraphics2D // extends SunGraphics2D
 		/**
 		 * @j2sNative
 		 * 
-		 * 			this.gc = SwingJS; this.width = canvas.width; this.height
-		 *            = canvas.height;
+		 * 			this.gc = SwingJS; this.width = canvas.width; this.height =
+		 *            canvas.height;
 		 * 
 		 */
 		{
@@ -187,8 +187,7 @@ public class JSGraphics2D // extends SunGraphics2D
 			/*
 			 * 
 			 * reduce antialiasing, thank you,
-			 * http://www.rgraph.net/docs/howto-get-crisp-lines-with-no-
-			 * antialias.html
+			 * http://www.rgraph.net/docs/howto-get-crisp-lines-with-no- antialias.html
 			 */
 			if (!isShifted)
 				ctx.translate(-0.5, -0.5);
@@ -475,37 +474,45 @@ public class JSGraphics2D // extends SunGraphics2D
 			 * 			pixels = img._pix; isRGB = (img.imageType == 1);
 			 *
 			 */
-			{
-
-			}
 			DOMNode imgNode = null;
 			int width = ((BufferedImage) img).getRaster().getWidth();
 			int height = ((BufferedImage) img).getRaster().getHeight();
+			
+			
 			if (pixels == null) {
 				if ((imgNode = getImageNode(img)) != null)
 					ctx.drawImage(imgNode, x, y, width, height);
 			} else {
-				if (buf8 == null || x != lastx || y != lasty || nx != width || ny != height) {
-					imageData = HTML5CanvasContext2D.getImageData(ctx, x, y, width, height);
-					buf8 = HTML5CanvasContext2D.getBuf8(imageData);
-					lastx = x;
-					lasty = y;
-					nx = width;
-					ny = height;
-				}
-				for (int pt = 0, i = 0, n = Math.min(buf8.length / 4, pixels.length); i < n; i++) {
-					int argb = pixels[i];
-					buf8[pt++] = (argb >> 16) & 0xFF;
-					buf8[pt++] = (argb >> 8) & 0xFF;
-					buf8[pt++] = argb & 0xFF;
-					buf8[pt++] = (isRGB ? 0xFF : (argb >> 24) & 0xFF);
-				}
-				HTML5CanvasContext2D.putImageData(ctx, imageData, x, y);
+				drawDirect(pixels, x, y, width, height, isRGB);
 			}
 			if (observer != null)
 				observe(img, observer, imgNode != null);
 		}
 		return true;
+	}
+
+	public void drawDirectRGBA(int[] pixels) {
+		// this can go VERY fast - for writing directly to the canvas context
+		drawDirect(pixels, 0, 0, width, height, false);
+	}
+
+	private void drawDirect(int[] pixels, int x, int y, int width, int height, boolean isRGB) {
+		if (buf8 == null || x != lastx || y != lasty || nx != width || ny != height) {
+			imageData = HTML5CanvasContext2D.getImageData(ctx, x, y, width, height);
+			buf8 = HTML5CanvasContext2D.getBuf8(imageData);
+			lastx = x;
+			lasty = y;
+			nx = width;
+			ny = height;
+		}
+		for (int pt = 0, i = 0, n = Math.min(buf8.length / 4, pixels.length); i < n; i++) {
+			int argb = pixels[i];
+			buf8[pt++] = (argb >> 16) & 0xFF;
+			buf8[pt++] = (argb >> 8) & 0xFF;
+			buf8[pt++] = argb & 0xFF;
+			buf8[pt++] = (isRGB ? 0xFF : (argb >> 24) & 0xFF);
+		}
+		HTML5CanvasContext2D.putImageData(ctx, imageData, x, y);
 	}
 
 	public boolean hit(Rectangle rect, Shape s, boolean onStroke) {
@@ -556,8 +563,8 @@ public class JSGraphics2D // extends SunGraphics2D
 		/**
 		 * @j2sNative
 		 * 
-		 * 			this.ctx.lineCap = lineCap; this.ctx.lineJoin = lineJoin;
-		 *            if (miterLimit >= 0) this.ctx.miterLimit = miterLimit;
+		 * 			this.ctx.lineCap = lineCap; this.ctx.lineJoin = lineJoin; if
+		 *            (miterLimit >= 0) this.ctx.miterLimit = miterLimit;
 		 */
 		{
 		}
@@ -754,8 +761,7 @@ public class JSGraphics2D // extends SunGraphics2D
 		/**
 		 * @j2sNative
 		 * 
-		 * 			this.ctx.transform (t.m00, t.m10, t.m01, t.m11, t.m02,
-		 *            t.m12);
+		 * 			this.ctx.transform (t.m00, t.m10, t.m01, t.m11, t.m02, t.m12);
 		 */
 		{
 		}
@@ -769,8 +775,7 @@ public class JSGraphics2D // extends SunGraphics2D
 		/**
 		 * @j2sNative
 		 * 
-		 * 			this.ctx.setTransform (t.m00, t.m10, t.m01, t.m11, t.m02,
-		 *            t.m12);
+		 * 			this.ctx.setTransform (t.m00, t.m10, t.m01, t.m11, t.m02, t.m12);
 		 * 
 		 * 
 		 */
@@ -983,10 +988,10 @@ public class JSGraphics2D // extends SunGraphics2D
 			g.hints = (RenderingHints) hints.clone();
 		}
 		/*
-		 * FontInfos are re-used, so must be cloned too, if they are valid, and
-		 * be nulled out if invalid. The implied trade-off is that there is more
-		 * to be gained from re-using these objects than is lost by having to
-		 * clone them when the SG2D is cloned.
+		 * FontInfos are re-used, so must be cloned too, if they are valid, and be
+		 * nulled out if invalid. The implied trade-off is that there is more to be
+		 * gained from re-using these objects than is lost by having to clone them when
+		 * the SG2D is cloned.
 		 */
 		// if (this.fontInfo != null) {
 		// if (this.validFontInfo) {
@@ -1009,6 +1014,5 @@ public class JSGraphics2D // extends SunGraphics2D
 	public void dispose() {
 		reset(initialState);
 	}
-
 
 }

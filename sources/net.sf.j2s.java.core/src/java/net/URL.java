@@ -1099,7 +1099,7 @@ public/* SwingJS final */class URL {// implements Serializable {
 
 	/**
 	 * same as openStream(), except here we might get string buffer data, not
-	 * bytes, since we will call J2S._doAjax(false), not J2S._doAjax(true), which
+	 * bytes, since we will call J2S.doAjax(false), not J2S.doAjax(true), which
 	 * will only return binary data for known binary file types (see j2sApplet)
 	 * 
 	 * @return input stream

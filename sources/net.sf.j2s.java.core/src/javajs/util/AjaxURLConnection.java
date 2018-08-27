@@ -3,6 +3,7 @@ package javajs.util;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -13,7 +14,7 @@ import javajs.api.js.J2SObjectInterface;
  * A method to allow a JavaScript Ajax 
  * 
  */
-public class AjaxURLConnection extends URLConnection {
+public class AjaxURLConnection extends HttpURLConnection {
 
   protected AjaxURLConnection(URL url) {
     super(url);
@@ -44,8 +45,8 @@ public class AjaxURLConnection extends URLConnection {
    */
   @SuppressWarnings("null")
   private Object doAjax(boolean isBinary) {
-    J2SObjectInterface j2s = /** @j2sNative J2S || */ null;
-    return j2s._doAjax(url, postOut, bytesOut, isBinary);
+    J2SObjectInterface J2S = /** @j2sNative self.J2S || */ null;
+    return J2S.doAjax(url.toString(), postOut, bytesOut, isBinary);
   }
 
   @Override
@@ -106,5 +107,48 @@ public class AjaxURLConnection extends URLConnection {
   public Object getContents() {
     return doAjax(false);
   }
+
+  @Override
+  public int getResponseCode() throws IOException {
+      /*
+       * We're got the response code already
+       */
+      if (responseCode != -1) {
+          return responseCode;
+      }
+
+      /*
+       * Ensure that we have connected to the server. Record
+       * exception as we need to re-throw it if there isn't
+       * a status line.
+       */
+      Exception exc = null;
+      try {
+          BufferedInputStream is = (BufferedInputStream) getInputStream();
+          if (is.available() > 40)
+          	return responseCode = HTTP_OK;
+          is.mark(15);
+          byte[] bytes = new byte[13];
+          is.read(bytes);
+          is.reset();
+          String s = new String(bytes);
+          if (s.startsWith("Network Error"))
+          	return responseCode = HTTP_NOT_FOUND;
+      } catch (Exception e) {
+          exc = e;
+      }      
+    	return responseCode = HTTP_INTERNAL_ERROR;
+  }
+@Override
+public void disconnect() {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public boolean usingProxy() {
+	// TODO Auto-generated method stub
+	return false;
+}
 
 }

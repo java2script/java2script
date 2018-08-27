@@ -118,31 +118,31 @@ public class JInternalFrame extends JFrame
         RootPaneContainer
 {
 	
-    /**
-     * The <code>JRootPane</code> instance that manages the
-     * content pane
-     * and optional menu bar for this internal frame, as well as the
-     * glass pane.
-     *
-     * @see JRootPane
-     * @see RootPaneContainer
-     */
-    protected JRootPane rootPane;
+//    /**
+//     * The <code>JRootPane</code> instance that manages the
+//     * content pane
+//     * and optional menu bar for this internal frame, as well as the
+//     * glass pane.
+//     *
+//     * @see JRootPane
+//     * @see RootPaneContainer
+//     */
+//    protected JRootPane rootPane;
 
     
     private VetoableChangeSupport vetoableChangeSupport;
 	
-    /**
-     * If true then calls to <code>add</code> and <code>setLayout</code>
-     * will be forwarded to the <code>contentPane</code>. This is initially
-     * false, but is set to true when the <code>JInternalFrame</code> is
-     * constructed.
-     *
-     * @see #isRootPaneCheckingEnabled
-     * @see #setRootPaneCheckingEnabled
-     * @see javax.swing.RootPaneContainer
-     */
-    protected boolean rootPaneCheckingEnabled = false;
+//    /**
+//     * If true then calls to <code>add</code> and <code>setLayout</code>
+//     * will be forwarded to the <code>contentPane</code>. This is initially
+//     * false, but is set to true when the <code>JInternalFrame</code> is
+//     * constructed.
+//     *
+//     * @see #isRootPaneCheckingEnabled
+//     * @see #setRootPaneCheckingEnabled
+//     * @see javax.swing.RootPaneContainer
+//     */
+//    protected boolean rootPaneCheckingEnabled = false;
 
     /** The frame can be closed. */
     protected boolean closable;
@@ -167,14 +167,14 @@ public class JInternalFrame extends JFrame
      * @see #isIcon()
      */
     protected boolean isIcon;
-    /** The frame's size can be changed. */
-    protected boolean resizable;
+//    /** The frame's size can be changed. */
+//    protected boolean resizable;
     /** The frame is currently selected. */
     protected boolean isSelected;
     /** The icon shown in the top-left corner of this internal frame. */
     protected Icon frameIcon;
     /** The title displayed in this internal frame's title bar. */
-    protected String  title;
+ //   protected String  title;
     /**
      * The icon that is displayed when this internal frame is iconified.
      * @see #iconable
@@ -187,7 +187,7 @@ public class JInternalFrame extends JFrame
 
     private Rectangle normalBounds = null;
 
-    private int defaultCloseOperation = DISPOSE_ON_CLOSE;
+    //private int defaultCloseOperation = DISPOSE_ON_CLOSE;
 
     /**
      * Contains the Component that focus is to go when
@@ -202,7 +202,13 @@ public class JInternalFrame extends JFrame
      * 
      */
 	/** A list of event listeners for this component. */
-	protected EventListenerList listenerList = new EventListenerList();
+	//protected EventListenerList listenerList;
+	
+
+	private JDesktopPane desktop;
+
+
+	public boolean isDragging;
 
 
     /** Bound property name. */
@@ -345,7 +351,8 @@ public class JInternalFrame extends JFrame
     public JInternalFrame(String title, boolean resizable, boolean closable,
                                 boolean maximizable, boolean iconifiable) {
     	super(title, null, "InternalFrameUI");
-        this.resizable = resizable;
+    	defaultCloseOperation = DISPOSE_ON_CLOSE;
+    	this.resizable = resizable;
         this.closable = closable;
         this.maximizable = maximizable;
         isMaximum = false;
@@ -751,7 +758,7 @@ public class JInternalFrame extends JFrame
           fireInternalFrameEvent(InternalFrameEvent.INTERNAL_FRAME_ACTIVATED);
         else
           fireInternalFrameEvent(InternalFrameEvent.INTERNAL_FRAME_DEACTIVATED);
-        repaint();
+        //repaint();
     }
 
     /**
@@ -889,8 +896,8 @@ public class JInternalFrame extends JFrame
              // Try to do the right thing
         	// SwingJS - Yes, force-alias this to JComponent!
              JLayeredPane.putLayer((JComponent) (Object) this, layer.intValue());
-             if(getParent() != null)
-                 getParent().repaint(getX(), getY(), getWidth(), getHeight());
+//             if(getParent() != null)
+//                 getParent().repaint(getX(), getY(), getWidth(), getHeight());
         }
     }
 
@@ -935,21 +942,22 @@ public class JInternalFrame extends JFrame
       *         or <code>null</code> if none is found
       */
     public JDesktopPane getDesktopPane() {
-        Container p;
-
-        // Search upward for desktop
-        p = getParent();
-        while(p != null && !(p instanceof JDesktopPane))
-            p = p.getParent();
-
-        if(p == null) {
-           // search its icon parent for desktop
-           p = getDesktopIcon().getParent();
-           while(p != null && !(p instanceof JDesktopPane))
-                p = p.getParent();
-        }
-
-        return (JDesktopPane)p;
+    	return desktop;
+//        Container p;
+//
+//        // Search upward for desktop
+//        p = getParent();
+//        while(p != null && !(p instanceof JDesktopPane))
+//            p = p.getParent();
+//
+//        if(p == null) {
+//           // search its icon parent for desktop
+//           p = getDesktopIcon().getParent();
+//           while(p != null && !(p instanceof JDesktopPane))
+//                p = p.getParent();
+//        }
+//
+//        return (JDesktopPane)p;
     }
 
     /**
@@ -1134,7 +1142,8 @@ public class JInternalFrame extends JFrame
      *
      * @param l the internal frame listener
      */
-    public void addInternalFrameListener(InternalFrameListener l) {  // remind: sync ??
+    public void addInternalFrameListener(InternalFrameListener l) { 
+    	// remind: sync ??
       listenerList.add(InternalFrameListener.class, l);
       // remind: needed?
       enableEvents(0);   // turn on the newEventsOnly flag in Component.
@@ -1189,7 +1198,6 @@ public class JInternalFrame extends JFrame
         if (listeners[i] == InternalFrameListener.class){
           if (e == null){
             e = new InternalFrameEvent(this, id);
-            //      System.out.println("InternalFrameEvent: " + e.paramString());
           }
           switch(e.getID()) {
           case InternalFrameEvent.INTERNAL_FRAME_OPENED:
@@ -1515,7 +1523,6 @@ public class JInternalFrame extends JFrame
      */
     public void toFront() {
         moveToFront();
-        super.toFront(); // Window
     }
 
     /**
@@ -1529,7 +1536,6 @@ public class JInternalFrame extends JFrame
      */
     public void toBack() {
         moveToBack();
-        super.toBack();
     }
 
     /**
@@ -2127,4 +2133,18 @@ public class JInternalFrame extends JFrame
 //
 //        } // AccessibleJDesktopIcon
     }
+
+    /**
+     * SwingJS needs this
+     * 
+     * @param jDesktopPane
+     */
+	public void setDesktop(JDesktopPane jDesktopPane) {
+		this.desktop = jDesktopPane;
+		
+	}
+	
+    public void checkInternalFrameMouseDown() {
+	}
+
 }

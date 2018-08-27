@@ -94,6 +94,11 @@ public class SAXParserFactory {
 				for (Object name : props.keySet()) {
 					r.setProperty((String) name, props.getProperty((String)name));
 				}
+			} else if (p instanceof org.xml.sax.XMLReader) {
+				org.xml.sax.XMLReader r = (org.xml.sax.XMLReader) p;
+				for (Object name : props.keySet()) {
+					r.setProperty((String) name, props.getProperty((String)name));
+				}
 			}
 			return p;
 		} catch (Exception e) {

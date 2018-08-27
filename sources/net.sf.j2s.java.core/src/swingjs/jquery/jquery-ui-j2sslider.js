@@ -12,7 +12,7 @@
 ;
 (function() {
 
-	if (J2S._isResourceLoaded("swingjs/jquery/jquery-ui-j2sslider.js", true))
+	if (J2S.isResourceLoaded("swingjs/jquery/jquery-ui-j2sslider.js", true))
 		return;
 
 	;
@@ -186,7 +186,7 @@
 								for (i = 0; i < handleCount; i++) {
 									handle = this.handles[i];
 									handle.index = i;
-									J2S._setDraggable(handle, [ fDown, fDrag,
+									J2S.setDraggable(handle, [ fDown, fDrag,
 											fUp ]);
 								}
 								

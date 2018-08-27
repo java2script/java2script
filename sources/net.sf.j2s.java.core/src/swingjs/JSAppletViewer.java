@@ -184,7 +184,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 
 		threadGroup = new JSThreadGroup(appletName);
 		myThread = new JSAppletThread(this, threadGroup, appletName);
-//		JSToolkit.J2S._setAppletThread(appletName, myThread);
+//		JSToolkit.J2S.setAppletThread(appletName, myThread);
 		java.lang.Thread.thisThread = (java.lang.Thread) ((Object) myThread);
 		
 		appContext = JSToolkit.createNewAppContext();
@@ -234,20 +234,20 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 		final Dimension currentSize = new Dimension(currentAppletSize.width, currentAppletSize.height);
 		currentAppletSize.width = width;
 		currentAppletSize.height = height;
-		japplet.setBounds(0, 0, width, height);
-		japplet.getRootPane().setBounds(0, 0, getWidth(), getHeight());
-		japplet.getContentPane().setBounds(0, 0, getWidth(), getHeight());
-		((JComponent) japplet.getContentPane()).revalidate();
+		applet.setBounds(0, 0, width, height);
+		applet.getRootPane().setBounds(0, 0, getWidth(), getHeight());
+		applet.getContentPane().setBounds(0, 0, getWidth(), getHeight());
+		((JComponent) applet.getContentPane()).revalidate();
 		if (addFrame) {
 			jAppletFrame = new JFrame("SwingJS Applet Viewer");
-			Container pane = japplet.getContentPane();
+			Container pane = applet.getContentPane();
 			jAppletFrame.setContentPane(pane);
-			japplet.setVisible(false);
+			applet.setVisible(false);
 			jAppletFrame.pack();
 			jAppletFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		}
 		// if (wNew > 0 && hNew > 0)
-		japplet.repaint(0, 0, getWidth(), getHeight());
+		applet.repaint(0, 0, getWidth(), getHeight());
 
 		dispatchAppletEvent(APPLET_RESIZE, currentSize);
 	}
@@ -293,7 +293,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 
 	@SuppressWarnings("deprecation")
 	public void setBounds(int x, int y, int width, int height) {
-		japplet.reshape(x, y, width, height); // straight to component
+		applet.reshape(x, y, width, height); // straight to component
 		currentAppletSize.width = width;
 		currentAppletSize.height = height;
 	}
@@ -409,12 +409,12 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 					break;
 				}
 				System.out.println("JSAppletViewer init");
-				japplet.setFont(new Font(Font.DIALOG, Font.PLAIN, 12));
-				japplet.resizeOriginal(defaultAppletSize.width, defaultAppletSize.height);
-				japplet.init();
+				applet.setFont(new Font(Font.DIALOG, Font.PLAIN, 12));
+				applet.resizeOriginal(defaultAppletSize.width, defaultAppletSize.height);
+				applet.init();
 				// Need the default(fallback) font to be created in this
 				// AppContext
-				japplet.validate(); // SwingJS
+				applet.validate(); // SwingJS
 				status = APPLET_INIT;
 				showAppletStatus("initialized");
 				nextStatus = APPLET_START;
@@ -426,19 +426,19 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 					status = APPLET_ERROR;
 					break;
 				}
-				japplet.getRootPane().addNotify();
+				applet.getRootPane().addNotify();
 				// force peer creation now
 				System.out.println("JSAppletViewer start" + currentAppletSize);
-				japplet.resizeOriginal(currentAppletSize.width, currentAppletSize.height);
-				japplet.start();
-				// japplet.repaint();
+				applet.resizeOriginal(currentAppletSize.width, currentAppletSize.height);
+				applet.start();
+				// applet.repaint();
 				status = APPLET_START;
 				showAppletStatus("started");
 				nextStatus = APPLET_READY;
 				ok = true;
 				break;
 			case APPLET_READY:
-				japplet.getContentPane().setBounds(japplet.getBounds()); // added
+				applet.getContentPane().setBounds(applet.getBounds()); // added
 																			// 7/13/17;
 																			// applet
 																			// background
@@ -449,22 +449,22 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 																			// setContentPane()
 																			// was
 																			// used
-				japplet.setVisible(true);
-				japplet.validate(); // one last validation necessary for PolyhedronApplet
+				applet.setVisible(true);
+				applet.validate(); // one last validation necessary for PolyhedronApplet
 				showAppletStatus("ready");
 				JSUtil.readyCallback(appletName, fullName, applet, this);
 				if (isResizable && !addFrame) {
-					resizer = ((Resizer) JSUtil.getInstance("swingjs.plaf.Resizer")).set(this);
+					resizer = ((Resizer) JSUtil.getInstance("swingjs.plaf.Resizer")).set(this, top);
 					if (resizer != null)
 						resizer.show();
 				}
-				japplet.repaint();
+				applet.repaint();
 				break;
 			case APPLET_STOP:
 				if (status == APPLET_START) {
 					status = APPLET_STOP;
-					japplet.setVisible(false);
-					japplet.stop();
+					applet.setVisible(false);
+					applet.stop();
 					showAppletStatus("stopped");
 				} else {
 					showAppletStatus("notstopped");
@@ -474,7 +474,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 			case APPLET_DESTROY:
 				if (status == APPLET_STOP || status == APPLET_INIT) {
 					status = APPLET_DESTROY;
-					japplet.destroy();
+					applet.destroy();
 					showAppletStatus("destroyed");
 				} else {
 					showAppletStatus("notdestroyed");
@@ -487,7 +487,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 					status = APPLET_ERROR;
 				} else {
 					status = APPLET_UNINITIALIZED;
-					// removeChild(japplet);
+					// removeChild(applet);
 					applet = null;
 					showAppletStatus("disposed");
 				}
@@ -531,7 +531,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 				code = "swingjs.JSApplet";
 			else if (code.indexOf(".") < 0)
 				code = "_." + code;
-			top = applet = japplet = (JApplet) JSUtil.getInstance(code);
+			top = applet = (JApplet) JSUtil.getInstance(code);
 			if (applet == null) {
 				System.out.println(code + " could not be launched");
 				status = APPLET_ERROR;
@@ -560,9 +560,9 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 			dispatchAppletEvent(APPLET_LOADING_COMPLETED, null);
 		}
 		if (applet != null) {
-			japplet.setStub(this);
-			japplet.setVisible(false);
-			japplet.setDispatcher();
+			applet.setStub(this);
+			applet.setVisible(false);
+			applet.setDispatcher();
 			// japplet.addNotify(); // we need this here because there is no
 			// frame
 			showAppletStatus("loaded");

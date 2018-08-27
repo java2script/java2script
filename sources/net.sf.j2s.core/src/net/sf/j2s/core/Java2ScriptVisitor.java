@@ -132,6 +132,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// BH 8/20/2018 -- fix for return (short)++;
+
 // BH 8/19/2018 -- refactored to simplify $finals$
 // BH 8/12/2018 -- refactored to simplify naming issues
 // BH 8/6/2018  -- additional Java 8 fixes; enum $valueOf$S to valueOf$S
@@ -2795,8 +2797,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				buffer.setLength(ptArray);
 				String name = left.substring(0, ptIndex1);
 				if (name.indexOf("(") >= 0) {
-					// test/Test_Static: getByteArray()[p++] += (byte) ++p;
-					// ($j$=C$.getByteArray())[$k$=p++]=($j$[$k$]+((++p|0))|0);
 					buffer.append("($j$=" + name + ")");
 					name = "$j$";
 					trailingBuffer.addType("j");
@@ -3513,7 +3513,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		boolean isChar = (type == 'c');
 		if (isChar)
 			type = 'p';
-		boolean isStatement = (parent instanceof Statement);
+		boolean isStatement = (parent instanceof Statement && !(parent instanceof ReturnStatement));
 		boolean addAnonymousWrapper = (!isChar || !isPrefix && !isStatement);
 		String key = "$" + type + (isChar ? "$" : "$[0]");
 		if (addAnonymousWrapper) {
@@ -3555,8 +3555,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				// ($b$[0]=++b,b=$b$[0]);
 				buffer.append(key);
 			} else {
-				// i = ($b$[0]=b,b=(++$b$[0],$b$[0]),--$b$[0],$b$[0]);
-				// ($b$[0]=b,b=(++$b$[0],$b$[0]));
+				// postfix
+				// statement:         ($b$[0]=b,b=(++$b$[0]                  ,$b$[0]))
+				// not statement: i = ($b$[0]=b,b=(++$b$[0] ,$b$[0]),--$b$[0],$b$[0]);
 				buffer.append("(");
 				buffer.append(op);
 				buffer.append(key);

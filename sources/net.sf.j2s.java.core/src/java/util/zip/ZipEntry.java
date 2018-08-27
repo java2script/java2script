@@ -79,27 +79,27 @@ class ZipEntry implements ZipConstants, Cloneable {
         this.name = name;
     }
 
-//    /**
-//     * Creates a new zip entry with fields taken from the specified
-//     * zip entry.
-//     * @param e a zip Entry object
-//     */
-//    public ZipEntry(ZipEntry e) {
-//        name = e.name;
-//        time = e.time;
-//        crc = e.crc;
-//        size = e.size;
-//        csize = e.csize;
-//        method = e.method;
-//        flag = e.flag;
-//        extra = e.extra;
-//        comment = e.comment;
-//    }
+    /**
+     * Creates a new zip entry with fields taken from the specified
+     * zip entry.
+     * @param e a zip Entry object
+     */
+    public ZipEntry(ZipEntry e) {
+        name = e.name;
+        time = e.time;
+        crc = e.crc;
+        size = e.size;
+        csize = e.csize;
+        method = e.method;
+        flag = e.flag;
+        extra = e.extra;
+        comment = e.comment;
+    }
 
-//    /*
-//     * Creates a new un-initialized zip entry
-//     */
-//    ZipEntry() {}
+    /*
+     * Creates a new un-initialized zip entry
+     */
+    ZipEntry() {}
 
     /**
      * Returns the name of the entry.

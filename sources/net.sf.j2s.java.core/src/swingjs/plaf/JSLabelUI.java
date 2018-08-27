@@ -16,7 +16,7 @@ import swingjs.api.js.DOMNode;
  *
  */
 public class JSLabelUI extends JSLightweightUI {
-	private JLabel label;
+	private JLabel label; // null for a JTooltip subclass
 	protected ImageIcon icon;
 	protected int gap;
 	protected String text;
@@ -49,6 +49,11 @@ public class JSLabelUI extends JSLightweightUI {
 			DOMNode.setStyles(centeringNode, "position", "absolute", "width",
 					actualWidth + "px");
 		setCssFont(centeringNode, c.getFont());
+		if (label != null) {
+			// not for JToolTip
+			setHorizontalButtonAlignments(label, label.getHorizontalTextPosition(),
+				label.getHorizontalAlignment());
+		}
 		if (jc.isOpaque() && jc.isEnabled())
 			setBackground(jc.getBackground());
 		return domNode;

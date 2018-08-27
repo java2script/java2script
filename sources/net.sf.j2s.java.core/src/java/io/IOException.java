@@ -44,4 +44,8 @@ public class IOException extends Exception {
 		super(detailMessage);
 	}
 
+	public IOException(Throwable cause) {
+		super(cause);
+	}
+
 }

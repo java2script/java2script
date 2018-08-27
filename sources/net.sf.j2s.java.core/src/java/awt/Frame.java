@@ -315,7 +315,7 @@ public class Frame extends Window {
      * @serial
      * @see #isResizable()
      */
-    boolean     resizable = true;
+    protected boolean     resizable = true;
 
     /**
      * This field indicates whether the frame is undecorated.
