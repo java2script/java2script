@@ -125,7 +125,6 @@
     	java/util/Hashtable.js
     	java/util/IdentityHashMap.js
     	java/util/Locale.js
-    	java/util/MapEntry.js
     	javajs/api/JSFunction.js
     	javajs/util/AjaxURLConnection.js
     	javajs/util/AjaxURLStreamHandlerFactory.js
