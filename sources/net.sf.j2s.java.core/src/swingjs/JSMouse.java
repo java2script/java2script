@@ -27,7 +27,6 @@
 package swingjs;
 
 import java.awt.event.InputEvent;
-import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Event;
@@ -67,10 +66,8 @@ public class JSMouse {
 			dragged(time, x, y, modifiers);
 			break;
 		case MouseEvent.MOUSE_ENTERED:
-			entry(time, x, y, false);
-			break;
 		case MouseEvent.MOUSE_EXITED:
-			entry(time, x, y, true);
+			entry(time, x, y, id);
 			break;
 		case MouseEvent.MOUSE_MOVED:
 			moved(time, x, y, modifiers);
@@ -128,11 +125,11 @@ public class JSMouse {
 	}
 
 	public void mouseEntered(MouseEvent e) {
-		entry(e.getWhen(), e.getX(), e.getY(), false);
+		entry(e.getWhen(), e.getX(), e.getY(), MouseEvent.MOUSE_ENTERED);
 	}
 
 	public void mouseExited(MouseEvent e) {
-		entry(e.getWhen(), e.getX(), e.getY(), true);
+		entry(e.getWhen(), e.getX(), e.getY(), MouseEvent.MOUSE_EXITED);
 	}
 
 	public void mousePressed(MouseEvent e) {
@@ -165,9 +162,9 @@ public class JSMouse {
 		wheeled(e.getWhen(), 0, 0, e.getWheelRotation(), e.getModifiers());
 	}
 
-	private void entry(long time, int x, int y, boolean isExit) {
+	private void entry(long time, int x, int y, int id) {
 		wheeling = false;
-		mouseEnterExit(time, x, y, isExit);
+		mouseEnterExit(time, x, y, id);
 	}
 
 	/**
@@ -258,8 +255,8 @@ public class JSMouse {
 		}
 	}
 
-	private void mouseEnterExit(long time, int x, int y, boolean isExit) {
-		// nothing here?
+	private void mouseEnterExit(long time, int x, int y, int id) {
+		mouseAction(id, time, x, y, 0, 0, 0);
 	}
 
 	@SuppressWarnings("unused")
@@ -279,7 +276,7 @@ public class JSMouse {
 		int button = getButton(modifiers);
 		int count = updateClickCount(id, time, x, y);
 
-		Component source = viewer.top; // may be a JFrame
+		Component source = viewer.getTopComponent(); // may be a JFrame
 		MouseEvent e;
 		if (id == MouseEvent.MOUSE_WHEEL) {
 			e = new MouseWheelEvent(source, id, time, modifiers, x, y, x, y, count, 
@@ -307,11 +304,11 @@ public class JSMouse {
 		// container and dispatch the event; if we go through the event queue, any e.consume()
 		// that occurs is too late to consume the event. 
 		
-		if (c == null) {
-			Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(e);
-		} else {
+//		if (c == null) {
+	//		Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(e);
+		//} else {
 		  ((Container) e.getSource()).dispatchEvent(e);
-		}
+	//	}
 	}
 
 	private long lasttime;

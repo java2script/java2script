@@ -184,7 +184,6 @@ public class Popup {
      */
     void pack() {
         Component component = getComponent();
-
         if (component instanceof Window) {
             ((Window)component).pack();
         }
@@ -267,6 +266,7 @@ public class Popup {
         @SuppressWarnings("deprecation")
 		@Override
 				public void show() {
+        	
             this.pack();
             if (getWidth() > 0 && getHeight() > 0) {
                 super.show();

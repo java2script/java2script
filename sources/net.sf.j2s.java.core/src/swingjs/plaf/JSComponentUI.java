@@ -1,6 +1,7 @@
 package swingjs.plaf;
 
 import java.awt.AWTEvent;
+import javax.swing.SwingConstants;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -33,8 +34,7 @@ import javax.swing.AbstractButton;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
-import javax.swing.JTable;
-import javax.swing.SwingConstants;
+import javax.swing.SwingConstants.*;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -50,6 +50,8 @@ import swingjs.JSToolkit;
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Applet;
+import swingjs.api.js.J2SInterface;
+import swingjs.api.js.JQuery;
 import swingjs.api.js.JQueryObject;
 
 /**
@@ -105,22 +107,17 @@ import swingjs.api.js.JQueryObject;
 public class JSComponentUI extends ComponentUI
 		implements ContainerPeer, JSEventHandler, PropertyChangeListener, ChangeListener, DropTargetPeer {
 
-	private static final Color rootPaneColor = new Color(238, 238, 238); // EE
-																			// EE
-																			// EE;
-																			// look
-																			// and
-																			// feel
-																			// "control"
+	private static final Color rootPaneColor = new Color(238, 238, 238);
 
+	final J2SInterface J2S = JSUtil.J2S;
 	/**
 	 * provides a unique id for any component; set on instantiation
 	 */
 	protected static int incr;
 
 	/**
-	 * Set this during run time using swingjs.plaf.JSComponentUI.borderTest =
-	 * true to debug alignments
+	 * Set this during run time using swingjs.plaf.JSComponentUI.borderTest = true
+	 * to debug alignments
 	 */
 	private static boolean borderTest;
 
@@ -149,25 +146,24 @@ public class JSComponentUI extends ComponentUI
 	protected JComponent jc;
 
 	/**
-	 * TableCellRenderers will not have parents; here we point to the table so 
-	 * that we can send the coordinates to the retrieve the row and cell
-	 *  
+	 * TableCellRenderers will not have parents; here we point to the table so that
+	 * we can send the coordinates to the retrieve the row and cell
+	 * 
 	 */
-	protected  JComponent targetParent;
-	
+	protected JComponent targetParent;
+
 	public JComponent getTargetParent() {
 		return targetParent;
 	}
 
-	//MouseInputListener mouseInputListener;
-	
+	// MouseInputListener mouseInputListener;
 
 	/**
-	 * The outermost div holding a component -- left, top, and for a container
-	 * width and height
+	 * The outermost div holding a component -- left, top, and for a container width
+	 * and height
 	 * 
-	 * Note that all controls have an associated outerNode div. Specifically,
-	 * menu items will be surrounded by an li element, not a div.
+	 * Note that all controls have an associated outerNode div. Specifically, menu
+	 * items will be surrounded by an li element, not a div.
 	 * 
 	 * This must be set up here, nowhere else.
 	 * 
@@ -182,15 +178,14 @@ public class JSComponentUI extends ComponentUI
 	protected DOMNode innerNode;
 
 	/**
-	 * the main HTML5 element for the component, possibly containing others,
-	 * such as radio button with its label.
+	 * the main HTML5 element for the component, possibly containing others, such as
+	 * radio button with its label.
 	 * 
 	 */
 	public DOMNode domNode;
 
 	/**
-	 * An inner div that allows vertical centering for a JLabel or
-	 * AbstractButton
+	 * An inner div that allows vertical centering for a JLabel or AbstractButton
 	 */
 	protected DOMNode centeringNode;
 
@@ -210,21 +205,28 @@ public class JSComponentUI extends ComponentUI
 	public void setDraggable(JSFunction f) {
 		// SplitPaneDivider
 		draggable = true; // never actually used
-		JSUtil.J2S._setDraggable(updateDOMNode(), f);
+		J2S.setDraggable(updateDOMNode(), f);
 	}
 
 	/**
-	 * The HTML5 input element being pressed, if the control 
-	 * is a radio or checkbox button.
+	 * The HTML5 input element being pressed, if the control is a radio or checkbox
+	 * button.
 	 * 
 	 */
-	protected DOMNode radioBtn;
+	protected DOMNode actionNode;
 
 	/**
 	 * the "FOR" label for a radio button
 	 * 
 	 */
-	protected DOMNode btnLabel; 
+	protected DOMNode buttonNode;
+
+	/**
+	 * the anchor tag surrounding a menu item
+	 * 
+	 */
+	
+ 	protected DOMNode menuAnchorNode;
 
 	/**
 	 * a component or subcomponent that can be enabled/disabled
@@ -288,8 +290,8 @@ public class JSComponentUI extends ComponentUI
 	// private boolean zeroWidth;
 
 	/**
-	 * indicates that in a toolbar, this component should use its preferred size
-	 * for min and max
+	 * indicates that in a toolbar, this component should use its preferred size for
+	 * min and max
 	 * 
 	 */
 
@@ -308,9 +310,8 @@ public class JSComponentUI extends ComponentUI
 	protected boolean boundsSet = false;
 
 	/**
-	 * Indicates that we do not need an outerNode and that we should be applying
-	 * any positioning to the node itself. All menu items will have this set
-	 * true.
+	 * Indicates that we do not need an outerNode and that we should be applying any
+	 * positioning to the node itself. All menu items will have this set true.
 	 */
 
 	protected boolean isMenuItem = false;
@@ -389,6 +390,8 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected boolean allowTextAlignment = true;
 
+	private JQuery jquery = JSUtil.getJQuery();
+
 	public JSComponentUI() {
 		setDoc();
 	}
@@ -419,8 +422,7 @@ public class JSComponentUI extends ComponentUI
 		/**
 		 * @j2sNative
 		 * 
-		 * 			this.c.addChangeListener$javax_swing_event_ChangeListener
-		 *            &&
+		 * 			this.c.addChangeListener$javax_swing_event_ChangeListener &&
 		 *            this.c.addChangeListener$javax_swing_event_ChangeListener(this);
 		 */
 		{
@@ -431,8 +433,7 @@ public class JSComponentUI extends ComponentUI
 	/**
 	 * Called upon disposal of Window, JPopupMenu, and JComponent.
 	 * 
-	 * Subclasses should not implement this method; use uninstallUIImpl()
-	 * instead
+	 * Subclasses should not implement this method; use uninstallUIImpl() instead
 	 * 
 	 */
 	@Override
@@ -444,8 +445,7 @@ public class JSComponentUI extends ComponentUI
 		 * @j2sNative
 		 * 
 		 * 			this.c &&
-		 *            this.c.removeChangeListener$javax_swing_event_ChangeListener
-		 *            &&
+		 *            this.c.removeChangeListener$javax_swing_event_ChangeListener &&
 		 *            this.c.removeChangeListener$javax_swing_event_ChangeListener(this);
 		 *            this.c &&
 		 *            this.c.removePropertyChangeListener$java_beans_PropertyChangeListener(this);
@@ -459,7 +459,7 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	protected JQueryObject $(Object node) {
-		return JSUtil.getJQuery().$(node);
+		return jquery.$(node);
 	}
 
 	public JSComponentUI set(JComponent target) {
@@ -496,18 +496,17 @@ public class JSComponentUI extends ComponentUI
 	// ////////////// user event handling ///////////////////
 
 	/**
-	 * When a user clicks a component in SwingJS, jQuery catches it, and a
-	 * message is sent to javax.swing.LightweightDispatcher (in Component.js) to
-	 * be processed. If this were actual Java, we would have to determine if a
+	 * When a user clicks a component in SwingJS, jQuery catches it, and a message
+	 * is sent to javax.swing.LightweightDispatcher (in Component.js) to be
+	 * processed. If this were actual Java, we would have to determine if a
 	 * component's button was clicked by running through all the buttons on the
-	 * component's "native container" and checking whether the click was within
-	 * the component's boundaries.
+	 * component's "native container" and checking whether the click was within the
+	 * component's boundaries.
 	 * 
-	 * By setting the data-component attribute of a DOM element, we are
-	 * indicating to the LightweightDispatcher that we already know what button
-	 * was clicked; it is not necessary to check x and y for that. This ensures
-	 * perfect correspondence between a clicked button and its handling by
-	 * SwingJS.
+	 * By setting the data-component attribute of a DOM element, we are indicating
+	 * to the LightweightDispatcher that we already know what button was clicked; it
+	 * is not necessary to check x and y for that. This ensures perfect
+	 * correspondence between a clicked button and its handling by SwingJS.
 	 * 
 	 * The action will be handled by a standard Java MouseListener
 	 * 
@@ -518,9 +517,9 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	/**
-	 * Indicate to J2S to completely ignore all mouse events for this control.
-	 * It will be handled by the control directly using a jQuery callback that
-	 * is generated by updateDOMNode. Used by JSComboBoxUI and JSSliderUI.
+	 * Indicate to J2S to completely ignore all mouse events for this control. It
+	 * will be handled by the control directly using a jQuery callback that is
+	 * generated by updateDOMNode. Used by JSComboBoxUI and JSSliderUI.
 	 * 
 	 * @param node
 	 */
@@ -533,11 +532,11 @@ public class JSComponentUI extends ComponentUI
 	 * attribute of a jQuery event target and, if found, reroute the event to
 	 * handleJSEvent, bypassing the standard LightweightDispatcher business.
 	 * 
-	 * JSComboBoxUI, JSFrameUI, and JSTextUI set jqevent.target["data-ui"] to
-	 * point to themselves. This allows the control to bypass the Java dispatch
-	 * system entirely and just come here for processing. This method is used
-	 * for specific operations, including JFrame closing, JComboBox selection,
-	 * and JSText action handling so that those can be handled specially.
+	 * JSComboBoxUI, JSFrameUI, and JSTextUI set jqevent.target["data-ui"] to point
+	 * to themselves. This allows the control to bypass the Java dispatch system
+	 * entirely and just come here for processing. This method is used for specific
+	 * operations, including JFrame closing, JComboBox selection, and JSText action
+	 * handling so that those can be handled specially.
 	 * 
 	 * This connection is set up in JSComponentUI.setDataUI() and handled by
 	 * overriding JSComponentUI.handleJSEvent().
@@ -551,11 +550,9 @@ public class JSComponentUI extends ComponentUI
 	/**
 	 * handle an event set up by adding the data-ui attribute to a DOM node.
 	 * 
-	 * @param target
-	 *            a DOMNode
-	 * @param eventType
-	 *            a MouseEvent id, including 501, 502, 503, or 506 (pressed,
-	 *            released, moved, and dragged, respectively)
+	 * @param target      a DOMNode
+	 * @param eventType   a MouseEvent id, including 501, 502, 503, or 506 (pressed,
+	 *                    released, moved, and dragged, respectively)
 	 * @param jQueryEvent
 	 * @return false to prevent the default process
 	 */
@@ -567,17 +564,17 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	/**
-	 * Used by JSFrameUI to indicate that it is to be the "currentTarget" for
-	 * mouse clicks that target one of its buttons. The DOM attributes applet
-	 * and _frameViewer will be set for the node, making it consistent with
-	 * handling for Jmol's applet canvas element.
+	 * Used by JSFrameUI to indicate that it is to be the "currentTarget" for mouse
+	 * clicks that target one of its buttons. The DOM attributes applet and
+	 * _frameViewer will be set for the node, making it consistent with handling for
+	 * Jmol's applet canvas element.
 	 * 
 	 * @param node
 	 * @param isFrame
 	 */
 	protected void setJ2sMouseHandler(DOMNode frameNode) {
 		DOMNode.setAttrs(frameNode, "applet", applet, "_frameViewer", jc.getFrameViewer());
-		JSUtil.J2S._jsSetMouse(frameNode, true);
+		J2S.setMouse(frameNode, true);
 	}
 
 	public static JSComponentUI focusedUI;
@@ -615,15 +612,12 @@ public class JSComponentUI extends ComponentUI
 	 * method to work.
 	 * 
 	 * 
-	 * @param node
-	 *            the JavaScript element that is being triggered
-	 * @param eventList
-	 *            one or more JavaScript event names to pass, separated by space
-	 * @param eventID
-	 *            an integer event type to return; can be anything, but
-	 *            Event.XXXX is recommended
-	 * @param andSetCSS
-	 *            TODO
+	 * @param node      the JavaScript element that is being triggered
+	 * @param eventList one or more JavaScript event names to pass, separated by
+	 *                  space
+	 * @param eventID   an integer event type to return; can be anything, but
+	 *                  Event.XXXX is recommended
+	 * @param andSetCSS TODO
 	 */
 	protected void bindJSEvents(DOMNode node, String eventList, int eventID, boolean andSetCSS) {
 		JSFunction f = null;
@@ -638,8 +632,8 @@ public class JSComponentUI extends ComponentUI
 		/**
 		 * @j2sNative
 		 * 
-		 * 			f = function(event) { me.handleJSEvent$O$I$O(node,
-		 *            eventID, event) }
+		 * 			f = function(event) { me.handleJSEvent$O$I$O(node, eventID, event)
+		 *            }
 		 */
 		{
 			handleJSEvent(null, 0, null); // Eclipse reference only; not in
@@ -668,13 +662,13 @@ public class JSComponentUI extends ComponentUI
 	 * For example, an item is added to a JComboBox, perhaps due to the user
 	 * selecting an option that changes a JComboBox contents.
 	 * 
-	 * We need to add that change to the DOM, so we make JSComboBoxUI a listener
-	 * for that event. JSComboBoxUI calls revalidate(), which calls
-	 * JComponent.revalidate(). JComponent.revalidate() first calls setTainted()
-	 * and then sets up a paint request.
+	 * We need to add that change to the DOM, so we make JSComboBoxUI a listener for
+	 * that event. JSComboBoxUI calls revalidate(), which calls
+	 * JComponent.revalidate(). JComponent.revalidate() first calls setTainted() and
+	 * then sets up a paint request.
 	 * 
-	 * This is just a convenience method that lets us trap with debugging when
-	 * this is occurring from this package.
+	 * This is just a convenience method that lets us trap with debugging when this
+	 * is occurring from this package.
 	 * 
 	 */
 	protected void revalidate() {
@@ -698,16 +692,17 @@ public class JSComponentUI extends ComponentUI
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
-		if (prop == "ancestor") {
-			JSComponentUI parentui = this;
-			/**
-			 * @j2sNative
-			 * 
-			 * 			parentui = this.jc.parent && this.jc.parent.getUI$ &&
-			 *            this.jc.parent.getUI$();
-			 */
+		if (prop == "ancestor") {			
+			JComponent p = (JComponent) jc.getParent();
+			while (p != null) {
+			JSComponentUI parentui = (JSComponentUI) (p == null ? null : p.getUI());
 			if (parentui != null)
 				parentui.setTainted();
+			p = (JComponent) p.getParent();
+			}
+			
+			if (e.getNewValue() == null)
+				return;
 			if (isDisposed && c.visible && e.getNewValue() != null)
 				setVisible(true);
 		}
@@ -784,114 +779,18 @@ public class JSComponentUI extends ComponentUI
 			System.out.println("JSComponentUI: unrecognized prop: " + this.id + " " + prop);
 	}
 
-	private ImageIcon getIcon(JSComponent c, Icon icon) {
-		return (c == null || icon == null 
-				&& (icon  = ((AbstractButton) c).getIcon()) == null ?
-			null : icon.getIconWidth() <= 0 || icon.getIconHeight() <= 0 ? null : (icon instanceof ImageIcon) ? (ImageIcon) icon :
-				JSToolkit.paintImageForIcon(jc, icon));
-	}
-
-	protected void setIconAndText(String prop, Icon icon, int gap, String text) {
-
-		// TODO add textPosition
-
-		actualWidth = actualHeight = 0;
-		currentText = text;
-		currentGap = gap;
-		canAlignText = false;
-		canAlignIcon = false;
-		currentIcon = null;
-		imageNode = null;
-		if (iconNode != null) {
-			icon = currentIcon = getIcon(jc, icon);
-			$(iconNode).empty();
-			if (currentIcon != null) {
-				imageNode = DOMNode.getImageNode(currentIcon.getImage());
-				DOMNode.setStyles(imageNode, "vertical-align", "middle"); // else
-																			// this
-																			// will
-																			// be
-																			// "baseline"
-				iconNode.appendChild(imageNode);
-				iconHeight = icon.getIconHeight();
-			}
-		}
-		boolean isHTML = false;
-		if (text == null || text.length() == 0) {
-			text = "";
-			if (icon != null)
-				canAlignIcon = true;
-		} else {
-			if (icon == null) {
-				canAlignText = allowTextAlignment;
-			} else {
-				// vCenter(imageNode, 10); // perhaps? Not sure if this is a
-				// good idea
-				if (gap == Integer.MAX_VALUE)
-					gap = getDefaultIconTextGap();
-				if (gap != 0 && text != null)
-					DOMNode.addHorizontalGap(iconNode, gap);
-			}
-			if (text.indexOf("<html>") == 0) {
-				isHTML = true;
-				// PhET uses <html> in labels and uses </br>
-				text = PT.rep(text.substring(6, text.length() - 7), "</br>", "");
-				text = PT.rep(text, "</html>", "");
-				text = PT.rep(text, "href=", "target=_blank href=");
-				text = PT.rep(text, "href=", "target=_blank href=");
-				// Jalview hack
-				text = PT.rep(text, "width: 350; text-align: justify; word-wrap: break-word;",
-						"width: 350px; word-wrap: break-word;");
-			}
-		}
-		DOMNode obj = null;
-		if (textNode != null) {
-			prop = "innerHTML";
-			obj = textNode;
-			if (!isHTML)
-				text = PT.rep(text, "<", "&lt;");
-		} else if (valueNode != null) {
-			prop = "value";
-			obj = valueNode;
-			if (iconNode != null)
-				DOMNode.setVisible(obj, text != null);
-		}
-		if (obj != null)
-			setProp(obj, prop, text);
-		if (centeringNode == null) {
-			// button
-			setBackgroundFor(valueNode, c.getBackground());
-		} else {
-			// label
-			setCssFont(centeringNode, c.getFont());
-			// added to make sure that the displayed element does not wrap with
-			// this new text
-		}
-		if (!boundsSet)
-			setHTMLSize(domNode, true);
-		if (centeringNode != null)
-			setAlignment();
-		if (debugging)
-			System.out.println("JSComponentUI: setting " + id + " " + prop);
-	}
-
-	protected int getDefaultIconTextGap() {
-		return 0;
-	}
-
 	private String createMsgs = "";
 
 	/**
-	 * set to TRUE by Container.validateTree at the beginning of its laying out
-	 * and FALSE when that is complete.
+	 * set to TRUE by Container.validateTree at the beginning of its laying out and
+	 * FALSE when that is complete.
 	 * 
 	 */
 	@SuppressWarnings("unused")
 	private boolean layingOut;
 
 	/**
-	 * has been disposed; will need to reattach it if it ever becomes visible
-	 * again.
+	 * has been disposed; will need to reattach it if it ever becomes visible again.
 	 * 
 	 */
 	private boolean isDisposed;
@@ -904,8 +803,8 @@ public class JSComponentUI extends ComponentUI
 	protected int actualHeight, actualWidth;
 
 	/**
-	 * can be set false to never draw a background, primarily because Mac OS
-	 * will paint a non-rectangular object.
+	 * can be set false to never draw a background, primarily because Mac OS will
+	 * paint a non-rectangular object.
 	 * 
 	 * (textfield, textarea, button, combobox, menuitem)
 	 */
@@ -1005,9 +904,9 @@ public class JSComponentUI extends ComponentUI
 		int h, w;
 		String w0 = null, h0 = null, w0i = null, h0i = null, position = null;
 		DOMNode parentNode = null;
-		if (centeringNode != null && node == domNode)
+		if (centeringNode != null && node == domNode) {
 			node = centeringNode;
-
+		}
 		if (scrollPaneUI != null) {
 			w = scrollPaneUI.c.getWidth();
 			h = scrollPaneUI.c.getHeight();
@@ -1027,12 +926,11 @@ public class JSComponentUI extends ComponentUI
 			/**
 			 * @j2sNative
 			 * 
-			 * 			w0 = node.style.width; h0 = node.style.height;
-			 *            position = node.style.position;
+			 * 			w0 = node.style.width; h0 = node.style.height; position =
+			 *            node.style.position;
 			 * 
-			 *            if (node == this.centeringNode && this.innerNode) {
-			 *            w0i = this.innerNode.style.width; h0i =
-			 *            this.innerNode.style.height; }
+			 *            if (node == this.centeringNode && this.innerNode) { w0i =
+			 *            this.innerNode.style.width; h0i = this.innerNode.style.height; }
 			 */
 			{
 				w0 = w0i = "";
@@ -1046,7 +944,7 @@ public class JSComponentUI extends ComponentUI
 				div = node;
 			else
 				div = wrap("div", id + "_temp", node);
-			DOMNode.setPositionAbsolute(div, Integer.MIN_VALUE, 0);
+			DOMNode.setPositionAbsolute(div);
 
 			// process of discovering width and height is facilitated using
 			// jQuery
@@ -1054,6 +952,14 @@ public class JSComponentUI extends ComponentUI
 			// By using .after() we avoid CSS changes in the BODY element.
 			// but this almost certainly has issues with zooming
 
+			if (node == this.centeringNode) {
+				// can't have these for getBoundingClientRect to work
+				DOMNode.setStyles(node, "position", null);
+				DOMNode.setStyles(this.textNode, "position", null);
+				DOMNode.setStyles(this.iconNode, "position", null);
+			}
+
+			
 			$(body).after(div);
 			// DOMNode test = (jc.uiClassID == "LabelUI" ? node : div);
 			Rectangle r = div.getBoundingClientRect();
@@ -1075,17 +981,16 @@ public class JSComponentUI extends ComponentUI
 			$(div).detach();
 		}
 		// allow a UI to slightly adjust its dimension
-		Dimension size = getCSSAdjustment(addCSS);
-		size.width += w;
-		size.height += h;
+		Dimension dim = getCSSAdjustment(addCSS);
+		dim.width += w;
+		dim.height += h;
 		if (addCSS) {
-			DOMNode.setPositionAbsolute(node, Integer.MIN_VALUE, 0);
-			DOMNode.setSize(node, size.width, size.height);
+			DOMNode.setPositionAbsolute(node);
+			DOMNode.setSize(node, dim.width, dim.height);
 			if (node == centeringNode) {
 				// also set domNode?
-//				DOMNode.setPositionAbsolute(parentNode, Integer.MIN_VALUE, 0);
-				DOMNode.setStyles(node, "position", null);
-				DOMNode.setSize(parentNode, size.width, size.height);
+//				DOMNode.setPositionAbsolute(parentNode);
+				DOMNode.setSize(parentNode, dim.width, dim.height);
 			}
 		} else {
 			DOMNode.setStyles(node, "position", null);
@@ -1100,14 +1005,13 @@ public class JSComponentUI extends ComponentUI
 		}
 		if (parentNode != null)
 			parentNode.appendChild(node);
-		return size;
+		return dim;
 	}
 
 	/**
 	 * allows for can be overloaded to allow some special adjustments
 	 * 
-	 * @param addingCSS
-	 *            TODO
+	 * @param addingCSS TODO
 	 * 
 	 * @return
 	 */
@@ -1119,8 +1023,8 @@ public class JSComponentUI extends ComponentUI
 	 * Creates the DOM node and inserts it into the tree at the correct place,
 	 * iterating through all children if this is a container.
 	 * 
-	 * Overridden for JSLabelUI, JSViewportUI, and JWindowUI, though both of
-	 * those classes do setHTMLElementCUI() first; they just append to it.
+	 * Overridden for JSLabelUI, JSViewportUI, and JWindowUI, though both of those
+	 * classes do setHTMLElementCUI() first; they just append to it.
 	 * 
 	 * 
 	 * 
@@ -1132,18 +1036,18 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	/**
-	 * When something has occurred that needs rebuilding of the internal
-	 * structure of the node, isTainted will be set. Only then will this method
-	 * be executed.
+	 * When something has occurred that needs rebuilding of the internal structure
+	 * of the node, isTainted will be set. Only then will this method be executed.
 	 * 
-	 * @return the outer node for this component's DOM tree, containing all
-	 *         child elements needed to implement it.
+	 * @return the outer node for this component's DOM tree, containing all child
+	 *         elements needed to implement it.
 	 */
 	protected DOMNode setHTMLElementCUI() {
+		
 		if (!isTainted)
 			return outerNode;
 
-		domNode = updateDOMNode();
+		updateDOMNode();
 		checkTransparent(domNode);
 		Component[] children = getChildren();
 		int n = children.length;
@@ -1160,8 +1064,7 @@ public class JSComponentUI extends ComponentUI
 		/**
 		 * @j2sNative
 		 * 
-		 * 			this.outerNode.setAttribute("name",
-		 *            this.jc.__CLASS_NAME__);
+		 * 			this.outerNode.setAttribute("name", this.jc.__CLASS_NAME__);
 		 */
 		{
 		}
@@ -1233,7 +1136,7 @@ public class JSComponentUI extends ComponentUI
 			if (parent == null && jc.getParent() != null && (parent = (JSComponentUI) jc.getParent().getUI()) != null
 					&& parent.outerNode != null)
 				parent.outerNode.appendChild(outerNode);
-			DOMNode.setPositionAbsolute(outerNode, Integer.MIN_VALUE, 0);
+			DOMNode.setPositionAbsolute(outerNode);
 			DOMNode.setStyles(outerNode, "left", (x = c.getX()) + "px", "top", (y = c.getY()) + "px");
 		}
 	}
@@ -1320,7 +1223,7 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public Dimension getMinimumSize() {
-		return  getMinimumSize(jc);
+		return getMinimumSize(jc);
 	}
 
 	@Override
@@ -1332,11 +1235,11 @@ public class JSComponentUI extends ComponentUI
 	 * getPreferredSize reports to a LayoutManager what the size is for this
 	 * component will be when placed in the DOM.
 	 * 
-	 * It is only called if the user has not already set the preferred size of
-	 * the component.
+	 * It is only called if the user has not already set the preferred size of the
+	 * component.
 	 * 
-	 * Later, the LayoutManager will make a call to setBounds in order to
-	 * complete the transaction, after taking everything into consideration.
+	 * Later, the LayoutManager will make a call to setBounds in order to complete
+	 * the transaction, after taking everything into consideration.
 	 * 
 	 */
 	@Override
@@ -1345,7 +1248,7 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	// the following are likely to be called in the original BasicXXXUI classes
-	
+
 	Dimension getMinimumSize(JComponent jc) {
 		return getPreferredSize(jc);
 	}
@@ -1369,22 +1272,19 @@ public class JSComponentUI extends ComponentUI
 
 	/**
 	 * 
-	 * Returns <code>true</code> if the specified <i>x,y</i> location is
-	 * contained within the look and feel's defined shape of the specified
-	 * component. <code>x</code> and <code>y</code> are defined to be relative
-	 * to the coordinate system of the specified component. Although a
-	 * component's <code>bounds</code> is constrained to a rectangle, this
-	 * method provides the means for defining a non-rectangular shape within
-	 * those bounds for the purpose of hit detection.
+	 * Returns <code>true</code> if the specified <i>x,y</i> location is contained
+	 * within the look and feel's defined shape of the specified component.
+	 * <code>x</code> and <code>y</code> are defined to be relative to the
+	 * coordinate system of the specified component. Although a component's
+	 * <code>bounds</code> is constrained to a rectangle, this method provides the
+	 * means for defining a non-rectangular shape within those bounds for the
+	 * purpose of hit detection.
 	 * 
-	 * @param c
-	 *            the component where the <i>x,y</i> location is being queried;
-	 *            this argument is often ignored, but might be used if the UI
-	 *            object is stateless and shared by multiple components
-	 * @param x
-	 *            the <i>x</i> coordinate of the point
-	 * @param y
-	 *            the <i>y</i> coordinate of the point
+	 * @param c the component where the <i>x,y</i> location is being queried; this
+	 *          argument is often ignored, but might be used if the UI object is
+	 *          stateless and shared by multiple components
+	 * @param x the <i>x</i> coordinate of the point
+	 * @param y the <i>y</i> coordinate of the point
 	 * 
 	 * @see javax.swing.JComponent#contains
 	 * @see java.awt.Component#contains
@@ -1398,11 +1298,11 @@ public class JSComponentUI extends ComponentUI
 	/**
 	 * Returns an instance of the UI delegate for the specified component. Each
 	 * subclass must provide its own static <code>createUI</code> method that
-	 * returns an instance of that UI delegate subclass. If the UI delegate
-	 * subclass is stateless, it may return an instance that is shared by
-	 * multiple components. If the UI delegate is stateful, then it should
-	 * return a new instance per component. The default implementation of this
-	 * method throws an error, as it should never be invoked.
+	 * returns an instance of that UI delegate subclass. If the UI delegate subclass
+	 * is stateless, it may return an instance that is shared by multiple
+	 * components. If the UI delegate is stateful, then it should return a new
+	 * instance per component. The default implementation of this method throws an
+	 * error, as it should never be invoked.
 	 */
 	public static ComponentUI createUI(JComponent c) {
 		// SwingJS so, actually, we don't do this. This class is NOT stateless.
@@ -1420,28 +1320,21 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	/**
-	 * Returns the baseline. The baseline is measured from the top of the
-	 * component. This method is primarily meant for <code>LayoutManager</code>s
-	 * to align components along their baseline. A return value less than 0
-	 * indicates this component does not have a reasonable baseline and that
-	 * <code>LayoutManager</code>s should not align this component on its
-	 * baseline.
+	 * Returns the baseline. The baseline is measured from the top of the component.
+	 * This method is primarily meant for <code>LayoutManager</code>s to align
+	 * components along their baseline. A return value less than 0 indicates this
+	 * component does not have a reasonable baseline and that
+	 * <code>LayoutManager</code>s should not align this component on its baseline.
 	 * <p>
 	 * This method returns -1. Subclasses that have a meaningful baseline should
 	 * override appropriately.
 	 * 
-	 * @param c
-	 *            <code>JComponent</code> baseline is being requested for
-	 * @param width
-	 *            the width to get the baseline for
-	 * @param height
-	 *            the height to get the baseline for
-	 * @throws NullPointerException
-	 *             if <code>c</code> is <code>null</code>
-	 * @throws IllegalArgumentException
-	 *             if width or height is &lt; 0
-	 * @return baseline or a value &lt; 0 indicating there is no reasonable
-	 *         baseline
+	 * @param c      <code>JComponent</code> baseline is being requested for
+	 * @param width  the width to get the baseline for
+	 * @param height the height to get the baseline for
+	 * @throws NullPointerException     if <code>c</code> is <code>null</code>
+	 * @throws IllegalArgumentException if width or height is &lt; 0
+	 * @return baseline or a value &lt; 0 indicating there is no reasonable baseline
 	 * @see javax.swing.JComponent#getBaseline(int,int)
 	 * @since 1.6
 	 */
@@ -1457,19 +1350,17 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	/**
-	 * Returns an enum indicating how the baseline of he component changes as
-	 * the size changes. This method is primarily meant for layout managers and
-	 * GUI builders.
+	 * Returns an enum indicating how the baseline of he component changes as the
+	 * size changes. This method is primarily meant for layout managers and GUI
+	 * builders.
 	 * <p>
 	 * This method returns <code>BaselineResizeBehavior.OTHER</code>. Subclasses
 	 * that support a baseline should override appropriately.
 	 * 
-	 * @param c
-	 *            <code>JComponent</code> to return baseline resize behavior for
+	 * @param c <code>JComponent</code> to return baseline resize behavior for
 	 * @return an enum indicating how the baseline changes as the component size
 	 *         changes
-	 * @throws NullPointerException
-	 *             if <code>c</code> is <code>null</code>
+	 * @throws NullPointerException if <code>c</code> is <code>null</code>
 	 * @see javax.swing.JComponent#getBaseline(int, int)
 	 * @since 1.6
 	 */
@@ -1659,74 +1550,263 @@ public class JSComponentUI extends ComponentUI
 					+ this.height + "->" + height);
 	}
 
-	private void setAlignment() {
-		if (canAlignText) {
-			setVerticalAlignment(true);
-			setTextAlignment();
-		} else if (canAlignIcon) {
-			setVerticalAlignment(false);
-			setTextAlignment();
-		}
+	private ImageIcon getIcon(JSComponent c, Icon icon) {
+		return (c == null || icon == null && (icon = ((AbstractButton) c).getIcon()) == null ? null
+				: icon.getIconWidth() <= 0 || icon.getIconHeight() <= 0 ? null
+						: (icon instanceof ImageIcon) ? (ImageIcon) icon : JSToolkit.paintImageForIcon(jc, icon));
 	}
 
-	private void setTextAlignment() {
-		if (this.c.getWidth() == 0)
-			return;
-		int type = ((AbstractButton) c).getHorizontalAlignment();
-		String prop = getCSSTextAlignment(type);
-		// the centeringNode is not visible. It is a div that allows us to
-		// position the text and icon of the image based on its preferred size
-		// in the
-		DOMNode.setStyles(domNode, "width", c.getWidth() + "px", "text-align", textAlign = prop);
-		if (jc.uiClassID == "LabelUI" && centeringNode != null) {
-			int left = 0;
+	protected void setHorizontalButtonAlignments(JComponent b, int pos, int align) {
+		// We need the width of the text to position the button.
+		
+//		DOMNode.setAttr(textNode,  "innerHTML", pos);
+		
+		int wIcon = Math.max(0, setHTMLSize1(iconNode, false, false).width - 1);
+		int wText = setHTMLSize1(textNode, false, false).width - 1;
+
+		// But we need to slightly underestimate it so that the
+		// width of label + button does not go over the total calculated width
+
+		// horizontalTextAlignment leading,left-to-right:
+		// horizontalTextAlignment trailing,right-to-left:
+		//
+		// text [btn].....
+		//
+		// horizontalTextAlignment trailing,left-to-right
+		//
+		// [btn] text.....
+		//
+		// horizontalTextAlignment trailing,right-to-left:
+		//
+		// .....text [btn]
+		//
+		// horizontalTextAlignment leading,right-to-left
+		//
+		// .....[btn] text
+		//
+		boolean ltr = jc.getComponentOrientation().isLeftToRight();
+		boolean alignLeft, alignRight, centered, text0;
+		
+		if (menuAnchorNode == null) {
+			alignLeft = (align == SwingConstants.LEFT
+					|| align == (ltr ? SwingConstants.LEADING : SwingConstants.TRAILING));
+
+			alignRight = (align == SwingConstants.RIGHT
+					|| align == (ltr ? SwingConstants.TRAILING : SwingConstants.LEADING));
+
+			centered = (!alignLeft && !alignRight);
+
+			text0 = (alignRight
+					? (pos == SwingConstants.RIGHT || pos == (ltr ? SwingConstants.TRAILING : SwingConstants.LEADING))
+					: (pos == SwingConstants.LEFT || pos == (ltr ? SwingConstants.LEADING : SwingConstants.TRAILING)));
+		} else {
+			// menus are far simpler!
+			alignLeft = ltr;
+			alignRight = !ltr;
+			centered = false;
+			text0 = false;
+		}
+
+		String poslr = (alignRight ? "right" : "left");				
+		String alignlr = (alignLeft ? "left" : alignRight ? "right" : "center");
+
+		DOMNode.setStyles(textNode, "left", null, "right", null);
+		DOMNode.setStyles(iconNode, "left", null, "right", null);
+		DOMNode.setStyles(centeringNode, "text-align", null, "left", null, "right", null);
+		DOMNode.setStyles(centeringNode, poslr, "0px", "text-align", alignlr);
+		if (buttonNode != null) {
+			DOMNode.setStyles(buttonNode, "text-align", null, "left", null, "right", null);
+			DOMNode.setStyles(buttonNode, "text-align", alignlr, alignlr, "0px");
+		}
+		if (centered) {
 			int w = actualWidth;
 			if (w == 0)
 				w = setHTMLSize1(centeringNode, false, false).width;
-			switch (type) {
-			case SwingConstants.LEFT:
-			case SwingConstants.LEADING:
-				break;
-			case SwingConstants.RIGHT:
-			case SwingConstants.TRAILING:
-				prop = "right";
-				left = c.getWidth() - w;
-				break;
-			case SwingConstants.CENTER:
-				left = (c.getWidth() - w) / 2;
-				break;
-			default:
-				return;
+			int off = (w - wText - wIcon) / 2;
+			if (text0) {
+				DOMNode.setStyles(textNode, "left", off + "px");
+				DOMNode.setStyles(iconNode, "left", (off + wText) + "px");
+			} else {
+				DOMNode.setStyles(textNode, "left", (off + wIcon) + "px");
+				DOMNode.setStyles(iconNode, "left", off + "px");
 			}
-			// Problem:
-			// edu_northwestern_physics_groups_atomic_applet_Mirror_applet.html
-			// an initial paint shows checkboxes lower than they should be.
-			// JalView panel checkboxes too low. 
-			// Solution: remove all setting of position:absolute for centeringNode 
-			// EXCEPT just before size testing with body.append(). 
-			DOMNode.setStyles(centeringNode, 
-//					"position", "absolute", 
-					"left", left + "px");
+		} else {
+			if (text0) {
+				DOMNode.setStyles(textNode, poslr, "0px");
+				DOMNode.setStyles(iconNode, poslr, wText + "px");
+			} else {
+				DOMNode.setStyles(textNode, poslr, (wIcon) + "px");
+				DOMNode.setStyles(iconNode, poslr, "0px");
+			}
+		} 
+		
+				// make everything absolute to pass sizing info to all
+
+		DOMNode.setPositionAbsolute(iconNode);
+		DOMNode.setPositionAbsolute(textNode);
+		if (buttonNode != null)
+			DOMNode.setPositionAbsolute(buttonNode);
+
+	}
+
+	protected void setIconAndText(String prop, Icon icon, int gap, String text) {
+
+		// TODO so, actually, icons replace the checkbox or radio button, they do not
+		// complement them
+
+		actualWidth = actualHeight = 0;
+		currentText = text;
+		currentGap = gap;
+		canAlignText = false;
+		canAlignIcon = false;
+		currentIcon = null;
+		imageNode = null;
+		if (iconNode != null) {
+			icon = currentIcon = getIcon(jc, icon);
+			$(iconNode).empty();
+			if (currentIcon != null) {
+				imageNode = DOMNode.getImageNode(currentIcon.getImage());
+				DOMNode.setStyles(imageNode, "vertical-align", "middle"); // else
+				iconNode.appendChild(imageNode);
+				iconHeight = icon.getIconHeight();
+			}
+		}
+		boolean isHTML = false;
+		if (text == null || text.length() == 0) {
+			text = "";
+			if (icon != null)
+				canAlignIcon = true;
+		} else {
+			if (icon == null) {
+				canAlignText = allowTextAlignment;
+			} else {
+				// vCenter(imageNode, 10); // perhaps? Not sure if this is a
+				// good idea
+				if (gap == Integer.MAX_VALUE)
+					gap = getDefaultIconTextGap();
+				if (gap != 0 && text != null)
+					DOMNode.addHorizontalGap(iconNode, gap);
+			}
+			if (text.indexOf("<html>") == 0) {
+				isHTML = true;
+				// PhET uses <html> in labels and uses </br>
+				text = PT.rep(text.substring(6, text.length() - 7), "</br>", "");
+				text = PT.rep(text, "</html>", "");
+				text = PT.rep(text, "href=", "target=_blank href=");
+				text = PT.rep(text, "href=", "target=_blank href=");
+				// Jalview hack
+				text = PT.rep(text, "width: 350; text-align: justify; word-wrap: break-word;",
+						"width: 350px; word-wrap: break-word;");
+			}
+		}
+		DOMNode obj = null;
+		if (textNode != null) {
+			prop = "innerHTML";
+			obj = textNode;
+			if (!isHTML)
+				text = PT.rep(text, "<", "&lt;");
+		} else if (valueNode != null) {
+			prop = "value";
+			obj = valueNode;
+			if (iconNode != null)
+				DOMNode.setVisible(obj, text != null);
+		}
+		if (obj != null)
+			setProp(obj, prop, text);
+		if (valueNode != null) {
+			setBackgroundFor(valueNode, c.getBackground());
+		} else if (centeringNode != null) {
+			// label
+			setCssFont(centeringNode, c.getFont());
+			// added to make sure that the displayed element does not wrap with
+			// this new text
+		}
+		if (!boundsSet)
+			setHTMLSize(domNode, true);
+		if (centeringNode != null)
+			setAlignment();
+		if (debugging)
+			System.out.println("JSComponentUI: setting " + id + " " + prop);
+	}
+
+	protected int getDefaultIconTextGap() {
+		return 0;
+	}
+
+	private void setAlignment() {
+		if (canAlignText) {
+			setVerticalAlignment(true);
+//			setOverallAlignment();
+		} else if (canAlignIcon) {
+			setVerticalAlignment(false);
+//			setOverallAlignment();
 		}
 	}
 
-	protected String getCSSTextAlignment(int type) {
-		String prop = null;
-		switch (type) {
-		case SwingConstants.RIGHT:
-		case SwingConstants.TRAILING:
-			prop = "right";
-			break;
-		case SwingConstants.LEFT:
-		case SwingConstants.LEADING:
-			prop = "left";
-			break;
-		case SwingConstants.CENTER:
-			prop = "center";
-			break;
-		}
-		return prop;
-	}
+//	private void setOverallAlignment() {
+//		// old code
+//		if (this.c.getWidth() == 0)
+//			return;
+//		// OK, this is the alignment of the component, not the text
+//		int type = ((AbstractButton) c).getHorizontalAlignment();
+//		String prop = getCSSTextAlignment(type);
+//		// the centeringNode is not visible. It is a div that allows us to
+//		// position the text and icon of the image based on its preferred size
+//		// in the overall space around it.
+//		
+//		if (menuAnchorNode != null) {
+//		}
+//		if (jc.uiClassID == "LabelUI" && centeringNode != null) {
+//			int left = 0;
+//			int w = actualWidth;
+//			if (w == 0)
+//				w = setHTMLSize1(centeringNode, false, false).width;
+//			switch (type) {
+//			case SwingConstants.LEFT:
+//			case SwingConstants.LEADING:
+//				break;
+//			case SwingConstants.RIGHT:
+//			case SwingConstants.TRAILING:
+//				prop = "right";
+//				left = c.getWidth() - w;
+//				break;
+//			case SwingConstants.CENTER:
+//				left = (c.getWidth() - w) / 2;
+//				break;
+//			default:
+//				DOMNode.setStyles(domNode, "width", c.getWidth() + "px", "text-align", textAlign = prop);
+//				return;
+//			}
+//			DOMNode.setStyles(domNode, "width", c.getWidth() + "px", "text-align", textAlign = prop);
+//			// Problem:
+//			// edu_northwestern_physics_groups_atomic_applet_Mirror_applet.html
+//			// an initial paint shows checkboxes lower than they should be.
+//			// JalView panel checkboxes too low.
+//			// Solution: remove all setting of position:absolute for centeringNode
+//			// EXCEPT just before size testing with body.append().
+//			DOMNode.setStyles(centeringNode,
+////					"position", "absolute", 
+//					"left", left + "px");
+//		}
+//	}
+
+//	protected String getCSSTextAlignment(int type) {
+//		String prop = null;
+//		switch (type) {
+//		case SwingConstants.RIGHT:
+//		case SwingConstants.TRAILING:
+//			prop = "right";
+//			break;
+//		case SwingConstants.LEFT:
+//		case SwingConstants.LEADING:
+//			prop = "left";
+//			break;
+//		case SwingConstants.CENTER:
+//			prop = "center";
+//			break;
+//		}
+//		return prop;
+//	}
 
 	protected void setVerticalAlignment(boolean isText) {
 		int type = ((AbstractButton) c).getVerticalAlignment();
@@ -1759,7 +1839,7 @@ public class JSComponentUI extends ComponentUI
 		default:
 			return;
 		}
-		DOMNode.setStyles(centeringNode, /*"position", "absolute", */"top", top + "px");
+		DOMNode.setStyles(centeringNode, /* "position", "absolute", */"top", top + "px");
 	}
 
 	@Override
@@ -1816,8 +1896,8 @@ public class JSComponentUI extends ComponentUI
 
 	/**
 	 * 
-	 * This control has been added back to some other node after being disposed
-	 * of. So now we need to undo that.
+	 * This control has been added back to some other node after being disposed of.
+	 * So now we need to undo that.
 	 * 
 	 * @param node
 	 */
@@ -1829,7 +1909,7 @@ public class JSComponentUI extends ComponentUI
 		}
 		// menu separators have domNode == outerNode
 		// cell renderers will set their domNode to null;
-		if (outerNode != null && domNode != null && domNode != outerNode) 
+		if (outerNode != null && domNode != null && domNode != outerNode)
 			outerNode.appendChild(domNode);
 		isDisposed = false;
 	}
@@ -2078,9 +2158,9 @@ public class JSComponentUI extends ComponentUI
 		 * 
 		 * 			if (what) return this.applet._z[what];
 		 * 
-		 *            while (node && !node.style["z-index"]) node =
-		 *            node.parentElement; z = parseInt(node.style["z-index"]);
-		 *            return(!z || isNaN(z) ? 100000 : z);
+		 *            while (node && !node.style["z-index"]) node = node.parentElement;
+		 *            z = parseInt(node.style["z-index"]); return(!z || isNaN(z) ?
+		 *            100000 : z);
 		 */
 		{
 			return z;
@@ -2104,8 +2184,7 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public void endValidate() {
-		// TODO Auto-generated method stub
-
+		setHTMLElement();
 	}
 
 	@Override
@@ -2152,8 +2231,8 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	/**
-	 * We allow here for an off-screen graphic for which the paint operation
-	 * also sets its location.
+	 * We allow here for an off-screen graphic for which the paint operation also
+	 * sets its location.
 	 * 
 	 * Called from edu.colorado.phet.common.phetgraphics.view.
 	 * 
@@ -2225,12 +2304,22 @@ public class JSComponentUI extends ComponentUI
 	private void setDropTarget(boolean adding) {
 		if (dropTarget == this)
 			return;
-		JSUtil.J2S._setDragDropTarget(c, getDOMNode(), dropTarget != null);
+		J2S.setDragDropTarget(c, getDOMNode(), dropTarget != null);
 	}
 
 	public void setTargetParent(JComponent targetParent, MouseInputListener mouseInputListener) {
 		this.targetParent = targetParent;
-		//this.mouseInputListener = mouseInputListener;
+		// this.mouseInputListener = mouseInputListener;
+	}
+
+	public void setZOrder(int z) {
+		DOMNode.setPositionAbsolute(domNode);
+		DOMNode.setZ(domNode, z);
+		DOMNode.setZ(outerNode, z);// saves it
+	}
+
+	public void invalidate() {
+		setTainted();
 	}
 
 }

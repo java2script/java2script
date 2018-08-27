@@ -10,13 +10,15 @@
 // TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
 //       It is possible that these might be loaded dynamically.
 
-// BH 8/19/2017 3.2.2.04 fixes Enum .name being .$name
+// BH 8/21/2018 3.2.2.04 fixes ?j2strace=xxx  message; sets user.home to https://./, not https://.//; Boolean upgrade and fix
+// BH 8/20/2018 3.2.2.04 adds character.isJavaIdentifierPart$C and several Character...$I equivalents, fixes newEnumConst(), System.getBoolean$S
+// BH 8/19/2018 3.2.2.04 fixes Enum .name being .$name
 // BH 8/16/2018 3.2.2.04 fixes Character.toTitleCase$C, [Integer,Long,Short,Byte].toString(i,radix)
 // BH 8/13/2018 3.2.2.04 $finals to $finals$ -- basically variables are $xxx, methods are xxx$, and special values are $xxx$
 // BH 8/12/2018 3.2.2 adding J2S.onClazzLoaded hook for Clazz loaded
 // BH 8/11/2018 3.2.2 Clazz.newLambda removed
 // BH 8/9/2018  3.2.2 adds newLambda(...'S')
-// BH 8/6/2018  3.2.2 sets user.home to be "https://./"
+// BH 8/6/2018  3.2.2 sets user.home to be "https://.//"
 // BH 8/6/2018  3.2.2 adds ?j2sverbose option -- lists all files loaded; sets Clazz._quiet = false
 // BH 8/5/2018  3.2.2 adds Clazz.newLambda(...)
 // BH 8/4/2018  3.2.2 cleans up String $-qualified methods headless and javax tests pass
@@ -502,14 +504,12 @@ Clazz.newClass = function (prefix, name, clazz, clazzSuper, interfacez, type) {
 };
 
 Clazz.newEnumConst = function(vals, c, enumName, enumOrdinal, args, cl) {
-  var o = Clazz.new_(c, args, cl);
-  o.name = o.$name = enumName;
-  o.ordinal = enumOrdinal;
-  o.$isEnumConst = true;
-  var clazzEnum = c.exClazz;
-  vals.push(clazzEnum[enumName] = clazzEnum.prototype[enumName] = o);
-}
-    
+	  var clazzEnum = c.exClazz;
+	  var e = clazzEnum.$init$$ || (clazzEnum.$init$$ = clazzEnum.$init$);
+	  clazzEnum.$init$ = function() {e.apply(this); this.name = this.$name = enumName; this.ordinal = enumOrdinal;this.$isEnumConst = true;}
+	  vals.push(clazzEnum[enumName] = clazzEnum.prototype[enumName] = Clazz.new_(c, args, cl));
+	}
+	        
 Clazz.newInstance = function (objThis, args, isInner, clazz) {
   if (args && ( 
      args[0] == inheritArgs 
@@ -1597,7 +1597,7 @@ var getSig = function(c, withParams) {
 Clazz._showStack = function(n) {
   if (!Clazz._stack)
 	 return;
-  n && n < Clazz.stack.length || (n = Clazz._stack.length);
+  n && n < Clazz._stack.length || (n = Clazz._stack.length);
   if (!n)
 	return;
   for (var i = 0; i < n; i++) {
@@ -1616,12 +1616,8 @@ Clazz._getStackTrace = function(n) {
     n = -n;
   // updateNode and updateParents cause infinite loop here
   var estack = [];
-  try {
-	    Clazz.failnow();
-	  } catch (e) {
-		  estack = e.stack.split("\n").reverse();
-		  estack.pop();
-	  }
+  estack = e.stack.split("\n").reverse();
+  estack.pop();
   var s = "\n";
   var c = arguments.callee;
   for (var i = 0; i < n; i++) {
@@ -1649,7 +1645,7 @@ Clazz._getStackTrace = function(n) {
   if (Clazz._stack.length) {
 	  s += "\nsee Clazz._stack";
 	  console.log("Clazz._stack = " + Clazz._stack);
-	  console.log("Use Clazz.showStack() or Clazz.showStack(n) to show parameters");
+	  console.log("Use Clazz._showStack() or Clazz._showStack(n) to show parameters");
   }
   return s;
 }
@@ -2748,7 +2744,7 @@ Clazz.loadScript = function(file) {
   var data = "";
   try{
     _Loader.onScriptLoading(file);
-    data = J2S._getFileData(file);
+    data = J2S.getFileData(file);
     evaluate(file, data);
     _Loader.onScriptLoaded(file, null, data);
   }catch(e) {
@@ -3253,7 +3249,7 @@ java.lang.System = System = {
         v = "50";
         break;
       case "user.home":
-    	v = "https://./";
+    	v = "https://.";
     	break;
       case "java.vendor":
     	v = "SwingJS/OpenJDK";
@@ -4035,65 +4031,67 @@ function(s){
   this.valueOf=function(){return b;};
 }, 1);
 
-m$(Boolean,"parseBoolean$S",
-function(s){
-return Boolean.toBoolean(s);
-}, 1);
-m$(Boolean,["booleanValue","booleanValue$"],
-function(){
-return this.valueOf();
-});
-m$(Boolean,["valueOf$S","valueOf$Z"],function(b){
-return((typeof b == "string"? "true".equalsIgnoreCase$S(b) : b)?Boolean.TRUE:Boolean.FALSE);
-}, 1);
+m$(Boolean,["booleanValue","booleanValue$"], function(){ return this.valueOf(); });
 
-m$(Boolean,"toString",
-function(){
-return this.valueOf()?"true":"false";
-});
-m$(Boolean,"hashCode$",
-function(){
-return this.valueOf()?1231:1237;
-});
-Boolean.prototype.equals = m$(Boolean,"equals$O",
-function(obj){
-return obj instanceof Boolean && this.booleanValue()==obj.booleanValue();
-});
-m$(Boolean,"getBoolean$S",
-function(name){
-var result=false;
-try{
-result=Boolean.toBoolean(System.getProperty(name));
-}catch(e){
-if(Clazz.instanceOf(e,IllegalArgumentException)){
-}else if(Clazz.instanceOf(e,NullPointerException)){
-}else{
-throw e;
-}
-}
-return result;
-}, 1);
+m$(Boolean,"compare$Z$Z", function(a,b){return(a == b ? 0 : a ? 1 : -1);}, 1);
+
 m$(Boolean,["compareTo$Boolean","compareTo$TT"],
-function(b){
-return(b.value==this.value?0:(this.value?1:-1));
-});
+		function(b){
+		return(b.valueOf() == this.valueOf() ? 0 : this.valueOf() ? 1 : -1);
+		});
 
-// added methods toBoolean and from
+Boolean.prototype.equals = m$(Boolean,"equals$O",
+		function(obj){
+		return obj instanceof Boolean && this.booleanValue()==obj.booleanValue();
+		});
+
+m$(Boolean,"getBoolean$S",
+		function(name){
+		var result=false;
+		try{
+		result=Boolean.toBoolean(System.getProperty$S(name));
+		}catch(e){
+		if(Clazz.instanceOf(e,IllegalArgumentException)){
+		}else if(Clazz.instanceOf(e,NullPointerException)){
+		}else{
+		throw e;
+		}
+		}
+		return result;
+		}, 1);
+
+m$(Boolean,"hashCode$", function(){ return this.valueOf()?1231:1237;});
+m$(Boolean,"hashCode$Z", function(b){ return b?1231:1237;}, 1);
+
+m$(Boolean,"logicalAnd$Z$Z", function(a,b){return(a && b);}, 1);
+m$(Boolean,"logicalOr$Z$Z", function(a,b){return(a || b);}, 1);
+m$(Boolean,"logicalXor$Z$Z", function(a,b){return !!(a ^ b);}, 1);
+
+m$(Boolean,"parseBoolean$S", function(s){return Boolean.toBoolean(s);}, 1);
+
+m$(Boolean,"toString",function(){return this.valueOf()?"true":"false";});
+m$(Boolean,"toString$Z",function(b){return "" + b;}, 1);
+
+m$(Boolean,"valueOf$S",function(s){	return("true".equalsIgnoreCase$S(s)?Boolean.TRUE:Boolean.FALSE);}, 1);
+m$(Boolean,"valueOf$Z",function(b){ return(b?Boolean.TRUE:Boolean.FALSE);}, 1);
+
+//the need is to have new Boolean(string), but that won't work with native Boolean
+//so instead we have to do a lexical switch from "new Boolean" to "Boolean.from"
+//note no $ here
+
 m$(Boolean,"toBoolean",
 function(name){
 return(typeof name == "string" ? name.equalsIgnoreCase$S("true") : !!name);
 }, 1);
 
-// the need is to have new Boolean(string), but that won't work with native Boolean
-// so instead we have to do a lexical switch from "new Boolean" to "Boolean.from"
 m$(Boolean,"from",
 function(name){
-return Clazz.new_(Boolean.c$, [typeof name == "string" ? name.equalsIgnoreCase$S("true") : !!name]);
+return Clazz.new_(Boolean.c$, [Boolean.toBoolean(name)]);
 }, 1);
 
 Boolean.TRUE=Boolean.prototype.TRUE=Clazz.new_(Boolean.c$, [true]);
 Boolean.FALSE=Boolean.prototype.FALSE=Clazz.new_(Boolean.c$, [false]);
-//Boolean.TYPE=Boolean.prototype.TYPE=Boolean;
+
 
 Clazz._Encoding={
   UTF8:"utf-8",
@@ -4443,7 +4441,7 @@ var s=this;
 if(arguments.length==1){
 var cs=arguments[0].toString().toLowerCase();
 var charset=[
-"utf-8","UTF8","us-ascii","iso-8859-1","8859_1","gb2312","gb18030","gbk"
+"utf-8","utf8","us-ascii","iso-8859-1","8859_1","gb2312","gb18030","gbk"
 ];
 var existed=false;
 for(var i=0;i<charset.length;i++){
@@ -4483,8 +4481,9 @@ var result=new Array(this.length);
 for(var i=0;i<this.length;i++){
 result[i]=this.charAt(i);
 }
-return result;
+return Clazz.array(Character.TYPE, -1, result);
 };
+
 String.valueOf$ = String.valueOf$Z = String.valueOf$C = String.valueOf$CA 
 				= String.valueOf$CA$I$I = String.valueOf$D = String.valueOf$F 
 				= String.valueOf$I = String.valueOf$J = String.valueOf$O = 
@@ -4743,7 +4742,7 @@ m$(C$,"getName$I",
 function(codePoint){
 	if (!unicode_txt) {
 		try {
-			unicode_txt = J2S._getFileData(ClassLoader.getClasspathFor("java.lang",1)  + "org/unicode/public/unidata/NamesList.txt");
+			unicode_txt = J2S.getFileData(ClassLoader.getClasspathFor("java.lang",1)  + "org/unicode/public/unidata/NamesList.txt");
 		} catch (e) {
 			return "??";
 		}
@@ -4803,32 +4802,66 @@ m$(C$,"toUpperCase$C",
 function(c){
 return(""+c).toUpperCase().charAt(0);
 }, 1);
-m$(C$,"isDigit$C",
+m$(C$,["isDigit$C","isDigit$I"],
 function(c){
-c = c.charCodeAt(0);
+	if (typeof c == "string")
+		  c = c.charCodeAt(0);
 return (48 <= c && c <= 57);
 }, 1);
 
-m$(C$,"isISOControl$C",
+m$(C$,["isISOControl$C", "isISOControl$I"],
 function(c){
 if (typeof c == "string")
   c = c.charCodeAt(0);
 return (c < 0x1F || 0x7F <= c && c <= 0x9F);
 }, 1);
 
-m$(C$,"isLetter$C",
+
+m$(C$,"isAlphabetic$I", function(c){return Character.isLetter$I(c)}, 1);
+
+//A character may be part of a Java identifier if any of the following are true:
+//
+//    it is a letter
+//    it is a currency symbol (such as '$')
+//    it is a connecting punctuation character (such as '_')
+//    it is a digit
+//    it is a numeric letter (such as a Roman numeral character)
+//    it is a combining mark
+//    it is a non-spacing mark
+//    isIdentifierIgnorable returns true for the character 
+    
+    
+m$(C$,["isJavaIdentifierStart$C","isJavaIdentifierStart$I"],
+		function(c){
+	if (typeof c == "string")
+		  c = c.charCodeAt(0);
+	// letter, $, _, 
+	return Character.isLetter$I(c) || c == 0x24 || c == 0x5F
+		}, 1);
+
+
+m$(C$,["isJavaIdentifierPart$C","isJavaIdentifierPart$I"],
+		function(c){
+	if (typeof c == "string")
+		  c = c.charCodeAt(0);
+	// letter, digit $, _, 
+	return Character.isLetterOrDigit$I(c) || c == 0x24 || c == 0x5F
+		}, 1);
+
+
+m$(C$,["isLetter$C", "isLetter$I"],
 function(c){
 if (typeof c == "string")
   c = c.charCodeAt(0);
 return (65 <= c && c <= 90 || 97 <= c && c <= 122);
 }, 1);
-m$(C$,"isLetterOrDigit$C",
+m$(C$,["isLetterOrDigit$C","isLetterOrDigit$I"],
 function(c){
 if (typeof c == "string")
   c = c.charCodeAt(0);
 return (65 <= c && c <= 90 || 97 <= c && c <= 122 || 48 <= c && c <= 57);
 }, 1);
-m$(C$,"isLowerCase$C",
+m$(C$,["isLowerCase$C","isLowerCase$I"],
 function(c){
 if (typeof c == "string")
     c = c.charCodeAt(0);
@@ -4839,33 +4872,33 @@ function(c){
  var i = c.charCodeAt(0);
  return (i==0x20||i==0x9||i==0xA||i==0xC||i==0xD);
 }, 1);
-m$(C$,"isSpaceChar$C",
+m$(C$,["isSpaceChar$C","isSpaceChar$I"],
 function(c){
  var i = (typeof c == "string" ? c.charCodeAt(0) : c);
 if(i==0x20||i==0xa0||i==0x1680)return true;
 if(i<0x2000)return false;
 return i<=0x200b||i==0x2028||i==0x2029||i==0x202f||i==0x3000;
 }, 1);
-m$(C$,"isTitleCase$C",
+m$(C$,["isTitleCase$C","isTitleCase$I"],
 function(c){
-  return Character.isUpperCase(c);
+  return Character.isUpperCase$C(c);
 }, 1);
-m$(C$,"isUpperCase$C",
+m$(C$,["isUpperCase$C","isUpperCase$I"],
 function(c){
 if (typeof c == "string")
   c = c.charCodeAt(0);
 return (65 <= c && c <= 90);
 }, 1);
-m$(C$,"isWhitespace$C",
+m$(C$,["isWhitespace$C","isWhitespace$I"],
 function(c){
 if (typeof c == "string")
  c = c.charCodeAt(0);
 return (c >= 0x1c && c <= 0x20 || c >= 0x9 && c <= 0xd || c == 0x1680
   || c >= 0x2000 && c != 0x2007 && (c <= 0x200b || c == 0x2028 || c == 0x2029 || c == 0x3000));
 }, 1);
-m$(C$,"digit$C$I",
+m$(C$,["digit$C$I","digit$I$I"],
 function(c,radix){
-var i = c.charCodeAt(0);
+var i = (typeof c == "string" ? c.charCodeAt(0) : c);
 if(radix >= 2 && radix <= 36){
   if(i < 128){
     var result = -1;
@@ -5217,8 +5250,8 @@ if(lineNum>=0){
 });
 
 
-TypeError.prototype.getMessage$ || (TypeError.prototype.getMessage$ = function(){ return (this.message || this.toString()) + (this.getStackTrace ? this.getStackTrace$() : Clazz._getStackTrace$())});
-
+TypeError.prototype.getMessage$ || (TypeError.prototype.getMessage$ = function(){ return (this.stack ? this.stack : this.message || this.toString()) + (this.getStackTrace ? this.getStackTrace$() : Clazz._getStackTrace())});
+TypeError.prototype.printStackTrace$ = function(){System.out.println(this + "\n" + this.stack)}
 
 Clazz.Error = Error;
 

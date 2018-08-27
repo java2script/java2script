@@ -26,6 +26,7 @@ import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.DefaultHandler;
 
 @SuppressWarnings({"deprecation"})
 public class JSSAXParser implements Parser, XMLReader {
@@ -62,7 +63,7 @@ public class JSSAXParser implements Parser, XMLReader {
 		this.errorHandler = handler;
 	}
 
-	public void parse(InputSource source, JSSAXContentHandler handler) throws SAXException, IOException {
+	public void parse(InputSource source, DefaultHandler handler) throws SAXException, IOException {
 		setContentHandler(handler);
 		parseSource(source);
 	}
@@ -122,12 +123,12 @@ public class JSSAXParser implements Parser, XMLReader {
 	 * @return reconfigured data
 	 */
 	private String removeProcessing(String data) {
-		if (data.indexOf("<?") >= 0) {
+		if (false && data.indexOf("<?") >= 0) { // doesn't seem to be necessary?
 			getUniqueSequence(data);
 			data = PT.rep(PT.rep(data,  "<?", "<![CDATA[" + uniqueSeq), "?>", "]]>");
 			if (data.startsWith("<!")) {
-				data = "<pre>" + data + "</pre>";
-				havePre = true;
+			data = "<pre>" + data + "</pre>";
+			havePre = true;
 			}
 		}
 	  return data;
@@ -153,8 +154,10 @@ public class JSSAXParser implements Parser, XMLReader {
   private boolean ver2;
   
   
+	private static final int ELEMENT_TYPE = 1;
+
   /**
-   * early Jmol method allowing reading data from an XHTML document
+   * Using JQuery to reading data from an XHTML document
    * 
    * @param doc
    * @throws SAXException
@@ -167,7 +170,26 @@ public class JSSAXParser implements Parser, XMLReader {
 			contentHandler.startDocument();
 		else
 			docHandler.startDocument();
-		walkDOMTree((DOMNode) DOMNode.getAttr(doc, "firstChild"), havePre);
+		
+		// We must continue down until we have the root node.
+		
+		DOMNode element = (DOMNode) DOMNode.getAttr(doc, "firstChild");
+	
+		// skipping type 8 (processing directive) and type 10 (doctype) and anything
+		// that is not 1 (element)
+		
+		/**
+		 * @j2sNative
+		 * 
+		 * var type;
+		 * while (element && (type = element.nodeType) != 1) {
+		 *   element = element.nextSibling;
+		 *   }
+		 * 
+		 */
+		
+		
+		walkDOMTree(element, havePre);
 		if (ver2)
 			contentHandler.endDocument();
 		else

@@ -303,7 +303,7 @@ public abstract class JComponent extends Container {
 	// bit 10 is free
 	private static final int IS_PRINTING = 11;
 	private static final int IS_PRINTING_ALL = 12;
-	private static final int IS_REPAINTING = 13;
+	private static final int ISREPAINTING = 13;
 	/** Bits 14-21 are used to handle nested writeObject calls. **/
 	// private static final int WRITE_OBJ_COUNTER_FIRST = 14;
 	// private static final int RESERVED_1 = 15;
@@ -925,12 +925,12 @@ public abstract class JComponent extends Container {
 		RepaintManager rm = RepaintManager.currentManager(this);
 		Rectangle clip = g.getClipBounds();
 		rm.beginPaint();
-		setFlag(IS_REPAINTING, true);
+		setFlag(ISREPAINTING, true);
 		try {
 			rm.paint(this, this, g, clip.x, clip.y, clip.width, clip.height);
 		} finally {
 			rm.endPaint();
-			setFlag(IS_REPAINTING, false);
+			setFlag(ISREPAINTING, false);
 		}
 	}
 
@@ -2802,23 +2802,22 @@ public abstract class JComponent extends Container {
 	 * >How to Use Tool Tips</a> in <em>The Java Tutorial</em> for further
 	 * documentation.
 	 * 
-	 * @param text
-	 *          the string to display; if the text is <code>null</code>, the tool
-	 *          tip is turned off for this component
+	 * @param text the string to display; if the text is <code>null</code>, the tool
+	 *             tip is turned off for this component
 	 * @see #TOOL_TIP_TEXT_KEY
 	 * @beaninfo preferred: true description: The text to display in a tool tip.
 	 */
 	public void setToolTipText(String text) {
-		// String oldText = getToolTipText();
+		String oldText = getToolTipText();
 		putClientProperty(TOOL_TIP_TEXT_KEY, text);
-		// ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
-		// if (text != null) {
-		// if (oldText == null) {
-		// toolTipManager.registerComponent(this);
-		// }
-		// } else {
-		// toolTipManager.unregisterComponent(this);
-		// }
+		ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
+		if (text != null) {
+			if (oldText == null) {
+				toolTipManager.registerComponent(this);
+			}
+		} else {
+			toolTipManager.unregisterComponent(this);
+		}
 	}
 
 	/**
@@ -4530,7 +4529,7 @@ public abstract class JComponent extends Container {
 			return;
 		}
 
-		paintingComponent.setFlag(IS_REPAINTING, true);
+		paintingComponent.setFlag(ISREPAINTING, true);
 
 		paintImmediatelyClip.x -= offsetX;
 		paintImmediatelyClip.y -= offsetY;
@@ -4593,7 +4592,7 @@ public abstract class JComponent extends Container {
 					}
 				}
 			}
-			paintingComponent.setFlag(IS_REPAINTING, false);
+			paintingComponent.setFlag(ISREPAINTING, false);
 		}
 		recycleRectangle(paintImmediatelyClip);
 	}
@@ -4611,7 +4610,7 @@ public abstract class JComponent extends Container {
 			if ((y + h) < maxY || (x + w) < maxX) {
 				setFlag(IS_PAINTING_TILE, true);
 			}
-			if (getFlag(IS_REPAINTING)) {
+			if (getFlag(ISREPAINTING)) {
 				// Called from paintImmediately (RepaintManager) to fill
 				// repaint request
 				paint(g);

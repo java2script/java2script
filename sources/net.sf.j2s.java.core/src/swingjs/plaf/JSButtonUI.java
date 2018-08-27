@@ -38,7 +38,9 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JTable;
+import javax.swing.JToggleButton;
 import javax.swing.LookAndFeel;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.plaf.TableUI;
 import javax.swing.plaf.UIResource;
@@ -65,8 +67,8 @@ public class JSButtonUI extends JSLightweightUI {
 	//       |__JSRadioButtonUI
 	//               |
 	//               |__JSCheckBoxUI
-	//               }      |
-	//               }      |__JSCheckBoxMenuItemUI
+	//               |      |
+	//               |      |__JSCheckBoxMenuItemUI
 	//               |
 	//               |__JSRadioButtonMenuItemUI
 	//
@@ -81,7 +83,7 @@ public class JSButtonUI extends JSLightweightUI {
 	
 	private boolean isSimpleButton;
 	private ButtonListener listener;
-	
+
 	@Override
 	public DOMNode updateDOMNode() {
 		isSimpleButton = true;
@@ -89,37 +91,24 @@ public class JSButtonUI extends JSLightweightUI {
 		// all subclasses will have their own version of this.
 		// this one is only for a simple button
 		if (domNode == null) {
-			domNode = enableNode = newDOMObject ("button", id, "type", "button");
-			DOMNode.setStyles(domNode, "lineHeight", "0.8");
+			domNode = buttonNode = newDOMObject ("button", id, "type", "button");
 			iconNode = newDOMObject("span", id + "_icon");
-			textNode = newDOMObject ("span", id + "_btn");
-			domNode.appendChild(iconNode);
-			domNode.appendChild(textNode);
-			setDataComponent (domNode);
-			setDataComponent (iconNode);
+			enableNode = buttonNode;
+			createButton();
+			DOMNode.setStyles(domNode, "lineHeight", "0.8");
 		}
-		setPadding(button.getMargin());
-// interestingly, this gives the background-border-only issue and causes problems with centering
-// because now the default position for the left side of the label is the button center.
-// and vertical alignment is off and vCenter does not help 
-		
-//		if (domNode == null) {
-//			domNode = enableNode = domBtn = newDOMObject("button", id);
-//			iconNode = newDOMObject("span", id + "_icon");
-//			textNode = newDOMObject("label", id + "_btn");
-//			domNode.appendChild(iconNode);
-//			domNode.appendChild(textNode);
-//			setDataComponent(domNode);
-//			setDataComponent(iconNode);
-//			setDataComponent(textNode);
-//		}
-		setIconAndText("button", (ImageIcon) button.getIcon(), button.getIconTextGap(), button.getText());
-		// "emptyBorder" is not really empty. It is 
-		if (button.getBorder() == null || button.getBorder() == BorderFactory.emptyBorder)
-			DOMNode.setStyles(domNode, "border", "none");
-		else if (button.getBorder() == BorderFactory.html5Border)
-			DOMNode.setStyles(domNode, "border", null);
+		setupButton();
 		return domNode;
+	}
+
+	protected void createButton() {
+		textNode = newDOMObject ("span", id + "_txt");
+		buttonNode.appendChild(iconNode);
+		buttonNode.appendChild(textNode);
+		setDataComponent(domNode);
+		setDataComponent(iconNode); // needed for mac safari/chrome
+		setDataComponent(textNode); // needed for mac safari/chrome
+		setEnabled(c.isEnabled());
 	}
 
 	/**
@@ -131,7 +120,8 @@ public class JSButtonUI extends JSLightweightUI {
 	 * @return
 	 */
 	protected DOMNode createItem(String type, DOMNode label) {
-		// all subclasses will call this method
+		// all subclasses will call this method, including
+		// standard MenuItem and Menu labels
 
 		// unnecessary? if (label == null)
 		// hasOuterDiv = false;
@@ -145,9 +135,9 @@ public class JSButtonUI extends JSLightweightUI {
 		itemNode = newDOMObject("li", id + type);
 		if (text == null && icon == null)
 			return itemNode;
-		DOMNode aNode = newDOMObject("a", id + type + "_a");
-		DOMNode.setStyles(aNode, "margin", "1px 4px 1px 4px");
-		itemNode.appendChild(aNode);
+		centeringNode = menuAnchorNode = newDOMObject("a", id + type + "_a");
+		DOMNode.setStyles(menuAnchorNode, "margin", "1px 4px 1px 4px");
+		itemNode.appendChild(menuAnchorNode);
 		if (label == null) {
 			// not a radio or checkbox
 			// TODO: add vertical centering 
@@ -159,23 +149,33 @@ public class JSButtonUI extends JSLightweightUI {
 			$(textNode).attr("role", "menucloser");
 			setDataUI(iconNode);
 			setDataUI(textNode);
-			aNode.appendChild(iconNode);
-			aNode.appendChild(textNode);
-			setCssFont(aNode, c.getFont());
-			enableNode = aNode;
+			menuAnchorNode.appendChild(iconNode);
+			menuAnchorNode.appendChild(textNode);
+			setCssFont(menuAnchorNode, c.getFont());
+			enableNode = menuAnchorNode;
 			setIconAndText("btn", icon, gap, text);
 		} else {
-			aNode.appendChild(label);
+			menuAnchorNode.appendChild(label);
 		}
 		// j2sMenu.js will set the mouse-up event for the <a> tag with the
 		// role=menuitem
-		// attribute via j2sApplet._jsSetMouse().
+		// attribute via j2sApplet.setMouse().
 		// That event will then fire handleJSEvent
-		setDataUI(aNode);
-		setDataComponent(aNode);
+		setDataUI(menuAnchorNode);
+		setDataComponent(menuAnchorNode);
 		setDataComponent(itemNode);
 		return itemNode;
 
+	}
+
+	protected void setupButton() {
+		setPadding(button.getMargin());
+		setIconAndText("button", (ImageIcon) button.getIcon(), button.getIconTextGap(), button.getText());
+		// "emptyBorder" is not really empty.
+		if (button.getBorder() == null || button.getBorder() == BorderFactory.emptyBorder)
+			DOMNode.setStyles(buttonNode, "border", "none");
+		else if (button.getBorder() == BorderFactory.html5Border)
+			DOMNode.setStyles(buttonNode, "border", null);
 	}
 
 	/**
@@ -190,7 +190,7 @@ public class JSButtonUI extends JSLightweightUI {
 		if (debugging)
 				System.out.println("JSButtonUI handleJSEvent for " + ((JSComponentUI)target).id);
   	// checkbox or radio menuitem handle themselves
-		if (menuItem != null && radioBtn == null) {			
+		if (menuItem != null && actionNode == null) {			
 		 switch (eventType) {
 		 case MouseEvent.MOUSE_RELEASED:
 				menuItem.doClick(0);

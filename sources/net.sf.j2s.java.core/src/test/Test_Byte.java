@@ -2,7 +2,25 @@ package test;
 
 class Test_Byte extends Test_ {
 	
-	public static void main(String[] args) {
+	  private static byte v=127;
+
+	  public static byte test1() {
+		  return v++;
+	  }
+	  
+	  public static void main(String[] args) {
+		
+		  
+		byte s = v++; 
+		System.out.println(s + " " + v);
+		assert((s + " " + v).equals("127 -128"));
+		  
+		
+		v = 127;
+		
+	    byte b2 = test1();
+	 
+		assert((b2 + " " + v).equals("127 -128"));
 		
 		// implied integer division can be done with int /=
 		double d = 3;
@@ -50,7 +68,9 @@ class Test_Byte extends Test_ {
 		b = 127;
 		b += 127;
 		b++;
-		short sh = b;
+		short sh = b++;
+		b--;
+		sh = b;
 		short sh1 = sh;
 		checkShort(sh);
 		short h = (short) ((i255 << 8) + 0xFF);

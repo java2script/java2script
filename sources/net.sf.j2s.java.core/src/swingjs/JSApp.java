@@ -54,7 +54,7 @@ public class JSApp {
 		this.params = params;
 		String language = getParameter("language");
 		if (language == null)
-			language = JSUtil.J2S._getDefaultLanguage(false);
+			language = JSUtil.J2S.getDefaultLanguage(false);
 		Locale.setDefault(JSUtil.getDefaultLocale(language));
 		htmlName = extract("" + getParameter("name"), "_object");
 		appletName = extract(htmlName + "_", "_");
@@ -76,8 +76,8 @@ public class JSApp {
 		if (params.containsKey("maximumSize"))
 			Math.max(((Integer) params.get("maximumSize")).intValue(), 100);
 		async = (testAsync || params.containsKey("async"));
-		HTML5Applet applet = JSUtil.J2S._findApplet(htmlName); 
-		String javaver = JSUtil.J2S._getJavaVersion();
+		HTML5Applet applet = JSUtil.J2S.findApplet(htmlName); 
+		String javaver = JSUtil.J2S.getJavaVersion();
 		html5Applet = applet;
 		strJavaVersion = javaver;
 		strJavaVendor = "Java2Script/Java 1.6 (HTML5)";

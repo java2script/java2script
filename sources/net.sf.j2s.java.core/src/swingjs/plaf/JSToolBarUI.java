@@ -144,7 +144,7 @@ public class JSToolBarUI extends JSPanelUI {
 	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			containerNode = domNode = newDOMObject("div", id);
-			DOMNode.setPositionAbsolute(domNode, 0, 0); // after title bar
+			DOMNode.setTopLeftAbsolute(domNode, 0, 0); // after title bar
 		}
 
 		return domNode;

@@ -670,6 +670,7 @@ public class Font
      *          <code>Font</code>, or <code>null</code>
      */
     public Font(Map<? extends Attribute, ?> attributes) {
+        initMasks();
         initFromValues(AttributeValues.fromMap(attributes, RECOGNIZED_MASK));
     }
 

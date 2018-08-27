@@ -13,7 +13,7 @@ public class JSToolTipUI extends JSLabelUI {
 
 	// TODO: allow generic tool tip, not just text
 	
-	// note that, however, JSToolTip is not an AbstractButton.
+	// note that, however, JSToolTip is not a label. 
 	
 	public JSToolTipUI() {
 		super();
@@ -22,6 +22,11 @@ public class JSToolTipUI extends JSLabelUI {
 	
 	protected JToolTip toolTip;
 
+	@Override
+	public DOMNode updateDOMNode() {
+		return super.updateDOMNode();
+	}
+	
 	@Override
 	protected void getIconAndText() {		
 		icon = null;

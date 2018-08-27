@@ -29,9 +29,11 @@ package java.awt;
 
 import java.awt.peer.ComponentPeer;
 import java.beans.PropertyChangeListener;
+import java.util.Arrays;
 
 import javax.swing.ArrayTable;
 import javax.swing.JComponent;
+import javax.swing.RootPaneContainer;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
@@ -40,7 +42,9 @@ import swingjs.JSAppletThread;
 import swingjs.JSAppletViewer;
 import swingjs.JSFrameViewer;
 import swingjs.JSGraphics2D;
+import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Canvas;
+import swingjs.plaf.JSComponentUI;
 
 /*
  * A class to support swingJS for selected AWT and Swing components
@@ -111,6 +115,8 @@ public abstract class JSComponent extends Component {
 		num = ++incr;
 	}
 
+	public HTML5Canvas _canvas;
+	
 	/**
 	 * 
 	 * For SwingJS, we have the graphics without needing to get it from a peer.
@@ -123,7 +129,7 @@ public abstract class JSComponent extends Component {
 		if (width == 0 || height == 0 || !isVisible())
 			return null;
 		if (frameViewer != null)
-			return frameViewer.getGraphics(0, 0).create();
+			return frameViewer.getGraphics().create();
 		if (parent == null) {
 			return null;
 		}
@@ -141,7 +147,8 @@ public abstract class JSComponent extends Component {
 	}
 
 	public JSFrameViewer setFrameViewer(JSFrameViewer viewer) {
-		return frameViewer = (viewer == null ? viewer = new JSFrameViewer().setForWindow((Container) this) : viewer);
+		// JApplet, JDialog, JFrame (including JInternalFrame), JRootPane, JWindow
+		return frameViewer = (viewer == null ? viewer = new JSFrameViewer().setForWindow((RootPaneContainer) this) : viewer);
 	}
 
 	private JSFrameViewer topFrameViewer;
@@ -275,5 +282,40 @@ public abstract class JSComponent extends Component {
 		return background != null;// false;// TODO (background != null &&
 									// !isBackgroundPainted);
 	}
+
+	protected void updateUIZOrder(JSComponent[] components) {
+		if (uiClassID != "DesktopPaneUI")
+			return;
+		// set the n by their position in the component list using the 
+		// same z orders that are already there - probably something like 
+		// 10000, 11000, 12000
+    	int n = components.length;
+    	if (n < 2)
+    		return;
+    	int[] zorders = new int[n];
+        for (int i = 0; i < n; i++)
+            zorders[i] = ((JSComponentUI) components[i].getUI()).getZIndex(null);
+        Arrays.sort(zorders);
+        for (int i = 0; i < n; i++)
+        	((JSComponentUI) components[i].getUI()).setZOrder(zorders[n - 1 - i]);
+	}
+
+	
+  @Override
+  protected void invalidateComp() {
+	  super.invalidateComp();
+	  if (ui != null)
+		  ((JSComponentUI)ui).invalidate();
+	  
+  }
+  
+  @Override
+  public void validateComponent() {
+	  boolean wasValid = isValid();
+	  super.validateComponent();
+	  if (ui != null && !wasValid)
+		  ((JSComponentUI)ui).endValidate();
+	  
+  }
 
 }

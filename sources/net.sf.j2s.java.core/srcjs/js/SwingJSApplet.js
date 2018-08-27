@@ -161,7 +161,7 @@ if (typeof(SwingJS) == "undefined") {
 		p._showInfo = proto._showInfo;	
 ///		p._search = proto._search;
 		p._getName = proto._getName;
-		p._readyCallback = proto._readyCallback;
+		p.readyCallback = proto.readyCallback;
 	}
 
 	Applet._createApplet = function(applet, Info, params) {
@@ -262,7 +262,7 @@ if (typeof(SwingJS) == "undefined") {
 		}
 
 		params.loadInline = (Info.inlineModel ? sterilizeInline(Info.inlineModel) : "");
-		params.appletReadyCallback = "J2S._readyCallback";
+		params.appletReadyCallback = "J2S.readyCallback";
 		if (J2S._syncedApplets.length)
 			params.synccallback = "J2S._mySyncCallback";
 		params.java_arguments = "-Xmx" + Math.round(Info.memoryLimit || this._memoryLimit) + "m";
@@ -276,7 +276,7 @@ if (typeof(SwingJS) == "undefined") {
    // applet-dependent
 	}
 
-	proto._readyCallback = function(id, fullid, isReady) {
+	proto.readyCallback = function(id, fullid, isReady) {
 		if (!isReady)
 			return; // ignore -- page is closing
 		J2S._setDestroy(this);
@@ -362,7 +362,7 @@ if (typeof(SwingJS) == "undefined") {
 		this._containerWidth = sz[0];
 		this._containerHeight = sz[1];
 		if (this._is2D)
-			J2S._repaint(this, true);
+			J2S.repaint(this, true);
 	}
 
 	proto._cover = function (doCover) {

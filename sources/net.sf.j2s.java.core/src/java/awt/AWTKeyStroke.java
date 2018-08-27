@@ -840,7 +840,7 @@ class VKCollection {
 		 * for (var k in C$)
 		 *   if (k.indexOf("VK_") == 0) {
 		 *     try {
-		 *     	this.put$S$I(k, Integer.valueOf$I(C$[k]));
+		 *     	this.put$S$Integer(k, Integer.valueOf$I(C$[k]));
 		 *     } catch (e) {}
 		 *   }
 		 */

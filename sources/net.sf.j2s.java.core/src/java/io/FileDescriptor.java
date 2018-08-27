@@ -27,6 +27,8 @@
 
 package java.io;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -46,7 +48,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public final class FileDescriptor {
 
-    private int fd;
+	File _file;
+	
+    private int fd = -1;
+    private long handle = -1;
 
     /**
      * A counter for tracking the FIS/FOS/RAF instances that
@@ -60,13 +65,28 @@ public final class FileDescriptor {
      * object.
      */
     public /**/ FileDescriptor() {
-        fd = -1;
         useCount = new AtomicInteger();
     }
 
     private /* */ FileDescriptor(int fd) {
         this.fd = fd;
         useCount = new AtomicInteger();
+    }
+
+    public void set(FileDescriptor obj, int fd) {
+        obj.fd = fd;
+    }
+
+    public int get(FileDescriptor obj) {
+        return obj.fd;
+    }
+
+    public void setHandle(FileDescriptor obj, long handle) {
+        obj.handle = handle;
+    }
+
+    public long getHandle(FileDescriptor obj) {
+        return obj.handle;
     }
 
     /**
@@ -106,35 +126,37 @@ public final class FileDescriptor {
         return fd != -1;
     }
 
-//    /**
-//     * Force all system buffers to synchronize with the underlying
-//     * device.  This method returns after all modified data and
-//     * attributes of this FileDescriptor have been written to the
-//     * relevant device(s).  In particular, if this FileDescriptor
-//     * refers to a physical storage medium, such as a file in a file
-//     * system, sync will not return until all in-memory modified copies
-//     * of buffers associated with this FileDescriptor have been
-//     * written to the physical medium.
-//     *
-//     * sync is meant to be used by code that requires physical
-//     * storage (such as a file) to be in a known state  For
-//     * example, a class that provided a simple transaction facility
-//     * might use sync to ensure that all changes to a file caused
-//     * by a given transaction were recorded on a storage medium.
-//     *
-//     * sync only affects buffers downstream of this FileDescriptor.  If
-//     * any in-memory buffering is being done by the application (for
-//     * example, by a BufferedOutputStream object), those buffers must
-//     * be flushed into the FileDescriptor (for example, by invoking
-//     * OutputStream.flush) before that data will be affected by sync.
-//     *
-//     * @exception SyncFailedException
-//     *        Thrown when the buffers cannot be flushed,
-//     *        or because the system cannot guarantee that all the
-//     *        buffers have been synchronized with physical media.
-//     * @since     JDK1.1
-//     */
-//    public native void sync() throws SyncFailedException;
+    /**
+     * Force all system buffers to synchronize with the underlying
+     * device.  This method returns after all modified data and
+     * attributes of this FileDescriptor have been written to the
+     * relevant device(s).  In particular, if this FileDescriptor
+     * refers to a physical storage medium, such as a file in a file
+     * system, sync will not return until all in-memory modified copies
+     * of buffers associated with this FileDescriptor have been
+     * written to the physical medium.
+     *
+     * sync is meant to be used by code that requires physical
+     * storage (such as a file) to be in a known state  For
+     * example, a class that provided a simple transaction facility
+     * might use sync to ensure that all changes to a file caused
+     * by a given transaction were recorded on a storage medium.
+     *
+     * sync only affects buffers downstream of this FileDescriptor.  If
+     * any in-memory buffering is being done by the application (for
+     * example, by a BufferedOutputStream object), those buffers must
+     * be flushed into the FileDescriptor (for example, by invoking
+     * OutputStream.flush) before that data will be affected by sync.
+     *
+     * @exception SyncFailedException
+     *        Thrown when the buffers cannot be flushed,
+     *        or because the system cannot guarantee that all the
+     *        buffers have been synchronized with physical media.
+     * @since     JDK1.1
+     */
+    public void sync() {
+    	// nothing to do in SwingJS
+    };
 //
 //    /* This routine initializes JNI field offsets for the class */
 //    private static native void initIDs();
@@ -143,20 +165,6 @@ public final class FileDescriptor {
 //        initIDs();
 //    }
 //
-//    // Set up JavaIOFileDescriptorAccess in SharedSecrets
-//    static {
-//        sun.misc.SharedSecrets.setJavaIOFileDescriptorAccess(
-//            new sun.misc.JavaIOFileDescriptorAccess() {
-//                public void set(FileDescriptor obj, int fd) {
-//                    obj.fd = fd;
-//                }
-//
-//                public int get(FileDescriptor obj) {
-//                    return obj.fd;
-//                }
-//            }
-//        );
-//    }
 
     // pacakge private methods used by FIS,FOS and RAF
 
@@ -167,4 +175,72 @@ public final class FileDescriptor {
     int decrementAndGetUseCount() {
         return useCount.decrementAndGet();
     }
+    
+    
+    private Closeable parent;
+    private List<Closeable> otherParents;
+    private boolean closed;
+
+    /**
+     * Attach a Closeable to this FD for tracking.
+     * parent reference is added to otherParents when
+     * needed to make closeAll simpler.
+     */
+    synchronized void attach(Closeable c) {
+
+    	_file = (/**  @j2sNative c._file || */null);
+    	
+        if (parent == null) {
+            // first caller gets to do this
+            parent = c;
+        } else if (otherParents == null) {
+            otherParents = new ArrayList<>();
+            otherParents.add(parent);
+            otherParents.add(c);
+        } else {
+            otherParents.add(c);
+        }
+    }
+    
+    /**
+     * Cycle through all Closeables sharing this FD and call
+     * close() on each one.
+     *
+     * The caller closeable gets to call close0().
+     */
+    @SuppressWarnings("try")
+    synchronized void closeAll(Closeable releaser) throws IOException {
+        if (!closed) {
+            closed = true;
+            IOException ioe = null;
+            try (Closeable c = releaser) {
+                if (otherParents != null) {
+                    for (Closeable referent : otherParents) {
+                        try {
+                            referent.close();
+                        } catch(IOException x) {
+                            if (ioe == null) {
+                                ioe = x;
+                            } else {
+//                                ioe.addSuppressed(x);
+                            }
+                        }
+                    }
+                }
+            } catch(IOException ex) {
+                /*
+                 * If releaser close() throws IOException
+                 * add other exceptions as suppressed.
+                 */
+//                if (ioe != null)
+//                    ex.addSuppressed(ioe);
+                ioe = ex;
+            } finally {
+                if (ioe != null)
+                    throw ioe;
+            }
+        }
+    }
+
+
 }
