@@ -12180,6 +12180,24 @@ if (!J2S._version)
 			return J2S._drag(who, ev, 503);
 		});
 
+		J2S.$bind(who, 'click', function(ev) {
+			if (J2S._traceMouse)
+				J2S.traceMouse("CLICK " + ev.originalEvent.detail, ev);
+
+			if (doIgnore(ev))
+				return true;
+			if (ev.target.getAttribute("role")) {
+				return true;
+			}
+
+			J2S.setMouseOwner(null);
+			var xym = J2S._jsGetXY(who, ev, 0);
+			if (!xym)
+				return false;
+			who.applet._processEvent(500, xym, ev, who._frameViewer);// MouseEvent.MOUSE_CLICK
+			return false;
+		});
+		
 		J2S.$bind(who, 'DOMMouseScroll mousewheel', function(ev) { // Zoom
 			// not for wheel event, or action will not take place on handle and
 			// track
@@ -12414,7 +12432,7 @@ if (!J2S._version)
 		J2S
 				.$bind(
 						who,
-						'mousedown touchstart mousemove touchmove mouseup touchend DOMMouseScroll mousewheel contextmenu mouseleave mouseenter mousemoveoutjsmol',
+						'click mousedown touchstart mousemove touchmove mouseup touchend DOMMouseScroll mousewheel contextmenu mouseleave mouseenter mousemoveoutjsmol',
 						null);
 		J2S.setMouseOwner(null);
 	}
@@ -12500,7 +12518,6 @@ if (!J2S._version)
 			x = ev.pageX - offsets.left;
 			y = ev.pageY - offsets.top;
 		}
-		// System.out.println([x,y,getMouseModifiers(ev)])
 		return (x == undefined ? null : [ Math.round(x), Math.round(y),
 				getMouseModifiers(ev, id) ]);
 	}
@@ -13192,7 +13209,6 @@ if (!J2S._version)
 		} else {
 			f();
 		}
-		// System.out.println(applet._appletPanel.getFullName())
 	}
 
 	/**
@@ -13206,7 +13222,6 @@ if (!J2S._version)
 		var id = "echo_" + echoName + path + (bytes ? "_" + bytes.length : "");
 		var canvas = J2S.getHiddenCanvas(platform.vwr.html5Applet, id, 0, 0,
 				false, true);
-		// System.out.println(["JSmol.js loadImage ",id,path,canvas,image])
 		if (canvas == null) {
 			if (image == null) {
 				image = new Image();
@@ -13263,8 +13278,6 @@ if (!J2S._version)
 			d.height = d.style.height = height;
 			d.id = id;
 			J2S._canvasCache[id] = d;
-			// System.out.println("JSmol.js loadImage setting cache" + id + " to
-			// " + d)
 		}
 
 		return d;

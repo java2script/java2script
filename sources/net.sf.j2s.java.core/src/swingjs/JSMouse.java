@@ -75,11 +75,15 @@ public class JSMouse {
 		case MouseEvent.MOUSE_RELEASED:
 			released(time, x, y, modifiers);
 			// simulate a mouseClicked event for us
-			if (x == xWhenPressed && y == yWhenPressed
-					&& modifiers == modifiersWhenPressed10) {
-				// the underlying code will turn this into dbl clicks for us
-				clicked(time, x, y, modifiers, 1);
-			}
+//			if (x == xWhenPressed && y == yWhenPressed
+//					&& modifiers == modifiersWhenPressed10) {
+//				// the underlying code will turn this into dbl clicks for us
+//				clicked(time, x, y, modifiers, 1);
+//			}
+			break;
+		case MouseEvent.MOUSE_CLICKED:
+			int n = /** @j2sNative jqevent.originalEvent.detail || */ 0;
+			clicked(time, x, y, modifiers, n);
 			break;
 		default:
 			return false;

@@ -129,7 +129,8 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				// TODO Auto-generated method stub
+				
+				System.out.println("BTN2 clicked " + e.getClickCount());
 				
 			}
 
@@ -218,8 +219,10 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				// TODO Auto-generated method stub
+
+				System.out.println("PANEL clicked " + e.getClickCount());
 				
+
 			}
 
 			@Override
