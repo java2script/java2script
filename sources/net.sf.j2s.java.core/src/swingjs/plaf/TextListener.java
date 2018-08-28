@@ -137,6 +137,7 @@ public class TextListener implements MouseListener, MouseMotionListener,
     }
 
     
+    private boolean selecting;
   
   /**
    * Called by JSTextUI.handleJSEvent
@@ -165,6 +166,7 @@ public class TextListener implements MouseListener, MouseMotionListener,
 		// HTML5 selection is always mark....dot
 		// but Java can be oldDot....oldMark
 
+		
 		int oldDot = ui.editor.getCaret().getDot();
 		int oldMark = ui.editor.getCaret().getMark();
 		if (dot != mark && oldMark == dot) {
@@ -175,7 +177,13 @@ public class TextListener implements MouseListener, MouseMotionListener,
 		case MouseEvent.MOUSE_WHEEL:
 			return false;
 		case MouseEvent.MOUSE_PRESSED:
+			selecting = true;
+			break;
 		case MouseEvent.MOUSE_RELEASED:
+			if (!selecting)
+				return false; // yield to some drag-drop event?
+			selecting = false;
+			break;
 		case MouseEvent.MOUSE_CLICKED:
 			break;
 		case KeyEvent.KEY_PRESSED:

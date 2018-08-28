@@ -1616,8 +1616,12 @@ Clazz._getStackTrace = function(n) {
     n = -n;
   // updateNode and updateParents cause infinite loop here
   var estack = [];
+  try {
+	    Clazz.failnow();
+	  } catch (e) {
   estack = e.stack.split("\n").reverse();
   estack.pop();
+	  }
   var s = "\n";
   var c = arguments.callee;
   for (var i = 0; i < n; i++) {

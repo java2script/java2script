@@ -141,7 +141,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				// TODO Auto-generated method stub
+				System.out.println("BTN2 released");
 				
 			}
 
@@ -252,6 +252,22 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 			
 		});
 		
+		
+		p.addMouseMotionListener(new MouseMotionListener() {
+
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				System.out.println("panel DRAG " + e);
+			}
+
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				System.out.println("panel Move " + e);
+				
+			}
+			
+		});
+
 		p.setToolTipText("this is the panel");
 		// p.setLayout(new GridLayout(2, 2, 2, 2));
 		JScrollPane sp = new JScrollPane();
