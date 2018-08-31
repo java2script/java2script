@@ -2691,6 +2691,9 @@ public class Container extends JSComponent {
      * SwingJS set by JSAppletViewer
      */
     public void setDispatcher() {
+    	if (dispatcher != null)
+    		return;
+      System.err.println("LWD dispatch for "+ this);
       dispatcher = new LightweightDispatcher(this);    	
     }
     /**
@@ -4291,6 +4294,8 @@ class LightweightDispatcher implements AWTEventListener {
      */
     private static final int  LWD_MOUSE_DRAGGED_OVER = 1500;
 
+	private Component targetLastDown, targetLastKnown;
+
 //    private static final Logger eventLog = Logger.getLogger("java.awt.event.LightweightDispatcher");
 
     LightweightDispatcher(Container nativeContainer) {
@@ -4304,7 +4309,6 @@ class LightweightDispatcher implements AWTEventListener {
      * should be called from Container.removeNotify
      */
     void dispose() {
-        //System.out.println("Disposing lw dispatcher");
         stopListeningForOtherDrags();
         mouseEventTarget = null;
     }
@@ -4387,35 +4391,51 @@ class LightweightDispatcher implements AWTEventListener {
 	private boolean processMouseEvent(MouseEvent e) {
 		int id = e.getID();
 
-		Component mouseOver = mouseEventTarget;
-		if (id != 505) {
+		// sensitive to mouse events
+
+		Component mouseOver = targetLastKnown = nativeContainer.getMouseEventTarget(e.getX(), e.getY(), Container.INCLUDE_SELF);
+
+		trackMouseEnterExit(mouseOver, e);
+
+		Component actualTarget;
+
+		switch (id) {
+		case MouseEvent.MOUSE_DRAGGED:
+		case MouseEvent.MOUSE_RELEASED:
+			actualTarget = targetLastDown;
+			break;
+		case MouseEvent.MOUSE_EXITED:
+			actualTarget = targetLastKnown;
+			break;
+	    default:
 			// see swingjs.plaf.JSButtionUI
-			mouseOver = (/** @j2sNative e.bdata.jqevent && e.bdata.jqevent.target["data-component"] || */null);
-
-			// sensitive to mouse events
-
-			if (mouseOver == null)
-				mouseOver = (id == MouseEvent.MOUSE_EXITED ? targetLastEntered
-						: nativeContainer.getMouseEventTarget(e.getX(), e.getY(), Container.INCLUDE_SELF));
-
-			// >>>>??trackMouseEnterExit(mouseOver, e);
-
-			// 4508327 : MOUSE_CLICKED should only go to the recipient of
-			// the accompanying MOUSE_PRESSED, so don't reset mouseEventTarget on a
-			// MOUSE_CLICKED.
-			if (!isMouseGrab(e) && id != MouseEvent.MOUSE_CLICKED) {
-				mouseEventTarget = (mouseOver != nativeContainer) ? mouseOver : null;
-			}
-
+	    	actualTarget = (/** @j2sNative e.bdata.jqevent && e.bdata.jqevent.target["data-component"] || */
+	    			null);
+	    	break;
 		}
 
+		// 4508327 : MOUSE_CLICKED should only go to the recipient of
+		// the accompanying MOUSE_PRESSED, so don't reset mouseEventTarget on a
+		// MOUSE_CLICKED.
+
+		if (actualTarget != null)
+			mouseEventTarget = actualTarget;
+		else if (!isMouseGrab(e) && id != MouseEvent.MOUSE_CLICKED) {
+			mouseEventTarget = (mouseOver != nativeContainer) ? mouseOver : null;
+		}
+		
 		if (mouseEventTarget != null) {
 			switch (id) {
+			case MouseEvent.MOUSE_ENTERED:
+			case MouseEvent.MOUSE_EXITED:
+				break;
 			case MouseEvent.MOUSE_PRESSED:
 				checkInternalFrameMouseDown((JSComponent) e.getSource());
+				targetLastDown = mouseEventTarget;
 				retargetMouseEvent(mouseEventTarget, id, e);
 				break;
 			case MouseEvent.MOUSE_RELEASED:
+				targetLastDown = null;
 				retargetMouseEvent(mouseEventTarget, id, e);
 				break;
 			case MouseEvent.MOUSE_CLICKED:
@@ -4424,18 +4444,10 @@ class LightweightDispatcher implements AWTEventListener {
 				// mouse is now over a different Component, don't dispatch the event.
 				// The previous fix for a similar problem was associated with bug
 				// 4155217.
+				targetLastDown = null;
 				if (mouseOver == mouseEventTarget) {
 					retargetMouseEvent(mouseOver, id, e);
 				}
-				break;
-			case MouseEvent.MOUSE_ENTERED:
-				targetLastEntered = mouseEventTarget;
-				System.out.println("LWD entered " + mouseEventTarget);
-				retargetMouseEvent(mouseEventTarget, id, e);
-				break;
-			case MouseEvent.MOUSE_EXITED:
-				System.out.println("LWD exited " + mouseEventTarget);
-				retargetMouseEvent(mouseEventTarget, id, e);
 				break;
 			case MouseEvent.MOUSE_MOVED:
 				retargetMouseEvent(mouseEventTarget, id, e);
@@ -4515,13 +4527,15 @@ class LightweightDispatcher implements AWTEventListener {
 	}
 
 	/*
-     * Generates enter/exit events as mouse moves over lw components
-     * @param targetOver        Target mouse is over (including native container)
-     * @param e                 Mouse event in native container
-     */
-    private void trackMouseEnterExit(Component targetOver, MouseEvent e) {
-        Component       targetEnter = null;
-        int             id = e.getID();
+	 * Generates enter/exit events as mouse moves over lw components
+	 * 
+	 * @param targetOver Target mouse is over (including native container)
+	 * 
+	 * @param e Mouse event in native container
+	 */
+	private void trackMouseEnterExit(Component targetOver, MouseEvent e) {
+		Component targetEnter = null;
+		int id = e.getID();
 
 //        if (e instanceof SunDropTargetEvent &&
 //            id == MouseEvent.MOUSE_ENTERED &&
@@ -4533,44 +4547,42 @@ class LightweightDispatcher implements AWTEventListener {
 //            targetLastEntered = null;
 //        } else 
 //        	
-        	if ( id != MouseEvent.MOUSE_EXITED &&
-             id != MouseEvent.MOUSE_DRAGGED &&
-             id != LWD_MOUSE_DRAGGED_OVER &&
-             isMouseInNativeContainer == false ) {
-            // any event but an exit or drag means we're in the native container
-            isMouseInNativeContainer = true;
-            startListeningForOtherDrags();
-        } else if ( id == MouseEvent.MOUSE_EXITED ) {
-            isMouseInNativeContainer = false;
-            stopListeningForOtherDrags();
-        }
+		if (id == MouseEvent.MOUSE_EXITED) {
+			isMouseInNativeContainer = false;
+			stopListeningForOtherDrags();
+		} else if (id != MouseEvent.MOUSE_DRAGGED && id != LWD_MOUSE_DRAGGED_OVER
+				&& isMouseInNativeContainer == false) {
+			// any event but an exit or drag means we're in the native container
+			isMouseInNativeContainer = true;
+			startListeningForOtherDrags();
+		}
+		
+		if (isMouseInNativeContainer) {
+			targetEnter = targetOver;
+		}
 
-        if (isMouseInNativeContainer) {
-            targetEnter = targetOver;
-        }
+		if (targetLastEntered == targetEnter) {
+			return;
+		}
 
-        if (targetLastEntered == targetEnter) {
-                return;
-        }
+		if (targetLastEntered != null) {
+			retargetMouseEvent(targetLastEntered, MouseEvent.MOUSE_EXITED, e);
+		}
+		if (id == MouseEvent.MOUSE_EXITED) {
+			// consume native exit event if we generate one
+			e.consume();
+		}
 
-        if (targetLastEntered != null) {
-            retargetMouseEvent(targetLastEntered, MouseEvent.MOUSE_EXITED, e);
-        }
-        if (id == MouseEvent.MOUSE_EXITED) {
-            // consume native exit event if we generate one
-            e.consume();
-        }
+		if (targetEnter != null) {
+			retargetMouseEvent(targetEnter, MouseEvent.MOUSE_ENTERED, e);
+		}
+		if (id == MouseEvent.MOUSE_ENTERED) {
+			// consume native enter event if we generate one
+			e.consume();
+		}
 
-        if (targetEnter != null) {
-            retargetMouseEvent(targetEnter, MouseEvent.MOUSE_ENTERED, e);
-        }
-        if (id == MouseEvent.MOUSE_ENTERED) {
-            // consume native enter event if we generate one
-            e.consume();
-        }
-
-        targetLastEntered = targetEnter;
-    }
+		targetLastEntered = targetEnter;
+	}
 
     /*
      * Listens to global mouse drag events so even drags originating
@@ -4578,7 +4590,6 @@ class LightweightDispatcher implements AWTEventListener {
      * events in this container
      */
     private void startListeningForOtherDrags() {
-//        //System.out.println("Adding AWTEventListener");
 //        java.security.AccessController.doPrivileged(
 //            new java.security.PrivilegedAction() {
 //                public Object run() {
@@ -4593,7 +4604,6 @@ class LightweightDispatcher implements AWTEventListener {
     }
 
     private void stopListeningForOtherDrags() {
-//        //System.out.println("Removing AWTEventListener");
 //        java.security.AccessController.doPrivileged(
 //            new java.security.PrivilegedAction() {
 //                public Object run() {
@@ -4691,24 +4701,24 @@ class LightweightDispatcher implements AWTEventListener {
 //                me.translatePoint( ptSrcOrigin.x - ptDstOrigin.x, ptSrcOrigin.y - ptDstOrigin.y );
 //            }
         }
-        //System.out.println("Track event: " + me);
         // feed the 'dragged-over' event directly to the enter/exit
         // code (not a real event so don't pass it to dispatchEvent)
         Component targetOver =
             nativeContainer.getMouseEventTarget(me.getX(), me.getY(),
                                                 Container.INCLUDE_SELF);
-        //>>>??trackMouseEnterExit(targetOver, me);
+        trackMouseEnterExit(targetOver, me);
     }
 
 	/**
-	 * Sends a mouse event to the current mouse event recipient using the given
-	 * event (sent to the windowed host) as a srcEvent. If the mouse event target is
-	 * still in the component tree, the coordinates of the event are translated to
-	 * those of the target. If the target has been removed, we don't bother to send
-	 * the message.
+     * Sends a mouse event to the current mouse event recipient using
+     * the given event (sent to the windowed host) as a srcEvent.  If
+     * the mouse event target is still in the component tree, the
+     * coordinates of the event are translated to those of the target.
+     * If the target has been removed, we don't bother to send the
+     * message.
 	 * 
-	 * Except for SwingJS we are using the parent frame as the native container, and
-	 * the PopupMenu does not have that as a parent.
+     * Except for SwingJS we are using the parent frame as the native container,
+     * and the PopupMenu does not have that as a parent. 
 	 */
 	void retargetMouseEvent(Component target, int id, MouseEvent e) {
 		if (target == null) {
@@ -4740,13 +4750,33 @@ class LightweightDispatcher implements AWTEventListener {
 //            } else 
 //            	
 			if (id == MouseEvent.MOUSE_WHEEL) {
-				retargeted = new MouseWheelEvent(target, id, e.getWhen(), e.getModifiersEx() | e.getModifiers(), x, y,
-						e.getXOnScreen(), e.getYOnScreen(), e.getClickCount(), e.isPopupTrigger(),
-						((MouseWheelEvent) e).getScrollType(), ((MouseWheelEvent) e).getScrollAmount(),
-						((MouseWheelEvent) e).getWheelRotation(), ((MouseWheelEvent) e).getPreciseWheelRotation());
-			} else {
-				retargeted = new MouseEvent(target, id, e.getWhen(), e.getModifiersEx() | e.getModifiers(), x, y,
-						e.getXOnScreen(), e.getYOnScreen(), e.getClickCount(), e.isPopupTrigger(), e.getButton());
+                retargeted = new MouseWheelEvent(target,
+                                      id,
+                                       e.getWhen(),
+                                       e.getModifiersEx() | e.getModifiers(),
+                                       x,
+                                       y,
+                                       e.getXOnScreen(),
+                                       e.getYOnScreen(),
+                                       e.getClickCount(),
+                                       e.isPopupTrigger(),
+                                       ((MouseWheelEvent)e).getScrollType(),
+                                       ((MouseWheelEvent)e).getScrollAmount(),
+                                       ((MouseWheelEvent)e).getWheelRotation(),
+                                       ((MouseWheelEvent)e).getPreciseWheelRotation());
+            }
+            else {
+                retargeted = new MouseEvent(target,
+                                            id,
+                                            e.getWhen(),
+                                            e.getModifiersEx() | e.getModifiers(),
+                                            x,
+                                            y,
+                                            e.getXOnScreen(),
+                                            e.getYOnScreen(),
+                                            e.getClickCount(),
+                                            e.isPopupTrigger(),
+                                            e.getButton());
 			}
 
 			((AWTEvent) e).copyPrivateDataInto(retargeted);

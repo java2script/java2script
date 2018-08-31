@@ -7217,6 +7217,7 @@ public abstract class Component
 	protected String paramStringComp() {
 		String thisName = getName();
 		String str = (thisName != null ? thisName : "");
+		str += (/** @j2sNative this.__JSID__ + */"");
 		if (!isValid()) {
 			str += ",invalid";
 		}

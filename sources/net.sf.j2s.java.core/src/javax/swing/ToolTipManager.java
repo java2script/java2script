@@ -509,7 +509,6 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 	 * @param event the event in question
 	 */
 	public void mouseExited(MouseEvent event) {
-		System.out.println("mouse exit " + event.getSource());
 		hasFired = true;
 		boolean shouldHide = true;
 		if (insideComponent == null) {
