@@ -25,7 +25,7 @@ automated production of browser-ready JavaScript versions of Java applications a
 
 # QuickStart
 
-See https://github.com/BobHanson/java2script/tree/master/dist and the README file in that directory.
+See https://github.com/BobHanson/java2script/tree/master/sources/net.sf.j2s.core/dist and the README file in that directory.
 
 # History - 2017-
 
