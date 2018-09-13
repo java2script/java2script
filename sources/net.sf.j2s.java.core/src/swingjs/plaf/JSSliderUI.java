@@ -378,6 +378,33 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		// ScrollBar subclass only
 	}
 
+	
+	public Dimension getMinimumSize(JComponent c) {
+		return (isScrollBar ? super.getMinimumSize(c) 
+				: isHoriz ? getMinimumHorizontalSize() : getMinimumVerticalSize());
+	}
+
+	private Dimension getMinimumHorizontalSize() {
+		Dimension horizDim = (Dimension) DefaultLookup.get(jSlider, this,
+				"Slider.minimumHorizontalSize");
+		if (horizDim == null) {
+			horizDim = new Dimension(36, 21);
+		}
+		return horizDim;
+	}
+
+	private Dimension getMinimumVerticalSize() {
+		Dimension vertDim = (Dimension) DefaultLookup.get(jSlider, this,
+				"Slider.minimumVerticalSize");
+		if (vertDim == null) {
+			vertDim = new Dimension(21, 36);
+		}
+		return vertDim;
+	}
+
+	public Dimension getPreferredSize(JComponent c) {
+		return (isScrollBar ? super.getPreferredSize(c) : isHoriz ? getPreferredHorizontalSize() : getPreferredVerticalSize());
+	}
 
 	public Dimension getPreferredHorizontalSize() {
 		Dimension horizDim = (Dimension) DefaultLookup.get(jSlider, this,

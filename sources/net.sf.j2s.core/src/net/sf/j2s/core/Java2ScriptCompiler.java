@@ -32,11 +32,11 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
  * @author Bob Hanson
  *
  */
-public class Java2ScriptCompiler {
+class Java2ScriptCompiler {
 	/**
 	 * The name of the J2S options file, aka as the "Dot-j2s" file.
 	 */
-	public static final String J2S_OPTIONS_FILE_NAME = ".j2s";
+	private static final String J2S_OPTIONS_FILE_NAME = ".j2s";
 	
 	// BH: added "true".equals(getProperty(props,
 	// "j2s.compiler.allow.compression")) to ensure compression only occurs when
@@ -77,7 +77,7 @@ public class Java2ScriptCompiler {
 
 	private IJavaProject project;
 
-	public static boolean isActive(IJavaProject project) {
+	static boolean isActive(IJavaProject project) {
 		try {
 			return new File(project.getProject().getLocation().toOSString(), J2S_OPTIONS_FILE_NAME).exists();
 		} catch (@SuppressWarnings("unused") Exception e) {
@@ -85,7 +85,7 @@ public class Java2ScriptCompiler {
 		}
 	}
 
-	public Java2ScriptCompiler() {
+	Java2ScriptCompiler() {
 		// initialized only once using CompilationParticipant; every time using
 		// older Builder idea
 	}
@@ -94,7 +94,7 @@ public class Java2ScriptCompiler {
 	 * only for CompilationParticipant
 	 * @param isClean
 	 */
-	public void startBuild(boolean isClean) {
+	void startBuild(boolean isClean) {
 		// at the beginning of a clean build, clear data
 		isCleanBuild = isClean;
 		htmlTemplate = null;
@@ -106,19 +106,7 @@ public class Java2ScriptCompiler {
 
 	}
 
-//	/**
-//	 * old way from original builder
-//	 * 
-//	 */
-//	public void process(ICompilationUnit sourceUnit, IContainer binaryFolder) {
-//		if (!(sourceUnit instanceof SourceFile))
-//			return;
-//		if (!initializeProject(binaryFolder.getProject(), false))
-//			return;
-//		compileToJavaScript(((SourceFile) sourceUnit).resource);
-//	}
-
-	/**
+ 	/**
 	 * from Java2ScriptCompilationParticipant.java
 	 * 
 	 * get all necessary .j2s params for a build
@@ -128,7 +116,7 @@ public class Java2ScriptCompiler {
 	 * @return true if this is a j2s project and is enabled
 	 * 
 	 */
-	public boolean initializeProject(IJavaProject project, boolean isCompilationParticipant) {
+	boolean initializeProject(IJavaProject project, boolean isCompilationParticipant) {
 		this.project = project;
 		this.isCompilationParticipant = isCompilationParticipant;
 		if (!isActive(project)) {
@@ -246,7 +234,7 @@ public class Java2ScriptCompiler {
 	 * 
 	 * @param javaSource
 	 */
-	public boolean compileToJavaScript(IFile javaSource) {
+	boolean compileToJavaScript(IFile javaSource) {
 
 		String fileName = new String(javaSource.getName());
 		if (lstExcludedPaths != null) {
@@ -312,6 +300,9 @@ public class Java2ScriptCompiler {
 		return true;
 	}
 
+	//// private methods ////
+	
+	
 	private void logMethods(String logCalled, String logDeclared, boolean doAppend) {
 		if (htMethodsCalled != null)
 			try {
@@ -353,7 +344,7 @@ public class Java2ScriptCompiler {
 		return val;
 	}
 
-	public void outputJavaScript(Java2ScriptVisitor visitor,
+	private void outputJavaScript(Java2ScriptVisitor visitor,
 			// DependencyASTVisitor dvisitor, CompilationUnit fRoot,
 			String j2sPath) {
 
@@ -419,6 +410,8 @@ public class Java2ScriptCompiler {
 
 	/**
 	 * The default .j2s file. Replaces .j2s only if it is found but is empty.
+	 * 
+	 * OK, I know this should be a resource.
 	 * 
 	 * 
 	 * 
