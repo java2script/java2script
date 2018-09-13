@@ -9,17 +9,11 @@ import swingjs.api.js.DOMNode;
 
 public class JSEditorPaneUI  extends JSTextUI {
 
-  /**
-   * the radio or check-box or simple button
-   * 
-   */
-  protected DOMNode domBtn;
-
-  @Override
+	@Override
   public DOMNode updateDOMNode() {
     if (domNode == null) {
       allowPaintedBackground = false;
-      domBtn = focusNode = enableNode = textNode = valueNode = domNode = 
+      focusNode = enableNode = textNode = valueNode = domNode = 
           newDOMObject("div", id);
       DOMNode.setStyles(domNode, "resize", "none");
       setDataUI(domNode);
