@@ -30,7 +30,7 @@ the Java Virtual Machine in JavaScript. Its two main JavaScript objects are
   Clazz (methods that emulate core java.lang methods) and 
   J2S (methods that provide an interface to the HTML5 document model) 
 
-Raw JavaScript files are in site/swingjs/js, These files are concatentated into
+Raw JavaScript files are in site/swingjs/js, These files are concatenated into
 site/swingjs/swingjs2.js, which your web page needs to call. For example:
 
 	<!DOCTYPE html>
@@ -40,7 +40,7 @@ site/swingjs/swingjs2.js, which your web page needs to call. For example:
 	...
 
 Besides that, all the java, javax, swingjs, and various other classes can be found
-in the site/swingjs/j2s directory.
+in the site/swingjs/j2s directory. They are loaded "just-in-time", only on demand.
 
 jQuery is used extensively, and a slightly enhanced version of jQuery (see site/swingjs/js/j2sJQueryExt)
 adds synchronous binary file transfer as well as "jQuery outside events".
@@ -60,6 +60,7 @@ Eclipse Photon or higher is necessary.
 	
 	net.sf.j2s.core_3.2.1.jar replaces net.sf.j2s.core_3.1.1.jar
 	 
+	These versions differ only in their internal workings relative to Eclipse (and new bug fixes).
 	
 	These versions differ only in their internal workings relative to Eclipse (and new bug fixes).
 	
@@ -171,21 +172,28 @@ If your source code is not all already in src/, navigate to the project...proper
 Java Build Path...source and add all the source directories you need.
 
 Note that your project must not include any Jar file-based dependencies. 
-All source code must be available. (Source code from decompiling .class files will work.)
+All source code must be available. (Source code from decompiling .class files will work,
+but it is not automatic, and we have not explored that option yet.)
 
 ---------------------------------------------------------------------
 Installing the SwingJS JavaScript version of the Java Virtual Machine 
 ---------------------------------------------------------------------
 
-Chrome users should consider using WebServer for Chrome to serve local files. It is very
-simple to set up. 
+Chrome users should consider using WebServer for Chrome to serve local files. 
 
 https://chrome.google.com/webstore/detail/web-server-for-chrome/ofhbbkphhbklhfoeikjpcbhemlocgigb?hl=en
 
+It is very simple to set up. 
+
+Firefox users need only set the about:config flag: 
+
+	security.fileuri.strict_origin_policy
+
+to "false".
 
 All of the JavaScript produced will be in the project site/ directory. 
 You must prepopulate this site with all the JavaScript required by the 
-JavaScript version of the JVM. The most recent version of site/ is at
+SwingJS JavaScript version of the JVM. The most recent version of site/ is at
 
 https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/swingjs/SwingJS-site.zip?raw=true
 
