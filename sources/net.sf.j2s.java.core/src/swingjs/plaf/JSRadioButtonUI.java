@@ -121,6 +121,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 		} else {
 			d = setHTMLSize1(obj, addCSS, false);
 			DOMNode.setPositionAbsolute(textNode);
+			DOMNode.setPositionAbsolute(iconNode);
 			DOMNode.setPositionAbsolute(buttonNode);
 //			if (centeringNode != null) problems with vertical offset
 //				DOMNode.setPositionAbsolute(centeringNode);
