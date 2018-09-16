@@ -132,8 +132,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// BH 9/16/2018 -- 3.2.2.06 removes "$" in JApplet public method alternative name
 // BH 8/20/2018 -- fix for return (short)++;
-
 // BH 8/19/2018 -- refactored to simplify $finals$
 // BH 8/12/2018 -- refactored to simplify naming issues
 // BH 8/6/2018  -- additional Java 8 fixes; enum $valueOf$S to valueOf$S
@@ -975,6 +975,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		return false;
 	}
 
+	private final static int METHOD_FULLY_QUALIFIED = 0;
+	private final static int METHOD_$_QUALIFIED = 1;
+	private final static int METHOD_UNQUALIFIED = 2;
+	
 	/**
 	 * Called by visit(MethodDeclaration) as well as addLambdaMethod().
 	 * 
@@ -996,12 +1000,17 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		boolean isPublic = Modifier.isPublic(mods);
 		boolean isPrivate = !isPublic && !isConstructor && isPrivate(mBinding);
 		boolean isStatic = isStatic(mBinding);
-		boolean addUnqualified = lambdaType == NOT_LAMBDA && (temp_addUnqualifiedMethod // method call to lambda
-				|| isUserApplet && !isConstructor && !isStatic && isPublic
-		// public applet methods could never be overloaded in
-		// JavaScript anyway.
-		);
-		String finalName = getFinalMethodNameOrArrayForDeclaration(mBinding, isConstructor, addUnqualified);
+		int qualification = (lambdaType != NOT_LAMBDA ? METHOD_FULLY_QUALIFIED 
+				: temp_addUnqualifiedMethod ? METHOD_$_QUALIFIED
+				:  isUserApplet && !isConstructor && !isStatic && isPublic ? METHOD_UNQUALIFIED 
+				: METHOD_FULLY_QUALIFIED);
+
+//		boolean addUnqualified = lambdaType == NOT_LAMBDA && (temp_addUnqualifiedMethod // method call to lambda
+//				|| isUserApplet && !isConstructor && !isStatic && isPublic
+//		// public applet methods could never be overloaded in
+//		// JavaScript anyway.
+//		);
+		String finalName = getFinalMethodNameOrArrayForDeclaration(mBinding, isConstructor, qualification);
 		boolean isMain = isStatic && isPublic && mBinding.getName().equals("main")
 				&& mBinding.getKey().endsWith(";.main([Ljava/lang/String;)V");
 		if (isMain) {
@@ -4827,10 +4836,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @param node
 	 * @param mBinding
 	 * @param isConstructor
+	 * @param qualification
 	 * @return j2s-qualified name or an array of j2s-qualified names
 	 */
 	private String getFinalMethodNameOrArrayForDeclaration(IMethodBinding mBinding, boolean isConstructor,
-			boolean addUnqualified) {
+			int qualification) {
 		String nodeName = mBinding.getName();
 		String methodName = (isConstructor ? "c$" : nodeName);
 		String qname = getFinalMethodNameWith$Params(methodName, null, mBinding, null, false, METHOD_NOTSPECIAL);
@@ -4844,12 +4854,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						METHOD_NOTSPECIAL);
 				if (pname != null)
 					names.add(pname);
-				if (addUnqualified)
+				if (qualification == METHOD_FULLY_QUALIFIED)
 					names.add(ensureMethod$Name(methodName, mBinding, getJavaClassNameQualified(methodClass)));
 			}
-		} else if (addUnqualified && !methodName.equals(qname) && !classHasMethod(methodClass, methodName)) {
+		} else if (qualification != METHOD_FULLY_QUALIFIED && !methodName.equals(qname) && !classHasMethod(methodClass, methodName)) {
 			names = new ArrayList<String>();
-			names.add(methodName + (methodName.indexOf("$") >= 0 ? "" : "$"));
+			names.add(methodName + (qualification == METHOD_UNQUALIFIED || methodName.indexOf("$") >= 0 ? "" : "$"));
 		}
 		if (names == null || names.size() == 0)
 			return "'" + qname + "'";
@@ -6311,7 +6321,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				buffer.append("Clazz.newLambda(");
 				appendFinalMethodQualifier(exp, declaringlassJavaName, null, FINAL_ESCAPECACHE | FINAL_LAMBDA);
 				buffer.append(",");
-				buffer.append(getFinalMethodNameOrArrayForDeclaration(mBinding, false, false));
+				buffer.append(getFinalMethodNameOrArrayForDeclaration(mBinding, false, METHOD_FULLY_QUALIFIED));
 				buffer.append(",'" + lambdaType + "')");
 			}
 			break;
