@@ -19,7 +19,7 @@ public class CorePlugin extends Plugin {
 	 * register the bundle version properly. So we use VERSION here instead.
 	 * 
 	 */
-	public static String VERSION = "3.2.2.04";
+	public static String VERSION = "3.2.2.06";
 	// 3.2.2.04 2018.08.15 fixing Java->JavaScript "getFinal" code for class names.
 	// 3.2.2.04 adds support for window-level applets, such as JmolApplet
 	// 3.2.2.03 adds Java 8 function and stream
