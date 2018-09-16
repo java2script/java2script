@@ -1823,6 +1823,8 @@ public class Container extends JSComponent {
     }
 
     public void paintContainer(Graphics g) {
+    	
+    	// !NOT!  -- 9/15/18
     	// SwingJS: split off here so that 
     	// the new JComponent-subclassed Window can 
     	// hit this one directly instead of JComponent.paint()
@@ -2693,7 +2695,7 @@ public class Container extends JSComponent {
     public void setDispatcher() {
     	if (dispatcher != null)
     		return;
-      System.err.println("LWD dispatch for "+ this);
+      //System.err.println("LWD dispatch for "+ this);
       dispatcher = new LightweightDispatcher(this);    	
     }
     /**

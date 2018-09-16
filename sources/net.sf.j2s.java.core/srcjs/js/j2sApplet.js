@@ -1634,6 +1634,9 @@ if (!J2S._version)
 
 			J2S.setMouseOwner(null);
 
+			if (!who)
+				return true;
+			
 			var ui = ev.target["data-ui"]; // e.g., a textbox
 			var handled = (ui && ui.handleJSEvent$O$I$O(who, 502, ev));
 			if (checkStopPropagation(ev, ui, handled))

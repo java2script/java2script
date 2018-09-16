@@ -24,6 +24,13 @@
 
 		var position, normValue, distance, closestHandle, index, allowed, offset, mouseOverHandle;
 
+		var clearEnds = function(e) {
+			e.removeClass("ui-j2sslider-at-top");
+			e.removeClass("ui-j2sslider-at-bottom");
+			e.removeClass("ui-j2sslider-at-left");
+			e.removeClass("ui-j2sslider-at-right");
+		};
+		
 		$
 				.widget(
 						"ui.j2sslider",
@@ -137,6 +144,14 @@
 									me._mouseSliding = false;
 								};
 
+								var fOutTrack = function(event, id) {
+									clearEnds(me.element);
+								};
+
+								var fMoveTrack = function(event, id) {
+										me._doMouseCapture(event, true, true);
+								};
+
 								var fDrag = function(xye, id) {
 									if (me.options.disabled)
 										return;
@@ -190,9 +205,14 @@
 											fUp ]);
 								}
 								
-								if (handleCount == 1)
+								if (handleCount == 1) {
 									$(this.element).mousedown(fDownTrack);
-
+									if (this.isScrollBar) {
+										$(this.element).mousemove(fMoveTrack);
+										$(this.element).mouseout(fOutTrack);
+									}
+								}
+								
 								this.handle = this.handles.eq(0);
 
 								this.handles.add(this.range).filter("a").click(
@@ -231,7 +251,8 @@
 								this._mouseDestroy();
 							},
 
-							_doMouseCapture : function(event, isTrackClick) {
+							_doMouseCapture : function(event, isTrackClick, isEndCheck) {
+								
 								var that = this, o = this.options;
 
 								if (o.disabled) {
@@ -293,11 +314,11 @@
 								this._clickOffset = (mouseOverHandle ? {
 									left : position.x
 											- offset.left
-											- (closestHandle.width() / 2 * this.options.scaleX)
+											- (closestHandle.width() / 2 * o.scaleX)
 											,
 									top : position.y
 											- offset.top
-											- (closestHandle.height() / 2 * this.options.scaleY)
+											- (closestHandle.height() / 2 * o.scaleY)
 											- (parseInt(closestHandle
 													.css("borderTopWidth"), 10) || 0)
 											- (parseInt(closestHandle
@@ -310,10 +331,27 @@
 											left : 0,
 											top : 0
 										});
-							
-								normValue = this._normValueFromMouse(position, isTrackClick);
+								var val = this._normValueFromMouse(position, isTrackClick);
+								var isMin = false;
+								var isAtEnd = (!this.isScrollBar ? 0 : (isMin = (val == this._valueMin())) ? -1 
+										: val >= this._getRealMax() - (isTrackClick ? 0 : o.jslider.ui.getUnitIncrement$()) ? 1 : 0);
+								if (isAtEnd) {
+									this.element.addClass(this.orientation === "horizontal" ? 
+											(isAtEnd == 1 ? "ui-j2sslider-at-right" : "ui-j2sslider-at-left")
+											: (isAtEnd == 1 ? "ui-j2sslider-at-bottom" : "ui-j2sslider-at-top"));
+								} else {
+									clearEnds(this.element);
+								}
+								if (isEndCheck) {
+									return;
+								}
+								var dir = Math.signum(!isAtEnd ? val - o.jslider.getValue$() : isMin ? -1 : 1);
 								if (!this.handles.hasClass("ui-state-hover")) {
-									this._slide(event, index, normValue);
+									if (isAtEnd) {
+										o.jslider.ui.scrollByUnit$I(dir);
+									} else if (isTrackClick) {
+										o.jslider.ui.scrollDueToClickInTrack$I(dir);
+									}
 								}
 								this._animateOff = true;
 								return true;
@@ -573,7 +611,7 @@
 									this._animateOff = false;
 								break;
 								case "handleSize":
- 									this.isScrollBar = this.options.isScrollBar = true;
+									this.isScrollBar = true;
  									this.handleFraction = value;
 									if (this.orientation === "horizontal")
 										$(this.handles[0]).width(this.handleSize = value * this.element.outerWidth());
@@ -590,10 +628,7 @@
 							// _value() returns value trimmed by min and max,
 							// aligned by step
 							_value : function() {
-								var val = this.options.value;
-								val = this._trimAlignValue(val);
-
-								return val;
+								return this._trimAlignValue(this.options.value);
 							},
 
 							// internal values getter
@@ -602,33 +637,30 @@
 							// _values( index ) returns single value trimmed by
 							// min and max, aligned by step
 							_values : function(index) {
-								var val, vals, i;
-
 								if (arguments.length) {
-									val = this.options.values[index];
-									val = this._trimAlignValue(val);
-
-									return val;
-								} else {
-									// .slice() creates a copy of the array
-									// this copy gets trimmed by min and max and
-									// then returned
-									vals = this.options.values.slice();
-									for (i = 0; i < vals.length; i += 1) {
-										vals[i] = this._trimAlignValue(vals[i]);
-									}
-
-									return vals;
+									return this._trimAlignValue(this.options.values[index]);
+								} 
+								// .slice() creates a copy of the array
+								// this copy gets trimmed by min and max and
+								// then returned
+								var vals = this.options.values.slice();
+								for (var i = 0; i < vals.length; i += 1) {
+									vals[i] = this._trimAlignValue(vals[i]);
 								}
+								return vals;
 							},
 
+							_getRealMax : function() {
+								return Math.round((this._valueMax() - this._valueMin()) * (1-this.handleFraction) + this._valueMin());
+							},
+							
 							// returns the step-aligned value that val is
 							// closest to, between (inclusive) min and max
 							_trimAlignValue : function(val) {
 								if (val <= this._valueMin()) {
 									return this._valueMin();
 								}
-								var max = Math.round((this._valueMax() - this._valueMin()) * (1-this.handleFraction) + this._valueMin());
+								var max = this._getRealMax();
 								if (val >= max) {
 									return max;
 								}
@@ -791,3 +823,4 @@
 	})(J2S.__$);
 
 })();
+// BH 9/15/2018

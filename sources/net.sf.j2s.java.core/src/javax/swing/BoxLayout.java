@@ -38,6 +38,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.LayoutManager2;
+import java.io.PrintStream;
 
 /**
  * A layout manager that allows multiple components to be laid out either
@@ -169,6 +170,9 @@ public class BoxLayout implements LayoutManager2 {
      */
     public static final int PAGE_AXIS = 3;
 
+    public BoxLayout(Container target, int axis, PrintStream dbg) {
+    	this(target, axis);
+    }
     /**
      * Creates a layout manager that will lay out components along the
      * given axis.

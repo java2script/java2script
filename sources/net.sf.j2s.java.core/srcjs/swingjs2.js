@@ -12290,6 +12290,9 @@ if (!J2S._version)
 
 			J2S.setMouseOwner(null);
 
+			if (!who)
+				return true;
+			
 			var ui = ev.target["data-ui"]; // e.g., a textbox
 			var handled = (ui && ui.handleJSEvent$O$I$O(who, 502, ev));
 			if (checkStopPropagation(ev, ui, handled))
@@ -13551,6 +13554,8 @@ if (!J2S._version)
 // TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
 //       It is possible that these might be loaded dynamically.
 
+// BH 9/15/2018 3.2.2.06 adds JScrollBar block and unit increments; fixes JLabel ui getMaximumSize
+// BH 9/15/2018 3.2.2.05 fixes Math.IEEEremainder
 // BH 8/21/2018 3.2.2.04 fixes ?j2strace=xxx  message; sets user.home to https://./, not https://.//; Boolean upgrade and fix
 // BH 8/20/2018 3.2.2.04 adds character.isJavaIdentifierPart$C and several Character...$I equivalents, fixes newEnumConst(), System.getBoolean$S
 // BH 8/19/2018 3.2.2.04 fixes Enum .name being .$name
@@ -13643,7 +13648,7 @@ window["j2s.clazzloaded"] = true;
   _debugging: false,
   _loadcore: true,
   _nooutput: 0,
-  _VERSION_R: "3.2.2.05",
+  _VERSION_R: "3.2.2.06",
   _VERSION_T: "unknown",
 };
 
@@ -16951,18 +16956,19 @@ Math.nextUp||(Math.nextUp=function(d){return 0});
 Math.ulp||(Math.ulp=function(d){return 0});
 Math.getExponent||(Math.getExponent=function(d){return 0});
 Math.IEEEremainder||(Math.IEEEremainder=function (x, y) {
-		if (y == 0  || Double.isNaN(x)  || Double.isInfinite(y) && !Double.isInfinite(x)  ) return NaN;
-		var modxy = x % y;
-		if (modxy == 0 ) return modxy;
-		var rem = modxy - (Math.abs(y) * Math.signum(x));
-		if (Math.abs(rem) == Math.abs(modxy) ) {
-		 var div = x / y;
-		 return (Math.abs(Math.round(div)) > Math.abs(div)  ? rem : modxy);
-		}
-		return (Math.abs(rem) < Math.abs(modxy)  ? rem : modxy);
-		});
-
-//end datatype reliant math declarations
+	if (Double.isNaN$D(x) || Double.isNaN$D(y) || Double.isInfinite$D(x) || y == 0) 
+		return NaN;
+	if (!Double.isInfinite$D(x) && Double.isInfinite$D(y))
+		return x;
+	var modxy = x % y;
+	if (modxy == 0) return modxy;
+	var rem = modxy - Math.abs(y) * Math.signum(x);
+	if (Math.abs(rem) == Math.abs(modxy)) {
+		var div = x / y;
+		return (Math.abs(Math.round(div)) > Math.abs(div) ? rem : modxy);
+	}
+	return (Math.abs(rem) < Math.abs(modxy) ? rem : modxy);
+});
 
 
 Clazz._setDeclared("java.lang.Number", java.lang.Number=Number);

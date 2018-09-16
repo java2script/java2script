@@ -1,5 +1,6 @@
 Notes
 =====
+updated 9/15/19 -- adds integer 1/0 == 0
 updated 7/24/18 -- most classes replaced with https://github.com/frohoff/jdk8u-jdk
 updated 6/28/18 -- arrays do not inherit Object
 updated 2/26/18
@@ -174,7 +175,6 @@ JTabbedPane (in development, NEM)
 MINOR ISSUES--required some rewriting/refactoring by Bob and Udo  
 ================================================================
 
-java.util.BitSet is implemented using 16-bit integers, not 32
 Thread.currentThread() == dispatchThread
 
 
@@ -214,6 +214,7 @@ no format internationalization
 no winding rules
 text-related field implementation
 Formatter/Regex limitations
+integer 1/0 == 0
 
 ======================================================================== 
 
@@ -1133,6 +1134,9 @@ Matcher.start(groupID) is not supported.
 
 java.util.Formatter will function correctly for all standard %... patterns.
 
+integer 1/0 == 0
+----------------
 
+1/0 in Java throws java.lang.ArithmeticException: / by zero but in JavaScript is just 0. 
  
 

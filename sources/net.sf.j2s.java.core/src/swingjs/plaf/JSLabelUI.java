@@ -1,5 +1,8 @@
 package swingjs.plaf;
 
+import java.awt.Container;
+import java.awt.Dimension;
+
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -52,7 +55,7 @@ public class JSLabelUI extends JSLightweightUI {
 		if (label != null) {
 			// not for JToolTip
 			setHorizontalButtonAlignments(label, label.getHorizontalTextPosition(),
-				label.getHorizontalAlignment());
+						label.getHorizontalAlignment());
 		}
 		if (jc.isOpaque() && jc.isEnabled())
 			setBackground(jc.getBackground());
@@ -87,6 +90,10 @@ public class JSLabelUI extends JSLightweightUI {
 	public void uninstallUI(JComponent jc) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	Dimension getMaximumSize(JComponent jc) {
+		return getPreferredSize();
 	}
 
 }
