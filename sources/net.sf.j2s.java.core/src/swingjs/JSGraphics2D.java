@@ -498,6 +498,7 @@ public class JSGraphics2D // extends SunGraphics2D
 
 	public void drawDirectRGBA(int[] pixels) {
 		// this can go VERY fast - for writing directly to the canvas context
+		backgroundPainted = true;
 		drawDirect(pixels, 0, 0, width, height, false);
 	}
 

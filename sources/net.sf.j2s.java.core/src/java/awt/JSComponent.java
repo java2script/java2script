@@ -318,4 +318,17 @@ public abstract class JSComponent extends Component {
 	  
   }
 
+    /**
+     * Paint this component, checking to see if the background got painted, and if so, make the 
+     * div background transparent so that that underlying HTML5 canvas shows through.
+     *  
+     * @param g
+     */
+	public void paintWithBackgroundCheck(Graphics g) {
+		checkBackgroundPainted(null);
+		paint(g);					
+		checkBackgroundPainted(getJSGraphic2D(g));
+	}
+
+
 }
