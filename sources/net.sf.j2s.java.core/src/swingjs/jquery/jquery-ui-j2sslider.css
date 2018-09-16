@@ -306,4 +306,9 @@
 .swingjs .ui-j2sslider-tick-mark-vert { display:inline-block; width:1px; background: black; border:1px; height:5px; position:absolute; top:12px; }
 .swingjs .ui-j2sslider-tick-mark-horiz { display:inline-block; height:1px; background: black; border:1px; width:5px; position:absolute; left:14px; }
 
+.swingjs .ui-j2sslider-at-bottom { border-bottom-width:3px; border-bottom-color:red }
+.swingjs .ui-j2sslider-at-top { border-top-width:3px; border-top-color:red }
+.swingjs .ui-j2sslider-at-left { border-left-width:3px; border-left-color:red }
+.swingjs .ui-j2sslider-at-right { border-right-width:3px; border-right-color:red }
+
 

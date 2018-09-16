@@ -39,6 +39,7 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.ViewportUI;
+import javax.swing.plaf.basic.BasicSliderUI;
 
 public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 
@@ -52,7 +53,6 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		 */
 	}
 	static DecimalFormat df = new DecimalFormat("0.00");
-
 	boolean preferred = true;
 
 	private JScrollBar hsb;
@@ -68,6 +68,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 
 	@Override
 	public void init() {
+		BasicSliderUI ui;
 
 		final JLabel label = new JLabel("hello");
 		// label.setBounds(0, 60, 200, 60);
@@ -278,6 +279,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		getContentPane().add(sp);
 		sp.getViewport().addChangeListener(this);
 		hsb = sp.getHorizontalScrollBar();
+		hsb.setUnitIncrement(100);
 		button2.setToolTipText("this is hsb");
 
 		mkBar(p, tf, Adjustable.VERTICAL, 20, 200).setToolTipText("this is scrollbar 1");
@@ -321,6 +323,8 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		setSize(bar, x, y);
 		bar.setBackground(Color.orange);
 		bar.setForeground(Color.green);
+		bar.setBlockIncrement(10);
+		bar.setUnitIncrement(100);
 		bar.setOpaque(true);
 		p.add(bar);
 		sbar = bar;

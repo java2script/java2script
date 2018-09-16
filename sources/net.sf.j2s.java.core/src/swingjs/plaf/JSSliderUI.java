@@ -24,6 +24,11 @@ import swingjs.jquery.JQueryUI;
 @SuppressWarnings({"rawtypes", "unchecked", "unused"})
 public class JSSliderUI extends JSLightweightUI implements PropertyChangeListener, ChangeListener {
 
+    public static final int POSITIVE_SCROLL = +1;
+    public static final int NEGATIVE_SCROLL = -1;
+    public static final int MIN_SCROLL = -2;
+    public static final int MAX_SCROLL = +2;
+
 	static {
 		Object jqueryui = JQueryUI.class; // loads jQuery.ui
 		// this static call allows for the CSS to be loaded only once and only when needed
@@ -31,7 +36,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		JSUtil.loadStaticResource("swingjs/jquery/jquery-ui-j2sslider.js");
 	}
 
-	JSlider jSlider;
+	protected JSlider slider;
 	private int min, max, val, majorSpacing, minorSpacing;
 	protected boolean paintTicks;
 	protected boolean paintLabels;
@@ -77,9 +82,9 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		orientation = (js.getOrientation() == SwingConstants.VERTICAL ? "vertical"
 				: "horizontal");
 		model = js.getModel();
-		boolean isHoriz = (jSlider.getOrientation() == SwingConstants.HORIZONTAL);
+		boolean isHoriz = (slider.getOrientation() == SwingConstants.HORIZONTAL);
 		boolean isVerticalScrollBar = (isScrollBar && !isHoriz);
-		boolean isInverted = isVerticalScrollBar || !isScrollBar && jSlider.getInverted();
+		boolean isInverted = isVerticalScrollBar || !isScrollBar && slider.getInverted();
 		boolean isChanged = false;
 		if (isHoriz != this.isHoriz || isVerticalScrollBar != this.isVerticalScrollBar
 				|| isInverted != this.isInverted) {
@@ -111,7 +116,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 
 	@Override
 	public void installUI(JComponent jc) {
-		jSlider = (JSlider) jc;
+		slider = (JSlider) jc;
 		if (isScrollBar)
 			jScrollBar = (JScrollBar) jc;
 	}
@@ -126,7 +131,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		 *            slider.j2sslider(
 		 *             { orientation: me.orientation, 
 		 *               jslider: me.c,
-		 *               isScrollBar: me.isScrollPaneScrollBar,
+		 *               isScrollBar: me.isScrollBar,
 		 *               range: false, 
 		 *               min: me.min,
 		 *               max: me.max,
@@ -154,7 +159,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	 * @param ui
 	 */
 	public void jqueryStart(Object event, Object ui) {
-	    jSlider.setValueIsAdjusting(true);
+	    slider.setValueIsAdjusting(true);
 	}
 
 	/**
@@ -164,7 +169,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	 * @param ui
 	 */
 	public void jqueryStop(Object event, Object ui) {
-	    jSlider.setValueIsAdjusting(false);
+	    slider.setValueIsAdjusting(false);
 	}
 	
 	/**
@@ -184,7 +189,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		 */
 		{}
 		
-		jSlider.setValue(val = Math.round(value));
+		slider.setValue(val = Math.round(value));
 	}
 
 	@Override
@@ -235,7 +240,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 
 		myHeight = 10;
 		int barPlace = 40;
-		if (isHoriz && jSlider.getBorder() != null)
+		if (isHoriz && slider.getBorder() != null)
 			barPlace += 10;
 
 		String tickClass = "ui-j2sslider-tick-mark"
@@ -247,7 +252,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			return;
 		int margin = 10;
 
-		int length = (isHoriz ? jSlider.getWidth() : jSlider.getHeight());
+		int length = (isHoriz ? slider.getWidth() : slider.getHeight());
 		if (length <= 0)
 			length = (isHoriz ? getPreferredHorizontalSize().width
 					: getPreferredVerticalSize().height);
@@ -279,7 +284,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		}
 		if (paintLabels) {
 			myHeight += 20;
-			labelTable = jSlider.getLabelTable();
+			labelTable = slider.getLabelTable();
 			Enumeration keys = labelTable.keys();
 			while (keys.hasMoreElements()) {
 				Object key = keys.nextElement();
@@ -334,7 +339,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		int d = 20;
 		if (paintLabels || paintTicks)
 			d += 10;
-		if (jSlider.getBorder() != null)
+		if (slider.getBorder() != null)
 			d += 10;
 		// only the width or height will be read here, not both
 		return new Dimension((isHoriz ? actualWidth : d), (isHoriz ? d : actualHeight));
@@ -351,11 +356,11 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		int v;
-		if ((v = jSlider.getMinimum()) != min)
+		if ((v = slider.getMinimum()) != min)
 			setSliderAttr("min", min = v);
-		if ((v = jSlider.getMaximum()) != max)
+		if ((v = slider.getMaximum()) != max)
 			setSliderAttr("max", max = v);
-		if ((v = jSlider.getValue()) != val)
+		if ((v = slider.getValue()) != val)
 			setSliderAttr("value", val = v);
 		setup(false);
 	}
@@ -385,7 +390,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	}
 
 	private Dimension getMinimumHorizontalSize() {
-		Dimension horizDim = (Dimension) DefaultLookup.get(jSlider, this,
+		Dimension horizDim = (Dimension) DefaultLookup.get(slider, this,
 				"Slider.minimumHorizontalSize");
 		if (horizDim == null) {
 			horizDim = new Dimension(36, 21);
@@ -394,7 +399,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	}
 
 	private Dimension getMinimumVerticalSize() {
-		Dimension vertDim = (Dimension) DefaultLookup.get(jSlider, this,
+		Dimension vertDim = (Dimension) DefaultLookup.get(slider, this,
 				"Slider.minimumVerticalSize");
 		if (vertDim == null) {
 			vertDim = new Dimension(21, 36);
@@ -407,7 +412,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	}
 
 	public Dimension getPreferredHorizontalSize() {
-		Dimension horizDim = (Dimension) DefaultLookup.get(jSlider, this,
+		Dimension horizDim = (Dimension) DefaultLookup.get(slider, this,
 				"Slider.horizontalSize");
 		if (horizDim == null) {
 			horizDim = new Dimension(200, 21);
@@ -416,12 +421,77 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	}
 
 	public Dimension getPreferredVerticalSize() {
-		Dimension vertDim = (Dimension) DefaultLookup.get(jSlider, this,
+		Dimension vertDim = (Dimension) DefaultLookup.get(slider, this,
 				"Slider.verticalSize");
 		if (vertDim == null) {
 			vertDim = new Dimension(21, 200);
 		}
 		return vertDim;
 	}
+	
+    public void scrollByBlock(int direction)    {
+        synchronized(slider)    {
+            int blockIncrement =
+                (slider.getMaximum() - slider.getMinimum()) / 10;
+            if (blockIncrement == 0) {
+                blockIncrement = 1;
+            }
+
+            if (slider.getSnapToTicks()) {
+                int tickSpacing = getTickSpacing();
+
+                if (blockIncrement < tickSpacing) {
+                    blockIncrement = tickSpacing;
+                }
+            }
+
+            int delta = blockIncrement * ((direction > 0) ? POSITIVE_SCROLL : NEGATIVE_SCROLL);
+            slider.setValue(slider.getValue() + delta);
+        }
+    }
+
+    public void scrollByUnit(int direction) {
+        synchronized(slider)    {
+            int delta = ((direction > 0) ? POSITIVE_SCROLL : NEGATIVE_SCROLL);
+
+            if (slider.getSnapToTicks()) {
+                delta *= getTickSpacing();
+            }
+
+            slider.setValue(slider.getValue() + delta);
+        }
+    }
+    
+    public int getUnitIncrement() {
+    	// JScrollBar only
+    	return -1;
+    }
+    
+    public void scrollDueToClickInTrack(int dir) {
+        scrollByUnit(dir);
+    }
+
+    private int getTickSpacing() {
+        int majorTickSpacing = slider.getMajorTickSpacing();
+        int minorTickSpacing = slider.getMinorTickSpacing();
+
+        int result;
+
+        if (minorTickSpacing > 0) {
+            result = minorTickSpacing;
+        } else if (majorTickSpacing > 0) {
+            result = majorTickSpacing;
+        } else {
+            result = 0;
+        }
+
+        return result;
+    }
+
+	Dimension getMaximumSize(JComponent jc) {
+		Dimension d = super.getMaximumSize(jc);
+		return (d != null ? d : isHoriz ? new Dimension(Short.MAX_VALUE, 21) : new Dimension(21, Short.MAX_VALUE));
+	}
+
 
 }
