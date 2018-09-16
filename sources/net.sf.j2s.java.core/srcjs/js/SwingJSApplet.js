@@ -281,13 +281,6 @@ if (typeof(SwingJS) == "undefined") {
 			return; // ignore -- page is closing
 		J2S._setDestroy(this);
 		this._ready = true;
-		var script = this._readyScript;
-		if (this._defaultModel)
-			J2S._search(this, this._defaultModel, (script ? ";" + script : ""));
-		else if (script)
-			this._script(script);
-		else if (this._src)
-			this._script('load "' + this._src + '"');
 		this._showInfo(true);
 		this._showInfo(false);
 		J2S.Cache.setDragDrop(this);
