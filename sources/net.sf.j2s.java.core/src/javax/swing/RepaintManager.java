@@ -870,7 +870,7 @@ public class RepaintManager {
 					if (g != null) {
 						// SwingJS not clipping, for performance g.setClip(rect.x, rect.y, rect.width, rect.height);
 						try {
-							((Container) dirtyComponent).paintContainer(g); // SwingJS
+							((Container) dirtyComponent).paint(g); // SwingJS was paintContainer, but that bypasses user's paint(g)?? 9/15/18
 						} finally {
 							g.dispose();
 						}

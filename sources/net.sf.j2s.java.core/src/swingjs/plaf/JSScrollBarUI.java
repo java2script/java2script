@@ -96,6 +96,42 @@ public class JSScrollBarUI extends JSSliderUI {
 		}
 	}
 
+    @Override
+    public void scrollByBlock(int direction) {
+    	// general click in track
+		JScrollBar sb = (JScrollBar) jc; 
+        int delta = sb.getBlockIncrement();
+        if (delta == Integer.MIN_VALUE && direction > 0)
+        	return;
+        delta *= (direction > 0 ? POSITIVE_SCROLL : NEGATIVE_SCROLL);
+        sb.setValue(sb.getValue() + delta);
+    }
+
+    @Override
+    public void scrollByUnit(int direction) {
+    	// scroll click at end of scrollbar
+		JScrollBar sb = (JScrollBar) jc; 
+        int delta = sb.getUnitIncrement();
+        if (delta == Integer.MIN_VALUE && direction > 0)
+        	return;
+        delta *= (direction > 0 ? POSITIVE_SCROLL : NEGATIVE_SCROLL);
+        sb.setValue(sb.getValue() + delta);
+    }
+
+    @Override
+    public int getUnitIncrement() {
+		JScrollBar sb = (JScrollBar) jc; 
+    	return sb.getUnitIncrement();
+    }
+    
+
+
+    @Override
+    public void scrollDueToClickInTrack( int dir ) {
+        scrollByBlock( dir );
+    }
+
+
 }
 
 

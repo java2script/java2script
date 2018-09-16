@@ -119,6 +119,7 @@ class Test_ {
 		Test_J8_Stream.main(args);
 		Test_Java8.main(args);
 		Test_Map.main(args);
+		Test_Math.main(args);
 		Test_Native.main(args);
 		Test_NoAssert.main(args);
 		Test_NoHeadless_1.main(args);

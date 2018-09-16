@@ -1614,14 +1614,14 @@ public class JSComponentUI extends ComponentUI
 		DOMNode.setStyles(iconNode, "left", null, "right", null);
 		DOMNode.setStyles(centeringNode, "text-align", null, "left", null, "right", null);
 		DOMNode.setStyles(centeringNode, poslr, "0px", "text-align", alignlr);
-		if (buttonNode != null) {
-			DOMNode.setStyles(buttonNode, "text-align", null, "left", null, "right", null);
-			DOMNode.setStyles(buttonNode, "text-align", alignlr, alignlr, "0px");
-		}
+		//if (buttonNode != null) {
+			DOMNode.setStyles(domNode, "text-align", null, "left", null, "right", null);
+			DOMNode.setStyles(domNode, "text-align", alignlr, poslr, "0px");
+		//}
 		if (centered) {
-			int w = actualWidth;
-			if (w == 0)
-				w = setHTMLSize1(centeringNode, false, false).width;
+			int w = (buttonNode == null ? 
+				 $(domNode).width() : setHTMLSize1(centeringNode, false, false).width
+					);
 			int off = (w - wText - wIcon) / 2;
 			if (text0) {
 				DOMNode.setStyles(textNode, "left", off + "px");

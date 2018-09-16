@@ -86,6 +86,11 @@ public class JSGraphics2D // extends SunGraphics2D
 		hints = new RenderingHints(new Hashtable());
 		this.canvas = (HTML5Canvas) canvas;
 		ctx = this.canvas.getContext("2d");
+		// reduce antialiasing, thank you,
+		// http://www.rgraph.net/docs/howto-get-crisp-lines-with-no- antialias.html
+		if (!isShifted)
+			ctx.translate(-0.5, -0.5);
+		isShifted = true;
 		transform = new AffineTransform();
 		setStroke(new BasicStroke());
 		/**
@@ -184,14 +189,6 @@ public class JSGraphics2D // extends SunGraphics2D
 	public void background(Color bgcolor) {
 		backgroundColor = bgcolor;
 		if (bgcolor == null) {
-			/*
-			 * 
-			 * reduce antialiasing, thank you,
-			 * http://www.rgraph.net/docs/howto-get-crisp-lines-with-no- antialias.html
-			 */
-			if (!isShifted)
-				ctx.translate(-0.5, -0.5);
-			isShifted = true;
 			return;
 		}
 		clearRect(0, 0, width, height);
@@ -244,7 +241,15 @@ public class JSGraphics2D // extends SunGraphics2D
 		if (width <= 0 || height <= 0)
 			return;
 		backgroundPainted = true;
+		ctx.translate(0.5, 0.5);
 		ctx.fillRect(x, y, width, height);
+		ctx.translate(-0.5, -0.5);
+//
+//		if (width == 1)
+//			drawLine(x, y, x, y + height);
+//		else if (height == 1)
+//			drawLine(x, y, x + width, y);
+//		else
 	}
 
 	public void draw3DRect(int x, int y, int width, int height, boolean raised) {
@@ -702,10 +707,14 @@ public class JSGraphics2D // extends SunGraphics2D
 	}
 
 	public void drawString(String s, int x, int y) {
-		ctx.fillText(s, x, y);
+		fillText(s, x, y);
 	}
 
 	public void drawString(String str, float x, float y) {
+		fillText(str, x, y);
+	}
+
+	private void fillText(String str, float x, float y) {
 		ctx.fillText(str, x, y);
 	}
 
