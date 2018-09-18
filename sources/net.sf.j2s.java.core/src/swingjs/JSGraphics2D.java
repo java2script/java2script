@@ -35,6 +35,7 @@ import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Canvas;
 import swingjs.api.js.HTML5CanvasContext2D;
 
+// BH 9/18/2018 fill3DRect fix
 // BH 6/2018 adds g.copyArea(x,y,width,height,dx,dy)
 
 /**
@@ -261,7 +262,7 @@ public class JSGraphics2D // extends SunGraphics2D
 		do3DRect(x, y, width, height, raised, true);
 	}
 
-	private void do3DRect(int x, int y, int width2, int height2, boolean raised, boolean isFill) {
+	private void do3DRect(int x, int y, int width, int height, boolean raised, boolean isFill) {
 		if (width <= 0 || height <= 0)
 			return;
 		Paint p = getPaint();
