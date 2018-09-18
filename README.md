@@ -2,7 +2,7 @@
 
 
 These notes are for Java developers who want to convert their Java applets or Java applications to 
-JavaScript, allowing continued one-source development of both Java and JavaScript. 
+JavaScript, allowing continued, simultaneous one-source development of both Java and JavaScript. 
 
 Developers of java2script/SwingJS itself should read README-developers.md
 
