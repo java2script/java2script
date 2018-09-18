@@ -1625,6 +1625,7 @@ Clazz._getStackTrace = function(n) {
   estack.pop();
 	  }
   var s = "\n";
+  try {
   var c = arguments.callee;
   for (var i = 0; i < n; i++) {
     if (!(c = c.caller))
@@ -1646,7 +1647,7 @@ Clazz._getStackTrace = function(n) {
       s += getArgs(c);
     }
   }
-  
+  } catch(e){}  
   s += estack.join("\n");
   if (Clazz._stack.length) {
 	  s += "\nsee Clazz._stack";
@@ -5128,6 +5129,7 @@ m$(C$, ['printStackTrace$java_io_PrintStream','printStackTrace$java_io_PrintWrit
 
 Clazz.newMeth(C$, 'fillInStackTrace$', function () {
 this.stackTrace = Clazz.array(StackTraceElement);
+try {
 var caller = arguments.callee.caller;
 var superCaller = null;
 var callerList = [];
@@ -5162,6 +5164,8 @@ while (index < 20 && caller != null) {
   }
   caller = (superCaller && superCaller.arguments && superCaller.arguments.callee) ? superCaller.arguments.callee.caller : null;
 }
+} catch (e) {};
+
 Clazz.initializingException = false;
 return this;
 });

@@ -262,7 +262,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * parameterized
 	 * 
 	 */
-	private boolean temp_addUnqualifiedMethod;
+	private boolean temp_add$UnqualifiedMethod;
 
 	// the three key elements of any class
 
@@ -1001,15 +1001,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		boolean isPrivate = !isPublic && !isConstructor && isPrivate(mBinding);
 		boolean isStatic = isStatic(mBinding);
 		int qualification = (lambdaType != NOT_LAMBDA ? METHOD_FULLY_QUALIFIED 
-				: temp_addUnqualifiedMethod ? METHOD_$_QUALIFIED
-				:  isUserApplet && !isConstructor && !isStatic && isPublic ? METHOD_UNQUALIFIED 
+				: temp_add$UnqualifiedMethod ? METHOD_$_QUALIFIED
 				: METHOD_FULLY_QUALIFIED);
-
-//		boolean addUnqualified = lambdaType == NOT_LAMBDA && (temp_addUnqualifiedMethod // method call to lambda
-//				|| isUserApplet && !isConstructor && !isStatic && isPublic
-//		// public applet methods could never be overloaded in
-//		// JavaScript anyway.
-//		);
+		if (isUserApplet && lambdaType == NOT_LAMBDA && !isConstructor && !isStatic && isPublic)
+			qualification |= METHOD_UNQUALIFIED;
 		String finalName = getFinalMethodNameOrArrayForDeclaration(mBinding, isConstructor, qualification);
 		boolean isMain = isStatic && isPublic && mBinding.getName().equals("main")
 				&& mBinding.getKey().endsWith(";.main([Ljava/lang/String;)V");
@@ -2020,15 +2015,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						log("default method " + method.getKey());
 						defpt = buffer.length();
 					}
-					boolean addUnqualifiedCurrent = temp_addUnqualifiedMethod;
+					boolean addUnqualifiedCurrent = temp_add$UnqualifiedMethod;
 					if (unqualifiedMethods != null) {
 						// check for all methods that override a functional interface abstract method,
-						// as those
-						// methods are not to be qualified
+						// as those methods are to be qualified only with $
 
 						for (int i = unqualifiedMethods.size(); --i >= 0;) {
 							if (method.overrides(unqualifiedMethods.get(i))) {
-								temp_addUnqualifiedMethod = true;
+								temp_add$UnqualifiedMethod = true;
 								break;
 							}
 						}
@@ -2038,7 +2032,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						defaults.append(buffer.substring(defpt));
 						buffer.setLength(defpt);
 					}
-					temp_addUnqualifiedMethod = addUnqualifiedCurrent;
+					temp_add$UnqualifiedMethod = addUnqualifiedCurrent;
 				}
 			}
 		}
@@ -4847,6 +4841,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		ITypeBinding methodClass = mBinding.getDeclaringClass();
 		List<String> names = null;
 		List<String[]> methodList = getGenericMethodList(methodClass, nodeName);
+		
 		if (methodList != null) {
 			names = new ArrayList<String>();
 			for (int i = methodList.size(); --i >= 0;) {
@@ -4854,12 +4849,20 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						METHOD_NOTSPECIAL);
 				if (pname != null)
 					names.add(pname);
-				if (qualification == METHOD_FULLY_QUALIFIED)
+				if (qualification != METHOD_FULLY_QUALIFIED)
 					names.add(ensureMethod$Name(methodName, mBinding, getJavaClassNameQualified(methodClass)));
 			}
-		} else if (qualification != METHOD_FULLY_QUALIFIED && !methodName.equals(qname) && !classHasMethod(methodClass, methodName)) {
-			names = new ArrayList<String>();
-			names.add(methodName + (qualification == METHOD_UNQUALIFIED || methodName.indexOf("$") >= 0 ? "" : "$"));
+		}
+		if ((qualification & METHOD_$_QUALIFIED) != 0 && !methodName.equals(qname)
+				&& !classHasNoParameterMethod(methodClass, methodName)) {
+			if (names == null)
+				names = new ArrayList<String>();
+			names.add(methodName + (methodName.indexOf("$") >= 0 ? "" : "$"));
+		}
+		if ((qualification & METHOD_UNQUALIFIED) != 0) {
+			if (names == null)
+				names = new ArrayList<String>();
+			names.add(methodName);
 		}
 		if (names == null || names.size() == 0)
 			return "'" + qname + "'";
@@ -4872,7 +4875,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		return "[" + qname.substring(1) + "]";
 	}
 
-	private static boolean classHasMethod(ITypeBinding methodClass, String methodName) {
+	private static boolean classHasNoParameterMethod(ITypeBinding methodClass, String methodName) {
 		while (methodClass != null) {
 			IMethodBinding[] methods = methodClass.getDeclaredMethods();
 			for (int i = methods.length; --i >= 0;) {
