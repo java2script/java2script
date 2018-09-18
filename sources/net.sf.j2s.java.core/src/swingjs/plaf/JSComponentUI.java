@@ -1561,6 +1561,7 @@ public class JSComponentUI extends ComponentUI
 		
 //		DOMNode.setAttr(textNode,  "innerHTML", pos);
 		
+		
 		int wIcon = Math.max(0, setHTMLSize1(iconNode, false, false).width - 1);
 		int wText = setHTMLSize1(textNode, false, false).width - 1;
 
@@ -1644,8 +1645,12 @@ public class JSComponentUI extends ComponentUI
 
 		DOMNode.setPositionAbsolute(iconNode);
 		DOMNode.setPositionAbsolute(textNode);
-		if (buttonNode != null)
+		if (buttonNode != null) {
 			DOMNode.setPositionAbsolute(buttonNode);
+		} else if (centeringNode != null) {
+			// See test/Puzzle.java
+				DOMNode.setStyles(centeringNode, "width", "100%");
+		}
 
 	}
 
