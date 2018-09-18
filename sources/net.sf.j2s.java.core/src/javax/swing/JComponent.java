@@ -4573,9 +4573,7 @@ public abstract class JComponent extends Container {
 					// jpanel.repaint() and then draws on the background,
 					// the JPanel's background is made transparent
 					// (so that the underlying JRootPane canvas can show).
-					checkBackgroundPainted(null);
-					paintingComponent.paint(g);					
-					checkBackgroundPainted(getJSGraphic2D(g));
+					paintingComponent.paintWithBackgroundCheck(g);
 				}
 			} finally {
 				g.dispose();
