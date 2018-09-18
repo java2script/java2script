@@ -86,11 +86,12 @@ public class JSGraphics2D // extends SunGraphics2D
 		hints = new RenderingHints(new Hashtable());
 		this.canvas = (HTML5Canvas) canvas;
 		ctx = this.canvas.getContext("2d");
-		// reduce antialiasing, thank you,
-		// http://www.rgraph.net/docs/howto-get-crisp-lines-with-no- antialias.html
-		if (!isShifted)
-			ctx.translate(-0.5, -0.5);
-		isShifted = true;
+// removed - caused blurriness 9/17/2018		
+//		// reduce antialiasing, thank you,
+//		// http://www.rgraph.net/docs/howto-get-crisp-lines-with-no- antialias.html
+//		if (!isShifted)
+//			ctx.translate(-0.5, -0.5);
+//		isShifted = true;
 		transform = new AffineTransform();
 		setStroke(new BasicStroke());
 		/**
