@@ -1,5 +1,6 @@
 package a2s;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.HeadlessException;
 import java.net.MalformedURLException;
@@ -14,7 +15,8 @@ public class Applet extends JApplet implements A2SContainer {
 	// or buttons will not show.
 
     public Applet() throws HeadlessException {
-    	super();    	
+    	super();    
+//    	getContentPane().setBackground(Color.white);
 		fixAppletPaint();
 		
 		// Note: applet.paint(g) needs to include super.paint(g), or buttons will not
@@ -44,6 +46,11 @@ public class Applet extends JApplet implements A2SContainer {
 //		});    	
     }
 
+	public void setBackground(Color c) {
+		super.setBackground(c);
+		getContentPane().setBackground(c);
+	}
+	
 	@Override
 	public void paint(Graphics g) {
 		super.paint(g);

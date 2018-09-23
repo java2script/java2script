@@ -1,12 +1,24 @@
 package a2s;
 
+import java.awt.Color;
 import java.awt.Graphics;
-
-import javax.swing.JComponent;
+import java.awt.GraphicsConfiguration;
 
 
 public class Canvas extends Panel {
 	
+	public Canvas() {
+		super();
+	}
+	
+	public Canvas(GraphicsConfiguration config) {
+		super();
+	}
+	
+	public void setBackground(Color c) {
+		super.setBackground(c);
+		setOpaque(c != null);
+	}
 
 	
 	@Override

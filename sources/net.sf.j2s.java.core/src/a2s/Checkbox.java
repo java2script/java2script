@@ -1,6 +1,5 @@
 package a2s;
 
-import java.awt.GraphicsEnvironment;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 
@@ -28,7 +27,7 @@ public class Checkbox extends JCheckBox {
 
     public Checkbox(String label, boolean state, CheckboxGroup group)
             throws HeadlessException {
-            setLabel(label);
+            setText(label);
             setState(state);
             if (group != null)
             	group.add(this);

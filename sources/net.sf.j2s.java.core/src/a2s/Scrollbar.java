@@ -8,16 +8,19 @@ public class Scrollbar extends JScrollBar implements A2SContainer {
 
 	public Scrollbar(int direction) {
 		super(direction);
+		setOpaque(true);
 		A2SEvent.addListener(null, this);
 	}
 
 	public Scrollbar() {
 		super();
+		setOpaque(true);
 		A2SEvent.addListener(null, this);
 	}
 
 	public Scrollbar(int orientation, int value, int extent, int min, int max) {
 		super(orientation, value, extent, min, max);
+		setOpaque(true);
 		A2SEvent.addListener(null, this);
 	}
 
