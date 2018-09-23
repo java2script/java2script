@@ -16,6 +16,7 @@ package netscape.javascript;
 
 import java.applet.Applet;
 import java.applet.AppletContext;
+import java.applet.JSApplet;
 
 /**
  * 
@@ -246,6 +247,14 @@ public class JSObject {
      * @throws JSException in case or error
      */
     public static JSObject getWindow(Applet applet) throws JSException {
+    	JSObject jsobject = new JSObject();
+		@SuppressWarnings("unused")
+		AppletContext context = applet.getAppletContext();
+		jsobject.obj = /** @j2sNative context.html5Applet._window || */ null;
+		return jsobject;
+    }
+
+    public static JSObject getWindow(JSApplet applet) throws JSException {
     	JSObject jsobject = new JSObject();
 		@SuppressWarnings("unused")
 		AppletContext context = applet.getAppletContext();
