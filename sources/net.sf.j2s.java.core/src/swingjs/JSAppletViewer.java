@@ -1,13 +1,12 @@
 package swingjs;
 
-import java.applet.Applet;
 import java.applet.AppletContext;
 import java.applet.AppletStub;
 import java.applet.AudioClip;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Frame;
+import java.awt.JSFrame;
 import java.awt.GraphicsConfiguration;
 import java.awt.Image;
 import java.awt.Insets;
@@ -130,7 +129,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 		allWindows.addLast(window);
 	}
 
-	public Frame sharedOwnerFrame;
+	public JSFrame sharedOwnerFrame;
 
 	public AppContext appContext;
 
@@ -317,8 +316,8 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 	}
 
 	@Override
-	public Applet getApplet(String name) {
-		Applet applet = null;
+	public java.applet.JSApplet getApplet(String name) {
+		JApplet applet = null;
 		/**
 		 * @j2sNative
 		 * 
@@ -332,7 +331,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 	}
 
 	@Override
-	public Enumeration<Applet> getApplets() {
+	public Enumeration<java.applet.JSApplet> getApplets() {
 		// not supported for now
 		return null;
 	}

@@ -8,10 +8,11 @@ import java.awt.Cursor;
 import java.awt.Dialog;
 import java.awt.Dialog.ModalExclusionType;
 import java.awt.Dialog.ModalityType;
+import java.awt.JSDialog;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import java.awt.Frame;
+import java.awt.JSFrame;
 import java.awt.GraphicsConfiguration;
 import java.awt.Image;
 import java.awt.JSComponent;
@@ -176,12 +177,12 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 
 	@Override
 	public boolean isModalExclusionTypeSupported(
-			ModalExclusionType modalExclusionType) {
+			Dialog.ModalExclusionType modalExclusionType) {
 		return true;
 	}
 
 	@Override
-	public boolean isModalityTypeSupported(ModalityType modalityType) {
+	public boolean isModalityTypeSupported(Dialog.ModalityType modalityType) {
 		return true;
 	}
 
@@ -514,7 +515,7 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	}
 
 	@Override
-	public FramePeer createFrame(Frame target) {
+	public FramePeer createFrame(JSFrame target) {
 		ComponentUI ui = target.getUI();
 		if (ui == null)
 			return null;
@@ -925,7 +926,7 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	 * for now we are ignoring props
 	 */
 	@Override
-	public PrintJob getPrintJob(Frame frame, String jobtitle, Properties props) {
+	public PrintJob getPrintJob(JSFrame frame, String jobtitle, Properties props) {
 		JSPrintJob job = (JSPrintJob) JSUtil.getInstance("swingjs.JSPrintJob");
 		job.setProperties(jobtitle, props);
 		return (PrintJob) (Object) job;
@@ -937,7 +938,7 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	 * for now we are ignoring jobAttributes and pageAttributes
 	 */
 	@Override
-	public PrintJob getPrintJob(Frame frame, String jobtitle,
+	public PrintJob getPrintJob(JSFrame frame, String jobtitle,
 			JobAttributes jobAttributes, PageAttributes pageAttributes) {
 		JSPrintJob job = (JSPrintJob) JSUtil.getInstance("swingjs.JSPrintJob");
 		job.setAttributes(jobtitle, jobAttributes, pageAttributes);

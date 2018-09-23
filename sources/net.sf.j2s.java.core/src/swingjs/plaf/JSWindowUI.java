@@ -1,5 +1,6 @@
 package swingjs.plaf;
 
+import java.awt.JSDialog;
 import java.awt.Dialog;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -131,8 +132,7 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 
 	@Override
 	public void setModalBlocked(Dialog blocker, boolean blocked) {
-		// TODO Auto-generated method stub
-		
+		JSDialog b = ((JSDialog) (Object) blocker);
 	}
 
 	@Override
