@@ -173,7 +173,7 @@ public class PrintWriter extends Writer {
 	 */
 	public PrintWriter(String fileName) throws FileNotFoundException {
 		this(new BufferedWriter(new OutputStreamWriter(
-				newFileOutputStream(new File(fileName)))), false);
+				new FileOutputStream(new File(fileName)))), false);
 	}
 
 	/**
@@ -211,13 +211,7 @@ public class PrintWriter extends Writer {
 	public PrintWriter(String fileName, String csn) throws FileNotFoundException,
 			UnsupportedEncodingException {
 		this(new BufferedWriter(new OutputStreamWriter(
-				newFileOutputStream(new File(fileName)), csn)), false);
-	}
-
-	private static OutputStream newFileOutputStream(File file) {
-		return (OutputStream) Interface.getInstanceWithParams(
-				"java.io.FileOutputStream", new Class[] { java.io.File.class },
-				new Object[] { file });
+				new FileOutputStream(new File(fileName)), csn)), false);
 	}
 
 	/**
@@ -248,7 +242,7 @@ public class PrintWriter extends Writer {
 	 * @since 1.5
 	 */
 	public PrintWriter(File file) throws FileNotFoundException {
-		this(new BufferedWriter(new OutputStreamWriter(newFileOutputStream(file))),
+		this(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file))),
 				false);
 	}
 
@@ -287,7 +281,7 @@ public class PrintWriter extends Writer {
 	 */
 	public PrintWriter(File file, String csn) throws FileNotFoundException,
 			UnsupportedEncodingException {
-		this(new BufferedWriter(new OutputStreamWriter(newFileOutputStream(file),
+		this(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file),
 				csn)), false);
 	}
 
