@@ -1,40 +1,39 @@
 package test;
 
+import java.applet.Applet;
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
+
 import java.awt.Label;
-
-import javax.swing.JApplet;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import java.awt.Panel;
 
 
-public class TApp2 extends JApplet {
+public class TApp2_AWT extends Applet {
 	public void init() {
 		setSize(500,500);
-		getContentPane().setBackground(Color.yellow);
+//		setBackground(Color.YELLOW);
 		setLayout(null);
-		JPanel panel = new JPanel();
+		Panel panel = new Panel();
 		panel.setBounds(10, 10, 100, 150);
 		add(panel);
 		panel.setLayout(null);
 		panel.setBackground(Color.red);
-		JLabel label = new JLabel("OK-netTapp2");
+		Label label = new Label("OKnet");
 		label.setBounds(10, 10, 50, 60);
 		panel.add(label);
 		
-		JPanel panel2 = new JPanel();
+		Panel panel2 = new Panel();
 		panel2.setLayout(new GridLayout(2, 1));
 		Label label1 = new Label("1");
+		label1.setBackground(Color.orange);
 		label1.setAlignment(Label.CENTER);
+		label1.setSize(50,15);
+		
 		panel2.add(label1);
-		label1.setSize(50,15);		
-		panel2.add(new JLabel("2"));
+		panel2.add(new Label("2"));
 		panel2.setBounds(200, 150, 100, 150);
 		add(panel2);
 	}
