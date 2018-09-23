@@ -27,7 +27,7 @@
  */
 package javax.swing;
 
-import java.applet.Applet;
+import java.applet.JSApplet;
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -94,7 +94,7 @@ import java.awt.LayoutManager;
  *
  * @author Arnaud Weber
  */
-public class JApplet extends Applet implements /* Accessible ,*/
+public class JApplet extends JSApplet implements /* Accessible ,*/
                                                RootPaneContainer/*,
                                TransferHandler.HasGetTransferHandler*/
 {
@@ -146,19 +146,12 @@ public class JApplet extends Applet implements /* Accessible ,*/
 //        q.startIfNeeded();
 //    }
 
-    /* Workaround for bug 4155072.  The shared double buffer image
-     * may hang on to a reference to this applet; unfortunately
-     * Image.getGraphics() will continue to call JApplet.getForeground()
-     * and getBackground() even after this applet has been destroyed.
-     * So we ensure that these properties are non-null here.
-     */
-    setForeground(Color.black);
-    setBackground(Color.white);
-
-    setLocale( JComponent.getDefaultLocale() );
-    setLayout(new BorderLayout());
     setRootPane(createRootPane());
     rootPane.setFrameViewer(appletViewer);
+    setForeground(Color.black);
+    setBackground(Color.white);
+    setLocale( JComponent.getDefaultLocale() );
+    setLayout(new BorderLayout());
     setRootPaneCheckingEnabled(true);
 
     setFocusTraversalPolicyProvider(true);

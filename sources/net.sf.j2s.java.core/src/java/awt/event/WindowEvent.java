@@ -88,7 +88,7 @@ public class WindowEvent extends ComponentEvent {
      * the window has been changed from a normal to a minimized state.
      * For many platforms, a minimized window is displayed as
      * the icon specified in the window's iconImage property.
-     * @see java.awt.Frame#setIconImage
+     * @see java.awt.JSFrame#setIconImage
      */
     public static final int WINDOW_ICONIFIED    = 3 + WINDOW_FIRST; //Event.WINDOW_ICONIFY
 
@@ -325,7 +325,7 @@ public class WindowEvent extends ComponentEvent {
      * </ul>
      *
      * @return a bitwise mask of the previous window state
-     * @see java.awt.Frame#getExtendedState()
+     * @see java.awt.JSFrame#getExtendedState()
      * @since 1.4
      */
     public int getOldState() {
@@ -348,7 +348,7 @@ public class WindowEvent extends ComponentEvent {
      * </ul>
      *
      * @return a bitwise mask of the new window state
-     * @see java.awt.Frame#getExtendedState()
+     * @see java.awt.JSFrame#getExtendedState()
      * @since 1.4
      */
     public int getNewState() {

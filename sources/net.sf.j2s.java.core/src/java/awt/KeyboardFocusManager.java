@@ -98,8 +98,8 @@ import sun.awt.AWTAccessor;
  * @author David Mendenhall
  *
  * @see Window
- * @see Frame
- * @see Dialog
+ * @see JSFrame
+ * @see JSDialog
  * @see java.awt.event.FocusEvent
  * @see java.awt.event.WindowEvent
  * @see java.awt.event.KeyEvent
@@ -2555,8 +2555,8 @@ public abstract class KeyboardFocusManager
                 ? SunToolkit.getContainingWindow(hwFocusRequest.heavyweight)
                 : nativeFocusedWindow);
             while (activeWindow != null &&
-                   !((activeWindow instanceof Frame) ||
-                     (activeWindow instanceof Dialog)))
+                   !((activeWindow instanceof JSFrame) ||
+                     (activeWindow instanceof JSDialog)))
             {
                 activeWindow = activeWindow.getParent_NoClientCode();
             }

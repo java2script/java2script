@@ -41,7 +41,7 @@ import java.awt.peer.ComponentPeer;
  * @see     java.awt.FlowLayout
  * @since   JDK1.0
  */
-public class Panel extends Container {
+public class JSPanel extends Container {
     private static final String base = "panel";
     private static int nameCounter = 0;
 
@@ -56,7 +56,7 @@ public class Panel extends Container {
      * <code>FlowLayout</code> class.
      * 
      */
-    public Panel() {
+    public JSPanel() {
     	this(new FlowLayout());
     }
 
@@ -72,7 +72,7 @@ public class Panel extends Container {
      * @param layout the layout manager for this panel.
      * @since JDK1.1
      */
-    public Panel(LayoutManager layout) {
+    public JSPanel(LayoutManager layout) {
     	setAppContext();
     	setLayout(layout);
     }
@@ -83,9 +83,9 @@ public class Panel extends Container {
      */
     @Override
 		String constructComponentName() {
-        synchronized (Panel.class) {
+ //       synchronized (JSPanel.class) {
             return base + nameCounter++;
-        }
+ //       }
     }
 
 	/**
@@ -103,7 +103,7 @@ public class Panel extends Container {
     
   	@Override
   	protected ComponentPeer getOrCreatePeer() {
-  		return (ui == null ? null : peer == null ? (peer = getToolkit().createPanel(this)) : peer);
+  		return (ui == null ? null : peer == null ? (peer = getToolkit().createPanel((Panel) (Object) this)) : peer);
   	}
 
 

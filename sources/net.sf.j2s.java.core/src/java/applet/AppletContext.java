@@ -78,7 +78,7 @@ public interface AppletContext {
      * @return  the applet with the given name, or <code>null</code> if
      *          not found.
      */
-    Applet getApplet(String name);
+    JSApplet getApplet(String name);
 
     /**
      * Finds all the applets in the document represented by this applet
@@ -87,7 +87,7 @@ public interface AppletContext {
      * @return  an enumeration of all applets in the document represented by
      *          this applet context.
      */
-    Enumeration<Applet> getApplets();
+    Enumeration<JSApplet> getApplets();
 
     /**
      * Requests that the browser or applet viewer show the Web page

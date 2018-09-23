@@ -285,10 +285,10 @@ public abstract class Toolkit {
      * @exception HeadlessException if GraphicsEnvironment.isHeadless()
      * returns true
      * @see       java.awt.GraphicsEnvironment#isHeadless
-     * @see       java.awt.Frame
+     * @see       java.awt.JSFrame
      * @see       java.awt.peer.FramePeer
      */
-    protected abstract FramePeer createFrame(Frame target);
+    protected abstract FramePeer createFrame(JSFrame target);
 //
 //    /**
 //     * Creates this toolkit's implementation of <code>Canvas</code> using
@@ -305,7 +305,7 @@ public abstract class Toolkit {
      * the specified peer interface.
      * @param     target the panel to be implemented.
      * @return    this toolkit's implementation of <code>Panel</code>.
-     * @see       java.awt.Panel
+     * @see       java.awt.JSPanel
      * @see       java.awt.peer.PanelPeer
      */
     protected abstract PanelPeer        createPanel(Panel target);
@@ -331,7 +331,7 @@ public abstract class Toolkit {
      * @exception HeadlessException if GraphicsEnvironment.isHeadless()
      * returns true
      * @see       java.awt.GraphicsEnvironment#isHeadless
-     * @see       java.awt.Dialog
+     * @see       java.awt.JSDialog
      * @see       java.awt.peer.DialogPeer
      */
     protected abstract java.awt.peer.DialogPeer createDialog(Dialog target)
@@ -1174,7 +1174,7 @@ public abstract class Toolkit {
      * @see     java.lang.RuntimePermission
      * @since   JDK1.1
      */
-    public abstract PrintJob getPrintJob(Frame frame, String jobtitle,
+    public abstract PrintJob getPrintJob(JSFrame frame, String jobtitle,
                                          Properties props);
 
     /**
@@ -1226,7 +1226,7 @@ public abstract class Toolkit {
      * @see     java.awt.PageAttributes
      * @since   1.3
      */
-    public PrintJob getPrintJob(Frame frame, String jobtitle,
+    public PrintJob getPrintJob(JSFrame frame, String jobtitle,
                                 JobAttributes jobAttributes,
                                 PageAttributes pageAttributes) {
         // Override to add printing support with new job/page control classes
@@ -1553,13 +1553,13 @@ public abstract class Toolkit {
      * @exception HeadlessException
      *     if <code>GraphicsEnvironment.isHeadless()</code>
      *     returns <code>true</code>.
-     * @see     java.awt.Frame#setExtendedState
+     * @see     java.awt.JSFrame#setExtendedState
      * @since   1.4
      */
     public boolean isFrameStateSupported(int state)
         
     {
-       return (state == Frame.NORMAL); // others are not guaranteed
+       return (state == JSFrame.NORMAL); // others are not guaranteed
     }
 
     /**
@@ -1825,8 +1825,8 @@ public abstract class Toolkit {
      *     type, <code>false</code> otherwise
      *
      * @see java.awt.Dialog.ModalityType
-     * @see java.awt.Dialog#getModalityType
-     * @see java.awt.Dialog#setModalityType
+     * @see java.awt.JSDialog#getModalityType
+     * @see java.awt.JSDialog#setModalityType
      *
      * @since 1.6
      */

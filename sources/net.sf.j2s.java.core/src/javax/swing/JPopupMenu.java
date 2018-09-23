@@ -33,7 +33,7 @@ import java.util.Vector;
 import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Frame;
+import java.awt.JSFrame;
 import java.awt.Graphics;
 import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
@@ -105,7 +105,7 @@ public class JPopupMenu extends JComponent implements MenuElement {
 
     transient  Component invoker;
     transient  Popup popup;
-    transient  Frame frame;
+    transient  JSFrame frame;
     private    int desiredLocationX,desiredLocationY;
 
     private    String     label                   = null;

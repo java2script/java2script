@@ -51,6 +51,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GraphicsConfiguration;
 import java.awt.Image;
+import java.awt.JSPanel;
 import java.awt.Panel;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
@@ -1495,7 +1496,7 @@ public abstract class SunToolkit extends Toolkit implements
 		// || comp instanceof Label
 		// || comp instanceof List
 		// ||
-		comp instanceof Panel
+		comp instanceof JSPanel
 		// || comp instanceof Scrollbar
 		// || comp instanceof ScrollPane
 		// || comp instanceof TextArea

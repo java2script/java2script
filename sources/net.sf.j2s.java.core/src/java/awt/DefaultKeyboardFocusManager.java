@@ -105,8 +105,8 @@ public class DefaultKeyboardFocusManager extends KeyboardFocusManager {
     }
 
     private Window getOwningFrameDialog(Window window) {
-        while (window != null && !(window instanceof Frame ||
-                                   window instanceof Dialog)) {
+        while (window != null && !(window instanceof JSFrame ||
+                                   window instanceof JSDialog)) {
             window = (Window)window.getParent();
         }
         return window;

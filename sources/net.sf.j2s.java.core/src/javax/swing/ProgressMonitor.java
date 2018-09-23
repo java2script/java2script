@@ -33,8 +33,8 @@ package javax.swing;
 
 
 import java.awt.BorderLayout;
-import java.awt.Frame;
-import java.awt.Dialog;
+import java.awt.JSFrame;
+import java.awt.JSDialog;
 import java.awt.Window;
 import java.awt.Component;
 import java.awt.Container;
@@ -174,10 +174,10 @@ public class ProgressMonitor
             final JDialog dialog;
 
             Window window = JOptionPane.getWindowForComponent(parentComponent);
-            if (window instanceof Frame) {
-                dialog = new JDialog((Frame)window, title, false);
+            if (window instanceof JSFrame) {
+                dialog = new JDialog((JSFrame)window, title, false);
             } else {
-                dialog = new JDialog((Dialog)window, title, false);
+                dialog = new JDialog((JSDialog)window, title, false);
             }
             if (window instanceof SwingUtilities.SharedOwnerFrame) {
                 WindowListener ownerShutdownListener =

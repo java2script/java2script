@@ -35,7 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import java.applet.Applet;
+import java.applet.JSApplet;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
@@ -43,7 +43,7 @@ import java.awt.GraphicsConfiguration;
 //import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.JSComponent;
-import java.awt.Panel;
+import java.awt.JSPanel;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -622,7 +622,7 @@ public class PopupFactory {
                         r.y = p.y;
                         return r.contains(x, y, width, height);
                     } else if (parent instanceof Window ||
-                               parent instanceof Applet) {
+                               parent instanceof JSApplet) {
                         // No suitable swing component found
                         break;
                     }
@@ -934,7 +934,7 @@ public class PopupFactory {
               if it has a layered pane,
               add to that, otherwise
               add to the window. */
-            while (!(parent instanceof Window || parent instanceof Applet) &&
+            while (!(parent instanceof Window || parent instanceof JSApplet) &&
                    (parent!=null)) {
                 parent = parent.getParent();
             }
@@ -963,7 +963,7 @@ public class PopupFactory {
 
         @Override
 				Component createComponent(Component owner) {
-            Panel component = new MediumWeightComponent();
+            JSPanel component = new MediumWeightComponent();
             
             rootPane = new JRootPane("_Popup" + (++popupCount), false);
             rootPane.setFrameViewer(((JSComponent) owner).getFrameViewer());
@@ -996,7 +996,7 @@ public class PopupFactory {
 
         // This implements SwingHeavyWeight so that repaints on it
         // are processed by the RepaintManager and SwingPaintEventDispatcher.
-        private static class MediumWeightComponent extends Panel implements
+        private static class MediumWeightComponent extends JSPanel implements
                                                            SwingHeavyWeight {
             MediumWeightComponent() {
                 super(new BorderLayout());

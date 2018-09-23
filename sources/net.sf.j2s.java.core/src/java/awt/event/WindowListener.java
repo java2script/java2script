@@ -74,7 +74,7 @@ public interface WindowListener extends EventListener {
      * minimized state. For many platforms, a minimized window
      * is displayed as the icon specified in the window's
      * iconImage property.
-     * @see java.awt.Frame#setIconImage
+     * @see java.awt.JSFrame#setIconImage
      */
     public void windowIconified(WindowEvent e);
 
