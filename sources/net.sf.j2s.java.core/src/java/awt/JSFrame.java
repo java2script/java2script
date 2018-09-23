@@ -128,7 +128,7 @@ import java.awt.peer.FramePeer;
  * @since       JDK1.0
  */
 @SuppressWarnings({"rawtypes"})
-public class Frame extends Window {
+public class JSFrame extends Window {
 
     /* Note: These are being obsoleted;  programs should use the Cursor class
      * variables going forward. See Cursor and Component.setCursor.
@@ -382,7 +382,7 @@ public class Frame extends Window {
      * 
      * 
      */
-    public Frame() {
+    public JSFrame() {
     	initTitleGC(null, null);
     }
 
@@ -403,7 +403,7 @@ public class Frame extends Window {
      * @since     1.3
      * 
      */
-    public Frame(GraphicsConfiguration gc) {
+    public JSFrame(GraphicsConfiguration gc) {
     	initTitleGC(null, gc);
     }
 
@@ -419,7 +419,7 @@ public class Frame extends Window {
      * @see java.awt.GraphicsConfiguration#getBounds
      * 
      */
-    public Frame(String title) {
+    public JSFrame(String title) {
     	initTitleGC(title, null);
     }
 
@@ -448,7 +448,7 @@ public class Frame extends Window {
      * 
      * 
      */
-    public Frame(String title, GraphicsConfiguration gc) {
+    public JSFrame(String title, GraphicsConfiguration gc) {
     	initTitleGC(title, gc);
     }
 
@@ -463,9 +463,9 @@ public class Frame extends Window {
      */
     @Override
 		String constructComponentName() {
-        synchronized (Frame.class) {
+//        synchronized (JSFrame.class) {
             return base + nameCounter++;
-        }
+//        }
     }
 
 	/**
@@ -615,7 +615,7 @@ public class Frame extends Window {
      * By default, all frames are initially resizable.
      * @return    <code>true</code> if the user can resize this frame;
      *                        <code>false</code> otherwise.
-     * @see       java.awt.Frame#setResizable(boolean)
+     * @see       java.awt.JSFrame#setResizable(boolean)
      */
     public boolean isResizable() {
         return resizable;
@@ -625,7 +625,7 @@ public class Frame extends Window {
      * Sets whether this frame is resizable by the user.
      * @param    resizable   <code>true</code> if this frame is resizable;
      *                       <code>false</code> otherwise.
-     * @see      java.awt.Frame#isResizable
+     * @see      java.awt.JSFrame#isResizable
      */
     public void setResizable(boolean resizable) {
         boolean oldResizable = this.resizable;
@@ -846,7 +846,7 @@ public class Frame extends Window {
      * By default, all frames are initially decorated.
      * @return    <code>true</code> if frame is undecorated;
      *                        <code>false</code> otherwise.
-     * @see       java.awt.Frame#setUndecorated(boolean)
+     * @see       java.awt.JSFrame#setUndecorated(boolean)
      * @since 1.4
      */
     public boolean isUndecorated() {
@@ -996,21 +996,21 @@ public class Frame extends Window {
      *
      * @since 1.2
      */
-    public static Frame[] getFrames() {
+    public static JSFrame[] getFrames() {
         Window[] allWindows = Window.getWindows();
 
         int frameCount = 0;
         for (Window w : allWindows) {
-            if (w instanceof Frame) {
+            if (w instanceof JSFrame) {
                 frameCount++;
             }
         }
 
-        Frame[] frames = new Frame[frameCount];
+        JSFrame[] frames = new JSFrame[frameCount];
         int c = 0;
         for (Window w : allWindows) {
-            if (w instanceof Frame) {
-                frames[c++] = (Frame)w;
+            if (w instanceof JSFrame) {
+                frames[c++] = (JSFrame)w;
             }
         }
 

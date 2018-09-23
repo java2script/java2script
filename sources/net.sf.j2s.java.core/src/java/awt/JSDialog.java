@@ -65,7 +65,7 @@ import java.util.Iterator;
  * restored, the dialog is made visible to the user again.
  * <p>
  * In a multi-screen environment, you can create a <code>Dialog</code>
- * on a different screen device than its owner.  See {@link java.awt.Frame} for
+ * on a different screen device than its owner.  See {@link java.awt.JSFrame} for
  * more information.
  * <p>
  * A dialog can be either modeless (the default) or modal.  A modal
@@ -88,10 +88,10 @@ import java.util.Iterator;
  * @author      Arthur van Hoff
  * @since       JDK1.0
  */
-public class Dialog extends Window {
+public class JSDialog extends Window {
 
 
-  transient static ArrayList<Dialog> modalDialogs = new ArrayList<Dialog>();
+  transient static ArrayList<JSDialog> modalDialogs = new ArrayList<JSDialog>();
 
   transient ArrayList<Window> blockedWindows = new ArrayList<Window>();
 
@@ -123,71 +123,6 @@ public class Dialog extends Window {
     private transient boolean initialized = false;
 
     /**
-     * Modal dialogs block all input to some top-level windows.
-     * Whether a particular window is blocked depends on dialog's type
-     * of modality; this is called the "scope of blocking". The
-     * <code>ModalityType</code> enum specifies modal types and their
-     * associated scopes.
-     *
-     * @see Dialog#getModalityType
-     * @see Dialog#setModalityType
-     * @see Toolkit#isModalityTypeSupported
-     *
-     * @since 1.6
-     */
-    public static enum ModalityType {
-        /**
-         * <code>MODELESS</code> dialog doesn't block any top-level windows.
-         */
-        MODELESS,
-        /**
-         * A <code>DOCUMENT_MODAL</code> dialog blocks input to all top-level windows
-         * from the same document except those from its own child hierarchy.
-         * A document is a top-level window without an owner. It may contain child
-         * windows that, together with the top-level window are treated as a single
-         * solid document. Since every top-level window must belong to some
-         * document, its root can be found as the top-nearest window without an owner.
-         */
-        DOCUMENT_MODAL,
-        /**
-         * An <code>APPLICATION_MODAL</code> dialog blocks all top-level windows
-         * from the same Java application except those from its own child hierarchy.
-         * If there are several applets launched in a browser, they can be
-         * treated either as separate applications or a single one. This behavior
-         * is implementation-dependent.
-         */
-        APPLICATION_MODAL,
-        /**
-         * A <code>TOOLKIT_MODAL</code> dialog blocks all top-level windows run
-         * from the same toolkit except those from its own child hierarchy. If there
-         * are several applets launched in a browser, all of them run with the same
-         * toolkit; thus, a toolkit-modal dialog displayed by an applet may affect
-         * other applets and all windows of the browser instance which embeds the
-         * Java runtime environment for this toolkit.
-         * Special <code>AWTPermission</code> "toolkitModality" must be granted to use
-         * toolkit-modal dialogs. If a <code>TOOLKIT_MODAL</code> dialog is being created
-         * and this permission is not granted, a <code>SecurityException</code> will be
-         * thrown, and no dialog will be created. If a modality type is being changed
-         * to <code>TOOLKIT_MODAL</code> and this permission is not granted, a
-         * <code>SecurityException</code> will be thrown, and the modality type will
-         * be left unchanged.
-         */
-        TOOLKIT_MODAL
-    }
-
-    /**
-     * Default modality type for modal dialogs. The default modality type is
-     * <code>APPLICATION_MODAL</code>. Calling the oldstyle <code>setModal(true)</code>
-     * is equal to <code>setModalityType(DEFAULT_MODALITY_TYPE)</code>.
-     *
-     * @see java.awt.Dialog.ModalityType
-     * @see java.awt.Dialog#setModal
-     *
-     * @since 1.6
-     */
-    public final static ModalityType DEFAULT_MODALITY_TYPE = ModalityType.APPLICATION_MODAL;
-
-    /**
      * True if this dialog is modal, false is the dialog is modeless.
      * A modal dialog blocks user input to some application top-level
      * windows. This field is kept only for backwards compatibility. Use the
@@ -199,62 +134,28 @@ public class Dialog extends Window {
      * @see #setModal
      * @see #getModalityType
      * @see #setModalityType
-     * @see ModalityType
+     * @see Dialog.ModalityType
      * @see ModalityType#MODELESS
-     * @see #DEFAULT_MODALITY_TYPE
+     * @see Dialog#DEFAULT_MODALITY_TYPE
      */
     boolean modal;
 
     /**
      * Modality type of this dialog. If the dialog's modality type is not
-     * {@link Dialog.ModalityType#MODELESS ModalityType.MODELESS}, it blocks all
+     * {@link JSDialog.ModalityType#MODELESS ModalityType.MODELESS}, it blocks all
      * user input to some application top-level windows.
      *
      * @serial
      *
-     * @see ModalityType
+     * @see Dialog.ModalityType
      * @see #getModalityType
      * @see #setModalityType
      *
      * @since 1.6
      */
-    ModalityType modalityType;
+    Dialog.ModalityType modalityType;
 
-    /**
-     * Any top-level window can be marked not to be blocked by modal
-     * dialogs. This is called "modal exclusion". This enum specifies
-     * the possible modal exclusion types.
-     *
-     * @see Window#getModalExclusionType
-     * @see Window#setModalExclusionType
-     * @see Toolkit#isModalExclusionTypeSupported
-     *
-     * @since 1.6
-     */
-    public static enum ModalExclusionType {
-        /**
-         * No modal exclusion.
-         */
-        NO_EXCLUDE,
-        /**
-         * <code>APPLICATION_EXCLUDE</code> indicates that a top-level window
-         * won't be blocked by any application-modal dialogs. Also, it isn't
-         * blocked by document-modal dialogs from outside of its child hierarchy.
-         */
-        APPLICATION_EXCLUDE,
-        /**
-         * <code>TOOLKIT_EXCLUDE</code> indicates that a top-level window
-         * won't be blocked by  application-modal or toolkit-modal dialogs. Also,
-         * it isn't blocked by document-modal dialogs from outside of its
-         * child hierarchy.
-         * The "toolkitModality" <code>AWTPermission</code> must be granted
-         * for this exclusion. If an exclusion property is being changed to
-         * <code>TOOLKIT_EXCLUDE</code> and this permission is not granted, a
-         * <code>SecurityEcxeption</code> will be thrown, and the exclusion
-         * property will be left unchanged.
-         */
-        TOOLKIT_EXCLUDE
-    }
+    
 
 //    /**
 //     * @since 1.6
@@ -325,7 +226,7 @@ public class Dialog extends Window {
      * @see Component#setSize
      * @see Component#setVisible
      */
-     public Dialog(Frame owner) {
+     public JSDialog(JSFrame owner) {
          this(owner, "", false);
      }
 
@@ -345,13 +246,13 @@ public class Dialog extends Window {
      *     <code>GraphicsEnvironment.isHeadless()</code> returns <code>true</code>
      *
      * @see java.awt.Dialog.ModalityType
-     * @see java.awt.Dialog.ModalityType#MODELESS
+     * @see java.awt.JSDialog.ModalityType#MODELESS
      * @see java.awt.Dialog#DEFAULT_MODALITY_TYPE
-     * @see java.awt.Dialog#setModal
-     * @see java.awt.Dialog#setModalityType
+     * @see java.awt.JSDialog#setModal
+     * @see java.awt.JSDialog#setModalityType
      * @see java.awt.GraphicsEnvironment#isHeadless
      */
-     public Dialog(Frame owner, boolean modal) {
+     public JSDialog(JSFrame owner, boolean modal) {
          this(owner, "", modal);
      }
 
@@ -372,7 +273,7 @@ public class Dialog extends Window {
      * @see Component#setSize
      * @see Component#setVisible
      */
-     public Dialog(Frame owner, String title) {
+     public JSDialog(JSFrame owner, String title) {
          this(owner, title, false);
      }
 
@@ -394,16 +295,16 @@ public class Dialog extends Window {
      *    <code>GraphicsEnvironment.isHeadless()</code> returns <code>true</code>
      *
      * @see java.awt.Dialog.ModalityType
-     * @see java.awt.Dialog.ModalityType#MODELESS
+     * @see java.awt.JSDialog.ModalityType#MODELESS
      * @see java.awt.Dialog#DEFAULT_MODALITY_TYPE
-     * @see java.awt.Dialog#setModal
-     * @see java.awt.Dialog#setModalityType
+     * @see java.awt.JSDialog#setModal
+     * @see java.awt.JSDialog#setModalityType
      * @see java.awt.GraphicsEnvironment#isHeadless
      * @see Component#setSize
      * @see Component#setVisible
      */
-     public Dialog(Frame owner, String title, boolean modal) {
-         this(owner, title, modal ? DEFAULT_MODALITY_TYPE : ModalityType.MODELESS);
+     public JSDialog(JSFrame owner, String title, boolean modal) {
+         this(owner, title, modal ? Dialog.DEFAULT_MODALITY_TYPE : Dialog.ModalityType.MODELESS);
      }
 
     /**
@@ -426,18 +327,18 @@ public class Dialog extends Window {
      *     <code>GraphicsEnvironment.isHeadless()</code> returns <code>true</code>
      *
      * @see java.awt.Dialog.ModalityType
-     * @see java.awt.Dialog.ModalityType#MODELESS
+     * @see java.awt.JSDialog.ModalityType#MODELESS
      * @see java.awt.Dialog#DEFAULT_MODALITY_TYPE
-     * @see java.awt.Dialog#setModal
-     * @see java.awt.Dialog#setModalityType
+     * @see java.awt.JSDialog#setModal
+     * @see java.awt.JSDialog#setModalityType
      * @see java.awt.GraphicsEnvironment#isHeadless
      * @see Component#setSize
      * @see Component#setVisible
      * @since 1.4
      */
-     public Dialog(Frame owner, String title, boolean modal,
+     public JSDialog(JSFrame owner, String title, boolean modal,
                    GraphicsConfiguration gc) {
-         this(owner, title, modal ? DEFAULT_MODALITY_TYPE : ModalityType.MODELESS, gc);
+         this(owner, title, modal ? Dialog.DEFAULT_MODALITY_TYPE : Dialog.ModalityType.MODELESS, gc);
      }
 
     /**
@@ -453,7 +354,7 @@ public class Dialog extends Window {
      * @see java.awt.GraphicsEnvironment#isHeadless
      * @since 1.2
      */
-     public Dialog(Dialog owner) {
+     public JSDialog(JSDialog owner) {
          this(owner, "", false);
      }
 
@@ -473,7 +374,7 @@ public class Dialog extends Window {
      * @see java.awt.GraphicsEnvironment#isHeadless
      * @since 1.2
      */
-     public Dialog(Dialog owner, String title) {
+     public JSDialog(JSDialog owner, String title) {
          this(owner, title, false);
      }
 
@@ -495,16 +396,16 @@ public class Dialog extends Window {
      *    <code>GraphicsEnvironment.isHeadless()</code> returns <code>true</code>
      *
      * @see java.awt.Dialog.ModalityType
-     * @see java.awt.Dialog.ModalityType#MODELESS
+     * @see java.awt.JSDialog.ModalityType#MODELESS
      * @see java.awt.Dialog#DEFAULT_MODALITY_TYPE
-     * @see java.awt.Dialog#setModal
-     * @see java.awt.Dialog#setModalityType
+     * @see java.awt.JSDialog#setModal
+     * @see java.awt.JSDialog#setModalityType
      * @see java.awt.GraphicsEnvironment#isHeadless
      *
      * @since 1.2
      */
-     public Dialog(Dialog owner, String title, boolean modal) {
-         this(owner, title, modal ? DEFAULT_MODALITY_TYPE : ModalityType.MODELESS);
+     public JSDialog(JSDialog owner, String title, boolean modal) {
+         this(owner, title, modal ? Dialog.DEFAULT_MODALITY_TYPE : Dialog.ModalityType.MODELESS);
      }
 
     /**
@@ -529,19 +430,19 @@ public class Dialog extends Window {
      *    <code>GraphicsEnvironment.isHeadless()</code> returns <code>true</code>
      *
      * @see java.awt.Dialog.ModalityType
-     * @see java.awt.Dialog.ModalityType#MODELESS
+     * @see java.awt.JSDialog.ModalityType#MODELESS
      * @see java.awt.Dialog#DEFAULT_MODALITY_TYPE
-     * @see java.awt.Dialog#setModal
-     * @see java.awt.Dialog#setModalityType
+     * @see java.awt.JSDialog#setModal
+     * @see java.awt.JSDialog#setModalityType
      * @see java.awt.GraphicsEnvironment#isHeadless
      * @see Component#setSize
      * @see Component#setVisible
      *
      * @since 1.4
      */
-     public Dialog(Dialog owner, String title, boolean modal,
+     public JSDialog(JSDialog owner, String title, boolean modal,
                    GraphicsConfiguration gc) {
-         this(owner, title, modal ? DEFAULT_MODALITY_TYPE : ModalityType.MODELESS, gc);
+         this(owner, title, modal ? Dialog.DEFAULT_MODALITY_TYPE : Dialog.ModalityType.MODELESS, gc);
      }
 
     /**
@@ -549,12 +450,12 @@ public class Dialog extends Window {
      * specified owner <code>Window</code> and an empty title.
      *
      * @param owner the owner of the dialog. The owner must be an instance of
-     *     {@link java.awt.Dialog Dialog}, {@link java.awt.Frame Frame}, any
+     *     {@link java.awt.JSDialog Dialog}, {@link java.awt.JSFrame Frame}, any
      *     of their descendents or <code>null</code>
      *
      * @exception java.lang.IllegalArgumentException if the <code>owner</code>
-     *     is not an instance of {@link java.awt.Dialog Dialog} or {@link
-     *     java.awt.Frame Frame}
+     *     is not an instance of {@link java.awt.JSDialog Dialog} or {@link
+     *     java.awt.JSFrame Frame}
      * @exception java.lang.IllegalArgumentException if the <code>owner</code>'s
      *     <code>GraphicsConfiguration</code> is not from a screen device
      * @exception HeadlessException when
@@ -564,8 +465,8 @@ public class Dialog extends Window {
      *
      * @since 1.6
      */
-    public Dialog(Window owner) {
-        this(owner, null, ModalityType.MODELESS);
+    public JSDialog(Window owner) {
+        this(owner, null, Dialog.ModalityType.MODELESS);
     }
 
     /**
@@ -573,14 +474,14 @@ public class Dialog extends Window {
      * the specified owner <code>Window</code> and title.
      *
      * @param owner the owner of the dialog. The owner must be an instance of
-     *    {@link java.awt.Dialog Dialog}, {@link java.awt.Frame Frame}, any
+     *    {@link java.awt.JSDialog Dialog}, {@link java.awt.JSFrame Frame}, any
      *    of their descendents or <code>null</code>
      * @param title the title of the dialog or <code>null</code> if this dialog
      *    has no title
      *
      * @exception java.lang.IllegalArgumentException if the <code>owner</code>
-     *    is not an instance of {@link java.awt.Dialog Dialog} or {@link
-     *    java.awt.Frame Frame}
+     *    is not an instance of {@link java.awt.JSDialog Dialog} or {@link
+     *    java.awt.JSFrame Frame}
      * @exception java.lang.IllegalArgumentException if the <code>owner</code>'s
      *    <code>GraphicsConfiguration</code> is not from a screen device
      * @exception HeadlessException when
@@ -590,8 +491,8 @@ public class Dialog extends Window {
      *
      * @since 1.6
      */
-    public Dialog(Window owner, String title) {
-        this(owner, title, ModalityType.MODELESS);
+    public JSDialog(Window owner, String title) {
+        this(owner, title, Dialog.ModalityType.MODELESS);
     }
 
     /**
@@ -599,15 +500,15 @@ public class Dialog extends Window {
      * specified owner <code>Window</code> and modality and an empty title.
      *
      * @param owner the owner of the dialog. The owner must be an instance of
-     *    {@link java.awt.Dialog Dialog}, {@link java.awt.Frame Frame}, any
+     *    {@link java.awt.JSDialog Dialog}, {@link java.awt.JSFrame Frame}, any
      *    of their descendents or <code>null</code>
      * @param modalityType specifies whether dialog blocks input to other
      *    windows when shown. <code>null</code> value and unsupported modality
      *    types are equivalent to <code>MODELESS</code>
      *
      * @exception java.lang.IllegalArgumentException if the <code>owner</code>
-     *    is not an instance of {@link java.awt.Dialog Dialog} or {@link
-     *    java.awt.Frame Frame}
+     *    is not an instance of {@link java.awt.JSDialog Dialog} or {@link
+     *    java.awt.JSFrame Frame}
      * @exception java.lang.IllegalArgumentException if the <code>owner</code>'s
      *    <code>GraphicsConfiguration</code> is not from a screen device
      * @exception HeadlessException when
@@ -616,14 +517,14 @@ public class Dialog extends Window {
      *    to create modal dialogs with the given <code>modalityType</code>
      *
      * @see java.awt.Dialog.ModalityType
-     * @see java.awt.Dialog#setModal
-     * @see java.awt.Dialog#setModalityType
+     * @see java.awt.JSDialog#setModal
+     * @see java.awt.JSDialog#setModalityType
      * @see java.awt.GraphicsEnvironment#isHeadless
      * @see java.awt.Toolkit#isModalityTypeSupported
      *
      * @since 1.6
      */
-    public Dialog(Window owner, ModalityType modalityType) {
+    public JSDialog(Window owner, Dialog.ModalityType modalityType) {
         this(owner, null, modalityType);
     }
 
@@ -632,7 +533,7 @@ public class Dialog extends Window {
      * specified owner <code>Window</code>, title and modality.
      *
      * @param owner the owner of the dialog. The owner must be an instance of
-     *     {@link java.awt.Dialog Dialog}, {@link java.awt.Frame Frame}, any
+     *     {@link java.awt.JSDialog Dialog}, {@link java.awt.JSFrame Frame}, any
      *     of their descendents or <code>null</code>
      * @param title the title of the dialog or <code>null</code> if this dialog
      *     has no title
@@ -641,8 +542,8 @@ public class Dialog extends Window {
      *    types are equivalent to <code>MODELESS</code>
      *
      * @exception java.lang.IllegalArgumentException if the <code>owner</code>
-     *     is not an instance of {@link java.awt.Dialog Dialog} or {@link
-     *     java.awt.Frame Frame}
+     *     is not an instance of {@link java.awt.JSDialog Dialog} or {@link
+     *     java.awt.JSFrame Frame}
      * @exception java.lang.IllegalArgumentException if the <code>owner</code>'s
      *     <code>GraphicsConfiguration</code> is not from a screen device
      * @exception HeadlessException when
@@ -651,19 +552,19 @@ public class Dialog extends Window {
      *     to create modal dialogs with the given <code>modalityType</code>
      *
      * @see java.awt.Dialog.ModalityType
-     * @see java.awt.Dialog#setModal
-     * @see java.awt.Dialog#setModalityType
+     * @see java.awt.JSDialog#setModal
+     * @see java.awt.JSDialog#setModalityType
      * @see java.awt.GraphicsEnvironment#isHeadless
      * @see java.awt.Toolkit#isModalityTypeSupported
      *
      * @since 1.6
      */
-    public Dialog(Window owner, String title, ModalityType modalityType) {
+    public JSDialog(Window owner, String title, Dialog.ModalityType modalityType) {
         super(owner);
 
         if ((owner != null) &&
-            !(owner instanceof Frame) &&
-            !(owner instanceof Dialog))
+            !(owner instanceof JSFrame) &&
+            !(owner instanceof JSDialog))
         {
             throw new IllegalArgumentException("Wrong parent window");
         }
@@ -680,7 +581,7 @@ public class Dialog extends Window {
      * <code>GraphicsConfiguration</code>.
      *
      * @param owner the owner of the dialog. The owner must be an instance of
-     *     {@link java.awt.Dialog Dialog}, {@link java.awt.Frame Frame}, any
+     *     {@link java.awt.JSDialog Dialog}, {@link java.awt.JSFrame Frame}, any
      *     of their descendents or <code>null</code>
      * @param title the title of the dialog or <code>null</code> if this dialog
      *     has no title
@@ -692,8 +593,8 @@ public class Dialog extends Window {
      *     is assumed
      *
      * @exception java.lang.IllegalArgumentException if the <code>owner</code>
-     *     is not an instance of {@link java.awt.Dialog Dialog} or {@link
-     *     java.awt.Frame Frame}
+     *     is not an instance of {@link java.awt.JSDialog Dialog} or {@link
+     *     java.awt.JSFrame Frame}
      * @exception java.lang.IllegalArgumentException if <code>gc</code>
      *     is not from a screen device
      * @exception HeadlessException when
@@ -702,20 +603,20 @@ public class Dialog extends Window {
      *     to create modal dialogs with the given <code>modalityType</code>
      *
      * @see java.awt.Dialog.ModalityType
-     * @see java.awt.Dialog#setModal
-     * @see java.awt.Dialog#setModalityType
+     * @see java.awt.JSDialog#setModal
+     * @see java.awt.JSDialog#setModalityType
      * @see java.awt.GraphicsEnvironment#isHeadless
      * @see java.awt.Toolkit#isModalityTypeSupported
      *
      * @since 1.6
      */
-    public Dialog(Window owner, String title, ModalityType modalityType,
+    public JSDialog(Window owner, String title, Dialog.ModalityType modalityType,
                   GraphicsConfiguration gc) {
         super(owner, gc);
 
         if ((owner != null) &&
-            !(owner instanceof Frame) &&
-            !(owner instanceof Dialog))
+            !(owner instanceof JSFrame) &&
+            !(owner instanceof JSDialog))
         {
             throw new IllegalArgumentException("wrong owner window");
         }
@@ -759,7 +660,7 @@ public class Dialog extends Window {
 
 	@Override
 	protected ComponentPeer getOrCreatePeer() {
-		return (ui == null ? null : peer == null ? (peer = getToolkit().createDialog(this)) : peer);
+		return (ui == null ? null : peer == null ? (peer = getToolkit().createDialog((Dialog) (Object) this)) : peer);
 	}
     /**
      * Indicates whether the dialog is modal.
@@ -771,16 +672,16 @@ public class Dialog extends Window {
      *            <code>false</code> otherwise
      *
      * @see       java.awt.Dialog#DEFAULT_MODALITY_TYPE
-     * @see       java.awt.Dialog.ModalityType#MODELESS
-     * @see       java.awt.Dialog#setModal
-     * @see       java.awt.Dialog#getModalityType
-     * @see       java.awt.Dialog#setModalityType
+     * @see       java.awt.JSDialog.ModalityType#MODELESS
+     * @see       java.awt.JSDialog#setModal
+     * @see       java.awt.JSDialog#getModalityType
+     * @see       java.awt.JSDialog#setModalityType
      */
     public boolean isModal() {
        return isModal_NoClientCode();
     }
     final boolean isModal_NoClientCode() {
-       return modalityType != ModalityType.MODELESS;
+       return modalityType != Dialog.ModalityType.MODELESS;
     }
 
     /**
@@ -799,16 +700,16 @@ public class Dialog extends Window {
      *     <code>setModalityType(Dialog.ModalityType.MODELESS)</code>
      *
      * @see       java.awt.Dialog#DEFAULT_MODALITY_TYPE
-     * @see       java.awt.Dialog.ModalityType#MODELESS
-     * @see       java.awt.Dialog#isModal
-     * @see       java.awt.Dialog#getModalityType
-     * @see       java.awt.Dialog#setModalityType
+     * @see       java.awt.JSDialog.ModalityType#MODELESS
+     * @see       java.awt.JSDialog#isModal
+     * @see       java.awt.JSDialog#getModalityType
+     * @see       java.awt.JSDialog#setModalityType
      *
      * @since     1.1
      */
     public void setModal(boolean modal) {
         this.modal = modal;
-        setModalityType(modal ? DEFAULT_MODALITY_TYPE : ModalityType.MODELESS);
+        setModalityType(modal ? Dialog.DEFAULT_MODALITY_TYPE : Dialog.ModalityType.MODELESS);
     }
 
     /**
@@ -816,11 +717,11 @@ public class Dialog extends Window {
      *
      * @return modality type of this dialog
      *
-     * @see java.awt.Dialog#setModalityType
+     * @see java.awt.JSDialog#setModalityType
      *
      * @since 1.6
      */
-    public ModalityType getModalityType() {
+    public Dialog.ModalityType getModalityType() {
         return modalityType;
     }
 
@@ -841,12 +742,12 @@ public class Dialog extends Window {
      * @exception SecurityException if the calling thread does not have permission
      *     to create modal dialogs with the given <code>modalityType</code>
      *
-     * @see       java.awt.Dialog#getModalityType
+     * @see       java.awt.JSDialog#getModalityType
      * @see       java.awt.Toolkit#isModalityTypeSupported
      *
      * @since     1.6
      */
-    public void setModalityType(ModalityType type) {
+    public void setModalityType(Dialog.ModalityType type) {
         if (type == null) {
             type = Dialog.ModalityType.MODELESS;
         }
@@ -860,7 +761,7 @@ public class Dialog extends Window {
         checkModalityPermission(type);
 
         modalityType = type;
-        modal = (modalityType != ModalityType.MODELESS);
+        modal = (modalityType != Dialog.ModalityType.MODELESS);
     }
 
     /**
@@ -868,7 +769,7 @@ public class Dialog extends Window {
      * dialog's border.
      * @return    the title of this dialog window. The title may be
      *            <code>null</code>.
-     * @see       java.awt.Dialog#setTitle
+     * @see       java.awt.JSDialog#setTitle
      */
     public String getTitle() {
         return title;
@@ -1003,7 +904,7 @@ public class Dialog extends Window {
      * @see java.awt.Window#dispose
      * @see java.awt.Component#isDisplayable
      * @see java.awt.Component#validate
-     * @see java.awt.Dialog#isModal
+     * @see java.awt.JSDialog#isModal
      */
     @Override
 		public void setVisible(boolean b) {
@@ -1318,7 +1219,7 @@ public class Dialog extends Window {
      * By default, all dialogs are initially resizable.
      * @return    <code>true</code> if the user can resize the dialog;
      *            <code>false</code> otherwise.
-     * @see       java.awt.Dialog#setResizable
+     * @see       java.awt.JSDialog#setResizable
      */
     public boolean isResizable() {
         return resizable;
@@ -1328,7 +1229,7 @@ public class Dialog extends Window {
      * Sets whether this dialog is resizable by the user.
      * @param     resizable <code>true</code> if the user can
      *                 resize this dialog; <code>false</code> otherwise.
-     * @see       java.awt.Dialog#isResizable
+     * @see       java.awt.JSDialog#isResizable
      */
     public void setResizable(boolean resizable) {
         boolean testvalid = false;
@@ -1379,7 +1280,7 @@ public class Dialog extends Window {
      * By default, all dialogs are initially decorated.
      * @return    <code>true</code> if dialog is undecorated;
      *                        <code>false</code> otherwise.
-     * @see       java.awt.Dialog#setUndecorated
+     * @see       java.awt.JSDialog#setUndecorated
      * @since 1.4
      */
     public boolean isUndecorated() {
@@ -1510,8 +1411,8 @@ public class Dialog extends Window {
         // by another dialogs
         for (int i = 0; i < blockedWindowsCount; i++) {
             Window w = save.get(i);
-            if ((w instanceof Dialog) && ((Dialog)w).isModal_NoClientCode()) {
-                Dialog d = (Dialog)w;
+            if ((w instanceof JSDialog) && ((JSDialog)w).isModal_NoClientCode()) {
+                JSDialog d = (JSDialog)w;
                 d.modalShow();
             } else {
                 checkShouldBeBlocked(w);
@@ -1537,7 +1438,7 @@ public class Dialog extends Window {
         {
             return false;
         }
-        if ((w instanceof Dialog) && ((Dialog)w).isInHide) {
+        if ((w instanceof JSDialog) && ((JSDialog)w).isInHide) {
             return false;
         }
         // check if w is from children hierarchy
@@ -1558,7 +1459,7 @@ public class Dialog extends Window {
             case MODELESS:
                 return false;
             case DOCUMENT_MODAL:
-                if (w.isModalExcluded(ModalExclusionType.APPLICATION_EXCLUDE)) {
+                if (w.isModalExcluded(Dialog.ModalExclusionType.APPLICATION_EXCLUDE)) {
                     // application- and toolkit-excluded windows are not blocked by
                     // document-modal dialogs from outside their children hierarchy
                     Component c = this;
@@ -1570,10 +1471,10 @@ public class Dialog extends Window {
                     return getDocumentRoot() == w.getDocumentRoot();
                 }
             case APPLICATION_MODAL:
-                return !w.isModalExcluded(ModalExclusionType.APPLICATION_EXCLUDE) &&
+                return !w.isModalExcluded(Dialog.ModalExclusionType.APPLICATION_EXCLUDE) &&
                     (appContext == w.appContext);
             case TOOLKIT_MODAL:
-                return !w.isModalExcluded(ModalExclusionType.TOOLKIT_EXCLUDE);
+                return !w.isModalExcluded(Dialog.ModalExclusionType.TOOLKIT_EXCLUDE);
         }
 
         return false;
@@ -1629,7 +1530,7 @@ public class Dialog extends Window {
     static void checkShouldBeBlocked(Window w) {
         synchronized (w.getTreeLock()) {
             for (int i = 0; i < modalDialogs.size(); i++) {
-                Dialog modalDialog = modalDialogs.get(i);
+                JSDialog modalDialog = modalDialogs.get(i);
                 if (modalDialog.shouldBlock(w)) {
                     modalDialog.blockWindow(w);
                     break;
@@ -1638,7 +1539,7 @@ public class Dialog extends Window {
         }
     }
 
-    private void checkModalityPermission(ModalityType mt) {
+    private void checkModalityPermission(Dialog.ModalityType mt) {
 //        if (mt == ModalityType.TOOLKIT_MODAL) {
 //            SecurityManager sm = System.getSecurityManager();
 //            if (sm != null) {
