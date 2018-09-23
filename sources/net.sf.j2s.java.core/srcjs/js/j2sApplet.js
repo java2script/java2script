@@ -2545,18 +2545,18 @@ if (!J2S._version)
 		}
 		applet._appletPanel.setScreenDimension$I$I(w, h);
 		var f = function() {
-			if (applet._appletPanel.paint$java_awt_Graphics)
-				applet._appletPanel.paint$java_awt_Graphics(null);
-			else
-				applet._appletPanel.update$java_awt_Graphicss(null)
+//			if (applet._appletPanel.top) {
+//				System.out.println("j2sApplet invalidate");
+//				applet._appletPanel.top.invalidate$();
+//				System.out.println("j2sApplet repaint");
+//				applet._appletPanel.top.repaint$();
+//			}
 		};
-		if (asNewThread) {
-			(self.requestAnimationFrame || self.setTimeout)(f); // requestAnimationFrame
-																// or (MSIE 9)
-																// setTimeout
-		} else {
+		//if (asNewThread) {
+			//self.setTimeout(f,20); // requestAnimationFrame
+		//} else {
 			f();
-		}
+		//}
 	}
 
 	/**

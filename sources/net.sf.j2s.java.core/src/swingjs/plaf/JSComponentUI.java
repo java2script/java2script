@@ -811,6 +811,7 @@ public class JSComponentUI extends ComponentUI
 	protected boolean allowPaintedBackground = true;
 
 	public void setAllowPaintedBackground(boolean TF) {
+		// listCellRenderer does not allow this.
 		allowPaintedBackground = TF;
 	}
 
