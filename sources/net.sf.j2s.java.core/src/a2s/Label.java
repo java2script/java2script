@@ -8,21 +8,17 @@ import javax.swing.SwingConstants;
 public class Label extends JLabel {
 
 	public Label() {
-		super();
-		super.setBackground(null);
-		setHorizontalAlignment(SwingConstants.LEFT);
+		this("", java.awt.Label.LEFT);
 	}
 	
 	public Label(String text) {
-		super(text);
-		super.setBackground(null);
-		setHorizontalAlignment(SwingConstants.LEFT);
+		this(text, java.awt.Label.LEFT);
 	}
 	
 	public Label(String text, int center) {
 		super(text, center);
 		super.setBackground(null);
-		setHorizontalAlignment(SwingConstants.LEFT);
+		setAlignment(java.awt.Label.LEFT);
 	}
 
 	public void setBackground(Color c) {

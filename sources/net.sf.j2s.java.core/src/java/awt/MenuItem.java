@@ -170,7 +170,7 @@ public class MenuItem extends a2s.MenuItem {//MenuComponent implements Accessibl
      * @since    JDK1.1
      */
     public MenuItem() throws HeadlessException {
-        this("", null);
+        super();//this("", null);
     }
 
     /**
@@ -186,7 +186,7 @@ public class MenuItem extends a2s.MenuItem {//MenuComponent implements Accessibl
      * @since       JDK1.0
      */
     public MenuItem(String label) throws HeadlessException {
-        this(label, null);
+    	super(label);//       this(label, null);
     }
 
     /**
@@ -203,9 +203,7 @@ public class MenuItem extends a2s.MenuItem {//MenuComponent implements Accessibl
      * @since       JDK1.1
      */
     public MenuItem(String label, MenuShortcut s) throws HeadlessException {
-    	super(label);
-//        this.label = label;
-//        this.shortcut = s;
+    	super(label, s);
     }
 
 //    /**

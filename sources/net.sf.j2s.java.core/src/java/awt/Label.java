@@ -109,7 +109,7 @@ public class Label extends a2s.Label {//Component implements Accessible {
      * @see java.awt.GraphicsEnvironment#isHeadless
      */
     public Label() throws HeadlessException {
-        this("", LEFT);
+        super();
     }
 
     /**

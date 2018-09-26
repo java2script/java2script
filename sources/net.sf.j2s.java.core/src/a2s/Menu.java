@@ -5,13 +5,16 @@ import javax.swing.JMenu;
 public class Menu extends JMenu {
 
 	public Menu(String title) {
-		super(title);
-		title=null;
+        this(title, false);
 	}
 
 	public Menu() {
-		super();
+        this("", false);
 		String s = null;
+	}
+
+	public Menu(String title, boolean isTearOff) {
+		super(title);
 	}
 
 	public int countItems() {

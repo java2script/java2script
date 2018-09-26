@@ -345,7 +345,7 @@ public class Scrollbar extends a2s.Scrollbar {//Component implements Adjustable,
      * @see java.awt.GraphicsEnvironment#isHeadless
      */
     public Scrollbar() throws HeadlessException {
-        this(VERTICAL, 0, 10, 0, 100);
+        super();//this(VERTICAL, 0, 10, 0, 100);
     }
 
     /**
@@ -364,7 +364,7 @@ public class Scrollbar extends a2s.Scrollbar {//Component implements Adjustable,
      * @see java.awt.GraphicsEnvironment#isHeadless
      */
     public Scrollbar(int orientation) throws HeadlessException {
-        this(orientation, 0, 10, 0, 100);
+        super(orientation);//this(orientation, 0, 10, 0, 100);
     }
 
     /**

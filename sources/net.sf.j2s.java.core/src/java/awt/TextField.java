@@ -142,7 +142,7 @@ public class TextField extends a2s.TextField {//TextComponent {
      * @see java.awt.GraphicsEnvironment#isHeadless
      */
     public TextField() throws HeadlessException {
-        this("", 0);
+        super();//this("", 0);
     }
 
     /**
@@ -155,7 +155,7 @@ public class TextField extends a2s.TextField {//TextComponent {
      * @see java.awt.GraphicsEnvironment#isHeadless
      */
     public TextField(String text) throws HeadlessException {
-        this(text, (text != null) ? text.length() : 0);
+        super(text);//this(text, (text != null) ? text.length() : 0);
     }
 
     /**
@@ -170,7 +170,7 @@ public class TextField extends a2s.TextField {//TextComponent {
      * @see java.awt.GraphicsEnvironment#isHeadless
      */
     public TextField(int columns) throws HeadlessException {
-        this("", columns);
+        super(columns);//this("", columns);
     }
 
     /**

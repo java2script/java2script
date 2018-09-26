@@ -65,7 +65,8 @@ public class PopupMenu extends a2s.PopupMenu {//Menu {
      * @see java.awt.GraphicsEnvironment#isHeadless
      */
     public PopupMenu() throws HeadlessException {
-        this("");
+    	super();
+//        this("");
     }
 
     /**

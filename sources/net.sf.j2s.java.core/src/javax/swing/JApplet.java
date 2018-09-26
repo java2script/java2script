@@ -132,12 +132,15 @@ public class JApplet extends JSApplet implements /* Accessible ,*/
      * @see JComponent#getDefaultLocale
      */
     public JApplet() {
+    	super();
     	setFrameViewer(appletViewer);
 		uiClassID = "AppletUI";
     	setJApplet();
         updateUI();
     }
-
+    protected void setPanelUIClassID() {
+    	// bypass JPanel UI call
+	}
 
     private void setJApplet() {
 //    // Check the timerQ and restart if necessary.
@@ -550,14 +553,14 @@ public class JApplet extends JSApplet implements /* Accessible ,*/
      * @since     1.6
      */
     @Override
-		public void repaint(long time, int x, int y, int width, int height) {
+	public void repaint(long time, int x, int y, int width, int height) {
       if (RepaintManager.HANDLE_TOP_LEVEL_PAINT) {
       	//System.out.println("repaintNow " + this);
           RepaintManager.currentManager(this).addDirtyRegion(
                             this, x, y, width, height);
       }
       else {
-          super.repaint(time, x, y, width, height);
+    	  super.repaint(time, x, y, width, height);
       }
     }
 
