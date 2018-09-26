@@ -15,35 +15,13 @@ public class Applet extends JApplet implements A2SContainer {
 	// or buttons will not show.
 
     public Applet() throws HeadlessException {
-    	super();    
-//    	getContentPane().setBackground(Color.white);
-		fixAppletPaint();
-		
+    	super();
 		// Note: applet.paint(g) needs to include super.paint(g), or buttons will not
-		// show.
-
-    	
-    	
+		// show. So we do that in fixAppletPaint().
+		fixAppletPaint();
 		listener = new A2SListener();
 		addMouseListener(listener);
 		addMouseMotionListener(listener);
-//		setContentPane(new JPanel() {
-//			@Override
-//			public void paintComponent(Graphics g) {
-//	 			super.paintComponent(g);
-//				// System.out.println("init " + this.getSize());
-//				try {
-//					// The content pane's paintComponent method has not been overridden. 
-//					// There may be no problem, but it also could mean that the applet
-//					// is not painting properly. 
-//					if (this.getWidth() > 0)
-//						paintComponent_(g);
-//				} catch (Throwable e) {
-//					System.out.println("There was a problem in Applet.paintComponent(g) " + e);
-//					e.printStackTrace();
-//				}
-//			}
-//		});    	
     }
 
 	public void setBackground(Color c) {
@@ -51,11 +29,6 @@ public class Applet extends JApplet implements A2SContainer {
 		getContentPane().setBackground(c);
 	}
 	
-	@Override
-	public void paint(Graphics g) {
-		super.paint(g);
-	}
-
 	/**
 	 * Effectively add "super.paint(g)" the user's method.
 	 * 

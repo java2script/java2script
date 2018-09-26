@@ -305,7 +305,7 @@ public abstract class Toolkit {
      * the specified peer interface.
      * @param     target the panel to be implemented.
      * @return    this toolkit's implementation of <code>Panel</code>.
-     * @see       java.awt.JSPanel
+     * @see       java.awt.Panel
      * @see       java.awt.peer.PanelPeer
      */
     protected abstract PanelPeer        createPanel(Panel target);

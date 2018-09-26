@@ -132,7 +132,8 @@ public class Checkbox extends a2s.Checkbox {//Component implements ItemSelectabl
      * @see java.awt.GraphicsEnvironment#isHeadless
      */
     public Checkbox() throws HeadlessException {
-        this("", false, null);
+        super();
+        //this("", false, null);
     }
 
     /**
@@ -148,7 +149,8 @@ public class Checkbox extends a2s.Checkbox {//Component implements ItemSelectabl
      * @see java.awt.GraphicsEnvironment#isHeadless
      */
     public Checkbox(String label) throws HeadlessException {
-        this(label, false, null);
+        super(label);
+        //this(label, false, null);
     }
 
     /**
@@ -165,7 +167,8 @@ public class Checkbox extends a2s.Checkbox {//Component implements ItemSelectabl
      * @see java.awt.GraphicsEnvironment#isHeadless
      */
     public Checkbox(String label, boolean state) throws HeadlessException {
-        this(label, state, null);
+        super(label, state);
+        //this(label, state, null);
     }
 
     /**
@@ -212,7 +215,7 @@ public class Checkbox extends a2s.Checkbox {//Component implements ItemSelectabl
      */
     public Checkbox(String label, CheckboxGroup group, boolean state)
         throws HeadlessException {
-        this(label, state, group);
+        super(label, state, group);
     }
 
 //    /**

@@ -1496,7 +1496,7 @@ public abstract class SunToolkit extends Toolkit implements
 		// || comp instanceof Label
 		// || comp instanceof List
 		// ||
-		comp instanceof JSPanel
+		comp instanceof Panel
 		// || comp instanceof Scrollbar
 		// || comp instanceof ScrollPane
 		// || comp instanceof TextArea

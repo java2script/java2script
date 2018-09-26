@@ -9,12 +9,18 @@ public class Panel extends JPanel {
 
 	public Panel(LayoutManager layout) {
 		super(layout);
+		subclassSetup();
 		setBackground(null);
 		setOpaque(false);
 	}
 
+	protected void subclassSetup() {
+		// JApplet startup
+	}
+
 	public Panel() {
 		super();
+		subclassSetup();
 		setBackground(null);
 		setOpaque(false);
 	} 

@@ -95,7 +95,7 @@ public class CheckboxMenuItem extends a2s.CheckboxMenuItem {//MenuItem implement
      * @since   JDK1.1
      */
     public CheckboxMenuItem() throws HeadlessException {
-        this("", false);
+        super();//this("", false);
     }
 
     /**
@@ -109,7 +109,8 @@ public class CheckboxMenuItem extends a2s.CheckboxMenuItem {//MenuItem implement
      * @see java.awt.GraphicsEnvironment#isHeadless
      */
     public CheckboxMenuItem(String label) throws HeadlessException {
-        this(label, false);
+    	super(label);
+        //this(label, false);
     }
 
     /**

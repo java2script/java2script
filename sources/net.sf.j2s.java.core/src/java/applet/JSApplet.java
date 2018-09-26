@@ -34,6 +34,7 @@ import java.net.URL;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.JSPanel;
+import java.awt.Panel;
 import java.util.Locale;
 
 import swingjs.JSToolkit;
@@ -58,19 +59,6 @@ import swingjs.api.js.HTML5Applet;
  * @since       JDK1.0
  */
 public class JSApplet extends JSPanel {
-
-	static {
-		
-		/**
-		 * SwingJS providing unqualified resize(w,h) as a convenience only
-		 * 
-		 * @j2sNative
-		 * 
-		 * C$.prototype.resize = C$.prototype.resize$I$I;  
-		 *  
-		 */
-
-	}
 
     /**
      * Constructs a new Applet.

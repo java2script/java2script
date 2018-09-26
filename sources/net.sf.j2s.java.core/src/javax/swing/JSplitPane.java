@@ -632,36 +632,25 @@ public class JSplitPane extends JComponent {
 	 * Sets the divider location as a percentage of the <code>JSplitPane</code>'s
 	 * size.
 	 * <p>
-	 * This method is implemented in terms of <code>setDividerLocation(int)</code>
-	 * . This method immediately changes the size of the split pane based on its
-	 * current size. If the split pane is not correctly realized and on screen,
-	 * this method will have no effect (new divider location will become (current
-	 * size * proportionalLocation) which is 0).
+	 * This method is implemented in terms of <code>setDividerLocation(int)</code> .
+	 * This method immediately changes the size of the split pane based on its
+	 * current size. If the split pane is not correctly realized and on screen, this
+	 * method will have no effect (new divider location will become (current size *
+	 * proportionalLocation) which is 0).
 	 * 
-	 * @param proportionalLocation
-	 *          a double-precision floating point value that specifies a
-	 *          percentage, from zero (top/left) to 1.0 (bottom/right)
-	 * @exception IllegalArgumentException
-	 *              if the specified location is < 0 or > 1.0
+	 * @param proportionalLocation a double-precision floating point value that
+	 *                             specifies a percentage, from zero (top/left) to
+	 *                             1.0 (bottom/right)
+	 * @exception IllegalArgumentException if the specified location is < 0 or > 1.0
 	 * @beaninfo description: The location of the divider.
 	 */
 	public void setDividerLocation(double proportionalLocation) {
-		// SwingJS note: JavaScript cannot handle two methods x(double) and x(int). 
-		// So we rename setDividerLocation(int) as setDividerLocationInt(int) and
-		// make all action go through here. 
-		// A limitation is that setDividerLocation(1) will be interpreted differently than in Java.
-		// 
-		int intLocation = (int) proportionalLocation;
-		boolean isInt = (intLocation == Math.round(proportionalLocation));
-		if (proportionalLocation < 0.0 || proportionalLocation > 1.0 && !isInt) {
-			throw new IllegalArgumentException("proportional location must "
-					+ "be between 0.0 and 1.0.");
+		if (proportionalLocation < 0.0 || proportionalLocation > 1.0) {
+			throw new IllegalArgumentException("proportional location must " + "be between 0.0 and 1.0.");
 		}
-		if (!isInt) {
-			int wh = (getOrientation() == VERTICAL_SPLIT ? getHeight() : getWidth());
-			intLocation = (int) ((wh - getDividerSize()) * proportionalLocation);
-		}
-		setDividerLocationInt(intLocation);
+		int wh = (getOrientation() == VERTICAL_SPLIT ? getHeight() : getWidth());
+		int intLocation = (int) ((wh - getDividerSize()) * proportionalLocation);
+		setDividerLocation(intLocation);
 	}
 
 	/**
@@ -676,7 +665,7 @@ public class JSplitPane extends JComponent {
 	 *          an int specifying a UI-specific value (typically a pixel count)
 	 * @beaninfo bound: true description: The location of the divider.
 	 */
-	public void setDividerLocationInt(int location) {
+	public void setDividerLocation(int location) {
 	  dividerLocationSetByUser = true; // SwingJS
 	  setDividerLocationIntImpl(location);
 	}

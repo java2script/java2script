@@ -43,7 +43,7 @@ import java.awt.GraphicsConfiguration;
 //import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.JSComponent;
-import java.awt.JSPanel;
+import java.awt.Panel;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -963,7 +963,7 @@ public class PopupFactory {
 
         @Override
 				Component createComponent(Component owner) {
-            JSPanel component = new MediumWeightComponent();
+            Panel component = new MediumWeightComponent();
             
             rootPane = new JRootPane("_Popup" + (++popupCount), false);
             rootPane.setFrameViewer(((JSComponent) owner).getFrameViewer());
@@ -996,7 +996,7 @@ public class PopupFactory {
 
         // This implements SwingHeavyWeight so that repaints on it
         // are processed by the RepaintManager and SwingPaintEventDispatcher.
-        private static class MediumWeightComponent extends JSPanel implements
+        private static class MediumWeightComponent extends Panel implements
                                                            SwingHeavyWeight {
             MediumWeightComponent() {
                 super(new BorderLayout());

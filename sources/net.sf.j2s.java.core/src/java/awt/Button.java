@@ -78,7 +78,7 @@ public class Button extends a2s.Button {// Component implements Accessible {
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
 	public Button() throws HeadlessException {
-		this("");
+		super();
 	}
 
 	/**

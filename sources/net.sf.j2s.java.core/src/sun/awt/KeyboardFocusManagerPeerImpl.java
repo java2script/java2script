@@ -29,7 +29,7 @@ import java.awt.KeyboardFocusManager;
 import java.awt.Window;
 import java.awt.Canvas;
 import java.awt.Scrollbar;
-import java.awt.JSPanel;
+import java.awt.Panel;
 
 import java.awt.event.FocusEvent;
 
@@ -90,8 +90,8 @@ public abstract class KeyboardFocusManagerPeerImpl implements KeyboardFocusManag
             acceptFocusOnClick = true;
 
         // PANEL, empty only, accepts focus on click
-        } else if (component instanceof JSPanel) {
-            acceptFocusOnClick = (((JSPanel)component).getComponentCount() == 0);
+        } else if (component instanceof Panel) {
+            acceptFocusOnClick = (((Panel)component).getComponentCount() == 0);
 
 
         // Other components

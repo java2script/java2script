@@ -60,21 +60,22 @@ public class JSPanel extends Container {
     	this(new FlowLayout());
     }
 
+
+	/**
+	 * Creates a new panel with the specified layout manager.
+	 * 
+	 * @param layout the layout manager for this panel.
+	 * @since JDK1.1
+	 */
+	public JSPanel(LayoutManager layout) {
+		setAppContext();
+		setLayout(layout);
+	}
+
     @Override
 		protected boolean canPaint() {
     	//return this.isContentPane || this.rootPane; ??
 			return isContentPane;
-    }
-
-
-		/**
-     * Creates a new panel with the specified layout manager.
-     * @param layout the layout manager for this panel.
-     * @since JDK1.1
-     */
-    public JSPanel(LayoutManager layout) {
-    	setAppContext();
-    	setLayout(layout);
     }
 
     /**

@@ -112,7 +112,7 @@ public class Menu extends a2s.Menu {//MenuItem implements MenuContainer, Accessi
      * @since      JDK1.1
      */
     public Menu() throws HeadlessException {
-        this("", false);
+    	super();
     }
 
     /**
@@ -125,7 +125,7 @@ public class Menu extends a2s.Menu {//MenuItem implements MenuContainer, Accessi
      * @see java.awt.GraphicsEnvironment#isHeadless
      */
     public Menu(String label) throws HeadlessException {
-        this(label, false);
+        super(label);
     }
 
     /**
