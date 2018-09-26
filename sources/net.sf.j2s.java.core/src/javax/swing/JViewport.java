@@ -28,7 +28,7 @@
 
 package javax.swing;
 
-import java.applet.Applet;
+import java.applet.JSApplet;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -458,7 +458,7 @@ public class JViewport extends JComponent
             if (!c.isLightweight()) {
                 return;
             }
-            if ((c instanceof Window) || (c instanceof Applet)) {
+            if ((c instanceof Window) || (c instanceof JSApplet)) {
                 root = c;
                 break;
             }

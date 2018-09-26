@@ -1,13 +1,12 @@
 package swingjs;
 
-import java.applet.Applet;
 import java.applet.AppletContext;
 import java.applet.AppletStub;
 import java.applet.AudioClip;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Frame;
+import java.awt.JSFrame;
 import java.awt.GraphicsConfiguration;
 import java.awt.Image;
 import java.awt.Insets;
@@ -24,6 +23,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JApplet;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import javajs.util.JSThread;
@@ -129,7 +129,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 		allWindows.addLast(window);
 	}
 
-	public Frame sharedOwnerFrame;
+	public JSFrame sharedOwnerFrame;
 
 	public AppContext appContext;
 
@@ -234,10 +234,13 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 		final Dimension currentSize = new Dimension(currentAppletSize.width, currentAppletSize.height);
 		currentAppletSize.width = width;
 		currentAppletSize.height = height;
-		applet.setBounds(0, 0, width, height);
 		applet.getRootPane().setBounds(0, 0, getWidth(), getHeight());
 		applet.getContentPane().setBounds(0, 0, getWidth(), getHeight());
+		applet.setBounds(0, 0, width, height);
+
+		// this will trigger a SwingUtilities.invokeLater(revalidate()) on the event thread;
 		((JComponent) applet.getContentPane()).revalidate();
+		
 		if (addFrame) {
 			jAppletFrame = new JFrame("SwingJS Applet Viewer");
 			Container pane = applet.getContentPane();
@@ -246,10 +249,13 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 			jAppletFrame.pack();
 			jAppletFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		}
-		// if (wNew > 0 && hNew > 0)
-		applet.repaint(0, 0, getWidth(), getHeight());
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				applet.repaint(0, 0, getWidth(), getHeight());
+				dispatchAppletEvent(APPLET_RESIZE, currentSize);
+			}
+		});
 
-		dispatchAppletEvent(APPLET_RESIZE, currentSize);
 	}
 
 	@Override
@@ -310,8 +316,8 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 	}
 
 	@Override
-	public Applet getApplet(String name) {
-		Applet applet = null;
+	public java.applet.JSApplet getApplet(String name) {
+		JApplet applet = null;
 		/**
 		 * @j2sNative
 		 * 
@@ -325,7 +331,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 	}
 
 	@Override
-	public Enumeration<Applet> getApplets() {
+	public Enumeration<java.applet.JSApplet> getApplets() {
 		// not supported for now
 		return null;
 	}

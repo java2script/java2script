@@ -74,11 +74,15 @@ public class JPanel extends JComponent
         setLayout(layout);
 //        setDoubleBuffered(isDoubleBuffered);
         setUIProperty("opaque", Boolean.TRUE);
-        uiClassID = "PanelUI";
-        updateUI();
+        setPanelUIClassID();
     }
 
-    /**
+    protected void setPanelUIClassID() {
+        uiClassID = "PanelUI";
+        updateUI();
+	}
+
+	/**
      * Create a new buffered JPanel with the specified layout manager
      *
      * @param layout  the LayoutManager to use

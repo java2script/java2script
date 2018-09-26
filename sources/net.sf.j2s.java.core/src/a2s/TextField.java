@@ -9,19 +9,19 @@ import javax.swing.event.DocumentListener;
 
 public class TextField extends JTextField {
 
-	public TextField(int width) {
-		super(width);
-	}
-
 	public TextField() {
-		super();
+		this("", 0);
 	}
 
 	public TextField(String text) {
-		super(text);
+        this(text, (text != null) ? text.length() : 0);
 	}
 
-	public TextField(String text, int width) {
+	public TextField(int width) {
+		this("", width);
+	}
+
+    public TextField(String text, int width) {
 		super(text, width);
 	}
 

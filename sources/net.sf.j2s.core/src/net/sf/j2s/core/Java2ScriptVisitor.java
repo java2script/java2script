@@ -132,6 +132,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// BH 9/23/2018 -- 3.2.2.07 adds support for java.applet.Applet and java.awt.* controls without use of a2s.*
 // BH 9/16/2018 -- 3.2.2.06 removes "$" in JApplet public method alternative name
 // BH 8/20/2018 -- fix for return (short)++;
 // BH 8/19/2018 -- refactored to simplify $finals$
@@ -365,15 +366,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		ITypeBinding b = binding;
 		while ((binding = binding.getSuperclass()) != null) {
 			String name = binding.getQualifiedName();
-			if (!("javax.swing.JApplet".equals(name))) {
-				if (name.startsWith("java.") || name.startsWith("javax"))
-					return false;
-				continue;
+			if ("javax.swing.JApplet".equals(name) || "java.applet.Applet".equals(name)) {
+				if (applets == null)
+					applets = new ArrayList<String>();
+				applets.add(class_fullName);
+				return true;
 			}
-			if (applets == null)
-				applets = new ArrayList<String>();
-			applets.add(class_fullName);
-			return true;
+			if (name.startsWith("java.") || name.startsWith("javax"))
+				return false;
 		}
 		return false;
 	}

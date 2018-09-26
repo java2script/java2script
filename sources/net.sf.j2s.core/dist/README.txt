@@ -474,6 +474,12 @@ Phet applets have not been put on GitHub yet.
 Development updates
 --------------------------------------------------------------------------------------------
 
+9/23/2018 Bob Hanson hansonr@stolaf.edu
+
+Java2Script 3.2.3.00 adds support for AWT applets and components w/o need for a2s.* class replacement in code
+
+---------------------
+
 9/13/2018 Bob Hanson hansonr@stolaf.edu
 
 JSlider minimum and preferred sizes fixed  swingjs/plaf/JSSliderUI.java
@@ -519,7 +525,6 @@ The dist/dropins folder has been renamed dist/swingjs
 
 It holds the key files that are needed for a J2S project (see below).
 
- 
 Java2Script 3.2.2.03 introduces and checks more Java 8 capabilities. Use
 
   eclipsec -clean  

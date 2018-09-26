@@ -10,6 +10,7 @@
 // TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
 //       It is possible that these might be loaded dynamically.
 
+// BH 9/23/2018 3.2.3.00 adds direct non-Swing applet support (java.applet.Applet and java.awt.*); no need for converting source to a2s.*
 // BH 9/15/2018 3.2.2.06 adds JScrollBar block and unit increments; fixes JLabel ui getMaximumSize
 // BH 9/15/2018 3.2.2.05 fixes Math.IEEEremainder
 // BH 8/21/2018 3.2.2.04 fixes ?j2strace=xxx  message; sets user.home to https://./, not https://.//; Boolean upgrade and fix
@@ -104,8 +105,8 @@ window["j2s.clazzloaded"] = true;
   _debugging: false,
   _loadcore: true,
   _nooutput: 0,
-  _VERSION_R: "3.2.2.06",
-  _VERSION_T: "unknown",
+  _VERSION_R: "3.2.3.00",
+  _VERSION_T: "3.2.3.00",
 };
 
 ;(function(Clazz, J2S) {

@@ -27,7 +27,6 @@
  */
 package java.awt;
 
-import java.applet.Applet;
 import java.awt.dnd.DropTarget;
 import java.awt.event.ActionEvent;
 import java.awt.event.AdjustmentEvent;
@@ -4156,8 +4155,8 @@ public abstract class Component
 
 	boolean checkWindowClosingException() {
 		if (windowClosingException != null) {
-			if (this instanceof Dialog) {
-				((Dialog) this).interruptBlocking();
+			if (this instanceof JSDialog) {
+				((JSDialog) this).interruptBlocking();
 			} else {
 				windowClosingException.fillInStackTrace();
 				windowClosingException.printStackTrace();

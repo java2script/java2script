@@ -239,7 +239,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		setSliderAttr("max", max);
 
 		myHeight = 10;
-		int barPlace = 40;
+		int barPlace = 40; // not for general slider or scrollbar
 		if (isHoriz && slider.getBorder() != null)
 			barPlace += 10;
 
@@ -369,10 +369,11 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	@Override
 	public void setInnerComponentBounds(int width, int height) {
 		if (!paintTicks && !paintLabels) {
+			int margin = (isScrollBar ? 6 : 10);
 			if (orientation == "vertical") {
-				DOMNode.setStyles(sliderTrack, "height", (height - 20) + "px");
+				DOMNode.setStyles(sliderTrack, "height", (height - margin * 2) + "px");
 			} else if (isScrollBar) {
-				DOMNode.setStyles(sliderTrack, "width", (width - 20) + "px");
+				DOMNode.setStyles(sliderTrack, "width", (width - margin * 2) + "px");
 			}
 			setScrollBarExtentAndCSS();
 

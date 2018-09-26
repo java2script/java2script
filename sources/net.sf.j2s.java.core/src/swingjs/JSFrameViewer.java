@@ -304,12 +304,12 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 		}
 	}
 
-	public void paint(Graphics g) {
-		// Note that the applet "Panel" is never painted.
-		// This class simply maintains valuable information for applet loading.
-		// Here we go straight to the contentPane and paint that.
-		((JSComponent)top).paint(setGraphics(g, 0, 0, null));
-	}
-
+//	public void paint(Graphics g) {
+//		// Note that the applet "Panel" is never painted.
+//		// This class simply maintains valuable information for applet loading.
+//		// Here we go straight to the contentPane and paint that.
+//		((JSComponent)top).paint(setGraphics(g, 0, 0, null));
+//	}
+//
 
 }

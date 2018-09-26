@@ -40,7 +40,7 @@ import javajs.util.Lst;
 
 import javax.swing.SortingFocusTraversalPolicy;
 
-import java.applet.Applet;
+import java.applet.JSApplet;
 import java.awt.AWTEvent;
 import java.awt.AWTKeyStroke;
 import java.awt.Color;
@@ -528,7 +528,7 @@ public abstract class JComponent extends Container {
 				if (parent instanceof JComponent) {
 					return ((JComponent) parent).getComponentPopupMenu();
 				}
-				if (parent instanceof Window || parent instanceof Applet) {
+				if (parent instanceof Window || parent instanceof JSApplet) {
 					// Reached toplevel, break and return null
 					break;
 				}
@@ -2747,7 +2747,7 @@ public abstract class JComponent extends Container {
 		 */
 		Container parent = this;
 		while (parent != null && !(parent instanceof Window)
-				&& !(parent instanceof Applet)) {
+				&& !(parent instanceof JSApplet)) {
 			if (parent instanceof JComponent) {
 				if (((JComponent) parent).processKeyBinding(ks, e,
 						WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, pressed))
@@ -3835,7 +3835,7 @@ public abstract class JComponent extends Container {
 		Container p = c.getParent();
 		Rectangle bounds = c.getBounds();
 
-		if (p == null || p instanceof Window || p instanceof Applet) {
+		if (p == null || p instanceof Window || p instanceof JSApplet) {
 			visibleRect.setBounds(0, 0, bounds.width, bounds.height);
 		} else {
 			computeVisibleRect(p, visibleRect);
@@ -3999,7 +3999,7 @@ public abstract class JComponent extends Container {
 	 */
 	public Container getTopLevelAncestor() {
 		for (Container p = this; p != null; p = p.getParent()) {
-			if (p instanceof Window || p instanceof Applet) {
+			if (p instanceof Window || p instanceof JSApplet) {
 				return p;
 			}
 		}
@@ -4446,7 +4446,7 @@ public abstract class JComponent extends Container {
 		}
 		Component child;
 		for (c = this, child = null; c != null && !(c instanceof Window)
-				&& !(c instanceof Applet); child = c, c = c.getParent()) {
+				&& !(c instanceof JSApplet); child = c, c = c.getParent()) {
 			JComponent jc = (c instanceof JComponent) ? (JComponent) c : null;
 			path.add(c);
 			if (!ontop && jc != null && !jc.isOptimizedDrawingEnabled()) {

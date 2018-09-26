@@ -27,18 +27,7 @@
  */
 package java.awt;
 
-//import java.lang.ref.WeakReference;
-//import java.lang.reflect.InvocationTargetException;
-//import java.awt.AWTPermission;
-//import java.awt.HeadlessException;
-import java.awt.KeyboardFocusManager;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EventListener;
-import java.util.Set;
-import java.util.Vector;
-
-import java.applet.Applet;
+import java.applet.JSApplet;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseWheelEvent;
@@ -49,8 +38,14 @@ import java.awt.event.WindowStateListener;
 import java.awt.peer.ComponentPeer;
 import java.awt.peer.WindowPeer;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EventListener;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.Vector;
+
 import javax.swing.JComponent;
 import javax.swing.JLayeredPane;
 import javax.swing.JRootPane;
@@ -62,7 +57,6 @@ import swingjs.JSToolkit;
 //import java.util.concurrent.atomic.AtomicBoolean;
 //import java.util.logging.Logger;
 import swingjs.JSUtil;
-import swingjs.plaf.JSComponentUI;
 
 /**
  * 
@@ -232,7 +226,7 @@ public class Window extends JComponent {
      *
      * @since 1.6
      */
-    transient Dialog modalBlocker;
+    transient JSDialog modalBlocker;
 
     /**
      * @serial
@@ -924,7 +918,7 @@ public class Window extends JComponent {
 //                // should be raised to front
 //                modalBlocker.toFront_NoClientCode();
 //            }
-            if (this instanceof Frame || this instanceof Dialog) {
+            if (this instanceof JSFrame || this instanceof JSDialog) {
                 updateChildFocusableWindowState(this);
             }
         }
@@ -1369,7 +1363,7 @@ public class Window extends JComponent {
         return modalBlocker != null;
     }
 
-    void setModalBlocked(Dialog blocker, boolean blocked, boolean peerCall) {
+    void setModalBlocked(JSDialog blocker, boolean blocked, boolean peerCall) {
 //        this.modalBlocker = blocked ? blocker : null;
 //        if (peerCall) {
 //            WindowPeer peer = (WindowPeer)this.peer;
@@ -1379,8 +1373,12 @@ public class Window extends JComponent {
 //        }
     }
 
-    Dialog getModalBlocker() {
-        return modalBlocker;
+    void setModalBlocked(Dialog blocker, boolean blocked, boolean peerCall) {
+    	setModalBlocked((JSDialog) blocker, blocked, peerCall);
+    }
+
+    public Dialog getModalBlocker() {
+        return (Dialog)(Object) modalBlocker;
     }
 
     /*
@@ -1451,7 +1449,7 @@ public class Window extends JComponent {
      * dialogs such as component positions, <code>LayoutManager</code>s
      * or serialization.
      *
-     * @see Frame#getFrames
+     * @see JSFrame#getFrames
      * @see Window#getOwnerlessWindows
      *
      * @since 1.6
@@ -1473,7 +1471,7 @@ public class Window extends JComponent {
      * dialogs such as component positions, <code>LayoutManager</code>s
      * or serialization.
      *
-     * @see Frame#getFrames
+     * @see JSFrame#getFrames
      * @see Window#getWindows()
      *
      * @since 1.6
@@ -1499,7 +1497,7 @@ public class Window extends JComponent {
         return ownerless;
     }
 
-    Window getDocumentRoot() {
+    public Window getDocumentRoot() {
         synchronized (getTreeLock()) {
             Window w = this;
             while (w.getOwner() != null) {
@@ -1521,7 +1519,7 @@ public class Window extends JComponent {
      * effect until it is hidden and then shown again.
      *
      * @param exclusionType the modal exclusion type for this window; a <code>null</code>
-     *     value is equivivalent to {@link Dialog.ModalExclusionType#NO_EXCLUDE
+     *     value is equivivalent to {@link JSDialog.ModalExclusionType#NO_EXCLUDE
      *     NO_EXCLUDE}
      * @throws SecurityException if the calling thread does not have permission
      *     to set the modal exclusion property to the window with the given
@@ -2344,7 +2342,7 @@ public class Window extends JComponent {
         }
 
         // All other tests apply only to Windows.
-        if (this instanceof Frame || this instanceof Dialog) {
+        if (this instanceof JSFrame || this instanceof JSDialog) {
             return true;
         }
 
@@ -2359,7 +2357,7 @@ public class Window extends JComponent {
         for (Window owner = getOwner(); owner != null;
              owner = owner.getOwner())
         {
-            if (owner instanceof Frame || owner instanceof Dialog) {
+            if (owner instanceof JSFrame || owner instanceof JSDialog) {
                 return owner.isShowing();
             }
         }
@@ -2979,12 +2977,12 @@ public class Window extends JComponent {
         Container root=null;
 
         if (c != null) {
-            if (c instanceof Window || c instanceof Applet) {
+            if (c instanceof Window || c instanceof JSApplet) {
                 root = (Container)c;
             } else {
                 Container parent;
                 for(parent = c.getParent() ; parent != null ; parent = parent.getParent()) {
-                    if (parent instanceof Window || parent instanceof Applet) {
+                    if (parent instanceof Window || parent instanceof JSApplet) {
                         root = parent;
                         break;
                     }

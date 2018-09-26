@@ -521,7 +521,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 		@Override
 		public void actionPerformed(ActionEvent ev) {
 			if (dividerKeyboardResize) {
-				splitPane.setDividerLocationInt(Math.max(0, getDividerLocation(splitPane)
+				splitPane.setDividerLocation(Math.max(0, getDividerLocation(splitPane)
 						- getKeyboardMoveIncrement()));
 			}
 		}
@@ -538,7 +538,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 		@Override
 		public void actionPerformed(ActionEvent ev) {
 			if (dividerKeyboardResize) {
-				splitPane.setDividerLocationInt(getDividerLocation(splitPane)
+				splitPane.setDividerLocation(getDividerLocation(splitPane)
 						+ getKeyboardMoveIncrement());
 			}
 		}
@@ -555,7 +555,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 		@Override
 		public void actionPerformed(ActionEvent ev) {
 			if (dividerKeyboardResize) {
-				splitPane.setDividerLocationInt(0);
+				splitPane.setDividerLocation(0);
 			}
 		}
 	}
@@ -576,9 +576,9 @@ public class JSSplitPaneUI extends JSPanelUI {
 				int rightI = (insets != null) ? insets.right : 0;
 
 				if (orientation == JSplitPane.VERTICAL_SPLIT) {
-					splitPane.setDividerLocationInt(splitPane.getHeight() - bottomI);
+					splitPane.setDividerLocation(splitPane.getHeight() - bottomI);
 				} else {
-					splitPane.setDividerLocationInt(splitPane.getWidth() - rightI);
+					splitPane.setDividerLocation(splitPane.getWidth() - rightI);
 				}
 			}
 		}
@@ -830,7 +830,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 	public void paint(Graphics g, JComponent jc) {
 		if (!painted && splitPane.getDividerLocation() < 0) {
 			ignoreDividerLocationChange = true;
-			splitPane.setDividerLocationInt(getDividerLocation(splitPane));
+			splitPane.setDividerLocation(getDividerLocation(splitPane));
 		}
 		painted = true;
 	}
@@ -950,7 +950,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 	protected void dragDividerTo(int location) {
 		if (getLastDragLocation() != location) {
 			if (isContinuousLayout()) {
-				splitPane.setDividerLocationInt(location);
+				splitPane.setDividerLocation(location);
 				setLastDragLocation(location);
 			} else {
 				// int lastLoc = getLastDragLocation();
@@ -997,7 +997,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 				}
 				splitPane.remove(nonContinuousLayoutDivider);
 			}
-			splitPane.setDividerLocationInt(location);
+			splitPane.setDividerLocation(location);
 		}
 	}
 
@@ -1120,7 +1120,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 
 					ignoreDividerLocationChange = true;
 					try {
-						splitPane.setDividerLocationInt(newLocation);
+						splitPane.setDividerLocation(newLocation);
 						// This is not always needed, but is rather tricky
 						// to determine when... The case this is needed for
 						// is if the user sets the divider location to some

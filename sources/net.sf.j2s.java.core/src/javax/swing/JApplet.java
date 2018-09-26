@@ -27,7 +27,7 @@
  */
 package javax.swing;
 
-import java.applet.Applet;
+import java.applet.JSApplet;
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -94,7 +94,7 @@ import java.awt.LayoutManager;
  *
  * @author Arnaud Weber
  */
-public class JApplet extends Applet implements /* Accessible ,*/
+public class JApplet extends JSApplet implements /* Accessible ,*/
                                                RootPaneContainer/*,
                                TransferHandler.HasGetTransferHandler*/
 {
@@ -132,12 +132,15 @@ public class JApplet extends Applet implements /* Accessible ,*/
      * @see JComponent#getDefaultLocale
      */
     public JApplet() {
+    	super();
     	setFrameViewer(appletViewer);
 		uiClassID = "AppletUI";
     	setJApplet();
         updateUI();
     }
-
+    protected void setPanelUIClassID() {
+    	// bypass JPanel UI call
+	}
 
     private void setJApplet() {
 //    // Check the timerQ and restart if necessary.
@@ -146,19 +149,12 @@ public class JApplet extends Applet implements /* Accessible ,*/
 //        q.startIfNeeded();
 //    }
 
-    /* Workaround for bug 4155072.  The shared double buffer image
-     * may hang on to a reference to this applet; unfortunately
-     * Image.getGraphics() will continue to call JApplet.getForeground()
-     * and getBackground() even after this applet has been destroyed.
-     * So we ensure that these properties are non-null here.
-     */
-    setForeground(Color.black);
-    setBackground(Color.white);
-
-    setLocale( JComponent.getDefaultLocale() );
-    setLayout(new BorderLayout());
     setRootPane(createRootPane());
     rootPane.setFrameViewer(appletViewer);
+    setForeground(Color.black);
+    setBackground(Color.white);
+    setLocale( JComponent.getDefaultLocale() );
+    setLayout(new BorderLayout());
     setRootPaneCheckingEnabled(true);
 
     setFocusTraversalPolicyProvider(true);
@@ -557,14 +553,14 @@ public class JApplet extends Applet implements /* Accessible ,*/
      * @since     1.6
      */
     @Override
-		public void repaint(long time, int x, int y, int width, int height) {
+	public void repaint(long time, int x, int y, int width, int height) {
       if (RepaintManager.HANDLE_TOP_LEVEL_PAINT) {
       	//System.out.println("repaintNow " + this);
           RepaintManager.currentManager(this).addDirtyRegion(
                             this, x, y, width, height);
       }
       else {
-          super.repaint(time, x, y, width, height);
+    	  super.repaint(time, x, y, width, height);
       }
     }
 

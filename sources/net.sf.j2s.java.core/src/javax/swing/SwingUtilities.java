@@ -27,12 +27,12 @@
  */
 package javax.swing;
 
-import java.applet.Applet;
+import java.applet.JSApplet;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.FontMetrics;
-import java.awt.Frame;
+import java.awt.JSFrame;
 import java.awt.Graphics;
 import java.awt.HeadlessException;
 import java.awt.IllegalComponentStateException;
@@ -379,7 +379,7 @@ public class SwingUtilities implements SwingConstants
                 if(c instanceof JComponent) {
                     x = ((JComponent)c).getX();
                     y = ((JComponent)c).getY();
-                } else if(c instanceof Applet ||
+                } else if(c instanceof JSApplet ||
                           c instanceof Window) {
                     try {
                         Point pp = c.getLocationOnScreen();
@@ -397,7 +397,7 @@ public class SwingUtilities implements SwingConstants
                 p.x += x;
                 p.y += y;
 
-                if(c instanceof Window || c instanceof Applet)
+                if(c instanceof Window || c instanceof JSApplet)
                     break;
                 c = c.getParent();
             } while(c != null);
@@ -418,7 +418,7 @@ public class SwingUtilities implements SwingConstants
             if(c instanceof JComponent) {
                 x = ((JComponent)c).getX();
                 y = ((JComponent)c).getY();
-            }  else if(c instanceof Applet ||
+            }  else if(c instanceof JSApplet ||
                        c instanceof Window) {
                 try {
                     Point pp = c.getLocationOnScreen();
@@ -436,7 +436,7 @@ public class SwingUtilities implements SwingConstants
             p.x -= x;
             p.y -= y;
 
-            if(c instanceof Window || c instanceof Applet)
+            if(c instanceof Window || c instanceof JSApplet)
                 break;
             c = c.getParent();
         } while(c != null);
@@ -1535,7 +1535,7 @@ public class SwingUtilities implements SwingConstants
             if (p instanceof Window) {
                 return p;
             }
-            if (p instanceof Applet) {
+            if (p instanceof JSApplet) {
                 applet = p;
             }
         }
@@ -1577,7 +1577,7 @@ public class SwingUtilities implements SwingConstants
                     return ((JComponent)component).processKeyBindings(
                                                    event, pressed);
                 }
-                if ((component instanceof Applet) ||
+                if ((component instanceof JSApplet) ||
                     (component instanceof Window)) {
                     // No JComponents, if Window or Applet parent, process
                     // WHEN_IN_FOCUSED_WINDOW bindings.
@@ -1855,9 +1855,9 @@ public class SwingUtilities implements SwingConstants
 	 *              if GraphicsEnvironment.isHeadless() returns true.
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
-	public static Frame getSharedOwnerFrame() {
+	public static JSFrame getSharedOwnerFrame() {
 		JSAppletViewer p = JSUtil.getAppletViewer();
-		Frame f = p.sharedOwnerFrame;
+		JSFrame f = p.sharedOwnerFrame;
 		return (f == null ? (p.sharedOwnerFrame = new SharedOwnerFrame()) : f);
 	}
 
@@ -1869,7 +1869,7 @@ public class SwingUtilities implements SwingConstants
      * @see java.awt.GraphicsEnvironment#isHeadless
      */
     static WindowListener getSharedOwnerFrameShutdownListener() {
-        Frame sharedOwnerFrame = getSharedOwnerFrame();
+        JSFrame sharedOwnerFrame = getSharedOwnerFrame();
         return (WindowListener)sharedOwnerFrame;
     }
 

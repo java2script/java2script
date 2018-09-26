@@ -32,7 +32,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Event;
-import java.awt.Frame;
+import java.awt.JSFrame;
 import java.awt.GraphicsConfiguration;
 import java.awt.Insets;
 import java.awt.Point;
@@ -692,11 +692,11 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 		}
 	}
 
-	static Frame frameForComponent(Component component) {
-		while (!(component instanceof Frame)) {
+	static JSFrame frameForComponent(Component component) {
+		while (!(component instanceof JSFrame)) {
 			component = component.getParent();
 		}
-		return (Frame) component;
+		return (JSFrame) component;
 	}
 
 	private FocusListener createFocusChangeListener() {

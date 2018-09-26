@@ -6,6 +6,31 @@ import javax.swing.JTextArea;
 public class TextArea extends JScrollPane {
 	private JTextArea ta;
 
+  /**
+  * Create and display both vertical and horizontal scrollbars.
+  * @since JDK1.1
+  */
+ public static final int SCROLLBARS_BOTH = 0;
+
+ /**
+  * Create and display vertical scrollbar only.
+  * @since JDK1.1
+  */
+ public static final int SCROLLBARS_VERTICAL_ONLY = 1;
+
+ /**
+  * Create and display horizontal scrollbar only.
+  * @since JDK1.1
+  */
+ public static final int SCROLLBARS_HORIZONTAL_ONLY = 2;
+
+ /**
+  * Do not create or display any scrollbars for the text area.
+  * @since JDK1.1
+  */
+ public static final int SCROLLBARS_NONE = 3;
+
+
 	public TextArea(int rows, int cols) {
 		super();
 		setViewportView(ta = new JTextArea(rows, cols));
@@ -30,6 +55,28 @@ public class TextArea extends JScrollPane {
 		awtDefaults();
 	}
 	
+	public TextArea(String text, int rows, int columns, int scrollbars) {
+		this(text, rows, columns);
+		switch (scrollbars) {
+		case SCROLLBARS_BOTH:
+	    	setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
+	    	setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
+	    	break;			
+		case SCROLLBARS_VERTICAL_ONLY:
+	    	setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_ALWAYS);
+	    	setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
+	    	break;			
+		case SCROLLBARS_HORIZONTAL_ONLY:
+	    	setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
+	    	setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_ALWAYS);
+	    	break;			
+		case SCROLLBARS_NONE:
+	    	setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
+	    	setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
+	    	break;			
+		}
+	}
+
 	public void setCaretPosition(int pos) {
 		ta.setCaretPosition(pos);
 	}

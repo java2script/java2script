@@ -35,8 +35,9 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dialog;
+import java.awt.JSDialog;
 import java.awt.Dimension;
-import java.awt.Frame;
+import java.awt.JSFrame;
 import java.awt.Graphics;
 import java.awt.IllegalComponentStateException;
 import java.awt.Insets;
@@ -527,12 +528,16 @@ public class JSToolBarUI extends JSPanelUI {
       class ToolBarDialog extends JDialog {
 
 
-					public ToolBarDialog(Frame owner, String title, boolean modal) {
+					public ToolBarDialog(JSFrame owner, String title, boolean modal) {
+              super(owner, title, modal);
+          }
+
+          public ToolBarDialog(JSDialog owner, String title, boolean modal) {
               super(owner, title, modal);
           }
 
           public ToolBarDialog(Dialog owner, String title, boolean modal) {
-              super(owner, title, modal);
+              super((JSDialog) owner, title, modal);
           }
 
           // Override createRootPane() to automatically resize
@@ -559,12 +564,12 @@ public class JSToolBarUI extends JSPanelUI {
 
       JDialog dialog;
       Window window = SwingUtilities.getWindowAncestor(toolbar);
-      if (window instanceof Frame) {
-          dialog = new ToolBarDialog((Frame)window, toolbar.getName(), false);
-      } else if (window instanceof Dialog) {
-          dialog = new ToolBarDialog((Dialog)window, toolbar.getName(), false);
+      if (window instanceof JSFrame) {
+          dialog = new ToolBarDialog((JSFrame)window, toolbar.getName(), false);
+      } else if (window instanceof JSDialog) {
+          dialog = new ToolBarDialog((JSDialog)window, toolbar.getName(), false);
       } else {
-          dialog = new ToolBarDialog((Frame)null, toolbar.getName(), false);
+          dialog = new ToolBarDialog((JSFrame)null, toolbar.getName(), false);
       }
 
       dialog.getRootPane().setName("ToolBar.FloatingWindow");

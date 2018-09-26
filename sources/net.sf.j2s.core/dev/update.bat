@@ -1,6 +1,6 @@
 rem rough update script for Windows for new transpiler and/or runtime
 rem plugin is set to deliver to c:\temp\plugins\plugins
-set ver=3.2.2
+set ver=3.2.3
 
 echo %ver%
 

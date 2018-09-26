@@ -213,6 +213,8 @@ public class InvocationEvent extends AWTEvent implements ActiveEvent {
         this.notifier = notifier;
         this.catchExceptions = catchThrowables;
         this.when = System.currentTimeMillis();
+//        String s = /** @j2sNative (this.__JSID__ + " " + runnable.run$.toString()) || */null;
+//    	System.out.println("new Invocation event runnable.run() " +s);
     }
 
     /**
@@ -233,6 +235,10 @@ public class InvocationEvent extends AWTEvent implements ActiveEvent {
             }
         }
         else {
+        	
+//            String s = /** @j2sNative this.__JSID__  || */null;
+//        	System.out.println("----Invocation event runnable.run() " + s);
+//        	
             runnable.run();
         }
 

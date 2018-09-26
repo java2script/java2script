@@ -31,9 +31,9 @@ package javax.swing;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Dialog;
+import java.awt.JSDialog;
 import java.awt.Dimension;
-import java.awt.Frame;
+import java.awt.JSFrame;
 import java.awt.HeadlessException;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
@@ -1058,7 +1058,7 @@ public class JOptionPane extends JComponent {
 	 */
 	public JDialog createDialog(String title) {
 		int style = styleFromMessageType(getMessageType());
-		JDialog dialog = new JDialog((Dialog) null, title, true);
+		JDialog dialog = new JDialog((JSDialog) null, title, true);
 		initDialog(dialog, style, null);
 		return dialog;
 	}
@@ -1068,10 +1068,10 @@ public class JOptionPane extends JComponent {
 		final JDialog dialog;
 
 		Window window = getWindowForComponent(parentComponent);
-		if (window instanceof Frame) {
-			dialog = new JDialog((Frame) window, title, true);
+		if (window instanceof JSFrame) {
+			dialog = new JDialog((JSFrame) window, title, true);
 		} else {
-			dialog = new JDialog((Dialog) window, title, true);
+			dialog = new JDialog((JSDialog) window, title, true);
 		}
 		if (window instanceof SwingUtilities.SharedOwnerFrame) {
 			WindowListener ownerShutdownListener = (WindowListener) SwingUtilities
@@ -1729,11 +1729,11 @@ public class JOptionPane extends JComponent {
 	 * @see #getRootFrame
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
-	public static Frame getFrameForComponent(Component parentComponent) {
+	public static JSFrame getFrameForComponent(Component parentComponent) {
 		if (parentComponent == null)
 			return getRootFrame();
-		if (parentComponent instanceof Frame)
-			return (Frame) parentComponent;
+		if (parentComponent instanceof JSFrame)
+			return (JSFrame) parentComponent;
 		return getFrameForComponent(parentComponent.getParent());
 	}
 
@@ -1756,7 +1756,7 @@ public class JOptionPane extends JComponent {
 	static Window getWindowForComponent(Component parentComponent) {
 		if (parentComponent == null)
 			return getRootFrame();
-		if (parentComponent instanceof Frame || parentComponent instanceof Dialog)
+		if (parentComponent instanceof JSFrame || parentComponent instanceof JSDialog)
 			return (Window) parentComponent;
 		return getWindowForComponent(parentComponent.getParent());
 	}
@@ -1791,7 +1791,7 @@ public class JOptionPane extends JComponent {
 	 * @param newRootFrame
 	 *            the default <code>Frame</code> to use
 	 */
-	public static void setRootFrame(Frame newRootFrame) {
+	public static void setRootFrame(JSFrame newRootFrame) {
 		if (newRootFrame != null) {
 			SwingUtilities.appContextPut(sharedFrameKey, newRootFrame);
 		} else {
@@ -1810,8 +1810,8 @@ public class JOptionPane extends JComponent {
 	 * @see #setRootFrame
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
-	public static Frame getRootFrame() {
-		Frame sharedFrame = (Frame) SwingUtilities.appContextGet(sharedFrameKey);
+	public static JSFrame getRootFrame() {
+		JSFrame sharedFrame = (JSFrame) SwingUtilities.appContextGet(sharedFrameKey);
 		if (sharedFrame == null) {
 			sharedFrame = SwingUtilities.getSharedOwnerFrame();
 			SwingUtilities.appContextPut(sharedFrameKey, sharedFrame);

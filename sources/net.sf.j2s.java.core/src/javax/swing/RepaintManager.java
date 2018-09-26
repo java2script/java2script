@@ -27,11 +27,11 @@
  */
 package javax.swing;
 
-import java.applet.Applet;
+import java.applet.JSApplet;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Frame;
+import java.awt.JSFrame;
 import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
 import java.awt.Image;
@@ -379,7 +379,7 @@ public class RepaintManager {
 				//System.out.println("RM noVisibleParent");
 				return;
 			}
-			if ((c instanceof Window) || (c instanceof Applet)) {
+			if ((c instanceof Window) || (c instanceof JSApplet)) {
 				root = c;
 				break;
 			}
@@ -483,10 +483,10 @@ public class RepaintManager {
 			if (!p.isVisible() || p.getPeer() == null) {
 				return;
 			}
-			if ((p instanceof Window) || (p instanceof Applet)) {
+			if ((p instanceof Window) || (p instanceof JSApplet)) {
 				// Iconified frames are still visible!
-				if (p instanceof Frame
-						&& (((Frame) p).getExtendedState() & Frame.ICONIFIED) == Frame.ICONIFIED) {
+				if (p instanceof JSFrame
+						&& (((JSFrame) p).getExtendedState() & JSFrame.ICONIFIED) == JSFrame.ICONIFIED) {
 					return;
 				}
 				root = p;
@@ -573,7 +573,7 @@ public class RepaintManager {
 	 * @see JApplet#repaint
 	 * @since 1.6
 	 */
-	public void addDirtyRegion(Applet applet, int x, int y, int w, int h) {
+	public void addDirtyRegion(JSApplet applet, int x, int y, int w, int h) {
 		addDirtyRegion0(applet, x, y, w, h);
 	}
 
@@ -591,8 +591,8 @@ public class RepaintManager {
 			Rectangle dirty = hws.get(hw);
 			if (hw instanceof Window) {
 				addDirtyRegion((Window) hw, dirty.x, dirty.y, dirty.width, dirty.height);
-			} else if (hw instanceof Applet) {
-				addDirtyRegion((Applet) hw, dirty.x, dirty.y, dirty.width, dirty.height);
+			} else if (hw instanceof JSApplet) {
+				addDirtyRegion((JSApplet) hw, dirty.x, dirty.y, dirty.width, dirty.height);
 			} else { // SwingHeavyWeight
 				addDirtyRegion0(hw, dirty.x, dirty.y, dirty.width, dirty.height);
 			}
