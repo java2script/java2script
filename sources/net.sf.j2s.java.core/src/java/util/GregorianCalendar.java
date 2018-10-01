@@ -2925,6 +2925,11 @@ public class GregorianCalendar extends Calendar {
         return isSet(ERA) ? internalGet(ERA) : CE;
     }
 
+	public void setGregorianChange(Date changeoverDate) {
+		// TODO Auto-generated method stub
+		
+	}
+
 //    /**
 //     * Updates internal state.
 //     */
