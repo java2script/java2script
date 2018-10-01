@@ -2246,9 +2246,10 @@ public class Container extends JSComponent {
      * @param searchHeavyweights if <code>false</code>, the method
      *        will bypass heavyweight components during the search.
      */
-    private Component getMouseEventTarget(int x, int y, boolean includeSelf,
+    public Component getMouseEventTarget(int x, int y, boolean includeSelf,
                                           EventTargetFilter filter,
                                           boolean searchHeavyweights) {
+    	// was default package-specific
         Component comp = null;
 //        if (searchHeavyweights) {
 //            comp = getMouseEventTargetImpl(x, y, includeSelf, filter,
@@ -2320,7 +2321,8 @@ public class Container extends JSComponent {
                             return deeper;
                         }
                     } else {
-                        if (filter.accept(comp)) {
+                    	// SwingJS adding filter == null for AWT events for A2SListener
+                        if (filter == null || filter.accept(comp)) {
                             // there isn't a deeper target, but this component
                             // is a target
                             return comp;
@@ -2341,7 +2343,7 @@ public class Container extends JSComponent {
 
             // didn't find a child target, return this component if it's
             // a possible target
-            if (isMouseOverMe && isPeerOK && filter.accept(this)) {
+            if (isMouseOverMe && isPeerOK && (filter == null || filter.accept(this))) {
                 return this;
             }
             // no possible target
@@ -4399,7 +4401,7 @@ class LightweightDispatcher implements AWTEventListener {
 
 		trackMouseEnterExit(mouseOver, e);
 
-		Component actualTarget;
+		Component actualTarget; 
 
 		switch (id) {
 		case MouseEvent.MOUSE_DRAGGED:
@@ -4729,7 +4731,7 @@ class LightweightDispatcher implements AWTEventListener {
 
 		int x = e.getX(), y = e.getY();
 		Component component = target;
-		if (target.parent == null) {
+		if (target.parent == null && component != nativeContainer) {
 			component = ((JSComponentUI) ((JSComponent) target).getUI()).getTargetParent();
 			if (component != null)
 				target = component;

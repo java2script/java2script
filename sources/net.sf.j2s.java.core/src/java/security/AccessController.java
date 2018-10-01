@@ -3,16 +3,23 @@ package java.security;
 public class AccessController implements AccessControlContext {
 
 	// a dummy class
-	
+
 	public static <T> T doPrivileged(PrivilegedAction<T> action) {
 		return action.run();
 	}
 
-	public static void doPrivileged(PrivilegedExceptionAction<Void> privilegedExceptionAction) {
+	public static <T> T doPrivileged(PrivilegedExceptionAction<T> action) throws PrivilegedActionException{
 		try {
-			privilegedExceptionAction.run();
+			return action.run();
 		} catch (Exception e) {
-		}		
+		}
+		return null;
+	}
+
+
+	
+	public static <T> T doPrivileged(PrivilegedAction<T> action, AccessControlContext context) {
+		return action.run();
 	}
 
 	public static AccessControlContext getContext() {
@@ -24,10 +31,5 @@ public class AccessController implements AccessControlContext {
 		// no access checking in JavaScript
 		return true;
 	}
-
-  public static <T> T doPrivileged(PrivilegedAction<T> action,
-      AccessControlContext context) {
-  	return action.run();
-  }
 
 }

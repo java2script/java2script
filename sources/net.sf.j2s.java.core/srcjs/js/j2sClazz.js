@@ -7,9 +7,8 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
-// TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
-//       It is possible that these might be loaded dynamically.
-
+// BH 10/1/2018 3.2.4.01 fixes problem with AWT mouseXxx(Event) not activating in children of Applet
+// BH 9/29/2018 3.2.4.00 adds JAXB support
 // BH 9/23/2018 3.2.3.00 adds direct non-Swing applet support (java.applet.Applet and java.awt.*); no need for converting source to a2s.*
 // BH 9/15/2018 3.2.2.06 adds JScrollBar block and unit increments; fixes JLabel ui getMaximumSize
 // BH 9/15/2018 3.2.2.05 fixes Math.IEEEremainder
@@ -105,8 +104,8 @@ window["j2s.clazzloaded"] = true;
   _debugging: false,
   _loadcore: true,
   _nooutput: 0,
-  _VERSION_R: "3.2.3.00",
-  _VERSION_T: "3.2.3.00",
+  _VERSION_R: "3.2.4.01",
+  _VERSION_T: "3.2.4.00",
 };
 
 ;(function(Clazz, J2S) {
@@ -744,6 +743,8 @@ Clazz.newMeth = function (clazzThis, funName, funBody, modifiers) {
   
   var isStatic = (modifiers == 1 || modifiers == 2);
   var isPrivate = (typeof modifiers == "object");
+  if (isPrivate) 
+	C$.$P$ = modifiers;
   Clazz.saemCount0++;
   funBody.exName = funName; // mark it as one of our methods
   funBody.exClazz = clazzThis; // make it traceable
@@ -3276,6 +3277,12 @@ java.lang.System = System = {
       case "os.version":
         v = navigator.userAgent;
         break;
+      case "javax.xml.datatype.DatatypeFactory":
+	v = "org.apache.xerces.jaxp.datatype";
+	break;
+      case "javax.xml.bind.JAXBContextFactory":
+	v = "swingjs.JSJAXBContextFactory";
+	break;
       }
       if (v)
         return System.$props[key] = v;
@@ -3544,8 +3551,7 @@ Integer.reverseBytes = m$(Integer,"reverseBytes$I",
 	           ((i << 24));
 	}, 1);
 
-m$(Integer,"signum$",
-		function(i){ return (i >> 31) | (-i >>> 31); }, 1);
+m$(Integer,"signum$I", function(i){ return i < 0 ? -1 : i > 0 ? 1 : 0; }, 1);
 
 m$(Integer,"min$I$I",
 		function(a,b) { return Math.min(a,b); }, 1);
@@ -3735,8 +3741,7 @@ Long.min$J$J = Integer.min$I$I;
 Long.max$J$J = Integer.max$I$I;
 Long.sum$J$J = Integer.sum$I$I;
 
-
-
+m$(Long,"signum$J", function(i){ return i < 0 ? -1 : i > 0 ? 1 : 0; }, 1);
 
 Clazz._setDeclared("java.lang.Short", java.lang.Short = Short = function(){
 if (typeof arguments[0] != "object")this.c$(arguments[0]);
