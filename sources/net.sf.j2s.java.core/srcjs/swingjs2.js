@@ -13552,9 +13552,7 @@ if (!J2S._version)
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
-// TODO: CharacterSequence does not implement Java 8 default methods chars() or codePoints()
-//       It is possible that these might be loaded dynamically.
-
+// BH 10/1/2018 3.2.4.01 fixes problem with AWT mouseXxx(Event) not activating in children of Applet
 // BH 9/29/2018 3.2.4.00 adds JAXB support
 // BH 9/23/2018 3.2.3.00 adds direct non-Swing applet support (java.applet.Applet and java.awt.*); no need for converting source to a2s.*
 // BH 9/15/2018 3.2.2.06 adds JScrollBar block and unit increments; fixes JLabel ui getMaximumSize
@@ -13651,8 +13649,8 @@ window["j2s.clazzloaded"] = true;
   _debugging: false,
   _loadcore: true,
   _nooutput: 0,
-  _VERSION_R: "3.2.3.00",
-  _VERSION_T: "3.2.3.00",
+  _VERSION_R: "3.2.4.01",
+  _VERSION_T: "3.2.4.00",
 };
 
 ;(function(Clazz, J2S) {

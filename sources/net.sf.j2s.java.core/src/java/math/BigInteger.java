@@ -35,7 +35,12 @@ import java.util.Random;
 
 /**
  * 
- * SwingJS note: This is only a minimal implementation. 
+ * SwingJS note: Because of the limitations of JavaScript with regard
+ * to long-integer bit storage as a double, this implementation drops
+ * the integer storage bit length to 26, giving 52 for long and leaving
+ * the last 12 bits for the exponent of the double number. This should
+ * not affect performance significantly. It does increase the storage 
+ * size by about 25%.    
  * 
  * Immutable arbitrary-precision integers.  All operations behave as if
  * BigIntegers were represented in two's-complement notation (like Java's
@@ -226,6 +231,8 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
     @Deprecated
     private int firstNonzeroIntNum;
 
+	private long THIRD_CARRY = 0x155556L;//for 26-bit; 32-bit is 0x55555556L;
+    private long THIRD_MULT = 0x2AAAAABL;//for 26-bit; 32-bit is 0xAAAAAAABL
 	private static Random myRandom;
 
     /**
@@ -233,26 +240,29 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
      * 
      * SwingJS : ANDing and ORing in JavaScript result in 32-bit numbers
      */
-    static long LONG_MASK = /** @j2sNative Math.pow(2,32) - 1 ||*/ 0xffffffffL;
+	
+	static int N_BITS = 26;
+	static int SPARE_BITS = 32 - N_BITS;
+    static long LONG_MASK = (1 << N_BITS) - 1;// 0xffffffffL;
 
-    static long TWO_TO_32 = LONG_MASK + 1;
+    static long FIRST_HIGH = LONG_MASK + 1;
 
 
-	static final double[] TWO_TO_THE = new double[55];
+	static final double[] TWO_TO_THE = new double[52];
 	// can't use << in JavaScript for large numbers
 	static {
 		TWO_TO_THE[0] = 1;
-		for (int i = 1; i <= 54; i++)
+		for (int i = 1; i <= N_BITS * 2; i++)
 			TWO_TO_THE[i] = TWO_TO_THE[i - 1] * 2;
 	}
 
 	static int longNumberOfLeadingZeros(long x) {    	
-		int n = 0;
+		int n = -SPARE_BITS;
 		long y = getHighBits(x); 
 		if (y == 0) {
 			x = getLowBits(x);
 		} else {
-			n = 32;
+			n = N_BITS - 2 * SPARE_BITS;
 			x = y;   		
 		}
 		return n + Integer.numberOfLeadingZeros((int) x);
@@ -261,11 +271,11 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
 	static long getLowBits(long y) {
     	// was y & LONG_MASK;
     	y = ((int) y) | 0;
-		return (y < 0 ? TWO_TO_32 + y : y);
+		return (y < 0 ? FIRST_HIGH + y : y);
 	}
 
 	static long toHighBits(long x) {
-		return longLeftShift(getLowBits(x), 32);
+		return longLeftShift(getLowBits(x), N_BITS);
 	}
 	
 	static long longLeftShift(long x, int n) {
@@ -277,7 +287,7 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
 	}
 
 	static long getHighBits(long x) {
-		return longRightShift(x, 32);
+		return longRightShift(x, N_BITS);
 	}
 	
 	static long longRightShift(long x, int n) {
@@ -286,7 +296,7 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
 		long tttn = doubleToLong(TWO_TO_THE[n]);
     	x = (x - getLowBits((x & (tttn - 1)))) / tttn;
     	// clear high bits if necessary
-    	return (x < 0 && n > 32 ? x & (doubleToLong(TWO_TO_THE[64 - n]) - 1) : x);
+    	return x;//(x < 0 && n > 32 ? x & (doubleToLong(TWO_TO_THE[ - n]) - 1) : x);
     }
     
     private static long doubleToLong(double d) {
@@ -645,7 +655,7 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
         // Pre-allocate array of expected size. May be too large but can
         // never be too small. Typically exact.
         long numBits = ((numDigits * bitsPerDigit[radix]) >>> 10) + 1;
-        if (numBits + 31 >= TWO_TO_32) {
+        if (numBits + 31 >= FIRST_HIGH) {
             reportOverflow();
         }
         int numWords = (int) (numBits + 31) >>> 5;
@@ -703,7 +713,7 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
             numWords = 1;
         } else {
             long numBits = ((numDigits * bitsPerDigit[10]) >>> 10) + 1;
-            if (numBits + 31 >= TWO_TO_32) {
+            if (numBits + 31 >= FIRST_HIGH) {
                 reportOverflow();
             }
             numWords = (int) (numBits + 31) >>> 5;
@@ -1479,7 +1489,7 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
                 long difference = getLowBits(val) - getLowBits(little[0]);
                 result[1] = (int)difference;
                 // Subtract remainder of longer number while borrow propagates
-                boolean borrow = (difference >> 32 != 0);
+                boolean borrow = (getHighBits(difference) != 0);
                 if (borrow) {
                     result[0] = highWord - 1;
                 } else {        // Copy remainder of longer number
@@ -1488,9 +1498,9 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
                 return result;
             } else { // little.length == 2
                 long difference = getLowBits(val) - getLowBits(little[1]);
-                result[1] = (int)difference;
-                difference = getLowBits(highWord) - getLowBits(little[0]) + (difference >> 32);
-                result[0] = (int)difference;
+                result[1] = (int) difference;
+                difference = getLowBits(highWord) - getLowBits(little[0]) + getHighBits(difference);
+                result[0] = (int) difference;
                 return result;
             }
         }
@@ -1515,12 +1525,12 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
         } else {
             difference = getLowBits(big[--bigIndex]) - getLowBits(val);
             result[bigIndex] = (int)difference;
-            difference = getLowBits(big[--bigIndex]) - getLowBits(highWord) + (difference >> 32);
+            difference = getLowBits(big[--bigIndex]) - getLowBits(highWord) + getHighBits(difference);
             result[bigIndex] = (int)difference;
         }
 
         // Subtract remainder of longer number while borrow propagates
-        boolean borrow = (difference >> 32 != 0);
+        boolean borrow = (getHighBits(difference) != 0);
         while (bigIndex > 0 && borrow)
             borrow = ((result[--bigIndex] = big[bigIndex] - 1) == -1);
 
@@ -1570,12 +1580,12 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
         while (littleIndex > 0) {
             difference = getLowBits(big[--bigIndex]) -
             		getLowBits(little[--littleIndex]) +
-                         (difference >> 32);
+                         getHighBits(difference);
             result[bigIndex] = (int)difference;
         }
 
         // Subtract remainder of longer number while borrow propagates
-        boolean borrow = (difference >> 32 != 0);
+        boolean borrow = (getHighBits(difference) != 0);
         while (bigIndex > 0 && borrow)
             borrow = ((result[--bigIndex] = big[bigIndex] - 1) == -1);
 
@@ -1762,7 +1772,10 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
         BigInteger p3 = xh.add(xl).multiply(yh.add(yl));
 
         // result = p1 * 2^(32*2*half) + (p3 - p1 - p2) * 2^(32*half) + p2
-        BigInteger result = p1.shiftLeft(32*half).add(p3.subtract(p1).subtract(p2)).shiftLeft(32*half).add(p2);
+        BigInteger result = p1.shiftLeft(N_BITS*half)
+        			.add(p3.subtract(p1).subtract(p2))
+        			.shiftLeft(N_BITS*half)
+        			.add(p2);
 
         if (x.signum != y.signum) {
             return result.negate();
@@ -1849,9 +1862,12 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
         tm1 = tm1.subtract(t2);
 
         // Number of bits to shift left.
-        int ss = k*32;
+        int ss = k*N_BITS;
 
-        BigInteger result = vinf.shiftLeft(ss).add(t2).shiftLeft(ss).add(t1).shiftLeft(ss).add(tm1).shiftLeft(ss).add(v0);
+        BigInteger result = vinf.shiftLeft(ss).add(t2)
+        		.shiftLeft(ss).add(t1)
+        		.shiftLeft(ss).add(tm1)
+        		.shiftLeft(ss).add(v0);
 
         if (a.signum != b.signum) {
             return result.negate();
@@ -1939,14 +1955,15 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
             // 0xAAAAAAAB is the modular inverse of 3 (mod 2^32).  Thus,
             // the effect of this is to divide by 3 (mod 2^32).
             // This is much faster than division on most architectures.
-            q = getLowBits((w * 0xAAAAAAABL));
+            q = getLowBits((w * THIRD_MULT));
             result[i] = (int) q;
 
+            // SWINGJS TODO - CHECK THIS
             // Now check the borrow. The second check can of course be
             // eliminated if the first fails.
-            if (q >= 0x55555556L) {
+            if (q >= THIRD_CARRY ) {
                 borrow++;
-                if (q >= 0xAAAAAAABL)
+                if (q >= THIRD_MULT)
                     borrow++;
             }
         }
@@ -2099,7 +2116,9 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
         BigInteger xls = xl.square();  // xls = xl^2
 
         // xh^2 << 64  +  (((xl+xh)^2 - (xh^2 + xl^2)) << 32) + xl^2
-        return xhs.shiftLeft(half*32).add(xl.add(xh).square().subtract(xhs.add(xls))).shiftLeft(half*32).add(xls);
+        return xhs.shiftLeft(half*N_BITS).add(xl.add(xh)
+        		.square().subtract(xhs.add(xls)))
+        		.shiftLeft(half*N_BITS).add(xls);
     }
 
     /**
@@ -2149,9 +2168,12 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
         tm1 = tm1.subtract(t2);
 
         // Number of bits to shift left.
-        int ss = k*32;
+        int ss = k*N_BITS;
 
-        return vinf.shiftLeft(ss).add(t2).shiftLeft(ss).add(t1).shiftLeft(ss).add(tm1).shiftLeft(ss).add(v0);
+        return vinf.shiftLeft(ss).add(t2)
+        		.shiftLeft(ss).add(t1)
+        		.shiftLeft(ss).add(tm1)
+        		.shiftLeft(ss).add(v0);
     }
 
     // Division
@@ -2903,11 +2925,11 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
 
         while (--len >= 0) {
             sum = getLowBits(a[len]) -
-            		getLowBits(b[len]) + (sum >> 32);
+            		getLowBits(b[len]) + getHighBits(sum);
             a[len] = (int)sum;
         }
 
-        return (int)(sum >> 32);
+        return (int)getHighBits(sum);
     }
 
     /**

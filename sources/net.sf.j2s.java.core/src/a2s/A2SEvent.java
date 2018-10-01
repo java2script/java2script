@@ -2,6 +2,7 @@ package a2s;
 
 import java.awt.AWTEvent;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Event;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -39,6 +40,9 @@ public class A2SEvent implements Runnable {
 	public void run() {
 	  Event e = this.e;
 	  Component target = (Component) this.target;
+	  if (target instanceof Container)
+		  target = ((Container)target).getMouseEventTarget(e.x, e.y, true, null, false);
+
 		
 		/**
 		 * Otherwise the states have not changed

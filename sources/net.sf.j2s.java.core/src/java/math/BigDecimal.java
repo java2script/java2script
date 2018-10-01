@@ -4787,7 +4787,7 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
         return divideAndRound128(dividendHi, dividendLo, divisor, qsign, scale, roundingMode, preferredScale);
     }
 
-    private static final long DIV_NUM_BASE = BigInteger.TWO_TO_32; // Number base (32 bits).
+    private static final long DIV_NUM_BASE = BigInteger.FIRST_HIGH; // Number base (32 bits).
 
     /*
      * divideAndRound 128-bit value by long divisor.

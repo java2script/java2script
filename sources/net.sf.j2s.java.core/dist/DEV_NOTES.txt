@@ -1,0 +1,5 @@
+BH 2018.10.01
+
+fix for AWT applets and frames not automatically 
+activating their childrens' mouse listeners.
+
