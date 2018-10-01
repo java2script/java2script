@@ -16,6 +16,8 @@ import javax.xml.sax.Parser;
 import javax.xml.sax.XMLReader;
 import javax.xml.validation.Schema;
 
+import org.xml.sax.SAXException;
+
 /**
  * 
  * SwingJS note: These class in the JDK is abstract. Here we allow instantiation
@@ -86,7 +88,7 @@ public class SAXParserFactory {
 	 * 
 	 * @return
 	 */
-	public SAXParser newSAXParser() {
+	public SAXParser newSAXParser() throws ParserConfigurationException, SAXException {
 		try {
 			SAXParser p = (SAXParser) makeParser();
 			if (p instanceof XMLReader) {

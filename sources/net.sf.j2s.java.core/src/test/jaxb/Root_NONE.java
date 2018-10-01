@@ -1,0 +1,229 @@
+package test.jaxb;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.logging.Logger;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
+
+// adapted source: http://blog.bdoughan.com/2011/06/using-jaxbs-xmlaccessortype-to.html
+
+// "Root" here would conflict with Root_FIELD 
+@XmlRootElement(name = "RootP", namespace = "www.jalview.org")
+@XmlAccessorType(XmlAccessType.NONE)
+//@XmlType(propOrder = {
+//	    "D",
+//	    "a",
+//	    "date",
+//	    "propertyC",
+//	    "b",
+//	    "c",
+//	    "publ"
+//	})
+public class Root_NONE {
+
+	static boolean isCopy = false;
+
+	static final String x = "Date";
+	// TODO: DOES NOT WORK @XmlElement(name=x)
+
+	public void toC(String c) {
+		this.c = c;
+	}
+
+	public String C() {
+		return c;
+	}
+
+	public String PC() {
+		return PropertyC;
+	}
+
+	public String pc() {
+		return propertyc;
+	}
+
+	public String pC() {
+		return propertyC;
+	}
+
+////////////////////////////////////////////////////
+
+	public String s;
+	// ignored -- not initialized
+
+	@XmlTransient
+	private String D;
+	// ignored - XmlTransient
+
+	private transient int t = 3;
+	// ignored - transient
+
+	private Root_FIELD r1;
+	// ignored - private
+
+	String Ang = "\u212B";
+	// <Ang>[3 bytes here]</Ang>
+	public String getPropertyAng() {
+		// ignored - not tagged
+		return Ang;
+	}
+	public void setPropertyAng(String a) {
+		Ang = a;
+	}
+
+	private int x1;
+
+	public int pi1, pi2, pi3 = 3;
+	// ignored - not tagged
+
+	@XmlAttribute
+	public int pi1a, pi2a, pi3a = 3;
+//<ns2:Root xmlns:ns2="www.jalview.org" pi1A="0" pi2A="0" pi3A="3">
+
+	public boolean b1;
+	// ignored - not tagged
+
+	private String a;
+	// ignored - not tagged
+	public String getA() {
+		// ignored - not tagged
+		return "getA";
+	}
+	public void setA(String a) {
+		this.a = "getA";
+	}
+
+	public String b = "b";
+	// ignored - not tagged
+	private String getPropertyB() {
+		// ignored - not tagged
+		return "getPropertyB";
+	}
+	public void setPropertyB(String b) {
+		this.b = b;
+	}
+
+	private String c = "c0";
+	// ignored - not tagged
+	private String getC() {
+		// ignored - not tagged
+		return "getC";
+	}
+	private void setC(String c) {
+		this.c = "setC";
+	}
+
+	private String d = "d_";
+	// ignored - not tagged
+	public String getD() {
+		// ignored - not tagged
+		return "getD";
+	}
+	public void setD(String d) {
+		D = "setD";
+	}
+
+	public Date date = new Date();
+	// ignored - not tagged
+
+///// capitalization tests /////
+	
+	private String PropertyCpriv = "PropertyCpriv";
+	// ignored - not tagged
+	
+	private String PropertyC = "PropertyC0";
+	// ignored - not tagged
+	
+	@XmlTransient
+	private String propertyC = "propertyC0";
+	@XmlElement
+	public String getproPERtyC() {
+//	    <proPERtyC>...</proPERtyC>
+// (at end)
+		return "getproPERtyC:" + propertyC + "1";
+	}
+	public void setproPERtyC(String c) {
+		propertyC = c;
+		System.out.println("setProPERtyC:" + c);
+	}
+	public String getPropertyC() {
+		// ignored - not tagged
+		return "getPropertyC:" + propertyC + "1";
+	}
+	public void setPropertyC(String c) {
+		propertyC = c;
+		System.out.println("setPropertyC:" + c);
+	}
+
+	@XmlTransient
+	private String propertyc = "propertyc0";
+//	public String getpropertyc() {
+//	// (at end)
+//    // <propertyc>getpropertyc</propertyc>
+//		return "getpropertyc:" + propertyc;
+//	}
+	public void setpropertyc(String c) {
+		propertyc = c;
+		System.out.println("setpropertyc:" + c);
+	}
+	@XmlElement
+	public String getPropertyc() {
+		return "getPropertyc:" + propertyc + 1;
+	}
+	public void setPropertyc(String c) {
+		propertyc = c;
+		System.out.println("setPropertyc:" + c);
+	}
+	
+
+	
+	
+///// no field, just get/is/Set
+	// after fields, before properties
+    // must be flagged with @XmlElement
+
+	@XmlElement
+	public boolean isB2() {
+		//         <b2>true</b2>
+		// after fields, before properties
+		return true;
+	}
+	public void setB2(boolean b) {
+	}
+
+	@XmlElement
+	public boolean getB3() {
+		//         <b2>true</b2>
+		// after fields, before properties
+		return true;
+	}
+	public void setB3(boolean b) {
+	}
+
+	@XmlElement
+	public String getAToBe() {
+		//  <AToBe>getAtoBe</AToBe>
+		return "getAtoBe";
+	}
+	public void setAToBe(String a) {
+		this.a = a;
+	}
+	@XmlElement
+	public String getPropertyAToBe() {
+    //  <propertyAToBe>getPropertyAtoB</propertyAToBe>
+		return "getPropertyAtoB";
+	}
+	public void setPropertyAToBe(String a) {
+		this.a = a;
+	}
+
+}

@@ -1,6 +1,7 @@
 Notes
 =====
 
+update 9/29/2018 -- 3.2.4 adds support for JAXB, changes default for ResourceBundle.getBundle
 update 9/23/2018 -- 3.2.3 adds support for direct use of java.awt.* components and java.applet.Applet 
                  -- no need for switching to a2s.*
 update 7/14/2018 -- 3.2.1 removes Java2ScriptJavaBuilder; uses CompilationParticipant instead
@@ -303,6 +304,8 @@ LookAndFeel
 toString() may need to be explicit
 myClass.getField not implemented
 "window" and other reserved JavaScript names
+ResourceBundle.getBundle
+
 
 MAJOR ISSUES--for Bob and Udo within SwingJS
 ============================================
@@ -546,6 +549,17 @@ using:
 
 No reserved top-level JavaScript name is allowed for a package name. So, for example, 
 one must rename packages such as "window" or "document" to names such as "win" or "doc".
+
+
+ResourceBundle.getBundle
+------------------------
+
+java.util.ResourceBundle(String) default is Control.FORMAT_DEFAULT, which
+first checks for a Java class, then a properties file. This causes problems
+as missing class files is a major failure case. The default in SwingJS is 
+FORMAT_PROPERTIES meaning that the default is NOT to look for a class file.
+It is felt that the developer should know which of these it is, and if it is
+a class file, then the ResourceBundle call should specify that. 
 
 
 MAJOR ISSUES--for Bob and Udo within SwingJS
