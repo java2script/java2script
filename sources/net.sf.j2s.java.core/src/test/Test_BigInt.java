@@ -2,12 +2,50 @@ package test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.GregorianCalendar;
+
+import org.apache.xerces.jaxp.datatype.XMLGregorianCalendarImpl;
 
 
 public class Test_BigInt extends Test_ {
 
 	public static void main(String[] args) {
 
+		BigDecimal e = new BigDecimal("200.05");
+		System.out.println(e);
+		BigDecimal f = new BigDecimal(45000);
+		System.out.println(f);
+		BigDecimal g = f.multiply(e);
+		System.out.println(g);
+		assert(g.toString().equals("9002250.00"));
+		assert(f.compareTo(new BigDecimal(45000)) == 0);
+
+		f = f.movePointLeft(3);
+		System.out.println(f);
+		assert(f.compareTo(new BigDecimal(45000)) == -1);
+		f = new BigDecimal(45000000L);
+		System.out.println(f);
+		f = f.movePointLeft(6);
+		System.out.println(f);
+		assert(f.compareTo(new BigDecimal("4500.00")) == -1);
+		assert(f.compareTo(new BigDecimal("0.00450000")) == 1);
+		if (true)
+			return;
+		// failing: 
+
+		g = new BigDecimal(200.05);
+		
+		long time = 1538673122263L;//System.currentTimeMillis();
+		g = BigDecimal.valueOf(time, 3);
+		System.out.println(time + " " + g);
+		assert (g.toString().equals("1538673122.263"));
+
+		
+//		
+//		XMLGregorianCalendarImpl cc = new XMLGregorianCalendarImpl(new GregorianCalendar());
+//		
+//		System.out.println(cc.toXMLFormat());
+		
 		BigInteger x = new BigInteger("100000000");
 		BigInteger y = new BigInteger("101000000");
 		BigInteger z = x.multiply(y);
@@ -74,6 +112,7 @@ public class Test_BigInt extends Test_ {
 		System.out.println(d);
 		d = d.multiply(c);
 		System.out.println(d);
+		assert (d.toString().equals("539659488879945019969144096149744253082822996305278833191693886734593196177571980115737100546042293708933808976540048777354725216"));
 		d = d.divide(c);
 		System.out.println(d);
 		d = d.divide(c);
@@ -92,20 +131,11 @@ public class Test_BigInt extends Test_ {
 		System.out.println(d);
 		assert(d.toString().equals("1"));
 		
-//		BigDecimal e = new BigDecimal(20000);
-//		BigDecimal f = new BigDecimal(45000);
-//		BigDecimal g = f.divide(e);
+//		g = f.divide(e);
 //		System.out.println(g);
-//		System.out.println(g);
+//		assert(g.toString().equals("2.5"));
 		
-		
-		
-		// OK through 48000000000000
-//		d = d.multiply(c);
-//		System.out.println(d);
-//		d = d.multiply(c);
-//		System.out.println(d);
-		System.out.println("Test_BigInt OK");
+//		System.out.println("Test_BigInt still testing");
 	}
 
 	private static void test(String s) {

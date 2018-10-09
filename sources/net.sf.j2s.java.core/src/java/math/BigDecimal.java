@@ -224,7 +224,7 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      * @serial
      * @see #unscaledValue
      */
-    private final BigInteger intVal;
+    private BigInteger intVal;
 
     /**
      * The scale of this BigDecimal, as returned by {@link #scale}.
@@ -232,7 +232,7 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      * @serial
      * @see #scale
      */
-    private final int scale;  // Note: this may have any value, so
+    private int scale;  // Note: this may have any value, so
                               // calculations must be done in longs
 
     /**
@@ -264,7 +264,7 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      * less than or equal to {@code Long.MAX_VALUE}, the value can be
      * compactly stored in this field and used in computations.
      */
-    private final transient long intCompact;
+    private transient long intCompact;
 
 	private static StringBuilderHelper myStringBuilder;
 
@@ -349,12 +349,25 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
 
     // Constructors
 
+    public BigDecimal() {
+    	
+    	/**
+    	 * because we are subclassing Number
+    	 * 
+    	 * @j2sNative
+    	 * 
+    	 * this.valueOf = this.toString;
+    	 * 
+    	 */
+	}
+
     /**
      * Trusted package private constructor.
      * Trusted simply means if val is INFLATED, intVal could not be null and
      * if intVal is null, val could not be INFLATED.
      */
     BigDecimal(BigInteger intVal, long val, int scale, int prec) {
+    	this();
         this.scale = scale;
         this.precision = prec;
         this.intCompact = val;
@@ -408,6 +421,7 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      * @since  1.5
      */
     public BigDecimal(char[] in, int offset, int len, MathContext mc) {
+    	this();
         // protect against huge length.
         if (offset + len > in.length || offset < 0)
             throw new NumberFormatException("Bad offset or len arguments for char[] input.");
@@ -892,6 +906,7 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      * @since  1.5
      */
     public BigDecimal(double val, MathContext mc) {
+    	this();
         if (Double.isInfinite(val) || Double.isNaN(val))
             throw new NumberFormatException("Infinite or NaN");
         // Translate the double into sign, exponent and significand, according
@@ -981,6 +996,7 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      *            {@code BigDecimal}.
      */
     public BigDecimal(BigInteger val) {
+    	this();
         scale = 0;
         intVal = val;
         intCompact = compactValFor(val);
@@ -1012,6 +1028,7 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      * @param scale scale of the {@code BigDecimal}.
      */
     public BigDecimal(BigInteger unscaledVal, int scale) {
+    	this();
         // Negative scales are now allowed
         this.intVal = unscaledVal;
         this.intCompact = compactValFor(unscaledVal);
@@ -1034,6 +1051,7 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      * @since  1.5
      */
     public BigDecimal(BigInteger unscaledVal, int scale, MathContext mc) {
+    	this();
         long compactVal = compactValFor(unscaledVal);
         int mcp = mc.precision;
         int prec = 0;
@@ -1080,6 +1098,7 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      * @since  1.5
      */
     public BigDecimal(int val) {
+    	this();
         this.intCompact = val;
         this.scale = 0;
         this.intVal = null;
@@ -1097,6 +1116,7 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      * @since  1.5
      */
     public BigDecimal(int val, MathContext mc) {
+    	this();
         int mcp = mc.precision;
         long compactVal = val;
         int scale = 0;
@@ -1125,6 +1145,7 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      * @since  1.5
      */
     public BigDecimal(long val) {
+    	this();
         this.intCompact = val;
         this.intVal = (val == INFLATED) ? INFLATED_BIGINT : null;
         this.scale = 0;
@@ -1142,6 +1163,7 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      * @since  1.5
      */
     public BigDecimal(long val, MathContext mc) {
+    	this();
         int mcp = mc.precision;
         int mode = mc.roundingMode.oldMode;
         int prec = 0;

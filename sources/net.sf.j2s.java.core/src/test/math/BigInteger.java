@@ -1486,13 +1486,12 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
 
         if ((xlen < KARATSUBA_THRESHOLD) || (ylen < KARATSUBA_THRESHOLD)) {
             int resultSign = signum == val.signum ? 1 : -1;
-            System.out.println("java bypassing multiplyByInt");
-//            if (val.mag.length == 1) {
-//                return multiplyByInt(mag,val.mag[0], resultSign);
-//            }
-//            if (mag.length == 1) {
-//                return multiplyByInt(val.mag,mag[0], resultSign);
-//            }
+            if (val.mag.length == 1) {
+                return multiplyByInt(mag,val.mag[0], resultSign);
+            }
+            if (mag.length == 1) {
+                return multiplyByInt(val.mag,mag[0], resultSign);
+            }
             int[] result = multiplyToLen(mag, xlen,
                                          val.mag, ylen, null);
             result = trustedStripLeadingZeroInts(result);
