@@ -23,6 +23,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.text.DecimalFormat;
+import java.util.Dictionary;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JApplet;
@@ -296,8 +297,15 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		p.setBackground(Color.blue);
 		button2.setToolTipText("this is Button 2");
 		button3.setToolTipText("this is Button 3");
-		mkBar(p, tf, Adjustable.HORIZONTAL, 100, 20);
-		mkSlider(p, tf, Adjustable.HORIZONTAL, 100, 20);
+		mkBar(p, tf, Adjustable.HORIZONTAL, 100, 40);
+		JSlider framesPerSecond = mkSlider(p, tf, Adjustable.HORIZONTAL, 300, 40);
+		framesPerSecond.setForeground(Color.BLACK);
+		framesPerSecond.setMajorTickSpacing(500);
+		framesPerSecond.setMinorTickSpacing(100);
+		framesPerSecond.setPaintTicks(true);
+		framesPerSecond.setPaintLabels(true);
+//		framesPerSecond.setLabelTable(labels);
+		
 		mkSlider(p, tf, Adjustable.HORIZONTAL, 100, 20).setInverted(true);
 		repaint();
 	}

@@ -31,7 +31,7 @@ package javax.swing;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Frame;
+import java.awt.JSFrame;
 import java.awt.Graphics;
 //import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
@@ -281,7 +281,7 @@ public class Popup {
      * PopupFactory uses this as a way to know when the Popup shouldn't
      * be cached based on the Window.
      */
-    static class DefaultFrame extends Frame {
+    static class DefaultFrame extends JSFrame {
     }
 
 		public static boolean isDefaultFrame(Object window) {

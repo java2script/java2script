@@ -97,7 +97,7 @@ import swingjs.api.Interface;
  *      } </pre>
  *
  * @see Window
- * @see Frame
+ * @see JSFrame
  * @see GraphicsEnvironment
  * @see GraphicsDevice
  * @see swingjs.JSGraphicsConfiguration

@@ -35,7 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import java.applet.Applet;
+import java.applet.JSApplet;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
@@ -622,7 +622,7 @@ public class PopupFactory {
                         r.y = p.y;
                         return r.contains(x, y, width, height);
                     } else if (parent instanceof Window ||
-                               parent instanceof Applet) {
+                               parent instanceof JSApplet) {
                         // No suitable swing component found
                         break;
                     }
@@ -934,7 +934,7 @@ public class PopupFactory {
               if it has a layered pane,
               add to that, otherwise
               add to the window. */
-            while (!(parent instanceof Window || parent instanceof Applet) &&
+            while (!(parent instanceof Window || parent instanceof JSApplet) &&
                    (parent!=null)) {
                 parent = parent.getParent();
             }

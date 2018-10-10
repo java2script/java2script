@@ -70,28 +70,32 @@ public class JSScrollBarUI extends JSSliderUI {
 	 */
 	@Override
 	void setScrollBarExtentAndCSS() {
-		String left;
-		String top;
+		String left, top, thickness;
 		JScrollBar sb = (JScrollBar) jc; 
 		int extent = sb.getVisibleAmount();
 		int max = sb.getMaximum();
 		int min = sb.getMinimum();
+		
 		float f = (extent > 0 && max > min && extent <= max - min 
 				? extent * 1f / (max - min) : 0.1f);
 		setSliderAttr("handleSize", f);
+		boolean isVertical = (orientation == "vertical");
 		if (myScrollPaneUI == null) {
 			// in 
-			left = "3px";
-			top = "3px";
+			int d = (isVertical ? sb.getWidth() : sb.getHeight());
+			int t = (int) Math.min(d * 0.8, 12);
+			left = top = ((d - t)/2 + 1) + "px";
+			thickness = t + "px";
 		} else {
 			left = "0px";
 			top = "0px";
+			thickness = "12px";
 		}
-		if (orientation == "vertical") {
-			DOMNode.setStyles(sliderTrack, "left", left, "width", "12px", "background", "lightgrey");
+		if (isVertical) {
+			DOMNode.setStyles(sliderTrack, "left", left, "width", thickness, "background", "lightgrey");
 			DOMNode.setStyles(sliderHandle, "left", "-1px", "margin-bottom", "0px");
 		} else {
-			DOMNode.setStyles(sliderTrack, "top", top, "height", "12px", "background", "lightgrey");
+			DOMNode.setStyles(sliderTrack, "top", top, "height", thickness, "background", "lightgrey");
 			DOMNode.setStyles(sliderHandle, "top", "-1px", "margin-left", "0px");
 		}
 	}

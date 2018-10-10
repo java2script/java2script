@@ -1,6 +1,20 @@
 Notes
 =====
 
+update 10/1/2018 -- 3.2.4.01
+
+AWT components in SwingJS:
+
+-- can be accessed directly as java.awt Components
+-- receive posted events to the component's MouseDown, MouseMove, etc, methods;
+-- can also be extended to use (or can alternatively use) Swing MouseListener and MouseAdapter methods;
+-- are subclasses of JComponent (JavaScript only, not Java), so also take all the event possibilities of Swing;
+-- require explicit graphics.dispose() if getGraphics() is called in any component. 
+
+
+update 9/29/2018 -- 3.2.4 adds support for JAXB, changes default for ResourceBundle.getBundle
+update 9/23/2018 -- 3.2.3 adds support for direct use of java.awt.* components and java.applet.Applet 
+                 -- no need for switching to a2s.*
 update 7/14/2018 -- 3.2.1 removes Java2ScriptJavaBuilder; uses CompilationParticipant instead
                  -- note that this change requires that the .project builder be set back to org.eclipse.jdt.core.javabuilder
                  
@@ -64,9 +78,11 @@ For example, javax.swing.Timer() works perfectly in JavaScript. All it means is 
 that use sleep(int) or notify() must be refectored to allow Timer-like callbacks. That is, 
 they must allow full exit and re-entry of Thread.run(), not the typical while/sleep motif. 
 
+Several examples are available illustrating how to do this. [TODO: more description here]
 
-No Non-Swing AWT Components
----------------------------
+
+Non-Swing AWT Components
+------------------------
 
 Swing was introduced into Java well after the Java Abstract Window Toolkit (AWT) was well
 established. As such, its designers chose to allow AWT controls such as Button and List to be used 
@@ -74,6 +90,129 @@ alongside their Swing counterparts JButton and JList. Reading the code, it is cl
 design choice posed a huge headache for Swing class developers. For SwingJS, we decided from 
 the beginning NOT to allow this mixed-mode programming and instead to require that all 
 components be Swing components.
+
+However, in v. 3.2.3 (Sept. 2018), all standard AWT components are subclasses of Swing equivalents. 
+For example, java.awt.Button subclasses javax.swing.JButton, and Canvas subclasses javax.swing.JPanel.
+This is accomplished through an adapter package (a2s.*). 
+
+There will be some nuanced differences, particularly when a developer subclasses an AWT component 
+and then uses super.xxx() to access a superclass method of the same name. But other than that,
+nothing is lost in this reorganization.
+
+  Basically, now:
+
+java.awt.Panel and java.awt.Canvas both subclass javax.swing.JPanel,
+through an a2s.Panel adapter class:
+
+	java.awt.Component
+	  java.awt.JSComponent
+	    java.awt.Container
+	      javax.swing.JComponent
+	        javax.swing.JPanel
+	          a2s.Panel
+	            java.awt.Panel (,java.awt.Canvas)
+
+rather than the separate hierarchies:
+
+	java.awt.Component
+	  java.awt.Container
+	    javax.swing.JComponent
+	      javax.swing.JPanel
+
+and
+
+	java.awt.Component
+	  java.awt.Container
+        java.awt.Panel (,java.awt.Canvas)
+
+where java.awt.JSComponent is slipped in between Container and Component,
+providing specialized Component methods that are JavaScript-specific.
+
+For all components, java.awt.Xxxx is equivalent to a2s.Xxxx. 
+java.awt.Xxxx now just consists of a set of constructors that all go to 
+super(...). This allows developers to use either java.awt.Xxxx or 
+a2s.Xxxx interchangeably. (This is the big change for this version.)
+
+a2s.* also uses super(...) extensively, but also adds rerouting of 
+Swing events to AWT events, conversion of AWT constant values to 
+SwingConstants values, default backgrounds and opacity that are 
+different between Swing and AWT, and a few other functions. 
+
+a2s.* also provides method equivalents (as best we can) from AWT
+to Swing. Right now this is hit and miss. [TODO: There is more to do there.]  
+
+Standard Swing components subclass JComponent, as usual,
+while AWT components subclass a2s.* component adapters, 
+which then subclass the Swing implementation of AWT: 
+
+	java.awt.Component
+	  java.awt.JSComponent
+	    java.awt.Container
+	      javax.swing.JComponent
+	        javax.swing.AbstractButton (,javax.swing.JLabel,...)
+	          javax.swing.JButton
+		        a2s.Button (,JToggleButton,JMenuItem,...)
+		          java.awt.Button
+
+Window now subclasses JComponent. In this way, Frames, InternalFrames, 
+Dialogs, and PopupMenus can all be JComponents as well:
+
+	java.awt.Component
+	  java.awt.JSComponent
+	    java.awt.Container
+	      javax.swing.JComponent
+	      	java.awt.Window [was subclass of java.awt.Container]
+	          java.awt.JSFrame [was java.awt.Frame]
+	            javax.swing.JFrame
+	              a2s.Frame (,javax.swing.JInternalFrame)
+	      	        java.awt.Frame
+
+
+In standard Java, JInternalFrame subclasses JComponent, reproducing
+independently all the standard Frame interface. This is much simpler,
+with JInternal frame subclassing JFrame.
+ 	      	        
+Same idea for Dialog:
+
+	java.awt.Component
+	  java.awt.JSComponent
+	    java.awt.Container
+	      javax.swing.JComponent
+	      	java.awt.Window
+	          java.awt.JSDialog  [formerly java.awt.Dialog] 
+	            javax.swing.JDialog
+	              a2s.Dialog
+	      	        java.awt.Dialog
+
+java.awt.Window has moved to subclass JComponent, again so that
+all of its subclasses can be Swing components.
+
+	java.awt.Component
+	  java.awt.JSComponent
+	    java.awt.Container
+	      javax.swing.JComponent
+	      	java.awt.Window
+	          java.awt.JWindow
+   
+Note that the original ordering involving java.awt.Window was:
+
+	java.awt.Component
+	    java.awt.Container
+	      	java.awt.Window (,javax.swing.JComponent)
+	          javax.swing.JWindow (,Frame, Dialog, PopupMenu)
+
+Finally, Applet now subclasses JApplet via a2s.Applet:
+
+	java.awt.Component
+	  java.awt.JSComponent
+	    java.awt.Container
+	      java.awt.JSPanel [formerly java.awt.Panel]
+	        java.applet.JSApplet [formerly java.applet.Applet]
+		      javax.swing.JApplet
+		        a2s.Applet
+		          java.applet.Applet
+		          
+Thus, the only components that are not JComponents now are Applet and JApplet.
 
  
 The a2s Adapter Package
@@ -92,6 +231,10 @@ In any case, it works -- mostly. By adding the a2s package to a project and chan
 statements to target a2s instead of java.awt, non-Swing applets can be easily converted to JavaScript.
 Certainly there will be issues such as missing methods. It is all a work in progress.
 
+As of v. 3.2.3, as mentioned above, java.awt.Xxxx components all now subclass a2s.Xxxx and, 
+by doing so, all become JComponents. java.applet.Applet subclasses a2s.Applet, which subclasses
+javax.swing.JApplet, which subclasses java.awt.Container via java.applet.JSApplet and
+java.awt.JSPanel. So javax.swing.JApplet and java.awt.Applet are not JComponents.
 
 Native calls
 ------------
@@ -145,8 +288,8 @@ swingjs.plaf JSxxxxUI.java code.
 
   
 
-UNIMPLEMENTED CLASSES BY DESIGN
-===============================
+UNIMPLEMENTED CLASSES and METHODS BY DESIGN
+===========================================
 
 accessibility
 security
@@ -160,37 +303,20 @@ TODO LIST FOR UNIMPLEMENTED CLASSES
 
 JEditorPane (minimal implementation)
 JSplitPane (in development, BH)
-JTabbedPane (in development, NEM)
-
-
-MINOR ISSUES--required some rewriting/refactoring by Bob and Udo  
-================================================================
-
-java.util.BitSet must be 16-bit
-Thread.currentThread() == dispatchThread
 
 
 MINOR ISSUES--requiring some rewriting/refactoring outside of SwingJS  
 =====================================================================
 
-primitive numerical types
-distinguishing arrays
-forced null typing
 ArrayIndexOutOfBounds
 native classes
-java.awt.Color
-javax.swing.JFileDialog
 key focus
-static methods and classes -- order is important
 LookAndFeel
-inner class order
-String does not implement CharSequence.length() or .subSequence()
 toString() may need to be explicit
-System.exit(0) does not stop all processes
-overloading of JSplitPane.setDividerLocation
-list cell renderers must be JComponents
 myClass.getField not implemented
 "window" and other reserved JavaScript names
+ResourceBundle.getBundle
+
 
 MAJOR ISSUES--for Bob and Udo within SwingJS
 ============================================
@@ -204,8 +330,9 @@ MAJOR ISSUES--to be resolved by implementers
 ============================================
 
 fonts
-specific AWT components not implemented
+Dialogs
 threads
+some Swing components not implemented
 image loading
 no BigInteger; no BigDecimal
 no format internationalization
@@ -214,6 +341,457 @@ text-related field implementation
 Formatter/Regex limitations
 
 ======================================================================== 
+
+//////////////////////////////////////////////////////////////////////////////
+
+UNIMPLEMENTED CLASSES
+=====================
+
+accessibility
+-------------
+
+All Accessibility handling has been commented out to save the download footprint.
+This removes the need for sun.misc.SharedSecrets
+
+
+security
+--------
+
+All JavaScript security is handled by the browser natively. 
+Thus, Java security checking is no longer necessary, and 
+java.security.AccessController has been simplified to work without
+native security checking.
+
+
+serialization
+-------------
+
+All serialization has been removed. It was never very useful for Swing anyway, 
+because one needs exactly the same Java version to save and restore serialized objects.
+
+key listeners
+-------------
+
+The KeyListener interface for JTextField and JTextArea has not been implemented. 
+Alternative coding is to use ActionListener, TextListener, or DocumentListener (largely untested)
+
+keyboard accelerators
+---------------------
+
+JMenu.setAccelerator() and JMenuItem.setAccelerator() hae not been implemented in SwingJS. 
+Thus, menus cannot be opened just be typing CTRL-C or similar shortcuts.
+
+
+
+MINOR ISSUES--requiring some rewriting/refactoring outside of SwingJS  
+=====================================================================
+
+primitive numerical types
+-------------------------
+
+JavaScript cannot distinguish among primitive number types 
+int, short, float, and double. Bob's J2S fix does allow for
+distinguishing between int[] and float[], but that is all. 
+The implication is for overloaded methods and constructors.
+For example:
+
+  Color(int r, int g, int b, int a)
+  Color(float r, float g, float b, float a)
+
+cannot be distinguished. A very important case in this regard is 
+
+  StringBuffer.append(int)
+  StringBuffer.append(float)
+  
+There is no way to know one's intent here. Integers must be changed to strings:
+
+  sb.append("" + i)
+
+  
+
+This will need careful checking and will be the source of bugs, for sure,
+because it is next to impossible to find all of these, and even if they are
+found, certain cases such as above will never be perfectly resolved.
+
+In addition, JavaScript does not/cannot support "long". 
+One cannot test against Long.MAX_VALUE or Long.MIN_VALUE.
+
+Since int, long, byte, and char are not really integers, care must be taken 
+to avoid a loop such as the following, which was in java.text.DigitList:
+
+  while (source > 0) {
+    ... 
+    source /= 10 
+  }
+
+Similarly, large integers will never roll over to negative ones. They will
+just get bigger.
+
+						int newLength = lineBuf.length * 2;
+						/**
+						 * @j2sIgnore
+						 */
+						{
+							// never going to happen in JavaScript
+							if (newLength < 0) {
+								newLength = Integer.MAX_VALUE;
+							}
+						}
+
+
+Also, J2S does not translate properly
+
+  int n = 110
+  n /= 100
+  
+This needs to be recast as
+  
+  n = n / 100
+  
+For example, SimpleDateFormat needs
+
+month = Clazz.doubleToInt(month / 367);
+
+instead of 
+
+month /= 367
+
+
+Because "-1" in JavaScript is not 0xFFFFFFFF one must take care to not compare a negative number with a 32-bit mask;
+
+(b & 0xFF000000) == 0xFF000000
+
+is true in Java for (int) b = -1, but is false in JavaScript, because 0xFF000000 is 4278190080, 
+while (-1 & 0xFF000000) is, strangely enough, -16777216, and, in fact, 
+
+(0xFF000000 & 0xFF000000) != 0xFF000000
+
+because -16777216 is not 4278190080.
+
+One must compare similar operations:
+
+if ((b & 0xFF000000) == (0xFF000000 & 0xFF000000)) .....
+
+
+
+ArrayIndexOutOfBounds
+---------------------
+
+You cannot intentionally throw an ArrayIndexOutOfBoundsException in JavaScript.
+JavaScript will simply return "undefined", not throw an Exception.
+
+ArrayIndexOutOutBoundsException cannot be trapped in JavaScript because 
+it is a JavaScript Error, not a Java Exception. 
+
+Solution is to change that catch to catch(Throwable e), 
+which includes all JavaScript errors and is transpiled as "catch(e)"
+ 
+
+java.awt.Color
+--------------
+
+See note under primitive types, above.
+
+ColorSpace: only "support" CS_sRGB
+
+ -BH: This is a temporary edit just to get us started.
+
+
+native classes
+--------------
+
+The J2S compiler ignores all static native method declarations.
+Anything of this nature needs to be implemented in JavaScript if it is needed,
+using j2sNative blocks:
+
+/**
+ * @j2sNative
+ *
+ */
+ {
+   // it is critical to remember to insert this { } phrasing, 
+   // or the block will be ignored!
+ }
+ 
+
+key Focus
+---------
+- Less explicit key focus 
+- handling (mostly done by Browser/HTML)
+- no SwingUtilities.findFocusOwner
+- focus traversal not implemented
+
+
+LookAndFeel
+-----------
+
+SwingJS implements the native browser LookAndFeel. Token UIManager methods are
+present but unimplemented; methods returning key bindings or other arrays return null.
+
+Note that LookAndFeel determines canvas size in a Frame because different operating
+systems (Mac OS vs Windows vs HTML5) will have different edge sizes on their frames. 
+
+
+toString() may need to be explicit (Can't convert .... to primitive type)
+-------------------------------------------------------------------------
+JavaScript will use its own method of creating a string form of an object. So if you
+have implemented a toString() method for x instanceof X, then you should use it 
+explicitly as "foo " + x.toString(), not "foo " + x. 
+
+This problem was first seen in the original form of java.awt.image.BufferedImage.toString() 
+where we got the JavaScript error "Can't convert .... to primitive type" in an error message
+due to " " + this.raster, where this.raster was a sun.awt.image.IntegerInterleavedRaster.
+ 
+
+myClass.getField not implemented
+--------------------------------
+java.lang.reflect.Field is not implemented. You can get a field value very simply
+using:
+
+/**
+ *@j2sNative
+ *
+ * return myClass[name]
+ */   
+
+
+"window" and other reserved JavaScript names
+--------------------------------------------
+
+No reserved top-level JavaScript name is allowed for a package name. So, for example, 
+one must rename packages such as "window" or "document" to names such as "win" or "doc".
+
+
+ResourceBundle.getBundle
+------------------------
+
+java.util.ResourceBundle(String) default is Control.FORMAT_DEFAULT, which
+first checks for a Java class, then a properties file. This causes problems
+as missing class files is a major failure case. The default in SwingJS is 
+FORMAT_PROPERTIES meaning that the default is NOT to look for a class file.
+It is felt that the developer should know which of these it is, and if it is
+a class file, then the ResourceBundle call should specify that. 
+
+
+MAJOR ISSUES--for Bob and Udo within SwingJS
+============================================
+
+fonts
+-----
+
+Fonts and FontMetrics will all be handled in JavaScript. Font matching will 
+not be exact, and composite (drawn) fonts will not be supported. 
+
+Jmol handles calls such as font.getFontMetrics(g).stringWidth("xxx") by 
+creating an off-page DOM image and querying its context. 
+This will be done here as well.
+ 
+ 
+OS-dependent classes
+--------------------
+
+Static classes such as:
+
+   java.awt.Toolkit
+   java.awt.GraphicsEnvironment
+   
+   
+which are created using Class.forName
+will be implemented as JavaScript classes in the swingjs package
+
+AWTAccessor and  AwtContext need to be customized 
+
+   
+AWT component peers and component "ui" user interfaces
+------------------------------------------------------
+
+ComponentPeer is a class that represents a native AWT component.
+Components with such peers are called "heavy-weight" components.
+They are expected to do the dirty work of graphics drawing. 
+
+Java Swing implements peers only for JApplet, JDialog, JFrame, and JWindow. 
+References to such objects have been removed, but clearly there must be 
+some connection to similar DOM objects, even for "light-weight" components. 
+
+
+  
+MAJOR ISSUES--to be resolved by implementers
+============================================
+
+fonts
+-----
+
+Glyph/composite/outline fonts are not supported
+   
+
+Dialogs
+-------
+
+Dialogs need special attention by developers. Except for the simplest types, 
+confirm() and prompt(), they cannot be made truly modal (wait for response). 
+But a modal dialog can be "faked" by setting up a state-based system. 
+See examples for ways of doing this. [TODO: say more; it all works very nicely]
+
+some Swing components not implemented
+-------------------------------------
+
+The following Swing components are not implemented:
+
+JEditorBox
+JTree
+
+[TODO: more? or is this really it now]
+
+
+threads
+-------
+
+Thread locking and synchronization are not relevant to JavaScript.
+Thus, anything requiring "notify.." or "waitFor.." could be a serious issue.
+ 
+All threading must be "faked" in JavaScript. Specifically not available is:
+
+  Thread.sleep()
+  
+javax.swing.AbstractButton#doClick(pressTime) will not work, as it requires Thread.sleep();
+    
+However, java.lang.Thread itself is implemented and used extensively. 
+
+Methods thread.start() and thread.run() both work fine. 
+
+For simple applications that use Thread.sleep() just to have a delay, as in a frame rate, for 
+example, one can use javax.swing.Timer instead. That is fully implemented. 
+
+Likewise, java.util.Timer can be replaced with no loss of performance with javax.Swing.Timer.
+Note that java.util.TimerTask is implemented, but it can also be replaced by an implementation of Runnable.
+
+task = new TimerTask(){....};
+t = new java.util.Timer();
+t.schedule(task, 0, 1);
+
+becomes
+
+task = new TimerTask(){....}; // or task = new Runnable() {...}
+t = new javax.swing.Timer(1, new ActionListener() {
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		task.run();
+	}
+};
+t.setInitialDelay(0); // not particularly necessary
+t.start();
+
+Internally, SwingJS uses swingjs.JSThread, which can serve as a
+state-based alternative to Thread. This class allows simple 
+
+  while(!interrupted()){
+  	wait() or sleep()
+  	...
+  }  
+
+action through an asynchronous function run1(mode). For example:
+
+	protected void run1(int mode) {
+		try {
+			while (true)
+				switch (mode) {
+				case INIT:
+					// once-through stuff here
+					mode = LOOP;
+					break;
+				case LOOP:
+					if (!doDispatch || isInterrupted()) {
+						mode = DONE;
+					} else {
+						Runnable r = new Runnable() {
+							public void run() {
+								// put the loop code here
+							}
+						};
+						dispatchAndReturn(r);
+						if (isJS)
+							return;
+					}
+					break;
+				// add more cases as needed
+				case DONE:
+					// finish up here
+					if (isInterrupted())
+						return;
+					// or here
+					break;
+				}
+		} finally {
+			// stuff here to be executed after each loop in JS or at the end in Java
+		}
+	}
+
+image loading
+-------------
+- JavaScript does not allow synchronous image loading. A callback is required, and 
+  since there is no Thread.sleep, this could be a problem in some cases. 
+
+- BufferedImage: only "support" imageType RGB and ARGB
+  -BH: This is a temporary edit, just to get us started. Certainly GRAY will be needed
+
+
+no BigInteger; no BigDecimal
+----------------------------
+
+BigInteger and BigDecimal are not supported
+
+
+no format internationalization
+------------------------------
+
+For now, just en for number and date formatters
+
+no winding rules
+----------------
+
+  When filling a graphic, only nonzero winding rule is implemented in HTML5 Canvas2D.
+
+
+
+text-related field implementation
+---------------------------------
+
+Text fields are:
+
+JTextField   (JavaScript <input type="text">)
+JTextArea    (JavaScript <textarea>;)
+JTextPane    (JavaScript <div>; non-editing; TODO)
+JEditorPane  NOT IMPLEMENTED
+
+For the initial implementation, we don't implement infinite undo/redo, and the abstract 
+document model is much less elaborate. Only PlainDocument (in the form of JSPlainDocument)
+is implemented. 
+Thus, the Document returned by JTextField.getDocument() is a javax.swing.text.Document, but it
+is a swingjs.JSPlainDocument (extending swingjs.JSAbstractDocument)
+rather than a javax.swing.text.PlainDocument (extending javax.swing.text.AbstractDocument).
+
+all scrolling is handled by HTML5
+javax.swing.AutoScroller is not implemented
+public static methods .stop, .isRunning, .processMouseDragged require true Java threading
+javax.swing.text.View and its subclasses are not implemented. 
+
+The JS document model does not allow two fields to address the same underlying document. 
+
+
+Formatter/Regex limitations
+---------------------------
+
+java.util.regex.Matcher and Pattern use JavaScript's RegExp object rather than
+the native Java object. These are not identical. Only flags /igm are supported.
+Matcher.start(groupID) is not supported.
+
+java.util.Formatter will function correctly for all standard %... patterns.
+
+
+ 
+
+
+
 
 DISCUSS
 =======
@@ -1164,588 +1742,4 @@ Class.loadClass("jsjava.text.SimpleDateFormat", function() { x = new jsjava.text
 
 
   
-
-//////////////////////////////////////////////////////////////////////////////
-
-UNIMPLEMENTED CLASSES
-=====================
-
-accessibility
--------------
-
-All Accessibility handling has been commented out to save the download footprint.
-This removes the need for sun.misc.SharedSecrets
-
-
-security
---------
-
-All JavaScript security is handled by the browser natively. 
-Thus, Java security checking is no longer necessary, and 
-java.security.AccessController has been simplified to work without
-native security checking.
-
-
-serialization
--------------
-
-All serialization has been removed. It was never very useful for Swing anyway, 
-because one needs exactly the same Java version to save and restore serialized objects.
-
-key listeners
--------------
-
-The KeyListener interface for JTextField and JTextArea has not been implemented. 
-Alternative coding is to use ActionListener, TextListener, or DocumentListener (largely untested)
-
-keyboard accelerators
----------------------
-
-JMenu.setAccelerator() and JMenuItem.setAccelerator() hae not been implemented in SwingJS. 
-Thus, menus cannot be opened just be typing CTRL-C or similar shortcuts.
-
-
-MINOR ISSUES--required some rewriting/refactoring by Bob and Udo  
-================================================================
-
-
-java.util.BitSet must be 16-bit
--------------------------------
-
-Although JavaScript will support numerical values up to 2^54, 
-these "long" values are really doubles. In addition, bit-wise 
-operations on values greater than 2^30 do not give the 
-expected results because integer bit-wise operation is used. 
-
-Math.pow(2,31)
-2147483648
-Math.pow(2,31)&Math.pow(2,31)
--2147483648
-
-This is no real consequence; it's just something that has to be done.
-
-
-Thread.currentThread() == dispatchThread
-----------------------------------------
-
-changed to JSToolkit.isDispatchThread()
-
-
-MINOR ISSUES--requiring some rewriting/refactoring outside of SwingJS  
-=====================================================================
-
-primitive numerical types
--------------------------
-
-JavaScript cannot distinguish among primitive number types 
-int, short, float, and double. Bob's J2S fix does allow for
-distinguishing between int[] and float[], but that is all. 
-The implication is for overloaded methods and constructors.
-For example:
-
-  Color(int r, int g, int b, int a)
-  Color(float r, float g, float b, float a)
-
-cannot be distinguished. A very important case in this regard is 
-
-  StringBuffer.append(int)
-  StringBuffer.append(float)
-  
-There is no way to know one's intent here. Integers must be changed to strings:
-
-  sb.append("" + i)
-
-  
-
-This will need careful checking and will be the source of bugs, for sure,
-because it is next to impossible to find all of these, and even if they are
-found, certain cases such as above will never be perfectly resolved.
-
-In addition, JavaScript does not/cannot support "long". 
-One cannot test against Long.MAX_VALUE or Long.MIN_VALUE.
-
-Since int, long, byte, and char are not really integers, care must be taken 
-to avoid a loop such as the following, which was in java.text.DigitList:
-
-  while (source > 0) {
-    ... 
-    source /= 10 
-  }
-
-Similarly, large integers will never roll over to negative ones. They will
-just get bigger.
-
-						int newLength = lineBuf.length * 2;
-						/**
-						 * @j2sIgnore
-						 */
-						{
-							// never going to happen in JavaScript
-							if (newLength < 0) {
-								newLength = Integer.MAX_VALUE;
-							}
-						}
-
-
-Also, J2S does not translate properly
-
-  int n = 110
-  n /= 100
-  
-This needs to be recast as
-  
-  n = n / 100
-  
-For example, SimpleDateFormat needs
-
-month = Clazz.doubleToInt(month / 367);
-
-instead of 
-
-month /= 367
-
-
-Because "-1" in JavaScript is not 0xFFFFFFFF one must take care to not compare a negative number with a 32-bit mask;
-
-(b & 0xFF000000) == 0xFF000000
-
-is true in Java for (int) b = -1, but is false in JavaScript, because 0xFF000000 is 4278190080, 
-while (-1 & 0xFF000000) is, strangely enough, -16777216, and, in fact, 
-
-(0xFF000000 & 0xFF000000) != 0xFF000000
-
-because -16777216 is not 4278190080.
-
-One must compare similar operations:
-
-if ((b & 0xFF000000) == (0xFF000000 & 0xFF000000)) .....
-
-
-
-distinguishing arrays
----------------------
-
-J2S cannot distinguish array types.
-One cannot test:
-
-  if (x instanceof float[]) {
-  } else if (x instanceof double[]) {
-  } else if (x instanceof Point2D[]) {
-  }
-   
-The javajs.util.AU class does provide a set of tests for specific
-kinds of arrays, but this is still not perfect, and it is not complete.
-These methods call Clazz.isAxx methods and depend upon the first
-inner-most array and, in some cases, inner-most array itself not being null.
-
-  public static boolean isAB(Object x)     // byte[]
-  public static boolean isAI(Object x)     // int[]
-  public static boolean isAII(Object x)    // int[][]
-  public static boolean isAF(Object x)     // float[]
-  public static boolean isAFF(Object x)    // float[][]
-  public static boolean isAFFF(Object x)   // float[][][]
-  public static boolean isAD(Object x)     // double[]
-  public static boolean isADD(Object x)    // double[][]
-  
-  public static boolean isAFloat(Object x) // Float[]
-  public static boolean isAS(Object x)     // String[]
-  public static boolean isASS(Object x)    // String[][]
-  public static boolean isAP(Object x)     // javajs.util.T3[]
-
-  
-
-forced null typing
-------------------
-
-The J2S compiler has support for proper method signature handling 
-in cases such as:
-
-  new URL((URL) null, filePath, null)
-  
-The issue here is that without that (URL) the call is ambiguous. 
-However, there is a flaw in j2slib (jmolj2s) in that the called 
-method receives a "null" URL object, which does not in JavaScript
-evaluate to true for "== null". Thus, testing for null within 
-functions called this way process improperly.
-
-ArrayIndexOutOfBounds
----------------------
-
-You cannot intentionally throw an ArrayIndexOutOfBoundsException in JavaScript.
-JavaScript will simply return "undefined", not throw an Exception.
-
-ArrayIndexOutOutBoundsException cannot be trapped in JavaScript because 
-it is a JavaScript Error, not a Java Exception. 
-
-Solution is to change that catch to catch(Throwable e), 
-which includes all JavaScript errors and is transpiled as "catch(e)"
- 
-
-java.awt.Color
---------------
-
-See note under primitive types, above.
-
-ColorSpace: only "support" CS_sRGB
-
- -BH: This is a temporary edit just to get us started.
-
-
-javax.swing.JFileDialog
------------------------
-
-Not implemented. HTML5 cannot expose a file directory structure
-
-
-native classes
---------------
-
-The J2S compiler ignores all static native method declarations.
-Anything of this nature needs to be implemented in JavaScript if it is needed,
-using j2sNative blocks:
-
-/**
- * @j2sNative
- *
- */
- {
-   // it is critical to remember to insert this { } phrasing, 
-   // or the block will be ignored!
- }
- 
-
-key Focus
----------
-- Less explicit key focus 
-- handling (mostly done by Browser/HTML)
-- no SwingUtilities.findFocusOwner
-- focus traversal not implemented
-
-static methods and classes -- order is important
-------------------------------------------------
-
-J2S cannot run a static method that calls an uninitiated static variable:
-
-	static int x = createX();
-
-    static int createX() {
-		return y;
-	}
-	
-	static int y = 20;
-
-will fail. It's actually quite odd that it does not fail in Java as well.
-
-Likewise, static classes hidden in other classes must be presented in an order
-that does not call an uninitiated class. In java.util.Collections, for example,
-it was important to move SynchronizedRandomAccessList to after SynchronizedList.
-
-The solution in some cases is to use
-
-@J2SRequireImport
-
-to force the transpiler to indicate that a class is needed prior to considering a class loaded.
-For example:
-
-@J2SRequireImport(NumberFormat.class)
-public class NumberFormatter extends InternationalFormatter...
-
-
-LookAndFeel
------------
-
-SwingJS implements the native browser LookAndFeel. Token UIManager methods are
-present but unimplemented; methods returning key bindings or other arrays return null.
-
-Note that LookAndFeel determines canvas size in a Frame because diffent operating
-systems (Mac OS vs Windows vs HTML5) will have different edge sizes on their frames. 
-
-inner class order
------------------
-For J2S, inner classes must not call other inner classes defined after them in a file.
-
-This showed up in java.awt.geom.Path2D.Float.CopyIterator, which extends
-java.awt.geom.Path2D.Iterator. Since the Iterator is in the code after CopyIterator,
-the reference to java.awt.geom.Path2D.Iterator in
-    
-    c$ = Clazz.decorateAsClass (function () {
-		this.floatCoords = null;
-		Clazz.instantialize (this, arguments);
-	}, java.awt.geom.Path2D.Float, "CopyIterator", java.awt.geom.Path2D.Iterator);
-     
-is null, and then CopyIterator does not extend Iterator.
-
-Solution is to simply move the inner class definitions in the .java file
-
-
-String does not implement CharSequence.length() or .subSequence()
------------------------------------------------------------------
-
-JavaScript String uses .length instead of .length(). As such, although
-nominally String implements CharSequence, in fact, it does not. It has neither
-.length() nor .subSequence(). All java core classes that require this implementation
-have been adjusted. Developers simply need to know that this is the case and
-adjust accordingly. String.length() is converted to String.length by the j2s
-compiler. But String.subSequence() is not convereted automatically to String.substring().
-Clear error messages will notify the developer if use of String.subSequence() is
-used.
-
-
-toString() may need to be explicit (Can't convert .... to primitive type)
--------------------------------------------------------------------------
-JavaScript will use its own method of creating a string form of an object. So if you
-have implemented a toString() method for x instanceof X, then you should use it 
-explicitly as "foo " + x.toString(), not "foo " + x. 
-
-This problem was first seen in the original form of java.awt.image.BufferedImage.toString() 
-where we got the JavaScript error "Can't convert .... to primitive type" in an error message
-due to " " + this.raster, where this.raster was a sun.awt.image.IntegerInterleavedRaster.
- 
-
-System.exit(0) does not stop all processes
-------------------------------------------
-
-Although System.ext(int) has been implemented in JavaScript, it does nothing. 
-Applications are responsible for shutting down prior to executing it. 
-
-
-overloading of JSplitPane.setDividerLocation
---------------------------------------------
-
-JSplitPane includes both setDividerLocation(double) and setDividerLocation(int).
-In order to handle this in SwingJS, we have renamed setDividerLocation(int) as setDividerLocationInt(int)
-and routed all int action through setDividerLocation(double). This works fine unless
-1) the developer subclasses JSplitPane and overrides setDividerLocation(int) and/or setDividerLocation(double), or
-2) JSplitPane.setDividerLocation(1) is called. The "1" intended to mean "1 pixel" will be interpreted as "1.0".
-
-
-list cell renderers must be JComponents
----------------------------------------
-
-JList requires cell renderers to be JComponents, same as all other components.
-
-myClass.getField not implemented
---------------------------------
-
-java.lang.reflect.Field is not implemented. You can get a field value very simply
-using:
-
-/**
- *@j2sNative
- *
- * return myClass[name]
- */   
-
-
-"window" and other reserved JavaScript names
---------------------------------------------
-
-No reserved top-level JavaScript name is allowed for a package name. So, for example, 
-one must rename packages such as "window" or "document" to names such as "win" or "doc".
-
-
-MAJOR ISSUES--for Bob and Udo within SwingJS
-============================================
-
-fonts
------
-
-Fonts and FontMetrics will all be handled in JavaScript. Font matching will 
-not be exact, and composite (drawn) fonts will not be supported. 
-
-Jmol handles calls such as font.getFontMetrics(g).stringWidth("xxx") by 
-creating an off-page DOM image and querying its context. 
-This will be done here as well.
- 
- 
-OS-dependent classes
---------------------
-
-Static classes such as:
-
-   java.awt.Toolkit
-   java.awt.GraphicsEnvironment
-   
-   
-which are created using Class.forName
-will be implemented as JavaScript classes in the swingjs package
-
-AWTAccessor and  AwtContext need to be customized 
-
-   
-AWT component peers and component "ui" user interfaces
-------------------------------------------------------
-
-ComponentPeer is a class that represents a native AWT component.
-Components with such peers are called "heavy-weight" components.
-They are expected to do the dirty work of graphics drawing. 
-
-Java Swing implements peers only for JApplet, JDialog, JFrame, and JWindow. 
-References to such objects have been removed, but clearly there must be 
-some connection to similar DOM objects, even for "light-weight" components. 
-
-
-  
-MAJOR ISSUES--to be resolved by implementers
-============================================
-
-fonts
------
-
-Glyph/composite/outline fonts are not supported
-   
-
-specific AWT components not implemented
----------------------------------------
-
-The only AWT components implemented are Dialog, Frame, Panel, and Window
-They are subclassed as JDialog, JFrame, JPanel/JApplet, and JWindow, respectively
-
-
-threads
--------
-
-Thread locking and synchronization are not relevant to JavaScript.
-Thus, anything requiring "notify.." or "waitFor.." could be a serious issue.
- 
-All threading must be "faked" in JavaScript. Specifically not available is:
-
-  Thread.sleep()
-  
-javax.swing.AbstractButton#doClick(pressTime) will not work, as it requires Thread.sleep();
-    
-However, java.lang.Thread itself is implemented and used extensively. 
-
-Methods thread.start() and thread.run() both work fine. 
-
-For simple applications that use Thread.sleep() just to have a delay, as in a frame rate, for 
-example, one can use javax.swing.Timer instead. That is fully implemented. 
-
-Likewise, java.util.Timer can be replaced with no loss of performance with javax.Swing.Timer.
-Note that java.util.TimerTask is implemented, but it can also be replaced by an implementation of Runnable.
-
-task = new TimerTask(){....};
-t = new java.util.Timer();
-t.schedule(task, 0, 1);
-
-becomes
-
-task = new TimerTask(){....}; // or task = new Runnable() {...}
-t = new javax.swing.Timer(1, new ActionListener() {
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		task.run();
-	}
-};
-t.setInitialDelay(0); // not particularly necessary
-t.start();
-
-In addition, SwingJS provides swingjs.JSThread, which can be subclassed
-if desired. This class allows simple 
-
-  while(!interrupted()){
-  	wait()
-  	...
-  }  
-
-action through an asynchronous function run1(mode). For example:
-
-	protected void run1(int mode) {
-		try {
-			while (true)
-				switch (mode) {
-				case INIT:
-					// once-through stuff here
-					mode = LOOP;
-					break;
-				case LOOP:
-					if (!doDispatch || isInterrupted()) {
-						mode = DONE;
-					} else {
-						Runnable r = new Runnable() {
-							public void run() {
-								// put the loop code here
-							}
-						};
-						dispatchAndReturn(r);
-						if (isJS)
-							return;
-					}
-					break;
-				// add more cases as needed
-				case DONE:
-					// finish up here
-					if (isInterrupted())
-						return;
-					// or here
-					break;
-				}
-		} finally {
-			// stuff here to be executed after each loop in JS or at the end in Java
-		}
-	}
-
-image loading
--------------
-- JavaScript does not allow synchronous image loading. A callback is required, and 
-  since there is no Thread.sleep, this could be a problem in some cases. 
-
-- BufferedImage: only "support" imageType RGB and ARGB
-  -BH: This is a temporary edit, just to get us started. Certainly GRAY will be needed
-
-
-no BigInteger; no BigDecimal
-----------------------------
-
-BigInteger and BigDecimal are not supported
-
-
-no format internationalization
-------------------------------
-
-For now, just en for number and date formatters
-
-no winding rules
-----------------
-
-  When filling a graphic, only nonzero winding rule is implemented in HTML5 Canvas2D.
-
-
-
-text-related field implementation
----------------------------------
-
-Text fields are:
-
-JTextField   (JavaScript <input type="text">)
-JTextArea    (JavaScript <textarea>;)
-JTextPane    (JavaScript <div>; non-editing; TODO)
-JEditorPane  NOT IMPLEMENTED
-
-For the initial implementation, we don't implement infinite undo/redo, and the abstract 
-document model is much less elaborate. Only PlainDocument (in the form of JSPlainDocument)
-is implemented. 
-Thus, the Document returned by JTextField.getDocument() is a javax.swing.text.Document, but it
-is a swingjs.JSPlainDocument (extending swingjs.JSAbstractDocument)
-rather than a javax.swing.text.PlainDocument (extending javax.swing.text.AbstractDocument).
-
-all scrolling is handled by HTML5
-javax.swing.AutoScroller is not implemented
-public static methods .stop, .isRunning, .processMouseDragged require true Java threading
-javax.swing.text.View and its subclasses are not implemented. 
-
-The JS document model does not allow two fields to address the same underlying document. 
-
-
-Formatter/Regex limitations
----------------------------
-
-java.util.regex.Matcher and Pattern use JavaScript's RegExp object rather than
-the native Java object. These are not identical. Only flags /igm are supported.
-Matcher.start(groupID) is not supported.
-
-java.util.Formatter will function correctly for all standard %... patterns.
-
-
- 
 

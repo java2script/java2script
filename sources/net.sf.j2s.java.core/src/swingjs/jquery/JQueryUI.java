@@ -10,11 +10,10 @@ package swingjs.jquery;
  */
 public class JQueryUI {
 
-	
 	public JQueryUI() {
+		
 		// for reflection
 	}
-	
 	static {
 		
 		/**

@@ -811,6 +811,7 @@ public class JSComponentUI extends ComponentUI
 	protected boolean allowPaintedBackground = true;
 
 	public void setAllowPaintedBackground(boolean TF) {
+		// listCellRenderer does not allow this.
 		allowPaintedBackground = TF;
 	}
 
@@ -1937,11 +1938,12 @@ public class JSComponentUI extends ComponentUI
 		if (node == null || isMenuItem)
 			return;
 		// if (color == null) // from paintComponentSafely
-		DOMNode.setStyles(node, "background-color", JSToolkit.getCSSColor(color == null ? rootPaneColor : color));
+		DOMNode.setStyles(node, "background-color", color == null ? null : JSToolkit.getCSSColor(color == null ? rootPaneColor : color));
 		if (allowPaintedBackground && jc.selfOrParentBackgroundPainted())
 			setTransparent(node);
 		else
 			checkTransparent(node);
+		
 	}
 
 	/**

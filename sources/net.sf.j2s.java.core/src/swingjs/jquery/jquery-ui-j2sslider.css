@@ -9,12 +9,14 @@
 */
 
 /* BH some of these will be overridden when there are tick marks */
+.ui-j2sscrollbar-horizontal { color:black;border-style:none solid none solid; border-width: 0px 5px; height: .3em; top: 40%;margin:0px 2px}
 .ui-j2sslider-horizontal { height: .3em; top: 40%;margin:0px 9px}
 .ui-j2sslider-horizontal .ui-j2sslider-handle { top: -.25em; margin-left: -.4em; }
 .ui-j2sslider-horizontal .ui-j2sslider-range { top: 0.1em; height: 30%; }
 .ui-j2sslider-horizontal .ui-j2sslider-range-min { left: 0; }
 .ui-j2sslider-horizontal .ui-j2sslider-range-max { right: 0; }
 
+.ui-j2sscrollbar-vertical { color:black;border-style:solid none solid none; border-width: 5px 0px; width: .3em; left: 40%; margin:2px 0px }
 .ui-j2sslider-vertical { width: .3em; left: 40%; margin:10px 0px }
 .ui-j2sslider-vertical .ui-j2sslider-handle { left: -.25em; margin-left: 0; margin-bottom: -.3em; }
 .ui-j2sslider-vertical .ui-j2sslider-range { left: 0.1em; width: 30%; }
@@ -306,9 +308,9 @@
 .swingjs .ui-j2sslider-tick-mark-vert { display:inline-block; width:1px; background: black; border:1px; height:5px; position:absolute; top:12px; }
 .swingjs .ui-j2sslider-tick-mark-horiz { display:inline-block; height:1px; background: black; border:1px; width:5px; position:absolute; left:14px; }
 
-.swingjs .ui-j2sslider-at-bottom { border-bottom-width:3px; border-bottom-color:red }
-.swingjs .ui-j2sslider-at-top { border-top-width:3px; border-top-color:red }
-.swingjs .ui-j2sslider-at-left { border-left-width:3px; border-left-color:red }
-.swingjs .ui-j2sslider-at-right { border-right-width:3px; border-right-color:red }
+.swingjs .ui-j2sslider-at-bottom { border-bottom-color:red }
+.swingjs .ui-j2sslider-at-top { border-top-color:red }
+.swingjs .ui-j2sslider-at-left { border-left-color:red }
+.swingjs .ui-j2sslider-at-right { border-right-color:red }
 
 

@@ -29,9 +29,9 @@ import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Dialog;
+import java.awt.JSDialog;
 import java.awt.EventQueue;
-import java.awt.Frame;
+import java.awt.JSFrame;
 import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.Window;
@@ -870,10 +870,10 @@ public class JFileChooser extends JComponent {
 
         JDialog dialog;
         Window window = JOptionPane.getWindowForComponent(parent);
-        if (window instanceof Frame) {
-            dialog = new JDialog((Frame)window, title, true);
+        if (window instanceof JSFrame) {
+            dialog = new JDialog((JSFrame)window, title, true);
         } else {
-            dialog = new JDialog((Dialog)window, title, true);
+            dialog = new JDialog((JSDialog)window, title, true);
         }
         dialog.setComponentOrientation(this.getComponentOrientation());
 

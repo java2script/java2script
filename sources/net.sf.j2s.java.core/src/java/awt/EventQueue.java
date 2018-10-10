@@ -634,7 +634,8 @@ public class EventQueue {
 		final Object src = event.getSource();
 		// final PrivilegedAction<Void> action = new PrivilegedAction<Void>() {
 		// public Void run() {
-		dispatchEventImpl(event, src, false); // SwingJS [and don't wait]
+		// CHANGED 9/22 to true -- should wait
+		dispatchEventImpl(event, src, true); // SwingJS [and don't wait]
 		// return null;
 		// }
 		// };

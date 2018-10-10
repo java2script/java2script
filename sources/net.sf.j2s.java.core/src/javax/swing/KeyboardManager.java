@@ -32,7 +32,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import java.applet.Applet;
+import java.applet.JSApplet;
 import java.awt.Container;
 import java.awt.Window;
 import java.awt.event.KeyEvent;
@@ -144,7 +144,7 @@ class KeyboardManager {
      private static Container getTopAncestor(JComponent c) {
         for(Container p = c.getParent(); p != null; p = p.getParent()) {
             if (p instanceof Window && ((Window)p).isFocusableWindow() ||
-                p instanceof Applet
+                p instanceof JSApplet
                 //|| p instanceof JInternalFrame
                 ) {
 

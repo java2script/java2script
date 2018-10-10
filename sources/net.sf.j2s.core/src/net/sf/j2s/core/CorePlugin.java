@@ -19,7 +19,10 @@ public class CorePlugin extends Plugin {
 	 * register the bundle version properly. So we use VERSION here instead.
 	 * 
 	 */
-	public static String VERSION = "3.2.2.06";
+	public static String VERSION = "3.2.4.00";
+	// BH 9/28/2018 -- 3.2.4.00 adds minimal support for JAXB
+	// BH 9/23/2018 -- 3.2.3.00 new transpiler + SwingJS-site.zip - support for java.applet.Applet and java.awt.* controls without use of a2s.*
+	// BH 9/16/2018 -- 3.2.2.06 removes "$" in JApplet public method alternative name
 	// 3.2.2.04 2018.08.15 fixing Java->JavaScript "getFinal" code for class names.
 	// 3.2.2.04 adds support for window-level applets, such as JmolApplet
 	// 3.2.2.03 adds Java 8 function and stream

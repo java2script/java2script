@@ -33,7 +33,7 @@ import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Frame;
+import java.awt.JSFrame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
@@ -90,7 +90,7 @@ import swingjs.plaf.JSComponentUI;
  * >Using Top-Level Containers</a> in <em>The Java Tutorial</em>.
  * <p>
  * In a multi-screen environment, you can create a <code>JFrame</code> on a
- * different screen device. See {@link java.awt.Frame} for more information.
+ * different screen device. See {@link java.awt.JSFrame} for more information.
  * <p>
  * <strong>Warning:</strong> Swing is not thread safe. For more information see
  * <a href="package-summary.html#threading">Swing's Threading Policy</a>.
@@ -115,7 +115,7 @@ import swingjs.plaf.JSComponentUI;
  * @author Georges Saab
  * @author David Kloba
  */
-public class JFrame extends Frame implements WindowConstants,
+public class JFrame extends JSFrame implements WindowConstants,
 
 RootPaneContainer// TransferHandler.HasGetTransferHandler
 {

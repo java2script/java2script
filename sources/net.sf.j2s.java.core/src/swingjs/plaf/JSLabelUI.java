@@ -57,8 +57,8 @@ public class JSLabelUI extends JSLightweightUI {
 			setHorizontalButtonAlignments(label, label.getHorizontalTextPosition(),
 						label.getHorizontalAlignment());
 		}
-		if (jc.isOpaque() && jc.isEnabled())
-			setBackground(jc.getBackground());
+		if (jc.isEnabled())
+			setBackground(jc.isOpaque() ? jc.getBackground() : null);
 		return domNode;
 
 	}

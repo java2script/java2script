@@ -40,6 +40,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 //import sun.misc.Unsafe;
 //import sun.reflect.ConstantPool;
 //import sun.reflect.Reflection;
@@ -3544,6 +3546,16 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		      for (int i = args.length; --i >= 0;)
 		    	  a[i] = (isProxy ? args[i] : /** @j2sNative (types[i].__PRIMITIVE && args[i].valueOf$ ? args[i].valueOf$() : args[i]) || */ null);
 		return a;
+	}
+
+	public Object getPackage() {
+		return null;
+	}
+
+	public XmlRootElement getAnnotation(Class<XmlRootElement> c) {
+		
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

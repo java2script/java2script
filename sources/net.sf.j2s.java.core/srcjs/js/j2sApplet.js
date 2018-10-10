@@ -1,5 +1,6 @@
 // j2sCore.js (based on JmolCore.js
 
+// BH 9/18/2018 fixes data.getBytes() not qualified
 // BH 8/12/2018 adding J2S.onClazzLoaded(i,msg) hook for customization
 //   for example, the developer can look for i=1 (pre-core) and add core files selectively
 //   or set System.$props["user.home"] to a desired directory before (i=1) or just after (i=2) core file loading
@@ -951,7 +952,7 @@ if (!J2S._version)
 
 	J2S._toBytes = function(data) {
 		if (typeof data == "string")
-			return data.getBytes();
+			return data.getBytes$();
 		// ArrayBuffer assumed here
 		data = new Uint8Array(data);
 		var b = Clazz.array(Byte.TYPE, data.length);
@@ -1083,7 +1084,7 @@ if (!J2S._version)
 														: ""));
 		var isString = (typeof data == "string");
 		data = Clazz.load("javajs.util.Base64").getBase64$BA(
-				isString ? data.getBytes("UTF-8") : data).toString();
+				isString ? data.getBytes$S("UTF-8") : data).toString();
 		encoding || (encoding = "base64");
 		var url = J2S._serverUrl;
 		url && url.indexOf("your.server") >= 0 && (url = "");
@@ -2544,18 +2545,18 @@ if (!J2S._version)
 		}
 		applet._appletPanel.setScreenDimension$I$I(w, h);
 		var f = function() {
-			if (applet._appletPanel.paint$java_awt_Graphics)
-				applet._appletPanel.paint$java_awt_Graphics(null);
-			else
-				applet._appletPanel.update$java_awt_Graphicss(null)
+//			if (applet._appletPanel.top) {
+//				System.out.println("j2sApplet invalidate");
+//				applet._appletPanel.top.invalidate$();
+//				System.out.println("j2sApplet repaint");
+//				applet._appletPanel.top.repaint$();
+//			}
 		};
-		if (asNewThread) {
-			(self.requestAnimationFrame || self.setTimeout)(f); // requestAnimationFrame
-																// or (MSIE 9)
-																// setTimeout
-		} else {
+		//if (asNewThread) {
+			//self.setTimeout(f,20); // requestAnimationFrame
+		//} else {
 			f();
-		}
+		//}
 	}
 
 	/**

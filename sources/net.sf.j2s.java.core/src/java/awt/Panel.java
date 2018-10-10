@@ -1,7 +1,4 @@
 /*
- * Some portions of this file have been modified by Robert Hanson hansonr.at.stolaf.edu 2012-2017
- * for use in SwingJS via transpilation into JavaScript using Java2Script.
- *
  * Copyright (c) 1995, 2007, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -27,8 +24,6 @@
  */
 package java.awt;
 
-import java.awt.peer.ComponentPeer;
-
 /**
  * <code>Panel</code> is the simplest container class. A panel
  * provides space in which an application can attach any other
@@ -41,75 +36,59 @@ import java.awt.peer.ComponentPeer;
  * @see     java.awt.FlowLayout
  * @since   JDK1.0
  */
-public class Panel extends Container {
-    private static final String base = "panel";
-    private static int nameCounter = 0;
-
-    /*
-     * JDK 1.1 serialVersionUID
-     */
-     //private static final long serialVersionUID = -2728009084054400034L;
-
+public class Panel extends a2s.Panel {//Container implements Accessible {
+//    private static final String base = "panel";
+//    private static int nameCounter = 0;
+//
+//    /*
+//     * JDK 1.1 serialVersionUID
+//     */
+//     private static final long serialVersionUID = -2728009084054400034L;
+//
     /**
      * Creates a new panel using the default layout manager.
      * The default layout manager for all panels is the
      * <code>FlowLayout</code> class.
-     * 
      */
     public Panel() {
-    	this(new FlowLayout());
+    	super();
     }
 
-    @Override
-		protected boolean canPaint() {
-    	//return this.isContentPane || this.rootPane; ??
-			return isContentPane;
-    }
-
-
-		/**
+    /**
      * Creates a new panel with the specified layout manager.
      * @param layout the layout manager for this panel.
      * @since JDK1.1
      */
     public Panel(LayoutManager layout) {
-    	setAppContext();
-    	setLayout(layout);
+    	super(layout);
     }
 
-    /**
-     * Construct a name for this component.  Called by getName() when the
-     * name is null.
-     */
-    @Override
-		String constructComponentName() {
-        synchronized (Panel.class) {
-            return base + nameCounter++;
-        }
-    }
-
-	/**
-	 * Creates the Panel's peer. The peer allows you to modify the appearance of
-	 * the panel without changing its functionality.
-	 */
-
-	@Override
-	public void addNotify() {
-		// synchronized (getTreeLock()) {
-		getOrCreatePeer();
-		super.addNotify();
-		// }
-	}
-    
-  	@Override
-  	protected ComponentPeer getOrCreatePeer() {
-  		return (ui == null ? null : peer == null ? (peer = getToolkit().createPanel(this)) : peer);
-  	}
-
-
-/////////////////
-// Accessibility support
-////////////////
+//    /**
+//     * Construct a name for this component.  Called by getName() when the
+//     * name is null.
+//     */
+//    String constructComponentName() {
+//        synchronized (Panel.class) {
+//            return base + nameCounter++;
+//        }
+//    }
+//
+//    /**
+//     * Creates the Panel's peer.  The peer allows you to modify the
+//     * appearance of the panel without changing its functionality.
+//     */
+//
+//    public void addNotify() {
+//        synchronized (getTreeLock()) {
+//            if (peer == null)
+//                peer = getToolkit().createPanel(this);
+//            super.addNotify();
+//        }
+//    }
+//
+///////////////////
+//// Accessibility support
+//////////////////
 //
 //    /**
 //     * Gets the AccessibleContext associated with this Panel.
@@ -136,7 +115,7 @@ public class Panel extends Container {
 //     */
 //    protected class AccessibleAWTPanel extends AccessibleAWTContainer {
 //
-//        //private static final long serialVersionUID = -6409552226660031050L;
+//        private static final long serialVersionUID = -6409552226660031050L;
 //
 //        /**
 //         * Get the role of this object.
@@ -148,5 +127,5 @@ public class Panel extends Container {
 //            return AccessibleRole.PANEL;
 //        }
 //    }
-
+//
 }

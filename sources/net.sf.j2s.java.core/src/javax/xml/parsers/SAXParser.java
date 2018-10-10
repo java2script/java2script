@@ -6,6 +6,8 @@ package javax.xml.parsers;
 
 import javax.xml.sax.Parser;
 
+import org.xml.sax.XMLReader;
+
 /**
  * Just an interface to fill in for the JavaScript version
  * 
@@ -14,5 +16,7 @@ import javax.xml.sax.Parser;
  */
 @SuppressWarnings("deprecation")
 public abstract class SAXParser implements Parser {
+
+	public abstract XMLReader getXMLReader();
 }
 

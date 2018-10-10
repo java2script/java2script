@@ -38,6 +38,10 @@ public class JSSAXParser implements Parser, XMLReader {
 	private ErrorHandler errorHandler;
 	private boolean havePre;
 
+	public XMLReader getXMLReader() {
+		return this;
+	}
+	
 	@Override
 	public void setLocale(Locale locale) throws SAXException {
 		// N/A

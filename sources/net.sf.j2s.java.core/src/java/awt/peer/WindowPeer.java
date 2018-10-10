@@ -30,6 +30,7 @@ package java.awt.peer;
 
 import java.awt.Color;
 import java.awt.Dialog;
+import java.awt.JSDialog;
 import java.awt.Window;
 import java.awt.image.BufferedImage;
 

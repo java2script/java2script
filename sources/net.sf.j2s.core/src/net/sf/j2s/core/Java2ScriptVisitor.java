@@ -132,6 +132,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// BH 9/28/2018 -- 3.2.4.00 adds minimal support for JAXB
+// BH 9/23/2018 -- 3.2.3.00 adds support for java.applet.Applet and java.awt.* controls without use of a2s.*
 // BH 9/16/2018 -- 3.2.2.06 removes "$" in JApplet public method alternative name
 // BH 8/20/2018 -- fix for return (short)++;
 // BH 8/19/2018 -- refactored to simplify $finals$
@@ -258,6 +260,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private boolean temp_processingArrayIndex;
 
 	/**
+	 * annotations collected for a class
+	 */
+	private List<ClassAnnotation> class_annotations;
+	/**
 	 * functionalInterface methods add the name$ qualifier even if they are
 	 * parameterized
 	 * 
@@ -296,13 +302,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		package_methodStackForFinals = parent.package_methodStackForFinals;
 		package_blockLevel = parent.package_blockLevel;
 		package_finalVars = parent.package_finalVars;
+		
 		class_visitedVars = parent.class_visitedVars;
-
 		// inner class temporary visitor business
 
 		this$0Name = parent.class_fullName;
 		innerNode = node;
-
+		
 		return this;
 	}
 
@@ -365,15 +371,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		ITypeBinding b = binding;
 		while ((binding = binding.getSuperclass()) != null) {
 			String name = binding.getQualifiedName();
-			if (!("javax.swing.JApplet".equals(name))) {
-				if (name.startsWith("java.") || name.startsWith("javax"))
-					return false;
-				continue;
+			if ("javax.swing.JApplet".equals(name) || "java.applet.Applet".equals(name)) {
+				if (applets == null)
+					applets = new ArrayList<String>();
+				applets.add(class_fullName);
+				return true;
 			}
-			if (applets == null)
-				applets = new ArrayList<String>();
-			applets.add(class_fullName);
-			return true;
+			if (name.startsWith("java.") || name.startsWith("javax"))
+				return false;
 		}
 		return false;
 	}
@@ -948,7 +953,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * 
 	 */
 	public boolean visit(Initializer node) {
-		if (NativeDoc.checkj2sIgnore(node)) {
+		if (checkj2sIgnoreAndJAXB(node)) {
 			return false;
 		}
 		node.getBody().accept(this);
@@ -969,7 +974,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	@SuppressWarnings("unchecked")
 	public boolean visit(MethodDeclaration node) {
 		IMethodBinding mBinding = node.resolveBinding();
-		if (mBinding == null || NativeDoc.checkj2sIgnore(node))
+		if (mBinding == null || checkj2sIgnoreAndJAXB(node))
 			return false;
 		processMethodDeclaration(mBinding, node.parameters(), node.getBody(), node.isConstructor(), NOT_LAMBDA);
 		return false;
@@ -1688,6 +1693,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		// set up key fields and local variables
 
+		if (isLocal || isClass) {
+			checkj2sIgnoreAndJAXB((TypeDeclaration) node);
+		}
 		ITypeBinding oldBinding = null;
 		String oldShortClassName = null, this$0Name0 = null, finalShortClassName, finalPackageName;
 		if (isTopLevel) {
@@ -1927,7 +1935,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				// in Class A.
 
 				if (isField || element instanceof Initializer) {
-					if ((isInterface || isStatic(element)) && !NativeDoc.checkj2sIgnore(element)) {
+					if ((isInterface || isStatic(element)) && !checkj2sIgnoreAndJAXB(element)) {
 						lstStatic.add(element);
 						if (isField)
 							addFieldDeclaration((FieldDeclaration) element, FIELD_DECL_STATIC_DEFAULTS);
@@ -1977,7 +1985,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 					BodyDeclaration element = (BodyDeclaration) iter.next();
 					if ((element instanceof FieldDeclaration || element instanceof Initializer) && !isStatic(element)
-							&& !NativeDoc.checkj2sIgnore(element)) {
+							&& !checkj2sIgnoreAndJAXB(element)) {
 						if (element instanceof FieldDeclaration)
 							addFieldDeclaration((FieldDeclaration) element, FIELD_DECL_NONSTATIC_ALL);
 						else
@@ -2057,6 +2065,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// add any recently defined static field definitions, assert strings
 		// and Enum constants
 
+		if (class_annotations != null)
+			ClassAnnotation.addClassAnnotations(class_annotations, trailingBuffer);
+
 		buffer.append(trailingBuffer); // also writes the assert string
 		if (isAnonymous) {
 			// if anonymous, restore old static def buffer
@@ -2077,7 +2088,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 
 		getJ2sJavadoc(node, false);
-
+		
 		if (!isTopLevel) {
 			addAnonymousFunctionWrapper(false);
 			if (isAnonymous) {
@@ -3596,12 +3607,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		return b != null && Modifier.isStatic(b.getModifiers());
 	}
 
-	/**
-	 * @param b
-	 * @return
-	 */
-	static boolean isStatic(IMethodBinding b) {
-		return b != null && Modifier.isStatic(b.getModifiers());
+	static boolean isTransient(IBinding b) {
+		return b != null && Modifier.isTransient(b.getModifiers());
 	}
 
 	static boolean isStatic(BodyDeclaration b) {
@@ -5298,6 +5305,64 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		return docs;
 	}
 
+	/**
+	 * @param node
+	 * @return true if we have @j2sIngore for this BodyDeclaration
+	 */
+	protected boolean checkj2sIgnoreAndJAXB(BodyDeclaration node) {
+		return checkAnnotations(node, "@j2sIgnore") != null;
+	}
+
+	/**
+	 * Method with "j2s*" tag.
+	 * 
+	 * @param node
+	 * @return
+	 */
+	private Object checkAnnotations(BodyDeclaration node, String tagName) {
+		Javadoc javadoc = node.getJavadoc();
+		if (javadoc != null) {
+			List<?> tags = javadoc.tags();
+			if (tags.size() != 0) {
+				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
+					TagElement tagEl = (TagElement) iter.next();
+					if (tagName.equals(tagEl.getTagName())) {
+						return tagEl;
+					}
+				}
+			}
+		}
+		List<?> modifiers = node.modifiers();
+		if (modifiers != null && modifiers.size() > 0) {
+			for (Iterator<?> iter = modifiers.iterator(); iter.hasNext();) {
+				Object obj = iter.next();
+				if (obj instanceof Annotation) {
+					Annotation annotation = (Annotation) obj;
+					String qName = annotation.getTypeName().getFullyQualifiedName();
+					int idx = qName.indexOf("J2S");
+					if (idx >= 0) {
+						String annName = qName.substring(idx);
+						annName = annName.replaceFirst("J2S", "@j2s");
+						if (annName.startsWith(tagName)) {
+							return annotation;
+						}
+					} else if (!qName.equals("Override") 
+							&& !qName.equals("Deprecated")
+							&& !qName.equals("Suppress")
+							&& !qName.equals("XmlTransient")
+							) {
+						if (class_annotations == null)
+							class_annotations = new ArrayList<ClassAnnotation>();
+						ClassAnnotation ann = ClassAnnotation.newAnnotation(qName, annotation, node);
+						if (ann != null)
+							class_annotations.add(ann);
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 	/////////////////////////////
 
 	/**
@@ -6057,7 +6122,61 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	}
 
-	public static class NativeDoc {
+	static class ClassAnnotation {
+		
+		protected BodyDeclaration node;
+		protected Annotation annotation;
+		private String qName;
+		
+		public static ClassAnnotation newAnnotation(String qName, Annotation annotation, BodyDeclaration node) {
+			
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		protected ClassAnnotation(String qName, Annotation annotation, BodyDeclaration node) {
+			System.out.println(">>>>" + qName + " " + annotation.getClass().getName() + " " + annotation);
+			this.qName = qName;
+			this.annotation = annotation;
+			this.node = node;
+		}
+
+		public static void addClassAnnotations(List<ClassAnnotation> class_annotations, TrailingBuffer trailingBuffer) {
+			if (class_annotations == null)
+				return;
+			int pt = 0;
+			for (int i = 0; i < class_annotations.size(); i++) {
+				ClassAnnotation a = class_annotations.get(i);
+				String str = a.annotation.toString();
+				if (str.startsWith("@SuppressWarnings"))
+					continue;
+				String nodeType = a.qName;
+				String varName = null;
+				if (a.node instanceof FieldDeclaration) {
+					FieldDeclaration field = (FieldDeclaration) a.node;
+					List<?> fragments = field.fragments();
+					VariableDeclarationFragment identifier = (VariableDeclarationFragment) fragments.get(0);
+					IVariableBinding var = identifier.resolveBinding();
+					nodeType = (var.getType().isArray() ? "[array]" : field.getType().toString());
+					varName = var.getName();
+				} else if (a.node instanceof MethodDeclaration) {
+					MethodDeclaration method = (MethodDeclaration) a.node;
+					IMethodBinding var = method.resolveBinding();
+					ITypeBinding type = var.getReturnType();
+					nodeType = (type.isArray() ? "[array]" : type.getName());
+					varName = "M:" + var.getName();
+				}
+				trailingBuffer.append(pt++ == 0 ? "C$.__ANN__ = [\n  " : " ,");
+				trailingBuffer.append("[" + (varName == null ? null : "'" + varName + "'")
+						+ ",'" + nodeType + "','" + str + "']\n");
+			}
+			if (pt > 0)
+				trailingBuffer.append("];\n");
+		}
+		
+	}
+	
+	static class NativeDoc {
 
 		/**
 		 * prepare a list that alternates [javadoc element javadoc element ... ]
@@ -6194,54 +6313,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			buffer.append(code);
 			buffer.append(isInline ? "" : addPostfix ? "\r\n}\r\n" : "\r\n");
 			return true;
-		}
-
-		/**
-		 * @param node
-		 * @return true if we have @j2sIngore for this BodyDeclaration
-		 */
-		protected static boolean checkj2sIgnore(BodyDeclaration node) {
-			return getJ2SKeepOrIgnore(node, "@j2sIgnore") != null;
-		}
-
-		/**
-		 * Method with "j2s*" tag.
-		 * 
-		 * @param node
-		 * @return
-		 */
-		private static Object getJ2SKeepOrIgnore(BodyDeclaration node, String tagName) {
-			Javadoc javadoc = node.getJavadoc();
-			if (javadoc != null) {
-				List<?> tags = javadoc.tags();
-				if (tags.size() != 0) {
-					for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
-						TagElement tagEl = (TagElement) iter.next();
-						if (tagName.equals(tagEl.getTagName())) {
-							return tagEl;
-						}
-					}
-				}
-			}
-			List<?> modifiers = node.modifiers();
-			if (modifiers != null && modifiers.size() > 0) {
-				for (Iterator<?> iter = modifiers.iterator(); iter.hasNext();) {
-					Object obj = iter.next();
-					if (obj instanceof Annotation) {
-						Annotation annotation = (Annotation) obj;
-						String qName = annotation.getTypeName().getFullyQualifiedName();
-						int idx = qName.indexOf("J2S");
-						if (idx >= 0) {
-							String annName = qName.substring(idx);
-							annName = annName.replaceFirst("J2S", "@j2s");
-							if (annName.startsWith(tagName)) {
-								return annotation;
-							}
-						}
-					}
-				}
-			}
-			return null;
 		}
 
 	}

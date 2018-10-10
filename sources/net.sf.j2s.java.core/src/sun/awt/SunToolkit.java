@@ -51,6 +51,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GraphicsConfiguration;
 import java.awt.Image;
+import java.awt.JSPanel;
 import java.awt.Panel;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;

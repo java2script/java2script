@@ -33,8 +33,9 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dialog;
+import java.awt.JSDialog;
 import java.awt.FlowLayout;
-import java.awt.Frame;
+import java.awt.JSFrame;
 
 //import java.io.IOException;
 //import java.io.ObjectOutputStream;
@@ -228,8 +229,8 @@ public class JColorChooser extends JComponent {
 			ActionListener okListener, ActionListener cancelListener, boolean disposeOnHide) {
 		Window window = JOptionPane.getWindowForComponent(c);
 		ColorChooserDialog dialog;
-		if (window instanceof Frame) {
-			dialog = new ColorChooserDialog((Frame) window, title, modal, c, chooserPane, okListener, cancelListener, disposeOnHide);
+		if (window instanceof JSFrame) {
+			dialog = new ColorChooserDialog((JSFrame) window, title, modal, c, chooserPane, okListener, cancelListener, disposeOnHide);
 		} else {
 			dialog = new ColorChooserDialog((Dialog) window, title, modal, c, chooserPane, okListener, cancelListener, disposeOnHide);
 		}
@@ -615,14 +616,14 @@ class ColorChooserDialog extends JDialog {
 		initColorChooserDialog(c, chooserPane, okListener, cancelListener);
 	}
 
-	public ColorChooserDialog(Frame owner, String title, boolean modal, Component c, JColorChooser chooserPane,
+	public ColorChooserDialog(JSFrame owner, String title, boolean modal, Component c, JColorChooser chooserPane,
 			ActionListener okListener, ActionListener cancelListener) {
 		super(owner, title, modal);
 		this.disposeOnHide  = false;
 		initColorChooserDialog(c, chooserPane, okListener, cancelListener);
 	}
 
-	ColorChooserDialog(Frame owner, String title, boolean modal, Component c, JColorChooser chooserPane,
+	ColorChooserDialog(JSFrame owner, String title, boolean modal, Component c, JColorChooser chooserPane,
 			ActionListener okListener, ActionListener cancelListener, boolean disposeOnHide) {
 		super(owner, title, modal);
 		this.disposeOnHide  = disposeOnHide;
