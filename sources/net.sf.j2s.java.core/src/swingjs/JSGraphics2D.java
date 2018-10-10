@@ -87,12 +87,6 @@ public class JSGraphics2D // extends SunGraphics2D
 		hints = new RenderingHints(new Hashtable());
 		this.canvas = (HTML5Canvas) canvas;
 		ctx = this.canvas.getContext("2d");
-// removed - caused blurriness 9/17/2018		
-//		// reduce antialiasing, thank you,
-//		// http://www.rgraph.net/docs/howto-get-crisp-lines-with-no- antialias.html
-//		if (!isShifted)
-//			ctx.translate(-0.5, -0.5);
-//		isShifted = true;
 		transform = new AffineTransform();
 		setStroke(new BasicStroke());
 		/**
@@ -104,12 +98,37 @@ public class JSGraphics2D // extends SunGraphics2D
 		 */
 		{
 		}
+		// removed - caused blurriness 9/17/2018		
+//		// reduce antialiasing, thank you,
+//		// http://www.rgraph.net/docs/howto-get-crisp-lines-with-no- antialias.html
+		setAntialias(true);
 	}
 
+	public void setAntialias(boolean tf) {
+		if (tf) {
+			if (!isShifted)
+				ctx.translate(-0.5, -0.5);
+		} else {
+			if (isShifted)
+				ctx.translate(0.5, 0.5);
+		}
+		// this is important if images are being drawn - test/TAPP6
+		// see also http://vaughnroyko.com/state-of-nearest-neighbor-interpolation-in-canvas/
+		/**
+		 * @j2sNative
+		 * 
+		 * 			this.ctx.mozImageSmoothingEnabled = false;
+		 *            this.ctx.webkitImageSmoothingEnabled = false;
+		 *            this.ctx.msImageSmoothingEnabled = false;
+		 *            this.ctx.imageSmoothingEnabled = false;
+		 * 
+		 */
+		isShifted = tf;
+	}
+	
 	/**
 	 * the SwingJS object
 	 */
-
 	public GraphicsConfiguration getDeviceConfiguration() {
 		return gc;
 	}
@@ -243,9 +262,11 @@ public class JSGraphics2D // extends SunGraphics2D
 		if (width <= 0 || height <= 0)
 			return;
 		backgroundPainted = true;
-		ctx.translate(0.5, 0.5);
+//		if (!isShifted)
+//			ctx.translate(0.5, 0.5);
 		ctx.fillRect(x, y, width, height);
-		ctx.translate(-0.5, -0.5);
+//		if (!isShifted)
+//			ctx.translate(-0.5, -0.5);
 //
 //		if (width == 1)
 //			drawLine(x, y, x, y + height);

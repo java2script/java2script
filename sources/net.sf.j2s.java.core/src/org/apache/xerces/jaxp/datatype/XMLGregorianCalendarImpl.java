@@ -177,7 +177,7 @@ import javax.xml.namespace.QName;
  * @version $Id: XMLGregorianCalendarImpl.java 759809 2009-03-30 00:44:05Z mrglavas $
  * @see javax.xml.datatype.Duration
  */
-class XMLGregorianCalendarImpl
+public class XMLGregorianCalendarImpl
 	extends XMLGregorianCalendar
 	implements Serializable, Cloneable {
     

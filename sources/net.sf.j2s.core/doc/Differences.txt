@@ -1,6 +1,17 @@
 Notes
 =====
 
+update 10/1/2018 -- 3.2.4.01
+
+AWT components in SwingJS:
+
+-- can be accessed directly as java.awt Components
+-- receive posted events to the component's MouseDown, MouseMove, etc, methods;
+-- can also be extended to use (or can alternatively use) Swing MouseListener and MouseAdapter methods;
+-- are subclasses of JComponent (JavaScript only, not Java), so also take all the event possibilities of Swing;
+-- require explicit graphics.dispose() if getGraphics() is called in any component. 
+
+
 update 9/29/2018 -- 3.2.4 adds support for JAXB, changes default for ResourceBundle.getBundle
 update 9/23/2018 -- 3.2.3 adds support for direct use of java.awt.* components and java.applet.Applet 
                  -- no need for switching to a2s.*
