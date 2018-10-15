@@ -3947,7 +3947,7 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
 
 
     void dumpBits() {
-    	dumpBits(null, "mag");
+    	//dumpBits(null, "mag");
 	}
 
 
