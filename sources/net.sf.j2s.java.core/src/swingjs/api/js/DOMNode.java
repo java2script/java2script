@@ -21,6 +21,10 @@ import swingjs.JSUtil;
 public abstract class DOMNode {
 
 
+	public abstract String[] getAttributeNames();
+
+	public abstract String getAttribute(String name);
+
 	// "abstract" in the sense that these are the exact calls to JavaScript
 	
 	public abstract void appendChild(DOMNode node);

@@ -31,7 +31,7 @@ public abstract class DatatypeFactory {
 	}
 
 	public static DatatypeFactory newInstance() throws DatatypeConfigurationException {
-		return (DatatypeFactory) Interface.getInstance("org.apache.xerces.jaxp.datatype.DatatypeFactoryImpl", false);
+		return (DatatypeFactory) Interface.getInstance("swingjs.JSJAXBDatatypeFactory", false);
 	}
 
 	public abstract Duration newDuration(String s);

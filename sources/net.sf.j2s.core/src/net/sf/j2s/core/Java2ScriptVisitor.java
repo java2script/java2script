@@ -5353,9 +5353,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 							) {
 						if (class_annotations == null)
 							class_annotations = new ArrayList<ClassAnnotation>();
-						ClassAnnotation ann = ClassAnnotation.newAnnotation(qName, annotation, node);
-						if (ann != null)
-							class_annotations.add(ann);
+						ClassAnnotation ann = new ClassAnnotation(qName, annotation, node);
+						class_annotations.add(ann);
 					}
 				}
 			}
@@ -6128,12 +6127,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		protected Annotation annotation;
 		private String qName;
 		
-		public static ClassAnnotation newAnnotation(String qName, Annotation annotation, BodyDeclaration node) {
-			
-			// TODO Auto-generated method stub
-			return null;
-		}
-
 		protected ClassAnnotation(String qName, Annotation annotation, BodyDeclaration node) {
 			System.out.println(">>>>" + qName + " " + annotation.getClass().getName() + " " + annotation);
 			this.qName = qName;
@@ -6150,6 +6143,20 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				String str = a.annotation.toString();
 				if (str.startsWith("@SuppressWarnings"))
 					continue;
+//				if (str.indexOf(".class") >= 0) {
+//					System.out.println(str + " >>" + a.annotation.getClass().getName());
+//					if (a.annotation instanceof SingleMemberAnnotation) {
+//						SingleMemberAnnotation ann = (SingleMemberAnnotation) a.annotation;
+//						Expression e = ann.getValue();
+//						System.out.println(e + " >>" + e.getClass().getName());
+//						str += e.getClass().getName();
+//						if (e instanceof TypeLiteral)
+//							str += "==" + ((TypeLiteral) e).getType().resolveBinding().getClass().getName();
+//					} else if (a.annotation instanceof NormalAnnotation) {
+//						NormalAnnotation an = (NormalAnnotation) a.annotation;
+//						str += "====" + an.resolveAnnotationBinding().getAllMemberValuePairs()[0].getValue();
+//					}
+//				}
 				String nodeType = a.qName;
 				String varName = null;
 				if (a.node instanceof FieldDeclaration) {
