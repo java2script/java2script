@@ -1,4 +1,4 @@
-package swingjs;
+package swingjs.xml;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

@@ -22,6 +22,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 // adapted source: http://blog.bdoughan.com/2011/06/using-jaxbs-xmlaccessortype-to.html
 
+
 @XmlRootElement(name="RootOrdered",namespace="www.jalview.org")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(propOrder = {
@@ -43,7 +44,7 @@ public class Root_ORDERED {
 	
 	
 	@XmlAccessorType(XmlAccessType.FIELD)
-	@XmlType(name="MoreComplex")
+	@XmlType(namespace="st.Olaf")
 	private static class SomewhatComplex {
 
 		@XmlValue

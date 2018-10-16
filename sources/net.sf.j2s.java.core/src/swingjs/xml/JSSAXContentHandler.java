@@ -1,4 +1,4 @@
-package swingjs;
+package swingjs.xml;
 
 // SAX event handler for demos.
 // No warranty; no copyright -- use this as you will.
@@ -6,6 +6,7 @@ package swingjs;
 
 import javajs.util.PT;
 import javajs.util.SB;
+import swingjs.JSUtil;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;

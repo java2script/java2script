@@ -1,4 +1,4 @@
-package swingjs;
+package swingjs.xml;
 
 import java.util.Map;
 
@@ -7,6 +7,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.Validator;
+
+import swingjs.JSUtil;
 
 public class JSJAXBContext extends JAXBContext {
 

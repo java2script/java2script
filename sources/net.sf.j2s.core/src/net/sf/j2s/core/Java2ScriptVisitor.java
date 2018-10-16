@@ -4239,7 +4239,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		return (isStatic(varBinding) && varBinding.getDeclaringClass() != null);
 	}
 
-	private static String getJavaClassNameQualified(ITypeBinding binding) {
+	static String getJavaClassNameQualified(ITypeBinding binding) {
 		String binaryName = null, bindingKey;
 
 		// about binding.isLocal()
@@ -5334,6 +5334,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 		List<?> modifiers = node.modifiers();
 		if (modifiers != null && modifiers.size() > 0) {
+			
 			for (Iterator<?> iter = modifiers.iterator(); iter.hasNext();) {
 				Object obj = iter.next();
 				if (obj instanceof Annotation) {
@@ -6138,6 +6139,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			if (class_annotations == null)
 				return;
 			int pt = 0;
+			ASTNode lastNode = null;
 			for (int i = 0; i < class_annotations.size(); i++) {
 				ClassAnnotation a = class_annotations.get(i);
 				String str = a.annotation.toString();
@@ -6159,26 +6161,40 @@ public class Java2ScriptVisitor extends ASTVisitor {
 //				}
 				String nodeType = a.qName;
 				String varName = null;
+				String className = null, binaryName = null;
 				if (a.node instanceof FieldDeclaration) {
 					FieldDeclaration field = (FieldDeclaration) a.node;
 					List<?> fragments = field.fragments();
 					VariableDeclarationFragment identifier = (VariableDeclarationFragment) fragments.get(0);
 					IVariableBinding var = identifier.resolveBinding();
+					className = getJavaClassNameQualified(var.getType());
+					binaryName = var.getType().getBinaryName();
 					nodeType = (var.getType().isArray() ? "[array]" : field.getType().toString());
+					var.getType().getQualifiedName();
 					varName = var.getName();
 				} else if (a.node instanceof MethodDeclaration) {
 					MethodDeclaration method = (MethodDeclaration) a.node;
 					IMethodBinding var = method.resolveBinding();
 					ITypeBinding type = var.getReturnType();
+					className = getJavaClassNameQualified(type);
+					binaryName = type.getBinaryName();
 					nodeType = (type.isArray() ? "[array]" : type.getName());
 					varName = "M:" + var.getName();
 				}
-				trailingBuffer.append(pt++ == 0 ? "C$.__ANN__ = [\n  " : " ,");
-				trailingBuffer.append("[" + (varName == null ? null : "'" + varName + "'")
-						+ ",'" + nodeType + "','" + str + "']\n");
+				if (a.node == lastNode) {
+					trailingBuffer.append(",");
+				} else {
+					lastNode = a.node;
+					trailingBuffer.append(pt++ == 0 ? "C$.__ANN__ = [[[" : "]],\n  [[");
+					trailingBuffer.append((varName == null ? null : "'" + varName + "'")
+							+ ",'" + nodeType + "'"
+							+ ",'" + className + "'"
+							+ ",'" + binaryName + "'],[");
+				}					
+				trailingBuffer.append("'" + str + "'");
 			}
 			if (pt > 0)
-				trailingBuffer.append("];\n");
+				trailingBuffer.append("]]];\n");
 		}
 		
 	}

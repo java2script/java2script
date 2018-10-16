@@ -1,4 +1,4 @@
-package swingjs;
+package swingjs.xml;
 
 import java.util.Hashtable;
 import java.util.Map;

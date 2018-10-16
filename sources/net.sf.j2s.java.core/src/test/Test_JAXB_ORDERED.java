@@ -52,7 +52,7 @@ public class Test_JAXB_ORDERED extends Test_ {
 		        Unmarshaller unmarshaller = jc.createUnmarshaller();
 		        ByteArrayInputStream is = new ByteArrayInputStream(s.getBytes("UTF-8"));
 				Root_ORDERED r = (Root_ORDERED) unmarshaller.unmarshal(is);
-				
+				System.out.println(r.getCreationDate());
  			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}

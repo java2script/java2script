@@ -1,11 +1,10 @@
-package swingjs;
+package swingjs.xml;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.GregorianCalendar;
 
 import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 
 import org.apache.xerces.jaxp.datatype.XMLGregorianCalendarImpl;

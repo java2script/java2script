@@ -1,4 +1,4 @@
-package swingjs;
+package swingjs.xml;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -19,6 +19,7 @@ import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
 
 import javajs.util.Base64;
+import swingjs.JSUtil;
 import swingjs.api.Interface;
 import swingjs.api.js.DOMNode;
 
@@ -75,7 +76,7 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 		this.writer = this.result.getWriter();
 		this.outputStream = this.result.getOutputStream();
 		Class<?> javaClass = ((JSJAXBContext) context).getjavaClass();
-		doMarshal(javaClass, javaObject, null);
+		doMarshal(javaClass, javaObject, null, false);
 	}
 
 	/**
@@ -83,16 +84,16 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 	 * 
 	 * @param javaClass    the class being marshalled
 	 * @param javaObject   the object being marshalled
-	 * @param a   the annotation for this class; null for the root
+	 * @param a   the field for this class; null for the root
+	 * @param isEntry TODO
 	 * @throws JAXBException
 	 */
-	@SuppressWarnings("unused")
-	private void doMarshal(Class<?> javaClass, Object javaObject, JSJAXBAnnotation a) throws JAXBException {
+	private void doMarshal(Class<?> javaClass, Object javaObject, JSJAXBField a, boolean isEntry) throws JAXBException {
 		// at least for now we rely on fields that are designated.
 
-		JSJAXBAnnotationType info = new JSJAXBAnnotationType();
-		info.annotation = a;
-
+		JSJAXBClass info = new JSJAXBClass(javaClass, javaObject);
+		info.field = a;
+		
 		Map<String, Integer> oldMap = null;
 		if (a == null) {
 			clearQualifierMap();
@@ -100,31 +101,8 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 			oldMap = newQualifierMap(null);
 		}
 		
-		boolean isTop = true;
-		while (javaClass != null) {
-
-//			C$.__ANN__ = [
-//	        [null,'XmlRootElement','@XmlRootElement']
-//	       ,['M:getId','int','@XmlAttribute']
-//	       ,['M:getName','String','@XmlElement']
-//	       ,['M:getSalary','float','@XmlElement(name="Salary")']
-//	      ];
-
-			Object clazz = (/** @j2sNative javaClass.$clazz$ || */null);
-			if (clazz == null)
-				break;
-			String[][] jsdata = (/** @j2sNative clazz.__ANN__ || */null);
-			String className = (/** @j2sNative clazz.__CLASS$NAME__ || clazz.__CLASS_NAME__ || */null);
-
-			if (!isTop) {
-				className = null;
-			}
-			isTop = false;
-			if (jsdata != null)
-				info.addTypeData(jsdata, className, javaObject);
-			javaClass = javaClass.getSuperclass();
-		}
-		writeXML(info, a == null);
+		writeXML(info, a == null, isEntry);
+		
 		newQualifierMap(oldMap);
 	}
 
@@ -208,21 +186,15 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 		return (/** @j2sNative (cl.$clazz$ ? !!cl.$clazz$.__ANN__ : 0) || */false);
 	}
 
-	private static boolean haveElements(JSJAXBAnnotationType info) {
-		if (info.propOrder.size() == 0) {
-			for (int i = 0, n = info.annotations.size(); i < n; i++)
-				if (getAnnotation(info, info.annotations.get(i).javaName + "@XmlElement") != null)
-					return true;
-		} else {
-			for (int i = 0, n = info.propOrder.size(); i < n; i++)
-	 			if (getAnnotation(info, info.propOrder.get(i) + "@XmlElement") != null)
-					return true;
-		}
+	private static boolean haveElements(JSJAXBClass info) {
+		for (int i = 0, n = info.fields.size(); i < n; i++)
+			if (!info.fields.get(i).isAttribute)
+				return true;
 		return false;
 	}
 
-	private static JSJAXBAnnotation getAnnotation(JSJAXBAnnotationType info, String namekey) {
-		return info.getAnnotationFromJavaName(namekey);
+	private static JSJAXBField getField(JSJAXBClass info, String javaName) {
+		return info.getFieldFromJavaName(javaName);
 	}
 
 	private static DOMNode textarea;
@@ -256,21 +228,26 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 	
 	/////////// output methods //////////////
 	
-	private void writeXML(JSJAXBAnnotationType info, boolean isRoot) throws JAXBException {
-		if (isRoot)
+	private void writeXML(JSJAXBClass info, boolean isRoot, boolean isEntry) throws JAXBException {
+		QName qname = (info.field == null ? info.qname : info.field.qualifiedName);
+		if (isRoot) {
 			outputHeader();
-		QName qname = (info.annotation == null ? info.qname : info.annotation.qualifiedName);
-		writeTagOpen(qname);
-		if (info.annotation != null)
-			outputInstanceType(getEntryType(info.qname, info.annotation.getValue()));
+			// sets default 
+			getXmlnsIfUnused(qname);
+		}
+		writeTagOpen(qname);   
+		if (isEntry) 
+			outputInstanceType(getEntryType(info.qualifiedTypeName, info.field.getValue()));
+		if (isRoot)
+			addDefaultNameSpace();
 		addAllNameSpaces(info);
-		addFields(info, "@XmlAttribute");
+		addFields(info, true);
 		if (!haveElements(info)) {
 			output(" />");
 			return;
 		}
 		output(">");
-		addFields(info, "@XmlElement");
+		addFields(info, false);
 		if (isRoot)
 			output("\n");
 		writeTagClose(qname);
@@ -279,46 +256,39 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 	private final static QName xsi = new QName("http://www.w3.org/2001/XMLSchema-instance", "xs", "xsi");
 	private final static QName xs = new QName("http://www.w3.org/2001/XMLSchema", "_", "xs");
 
-	private void addAllNameSpaces(JSJAXBAnnotationType info) throws JAXBException {
-		if (info.propOrder.size() == 0) {
-			for (int i = 0, n = info.annotations.size(); i < n; i++)
-				addNameSpaceIfNeeded(getAnnotation(info, info.annotations.get(i).javaName).qualifiedName);
-		} else {
-			for (int i = 0, n = info.propOrder.size(); i < n; i++)
-				addNameSpaceIfNeeded(getAnnotation(info, info.propOrder.get(i)).qualifiedName);
-			for (int i = 0, n = info.annotations.size(); i < n; i++) {
-				JSJAXBAnnotation a = getAnnotation(info, info.annotations.get(i).javaName + "@XmlAttribute");
-				if (a != null)
-					addNameSpaceIfNeeded(a.qualifiedName);
-			}
-		}
+	private void addAllNameSpaces(JSJAXBClass info) throws JAXBException {
+			for (int i = 0, n = info.fields.size(); i < n; i++)
+				addNameSpaceIfNeeded(info.fields.get(i).qualifiedName);
 		addNameSpaceIfNeeded(xsi);
 		addNameSpaceIfNeeded(xs);
 	}
 
-	private void addFields(JSJAXBAnnotationType info, String key) throws JAXBException {
+	private void addFields(JSJAXBClass info, boolean isAttribute) throws JAXBException {
 		// no ordering for attributes -- they must be designated explicitly
-		JSJAXBAnnotation a;
-		if (info.propOrder.size() == 0 || key.equals("@XmlAttribute")) {
-			for (int i = 0, n = info.annotations.size(); i < n; i++)
-				if ((a = info.annotations.get(i)).tagName.equals(key))
+		JSJAXBField a;
+		if (info.propOrder.size() == 0 || isAttribute) {
+			for (int i = 0, n = info.fields.size(); i < n; i++)
+				if (isAttribute == (a = info.fields.get(i)).isAttribute)
 					addField(a);
 		} else {
-			for (int i = 0, n = info.propOrder.size(); i < n; i++)
-				addField(getAnnotation(info, info.propOrder.get(i) + key));
+			for (int i = 0, n = info.propOrder.size(); i < n; i++) {
+				a = getField(info, info.propOrder.get(i));
+				if (!a.isAttribute)
+					addField(a);
+			}
  		}
 	}
 
-	private void addField(JSJAXBAnnotation a) throws JAXBException {
+	private void addField(JSJAXBField a) throws JAXBException {
 		if (a == null)
 			return;
 		Object value = a.getValue();
 		addFieldListable(a, value, false);
 	}
 
-	private void addFieldListable(JSJAXBAnnotation a, Object value, boolean isEntry) throws JAXBException {
+	private void addFieldListable(JSJAXBField a, Object value, boolean isEntry) throws JAXBException {
 		if (value == null) {
-			if (a.isNillable())
+			if (a.isNillable)
 	 			writeField(a, value, isEntry);
 			return;
 		}
@@ -333,18 +303,18 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 		}
 	}
 
-	private void writeField(JSJAXBAnnotation annotation, Object value, boolean isEntry) throws JAXBException {
+	private void writeField(JSJAXBField field, Object value, boolean isEntry) throws JAXBException {
 		if (hasJSData(value)) {
-			doMarshal(value.getClass(), value, annotation);
+			doMarshal(value.getClass(), value, field, isEntry);
 			return;
 		}
-		if (annotation.isAttribute) {
-			writeAttribute(annotation, value);
-		} else if (annotation.isValue) {
-			writeValue(annotation, value);
+		if (field.isAttribute) {
+			writeAttribute(field, value);
+		} else if (field.isValue) {
+			writeValue(field, value);
 		} else {
-			writeTagOpen(annotation.qualifiedName);
-			if (value == null && annotation.isNillable()) {
+			writeTagOpen(field.qualifiedName);
+			if (value == null && field.isNillable) {
 				outputNil();
 				output(" />");
 				return;
@@ -353,8 +323,8 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 				outputInstanceType(getEntryType(null, value));
 			}
 			output(">");
-			writeValue(annotation, value);
-			writeTagClose(annotation.qualifiedName);
+			writeValue(field, value);
+			writeTagClose(field.qualifiedName);
 		}
 	}
 
@@ -392,12 +362,12 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 		default:
 			if (qname != null)
 				return getXMLQname(qname);
-			className = JSJAXBAnnotationType.getXmlNameFromClassName(className);
+			className = JSJAXBClass.getXmlNameFromClassName(className);
 			return className.substring(0, 1).toLowerCase() + className.substring(1);
 		}
 	}
 
-	private void writeAttribute(JSJAXBAnnotation a, Object value) throws JAXBException {
+	private void writeAttribute(JSJAXBField a, Object value) throws JAXBException {
 		// null attributes are not allowed
 		if (value == null)
 			return;
@@ -412,6 +382,11 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 		addNameSpaceIfNeeded(qname);
 	}
 
+	private void addDefaultNameSpace() throws JAXBException {
+		if (defaultNamespace != null)
+			output(" xmlns=\"" + defaultNamespace + "\"");
+			
+	}
 	private void addNameSpaceIfNeeded(QName qname) throws JAXBException {
 		String ns = getXmlnsIfUnused(qname);
 		if (ns != null)
@@ -422,7 +397,7 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 		output("</" + getXMLQname(qname) + ">");
 	}
 
-	private void writeValue(JSJAXBAnnotation a, Object value) throws JAXBException {
+	private void writeValue(JSJAXBField a, Object value) throws JAXBException {
 		if (a.xmlSchema != null) {
 			writeSchema(a, value);
 		} else if (a.typeAdapter != null) {
@@ -434,66 +409,66 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 		}
 	}
 
-	private void writeMimeType(JSJAXBAnnotation annotation, Object value) throws JAXBException {
-		JSUtil.notImplemented(annotation.text);
-		outputSimple(annotation, value);
+	private void writeMimeType(JSJAXBField field, Object value) throws JAXBException {
+		JSUtil.notImplemented(field.text);
+		outputSimple(field, value);
 	}
 
-	private void writeTypeAdapter(JSJAXBAnnotation annotation, Object value) throws JAXBException {
-		String adapterClass = "javax.xml.bind.annotation.adapters." + annotation.typeAdapter;
+	private void writeTypeAdapter(JSJAXBField field, Object value) throws JAXBException {
+		String adapterClass = "javax.xml.bind.annotation.adapters." + field.typeAdapter;
 		XmlAdapter adapter = getAdapter(adapterClass);
 		if (adapter == null) {
-			writeValue(annotation, value);
+			writeValue(field, value);
 		} else {
 			try {
 				output((String) adapter.marshal(value));
 			} catch (Exception e) {
-				System.out.println(e + " trying to marshal " + annotation.text);
-				outputSimple(annotation, value);				
+				System.out.println(e + " trying to marshal " + field.text);
+				outputSimple(field, value);				
 			}
 		}
 			
 		
 	}
 
-	private void writeSchema(JSJAXBAnnotation annotation, Object value) throws JAXBException {
+	private void writeSchema(JSJAXBField field, Object value) throws JAXBException {
 		if (value instanceof JSXMLGregorianCalendarImpl){
-			writeDate(annotation, value);
+			writeDate(field, value);
 		} else {
-			switch (annotation.xmlSchema) {
+			switch (field.xmlSchema) {
 			case "base64Binary":
 				byte[] bytes = (byte[]) value;
 				output(Base64.getBase64(bytes).toString());
 				break;
 			default:
-				System.out.println("schema not supported " + annotation.xmlSchema);
+				System.out.println("schema not supported " + field.xmlSchema);
 				// fall through //
 			case "xsd:ID":
-				outputSimple(annotation, value);
+				outputSimple(field, value);
 				break;
 			}
 		}
 	}
-	private void writeDate(JSJAXBAnnotation annotation, Object value) throws JAXBException {
+	private void writeDate(JSJAXBField field, Object value) throws JAXBException {
 		JSXMLGregorianCalendarImpl cal = ((JSXMLGregorianCalendarImpl) value);
 		QName schema = cal.xmlSchema;
-		if (annotation.xmlSchema != null)
-			cal.setXMLSchemaType(annotation.xmlSchema);
+		if (field.xmlSchema != null)
+			cal.setXMLSchemaType(field.xmlSchema);
 		output(cal.toXMLFormat());
 		cal.xmlSchema = schema;
 	}
 	
 	private static final QName qnEntryValue = new QName("","value","");
 
-	private void writeFieldArray(JSJAXBAnnotation annotation, Object values) throws JAXBException {
+	private void writeFieldArray(JSJAXBField field, Object values) throws JAXBException {
 		Object[] list = (Object[]) values;
-		boolean asList = annotation.asList;
-		boolean isNillable = !asList && annotation.isNillable();
-		QName wrapName = annotation.qualifiedWrapName;
+		boolean asList = field.asList;
+		boolean isNillable = !asList && field.isNillable;
+		QName wrapName = field.qualifiedWrapName;
 		boolean isNull = (values == null);
 		boolean isEmpty = (!isNull && list.length == 0);
 		if (asList)
-			wrapName = annotation.qualifiedName;
+			wrapName = field.qualifiedName;
 		if (wrapName != null) {
  			writeTagOpen(wrapName);
 			output(">");
@@ -507,11 +482,11 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 					continue;
 				if (pt++ > 0)
 					output(" ");
-				outputSimple(annotation, value);
+				outputSimple(field, value);
 			} else {
 				if (value == null && !isNillable)
 					continue;
-				addFieldListable(annotation, value, true);
+				addFieldListable(field, value, true);
 			}
 		}
 		if (wrapName != null) {
@@ -521,14 +496,14 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 		}
 	}
 
-	private void writeFieldList(JSJAXBAnnotation annotation, List<?> list) throws JAXBException {
-		boolean asList = annotation.asList;
-		boolean isNillable = !asList && annotation.isNillable();
-		QName wrapName = annotation.qualifiedWrapName;
+	private void writeFieldList(JSJAXBField field, List<?> list) throws JAXBException {
+		boolean asList = field.asList;
+		boolean isNillable = !asList && field.isNillable;
+		QName wrapName = field.qualifiedWrapName;
 		boolean isNull = (list == null);
 		boolean isEmpty = (!isNull && list.isEmpty());
 		if (asList)
-			wrapName = annotation.qualifiedName;
+			wrapName = field.qualifiedName;
 		if (wrapName != null) {
  			writeTagOpen(wrapName);
 			output(">");
@@ -542,11 +517,11 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 					continue;
 				if (pt++ > 0)
 					output(" ");
-				outputSimple(annotation, value);
+				outputSimple(field, value);
 			} else {
 				if (value == null && !isNillable)
 					continue;
-				addFieldListable(annotation, value, true);
+				addFieldListable(field, value, true);
 			}
 		}
 		if (wrapName != null) {
@@ -556,7 +531,7 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 		}
 	}
 
-	private void writeFieldMap(JSJAXBAnnotation annotation, Map<?, ?> map) throws JAXBException {
+	private void writeFieldMap(JSJAXBField field, Map<?, ?> map) throws JAXBException {
 //	    <hm>
 //        <entry>
 //            <key>null</key>
@@ -566,30 +541,30 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 //            <value>TESTING</value>
 //        </entry>
 //    </hm>
-		boolean isNillable = annotation.isNillable();
-		QName wrapName = annotation.qualifiedWrapName;
+		boolean isNillable = field.isNillable;
+		QName wrapName = field.qualifiedWrapName;
 		if (wrapName == null)
-			wrapName = annotation.qualifiedName;
+			wrapName = field.qualifiedName;
 		boolean isNull = (map == null);
 		boolean isEmpty = (!isNull && map.isEmpty());
 		writeTagOpen(wrapName);
 		output(">\n");
-		QName qn = annotation.qualifiedName;
-		annotation.qualifiedName = qnEntryValue;
+		QName qn = field.qualifiedName;
+		field.qualifiedName = qnEntryValue;
 		for (Entry<?, ?> e : map.entrySet()) {
 			String key = (String) e.getKey();
 			output("<entry>\n");
 			output("<key>" + key + "</key>");
 			Object value = e.getValue();
 			if (value != null || isNillable) {
-				annotation.entryValue = value;
-				addFieldListable(annotation, value, true);				
-				annotation.entryValue = null;
+				field.entryValue = value;
+				addFieldListable(field, value, true);				
+				field.entryValue = null;
 			}
 			output("\n</entry>\n");
 		}
-		annotation.entryValue = null;
-		annotation.qualifiedName = qn;
+		field.entryValue = null;
+		field.qualifiedName = qn;
 		writeTagClose(wrapName);
     }
 
@@ -597,7 +572,7 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 		output("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
 	}
 
-	private void outputSimple(JSJAXBAnnotation a, Object value) throws JAXBException {
+	private void outputSimple(JSJAXBField a, Object value) throws JAXBException {
 		if (value == null)
 			return;
 		String sval = null;

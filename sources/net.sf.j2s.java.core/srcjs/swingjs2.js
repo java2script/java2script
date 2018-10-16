@@ -16826,7 +16826,7 @@ java.lang.System = System = {
 	v = "org.apache.xerces.jaxp.datatype";
 	break;
       case "javax.xml.bind.JAXBContextFactory":
-	v = "swingjs.JSJAXBContextFactory";
+	v = "swingjs.xml.JSJAXBContextFactory";
 	break;
       }
       if (v)

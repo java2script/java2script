@@ -1,4 +1,4 @@
-package swingjs;
+package swingjs.xml;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -12,6 +12,7 @@ import java.util.Map;
 import javajs.util.AU;
 import javajs.util.PT;
 import javajs.util.Rdr;
+import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 
 import org.xml.sax.ContentHandler;
@@ -114,7 +115,7 @@ public class JSSAXParser implements Parser, XMLReader {
 		}
 	}
 
-	private DOMNode parseXML(String data) {
+	public DOMNode parseXML(String data) {
 		return JSUtil.jQuery.parseXML(removeProcessing(data));
 	}
 
@@ -170,6 +171,7 @@ public class JSSAXParser implements Parser, XMLReader {
 		if (docHandler == null && contentHandler == null)
 			contentHandler = new JSSAXContentHandler();
 		ver2 = (contentHandler != null);
+		setNode(doc);
 		if (ver2)
 			contentHandler.startDocument();
 		else
@@ -202,6 +204,10 @@ public class JSSAXParser implements Parser, XMLReader {
 
 	private char[] tempChars = new char[1024];
 
+	public void walkDOMTree(DOMNode node) throws SAXException {
+		walkDOMTree(node, false);
+	}
+
 	private void walkDOMTree(DOMNode node, boolean skipTag) throws SAXException {
 		String localName = ((String) DOMNode.getAttr(node, "localName"));
 		String qName = (String) DOMNode.getAttr(node, "nodeName");
@@ -217,6 +223,7 @@ public class JSSAXParser implements Parser, XMLReader {
 						ch = tempChars = (char[]) AU.ensureLength(ch, len * 2);
 					for (int i = len; --i >= 0;)
 						ch[i] = data.charAt(i);
+					setNode(node);
 					if (ver2)
 						contentHandler.characters(ch, 0, len);
 					else
@@ -234,11 +241,13 @@ public class JSSAXParser implements Parser, XMLReader {
 			}
 		} else if (!skipTag) {
 			JSSAXAttributes atts = new JSSAXAttributes(node);
+			setNode(node);
 			if (ver2)
 				contentHandler.startElement(uri, localName, qName, atts);
 			else
 				docHandler.startElement(localName, atts);
 		}
+		DOMNode thisNode = node;
 		node = (DOMNode) DOMNode.getAttr(node, "firstChild");
 		while (node != null) {
 			walkDOMTree(node, false);
@@ -246,10 +255,20 @@ public class JSSAXParser implements Parser, XMLReader {
 		}
 		if (localName == null || skipTag)
 			return;
+		setNode(thisNode);
 		if (ver2)
 			contentHandler.endElement(uri, localName, qName);
 		else
 			docHandler.endElement(localName);
+	}
+
+	DOMNode currentNode;
+	private void setNode(DOMNode node) {
+		this.currentNode = node;
+	}
+	
+	public DOMNode getNode() {
+		return currentNode;
 	}
 
 	@Override

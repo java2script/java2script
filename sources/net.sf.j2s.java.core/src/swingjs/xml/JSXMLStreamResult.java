@@ -1,4 +1,4 @@
-package swingjs;
+package swingjs.xml;
 
 import java.io.File;
 import java.io.OutputStream;
