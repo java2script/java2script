@@ -14,10 +14,23 @@ import javajs.util.PT;
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 
+/**
+ * A simplified class that acts as a repository for critical JAXB XML 
+ * and Java information, both for the marshaller and unmarshaller. 
+ * 
+ * @author hansonr
+ *
+ */
 class JSJAXBField {
 
 	private Object javaObject;
-	Object entryValue;
+
+	// Marshaller only
+	
+	Object entryValue; 
+	
+	// Unmarshaller only
+	
 	DOMNode boundNode;
 	List<Object> boundListNodes;
 	String xmlCharacterData; 
@@ -25,6 +38,11 @@ class JSJAXBField {
 	Attributes xmlAttributes;
 	String xmlType;
 	
+	/**
+	 * prior to re-use in unmarshalling
+	 * 
+	 * @param javaObject
+	 */
 	public void clear(Object javaObject) {
 		this.javaObject = javaObject;
 		this.entryValue = null;
@@ -58,12 +76,14 @@ class JSJAXBField {
 		}
 		boundNode = node;
 	}
+
+	// marshaller and unmarshaller
 	
 	int index;
 
 	String text;
 	String javaName;
-	String methodName;	
+	String methodNameGet;	
 	String javaClassName;
 
 	boolean isAttribute;
@@ -83,6 +103,8 @@ class JSJAXBField {
 	String typeAdapter;
 	String mimeType;
 
+	private String methodNameSet;
+
 	private static final Map<String, String> namespacePrefixes = new Hashtable<String, String>();
 	private static int prefixIndex = 1;
 
@@ -93,15 +115,25 @@ class JSJAXBField {
 		return prefix;
 	}
 
-	JSJAXBField(JSJAXBClass t, Object[][] adata, Object javaObject, int index, List<String> propOrder) {
+	/**
+	 * @param jclass
+	 * @param adata
+	 * @param javaObject
+	 * @param index
+	 * @param propOrder
+	 */
+	JSJAXBField(JSJAXBClass jaxbClass, Object[][] adata, Object javaObject, int index, List<String> propOrder) {
 		this.javaObject = javaObject;
 		this.index = index;
 		javaName = (String) adata[0][0];
 		javaClassName = (String) adata[0][1];
 		isByteArray = javaClassName.equals("byte[]");
-		isArray = !isByteArray && javaClassName.indexOf("[]") >= 0;			
-		String[] javaAnnotations = (String[]) adata[1];
+		isArray = !isByteArray && javaClassName.indexOf("[]") >= 0;
 		attr = new Hashtable<String, String>();
+		readAnnotations(jaxbClass, (String[]) adata[1], propOrder);
+	}
+
+	private void readAnnotations(JSJAXBClass jclass, String[] javaAnnotations, List<String> propOrder) {
 		text = "";
 		for (int i = 0; i < javaAnnotations.length; i++) {
 			String data = javaAnnotations[i];
@@ -112,25 +144,46 @@ class JSJAXBField {
 			if (pt >= 0 && data.indexOf("=") >= 0)
 				addXMLAttributes(tag, data, attr);
 			if (javaName != null && javaName.startsWith("M:")) {
-				methodName = javaName.substring(2);
+				methodNameGet = javaName.substring(2);
 				// annotation can be on set... or get... or is...
-				if (methodName.startsWith("set")) {
-					methodName = "get" + methodName.substring(3);
+				// qualifications getXxxx$() and setXxxx$mytype_escaped(xxx)
+				if (methodNameGet.startsWith("set")) {
+					methodNameSet = methodNameGet;
+					methodNameGet = "get" + methodNameGet.substring(3) + "$";
+					methodNameGet = methodNameGet.split("$")[0] + "$";
+					boolean haveGet = false;
+					/**
+					 * @j2sNative haveGet = !!javaObject[methodName];
+					 */
+					if (!haveGet)
+						methodNameGet = "is" + methodNameGet.substring(3);
+				} else {
+					methodNameSet = "set" + methodNameGet.substring(methodNameGet.startsWith("is") ? 2 : 3);
+					/**
+					 * Looking here for a match to the first $
+					 * 
+					 * @j2sNative
+					 * 
+					 * 			for (var a in javaObject){if (a.startsWith(this.methodNameSet)) {
+					 *            this.methodNameSet = a;break; } }
+					 */
 				}
-				javaName = getJavaNameFromMethodName(methodName);
+				javaName = getJavaNameFromMethodName(methodNameGet);
 			}
-			processTagName(t, tag, data, propOrder);
-
+			processTagName(jclass, tag, data, propOrder);
 		}
-		if (javaName != null) {   
+		// ensure that we have a qualified name if appropriate
+		if (javaName != null) {
 			setDefaults();
 			if (qualifiedName.getLocalPart().length() == 0)
-			qualifiedName = new QName(qualifiedName.getNamespaceURI(), 
-					JSJAXBClass.getXmlNameFromClassName(javaName), 
-					qualifiedName.getPrefix());
+				qualifiedName = new QName(qualifiedName.getNamespaceURI(),
+						JSJAXBClass.getXmlNameFromClassName(javaName), qualifiedName.getPrefix());
 		}
 	}
 
+	/**
+	 * Set a few defaults. The xmlSchema "hexBinary" does not work.
+	 */
 	private void setDefaults() {
 		if (xmlSchema == null && typeAdapter == null) {
 			if (javaClassName.equals("byte[]"))
@@ -201,16 +254,16 @@ class JSJAXBField {
 				xmlSchema = null;
 				typeAdapter = "HexBinaryAdapter";
 			}
-// e.g. 
-//			   @XmlSchemaType(name="date")
-//			   public XMLGregorianCalendar cal;
-//			
-//			   @XmlSchemaType(name="hexBinary") <-- does not work with JAXB
-			// https://jinahya.wordpress.com/2012/11/08/printing-binary-as-hexbinary-not-base64binary-with-jaxb/
-//			   public byte[] hexBytes;
-//			 
-//			   @XmlSchemaType(name="base64Binary")
-//			   public byte[] base64Bytes;
+				// e.g. 
+				//			   @XmlSchemaType(name="date")
+				//			   public XMLGregorianCalendar cal;
+				//			
+				//			   @XmlSchemaType(name="hexBinary") <-- does not work with JAXB
+							// https://jinahya.wordpress.com/2012/11/08/printing-binary-as-hexbinary-not-base64binary-with-jaxb/
+				//			   public byte[] hexBytes;
+				//			 
+				//			   @XmlSchemaType(name="base64Binary")
+				//			   public byte[] base64Bytes;
 			break;
 		case "@XmlJavaTypeAdapter":  
 			// typically CollapsedStringAdapter.class
@@ -240,6 +293,13 @@ class JSJAXBField {
 		}
 	}
 
+	/**
+	 * Prepend @Xml......: to the tag name to avoid internal collision when
+	 * combining all annotations into one.
+	 * 
+	 * @param tag
+	 * @return
+	 */
 	private QName getName(String tag) {
 		String name, namespace;
 		name = attr.get(tag + ":name");
@@ -247,6 +307,12 @@ class JSJAXBField {
 		return new QName(namespace, name == null ? "" : name, namespace == null ? "" : getPrefixFor(namespace));
 	}
 
+	/**
+	 * There are rules here...
+	 * 
+	 * @param methodName
+	 * @return
+	 */
 	private String getJavaNameFromMethodName(String methodName) {
 		String javaName = methodName.substring(methodName.startsWith("is") ? 2 : 3);
 		String lcaseName = javaName.substring(0, 1).toLowerCase() + javaName.substring(1);
@@ -262,11 +328,24 @@ class JSJAXBField {
 		return name;
 	}
 
+	/**
+	 * read the JavaScript type of this object -- array, etc. 
+	 * @param javaName
+	 * @return
+	 */
 	private String getJSType(String javaName) {
 		return (/** @j2sNative ( typeof this.javaObject[javaName]) || */
 		null);
 	}
 
+	/**
+	 * Use the built-in jQuery XML parser here (as well as in JSSAXParser)
+	 * to do the simple conversion of annotation expressions.
+	 * 
+	 * @param tag
+	 * @param data
+	 * @param attr
+	 */
 	private void addXMLAttributes(String tag, String data, Map<String, String> attr) {
 		data = "<__ " + removeCommas(data) + " />";
 		// System.out.println(data);
@@ -277,7 +356,7 @@ class JSJAXBField {
 			attr.put(tag + ":" + names[i], node.getAttribute(names[i]));
 	}
 
-	private String removeCommas(String s) {
+	private static String removeCommas(String s) {
 		boolean escaped = false;
 		for (int i = 0; i < s.length(); i++) {
 			switch (s.charAt(i)) {
@@ -300,22 +379,6 @@ class JSJAXBField {
 		}
 		s = s.replace("=true", "=\"true\"").replace("=false", "=\"false\"");
 		return s;
-	}
-
-	@SuppressWarnings("unused")
-	public Object getValue() {
-		if (entryValue != null)
-			return entryValue;
-		String javaName = this.javaName;
-		Object obj = this.javaObject;
-		boolean isMethod = (this.methodName != null);
-		/**
-		 * @j2sNative
-		 *
-		 * 			obj = (isMethod ? obj[this.methodName]() : obj[javaName])
-		 * 
-		 */
-		return obj;
 	}
 
 	public String toString() {
@@ -356,6 +419,39 @@ class JSJAXBField {
 	public Class<?> getJavaClassForUnmarshaling() throws ClassNotFoundException {
 		return Class.forName(javaClassName);
 	}
+	
+	/**
+	 * Retrieve the Java value using the method or directly 
+	 * 
+	 * @return
+	 */
+	@SuppressWarnings("unused")
+	public Object getValue() {
+		if (entryValue != null)
+			return entryValue;
+		String n = this.javaName;
+		Object o = javaObject;
+		String m = methodNameGet;
+		/**
+		 * @j2sNative
+		 *
+		 * 			o = (m ? o[m]apply(o, []) : o[n]);
+		 * 
+		 */
+		return o;
+	}
+
+	public Object getObject() {
+		Object o = javaObject;
+		String x = javaName;
+		String m = methodNameGet;
+		/**
+		 * return (m ? o[m].apply(o, []) : o[x];
+		 */
+		return null;
+	}
+
+	
 	/**
 	 * NOTE: This will not work for private set methods
 	 * 
@@ -363,44 +459,33 @@ class JSJAXBField {
 	 */
 	@SuppressWarnings("unused")
 	public void setValue(Object value) {
-		String m = this.methodName;
-		String j = this.javaName;
-		Object o = this.javaObject;
+		String m = methodNameSet;
+		String j = javaName;
+		Object o = javaObject;
 			/**
 			 * @j2sNative
 			 * 
-			 * if (m)
+			 * if(m)
 			 *   o[m].apply(o, [value]);
 			 *     else 
 			 *   o[j] = value;
 			 */
 	}
 
+	/**
+	 * Get the (default) adapter. TODO: generalize this. A bit of a hack
+	 * 
+	 * @return
+	 */
 	public XmlAdapter getAdapter() {
 		if (typeAdapter == null)
 			return null;
-		String adapterClass = "javax.xml.bind.annotation.adapters." + typeAdapter;
+		String adapterClass = (typeAdapter.indexOf(".xml.") < 0 ? 
+				"javax.xml.bind.annotation.adapters." : "") 
+				+ typeAdapter;
 		return JSJAXBClass.getAdapter(adapterClass);
 	}
 
-	public Object getXMLValue() {
-		if (xmlAttributeData != null)
-			return xmlAttributeData;
-		
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public Object getObject() {
-		Object o = javaObject;
-		String x = javaName;
-		/**
-		 * return o[x];
-		 */
-		return null;
-	}
-
-	
 	/*
 	 * notes
 	 * 
