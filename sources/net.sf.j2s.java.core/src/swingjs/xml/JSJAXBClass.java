@@ -6,7 +6,11 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.namespace.QName;
+
+import swingjs.api.Interface;
+import swingjs.api.js.DOMNode;
 
 class JSJAXBClass {
 
@@ -31,8 +35,21 @@ class JSJAXBClass {
 	public JSJAXBField field;
     QName qualifiedTypeName;
 
+	JSJAXBField valueField;
+
 	@SuppressWarnings("unused")
 	public JSJAXBClass(Class<?> javaClass, Object javaObject) {
+		checkC$__ANN__(this, javaClass, javaObject);
+	}
+
+	/**
+	 * 
+	 * @param jsjaxbClass null to just check
+	 * @param javaClass
+	 * @param javaObject
+	 * @return
+	 */
+	private static boolean checkC$__ANN__(JSJAXBClass jsjaxbClass, Class<?> javaClass, Object javaObject) {
 		boolean isTop = true;
 		while (javaClass != null) {
 
@@ -54,12 +71,16 @@ class JSJAXBClass {
 				className = null;
 			}
 			isTop = false;
-			if (jsdata != null)
-				addTypeData(jsdata, className, javaObject);
+			if (jsdata != null) {
+				if (jsjaxbClass == null)
+					return true;
+				jsjaxbClass.addTypeData(jsdata, className, javaObject);
+			}
 			javaClass = javaClass.getSuperclass();
 		}
-
+		return false;
 	}
+
 
 	public JSJAXBClass addTypeData(Object[][][] jsdata, String className, Object javaObject) {
 		for (int i = 0; i < jsdata.length; i++) {
@@ -105,6 +126,23 @@ class JSJAXBClass {
 	}
 
 	Map<String, JSJAXBField> bindingMap = new Hashtable<String, JSJAXBField>();
+	//	private static boolean hasNull(Object[] list) {
+	//		for (int i = list.length; --i >= 0;)
+	//			if (list[i] == null)
+	//				return true;
+	//		return false;
+	//	}
+	//
+	//	private static boolean hasNull(List<?> list) {
+	//		for (int i = list.size(); --i >= 0;)
+	//			if (list.get(i) == null)
+	//				return true;
+	//		return false;
+	//	}
+	//
+	
+	static Map<String, XmlAdapter> adapterMap = new HashMap<String, XmlAdapter>();
+	
 	public void prepareForUnmarshalling() {
 		for (int i = 0; i < fields.size(); i++) {
 			JSJAXBField a = fields.get(i);
@@ -116,12 +154,60 @@ class JSJAXBClass {
 				name += ":" + q.getLocalPart();
 			bindingMap.put(name, a);
 		}
-		// TODO Auto-generated method stub
-		
 	}
 
-	public JSJAXBField getFieldFromQName(String qName) {
+	JSJAXBField getFieldFromQName(String qName) {
 		return bindingMap.get(qName);
 	}
+
+	boolean hasElements() {
+		for (int i = 0, n = fields.size(); i < n; i++)
+			if (!fields.get(i).isAttribute)
+				return true;
+		return false;
+	}
+
+	final static Map<String, Boolean> classMap = new Hashtable<String,Boolean>();
+
+	static boolean isSimple(String javaClassName) {
+		Boolean isSimple = true;
+		try {
+			if (classMap.containsKey(javaClassName))
+				return classMap.get(javaClassName).booleanValue();
+			isSimple = !(checkC$__ANN__(null, Class.forName(javaClassName), null));
+		} catch (ClassNotFoundException e) {
+		}
+		classMap.put(javaClassName, Boolean.valueOf(isSimple));
+		return isSimple;
+	}
+
+	public static Map<String, JSJAXBClass> knownClasses = new Hashtable<>();
+	
+	public static JSJAXBClass newInstance(Class<?> javaClass, Object javaObject) {
+		String name = javaClass.getCanonicalName();
+		JSJAXBClass jjc = knownClasses.get(name);
+		if (jjc == null) {
+			jjc = new JSJAXBClass(javaClass, javaObject);
+			knownClasses.put(name, jjc);
+			return jjc;
+		}
+		jjc.clear(javaObject);
+		return jjc;
+	}
+
+	private void clear(Object javaObject) {
+		for (int i = fields.size(); --i >= 0;) {
+			fields.get(i).clear(javaObject);
+		}
+	}
+
+	static XmlAdapter getAdapter(String adapterClass) {
+		XmlAdapter adapter = adapterMap.get(adapterClass);
+		if (adapter == null && !adapterMap.containsKey(adapterClass)) {
+			adapterMap.put(adapterClass, adapter = (XmlAdapter) Interface.getInstance(adapterClass, false));
+		}
+		return adapter;
+	}
+	
 
 }

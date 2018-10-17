@@ -2500,7 +2500,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 */
 	class TrailingBuffer {
 
-		private StringBuffer buf;
+		StringBuffer buf;
 		private String added = "";
 
 		boolean hasAssert;
@@ -4308,7 +4308,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				+ (andIncrement ? ++lambdaCount : lambdaCount);
 	}
 
-	private static String stripJavaLang(String name) {
+	static String stripJavaLang(String name) {
 		// shorten java.lang.XXX.YYY but not java.lang.xxx.YYY
 		return (!name.startsWith("java.lang.") || name.equals("java.lang.Object")
 				|| name.length() > 10 && !Character.isUpperCase(name.charAt(10)) ? name : name.substring(10));
@@ -5065,7 +5065,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @param qName
 	 * @return
 	 */
-	private static String removeBracketsAndFixNullPackageName(String qName) {
+	static String removeBracketsAndFixNullPackageName(String qName) {
 		if (qName == null)
 			return null;
 		qName = NameMapper.fixPackageName(qName);
@@ -6138,63 +6138,61 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		public static void addClassAnnotations(List<ClassAnnotation> class_annotations, TrailingBuffer trailingBuffer) {
 			if (class_annotations == null)
 				return;
-			int pt = 0;
+			int pt = 0, ptBuf = 0;
 			ASTNode lastNode = null;
+			List<?> fragments = null;
 			for (int i = 0; i < class_annotations.size(); i++) {
 				ClassAnnotation a = class_annotations.get(i);
 				String str = a.annotation.toString();
 				if (str.startsWith("@SuppressWarnings"))
 					continue;
-//				if (str.indexOf(".class") >= 0) {
-//					System.out.println(str + " >>" + a.annotation.getClass().getName());
-//					if (a.annotation instanceof SingleMemberAnnotation) {
-//						SingleMemberAnnotation ann = (SingleMemberAnnotation) a.annotation;
-//						Expression e = ann.getValue();
-//						System.out.println(e + " >>" + e.getClass().getName());
-//						str += e.getClass().getName();
-//						if (e instanceof TypeLiteral)
-//							str += "==" + ((TypeLiteral) e).getType().resolveBinding().getClass().getName();
-//					} else if (a.annotation instanceof NormalAnnotation) {
-//						NormalAnnotation an = (NormalAnnotation) a.annotation;
-//						str += "====" + an.resolveAnnotationBinding().getAllMemberValuePairs()[0].getValue();
-//					}
-//				}
-				String nodeType = a.qName;
-				String varName = null;
-				String className = null, binaryName = null;
-				if (a.node instanceof FieldDeclaration) {
-					FieldDeclaration field = (FieldDeclaration) a.node;
-					List<?> fragments = field.fragments();
-					VariableDeclarationFragment identifier = (VariableDeclarationFragment) fragments.get(0);
-					IVariableBinding var = identifier.resolveBinding();
-					className = getJavaClassNameQualified(var.getType());
-					binaryName = var.getType().getBinaryName();
-					nodeType = (var.getType().isArray() ? "[array]" : field.getType().toString());
-					var.getType().getQualifiedName();
-					varName = var.getName();
-				} else if (a.node instanceof MethodDeclaration) {
-					MethodDeclaration method = (MethodDeclaration) a.node;
-					IMethodBinding var = method.resolveBinding();
-					ITypeBinding type = var.getReturnType();
-					className = getJavaClassNameQualified(type);
-					binaryName = type.getBinaryName();
-					nodeType = (type.isArray() ? "[array]" : type.getName());
-					varName = "M:" + var.getName();
-				}
 				if (a.node == lastNode) {
 					trailingBuffer.append(",");
 				} else {
 					lastNode = a.node;
+					String varName = null;
+					ITypeBinding type = null;
+					// time to pick up the fragments
+					addTrailingFragments(fragments, trailingBuffer, ptBuf);
+					fragments = null;
+					if (a.node instanceof FieldDeclaration) {
+						FieldDeclaration field = (FieldDeclaration) a.node;
+						fragments = field.fragments();
+						VariableDeclarationFragment identifier = (VariableDeclarationFragment) fragments.get(0);
+						IVariableBinding var = identifier.resolveBinding();
+						varName = var.getName();
+						type = var.getType();
+					} else if (a.node instanceof MethodDeclaration) {
+						MethodDeclaration method = (MethodDeclaration) a.node;
+						IMethodBinding var = method.resolveBinding();
+						varName = "M:" + var.getName();
+						type = var.getReturnType();
+					}
+					String className = (type == null ? null
+							: stripJavaLang(NameMapper.checkClassReplacement(
+									removeBracketsAndFixNullPackageName(getJavaClassNameQualified(type)))));
 					trailingBuffer.append(pt++ == 0 ? "C$.__ANN__ = [[[" : "]],\n  [[");
-					trailingBuffer.append((varName == null ? null : "'" + varName + "'")
-							+ ",'" + nodeType + "'"
-							+ ",'" + className + "'"
-							+ ",'" + binaryName + "'],[");
-				}					
+					trailingBuffer.append((varName == null ? null : "'" + varName + "'"));
+					ptBuf = trailingBuffer.buf.length();
+					trailingBuffer.append(",'" + className + "'],[");
+				}
 				trailingBuffer.append("'" + str + "'");
 			}
+			addTrailingFragments(fragments, trailingBuffer, ptBuf);
 			if (pt > 0)
 				trailingBuffer.append("]]];\n");
+		}
+
+		private static void addTrailingFragments(List<?> fragments, TrailingBuffer trailingBuffer, int ptBuf) {
+			if (fragments == null || fragments.size() == 0)
+				return;
+			String line = trailingBuffer.buf.substring(ptBuf);
+			for (int f = 1; f < fragments.size(); f++) {
+				VariableDeclarationFragment identifier = (VariableDeclarationFragment) fragments.get(f);
+				IVariableBinding var = identifier.resolveBinding();
+				trailingBuffer.append("]],\n  [['" + var.getName() + "'");
+				trailingBuffer.append(line);
+			}
 		}
 		
 	}

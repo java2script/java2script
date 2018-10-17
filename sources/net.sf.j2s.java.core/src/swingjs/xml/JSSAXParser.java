@@ -70,15 +70,19 @@ public class JSSAXParser implements Parser, XMLReader {
 
 	public void parse(InputSource source, DefaultHandler handler) throws SAXException, IOException {
 		setContentHandler(handler);
-		parseSource(source);
+		parseSource(source, false);
 	}
 
 	@Override
 	public void parse(InputSource source) throws SAXException, IOException {
-		parseSource(source);
+		parseSource(source, false);
 	}
 
-	private void parseSource(InputSource source) throws IOException, SAXException {
+	public void parse(InputSource source, boolean topOnly) throws  SAXException, IOException  {
+		parseSource(source, topOnly);
+	}
+
+	private void parseSource(InputSource source, boolean topOnly) throws IOException, SAXException {
 		Reader rdr = source.getCharacterStream();
 		String[] data = new String[1];
 		if (rdr == null) {
@@ -92,7 +96,7 @@ public class JSSAXParser implements Parser, XMLReader {
 			Rdr.readAllAsString((BufferedReader) rdr, -1, false, data, 0);
 		}
 		try {
-			parseDocument(parseXML(data[0]));
+			parseDocument(parseXML(data[0]), topOnly);
 		} catch (Exception e) {
 			error(e);
 		}
@@ -101,7 +105,7 @@ public class JSSAXParser implements Parser, XMLReader {
 	@Override
 	public void parse(String fileName) throws SAXException, IOException {
 		try {
-			parseDocument(parseXML(JSUtil.getFileAsString(fileName)));
+			parseDocument(parseXML(JSUtil.getFileAsString(fileName)), false);
 		} catch (Exception e) {
 			error(e);
 		}
@@ -109,7 +113,7 @@ public class JSSAXParser implements Parser, XMLReader {
 
 	public void parseXMLString(String data) throws SAXException, IOException {	
 		try {
-			parseDocument(parseXML(data));
+			parseDocument(parseXML(data), false);
 		} catch (Exception e) {
 			error(e);
 		}
@@ -157,6 +161,8 @@ public class JSSAXParser implements Parser, XMLReader {
 	}
 
   private boolean ver2;
+
+  private DOMNode root;
   
   
 	private static final int ELEMENT_TYPE = 1;
@@ -167,10 +173,11 @@ public class JSSAXParser implements Parser, XMLReader {
    * @param doc
    * @throws SAXException
    */
-	private void parseDocument(DOMNode doc) throws SAXException {
+	private void parseDocument(DOMNode doc, boolean topOnly) throws SAXException {
 		if (docHandler == null && contentHandler == null)
 			contentHandler = new JSSAXContentHandler();
 		ver2 = (contentHandler != null);
+		root = null;
 		setNode(doc);
 		if (ver2)
 			contentHandler.startDocument();
@@ -195,7 +202,7 @@ public class JSSAXParser implements Parser, XMLReader {
 		 */
 		
 		
-		walkDOMTree(element, havePre);
+		walkDOMTreePrivate(element, havePre, topOnly);
 		if (ver2)
 			contentHandler.endDocument();
 		else
@@ -204,11 +211,24 @@ public class JSSAXParser implements Parser, XMLReader {
 
 	private char[] tempChars = new char[1024];
 
-	public void walkDOMTree(DOMNode node) throws SAXException {
-		walkDOMTree(node, false);
+	/**
+	 * SwingJS: Allow for a top-level only parsing
+	 * 
+	 * @param node
+	 * @param topOnly
+	 * @throws SAXException
+	 */
+	public void walkDOMTree(DOMNode node, boolean topOnly) throws SAXException {
+		root = null;
+		walkDOMTreePrivate(node, false, topOnly);
 	}
 
-	private void walkDOMTree(DOMNode node, boolean skipTag) throws SAXException {
+	public static boolean isTextOrCdata(DOMNode node) {
+		Object qName = DOMNode.getAttr(node, "nodeName");
+		return "#text".equals(qName) || "#cdata-section".equals(qName);
+	}
+	
+	private void walkDOMTreePrivate(DOMNode node, boolean skipTag, boolean topOnly) throws SAXException {
 		String localName = ((String) DOMNode.getAttr(node, "localName"));
 		String qName = (String) DOMNode.getAttr(node, "nodeName");
 		String uri = (String) DOMNode.getAttr(node, "namespaceURI");
@@ -247,10 +267,13 @@ public class JSSAXParser implements Parser, XMLReader {
 			else
 				docHandler.startElement(localName, atts);
 		}
+		if (root == null)
+			root = node;
 		DOMNode thisNode = node;
 		node = (DOMNode) DOMNode.getAttr(node, "firstChild");
 		while (node != null) {
-			walkDOMTree(node, false);
+			if (!topOnly || thisNode == root || isTextOrCdata(node))
+				walkDOMTreePrivate(node, false, topOnly);
 			node = (DOMNode) DOMNode.getAttr(node, "nextSibling");
 		}
 		if (localName == null || skipTag)

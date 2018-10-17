@@ -3,7 +3,6 @@ package swingjs.xml;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +19,6 @@ import javax.xml.transform.stream.StreamResult;
 
 import javajs.util.Base64;
 import swingjs.JSUtil;
-import swingjs.api.Interface;
 import swingjs.api.js.DOMNode;
 
 /**
@@ -33,22 +31,6 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 
 	// TODO: Transpiler needs to accurately indicate which fields and methods to use.
 	//       As it is, we rely on @XmlAttribute and propOrder or explicit @XmlElement
-	
-	// general findings:
-	//
-	//                 PROPERTY         FIELD           PUBLIC_MEMBER    NONE
-	//
-	// field default   @XmlTransient    @XmlTransient   @XmlTransient    @XmlTransient
-	//                                                   if not public
-	//                                                  @XmlElement
-	//                                                   otherwise
-	//
-	// method default @XmlTransient     @XmlTransient    same as above;  @XmlTransient
-	//                 unless there                      if both field
-	//                 are matching                      and method are
-	//                 get/is and set                    public, ONE must
-    //                                                   be explicitly
-	//                                                   @XmlElement
 	
 	private Writer writer;
 	private OutputStream outputStream;
@@ -66,9 +48,6 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 		if (jaxbElement instanceof JAXBElement) {
 			jaxbElement = (JAXBElement<?>) jaxbElement;
 			javaObject = this.jaxbElement.getValue();
-
-			// here we get default name and namespace information
-
 		} else {
 			javaObject = jaxbElement;
 		}
@@ -155,45 +134,7 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 		}
 	}
 
-//	private static boolean hasNull(Object[] list) {
-//		for (int i = list.length; --i >= 0;)
-//			if (list[i] == null)
-//				return true;
-//		return false;
-//	}
-//
-//	private static boolean hasNull(List<?> list) {
-//		for (int i = list.size(); --i >= 0;)
-//			if (list.get(i) == null)
-//				return true;
-//		return false;
-//	}
-//
-	private static Map<String, XmlAdapter> adapterMap = new HashMap<String, XmlAdapter>();	
-	
-	private static XmlAdapter getAdapter(String adapterClass) {
-		XmlAdapter adapter = adapterMap.get(adapterClass);
-		if (adapter == null && !adapterMap.containsKey(adapterClass)) {
-			adapterMap.put(adapterClass, adapter = (XmlAdapter) Interface.getInstance(adapterClass, false));
-		}
-		return adapter;
-	}
-
-	private static boolean hasJSData(Object value) {
-		if (value == null)
-			return false;
-		Class<?> cl = value.getClass();
-		return (/** @j2sNative (cl.$clazz$ ? !!cl.$clazz$.__ANN__ : 0) || */false);
-	}
-
-	private static boolean haveElements(JSJAXBClass info) {
-		for (int i = 0, n = info.fields.size(); i < n; i++)
-			if (!info.fields.get(i).isAttribute)
-				return true;
-		return false;
-	}
-
-	private static JSJAXBField getField(JSJAXBClass info, String javaName) {
+private static JSJAXBField getField(JSJAXBClass info, String javaName) {
 		return info.getFieldFromJavaName(javaName);
 	}
 
@@ -242,7 +183,7 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 			addDefaultNameSpace();
 		addAllNameSpaces(info);
 		addFields(info, true);
-		if (!haveElements(info)) {
+		if (!info.hasElements()) {
 			output(" />");
 			return;
 		}
@@ -304,7 +245,7 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 	}
 
 	private void writeField(JSJAXBField field, Object value, boolean isEntry) throws JAXBException {
-		if (hasJSData(value)) {
+		if (JSJAXBField.hasJSData(value)) {
 			doMarshal(value.getClass(), value, field, isEntry);
 			return;
 		}
@@ -415,8 +356,7 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 	}
 
 	private void writeTypeAdapter(JSJAXBField field, Object value) throws JAXBException {
-		String adapterClass = "javax.xml.bind.annotation.adapters." + field.typeAdapter;
-		XmlAdapter adapter = getAdapter(adapterClass);
+		XmlAdapter adapter = field.getAdapter();
 		if (adapter == null) {
 			writeValue(field, value);
 		} else {
@@ -608,4 +548,22 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 		}
 	}
 
+	// general findings:
+	//
+	//                 PROPERTY         FIELD           PUBLIC_MEMBER    NONE
+	//
+	// field default   @XmlTransient    @XmlElement     @XmlTransient    @XmlTransient
+	//                                                   if not public
+	//                                                  @XmlElement
+	//                                                   otherwise
+	//
+	// method default @XmlTransient     @XmlTransient    same as above;  @XmlTransient
+	//                 unless there                      if both field
+	//                 are matching                      and method are
+	//                 get/is and set                    public, ONE must
+    //                                                   be explicitly
+	//                                                   @XmlElement
+	
+
+	
 }

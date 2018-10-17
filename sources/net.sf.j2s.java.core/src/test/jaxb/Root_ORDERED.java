@@ -26,11 +26,11 @@ import javax.xml.datatype.XMLGregorianCalendar;
 @XmlRootElement(name="RootOrdered",namespace="www.jalview.org")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(propOrder = {
+	    "creationDate",
 	    "c",
 	    "b",
 	    "a",
 	    "id",
-	    "creationDate",
 	    "cx",
 	    "slist",
 	    "bytes64",
@@ -38,18 +38,23 @@ import javax.xml.datatype.XMLGregorianCalendar;
 	    "ilist",
 	    "Ilist",
 	    "hm",
-	    "list"
+	    "list",
+	    "bi"
 	})
 public class Root_ORDERED {
 	
+	
+	@XmlElement
+	BigInteger bi = new BigInteger("1234567890123456789012345");
 	
 	@XmlAccessorType(XmlAccessType.FIELD)
 	@XmlType(namespace="st.Olaf")
 	private static class SomewhatComplex {
 
+	
 		@XmlValue
 		String ca = "c\"<>b& \u212B";
-				
+	
 		@XmlAttribute(namespace="www.jalview.org2")
 		String cb = "c\"<>b& \u212B";
 
@@ -72,7 +77,7 @@ public class Root_ORDERED {
 		list.add(Integer.valueOf(3));
 		list.add(Long.valueOf(4));
 		list.add(Float.valueOf(6.6f));
-		list.add(Double.valueOf(8.8));
+		list.add(Double.valueOf(8.9));
 		list.add(new BigInteger("12345678910111213141516"));
 		// fails in JAXB-Java: list.add(new int[] {3, 5, 7, 9});
 	}
@@ -107,6 +112,7 @@ public class Root_ORDERED {
 	@XmlAttribute(name="nil")
 	private String nil = null;
 	
+	@XmlElement
 	private String a = "a", b = "b", c = "c";
 	
 	@XmlAttribute

@@ -5,6 +5,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.namespace.QName;
 
 import org.xml.sax.Attributes;
@@ -16,9 +17,7 @@ import swingjs.api.js.DOMNode;
 class JSJAXBField {
 
 	private Object javaObject;
-
-	int index;
-
+	Object entryValue;
 	DOMNode boundNode;
 	List<Object> boundListNodes;
 	String xmlCharacterData; 
@@ -26,6 +25,17 @@ class JSJAXBField {
 	Attributes xmlAttributes;
 	String xmlType;
 	
+	public void clear(Object javaObject) {
+		this.javaObject = javaObject;
+		this.entryValue = null;
+		this.boundNode = null;
+		this.boundListNodes = null;
+		this.xmlCharacterData = null;
+		this.xmlAttributeData = null;
+		this.xmlAttributes = null;
+		this.xmlType = null;
+	}
+
 	public void setCharacters(String ch) {
 		xmlCharacterData = ch;
 	}
@@ -49,14 +59,12 @@ class JSJAXBField {
 		boundNode = node;
 	}
 	
-	String text;
+	int index;
 
+	String text;
 	String javaName;
-	String methodName;
-	
-	String javaType;       // [array]
-	String javaClassName;  // byte[]
-	String javaBinaryName; // [B
+	String methodName;	
+	String javaClassName;
 
 	boolean isAttribute;
 	boolean isID;
@@ -74,7 +82,6 @@ class JSJAXBField {
 	String xmlSchema;
 	String typeAdapter;
 	String mimeType;
-	Object entryValue;
 
 	private static final Map<String, String> namespacePrefixes = new Hashtable<String, String>();
 	private static int prefixIndex = 1;
@@ -90,12 +97,9 @@ class JSJAXBField {
 		this.javaObject = javaObject;
 		this.index = index;
 		javaName = (String) adata[0][0];
-		javaType = (String) adata[0][1];
-		javaClassName = (String) adata[0][2];
-		javaBinaryName = (String) adata[0][3];
+		javaClassName = (String) adata[0][1];
 		isByteArray = javaClassName.equals("byte[]");
-		isArray = javaType.equals("[array]") && !isByteArray;
-			
+		isArray = !isByteArray && javaClassName.indexOf("[]") >= 0;			
 		String[] javaAnnotations = (String[]) adata[1];
 		attr = new Hashtable<String, String>();
 		text = "";
@@ -131,10 +135,11 @@ class JSJAXBField {
 		if (xmlSchema == null && typeAdapter == null) {
 			if (javaClassName.equals("byte[]"))
 				xmlSchema = "base64Binary";
-			if (javaType.equals("XMLGregorianCalendar"))
+			if (javaClassName.equals("javax.xml.datatype.XMLGregorianCalendar"))
 				xmlSchema = "dateTime";
 		}
 	}
+
 
 	/**
 	 * Process the tag name for critical information, possibly updating the main
@@ -153,7 +158,7 @@ class JSJAXBField {
 			break;
 		case "@XmlType":
 			t.qualifiedTypeName = getName(tag);
-			String order = attr.get("propOrder");
+			String order = attr.get("@XmlType:propOrder");
 			if (order != null) {
 				int[] pt = new int[1];
 				while (pt[0] >= 0) {
@@ -187,6 +192,7 @@ class JSJAXBField {
 			isNillable = "true".equals(attr.get("@XmlElement:nillable"));
 			break;
 		case "@XmlValue":
+			t.valueField = this;
 			isValue = true;
 			break;
 		case "@XmlSchemaType":
@@ -316,6 +322,85 @@ class JSJAXBField {
 		return "{" + javaName + "}" + index;
 	}
 
+	
+	static boolean hasJSData(Object value) {
+		if (value == null)
+			return false;
+		Class<?> cl = value.getClass();
+		return (/** @j2sNative (cl.$clazz$ ? !!cl.$clazz$.__ANN__ : 0) || */false);
+	}
+
+	// unmarshalling
+	
+	boolean isNil() {
+	  return (xmlAttributes != null && xmlAttributes.getIndex("xsi:nil") >= 0);	
+	}
+	
+	boolean mustUnmarshal() {
+		if (isAttribute || asList 
+				|| isByteArray
+				|| isArray 
+				|| qualifiedWrapName != null
+				|| isNil() 
+				|| simplePackages()
+				|| JSJAXBClass.isSimple(javaClassName))
+			return false;
+		return true;
+	}
+	
+	private boolean simplePackages() {
+		return (javaClassName.indexOf(".") < 0 || javaClassName.startsWith("java.")
+				|| javaClassName.startsWith("javax.") || javaClassName.startsWith("javajs."));
+	}
+
+	public Class<?> getJavaClassForUnmarshaling() throws ClassNotFoundException {
+		return Class.forName(javaClassName);
+	}
+	/**
+	 * NOTE: This will not work for private set methods
+	 * 
+	 * @param value
+	 */
+	@SuppressWarnings("unused")
+	public void setValue(Object value) {
+		String m = this.methodName;
+		String j = this.javaName;
+		Object o = this.javaObject;
+			/**
+			 * @j2sNative
+			 * 
+			 * if (m)
+			 *   o[m].apply(o, [value]);
+			 *     else 
+			 *   o[j] = value;
+			 */
+	}
+
+	public XmlAdapter getAdapter() {
+		if (typeAdapter == null)
+			return null;
+		String adapterClass = "javax.xml.bind.annotation.adapters." + typeAdapter;
+		return JSJAXBClass.getAdapter(adapterClass);
+	}
+
+	public Object getXMLValue() {
+		if (xmlAttributeData != null)
+			return xmlAttributeData;
+		
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Object getObject() {
+		Object o = javaObject;
+		String x = javaName;
+		/**
+		 * return o[x];
+		 */
+		return null;
+	}
+
+	
 	/*
 	 * notes
 	 * 
@@ -337,5 +422,37 @@ class JSJAXBField {
 	 * XmlElementWrapper, XmlJavaTypeAdapter.
 	 * 
 	 */
+	
+	
+//  https://docs.oracle.com/cd/E13222_01/wls/docs103/webserv/data_types.html
+	
+//	XML Schema Data Type
+	
+//	anySimpleType 		java.lang.Object (for xsd:element of this type)
+//	anySimpleType 		java.lang.String (for xsd:attribute of this type)
+//	base64Binary		byte[]
+//	boolean				boolean
+//	byte				byte
+//	date				javax.xml.datatype.XMLGregorianCalendar
+//	dateTime			javax.xml.datatype.XMLGregorianCalendar
+//	decimal				java.math.BigDecimal
+//	double				double
+//	duration			javax.xml.datatype.Duration
+//	float				float
+//	g					java.xml.datatype.XMLGregorianCalendar
+//	hexBinary			byte[]
+//	int					int
+//	integer				java.math.BigInteger
+//	long				long
+//	NOTATION			javax.xml.namespace.QName
+//	Qname				javax.xml.namespace.QName
+//	short				short
+//	string				java.lang.String
+//	time				java.xml.datatype.XMLGregorianCalendar
+//	unsignedByte		short
+//	unsignedInt			long	
+//	unsignedShort		int 
 }
+
+
 
