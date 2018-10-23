@@ -1709,9 +1709,9 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		 */
 		{
 		}
-	  _pix = toIntARGB(data);
+		DataBufferInt buffer = (DataBufferInt) raster.getDataBuffer();
+	    toIntARGB(data, _pix = buffer.data);
 		_imgNode = canvas;
-		((DataBufferInt) raster.getDataBuffer()).data = _pix;
 		_havePix = true;
 	}
 
@@ -1724,7 +1724,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @return array of ARGB values
 	 * 
 	 */
-  int[] toIntARGB(int[] imgData) {
+  void toIntARGB(int[] imgData, int[] iData) {
     /*
      * red=imgData.data[0];
      * green=imgData.data[1];
@@ -1732,10 +1732,11 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
      * alpha=imgData.data[3];
      */
     int n = imgData.length / 4;
-    int[] iData = new int[n];
-    for (int i = 0, j = 0; i < n; j++)
-      iData[i++] = (imgData[j++] << 16) | (imgData[j++] << 8) | imgData[j++] | 0xFF000000;
-    return iData;
+    int a;
+    for (int i = 0, j = 0; i < n;) {
+		  int argb = (imgData[j++] << 16) | (imgData[j++] << 8) | imgData[j++] | 0xFF000000;
+	      iData[i++] =  (imgData[j++] == 0 ? 0 : argb);   	
+    }
   }
 
   /**
