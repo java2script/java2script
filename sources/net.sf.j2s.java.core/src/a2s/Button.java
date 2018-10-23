@@ -1,5 +1,6 @@
 package a2s;
 
+import java.awt.A2SEvent;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 

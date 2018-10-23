@@ -1,7 +1,7 @@
 package a2s;
 
-interface A2SContainer {
+public interface A2SContainer {
 
-   A2SListener getA2SListener();
+   public A2SListener getA2SListener();
 
 }
