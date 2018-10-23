@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -63,24 +64,24 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 	 * 
 	 * @param javaClass    the class being marshalled
 	 * @param javaObject   the object being marshalled
-	 * @param a   the field for this class; null for the root
-	 * @param isEntry TODO
+	 * @param field   the field for this class; null for the root
+	 * @param addXsiType TODO
 	 * @throws JAXBException
 	 */
-	private void doMarshal(Class<?> javaClass, Object javaObject, JSJAXBField a, boolean isEntry) throws JAXBException {
+	private void doMarshal(Class<?> javaClass, Object javaObject, JSJAXBField field, boolean addXsiType) throws JAXBException {
 		// at least for now we rely on fields that are designated.
 
-		JSJAXBClass info = new JSJAXBClass(javaClass, javaObject);
-		info.field = a;
+		JSJAXBClass jaxbClass = new JSJAXBClass(javaClass, javaObject);
+		jaxbClass.field = field;
 		
 		Map<String, Integer> oldMap = null;
-		if (a == null) {
+		if (field == null) {
 			clearQualifierMap();
 		} else { 
 			oldMap = newQualifierMap(null);
 		}
 		
-		writeXML(info, a == null, isEntry);
+		writeXML(jaxbClass, field == null, addXsiType);
 		
 		newQualifierMap(oldMap);
 	}
@@ -105,24 +106,25 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 		defaultNamespace = null;
 	}
 	
-	private static String getXmlnsIfUnused(QName qname) {
+	private static String getXmlnsIfUnusedYet(QName qname, boolean isRoot) {
 		// TODO Q: Does this have to be hierarchical - first time within this group?
 		String xmlns = qname.getNamespaceURI();
 		if (xmlns.length() == 0)
 			return null;
-		if (!mapQualifierLevel.containsKey(xmlns)) {
-			if (mapQualifierLevel.isEmpty())
-				defaultNamespace = xmlns;
+		if (mapQualifierLevel.isEmpty())
+			defaultNamespace = xmlns;
+		if (!isRoot && !mapQualifierLevel.containsKey(xmlns)) {
 			mapQualifierLevel.put(xmlns, Integer.valueOf(1));
 			return xmlns;
 		}
 		return null;
 	}
 	
-	private static String getXMLQname(QName qname) {
+	private static String getXMLQname(QName qname, boolean allowDefault) {
 		String l = qname.getLocalPart();
 		String ns = qname.getNamespaceURI();
-		return (ns == null || ns.length() == 0 || ns.equals(defaultNamespace) ? l : qname.getPrefix() + ":" + l);
+		return (ns == null || ns.length() == 0 
+				|| allowDefault && ns.equals(defaultNamespace) ? l : qname.getPrefix() + ":" + l);
 	}
 
 	private static boolean isArray(Object value) {
@@ -134,8 +136,8 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 		}
 	}
 
-private static JSJAXBField getField(JSJAXBClass info, String javaName) {
-		return info.getFieldFromJavaName(javaName);
+private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
+		return jaxbClass.getFieldFromJavaName(javaName);
 	}
 
 	private static DOMNode textarea;
@@ -169,103 +171,107 @@ private static JSJAXBField getField(JSJAXBClass info, String javaName) {
 	
 	/////////// output methods //////////////
 	
-	private void writeXML(JSJAXBClass info, boolean isRoot, boolean isEntry) throws JAXBException {
-		QName qname = (info.field == null ? info.qname : info.field.qualifiedName);
+	private void writeXML(JSJAXBClass jaxbClass, boolean isRoot, boolean addXsiType) throws JAXBException {
+		QName qname = (jaxbClass.field == null ? jaxbClass.qname : jaxbClass.field.qualifiedName);
 		if (isRoot) {
 			outputHeader();
-			// sets default 
-			getXmlnsIfUnused(qname);
 		}
-		writeTagOpen(qname);   
-		if (isEntry) 
-			outputInstanceType(getEntryType(info.qualifiedTypeName, info.field.getValue()));
+		getXmlnsIfUnusedYet(qname, isRoot);
+		writeTagOpen(qname, !isRoot);   
+		if (addXsiType) {
+			addNameSpaceIfNeeded(jaxbClass.qualifiedTypeName, isRoot);
+			outputInstanceType(getEntryType(jaxbClass.qualifiedTypeName, jaxbClass.field.getValue()));
+		}
 		if (isRoot)
 			addDefaultNameSpace();
-		addAllNameSpaces(info);
-		addFields(info, true);
-		if (!info.hasElements()) {
+		addAllNameSpaces(jaxbClass);
+		addFields(jaxbClass, true);
+		if (!jaxbClass.hasElements()) {
 			output(" />");
 			return;
 		}
 		output(">");
-		addFields(info, false);
+		addFields(jaxbClass, false);
 		if (isRoot)
 			output("\n");
-		writeTagClose(qname);
+		writeTagClose(qname, !isRoot);
 	}
 	
 	private final static QName xsi = new QName("http://www.w3.org/2001/XMLSchema-instance", "xs", "xsi");
 	private final static QName xs = new QName("http://www.w3.org/2001/XMLSchema", "_", "xs");
 
-	private void addAllNameSpaces(JSJAXBClass info) throws JAXBException {
-			for (int i = 0, n = info.fields.size(); i < n; i++)
-				addNameSpaceIfNeeded(info.fields.get(i).qualifiedName);
-		addNameSpaceIfNeeded(xsi);
-		addNameSpaceIfNeeded(xs);
+	private void addAllNameSpaces(JSJAXBClass jaxbClass) throws JAXBException {
+		addNameSpaceIfNeeded(jaxbClass.qname, true);
+			for (int i = 0, n = jaxbClass.fields.size(); i < n; i++) {
+				JSJAXBField f = jaxbClass.fields.get(i);
+				addNameSpaceIfNeeded(f.qualifiedName, false);
+				if (f.boundListNodes != null)
+					addNameSpaceIfNeeded(f.qualifiedName, false);
+			}
+		addNameSpaceIfNeeded(xsi, false);
+		addNameSpaceIfNeeded(xs, false);
 	}
 
-	private void addFields(JSJAXBClass info, boolean isAttribute) throws JAXBException {
+	private void addFields(JSJAXBClass jaxbClass, boolean isAttribute) throws JAXBException {
 		// no ordering for attributes -- they must be designated explicitly
-		JSJAXBField a;
-		if (info.propOrder.size() == 0 || isAttribute) {
-			for (int i = 0, n = info.fields.size(); i < n; i++)
-				if (isAttribute == (a = info.fields.get(i)).isAttribute)
-					addField(a);
+		JSJAXBField field;
+		if (jaxbClass.propOrder.size() == 0 || isAttribute) {
+			for (int i = 0, n = jaxbClass.fields.size(); i < n; i++)
+				if (isAttribute == (field = jaxbClass.fields.get(i)).isAttribute)
+					addField(field);
 		} else {
-			for (int i = 0, n = info.propOrder.size(); i < n; i++) {
-				a = getField(info, info.propOrder.get(i));
-				if (!a.isAttribute)
-					addField(a);
+			for (int i = 0, n = jaxbClass.propOrder.size(); i < n; i++) {
+				field = getField(jaxbClass, jaxbClass.propOrder.get(i));
+				if (!field.isAttribute)
+					addField(field);
 			}
  		}
 	}
 
-	private void addField(JSJAXBField a) throws JAXBException {
-		if (a == null)
-			return;
-		Object value = a.getValue();
-		addFieldListable(a, value, false);
+	private void addField(JSJAXBField field) throws JAXBException {
+		if (field != null)
+			addFieldListable(field, field.getValue(), field.holdsObjects != JSJAXBField.NO_OBJECT);
 	}
 
-	private void addFieldListable(JSJAXBField a, Object value, boolean isEntry) throws JAXBException {
+	private void addFieldListable(JSJAXBField field, Object value, boolean addXsiType) throws JAXBException {
 		if (value == null) {
-			if (a.isNillable)
-	 			writeField(a, value, isEntry);
+			if (field.isNillable)
+	 			writeField(field, null, addXsiType);
+			return;
+		}
+		if (JSJAXBClass.needsMarshalling(value)) {
+			doMarshal(value.getClass(), value, field, addXsiType);
 			return;
 		}
 		if (value instanceof List) {
-			writeFieldList(a, (List<?>) value);
+			writeFieldList(field, (List<?>) value);
 		} else if (value instanceof Map) {
-			writeFieldMap(a, (Map<?, ?>) value);
+			writeFieldMap(field, (Map<?, ?>) value);
 		} else if (isArray(value)) {
-			writeFieldArray(a, value);
+			writeFieldArray(field, value);
 		} else {
-			writeField(a, value, isEntry);
+			writeField(field, value, addXsiType);
 		}
 	}
 
-	private void writeField(JSJAXBField field, Object value, boolean isEntry) throws JAXBException {
-		if (JSJAXBField.hasJSData(value)) {
-			doMarshal(value.getClass(), value, field, isEntry);
-			return;
-		}
+	private void writeField(JSJAXBField field, Object value, boolean addXsiType) throws JAXBException {
 		if (field.isAttribute) {
 			writeAttribute(field, value);
 		} else if (field.isValue) {
 			writeValue(field, value);
 		} else {
-			writeTagOpen(field.qualifiedName);
+			writeTagOpen(field.qualifiedName, true);
 			if (value == null && field.isNillable) {
 				outputNil();
 				output(" />");
 				return;
 			}
-			if (isEntry) {
+			if (addXsiType) {
 				outputInstanceType(getEntryType(null, value));
 			}
 			output(">");
 			writeValue(field, value);
-			writeTagClose(field.qualifiedName);
+			writeTagClose(field.qualifiedName, true);
 		}
 	}
 
@@ -288,10 +294,11 @@ private static JSJAXBField getField(JSJAXBClass info, String javaName) {
 	private String getEntryType(QName qname, Object value) throws JAXBException {
 		String className = value.getClass().getName();
 		switch (className) {
+		case "Integer":
+			return "xs:int";
 		case "Boolean":
 		case "Byte":
 		case "Short":
-		case "Integer":
 		case "Long":
 		case "Float":
 		case "Double":
@@ -302,25 +309,25 @@ private static JSJAXBField getField(JSJAXBClass info, String javaName) {
 			return "xs:integer";
 		default:
 			if (qname != null)
-				return getXMLQname(qname);
+				return getXMLQname(qname, true);
 			className = JSJAXBClass.getXmlNameFromClassName(className);
 			return className.substring(0, 1).toLowerCase() + className.substring(1);
 		}
 	}
 
-	private void writeAttribute(JSJAXBField a, Object value) throws JAXBException {
+	private void writeAttribute(JSJAXBField field, Object value) throws JAXBException {
 		// null attributes are not allowed
 		if (value == null)
 			return;
-		addNameSpaceIfNeeded(a.qualifiedName);
-		output(" " + getXMLQname(a.qualifiedName) + "=\"");
-		writeValue(a, value);
+		addNameSpaceIfNeeded(field.qualifiedName, false);
+		output(" " + getXMLQname(field.qualifiedName, true) + "=\"");
+		writeValue(field, value);
 		output("\"");
 	}
 
-	private void writeTagOpen(QName qname) throws JAXBException {
-		output("\n<" + getXMLQname(qname));
-		addNameSpaceIfNeeded(qname);
+	private void writeTagOpen(QName qname, boolean allowDefault) throws JAXBException {
+		output("\n<" + getXMLQname(qname, allowDefault));
+		addNameSpaceIfNeeded(qname, !allowDefault);
 	}
 
 	private void addDefaultNameSpace() throws JAXBException {
@@ -328,25 +335,25 @@ private static JSJAXBField getField(JSJAXBClass info, String javaName) {
 			output(" xmlns=\"" + defaultNamespace + "\"");
 			
 	}
-	private void addNameSpaceIfNeeded(QName qname) throws JAXBException {
-		String ns = getXmlnsIfUnused(qname);
+	private void addNameSpaceIfNeeded(QName qname, boolean isRoot) throws JAXBException {
+		String ns = getXmlnsIfUnusedYet(qname, isRoot);
 		if (ns != null)
 			output(" xmlns:" + qname.getPrefix() + "=\"" + ns + "\"");
 	}
 
-	private void writeTagClose(QName qname) throws JAXBException {
-		output("</" + getXMLQname(qname) + ">");
+	private void writeTagClose(QName qname, boolean allowDefault) throws JAXBException {
+		output("</" + getXMLQname(qname, allowDefault) + ">");
 	}
 
-	private void writeValue(JSJAXBField a, Object value) throws JAXBException {
-		if (a.xmlSchema != null) {
-			writeSchema(a, value);
-		} else if (a.typeAdapter != null) {
-			writeTypeAdapter(a, value);
-		} else if (a.mimeType != null) {
-			writeMimeType(a, value);
+	private void writeValue(JSJAXBField field, Object value) throws JAXBException {
+		if (field.xmlSchema != null) {
+			writeSchema(field, value);
+		} else if (field.typeAdapter != null) {
+			writeTypeAdapter(field, value);
+		} else if (field.mimeType != null) {
+			writeMimeType(field, value);
 		} else {
-			outputSimple(a, value);
+			outputSimple(field, value);
 		}
 	}
 
@@ -376,9 +383,11 @@ private static JSJAXBField getField(JSJAXBClass info, String javaName) {
 			writeDate(field, value);
 		} else {
 			switch (field.xmlSchema) {
+			case "hexBinary":
+				output(DatatypeConverter.printHexBinary((byte[]) value));
+			break;
 			case "base64Binary":
-				byte[] bytes = (byte[]) value;
-				output(Base64.getBase64(bytes).toString());
+				output(DatatypeConverter.printBase64Binary((byte[]) value));
 				break;
 			default:
 				System.out.println("schema not supported " + field.xmlSchema);
@@ -398,6 +407,8 @@ private static JSJAXBField getField(JSJAXBClass info, String javaName) {
 		cal.xmlSchema = schema;
 	}
 	
+	private static final QName qnEntryKey = new QName("","key","");
+
 	private static final QName qnEntryValue = new QName("","value","");
 
 	private void writeFieldArray(JSJAXBField field, Object values) throws JAXBException {
@@ -410,7 +421,7 @@ private static JSJAXBField getField(JSJAXBClass info, String javaName) {
 		if (asList)
 			wrapName = field.qualifiedName;
 		if (wrapName != null) {
- 			writeTagOpen(wrapName);
+ 			writeTagOpen(wrapName, true);
 			output(">");
 		} else 	if (isEmpty && !isNillable) {
 			return;
@@ -426,13 +437,13 @@ private static JSJAXBField getField(JSJAXBClass info, String javaName) {
 			} else {
 				if (value == null && !isNillable)
 					continue;
-				addFieldListable(field, value, true);
+				addFieldListable(field, value, field.javaClassName.equals("Object[]"));
 			}
 		}
 		if (wrapName != null) {
 			if (!asList)
 				output("\n");
-			writeTagClose(wrapName);
+			writeTagClose(wrapName, true);
 		}
 	}
 
@@ -445,7 +456,7 @@ private static JSJAXBField getField(JSJAXBClass info, String javaName) {
 		if (asList)
 			wrapName = field.qualifiedName;
 		if (wrapName != null) {
- 			writeTagOpen(wrapName);
+ 			writeTagOpen(wrapName, true);
 			output(">");
 		} else 	if (isEmpty && !isNillable) {
 			return;
@@ -461,13 +472,13 @@ private static JSJAXBField getField(JSJAXBClass info, String javaName) {
 			} else {
 				if (value == null && !isNillable)
 					continue;
-				addFieldListable(field, value, true);
+				addFieldListable(field, value, field.holdsObjects != JSJAXBField.NO_OBJECT);
 			}
 		}
 		if (wrapName != null) {
 			if (!asList)
 				output("\n");
-			writeTagClose(wrapName);
+			writeTagClose(wrapName, true);
 		}
 	}
 
@@ -487,39 +498,41 @@ private static JSJAXBField getField(JSJAXBClass info, String javaName) {
 			wrapName = field.qualifiedName;
 		boolean isNull = (map == null);
 		boolean isEmpty = (!isNull && map.isEmpty());
-		writeTagOpen(wrapName);
+		writeTagOpen(wrapName, true);
 		output(">\n");
 		QName qn = field.qualifiedName;
-		field.qualifiedName = qnEntryValue;
 		for (Entry<?, ?> e : map.entrySet()) {
-			String key = (String) e.getKey();
-			output("<entry>\n");
-			output("<key>" + key + "</key>");
+			Object key = e.getKey();
 			Object value = e.getValue();
+			output("<entry>");
+			field.qualifiedName = qnEntryKey;
+			field.entryValue = key;
+			addFieldListable(field, key, ((field.holdsObjects & JSJAXBField.MAP_KEY_OBJECT) != 0));			
 			if (value != null || isNillable) {
 				field.entryValue = value;
-				addFieldListable(field, value, true);				
-				field.entryValue = null;
+				field.qualifiedName = qnEntryValue;
+				addFieldListable(field, value, ((field.holdsObjects & JSJAXBField.MAP_VALUE_OBJECT) != 0));
 			}
+			field.entryValue = null;
 			output("\n</entry>\n");
 		}
 		field.entryValue = null;
 		field.qualifiedName = qn;
-		writeTagClose(wrapName);
+		writeTagClose(wrapName, true);
     }
 
 	private void outputHeader() throws JAXBException {
 		output("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
 	}
 
-	private void outputSimple(JSJAXBField a, Object value) throws JAXBException {
+	private void outputSimple(JSJAXBField field, Object value) throws JAXBException {
 		if (value == null)
 			return;
 		String sval = null;
 		/**
 		 * @j2sNative sval = (value.toString ? value.toString() : "" + value);
 		 */
-		output(escapeString(sval, a.isAttribute));
+		output(escapeString(sval, field.isAttribute));
 	}
 
 	private void outputNil() throws JAXBException {

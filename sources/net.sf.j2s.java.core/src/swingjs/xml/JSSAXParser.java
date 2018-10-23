@@ -68,21 +68,30 @@ public class JSSAXParser implements Parser, XMLReader {
 		this.errorHandler = handler;
 	}
 
-	public void parse(InputSource source, DefaultHandler handler) throws SAXException, IOException {
-		setContentHandler(handler);
-		parseSource(source, false);
+	@Override
+	public void parse(String fileName) throws SAXException, IOException {
+		parseXMLString(JSUtil.getFileAsString(fileName));
 	}
 
 	@Override
 	public void parse(InputSource source) throws SAXException, IOException {
-		parseSource(source, false);
+		parse(source, false);
+	}
+
+	public void parseXMLString(String data) throws SAXException, IOException {	
+		try {
+			parseDocument(parseXML(data), false);
+		} catch (Exception e) {
+			error(e);
+		}
+	}
+
+	public void parse(InputSource source, DefaultHandler handler) throws SAXException, IOException {
+		setContentHandler(handler);
+		parse(source, false);
 	}
 
 	public void parse(InputSource source, boolean topOnly) throws  SAXException, IOException  {
-		parseSource(source, topOnly);
-	}
-
-	private void parseSource(InputSource source, boolean topOnly) throws IOException, SAXException {
 		Reader rdr = source.getCharacterStream();
 		String[] data = new String[1];
 		if (rdr == null) {
@@ -97,23 +106,6 @@ public class JSSAXParser implements Parser, XMLReader {
 		}
 		try {
 			parseDocument(parseXML(data[0]), topOnly);
-		} catch (Exception e) {
-			error(e);
-		}
-	}
-
-	@Override
-	public void parse(String fileName) throws SAXException, IOException {
-		try {
-			parseDocument(parseXML(JSUtil.getFileAsString(fileName)), false);
-		} catch (Exception e) {
-			error(e);
-		}
-	}
-
-	public void parseXMLString(String data) throws SAXException, IOException {	
-		try {
-			parseDocument(parseXML(data), false);
 		} catch (Exception e) {
 			error(e);
 		}
@@ -162,12 +154,50 @@ public class JSSAXParser implements Parser, XMLReader {
 
   private boolean ver2;
 
-  private DOMNode root;
-  
-  
 	private static final int ELEMENT_TYPE = 1;
 
-  /**
+	private Map<String, String> htPrefixMap = new Hashtable<>();
+	
+	void registerPrefixes(DOMNode node) {
+		String[] names = new String[0];
+		/**
+		 * @j2sNative names = node.getAttributeNames();
+		 */
+		for (int i = names.length; --i >= 0;) {
+			String name = names[i];
+			boolean isDefault;
+			if (!(isDefault = name.equals("xmlns")) &&
+					!name.startsWith("xmlns:"))
+				continue;
+			String prefix = (isDefault ? "##default:" : name.substring(6) + ":");
+			String val = getAttribute(node, name);
+			htPrefixMap.put(prefix, val);
+			htPrefixMap.put(val + ":", val);
+			htPrefixMap.put(val, prefix);
+		}
+	}
+
+	/**
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public String getNamespaceForAttributeName(String name) {
+		int pt = name.indexOf(":");
+		if (pt < 0)
+			return "";
+		String uri = htPrefixMap.get(name.substring(0, pt + 1));
+		if (uri != null)
+			return uri;
+		System.out.println("!! JSSAXParser could not find " + name);
+		return "";
+	}
+	
+	static String getAttribute(DOMNode node, String name) {
+		return (/** @j2sNative node.getAttribute(name) || */ null);
+	}
+
+/**
    * Using JQuery to reading data from an XHTML document
    * 
    * @param doc
@@ -177,7 +207,6 @@ public class JSSAXParser implements Parser, XMLReader {
 		if (docHandler == null && contentHandler == null)
 			contentHandler = new JSSAXContentHandler();
 		ver2 = (contentHandler != null);
-		root = null;
 		setNode(doc);
 		if (ver2)
 			contentHandler.startDocument();
@@ -201,8 +230,7 @@ public class JSSAXParser implements Parser, XMLReader {
 		 * 
 		 */
 		
-		
-		walkDOMTreePrivate(element, havePre, topOnly);
+		walkDOMTreePrivate(null, element, havePre, topOnly);
 		if (ver2)
 			contentHandler.endDocument();
 		else
@@ -219,70 +247,85 @@ public class JSSAXParser implements Parser, XMLReader {
 	 * @throws SAXException
 	 */
 	public void walkDOMTree(DOMNode node, boolean topOnly) throws SAXException {
-		root = null;
-		walkDOMTreePrivate(node, false, topOnly);
+		walkDOMTreePrivate(null, node, false, topOnly);
 	}
 
-	public static boolean isTextOrCdata(DOMNode node) {
-		Object qName = DOMNode.getAttr(node, "nodeName");
-		return "#text".equals(qName) || "#cdata-section".equals(qName);
-	}
-	
-	private void walkDOMTreePrivate(DOMNode node, boolean skipTag, boolean topOnly) throws SAXException {
+	private void walkDOMTreePrivate(DOMNode root, DOMNode node, boolean skipTag, boolean topOnly) throws SAXException {
 		String localName = ((String) DOMNode.getAttr(node, "localName"));
-		String qName = (String) DOMNode.getAttr(node, "nodeName");
+		String nodeName = (String) DOMNode.getAttr(node, "nodeName");
 		String uri = (String) DOMNode.getAttr(node, "namespaceURI");
 		if (localName == null) {
-			boolean isText = "#text".equals(qName);
-			if (isText || "#cdata-section".equals(qName)) {
-				String data = (String) DOMNode.getAttr(node, "textContent");
-				if (isText || uniqueSeq == null || !data.startsWith(uniqueSeq)) {
-					int len = data.length();
-					char[] ch = tempChars;
-					if (len > ch.length)
-						ch = tempChars = (char[]) AU.ensureLength(ch, len * 2);
-					for (int i = len; --i >= 0;)
-						ch[i] = data.charAt(i);
-					setNode(node);
-					if (ver2)
-						contentHandler.characters(ch, 0, len);
-					else
-						docHandler.characters(ch, 0, len);
-					return;
-				}
-				data = data.substring(uniqueSeq.length());
-				String target = data + " ";
-				target = target.substring(0, target.indexOf(" "));
-				data = data.substring(target.length()).trim();
-				if (ver2)
-					contentHandler.processingInstruction(target, data);
-				else
-					docHandler.processingInstruction(target, data);
-			}
+			if (topOnly)
+				return;
+			getTextData(node, true);
 		} else if (!skipTag) {
+			registerPrefixes(node);
+			//System.out.println("JSSAXParser: uri::" + uri + " localName::" + localName + " qName::" + nodeName);
 			JSSAXAttributes atts = new JSSAXAttributes(node);
 			setNode(node);
 			if (ver2)
-				contentHandler.startElement(uri, localName, qName, atts);
+				contentHandler.startElement(uri, localName, nodeName, atts);
 			else
 				docHandler.startElement(localName, atts);
 		}
 		if (root == null)
 			root = node;
-		DOMNode thisNode = node;
+		boolean isRoot = (node == root);
 		node = (DOMNode) DOMNode.getAttr(node, "firstChild");
 		while (node != null) {
-			if (!topOnly || thisNode == root || isTextOrCdata(node))
-				walkDOMTreePrivate(node, false, topOnly);
+			if (isRoot || !topOnly)
+				walkDOMTreePrivate(root, node, false, topOnly);
 			node = (DOMNode) DOMNode.getAttr(node, "nextSibling");
 		}
 		if (localName == null || skipTag)
 			return;
-		setNode(thisNode);
 		if (ver2)
-			contentHandler.endElement(uri, localName, qName);
+			contentHandler.endElement(uri, localName, nodeName);
 		else
 			docHandler.endElement(localName);
+	}
+
+	public static DOMNode[] getChildren(DOMNode node) {
+		return (DOMNode[]) DOMNode.getAttr(node, "children");
+	}
+	
+	public static String getSimpleInnerText(DOMNode node) {
+		DOMNode[] children = getChildren(node);
+		return (children == null || children.length > 0 ? "" 
+				: (String) DOMNode.getAttr(node, "textContent"));
+	}
+	
+	private String getTextData(DOMNode node, boolean doProcess) throws SAXException {
+		String nodeName = (String) DOMNode.getAttr(node, "nodeName");
+		boolean isText = "#text".equals(nodeName);
+		if (isText || "#cdata-section".equals(nodeName)) {
+			String data = (String) DOMNode.getAttr(node, "textContent");
+			if (!doProcess)
+				return data;
+			if (isText || uniqueSeq == null || !data.startsWith(uniqueSeq)) {
+				int len = data.length();
+				char[] ch = tempChars;
+				if (len > ch.length)
+					ch = tempChars = (char[]) AU.ensureLength(ch, len * 2);
+				for (int i = len; --i >= 0;)
+					ch[i] = data.charAt(i);
+				setNode(node);
+				if (ver2)
+					contentHandler.characters(ch, 0, len);
+				else
+					docHandler.characters(ch, 0, len);
+				return null;
+			}
+			data = data.substring(uniqueSeq.length());
+			String target = data + " ";
+			target = target.substring(0, target.indexOf(" "));
+			data = data.substring(target.length()).trim();
+			if (ver2)
+				contentHandler.processingInstruction(target, data);
+			else
+				docHandler.processingInstruction(target, data);
+		}
+		return null;
 	}
 
 	DOMNode currentNode;

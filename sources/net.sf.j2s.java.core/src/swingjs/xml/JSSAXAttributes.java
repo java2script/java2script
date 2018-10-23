@@ -33,6 +33,18 @@ class JSSAXAttributes implements Attributes2, AttributeList {
 
 	JSSAXAttributes(DOMNode node) {
 		nodes = (DOMNode[]) DOMNode.getAttr(node, "attributes");
+	//	debugDump();
+	}
+
+	private void debugDump() {
+		for (int i = 0; i < nodes.length; i++) {
+			System.out.println("JSSAXAttribute " + i 
+					+ ": uri::" + getURI(i) 
+					+ " localName::" + getLocalName(i) 
+					+ " qName::" + getQName(i)
+					+ " value::" + getValue(i)
+			);
+		}
 	}
 
 	@Override

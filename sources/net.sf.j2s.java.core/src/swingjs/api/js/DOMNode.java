@@ -79,6 +79,10 @@ public abstract class DOMNode {
 		return 	(/**  @j2sNative node && node[attr] ||*/ null);
 	}
 
+	public static int getAttrInt(DOMNode node, String attr) {
+		return 	(/**  @j2sNative node && node[attr] ||*/ 0);
+	}
+
 	public static String getStyle(DOMNode node, String style) {
 		return 	(/**  @j2sNative node && node.style[style] ||*/ null);
 	}

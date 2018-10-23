@@ -2,28 +2,17 @@ package test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.GregorianCalendar;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlElementDecl;
 import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import javax.xml.namespace.QName;
 
 import test.jaxb.Root_ORDERED;
 
@@ -40,6 +29,8 @@ public class Test_JAXB_ORDERED extends Test_ {
 		try {
 			jc = JAXBContext.newInstance(Root_ORDERED.class);			
 	        Root_ORDERED root = new Root_ORDERED();
+	        root.f5[0] = 1.25f;
+	        root.f5[1] = new test.jaxb.Obj();
 	        root.setCreationDate(now());
 	        Marshaller marshaller = jc.createMarshaller();
 	        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
@@ -51,8 +42,12 @@ public class Test_JAXB_ORDERED extends Test_ {
 		        System.out.println(s);
 		        Unmarshaller unmarshaller = jc.createUnmarshaller();
 		        ByteArrayInputStream is = new ByteArrayInputStream(s.getBytes("UTF-8"));
-				Root_ORDERED r = (Root_ORDERED) unmarshaller.unmarshal(is);
+				
+		        Root_ORDERED r = (Root_ORDERED) unmarshaller.unmarshal(is);
+				
 				System.out.println(r.getCreationDate());
+				System.out.println(r.f5[0]);
+				System.out.println(((test.jaxb.Obj) r.f5[1]).obj1);
  			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}

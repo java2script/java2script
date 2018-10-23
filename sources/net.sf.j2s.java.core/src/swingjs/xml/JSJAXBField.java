@@ -33,7 +33,7 @@ class JSJAXBField {
 	
 	DOMNode boundNode;
 	List<Object> boundListNodes;
-	String xmlCharacterData; 
+	String xmlCharacterData = ""; 
 	String xmlAttributeData;
 	Attributes xmlAttributes;
 	String xmlType;
@@ -43,7 +43,7 @@ class JSJAXBField {
 	 * 
 	 * @param javaObject
 	 */
-	public void clear(Object javaObject) {
+	void clear(Object javaObject) {
 		this.javaObject = javaObject;
 		this.entryValue = null;
 		this.boundNode = null;
@@ -54,21 +54,21 @@ class JSJAXBField {
 		this.xmlType = null;
 	}
 
-	public void setCharacters(String ch) {
+	void setCharacters(String ch) {
 		xmlCharacterData = ch;
 	}
 
-	public void setAttributeData(String val) {
+	void setAttributeData(String val) {
 		xmlAttributeData = val;
 	}
 
-	public void setAttributes(Attributes attr) {
+	void setAttributes(Attributes attr) {
 		xmlAttributes = attr;
 		xmlType = attr.getValue("xsi:type");
 	}
 	
-	public void setNode(DOMNode node) {
-		if (isArray) {
+	void setNode(DOMNode node) {
+		if (isContainer) {
 			if (boundListNodes == null) {
 				boundListNodes = new ArrayList<Object>();
 			}
@@ -94,8 +94,9 @@ class JSJAXBField {
 	boolean isNillable;
 	boolean isArray;
 	boolean isByteArray;
+	boolean isContainer;
 
-	QName qualifiedName = new QName("","","");
+	QName qualifiedName = new QName("","##default","");
 	QName qualifiedWrapName;
 	Map<String, String> attr;
 
@@ -105,6 +106,27 @@ class JSJAXBField {
 
 	private String methodNameSet;
 
+    String[] maplistClassNames;
+
+	QName qualifiedTypeName;
+
+	final static int SEE_ALSO = -1;
+	final static int SIMPLE = 0;
+	final static int LIST = 1;
+	final static int MAP = 2;
+
+	final static int NO_OBJECT = 0;
+	final static int SIMPLE_OBJECT = 1;
+	final static int ARRAY_OBJECT = 2;
+	final static int LIST_OBJECT = 3;
+	final static int MAP_KEY_OBJECT = 4;
+	final static int MAP_VALUE_OBJECT = 8;
+	final static int MAP_KEY_VALUE_OBJECT = 12;
+	
+	int fieldType = SIMPLE;
+
+	int holdsObjects = NO_OBJECT;
+
 	private static final Map<String, String> namespacePrefixes = new Hashtable<String, String>();
 	private static int prefixIndex = 1;
 
@@ -112,6 +134,7 @@ class JSJAXBField {
 		String prefix = namespacePrefixes.get(namespace);
 		if (prefix == null)
 			namespacePrefixes.put(namespace, prefix = "ns" + (++prefixIndex));
+//		System.out.println("getPrefix " + namespace + "  " + prefix);
 		return prefix;
 	}
 
@@ -127,13 +150,47 @@ class JSJAXBField {
 		this.index = index;
 		javaName = (String) adata[0][0];
 		javaClassName = (String) adata[0][1];
+		holdsObjects = (isObject(javaClassName) ? SIMPLE_OBJECT : NO_OBJECT);
+		int pt = javaClassName.indexOf("<");
+		if (pt >= 0) {
+			isContainer = true;
+			maplistClassNames = javaClassName.substring(pt + 1, javaClassName.lastIndexOf(">")).split(",");
+			fieldType  = maplistClassNames.length;
+			for (int i = 0; i < fieldType; i++)
+				if (maplistClassNames[i].startsWith("java.lang."))
+					maplistClassNames[i] = maplistClassNames[i].substring(10);
+			// Map<String, Object>
+			// List<Object>
+			javaClassName = javaClassName.substring(0, pt);
+			switch (fieldType) {
+			case LIST:
+				if (isObject(maplistClassNames[0]))
+					holdsObjects = LIST_OBJECT;
+				break;
+			case MAP:
+				if (isObject(maplistClassNames[0]))
+					holdsObjects = MAP_KEY_OBJECT;
+				if (isObject(maplistClassNames[1]))
+					holdsObjects += MAP_VALUE_OBJECT;
+				break;
+			}
+		}
 		isByteArray = javaClassName.equals("byte[]");
 		isArray = !isByteArray && javaClassName.indexOf("[]") >= 0;
+		if (isArray && holdsObjects == SIMPLE_OBJECT)
+			holdsObjects = ARRAY_OBJECT;
+		isContainer |= isArray;
 		attr = new Hashtable<String, String>();
 		readAnnotations(jaxbClass, (String[]) adata[1], propOrder);
 	}
 
-	private void readAnnotations(JSJAXBClass jclass, String[] javaAnnotations, List<String> propOrder) {
+	private static boolean isObject(String javaClassName) {
+		return javaClassName.equals("java.lang.Object") 
+				|| javaClassName.equals("Object")
+				|| javaClassName.equals("Object[]");
+	}
+
+	private void readAnnotations(JSJAXBClass jaxbClass, String[] javaAnnotations, List<String> propOrder) {
 		text = "";
 		for (int i = 0; i < javaAnnotations.length; i++) {
 			String data = javaAnnotations[i];
@@ -170,15 +227,27 @@ class JSJAXBField {
 				}
 				javaName = getJavaNameFromMethodName(methodNameGet);
 			}
-			processTagName(jclass, tag, data, propOrder);
+			processTagName(jaxbClass, tag, data, propOrder);
 		}
 		// ensure that we have a qualified name if appropriate
-		if (javaName != null) {
-			setDefaults();
-			if (qualifiedName.getLocalPart().length() == 0)
-				qualifiedName = new QName(qualifiedName.getNamespaceURI(),
-						JSJAXBClass.getXmlNameFromClassName(javaName), qualifiedName.getPrefix());
+		setDefaults();
+		qualifiedName = finalizeName(qualifiedName, false);
+		if (javaName == null) {
+			jaxbClass.qname = qualifiedName;
+			if (qualifiedTypeName == null)
+				qualifiedTypeName = new QName("","##default","");
+			jaxbClass.qualifiedTypeName = finalizeName(qualifiedTypeName, true);
+			jaxbClass.isAnonymous = (qualifiedTypeName.getLocalPart().length() == 0);
 		}
+	}
+
+	private QName finalizeName(QName qName, boolean isTypeName) {
+		//System.out.println("finalizing " + isTypeName + " qName " + qName + " for " + javaName + " " + javaClassName + " " + text);
+		if (qName.getLocalPart().equals("##default"))
+ 			qName = new QName(qName.getNamespaceURI(),
+					JSJAXBClass.getXmlNameFromClassName(javaName == null ? javaClassName : javaName), qName.getPrefix());
+		//System.out.println("finalized as ----" + qName );
+		return qName;
 	}
 
 	/**
@@ -203,14 +272,14 @@ class JSJAXBField {
 	 * @param propOrder
 	 * @param a
 	 */
-	private void processTagName(JSJAXBClass t, String tag, String data, List<String> propOrder) {
+	private void processTagName(JSJAXBClass jaxbClass, String tag, String data, List<String> propOrder) {
 		// note that we are not checking for JAXBExceptions here
 		switch (tag) {
 		case "@XmlRootElement":
-			t.qname = getName(tag);
+			qualifiedName = getName(tag);
 			break;
 		case "@XmlType":
-			t.qualifiedTypeName = getName(tag);
+			qualifiedTypeName = getName(tag);
 			String order = attr.get("@XmlType:propOrder");
 			if (order != null) {
 				int[] pt = new int[1];
@@ -224,17 +293,18 @@ class JSJAXBField {
 			break;
 		case "@XmlAccessorType":
 			if (data.indexOf("FIELD") >= 0)
-				t.accessorType = JSJAXBClass.TYPE_FIELD;
+				jaxbClass.accessorType = JSJAXBClass.TYPE_FIELD;
 			else if (data.indexOf("MEMBER") >= 0)
-				t.accessorType = JSJAXBClass.TYPE_PUBLIC_MEMBER;
+				jaxbClass.accessorType = JSJAXBClass.TYPE_PUBLIC_MEMBER;
 			else if (data.indexOf("PROPERTY") >= 0)
-				t.accessorType = JSJAXBClass.TYPE_PROPERTY;
+				jaxbClass.accessorType = JSJAXBClass.TYPE_PROPERTY;
 			break;
 		case "@XmlSeeAlso":
 			// @XmlSeeAlso({Dog.class,Cat.class})
 			// class Animal {}
 			// class Dog extends Animal {}
 			// class Cat extends Animal {}
+			jaxbClass.setSeeAlso(getSeeAlso(data));
 			break;
 		case "@XmlAttribute":
 			isAttribute = true;
@@ -245,7 +315,7 @@ class JSJAXBField {
 			isNillable = "true".equals(attr.get("@XmlElement:nillable"));
 			break;
 		case "@XmlValue":
-			t.valueField = this;
+			jaxbClass.valueField = this;
 			isValue = true;
 			break;
 		case "@XmlSchemaType":
@@ -256,7 +326,7 @@ class JSJAXBField {
 			}
 				// e.g. 
 				//			   @XmlSchemaType(name="date")
-				//			   public XMLGregorianCalendar cal;
+				//			   XMLGregorianCalendar cal;
 				//			
 				//			   @XmlSchemaType(name="hexBinary") <-- does not work with JAXB
 							// https://jinahya.wordpress.com/2012/11/08/printing-binary-as-hexbinary-not-base64binary-with-jaxb/
@@ -290,7 +360,21 @@ class JSJAXBField {
 		case "@XmlElementWrapper":
 			qualifiedWrapName = getName(tag);
 			break;
+		} 	
+	}
+
+	private String[] getSeeAlso(String data) {
+		// @XmlSeeAlso(test.jaxb2.Obj.class)
+		// @XmlSeeAlso({test.jaxb2.Obj.class,test.jaxb.Obj.class})
+		// --> ["test.jaxb.Obj.class"]
+		if (data.startsWith("{"))
+			data = data.substring(1, data.length() - 1);
+		String[] a = data.split(",");
+		for (int i = a.length; --i >= 0;) {
+			a[i] = a[i].trim();
+			a[i] = a[i].substring(0, a[i].length() - 6);
 		}
+		return a;
 	}
 
 	/**
@@ -303,8 +387,8 @@ class JSJAXBField {
 	private QName getName(String tag) {
 		String name, namespace;
 		name = attr.get(tag + ":name");
-		namespace = attr.get(tag = ":namespace");
-		return new QName(namespace, name == null ? "" : name, namespace == null ? "" : getPrefixFor(namespace));
+		namespace = attr.get(tag + ":namespace");
+		return new QName(namespace, name == null ? "##default" : name, namespace == null ? "" : getPrefixFor(namespace));
 	}
 
 	/**
@@ -386,12 +470,7 @@ class JSJAXBField {
 	}
 
 	
-	static boolean hasJSData(Object value) {
-		if (value == null)
-			return false;
-		Class<?> cl = value.getClass();
-		return (/** @j2sNative (cl.$clazz$ ? !!cl.$clazz$.__ANN__ : 0) || */false);
-	}
+	
 
 	// unmarshalling
 	
@@ -399,16 +478,13 @@ class JSJAXBField {
 	  return (xmlAttributes != null && xmlAttributes.getIndex("xsi:nil") >= 0);	
 	}
 	
-	boolean mustUnmarshal() {
-		if (isAttribute || asList 
+	boolean isSimpleType() {
+		return (isAttribute || asList 
 				|| isByteArray
 				|| isArray 
 				|| qualifiedWrapName != null
 				|| isNil() 
-				|| simplePackages()
-				|| JSJAXBClass.isSimple(javaClassName))
-			return false;
-		return true;
+				|| simplePackages());
 	}
 	
 	private boolean simplePackages() {
@@ -435,7 +511,7 @@ class JSJAXBField {
 		/**
 		 * @j2sNative
 		 *
-		 * 			o = (m ? o[m]apply(o, []) : o[n]);
+		 * 			o = (m ? o[m].apply(o, []) : o[n]);
 		 * 
 		 */
 		return o;
@@ -472,18 +548,10 @@ class JSJAXBField {
 			 */
 	}
 
-	/**
-	 * Get the (default) adapter. TODO: generalize this. A bit of a hack
-	 * 
-	 * @return
-	 */
-	public XmlAdapter getAdapter() {
+	XmlAdapter getAdapter() {
 		if (typeAdapter == null)
 			return null;
-		String adapterClass = (typeAdapter.indexOf(".xml.") < 0 ? 
-				"javax.xml.bind.annotation.adapters." : "") 
-				+ typeAdapter;
-		return JSJAXBClass.getAdapter(adapterClass);
+		return JSJAXBClass.getAdapter(typeAdapter);
 	}
 
 	/*

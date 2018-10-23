@@ -5349,7 +5349,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						}
 					} else if (!qName.equals("Override") 
 							&& !qName.equals("Deprecated")
-							&& !qName.equals("Suppress")
+							&& !qName.startsWith("Suppress")
 							&& !qName.equals("XmlTransient")
 							) {
 						if (class_annotations == null)
@@ -6135,6 +6135,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			this.node = node;
 		}
 
+		@SuppressWarnings("unchecked")
 		public static void addClassAnnotations(List<ClassAnnotation> class_annotations, TrailingBuffer trailingBuffer) {
 			if (class_annotations == null)
 				return;
@@ -6144,8 +6145,33 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			for (int i = 0; i < class_annotations.size(); i++) {
 				ClassAnnotation a = class_annotations.get(i);
 				String str = a.annotation.toString();
-				if (str.startsWith("@SuppressWarnings"))
-					continue;
+				if (a.annotation instanceof SingleMemberAnnotation) {
+					// resolve classes 
+					List<ASTNode> expressions = null;
+					Expression e = ((SingleMemberAnnotation) a.annotation).getValue();
+					if (e instanceof TypeLiteral) {
+						expressions = new ArrayList<ASTNode>();
+						expressions.add(e);
+					} else if (e instanceof ArrayInitializer) {
+						expressions = ((ArrayInitializer) e).expressions();
+					}
+					if (expressions != null) {
+						str = str.substring(0, str.indexOf("(") + 1);
+						int n = expressions.size();
+						String sep = (n > 1 ? "{" : "");
+						for (int j = 0; j < n; j++) {
+							str += sep;
+							e = (Expression) expressions.get(j);
+							if (e instanceof TypeLiteral) {
+								str += ((TypeLiteral) e).getType().resolveBinding().getQualifiedName() + ".class";
+							} else {
+								str += e.toString();
+							}
+							sep = ",";
+						}
+						str += (n > 1 ? "})" : ")");
+					}
+				}
 				if (a.node == lastNode) {
 					trailingBuffer.append(",");
 				} else {
@@ -6155,7 +6181,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					// time to pick up the fragments
 					addTrailingFragments(fragments, trailingBuffer, ptBuf);
 					fragments = null;
-					if (a.node instanceof FieldDeclaration) {
+					if (a.node instanceof TypeDeclaration) {
+						type = ((TypeDeclaration) a.node).resolveBinding();
+					} else if (a.node instanceof FieldDeclaration) {
 						FieldDeclaration field = (FieldDeclaration) a.node;
 						fragments = field.fragments();
 						VariableDeclarationFragment identifier = (VariableDeclarationFragment) fragments.get(0);
@@ -6169,8 +6197,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						type = var.getReturnType();
 					}
 					String className = (type == null ? null
-							: stripJavaLang(NameMapper.checkClassReplacement(
-									removeBracketsAndFixNullPackageName(getJavaClassNameQualified(type)))));
+							: stripJavaLang(
+									//NameMapper.checkClassReplacement(
+									//removeBracketsAndFixNullPackageName(
+									NameMapper.fixPackageName(
+											getJavaClassNameQualified(type)
+									)
+											//))
+									));
 					trailingBuffer.append(pt++ == 0 ? "C$.__ANN__ = [[[" : "]],\n  [[");
 					trailingBuffer.append((varName == null ? null : "'" + varName + "'"));
 					ptBuf = trailingBuffer.buf.length();

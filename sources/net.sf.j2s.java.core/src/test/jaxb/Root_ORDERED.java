@@ -1,5 +1,6 @@
 package test.jaxb;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,10 +11,12 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlList;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
@@ -22,11 +25,12 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 // adapted source: http://blog.bdoughan.com/2011/06/using-jaxbs-xmlaccessortype-to.html
 
-
+@XmlSeeAlso({test.jaxb2.Obj.class, test.jaxb.Obj.class})
 @XmlRootElement(name="RootOrdered",namespace="www.jalview.org")
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder = {
-	    "creationDate",
+@XmlType(propOrder = {  
+		"list0",
+		"creationDate",
 	    "c",
 	    "b",
 	    "a",
@@ -37,23 +41,48 @@ import javax.xml.datatype.XMLGregorianCalendar;
 	    "byteshex",
 	    "ilist",
 	    "Ilist",
-	    "hm",
 	    "list",
-	    "bi"
+	    "bi","bd",
+	    "f","f2","f3","f4","f6","Ilist2","f5",
+	    "hm","hm2","type"
 	})
 public class Root_ORDERED {
-	
+
+	@XmlElement
+	List<Object> list0 = new ArrayList<Object>(); 
+	{
+		list0.add(new SomewhatComplex());
+	}
 	
 	@XmlElement
 	BigInteger bi = new BigInteger("1234567890123456789012345");
 	
+	@XmlElement
+	BigDecimal bd = new BigDecimal("123.456");
+	
+	@XmlElement
+	float[] f = new float[] {1.2f}; 
+
+	@XmlElement
+	float f2 = 1.3f;
+
+	@XmlElement
+	Float[] f3 = new Float[] {1.2f};
+
+	@XmlElement
+	Float f4 = 1.3f;
+
+	@XmlElement
+	Object f6 = new Integer(3);
+	
+	
 	@XmlAccessorType(XmlAccessType.FIELD)
-	@XmlType(namespace="st.Olaf")
+	@XmlType(name="MoreComplex",namespace="st.Olaf")
 	private static class SomewhatComplex {
 
 	
 		@XmlValue
-		String ca = "c\"<>b& \u212B";
+		String ca = "c\"<>b& \u212B"; 
 	
 		@XmlAttribute(namespace="www.jalview.org2")
 		String cb = "c\"<>b& \u212B";
@@ -82,16 +111,6 @@ public class Root_ORDERED {
 		// fails in JAXB-Java: list.add(new int[] {3, 5, 7, 9});
 	}
 
-	@XmlElementWrapper(name="hm1")
-	public HashMap<String, Object> hm = new HashMap<>();
-
-	{
-		hm.put("testing", "TESTING");
-		hm.put("null", null); 
-		hm.put("map",  new SomewhatComplex());
-		
-	}
-	
 	// does not work in JAXB: @XmlSchemaType(name="hexBinary")
 	@XmlJavaTypeAdapter(HexBinaryAdapter.class)
 	@XmlAttribute
@@ -134,11 +153,34 @@ public class Root_ORDERED {
 	@XmlElement(name="I",nillable=true)
 	Integer[] Ilist = new Integer[] {null, Integer.valueOf(2), null};
 	
+	@XmlElement(name="I2",nillable=true)
+	Integer[] Ilist2 = new Integer[] {null, Integer.valueOf(2), null};
 	
     @XmlElement
     @XmlSchemaType(name = "date")
     protected XMLGregorianCalendar creationDate;
 
+	@XmlElement
+	public
+	Object[] f5 = new Object[] {null, null };
+
+	@XmlElementWrapper(name="hm1")
+	public HashMap<String, Object> hm = new HashMap<>();
+
+	@XmlElementWrapper(name="hm2")
+	public HashMap<Object, String> hm2 = new HashMap<>();
+
+	{
+		hm.put("testing", "TESTING");
+		hm.put("null", null); 
+		hm.put("map",  new SomewhatComplex());
+
+		hm2.put(Integer.valueOf(-1), "V1");
+		hm2.put(Integer.valueOf(-2), null); 
+		hm2.put(Integer.valueOf(-3), "V3");
+
+	}
+	
     /**
      * Gets the value of the creationDate property.
      * 
@@ -163,5 +205,11 @@ public class Root_ORDERED {
         this.creationDate = value;
     }
 
+    @XmlElement
+    private CustomerType type = CustomerType.NEW_CUSTOMER;
+    
+    @XmlEnum(String.class)
+    private enum CustomerType { PROMO_CUSTOMER, NEW_CUSTOMER, VIP, NORMAL }
+  
 	
 }
