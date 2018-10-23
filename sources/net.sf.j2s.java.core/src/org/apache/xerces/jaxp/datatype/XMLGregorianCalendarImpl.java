@@ -601,7 +601,7 @@ public class XMLGregorianCalendarImpl
      * @param millisecond of <code>XMLGregorianCalendar</code> to be created.
      * @param timezone of <code>XMLGregorianCalendar</code> to be created.
      */
-    private XMLGregorianCalendarImpl(
+    protected XMLGregorianCalendarImpl(
         int year,
         int month,
         int day,

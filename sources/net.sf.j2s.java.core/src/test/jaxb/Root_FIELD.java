@@ -29,7 +29,7 @@ import javax.xml.bind.annotation.XmlType;
 //	})
 public class Root_FIELD {
 
-	static boolean isCopy = false;
+	public static boolean isCopy = false;
 
 	static final String x = "Date";
 	// TODO: DOES NOT WORK @XmlElement(name=x)
@@ -86,6 +86,7 @@ public class Root_FIELD {
 
 	public Root_FIELD r1;
 	// if initialized: <r1 pi1A="0" pi2A="0" pi3A="3">....</r1>
+
 
 ///// nillable /////
 	

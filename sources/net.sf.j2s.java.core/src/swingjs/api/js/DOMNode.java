@@ -21,6 +21,10 @@ import swingjs.JSUtil;
 public abstract class DOMNode {
 
 
+	public abstract String[] getAttributeNames();
+
+	public abstract String getAttribute(String name);
+
 	// "abstract" in the sense that these are the exact calls to JavaScript
 	
 	public abstract void appendChild(DOMNode node);
@@ -73,6 +77,10 @@ public abstract class DOMNode {
 
 	public static Object getAttr(DOMNode node, String attr) {
 		return 	(/**  @j2sNative node && node[attr] ||*/ null);
+	}
+
+	public static int getAttrInt(DOMNode node, String attr) {
+		return 	(/**  @j2sNative node && node[attr] ||*/ 0);
 	}
 
 	public static String getStyle(DOMNode node, String style) {

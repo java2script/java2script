@@ -21,7 +21,7 @@ import org.xml.sax.SAXException;
 /**
  * 
  * SwingJS note: These class in the JDK is abstract. Here we allow instantiation
- * just of this. The default parser created is swingjs.JSSAXParser, a minimal implementation,
+ * just of this. The default parser created is swingjs.xml.JSSAXParser, a minimal implementation,
  * but this default can be set by the developer on the page using 
  * 
  * 		System.setProperty("org.xml.sax.parser", fullClassName);
@@ -134,8 +134,8 @@ public class SAXParserFactory {
 	 */
 	public static Parser makeParser() throws ClassNotFoundException, IllegalAccessException, InstantiationException,
 			NullPointerException, ClassCastException {
-		// SwingJS -- directs to swingjs.JSSAXParser
-		String className = System.getProperty("org.xml.sax.parser", "swingjs.JSSAXParser");
+		// SwingJS -- directs to swingjs.xml.JSSAXParser
+		String className = System.getProperty("org.xml.sax.parser", "swingjs.xml.JSSAXParser");
 		if (className == null) {
 			throw new NullPointerException("No value for sax.parser property");
 		} else {

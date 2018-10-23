@@ -2,9 +2,6 @@ package test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.GregorianCalendar;
-
-import org.apache.xerces.jaxp.datatype.XMLGregorianCalendarImpl;
 
 
 public class Test_BigInt extends Test_ {

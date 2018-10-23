@@ -11724,7 +11724,7 @@ if (!J2S._version)
 	// J2S._localFileSaveFunction -- // do something local here; Maybe try the
 	// FileSave interface? return true if successful
 
-	J2S.saveFile = function(filename, data, mimetype, encoding) {
+	J2S.saveFile = J2S._saveFile = function(filename, data, mimetype, encoding) {
 		if (J2S._localFileSaveFunction
 				&& J2S._localFileSaveFunction(filename, data))
 			return "OK";
@@ -16826,7 +16826,7 @@ java.lang.System = System = {
 	v = "org.apache.xerces.jaxp.datatype";
 	break;
       case "javax.xml.bind.JAXBContextFactory":
-	v = "swingjs.JSJAXBContextFactory";
+	v = "swingjs.xml.JSJAXBContextFactory";
 	break;
       }
       if (v)
