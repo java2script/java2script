@@ -1,4 +1,4 @@
-package a2s;
+package swingjs.a2s;
 
 import java.awt.event.TextEvent;
 import java.awt.event.TextListener;

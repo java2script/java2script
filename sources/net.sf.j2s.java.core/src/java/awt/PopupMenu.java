@@ -37,7 +37,7 @@ package java.awt;
  *
  * @author      Amy Fowler
  */
-public class PopupMenu extends a2s.PopupMenu {//Menu {
+public class PopupMenu extends swingjs.a2s.PopupMenu {//Menu {
 
 //    private static final String base = "popup";
 //    static int nameCounter = 0;

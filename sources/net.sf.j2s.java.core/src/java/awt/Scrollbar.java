@@ -154,7 +154,7 @@ package java.awt;
  * @see         java.awt.event.AdjustmentListener
  * @since       JDK1.0
  */
-public class Scrollbar extends a2s.Scrollbar {//Component implements Adjustable, Accessible {
+public class Scrollbar extends swingjs.a2s.Scrollbar {//Component implements Adjustable, Accessible {
 //
 //    /**
 //     * A constant that indicates a horizontal scroll bar.

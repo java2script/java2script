@@ -46,7 +46,7 @@ package java.awt;
  * @author      Sami Shaio
  * @since       JDK1.0
  */
-public class Label extends a2s.Label {//Component implements Accessible {
+public class Label extends swingjs.a2s.Label {//Component implements Accessible {
 
 //    static {
 //        /* ensure that the necessary native libraries are loaded */

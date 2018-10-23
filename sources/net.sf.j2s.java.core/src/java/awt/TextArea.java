@@ -53,7 +53,7 @@ import javax.accessibility.*;
  * @author      Sami Shaio
  * @since       JDK1.0
  */
-public class TextArea extends a2s.TextArea {//TextComponent {
+public class TextArea extends swingjs.a2s.TextArea {//TextComponent {
 
 //    /**
 //     * The number of rows in the <code>TextArea</code>.

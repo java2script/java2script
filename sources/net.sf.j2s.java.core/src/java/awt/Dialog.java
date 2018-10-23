@@ -79,7 +79,7 @@ import java.awt.event.WindowEvent;
  * @author      Arthur van Hoff
  * @since       JDK1.0
  */
-public class Dialog extends a2s.Dialog {
+public class Dialog extends swingjs.a2s.Dialog {
 
 //    static {
 //        /* ensure that the necessary native libraries are loaded */

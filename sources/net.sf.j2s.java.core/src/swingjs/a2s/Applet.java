@@ -1,4 +1,4 @@
-package a2s;
+package swingjs.a2s;
 
 import java.awt.Color;
 import java.awt.Graphics;

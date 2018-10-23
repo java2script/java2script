@@ -85,7 +85,7 @@ package java.awt;
  * @see         java.awt.TextField#addActionListener
  * @since       JDK1.0
  */
-public class TextField extends a2s.TextField {//TextComponent {
+public class TextField extends swingjs.a2s.TextField {//TextComponent {
 
 //    /**
 //     * The number of columns in the text field.

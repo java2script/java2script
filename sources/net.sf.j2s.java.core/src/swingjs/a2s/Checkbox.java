@@ -1,6 +1,5 @@
-package a2s;
+package swingjs.a2s;
 
-import java.awt.A2SEvent;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 

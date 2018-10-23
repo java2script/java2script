@@ -1,5 +1,10 @@
-package java.awt;
+package swingjs.a2s;
 
+import java.awt.AWTEvent;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Event;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
@@ -18,15 +23,6 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JScrollBar;
 
-import a2s.A2SContainer;
-import a2s.A2SListener;
-import a2s.Choice;
-import a2s.Dialog;
-import a2s.Frame;
-import a2s.List;
-import a2s.MenuItem;
-import a2s.TextField;
-
 
 public class A2SEvent implements Runnable {
 
@@ -35,9 +31,8 @@ public class A2SEvent implements Runnable {
 
 	public A2SEvent(AWTEvent e) {
 		this.target = e.getSource();
-		this.e = A2SEvent.convertToOld(e);
+		this.e = convertToOld(e);
 	}
-
 
 	@SuppressWarnings("deprecation")
 	@Override

@@ -59,7 +59,7 @@ package java.awt;
  *
  * @author Sami Shaio
  */
-public class MenuItem extends a2s.MenuItem {//MenuComponent implements Accessible {
+public class MenuItem extends swingjs.a2s.MenuItem {//MenuComponent implements Accessible {
 //
 //    static {
 //        /* ensure that the necessary native libraries are loaded */

@@ -118,7 +118,7 @@ import java.awt.event.WindowEvent;
  * @see Window#addWindowListener
  * @since       JDK1.0
  */
-public class Frame extends a2s.Frame {//Window implements MenuContainer {
+public class Frame extends swingjs.a2s.Frame {//Window implements MenuContainer {
 
 //    /* Note: These are being obsoleted;  programs should use the Cursor class
 //     * variables going forward. See Cursor and Component.setCursor.
