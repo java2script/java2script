@@ -71,9 +71,9 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 	private void doMarshal(Class<?> javaClass, Object javaObject, JSJAXBField field, boolean addXsiType) throws JAXBException {
 		// at least for now we rely on fields that are designated.
 
-		JSJAXBClass jaxbClass = new JSJAXBClass(javaClass, javaObject);
+		JSJAXBClass jaxbClass = new JSJAXBClass(javaClass, javaObject, field != null && field.isXmlIDREF);
 		jaxbClass.field = field;
-		
+
 		Map<String, Integer> oldMap = null;
 		if (field == null) {
 			clearQualifierMap();
@@ -137,7 +137,7 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 	}
 
 private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
-		return jaxbClass.getFieldFromJavaName(javaName);
+		return jaxbClass.getFieldFromJavaNameForMarshaller(javaName);
 	}
 
 	private static DOMNode textarea;
@@ -185,13 +185,18 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 		if (isRoot)
 			addDefaultNameSpace();
 		addAllNameSpaces(jaxbClass);
-		addFields(jaxbClass, true);
+		if (!jaxbClass.isXmlIDREF)
+			addFields(jaxbClass, true);
 		if (!jaxbClass.hasElements()) {
 			output(" />");
 			return;
 		}
 		output(">");
-		addFields(jaxbClass, false);
+		if (jaxbClass.isXmlIDREF) {
+			writeValue(jaxbClass.xmlIDField, jaxbClass.xmlIDField.getValue());
+		} else {
+			addFields(jaxbClass, false);
+		}
 		if (isRoot)
 			output("\n");
 		writeTagClose(qname, !isRoot);
@@ -214,8 +219,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 
 	private void addFields(JSJAXBClass jaxbClass, boolean isAttribute) throws JAXBException {
 		// no ordering for attributes -- they must be designated explicitly
-		JSJAXBField field;
-		if (jaxbClass.propOrder.size() == 0 || isAttribute) {
+		JSJAXBField field;if (jaxbClass.propOrder.size() == 0 || isAttribute) {
 			for (int i = 0, n = jaxbClass.fields.size(); i < n; i++)
 				if (isAttribute == (field = jaxbClass.fields.get(i)).isAttribute)
 					addField(field);
@@ -257,7 +261,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 	private void writeField(JSJAXBField field, Object value, boolean addXsiType) throws JAXBException {
 		if (field.isAttribute) {
 			writeAttribute(field, value);
-		} else if (field.isValue) {
+		} else if (field.isXmlValue) {
 			writeValue(field, value);
 		} else {
 			writeTagOpen(field.qualifiedName, true);
@@ -423,7 +427,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 		if (wrapName != null) {
  			writeTagOpen(wrapName, true);
 			output(">");
-		} else 	if (isEmpty && !isNillable) {
+		} else 	if (isEmpty && !isNillable) { 
 			return;
 		}
 		for (int i = 0, pt = 0, n = list.length; i < n; i++) {

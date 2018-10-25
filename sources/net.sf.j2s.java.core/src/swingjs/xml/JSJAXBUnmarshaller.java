@@ -105,11 +105,12 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			e.printStackTrace();
 			return null;
 		}
-
+		if (jaxbClass != null)
+			jaxbClass.addSeeAlso(javaClass);
 		JSJAXBClass oldJaxbClass = jaxbClass;
 		DOMNode oldDoc = doc;
 		doc = null;
-		jaxbClass = JSJAXBClass.newInstance(javaClass, javaObject);
+		jaxbClass = JSJAXBClass.newUnmarshalledInstance(javaClass, javaObject);
 		boolean topOnly = true;
 		try {
 			parser.setContentHandler(this);
@@ -236,7 +237,12 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			return null;
 		if (type.indexOf(":") >= 0 && !type.startsWith("xs:")) {
 			// this is a SeeAlso entry
-			return unmarshalField(jaxbClass.getFieldFromQName(getQnameForAttribute(null, null, type)), node);
+			QName qname = getQnameForAttribute(null, null, type);
+			JSJAXBField field = jaxbClass.getFieldFromQName(qname);
+
+
+			
+			return unmarshalField(field, node);
 		}
 		return convertFromType(null, data, type, asObject);
 	}
@@ -255,15 +261,15 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 	}
 
 	private void setDocAttributes(String value, Attributes atts) {
-		if (jaxbClass.valueField != null) {
-			jaxbClass.valueField.setCharacters(value);
-			jaxbClass.valueField.setNode(doc);
-			setFieldValue(jaxbClass.valueField);
+		if (jaxbClass.xmlValueField != null) {
+			jaxbClass.xmlValueField.setCharacters(value);
+			jaxbClass.xmlValueField.setNode(doc);
+			setFieldValue(jaxbClass.xmlValueField);
 		}
 		jaxbClass.prepareForUnmarshalling(atts.getValue("xmlns"));
 		for (int i = atts.getLength(); --i >= 0;) {
 			String uri = atts.getURI(i);
-			String localName = atts.getURI(i);
+			String localName = atts.getLocalName(i);
 			String qname = atts.getQName(i);
 			if (qname.equals("xmlns") || qname.startsWith("xmlns:")) {
 				continue;

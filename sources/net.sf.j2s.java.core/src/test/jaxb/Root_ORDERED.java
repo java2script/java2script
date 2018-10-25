@@ -13,6 +13,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlID;
+import javax.xml.bind.annotation.XmlIDREF;
 import javax.xml.bind.annotation.XmlList;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
@@ -29,13 +30,14 @@ import javax.xml.datatype.XMLGregorianCalendar;
 @XmlRootElement(name="RootOrdered",namespace="www.jalview.org")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(propOrder = {  
+		"cx",
 		"list0",
 		"creationDate",
 	    "c",
 	    "b",
 	    "a",
 	    "id",
-	    "cx",
+//	    "cxa",
 	    "slist",
 	    "bytes64",
 	    "byteshex",
@@ -78,17 +80,30 @@ public class Root_ORDERED {
 	
 	@XmlAccessorType(XmlAccessType.FIELD)
 	@XmlType(name="MoreComplex",namespace="st.Olaf")
-	private static class SomewhatComplex {
-
+		public static class SomewhatComplex {
 	
-		@XmlValue
+
+		public SomewhatComplex() {
+			
+		}
+		
+		public SomewhatComplex(String id) {
+			this.id = "id#" + id;
+		}
+	
+		@XmlID
+		@XmlElement
+		public String id = "id#SC1";
+		
+		//@XmlValue
+		@XmlElement
 		String ca = "c\"<>b& \u212B"; 
 	
 		@XmlAttribute(namespace="www.jalview.org2")
 		String cb = "c\"<>b& \u212B";
 
 		@XmlAttribute
-		byte[] bytes = new byte[] {(byte) 100, (byte) 101};
+		public byte[] bytes = new byte[] {(byte) 100, (byte) 101};
 
 
 	}
@@ -99,7 +114,7 @@ public class Root_ORDERED {
 	{
 		list.add("TESTING");
 		list.add("null"); 
-		list.add(new SomewhatComplex());
+		list.add(new SomewhatComplex("idList#1"));
 		list.add(Boolean.TRUE);
 		list.add(Byte.valueOf((byte)1));
 		list.add(Short.valueOf((short)2));
@@ -120,9 +135,13 @@ public class Root_ORDERED {
 	@XmlSchemaType(name="base64Binary")
 	byte[] bytes64 = new byte[] {(byte) 100, (byte) 101};
 
-	
+
+////	@XmlIDREF
 	@XmlElement(namespace="www.jalview.org3")
-	private SomewhatComplex cx = new SomewhatComplex();
+	public SomewhatComplex cx = new SomewhatComplex("0");
+//
+//	@XmlElement(namespace="www.jalview.org3")
+//	public SomewhatComplex[] cxa = new SomewhatComplex[] { new SomewhatComplex("1"),  new SomewhatComplex("2")};
 
 
 	@XmlAttribute(name="extra")
@@ -139,7 +158,7 @@ public class Root_ORDERED {
 
 	@XmlID
 	@XmlAttribute
-	private String id = "id";
+	private String id = "id#1";
 	
 //	@XmlElementWrapper(name="slists")
 	@XmlElement(name="s",nillable=true)
@@ -210,6 +229,6 @@ public class Root_ORDERED {
     
     @XmlEnum(String.class)
     private enum CustomerType { PROMO_CUSTOMER, NEW_CUSTOMER, VIP, NORMAL }
-  
+
 	
 }

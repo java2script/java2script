@@ -31,13 +31,17 @@ class JSJAXBClass {
 	private Map<String, JSJAXBField> fieldMap = new Hashtable<String, JSJAXBField>();
 
 	boolean isAnonymous;
+	boolean isXmlIDREF;
+	
 	JSJAXBField field;
 	QName qualifiedTypeName;
 
-	JSJAXBField valueField;
+	JSJAXBField xmlValueField, xmlIDField;
+	
 
-	JSJAXBClass(Class<?> javaClass, Object javaObject) {
-		checkC$__ANN__(this, javaClass, javaObject);
+	JSJAXBClass(Class<?> javaClass, Object javaObject, boolean isXmlIDREF) {
+		checkC$__ANN__(this, javaClass, javaObject, isXmlIDREF);
+		this.isXmlIDREF = isXmlIDREF;
 	}
 
 	/**
@@ -48,7 +52,7 @@ class JSJAXBClass {
 	 * @return
 	 */
 	@SuppressWarnings("unused")
-	private static boolean checkC$__ANN__(JSJAXBClass jsjaxbClass, Class<?> javaClass, Object javaObject) {
+	private static boolean checkC$__ANN__(JSJAXBClass jsjaxbClass, Class<?> javaClass, Object javaObject, boolean isXmlIDREF) {
 		boolean isTop = true;
 		while (javaClass != null) {
 
@@ -57,15 +61,12 @@ class JSJAXBClass {
 //			              ['cb','String',['@XmlAttribute(namespace="www.jalview.org2")']],
 //			              ['bytes','[array]',['@XmlAttribute']]];
 
-			Object clazz = (/** @j2sNative javaClass.$clazz$ || */
-			null);
+			Object clazz = (/** @j2sNative javaClass.$clazz$ || */ null);
 			if (clazz == null)
 				break;
-			Object[][][] jsdata = (/** @j2sNative clazz.__ANN__ || */
-			null);
-			String className = (/** @j2sNative clazz.__CLASS$NAME__ || clazz.__CLASS_NAME__ || */
-			null);
-
+			Object[][][] jsdata = (/** @j2sNative clazz.__ANN__ || */ null);
+			String className = (/** @j2sNative clazz.__CLASS$NAME__ || clazz.__CLASS_NAME__ || */ null);
+			
 			if (!isTop) {
 				className = null;
 			}
@@ -83,9 +84,8 @@ class JSJAXBClass {
 	JSJAXBClass addTypeData(Object[][][] jsdata, String className, Object javaObject) {
 		for (int i = 0; i < jsdata.length; i++) {
 			JSJAXBField field = new JSJAXBField(this, jsdata[i], javaObject, fields.size(), propOrder);
-			addField(field);
+				addField(field);
 		}
-
 		for (int i = propOrder.size(); --i >= 0;) {
 			String prop = propOrder.get(i);
 			JSJAXBField field = fieldMap.get(prop);
@@ -95,7 +95,7 @@ class JSJAXBClass {
 						new Object[][] { new Object[] { prop, null, null, null }, new Object[] { "@XmlElement" } },
 						javaObject, fields.size(), null));
 			}
-		}
+		}		
 		return this;
 	}
 
@@ -105,7 +105,7 @@ class JSJAXBClass {
 			fieldMap.put(field.javaName, field);
 	}
 
-	JSJAXBField getFieldFromJavaName(String javaName) {
+	JSJAXBField getFieldFromJavaNameForMarshaller(String javaName) {
 		return fieldMap.get(javaName);
 	}
 
@@ -116,7 +116,6 @@ class JSJAXBClass {
 		return className;
 	}
 
-	final static Map<String, JSJAXBField> bindingMap = new Hashtable<String, JSJAXBField>();
 	// private static boolean hasNull(Object[] list) {
 	// for (int i = list.length; --i >= 0;)
 	// if (list[i] == null)
@@ -131,16 +130,18 @@ class JSJAXBClass {
 	// return false;
 	// }
 	//
-	public String defaultNamespace;
+	String defaultNamespace;
 	private String[] seeAlso;
+	final Map<String, JSJAXBField> bindingMap = new Hashtable<String, JSJAXBField>();
+	final static Map<String, JSJAXBField> seeAlsoMap = new Hashtable<String, JSJAXBField>();
 
 	void prepareForUnmarshalling(String defaultNamespace) {
 		this.defaultNamespace = defaultNamespace;
 		if (seeAlso != null) {
 			for (int i = 0; i < seeAlso.length; i++) {
 				try {
-					JSJAXBClass jaxbClass = new JSJAXBClass(Class.forName(seeAlso[i]), null);
-					bindQNamesForField(jaxbClass.fields.get(0));
+					Class<?> cl = Class.forName(seeAlso[i]);
+					addSeeAlso(cl);
 					System.out.println("JSJAXBClass seeAlso: " + seeAlso[i]);
 				} catch (ClassNotFoundException e) {
 					System.out.println("JSJAXBClass[" + i + "] not found: " + seeAlso[i]);
@@ -148,31 +149,42 @@ class JSJAXBClass {
 			}
 		}
 		for (int i = 0; i < fields.size(); i++) {
-			bindQNamesForField(fields.get(i));
+			JSJAXBField field = fields.get(i);
+			bindQName(bindingMap, field.qualifiedName, field);
+			bindQName(bindingMap, field.qualifiedWrapName, field);
+			bindQName(bindingMap, field.qualifiedTypeName, field);
 		}
 	}
 
-	private void bindQNamesForField(JSJAXBField field) {
-		bindQName(field.qualifiedName, field);
-		bindQName(field.qualifiedWrapName, field);
-		bindQName(field.qualifiedTypeName, field);
+	void addSeeAlso(Class<?> cl) {
+		JSJAXBClass jaxbClass = new JSJAXBClass(cl, null, false);
+		JSJAXBField field = jaxbClass.fields.get(0);
+		bindQName(seeAlsoMap, field.qualifiedName, field);
+		bindQName(seeAlsoMap, field.qualifiedWrapName, field);
+		bindQName(seeAlsoMap, field.qualifiedTypeName, field);
 	}
-	
-	private void bindQName(QName q, JSJAXBField field) {
+
+	private void bindQName(Map<String, JSJAXBField> map, QName q, JSJAXBField field) {
 		if (q == null)
 			return;
-		bindingMap.put(q.getLocalPart(), field);
+		map.put(q.getLocalPart(), field);
 		String namespace = q.getNamespaceURI();
 		if (namespace.length() == 0)
 			namespace = defaultNamespace;
 		if (namespace != null)
-			bindingMap.put(namespace + ":" + q.getLocalPart(), field);
+			map.put(namespace + ":" + q.getLocalPart(), field);
 		//System.out.println("JSJAXBClass#binding " + namespace + ":" + q.getLocalPart() + "->" + field.javaName);
 	}
 
 	JSJAXBField getFieldFromQName(QName qName) {
 		String key = qName.getNamespaceURI() + ":" + qName.getLocalPart();
 		JSJAXBField f = bindingMap.get(key);
+		if (f == null)
+			f = bindingMap.get(qName.getLocalPart());
+		if (f == null)
+			f = seeAlsoMap.get(key);
+		if (f == null)
+			f = seeAlsoMap.get(qName.getLocalPart());
 		return f; 
 	}
 
@@ -201,7 +213,7 @@ class JSJAXBClass {
 		try {
 			if (classMap.containsKey(javaClassName))
 				return classMap.get(javaClassName).booleanValue();
-			isMarshallable = (checkC$__ANN__(null, Class.forName(javaClassName), null));
+			isMarshallable = (checkC$__ANN__(null, Class.forName(javaClassName), null, false));
 		} catch (ClassNotFoundException e) {
 			System.out.println("JSJAXBClass: class was not found: " + javaClassName);
 			e.printStackTrace();
@@ -213,11 +225,11 @@ class JSJAXBClass {
 
 	static Map<String, JSJAXBClass> knownClasses = new Hashtable<>();
 
-	static JSJAXBClass newInstance(Class<?> javaClass, Object javaObject) {
+	static JSJAXBClass newUnmarshalledInstance(Class<?> javaClass, Object javaObject) {
 		String name = javaClass.getCanonicalName();
 		JSJAXBClass jjc = knownClasses.get(name);
 		if (jjc == null) {
-			jjc = new JSJAXBClass(javaClass, javaObject);
+			jjc = new JSJAXBClass(javaClass, javaObject, false);
 			knownClasses.put(name, jjc);
 			return jjc;
 		}

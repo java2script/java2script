@@ -15,6 +15,7 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import test.jaxb.Root_ORDERED;
+import test.jaxb.Root_ORDERED.SomewhatComplex;
 
 @XmlRegistry
 public class Test_JAXB_ORDERED extends Test_ {
@@ -31,6 +32,9 @@ public class Test_JAXB_ORDERED extends Test_ {
 	        Root_ORDERED root = new Root_ORDERED();
 	        root.f5[0] = 1.25f;
 	        root.f5[1] = new test.jaxb.Obj();
+	        ((SomewhatComplex)root.cx).bytes[0] = 99; 
+	        ((SomewhatComplex)root.cx).id = "#??";
+	        
 	        root.setCreationDate(now());
 	        Marshaller marshaller = jc.createMarshaller();
 	        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
@@ -48,6 +52,8 @@ public class Test_JAXB_ORDERED extends Test_ {
 				System.out.println(r.getCreationDate());
 				System.out.println(r.f5[0]);
 				System.out.println(((test.jaxb.Obj) r.f5[1]).obj1);
+				System.out.println(((SomewhatComplex)r.cx).bytes[0]);
+				System.out.println(((SomewhatComplex)r.cx).id);
  			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}

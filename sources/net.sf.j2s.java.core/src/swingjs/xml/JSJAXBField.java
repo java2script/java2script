@@ -87,9 +87,9 @@ class JSJAXBField {
 	String javaClassName;
 
 	boolean isAttribute;
-	boolean isID;
-	boolean isIDREF;
-	boolean isValue;
+	boolean isXmlID;
+	boolean isXmlIDREF;
+	boolean isXmlValue;
 	boolean asList;
 	boolean isNillable;
 	boolean isArray;
@@ -301,9 +301,10 @@ class JSJAXBField {
 			break;
 		case "@XmlSeeAlso":
 			// @XmlSeeAlso({Dog.class,Cat.class})
-			// class Animal {}
-			// class Dog extends Animal {}
-			// class Cat extends Animal {}
+			// allows these classes to be identified even though not 
+			// part of the context of the given class, for example 
+			// an instance-only class referenced by this class, as
+			// in an Object, Object[], List<Object>, or Map<Object,Object> 
 			jaxbClass.setSeeAlso(getSeeAlso(data));
 			break;
 		case "@XmlAttribute":
@@ -313,10 +314,6 @@ class JSJAXBField {
 		case "@XmlElement":
 			qualifiedName = getName(tag);
 			isNillable = "true".equals(attr.get("@XmlElement:nillable"));
-			break;
-		case "@XmlValue":
-			jaxbClass.valueField = this;
-			isValue = true;
 			break;
 		case "@XmlSchemaType":
 			xmlSchema = attr.get("@XmlSchemaType:name");
@@ -343,10 +340,15 @@ class JSJAXBField {
 			typeAdapter = typeAdapter.substring(0, data.length() - 6);
 			break;
 		case "@XmlID":
-			isID = true;
+			isXmlID = true;
+			jaxbClass.xmlIDField = this;
+			break;
+		case "@XmlValue":
+			jaxbClass.xmlValueField = this;
+			isXmlValue = true;
 			break;
 		case "@XmlIDREF":
-			isIDREF = true;
+			isXmlIDREF = true;
 			break;
 		case "@XmlList":
 			asList = true;
