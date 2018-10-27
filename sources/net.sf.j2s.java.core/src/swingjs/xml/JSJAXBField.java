@@ -23,6 +23,7 @@ import swingjs.api.js.DOMNode;
  */
 class JSJAXBField {
 
+
 	private Object javaObject;
 
 	// Marshaller only
@@ -95,12 +96,15 @@ class JSJAXBField {
 	boolean isArray;
 	boolean isByteArray;
 	boolean isContainer;
+	boolean isEnum; 
+	boolean isEnumValue;
 
+	
 	QName qualifiedName = new QName("","##default","");
 	QName qualifiedWrapName;
 	Map<String, String> attr;
 
-	String xmlSchema;
+	String xmlSchemaType;
 	String typeAdapter;
 	String mimeType;
 
@@ -127,7 +131,8 @@ class JSJAXBField {
 
 	int holdsObjects = NO_OBJECT;
 
-	private static final Map<String, String> namespacePrefixes = new Hashtable<String, String>();
+	private final static Map<String, String> namespacePrefixes = new Hashtable<String, String>();
+
 	private static int prefixIndex = 1;
 
 	private static String getPrefixFor(String namespace) {
@@ -227,7 +232,10 @@ class JSJAXBField {
 				}
 				javaName = getJavaNameFromMethodName(methodNameGet);
 			}
-			processTagName(jaxbClass, tag, data, propOrder);
+			if (javaName == null)
+				processTypeAnnotation(jaxbClass, tag, data, propOrder);
+			else
+				processFieldAnnotation(jaxbClass, tag, data);
 		}
 		// ensure that we have a qualified name if appropriate
 		setDefaults();
@@ -254,30 +262,37 @@ class JSJAXBField {
 	 * Set a few defaults. The xmlSchema "hexBinary" does not work.
 	 */
 	private void setDefaults() {
-		if (xmlSchema == null && typeAdapter == null) {
+		if (xmlSchemaType == null && typeAdapter == null) {
 			if (javaClassName.equals("byte[]"))
-				xmlSchema = "base64Binary";
+				xmlSchemaType = "base64Binary";
 			if (javaClassName.equals("javax.xml.datatype.XMLGregorianCalendar"))
-				xmlSchema = "dateTime";
+				xmlSchemaType = "dateTime";
 		}
 	}
 
-
 	/**
-	 * Process the tag name for critical information, possibly updating the main
-	 * reference tag.
+	 * The first element of the annotation entry is null: 
 	 * 
+	 * Process a type or package annotation. Note that we are not checking for
+	 * JAXBExceptions here.
+	 * 
+	 * @param jaxbClass
 	 * @param tag
-	 * @param qname
+	 * @param data
 	 * @param propOrder
-	 * @param a
 	 */
-	private void processTagName(JSJAXBClass jaxbClass, String tag, String data, List<String> propOrder) {
-		// note that we are not checking for JAXBExceptions here
+	private void processTypeAnnotation(JSJAXBClass jaxbClass, String tag, String data, List<String> propOrder) {
+		// check package annotations -- NOT IMPLEMENTED
+		switch (tag) {
+		case "@XmlSchema":
+			return;
+		}
+		
+		// check type annotations:
 		switch (tag) {
 		case "@XmlRootElement":
 			qualifiedName = getName(tag);
-			break;
+			return;
 		case "@XmlType":
 			qualifiedTypeName = getName(tag);
 			String order = attr.get("@XmlType:propOrder");
@@ -290,7 +305,7 @@ class JSJAXBField {
 					propOrder.add(prop);
 				}
 			}
-			break;
+			return;
 		case "@XmlAccessorType":
 			if (data.indexOf("FIELD") >= 0)
 				jaxbClass.accessorType = JSJAXBClass.TYPE_FIELD;
@@ -298,7 +313,7 @@ class JSJAXBField {
 				jaxbClass.accessorType = JSJAXBClass.TYPE_PUBLIC_MEMBER;
 			else if (data.indexOf("PROPERTY") >= 0)
 				jaxbClass.accessorType = JSJAXBClass.TYPE_PROPERTY;
-			break;
+			return;
 		case "@XmlSeeAlso":
 			// @XmlSeeAlso({Dog.class,Cat.class})
 			// allows these classes to be identified even though not 
@@ -306,20 +321,39 @@ class JSJAXBField {
 			// an instance-only class referenced by this class, as
 			// in an Object, Object[], List<Object>, or Map<Object,Object> 
 			jaxbClass.setSeeAlso(getSeeAlso(data));
-			break;
+			return;
+		case "@XmlEnum":
+			jaxbClass.enumClassType = data;
+			jaxbClass.isEnum = true; 
+			jaxbClass.enumMap = new Hashtable<Object, Object>();
+			return;
+		}
+		System.out.println("JSJAXBField Unprocessed type annotation: " + text);
+	}	
+	
+	/**
+	 * Process a field or method annotation. Note that we are not checking for
+	 * JAXBExceptions here.
+	 * 
+	 * @param jaxbClass
+	 * @param tag
+	 * @param data      what is in the (...)
+	 */
+	private void processFieldAnnotation(JSJAXBClass jaxbClass, String tag, String data) {
+		switch (tag) {
 		case "@XmlAttribute":
 			isAttribute = true;
 			qualifiedName = getName(tag);
-			break;
+			return;
 		case "@XmlElement":
 			qualifiedName = getName(tag);
 			isNillable = "true".equals(attr.get("@XmlElement:nillable"));
-			break;
+			return;
 		case "@XmlSchemaType":
-			xmlSchema = attr.get("@XmlSchemaType:name");
-			if (xmlSchema.equals("hexBinary")) {
-				xmlSchema = null;
-				typeAdapter = "HexBinaryAdapter";
+			xmlSchemaType = attr.get("@XmlSchemaType:name");
+			if (xmlSchemaType.equals("hexBinary")) {
+				xmlSchemaType = null;
+				typeAdapter = "javax.xml.bind.annotation.adapters.HexBinaryAdapter";
 			}
 				// e.g. 
 				//			   @XmlSchemaType(name="date")
@@ -331,38 +365,45 @@ class JSJAXBField {
 				//			 
 				//			   @XmlSchemaType(name="base64Binary")
 				//			   public byte[] base64Bytes;
-			break;
+			return;
 		case "@XmlJavaTypeAdapter":  
 			// typically CollapsedStringAdapter.class
 			typeAdapter = attr.get("@XmlJavaTypeAdapter:name");
 			if (typeAdapter == null)
 				typeAdapter = data;
 			typeAdapter = typeAdapter.substring(0, data.length() - 6);
-			break;
-		case "@XmlID":
-			isXmlID = true;
-			jaxbClass.xmlIDField = this;
-			break;
+			return;
 		case "@XmlValue":
 			jaxbClass.xmlValueField = this;
 			isXmlValue = true;
-			break;
-		case "@XmlIDREF":
-			isXmlIDREF = true;
-			break;
+			return;
+		case "@XmlEnumValue":
+			data = PT.trim(data, "\"");
+			jaxbClass.enumMap.put("/" + javaName, data); // for marshaller
+			jaxbClass.enumMap.put(data, this); // for unmarshaller
+			isEnumValue = true;
+			return;
 		case "@XmlList":
 			asList = true;
-			break;
+			return;
+		case "@XmlID":
+			isXmlID = true;
+			jaxbClass.xmlIDField = this;
+			return;
+		case "@XmlIDREF":
+			isXmlIDREF = true;
+			return;
 		case "@XmlMimeType":
 			mimeType = attr.get("@XmlMimeType:name");
 			// e.g. @XmlMimeType("application/octet-stream")
 			// @XmlMimeType("image/jpeg")
 			// @XmlMimeType("text/xml; charset=iso-8859-1")
-			break;
+			return;
 		case "@XmlElementWrapper":
 			qualifiedWrapName = getName(tag);
-			break;
-		} 	
+			return;
+		}
+		System.out.println("JSJAXBField Unprocessed field annotation: " + text);
 	}
 
 	private String[] getSeeAlso(String data) {

@@ -896,6 +896,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	public boolean visit(EnumConstantDeclaration node) {
+		
+System.out.println("EnumConstantDeclaration???" + node);
+
+		if (checkj2sIgnoreAndJAXB(node))
+			return false;
 		buffer.append("this.");
 		node.getName().accept(this);
 		buffer.append(" = ");
@@ -953,9 +958,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * 
 	 */
 	public boolean visit(Initializer node) {
-		if (checkj2sIgnoreAndJAXB(node)) {
+		if (checkj2sIgnoreAndJAXB(node))
 			return false;
-		}
 		node.getBody().accept(this);
 		buffer.append("\r\n");
 		return false;
@@ -1693,8 +1697,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		// set up key fields and local variables
 
-		if (isLocal || isClass) {
-			checkj2sIgnoreAndJAXB((TypeDeclaration) node);
+		if (isLocal || isClass || isEnum) {
+			checkj2sIgnoreAndJAXB((BodyDeclaration) node);
 		}
 		ITypeBinding oldBinding = null;
 		String oldShortClassName = null, this$0Name0 = null, finalShortClassName, finalPackageName;
@@ -2152,6 +2156,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		buffer.append("$vals=Clazz.array(C$,[0]);\r\n");
 		for (int i = 0; i < constants.size(); i++) {
 			EnumConstantDeclaration enumConst = (EnumConstantDeclaration) constants.get(i);
+
+			System.out.println("addEnumConstants???" + enumConst);		
+
+
+			if (checkj2sIgnoreAndJAXB(enumConst)) // for JAXB
+				continue;
+
 			IMethodBinding binding = enumConst.resolveConstructorBinding();
 			AnonymousClassDeclaration anonDeclare = enumConst.getAnonymousClassDeclaration();
 			String anonName = null;
@@ -5350,7 +5361,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					} else if (!qName.equals("Override") 
 							&& !qName.equals("Deprecated")
 							&& !qName.startsWith("Suppress")
-							&& !qName.equals("XmlTransient")
 							) {
 						if (class_annotations == null)
 							class_annotations = new ArrayList<ClassAnnotation>();
@@ -6181,9 +6191,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					// time to pick up the fragments
 					addTrailingFragments(fragments, trailingBuffer, ptBuf);
 					fragments = null;
-					if (a.node instanceof TypeDeclaration) {
+					if (a.node instanceof EnumDeclaration) {
+						type = ((EnumDeclaration) a.node).resolveBinding();
+					} else if (a.node instanceof TypeDeclaration) {
 						type = ((TypeDeclaration) a.node).resolveBinding();
-					} else if (a.node instanceof FieldDeclaration) {
+ 					} else if (a.node instanceof FieldDeclaration) {
 						FieldDeclaration field = (FieldDeclaration) a.node;
 						fragments = field.fragments();
 						VariableDeclarationFragment identifier = (VariableDeclarationFragment) fragments.get(0);
@@ -6195,6 +6207,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						IMethodBinding var = method.resolveBinding();
 						varName = "M:" + var.getName();
 						type = var.getReturnType();
+					} else if (a.node instanceof EnumConstantDeclaration) {
+						EnumConstantDeclaration con = (EnumConstantDeclaration) a.node;
+						IVariableBinding var = con.resolveVariable();
+						varName = var.getName();
+						type = var.getType();
 					}
 					String className = (type == null ? null
 							: stripJavaLang(

@@ -29,9 +29,10 @@ public class Test_JAXB_ORDERED extends Test_ {
         JAXBContext jc;
 		try {
 			jc = JAXBContext.newInstance(Root_ORDERED.class);			
-	        Root_ORDERED root = new Root_ORDERED();
+	        Root_ORDERED root = new Root_ORDERED("test");
 	        root.f5[0] = 1.25f;
 	        root.f5[1] = new test.jaxb.Obj();
+	        root.cx = new SomewhatComplex();
 	        ((SomewhatComplex)root.cx).bytes[0] = 99; 
 	        ((SomewhatComplex)root.cx).id = "#??";
 	        
@@ -50,10 +51,14 @@ public class Test_JAXB_ORDERED extends Test_ {
 		        Root_ORDERED r = (Root_ORDERED) unmarshaller.unmarshal(is);
 				
 				System.out.println(r.getCreationDate());
+				System.out.println(r.id);
 				System.out.println(r.f5[0]);
 				System.out.println(((test.jaxb.Obj) r.f5[1]).obj1);
+				// note that if @xmlIDREF is indicated, then r.cx will be null
+				// that is, never set when unmarshalling
 				System.out.println(((SomewhatComplex)r.cx).bytes[0]);
 				System.out.println(((SomewhatComplex)r.cx).id);
+				System.out.println("type is " + r.type);
  			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}

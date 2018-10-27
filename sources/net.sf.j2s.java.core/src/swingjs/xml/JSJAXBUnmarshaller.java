@@ -72,7 +72,9 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 	protected Object unmarshal(XMLReader reader, InputSource source) throws JAXBException {
 		parser = (JSSAXParser) reader;
 		xmlSource = source;		
-		return doUnmarshal(null, ((JSJAXBContext) context).getjavaClass());
+		Object o = doUnmarshal(null, ((JSJAXBContext) context).getjavaClass());
+		JSJAXBClass.clearStatics();
+		return o;
 	}
 
 	private Object unmarshal(DOMNode node, Class<?> cl) throws JAXBException {
@@ -98,18 +100,21 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 	 * @return an instance of this class
 	 */
 	private Object doUnmarshal(DOMNode node, Class<?> javaClass) {
-		Object javaObject;
+		if (jaxbClass != null)
+			jaxbClass.addSeeAlso(javaClass);
+
+		JSJAXBClass oldJaxbClass = jaxbClass;
+		DOMNode oldDoc = doc;
+		doc = null;
+		boolean isEnum = javaClass.isEnum();
+		Object javaObject = null;
 		try {
-			javaObject = javaClass.newInstance();
+			if (!isEnum)
+				javaObject = javaClass.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 			return null;
 		}
-		if (jaxbClass != null)
-			jaxbClass.addSeeAlso(javaClass);
-		JSJAXBClass oldJaxbClass = jaxbClass;
-		DOMNode oldDoc = doc;
-		doc = null;
 		jaxbClass = JSJAXBClass.newUnmarshalledInstance(javaClass, javaObject);
 		boolean topOnly = true;
 		try {
@@ -125,6 +130,8 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		}
 		processArraysAndLists();
 		processMaps();
+		if (jaxbClass.isEnum) 
+			javaObject = jaxbClass.setEnumValue(javaClass, parser.getSimpleInnerText(node));
 		jaxbClass = oldJaxbClass;
 		doc = oldDoc;
 		return javaObject;
@@ -239,9 +246,6 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			// this is a SeeAlso entry
 			QName qname = getQnameForAttribute(null, null, type);
 			JSJAXBField field = jaxbClass.getFieldFromQName(qname);
-
-
-			
 			return unmarshalField(field, node);
 		}
 		return convertFromType(null, data, type, asObject);
@@ -401,14 +405,14 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
  			if (type.contains("XMLGregorianCalendar")) {
 				return newVal = new JSXMLGregorianCalendarImpl(val);
 			}
-			if (field.xmlSchema != null) {
-				switch (field.xmlSchema) {
+			if (field.xmlSchemaType != null) {
+				switch (field.xmlSchemaType) {
 				case "base64Binary":
 					return newVal = DatatypeConverter.parseBase64Binary(val);
 				case "hexBinary":
 					return newVal = DatatypeConverter.parseHexBinary(val);
 				default:
-					System.out.println("schema not supported " + field.xmlSchema);
+					System.out.println("JSJAXBUnmarhsaller schema not supported: " + field.xmlSchemaType);
 					// fall through //
 				case "xsd:ID":
 					break;

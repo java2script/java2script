@@ -12,6 +12,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlIDREF;
 import javax.xml.bind.annotation.XmlList;
@@ -30,6 +31,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 @XmlRootElement(name="RootOrdered",namespace="www.jalview.org")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(propOrder = {  
+		"type",
 		"cx",
 		"list0",
 		"creationDate",
@@ -46,24 +48,53 @@ import javax.xml.datatype.XMLGregorianCalendar;
 	    "list",
 	    "bi","bd",
 	    "f","f2","f3","f4","f6","Ilist2","f5",
-	    "hm","hm2","type"
+	    "hm","hm2"
 	})
 public class Root_ORDERED {
 
-	@XmlElement
-	List<Object> list0 = new ArrayList<Object>(); 
-	{
-		list0.add(new SomewhatComplex());
+	
+	public Root_ORDERED() {
+		
+	}
+	
+	public Root_ORDERED(String name) {
+		id = name;
+		type = CustomerType.NEW_CUSTOMER;	
+		list0 = new ArrayList<Object>();
+		list0.add(new SomewhatComplex("List"));
+		bi = new BigInteger("1234567890123456789012345");
+		f = new float[] {1.2f};
+		list.add("TESTING");
+		list.add("null"); 
+		list.add(new SomewhatComplex("idList#1"));
+		list.add(Boolean.TRUE);
+		list.add(Byte.valueOf((byte)1));
+		list.add(Short.valueOf((short)2));
+		list.add(Integer.valueOf(3));
+		list.add(Long.valueOf(4));
+		list.add(Float.valueOf(6.6f));
+		list.add(Double.valueOf(8.9));
+		list.add(new BigInteger("12345678910111213141516")); 
+		// fails in JAXB-Java: list.add(new int[] {3, 5, 7, 9});
+		
+		hm2 = new HashMap<>();
+		hm2.put(Integer.valueOf(-1), "V1");
+		hm2.put(Integer.valueOf(-2), null); 
+		hm2.put(Integer.valueOf(-3), "V3");
+
 	}
 	
 	@XmlElement
-	BigInteger bi = new BigInteger("1234567890123456789012345");
+	List<Object> list0; 
+	
+	@XmlElement
+	BigInteger bi;
 	
 	@XmlElement
 	BigDecimal bd = new BigDecimal("123.456");
 	
 	@XmlElement
-	float[] f = new float[] {1.2f}; 
+	float[] f; 
 
 	@XmlElement
 	float f2 = 1.3f;
@@ -84,7 +115,7 @@ public class Root_ORDERED {
 	
 
 		public SomewhatComplex() {
-			
+			System.out.println("new somewhatcomplex");
 		}
 		
 		public SomewhatComplex(String id) {
@@ -111,21 +142,6 @@ public class Root_ORDERED {
 	@XmlElementWrapper(name="list1")
 	public List<Object> list = new ArrayList<>();
 
-	{
-		list.add("TESTING");
-		list.add("null"); 
-		list.add(new SomewhatComplex("idList#1"));
-		list.add(Boolean.TRUE);
-		list.add(Byte.valueOf((byte)1));
-		list.add(Short.valueOf((short)2));
-		list.add(Integer.valueOf(3));
-		list.add(Long.valueOf(4));
-		list.add(Float.valueOf(6.6f));
-		list.add(Double.valueOf(8.9));
-		list.add(new BigInteger("12345678910111213141516"));
-		// fails in JAXB-Java: list.add(new int[] {3, 5, 7, 9});
-	}
-
 	// does not work in JAXB: @XmlSchemaType(name="hexBinary")
 	@XmlJavaTypeAdapter(HexBinaryAdapter.class)
 	@XmlAttribute
@@ -135,10 +151,9 @@ public class Root_ORDERED {
 	@XmlSchemaType(name="base64Binary")
 	byte[] bytes64 = new byte[] {(byte) 100, (byte) 101};
 
-
-////	@XmlIDREF
+	//@XmlIDREF
 	@XmlElement(namespace="www.jalview.org3")
-	public SomewhatComplex cx = new SomewhatComplex("0");
+	public SomewhatComplex cx;  
 //
 //	@XmlElement(namespace="www.jalview.org3")
 //	public SomewhatComplex[] cxa = new SomewhatComplex[] { new SomewhatComplex("1"),  new SomewhatComplex("2")};
@@ -158,7 +173,7 @@ public class Root_ORDERED {
 
 	@XmlID
 	@XmlAttribute
-	private String id = "id#1";
+	public String id = "id#1";
 	
 //	@XmlElementWrapper(name="slists")
 	@XmlElement(name="s",nillable=true)
@@ -187,16 +202,12 @@ public class Root_ORDERED {
 	public HashMap<String, Object> hm = new HashMap<>();
 
 	@XmlElementWrapper(name="hm2")
-	public HashMap<Object, String> hm2 = new HashMap<>();
+	public HashMap<Object, String> hm2;
 
 	{
 		hm.put("testing", "TESTING");
 		hm.put("null", null); 
-		hm.put("map",  new SomewhatComplex());
-
-		hm2.put(Integer.valueOf(-1), "V1");
-		hm2.put(Integer.valueOf(-2), null); 
-		hm2.put(Integer.valueOf(-3), "V3");
+		hm.put("map",  new SomewhatComplex("map"));
 
 	}
 	
@@ -225,10 +236,19 @@ public class Root_ORDERED {
     }
 
     @XmlElement
-    private CustomerType type = CustomerType.NEW_CUSTOMER;
+	public CustomerType type;
     
     @XmlEnum(String.class)
-    private enum CustomerType { PROMO_CUSTOMER, NEW_CUSTOMER, VIP, NORMAL }
+    private enum CustomerType { 
+    	@XmlEnumValue("promo")
+    	PROMO_CUSTOMER, 
+    	@XmlEnumValue("cust")
+    	NEW_CUSTOMER, 
+    	@XmlEnumValue("vip")
+    	VIP, 
+    	@XmlEnumValue("norm")
+    	NORMAL
+    	}
 
 	
 }

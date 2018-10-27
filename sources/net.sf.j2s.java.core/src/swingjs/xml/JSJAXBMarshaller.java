@@ -57,7 +57,8 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 		this.outputStream = this.result.getOutputStream();
 		Class<?> javaClass = ((JSJAXBContext) context).getjavaClass();
 		doMarshal(javaClass, javaObject, null, false);
-	}
+		JSJAXBClass.clearStatics();
+ 	}
 
 	/**
 	 * The main entry point for all marshalling; iterates for embedded classes
@@ -72,7 +73,7 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 		// at least for now we rely on fields that are designated.
 
 		JSJAXBClass jaxbClass = new JSJAXBClass(javaClass, javaObject, field != null && field.isXmlIDREF);
-		jaxbClass.field = field;
+		jaxbClass.tagField = field;
 
 		Map<String, Integer> oldMap = null;
 		if (field == null) {
@@ -172,7 +173,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 	/////////// output methods //////////////
 	
 	private void writeXML(JSJAXBClass jaxbClass, boolean isRoot, boolean addXsiType) throws JAXBException {
-		QName qname = (jaxbClass.field == null ? jaxbClass.qname : jaxbClass.field.qualifiedName);
+		QName qname = (jaxbClass.tagField == null ? jaxbClass.qname : jaxbClass.tagField.qualifiedName);
 		if (isRoot) {
 			outputHeader();
 		}
@@ -180,7 +181,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 		writeTagOpen(qname, !isRoot);   
 		if (addXsiType) {
 			addNameSpaceIfNeeded(jaxbClass.qualifiedTypeName, isRoot);
-			outputInstanceType(getEntryType(jaxbClass.qualifiedTypeName, jaxbClass.field.getValue()));
+			outputInstanceType(getEntryType(jaxbClass.qualifiedTypeName, jaxbClass.tagField.getValue()));
 		}
 		if (isRoot)
 			addDefaultNameSpace();
@@ -194,6 +195,9 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 		output(">");
 		if (jaxbClass.isXmlIDREF) {
 			writeValue(jaxbClass.xmlIDField, jaxbClass.xmlIDField.getValue());
+		} else if (jaxbClass.enumMap != null) {
+			String s = (String) jaxbClass.enumMap.get("/" + jaxbClass.tagField.getValue().toString());
+			output(s);
 		} else {
 			addFields(jaxbClass, false);
 		}
@@ -350,7 +354,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 	}
 
 	private void writeValue(JSJAXBField field, Object value) throws JAXBException {
-		if (field.xmlSchema != null) {
+		if (field.xmlSchemaType != null) {
 			writeSchema(field, value);
 		} else if (field.typeAdapter != null) {
 			writeTypeAdapter(field, value);
@@ -374,7 +378,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 			try {
 				output((String) adapter.marshal(value));
 			} catch (Exception e) {
-				System.out.println(e + " trying to marshal " + field.text);
+				System.out.println("JSJAXBMarshaller " + e + " trying to marshal " + field.text);
 				outputSimple(field, value);				
 			}
 		}
@@ -386,7 +390,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 		if (value instanceof JSXMLGregorianCalendarImpl){
 			writeDate(field, value);
 		} else {
-			switch (field.xmlSchema) {
+			switch (field.xmlSchemaType) {
 			case "hexBinary":
 				output(DatatypeConverter.printHexBinary((byte[]) value));
 			break;
@@ -394,7 +398,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 				output(DatatypeConverter.printBase64Binary((byte[]) value));
 				break;
 			default:
-				System.out.println("schema not supported " + field.xmlSchema);
+				System.out.println("JSJAXBMarshaller schema not supported " + field.xmlSchemaType);
 				// fall through //
 			case "xsd:ID":
 				outputSimple(field, value);
@@ -405,8 +409,8 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 	private void writeDate(JSJAXBField field, Object value) throws JAXBException {
 		JSXMLGregorianCalendarImpl cal = ((JSXMLGregorianCalendarImpl) value);
 		QName schema = cal.xmlSchema;
-		if (field.xmlSchema != null)
-			cal.setXMLSchemaType(field.xmlSchema);
+		if (field.xmlSchemaType != null)
+			cal.setXMLSchemaType(field.xmlSchemaType);
 		output(cal.toXMLFormat());
 		cal.xmlSchema = schema;
 	}

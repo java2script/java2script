@@ -269,6 +269,7 @@ class Java2ScriptCompiler {
 			addHTML(visitor.getAppList(false), siteFolder, htmlTemplate, false);
 		} catch (Throwable e) {
 			e.printStackTrace();
+			e.printStackTrace(System.out);
 			// find the file and delete it.
 			String filePath = j2sPath;
 			String rootName = root.getJavaElement().getElementName();

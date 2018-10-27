@@ -13,31 +13,79 @@ import swingjs.api.Interface;
 
 class JSJAXBClass {
 
-//		C$.__ANN__ = [
-//		              [null,'XmlRootElement','@XmlRootElement(name="RootOrdered",namespace="www.jalview.org")']
-//		             ,[null,'XmlAccessorType','@XmlAccessorType(XmlAccessType.FIELD)']
-//		             ,[null,'XmlType','@XmlType(propOrder={"c","b","a"})']
-//		            ];
+//	C$.__ANN__ = [[[null,'test.jaxb.Root_ORDERED.SomewhatComplex'],['@XmlAccessorType(XmlAccessType.FIELD)','@XmlType(name="MoreComplex",namespace="st.Olaf")']],
+//	              [['id','String'],['@XmlID','@XmlElement']],
+//	              [['ca','String'],['@XmlElement']],
+//	              [['cb','String'],['@XmlAttribute(namespace="www.jalview.org2")']],
+//	              [['bytes','byte[]'],['@XmlAttribute']]];
+//	            })()
 
-	final static int TYPE_PUBLIC_MEMBER = 0;
+	final static int TYPE_NONE = 0;
 	final static int TYPE_FIELD = 1;
-	final static int TYPE_PROPERTY = 2;
+	final static int TYPE_PUBLIC_MEMBER = 2;
+	final static int TYPE_PROPERTY = 3;
 
+	/**
+	 * this class's accessorType, which is not implemented yet. We need explicit
+	 * propOrder or XmlAttribute or XmlElement.
+	 */
 	int accessorType = TYPE_PUBLIC_MEMBER;
 
-	List<String> propOrder = new ArrayList<String>();
-	List<JSJAXBField> fields = new ArrayList<JSJAXBField>();
-	QName qname = new QName("", "", "");
-	private Map<String, JSJAXBField> fieldMap = new Hashtable<String, JSJAXBField>();
-
-	boolean isAnonymous;
-	boolean isXmlIDREF;
-	
-	JSJAXBField field;
+	QName qname = new QName("", "##default", "");
 	QName qualifiedTypeName;
 
-	JSJAXBField xmlValueField, xmlIDField;
+	/**
+	 * for the root, null, but for fields that need unmarshalling, the field that
+	 * is being filled by this unmarshalling 
+	 */
+	JSJAXBField tagField;
+
+	/**
+	 * from XmlType(name=""), but not used
+	 */
+	boolean isAnonymous; 
 	
+	/**
+	 * XmlIDREF 
+	 */
+	boolean isXmlIDREF;
+	JSJAXBField xmlIDField;
+	
+	boolean isEnum;
+	
+	List<String> propOrder = new ArrayList<String>();
+	List<JSJAXBField> fields = new ArrayList<JSJAXBField>();
+	
+	private Map<String, JSJAXBField> fieldMap = new Hashtable<String, JSJAXBField>();
+
+	/**
+	 * holds the enum name/value pairs for marshaller and unmarshaller
+	 */
+	Map<Object, Object> enumMap;
+	String enumClassType;
+
+	JSJAXBField xmlValueField;
+	private String defaultNamespace;
+	private String[] seeAlso;
+	final Map<String, JSJAXBField> bindingMap = new Hashtable<String, JSJAXBField>();
+	
+	final static Map<String, JSJAXBField> seeAlsoMap = new Hashtable<String, JSJAXBField>();
+	final static Map<String, Boolean> classMap = new Hashtable<String, Boolean>();
+	private final static Map<String, JSJAXBClass> knownClasses = new Hashtable<>();
+	private static final Map<String, String> marshallerNamespacePrefixes = new Hashtable<String, String>();
+	private final static Map<String, XmlAdapter> adapterMap = new HashMap<String, XmlAdapter>();
+
+	static void clearStatics() {
+		seeAlsoMap.clear();
+		classMap.clear();
+		knownClasses.clear();
+		marshallerNamespacePrefixes.clear();
+		adapterMap.clear();
+	}
+
+	private static int prefixIndex = 1;
+
+
 
 	JSJAXBClass(Class<?> javaClass, Object javaObject, boolean isXmlIDREF) {
 		checkC$__ANN__(this, javaClass, javaObject, isXmlIDREF);
@@ -116,25 +164,6 @@ class JSJAXBClass {
 		return className;
 	}
 
-	// private static boolean hasNull(Object[] list) {
-	// for (int i = list.length; --i >= 0;)
-	// if (list[i] == null)
-	// return true;
-	// return false;
-	// }
-	//
-	// private static boolean hasNull(List<?> list) {
-	// for (int i = list.size(); --i >= 0;)
-	// if (list.get(i) == null)
-	// return true;
-	// return false;
-	// }
-	//
-	String defaultNamespace;
-	private String[] seeAlso;
-	final Map<String, JSJAXBField> bindingMap = new Hashtable<String, JSJAXBField>();
-	final static Map<String, JSJAXBField> seeAlsoMap = new Hashtable<String, JSJAXBField>();
-
 	void prepareForUnmarshalling(String defaultNamespace) {
 		this.defaultNamespace = defaultNamespace;
 		if (seeAlso != null) {
@@ -144,7 +173,7 @@ class JSJAXBClass {
 					addSeeAlso(cl);
 					System.out.println("JSJAXBClass seeAlso: " + seeAlso[i]);
 				} catch (ClassNotFoundException e) {
-					System.out.println("JSJAXBClass[" + i + "] not found: " + seeAlso[i]);
+					System.out.println("JSJAXBClass seeAlso[" + i + "] not found: " + seeAlso[i]);
 				}
 			}
 		}
@@ -205,7 +234,6 @@ class JSJAXBClass {
 		return isMarshallable(field);
 	}
 
-	final static Map<String, Boolean> classMap = new Hashtable<String, Boolean>();
 
 	static boolean isMarshallable(JSJAXBField field) {
 		boolean isMarshallable = false;
@@ -222,8 +250,6 @@ class JSJAXBClass {
 		}
 		return isMarshallable;
 	}
-
-	static Map<String, JSJAXBClass> knownClasses = new Hashtable<>();
 
 	static JSJAXBClass newUnmarshalledInstance(Class<?> javaClass, Object javaObject) {
 		String name = javaClass.getCanonicalName();
@@ -251,9 +277,6 @@ class JSJAXBClass {
 		false);
 	}
 
-	private static final Map<String, String> marshallerNamespacePrefixes = new Hashtable<String, String>();
-	private static int prefixIndex = 1;
-
 	/**
 	 * Prepend @Xml......: to the tag name to avoid internal collision when
 	 * combining all annotations into one.
@@ -268,8 +291,6 @@ class JSJAXBClass {
 		return prefix;
 	}
 
-	private final static Map<String, XmlAdapter> adapterMap = new HashMap<String, XmlAdapter>();
-
 	static XmlAdapter getAdapter(String adapterClass) {
 		XmlAdapter adapter = adapterMap.get(adapterClass);
 		if (adapter == null && !adapterMap.containsKey(adapterClass)) {
@@ -277,5 +298,17 @@ class JSJAXBClass {
 		}
 		return adapter;
 	}
+
+	public Object setEnumValue(Class<?> javaClass, String name) {
+		name = ((JSJAXBField) enumMap.get(name)).javaName;
+		Object o = null;
+		/**
+		 * @j2sNative
+		 * 
+		 *   o = Enum.valueOf$Class$S(javaClass, name);
+		 */
+		return o;
+	}
+
 
 }
