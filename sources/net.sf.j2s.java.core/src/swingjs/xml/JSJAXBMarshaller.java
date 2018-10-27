@@ -237,7 +237,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 	}
 
 	private void addField(JSJAXBField field) throws JAXBException {
-		if (field != null)
+		if (field != null && !field.isTransient)
 			addFieldListable(field, field.getValue(), field.holdsObjects != JSJAXBField.NO_OBJECT);
 	}
 

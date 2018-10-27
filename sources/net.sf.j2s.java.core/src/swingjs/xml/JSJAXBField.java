@@ -87,6 +87,7 @@ class JSJAXBField {
 	String methodNameGet;	
 	String javaClassName;
 
+	boolean isTransient;
 	boolean isAttribute;
 	boolean isXmlID;
 	boolean isXmlIDREF;
@@ -341,6 +342,9 @@ class JSJAXBField {
 	 */
 	private void processFieldAnnotation(JSJAXBClass jaxbClass, String tag, String data) {
 		switch (tag) {
+		case "@XmlTransient":
+			isTransient = true;
+			return;
 		case "@XmlAttribute":
 			isAttribute = true;
 			qualifiedName = getName(tag);

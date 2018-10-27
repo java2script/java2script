@@ -132,6 +132,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// BH 10/27/2018 -- 3.2.4.01 support for JAXB FIELD+propOrder and NONE types 
 // BH 9/28/2018 -- 3.2.4.00 adds minimal support for JAXB
 // BH 9/23/2018 -- 3.2.3.00 adds support for java.applet.Applet and java.awt.* controls without use of a2s.*
 // BH 9/16/2018 -- 3.2.2.06 removes "$" in JApplet public method alternative name
