@@ -22,6 +22,7 @@ import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.namespace.QName;
 
 import test.jaxb.Root_FIELD;
+import test.jaxb.Root_NONE;
 
 @XmlRegistry
 public class Test_JAXB_FIELD extends Test_ {
@@ -41,7 +42,7 @@ public class Test_JAXB_FIELD extends Test_ {
 			Date d = new Date(1373360175539L);
 			System.out.println(d);
 			
-	        Root_FIELD root = new Root_FIELD();
+	        Root_FIELD root = new Root_FIELD(false);
 			System.out.println("c is " + root.C());
 			System.out.println("getPropertyC is " + root.getPropertyC());
 			System.out.println("DEFVAL is " + root.DEFVAL);
@@ -60,16 +61,18 @@ public class Test_JAXB_FIELD extends Test_ {
 		        ByteArrayInputStream is = new ByteArrayInputStream(s.getBytes("UTF-8"));
 				Root_FIELD r = (Root_FIELD) unmarshaller.unmarshal(is);
 				assert(r.getPropertyAng().equals("\u212B"));
+				System.out.println("date is " + r.date);
 				System.out.println("PropertyC is " + r.PC());
 				System.out.println("propertyc is " + r.pc());
 				System.out.println("propertyC is " + r.pC());
 				System.out.println("getPropertyAng[].length is " + r.getPropertyAng().getBytes("utf-8").length);
 				System.out.println("DEFVAL is " + r.DEFVAL);
 				
-				Class<?> c = Test_JAXB_FIELD.class;
-				InputStream ris = c.getResourceAsStream("jaxb/Root_FIELD.xml");
-				unmarshaller.unmarshal(ris);
-				
+//
+//				Class<?> c = Test_JAXB_FIELD.class;
+//				InputStream ris = c.getResourceAsStream("jaxb/Root_FIELD.xml");
+//		        ByteArrayInputStream ris = new ByteArrayInputStream(s.getBytes("UTF-8"));
+
  			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
