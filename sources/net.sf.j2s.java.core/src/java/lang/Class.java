@@ -42,6 +42,8 @@ import java.util.Map;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import swingjs.JSUtil;
+
 //import sun.misc.Unsafe;
 //import sun.reflect.ConstantPool;
 //import sun.reflect.Reflection;
@@ -2288,17 +2290,19 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @since JDK1.1
 	 */
 	
+	@SuppressWarnings("unused")
 	public InputStream getResourceAsStream(String name) {
 		// allows an optional second argument to be a base directory in JavaScript
 	    @SuppressWarnings("unused")
 		String clazzName = $clazz$.__CLASS_NAME__;
+	    Object data = null, fname = null;
 		/**
 		 * @j2sNative
 	    if (!name)
 	      return null;
 	    name = name.replace (/\\/g, '/');
 	    var baseFolder = null;
-	    var fname = name;
+	    fname = name;
 	    if (arguments.length == 2 && name.indexOf ('/') != 0) { // additional argument
 	      name = "/" + name;
 	    }
@@ -2342,10 +2346,13 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	      return null;
 	    }
 	    var fileCache = J2S.getSetJavaFileCache(null);
-	    var data = fileCache && fileCache.get$O(javapath);   
-	    if (!data)
-	      data = J2S.getFileData(fname.toString(),null,1,1);
-	    
+	    data = fileCache && fileCache.get$O(javapath); 
+	    */
+	    if (data == null)
+	      data = JSUtil.J2S.getFileData(fname.toString(),null,true,true);
+	    /**
+	     * @j2sNative
+	     * 
 	    if (data == null || data == "error" || data.indexOf && data.indexOf("[Exception") == 0)
 	      return null;
 	            

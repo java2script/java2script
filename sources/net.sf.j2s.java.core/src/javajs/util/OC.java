@@ -350,7 +350,7 @@ public class OC extends OutputStream implements GenericOutputChannel {
       // temp files will not be sent this way.
       Object data = (sb == null ? toByteArray() : sb.toString());
       if (_function == null) {
-    	Object info = /** @j2sNative { isBinary : (sb == null) } || */ null;
+    	Object info = /** @j2sNative { isBinary : (this.sb == null) } || */ null;
         J2S.doAjax(fileName, null, data, info);
       } else {
         J2S.applyFunc(_function, data);
