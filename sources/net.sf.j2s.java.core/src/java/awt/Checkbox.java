@@ -188,7 +188,7 @@ public class Checkbox extends swingjs.a2s.Checkbox {//Component implements ItemS
      */
     public Checkbox(String label, boolean state, CheckboxGroup group)
         throws HeadlessException {
-    	super(label, state, (swingjs.a2s.CheckboxGroup) (Object) group);
+    	super(label, state, (CheckboxGroup) (Object) group);
 //        GraphicsEnvironment.checkHeadless();
 //        this.label = label;
 //        this.state = state;

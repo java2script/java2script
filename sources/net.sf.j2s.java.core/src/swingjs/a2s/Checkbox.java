@@ -25,7 +25,7 @@ public class Checkbox extends JCheckBox {
 		super(string, b);
 	}
 
-    public Checkbox(String label, boolean state, CheckboxGroup group)
+    public Checkbox(String label, boolean state, java.awt.CheckboxGroup group)
             throws HeadlessException {
             setText(label);
             setState(state);
@@ -35,10 +35,12 @@ public class Checkbox extends JCheckBox {
             	setSelected(state);
             }
         }
-    public Checkbox(String label, CheckboxGroup group, boolean state)
+    public Checkbox(String label, java.awt.CheckboxGroup group, boolean state)
             throws HeadlessException {
             this(label, state, group);
-        }	public Checkbox() {
+        }	
+    
+    public Checkbox() {
 		super();
 	}
 
@@ -50,7 +52,7 @@ public class Checkbox extends JCheckBox {
 		setSelected(b);
 	}   
 	
-	public void setCheckboxGroup(CheckboxGroup group) throws HeadlessException {
+	public void setCheckboxGroup(java.awt.CheckboxGroup group) throws HeadlessException {
             if (group != null)
             	group.add(this);
     }
