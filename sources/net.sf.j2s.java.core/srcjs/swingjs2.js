@@ -15181,7 +15181,7 @@ Clazz._getStackTrace = function(n) {
       s += "<recursing>\n";
       break;
     }
-    if (showParams) {
+    if (showParams) { 	
       s += getArgs(c);
     }
   }
