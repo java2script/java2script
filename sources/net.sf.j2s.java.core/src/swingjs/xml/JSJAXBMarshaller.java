@@ -3,6 +3,7 @@ package swingjs.xml;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +73,7 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 	private void doMarshal(Class<?> javaClass, Object javaObject, JSJAXBField field, boolean addXsiType) throws JAXBException {
 		// at least for now we rely on fields that are designated.
 
-		JSJAXBClass jaxbClass = new JSJAXBClass(javaClass, javaObject, field != null && field.isXmlIDREF);
+		JSJAXBClass jaxbClass = new JSJAXBClass(javaClass, javaObject, field != null && field.isXmlIDREF, true);
 		jaxbClass.tagField = field;
 
 		Map<String, Integer> oldMap = null;
@@ -188,15 +189,15 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 		addAllNameSpaces(jaxbClass);
 		if (!jaxbClass.isXmlIDREF)
 			addFields(jaxbClass, true);
-		if (!jaxbClass.hasElements()) {
+		if (!hasElements(jaxbClass.fields)) {
 			output(" />");
 			return;
 		}
 		output(">");
 		if (jaxbClass.isXmlIDREF) {
-			writeValue(jaxbClass.xmlIDField, jaxbClass.xmlIDField.getValue());
+			writeValue(jaxbClass.xmlIDField, jaxbClass.xmlIDField.getObject());
 		} else if (jaxbClass.enumMap != null) {
-			String s = (String) jaxbClass.enumMap.get("/" + jaxbClass.tagField.getValue().toString());
+			String s = (String) jaxbClass.enumMap.get("/" + jaxbClass.tagField.getObject().toString());
 			output(s);
 		} else {
 			addFields(jaxbClass, false);
@@ -206,6 +207,14 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 		writeTagClose(qname, !isRoot);
 	}
 	
+	private static boolean hasElements(List<JSJAXBField> fields) {
+		for (int i = 0, n = fields.size(); i < n; i++)
+			if (!fields.get(i).isAttribute)
+				return true;
+		return false;
+	}
+
+
 	private final static QName xsi = new QName("http://www.w3.org/2001/XMLSchema-instance", "xs", "xsi");
 	private final static QName xs = new QName("http://www.w3.org/2001/XMLSchema", "_", "xs");
 
@@ -238,7 +247,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 
 	private void addField(JSJAXBField field) throws JAXBException {
 		if (field != null && !field.isTransient)
-			addFieldListable(field, field.getValue(), field.holdsObjects != JSJAXBField.NO_OBJECT);
+			addFieldListable(field, field.getObject(), field.holdsObjects != JSJAXBField.NO_OBJECT);
 	}
 
 	private void addFieldListable(JSJAXBField field, Object value, boolean addXsiType) throws JAXBException {
@@ -247,7 +256,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 	 			writeField(field, null, addXsiType);
 			return;
 		}
-		if (JSJAXBClass.needsMarshalling(value)) {
+		if (needsMarshalling(value)) {
 			doMarshal(value.getClass(), value, field, addXsiType);
 			return;
 		}
@@ -259,6 +268,18 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 			writeFieldArray(field, value);
 		} else {
 			writeField(field, value, addXsiType);
+		}
+	}
+
+	static boolean needsMarshalling(Object value) {
+		if (value == null)
+			return false;
+		try {
+			// Date does not have a class?
+		Class<?> cl = value.getClass();
+		return (/** @j2sNative (cl.$clazz$ ? !!cl.$clazz$.__ANN__ : 0) || */false);
+		} catch (Throwable t) {
+			return false;
 		}
 	}
 
@@ -387,6 +408,12 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 	}
 
 	private void writeSchema(JSJAXBField field, Object value) throws JAXBException {
+		if (value instanceof Date) {
+			/**
+			 * @j2sNative
+			 * value = value.toISOString();
+			 */			
+		}
 		if (value instanceof JSXMLGregorianCalendarImpl){
 			writeDate(field, value);
 		} else {

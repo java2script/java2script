@@ -744,7 +744,7 @@ Clazz.newMeth = function (clazzThis, funName, funBody, modifiers) {
   var isStatic = (modifiers == 1 || modifiers == 2);
   var isPrivate = (typeof modifiers == "object");
   if (isPrivate) 
-	C$.$P$ = modifiers;
+	clazzThis.$P$ = modifiers;
   Clazz.saemCount0++;
   funBody.exName = funName; // mark it as one of our methods
   funBody.exClazz = clazzThis; // make it traceable

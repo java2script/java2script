@@ -31,6 +31,8 @@ class JSJAXBClass {
 	 */
 	int accessorType = TYPE_PUBLIC_MEMBER;
 
+	private boolean isMarshaller;
+
 	QName qname = new QName("", "##default", "");
 	QName qualifiedTypeName;
 
@@ -65,29 +67,21 @@ class JSJAXBClass {
 	String enumClassType;
 
 	JSJAXBField xmlValueField;
-	private String defaultNamespace;
-	private String[] seeAlso;
-	final Map<String, JSJAXBField> bindingMap = new Hashtable<String, JSJAXBField>();
+	String defaultNamespace;
+	String[] seeAlso;
+	final Map<String, JSJAXBField> unmarshallerFieldMap = new Hashtable<String, JSJAXBField>();
 	
-	final static Map<String, JSJAXBField> seeAlsoMap = new Hashtable<String, JSJAXBField>();
-	final static Map<String, Boolean> classMap = new Hashtable<String, Boolean>();
-	private final static Map<String, JSJAXBClass> knownClasses = new Hashtable<>();
-	private static final Map<String, String> marshallerNamespacePrefixes = new Hashtable<String, String>();
+	private final static Map<String, String> marshallerNamespacePrefixes = new Hashtable<String, String>();
 	private final static Map<String, XmlAdapter> adapterMap = new HashMap<String, XmlAdapter>();
 
 	static void clearStatics() {
-		seeAlsoMap.clear();
-		classMap.clear();
-		knownClasses.clear();
+		prefixIndex = 1;
 		marshallerNamespacePrefixes.clear();
 		adapterMap.clear();
 	}
 
-	private static int prefixIndex = 1;
-
-
-
-	JSJAXBClass(Class<?> javaClass, Object javaObject, boolean isXmlIDREF) {
+	JSJAXBClass(Class<?> javaClass, Object javaObject, boolean isXmlIDREF, boolean isMarshaller) {
+		this.isMarshaller = isMarshaller;
 		checkC$__ANN__(this, javaClass, javaObject, isXmlIDREF);
 		this.isXmlIDREF = isXmlIDREF;
 	}
@@ -100,7 +94,7 @@ class JSJAXBClass {
 	 * @return
 	 */
 	@SuppressWarnings("unused")
-	private static boolean checkC$__ANN__(JSJAXBClass jsjaxbClass, Class<?> javaClass, Object javaObject, boolean isXmlIDREF) {
+	static boolean checkC$__ANN__(JSJAXBClass jsjaxbClass, Class<?> javaClass, Object javaObject, boolean isXmlIDREF) {
 		boolean isTop = true;
 		while (javaClass != null) {
 
@@ -122,18 +116,25 @@ class JSJAXBClass {
 			if (jsdata != null) {
 				if (jsjaxbClass == null)
 					return true;
-				jsjaxbClass.addTypeData(jsdata, className, javaObject);
+				jsjaxbClass.addTypeData(jsdata, clazz, javaObject);
 			}
 			javaClass = javaClass.getSuperclass();
 		}
 		return false;
 	}
 
-	JSJAXBClass addTypeData(Object[][][] jsdata, String className, Object javaObject) {
-		for (int i = 0; i < jsdata.length; i++) {
-			JSJAXBField field = new JSJAXBField(this, jsdata[i], javaObject, fields.size(), propOrder);
+	JSJAXBClass addTypeData(Object[][][] jsdata, Object clazz, Object javaObject) {
+		int n = (javaObject == null ? 1 : jsdata.length);
+		for (int i = 0; i < n; i++) {
+			JSJAXBField field = new JSJAXBField(this, jsdata[i], clazz, javaObject, fields.size(), propOrder);
 				addField(field);
 		}
+		if (isMarshaller)
+			processPropOrder(javaObject);
+		return this;
+	}
+
+	private void processPropOrder(Object javaObject) {
 		for (int i = propOrder.size(); --i >= 0;) {
 			String prop = propOrder.get(i);
 			JSJAXBField field = fieldMap.get(prop);
@@ -141,15 +142,14 @@ class JSJAXBClass {
 			if (field == null) {
 				addField(new JSJAXBField(this,
 						new Object[][] { new Object[] { prop, null, null, null }, new Object[] { "@XmlElement" } },
-						javaObject, fields.size(), null));
+						null, javaObject, fields.size(), null));
 			}
 		}		
-		return this;
 	}
 
 	private void addField(JSJAXBField field) {
 		fields.add(field);
-		if (field.javaName != null)
+		if (isMarshaller && field.javaName != null)
 			fieldMap.put(field.javaName, field);
 	}
 
@@ -164,118 +164,11 @@ class JSJAXBClass {
 		return className;
 	}
 
-	void prepareForUnmarshalling(String defaultNamespace) {
-		this.defaultNamespace = defaultNamespace;
-		if (seeAlso != null) {
-			for (int i = 0; i < seeAlso.length; i++) {
-				try {
-					Class<?> cl = Class.forName(seeAlso[i]);
-					addSeeAlso(cl);
-					System.out.println("JSJAXBClass seeAlso: " + seeAlso[i]);
-				} catch (ClassNotFoundException e) {
-					System.out.println("JSJAXBClass seeAlso[" + i + "] not found: " + seeAlso[i]);
-				}
-			}
-		}
-		for (int i = 0; i < fields.size(); i++) {
-			JSJAXBField field = fields.get(i);
-			bindQName(bindingMap, field.qualifiedName, field);
-			bindQName(bindingMap, field.qualifiedWrapName, field);
-			bindQName(bindingMap, field.qualifiedTypeName, field);
-		}
-	}
-
-	void addSeeAlso(Class<?> cl) {
-		JSJAXBClass jaxbClass = new JSJAXBClass(cl, null, false);
-		JSJAXBField field = jaxbClass.fields.get(0);
-		bindQName(seeAlsoMap, field.qualifiedName, field);
-		bindQName(seeAlsoMap, field.qualifiedWrapName, field);
-		bindQName(seeAlsoMap, field.qualifiedTypeName, field);
-	}
-
-	private void bindQName(Map<String, JSJAXBField> map, QName q, JSJAXBField field) {
-		if (q == null)
-			return;
-		map.put(q.getLocalPart(), field);
-		String namespace = q.getNamespaceURI();
-		if (namespace.length() == 0)
-			namespace = defaultNamespace;
-		if (namespace != null)
-			map.put(namespace + ":" + q.getLocalPart(), field);
-		//System.out.println("JSJAXBClass#binding " + namespace + ":" + q.getLocalPart() + "->" + field.javaName);
-	}
-
-	JSJAXBField getFieldFromQName(QName qName) {
-		String key = qName.getNamespaceURI() + ":" + qName.getLocalPart();
-		JSJAXBField f = bindingMap.get(key);
-		if (f == null)
-			f = bindingMap.get(qName.getLocalPart());
-		if (f == null)
-			f = seeAlsoMap.get(key);
-		if (f == null)
-			f = seeAlsoMap.get(qName.getLocalPart());
-		return f; 
-	}
-
-	boolean hasElements() {
-		for (int i = 0, n = fields.size(); i < n; i++)
-			if (!fields.get(i).isAttribute)
-				return true;
-		return false;
-	}
-
 	public void setSeeAlso(String[] seeAlso) {
 		this.seeAlso = seeAlso;
 	}
 
-	public boolean mustUnmarshal(JSJAXBField field) {
-		if (field.isSimpleType())
-			return false;
-		return isMarshallable(field);
-	}
-
-
-	static boolean isMarshallable(JSJAXBField field) {
-		boolean isMarshallable = false;
-		String javaClassName = field.javaClassName;
-		try {
-			if (classMap.containsKey(javaClassName))
-				return classMap.get(javaClassName).booleanValue();
-			isMarshallable = (checkC$__ANN__(null, Class.forName(javaClassName), null, false));
-		} catch (ClassNotFoundException e) {
-			System.out.println("JSJAXBClass: class was not found: " + javaClassName);
-			e.printStackTrace();
-		} finally {
-		classMap.put(javaClassName, Boolean.valueOf(isMarshallable));
-		}
-		return isMarshallable;
-	}
-
-	static JSJAXBClass newUnmarshalledInstance(Class<?> javaClass, Object javaObject) {
-		String name = javaClass.getCanonicalName();
-		JSJAXBClass jjc = knownClasses.get(name);
-		if (jjc == null) {
-			jjc = new JSJAXBClass(javaClass, javaObject, false);
-			knownClasses.put(name, jjc);
-			return jjc;
-		}
-		jjc.clearUnmarshalling(javaObject);
-		return jjc;
-	}
-
-	private void clearUnmarshalling(Object javaObject) {
-		for (int i = fields.size(); --i >= 0;) {
-			fields.get(i).clear(javaObject);
-		}
-	}
-
-	static boolean needsMarshalling(Object value) {
-		if (value == null)
-			return false;
-		Class<?> cl = value.getClass();
-		return (/** @j2sNative (cl.$clazz$ ? !!cl.$clazz$.__ANN__ : 0) || */
-		false);
-	}
+	private static int prefixIndex = 1;
 
 	/**
 	 * Prepend @Xml......: to the tag name to avoid internal collision when
@@ -284,7 +177,7 @@ class JSJAXBClass {
 	 * @param tag
 	 * @return
 	 */
-	static String getNamespacePrefix(String namespace) {
+	static String getPrefixFor(String namespace) {
 		String prefix = marshallerNamespacePrefixes.get(namespace);
 		if (prefix == null)
 			marshallerNamespacePrefixes.put(namespace, prefix = "ns" + (++prefixIndex));
@@ -298,17 +191,5 @@ class JSJAXBClass {
 		}
 		return adapter;
 	}
-
-	public Object setEnumValue(Class<?> javaClass, String name) {
-		name = ((JSJAXBField) enumMap.get(name)).javaName;
-		Object o = null;
-		/**
-		 * @j2sNative
-		 * 
-		 *   o = Enum.valueOf$Class$S(javaClass, name);
-		 */
-		return o;
-	}
-
 
 }

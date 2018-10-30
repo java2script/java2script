@@ -218,6 +218,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	private static final String NULL_PACKAGE = "_";
 
+	static final int JAXB_TYPE_UNKNOWN =  -1;
+	final static int JAXB_TYPE_NONE = 0;
+	final static int JAXB_TYPE_FIELD = 1;
+	final static int JAXB_TYPE_PUBLIC_MEMBER = 2;
+	final static int JAXB_TYPE_PROPERTY = 3;
+
+
 	private IJavaProject global_project;
 
 	private String package_name;
@@ -254,16 +261,19 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 */
 	private List<LocalVariable> class_visitedVars = new ArrayList<LocalVariable>();
 
+	int class_jaxbAccessorType = JAXB_TYPE_UNKNOWN;
+	
+	/**
+	 * annotations collected for a class
+	 */
+	private List<ClassAnnotation> class_annotations;
+
 	/**
 	 * a flag to indicate that the expression being evaluated is an ArrayAccess type
 	 * and so must be integerized with |0
 	 */
 	private boolean temp_processingArrayIndex;
 
-	/**
-	 * annotations collected for a class
-	 */
-	private List<ClassAnnotation> class_annotations;
 	/**
 	 * functionalInterface methods add the name$ qualifier even if they are
 	 * parameterized
@@ -890,28 +900,15 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		buffer.append(s);
 	}
 
+	public boolean visit(EnumConstantDeclaration node) {
+		// see addEnumConstants
+		return false;
+	}
+
 	public boolean visit(EnumDeclaration node) {
 		setPackage(null);
 		addClassOrInterface(node, node.resolveBinding(), node.bodyDeclarations(), 'e');
 		return false;
-	}
-
-	public boolean visit(EnumConstantDeclaration node) {
-		
-System.out.println("EnumConstantDeclaration???" + node);
-
-		if (checkj2sIgnoreAndJAXB(node))
-			return false;
-		buffer.append("this.");
-		node.getName().accept(this);
-		buffer.append(" = ");
-		node.getName().accept(this);
-		buffer.append(";\r\n");
-//		 EnumConstantDeclaration:
-//		     [ Javadoc ] { ExtendedModifier } Identifier
-//		         [ ( [ Expression { , Expression } ] ) ]
-//		         [ AnonymousClassDeclaration ]
-		return true;
 	}
 
 	public boolean visit(ExpressionStatement node) {
@@ -959,10 +956,7 @@ System.out.println("EnumConstantDeclaration???" + node);
 	 * 
 	 */
 	public boolean visit(Initializer node) {
-		if (checkj2sIgnoreAndJAXB(node))
-			return false;
-		node.getBody().accept(this);
-		buffer.append("\r\n");
+		// handled by addClassOrInterface
 		return false;
 	}
 
@@ -976,12 +970,8 @@ System.out.println("EnumConstantDeclaration???" + node);
 		return false;
 	}
 
-	@SuppressWarnings("unchecked")
 	public boolean visit(MethodDeclaration node) {
-		IMethodBinding mBinding = node.resolveBinding();
-		if (mBinding == null || checkj2sIgnoreAndJAXB(node))
-			return false;
-		processMethodDeclaration(mBinding, node.parameters(), node.getBody(), node.isConstructor(), NOT_LAMBDA);
+		// handled in addClassorInterface
 		return false;
 	}
 
@@ -1631,7 +1621,7 @@ System.out.println("EnumConstantDeclaration???" + node);
 	 *                         class)
 	 * @return localName
 	 */
-	@SuppressWarnings("null")
+	@SuppressWarnings({ "null", "unchecked" })
 	private void addClassOrInterface(ASTNode node, ITypeBinding binding, List<?> bodyDeclarations, char type) {
 		if (binding == null)
 			return;
@@ -1699,7 +1689,7 @@ System.out.println("EnumConstantDeclaration???" + node);
 		// set up key fields and local variables
 
 		if (isLocal || isClass || isEnum) {
-			checkj2sIgnoreAndJAXB((BodyDeclaration) node);
+			checkAnnotations((BodyDeclaration) node, CHECK_ANNOTATIONS_ONLY);
 		}
 		ITypeBinding oldBinding = null;
 		String oldShortClassName = null, this$0Name0 = null, finalShortClassName, finalPackageName;
@@ -1940,11 +1930,10 @@ System.out.println("EnumConstantDeclaration???" + node);
 				// in Class A.
 
 				if (isField || element instanceof Initializer) {
-					if ((isInterface || isStatic(element)) && !checkj2sIgnoreAndJAXB(element)) {
+					if ((isInterface || isStatic(element)) && checkAnnotations(element, CHECK_J2S_IGNORE_ONLY)) {
 						lstStatic.add(element);
 						if (isField)
 							addFieldDeclaration((FieldDeclaration) element, FIELD_DECL_STATIC_DEFAULTS);
-
 					}
 				}
 			}
@@ -1958,7 +1947,7 @@ System.out.println("EnumConstantDeclaration???" + node);
 			for (int i = lstStatic.size(); --i >= 0;) {
 				BodyDeclaration element = lstStatic.remove(0);
 				if (element instanceof Initializer) {
-					element.accept(this);
+					((Initializer) element).getBody().accept(this);
 					buffer.append(";\r\n");
 					haveDeclarations = true;
 				} else if (addFieldDeclaration((FieldDeclaration) element, FIELD_DECL_STATIC_NONDEFAULT)) {
@@ -1975,6 +1964,9 @@ System.out.println("EnumConstantDeclaration???" + node);
 			setClassAndBinding(finalShortClassName, binding);
 		}
 
+		List<FieldDeclaration> fields = (isInterface || isLambda || isEnum || class_annotations == null ? null : new ArrayList<>());
+		List<IMethodBinding> methods = (fields == null ? null : new ArrayList<>());
+
 		if (!isInterface) {
 
 			// if this is not an interface, generate $init0$ and $init$ methods
@@ -1986,15 +1978,21 @@ System.out.println("EnumConstantDeclaration???" + node);
 			buffer.append("\r\nClazz.newMeth(C$, '$init$', function () {\r\n");
 			// we include all field definitions here and all nonstatic
 			// initializers
+			
 			if (!isLambda)
 				for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 					BodyDeclaration element = (BodyDeclaration) iter.next();
-					if ((element instanceof FieldDeclaration || element instanceof Initializer) && !isStatic(element)
-							&& !checkj2sIgnoreAndJAXB(element)) {
-						if (element instanceof FieldDeclaration)
+					boolean isField = element instanceof FieldDeclaration;
+					if ((isField || element instanceof Initializer) && !isStatic(element)
+							&& checkAnnotations(element, CHECK_J2S_IGNORE_AND_ANNOTATIONS)) {
+						if (isField) {
+							 if (fields != null && !Modifier.isTransient(((FieldDeclaration) element).getModifiers()))
+								 fields.add((FieldDeclaration) element);
 							addFieldDeclaration((FieldDeclaration) element, FIELD_DECL_NONSTATIC_ALL);
-						else
-							element.accept(this);
+						} else {
+							((Initializer) element).getBody().accept(this);
+							buffer.append("\r\n");
+						}
 					}
 				}
 			buffer.append("}, 1);\r\n");
@@ -2022,7 +2020,15 @@ System.out.println("EnumConstantDeclaration???" + node);
 			for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 				ASTNode element = (ASTNode) iter.next();
 				if (element instanceof MethodDeclaration) {
-					IMethodBinding method = ((MethodDeclaration) element).resolveBinding();
+					MethodDeclaration mnode = (MethodDeclaration) element;
+					IMethodBinding method = mnode.resolveBinding();
+					if (method == null || !checkAnnotations(mnode, CHECK_J2S_IGNORE_AND_ANNOTATIONS))
+						continue;
+					if (methods != null) {
+						String mname = method.getName();
+						if (mname.startsWith("set") || mname.startsWith("get") || mname.startsWith("is"))
+							methods.add(method);
+					}
 					int defpt = -1;
 					if (Modifier.isDefault(method.getModifiers())) {
 						log("default method " + method.getKey());
@@ -2040,7 +2046,7 @@ System.out.println("EnumConstantDeclaration???" + node);
 							}
 						}
 					}
-					element.accept(this);
+					processMethodDeclaration(method, mnode.parameters(), mnode.getBody(), mnode.isConstructor(), NOT_LAMBDA);
 					if (defpt >= 0) {
 						defaults.append(buffer.substring(defpt));
 						buffer.setLength(defpt);
@@ -2070,8 +2076,8 @@ System.out.println("EnumConstantDeclaration???" + node);
 		// add any recently defined static field definitions, assert strings
 		// and Enum constants
 
-		if (class_annotations != null)
-			ClassAnnotation.addClassAnnotations(class_annotations, trailingBuffer);
+		if (class_jaxbAccessorType != JAXB_TYPE_UNKNOWN)
+			ClassAnnotation.addClassAnnotations(class_jaxbAccessorType, class_annotations, fields, methods, trailingBuffer);
 
 		buffer.append(trailingBuffer); // also writes the assert string
 		if (isAnonymous) {
@@ -2101,6 +2107,23 @@ System.out.println("EnumConstantDeclaration???" + node);
 				this$0Name = this$0Name0;
 				setClassAndBinding(oldShortClassName, oldBinding);
 			}
+		}
+	}
+
+	private boolean checkDeclarationType(BodyDeclaration element, int type) {
+		switch (class_jaxbAccessorType) {
+		case JAXB_TYPE_FIELD:
+		case JAXB_TYPE_PROPERTY:
+			return (type == class_jaxbAccessorType);
+		case JAXB_TYPE_NONE:
+		case JAXB_TYPE_PUBLIC_MEMBER:
+			return true;
+			// can't check here, because if just one of set or get is annotated,
+			// then it doesn't matter if either is public or not
+//			return Modifier.isPublic(element.getModifiers());
+		default:
+		case JAXB_TYPE_UNKNOWN:
+			return false;
 		}
 	}
 
@@ -2157,13 +2180,7 @@ System.out.println("EnumConstantDeclaration???" + node);
 		buffer.append("$vals=Clazz.array(C$,[0]);\r\n");
 		for (int i = 0; i < constants.size(); i++) {
 			EnumConstantDeclaration enumConst = (EnumConstantDeclaration) constants.get(i);
-
-			System.out.println("addEnumConstants???" + enumConst);		
-
-
-			if (checkj2sIgnoreAndJAXB(enumConst)) // for JAXB
-				continue;
-
+			checkAnnotations(enumConst, CHECK_ANNOTATIONS_ONLY); // for JAXB only
 			IMethodBinding binding = enumConst.resolveConstructorBinding();
 			AnonymousClassDeclaration anonDeclare = enumConst.getAnonymousClassDeclaration();
 			String anonName = null;
@@ -2193,6 +2210,7 @@ System.out.println("EnumConstantDeclaration???" + node);
 	 * 
 	 * 
 	 * @param field the field being declared
+	 * @param fields 
 	 * @param mode  FIELD_DECL_STATIC_NONDEFAULT static fields into $clinit$
 	 *              (values) FIELD_DECL_STATIC_DEFAULTS static fields into buffer
 	 *              directly (defaults) FIELD_DECL_NONSTATIC_ALL static variables
@@ -5317,36 +5335,34 @@ System.out.println("EnumConstantDeclaration???" + node);
 		return docs;
 	}
 
-	/**
-	 * @param node
-	 * @return true if we have @j2sIngore for this BodyDeclaration
-	 */
-	protected boolean checkj2sIgnoreAndJAXB(BodyDeclaration node) {
-		return checkAnnotations(node, "@j2sIgnore") != null;
-	}
+	private final static int CHECK_J2S_IGNORE_ONLY = 1;
+	private final static int CHECK_ANNOTATIONS_ONLY = 2;
+	private final static int CHECK_J2S_IGNORE_AND_ANNOTATIONS = 3;
 
 	/**
 	 * Method with "j2s*" tag.
 	 * 
 	 * @param node
-	 * @return
+	 * @return false if we have @j2sIngore for this BodyDeclaration
 	 */
-	private Object checkAnnotations(BodyDeclaration node, String tagName) {
-		Javadoc javadoc = node.getJavadoc();
-		if (javadoc != null) {
-			List<?> tags = javadoc.tags();
-			if (tags.size() != 0) {
-				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					if (tagName.equals(tagEl.getTagName())) {
-						return tagEl;
+	private boolean checkAnnotations(BodyDeclaration node, int mode) {
+		if (mode != CHECK_ANNOTATIONS_ONLY) {
+			Javadoc javadoc = node.getJavadoc();
+			if (javadoc != null) {
+				List<?> tags = javadoc.tags();
+				if (tags.size() != 0) {
+					for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
+						TagElement tagEl = (TagElement) iter.next();
+						if ("@j2sIgnore".equals(tagEl.getTagName())) {
+							return false;
+						}
 					}
 				}
 			}
 		}
 		List<?> modifiers = node.modifiers();
 		if (modifiers != null && modifiers.size() > 0) {
-			
+
 			for (Iterator<?> iter = modifiers.iterator(); iter.hasNext();) {
 				Object obj = iter.next();
 				if (obj instanceof Annotation) {
@@ -5354,24 +5370,36 @@ System.out.println("EnumConstantDeclaration???" + node);
 					String qName = annotation.getTypeName().getFullyQualifiedName();
 					int idx = qName.indexOf("J2S");
 					if (idx >= 0) {
+						if (mode == CHECK_ANNOTATIONS_ONLY)
+							continue;
 						String annName = qName.substring(idx);
-						annName = annName.replaceFirst("J2S", "@j2s");
-						if (annName.startsWith(tagName)) {
-							return annotation;
+						if (annName.startsWith("J2SIgnore")) {
+							return false;
 						}
-					} else if (!qName.equals("Override") 
-							&& !qName.equals("Deprecated")
-							&& !qName.startsWith("Suppress")
-							) {
+					} else if (qName.equals("Override") 
+							|| qName.equals("Deprecated")
+							|| qName.startsWith("Suppress")
+							|| qName.startsWith("ConstructorProperties")) {
+						// see java\awt\ScrollPane.js    @ConstructorProperties({"scrollbarDisplayPolicy"})
+						// ignore
+					} else {
 						if (class_annotations == null)
 							class_annotations = new ArrayList<ClassAnnotation>();
 						ClassAnnotation ann = new ClassAnnotation(qName, annotation, node);
 						class_annotations.add(ann);
+						if ("XmlAccessorType".equals(qName)) {
+							String s= annotation.toString();
+							class_jaxbAccessorType = (
+									s.contains("FIELD") ? JAXB_TYPE_FIELD
+									: s.contains("PUBLIC") ? JAXB_TYPE_PUBLIC_MEMBER
+									: s.contains("PROPERTY") ? JAXB_TYPE_PROPERTY 
+									: JAXB_TYPE_NONE);
+						}
 					}
 				}
 			}
 		}
-		return null;
+		return true;
 	}
 
 	/////////////////////////////
@@ -6140,24 +6168,26 @@ System.out.println("EnumConstantDeclaration???" + node);
 		private String qName;
 		
 		protected ClassAnnotation(String qName, Annotation annotation, BodyDeclaration node) {
-			System.out.println(">>>>" + qName + " " + annotation.getClass().getName() + " " + annotation);
+			System.out.println(">>>>" + qName + " "
+		//+ annotation.getClass().getName()
+					+ " " + annotation);
 			this.qName = qName;
 			this.annotation = annotation;
 			this.node = node;
 		}
 
 		@SuppressWarnings("unchecked")
-		public static void addClassAnnotations(List<ClassAnnotation> class_annotations, TrailingBuffer trailingBuffer) {
-			if (class_annotations == null)
-				return;
+		public static void addClassAnnotations(int accessType, List<ClassAnnotation> class_annotations, List<FieldDeclaration> fields,
+				List<IMethodBinding> methods, TrailingBuffer trailingBuffer) {
 			int pt = 0, ptBuf = 0;
 			ASTNode lastNode = null;
 			List<?> fragments = null;
+			boolean allowImplicit = true;
 			for (int i = 0; i < class_annotations.size(); i++) {
 				ClassAnnotation a = class_annotations.get(i);
 				String str = a.annotation.toString();
 				if (a.annotation instanceof SingleMemberAnnotation) {
-					// resolve classes 
+					// resolve classes
 					List<ASTNode> expressions = null;
 					Expression e = ((SingleMemberAnnotation) a.annotation).getValue();
 					if (e instanceof TypeLiteral) {
@@ -6194,10 +6224,12 @@ System.out.println("EnumConstantDeclaration???" + node);
 					fragments = null;
 					if (a.node instanceof EnumDeclaration) {
 						type = ((EnumDeclaration) a.node).resolveBinding();
+						allowImplicit = false;
 					} else if (a.node instanceof TypeDeclaration) {
 						type = ((TypeDeclaration) a.node).resolveBinding();
- 					} else if (a.node instanceof FieldDeclaration) {
+					} else if (a.node instanceof FieldDeclaration) {
 						FieldDeclaration field = (FieldDeclaration) a.node;
+						fields.remove(field);
 						fragments = field.fragments();
 						VariableDeclarationFragment identifier = (VariableDeclarationFragment) fragments.get(0);
 						IVariableBinding var = identifier.resolveBinding();
@@ -6206,6 +6238,10 @@ System.out.println("EnumConstantDeclaration???" + node);
 					} else if (a.node instanceof MethodDeclaration) {
 						MethodDeclaration method = (MethodDeclaration) a.node;
 						IMethodBinding var = method.resolveBinding();
+						methods.remove(var);
+						var = getJAXBGetMethod(var, methods, false);
+						if (var == null)
+							continue;
 						varName = "M:" + var.getName();
 						type = var.getReturnType();
 					} else if (a.node instanceof EnumConstantDeclaration) {
@@ -6216,23 +6252,88 @@ System.out.println("EnumConstantDeclaration???" + node);
 					}
 					String className = (type == null ? null
 							: stripJavaLang(
-									//NameMapper.checkClassReplacement(
-									//removeBracketsAndFixNullPackageName(
-									NameMapper.fixPackageName(
-											getJavaClassNameQualified(type)
-									)
-											//))
-									));
+									// NameMapper.checkClassReplacement(
+									// removeBracketsAndFixNullPackageName(
+									NameMapper.fixPackageName(getJavaClassNameQualified(type))
+							// ))
+							));
 					trailingBuffer.append(pt++ == 0 ? "C$.__ANN__ = [[[" : "]],\n  [[");
 					trailingBuffer.append((varName == null ? null : "'" + varName + "'"));
 					ptBuf = trailingBuffer.buf.length();
 					trailingBuffer.append(",'" + className + "'],[");
 				}
 				trailingBuffer.append("'" + str + "'");
+				if (allowImplicit && str.indexOf("propOrder=") >= 0)
+					allowImplicit = false;
 			}
-			addTrailingFragments(fragments, trailingBuffer, ptBuf);
-			if (pt > 0)
+			if (pt > 0) {
+				addTrailingFragments(fragments, trailingBuffer, ptBuf);
+				if (allowImplicit)
+					addImplicitJAXBFieldsAndMethods(accessType, trailingBuffer, fields, methods);
 				trailingBuffer.append("]]];\n");
+			}
+		}
+
+		private static IMethodBinding getJAXBGetMethod(IMethodBinding var, List<IMethodBinding> methods, boolean returnVar2) {
+			String varName = var.getName();
+			// check for matching get/is and set
+			if (varName.startsWith("set")) {
+				return getMethodBinding(methods, "g" + varName.substring(1));
+			} 
+			IMethodBinding var2 = getMethodBinding(methods,
+					"set" + varName.substring(varName.startsWith("get") ? 3 : 2));			
+			return (var2 == null ? null : returnVar2 ? var2 : var);
+		}
+
+		private static void addImplicitJAXBFieldsAndMethods(int accessType, TrailingBuffer trailingBuffer,
+				List<FieldDeclaration> fields, List<IMethodBinding> methods) {
+			if (accessType == JAXB_TYPE_NONE)
+				return;
+			boolean publicOnly = (accessType == JAXB_TYPE_PUBLIC_MEMBER);
+			if (accessType != JAXB_TYPE_PROPERTY) {
+				for (int j = 0; j < fields.size(); j++) {
+					FieldDeclaration field = fields.get(j);
+					if (publicOnly && !Modifier.isPublic(field.getModifiers()))
+						continue;
+					List fragments = field.fragments();
+					for (int i = 0; i < fragments.size(); i++) {
+						VariableDeclarationFragment identifier = (VariableDeclarationFragment) fragments.get(i);
+						IVariableBinding var = identifier.resolveBinding();
+						String varName = var.getName();
+						ITypeBinding type = var.getType();
+						addAnnotation(type, varName, "@XmlElement", trailingBuffer);
+					}
+				}
+			}
+			if (accessType != JAXB_TYPE_FIELD) {
+				for (int i = 0; i < methods.size(); i++) {
+					IMethodBinding var = methods.get(i);
+					IMethodBinding var2 = getJAXBGetMethod(var, methods, true);
+					if (var2 == null || publicOnly && !Modifier.isPublic(var.getModifiers()) && !Modifier.isPublic(var2.getModifiers()))
+						continue;
+					String varName = var.getName();
+					if (varName.startsWith("set"))
+						varName = (var = var2).getName();
+					ITypeBinding type = var.getReturnType();
+					addAnnotation(type, "M:" + varName, "@XmlElement", trailingBuffer);
+				}
+			}
+		}
+
+		private static void addAnnotation(ITypeBinding type, String varName, String str, TrailingBuffer trailingBuffer) {
+			String className = (stripJavaLang(NameMapper.fixPackageName(getJavaClassNameQualified(type))));
+			trailingBuffer.append("]],\n  [[");
+			trailingBuffer.append("'" + varName + "'");
+			trailingBuffer.append(",'" + className + "'],['"+ str + "'");
+		}
+
+		private static IMethodBinding getMethodBinding(List<IMethodBinding> methods, String name) {
+			for (int i = methods.size(); --i >= 0;) {
+				if (name.equals(methods.get(i).getName())) {
+					return 	methods.remove(i);
+				}
+			}
+			return null;
 		}
 
 		private static void addTrailingFragments(List<?> fragments, TrailingBuffer trailingBuffer, int ptBuf) {

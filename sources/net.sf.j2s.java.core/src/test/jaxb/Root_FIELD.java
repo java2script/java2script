@@ -35,6 +35,13 @@ public class Root_FIELD {
 	// TODO: DOES NOT WORK @XmlElement(name=x)
 
 	public Root_FIELD() {
+		System.out.println("root field () constructor ");
+	}
+
+	public Root_FIELD(boolean addR1) {
+		if (addR1)
+			r1 = new Root_FIELD();
+		date = new Date();
 
 		lst.add("list1");
 		lst.add(null);
@@ -44,12 +51,23 @@ public class Root_FIELD {
 		hm.put("null", null);
 		if (!isCopy) {
 			isCopy = true;
-			r1 = new Root_FIELD();
+//			r1 = new Root_FIELD();
 		}
-	}
+		
+		NILLt = "nillable-true";
 
-	public Root_FIELD(boolean addR1) {
-		r1 = new Root_FIELD();
+
+		i2 = new Integer[2];
+
+		ia = new int[2];
+		sa = new String[] { null, "s", "a", null };
+
+		saa = new String[][] { null, new String[] { "s", "a" }, null };
+
+		saaa = new String[][][] { null,
+				new String[][] { new String[] { "s", "a" }, new String[] { "t", "b" } }, null };
+
+		Ang = "\u212B";
 	}
 
 	public void toC(String c) {
@@ -74,7 +92,7 @@ public class Root_FIELD {
 
 ////////////////////////////////////////////////////
 
-	public String s;
+	public String s; 
 	// ignored -- not initialized
 
 	@XmlTransient
@@ -95,34 +113,34 @@ public class Root_FIELD {
     //     <NILL xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
 
 	@XmlElement(nillable=true)
-	private String NILLt = "nillable-true";
+	private String NILLt;
     //         <NILLt>nillable-true</NILLt>
 
-	@XmlElement(defaultValue="default-value")
-	public String DEFVAL = null;
+	@XmlElement(defaultValue="default-value") // DOES NOT WORK IN JAVA OR JAVASCRIPT
+	public String DEFVAL;
     //         <DEFVAL xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
 	
 ///// arrays /////
 
-	public Root_FIELD[] r2 = new Root_FIELD[2];
+	public Root_FIELD[] r2;
 //    <r2 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
 //    <r2 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
 
-	public Integer[] i2 = new Integer[2];
+	public Integer[] i2;
 //    <i2 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
 //    <i2 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
 
-	public int[] ia = new int[2];
+	public int[] ia;
 //    <ia>0</ia>
 //    <ia>0</ia>
 
-	public String[] sa = new String[] { null, "s", "a", null };
+	public String[] sa;
 //  <sa xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
 //  <sa>s</sa>
 //  <sa>a</sa>
 //  <sa xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
 
-	public String[][] saa = new String[][] { null, new String[] { "s", "a" }, null };
+	public String[][] saa;
 //  <saa xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
 //  <saa>
 //      <item>s</item>
@@ -130,8 +148,7 @@ public class Root_FIELD {
 //  </saa>
 //  <saa xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
 
-	public String[][][] saaa = new String[][][] { null,
-			new String[][] { new String[] { "s", "a" }, new String[] { "t", "b" } }, null };
+	public String[][][] saaa;
 //  <saaa xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
 //  <saaa>
 //      <item>
@@ -173,7 +190,7 @@ public class Root_FIELD {
 //        <item xsi:nil="true"/>
 //    </lst>
 
-	String Ang = "\u212B";
+	String Ang;
 	// <Ang>[3 bytes here]</Ang>
 	public String getPropertyAng() {
 		return Ang;
@@ -236,7 +253,7 @@ public class Root_FIELD {
 		D = "setD";
 	}
 
-	public Date date = new Date();
+	public Date date;
 //<date>2018-09-30T05:44:03.162-05:00</date>
 
 ///// capitalization tests /////
