@@ -70,6 +70,7 @@ class JSJAXBClass {
 	String defaultNamespace;
 	String[] seeAlso;
 	final Map<String, JSJAXBField> unmarshallerFieldMap = new Hashtable<String, JSJAXBField>();
+	private Class<?> javaClass;
 	
 	private final static Map<String, String> marshallerNamespacePrefixes = new Hashtable<String, String>();
 	private final static Map<String, XmlAdapter> adapterMap = new HashMap<String, XmlAdapter>();
@@ -82,6 +83,7 @@ class JSJAXBClass {
 
 	JSJAXBClass(Class<?> javaClass, Object javaObject, boolean isXmlIDREF, boolean isMarshaller) {
 		this.isMarshaller = isMarshaller;
+		this.javaClass = javaClass;
 		checkC$__ANN__(this, javaClass, javaObject, isXmlIDREF);
 		this.isXmlIDREF = isXmlIDREF;
 	}
@@ -96,6 +98,7 @@ class JSJAXBClass {
 	@SuppressWarnings("unused")
 	static boolean checkC$__ANN__(JSJAXBClass jsjaxbClass, Class<?> javaClass, Object javaObject, boolean isXmlIDREF) {
 		boolean isTop = true;
+		JSJAXBClass top = jsjaxbClass;
 		while (javaClass != null) {
 
 //			C$.__ANN__ = [[null,'XmlAccessorType',['@XmlAccessorType(XmlAccessType.FIELD)','@XmlType(name="MoreComplex")']],
@@ -112,12 +115,16 @@ class JSJAXBClass {
 			if (!isTop) {
 				className = null;
 			}
-			isTop = false;
 			if (jsdata != null) {
 				if (jsjaxbClass == null)
 					return true;
 				jsjaxbClass.addTypeData(jsdata, clazz, javaObject);
+				if (!isTop) {
+					for (int i = 1, n = jsjaxbClass.fields.size(); i < n; i++)
+						top.addField(jsjaxbClass.fields.get(i));
+				}
 			}
+			isTop = false;
 			javaClass = javaClass.getSuperclass();
 		}
 		return false;
@@ -125,27 +132,27 @@ class JSJAXBClass {
 
 	JSJAXBClass addTypeData(Object[][][] jsdata, Object clazz, Object javaObject) {
 		int n = (javaObject == null ? 1 : jsdata.length);
-		for (int i = 0; i < n; i++) {
+		for (int i = fields.size() == 0 ? 0 : 1; i < n; i++) {
 			JSJAXBField field = new JSJAXBField(this, jsdata[i], clazz, javaObject, fields.size(), propOrder);
 				addField(field);
 		}
-		if (isMarshaller)
-			processPropOrder(javaObject);
+//		if (isMarshaller)
+//			processPropOrder(javaObject);
 		return this;
 	}
 
-	private void processPropOrder(Object javaObject) {
-		for (int i = propOrder.size(); --i >= 0;) {
-			String prop = propOrder.get(i);
-			JSJAXBField field = fieldMap.get(prop);
-			// annotations may only show up in @XmlType:propOrder
-			if (field == null) {
-				addField(new JSJAXBField(this,
-						new Object[][] { new Object[] { prop, null, null, null }, new Object[] { "@XmlElement" } },
-						null, javaObject, fields.size(), null));
-			}
-		}		
-	}
+//	private void processPropOrder(Object javaObject) {
+//		for (int i = propOrder.size(); --i >= 0;) {
+//			String prop = propOrder.get(i);
+//			JSJAXBField field = fieldMap.get(prop);
+//			// annotations may only show up in @XmlType:propOrder
+//			if (field == null) {
+//				addField(new JSJAXBField(this,
+//						new Object[][] { new Object[] { prop, null, null, null }, new Object[] { "@XmlElement" } },
+//						null, javaObject, fields.size(), null));
+//			}
+//		}		
+//	}
 
 	private void addField(JSJAXBField field) {
 		fields.add(field);

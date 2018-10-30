@@ -134,6 +134,8 @@ class JSJAXBField {
 
 	private Object clazz;
 
+	private Object[][] adata;
+
 	/**
 	 * @param jclass
 	 * @param adata
@@ -146,6 +148,7 @@ class JSJAXBField {
 		this.javaObject = javaObject;
 		this.clazz = clazz;
 		this.index = index;
+		this.adata = adata;
 		javaName = (String) adata[0][0];
 		isMethod = (javaName != null && javaName.charAt(1) == ':'); 
 		javaClassName = (String) adata[0][1];

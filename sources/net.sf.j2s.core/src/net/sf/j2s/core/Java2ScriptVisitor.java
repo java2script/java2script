@@ -6179,10 +6179,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		@SuppressWarnings("unchecked")
 		public static void addClassAnnotations(int accessType, List<ClassAnnotation> class_annotations, List<FieldDeclaration> fields,
 				List<IMethodBinding> methods, TrailingBuffer trailingBuffer) {
+
 			int pt = 0, ptBuf = 0;
 			ASTNode lastNode = null;
 			List<?> fragments = null;
-			boolean allowImplicit = true;
+			String propOrder = null;
 			for (int i = 0; i < class_annotations.size(); i++) {
 				ClassAnnotation a = class_annotations.get(i);
 				String str = a.annotation.toString();
@@ -6204,7 +6205,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 							str += sep;
 							e = (Expression) expressions.get(j);
 							if (e instanceof TypeLiteral) {
-								str += ((TypeLiteral) e).getType().resolveBinding().getQualifiedName() + ".class";
+								str += "\""+((TypeLiteral) e).getType().resolveBinding().getQualifiedName() + ".class\"";
 							} else {
 								str += e.toString();
 							}
@@ -6224,7 +6225,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					fragments = null;
 					if (a.node instanceof EnumDeclaration) {
 						type = ((EnumDeclaration) a.node).resolveBinding();
-						allowImplicit = false;
+						propOrder = "XX";
 					} else if (a.node instanceof TypeDeclaration) {
 						type = ((TypeDeclaration) a.node).resolveBinding();
 					} else if (a.node instanceof FieldDeclaration) {
@@ -6263,13 +6264,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					trailingBuffer.append(",'" + className + "'],[");
 				}
 				trailingBuffer.append("'" + str + "'");
-				if (allowImplicit && str.indexOf("propOrder=") >= 0)
-					allowImplicit = false;
+				if (propOrder == null && str.indexOf("propOrder=") >= 0)
+					propOrder = str;
 			}
 			if (pt > 0) {
 				addTrailingFragments(fragments, trailingBuffer, ptBuf);
-				if (allowImplicit)
-					addImplicitJAXBFieldsAndMethods(accessType, trailingBuffer, fields, methods);
+				addImplicitJAXBFieldsAndMethods(accessType, trailingBuffer, fields, methods, propOrder);
 				trailingBuffer.append("]]];\n");
 			}
 		}
@@ -6286,7 +6286,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 
 		private static void addImplicitJAXBFieldsAndMethods(int accessType, TrailingBuffer trailingBuffer,
-				List<FieldDeclaration> fields, List<IMethodBinding> methods) {
+				List<FieldDeclaration> fields, List<IMethodBinding> methods, String propOrder) {
 			if (accessType == JAXB_TYPE_NONE)
 				return;
 			boolean publicOnly = (accessType == JAXB_TYPE_PUBLIC_MEMBER);
@@ -6300,6 +6300,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						VariableDeclarationFragment identifier = (VariableDeclarationFragment) fragments.get(i);
 						IVariableBinding var = identifier.resolveBinding();
 						String varName = var.getName();
+						// If propOrder is defined, then we are only allowed to 
+						// add implicit fields that are in that propOrder
+						if (propOrder != null && propOrder.indexOf("\"" + varName + "\"") < 0)
+							continue;
 						ITypeBinding type = var.getType();
 						addAnnotation(type, varName, "@XmlElement", trailingBuffer);
 					}

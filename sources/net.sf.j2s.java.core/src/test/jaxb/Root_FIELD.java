@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.XmlType;
 //	    "c",
 //	    "publ"
 //	})
-public class Root_FIELD {
+public class Root_FIELD extends ROOT {
 
 	public static boolean isCopy = false;
 

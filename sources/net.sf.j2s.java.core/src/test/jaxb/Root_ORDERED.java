@@ -30,7 +30,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 @XmlSeeAlso({test.jaxb2.Obj.class, test.jaxb.Obj.class})
 @XmlRootElement(name="RootOrdered",namespace="www.jalview.org")
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder = {  
+@XmlType(propOrder = {
 		"type",
 		"cx",
 		"list0",
@@ -84,28 +84,20 @@ public class Root_ORDERED {
 
 	}
 	
-	@XmlElement
 	List<Object> list0; 
 	
-	@XmlElement
 	BigInteger bi;
 	
-	@XmlElement
 	BigDecimal bd = new BigDecimal("123.456");
 	
-	@XmlElement
 	float[] f; 
 
-	@XmlElement
 	float f2 = 1.3f;
 
-	@XmlElement
 	Float[] f3 = new Float[] {1.2f};
 
-	@XmlElement
 	Float f4 = 1.3f;
 
-	@XmlElement
 	Object f6 = new Integer(3);
 	
 	
@@ -152,8 +144,9 @@ public class Root_ORDERED {
 	byte[] bytes64 = new byte[] {(byte) 100, (byte) 101};
 
 	//@XmlIDREF
-	@XmlElement(namespace="www.jalview.org3")
-	public SomewhatComplex cx;  
+	//@XmlElement(namespace="www.jalview.org3")
+	public SomewhatComplex cx;
+	
 //
 //	@XmlElement(namespace="www.jalview.org3")
 //	public SomewhatComplex[] cxa = new SomewhatComplex[] { new SomewhatComplex("1"),  new SomewhatComplex("2")};

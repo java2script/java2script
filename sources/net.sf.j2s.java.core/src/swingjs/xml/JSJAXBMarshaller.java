@@ -38,7 +38,6 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 	private OutputStream outputStream;
 	private JAXBContext context;
 	private StreamResult result;
-	private JAXBElement<?> jaxbElement;
 
 	public JSJAXBMarshaller(JAXBContext context) {
 		this.context = context;
@@ -46,13 +45,8 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 
 	@Override
 	public void marshal(Object jaxbElement, Result result) throws JAXBException {
-		Object javaObject;
-		if (jaxbElement instanceof JAXBElement) {
-			jaxbElement = (JAXBElement<?>) jaxbElement;
-			javaObject = this.jaxbElement.getValue();
-		} else {
-			javaObject = jaxbElement;
-		}
+		Object javaObject = (jaxbElement instanceof JAXBElement 
+				? ((JAXBElement<?>) jaxbElement).getValue() : jaxbElement);
 		this.result = (StreamResult) result;
 		this.writer = this.result.getWriter();
 		this.outputStream = this.result.getOutputStream();
@@ -238,7 +232,11 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 					addField(field);
 		} else {
 			for (int i = 0, n = jaxbClass.propOrder.size(); i < n; i++) {
-				field = getField(jaxbClass, jaxbClass.propOrder.get(i));
+				String name = jaxbClass.propOrder.get(i);
+				field = getField(jaxbClass, name);
+				if (field == null) {
+					/**@j2sNative debugger */
+				}
 				if (!field.isAttribute)
 					addField(field);
 			}
