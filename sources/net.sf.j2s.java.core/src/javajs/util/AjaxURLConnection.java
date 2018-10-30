@@ -46,7 +46,10 @@ public class AjaxURLConnection extends HttpURLConnection {
   @SuppressWarnings("null")
   private Object doAjax(boolean isBinary) {
     J2SObjectInterface J2S = /** @j2sNative self.J2S || */ null;
-    return J2S.doAjax(url.toString(), postOut, bytesOut, isBinary);
+    Object info = (/** @j2sNative {isBinary: isBinary } || */null);
+    Object result = J2S.doAjax(url.toString(), postOut, bytesOut, info);
+    responseCode = /** @j2sNative info.xhr.status || */0;
+    return result;
   }
 
   @Override
@@ -66,6 +69,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 
 	@Override
 	public InputStream getInputStream() {
+		responseCode = 200;
 		BufferedInputStream is = getAttachedStreamData(url, false);
 		return (is == null ? attachStreamData(url, doAjax(true)) : is);
 	}
@@ -111,7 +115,7 @@ public class AjaxURLConnection extends HttpURLConnection {
   @Override
   public int getResponseCode() throws IOException {
       /*
-       * We're got the response code already
+       * We have the response code already
        */
       if (responseCode != -1) {
           return responseCode;
@@ -125,6 +129,8 @@ public class AjaxURLConnection extends HttpURLConnection {
       Exception exc = null;
       try {
           BufferedInputStream is = (BufferedInputStream) getInputStream();
+          if (responseCode != HTTP_OK)
+        	  return responseCode;
           if (is.available() > 40)
           	return responseCode = HTTP_OK;
           is.mark(15);
@@ -137,7 +143,7 @@ public class AjaxURLConnection extends HttpURLConnection {
       } catch (Exception e) {
           exc = e;
       }      
-    	return responseCode = HTTP_INTERNAL_ERROR;
+      return responseCode = HTTP_OK;
   }
 @Override
 public void disconnect() {

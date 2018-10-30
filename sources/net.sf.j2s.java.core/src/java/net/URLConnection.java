@@ -31,6 +31,10 @@ package java.net;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 import javajs.util.Lst;
 
 /**
@@ -400,262 +404,260 @@ public abstract class URLConnection {
 		requests.addLast(new String[] { key, value });
 	}
 
-}
 
-//
-//
-// /**
-// * Set the value of the <code>allowUserInteraction</code> field of
-// * this <code>URLConnection</code>.
-// *
-// * @param allowuserinteraction the new value.
-// * @throws IllegalStateException if already connected
-// * @see #getAllowUserInteraction()
-// */
-// public void setAllowUserInteraction(boolean allowuserinteraction) {
-// if (connected)
-// throw new IllegalStateException("Already connected");
-// allowUserInteraction = allowuserinteraction;
-// }
-//
-// /**
-// * Returns the value of the <code>allowUserInteraction</code> field for
-// * this object.
-// *
-// * @return the value of the <code>allowUserInteraction</code> field for
-// * this object.
-// * @see #setAllowUserInteraction(boolean)
-// */
-// public boolean getAllowUserInteraction() {
-// return allowUserInteraction;
-// }
-//
-// /**
-// * Sets the default value of the
-// * <code>allowUserInteraction</code> field for all future
-// * <code>URLConnection</code> objects to the specified value.
-// *
-// * @param defaultallowuserinteraction the new value.
-// * @see #getDefaultAllowUserInteraction()
-// */
-// public static void setDefaultAllowUserInteraction(boolean
-// defaultallowuserinteraction) {
-// defaultAllowUserInteraction = defaultallowuserinteraction;
-// }
-//
-// /**
-// * Returns the default value of the <code>allowUserInteraction</code>
-// * field.
-// * <p>
-// * Ths default is "sticky", being a part of the static state of all
-// * URLConnections. This flag applies to the next, and all following
-// * URLConnections that are created.
-// *
-// * @return the default value of the <code>allowUserInteraction</code>
-// * field.
-// * @see #setDefaultAllowUserInteraction(boolean)
-// */
-// public static boolean getDefaultAllowUserInteraction() {
-// return defaultAllowUserInteraction;
-// }
-//
-// /**
-// * Sets the value of the <code>useCaches</code> field of this
-// * <code>URLConnection</code> to the specified value.
-// * <p>
-// * Some protocols do caching of documents. Occasionally, it is important
-// * to be able to "tunnel through" and ignore the caches (e.g., the
-// * "reload" button in a browser). If the UseCaches flag on a connection
-// * is true, the connection is allowed to use whatever caches it can.
-// * If false, caches are to be ignored.
-// * The default value comes from DefaultUseCaches, which defaults to
-// * true.
-// *
-// * @param usecaches a <code>boolean</code> indicating whether
-// * or not to allow caching
-// * @throws IllegalStateException if already connected
-// * @see #getUseCaches()
-// */
-// public void setUseCaches(boolean usecaches) {
-// if (connected)
-// throw new IllegalStateException("Already connected");
-// useCaches = usecaches;
-// }
-//
-// /**
-// * Returns the value of this <code>URLConnection</code>'s
-// * <code>useCaches</code> field.
-// *
-// * @return the value of this <code>URLConnection</code>'s
-// * <code>useCaches</code> field.
-// * @see #setUseCaches(boolean)
-// */
-// public boolean getUseCaches() {
-// return useCaches;
-// }
-//
-// /**
-// * Sets the value of the <code>ifModifiedSince</code> field of
-// * this <code>URLConnection</code> to the specified value.
-// *
-// * @param ifmodifiedsince the new value.
-// * @throws IllegalStateException if already connected
-// * @see #getIfModifiedSince()
-// */
-// public void setIfModifiedSince(long ifmodifiedsince) {
-// if (connected)
-// throw new IllegalStateException("Already connected");
-// ifModifiedSince = ifmodifiedsince;
-// }
-//
-// /**
-// * Returns the value of this object's <code>ifModifiedSince</code> field.
-// *
-// * @return the value of this object's <code>ifModifiedSince</code> field.
-// * @see #setIfModifiedSince(long)
-// */
-// public long getIfModifiedSince() {
-// return ifModifiedSince;
-// }
-//
-// /**
-// * Returns the default value of a <code>URLConnection</code>'s
-// * <code>useCaches</code> flag.
-// * <p>
-// * Ths default is "sticky", being a part of the static state of all
-// * URLConnections. This flag applies to the next, and all following
-// * URLConnections that are created.
-// *
-// * @return the default value of a <code>URLConnection</code>'s
-// * <code>useCaches</code> flag.
-// * @see #setDefaultUseCaches(boolean)
-// */
-// public boolean getDefaultUseCaches() {
-// return defaultUseCaches;
-// }
-//
-// /**
-// * Sets the default value of the <code>useCaches</code> field to the
-// * specified value.
-// *
-// * @param defaultusecaches the new value.
-// * @see #getDefaultUseCaches()
-// */
-// public void setDefaultUseCaches(boolean defaultusecaches) {
-// defaultUseCaches = defaultusecaches;
-// }
-//
-//
-// /**
-// * Adds a general request property specified by a
-// * key-value pair. This method will not overwrite
-// * existing values associated with the same key.
-// *
-// * @param key the keyword by which the request is known
-// * (e.g., "<code>accept</code>").
-// * @param value the value associated with it.
-// * @throws IllegalStateException if already connected
-// * @throws NullPointerException if key is null
-// * @see #getRequestProperties()
-// * @since 1.4
-// */
-// public void addRequestProperty(String key, String value) {
-// if (connected)
-// throw new IllegalStateException("Already connected");
-// if (key == null)
-// throw new NullPointerException ("key is null");
-//
+ /**
+ * Set the value of the <code>allowUserInteraction</code> field of
+ * this <code>URLConnection</code>.
+ *
+ * @param allowuserinteraction the new value.
+ * @throws IllegalStateException if already connected
+ * @see #getAllowUserInteraction()
+ */
+ public void setAllowUserInteraction(boolean allowuserinteraction) {
+ if (connected)
+ throw new IllegalStateException("Already connected");
+ allowUserInteraction = allowuserinteraction;
+ }
+
+ /**
+ * Returns the value of the <code>allowUserInteraction</code> field for
+ * this object.
+ *
+ * @return the value of the <code>allowUserInteraction</code> field for
+ * this object.
+ * @see #setAllowUserInteraction(boolean)
+ */
+ public boolean getAllowUserInteraction() {
+ return allowUserInteraction;
+ }
+
+ /**
+ * Sets the default value of the
+ * <code>allowUserInteraction</code> field for all future
+ * <code>URLConnection</code> objects to the specified value.
+ *
+ * @param defaultallowuserinteraction the new value.
+ * @see #getDefaultAllowUserInteraction()
+ */
+ public static void setDefaultAllowUserInteraction(boolean
+ defaultallowuserinteraction) {
+ defaultAllowUserInteraction = defaultallowuserinteraction;
+ }
+
+ /**
+ * Returns the default value of the <code>allowUserInteraction</code>
+ * field.
+ * <p>
+ * Ths default is "sticky", being a part of the static state of all
+ * URLConnections. This flag applies to the next, and all following
+ * URLConnections that are created.
+ *
+ * @return the default value of the <code>allowUserInteraction</code>
+ * field.
+ * @see #setDefaultAllowUserInteraction(boolean)
+ */
+ public static boolean getDefaultAllowUserInteraction() {
+ return defaultAllowUserInteraction;
+ }
+
+ /**
+ * Sets the value of the <code>useCaches</code> field of this
+ * <code>URLConnection</code> to the specified value.
+ * <p>
+ * Some protocols do caching of documents. Occasionally, it is important
+ * to be able to "tunnel through" and ignore the caches (e.g., the
+ * "reload" button in a browser). If the UseCaches flag on a connection
+ * is true, the connection is allowed to use whatever caches it can.
+ * If false, caches are to be ignored.
+ * The default value comes from DefaultUseCaches, which defaults to
+ * true.
+ *
+ * @param usecaches a <code>boolean</code> indicating whether
+ * or not to allow caching
+ * @throws IllegalStateException if already connected
+ * @see #getUseCaches()
+ */
+ public void setUseCaches(boolean usecaches) {
+ if (connected)
+ throw new IllegalStateException("Already connected");
+ useCaches = usecaches;
+ }
+
+ /**
+ * Returns the value of this <code>URLConnection</code>'s
+ * <code>useCaches</code> field.
+ *
+ * @return the value of this <code>URLConnection</code>'s
+ * <code>useCaches</code> field.
+ * @see #setUseCaches(boolean)
+ */
+ public boolean getUseCaches() {
+ return useCaches;
+ }
+
+ /**
+ * Sets the value of the <code>ifModifiedSince</code> field of
+ * this <code>URLConnection</code> to the specified value.
+ *
+ * @param ifmodifiedsince the new value.
+ * @throws IllegalStateException if already connected
+ * @see #getIfModifiedSince()
+ */
+ public void setIfModifiedSince(long ifmodifiedsince) {
+ if (connected)
+ throw new IllegalStateException("Already connected");
+ ifModifiedSince = ifmodifiedsince;
+ }
+
+ /**
+ * Returns the value of this object's <code>ifModifiedSince</code> field.
+ *
+ * @return the value of this object's <code>ifModifiedSince</code> field.
+ * @see #setIfModifiedSince(long)
+ */
+ public long getIfModifiedSince() {
+ return ifModifiedSince;
+ }
+
+ /**
+ * Returns the default value of a <code>URLConnection</code>'s
+ * <code>useCaches</code> flag.
+ * <p>
+ * Ths default is "sticky", being a part of the static state of all
+ * URLConnections. This flag applies to the next, and all following
+ * URLConnections that are created.
+ *
+ * @return the default value of a <code>URLConnection</code>'s
+ * <code>useCaches</code> flag.
+ * @see #setDefaultUseCaches(boolean)
+ */
+ public boolean getDefaultUseCaches() {
+ return defaultUseCaches;
+ }
+
+ /**
+ * Sets the default value of the <code>useCaches</code> field to the
+ * specified value.
+ *
+ * @param defaultusecaches the new value.
+ * @see #getDefaultUseCaches()
+ */
+ public void setDefaultUseCaches(boolean defaultusecaches) {
+ defaultUseCaches = defaultusecaches;
+ }
+
+
+ /**
+ * Adds a general request property specified by a
+ * key-value pair. This method will not overwrite
+ * existing values associated with the same key.
+ *
+ * @param key the keyword by which the request is known
+ * (e.g., "<code>accept</code>").
+ * @param value the value associated with it.
+ * @throws IllegalStateException if already connected
+ * @throws NullPointerException if key is null
+ * @see #getRequestProperties()
+ * @since 1.4
+ */
+ public void addRequestProperty(String key, String value) {
+ if (connected)
+ throw new IllegalStateException("Already connected");
+ if (key == null)
+ throw new NullPointerException ("key is null");
+
 // if (requests == null)
 // requests = new MessageHeader();
 //
 // requests.add(key, value);
-// }
-//
-//
-// /**
-// * Returns the value of the named general request property for this
-// * connection.
-// *
-// * @param key the keyword by which the request is known (e.g., "accept").
-// * @return the value of the named general request property for this
-// * connection. If key is null, then null is returned.
-// * @throws IllegalStateException if already connected
-// * @see #setRequestProperty(java.lang.String, java.lang.String)
-// */
-// public String getRequestProperty(String key) {
-// if (connected)
-// throw new IllegalStateException("Already connected");
-//
+ }
+
+
+ /**
+ * Returns the value of the named general request property for this
+ * connection.
+ *
+ * @param key the keyword by which the request is known (e.g., "accept").
+ * @return the value of the named general request property for this
+ * connection. If key is null, then null is returned.
+ * @throws IllegalStateException if already connected
+ * @see #setRequestProperty(java.lang.String, java.lang.String)
+ */
+ public String getRequestProperty(String key) {
+ if (connected)
+ throw new IllegalStateException("Already connected");
+
 // if (requests == null)
-// return null;
-//
+ return null;
+
 // return requests.findValue(key);
-// }
-//
-// /**
-// * Returns an unmodifiable Map of general request
-// * properties for this connection. The Map keys
-// * are Strings that represent the request-header
-// * field names. Each Map value is a unmodifiable List
-// * of Strings that represents the corresponding
-// * field values.
-// *
-// * @return a Map of the general request properties for this connection.
-// * @throws IllegalStateException if already connected
-// * @since 1.4
-// */
-// public Map<String,List<String>> getRequestProperties() {
-// if (connected)
-// throw new IllegalStateException("Already connected");
-//
+ }
+
+ /**
+ * Returns an unmodifiable Map of general request
+ * properties for this connection. The Map keys
+ * are Strings that represent the request-header
+ * field names. Each Map value is a unmodifiable List
+ * of Strings that represents the corresponding
+ * field values.
+ *
+ * @return a Map of the general request properties for this connection.
+ * @throws IllegalStateException if already connected
+ * @since 1.4
+ */
+ public Map<String,List<String>> getRequestProperties() {
+ if (connected)
+ throw new IllegalStateException("Already connected");
+
 // if (requests == null)
-// return Collections.EMPTY_MAP;
-//
+ return Collections.EMPTY_MAP;
+
 // return requests.getHeaders(null);
-// }
-//
-// /**
-// * Sets the default value of a general request property. When a
-// * <code>URLConnection</code> is created, it is initialized with
-// * these properties.
-// *
-// * @param key the keyword by which the request is known
-// * (e.g., "<code>accept</code>").
-// * @param value the value associated with the key.
-// *
-// * @see
-// java.net.URLConnection#setRequestProperty(java.lang.String,java.lang.String)
-// *
-// * @deprecated The instance specific setRequestProperty method
-// * should be used after an appropriate instance of URLConnection
-// * is obtained. Invoking this method will have no effect.
-// *
-// * @see #getDefaultRequestProperty(java.lang.String)
-// */
-// @Deprecated
-// public static void setDefaultRequestProperty(String key, String value) {
-// }
-//
-// /**
-// * Returns the value of the default request property. Default request
-// * properties are set for every connection.
-// *
-// * @param key the keyword by which the request is known (e.g., "accept").
-// * @return the value of the default request property
-// * for the specified key.
-// *
-// * @see java.net.URLConnection#getRequestProperty(java.lang.String)
-// *
-// * @deprecated The instance specific getRequestProperty method
-// * should be used after an appropriate instance of URLConnection
-// * is obtained.
-// *
-// * @see #setDefaultRequestProperty(java.lang.String, java.lang.String)
-// */
-// @Deprecated
-// public static String getDefaultRequestProperty(String key) {
-// return null;
-// }
+ }
+
+ /**
+ * Sets the default value of a general request property. When a
+ * <code>URLConnection</code> is created, it is initialized with
+ * these properties.
+ *
+ * @param key the keyword by which the request is known
+ * (e.g., "<code>accept</code>").
+ * @param value the value associated with the key.
+ *
+ * @see
+ java.net.URLConnection#setRequestProperty(java.lang.String,java.lang.String)
+ *
+ * @deprecated The instance specific setRequestProperty method
+ * should be used after an appropriate instance of URLConnection
+ * is obtained. Invoking this method will have no effect.
+ *
+ * @see #getDefaultRequestProperty(java.lang.String)
+ */
+ @Deprecated
+ public static void setDefaultRequestProperty(String key, String value) {
+ }
+
+ /**
+ * Returns the value of the default request property. Default request
+ * properties are set for every connection.
+ *
+ * @param key the keyword by which the request is known (e.g., "accept").
+ * @return the value of the default request property
+ * for the specified key.
+ *
+ * @see java.net.URLConnection#getRequestProperty(java.lang.String)
+ *
+ * @deprecated The instance specific getRequestProperty method
+ * should be used after an appropriate instance of URLConnection
+ * is obtained.
+ *
+ * @see #setDefaultRequestProperty(java.lang.String, java.lang.String)
+ */
+ @Deprecated
+ public static String getDefaultRequestProperty(String key) {
+ return null;
+ }
+ 
 //
 // /**
 // * The ContentHandler factory.
@@ -1221,94 +1223,94 @@ public abstract class URLConnection {
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-// private static boolean defaultAllowUserInteraction = false;
-//
-// /**
-// * If <code>true</code>, this <code>URL</code> is being examined in
-// * a context in which it makes sense to allow user interactions such
-// * as popping up an authentication dialog. If <code>false</code>,
-// * then no user interaction is allowed.
-// * <p>
-// * The value of this field can be set by the
-// * <code>setAllowUserInteraction</code> method.
-// * Its value is returned by the
-// * <code>getAllowUserInteraction</code> method.
-// * Its default value is the value of the argument in the last invocation
-// * of the <code>setDefaultAllowUserInteraction</code> method.
-// *
-// * @see java.net.URLConnection#getAllowUserInteraction()
-// * @see java.net.URLConnection#setAllowUserInteraction(boolean)
-// * @see java.net.URLConnection#setDefaultAllowUserInteraction(boolean)
-// */
-// protected boolean allowUserInteraction = defaultAllowUserInteraction;
-//
-// private static boolean defaultUseCaches = true;
-//
-// /**
-// * If <code>true</code>, the protocol is allowed to use caching
-// * whenever it can. If <code>false</code>, the protocol must always
-// * try to get a fresh copy of the object.
-// * <p>
-// * This field is set by the <code>setUseCaches</code> method. Its
-// * value is returned by the <code>getUseCaches</code> method.
-// * <p>
-// * Its default value is the value given in the last invocation of the
-// * <code>setDefaultUseCaches</code> method.
-// *
-// * @see java.net.URLConnection#setUseCaches(boolean)
-// * @see java.net.URLConnection#getUseCaches()
-// * @see java.net.URLConnection#setDefaultUseCaches(boolean)
-// */
-// protected boolean useCaches = defaultUseCaches;
-//
-// /**
-// * Some protocols support skipping the fetching of the object unless
-// * the object has been modified more recently than a certain time.
-// * <p>
-// * A nonzero value gives a time as the number of milliseconds since
-// * January 1, 1970, GMT. The object is fetched only if it has been
-// * modified more recently than that time.
-// * <p>
-// * This variable is set by the <code>setIfModifiedSince</code>
-// * method. Its value is returned by the
-// * <code>getIfModifiedSince</code> method.
-// * <p>
-// * The default value of this field is <code>0</code>, indicating
-// * that the fetching must always occur.
-// *
-// * @see java.net.URLConnection#getIfModifiedSince()
-// * @see java.net.URLConnection#setIfModifiedSince(long)
-// */
-// protected long ifModifiedSince = 0;
-//
-// /**
-// * @since 1.5
-// */
-// private int connectTimeout;
-// private int readTimeout;
-//
-// /**
-// * @since 1.6
-// */
+
+
+
+
+
+
+
+ private static boolean defaultAllowUserInteraction = false;
+
+ /**
+ * If <code>true</code>, this <code>URL</code> is being examined in
+ * a context in which it makes sense to allow user interactions such
+ * as popping up an authentication dialog. If <code>false</code>,
+ * then no user interaction is allowed.
+ * <p>
+ * The value of this field can be set by the
+ * <code>setAllowUserInteraction</code> method.
+ * Its value is returned by the
+ * <code>getAllowUserInteraction</code> method.
+ * Its default value is the value of the argument in the last invocation
+ * of the <code>setDefaultAllowUserInteraction</code> method.
+ *
+ * @see java.net.URLConnection#getAllowUserInteraction()
+ * @see java.net.URLConnection#setAllowUserInteraction(boolean)
+ * @see java.net.URLConnection#setDefaultAllowUserInteraction(boolean)
+ */
+ protected boolean allowUserInteraction = defaultAllowUserInteraction;
+
+ private static boolean defaultUseCaches = true;
+
+ /**
+ * If <code>true</code>, the protocol is allowed to use caching
+ * whenever it can. If <code>false</code>, the protocol must always
+ * try to get a fresh copy of the object.
+ * <p>
+ * This field is set by the <code>setUseCaches</code> method. Its
+ * value is returned by the <code>getUseCaches</code> method.
+ * <p>
+ * Its default value is the value given in the last invocation of the
+ * <code>setDefaultUseCaches</code> method.
+ *
+ * @see java.net.URLConnection#setUseCaches(boolean)
+ * @see java.net.URLConnection#getUseCaches()
+ * @see java.net.URLConnection#setDefaultUseCaches(boolean)
+ */
+ protected boolean useCaches = defaultUseCaches;
+
+ /**
+ * Some protocols support skipping the fetching of the object unless
+ * the object has been modified more recently than a certain time.
+ * <p>
+ * A nonzero value gives a time as the number of milliseconds since
+ * January 1, 1970, GMT. The object is fetched only if it has been
+ * modified more recently than that time.
+ * <p>
+ * This variable is set by the <code>setIfModifiedSince</code>
+ * method. Its value is returned by the
+ * <code>getIfModifiedSince</code> method.
+ * <p>
+ * The default value of this field is <code>0</code>, indicating
+ * that the fetching must always occur.
+ *
+ * @see java.net.URLConnection#getIfModifiedSince()
+ * @see java.net.URLConnection#setIfModifiedSince(long)
+ */
+ protected long ifModifiedSince = 0;
+
+ /**
+ * @since 1.5
+ */
+ private int connectTimeout;
+ private int readTimeout;
+
+ /**
+ * @since 1.6
+ */
 // private MessageHeader requests;
-//
-// /**
-// * @since JDK1.1
-// */
-// private static FileNameMap fileNameMap;
-//
-// /**
-// * @since 1.2.2
-// */
-// private static boolean fileNameMapLoaded = false;
-//
+
+ /**
+ * @since JDK1.1
+ */
+ private static FileNameMap fileNameMap;
+ 
+ /**
+ * @since 1.2.2
+ */
+ private static boolean fileNameMapLoaded = false;
+
 // /**
 // * Loads filename map (a mimetable) from a data file. It will
 // * first try to load the user-specific table, defined
@@ -1355,93 +1357,93 @@ public abstract class URLConnection {
 // fileNameMap = map;
 // }
 //
-// /**
-// * Sets a specified timeout value, in milliseconds, to be used
-// * when opening a communications link to the resource referenced
-// * by this URLConnection. If the timeout expires before the
-// * connection can be established, a
-// * java.net.SocketTimeoutException is raised. A timeout of zero is
-// * interpreted as an infinite timeout.
-//
-// * <p> Some non-standard implmentation of this method may ignore
-// * the specified timeout. To see the connect timeout set, please
-// * call getConnectTimeout().
-// *
-// * @param timeout an <code>int</code> that specifies the connect
-// * timeout value in milliseconds
-// * @throws IllegalArgumentException if the timeout parameter is negative
-// *
-// * @see #getConnectTimeout()
-// * @see #connect()
-// * @since 1.5
-// */
-// public void setConnectTimeout(int timeout) {
-// if (timeout < 0) {
-// throw new IllegalArgumentException("timeout can not be negative");
-// }
-// connectTimeout = timeout;
-// }
-//
-// /**
-// * Returns setting for connect timeout.
-// * <p>
-// * 0 return implies that the option is disabled
-// * (i.e., timeout of infinity).
-// *
-// * @return an <code>int</code> that indicates the connect timeout
-// * value in milliseconds
-// * @see #setConnectTimeout(int)
-// * @see #connect()
-// * @since 1.5
-// */
-// public int getConnectTimeout() {
-// return connectTimeout;
-// }
-//
-// /**
-// * Sets the read timeout to a specified timeout, in
-// * milliseconds. A non-zero value specifies the timeout when
-// * reading from Input stream when a connection is established to a
-// * resource. If the timeout expires before there is data available
-// * for read, a java.net.SocketTimeoutException is raised. A
-// * timeout of zero is interpreted as an infinite timeout.
-// *
-// *<p> Some non-standard implementation of this method ignores the
-// * specified timeout. To see the read timeout set, please call
-// * getReadTimeout().
-// *
-// * @param timeout an <code>int</code> that specifies the timeout
-// * value to be used in milliseconds
-// * @throws IllegalArgumentException if the timeout parameter is negative
-// *
-// * @see #getReadTimeout()
-// * @see InputStream#read()
-// * @since 1.5
-// */
-// public void setReadTimeout(int timeout) {
-// if (timeout < 0) {
-// throw new IllegalArgumentException("timeout can not be negative");
-// }
-// readTimeout = timeout;
-// }
-//
-// /**
-// * Returns setting for read timeout. 0 return implies that the
-// * option is disabled (i.e., timeout of infinity).
-// *
-// * @return an <code>int</code> that indicates the read timeout
-// * value in milliseconds
-// *
-// * @see #setReadTimeout(int)
-// * @see InputStream#read()
-// * @since 1.5
-// */
-// public int getReadTimeout() {
-// return readTimeout;
-// }
-//
-//
-//
+ /**
+ * Sets a specified timeout value, in milliseconds, to be used
+ * when opening a communications link to the resource referenced
+ * by this URLConnection. If the timeout expires before the
+ * connection can be established, a
+ * java.net.SocketTimeoutException is raised. A timeout of zero is
+ * interpreted as an infinite timeout.
+
+ * <p> Some non-standard implmentation of this method may ignore
+ * the specified timeout. To see the connect timeout set, please
+ * call getConnectTimeout().
+ *
+ * @param timeout an <code>int</code> that specifies the connect
+ * timeout value in milliseconds
+ * @throws IllegalArgumentException if the timeout parameter is negative
+ *
+ * @see #getConnectTimeout()
+ * @see #connect()
+ * @since 1.5
+ */
+ public void setConnectTimeout(int timeout) {
+ if (timeout < 0) {
+ throw new IllegalArgumentException("timeout can not be negative");
+ }
+ connectTimeout = timeout;
+ }
+
+ /**
+ * Returns setting for connect timeout.
+ * <p>
+ * 0 return implies that the option is disabled
+ * (i.e., timeout of infinity).
+ *
+ * @return an <code>int</code> that indicates the connect timeout
+ * value in milliseconds
+ * @see #setConnectTimeout(int)
+ * @see #connect()
+ * @since 1.5
+ */
+ public int getConnectTimeout() {
+ return connectTimeout;
+ }
+
+ /**
+ * Sets the read timeout to a specified timeout, in
+ * milliseconds. A non-zero value specifies the timeout when
+ * reading from Input stream when a connection is established to a
+ * resource. If the timeout expires before there is data available
+ * for read, a java.net.SocketTimeoutException is raised. A
+ * timeout of zero is interpreted as an infinite timeout.
+ *
+ *<p> Some non-standard implementation of this method ignores the
+ * specified timeout. To see the read timeout set, please call
+ * getReadTimeout().
+ *
+ * @param timeout an <code>int</code> that specifies the timeout
+ * value to be used in milliseconds
+ * @throws IllegalArgumentException if the timeout parameter is negative
+ *
+ * @see #getReadTimeout()
+ * @see InputStream#read()
+ * @since 1.5
+ */
+ public void setReadTimeout(int timeout) {
+ if (timeout < 0) {
+ throw new IllegalArgumentException("timeout can not be negative");
+ }
+ readTimeout = timeout;
+ }
+
+ /**
+ * Returns setting for read timeout. 0 return implies that the
+ * option is disabled (i.e., timeout of infinity).
+ *
+ * @return an <code>int</code> that indicates the read timeout
+ * value in milliseconds
+ *
+ * @see #setReadTimeout(int)
+ * @see InputStream#read()
+ * @since 1.5
+ */
+ public int getReadTimeout() {
+ return readTimeout;
+ }
+
+
+
 // /**
 // * Returns the value of the <code>content-length</code> header field.
 // *
@@ -1756,7 +1758,4 @@ public abstract class URLConnection {
 // public Object getContent(URLConnection uc) throws IOException {
 // return uc.getInputStream();
 // }
-// }
-//
-//
-//
+}

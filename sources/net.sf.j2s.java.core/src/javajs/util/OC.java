@@ -349,10 +349,12 @@ public class OC extends OutputStream implements GenericOutputChannel {
       // action here generally will be for the browser to display a download message
       // temp files will not be sent this way.
       Object data = (sb == null ? toByteArray() : sb.toString());
-      if (_function == null)
-        J2S.doAjax(fileName, null, data, sb == null);
-      else
+      if (_function == null) {
+    	Object info = /** @j2sNative { isBinary : (sb == null) } || */ null;
+        J2S.doAjax(fileName, null, data, info);
+      } else {
         J2S.applyFunc(_function, data);
+      }
     }
     return null;
   }
