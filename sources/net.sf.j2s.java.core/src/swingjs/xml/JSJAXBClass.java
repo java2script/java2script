@@ -98,7 +98,6 @@ class JSJAXBClass {
 	@SuppressWarnings("unused")
 	static boolean checkC$__ANN__(JSJAXBClass jsjaxbClass, Class<?> javaClass, Object javaObject, boolean isXmlIDREF) {
 		boolean isTop = true;
-		JSJAXBClass top = jsjaxbClass;
 		while (javaClass != null) {
 
 //			C$.__ANN__ = [[null,'XmlAccessorType',['@XmlAccessorType(XmlAccessType.FIELD)','@XmlType(name="MoreComplex")']],
@@ -119,10 +118,6 @@ class JSJAXBClass {
 				if (jsjaxbClass == null)
 					return true;
 				jsjaxbClass.addTypeData(jsdata, clazz, javaObject);
-				if (!isTop) {
-					for (int i = 1, n = jsjaxbClass.fields.size(); i < n; i++)
-						top.addField(jsjaxbClass.fields.get(i));
-				}
 			}
 			isTop = false;
 			javaClass = javaClass.getSuperclass();
