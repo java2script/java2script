@@ -412,6 +412,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (annotations != null && annotations.size() > 0) {
 			for (int i = 0; i < annotations.size(); i++)
 				addAnnotation((Annotation) annotations.get(i), node, CHECK_ANNOTATIONS_ONLY);
+			if (class_jaxbAccessorType == JAXB_TYPE_UNKNOWN)
+				class_jaxbAccessorType = JAXB_TYPE_PUBLIC_MEMBER;
 		}
 		setPackage(node.getName().toString());
 		return false;
@@ -6194,9 +6196,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		private String qName;
 		
 		protected ClassAnnotation(String qName, Annotation annotation, ASTNode node) {
-		//	System.out.println(">>>>" + qName + " "
+			//System.out.println(">>>>" + qName + " "
 		//+ annotation.getClass().getName()
-		//			+ " " + annotation);
+				//	+ " " + annotation);
 			this.qName = qName;
 			this.annotation = annotation;
 			this.node = node;

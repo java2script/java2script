@@ -256,7 +256,6 @@ class JSJAXBField {
 		// check package annotations
 		switch (tag) {
 		case "@XmlSchema":
-			jaxbClass.qname = qualifiedName = getName(tag);
 			return;
 		}
 

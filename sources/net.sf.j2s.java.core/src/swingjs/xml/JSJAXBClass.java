@@ -219,19 +219,25 @@ class JSJAXBClass {
 		String ns = qualifiedName.getNamespaceURI();
 		if (ns.length() == 0) {
 			if (defaultNamespace == null) {
-				defaultNamespace = getDefaultNamespaceFromPackageInfo();
+				defaultNamespace = getDefaultNamespaceFromObjectFactory();
 			}
  			qualifiedName = new QName(defaultNamespace == null ? "" : defaultNamespace, qualifiedName.getLocalPart(), "");			
 		}
 		qname = qualifiedName;
 	}
 
-	private String getDefaultNamespaceFromPackageInfo() {
+	private String getDefaultNamespaceFromObjectFactory() {
 		defaultNamespace = "";
-		InputStream is = javaClass.getResourceAsStream("_$.js");
+		
+//		C$._WebServiceParameterSet_QNAME=Clazz.new_(Clazz.load('javax.xml.namespace.QName').c$$S$S,["www.jalview.org/xml/wsparamset", "WebServiceParameterSet"]);
+//		C$._JalviewModel_QNAME=Clazz.new_($I$(1).c$$S$S,["www.jalview.org", "JalviewModel"]);
+//		C$._JalviewUserColours_QNAME=Clazz.new_($I$(1).c$$S$S,["www.jalview.org/colours", "JalviewUserColours"]);
+		InputStream is = javaClass.getResourceAsStream("ObjectFactory.js");
 		if (is != null) {
 		  String data = Rdr.streamToUTF8String(new BufferedInputStream(is));
-		  data = PT.getQuotedAttribute(data, "namespace");
+		  int ipt0 = data.indexOf("_" + javaClass.getSimpleName() + "_QNAME=Clazz");
+		  if (ipt0 > 0)
+			  data = PT.getQuotedStringAt(data, ipt0);
 		  if (data != null)
 			  defaultNamespace = data;
 		}
