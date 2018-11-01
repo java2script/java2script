@@ -23,8 +23,6 @@ import swingjs.api.js.DOMNode;
  */
 class JSJAXBField {
 
-	private Object javaObject;
-
 	// Marshaller only
 
 	Object entryValue = this;
@@ -43,8 +41,7 @@ class JSJAXBField {
 	 * 
 	 * @param javaObject
 	 */
-	void clear(Object javaObject) {
-		this.javaObject = javaObject;
+	void clear() {
 		this.entryValue = null;
 		this.boundNode = null;
 		this.boundListNodes = null;
@@ -144,8 +141,7 @@ class JSJAXBField {
 	 * @param index
 	 * @param propOrder
 	 */
-	JSJAXBField(JSJAXBClass jaxbClass, Object[][] adata, Object clazz, Object javaObject, int index, List<String> propOrder) {
-		this.javaObject = javaObject;
+	JSJAXBField(JSJAXBClass jaxbClass, Object[][] adata, Object clazz, int index, List<String> propOrder) {
 		this.clazz = clazz;
 		this.index = index;
 		this.adata = adata;
@@ -183,7 +179,7 @@ class JSJAXBField {
 			holdsObjects = ARRAY_OBJECT;
 		isContainer |= isArray;
 		if (isMethod)
-			getMethods();
+			getMethods(jaxbClass.getJavaObject());
 		attr = new Hashtable<String, String>();
 		readAnnotations(jaxbClass, (String[]) adata[1], propOrder);
 	}
@@ -200,6 +196,7 @@ class JSJAXBField {
 			text += data + ";";
 			int pt = data.indexOf("(");
 			String tag = data.substring(0, (pt < 0 ? data.length() : pt));
+			tag = tag.replace("@javax.xml.bind.annotation.", "@");
 			data = (pt < 0 ? "" : data.substring(pt + 1, data.lastIndexOf(")")));
 			if (pt >= 0 && data.indexOf("=") >= 0)
 				addXMLAttributes(tag, data, attr);
@@ -212,7 +209,7 @@ class JSJAXBField {
 		setDefaults();
 		qualifiedName = finalizeName(qualifiedName, false);
 		if (javaName == null) {
-			jaxbClass.qname = qualifiedName;
+			jaxbClass.setQNameFromField0(qualifiedName);
 			if (qualifiedTypeName == null)
 				qualifiedTypeName = new QName("", "##default", "");
 			jaxbClass.qualifiedTypeName = finalizeName(qualifiedTypeName, true);
@@ -256,9 +253,10 @@ class JSJAXBField {
 	 * @param propOrder
 	 */
 	private void processTypeAnnotation(JSJAXBClass jaxbClass, String tag, String data, List<String> propOrder) {
-		// check package annotations -- NOT IMPLEMENTED
+		// check package annotations
 		switch (tag) {
 		case "@XmlSchema":
+			jaxbClass.qname = qualifiedName = getName(tag);
 			return;
 		}
 
@@ -294,7 +292,7 @@ class JSJAXBField {
 			// part of the context of the given class, for example
 			// an instance-only class referenced by this class, as
 			// in an Object, Object[], List<Object>, or Map<Object,Object>
-			jaxbClass.setSeeAlso(getSeeAlso(data));
+			jaxbClass.seeAlso = getSeeAlso(data);
 			return;
 		case "@XmlEnum":
 			jaxbClass.enumClassType = data;
@@ -413,17 +411,6 @@ class JSJAXBField {
 	}
 
 	/**
-	 * read the JavaScript type of this object -- array, etc.
-	 * 
-	 * @param javaName
-	 * @return
-	 */
-	private String getJSType(String javaName) {
-		return (/** @j2sNative ( typeof this.javaObject[javaName]) || */
-		null);
-	}
-
-	/**
 	 * Use the built-in jQuery XML parser here (as well as in JSSAXParser) to do the
 	 * simple conversion of annotation expressions.
 	 * 
@@ -508,7 +495,7 @@ class JSJAXBField {
 	/**
 	 * Check for methods in C$.$P$[] (private) and object[] (all others) 
 	 */
-	private void getMethods() {
+	private void getMethods(Object javaObject) {
 		String methodName = javaName.substring(2);
 		Object[] pm = /** @j2sNative this.clazz.$P$ || */null;
 		Object[] jo = /** @j2sNative this.clazz.prototype || */null;
@@ -516,7 +503,7 @@ class JSJAXBField {
 		// so we start by using get instead of set
 		// qualifications getXxxx$() and setXxxx$mytype_escaped(xxx)
 		methodGet = getMethod(methodName, pm, jo);
-		javaName = getJavaNameFromMethodName(methodName);
+		javaName = getJavaNameFromMethodName(methodName, javaObject);
 		if (methodGet == null && !isContainer)
 			methodGet = getMethod("is" + methodName.substring(3), pm, jo);
 		if (methodGet == null) {
@@ -538,16 +525,18 @@ class JSJAXBField {
 	 * There are rules here...
 	 * 
 	 * @param methodName
+	 * @param javaObject 
 	 * @return
 	 */
-	private String getJavaNameFromMethodName(String methodName) {
+	private String getJavaNameFromMethodName(String methodName, Object javaObject) {
 		String javaName = methodName.substring(methodName.startsWith("is") ? 2 : 3, methodName.length());
 		String lcaseName = javaName.substring(0, 1).toLowerCase() + javaName.substring(1);
 		String name = null;
-		if (getJSType(name = javaName).equals("undefined") && getJSType(name = lcaseName).equals("undefined")
+		if (!isDefined(javaObject, name = javaName)
+				&& !isDefined(javaObject, name = lcaseName)
 				&& methodName.endsWith("Property")) {
-			if (getJSType(name = javaName.substring(javaName.length() - 8)).equals("undefined")
-					&& getJSType(name = lcaseName.substring(javaName.length() - 8)).equals("undefined")) {
+			if (!isDefined(javaObject, name = javaName.substring(javaName.length() - 8))
+					&& isDefined(javaObject, name = lcaseName.substring(javaName.length() - 8))) {
 				System.out.println("JSJAXBMarshaller cannot find field for " + methodName);
 				name = methodName;
 			}
@@ -566,21 +555,30 @@ class JSJAXBField {
 	}
 
 	/**
+	 * read the JavaScript type of this object -- array, etc.
+	 * 
+	 * @param javaName
+	 * @return
+	 */
+	private boolean isDefined(Object javaObject, String fieldName) {
+		return (/** @j2sNative javaObject && (typeof javaObject[fieldName] != "undefined") || */ false);
+	}
+
+	/**
 	 * Retrieve the Java value using the method or directly
 	 * 
 	 * @return
 	 */
-	public Object getValue() {
-		return (entryValue == this ? getObject() : entryValue);
+	public Object getValue(Object javaObject) {
+		return (entryValue == this ? getObject(javaObject) : entryValue);
 	}
 
 	@SuppressWarnings("unused")
-	public Object getObject() {
-		Object o = javaObject;
+	public Object getObject(Object javaObject) {
 		String n = javaName;
 		Object m = (isMethod ? methodGet : null);
 
-		/** @j2sNative return (m ? m.apply(o, []) : o[n]) */
+		/** @j2sNative return (m ? m.apply(javaObject, []) : javaObject[n]) */
 		{
 			return null;
 		}
@@ -590,14 +588,13 @@ class JSJAXBField {
 	 * @param value
 	 */
 	@SuppressWarnings("unused")
-	public void setValue(Object value) {
+	public void setValue(Object value, Object javaObject) {
 		Object m = (isMethod ? methodSet : null);
 		String j = javaName;
-		Object o = javaObject;
 		/**
 		 * @j2sNative
 		 * 
-		 * 			if(m) m.apply(o, [value]); else o[j] = value;
+		 * 			if(m) m.apply(javaObject, [value]); else javaObject[j] = value;
 		 */
 	}
 

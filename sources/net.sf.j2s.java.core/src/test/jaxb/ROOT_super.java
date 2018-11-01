@@ -5,10 +5,10 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-@XmlRootElement(name = "Root", namespace = "www.jalview.org")
+@XmlRootElement(name = "Root_super", namespace = "www.jalview.org")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(propOrder = {"root"})
-public class ROOT {
+public class ROOT_super {
 	boolean root = true;
 
 }

@@ -328,6 +328,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private boolean class_isAnonymousOrLocal;
 	private boolean inNewLambdaExpression;
 
+
 	/**
 	 * default constructor found by visit(MethodDeclaration)
 	 */
@@ -407,6 +408,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	public boolean visit(PackageDeclaration node) {
 		setMapJavaDoc(node);
+		List annotations = node.annotations(); 
+		if (annotations != null && annotations.size() > 0) {
+			for (int i = 0; i < annotations.size(); i++)
+				addAnnotation((Annotation) annotations.get(i), node, CHECK_ANNOTATIONS_ONLY);
+		}
 		setPackage(node.getName().toString());
 		return false;
 	}
@@ -2076,8 +2082,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// add any recently defined static field definitions, assert strings
 		// and Enum constants
 
-		if (class_jaxbAccessorType != JAXB_TYPE_UNKNOWN)
+		if (class_jaxbAccessorType != JAXB_TYPE_UNKNOWN) {
 			ClassAnnotation.addClassAnnotations(class_jaxbAccessorType, class_annotations, fields, methods, trailingBuffer);
+			class_annotations = null;
+			class_jaxbAccessorType = JAXB_TYPE_UNKNOWN;
+		}
 
 		buffer.append(trailingBuffer); // also writes the assert string
 		if (isAnonymous) {
@@ -5366,37 +5375,42 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			for (Iterator<?> iter = modifiers.iterator(); iter.hasNext();) {
 				Object obj = iter.next();
 				if (obj instanceof Annotation) {
-					Annotation annotation = (Annotation) obj;
-					String qName = annotation.getTypeName().getFullyQualifiedName();
-					int idx = qName.indexOf("J2S");
-					if (idx >= 0) {
-						if (mode == CHECK_ANNOTATIONS_ONLY)
-							continue;
-						String annName = qName.substring(idx);
-						if (annName.startsWith("J2SIgnore")) {
-							return false;
-						}
-					} else if (qName.equals("Override") 
-							|| qName.equals("Deprecated")
-							|| qName.startsWith("Suppress")
-							|| qName.startsWith("ConstructorProperties")) {
-						// see java\awt\ScrollPane.js    @ConstructorProperties({"scrollbarDisplayPolicy"})
-						// ignore
-					} else {
-						if (class_annotations == null)
-							class_annotations = new ArrayList<ClassAnnotation>();
-						ClassAnnotation ann = new ClassAnnotation(qName, annotation, node);
-						class_annotations.add(ann);
-						if ("XmlAccessorType".equals(qName)) {
-							String s= annotation.toString();
-							class_jaxbAccessorType = (
-									s.contains("FIELD") ? JAXB_TYPE_FIELD
-									: s.contains("PUBLIC") ? JAXB_TYPE_PUBLIC_MEMBER
-									: s.contains("PROPERTY") ? JAXB_TYPE_PROPERTY 
-									: JAXB_TYPE_NONE);
-						}
-					}
+					if (!addAnnotation((Annotation) obj, node, mode))
+						return false;
 				}
+			}
+		}
+		return true;
+	}
+
+	private boolean addAnnotation(Annotation annotation, ASTNode node, int mode) {
+		String qName = annotation.getTypeName().getFullyQualifiedName();
+		int idx = qName.indexOf("J2S");
+		if (idx >= 0) {
+			if (mode == CHECK_ANNOTATIONS_ONLY)
+				return true;
+			String annName = qName.substring(idx);
+			if (annName.startsWith("J2SIgnore")) {
+				return false;
+			}
+		} else if (qName.equals("Override") 
+				|| qName.equals("Deprecated")
+				|| qName.startsWith("Suppress")
+				|| qName.startsWith("ConstructorProperties")) {
+			// see java\awt\ScrollPane.js    @ConstructorProperties({"scrollbarDisplayPolicy"})
+			// ignore
+		} else {
+			if (class_annotations == null)
+				class_annotations = new ArrayList<ClassAnnotation>();
+			ClassAnnotation ann = new ClassAnnotation(qName, annotation, node);
+			class_annotations.add(ann);
+			if ("XmlAccessorType".equals(qName)) {
+				String s= annotation.toString();
+				class_jaxbAccessorType = (
+						s.contains("FIELD") ? JAXB_TYPE_FIELD
+						: s.contains("PUBLIC") ? JAXB_TYPE_PUBLIC_MEMBER
+						: s.contains("PROPERTY") ? JAXB_TYPE_PROPERTY 
+						: JAXB_TYPE_NONE);
 			}
 		}
 		return true;
@@ -5491,6 +5505,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @return List {elementName, js, elementName, js, ....}
 	 */
 	public List<String> getElementList() {
+		if (class_jaxbAccessorType != JAXB_TYPE_UNKNOWN) {
+			addDummyClassForPackageOnlyFile();
+		}
+
 		String trailer = ";Clazz.setTVer('" + VERSION + "');//Created "
 				+ new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " Java2ScriptVisitor version "
 				+ VERSION + " net.sf.j2s.core.jar version " + CorePlugin.VERSION + "\n";
@@ -5514,6 +5532,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 		resetPrivateVars();
 		return elements;
+	}
+
+	private void addDummyClassForPackageOnlyFile() {
+		appendElementKey("_$");
+		buffer.append("var C$=Clazz.newClass(\"_$\");\nC$.$clinit$ = function() {Clazz.load(C$, 1)};\n");
+		ClassAnnotation.addClassAnnotations(class_jaxbAccessorType, class_annotations, null, null, trailingBuffer);
+		buffer.append(trailingBuffer);
+		addDefaultConstructor();
 	}
 
 	public boolean visit(AnnotationTypeDeclaration node) {
@@ -6163,14 +6189,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	static class ClassAnnotation {
 		
-		protected BodyDeclaration node;
+		protected ASTNode node;
 		protected Annotation annotation;
 		private String qName;
 		
-		protected ClassAnnotation(String qName, Annotation annotation, BodyDeclaration node) {
-			System.out.println(">>>>" + qName + " "
+		protected ClassAnnotation(String qName, Annotation annotation, ASTNode node) {
+		//	System.out.println(">>>>" + qName + " "
 		//+ annotation.getClass().getName()
-					+ " " + annotation);
+		//			+ " " + annotation);
 			this.qName = qName;
 			this.annotation = annotation;
 			this.node = node;
@@ -6287,7 +6313,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		private static void addImplicitJAXBFieldsAndMethods(int accessType, TrailingBuffer trailingBuffer,
 				List<FieldDeclaration> fields, List<IMethodBinding> methods, String propOrder) {
-			if (accessType == JAXB_TYPE_NONE)
+			if (accessType == JAXB_TYPE_NONE || fields == null)
 				return;
 			boolean publicOnly = (accessType == JAXB_TYPE_PUBLIC_MEMBER);
 			if (accessType != JAXB_TYPE_PROPERTY) {
