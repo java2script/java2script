@@ -154,7 +154,7 @@ public class Root_ORDERED {
 
 	@XmlAttribute(name="extra")
 	private String extra = "extra";
-
+	
 	@XmlAttribute(name="nil")
 	private String nil = null;
 	

@@ -52,7 +52,7 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 		this.writer = this.result.getWriter();
 		this.outputStream = this.result.getOutputStream();
 		Class<?> javaClass = ((JSJAXBContext) context).getjavaClass();
-		doMarshal(javaClass, javaObject, null, false);
+		doMarshal(javaClass, javaObject, null, null, false);
 		JSJAXBClass.clearStatics();
  	}
 
@@ -61,28 +61,29 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 	 * 
 	 * @param javaClass    the class being marshalled
 	 * @param javaObject   the object being marshalled
-	 * @param field   the field for this class; null for the root
+	 * @param tagField   the field for this class; null for the root
 	 * @param addXsiType TODO
 	 * @throws JAXBException
 	 */
-	private void doMarshal(Class<?> javaClass, Object javaObject, JSJAXBField field, boolean addXsiType) throws JAXBException {
+	private void doMarshal(Class<?> javaClass, Object javaObject, Object tagObject, JSJAXBField tagField, boolean addXsiType) throws JAXBException {
 		// at least for now we rely on fields that are designated.
 
-		JSJAXBClass jaxbClass = new JSJAXBClass(javaClass, javaObject, field != null && field.isXmlIDREF, true);
+		JSJAXBClass jaxbClass = new JSJAXBClass(javaClass, javaObject, tagField != null && tagField.isXmlIDREF, true);
 		
 		
-		jaxbClass.tagField = field;
+		jaxbClass.tagField = tagField;
+		jaxbClass.tagObject = tagObject;
 
 		Map<String, Integer> oldMap = null;
 		Object oldObject = this.javaObject;
 		this.javaObject = javaObject;
-		if (field == null) {
+		if (tagField == null) {
 			clearQualifierMap();
 		} else { 
 			oldMap = newQualifierMap(null);
 		}
 
-		writeXML(jaxbClass, field == null, addXsiType);
+		writeXML(jaxbClass, tagField == null, addXsiType);
 		
 		this.javaObject = oldObject;
 		newQualifierMap(oldMap);
@@ -184,7 +185,9 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 		writeTagOpen(qname, !isRoot);   
 		if (addXsiType) {
 			addNameSpaceIfNeeded(jaxbClass.qualifiedTypeName, isRoot);
-			outputInstanceType(getEntryType(jaxbClass.qualifiedTypeName, jaxbClass.tagField.getValue(javaObject)));
+			Object v = jaxbClass.tagField.getValue(jaxbClass.tagObject);
+			String name = getEntryType(jaxbClass.qualifiedTypeName, v);
+			outputInstanceType(name);
 		}
 		if (isRoot)
 			addDefaultNameSpace();
@@ -199,7 +202,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 		if (jaxbClass.isXmlIDREF) {
 			writeValue(jaxbClass.xmlIDField, jaxbClass.xmlIDField.getObject(javaObject));
 		} else if (jaxbClass.enumMap != null) {
-			String s = (String) jaxbClass.enumMap.get("/" + jaxbClass.tagField.getObject(javaObject).toString());
+			String s = (String) jaxbClass.enumMap.get("/" + jaxbClass.tagField.getObject(jaxbClass.tagObject).toString());
 			output(s);
 		} else {
 			addFields(jaxbClass, false);
@@ -223,10 +226,10 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 	private void addAllNameSpaces(JSJAXBClass jaxbClass) throws JAXBException {
 		addNameSpaceIfNeeded(jaxbClass.qname, true);
 			for (int i = 0, n = jaxbClass.fields.size(); i < n; i++) {
-				JSJAXBField f = jaxbClass.fields.get(i);
-				addNameSpaceIfNeeded(f.qualifiedName, false);
-				if (f.boundListNodes != null)
-					addNameSpaceIfNeeded(f.qualifiedName, false);
+//				JSJAXBField f = ;
+				addNameSpaceIfNeeded(jaxbClass.fields.get(i).qualifiedName, false);
+//				if (f.boundListNodes != null)
+//					addNameSpaceIfNeeded(f.qualifiedName, false);
 			}
 		addNameSpaceIfNeeded(xsi, false);
 		addNameSpaceIfNeeded(xs, false);
@@ -242,9 +245,6 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 			for (int i = 0, n = jaxbClass.propOrder.size(); i < n; i++) {
 				String name = jaxbClass.propOrder.get(i);
 				field = getField(jaxbClass, name);
-				if (field == null) {
-					/**@j2sNative debugger */
-				}
 				if (!field.isAttribute)
 					addField(field);
 			}
@@ -263,7 +263,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 			return;
 		}
 		if (needsMarshalling(value)) {
-			doMarshal(value.getClass(), value, field, addXsiType);
+			doMarshal(value.getClass(), value, this.javaObject, field, addXsiType);
 			return;
 		}
 		if (value instanceof List) {
@@ -538,26 +538,27 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 		if (wrapName == null)
 			wrapName = field.qualifiedName;
 		boolean isNull = (map == null);
-		boolean isEmpty = (!isNull && map.isEmpty());
+//		boolean isEmpty = (!isNull && map.isEmpty());
 		writeTagOpen(wrapName, true);
 		output(">\n");
 		QName qn = field.qualifiedName;
+		Object eval = field.mapEntryValue;
+		boolean addXsiType = ((field.holdsObjects & JSJAXBField.MAP_KEY_OBJECT) != 0);
 		for (Entry<?, ?> e : map.entrySet()) {
 			Object key = e.getKey();
 			Object value = e.getValue();
 			output("<entry>");
 			field.qualifiedName = qnEntryKey;
-			field.entryValue = key;
-			addFieldListable(field, key, ((field.holdsObjects & JSJAXBField.MAP_KEY_OBJECT) != 0));			
+			field.mapEntryValue = key;
+			addFieldListable(field, key, addXsiType);			
 			if (value != null || isNillable) {
-				field.entryValue = value;
+				field.mapEntryValue = value;
 				field.qualifiedName = qnEntryValue;
-				addFieldListable(field, value, ((field.holdsObjects & JSJAXBField.MAP_VALUE_OBJECT) != 0));
+				addFieldListable(field, value, addXsiType);
 			}
-			field.entryValue = null;
 			output("\n</entry>\n");
 		}
-		field.entryValue = null;
+		field.mapEntryValue = eval;
 		field.qualifiedName = qn;
 		writeTagClose(wrapName, true);
     }

@@ -340,7 +340,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		JSJAXBClass.clearStatics();
 	}
 
-	public static boolean mustUnmarshal(JSJAXBField field) {
+	public static boolean needsUnmarshalling(JSJAXBField field) {
 		if (field.isSimpleType())
 			return false;
 		boolean isMarshalled = false;
@@ -434,12 +434,12 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 
 		// nil object - ignore
 
-		if (field.isNil())
+		if (field.isNil)
 			return;
 
 		// complex object -- unmarshal directly
 
-		if (mustUnmarshal(field)) {
+		if (needsUnmarshalling(field)) {
 			field.setValue(unmarshalField(field, field.boundNode), javaObject);
 			return;
 		}

@@ -263,6 +263,10 @@ public class Root_FIELD extends ROOT_super {
 	private String PropertyC = "PropertyC0";
     //    <PropertyC>PropertyC0</PropertyC>
 	
+	
+	@XmlElement(type=Integer.class, namespace="testing",name="what", nillable=true)
+	private Integer iii = Integer.valueOf(3);
+
 	@XmlTransient
 	private String propertyC = "propertyC0";
 	@XmlElement

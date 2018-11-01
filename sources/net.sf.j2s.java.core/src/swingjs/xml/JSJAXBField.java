@@ -25,7 +25,7 @@ class JSJAXBField {
 
 	// Marshaller only
 
-	Object entryValue = this;
+	Object mapEntryValue = this;
 
 	// Unmarshaller only
 
@@ -35,20 +35,23 @@ class JSJAXBField {
 	String xmlAttributeData;
 	Attributes xmlAttributes;
 	String xmlType;
+	boolean isNil;
 
 	/**
 	 * prior to re-use in unmarshalling
 	 * 
-	 * @param javaObject
 	 */
 	void clear() {
-		this.entryValue = null;
+		// marshaller
+		this.mapEntryValue = null;
+		// unmarshaller
 		this.boundNode = null;
 		this.boundListNodes = null;
 		this.xmlCharacterData = null;
 		this.xmlAttributeData = null;
 		this.xmlAttributes = null;
 		this.xmlType = null;
+		this.isNil = false;
 	}
 
 	void setCharacters(String ch) {
@@ -62,6 +65,7 @@ class JSJAXBField {
 	void setAttributes(Attributes attr) {
 		xmlAttributes = attr;
 		xmlType = attr.getValue("xsi:type");
+		isNil = (attr.getIndex("xsi:nil") >= 0);
 	}
 
 	void setNode(DOMNode node) {
@@ -255,7 +259,7 @@ class JSJAXBField {
 	private void processTypeAnnotation(JSJAXBClass jaxbClass, String tag, String data, List<String> propOrder) {
 		// check package annotations
 		switch (tag) {
-		case "@XmlSchema":
+		case "@XmlSchema": 
 			return;
 		}
 
@@ -345,7 +349,7 @@ class JSJAXBField {
 			typeAdapter = attr.get("@XmlJavaTypeAdapter:name");
 			if (typeAdapter == null)
 				typeAdapter = data;
-			typeAdapter = typeAdapter.substring(0, data.length() - 6);
+			typeAdapter = getQuotedClass(data);
 			return;
 		case "@XmlValue":
 			jaxbClass.xmlValueField = this;
@@ -380,18 +384,19 @@ class JSJAXBField {
 		System.out.println("JSJAXBField Unprocessed field annotation: " + text);
 	}
 
-	private String[] getSeeAlso(String data) {
+	private static String[] getSeeAlso(String data) {
 		// @XmlSeeAlso(test.jaxb2.Obj.class)
-		// @XmlSeeAlso({test.jaxb2.Obj.class,test.jaxb.Obj.class})
+		// @XmlSeeAlso({"test.jaxb2.Obj.class","test.jaxb.Obj.class"})
 		// --> ["test.jaxb.Obj.class"]
-		if (data.startsWith("{"))
-			data = data.substring(1, data.length() - 1);
 		String[] a = data.split(",");
-		for (int i = a.length; --i >= 0;) {
-			a[i] = a[i].trim();
-			a[i] = a[i].substring(0, a[i].length() - 6);
-		}
+		for (int i = a.length; --i >= 0;)
+			a[i] = getQuotedClass(a[i]);
 		return a;
+	}
+
+	private static String getQuotedClass(String s) {
+		s = PT.getQuotedStringAt(s, 0);
+		return s.substring(0, s.length() - 6);
 	}
 
 	/**
@@ -418,7 +423,7 @@ class JSJAXBField {
 	 * @param attr
 	 */
 	private void addXMLAttributes(String tag, String data, Map<String, String> attr) {
-		data = "<__ " + removeCommas(data) + " />";
+		data = "<__ " + data.replace('{', '\'').replace('}', '\'') + " />";
 		// System.out.println(data);
 		DOMNode doc = JSUtil.jQuery.parseXML(data);
 		DOMNode node = DOMNode.firstChild(doc);
@@ -427,30 +432,50 @@ class JSJAXBField {
 			attr.put(tag + ":" + names[i], node.getAttribute(names[i]));
 	}
 
-	private static String removeCommas(String s) {
-		boolean escaped = false;
-		for (int i = 0; i < s.length(); i++) {
-			switch (s.charAt(i)) {
-			case '"':
-				escaped = !escaped;
-				break;
-			case '}':
-			case '{':
-				if (!escaped)
-					s = s.substring(0, i) + "'" + s.substring(i + 1);
-				break;
-			case ',':
-				if (!escaped)
-					s = s.substring(0, i) + " " + s.substring(i + 1);
-				break;
-			case '\\':
-				i++;
-				break;
-			}
-		}
-		s = s.replace("=true", "=\"true\"").replace("=false", "=\"false\"");
-		return s;
-	}
+//	private static String removeCommas(String data) {
+//		return data.replace('{', '\'').replace('}', '\'');
+//		boolean quoted = false;
+//		boolean needQuote = false;
+//		boolean needQuote2 = false;
+//		for (int i = 0; i < s.length(); i++) {
+//			char c = s.charAt(i);
+//			if (c == '"') {
+//				quoted = !quoted;
+//				needQuote = false;
+//				continue;
+//			}
+//			if (needQuote) {
+//				if (c != '{') {
+//					s = s.substring(0, i) + "\"" + s.substring(i++);
+//					needQuote = false;
+//					needQuote2 = true;
+//					continue;
+//				}
+//				needQuote = false;
+//			}
+//			if (quoted)
+//				continue;
+//			switch (c) { 	
+//			case '=':
+//				needQuote = true;
+//				break;
+//			case '\\':
+//				i++;
+//				break;
+//			case ',':
+//				s = s.substring(0, i) + (needQuote2 ? "\" " : " ") + s.substring(++i);
+//				needQuote2 = false;
+//				break;
+//			case '{':
+//			case '}':
+//				s = s.substring(0, i) + "'" + s.substring(i + 1);
+//				break;
+//			}
+//		}
+//		if (needQuote2)
+//			s += '"';
+//		return s;
+//	}
 
 	public String toString() {
 		return "{" + javaName + "}" + index;
@@ -458,12 +483,8 @@ class JSJAXBField {
 
 	// unmarshalling
 
-	boolean isNil() {
-		return (xmlAttributes != null && xmlAttributes.getIndex("xsi:nil") >= 0);
-	}
-
 	boolean isSimpleType() {
-		return (isAttribute || asList || isByteArray || isArray || qualifiedWrapName != null || isNil()
+		return (isAttribute || asList || isByteArray || isArray || qualifiedWrapName != null || isNil
 				|| simplePackages());
 	}
 
@@ -569,7 +590,9 @@ class JSJAXBField {
 	 * @return
 	 */
 	public Object getValue(Object javaObject) {
-		return (entryValue == this ? getObject(javaObject) : entryValue);
+		if (mapEntryValue == this)
+			return getObject(javaObject);
+		return mapEntryValue;
 	}
 
 	@SuppressWarnings("unused")

@@ -84,6 +84,9 @@ class JSJAXBClass {
 
 	Class<?> javaClass; // for JavaScript debugging
 	private Object javaObject;
+	
+	transient Object tagObject;
+	
 	private static String defaultNamespace;
 	
 	private final static Map<String, String> marshallerNamespacePrefixes = new Hashtable<String, String>();
@@ -100,7 +103,7 @@ class JSJAXBClass {
 		this.isMarshaller = isMarshaller;
 		this.javaClass = javaClass;
 		this.javaObject = javaObject;
-		checkC$__ANN__(this, javaClass, javaObject != null, isXmlIDREF);
+		checkC$__ANN__(this, javaClass, javaObject != null || javaClass.isEnum(), isXmlIDREF);
 		this.isXmlIDREF = isXmlIDREF;
 	}
 

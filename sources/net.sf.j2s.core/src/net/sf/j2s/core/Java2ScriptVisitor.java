@@ -23,6 +23,8 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.regex.Pattern;
 
+import javax.xml.bind.annotation.XmlElement;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -65,6 +67,7 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -223,6 +226,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	final static int JAXB_TYPE_FIELD = 1;
 	final static int JAXB_TYPE_PUBLIC_MEMBER = 2;
 	final static int JAXB_TYPE_PROPERTY = 3;
+	static final int JAXB_TYPE_ENUM = 4;
 
 
 	private IJavaProject global_project;
@@ -1946,12 +1950,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				}
 			}
 		}
+		List<EnumConstantDeclaration> enums = (isEnum ? new ArrayList<>(): null);
 		if (lstStatic.size() > 0 || hasDependents) {
 			int pt = buffer.length();
 			buffer.append("\r\nC$.$clinit$ = function() {Clazz.load(C$, 1);\r\n");
 			boolean haveDeclarations = isEnum;
 			if (isEnum)
-				addEnumConstants((EnumDeclaration) node);
+				addEnumConstants((EnumDeclaration) node, enums);
 			for (int i = lstStatic.size(); --i >= 0;) {
 				BodyDeclaration element = lstStatic.remove(0);
 				if (element instanceof Initializer) {
@@ -2085,7 +2090,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// and Enum constants
 
 		if (class_jaxbAccessorType != JAXB_TYPE_UNKNOWN) {
-			ClassAnnotation.addClassAnnotations(class_jaxbAccessorType, class_annotations, fields, methods, trailingBuffer);
+			ClassAnnotation.addClassAnnotations(class_jaxbAccessorType, class_annotations, enums, fields, methods, trailingBuffer);
 			class_annotations = null;
 			class_jaxbAccessorType = JAXB_TYPE_UNKNOWN;
 		}
@@ -2121,22 +2126,22 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 	}
 
-	private boolean checkDeclarationType(BodyDeclaration element, int type) {
-		switch (class_jaxbAccessorType) {
-		case JAXB_TYPE_FIELD:
-		case JAXB_TYPE_PROPERTY:
-			return (type == class_jaxbAccessorType);
-		case JAXB_TYPE_NONE:
-		case JAXB_TYPE_PUBLIC_MEMBER:
-			return true;
-			// can't check here, because if just one of set or get is annotated,
-			// then it doesn't matter if either is public or not
-//			return Modifier.isPublic(element.getModifiers());
-		default:
-		case JAXB_TYPE_UNKNOWN:
-			return false;
-		}
-	}
+//	private boolean checkDeclarationType(BodyDeclaration element, int type) {
+//		switch (class_jaxbAccessorType) {
+//		case JAXB_TYPE_FIELD:
+//		case JAXB_TYPE_PROPERTY:
+//			return (type == class_jaxbAccessorType);
+//		case JAXB_TYPE_NONE:
+//		case JAXB_TYPE_PUBLIC_MEMBER:
+//			return true;
+//			// can't check here, because if just one of set or get is annotated,
+//			// then it doesn't matter if either is public or not
+////			return Modifier.isPublic(element.getModifiers());
+//		default:
+//		case JAXB_TYPE_UNKNOWN:
+//			return false;
+//		}
+//	}
 
 	/**
 	 * Collect all names of all functional interface abstract methods that this
@@ -2186,11 +2191,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @param constants
 	 */
 
-	private void addEnumConstants(EnumDeclaration e) {
+	private void addEnumConstants(EnumDeclaration e, List<EnumConstantDeclaration> enums) {
 		List<?> constants = e.enumConstants();
 		buffer.append("$vals=Clazz.array(C$,[0]);\r\n");
 		for (int i = 0; i < constants.size(); i++) {
 			EnumConstantDeclaration enumConst = (EnumConstantDeclaration) constants.get(i);
+			enums.add(enumConst);
 			checkAnnotations(enumConst, CHECK_ANNOTATIONS_ONLY); // for JAXB only
 			IMethodBinding binding = enumConst.resolveConstructorBinding();
 			AnonymousClassDeclaration anonDeclare = enumConst.getAnonymousClassDeclaration();
@@ -5413,7 +5419,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						: s.contains("PUBLIC") ? JAXB_TYPE_PUBLIC_MEMBER
 						: s.contains("PROPERTY") ? JAXB_TYPE_PROPERTY 
 						: JAXB_TYPE_NONE);
-			}
+			} else if (qName.startsWith("XmlEnum"))
+				class_jaxbAccessorType = JAXB_TYPE_ENUM;
 		}
 		return true;
 	}
@@ -5539,7 +5546,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private void addDummyClassForPackageOnlyFile() {
 		appendElementKey("_$");
 		buffer.append("var C$=Clazz.newClass(\"_$\");\nC$.$clinit$ = function() {Clazz.load(C$, 1)};\n");
-		ClassAnnotation.addClassAnnotations(class_jaxbAccessorType, class_annotations, null, null, trailingBuffer);
+		ClassAnnotation.addClassAnnotations(class_jaxbAccessorType, class_annotations, null, null, null, trailingBuffer);
 		buffer.append(trailingBuffer);
 		addDefaultConstructor();
 	}
@@ -6205,7 +6212,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 
 		@SuppressWarnings("unchecked")
-		public static void addClassAnnotations(int accessType, List<ClassAnnotation> class_annotations, List<FieldDeclaration> fields,
+		public static void addClassAnnotations(int accessType, List<ClassAnnotation> class_annotations, List<EnumConstantDeclaration> enums, List<FieldDeclaration> fields,
 				List<IMethodBinding> methods, TrailingBuffer trailingBuffer) {
 
 			int pt = 0, ptBuf = 0;
@@ -6215,10 +6222,22 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			for (int i = 0; i < class_annotations.size(); i++) {
 				ClassAnnotation a = class_annotations.get(i);
 				String str = a.annotation.toString();
-				if (a.annotation instanceof SingleMemberAnnotation) {
-					// resolve classes
+				//System.out.println(">>>str " + str);
+				//System.out.println(">>>ann " + a.annotation.getClass().getName());
+				if (a.annotation instanceof NormalAnnotation) {
+					//	@XmlElement(name="test",type=Integer.class)
+					// remove commas, add quotes
+					NormalAnnotation na = (NormalAnnotation) a.annotation;
+					IMemberValuePairBinding[] pairs = na.resolveAnnotationBinding().getDeclaredMemberValuePairs();
+					str = str.substring(0, str.indexOf("(") + 1);
+					for (int j = 0; j < pairs.length; j++)
+						str += annotationNameValue(pairs[j].getName(), pairs[j].getValue());
+					str += ")";
+				} else if (a.annotation instanceof SingleMemberAnnotation) {
+					// add quotes
 					List<ASTNode> expressions = null;
 					Expression e = ((SingleMemberAnnotation) a.annotation).getValue();
+					//System.out.println(">>>e " + e.getClass().getName());
 					if (e instanceof TypeLiteral) {
 						expressions = new ArrayList<ASTNode>();
 						expressions.add(e);
@@ -6230,13 +6249,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						int n = expressions.size();
 						String sep = (n > 1 ? "{" : "");
 						for (int j = 0; j < n; j++) {
-							str += sep;
-							e = (Expression) expressions.get(j);
-							if (e instanceof TypeLiteral) {
-								str += "\""+((TypeLiteral) e).getType().resolveBinding().getQualifiedName() + ".class\"";
-							} else {
-								str += e.toString();
-							}
+							str += sep + annotationNameValue(null, expressions.get(j));
 							sep = ",";
 						}
 						str += (n > 1 ? "})" : ")");
@@ -6275,6 +6288,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						type = var.getReturnType();
 					} else if (a.node instanceof EnumConstantDeclaration) {
 						EnumConstantDeclaration con = (EnumConstantDeclaration) a.node;
+						enums.remove(con);
 						IVariableBinding var = con.resolveVariable();
 						varName = var.getName();
 						type = var.getType();
@@ -6297,9 +6311,29 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			}
 			if (pt > 0) {
 				addTrailingFragments(fragments, trailingBuffer, ptBuf);
-				addImplicitJAXBFieldsAndMethods(accessType, trailingBuffer, fields, methods, propOrder);
+				addImplicitJAXBFieldsAndMethods(accessType, trailingBuffer, enums, fields, methods, propOrder);
 				trailingBuffer.append("]]];\n");
 			}
+		}
+
+		private static String annotationNameValue(String name, Object value) {
+			String str = (name == null ? "" : name + "=");
+			if (value instanceof TypeLiteral) {
+				str += "\"" + ((TypeLiteral) value).getType().resolveBinding().getQualifiedName() + ".class\"";
+			} else if (value instanceof ITypeBinding) {
+				str += "\"" + ((ITypeBinding) value).getQualifiedName() + ".class\"";
+			} else if (value instanceof Object[]){
+				// propOrder
+				Object[] o = (Object[])value;
+				str += "{";
+				for (int i = 0; i < o.length; i++)
+					str += annotationNameValue(null, o[i]) + " ";
+				str += "}";
+			} else {
+				str += "\"" + value.toString() + "\"";
+			}
+			str += " ";
+			return str;
 		}
 
 		private static IMethodBinding getJAXBGetMethod(IMethodBinding var, List<IMethodBinding> methods, boolean returnVar2) {
@@ -6314,7 +6348,17 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 
 		private static void addImplicitJAXBFieldsAndMethods(int accessType, TrailingBuffer trailingBuffer,
-				List<FieldDeclaration> fields, List<IMethodBinding> methods, String propOrder) {
+				List<EnumConstantDeclaration> enums, List<FieldDeclaration> fields, List<IMethodBinding> methods, String propOrder) {
+			if (accessType == JAXB_TYPE_ENUM) {
+				for (int j = 0; j < enums.size(); j++) {
+					EnumConstantDeclaration con = enums.get(j);
+					IVariableBinding var = con.resolveVariable();
+					String varName = var.getName();
+					ITypeBinding type = var.getType();
+					addAnnotation(type, varName, "@XmlEnumValue", trailingBuffer);
+				}
+				return;
+			}
 			if (accessType == JAXB_TYPE_NONE || fields == null)
 				return;
 			boolean publicOnly = (accessType == JAXB_TYPE_PUBLIC_MEMBER);
