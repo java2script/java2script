@@ -16,7 +16,7 @@ import javax.xml.bind.annotation.XmlType;
 
 // adapted source: http://blog.bdoughan.com/2011/06/using-jaxbs-xmlaccessortype-to.html
 
-@XmlRootElement(name = "Root", namespace = "www.jalview.org")
+@XmlRootElement(name = "Root")
 @XmlAccessorType(XmlAccessType.FIELD)
 //@XmlType(propOrder = {
 //	    "D",
@@ -27,10 +27,9 @@ import javax.xml.bind.annotation.XmlType;
 //	    "c",
 //	    "publ"
 //	})
-public class Root_FIELD extends ROOT {
+public class Root_FIELD extends ROOT_super {
 
 	public static boolean isCopy = false;
-
 	static final String x = "Date";
 	// TODO: DOES NOT WORK @XmlElement(name=x)
 
