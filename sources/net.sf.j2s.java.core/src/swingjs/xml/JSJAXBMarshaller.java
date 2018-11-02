@@ -262,7 +262,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 	 			writeField(field, null, addXsiType);
 			return;
 		}
-		if (needsMarshalling(value)) {
+		if (!field.isAttribute && JSJAXBClass.hasAnnotations(value)) {
 			doMarshal(value.getClass(), value, this.javaObject, field, addXsiType);
 			return;
 		}
@@ -274,18 +274,6 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 			writeFieldArray(field, value);
 		} else {
 			writeField(field, value, addXsiType);
-		}
-	}
-
-	static boolean needsMarshalling(Object value) {
-		if (value == null)
-			return false;
-		try {
-			// Date does not have a class?
-		Class<?> cl = value.getClass();
-		return (/** @j2sNative (cl.$clazz$ ? !!cl.$clazz$.__ANN__ : 0) || */false);
-		} catch (Throwable t) {
-			return false;
 		}
 	}
 
@@ -354,6 +342,15 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 		// null attributes are not allowed
 		if (value == null)
 			return;
+		if (value.getClass().isEnum()) {
+			JSJAXBClass jjc = new JSJAXBClass(value.getClass(), null, false, true);
+			if (jjc.enumMap != null) {
+				Object o = jjc.enumMap.get("/" + value.toString());
+				if (o != null)
+					value = o;
+			}
+		}
+		
 		addNameSpaceIfNeeded(field.qualifiedName, false);
 		output(" " + getXMLQname(field.qualifiedName, true) + "=\"");
 		writeValue(field, value);

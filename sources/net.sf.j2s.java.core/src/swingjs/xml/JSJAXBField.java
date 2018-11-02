@@ -96,8 +96,6 @@ class JSJAXBField {
 	boolean isArray;
 	boolean isByteArray;
 	boolean isContainer;
-	boolean isEnum;
-	boolean isEnumValue;
 
 	QName qualifiedName = new QName("", "##default", "");
 	QName qualifiedWrapName;
@@ -106,6 +104,7 @@ class JSJAXBField {
 	String xmlSchemaType;
 	String typeAdapter;
 	String mimeType;
+    String enumValue;
 
 	private Object methodSet;
 	private Object methodGet;
@@ -136,6 +135,7 @@ class JSJAXBField {
 	private Object clazz;
 
 	private Object[][] adata;
+
 
 	/**
 	 * @param jclass
@@ -298,9 +298,7 @@ class JSJAXBField {
 			jaxbClass.seeAlso = getSeeAlso(data);
 			return;
 		case "@XmlEnum":
-			jaxbClass.enumClassType = data;
-			jaxbClass.isEnum = true;
-			jaxbClass.enumMap = new Hashtable<Object, Object>();
+			jaxbClass.initEnum(data);
 			return;
 		}
 		System.out.println("JSJAXBField Unprocessed type annotation: " + text);
@@ -356,10 +354,10 @@ class JSJAXBField {
 			isXmlValue = true;
 			return;
 		case "@XmlEnumValue":
-			data = PT.trim(data, "\"");
+			enumValue = data = PT.trim(data, "\"");
 			jaxbClass.enumMap.put("/" + javaName, data); // for marshaller
+			jaxbClass.enumMap.put("//" + data, javaName); // for unmarshaller
 			jaxbClass.enumMap.put(data, this); // for unmarshaller
-			isEnumValue = true;
 			return;
 		case "@XmlList":
 			asList = true;
@@ -597,6 +595,9 @@ class JSJAXBField {
 
 	@SuppressWarnings("unused")
 	public Object getObject(Object javaObject) {
+		if (enumValue != null) {
+			return enumValue;
+		}
 		String n = javaName;
 		Object m = (isMethod ? methodGet : null);
 

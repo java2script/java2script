@@ -42,15 +42,14 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 //	    <Salary>50000.0</Salary>
 //	</employee>
 
-
 	private JAXBContext context;
 	private JSSAXParser parser;
 	private InputSource xmlSource;
-	
+
 	private JSJAXBClass jaxbClass;
 	private DOMNode doc;
 	private Object javaObject;
-		
+
 //	Map<String, Object> properties = new HashMap<String, Object>();
 //	private InputStream inputStream;
 //	private Reader reader;
@@ -74,7 +73,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 	@Override
 	protected Object unmarshal(XMLReader reader, InputSource source) throws JAXBException {
 		parser = (JSSAXParser) reader;
-		xmlSource = source;		
+		xmlSource = source;
 		Object o = doUnmarshal(null, ((JSJAXBContext) context).getjavaClass());
 		clearStatics();
 		return o;
@@ -96,7 +95,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 	}
 
 	/**
-	 * Optionally start with a DOMNode 
+	 * Optionally start with a DOMNode
 	 * 
 	 * @param doc
 	 * @param javaClass
@@ -112,7 +111,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		boolean isEnum = javaClass.isEnum();
 		Object oldObject = this.javaObject;
 		Object javaObject = null;
-		try { 
+		try {
 			if (!isEnum)
 				javaObject = javaClass.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
@@ -135,22 +134,24 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		}
 		processArraysAndLists();
 		processMaps();
-		if (jaxbClass.isEnum) 
-			javaObject = setEnumValue(javaClass, node);
+		if (jaxbClass.isEnum)
+			javaObject = getEnumValue(jaxbClass, javaClass, JSSAXParser.getSimpleInnerText(node));
 		jaxbClass = oldJaxbClass;
 		doc = oldDoc;
 		this.javaObject = oldObject;
 		return javaObject;
 	}
 
-	public Object setEnumValue(Class<?> javaClass, DOMNode node) {
-		String name = JSSAXParser.getSimpleInnerText(node);
-		name = ((JSJAXBField) jaxbClass.enumMap.get(name)).javaName;
+	public Object getEnumValue(JSJAXBClass jaxbClass, Class<?> javaClass, String xmlName) {
+		if (jaxbClass == null)
+			jaxbClass = new JSJAXBClass(javaClass, null, false, false);
+		@SuppressWarnings("unused")
+		String name = (String) jaxbClass.enumMap.get("//" + xmlName);
 		Object o = null;
 		/**
 		 * @j2sNative
 		 * 
-		 *   o = Enum.valueOf$Class$S(javaClass, name);
+		 * 			o = Enum.valueOf$Class$S(javaClass, name);
 		 */
 		return o;
 	}
@@ -192,14 +193,16 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 				continue;
 //			System.out.println("Filling Map " + field.javaName);
 			List<Object> nodes = field.boundListNodes;
-			Map<Object,Object> map = (Map<Object,Object>) field.getObject(javaObject);
+			Map<Object, Object> map = (Map<Object, Object>) field.getObject(javaObject);
 			if (map == null) {
 				field.setValue(map = new HashMap<Object, Object>(), javaObject);
 			}
 			map.clear();
 			if (nodes != null) {
-				String keyType = ((field.holdsObjects & JSJAXBField.MAP_KEY_OBJECT) != 0 ? null : field.maplistClassNames[0]);
-				String valueType = ((field.holdsObjects & JSJAXBField.MAP_VALUE_OBJECT) != 0 ? null : field.maplistClassNames[1]);
+				String keyType = ((field.holdsObjects & JSJAXBField.MAP_KEY_OBJECT) != 0 ? null
+						: field.maplistClassNames[0]);
+				String valueType = ((field.holdsObjects & JSJAXBField.MAP_VALUE_OBJECT) != 0 ? null
+						: field.maplistClassNames[1]);
 				for (int i = 1, n = nodes.size(); i < n;) {
 					Object key = getNodeObject((DOMNode) nodes.get(i++), keyType, null, true);
 					Object value = getNodeObject((DOMNode) nodes.get(i++), valueType, null, true);
@@ -210,18 +213,17 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			field.boundListNodes = null;
 		}
 	}
-	
+
 	private Object[] getArrayOfType(JSJAXBField field, String type, int len) {
-		// JavaScript will return the appropriate type of array, 
+		// JavaScript will return the appropriate type of array,
 		// even if it is primitive.
-		
+
 		Object[] a = (Object[]) field.getObject(javaObject);
 		if (a != null)
 			return a;
 		if (type != null) {
 			if (isPrimitive(type)) {
-				type = (type == "int" ? "Integer" 
-						: type.substring(0, 1).toUpperCase() + type.substring(1)) + ".TYPE";
+				type = (type == "int" ? "Integer" : type.substring(0, 1).toUpperCase() + type.substring(1)) + ".TYPE";
 				/**
 				 * @j2sNative
 				 * 
@@ -239,7 +241,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		}
 		return new Object[len];
 	}
-	
+
 	private Object[] fillArrayData(JSJAXBField field, DOMNode node, Object[] data, String arrayType, boolean asObject) {
 		boolean haveData = (data != null);
 		int n = (haveData ? data.length : field.boundListNodes.size());
@@ -247,11 +249,11 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		if (!haveData)
 			data = a; // nulls
 		for (int i = 0; i < n; i++)
-			a[i] = getNodeObject((node == null ? (DOMNode) field.boundListNodes.get(i) : node), 
-			arrayType, data[i], asObject);
+			a[i] = getNodeObject((node == null ? (DOMNode) field.boundListNodes.get(i) : node), arrayType, data[i],
+					asObject);
 		return a;
- 	}
-	
+	}
+
 	private Object getNodeObject(DOMNode node, String definedType, Object data, boolean asObject) {
 		if (node == null)
 			return null;
@@ -285,7 +287,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		JSJAXBField field = getFieldFromQName(qName);
 		bindNode(node, field, atts);
 		field.setCharacters(text);
-		setFieldValue(field); 
+		setFieldValue(field);
 	}
 
 	private void setDocAttributes(String value, Attributes atts) {
@@ -328,16 +330,31 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 	}
 
 	///////////////////////// class and field checks ///////////////////
+
+	private final static Map<String, Boolean> knownJavaClasses = new Hashtable<>();
+	private final static Map<String, JSJAXBField> seeAlsoMap = new Hashtable<>();
+	private final static Map<String,JSJAXBClass> knownJAXBClasses = new Hashtable<>();
 	
-	private final static Map<String, Boolean> knownJavaClasses = new Hashtable<String, Boolean>();
-	private final static Map<String, JSJAXBClass> knownJaxBClasses = new Hashtable<>();
-	private final static Map<String, JSJAXBField> seeAlsoMap = new Hashtable<String, JSJAXBField>();
 
 	static void clearStatics() {
 		knownJavaClasses.clear();
-		knownJaxBClasses.clear();
+		knownJAXBClasses.clear();
 		seeAlsoMap.clear();
 		JSJAXBClass.clearStatics();
+	}
+
+	static JSJAXBClass newUnmarshalledInstance(Class<?> javaClass, Object javaObject) {
+		String name = javaClass.getCanonicalName();
+		JSJAXBClass jjc = knownJAXBClasses.get(name);
+		if (jjc == null) {
+			jjc = new JSJAXBClass(javaClass, javaObject, false, false);
+			knownJAXBClasses.put(name, jjc);
+			return jjc;
+		}
+		for (int i = jjc.fields.size(); --i >= 0;) {
+			jjc.fields.get(i).clear();
+		}
+		return jjc;
 	}
 
 	public static boolean needsUnmarshalling(JSJAXBField field) {
@@ -353,25 +370,11 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			System.out.println("JSJAXBClass: class was not found: " + javaClassName);
 			e.printStackTrace();
 		} finally {
-		knownJavaClasses.put(javaClassName, Boolean.valueOf(isMarshalled));
+			knownJavaClasses.put(javaClassName, Boolean.valueOf(isMarshalled));
 		}
 		return isMarshalled;
 	}
 
-	static JSJAXBClass newUnmarshalledInstance(Class<?> javaClass, Object javaObject) {
-		String name = javaClass.getCanonicalName();
-		JSJAXBClass jjc = knownJaxBClasses.get(name);
-		if (jjc == null) {
-			jjc = new JSJAXBClass(javaClass, javaObject, false, false);
-			knownJaxBClasses.put(name, jjc);
-			return jjc;
-		}
-		for (int i = jjc.fields.size(); --i >= 0;) {
-			jjc.fields.get(i).clear();
-		}
-		return jjc;
-	}
-	
 	void prepareForUnmarshalling(String defaultNamespace) {
 		jaxbClass.setNamespace(defaultNamespace);
 		String[] seeAlso = jaxbClass.seeAlso;
@@ -412,7 +415,8 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			namespace = jaxbClass.getNamespace();
 		if (namespace != null)
 			map.put(namespace + ":" + q.getLocalPart(), field);
-		//System.out.println("JSJAXBClass#binding " + namespace + ":" + q.getLocalPart() + "->" + field.javaName);
+		// System.out.println("JSJAXBClass#binding " + namespace + ":" +
+		// q.getLocalPart() + "->" + field.javaName);
 	}
 
 	JSJAXBField getFieldFromQName(QName qName) {
@@ -424,9 +428,8 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			f = seeAlsoMap.get(key);
 		if (f == null)
 			f = seeAlsoMap.get(qName.getLocalPart());
-		return f; 
+		return f;
 	}
-
 
 	///////////////////////// converting and assigning /////////////////
 
@@ -487,14 +490,14 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		return node;
 	}
 
-	private String getArrayType(JSJAXBField field) { 
+	private String getArrayType(JSJAXBField field) {
 		return (field.isArray ? field.javaClassName.replace("[]", "") : field.maplistClassNames[0]);
 	}
 
 	private boolean isPrimitive(String type) {
-		return PT.isOneOf(type,";byte;short;int;long;float;double;boolean;");
+		return PT.isOneOf(type, ";byte;short;int;long;float;double;boolean;");
 	}
-	
+
 	/**
 	 * This could be a field with a Java type or an xsi:type=xs.xxxxxx type (Object,
 	 * List<Object>, or Map<String, Object>). JavaScript will return either an Object
@@ -621,16 +624,26 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			// probably fail without a NameSpaceContext
 			return newVal = DatatypeConverter.parseQName(val, null);
 		}
+		Class<?> cl = null;
 		try {
-			Class<?> cl = Class.forName(type);
+			cl = Class.forName(type);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 			return null;
 		}
-		// all Numbers
+		
+		if (cl.isEnum()) {
+			if (JSJAXBClass.hasAnnotations(cl)) {
+			return getEnumValue(null, cl, val);
+			}
+		}
+		
+		// all Numbers and Enum
 		/**
 		 * @j2sNative if (cl.$clazz$.valueOf$S) return newVal = cl.$clazz$.valueOf$S(objVal);
 		 */
+		
+		
 
 		// BigInteger, BigDecimal
 		/**
@@ -662,15 +675,15 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		return null;
 	}
 
-	/////////// JSSAXParser callbacks //////// 
-	
+	/////////// JSSAXParser callbacks ////////
+
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
-		start(parser.getNode(), new QName(uri, localName, ""), atts);		
+		start(parser.getNode(), new QName(uri, localName, ""), atts);
 	}
 
 	/////////// unused XMLReader /////////
-	
+
 	@Override
 	public void startDocument() throws SAXException {
 	}
@@ -678,14 +691,13 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 	@Override
 	public void characters(char[] ch, int start, int length) throws SAXException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 	}
 
-	
 	@Override
 	public void endDocument() throws SAXException {
 	}
@@ -693,38 +705,37 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 	@Override
 	public void setDocumentLocator(Locator locator) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void startPrefixMapping(String prefix, String uri) throws SAXException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void endPrefixMapping(String prefix) throws SAXException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void processingInstruction(String target, String data) throws SAXException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void skippedEntity(String name) throws SAXException {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
 
 }

@@ -251,4 +251,22 @@ class JSJAXBClass {
 		return javaObject;
 	}
 
+	public void initEnum(String data) {
+		enumClassType = data;
+		isEnum = true;
+		enumMap = new Hashtable<Object, Object>();
+	}
+
+	static boolean hasAnnotations(Object value) {
+		if (value == null)
+			return false;
+		try {
+			// Date does not have a class?
+		Class<?> cl = value.getClass();
+		return (/** @j2sNative (value.$clazz$ ? !!value.$clazz$.__ANN__ : cl.$clazz$ ? !!cl.$clazz$.__ANN__ : 0) || */false);
+		} catch (Throwable t) {
+			return false;
+		}
+	}
+
 }

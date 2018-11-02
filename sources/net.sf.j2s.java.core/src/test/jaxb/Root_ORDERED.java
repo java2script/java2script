@@ -228,8 +228,8 @@ public class Root_ORDERED {
         this.creationDate = value;
     }
 
-    @XmlElement
-	public CustomerType type;
+    @XmlAttribute
+	public CustomerType type; 
     
     @XmlEnum(String.class)
     private enum CustomerType { 
