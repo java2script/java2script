@@ -135,6 +135,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// BH 11/4/2018 -- 3.2.4.02 broad JAXB support
 // BH 10/27/2018 -- 3.2.4.01 support for JAXB FIELD+propOrder and NONE types 
 // BH 9/28/2018 -- 3.2.4.00 adds minimal support for JAXB
 // BH 9/23/2018 -- 3.2.3.00 adds support for java.applet.Applet and java.awt.* controls without use of a2s.*
@@ -6019,7 +6020,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		private final static String defaultNonQualified
 		// Math and Date both are minor extensions
 		// of JavaScript, so they are not qualified
-				= "java.lang.Math;" + "java.util.Date;"
+				= "java.lang.Math;"
+		// MAYBE NOT! + "java.util.Date;"
 				// swingjs.api.js and javajs.api.js contain
 				// interfaces to JavaScript methods and so
 				// are not parameterized.
@@ -6346,9 +6348,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 
 		private static String annotationNameValue(String name, Object value) {
+			System.out.println(">>>value " + value + " " + value.getClass().getName() + " = " + value.toString());
 			String str = (name == null ? "" : name + "=");
-			if (value instanceof TypeLiteral) {
+			if (value instanceof TypeLiteral) { 
 				str += "\"" + ((TypeLiteral) value).getType().resolveBinding().getQualifiedName() + ".class\"";
+			} else if (value instanceof IVariableBinding) {
+				str += "\"" + ((IVariableBinding) value).getType().getQualifiedName() + "." + ((IVariableBinding) value).getName() + "\"";
+			} else if (value instanceof Expression) {
+					str += "\"" + value + "\"";
 			} else if (value instanceof ITypeBinding) {
 				str += "\"" + ((ITypeBinding) value).getQualifiedName() + ".class\"";
 			} else if (value instanceof Object[]){

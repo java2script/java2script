@@ -278,19 +278,18 @@ class JSJAXBClass implements Cloneable {
 		}
 	}
 
-//	public JSJAXBClass clone() {
-//		try {
-//			JSJAXBClass jaxbClass = (JSJAXBClass) super.clone();
-//			for (int i = 0, n = fields.size(); i < n; i++) {
-//				jaxbClass.addField((JSJAXBField) fields.get(i).clone());
-//			}
-//			return jaxbClass;
-//		} catch (CloneNotSupportedException e) {
-//			return null;
-//		}
-//		
-//		
-//	}
+	public JSJAXBClass clone() {
+		try {
+			JSJAXBClass jaxbClass = (JSJAXBClass) super.clone();
+			jaxbClass.fields = new ArrayList<JSJAXBField>();
+			for (int i = 0, n = fields.size(); i < n; i++) {
+				jaxbClass.addField((JSJAXBField) fields.get(i).clone());
+			}
+			return jaxbClass;
+		} catch (CloneNotSupportedException e) {
+			return null;
+		}
+	}
 
 	QName finalizeFieldQName(QName qName, String defaultName) {
 		if (qName == null)

@@ -189,8 +189,8 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		} catch (SAXException e) {
 			e.printStackTrace();
 		}
-		processArraysAndLists();
 		processMaps();
+		processArraysAndLists();
 		if (jaxbClass.isEnum)
 			javaObject = getEnumValue(jaxbClass, javaClass, JSSAXParser.getSimpleInnerText(node));
 
@@ -335,7 +335,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 	}
 
 	private void start(DOMNode node, QName qName, Attributes atts) {
-		System.out.println(">>" + qName);
+		//System.out.println(">>JSJAXBUnmarshaller start:" + qName);
 		String text = JSSAXParser.getSimpleInnerText(node);
 		if (doc == null) {
 			doc = node;
@@ -414,12 +414,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			knownJAXBClasses.put(name, jjc);
 			return jjc;
 		}
-		for (int i = jjc.fields.size(); --i >= 0;) {
-			jjc.fields.get(i).clear();
-		}
-		return jjc;
-
-		// return jjc.clone();
+		return jjc.clone();
 	}
 
 	public static boolean needsUnmarshalling(JSJAXBField field) {
@@ -539,11 +534,11 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			return;
 		}
 
+		// unwrapped List or array
+
 		if (field.boundListNodes != null) {
 			return;
 		}
-
-		// unwrapped List or array
 
 		// qualifiedWrapName is null;
 
@@ -607,7 +602,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 					case "hexBinary":
 						return newVal = DatatypeConverter.parseHexBinary(val);
 					case "dateTime":
-						return newVal = new Date(/** @j2sNative new Date(val) || */
+						return newVal = new Date(/** @j2sNative +Date.parse(val) || */
 								null);
 					default:
 						System.out.println("JSJAXBUnmarhsaller schema not supported: " + field.xmlSchemaType);

@@ -18,20 +18,10 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement(namespace="root.field", name="RootF")
 @XmlAccessorType(XmlAccessType.FIELD)
-//@XmlType(propOrder = {
-//	    "D",
-//	    "a",
-//	    "date",
-//	    "propertyC",
-//	    "b",
-//	    "c",
-//	    "publ"
-//	})
 public class Root_FIELD extends ROOT_super {
 
 	public static boolean isCopy = false;
 	static final String x = "Date";
-	// TODO: DOES NOT WORK @XmlElement(name=x)
 
 	public Root_FIELD() {
 		System.out.println("root field () constructor ");

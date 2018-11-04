@@ -30,36 +30,92 @@ class JSJAXBField implements Cloneable {
 
 	// Unmarshaller only
 
+	final static int SIMPLE = 0;
+	final static int LIST = 1;
+	final static int MAP = 2;
+
+	int fieldType = SIMPLE;
+
 	DOMNode boundNode;
 	List<Object> boundListNodes;
+	QName qualifiedTypeName;
+
 	String xmlCharacterData = "";
 	String xmlAttributeData;
-	Attributes xmlAttributes;
+//	Attributes xmlAttributes;
 	String xmlType;
 	boolean isNil;
+
+	// marshaller and unmarshaller
+
+	final static int NO_OBJECT = 0;
+	final static int SIMPLE_OBJECT = 1;
+	final static int ARRAY_OBJECT = 2;
+	final static int LIST_OBJECT = 3;
+	final static int MAP_KEY_OBJECT = 4;
+	final static int MAP_VALUE_OBJECT = 8;
+
+	int holdsObjects = NO_OBJECT;
+
+	QName qualifiedName;
+	QName qualifiedWrapName;
+
+	String text;
+	String javaName;
+	String javaClassName;
+	String xmlSchemaType;
+	String typeAdapter;
+	String mimeType;
+    String enumValue;
+	String mapClassNameKey;
+	String mapClassNameValue;
+	String listClassName;
+
+
+	boolean isTransient;
+	boolean isAttribute;
+	boolean isXmlID;
+	boolean isXmlIDREF;
+	boolean isXmlValue;
+	boolean asList;
+	boolean isNillable;
+	boolean isArray;
+	boolean isByteArray;
+	boolean isContainer;
+
+	/// private only
+	
+	private Object methodSet;
+	private Object methodGet;
+	private boolean isMethod;
+
+	/// debugging only
+	
+	private int index;
+    private Object clazz; // for debugging only
+
 
 	/**
 	 * prior to re-use in unmarshalling
 	 * 
 	 */
-	public JSJAXBField clear() {		
-//		try {
-//			JSJAXBField f = (JSJAXBField) super.clone();
+	public JSJAXBField clone() {		
+		try {
+			JSJAXBField f = (JSJAXBField) super.clone();
 		// marshaller
-		this.mapEntryValue = null;
+		f.mapEntryValue = null;
 		// unmarshaller
-		this.boundNode = null;
-		this.boundListNodes = null;
-		this.xmlCharacterData = null;
-		this.xmlAttributeData = null;
-		this.xmlAttributes = null;
-		this.xmlType = null;
-		this.isNil = false;
-		return this;
-//		return f;
-//		} catch (CloneNotSupportedException e) {
-//			return null;
-//		}
+		f.boundNode = null;
+		f.boundListNodes = null;
+		f.xmlCharacterData = null;
+		f.xmlAttributeData = null;
+//		f.xmlAttributes = null;
+		f.xmlType = null;
+		f.isNil = false;
+		return f;
+		} catch (CloneNotSupportedException e) {
+			return null;
+		}
 	}
 
 	void setCharacters(String ch) {
@@ -71,7 +127,7 @@ class JSJAXBField implements Cloneable {
 	}
 
 	void setAttributes(Attributes attr) {
-		xmlAttributes = attr;
+//		xmlAttributes = attr;
 		xmlType = attr.getValue("xsi:type");
 		isNil = (attr.getIndex("xsi:nil") >= 0);
 	}
@@ -85,63 +141,6 @@ class JSJAXBField implements Cloneable {
 		}
 		boundNode = node;
 	}
-
-	// marshaller and unmarshaller
-
-	int index;
-
-	String text;
-	String javaName;
-	String javaClassName;
-
-	Map<String, String> attr;
-
-	boolean isTransient;
-	boolean isAttribute;
-	boolean isXmlID;
-	boolean isXmlIDREF;
-	boolean isXmlValue;
-	boolean asList;
-	boolean isNillable;
-	boolean isArray;
-	boolean isByteArray;
-	boolean isContainer;
-
-	QName qualifiedName = null;
-	QName qualifiedWrapName;
-
-	String xmlSchemaType;
-	String typeAdapter;
-	String mimeType;
-    String enumValue;
-
-	private Object methodSet;
-	private Object methodGet;
-
-	String mapClassNameKey, mapClassNameValue, listClassName;
-
-	QName qualifiedTypeName;
-
-	final static int SEE_ALSO = -1;
-	final static int SIMPLE = 0;
-	final static int LIST = 1;
-	final static int MAP = 2;
-
-	final static int NO_OBJECT = 0;
-	final static int SIMPLE_OBJECT = 1;
-	final static int ARRAY_OBJECT = 2;
-	final static int LIST_OBJECT = 3;
-	final static int MAP_KEY_OBJECT = 4;
-	final static int MAP_VALUE_OBJECT = 8;
-	final static int MAP_KEY_VALUE_OBJECT = 12;
-
-	int fieldType = SIMPLE;
-
-	int holdsObjects = NO_OBJECT;
-
-	private boolean isMethod;
-
-	private Object clazz;
 
 	/**
 	 * @param jclass
@@ -189,10 +188,10 @@ class JSJAXBField implements Cloneable {
 			holdsObjects = ARRAY_OBJECT;
 		isContainer |= isArray;
 		if (isMethod)
-			getMethods(jaxbClass.getJavaObject());
-		attr = new Hashtable<String, String>();
+			getMethods(jaxbClass.getJavaObject(), clazz);
+		Map<String, String> attr = new Hashtable<String, String>();
 		text = "";
-		readAnnotations(jaxbClass, (String[]) adata[1], propOrder);
+		readAnnotations(jaxbClass, (String[]) adata[1], propOrder, attr);
 		// ensure that we have a qualified name if appropriate
 		setDefaults();
 		if (qualifiedWrapName != null) {
@@ -214,7 +213,7 @@ class JSJAXBField implements Cloneable {
 				|| javaClassName.equals("Object[]");
 	}
 
-	private void readAnnotations(JSJAXBClass jaxbClass, String[] javaAnnotations, List<String> propOrder) {
+	private void readAnnotations(JSJAXBClass jaxbClass, String[] javaAnnotations, List<String> propOrder, Map<String, String> attr) {
 		for (int i = 0; i < javaAnnotations.length; i++) {
 			String data = javaAnnotations[i];
 			text += data + ";";
@@ -225,9 +224,9 @@ class JSJAXBField implements Cloneable {
 			if (pt >= 0 && data.indexOf("=") >= 0)
 				addXMLAttributes(tag, data, attr);
 			if (javaName == null)
-				processTypeAnnotation(jaxbClass, tag, data, propOrder);
+				processTypeAnnotation(jaxbClass, tag, data, propOrder, attr);
 			else
-				processFieldAnnotation(jaxbClass, tag, data);
+				processFieldAnnotation(jaxbClass, tag, data, attr);
 		}
 	}
 
@@ -254,8 +253,9 @@ class JSJAXBField implements Cloneable {
 	 * @param tag
 	 * @param data
 	 * @param propOrder
+	 * @param attr TODO
 	 */
-	private void processTypeAnnotation(JSJAXBClass jaxbClass, String tag, String data, List<String> propOrder) {
+	private void processTypeAnnotation(JSJAXBClass jaxbClass, String tag, String data, List<String> propOrder, Map<String, String> attr) {
 		// check package annotations
 		switch (tag) {
 		case "@XmlSchema": 
@@ -265,10 +265,10 @@ class JSJAXBField implements Cloneable {
 		// check type annotations:
 		switch (tag) {
 		case "@XmlRootElement":
-			qualifiedName = getName(tag);
+			qualifiedName = getName(tag, attr);
 			return;
 		case "@XmlType":
-			qualifiedTypeName = getName(tag);
+			qualifiedTypeName = getName(tag, attr);
 			String order = attr.get("@XmlType:propOrder");
 			if (order != null) {
 				int[] pt = new int[1];
@@ -308,8 +308,9 @@ class JSJAXBField implements Cloneable {
 	 * @param jaxbClass
 	 * @param tag
 	 * @param data      what is in the (...)
+	 * @param attr 
 	 */
-	private void processFieldAnnotation(JSJAXBClass jaxbClass, String tag, String data) {
+	private void processFieldAnnotation(JSJAXBClass jaxbClass, String tag, String data, Map<String, String> attr) {
 		switch (tag) {
 		case "!XmlInner":
 			jaxbClass.addSeeAlso(javaClassName);
@@ -320,10 +321,10 @@ class JSJAXBField implements Cloneable {
 			return;
 		case "@XmlAttribute":
 			isAttribute = true;
-			qualifiedName = getName(tag);
+			qualifiedName = getName(tag, attr);
 			return;
 		case "@XmlElement":
-			qualifiedName = getName(tag);
+			qualifiedName = getName(tag, attr);
 			isNillable = "true".equals(attr.get("@XmlElement:nillable"));
 			return;
 		case "@XmlSchemaType":
@@ -377,7 +378,7 @@ class JSJAXBField implements Cloneable {
 			// @XmlMimeType("text/xml; charset=iso-8859-1")
 			return;
 		case "@XmlElementWrapper":
-			qualifiedWrapName = getName(tag);
+			qualifiedWrapName = getName(tag, attr);
 			return;
 		}
 		System.out.println("JSJAXBField Unprocessed field annotation: " + text);
@@ -403,9 +404,10 @@ class JSJAXBField implements Cloneable {
 	 * combining all annotations into one.
 	 * 
 	 * @param tag
+	 * @param attr TODO
 	 * @return
 	 */
-	private QName getName(String tag) {
+	private QName getName(String tag, Map<String, String> attr) {
 		String name, namespace;
 		name = attr.get(tag + ":name");
 		namespace = attr.get(tag + ":namespace");
@@ -509,10 +511,10 @@ class JSJAXBField implements Cloneable {
 	/**
 	 * Check for methods in C$.$P$[] (private) and object[] (all others) 
 	 */
-	private void getMethods(Object javaObject) {
+	private void getMethods(Object javaObject, Object clazz) {
 		String methodName = javaName.substring(2);
-		Object[] pm = /** @j2sNative this.clazz.$P$ || */null;
-		Object[] jo = /** @j2sNative this.clazz.prototype || */null;
+		Object[] pm = /** @j2sNative clazz.$P$ || */null;
+		Object[] jo = /** @j2sNative clazz.prototype || */null;
 		// annotation can be on set... or get... or is...
 		// so we start by using get instead of set
 		// qualifications getXxxx$() and setXxxx$mytype_escaped(xxx)

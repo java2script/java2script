@@ -112,6 +112,7 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 		mapQualifierLevel = new Hashtable<String, Integer>(oldMap);
 		return oldMap;
 	}
+	
 	private static void clearQualifierMap() {
 		// not thread safe
 		mapQualifierLevel.clear();
@@ -166,6 +167,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 		/**
 		 * @j2sNative str= (this.textarea.innerHTML=str,this.textarea.innerHTML);
 		 */
+		str = str.replace("&", "&amp;");
 		if (isAttribute)
 			str = str.replace("\"", "&quot;");
 		

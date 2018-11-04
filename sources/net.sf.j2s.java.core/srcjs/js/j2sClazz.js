@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 11/4/2018 3.2.4.02 fixes problem with new Date("10/20/2018") and missing date.equals()
 // BH 10/1/2018 3.2.4.01 fixes problem with AWT mouseXxx(Event) not activating in children of Applet
 // BH 9/29/2018 3.2.4.00 adds JAXB support
 // BH 9/23/2018 3.2.3.00 adds direct non-Swing applet support (java.applet.Applet and java.awt.*); no need for converting source to a2s.*
@@ -104,7 +105,7 @@ window["j2s.clazzloaded"] = true;
   _debugging: false,
   _loadcore: true,
   _nooutput: 0,
-  _VERSION_R: "3.2.4.01",
+  _VERSION_R: "3.2.4.02",
   _VERSION_T: "3.2.4.00",
 };
 
@@ -279,8 +280,12 @@ Clazz.assert = function(clazz, obj, tf, msg) {
 
 Clazz.clone = function(me) { 
   // BH allows @j2sNative access without super constructor
-  return appendMap(me.__ARRAYTYPE ? Clazz.array(me.__BASECLASS, me.__ARRAYTYPE, -1, me, true)
-   : new me.constructor(inheritArgs), me); 
+if (me.__ARRAYTYPE) {
+  return appendMap(Clazz.array(me.__BASECLASS, me.__ARRAYTYPE, -1, me, true), me);
+}
+  me = appendMap(new me.constructor(inheritArgs), me); 
+  me.__JSID__ = ++_jsid;
+  return me;
 }
 
 /**sgurin
@@ -4966,30 +4971,34 @@ Character.prototype.intValue$  = function() { return this.value.codePointAt(0) }
 
 // TODO: Only asking for problems declaring Date. This is not necessary
 
+// NOTE THAT java.util.Date, like java.lang.Math, is unqualified by the transpiler -- this is NOT necessary
+
 Clazz._setDeclared("java.util.Date", java.util.Date=Date);
 //Date.TYPE="java.util.Date";
 Date.__CLASS_NAME__="Date";
 addInterface(Date,[java.io.Serializable,java.lang.Comparable]);
 
-m$(java.util.Date, "c$", function(t) {
-  this.setTime$J(t || System.currentTimeMillis$())
+m$(java.util.Date, ["c$", "c$$S", "c$$J"], function(t) {
+  this.setTime$J(typeof t == "string" ? Date.parse(t) : t ? t : System.currentTimeMillis$())
 }, 1);
 
-m$(java.util.Date,"clone$",
+m$(java.util.Date, ["getClass$", "getClass"], function () { return Clazz.getClass(this); }, 1);
+
+m$(java.util.Date,["clone$","clone"],
 function(){
 return new Date(this.getTime());
 });
 
-m$(java.util.Date,"before$java_util_Date",
+m$(java.util.Date,["before", "before$java_util_Date"],
 function(when){
 return this.getTime()<when.getTime();
 });
-m$(java.util.Date,"after$java_util_Date",
+m$(java.util.Date,["after", "after$java_util_Date"],
 function(when){
 return this.getTime()>when.getTime();
 });
 
-m$(java.util.Date,"equals$O",
+m$(java.util.Date,["equals","equals$O"],
 function(obj){
 return Clazz.instanceOf(obj,java.util.Date)&&this.getTime()==(obj).getTime();
 });
@@ -5029,7 +5038,7 @@ dp.setSeconds$I = dp.setSeconds;
 dp.setTime$J = dp.setTime;
 dp.setYear$I = dp.setYear;
 dp.toGMTString$ = dp.toGMTString;
-dp.toLocaleString$ = dp.toLocaleDateString;
+dp.toLocaleString$ = dp.toLocaleString = dp.toLocaleDateString;
 dp.UTC$ = dp.UTC;
 
 
