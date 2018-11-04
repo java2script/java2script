@@ -31,14 +31,36 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _Root_FIELD_QNAME = new QName("www.jalview.org", "JalviewModel");
+	// note that these methods are only for the developer -- 
+	// they are not used by the marshaller or unmarshaller
+	
+    private final static QName _Root_FIELD_QNAME = new QName("root.field", "RootF");
+    private final static QName _Root_ORDERED_QNAME = new QName("root.ordered", "RootO");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: jalview.xml.binding.jalview
      * 
      */
-    public ObjectFactory() {
+    public ObjectFactory() { 
     }
 
+    public Root_ORDERED createRootOrdered() {
+        return new Root_ORDERED();
+    }
+
+
+    @XmlElementDecl(namespace="root.ordered", name="RootO")
+    public JAXBElement<Root_ORDERED> createRootOrdered(Root_ORDERED value) {
+    	// the qname here replaces the QName in the file's rootElement annotation
+    	// but note that if we change this here, unmarshalling will fail in Java and JavaScript
+        return new JAXBElement<Root_ORDERED>(_Root_ORDERED_QNAME, Root_ORDERED.class, null, value);
+    }
+
+    @XmlElementDecl(namespace="root.field", name="RootF")
+    public JAXBElement<Root_FIELD> createRootField(Root_FIELD value) {
+    	// the qname here replaces the QName in the file's rootElement annotation
+    	// but note that if we change this here, unmarshalling will fail in Java and JavaScript
+        return new JAXBElement<Root_FIELD>(_Root_FIELD_QNAME, Root_FIELD.class, null, value);
+    }
 
 }

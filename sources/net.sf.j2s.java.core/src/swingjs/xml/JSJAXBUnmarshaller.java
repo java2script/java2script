@@ -11,11 +11,13 @@ import java.util.Map;
 
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.UnmarshallerHandler;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.helpers.AbstractUnmarshallerImpl;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamReader;
 
 import org.w3c.dom.Node;
 import org.xml.sax.Attributes;
@@ -35,6 +37,11 @@ import swingjs.api.js.DOMNode;
  *
  */
 public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements ContentHandler {
+
+	private static final int MODE_START = 0;
+	private static final int MODE_RESTARTING = 1;
+	private static final int MODE_RETURN_ELEMENT = 2;
+	private static final int MODE_CONTINUE = 3;
 
 //	<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 //	<employee id="1">
@@ -64,33 +71,75 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		return null;
 	}
 
-	@Override
 	public UnmarshallerHandler getUnmarshallerHandler() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
+	public <T> JAXBElement<T> unmarshal(XMLStreamReader reader, Class<T> expectedType) throws JAXBException {
+		parser = new JSSAXParser();
+		xmlSource = ((JSXMLStreamReader) reader).getSource();
+		return (JAXBElement<T>) doUnmarshal(null, expectedType, MODE_RETURN_ELEMENT);
+	}
+
+	@Override
 	protected Object unmarshal(XMLReader reader, InputSource source) throws JAXBException {
 		parser = (JSSAXParser) reader;
 		xmlSource = source;
-		Object o = doUnmarshal(null, ((JSJAXBContext) context).getjavaClass());
+		Class<?>[] classes = ((JSJAXBContext) context).getjavaClasses();
+		Class<?> javaClass = null;
+		doc = null;
+		try {
+			switch (classes.length) {
+			case 0:
+				return null;
+			case 1:
+				javaClass = classes[0];
+				break;
+			default:
+				parser.setContentHandler(this);
+				parser.parse(xmlSource, JSSAXParser.PARSE_GET_DOC_ONLY);
+				doc = parser.getNode();
+				javaClass = findClassForNode(doc, classes);
+			}
+		} catch (IOException | SAXException e) {
+			e.printStackTrace();
+		}
+
+		if (javaClass == null)
+			return null;
+		Object o = doUnmarshal(doc, javaClass, classes.length > 1 ? MODE_RESTARTING : MODE_START);
+		
+		jaxbClass = null;
+		doc = null;
+		javaObject = null;
 		clearStatics();
 		return o;
 	}
 
-	private Object unmarshal(DOMNode node, Class<?> cl) throws JAXBException {
-		return doUnmarshal(node, cl);
+	private Class<?> findClassForNode(DOMNode doc, Class<?>[] classes) {
+
+		DOMNode node = /** @j2sNative doc.children[0] || */
+				null;
+		String nodeName = (String) DOMNode.getAttr(node, "localName");
+		for (int i = 0; i < classes.length; i++) {
+			JSJAXBClass jaxbClass = new JSJAXBClass(classes[i], null, false, false, null);
+			String name = jaxbClass.qname.getLocalPart();
+			if (nodeName.equals(name))
+				return classes[i];
+		}
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	private Object unmarshalField(JSJAXBField field, DOMNode node) {
-		Class<?> cl;
-		try {
-			cl = field.getJavaClassForUnmarshaling();
-			return doUnmarshal(node, cl);
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
+		if (field != null)
+			try {
+				return doUnmarshal(node, Class.forName(field.javaClassName), MODE_CONTINUE);
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
 		return null;
 	}
 
@@ -101,7 +150,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 	 * @param javaClass
 	 * @return an instance of this class
 	 */
-	private Object doUnmarshal(DOMNode node, Class<?> javaClass) {
+	private Object doUnmarshal(DOMNode node, Class<?> javaClass, int mode) {
 		if (jaxbClass != null)
 			addSeeAlso(javaClass);
 
@@ -120,13 +169,21 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		}
 		this.javaObject = javaObject;
 		jaxbClass = newUnmarshalledInstance(javaClass, javaObject);
-		boolean topOnly = true;
 		try {
 			parser.setContentHandler(this);
-			if (node == null)
-				parser.parse(xmlSource, topOnly);
-			else
-				parser.walkDOMTree(node, topOnly);
+			switch (mode) {
+			case MODE_RESTARTING:
+				parser.parseDocument(oldDoc, JSSAXParser.PARSE_TOP_LEVEL_ONLY);
+				break;
+			case MODE_RETURN_ELEMENT:
+			case MODE_START:
+				// node == null
+				parser.parse(xmlSource, JSSAXParser.PARSE_TOP_LEVEL_ONLY);
+				break;
+			case MODE_CONTINUE:
+				parser.walkDOMTree(node, JSSAXParser.PARSE_TOP_LEVEL_ONLY);
+				break;
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (SAXException e) {
@@ -136,15 +193,19 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		processMaps();
 		if (jaxbClass.isEnum)
 			javaObject = getEnumValue(jaxbClass, javaClass, JSSAXParser.getSimpleInnerText(node));
+
+		QName qname = jaxbClass.qname;
+
 		jaxbClass = oldJaxbClass;
 		doc = oldDoc;
 		this.javaObject = oldObject;
-		return javaObject;
+
+		return (mode == MODE_RETURN_ELEMENT ? new JAXBElement(qname, javaClass, javaObject) : javaObject);
 	}
 
 	public Object getEnumValue(JSJAXBClass jaxbClass, Class<?> javaClass, String xmlName) {
 		if (jaxbClass == null)
-			jaxbClass = new JSJAXBClass(javaClass, null, false, false);
+			jaxbClass = new JSJAXBClass(javaClass, null, false, false, null);
 		@SuppressWarnings("unused")
 		String name = (String) jaxbClass.enumMap.get("//" + xmlName);
 		Object o = null;
@@ -163,7 +224,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			if (field.boundListNodes != null && field.fieldType != JSJAXBField.MAP) {
 				// unwrapped set - array or list or map?
 //				System.out.println("Filling List " + field.javaName);
-				String type = (field.isArray ? field.javaClassName.replace("[]", "") : field.maplistClassNames[0]);
+				String type = (field.isArray ? field.javaClassName.replace("[]", "") : field.listClassName);
 				List<Object> nodes = field.boundListNodes;
 				int n = nodes.size();
 				boolean holdsObject = (field.holdsObjects != JSJAXBField.NO_OBJECT);
@@ -200,9 +261,9 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			map.clear();
 			if (nodes != null) {
 				String keyType = ((field.holdsObjects & JSJAXBField.MAP_KEY_OBJECT) != 0 ? null
-						: field.maplistClassNames[0]);
+						: field.mapClassNameKey);
 				String valueType = ((field.holdsObjects & JSJAXBField.MAP_VALUE_OBJECT) != 0 ? null
-						: field.maplistClassNames[1]);
+						: field.mapClassNameValue);
 				for (int i = 1, n = nodes.size(); i < n;) {
 					Object key = getNodeObject((DOMNode) nodes.get(i++), keyType, null, true);
 					Object value = getNodeObject((DOMNode) nodes.get(i++), valueType, null, true);
@@ -274,6 +335,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 	}
 
 	private void start(DOMNode node, QName qName, Attributes atts) {
+		System.out.println(">>" + qName);
 		String text = JSSAXParser.getSimpleInnerText(node);
 		if (doc == null) {
 			doc = node;
@@ -285,9 +347,11 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 //		System.out.println("start:" +node.outerHTML);
 //		 */
 		JSJAXBField field = getFieldFromQName(qName);
-		bindNode(node, field, atts);
-		field.setCharacters(text);
-		setFieldValue(field);
+		if (field != null) {
+			bindNode(node, field, atts);
+			field.setCharacters(text);
+			setFieldValue(field);
+		}
 	}
 
 	private void setDocAttributes(String value, Attributes atts) {
@@ -301,7 +365,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			String uri = atts.getURI(i);
 			String localName = atts.getLocalName(i);
 			String qname = atts.getQName(i);
-			if (qname.equals("xmlns") || qname.startsWith("xmlns:")) {
+			if (qname.equals("xmlns") || qname.startsWith("xmlns:") || qname.startsWith("xsi:")) {
 				continue;
 			}
 			QName qn = getQnameForAttribute(uri, localName, qname);
@@ -333,8 +397,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 
 	private final static Map<String, Boolean> knownJavaClasses = new Hashtable<>();
 	private final static Map<String, JSJAXBField> seeAlsoMap = new Hashtable<>();
-	private final static Map<String,JSJAXBClass> knownJAXBClasses = new Hashtable<>();
-	
+	private final static Map<String, JSJAXBClass> knownJAXBClasses = new Hashtable<>();
 
 	static void clearStatics() {
 		knownJavaClasses.clear();
@@ -347,7 +410,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		String name = javaClass.getCanonicalName();
 		JSJAXBClass jjc = knownJAXBClasses.get(name);
 		if (jjc == null) {
-			jjc = new JSJAXBClass(javaClass, javaObject, false, false);
+			jjc = new JSJAXBClass(javaClass, javaObject, false, false, null);
 			knownJAXBClasses.put(name, jjc);
 			return jjc;
 		}
@@ -355,6 +418,8 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			jjc.fields.get(i).clear();
 		}
 		return jjc;
+
+		// return jjc.clone();
 	}
 
 	public static boolean needsUnmarshalling(JSJAXBField field) {
@@ -376,16 +441,16 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 	}
 
 	void prepareForUnmarshalling(String defaultNamespace) {
-		jaxbClass.setNamespace(defaultNamespace);
-		String[] seeAlso = jaxbClass.seeAlso;
+		jaxbClass.setUnmarshallerDefaultNamespace(defaultNamespace);
+		List<String> seeAlso = jaxbClass.seeAlso;
 		if (seeAlso != null) {
-			for (int i = 0; i < seeAlso.length; i++) {
+			for (int i = 0; i < seeAlso.size(); i++) {
+				String cl = seeAlso.get(i);
 				try {
-					Class<?> cl = Class.forName(seeAlso[i]);
-					addSeeAlso(cl);
-					System.out.println("JSJAXBClass seeAlso: " + seeAlso[i]);
+					addSeeAlso(Class.forName(cl));
+					System.out.println("JSJAXBClass seeAlso: " + cl);
 				} catch (ClassNotFoundException e) {
-					System.out.println("JSJAXBClass seeAlso[" + i + "] not found: " + seeAlso[i]);
+					System.out.println("JSJAXBClass seeAlso[" + i + "] not found: " + cl);
 				}
 			}
 		}
@@ -398,7 +463,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 	}
 
 	void addSeeAlso(Class<?> cl) {
-		JSJAXBClass jaxbClass = new JSJAXBClass(cl, null, false, false);
+		JSJAXBClass jaxbClass = new JSJAXBClass(cl, null, false, false, null);
 		JSJAXBField field = jaxbClass.fields.get(0);
 		bindQName(field.qualifiedName, field, true);
 		bindQName(field.qualifiedWrapName, field, true);
@@ -411,10 +476,10 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		Map<String, JSJAXBField> map = (isSeeAlso ? seeAlsoMap : jaxbClass.unmarshallerFieldMap);
 		map.put(q.getLocalPart(), field);
 		String namespace = q.getNamespaceURI();
-		if (namespace.length() == 0)
-			namespace = jaxbClass.getNamespace();
-		if (namespace != null)
-			map.put(namespace + ":" + q.getLocalPart(), field);
+//		if (namespace.length() == 0)
+//			namespace = jaxbClass.getUnmarshallerDefaultNamespace();
+//		if (namespace != null)
+		map.put(namespace + ":" + q.getLocalPart(), field);
 		// System.out.println("JSJAXBClass#binding " + namespace + ":" +
 		// q.getLocalPart() + "->" + field.javaName);
 	}
@@ -422,12 +487,14 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 	JSJAXBField getFieldFromQName(QName qName) {
 		String key = qName.getNamespaceURI() + ":" + qName.getLocalPart();
 		JSJAXBField f = jaxbClass.unmarshallerFieldMap.get(key);
-		if (f == null)
-			f = jaxbClass.unmarshallerFieldMap.get(qName.getLocalPart());
+//		if (f == null)
+//			f = jaxbClass.unmarshallerFieldMap.get(qName.getLocalPart());
 		if (f == null)
 			f = seeAlsoMap.get(key);
+//		if (f == null)
+//			f = seeAlsoMap.get(qName.getLocalPart());
 		if (f == null)
-			f = seeAlsoMap.get(qName.getLocalPart());
+			System.out.println("JSJAXBUnmarshaller could not associate a field with " + qName);
 		return f;
 	}
 
@@ -491,7 +558,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 	}
 
 	private String getArrayType(JSJAXBField field) {
-		return (field.isArray ? field.javaClassName.replace("[]", "") : field.maplistClassNames[0]);
+		return (field.isArray ? field.javaClassName.replace("[]", "") : field.listClassName);
 	}
 
 	private boolean isPrimitive(String type) {
@@ -500,8 +567,8 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 
 	/**
 	 * This could be a field with a Java type or an xsi:type=xs.xxxxxx type (Object,
-	 * List<Object>, or Map<String, Object>). JavaScript will return either an Object
-	 * or a primitive, as appropriate.
+	 * List<Object>, or Map<String, Object>). JavaScript will return either an
+	 * Object or a primitive, as appropriate.
 	 * 
 	 * 
 	 * @param field
@@ -512,146 +579,145 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 	 */
 	private Object convertFromType(JSJAXBField field, Object objVal, String type, boolean asObject) {
 		Object newVal = null;
-		try { 
+		try {
 
-		if (!(objVal instanceof String))
-			return newVal = objVal;
+			if (!(objVal instanceof String))
+				return newVal = objVal;
 
-		String val = (String) objVal;
-				
-		if (field != null) {
-			if (field.typeAdapter != null) {
-				XmlAdapter adapter = field.getAdapter();
-				try {
-					return newVal = adapter.unmarshal(val);
-				} catch (Exception e) {
-					e.printStackTrace();
-					return null;
-				}	
+			String val = (String) objVal;
+
+			if (field != null) {
+				if (field.typeAdapter != null) {
+					XmlAdapter adapter = field.getAdapter();
+					try {
+						return newVal = adapter.unmarshal(val);
+					} catch (Exception e) {
+						e.printStackTrace();
+						return null;
+					}
+				}
+
+				if (type.contains("XMLGregorianCalendar")) {
+					return newVal = new JSXMLGregorianCalendarImpl(val);
+				}
+				if (field.xmlSchemaType != null) {
+					switch (field.xmlSchemaType) {
+					case "base64Binary":
+						return newVal = DatatypeConverter.parseBase64Binary(val);
+					case "hexBinary":
+						return newVal = DatatypeConverter.parseHexBinary(val);
+					case "dateTime":
+						return newVal = new Date(/** @j2sNative new Date(val) || */
+								null);
+					default:
+						System.out.println("JSJAXBUnmarhsaller schema not supported: " + field.xmlSchemaType);
+						// fall through //
+					case "xsd:ID":
+						break;
+					}
+				}
 			}
 
- 			if (type.contains("XMLGregorianCalendar")) {
-				return newVal = new JSXMLGregorianCalendarImpl(val);
-			}
-			if (field.xmlSchemaType != null) {
-				switch (field.xmlSchemaType) {
-				case "base64Binary":
-					return newVal = DatatypeConverter.parseBase64Binary(val);
-				case "hexBinary":
-					return newVal = DatatypeConverter.parseHexBinary(val);
-				case "dateTime":
-					return newVal = new Date(/**@j2sNative new Date(val) || */null);
+			if (type.startsWith("xs:")) {
+				String lctype = type.substring(3);
+				// must be an OBJECT for a List, Map, or Object field
+				type = type.substring(3, 4).toUpperCase() + lctype.substring(1);
+				switch (type) {
+				case "Decimal":
+					type = "java.math.BigDecimal";
+					break;
+				case "Integer":
+					type = "java.math.BigInteger";
+					break;
+				case "Int":
+				case "Unsignedshort":
+					type = "Integer";
+					break;
+				case "Unsignedbyte":
+					type = "Short";
+					break;
+				case "Unsignedint":
+					type = "Long";
+					break;
 				default:
-					System.out.println("JSJAXBUnmarhsaller schema not supported: " + field.xmlSchemaType);
-					// fall through //
-				case "xsd:ID":
+					if (isPrimitive(lctype)) {
+						/**
+						 * return newVal = eval(type + ".valueOf$S(" + objVal + ")");
+						 */
+					}
 					break;
 				}
 			}
-		}
-		
-		if (type.startsWith("xs:")) {
-			String lctype = type.substring(3);
-			// must be an OBJECT for a List, Map, or Object field
-			type = type.substring(3,4).toUpperCase() + lctype.substring(1);
-			switch (type) {
-			case "Decimal":
-				type = "java.math.BigDecimal";
-				break;
-			case "Integer":
-				type = "java.math.BigInteger";
-				break;
-			case "Int":
-			case "Unsignedshort":
-				type = "Integer";
-				break;
-			case "Unsignedbyte":
-				type = "Short";
-				break;
-			case "Unsignedint":
-				type = "Long";
-				break;
-			default:
-				if (isPrimitive(lctype)) {
-					/**
-					 * return newVal = eval(type + ".valueOf$S(" + objVal + ")");
-					 */
-				} 
-				break;
-			} 
-		}
 
-
-
-		if (type.equals("Anysimpletype") || type.equals("String")) {
-		// jQuery's xml parser will already have converted HTML5 entities
-			return newVal = val;
-		}
-		
-		// switch to Java notation for NaN, 
-		Object nan = getNanInf(objVal);
-		if (nan != null)
-			return newVal = nan;  // also INF and -INF
-
-		// all primitives
-
-		switch (type) {
-		case "boolean":
-			/**
-			 * @j2sNative return newVal = (objVal=="true");
-			 * 
-			 */
-		case "byte":
-		case "short":
-		case "int":
-		case "long":
-		case "double":
-		case "float":
-			/**
-			 * @j2sNative return newVal = +objVal;
-			 * 
-			 */
-		case "G":
-		case "Date":
-		case "Datetime":
-		case "Time":
-			return newVal = new JSXMLGregorianCalendarImpl(val);
-		case "Duration":
-//			return new 		//		duration			javax.xml.datatype.Duration
-			return null; // not implemented
-		case "Notation":
-		case "Qname":
-			// probably fail without a NameSpaceContext
-			return newVal = DatatypeConverter.parseQName(val, null);
-		}
-		Class<?> cl = null;
-		try {
-			cl = Class.forName(type);
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-			return null;
-		}
-		
-		if (cl.isEnum()) {
-			if (JSJAXBClass.hasAnnotations(cl)) {
-			return getEnumValue(null, cl, val);
+			if (type.equals("Anysimpletype") || type.equals("String")) {
+				// jQuery's xml parser will already have converted HTML5 entities
+				return newVal = val;
 			}
-		}
-		
-		// all Numbers and Enum
-		/**
-		 * @j2sNative if (cl.$clazz$.valueOf$S) return newVal = cl.$clazz$.valueOf$S(objVal);
-		 */
-		
-		
 
-		// BigInteger, BigDecimal
-		/**
-		 * @j2sNative if (cl.$clazz$.c$$S) return newVal = Clazz.new_(cl.$clazz$.c$$S,[objVal]);
-		 */
+			// switch to Java notation for NaN,
+			Object nan = getNanInf(objVal);
+			if (nan != null)
+				return newVal = nan; // also INF and -INF
 
-		return null;
-		
+			// all primitives
+
+			switch (type) {
+			case "boolean":
+				/**
+				 * @j2sNative return newVal = (objVal=="true");
+				 * 
+				 */
+			case "byte":
+			case "short":
+			case "int":
+			case "long":
+			case "double":
+			case "float":
+				/**
+				 * @j2sNative return newVal = +objVal;
+				 * 
+				 */
+			case "G":
+			case "Date":
+			case "Datetime":
+			case "Time":
+				return newVal = new JSXMLGregorianCalendarImpl(val);
+			case "Duration":
+//			return new 		//		duration			javax.xml.datatype.Duration
+				return null; // not implemented
+			case "Notation":
+			case "Qname":
+				// probably fail without a NameSpaceContext
+				return newVal = DatatypeConverter.parseQName(val, null);
+			}
+			Class<?> cl = null;
+			try {
+				cl = Class.forName(type);
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+				return null;
+			}
+
+			if (cl.isEnum()) {
+				if (JSJAXBClass.hasAnnotations(cl)) {
+					return getEnumValue(null, cl, val);
+				}
+			}
+
+			// all Numbers and Enum
+			/**
+			 * @j2sNative if (cl.$clazz$.valueOf$S) return newVal =
+			 *            cl.$clazz$.valueOf$S(objVal);
+			 */
+
+			// BigInteger, BigDecimal
+			/**
+			 * @j2sNative if (cl.$clazz$.c$$S) return newVal =
+			 *            Clazz.new_(cl.$clazz$.c$$S,[objVal]);
+			 */
+
+			return null;
+
 		} finally {
 //			System.out.println("converting " + objVal + " -> " + newVal);
 		}

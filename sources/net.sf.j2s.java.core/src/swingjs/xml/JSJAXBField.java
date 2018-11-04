@@ -21,11 +21,12 @@ import swingjs.api.js.DOMNode;
  * @author hansonr
  *
  */
-class JSJAXBField {
+class JSJAXBField implements Cloneable {
 
 	// Marshaller only
 
-	Object mapEntryValue = this;
+	// used immediately and nulled out.
+	transient Object mapEntryValue = this;
 
 	// Unmarshaller only
 
@@ -41,7 +42,9 @@ class JSJAXBField {
 	 * prior to re-use in unmarshalling
 	 * 
 	 */
-	void clear() {
+	public JSJAXBField clear() {		
+//		try {
+//			JSJAXBField f = (JSJAXBField) super.clone();
 		// marshaller
 		this.mapEntryValue = null;
 		// unmarshaller
@@ -52,6 +55,11 @@ class JSJAXBField {
 		this.xmlAttributes = null;
 		this.xmlType = null;
 		this.isNil = false;
+		return this;
+//		return f;
+//		} catch (CloneNotSupportedException e) {
+//			return null;
+//		}
 	}
 
 	void setCharacters(String ch) {
@@ -86,6 +94,8 @@ class JSJAXBField {
 	String javaName;
 	String javaClassName;
 
+	Map<String, String> attr;
+
 	boolean isTransient;
 	boolean isAttribute;
 	boolean isXmlID;
@@ -97,9 +107,8 @@ class JSJAXBField {
 	boolean isByteArray;
 	boolean isContainer;
 
-	QName qualifiedName = new QName("", "##default", "");
+	QName qualifiedName = null;
 	QName qualifiedWrapName;
-	Map<String, String> attr;
 
 	String xmlSchemaType;
 	String typeAdapter;
@@ -109,7 +118,7 @@ class JSJAXBField {
 	private Object methodSet;
 	private Object methodGet;
 
-	String[] maplistClassNames;
+	String mapClassNameKey, mapClassNameValue, listClassName;
 
 	QName qualifiedTypeName;
 
@@ -134,45 +143,42 @@ class JSJAXBField {
 
 	private Object clazz;
 
-	private Object[][] adata;
-
-
 	/**
 	 * @param jclass
 	 * @param adata
 	 * @param javaObject
-	 * @param javaObject2 
+	 * @param javaObject2
 	 * @param index
 	 * @param propOrder
 	 */
 	JSJAXBField(JSJAXBClass jaxbClass, Object[][] adata, Object clazz, int index, List<String> propOrder) {
 		this.clazz = clazz;
 		this.index = index;
-		this.adata = adata;
 		javaName = (String) adata[0][0];
-		isMethod = (javaName != null && javaName.charAt(1) == ':'); 
+		isMethod = (javaName != null && javaName.charAt(1) == ':');
 		javaClassName = (String) adata[0][1];
 		holdsObjects = (isObject(javaClassName) ? SIMPLE_OBJECT : NO_OBJECT);
 		int pt = javaClassName.indexOf("<");
 		if (pt >= 0) {
 			isContainer = true;
-			maplistClassNames = javaClassName.substring(pt + 1, javaClassName.lastIndexOf(">")).split(",");
-			fieldType = maplistClassNames.length;
+			String[] classNames = javaClassName.substring(pt + 1, javaClassName.lastIndexOf(">")).split(",");
+			fieldType = classNames.length;
 			for (int i = 0; i < fieldType; i++)
-				if (maplistClassNames[i].startsWith("java.lang."))
-					maplistClassNames[i] = maplistClassNames[i].substring(10);
+				if (classNames[i].startsWith("java.lang."))
+					classNames[i] = classNames[i].substring(10);
 			// Map<String, Object>
 			// List<Object>
 			javaClassName = javaClassName.substring(0, pt);
 			switch (fieldType) {
 			case LIST:
-				if (isObject(maplistClassNames[0]))
+				if (isObject(listClassName = classNames[0]))
 					holdsObjects = LIST_OBJECT;
+
 				break;
 			case MAP:
-				if (isObject(maplistClassNames[0]))
+				if (isObject(mapClassNameKey = classNames[0]))
 					holdsObjects = MAP_KEY_OBJECT;
-				if (isObject(maplistClassNames[1]))
+				if (isObject(mapClassNameValue = classNames[1]))
 					holdsObjects += MAP_VALUE_OBJECT;
 				break;
 			}
@@ -185,7 +191,22 @@ class JSJAXBField {
 		if (isMethod)
 			getMethods(jaxbClass.getJavaObject());
 		attr = new Hashtable<String, String>();
+		text = "";
 		readAnnotations(jaxbClass, (String[]) adata[1], propOrder);
+		// ensure that we have a qualified name if appropriate
+		setDefaults();
+		if (qualifiedWrapName != null) {
+			qualifiedWrapName = jaxbClass.finalizeFieldQName(qualifiedWrapName, null);
+		}
+		if (index == 0) {
+			qualifiedName = jaxbClass.finalizeFieldQName(qualifiedName, javaClassName);
+			jaxbClass.setQName(qualifiedName);
+			jaxbClass.qualifiedTypeName = jaxbClass.finalizeFieldQName(qualifiedTypeName, javaClassName);
+			jaxbClass.isAnonymous = (jaxbClass.qualifiedTypeName.getLocalPart().length() == 0);
+		} else {
+			if (javaName != null)
+				qualifiedName = jaxbClass.finalizeFieldQName(qualifiedName, javaName);
+		}
 	}
 
 	private static boolean isObject(String javaClassName) {
@@ -194,7 +215,6 @@ class JSJAXBField {
 	}
 
 	private void readAnnotations(JSJAXBClass jaxbClass, String[] javaAnnotations, List<String> propOrder) {
-		text = "";
 		for (int i = 0; i < javaAnnotations.length; i++) {
 			String data = javaAnnotations[i];
 			text += data + ";";
@@ -209,27 +229,6 @@ class JSJAXBField {
 			else
 				processFieldAnnotation(jaxbClass, tag, data);
 		}
-		// ensure that we have a qualified name if appropriate
-		setDefaults();
-		qualifiedName = finalizeName(qualifiedName, false);
-		if (javaName == null) {
-			jaxbClass.setQNameFromField0(qualifiedName);
-			if (qualifiedTypeName == null)
-				qualifiedTypeName = new QName("", "##default", "");
-			jaxbClass.qualifiedTypeName = finalizeName(qualifiedTypeName, true);
-			jaxbClass.isAnonymous = (qualifiedTypeName.getLocalPart().length() == 0);
-		}
-	}
-
-	private QName finalizeName(QName qName, boolean isTypeName) {
-		// System.out.println("finalizing " + isTypeName + " qName " + qName + " for " +
-		// javaName + " " + javaClassName + " " + text);
-		if (qName.getLocalPart().equals("##default"))
-			qName = new QName(qName.getNamespaceURI(),
-					JSJAXBClass.getXmlNameFromClassName(javaName == null ? javaClassName : javaName),
-					qName.getPrefix());
-		// System.out.println("finalized as ----" + qName );
-		return qName;
 	}
 
 	/**
@@ -282,12 +281,10 @@ class JSJAXBField {
 			}
 			return;
 		case "@XmlAccessorType":
-			if (data.indexOf("FIELD") >= 0)
-				jaxbClass.accessorType = JSJAXBClass.TYPE_FIELD;
-			else if (data.indexOf("MEMBER") >= 0)
-				jaxbClass.accessorType = JSJAXBClass.TYPE_PUBLIC_MEMBER;
-			else if (data.indexOf("PROPERTY") >= 0)
-				jaxbClass.accessorType = JSJAXBClass.TYPE_PROPERTY;
+			jaxbClass.accessorType = (data.indexOf("FIELD") >= 0 ? JSJAXBClass.TYPE_FIELD
+					: data.indexOf("MEMBER") >= 0 ? JSJAXBClass.TYPE_PUBLIC_MEMBER
+					: data.indexOf("PROPERTY") >= 0 ? JSJAXBClass.TYPE_PROPERTY
+					: JSJAXBClass.TYPE_NONE);
 			return;
 		case "@XmlSeeAlso":
 			// @XmlSeeAlso({Dog.class,Cat.class})
@@ -295,7 +292,7 @@ class JSJAXBField {
 			// part of the context of the given class, for example
 			// an instance-only class referenced by this class, as
 			// in an Object, Object[], List<Object>, or Map<Object,Object>
-			jaxbClass.seeAlso = getSeeAlso(data);
+			jaxbClass.addSeeAlso(getSeeAlso(data));
 			return;
 		case "@XmlEnum":
 			jaxbClass.initEnum(data);
@@ -314,6 +311,10 @@ class JSJAXBField {
 	 */
 	private void processFieldAnnotation(JSJAXBClass jaxbClass, String tag, String data) {
 		switch (tag) {
+		case "!XmlInner":
+			jaxbClass.addSeeAlso(javaClassName);
+			javaName = null;
+			return;
 		case "@XmlTransient":
 			isTransient = true;
 			return;
@@ -408,8 +409,7 @@ class JSJAXBField {
 		String name, namespace;
 		name = attr.get(tag + ":name");
 		namespace = attr.get(tag + ":namespace");
-		return new QName(namespace, name == null ? "##default" : name,
-				namespace == null ? "" : JSJAXBClass.getPrefixFor(namespace));
+		return new QName(namespace == null ? "##default" : namespace, name == null ? "##default" : name, "");
 	}
 
 	/**
@@ -489,10 +489,6 @@ class JSJAXBField {
 	private boolean simplePackages() {
 		return (javaClassName.indexOf(".") < 0 || javaClassName.startsWith("java.")
 				|| javaClassName.startsWith("javax.") || javaClassName.startsWith("javajs."));
-	}
-
-	public Class<?> getJavaClassForUnmarshaling() throws ClassNotFoundException {
-		return Class.forName(javaClassName);
 	}
 
 	private Object findSetMethod(String m, Object[] pm, Object[] jo) {
@@ -587,14 +583,16 @@ class JSJAXBField {
 	 * 
 	 * @return
 	 */
-	public Object getValue(Object javaObject) {
-		if (mapEntryValue == this)
+	Object getValue(Object javaObject) {
+		Object o = mapEntryValue;
+		if (o == this)
 			return getObject(javaObject);
-		return mapEntryValue;
+		mapEntryValue = this;
+		return o;
 	}
 
 	@SuppressWarnings("unused")
-	public Object getObject(Object javaObject) {
+	Object getObject(Object javaObject) {
 		if (enumValue != null) {
 			return enumValue;
 		}
@@ -611,7 +609,7 @@ class JSJAXBField {
 	 * @param value
 	 */
 	@SuppressWarnings("unused")
-	public void setValue(Object value, Object javaObject) {
+	void setValue(Object value, Object javaObject) {
 		Object m = (isMethod ? methodSet : null);
 		String j = javaName;
 		/**

@@ -15,7 +15,7 @@ import javajs.util.PT;
 import javajs.util.Rdr;
 import swingjs.api.Interface;
 
-class JSJAXBClass {
+class JSJAXBClass implements Cloneable {
 
 //	C$.__ANN__ = [[[null,'test.jaxb.Root_ORDERED.SomewhatComplex'],['@XmlAccessorType(XmlAccessType.FIELD)','@XmlType(name="MoreComplex",namespace="st.Olaf")']],
 //	              [['id','String'],['@XmlID','@XmlElement']],
@@ -43,7 +43,7 @@ class JSJAXBClass {
 
 	private boolean isMarshaller;
 
-	private String namespace;
+	private String unmarshallerDefaultNamespace;
 	
 	QName qname = new QName("", "##default", "");
 	QName qualifiedTypeName;
@@ -70,7 +70,7 @@ class JSJAXBClass {
 	List<String> propOrder = new ArrayList<String>();
 	List<JSJAXBField> fields = new ArrayList<JSJAXBField>();
 	
-	private Map<String, JSJAXBField> fieldMap = new Hashtable<String, JSJAXBField>();
+	private Map<String, JSJAXBField> marshallerFieldMap = new Hashtable<String, JSJAXBField>();
 
 	/**
 	 * holds the enum name/value pairs for marshaller and unmarshaller
@@ -79,30 +79,50 @@ class JSJAXBClass {
 	String enumClassType;
 	
 	JSJAXBField xmlValueField;
-	String[] seeAlso;
 	final Map<String, JSJAXBField> unmarshallerFieldMap = new Hashtable<String, JSJAXBField>();
 
 	Class<?> javaClass; // for JavaScript debugging
 	private Object javaObject;
+	List<String> seeAlso;
 	
+
 	transient Object tagObject;
+	private String createName;
+	private boolean isInnerClass;
 	
-	private static String defaultNamespace;
+	private static String packageNamespace;
+	private static String packageAccessorType;
 	
 	private final static Map<String, String> marshallerNamespacePrefixes = new Hashtable<String, String>();
 	private final static Map<String, XmlAdapter> adapterMap = new HashMap<String, XmlAdapter>();
 
 	static void clearStatics() {
 		prefixIndex = 1;
-		defaultNamespace = null;
+		packageNamespace = null;
+		packageAccessorType = null;
 		marshallerNamespacePrefixes.clear();
 		adapterMap.clear();
 	}
 
-	JSJAXBClass(Class<?> javaClass, Object javaObject, boolean isXmlIDREF, boolean isMarshaller) {
+	private static void getDefaultNamespaceFromPackageInfo(Class<?> javaClass) {
+		if (packageNamespace != null)
+			return;
+		packageNamespace = "";
+		InputStream is = javaClass.getResourceAsStream("_$.js");
+		if (is != null) {
+		  String data = Rdr.streamToUTF8String(new BufferedInputStream(is));
+		  data = PT.getQuotedAttribute(data, "namespace");
+		  if (data != null)
+			  packageNamespace = data;
+		}
+	}
+
+	JSJAXBClass(Class<?> javaClass, Object javaObject, boolean isXmlIDREF, boolean isMarshaller, QName qname) {
 		this.isMarshaller = isMarshaller;
 		this.javaClass = javaClass;
+		isInnerClass = /** @j2sNative !!javaClass.$clazz$.__CLASS_NAME$__ || */false;
 		this.javaObject = javaObject;
+		this.qname = qname; // from JAXBElement constructor
 		checkC$__ANN__(this, javaClass, javaObject != null || javaClass.isEnum(), isXmlIDREF);
 		this.isXmlIDREF = isXmlIDREF;
 	}
@@ -116,6 +136,7 @@ class JSJAXBClass {
 	 */
 	@SuppressWarnings("unused")
 	static boolean checkC$__ANN__(JSJAXBClass jsjaxbClass, Class<?> javaClass, boolean haveJavaObject, boolean isXmlIDREF) {
+		getDefaultNamespaceFromPackageInfo(javaClass);
 		boolean isTop = true;
 		while (javaClass != null) {
 
@@ -146,8 +167,25 @@ class JSJAXBClass {
 
 	JSJAXBClass addTypeData(Object[][][] jsdata, Object clazz, boolean haveJavaObject) {
 		int n = (haveJavaObject ? jsdata.length : 1);
-		for (int i = fields.size() == 0 ? 0 : 1; i < n; i++) {
-			JSJAXBField field = new JSJAXBField(this, jsdata[i], clazz, fields.size(), propOrder);
+		boolean isSuperclass = (fields.size() > 0);
+		String lastClassName = null;
+		for (int i = 0; i < n; i++) {
+			Object[][] adata = jsdata[i];
+			if (i == 0) {
+				if (isSuperclass) {
+					// TODO -- append to the first all missing superclass flags?
+					// looking specifically for accessortype. Only if not present already.
+					continue;
+				} else {
+					// specify accessor type
+				}
+			}
+			if (adata[0][1].equals("."))
+				adata[0][1] = lastClassName;
+			else
+				lastClassName = (String) adata[0][1];
+			JSJAXBField field = new JSJAXBField(this, adata, clazz, fields.size(), propOrder);
+			if (i == 0 || field.javaName != null)
 				addField(field);
 		}
 //		if (isMarshaller)
@@ -155,27 +193,21 @@ class JSJAXBClass {
 		return this;
 	}
 
-//	private void processPropOrder(Object javaObject) {
-//		for (int i = propOrder.size(); --i >= 0;) {
-//			String prop = propOrder.get(i);
-//			JSJAXBField field = fieldMap.get(prop);
-//			// annotations may only show up in @XmlType:propOrder
-//			if (field == null) {
-//				addField(new JSJAXBField(this,
-//						new Object[][] { new Object[] { prop, null, null, null }, new Object[] { "@XmlElement" } },
-//						null, javaObject, fields.size(), null));
-//			}
-//		}		
-//	}
+	public void addSeeAlso(String... javaClassName) {
+		if (seeAlso == null)
+			seeAlso = new ArrayList<>();
+		for (int i = 0; i < javaClassName.length; i++)
+		seeAlso.add(javaClassName[i]);
+	}
 
 	private void addField(JSJAXBField field) {
 		fields.add(field);
 		if (isMarshaller && field.javaName != null)
-			fieldMap.put(field.javaName, field);
+			marshallerFieldMap.put(field.javaName, field);
 	}
 
 	JSJAXBField getFieldFromJavaNameForMarshaller(String javaName) {
-		return fieldMap.get(javaName);
+		return marshallerFieldMap.get(javaName);
 	}
 
 	static String getXmlNameFromClassName(String className) {
@@ -195,7 +227,7 @@ class JSJAXBClass {
 	 * @return
 	 */
 	static String getPrefixFor(String namespace) {
-		String prefix = marshallerNamespacePrefixes.get(namespace);
+		String prefix = (namespace.length() == 0 ? "" : marshallerNamespacePrefixes.get(namespace));
 		if (prefix == null)
 			marshallerNamespacePrefixes.put(namespace, prefix = "ns" + (++prefixIndex));
 		return prefix;
@@ -209,45 +241,22 @@ class JSJAXBClass {
 		return adapter;
 	}
 
-	void setNamespace(String namespace) {
-		if (namespace == null)
-			this.namespace = namespace;		
+	void setUnmarshallerDefaultNamespace(String namespace) {
+		if (namespace != null)
+			this.unmarshallerDefaultNamespace = namespace;		
 	}
 
-	String getNamespace() {
-		return namespace;
+	String getUnmarshallerDefaultNamespace() {
+		return unmarshallerDefaultNamespace;
 	}
 
-	public void setQNameFromField0(QName qualifiedName) {
-		String ns = qualifiedName.getNamespaceURI();
-		if (ns.length() == 0) {
-			if (defaultNamespace == null) {
-				defaultNamespace = getDefaultNamespaceFromObjectFactory();
-			}
- 			qualifiedName = new QName(defaultNamespace == null ? "" : defaultNamespace, qualifiedName.getLocalPart(), "");			
-		}
+	void setQName(QName qualifiedName) {
+		if (qname != null && qname.getPrefix().length() > 0)
+			return;
 		qname = qualifiedName;
 	}
 
-	private String getDefaultNamespaceFromObjectFactory() {
-		defaultNamespace = "";
-		
-//		C$._WebServiceParameterSet_QNAME=Clazz.new_(Clazz.load('javax.xml.namespace.QName').c$$S$S,["www.jalview.org/xml/wsparamset", "WebServiceParameterSet"]);
-//		C$._JalviewModel_QNAME=Clazz.new_($I$(1).c$$S$S,["www.jalview.org", "JalviewModel"]);
-//		C$._JalviewUserColours_QNAME=Clazz.new_($I$(1).c$$S$S,["www.jalview.org/colours", "JalviewUserColours"]);
-		InputStream is = javaClass.getResourceAsStream("ObjectFactory.js");
-		if (is != null) {
-		  String data = Rdr.streamToUTF8String(new BufferedInputStream(is));
-		  int ipt0 = data.indexOf("_" + javaClass.getSimpleName() + "_QNAME=Clazz");
-		  if (ipt0 > 0)
-			  data = PT.getQuotedStringAt(data, ipt0);
-		  if (data != null)
-			  defaultNamespace = data;
-		}
-		return defaultNamespace;
-	}
-
-	public Object getJavaObject() {
+	Object getJavaObject() {
 		return javaObject;
 	}
 
@@ -268,5 +277,37 @@ class JSJAXBClass {
 			return false;
 		}
 	}
+
+//	public JSJAXBClass clone() {
+//		try {
+//			JSJAXBClass jaxbClass = (JSJAXBClass) super.clone();
+//			for (int i = 0, n = fields.size(); i < n; i++) {
+//				jaxbClass.addField((JSJAXBField) fields.get(i).clone());
+//			}
+//			return jaxbClass;
+//		} catch (CloneNotSupportedException e) {
+//			return null;
+//		}
+//		
+//		
+//	}
+
+	QName finalizeFieldQName(QName qName, String defaultName) {
+		if (qName == null)
+			qName = new QName("##default", "##default", "");
+		String namespace = qName.getNamespaceURI();
+		String name = qName.getLocalPart();
+		if (namespace.equals("##default"))
+			namespace = getDefaultNamespace();
+		if (name.equals("##default"))
+			name = JSJAXBClass.getXmlNameFromClassName(defaultName);
+		String prefix = JSJAXBClass.getPrefixFor(namespace);
+		return new QName(namespace, name, prefix);
+	}
+
+	private String getDefaultNamespace() {
+		return (isInnerClass  && qualifiedTypeName != null ? qualifiedTypeName.getNamespaceURI() : packageNamespace);
+	}
+
 
 }

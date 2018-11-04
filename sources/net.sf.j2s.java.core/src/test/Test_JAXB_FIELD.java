@@ -21,21 +21,17 @@ import javax.xml.bind.annotation.XmlElementDecl;
 import javax.xml.bind.annotation.XmlRegistry;
 import javax.xml.namespace.QName;
 
+import test.jaxb.ObjectFactory;
 import test.jaxb.Root_FIELD;
 import test.jaxb.Root_NONE;
+import test.jaxb.Root_ORDERED;
 
-@XmlRegistry
 public class Test_JAXB_FIELD extends Test_ {
-
-//    @XmlElementDecl(namespace = "www.jalview.org", name = "Root")
-//    public static JAXBElement<Root_FIELD> createRootModel(Root_FIELD value) {
-//        return new JAXBElement<Root_FIELD>(new QName("www.jalview.org", "Root"), Root_FIELD.class, null, value);
-//    }
 
 	public static void main(String[] args) {
         JAXBContext jc;
 		try {
-			jc = JAXBContext.newInstance(Root_FIELD.class);
+			jc = JAXBContext.newInstance(Root_ORDERED.class, Root_FIELD.class);
 			
 			long x = 1234567899123456L;
 			int y = (int) x;
@@ -50,13 +46,11 @@ public class Test_JAXB_FIELD extends Test_ {
 	        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 	        ByteArrayOutputStream bos = new ByteArrayOutputStream();	        
 //	        marshaller.marshal(createRootModel(root), bos);
-	        marshaller.marshal(root, bos);
+	        marshaller.marshal(new ObjectFactory().createRootField(root), bos);
 	        String s = null;
 			try {
 				s = new String(bos.toByteArray(), "UTF-8");
 		        System.out.println(s);
-//		        s = s.replace("</ns2:Root", "<DEFVAL></DEFVAL></ns2:Root");
-//		        System.out.println(s);
 		        Unmarshaller unmarshaller = jc.createUnmarshaller();
 		        ByteArrayInputStream is = new ByteArrayInputStream(s.getBytes("UTF-8"));
 				Root_FIELD r = (Root_FIELD) unmarshaller.unmarshal(is);

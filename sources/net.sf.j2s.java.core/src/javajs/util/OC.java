@@ -351,7 +351,12 @@ public class OC extends OutputStream implements GenericOutputChannel {
       Object data = (sb == null ? toByteArray() : sb.toString());
       if (_function == null) {
     	Object info = /** @j2sNative { isBinary : (this.sb == null) } || */ null;
-        J2S.doAjax(fileName, null, data, info);
+  	  	String mimetype = null;
+    	if (bytes != null && Rdr.isZipB(bytes)) {
+    		mimetype= "application/zip";
+    	}
+  	  	
+        J2S.doAjax(fileName, mimetype, data, info);
       } else {
         J2S.applyFunc(_function, data);
       }

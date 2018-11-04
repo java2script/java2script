@@ -227,7 +227,15 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	final static int JAXB_TYPE_PUBLIC_MEMBER = 2;
 	final static int JAXB_TYPE_PROPERTY = 3;
 	static final int JAXB_TYPE_ENUM = 4;
-
+	/**
+	 * UNSPECIFIED indicates that no XMLAccesorType was indicated for the class, 
+	 * so this must be determined at run time based on the package. In this case
+	 * we introduce the !XMLPublic(true|false) annotation into C$.__ANN__ so that
+	 * at least we know whether this field is public or not. This is then a flag
+	 * to the marshaller to filter fields based on whether we are using PUBLIC_MEMBER
+	 * or not from the package or superclass. Could work. Not tested. 
+	 */
+	static final int JAXB_TYPE_UNSPECIFIED =  5;
 
 	private IJavaProject global_project;
 
@@ -1773,6 +1781,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		boolean hasDependents = isEnum;
 		buffer.append(", ");
 		List<IMethodBinding> unqualifiedMethods = getUnqualifiedMethods(binding, null);
+		List<AbstractTypeDeclaration> innerClasses = new ArrayList<>();
 		if (isAnonymous) {
 			if (!(parent instanceof EnumConstantDeclaration))
 				func = "function(){Clazz.newInstance(this, arguments[0],1,C$);}";
@@ -1791,11 +1800,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				superInterfaceTypes = types;
 			}
 		} else {
-			List<BodyDeclaration> innerClasses = new ArrayList<BodyDeclaration>();
 			for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 				BodyDeclaration bd = (BodyDeclaration) iter.next();
 				if (bd instanceof TypeDeclaration || bd instanceof EnumDeclaration) {
-					innerClasses.add(bd);
+					innerClasses.add((AbstractTypeDeclaration) bd);
 				}
 			}
 			if (!isTopLevel || !innerClasses.isEmpty()) {
@@ -1950,7 +1958,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				}
 			}
 		}
-		List<EnumConstantDeclaration> enums = (isEnum ? new ArrayList<>(): null);
+
+		// for JAXB:
+		List<EnumConstantDeclaration> enums = (isEnum ? new ArrayList<>() : null);
+		List<FieldDeclaration> fields = (isInterface || isLambda || isEnum ? null : new ArrayList<>());
+		List<IMethodBinding> methods = (fields == null ? null : new ArrayList<>());
+
 		if (lstStatic.size() > 0 || hasDependents) {
 			int pt = buffer.length();
 			buffer.append("\r\nC$.$clinit$ = function() {Clazz.load(C$, 1);\r\n");
@@ -1977,9 +1990,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			setClassAndBinding(finalShortClassName, binding);
 		}
 
-		List<FieldDeclaration> fields = (isInterface || isLambda || isEnum || class_annotations == null ? null : new ArrayList<>());
-		List<IMethodBinding> methods = (fields == null ? null : new ArrayList<>());
-
 		if (!isInterface) {
 
 			// if this is not an interface, generate $init0$ and $init$ methods
@@ -1991,7 +2001,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			buffer.append("\r\nClazz.newMeth(C$, '$init$', function () {\r\n");
 			// we include all field definitions here and all nonstatic
 			// initializers
-			
+
 			if (!isLambda)
 				for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 					BodyDeclaration element = (BodyDeclaration) iter.next();
@@ -1999,8 +2009,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					if ((isField || element instanceof Initializer) && !isStatic(element)
 							&& checkAnnotations(element, CHECK_J2S_IGNORE_AND_ANNOTATIONS)) {
 						if (isField) {
-							 if (fields != null && !Modifier.isTransient(((FieldDeclaration) element).getModifiers()))
-								 fields.add((FieldDeclaration) element);
+							if (fields != null && !Modifier.isTransient(((FieldDeclaration) element).getModifiers()))
+								fields.add((FieldDeclaration) element);
 							addFieldDeclaration((FieldDeclaration) element, FIELD_DECL_NONSTATIC_ALL);
 						} else {
 							((Initializer) element).getBody().accept(this);
@@ -2059,7 +2069,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 							}
 						}
 					}
-					processMethodDeclaration(method, mnode.parameters(), mnode.getBody(), mnode.isConstructor(), NOT_LAMBDA);
+					processMethodDeclaration(method, mnode.parameters(), mnode.getBody(), mnode.isConstructor(),
+							NOT_LAMBDA);
 					if (defpt >= 0) {
 						defaults.append(buffer.substring(defpt));
 						buffer.setLength(defpt);
@@ -2090,7 +2101,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// and Enum constants
 
 		if (class_jaxbAccessorType != JAXB_TYPE_UNKNOWN) {
-			ClassAnnotation.addClassAnnotations(class_jaxbAccessorType, class_annotations, enums, fields, methods, trailingBuffer);
+			ClassAnnotation.addClassAnnotations(class_jaxbAccessorType, class_annotations, 
+					enums, fields, methods, innerClasses,
+					trailingBuffer);
 			class_annotations = null;
 			class_jaxbAccessorType = JAXB_TYPE_UNKNOWN;
 		}
@@ -2115,7 +2128,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 
 		getJ2sJavadoc(node, false);
-		
+
 		if (!isTopLevel) {
 			addAnonymousFunctionWrapper(false);
 			if (isAnonymous) {
@@ -5419,8 +5432,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						: s.contains("PUBLIC") ? JAXB_TYPE_PUBLIC_MEMBER
 						: s.contains("PROPERTY") ? JAXB_TYPE_PROPERTY 
 						: JAXB_TYPE_NONE);
-			} else if (qName.startsWith("XmlEnum"))
+			} else if (qName.startsWith("XmlEnum")) {
 				class_jaxbAccessorType = JAXB_TYPE_ENUM;
+			} else if (class_jaxbAccessorType == JAXB_TYPE_UNKNOWN && qName.startsWith("Xml")) {
+				System.out.println(">>>unspecified!");
+				class_jaxbAccessorType = JAXB_TYPE_UNSPECIFIED;
+			}
 		}
 		return true;
 	}
@@ -5546,7 +5563,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private void addDummyClassForPackageOnlyFile() {
 		appendElementKey("_$");
 		buffer.append("var C$=Clazz.newClass(\"_$\");\nC$.$clinit$ = function() {Clazz.load(C$, 1)};\n");
-		ClassAnnotation.addClassAnnotations(class_jaxbAccessorType, class_annotations, null, null, null, trailingBuffer);
+		ClassAnnotation.addClassAnnotations(class_jaxbAccessorType, class_annotations, null, null, null, null, trailingBuffer);
 		buffer.append(trailingBuffer);
 		addDefaultConstructor();
 	}
@@ -6212,20 +6229,25 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 
 		@SuppressWarnings("unchecked")
-		public static void addClassAnnotations(int accessType, List<ClassAnnotation> class_annotations, List<EnumConstantDeclaration> enums, List<FieldDeclaration> fields,
-				List<IMethodBinding> methods, TrailingBuffer trailingBuffer) {
-
+		public static void addClassAnnotations(int accessType, List<ClassAnnotation> class_annotations,
+				List<EnumConstantDeclaration> enums, 
+				List<FieldDeclaration> fields, 
+				List<IMethodBinding> methods,
+				List<AbstractTypeDeclaration> innerClasses,
+				TrailingBuffer trailingBuffer) {
+			boolean isPackage = (fields == null && enums == null);
 			int pt = 0, ptBuf = 0;
 			ASTNode lastNode = null;
 			List<?> fragments = null;
 			String propOrder = null;
+			String lastClassName = null;
 			for (int i = 0; i < class_annotations.size(); i++) {
 				ClassAnnotation a = class_annotations.get(i);
 				String str = a.annotation.toString();
-				//System.out.println(">>>str " + str);
-				//System.out.println(">>>ann " + a.annotation.getClass().getName());
+				// System.out.println(">>>str " + str);
+				// System.out.println(">>>ann " + a.annotation.getClass().getName());
 				if (a.annotation instanceof NormalAnnotation) {
-					//	@XmlElement(name="test",type=Integer.class)
+					// @XmlElement(name="test",type=Integer.class)
 					// remove commas, add quotes
 					NormalAnnotation na = (NormalAnnotation) a.annotation;
 					IMemberValuePairBinding[] pairs = na.resolveAnnotationBinding().getDeclaredMemberValuePairs();
@@ -6237,7 +6259,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					// add quotes
 					List<ASTNode> expressions = null;
 					Expression e = ((SingleMemberAnnotation) a.annotation).getValue();
-					//System.out.println(">>>e " + e.getClass().getName());
+					// System.out.println(">>>e " + e.getClass().getName());
 					if (e instanceof TypeLiteral) {
 						expressions = new ArrayList<ASTNode>();
 						expressions.add(e);
@@ -6280,7 +6302,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					} else if (a.node instanceof MethodDeclaration) {
 						MethodDeclaration method = (MethodDeclaration) a.node;
 						IMethodBinding var = method.resolveBinding();
-						methods.remove(var);
+						if (methods.contains(var))
+							methods.remove(var);
 						var = getJAXBGetMethod(var, methods, false);
 						if (var == null)
 							continue;
@@ -6300,6 +6323,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 									NameMapper.fixPackageName(getJavaClassNameQualified(type))
 							// ))
 							));
+					if (className != null && className.equals(lastClassName)) {
+						className = ".";
+					} else {
+						lastClassName = className;
+					}
 					trailingBuffer.append(pt++ == 0 ? "C$.__ANN__ = [[[" : "]],\n  [[");
 					trailingBuffer.append((varName == null ? null : "'" + varName + "'"));
 					ptBuf = trailingBuffer.buf.length();
@@ -6311,7 +6339,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			}
 			if (pt > 0) {
 				addTrailingFragments(fragments, trailingBuffer, ptBuf);
-				addImplicitJAXBFieldsAndMethods(accessType, trailingBuffer, enums, fields, methods, propOrder);
+				if (!isPackage)
+					addImplicitJAXBFieldsAndMethods(accessType, trailingBuffer, enums, fields, methods, innerClasses, propOrder);
 				trailingBuffer.append("]]];\n");
 			}
 		}
@@ -6339,6 +6368,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		private static IMethodBinding getJAXBGetMethod(IMethodBinding var, List<IMethodBinding> methods, boolean returnVar2) {
 			String varName = var.getName();
 			// check for matching get/is and set
+			if (varName.startsWith("create")) {
+				return var;
+			}
 			if (varName.startsWith("set")) {
 				return getMethodBinding(methods, "g" + varName.substring(1));
 			} 
@@ -6347,56 +6379,90 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			return (var2 == null ? null : returnVar2 ? var2 : var);
 		}
 
+		/**
+		 * Add all implicit fields. Note that we still cannot marshal a class that has
+		 * NO JAXB annotations at all. We have to have some.
+		 * 
+		 * @param accessType
+		 * @param trailingBuffer
+		 * @param enums
+		 * @param fields
+		 * @param methods
+		 * @param innerClasses 
+		 * @param propOrder
+		 */
 		private static void addImplicitJAXBFieldsAndMethods(int accessType, TrailingBuffer trailingBuffer,
-				List<EnumConstantDeclaration> enums, List<FieldDeclaration> fields, List<IMethodBinding> methods, String propOrder) {
-			if (accessType == JAXB_TYPE_ENUM) {
+				List<EnumConstantDeclaration> enums, List<FieldDeclaration> fields, List<IMethodBinding> methods,
+				List<AbstractTypeDeclaration> innerClasses, String propOrder) {
+			for (int i = 0; i < innerClasses.size(); i++) {
+				ITypeBinding type = innerClasses.get(i).resolveBinding();
+				if (isStatic(type)) {
+					addAnnotation(null, type, "!XmlInner", trailingBuffer);
+				}
+			}
+
+			switch (accessType) {
+			case JAXB_TYPE_NONE:
+				return;
+			case JAXB_TYPE_ENUM:
 				for (int j = 0; j < enums.size(); j++) {
 					EnumConstantDeclaration con = enums.get(j);
 					IVariableBinding var = con.resolveVariable();
 					String varName = var.getName();
 					ITypeBinding type = var.getType();
-					addAnnotation(type, varName, "@XmlEnumValue", trailingBuffer);
+					addAnnotation(varName, type, "@XmlEnumValue", trailingBuffer);
 				}
 				return;
-			}
-			if (accessType == JAXB_TYPE_NONE || fields == null)
-				return;
-			boolean publicOnly = (accessType == JAXB_TYPE_PUBLIC_MEMBER);
-			if (accessType != JAXB_TYPE_PROPERTY) {
-				for (int j = 0; j < fields.size(); j++) {
-					FieldDeclaration field = fields.get(j);
-					if (publicOnly && !Modifier.isPublic(field.getModifiers()))
-						continue;
-					List fragments = field.fragments();
-					for (int i = 0; i < fragments.size(); i++) {
-						VariableDeclarationFragment identifier = (VariableDeclarationFragment) fragments.get(i);
-						IVariableBinding var = identifier.resolveBinding();
-						String varName = var.getName();
-						// If propOrder is defined, then we are only allowed to 
-						// add implicit fields that are in that propOrder
-						if (propOrder != null && propOrder.indexOf("\"" + varName + "\"") < 0)
+			default:
+				System.out.println(">>>addImplicitJAXB accessType: " + accessType + " f=" + fields.size() + " m=" + methods.size());
+				boolean isUnspecified = (accessType == JAXB_TYPE_UNSPECIFIED);
+				boolean publicOnly = (accessType == JAXB_TYPE_PUBLIC_MEMBER);
+				if (accessType != JAXB_TYPE_PROPERTY) {
+					for (int j = 0; j < fields.size(); j++) {
+						FieldDeclaration field = fields.get(j);
+						boolean isPublic = Modifier.isPublic(field.getModifiers());
+						if (publicOnly && !isPublic)
 							continue;
-						ITypeBinding type = var.getType();
-						addAnnotation(type, varName, "@XmlElement", trailingBuffer);
+						List fragments = field.fragments();
+						for (int i = 0; i < fragments.size(); i++) {
+							VariableDeclarationFragment identifier = (VariableDeclarationFragment) fragments.get(i);
+							IVariableBinding var = identifier.resolveBinding();
+							String varName = var.getName();
+							// If propOrder is defined, then we are only allowed to
+							// add implicit fields that are in that propOrder
+							if (propOrder != null && propOrder.indexOf("\"" + varName + "\"") < 0)
+								continue;
+							ITypeBinding type = var.getType();
+							addAnnotation(varName, type, "@XmlElement", trailingBuffer);
+							if (isUnspecified)
+								addAnnotation(varName, type, "!XmlPublic(" + isPublic + ")", trailingBuffer);
+						}
 					}
 				}
-			}
-			if (accessType != JAXB_TYPE_FIELD) {
-				for (int i = 0; i < methods.size(); i++) {
-					IMethodBinding var = methods.get(i);
-					IMethodBinding var2 = getJAXBGetMethod(var, methods, true);
-					if (var2 == null || publicOnly && !Modifier.isPublic(var.getModifiers()) && !Modifier.isPublic(var2.getModifiers()))
-						continue;
-					String varName = var.getName();
-					if (varName.startsWith("set"))
-						varName = (var = var2).getName();
-					ITypeBinding type = var.getReturnType();
-					addAnnotation(type, "M:" + varName, "@XmlElement", trailingBuffer);
+				if (accessType != JAXB_TYPE_FIELD) {
+					for (int i = 0; i < methods.size(); i++) {
+						IMethodBinding var = methods.get(i);
+						IMethodBinding var2 = getJAXBGetMethod(var, methods, true);
+						if (var2 == null)
+							continue;
+						boolean isPublic = (Modifier.isPublic(var.getModifiers())
+								|| Modifier.isPublic(var2.getModifiers()));
+						if (publicOnly && !isPublic)
+							continue;
+						String varName = var.getName();
+						if (varName.startsWith("set"))
+							varName = (var = var2).getName();
+						ITypeBinding type = var.getReturnType();
+						addAnnotation("M:" + varName, type, "@XmlElement", trailingBuffer);
+						if (isUnspecified)
+							addAnnotation("M:" + varName, type, "!XmlPublic(" + isPublic + ")", trailingBuffer);
+					}
 				}
+				break;
 			}
 		}
 
-		private static void addAnnotation(ITypeBinding type, String varName, String str, TrailingBuffer trailingBuffer) {
+		private static void addAnnotation(String varName, ITypeBinding type, String str, TrailingBuffer trailingBuffer) {
 			String className = (stripJavaLang(NameMapper.fixPackageName(getJavaClassNameQualified(type))));
 			trailingBuffer.append("]],\n  [[");
 			trailingBuffer.append("'" + varName + "'");

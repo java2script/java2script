@@ -46,13 +46,22 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 
 	@Override
 	public void marshal(Object jaxbElement, Result result) throws JAXBException {
-		javaObject = (jaxbElement instanceof JAXBElement 
-				? ((JAXBElement<?>) jaxbElement).getValue() : jaxbElement);
+		Class<?> javaClass;
+		QName qname;
+		if (jaxbElement instanceof JAXBElement) { 
+			JAXBElement<?> element = (JAXBElement<?>) jaxbElement;
+			javaObject = element.getValue();
+			javaClass = element.getDeclaredType();
+			qname = element.getName();
+		} else {
+			javaObject = jaxbElement;
+			javaClass = javaObject.getClass();
+			qname = null;
+		}
 		this.result = (StreamResult) result;
 		this.writer = this.result.getWriter();
 		this.outputStream = this.result.getOutputStream();
-		Class<?> javaClass = ((JSJAXBContext) context).getjavaClass();
-		doMarshal(javaClass, javaObject, null, null, false);
+		doMarshal(javaClass, javaObject, qname, null, null, false);
 		JSJAXBClass.clearStatics();
  	}
 
@@ -61,14 +70,15 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 	 * 
 	 * @param javaClass    the class being marshalled
 	 * @param javaObject   the object being marshalled
+	 * @param qname TODO
 	 * @param tagField   the field for this class; null for the root
 	 * @param addXsiType TODO
 	 * @throws JAXBException
 	 */
-	private void doMarshal(Class<?> javaClass, Object javaObject, Object tagObject, JSJAXBField tagField, boolean addXsiType) throws JAXBException {
+	private void doMarshal(Class<?> javaClass, Object javaObject, QName qname, Object tagObject, JSJAXBField tagField, boolean addXsiType) throws JAXBException {
 		// at least for now we rely on fields that are designated.
 
-		JSJAXBClass jaxbClass = new JSJAXBClass(javaClass, javaObject, tagField != null && tagField.isXmlIDREF, true);
+		JSJAXBClass jaxbClass = new JSJAXBClass(javaClass, javaObject, tagField != null && tagField.isXmlIDREF, true, qname);
 		
 		
 		jaxbClass.tagField = tagField;
@@ -113,8 +123,8 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 		String xmlns = qname.getNamespaceURI();
 		if (xmlns.length() == 0)
 			return null;
-		if (mapQualifierLevel.isEmpty())
-			defaultNamespace = xmlns;
+//		if (mapQualifierLevel.isEmpty())
+//			defaultNamespace = xmlns;
 		if (!isRoot && !mapQualifierLevel.containsKey(xmlns)) {
 			mapQualifierLevel.put(xmlns, Integer.valueOf(1));
 			return xmlns;
@@ -123,6 +133,7 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 	}
 	
 	private static String getXMLQname(QName qname, boolean allowDefault) {
+		
 		String l = qname.getLocalPart();
 		String ns = qname.getNamespaceURI();
 		String p = qname.getPrefix();
@@ -182,9 +193,9 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 			outputHeader();
 		}
 		getXmlnsIfUnusedYet(qname, isRoot);
-		writeTagOpen(qname, !isRoot);   
+		writeTagOpen(qname, true);   
 		if (addXsiType) {
-			addNameSpaceIfNeeded(jaxbClass.qualifiedTypeName, isRoot);
+			addNameSpaceIfNeeded(jaxbClass.qualifiedTypeName, false);
 			Object v = jaxbClass.tagField.getValue(jaxbClass.tagObject);
 			String name = getEntryType(jaxbClass.qualifiedTypeName, v);
 			outputInstanceType(name);
@@ -209,7 +220,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 		}
 		if (isRoot)
 			output("\n");
-		writeTagClose(qname, !isRoot);
+		writeTagClose(qname, true);
 	}
 	
 	private static boolean hasElements(List<JSJAXBField> fields) {
@@ -263,7 +274,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 			return;
 		}
 		if (!field.isAttribute && JSJAXBClass.hasAnnotations(value)) {
-			doMarshal(value.getClass(), value, this.javaObject, field, addXsiType);
+			doMarshal(value.getClass(), value, null, this.javaObject, field, addXsiType);
 			return;
 		}
 		if (value instanceof List) {
@@ -343,7 +354,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 		if (value == null)
 			return;
 		if (value.getClass().isEnum()) {
-			JSJAXBClass jjc = new JSJAXBClass(value.getClass(), null, false, true);
+			JSJAXBClass jjc = new JSJAXBClass(value.getClass(), null, false, true, null);
 			if (jjc.enumMap != null) {
 				Object o = jjc.enumMap.get("/" + value.toString());
 				if (o != null)
@@ -357,24 +368,27 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 		output("\"");
 	}
 
-	private void writeTagOpen(QName qname, boolean allowDefault) throws JAXBException {
-		output("\n<" + getXMLQname(qname, allowDefault));
-		addNameSpaceIfNeeded(qname, !allowDefault);
+	private void writeTagOpen(QName qname, boolean unused) throws JAXBException {
+		output("\n<" + getXMLQname(qname, true));
+		addNameSpaceIfNeeded(qname, false);
 	}
 
 	private void addDefaultNameSpace() throws JAXBException {
-		if (defaultNamespace != null)
-			output(" xmlns=\"" + defaultNamespace + "\"");
-			
+//		if (defaultNamespace != null)
+//			output(" xmlns=\"" + fixNamespace(defaultNamespace) + "\"");			
 	}
-	private void addNameSpaceIfNeeded(QName qname, boolean isRoot) throws JAXBException {
-		String ns = getXmlnsIfUnusedYet(qname, isRoot);
-		if (ns != null)
-			output(" xmlns:" + qname.getPrefix() + "=\"" + ns + "\"");
+	private String fixNamespace(String space) {
+		return space;
 	}
 
-	private void writeTagClose(QName qname, boolean allowDefault) throws JAXBException {
-		output("</" + getXMLQname(qname, allowDefault) + ">");
+	private void addNameSpaceIfNeeded(QName qname, boolean isRoot) throws JAXBException {
+		String ns = getXmlnsIfUnusedYet(qname, false);
+		if (ns != null)
+			output(" xmlns:" + qname.getPrefix() + "=\"" + fixNamespace(ns) + "\"");
+	}
+
+	private void writeTagClose(QName qname, boolean unused) throws JAXBException {
+		output("</" + getXMLQname(qname, true) + ">");
 	}
 
 	private void writeValue(JSJAXBField field, Object value) throws JAXBException {
@@ -547,7 +561,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 			output("<entry>");
 			field.qualifiedName = qnEntryKey;
 			field.mapEntryValue = key;
-			addFieldListable(field, key, addXsiType);			
+			addFieldListable(field, key, addXsiType);
 			if (value != null || isNillable) {
 				field.mapEntryValue = value;
 				field.qualifiedName = qnEntryValue;

@@ -28,7 +28,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 // adapted source: http://blog.bdoughan.com/2011/06/using-jaxbs-xmlaccessortype-to.html
 
 @XmlSeeAlso({test.jaxb2.Obj.class, test.jaxb.Obj.class})
-@XmlRootElement(name="RootOrdered",namespace="www.jalview.org")
+@XmlRootElement(namespace="root.ordered", name="RootO")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(propOrder = {
 		"type",
@@ -83,8 +83,8 @@ public class Root_ORDERED {
 		hm2.put(Integer.valueOf(-3), "V3");
 
 	}
-	
-	List<Object> list0; 
+
+    List<Object> list0; 
 	
 	BigInteger bi;
 	
@@ -131,7 +131,13 @@ public class Root_ORDERED {
 
 	}
 
-	@XmlElementWrapper(name="list1")
+	
+    @XmlElement(namespace="")
+    @XmlSchemaType(name = "date")
+    protected XMLGregorianCalendar creationDate;
+
+
+    @XmlElementWrapper(name="list1")
 	public List<Object> list = new ArrayList<>();
 
 	// does not work in JAXB: @XmlSchemaType(name="hexBinary")
@@ -183,10 +189,6 @@ public class Root_ORDERED {
 	@XmlElement(name="I2",nillable=true)
 	Integer[] Ilist2 = new Integer[] {null, Integer.valueOf(2), null};
 	
-    @XmlElement
-    @XmlSchemaType(name = "date")
-    protected XMLGregorianCalendar creationDate;
-
 	@XmlElement
 	public
 	Object[] f5 = new Object[] {null, null };
@@ -230,6 +232,11 @@ public class Root_ORDERED {
 
     @XmlAttribute
 	public CustomerType type; 
+    
+    @XmlType(name = "st")
+    static class St {
+    	
+    }
     
     @XmlEnum(String.class)
     private enum CustomerType { 

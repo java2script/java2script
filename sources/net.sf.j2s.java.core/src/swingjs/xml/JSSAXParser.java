@@ -75,12 +75,12 @@ public class JSSAXParser implements Parser, XMLReader {
 
 	@Override
 	public void parse(InputSource source) throws SAXException, IOException {
-		parse(source, false);
+		parse(source, PARSE_ALL);
 	}
 
 	public void parseXMLString(String data) throws SAXException, IOException {	
 		try {
-			parseDocument(parseXML(data), false);
+			parseDocument(parseXML(data), PARSE_ALL);
 		} catch (Exception e) {
 			error(e);
 		}
@@ -88,10 +88,10 @@ public class JSSAXParser implements Parser, XMLReader {
 
 	public void parse(InputSource source, DefaultHandler handler) throws SAXException, IOException {
 		setContentHandler(handler);
-		parse(source, false);
+		parse(source, PARSE_ALL);
 	}
 
-	public void parse(InputSource source, boolean topOnly) throws  SAXException, IOException  {
+	public void parse(InputSource source, int mode) throws  SAXException, IOException  {
 		Reader rdr = source.getCharacterStream();
 		String[] data = new String[1];
 		if (rdr == null) {
@@ -105,7 +105,7 @@ public class JSSAXParser implements Parser, XMLReader {
 			Rdr.readAllAsString((BufferedReader) rdr, -1, false, data, 0);
 		}
 		try {
-			parseDocument(parseXML(data[0]), topOnly);
+			parseDocument(parseXML(data[0]), mode);
 		} catch (Exception e) {
 			error(e);
 		}
@@ -155,6 +155,9 @@ public class JSSAXParser implements Parser, XMLReader {
   private boolean ver2;
 
 	private static final int ELEMENT_TYPE = 1;
+	public static final int PARSE_ALL = 0;
+	public static final int PARSE_TOP_LEVEL_ONLY = 1;
+	public static final int PARSE_GET_DOC_ONLY = 2;
 
 	private Map<String, String> htPrefixMap = new Hashtable<>();
 	
@@ -203,11 +206,13 @@ public class JSSAXParser implements Parser, XMLReader {
    * @param doc
    * @throws SAXException
    */
-	private void parseDocument(DOMNode doc, boolean topOnly) throws SAXException {
+	public void parseDocument(DOMNode doc, int mode) throws SAXException {
 		if (docHandler == null && contentHandler == null)
 			contentHandler = new JSSAXContentHandler();
 		ver2 = (contentHandler != null);
 		setNode(doc);
+		if (mode == PARSE_GET_DOC_ONLY)
+			return;
 		if (ver2)
 			contentHandler.startDocument();
 		else
@@ -230,7 +235,7 @@ public class JSSAXParser implements Parser, XMLReader {
 		 * 
 		 */
 		
-		walkDOMTreePrivate(null, element, havePre, topOnly);
+		walkDOMTreePrivate(null, element, havePre, mode);
 		if (ver2)
 			contentHandler.endDocument();
 		else
@@ -246,16 +251,16 @@ public class JSSAXParser implements Parser, XMLReader {
 	 * @param topOnly
 	 * @throws SAXException
 	 */
-	public void walkDOMTree(DOMNode node, boolean topOnly) throws SAXException {
-		walkDOMTreePrivate(null, node, false, topOnly);
+	public void walkDOMTree(DOMNode node, int mode) throws SAXException {
+		walkDOMTreePrivate(null, node, false, mode);
 	}
 
-	private void walkDOMTreePrivate(DOMNode root, DOMNode node, boolean skipTag, boolean topOnly) throws SAXException {
+	private void walkDOMTreePrivate(DOMNode root, DOMNode node, boolean skipTag, int mode) throws SAXException {
 		String localName = ((String) DOMNode.getAttr(node, "localName"));
 		String nodeName = (String) DOMNode.getAttr(node, "nodeName");
 		String uri = (String) DOMNode.getAttr(node, "namespaceURI");
 		if (localName == null) {
-			if (topOnly)
+			if (mode != PARSE_ALL)
 				return;
 			getTextData(node, true);
 		} else if (!skipTag) {
@@ -273,8 +278,8 @@ public class JSSAXParser implements Parser, XMLReader {
 		boolean isRoot = (node == root);
 		node = (DOMNode) DOMNode.getAttr(node, "firstChild");
 		while (node != null) {
-			if (isRoot || !topOnly)
-				walkDOMTreePrivate(root, node, false, topOnly);
+			if (isRoot || mode == PARSE_ALL)
+				walkDOMTreePrivate(root, node, false, mode);
 			node = (DOMNode) DOMNode.getAttr(node, "nextSibling");
 		}
 		if (localName == null || skipTag)

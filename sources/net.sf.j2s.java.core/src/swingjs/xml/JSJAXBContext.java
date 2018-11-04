@@ -12,20 +12,22 @@ import swingjs.JSUtil;
 
 public class JSJAXBContext extends JAXBContext {
 
-	protected Class<?> javaClass;
 	private Map<String, ?> properties;
+	private Class<?>[] javaClasses;
+	private String contextPath;
 
 	public JSJAXBContext(Class<?>[] classes, Map<String, ?> properties) {
 		this.properties = properties;
-		this.javaClass = classes[0]; 
+		this.javaClasses = classes;
 	}
 
 	public JSJAXBContext(String contextPath, ClassLoader classLoader, Map<String, ?> properties) {
-		JSUtil.notImplemented("JSJAXBContext(contextPath)");
+		this.contextPath = contextPath;
+		this.properties = properties;
 	}
 
-	public Class<?> getjavaClass() {
-		return javaClass;
+	public Class<?>[] getjavaClasses() {
+		return javaClasses;
 	}
 
 	@Override

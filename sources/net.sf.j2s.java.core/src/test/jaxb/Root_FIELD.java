@@ -16,7 +16,7 @@ import javax.xml.bind.annotation.XmlType;
 
 // adapted source: http://blog.bdoughan.com/2011/06/using-jaxbs-xmlaccessortype-to.html
 
-@XmlRootElement(name = "Root")
+@XmlRootElement(namespace="root.field", name="RootF")
 @XmlAccessorType(XmlAccessType.FIELD)
 //@XmlType(propOrder = {
 //	    "D",
