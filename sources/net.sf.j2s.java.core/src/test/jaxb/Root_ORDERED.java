@@ -93,6 +93,8 @@ public class Root_ORDERED {
 		type = CustomerType.NEW_CUSTOMER;	
 		list0 = new ArrayList<Object>();
 		list0.add(new SomewhatComplex("List"));
+		list0.add(new String("list0[1]"));
+		list0.add(new String("list0[2]"));
 		bi = new BigInteger("1234567890123456789012345");
 		f = new float[] {1.2f};
 		list.add("TESTING");

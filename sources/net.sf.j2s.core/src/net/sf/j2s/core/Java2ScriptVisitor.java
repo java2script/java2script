@@ -6348,7 +6348,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 
 		private static String annotationNameValue(String name, Object value) {
-			System.out.println(">>>value " + value + " " + value.getClass().getName() + " = " + value.toString());
+			//System.out.println(">>>value " + value + " " + value.getClass().getName() + " = " + value.toString());
 			String str = (name == null ? "" : name + "=");
 			if (value instanceof TypeLiteral) { 
 				str += "\"" + ((TypeLiteral) value).getType().resolveBinding().getQualifiedName() + ".class\"";

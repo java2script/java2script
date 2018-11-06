@@ -125,7 +125,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		String nodeName = (String) DOMNode.getAttr(node, "localName");
 		for (int i = 0; i < classes.length; i++) {
 			JSJAXBClass jaxbClass = new JSJAXBClass(classes[i], null, false, false, null);
-			String name = jaxbClass.qname.getLocalPart();
+			String name = jaxbClass.getQName().getLocalPart();
 			if (nodeName.equals(name))
 				return classes[i];
 		}
@@ -194,7 +194,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		if (jaxbClass.isEnum)
 			javaObject = getEnumValue(jaxbClass, javaClass, JSSAXParser.getSimpleInnerText(node));
 
-		QName qname = jaxbClass.qname;
+		QName qname = jaxbClass.getQName();
 
 		jaxbClass = oldJaxbClass;
 		doc = oldDoc;

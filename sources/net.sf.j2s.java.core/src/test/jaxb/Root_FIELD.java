@@ -16,7 +16,10 @@ import javax.xml.bind.annotation.XmlType;
 
 // adapted source: http://blog.bdoughan.com/2011/06/using-jaxbs-xmlaccessortype-to.html
 
+// XmlRootElement is used by the unmarshaller to find the correct class
 @XmlRootElement(namespace="root.field", name="RootF")
+// XmlType overrides this 
+@XmlType(namespace="root.field", name="RootF")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Root_FIELD extends ROOT_super {
 

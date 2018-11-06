@@ -122,9 +122,10 @@ class JSJAXBClass implements Cloneable {
 		this.javaClass = javaClass;
 		isInnerClass = /** @j2sNative !!javaClass.$clazz$.__CLASS_NAME$__ || */false;
 		this.javaObject = javaObject;
-		this.qname = qname; // from JAXBElement constructor
 		checkC$__ANN__(this, javaClass, javaObject != null || javaClass.isEnum(), isXmlIDREF);
 		this.isXmlIDREF = isXmlIDREF;
+		if (qname != null)
+			setQName(qname); // from JAXBElement constructor
 	}
 
 	/**
@@ -170,22 +171,22 @@ class JSJAXBClass implements Cloneable {
 		boolean isSuperclass = (fields.size() > 0);
 		String lastClassName = null;
 		for (int i = 0; i < n; i++) {
+//			if (i == 0) {
+//				if (isSuperclass) {
+//					// TODO -- append to the first all missing superclass flags?
+//					// looking specifically for accessortype. Only if not present already.
+//					continue;
+//				} else {
+//					// specify accessor type
+//				}
+//			}
 			Object[][] adata = jsdata[i];
-			if (i == 0) {
-				if (isSuperclass) {
-					// TODO -- append to the first all missing superclass flags?
-					// looking specifically for accessortype. Only if not present already.
-					continue;
-				} else {
-					// specify accessor type
-				}
-			}
 			if (adata[0][1].equals("."))
 				adata[0][1] = lastClassName;
 			else
 				lastClassName = (String) adata[0][1];
 			JSJAXBField field = new JSJAXBField(this, adata, clazz, fields.size(), propOrder);
-			if (i == 0 || field.javaName != null)
+			if (i == 0 && !isSuperclass || field.javaName != null)
 				addField(field);
 		}
 //		if (isMarshaller)
@@ -251,7 +252,7 @@ class JSJAXBClass implements Cloneable {
 	}
 
 	void setQName(QName qualifiedName) {
-		if (qname != null && qname.getPrefix().length() > 0)
+		if (qname.getPrefix().length() > 0)
 			return;
 		qname = qualifiedName;
 	}
@@ -306,6 +307,12 @@ class JSJAXBClass implements Cloneable {
 
 	private String getDefaultNamespace() {
 		return (isInnerClass  && qualifiedTypeName != null ? qualifiedTypeName.getNamespaceURI() : packageNamespace);
+	}
+
+	public QName getQName() {
+		
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 

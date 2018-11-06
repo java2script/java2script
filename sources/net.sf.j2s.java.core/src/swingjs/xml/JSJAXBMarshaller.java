@@ -190,7 +190,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 	/////////// output methods //////////////
 	
 	private void writeXML(JSJAXBClass jaxbClass, boolean isRoot, boolean addXsiType) throws JAXBException {
-		QName qname = (jaxbClass.tagField == null ? jaxbClass.qname : jaxbClass.tagField.qualifiedName);
+		QName qname = (jaxbClass.tagField == null ? jaxbClass.getQName() : jaxbClass.tagField.qualifiedName);
 		if (isRoot) {
 			outputHeader();
 		}
@@ -237,7 +237,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 	private final static QName xs = new QName("http://www.w3.org/2001/XMLSchema", "_", "xs");
 
 	private void addAllNameSpaces(JSJAXBClass jaxbClass) throws JAXBException {
-		addNameSpaceIfNeeded(jaxbClass.qname, true);
+		addNameSpaceIfNeeded(jaxbClass.getQName(), true);
 			for (int i = 0, n = jaxbClass.fields.size(); i < n; i++) {
 //				JSJAXBField f = ;
 				addNameSpaceIfNeeded(jaxbClass.fields.get(i).qualifiedName, false);
@@ -275,16 +275,14 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 	 			writeField(field, null, addXsiType);
 			return;
 		}
-		if (!field.isAttribute && JSJAXBClass.hasAnnotations(value)) {
-			doMarshal(value.getClass(), value, null, this.javaObject, field, addXsiType);
-			return;
-		}
 		if (value instanceof List) {
 			writeFieldList(field, (List<?>) value);
 		} else if (value instanceof Map) {
 			writeFieldMap(field, (Map<?, ?>) value);
 		} else if (isArray(value)) {
 			writeFieldArray(field, value);
+		} else if (!field.isAttribute && JSJAXBClass.hasAnnotations(value)) {
+			doMarshal(value.getClass(), value, null, this.javaObject, field, addXsiType);
 		} else {
 			writeField(field, value, addXsiType);
 		}
@@ -606,7 +604,12 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 	 */
 	private void output(String s) throws JAXBException {
 		try {
+			/** @j2sNative console.log(s) */
 			if (writer != null) {
+
+				
+	System.out.println((s.startsWith("<") ? "\n" : "") + s);
+				
 				writer.write(s);
 			} else if (outputStream != null) {
 				outputStream.write(s.getBytes());

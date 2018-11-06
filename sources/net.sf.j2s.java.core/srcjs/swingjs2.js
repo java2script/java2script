@@ -13820,7 +13820,7 @@ if (me.__ARRAYTYPE) {
   return appendMap(Clazz.array(me.__BASECLASS, me.__ARRAYTYPE, -1, me, true), me);
 }
   me = appendMap(new me.constructor(inheritArgs), me); 
-  me.__JSID__++;
+  me.__JSID__ = ++_jsid;
   return me;
 }
 

@@ -198,13 +198,25 @@ class JSJAXBField implements Cloneable {
 			qualifiedWrapName = jaxbClass.finalizeFieldQName(qualifiedWrapName, null);
 		}
 		if (index == 0) {
+			if (qualifiedTypeName == null)
+				qualifiedTypeName = new QName("##default", "##default", "");
+			boolean haveTypeNS = (!qualifiedTypeName.getNamespaceURI().equals("##default"));
 			qualifiedName = jaxbClass.finalizeFieldQName(qualifiedName, javaClassName);
-			jaxbClass.setQName(qualifiedName);
+			if (!haveTypeNS)
+				qualifiedTypeName = new QName(qualifiedName.getNamespaceURI(), qualifiedTypeName.getLocalPart(), "");
 			jaxbClass.qualifiedTypeName = jaxbClass.finalizeFieldQName(qualifiedTypeName, javaClassName);
 			jaxbClass.isAnonymous = (jaxbClass.qualifiedTypeName.getLocalPart().length() == 0);
+			jaxbClass.setQName(jaxbClass.qualifiedTypeName);
 		} else {
-			if (javaName != null)
+			if (javaName != null) {
+				if (qualifiedName == null)
+					qualifiedName = new QName("##default", "##default", "");
+				boolean isDefaultNS = (qualifiedName.getNamespaceURI().equals("##default"));
 				qualifiedName = jaxbClass.finalizeFieldQName(qualifiedName, javaName);
+				if (isDefaultNS)
+					qualifiedName = new QName(isAttribute ? "" : jaxbClass.qname.getNamespaceURI(), 
+							qualifiedName.getLocalPart(), this.isAttribute ? "" : jaxbClass.qname.getPrefix());
+			}
 		}
 	}
 
