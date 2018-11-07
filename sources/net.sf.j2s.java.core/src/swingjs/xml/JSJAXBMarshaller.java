@@ -197,9 +197,9 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 		getXmlnsIfUnusedYet(qname, isRoot);
 		writeTagOpen(qname, true);   
 		if (addXsiType) {
-			addNameSpaceIfNeeded(jaxbClass.qualifiedTypeName, false);
+			addNameSpaceIfNeeded(jaxbClass.getQName(), false);
 			Object v = jaxbClass.tagField.getValue(jaxbClass.tagObject);
-			String name = getEntryType(jaxbClass.qualifiedTypeName, v);
+			String name = getEntryType(jaxbClass.getQName(), v);
 			outputInstanceType(name);
 		}
 		if (isRoot)
@@ -237,12 +237,10 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 	private final static QName xs = new QName("http://www.w3.org/2001/XMLSchema", "_", "xs");
 
 	private void addAllNameSpaces(JSJAXBClass jaxbClass) throws JAXBException {
+		// was NULL here until just now
 		addNameSpaceIfNeeded(jaxbClass.getQName(), true);
 			for (int i = 0, n = jaxbClass.fields.size(); i < n; i++) {
-//				JSJAXBField f = ;
 				addNameSpaceIfNeeded(jaxbClass.fields.get(i).qualifiedName, false);
-//				if (f.boundListNodes != null)
-//					addNameSpaceIfNeeded(f.qualifiedName, false);
 			}
 		addNameSpaceIfNeeded(xsi, false);
 		addNameSpaceIfNeeded(xs, false);
@@ -604,11 +602,10 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 	 */
 	private void output(String s) throws JAXBException {
 		try {
-			/** @j2sNative console.log(s) */
+//			/** @j2sNative console.log(s) */
 			if (writer != null) {
-
-				
-	System.out.println((s.startsWith("<") ? "\n" : "") + s);
+			
+//	System.out.println((s.startsWith("<") ? "\n" : "") + s);
 				
 				writer.write(s);
 			} else if (outputStream != null) {

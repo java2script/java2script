@@ -7,7 +7,8 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement(name = "Root_super", namespace = "www.jalview.org")
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder = {"root"})
+// J2S can only do the following if subclasses also have propOrder
+// @XmlType(propOrder = {"root"})
 public class ROOT_super {
 	boolean root = true;
 

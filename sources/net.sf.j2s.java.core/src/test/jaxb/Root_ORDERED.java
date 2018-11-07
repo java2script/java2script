@@ -29,7 +29,6 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import test.jaxb.Root_ORDERED.SomewhatComplex;
 
 // adapted source: http://blog.bdoughan.com/2011/06/using-jaxbs-xmlaccessortype-to.html
 
@@ -176,6 +175,12 @@ public class Root_ORDERED {
 		assert(date.equals(new Date("10/20/2018")));
 	}
 
+	@XmlElementWrapper(name="hm1")
+	public HashMap<String, Object> hm = new HashMap<>();
+
+	@XmlElementWrapper(name="hm2")
+	public HashMap<Object, String> hm2;
+
 	
 
     List<Object> list0; 
@@ -296,12 +301,6 @@ public class Root_ORDERED {
 	@XmlElement
 	public
 	Object[] f5;
-
-	@XmlElementWrapper(name="hm1")
-	public HashMap<String, Object> hm = new HashMap<>();
-
-	@XmlElementWrapper(name="hm2")
-	public HashMap<Object, String> hm2;
 
     /**
      * Gets the value of the creationDate property.

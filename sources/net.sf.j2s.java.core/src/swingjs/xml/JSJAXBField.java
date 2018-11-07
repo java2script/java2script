@@ -39,6 +39,7 @@ class JSJAXBField implements Cloneable {
 	DOMNode boundNode;
 	List<Object> boundListNodes;
 	QName qualifiedTypeName;
+	String unmarshallingClassName;
 
 	String xmlCharacterData = "";
 	String xmlAttributeData;
@@ -54,6 +55,12 @@ class JSJAXBField implements Cloneable {
 	final static int LIST_OBJECT = 3;
 	final static int MAP_KEY_OBJECT = 4;
 	final static int MAP_VALUE_OBJECT = 8;
+
+	final static int TYPE_NONE = 0;
+	final static int TYPE_ROOT_ELEMENT = 1;
+	final static int TYPE_XML_TYPE = 2;
+	final static int TYPE_ATTRIBUTE = 3;
+	final static int TYPE_ELEMENT = 4;
 
 	int holdsObjects = NO_OBJECT;
 
@@ -94,6 +101,7 @@ class JSJAXBField implements Cloneable {
 	private int index;
     private Object clazz; // for debugging only
 
+	
 
 	/**
 	 * prior to re-use in unmarshalling
@@ -107,7 +115,7 @@ class JSJAXBField implements Cloneable {
 		// unmarshaller
 		f.boundNode = null;
 		f.boundListNodes = null;
-		f.xmlCharacterData = null;
+		f.xmlCharacterData = "";
 		f.xmlAttributeData = null;
 //		f.xmlAttributes = null;
 		f.xmlType = null;
@@ -119,7 +127,8 @@ class JSJAXBField implements Cloneable {
 	}
 
 	void setCharacters(String ch) {
-		xmlCharacterData = ch;
+		// <..../> will result in null for textContent
+		xmlCharacterData = (ch == null ? "" : ch);
 	}
 
 	void setAttributeData(String val) {
@@ -194,28 +203,16 @@ class JSJAXBField implements Cloneable {
 		readAnnotations(jaxbClass, (String[]) adata[1], propOrder, attr);
 		// ensure that we have a qualified name if appropriate
 		setDefaults();
-		if (qualifiedWrapName != null) {
-			qualifiedWrapName = jaxbClass.finalizeFieldQName(qualifiedWrapName, null);
-		}
 		if (index == 0) {
-			if (qualifiedTypeName == null)
-				qualifiedTypeName = new QName("##default", "##default", "");
-			boolean haveTypeNS = (!qualifiedTypeName.getNamespaceURI().equals("##default"));
-			qualifiedName = jaxbClass.finalizeFieldQName(qualifiedName, javaClassName);
-			if (!haveTypeNS)
-				qualifiedTypeName = new QName(qualifiedName.getNamespaceURI(), qualifiedTypeName.getLocalPart(), "");
-			jaxbClass.qualifiedTypeName = jaxbClass.finalizeFieldQName(qualifiedTypeName, javaClassName);
+			qualifiedName = jaxbClass.finalizeFieldQName(qualifiedName, javaClassName, TYPE_ROOT_ELEMENT);
+			qualifiedTypeName = jaxbClass.finalizeFieldQName(qualifiedTypeName, javaClassName, TYPE_XML_TYPE);
 			jaxbClass.isAnonymous = (jaxbClass.qualifiedTypeName.getLocalPart().length() == 0);
-			jaxbClass.setQName(jaxbClass.qualifiedTypeName);
 		} else {
 			if (javaName != null) {
-				if (qualifiedName == null)
-					qualifiedName = new QName("##default", "##default", "");
-				boolean isDefaultNS = (qualifiedName.getNamespaceURI().equals("##default"));
-				qualifiedName = jaxbClass.finalizeFieldQName(qualifiedName, javaName);
-				if (isDefaultNS)
-					qualifiedName = new QName(isAttribute ? "" : jaxbClass.qname.getNamespaceURI(), 
-							qualifiedName.getLocalPart(), this.isAttribute ? "" : jaxbClass.qname.getPrefix());
+				if (qualifiedWrapName != null) {
+					qualifiedWrapName = jaxbClass.finalizeFieldQName(qualifiedWrapName, null, TYPE_ELEMENT);
+				}
+				qualifiedName = jaxbClass.finalizeFieldQName(qualifiedName, javaName, (isAttribute ? TYPE_ATTRIBUTE : TYPE_ELEMENT));
 			}
 		}
 	}
@@ -495,12 +492,15 @@ class JSJAXBField implements Cloneable {
 
 	// unmarshalling
 
-	boolean isSimpleType() {
-		return (isAttribute || asList || isByteArray || isArray || qualifiedWrapName != null || isNil
-				|| simplePackages());
+	boolean isSimpleType(String javaClassName) {
+		return (javaClassName != null ? simplePackages(javaClassName)
+				: isNil || isAttribute 
+				|| asList || isByteArray 
+				|| isArray || qualifiedWrapName != null
+				|| simplePackages(this.javaClassName));
 	}
 
-	private boolean simplePackages() {
+	static boolean simplePackages(String javaClassName) {
 		return (javaClassName.indexOf(".") < 0 || javaClassName.startsWith("java.")
 				|| javaClassName.startsWith("javax.") || javaClassName.startsWith("javajs."));
 	}
