@@ -46,7 +46,7 @@ package java.awt;
  * @see     java.awt.CheckboxMenuItem
  * @since   JDK1.0
  */
-public class Menu extends a2s.Menu {//MenuItem implements MenuContainer, Accessible {
+public class Menu extends swingjs.a2s.Menu {//MenuItem implements MenuContainer, Accessible {
 //
 //    static {
 //        /* ensure that the necessary native libraries are loaded */

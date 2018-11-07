@@ -58,7 +58,7 @@ package java.awt;
  * @see        java.awt.MenuShortcut
  * @since      JDK1.0
  */
-public class MenuBar extends a2s.MenuBar {//{MenuComponent implements MenuContainer, Accessible {
+public class MenuBar extends swingjs.a2s.MenuBar {//{MenuComponent implements MenuContainer, Accessible {
 
 //    static {
 //        /* ensure that the necessary native libraries are loaded */

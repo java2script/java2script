@@ -66,7 +66,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
  * @author <ul><li>Ryan Shoemaker, Sun Microsystems, Inc.</li></ul>
  * @since JAXB 2.1
  */
-final class DatatypeConverterImpl implements DatatypeConverterInterface {
+final public class DatatypeConverterImpl implements DatatypeConverterInterface {
 
     /**
      * To avoid re-creating instances, we cache one instance.

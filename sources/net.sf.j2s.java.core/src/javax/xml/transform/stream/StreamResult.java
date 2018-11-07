@@ -6,9 +6,7 @@ import java.io.Writer;
 
 import javax.xml.transform.Result;
 
-import swingjs.JSXMLStreamResult;
-
-public class StreamResult extends JSXMLStreamResult implements Result {
+public class StreamResult extends swingjs.xml.JSXMLStreamResult implements Result {
 	
 	public StreamResult() {
 		super();

@@ -59,7 +59,7 @@ package java.awt;
  * @author      Arthur van Hoff
  * @since       JDK1.0
  */
-public class Choice extends a2s.Choice {//Component implements ItemSelectable, Accessible {
+public class Choice extends swingjs.a2s.Choice {//Component implements ItemSelectable, Accessible {
 //    /**
 //     * The items for the <code>Choice</code>.
 //     * This can be a <code>null</code> value.

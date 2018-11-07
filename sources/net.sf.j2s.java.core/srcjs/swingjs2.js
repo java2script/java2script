@@ -11192,7 +11192,8 @@ if (!J2S._version)
 
 	J2S._ajax = function(info) {
 		if (!info.async) {
-			return J2S.$ajax(info).responseText;
+			info.xhr = J2S.$ajax(info);
+			return info.xhr.responseText;
 		}
 		J2S._ajaxQueue.push(info)
 		if (J2S._ajaxQueue.length == 1)
@@ -11270,7 +11271,7 @@ if (!J2S._version)
 	}
 
 	J2S._getRawDataFromServer = function(database, query, fSuccess, fError,
-			asBase64, noScript) {
+			asBase64, noScript, infoRet) {
 		// note that this method is now only enabled for "_"
 		// server-side processing of database queries was too slow and only
 		// useful for
@@ -11284,7 +11285,7 @@ if (!J2S._version)
 				+ (noScript ? "" : "&script="
 						+ encodeURIComponent(J2S
 								._getScriptForDatabase(database)));
-		return J2S._contactServer(s, fSuccess, fError);
+		return J2S._contactServer(s, fSuccess, fError, infoRet);
 	}
 
 	J2S._checkFileName = function(applet, fileName, isRawRet) {
@@ -11324,26 +11325,21 @@ if (!J2S._version)
 				: (J2S._javaFileCache = cache));
 	}
 
-	J2S._loadFileData = function(applet, fileName, fSuccess, fError) {
+	J2S._loadFileData = function(applet, fileName, fSuccess, fError, info) {
+		info || (info = {});
 		var isRaw = [];
 		fileName = J2S._checkFileName(applet, fileName, isRaw);
 		fSuccess = J2S._checkCache(applet, fileName, fSuccess);
 		if (isRaw[0]) {
-			J2S._getRawDataFromServer("_", fileName, fSuccess, fError);
+			J2S._getRawDataFromServer("_", fileName, fSuccess, fError, info);
 			return;
 		}
-		var info = {
-			type : "GET",
-			dataType : "text",
-			url : fileName,
-			async : J2S._asynchronous,
-			success : function(a) {
-				J2S._loadSuccess(a, fSuccess)
-			},
-			error : function() {
-				J2S._loadError(fError)
-			}
-		}
+		info.type = "GET";
+		info.dataType = "text";
+		info.url = fileName;
+		info.async = J2S._asynchronous;
+		info.success = function(a) { J2S._loadSuccess(a, fSuccess) };
+		info.error = function() { J2S._loadError(fError) };
 		J2S._checkAjaxPost(info);
 		J2S._ajax(info);
 	}
@@ -11357,19 +11353,14 @@ if (!J2S._version)
 			info.contentType = "application/x-www-form-urlencoded";
 		}
 	}
-	J2S._contactServer = function(data, fSuccess, fError) {
-		var info = {
-			dataType : "text",
-			type : "GET",
-			url : J2S._serverUrl + data,
-			success : function(a) {
-				J2S._loadSuccess(a, fSuccess)
-			},
-			error : function() {
-				J2S._loadError(fError)
-			},
-			async : fSuccess ? J2S._asynchronous : false
-		}
+	J2S._contactServer = function(data, fSuccess, fError, info) {
+		info || (info = {});
+		info.dataType = "text";
+		info.type = "GET";
+		info.url = J2S._serverUrl + data;
+		info.success = function(a) { J2S._loadSuccess(a, fSuccess) };
+		info.error = function() { J2S._loadError(fError) };
+		info.async = (fSuccess ? J2S._asynchronous : false);
 		J2S._checkAjaxPost(info);
 		return J2S._ajax(info);
 	}
@@ -11415,7 +11406,11 @@ if (!J2S._version)
 		return false;
 	}
 
-	J2S.getFileData = function(fileName, fSuccess, doProcess, isBinary) {
+	J2S.getFileData = function(fileName, fSuccess, doProcess, info) {
+		if (info === true)
+			info = {isBinary: true};
+		info || (info = {});
+		var isBinary = info.isBinary;
 		// swingjs.api.J2SInterface
 		// use host-server PHP relay if not from this host
 		if (fileName.indexOf("https://./") == 0)
@@ -11454,13 +11449,11 @@ if (!J2S._version)
 				&& (isHttps2Http || asBase64 || !isMyHost && !isDirectCall || !fSuccess
 						&& cantDoSynchronousLoad)) {
 			data = J2S._getRawDataFromServer("_", fileName, fSuccess, fSuccess,
-					asBase64, true);
+					asBase64, true, info);
 		} else {
 			fileName = fileName.replace(/file:\/\/\/\//, "file://"); // opera
-			var info = {
-				dataType : (isBinary ? "binary" : "text"),
-				async : !!fSuccess
-			};
+			info.dataType = (isBinary ? "binary" : "text");
+			info.async = !!fSuccess;
 			if (isPost) {
 				info.type = "POST";
 				info.url = fileName.split("?POST?")[0]
@@ -11470,12 +11463,8 @@ if (!J2S._version)
 				info.url = fileName;
 			}
 			if (fSuccess) {
-				info.success = function(data) {
-					fSuccess(J2S._xhrReturn(info.xhr))
-				};
-				info.error = function() {
-					fSuccess(info.xhr.statusText)
-				};
+				info.success = function(data) { fSuccess(J2S._xhrReturn(info.xhr)) };
+				info.error = function() { fSuccess(info.xhr.statusText) };
 			}
 			info.xhr = J2S.$ajax(info);
 			if (!fSuccess) {
@@ -11710,21 +11699,23 @@ if (!J2S._version)
 		}
 	}
 
-	J2S.doAjax = function(url, postOut, dataOut) {
+	J2S.doAjax = function(url, postOut, dataOut, info) {
+		if (info === true)
+			info = {isBinary: true};
+		info || (info = {});
 		// called by org.J2S.awtjs2d.JmolURLConnection.doAjax()
 		url = url.toString();
-
 		if (dataOut != null)
 			return J2S.saveFile(url, dataOut);
 		if (postOut)
 			url += "?POST?" + postOut;
-		return J2S.getFileData(url, null, true);
+		return J2S.getFileData(url, null, true, info);
 	}
 
 	// J2S._localFileSaveFunction -- // do something local here; Maybe try the
 	// FileSave interface? return true if successful
 
-	J2S.saveFile = function(filename, data, mimetype, encoding) {
+	J2S.saveFile = J2S._saveFile = function(filename, data, mimetype, encoding) {
 		if (J2S._localFileSaveFunction
 				&& J2S._localFileSaveFunction(filename, data))
 			return "OK";
@@ -13552,6 +13543,7 @@ if (!J2S._version)
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 11/4/2018 3.2.4.02 fixes problem with new Date("10/20/2018") and missing date.equals()
 // BH 10/1/2018 3.2.4.01 fixes problem with AWT mouseXxx(Event) not activating in children of Applet
 // BH 9/29/2018 3.2.4.00 adds JAXB support
 // BH 9/23/2018 3.2.3.00 adds direct non-Swing applet support (java.applet.Applet and java.awt.*); no need for converting source to a2s.*
@@ -13649,7 +13641,7 @@ window["j2s.clazzloaded"] = true;
   _debugging: false,
   _loadcore: true,
   _nooutput: 0,
-  _VERSION_R: "3.2.4.01",
+  _VERSION_R: "3.2.4.02",
   _VERSION_T: "3.2.4.00",
 };
 
@@ -13824,8 +13816,12 @@ Clazz.assert = function(clazz, obj, tf, msg) {
 
 Clazz.clone = function(me) { 
   // BH allows @j2sNative access without super constructor
-  return appendMap(me.__ARRAYTYPE ? Clazz.array(me.__BASECLASS, me.__ARRAYTYPE, -1, me, true)
-   : new me.constructor(inheritArgs), me); 
+if (me.__ARRAYTYPE) {
+  return appendMap(Clazz.array(me.__BASECLASS, me.__ARRAYTYPE, -1, me, true), me);
+}
+  me = appendMap(new me.constructor(inheritArgs), me); 
+  me.__JSID__ = ++_jsid;
+  return me;
 }
 
 /**sgurin
@@ -14289,7 +14285,7 @@ Clazz.newMeth = function (clazzThis, funName, funBody, modifiers) {
   var isStatic = (modifiers == 1 || modifiers == 2);
   var isPrivate = (typeof modifiers == "object");
   if (isPrivate) 
-	C$.$P$ = modifiers;
+	clazzThis.$P$ = modifiers;
   Clazz.saemCount0++;
   funBody.exName = funName; // mark it as one of our methods
   funBody.exClazz = clazzThis; // make it traceable
@@ -15190,7 +15186,7 @@ Clazz._getStackTrace = function(n) {
       s += "<recursing>\n";
       break;
     }
-    if (showParams) {
+    if (showParams) { 	
       s += getArgs(c);
     }
   }
@@ -15198,7 +15194,7 @@ Clazz._getStackTrace = function(n) {
   s += estack.join("\n");
   if (Clazz._stack.length) {
 	  s += "\nsee Clazz._stack";
-	  console.log("Clazz._stack = " + Clazz._stack);
+	  console.log("Clazz._stack() = " + Clazz._stack());
 	  console.log("Use Clazz._showStack() or Clazz._showStack(n) to show parameters");
   }
   return s;
@@ -16826,7 +16822,7 @@ java.lang.System = System = {
 	v = "org.apache.xerces.jaxp.datatype";
 	break;
       case "javax.xml.bind.JAXBContextFactory":
-	v = "swingjs.JSJAXBContextFactory";
+	v = "swingjs.xml.JSJAXBContextFactory";
 	break;
       }
       if (v)
@@ -18511,30 +18507,34 @@ Character.prototype.intValue$  = function() { return this.value.codePointAt(0) }
 
 // TODO: Only asking for problems declaring Date. This is not necessary
 
+// NOTE THAT java.util.Date, like java.lang.Math, is unqualified by the transpiler -- this is NOT necessary
+
 Clazz._setDeclared("java.util.Date", java.util.Date=Date);
 //Date.TYPE="java.util.Date";
 Date.__CLASS_NAME__="Date";
 addInterface(Date,[java.io.Serializable,java.lang.Comparable]);
 
-m$(java.util.Date, "c$", function(t) {
-  this.setTime$J(t || System.currentTimeMillis$())
+m$(java.util.Date, ["c$", "c$$S", "c$$J"], function(t) {
+  this.setTime$J(typeof t == "string" ? Date.parse(t) : t ? t : System.currentTimeMillis$())
 }, 1);
 
-m$(java.util.Date,"clone$",
+m$(java.util.Date, ["getClass$", "getClass"], function () { return Clazz.getClass(this); }, 1);
+
+m$(java.util.Date,["clone$","clone"],
 function(){
 return new Date(this.getTime());
 });
 
-m$(java.util.Date,"before$java_util_Date",
+m$(java.util.Date,["before", "before$java_util_Date"],
 function(when){
 return this.getTime()<when.getTime();
 });
-m$(java.util.Date,"after$java_util_Date",
+m$(java.util.Date,["after", "after$java_util_Date"],
 function(when){
 return this.getTime()>when.getTime();
 });
 
-m$(java.util.Date,"equals$O",
+m$(java.util.Date,["equals","equals$O"],
 function(obj){
 return Clazz.instanceOf(obj,java.util.Date)&&this.getTime()==(obj).getTime();
 });
@@ -18574,7 +18574,7 @@ dp.setSeconds$I = dp.setSeconds;
 dp.setTime$J = dp.setTime;
 dp.setYear$I = dp.setYear;
 dp.toGMTString$ = dp.toGMTString;
-dp.toLocaleString$ = dp.toLocaleDateString;
+dp.toLocaleString$ = dp.toLocaleString = dp.toLocaleDateString;
 dp.UTC$ = dp.UTC;
 
 

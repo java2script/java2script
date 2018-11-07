@@ -54,7 +54,7 @@ package java.awt;
  * @see         java.awt.Checkbox
  * @since       JDK1.0
  */
-public class CheckboxGroup extends a2s.CheckboxGroup {//implements java.io.Serializable {
+public class CheckboxGroup extends swingjs.a2s.CheckboxGroup {//implements java.io.Serializable {
 //    /**
 //     * The current choice.
 //     * @serial

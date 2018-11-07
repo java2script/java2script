@@ -41,7 +41,7 @@ import javax.accessibility.*;
  * @author      Sami Shaio
  * @since       JDK1.0
  */
-public class Canvas extends a2s.Canvas {//Component implements Accessible {
+public class Canvas extends swingjs.a2s.Canvas {//Component implements Accessible {
 
 //    private static final String base = "canvas";
 //    private static int nameCounter = 0;

@@ -51,7 +51,7 @@ package java.awt;
  * @see         java.awt.event.ItemListener
  * @since       JDK1.0
  */
-public class CheckboxMenuItem extends a2s.CheckboxMenuItem {//MenuItem implements ItemSelectable, Accessible {
+public class CheckboxMenuItem extends swingjs.a2s.CheckboxMenuItem {//MenuItem implements ItemSelectable, Accessible {
 //
 //    static {
 //        /* ensure that the necessary native libraries are loaded */

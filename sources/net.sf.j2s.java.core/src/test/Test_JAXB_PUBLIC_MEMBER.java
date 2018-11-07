@@ -54,7 +54,7 @@ public class Test_JAXB_PUBLIC_MEMBER extends Test_ {
 				e.printStackTrace();
 			}
 			
-	        System.out.println("Test_JAXB_Public OK");
+	        System.out.println("Test_JAXB_PUBLIC_MEMBER OK");
 		} catch (JAXBException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

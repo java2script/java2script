@@ -30,11 +30,6 @@ import javax.xml.bind.annotation.XmlType;
 //	})
 public class Root_PUBLIC_MEMBER {
 
-	static boolean isCopy = false;
-
-	static final String x = "Date";
-	// TODO: DOES NOT WORK @XmlElement(name=x)
-
 	public void toC(String c) {
 		this.c = c;
 	}
@@ -84,13 +79,6 @@ public class Root_PUBLIC_MEMBER {
 //  <pi2>0</pi2>
 //  <pi3>3</pi3>
 
-	@XmlAttribute
-	public int pi1a, pi2a, pi3a = 3;
-//<ns2:Root xmlns:ns2="www.jalview.org" pi1A="0" pi2A="0" pi3A="3">
-
-	public boolean b1;
-//     <b1>false</b1>
-
 	private String a;
 	// ignored as private
 	public String getA() {
@@ -98,16 +86,18 @@ public class Root_PUBLIC_MEMBER {
 		return "getA";
 	}
 	public void setA(String a) {
-		this.a = "getA";
+		this.a = "setA";
 	}
 
 	public String b = "b";
 //  <b>b</b>
    String getPropertyB() {
 // ignored -- not public
-		return "getPropertyB";
+	   System.out.println("getPropertyB()");
+		return "getPropertyB:" + b;
 	}
 	public void setPropertyB(String b) {
+		   System.out.println("setPropertyB()");
 		this.b = b;
 	}
 
@@ -121,14 +111,17 @@ public class Root_PUBLIC_MEMBER {
 		this.c = "setC";
 	}
 
-	private String d = "d_";
+	@XmlTransient
+	public String d = "d_";
 //  <d>getD</d>
-	public String getD() {
-		return "getD";
+	private String getD() {
+		return "getD:" + d;
 	}
-
+	@XmlElement
 	public void setD(String d) {
-		D = "setD";
+		// ignored -- getD is not public
+		System.out.println("setD:" + d);
+		this.d = "setD";
 	}
 
 	public Date date = new Date();
@@ -139,11 +132,11 @@ public class Root_PUBLIC_MEMBER {
 	private String PropertyCpriv = "PropertyCpriv";
 	// ignored for PUBLIC_MEMBER
 	
-	private String PropertyC = "PropertyC0";
+	private String PropertyC = "PC0";
 	// ignored for PUBLIC_MEMBER
 	
 	@XmlTransient
-	private String propertyC = "propertyC0";
+	private String propertyC = "pC0";
 	@XmlElement
 	public String getproPERtyC() {
 //	    <proPERtyC>?</proPERtyC>
@@ -164,7 +157,7 @@ public class Root_PUBLIC_MEMBER {
 	}
 
 	@XmlTransient
-	private String propertyc = "propertyc0";
+	private String propertyc = "pc0";
 //	public String getpropertyc() {
 //	// (at end)
 //    // <propertyc>getpropertyc</propertyc>
