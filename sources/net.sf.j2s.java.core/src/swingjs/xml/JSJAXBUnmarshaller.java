@@ -133,14 +133,10 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		return null;
 	}
 
-	private Object unmarshalField(JSJAXBField field, DOMNode node) {
+	private Object unmarshalField(JSJAXBField field, DOMNode node, String className) {
 		if (field != null)
 			try {
-				String className = field.unmarshallingClassName;
-				if (className == null)
-					className = field.javaClassName;
-				field.unmarshallingClassName = null;
-				return doUnmarshal(node, Class.forName(className), MODE_CONTINUE);
+				return doUnmarshal(node, Class.forName(className == null ? field.javaClassName :className), MODE_CONTINUE);
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -268,8 +264,14 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 						: field.mapClassNameKey);
 				String valueType = ((field.holdsObjects & JSJAXBField.MAP_VALUE_OBJECT) != 0 ? null
 						: field.mapClassNameValue);
-				JSJAXBField keyFieldToUnmarshal = (needsUnmarshalling(field, keyType) ? field : null);
-				JSJAXBField valueFieldToUnmarshal = (needsUnmarshalling(field, valueType) ? field : null);
+				String className = needsUnmarshalling(field, keyType);
+				if (className != null)
+					keyType = className;
+				JSJAXBField keyFieldToUnmarshal = (className == null ? null : field);
+				className = needsUnmarshalling(field, valueType);
+				if (className != null)
+					valueType = className;
+				JSJAXBField valueFieldToUnmarshal = (className == null ? null : field);
 				for (int i = 1, n = nodes.size(); i < n;) {
 					Object key = getNodeObject(keyFieldToUnmarshal, (DOMNode) nodes.get(i++), keyType, null, true);
 					Object value = getNodeObject(valueFieldToUnmarshal, (DOMNode) nodes.get(i++), valueType, null, true);
@@ -316,16 +318,19 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		if (!haveData)
 			data = a; // nulls
 		// TODO: what if arrayType is Object?
-		JSJAXBField fieldToUnmarshal = (needsUnmarshalling(field, arrayType) ? field : null);
+		String className = needsUnmarshalling(field, arrayType);
+		JSJAXBField fieldToUnmarshal = (className == null ? null : field);
+		if (className != null)
+			arrayType = className;
 		for (int i = 0; i < n; i++)
-			a[i] = getNodeObject(fieldToUnmarshal, (node == null ? (DOMNode) field.boundListNodes.get(i) : node), field.unmarshallingClassName, data[i],
+			a[i] = getNodeObject(fieldToUnmarshal, (node == null ? (DOMNode) field.boundListNodes.get(i) : node), arrayType, data[i],
 					asObject);
 		return a;
 	}
 
 	private Object getNodeObject(JSJAXBField fieldToUnmarshal, DOMNode node, String type, Object data, boolean asObject) {
 		if (fieldToUnmarshal != null) {
-			return unmarshalField(fieldToUnmarshal, node);
+			return unmarshalField(fieldToUnmarshal, node, type);
 		}
 		if (node == null)
 			return null;
@@ -339,7 +344,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 				// this is a SeeAlso entry
 				QName qname = getQnameForAttribute(null, null, type);
 				JSJAXBField field = getFieldFromQName(qname);
-				return unmarshalField(field, node);
+				return unmarshalField(field, node, null);
 			}
 		}
 		return convertFromType(null, data, type, asObject);
@@ -428,9 +433,9 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		return jjc.clone();
 	}
 
-	public static boolean needsUnmarshalling(JSJAXBField field, String javaClassName) {
+	public static String needsUnmarshalling(JSJAXBField field, String javaClassName) {
 		if (field.isSimpleType(javaClassName))
-			return false;
+			return null;
 		boolean isMarshalled = false;
 		if (javaClassName == null)
 			javaClassName = field.javaClassName;
@@ -438,15 +443,13 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			isMarshalled = (knownJavaClasses.containsKey(javaClassName)
 					? knownJavaClasses.get(javaClassName).booleanValue()
 					: JSJAXBClass.checkC$__ANN__(null, Class.forName(javaClassName), false, false));
-			if (isMarshalled)
-				field.unmarshallingClassName = javaClassName;
 		} catch (ClassNotFoundException e) {
 			System.out.println("JSJAXBClass: class was not found: " + javaClassName);
 			e.printStackTrace();
 		} finally {
 			knownJavaClasses.put(javaClassName, Boolean.valueOf(isMarshalled));
 		}
-		return isMarshalled;
+		return (isMarshalled ? javaClassName : null);
 	}
 
 	void prepareForUnmarshalling(String defaultNamespace) {
@@ -518,8 +521,9 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 
 		// complex object -- unmarshal directly
 
-		if (needsUnmarshalling(field, null)) {
-			field.setValue(unmarshalField(field, field.boundNode), javaObject);
+		String className = needsUnmarshalling(field, null);
+		if (className != null) {
+			field.setValue(unmarshalField(field, field.boundNode, className), javaObject);
 			return;
 		}
 

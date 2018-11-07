@@ -39,7 +39,6 @@ class JSJAXBField implements Cloneable {
 	DOMNode boundNode;
 	List<Object> boundListNodes;
 	QName qualifiedTypeName;
-	String unmarshallingClassName;
 
 	String xmlCharacterData = "";
 	String xmlAttributeData;

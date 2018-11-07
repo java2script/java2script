@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 11/6/2018 3.2.4.03 adds TypeError.prototype.printStackTrace$java_io_PrintStream
 // BH 11/4/2018 3.2.4.02 fixes problem with new Date("10/20/2018") and missing date.equals()
 // BH 10/1/2018 3.2.4.01 fixes problem with AWT mouseXxx(Event) not activating in children of Applet
 // BH 9/29/2018 3.2.4.00 adds JAXB support
@@ -5277,7 +5278,8 @@ if(lineNum>=0){
 
 
 TypeError.prototype.getMessage$ || (TypeError.prototype.getMessage$ = function(){ return (this.stack ? this.stack : this.message || this.toString()) + (this.getStackTrace ? this.getStackTrace$() : Clazz._getStackTrace())});
-TypeError.prototype.printStackTrace$ = function(){System.out.println(this + "\n" + this.stack)}
+TypeError.prototype.printStackTrace$ = function(){System.out.println(this + "\n" + this.stack)};
+TypeError.prototype.printStackTrace$java_io_PrintStream = function(stream){stream.println$S(e + "\n" + e.stack);};
 
 Clazz.Error = Error;
 
