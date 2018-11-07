@@ -135,6 +135,10 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// note to self: It is an annoyance that Eclipse does not recognize an annotation edit
+//               as a need to recompile automatically
+// TODO: Create a j2s configuration tag "j2s.jaxb.packages= package;package;package..."
+//       that will direct the transpiler to create __ANN__ in any class within this package. 
 // BH 11/4/2018 -- 3.2.4.02 broad JAXB support
 // BH 10/27/2018 -- 3.2.4.01 support for JAXB FIELD+propOrder and NONE types 
 // BH 9/28/2018 -- 3.2.4.00 adds minimal support for JAXB
