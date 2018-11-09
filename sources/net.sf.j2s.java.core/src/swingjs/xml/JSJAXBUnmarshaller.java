@@ -355,7 +355,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		String text = JSSAXParser.getSimpleInnerText(node);
 		if (doc == null) {
 			doc = node;
-			setDocAttributes(text, atts);
+			setDocAttributes(qName, text, atts);
 			return;
 		}
 //		/**
@@ -370,7 +370,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		}
 	}
 
-	private void setDocAttributes(String value, Attributes atts) {
+	private void setDocAttributes(QName qName, String value, Attributes atts) {
 		if (jaxbClass.xmlValueField != null) {
 			jaxbClass.xmlValueField.setCharacters(value);
 			jaxbClass.xmlValueField.setNode(doc);
@@ -384,6 +384,9 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			if (qname.equals("xmlns") || qname.startsWith("xmlns:") || qname.startsWith("xsi:")) {
 				continue;
 			}
+			// attribute assumes uri of tag if "" -- NO!
+//			if (uri.length() == 0)
+//				uri = qName.getNamespaceURI();
 			QName qn = getQnameForAttribute(uri, localName, qname);
 			JSJAXBField field = getFieldFromQName(qn);
 			if (field != null) {
@@ -433,12 +436,18 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		return jjc.clone();
 	}
 
-	public static String needsUnmarshalling(JSJAXBField field, String javaClassName) {
+	public String needsUnmarshalling(JSJAXBField field, String javaClassName) {
 		if (field.isSimpleType(javaClassName))
 			return null;
 		boolean isMarshalled = false;
 		if (javaClassName == null)
 			javaClassName = field.javaClassName;
+		if (field.xmlType != null) {
+			String typeClassName = getXMLTypeClassName(field);
+			if (typeClassName == null)
+				return null;
+			javaClassName = typeClassName;
+		}		
 		try {
 			isMarshalled = (knownJavaClasses.containsKey(javaClassName)
 					? knownJavaClasses.get(javaClassName).booleanValue()
@@ -450,6 +459,15 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			knownJavaClasses.put(javaClassName, Boolean.valueOf(isMarshalled));
 		}
 		return (isMarshalled ? javaClassName : null);
+	}
+
+	private String getXMLTypeClassName(JSJAXBField field) {
+		if (field.xmlType.indexOf(":") >= 0 && !field.xmlType.startsWith("xs:")) {
+			QName qname = getQnameForAttribute(null, null, field.xmlType);
+			field = getFieldFromQName(qname);
+			return (field == null ? null : field.javaClassName);
+		}
+		return null;
 	}
 
 	void prepareForUnmarshalling(String defaultNamespace) {
@@ -487,11 +505,12 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			return;
 		Map<String, JSJAXBField> map = (isSeeAlso ? seeAlsoMap : jaxbClass.unmarshallerFieldMap);
 		map.put(q.getLocalPart(), field);
-		String namespace = q.getNamespaceURI();
 //		if (namespace.length() == 0)
 //			namespace = jaxbClass.getUnmarshallerDefaultNamespace();
 //		if (namespace != null)
-		map.put(namespace + ":" + q.getLocalPart(), field);
+		String qn = q.getNamespaceURI() + ":" + q.getLocalPart();
+		map.put(qn, field);
+		map.put("/lc/" + qn.toLowerCase(), field);
 		// System.out.println("JSJAXBClass#binding " + namespace + ":" +
 		// q.getLocalPart() + "->" + field.javaName);
 	}
@@ -505,6 +524,10 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			f = seeAlsoMap.get(key);
 //		if (f == null)
 //			f = seeAlsoMap.get(qName.getLocalPart());
+
+		// desparately doing this because I cannot find the capitalization algorithm in JAXB!
+		if (f == null)
+			f = jaxbClass.unmarshallerFieldMap.get("/lc/" + key.toLowerCase());		
 		if (f == null)
 			System.out.println("JSJAXBUnmarshaller could not associate a field with " + qName);
 		return f;
@@ -518,14 +541,6 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 
 		if (field.isNil)
 			return;
-
-		// complex object -- unmarshal directly
-
-		String className = needsUnmarshalling(field, null);
-		if (className != null) {
-			field.setValue(unmarshalField(field, field.boundNode, className), javaObject);
-			return;
-		}
 
 		// char data for field
 		if (field.asList) {
@@ -559,6 +574,15 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		}
 
 		// qualifiedWrapName is null;
+
+		String className = needsUnmarshalling(field, null);
+		if (className != null) {
+
+			// complex object -- unmarshal directly
+
+			field.setValue(unmarshalField(field, field.boundNode, className), javaObject);
+			return;
+		}
 
 		String data = (field.isAttribute ? field.xmlAttributeData : field.xmlCharacterData.trim());
 		String dataType = (field.xmlType == null ? field.javaClassName : field.xmlType);

@@ -322,16 +322,29 @@ class JSJAXBClass implements Cloneable {
 			return this.qname = qname;
 		case JSJAXBField.TYPE_XML_TYPE:
 			return this.qname = qualifiedTypeName = qname;
+		default:
 		case JSJAXBField.TYPE_ATTRIBUTE:
 		case JSJAXBField.TYPE_ELEMENT:
 			return qname;
 		}
-		// not possible
-		return null;
 	}
 
 	private boolean haveXMLTypeNamespace = true;
 	
+	/**
+	 * Get the default namespace depending upon type. 
+	 * 
+	 * RootElement: packageNamespace unless the namespace has been set in the annotation
+	 * 
+	 * XMLType: the name from the RootElement
+	 * 
+	 * XMLAttribute: empty string (surprise!)
+	 * 
+	 * XMLElement: the enclosing class's XMLType, if it exists, or the package namespace
+	 * 
+	 * @param type
+	 * @return
+	 */
 	private String getDefaultNamespace(int type) {
 		switch (type) {
 		case JSJAXBField.TYPE_ROOT_ELEMENT:
@@ -341,11 +354,10 @@ class JSJAXBClass implements Cloneable {
 			return qname.getNamespaceURI();			
 		case JSJAXBField.TYPE_ATTRIBUTE:
 			return "";
+		default:
 		case JSJAXBField.TYPE_ELEMENT:
 			return (haveXMLTypeNamespace ? qname.getNamespaceURI() : packageNamespace);
 		}
-		// not possible
-		return null;
 	}
 
 	public JSJAXBClass clone() {

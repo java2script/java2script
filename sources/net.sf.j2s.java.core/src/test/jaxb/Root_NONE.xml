@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<RootNone xmlns="package-namespace" ang="?" pi1A="0" pi2A="0" pi3A="3">
+    <propertyC>propertyC0</propertyC>
+    <AToBe>getAtoBe</AToBe>
+    <b2>true</b2>
+    <b3>true</b3>
+    <c>getC</c>
+    <propertyAToBe>=getPropertyAtoB</propertyAToBe>
+    <propc>=getproPERtyC:propertyC01</propc>
+    <propertyc>=getpropertyc:propertyC0</propertyc>
+</RootNone>

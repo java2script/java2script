@@ -493,10 +493,9 @@ class JSJAXBField implements Cloneable {
 
 	boolean isSimpleType(String javaClassName) {
 		return (javaClassName != null ? simplePackages(javaClassName)
-				: isNil || isAttribute 
-				|| asList || isByteArray 
-				|| isArray || qualifiedWrapName != null
-				|| simplePackages(this.javaClassName));
+				: isNil || asList || isByteArray || isArray || qualifiedWrapName != null ? true 
+				: xmlType != null ? false 
+				: isAttribute || simplePackages(this.javaClassName));
 	}
 
 	static boolean simplePackages(String javaClassName) {
