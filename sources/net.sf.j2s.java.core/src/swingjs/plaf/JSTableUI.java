@@ -155,7 +155,8 @@ public class JSTableUI extends JSPanelUI {
 	private JSComponent getCellComponent(int row, int column) {
 		TableCellRenderer renderer = table.getCellRenderer(row, column);
 		JSComponent c = (JSComponent) table.prepareRenderer(renderer, row, column);
-		((JSComponentUI) c.getUI()).setTargetParent(table, mouseInputListener);
+		if (c != null)
+			((JSComponentUI) c.getUI()).setTargetParent(table, mouseInputListener);
 		return c;
 	}
 
