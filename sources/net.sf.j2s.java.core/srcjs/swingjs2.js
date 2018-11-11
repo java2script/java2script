@@ -13545,6 +13545,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 11/11/2018 3.2.4.04 fixes String.CASE_INSENSITIVE_ORDER.compare$S$S
 // BH 11/10/2018 3.2.4.04 fixes inner class synthetic references to interfaces
 // BH 11/10/2018 3.2.4.04 fixes String.prototype.split$S and.split$S$I to remove trailing ""
 // BH 11/6/2018 3.2.4.03 adds TypeError.prototype.printStackTrace$java_io_PrintStream
@@ -17771,11 +17772,13 @@ String.format$S$OA = function(format, args) {
 	 }
  } 
  
+String.CASE_INSENSITIVE_ORDER.compare$S$S = String.CASE_INSENSITIVE_ORDER.compare$;
+
 CharSequence.$defaults$(String);
  
 ;(function(sp) {
 
-sp.compareToIgnoreCase$S = function(str) { return String.CASE_INSENSITIVE_ORDER.compare(this, str);}
+sp.compareToIgnoreCase$S = function(str) { return String.CASE_INSENSITIVE_ORDER.compare$S$S(this, str);}
 
 sp.generateExpFunction$S=function(str){
 var arr=[];
