@@ -78,15 +78,16 @@ class JSJAXBClass implements Cloneable {
 	List<String> seeAlso;
 
 	transient Object tagObject;
-	private String createName;
 	private boolean isInnerClass;
 
 	QName declaredTypeName;
 
 	private static String packageNamespace;
+	// TODO: allow for package accessor type. 
 	private static String packageAccessorType;
 
 	private final static Map<String, String> marshallerNamespacePrefixes = new Hashtable<String, String>();
+	@SuppressWarnings("rawtypes")
 	private final static Map<String, XmlAdapter> adapterMap = new HashMap<String, XmlAdapter>();
 
 	static void clearStatics() {
@@ -235,6 +236,7 @@ class JSJAXBClass implements Cloneable {
 		return prefix;
 	}
 
+	@SuppressWarnings("rawtypes")
 	static XmlAdapter getAdapter(String adapterClass) {
 		XmlAdapter adapter = adapterMap.get(adapterClass);
 		if (adapter == null && !adapterMap.containsKey(adapterClass)) {
@@ -277,6 +279,7 @@ class JSJAXBClass implements Cloneable {
 			return false;
 		try {
 			// Date does not have a class?
+			@SuppressWarnings("unused")
 			Class<?> cl = value.getClass();
 			return (/**
 					 * @j2sNative (value.$clazz$ ? !!value.$clazz$.__ANN__ : cl.$clazz$ ?

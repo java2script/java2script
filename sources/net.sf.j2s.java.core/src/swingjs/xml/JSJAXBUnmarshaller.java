@@ -2,7 +2,6 @@ package swingjs.xml;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -55,7 +54,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 
 	private JSJAXBClass jaxbClass;
 	private DOMNode doc;
-	private static Object javaObject;
+	private Object javaObject;
 	private String haventUnmarshalled = "";
 
 //	Map<String, Object> properties = new HashMap<String, Object>();
@@ -81,7 +80,10 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 	public <T> JAXBElement<T> unmarshal(XMLStreamReader reader, Class<T> expectedType) throws JAXBException {
 		parser = new JSSAXParser();
 		xmlSource = ((JSXMLStreamReader) reader).getSource();
-		return (JAXBElement<T>) doUnmarshal(null, expectedType, MODE_RETURN_ELEMENT);
+		@SuppressWarnings("unchecked")
+		JAXBElement<T> o = (JAXBElement<T>) doUnmarshal(null, expectedType, MODE_RETURN_ELEMENT);
+		clearStatics();
+		return o;
 	}
 
 	@Override
@@ -151,6 +153,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 	 * @param javaClass
 	 * @return an instance of this class
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Object doUnmarshal(DOMNode node, Class<?> javaClass, int mode) {
 		if (jaxbClass != null)
 			addSeeAlso(javaClass);
@@ -605,7 +608,9 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 	 * @param asObject TODO
 	 * @return
 	 */
+	@SuppressWarnings({ "unchecked", "deprecation" })
 	private Object convertFromType(JSJAXBField field, Object objVal, String type, boolean asObject) {
+		@SuppressWarnings("unused")
 		Object newVal = null;
 		try {
 
@@ -616,6 +621,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 
 			if (field != null) {
 				if (field.typeAdapter != null) {
+					@SuppressWarnings("rawtypes")
 					XmlAdapter adapter = field.getAdapter();
 					try {
 						return newVal = adapter.unmarshal(val);
