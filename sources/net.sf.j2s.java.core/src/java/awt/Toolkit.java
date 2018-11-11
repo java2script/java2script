@@ -1473,7 +1473,7 @@ public abstract class Toolkit {
 //            return Toolkit.getDefaultToolkit().
 //                createCustomCursor(cursor, hotSpot, name);
 //        } else {
-            return new Cursor(Cursor.DEFAULT_CURSOR);
+            return (name == null ? new Cursor(Cursor.DEFAULT_CURSOR) : new Cursor(name));
 //        }
     }
 

@@ -2653,7 +2653,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		// J2S.setDraggable(tag, target)
 		// J2S.setDraggable(tag, fTarget)
 
-		// draggable tag object simply loades/reports mouse position as
+		// draggable tag object simply loade=s/reports mouse position as
 		// fDown({x:x,y:y,dx:dx,dy:dy,ev:ev}) should fill x and y with starting
 		// points
 		// fDrag(xy) and fUp(xy) will get {x:x,y:y,dx:dx,dy:dy,ev:ev} to use as
@@ -2672,7 +2672,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		// until the mouse is released.
 		// uses jQuery outside events - v1.1 - 3/16/2010 (see j2sJQueryExt.js)
 
-		// J2S.setDraggable(titlebar, frame.outerNode), for example, is issued
+		// J2S.setDraggable(titlebar, fGetFrameParent), for example, is issued
 		// in swingjs.plaf.JSFrameUI.js
 
 		var drag, up;
@@ -2772,10 +2772,9 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 						ev : ev
 					}, 506);
 				} else if (target) {
-					$(target(506)).css({
-						top : y + 'px',
-						left : x + 'px'
-					})
+					var frame = target(506, x, y);
+					if (frame)
+						$(frame).css({ top : y + 'px', left : x + 'px'})
 				}
 			}
 		}, up = function(ev) {
