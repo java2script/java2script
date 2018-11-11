@@ -1,5 +1,6 @@
 package test.jaxb;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -27,7 +28,6 @@ public class Root_FIELD extends ROOT_super {
 	static final String x = "Date";
 
 	public Root_FIELD() {
-		System.out.println("root field () constructor ");
 	}
 
 	public Root_FIELD(boolean addR1) {
@@ -60,6 +60,27 @@ public class Root_FIELD extends ROOT_super {
 				new String[][] { new String[] { "s", "a" }, new String[] { "t", "b" } }, null };
 
 		Ang = "\u212B";
+		
+		iii = new Integer(2);
+	}
+
+	public void validate() {
+//		assert(getPropertyAng().equals("\u212B"));
+		assert (iii.equals(Integer.valueOf(2)));
+		System.out.println("date is " + date);
+		System.out.println(PC());
+		assert (PC().equals("PropertyC0"));
+		System.out.println(pc());
+		assert (pc().equals("getPropertyc:propertyc01"));
+		System.out.println(pC());
+		assert (pC().equals("getproPERtyC:propertyC01"));
+		System.out.println("DEFVAL=" + DEFVAL);
+		assert (DEFVAL.equals("default-value"));
+
+		try {
+			assert (getPropertyAng().getBytes("utf-8").length == 3);
+		} catch (UnsupportedEncodingException e) {
+		}
 	}
 
 	public void toC(String c) {
@@ -108,9 +129,9 @@ public class Root_FIELD extends ROOT_super {
 	private String NILLt;
     //         <NILLt>nillable-true</NILLt>
 
-	@XmlElement(defaultValue="default-value") // DOES NOT WORK IN JAVA OR JAVASCRIPT
-	public String DEFVAL;
-    //         <DEFVAL xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+	// DOES NOT WORK since our marshaller will not use "/>"
+	@XmlElement(defaultValue="default-value") 
+	public String DEFVAL = "defval";
 	
 ///// arrays /////
 
@@ -258,7 +279,7 @@ public class Root_FIELD extends ROOT_super {
 	
 	
 	@XmlElement(type=Integer.class, namespace="testing",name="what", nillable=true)
-	private Integer iii = Integer.valueOf(3);
+	private Object iii;
 
 	@XmlTransient
 	private String propertyC = "propertyC0";

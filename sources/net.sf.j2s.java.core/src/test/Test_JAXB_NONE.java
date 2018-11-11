@@ -28,6 +28,10 @@ import test.jaxb.Root_NONE;
 @XmlRegistry
 public class Test_JAXB_NONE extends Test_ {
 
+	static {
+		System.out.println("te\n\r".split("\\s").length);
+	}
+	
 	public static void main(String[] args) {
         JAXBContext jc;
 		try {

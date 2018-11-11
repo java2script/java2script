@@ -20,6 +20,7 @@ import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
 
 import javajs.util.Base64;
+import javajs.util.PT;
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 
@@ -39,6 +40,7 @@ public class JSJAXBMarshaller extends AbstractMarshallerImpl {
 	private JAXBContext context;
 	private StreamResult result;
 	private Object javaObject;
+	private static String cantmarshall = "";
 
 	public JSJAXBMarshaller(JAXBContext context) {
 		this.context = context;
@@ -251,34 +253,34 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 		JSJAXBField field;if (jaxbClass.propOrder.size() == 0 || isAttribute) {
 			for (int i = 0, n = jaxbClass.fields.size(); i < n; i++)
 				if (isAttribute == (field = jaxbClass.fields.get(i)).isAttribute)
-					addField(field);
+					addField(jaxbClass, field);
 		} else {
 			for (int i = 0, n = jaxbClass.propOrder.size(); i < n; i++) {
 				String name = jaxbClass.propOrder.get(i);
 				field = getField(jaxbClass, name);
 				if (!field.isAttribute)
-					addField(field);
+					addField(jaxbClass, field);
 			}
  		}
 	}
 
-	private void addField(JSJAXBField field) throws JAXBException {
+	private void addField(JSJAXBClass jaxbClass, JSJAXBField field) throws JAXBException {
 		if (field != null && !field.isTransient)
-			addFieldListable(field, field.getObject(javaObject), field.holdsObjects != JSJAXBField.NO_OBJECT);
+			addFieldListable(jaxbClass, field, field.getObject(javaObject), field.holdsObjects != JSJAXBField.NO_OBJECT);
 	}
 
-	private void addFieldListable(JSJAXBField field, Object value, boolean addXsiType) throws JAXBException {
+	private void addFieldListable(JSJAXBClass jaxbClass, JSJAXBField field, Object value, boolean addXsiType) throws JAXBException {
 		if (value == null) {
 			if (field.isNillable)
 	 			writeField(field, null, addXsiType);
 			return;
 		}
 		if (value instanceof List) {
-			writeFieldList(field, (List<?>) value);
+			writeFieldList(jaxbClass, field, (List<?>) value);
 		} else if (value instanceof Map) {
-			writeFieldMap(field, (Map<?, ?>) value);
+			writeFieldMap(jaxbClass, field, (Map<?, ?>) value);
 		} else if (isArray(value)) {
-			writeFieldArray(field, value);
+			writeFieldArray(jaxbClass, field, value);
 		} else if (!field.isAttribute && JSJAXBClass.hasAnnotations(value)) {
 			doMarshal(value.getClass(), value, null, this.javaObject, field, addXsiType);
 		} else {
@@ -423,24 +425,22 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 	}
 
 	private void writeSchema(JSJAXBField field, Object value) throws JAXBException {
-		if (value instanceof Date) {
-			/**
-			 * @j2sNative
-			 * value = value.toISOString();
-			 */			
-		}
-		if (value instanceof JSXMLGregorianCalendarImpl){
+		if (value instanceof Date || value instanceof JSXMLGregorianCalendarImpl) {
 			writeDate(field, value);
 		} else {
 			switch (field.xmlSchemaType) {
 			case "hexBinary":
 				output(DatatypeConverter.printHexBinary((byte[]) value));
-			break;
+				break;
 			case "base64Binary":
 				output(DatatypeConverter.printBase64Binary((byte[]) value));
 				break;
 			default:
-				System.out.println("JSJAXBMarshaller schema not supported " + field.xmlSchemaType);
+				if (!JSJAXBField.isknownSchemaType(field.xmlSchemaType)
+						&& cantmarshall.indexOf(field.xmlSchemaType) < 0) {
+					System.out.println("JSJAXBMarshaller schema not supported " + field.xmlSchemaType);
+					cantmarshall += ";" + field.xmlSchemaType;
+				}
 				// fall through //
 			case "xsd:ID":
 				outputSimple(field, value);
@@ -449,6 +449,14 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 		}
 	}
 	private void writeDate(JSJAXBField field, Object value) throws JAXBException {
+		if (value instanceof Date) {
+			/**
+			 * @j2sNative
+			 * value = value.toISOString();
+			 */			
+			outputSimple(field, value);
+			return;
+		}
 		JSXMLGregorianCalendarImpl cal = ((JSXMLGregorianCalendarImpl) value);
 		QName schema = cal.xmlSchema;
 		if (field.xmlSchemaType != null)
@@ -461,7 +469,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 
 	private static final QName qnEntryValue = new QName("","value","");
 
-	private void writeFieldArray(JSJAXBField field, Object values) throws JAXBException {
+	private void writeFieldArray(JSJAXBClass jaxbClass, JSJAXBField field, Object values) throws JAXBException {
 		Object[] list = (Object[]) values;
 		boolean asList = field.asList;
 		boolean isNillable = !asList && field.isNillable;
@@ -487,7 +495,12 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 			} else {
 				if (value == null && !isNillable)
 					continue;
-				addFieldListable(field, value, field.javaClassName.equals("Object[]"));
+				if (field.listFields == null) {					
+					addFieldListable(jaxbClass, field, value, field.javaClassName.equals("Object[]"));
+				} else {
+					JSJAXBField f = jaxbClass.getFieldFromJavaNameForMarshaller(field.javaName + "::" + value.getClass().getName());
+					addFieldListable(jaxbClass, f, value, false);
+				}
 			}
 		}
 		if (wrapName != null) {
@@ -497,7 +510,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 		}
 	}
 
-	private void writeFieldList(JSJAXBField field, List<?> list) throws JAXBException {
+	private void writeFieldList(JSJAXBClass jaxbClass, JSJAXBField field, List<?> list) throws JAXBException {
 		boolean asList = field.asList;
 		boolean isNillable = !asList && field.isNillable;
 		QName wrapName = field.qualifiedWrapName;
@@ -522,7 +535,12 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 			} else {
 				if (value == null && !isNillable)
 					continue;
-				addFieldListable(field, value, field.holdsObjects != JSJAXBField.NO_OBJECT);
+				if (field.listFields == null) {					
+					addFieldListable(jaxbClass, field, value, field.holdsObjects != JSJAXBField.NO_OBJECT);
+				} else {
+					JSJAXBField f = jaxbClass.getFieldFromJavaNameForMarshaller(field.javaName + "::" + value.getClass().getName());
+					addFieldListable(jaxbClass, f, value, false);
+				}
 			}
 		}
 		if (wrapName != null) {
@@ -532,7 +550,7 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 		}
 	}
 
-	private void writeFieldMap(JSJAXBField field, Map<?, ?> map) throws JAXBException {
+	private void writeFieldMap(JSJAXBClass jaxbClass, JSJAXBField field, Map<?, ?> map) throws JAXBException {
 //	    <hm>
 //        <entry>
 //            <key>null</key>
@@ -559,11 +577,11 @@ private static JSJAXBField getField(JSJAXBClass jaxbClass, String javaName) {
 			output("<entry>");
 			field.qualifiedName = qnEntryKey;
 			field.mapEntryValue = key;
-			addFieldListable(field, key, addXsiType);
+			addFieldListable(jaxbClass, field, key, addXsiType);
 			if (value != null || isNillable) {
 				field.mapEntryValue = value;
 				field.qualifiedName = qnEntryValue;
-				addFieldListable(field, value, addXsiType);
+				addFieldListable(jaxbClass, field, value, addXsiType);
 			}
 			output("\n</entry>\n");
 		}

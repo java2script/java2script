@@ -17,13 +17,6 @@ import swingjs.api.Interface;
 
 class JSJAXBClass implements Cloneable {
 
-//	C$.__ANN__ = [[[null,'test.jaxb.Root_ORDERED.SomewhatComplex'],['@XmlAccessorType(XmlAccessType.FIELD)','@XmlType(name="MoreComplex",namespace="st.Olaf")']],
-//	              [['id','String'],['@XmlID','@XmlElement']],
-//	              [['ca','String'],['@XmlElement']],
-//	              [['cb','String'],['@XmlAttribute(namespace="www.jalview.org2")']],
-//	              [['bytes','byte[]'],['@XmlAttribute']]];
-//	            })()
-
 	final static int TYPE_NONE = 0;
 	final static int TYPE_FIELD = 1;
 	final static int TYPE_PUBLIC_MEMBER = 2;
@@ -206,6 +199,10 @@ class JSJAXBClass implements Cloneable {
 	}
 
 	private void addField(JSJAXBField field) {
+		if (field.listFields != null) {
+			for (int i = field.listFields.size(); --i >= 0;)
+				addField(field.listFields.get(i));
+		}
 		fields.add(field);
 		if (isMarshaller && field.javaName != null)
 			marshallerFieldMap.put(field.javaName, field);

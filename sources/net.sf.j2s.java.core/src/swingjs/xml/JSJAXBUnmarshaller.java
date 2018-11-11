@@ -55,7 +55,8 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 
 	private JSJAXBClass jaxbClass;
 	private DOMNode doc;
-	private Object javaObject;
+	private static Object javaObject;
+	private String haventUnmarshalled = "";
 
 //	Map<String, Object> properties = new HashMap<String, Object>();
 //	private InputStream inputStream;
@@ -217,30 +218,17 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		return o;
 	}
 
-	@SuppressWarnings("unchecked")
 	private void processArraysAndLists() {
 		for (int j = jaxbClass.fields.size(); --j >= 0;) {
 			JSJAXBField field = jaxbClass.fields.get(j);
-			if (field.boundListNodes != null && field.fieldType != JSJAXBField.MAP) {
+			if (!field.isAttribute 
+					&& (field.boundListNodes != null || field.listValues != null) 
+					&& field.fieldType != JSJAXBField.MAP) {
 				// unwrapped set - array or list or map?
 //				System.out.println("Filling List " + field.javaName);
 				String type = (field.isArray ? field.javaClassName.replace("[]", "") : field.listClassName);
-				List<Object> nodes = field.boundListNodes;
-				int n = nodes.size();
 				boolean holdsObject = (field.holdsObjects != JSJAXBField.NO_OBJECT);
-				Object[] a = fillArrayData(field, null, null, (holdsObject ? null : type), !field.isArray);
-				if (field.isArray) {
-					field.setValue(a, javaObject);
-				} else {
-					List<Object> l = (List<Object>) field.getObject(javaObject);
-					if (l == null) {
-						l = new ArrayList<Object>();
-						field.setValue(l, javaObject);
-					}
-					l.clear();
-					for (int i = 0; i < n; i++)
-						l.add(a[i]);
-				}
+				field.setValue(fillArrayData(field, null, null, (holdsObject ? null : type), !field.isArray), this.javaObject);
 			}
 			field.boundListNodes = null;
 		}
@@ -313,7 +301,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 
 	private Object[] fillArrayData(JSJAXBField field, DOMNode node, Object[] data, String arrayType, boolean asObject) {
 		boolean haveData = (data != null);
-		int n = (haveData ? data.length : field.boundListNodes.size());
+		int n = (haveData ? data.length : field.boundListNodes != null ? field.boundListNodes.size() : field.listValues.size());
 		Object[] a = getArrayOfType(field, arrayType, n);
 		if (!haveData)
 			data = a; // nulls
@@ -323,8 +311,8 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		if (className != null)
 			arrayType = className;
 		for (int i = 0; i < n; i++)
-			a[i] = getNodeObject(fieldToUnmarshal, (node == null ? (DOMNode) field.boundListNodes.get(i) : node), arrayType, data[i],
-					asObject);
+			a[i] = (field.listValues != null ? field.listValues.get(i) : getNodeObject(fieldToUnmarshal, (node == null ? (DOMNode) field.boundListNodes.get(i) : node), arrayType, data[i],
+					asObject));
 		return a;
 	}
 
@@ -478,7 +466,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 				String cl = seeAlso.get(i);
 				try {
 					addSeeAlso(Class.forName(cl));
-					System.out.println("JSJAXBClass seeAlso: " + cl);
+					//System.out.println("JSJAXBClass seeAlso: " + cl);
 				} catch (ClassNotFoundException e) {
 					System.out.println("JSJAXBClass seeAlso[" + i + "] not found: " + cl);
 				}
@@ -542,9 +530,13 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		if (field.isNil)
 			return;
 
+		String data = (field.isAttribute ? field.xmlAttributeData : field.xmlCharacterData.trim());
+		if (!field.isAttribute && data.length() == 0 && field.defaultValue != null)
+			data = field.defaultValue;
+
 		// char data for field
 		if (field.asList) {
-			field.setValue(fillArrayData(field, field.boundNode, field.xmlCharacterData.trim().split(" "),
+			field.setValue(fillArrayData(field, field.boundNode, data.split(" "),
 					getArrayType(field), false), javaObject);
 			return;
 		}
@@ -584,7 +576,6 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			return;
 		}
 
-		String data = (field.isAttribute ? field.xmlAttributeData : field.xmlCharacterData.trim());
 		String dataType = (field.xmlType == null ? field.javaClassName : field.xmlType);
 		field.setValue(convertFromType(field, data, dataType, field.xmlType != null), javaObject);
 	}
@@ -647,7 +638,10 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 						return newVal = new Date(/** @j2sNative +Date.parse(val) || */
 								null);
 					default:
-						System.out.println("JSJAXBUnmarhsaller schema not supported: " + field.xmlSchemaType);
+						if (haventUnmarshalled.indexOf(field.xmlSchemaType) < 0) {
+							haventUnmarshalled  += ";" + field.xmlSchemaType;
+							System.out.println("JSJAXBUnmarhsaller using target type " + type + " for " + field.xmlSchemaType);
+						}
 						// fall through //
 					case "xsd:ID":
 						break;
@@ -663,6 +657,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 				case "Decimal":
 					type = "java.math.BigDecimal";
 					break;
+				case "Unsignedlong": 
 				case "Integer":
 					type = "java.math.BigInteger";
 					break;
@@ -707,6 +702,9 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			case "byte":
 			case "short":
 			case "int":
+			case "unsigngedshort":
+			case "unsignedbyte":
+			case "unsignedint":
 			case "long":
 			case "double":
 			case "float":
@@ -726,6 +724,9 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			case "Qname":
 				// probably fail without a NameSpaceContext
 				return newVal = DatatypeConverter.parseQName(val, null);
+			case "unsignedlong":
+				type = "java.math.BigInteger";
+				break;				
 			}
 			Class<?> cl = null;
 			try {
@@ -754,7 +755,9 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			 */
 
 			return null;
-
+		} catch (NumberFormatException e) {
+			return null;
+			// ok, probably ""
 		} finally {
 //			System.out.println("converting " + objVal + " -> " + newVal);
 		}
