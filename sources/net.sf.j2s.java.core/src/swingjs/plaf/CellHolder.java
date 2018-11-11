@@ -29,7 +29,7 @@ public abstract class CellHolder extends JSLightweightUI {
 		DOMNode.setStyles(td, "overflow", "hidden", "background", "transparent");
 		holder.$(td).addClass("swing-td");
 		DOMNode.setAttrs(td, "data-table-ui", holder, "data-row", "" + row, "data-col", "" + col);
-		DOMNode.setStyles(td, "width", w + "px", "height", h + "px", "left", x + "px", y + "px");
+		DOMNode.setStyles(td, "width", w + "px", "height", h + "px", "left", x + "px", "top", y + "px");
 		DOMNode.setStyles(td, "position", "absolute", "overflow", "hidden", "background", "transparent");
 		return td;
 	}
