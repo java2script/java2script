@@ -98,7 +98,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 
 			titleNode = newDOMObject("label", id + "_title");
 			DOMNode.setTopLeftAbsolute(titleNode, 2, 4);
-			DOMNode.setStyles(titleNode, "height", "20px");
+			DOMNode.setStyles(titleNode, "height", "20px", "overflow", "hidden");
 
 			closerWrap = newDOMObject("div", id + "_closerwrap");
 			DOMNode.setTopLeftAbsolute(closerWrap, 0, 0);
