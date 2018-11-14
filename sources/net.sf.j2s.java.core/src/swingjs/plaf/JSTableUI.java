@@ -33,6 +33,7 @@ import java.awt.Component;
 import java.awt.ComponentOrientation;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.JSComponent;
 import java.awt.Point;
@@ -113,32 +114,62 @@ public class JSTableUI extends JSPanelUI {
 		return height = table.getParent().getHeight();
 	}
 
+	private boolean working;
+	private int oldWidth;
+	private int oldHeight;
+	private Object oldFont;
 
+	@Override
+	public void setTainted() {
+		if (!working)
+			isTainted = true;
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent e) {
+		String prop = e.getPropertyName();
+		switch (prop) {
+		case "autoCreateRowSorter":
+		case "rowSorter":
+		case "sorter":
+		case "autoResizeMode":
+		case "model":
+			return;
+		}
+		super.propertyChange(e);
+	}
 
 	@Override
 	public DOMNode updateDOMNode() {
 		int rc = table.getRowCount();
 		int rh = table.getRowHeight();
-		
+
 		boolean rebuild = (rc != oldrc || rh != oldrh);
-		
+
 		oldrh = rh;
 		oldrc = rc;
 
-		Dimension d = getPreferredSize(jc);
-		int w = d.width;//tcm.getTotalColumnWidth();
-		int h = d.height;//table.getVisibleRect().height - thh;
-		
 		if (domNode == null) {
-		 domNode = newDOMObject("div", id);
+			domNode = newDOMObject("div", id);
 		}
 		if (rebuild)
 			children = new Component[table.getRowCount() * table.getColumnCount()];
-		DOMNode.setStyles(domNode, 
-				"width", w + "px", 
-				"height", h + "px"
-				);
-		return setCssFont(domNode, c.getFont());	
+
+		Dimension d = getPreferredSize(jc);
+		int w = d.width;// tcm.getTotalColumnWidth();
+		int h = d.height;// table.getVisibleRect().height - thh;
+
+		if (w != oldWidth || h != oldHeight) {
+			oldWidth = w;
+			oldHeight = h;
+			DOMNode.setStyles(domNode, "width", w + "px", "height", h + "px");
+		}
+		Font font = c.getFont();
+		if (!font.equals(oldFont)) {
+			oldFont = font;
+			setCssFont(domNode, c.getFont());
+		}
+		return domNode;
 	}
 
 
@@ -155,7 +186,8 @@ public class JSTableUI extends JSPanelUI {
 	private JSComponent getCellComponent(int row, int column) {
 		TableCellRenderer renderer = table.getCellRenderer(row, column);
 		JSComponent c = (JSComponent) table.prepareRenderer(renderer, row, column);
-		((JSComponentUI) c.getUI()).setTargetParent(table, mouseInputListener);
+		if (c != null)
+			((JSComponentUI) c.getUI()).setTargetParent(table, mouseInputListener);
 		return c;
 	}
 
@@ -163,27 +195,36 @@ public class JSTableUI extends JSPanelUI {
 		int nrows = table.getRowCount();
 		int ncols = table.getColumnCount();
 		int h = table.getRowHeight();
-		//int thh =  table.getTableHeader().getHeight();
-		//int th = table.getVisibleRect().height -thh;
+		// int thh = table.getTableHeader().getHeight();
+		// int th = table.getVisibleRect().height -thh;
 		int[] cw = new int[ncols];
 		for (int col = 0; col < ncols; col++)
 			cw[col] = table.getColumnModel().getColumn(col).getWidth();
-		//DOMNode.setStyles(outerNode, "overflow", "hidden", "height", th + "px");
+		// DOMNode.setStyles(outerNode, "overflow", "hidden", "height", th + "px");
 		$(domNode).empty();
-		int ty = 0;
-		for (int row = 0; row < nrows; row++) {
-			String rid = id + "_tab_row" + row;
-			DOMNode tr = DOMNode.createElement("div", rid);
-			DOMNode.setStyles(tr, "height", h + "px");
-			int tx = 0;
-			for (int col = 0; col < ncols; col++) {
-				TableCellRenderer renderer = table.getCellRenderer(row, col);
-				DOMNode td = CellHolder.createCellNode(this, row, col, tx, ty, cw[col], h); 
-				tx += cw[col];
-				updateCellNode(td, row, col);
-				tr.appendChild(td);
+		Rectangle r = table.getVisibleRect();
+		int rminy = r.y;
+		int rmaxy = r.y + r.height;
+		int rminx = r.x;
+		int rmaxx = r.x + r.width;
+
+		for (int row = 0, ty = 0; row < nrows && ty < rmaxy; row++) {
+			if (ty + h >= rminy) {
+				String rid = id + "_tab_row" + row;
+				DOMNode tr = DOMNode.createElement("div", rid);
+				DOMNode.setStyles(tr, "height", h + "px");
+				for (int col = 0, tx = 0; col < ncols && tx < rmaxx; col++) {
+					int w = cw[col];
+					if (tx + w >= rminx) {
+//						TableCellRenderer renderer = table.getCellRenderer(row, col);
+						DOMNode td = CellHolder.createCellNode(this, row, col, tx, ty, w, h);
+						updateCellNode(td, row, col);
+						tr.appendChild(td);
+					}
+					tx += w;
+				}
+				domNode.appendChild(tr);
 			}
-			domNode.appendChild(tr);
 			ty += h;
 		}
 
@@ -1930,10 +1971,12 @@ public class JSTableUI extends JSPanelUI {
 	    public void paint(Graphics g, JComponent c) {
 	        Rectangle clip = g.getClipBounds();
 
-	        Rectangle bounds = table.getBounds();
+	        Rectangle bounds = table.getVisibleRect();//table.getBounds();
+	        
+	        System.out.println(clip + " " + bounds);
 	        // account for the fact that the graphics has already been translated
 	        // into the table's bounds
-	        bounds.x = bounds.y = 0;
+	        //bounds.x = bounds.y = 0;
 
 	        if (table.getRowCount() <= 0 || table.getColumnCount() <= 0 ||
 	                // this check prevents us from painting the entire table
@@ -1944,8 +1987,13 @@ public class JSTableUI extends JSPanelUI {
 	            return;
 	        }
 
+	        working = true;
+	        
 	        boolean ltr = table.getComponentOrientation().isLeftToRight();
 
+	        
+	        clip = bounds; // BH ??
+	        
 	        Point upperLeft = clip.getLocation();
 	        Point lowerRight = new Point(clip.x + clip.width - 1,
 	                                     clip.y + clip.height - 1);
@@ -1977,6 +2025,10 @@ public class JSTableUI extends JSPanelUI {
 	            cMax = table.getColumnCount()-1;
 	        }
 
+	        System.out.println("painting " + rMin + "  " + rMax + " " + cMin + " " + cMax);
+	    	
+
+	        
 	        // Paint the grid.
 	        paintGrid(g, rMin, rMax, cMin, cMax);
 
@@ -1984,6 +2036,8 @@ public class JSTableUI extends JSPanelUI {
 	        paintCells(g, rMin, rMax, cMin, cMax);
 
 	        paintDropLines(g);
+	        
+	        working = false;
 	    }
 
 	    private void paintDropLines(Graphics g) {

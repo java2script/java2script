@@ -98,7 +98,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 
 			titleNode = newDOMObject("label", id + "_title");
 			DOMNode.setTopLeftAbsolute(titleNode, 2, 4);
-			DOMNode.setStyles(titleNode, "height", "20px");
+			DOMNode.setStyles(titleNode, "height", "20px", "overflow", "hidden");
 
 			closerWrap = newDOMObject("div", id + "_closerwrap");
 			DOMNode.setTopLeftAbsolute(closerWrap, 0, 0);
@@ -124,18 +124,21 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			
 			JSFunction fGetFrameParent = null; 
 			/**
-			 * @j2sNative var me = this; fGetFrameParent = function(x, y) {
-			 * 
-			 *            if (arguments.length == 1) {
-			 *  	         if (x == 501)
+			 * @j2sNative var me = this; 
+			 * fGetFrameParent = function(mode, x, y) {
+			 * 		switch(arguments.length) {
+			 * 		case 1:
+			 *  	         if (mode == 501)
 			 *      	        me.selected$();  
 			 *          	 return $(fnode).parent();
-			 *            }
-			 *            var xy = me.getMoveCoords$I$I(x, y);
-			 *            $($(fnode).parent()).css({ top: xy[1] + 'px', left: xy[0] + 'px' });
-			 *            me.notifyFrameMoved$();
-			 *            return null;
-			 *            };
+			 *      case 3:
+			 *      		 if (mode == 506) {
+			 *      			me.moveFrame$I$I(x,y);
+			 *      			return null;
+			 *               }
+			 *     }
+			 *     return null;
+			 * }
 			 */
 			
 			J2S.setDraggable(titleBarNode, fGetFrameParent);
@@ -158,6 +161,10 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		return domNode;
 	}
 
+	void moveFrame(int x, int y) {
+		frame.setLocation(x, y);
+	}
+	
 	public int[] getMoveCoords(int x, int y) {
 		return new int[] {x, y};
 	}
@@ -183,7 +190,6 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			{}
 			if (eventType == -1) {
 		  	if (type == "click") {
-		  		@SuppressWarnings("unused")
 					DOMNode tbar = titleBarNode;
 		  		J2S.setDraggable(tbar, false);
 		  		frameCloserAction();

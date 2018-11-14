@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * Status: marshalling/unmarshalling working perfectly
@@ -32,11 +33,20 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author hansonr
  *
  */
-@XmlRootElement(name = "RootNone", namespace = "www.jalview.org")
+@XmlRootElement(name = "RootNone",namespace="root.element")
 @XmlAccessorType(XmlAccessType.NONE)
 public class Root_NONE {
 
-	public Root_NONE() {
+	@XmlType(name="")
+	static class Inner {
+		@XmlElement(namespace="")
+		public String innerString = "innerString";
+	}
+	
+	@XmlElement(name="inner_1")
+	private Inner inner = new Inner();
+	
+	public Root_NONE() { 
 	
 	}
 	
@@ -66,8 +76,12 @@ public class Root_NONE {
 		Ang = a;
 	}
 
-	@XmlAttribute
-	public int pi1a, pi2a, pi3a = 3;
+	@XmlAttribute(name="pi1a")
+	public int pi1a;
+	@XmlAttribute(name="pi2a")
+	public int pi2a;
+	@XmlAttribute(name="pi3a")
+	public int pi3a;
 //<ns2:Root xmlns:ns2="www.jalview.org" pi1A="0" pi2A="0" pi3A="3">
 
 	// ignored - not tagged

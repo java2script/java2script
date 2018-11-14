@@ -101,7 +101,8 @@ public class JSGraphics2D // extends SunGraphics2D
 		// removed - caused blurriness 9/17/2018		
 //		// reduce antialiasing, thank you,
 //		// http://www.rgraph.net/docs/howto-get-crisp-lines-with-no- antialias.html
-		setAntialias(true);
+		// having this set default TRUE gave extra lines around panels in Jalview
+		setAntialias(false);
 	}
 
 	public void setAntialias(boolean tf) {

@@ -3440,6 +3440,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		ASTNode classNode = (node == null ? null : getAbstractOrAnonymousParentForNode(node));
 		if (class_isAnonymousOrLocal || classNode != null && classNode.getParent() != null // CompilationUnit
 				&& classNode.getParent().getParent() != null) {
+			// not the top level, but "this" refers to this class
+			if (binding.getBinaryName().equals(class_typeBinding.getBinaryName()))
+				return ref;
 			// not the top level -- add the synthetic reference.
 			// anonymous and local will not have fully qualified names
 			return getSyntheticReference(getJavaClassNameQualified(binding));
@@ -5419,29 +5422,36 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			if (annName.startsWith("J2SIgnore")) {
 				return false;
 			}
-		} else if (qName.equals("Override") 
-				|| qName.equals("Deprecated")
-				|| qName.startsWith("Suppress")
+		} else if (qName.equals("Override") || qName.equals("Deprecated") || qName.startsWith("Suppress")
 				|| qName.startsWith("ConstructorProperties")) {
-			// see java\awt\ScrollPane.js    @ConstructorProperties({"scrollbarDisplayPolicy"})
+			// see java\awt\ScrollPane.js @ConstructorProperties({"scrollbarDisplayPolicy"})
 			// ignore
 		} else {
 			if (class_annotations == null)
 				class_annotations = new ArrayList<ClassAnnotation>();
-			ClassAnnotation ann = new ClassAnnotation(qName, annotation, node);
-			class_annotations.add(ann);
+			class_annotations.add(new ClassAnnotation(qName, annotation, node));
 			if ("XmlAccessorType".equals(qName)) {
-				String s= annotation.toString();
-				class_jaxbAccessorType = (
-						s.contains("FIELD") ? JAXB_TYPE_FIELD
+				String s = annotation.toString();
+				class_jaxbAccessorType = (s.contains("FIELD") ? JAXB_TYPE_FIELD
 						: s.contains("PUBLIC") ? JAXB_TYPE_PUBLIC_MEMBER
-						: s.contains("PROPERTY") ? JAXB_TYPE_PROPERTY 
-						: JAXB_TYPE_NONE);
+								: s.contains("PROPERTY") ? JAXB_TYPE_PROPERTY : JAXB_TYPE_NONE);
 			} else if (qName.startsWith("XmlEnum")) {
 				class_jaxbAccessorType = JAXB_TYPE_ENUM;
 			} else if (class_jaxbAccessorType == JAXB_TYPE_UNKNOWN && qName.startsWith("Xml")) {
 				System.out.println(">>>unspecified!");
 				class_jaxbAccessorType = JAXB_TYPE_UNSPECIFIED;
+			} else if ("XmlElements".equals(qName) && annotation.isSingleMemberAnnotation()) {
+				Expression e = ((SingleMemberAnnotation) annotation).getValue();
+				if (e instanceof ArrayInitializer) {
+					List<Expression> expressions = ((ArrayInitializer) e).expressions();
+					for (int i = expressions.size(); --i >= 0;) {
+						Expression exp = expressions.get(i);
+						if (exp instanceof Annotation) {
+							class_annotations.add(new ClassAnnotation(qName, (Annotation) exp, node));
+						}
+					}
+				}
+
 			}
 		}
 		return true;
@@ -6425,7 +6435,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				}
 				return;
 			default:
-				System.out.println(">>>addImplicitJAXB accessType: " + accessType + " f=" + fields.size() + " m=" + methods.size());
 				boolean isUnspecified = (accessType == JAXB_TYPE_UNSPECIFIED);
 				boolean publicOnly = (accessType == JAXB_TYPE_PUBLIC_MEMBER);
 				if (accessType != JAXB_TYPE_PROPERTY) {

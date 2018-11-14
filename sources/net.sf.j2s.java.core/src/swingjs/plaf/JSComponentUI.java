@@ -5,6 +5,7 @@ import javax.swing.SwingConstants;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.Font;
@@ -1588,7 +1589,7 @@ public class JSComponentUI extends ComponentUI
 		//
 		boolean ltr = jc.getComponentOrientation().isLeftToRight();
 		boolean alignLeft, alignRight, centered, text0;
-		
+		String px0 = "0px";
 		if (menuAnchorNode == null) {
 			alignLeft = (align == SwingConstants.LEFT
 					|| align == (ltr ? SwingConstants.LEADING : SwingConstants.TRAILING));
@@ -1607,6 +1608,13 @@ public class JSComponentUI extends ComponentUI
 			alignRight = !ltr;
 			centered = false;
 			text0 = false;
+			if (alignRight) {
+				if (buttonNode != null) {
+					DOMNode.setStyles(buttonNode, "right","0");
+				} else {
+					System.out.println("HHHMMM");
+				}
+			}
 		}
 
 		String poslr = (alignRight ? "right" : "left");				
@@ -1978,29 +1986,29 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public void updateCursorImmediately() {
-		String curs;
-		switch (c.getCursor().getType()) {
-		case 1:
-			curs = "crosshair";
-			break;
-		case 3: // wait
-			curs = "wait";
-			break;
-		case 8: // zoom
-			curs = "ns-resize";
-			break;
-		case 12: // hand
-			curs = "grab";
-			break;
-		case 13:
-			curs = "move";
-			break;
-		default:
-			curs = "default";
-			break;
-		}
-		DOMNode.setStyles(setHTMLElement(), "cursor", curs);
+		String curs = getCursorName(c.getCursor());
+		setHTMLElement();
+		DOMNode.setStyles(domNode, "cursor", curs);
 		setWaitImage(curs == "wait");
+	}
+
+	static String getCursorName(Cursor cursor) {
+		switch (cursor.getType()) {
+		case Cursor.CROSSHAIR_CURSOR:
+			return "crosshair";
+		case Cursor.WAIT_CURSOR:
+			return "wait";
+		case Cursor.N_RESIZE_CURSOR: // zoom
+			return "ns-resize";
+		case Cursor.HAND_CURSOR: // hand
+			return "grab";
+		case Cursor.MOVE_CURSOR:
+			return "move";
+		case Cursor.CUSTOM_CURSOR:
+			return cursor.getName();
+		default:
+			return "default";
+		}
 	}
 
 	protected void setWaitImage(boolean doShow) {

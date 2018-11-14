@@ -7,6 +7,10 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 11/11/2018 3.2.4.04 fixes String.CASE_INSENSITIVE_ORDER.compare$S$S
+// BH 11/10/2018 3.2.4.04 fixes inner class synthetic references to interfaces
+// BH 11/10/2018 3.2.4.04 fixes String.prototype.split$S and.split$S$I to remove trailing ""
+// BH 11/6/2018 3.2.4.03 adds TypeError.prototype.printStackTrace$java_io_PrintStream
 // BH 11/4/2018 3.2.4.02 fixes problem with new Date("10/20/2018") and missing date.equals()
 // BH 10/1/2018 3.2.4.01 fixes problem with AWT mouseXxx(Event) not activating in children of Applet
 // BH 9/29/2018 3.2.4.00 adds JAXB support
@@ -266,7 +270,7 @@ Clazz.assert = function(clazz, obj, tf, msg) {
     ok = false;
   }
   if (!ok) {
-    debugger;
+    doDebugger();
     if (Clazz._assertFunction) {
       return Clazz._assertFunction(clazz, obj, msg || Clazz._getStackTrace());
     }
@@ -617,18 +621,18 @@ var addB$Keys = function(clazz, isNew, b, outerObj, objThis) {
     b[key] = outerObj; 
     if (key.indexOf("java.lang.") == 0)
     	b[key.substring(10)] = outerObj;
-  } while ((cl = cl.superclazz));
-  if (cl != clazz && clazz.implementz) {
-  	var impl = clazz.implementz;
+  if (cl.implementz) {
+  	var impl = cl.implementz;
   	for (var i = impl.length; --i >= 0;) {
       var key = getClassName(impl[i], true);
       if (isNew || !b[key]) {
-        b[key] = objThis; 
+        b[key] = outerObj; 
 	    if (key.indexOf("java.lang.") == 0)
 	    	b[key.substring(10)] = outerObj;
       }
   	}
   }
+  } while ((cl = cl.superclazz));
 };
 
 
@@ -1961,7 +1965,7 @@ Clazz.newInterface(java.lang,"Runnable");
 //Clazz.newMeth(C$);
 //})()
 //})();
-//;Clazz.setTVer('3.2.2.03');//Created 2018-08-09 18:57:20 Java2ScriptVisitor version 3.2.2.03 net.sf.j2s.core.jar version 3.2.2.03
+//;Clazz.setTVer('3.2.4.04');//Created 2018-08-09 18:57:20 Java2ScriptVisitor version 3.2.2.03 net.sf.j2s.core.jar version 3.2.2.03
 
 (function(){var P$=java.lang,I$=[[0,'java.util.stream.StreamSupport','java.util.Spliterators','java.lang.CharSequence$lambda1','java.lang.CharSequence$lambda2']],$I$=function(i){return I$[i]||(I$[i]=Clazz.load(I$[0][i]))};
 var C$=Clazz.newInterface(P$, "CharSequence");
@@ -3239,9 +3243,8 @@ java.lang.System = System = {
   currentTimeMillis$ : function () {
     return new Date ().getTime ();
   },
-  exit$ : function() {
-  debugger 
-  swingjs.JSToolkit && swingjs.JSToolkit.exit$() 
+  exit$ : function() { 
+ 	 swingjs.JSToolkit && swingjs.JSToolkit.exit$() 
   },
   gc$ : function() {}, // bh
   getProperties$ : function () {
@@ -3333,12 +3336,12 @@ Sys.out.flush$ = function() {}
 Sys.out.println = Sys.out.println$O = Sys.out.println$Z = Sys.out.println$I = Sys.out.println$J = Sys.out.println$S = Sys.out.println$C = Sys.out.println = function(s) {
 
 if (("" + s).indexOf("TypeError") >= 0) {
-   debugger;
+   doDebugger();
 }
   if (Clazz._nooutput) return;
   if (Clazz._traceOutput && s && ("" + s).indexOf(Clazz._traceOutput) >= 0) {
     alert(s + "\n\n" + Clazz._getStackTrace());
-    debugger;
+    doDebugger();
   }
   Con.consoleOutput(typeof s == "undefined" ? "\r\n" : s == null ?  s = "null\r\n" : s + "\r\n");
 };
@@ -3363,7 +3366,7 @@ Sys.err.printf = Sys.err.printf$S$OA = Sys.err.format = Sys.err.format$S$OA = Sy
 Sys.err.println = Sys.err.println$O = Sys.err.println$Z = Sys.err.println$I = Sys.err.println$S = Sys.err.println$C = Sys.err.println = function (s) {
   if (Clazz._traceOutput && s && ("" + s).indexOf(Clazz._traceOutput) >= 0) {
     alert(s + "\n\n" + Clazz._getStackTrace());
-    debugger;
+    doDebugger();
   }
   Con.consoleOutput (typeof s == "undefined" ? "\r\n" : s == null ?  s = "null\r\n" : s + "\r\n", "red");
 };
@@ -4231,11 +4234,13 @@ String.format$S$OA = function(format, args) {
 	 }
  } 
  
+String.CASE_INSENSITIVE_ORDER.compare$S$S = String.CASE_INSENSITIVE_ORDER.compare$;
+
 CharSequence.$defaults$(String);
  
 ;(function(sp) {
 
-sp.compareToIgnoreCase$S = function(str) { return String.CASE_INSENSITIVE_ORDER.compare(this, str);}
+sp.compareToIgnoreCase$S = function(str) { return String.CASE_INSENSITIVE_ORDER.compare$S$S(this, str);}
 
 sp.generateExpFunction$S=function(str){
 var arr=[];
@@ -4370,6 +4375,8 @@ if (!limit && regex == " ") {
 	var regExp=new RegExp(regex,"gm");
 	arr = this.split(regExp);
 }
+while (arr[arr.length - 1] === "")
+	arr.pop();
 return Clazz.array(String, -1, arr);
 };
 
@@ -5277,7 +5284,8 @@ if(lineNum>=0){
 
 
 TypeError.prototype.getMessage$ || (TypeError.prototype.getMessage$ = function(){ return (this.stack ? this.stack : this.message || this.toString()) + (this.getStackTrace ? this.getStackTrace$() : Clazz._getStackTrace())});
-TypeError.prototype.printStackTrace$ = function(){System.out.println(this + "\n" + this.stack)}
+TypeError.prototype.printStackTrace$ = function(){System.out.println(this + "\n" + this.stack)};
+TypeError.prototype.printStackTrace$java_io_PrintStream = function(stream){stream.println$S(e + "\n" + e.stack);};
 
 Clazz.Error = Error;
 

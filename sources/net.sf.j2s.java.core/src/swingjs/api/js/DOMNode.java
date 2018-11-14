@@ -76,7 +76,17 @@ public abstract class DOMNode {
 	}
 
 	public static Object getAttr(DOMNode node, String attr) {
-		return 	(/**  @j2sNative node && node[attr] ||*/ null);
+		/**
+		 * @j2sNative
+		 * 
+		 * if (!node)
+		 *   return null;
+		 * var a = node[attr];
+		 * return (typeof a == "undefined" ? null : a); 
+		 */
+		{
+		return null;
+		}
 	}
 
 	public static int getAttrInt(DOMNode node, String attr) {

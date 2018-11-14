@@ -19,7 +19,8 @@ public class CorePlugin extends Plugin {
 	 * register the bundle version properly. So we use VERSION here instead.
 	 * 
 	 */
-	public static String VERSION = "3.2.4.02";
+	public static String VERSION = "3.2.4.04";
+	// BH 11/10/2018 -- 3.2.4.04 additional support for JAXB
 	// BH 11/04/2018 -- 3.2.4.02 support for JAXB - all accessor types, ObjectFactory, package-level namespace, but not yet accessor type
 	// BH 10/27/2018 -- 3.2.4.01 support for JAXB FIELD+propOrder and NONE types 
 	// BH 9/28/2018 -- 3.2.4.00 adds minimal support for JAXB

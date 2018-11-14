@@ -1,5 +1,6 @@
 // j2sCore.js (based on JmolCore.js
 
+// BH 11/7/2018 adds J2S.addDirectDatabaseCall(domain)
 // BH 9/18/2018 fixes data.getBytes() not qualified
 // BH 8/12/2018 adding J2S.onClazzLoaded(i,msg) hook for customization
 //   for example, the developer can look for i=1 (pre-core) and add core files selectively
@@ -565,6 +566,10 @@ if (!J2S._version)
 		return (J2S.db._databasePrefixes.indexOf(query.substring(0, 1)) >= 0);
 	}
 
+	J2S.addDirectDatabaseCall = function(domain) {
+		J2S.db._DirectDatabaseCalls[domain] = null;
+	}
+
 	J2S._getDirectDatabaseCall = function(query, checkXhr2) {
 		if (checkXhr2 && !J2S.featureDetection.supportsXhr2())
 			return query;
@@ -620,6 +625,9 @@ if (!J2S._version)
 		// server-side processing of database queries was too slow and only
 		// useful for
 		// the IMAGE option, which has been abandoned.
+
+console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
+ 
 		var s = "?call=getRawDataFromDatabase&database="
 				+ database
 				+ (query.indexOf("?POST?") >= 0 ? "?POST?" : "")
@@ -750,6 +758,8 @@ if (!J2S._version)
 		return false;
 	}
 
+	var knownDomains = {};
+
 	J2S.getFileData = function(fileName, fSuccess, doProcess, info) {
 		if (info === true)
 			info = {isBinary: true};
@@ -776,22 +786,15 @@ if (!J2S._version)
 			fileName = "file://" + fileName.substring(5); // / fixes IE
 															// problem
 		var isFile = (fileName.indexOf("file://") == 0);
-		
 		var isMyHost = (fileName.indexOf("://") < 0 || fileName
 				.indexOf(document.location.protocol) == 0
 				&& fileName.indexOf(document.location.host) >= 0);
-		var isHttps2Http = (J2S._httpProto == "https://" && fileName
-				.indexOf("http://") == 0);
-		var isDirectCall = J2S._isDirectCall(fileName);
-		// if (fileName.indexOf("http://pubchem.ncbi.nlm.nih.gov/") ==
-		// 0)isDirectCall = false;
-
-		var cantDoSynchronousLoad = (!isMyHost && J2S
-				.$supportsIECrossDomainScripting());
+		var isHttps2Http = (J2S._httpProto == "https://" && fileName.indexOf("http://") == 0);
+		var cantDoSynchronousLoad = (!isMyHost && J2S.$supportsIECrossDomainScripting());
+		var mustCallHome = !isFile && (isHttps2Http || asBase64 || !fSuccess && cantDoSynchronousLoad);
+		var isNotDirectCall = !mustCallHome && !isFile && !isMyHost && !J2S._isDirectCall(fileName);
 		var data = null;
-		if (!isFile
-				&& (isHttps2Http || asBase64 || !isMyHost && !isDirectCall || !fSuccess
-						&& cantDoSynchronousLoad)) {
+		if (mustCallHome || isNotDirectCall) {
 			data = J2S._getRawDataFromServer("_", fileName, fSuccess, fSuccess,
 					asBase64, true, info);
 		} else {
@@ -2650,7 +2653,7 @@ if (!J2S._version)
 		// J2S.setDraggable(tag, target)
 		// J2S.setDraggable(tag, fTarget)
 
-		// draggable tag object simply loades/reports mouse position as
+		// draggable tag object simply loade=s/reports mouse position as
 		// fDown({x:x,y:y,dx:dx,dy:dy,ev:ev}) should fill x and y with starting
 		// points
 		// fDrag(xy) and fUp(xy) will get {x:x,y:y,dx:dx,dy:dy,ev:ev} to use as
@@ -2669,7 +2672,7 @@ if (!J2S._version)
 		// until the mouse is released.
 		// uses jQuery outside events - v1.1 - 3/16/2010 (see j2sJQueryExt.js)
 
-		// J2S.setDraggable(titlebar, frame.outerNode), for example, is issued
+		// J2S.setDraggable(titlebar, fGetFrameParent), for example, is issued
 		// in swingjs.plaf.JSFrameUI.js
 
 		var drag, up;
@@ -2769,10 +2772,9 @@ if (!J2S._version)
 						ev : ev
 					}, 506);
 				} else if (target) {
-					$(target(506)).css({
-						top : y + 'px',
-						left : x + 'px'
-					})
+					var frame = target(506, x, y);
+					if (frame)
+						$(frame).css({ top : y + 'px', left : x + 'px'})
 				}
 			}
 		}, up = function(ev) {

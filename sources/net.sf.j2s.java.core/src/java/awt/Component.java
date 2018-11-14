@@ -2872,7 +2872,7 @@ public abstract class Component
 	final void updateCursorImmediately() {
 		// this is the key method that updates a JComponent if there is 
 		// no layout manager -- for example, for a JDesktop. 
-		JSToolkit.setCursor(this, cursor);
+		//JSToolkit.setCursor(this, cursor);
 		// TODO
 		// if (peer instanceof LightweightPeer) {
 		// Container nativeContainer = getNativeContainer();

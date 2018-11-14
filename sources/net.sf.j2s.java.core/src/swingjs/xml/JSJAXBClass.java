@@ -17,13 +17,6 @@ import swingjs.api.Interface;
 
 class JSJAXBClass implements Cloneable {
 
-//	C$.__ANN__ = [[[null,'test.jaxb.Root_ORDERED.SomewhatComplex'],['@XmlAccessorType(XmlAccessType.FIELD)','@XmlType(name="MoreComplex",namespace="st.Olaf")']],
-//	              [['id','String'],['@XmlID','@XmlElement']],
-//	              [['ca','String'],['@XmlElement']],
-//	              [['cb','String'],['@XmlAttribute(namespace="www.jalview.org2")']],
-//	              [['bytes','byte[]'],['@XmlAttribute']]];
-//	            })()
-
 	final static int TYPE_NONE = 0;
 	final static int TYPE_FIELD = 1;
 	final static int TYPE_PUBLIC_MEMBER = 2;
@@ -85,15 +78,16 @@ class JSJAXBClass implements Cloneable {
 	List<String> seeAlso;
 
 	transient Object tagObject;
-	private String createName;
 	private boolean isInnerClass;
 
 	QName declaredTypeName;
 
 	private static String packageNamespace;
+	// TODO: allow for package accessor type. 
 	private static String packageAccessorType;
 
 	private final static Map<String, String> marshallerNamespacePrefixes = new Hashtable<String, String>();
+	@SuppressWarnings("rawtypes")
 	private final static Map<String, XmlAdapter> adapterMap = new HashMap<String, XmlAdapter>();
 
 	static void clearStatics() {
@@ -206,6 +200,10 @@ class JSJAXBClass implements Cloneable {
 	}
 
 	private void addField(JSJAXBField field) {
+		if (field.listFields != null) {
+			for (int i = field.listFields.size(); --i >= 0;)
+				addField(field.listFields.get(i));
+		}
 		fields.add(field);
 		if (isMarshaller && field.javaName != null)
 			marshallerFieldMap.put(field.javaName, field);
@@ -238,6 +236,7 @@ class JSJAXBClass implements Cloneable {
 		return prefix;
 	}
 
+	@SuppressWarnings("rawtypes")
 	static XmlAdapter getAdapter(String adapterClass) {
 		XmlAdapter adapter = adapterMap.get(adapterClass);
 		if (adapter == null && !adapterMap.containsKey(adapterClass)) {
@@ -280,6 +279,7 @@ class JSJAXBClass implements Cloneable {
 			return false;
 		try {
 			// Date does not have a class?
+			@SuppressWarnings("unused")
 			Class<?> cl = value.getClass();
 			return (/**
 					 * @j2sNative (value.$clazz$ ? !!value.$clazz$.__ANN__ : cl.$clazz$ ?
@@ -322,16 +322,29 @@ class JSJAXBClass implements Cloneable {
 			return this.qname = qname;
 		case JSJAXBField.TYPE_XML_TYPE:
 			return this.qname = qualifiedTypeName = qname;
+		default:
 		case JSJAXBField.TYPE_ATTRIBUTE:
 		case JSJAXBField.TYPE_ELEMENT:
 			return qname;
 		}
-		// not possible
-		return null;
 	}
 
 	private boolean haveXMLTypeNamespace = true;
 	
+	/**
+	 * Get the default namespace depending upon type. 
+	 * 
+	 * RootElement: packageNamespace unless the namespace has been set in the annotation
+	 * 
+	 * XMLType: the name from the RootElement
+	 * 
+	 * XMLAttribute: empty string (surprise!)
+	 * 
+	 * XMLElement: the enclosing class's XMLType, if it exists, or the package namespace
+	 * 
+	 * @param type
+	 * @return
+	 */
 	private String getDefaultNamespace(int type) {
 		switch (type) {
 		case JSJAXBField.TYPE_ROOT_ELEMENT:
@@ -341,11 +354,10 @@ class JSJAXBClass implements Cloneable {
 			return qname.getNamespaceURI();			
 		case JSJAXBField.TYPE_ATTRIBUTE:
 			return "";
+		default:
 		case JSJAXBField.TYPE_ELEMENT:
 			return (haveXMLTypeNamespace ? qname.getNamespaceURI() : packageNamespace);
 		}
-		// not possible
-		return null;
 	}
 
 	public JSJAXBClass clone() {

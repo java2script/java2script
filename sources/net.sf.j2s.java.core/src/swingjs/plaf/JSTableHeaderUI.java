@@ -115,6 +115,15 @@ public class JSTableHeaderUI extends JSLightweightUI {
 	}
 	
 
+	private boolean working;
+
+	@Override
+	public void setTainted() {
+		if (!working)
+			isTainted = true;
+	}
+
+
 	@Override
 	public DOMNode updateDOMNode() {
 		
@@ -726,6 +735,9 @@ public class JSTableHeaderUI extends JSLightweightUI {
 	        if (tableHeader.getColumnModel().getColumnCount() <= 0) {
 	            return;
 	        }
+	        
+	        working = true;
+
 	        boolean ltr = tableHeader.getComponentOrientation().isLeftToRight();
 
 	        Rectangle clip = g.getClipBounds();
@@ -792,6 +804,8 @@ public class JSTableHeaderUI extends JSLightweightUI {
 
 	        // Remove all components in the rendererPane.
 	        rendererPane.removeAll();
+
+	        working = false;
 	    }
 
 	    private Component getHeaderRenderer(int columnIndex) {

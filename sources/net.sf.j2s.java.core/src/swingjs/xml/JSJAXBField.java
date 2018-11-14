@@ -39,7 +39,11 @@ class JSJAXBField implements Cloneable {
 	DOMNode boundNode;
 	List<Object> boundListNodes;
 	QName qualifiedTypeName;
-	String unmarshallingClassName;
+	List<JSJAXBField> listFields;
+	List<Object> listValues;
+
+	JSJAXBField listOwner;
+	String defaultValue;
 
 	String xmlCharacterData = "";
 	String xmlAttributeData;
@@ -73,11 +77,10 @@ class JSJAXBField implements Cloneable {
 	String xmlSchemaType;
 	String typeAdapter;
 	String mimeType;
-    String enumValue;
+	String enumValue;
 	String mapClassNameKey;
 	String mapClassNameValue;
 	String listClassName;
-
 
 	boolean isTransient;
 	boolean isAttribute;
@@ -91,36 +94,118 @@ class JSJAXBField implements Cloneable {
 	boolean isContainer;
 
 	/// private only
-	
+
 	private Object methodSet;
 	private Object methodGet;
 	private boolean isMethod;
 
 	/// debugging only
-	
-	private int index;
-    private Object clazz; // for debugging only
 
+	private int index;
+	private Object clazz; // for debugging only
+
+	JSJAXBField(JSJAXBField listOwner) {
+		this.listOwner = listOwner;
+	}
 	
+	/**
+	 * @param jclass
+	 * @param adata
+	 * @param javaObject
+	 * @param javaObject2
+	 * @param index
+	 * @param propOrder
+	 */
+	JSJAXBField(JSJAXBClass jaxbClass, Object[][] adata, Object clazz, int index, List<String> propOrder) {
+		this.clazz = clazz;
+		this.index = index;
+		javaName = (String) adata[0][0];
+		isMethod = (javaName != null && javaName.charAt(1) == ':');
+		javaClassName = (String) adata[0][1];
+		holdsObjects = (isObject(javaClassName) ? SIMPLE_OBJECT : NO_OBJECT);
+		int pt = javaClassName.indexOf("<");
+		if (pt >= 0) {
+			isContainer = true;
+			String[] classNames = javaClassName.substring(pt + 1, javaClassName.lastIndexOf(">")).split(",");
+			fieldType = classNames.length;
+			for (int i = 0; i < fieldType; i++)
+				classNames[i] = stripJavaLang(classNames[i]);
+			// Map<String, Object>
+			// List<Object>
+			javaClassName = javaClassName.substring(0, pt);
+			switch (fieldType) {
+			case LIST:
+				if (isObject(listClassName = classNames[0]))
+					holdsObjects = LIST_OBJECT;
+
+				break;
+			case MAP:
+				if (isObject(mapClassNameKey = classNames[0]))
+					holdsObjects = MAP_KEY_OBJECT;
+				if (isObject(mapClassNameValue = classNames[1]))
+					holdsObjects += MAP_VALUE_OBJECT;
+				break;
+			}
+		}
+		isByteArray = javaClassName.equals("byte[]");
+		isArray = !isByteArray && javaClassName.indexOf("[]") >= 0;
+		if (isArray && holdsObjects == SIMPLE_OBJECT)
+			holdsObjects = ARRAY_OBJECT;
+		isContainer |= isArray;
+		if (isMethod)
+			getMethods(jaxbClass.getJavaObject(), clazz);
+		Map<String, String> attr = new Hashtable<String, String>();
+		text = "";
+		readAnnotations(jaxbClass, (String[]) adata[1], propOrder, attr);
+		// ensure that we have a qualified name if appropriate
+		finalizeNames(index, jaxbClass);
+	}
+
+	private void finalizeNames(int index, JSJAXBClass jaxbClass) {
+		if (xmlSchemaType == null && typeAdapter == null) {
+			if (javaClassName.equals("byte[]"))
+				xmlSchemaType = "base64Binary";
+			if (javaClassName.equals("javax.xml.datatype.XMLGregorianCalendar")
+					|| javaClassName.equals("java.util.Date"))
+				xmlSchemaType = "dateTime";
+		}
+		if (index == 0) {
+			qualifiedName = jaxbClass.finalizeFieldQName(qualifiedName, javaClassName, TYPE_ROOT_ELEMENT);
+			qualifiedTypeName = jaxbClass.finalizeFieldQName(qualifiedTypeName, javaClassName, TYPE_XML_TYPE);
+			jaxbClass.isAnonymous = (jaxbClass.qualifiedTypeName.getLocalPart().length() == 0);
+		} else {
+			if (javaName != null) {
+				if (qualifiedWrapName != null) {
+					qualifiedWrapName = jaxbClass.finalizeFieldQName(qualifiedWrapName, null, TYPE_ELEMENT);
+				}
+				qualifiedName = jaxbClass.finalizeFieldQName(qualifiedName, javaName,
+						(isAttribute ? TYPE_ATTRIBUTE : TYPE_ELEMENT));
+			}
+		}
+	}
+
+	private static String stripJavaLang(String name) {
+		return (name.startsWith("java.lang.")?  name.substring(10) : name);
+	}
 
 	/**
 	 * prior to re-use in unmarshalling
 	 * 
 	 */
-	public JSJAXBField clone() {		
+	public JSJAXBField clone() {
 		try {
 			JSJAXBField f = (JSJAXBField) super.clone();
-		// marshaller
-		f.mapEntryValue = null;
-		// unmarshaller
-		f.boundNode = null;
-		f.boundListNodes = null;
-		f.xmlCharacterData = "";
-		f.xmlAttributeData = null;
+			// marshaller
+			f.mapEntryValue = null;
+			// unmarshaller
+			f.boundNode = null;
+			f.boundListNodes = null;
+			f.xmlCharacterData = "";
+			f.xmlAttributeData = null;
 //		f.xmlAttributes = null;
-		f.xmlType = null;
-		f.isNil = false;
-		return f;
+			f.xmlType = null;
+			f.isNil = false;
+			return f;
 		} catch (CloneNotSupportedException e) {
 			return null;
 		}
@@ -151,78 +236,13 @@ class JSJAXBField implements Cloneable {
 		boundNode = node;
 	}
 
-	/**
-	 * @param jclass
-	 * @param adata
-	 * @param javaObject
-	 * @param javaObject2
-	 * @param index
-	 * @param propOrder
-	 */
-	JSJAXBField(JSJAXBClass jaxbClass, Object[][] adata, Object clazz, int index, List<String> propOrder) {
-		this.clazz = clazz;
-		this.index = index;
-		javaName = (String) adata[0][0];
-		isMethod = (javaName != null && javaName.charAt(1) == ':');
-		javaClassName = (String) adata[0][1];
-		holdsObjects = (isObject(javaClassName) ? SIMPLE_OBJECT : NO_OBJECT);
-		int pt = javaClassName.indexOf("<");
-		if (pt >= 0) {
-			isContainer = true;
-			String[] classNames = javaClassName.substring(pt + 1, javaClassName.lastIndexOf(">")).split(",");
-			fieldType = classNames.length;
-			for (int i = 0; i < fieldType; i++)
-				if (classNames[i].startsWith("java.lang."))
-					classNames[i] = classNames[i].substring(10);
-			// Map<String, Object>
-			// List<Object>
-			javaClassName = javaClassName.substring(0, pt);
-			switch (fieldType) {
-			case LIST:
-				if (isObject(listClassName = classNames[0]))
-					holdsObjects = LIST_OBJECT;
-
-				break;
-			case MAP:
-				if (isObject(mapClassNameKey = classNames[0]))
-					holdsObjects = MAP_KEY_OBJECT;
-				if (isObject(mapClassNameValue = classNames[1]))
-					holdsObjects += MAP_VALUE_OBJECT;
-				break;
-			}
-		}
-		isByteArray = javaClassName.equals("byte[]");
-		isArray = !isByteArray && javaClassName.indexOf("[]") >= 0;
-		if (isArray && holdsObjects == SIMPLE_OBJECT)
-			holdsObjects = ARRAY_OBJECT;
-		isContainer |= isArray;
-		if (isMethod)
-			getMethods(jaxbClass.getJavaObject(), clazz);
-		Map<String, String> attr = new Hashtable<String, String>();
-		text = "";
-		readAnnotations(jaxbClass, (String[]) adata[1], propOrder, attr);
-		// ensure that we have a qualified name if appropriate
-		setDefaults();
-		if (index == 0) {
-			qualifiedName = jaxbClass.finalizeFieldQName(qualifiedName, javaClassName, TYPE_ROOT_ELEMENT);
-			qualifiedTypeName = jaxbClass.finalizeFieldQName(qualifiedTypeName, javaClassName, TYPE_XML_TYPE);
-			jaxbClass.isAnonymous = (jaxbClass.qualifiedTypeName.getLocalPart().length() == 0);
-		} else {
-			if (javaName != null) {
-				if (qualifiedWrapName != null) {
-					qualifiedWrapName = jaxbClass.finalizeFieldQName(qualifiedWrapName, null, TYPE_ELEMENT);
-				}
-				qualifiedName = jaxbClass.finalizeFieldQName(qualifiedName, javaName, (isAttribute ? TYPE_ATTRIBUTE : TYPE_ELEMENT));
-			}
-		}
-	}
-
 	private static boolean isObject(String javaClassName) {
 		return javaClassName.equals("java.lang.Object") || javaClassName.equals("Object")
 				|| javaClassName.equals("Object[]");
 	}
 
-	private void readAnnotations(JSJAXBClass jaxbClass, String[] javaAnnotations, List<String> propOrder, Map<String, String> attr) {
+	private void readAnnotations(JSJAXBClass jaxbClass, String[] javaAnnotations, List<String> propOrder,
+			Map<String, String> attr) {
 		for (int i = 0; i < javaAnnotations.length; i++) {
 			String data = javaAnnotations[i];
 			text += data + ";";
@@ -230,7 +250,7 @@ class JSJAXBField implements Cloneable {
 			String tag = data.substring(0, (pt < 0 ? data.length() : pt));
 			tag = tag.replace("@javax.xml.bind.annotation.", "@");
 			data = (pt < 0 ? "" : data.substring(pt + 1, data.lastIndexOf(")")));
-			if (pt >= 0 && data.indexOf("=") >= 0)
+			if (pt >= 0 && !tag.equals("@XmlElements") && data.indexOf("=") >= 0)
 				addXMLAttributes(tag, data, attr);
 			if (javaName == null)
 				processTypeAnnotation(jaxbClass, tag, data, propOrder, attr);
@@ -239,18 +259,6 @@ class JSJAXBField implements Cloneable {
 		}
 	}
 
-	/**
-	 * Set a few defaults. The xmlSchema "hexBinary" does not work.
-	 */
-	private void setDefaults() {
-		if (xmlSchemaType == null && typeAdapter == null) {
-			if (javaClassName.equals("byte[]"))
-				xmlSchemaType = "base64Binary";
-			if (javaClassName.equals("javax.xml.datatype.XMLGregorianCalendar")
-					|| javaClassName.equals("java.util.Date"))
-				xmlSchemaType = "dateTime";
-		}
-	}
 
 	/**
 	 * The first element of the annotation entry is null:
@@ -262,12 +270,13 @@ class JSJAXBField implements Cloneable {
 	 * @param tag
 	 * @param data
 	 * @param propOrder
-	 * @param attr TODO
+	 * @param attr      TODO
 	 */
-	private void processTypeAnnotation(JSJAXBClass jaxbClass, String tag, String data, List<String> propOrder, Map<String, String> attr) {
+	private void processTypeAnnotation(JSJAXBClass jaxbClass, String tag, String data, List<String> propOrder,
+			Map<String, String> attr) {
 		// check package annotations
 		switch (tag) {
-		case "@XmlSchema": 
+		case "@XmlSchema":
 			return;
 		}
 
@@ -292,8 +301,7 @@ class JSJAXBField implements Cloneable {
 		case "@XmlAccessorType":
 			jaxbClass.accessorType = (data.indexOf("FIELD") >= 0 ? JSJAXBClass.TYPE_FIELD
 					: data.indexOf("MEMBER") >= 0 ? JSJAXBClass.TYPE_PUBLIC_MEMBER
-					: data.indexOf("PROPERTY") >= 0 ? JSJAXBClass.TYPE_PROPERTY
-					: JSJAXBClass.TYPE_NONE);
+							: data.indexOf("PROPERTY") >= 0 ? JSJAXBClass.TYPE_PROPERTY : JSJAXBClass.TYPE_NONE);
 			return;
 		case "@XmlSeeAlso":
 			// @XmlSeeAlso({Dog.class,Cat.class})
@@ -317,7 +325,7 @@ class JSJAXBField implements Cloneable {
 	 * @param jaxbClass
 	 * @param tag
 	 * @param data      what is in the (...)
-	 * @param attr 
+	 * @param attr
 	 */
 	private void processFieldAnnotation(JSJAXBClass jaxbClass, String tag, String data, Map<String, String> attr) {
 		switch (tag) {
@@ -330,11 +338,29 @@ class JSJAXBField implements Cloneable {
 			return;
 		case "@XmlAttribute":
 			isAttribute = true;
+			if (isContainer)
+				asList = true;
 			qualifiedName = getName(tag, attr);
 			return;
+		case "@XmlElements":
+			listFields = new ArrayList<JSJAXBField>();
+			return;
 		case "@XmlElement":
+			if (listFields != null) {
+				JSJAXBField f = new JSJAXBField(this);
+				listFields.add(f);
+				f.processFieldAnnotation(jaxbClass, tag, data, attr);
+				f.javaClassName = stripJavaLang(f.javaClassName).replace(".class",  "");
+				f.javaName = javaName + "::" + f.javaClassName;
+				f.finalizeNames(index, jaxbClass);
+				return;
+			}
 			qualifiedName = getName(tag, attr);
 			isNillable = "true".equals(attr.get("@XmlElement:nillable"));
+			defaultValue = attr.get("@XmlElement:defaultValue");
+			String type = attr.get("@XmlElement:type");
+			if (type != null)
+				javaClassName = type;
 			return;
 		case "@XmlSchemaType":
 			xmlSchemaType = attr.get("@XmlSchemaType:name");
@@ -494,10 +520,8 @@ class JSJAXBField implements Cloneable {
 
 	boolean isSimpleType(String javaClassName) {
 		return (javaClassName != null ? simplePackages(javaClassName)
-				: isNil || isAttribute 
-				|| asList || isByteArray 
-				|| isArray || qualifiedWrapName != null
-				|| simplePackages(this.javaClassName));
+				: isNil || asList || isByteArray || isArray || qualifiedWrapName != null ? true
+						: xmlType != null ? false : isAttribute || simplePackages(this.javaClassName));
 	}
 
 	static boolean simplePackages(String javaClassName) {
@@ -520,13 +544,16 @@ class JSJAXBField implements Cloneable {
 		}
 		return null;
 	}
+
 	/**
-	 * Check for methods in C$.$P$[] (private) and object[] (all others) 
+	 * Check for methods in C$.$P$[] (private) and object[] (all others)
 	 */
 	private void getMethods(Object javaObject, Object clazz) {
 		String methodName = javaName.substring(2);
-		Object[] pm = /** @j2sNative clazz.$P$ || */null;
-		Object[] jo = /** @j2sNative clazz.prototype || */null;
+		Object[] pm = /** @j2sNative clazz.$P$ || */
+				null;
+		Object[] jo = /** @j2sNative clazz.prototype || */
+				null;
 		// annotation can be on set... or get... or is...
 		// so we start by using get instead of set
 		// qualifications getXxxx$() and setXxxx$mytype_escaped(xxx)
@@ -540,7 +567,7 @@ class JSJAXBField implements Cloneable {
 			return;
 		}
 		if (isContainer)
-			return;		
+			return;
 		methodName = "set" + methodName.substring(methodName.startsWith("is") ? 2 : 3);
 		methodSet = findSetMethod(methodName, pm, jo);
 		if (methodSet == null) {
@@ -553,15 +580,14 @@ class JSJAXBField implements Cloneable {
 	 * There are rules here...
 	 * 
 	 * @param methodName
-	 * @param javaObject 
+	 * @param javaObject
 	 * @return
 	 */
 	private String getJavaNameFromMethodName(String methodName, Object javaObject) {
 		String javaName = methodName.substring(methodName.startsWith("is") ? 2 : 3, methodName.length());
 		String lcaseName = javaName.substring(0, 1).toLowerCase() + javaName.substring(1);
 		String name = null;
-		if (!isDefined(javaObject, name = javaName)
-				&& !isDefined(javaObject, name = lcaseName)
+		if (!isDefined(javaObject, name = javaName) && !isDefined(javaObject, name = lcaseName)
 				&& methodName.endsWith("Property")) {
 			if (!isDefined(javaObject, name = javaName.substring(javaName.length() - 8))
 					&& isDefined(javaObject, name = lcaseName.substring(javaName.length() - 8))) {
@@ -574,12 +600,13 @@ class JSJAXBField implements Cloneable {
 
 	private Object getMethod(String methodName, Object[] pm, Object[] jo) {
 		Object m = getMethodI(methodName, pm);
-		return (m != null || jo == null ? m 
+		return (m != null || jo == null ? m
 				: getMethodI(methodName.indexOf("$") < 0 ? methodName + "$" : methodName, jo));
 	}
 
 	private Object getMethodI(String methodName, Object[] a) {
-		return /** @j2sNative a && a[methodName] || */ null;
+		return /** @j2sNative a && a[methodName] || */
+		null;
 	}
 
 	/**
@@ -589,7 +616,8 @@ class JSJAXBField implements Cloneable {
 	 * @return
 	 */
 	private boolean isDefined(Object javaObject, String fieldName) {
-		return (/** @j2sNative javaObject && (typeof javaObject[fieldName] != "undefined") || */ false);
+		return (/** @j2sNative javaObject && (typeof javaObject[fieldName] != "undefined") || */
+		false);
 	}
 
 	/**
@@ -624,6 +652,25 @@ class JSJAXBField implements Cloneable {
 	 */
 	@SuppressWarnings("unused")
 	void setValue(Object value, Object javaObject) {
+		if (listOwner != null) {
+			listOwner.addValue(value);
+			return;
+		}
+		if (fieldType == LIST) {
+			List<Object> l = (List<Object>) getObject(javaObject);
+			if (l == null) {
+				l = new ArrayList<Object>();
+			} else {
+				l.clear();
+			}
+			Object[] a = (Object[]) value;
+			for (int i = 0, n = a.length; i < n; i++)
+				l.add(a[i]);
+			if (isMethod)
+				return;
+			value = l;
+		}
+
 		Object m = (isMethod ? methodSet : null);
 		String j = javaName;
 		/**
@@ -631,6 +678,12 @@ class JSJAXBField implements Cloneable {
 		 * 
 		 * 			if(m) m.apply(javaObject, [value]); else javaObject[j] = value;
 		 */
+	}
+
+	private void addValue(Object value) {
+		if (listValues == null)
+			listValues = new ArrayList<Object>();
+		listValues.add(value);
 	}
 
 	XmlAdapter getAdapter() {
@@ -661,32 +714,28 @@ class JSJAXBField implements Cloneable {
 	 * 
 	 */
 
-//  https://docs.oracle.com/cd/E13222_01/wls/docs103/webserv/data_types.html
+// https://www.w3.org/TR/xmlschema11-2/
+	
+	public static final String XML_SCHEMA_TYPES = ""
+// datetype:
+			+ ";duration;dateTime;time;date;gYearMonth;gYear;gMonthDay;gDay;gMonth;yearMonthDuration;dayTimeDuration;dateTimeStamp"
+//		    3.2 Special Built-in Datatypes
+			+ ";anySimpleType;anyAtomicType"
+			+ ";string;boolean;decimal;float;double;"// duration;dateTime;time
+//		    3.3 Primitive Datatypes    	
+			+ ";hexBinary;base64Binary;anyURI;QName;NOTATION" // date;gYearMonth;gYear;gMonthDay;gDay;gMonth;		
+//		    3.4 Other Built-in Datatypes
+			+ ";normalizedString;token;language;NMTOKEN;NMTOKENS;Name;NCName"
+			+ ";ID;IDREF;IDREFS;ENTITY;ENTITIES;integer;nonPositiveInteger;negativeInteger"
+			+ ";long;int;short;byte;nonNegativeInteger;unsignedLong;unsignedInt;unsignedShort"
+			+ ";unsignedByte;positiveInteger;"; // ;yearMonthDuration;dayTimeDuration;dateTimeStamp;
+
+//  see also https://docs.oracle.com/cd/E13222_01/wls/docs103/webserv/data_types.html
 
 //	XML Schema Data Type
 
-//	anySimpleType 		java.lang.Object (for xsd:element of this type)
-//	anySimpleType 		java.lang.String (for xsd:attribute of this type)
-//	base64Binary		byte[]
-//	boolean				boolean
-//	byte				byte
-//	date				javax.xml.datatype.XMLGregorianCalendar
-//	dateTime			javax.xml.datatype.XMLGregorianCalendar
-//	decimal				java.math.BigDecimal
-//	double				double
-//	duration			javax.xml.datatype.Duration
-//	float				float
-//	g					java.xml.datatype.XMLGregorianCalendar
-//	hexBinary			byte[]
-//	int					int
-//	integer				java.math.BigInteger
-//	long				long
-//	NOTATION			javax.xml.namespace.QName
-//	Qname				javax.xml.namespace.QName
-//	short				short
-//	string				java.lang.String
-//	time				java.xml.datatype.XMLGregorianCalendar
-//	unsignedByte		short
-//	unsignedInt			long	
-//	unsignedShort		int 
+	public static boolean isknownSchemaType(String xmlSchemaType) {
+		return PT.isOneOf(xmlSchemaType, XML_SCHEMA_TYPES);
+	}
+
 }

@@ -85,33 +85,33 @@ public class DefaultDesktopManager implements DesktopManager, java.io.Serializab
      * @param f the <code>JInternalFrame</code> to be removed
      */
     public void closeFrame(JInternalFrame f) {
-//        JDesktopPane d = f.getDesktopPane();
-//        if (d == null) {
-//            return;
-//        }
-//        boolean findNext = f.isSelected();
-//        Container c = f.getParent();
-//        JInternalFrame nextFrame = null;
-//        if (findNext) {
-//            nextFrame = d.getNextFrame(f);
-//            try { f.setSelected(false); } catch (PropertyVetoException e2) { }
-//        }
-//        if(c != null) {
-//            c.remove(f); // Removes the focus.
+        JDesktopPane d = f.getDesktopPane();
+        if (d == null) {
+            return;
+        }
+        boolean findNext = f.isSelected();
+        Container c = f.getParent();
+        JInternalFrame nextFrame = null;
+        if (findNext) {
+            nextFrame = d.getNextFrame(f);
+            try { f.setSelected(false); } catch (PropertyVetoException e2) { }
+        }
+        if(c != null) {
+            c.remove(f); // Removes the focus.
 //            c.repaint(f.getX(), f.getY(), f.getWidth(), f.getHeight());
-//        }
-//        removeIconFor(f);
-//        if(f.getNormalBounds() != null)
-//            f.setNormalBounds(null);
-//        if(wasIcon(f))
-//            setWasIcon(f, null);
-//        if (nextFrame != null) {
-//            try { nextFrame.setSelected(true); }
-//            catch (PropertyVetoException e2) { }
-//        } else if (findNext && d.getComponentCount() == 0) {
-//            // It was selected and was the last component on the desktop.
-//            d.requestFocus();
-//        }
+        }
+        removeIconFor(f);
+        if(f.getNormalBounds() != null)
+            f.setNormalBounds(null);
+        if(wasIcon(f))
+            setWasIcon(f, null);
+        if (nextFrame != null) {
+            try { nextFrame.setSelected(true); }
+            catch (PropertyVetoException e2) { }
+        } else if (findNext && d.getComponentCount() == 0) {
+            // It was selected and was the last component on the desktop.
+            d.requestFocus();
+        }
     }
 
     /**
