@@ -52,6 +52,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.MouseMotionListener;
 
+import javajs.api.JSFunction;
+import swingjs.JSToolkit;
+
 /**
  * Manages all the <code>ToolTips</code> in the system.
  * <p>
@@ -375,22 +378,23 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 			insideTimer.start();
 			tipShowing = true;
 		}
-//    	System.out.println("TTM showTipWindow2");
 	}
 
 	void hideTipWindow() {
 		if (tipWindow != null) {
-			// System.out.println("TTM hideTipWindow1");
 			if (window != null) {
 				window.removeMouseListener(this);
 				window = null;
 			}
-			tipWindow.hide();
+			@SuppressWarnings("unused")
+			Popup win = this.tipWindow;
+			// give this a few milliseconds, for continuity
+			JSToolkit.dispatch(/** @j2sNative function() {win.hide$()} || */null, 10, 0);
+//			tipWindow.hide();
 			tipWindow = null;
 			tipShowing = false;
 			tip = null;
 			insideTimer.stop();
-			// System.out.println("TTM hideTipWindow2");
 			enterTimer.stop();
 			exitTimer.stop();
 		}
@@ -645,6 +649,14 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 			mouseEvent = event;
 			if ((newText == null || newText.equals(toolTipText))
 					&& (newPreferredLocation == null || newPreferredLocation.equals(preferredLocation))) {
+				
+				
+				if (newText != null) {
+					enterTimer.restart();
+					return;
+				}
+
+				
 //				if (tipWindow != null) {
 //					System.out.println("restarting insideTimer");
 //					insideTimer.restart();
