@@ -1589,7 +1589,7 @@ public class JSComponentUI extends ComponentUI
 		//
 		boolean ltr = jc.getComponentOrientation().isLeftToRight();
 		boolean alignLeft, alignRight, centered, text0;
-		
+		String px0 = "0px";
 		if (menuAnchorNode == null) {
 			alignLeft = (align == SwingConstants.LEFT
 					|| align == (ltr ? SwingConstants.LEADING : SwingConstants.TRAILING));
@@ -1608,6 +1608,13 @@ public class JSComponentUI extends ComponentUI
 			alignRight = !ltr;
 			centered = false;
 			text0 = false;
+			if (alignRight) {
+				if (buttonNode != null) {
+					DOMNode.setStyles(buttonNode, "right","0");
+				} else {
+					System.out.println("HHHMMM");
+				}
+			}
 		}
 
 		String poslr = (alignRight ? "right" : "left");				

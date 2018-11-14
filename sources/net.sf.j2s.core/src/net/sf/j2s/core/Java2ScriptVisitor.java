@@ -3440,6 +3440,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		ASTNode classNode = (node == null ? null : getAbstractOrAnonymousParentForNode(node));
 		if (class_isAnonymousOrLocal || classNode != null && classNode.getParent() != null // CompilationUnit
 				&& classNode.getParent().getParent() != null) {
+			// not the top level, but "this" refers to this class
+			if (binding.getBinaryName().equals(class_typeBinding.getBinaryName()))
+				return ref;
 			// not the top level -- add the synthetic reference.
 			// anonymous and local will not have fully qualified names
 			return getSyntheticReference(getJavaClassNameQualified(binding));
@@ -6432,7 +6435,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				}
 				return;
 			default:
-				System.out.println(">>>addImplicitJAXB accessType: " + accessType + " f=" + fields.size() + " m=" + methods.size());
 				boolean isUnspecified = (accessType == JAXB_TYPE_UNSPECIFIED);
 				boolean publicOnly = (accessType == JAXB_TYPE_PUBLIC_MEMBER);
 				if (accessType != JAXB_TYPE_PROPERTY) {
