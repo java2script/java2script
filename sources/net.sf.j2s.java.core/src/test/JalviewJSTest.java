@@ -16,6 +16,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JRadioButtonMenuItem;
@@ -73,116 +74,129 @@ public class JalviewJSTest extends JPanel
      */
     Font font = new Font("Verdana", Font.PLAIN, 11);
 
-    JLabel l1 = new JLabel(getImage("test2.png"));
-    l1.setText("trailing right");
-    l1.setHorizontalTextPosition(SwingConstants.TRAILING);
-    l1.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
-    l1.setHorizontalAlignment(SwingConstants.RIGHT);
+//    JLabel l1 = new JLabel(getImage("test2.png"));
+//    l1.setText("trailing right");
+//    l1.setHorizontalTextPosition(SwingConstants.TRAILING);
+//    l1.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+//    l1.setHorizontalAlignment(SwingConstants.RIGHT);
+//
+//    JLabel l2 = new JLabel(getImage("test2.png"));
+//    l2.setText("leading left");
+//    l2.setFont(font);
+//    l2.setHorizontalTextPosition(SwingConstants.LEADING);
+//    l2.setHorizontalAlignment(SwingConstants.LEFT);
+//
+//    JButton b1 = new JButton("right left");
+//    b1.setIcon(getImage("test2.png"));
+//    b1.setFont(font);
+//    b1.setHorizontalTextPosition(SwingConstants.RIGHT);
+//    b1.setHorizontalAlignment(SwingConstants.LEFT);
+//
+//    firstColumn.add(l1);
+//    firstColumn.add(l2);
+//    firstColumn.add(b1);
 
-    JLabel l2 = new JLabel(getImage("test2.png"));
-    l2.setText("leading left");
-    l2.setFont(font);
-    l2.setHorizontalTextPosition(SwingConstants.LEADING);
-    l2.setHorizontalAlignment(SwingConstants.LEFT);
-
-    JButton b1 = new JButton("right left");
-    b1.setIcon(getImage("test2.png"));
-    b1.setFont(font);
-    b1.setHorizontalTextPosition(SwingConstants.RIGHT);
-    b1.setHorizontalAlignment(SwingConstants.LEFT);
-
-    firstColumn.add(l1);
-    firstColumn.add(l2);
-    firstColumn.add(b1);
+//    
+//    JCheckBox cb3 = new JCheckBox("leading,left-to-right,rt");
+//    cb3.setFont(font);
+//    cb3.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+//    cb3.setHorizontalTextPosition(SwingConstants.LEADING);
+//    cb3.setHorizontalAlignment(SwingConstants.TRAILING);
+//
+//    JCheckBox cb4 = new JCheckBox("leading,right-to-left");
+//    cb4.setFont(font);
+//    cb4.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+//    cb4.setHorizontalTextPosition(SwingConstants.LEADING);
+//
+//    JCheckBox cb5 = new JCheckBox("trailing,left-to-right");
+//    cb5.setFont(font);
+//    cb5.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+//    cb5.setHorizontalTextPosition(SwingConstants.TRAILING);
+//
+//    JRadioButton rb1 = new JRadioButton("trailing,right-to-left");
+//    rb1.setFont(font);
+//    rb1.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+//    rb1.setHorizontalTextPosition(SwingConstants.TRAILING);
+//
+//    JRadioButton rb2 = new JRadioButton("right,left-to-right");
+//    rb2.setFont(font);
+//    rb2.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+//    rb2.setHorizontalTextPosition(SwingConstants.RIGHT);
+//
+//    JRadioButton rb3 = new JRadioButton("right,r2l");
+//    rb3.setFont(font);
+//    rb3.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+//    rb3.setHorizontalTextPosition(SwingConstants.RIGHT);
+//
 
     
-    JCheckBox cb3 = new JCheckBox("leading,left-to-right,rt");
-    cb3.setFont(font);
-    cb3.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
-    cb3.setHorizontalTextPosition(SwingConstants.LEADING);
-    cb3.setHorizontalAlignment(SwingConstants.TRAILING);
-
-    JCheckBox cb4 = new JCheckBox("leading,right-to-left");
-    cb4.setFont(font);
-    cb4.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-    cb4.setHorizontalTextPosition(SwingConstants.LEADING);
-
-    JCheckBox cb5 = new JCheckBox("trailing,left-to-right");
-    cb5.setFont(font);
-    cb5.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
-    cb5.setHorizontalTextPosition(SwingConstants.TRAILING);
-
-    JRadioButton rb1 = new JRadioButton("trailing,right-to-left");
-    rb1.setFont(font);
-    rb1.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-    rb1.setHorizontalTextPosition(SwingConstants.TRAILING);
-
-    JRadioButton rb2 = new JRadioButton("right,left-to-right");
-    rb2.setFont(font);
-    rb2.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
-    rb2.setHorizontalTextPosition(SwingConstants.RIGHT);
-
-    JRadioButton rb3 = new JRadioButton("right,right-to-left");
-    rb3.setFont(font);
-    rb3.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-    rb3.setHorizontalTextPosition(SwingConstants.RIGHT);
-
-
-    
-    firstColumn.add(cb3);
-    firstColumn.add(cb4);
-    firstColumn.add(cb5);
-    firstColumn.add(rb1);
-    firstColumn.add(rb2);
-    firstColumn.add(rb3);
+//    firstColumn.add(cb3);
+//    firstColumn.add(cb4);
+//    firstColumn.add(cb5);
+//    firstColumn.add(rb1);
+//    firstColumn.add(rb2);
+//    firstColumn.add(rb3);
     firstColumn.setBounds(200, 20, 200, 500);
 
-    JCheckBoxMenuItem cb3m = new JCheckBoxMenuItem("leading,left-to-right");
-    cb3m.setFont(font);
-    cb3m.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
-    cb3m.setHorizontalTextPosition(SwingConstants.LEADING);
-
-    JCheckBoxMenuItem cb4m = new JCheckBoxMenuItem("leading,right-to-left");
-    cb4m.setFont(font);
-    cb4m.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-    cb4m.setHorizontalTextPosition(SwingConstants.LEADING);
-
-    JCheckBoxMenuItem cb5m = new JCheckBoxMenuItem("trailing,left-to-right");
-    cb5m.setFont(font);
-    cb5m.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
-    cb5m.setHorizontalTextPosition(SwingConstants.TRAILING);
-
-    JCheckBoxMenuItem cb6m = new JCheckBoxMenuItem("trailing,right-to-left");
-    cb6m.setFont(font);
-    cb6m.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-    cb6m.setHorizontalTextPosition(SwingConstants.TRAILING);
-
-    JRadioButtonMenuItem rb1m = new JRadioButtonMenuItem("trailing,right-to-left");
-    rb1m.setFont(font);
-    rb1m.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-    rb1m.setHorizontalTextPosition(SwingConstants.TRAILING);
-
-    JRadioButtonMenuItem rb2m = new JRadioButtonMenuItem("right,left-to-right");
-    rb2m.setFont(font);
-    rb2m.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
-    rb2m.setHorizontalTextPosition(SwingConstants.RIGHT);
-
-    JRadioButtonMenuItem rb3m = new JRadioButtonMenuItem("right,right-to-left");
+//    JCheckBoxMenuItem cb3m = new JCheckBoxMenuItem("leading,left-to-right");
+//    cb3m.setFont(font);
+//    cb3m.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+//    cb3m.setHorizontalTextPosition(SwingConstants.LEADING);
+//
+//    JCheckBoxMenuItem cb4m = new JCheckBoxMenuItem("leading,right-to-left");
+//    cb4m.setFont(font);
+//    cb4m.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+//    cb4m.setHorizontalTextPosition(SwingConstants.LEADING);
+//
+//    JCheckBoxMenuItem cb5m = new JCheckBoxMenuItem("trailing,left-to-right");
+//    cb5m.setFont(font);
+//    cb5m.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+//    cb5m.setHorizontalTextPosition(SwingConstants.TRAILING);
+//
+//    JCheckBoxMenuItem cb6m = new JCheckBoxMenuItem("trailing,right-to-left");
+//    cb6m.setFont(font);
+//    cb6m.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+//    cb6m.setHorizontalTextPosition(SwingConstants.TRAILING);
+//
+//    JRadioButtonMenuItem rb1m = new JRadioButtonMenuItem("trailing,right-to-left");
+//    rb1m.setFont(font);
+//    rb1m.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+//    rb1m.setHorizontalTextPosition(SwingConstants.TRAILING);
+//
+//    JRadioButtonMenuItem rb2m = new JRadioButtonMenuItem("right,left-to-right");
+//    rb2m.setFont(font);
+//    rb2m.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+//    rb2m.setHorizontalTextPosition(SwingConstants.RIGHT);
+//
+    JRadioButtonMenuItem rb3m = new JRadioButtonMenuItem("rr2l");
     rb3m.setFont(font);
     rb3m.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
     rb3m.setHorizontalTextPosition(SwingConstants.RIGHT);
 
+    JMenuItem mb3 = new JMenuItem("rtf");
+    mb3.setFont(font);
+    mb3.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+    mb3.setHorizontalTextPosition(SwingConstants.RIGHT);
+
+    JMenuItem mb4 = new JMenuItem("right,right-to-left");
+    mb4.setFont(font);
+    mb4.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+    mb4.setHorizontalTextPosition(SwingConstants.RIGHT);
+
+    
     JMenu m1 = new JMenu("left");
     JMenu m2 = new JMenu("right");
     menu.add(m1);
     menu.add(m2);
-    m1.add(cb3m);
-    m2.add(cb4m);
-    m1.add(cb5m);
-    m2.add(cb6m);
-    m2.add(rb1m);
-    m1.add(rb2m);
+//    m1.add(cb3m);
+//    m2.add(cb4m);
+//    m1.add(cb5m);
+//    m2.add(cb6m);
+//    m2.add(rb1m);
+//    m1.add(rb2m);
     m2.add(rb3m);
+    m2.add(mb3);
+    m2.add(mb4);
     
     JPanel theTab = new JPanel();
     
