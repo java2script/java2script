@@ -596,7 +596,7 @@ public class File
      * @since   JDK1.1
      */
     public String getCanonicalPath() throws IOException {
-    	return this.path;
+    	return this.path.replace('\\', '/');
 //        return fs.canonicalize(fs.resolve(this));
     }
 
@@ -1951,23 +1951,28 @@ public class File
         return false;
     }
 
-//    /**
-//     * Computes a hash code for this abstract pathname.  Because equality of
-//     * abstract pathnames is inherently system-dependent, so is the computation
-//     * of their hash codes.  On UNIX systems, the hash code of an abstract
-//     * pathname is equal to the exclusive <em>or</em> of the hash code
-//     * of its pathname string and the decimal value
-//     * <code>1234321</code>.  On Microsoft Windows systems, the hash
-//     * code is equal to the exclusive <em>or</em> of the hash code of
-//     * its pathname string converted to lower case and the decimal
-//     * value <code>1234321</code>.  Locale is not taken into account on
-//     * lowercasing the pathname string.
-//     *
-//     * @return  A hash code for this abstract pathname
-//     */
-//    public int hashCode() {
+    /**
+     * Computes a hash code for this abstract pathname.  Because equality of
+     * abstract pathnames is inherently system-dependent, so is the computation
+     * of their hash codes.  On UNIX systems, the hash code of an abstract
+     * pathname is equal to the exclusive <em>or</em> of the hash code
+     * of its pathname string and the decimal value
+     * <code>1234321</code>.  On Microsoft Windows systems, the hash
+     * code is equal to the exclusive <em>or</em> of the hash code of
+     * its pathname string converted to lower case and the decimal
+     * value <code>1234321</code>.  Locale is not taken into account on
+     * lowercasing the pathname string.
+     *
+     * @return  A hash code for this abstract pathname
+     */
+    public int hashCode() {
+    	try {
+			return this.getCanonicalPath().hashCode() | 1234321;
+		} catch (IOException e) {
+			return 0;
+		}
 //        return fs.hashCode(this);
-//    }
+    }
 
     /**
      * Returns the pathname string of this abstract pathname.  This is just the
