@@ -11327,10 +11327,19 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		return fSuccess;
 	}
 
-	J2S.getSetJavaFileCache = function(cache) {
+	J2S.getSetJavaFileCache = function(map) {
 		// called by swingjs.JSUtil
-		return (cache == null ? J2S._javaFileCache
-				: (J2S._javaFileCache = cache));
+		return (map == null ? J2S._javaFileCache
+				: (J2S._javaFileCache = map));
+	}
+
+	J2S.getCachedJavaFile = function(key) {
+		// called by swingjs.JSUtil
+		if (!J2S._javaFileCache) return null;
+		var data = J2S._javaFileCache.get$S(key);
+		if (data == null && key.indexOf("file:/") == 0)
+			data = J2S._javaFileCache.get$O(key.substring(6));
+		return data;
 	}
 
 	J2S._loadFileData = function(applet, fileName, fSuccess, fError, info) {
