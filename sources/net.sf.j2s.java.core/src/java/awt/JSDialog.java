@@ -229,6 +229,9 @@ public class JSDialog extends Window {
      public JSDialog(JSFrame owner) {
          this(owner, "", false);
      }
+     public JSDialog(Frame owner) {
+         this(owner, "", false);
+     }
 
     /**
      * Constructs an initially invisible <code>Dialog</code> with the specified
@@ -256,6 +259,10 @@ public class JSDialog extends Window {
          this(owner, "", modal);
      }
 
+     public JSDialog(Frame owner, boolean modal) {
+         this(owner, "", modal);
+     }
+
     /**
      * Constructs an initially invisible, modeless <code>Dialog</code> with
      * the specified owner <code>Frame</code> and title.
@@ -274,6 +281,10 @@ public class JSDialog extends Window {
      * @see Component#setVisible
      */
      public JSDialog(JSFrame owner, String title) {
+         this(owner, title, false);
+     }
+
+     public JSDialog(Frame owner, String title) {
          this(owner, title, false);
      }
 
@@ -304,6 +315,10 @@ public class JSDialog extends Window {
      * @see Component#setVisible
      */
      public JSDialog(JSFrame owner, String title, boolean modal) {
+         this(owner, title, modal ? Dialog.DEFAULT_MODALITY_TYPE : Dialog.ModalityType.MODELESS);
+     }
+
+     public JSDialog(Frame owner, String title, boolean modal) {
          this(owner, title, modal ? Dialog.DEFAULT_MODALITY_TYPE : Dialog.ModalityType.MODELESS);
      }
 
@@ -341,6 +356,11 @@ public class JSDialog extends Window {
          this(owner, title, modal ? Dialog.DEFAULT_MODALITY_TYPE : Dialog.ModalityType.MODELESS, gc);
      }
 
+     public JSDialog(Frame owner, String title, boolean modal,
+             GraphicsConfiguration gc) {
+    	 this(owner, title, modal ? Dialog.DEFAULT_MODALITY_TYPE : Dialog.ModalityType.MODELESS, gc);
+}
+
     /**
      * Constructs an initially invisible, modeless <code>Dialog</code> with
      * the specified owner <code>Dialog</code> and an empty title.
@@ -355,6 +375,10 @@ public class JSDialog extends Window {
      * @since 1.2
      */
      public JSDialog(JSDialog owner) {
+         this(owner, "", false);
+     }
+
+     public JSDialog(Dialog owner) {
          this(owner, "", false);
      }
 
@@ -375,6 +399,10 @@ public class JSDialog extends Window {
      * @since 1.2
      */
      public JSDialog(JSDialog owner, String title) {
+         this(owner, title, false);
+     }
+
+     public JSDialog(Dialog owner, String title) {
          this(owner, title, false);
      }
 
@@ -405,6 +433,10 @@ public class JSDialog extends Window {
      * @since 1.2
      */
      public JSDialog(JSDialog owner, String title, boolean modal) {
+         this(owner, title, modal ? Dialog.DEFAULT_MODALITY_TYPE : Dialog.ModalityType.MODELESS);
+     }
+
+     public JSDialog(Dialog owner, String title, boolean modal) {
          this(owner, title, modal ? Dialog.DEFAULT_MODALITY_TYPE : Dialog.ModalityType.MODELESS);
      }
 
@@ -444,6 +476,10 @@ public class JSDialog extends Window {
                    GraphicsConfiguration gc) {
          this(owner, title, modal ? Dialog.DEFAULT_MODALITY_TYPE : Dialog.ModalityType.MODELESS, gc);
      }
+
+	public JSDialog(Dialog owner, String title, boolean modal, GraphicsConfiguration gc) {
+		this(owner, title, modal ? Dialog.DEFAULT_MODALITY_TYPE : Dialog.ModalityType.MODELESS, gc);
+	}
 
     /**
      * Constructs an initially invisible, modeless <code>Dialog</code> with the

@@ -32,6 +32,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dialog;
+import java.awt.Frame;
 import java.awt.JSDialog;
 import java.awt.JSFrame;
 import java.awt.Graphics;
@@ -220,6 +221,10 @@ public class JDialog extends JSDialog implements WindowConstants,
         this(owner, false);
     }
 
+    public JDialog(Frame owner) {
+        this(owner, false);
+    }
+
     /**
      * Creates a dialog with the specified owner <code>Frame</code>, modality
      * and an empty title. If <code>owner</code> is <code>null</code>,
@@ -247,6 +252,10 @@ public class JDialog extends JSDialog implements WindowConstants,
         this(owner, null, modal);
     }
 
+    public JDialog(Frame owner, boolean modal) {
+        this(owner, null, modal);
+    }
+
     /**
      * Creates a modeless dialog with the specified title and
      * with the specified owner frame.  If <code>owner</code>
@@ -271,6 +280,10 @@ public class JDialog extends JSDialog implements WindowConstants,
      * @see JComponent#getDefaultLocale
      */
     public JDialog(JSFrame owner, String title) {
+        this(owner, title, false);
+    }
+
+    public JDialog(Frame owner, String title) {
         this(owner, title, false);
     }
 
@@ -310,6 +323,17 @@ public class JDialog extends JSDialog implements WindowConstants,
      * @see JComponent#getDefaultLocale
      */
     public JDialog(JSFrame owner, String title, boolean modal) {
+        super(owner == null? SwingUtilities.getSharedOwnerFrame() : owner,
+              title, modal);
+        if (owner == null) {
+            WindowListener ownerShutdownListener =
+                (WindowListener)SwingUtilities.getSharedOwnerFrameShutdownListener();
+            addWindowListener(ownerShutdownListener);
+        }
+        dialogInit();
+    }
+
+    public JDialog(Frame owner, String title, boolean modal) {
         super(owner == null? SwingUtilities.getSharedOwnerFrame() : owner,
               title, modal);
         if (owner == null) {
@@ -371,6 +395,16 @@ public class JDialog extends JSDialog implements WindowConstants,
         }
         dialogInit();
     }
+
+	public JDialog(Frame owner, String title, boolean modal, GraphicsConfiguration gc) {
+		super(owner == null ? SwingUtilities.getSharedOwnerFrame() : owner, title, modal, gc);
+		if (owner == null) {
+			WindowListener ownerShutdownListener = (WindowListener) SwingUtilities
+					.getSharedOwnerFrameShutdownListener();
+			addWindowListener(ownerShutdownListener);
+		}
+		dialogInit();
+	}
 
     /**
      * Creates a modeless dialog without a title with the

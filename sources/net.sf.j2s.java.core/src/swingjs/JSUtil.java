@@ -175,7 +175,7 @@ public class JSUtil {
 	}
 
 	static void cacheFileData(String path, Object data) {		
-		getFileCache().put(path,  data);
+		getFileCache().put(path, data);
 	}
 
 	/**

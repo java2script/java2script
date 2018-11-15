@@ -30,6 +30,7 @@ package javax.swing;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Frame;
 import java.awt.JSFrame;
 import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
@@ -184,6 +185,16 @@ public class JWindow extends Window implements RootPaneContainer {
 	 * @see JComponent#getDefaultLocale
 	 */
 	public JWindow(JSFrame owner) {
+		super(owner == null ? SwingUtilities.getSharedOwnerFrame() : owner);
+		if (owner == null) {
+			WindowListener ownerShutdownListener = (WindowListener) SwingUtilities
+					.getSharedOwnerFrameShutdownListener();
+			addWindowListener(ownerShutdownListener);
+		}
+		windowInit();
+	}
+
+	public JWindow(Frame owner) {
 		super(owner == null ? SwingUtilities.getSharedOwnerFrame() : owner);
 		if (owner == null) {
 			WindowListener ownerShutdownListener = (WindowListener) SwingUtilities
