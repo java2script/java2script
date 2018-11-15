@@ -7,6 +7,8 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.MediaTracker;
 import java.awt.MenuItem;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -23,13 +25,15 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 
 /**
  * A class with a main method entry point for ad hoc tests of JalviewJS
  * behaviour. The J2S transpiler should generate an html entry point for this
  * class, allowing comparison between Java and Javascript execution.
  */
-public class JalviewJSTest extends JPanel
+public class JalviewJSTest extends JPanel implements MenuListener, ItemListener
 {
   public static void main(String[] args)
   {
@@ -186,6 +190,7 @@ public class JalviewJSTest extends JPanel
     
     JMenu m1 = new JMenu("left");
     JMenu m2 = new JMenu("right");
+    m2.addMenuListener(this);
     menu.add(m1);
     menu.add(m2);
 //    m1.add(cb3m);
@@ -197,6 +202,7 @@ public class JalviewJSTest extends JPanel
     m2.add(rb3m);
     m2.add(mb3);
     m2.add(mb4);
+    mb4.addItemListener(this);
     
     JPanel theTab = new JPanel();
     
@@ -216,5 +222,30 @@ private ImageIcon getImage(String name) {
 		} catch (InterruptedException e) {
 		}
     return icon;
+}
+
+@Override
+public void menuSelected(MenuEvent e) {
+	System.out.println("menuSelected " + e.getSource().toString());
+	
+}
+
+@Override
+public void menuDeselected(MenuEvent e) {
+	System.out.println("menuDeselected " + e.getSource().toString());
+	
+	
+}
+
+@Override
+public void menuCanceled(MenuEvent e) {
+	System.out.println("menuCanceled " + e.getSource().toString());
+	
+}
+
+@Override
+public void itemStateChanged(ItemEvent e) {
+	System.out.println("itemStateChanged " + e.getItem());
+	
 }
 }
