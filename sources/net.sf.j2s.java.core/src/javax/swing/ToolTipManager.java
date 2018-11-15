@@ -665,8 +665,6 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 //					enterTimer.restart();
 //				}
 			} else {
-
-				System.out.println("starting new tip");
 				toolTipText = newText;
 				preferredLocation = newPreferredLocation;
 				if (showImmediately) {
