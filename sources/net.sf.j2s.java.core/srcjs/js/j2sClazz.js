@@ -5283,7 +5283,8 @@ if(lineNum>=0){
 });
 
 
-TypeError.prototype.getMessage$ || (TypeError.prototype.getMessage$ = function(){ return (this.stack ? this.stack : this.message || this.toString()) + (this.getStackTrace ? this.getStackTrace$() : Clazz._getStackTrace())});
+TypeError.prototype.getMessage$ || (TypeError.prototype.getMessage$ = TypeError.prototype.getLocalizedMessage$ 
+			= function(){ return (this.stack ? this.stack : this.message || this.toString()) + (this.getStackTrace ? this.getStackTrace$() : Clazz._getStackTrace())});
 TypeError.prototype.printStackTrace$ = function(){System.out.println(this + "\n" + this.stack)};
 TypeError.prototype.printStackTrace$java_io_PrintStream = function(stream){stream.println$S(e + "\n" + e.stack);};
 
