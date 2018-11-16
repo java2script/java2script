@@ -40,6 +40,8 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener
     new JalviewJSTest().doTest();
   }
 
+private JMenuItem mb5;
+
   /**
    * Put some content in a JFrame and show it
    */
@@ -187,6 +189,11 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener
     mb4.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
     mb4.setHorizontalTextPosition(SwingConstants.RIGHT);
 
+    mb5 = new JMenuItem("added");
+    mb5.setFont(font);
+    mb5.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+    mb5.setHorizontalTextPosition(SwingConstants.RIGHT);
+
     
     JMenu m1 = new JMenu("left");
     JMenu m2 = new JMenu("right");
@@ -227,8 +234,9 @@ private ImageIcon getImage(String name) {
 @Override
 public void menuSelected(MenuEvent e) {
 	System.out.println("menuSelected " + e.getSource().toString());
-	
-}
+	JMenu menu = (JMenu) e.getSource();
+	menu.add(mb5);
+}	
 
 @Override
 public void menuDeselected(MenuEvent e) {
