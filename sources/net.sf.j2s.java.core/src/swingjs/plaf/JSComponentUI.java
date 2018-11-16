@@ -335,7 +335,7 @@ public class JSComponentUI extends ComponentUI
 	 * panels
 	 * 
 	 */
-	protected boolean isContainer, isWindow, isRootPane, isContentPane;
+	protected boolean isContainer, isWindow, isRootPane, isContentPane, isPanel;
 
 	/**
 	 * linked nodes of this class
@@ -1085,7 +1085,7 @@ public class JSComponentUI extends ComponentUI
 				int h = getContainerHeight();
 				DOMNode.setSize(outerNode, w, h);
 				// not clear why this does not always work:
-				if (isContentPane)
+				if (isContentPane || isPanel)
 					DOMNode.setStyles(outerNode, "overflow", "hidden");
 			}
 			if (isRootPane) {
