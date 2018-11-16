@@ -43,6 +43,10 @@ public class JSComboBoxUI extends JSLightweightUI implements PropertyChangeListe
 			addJQueryFocusCallbacks();
 		}
 		populateList();
+		if (comboBox.isEnabled())
+			domNode.removeAttribute("disabled");
+		else
+			DOMNode.setAttr(domNode, "disabled", "true");			
     return domNode;
 	}
 
