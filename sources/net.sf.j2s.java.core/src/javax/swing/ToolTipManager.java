@@ -100,7 +100,7 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 
 	private FocusListener focusChangeListener = null;
 	private MouseMotionListener moveBeforeEnterListener = null;
-	private KeyListener accessibilityKeyListener = null;
+//	private KeyListener accessibilityKeyListener = null;
 
 	// PENDING(ges)
 	protected boolean lightWeightPopupEnabled = false; // BH 2018 true;
@@ -155,7 +155,7 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 		insideTimer.setRepeats(false);
 
 		moveBeforeEnterListener = new MoveBeforeEnterListener();
-		accessibilityKeyListener = new AccessibilityKeyListener();
+//		accessibilityKeyListener = new AccessibilityKeyListener();
 	}
 
 	/**
@@ -274,7 +274,13 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 	void showTipWindow() {
 		if (insideComponent == null || !insideComponent.isShowing())
 			return;
+		Component win = insideComponent.getTopLevelAncestor();
+		if (win instanceof Window) {
+			if (((Window) win).getModalBlocker() != null)
+				return;
+		}
 
+		
 //    	System.out.println("TTM showTipWindow1");
 
 //        String mode = UIManager.getString("ToolTipManager.enableToolTipMode");
@@ -432,8 +438,8 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 		component.addMouseListener(this);
 		component.removeMouseMotionListener(moveBeforeEnterListener);
 		component.addMouseMotionListener(moveBeforeEnterListener);
-		component.removeKeyListener(accessibilityKeyListener);
-		component.addKeyListener(accessibilityKeyListener);
+//		component.removeKeyListener(accessibilityKeyListener);
+	//	component.addKeyListener(accessibilityKeyListener);
 	}
 
 	/**
@@ -444,7 +450,7 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 	public void unregisterComponent(JComponent component) {
 		component.removeMouseListener(this);
 		component.removeMouseMotionListener(moveBeforeEnterListener);
-		component.removeKeyListener(accessibilityKeyListener);
+//		component.removeKeyListener(accessibilityKeyListener);
 	}
 
 	// implements java.awt.event.MouseListener
@@ -823,28 +829,28 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 		insideComponent = null;
 	}
 
-	/*
-	 * This listener is registered when the tooltip is first registered on a
-	 * component in order to process accessibility keybindings. This will apply
-	 * globally across L&F
-	 *
-	 * Post Tip: Ctrl+F1 Unpost Tip: Esc and Ctrl+F1
-	 */
-	private class AccessibilityKeyListener extends KeyAdapter {
-		public void keyPressed(KeyEvent e) {
-			if (!e.isConsumed()) {
-				JComponent source = (JComponent) e.getComponent();
-				if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-					if (tipWindow != null) {
-						hide(source);
-						e.consume();
-					}
-				} else if (e.getKeyCode() == KeyEvent.VK_F1 && e.getModifiers() == Event.CTRL_MASK) {
-					// Shown tooltip will be hidden
-					ToolTipManager.this.show(source);
-					e.consume();
-				}
-			}
-		}
-	}
+//	/*
+//	 * This listener is registered when the tooltip is first registered on a
+//	 * component in order to process accessibility keybindings. This will apply
+//	 * globally across L&F
+//	 *
+//	 * Post Tip: Ctrl+F1 Unpost Tip: Esc and Ctrl+F1
+//	 */
+//	private class AccessibilityKeyListener extends KeyAdapter {
+//		public void keyPressed(KeyEvent e) {
+//			if (!e.isConsumed()) {
+//				JComponent source = (JComponent) e.getComponent();
+//				if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+//					if (tipWindow != null) {
+//						hide(source);
+//						e.consume();
+//					}
+//				} else if (e.getKeyCode() == KeyEvent.VK_F1 && e.getModifiers() == Event.CTRL_MASK) {
+//					// Shown tooltip will be hidden
+//					ToolTipManager.this.show(source);
+//					e.consume();
+//				}
+//			}
+//		}
+//	}
 }
