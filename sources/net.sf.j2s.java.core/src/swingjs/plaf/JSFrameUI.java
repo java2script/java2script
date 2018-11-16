@@ -315,7 +315,9 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	  if (isModal) {
 		  if (b) {
 			  $(body).after(modalNode);
-			  int z = getZIndex(null) - 1;
+			  $(modalNode).addClass("swingjs-window"); // so as to slip into z-index ranking
+			  String sz = DOMNode.getStyle(domNode, "z-index");
+			  int z = (( /** @j2sNative +sz || */getZIndex(null))) - 1;
 			  DOMNode.setStyles(modalNode, "z-index", "" + z);
 		  }
 		  DOMNode.setVisible(modalNode, b);

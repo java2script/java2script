@@ -2843,7 +2843,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		}
 		z = (node.style.zIndex = (z > 0 ? zbase : z0));
 		node.style.position = "absolute";
-		if (J2S._checkLoading)
+		if (J2S._checkLoading) 
 			System.out.println("setting z-index to " + z + " for " + node.id);
 		return z;
 	}
