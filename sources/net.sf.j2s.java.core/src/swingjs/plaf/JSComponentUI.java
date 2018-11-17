@@ -697,6 +697,58 @@ public class JSComponentUI extends ComponentUI
 			System.out.println(id + " stateChange " + dumpEvent(e));
 	}
 
+
+	
+	private void updatePropertyAncestor(boolean fromButtonListener) {
+		if (fromButtonListener) {
+			setTainted();
+			setHTMLElement();
+		}
+		JComponent p = (JComponent) jc.getParent();
+		while (p != null) {
+			JSComponentUI parentui = (JSComponentUI) (p == null ? null : p.getUI());
+			if (parentui != null) {
+				parentui.setTainted();
+				if (fromButtonListener) {
+					parentui.setHTMLElement();
+					if (parentui.menu != null) {
+						((JSPopupMenuUI) parentui).updateMenu();
+					} else if (parentui.isPopupMenu && p.getParent() == null) {
+						p = (JComponent) ((JPopupMenu) p).getInvoker();
+						continue;
+					}
+				}
+			}
+			p = (JComponent) p.getParent();
+		}
+	}
+	
+	
+//	
+//	@Override
+//	public void propertyChange(PropertyChangeEvent e) {
+//		// old
+//		String prop = e.getPropertyName();
+//		if (prop == "ancestor") {
+//			JComponent p = (JComponent) jc.getParent();
+//			while (p != null) {
+//				JSComponentUI parentui = (JSComponentUI) (p == null ? null : p.getUI());
+//				if (parentui != null)
+//					parentui.setTainted();
+//				p = (JComponent) p.getParent();
+//			}
+//
+//			if (e.getNewValue() == null)
+//				return;
+//			if (isDisposed && c.visible && e.getNewValue() != null)
+//				setVisible(true);
+//		}
+//		propertyChangedCUI(prop);
+//	}
+//
+//	
+
+
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
@@ -710,32 +762,9 @@ public class JSComponentUI extends ComponentUI
 		propertyChangedCUI(prop);
 	}
 
-	private void updatePropertyAncestor(boolean fromButtonListener) {
-		if (fromButtonListener) {
-			setTainted();
-			setHTMLElement();
-		}
-		JComponent p = (JComponent) jc.getParent();
-		while (p != null) {
-			JSComponentUI parentui = (JSComponentUI) (p == null ? null : p.getUI());
-			if (parentui != null) {
-				parentui.setTainted();
-				parentui.setHTMLElement();
-				if (fromButtonListener) {
-					if (parentui.menu != null) {
-//						System.out.println(
-//								"ancestor " + fromButtonListener + " " + id + " " + parentui.id + " " + p.isVisible());
-						((JSPopupMenuUI) parentui).updateMenu();
-					} else if (parentui.isPopupMenu && p.getParent() == null) {
-						p = (JComponent) ((JPopupMenu) p).getInvoker();
-						continue;
-					}
-				}
-			}
-			p = (JComponent) p.getParent();
-		}
-	}
-
+	
+	
+	
 	/**
 	 * plaf ButtonListener and TextListener will call this to update common
 	 * properties such as "text".
@@ -748,6 +777,9 @@ public class JSComponentUI extends ComponentUI
 		propertyChangedCUI(prop);
 	}
 
+
+	
+	
 	protected void propertyChangedCUI(String prop) {
 		// don't want to update a menu until we have to, after its place is set
 		// and we know it is not a JMenuBar menu
@@ -808,6 +840,85 @@ public class JSComponentUI extends ComponentUI
 			System.out.println("JSComponentUI: unrecognized prop: " + this.id + " " + prop);
 	}
 
+	
+//	/**
+//	 * plaf ButtonListener and TextListener will call this to update common
+//	 * properties such as "text".
+//	 * 
+//	 * @param prop
+//	 */
+//	void propertyChangedFromListener(String prop) {
+//		propertyChangedCUI(prop);
+//	}
+
+	
+//
+//	protected void propertyChangedCUI(String prop) {
+//		// don't want to update a menu until we have to, after its place is set
+//		// and we know it is not a JMenuBar menu
+//		if (!isMenu)
+//			updateDOMNode();
+//		if (prop == "preferredSize") {
+//			// size has been set by JComponent layout
+//			preferredSize = c.getPreferredSize(); // may be null
+//			getPreferredSize();
+//			return;
+//		}
+//		if (prop == "background") {
+//			setBackground(c.getBackground());
+//			return;
+//		}
+//		if (prop == "foreground") {
+//			setForeground(c.getForeground());
+//			return;
+//		}
+//		if (prop == "opaque") {
+//			setBackground(c.getBackground());
+//			return;
+//		}
+//		if (prop == "inverted") {
+//			updateDOMNode();
+//			return;
+//		}
+//		if (prop == "text") {
+//			String val = ((AbstractButton) c).getText();
+//			if (val == null ? currentText != null : !val.equals(currentText))
+//				setIconAndText(prop, currentIcon, currentGap, (String) val);
+//			return;
+//		}
+//		if (prop == "iconTextGap") {
+//			if (iconNode != null) {
+//				int gap = ((AbstractButton) c).getIconTextGap();
+//				if (currentGap != gap)
+//					setIconAndText(prop, currentIcon, gap, currentText);
+//			}
+//			return;
+//		}
+//		if (prop == "icon") {
+//			if (iconNode != null) {
+//				// note that we use AbstractButton cast here just because
+//				// it has a getIcon() method. JavaScript will not care if
+//				// it is really a JLabel or JOptionPane, which also have icons
+//				ImageIcon icon = getIcon(c, null);
+//				if (icon == null ? currentIcon != null : !icon.equals(currentIcon))
+//					setIconAndText(prop, icon, currentGap, currentText);
+//			}
+//			return;
+//		}
+//		if (prop == "horizontalAlignment" || prop == "verticalAlignment") {
+//			setAlignment();
+//			return;
+//		}
+//		if (debugging)
+//			System.out.println("JSComponentUI: unrecognized prop: " + this.id + " " + prop);
+//	}
+//
+	
+	
+	
+	
+	
+	
 	private String createMsgs = "";
 
 	/**

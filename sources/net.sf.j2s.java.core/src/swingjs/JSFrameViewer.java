@@ -180,9 +180,12 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 	public Graphics getGraphics(int wNew, int hNew, RootPaneContainer window) {
 		if (window == null) // from, for example, a resize of the browser page
 			window = top;
+		if (window == null)
+			return null; // will be null from j2sApplet.js
+		
 		// technically, a JApplet is not a Window, but it is a Container and it is a
 		// RootPaneContainer
-		JSComponent c = (JSComponent) window; // will be null from j2sApplet.js
+		JSComponent c = (JSComponent) window; 
 		if (wNew == 0) {
 			wNew = Math.max(0, window.getContentPane().getWidth());
 			hNew = Math.max(0, window.getContentPane().getHeight());
