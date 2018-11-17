@@ -114,8 +114,8 @@ Swing.__getMenuStyle = function(applet) { return '\
 	.swingjsPopupMenu .ui-menu-icons .ui-menu-item a{position:relative;padding-left:2em}\
 	.swingjsPopupMenu .ui-icon{display:block;text-indent:-99999px;overflow:hidden;background-repeat:no-repeat;position:absolute;top:.2em;left:.2em}\
 	.swingjsPopupMenu .ui-menu-icon{position:static;float:right}\
-	.swingjsPopupMenu .ui-icon-carat-1-e{min-width:2ex;text-align:right;background-image:none;background-position:0 0}\
-	.swingjsPopupMenu .ui-icon-carat-1-e:after{content:"\\25B8"}\
+	.swingjsPopupMenu .ui-icon-carat-1-e{min-width:10ex;text-align:right;background-image:none;background-position:0 0}\
+	.swingjsPopupMenu .ui-icon-carat-1-e:after{content:"\\23F5"}\
 	.swingjsPopupMenu .ui-state-default{border:1px solid #c5dbec;background:#dfeffc;color:#2e6e9e}\
 	.swingjsPopupMenu .ui-state-default a{color:#2e6e9e;text-decoration:none}\
 	.swingjsPopupMenu .ui-state-hover,.swingjsPopupMenu .ui-state-focus{border:1px solid #79b7e7;background:#d0e5f5;color:#1d5987}\
