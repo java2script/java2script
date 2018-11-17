@@ -170,7 +170,8 @@ public class JSButtonUI extends JSLightweightUI {
 	}
 
 	protected void setupButton() {
-		setPadding(button.getMargin());
+		if (!isMenuItem)
+			setPadding(button.getMargin());
 		setIconAndText("button", (ImageIcon) button.getIcon(), button.getIconTextGap(), button.getText());
 		// "emptyBorder" is not really empty.
 		if (button.getBorder() == null || button.getBorder() == BorderFactory.emptyBorder)

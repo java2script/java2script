@@ -147,14 +147,16 @@ private JMenuItem mb5;
     firstColumn.add(rb3);
     firstColumn.setBounds(200, 20, 200, 500);
 
+    
+    font = new Font("Verdana", Font.PLAIN, 11);
+
     JMenuItem cb3m = new JMenuItem("Xleading,left-to-right");
     cb3m.setFont(font);
     cb3m.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
     cb3m.setHorizontalTextPosition(SwingConstants.LEADING);
 
     JCheckBoxMenuItem cb4m = new JCheckBoxMenuItem("Xleading,right-to-left");
-    cb4m.setFont(font);
-    
+    cb4m.setFont(font);    
     cb4m.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
     cb4m.setHorizontalTextPosition(SwingConstants.LEADING);
 
@@ -225,8 +227,10 @@ private JMenuItem mb5;
     });
 
     JMenu m1 = new JMenu("left");
+    m1.setFont(font);
     m1.addMenuListener(this);
     JMenu m2 = new JMenu("right");
+    m2.setFont(font);
     m2.addMenuListener(this);
     m1.add(cb4m);
     m1.add(cb3m);
@@ -241,8 +245,12 @@ private JMenuItem mb5;
     
     mb4.addItemListener(this);
     menu.add(m1);
-    menu.add(new JMenuItem("-"));
-    menu.add(new JMenuItem("testing"));
+    JMenuItem btn = new JMenuItem("-");
+    btn.setFont(font);
+    menu.add(btn);
+    btn=new JMenuItem("testing");
+    btn.setFont(font);
+    menu.add(btn);
     menu.add(m2);
 
 
