@@ -10,7 +10,8 @@ public class JSCheckBoxMenuItemUI extends JSCheckBoxUI {
 	public JSCheckBoxMenuItemUI() {
 		super();
 		isMenuItem = true;
-	}
+		actionItemOffset = "-7px";
+	} 
 	
 	@Override
 	protected String getPropertyPrefix() {
