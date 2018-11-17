@@ -13425,7 +13425,8 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		}, drag = function(ev) {
 			// we will move the frame's parent node and take the frame along
 			// with it
-			if (tag.isDragging && J2S._dmouseOwner == tag) {
+			var mode = (tag.isDragging ? 506 : 503);
+			if (!J2S._dmouseOwner || tag.isDragging && J2S._dmouseOwner == tag) {
 				x = pageX0 + (dx = ev.pageX - pageX);
 				y = pageY0 + (dy = ev.pageY - pageY);
 				if (fDrag) {
@@ -13435,9 +13436,9 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 						dx : dx,
 						dy : dy,
 						ev : ev
-					}, 506);
+					}, mode);
 				} else if (target) {
-					var frame = target(506, x, y);
+					var frame = target(mode, x, y);
 					if (frame)
 						$(frame).css({ top : y + 'px', left : x + 'px'})
 				}

@@ -29,6 +29,7 @@ package swingjs.plaf;
 
 //import java.awt.Canvas;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 
 import javajs.api.JSFunction;
 import java.awt.Color;
@@ -190,6 +191,8 @@ public class JSSplitPaneUI extends JSPanelUI {
 
 	private int pressedLocation;
 
+	private boolean isHorizontal;
+
 	// /**
 	// * Creates a new BasicSplitPaneUI instance
 	// */
@@ -224,10 +227,12 @@ public class JSSplitPaneUI extends JSPanelUI {
 	}
 
 	protected void fHandleDrag(Object xyev, int type) {
-		boolean isHorizontal = (splitPane.getOrientation() == JSplitPane.HORIZONTAL_SPLIT);
-		if (cursor == null)
-			cursor = Toolkit.getDefaultToolkit().createCustomCursor(null, null, isHorizontal ? "col-resize" : "row-resize");
+		isHorizontal = (splitPane.getOrientation() == JSplitPane.HORIZONTAL_SPLIT);
+		getCursor();
 		switch (type) {
+		case MouseEvent.MOUSE_MOVED:
+			divider.setCursor(cursor);
+			break;
 		case MouseEvent.MOUSE_PRESSED:
 			this.xyev = xyev;
 			this.pressedLocation = splitPane.getDividerLocation();
@@ -235,7 +240,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 			DOMNode.setCursor(getCursorName(cursor), null);
 			break;
 		case MouseEvent.MOUSE_DRAGGED:
-			int d = this.pressedLocation + /** @j2sNative (isHorizontal ? xyev.dx : xyev.dy) || */ 0;
+			int d = this.pressedLocation + /** @j2sNative (this.isHorizontal ? xyev.dx : xyev.dy) || */ 0;
 			int max = getMaximumDividerLocation(splitPane);
 			int min = getMinimumDividerLocation(splitPane);
 			d = Math.max(min, Math.min(max, d));
@@ -248,10 +253,18 @@ public class JSSplitPaneUI extends JSPanelUI {
 		}
 	}	
 	
+	private Cursor getCursor() {
+		if (cursor == null) {
+			cursor = Toolkit.getDefaultToolkit().createCustomCursor(null, null, isHorizontal ? "col-resize" : "row-resize");
+		}
+		return cursor;
+	}
+
 	private void setupDivider() {
 		divider = new SplitPaneDivider(this); 
 		JSFunction fDrag = null;
 		JSSplitPaneUI me = this;
+
 		/**
 		 * @j2sNative
 		 * 
