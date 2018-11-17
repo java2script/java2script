@@ -35,6 +35,7 @@ import javax.swing.AbstractButton;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants.*;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
@@ -110,6 +111,8 @@ public class JSComponentUI extends ComponentUI
 
 	private static final Color rootPaneColor = new Color(238, 238, 238);
 
+	private static final int MENUITEM_OFFSET = 11;
+
 	final J2SInterface J2S = JSUtil.J2S;
 	/**
 	 * provides a unique id for any component; set on instantiation
@@ -156,6 +159,8 @@ public class JSComponentUI extends ComponentUI
 	public JComponent getTargetParent() {
 		return targetParent;
 	}
+
+	protected JPopupMenu menu;
 
 	// MouseInputListener mouseInputListener;
 
@@ -335,7 +340,7 @@ public class JSComponentUI extends ComponentUI
 	 * panels
 	 * 
 	 */
-	protected boolean isContainer, isWindow, isRootPane, isContentPane;
+	protected boolean isContainer, isWindow, isRootPane, isContentPane, isPanel;
 
 	/**
 	 * linked nodes of this class
@@ -392,6 +397,8 @@ public class JSComponentUI extends ComponentUI
 	protected boolean allowTextAlignment = true;
 
 	private JQuery jquery = JSUtil.getJQuery();
+
+	protected boolean isPopupMenu;
 
 	public JSComponentUI() {
 		setDoc();
@@ -693,21 +700,40 @@ public class JSComponentUI extends ComponentUI
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
-		if (prop == "ancestor") {			
-			JComponent p = (JComponent) jc.getParent();
-			while (p != null) {
-			JSComponentUI parentui = (JSComponentUI) (p == null ? null : p.getUI());
-			if (parentui != null)
-				parentui.setTainted();
-			p = (JComponent) p.getParent();
-			}
-			
+		if (prop == "ancestor") {
+			updatePropertyAncestor(false);
 			if (e.getNewValue() == null)
 				return;
 			if (isDisposed && c.visible && e.getNewValue() != null)
 				setVisible(true);
 		}
 		propertyChangedCUI(prop);
+	}
+
+	private void updatePropertyAncestor(boolean fromButtonListener) {
+		if (fromButtonListener) {
+			setTainted();
+			setHTMLElement();
+		}
+		JComponent p = (JComponent) jc.getParent();
+		while (p != null) {
+			JSComponentUI parentui = (JSComponentUI) (p == null ? null : p.getUI());
+			if (parentui != null) {
+				parentui.setTainted();
+				parentui.setHTMLElement();
+				if (fromButtonListener) {
+					if (parentui.menu != null) {
+//						System.out.println(
+//								"ancestor " + fromButtonListener + " " + id + " " + parentui.id + " " + p.isVisible());
+						((JSPopupMenuUI) parentui).updateMenu();
+					} else if (parentui.isPopupMenu && p.getParent() == null) {
+						p = (JComponent) ((JPopupMenu) p).getInvoker();
+						continue;
+					}
+				}
+			}
+			p = (JComponent) p.getParent();
+		}
 	}
 
 	/**
@@ -717,6 +743,8 @@ public class JSComponentUI extends ComponentUI
 	 * @param prop
 	 */
 	void propertyChangedFromListener(String prop) {
+		if (prop == "ancestor")
+			updatePropertyAncestor(true);
 		propertyChangedCUI(prop);
 	}
 
@@ -876,8 +904,10 @@ public class JSComponentUI extends ComponentUI
 		System.out.println(DOMNode.getAttr(d, "outerHTML"));
 	}
 
-	protected static void vCenter(DOMNode obj, int offset) {
-		DOMNode.setStyles(obj, "top", "50%", "transform", "translateY(" + offset + "%)");
+	protected static void vCenter(DOMNode obj, int offset, float scale) {
+		DOMNode.setStyles(obj, "top", "50%", "transform", 
+				(scale > 0 ? "scale(" + scale + "," + scale + ")" : "")
+				+"translateY(" + offset + "%)");
 	}
 
 	/**
@@ -1085,7 +1115,7 @@ public class JSComponentUI extends ComponentUI
 				int h = getContainerHeight();
 				DOMNode.setSize(outerNode, w, h);
 				// not clear why this does not always work:
-				if (isContentPane)
+				if (isContentPane || isPanel)
 					DOMNode.setStyles(outerNode, "overflow", "hidden");
 			}
 			if (isRootPane) {
@@ -1535,6 +1565,8 @@ public class JSComponentUI extends ComponentUI
 
 	private Object dropTarget = this; // unactivated
 
+	protected String actionItemOffset;
+
 	protected void setJSDimensions(int width, int height) {
 		if (jsActualWidth > 0)
 			width = jsActualWidth;
@@ -1565,6 +1597,8 @@ public class JSComponentUI extends ComponentUI
 		
 		
 		int wIcon = Math.max(0, setHTMLSize1(iconNode, false, false).width - 1);
+		if (isMenuItem && actionNode != null)
+			wIcon = 15;
 		int wText = setHTMLSize1(textNode, false, false).width - 1;
 
 		// But we need to slightly underestimate it so that the
@@ -1611,8 +1645,6 @@ public class JSComponentUI extends ComponentUI
 			if (alignRight) {
 				if (buttonNode != null) {
 					DOMNode.setStyles(buttonNode, "right","0");
-				} else {
-					System.out.println("HHHMMM");
 				}
 			}
 		}
@@ -1626,7 +1658,7 @@ public class JSComponentUI extends ComponentUI
 		DOMNode.setStyles(centeringNode, poslr, "0px", "text-align", alignlr);
 		//if (buttonNode != null) {
 			DOMNode.setStyles(domNode, "text-align", null, "left", null, "right", null);
-			DOMNode.setStyles(domNode, "text-align", alignlr, poslr, "0px");
+			DOMNode.setStyles(domNode, "text-align", alignlr, poslr, px0);
 		//}
 		if (centered) {
 			int w = (buttonNode == null ? 
@@ -1646,7 +1678,7 @@ public class JSComponentUI extends ComponentUI
 				DOMNode.setStyles(iconNode, poslr, wText + "px");
 			} else {
 				DOMNode.setStyles(textNode, poslr, (wIcon) + "px");
-				DOMNode.setStyles(iconNode, poslr, "0px");
+				DOMNode.setStyles(iconNode, poslr, (!isMenuItem ? "0px" : ltr ? actionItemOffset : "-3px"));
 			}
 		} 
 		
@@ -1691,8 +1723,11 @@ public class JSComponentUI extends ComponentUI
 			if (icon != null)
 				canAlignIcon = true;
 		} else {
-			if (icon == null) {
+			if (icon == null) {				
 				canAlignText = allowTextAlignment;
+				if (iconNode != null && isMenuItem && actionNode == null && text != null) {
+					DOMNode.addHorizontalGap(iconNode, gap + MENUITEM_OFFSET);
+				}
 			} else {
 				// vCenter(imageNode, 10); // perhaps? Not sure if this is a
 				// good idea

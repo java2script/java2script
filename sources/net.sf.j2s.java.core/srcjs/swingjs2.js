@@ -11327,10 +11327,19 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		return fSuccess;
 	}
 
-	J2S.getSetJavaFileCache = function(cache) {
+	J2S.getSetJavaFileCache = function(map) {
 		// called by swingjs.JSUtil
-		return (cache == null ? J2S._javaFileCache
-				: (J2S._javaFileCache = cache));
+		return (map == null ? J2S._javaFileCache
+				: (J2S._javaFileCache = map));
+	}
+
+	J2S.getCachedJavaFile = function(key) {
+		// called by Jmol FileManager
+		if (!J2S._javaFileCache) return null;
+		var data = J2S._javaFileCache.get$O(key);
+		if (data == null && key.indexOf("file:/") == 0)
+			data = J2S._javaFileCache.get$O(key.substring(6));
+		return data;
 	}
 
 	J2S._loadFileData = function(applet, fileName, fSuccess, fError, info) {
@@ -13490,7 +13499,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		}
 		z = (node.style.zIndex = (z > 0 ? zbase : z0));
 		node.style.position = "absolute";
-		if (J2S._checkLoading)
+		if (J2S._checkLoading) 
 			System.out.println("setting z-index to " + z + " for " + node.id);
 		return z;
 	}
@@ -18821,7 +18830,8 @@ if(lineNum>=0){
 });
 
 
-TypeError.prototype.getMessage$ || (TypeError.prototype.getMessage$ = function(){ return (this.stack ? this.stack : this.message || this.toString()) + (this.getStackTrace ? this.getStackTrace$() : Clazz._getStackTrace())});
+TypeError.prototype.getMessage$ || (TypeError.prototype.getMessage$ = TypeError.prototype.getLocalizedMessage$ 
+			= function(){ return (this.stack ? this.stack : this.message || this.toString()) + (this.getStackTrace ? this.getStackTrace$() : Clazz._getStackTrace())});
 TypeError.prototype.printStackTrace$ = function(){System.out.println(this + "\n" + this.stack)};
 TypeError.prototype.printStackTrace$java_io_PrintStream = function(stream){stream.println$S(e + "\n" + e.stack);};
 

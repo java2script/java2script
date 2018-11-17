@@ -45,6 +45,8 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 
 	private Graphics2D graphics;
 
+	private Object dialogBlocker;
+
 	/*
 	 * Not Lightweight; an independent space with RootPane, LayeredPane,
 	 * ContentPane, (optional) MenuBar, and GlassPane
@@ -103,13 +105,16 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 		if (debugging)
 			System.out.println("window to front for " + id);
 		z = J2S.setWindowZIndex(domNode, Integer.MAX_VALUE);
+		if (modalNode != null)
+			DOMNode.setZ(modalNode, z - 1);
 	}
 
 	@Override
 	public void toBack() {
 		System.out.println("window to back for " + id);
 		z = J2S.setWindowZIndex(domNode, Integer.MIN_VALUE);
-		
+		if (modalNode != null)
+			DOMNode.setZ(modalNode, z - 1);		
 	}
 
 	@Override
@@ -133,6 +138,12 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 	@Override
 	public void setModalBlocked(Dialog blocker, boolean blocked) {
 		JSDialog b = ((JSDialog) (Object) blocker);
+		dialogBlocker = (blocked ? b : null);
+	}
+
+	@Override
+	public void setModalBlocked(JSDialog blocker, boolean blocked) {
+		dialogBlocker = (blocked ? blocker : null);
 	}
 
 	@Override

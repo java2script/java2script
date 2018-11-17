@@ -21,6 +21,7 @@ public class JSMenuUI extends JSMenuItemUI {
 			isMenuItem = !((JMenu) jc).isTopLevelMenu();
 			if (isMenuItem) {
 				containerNode = domNode = createItem("_menu", null);
+				DOMNode.addJqueryHandledEvent(this, domNode, "mouseenter mouseleave");			
 			} else {
 //				DOMNode labelNode = newDOMObject("label", id);
 				domNode = createItem("_item", null);
@@ -35,6 +36,34 @@ public class JSMenuUI extends JSMenuItemUI {
 		DOMNode.setVisible(domNode, jc.isVisible());
 		return domNode;
 	}
+
+	@Override
+	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
+		String type = "";
+		// we use == here because this will be JavaScript
+		if (target == domNode) {
+			/**
+			 * @j2sNative
+			 * 
+			 * 			type = jQueryEvent.type;
+			 * 
+			 */
+			{
+			}
+			if (eventType == -1) {
+				if (type.equals("mouseenter")) {
+					((JMenu) jc).setSelected(true);
+					return true;
+				}
+				if (type.equals("mouseleave")) {
+					((JMenu) jc).setSelected(false);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 
 	@Override
 	public void installUI(JComponent jc) {

@@ -1450,9 +1450,11 @@ public class Container extends JSComponent {
 		@Deprecated
     public void layout() {
     	// called by Component and Container
-        if (this.layoutMgr != null && this.width > 0 && this.height > 0) {
-        	this.layoutMgr.layoutContainer(this);
-        }
+    	// The reason we don't care about w&h is that 
+    	// we can be working just with preferences here. 
+    	// This is when getPreferredSize() is copied to getSize()
+        if (layoutMgr != null)//BH out 11/16/18 && this.width > 0 && this.height > 0) {
+        	layoutMgr.layoutContainer(this);
     }
 
     /**

@@ -12,6 +12,7 @@ import java.awt.JSDialog;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.Frame;
 import java.awt.JSFrame;
 import java.awt.GraphicsConfiguration;
 import java.awt.Image;
@@ -525,6 +526,16 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	}
 
 	@Override
+	protected FramePeer createFrame(Frame target) {
+		ComponentUI ui = target.getUI();
+		if (ui == null)
+			return null;
+  	if (JSUtil.debugging)
+  		System.out.println("JSToolkit creating Frame Peer for " +  target.getClass().getName() + ": " + target.getClass().getName());
+		return (FramePeer) ((WindowPeer) ui).setFrame(target, true);
+	}
+
+	@Override
 	public WindowPeer createWindow(Window target) {
 		ComponentUI ui = target.getUI();
 		if (ui == null)
@@ -932,6 +943,13 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		return (PrintJob) (Object) job;
 	}
 	
+	@Override
+	public PrintJob getPrintJob(Frame frame, String jobtitle, Properties props) {
+		JSPrintJob job = (JSPrintJob) JSUtil.getInstance("swingjs.JSPrintJob");
+		job.setProperties(jobtitle, props);
+		return (PrintJob) (Object) job;
+	}
+
 	/**
 	 * Get a gnu.jpdf.PDFJob.
 	 * 
@@ -939,6 +957,14 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	 */
 	@Override
 	public PrintJob getPrintJob(JSFrame frame, String jobtitle,
+			JobAttributes jobAttributes, PageAttributes pageAttributes) {
+		JSPrintJob job = (JSPrintJob) JSUtil.getInstance("swingjs.JSPrintJob");
+		job.setAttributes(jobtitle, jobAttributes, pageAttributes);
+		return (PrintJob) (Object) job;
+	}
+
+	@Override
+	public PrintJob getPrintJob(Frame frame, String jobtitle,
 			JobAttributes jobAttributes, PageAttributes pageAttributes) {
 		JSPrintJob job = (JSPrintJob) JSUtil.getInstance("swingjs.JSPrintJob");
 		job.setAttributes(jobtitle, jobAttributes, pageAttributes);
@@ -963,5 +989,6 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 			focusManager = new JSFocusManager();
 		return focusManager;
 	}
+
 
 }

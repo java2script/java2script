@@ -1364,13 +1364,13 @@ public class Window extends JComponent {
     }
 
     void setModalBlocked(JSDialog blocker, boolean blocked, boolean peerCall) {
-//        this.modalBlocker = blocked ? blocker : null;
-//        if (peerCall) {
-//            WindowPeer peer = (WindowPeer)this.peer;
-//            if (peer != null) {
-//                peer.setModalBlocked(blocker, blocked);
-//            }
-//        }
+        this.modalBlocker = blocked ? blocker : null;
+        if (peerCall) {
+            WindowPeer peer = (WindowPeer)this.peer;
+            if (peer != null) {
+                peer.setModalBlocked(blocker, blocked);
+            }
+        }
     }
 
     void setModalBlocked(Dialog blocker, boolean blocked, boolean peerCall) {

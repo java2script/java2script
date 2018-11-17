@@ -13,7 +13,7 @@ public class JSPanelUI extends JSLightweightUI {
 
 	int frameZ = 10000;
 	public JSPanelUI() {
-		isContainer = true;
+		isContainer = isPanel = true;
 		setDoc();
 	}
 	

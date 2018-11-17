@@ -2,6 +2,7 @@ package swingjs.plaf;
 
 
 import java.awt.Dimension;
+import java.beans.PropertyChangeEvent;
 
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
@@ -27,6 +28,7 @@ public class JSMenuItemUI extends JSButtonUI {
 		}
 		// add code here for adjustments when changes in bounds or other properties occur.
 		DOMNode.setVisible(domNode, jc.isVisible());
+		setupButton();
 		return domNode;
 	}
 
@@ -48,4 +50,17 @@ public class JSMenuItemUI extends JSButtonUI {
         "MenuItem.font");		
 	}
 	
+	@Override
+	public void propertyChange(PropertyChangeEvent e) {
+		super.propertyChange(e);
+		String prop = e.getPropertyName();
+		if (jc.isVisible()) {
+			if (prop == "ancestor") {
+				if (jc.getParent() != null) {
+					((JSComponentUI) jc.getParent().getUI()).setHTMLElement();
+				}
+			}
+		}
+	}
+
 }
