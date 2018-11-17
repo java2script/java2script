@@ -93,9 +93,9 @@ public class JSRadioButtonUI extends JSButtonUI {
 		DOMNode.setStyles(textNode, "position", null);
 		Dimension dim = null;
 		dim = setHTMLSize1(wrap("div", "", iconNode, textNode), false, false);
+		vCenter(iconNode, (actionNode == null ? -15 : isMenuItem ? -110 : -75), isMenuItem ? 0.6f : 0);
+		vCenter(textNode, -50, 0);
 		setHorizontalButtonAlignments(b, b.getHorizontalTextPosition(), b.getHorizontalAlignment());
-		vCenter(iconNode, (actionNode == null ? -15 : -75));
-		vCenter(textNode, -50);
 		if (!isMenuItem) { // only problem here is menu width 
 		}
 		buttonNode.appendChild(textNode);

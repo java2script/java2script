@@ -20,8 +20,6 @@ public class JSPopupMenuUI extends JSPanelUI {
 	// a frameless independent window
 	
 	static JSSwingMenu j2sSwingMenu;
-	private JPopupMenu menu;
-
 
 	public JSPopupMenuUI() {
 		
@@ -31,6 +29,7 @@ public class JSPopupMenuUI extends JSPanelUI {
 		}
 		isContainer = true;	
 		isMenuItem = true;
+		isPopupMenu = true;
 		setDoc();
 	}
 	
@@ -48,7 +47,8 @@ public class JSPopupMenuUI extends JSPanelUI {
 
 	@Override
 	public void installUI(JComponent jc) {
-    LookAndFeel.installColorsAndFont(jc,
+		
+      LookAndFeel.installColorsAndFont(jc,
         "PopupMenu.background",
         "PopupMenu.foreground",
         "PopupMenu.font");
@@ -71,8 +71,10 @@ public class JSPopupMenuUI extends JSPanelUI {
 		if (menu == null) {
 			// important to do this here, not earlier?
 			menu = (JPopupMenu) jc;
-			j2sSwingMenu.setMenu(menu);
+			setTainted();
 		}
+		if (isTainted)
+			j2sSwingMenu.setMenu(menu);
 		if (b) {
 			jc.addNotify();
 //			jc.repackContainer();
@@ -108,5 +110,10 @@ public class JSPopupMenuUI extends JSPanelUI {
 		return null;
 	}
 
+	public void updateMenu() {
+		setTainted();
+		setHTMLElement();
+		JSPopupMenuUI.j2sSwingMenu.updateMenu(menu);
+	}
 
 }
