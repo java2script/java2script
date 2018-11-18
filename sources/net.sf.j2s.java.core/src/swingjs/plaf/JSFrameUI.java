@@ -54,8 +54,8 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		frameZ += 1000;
 		z = frameZ;
 		isContainer = true;
-		defaultHeight = 0;
-		defaultWidth = 0;
+		defaultHeight = 500;
+		defaultWidth = 500;
 		setDoc();
 	}
 
