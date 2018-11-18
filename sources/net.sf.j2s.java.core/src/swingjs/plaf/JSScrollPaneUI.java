@@ -192,13 +192,13 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 
 	@Override
 	public void paint(Graphics g, JComponent c) {
-		checkTextAreaHeight();
-// unnecessary		updateScrollBarExtents();
-		Border vpBorder = scrollpane.getViewportBorder();
-		if (vpBorder != null) {
-			Rectangle r = scrollpane.getViewportBorderBounds();
-			vpBorder.paintBorder(scrollpane, g, r.x, r.y, r.width, r.height);
-		}
+//		checkTextAreaHeight();
+//// unnecessary		updateScrollBarExtents();
+//		Border vpBorder = scrollpane.getViewportBorder();
+//		if (vpBorder != null) {
+//			Rectangle r = scrollpane.getViewportBorderBounds();
+//			vpBorder.paintBorder(scrollpane, g, r.x, r.y, r.width, r.height);
+//		}
 	}
 
 //	private void updateScrollBarExtents() {

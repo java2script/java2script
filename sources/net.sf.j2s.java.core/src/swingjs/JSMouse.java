@@ -183,7 +183,7 @@ public class JSMouse {
 		// clearKeyBuffer();
 		// clickedCount is not reliable on some platforms
 		// so we will just deal with it ourselves
-		mouseAction(MouseEvent.MOUSE_CLICKED, time, x, y, 1, modifiers, 0);
+		mouseAction(MouseEvent.MOUSE_CLICKED, time, x, y, clickCount, modifiers, 0);
 	}
 
 	private boolean isCtrlShiftMouseDown; // Macintosh may not recognize CTRL-SHIFT-LEFT as
@@ -278,7 +278,7 @@ public class JSMouse {
 				extended == InputEvent.META_DOWN_MASK ||
 				JSToolkit.isMac && extended == (InputEvent.CTRL_DOWN_MASK | InputEvent.BUTTON1_DOWN_MASK));
 		int button = getButton(modifiers);
-		int count = updateClickCount(id, time, x, y);
+		int count = (xcount > 1 && id == MouseEvent.MOUSE_CLICKED ? xcount : updateClickCount(id, time, x, y));
 
 		Component source = viewer.getTopComponent(); // may be a JFrame
 		MouseEvent e;

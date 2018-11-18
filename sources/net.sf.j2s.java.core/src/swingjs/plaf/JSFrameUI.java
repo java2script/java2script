@@ -54,8 +54,8 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		frameZ += 1000;
 		z = frameZ;
 		isContainer = true;
-		defaultHeight = 500;
-		defaultWidth = 500;
+		defaultHeight = 0;
+		defaultWidth = 0;
 		setDoc();
 	}
 
@@ -76,6 +76,8 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			// page too much.
 			// a Windows applet has a sort of fuzzy shadowy border
 			domNode = frameNode = newDOMObject("div", id + "_frame");
+			if (isDummyFrame)
+				return domNode;
 			DOMNode.setStyles(frameNode, "box-shadow", "0px 0px 10px gray", "box-sizing", "content-box");
 			setWindowClass();
 			int w = c.getWidth();
@@ -227,7 +229,9 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	public void installUI(JComponent jc) {
 		super.installUI(jc); 
 		// jc is really JFrame, even though JFrame is not a JComponent
-		frame = (JFrame) c;		
+		frame = (JFrame) c;	
+		isDummyFrame = frame.getClass().getName().equals("javax.swing.SwingUtilities$SharedOwnerFrame");
+		
 		 LookAndFeel.installColors(jc,
 		 "Frame.background",
 		 "Frame.foreground");
@@ -294,7 +298,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 
 	@Override
 	public Insets getInsets() {
-		return jc.getFrameViewer().getInsets();
+		return (isDummyFrame ? null : jc.getFrameViewer().getInsets());
 	}
 
 	@Override
@@ -311,6 +315,8 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 
 	@Override
 	public void setVisible(boolean b) {
+		if (isDummyFrame)
+			b = false;
 	  super.setVisible(b);
 	  if (isModal) {
 		  if (b) {

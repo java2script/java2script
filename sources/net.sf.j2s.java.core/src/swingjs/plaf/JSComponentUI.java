@@ -295,6 +295,8 @@ public class JSComponentUI extends ComponentUI
 	// */
 	// private boolean zeroWidth;
 
+	protected boolean isDummyFrame;
+	
 	/**
 	 * indicates that in a toolbar, this component should use its preferred size for
 	 * min and max
@@ -1190,6 +1192,10 @@ public class JSComponentUI extends ComponentUI
 		if (!isTainted)
 			return outerNode;
 
+		if (isDummyFrame) {
+			isTainted = false;
+			return (outerNode = DOMNode.createElement("div", "dummyFrame"));
+		}
 		updateDOMNode();
 		checkTransparent(domNode);
 		Component[] children = getChildren();

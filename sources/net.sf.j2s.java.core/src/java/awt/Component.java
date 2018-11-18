@@ -2884,7 +2884,8 @@ public abstract class Component
 		// cPeer.updateCursorImmediately();
 		// }
 		// } else if (peer != null) {
-		 peer.updateCursorImmediately();
+		if (peer != null)
+			peer.updateCursorImmediately();
 		// }
 	}
 
