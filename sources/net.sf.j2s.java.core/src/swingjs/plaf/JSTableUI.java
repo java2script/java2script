@@ -133,9 +133,10 @@ public class JSTableUI extends JSPanelUI {
 		case "rowSorter":
 		case "sorter":
 		case "autoResizeMode":
-		case "model":
+//		case "model":
 			return;
 		}
+		System.out.println("JTableUI property not handled: " + prop);
 		super.propertyChange(e);
 	}
 
@@ -1260,30 +1261,30 @@ public class JSTableUI extends JSPanelUI {
 	            boolean grabFocus = true;
 	            dragStarted = false;
 
-//	            if (canStartDrag() && DragRecognitionSupport.mousePressed(e)) {
-//
-//	                dragPressDidSelection = false;
-//
-//	                if (e.isControlDown() && isFileList) {
-//	                    // do nothing for control - will be handled on release
-//	                    // or when drag starts
-//	                    return;
-//	                } else if (!e.isShiftDown() && table.isCellSelected(pressedRow, pressedCol)) {
-//	                    // clicking on something that's already selected
-//	                    // and need to make it the lead now
-//	                    table.getSelectionModel().addSelectionInterval(pressedRow,
-//	                                                                   pressedRow);
-//	                    table.getColumnModel().getSelectionModel().
-//	                        addSelectionInterval(pressedCol, pressedCol);
-//
-//	                    return;
-//	                }
-//
-//	                dragPressDidSelection = true;
-//
-//	                // could be a drag initiating event - don't grab focus
-//	                grabFocus = false;
-//	            } else 
+	            if (canStartDrag()) {// && DragRecognitionSupport.mousePressed(e)) {
+
+	                dragPressDidSelection = false;
+
+	                if (e.isControlDown() && isFileList) {
+	                    // do nothing for control - will be handled on release
+	                    // or when drag starts
+	                    return;
+	                } else if (!e.isShiftDown() && table.isCellSelected(pressedRow, pressedCol)) {
+	                    // clicking on something that's already selected
+	                    // and need to make it the lead now
+	                    table.getSelectionModel().addSelectionInterval(pressedRow,
+	                                                                   pressedRow);
+	                    table.getColumnModel().getSelectionModel().
+	                        addSelectionInterval(pressedCol, pressedCol);
+
+	                    return;
+	                }
+
+	                dragPressDidSelection = true;
+
+	                // could be a drag initiating event - don't grab focus
+	                grabFocus = false;
+	            } else 
 	            	
 	            	if (!isFileList) {
 	                // When drag can't happen, mouse drags might change the selection in the table
@@ -1384,39 +1385,40 @@ public class JSTableUI extends JSPanelUI {
 	        }
 
 	        private void mouseReleasedDND(MouseEvent e) {
-//	            MouseEvent me = DragRecognitionSupport.mouseReleased(e);
-//	            if (me != null) {
-//	                SwingUtilities2.adjustFocus(table);
-//	                if (!dragPressDidSelection) {
-//	                    adjustSelection(me);
-//	                }
-//	            }
-//
-//	            if (!dragStarted) {
-//	                if (isFileList) {
-//	                    maybeStartTimer();
-//	                    return;
-//	                }
-//
-//	                Point p = e.getPoint();
-//
-//	                if (pressedEvent != null &&
-//	                        table.rowAtPoint(p) == pressedRow &&
-//	                        table.columnAtPoint(p) == pressedCol &&
-//	                        table.editCellAt(pressedRow, pressedCol, pressedEvent)) {
-//
-//	                    setDispatchComponent(pressedEvent);
-//	                    repostEvent(pressedEvent);
-//
-//	                    // This may appear completely odd, but must be done for backward
-//	                    // compatibility reasons. Developers have been known to rely on
-//	                    // a call to shouldSelectCell after editing has begun.
-//	                    CellEditor ce = table.getCellEditor();
-//	                    if (ce != null) {
-//	                        ce.shouldSelectCell(pressedEvent);
-//	                    }
-//	                }
-//	            }
+	            MouseEvent me = e;//DragRecognitionSupport.mouseReleased(e);
+	            if (me != null) {
+	                SwingUtilities2.adjustFocus(table);
+	                if (!dragPressDidSelection) {
+	                    adjustSelection(me);
+	                }
+	            }
+
+	            if (!dragStarted) {
+	                if (isFileList) {
+	                    maybeStartTimer();
+	                    return;
+	                }
+
+	                Point p = e.getPoint();
+
+	                if (pressedEvent != null &&
+	                        table.rowAtPoint(p) == pressedRow &&
+	                        table.columnAtPoint(p) == pressedCol &&
+	                        table.editCellAt(pressedRow, pressedCol, pressedEvent)) {
+
+	                    setDispatchComponent(pressedEvent);
+	                    repostEvent(pressedEvent);
+
+	                    // This may appear completely odd, but must be done for backward
+	                    // compatibility reasons. Developers have been known to rely on
+	                    // a call to shouldSelectCell after editing has begun.
+	                    CellEditor ce = table.getCellEditor();
+	                    if (ce != null) {
+	                        ce.shouldSelectCell(pressedEvent);
+	                    }
+	                }
+	            }
+	            repaintTable();
 	        }
 
 	        public void mouseEntered(MouseEvent e) {}
@@ -1442,12 +1444,14 @@ public class JSTableUI extends JSPanelUI {
 	            if (SwingUtilities2.shouldIgnore(e, table)) {
 	                return;
 	            }
-//
-//	            if (table.getDragEnabled() &&
-//	                    (DragRecognitionSupport.mouseDragged(e, this) || dragStarted)) {
-//
-//	                return;
-//	            }
+
+	            if (table.getDragEnabled()
+//	            		&& (DragRecognitionSupport.mouseDragged(e, this) || 
+//	                    		dragStarted)
+	            		) {
+
+	                return;
+	            }
 
 	            repostEvent(e);
 
@@ -1488,7 +1492,8 @@ public class JSTableUI extends JSPanelUI {
 	                    header.setComponentOrientation(
 	                            (ComponentOrientation)event.getNewValue());
 	                }
-//	            } else if ("dropLocation" == changeName) {
+	            } else if ("dropLocation" == changeName) {
+	            	repaintTable();
 //	                JTable.DropLocation oldValue = (JTable.DropLocation)event.getOldValue();
 //	                repaintDropLocation(oldValue);
 //	                repaintDropLocation(table.getDropLocation());
@@ -2275,57 +2280,59 @@ public class JSTableUI extends JSPanelUI {
 	    }
 
 	    private void paintDraggedArea(Graphics g, int rMin, int rMax, TableColumn draggedColumn, int distance) {
-	        int draggedColumnIndex = viewIndexForColumn(draggedColumn);
-
-	        Rectangle minCell = table.getCellRect(rMin, draggedColumnIndex, true);
-	        Rectangle maxCell = table.getCellRect(rMax, draggedColumnIndex, true);
-
-	        Rectangle vacatedColumnRect = minCell.union(maxCell);
-
-	        // Paint a gray well in place of the moving column.
-	        g.setColor(table.getParent().getBackground());
-	        g.fillRect(vacatedColumnRect.x, vacatedColumnRect.y,
-	                   vacatedColumnRect.width, vacatedColumnRect.height);
-
-	        // Move to the where the cell has been dragged.
-	        vacatedColumnRect.x += distance;
-
-	        // Fill the background.
-	        g.setColor(table.getBackground());
-	        g.fillRect(vacatedColumnRect.x, vacatedColumnRect.y,
-	                   vacatedColumnRect.width, vacatedColumnRect.height);
-
-	        // Paint the vertical grid lines if necessary.
-	        if (table.getShowVerticalLines()) {
-	            g.setColor(table.getGridColor());
-	            int x1 = vacatedColumnRect.x;
-	            int y1 = vacatedColumnRect.y;
-	            int x2 = x1 + vacatedColumnRect.width - 1;
-	            int y2 = y1 + vacatedColumnRect.height - 1;
-	            // Left
-	            g.drawLine(x1-1, y1, x1-1, y2);
-	            // Right
-	            g.drawLine(x2, y1, x2, y2);
-	        }
-
-	        for(int row = rMin; row <= rMax; row++) {
-	            // Render the cell value
-	            Rectangle r = table.getCellRect(row, draggedColumnIndex, false);
-	            r.x += distance;
-	            paintCell(g, r, row, draggedColumnIndex);
-
-	            // Paint the (lower) horizontal grid line if necessary.
-	            if (table.getShowHorizontalLines()) {
-	                g.setColor(table.getGridColor());
-	                Rectangle rcr = table.getCellRect(row, draggedColumnIndex, true);
-	                rcr.x += distance;
-	                int x1 = rcr.x;
-	                int y1 = rcr.y;
-	                int x2 = x1 + rcr.width - 1;
-	                int y2 = y1 + rcr.height - 1;
-	                g.drawLine(x1, y2, x2, y2);
-	            }
-	        }
+        	setTainted();
+        	setHTMLElement();
+//	        int draggedColumnIndex = viewIndexForColumn(draggedColumn);
+//
+//	        Rectangle minCell = table.getCellRect(rMin, draggedColumnIndex, true);
+//	        Rectangle maxCell = table.getCellRect(rMax, draggedColumnIndex, true);
+//
+//	        Rectangle vacatedColumnRect = minCell.union(maxCell);
+//
+//	        // Paint a gray well in place of the moving column.
+//	        g.setColor(table.getParent().getBackground());
+//	        g.fillRect(vacatedColumnRect.x, vacatedColumnRect.y,
+//	                   vacatedColumnRect.width, vacatedColumnRect.height);
+//
+//	        // Move to the where the cell has been dragged.
+//	        vacatedColumnRect.x += distance;
+//
+//	        // Fill the background.
+//	        g.setColor(table.getBackground());
+//	        g.fillRect(vacatedColumnRect.x, vacatedColumnRect.y,
+//	                   vacatedColumnRect.width, vacatedColumnRect.height);
+//
+//	        // Paint the vertical grid lines if necessary.
+//	        if (table.getShowVerticalLines()) {
+//	            g.setColor(table.getGridColor());
+//	            int x1 = vacatedColumnRect.x;
+//	            int y1 = vacatedColumnRect.y;
+//	            int x2 = x1 + vacatedColumnRect.width - 1;
+//	            int y2 = y1 + vacatedColumnRect.height - 1;
+//	            // Left
+//	            g.drawLine(x1-1, y1, x1-1, y2);
+//	            // Right
+//	            g.drawLine(x2, y1, x2, y2);
+//	        }
+//
+//	        for(int row = rMin; row <= rMax; row++) {
+//	            // Render the cell value
+//	            Rectangle r = table.getCellRect(row, draggedColumnIndex, false);
+//	            r.x += distance;
+//	            paintCell(g, r, row, draggedColumnIndex);
+//
+//	            // Paint the (lower) horizontal grid line if necessary.
+//	            if (table.getShowHorizontalLines()) {
+//	                g.setColor(table.getGridColor());
+//	                Rectangle rcr = table.getCellRect(row, draggedColumnIndex, true);
+//	                rcr.x += distance;
+//	                int x1 = rcr.x;
+//	                int y1 = rcr.y;
+//	                int x2 = x1 + rcr.width - 1;
+//	                int y2 = y1 + rcr.height - 1;
+//	                g.drawLine(x1, y2, x2, y2);
+//	            }
+//	        }
 	    }
 
 	private void paintCell(Graphics g, Rectangle cellRect, int row, int column) {
@@ -2440,5 +2447,10 @@ public class JSTableUI extends JSPanelUI {
 //
 	    
 	    
+		public void repaintTable() {
+        	setTainted();
+        	setHTMLElement();
+		}
+
 
 }

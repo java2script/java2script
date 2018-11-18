@@ -230,7 +230,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		super.installUI(jc); 
 		// jc is really JFrame, even though JFrame is not a JComponent
 		frame = (JFrame) c;	
-		isDummyFrame = frame.getClass().getName().equals("javax.swing.SwingUtilities$SharedOwnerFrame");
+		isDummyFrame = /** @j2sNative jc.__CLASS_NAME__ == "javax.swing.SwingUtilities.SharedOwnerFrame" || */false;
 		
 		 LookAndFeel.installColors(jc,
 		 "Frame.background",

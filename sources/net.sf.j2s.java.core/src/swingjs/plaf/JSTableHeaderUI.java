@@ -552,6 +552,8 @@ public class JSTableHeaderUI extends JSLightweightUI {
 	     * @since 1.6
 	     */
 	    protected void rolloverColumnUpdated(int oldColumn, int newColumn) {
+	    	setTainted();
+	    	setHTMLElement();
 	    }
 
 	    private void updateRolloverColumn(MouseEvent e) {
