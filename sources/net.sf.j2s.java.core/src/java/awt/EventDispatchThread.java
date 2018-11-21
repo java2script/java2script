@@ -96,8 +96,8 @@ class EventDispatchThread extends JSThread {
 			}
 		};
 		JSThread me = this;
-		JSFunction f = /** @j2sNative  function() {r.run$();me.run1$I(mode)} || */ null; 		
 		int mode = LOOP;
+		JSFunction f = /** @j2sNative  function() {r.run$();me.run1$I(mode)} || */ null;
 		JSToolkit.dispatch(f, 0, 0);
 		// handling sleepAndReturn myself
 		// and once through only

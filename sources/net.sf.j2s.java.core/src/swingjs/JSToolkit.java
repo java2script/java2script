@@ -436,8 +436,8 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		 *              var id0 = SwingJS.eventID || 0;
 		 *              SwingJS.eventID = id;
 		 *              java.lang.Thread.thisThread = thread; 
-		 *              if (f.run)
-		 *                f.run();
+		 *              if (f.run$)
+		 *                f.run$();
 		 *              else
 		 *                f();
 		 *              SwingJS.eventID = id0;

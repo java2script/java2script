@@ -1765,7 +1765,7 @@ public class SwingUtilities implements SwingConstants
     static class SharedOwnerFrame extends JFrame implements WindowListener {
     	
     	SharedOwnerFrame() {
-    		super(); // required by SwingJS
+    		super(null, null, null, null); // required by SwingJS
     	}
     	
         @Override

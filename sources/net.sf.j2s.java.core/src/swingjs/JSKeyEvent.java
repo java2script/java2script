@@ -45,9 +45,11 @@ public class JSKeyEvent extends KeyEvent {
 				: evType == "keypress" ? KEY_TYPED 
 				: evType == "keyup" ? KEY_RELEASED 
 				: 0);
+		if (id == 0)
+			return null;
 		int keyCode = getJavaKeyCode(jskeyCode, jskey);
 		char keyChar = getJavaKeyChar(keyCode, jskey);
-		return (id == 0 || keyChar == CHAR_UNDEFINED && id == KEY_TYPED ? null
+		return (keyChar == CHAR_UNDEFINED && id == KEY_TYPED ? null
 				: new JSKeyEvent(source, jQueryEvent, id, 
 						(id == KEY_TYPED ? JSKeyEvent.VK_UNDEFINED : keyCode),
 						keyChar,

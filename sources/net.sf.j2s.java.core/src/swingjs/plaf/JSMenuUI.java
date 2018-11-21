@@ -2,11 +2,13 @@ package swingjs.plaf;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.ContainerEvent;
+import java.awt.event.ContainerListener;
 
 import javax.swing.JComponent;
 import javax.swing.JMenu;
 import swingjs.api.js.DOMNode;
-public class JSMenuUI extends JSMenuItemUI {
+public class JSMenuUI extends JSMenuItemUI implements ContainerListener {
 
 	private JMenu jm;
 
@@ -21,7 +23,6 @@ public class JSMenuUI extends JSMenuItemUI {
 			isMenuItem = !((JMenu) jc).isTopLevelMenu();
 			if (isMenuItem) {
 				containerNode = domNode = createItem("_menu", null);
-				DOMNode.addJqueryHandledEvent(this, domNode, "mouseenter mouseleave");			
 			} else {
 //				DOMNode labelNode = newDOMObject("label", id);
 				domNode = createItem("_item", null);
@@ -31,8 +32,9 @@ public class JSMenuUI extends JSMenuItemUI {
 //						c.getFont());
 //				setDataComponent(labelNode);
 			}
+			DOMNode.addJqueryHandledEvent(this, domNode, "mouseenter mouseleave");			
 		}
-		setCssFont(domNode, c.getFont());
+		setCssFont(domNode, c.getFont()); 
 		DOMNode.setVisible(domNode, jc.isVisible());
 		return domNode;
 	}
@@ -52,23 +54,30 @@ public class JSMenuUI extends JSMenuItemUI {
 			}
 			if (eventType == -1) {
 				if (type.equals("mouseenter")) {
+					if(!jc.getParent().getUIClassID().equals("MenuBarUI"))
+						stopPopupTimer();
 					((JMenu) jc).setSelected(true);
 					return true;
 				}
 				if (type.equals("mouseleave")) {
 					((JMenu) jc).setSelected(false);
+					System.out.println("menubar leaving");
+					if(jc.getParent().getUIClassID().equals("MenuBarUI"))
+						startPopupTimer();
 					return true;
 				}
 			}
 		}
-		return false;
+		return super.handleJSEvent(target, eventType, jQueryEvent);
 	}
 
-
+	
 	@Override
 	public void installUI(JComponent jc) {
 		jm = (JMenu) jc;
 		super.installUI(jc);
+		// handle add/remove
+		jm.getPopupMenu().addContainerListener(this);
 	}
 
 	@Override
@@ -80,6 +89,24 @@ public class JSMenuUI extends JSMenuItemUI {
 	@Override
 	public Dimension getMaximumSize() {
 		return getPreferredSize();
+	}
+
+	@Override
+	public void componentAdded(ContainerEvent e) {
+		JSPopupMenuUI popupui = (JSPopupMenuUI) jm.getPopupMenu().getUI();
+		// OK, the idea here is that we detach all child nodes
+		// and then reattach them. 
+		DOMNode.detachAll(popupui.outerNode);
+		popupui.setTainted();
+		popupui.setHTMLElement();
+	}
+
+	@Override
+	public void componentRemoved(ContainerEvent e) {
+		JSPopupMenuUI popupui = (JSPopupMenuUI) jm.getPopupMenu().getUI();
+		DOMNode.detachAll(popupui.outerNode);
+		popupui.setTainted();
+		popupui.setHTMLElement();
 	}
 
 }

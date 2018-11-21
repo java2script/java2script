@@ -30,7 +30,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 			DOMNode.setAttr(buttonNode, "htmlFor", id);
 		} else {
 			if (actionNode != null)
-				DOMNode.remove(actionNode);
+				DOMNode.dispose(actionNode);
 		}
 		enableNodes = new DOMNode[] { actionNode, buttonNode };
 		setDataComponent(actionNode);
