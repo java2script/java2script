@@ -618,7 +618,7 @@
 				},
 				
 				_getPixelMouse : function(position, offsetHandle) {
-					var offset = this.element.offset;
+					var offset = this.element.offset();
 					var p = (this.orientation === "horizontal" ?
 							position.x
 								- offset.left
