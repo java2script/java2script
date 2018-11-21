@@ -185,9 +185,9 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 	@Override
 	public void dispose() {
 		J2S.unsetMouse(domNode);
-		DOMNode.remove(outerNode);
+		DOMNode.dispose(outerNode);
 		if (modalNode != null)
-			DOMNode.remove(modalNode);
+			DOMNode.dispose(modalNode);
 	}
 
 	@Override

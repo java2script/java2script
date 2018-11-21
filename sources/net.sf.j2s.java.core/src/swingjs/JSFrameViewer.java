@@ -230,7 +230,7 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 		}
 		DOMNode rootNode = (root == null ? null : ((JSComponentUI) root.getUI()).domNode);
 		if (rootNode != null)
-			DOMNode.remove(canvas);
+			DOMNode.dispose(canvas);
 		display = canvasId = appletViewer.appletName + "_canvas" + ++canvasCount;
 		canvas = (HTML5Canvas) DOMNode.createElement("canvas", canvasId);
 		if (userFramedApplet != null) {

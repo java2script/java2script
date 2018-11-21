@@ -823,9 +823,9 @@ public class JMenu extends JMenuItem implements MenuElement
      */
     @Override
 		public void remove(Component c) {
-    	if (c instanceof JMenuItem)
-        if (popupMenu != null)
-            popupMenu.remove(c);
+//  why did I add this? BH 2018  	if (c instanceof JMenuItem)
+//        if (popupMenu != null)
+//            popupMenu.remove(c);
         if (popupMenu != null)
             popupMenu.remove(c);
     }

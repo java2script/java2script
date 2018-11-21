@@ -28,6 +28,8 @@ public abstract class DOMNode {
 	// "abstract" in the sense that these are the exact calls to JavaScript
 	
 	public abstract void appendChild(DOMNode node);
+	
+	public abstract DOMNode removeChild(DOMNode node);
 
 	public abstract boolean hasFocus();
 
@@ -249,9 +251,31 @@ public abstract class DOMNode {
 	 * @param node
 	 * @return parent or null
 	 */
-	public static void remove(DOMNode node) {
+	public static void dispose(DOMNode node) {
 		if (node != null)		
 			JSUtil.jQuery.$(node).remove();
+	}
+
+	/**
+	 * Just remove the node; don't 
+	 * @param node
+	 */
+	public static void remove(DOMNode node) {
+		
+		// NOTE: IE does not have node.remove()
+		
+		DOMNode p = getParent(node);
+		if (p != null)
+			p.removeChild(node);
+	}
+
+	public static void detachAll(DOMNode node) {
+		/**
+		 * @j2sNative
+		 *  if(node)
+		 *    while(node.lastChild)
+		 *  	node.removeChild(node.lastChild);
+		 */
 	}
 	
 	/**
@@ -266,7 +290,8 @@ public abstract class DOMNode {
 			return null;
 		DOMNode p = getParent(node);
 		try {
-			JSUtil.jQuery.$(node).detach();
+			if (p != null)
+				JSUtil.jQuery.$(node).detach();
 		} catch (Throwable e) {
 			// ignore
 		}

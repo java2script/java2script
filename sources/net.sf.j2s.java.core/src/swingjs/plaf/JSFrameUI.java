@@ -76,8 +76,10 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			// page too much.
 			// a Windows applet has a sort of fuzzy shadowy border
 			domNode = frameNode = newDOMObject("div", id + "_frame");
-			if (isDummyFrame)
+			if (isDummyFrame) {
+				DOMNode.setStyles(domNode, "display", "hidden");
 				return domNode;
+			}
 			DOMNode.setStyles(frameNode, "box-shadow", "0px 0px 10px gray", "box-sizing", "content-box");
 			setWindowClass();
 			int w = c.getWidth();

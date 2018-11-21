@@ -1161,7 +1161,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 	// }
 	// }
 
-		private boolean isAdjusting;
+		//private boolean isAdjusting;
 
 		//
 		// ChangeListener: This is added to the vieport, and hsb/vsb models.
@@ -1191,12 +1191,12 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 			BoundedRangeModel model = (BoundedRangeModel) (e.getSource());
 			Point p = viewport.getViewPosition();
 			p.y = model.getValue();
-			if (!isAdjusting) {
-				isAdjusting = true;
+//			if (!isAdjusting) {
+//				isAdjusting = true;
 				viewport.setViewPosition(p);
 				scrollpane.getVerticalScrollBar().setVisibleAmount(viewport.getHeight());
-				isAdjusting = false;
-			}
+//				isAdjusting = false;
+//			}
 		}
 
 		private void hsbStateChanged(JViewport viewport, ChangeEvent e) {
@@ -1231,12 +1231,12 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 					}
 				}
 			}
-			if (!isAdjusting) {
-				isAdjusting = true;
+//			if (!isAdjusting) {
+//				isAdjusting = true;
 				viewport.setViewPosition(p);
 				scrollpane.getHorizontalScrollBar().setVisibleAmount(viewport.getWidth());
-				isAdjusting = false;
-			}
+//				isAdjusting = false;
+//			}
 		}
 
 		private void viewportStateChanged(ChangeEvent e) {

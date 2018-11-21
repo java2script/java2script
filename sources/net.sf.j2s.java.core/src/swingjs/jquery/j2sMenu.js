@@ -125,7 +125,7 @@ Swing.__getMenuStyle = function(applet) { return '\
 	.swingjsPopupMenu .ui-icon{display:block;text-indent:-99999px;overflow:hidden;background-repeat:no-repeat;position:absolute;top:.2em;left:.2em}\
 	.swingjsPopupMenu .ui-menu-icon{position:static;float:right}\
 	.swingjsPopupMenu .ui-icon-carat-1-e{min-width:10ex;text-align:right;background-image:none;background-position:0 0}\
-	.swingjsPopupMenu .ui-icon-carat-1-e:after{content:"\\23F5"}\
+	.swingjsPopupMenu .ui-icon-carat-1-e:after{content:"\\0023F5"}\
 	.swingjsPopupMenu .ui-state-default{border:1px solid #c5dbec;background:#dfeffc;color:#2e6e9e}\
 	.swingjsPopupMenu .ui-state-default a{color:#2e6e9e;text-decoration:none}\
 	.swingjsPopupMenu .ui-state-hover,.swingjsPopupMenu .ui-state-focus{border:1px solid #79b7e7;background:#d0e5f5;color:#1d5987}\
@@ -204,7 +204,7 @@ Swing.initMenuItem = function(item) {
   item.icon && (item.icon = '<img src="' + item._applet._j2sPath + '/' + item.icon + '" style="max-height: 20px;" />')
 }
 
-Swing.updateMenu = function(menu) {
+Swing.updateMenu = function(menu, andShow) {
     if (menu.uiClassID) {
 	    // for SwingJS the top node is domNode itself, which is already <ul> 
 	    var node = menu.ui.domNode;
@@ -217,7 +217,9 @@ Swing.updateMenu = function(menu) {
 	        J2S.$(node).addClass("swingjsPopupMenu");
 	    }
 	    J2S.$after("body",node);
-	    node.style.display = "block";
+		if (andShow) {
+	    	node.style.display = "block";
+	    }
     } else {
   		menu.$ulTop.html(menu.toHTML());
   		bindMenuActionCommands(menu._actionEvent, menu, true);
@@ -253,12 +255,12 @@ Swing.showMenu = function(menu, x, y) {
   menu._visible = true;
   menu.timestamp = System.currentTimeMillis$();
   menu.dragBind(true);
-//  menu.$ulTop.unbind('clickoutjsmol mousemoveoutjsmol');
-//  if (!J2S._persistentMenu)
-//  	menu.$ulTop.bind('clickoutjsmol mousemoveoutjsmol', function(evspecial, target, ev) {
-//	  if (System.currentTimeMillis$() - menu.timestamp > 500)
-//		  Swing.hideMenu(menu);
-//	});
+  menu.$ulTop.unbind('clickoutjsmol mousemoveoutjsmol');
+  if (!J2S._persistentMenu)
+  	menu.$ulTop.bind('clickoutjsmol mousemoveoutjsmol', function(evspecial, target, ev) {
+	  if (System.currentTimeMillis$() - menu.timestamp > 500)
+		  Swing.hideMenu(menu);
+	});
   menu.$ulTop.bind("contextmenu", function() {return false;});
 } 
 

@@ -463,7 +463,7 @@ public class JSComponentUI extends ComponentUI
 		{
 		}
 		if (outerNode != null) {
-			DOMNode.remove(outerNode);
+			DOMNode.dispose(outerNode);
 			outerNode = null;
 		}
 	}
@@ -714,7 +714,7 @@ public class JSComponentUI extends ComponentUI
 				if (fromButtonListener) {
 					parentui.setHTMLElement();
 					if (parentui.menu != null) {
-						((JSPopupMenuUI) parentui).updateMenu();
+						((JSPopupMenuUI) parentui).updateMenu(false);
 					} else if (parentui.isPopupMenu && p.getParent() == null) {
 						p = (JComponent) ((JPopupMenu) p).getInvoker();
 						continue;
@@ -2055,9 +2055,9 @@ public class JSComponentUI extends ComponentUI
 	@Override
 	public void dispose() {
 		isDisposed = true;
-		DOMNode.remove(domNode);
+		DOMNode.dispose(domNode);
 		if (domNode != outerNode)
-			DOMNode.remove(outerNode);
+			DOMNode.dispose(outerNode);
 	}
 
 	/**

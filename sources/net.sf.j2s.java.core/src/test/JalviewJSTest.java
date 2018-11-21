@@ -43,6 +43,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener
   }
 
 private JMenuItem mb5;
+private JMenuItem testbtn;
 
   /**
    * Put some content in a JFrame and show it
@@ -74,7 +75,7 @@ private JMenuItem mb5;
 
     
     JPanel firstColumn = new JPanel();
-    firstColumn.setLayout(new GridLayout(10, 1));
+    firstColumn.setLayout(new GridLayout(13, 1));
     firstColumn.setBorder(new TitledBorder("column 1"));
 
     /*
@@ -145,7 +146,7 @@ private JMenuItem mb5;
     firstColumn.add(rb1);
     firstColumn.add(rb2);
     firstColumn.add(rb3);
-    firstColumn.setBounds(200, 20, 200, 500);
+    firstColumn.setBounds(100, 20, 200, 500);
 
     
     font = new Font("Verdana", Font.PLAIN, 11);
@@ -248,14 +249,40 @@ private JMenuItem mb5;
     JMenuItem btn = new JMenuItem("-");
     btn.setFont(font);
     menu.add(btn);
-    btn=new JMenuItem("testing");
-    btn.setFont(font);
-    menu.add(btn);
+    testbtn=new JMenuItem("testing");
+    testbtn.setFont(font);
+    menu.add(testbtn);
     menu.add(m2);
 
 
     JPanel theTab = new JPanel();
     
+    firstColumn.add(new JButton("remove 'testbtn'") {
+    	{
+    		this.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					menu.remove(testbtn);					
+				}
+    			
+    		});
+    	}
+    });
+    firstColumn.add(new JButton("add 'testbtn'") {
+    	{
+    		this.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					testbtn.setText("testbtn");
+					menu.add(testbtn);
+					
+				}
+    			
+    		});
+    	}
+    });
     theTab.setLayout(null);
     theTab.add(firstColumn);
     panel.add(theTab);

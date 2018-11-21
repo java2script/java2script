@@ -151,7 +151,7 @@
 					};
 
 					var fDrag = function(xye, id) {
-						if (me.options.disabled)
+						if (id != 506 || me.options.disabled)
 							return;
 						var event = xye.ev;
 						var position = me._getPosition(event);

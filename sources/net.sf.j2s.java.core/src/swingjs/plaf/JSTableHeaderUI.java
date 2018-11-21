@@ -169,7 +169,7 @@ public class JSTableHeaderUI extends JSLightweightUI {
 			cw[col] = table.getColumnModel().getColumn(col).getWidth();
 		String rid = id + "_tab_header";
 		if (headdiv != null)
-			DOMNode.remove(headdiv);
+			DOMNode.dispose(headdiv);
 		headdiv = DOMNode.createElement("div", rid);
 		DOMNode.setStyles(headdiv, "height", thh + "px");
 		domNode.appendChild(headdiv);
