@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Hashtable;
+import java.util.Map;
 
 import javajs.api.js.J2SObjectInterface;
 
@@ -71,7 +73,25 @@ public class AjaxURLConnection extends HttpURLConnection {
 	public InputStream getInputStream() {
 		responseCode = 200;
 		BufferedInputStream is = getAttachedStreamData(url, false);
-		return (is == null ? attachStreamData(url, doAjax(true)) : is);
+		if (is != null || getUseCaches() && (is = getCachedStream(url)) != null)
+			return is;
+		is = attachStreamData(url, doAjax(true));
+		if (getUseCaches() && is != null)
+			setCachedStream(url);
+		return is;
+	}
+
+	static Map<String, Object> urlCache = new Hashtable<String, Object>();
+	
+	private BufferedInputStream getCachedStream(URL url) {
+		Object data = urlCache.get(url.toString());
+		return (data == null ? null : Rdr.toBIS(data));
+	}
+
+	private void setCachedStream(URL url) {
+		Object data = url._streamData;
+		if (data != null)
+			urlCache.put(url.toString(), data);
 	}
 
 	/**
@@ -96,6 +116,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 	}
 
    public static BufferedInputStream attachStreamData(URL url, Object o) {
+	   
 	   /**
 	    * @j2sNative
 	    * 

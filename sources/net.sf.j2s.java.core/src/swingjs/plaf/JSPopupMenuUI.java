@@ -4,6 +4,8 @@ package swingjs.plaf;
 import java.awt.Dimension;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.ContainerEvent;
+import java.awt.event.ContainerListener;
 
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
@@ -13,7 +15,8 @@ import swingjs.api.js.JSSwingMenu;
 import swingjs.jquery.JQueryUI;
 import swingjs.api.js.DOMNode;
 
-public class JSPopupMenuUI extends JSPanelUI {
+public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
+
 	
 	static {
 		Object jqueryui = JQueryUI.class; // loads jQuery.ui
@@ -21,9 +24,26 @@ public class JSPopupMenuUI extends JSPanelUI {
 
 	// a frameless independent window
 	
-	static JSSwingMenu j2sSwingMenu;
+	private static JSSwingMenu j2sSwingMenu;
 	
-	int timer;
+
+	@Override
+	public void componentAdded(ContainerEvent e) {
+		// OK, the idea here is that we detach all child nodes
+		// and then reattach them. 
+		DOMNode.detachAll(outerNode);
+		setTainted();
+		setHTMLElement();
+	}
+
+	@Override
+	public void componentRemoved(ContainerEvent e) {
+		DOMNode.detachAll(outerNode);
+		setTainted();
+		setHTMLElement();
+	}
+
+	/*private*/ int timer;
 
 	public JSPopupMenuUI() {
 		
@@ -51,6 +71,7 @@ public class JSPopupMenuUI extends JSPanelUI {
 
 	@Override
 	public void installUI(JComponent jc) {
+		((JPopupMenu) jc).addContainerListener(this);
       LookAndFeel.installColorsAndFont(jc,
         "PopupMenu.background",
         "PopupMenu.foreground",
@@ -59,6 +80,7 @@ public class JSPopupMenuUI extends JSPanelUI {
 
 	@Override
 	public void uninstallUI(JComponent jc) {
+		((JPopupMenu) jc).removeContainerListener(this);
 		// TODO Auto-generated method stub
 		
 	}
@@ -122,14 +144,16 @@ public class JSPopupMenuUI extends JSPanelUI {
 	void hideMenu() {
 		System.out.println("hideMenu");
 		// not private -- hideMenu$
-		j2sSwingMenu.hideMenu(menu);	
+		if (menu != null)
+			j2sSwingMenu.hideMenu(menu);	
 	}
 	
 	@Override
 	public void dispose() {
     DOMNode.dispose(domNode);
     DOMNode.dispose(outerNode);
-    j2sSwingMenu.disposeMenu(menu);
+    if (menu != null)
+    	j2sSwingMenu.disposeMenu(menu);
 	}
 
 	@Override
