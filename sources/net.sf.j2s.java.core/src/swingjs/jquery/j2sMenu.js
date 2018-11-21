@@ -255,12 +255,12 @@ Swing.showMenu = function(menu, x, y) {
   menu._visible = true;
   menu.timestamp = System.currentTimeMillis$();
   menu.dragBind(true);
-  menu.$ulTop.unbind('clickoutjsmol mousemoveoutjsmol');
-  if (!J2S._persistentMenu)
-  	menu.$ulTop.bind('clickoutjsmol mousemoveoutjsmol', function(evspecial, target, ev) {
-	  if (System.currentTimeMillis$() - menu.timestamp > 500)
-		  Swing.hideMenu(menu);
-	});
+//  menu.$ulTop.unbind('clickoutjsmol mousemoveoutjsmol');
+//  if (!J2S._persistentMenu)
+//  	menu.$ulTop.bind('clickoutjsmol mousemoveoutjsmol', function(evspecial, target, ev) {
+//	  if (System.currentTimeMillis$() - menu.timestamp > 500)
+//		  Swing.hideMenu(menu);
+//	});
   menu.$ulTop.bind("contextmenu", function() {return false;});
 } 
 
