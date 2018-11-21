@@ -98,20 +98,18 @@ public class JSGraphics2D // extends SunGraphics2D
 		 */
 		{
 		}
-		// removed - caused blurriness 9/17/2018		
 //		// reduce antialiasing, thank you,
 //		// http://www.rgraph.net/docs/howto-get-crisp-lines-with-no- antialias.html
-		// having this set default TRUE gave extra lines around panels in Jalview
-		setAntialias(false);
+		setAntialias(true);
 	}
 
 	public void setAntialias(boolean tf) {
 		if (tf) {
 			if (!isShifted)
-				ctx.translate(-0.5, -0.5);
+				ctx.translate(0.5, 0.5);
 		} else {
 			if (isShifted)
-				ctx.translate(0.5, 0.5);
+				ctx.translate(-0.5, -0.5);
 		}
 		// this is important if images are being drawn - test/TAPP6
 		// see also http://vaughnroyko.com/state-of-nearest-neighbor-interpolation-in-canvas/

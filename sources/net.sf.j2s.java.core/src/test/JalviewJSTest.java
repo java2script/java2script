@@ -11,6 +11,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -22,6 +24,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.SwingConstants;
@@ -59,6 +62,50 @@ private JMenuItem testbtn;
     main.getJMenuBar().add(menu);
     main.pack();
     main.setVisible(true);
+    
+    JPopupMenu pmenu = new JPopupMenu();
+    pmenu.add(new JMenuItem("testing1"));
+    pmenu.add(new JMenuItem("testing2"));
+    pmenu.add(new JMenuItem("testing3"));
+
+    main.addMouseListener(new MouseListener() {
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			System.out.println(pmenu.getComponents().length);
+			pmenu.remove(pmenu.getComponents().length - 1);
+			System.out.println(pmenu.getComponents().length);
+			pmenu.show(main,  100,  100);
+			System.out.println(pmenu.getComponents().length);
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mousePressed(MouseEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mouseExited(MouseEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+    	
+    });
   }
 
   /**

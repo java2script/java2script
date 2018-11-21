@@ -8,8 +8,8 @@ import java.awt.event.ContainerListener;
 import javax.swing.JComponent;
 import javax.swing.JMenu;
 import swingjs.api.js.DOMNode;
-public class JSMenuUI extends JSMenuItemUI implements ContainerListener {
-
+public class JSMenuUI extends JSMenuItemUI {
+	
 	private JMenu jm;
 
 	public JSMenuUI() {
@@ -76,8 +76,6 @@ public class JSMenuUI extends JSMenuItemUI implements ContainerListener {
 	public void installUI(JComponent jc) {
 		jm = (JMenu) jc;
 		super.installUI(jc);
-		// handle add/remove
-		jm.getPopupMenu().addContainerListener(this);
 	}
 
 	@Override
@@ -89,24 +87,6 @@ public class JSMenuUI extends JSMenuItemUI implements ContainerListener {
 	@Override
 	public Dimension getMaximumSize() {
 		return getPreferredSize();
-	}
-
-	@Override
-	public void componentAdded(ContainerEvent e) {
-		JSPopupMenuUI popupui = (JSPopupMenuUI) jm.getPopupMenu().getUI();
-		// OK, the idea here is that we detach all child nodes
-		// and then reattach them. 
-		DOMNode.detachAll(popupui.outerNode);
-		popupui.setTainted();
-		popupui.setHTMLElement();
-	}
-
-	@Override
-	public void componentRemoved(ContainerEvent e) {
-		JSPopupMenuUI popupui = (JSPopupMenuUI) jm.getPopupMenu().getUI();
-		DOMNode.detachAll(popupui.outerNode);
-		popupui.setTainted();
-		popupui.setHTMLElement();
 	}
 
 }
