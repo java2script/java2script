@@ -76,6 +76,10 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			// page too much.
 			// a Windows applet has a sort of fuzzy shadowy border
 			domNode = frameNode = newDOMObject("div", id + "_frame");
+			if (isDummyFrame) {
+				DOMNode.setStyles(domNode, "display", "hidden");
+				return domNode;
+			}
 			DOMNode.setStyles(frameNode, "box-shadow", "0px 0px 10px gray", "box-sizing", "content-box");
 			setWindowClass();
 			int w = c.getWidth();
@@ -98,7 +102,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 
 			titleNode = newDOMObject("label", id + "_title");
 			DOMNode.setTopLeftAbsolute(titleNode, 2, 4);
-			DOMNode.setStyles(titleNode, "height", "20px");
+			DOMNode.setStyles(titleNode, "height", "20px", "overflow", "hidden");
 
 			closerWrap = newDOMObject("div", id + "_closerwrap");
 			DOMNode.setTopLeftAbsolute(closerWrap, 0, 0);
@@ -124,18 +128,21 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			
 			JSFunction fGetFrameParent = null; 
 			/**
-			 * @j2sNative var me = this; fGetFrameParent = function(x, y) {
-			 * 
-			 *            if (arguments.length == 1) {
-			 *  	         if (x == 501)
+			 * @j2sNative var me = this; 
+			 * fGetFrameParent = function(mode, x, y) {
+			 * 		switch(arguments.length) {
+			 * 		case 1:
+			 *  	         if (mode == 501)
 			 *      	        me.selected$();  
 			 *          	 return $(fnode).parent();
-			 *            }
-			 *            var xy = me.getMoveCoords$I$I(x, y);
-			 *            $($(fnode).parent()).css({ top: xy[1] + 'px', left: xy[0] + 'px' });
-			 *            me.notifyFrameMoved$();
-			 *            return null;
-			 *            };
+			 *      case 3:
+			 *      		 if (mode == 506) {
+			 *      			me.moveFrame$I$I(x,y);
+			 *      			return null;
+			 *               }
+			 *     }
+			 *     return null;
+			 * }
 			 */
 			
 			J2S.setDraggable(titleBarNode, fGetFrameParent);
@@ -158,6 +165,10 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		return domNode;
 	}
 
+	void moveFrame(int x, int y) {
+		frame.setLocation(x, y);
+	}
+	
 	public int[] getMoveCoords(int x, int y) {
 		return new int[] {x, y};
 	}
@@ -183,7 +194,6 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			{}
 			if (eventType == -1) {
 		  	if (type == "click") {
-		  		@SuppressWarnings("unused")
 					DOMNode tbar = titleBarNode;
 		  		J2S.setDraggable(tbar, false);
 		  		frameCloserAction();
@@ -221,7 +231,9 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	public void installUI(JComponent jc) {
 		super.installUI(jc); 
 		// jc is really JFrame, even though JFrame is not a JComponent
-		frame = (JFrame) c;		
+		frame = (JFrame) c;	
+		isDummyFrame = /** @j2sNative jc.__CLASS_NAME__ == "javax.swing.SwingUtilities.SharedOwnerFrame" || */false;
+		
 		 LookAndFeel.installColors(jc,
 		 "Frame.background",
 		 "Frame.foreground");
@@ -288,7 +300,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 
 	@Override
 	public Insets getInsets() {
-		return jc.getFrameViewer().getInsets();
+		return (isDummyFrame ? null : jc.getFrameViewer().getInsets());
 	}
 
 	@Override
@@ -305,11 +317,15 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 
 	@Override
 	public void setVisible(boolean b) {
+		if (isDummyFrame)
+			b = false;
 	  super.setVisible(b);
 	  if (isModal) {
 		  if (b) {
 			  $(body).after(modalNode);
-			  int z = getZIndex(null) - 1;
+			  $(modalNode).addClass("swingjs-window"); // so as to slip into z-index ranking
+			  String sz = DOMNode.getStyle(domNode, "z-index");
+			  int z = (( /** @j2sNative +sz || */getZIndex(null))) - 1;
 			  DOMNode.setStyles(modalNode, "z-index", "" + z);
 		  }
 		  DOMNode.setVisible(modalNode, b);

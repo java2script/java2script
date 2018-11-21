@@ -47,7 +47,7 @@ import javax.accessibility.*;
  * @author      Chris Warth
  * @since       JDK1.0
  */
-public class Applet extends a2s.Applet {//Panel {
+public class Applet extends swingjs.a2s.Applet {//Panel {
 
     /**
      * Constructs a new Applet.

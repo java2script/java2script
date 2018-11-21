@@ -289,6 +289,7 @@ public abstract class Toolkit {
      * @see       java.awt.peer.FramePeer
      */
     protected abstract FramePeer createFrame(JSFrame target);
+    protected abstract FramePeer createFrame(Frame target);
 //
 //    /**
 //     * Creates this toolkit's implementation of <code>Canvas</code> using
@@ -1177,6 +1178,9 @@ public abstract class Toolkit {
     public abstract PrintJob getPrintJob(JSFrame frame, String jobtitle,
                                          Properties props);
 
+    public abstract PrintJob getPrintJob(Frame frame, String jobtitle,
+            Properties props);
+
     /**
      * Gets a <code>PrintJob</code> object which is the result of initiating
      * a print operation on the toolkit's platform.
@@ -1231,6 +1235,18 @@ public abstract class Toolkit {
                                 PageAttributes pageAttributes) {
         // Override to add printing support with new job/page control classes
 
+        if (this != Toolkit.getDefaultToolkit()) {
+            return Toolkit.getDefaultToolkit().getPrintJob(frame, jobtitle,
+                                                           jobAttributes,
+                                                           pageAttributes);
+        } else {
+            return getPrintJob(frame, jobtitle, null);
+        }
+    }
+
+    public PrintJob getPrintJob(Frame frame, String jobtitle,
+            JobAttributes jobAttributes,
+            PageAttributes pageAttributes) {
         if (this != Toolkit.getDefaultToolkit()) {
             return Toolkit.getDefaultToolkit().getPrintJob(frame, jobtitle,
                                                            jobAttributes,
@@ -1473,7 +1489,7 @@ public abstract class Toolkit {
 //            return Toolkit.getDefaultToolkit().
 //                createCustomCursor(cursor, hotSpot, name);
 //        } else {
-            return new Cursor(Cursor.DEFAULT_CURSOR);
+            return (name == null ? new Cursor(Cursor.DEFAULT_CURSOR) : new Cursor(name));
 //        }
     }
 

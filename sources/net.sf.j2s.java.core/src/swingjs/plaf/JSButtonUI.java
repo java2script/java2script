@@ -136,11 +136,12 @@ public class JSButtonUI extends JSLightweightUI {
 		if (text == null && icon == null)
 			return itemNode;
 		centeringNode = menuAnchorNode = newDOMObject("a", id + type + "_a");
-		DOMNode.setStyles(menuAnchorNode, "margin", "1px 4px 1px 4px");
+		DOMNode.setStyles(menuAnchorNode, "margin", "1px 2px 1px 2px");
 		itemNode.appendChild(menuAnchorNode);
 		if (label == null) {
 			// not a radio or checkbox
 			// TODO: add vertical centering 
+			boolean hasIcon = (iconNode != null);
 			if (iconNode == null)
 				iconNode = newDOMObject("span", id + "_icon");
 			if (textNode == null)
@@ -169,7 +170,8 @@ public class JSButtonUI extends JSLightweightUI {
 	}
 
 	protected void setupButton() {
-		setPadding(button.getMargin());
+		if (!isMenuItem)
+			setPadding(button.getMargin());
 		setIconAndText("button", (ImageIcon) button.getIcon(), button.getIconTextGap(), button.getText());
 		// "emptyBorder" is not really empty.
 		if (button.getBorder() == null || button.getBorder() == BorderFactory.emptyBorder)

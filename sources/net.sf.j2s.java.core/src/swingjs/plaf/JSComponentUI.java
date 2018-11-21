@@ -5,6 +5,7 @@ import javax.swing.SwingConstants;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.Font;
@@ -34,6 +35,7 @@ import javax.swing.AbstractButton;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants.*;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
@@ -109,6 +111,8 @@ public class JSComponentUI extends ComponentUI
 
 	private static final Color rootPaneColor = new Color(238, 238, 238);
 
+	private static final int MENUITEM_OFFSET = 11;
+
 	final J2SInterface J2S = JSUtil.J2S;
 	/**
 	 * provides a unique id for any component; set on instantiation
@@ -155,6 +159,8 @@ public class JSComponentUI extends ComponentUI
 	public JComponent getTargetParent() {
 		return targetParent;
 	}
+
+	protected JPopupMenu menu;
 
 	// MouseInputListener mouseInputListener;
 
@@ -289,6 +295,8 @@ public class JSComponentUI extends ComponentUI
 	// */
 	// private boolean zeroWidth;
 
+	protected boolean isDummyFrame;
+	
 	/**
 	 * indicates that in a toolbar, this component should use its preferred size for
 	 * min and max
@@ -334,7 +342,7 @@ public class JSComponentUI extends ComponentUI
 	 * panels
 	 * 
 	 */
-	protected boolean isContainer, isWindow, isRootPane, isContentPane;
+	protected boolean isContainer, isWindow, isRootPane, isContentPane, isPanel;
 
 	/**
 	 * linked nodes of this class
@@ -391,6 +399,8 @@ public class JSComponentUI extends ComponentUI
 	protected boolean allowTextAlignment = true;
 
 	private JQuery jquery = JSUtil.getJQuery();
+
+	protected boolean isPopupMenu;
 
 	public JSComponentUI() {
 		setDoc();
@@ -453,7 +463,7 @@ public class JSComponentUI extends ComponentUI
 		{
 		}
 		if (outerNode != null) {
-			DOMNode.remove(outerNode);
+			DOMNode.dispose(outerNode);
 			outerNode = null;
 		}
 	}
@@ -689,18 +699,63 @@ public class JSComponentUI extends ComponentUI
 			System.out.println(id + " stateChange " + dumpEvent(e));
 	}
 
+
+	
+	private void updatePropertyAncestor(boolean fromButtonListener) {
+		if (fromButtonListener) {
+			setTainted();
+			setHTMLElement();
+		}
+		JComponent p = (JComponent) jc.getParent();
+		while (p != null) {
+			JSComponentUI parentui = (JSComponentUI) (p == null ? null : p.getUI());
+			if (parentui != null) {
+				parentui.setTainted();
+				if (fromButtonListener) {
+					parentui.setHTMLElement();
+					if (parentui.menu != null) {
+						((JSPopupMenuUI) parentui).updateMenu(false);
+					} else if (parentui.isPopupMenu && p.getParent() == null) {
+						p = (JComponent) ((JPopupMenu) p).getInvoker();
+						continue;
+					}
+				}
+			}
+			p = (JComponent) p.getParent();
+		}
+	}
+	
+	
+//	
+//	@Override
+//	public void propertyChange(PropertyChangeEvent e) {
+//		// old
+//		String prop = e.getPropertyName();
+//		if (prop == "ancestor") {
+//			JComponent p = (JComponent) jc.getParent();
+//			while (p != null) {
+//				JSComponentUI parentui = (JSComponentUI) (p == null ? null : p.getUI());
+//				if (parentui != null)
+//					parentui.setTainted();
+//				p = (JComponent) p.getParent();
+//			}
+//
+//			if (e.getNewValue() == null)
+//				return;
+//			if (isDisposed && c.visible && e.getNewValue() != null)
+//				setVisible(true);
+//		}
+//		propertyChangedCUI(prop);
+//	}
+//
+//	
+
+
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
-		if (prop == "ancestor") {			
-			JComponent p = (JComponent) jc.getParent();
-			while (p != null) {
-			JSComponentUI parentui = (JSComponentUI) (p == null ? null : p.getUI());
-			if (parentui != null)
-				parentui.setTainted();
-			p = (JComponent) p.getParent();
-			}
-			
+		if (prop == "ancestor") {
+			updatePropertyAncestor(false);
 			if (e.getNewValue() == null)
 				return;
 			if (isDisposed && c.visible && e.getNewValue() != null)
@@ -709,6 +764,9 @@ public class JSComponentUI extends ComponentUI
 		propertyChangedCUI(prop);
 	}
 
+	
+	
+	
 	/**
 	 * plaf ButtonListener and TextListener will call this to update common
 	 * properties such as "text".
@@ -716,9 +774,14 @@ public class JSComponentUI extends ComponentUI
 	 * @param prop
 	 */
 	void propertyChangedFromListener(String prop) {
+		if (prop == "ancestor")
+			updatePropertyAncestor(true);
 		propertyChangedCUI(prop);
 	}
 
+
+	
+	
 	protected void propertyChangedCUI(String prop) {
 		// don't want to update a menu until we have to, after its place is set
 		// and we know it is not a JMenuBar menu
@@ -779,6 +842,85 @@ public class JSComponentUI extends ComponentUI
 			System.out.println("JSComponentUI: unrecognized prop: " + this.id + " " + prop);
 	}
 
+	
+//	/**
+//	 * plaf ButtonListener and TextListener will call this to update common
+//	 * properties such as "text".
+//	 * 
+//	 * @param prop
+//	 */
+//	void propertyChangedFromListener(String prop) {
+//		propertyChangedCUI(prop);
+//	}
+
+	
+//
+//	protected void propertyChangedCUI(String prop) {
+//		// don't want to update a menu until we have to, after its place is set
+//		// and we know it is not a JMenuBar menu
+//		if (!isMenu)
+//			updateDOMNode();
+//		if (prop == "preferredSize") {
+//			// size has been set by JComponent layout
+//			preferredSize = c.getPreferredSize(); // may be null
+//			getPreferredSize();
+//			return;
+//		}
+//		if (prop == "background") {
+//			setBackground(c.getBackground());
+//			return;
+//		}
+//		if (prop == "foreground") {
+//			setForeground(c.getForeground());
+//			return;
+//		}
+//		if (prop == "opaque") {
+//			setBackground(c.getBackground());
+//			return;
+//		}
+//		if (prop == "inverted") {
+//			updateDOMNode();
+//			return;
+//		}
+//		if (prop == "text") {
+//			String val = ((AbstractButton) c).getText();
+//			if (val == null ? currentText != null : !val.equals(currentText))
+//				setIconAndText(prop, currentIcon, currentGap, (String) val);
+//			return;
+//		}
+//		if (prop == "iconTextGap") {
+//			if (iconNode != null) {
+//				int gap = ((AbstractButton) c).getIconTextGap();
+//				if (currentGap != gap)
+//					setIconAndText(prop, currentIcon, gap, currentText);
+//			}
+//			return;
+//		}
+//		if (prop == "icon") {
+//			if (iconNode != null) {
+//				// note that we use AbstractButton cast here just because
+//				// it has a getIcon() method. JavaScript will not care if
+//				// it is really a JLabel or JOptionPane, which also have icons
+//				ImageIcon icon = getIcon(c, null);
+//				if (icon == null ? currentIcon != null : !icon.equals(currentIcon))
+//					setIconAndText(prop, icon, currentGap, currentText);
+//			}
+//			return;
+//		}
+//		if (prop == "horizontalAlignment" || prop == "verticalAlignment") {
+//			setAlignment();
+//			return;
+//		}
+//		if (debugging)
+//			System.out.println("JSComponentUI: unrecognized prop: " + this.id + " " + prop);
+//	}
+//
+	
+	
+	
+	
+	
+	
 	private String createMsgs = "";
 
 	/**
@@ -875,8 +1017,10 @@ public class JSComponentUI extends ComponentUI
 		System.out.println(DOMNode.getAttr(d, "outerHTML"));
 	}
 
-	protected static void vCenter(DOMNode obj, int offset) {
-		DOMNode.setStyles(obj, "top", "50%", "transform", "translateY(" + offset + "%)");
+	protected static void vCenter(DOMNode obj, int offset, float scale) {
+		DOMNode.setStyles(obj, "top", "50%", "transform", 
+				(scale > 0 ? "scale(" + scale + "," + scale + ")" : "")
+				+"translateY(" + offset + "%)");
 	}
 
 	/**
@@ -1048,6 +1192,10 @@ public class JSComponentUI extends ComponentUI
 		if (!isTainted)
 			return outerNode;
 
+		if (isDummyFrame) {
+			isTainted = false;
+			return (outerNode = DOMNode.createElement("div", "dummyFrame"));
+		}
 		updateDOMNode();
 		checkTransparent(domNode);
 		Component[] children = getChildren();
@@ -1084,7 +1232,7 @@ public class JSComponentUI extends ComponentUI
 				int h = getContainerHeight();
 				DOMNode.setSize(outerNode, w, h);
 				// not clear why this does not always work:
-				if (isContentPane)
+				if (isContentPane || isPanel)
 					DOMNode.setStyles(outerNode, "overflow", "hidden");
 			}
 			if (isRootPane) {
@@ -1534,6 +1682,8 @@ public class JSComponentUI extends ComponentUI
 
 	private Object dropTarget = this; // unactivated
 
+	protected String actionItemOffset;
+
 	protected void setJSDimensions(int width, int height) {
 		if (jsActualWidth > 0)
 			width = jsActualWidth;
@@ -1564,6 +1714,8 @@ public class JSComponentUI extends ComponentUI
 		
 		
 		int wIcon = Math.max(0, setHTMLSize1(iconNode, false, false).width - 1);
+		if (isMenuItem && actionNode != null)
+			wIcon = 15;
 		int wText = setHTMLSize1(textNode, false, false).width - 1;
 
 		// But we need to slightly underestimate it so that the
@@ -1588,7 +1740,7 @@ public class JSComponentUI extends ComponentUI
 		//
 		boolean ltr = jc.getComponentOrientation().isLeftToRight();
 		boolean alignLeft, alignRight, centered, text0;
-		
+		String px0 = "0px";
 		if (menuAnchorNode == null) {
 			alignLeft = (align == SwingConstants.LEFT
 					|| align == (ltr ? SwingConstants.LEADING : SwingConstants.TRAILING));
@@ -1607,6 +1759,11 @@ public class JSComponentUI extends ComponentUI
 			alignRight = !ltr;
 			centered = false;
 			text0 = false;
+			if (alignRight) {
+				if (buttonNode != null) {
+					DOMNode.setStyles(buttonNode, "right","0");
+				}
+			}
 		}
 
 		String poslr = (alignRight ? "right" : "left");				
@@ -1618,7 +1775,7 @@ public class JSComponentUI extends ComponentUI
 		DOMNode.setStyles(centeringNode, poslr, "0px", "text-align", alignlr);
 		//if (buttonNode != null) {
 			DOMNode.setStyles(domNode, "text-align", null, "left", null, "right", null);
-			DOMNode.setStyles(domNode, "text-align", alignlr, poslr, "0px");
+			DOMNode.setStyles(domNode, "text-align", alignlr, poslr, px0);
 		//}
 		if (centered) {
 			int w = (buttonNode == null ? 
@@ -1638,7 +1795,7 @@ public class JSComponentUI extends ComponentUI
 				DOMNode.setStyles(iconNode, poslr, wText + "px");
 			} else {
 				DOMNode.setStyles(textNode, poslr, (wIcon) + "px");
-				DOMNode.setStyles(iconNode, poslr, "0px");
+				DOMNode.setStyles(iconNode, poslr, (!isMenuItem ? "0px" : ltr ? actionItemOffset : "-3px"));
 			}
 		} 
 		
@@ -1683,8 +1840,11 @@ public class JSComponentUI extends ComponentUI
 			if (icon != null)
 				canAlignIcon = true;
 		} else {
-			if (icon == null) {
+			if (icon == null) {				
 				canAlignText = allowTextAlignment;
+				if (iconNode != null && isMenuItem && actionNode == null && text != null) {
+					DOMNode.addHorizontalGap(iconNode, gap + MENUITEM_OFFSET);
+				}
 			} else {
 				// vCenter(imageNode, 10); // perhaps? Not sure if this is a
 				// good idea
@@ -1895,9 +2055,9 @@ public class JSComponentUI extends ComponentUI
 	@Override
 	public void dispose() {
 		isDisposed = true;
-		DOMNode.remove(domNode);
+		DOMNode.dispose(domNode);
 		if (domNode != outerNode)
-			DOMNode.remove(outerNode);
+			DOMNode.dispose(outerNode);
 	}
 
 	/**
@@ -1978,29 +2138,29 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public void updateCursorImmediately() {
-		String curs;
-		switch (c.getCursor().getType()) {
-		case 1:
-			curs = "crosshair";
-			break;
-		case 3: // wait
-			curs = "wait";
-			break;
-		case 8: // zoom
-			curs = "ns-resize";
-			break;
-		case 12: // hand
-			curs = "grab";
-			break;
-		case 13:
-			curs = "move";
-			break;
-		default:
-			curs = "default";
-			break;
-		}
-		DOMNode.setStyles(setHTMLElement(), "cursor", curs);
+		String curs = getCursorName(c.getCursor());
+		setHTMLElement();
+		DOMNode.setStyles(domNode, "cursor", curs);
 		setWaitImage(curs == "wait");
+	}
+
+	static String getCursorName(Cursor cursor) {
+		switch (cursor.getType()) {
+		case Cursor.CROSSHAIR_CURSOR:
+			return "crosshair";
+		case Cursor.WAIT_CURSOR:
+			return "wait";
+		case Cursor.N_RESIZE_CURSOR: // zoom
+			return "ns-resize";
+		case Cursor.HAND_CURSOR: // hand
+			return "grab";
+		case Cursor.MOVE_CURSOR:
+			return "move";
+		case Cursor.CUSTOM_CURSOR:
+			return cursor.getName();
+		default:
+			return "default";
+		}
 	}
 
 	protected void setWaitImage(boolean doShow) {

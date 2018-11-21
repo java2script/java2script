@@ -115,6 +115,15 @@ public class JSTableHeaderUI extends JSLightweightUI {
 	}
 	
 
+	private boolean working;
+
+	@Override
+	public void setTainted() {
+		if (!working)
+			isTainted = true;
+	}
+
+
 	@Override
 	public DOMNode updateDOMNode() {
 		
@@ -160,7 +169,7 @@ public class JSTableHeaderUI extends JSLightweightUI {
 			cw[col] = table.getColumnModel().getColumn(col).getWidth();
 		String rid = id + "_tab_header";
 		if (headdiv != null)
-			DOMNode.remove(headdiv);
+			DOMNode.dispose(headdiv);
 		headdiv = DOMNode.createElement("div", rid);
 		DOMNode.setStyles(headdiv, "height", thh + "px");
 		domNode.appendChild(headdiv);
@@ -543,6 +552,8 @@ public class JSTableHeaderUI extends JSLightweightUI {
 	     * @since 1.6
 	     */
 	    protected void rolloverColumnUpdated(int oldColumn, int newColumn) {
+	    	setTainted();
+	    	setHTMLElement();
 	    }
 
 	    private void updateRolloverColumn(MouseEvent e) {
@@ -726,6 +737,9 @@ public class JSTableHeaderUI extends JSLightweightUI {
 	        if (tableHeader.getColumnModel().getColumnCount() <= 0) {
 	            return;
 	        }
+	        
+	        working = true;
+
 	        boolean ltr = tableHeader.getComponentOrientation().isLeftToRight();
 
 	        Rectangle clip = g.getClipBounds();
@@ -792,6 +806,8 @@ public class JSTableHeaderUI extends JSLightweightUI {
 
 	        // Remove all components in the rendererPane.
 	        rendererPane.removeAll();
+
+	        working = false;
 	    }
 
 	    private Component getHeaderRenderer(int columnIndex) {

@@ -27,29 +27,32 @@
 
 package swingjs.plaf;
 
-//import java.awt.Canvas;
-import java.awt.event.MouseEvent;
-
-import javajs.api.JSFunction;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.LayoutManager2;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+//import java.awt.Canvas;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JSplitPane;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
+
+import javajs.api.JSFunction;
 import swingjs.api.js.DOMNode;
 
 /**
@@ -63,38 +66,30 @@ public class JSSplitPaneUI extends JSPanelUI {
 
 	private class SplitPaneDivider extends JLabel {
 
-		SplitPaneDivider(JSSplitPaneUI ui) {
+	    private JSSplitPaneUI paneui;
+
+		/**
+	     * Returns dividerSize x dividerSize
+	     */
+	    public Dimension getPreferredSize() {
+	        // Ideally this would return the size from the layout manager,
+	        // but that could result in the layed out size being different from
+	        // the dividerSize, which may break developers as well as
+	        // BasicSplitPaneUI.
+	        if (orientation == JSplitPane.HORIZONTAL_SPLIT) {
+	            return new Dimension(paneui.splitPane.getDividerSize(), 1);
+	        }
+	        return new Dimension(1, paneui.splitPane.getDividerSize());
+	    }
+
+	    SplitPaneDivider(JSSplitPaneUI ui) {
 			super();
+	    	paneui = ui;
 			setOpaque(true);
-			JSFunction fHandleDrag = null;
-			/**
-			 * @j2sNative
-			 * 
-			 *            fHandleDrag = function(xyev,type){ui.fHandleDrag$I$I$I(xyev.dx,
-			 *            xyev.dy,type)};
-			 * 
-			 */
-			{
-			}
-			ui.setDraggable(fHandleDrag);
 		}
 
 	}
 
-	protected void fHandleDrag(int dx, int dy, int type) {
-		switch (type) {
-		case MouseEvent.MOUSE_PRESSED:
-			DOMNode.setCursor("nwse-resize", null);
-			// set cursor to dragging
-			break;
-		case MouseEvent.MOUSE_DRAGGED:
-			break;
-		case MouseEvent.MOUSE_RELEASED:
-			DOMNode.setCursor(null, null);
-			break;
-		}
-	}	
-	
 	/**
 	 * The divider used for non-continuous layout is added to the split pane with
 	 * this object.
@@ -190,6 +185,14 @@ public class JSSplitPaneUI extends JSPanelUI {
 	/** If true, setDividerLocation does nothing. */
 	boolean ignoreDividerLocationChange;
 
+	private Cursor cursor;
+
+	Object xyev;
+
+	private int pressedLocation;
+
+	private boolean isHorizontal;
+
 	// /**
 	// * Creates a new BasicSplitPaneUI instance
 	// */
@@ -214,6 +217,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 	@Override
 	public void installUI(JComponent jc) {
 		splitPane = (JSplitPane) jc;
+		isHorizontal = (splitPane.getOrientation() == JSplitPane.HORIZONTAL_SPLIT);
 		dividerLocationIsSet = false;
 		dividerKeyboardResize = false;
 		keepHidden = false;
@@ -223,6 +227,57 @@ public class JSSplitPaneUI extends JSPanelUI {
 		setLastDragLocation(-1);
 	}
 
+	protected void fHandleDrag(Object xyev, int type) {
+		getCursor();
+		if (splitPane.isEnabled())
+			switch (type) {
+			case MouseEvent.MOUSE_MOVED:
+				divider.setCursor(cursor);
+				return;
+			case MouseEvent.MOUSE_PRESSED:
+				this.xyev = xyev;
+				this.pressedLocation = splitPane.getDividerLocation();
+				divider.setCursor(cursor);
+				DOMNode.setCursor(getCursorName(cursor), null);
+				return;
+			case MouseEvent.MOUSE_DRAGGED:
+				int d = this.pressedLocation + /** @j2sNative (this.isHorizontal ? xyev.dx : xyev.dy) || */
+						0;
+				int max = getMaximumDividerLocation(splitPane);
+				int min = getMinimumDividerLocation(splitPane);
+				d = Math.max(min, Math.min(max, d));
+				splitPane.setDividerLocation(d);
+				return;
+			case MouseEvent.MOUSE_RELEASED:
+				break;
+			}
+		DOMNode.setCursor(null, null);
+		divider.setCursor(null);
+	}	
+	
+	private Cursor getCursor() {
+		isHorizontal = (splitPane.getOrientation() == JSplitPane.HORIZONTAL_SPLIT);
+		if (cursor == null) {
+			cursor = Toolkit.getDefaultToolkit().createCustomCursor(null, null, isHorizontal ? "col-resize" : "row-resize");
+		}
+		return cursor;
+	}
+
+	private void setupDivider() {
+		divider = new SplitPaneDivider(this); 
+		JSFunction fDrag = null;
+		@SuppressWarnings("unused")
+		JSSplitPaneUI me = this;
+
+		/**
+		 * @j2sNative
+		 * 
+		 *            fDrag = [function(xyev,type){me.fHandleDrag$O$I(xyev, type)}];
+		 * 
+		 */
+		// note that this "JSFunction" is actually an array
+		divider.getUI().setDraggable(fDrag);
+	}
 	/**
 	 * Installs the UI defaults.
 	 */
@@ -232,8 +287,9 @@ public class JSSplitPaneUI extends JSPanelUI {
 				"SplitPane.foreground");
 		LookAndFeel.installProperty(splitPane, "opaque", Boolean.TRUE);
 
-		if (divider == null)
-			divider = new SplitPaneDivider(this);
+		if (divider == null) {
+			setupDivider();
+		}
 
 		// dividerDraggingColor =
 		// UIManager.getColor("SplitPaneDivider.draggingColor");
@@ -283,6 +339,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 		// KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS,
 		// managingFocusBackwardTraversalKeys);
 	}
+
 
 	/**
 	 * Installs the event listeners for the UI.
@@ -2138,5 +2195,11 @@ public class JSSplitPaneUI extends JSPanelUI {
 	// protected ActionListener createKeyboardResizeToggleListener() {
 	// return new KeyboardResizeToggleHandler();
 	// }
+
+	@Override
+	public void setEnabled(boolean b) {
+		super.setEnabled(b);
+		splitPane.setCursor(b ? getCursor() : null);
+	}
 
 }

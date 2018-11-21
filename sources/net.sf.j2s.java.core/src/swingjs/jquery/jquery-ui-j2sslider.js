@@ -151,7 +151,7 @@
 					};
 
 					var fDrag = function(xye, id) {
-						if (me.options.disabled)
+						if (id != 506 || me.options.disabled)
 							return;
 						var event = xye.ev;
 						var position = me._getPosition(event);
@@ -249,8 +249,6 @@
 					if (o.disabled) {
 						return false;
 					}
-
-					this.elementOffset = this.element.offset();
 
 					var position = this._getPosition(event);
 
@@ -620,12 +618,13 @@
 				},
 				
 				_getPixelMouse : function(position, offsetHandle) {
+					var offset = this.element.offset;
 					var p = (this.orientation === "horizontal" ?
 							position.x
-								- this.elementOffset.left
+								- offset.left
 								- (this._clickOffset ? this._clickOffset.left : 0)
 						 : position.y
-								- this.elementOffset.top
+								- offset.top
 								- (this._clickOffset ? this._clickOffset.top : 0));
 					return p - this.handleSize / 2;
 				},

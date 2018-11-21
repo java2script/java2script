@@ -129,21 +129,18 @@ public abstract class AbstractMarshallerImpl implements Marshaller
 
     public final void marshal( Object obj, java.io.Writer w ) 
         throws JAXBException {
-    	JSUtil.notImplemented("marshal Contenthandler");
         checkNotNull( obj, "obj", w, "writer" );
         marshal( obj, new StreamResult(w) );
     }
     
     public final void marshal( Object obj, org.xml.sax.ContentHandler handler ) 
         throws JAXBException {
-    	JSUtil.notImplemented("marshal Contenthandler");
         checkNotNull( obj, "obj", handler, "handler" );
         marshal( obj, new SAXResult(handler) );
     }
     
     public final void marshal( Object obj, org.w3c.dom.Node node ) 
         throws JAXBException {
-    	JSUtil.notImplemented("marshal Contenthandler");            
         checkNotNull( obj, "obj", node, "node" );
         marshal( obj, new DOMResult(node) );
     }

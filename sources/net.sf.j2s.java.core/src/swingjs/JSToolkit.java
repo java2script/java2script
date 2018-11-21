@@ -12,6 +12,7 @@ import java.awt.JSDialog;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.Frame;
 import java.awt.JSFrame;
 import java.awt.GraphicsConfiguration;
 import java.awt.Image;
@@ -435,8 +436,8 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		 *              var id0 = SwingJS.eventID || 0;
 		 *              SwingJS.eventID = id;
 		 *              java.lang.Thread.thisThread = thread; 
-		 *              if (f.run)
-		 *                f.run();
+		 *              if (f.run$)
+		 *                f.run$();
 		 *              else
 		 *                f();
 		 *              SwingJS.eventID = id0;
@@ -516,6 +517,16 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 
 	@Override
 	public FramePeer createFrame(JSFrame target) {
+		ComponentUI ui = target.getUI();
+		if (ui == null)
+			return null;
+  	if (JSUtil.debugging)
+  		System.out.println("JSToolkit creating Frame Peer for " +  target.getClass().getName() + ": " + target.getClass().getName());
+		return (FramePeer) ((WindowPeer) ui).setFrame(target, true);
+	}
+
+	@Override
+	protected FramePeer createFrame(Frame target) {
 		ComponentUI ui = target.getUI();
 		if (ui == null)
 			return null;
@@ -932,6 +943,13 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		return (PrintJob) (Object) job;
 	}
 	
+	@Override
+	public PrintJob getPrintJob(Frame frame, String jobtitle, Properties props) {
+		JSPrintJob job = (JSPrintJob) JSUtil.getInstance("swingjs.JSPrintJob");
+		job.setProperties(jobtitle, props);
+		return (PrintJob) (Object) job;
+	}
+
 	/**
 	 * Get a gnu.jpdf.PDFJob.
 	 * 
@@ -939,6 +957,14 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	 */
 	@Override
 	public PrintJob getPrintJob(JSFrame frame, String jobtitle,
+			JobAttributes jobAttributes, PageAttributes pageAttributes) {
+		JSPrintJob job = (JSPrintJob) JSUtil.getInstance("swingjs.JSPrintJob");
+		job.setAttributes(jobtitle, jobAttributes, pageAttributes);
+		return (PrintJob) (Object) job;
+	}
+
+	@Override
+	public PrintJob getPrintJob(Frame frame, String jobtitle,
 			JobAttributes jobAttributes, PageAttributes pageAttributes) {
 		JSPrintJob job = (JSPrintJob) JSUtil.getInstance("swingjs.JSPrintJob");
 		job.setAttributes(jobtitle, jobAttributes, pageAttributes);
@@ -963,5 +989,6 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 			focusManager = new JSFocusManager();
 		return focusManager;
 	}
+
 
 }

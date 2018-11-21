@@ -1,5 +1,6 @@
 // j2sCore.js (based on JmolCore.js
 
+// BH 11/7/2018 adds J2S.addDirectDatabaseCall(domain)
 // BH 9/18/2018 fixes data.getBytes() not qualified
 // BH 8/12/2018 adding J2S.onClazzLoaded(i,msg) hook for customization
 //   for example, the developer can look for i=1 (pre-core) and add core files selectively
@@ -536,7 +537,8 @@ if (!J2S._version)
 
 	J2S._ajax = function(info) {
 		if (!info.async) {
-			return J2S.$ajax(info).responseText;
+			info.xhr = J2S.$ajax(info);
+			return info.xhr.responseText;
 		}
 		J2S._ajaxQueue.push(info)
 		if (J2S._ajaxQueue.length == 1)
@@ -562,6 +564,10 @@ if (!J2S._version)
 
 	J2S._isDatabaseCall = function(query) {
 		return (J2S.db._databasePrefixes.indexOf(query.substring(0, 1)) >= 0);
+	}
+
+	J2S.addDirectDatabaseCall = function(domain) {
+		J2S.db._DirectDatabaseCalls[domain] = null;
 	}
 
 	J2S._getDirectDatabaseCall = function(query, checkXhr2) {
@@ -614,11 +620,14 @@ if (!J2S._version)
 	}
 
 	J2S._getRawDataFromServer = function(database, query, fSuccess, fError,
-			asBase64, noScript) {
+			asBase64, noScript, infoRet) {
 		// note that this method is now only enabled for "_"
 		// server-side processing of database queries was too slow and only
 		// useful for
 		// the IMAGE option, which has been abandoned.
+
+console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
+ 
 		var s = "?call=getRawDataFromDatabase&database="
 				+ database
 				+ (query.indexOf("?POST?") >= 0 ? "?POST?" : "")
@@ -628,7 +637,7 @@ if (!J2S._version)
 				+ (noScript ? "" : "&script="
 						+ encodeURIComponent(J2S
 								._getScriptForDatabase(database)));
-		return J2S._contactServer(s, fSuccess, fError);
+		return J2S._contactServer(s, fSuccess, fError, infoRet);
 	}
 
 	J2S._checkFileName = function(applet, fileName, isRawRet) {
@@ -662,32 +671,36 @@ if (!J2S._version)
 		return fSuccess;
 	}
 
-	J2S.getSetJavaFileCache = function(cache) {
+	J2S.getSetJavaFileCache = function(map) {
 		// called by swingjs.JSUtil
-		return (cache == null ? J2S._javaFileCache
-				: (J2S._javaFileCache = cache));
+		return (map == null ? J2S._javaFileCache
+				: (J2S._javaFileCache = map));
 	}
 
-	J2S._loadFileData = function(applet, fileName, fSuccess, fError) {
+	J2S.getCachedJavaFile = function(key) {
+		// called by Jmol FileManager
+		if (!J2S._javaFileCache) return null;
+		var data = J2S._javaFileCache.get$O(key);
+		if (data == null && key.indexOf("file:/") == 0)
+			data = J2S._javaFileCache.get$O(key.substring(6));
+		return data;
+	}
+
+	J2S._loadFileData = function(applet, fileName, fSuccess, fError, info) {
+		info || (info = {});
 		var isRaw = [];
 		fileName = J2S._checkFileName(applet, fileName, isRaw);
 		fSuccess = J2S._checkCache(applet, fileName, fSuccess);
 		if (isRaw[0]) {
-			J2S._getRawDataFromServer("_", fileName, fSuccess, fError);
+			J2S._getRawDataFromServer("_", fileName, fSuccess, fError, info);
 			return;
 		}
-		var info = {
-			type : "GET",
-			dataType : "text",
-			url : fileName,
-			async : J2S._asynchronous,
-			success : function(a) {
-				J2S._loadSuccess(a, fSuccess)
-			},
-			error : function() {
-				J2S._loadError(fError)
-			}
-		}
+		info.type = "GET";
+		info.dataType = "text";
+		info.url = fileName;
+		info.async = J2S._asynchronous;
+		info.success = function(a) { J2S._loadSuccess(a, fSuccess) };
+		info.error = function() { J2S._loadError(fError) };
 		J2S._checkAjaxPost(info);
 		J2S._ajax(info);
 	}
@@ -701,19 +714,14 @@ if (!J2S._version)
 			info.contentType = "application/x-www-form-urlencoded";
 		}
 	}
-	J2S._contactServer = function(data, fSuccess, fError) {
-		var info = {
-			dataType : "text",
-			type : "GET",
-			url : J2S._serverUrl + data,
-			success : function(a) {
-				J2S._loadSuccess(a, fSuccess)
-			},
-			error : function() {
-				J2S._loadError(fError)
-			},
-			async : fSuccess ? J2S._asynchronous : false
-		}
+	J2S._contactServer = function(data, fSuccess, fError, info) {
+		info || (info = {});
+		info.dataType = "text";
+		info.type = "GET";
+		info.url = J2S._serverUrl + data;
+		info.success = function(a) { J2S._loadSuccess(a, fSuccess) };
+		info.error = function() { J2S._loadError(fError) };
+		info.async = (fSuccess ? J2S._asynchronous : false);
 		J2S._checkAjaxPost(info);
 		return J2S._ajax(info);
 	}
@@ -759,7 +767,13 @@ if (!J2S._version)
 		return false;
 	}
 
-	J2S.getFileData = function(fileName, fSuccess, doProcess, isBinary) {
+	var knownDomains = {};
+
+	J2S.getFileData = function(fileName, fSuccess, doProcess, info) {
+		if (info === true)
+			info = {isBinary: true};
+		info || (info = {});
+		var isBinary = info.isBinary;
 		// swingjs.api.J2SInterface
 		// use host-server PHP relay if not from this host
 		if (fileName.indexOf("https://./") == 0)
@@ -781,30 +795,21 @@ if (!J2S._version)
 			fileName = "file://" + fileName.substring(5); // / fixes IE
 															// problem
 		var isFile = (fileName.indexOf("file://") == 0);
-		
 		var isMyHost = (fileName.indexOf("://") < 0 || fileName
 				.indexOf(document.location.protocol) == 0
 				&& fileName.indexOf(document.location.host) >= 0);
-		var isHttps2Http = (J2S._httpProto == "https://" && fileName
-				.indexOf("http://") == 0);
-		var isDirectCall = J2S._isDirectCall(fileName);
-		// if (fileName.indexOf("http://pubchem.ncbi.nlm.nih.gov/") ==
-		// 0)isDirectCall = false;
-
-		var cantDoSynchronousLoad = (!isMyHost && J2S
-				.$supportsIECrossDomainScripting());
+		var isHttps2Http = (J2S._httpProto == "https://" && fileName.indexOf("http://") == 0);
+		var cantDoSynchronousLoad = (!isMyHost && J2S.$supportsIECrossDomainScripting());
+		var mustCallHome = !isFile && (isHttps2Http || asBase64 || !fSuccess && cantDoSynchronousLoad);
+		var isNotDirectCall = !mustCallHome && !isFile && !isMyHost && !J2S._isDirectCall(fileName);
 		var data = null;
-		if (!isFile
-				&& (isHttps2Http || asBase64 || !isMyHost && !isDirectCall || !fSuccess
-						&& cantDoSynchronousLoad)) {
+		if (mustCallHome || isNotDirectCall) {
 			data = J2S._getRawDataFromServer("_", fileName, fSuccess, fSuccess,
-					asBase64, true);
+					asBase64, true, info);
 		} else {
 			fileName = fileName.replace(/file:\/\/\/\//, "file://"); // opera
-			var info = {
-				dataType : (isBinary ? "binary" : "text"),
-				async : !!fSuccess
-			};
+			info.dataType = (isBinary ? "binary" : "text");
+			info.async = !!fSuccess;
 			if (isPost) {
 				info.type = "POST";
 				info.url = fileName.split("?POST?")[0]
@@ -814,12 +819,8 @@ if (!J2S._version)
 				info.url = fileName;
 			}
 			if (fSuccess) {
-				info.success = function(data) {
-					fSuccess(J2S._xhrReturn(info.xhr))
-				};
-				info.error = function() {
-					fSuccess(info.xhr.statusText)
-				};
+				info.success = function(data) { fSuccess(J2S._xhrReturn(info.xhr)) };
+				info.error = function() { fSuccess(info.xhr.statusText) };
 			}
 			info.xhr = J2S.$ajax(info);
 			if (!fSuccess) {
@@ -1054,15 +1055,17 @@ if (!J2S._version)
 		}
 	}
 
-	J2S.doAjax = function(url, postOut, dataOut) {
+	J2S.doAjax = function(url, postOut, dataOut, info) {
+		if (info === true)
+			info = {isBinary: true};
+		info || (info = {});
 		// called by org.J2S.awtjs2d.JmolURLConnection.doAjax()
 		url = url.toString();
-
 		if (dataOut != null)
 			return J2S.saveFile(url, dataOut);
 		if (postOut)
 			url += "?POST?" + postOut;
-		return J2S.getFileData(url, null, true);
+		return J2S.getFileData(url, null, true, info);
 	}
 
 	// J2S._localFileSaveFunction -- // do something local here; Maybe try the
@@ -2659,7 +2662,7 @@ if (!J2S._version)
 		// J2S.setDraggable(tag, target)
 		// J2S.setDraggable(tag, fTarget)
 
-		// draggable tag object simply loades/reports mouse position as
+		// draggable tag object simply loade=s/reports mouse position as
 		// fDown({x:x,y:y,dx:dx,dy:dy,ev:ev}) should fill x and y with starting
 		// points
 		// fDrag(xy) and fUp(xy) will get {x:x,y:y,dx:dx,dy:dy,ev:ev} to use as
@@ -2678,7 +2681,7 @@ if (!J2S._version)
 		// until the mouse is released.
 		// uses jQuery outside events - v1.1 - 3/16/2010 (see j2sJQueryExt.js)
 
-		// J2S.setDraggable(titlebar, frame.outerNode), for example, is issued
+		// J2S.setDraggable(titlebar, fGetFrameParent), for example, is issued
 		// in swingjs.plaf.JSFrameUI.js
 
 		var drag, up;
@@ -2766,7 +2769,8 @@ if (!J2S._version)
 		}, drag = function(ev) {
 			// we will move the frame's parent node and take the frame along
 			// with it
-			if (tag.isDragging && J2S._dmouseOwner == tag) {
+			var mode = (tag.isDragging ? 506 : 503);
+			if (!J2S._dmouseOwner || tag.isDragging && J2S._dmouseOwner == tag) {
 				x = pageX0 + (dx = ev.pageX - pageX);
 				y = pageY0 + (dy = ev.pageY - pageY);
 				if (fDrag) {
@@ -2776,12 +2780,11 @@ if (!J2S._version)
 						dx : dx,
 						dy : dy,
 						ev : ev
-					}, 506);
+					}, mode);
 				} else if (target) {
-					$(target(506)).css({
-						top : y + 'px',
-						left : x + 'px'
-					})
+					var frame = target(mode, x, y);
+					if (frame)
+						$(frame).css({ top : y + 'px', left : x + 'px'})
 				}
 			}
 		}, up = function(ev) {
@@ -2841,7 +2844,7 @@ if (!J2S._version)
 		}
 		z = (node.style.zIndex = (z > 0 ? zbase : z0));
 		node.style.position = "absolute";
-		if (J2S._checkLoading)
+		if (J2S._checkLoading) 
 			System.out.println("setting z-index to " + z + " for " + node.id);
 		return z;
 	}

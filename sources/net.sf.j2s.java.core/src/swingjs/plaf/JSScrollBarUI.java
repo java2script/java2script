@@ -24,6 +24,8 @@ public class JSScrollBarUI extends JSSliderUI {
 	
 	private boolean isInvisible;
 
+	//private boolean isAdjusting;
+
 	public JSScrollBarUI() {
 		super();
 		isScrollBar = true;
@@ -38,10 +40,14 @@ public class JSScrollBarUI extends JSSliderUI {
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		super.stateChanged(e);
-		setScrollBarExtentAndCSS();
-		if (debugging) 
-					System.out.println(id + " stateChange " + dumpEvent(e));
+//		if (!isAdjusting) {
+//			isAdjusting = true;
+			super.stateChanged(e);
+			setScrollBarExtentAndCSS();
+//			isAdjusting = false;
+			if (debugging) 
+				System.out.println(id + " stateChange " + dumpEvent(e));
+//		}		
 	}
 
 

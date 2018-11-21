@@ -7,6 +7,11 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 11/11/2018 3.2.4.04 fixes String.CASE_INSENSITIVE_ORDER.compare$S$S
+// BH 11/10/2018 3.2.4.04 fixes inner class synthetic references to interfaces
+// BH 11/10/2018 3.2.4.04 fixes String.prototype.split$S and.split$S$I to remove trailing ""
+// BH 11/6/2018 3.2.4.03 adds TypeError.prototype.printStackTrace$java_io_PrintStream
+// BH 11/4/2018 3.2.4.02 fixes problem with new Date("10/20/2018") and missing date.equals()
 // BH 10/1/2018 3.2.4.01 fixes problem with AWT mouseXxx(Event) not activating in children of Applet
 // BH 9/29/2018 3.2.4.00 adds JAXB support
 // BH 9/23/2018 3.2.3.00 adds direct non-Swing applet support (java.applet.Applet and java.awt.*); no need for converting source to a2s.*
@@ -104,7 +109,7 @@ window["j2s.clazzloaded"] = true;
   _debugging: false,
   _loadcore: true,
   _nooutput: 0,
-  _VERSION_R: "3.2.4.01",
+  _VERSION_R: "3.2.4.02",
   _VERSION_T: "3.2.4.00",
 };
 
@@ -265,7 +270,7 @@ Clazz.assert = function(clazz, obj, tf, msg) {
     ok = false;
   }
   if (!ok) {
-    debugger;
+    doDebugger();
     if (Clazz._assertFunction) {
       return Clazz._assertFunction(clazz, obj, msg || Clazz._getStackTrace());
     }
@@ -279,8 +284,12 @@ Clazz.assert = function(clazz, obj, tf, msg) {
 
 Clazz.clone = function(me) { 
   // BH allows @j2sNative access without super constructor
-  return appendMap(me.__ARRAYTYPE ? Clazz.array(me.__BASECLASS, me.__ARRAYTYPE, -1, me, true)
-   : new me.constructor(inheritArgs), me); 
+if (me.__ARRAYTYPE) {
+  return appendMap(Clazz.array(me.__BASECLASS, me.__ARRAYTYPE, -1, me, true), me);
+}
+  me = appendMap(new me.constructor(inheritArgs), me); 
+  me.__JSID__ = ++_jsid;
+  return me;
 }
 
 /**sgurin
@@ -612,18 +621,18 @@ var addB$Keys = function(clazz, isNew, b, outerObj, objThis) {
     b[key] = outerObj; 
     if (key.indexOf("java.lang.") == 0)
     	b[key.substring(10)] = outerObj;
-  } while ((cl = cl.superclazz));
-  if (cl != clazz && clazz.implementz) {
-  	var impl = clazz.implementz;
+  if (cl.implementz) {
+  	var impl = cl.implementz;
   	for (var i = impl.length; --i >= 0;) {
       var key = getClassName(impl[i], true);
       if (isNew || !b[key]) {
-        b[key] = objThis; 
+        b[key] = outerObj; 
 	    if (key.indexOf("java.lang.") == 0)
 	    	b[key.substring(10)] = outerObj;
       }
   	}
   }
+  } while ((cl = cl.superclazz));
 };
 
 
@@ -744,7 +753,7 @@ Clazz.newMeth = function (clazzThis, funName, funBody, modifiers) {
   var isStatic = (modifiers == 1 || modifiers == 2);
   var isPrivate = (typeof modifiers == "object");
   if (isPrivate) 
-	C$.$P$ = modifiers;
+	clazzThis.$P$ = modifiers;
   Clazz.saemCount0++;
   funBody.exName = funName; // mark it as one of our methods
   funBody.exClazz = clazzThis; // make it traceable
@@ -1645,7 +1654,7 @@ Clazz._getStackTrace = function(n) {
       s += "<recursing>\n";
       break;
     }
-    if (showParams) {
+    if (showParams) { 	
       s += getArgs(c);
     }
   }
@@ -1653,7 +1662,7 @@ Clazz._getStackTrace = function(n) {
   s += estack.join("\n");
   if (Clazz._stack.length) {
 	  s += "\nsee Clazz._stack";
-	  console.log("Clazz._stack = " + Clazz._stack);
+	  console.log("Clazz._stack() = " + Clazz._stack());
 	  console.log("Use Clazz._showStack() or Clazz._showStack(n) to show parameters");
   }
   return s;
@@ -1956,7 +1965,7 @@ Clazz.newInterface(java.lang,"Runnable");
 //Clazz.newMeth(C$);
 //})()
 //})();
-//;Clazz.setTVer('3.2.2.03');//Created 2018-08-09 18:57:20 Java2ScriptVisitor version 3.2.2.03 net.sf.j2s.core.jar version 3.2.2.03
+//;Clazz.setTVer('3.2.4.04');//Created 2018-08-09 18:57:20 Java2ScriptVisitor version 3.2.2.03 net.sf.j2s.core.jar version 3.2.2.03
 
 (function(){var P$=java.lang,I$=[[0,'java.util.stream.StreamSupport','java.util.Spliterators','java.lang.CharSequence$lambda1','java.lang.CharSequence$lambda2']],$I$=function(i){return I$[i]||(I$[i]=Clazz.load(I$[0][i]))};
 var C$=Clazz.newInterface(P$, "CharSequence");
@@ -3234,9 +3243,8 @@ java.lang.System = System = {
   currentTimeMillis$ : function () {
     return new Date ().getTime ();
   },
-  exit$ : function() {
-  debugger 
-  swingjs.JSToolkit && swingjs.JSToolkit.exit$() 
+  exit$ : function() { 
+ 	 swingjs.JSToolkit && swingjs.JSToolkit.exit$() 
   },
   gc$ : function() {}, // bh
   getProperties$ : function () {
@@ -3328,12 +3336,12 @@ Sys.out.flush$ = function() {}
 Sys.out.println = Sys.out.println$O = Sys.out.println$Z = Sys.out.println$I = Sys.out.println$J = Sys.out.println$S = Sys.out.println$C = Sys.out.println = function(s) {
 
 if (("" + s).indexOf("TypeError") >= 0) {
-   debugger;
+   doDebugger();
 }
   if (Clazz._nooutput) return;
   if (Clazz._traceOutput && s && ("" + s).indexOf(Clazz._traceOutput) >= 0) {
     alert(s + "\n\n" + Clazz._getStackTrace());
-    debugger;
+    doDebugger();
   }
   Con.consoleOutput(typeof s == "undefined" ? "\r\n" : s == null ?  s = "null\r\n" : s + "\r\n");
 };
@@ -3358,7 +3366,7 @@ Sys.err.printf = Sys.err.printf$S$OA = Sys.err.format = Sys.err.format$S$OA = Sy
 Sys.err.println = Sys.err.println$O = Sys.err.println$Z = Sys.err.println$I = Sys.err.println$S = Sys.err.println$C = Sys.err.println = function (s) {
   if (Clazz._traceOutput && s && ("" + s).indexOf(Clazz._traceOutput) >= 0) {
     alert(s + "\n\n" + Clazz._getStackTrace());
-    debugger;
+    doDebugger();
   }
   Con.consoleOutput (typeof s == "undefined" ? "\r\n" : s == null ?  s = "null\r\n" : s + "\r\n", "red");
 };
@@ -4226,11 +4234,13 @@ String.format$S$OA = function(format, args) {
 	 }
  } 
  
+String.CASE_INSENSITIVE_ORDER.compare$S$S = String.CASE_INSENSITIVE_ORDER.compare$;
+
 CharSequence.$defaults$(String);
  
 ;(function(sp) {
 
-sp.compareToIgnoreCase$S = function(str) { return String.CASE_INSENSITIVE_ORDER.compare(this, str);}
+sp.compareToIgnoreCase$S = function(str) { return String.CASE_INSENSITIVE_ORDER.compare$S$S(this, str);}
 
 sp.generateExpFunction$S=function(str){
 var arr=[];
@@ -4365,6 +4375,8 @@ if (!limit && regex == " ") {
 	var regExp=new RegExp(regex,"gm");
 	arr = this.split(regExp);
 }
+while (arr[arr.length - 1] === "")
+	arr.pop();
 return Clazz.array(String, -1, arr);
 };
 
@@ -4966,30 +4978,34 @@ Character.prototype.intValue$  = function() { return this.value.codePointAt(0) }
 
 // TODO: Only asking for problems declaring Date. This is not necessary
 
+// NOTE THAT java.util.Date, like java.lang.Math, is unqualified by the transpiler -- this is NOT necessary
+
 Clazz._setDeclared("java.util.Date", java.util.Date=Date);
 //Date.TYPE="java.util.Date";
 Date.__CLASS_NAME__="Date";
 addInterface(Date,[java.io.Serializable,java.lang.Comparable]);
 
-m$(java.util.Date, "c$", function(t) {
-  this.setTime$J(t || System.currentTimeMillis$())
+m$(java.util.Date, ["c$", "c$$S", "c$$J"], function(t) {
+  this.setTime$J(typeof t == "string" ? Date.parse(t) : t ? t : System.currentTimeMillis$())
 }, 1);
 
-m$(java.util.Date,"clone$",
+m$(java.util.Date, ["getClass$", "getClass"], function () { return Clazz.getClass(this); }, 1);
+
+m$(java.util.Date,["clone$","clone"],
 function(){
 return new Date(this.getTime());
 });
 
-m$(java.util.Date,"before$java_util_Date",
+m$(java.util.Date,["before", "before$java_util_Date"],
 function(when){
 return this.getTime()<when.getTime();
 });
-m$(java.util.Date,"after$java_util_Date",
+m$(java.util.Date,["after", "after$java_util_Date"],
 function(when){
 return this.getTime()>when.getTime();
 });
 
-m$(java.util.Date,"equals$O",
+m$(java.util.Date,["equals","equals$O"],
 function(obj){
 return Clazz.instanceOf(obj,java.util.Date)&&this.getTime()==(obj).getTime();
 });
@@ -5029,7 +5045,7 @@ dp.setSeconds$I = dp.setSeconds;
 dp.setTime$J = dp.setTime;
 dp.setYear$I = dp.setYear;
 dp.toGMTString$ = dp.toGMTString;
-dp.toLocaleString$ = dp.toLocaleDateString;
+dp.toLocaleString$ = dp.toLocaleString = dp.toLocaleDateString;
 dp.UTC$ = dp.UTC;
 
 
@@ -5267,8 +5283,10 @@ if(lineNum>=0){
 });
 
 
-TypeError.prototype.getMessage$ || (TypeError.prototype.getMessage$ = function(){ return (this.stack ? this.stack : this.message || this.toString()) + (this.getStackTrace ? this.getStackTrace$() : Clazz._getStackTrace())});
-TypeError.prototype.printStackTrace$ = function(){System.out.println(this + "\n" + this.stack)}
+TypeError.prototype.getMessage$ || (TypeError.prototype.getMessage$ = TypeError.prototype.getLocalizedMessage$ 
+			= function(){ return (this.stack ? this.stack : this.message || this.toString()) + (this.getStackTrace ? this.getStackTrace$() : Clazz._getStackTrace())});
+TypeError.prototype.printStackTrace$ = function(){System.out.println(this + "\n" + this.stack)};
+TypeError.prototype.printStackTrace$java_io_PrintStream = function(stream){stream.println$S(e + "\n" + e.stack);};
 
 Clazz.Error = Error;
 

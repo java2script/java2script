@@ -2,6 +2,7 @@ package swingjs.plaf;
 
 
 import java.awt.Dimension;
+import java.awt.LayoutManager;
 
 import javax.swing.JComponent;
 import javax.swing.JRootPane;
@@ -12,7 +13,7 @@ public class JSPanelUI extends JSLightweightUI {
 
 	int frameZ = 10000;
 	public JSPanelUI() {
-		isContainer = true;
+		isContainer = isPanel = true;
 		setDoc();
 	}
 	
@@ -53,6 +54,12 @@ public class JSPanelUI extends JSLightweightUI {
 	public Dimension getPreferredSize() {
   	return null;
   }
+	
+	@Override
+	public Dimension getMinimumSize() {
+		LayoutManager man = jc.getLayout();
+		return (man == null ? super.getMinimumSize() : jc.getLayout().minimumLayoutSize(jc));
+	}
 
 
 }

@@ -64,7 +64,7 @@ package java.awt;
  * @see         java.awt.CheckboxGroup
  * @since       JDK1.0
  */
-public class Checkbox extends a2s.Checkbox {//Component implements ItemSelectable, Accessible {
+public class Checkbox extends swingjs.a2s.Checkbox {//Component implements ItemSelectable, Accessible {
 
 //    static {
 //        /* ensure that the necessary native libraries are loaded */
@@ -188,7 +188,7 @@ public class Checkbox extends a2s.Checkbox {//Component implements ItemSelectabl
      */
     public Checkbox(String label, boolean state, CheckboxGroup group)
         throws HeadlessException {
-    	super(label, state, (a2s.CheckboxGroup) (Object) group);
+    	super(label, state, (CheckboxGroup) (Object) group);
 //        GraphicsEnvironment.checkHeadless();
 //        this.label = label;
 //        this.state = state;

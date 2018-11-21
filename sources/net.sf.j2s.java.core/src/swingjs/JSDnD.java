@@ -14,7 +14,9 @@ import java.awt.dnd.peer.DropTargetContextPeer;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JComponent;
 
@@ -161,6 +163,7 @@ public class JSDnD {
 		
 		public FileTransferable(String name, byte[] data) {
 			file = new JSFileBytes(name, data);
+			JSUtil.cacheFileData(name, data);
 		}
 
 		@Override

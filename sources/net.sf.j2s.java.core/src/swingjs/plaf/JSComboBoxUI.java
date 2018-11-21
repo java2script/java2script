@@ -4,8 +4,6 @@ package swingjs.plaf;
 import javajs.util.PT;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.LookAndFeel;
@@ -23,7 +21,7 @@ import swingjs.api.js.DOMNode;
  * 
  */
 
-public class JSComboBoxUI extends JSLightweightUI implements PropertyChangeListener, ItemListener, ListDataListener {
+public class JSComboBoxUI extends JSLightweightUI implements ItemListener, ListDataListener {
 
 	private JComboBox comboBox;
 
@@ -43,7 +41,21 @@ public class JSComboBoxUI extends JSLightweightUI implements PropertyChangeListe
 			addJQueryFocusCallbacks();
 		}
 		populateList();
+		checkEnabled();
     return domNode;
+	}
+
+	private void checkEnabled() {
+		if (comboBox.isEnabled())
+			domNode.removeAttribute("disabled");
+		else
+			DOMNode.setAttr(domNode, "disabled", "true");			
+	}
+
+	
+	@Override
+	public void setEnabled(boolean b) {
+		checkEnabled();
 	}
 
 	@Override
@@ -145,11 +157,11 @@ public class JSComboBoxUI extends JSLightweightUI implements PropertyChangeListe
 
 	
 	
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-		if (debugging)
-			System.out.println("JSComboBoxUI propertychange " + evt);
-	}
+//	@Override
+//	public void propertyChange(PropertyChangeEvent evt) {
+//		if (debugging)
+//			System.out.println("JSComboBoxUI propertychange " + evt);
+//	}
 	
 	@Override
   public boolean contains(JComponent c, int x, int y) {

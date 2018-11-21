@@ -109,6 +109,8 @@ public class Resizer {
 		if (!enabled)
 			return;
 		switch (type) {
+		case MouseEvent.MOUSE_MOVED:
+			break; // TODO - change cursor? Entry/Exit?
 		case MouseEvent.MOUSE_PRESSED:
 			DOMNode.setStyles(resizer, "background-color", "green");
 			DOMNode.setVisible(rubberBand, true);

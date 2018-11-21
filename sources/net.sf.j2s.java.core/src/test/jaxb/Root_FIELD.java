@@ -1,5 +1,6 @@
 package test.jaxb;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -16,25 +17,23 @@ import javax.xml.bind.annotation.XmlType;
 
 // adapted source: http://blog.bdoughan.com/2011/06/using-jaxbs-xmlaccessortype-to.html
 
-@XmlRootElement(name = "Root", namespace = "www.jalview.org")
+// XmlRootElement is used by the unmarshaller to find the correct class
+@XmlRootElement(namespace="root.field", name="RootF")
+// XmlType overrides this 
+@XmlType(namespace="root.field", name="RootF")
 @XmlAccessorType(XmlAccessType.FIELD)
-//@XmlType(propOrder = {
-//	    "D",
-//	    "a",
-//	    "date",
-//	    "propertyC",
-//	    "b",
-//	    "c",
-//	    "publ"
-//	})
-public class Root_FIELD {
+public class Root_FIELD extends ROOT_super {
 
 	public static boolean isCopy = false;
-
 	static final String x = "Date";
-	// TODO: DOES NOT WORK @XmlElement(name=x)
 
 	public Root_FIELD() {
+	}
+
+	public Root_FIELD(boolean addR1) {
+		if (addR1)
+			r1 = new Root_FIELD();
+		date = new Date();
 
 		lst.add("list1");
 		lst.add(null);
@@ -44,12 +43,44 @@ public class Root_FIELD {
 		hm.put("null", null);
 		if (!isCopy) {
 			isCopy = true;
-			r1 = new Root_FIELD();
+//			r1 = new Root_FIELD();
 		}
+		
+		NILLt = "nillable-true";
+
+
+		i2 = new Integer[2];
+
+		ia = new int[2];
+		sa = new String[] { null, "s", "a", null };
+
+		saa = new String[][] { null, new String[] { "s", "a" }, null };
+
+		saaa = new String[][][] { null,
+				new String[][] { new String[] { "s", "a" }, new String[] { "t", "b" } }, null };
+
+		Ang = "\u212B";
+		
+		iii = new Integer(2);
 	}
 
-	public Root_FIELD(boolean addR1) {
-		r1 = new Root_FIELD();
+	public void validate() {
+//		assert(getPropertyAng().equals("\u212B"));
+		assert (iii.equals(Integer.valueOf(2)));
+		System.out.println("date is " + date);
+		System.out.println(PC());
+		assert (PC().equals("PropertyC0"));
+		System.out.println(pc());
+		assert (pc().equals("getPropertyc:propertyc01"));
+		System.out.println(pC());
+		assert (pC().equals("getproPERtyC:propertyC01"));
+		System.out.println("DEFVAL=" + DEFVAL);
+		assert (DEFVAL.equals("default-value"));
+
+		try {
+			assert (getPropertyAng().getBytes("utf-8").length == 3);
+		} catch (UnsupportedEncodingException e) {
+		}
 	}
 
 	public void toC(String c) {
@@ -74,7 +105,7 @@ public class Root_FIELD {
 
 ////////////////////////////////////////////////////
 
-	public String s;
+	public String s; 
 	// ignored -- not initialized
 
 	@XmlTransient
@@ -95,34 +126,34 @@ public class Root_FIELD {
     //     <NILL xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
 
 	@XmlElement(nillable=true)
-	private String NILLt = "nillable-true";
+	private String NILLt;
     //         <NILLt>nillable-true</NILLt>
 
-	@XmlElement(defaultValue="default-value")
-	public String DEFVAL = null;
-    //         <DEFVAL xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+	// DOES NOT WORK since our marshaller will not use "/>"
+	@XmlElement(defaultValue="default-value") 
+	public String DEFVAL = "defval";
 	
 ///// arrays /////
 
-	public Root_FIELD[] r2 = new Root_FIELD[2];
+	public Root_FIELD[] r2;
 //    <r2 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
 //    <r2 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
 
-	public Integer[] i2 = new Integer[2];
+	public Integer[] i2;
 //    <i2 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
 //    <i2 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
 
-	public int[] ia = new int[2];
+	public int[] ia;
 //    <ia>0</ia>
 //    <ia>0</ia>
 
-	public String[] sa = new String[] { null, "s", "a", null };
+	public String[] sa;
 //  <sa xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
 //  <sa>s</sa>
 //  <sa>a</sa>
 //  <sa xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
 
-	public String[][] saa = new String[][] { null, new String[] { "s", "a" }, null };
+	public String[][] saa;
 //  <saa xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
 //  <saa>
 //      <item>s</item>
@@ -130,8 +161,7 @@ public class Root_FIELD {
 //  </saa>
 //  <saa xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
 
-	public String[][][] saaa = new String[][][] { null,
-			new String[][] { new String[] { "s", "a" }, new String[] { "t", "b" } }, null };
+	public String[][][] saaa;
 //  <saaa xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
 //  <saaa>
 //      <item>
@@ -173,7 +203,7 @@ public class Root_FIELD {
 //        <item xsi:nil="true"/>
 //    </lst>
 
-	String Ang = "\u212B";
+	String Ang;
 	// <Ang>[3 bytes here]</Ang>
 	public String getPropertyAng() {
 		return Ang;
@@ -236,7 +266,7 @@ public class Root_FIELD {
 		D = "setD";
 	}
 
-	public Date date = new Date();
+	public Date date;
 //<date>2018-09-30T05:44:03.162-05:00</date>
 
 ///// capitalization tests /////
@@ -247,6 +277,10 @@ public class Root_FIELD {
 	private String PropertyC = "PropertyC0";
     //    <PropertyC>PropertyC0</PropertyC>
 	
+	
+	@XmlElement(type=Integer.class, namespace="testing",name="what", nillable=true)
+	private Object iii;
+
 	@XmlTransient
 	private String propertyC = "propertyC0";
 	@XmlElement

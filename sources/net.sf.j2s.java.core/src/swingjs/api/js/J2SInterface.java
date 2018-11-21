@@ -33,6 +33,8 @@ public interface J2SInterface {
 
 	Hashtable<String, Object> getSetJavaFileCache(Object object);
 	
+	Object getCachedJavaFile(String key);
+	
 	JSSwingMenu getSwing();
 
 	int getZ(HTML5Applet applet, String frameType);

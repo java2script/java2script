@@ -69,7 +69,7 @@ package java.awt;
  * @see java.awt.Component#addMouseListener
  * @since JDK1.0
  */
-public class Button extends a2s.Button {// Component implements Accessible {
+public class Button extends swingjs.a2s.Button {// Component implements Accessible {
 
 	/**
 	 * Constructs a button with an empty string for its label.

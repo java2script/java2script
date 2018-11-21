@@ -68,7 +68,7 @@ public class JSUtil {
 
 	/**
 	 * This could be a simple String, a javajs.util.SB, or unsigned or signed bytes
-	 * depending upon the browser and the file type. 
+	 * depending upon the browser and the file type.
 	 * 
 	 * It will not be cached, but it might come from a cache;
 	 * 
@@ -78,24 +78,19 @@ public class JSUtil {
 	@SuppressWarnings("unused")
 	private static Object getFileContents(Object uriOrJSFile) {
 		if (uriOrJSFile instanceof File) {
-		  byte[] bytes = /** @j2sNative uriOrJSFile.bytes ||*/ null;
-		  if (bytes != null)
-			  return bytes;
+			byte[] bytes = /** @j2sNative uriOrJSFile.bytes || */
+					null;
+			if (bytes != null)
+				return bytes;
 		}
 		String uri = uriOrJSFile.toString();
 		Object data = getCachedFileData(uri);
-		if (data == null)  	{
-
-			// for reference -- not used in JavaScript
-			
-			/**
-			 * @j2sNative
-			 * 
-			 */
-			try {
-				data = Rdr.streamToUTF8String((BufferedInputStream) new URL(uri).getContent());
-			} catch (Exception e) {
-			}
+		if (data == null && !uri.startsWith("./")) {
+			// Java applications may use "./" here
+				try {
+					data = Rdr.streamToUTF8String((BufferedInputStream) new URL(uri).getContent());
+				} catch (Exception e) {
+				}
 			// bypasses AjaxURLConnection
 			data = JSUtil.J2S.getFileData(uri, null, false, false);
 		}
@@ -175,7 +170,7 @@ public class JSUtil {
 	}
 
 	static void cacheFileData(String path, Object data) {		
-		getFileCache().put(path,  data);
+		getFileCache().put(path, data);
 	}
 
 	/**

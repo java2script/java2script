@@ -30,7 +30,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 			DOMNode.setAttr(buttonNode, "htmlFor", id);
 		} else {
 			if (actionNode != null)
-				DOMNode.remove(actionNode);
+				DOMNode.dispose(actionNode);
 		}
 		enableNodes = new DOMNode[] { actionNode, buttonNode };
 		setDataComponent(actionNode);
@@ -92,10 +92,10 @@ public class JSRadioButtonUI extends JSButtonUI {
 		DOMNode.setStyles(iconNode, "position", null);
 		DOMNode.setStyles(textNode, "position", null);
 		Dimension dim = null;
+		vCenter(iconNode, (actionNode == null ? -15 : isMenuItem ? -110 : -75), isMenuItem ? 0.6f : 0);
 		dim = setHTMLSize1(wrap("div", "", iconNode, textNode), false, false);
+		vCenter(textNode, -50, 0);
 		setHorizontalButtonAlignments(b, b.getHorizontalTextPosition(), b.getHorizontalAlignment());
-		vCenter(iconNode, (actionNode == null ? -15 : -75));
-		vCenter(textNode, -50);
 		if (!isMenuItem) { // only problem here is menu width 
 		}
 		buttonNode.appendChild(textNode);
@@ -103,8 +103,11 @@ public class JSRadioButtonUI extends JSButtonUI {
 		if (doAll && !isMenuItem)
 			DOMNode.setPositionAbsolute(domNode);
 		if (dim != null) {
-			DOMNode.setSize(buttonNode, dim.width, dim.height);
-			DOMNode.setSize(centeringNode, dim.width, dim.height);
+			int ht = (isMenuItem ? c.getFont().getSize() + 3 : 36);
+			if (ht > 18)
+				ht = dim.height;
+			DOMNode.setSize(buttonNode, dim.width, ht);
+			DOMNode.setSize(centeringNode, dim.width, ht);
 		}
 	}
 

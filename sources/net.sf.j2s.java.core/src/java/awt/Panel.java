@@ -36,7 +36,7 @@ package java.awt;
  * @see     java.awt.FlowLayout
  * @since   JDK1.0
  */
-public class Panel extends a2s.Panel {//Container implements Accessible {
+public class Panel extends swingjs.a2s.Panel {//Container implements Accessible {
 //    private static final String base = "panel";
 //    private static int nameCounter = 0;
 //

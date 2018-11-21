@@ -1125,7 +1125,7 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
 
         g.setFont(font);
 
-        System.out.println("painting tab text " + tabPlacement + " " + title + " "+ textRect);
+        //System.out.println("painting tab text " + tabPlacement + " " + title + " "+ textRect);
         View v = getTextViewForTab(tabIndex);
         if (v != null) {
             // html

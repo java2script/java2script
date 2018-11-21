@@ -107,7 +107,7 @@ abstract class ModalEventFilter implements EventFilter {
             c = c.getParent_NoClientCode();
         }
         // check if one dialog blocks (directly or indirectly) another
-        Dialog blocker = ((a2s.Dialog) modalDialog).getModalBlocker();
+        Dialog blocker = ((swingjs.a2s.Dialog) modalDialog).getModalBlocker();
         while (blocker != null) {
             if (blocker == anotherDialog) {
                 return -1;

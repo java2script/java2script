@@ -326,16 +326,16 @@ class ContextFinder {
         Class[] contextPathClasses = ModuleUtil.getClassesFromContextPath(contextPath, classLoader);
 
         //first try with classloader#getResource
-        String factoryClassName = jaxbProperties(contextPath, classLoader, factoryId);
-        if (factoryClassName == null && contextPathClasses != null) {
-            //try with class#getResource
-            factoryClassName = jaxbProperties(contextPathClasses, factoryId);
-        }
-
-        if (factoryClassName != null) {
-            return newInstance(contextPath, contextPathClasses, factoryClassName, classLoader, properties);
-        }
-
+        String factoryClassName = null;//jaxbProperties(contextPath, classLoader, factoryId);
+//        if (factoryClassName == null && contextPathClasses != null) {
+//            //try with class#getResource
+//            factoryClassName = jaxbProperties(contextPathClasses, factoryId);
+//        }
+//
+//        if (factoryClassName != null) {
+//            return newInstance(contextPath, contextPathClasses, factoryClassName, classLoader, properties);
+//        }
+//
 
         String factoryName = classNameFromSystemProperties();
         if (factoryName != null) return newInstance(contextPath, contextPathClasses, factoryName, classLoader, properties);

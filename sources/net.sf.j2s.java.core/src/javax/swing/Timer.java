@@ -555,7 +555,7 @@ public class Timer implements Serializable {
 	public void restart() {
 		// getLock().lock();
 		// try {
-		// stop();
+	    stop();
 		start();
 		// } finally {
 		// getLock().unlock();

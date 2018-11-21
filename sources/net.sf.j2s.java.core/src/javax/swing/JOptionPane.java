@@ -33,6 +33,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.JSDialog;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.JSFrame;
 import java.awt.HeadlessException;
 import java.awt.KeyboardFocusManager;
@@ -1792,6 +1793,14 @@ public class JOptionPane extends JComponent {
 	 *            the default <code>Frame</code> to use
 	 */
 	public static void setRootFrame(JSFrame newRootFrame) {
+		if (newRootFrame != null) {
+			SwingUtilities.appContextPut(sharedFrameKey, newRootFrame);
+		} else {
+			SwingUtilities.appContextRemove(sharedFrameKey);
+		}
+	}
+
+	public static void setRootFrame(Frame newRootFrame) {
 		if (newRootFrame != null) {
 			SwingUtilities.appContextPut(sharedFrameKey, newRootFrame);
 		} else {

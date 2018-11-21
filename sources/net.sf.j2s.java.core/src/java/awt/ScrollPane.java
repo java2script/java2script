@@ -79,7 +79,7 @@ import java.beans.ConstructorProperties;
  * @author      Amy Fowler
  * @author      Tim Prinzing
  */
-public class ScrollPane extends a2s.ScrollPane {//Container implements Accessible {
+public class ScrollPane extends swingjs.a2s.ScrollPane {//Container implements Accessible {
 
 //
 //    /**

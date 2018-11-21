@@ -2,6 +2,8 @@ package swingjs.plaf;
 
 
 import java.awt.Dimension;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
@@ -20,8 +22,8 @@ public class JSPopupMenuUI extends JSPanelUI {
 	// a frameless independent window
 	
 	static JSSwingMenu j2sSwingMenu;
-	private JPopupMenu menu;
-
+	
+	int timer;
 
 	public JSPopupMenuUI() {
 		
@@ -31,6 +33,7 @@ public class JSPopupMenuUI extends JSPanelUI {
 		}
 		isContainer = true;	
 		isMenuItem = true;
+		isPopupMenu = true;
 		setDoc();
 	}
 	
@@ -48,7 +51,7 @@ public class JSPopupMenuUI extends JSPanelUI {
 
 	@Override
 	public void installUI(JComponent jc) {
-    LookAndFeel.installColorsAndFont(jc,
+      LookAndFeel.installColorsAndFont(jc,
         "PopupMenu.background",
         "PopupMenu.foreground",
         "PopupMenu.font");
@@ -65,40 +68,67 @@ public class JSPopupMenuUI extends JSPanelUI {
 		return null;		
 	}
 
-
 	@Override
 	public void setVisible(boolean b) {
-		if (menu == null) {
-			// important to do this here, not earlier?
-			menu = (JPopupMenu) jc;
-			j2sSwingMenu.setMenu(menu);
-		}
 		if (b) {
+			if (isTainted || menu == null || outerNode == null || DOMNode.firstChild(outerNode) == null) {
+				if (menu == null) {
+					// important to do this here, not earlier?
+					setTainted();
+					setHTMLElement();
+					menu = (JPopupMenu) jc;
+					j2sSwingMenu.setMenu(menu);
+					isTainted = false;
+				} else {
+					updateMenu(true);
+				}
+			}
 			jc.addNotify();
 //			jc.repackContainer();
-			getOuterNode();
 			int x = 0, y = 0;
-			
+
 			/**
 			 * have to cheat here, because we want screen coordinates
 			 * 
 			 * @j2sNative
 			 * 
-			 * x = this.menu.desiredLocationX;
-			 * y = this.menu.desiredLocationY;
+			 * 			x = this.menu.desiredLocationX; y = this.menu.desiredLocationY;
 			 * 
 			 */
-			{}
+			{
+			}
 			j2sSwingMenu.showMenu(menu, x, y);
 		} else {
-			j2sSwingMenu.hideMenu(menu);
+			hideMenu();
 		}
+	}
+
+	void startTimer() {
+		System.out.println("startTimer");
+		Object me = this;
+		timer = /** @j2sNative setTimeout(function() { me.hideMenu$()},1000) || */0;
+	}
+
+	void stopTimer() {
+		System.out.println("stopTimer");
+	  /** @j2sNative
+	   *  
+	   * if (this.timer) 
+	   *   clearTimeout(this.timer); 
+	   */
+	  timer = 0;
+	}
+	
+	void hideMenu() {
+		System.out.println("hideMenu");
+		// not private -- hideMenu$
+		j2sSwingMenu.hideMenu(menu);	
 	}
 	
 	@Override
 	public void dispose() {
-    DOMNode.remove(domNode);
-    DOMNode.remove(outerNode);
+    DOMNode.dispose(domNode);
+    DOMNode.dispose(outerNode);
     j2sSwingMenu.disposeMenu(menu);
 	}
 
@@ -108,5 +138,10 @@ public class JSPopupMenuUI extends JSPanelUI {
 		return null;
 	}
 
+	public void updateMenu(boolean andShow) {
+		setTainted();
+		setHTMLElement();
+		JSPopupMenuUI.j2sSwingMenu.updateMenu(menu, andShow);
+	}
 
 }

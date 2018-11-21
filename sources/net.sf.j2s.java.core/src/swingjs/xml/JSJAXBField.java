@@ -15,47 +15,205 @@ import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 
 /**
- * A simplified class that acts as a repository for critical JAXB XML 
- * and Java information, both for the marshaller and unmarshaller. 
+ * A simplified class that acts as a repository for critical JAXB XML and Java
+ * information, both for the marshaller and unmarshaller.
  * 
  * @author hansonr
  *
  */
-class JSJAXBField {
-
-	private Object javaObject;
+class JSJAXBField implements Cloneable {
 
 	// Marshaller only
-	
-	Object entryValue; 
-	
+
+	// used immediately and nulled out.
+	transient Object mapEntryValue = this;
+
 	// Unmarshaller only
-	
+
+	final static int SIMPLE = 0;
+	final static int LIST = 1;
+	final static int MAP = 2;
+
+	int fieldType = SIMPLE;
+
 	DOMNode boundNode;
 	List<Object> boundListNodes;
-	String xmlCharacterData = ""; 
+	QName qualifiedTypeName;
+	List<JSJAXBField> listFields;
+	List<Object> listValues;
+
+	JSJAXBField listOwner;
+	String defaultValue;
+
+	String xmlCharacterData = "";
 	String xmlAttributeData;
-	Attributes xmlAttributes;
+//	Attributes xmlAttributes;
 	String xmlType;
+	boolean isNil;
+
+	// marshaller and unmarshaller
+
+	final static int NO_OBJECT = 0;
+	final static int SIMPLE_OBJECT = 1;
+	final static int ARRAY_OBJECT = 2;
+	final static int LIST_OBJECT = 3;
+	final static int MAP_KEY_OBJECT = 4;
+	final static int MAP_VALUE_OBJECT = 8;
+
+	final static int TYPE_NONE = 0;
+	final static int TYPE_ROOT_ELEMENT = 1;
+	final static int TYPE_XML_TYPE = 2;
+	final static int TYPE_ATTRIBUTE = 3;
+	final static int TYPE_ELEMENT = 4;
+
+	int holdsObjects = NO_OBJECT;
+
+	QName qualifiedName;
+	QName qualifiedWrapName;
+
+	String text;
+	String javaName;
+	String javaClassName;
+	String xmlSchemaType;
+	String typeAdapter;
+	String mimeType;
+	String enumValue;
+	String mapClassNameKey;
+	String mapClassNameValue;
+	String listClassName;
+
+	boolean isTransient;
+	boolean isAttribute;
+	boolean isXmlID;
+	boolean isXmlIDREF;
+	boolean isXmlValue;
+	boolean asList;
+	boolean isNillable;
+	boolean isArray;
+	boolean isByteArray;
+	boolean isContainer;
+
+	/// private only
+
+	private Object methodSet;
+	private Object methodGet;
+	private boolean isMethod;
+
+	/// debugging only
+
+	private int index;
+	private Object clazz; // for debugging only
+
+	JSJAXBField(JSJAXBField listOwner) {
+		this.listOwner = listOwner;
+	}
 	
+	/**
+	 * @param jclass
+	 * @param adata
+	 * @param javaObject
+	 * @param javaObject2
+	 * @param index
+	 * @param propOrder
+	 */
+	JSJAXBField(JSJAXBClass jaxbClass, Object[][] adata, Object clazz, int index, List<String> propOrder) {
+		this.clazz = clazz;
+		this.index = index;
+		javaName = (String) adata[0][0];
+		isMethod = (javaName != null && javaName.charAt(1) == ':');
+		javaClassName = (String) adata[0][1];
+		holdsObjects = (isObject(javaClassName) ? SIMPLE_OBJECT : NO_OBJECT);
+		int pt = javaClassName.indexOf("<");
+		if (pt >= 0) {
+			isContainer = true;
+			String[] classNames = javaClassName.substring(pt + 1, javaClassName.lastIndexOf(">")).split(",");
+			fieldType = classNames.length;
+			for (int i = 0; i < fieldType; i++)
+				classNames[i] = stripJavaLang(classNames[i]);
+			// Map<String, Object>
+			// List<Object>
+			javaClassName = javaClassName.substring(0, pt);
+			switch (fieldType) {
+			case LIST:
+				if (isObject(listClassName = classNames[0]))
+					holdsObjects = LIST_OBJECT;
+
+				break;
+			case MAP:
+				if (isObject(mapClassNameKey = classNames[0]))
+					holdsObjects = MAP_KEY_OBJECT;
+				if (isObject(mapClassNameValue = classNames[1]))
+					holdsObjects += MAP_VALUE_OBJECT;
+				break;
+			}
+		}
+		isByteArray = javaClassName.equals("byte[]");
+		isArray = !isByteArray && javaClassName.indexOf("[]") >= 0;
+		if (isArray && holdsObjects == SIMPLE_OBJECT)
+			holdsObjects = ARRAY_OBJECT;
+		isContainer |= isArray;
+		if (isMethod)
+			getMethods(jaxbClass.getJavaObject(), clazz);
+		Map<String, String> attr = new Hashtable<String, String>();
+		text = "";
+		readAnnotations(jaxbClass, (String[]) adata[1], propOrder, attr);
+		// ensure that we have a qualified name if appropriate
+		finalizeNames(index, jaxbClass);
+	}
+
+	private void finalizeNames(int index, JSJAXBClass jaxbClass) {
+		if (xmlSchemaType == null && typeAdapter == null) {
+			if (javaClassName.equals("byte[]"))
+				xmlSchemaType = "base64Binary";
+			if (javaClassName.equals("javax.xml.datatype.XMLGregorianCalendar")
+					|| javaClassName.equals("java.util.Date"))
+				xmlSchemaType = "dateTime";
+		}
+		if (index == 0) {
+			qualifiedName = jaxbClass.finalizeFieldQName(qualifiedName, javaClassName, TYPE_ROOT_ELEMENT);
+			qualifiedTypeName = jaxbClass.finalizeFieldQName(qualifiedTypeName, javaClassName, TYPE_XML_TYPE);
+			jaxbClass.isAnonymous = (jaxbClass.qualifiedTypeName.getLocalPart().length() == 0);
+		} else {
+			if (javaName != null) {
+				if (qualifiedWrapName != null) {
+					qualifiedWrapName = jaxbClass.finalizeFieldQName(qualifiedWrapName, null, TYPE_ELEMENT);
+				}
+				qualifiedName = jaxbClass.finalizeFieldQName(qualifiedName, javaName,
+						(isAttribute ? TYPE_ATTRIBUTE : TYPE_ELEMENT));
+			}
+		}
+	}
+
+	private static String stripJavaLang(String name) {
+		return (name.startsWith("java.lang.")?  name.substring(10) : name);
+	}
+
 	/**
 	 * prior to re-use in unmarshalling
 	 * 
-	 * @param javaObject
 	 */
-	void clear(Object javaObject) {
-		this.javaObject = javaObject;
-		this.entryValue = null;
-		this.boundNode = null;
-		this.boundListNodes = null;
-		this.xmlCharacterData = null;
-		this.xmlAttributeData = null;
-		this.xmlAttributes = null;
-		this.xmlType = null;
+	public JSJAXBField clone() {
+		try {
+			JSJAXBField f = (JSJAXBField) super.clone();
+			// marshaller
+			f.mapEntryValue = null;
+			// unmarshaller
+			f.boundNode = null;
+			f.boundListNodes = null;
+			f.xmlCharacterData = "";
+			f.xmlAttributeData = null;
+//		f.xmlAttributes = null;
+			f.xmlType = null;
+			f.isNil = false;
+			return f;
+		} catch (CloneNotSupportedException e) {
+			return null;
+		}
 	}
 
 	void setCharacters(String ch) {
-		xmlCharacterData = ch;
+		// <..../> will result in null for textContent
+		xmlCharacterData = (ch == null ? "" : ch);
 	}
 
 	void setAttributeData(String val) {
@@ -63,10 +221,11 @@ class JSJAXBField {
 	}
 
 	void setAttributes(Attributes attr) {
-		xmlAttributes = attr;
+//		xmlAttributes = attr;
 		xmlType = attr.getValue("xsi:type");
+		isNil = (attr.getIndex("xsi:nil") >= 0);
 	}
-	
+
 	void setNode(DOMNode node) {
 		if (isContainer) {
 			if (boundListNodes == null) {
@@ -77,209 +236,57 @@ class JSJAXBField {
 		boundNode = node;
 	}
 
-	// marshaller and unmarshaller
-	
-	int index;
-
-	String text;
-	String javaName;
-	String methodNameGet;	
-	String javaClassName;
-
-	boolean isAttribute;
-	boolean isID;
-	boolean isIDREF;
-	boolean isValue;
-	boolean asList;
-	boolean isNillable;
-	boolean isArray;
-	boolean isByteArray;
-	boolean isContainer;
-
-	QName qualifiedName = new QName("","##default","");
-	QName qualifiedWrapName;
-	Map<String, String> attr;
-
-	String xmlSchema;
-	String typeAdapter;
-	String mimeType;
-
-	private String methodNameSet;
-
-    String[] maplistClassNames;
-
-	QName qualifiedTypeName;
-
-	final static int SEE_ALSO = -1;
-	final static int SIMPLE = 0;
-	final static int LIST = 1;
-	final static int MAP = 2;
-
-	final static int NO_OBJECT = 0;
-	final static int SIMPLE_OBJECT = 1;
-	final static int ARRAY_OBJECT = 2;
-	final static int LIST_OBJECT = 3;
-	final static int MAP_KEY_OBJECT = 4;
-	final static int MAP_VALUE_OBJECT = 8;
-	final static int MAP_KEY_VALUE_OBJECT = 12;
-	
-	int fieldType = SIMPLE;
-
-	int holdsObjects = NO_OBJECT;
-
-	private static final Map<String, String> namespacePrefixes = new Hashtable<String, String>();
-	private static int prefixIndex = 1;
-
-	private static String getPrefixFor(String namespace) {
-		String prefix = namespacePrefixes.get(namespace);
-		if (prefix == null)
-			namespacePrefixes.put(namespace, prefix = "ns" + (++prefixIndex));
-//		System.out.println("getPrefix " + namespace + "  " + prefix);
-		return prefix;
-	}
-
-	/**
-	 * @param jclass
-	 * @param adata
-	 * @param javaObject
-	 * @param index
-	 * @param propOrder
-	 */
-	JSJAXBField(JSJAXBClass jaxbClass, Object[][] adata, Object javaObject, int index, List<String> propOrder) {
-		this.javaObject = javaObject;
-		this.index = index;
-		javaName = (String) adata[0][0];
-		javaClassName = (String) adata[0][1];
-		holdsObjects = (isObject(javaClassName) ? SIMPLE_OBJECT : NO_OBJECT);
-		int pt = javaClassName.indexOf("<");
-		if (pt >= 0) {
-			isContainer = true;
-			maplistClassNames = javaClassName.substring(pt + 1, javaClassName.lastIndexOf(">")).split(",");
-			fieldType  = maplistClassNames.length;
-			for (int i = 0; i < fieldType; i++)
-				if (maplistClassNames[i].startsWith("java.lang."))
-					maplistClassNames[i] = maplistClassNames[i].substring(10);
-			// Map<String, Object>
-			// List<Object>
-			javaClassName = javaClassName.substring(0, pt);
-			switch (fieldType) {
-			case LIST:
-				if (isObject(maplistClassNames[0]))
-					holdsObjects = LIST_OBJECT;
-				break;
-			case MAP:
-				if (isObject(maplistClassNames[0]))
-					holdsObjects = MAP_KEY_OBJECT;
-				if (isObject(maplistClassNames[1]))
-					holdsObjects += MAP_VALUE_OBJECT;
-				break;
-			}
-		}
-		isByteArray = javaClassName.equals("byte[]");
-		isArray = !isByteArray && javaClassName.indexOf("[]") >= 0;
-		if (isArray && holdsObjects == SIMPLE_OBJECT)
-			holdsObjects = ARRAY_OBJECT;
-		isContainer |= isArray;
-		attr = new Hashtable<String, String>();
-		readAnnotations(jaxbClass, (String[]) adata[1], propOrder);
-	}
-
 	private static boolean isObject(String javaClassName) {
-		return javaClassName.equals("java.lang.Object") 
-				|| javaClassName.equals("Object")
+		return javaClassName.equals("java.lang.Object") || javaClassName.equals("Object")
 				|| javaClassName.equals("Object[]");
 	}
 
-	private void readAnnotations(JSJAXBClass jaxbClass, String[] javaAnnotations, List<String> propOrder) {
-		text = "";
+	private void readAnnotations(JSJAXBClass jaxbClass, String[] javaAnnotations, List<String> propOrder,
+			Map<String, String> attr) {
 		for (int i = 0; i < javaAnnotations.length; i++) {
 			String data = javaAnnotations[i];
 			text += data + ";";
 			int pt = data.indexOf("(");
 			String tag = data.substring(0, (pt < 0 ? data.length() : pt));
+			tag = tag.replace("@javax.xml.bind.annotation.", "@");
 			data = (pt < 0 ? "" : data.substring(pt + 1, data.lastIndexOf(")")));
-			if (pt >= 0 && data.indexOf("=") >= 0)
+			if (pt >= 0 && !tag.equals("@XmlElements") && data.indexOf("=") >= 0)
 				addXMLAttributes(tag, data, attr);
-			if (javaName != null && javaName.startsWith("M:")) {
-				methodNameGet = javaName.substring(2);
-				// annotation can be on set... or get... or is...
-				// qualifications getXxxx$() and setXxxx$mytype_escaped(xxx)
-				if (methodNameGet.startsWith("set")) {
-					methodNameSet = methodNameGet;
-					methodNameGet = "get" + methodNameGet.substring(3) + "$";
-					methodNameGet = methodNameGet.split("$")[0] + "$";
-					boolean haveGet = false;
-					/**
-					 * @j2sNative haveGet = !!javaObject[methodName];
-					 */
-					if (!haveGet)
-						methodNameGet = "is" + methodNameGet.substring(3);
-				} else {
-					methodNameSet = "set" + methodNameGet.substring(methodNameGet.startsWith("is") ? 2 : 3);
-					/**
-					 * Looking here for a match to the first $
-					 * 
-					 * @j2sNative
-					 * 
-					 * 			for (var a in javaObject){if (a.startsWith(this.methodNameSet)) {
-					 *            this.methodNameSet = a;break; } }
-					 */
-				}
-				javaName = getJavaNameFromMethodName(methodNameGet);
-			}
-			processTagName(jaxbClass, tag, data, propOrder);
-		}
-		// ensure that we have a qualified name if appropriate
-		setDefaults();
-		qualifiedName = finalizeName(qualifiedName, false);
-		if (javaName == null) {
-			jaxbClass.qname = qualifiedName;
-			if (qualifiedTypeName == null)
-				qualifiedTypeName = new QName("","##default","");
-			jaxbClass.qualifiedTypeName = finalizeName(qualifiedTypeName, true);
-			jaxbClass.isAnonymous = (qualifiedTypeName.getLocalPart().length() == 0);
-		}
-	}
-
-	private QName finalizeName(QName qName, boolean isTypeName) {
-		//System.out.println("finalizing " + isTypeName + " qName " + qName + " for " + javaName + " " + javaClassName + " " + text);
-		if (qName.getLocalPart().equals("##default"))
- 			qName = new QName(qName.getNamespaceURI(),
-					JSJAXBClass.getXmlNameFromClassName(javaName == null ? javaClassName : javaName), qName.getPrefix());
-		//System.out.println("finalized as ----" + qName );
-		return qName;
-	}
-
-	/**
-	 * Set a few defaults. The xmlSchema "hexBinary" does not work.
-	 */
-	private void setDefaults() {
-		if (xmlSchema == null && typeAdapter == null) {
-			if (javaClassName.equals("byte[]"))
-				xmlSchema = "base64Binary";
-			if (javaClassName.equals("javax.xml.datatype.XMLGregorianCalendar"))
-				xmlSchema = "dateTime";
+			if (javaName == null)
+				processTypeAnnotation(jaxbClass, tag, data, propOrder, attr);
+			else
+				processFieldAnnotation(jaxbClass, tag, data, attr);
 		}
 	}
 
 
 	/**
-	 * Process the tag name for critical information, possibly updating the main
-	 * reference tag.
+	 * The first element of the annotation entry is null:
 	 * 
+	 * Process a type or package annotation. Note that we are not checking for
+	 * JAXBExceptions here.
+	 * 
+	 * @param jaxbClass
 	 * @param tag
-	 * @param qname
+	 * @param data
 	 * @param propOrder
-	 * @param a
+	 * @param attr      TODO
 	 */
-	private void processTagName(JSJAXBClass jaxbClass, String tag, String data, List<String> propOrder) {
-		// note that we are not checking for JAXBExceptions here
+	private void processTypeAnnotation(JSJAXBClass jaxbClass, String tag, String data, List<String> propOrder,
+			Map<String, String> attr) {
+		// check package annotations
+		switch (tag) {
+		case "@XmlSchema":
+			return;
+		}
+
+		// check type annotations:
 		switch (tag) {
 		case "@XmlRootElement":
-			qualifiedName = getName(tag);
-			break;
+			qualifiedName = getName(tag, attr);
+			return;
 		case "@XmlType":
-			qualifiedTypeName = getName(tag);
+			qualifiedTypeName = getName(tag, attr);
 			String order = attr.get("@XmlType:propOrder");
 			if (order != null) {
 				int[] pt = new int[1];
@@ -290,91 +297,141 @@ class JSJAXBField {
 					propOrder.add(prop);
 				}
 			}
-			break;
+			return;
 		case "@XmlAccessorType":
-			if (data.indexOf("FIELD") >= 0)
-				jaxbClass.accessorType = JSJAXBClass.TYPE_FIELD;
-			else if (data.indexOf("MEMBER") >= 0)
-				jaxbClass.accessorType = JSJAXBClass.TYPE_PUBLIC_MEMBER;
-			else if (data.indexOf("PROPERTY") >= 0)
-				jaxbClass.accessorType = JSJAXBClass.TYPE_PROPERTY;
-			break;
+			jaxbClass.accessorType = (data.indexOf("FIELD") >= 0 ? JSJAXBClass.TYPE_FIELD
+					: data.indexOf("MEMBER") >= 0 ? JSJAXBClass.TYPE_PUBLIC_MEMBER
+							: data.indexOf("PROPERTY") >= 0 ? JSJAXBClass.TYPE_PROPERTY : JSJAXBClass.TYPE_NONE);
+			return;
 		case "@XmlSeeAlso":
 			// @XmlSeeAlso({Dog.class,Cat.class})
-			// class Animal {}
-			// class Dog extends Animal {}
-			// class Cat extends Animal {}
-			jaxbClass.setSeeAlso(getSeeAlso(data));
-			break;
+			// allows these classes to be identified even though not
+			// part of the context of the given class, for example
+			// an instance-only class referenced by this class, as
+			// in an Object, Object[], List<Object>, or Map<Object,Object>
+			jaxbClass.addSeeAlso(getSeeAlso(data));
+			return;
+		case "@XmlEnum":
+			jaxbClass.initEnum(data);
+			return;
+		}
+		System.out.println("JSJAXBField Unprocessed type annotation: " + text);
+	}
+
+	/**
+	 * Process a field or method annotation. Note that we are not checking for
+	 * JAXBExceptions here.
+	 * 
+	 * @param jaxbClass
+	 * @param tag
+	 * @param data      what is in the (...)
+	 * @param attr
+	 */
+	private void processFieldAnnotation(JSJAXBClass jaxbClass, String tag, String data, Map<String, String> attr) {
+		switch (tag) {
+		case "!XmlInner":
+			jaxbClass.addSeeAlso(javaClassName);
+			javaName = null;
+			return;
+		case "@XmlTransient":
+			isTransient = true;
+			return;
 		case "@XmlAttribute":
 			isAttribute = true;
-			qualifiedName = getName(tag);
-			break;
+			if (isContainer)
+				asList = true;
+			qualifiedName = getName(tag, attr);
+			return;
+		case "@XmlElements":
+			listFields = new ArrayList<JSJAXBField>();
+			return;
 		case "@XmlElement":
-			qualifiedName = getName(tag);
-			isNillable = "true".equals(attr.get("@XmlElement:nillable"));
-			break;
-		case "@XmlValue":
-			jaxbClass.valueField = this;
-			isValue = true;
-			break;
-		case "@XmlSchemaType":
-			xmlSchema = attr.get("@XmlSchemaType:name");
-			if (xmlSchema.equals("hexBinary")) {
-				xmlSchema = null;
-				typeAdapter = "HexBinaryAdapter";
+			if (listFields != null) {
+				JSJAXBField f = new JSJAXBField(this);
+				listFields.add(f);
+				f.processFieldAnnotation(jaxbClass, tag, data, attr);
+				f.javaClassName = stripJavaLang(f.javaClassName).replace(".class",  "");
+				f.javaName = javaName + "::" + f.javaClassName;
+				f.finalizeNames(index, jaxbClass);
+				return;
 			}
-				// e.g. 
-				//			   @XmlSchemaType(name="date")
-				//			   XMLGregorianCalendar cal;
-				//			
-				//			   @XmlSchemaType(name="hexBinary") <-- does not work with JAXB
-							// https://jinahya.wordpress.com/2012/11/08/printing-binary-as-hexbinary-not-base64binary-with-jaxb/
-				//			   public byte[] hexBytes;
-				//			 
-				//			   @XmlSchemaType(name="base64Binary")
-				//			   public byte[] base64Bytes;
-			break;
-		case "@XmlJavaTypeAdapter":  
+			qualifiedName = getName(tag, attr);
+			isNillable = "true".equals(attr.get("@XmlElement:nillable"));
+			defaultValue = attr.get("@XmlElement:defaultValue");
+			String type = attr.get("@XmlElement:type");
+			if (type != null)
+				javaClassName = type;
+			return;
+		case "@XmlSchemaType":
+			xmlSchemaType = attr.get("@XmlSchemaType:name");
+			if (xmlSchemaType.equals("hexBinary")) {
+				xmlSchemaType = null;
+				typeAdapter = "javax.xml.bind.annotation.adapters.HexBinaryAdapter";
+			}
+			// e.g.
+			// @XmlSchemaType(name="date")
+			// XMLGregorianCalendar cal;
+			//
+			// @XmlSchemaType(name="hexBinary") <-- does not work with JAXB
+			// https://jinahya.wordpress.com/2012/11/08/printing-binary-as-hexbinary-not-base64binary-with-jaxb/
+			// public byte[] hexBytes;
+			//
+			// @XmlSchemaType(name="base64Binary")
+			// public byte[] base64Bytes;
+			return;
+		case "@XmlJavaTypeAdapter":
 			// typically CollapsedStringAdapter.class
 			typeAdapter = attr.get("@XmlJavaTypeAdapter:name");
 			if (typeAdapter == null)
 				typeAdapter = data;
-			typeAdapter = typeAdapter.substring(0, data.length() - 6);
-			break;
-		case "@XmlID":
-			isID = true;
-			break;
-		case "@XmlIDREF":
-			isIDREF = true;
-			break;
+			typeAdapter = getQuotedClass(data);
+			return;
+		case "@XmlValue":
+			jaxbClass.xmlValueField = this;
+			isXmlValue = true;
+			return;
+		case "@XmlEnumValue":
+			enumValue = data = PT.trim(data, "\"");
+			jaxbClass.enumMap.put("/" + javaName, data); // for marshaller
+			jaxbClass.enumMap.put("//" + data, javaName); // for unmarshaller
+			jaxbClass.enumMap.put(data, this); // for unmarshaller
+			return;
 		case "@XmlList":
 			asList = true;
-			break;
+			return;
+		case "@XmlID":
+			isXmlID = true;
+			jaxbClass.xmlIDField = this;
+			return;
+		case "@XmlIDREF":
+			isXmlIDREF = true;
+			return;
 		case "@XmlMimeType":
 			mimeType = attr.get("@XmlMimeType:name");
 			// e.g. @XmlMimeType("application/octet-stream")
 			// @XmlMimeType("image/jpeg")
 			// @XmlMimeType("text/xml; charset=iso-8859-1")
-			break;
+			return;
 		case "@XmlElementWrapper":
-			qualifiedWrapName = getName(tag);
-			break;
-		} 	
+			qualifiedWrapName = getName(tag, attr);
+			return;
+		}
+		System.out.println("JSJAXBField Unprocessed field annotation: " + text);
 	}
 
-	private String[] getSeeAlso(String data) {
+	private static String[] getSeeAlso(String data) {
 		// @XmlSeeAlso(test.jaxb2.Obj.class)
-		// @XmlSeeAlso({test.jaxb2.Obj.class,test.jaxb.Obj.class})
+		// @XmlSeeAlso({"test.jaxb2.Obj.class","test.jaxb.Obj.class"})
 		// --> ["test.jaxb.Obj.class"]
-		if (data.startsWith("{"))
-			data = data.substring(1, data.length() - 1);
 		String[] a = data.split(",");
-		for (int i = a.length; --i >= 0;) {
-			a[i] = a[i].trim();
-			a[i] = a[i].substring(0, a[i].length() - 6);
-		}
+		for (int i = a.length; --i >= 0;)
+			a[i] = getQuotedClass(a[i]);
 		return a;
+	}
+
+	private static String getQuotedClass(String s) {
+		s = PT.getQuotedStringAt(s, 0);
+		return s.substring(0, s.length() - 6);
 	}
 
 	/**
@@ -382,56 +439,26 @@ class JSJAXBField {
 	 * combining all annotations into one.
 	 * 
 	 * @param tag
+	 * @param attr TODO
 	 * @return
 	 */
-	private QName getName(String tag) {
+	private QName getName(String tag, Map<String, String> attr) {
 		String name, namespace;
 		name = attr.get(tag + ":name");
 		namespace = attr.get(tag + ":namespace");
-		return new QName(namespace, name == null ? "##default" : name, namespace == null ? "" : getPrefixFor(namespace));
+		return new QName(namespace == null ? "##default" : namespace, name == null ? "##default" : name, "");
 	}
 
 	/**
-	 * There are rules here...
-	 * 
-	 * @param methodName
-	 * @return
-	 */
-	private String getJavaNameFromMethodName(String methodName) {
-		String javaName = methodName.substring(methodName.startsWith("is") ? 2 : 3);
-		String lcaseName = javaName.substring(0, 1).toLowerCase() + javaName.substring(1);
-		String name = null;
-		if (getJSType(name = javaName).equals("undefined") && getJSType(name = lcaseName).equals("undefined")
-				&& methodName.endsWith("Property")) {
-			if (getJSType(name = javaName.substring(javaName.length() - 8)).equals("undefined")
-					&& getJSType(name = lcaseName.substring(javaName.length() - 8)).equals("undefined")) {
-				System.out.println("JSJAXBMarshaller cannot find field for " + methodName);
-				name = methodName;
-			}
-		}
-		return name;
-	}
-
-	/**
-	 * read the JavaScript type of this object -- array, etc. 
-	 * @param javaName
-	 * @return
-	 */
-	private String getJSType(String javaName) {
-		return (/** @j2sNative ( typeof this.javaObject[javaName]) || */
-		null);
-	}
-
-	/**
-	 * Use the built-in jQuery XML parser here (as well as in JSSAXParser)
-	 * to do the simple conversion of annotation expressions.
+	 * Use the built-in jQuery XML parser here (as well as in JSSAXParser) to do the
+	 * simple conversion of annotation expressions.
 	 * 
 	 * @param tag
 	 * @param data
 	 * @param attr
 	 */
 	private void addXMLAttributes(String tag, String data, Map<String, String> attr) {
-		data = "<__ " + removeCommas(data) + " />";
+		data = "<__ " + data.replace('{', '\'').replace('}', '\'') + " />";
 		// System.out.println(data);
 		DOMNode doc = JSUtil.jQuery.parseXML(data);
 		DOMNode node = DOMNode.firstChild(doc);
@@ -440,112 +467,223 @@ class JSJAXBField {
 			attr.put(tag + ":" + names[i], node.getAttribute(names[i]));
 	}
 
-	private static String removeCommas(String s) {
-		boolean escaped = false;
-		for (int i = 0; i < s.length(); i++) {
-			switch (s.charAt(i)) {
-			case '"':
-				escaped = !escaped;
-				break;
-			case '}':
-			case '{':
-				if (!escaped)
-					s = s.substring(0, i) + "'" + s.substring(i + 1);
-				break;
-			case ',':
-				if (!escaped)
-					s = s.substring(0, i) + " " + s.substring(i + 1);
-				break;
-			case '\\':
-				i++;
-				break;
-			}
-		}
-		s = s.replace("=true", "=\"true\"").replace("=false", "=\"false\"");
-		return s;
-	}
+//	private static String removeCommas(String data) {
+//		return data.replace('{', '\'').replace('}', '\'');
+//		boolean quoted = false;
+//		boolean needQuote = false;
+//		boolean needQuote2 = false;
+//		for (int i = 0; i < s.length(); i++) {
+//			char c = s.charAt(i);
+//			if (c == '"') {
+//				quoted = !quoted;
+//				needQuote = false;
+//				continue;
+//			}
+//			if (needQuote) {
+//				if (c != '{') {
+//					s = s.substring(0, i) + "\"" + s.substring(i++);
+//					needQuote = false;
+//					needQuote2 = true;
+//					continue;
+//				}
+//				needQuote = false;
+//			}
+//			if (quoted)
+//				continue;
+//			switch (c) { 	
+//			case '=':
+//				needQuote = true;
+//				break;
+//			case '\\':
+//				i++;
+//				break;
+//			case ',':
+//				s = s.substring(0, i) + (needQuote2 ? "\" " : " ") + s.substring(++i);
+//				needQuote2 = false;
+//				break;
+//			case '{':
+//			case '}':
+//				s = s.substring(0, i) + "'" + s.substring(i + 1);
+//				break;
+//			}
+//		}
+//		if (needQuote2)
+//			s += '"';
+//		return s;
+//	}
 
 	public String toString() {
 		return "{" + javaName + "}" + index;
 	}
 
-	
-	
-
 	// unmarshalling
-	
-	boolean isNil() {
-	  return (xmlAttributes != null && xmlAttributes.getIndex("xsi:nil") >= 0);	
+
+	boolean isSimpleType(String javaClassName) {
+		return (javaClassName != null ? simplePackages(javaClassName)
+				: isNil || asList || isByteArray || isArray || qualifiedWrapName != null ? true
+						: xmlType != null ? false : isAttribute || simplePackages(this.javaClassName));
 	}
-	
-	boolean isSimpleType() {
-		return (isAttribute || asList 
-				|| isByteArray
-				|| isArray 
-				|| qualifiedWrapName != null
-				|| isNil() 
-				|| simplePackages());
-	}
-	
-	private boolean simplePackages() {
+
+	static boolean simplePackages(String javaClassName) {
 		return (javaClassName.indexOf(".") < 0 || javaClassName.startsWith("java.")
 				|| javaClassName.startsWith("javax.") || javaClassName.startsWith("javajs."));
 	}
 
-	public Class<?> getJavaClassForUnmarshaling() throws ClassNotFoundException {
-		return Class.forName(javaClassName);
-	}
-	
-	/**
-	 * Retrieve the Java value using the method or directly 
-	 * 
-	 * @return
-	 */
-	@SuppressWarnings("unused")
-	public Object getValue() {
-		if (entryValue != null)
-			return entryValue;
-		String n = this.javaName;
-		Object o = javaObject;
-		String m = methodNameGet;
-		/**
-		 * @j2sNative
-		 *
-		 * 			o = (m ? o[m].apply(o, []) : o[n]);
-		 * 
-		 */
-		return o;
-	}
-
-	public Object getObject() {
-		Object o = javaObject;
-		String x = javaName;
-		String m = methodNameGet;
-		/**
-		 * return (m ? o[m].apply(o, []) : o[x];
-		 */
+	private Object findSetMethod(String m, Object[] pm, Object[] jo) {
+		if (m.indexOf("$") < 0)
+			m += "$";
+		for (int i = 0; i < 2; i++) {
+			if (pm != null) {
+				/**
+				 * Looking here for a match to the first $
+				 * 
+				 * @j2sNative for (var a in pm){if (a.startsWith(m)) { return(pm[a]); } }
+				 */
+			}
+			pm = jo;
+		}
 		return null;
 	}
 
-	
 	/**
-	 * NOTE: This will not work for private set methods
+	 * Check for methods in C$.$P$[] (private) and object[] (all others)
+	 */
+	private void getMethods(Object javaObject, Object clazz) {
+		String methodName = javaName.substring(2);
+		Object[] pm = /** @j2sNative clazz.$P$ || */
+				null;
+		Object[] jo = /** @j2sNative clazz.prototype || */
+				null;
+		// annotation can be on set... or get... or is...
+		// so we start by using get instead of set
+		// qualifications getXxxx$() and setXxxx$mytype_escaped(xxx)
+		methodGet = getMethod(methodName, pm, jo);
+		javaName = getJavaNameFromMethodName(methodName, javaObject);
+		if (methodGet == null && !isContainer)
+			methodGet = getMethod("is" + methodName.substring(3), pm, jo);
+		if (methodGet == null) {
+			isMethod = false;
+			System.out.println("JSJAXBField cannot find getter for " + text);
+			return;
+		}
+		if (isContainer)
+			return;
+		methodName = "set" + methodName.substring(methodName.startsWith("is") ? 2 : 3);
+		methodSet = findSetMethod(methodName, pm, jo);
+		if (methodSet == null) {
+			isMethod = false;
+			System.out.println("JSJAXBField cannot find setter for " + text);
+		}
+	}
+
+	/**
+	 * There are rules here...
 	 * 
+	 * @param methodName
+	 * @param javaObject
+	 * @return
+	 */
+	private String getJavaNameFromMethodName(String methodName, Object javaObject) {
+		String javaName = methodName.substring(methodName.startsWith("is") ? 2 : 3, methodName.length());
+		String lcaseName = javaName.substring(0, 1).toLowerCase() + javaName.substring(1);
+		String name = null;
+		if (!isDefined(javaObject, name = javaName) && !isDefined(javaObject, name = lcaseName)
+				&& methodName.endsWith("Property")) {
+			if (!isDefined(javaObject, name = javaName.substring(javaName.length() - 8))
+					&& isDefined(javaObject, name = lcaseName.substring(javaName.length() - 8))) {
+				System.out.println("JSJAXBMarshaller cannot find field for " + methodName);
+				name = methodName;
+			}
+		}
+		return name;
+	}
+
+	private Object getMethod(String methodName, Object[] pm, Object[] jo) {
+		Object m = getMethodI(methodName, pm);
+		return (m != null || jo == null ? m
+				: getMethodI(methodName.indexOf("$") < 0 ? methodName + "$" : methodName, jo));
+	}
+
+	private Object getMethodI(String methodName, Object[] a) {
+		return /** @j2sNative a && a[methodName] || */
+		null;
+	}
+
+	/**
+	 * read the JavaScript type of this object -- array, etc.
+	 * 
+	 * @param javaName
+	 * @return
+	 */
+	private boolean isDefined(Object javaObject, String fieldName) {
+		return (/** @j2sNative javaObject && (typeof javaObject[fieldName] != "undefined") || */
+		false);
+	}
+
+	/**
+	 * Retrieve the Java value using the method or directly
+	 * 
+	 * @return
+	 */
+	Object getValue(Object javaObject) {
+		Object o = mapEntryValue;
+		if (o == this)
+			return getObject(javaObject);
+		mapEntryValue = this;
+		return o;
+	}
+
+	@SuppressWarnings("unused")
+	Object getObject(Object javaObject) {
+		if (enumValue != null) {
+			return enumValue;
+		}
+		String n = javaName;
+		Object m = (isMethod ? methodGet : null);
+
+		/** @j2sNative return (m ? m.apply(javaObject, []) : javaObject[n]) */
+		{
+			return null;
+		}
+	}
+
+	/**
 	 * @param value
 	 */
 	@SuppressWarnings("unused")
-	public void setValue(Object value) {
-		String m = methodNameSet;
+	void setValue(Object value, Object javaObject) {
+		if (listOwner != null) {
+			listOwner.addValue(value);
+			return;
+		}
+		if (fieldType == LIST) {
+			List<Object> l = (List<Object>) getObject(javaObject);
+			if (l == null) {
+				l = new ArrayList<Object>();
+			} else {
+				l.clear();
+			}
+			Object[] a = (Object[]) value;
+			for (int i = 0, n = a.length; i < n; i++)
+				l.add(a[i]);
+			if (isMethod)
+				return;
+			value = l;
+		}
+
+		Object m = (isMethod ? methodSet : null);
 		String j = javaName;
-		Object o = javaObject;
-			/**
-			 * @j2sNative
-			 * 
-			 * if(m)
-			 *   o[m].apply(o, [value]);
-			 *     else 
-			 *   o[j] = value;
-			 */
+		/**
+		 * @j2sNative
+		 * 
+		 * 			if(m) m.apply(javaObject, [value]); else javaObject[j] = value;
+		 */
+	}
+
+	private void addValue(Object value) {
+		if (listValues == null)
+			listValues = new ArrayList<Object>();
+		listValues.add(value);
 	}
 
 	XmlAdapter getAdapter() {
@@ -575,37 +713,29 @@ class JSJAXBField {
 	 * XmlElementWrapper, XmlJavaTypeAdapter.
 	 * 
 	 */
+
+// https://www.w3.org/TR/xmlschema11-2/
 	
-	
-//  https://docs.oracle.com/cd/E13222_01/wls/docs103/webserv/data_types.html
-	
+	public static final String XML_SCHEMA_TYPES = ""
+// datetype:
+			+ ";duration;dateTime;time;date;gYearMonth;gYear;gMonthDay;gDay;gMonth;yearMonthDuration;dayTimeDuration;dateTimeStamp"
+//		    3.2 Special Built-in Datatypes
+			+ ";anySimpleType;anyAtomicType"
+			+ ";string;boolean;decimal;float;double;"// duration;dateTime;time
+//		    3.3 Primitive Datatypes    	
+			+ ";hexBinary;base64Binary;anyURI;QName;NOTATION" // date;gYearMonth;gYear;gMonthDay;gDay;gMonth;		
+//		    3.4 Other Built-in Datatypes
+			+ ";normalizedString;token;language;NMTOKEN;NMTOKENS;Name;NCName"
+			+ ";ID;IDREF;IDREFS;ENTITY;ENTITIES;integer;nonPositiveInteger;negativeInteger"
+			+ ";long;int;short;byte;nonNegativeInteger;unsignedLong;unsignedInt;unsignedShort"
+			+ ";unsignedByte;positiveInteger;"; // ;yearMonthDuration;dayTimeDuration;dateTimeStamp;
+
+//  see also https://docs.oracle.com/cd/E13222_01/wls/docs103/webserv/data_types.html
+
 //	XML Schema Data Type
-	
-//	anySimpleType 		java.lang.Object (for xsd:element of this type)
-//	anySimpleType 		java.lang.String (for xsd:attribute of this type)
-//	base64Binary		byte[]
-//	boolean				boolean
-//	byte				byte
-//	date				javax.xml.datatype.XMLGregorianCalendar
-//	dateTime			javax.xml.datatype.XMLGregorianCalendar
-//	decimal				java.math.BigDecimal
-//	double				double
-//	duration			javax.xml.datatype.Duration
-//	float				float
-//	g					java.xml.datatype.XMLGregorianCalendar
-//	hexBinary			byte[]
-//	int					int
-//	integer				java.math.BigInteger
-//	long				long
-//	NOTATION			javax.xml.namespace.QName
-//	Qname				javax.xml.namespace.QName
-//	short				short
-//	string				java.lang.String
-//	time				java.xml.datatype.XMLGregorianCalendar
-//	unsignedByte		short
-//	unsignedInt			long	
-//	unsignedShort		int 
+
+	public static boolean isknownSchemaType(String xmlSchemaType) {
+		return PT.isOneOf(xmlSchemaType, XML_SCHEMA_TYPES);
+	}
+
 }
-
-
-

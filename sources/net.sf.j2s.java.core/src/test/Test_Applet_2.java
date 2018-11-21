@@ -746,6 +746,9 @@ class Test_2Controls extends JPanel implements ItemListener {
 	private ButtonGroup bg;
 
 	public Test_2Controls(Test_2Canvas canvas) {
+		
+		setBackground(Color.white);
+		
 		setLayout(new FlowLayout()); 
 		// default for JPanel, but 
 		// being explicit allows debugging.
@@ -757,6 +760,7 @@ class Test_2Controls extends JPanel implements ItemListener {
 	  		.getClassLoader()
 	  		.getResource("test/test2.png"), "test");
 	  JLabel l = new JLabel(text, icon, SwingConstants.LEFT);
+	  
 	  add(l);
 		JCheckBox c = new JCheckBox("test");
 		c.addItemListener(this);
@@ -777,6 +781,10 @@ class Test_2Controls extends JPanel implements ItemListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				enableButtons(enableBtn.getText().equals("Enable"));
+				
+				bg0.setOpaque(false);
+				bg0.setBackground(Color.green);
+
 			}
 
 			private void enableButtons(boolean isEnable) {
@@ -795,6 +803,8 @@ class Test_2Controls extends JPanel implements ItemListener {
 		bg.add(c = new JRadioButton(text, b));
 		c.setName(text);
 		add(c);
+		c.setBackground(Color.blue);
+		System.out.println("radio is opaque " + c.isOpaque());
 		c.setEnabled(false);
 		c.addItemListener(this);
 		c.setFont(new Font("Arial", Font.PLAIN & Font.BOLD, 10));

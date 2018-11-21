@@ -30,8 +30,16 @@ try{
  role:"menu",
  blur:null,
  focus:null,
- select:null},
- _create:function(){this.activeMenu=this.element,this.element.uniqueId().addClass("ui-menu ui-widget ui-widget-content ui-corner-all").toggleClass("ui-menu-icons",!!this.element.find(".ui-icon").length)
+ select:null
+ },
+ 
+ 
+ _create:function(){
+	 
+	 if (typeof this.options.delay == "number")
+		 this.delay = this.options.delay;
+	 
+	 this.activeMenu=this.element,this.element.uniqueId().addClass("ui-menu ui-widget ui-widget-content ui-corner-all").toggleClass("ui-menu-icons",!!this.element.find(".ui-icon").length)
  .attr({role:this.options.role,tabIndex:0}).bind("click"+this.eventNamespace,e.proxy(function(e){this.options.disabled&&e.preventDefault()},this)),this.options.disabled&&this.element.addClass("ui-state-disabled").attr("aria-disabled","true"),
  this._on({"mousedown .ui-menu-item > a":function(e){e.preventDefault()},
  "click .ui-state-disabled > a":function(e){e.preventDefault()},
@@ -44,16 +52,31 @@ try{
  this._on(this.document,{
  click:function(t){e(t.target).closest(".ui-menu").length||this.collapseAll(t),n=!1}})},
  
- 
- 
  _destroy:function(){this.element.removeAttr("aria-activedescendant").find(".ui-menu").andSelf().removeClass("ui-menu ui-widget ui-widget-content ui-corner-all ui-menu-icons").removeAttr("role").removeAttr("tabIndex").removeAttr("aria-labelledby").removeAttr("aria-expanded").removeAttr("aria-hidden").removeAttr("aria-disabled").removeUniqueId().show(),this.element.find(".ui-menu-item").removeClass("ui-menu-item").removeAttr("role").removeAttr("aria-disabled").children("a").removeUniqueId().removeClass("ui-corner-all ui-state-hover").removeAttr("tabIndex").removeAttr("role").removeAttr("aria-haspopup").children().each(function(){var t=e(this);t.data("ui-menu-submenu-carat")&&t.remove()}),this.element.find(".ui-menu-divider").removeClass("ui-menu-divider ui-widget-content")},
  _keydown:function(t){function a(e){return e.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g,"\\$&")}var n,r,i,s,o,u=!0;switch(t.keyCode){case e.ui.keyCode.PAGE_UP:this.previousPage(t);break;case e.ui.keyCode.PAGE_DOWN:this.nextPage(t);break;case e.ui.keyCode.HOME:this._move("first","first",t);break;case e.ui.keyCode.END:this._move("last","last",t);break;case e.ui.keyCode.UP:this.previous(t);break;case e.ui.keyCode.DOWN:this.next(t);break;case e.ui.keyCode.LEFT:this.collapse(t);break;case e.ui.keyCode.RIGHT:this.active&&!this.active.is(".ui-state-disabled")&&this.expand(t);break;case e.ui.keyCode.ENTER:case e.ui.keyCode.SPACE:this._activate(t);break;case e.ui.keyCode.ESCAPE:this.collapse(t);break;default:u=!1,r=this.previousFilter||"",i=String.fromCharCode(t.keyCode),s=!1,clearTimeout(this.filterTimer),i===r?s=!0:i=r+i,o=new RegExp("^"+a(i),"i"),n=this.activeMenu.children(".ui-menu-item").filter(function(){return o.test(e(this).children("a").text())}),n=s&&n.index(this.active.next())!==-1?this.active.nextAll(".ui-menu-item"):n,n.length||(i=String.fromCharCode(t.keyCode),o=new RegExp("^"+a(i),"i"),n=this.activeMenu.children(".ui-menu-item").filter(function(){return o.test(e(this).children("a").text())})),n.length?(this.focus(t,n),n.length>1?(this.previousFilter=i,this.filterTimer=this._delay(function(){delete this.previousFilter},1e3)):delete this.previousFilter):delete this.previousFilter}u&&t.preventDefault()},
  _activate:function(e){this.active.is(".ui-state-disabled")||(this.active.children("a[aria-haspopup='true']").length?this.expand(e):this.select(e))},
- refresh:function(){var t,n=this.options.icons.submenu,r=this.element.find(this.options.menus);r.filter(":not(.ui-menu)").addClass("ui-menu ui-widget ui-widget-content ui-corner-all").hide().attr({role:this.options.role,"aria-hidden":"true","aria-expanded":"false"}).each(function(){var t=e(this),r=t.prev("a"),i=e("<span>").addClass("ui-menu-icon ui-icon "+n).data("ui-menu-submenu-carat",!0);r.attr("aria-haspopup","true").prepend(i),t.attr("aria-labelledby",r.attr("id"))}),t=r.add(this.element),t.children(":not(.ui-menu-item):has(a)").addClass("ui-menu-item").attr("role","presentation").children("a").uniqueId().addClass("ui-corner-all").attr({tabIndex:-1,role:this._itemRole()}),t.children(":not(.ui-menu-item)").each(function(){var t=e(this);/[^\-+�G��G��+�G��G��\s]/.test(t.text())||t.addClass("ui-widget-content ui-menu-divider")}),t.children(".ui-state-disabled").attr("aria-disabled","true"),this.active&&!e.contains(this.element[0],this.active[0])&&this.blur()},
+ refresh:function(){
+	 var t,n=this.options.icons.submenu,role=this.options.role,
+	 r=this.element.find(this.options.menus);
+	 r.filter(":not(.ui-menu)")
+	   .addClass("ui-menu ui-widget ui-widget-content ui-corner-all")
+	   .hide().attr({role:this.options.role,"aria-hidden":"true","aria-expanded":"false"})
+	   .each(function(){var t=e(this),r=t.prev("a"),
+		   i=e("<span>").addClass("ui-menu-icon ui-icon "+n)
+		   .attr({role:role})
+		   .data("ui-menu-submenu-carat",!0);
+	   r.attr("aria-haspopup","true").prepend(i),t.attr("aria-labelledby",r.attr("id"))}),t=r.add(this.element),t.children(":not(.ui-menu-item):has(a)").addClass("ui-menu-item").attr("role","presentation").children("a").uniqueId().addClass("ui-corner-all").attr({tabIndex:-1,role:this._itemRole()}),t.children(":not(.ui-menu-item)").each(function(){var t=e(this);/[^\-+�G��G��+�G��G��\s]/.test(t.text())||t.addClass("ui-widget-content ui-menu-divider")}),t.children(".ui-state-disabled").attr("aria-disabled","true"),this.active&&!e.contains(this.element[0],this.active[0])&&this.blur()},
  _itemRole:function(){return{menu:"menuitem",listbox:"option"}[this.options.role]},
  focus:function(e,t){var n,r;this.blur(e,e&&e.type==="focus"),this._scrollIntoView(t),this.active=t.first(),r=this.active.children("a").addClass("ui-state-focus"),this.options.role&&this.element.attr("aria-activedescendant",r.attr("id")),this.active.parent().closest(".ui-menu-item").children("a:first").addClass("ui-state-active"),e&&e.type==="keydown"?this._close():this.timer=this._delay(function(){this._close()},this.delay),n=t.children(".ui-menu"),n.length&&/^mouse/.test(e.type)&&this._startOpening(n),this.activeMenu=t.parent(),this._trigger("focus",e,{item:t})},
  _scrollIntoView:function(t){var n,r,i,s,o,u;this._hasScroll()&&(n=parseFloat(e.css(this.activeMenu[0],"borderTopWidth"))||0,r=parseFloat(e.css(this.activeMenu[0],"paddingTop"))||0,i=t.offset().top-this.activeMenu.offset().top-n-r,s=this.activeMenu.scrollTop(),o=this.activeMenu.height(),u=t.height(),i<0?this.activeMenu.scrollTop(s+i):i+u>o&&this.activeMenu.scrollTop(s+i-o+u))},
- blur:function(e,t){t||clearTimeout(this.timer);if(!this.active)return;this.active.children("a").removeClass("ui-state-focus"),this.active=null,this._trigger("blur",e,{item:this.active})},
+ blur:function(e,t){
+	 
+	 if (this.active && typeof t == "undefined" && e.relatedTarget && e.relatedTarget.getAttribute("role") != "presentation")	 {
+		 this.element.hide();
+	 }
+
+
+	 t||clearTimeout(this.timer);if(!this.active)return;this.active.children("a").removeClass("ui-state-focus"),this.active=null,this._trigger("blur",e,{item:this.active})},
  _startOpening:function(e){clearTimeout(this.timer);if(e.attr("aria-hidden")!=="true")return;this.timer=this._delay(function(){this._close(),this._open(e)},this.delay)},
  _open:function(t){var n=e.extend({of:this.active},this.options.position);clearTimeout(this.timer),this.element.find(".ui-menu").not(t.parents(".ui-menu")).hide().attr("aria-hidden","true"),t.show().removeAttr("aria-hidden").attr("aria-expanded","true").position(n)},
  collapseAll:function(t,n){clearTimeout(this.timer),this.timer=this._delay(function(){var r=n?this.element:e(t&&t.target).closest(this.element.find(".ui-menu"));r.length||(r=this.element),this._close(r),this.blur(t),this.activeMenu=r},this.delay)},
@@ -101,8 +124,8 @@ Swing.__getMenuStyle = function(applet) { return '\
 	.swingjsPopupMenu .ui-menu-icons .ui-menu-item a{position:relative;padding-left:2em}\
 	.swingjsPopupMenu .ui-icon{display:block;text-indent:-99999px;overflow:hidden;background-repeat:no-repeat;position:absolute;top:.2em;left:.2em}\
 	.swingjsPopupMenu .ui-menu-icon{position:static;float:right}\
-	.swingjsPopupMenu .ui-icon-carat-1-e{min-width:2ex;text-align:right;background-image:none;background-position:0 0}\
-	.swingjsPopupMenu .ui-icon-carat-1-e:after{content:"\\25B8"}\
+	.swingjsPopupMenu .ui-icon-carat-1-e{min-width:10ex;text-align:right;background-image:none;background-position:0 0}\
+	.swingjsPopupMenu .ui-icon-carat-1-e:after{content:"\\0023F5"}\
 	.swingjsPopupMenu .ui-state-default{border:1px solid #c5dbec;background:#dfeffc;color:#2e6e9e}\
 	.swingjsPopupMenu .ui-state-default a{color:#2e6e9e;text-decoration:none}\
 	.swingjsPopupMenu .ui-state-hover,.swingjsPopupMenu .ui-state-focus{border:1px solid #79b7e7;background:#d0e5f5;color:#1d5987}\
@@ -181,6 +204,40 @@ Swing.initMenuItem = function(item) {
   item.icon && (item.icon = '<img src="' + item._applet._j2sPath + '/' + item.icon + '" style="max-height: 20px;" />')
 }
 
+Swing.updateMenu = function(menu, andShow) {
+    if (menu.uiClassID) {
+	    // for SwingJS the top node is domNode itself, which is already <ul> 
+	    var node = menu.ui.domNode;
+	    if (node != menu.$ulTop[0]) {
+	        if (menu.$ulTop) {
+	          //bindMenuActionCommands(menu._actionEvent, menu, false);
+	          menu.$ulTop.remove();
+	        }
+	        menu.setContainer(J2S.$(node));
+	        J2S.$(node).addClass("swingjsPopupMenu");
+	    }
+	    J2S.$after("body",node);
+		if (andShow) {
+	    	node.style.display = "block";
+	    }
+    } else {
+  		menu.$ulTop.html(menu.toHTML());
+  		bindMenuActionCommands(menu._actionEvent, menu, true);
+    }
+    menu.$ulTop.menu({delay:300}).menu('refresh');  
+    if (menu.uiClassID)
+        menu.$ulTop.find("[role=menuitem]").each(function(){Swing.updateMenuItem(menu, this);});
+	menu._tainted = false;
+}
+
+Swing.updateMenuItem = function(menu, node) {
+    J2S.unsetMouse(node);
+    node.applet = menu._applet;
+    node._frameViewer = menu.invoker.getFrameViewer$();
+    node._menu = menu;
+    J2S.setMouse(node, true);
+}
+
 Swing.showMenu = function(menu, x, y) {
   // called by javajs.swing.JPopupMenu and swingjs.plaf.JSPopupMenuUI (menu.uiClassID)
   // allow for a user callback for customization of menu
@@ -189,49 +246,22 @@ Swing.showMenu = function(menu, x, y) {
   for (var i in menu._applet._menus)
     Swing.hideMenu(menu._applet._menus[i], true);  
   if (J2S._showMenuCallback)
-		J2S._showMenuCallback(menu, x, y);
+	J2S._showMenuCallback(menu, x, y);
   var wasTainted = menu._tainted;
-	if (menu._tainted) {
-    if (menu.uiClassID) {
-      // for SwingJS the top node is domNode itself, which is already <ul> 
-      var node = menu.ui.domNode;
-      if (node != menu.$ulTop[0]) {
-        if (menu.$ulTop) {
-          //bindMenuActionCommands(menu._actionEvent, menu, false);
-          menu.$ulTop.remove();
-        }
-        menu.setContainer(J2S.$(node));
-        J2S.$(node).addClass("swingjsPopupMenu");
-      }
-    	J2S.$after("body",node);
-      node.style.display = "block";
-    } else {
-  		menu.$ulTop.html(menu.toHTML());
-  		bindMenuActionCommands(menu._actionEvent, menu, true);
-    }
-		menu._tainted = false;
-	}
+  if (menu._tainted)
+	  Swing.updateMenu(menu);
   menu.setPosition(x, y);
- 	menu.$ulTop.hide().menu().menu('refresh').show();  
-  if (menu.uiClassID && wasTainted) {      
-    menu.$ulTop.find("[role=menuitem]").each(function(){
-      var node = this;
-      node.applet = menu._applet;
-      node._frameViewer = menu.invoker.getFrameViewer$();
-      node._menu = menu;
-      J2S.setMouse(node, true);
-    });
-  }
-	menu._visible = true;
-	menu.timestamp = System.currentTimeMillis$();
-	menu.dragBind(true);
-	menu.$ulTop.unbind('clickoutjsmol mousemoveoutjsmol');
+  menu.$ulTop.hide().menu().show();  
+  menu._visible = true;
+  menu.timestamp = System.currentTimeMillis$();
+  menu.dragBind(true);
+  menu.$ulTop.unbind('clickoutjsmol mousemoveoutjsmol');
   if (!J2S._persistentMenu)
   	menu.$ulTop.bind('clickoutjsmol mousemoveoutjsmol', function(evspecial, target, ev) {
-	  if (System.currentTimeMillis$() - menu.timestamp > 1000)
+	  if (System.currentTimeMillis$() - menu.timestamp > 500)
 		  Swing.hideMenu(menu);
 	});
-	menu.$ulTop.bind("contextmenu", function() {return false;});
+  menu.$ulTop.bind("contextmenu", function() {return false;});
 } 
 
 Swing.hideMenu = function(menu, force) {
@@ -252,7 +282,7 @@ Swing.disposeMenu = function(menu) {
   if (menu.uiClassID) {      
     menu.$ulTop.find("[role=menuitem]").each(function(){
       this.applet = menu.ui.applet;
-      J2S.setMouse(this, false);
+      J2S.unsetMouse(this);
     });
   } else {
    	Swing.bindMenuActionCommands(menu, false);

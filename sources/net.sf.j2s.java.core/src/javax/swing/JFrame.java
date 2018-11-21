@@ -288,6 +288,11 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 		rootPane.addNotify(); // builds a peer for the root pane
 	}
 
+	public JFrame(Object object, Object object2, Object object3, Object object4) {
+		uiClassID = "FrameUI";
+		
+	}
+
 	private static int frameCount;
 
 	/**

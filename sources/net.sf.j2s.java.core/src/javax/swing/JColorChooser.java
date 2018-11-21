@@ -35,6 +35,7 @@ import java.awt.Container;
 import java.awt.Dialog;
 import java.awt.JSDialog;
 import java.awt.FlowLayout;
+import java.awt.Frame;
 import java.awt.JSFrame;
 
 //import java.io.IOException;
@@ -623,7 +624,21 @@ class ColorChooserDialog extends JDialog {
 		initColorChooserDialog(c, chooserPane, okListener, cancelListener);
 	}
 
+	public ColorChooserDialog(Frame owner, String title, boolean modal, Component c, JColorChooser chooserPane,
+			ActionListener okListener, ActionListener cancelListener) {
+		super(owner, title, modal);
+		this.disposeOnHide  = false;
+		initColorChooserDialog(c, chooserPane, okListener, cancelListener);
+	}
+
 	ColorChooserDialog(JSFrame owner, String title, boolean modal, Component c, JColorChooser chooserPane,
+			ActionListener okListener, ActionListener cancelListener, boolean disposeOnHide) {
+		super(owner, title, modal);
+		this.disposeOnHide  = disposeOnHide;
+		initColorChooserDialog(c, chooserPane, okListener, cancelListener);
+	}
+
+	ColorChooserDialog(Frame owner, String title, boolean modal, Component c, JColorChooser chooserPane,
 			ActionListener okListener, ActionListener cancelListener, boolean disposeOnHide) {
 		super(owner, title, modal);
 		this.disposeOnHide  = disposeOnHide;

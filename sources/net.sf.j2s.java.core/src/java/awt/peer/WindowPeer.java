@@ -35,52 +35,60 @@ import java.awt.Window;
 import java.awt.image.BufferedImage;
 
 /**
- * The peer interfaces are intended only for use in porting
- * the AWT. They are not intended for use by application
- * developers, and developers should not implement peers
- * nor invoke any of the peer methods directly on the peer
+ * The peer interfaces are intended only for use in porting the AWT. They are
+ * not intended for use by application developers, and developers should not
+ * implement peers nor invoke any of the peer methods directly on the peer
  * instances.
  * 
  * Not a LightWeightPeer
  * 
  */
 public interface WindowPeer extends ContainerPeer {
-    void toFront();
-    void toBack();
-    void updateAlwaysOnTopState();
-    void updateFocusableWindowState();
-    boolean requestWindowFocus();
-    void setModalBlocked(Dialog blocker, boolean blocked);
-    void updateMinimumSize();
-    void updateIconImages();
+	void toFront();
 
-    /**
-     * Sets the level of opacity for the window.
-     *
-     * @see Window#setOpacity(float)
-     */
-    void setOpacity(float opacity);
+	void toBack();
 
-    /**
-     * Enables the per-pixel alpha support for the window.
-     *
-     * @see Window#setBackground(Color)
-     */
-    void setOpaque(boolean isOpaque);
+	void updateAlwaysOnTopState();
 
-    /**
-     * Updates the native part of non-opaque window using
-     * the given image with color+alpha values for each pixel.
-     *
-     * @see Window#setBackground(Color)
-     */
-    void updateWindow(BufferedImage backBuffer);
+	void updateFocusableWindowState();
 
-    /**
-     * Instructs the peer to update the position of the security warning.
-     */
-    void repositionSecurityWarning();
-    
-		WindowPeer setFrame(Window target, boolean b);
-		
+	boolean requestWindowFocus();
+
+	void setModalBlocked(Dialog blocker, boolean blocked);
+
+	void setModalBlocked(JSDialog blocker, boolean blocked);
+
+	void updateMinimumSize();
+
+	void updateIconImages();
+
+	/**
+	 * Sets the level of opacity for the window.
+	 *
+	 * @see Window#setOpacity(float)
+	 */
+	void setOpacity(float opacity);
+
+	/**
+	 * Enables the per-pixel alpha support for the window.
+	 *
+	 * @see Window#setBackground(Color)
+	 */
+	void setOpaque(boolean isOpaque);
+
+	/**
+	 * Updates the native part of non-opaque window using the given image with
+	 * color+alpha values for each pixel.
+	 *
+	 * @see Window#setBackground(Color)
+	 */
+	void updateWindow(BufferedImage backBuffer);
+
+	/**
+	 * Instructs the peer to update the position of the security warning.
+	 */
+	void repositionSecurityWarning();
+
+	WindowPeer setFrame(Window target, boolean b);
+
 }
