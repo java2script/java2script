@@ -37,6 +37,7 @@ import java.beans.PropertyChangeListener;
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.swing.LookAndFeel;
 import javax.swing.TransferHandler;
 import javax.swing.UIManager;
@@ -67,7 +68,7 @@ public class JSColorChooserUI extends JSPanelUI
      */
     protected JColorChooser chooser;
 
-    JComboPane tabbedPane;
+    JTabbedPane tabbedPane;
     JPanel singlePanel;
 
     JPanel previewPanelHolder;
@@ -105,7 +106,7 @@ public class JSColorChooserUI extends JSPanelUI
         installDefaults();
         installListeners();
 
-        tabbedPane = new JComboPane();
+        tabbedPane = new JTabbedPane();
         tabbedPane.setName("ColorChooser.tabPane");
         tabbedPane.setInheritsPopupMenu(true);
         singlePanel = new JPanel(new CenterLayout());

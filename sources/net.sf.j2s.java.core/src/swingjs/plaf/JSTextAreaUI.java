@@ -2,22 +2,20 @@ package swingjs.plaf;
 
 import java.awt.Dimension;
 import java.awt.Insets;
+import java.beans.PropertyChangeEvent;
+
+import javax.swing.JTextArea;
 
 import swingjs.api.js.DOMNode;
 
 /**
- * SWingJS implementation of stateful user interface for buttons. 
- * Modeled after javax.swing.plaf.basic.BasicButtonUI.java (commented out below).
+ * Note that java.awt.TextArea is a JScrollPane, NOT a JTextArea.
  * 
  * @author Bob Hanson
  *
  */
 public class JSTextAreaUI extends JSTextUI {
 
-	/**
-	 * the radio or check-box or simple button
-	 * 
-	 */
 	protected DOMNode domBtn;
 
 	@Override
@@ -28,6 +26,10 @@ public class JSTextAreaUI extends JSTextUI {
 			DOMNode.setStyles(domNode, "resize", "none");
 			bindJSKeyEvents(domNode, true);
 		}
+		if (((JTextArea) jc).getLineWrap())
+			domNode.removeAttribute("wrap");
+		else
+			DOMNode.setAttr(domNode, "wrap", "off");
 		textListener.checkDocument();
 		setCssFont(
 				DOMNode.setAttr(domNode, "innerHTML", getComponentText()),
@@ -88,7 +90,9 @@ public class JSTextAreaUI extends JSTextUI {
 	@Override
 	protected DOMNode setHTMLElement() {
 		// handled by JScrollPane
-		return DOMNode.setStyles(setHTMLElementCUI(), "overflow", "hidden", "position", "absolute");
+		return DOMNode.setStyles(setHTMLElementCUI(), 
+				"overflow", "hidden",
+				"position", "absolute");
 	}
 
 

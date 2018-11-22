@@ -15,7 +15,9 @@ import java.beans.PropertyChangeListener;
 import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollBar;
+import javax.swing.border.LineBorder;
 
 /**
  * test of general button, label, scrollbar, BorderLayout, backgrounds,
@@ -33,7 +35,9 @@ public class Test_Applet_1 extends JApplet implements AdjustmentListener, Proper
 		JScrollBar bar = new JScrollBar(JScrollBar.HORIZONTAL);
 		bar.addAdjustmentListener(this);
 		bar.addPropertyChangeListener(this);
-		/* final */ JLabel label = new JLabel("hello");
+		JLabel label = new JLabel("hello");
+		((JPanel) getContentPane()).setBorder(new LineBorder(Color.blue,2));
+		label.setBorder(new LineBorder(Color.red, 3));
 		label.setBounds(0, 60, 200, 60);
 		label.setPreferredSize(new Dimension(80, 80));
 		label.setBackground(Color.yellow);
@@ -46,6 +50,7 @@ public class Test_Applet_1 extends JApplet implements AdjustmentListener, Proper
 		/* final */ JButton button = new JButton("test");
 		button.addPropertyChangeListener(this);
 		button.addFocusListener(this);
+		button.setBorder(new LineBorder(Color.yellow, 4));
 		button.setSize(80, 40);
 		button.setBackground(Color.orange);
 		/* final$ */Test_Applet_1 me = this;

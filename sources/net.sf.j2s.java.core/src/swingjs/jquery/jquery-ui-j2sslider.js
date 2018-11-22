@@ -61,7 +61,7 @@
 							.find(".ui-j2sslider-handle")
 							.addClass(
 									"ui-state-default ui-corner-all"), handle = "<a class='ui-j2sslider-handle ui-state-default ui-corner-all' href='#'></a>", handles = [];
-
+					this.jslider || (this.jslider = o.jslider);
 					this._keySliding = false;
 					this._mouseSliding = false;
 					this._animateOff = true;
@@ -71,6 +71,8 @@
 					this.isScrollBar = o.isScrollBar;
 					this.handleSize = 0; // scrollbar only
 					this.handleFraction = 0;
+					this.marginX = (o.isScrollBar ? 0 : 19); // from CSS - margin * 2 + border
+					this.marginY = (o.isScrollBar ? 0 : 0);
 					this.element
 							.addClass("ui-j2sslider"
 									+ " ui-j2sslider-"
@@ -125,7 +127,7 @@
 						// InputEvent.BUTTON1 +
 						// InputEvent.BUTTON1_DOWN_MASK;
 						// same call here as in j2sApplet
-						me.options.jslider.getFrameViewer$()
+						me.jslider.getFrameViewer$()
 								.processMouseEvent$I$I$I$I$J$O$I(
 										id, xye.x, xye.y, 1040,
 										System.currentTimeMillis$(),
@@ -215,16 +217,30 @@
 					this._animateOff = false;
 				},
 				
+				_width() {
+					return Math.max(0, this.element.width() || this.element.parent().width() - this.marginX || 0);
+				},
+				
+				_height() {
+					return Math.max(0, this.element.height() || this.element.parent().height() - this.marginY || 0);
+				},
+				
 				_getPixelTotal() {
-					return (this.orientation == "horizontal" ? this.element.width()
-							- (true || this.isScrollBar ? 0 : this.handle.width()/2)
-							: this.element.height()
-							- (this.isScrollBar ? 0 : this.handle.height()/2)
+					return (this.orientation == "horizontal" ? this._width()
+//							- (true || this.isScrollBar ? 0 : this.handle.width()/2)
+							: this._height()
+//							- (true || this.isScrollBar ? 0 : this.handle.height()/2)
 					) || 100;
 					
 				},
 
 				_destroy : function() {
+					
+					for (i = 0; i < handles.length; i++) {
+						J2S.setDraggable(this.handles[i], false);
+					}
+					
+
 					this.handles.remove();
 					this.range.remove();
 
@@ -321,12 +337,12 @@
 					if (isEndCheck) {
 						return;
 					}
-					var dir = Math.signum(!isAtEnd ? val - o.jslider.getValue$() : isAtEnd);
+					var dir = Math.signum(!isAtEnd ? val - this.jslider.getValue$() : isAtEnd);
 					if (!this.handles.hasClass("ui-state-hover")) {
 						if (isAtEnd) {
-							o.jslider.ui.scrollByUnit$I(dir);
+							this.jslider.ui.scrollByUnit$I(dir);
 						} else if (isTrackClick) {
-							o.jslider.ui.scrollDueToClickInTrack$I(dir);
+							this.jslider.ui.scrollDueToClickInTrack$I(dir);
 						}
 					}
 					this._animateOff = true;
@@ -567,9 +583,9 @@
 						this.isScrollBar = true;
 						this.handleFraction = value;
 						if (this.orientation === "horizontal")
-							$(this.handles[0]).width(this.handleSize = value * this.element.width());
+							$(this.handles[0]).width(this.handleSize = value * this._width());
 						else
-							$(this.handles[0]).height(this.handleSize = value * this.element.height());
+							$(this.handles[0]).height(this.handleSize = value * this._height());
 						this._animateOff = true;
 						this._resetClass();
 						this._refreshValue();
@@ -753,9 +769,7 @@
 						// just one handle
 						valPercent = this._getValPercent(-1);
 						var isHorizontal = (this.orientation === "horizontal");
-						var val = (valPercent * this._getPixelTotal()/100) + "px";
-						//"" + valPercent + "%";
-									
+						var val = (valPercent * this._getPixelTotal()/100) + "px";									
 						_set[isHorizontal ? "left"
 								: this.isScrollBar ? "top" : "bottom"] = val;
 						this.handle.stop(1, 1)[animate ? "animate"

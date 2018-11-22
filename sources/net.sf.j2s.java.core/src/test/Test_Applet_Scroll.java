@@ -33,9 +33,11 @@ import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JViewport;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -305,6 +307,18 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		framesPerSecond.setPaintTicks(true);
 		framesPerSecond.setPaintLabels(true);
 //		framesPerSecond.setLabelTable(labels);
+		
+		
+        JSlider redSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, 100);
+        redSlider.setMajorTickSpacing( 85 );
+        redSlider.setMinorTickSpacing( 17 );
+        redSlider.setPaintTicks( true );
+        redSlider.setPaintLabels( true );
+		p.add(redSlider);
+		
+		
+		
+		
 		
 		mkSlider(p, tf, Adjustable.HORIZONTAL, 100, 20).setInverted(true);
 		repaint();

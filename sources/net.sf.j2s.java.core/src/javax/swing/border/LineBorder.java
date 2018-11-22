@@ -123,7 +123,7 @@ public class LineBorder extends AbstractBorder
      */
     @Override
 		public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-        if ((this.thickness > 0) && (g instanceof Graphics2D)) {
+        if ((this.thickness > 0)/* && (g instanceof Graphics2D)*/) {
             Graphics2D g2d = (Graphics2D) g;
 
             Color oldColor = g2d.getColor();

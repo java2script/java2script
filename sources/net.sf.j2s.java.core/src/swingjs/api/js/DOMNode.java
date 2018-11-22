@@ -29,6 +29,8 @@ public abstract class DOMNode {
 	
 	public abstract void appendChild(DOMNode node);
 	
+	public abstract void insertBefore(DOMNode node, DOMNode refNode);
+	
 	public abstract DOMNode removeChild(DOMNode node);
 
 	public abstract boolean hasFocus();
