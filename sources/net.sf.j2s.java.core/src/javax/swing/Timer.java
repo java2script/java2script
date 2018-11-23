@@ -205,6 +205,7 @@ public class Timer implements Serializable {
 			if (logTimers) {
 				System.out.println("Timer ringing: " + Timer.this);
 			}
+			int id = html5Id;
 			if (notify.get()) {
 				fireActionPerformed(new ActionEvent(Timer.this, 0, getActionCommand(),
 						System.currentTimeMillis(), 0));
@@ -215,7 +216,7 @@ public class Timer implements Serializable {
 			if (isRepeats())
 				dispatch(getDelay());
 			else
-				stop();
+				stop(id);
 		}
 
 		Timer getTimer() {
@@ -234,6 +235,7 @@ public class Timer implements Serializable {
 	public void addActionListener(ActionListener listener) {
 		listenerList.add(ActionListener.class, listener);
 	}
+
 
 	/**
 	 * Removes the specified action listener from the <code>Timer</code>.
@@ -534,14 +536,22 @@ public class Timer implements Serializable {
 	public void stop() {
 		// getLock().lock();
 		// try {
+		stop(html5Id);
+		// } finally {
+		// getLock().unlock();
+		// }
+	}
+
+	protected void stop(int id) {
+		if (id != html5Id)
+			return;
 		JSToolkit.killDispatched(html5Id);
 		cancelNotify();
 		repeats = false;
 		timerQueue().remove(this);
 		html5Id = Integer.MIN_VALUE;
-		// } finally {
-		// getLock().unlock();
-		// }
+		// TODO Auto-generated method stub
+		
 	}
 
 	private ArrayList<Object> timerQueue() {
