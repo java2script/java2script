@@ -4,6 +4,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
+import java.beans.PropertyChangeEvent;
 
 import javax.swing.JComponent;
 import javax.swing.JMenu;
@@ -20,7 +21,7 @@ public class JSMenuUI extends JSMenuItemUI {
 	@Override
 	public DOMNode updateDOMNode() {
 		if (domNode == null) {
-			isMenuItem = !((JMenu) jc).isTopLevelMenu();
+			isMenuItem = !jm.isTopLevelMenu();
 			if (isMenuItem) {
 				containerNode = domNode = createItem("_menu", null);
 			} else {
@@ -54,15 +55,15 @@ public class JSMenuUI extends JSMenuItemUI {
 			}
 			if (eventType == -1) {
 				if (type.equals("mouseenter")) {
-					if(!jc.getParent().getUIClassID().equals("MenuBarUI"))
+					if(!jm.getParent().getUIClassID().equals("MenuBarUI"))
 						stopPopupTimer();
-					((JMenu) jc).setSelected(true);
+					jm.setSelected(true);
 					return true;
 				}
 				if (type.equals("mouseleave")) {
-					((JMenu) jc).setSelected(false);
+					jm.setSelected(false);
 					System.out.println("menubar leaving");
-					if(jc.getParent().getUIClassID().equals("MenuBarUI"))
+					if(jm.getParent().getUIClassID().equals("MenuBarUI"))
 						startPopupTimer();
 					return true;
 				}
@@ -71,6 +72,24 @@ public class JSMenuUI extends JSMenuItemUI {
 		return super.handleJSEvent(target, eventType, jQueryEvent);
 	}
 
+	@Override
+	public void propertyChange(PropertyChangeEvent e) {
+		String prop = e.getPropertyName();
+		if (jc.isVisible()) {
+			if (prop == "ancestor") {
+				if (jc.getParent() != null) {
+					if (domNode != null && isMenuItem == jm.isTopLevelMenu()) {
+						dispose();
+						reInit();
+						outerNode = null;
+						updateDOMNode();
+						return;
+					}
+				}
+			}
+		}
+		super.propertyChange(e);
+	}
 	
 	@Override
 	public void installUI(JComponent jc) {
@@ -78,6 +97,12 @@ public class JSMenuUI extends JSMenuItemUI {
 		super.installUI(jc);
 	}
 
+	@Override
+	public void uninstallUI(JComponent jc) {
+		super.uninstallUI(jc);
+	}
+
+	
 	@Override
 	protected Component[] getChildren() {
 		return (isMenuItem ? new Component[] { jm.getPopupMenu() } : jm

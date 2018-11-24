@@ -56,10 +56,18 @@ private JMenuItem testbtn;
     JFrame main = new JFrame();
     main.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     JMenu menu = new JMenu("testing");
+    
+    JMenu menu1 = new JMenu("testing1");
+    JMenu menu2 = new JMenu("testing2");
+
+    
+    
     menu.setHorizontalAlignment(SwingConstants.RIGHT);
-    main.setContentPane(getVisualPaneContent(menu));
     main.setJMenuBar(new JMenuBar());
+    main.setContentPane(getVisualPaneContent(menu, menu1, menu2));
     main.getJMenuBar().add(menu);
+    main.getJMenuBar().add(menu1);
+    main.getJMenuBar().add(menu2);
     main.pack();
     main.setVisible(true);
     
@@ -73,7 +81,8 @@ private JMenuItem testbtn;
 		@Override
 		public void mouseClicked(MouseEvent e) {
 			System.out.println(pmenu.getComponents().length);
-			pmenu.remove(pmenu.getComponents().length - 1);
+			if (pmenu.getComponents().length > 1)
+				pmenu.remove(pmenu.getComponents().length - 1);
 			System.out.println(pmenu.getComponents().length);
 			pmenu.show(main,  100,  100);
 			System.out.println(pmenu.getComponents().length);
@@ -113,7 +122,7 @@ private JMenuItem testbtn;
    * problems
  * @param menu 
    */
-  Container getVisualPaneContent(JMenu menu)
+  Container getVisualPaneContent(JMenu menu, JMenu menu1, JMenu menu2)
   {
     JPanel panel = new JPanel();
     panel.setPreferredSize(new Dimension(400, 500));
@@ -280,9 +289,6 @@ private JMenuItem testbtn;
     JMenu m2 = new JMenu("right");
     m2.setFont(font);
     m2.addMenuListener(this);
-    m1.add(cb4m);
-    m1.add(cb3m);
-    m1.add(cb5m);
     m2.add(cb6m);
     m2.add(rb1m);
     m1.add(rb2m);
@@ -290,6 +296,12 @@ private JMenuItem testbtn;
     m2.add(mb3);
     m2.add(mb4);
 
+
+    menu1.add(cb4m);
+    menu1.add(cb3m);
+    menu2.add(cb5m);
+    
+    
     
     mb4.addItemListener(this);
     menu.add(m1);
