@@ -2,12 +2,11 @@ package swingjs.plaf;
 
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.event.ContainerEvent;
-import java.awt.event.ContainerListener;
 import java.beans.PropertyChangeEvent;
 
 import javax.swing.JComponent;
 import javax.swing.JMenu;
+
 import swingjs.api.js.DOMNode;
 public class JSMenuUI extends JSMenuItemUI {
 	
@@ -25,13 +24,7 @@ public class JSMenuUI extends JSMenuItemUI {
 			if (isMenuItem) {
 				containerNode = domNode = createItem("_menu", null);
 			} else {
-//				DOMNode labelNode = newDOMObject("label", id);
 				domNode = createItem("_item", null);
-//
-//				// TODO implement icons for menuBar?
-//				setCssFont(DOMNode.setAttr(labelNode, "innerHTML", menuItem.getText()),
-//						c.getFont());
-//				setDataComponent(labelNode);
 			}
 			DOMNode.addJqueryHandledEvent(this, domNode, "mouseenter mouseleave");			
 		}
@@ -42,31 +35,20 @@ public class JSMenuUI extends JSMenuItemUI {
 
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
-		String type = "";
 		// we use == here because this will be JavaScript
-		if (target == domNode) {
-			/**
-			 * @j2sNative
-			 * 
-			 * 			type = jQueryEvent.type;
-			 * 
-			 */
-			{
+		if (target == domNode && eventType == -1) {
+			String type = (/** @j2sNative jQueryEvent.type || */ "");
+			if (type.equals("mouseenter")) {
+				if (!jm.getParent().getUIClassID().equals("MenuBarUI"))
+					stopPopupMenuTimer();
+				jm.setSelected(true);
+				return true;
 			}
-			if (eventType == -1) {
-				if (type.equals("mouseenter")) {
-					if(!jm.getParent().getUIClassID().equals("MenuBarUI"))
-						stopPopupTimer();
-					jm.setSelected(true);
-					return true;
-				}
-				if (type.equals("mouseleave")) {
-					jm.setSelected(false);
-					System.out.println("menubar leaving");
-					if(jm.getParent().getUIClassID().equals("MenuBarUI"))
-						startPopupTimer();
-					return true;
-				}
+			if (type.equals("mouseleave")) {
+				jm.setSelected(false);
+				if (jm.getParent().getUIClassID().equals("MenuBarUI"))
+					startPopupMenuTimer();
+				return true;
 			}
 		}
 		return super.handleJSEvent(target, eventType, jQueryEvent);
@@ -79,7 +61,6 @@ public class JSMenuUI extends JSMenuItemUI {
 			if (prop == "ancestor") {
 				if (jc.getParent() != null) {
 					if (domNode != null && isMenuItem == jm.isTopLevelMenu()) {
-						dispose();
 						reInit();
 						outerNode = null;
 						updateDOMNode();

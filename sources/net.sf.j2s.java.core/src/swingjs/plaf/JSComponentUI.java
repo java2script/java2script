@@ -1,7 +1,6 @@
 package swingjs.plaf;
 
 import java.awt.AWTEvent;
-import javax.swing.SwingConstants;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -35,8 +34,9 @@ import javax.swing.AbstractButton;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
-import javax.swing.SwingConstants.*;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -2487,6 +2487,49 @@ public class JSComponentUI extends ComponentUI
 
 	public void invalidate() {
 		setTainted();
+	}
+
+	/**
+	 * mouseenter for a menuItem 
+	 * @param target
+	 * @param eventType
+	 * @param jQueryEvent
+	 */
+	protected void checkStopPopupMenuTimer(Object target, int eventType, Object jQueryEvent) {
+		if (target == domNode && eventType == -1) {
+			String type = (/** @j2sNative jQueryEvent.type || */"");
+			if (type.equals("mouseenter")) {
+				stopPopupMenuTimer();
+			}
+		}
+	}
+
+	protected int timer;
+
+	/**
+	 * Called from JSMenuUI in a JMenuBar to start a timer that closes the popup window after a short period.
+	 *  
+	 * @param ui
+	 */
+	protected void startPopupMenuTimer() {
+		JSPopupMenuUI ui = (JSPopupMenuUI) ((JMenu) jc).getPopupMenu().getUI();
+		ui.timer = /** @j2sNative setTimeout(function() { ui.hideMenu$()},1000) || */0;
+	}
+
+	/**
+	 * Called from JSMenuUI, JSMenuItem, and JSRadioButtonUI to stop the the popup window timer so that it can persist.
+	 *  
+	 * @param ui
+	 */
+	protected void stopPopupMenuTimer() {
+		JSPopupMenuUI ui = (JSPopupMenuUI) (isPopupMenu ? this : jc.getParent().getUI());
+		if (ui.timer != 0) { 
+		  /** @j2sNative
+		   *  
+		   *   clearTimeout(ui.timer); 
+		   */
+		  ui.timer = 0;
+		}
 	}
 
 }

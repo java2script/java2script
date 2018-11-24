@@ -45,6 +45,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 		setEnabled(c.isEnabled());
 		if (isMenuItem) {
 			domNode = createItem("_item", buttonNode);
+			DOMNode.addJqueryHandledEvent(this, domNode, "mouseenter");			
 		} else {
 			domNode = newDOMObject("div", id + "_dom");
 //			centeringNode = newDOMObject("div", id + "_ctr");
@@ -56,6 +57,15 @@ public class JSRadioButtonUI extends JSButtonUI {
 			centeringNode.appendChild(iconNode);
 		}
 	}
+	
+	@Override
+	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
+		// we use == here because this will be JavaScript
+		checkStopPopupMenuTimer(target, eventType, jQueryEvent);
+		return super.handleJSEvent(target, eventType, jQueryEvent);
+	}
+
+
 
 	/**
 	 * 
