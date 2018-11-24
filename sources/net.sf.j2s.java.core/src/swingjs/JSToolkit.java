@@ -770,54 +770,45 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		return null;
 	}
 
-	public static void setCursor(Component comp, Cursor c) {
-		String curs = null;
-    switch(c == null ? Cursor.DEFAULT_CURSOR : c.getType()) {
-    case Cursor.CROSSHAIR_CURSOR: 
-      curs = "crosshair";
-      break;
-    case Cursor.WAIT_CURSOR:
-      curs = "wait";
-      break;
-    case Cursor.TEXT_CURSOR:     
-    	curs = "text";
-    	break;
-    case Cursor.N_RESIZE_CURSOR:
-    case Cursor.S_RESIZE_CURSOR: 
-      curs = "ns-resize"; 
-      break;
-    case Cursor.HAND_CURSOR:
-      curs = "grab"; 
-      break;
-    case Cursor.MOVE_CURSOR: 
-    	curs = "move";
-      break;
-    case Cursor.NE_RESIZE_CURSOR:
-    case Cursor.SW_RESIZE_CURSOR:
-      curs = "nesw-resize";
-      break;
-    case Cursor.SE_RESIZE_CURSOR:
-    case Cursor.NW_RESIZE_CURSOR:
-      curs = "nwse-resize";
-      break;
-    case Cursor.E_RESIZE_CURSOR:
-    case Cursor.W_RESIZE_CURSOR:
-      curs = "ew-resize";
-      break;
-    case Cursor.DEFAULT_CURSOR:
-    default:
-      curs = "default";
-      break;
-    }		
-		DOMNode.setCursor(curs, comp);
-		
+
+//////// FONTS and CURSORS ///////
+	
+//	public static void setCursor(Component comp, Cursor c) {
+//		DOMNode.setCursor(getCursorName(c), comp);
+//	}
+	
+	public static String getCursorName(Cursor c) {
+		switch (c == null ? Cursor.DEFAULT_CURSOR : c.getType()) {
+		case Cursor.CROSSHAIR_CURSOR:
+			return "crosshair";
+		case Cursor.WAIT_CURSOR:
+			return "wait";
+		case Cursor.TEXT_CURSOR:
+			return "text";
+		case Cursor.HAND_CURSOR:
+			return "grab";
+		case Cursor.MOVE_CURSOR:
+			return "move";
+		case Cursor.N_RESIZE_CURSOR:
+		case Cursor.S_RESIZE_CURSOR:
+			return "ns-resize";
+		case Cursor.NE_RESIZE_CURSOR:
+		case Cursor.SW_RESIZE_CURSOR:
+			return "nesw-resize";
+		case Cursor.SE_RESIZE_CURSOR:
+		case Cursor.NW_RESIZE_CURSOR:
+			return "nwse-resize";
+		case Cursor.E_RESIZE_CURSOR:
+		case Cursor.W_RESIZE_CURSOR:
+			return "ew-resize";
+		case Cursor.CUSTOM_CURSOR:
+			return c.getName();
+		case Cursor.DEFAULT_CURSOR:
+		default:
+			return "default";
+		}
 	}
 
-	
-
-//////// FONTS ///////
-	
-	
 	private static String[] hardwiredFontList; 
 
 	// -- Obsolete font names from 1.0.2. It was decided that

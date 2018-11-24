@@ -2138,29 +2138,10 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public void updateCursorImmediately() {
-		String curs = getCursorName(c.getCursor());
 		setHTMLElement();
-		DOMNode.setStyles(domNode, "cursor", curs);
+		String curs = JSToolkit.getCursorName(c.getCursor());
+		DOMNode.setStyles(outerNode, "cursor", curs);
 		setWaitImage(curs == "wait");
-	}
-
-	static String getCursorName(Cursor cursor) {
-		switch (cursor.getType()) {
-		case Cursor.CROSSHAIR_CURSOR:
-			return "crosshair";
-		case Cursor.WAIT_CURSOR:
-			return "wait";
-		case Cursor.N_RESIZE_CURSOR: // zoom
-			return "ns-resize";
-		case Cursor.HAND_CURSOR: // hand
-			return "grab";
-		case Cursor.MOVE_CURSOR:
-			return "move";
-		case Cursor.CUSTOM_CURSOR:
-			return cursor.getName();
-		default:
-			return "default";
-		}
 	}
 
 	protected void setWaitImage(boolean doShow) {

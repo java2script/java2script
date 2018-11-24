@@ -27,6 +27,8 @@
  */
 package java.awt;
 
+import swingjs.JSToolkit;
+
 /**
  * A class to encapsulate the bitmap representation of the mouse cursor.
  *
@@ -297,9 +299,9 @@ public class Cursor {
             throw new IllegalArgumentException("illegal cursor type");
         }
         this.type = type;
-
-        // Lookup localized name.
-        name = "TODO_CURSOR";//Toolkit.getProperty(cursorProperties[type][0],
+        name = "TODO_CURSOR";
+        name = JSToolkit.getCursorName(this);
+        		//Toolkit.getProperty(cursorProperties[type][0],
                            //        cursorProperties[type][1]);
     }
 

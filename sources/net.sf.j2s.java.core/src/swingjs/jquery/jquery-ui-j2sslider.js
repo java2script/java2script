@@ -236,7 +236,7 @@
 
 				_destroy : function() {
 					
-					for (i = 0; i < handles.length; i++) {
+					for (i = 0; i < this.handles.length; i++) {
 						J2S.setDraggable(this.handles[i], false);
 					}
 					
