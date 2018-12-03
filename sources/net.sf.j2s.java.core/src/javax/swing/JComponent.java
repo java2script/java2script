@@ -51,6 +51,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Insets;
+import java.awt.JSComponent;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
@@ -187,6 +188,7 @@ public abstract class JComponent extends Container {
 	private static final int PARTIALLY_OBSCURED = 1;
 	private static final int COMPLETELY_OBSCURED = 2;
 
+	
 	/**
 	 * Set to true when DebugGraphics has been loaded.
 	 */
@@ -624,11 +626,11 @@ public abstract class JComponent extends Container {
 				// note that this update will fill the component's background, but  
 				// that is not what we are worried about. What we are worried about
 				// is if this method is overridden and is written to.
-				isBackgroundPainted = false;
+				_isBackgroundPainted = false;
 				ui.update(scratchGraphics, this);
 				// BH TODO CHECK THIS 
 				JSGraphics2D jsg = getJSGraphic2D(scratchGraphics);		
-				isBackgroundPainted = (jsg != null && jsg.isBackgroundPainted());
+				_isBackgroundPainted = (jsg != null && jsg.isBackgroundPainted());
 			} finally {
 				scratchGraphics.dispose();
 			}
@@ -780,6 +782,7 @@ public abstract class JComponent extends Container {
 	protected void paintBorder(Graphics g) {
 		Border border = getBorder();
 		if (border != null) {
+			((JSComponentUI)ui).setPainted();
 			border.paintBorder(this, g, 0, 0, getWidth(), getHeight());
 		}
 	}
@@ -3443,20 +3446,23 @@ public abstract class JComponent extends Container {
 		// classes JFrame, JDialog, or JApplet, as those do 
 		// not  
 		
+		ComponentUI oldUI = ui;
+	
 		uninstallUIAndProperties();
 
 		// // aaText shouldn't persist between look and feels, reset it.
 		// aaTextInfo =
 		// UIManager.getDefaults().get(SwingUtilities2.AA_TEXT_PROPERTY_KEY);
-		// ComponentUI oldUI = ui;
 		ui = newUI;
-		if (ui != null) {
-			ui.installJS(); // not ui.installUI(this), as that is done earlier
-		}
+//		if (ui != null) {
+//			ui.installJS(); // not ui.installUI(this), as that is done earlier
+//		}
 		//
 		// firePropertyChange("UI", oldUI, newUI);
-		revalidate();
-		repaint();
+		if (oldUI != null) {
+			revalidate();
+			repaint();
+		}
 	}
 
 	/**
@@ -3465,8 +3471,7 @@ public abstract class JComponent extends Container {
 	 */
 	private void uninstallUIAndProperties() {
 		if (ui != null) {
-			ui.uninstallUI(this);
-			ui.uninstallJS();
+			((JSComponentUI) ui).reinstallUI(this,  null);
 			// //clean UIClientPropertyKeys from client properties
 			// if (clientProperties != null) {
 			// synchronized(clientProperties) {
@@ -4464,9 +4469,10 @@ public abstract class JComponent extends Container {
 					if (jc.isPaintingOrigin()) {
 						resetPC = true;
 					} else {
-						Component[] children = c.getComponents();
+						
+						Component[] children = JSComponent.getChildArray(c);
 						int i = 0;
-						for (; i < children.length; i++) {
+						for (int n = c.getComponentCount(); i < n; i++) {
 							if (children[i] == child)
 								break;
 						}

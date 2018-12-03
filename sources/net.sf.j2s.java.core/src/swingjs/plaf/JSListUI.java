@@ -131,7 +131,7 @@ public class JSListUI extends JSLightweightUI {
 		if (needFilling) {
 			fillDOM();
 		}
-		return domNode;
+		return updateDOMNodeCUI();
 	}
 
 	@Override
@@ -348,7 +348,7 @@ public class JSListUI extends JSLightweightUI {
 
 	private void updateItemHTML(JComponent c, int index, int left, int top,
 			int width, int height) {
-		DOMNode node = c.ui.getDOMNode();
+		DOMNode node = ((JSComponentUI)c.ui).getDOMNode();
 		String myid = id + "_" + index;
 		JQueryObject jnode = $((DOMNode) (Object) ("#" + myid));
 		if (((DOMNode[]) (Object) jnode)[0] == null) {
@@ -372,6 +372,7 @@ public class JSListUI extends JSLightweightUI {
 	 */
 	@Override
 	public void paint(Graphics g, JComponent c) {
+		super.paint(g, c);
 		Shape clip = g.getClip();
 		paintImpl(g, c);
 		g.setClip(clip);
@@ -976,6 +977,7 @@ public class JSListUI extends JSLightweightUI {
 	 * @see #installListeners
 	 * @see #installKeyboardActions
 	 */
+	@Override
 	public void installUI(JComponent c) {
 		list = (JList) jc;
 
@@ -1003,6 +1005,7 @@ public class JSListUI extends JSLightweightUI {
 	 * @see #uninstallKeyboardActions
 	 * @see #uninstallDefaults
 	 */
+	@Override
 	public void uninstallUI(JComponent c) {
 		uninstallListeners();
 		uninstallDefaults();

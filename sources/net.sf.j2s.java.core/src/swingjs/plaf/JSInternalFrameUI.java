@@ -46,12 +46,14 @@ public class JSInternalFrameUI extends JSFrameUI {
 	}
 
 	
+	@Override
 	protected void frameCloserAction() {
 		JInternalFrame jif = (JInternalFrame) iframe;
          if(jif.isClosable())
             jif.doDefaultCloseAction();
 	}
 	
+	@Override
 	public int[] getMoveCoords(int x, int y) {
 //		JInternalFrame jif = (JInternalFrame) frame;    	
 //        if (jif.getDesktopPane() == null) {
@@ -74,7 +76,8 @@ public class JSInternalFrameUI extends JSFrameUI {
 	private PropertyChangeListener propertyChangeListener;
 	private static DesktopManager sharedDesktopManager;
 	
-    public void installUI(JComponent c)   {
+    @Override
+	public void installUI(JComponent c)   {
     	super.installUI(c);
 
         iframe = (JInternalFrame)c;
@@ -87,7 +90,8 @@ public class JSInternalFrameUI extends JSFrameUI {
         LookAndFeel.installProperty(iframe, "opaque", Boolean.TRUE);
     }
 
-    public void uninstallUI(JComponent c) {
+    @Override
+	public void uninstallUI(JComponent c) {
         if(c != iframe)
             throw new IllegalComponentStateException(
                 this + " was asked to deinstall() "
@@ -290,7 +294,8 @@ public class JSInternalFrameUI extends JSFrameUI {
      * Detects changes in state from the JInternalFrame and handles
      * actions.
      */
-    public void propertyChange(PropertyChangeEvent evt) {
+    @Override
+	public void propertyChange(PropertyChangeEvent evt) {
         getHandler().propertyChange(evt);
     }
 }
@@ -341,13 +346,15 @@ public class JSInternalFrameUI extends JSFrameUI {
    }
 
 
+	@Override
 	protected void selected() {
 		activateFrame((JInternalFrame) jc);
 	}
 
 
     // PropertyChangeListener
-    public void propertyChange(PropertyChangeEvent evt) {
+    @Override
+	public void propertyChange(PropertyChangeEvent evt) {
     	super.propertyChange(evt);
         String prop = evt.getPropertyName();
         JInternalFrame f = (JInternalFrame)evt.getSource();
@@ -415,32 +422,39 @@ public class JSInternalFrameUI extends JSFrameUI {
       // its functionality has been moved into Handler. If you need to add
       // new functionality add it to the Handler, but make sure this
       // class calls into the Handler.
-      public void internalFrameClosing(InternalFrameEvent e) {
+      @Override
+	public void internalFrameClosing(InternalFrameEvent e) {
           getHandler().internalFrameClosing(e);
       }
 
-      public void internalFrameClosed(InternalFrameEvent e) {
+      @Override
+	public void internalFrameClosed(InternalFrameEvent e) {
           getHandler().internalFrameClosed(e);
       }
 
-      public void internalFrameOpened(InternalFrameEvent e) {
+      @Override
+	public void internalFrameOpened(InternalFrameEvent e) {
           getHandler().internalFrameOpened(e);
       }
 
-      public void internalFrameIconified(InternalFrameEvent e) {
+      @Override
+	public void internalFrameIconified(InternalFrameEvent e) {
           getHandler().internalFrameIconified(e);
       }
 
-      public void internalFrameDeiconified(InternalFrameEvent e) {
+      @Override
+	public void internalFrameDeiconified(InternalFrameEvent e) {
           getHandler().internalFrameDeiconified(e);
       }
 
-      public void internalFrameActivated(InternalFrameEvent e) {
+      @Override
+	public void internalFrameActivated(InternalFrameEvent e) {
           getHandler().internalFrameActivated(e);
       }
 
 
-      public void internalFrameDeactivated(InternalFrameEvent e) {
+      @Override
+	public void internalFrameDeactivated(InternalFrameEvent e) {
           getHandler().internalFrameDeactivated(e);
       }
     }
@@ -449,10 +463,12 @@ public class JSInternalFrameUI extends JSFrameUI {
             /*LayoutManager, MouseInputListener, */PropertyChangeListener,
             WindowFocusListener, SwingConstants {
 
-        public void windowGainedFocus(WindowEvent e) {
+        @Override
+		public void windowGainedFocus(WindowEvent e) {
         }
 
-        public void windowLostFocus(WindowEvent e) {
+        @Override
+		public void windowLostFocus(WindowEvent e) {
             // Cancel a resize which may be in progress, when a
             // WINDOW_LOST_FOCUS event occurs, which may be
             // caused by an Alt-Tab or a modal dialog popup.
@@ -500,11 +516,13 @@ public class JSInternalFrameUI extends JSFrameUI {
 
 
         // InternalFrameListener
-        public void internalFrameClosed(InternalFrameEvent e) {
+        @Override
+		public void internalFrameClosed(InternalFrameEvent e) {
             iframe.removeInternalFrameListener(getHandler());
         }
 
-        public void internalFrameActivated(InternalFrameEvent e) {
+        @Override
+		public void internalFrameActivated(InternalFrameEvent e) {
 //            if (!isKeyBindingRegistered()){
 //                setKeyBindingRegistered(true);
 //                setupMenuOpenKey();
@@ -514,19 +532,25 @@ public class JSInternalFrameUI extends JSFrameUI {
 //                setKeyBindingActive(true);
         }
 
-        public void internalFrameDeactivated(InternalFrameEvent e) {
+        @Override
+		public void internalFrameDeactivated(InternalFrameEvent e) {
 //            setKeyBindingActive(false);
         }
 
-        public void internalFrameClosing(InternalFrameEvent e) { }
-        public void internalFrameOpened(InternalFrameEvent e) { }
-        public void internalFrameIconified(InternalFrameEvent e) { }
-        public void internalFrameDeiconified(InternalFrameEvent e) { }
+        @Override
+		public void internalFrameClosing(InternalFrameEvent e) { }
+        @Override
+		public void internalFrameOpened(InternalFrameEvent e) { }
+        @Override
+		public void internalFrameIconified(InternalFrameEvent e) { }
+        @Override
+		public void internalFrameDeiconified(InternalFrameEvent e) { }
 
 
 
         // PropertyChangeListener
-        public void propertyChange(PropertyChangeEvent evt) {
+        @Override
+		public void propertyChange(PropertyChangeEvent evt) {
             String prop = evt.getPropertyName();
             JInternalFrame f = (JInternalFrame)evt.getSource();
             Object newValue = evt.getNewValue();

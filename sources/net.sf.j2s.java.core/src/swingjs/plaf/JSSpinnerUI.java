@@ -76,8 +76,7 @@ public class JSSpinnerUI extends JSLightweightUI {
 		DOMNode.setStyles(valueNode, "width", (w - 38) + "px");
 		DOMNode.setStyles(up, "left", (w - 34)  + "px");
 		DOMNode.setStyles(dn, "left", (w - 34)  + "px");
-			
-		return domNode;
+		return updateDOMNodeCUI();
 	}
 
 	private DOMNode setValue() {

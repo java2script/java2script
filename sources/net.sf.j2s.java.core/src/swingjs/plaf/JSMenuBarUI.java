@@ -72,8 +72,7 @@ public class JSMenuBarUI extends JSPanelUI implements ContainerListener {
 			containerNode = domNode = newDOMObject("div", id);
 			DOMNode.setTopLeftAbsolute(domNode, 0, 0); // after title bar
 		}
-
-		return domNode;
+		return updateDOMNodeCUI();
 	}
 
 //	private void setMenu() {

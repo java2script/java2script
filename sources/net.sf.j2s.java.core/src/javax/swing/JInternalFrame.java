@@ -408,20 +408,19 @@ public class JInternalFrame extends JFrame
         }
     }
 
-    /* This method is called if <code>updateUI</code> was called
-     * on the associated
-     * JDesktopIcon.  It's necessary to avoid infinite recursion.
-     */
-    void updateUIWhenHidden() {
-        setUI((InternalFrameUI)UIManager.getUI(this));
-        invalidate();
-        Component[] children = getComponents();
-        if (children != null) {
-            for(int i = 0; i < children.length; i++) {
-                SwingUtilities.updateComponentTreeUI(children[i]);
-            }
-        }
-    }
+	/*
+	 * This method is called if <code>updateUI</code> was called on the associated
+	 * JDesktopIcon. It's necessary to avoid infinite recursion.
+	 */
+	void updateUIWhenHidden() {
+		setUI((InternalFrameUI) UIManager.getUI(this));
+		invalidate();
+		Component[] children = JSComponent.getChildArray(desktop);
+		int n = desktop.getComponentCount();
+		for (int i = 0; i < n; i++) {
+			SwingUtilities.updateComponentTreeUI(children[i]);
+		}
+	}
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -1128,8 +1127,8 @@ public class JInternalFrame extends JFrame
      */
     public void reshape(int x, int y, int width, int height) {
         super.reshape(x, y, width, height);
-        validate();
-        repaint();
+//        validate();
+//        repaint();
     }
 
 ///////////////////////////
@@ -1979,9 +1978,9 @@ public class JInternalFrame extends JFrame
             setSize(r.width, r.height);
 
             invalidate();
-            Component[] children = getComponents();
+			Component[] children = JSComponent.getChildArray(this);
             if (children != null) {
-                for(int i = 0; i < children.length; i++) {
+                for(int i = 0, n = getComponentCount(); i < n; i++) {
                     SwingUtilities.updateComponentTreeUI(children[i]);
                 }
             }

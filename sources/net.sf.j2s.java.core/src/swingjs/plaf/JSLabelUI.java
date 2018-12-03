@@ -1,6 +1,5 @@
 package swingjs.plaf;
 
-import java.awt.Container;
 import java.awt.Dimension;
 
 import javax.swing.ImageIcon;
@@ -19,7 +18,6 @@ import swingjs.api.js.DOMNode;
  *
  */
 public class JSLabelUI extends JSLightweightUI {
-	private JLabel label; // null for a JTooltip subclass
 	protected ImageIcon icon;
 	protected int gap;
 	protected String text;
@@ -59,8 +57,7 @@ public class JSLabelUI extends JSLightweightUI {
 		}
 		if (jc.isEnabled())
 			setBackground(jc.isOpaque() ? jc.getBackground() : null);
-		return domNode;
-
+		return updateDOMNodeCUI();
 	}
 
 	protected void getIconAndText() {		
@@ -70,14 +67,14 @@ public class JSLabelUI extends JSLightweightUI {
 	}
 
 
-	/**
-	 * adding in outer styles for text alignment of a label
-	 */
-	@Override
-	protected DOMNode setHTMLElement() {
-		setHTMLElementCUI();
-		return outerNode;
-	}
+//	/**
+//	 * adding in outer styles for text alignment of a label
+//	 */
+//	@Override
+//	protected DOMNode setHTMLElement() {
+//		setHTMLElementCUI();
+//		return outerNode;
+//	}
 	
 	@Override
 	public void installUI(JComponent jc) {
@@ -92,6 +89,7 @@ public class JSLabelUI extends JSLightweightUI {
 		
 	}
 
+	@Override
 	Dimension getMaximumSize(JComponent jc) {
 		return getPreferredSize();
 	}

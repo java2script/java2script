@@ -115,6 +115,7 @@ public class BasicArrowButton extends JButton implements SwingConstants
             this.direction = direction;
         }
 
+    	@Override
         public void paint(Graphics g) {
             Color origColor;
             boolean isPressed, isEnabled;
@@ -182,6 +183,7 @@ public class BasicArrowButton extends JButton implements SwingConstants
          *
          * @return the preferred size
          */
+    	@Override
         public Dimension getPreferredSize() {
             return new Dimension(16, 16);
         }
@@ -191,6 +193,7 @@ public class BasicArrowButton extends JButton implements SwingConstants
          *
          * @return the minimum size
          */
+    	@Override
         public Dimension getMinimumSize() {
             return new Dimension(5, 5);
         }
@@ -200,6 +203,7 @@ public class BasicArrowButton extends JButton implements SwingConstants
          *
          * @return the maximum size
          */
+    	@Override
         public Dimension getMaximumSize() {
             return new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);
         }
@@ -213,6 +217,7 @@ public class BasicArrowButton extends JButton implements SwingConstants
          *
          * @return {@code false}
          */
+    	@Override
         public boolean isFocusTraversable() {
           return false;
         }

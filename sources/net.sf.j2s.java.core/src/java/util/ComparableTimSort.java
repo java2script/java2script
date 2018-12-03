@@ -240,7 +240,7 @@ class ComparableTimSort {
      * @param start the index of the first element in the range that is
      *        not already known to be sorted ({@code lo <= start <= hi})
      */
-    @SuppressWarnings({"fallthrough", "rawtypes", "unchecked"})
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private static void binarySort(Object[] a, int lo, int hi, int start) {
         assert lo <= start && start <= hi;
         if (start == lo)

@@ -98,7 +98,8 @@ public class JSColorChooserUI extends JSPanelUI
         }
     }
 
-    public void installUI( JComponent c ) {
+    @Override
+	public void installUI( JComponent c ) {
         chooser = (JColorChooser)c;
 
         super.installUI( c );
@@ -133,7 +134,8 @@ public class JSColorChooserUI extends JSPanelUI
         chooser.applyComponentOrientation(c.getComponentOrientation());
     }
 
-    public void uninstallUI( JComponent c ) {
+    @Override
+	public void uninstallUI( JComponent c ) {
         chooser.remove(tabbedPane);
         chooser.remove(singlePanel);
         chooser.remove(previewPanelHolder);
@@ -233,7 +235,8 @@ public class JSColorChooserUI extends JSPanelUI
         //
         // ChangeListener
         //
-        public void stateChanged(ChangeEvent evt) {
+        @Override
+		public void stateChanged(ChangeEvent evt) {
             ColorSelectionModel model = (ColorSelectionModel)evt.getSource();
             if (previewPanel != null) {
                 previewPanel.setForeground(model.getSelectedColor());
@@ -243,21 +246,27 @@ public class JSColorChooserUI extends JSPanelUI
 
         //
         // MouseListener
-        public void mousePressed(MouseEvent evt) {
+        @Override
+		public void mousePressed(MouseEvent evt) {
             if (chooser.getDragEnabled()) {
                 TransferHandler th = chooser.getTransferHandler();
                 th.exportAsDrag(chooser, evt, TransferHandler.COPY);
             }
         }
-        public void mouseReleased(MouseEvent evt) {}
-        public void mouseClicked(MouseEvent evt) {}
-        public void mouseEntered(MouseEvent evt) {}
-        public void mouseExited(MouseEvent evt) {}
+        @Override
+		public void mouseReleased(MouseEvent evt) {}
+        @Override
+		public void mouseClicked(MouseEvent evt) {}
+        @Override
+		public void mouseEntered(MouseEvent evt) {}
+        @Override
+		public void mouseExited(MouseEvent evt) {}
 
         //
         // PropertyChangeListener
         //
-        public void propertyChange(PropertyChangeEvent evt) {
+        @Override
+		public void propertyChange(PropertyChangeEvent evt) {
             String prop = evt.getPropertyName();
 
             if (prop == JColorChooser.CHOOSER_PANELS_PROPERTY) {
@@ -338,7 +347,8 @@ public class JSColorChooserUI extends JSPanelUI
      * Instantiate it only within subclasses of <Foo>.
      */
     public class PropertyHandler implements PropertyChangeListener {
-        public void propertyChange(PropertyChangeEvent e) {
+        @Override
+		public void propertyChange(PropertyChangeEvent e) {
             getHandler().propertyChange(e);
         }
     }

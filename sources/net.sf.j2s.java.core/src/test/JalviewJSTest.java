@@ -90,8 +90,9 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if (pmenu.getComponents().length > 1)
-					pmenu.remove(pmenu.getComponents().length - 1);
+				int n = pmenu.getComponentCount();
+				if (n > 1)
+					pmenu.remove(n - 1);
 				pmenu.show(main, 100, 100);
 				// TODO Auto-generated method stub
 

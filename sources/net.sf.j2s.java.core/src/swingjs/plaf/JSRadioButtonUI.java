@@ -15,7 +15,8 @@ public class JSRadioButtonUI extends JSButtonUI {
 
 	@Override
 	public DOMNode updateDOMNode() {
-		return updateButton("radio");
+		updateButton("radio");
+		return updateDOMNodeCUI();
 	}
 
 	@Override
@@ -37,6 +38,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 		createButton();
 	}
 	
+	@Override
 	protected void createButton() {
 		textNode = newDOMObject("span", id + "_txt");
 		setDataComponent(buttonNode);

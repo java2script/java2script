@@ -58,7 +58,8 @@ public class Checkbox extends JCheckBox {
     }
     
 
-    protected void fireActionPerformed(ActionEvent event) {
+    @Override
+	protected void fireActionPerformed(ActionEvent event) {
     	A2SEvent.addListener(null, this);
     	super.fireActionPerformed(event);
     }

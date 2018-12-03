@@ -111,7 +111,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		setSlider();
 		if (jc.isOpaque())
 			setBackground(jc.getBackground());
-		return domNode;
+		return updateDOMNodeCUI();
 	}
 
 	private void disposeSlider() {
@@ -230,12 +230,18 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	 */
 	protected void setSliderAttr(String key, float val) {
 	
+		String id = null;
+		try {
 		Object slider = $(jqSlider);
 		/**
 		 * @j2sNative
-		 * 
+		 *   id = this.jqSlider.id;
 		 *  slider.j2sslider("option",key,val);
 		 */
+		} catch (Throwable t) {
+			System.out.println(key + ":" + val + " could not be set for " + id);
+			// ignore -- disposal problem?
+		}
 	}
 
 	public void setSlider() {
@@ -394,6 +400,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	}
 
 	
+	@Override
 	public Dimension getMinimumSize(JComponent c) {
 		return (isScrollBar ? super.getMinimumSize(c) 
 				: isHoriz ? getMinimumHorizontalSize() : getMinimumVerticalSize());
@@ -417,6 +424,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		return vertDim;
 	}
 
+	@Override
 	public Dimension getPreferredSize(JComponent c) {
 		return (isScrollBar ? super.getPreferredSize(c) : isHoriz ? getPreferredHorizontalSize() : getPreferredVerticalSize());
 	}

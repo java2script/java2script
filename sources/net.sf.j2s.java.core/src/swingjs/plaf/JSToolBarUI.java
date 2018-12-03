@@ -40,6 +40,7 @@ import java.awt.JSFrame;
 import java.awt.Graphics;
 import java.awt.IllegalComponentStateException;
 import java.awt.Insets;
+import java.awt.JSComponent;
 import java.awt.LayoutManager;
 import java.awt.Point;
 import java.awt.Window;
@@ -142,12 +143,12 @@ public class JSToolBarUI extends JSPanelUI {
 			containerNode = domNode = newDOMObject("div", id);
 			DOMNode.setTopLeftAbsolute(domNode, 0, 0); // after title bar
 		}
-
-		return domNode;
+		return updateDOMNodeCUI();
 	}
 
 	private static String FOCUSED_COMP_INDEX = "JToolBar.focusedCompIndex";
 
+	@Override
 	public void installUI(JComponent c) {
 		toolBar = (JToolBar) jc;
 
@@ -171,6 +172,7 @@ public class JSToolBarUI extends JSPanelUI {
 		}
 	}
 
+	@Override
 	public void uninstallUI(JComponent c) {
 
 		// Clear defaults
@@ -267,9 +269,9 @@ public class JSToolBarUI extends JSPanelUI {
 
 		if (toolBarFocusListener != null) {
 			// Put focus listener on all components in toolbar
-			Component[] components = toolBar.getComponents();
+			Component[] components = JSComponent.getChildArray(toolBar);
 
-			for (int i = 0; i < components.length; ++i) {
+			for (int i = 0, n = toolBar.getComponentCount(); i < n; ++i) {
 				components[i].addFocusListener(toolBarFocusListener);
 			}
 		}
@@ -295,9 +297,8 @@ public class JSToolBarUI extends JSPanelUI {
 
 		if (toolBarFocusListener != null) {
 			// Remove focus listener from all components in toolbar
-			Component[] components = toolBar.getComponents();
-
-			for (int i = 0; i < components.length; ++i) {
+			Component[] components = JSComponent.getChildArray(toolBar);
+			for (int i = 0, n = toolBar.getComponentCount(); i < n; ++i) {
 				components[i].removeFocusListener(toolBarFocusListener);
 			}
 
@@ -597,13 +598,11 @@ public class JSToolBarUI extends JSPanelUI {
 	 */
 	protected void installRolloverBorders(JComponent c) {
 		// Put rollover borders on buttons
-		Component[] components = c.getComponents();
-
-		for (int i = 0; i < components.length; ++i) {
-			if (components[i] instanceof JComponent) {
-				((JComponent) components[i]).updateUI();
-				setBorderToRollover(components[i]);
-			}
+		Component[] components = JSComponent.getChildArray(c);
+		for (int i = 0, n = c.getComponentCount(); i < n; ++i) {
+//			if (components[i] instanceof JComponent) {
+			((JComponent) components[i]).updateUI();
+//				setBorderToRollover(components[i]);
 		}
 	}
 
@@ -621,9 +620,9 @@ public class JSToolBarUI extends JSPanelUI {
 	 */
 	protected void installNonRolloverBorders(JComponent c) {
 		// Put non-rollover borders on buttons. These borders reduce the margin.
-		Component[] components = c.getComponents();
+		Component[] components = JSComponent.getChildArray(c);
 
-		for (int i = 0; i < components.length; ++i) {
+		for (int i = 0, n = toolBar.getComponentCount(); i < n; ++i) {
 			if (components[i] instanceof JComponent) {
 				((JComponent) components[i]).updateUI();
 				setBorderToNonRollover(components[i]);
@@ -645,9 +644,9 @@ public class JSToolBarUI extends JSPanelUI {
 	 */
 	protected void installNormalBorders(JComponent c) {
 		// Put back the normal borders on buttons
-		Component[] components = c.getComponents();
+		Component[] components = JSComponent.getChildArray(c);
 
-		for (int i = 0; i < components.length; ++i) {
+		for (int i = 0, n = c.getComponentCount(); i < n; ++i) {
 			setBorderToNormal(components[i]);
 		}
 	}
@@ -1181,11 +1180,12 @@ public class JSToolBarUI extends JSPanelUI {
 			} else if (propertyName == "orientation") {
 				// Search for JSeparator components and change it's orientation
 				// to match the toolbar and flip it's orientation.
-				Component[] components = toolBar.getComponents();
+				Component[] components = JSComponent.getChildArray(toolBar);
+				int n = toolBar.getComponentCount();
 				int orientation = ((Integer) evt.getNewValue()).intValue();
 				JToolBar.Separator separator;
 
-				for (int i = 0; i < components.length; ++i) {
+				for (int i = 0; i < n; ++i) {
 					if (components[i] instanceof JToolBar.Separator) {
 						separator = (JToolBar.Separator) components[i];
 						if ((orientation == JToolBar.HORIZONTAL)) {

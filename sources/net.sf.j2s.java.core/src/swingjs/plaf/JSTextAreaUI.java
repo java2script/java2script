@@ -36,7 +36,7 @@ public class JSTextAreaUI extends JSTextUI {
 				c.getFont());
 		if (!editable)
 			DOMNode.setAttr(domNode, "readOnly", "true");		
-		return domNode;
+		return updateDOMNodeCUI();
 	}
 
 	/**

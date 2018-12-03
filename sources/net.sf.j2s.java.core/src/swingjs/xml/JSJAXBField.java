@@ -192,6 +192,7 @@ class JSJAXBField implements Cloneable {
 	 * prior to re-use in unmarshalling
 	 * 
 	 */
+	@Override
 	public JSJAXBField clone() {
 		try {
 			JSJAXBField f = (JSJAXBField) super.clone();
@@ -512,6 +513,7 @@ class JSJAXBField implements Cloneable {
 //		return s;
 //	}
 
+	@Override
 	public String toString() {
 		return "{" + javaName + "}" + index;
 	}

@@ -46,8 +46,18 @@ import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Canvas;
 import swingjs.plaf.JSComponentUI;
 
-/*
+/**
  * A class to support swingJS for selected AWT and Swing components
+ * 
+ * Note that JPanel, JRootPane, and JDesktopPane allow for
+ * 
+ * putClientProperty("swingjs.overflow.hidden","false")
+ * 
+ * This allows for overflow, particularly of JInternalFrames on a JDesktop.
+ * 
+ * Used in Jalview. When used, one must set that client property for getRootPane(),
+ * getContentPane(), and the JDesktop itself.
+ * 
  * 
  * @author Bob Hanson
  * 
@@ -92,6 +102,9 @@ public abstract class JSComponent extends Component {
 		}
 	}
 
+	public static Component[] getChildArray(Container c) {
+		return (c == null ? Container.EMPTY_ARRAY : c.getChildArray());
+	}
 	/**
 	 * 
 	 * used by SwingJS
@@ -102,21 +115,33 @@ public abstract class JSComponent extends Component {
 	public boolean isFramedApplet;
 
 	public String htmlName;
-	protected int num;
-	private static int incr;
+	protected int _num;
+	private static int _incr;
 
 	public boolean isRootPane, isContentPane;
 	public HTML5Canvas canvas;
 	public JSAppletViewer appletViewer = ((JSAppletThread) Thread.currentThread()).appletViewer;
-	private JSFrameViewer frameViewer;
+	private JSFrameViewer frameViewer, topFrameViewer;
+	public HTML5Canvas _canvas;
+	public ComponentUI ui;
+
+	public String uiClassID = "ComponentUI";
+
+	Boolean peerVis;
+
+	/**
+	 * not totally successful; triggered for images, background, and fillBox
+	 * 
+	 */
+	public boolean _isBackgroundPainted;
+
+	
 
 	public JSComponent() {
 		super();
-		num = ++incr;
+		_num = ++_incr;
 	}
 
-	public HTML5Canvas _canvas;
-	
 	/**
 	 * 
 	 * For SwingJS, we have the graphics without needing to get it from a peer.
@@ -151,8 +176,6 @@ public abstract class JSComponent extends Component {
 		return frameViewer = (viewer == null ? viewer = new JSFrameViewer().setForWindow((RootPaneContainer) this) : viewer);
 	}
 
-	private JSFrameViewer topFrameViewer;
-
 	public JSFrameViewer getFrameViewer() {
 		JSComponent parent = null;
 		return (topFrameViewer != null ? topFrameViewer
@@ -161,12 +184,8 @@ public abstract class JSComponent extends Component {
 	}
 
 	public String getHTMLName(String uid) {
-		return (htmlName == null ? htmlName = appContext.getThreadGroup().getName() + "_" + uid + "_" + num : htmlName);
+		return (htmlName == null ? htmlName = appContext.getThreadGroup().getName() + "_" + uid + "_" + _num : htmlName);
 	}
-
-	public ComponentUI ui;
-
-	public String uiClassID = "ComponentUI";
 
 	/**
 	 * Returns the <code>UIDefaults</code> key used to look up the name of the
@@ -187,25 +206,23 @@ public abstract class JSComponent extends Component {
 	}
 
 	/**
-	 * a version of setUI for objects that are not JComponents (JDialog, JFrame,
-	 * JWindow).
+	 * required by Container, but not actually ever called, 
+	 * because all Containers are JComponents in SwingJS
 	 * 
 	 * @param ui
 	 */
 	public void setUI(ComponentUI ui) {
 		this.ui = ui;
-		if (ui != null) {
-			// set up the ui as a PropertyChangeListener
-			// and, if applicable, a ChangeListener
-			ui.installJS();
-		}
+//		if (ui != null) {
+//			// set up the ui as a PropertyChangeListener
+//			// and, if applicable, a ChangeListener
+//			ui.installJS();
+//		}
 	}
 
 	public ComponentUI getUI() {
 		return ui;
 	}
-
-	Boolean peerVis;
 
 	@Override
 	protected void updatePeerVisibility(boolean isVisible) {
@@ -221,8 +238,7 @@ public abstract class JSComponent extends Component {
 	 */
 	@Override
 	protected ComponentPeer getOrCreatePeer() {
-		return (ui == null ? null
-				: ui == null ? null : peer == null ? (peer = getToolkit().createComponent(this)) : peer);
+		return (ui == null ? null : peer == null ? (peer = getToolkit().createComponent(this)) : peer);
 	}
 
 	/**
@@ -235,12 +251,6 @@ public abstract class JSComponent extends Component {
 		if (ui == null)
 			setUI(UIManager.getUI(this));
 	}
-
-	/**
-	 * not totally successful; triggered for images, background, and fillBox
-	 * 
-	 */
-	public boolean isBackgroundPainted;
 
 	protected JSGraphics2D getJSGraphic2D(Graphics g) {
 		return (/** @j2sNative g.mark$ ? g : */ null);
@@ -255,22 +265,22 @@ public abstract class JSComponent extends Component {
 	 */
 	public void checkBackgroundPainted(JSGraphics2D jsg) {
 		if (jsg == null) {
-			isBackgroundPainted = false;
+			_isBackgroundPainted = false;
 			return;
 		}
-		isBackgroundPainted = jsg.isBackgroundPainted();
-		if (isBackgroundPainted) {
-			ui.setBackgroundPainted();
+		_isBackgroundPainted = jsg.isBackgroundPainted();
+		if (_isBackgroundPainted) {
+			((JSComponentUI) ui).setPainted();
 			// It's all one canvas, and it is behind the root pane (bad design?)
 			// so if it is painted, we should make the root pane transparent
-			((JComponent) this).getRootPane().getUI().setBackgroundPainted();
+			((JSComponentUI) ((JComponent) this).getRootPane().getUI()).setPainted();
 		}
 	}
 
 	public boolean selfOrParentBackgroundPainted() {
 		JSComponent c = this;
 		while (c != null) {
-			if (c.isBackgroundPainted)
+			if (c._isBackgroundPainted)
 				return true;
 			c = (JSComponent) c.getParent();
 		}
@@ -283,13 +293,14 @@ public abstract class JSComponent extends Component {
 									// !isBackgroundPainted);
 	}
 
-	protected void updateUIZOrder(JSComponent[] components) {
+	protected void updateUIZOrder() {
 		if (uiClassID != "DesktopPaneUI")
 			return;
 		// set the n by their position in the component list using the 
 		// same z orders that are already there - probably something like 
 		// 10000, 11000, 12000
-    	int n = components.length;
+    	int n = ((Container) this).getComponentCount();
+    	JSComponent[] components = (JSComponent[]) getChildArray((Container) this);
     	if (n < 2)
     		return;
     	int[] zorders = new int[n];

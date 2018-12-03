@@ -17,7 +17,8 @@ public class JpgImageWriteParam extends ImageWriteParam {
 		compressionQuality = 0.75f;
 	}
 	
-    public void unsetCompression() {
+    @Override
+	public void unsetCompression() {
         if (getCompressionMode() != MODE_EXPLICIT) {
             throw new IllegalStateException
                 ("Compression mode not MODE_EXPLICIT!");

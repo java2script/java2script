@@ -74,6 +74,7 @@ public class JSXMLGregorianCalendarImpl extends XMLGregorianCalendarImpl {
 		super(year, month, day, hour, minute, second, millisecond, timezone);
 	}
 
+	@Override
 	public QName getXMLSchemaType() {
 		return (xmlSchema == null ? super.getXMLSchemaType() : xmlSchema);
 	}

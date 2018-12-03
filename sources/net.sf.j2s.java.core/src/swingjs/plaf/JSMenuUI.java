@@ -2,6 +2,7 @@ package swingjs.plaf;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.JSComponent;
 import java.beans.PropertyChangeEvent;
 
 import javax.swing.JComponent;
@@ -84,11 +85,20 @@ public class JSMenuUI extends JSMenuItemUI {
 	}
 
 	
+	/** note that the last element is null if array is oversize
+	 * 
+	 */
 	@Override
 	protected Component[] getChildren() {
-		return (isMenuItem ? new Component[] { jm.getPopupMenu() } : jm
-				.getComponents());
+		return (isMenuItem ? new Component[] { jm.getPopupMenu() } : 
+			JSComponent.getChildArray(jm));
 	}
+
+	@Override
+	protected int getChildCount() {
+		return (isMenuItem ? 1 : jc.getComponentCount());
+	}
+
 
 	@Override
 	public Dimension getMaximumSize() {

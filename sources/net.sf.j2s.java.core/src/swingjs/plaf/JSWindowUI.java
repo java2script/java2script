@@ -82,7 +82,7 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 		return domNode;
 	}
 	
-	protected void setWindowClass() {
+	protected void setWindowClass() { 
 		DOMNode.setZ(domNode, z);
 		$(domNode).addClass("swingjs-window");
 	}
