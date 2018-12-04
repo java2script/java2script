@@ -2,23 +2,23 @@ package swingjs.plaf;
 
 
 import java.awt.Dimension;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
 
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.LookAndFeel;
+
 import swingjs.JSUtil;
+import swingjs.api.js.DOMNode;
 import swingjs.api.js.JSSwingMenu;
 import swingjs.jquery.JQueryUI;
-import swingjs.api.js.DOMNode;
 
 public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 
 	
 	static {
+		@SuppressWarnings("unused")
 		Object jqueryui = JQueryUI.class; // loads jQuery.ui
 	}
 
@@ -43,10 +43,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 		setHTMLElement();
 	}
 
-	/*private*/ int timer;
-
 	public JSPopupMenuUI() {
-		
 		if (j2sSwingMenu == null) {
 			JSUtil.loadStaticResource("swingjs/jquery/j2sMenu.js");
 			j2sSwingMenu = J2S.getSwing();
@@ -65,8 +62,16 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 //			isTopLevel = (!(popupMenu.getInvoker() instanceof JMenu) 
 //					|| ((JMenu) popupMenu.getInvoker()).isTopLevelMenu());
 			domNode = containerNode = newDOMObject("ul", id);
+			DOMNode.addJqueryHandledEvent(this, domNode, "mouseenter");
 		}
-		return domNode;
+		return updateDOMNodeCUI();
+	}
+
+	@Override
+	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
+		// we use == here because this will be JavaScript
+		checkStopPopupMenuTimer(target, eventType, jQueryEvent);
+		return super.handleJSEvent(target, eventType, jQueryEvent);
 	}
 
 	@Override
@@ -125,25 +130,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 		}
 	}
 
-	void startTimer() {
-		System.out.println("startTimer");
-		Object me = this;
-		timer = /** @j2sNative setTimeout(function() { me.hideMenu$()},1000) || */0;
-	}
-
-	void stopTimer() {
-		System.out.println("stopTimer");
-	  /** @j2sNative
-	   *  
-	   * if (this.timer) 
-	   *   clearTimeout(this.timer); 
-	   */
-	  timer = 0;
-	}
-	
-	void hideMenu() {
-		System.out.println("hideMenu");
-		// not private -- hideMenu$
+	/*not private*/ void hideMenu() {
 		if (menu != null)
 			j2sSwingMenu.hideMenu(menu);	
 	}

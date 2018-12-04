@@ -33,6 +33,7 @@ import java.util.Vector;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Insets;
+import java.awt.JSComponent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 //
@@ -209,9 +210,9 @@ public class JMenuBar extends JComponent implements MenuElement
      */
     public int getComponentIndex(Component c) {
         int ncomponents = this.getComponentCount();
-        Component[] component = this.getComponents();
+        Component[] components = JSComponent.getChildArray(this);
         for (int i = 0 ; i < ncomponents ; i++) {
-            Component comp = component[i];
+            Component comp = components[i];
             if (comp == c)
                 return i;
         }

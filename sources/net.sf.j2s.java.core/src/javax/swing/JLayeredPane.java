@@ -30,6 +30,7 @@ package javax.swing;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
+import java.awt.JSComponent;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -206,8 +207,10 @@ public class JLayeredPane extends JComponent /* implements Accessible */ {
         boolean layeredComponentFound = false;
         synchronized(getTreeLock()) {
             Integer layer = null;
-
-            for (Component c : getComponents()) {
+            Component[] children = JSComponent.getChildArray(this);
+            int n = getComponentCount();
+            for (int i = 0; i < n; i++) {
+            	Component c = children[i];
                 layer = null;
                 if(
                 		//c instanceof JInternalFrame || 
@@ -271,9 +274,10 @@ public class JLayeredPane extends JComponent /* implements Accessible */ {
      */
     @Override
 		public void removeAll() {
-        Component[] children = getComponents();
+        Component[] children = JSComponent.getChildArray(this);
+        int n = getComponentCount();
         Hashtable cToL = getComponentToLayer();
-        for (int counter = children.length - 1; counter >= 0; counter--) {
+        for (int counter = n - 1; counter >= 0; counter--) {
             Component c = children[counter];
             if (c != null && !(c instanceof JComponent)) {
                 cToL.remove(c);

@@ -24,6 +24,7 @@ public class Applet extends JApplet implements A2SContainer {
 		addMouseMotionListener(listener);
     }
 
+	@Override
 	public void setBackground(Color c) {
 		super.setBackground(c);
 		getContentPane().setBackground(c);

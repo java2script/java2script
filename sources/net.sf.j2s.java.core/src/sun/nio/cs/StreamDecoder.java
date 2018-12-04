@@ -108,11 +108,11 @@ public class StreamDecoder extends Reader
         return null;
     }
 
-    public int read() throws IOException {
+    @Override
+	public int read() throws IOException {
         return read0();
     }
 
-    @SuppressWarnings("fallthrough")
     private int read0() throws IOException {
         synchronized (lock) {
 
@@ -141,7 +141,8 @@ public class StreamDecoder extends Reader
         }
     }
 
-    public int read(char cbuf[], int offset, int length) throws IOException {
+    @Override
+	public int read(char cbuf[], int offset, int length) throws IOException {
         int off = offset;
         int len = length;
         synchronized (lock) {
@@ -179,14 +180,16 @@ public class StreamDecoder extends Reader
         }
     }
 
-    public boolean ready() throws IOException {
+    @Override
+	public boolean ready() throws IOException {
         synchronized (lock) {
             ensureOpen();
             return haveLeftoverChar || implReady();
         }
     }
 
-    public void close() throws IOException {
+    @Override
+	public void close() throws IOException {
         synchronized (lock) {
             if (!isOpen)
                 return;

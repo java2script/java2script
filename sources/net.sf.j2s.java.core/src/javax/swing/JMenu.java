@@ -37,6 +37,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GraphicsConfiguration;
 import java.awt.Insets;
+import java.awt.JSComponent;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -845,10 +846,7 @@ public class JMenu extends JMenuItem implements MenuElement
      * @return an integer containing the number of components on the menu
      */
     public int getMenuComponentCount() {
-        int componentCount = 0;
-        if (popupMenu != null)
-            componentCount = popupMenu.getComponentCount();
-        return componentCount;
+        return (popupMenu == null ? 0 : popupMenu.getComponentCount());
     }
 
     /**
@@ -860,10 +858,7 @@ public class JMenu extends JMenuItem implements MenuElement
      *
      */
     public Component getMenuComponent(int n) {
-        if (popupMenu != null)
-            return popupMenu.getComponent(n);
-
-        return null;
+        return (popupMenu == null ? null : popupMenu.getComponent(n));
     }
 
     /**
@@ -875,10 +870,11 @@ public class JMenu extends JMenuItem implements MenuElement
      *          if there is no popup menu
      */
     public Component[] getMenuComponents() {
-        if (popupMenu != null)
-            return popupMenu.getComponents();
-
-        return new Component[0];
+        return (popupMenu == null ? Container.EMPTY_ARRAY : popupMenu.getComponents());
+    }
+    
+    public Component[] getMenuArray() {
+    	return JSComponent.getChildArray(popupMenu);
     }
 
     /**
@@ -914,8 +910,8 @@ public class JMenu extends JMenuItem implements MenuElement
                 return true;
         }
         // Are we in a Component on the PopupMenu
-        int ncomponents = this.getMenuComponentCount();
-        Component[] component = this.getMenuComponents();
+        int ncomponents = getMenuComponentCount();
+        Component[] component = getMenuArray();
         for (int i = 0 ; i < ncomponents ; i++) {
             Component comp = component[i];
             // Are we in the current component?

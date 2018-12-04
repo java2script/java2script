@@ -23,8 +23,7 @@ public class JSEditorPaneUI  extends JSTextUI {
     textListener.checkDocument();
     setCssFont(DOMNode.setAttr(domNode, "innerHTML", getComponentText()), c.getFont());
     DOMNode.setAttr(domNode, "contentEditable", editable ? "true" : "false");
-
-    return domNode;
+	return updateDOMNodeCUI();
   }
 
   private Insets myInsets = new Insets(0, 0, 5, 5); 

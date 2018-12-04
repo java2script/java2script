@@ -2,11 +2,12 @@ package swingjs.plaf;
 
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.event.ContainerEvent;
-import java.awt.event.ContainerListener;
+import java.awt.JSComponent;
+import java.beans.PropertyChangeEvent;
 
 import javax.swing.JComponent;
 import javax.swing.JMenu;
+
 import swingjs.api.js.DOMNode;
 public class JSMenuUI extends JSMenuItemUI {
 	
@@ -20,17 +21,11 @@ public class JSMenuUI extends JSMenuItemUI {
 	@Override
 	public DOMNode updateDOMNode() {
 		if (domNode == null) {
-			isMenuItem = !((JMenu) jc).isTopLevelMenu();
+			isMenuItem = !jm.isTopLevelMenu();
 			if (isMenuItem) {
 				containerNode = domNode = createItem("_menu", null);
 			} else {
-//				DOMNode labelNode = newDOMObject("label", id);
 				domNode = createItem("_item", null);
-//
-//				// TODO implement icons for menuBar?
-//				setCssFont(DOMNode.setAttr(labelNode, "innerHTML", menuItem.getText()),
-//						c.getFont());
-//				setDataComponent(labelNode);
 			}
 			DOMNode.addJqueryHandledEvent(this, domNode, "mouseenter mouseleave");			
 		}
@@ -41,36 +36,42 @@ public class JSMenuUI extends JSMenuItemUI {
 
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
-		String type = "";
 		// we use == here because this will be JavaScript
-		if (target == domNode) {
-			/**
-			 * @j2sNative
-			 * 
-			 * 			type = jQueryEvent.type;
-			 * 
-			 */
-			{
+		if (target == domNode && eventType == -1) {
+			String type = (/** @j2sNative jQueryEvent.type || */ "");
+			if (type.equals("mouseenter")) {
+				if (!jm.getParent().getUIClassID().equals("MenuBarUI"))
+					stopPopupMenuTimer();
+				jm.setSelected(true);
+				return true;
 			}
-			if (eventType == -1) {
-				if (type.equals("mouseenter")) {
-					if(!jc.getParent().getUIClassID().equals("MenuBarUI"))
-						stopPopupTimer();
-					((JMenu) jc).setSelected(true);
-					return true;
-				}
-				if (type.equals("mouseleave")) {
-					((JMenu) jc).setSelected(false);
-					System.out.println("menubar leaving");
-					if(jc.getParent().getUIClassID().equals("MenuBarUI"))
-						startPopupTimer();
-					return true;
-				}
+			if (type.equals("mouseleave")) {
+				jm.setSelected(false);
+				if (jm.getParent().getUIClassID().equals("MenuBarUI"))
+					startPopupMenuTimer();
+				return true;
 			}
 		}
 		return super.handleJSEvent(target, eventType, jQueryEvent);
 	}
 
+	@Override
+	public void propertyChange(PropertyChangeEvent e) {
+		String prop = e.getPropertyName();
+		if (jc.isVisible()) {
+			if (prop == "ancestor") {
+				if (jc.getParent() != null) {
+					if (domNode != null && isMenuItem == jm.isTopLevelMenu()) {
+						reInit();
+						outerNode = null;
+						updateDOMNode();
+						return;
+					}
+				}
+			}
+		}
+		super.propertyChange(e);
+	}
 	
 	@Override
 	public void installUI(JComponent jc) {
@@ -79,10 +80,25 @@ public class JSMenuUI extends JSMenuItemUI {
 	}
 
 	@Override
-	protected Component[] getChildren() {
-		return (isMenuItem ? new Component[] { jm.getPopupMenu() } : jm
-				.getComponents());
+	public void uninstallUI(JComponent jc) {
+		super.uninstallUI(jc);
 	}
+
+	
+	/** note that the last element is null if array is oversize
+	 * 
+	 */
+	@Override
+	protected Component[] getChildren() {
+		return (isMenuItem ? new Component[] { jm.getPopupMenu() } : 
+			JSComponent.getChildArray(jm));
+	}
+
+	@Override
+	protected int getChildCount() {
+		return (isMenuItem ? 1 : jc.getComponentCount());
+	}
+
 
 	@Override
 	public Dimension getMaximumSize() {

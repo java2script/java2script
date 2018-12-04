@@ -11,6 +11,7 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.JSComponent;
 import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -61,7 +62,7 @@ public class JSOptionPaneUI extends JSPanelUI {
 		if (domNode == null) {
 			domNode = super.updateDOMNode();
 		}
-    return domNode;
+		return domNode;
 	}
 
 	
@@ -113,7 +114,8 @@ public class JSOptionPaneUI extends JSPanelUI {
       * Installs the receiver as the L&amp;F for the passed in
       * <code>JOptionPane</code>.
       */
-    public void installUI(JComponent c) {
+    @Override
+	public void installUI(JComponent c) {
         optionPane = (JOptionPane)c;
         installDefaults();
         optionPane.setLayout(createLayoutManager());
@@ -126,7 +128,8 @@ public class JSOptionPaneUI extends JSPanelUI {
       * Removes the receiver from the L&amp;F controller of the passed in split
       * pane.
       */
-    public void uninstallUI(JComponent c) {
+    @Override
+	public void uninstallUI(JComponent c) {
         uninstallComponents();
         optionPane.setLayout(null);
         uninstallKeyboardActions();
@@ -240,7 +243,8 @@ public class JSOptionPaneUI extends JSPanelUI {
      * the <code>LayoutManager</code> for the <code>JOptionPane</code>, and
      * <code>getMinimumOptionPaneSize</code>.
      */
-    public Dimension getPreferredSize(JComponent c) {
+    @Override
+	public Dimension getPreferredSize(JComponent c) {
         if (c == optionPane) {
             Dimension            ourMin = getMinimumOptionPaneSize();
             LayoutManager        lm = c.getLayout();
@@ -374,7 +378,8 @@ public class JSOptionPaneUI extends JSPanelUI {
                 // break up newlines
                 if (nl == 0) {
                     JPanel breakPanel = new JPanel() {
-                        public Dimension getPreferredSize() {
+                        @Override
+						public Dimension getPreferredSize() {
                             Font       f = getFont();
 
                             if (f != null) {
@@ -676,7 +681,8 @@ public class JSOptionPaneUI extends JSPanelUI {
                     if (initialFocusComponent instanceof JButton) {
                         JButton defaultB = (JButton)initialFocusComponent;
                         defaultB.addHierarchyListener(new HierarchyListener() {
-                            public void hierarchyChanged(HierarchyEvent e) {
+                            @Override
+							public void hierarchyChanged(HierarchyEvent e) {
                                 if ((e.getChangeFlags() &
                                         HierarchyEvent.PARENT_CHANGED) != 0) {
                                     JButton defaultButton = (JButton) e.getComponent();
@@ -965,92 +971,85 @@ public class JSOptionPaneUI extends JSPanelUI {
             return SwingConstants.LEFT;
         }
 
-        public void addLayoutComponent(String string, Component comp) {
+        @Override
+		public void addLayoutComponent(String string, Component comp) {
         }
 
-        public void layoutContainer(Container container) {
-            Component[]      children = container.getComponents();
+		@Override
+		public void layoutContainer(Container container) {
+			int numChildren = container.getComponentCount();
+			Component[] children = JSComponent.getChildArray(container);
 
-            if(children != null && children.length > 0) {
-                int               numChildren = children.length;
-                Insets            insets = container.getInsets();
-                int maxWidth = 0;
-                int maxHeight = 0;
-                int totalButtonWidth = 0;
-                int x = 0;
-                int xOffset = 0;
-                boolean ltr = container.getComponentOrientation().
-                                        isLeftToRight();
-                boolean reverse = (ltr) ? reverseButtons : !reverseButtons;
+			if (numChildren > 0) {
+				Insets insets = container.getInsets();
+				int maxWidth = 0;
+				int maxHeight = 0;
+				int totalButtonWidth = 0;
+				int x = 0;
+				int xOffset = 0;
+				boolean ltr = container.getComponentOrientation().isLeftToRight();
+				boolean reverse = (ltr) ? reverseButtons : !reverseButtons;
 
-                for(int counter = 0; counter < numChildren; counter++) {
-                    Dimension pref = children[counter].getPreferredSize();
-                    maxWidth = Math.max(maxWidth, pref.width);
-                    maxHeight = Math.max(maxHeight, pref.height);
-                    totalButtonWidth += pref.width;
-                }
-                if (getSyncAllWidths()) {
-                    totalButtonWidth = maxWidth * numChildren;
-                }
-                totalButtonWidth += (numChildren - 1) * padding;
+				for (int counter = 0; counter < numChildren; counter++) {
+					Dimension pref = children[counter].getPreferredSize();
+					maxWidth = Math.max(maxWidth, pref.width);
+					maxHeight = Math.max(maxHeight, pref.height);
+					totalButtonWidth += pref.width;
+				}
+				if (getSyncAllWidths()) {
+					totalButtonWidth = maxWidth * numChildren;
+				}
+				totalButtonWidth += (numChildren - 1) * padding;
 
-                switch (getOrientation(container)) {
-                case SwingConstants.LEFT:
-                    x = insets.left;
-                    break;
-                case SwingConstants.RIGHT:
-                    x = container.getWidth() - insets.right - totalButtonWidth;
-                    break;
-                case SwingConstants.CENTER:
-                    if (getCentersChildren() || numChildren < 2) {
-                        x = (container.getWidth() - totalButtonWidth) / 2;
-                    }
-                    else {
-                        x = insets.left;
-                        if (getSyncAllWidths()) {
-                            xOffset = (container.getWidth() - insets.left -
-                                       insets.right - totalButtonWidth) /
-                                (numChildren - 1) + maxWidth;
-                        }
-                        else {
-                            xOffset = (container.getWidth() - insets.left -
-                                       insets.right - totalButtonWidth) /
-                                      (numChildren - 1);
-                        }
-                    }
-                    break;
-                }
+				switch (getOrientation(container)) {
+				case SwingConstants.LEFT:
+					x = insets.left;
+					break;
+				case SwingConstants.RIGHT:
+					x = container.getWidth() - insets.right - totalButtonWidth;
+					break;
+				case SwingConstants.CENTER:
+					if (getCentersChildren() || numChildren < 2) {
+						x = (container.getWidth() - totalButtonWidth) / 2;
+					} else {
+						x = insets.left;
+						if (getSyncAllWidths()) {
+							xOffset = (container.getWidth() - insets.left - insets.right - totalButtonWidth)
+									/ (numChildren - 1) + maxWidth;
+						} else {
+							xOffset = (container.getWidth() - insets.left - insets.right - totalButtonWidth)
+									/ (numChildren - 1);
+						}
+					}
+					break;
+				}
 
-                for (int counter = 0; counter < numChildren; counter++) {
-                    int index = (reverse) ? numChildren - counter - 1 :
-                                counter;
-                    Dimension pref = children[index].getPreferredSize();
+				for (int counter = 0; counter < numChildren; counter++) {
+					int index = (reverse) ? numChildren - counter - 1 : counter;
+					Dimension pref = children[index].getPreferredSize();
 
-                    if (getSyncAllWidths()) {
-                        children[index].setBounds(x, insets.top,
-                                                  maxWidth, maxHeight);
-                    }
-                    else {
-                        children[index].setBounds(x, insets.top, pref.width,
-                                                  pref.height);
-                    }
-                    if (xOffset != 0) {
-                        x += xOffset;
-                    }
-                    else {
-                        x += children[index].getWidth() + padding;
-                    }
-                }
-            }
-        }
+					if (getSyncAllWidths()) {
+						children[index].setBounds(x, insets.top, maxWidth, maxHeight);
+					} else {
+						children[index].setBounds(x, insets.top, pref.width, pref.height);
+					}
+					if (xOffset != 0) {
+						x += xOffset;
+					} else {
+						x += children[index].getWidth() + padding;
+					}
+				}
+			}
+		}
 
-        public Dimension minimumLayoutSize(Container c) {
+        @Override
+		public Dimension minimumLayoutSize(Container c) {
             if(c != null) {
-                Component[]       children = c.getComponents();
+                Component[]       children = JSComponent.getChildArray(c);
+                int           numChildren = c.getComponentCount();
 
-                if(children != null && children.length > 0) {
+                if(numChildren > 0) {
                     Dimension     aSize;
-                    int           numChildren = children.length;
                     int           height = 0;
                     Insets        cInsets = c.getInsets();
                     int           extraHeight = cInsets.top + cInsets.bottom;
@@ -1084,11 +1083,13 @@ public class JSOptionPaneUI extends JSPanelUI {
             return new Dimension(0, 0);
         }
 
-        public Dimension preferredLayoutSize(Container c) {
+        @Override
+		public Dimension preferredLayoutSize(Container c) {
             return minimumLayoutSize(c);
         }
 
-        public void removeLayoutComponent(Component c) { }
+        @Override
+		public void removeLayoutComponent(Component c) { }
     }
 
 
@@ -1103,7 +1104,8 @@ public class JSOptionPaneUI extends JSPanelUI {
          * OPTIONS_PROPERTY or INITIAL_VALUE_PROPERTY,
          * validateComponent is invoked.
          */
-        public void propertyChange(PropertyChangeEvent e) {
+        @Override
+		public void propertyChange(PropertyChangeEvent e) {
             getHandler().propertyChange(e);
         }
     }
@@ -1148,6 +1150,7 @@ public class JSOptionPaneUI extends JSPanelUI {
             this.buttonIndex = buttonIndex;
         }
 
+		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (optionPane != null) {
 				int optionType = optionPane.getOptionType();
@@ -1191,7 +1194,8 @@ public class JSOptionPaneUI extends JSPanelUI {
         //
         // ActionListener
         //
-        public void actionPerformed(ActionEvent e) {
+        @Override
+		public void actionPerformed(ActionEvent e) {
             optionPane.setInputValue(((JTextField)e.getSource()).getText());
         }
 
@@ -1199,19 +1203,24 @@ public class JSOptionPaneUI extends JSPanelUI {
         //
         // MouseListener
         //
-        public void mouseClicked(MouseEvent e) {
+        @Override
+		public void mouseClicked(MouseEvent e) {
         }
 
-        public void mouseReleased(MouseEvent e) {
+        @Override
+		public void mouseReleased(MouseEvent e) {
         }
 
-        public void mouseEntered(MouseEvent e) {
+        @Override
+		public void mouseEntered(MouseEvent e) {
         }
 
-        public void mouseExited(MouseEvent e) {
+        @Override
+		public void mouseExited(MouseEvent e) {
         }
 
-        public void mousePressed(MouseEvent e) {
+        @Override
+		public void mousePressed(MouseEvent e) {
             if (e.getClickCount() == 2) {
                 JList     list = (JList)e.getSource();
                 int       index = list.locationToIndex(e.getPoint());
@@ -1224,7 +1233,8 @@ public class JSOptionPaneUI extends JSPanelUI {
         //
         // PropertyChangeListener
         //
-        public void propertyChange(PropertyChangeEvent e) {
+        @Override
+		public void propertyChange(PropertyChangeEvent e) {
             if(e.getSource() == optionPane) {
                 // Option Pane Auditory Cue Activation
                 // only respond to "ancestor" changes
@@ -1335,7 +1345,8 @@ public class JSOptionPaneUI extends JSPanelUI {
             this.strokes = strokes;
         }
 
-        protected boolean processKeyBinding(KeyStroke ks, KeyEvent e,
+        @Override
+		protected boolean processKeyBinding(KeyStroke ks, KeyEvent e,
                                             int condition, boolean pressed) {
             boolean processed = super.processKeyBinding(ks, e, condition,
                                                         pressed);
@@ -1368,7 +1379,8 @@ public class JSOptionPaneUI extends JSPanelUI {
             super(key);
         }
 
-        public void actionPerformed(ActionEvent e) {
+        @Override
+		public void actionPerformed(ActionEvent e) {
             if (getName() == CLOSE) {
                 JOptionPane optionPane = (JOptionPane)e.getSource();
 
@@ -1421,13 +1433,15 @@ public class JSOptionPaneUI extends JSPanelUI {
                 this.minimumWidth = minimumWidth;
             }
 
-            public Dimension getMinimumSize() {
+            @Override
+			public Dimension getMinimumSize() {
                 Dimension min = super.getMinimumSize();
                 min.width = Math.max(min.width, minimumWidth);
                 return min;
             }
 
-            public Dimension getPreferredSize() {
+            @Override
+			public Dimension getPreferredSize() {
                 Dimension pref = super.getPreferredSize();
                 pref.width = Math.max(pref.width, minimumWidth);
                 return pref;

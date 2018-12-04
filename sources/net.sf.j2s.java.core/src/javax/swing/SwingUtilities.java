@@ -38,6 +38,7 @@ import java.awt.HeadlessException;
 import java.awt.IllegalComponentStateException;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.JSComponent;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -272,8 +273,8 @@ public class SwingUtilities implements SwingConstants
             return null;
         }
         if (parent instanceof Container) {
-            Component components[] = ((Container)parent).getComponents();
-            for (int i = 0 ; i < components.length ; i++) {
+            Component components[] = JSComponent.getChildArray((Container)parent);
+            for (int i = 0, n = ((Container) parent).getComponentCount() ; i < n ; i++) {
                 Component comp = components[i];
                 if (comp != null && comp.isVisible()) {
                     Point loc = comp.getLocation();
@@ -1243,16 +1244,17 @@ public class SwingUtilities implements SwingConstants
             }
         }
         Component[] children = null;
+        int n = 0;
         if (c instanceof JMenu) {
-            children = ((JMenu)c).getMenuComponents();
+            children = ((JMenu)c).getMenuArray();
+            n = ((JMenu) c).getMenuComponentCount();
         }
         else if (c instanceof Container) {
-            children = ((Container)c).getComponents();
+            children = JSComponent.getChildArray((Container)c);
+            n = ((Container) c).getComponentCount();
         }
-        if (children != null) {
-            for(int i = 0; i < children.length; i++) {
-                updateComponentTreeUI0(children[i]);
-            }
+        for(int i = 0; i < n; i++) {
+            updateComponentTreeUI0(children[i]);
         }
     }
 

@@ -33,6 +33,8 @@ import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 
+import swingjs.plaf.JSComponentUI;
+
 /**
  * This class is inserted in between cell renderers and the components that
  * use them.  It just exists to thwart the repaint() and invalidate() methods
@@ -140,11 +142,20 @@ public class CellRendererPane extends JPanel
           this.add(c);
       }
 
+      c.setBounds(-w, -h, 0, 0); // force new bounds
       c.setBounds(x, y, w, h);
-
+      
       if(shouldValidate) {
           c.validate();
+      } else {
+    	  JSComponentUI ui = (JSComponentUI) ((JComponent) c).getUI();
+    	  ui.updateDOMNode();
+//          if (!ui.doPaintBackground())
+//        	  return;
+    	  ui.setTainted(false);
       }
+      
+      
 
 //      boolean wasDoubleBuffered = false;
 //      if ((c instanceof JComponent) && ((JComponent)c).isDoubleBuffered()) {
@@ -165,6 +176,7 @@ public class CellRendererPane extends JPanel
 //      }
 //
       c.setBounds(-w, -h, 0, 0);
+      
 		}
 
 		/**

@@ -1,15 +1,12 @@
 package swingjs.plaf;
 
 
-import java.awt.Container; 
 import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 
 import javax.swing.JComponent;
-import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.LookAndFeel;
-import javax.swing.plaf.ComponentUI;
 
 import swingjs.api.js.DOMNode;
 
@@ -35,37 +32,12 @@ public class JSMenuItemUI extends JSButtonUI {
 		setupButton();
 		return domNode;
 	}
-
+	
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
-		String type = "";
 		// we use == here because this will be JavaScript
-		if (target == domNode) {
-			/**
-			 * @j2sNative
-			 * 
-			 * 			type = jQueryEvent.type;
-			 * 
-			 */
-			{
-			}
-			if (eventType == -1) {
-				if (type.equals("mouseenter")) {
-						stopPopupTimer();
-			 }
-			}
-		}
+		checkStopPopupMenuTimer(target, eventType, jQueryEvent);
 		return super.handleJSEvent(target, eventType, jQueryEvent);
-	}
-
-	protected void startPopupTimer() {
-		JSPopupMenuUI ui = (JSPopupMenuUI) ((JMenu) jc).getPopupMenu().getUI();
-		((JSPopupMenuUI) ui).startTimer();
-	}
-
-	protected void stopPopupTimer() {
-		JSComponentUI ui = (JSComponentUI) ((JComponent) jc.getParent()).getUI();
-			((JSPopupMenuUI) ui).stopTimer();
 	}
 
 	@Override
@@ -93,7 +65,7 @@ public class JSMenuItemUI extends JSButtonUI {
 		if (jc.isVisible()) {
 			if (prop == "ancestor") {
 				if (jc.getParent() != null) {
-					((JSComponentUI) jc.getParent().getUI()).setHTMLElement();
+ 					((JSComponentUI) jc.getParent().getUI()).setHTMLElement();
 				}
 			}
 		}

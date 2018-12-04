@@ -34,6 +34,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Insets;
+import java.awt.JSComponent;
 import java.awt.LayoutManager2;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -53,6 +54,7 @@ import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 
 import javajs.api.JSFunction;
+import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
 
 /**
@@ -71,7 +73,8 @@ public class JSSplitPaneUI extends JSPanelUI {
 		/**
 	     * Returns dividerSize x dividerSize
 	     */
-	    public Dimension getPreferredSize() {
+	    @Override
+		public Dimension getPreferredSize() {
 	        // Ideally this would return the size from the layout manager,
 	        // but that could result in the layed out size being different from
 	        // the dividerSize, which may break developers as well as
@@ -238,7 +241,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 				this.xyev = xyev;
 				this.pressedLocation = splitPane.getDividerLocation();
 				divider.setCursor(cursor);
-				DOMNode.setCursor(getCursorName(cursor), null);
+				DOMNode.setCursor(JSToolkit.getCursorName(cursor), null);
 				return;
 			case MouseEvent.MOUSE_DRAGGED:
 				int d = this.pressedLocation + /** @j2sNative (this.isHorizontal ? xyev.dx : xyev.dy) || */
@@ -276,7 +279,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 		 * 
 		 */
 		// note that this "JSFunction" is actually an array
-		divider.getUI().setDraggable(fDrag);
+		((JSComponentUI) divider.getUI()).setDraggable(fDrag);
 	}
 	/**
 	 * Installs the UI defaults.
@@ -885,6 +888,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 	 */
 	@Override
 	public void paint(Graphics g, JComponent jc) {
+		super.paint(g, jc);
 		if (!painted && splitPane.getDividerLocation() < 0) {
 			ignoreDividerLocationChange = true;
 			splitPane.setDividerLocation(getDividerLocation(splitPane));
@@ -896,6 +900,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 	 * Returns the preferred size for the passed in component, This is passed off
 	 * to the current layoutmanager.
 	 */
+	@Override
 	public Dimension getPreferredSize(JComponent jc) {
 		if (splitPane != null)
 			return layoutManager.preferredLayoutSize(splitPane);
@@ -906,6 +911,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 	 * Returns the minimum size for the passed in component, This is passed off to
 	 * the current layoutmanager.
 	 */
+	@Override
 	public Dimension getMinimumSize(JComponent jc) {
 		if (splitPane != null)
 			return layoutManager.minimumLayoutSize(splitPane);
@@ -916,6 +922,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 	 * Returns the maximum size for the passed in component, This is passed off to
 	 * the current layoutmanager.
 	 */
+	@Override
 	public Dimension getMaximumSize(JComponent jc) {
 		if (splitPane != null)
 			return layoutManager.maximumLayoutSize(splitPane);
@@ -1558,11 +1565,11 @@ public class JSSplitPaneUI extends JSPanelUI {
 			}
 
 			/* Find the divider. */
-			Component[] children = splitPane.getComponents();
+			Component[] children = JSComponent.getChildArray(splitPane);
 			Component oldDivider = components[2];
 
 			components[2] = null;
-			for (int counter = children.length - 1; counter >= 0; counter--) {
+			for (int counter = splitPane.getComponentCount(); counter >= 0; counter--) {
 				if (children[counter] != components[0]
 						&& children[counter] != components[1]
 						&& children[counter] != nonContinuousLayoutDivider) {

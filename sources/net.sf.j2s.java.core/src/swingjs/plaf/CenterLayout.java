@@ -38,12 +38,15 @@ import java.awt.LayoutManager;
  * @author Steve Wilson
  */
 class CenterLayout implements LayoutManager {
+	@Override
 	public void addLayoutComponent(String name, Component comp) {
 	}
 
+	@Override
 	public void removeLayoutComponent(Component comp) {
 	}
 
+	@Override
 	public Dimension preferredLayoutSize(Container container) {
 		Component c = container.getComponent(0);
 		if (c != null) {
@@ -56,10 +59,12 @@ class CenterLayout implements LayoutManager {
 		}
 	}
 
+	@Override
 	public Dimension minimumLayoutSize(Container cont) {
 		return preferredLayoutSize(cont);
 	}
 
+	@Override
 	public void layoutContainer(Container container) {
 		if (container.getComponentCount() > 0) {
 			Component c = container.getComponent(0);

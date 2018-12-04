@@ -9,6 +9,7 @@ import java.awt.Rectangle;
 import javax.swing.plaf.ComponentUI;
 
 import swingjs.JSUtil;
+import swingjs.plaf.JSComponentUI;
 
 /**
  * A mix of direct DOM calls on DOM nodes and convenience methods to do that.
@@ -28,6 +29,8 @@ public abstract class DOMNode {
 	// "abstract" in the sense that these are the exact calls to JavaScript
 	
 	public abstract void appendChild(DOMNode node);
+	
+	public abstract void insertBefore(DOMNode node, DOMNode refNode);
 	
 	public abstract DOMNode removeChild(DOMNode node);
 
@@ -51,6 +54,10 @@ public abstract class DOMNode {
 		 * 					id && (node.id = id);
 		 */
 		return node;
+	}
+
+	public static DOMNode getElement(String id) {
+		return (/**  @j2sNative  document.getElementById(id) ||*/ null);
 	}
 
 	public static DOMNode createTextNode(String text) {
@@ -182,7 +189,7 @@ public abstract class DOMNode {
 	}
 
 	public static void setCursor(String c, Component comp) {
-		ComponentUI ui = (comp == null ? null : ((JSComponent) comp).getUI());
+		JSComponentUI ui = (comp == null ? null : (JSComponentUI)((JSComponent) comp).getUI());
 		@SuppressWarnings("unused")
 		DOMNode node = (ui == null ? null : ui.getDOMNode());
 		/**

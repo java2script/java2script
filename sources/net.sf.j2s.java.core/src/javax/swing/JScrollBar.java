@@ -31,6 +31,7 @@ package javax.swing;
 import java.awt.Adjustable;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.JSComponent;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 
@@ -727,9 +728,10 @@ public class JScrollBar extends JComponent implements Adjustable
     @Override
 		public void setEnabled(boolean x)  {
         super.setEnabled(x);
-        Component[] children = getComponents();
-        for(int i = 0; i < children.length; i++) {
-            children[i].setEnabled(x);
+        int n = this.getComponentCount();
+        Component[] components = JSComponent.getChildArray(this);
+        for(int i = 0; i < n; i++) {
+            components[i].setEnabled(x);
         }
     }
 

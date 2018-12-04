@@ -37,6 +37,7 @@ import java.awt.JSFrame;
 import java.awt.Graphics;
 import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
+import java.awt.JSComponent;
 import java.awt.Point;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
@@ -48,6 +49,8 @@ import javax.swing.event.MenuKeyListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.plaf.PopupMenuUI;
+
+import swingjs.plaf.JSComponentUI;
 
 /**
  * An implementation of a popup menu -- a small window that pops up
@@ -845,10 +848,7 @@ public class JPopupMenu extends JComponent implements MenuElement {
         Component oldInvoker = this.invoker;
         this.invoker = invoker;
         if ((oldInvoker != this.invoker) && (ui != null)) {
-            ui.uninstallUI(this);
-            ui.uninstallJS();
-            ui.installJS();
-            ui.installUI(this);
+        	((JSComponentUI) ui).reinstallUI(this, (JComponent) invoker);
         }
         invalidate();
     }
@@ -945,9 +945,9 @@ public class JPopupMenu extends JComponent implements MenuElement {
      */
     public int getComponentIndex(Component c) {
         int ncomponents = this.getComponentCount();
-        Component[] component = this.getComponents();
+        Component[] components = JSComponent.getChildArray(this);
         for (int i = 0 ; i < ncomponents ; i++) {
-            Component comp = component[i];
+            Component comp = components[i];
             if (comp == c)
                 return i;
         }
@@ -1068,9 +1068,9 @@ public class JPopupMenu extends JComponent implements MenuElement {
      */
     boolean isSubPopupMenu(JPopupMenu popup) {
         int ncomponents = this.getComponentCount();
-        Component[] component = this.getComponents();
+        Component[] components = JSComponent.getChildArray(this);
         for (int i = 0 ; i < ncomponents ; i++) {
-            Component comp = component[i];
+            Component comp = components[i];
             if (comp instanceof JMenu) {
                 JMenu menu = (JMenu)comp;
                 JPopupMenu subPopup = menu.getPopupMenu();

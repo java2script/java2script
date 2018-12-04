@@ -118,8 +118,8 @@ public class ContainerOrderFocusTraversalPolicy extends FocusTraversalPolicy
 
         cycle.add(container);
 
-        Component[] components = container.getComponents();
-        for (int i = 0; i < components.length; i++) {
+        Component[] components = container.getChildArray();
+        for (int i = 0, n = container.getComponentCount(); i < n; i++) {
             Component comp = components[i];
             if (comp instanceof Container) {
                 Container cont = (Container)comp;

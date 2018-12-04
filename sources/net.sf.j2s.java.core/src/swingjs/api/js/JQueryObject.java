@@ -36,6 +36,8 @@ public interface JQueryObject {
 
 	public abstract JQueryObject find(String selector);
 
+	public abstract void before(Object obj);
+
 	public abstract void appendTo(Object obj);
 
 	public abstract JQueryObject css(String key, String value);

@@ -9,7 +9,7 @@ public class JSAppletUI extends JSLightweightUI {
 		if (domNode == null) {
 			containerNode = domNode = newDOMObject("div", id);
 		}
-		return domNode;
+		return updateDOMNodeCUI();
 	}
 	
 }

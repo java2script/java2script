@@ -45,6 +45,7 @@ public class ScrollPane extends JScrollPane {
 		}
 	}
 	
+	@Override
 	public Component add(Component c) {
 		getViewport().add(c);
 		return c;

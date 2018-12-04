@@ -283,7 +283,8 @@ public class BasicHTML {
         /**
          * Overriden to return our own slimmed down style sheet.
          */
-        public StyleSheet getStyleSheet() {
+        @Override
+		public StyleSheet getStyleSheet() {
             if (defaultStyles == null) {
                 defaultStyles = new StyleSheet();
                 StringReader r = new StringReader(styleChanges);
@@ -318,7 +319,8 @@ public class BasicHTML {
          * Returns the ViewFactory that is used to make sure the Views don't
          * load in the background.
          */
-        public ViewFactory getViewFactory() {
+        @Override
+		public ViewFactory getViewFactory() {
             return basicHTMLViewFactory;
         }
     }
@@ -329,7 +331,8 @@ public class BasicHTML {
      * synchronously.
      */
     static class BasicHTMLViewFactory extends HTMLEditorKit.HTMLFactory {
-        public View create(Element elem) {
+        @Override
+		public View create(Element elem) {
             View view = super.create(elem);
 
             if (view instanceof ImageView) {
@@ -388,7 +391,8 @@ public class BasicHTML {
          * level there are no attributes.  If an attribute is resolved
          * up the view hierarchy this is the end of the line.
          */
-        public AttributeSet getAttributes() {
+        @Override
+		public AttributeSet getAttributes() {
             return null;
         }
 
@@ -401,7 +405,8 @@ public class BasicHTML {
          *         that is returned, although there is no guarantee.
          *         The parent may choose to resize or break the view.
          */
-        public float getPreferredSpan(int axis) {
+        @Override
+		public float getPreferredSpan(int axis) {
             if (axis == X_AXIS) {
                 // width currently laid out to
                 return width;
@@ -418,7 +423,8 @@ public class BasicHTML {
          *         that is returned, although there is no guarantee.
          *         The parent may choose to resize or break the view.
          */
-        public float getMinimumSpan(int axis) {
+        @Override
+		public float getMinimumSpan(int axis) {
             return view.getMinimumSpan(axis);
         }
 
@@ -431,7 +437,8 @@ public class BasicHTML {
          *         that is returned, although there is no guarantee.
          *         The parent may choose to resize or break the view.
          */
-        public float getMaximumSpan(int axis) {
+        @Override
+		public float getMaximumSpan(int axis) {
             return Integer.MAX_VALUE;
         }
 
@@ -453,7 +460,8 @@ public class BasicHTML {
          * @param width true if the width preference has changed
          * @param height true if the height preference has changed
          */
-        public void preferenceChanged(View child, boolean width, boolean height) {
+        @Override
+		public void preferenceChanged(View child, boolean width, boolean height) {
             host.revalidate();
             host.repaint();
         }
@@ -465,7 +473,8 @@ public class BasicHTML {
          * @return the desired alignment, where 0.0 indicates the origin
          *     and 1.0 the full span away from the origin
          */
-        public float getAlignment(int axis) {
+        @Override
+		public float getAlignment(int axis) {
             return view.getAlignment(axis);
         }
 
@@ -475,7 +484,8 @@ public class BasicHTML {
          * @param g the graphics context
          * @param allocation the region to render into
          */
-        public void paint(Graphics g, Shape allocation) {
+        @Override
+		public void paint(Graphics g, Shape allocation) {
             Rectangle alloc = allocation.getBounds();
             view.setSize(alloc.width, alloc.height);
             view.paint(g, allocation);
@@ -486,7 +496,8 @@ public class BasicHTML {
          *
          * @param parent the parent view
          */
-        public void setParent(View parent) {
+        @Override
+		public void setParent(View parent) {
             throw new Error("Can't set parent on root view");
         }
 
@@ -498,7 +509,8 @@ public class BasicHTML {
          * @return the number of views
          * @see #getView
          */
-        public int getViewCount() {
+        @Override
+		public int getViewCount() {
             return 1;
         }
 
@@ -508,7 +520,8 @@ public class BasicHTML {
          * @param n the number of the view to get
          * @return the view
          */
-        public View getView(int n) {
+        @Override
+		public View getView(int n) {
             return view;
         }
 
@@ -520,7 +533,8 @@ public class BasicHTML {
          * @param a the allocated region to render into
          * @return the bounding box of the given position
          */
-        public Shape modelToView(int pos, Shape a, Position.Bias b) throws BadLocationException {
+        @Override
+		public Shape modelToView(int pos, Shape a, Position.Bias b) throws BadLocationException {
             return view.modelToView(pos, a, b);
         }
 
@@ -543,7 +557,8 @@ public class BasicHTML {
          * @exception IllegalArgumentException for an invalid bias argument
          * @see View#viewToModel
          */
-        public Shape modelToView(int p0, Position.Bias b0, int p1,
+        @Override
+		public Shape modelToView(int p0, Position.Bias b0, int p1,
                                  Position.Bias b1, Shape a) throws BadLocationException {
             return view.modelToView(p0, b0, p1, b1, a);
         }
@@ -558,7 +573,8 @@ public class BasicHTML {
          * @return the location within the model that best represents the
          *    given point in the view
          */
-        public int viewToModel(float x, float y, Shape a, Position.Bias[] bias) {
+        @Override
+		public int viewToModel(float x, float y, Shape a, Position.Bias[] bias) {
             return view.viewToModel(x, y, a, bias);
         }
 
@@ -567,7 +583,8 @@ public class BasicHTML {
          *
          * @return the model
          */
-        public Document getDocument() {
+        @Override
+		public Document getDocument() {
             return view.getDocument();
         }
 
@@ -576,7 +593,8 @@ public class BasicHTML {
          *
          * @return the starting offset
          */
-        public int getStartOffset() {
+        @Override
+		public int getStartOffset() {
             return view.getStartOffset();
         }
 
@@ -585,7 +603,8 @@ public class BasicHTML {
          *
          * @return the ending offset
          */
-        public int getEndOffset() {
+        @Override
+		public int getEndOffset() {
             return view.getEndOffset();
         }
 
@@ -594,7 +613,8 @@ public class BasicHTML {
          *
          * @return the view
          */
-        public Element getElement() {
+        @Override
+		public Element getElement() {
             return view.getElement();
         }
 
@@ -604,7 +624,8 @@ public class BasicHTML {
          * @param width the width
          * @param height the height
          */
-        public void setSize(float width, float height) {
+        @Override
+		public void setSize(float width, float height) {
             this.width = (int) width;
             view.setSize(width, height);
         }
@@ -617,7 +638,8 @@ public class BasicHTML {
          *
          * @return the container
          */
-        public Container getContainer() {
+        @Override
+		public Container getContainer() {
             return host;
         }
 
@@ -631,7 +653,8 @@ public class BasicHTML {
          *
          * @return the factory
          */
-        public ViewFactory getViewFactory() {
+        @Override
+		public ViewFactory getViewFactory() {
             return factory;
         }
 

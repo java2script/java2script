@@ -32,6 +32,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.JSComponent;
 import java.awt.Rectangle;
 import java.awt.Shape;
 
@@ -114,11 +115,12 @@ public abstract class SunGraphicsCallback {
      * window such as JFrame, JDialog, and JWindow.
      * 
      * 
+     * @param n 
      * @param comps
      * @param g
      * @param weightFlags
      */
-    public final void runComponents(Component[] comps, Graphics g,
+    public final void runComponents(int n, Component[] comps, Graphics g,
                                     int weightFlags) {
         int ncomponents = comps.length;
         
@@ -167,7 +169,8 @@ public abstract class SunGraphicsCallback {
             if (!comp.isLightweight()) {
                 comp.paintAll(cg);
             } else if (comp instanceof Container) {
-                runComponents(((Container)comp).getComponents(), cg,
+                runComponents(((Container) comp).getComponentCount(), 
+                		JSComponent.getChildArray((Container)comp), cg,
                               LIGHTWEIGHTS | HEAVYWEIGHTS);
             }
         }

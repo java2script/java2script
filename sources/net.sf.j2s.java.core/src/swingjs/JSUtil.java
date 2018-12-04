@@ -76,7 +76,7 @@ public class JSUtil {
 	 * @return
 	 */
 	@SuppressWarnings("unused")
-	private static Object getFileContents(Object uriOrJSFile) {
+	private static Object getFileContents(Object uriOrJSFile, boolean asBytes) {
 		if (uriOrJSFile instanceof File) {
 			byte[] bytes = /** @j2sNative uriOrJSFile.bytes || */
 					null;
@@ -84,15 +84,22 @@ public class JSUtil {
 				return bytes;
 		}
 		String uri = uriOrJSFile.toString();
+		if (asBytes && uri.indexOf(":/") < 0) {
+			// looking for "examples/xxxx.xxx" --> "./examples/xxxx.xxx"
+			if (!uri.startsWith("/"))
+				uri = "/" + uri;
+			uri = "http://." + uri;
+		}
 		Object data = getCachedFileData(uri);
 		if (data == null && !uri.startsWith("./")) {
 			// Java applications may use "./" here
 				try {
-					data = Rdr.streamToUTF8String((BufferedInputStream) new URL(uri).getContent());
+					BufferedInputStream stream = (BufferedInputStream) new URL(uri).getContent();
+					data = (asBytes ? Rdr.getStreamAsBytes(stream, null) : Rdr.streamToUTF8String(stream));
 				} catch (Exception e) {
+					// bypasses AjaxURLConnection
+					data = JSUtil.J2S.getFileData(uri, null, false, asBytes);
 				}
-			// bypasses AjaxURLConnection
-			data = JSUtil.J2S.getFileData(uri, null, false, false);
 		}
 		return data;
 	}
@@ -105,7 +112,7 @@ public class JSUtil {
 	 * @return
 	 */
 	public static String getFileAsString(String filename) {
-		Object data = getFileContents(filename);
+		Object data = getFileContents(filename, false);
 		return  JSUtil.ensureString(data);
 	}
 
@@ -117,7 +124,7 @@ public class JSUtil {
 	 * @return
 	 */
 	public static byte[] getFileAsBytes(Object file) {
-		Object data = getFileContents(file);
+		Object data = getFileContents(file, true);
 		byte[] b = null;
 		if (AU.isAB(data))
 			b = (byte[]) data;

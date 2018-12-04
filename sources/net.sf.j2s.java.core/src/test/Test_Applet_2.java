@@ -63,6 +63,7 @@ public class Test_Applet_2 extends JApplet {
 		Container c = getContentPane();
 		((JPanel) c).setBorder(new TitledBorder("testing"));
 		c.setSize(850, 500);
+		((JPanel) c).setOpaque(false);
 		c.add(canvas, BorderLayout.CENTER);
 		c.add(controls = new Test_2Controls(canvas), BorderLayout.NORTH);
 //		System.out.println( controls.bg0.getForeground()); 
@@ -106,6 +107,7 @@ public class Test_Applet_2 extends JApplet {
 		tanabe.init();
 		tanabe.start();
 		f.add("Center", tanabe);
+		f.setBackground(Color.white);
 		f.pack();
 		f.setVisible(true);
     f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -387,7 +389,7 @@ class Test_2Canvas extends JPanel implements MouseListener, MouseMotionListener 
 
 	public Test_2Canvas() {
 		setName("Test_2Canvas");
-		setBackground(Color.blue);
+		//setBackground(Color.blue);
 		start_x = 0;
 		end_x = 50;
 		hlines = 10;
@@ -444,7 +446,7 @@ class Test_2Canvas extends JPanel implements MouseListener, MouseMotionListener 
 		
 		Graphics2D g2 = (Graphics2D) g;
 
-		g2.setColor(ltgrey);
+		g2.setColor(Color.white);//ltgrey);
 		g2.fillRect(0,  0, getWidth(), getHeight());
 		g2.setBackground(g2.getBackground());
 
@@ -765,6 +767,7 @@ class Test_2Controls extends JPanel implements ItemListener {
 		JCheckBox c = new JCheckBox("test");
 		c.addItemListener(this);
 		c.setFont(new Font("Arial", Font.PLAIN & Font.BOLD, 10));
+		c.setOpaque(false);//c.setBackground(Color.blue);
 		add(c);
 		bg = new ButtonGroup();
 		bg0 = addButton(bg, "0-50", true);
@@ -803,7 +806,7 @@ class Test_2Controls extends JPanel implements ItemListener {
 		bg.add(c = new JRadioButton(text, b));
 		c.setName(text);
 		add(c);
-		c.setBackground(Color.blue);
+		c.setOpaque(false);//c.setBackground(Color.blue);
 		System.out.println("radio is opaque " + c.isOpaque());
 		c.setEnabled(false);
 		c.addItemListener(this);

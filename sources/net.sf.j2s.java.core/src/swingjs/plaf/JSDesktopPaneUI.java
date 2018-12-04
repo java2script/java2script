@@ -36,6 +36,11 @@ public class JSDesktopPaneUI extends JSPanelUI {
 
     protected JDesktopPane desktop;
     protected DesktopManager desktopManager;
+    
+    public JSDesktopPaneUI() {
+    	super();
+    	isDesktop = true;
+    }
 
 	@Override
 	public DOMNode updateDOMNode() {
@@ -48,7 +53,8 @@ public class JSDesktopPaneUI extends JSPanelUI {
 	}
 
 	
-    public void installUI(JComponent c)   {
+    @Override
+	public void installUI(JComponent c)   {
         desktop = (JDesktopPane)c;
         installDefaults();
         installDesktopManager();
@@ -57,7 +63,8 @@ public class JSDesktopPaneUI extends JSPanelUI {
     }
 
     
-    public void uninstallUI(JComponent c) {
+    @Override
+	public void uninstallUI(JComponent c) {
         uninstallKeyboardActions();
         uninstallListeners();
         uninstallDesktopManager();
@@ -192,7 +199,8 @@ public class JSDesktopPaneUI extends JSPanelUI {
     }
 
     private class Handler implements PropertyChangeListener {
-        public void propertyChange(PropertyChangeEvent evt) {
+        @Override
+		public void propertyChange(PropertyChangeEvent evt) {
             String propertyName = evt.getPropertyName();
             if ("desktopManager" == propertyName) {
                 installDesktopManager();
@@ -241,7 +249,8 @@ public class JSDesktopPaneUI extends JSPanelUI {
             super(name);
         }
 
-        public void actionPerformed(ActionEvent e) {
+        @Override
+		public void actionPerformed(ActionEvent e) {
             JDesktopPane dp = (JDesktopPane)e.getSource();
             String key = getName();
 
@@ -502,7 +511,8 @@ public class JSDesktopPaneUI extends JSPanelUI {
             }
         }
 
-        public boolean isEnabled(Object sender) {
+        @Override
+		public boolean isEnabled(Object sender) {
             if (sender instanceof JDesktopPane) {
                 JDesktopPane dp = (JDesktopPane)sender;
                 String action = getName();

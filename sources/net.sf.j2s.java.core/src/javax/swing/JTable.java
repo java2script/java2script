@@ -1179,6 +1179,16 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		repaint();
 	}
 
+	@Override
+	public void repaint() {
+		super.repaint();
+	}
+	
+	@Override
+	public void repaint(int x, int y, int width, int height) {
+		super.repaint(x, y, width, height);
+	}
+	
 	/**
 	 * Sets whether the table draws horizontal lines between cells. If
 	 * <code>showHorizontalLines</code> is true it does; if it is false it
@@ -5523,7 +5533,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 				int row, int column) {
 			if (isSelected) {
 				setForeground(table.getSelectionForeground());
-				super.setBackground(table.getSelectionBackground());
+				setBackground(table.getSelectionBackground());
 			} else {
 				setForeground(table.getForeground());
 				setBackground(table.getBackground());

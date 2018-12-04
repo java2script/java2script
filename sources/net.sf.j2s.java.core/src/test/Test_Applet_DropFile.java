@@ -37,17 +37,12 @@ public class Test_Applet_DropFile extends JApplet implements DropTargetListener 
 		fileName.setText("drag-drop a file into this applet");
 		getContentPane().add(fileName, BorderLayout.NORTH);
 		getContentPane().add(fileDataPane, BorderLayout.CENTER);
-		JCheckBox b = new JCheckBox("testing");
+		JCheckBox b = new JCheckBox("wrap");
 		b.addActionListener(new ActionListener(){
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				/**
-				 * @j2sNative
-				 * 
-				 * alert("OK");
-				 */
-				
+				fileData.setLineWrap(!fileData.getLineWrap());
 			}
 			
 		});

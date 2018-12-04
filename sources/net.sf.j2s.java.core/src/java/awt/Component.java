@@ -2143,7 +2143,8 @@ public abstract class Component
 			if (needNotify) {
 				notifyNewBounds(resized, moved);
 			}
-			repaintParentIfNeeded(oldX, oldY, oldWidth, oldHeight);
+			if (resized)
+				repaintParentIfNeeded(oldX, oldY, oldWidth, oldHeight);
 		} finally {
 			setBoundsOp(ComponentPeer.RESET_OPERATION);
 		}

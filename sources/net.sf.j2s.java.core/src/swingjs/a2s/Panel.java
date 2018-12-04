@@ -25,6 +25,7 @@ public class Panel extends JPanel {
 		setOpaque(false);
 	} 
 
+	@Override
 	public void setBackground(Color c) {
 		super.setBackground(c);
 		setOpaque(c != null);

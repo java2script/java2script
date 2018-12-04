@@ -35,6 +35,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.JSComponent;
 import java.awt.LayoutManager;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -1691,10 +1692,9 @@ public class JViewport extends JComponent
 
             if(lastParent != null && parent instanceof JComponent &&
                !((JComponent)parent).isOptimizedDrawingEnabled()) {
-                Component comps[] = parent.getComponents();
+                Component comps[] = JSComponent.getChildArray(parent);
                 int index = 0;
-
-                for(int i = comps.length - 1 ;i >= 0; i--) {
+                for(int i = parent.getComponentCount() - 1 ;i >= 0; i--) {
                     if(comps[i] == lastParent) {
                         index = i - 1;
                         break;
