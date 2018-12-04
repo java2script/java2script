@@ -624,7 +624,7 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	}
 
 	public ImageIcon createImageIcon(Component c, Icon icon) {
-		return getImagekit().createImageIcon(c, icon);
+		return JSImagekit.createImageIcon(c, icon);
 	}
 	
 	@Override

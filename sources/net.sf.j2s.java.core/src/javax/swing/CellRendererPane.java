@@ -142,8 +142,9 @@ public class CellRendererPane extends JPanel
           this.add(c);
       }
 
+      c.setBounds(-w, -h, 0, 0); // force new bounds
       c.setBounds(x, y, w, h);
-
+      
       if(shouldValidate) {
           c.validate();
       } else {

@@ -13555,6 +13555,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 12/1/2018 3.2.4.04 fixes TypeError e.stack e not found
 // BH 11/11/2018 3.2.4.04 fixes String.CASE_INSENSITIVE_ORDER.compare$S$S
 // BH 11/10/2018 3.2.4.04 fixes inner class synthetic references to interfaces
 // BH 11/10/2018 3.2.4.04 fixes String.prototype.split$S and.split$S$I to remove trailing ""
@@ -18834,7 +18835,7 @@ if(lineNum>=0){
 TypeError.prototype.getMessage$ || (TypeError.prototype.getMessage$ = TypeError.prototype.getLocalizedMessage$ 
 			= function(){ return (this.stack ? this.stack : this.message || this.toString()) + (this.getStackTrace ? this.getStackTrace$() : Clazz._getStackTrace())});
 TypeError.prototype.printStackTrace$ = function(){System.out.println(this + "\n" + this.stack)};
-TypeError.prototype.printStackTrace$java_io_PrintStream = function(stream){stream.println$S(e + "\n" + e.stack);};
+TypeError.prototype.printStackTrace$java_io_PrintStream = function(stream){stream.println$S(this + "\n" + this.stack);};
 
 Clazz.Error = Error;
 

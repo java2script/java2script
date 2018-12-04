@@ -277,16 +277,6 @@ public abstract class JSComponent extends Component {
 		}
 	}
 
-	public boolean selfOrParentBackgroundPainted() {
-		JSComponent c = this;
-		while (c != null) {
-			if (c._isBackgroundPainted)
-				return true;
-			c = (JSComponent) c.getParent();
-		}
-		return false;
-	}
-
 	@Override
 	public boolean isBackgroundSet() {
 		return background != null;// false;// TODO (background != null &&

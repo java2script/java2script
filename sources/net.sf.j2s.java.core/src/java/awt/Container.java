@@ -4766,12 +4766,10 @@ class LightweightDispatcher implements AWTEventListener {
 
 		int x = e.getX(), y = e.getY();
 		Component component = target;
-		if (target.parent == null && component != nativeContainer) {
-			component = ((JSComponentUI) ((JSComponent) target).getUI()).getTargetParent();
-			if (component != null)
-				target = component;
+		Component p = ((JSComponentUI) ((JSComponent) target).getUI()).getTargetParent();
+		if (p != null) {
+			target = component = p;
 		}
-		// SwingJS - TableCellRenderers do not have parents
 		for (; component != null && component != nativeContainer; component = component.getParent()) {
 			x -= component.x;
 			y -= component.y;
