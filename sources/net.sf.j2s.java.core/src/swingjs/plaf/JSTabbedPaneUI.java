@@ -38,6 +38,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.awt.JSComponent;
 import java.awt.LayoutManager;
 import java.awt.Point;
 import java.awt.Polygon;
@@ -253,7 +254,7 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
 			if (root != null && root.getGlassPane() == c)
 				DOMNode.setVisible(domNode,  false);
 		}
-    return domNode;
+		return updateDOMNodeCUI();
 	}
 
 	@Override
@@ -288,7 +289,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
 
 // UI Installation/De-installation
 
-    public void installUI(JComponent c) {
+    @Override
+	public void installUI(JComponent c) {
         this.tabPane = (JTabbedPane)c;
 
         calculatedBaseline = false;
@@ -301,7 +303,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
         installKeyboardActions();
     }
 
-    public void uninstallUI(JComponent c) {
+    @Override
+	public void uninstallUI(JComponent c) {
         uninstallKeyboardActions();
         uninstallListeners();
         uninstallDefaults();
@@ -667,12 +670,14 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
         return rolloverTabIndex;
     }
 
-    public Dimension getMinimumSize(JComponent c) {
+    @Override
+	public Dimension getMinimumSize(JComponent c) {
         // Default to LayoutManager's minimumLayoutSize
         return null;
     }
 
-    public Dimension getMaximumSize(JComponent c) {
+    @Override
+	public Dimension getMaximumSize(JComponent c) {
         // Default to LayoutManager's maximumLayoutSize
         return null;
     }
@@ -685,7 +690,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
      * @see javax.swing.JComponent#getBaseline(int, int)
      * @since 1.6
      */
-    public int getBaseline(JComponent c, int width, int height) {
+    @Override
+	public int getBaseline(JComponent c, int width, int height) {
         super.getBaseline(c, width, height);
         int baseline = calculateBaselineIfNecessary();
         if (baseline != -1) {
@@ -717,7 +723,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
      * @see javax.swing.JComponent#getBaseline(int, int)
      * @since 1.6
      */
-    public Component.BaselineResizeBehavior getBaselineResizeBehavior(
+    @Override
+	public Component.BaselineResizeBehavior getBaselineResizeBehavior(
             JComponent c) {
         super.getBaselineResizeBehavior(c);
         switch(tabPane.getTabPlacement()) {
@@ -847,7 +854,9 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
 
 // UI Rendering
 
-    public void paint(Graphics g, JComponent c) {
+    @Override
+	public void paint(Graphics g, JComponent c) {
+		super.paint(g, c);
         int selectedIndex = tabPane.getSelectedIndex();
         int tabPlacement = tabPane.getTabPlacement();
 
@@ -2249,7 +2258,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
             super(key);
         }
 
-        public void actionPerformed(ActionEvent e) {
+        @Override
+		public void actionPerformed(ActionEvent e) {
             String key = getName();
             JTabbedPane pane = (JTabbedPane)e.getSource();
             JSTabbedPaneUI ui = (JSTabbedPaneUI) pane.getUI();
@@ -2339,15 +2349,19 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
      */
     public class TabbedPaneLayout implements LayoutManager {
 
-        public void addLayoutComponent(String name, Component comp) {}
+        @Override
+		public void addLayoutComponent(String name, Component comp) {}
 
-        public void removeLayoutComponent(Component comp) {}
+        @Override
+		public void removeLayoutComponent(Component comp) {}
 
-        public Dimension preferredLayoutSize(Container parent) {
+        @Override
+		public Dimension preferredLayoutSize(Container parent) {
             return calculateSize(false);
         }
 
-        public Dimension minimumLayoutSize(Container parent) {
+        @Override
+		public Dimension minimumLayoutSize(Container parent) {
             return calculateSize(true);
         }
 
@@ -2455,7 +2469,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
             return total;
         }
 
-        public void layoutContainer(Container parent) {
+        @Override
+		public void layoutContainer(Container parent) {
             /* Some of the code in this method deals with changing the
             * visibility of components to hide and show the contents for the
             * selected tab. This is older code that has since been duplicated
@@ -2955,15 +2970,18 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
 
     private class TabbedPaneScrollLayout extends TabbedPaneLayout {
 
-        protected int preferredTabAreaHeight(int tabPlacement, int width) {
+        @Override
+		protected int preferredTabAreaHeight(int tabPlacement, int width) {
             return calculateMaxTabHeight(tabPlacement);
         }
 
-        protected int preferredTabAreaWidth(int tabPlacement, int height) {
+        @Override
+		protected int preferredTabAreaWidth(int tabPlacement, int height) {
             return calculateMaxTabWidth(tabPlacement);
         }
 
-        public void layoutContainer(Container parent) {
+        @Override
+		public void layoutContainer(Container parent) {
             /* Some of the code in this method deals with changing the
              * visibility of components to hide and show the contents for the
              * selected tab. This is older code that has since been duplicated
@@ -3213,7 +3231,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
             }
         }
 
-        protected void calculateTabRects(int tabPlacement, int tabCount) {
+        @Override
+		protected void calculateTabRects(int tabPlacement, int tabCount) {
             FontMetrics metrics = getFontMetrics();
             Dimension size = tabPane.getSize();
             Insets insets = tabPane.getInsets();
@@ -3413,7 +3432,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
             viewport.setViewPosition(tabViewPosition);
         }
 
-        public void stateChanged(ChangeEvent e) {
+        @Override
+		public void stateChanged(ChangeEvent e) {
             updateView();
         }
 
@@ -3487,7 +3507,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
         /**
          * ActionListener for the scroll buttons.
          */
-        public void actionPerformed(ActionEvent e) {
+        @Override
+		public void actionPerformed(ActionEvent e) {
             ActionMap map = tabPane.getActionMap();
 
             if (map != null) {
@@ -3509,7 +3530,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
             }
         }
 
-        public String toString() {
+        @Override
+		public String toString() {
             return new String("viewport.viewSize="+viewport.getViewSize()+"\n"+
                               "viewport.viewRectangle="+viewport.getViewRect()+"\n"+
                               "leadingTabIndex="+leadingTabIndex+"\n"+
@@ -3542,7 +3564,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
             }
             setBackground(bgColor);
         }
-        public void paintComponent(Graphics g) {
+        @Override
+		public void paintComponent(Graphics g) {
             super.paintComponent(g);
             JSTabbedPaneUI.this.paintTabArea(g, tabPane.getTabPlacement(),
                                                 tabPane.getSelectedIndex());
@@ -3554,7 +3577,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
             }
         }
 
-        public void doLayout() {
+        @Override
+		public void doLayout() {
             if (getComponentCount() > 0) {
                 Component child = getComponent(0);
                 child.setBounds(0, 0, getWidth(), getHeight());
@@ -3582,7 +3606,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
         //
         // PropertyChangeListener
         //
-        public void propertyChange(PropertyChangeEvent e) {
+        @Override
+		public void propertyChange(PropertyChangeEvent e) {
             JTabbedPane pane = (JTabbedPane)e.getSource();
             String name = e.getPropertyName();
             boolean isScrollLayout = scrollableTabLayoutEnabled();
@@ -3661,7 +3686,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
         //
         // ChangeListener
         //
-        public void stateChanged(ChangeEvent e) {
+        @Override
+		public void stateChanged(ChangeEvent e) {
             JTabbedPane tabPane = (JTabbedPane)e.getSource();
             tabPane.revalidate();
             tabPane.repaint();
@@ -3680,21 +3706,26 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
         //
         // MouseListener
         //
-        public void mouseClicked(MouseEvent e) {
+        @Override
+		public void mouseClicked(MouseEvent e) {
         }
 
-        public void mouseReleased(MouseEvent e) {
+        @Override
+		public void mouseReleased(MouseEvent e) {
         }
 
-        public void mouseEntered(MouseEvent e) {
+        @Override
+		public void mouseEntered(MouseEvent e) {
             setRolloverTab(e.getX(), e.getY());
         }
 
-        public void mouseExited(MouseEvent e) {
+        @Override
+		public void mouseExited(MouseEvent e) {
             setRolloverTab(-1);
         }
 
-        public void mousePressed(MouseEvent e) {
+        @Override
+		public void mousePressed(MouseEvent e) {
             if (!tabPane.isEnabled()) {
                 return;
             }
@@ -3718,20 +3749,24 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
         //
         // MouseMotionListener
         //
-        public void mouseDragged(MouseEvent e) {
+        @Override
+		public void mouseDragged(MouseEvent e) {
         }
 
-        public void mouseMoved(MouseEvent e) {
+        @Override
+		public void mouseMoved(MouseEvent e) {
             setRolloverTab(e.getX(), e.getY());
         }
 
         //
         // FocusListener
         //
-        public void focusGained(FocusEvent e) {
+        @Override
+		public void focusGained(FocusEvent e) {
            setFocusIndex(tabPane.getSelectedIndex(), true);
         }
-        public void focusLost(FocusEvent e) {
+        @Override
+		public void focusLost(FocusEvent e) {
            repaintTab(focusIndex);
         }
 
@@ -3769,7 +3804,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
        changes to tab text, this code should be removed and
        replaced by something which uses that.  */
 
-        public void componentAdded(ContainerEvent e) {
+        @Override
+		public void componentAdded(ContainerEvent e) {
             JTabbedPane tp = (JTabbedPane)e.getContainer();
             Component child = e.getChild();
             if (child instanceof UIResource) {
@@ -3778,7 +3814,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
             isRunsDirty = true;
             updateHtmlViews(tp.indexOfComponent(child));
         }
-        public void componentRemoved(ContainerEvent e) {
+        @Override
+		public void componentRemoved(ContainerEvent e) {
             JTabbedPane tp = (JTabbedPane)e.getContainer();
             Component child = e.getChild();
             if (child instanceof UIResource) {
@@ -3815,7 +3852,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
         // its functionality has been moved into Handler. If you need to add
         // new functionality add it to the Handler, but make sure this
         // class calls into the Handler.
-        public void propertyChange(PropertyChangeEvent e) {
+        @Override
+		public void propertyChange(PropertyChangeEvent e) {
             getHandler().propertyChange(e);
         }
     }
@@ -3829,7 +3867,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
         // its functionality has been moved into Handler. If you need to add
         // new functionality add it to the Handler, but make sure this
         // class calls into the Handler.
-        public void stateChanged(ChangeEvent e) {
+        @Override
+		public void stateChanged(ChangeEvent e) {
             getHandler().stateChanged(e);
         }
     }
@@ -3843,7 +3882,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
         // its functionality has been moved into Handler. If you need to add
         // new functionality add it to the Handler, but make sure this
         // class calls into the Handler.
-        public void mousePressed(MouseEvent e) {
+        @Override
+		public void mousePressed(MouseEvent e) {
             getHandler().mousePressed(e);
         }
     }
@@ -3857,10 +3897,12 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
         // its functionality has been moved into Handler. If you need to add
         // new functionality add it to the Handler, but make sure this
         // class calls into the Handler.
-        public void focusGained(FocusEvent e) {
+        @Override
+		public void focusGained(FocusEvent e) {
             getHandler().focusGained(e);
         }
-        public void focusLost(FocusEvent e) {
+        @Override
+		public void focusLost(FocusEvent e) {
             getHandler().focusLost(e);
         }
     }
@@ -3889,7 +3931,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
             setOpaque(false);
         }
 
-        public void remove(Component comp) {
+        @Override
+		public void remove(Component comp) {
             int index = tabPane.indexOfTabComponent(comp);
             super.remove(comp);
             if (notifyTabbedPane && index != -1) {
@@ -3898,7 +3941,9 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
         }
 
         private void removeUnusedTabComponents() {
-            for (Component c : getComponents()) {
+        	Component[] components = JSComponent.getChildArray(this);
+        	for (int i = 0, n = getComponentCount(); i < n; i++) {
+        		Component c = components[i];
                 if (!(c instanceof UIResource)) {
                     int index = tabPane.indexOfTabComponent(c);
                     if (index == -1) {
@@ -3908,11 +3953,13 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
             }
         }
 
-        public boolean isOptimizedDrawingEnabled() {
+        @Override
+		public boolean isOptimizedDrawingEnabled() {
             return tabScroller != null && !tabScroller.croppedEdge.isParamsSet();
         }
 
-        public void doLayout() {
+        @Override
+		public void doLayout() {
             // We layout tabComponents in JTabbedPane's layout manager
             // and use this method as a hook for repainting tabs
             // to update tabs area e.g. when the size of tabComponent was changed
@@ -3982,7 +4029,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
             return UIManager.getColor("control");
         }
 
-        protected void paintComponent(Graphics g) {
+        @Override
+		protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             if (isParamsSet() && g instanceof Graphics2D) {
                 Graphics2D g2 = (Graphics2D) g;

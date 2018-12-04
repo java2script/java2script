@@ -31,6 +31,7 @@ package javax.swing;
 import javajs.util.Lst;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.JSComponent;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
@@ -974,8 +975,9 @@ public class JTabbedPane2 extends JTabbedPane
         // container's children array indices, so make sure we
         // remove the correct child!
         if (component != null) {
-            Component components[] = getComponents();
-            for (int i = components.length; --i >= 0; ) {
+            int n = this.getComponentCount();
+            Component[] components = JSComponent.getChildArray(this);
+            for (int i = n; --i >= 0; ) {
                 if (components[i] == component) {
                     super.remove(i);
                     component.setVisible(true);
@@ -1010,9 +1012,10 @@ public class JTabbedPane2 extends JTabbedPane
         } else {
             // Container#remove(comp) invokes Container#remove(int)
             // so make sure JTabbedPane#remove(int) isn't called here
-            Component children[] = getComponents();
-            for (int i=0; i < children.length; i++) {
-                if (component == children[i]) {
+            int n = this.getComponentCount();
+            Component[] components = JSComponent.getChildArray(this);
+            for (int i=0; i < n; i++) {
+                if (component == components[i]) {
                     super.remove(i);
                     break;
                 }
@@ -1530,9 +1533,9 @@ public class JTabbedPane2 extends JTabbedPane
                 // why not if (page.component.getParent() == this) remove(component)
                 synchronized(getTreeLock()) {
                     int count = getComponentCount();
-                    Component children[] = getComponents();
+                    Component[] components = JSComponent.getChildArray(this);
                     for (int i = 0; i < count; i++) {
-                        if (children[i] == page.component) {
+                        if (components[i] == page.component) {
                             super.remove(i);
                         }
                     }

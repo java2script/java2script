@@ -98,7 +98,7 @@ public class JSButtonUI extends JSLightweightUI {
 			DOMNode.setStyles(domNode, "lineHeight", "0.8");
 		}
 		setupButton();
-		return domNode;
+		return updateDOMNodeCUI();
 	}
 
 	protected void createButton() {

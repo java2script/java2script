@@ -30,11 +30,15 @@ package swingjs.plaf;
 
 
 import java.awt.Dimension;
+import java.awt.event.ContainerEvent;
+import java.awt.event.ContainerListener;
+
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JMenuBar;
 import javax.swing.LookAndFeel;
 import javax.swing.plaf.UIResource;
+
 import swingjs.api.js.DOMNode;
 
 /**
@@ -45,7 +49,7 @@ import swingjs.api.js.DOMNode;
  * @author Bob Hanson
  *
  */
-public class JSMenuBarUI extends JSPanelUI {
+public class JSMenuBarUI extends JSPanelUI implements ContainerListener {
 
 //	static {
 //		
@@ -68,8 +72,7 @@ public class JSMenuBarUI extends JSPanelUI {
 			containerNode = domNode = newDOMObject("div", id);
 			DOMNode.setTopLeftAbsolute(domNode, 0, 0); // after title bar
 		}
-
-		return domNode;
+		return updateDOMNodeCUI();
 	}
 
 //	private void setMenu() {
@@ -109,6 +112,7 @@ public class JSMenuBarUI extends JSPanelUI {
     if (menuBar.getLayout() == null ||
         menuBar.getLayout() instanceof UIResource) {
         menuBar.setLayout(new DefaultMenuLayout(menuBar,BoxLayout.LINE_AXIS));
+        menuBar.addContainerListener(this);
     }
 
     LookAndFeel.installColorsAndFont(jc,
@@ -141,5 +145,22 @@ public class JSMenuBarUI extends JSPanelUI {
   	Dimension d = new Dimension(0, 25);
   	return d;
 	}
+	
+	@Override
+	public void componentAdded(ContainerEvent e) {
+		// OK, the idea here is that we detach all child nodes
+		// and then reattach them. 
+		DOMNode.detachAll(outerNode);
+		setTainted();
+		setHTMLElement();
+	}
+
+	@Override
+	public void componentRemoved(ContainerEvent e) {
+		DOMNode.detachAll(outerNode);
+		setTainted();
+		setHTMLElement();
+	}
+
 
 }

@@ -35,6 +35,7 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 
 import sun.swing.DefaultLookup;
+import swingjs.plaf.JSComponentUI;
 
 
 /**
@@ -95,7 +96,7 @@ public class DefaultListCellRenderer extends JLabel
         setName("List.cellRenderer");
         // JavaScript is a little slow on painting selection backgrounds, so we instead 
         // set the background using CSS
-        getUI().setAllowPaintedBackground(false);
+        ((JSComponentUI)getUI()).setAllowPaintedBackground(false);
     }
 
     private Border getNoFocusBorder() {

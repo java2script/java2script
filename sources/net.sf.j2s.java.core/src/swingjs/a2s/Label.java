@@ -21,6 +21,7 @@ public class Label extends JLabel {
 		setAlignment(java.awt.Label.LEFT);
 	}
 
+	@Override
 	public void setBackground(Color c) {
 		super.setBackground(c);
 		setOpaque(c != null);

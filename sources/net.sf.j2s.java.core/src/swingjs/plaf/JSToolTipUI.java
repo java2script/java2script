@@ -23,11 +23,6 @@ public class JSToolTipUI extends JSLabelUI {
 	protected JToolTip toolTip;
 
 	@Override
-	public DOMNode updateDOMNode() {
-		return super.updateDOMNode();
-	}
-	
-	@Override
 	protected void getIconAndText() {		
 		icon = null;
 		iconNode = null; // not an Abstract Button

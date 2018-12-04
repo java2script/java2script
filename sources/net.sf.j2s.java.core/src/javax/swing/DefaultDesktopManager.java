@@ -769,23 +769,24 @@ public class DefaultDesktopManager implements DesktopManager, java.io.Serializab
       return false;
    }
 
-   private Rectangle[] findFloatingItems(JComponent f) {
-      Container desktop = f.getParent();
-      Component[] children = desktop.getComponents();
-      int i = 0;
-      for (i = 0; i < children.length; i++) {
-         if (children[i] == f) {
-            break;
-         }
-      }
-      // System.out.println(i);
-      Rectangle[] floaters = new Rectangle[i];
-      for (i = 0; i < floaters.length; i++) {
-         floaters[i] = children[i].getBounds();
-      }
-
-      return floaters;
-   }
+//   private Rectangle[] findFloatingItems(JComponent f) {
+//      Container desktop = f.getParent();
+//      Component[] children = JSComponent.getChildArray(desktop);
+//      int n = desktop.getComponentCount();
+//      int i = 0;
+//      for (i = 0; i < n; i++) {
+//         if (children[i] == f) {
+//            break;
+//         }
+//      }
+//      // System.out.println(i);
+//      Rectangle[] floaters = new Rectangle[i];
+//      for (i = 0; i < floaters.length; i++) {
+//         floaters[i] = children[i].getBounds();
+//      }
+//
+//      return floaters;
+//   }
 
    /**
      * This method is here to clean up problems associated

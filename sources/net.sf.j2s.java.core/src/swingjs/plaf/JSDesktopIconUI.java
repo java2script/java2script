@@ -31,7 +31,7 @@ public class JSDesktopIconUI extends JSPanelUI {
 			if (root != null && root.getGlassPane() == c)
 				DOMNode.setVisible(domNode,  false);
 		}
-    return domNode;
+		return updateDOMNodeCUI();
 	}
 
 	@Override

@@ -57,6 +57,7 @@ import swingjs.JSToolkit;
 //import java.util.concurrent.atomic.AtomicBoolean;
 //import java.util.logging.Logger;
 import swingjs.JSUtil;
+import swingjs.plaf.JSComponentUI;
 
 /**
  * 
@@ -1027,17 +1028,15 @@ public class Window extends JComponent {
     }
 
 	void doDispose() {
-		final Component me = this;
+		final JComponent me = this;
 
 		Runnable action = new Runnable() {
 			@Override
 			public void run() {
 
-				// Though Window is not a JComponent, we still treat it as such.
-				ComponentUI ui = ((JComponent) me).getUI();
+				JSComponentUI ui = (JSComponentUI) me.getUI();
 				if (ui != null) {
-					ui.uninstallUI(null);
-					ui.uninstallJS();
+					ui.reinstallUI(me, null);
 				}
 				// Check if this window is the fullscreen window for the
 				// device. Exit the fullscreen mode prior to disposing

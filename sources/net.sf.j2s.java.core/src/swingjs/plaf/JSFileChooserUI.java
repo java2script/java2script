@@ -75,7 +75,8 @@ public class JSFileChooserUI extends JSPanelUI {
     private JPanel accessoryPanel = null;
 
 
-    public void installUI(JComponent c) {
+    @Override
+	public void installUI(JComponent c) {
         accessoryPanel = new JPanel(new BorderLayout());
         filechooser = (JFileChooser) c;
 
@@ -85,7 +86,8 @@ public class JSFileChooserUI extends JSPanelUI {
         filechooser.applyComponentOrientation(filechooser.getComponentOrientation());
     }
 
-    public void uninstallUI(JComponent c) {
+    @Override
+	public void uninstallUI(JComponent c) {
         uninstallListeners((JFileChooser) filechooser);
         uninstallComponents((JFileChooser) filechooser);
         uninstallDefaults((JFileChooser) filechooser);
@@ -268,7 +270,8 @@ public class JSFileChooserUI extends JSPanelUI {
         protected ApproveSelectionAction() {
             super(ACTION_APPROVE_SELECTION);
         }
-        public void actionPerformed(ActionEvent e) {
+        @Override
+		public void actionPerformed(ActionEvent e) {
 
             JFileChooser chooser = getFileChooser();
 
@@ -295,7 +298,8 @@ public class JSFileChooserUI extends JSPanelUI {
      * Responds to a cancel request.
      */
     protected class CancelSelectionAction extends AbstractAction {
-        public void actionPerformed(ActionEvent e) {
+        @Override
+		public void actionPerformed(ActionEvent e) {
             getFileChooser().cancelSelection();
         }
     }

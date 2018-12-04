@@ -360,6 +360,7 @@ class JSJAXBClass implements Cloneable {
 		}
 	}
 
+	@Override
 	public JSJAXBClass clone() {
 		try {
 			JSJAXBClass jaxbClass = (JSJAXBClass) super.clone();

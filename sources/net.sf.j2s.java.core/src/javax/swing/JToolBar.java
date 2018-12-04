@@ -33,6 +33,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Insets;
+import java.awt.JSComponent;
 import java.awt.LayoutManager;
 import java.awt.LayoutManager2;
 import java.beans.PropertyChangeEvent;
@@ -169,7 +170,7 @@ public class JToolBar extends JComponent implements SwingConstants {
 	 */
 	public int getComponentIndex(Component c) {
 		int ncomponents = this.getComponentCount();
-		Component[] component = this.getComponents();
+		Component[] component = JSComponent.getChildArray(this);
 		for (int i = 0; i < ncomponents; i++) {
 			Component comp = component[i];
 			if (comp == c)
@@ -188,12 +189,7 @@ public class JToolBar extends JComponent implements SwingConstants {
 	 * 
 	 */
 	public Component getComponentAtIndex(int i) {
-		int ncomponents = this.getComponentCount();
-		if (i >= 0 && i < ncomponents) {
-			Component[] component = this.getComponents();
-			return component[i];
-		}
-		return null;
+		return (i >= 0 && i < getComponentCount() ? JSComponent.getChildArray(this)[i] : null);
 	}
 
 	/**

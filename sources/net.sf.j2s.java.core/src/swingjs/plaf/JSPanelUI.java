@@ -26,7 +26,7 @@ public class JSPanelUI extends JSLightweightUI {
 			if (root != null && root.getGlassPane() == c)
 				DOMNode.setVisible(domNode,  false);
 		}
-    return domNode;
+		return updateDOMNodeCUI();
 	}
 
 	@Override

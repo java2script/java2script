@@ -52,8 +52,7 @@ ChangeListener {
 			domNode = newDOMObject("div", id);
 			ignoreAllMouseEvents(domNode);
 		}
-		// add code here for adjustments when changes in bounds or other properties occur.
-		return domNode;
+		return updateDOMNodeCUI();
 	}
 
 	@Override

@@ -15,6 +15,7 @@ public class Canvas extends Panel {
 		super();
 	}
 	
+	@Override
 	public void setBackground(Color c) {
 		super.setBackground(c);
 		setOpaque(c != null);

@@ -347,8 +347,8 @@ public class PopupFactory {
             if(contents != null && contents.isFocusable()) {
                 if(contents instanceof JPopupMenu) {
                     JPopupMenu jpm = (JPopupMenu) contents;
-                    Component popComps[] = jpm.getComponents();
-                    for(int i=0;i<popComps.length;i++) {
+                    Component popComps[] = JSComponent.getChildArray(jpm);
+                    for(int i = 0, n = jpm.getComponentCount(); i < n; i++) {
                         if(!(popComps[i] instanceof MenuElement) &&
                            !(popComps[i] instanceof JSeparator)) {
                             focusPopup = true;

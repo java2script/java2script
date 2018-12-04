@@ -932,7 +932,7 @@ java.io.Serializable {
      */
 
     private long[]  preInitMaximumArraySizes(Container parent){
-        Component components[] = parent.getComponents();
+        Component components[] = parent.getChildArray();
         Component comp;
         GridBagConstraints constraints;
         int curX, curY;
@@ -941,7 +941,7 @@ java.io.Serializable {
         int preMaximumArrayYIndex = 0;
         long [] returnArray = new long[2];
 
-        for (int compId = 0 ; compId < components.length ; compId++) {
+        for (int compId = 0, n = parent.getComponentCount(); compId < n; compId++) {
             comp = components[compId];
             if (!comp.isVisible()) {
                 continue;
@@ -1000,7 +1000,8 @@ java.io.Serializable {
             Component comp;
             GridBagConstraints constraints;
             Dimension d;
-            Component components[] = parent.getComponents();
+            Component components[] = parent.getChildArray();
+            int n = parent.getComponentCount();
             // Code below will address index curX+curWidth in the case of yMaxArray, weightY
             // ( respectively curY+curHeight for xMaxArray, weightX ) where
             //  curX in 0 to preInitMaximumArraySizes.y
@@ -1054,7 +1055,7 @@ java.io.Serializable {
             yMaxArray = new int[maximumArrayYIndex];
 
             boolean hasBaseline = false;
-            for (compindex = 0 ; compindex < components.length ; compindex++) {
+            for (compindex = 0 ; compindex < n ; compindex++) {
                 comp = components[compindex];
                 if (!comp.isVisible())
                     continue;
@@ -1181,7 +1182,7 @@ java.io.Serializable {
             }
 
 
-            for (compindex = 0 ; compindex < components.length ; compindex++) {
+            for (compindex = 0 ; compindex < n; compindex++) {
                 comp = components[compindex];
                 if (!comp.isVisible())
                     continue;
@@ -1369,7 +1370,7 @@ java.io.Serializable {
             for (i = 1;
                  i != Integer.MAX_VALUE;
                  i = nextSize, nextSize = Integer.MAX_VALUE) {
-                for (compindex = 0 ; compindex < components.length ; compindex++) {
+                for (compindex = 0 ; compindex < n; compindex++) {
                     comp = components[compindex];
                     if (!comp.isVisible())
                         continue;
@@ -2053,7 +2054,7 @@ java.io.Serializable {
         int compindex;
         GridBagConstraints constraints;
         Insets insets = parent.getInsets();
-        Component components[] = parent.getComponents();
+        int n = parent.getComponentCount();
         Dimension d;
         Rectangle r = new Rectangle();
         int i, diffw, diffh;
@@ -2066,7 +2067,7 @@ java.io.Serializable {
          * If the parent has no slaves anymore, then don't do anything
          * at all:  just leave the parent's size as-is.
          */
-        if (components.length == 0 &&
+        if (n == 0 &&
             (columnWidths == null || columnWidths.length == 0) &&
             (rowHeights == null || rowHeights.length == 0)) {
             return;
@@ -2170,7 +2171,8 @@ java.io.Serializable {
         info.startx = diffw/2 + insets.left;
         info.starty = diffh/2 + insets.top;
 
-        for (compindex = 0 ; compindex < components.length ; compindex++) {
+        Component components[] = parent.getChildArray();
+        for (compindex = 0 ; compindex < n ; compindex++) {
             comp = components[compindex];
             if (!comp.isVisible()){
                 continue;

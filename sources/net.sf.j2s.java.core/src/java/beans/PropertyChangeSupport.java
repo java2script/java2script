@@ -292,9 +292,8 @@ public class PropertyChangeSupport {
 
     private void fire(PropertyChangeListener[] listeners, PropertyChangeEvent event) {
         if (listeners != null) {
-            for (PropertyChangeListener listener : listeners) {
-                listener.propertyChange(event);
-            }
+        	for (int i = 0, n = listeners.length; i < n; i++)
+                listeners[i].propertyChange(event);
         }
     }
 

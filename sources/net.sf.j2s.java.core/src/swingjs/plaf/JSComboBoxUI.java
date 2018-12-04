@@ -42,7 +42,7 @@ public class JSComboBoxUI extends JSLightweightUI implements ItemListener, ListD
 		}
 		populateList();
 		checkEnabled();
-    return domNode;
+		return updateDOMNodeCUI();
 	}
 
 	private void checkEnabled() {

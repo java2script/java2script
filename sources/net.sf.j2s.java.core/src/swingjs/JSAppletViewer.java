@@ -250,6 +250,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 			jAppletFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		}
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				applet.repaint(0, 0, getWidth(), getHeight());
 				dispatchAppletEvent(APPLET_RESIZE, currentSize);

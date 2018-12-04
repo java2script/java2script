@@ -32,6 +32,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Insets;
+import java.awt.JSComponent;
 import java.awt.LayoutManager;
 
 
@@ -154,21 +155,21 @@ class SmartGridLayout implements LayoutManager {
 
   private void buildLayoutGrid(Container c) {
 
-      Component[] children = c.getComponents();
+      Component[] children = JSComponent.getChildArray(c);
 
-      for (int componentCount = 0; componentCount < children.length; componentCount++) {
+      for (int i = 0, n = c.getComponentCount(); i < n; i++) {
         //      System.out.println("Children: " +componentCount);
         int row = 0;
         int column = 0;
 
-        if (componentCount != 0) {
-          column = componentCount % columns;
-          row = (componentCount - column) / columns;
+        if (i != 0) {
+          column = i % columns;
+          row = (i - column) / columns;
         }
 
         //      System.out.println("inserting into: "+ column +  " " + row);
 
-        layoutGrid[column][row] = children[componentCount];
+        layoutGrid[column][row] = children[i];
       }
   }
 

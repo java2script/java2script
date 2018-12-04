@@ -227,7 +227,7 @@ public class JToggleButton extends AbstractButton {
          *          false deselects the toggle button.
          */
         @Override
-				public void setSelected(boolean b) {
+		public void setSelected(boolean b) {
             ButtonGroup group = getGroup();
             if (group != null) {
                 // use the group model instead

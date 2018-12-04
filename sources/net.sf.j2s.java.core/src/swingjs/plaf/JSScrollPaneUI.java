@@ -61,7 +61,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 		}
 		// add code here for adjustments when changes in bounds or other properties
 		// occur.
-		return domNode;
+		return updateDOMNodeCUI();
 	}
 
 	// all are required:
@@ -75,6 +75,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 	boolean jsSetViewPort() {
 		// first time through -- could be a view, but not necessarily
 		// need to find a listener for this
+		viewport = scrollpane.getViewport();
 		JScrollBar hscrollbar = scrollpane.getHorizontalScrollBar();
 		hscrollbar.addChangeListener(this);
 		hscrollbar.addPropertyChangeListener(this);
@@ -82,22 +83,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 		vscrollbar.addChangeListener(this);
 		vscrollbar.addPropertyChangeListener(this);
 
-		viewport = scrollpane.getViewport();
-		JComponent sc = (JComponent) viewport.getView();
-		// for whatever reason, the component being scrolled
-		// in Java is referred to as the "view". This makes
-		// no sense to me; I am calling it scrolledComponent.
-		if (sc == null || sc.ui == null)
-			return false;
-		if (sc != scrolledComponent) {
-			scrolledComponent = sc;
-			// just experimenting  scrollBarUIDisabled = (sc.getUIClassID() == "TextAreaUI");
-			scrolledUI = (JSComponentUI) sc.ui;
-			scrolledUI.scrollPaneUI = this;
-			scrollNode = scrolledUI.domNode; // why outer node?
-			DOMNode.setSize(scrollNode, c.getWidth(), c.getHeight());
-		}
-		return true;
+		return setScrollComponent(viewport, true);
 	}
 
 	// @Override
@@ -111,6 +97,26 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 	// if (vscrollbar != null)
 	// vscrollbar.removePropertyChangeListener(this);
 	// }
+
+	private boolean setScrollComponent(JViewport viewport, boolean setSize) {
+		this.viewport = viewport;
+		JComponent sc = (JComponent) viewport.getView();
+		// for whatever reason, the component being scrolled
+		// in Java is referred to as the "view". This makes
+		// no sense to me; I am calling it scrolledComponent.
+		if (sc == null || sc.ui == null)
+			return false;
+		if (sc != scrolledComponent) {
+			scrolledComponent = sc;
+			// just experimenting  scrollBarUIDisabled = (sc.getUIClassID() == "TextAreaUI");
+			scrolledUI = (JSComponentUI) sc.ui;
+			scrolledUI.scrollPaneUI = this;
+			scrollNode = scrolledUI.domNode; // why outer node?
+			if (setSize)
+				DOMNode.setSize(scrollNode, c.getWidth(), c.getHeight());
+		}
+		return true;
+	}
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
@@ -192,6 +198,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 
 	@Override
 	public void paint(Graphics g, JComponent c) {
+		super.paint(g, c);
 //		checkTextAreaHeight();
 //// unnecessary		updateScrollBarExtents();
 //		Border vpBorder = scrollpane.getViewportBorder();
@@ -253,6 +260,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 	/**
 	 * @return new Dimension(Short.MAX_VALUE, Short.MAX_VALUE)
 	 */
+	@Override
 	public Dimension getMaximumSize(JComponent c) {
 		return new Dimension(Short.MAX_VALUE, Short.MAX_VALUE);
 	}
@@ -1191,6 +1199,8 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 			BoundedRangeModel model = (BoundedRangeModel) (e.getSource());
 			Point p = viewport.getViewPosition();
 			p.y = model.getValue();
+			setScrollComponent(viewport, false);
+			notifyTableScrolling();
 //			if (!isAdjusting) {
 //				isAdjusting = true;
 				viewport.setViewPosition(p);
@@ -1202,6 +1212,8 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 		private void hsbStateChanged(JViewport viewport, ChangeEvent e) {
 			BoundedRangeModel model = (BoundedRangeModel) (e.getSource());
 			Point p = viewport.getViewPosition();
+			setScrollComponent(viewport, false);
+			notifyTableScrolling();
 			int value = model.getValue();
 			if (scrollpane.getComponentOrientation().isLeftToRight()) {
 				p.x = value;
@@ -1320,6 +1332,12 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 					viewport.setViewPosition(p);
 				}
 			}
+		}
+	}
+
+	public void notifyTableScrolling() {
+		if (scrolledComponent != null && scrolledComponent.getUIClassID() == "TableUI") {
+			((JSTableUI) scrolledComponent.ui).setScrolling();
 		}
 	}
 

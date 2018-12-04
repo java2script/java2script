@@ -44,7 +44,7 @@ public class JSTextFieldUI extends JSTextUI {
 		setEditable(editable);
 		if (jc.isOpaque() && jc.isEnabled())
 			setBackground(jc.getBackground());
-		return domNode;
+		return updateDOMNodeCUI();
 	}
 
 	@Override

@@ -45,6 +45,7 @@ public class JSSpinnerUI extends JSLightweightUI {
 			upNode = DOMNode.setStyles(
 					newDOMObject("input", id + "_up", "type", "button", "value", ""),
 					"transform", "scaleY(.5)", "width", "20px", "height", "20px");
+			DOMNode.setAttr(upNode, "value",  "\u25b2");
 			up.appendChild(upNode);
 			bindJSEvents(upNode, "mousedown touchstart", Event.MOUSE_DOWN, true);
 			bindJSEvents(upNode, "mouseup touchend", Event.MOUSE_UP, true);
@@ -56,6 +57,7 @@ public class JSSpinnerUI extends JSLightweightUI {
 					newDOMObject("input", id + "_dn", "type", "button", "value", ""),
 					"transform", "scaleY(.5)", "width", "20px", "height",
 					"20px");
+			DOMNode.setAttr(dnNode, "value",  "\u25bc");
 			dn.appendChild(dnNode);
 			bindJSEvents(dnNode, "mousedown touchstart", Event.MOUSE_DOWN, true);
 			bindJSEvents(dnNode, "mouseup touchend", Event.MOUSE_UP, true);
@@ -74,8 +76,7 @@ public class JSSpinnerUI extends JSLightweightUI {
 		DOMNode.setStyles(valueNode, "width", (w - 38) + "px");
 		DOMNode.setStyles(up, "left", (w - 34)  + "px");
 		DOMNode.setStyles(dn, "left", (w - 34)  + "px");
-			
-		return domNode;
+		return updateDOMNodeCUI();
 	}
 
 	private DOMNode setValue() {

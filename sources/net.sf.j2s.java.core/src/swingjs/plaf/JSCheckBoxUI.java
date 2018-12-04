@@ -11,7 +11,8 @@ public class JSCheckBoxUI extends JSRadioButtonUI {
 
 	@Override
 	public DOMNode updateDOMNode() {
-		return updateButton("checkBox");
+		updateButton("checkBox");
+		return updateDOMNodeCUI();
 	}
 
 	@Override

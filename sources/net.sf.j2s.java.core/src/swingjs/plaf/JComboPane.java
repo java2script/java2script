@@ -129,6 +129,7 @@ public class JComboPane extends JPanel {
 		// update(false, true);
 	}
 
+	@Override
 	public void remove(int n) {
 		pages.removeItemAt(n);
 		tabs.removeItemAt(n);

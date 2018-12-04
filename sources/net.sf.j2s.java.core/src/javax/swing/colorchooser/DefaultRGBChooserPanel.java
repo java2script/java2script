@@ -30,6 +30,8 @@ package javax.swing.colorchooser;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Font;
+
 import javax.swing.Icon;
 import javax.swing.JColorChooser;
 import javax.swing.JLabel;
@@ -204,16 +206,10 @@ class DefaultRGBChooserPanel extends AbstractColorChooserPanel implements Change
         JLabel l = new JLabel(redString);
         l.setDisplayedMnemonic(AbstractColorChooserPanel.getInt("ColorChooser.rgbRedMnemonic", -1));
         enclosure.add(l);
-        redSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, color.getRed());
-        redSlider.setMajorTickSpacing( 85 );
-        redSlider.setMinorTickSpacing( 17 );
-        redSlider.setPaintTicks( true );
-        redSlider.setPaintLabels( true );
-        redSlider.setInheritsPopupMenu(true);
-        enclosure.add( redSlider );
+        redSlider = newSlider(color.getRed(), l);
+        enclosure.add(redSlider);
         redField = new JSpinner(
             new SpinnerNumberModel(color.getRed(), minValue, maxValue, 1));
-        l.setLabelFor(redSlider);
         redField.setInheritsPopupMenu(true);
         JPanel redFieldHolder = new JPanel(new CenterLayout());
         redFieldHolder.setInheritsPopupMenu(true);
@@ -221,21 +217,14 @@ class DefaultRGBChooserPanel extends AbstractColorChooserPanel implements Change
         redFieldHolder.add(redField);
         enclosure.add(redFieldHolder);
 
-
         // The row for the green value
         l = new JLabel(greenString);
         l.setDisplayedMnemonic(AbstractColorChooserPanel.getInt("ColorChooser.rgbGreenMnemonic", -1));
         enclosure.add(l);
-        greenSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, color.getGreen());
-        greenSlider.setMajorTickSpacing( 85 );
-        greenSlider.setMinorTickSpacing( 17 );
-        greenSlider.setPaintTicks( true );
-        greenSlider.setPaintLabels( true );
-        greenSlider.setInheritsPopupMenu(true);
+        greenSlider = newSlider(color.getGreen(), l);
         enclosure.add(greenSlider);
         greenField = new JSpinner(
             new SpinnerNumberModel(color.getGreen(), minValue, maxValue, 1));
-        l.setLabelFor(greenSlider);
         greenField.setInheritsPopupMenu(true);
         JPanel greenFieldHolder = new JPanel(new CenterLayout());
         greenFieldHolder.add(greenField);
@@ -247,16 +236,10 @@ class DefaultRGBChooserPanel extends AbstractColorChooserPanel implements Change
         l = new JLabel(blueString);
         l.setDisplayedMnemonic(AbstractColorChooserPanel.getInt("ColorChooser.rgbBlueMnemonic", -1));
         enclosure.add(l);
-        blueSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, color.getBlue());
-        blueSlider.setMajorTickSpacing( 85 );
-        blueSlider.setMinorTickSpacing( 17 );
-        blueSlider.setPaintTicks( true );
-        blueSlider.setPaintLabels( true );
-        blueSlider.setInheritsPopupMenu(true);
+        blueSlider = newSlider(color.getBlue(), l);
         enclosure.add(blueSlider);
         blueField = new JSpinner(
             new SpinnerNumberModel(color.getBlue(), minValue, maxValue, 1));
-        l.setLabelFor(blueSlider);
         blueField.setInheritsPopupMenu(true);
         JPanel blueFieldHolder = new JPanel(new CenterLayout());
         blueFieldHolder.add(blueField);
@@ -273,7 +256,19 @@ class DefaultRGBChooserPanel extends AbstractColorChooserPanel implements Change
         blueSlider.putClientProperty("JSlider.isFilled", Boolean.TRUE);
     }
 
-    @Override
+    private JSlider newSlider(int val, JLabel l) {
+        JSlider s = new JSlider(JSlider.HORIZONTAL, 0, 255, val);
+        s.setFont(new Font("Helvetica", Font.PLAIN, 8));
+        s.setMajorTickSpacing( 85 );
+        s.setMinorTickSpacing( 17 );
+        s.setPaintTicks( true );
+        s.setPaintLabels( true );
+        s.setInheritsPopupMenu(true);
+        l.setLabelFor(s);
+        return s;
+	}
+
+	@Override
 		public void uninstallChooserPanel(JColorChooser enclosingChooser) {
         super.uninstallChooserPanel(enclosingChooser);
         removeAll();
