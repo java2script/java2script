@@ -28,6 +28,7 @@ public class JSLabelUI extends JSLightweightUI {
 
 	@Override
 	public DOMNode updateDOMNode() {
+		label = (JLabel) jc;
 		if (domNode == null) {
 			domNode = newDOMObject("label", id);
 			textNode = newDOMObject("span", id + "_text");
@@ -60,7 +61,7 @@ public class JSLabelUI extends JSLightweightUI {
 		return updateDOMNodeCUI();
 	}
 
-	protected void getIconAndText() {		
+	protected void getIconAndText() {	
 		icon = (ImageIcon) label.getIcon();
 		gap = label.getIconTextGap();
 		text = label.getText();

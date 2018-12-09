@@ -41,7 +41,7 @@ public abstract class CellHolder extends JSLightweightUI {
 		return DOMNode.getElement(rcID);
 	}
 
-	static void updateCellNode(DOMNode td, JSComponent c, int width, int height, boolean forceNew) {
+	static void updateCellNode(DOMNode td, JSComponent c, int width, int height) {
 		JSComponentUI ui;
 		if (c == null || (ui = (JSComponentUI) c.getUI()).isNull)
 			return;
@@ -53,16 +53,12 @@ public abstract class CellHolder extends JSLightweightUI {
 			height = DOMNode.getHeight(td);
 		}
 		ui.setRenderer(c, width, height);
-		if (forceNew) {
-			ui.outerNode = null;
-			ui.reInit();
-			ui.updateDOMNode();
-			ui.$(td).empty();
-			td.appendChild(ui.domNode);
-		} else {
-			ui.domNode = DOMNode.firstChild(ui.outerNode);
-			ui.updateDOMNode();
-		}
+		ui.outerNode = null;
+		ui.reInit();
+		ui.updateDOMNode();
+		ui.$(td).empty();
+		td.appendChild(ui.domNode);
+		ui.setCellNodes(td);
 		ui.domNode = ui.outerNode = null;
 	}
 

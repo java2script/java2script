@@ -670,6 +670,7 @@ public abstract class JComponent extends Container {
 				}
 			}
 			Rectangle tmpRect = fetchRectangle();
+			Rectangle tmpRect2 = fetchRectangle();
 			// boolean checkSiblings = (!isOptimizedDrawingEnabled() &&
 			// checkIfChildObscuredBySibling());
 			// Rectangle clipBounds = null;
@@ -687,31 +688,13 @@ public abstract class JComponent extends Container {
 				// SwingJS: everything is a JComponent
 				// and probably not do this.
 				// SwingJS TODO -- allow JSpecView-like layer for writing over buttons
-				if (jc != null && jc.isVisible() == true) {
-					Rectangle cr = jc.getBounds(tmpRect);
-					//
-					// boolean hitClip = g.hitClip(cr.x, cr.y, cr.width, cr.height);
-					//
-					// if (hitClip) {
-					// if (checkSiblings && i > 0) {
-					// int x = cr.x;
-					// int y = cr.y;
-					// int width = cr.width;
-					// int height = cr.height;
-					// SwingUtilities.computeIntersection(clipBounds.x, clipBounds.y,
-					// clipBounds.width, clipBounds.height, cr);
-					//
-					// if (getObscuredState(i, cr.x, cr.y, cr.width, cr.height) ==
-					// COMPLETELY_OBSCURED) {
-					// continue;
-					// }
-					// cr.x = x;
-					// cr.y = y;
-					// cr.width = width;
-					// cr.height = height;
-					// }
-					JSGraphics2D jsg = (JSGraphics2D) (Object) sg.create(cr.x, 
-							(jc.isContentPane ? 0 : cr.y), cr.width, cr.height); 
+				if (jc != null && jc.isVisible()) {
+					jc.getBounds(tmpRect);
+					Rectangle vr = jc.getVisibleRect();
+					
+					
+					JSGraphics2D jsg = (JSGraphics2D) (Object) sg.create(tmpRect.x, 
+							(/*isContentPane ? 0 : */tmpRect.y), vr.width, vr.height); 
 					jsg.setColor(jc.getForeground());
 					jsg.setFont(jc.getFont());
 					boolean shouldSetFlagBack = false;
@@ -759,6 +742,7 @@ public abstract class JComponent extends Container {
 				// }
 
 			}
+			recycleRectangle(tmpRect2);
 			recycleRectangle(tmpRect);
 		}
 	}
@@ -782,7 +766,7 @@ public abstract class JComponent extends Container {
 	protected void paintBorder(Graphics g) {
 		Border border = getBorder();
 		if (border != null) {
-			((JSComponentUI)ui).setPainted();
+//			((JSComponentUI)ui).setPainted(g);
 			border.paintBorder(this, g, 0, 0, getWidth(), getHeight());
 		}
 	}
@@ -4622,7 +4606,7 @@ public abstract class JComponent extends Container {
 				// Called from paint() (AWT) to repair damage
 				if (!rectangleIsObscured(x, y, w, h)) {
 					paintComponentSafely(g);
-					paintBorder(g);
+					paintBorderSafely(g);
 				}
 				paintChildren(g);
 			}
@@ -4861,9 +4845,11 @@ public abstract class JComponent extends Container {
 	 * @param g
 	 */
 	private void paintBorderSafely(Graphics g) {
+		if (getBorder() == null)
+			return;
 		JSGraphics2D jsg = getJSGraphic2D(g);		
 		int nSave = (jsg == null ? 0 : jsg.mark());
-		printBorder(g);
+		paintBorder(g);
 		if (jsg != null)
 			jsg.reset(nSave);
 	}
@@ -4881,6 +4867,9 @@ public abstract class JComponent extends Container {
 	 * @param g
 	 */
 	private void printBorderSafely(Graphics g) {
+		if (getBorder() == null)
+			return;
+		_isBackgroundPainted=true;
 		JSGraphics2D jsg = getJSGraphic2D(g);		
 		int nSave = (jsg == null ? 0 : jsg.mark());
 		printBorder(g);

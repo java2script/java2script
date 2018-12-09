@@ -941,6 +941,7 @@ public class JSGraphics2D // extends SunGraphics2D
 	 * @return the length of the ctx._aSaved array after the push
 	 */
 	public int mark() {
+		// note: This method is referred to in JComponent.java j2snative block as mark$
 		ctx.save();
 		Object[] map = new Object[SAVE_MAX];
 

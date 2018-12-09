@@ -168,7 +168,7 @@ public abstract class ComponentUI implements ComponentPeer {
 	 * @see javax.swing.JComponent#paintComponent
 	 */
 	public void update(Graphics g, JComponent c) {
-// SwingJS unnec
+// SwingJS overwritten
 //       if (c.isOpaque()) {
 //            g.setColor(c.getBackground());
 //            g.fillRect(0, 0, c.getWidth(),c.getHeight());

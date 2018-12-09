@@ -5,6 +5,7 @@ import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -37,7 +38,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
-@SuppressWarnings("serial")
 public class Test_Applet_2 extends JApplet {
 
 	Test_2Canvas canvas;
@@ -777,6 +777,7 @@ class Test_2Controls extends JPanel implements ItemListener {
 		addButton(bg, "30-40", false);
 		bg5 = addButton(bg, "40-50", false);
 		final JButton enableBtn = new JButton("Enable");
+		enableBtn.setPreferredSize(new Dimension(70, 20));
 		b = enableBtn;
 		add(enableBtn);
 		enableBtn.addActionListener(new ActionListener() {

@@ -22,12 +22,10 @@ import swingjs.api.js.DOMNode;
 public class JSSpinnerUI extends JSLightweightUI {
 	private JSpinner spinner;
 
-	private DOMNode dn, up, dnNode, upNode;
-	
 	@Override
 	public DOMNode updateDOMNode() {
+		spinner = (JSpinner) jc;
 		if (domNode == null) {
-
 			domNode = newDOMObject("div", id);
 
 			// no textNode here, because in input does not have that.
@@ -40,9 +38,9 @@ public class JSSpinnerUI extends JSLightweightUI {
 			bindJSKeyEvents(valueNode, false);
 
 			// increment button
-			up = DOMNode.setStyles(newDOMObject("div", id + "_updiv"),
+			DOMNode up = DOMNode.setStyles(newDOMObject("div", id + "_updiv"),
 					"left", "33px", "top", "-5px", "position", "absolute");
-			upNode = DOMNode.setStyles(
+			DOMNode upNode = DOMNode.setStyles(
 					newDOMObject("input", id + "_up", "type", "button", "value", ""),
 					"transform", "scaleY(.5)", "width", "20px", "height", "20px");
 			DOMNode.setAttr(upNode, "value",  "\u25b2");
@@ -51,9 +49,9 @@ public class JSSpinnerUI extends JSLightweightUI {
 			bindJSEvents(upNode, "mouseup touchend", Event.MOUSE_UP, true);
 
 			// decrement button
-			dn = DOMNode.setStyles(newDOMObject("div", id + "_dndiv"),
+			DOMNode dn = DOMNode.setStyles(newDOMObject("div", id + "_dndiv"),
 					"left", "33px", "top", "5px", "position", "absolute");
-			dnNode = DOMNode.setStyles(
+			DOMNode dnNode = DOMNode.setStyles(
 					newDOMObject("input", id + "_dn", "type", "button", "value", ""),
 					"transform", "scaleY(.5)", "width", "20px", "height",
 					"20px");
@@ -73,9 +71,9 @@ public class JSSpinnerUI extends JSLightweightUI {
 		}
 		setCssFont(setValue(), c.getFont());
 		int w = (spinner.isPreferredSizeSet() ? spinner.getPreferredSize().width : 70);
-		DOMNode.setStyles(valueNode, "width", (w - 38) + "px");
-		DOMNode.setStyles(up, "left", (w - 34)  + "px");
-		DOMNode.setStyles(dn, "left", (w - 34)  + "px");
+		DOMNode.setStyles(enableNodes[0], "width", (w - 38) + "px");
+		DOMNode.setStyles(enableNodes[1], "left", (w - 34)  + "px");
+		DOMNode.setStyles(enableNodes[2], "left", (w - 34)  + "px");
 		return updateDOMNodeCUI();
 	}
 

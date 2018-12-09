@@ -35,8 +35,6 @@ import java.awt.Dimension;
 import java.awt.HeadlessException;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
@@ -82,6 +80,7 @@ import sun.swing.SwingLazyValue;
 import sun.swing.SwingUtilities2;
 // SwingJS  TODO import java.text.DateFormat;
 //import sun.swing.SwingLazyValue;
+import swingjs.plaf.JSComponentUI;
 
 /**
  * The <code>JTable</code> is used to display and edit regular two-dimensional
@@ -1414,12 +1413,11 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 			} else {
 				Class c = null;
 				/**
-				 * String does not have .getSuperclass
 				 * 
 				 * @j2sNative
 				 * 
-				 * 			c = columnClass.getSuperclass &&
-				 *            columnClass.getSuperclass();
+				 * 			c = columnClass.getSuperclass$ &&
+				 *            columnClass.getSuperclass$();
 				 */
 				{
 					columnClass.getSuperclass();
@@ -1487,12 +1485,11 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 			else {
 				Class c = null;
 				/**
-				 * String does not have .getSuperclass
 				 * 
 				 * @j2sNative
 				 * 
-				 * 			c = columnClass.getSuperclass &&
-				 *            columnClass.getSuperclass();
+				 * 			c = columnClass.getSuperclass$ &&
+				 *            columnClass.getSuperclass$();
 				 */
 				{
 					columnClass.getSuperclass();
@@ -3705,15 +3702,31 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 
 		TableCellEditor editor = getCellEditor(row, column);
 		if (editor != null && editor.isCellEditable(e)) {
-			editorComp = prepareEditor(editor, row, column);
+			JComponent comp = (JComponent) (editorComp = prepareEditor(editor, row, column));
 			if (editorComp == null) {
 				removeEditor();
 				return false;
 			}
-			editorComp.setBounds(getCellRect(row, column, false));
-			add(editorComp);
-			editorComp.validate();
-			editorComp.repaint();
+			Rectangle rect = getCellRect(row, column, false);
+			if (comp instanceof JTextField) {
+				rect.y -= 3;
+				rect.width -= 2;
+				rect.height -= 3;
+			}
+			comp.setBounds(rect);
+			add(comp);
+			comp.validate();
+			comp.repaint();
+			comp.setVisible(true);
+			// force domNode to be visible as well as outer node
+			((JSComponentUI) comp.getUI()).setVisible(null, true);
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					comp.requestFocus();
+					((JSComponentUI) comp.getUI()).notifyFocus(true);
+				}
+			});
 
 			// BH SwingJS - moved these next two lines up so that we have that
 			// info in JSTableUI
@@ -3722,6 +3735,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 			setCellEditor(editor);
 			// setEditingRow(row);
 			// setEditingColumn(column);
+			editor.removeCellEditorListener(this);
 			editor.addCellEditorListener(this);
 
 			return true;
@@ -5915,13 +5929,14 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 	public Component prepareEditor(TableCellEditor editor, int row, int column) {
 		Object value = getValueAt(row, column);
 		boolean isSelected = isCellSelected(row, column);
-		Component comp = editor.getTableCellEditorComponent(this, value, isSelected, row, column);
+		JComponent comp = (JComponent) editor.getTableCellEditorComponent(this, value, isSelected, row, column);
 		// if (comp instanceof JComponent) {
 		// JComponent jComp = (JComponent)comp;
 		// if (jComp.getNextFocusableComponent() == null) {
 		// jComp.setNextFocusableComponent(this);
 		// }
 		// }
+		((JSComponentUI) comp.getUI()).setRenderer(comp, 0, 0);
 		return comp;
 	}
 

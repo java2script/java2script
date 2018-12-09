@@ -24,6 +24,7 @@ public class JSTextFieldUI extends JSTextUI {
 
 	@Override
 	public DOMNode updateDOMNode() {
+		textField = (JTextField) jc;
 		if (domNode == null) {
 			allowPaintedBackground = false;
 			// no textNode here, because in input does not have that.
@@ -62,9 +63,10 @@ public class JSTextFieldUI extends JSTextUI {
 	boolean handleEnter(int eventType) {
 		if (eventType == KeyEvent.KEY_PRESSED) {
 			Action a = getActionMap().get(JTextField.notifyAction);
-			if (a != null)
+			if (a != null) {				
 				a.actionPerformed(new ActionEvent(c, ActionEvent.ACTION_PERFORMED,
 						JTextField.notifyAction, System.currentTimeMillis(), 0));
+			}
 		}
 		return true;
 	}

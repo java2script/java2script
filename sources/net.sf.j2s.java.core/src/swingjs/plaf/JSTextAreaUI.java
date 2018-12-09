@@ -2,7 +2,6 @@ package swingjs.plaf;
 
 import java.awt.Dimension;
 import java.awt.Insets;
-import java.beans.PropertyChangeEvent;
 
 import javax.swing.JTextArea;
 
@@ -16,13 +15,11 @@ import swingjs.api.js.DOMNode;
  */
 public class JSTextAreaUI extends JSTextUI {
 
-	protected DOMNode domBtn;
-
 	@Override
 	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			allowPaintedBackground = false;
-			domBtn = focusNode = enableNode = textNode = valueNode = domNode = newDOMObject("textarea", id);
+			focusNode = enableNode = textNode = valueNode = domNode = newDOMObject("textarea", id);
 			DOMNode.setStyles(domNode, "resize", "none");
 			bindJSKeyEvents(domNode, true);
 		}

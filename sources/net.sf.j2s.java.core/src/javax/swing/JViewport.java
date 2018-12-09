@@ -1091,8 +1091,8 @@ public class JViewport extends JComponent
                 Rectangle dirty = rm.getDirtyRegion(jview);
                 if (dirty == null || !dirty.contains(jview.getVisibleRect())) {
                     rm.beginPaint();
+                    Graphics g = JComponent.safelyGetGraphics(this, SwingUtilities.getRoot(this));
                     try {
-                        Graphics g = JComponent.safelyGetGraphics(this, SwingUtilities.getRoot(this));
                         flushViewDirtyRegion(g, dirty);
                         view.setLocation(newX, newY);
                         g.setClip(0,0,getWidth(), Math.min(getHeight(),
@@ -1101,11 +1101,11 @@ public class JViewport extends JComponent
                         // and needsRepaintAfterBlit returns true.
                         repaintAll = (windowBlitPaint(g) &&
                                       needsRepaintAfterBlit());
-                        g.dispose();
                         rm.markCompletelyClean((JComponent)getParent());
                         rm.markCompletelyClean(this);
                         rm.markCompletelyClean(jview);
                     } finally {
+                        g.dispose();
                         rm.endPaint();
                     }
                 }

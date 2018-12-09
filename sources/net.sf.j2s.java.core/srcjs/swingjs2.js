@@ -12135,11 +12135,13 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 					.indexOf("swingjs-ui") >= 0)
 		};
 
-		var checkStopPropagation = function(ev, ui, handled) {
+		var checkStopPropagation = function(ev, ui, handled, target) {
 			if (!ui || !handled || !ev.target.getAttribute("role")) {
-				if (!ui || !ui.textListener)
-					ev.preventDefault();
-				ev.stopPropagation();
+				if (!target || !target.ui.buttonListener) {
+					if (!ui || !ui.textListener)
+						ev.preventDefault();
+					ev.stopPropagation();
+				}
 			}
 			return handled;
 		};
@@ -12215,10 +12217,10 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 				return true;
 			}
 			var ui = ev.target["data-ui"];
+			var target = ev.target["data-component"];
 			var handled = (ui && ui.handleJSEvent$O$I$O(who, 507, ev));
 			if (checkStopPropagation(ev, ui, handled))
 				return true;
-			ui || (ui = ev.target["data-component"]);
 			who.isDragging = false;
 
 			var oe = ev.originalEvent;
@@ -12231,7 +12233,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 				xym.push(scroll < 0 ? -1 : 1)
 				who.applet._processEvent(507, xym, ev, who._frameViewer);
 			}
-			return !!ui;
+			return !!(ui || target);
 		});
 
 		J2S.$bind(who, 'mousedown touchstart', function(ev) {
@@ -12246,13 +12248,13 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 
 			J2S.setMouseOwner(who, true, ev.target);
 			var ui = ev.target["data-ui"];
+			var target = ev.target["data-component"];
 			var handled = (ui && ui.handleJSEvent$O$I$O(who, 501, ev));
-			if (checkStopPropagation(ev, ui, handled))
+			if (checkStopPropagation(ev, ui, handled, target))
 				return true;
-			ui = ev.target["data-component"];
 			who.isDragging = true;
 			if ((ev.type == "touchstart") && J2S._gestureUpdate(who, ev))
-				return !!ui;
+				return !!target;
 			J2S._setConsoleDiv(who.applet._console);
 			var xym = J2S._jsGetXY(who, ev, 0);
 			if (xym) {
@@ -12263,7 +12265,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 //							Integer.MAX_VALUE);
 				who.applet._processEvent(501, xym, ev, who._frameViewer); // MouseEvent.MOUSE_PRESSED
 			}
-			return !!ui;
+			return !!target;
 		});
 
 		J2S.$bind(who, 'mouseup touchend', function(ev) {
@@ -12298,11 +12300,10 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 				return true;
 			
 			var ui = ev.target["data-ui"]; // e.g., a textbox
+			var target = ev.target["data-component"]; // e.g., a button
 			var handled = (ui && ui.handleJSEvent$O$I$O(who, 502, ev));
 			if (checkStopPropagation(ev, ui, handled))
 				return true;
-			
-			ui || (ui = ev.target["data-component"]); // e.g., a button
 			
 			who.isDragging = false;
 			
@@ -12312,7 +12313,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 					who.applet._processEvent(502, xym, ev, who._frameViewer);// MouseEvent.MOUSE_RELEASED
 			}
 						
-			return !!ui;
+			return !!(ui || target);
 		}
 		
 		J2S.$bind(who, 'mouseenter', function(ev) {
@@ -12423,12 +12424,12 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 
 
 		var ui = ev.target["data-ui"];
-		
+		var target = ev.target["data-component"];
+
 		who.applet._processEvent(J2S._mouseOwner && J2S._mouseOwner.isDragging ? 506 : 503, xym, ev,
 				who._frameViewer); // MouseEvent.MOUSE_DRAGGED :
 									// MouseEvent.MOUSE_MOVED
-		ui || (ui = ev.target["data-component"]);
-		return !!ui;
+		return !!(ui || target);
 	}
 
 	J2S.unsetMouse = function(who) {
