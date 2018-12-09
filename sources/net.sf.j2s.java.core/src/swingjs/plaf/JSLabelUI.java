@@ -18,6 +18,7 @@ import swingjs.api.js.DOMNode;
  *
  */
 public class JSLabelUI extends JSLightweightUI {
+
 	protected ImageIcon icon;
 	protected int gap;
 	protected String text;
@@ -28,7 +29,6 @@ public class JSLabelUI extends JSLightweightUI {
 
 	@Override
 	public DOMNode updateDOMNode() {
-		label = (JLabel) jc;
 		if (domNode == null) {
 			domNode = newDOMObject("label", id);
 			textNode = newDOMObject("span", id + "_text");
@@ -40,7 +40,7 @@ public class JSLabelUI extends JSLightweightUI {
 			centeringNode.appendChild(textNode);
 			domNode.appendChild(centeringNode);
 		}
-		getIconAndText(); // could be ToolTip
+		getIconAndText(); 
 		setIconAndText("label", icon, gap, text);
 		DOMNode.setStyles(domNode, "position", "absolute", "width", c.getWidth()
 				+ "px", "height", c.getHeight() + "px");
@@ -62,6 +62,8 @@ public class JSLabelUI extends JSLightweightUI {
 	}
 
 	protected void getIconAndText() {	
+		// overridden in JSToolTipUI
+		label = (JLabel) jc;
 		icon = (ImageIcon) label.getIcon();
 		gap = label.getIconTextGap();
 		text = label.getText();
