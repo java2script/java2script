@@ -180,9 +180,12 @@ public class JSComponentUI extends ComponentUI
 	 * When CellRendererPane updates a table cell, it needs to save and restore
 	 * all of the various nodes -- enableNode, textNode, etc -- to domNode.
 	 * 
+	 * This save is done immediately after painting. It disables the ui for any
+	 * changes that might pass to it from property changes.
+	 * 
 	 * @param td
 	 */
-	protected void setCellNodes(DOMNode td) {
+	protected void saveCellNodes(DOMNode td) {
 		DOMNode[] nodes = new DOMNode[] {
 				domNode,
 				innerNode,
@@ -203,10 +206,18 @@ public class JSComponentUI extends ComponentUI
 				scrollNode,
 		};	
 		DOMNode.setAttr(td, "data-nodes", nodes);
+		DOMNode node = DOMNode.firstChild(td);
+		if (node != domNode) {
+			$(td).empty();
+			td.appendChild(domNode);
+		}
+		domNode = outerNode = null;
 	}
 
-	protected void getCellNodes(DOMNode td) {
+	protected void restoreCellNodes(DOMNode td) {
 		DOMNode[] nodes = (DOMNode[]) DOMNode.getAttr(td, "data-nodes");
+		if (nodes == null)
+			return;
 		domNode 		= nodes[0];
 		innerNode		= nodes[1];
 		centeringNode 	= nodes[2];
@@ -228,6 +239,54 @@ public class JSComponentUI extends ComponentUI
 		scrollNode		= nodes[13];
 	}
 
+
+//	
+//	protected void setCellNodes(DOMNode td) {
+//		DOMNode[] nodes = new DOMNode[] {
+//				domNode,
+//				innerNode,
+//				centeringNode,
+//				
+//				iconNode,
+//				textNode,
+//				buttonNode,			
+//				enableNode,
+//				
+//				(enableNodes == null ? null : enableNodes[0]),
+//				(enableNodes == null ? null : enableNodes[1]),
+//				(enableNodes == null ? null : enableNodes[2]),
+//				
+//				focusNode,
+//				actionNode,
+//				valueNode,
+//				scrollNode,
+//		};	
+//		DOMNode.setAttr(td, "data-nodes", nodes);
+//	}
+//
+//	protected void getCellNodes(DOMNode td) {
+//		DOMNode[] nodes = (DOMNode[]) DOMNode.getAttr(td, "data-nodes");
+//		domNode 		= nodes[0];
+//		innerNode		= nodes[1];
+//		centeringNode 	= nodes[2];
+//		
+//		iconNode		= nodes[3];
+//		textNode		= nodes[4];
+//		buttonNode 		= nodes[5];
+//		enableNode 		= nodes[6];
+//		
+//		if (nodes[7] != null) {
+//			enableNodes[0] = nodes[7];
+//			enableNodes[1] = nodes[8];
+//			enableNodes[2] = nodes[9];
+//		}
+//		
+//		focusNode		= nodes[10];
+//		actionNode 		= nodes[11];
+//		valueNode		= nodes[12];
+//		scrollNode		= nodes[13];
+//	}
+//
 
 	
 	/**
@@ -338,11 +397,6 @@ public class JSComponentUI extends ComponentUI
 		draggable = true; // never actually used
 		J2S.setDraggable(getDOMNode(), f);
 	}
-
-	/**
-	 * label for JLabel; null for JSTooltipUI subclass of JSLabelUI 
-	 */
-	protected JLabel label;
 
 	/**
 	 * a numerical reference for an ID
@@ -546,6 +600,9 @@ public class JSComponentUI extends ComponentUI
 	private void setComponent(JComponent comp) {
 		c = jc = comp;
 		isUIDisabled = (comp == null);
+		if (isUIDisabled)
+			domNode = outerNode = null;		
+
 	}
 
 	public JSComponentUI set(JComponent target) {

@@ -2,11 +2,6 @@ package swingjs.plaf;
 
 import java.awt.JSComponent;
 
-import javax.swing.AbstractButton;
-import javax.swing.SwingConstants;
-import javax.swing.JTable.BooleanRenderer;
-import javax.swing.table.TableCellRenderer;
-
 import swingjs.api.js.DOMNode;
 
 /**
@@ -18,7 +13,7 @@ import swingjs.api.js.DOMNode;
  */
 public abstract class CellHolder extends JSLightweightUI {
 	
-    static String getRowColumnID(JSComponentUI holder, int row, int col) {
+	static String getRowColumnID(JSComponentUI holder, int row, int col) {
     	return holder.id + "_tab" + (row >= 0 ? "_row" + row : "") + "_col" + col;
     }
 
@@ -56,10 +51,7 @@ public abstract class CellHolder extends JSLightweightUI {
 		ui.outerNode = null;
 		ui.reInit();
 		ui.updateDOMNode();
-		ui.$(td).empty();
-		td.appendChild(ui.domNode);
-		ui.setCellNodes(td);
-		ui.domNode = ui.outerNode = null;
+		ui.saveCellNodes(td);
 	}
 
 

@@ -23,6 +23,12 @@ public class JSLabelUI extends JSLightweightUI {
 	protected int gap;
 	protected String text;
 
+	/**
+	 * label for JLabel; null for JSTooltipUI subclass of JSLabelUI 
+	 */
+	private JLabel label;
+
+
 	public JSLabelUI() {
 		setDoc();
 	}

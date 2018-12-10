@@ -5562,6 +5562,11 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 
 			return this;
 		}
+		
+		public Component getComponent() {
+			return this;
+		}
+
 
 	}
 

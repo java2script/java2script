@@ -36,11 +36,21 @@ package components;
  */
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
+
+import components.TableDemo.DemoColor;
+
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.GridLayout;
 
 /**
@@ -48,14 +58,40 @@ import java.awt.GridLayout;
  * TableModel.
  */
 public class TableDemo extends JPanel {
+	public class ColorRenderer extends JLabel implements TableCellRenderer {
+		
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+				int row, int column) {
+			setOpaque(true);
+			setBackground(colors[row % 3]);
+			setText("  " + row);
+			setBorder(new LineBorder(Color.white, 3));
+			return this;
+		}
+		
+		public Component getComponent() {
+			return this;
+		}
+
+	}
+
+	static Color[] colors = new Color[] {Color.red, Color.blue, Color.green};
+
+	public class DemoColor {}
+
+	private DemoColor color = new DemoColor();
 	private boolean DEBUG = false;
 
 	public TableDemo() {
 		super(new GridLayout(1, 0));
 
+
 		JTable table = new JTable(new MyTableModel());
 		table.setPreferredScrollableViewportSize(new Dimension(500, 70));
 		table.setFillsViewportHeight(true);
+
+	    table.setDefaultRenderer(DemoColor.class, new ColorRenderer());
 
 		// Create the scroll pane and add the table to it.
 		JScrollPane scrollPane = new JScrollPane(table);
@@ -65,31 +101,31 @@ public class TableDemo extends JPanel {
 	}
 
 	class MyTableModel extends AbstractTableModel {
-		private String[] columnNames = { "Row", "First Name", "Last Name", "Sport", "# of Years", "Vegetarian" };
+		private String[] columnNames = { "Row", "Fav. Color", "First Name", "Last Name", "Sport", "# of Years", "Vegetarian" };
 		private int i = 0;
-		private Object[][] data = { { ++i,  "Kathy", "Smith", "Snowboarding", new Integer(5), new Boolean(false) },
-				{ ++i,  "John", "Doe", "Rowing", new Integer(3), new Boolean(true) },
-				{ ++i,  "Sue", "Black", "Knitting", new Integer(2), new Boolean(false) },
-				{ ++i,  "Jane", "White", "Speed reading", new Integer(20), new Boolean(true) },
-				{ ++i,  "John", "Doe", "Rowing", new Integer(3), new Boolean(true) },
-				{ ++i,  "Sue", "Black", "Knitting", new Integer(2), new Boolean(false) },
-				{ ++i,  "Jane", "White", "Speed reading", new Integer(20), new Boolean(true) },
-				{ ++i,  "John", "Doe", "Rowing", new Integer(3), new Boolean(true) },
-				{ ++i,  "Sue", "Black", "Knitting", new Integer(2), new Boolean(false) },
-				{ ++i,  "Jane", "White", "Speed reading", new Integer(20), new Boolean(true) },
-				{ ++i,  "John", "Doe", "Rowing", new Integer(3), new Boolean(true) },
-				{ ++i,  "Sue", "Black", "Knitting", new Integer(2), new Boolean(false) },
-				{ ++i,  "Jane", "White", "Speed reading", new Integer(20), new Boolean(true) },
-				{ ++i,  "John", "Doe", "Rowing", new Integer(3), new Boolean(true) },
-				{ ++i,  "Sue", "Black", "Knitting", new Integer(2), new Boolean(false) },
-				{ ++i,  "Jane", "White", "Speed reading", new Integer(20), new Boolean(true) },
-				{ ++i,  "John", "Doe", "Rowing", new Integer(3), new Boolean(true) },
-				{ ++i,  "Sue", "Black", "Knitting", new Integer(2), new Boolean(false) },
-				{ ++i,  "Jane", "White", "Speed reading", new Integer(20), new Boolean(true) },
-				{ ++i,  "John", "Doe", "Rowing", new Integer(3), new Boolean(true) },
-				{ ++i,  "Sue", "Black", "Knitting", new Integer(2), new Boolean(false) },
-				{ ++i,  "Jane", "White", "Speed reading", new Integer(20), new Boolean(true) },
-				{ ++i,  "Joe", "Brown", "Pool", new Integer(10), new Boolean(false) } };
+		private Object[][] data = { { ++i,  color, "Kathy", "Smith", "Snowboarding", new Integer(5), new Boolean(false) },
+				{ ++i,  color, "John", "Doe", "Rowing", new Integer(3), new Boolean(true) },
+				{ ++i,  color, "Sue", "Black", "Knitting", new Integer(2), new Boolean(false) },
+				{ ++i,  color, "Jane", "White", "Speed reading", new Integer(20), new Boolean(true) },
+				{ ++i,  color, "John", "Doe", "Rowing", new Integer(3), new Boolean(true) },
+				{ ++i,  color, "Sue", "Black", "Knitting", new Integer(2), new Boolean(false) },
+				{ ++i,  color, "Jane", "White", "Speed reading", new Integer(20), new Boolean(true) },
+				{ ++i,  color, "John", "Doe", "Rowing", new Integer(3), new Boolean(true) },
+				{ ++i,  color, "Sue", "Black", "Knitting", new Integer(2), new Boolean(false) },
+				{ ++i,  color, "Jane", "White", "Speed reading", new Integer(20), new Boolean(true) },
+				{ ++i,  color, "John", "Doe", "Rowing", new Integer(3), new Boolean(true) },
+				{ ++i,  color, "Sue", "Black", "Knitting", new Integer(2), new Boolean(false) },
+				{ ++i,  color, "Jane", "White", "Speed reading", new Integer(20), new Boolean(true) },
+				{ ++i,  color, "John", "Doe", "Rowing", new Integer(3), new Boolean(true) },
+				{ ++i,  color, "Sue", "Black", "Knitting", new Integer(2), new Boolean(false) },
+				{ ++i,  color, "Jane", "White", "Speed reading", new Integer(20), new Boolean(true) },
+				{ ++i,  color, "John", "Doe", "Rowing", new Integer(3), new Boolean(true) },
+				{ ++i,  color, "Sue", "Black", "Knitting", new Integer(2), new Boolean(false) },
+				{ ++i,  color, "Jane", "White", "Speed reading", new Integer(20), new Boolean(true) },
+				{ ++i,  color, "John", "Doe", "Rowing", new Integer(3), new Boolean(true) },
+				{ ++i,  color, "Sue", "Black", "Knitting", new Integer(2), new Boolean(false) },
+				{ ++i,  color, "Jane", "White", "Speed reading", new Integer(20), new Boolean(true) },
+				{ ++i,  color, "Joe", "Brown", "Pool", new Integer(10), new Boolean(false) } };
 
 		public int getColumnCount() {
 			return columnNames.length;
