@@ -111,7 +111,7 @@ public class JSLabelUI extends JSLightweightUI {
 	public void paint(Graphics g, JComponent c) {
 		super.paint(g, c);
 		if (icon != null) {
-			System.out.println("JSLabelUI " + currentIcon.getIconWidth() + " " + currentIcon.getIconHeight());
+			//System.out.println("JSLabelUI " + currentIcon.getIconWidth() + " " + currentIcon.getIconHeight());
 			debugDump(iconNode);
 			int w = icon.getIconWidth();
 			int h = icon.getIconHeight();

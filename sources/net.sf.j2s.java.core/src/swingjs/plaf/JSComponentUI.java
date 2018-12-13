@@ -2041,7 +2041,6 @@ public class JSComponentUI extends ComponentUI
 			if (w == 0 && (w = this.jc.getWidth()) == 0) {
 				w = wText + wIcon;
 			}
-			System.out.println("JCUI " + w);
 			off = (w - wText - wIcon) / 2;
 			if (text0) {
 				DOMNode.setStyles(textNode, "left", off + "px");

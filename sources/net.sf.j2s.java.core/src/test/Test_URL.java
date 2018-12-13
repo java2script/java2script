@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.util.List;
@@ -182,6 +183,14 @@ public class Test_URL extends Test_ {
 
 	  public static void main(String[] args) {
 
+		try {
+			URL url = new URL("https://asfadlkfj");
+		    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		    assert (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND);
+		} catch (IOException e1) {
+			assert(false);
+		}
+		  
 		try {
 			
 			
