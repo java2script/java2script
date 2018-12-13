@@ -17,7 +17,7 @@ public class Test_call2 extends Test_call0 {
 	int i4 = -4;
 
 	public void setX(int i) {
-		// TODO Auto-generated method stub
+		System.out.println("Test_call2.setX " + i);
 		x = i;
 	}
 

@@ -44,7 +44,7 @@ import swingjs.api.js.HTML5Applet;
 /**
  * SwingJS note: This class is the original java.applet.Applet class. 
  * It is subclassed by JApplet. The replacement java.applet.Applet class
- * subclassed a2s.Applet, which subclasses JApplet.
+ * subclassed java.applet.Applet, which subclasses JApplet.
  * 
  * An applet is a small program that is intended not to be run on
  * its own, but rather to be embedded inside another application.
@@ -152,7 +152,14 @@ public class JSApplet extends JSPanel {
      * @see     java.applet.Applet#getDocumentBase()
      */
     public URL getCodeBase() {
-        return stub.getCodeBase();
+    	if (stub != null) 
+            return stub.getCodeBase();
+    	String path = getClass().getName().replace(".",  "/");
+    	try {
+			return new URL("http://./" + path.substring(0, path.lastIndexOf("/") + 1));
+		} catch (MalformedURLException e) {
+			return null;
+		}
     }
 
     /**

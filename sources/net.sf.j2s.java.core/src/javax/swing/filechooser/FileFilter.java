@@ -54,7 +54,10 @@ import java.io.File;
 public /* SwingJS abstract*/ class FileFilter {
     //private String[] options;
 
-		public FileFilter(String[] options) {
+	public FileFilter() {
+
+	}
+	public FileFilter(String[] options) {
     	//this.options = options;
 	}
 

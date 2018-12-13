@@ -16,9 +16,9 @@ public class Label extends JLabel {
 	}
 	
 	public Label(String text, int center) {
-		super(text, center);
+		super(text);
 		super.setBackground(null);
-		setAlignment(java.awt.Label.LEFT);
+		setAlignment(center);
 	}
 
 	@Override
