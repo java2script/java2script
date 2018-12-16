@@ -34,6 +34,7 @@ public class JSLabelUI extends JSLightweightUI {
 
 	public JSLabelUI() {
 		setDoc();
+		isLabel = true;
 	}
 
 	@Override
@@ -113,18 +114,32 @@ public class JSLabelUI extends JSLightweightUI {
 	@Override
 	public void paint(Graphics g, JComponent c) {
 		super.paint(g, c);
+		// TODO: implement this for buttons?
+		DOMNode.setStyles(textNode, "overflow", "hidden", "white-space", "nowrap");
 		if (icon != null) {
-			DOMNode.setStyles(imageNode, "display",null);
+			// The graphics object is translated to the label, 
+			// not the image, at this point. In order to get
+			// a clientRectangle, the node must be visible, even for just
+			// an instant.
+			DOMNode.setStyles(imageNode, "visibility", null);
 			Rectangle r = imageNode.getBoundingClientRect();
-			Rectangle r0 =domNode.getBoundingClientRect();
-			icon.paintIcon(c, g, (int)(r.x - r0.x), (int) (r.y - r0.y));
-			DOMNode.setStyles(imageNode, "display","none");
+			DOMNode parent = null;
+			if (r.width == 0) {
+				parent = DOMNode.getParent(domNode);
+				$("body").append(domNode);
+				r = imageNode.getBoundingClientRect();
+			}
+			Rectangle r0 = domNode.getBoundingClientRect();
+			if (parent != null)
+				DOMNode.transferTo(domNode,  parent);				
+			DOMNode.setStyles(imageNode, "visibility", "hidden");
+			icon.paintIcon(c, g, (int) (r.x - r0.x), (int) (r.y - r0.y));
 		}
-		}
+	}
 
 	@Override
 	Dimension getPreferredSize(JComponent jc) {
-		return JSGraphicsUtils.getPreferredButtonSize(((AbstractButton) jc), ((AbstractButton) jc).getIconTextGap());
+		return (label == null ? super.getPreferredSize(jc) : JSGraphicsUtils.getPreferredButtonSize(((AbstractButton) jc), ((AbstractButton) jc).getIconTextGap()));
 	}
 
 }

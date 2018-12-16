@@ -295,7 +295,7 @@ public class JSGraphicsUtils
         r.width += insets.left + insets.right;
         r.height += insets.top + insets.bottom;
 
-        System.out.println("JSGraphUtil " + b.getText() + " " + r);
+        //System.out.println("JSGraphUtil " + b.getText() + " " + r);
         return r.getSize();
     }
 

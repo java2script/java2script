@@ -970,9 +970,6 @@ public class SwingUtilities implements SwingConstants
         /* Initialize the icon bounds rectangle iconR.
          */
 
-        System.out.println("SwingUtil tiv0 " + text + "\n" + textR + "\n" + iconR + "\n" + viewR + "\n" 
-        + fm.getDescent() + " " + fm.getAscent() + " " + fm.getHeight() + " " + fm.getMaxAscent());
-
         if (icon != null) {
             iconR.width = icon.getIconWidth();
             iconR.height = icon.getIconHeight();
@@ -1020,7 +1017,6 @@ public class SwingUtilities implements SwingConstants
                 Dimension d =  ui.getHTMLSize(ui.textNode);
                 textR.width = d.width;
                 textR.height = d.height;
-                System.out.println("swingutil " + text + " " + d + " " + fm.getHeight());
                 // Take into account the left and right side bearings.
                 // This gives more space than it is actually needed,
                 // but there are two reasons:
@@ -1148,9 +1144,7 @@ public class SwingUtilities implements SwingConstants
         	// SwingJS, for JSGraphicsUtil setting preferred button size;
         	viewR.width = labelR_width;
         	viewR.height = labelR_height;
-        }
-        
-        System.out.println("SwingUtil tiv " + text + "\n" + textR + "\n" + iconR + "\n" + viewR + "\n");
+        }        
         return text;
     }
 

@@ -30,6 +30,7 @@ package swingjs.plaf;
 
 //import java.awt.FontMetrics;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import javax.swing.AbstractButton;
@@ -752,5 +753,10 @@ public class JSButtonUI extends JSLightweightUI {
 		return d;
 	}
 
+	@Override
+	public void paint(Graphics g, JComponent c) {
+		imagePersists = true; // at least for now. 
+		super.paint(g, c);
+	}
 
 }

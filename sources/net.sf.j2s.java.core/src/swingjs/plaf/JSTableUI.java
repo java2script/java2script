@@ -109,7 +109,7 @@ public class JSTableUI extends JSPanelUI {
 	@Override
 	public void endLayout() {
 		super.endLayout();
-		System.out.println("end layout");
+		System.out.println("end table layout");
 		setHTMLElement();
 	}
 
@@ -159,7 +159,6 @@ public class JSTableUI extends JSPanelUI {
 	@Override
 	public DOMNode updateDOMNode() {
 		
-		System.out.println("jstableui updatedom");
 		int rc = table.getRowCount();
 		int rh = table.getRowHeight();
 
