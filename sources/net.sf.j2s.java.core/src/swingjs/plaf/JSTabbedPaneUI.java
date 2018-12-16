@@ -958,8 +958,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
 
             paintIcon(g, tabPlacement, tabIndex, icon, iconRect, isSelected);
         }
-        paintFocusIndicator(g, tabPlacement, rects, tabIndex,
-                  iconRect, textRect, isSelected);
+//        paintFocusIndicator(g, tabPlacement, rects, tabIndex,
+//                  iconRect, textRect, isSelected);
     }
 
     private boolean isHorizontalTabPlacement() {
@@ -1208,43 +1208,43 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
         }
     }
 
-    protected void paintFocusIndicator(Graphics g, int tabPlacement,
-                                       Rectangle[] rects, int tabIndex,
-                                       Rectangle iconRect, Rectangle textRect,
-                                       boolean isSelected) {
-        Rectangle tabRect = rects[tabIndex];
-        if (tabPane.hasFocus() && isSelected) {
-            int x, y, w, h;
-            g.setColor(focus);
-            switch(tabPlacement) {
-              case LEFT:
-                  x = tabRect.x + 3;
-                  y = tabRect.y + 3;
-                  w = tabRect.width - 5;
-                  h = tabRect.height - 6;
-                  break;
-              case RIGHT:
-                  x = tabRect.x + 2;
-                  y = tabRect.y + 3;
-                  w = tabRect.width - 5;
-                  h = tabRect.height - 6;
-                  break;
-              case BOTTOM:
-                  x = tabRect.x + 3;
-                  y = tabRect.y + 2;
-                  w = tabRect.width - 6;
-                  h = tabRect.height - 5;
-                  break;
-              case TOP:
-              default:
-                  x = tabRect.x + 3;
-                  y = tabRect.y + 3;
-                  w = tabRect.width - 6;
-                  h = tabRect.height - 5;
-            }
-            BasicGraphicsUtils.drawDashedRect(g, x, y, w, h);
-        }
-    }
+//    protected void paintFocusIndicator(Graphics g, int tabPlacement,
+//                                       Rectangle[] rects, int tabIndex,
+//                                       Rectangle iconRect, Rectangle textRect,
+//                                       boolean isSelected) {
+//        Rectangle tabRect = rects[tabIndex];
+//        if (tabPane.hasFocus() && isSelected) {
+//            int x, y, w, h;
+//            g.setColor(focus);
+//            switch(tabPlacement) {
+//              case LEFT:
+//                  x = tabRect.x + 3;
+//                  y = tabRect.y + 3;
+//                  w = tabRect.width - 5;
+//                  h = tabRect.height - 6;
+//                  break;
+//              case RIGHT:
+//                  x = tabRect.x + 2;
+//                  y = tabRect.y + 3;
+//                  w = tabRect.width - 5;
+//                  h = tabRect.height - 6;
+//                  break;
+//              case BOTTOM:
+//                  x = tabRect.x + 3;
+//                  y = tabRect.y + 2;
+//                  w = tabRect.width - 6;
+//                  h = tabRect.height - 5;
+//                  break;
+//              case TOP:
+//              default:
+//                  x = tabRect.x + 3;
+//                  y = tabRect.y + 3;
+//                  w = tabRect.width - 6;
+//                  h = tabRect.height - 5;
+//            }
+//            JSGraphicsUtils.drawDashedRect(g, x, y, w, h);
+//        }
+//    }
 
     /**
       * this function draws the border around each tab
@@ -1904,7 +1904,7 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
                              "TabbedPane.selectionFollowsFocus", true) ?
                              tabPane.getSelectedIndex() : getFocusIndex();
         int tabCount = tabPane.getTabCount();
-        boolean leftToRight = BasicGraphicsUtils.isLeftToRight(tabPane);
+        boolean leftToRight = JSGraphicsUtils.isLeftToRight(tabPane);
 
         // If we have no tabs then don't navigate.
         if (tabCount <= 0) {
@@ -2642,7 +2642,7 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
             int x, y;
             int returnAt;
             boolean verticalTabRuns = (tabPlacement == LEFT || tabPlacement == RIGHT);
-            boolean leftToRight = BasicGraphicsUtils.isLeftToRight(tabPane);
+            boolean leftToRight = JSGraphicsUtils.isLeftToRight(tabPane);
 
             //
             // Calculate bounds within which a tab run must fit
@@ -3241,7 +3241,7 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
             int selectedIndex = tabPane.getSelectedIndex();
             int i, j;
             boolean verticalTabRuns = (tabPlacement == LEFT || tabPlacement == RIGHT);
-            boolean leftToRight = BasicGraphicsUtils.isLeftToRight(tabPane);
+            boolean leftToRight = JSGraphicsUtils.isLeftToRight(tabPane);
             int x = tabAreaInsets.left;
             int y = tabAreaInsets.top;
             int totalWidth = 0;

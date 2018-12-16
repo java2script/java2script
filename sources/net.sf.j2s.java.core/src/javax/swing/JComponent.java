@@ -694,7 +694,7 @@ public abstract class JComponent extends Container {
 					
 					
 					JSGraphics2D jsg = (JSGraphics2D) (Object) sg.create(tmpRect.x, 
-							(/*isContentPane ? 0 : */tmpRect.y), vr.width, vr.height); 
+							(jc.isContentPane ? 0 : tmpRect.y), vr.width, vr.height); 
 					jsg.setColor(jc.getForeground());
 					jsg.setFont(jc.getFont());
 					boolean shouldSetFlagBack = false;

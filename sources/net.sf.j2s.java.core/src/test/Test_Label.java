@@ -17,6 +17,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
+import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -70,12 +71,12 @@ public class Test_Label extends JPanel implements MenuListener, ItemListener {
 	Container getVisualPaneContent() {
 
 		JPanel panel = new JPanel();
-		panel.setPreferredSize(new Dimension(400, 700));
+		panel.setPreferredSize(new Dimension(400, 500));
 		panel.setOpaque(true);
-		panel.setLayout(new BorderLayout());
+//		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));//BorderLayout());
 
 		JPanel firstColumn = new JPanel();
-		firstColumn.setLayout(new GridLayout(20, 1));
+		firstColumn.setLayout(new BoxLayout(firstColumn, BoxLayout.Y_AXIS));
 		firstColumn.setBorder(new TitledBorder("column 1"));
 
 		/*
@@ -84,37 +85,39 @@ public class Test_Label extends JPanel implements MenuListener, ItemListener {
 		 */
 		Font font = new Font("Verdana", Font.PLAIN, 11);
 
-		JLabel l1 = new JLabel(getImage("test2.png"));
-		l1.setText("ltrailing right");
-		l1.setHorizontalTextPosition(SwingConstants.TRAILING);
-		l1.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
-		l1.setHorizontalAlignment(SwingConstants.RIGHT);
-
-		JLabel l2 = new JLabel(getImage("test2.png"));
-		l2.setText("lleading left");
-		l2.setFont(font);
-		l2.setHorizontalTextPosition(SwingConstants.LEADING);
-		l2.setHorizontalAlignment(SwingConstants.LEFT);
-		Icon icon = new Icon() {
-
-			int test;
-			@Override
-			public void paintIcon(Component c, Graphics g, int x, int y) {
-				g.setColor((test = 1 - test) == 1 ? Color.green: Color.yellow);
-				g.fillRect(x, y, 20, 20);
-			}
-
-			@Override
-			public int getIconWidth() {
-				return 20;
-			}
-
-			@Override
-			public int getIconHeight() {
-				return 20;
-			}
-		};
-		JLabel l3 = new JLabel(icon);
+//		JLabel l1 = new JLabel(getImage("test2.png"));
+//		l1.setText("ltrailing right");
+//		l1.setHorizontalTextPosition(SwingConstants.TRAILING);
+//		l1.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+//		l1.setHorizontalAlignment(SwingConstants.RIGHT);
+//
+//		JLabel l2 = new JLabel(getImage("test2.png"));
+//		l2.setText("lleading left");
+//		l2.setFont(font);
+//		l2.setHorizontalTextPosition(SwingConstants.LEADING);
+//		l2.setHorizontalAlignment(SwingConstants.LEFT);
+//		Icon icon = new Icon() {
+//
+//			int test;
+//			@Override
+//			public void paintIcon(Component c, Graphics g, int x, int y) {
+//				g.setColor((test = 1 - test) == 1 ? Color.green: Color.yellow);
+//				g.fillRect(x, y, 20, 20);
+//			}
+//
+//			@Override
+//			public int getIconWidth() {
+//				return 20;
+//			}
+//
+//			@Override
+//			public int getIconHeight() {
+//				return 20;
+//			}
+//		};
+//		
+		Icon icon = getImage("test2.png");
+		JLabel l3 = new JLabel(icon); 
 		l3.setOpaque(true);
 		l3.setBackground(Color.red);
 		l3.setText("lleading left");
@@ -122,59 +125,77 @@ public class Test_Label extends JPanel implements MenuListener, ItemListener {
 		l3.setHorizontalTextPosition(SwingConstants.LEADING);
 		l3.setHorizontalAlignment(SwingConstants.LEFT);
 		l3.setVerticalAlignment(SwingConstants.CENTER);
+//		l3.setBounds(80,0,70,40);
 
-		JLabel l4 = new JLabel(icon);
+		JLabel l4 = new JLabel();
+		l4.setIcon(icon);
 		l4.setOpaque(true);
-		l4.setText("center");
-		l4.setBackground(Color.blue);
+		l4.setText("4");
+		l4.setBackground(Color.white);
 		l4.setFont(font);
-		l4.setBorder(new LineBorder(Color.white, 10));
-		l4.setHorizontalTextPosition(SwingConstants.CENTER);
+//		l4.setPreferredSize(new Dimension(180, 30)); // not relevant for label?
+		l4.setBorder(new LineBorder(Color.black, 1));
+		l4.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+		l4.setHorizontalTextPosition(SwingConstants.TRAILING);
+		l4.setVerticalTextPosition(SwingConstants.CENTER);
+		l4.setIconTextGap(10);
 		l4.setHorizontalAlignment(SwingConstants.CENTER);
 		l4.setVerticalAlignment(SwingConstants.CENTER);
+//		l4.setBounds(0,0,70,40);
 
-		JButton b1 = new JButton("right left");
-		b1.setIcon(getImage("test2.png"));
+		JButton b1 = new JButton("X");
+//		b1.setBounds(0,60,70,40);
+//		b1.setIcon(getImage("test2.png"));
 		b1.setFont(font);
-		b1.setHorizontalTextPosition(SwingConstants.RIGHT);
-		b1.setHorizontalAlignment(SwingConstants.LEFT);
+//		b1.setHorizontalTextPosition(SwingConstants.LEFT);
+//		b1.setHorizontalAlignment(SwingConstants.LEFT);
 
-		JCheckBox cb3 = new JCheckBox("leading,left-to-right,rt");
-		cb3.setFont(font);
-		cb3.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
-		cb3.setHorizontalTextPosition(SwingConstants.LEADING);
-		cb3.setHorizontalAlignment(SwingConstants.TRAILING);
+		JButton b2 = new JButton("2");
+//		b2.setBounds(0,120,70,40);
+		b2.setIcon(getImage("test2.png"));
+		b2.setFont(font);
+		b2.setIconTextGap(2);
+		b2.setHorizontalTextPosition(SwingConstants.RIGHT);
+		b2.setHorizontalAlignment(SwingConstants.LEFT);
+		b2.setVerticalAlignment(SwingConstants.CENTER);
 
-		JCheckBox cb4 = new JCheckBox("leading,right-to-left");
-		cb4.setFont(font);
-		cb4.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-		cb4.setHorizontalTextPosition(SwingConstants.LEADING);
-
-		JCheckBox cb5 = new JCheckBox("trailing,left-to-right");
-		cb5.setFont(font);
-		cb5.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
-		cb5.setHorizontalTextPosition(SwingConstants.TRAILING);
-
-		JRadioButton rb1 = new JRadioButton("trailing,right-to-left");
-		rb1.setFont(font);
-		rb1.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-		rb1.setHorizontalTextPosition(SwingConstants.TRAILING);
-
-		JRadioButton rb2 = new JRadioButton("right,left-to-right");
-		rb2.setFont(font);
-		rb2.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
-		rb2.setHorizontalTextPosition(SwingConstants.RIGHT);
-
-		JRadioButton rb3 = new JRadioButton("right,r2l");
-		rb3.setFont(font);
-		rb3.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-		rb3.setHorizontalTextPosition(SwingConstants.RIGHT);
+//		JCheckBox cb3 = new JCheckBox("leading,left-to-right,rt");
+//		cb3.setFont(font);
+//		cb3.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+//		cb3.setHorizontalTextPosition(SwingConstants.LEADING);
+//		cb3.setHorizontalAlignment(SwingConstants.TRAILING);
+//
+//		JCheckBox cb4 = new JCheckBox("leading,right-to-left");
+//		cb4.setFont(font);
+//		cb4.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+//		cb4.setHorizontalTextPosition(SwingConstants.LEADING);
+//
+//		JCheckBox cb5 = new JCheckBox("trailing,left-to-right");
+//		cb5.setFont(font);
+//		cb5.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+//		cb5.setHorizontalTextPosition(SwingConstants.TRAILING);
+//
+//		JRadioButton rb1 = new JRadioButton("trailing,right-to-left");
+//		rb1.setFont(font);
+//		rb1.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+//		rb1.setHorizontalTextPosition(SwingConstants.TRAILING);
+//
+//		JRadioButton rb2 = new JRadioButton("right,left-to-right");
+//		rb2.setFont(font);
+//		rb2.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+//		rb2.setHorizontalTextPosition(SwingConstants.RIGHT);
+//
+//		JRadioButton rb3 = new JRadioButton("right,r2l");
+//		rb3.setFont(font);
+//		rb3.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+//		rb3.setHorizontalTextPosition(SwingConstants.RIGHT);
 
 //		firstColumn.add(l1);
 //		firstColumn.add(l2);
-//		firstColumn.add(l3);
+		firstColumn.add(l3);
 		firstColumn.add(l4);
-//		firstColumn.add(b1);
+		firstColumn.add(b1);
+//		firstColumn.add(b2);
 //
 //		firstColumn.add(cb3);
 //		firstColumn.add(cb4);
@@ -182,7 +203,7 @@ public class Test_Label extends JPanel implements MenuListener, ItemListener {
 //		firstColumn.add(rb1);
 //		firstColumn.add(rb2);
 //		firstColumn.add(rb3);
-		firstColumn.setBounds(100, 20, 200, 700);
+//		firstColumn.setBounds(100, 20, 200, 350);
 
 
 		JPanel theTab = new JPanel();
@@ -213,7 +234,7 @@ public class Test_Label extends JPanel implements MenuListener, ItemListener {
 //				});
 //			}
 //		});
-		theTab.setLayout(null);
+//		theTab.setLayout(new BoxLayout(theTab, BoxLayout.Y_AXIS));
 		theTab.add(firstColumn);
 		panel.add(theTab);
 
