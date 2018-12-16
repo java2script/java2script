@@ -2,7 +2,10 @@ package test;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.MediaTracker;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
@@ -12,6 +15,8 @@ import java.awt.event.FocusListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -30,6 +35,20 @@ public class Test_Applet_1 extends JApplet implements AdjustmentListener, Proper
 
 	int ipt;
 
+	private ImageIcon getImage(String name) {
+		ImageIcon icon = new ImageIcon(getClass().getResource(name));
+
+		while (icon.getImageLoadStatus() == MediaTracker.LOADING)
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+			}
+		return icon;
+	}
+
+
+	int n = 0;
+	
 	@Override
 	public void init() {
 		JScrollBar bar = new JScrollBar(JScrollBar.HORIZONTAL);
@@ -37,8 +56,7 @@ public class Test_Applet_1 extends JApplet implements AdjustmentListener, Proper
 		bar.addPropertyChangeListener(this);
 		JLabel label = new JLabel("hello");
 		((JPanel) getContentPane()).setBorder(new LineBorder(Color.blue,2));
-		label.setBorder(new LineBorder(Color.red, 3));
-		label.setBounds(0, 60, 200, 60);
+		label.setBorder(new LineBorder(Color.green, 3));
 		label.setPreferredSize(new Dimension(80, 80));
 		label.setBackground(Color.yellow);
 		label.setForeground(Color.BLUE);
@@ -48,6 +66,7 @@ public class Test_Applet_1 extends JApplet implements AdjustmentListener, Proper
 		label.addPropertyChangeListener(this);
 		label.addFocusListener(this);
 		/* final */ JButton button = new JButton("test");
+		button.setIcon(getImage("test2.png"));
 		button.addPropertyChangeListener(this);
 		button.addFocusListener(this);
 		button.setBorder(new LineBorder(Color.yellow, 4));
@@ -59,7 +78,7 @@ public class Test_Applet_1 extends JApplet implements AdjustmentListener, Proper
 			public void actionPerformed(ActionEvent event) {
 				boolean b = label.isOpaque();
 				label.setOpaque(!b);
-				System.out.println("this is " + this + "\nthis$0 is " + me);
+				System.out.println("Test_Applet_1 action " + ++n + " " + event);
 				label.setBackground(Color.green);
 				switch (++ipt % 3) {
 				case 0:
@@ -102,7 +121,7 @@ public class Test_Applet_1 extends JApplet implements AdjustmentListener, Proper
 	}
 
 	private void log(Object e) {
-		System.out.println(e.toString().replace("=,", ";").replace(',', '\n'));		
+//		System.out.println(e.toString().replace("=,", ";").replace(',', '\n'));		
 	}
 
 	@Override

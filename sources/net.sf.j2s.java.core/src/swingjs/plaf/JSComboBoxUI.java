@@ -33,6 +33,7 @@ public class JSComboBoxUI extends JSLightweightUI implements ItemListener, ListD
 	
 	@Override
 	public DOMNode updateDOMNode() {
+		comboBox = (JComboBox) jc;
 		if (domNode == null) {
 			domNode = focusNode = DOMNode.setStyles(newDOMObject("select", id), 
 					"padding", "0px 0px","lineHeight", "0.8","box-sizing", "border-box");
@@ -88,10 +89,7 @@ public class JSComboBoxUI extends JSLightweightUI implements ItemListener, ListD
 	public void installUI(JComponent jc) {
 		comboBox = (JComboBox) jc;
 		installListeners();
-    LookAndFeel.installColorsAndFont(jc,
-        "ComboBox.background",
-        "ComboBox.foreground",
-        "ComboBox.font");
+		LookAndFeel.installColorsAndFont(jc, "ComboBox.background", "ComboBox.foreground", "ComboBox.font");
 	}
 
 	/**

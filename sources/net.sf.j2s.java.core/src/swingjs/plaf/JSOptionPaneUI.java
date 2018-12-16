@@ -59,6 +59,7 @@ public class JSOptionPaneUI extends JSPanelUI {
 	
 	@Override
 	public DOMNode updateDOMNode() {
+        optionPane = (JOptionPane)c;
 		if (domNode == null) {
 			domNode = super.updateDOMNode();
 		}

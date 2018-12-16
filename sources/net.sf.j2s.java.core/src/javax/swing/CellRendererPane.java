@@ -147,16 +147,13 @@ public class CellRendererPane extends JPanel
       
       if(shouldValidate) {
           c.validate();
-      } else {
-    	  JSComponentUI ui = (JSComponentUI) ((JComponent) c).getUI();
-    	  ui.updateDOMNode();
+      } 
+	  JSComponentUI ui = (JSComponentUI) ((JComponent) c).getUI();
+	  ui.updateDOMNode();
 //          if (!ui.doPaintBackground())
 //        	  return;
-    	  ui.setTainted(false);
-      }
+	  ui.setTainted(false);
       
-      
-
 //      boolean wasDoubleBuffered = false;
 //      if ((c instanceof JComponent) && ((JComponent)c).isDoubleBuffered()) {
 //          wasDoubleBuffered = true;

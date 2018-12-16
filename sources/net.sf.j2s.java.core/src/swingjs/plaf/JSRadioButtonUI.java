@@ -33,7 +33,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 			if (actionNode != null)
 				DOMNode.dispose(actionNode);
 		}
-		enableNodes = new DOMNode[] { actionNode, buttonNode };
+		enableNodes = new DOMNode[] { actionNode, buttonNode, null };
 		setDataComponent(actionNode);
 		createButton();
 	}
@@ -50,9 +50,6 @@ public class JSRadioButtonUI extends JSButtonUI {
 			DOMNode.addJqueryHandledEvent(this, domNode, "mouseenter");			
 		} else {
 			domNode = newDOMObject("div", id + "_dom");
-//			centeringNode = newDOMObject("div", id + "_ctr");
-//			domNode.appendChild(centeringNode);
-//			centeringNode.appendChild(buttonNode);
 			domNode.appendChild(buttonNode);
 			centeringNode = buttonNode;
 			centeringNode.appendChild(textNode);
@@ -88,6 +85,9 @@ public class JSRadioButtonUI extends JSButtonUI {
 	}
 	
 	protected void setupButton(JToggleButton b, boolean doAll) {
+		// actionNode, iconNode, textNode, centeringNode, buttonNode
+		
+		
 		if (b.isSelected())
 			DOMNode.setAttr(actionNode, "checked", "true");
 		else

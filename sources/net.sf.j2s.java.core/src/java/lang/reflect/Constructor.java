@@ -43,9 +43,9 @@ public final class Constructor<T> extends AccessibleObject implements GenericDec
 		this.parameterTypes = parameterTypes;
 		this.exceptionTypes = checkedExceptions;
 		this.modifiers = modifiers;
-		// all of the SwingJS primitive classes run without parameterization
-		if (";Integer;Long;Short;Byte;Float;Double;".indexOf(";" + declaringClass.getName() + ";") >= 0)
-			parameterTypes = null;
+		// NO!! wrong: all of the SwingJS primitive classes run without parameterization
+		//if (";Integer;Long;Short;Byte;Float;Double;".indexOf(";" + declaringClass.getName() + ";") >= 0)
+			//parameterTypes = null;
 		this.parameterTypes = parameterTypes;
 		this.signature = "c$" + Class.argumentTypesToString(parameterTypes);
  		constr = /** @j2sNative this.Class_.$clazz$[this.signature] || */ null;

@@ -50,7 +50,19 @@ public class AjaxURLConnection extends HttpURLConnection {
     J2SObjectInterface J2S = /** @j2sNative self.J2S || */ null;
     Object info = (/** @j2sNative {isBinary: isBinary } || */null);
     Object result = J2S.doAjax(url.toString(), postOut, bytesOut, info);
-    responseCode = /** @j2sNative info.xhr.status || */0;
+    boolean isEmpty = false;
+    // the problem is that jsmol.php is still returning crlf even if output is 0 bytes
+    // and it is not passing through the not-found state, just 200
+    /**
+     * @j2sNative
+     * 
+     *    isEmpty = (!result || result.length == 2 && result[0] == 13 && result[1] == 10);
+     *    if (isEmpty)
+     *      result = new Int8Array;
+     *    
+     *     
+     */
+    responseCode = isEmpty ? HTTP_NOT_FOUND : /** @j2sNative info.xhr.status || */0;
     return result;
   }
 
@@ -71,21 +83,29 @@ public class AjaxURLConnection extends HttpURLConnection {
 
 	@Override
 	public InputStream getInputStream() {
-		responseCode = 200;
+		responseCode = -1;
+		return getInputStreamAndResponse(url, false);
+	}
+
+	private InputStream getInputStreamAndResponse(URL url, boolean allowNWError) {
 		BufferedInputStream is = getAttachedStreamData(url, false);
-		if (is != null || getUseCaches() && (is = getCachedStream(url)) != null)
+		if (is != null || getUseCaches() && (is = getCachedStream(url, allowNWError)) != null)
 			return is;
 		is = attachStreamData(url, doAjax(true));
 		if (getUseCaches() && is != null)
 			setCachedStream(url);
+		isNetworkError(is);
 		return is;
 	}
 
 	static Map<String, Object> urlCache = new Hashtable<String, Object>();
 	
-	private BufferedInputStream getCachedStream(URL url) {
+	private BufferedInputStream getCachedStream(URL url, boolean allowNWError) {
 		Object data = urlCache.get(url.toString());
-		return (data == null ? null : Rdr.toBIS(data));
+		if (data == null)
+			return null;
+		BufferedInputStream bis = Rdr.toBIS(data);
+		return (allowNWError || !isNetworkError(bis) ? bis : null);
 	}
 
 	private void setCachedStream(URL url) {
@@ -94,6 +114,23 @@ public class AjaxURLConnection extends HttpURLConnection {
 			urlCache.put(url.toString(), data);
 	}
 
+	private boolean isNetworkError(BufferedInputStream is) {
+        is.mark(15);
+        byte[] bytes = new byte[13];
+        try {
+			is.read(bytes);
+	        is.reset();
+	        for (int i = NETWORK_ERROR.length; --i >= 0;)
+	        	if (bytes[i] != NETWORK_ERROR[i])
+	        		return false;
+		} catch (IOException e) {
+		}
+		responseCode = HTTP_NOT_FOUND;
+        return true;
+	}
+
+	final private static int[] NETWORK_ERROR = new int[] { 78, 101, 116, 119, 111, 114, 107, 69, 114, 114, 111, 114 };
+	
 	/**
 	 * J2S will attach the data (String, SB, or byte[]) to any URL that is 
 	 * retrieved using a ClassLoader. This improves performance by
@@ -133,39 +170,23 @@ public class AjaxURLConnection extends HttpURLConnection {
     return doAjax(false);
   }
 
-  @Override
-  public int getResponseCode() throws IOException {
-      /*
-       * We have the response code already
-       */
-      if (responseCode != -1) {
-          return responseCode;
-      }
-
-      /*
-       * Ensure that we have connected to the server. Record
-       * exception as we need to re-throw it if there isn't
-       * a status line.
-       */
-      Exception exc = null;
-      try {
-          BufferedInputStream is = (BufferedInputStream) getInputStream();
-          if (responseCode != HTTP_OK)
-        	  return responseCode;
-          if (is.available() > 40)
-          	return responseCode = HTTP_OK;
-          is.mark(15);
-          byte[] bytes = new byte[13];
-          is.read(bytes);
-          is.reset();
-          String s = new String(bytes);
-          if (s.startsWith("Network Error"))
-          	return responseCode = HTTP_NOT_FOUND;
-      } catch (Exception e) {
-          exc = e;
-      }      
-      return responseCode = HTTP_OK;
-  }
+	@Override
+	public int getResponseCode() throws IOException {
+		/*
+		 * Check to see if have the response code already
+		 */
+		if (responseCode == -1) {
+			/*
+			 * Ensure that we have connected to the server. Record exception as we need to
+			 * re-throw it if there isn't a status line.
+			 */
+			try {
+				getInputStreamAndResponse(url, true);
+			} catch (Exception e) {
+			}
+		}
+		return responseCode;
+	}
 @Override
 public void disconnect() {
 	// TODO Auto-generated method stub

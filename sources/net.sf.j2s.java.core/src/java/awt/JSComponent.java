@@ -165,7 +165,7 @@ public abstract class JSComponent extends Component {
 		// ((ConstrainableGraphics) g).constrain(x, y, width, height);
 		// } else {
 		g.translate(x, (isContentPane ? 0 : y));
-		g.setClip(0, 0, width, height);
+		g.clipRect(0, 0, width, height); // BH changed 2018.12.05 was setClip
 		// }
 		g.setFont(getFont());
 		return g;
@@ -270,10 +270,10 @@ public abstract class JSComponent extends Component {
 		}
 		_isBackgroundPainted = jsg.isBackgroundPainted();
 		if (_isBackgroundPainted) {
-			((JSComponentUI) ui).setPainted();
+			((JSComponentUI) ui).setPainted(null);
 			// It's all one canvas, and it is behind the root pane (bad design?)
 			// so if it is painted, we should make the root pane transparent
-			((JSComponentUI) ((JComponent) this).getRootPane().getUI()).setPainted();
+			((JSComponentUI) ((JComponent) this).getRootPane().getUI()).setPainted(null);
 		}
 	}
 
@@ -327,7 +327,7 @@ public abstract class JSComponent extends Component {
      */
 	public void paintWithBackgroundCheck(Graphics g) {
 		checkBackgroundPainted(null);
-		paint(g);					
+		paint(g);
 		checkBackgroundPainted(getJSGraphic2D(g));
 	}
 

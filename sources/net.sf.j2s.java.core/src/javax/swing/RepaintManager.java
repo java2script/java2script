@@ -452,15 +452,6 @@ public class RepaintManager {
 				|| c.getWidth() <= 0 || c.getHeight() <= 0)
 			return;
 
-//		/**
-//		 * xxxj2sNative
-//		 * 
-//		 * var g = c.getGraphics();
-//		 * if (g == null || g.gc == null)return;
-//		 * 
-//		 */
-//		{}
-//		
 		if (extendDirtyRegion(c, x, y, w, h)) {
 			// Component was already marked as dirty, region has been
 			// extended, no need to continue.

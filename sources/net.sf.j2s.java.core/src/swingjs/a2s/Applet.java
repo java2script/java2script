@@ -48,7 +48,7 @@ public class Applet extends JApplet implements A2SContainer {
 		 *      };
 		 * }
 		 * } catch(e) {
-		 * System.out.println("a2s.Applet.fixAppletPaint() exception: " + e);
+		 * System.out.println("java.applet.Applet.fixAppletPaint() exception: " + e);
 		 * }
 		 */
 	}

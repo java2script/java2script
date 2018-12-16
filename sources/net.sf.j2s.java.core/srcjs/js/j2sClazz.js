@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 12/13/2018 3.2.4.05 fixes Class.js field reflection, inner anonymous class of outer class creates wrong synthetic pointer 
 // BH 12/1/2018 3.2.4.04 fixes TypeError e.stack e not found
 // BH 11/11/2018 3.2.4.04 fixes String.CASE_INSENSITIVE_ORDER.compare$S$S
 // BH 11/10/2018 3.2.4.04 fixes inner class synthetic references to interfaces
@@ -110,8 +111,8 @@ window["j2s.clazzloaded"] = true;
   _debugging: false,
   _loadcore: true,
   _nooutput: 0,
-  _VERSION_R: "3.2.4.02",
-  _VERSION_T: "3.2.4.00",
+  _VERSION_R: "3.2.4.05",
+  _VERSION_T: "3.2.4.05",
 };
 
 ;(function(Clazz, J2S) {
@@ -452,18 +453,18 @@ Clazz.new_ = function(c, args, cl) {
   var clInner = cl;
   cl = cl || c.exClazz || c;
   cl.$clinit$ && cl.$clinit$();
-  var f = new (Function.prototype.bind.apply(cl, arguments));
+  var obj = new (Function.prototype.bind.apply(cl, arguments));
   if (args[2] != inheritArgs) {
-//    cl.$init0$ && cl.$init0$.apply(f);
+//    cl.$init0$ && cl.$init0$.apply(obj);
     if (haveArgs) {
-      c.apply(f, args);
+      c.apply(obj, args);
     }
-    clInner && clInner.$init$.apply(f);
+    clInner && clInner.$init$.apply(obj);
   }
     
   _profileNew && addProfileNew(cl, window.performance.now() - t0);
 
-  return f;
+  return obj;
 }
 
 Clazz.newClass = function (prefix, name, clazz, clazzSuper, interfacez, type) { 
@@ -553,12 +554,21 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
     }
     return;
   }
+
+
   // args[0] = outerObject
   // args[1] = b$ array
   // args[2-n] = actual arguments
   var outerObj = shiftArray(args, 0, 1);  
   var finalVars = shiftArray(args, 0, 1);
   var haveFinals = (finalVars || outerObj && outerObj.$finals$);
+  if (!outerObj || !objThis)
+    return;
+  var clazz1 = getClazz(outerObj);
+  if (clazz1 == outerObj) {
+    outerObj = objThis;
+  }
+
   if (haveFinals) {
     // f$ is short for the once-chosen "$finals$"
     var of$ = outerObj.$finals$;
@@ -566,14 +576,11 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
       (of$ ? appendMap(appendMap({}, of$), finalVars) : finalVars)
       : of$ ? of$ : null);
   }
-  if (!outerObj || !objThis)// could be String implementing CharSequence || !outerObj.__CLASS_NAME__)
-    return;
   // BH: For efficiency: Save the b$ array with the OUTER class as $b$, 
   // as its keys are properties of it and can be used again.
   var b = outerObj.$b$;
   var isNew = false;
   var innerName = getClassName(objThis, true);
-  var clazz1 = getClazz(outerObj);
   if (!b) {
     b = outerObj.b$;
     // Inner class of an inner class must inherit all outer object references. Note that this 

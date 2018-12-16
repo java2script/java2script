@@ -128,7 +128,7 @@ public class DefaultTableCellHeaderRenderer extends DefaultTableCellRenderer
 
         return this;
     }
-
+    
     public static SortOrder getColumnSortOrder(JTable table, int column) {
         SortOrder rv = null;
         if (table == null || table.getRowSorter() == null) {

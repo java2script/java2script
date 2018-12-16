@@ -252,12 +252,13 @@ public class JSImagekit implements ImageConsumer {
 	 * 
 	 * @param c
 	 * @param icon
+	 * @param id 
 	 * @return
 	 */
-	public static ImageIcon createImageIcon(Component c, Icon icon) {
+	public static ImageIcon createImageIcon(Component c, Icon icon, String id) {
 		int width = icon.getIconWidth();
 		int height = icon.getIconHeight();
-		HTML5Canvas canvas = (HTML5Canvas) DOMNode.createElement("canvas", "tmpIcon");
+		HTML5Canvas canvas = (HTML5Canvas) DOMNode.createElement("canvas", id + "");
 		DOMNode.setStyles(canvas, "width", width + "px", "height", height + "px");
 		/**
 		 * @j2sNative

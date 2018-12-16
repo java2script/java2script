@@ -1723,7 +1723,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		 *            if (this.excludeField$S(m)) continue; 
 		 *            var o = c[m]; 
 		 *            switch (typeof o) {
-		 *             case "object": if (o.__CLASS_NAME__) continue; 
+		 *             case "object": if (o && o.__CLASS_NAME__) continue; 
 		 *             case "number": case "boolean": case "string":
 		 */
 		 

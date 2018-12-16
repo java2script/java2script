@@ -35,6 +35,10 @@ import java.awt.Toolkit;
 //import java.util.logging.Logger;
 //import java.util.logging.Level;
 
+import javax.swing.JComponent;
+
+import swingjs.plaf.JSComponentUI;
+
 /**
  * The root event class for all component-level input events.
  *
@@ -187,6 +191,8 @@ public abstract class InputEvent extends ComponentEvent {
      * @see java.awt.event.MouseEvent
      */
     protected int modifiers;
+    
+    public int[] bdata;
 
     /*
      * A flag that indicates that this instance can be used to access
@@ -349,17 +355,20 @@ public abstract class InputEvent extends ComponentEvent {
      */
     @Override
 		public void consume() {
+    	
+    	JSComponentUI ui = (JSComponentUI)((JComponent) source).getUI();
+    	if (bdata != null && ui != null && ui.buttonListener == null) {
     	/**
     	 * @j2sNative
     	 * 
-    	 * if (this.bdata && this.bdata.jqevent) {
-    	 * 			this.bdata.jqevent.stopPropagation();
+    	 * if (this.bdata.jqevent) {
+    	 * 		this.bdata.jqevent.stopPropagation();
     	 *      this.bdata.jqevent.preventDefault();
     	 * }
     	 */
-    	{
+	
     	}
-        consumed = true;
+    	consumed = true;
     }
 
     /**
