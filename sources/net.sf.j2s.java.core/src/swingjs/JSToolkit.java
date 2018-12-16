@@ -6,17 +6,14 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dialog;
-import java.awt.Dialog.ModalExclusionType;
-import java.awt.Dialog.ModalityType;
-import java.awt.JSDialog;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Frame;
-import java.awt.JSFrame;
 import java.awt.GraphicsConfiguration;
 import java.awt.Image;
 import java.awt.JSComponent;
+import java.awt.JSFrame;
 import java.awt.JobAttributes;
 import java.awt.PageAttributes;
 import java.awt.PrintJob;
@@ -64,7 +61,6 @@ import sun.awt.KeyboardFocusManagerPeerProvider;
 import sun.awt.SunToolkit;
 import swingjs.api.Interface;
 import swingjs.api.JSFileHandler;
-import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Applet;
 import swingjs.api.js.HTML5CanvasContext2D;
 import swingjs.api.js.JQuery;
@@ -623,8 +619,8 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		return kit.getCreatedImage();
 	}
 
-	public ImageIcon createImageIcon(Component c, Icon icon) {
-		return JSImagekit.createImageIcon(c, icon);
+	public static ImageIcon createImageIcon(Component c, Icon icon, String id) {
+		return JSImagekit.createImageIcon(c, icon, id);
 	}
 	
 	@Override
@@ -960,10 +956,6 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		JSPrintJob job = (JSPrintJob) JSUtil.getInstance("swingjs.JSPrintJob");
 		job.setAttributes(jobtitle, jobAttributes, pageAttributes);
 		return (PrintJob) (Object) job;
-	}
-
-	public static ImageIcon paintImageForIcon(JComponent c, Icon icon) {
-		return JSImagekit.createImageIcon(c, icon);
 	}
 
 	@Override

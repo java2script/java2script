@@ -533,6 +533,12 @@ public class JSGraphics2D // extends SunGraphics2D
 			nx = width;
 			ny = height;
 		}
+		double[] m = new double[6];
+		transform.getMatrix(m);
+		if (m[0] != 1 || m[1] != 0 || m[2] != 0 || m[3] != 1)
+			System.err.println("Unsupported transform");
+		x += m[4];
+		y += m[5];
 		for (int pt = 0, i = 0, n = Math.min(buf8.length / 4, pixels.length); i < n; i++) {
 			int argb = pixels[i];
 			buf8[pt++] = (argb >> 16) & 0xFF;
@@ -941,6 +947,7 @@ public class JSGraphics2D // extends SunGraphics2D
 	 * @return the length of the ctx._aSaved array after the push
 	 */
 	public int mark() {
+		// note: This method is referred to in JComponent.java j2snative block as mark$
 		ctx.save();
 		Object[] map = new Object[SAVE_MAX];
 

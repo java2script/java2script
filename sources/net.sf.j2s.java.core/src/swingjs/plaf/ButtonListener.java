@@ -94,6 +94,8 @@ public class ButtonListener implements MouseListener, MouseMotionListener,
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
+		if (ui.isUIDisabled)
+			return;
 		// System.out.println("JSButtonListener property change: " + prop + " " +
 		// e.getSource());
 		AbstractButton b = (AbstractButton) e.getSource();

@@ -67,21 +67,21 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 
 	@Override
 	public DOMNode updateDOMNode() {
-		JSlider js = (JSlider) jc;
-		min = js.getMinimum();
-		max = js.getMaximum();
-		val = js.getValue();
+		setSliderFields();
+		min = slider.getMinimum();
+		max = slider.getMaximum();
+		val = slider.getValue();
 		if (!isScrollBar) {
-			minorSpacing = js.getMinorTickSpacing();
-			majorSpacing = js.getMajorTickSpacing();
-			paintTicks = js.getPaintTicks();
-			paintLabels = js.getPaintLabels();
-			paintTrack = js.getPaintTrack();
-			snapToTicks = js.getSnapToTicks();
+			minorSpacing = slider.getMinorTickSpacing();
+			majorSpacing = slider.getMajorTickSpacing();
+			paintTicks = slider.getPaintTicks();
+			paintLabels = slider.getPaintLabels();
+			paintTrack = slider.getPaintTrack();
+			snapToTicks = slider.getSnapToTicks();
 		}
-		orientation = (js.getOrientation() == SwingConstants.VERTICAL ? "vertical"
+		orientation = (slider.getOrientation() == SwingConstants.VERTICAL ? "vertical"
 				: "horizontal");
-		model = js.getModel();
+		model = slider.getModel();
 		boolean isHoriz = (slider.getOrientation() == SwingConstants.HORIZONTAL);
 		boolean isVerticalScrollBar = (isScrollBar && !isHoriz);
 		boolean isInverted = isVerticalScrollBar || !isScrollBar && slider.getInverted();
@@ -125,11 +125,15 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 
 	@Override
 	public void installUI(JComponent jc) {
+		setSliderFields();
+	}
+	
+	private void setSliderFields() {
 		slider = (JSlider) jc;
 		if (isScrollBar)
 			jScrollBar = (JScrollBar) jc;
 	}
-	
+
 	private void setJQuerySliderAndEvents() {
 
 		Object slider = $(jqSlider);

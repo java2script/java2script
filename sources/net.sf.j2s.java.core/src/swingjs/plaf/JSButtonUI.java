@@ -30,6 +30,7 @@ package swingjs.plaf;
 
 //import java.awt.FontMetrics;
 import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import javax.swing.AbstractButton;
@@ -42,6 +43,7 @@ import javax.swing.JToggleButton;
 import javax.swing.LookAndFeel;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
+import javax.swing.border.Border;
 import javax.swing.plaf.TableUI;
 import javax.swing.plaf.UIResource;
 
@@ -81,9 +83,6 @@ public class JSButtonUI extends JSLightweightUI {
 	protected JMenuItem menuItem;
 	protected AbstractButton button;
 	
-	private boolean isSimpleButton;
-	private ButtonListener listener;
-
 	@Override
 	public DOMNode updateDOMNode() {
 		isSimpleButton = true;
@@ -91,9 +90,8 @@ public class JSButtonUI extends JSLightweightUI {
 		// all subclasses will have their own version of this.
 		// this one is only for a simple button
 		if (domNode == null) {
-			domNode = buttonNode = newDOMObject ("button", id, "type", "button");
+			domNode = enableNode = buttonNode = newDOMObject ("button", id, "type", "button");
 			iconNode = newDOMObject("span", id + "_icon");
-			enableNode = buttonNode;
 			createButton();
 			DOMNode.setStyles(domNode, "lineHeight", "0.8");
 		}
@@ -110,7 +108,7 @@ public class JSButtonUI extends JSLightweightUI {
 		setDataComponent(textNode); // needed for mac safari/chrome
 		setEnabled(c.isEnabled());
 	}
-
+	
 	/**
 	 * 
 	 * @param type
@@ -170,6 +168,7 @@ public class JSButtonUI extends JSLightweightUI {
 	}
 
 	protected void setupButton() {
+		button = (AbstractButton) jc;
 		if (!isMenuItem)
 			setPadding(button.getMargin());
 		setIconAndText("button", (ImageIcon) button.getIcon(), button.getIconTextGap(), button.getText());
@@ -226,13 +225,13 @@ public class JSButtonUI extends JSLightweightUI {
 	}
 
 	protected void installListeners(AbstractButton b) {	
-		listener = new ButtonListener(this, isMenuItem);
-		if (listener != null) {
-			b.addMouseListener(listener);
-			b.addMouseMotionListener(listener);
-			b.addFocusListener(listener);
-			b.addPropertyChangeListener(listener);
-			b.addChangeListener(listener);
+		buttonListener = new ButtonListener(this, isMenuItem);
+		if (buttonListener != null) {
+			b.addMouseListener(buttonListener);
+			b.addMouseMotionListener(buttonListener);
+			b.addFocusListener(buttonListener);
+			b.addPropertyChangeListener(buttonListener);
+			b.addChangeListener(buttonListener);
 		}
 	}
 
@@ -744,8 +743,13 @@ public class JSButtonUI extends JSLightweightUI {
 	
 	@Override
 	protected void setInnerComponentBounds(int width, int height) {
-		if (isSimpleButton && (imageNode == null || button.getText() == null))
-			DOMNode.setSize(innerNode = domNode, width, height);
+		if (isSimpleButton) {
+			Border b = jc.getBorder();
+			Insets insets = (b == null ? null : b.getBorderInsets(jc));
+			//if (imageNode == null || button.getText() == null)
+			DOMNode.setSize(domNode, width - (b == null ? 0 : insets.left + insets.right), height - (b == null ? 0 : insets.top + insets.bottom));
+			DOMNode.setStyles(domNode, "margin", insets.left + "px " + insets.top + "px " + insets.right + "px " + insets.bottom + "px");
+		}
 	}
 
 }

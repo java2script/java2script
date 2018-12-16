@@ -18,6 +18,13 @@ class Test_ {
 		return t;
 	}
 
+	public String t_test = "test_";
+
+	public String showt2() {
+		System.out.println("Test_.showt2() test_.t is " + t + " t_test is " + t_test);
+		return t_test;
+	}
+
 	static {
 		ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
 	}

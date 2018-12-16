@@ -262,6 +262,10 @@ public class DefaultTableCellRenderer extends JLabel
         return this;
     }
 
+	public Component getComponent() {
+		return this;
+	}
+
     /*
      * The following methods are overridden as a performance measure to
      * to prune code-paths are often called in the case of renders

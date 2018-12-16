@@ -36,12 +36,11 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
+import javax.swing.JTable.BooleanRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
-import javax.swing.JTable.BooleanRenderer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.MouseInputListener;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.UIResource;
 
@@ -151,6 +150,12 @@ public class JSComponentUI extends ComponentUI
 	protected JComponent jc;
 
 	/**
+	 * the associated JLabel, if this is one
+	 */
+	
+	protected JLabel label;
+	
+	/**
 	 * TableCellRenderers will not have parents; here we point to the table so that
 	 * we can send the coordinates to the retrieve the row and cell
 	 * 
@@ -178,6 +183,119 @@ public class JSComponentUI extends ComponentUI
 	public DOMNode outerNode;
 
 	/**
+	 * When CellRendererPane updates a table cell, it needs to save and restore
+	 * all of the various nodes -- enableNode, textNode, etc -- to domNode.
+	 * 
+	 * This save is done immediately after painting. It disables the ui for any
+	 * changes that might pass to it from property changes.
+	 * 
+	 * @param td
+	 */
+	protected void saveCellNodes(DOMNode td) {
+		DOMNode[] nodes = new DOMNode[] {
+				domNode,
+				innerNode,
+				centeringNode,
+				
+				iconNode,
+				textNode,
+				buttonNode,			
+				enableNode,
+				
+				(enableNodes == null ? null : enableNodes[0]),
+				(enableNodes == null ? null : enableNodes[1]),
+				(enableNodes == null ? null : enableNodes[2]),
+				
+				focusNode,
+				actionNode,
+				valueNode,
+				scrollNode,
+		};	
+		DOMNode.setAttr(td, "data-nodes", nodes);
+		DOMNode node = DOMNode.firstChild(td);
+		if (node != domNode) {
+			$(td).empty();
+			td.appendChild(domNode);
+		}
+		domNode = outerNode = null;
+	}
+
+	protected void restoreCellNodes(DOMNode td) {
+		DOMNode[] nodes = (DOMNode[]) DOMNode.getAttr(td, "data-nodes");
+		if (nodes == null)
+			return;
+		domNode 		= nodes[0];
+		innerNode		= nodes[1];
+		centeringNode 	= nodes[2];
+		
+		iconNode		= nodes[3];
+		textNode		= nodes[4];
+		buttonNode 		= nodes[5];
+		enableNode 		= nodes[6];
+		
+		if (nodes[7] != null) {
+			enableNodes[0] = nodes[7];
+			enableNodes[1] = nodes[8];
+			enableNodes[2] = nodes[9];
+		}
+		
+		focusNode		= nodes[10];
+		actionNode 		= nodes[11];
+		valueNode		= nodes[12];
+		scrollNode		= nodes[13];
+	}
+
+
+//	
+//	protected void setCellNodes(DOMNode td) {
+//		DOMNode[] nodes = new DOMNode[] {
+//				domNode,
+//				innerNode,
+//				centeringNode,
+//				
+//				iconNode,
+//				textNode,
+//				buttonNode,			
+//				enableNode,
+//				
+//				(enableNodes == null ? null : enableNodes[0]),
+//				(enableNodes == null ? null : enableNodes[1]),
+//				(enableNodes == null ? null : enableNodes[2]),
+//				
+//				focusNode,
+//				actionNode,
+//				valueNode,
+//				scrollNode,
+//		};	
+//		DOMNode.setAttr(td, "data-nodes", nodes);
+//	}
+//
+//	protected void getCellNodes(DOMNode td) {
+//		DOMNode[] nodes = (DOMNode[]) DOMNode.getAttr(td, "data-nodes");
+//		domNode 		= nodes[0];
+//		innerNode		= nodes[1];
+//		centeringNode 	= nodes[2];
+//		
+//		iconNode		= nodes[3];
+//		textNode		= nodes[4];
+//		buttonNode 		= nodes[5];
+//		enableNode 		= nodes[6];
+//		
+//		if (nodes[7] != null) {
+//			enableNodes[0] = nodes[7];
+//			enableNodes[1] = nodes[8];
+//			enableNodes[2] = nodes[9];
+//		}
+//		
+//		focusNode		= nodes[10];
+//		actionNode 		= nodes[11];
+//		valueNode		= nodes[12];
+//		scrollNode		= nodes[13];
+//	}
+//
+
+	
+	/**
 	 * inner node for JButtonUI that needs to be cleared prior to calculating
 	 * preferred size
 	 * 
@@ -203,18 +321,6 @@ public class JSComponentUI extends ComponentUI
 	protected DOMNode imageNode;
 
 	/**
-	 * for SplitPaneDivider
-	 * 
-	 */
-	protected boolean draggable;
-
-	public void setDraggable(JSFunction f) {
-		// SplitPaneDivider
-		draggable = true; // never actually used
-		J2S.setDraggable(getDOMNode(), f);
-	}
-
-	/**
 	 * The HTML5 input element being pressed, if the control is a radio or checkbox
 	 * button.
 	 * 
@@ -228,19 +334,13 @@ public class JSComponentUI extends ComponentUI
 	protected DOMNode buttonNode;
 
 	/**
-	 * the anchor tag surrounding a menu item
-	 * 
-	 */
-	
- 	protected DOMNode menuAnchorNode;
-
-	/**
 	 * a component or subcomponent that can be enabled/disabled
 	 */
 	protected DOMNode enableNode;
 
 	/**
-	 * a component or subcomponent that can be enabled/disabled
+	 * a component or subcomponent that can be enabled/disabled;
+	 * this is DOMNode[3]
 	 */
 	protected DOMNode[] enableNodes;
 
@@ -255,11 +355,6 @@ public class JSComponentUI extends ComponentUI
 	protected DOMNode textNode;
 
 	/**
-	 * "left" "right" "center" if defined
-	 */
-	protected String textAlign;
-
-	/**
 	 * the subcomponent with the value field
 	 */
 	protected DOMNode valueNode;
@@ -270,19 +365,44 @@ public class JSComponentUI extends ComponentUI
 	protected DOMNode scrollNode;
 
 	/**
-	 * Labels with icons will have this
-	 */
-	protected int iconHeight;
-
-	/**
 	 * a component that is focusable
 	 */
 	protected DOMNode focusNode;
 
 	/**
-	 * label for JLabel; null for JSTooltipUI subclass of JSLabelUI 
+	 * "left" "right" "center" if defined
 	 */
-	protected JLabel label;
+	protected String textAlign;
+
+	/**
+	 * Labels with icons will have this
+	 */
+	protected int iconHeight;
+
+	/**
+	 * jSButtonUI buttonListener
+	 * 
+	 */
+	public ButtonListener buttonListener;
+	
+	/**
+	 * the anchor tag surrounding a menu item
+	 * 
+	 */
+	
+ 	protected DOMNode menuAnchorNode;
+
+	/**
+	 * for SplitPaneDivider
+	 * 
+	 */
+	protected boolean draggable;
+
+	public void setDraggable(JSFunction f) {
+		// SplitPaneDivider
+		draggable = true; // never actually used
+		J2S.setDraggable(getDOMNode(), f);
+	}
 
 	/**
 	 * a numerical reference for an ID
@@ -317,17 +437,23 @@ public class JSComponentUI extends ComponentUI
 	protected boolean boundsSet = false;
 
 	/**
-	 * Indicates that we do not need an outerNode and that we should be applying any
-	 * positioning to the node itself. All menu items will have this set true.
+	 * indicates that we do not need an outerNode and that we should be applying any
+	 * positioning to the node itself; all menu items will have this set true
 	 */
 
 	protected boolean isMenuItem = false;
 
 	/**
-	 * Indicates that we do not want to updateDOMNode too early.
+	 * indicates that we do not want to updateDOMNode too early
 	 */
 
 	protected boolean isMenu = false;
+	
+	/**
+	 * flag for raw JButton used in setHTMLSize1 only
+	 * 
+	 */
+	protected boolean isSimpleButton;
 
 	protected int x, y;
 
@@ -438,7 +564,8 @@ public class JSComponentUI extends ComponentUI
 		 */
 		{
 		}
-		c.addPropertyChangeListener(this);
+		if (buttonListener == null)
+			c.addPropertyChangeListener(this);
 	}
 
 	/**
@@ -479,6 +606,9 @@ public class JSComponentUI extends ComponentUI
 	private void setComponent(JComponent comp) {
 		c = jc = comp;
 		isUIDisabled = (comp == null);
+		if (isUIDisabled)
+			domNode = outerNode = null;		
+
 	}
 
 	public JSComponentUI set(JComponent target) {
@@ -527,7 +657,9 @@ public class JSComponentUI extends ComponentUI
 	 * is not necessary to check x and y for that. This ensures perfect
 	 * correspondence between a clicked button and its handling by SwingJS.
 	 * 
-	 * The action will be handled by a standard Java MouseListener
+	 * The action will be handled by a standard Java MouseListener.
+	 * 
+	 * Includes Button, List, Slider, and TextField
 	 * 
 	 * @param button
 	 */
@@ -775,6 +907,7 @@ public class JSComponentUI extends ComponentUI
 		if (isUIDisabled)
 			return;
 		String prop = e.getPropertyName();
+//		System.out.println("jcui " + prop);
 		if (prop == "ancestor") {
 			if (cellComponent != null)
 				return;
@@ -794,6 +927,7 @@ public class JSComponentUI extends ComponentUI
 	 * @param prop
 	 */
 	void propertyChangedFromListener(String prop) {
+		//System.out.println("jcui listener " + prop);
 		if (isUIDisabled)
 			return;
 		if (prop == "ancestor") {
@@ -963,7 +1097,7 @@ public class JSComponentUI extends ComponentUI
 	 * table cell renderer component
 	 * 
 	 */
-	private JSComponent cellComponent;
+	protected JSComponent cellComponent;
 	
 	/**
 	 * table cell width and height
@@ -1023,13 +1157,16 @@ public class JSComponentUI extends ComponentUI
 	}
 	
 	protected DOMNode updateDOMNodeCUI() {
-		if (cellComponent != null)
+		if (cellComponent != null) {
 			updateCell(cellWidth, cellHeight);
+		}
 		return domNode;
 	}
 
 	private void updateCell(int width, int height) {
-		DOMNode.setStyles(domNode, "width", "100%", "height", "100%", "background", "transparent");
+		DOMNode.setStyles(domNode, "width", "100%", "height", "100%");
+		if (allowPaintedBackground)
+			DOMNode.setStyles(domNode, "background", "transparent");
 		if (cellComponent instanceof BooleanRenderer) {
 			DOMNode.setStyles(centeringNode, "width", "100%", "height", "100%");
 			DOMNode.setStyles(buttonNode, "width", "100%", "height", "100%");
@@ -1040,19 +1177,20 @@ public class JSComponentUI extends ComponentUI
 			case SwingConstants.RIGHT:
 			case SwingConstants.TRAILING:
 				DOMNode.setStyles(actionNode, "left", width + "px", "transform",
-						"scale(0.6,0.6) translate(-30px,-20px)");
+						"scale(0.75,0.75) translate(-25px,-16px)");
 				break;
 			case SwingConstants.LEFT:
 			case SwingConstants.LEADING:
-				DOMNode.setStyles(actionNode, "left", "0px", "transform", "scale(0.6,0.6) translate(-10px,-10px)");
+				DOMNode.setStyles(actionNode, "left", "0px", "transform", "scale(0.75,0.75) translate(-5px,-16px)");
 				break;
 			case SwingConstants.CENTER:
 				DOMNode.setStyles(actionNode, "left", (width / 2) + "px", "transform",
-						"scale(0.6,0.6) translate(-20px,-20px)");
+						"scale(0.75,0.75) translate(-15px,-16px)");
 				break;
 			}
 		}
 	}
+	
 	protected DOMNode setCssFont(DOMNode obj, Font font) {
 		if (font != null) {
 			int istyle = font.getStyle();
@@ -1107,7 +1245,7 @@ public class JSComponentUI extends ComponentUI
 	 * @return
 	 */
 	protected Dimension setHTMLSize(DOMNode obj, boolean addCSS) {
-		return setHTMLSize1(obj, addCSS, true);
+		return setHTMLSize1(centeringNode == null || obj != domNode ? obj : centeringNode, addCSS, true);
 	}
 
 	/**
@@ -1125,9 +1263,10 @@ public class JSComponentUI extends ComponentUI
 		int h, w;
 		String w0 = null, h0 = null, w0i = null, h0i = null, position = null;
 		DOMNode parentNode = null;
-		if (centeringNode != null && node == domNode) {
-			node = centeringNode;
-		}
+// BH removed 12/7/18 because it prevents labels from having horizontal centering
+//		if (centeringNode != null && node == domNode) {
+//			node = centeringNode;
+//		}
 		if (scrollPaneUI != null) {
 			w = scrollPaneUI.c.getWidth();
 			h = scrollPaneUI.c.getHeight();
@@ -1150,15 +1289,15 @@ public class JSComponentUI extends ComponentUI
 			 * 			w0 = node.style.width; h0 = node.style.height; position =
 			 *            node.style.position;
 			 * 
-			 *            if (node == this.centeringNode && this.innerNode) { w0i =
-			 *            this.innerNode.style.width; h0i = this.innerNode.style.height; }
+			 *            if (node == this.centeringNode && this.isSimpleButton) { w0i =
+			 *            this.domNode.style.width; h0i = this.domNode.style.height; }
 			 */
 			{
 				w0 = w0i = "";
 			}
 			DOMNode.setStyles(node, "position", null, "width", null, "height", null);
-			if (innerNode != null)
-				DOMNode.setStyles(innerNode, "width", null, "height", null);
+			if (isSimpleButton)
+				DOMNode.setStyles(domNode, "width", null, "height", null);
 
 			DOMNode div;
 			if (DOMNode.getAttr(node, "tagName") == "DIV")
@@ -1222,7 +1361,7 @@ public class JSComponentUI extends ComponentUI
 
 		}
 		if (w0i != null) {
-			DOMNode.setStyles(innerNode, "width", w0i, "height", h0i);
+			DOMNode.setStyles(domNode, "width", w0i, "height", h0i);
 		}
 		if (parentNode != null)
 			parentNode.appendChild(node);
@@ -1303,7 +1442,7 @@ public class JSComponentUI extends ComponentUI
 			// set width from component
 			updateOuterNode();
 			addChildrenToDOM(children, n);
-			if (isWindow && jc.getUIClassID() != "InternalFrameUI") {
+			if (isWindow && jc.getUIClassID() != "InternalFrameUI" && jc.getWidth() > 0) {
 				DOMNode.transferTo(outerNode, body);
 			}
 		}
@@ -1430,9 +1569,11 @@ public class JSComponentUI extends ComponentUI
 	 * This flag is set by border painting and background painting detection
 	 * to indicate that a cell renderer must do that painting.
 	 */
-	public void setPainted() {
+	public void setPainted(Graphics g) {
 		backgroundPainted = true;
-		setTransparent(domNode);
+		if (allowPaintedBackground) {
+			setTransparent(domNode);
+		}
 	}
 
 	/**
@@ -1651,9 +1792,12 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public void setVisible(boolean b) {
+		setVisible(getOuterNode(), b);
+	}
+	
+	public void setVisible(DOMNode node, boolean b) {
 		if (!b && cellComponent != null)
 			return;
-		DOMNode node = getOuterNode();
 		if (node == null)
 			node = domNode; // a frame or other window
 		DOMNode.setVisible(node, b);
@@ -1813,18 +1957,19 @@ public class JSComponentUI extends ComponentUI
 	private ImageIcon getIcon(JSComponent c, Icon icon) {
 		return (c == null || icon == null && (icon = ((AbstractButton) c).getIcon()) == null ? null
 				: icon.getIconWidth() <= 0 || icon.getIconHeight() <= 0 ? null
-						: (icon instanceof ImageIcon) ? (ImageIcon) icon : JSToolkit.paintImageForIcon(jc, icon));
+						: (icon instanceof ImageIcon) ? (ImageIcon) icon : JSToolkit.createImageIcon(jc, icon, id + "tmpIcon"));
 	}
+
+	protected Insets insets;
+
+	protected int iconX, iconY;
 
 	protected void setHorizontalButtonAlignments(JComponent b, int pos, int align) {
 		// We need the width of the text to position the button.
-		
+
 //		DOMNode.setAttr(textNode,  "innerHTML", pos);
-		
-		
-		int wIcon = Math.max(0, setHTMLSize1(iconNode, false, false).width - 1);
-		if (isMenuItem && actionNode != null)
-			wIcon = 15;
+
+		int wIcon = (isMenuItem && actionNode != null ? 15 : Math.max(0, setHTMLSize1(iconNode, false, false).width - 1));
 		int wText = setHTMLSize1(textNode, false, false).width - 1;
 
 		// But we need to slightly underestimate it so that the
@@ -1847,6 +1992,7 @@ public class JSComponentUI extends ComponentUI
 		//
 		// .....[btn] text
 		//
+		getJSInsets();
 		boolean ltr = jc.getComponentOrientation().isLeftToRight();
 		boolean alignLeft, alignRight, centered, text0;
 		String px0 = "0px";
@@ -1870,43 +2016,53 @@ public class JSComponentUI extends ComponentUI
 			text0 = false;
 			if (alignRight) {
 				if (buttonNode != null) {
-					DOMNode.setStyles(buttonNode, "right","0");
+					DOMNode.setStyles(buttonNode, "right", "0");
 				}
 			}
 		}
 
-		String poslr = (alignRight ? "right" : "left");				
+		String poslr = (alignRight ? "right" : "left");
 		String alignlr = (alignLeft ? "left" : alignRight ? "right" : "center");
 
 		DOMNode.setStyles(textNode, "left", null, "right", null);
 		DOMNode.setStyles(iconNode, "left", null, "right", null);
 		DOMNode.setStyles(centeringNode, "text-align", null, "left", null, "right", null);
+		
 		DOMNode.setStyles(centeringNode, poslr, "0px", "text-align", alignlr);
-		//if (buttonNode != null) {
-			DOMNode.setStyles(domNode, "text-align", null, "left", null, "right", null);
-			DOMNode.setStyles(domNode, "text-align", alignlr, poslr, px0);
-		//}
+		// if (buttonNode != null) {
+		DOMNode.setStyles(domNode, "text-align", null, "left", null, "right", null);
+		DOMNode.setStyles(domNode, "text-align", alignlr, poslr, px0);
+		// }
+		int off;
 		if (centered) {
-			int w = setHTMLSize1((buttonNode == null ? domNode : centeringNode), false, false).width;
-			int off = (w - wText - wIcon) / 2;
+			int w = (cellComponent == null
+					? setHTMLSize1((buttonNode == null ? domNode : centeringNode), false, false).width
+					: cellWidth);
+			if (w == 0 && (w = this.jc.getWidth()) == 0) {
+				w = wText + wIcon;
+			}
+			off = (w - wText - wIcon) / 2;
 			if (text0) {
 				DOMNode.setStyles(textNode, "left", off + "px");
-				DOMNode.setStyles(iconNode, "left", (off + wText) + "px");
+				DOMNode.setStyles(iconNode, "left", (iconX = off + wText) + "px");
 			} else {
 				DOMNode.setStyles(textNode, "left", (off + wIcon) + "px");
-				DOMNode.setStyles(iconNode, "left", off + "px");
+				DOMNode.setStyles(iconNode, "left", (iconX = off) + "px");
 			}
 		} else {
+			off = (alignRight ? insets.right : insets.left);
 			if (text0) {
-				DOMNode.setStyles(textNode, poslr, "0px");
-				DOMNode.setStyles(iconNode, poslr, wText + "px");
+				DOMNode.setStyles(textNode, poslr, off + "px");
+				DOMNode.setStyles(iconNode, poslr, (iconX = off + wText) + "px");
 			} else {
-				DOMNode.setStyles(textNode, poslr, (wIcon) + "px");
-				DOMNode.setStyles(iconNode, poslr, (!isMenuItem ? "0px" : ltr ? actionItemOffset : "-3px"));
+				DOMNode.setStyles(textNode, poslr, (off + wIcon) + "px");
+				DOMNode.setStyles(iconNode, poslr, (!isMenuItem ? (iconX = off) + "px" : ltr ? actionItemOffset : "-3px"));
 			}
-		} 
-		
-				// make everything absolute to pass sizing info to all
+			if (poslr == "right")
+				iconX = -iconX;
+		}
+
+		// make everything absolute to pass sizing info to all
 
 		DOMNode.setPositionAbsolute(iconNode);
 		DOMNode.setPositionAbsolute(textNode);
@@ -1914,9 +2070,16 @@ public class JSComponentUI extends ComponentUI
 			DOMNode.setPositionAbsolute(buttonNode);
 		} else if (centeringNode != null) {
 			// See test/Puzzle.java
-				DOMNode.setStyles(centeringNode, "width", "100%");
+			DOMNode.setStyles(centeringNode, "width", "100%");
 		}
 
+		//debugDump(centeringNode);
+	}
+
+	protected void getJSInsets() {
+		if (insets == null)
+			insets = new Insets(0, 0, 0, 0);
+		//jc.getInsets(insets);
 	}
 
 	protected void setIconAndText(String prop, Icon icon, int gap, String text) {
@@ -1927,8 +2090,8 @@ public class JSComponentUI extends ComponentUI
 		actualWidth = actualHeight = 0;
 		currentText = text;
 		currentGap = gap;
-		canAlignText = false;
-		canAlignIcon = false;
+		canAlignText = (label != null && text != null);
+		canAlignIcon = (label != null && icon != null);
 		currentIcon = null;
 		imageNode = null;
 		if (iconNode != null) {
@@ -2091,7 +2254,7 @@ public class JSComponentUI extends ComponentUI
 			if (isText) {
 				if (c.getFont() == null)
 					return;
-				h = setHTMLSize1(domNode, false, false).height;
+				h = setHTMLSize1(centeringNode, false, false).height;
 				// for example, a 12-pt font might have a height of 16, and
 				// ascent of 13, and descent of 3
 				// adjust down to center only the ascension of the text.
@@ -2112,6 +2275,8 @@ public class JSComponentUI extends ComponentUI
 		default:
 			return;
 		}
+		if (!isText)
+			iconY = top;
 		DOMNode.setStyles(centeringNode, /* "position", "absolute", */"top", top + "px");
 	}
 
@@ -2161,8 +2326,12 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public void dispose() {
-		if (isUIDisabled || cellComponent != null)
+		if (isUIDisabled)
 			return;
+		if (cellComponent != null) {
+			DOMNode.setVisible(domNode, false);
+			return;
+		}
 		isDisposed = true;
 		DOMNode.dispose(domNode);
 		if (domNode != outerNode)
@@ -2244,7 +2413,8 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	private void setTransparent(DOMNode node) {
-		DOMNode.setStyles(node, "background", "transparent");
+		if (allowPaintedBackground)
+			DOMNode.setStyles(node, "background", "transparent");
 	}
 
 	@Override
@@ -2440,6 +2610,8 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public Insets getInsets() {
+		// In lieu of a JComponent border, the UI is responsible for setting 
+		// the inset that is calculated into the position of the component
 		return null;
 	}
 
@@ -2633,10 +2805,11 @@ public class JSComponentUI extends ComponentUI
 		// We must disable the UI after painting so that when 
 		// the next cell is chosen we do not act on the previous cell
 		// in table.prepareRenderer(...) prior to assigning the desired table cell.
+		//System.out.println(this.id + " " + rendererComponent + " " + width + " " + height);
 		setComponent((JComponent) rendererComponent);
 		if (isUIDisabled)
 			return;
-		this.cellComponent = rendererComponent;		
+		cellComponent = rendererComponent;		
 		backgroundPainted = false;
 		if (width == 0)
 			return;

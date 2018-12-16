@@ -44,67 +44,65 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 
-public class TextListener implements MouseListener, MouseMotionListener,
-                                   FocusListener, ChangeListener, PropertyChangeListener, DocumentListener
-{
+public class TextListener implements MouseListener, MouseMotionListener, FocusListener, ChangeListener,
+		PropertyChangeListener, DocumentListener {
 
-    private JTextComponent txtComp;
-    
-    boolean haveDocument;
+	private JTextComponent txtComp;
 
-		private JSTextUI ui;
+	boolean haveDocument;
 
-		public TextListener(JSTextUI ui, JTextComponent txtComp) {
-    	this.txtComp = txtComp;
-    	this.ui = ui;
-    }
+	private JSTextUI ui;
 
-  void checkDocument() {
-  	if (!haveDocument && txtComp.getDocument() != null) {
-  		haveDocument = true;
-  		txtComp.getDocument().addDocumentListener(this);
-  	}
-  }
+	public TextListener(JSTextUI ui, JTextComponent txtComp) {
+		this.txtComp = txtComp;
+		this.ui = ui;
+	}
+
+	void checkDocument() {
+		if (!haveDocument && txtComp.getDocument() != null) {
+			haveDocument = true;
+			txtComp.getDocument().addDocumentListener(this);
+		}
+	}
+
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
-		//System.out.println("JSTextListener property change: " + prop + " " + e.getSource());
+		// System.out.println("JSTextListener property change: " + prop + " " +
+		// e.getSource());
 		if ("font" == prop || "foreground" == prop || "preferredSize" == prop) {
 			JTextComponent txtComp = (JTextComponent) e.getSource();
-			((JSComponentUI)  txtComp.getUI()).propertyChangedFromListener(prop);
+			((JSComponentUI) txtComp.getUI()).propertyChangedFromListener(prop);
 		}
 		if ("editable" == prop)
 			ui.setEditable(((Boolean) e.getNewValue()).booleanValue());
 	}
 
-  @Override
+	@Override
 	public void stateChanged(ChangeEvent e) {
-        JTextComponent txtComp = (JTextComponent) e.getSource();
-        txtComp.repaint();
-    }
+		JTextComponent txtComp = (JTextComponent) e.getSource();
+		txtComp.repaint();
+	}
 
-    @Override
-		public void focusGained(FocusEvent e) {
-    }
+	@Override
+	public void focusGained(FocusEvent e) {
+	}
 
-    @Override
-		public void focusLost(FocusEvent e) {
-     //   JTextComponent b = (JTextComponent) e.getSource();
-        
-    }
+	@Override
+	public void focusLost(FocusEvent e) {
+	}
 
-    @Override
-		public void mouseMoved(MouseEvent e) {
-    }
+	@Override
+	public void mouseMoved(MouseEvent e) {
+	}
 
+	@Override
+	public void mouseDragged(MouseEvent e) {
+	}
 
-    @Override
-		public void mouseDragged(MouseEvent e) {
-    }
-
-    @Override
-		public void mouseClicked(MouseEvent e) {
-    }
+	@Override
+	public void mouseClicked(MouseEvent e) {
+	}
 
 	@Override
 	public void mousePressed(MouseEvent e) {
@@ -118,35 +116,34 @@ public class TextListener implements MouseListener, MouseMotionListener,
 		}
 	}
 
-    @Override
-		public void mouseReleased(MouseEvent e) {
-    }
+	@Override
+	public void mouseReleased(MouseEvent e) {
+	}
 
-    @Override
-		public void mouseEntered(MouseEvent e) {
-    }
+	@Override
+	public void mouseEntered(MouseEvent e) {
+	}
 
-    @Override
-		public void mouseExited(MouseEvent e) {
+	@Override
+	public void mouseExited(MouseEvent e) {
 //        JTextComponent b = (JTextComponent) e.getSource();
 //        ButtonModel model = b.getModel();
 //        if(b.isRolloverEnabled()) {
 //            model.setRollover(false);
 //        }
 //        model.setArmed(false);
-    }
+	}
 
-    
-    private boolean selecting;
-  
-  /**
-   * Called by JSTextUI.handleJSEvent
-   * 
-   * @param ui
-   * @param eventType 
-   * @param jQueryEvent
-   * @return
-   */
+	private boolean selecting;
+
+	/**
+	 * Called by JSTextUI.handleJSEvent
+	 * 
+	 * @param ui
+	 * @param eventType
+	 * @param jQueryEvent
+	 * @return
+	 */
 	boolean handleJSTextEvent(JSTextUI ui, int eventType, Object jQueryEvent) {
 		int dot = 0, mark = 0;
 		String evType = null;
@@ -154,11 +151,9 @@ public class TextListener implements MouseListener, MouseMotionListener,
 		/**
 		 * @j2sNative
 		 * 
-		 *            mark = jQueryEvent.target.selectionStart; 
-		 *            dot = jQueryEvent.target.selectionEnd; 
-		 *            evType = jQueryEvent.type;
-		 *            keyCode = jQueryEvent.keyCode;
-		 *            if (keyCode == 13) keyCode = 10; 
+		 * 			mark = jQueryEvent.target.selectionStart; dot =
+		 *            jQueryEvent.target.selectionEnd; evType = jQueryEvent.type;
+		 *            keyCode = jQueryEvent.keyCode; if (keyCode == 13) keyCode = 10;
 		 */
 		{
 		}
@@ -166,7 +161,6 @@ public class TextListener implements MouseListener, MouseMotionListener,
 		// HTML5 selection is always mark....dot
 		// but Java can be oldDot....oldMark
 
-		
 		int oldDot = ui.editor.getCaret().getDot();
 		int oldMark = ui.editor.getCaret().getMark();
 		if (dot != mark && oldMark == dot) {
@@ -189,6 +183,7 @@ public class TextListener implements MouseListener, MouseMotionListener,
 		case KeyEvent.KEY_PRESSED:
 		case KeyEvent.KEY_RELEASED:
 		case KeyEvent.KEY_TYPED:
+			//System.out.println("textlistener " + keyCode + " " + eventType);
 			if (keyCode == KeyEvent.VK_ENTER && ui.handleEnter(eventType))
 				break;
 			String val = ui.getJSTextValue();
@@ -196,7 +191,7 @@ public class TextListener implements MouseListener, MouseMotionListener,
 				String oldval = ui.currentText;
 				ui.editor.setText(val);
 				// the text may have been filtered, but we should not change it yet
-				//val = ui.getComponentText();
+				// val = ui.getComponentText();
 				ui.editor.firePropertyChange("text", oldval, val);
 				ui.domNode.setSelectionRange(dot, dot);
 			}
@@ -209,8 +204,8 @@ public class TextListener implements MouseListener, MouseMotionListener,
 			ui.editor.caretEvent.fire();
 		}
 		if (JSComponentUI.debugging)
-			System.out.println(ui.id + " TextListener handling event " + evType + " " + eventType
-				+ " " + ui.editor.getCaret() + " " + ui.getComponentText().length());
+			System.out.println(ui.id + " TextListener handling event " + evType + " " + eventType + " "
+					+ ui.editor.getCaret() + " " + ui.getComponentText().length());
 		return true;
 	}
 
@@ -232,4 +227,3 @@ public class TextListener implements MouseListener, MouseMotionListener,
 		ui.setText(txtComp.getText());
 	}
 }
-  

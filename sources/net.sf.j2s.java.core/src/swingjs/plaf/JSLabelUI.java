@@ -1,11 +1,14 @@
 package swingjs.plaf;
 
 import java.awt.Dimension;
+import java.awt.Graphics;
 
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.LookAndFeel;
+import javax.swing.SwingConstants;
 
 import swingjs.api.js.DOMNode;
 
@@ -18,9 +21,16 @@ import swingjs.api.js.DOMNode;
  *
  */
 public class JSLabelUI extends JSLightweightUI {
-	protected ImageIcon icon;
+
+	protected Icon icon;
 	protected int gap;
 	protected String text;
+
+	/**
+	 * label for JLabel; null for JSTooltipUI subclass of JSLabelUI 
+	 */
+	private boolean isImageIcon;
+
 
 	public JSLabelUI() {
 		setDoc();
@@ -39,7 +49,7 @@ public class JSLabelUI extends JSLightweightUI {
 			centeringNode.appendChild(textNode);
 			domNode.appendChild(centeringNode);
 		}
-		getIconAndText(); // could be ToolTip
+		getIconAndText(); 
 		setIconAndText("label", icon, gap, text);
 		DOMNode.setStyles(domNode, "position", "absolute", "width", c.getWidth()
 				+ "px", "height", c.getHeight() + "px");
@@ -60,8 +70,11 @@ public class JSLabelUI extends JSLightweightUI {
 		return updateDOMNodeCUI();
 	}
 
-	protected void getIconAndText() {		
+	protected void getIconAndText() {	
+		// overridden in JSToolTipUI
+		label = (JLabel) jc;
 		icon = (ImageIcon) label.getIcon();
+		isImageIcon = (icon != null && icon instanceof ImageIcon);
 		gap = label.getIconTextGap();
 		text = label.getText();
 	}
@@ -92,6 +105,35 @@ public class JSLabelUI extends JSLightweightUI {
 	@Override
 	Dimension getMaximumSize(JComponent jc) {
 		return getPreferredSize();
+	}
+
+	@Override
+	public void paint(Graphics g, JComponent c) {
+		super.paint(g, c);
+		if (icon != null) {
+			//System.out.println("JSLabelUI " + currentIcon.getIconWidth() + " " + currentIcon.getIconHeight());
+			debugDump(iconNode);
+			int w = icon.getIconWidth();
+			int h = icon.getIconHeight();
+			//getJSInsets();
+			int x=0, y=0;
+//			switch (label.getVerticalAlignment()) {
+//			default:
+//			case SwingConstants.TOP:
+//				y = 0 + insets.top;
+//				break;
+//			case SwingConstants.BOTTOM:
+//				y = height - h - insets.bottom;
+//				break;
+//			case SwingConstants.CENTER:
+//				y = (height - h - insets.bottom + insets.top) / 2;
+//				break;
+//			}
+//			x = iconX;
+//			y = iconY + insets.top + insets.top + insets.top/2;
+//			switch (label.getHorizontalAlignment()) {
+			icon.paintIcon(c, g, x, y);
+		}
 	}
 
 }

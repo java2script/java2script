@@ -49,6 +49,7 @@ class Test_Class extends Test_ {
 
 		
 		System.out.println(true);
+		
 		final Test_Class me = Test_Class.this;
 		MouseListener c = new MouseListener() {
 			

@@ -95,10 +95,21 @@ public abstract class HTML5CanvasContext2D {
 		 * 
 		 * return (ctx._aSaved && ctx._aSaved.length > 0 ? ctx._aSaved.pop() : null); 
 		 */
-		{}
-		return null;
+		{
+			return null;
+		}
 	}
 
+	public static Object[][] getSaveStack(HTML5CanvasContext2D ctx) {
+		/**
+		 * @j2sNative
+		 * 
+		 * return ctx._aSaved; 
+		 */
+		{
+			return null;
+		}
+	}
 	public static int getSavedLevel(HTML5CanvasContext2D ctx) {
 		/**
 		 * @j2sNative

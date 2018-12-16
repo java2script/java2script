@@ -40,12 +40,12 @@ import swingjs.plaf.Resizer;
  * JSAppletViewer
  * 
  * SwingJS class to start an applet. Note that this must be a JApplet, not just
- * java.awt.Applet. The SwingJS implementation does not allow "mixed" contents
+ * java.applet. The SwingJS implementation does not allow "mixed" contents
  * -- That is, no non-Swing Applet components are allowed.
  * 
  * However, the package a2s has adapter classes that have names of the AWT
  * components Label, Button, Applet, Frame, etc., which allow one to simply
- * change the imports from java.awt or java.awt.applet to a2s and be done with
+ * change the imports from java.awt or java.applet to a2s and be done with
  * it. This may take some development along the way, as we have not fully
  * implemented all of the methods of AWT classes, and the JComponent does not
  * subclass its AWT counterpart.

@@ -55,7 +55,6 @@ public class Test_Call extends Test_call0 implements Comparable<Test_Call>{
 				
 		Inner2 t2;
 
-
 		@SuppressWarnings("synthetic-access") 
 		Inner1() {
 			System.out.println(this);

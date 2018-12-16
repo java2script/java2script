@@ -175,7 +175,7 @@ public class JSTableHeaderUI extends JSLightweightUI {
 			DOMNode.setStyles(td, "width", cw[col] + "px", "height", thh + "px", "left", tx + "px", "top", "0px");
 			tx += cw[col];
 			headdiv.appendChild(td);
-			CellHolder.updateCellNode(td, (JSComponent) getHeaderRenderer(col), cw[col], thh, true);
+			CellHolder.updateCellNode(td, (JSComponent) getHeaderComponent(col), cw[col], thh);
 		}
 
 	}
@@ -217,7 +217,6 @@ public class JSTableHeaderUI extends JSLightweightUI {
 				if (ui == null) {
 					return;
 				}
-				System.out.println("repaintHeader");
 				th.repaint(th.getHeaderRect(ui.getSelectedColumnIndex()));
 			}
 		}
@@ -700,7 +699,7 @@ public class JSTableHeaderUI extends JSLightweightUI {
 		TableColumnModel columnModel = tableHeader.getColumnModel();
 		for (int column = 0; column < columnModel.getColumnCount(); column++) {
 			TableColumn aColumn = columnModel.getColumn(column);
-			Component comp = getHeaderRenderer(column);
+			Component comp = getHeaderComponent(column);
 			Dimension pref = comp.getPreferredSize();
 			int columnBaseline = comp.getBaseline(pref.width, height);
 			if (columnBaseline >= 0) {
@@ -715,9 +714,6 @@ public class JSTableHeaderUI extends JSLightweightUI {
 		return baseline;
 	}
 
-	//
-	// Paint Methods and support
-	//
 
 	@Override
 	public void paint(Graphics g, JComponent c) {
@@ -796,7 +792,11 @@ public class JSTableHeaderUI extends JSLightweightUI {
 		working = false;
 	}
 
-	private Component getHeaderRenderer(int columnIndex) {
+	//
+	// Paint Methods and support
+	//
+
+	private Component getHeaderComponent(int columnIndex) {
 		TableColumn aColumn = tableHeader.getColumnModel().getColumn(columnIndex);
 		TableCellRenderer renderer = aColumn.getHeaderRenderer();
 		if (renderer == null) {
@@ -805,13 +805,16 @@ public class JSTableHeaderUI extends JSLightweightUI {
 
 		boolean hasFocus = !tableHeader.isPaintingForPrint() && (columnIndex == getSelectedColumnIndex())
 				&& tableHeader.hasFocus();
-		return renderer.getTableCellRendererComponent(tableHeader.getTable(), aColumn.getHeaderValue(), false, hasFocus,
+				
+		JComponent c = (JComponent) renderer.getTableCellRendererComponent(tableHeader.getTable(), aColumn.getHeaderValue(), false, hasFocus,
 				-1, columnIndex);
+		return c;
 	}
 
 	private void paintCell(Graphics g, Rectangle cellRect, int columnIndex) {
 		// System.out.println("paintCell header" + columnIndex);
-		Component component = getHeaderRenderer(columnIndex);
+		JComponent component = (JComponent) getHeaderComponent(columnIndex);
+		((JSComponentUI) component.getUI()).setRenderer(component, cellRect.width, cellRect.height);
 		rendererPane.paintComponent(g, component, tableHeader, cellRect.x, cellRect.y, cellRect.width, cellRect.height,
 				true);
 	}
@@ -839,7 +842,7 @@ public class JSTableHeaderUI extends JSLightweightUI {
 			boolean isDefault = (aColumn.getHeaderRenderer() == null);
 
 			if (!isDefault || !accomodatedDefault) {
-				Component comp = getHeaderRenderer(column);
+				Component comp = getHeaderComponent(column);
 				int rendererHeight = comp.getPreferredSize().height;
 				height = Math.max(height, rendererHeight);
 

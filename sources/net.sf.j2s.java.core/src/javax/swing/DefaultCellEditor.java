@@ -40,6 +40,8 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.TreeCellEditor;
 
+import swingjs.plaf.JSComponentUI;
+
 /**
  * The default editor for table and tree cells.
  * <p>
@@ -87,7 +89,7 @@ public class DefaultCellEditor extends AbstractCellEditor
      * @param textField  a <code>JTextField</code> object
      */
     public DefaultCellEditor(final JTextField textField) {
-        editorComponent = textField;
+    	setComponent(textField);
         this.clickCountToStart = 2;
         delegate = new EditorDelegate() {
             @Override
@@ -103,13 +105,19 @@ public class DefaultCellEditor extends AbstractCellEditor
         textField.addActionListener(delegate);
     }
 
-    /**
+    private void setComponent(JComponent comp) {
+        editorComponent = comp;
+		((JSComponentUI) (Object) comp.getUI()).setRenderer(comp, 0, 0);
+	}
+
+	/**
      * Constructs a <code>DefaultCellEditor</code> object that uses a check box.
      *
      * @param checkBox  a <code>JCheckBox</code> object
      */
     public DefaultCellEditor(final JCheckBox checkBox) {
-        editorComponent = checkBox;
+        setComponent(checkBox);
+
         delegate = new EditorDelegate() {
             @Override
 						public void setValue(Object value) {
@@ -139,7 +147,7 @@ public class DefaultCellEditor extends AbstractCellEditor
      * @param comboBox  a <code>JComboBox</code> object
      */
     public DefaultCellEditor(final JComboBox comboBox) {
-        editorComponent = comboBox;
+        setComponent(comboBox);
         comboBox.putClientProperty("JComboBox.isTableCellEditor", Boolean.TRUE);
         delegate = new EditorDelegate() {
             @Override

@@ -20,4 +20,9 @@ public class Choice extends JComboBox {
 		return (String)getItemAt(n);
 	}
 	
+	@Override
+	public void removeAll() {
+		removeAllItems();
+	}
+	
 }
