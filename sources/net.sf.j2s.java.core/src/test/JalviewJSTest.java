@@ -2,12 +2,10 @@ package test;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.ComponentOrientation;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.MediaTracker;
 import java.awt.event.ActionEvent;
@@ -17,7 +15,6 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -138,12 +135,12 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 	Container getVisualPaneContent(JMenu menu, JMenu menu1, JMenu menu2) {
 
 		JPanel panel = new JPanel();
-		panel.setPreferredSize(new Dimension(400, 700));
+		panel.setPreferredSize(new Dimension(400, 500));
 		panel.setOpaque(true);
 		panel.setLayout(new BorderLayout());
 
 		JPanel firstColumn = new JPanel();
-		firstColumn.setLayout(new GridLayout(20, 1));
+		firstColumn.setLayout(new GridLayout(13, 1));
 		firstColumn.setBorder(new TitledBorder("column 1"));
 
 		/*
@@ -153,55 +150,26 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		Font font = new Font("Verdana", Font.PLAIN, 11);
 
 		JLabel l1 = new JLabel(getImage("test2.png"));
-		l1.setText("ltrailing right");
+		l1.setText("trailling right");
 		l1.setHorizontalTextPosition(SwingConstants.TRAILING);
 		l1.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 		l1.setHorizontalAlignment(SwingConstants.RIGHT);
 
 		JLabel l2 = new JLabel(getImage("test2.png"));
-		l2.setText("lleading left");
+		l2.setText("leading left");
 		l2.setFont(font);
 		l2.setHorizontalTextPosition(SwingConstants.LEADING);
 		l2.setHorizontalAlignment(SwingConstants.LEFT);
-		Icon icon = new Icon() {
-
-			@Override
-			public void paintIcon(Component c, Graphics g, int x, int y) {
-				g.setColor(Color.white);
-				g.fillRect(x+2, y+2, 16, 16);
-			}
-
-			@Override
-			public int getIconWidth() {
-				return 20;
-			}
-
-			@Override
-			public int getIconHeight() {
-				return 20;
-			}
-		};
-		JLabel l3 = new JLabel(icon);
-		l3.setOpaque(true);
-		l3.setBackground(Color.red);
-		l3.setText("lleading left");
-		l3.setFont(font);
-		l3.setHorizontalTextPosition(SwingConstants.LEADING);
-		l3.setHorizontalAlignment(SwingConstants.LEFT);
-
-		JLabel l4 = new JLabel(icon);
-		l4.setOpaque(true);
-		l4.setText("lleading left");
-		l4.setBackground(Color.blue);
-		l4.setFont(font);
-		l4.setHorizontalTextPosition(SwingConstants.CENTER);
-		l4.setHorizontalAlignment(SwingConstants.CENTER);
 
 		JButton b1 = new JButton("right left");
 		b1.setIcon(getImage("test2.png"));
 		b1.setFont(font);
 		b1.setHorizontalTextPosition(SwingConstants.RIGHT);
 		b1.setHorizontalAlignment(SwingConstants.LEFT);
+
+		firstColumn.add(l1);
+		firstColumn.add(l2);
+		firstColumn.add(b1);
 
 		JCheckBox cb3 = new JCheckBox("leading,left-to-right,rt");
 		cb3.setFont(font);
@@ -234,19 +202,13 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		rb3.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		rb3.setHorizontalTextPosition(SwingConstants.RIGHT);
 
-		firstColumn.add(l1);
-//		firstColumn.add(l2);
-//		firstColumn.add(l3);
-//		firstColumn.add(l4);
-//		firstColumn.add(b1);
-//
-//		firstColumn.add(cb3);
-//		firstColumn.add(cb4);
-//		firstColumn.add(cb5);
-//		firstColumn.add(rb1);
-//		firstColumn.add(rb2);
-//		firstColumn.add(rb3);
-		firstColumn.setBounds(100, 20, 200, 700);
+		firstColumn.add(cb3);
+		firstColumn.add(cb4);
+		firstColumn.add(cb5);
+		firstColumn.add(rb1);
+		firstColumn.add(rb2);
+		firstColumn.add(rb3);
+		firstColumn.setBounds(100, 20, 200, 500);
 
 		font = new Font("Verdana", Font.PLAIN, 11);
 
@@ -286,18 +248,18 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		rb2m.setHorizontalTextPosition(SwingConstants.RIGHT);
 		rb2m.addActionListener(listener);
 
-		JRadioButtonMenuItem rb3m = new JRadioButtonMenuItem("rr2l");
+		JRadioButtonMenuItem rb3m = new JRadioButtonMenuItem("right,right-to-left1");
 		rb3m.setFont(font);
 		rb3m.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		rb3m.setHorizontalTextPosition(SwingConstants.RIGHT);
 		rb3m.addActionListener(listener);
 
-		JMenuItem mb3 = new JMenuItem("rtf");
+		JMenuItem mb3 = new JMenuItem("right,right-to-left2");
 		mb3.setFont(font);
 		mb3.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		mb3.setHorizontalTextPosition(SwingConstants.RIGHT);
 
-		JMenuItem mb4 = new JMenuItem("right,right-to-left");
+		JMenuItem mb4 = new JMenuItem("right,right-to-left3");
 		mb4.setFont(font);
 		mb4.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		mb4.setHorizontalTextPosition(SwingConstants.RIGHT);
@@ -356,33 +318,34 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 
 		JPanel theTab = new JPanel();
 
-//		firstColumn.add(new JButton("remove 'testbtn'") {
-//			{
-//				this.addActionListener(new ActionListener() {
-//
-//					@Override
-//					public void actionPerformed(ActionEvent e) {
-//						menu.remove(testbtn);
-//					}
-//
-//				});
-//			}
-//		});
-//		firstColumn.add(new JButton("add 'testbtn'") {
-//			{
-//				this.addActionListener(new ActionListener() {
-//
-//					@Override
-//					public void actionPerformed(ActionEvent e) {
-//						testbtn.setText("testbtn");
-//						menu.add(testbtn);
-//
-//					}
-//
-//				});
-//			}
-//		});
+		firstColumn.add(new JButton("remove 'testbtn'") {
+			{
+				this.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						menu.remove(testbtn);
+					}
+
+				});
+			}
+		});
+		firstColumn.add(new JButton("add 'testbtn'") {
+			{
+				this.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						testbtn.setText("testbtn");
+						menu.add(testbtn);
+
+					}
+
+				});
+			}
+		});
 		theTab.setLayout(null);
+		theTab.setBackground(Color.white);
 		theTab.add(firstColumn);
 		panel.add(theTab);
 

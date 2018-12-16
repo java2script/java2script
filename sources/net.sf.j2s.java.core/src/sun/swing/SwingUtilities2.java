@@ -45,8 +45,15 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.LineBreakMeasurer;
 import java.awt.font.TextHitInfo;
 import java.awt.font.TextLayout;
+import java.lang.ref.SoftReference;
 import java.text.AttributedString;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
 import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JTable;
@@ -94,16 +101,16 @@ public class SwingUtilities2 {
     public static final Object LAF_STATE_KEY = new Object(); // LookAndFeel State
 
     // Most of applications use 10 or less fonts simultaneously
-//    private static final int STRONG_BEARING_CACHE_SIZE = 10;
+    private static final int STRONG_BEARING_CACHE_SIZE = 10;
     // Strong cache for the left and right side bearings
     // for STRONG_BEARING_CACHE_SIZE most recently used fonts.
-//    private static BearingCacheEntry[] strongBearingCache =
-//            new BearingCacheEntry[STRONG_BEARING_CACHE_SIZE];
+    private static BearingCacheEntry[] strongBearingCache =
+            new BearingCacheEntry[STRONG_BEARING_CACHE_SIZE];
     // Next index to insert an entry into the strong bearing cache
-//    private static int strongBearingCacheNextIndex = 0;
+    private static int strongBearingCacheNextIndex = 0;
     // Soft cache for the left and right side bearings
-//    private static Set<SoftReference<BearingCacheEntry>> softBearingCache =
-//            new HashSet<SoftReference<BearingCacheEntry>>();
+    private static Set<SoftReference<BearingCacheEntry>> softBearingCache =
+            new HashSet<SoftReference<BearingCacheEntry>>();
 
     public static final FontRenderContext DEFAULT_FRC =
         new FontRenderContext(null, false, false);
@@ -293,78 +300,77 @@ public class SwingUtilities2 {
      */
     public static int getRightSideBearing(JComponent c, FontMetrics fm,
                                          char lastChar) {
-    	return 0;
-//        return getBearing(c, fm, lastChar, false);
+        return getBearing(c, fm, lastChar, false);
     }
 
-//    /* Calculates the left and right side bearing for a character.
-//     * Strongly caches bearings for STRONG_BEARING_CACHE_SIZE
-//     * most recently used Fonts and softly caches as many as GC allows.
-//     */
-//    private static int getBearing(JComponent comp, FontMetrics fm, char c,
-//                                  boolean isLeftBearing) {
-//        if (fm == null) {
-//            if (comp == null) {
-//                return 0;
-//            } else {
-//                fm = comp.getFontMetrics(comp.getFont());
-//            }
-//        }
-//        synchronized (SwingUtilities2.class) {
-//            BearingCacheEntry entry = null;
-//            BearingCacheEntry searchKey = new BearingCacheEntry(fm);
-//            // See if we already have an entry in the strong cache
-//            for (BearingCacheEntry cacheEntry : strongBearingCache) {
-//                if (searchKey.equals(cacheEntry)) {
-//                    entry = cacheEntry;
-//                    break;
-//                }
-//            }
-//            // See if we already have an entry in the soft cache
-//            if (entry == null) {
-//                Iterator<SoftReference<BearingCacheEntry>> iter =
-//                        softBearingCache.iterator();
-//                while (iter.hasNext()) {
-//                    BearingCacheEntry cacheEntry = iter.next().get();
-//                    if (cacheEntry == null) {
-//                        // Remove discarded soft reference from the cache
-//                        iter.remove();
-//                        continue;
-//                    }
-//                    if (searchKey.equals(cacheEntry)) {
-//                        entry = cacheEntry;
-//                        putEntryInStrongCache(entry);
-//                        break;
-//                    }
-//                }
-//            }
-//            if (entry == null) {
-//                // No entry, add it
-//                entry = searchKey;
-//                cacheEntry(entry);
-//            }
-//            return (isLeftBearing)
-//                    ? entry.getLeftSideBearing(c)
-//                    : entry.getRightSideBearing(c);
-//        }
-//    }
+    /* Calculates the left and right side bearing for a character.
+     * Strongly caches bearings for STRONG_BEARING_CACHE_SIZE
+     * most recently used Fonts and softly caches as many as GC allows.
+     */
+    private static int getBearing(JComponent comp, FontMetrics fm, char c,
+                                  boolean isLeftBearing) {
+        if (fm == null) {
+            if (comp == null) {
+                return 0;
+            } else {
+                fm = comp.getFontMetrics(comp.getFont());
+            }
+        }
+        synchronized (SwingUtilities2.class) {
+            BearingCacheEntry entry = null;
+            BearingCacheEntry searchKey = new BearingCacheEntry(fm);
+            // See if we already have an entry in the strong cache
+            for (BearingCacheEntry cacheEntry : strongBearingCache) {
+                if (searchKey.equals(cacheEntry)) {
+                    entry = cacheEntry;
+                    break;
+                }
+            }
+            // See if we already have an entry in the soft cache
+            if (entry == null) {
+                Iterator<SoftReference<BearingCacheEntry>> iter =
+                        softBearingCache.iterator();
+                while (iter.hasNext()) {
+                    BearingCacheEntry cacheEntry = iter.next().get();
+                    if (cacheEntry == null) {
+                        // Remove discarded soft reference from the cache
+                        iter.remove();
+                        continue;
+                    }
+                    if (searchKey.equals(cacheEntry)) {
+                        entry = cacheEntry;
+                        putEntryInStrongCache(entry);
+                        break;
+                    }
+                }
+            }
+            if (entry == null) {
+                // No entry, add it
+                entry = searchKey;
+                cacheEntry(entry);
+            }
+            return (isLeftBearing)
+                    ? entry.getLeftSideBearing(c)
+                    : entry.getRightSideBearing(c);
+        }
+    }
 
-//    private synchronized static void cacheEntry(BearingCacheEntry entry) {
-//        // Move the oldest entry from the strong cache into the soft cache
-//        BearingCacheEntry oldestEntry =
-//                strongBearingCache[strongBearingCacheNextIndex];
-//        if (oldestEntry != null) {
-//            softBearingCache.add(new SoftReference<BearingCacheEntry>(oldestEntry));
-//        }
-//        // Put entry in the strong cache
-//        putEntryInStrongCache(entry);
-//    }
+    private synchronized static void cacheEntry(BearingCacheEntry entry) {
+        // Move the oldest entry from the strong cache into the soft cache
+        BearingCacheEntry oldestEntry =
+                strongBearingCache[strongBearingCacheNextIndex];
+        if (oldestEntry != null) {
+            softBearingCache.add(new SoftReference<BearingCacheEntry>(oldestEntry));
+        }
+        // Put entry in the strong cache
+        putEntryInStrongCache(entry);
+    }
 
-//    private synchronized static void putEntryInStrongCache(BearingCacheEntry entry) {
-//        strongBearingCache[strongBearingCacheNextIndex] = entry;
-//        strongBearingCacheNextIndex = (strongBearingCacheNextIndex + 1)
-//                % STRONG_BEARING_CACHE_SIZE;
-//    }
+    private synchronized static void putEntryInStrongCache(BearingCacheEntry entry) {
+        strongBearingCache[strongBearingCacheNextIndex] = entry;
+        strongBearingCacheNextIndex = (strongBearingCacheNextIndex + 1)
+                % STRONG_BEARING_CACHE_SIZE;
+    }
 
     /**
      * Returns the FontMetrics for the current Font of the passed
@@ -1087,58 +1093,59 @@ public class SwingUtilities2 {
         return true;
     }
 
-//    /**
-//     * BearingCacheEntry is used to cache left and right character bearings
-//     * for a particular <code>Font</code> and <code>FontRenderContext</code>.
-//     */
-//    private static class BearingCacheEntry {
-//        private FontMetrics fontMetrics;
-//        private Font font;
-//        private FontRenderContext frc;
-//        private Map<Character, Short> cache;
-//        // Used for the creation of a GlyphVector
-//        private static final char[] oneChar = new char[1];
-//
-//        public BearingCacheEntry(FontMetrics fontMetrics) {
-//            this.fontMetrics = fontMetrics;
-//            this.font = fontMetrics.getFont();
-//            this.frc = fontMetrics.getFontRenderContext();
-//            this.cache = new HashMap<Character, Short>();
-//            //assert (font != null && frc != null);
-//        }
-//
-//        public int getLeftSideBearing(char aChar) {
-//            Short bearing = cache.get(aChar);
-//            if (bearing == null) {
-//                bearing = calcBearing(aChar);
-//                cache.put(aChar, bearing);
-//            }
-//            return ((0xFF00 & bearing) >>> 8) - 127;
-//        }
-//
-//        public int getRightSideBearing(char aChar) {
-//            Short bearing = cache.get(aChar);
-//            if (bearing == null) {
-//                bearing = calcBearing(aChar);
-//                cache.put(aChar, bearing);
-//            }
-//            return (0xFF & bearing) - 127;
-//        }
-//
-//        /* Calculates left and right side bearings for a character.
-//         * Makes an assumption that bearing is a value between -127 and +127.
-//         * Stores LSB and RSB as single two-byte number (short):
-//         * LSB is the high byte, RSB is the low byte.
-//         */
-//        private short calcBearing(char aChar) {
+    /**
+     * BearingCacheEntry is used to cache left and right character bearings
+     * for a particular <code>Font</code> and <code>FontRenderContext</code>.
+     */
+    private static class BearingCacheEntry {
+        private FontMetrics fontMetrics;
+        private Font font;
+        private FontRenderContext frc;
+        private Map<Character, Short> cache;
+        // Used for the creation of a GlyphVector
+        private static final char[] oneChar = new char[1];
+
+        public BearingCacheEntry(FontMetrics fontMetrics) {
+            this.fontMetrics = fontMetrics;
+            this.font = fontMetrics.getFont();
+            this.frc = fontMetrics.getFontRenderContext();
+            this.cache = new HashMap<Character, Short>();
+            //assert (font != null && frc != null);
+        }
+
+        public int getLeftSideBearing(char aChar) {
+            Short bearing = cache.get(aChar);
+            if (bearing == null) {
+                bearing = calcBearing(aChar);
+                cache.put(aChar, bearing);
+            }
+            return ((0xFF00 & bearing) >>> 8) - 127;
+        }
+
+        public int getRightSideBearing(char aChar) {
+            Short bearing = cache.get(aChar);
+            if (bearing == null) {
+                bearing = calcBearing(aChar);
+                cache.put(aChar, bearing);
+            }
+            return (0xFF & bearing) - 127;
+        }
+
+        /* Calculates left and right side bearings for a character.
+         * Makes an assumption that bearing is a value between -127 and +127.
+         * Stores LSB and RSB as single two-byte number (short):
+         * LSB is the high byte, RSB is the low byte.
+         */
+        private short calcBearing(char aChar) {
+        	int width = fontMetrics.charWidth(aChar);
 //            oneChar[0] = aChar;
 //            GlyphVector gv = font.createGlyphVector(frc, oneChar);
 //            Rectangle pixelBounds = gv.getGlyphPixelBounds(0, frc, 0f, 0f);
-//
-//            // Get bearings
-//            int lsb = pixelBounds.x;
-//            int rsb = pixelBounds.width - fontMetrics.charWidth(aChar);
-//
+
+            // Get bearings
+            int lsb = width / 2;//pixelBounds.x;
+            int rsb = width / 2; // pixelBounds.width - fontMetrics.charWidth(aChar);
+
 //            /* HRGB/HBGR LCD glyph images will always have a pixel
 //             * on the left and a pixel on the right
 //             * used in colour fringe reduction.
@@ -1160,42 +1167,42 @@ public class SwingUtilities2 {
 //                     rsb--;
 //                 }
 //            }
-//
-//            // Make sure that LSB and RSB are valid (see 6472972)
-//            if (lsb < -127 || lsb > 127) {
-//                lsb = 0;
-//            }
-//            if (rsb < -127 || rsb > 127) {
-//                rsb = 0;
-//            }
-//
-//            int bearing = ((lsb + 127) << 8) + (rsb + 127);
-//            return 0;//(short)bearing;
-//        }
-//
-//        public boolean equals(Object entry) {
-//            if (entry == this) {
-//                return true;
-//            }
-//            if (!(entry instanceof BearingCacheEntry)) {
-//                return false;
-//            }
-//            BearingCacheEntry oEntry = (BearingCacheEntry)entry;
-//            return (font.equals(oEntry.font) &&
-//                    frc.equals(oEntry.frc));
-//        }
-//
-//        public int hashCode() {
-//            int result = 17;
-//            if (font != null) {
-//                result = 37 * result + font.hashCode();
-//            }
-//            if (frc != null) {
-//                result = 37 * result + frc.hashCode();
-//            }
-//            return result;
-//        }
-//    }
+
+            // Make sure that LSB and RSB are valid (see 6472972)
+            if (lsb < -127 || lsb > 127) {
+                lsb = 0;
+            }
+            if (rsb < -127 || rsb > 127) {
+                rsb = 0;
+            }
+
+            return (short) (((lsb + 127) << 8) + (rsb + 127));
+
+        }
+
+        public boolean equals(Object entry) {
+            if (entry == this) {
+                return true;
+            }
+            if (!(entry instanceof BearingCacheEntry)) {
+                return false;
+            }
+            BearingCacheEntry oEntry = (BearingCacheEntry)entry;
+            return (font.equals(oEntry.font) &&
+                    frc.equals(oEntry.frc));
+        }
+
+        public int hashCode() {
+            int result = 17;
+            if (font != null) {
+                result = 37 * result + font.hashCode();
+            }
+            if (frc != null) {
+                result = 37 * result + frc.hashCode();
+            }
+            return result;
+        }
+    }
 
 
     /*

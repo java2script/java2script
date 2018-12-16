@@ -30,6 +30,7 @@ package javax.swing;
 import java.applet.JSApplet;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FontMetrics;
 import java.awt.JSFrame;
@@ -62,6 +63,8 @@ import sun.swing.UIAction;
 import swingjs.JSAppletViewer;
 import swingjs.JSUtil;
 import swingjs.api.Interface;
+import swingjs.api.js.DOMNode;
+import swingjs.plaf.JSComponentUI;
 
 /**
  * A collection of utility methods for Swing.
@@ -858,39 +861,43 @@ public class SwingUtilities implements SwingConstants
                                              Rectangle textR,
                                              int textIconGap)
     {
-        boolean orientationIsLeftToRight = true;
-        int     hAlign = horizontalAlignment;
-        int     hTextPos = horizontalTextPosition;
+    	
+    	JSComponentUI ui = (JSComponentUI) c.getUI();
 
-        if (c != null) {
-            if (!(c.getComponentOrientation().isLeftToRight())) {
-                orientationIsLeftToRight = false;
-            }
-        }
+        boolean ltr = (c == null || c.getComponentOrientation().isLeftToRight());
+        int hAlign, hTextPos;
 
-        // Translate LEADING/TRAILING values in horizontalAlignment
-        // to LEFT/RIGHT values depending on the components orientation
-        switch (horizontalAlignment) {
-        case LEADING:
-            hAlign = (orientationIsLeftToRight) ? LEFT : RIGHT;
-            break;
-        case TRAILING:
-            hAlign = (orientationIsLeftToRight) ? RIGHT : LEFT;
-            break;
-        }
-
-        // Translate LEADING/TRAILING values in horizontalTextPosition
-        // to LEFT/RIGHT values depending on the components orientation
-        switch (horizontalTextPosition) {
-        case LEADING:
-            hTextPos = (orientationIsLeftToRight) ? LEFT : RIGHT;
-            break;
-        case TRAILING:
-            hTextPos = (orientationIsLeftToRight) ? RIGHT : LEFT;
-            break;
-        }
-
-        return layoutCompoundLabelImpl(c,
+		if (ui.menuAnchorNode == null) {
+	        // Translate LEADING/TRAILING values in horizontalAlignment
+	        // to LEFT/RIGHT values depending on the components orientation
+	        switch (horizontalAlignment) {
+	        case LEADING:
+	            hAlign = (ltr) ? LEFT : RIGHT;
+	            break;
+	        case TRAILING:
+	            hAlign = (ltr) ? RIGHT : LEFT;
+	            break;
+	        default:
+				hAlign = horizontalAlignment;
+	        	break;
+	        }
+	        switch (horizontalTextPosition) {
+	        case LEADING:
+	            hTextPos = (ltr) ? LEFT : RIGHT;
+	            break;
+	        case TRAILING:
+	            hTextPos = (ltr) ? RIGHT : LEFT;
+	            break;
+	        default:
+		        hTextPos = horizontalTextPosition;
+	        	break;
+	        }
+		} else {
+			// menus are far simpler!
+			hAlign = hTextPos = (ltr ? LEFT : RIGHT);
+		}
+    	
+        return layoutCompoundLabelImpl(c, ui,
                                        fm,
                                        text,
                                        icon,
@@ -927,7 +934,7 @@ public class SwingUtilities implements SwingConstants
         Rectangle textR,
         int textIconGap)
     {
-        return layoutCompoundLabelImpl(null, fm, text, icon,
+        return layoutCompoundLabelImpl(null, null, fm, text, icon,
                                        verticalAlignment,
                                        horizontalAlignment,
                                        verticalTextPosition,
@@ -947,6 +954,7 @@ public class SwingUtilities implements SwingConstants
      */
     private static String layoutCompoundLabelImpl(
         JComponent c,
+        JSComponentUI ui,
         FontMetrics fm,
         String text,
         Icon icon,
@@ -962,12 +970,16 @@ public class SwingUtilities implements SwingConstants
         /* Initialize the icon bounds rectangle iconR.
          */
 
+        System.out.println("SwingUtil tiv0 " + text + "\n" + textR + "\n" + iconR + "\n" + viewR + "\n" 
+        + fm.getDescent() + " " + fm.getAscent() + " " + fm.getHeight() + " " + fm.getMaxAscent());
+
         if (icon != null) {
             iconR.width = icon.getIconWidth();
             iconR.height = icon.getIconHeight();
-        }
-        else {
-            iconR.width = iconR.height = 0;
+//        }
+//        else {
+           // SwingJS -- we allow passing in the radio button 
+//            iconR.width = iconR.height = 0;
         }
 
         /* Initialize the text bounds rectangle textR.  If a null
@@ -991,7 +1003,7 @@ public class SwingUtilities implements SwingConstants
         }
         else {
             int availTextWidth;
-            gap = (icon == null) ? 0 : textIconGap;
+            gap = (iconR.width == 0) ? 0 : textIconGap;
 
             if (horizontalTextPosition == CENTER) {
                 availTextWidth = viewR.width;
@@ -1005,8 +1017,10 @@ public class SwingUtilities implements SwingConstants
                                        (int) v.getPreferredSpan(View.X_AXIS));
                 textR.height = (int) v.getPreferredSpan(View.Y_AXIS);
             } else {
-                textR.width = SwingUtilities2.stringWidth(c, fm, text);
-
+                Dimension d =  ui.getHTMLSize(ui.textNode);
+                textR.width = d.width;
+                textR.height = d.height;
+                System.out.println("swingutil " + text + " " + d + " " + fm.getHeight());
                 // Take into account the left and right side bearings.
                 // This gives more space than it is actually needed,
                 // but there are two reasons:
@@ -1015,21 +1029,21 @@ public class SwingUtilities implements SwingConstants
                 //    themselves. NOTE: all pref size calculations don't do it.
                 // 2. You can do a drawString at the returned location
                 //    and the text won't be clipped.
-                lsb = SwingUtilities2.getLeftSideBearing(c, fm, text);
-                if (lsb < 0) {
-                    textR.width -= lsb;
-                }
-                rsb = SwingUtilities2.getRightSideBearing(c, fm, text);
-                if (rsb > 0) {
-                    textR.width += rsb;
-                }
+// SwingJS                lsb = SwingUtilities2.getLeftSideBearing(c, fm, text);
+//                if (lsb < 0) {
+//                    textR.width -= lsb;
+//                }
+//                rsb = SwingUtilities2.getRightSideBearing(c, fm, text);
+//                if (rsb > 0) {
+//                    textR.width += rsb;
+//                }
 
                 if (textR.width > availTextWidth) {
                     text = SwingUtilities2.clipString(c, fm, text,
                                                       availTextWidth);
                     textR.width = SwingUtilities2.stringWidth(c, fm, text);
                 }
-                textR.height = fm.getHeight();
+//                textR.height = fm.getHeight();
             }
         }
 
@@ -1041,13 +1055,14 @@ public class SwingUtilities implements SwingConstants
         if (verticalTextPosition == TOP) {
             if (horizontalTextPosition != CENTER) {
                 textR.y = 0;
+//                textR.y = iconR.height  - textR.height;//(int) (4 * textR.height/54f);//- textR.height;
             }
             else {
                 textR.y = -(textR.height + gap);
             }
         }
-        else if (verticalTextPosition == CENTER) {
-            textR.y = (iconR.height / 2) - (textR.height / 2);
+        else if (verticalTextPosition == CENTER) { // 16 pt max; height is 18, ascent is 12, actually
+            textR.y = (iconR.height/2) - (textR.height / 2);
         }
         else { // (verticalTextPosition == BOTTOM)
             if (horizontalTextPosition != CENTER) {
@@ -1118,17 +1133,24 @@ public class SwingUtilities implements SwingConstants
         iconR.x += dx;
         iconR.y += dy;
 
-        if (lsb < 0) {
-            // lsb is negative. Shift the x location so that the text is
-            // visually drawn at the right location.
-            textR.x -= lsb;
+//SwingJS        if (lsb < 0) {
+//            // lsb is negative. Shift the x location so that the text is
+//            // visually drawn at the right location.
+//            textR.x -= lsb;
+//
+//            textR.width += lsb;
+//        }
+//        if (rsb > 0) {
+//            textR.width -= rsb;
+//        }
 
-            textR.width += lsb;
+        if (viewR.width == Short.MAX_VALUE) {
+        	// SwingJS, for JSGraphicsUtil setting preferred button size;
+        	viewR.width = labelR_width;
+        	viewR.height = labelR_height;
         }
-        if (rsb > 0) {
-            textR.width -= rsb;
-        }
-
+        
+        System.out.println("SwingUtil tiv " + text + "\n" + textR + "\n" + iconR + "\n" + viewR + "\n");
         return text;
     }
 

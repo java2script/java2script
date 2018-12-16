@@ -25,6 +25,7 @@ public class JSMenuUI extends JSMenuItemUI {
 			if (isMenuItem) {
 				containerNode = domNode = createItem("_menu", null);
 			} else {
+				allowTextAlignment = false;
 				domNode = createItem("_item", null);
 			}
 			DOMNode.addJqueryHandledEvent(this, domNode, "mouseenter mouseleave");			

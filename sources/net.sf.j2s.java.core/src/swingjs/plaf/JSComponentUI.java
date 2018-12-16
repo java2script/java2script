@@ -37,7 +37,9 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable.BooleanRenderer;
+import javax.swing.border.Border;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -152,11 +154,11 @@ public class JSComponentUI extends ComponentUI
 	/**
 	 * the associated JLabel, if this is one
 	 */
-	
+
 	protected JLabel label;
 	
 	/**
-	 * TableCellRenderers will not have parents; here we point to the table so that
+	 *  TableCellRenderers will not have parents; here we point to the table so that
 	 * we can send the coordinates to the retrieve the row and cell
 	 * 
 	 */
@@ -294,7 +296,6 @@ public class JSComponentUI extends ComponentUI
 //	}
 //
 
-	
 	/**
 	 * inner node for JButtonUI that needs to be cleared prior to calculating
 	 * preferred size
@@ -308,7 +309,7 @@ public class JSComponentUI extends ComponentUI
 	 * 
 	 */
 	public DOMNode domNode;
-
+	
 	/**
 	 * An inner div that allows vertical centering for a JLabel or AbstractButton
 	 */
@@ -352,7 +353,7 @@ public class JSComponentUI extends ComponentUI
 	/**
 	 * the part of a component that can hold text
 	 */
-	protected DOMNode textNode;
+	public DOMNode textNode;
 
 	/**
 	 * the subcomponent with the value field
@@ -390,7 +391,7 @@ public class JSComponentUI extends ComponentUI
 	 * 
 	 */
 	
- 	protected DOMNode menuAnchorNode;
+ 	public DOMNode menuAnchorNode;
 
 	/**
 	 * for SplitPaneDivider
@@ -404,7 +405,7 @@ public class JSComponentUI extends ComponentUI
 		J2S.setDraggable(getDOMNode(), f);
 	}
 
-	/**
+   /**
 	 * a numerical reference for an ID
 	 */
 	protected int num;
@@ -448,7 +449,7 @@ public class JSComponentUI extends ComponentUI
 	 */
 
 	protected boolean isMenu = false;
-	
+
 	/**
 	 * flag for raw JButton used in setHTMLSize1 only
 	 * 
@@ -565,7 +566,7 @@ public class JSComponentUI extends ComponentUI
 		{
 		}
 		if (buttonListener == null)
-			c.addPropertyChangeListener(this);
+		c.addPropertyChangeListener(this);
 	}
 
 	/**
@@ -991,7 +992,7 @@ public class JSComponentUI extends ComponentUI
 			return;
 		}
 		if (prop == "horizontalAlignment" || prop == "verticalAlignment") {
-			setAlignment();
+			//setAlignment();
 			return;
 		}
 		if (debugging)
@@ -1163,6 +1164,7 @@ public class JSComponentUI extends ComponentUI
 		return domNode;
 	}
 
+
 	private void updateCell(int width, int height) {
 		DOMNode.setStyles(domNode, "width", "100%", "height", "100%");
 		if (allowPaintedBackground)
@@ -1244,10 +1246,17 @@ public class JSComponentUI extends ComponentUI
 	 * @param addCSS
 	 * @return
 	 */
+//	protected Dimension setHTMLSize(DOMNode obj, boolean addCSS) {
+//		return setHTMLSize1(obj, addCSS, true);
+//	}
 	protected Dimension setHTMLSize(DOMNode obj, boolean addCSS) {
 		return setHTMLSize1(centeringNode == null || obj != domNode ? obj : centeringNode, addCSS, true);
 	}
 
+	public Dimension getHTMLSize(DOMNode obj) {
+		return setHTMLSize1(obj, false, false);
+	}
+	
 	/**
 	 * also called by JSRadioButtonUI so that it can calculate subset dimensions
 	 * 
@@ -1296,8 +1305,8 @@ public class JSComponentUI extends ComponentUI
 				w0 = w0i = "";
 			}
 			DOMNode.setStyles(node, "position", null, "width", null, "height", null);
-			if (isSimpleButton)
-				DOMNode.setStyles(domNode, "width", null, "height", null);
+			if (innerNode != null)
+				DOMNode.setStyles(innerNode, "width", null, "height", null);
 
 			DOMNode div;
 			if (DOMNode.getAttr(node, "tagName") == "DIV")
@@ -1552,6 +1561,7 @@ public class JSComponentUI extends ComponentUI
 			System.out.println("drawing " + c.getWidth() + " " + c.getHeight());
 		}
 		setHTMLElement();
+		setAlignment();
 		paint(g, c);
 	}
 
@@ -1630,6 +1640,8 @@ public class JSComponentUI extends ComponentUI
 	 * Later, the LayoutManager will make a call to setBounds in order to complete
 	 * the transaction, after taking everything into consideration.
 	 * 
+	 * SwingJS: Do not override this method.
+	 * 
 	 */
 	@Override
 	public Dimension getPreferredSize() {
@@ -1642,6 +1654,12 @@ public class JSComponentUI extends ComponentUI
 		return getPreferredSize(jc);
 	}
 
+	/**
+	 * SwingJS: Override this method to set preferred sizes
+	 * 
+	 * @param jc
+	 * @return
+	 */
 	Dimension getPreferredSize(JComponent jc) {
 		Dimension d = getHTMLSize();
 		if (debugging)
@@ -1650,7 +1668,7 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	Dimension getMaximumSize(JComponent jc) {
-		if (isToolbarFixed) {
+		if (isToolbarFixed) { // default is true
 			Container parent = jc.getParent();
 			String parentClass = (parent == null ? null : parent.getUIClassID());
 			if ("ToolBarUI" == parentClass)
@@ -1948,7 +1966,6 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	protected void setInnerComponentBounds(int width, int height) {
-		setAlignment();
 		if (debugging)
 			System.out.println("CUI reshapeMe: need to reshape " + id + " w:" + this.width + "->" + width + " h:"
 					+ this.height + "->" + height);
@@ -1960,18 +1977,19 @@ public class JSComponentUI extends ComponentUI
 						: (icon instanceof ImageIcon) ? (ImageIcon) icon : JSToolkit.createImageIcon(jc, icon, id + "tmpIcon"));
 	}
 
-	protected Insets insets;
-
-	protected int iconX, iconY;
-
-	protected void setHorizontalButtonAlignments(JComponent b, int pos, int align) {
+	protected void setHorizontalButtonAlignments(AbstractButton b, int pos, int horizAlign) {
 		// We need the width of the text to position the button.
-
+		
 //		DOMNode.setAttr(textNode,  "innerHTML", pos);
-
-		int wIcon = (isMenuItem && actionNode != null ? 15 : Math.max(0, setHTMLSize1(iconNode, false, false).width - 1));
+		
+		
+		int wIcon = (iconNode == null ? 0 : imageNode == null ? 20 : Math.max(0, setHTMLSize1(iconNode, false, false).width - 1));
+		if (isMenuItem && actionNode != null)
+			wIcon = 15;
 		int wText = setHTMLSize1(textNode, false, false).width - 1;
 
+		int gap = (wText == 0 || wIcon == 0 ? 0 : b.getIconTextGap());
+		
 		// But we need to slightly underestimate it so that the
 		// width of label + button does not go over the total calculated width
 
@@ -1980,28 +1998,42 @@ public class JSComponentUI extends ComponentUI
 		//
 		// text [btn].....
 		//
+		
 		// horizontalTextAlignment trailing,left-to-right
 		//
 		// [btn] text.....
 		//
+		
 		// horizontalTextAlignment trailing,right-to-left:
 		//
 		// .....text [btn]
 		//
+
 		// horizontalTextAlignment leading,right-to-left
 		//
 		// .....[btn] text
 		//
-		getJSInsets();
+		
+		// horizontalTextAlignment center, valign top
+		// text
+		// [btn] 
+
+		// horizontalTextAlignment center, valign bottom
+		// [btn] 
+		// text
+
+		// horizontalTextAlignment center, valign center
+		// [btn/text] can be on top of each other
+
 		boolean ltr = jc.getComponentOrientation().isLeftToRight();
 		boolean alignLeft, alignRight, centered, text0;
 		String px0 = "0px";
 		if (menuAnchorNode == null) {
-			alignLeft = (align == SwingConstants.LEFT
-					|| align == (ltr ? SwingConstants.LEADING : SwingConstants.TRAILING));
+			alignLeft = (horizAlign == SwingConstants.LEFT
+					|| horizAlign == (ltr ? SwingConstants.LEADING : SwingConstants.TRAILING));
 
-			alignRight = (align == SwingConstants.RIGHT
-					|| align == (ltr ? SwingConstants.TRAILING : SwingConstants.LEADING));
+			alignRight = (horizAlign == SwingConstants.RIGHT
+					|| horizAlign == (ltr ? SwingConstants.TRAILING : SwingConstants.LEADING));
 
 			centered = (!alignLeft && !alignRight);
 
@@ -2016,53 +2048,43 @@ public class JSComponentUI extends ComponentUI
 			text0 = false;
 			if (alignRight) {
 				if (buttonNode != null) {
-					DOMNode.setStyles(buttonNode, "right", "0");
+					DOMNode.setStyles(buttonNode, "right","0");
 				}
 			}
 		}
 
-		String poslr = (alignRight ? "right" : "left");
+		String poslr = (alignRight ? "right" : "left");				
 		String alignlr = (alignLeft ? "left" : alignRight ? "right" : "center");
 
 		DOMNode.setStyles(textNode, "left", null, "right", null);
 		DOMNode.setStyles(iconNode, "left", null, "right", null);
 		DOMNode.setStyles(centeringNode, "text-align", null, "left", null, "right", null);
-		
 		DOMNode.setStyles(centeringNode, poslr, "0px", "text-align", alignlr);
-		// if (buttonNode != null) {
-		DOMNode.setStyles(domNode, "text-align", null, "left", null, "right", null);
-		DOMNode.setStyles(domNode, "text-align", alignlr, poslr, px0);
-		// }
-		int off;
+		//if (buttonNode != null) {
+			DOMNode.setStyles(domNode, "text-align", null, "left", null, "right", null);
+			DOMNode.setStyles(domNode, "text-align", alignlr, poslr, px0);
+		//}
 		if (centered) {
-			int w = (cellComponent == null
-					? setHTMLSize1((buttonNode == null ? domNode : centeringNode), false, false).width
-					: cellWidth);
-			if (w == 0 && (w = this.jc.getWidth()) == 0) {
-				w = wText + wIcon;
-			}
-			off = (w - wText - wIcon) / 2;
+			int w = setHTMLSize1((buttonNode == null ? domNode : centeringNode), false, false).width;
+			int off = (w - wText - wIcon - gap) / 2;
 			if (text0) {
 				DOMNode.setStyles(textNode, "left", off + "px");
-				DOMNode.setStyles(iconNode, "left", (iconX = off + wText) + "px");
+				DOMNode.setStyles(iconNode, "left", (off + gap + wText) + "px");
 			} else {
-				DOMNode.setStyles(textNode, "left", (off + wIcon) + "px");
-				DOMNode.setStyles(iconNode, "left", (iconX = off) + "px");
+				DOMNode.setStyles(textNode, "left", (off + gap + wIcon) + "px");
+				DOMNode.setStyles(iconNode, "left", off + "px");
 			}
 		} else {
-			off = (alignRight ? insets.right : insets.left);
 			if (text0) {
-				DOMNode.setStyles(textNode, poslr, off + "px");
-				DOMNode.setStyles(iconNode, poslr, (iconX = off + wText) + "px");
+				DOMNode.setStyles(textNode, poslr, !isMenuItem || ltr || actionNode != null ? "0px" : actionItemOffset);
+				DOMNode.setStyles(iconNode, poslr, (wText + gap) + "px");
 			} else {
-				DOMNode.setStyles(textNode, poslr, (off + wIcon) + "px");
-				DOMNode.setStyles(iconNode, poslr, (!isMenuItem ? (iconX = off) + "px" : ltr ? actionItemOffset : "-3px"));
+				DOMNode.setStyles(textNode, poslr, (gap + wIcon) + "px");
+				DOMNode.setStyles(iconNode, poslr, (!isMenuItem ? "0px" : ltr ? actionItemOffset : "-3px"));
 			}
-			if (poslr == "right")
-				iconX = -iconX;
-		}
-
-		// make everything absolute to pass sizing info to all
+		} 
+		
+				// make everything absolute to pass sizing info to all
 
 		DOMNode.setPositionAbsolute(iconNode);
 		DOMNode.setPositionAbsolute(textNode);
@@ -2070,16 +2092,9 @@ public class JSComponentUI extends ComponentUI
 			DOMNode.setPositionAbsolute(buttonNode);
 		} else if (centeringNode != null) {
 			// See test/Puzzle.java
-			DOMNode.setStyles(centeringNode, "width", "100%");
+				DOMNode.setStyles(centeringNode, "width", "100%");
 		}
 
-		//debugDump(centeringNode);
-	}
-
-	protected void getJSInsets() {
-		if (insets == null)
-			insets = new Insets(0, 0, 0, 0);
-		//jc.getInsets(insets);
 	}
 
 	protected void setIconAndText(String prop, Icon icon, int gap, String text) {
@@ -2090,8 +2105,8 @@ public class JSComponentUI extends ComponentUI
 		actualWidth = actualHeight = 0;
 		currentText = text;
 		currentGap = gap;
-		canAlignText = (label != null && text != null);
-		canAlignIcon = (label != null && icon != null);
+		canAlignText = false;
+		canAlignIcon = false;
 		currentIcon = null;
 		imageNode = null;
 		if (iconNode != null) {
@@ -2099,7 +2114,7 @@ public class JSComponentUI extends ComponentUI
 			$(iconNode).empty();
 			if (currentIcon != null) {
 				imageNode = DOMNode.getImageNode(currentIcon.getImage());
-				DOMNode.setStyles(imageNode, "vertical-align", "middle"); // else
+				DOMNode.setStyles(imageNode, "display", null, "vertical-align", "middle"); // else
 				iconNode.appendChild(imageNode);
 				iconHeight = icon.getIconHeight();
 			}
@@ -2111,6 +2126,7 @@ public class JSComponentUI extends ComponentUI
 				canAlignIcon = true;
 		} else {
 			if (icon == null) {				
+				// tool tip does not allow text alignment
 				canAlignText = allowTextAlignment;
 				if (iconNode != null && isMenuItem && actionNode == null && text != null) {
 					DOMNode.addHorizontalGap(iconNode, gap + MENUITEM_OFFSET);
@@ -2130,15 +2146,18 @@ public class JSComponentUI extends ComponentUI
 				text = PT.rep(text, "</html>", "");
 				text = PT.rep(text, "href=", "target=_blank href=");
 				text = PT.rep(text, "href=", "target=_blank href=");
-				// Jalview hack
-				text = PT.rep(text, "width: 350; text-align: justify; word-wrap: break-word;",
-						"width: 350px; word-wrap: break-word;");
+//				// Jalview hack
+//				text = PT.rep(text, "width: 350; text-align: justify; word-wrap: break-word;",
+//						"width: 350px; word-wrap: break-word;");
+			} else if (jc.getClientProperty("html") != null) {
+				isHTML = true;
 			}
 		}
 		DOMNode obj = null;
 		if (textNode != null) {
 			prop = "innerHTML";
 			obj = textNode;
+			setCssFont(textNode, c.getFont());
 			if (!isHTML)
 				text = PT.rep(text, "<", "&lt;");
 		} else if (valueNode != null) {
@@ -2159,8 +2178,6 @@ public class JSComponentUI extends ComponentUI
 		}
 		if (!boundsSet)
 			setHTMLSize(domNode, true);
-		if (centeringNode != null)
-			setAlignment();
 		if (debugging)
 			System.out.println("JSComponentUI: setting " + id + " " + prop);
 	}
@@ -2169,8 +2186,50 @@ public class JSComponentUI extends ComponentUI
 		return 0;
 	}
 
-	private void setAlignment() {
-		if (canAlignText) {
+	protected Insets insets;
+
+	protected Icon icon;
+	protected Rectangle viewR, iconR, textR;
+
+	protected void getJSInsets() {
+		if (insets == null)
+			insets = new Insets(0, 0, 0, 0);
+		jc.getInsets(insets);
+	}
+
+	public void setButtonRectangles(boolean isPreferred) {
+		if (iconR == null) {
+			iconR = new Rectangle();
+			textR = new Rectangle();
+			viewR = new Rectangle();
+		}
+		getJSInsets();
+		if (isPreferred) {
+			viewR.width = Short.MAX_VALUE;
+			viewR.height = Short.MAX_VALUE;
+		} else {
+			viewR.x = 0;
+			viewR.y = 0;
+			viewR.width = width - insets.right - insets.left;
+			viewR.height = height - insets.bottom - insets.top;		
+		}
+		iconR.width = -1;
+		if (isMenuItem && actionNode != null) {
+			iconR.width = iconR.height = 15;
+		} else if (icon == null) {
+			Dimension d = getHTMLSize(iconNode);
+			iconR.width = d.width;
+			iconR.height = d.height;
+		}
+		iconR.x = iconR.y = textR.x = textR.y = 0;
+	}
+	
+	protected void setAlignment() {
+		if (!allowTextAlignment)
+			return;
+		if (false && centeringNode != null) {
+			setAlignments((AbstractButton)jc);
+		} else if (canAlignText) {
 			setVerticalAlignment(true);
 //			setOverallAlignment();
 		} else if (canAlignIcon) {
@@ -2179,6 +2238,59 @@ public class JSComponentUI extends ComponentUI
 		}
 	}
 
+	protected void setAlignments(AbstractButton b) {
+		if (width == 0 || !allowTextAlignment)
+			return;
+		
+		if (isMenuItem|| true) {
+			setHorizontalButtonAlignments(b, b.getHorizontalTextPosition(), b.getHorizontalAlignment());
+			return;
+		}
+		
+		setButtonRectangles(false);
+		SwingUtilities.layoutCompoundLabel(b, b.getFont().getFontMetrics(), b.getText(), 
+				b.getIcon(), b.getVerticalAlignment(), b.getHorizontalAlignment(), 
+				b.getVerticalTextPosition(), b.getHorizontalTextPosition(),
+				viewR, iconR, textR,
+                b.getIconTextGap());
+//		boolean alignLeft, alignRight, centered, text0, textIconCentered;
+//		String px0 = "0px";
+//		if (menuAnchorNode == null) {
+			
+			DOMNode.setPositionAbsolute(iconNode);
+			DOMNode.setPositionAbsolute(textNode);
+
+			if (iconNode != null) {
+				DOMNode.setStyles(iconNode, "left", iconR.x + "px", "top", iconR.y + "px");
+			}
+
+			
+			if (textNode != null) {
+				if (currentIcon == null) {
+					DOMNode.setStyles(textNode, "left", textR.x + "px");
+					setVerticalAlignment(true);					
+				} else {				
+					DOMNode.setStyles(textNode, "left", textR.x + "px", "top", textR.y + "px");
+				}
+			}
+			
+			System.out.println("jcui iconR,textR " + b.getText() + " \n" + iconR + "\n" + textR);
+			
+
+		if (buttonNode != null) {
+			DOMNode.setPositionAbsolute(buttonNode);
+			if (isSimpleButton)
+				DOMNode.setStyles(buttonNode, "width", viewR.width + "px", "height", viewR.height + "px");
+//				
+//		} else if (centeringNode != null) {
+//			// See test/Puzzle.java
+//			DOMNode.setStyles(centeringNode, "width", "100%");
+		}
+
+		//debugDump(centeringNode);
+	}
+
+	
 //	private void setOverallAlignment() {
 //		// old code
 //		if (this.c.getWidth() == 0)
@@ -2254,7 +2366,7 @@ public class JSComponentUI extends ComponentUI
 			if (isText) {
 				if (c.getFont() == null)
 					return;
-				h = setHTMLSize1(centeringNode, false, false).height;
+				h = setHTMLSize1(domNode, false, false).height;
 				// for example, a 12-pt font might have a height of 16, and
 				// ascent of 13, and descent of 3
 				// adjust down to center only the ascension of the text.
@@ -2275,8 +2387,6 @@ public class JSComponentUI extends ComponentUI
 		default:
 			return;
 		}
-		if (!isText)
-			iconY = top;
 		DOMNode.setStyles(centeringNode, /* "position", "absolute", */"top", top + "px");
 	}
 
@@ -2337,6 +2447,7 @@ public class JSComponentUI extends ComponentUI
 		if (domNode != outerNode)
 			DOMNode.dispose(outerNode);
 	}
+
 
 	/**
 	 * 
@@ -2543,8 +2654,6 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public void layout() {
-		JSUtil.notImplemented("");
-
 	}
 
 	@Override
@@ -2635,9 +2744,12 @@ public class JSComponentUI extends ComponentUI
 		layingOut = true;
 	}
 
+	boolean isLaidOut;
+	
 	@Override
 	public void endLayout() {
 		layingOut = false;
+		isLaidOut = true;
 	}
 
 	public String getId() {
@@ -2825,6 +2937,10 @@ public class JSComponentUI extends ComponentUI
         	installJS();
         	installUI(newC);
         }
+	}
+
+	public int getTextWidth() {
+		return (textNode == null ? 0 : getHTMLSize(textNode).width);
 	}
 
 }

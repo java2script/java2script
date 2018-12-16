@@ -30,7 +30,6 @@ package swingjs.plaf;
 
 //import java.awt.FontMetrics;
 import java.awt.Dimension;
-import java.awt.Insets;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import javax.swing.AbstractButton;
@@ -43,7 +42,6 @@ import javax.swing.JToggleButton;
 import javax.swing.LookAndFeel;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
-import javax.swing.border.Border;
 import javax.swing.plaf.TableUI;
 import javax.swing.plaf.UIResource;
 
@@ -82,6 +80,7 @@ public class JSButtonUI extends JSLightweightUI {
     protected DOMNode itemNode;
 	protected JMenuItem menuItem;
 	protected AbstractButton button;
+
 	
 	@Override
 	public DOMNode updateDOMNode() {
@@ -90,8 +89,9 @@ public class JSButtonUI extends JSLightweightUI {
 		// all subclasses will have their own version of this.
 		// this one is only for a simple button
 		if (domNode == null) {
-			domNode = enableNode = buttonNode = newDOMObject ("button", id, "type", "button");
+			domNode = buttonNode = newDOMObject ("button", id, "type", "button");
 			iconNode = newDOMObject("span", id + "_icon");
+			enableNode = buttonNode;
 			createButton();
 			DOMNode.setStyles(domNode, "lineHeight", "0.8");
 		}
@@ -108,7 +108,7 @@ public class JSButtonUI extends JSLightweightUI {
 		setDataComponent(textNode); // needed for mac safari/chrome
 		setEnabled(c.isEnabled());
 	}
-	
+
 	/**
 	 * 
 	 * @param type
@@ -168,7 +168,6 @@ public class JSButtonUI extends JSLightweightUI {
 	}
 
 	protected void setupButton() {
-		button = (AbstractButton) jc;
 		if (!isMenuItem)
 			setPadding(button.getMargin());
 		setIconAndText("button", (ImageIcon) button.getIcon(), button.getIconTextGap(), button.getText());
@@ -743,13 +742,15 @@ public class JSButtonUI extends JSLightweightUI {
 	
 	@Override
 	protected void setInnerComponentBounds(int width, int height) {
-		if (isSimpleButton) {
-			Border b = jc.getBorder();
-			Insets insets = (b == null ? null : b.getBorderInsets(jc));
-			//if (imageNode == null || button.getText() == null)
-			DOMNode.setSize(domNode, width - (b == null ? 0 : insets.left + insets.right), height - (b == null ? 0 : insets.top + insets.bottom));
-			DOMNode.setStyles(domNode, "margin", insets.left + "px " + insets.top + "px " + insets.right + "px " + insets.bottom + "px");
-		}
+		if (isSimpleButton && (imageNode == null || button.getText() == null))
+			DOMNode.setSize(innerNode = domNode, width, height);
 	}
+
+	@Override
+	public Dimension getMaximumSize(JComponent c) {
+		Dimension d = getPreferredSize(c);
+		return d;
+	}
+
 
 }
