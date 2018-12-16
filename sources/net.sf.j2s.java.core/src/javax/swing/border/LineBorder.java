@@ -140,8 +140,8 @@ public class LineBorder extends AbstractBorder
                 inner = new RoundRectangle2D.Float(x + offs, y + offs, width - size, height - size, arc, arc);
             }
             else {
-                outer = new Rectangle2D.Float(x, y, width, height);
-                inner = new Rectangle2D.Float(x + offs, y + offs, width - size, height - size);
+                outer = new Rectangle2D.Float(x-0.5f, y-0.5f, width+1, height+1);
+                inner = new Rectangle2D.Float(x + offs-0.5f, y + offs-0.5f, width - size+1, height - size+1);
             }
             Path2D path = new Path2D.Float(Path2D.WIND_EVEN_ODD);
             path.append(outer, false);
