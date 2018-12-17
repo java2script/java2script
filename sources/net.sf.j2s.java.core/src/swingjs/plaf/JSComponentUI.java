@@ -2179,11 +2179,8 @@ public class JSComponentUI extends ComponentUI
 //		DOMNode.setAttr(textNode,  "innerHTML", pos);
 		
 		
-		int wIcon = (iconNode == null ? 0 : imageNode == null ? 20 : Math.max(0, setHTMLSize1(iconNode, false, false).width - 1));
-		if (isMenuItem && actionNode != null)
-			wIcon = 15;
-		int wText = setHTMLSize1(textNode, false, false).width - 1;
-
+		int wIcon = (actionNode != null ? (isMenuItem ? 15 : 20) : iconNode == null ? 0 : imageNode == null ? 0 : Math.max(0, setHTMLSize1(iconNode, false, false).width - 1));
+		int wText = setHTMLSize1(textNode, false, false).width - 1;		
 		int gap = (wText == 0 || wIcon == 0 ? 0 : b.getIconTextGap());
 		
 		// But we need to slightly underestimate it so that the
@@ -2261,7 +2258,7 @@ public class JSComponentUI extends ComponentUI
 			DOMNode.setStyles(domNode, "text-align", alignlr, poslr, px0);
 		//}
 		if (centered) {
-			int w = setHTMLSize1((buttonNode == null ? domNode : centeringNode), false, false).width;
+			int w = cellComponent != null ? cellWidth : setHTMLSize1((buttonNode == null ? domNode : centeringNode), false, false).width;
 			switch (hTextPos) {
 			case SwingConstants.CENTER:
 			case SwingConstants.TOP:
