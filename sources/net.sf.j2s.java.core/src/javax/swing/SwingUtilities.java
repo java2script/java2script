@@ -1014,10 +1014,15 @@ public class SwingUtilities implements SwingConstants
                                        (int) v.getPreferredSpan(View.X_AXIS));
                 textR.height = (int) v.getPreferredSpan(View.Y_AXIS);
             } else {
-                Dimension d =  ui.getHTMLSize(ui.textNode);
-                textR.width = d.width;
-                textR.height = d.height;
-                // Take into account the left and right side bearings.
+            	if (ui.textNode == null) {
+            		textR.width = fm.stringWidth(text);
+            		textR.height = fm.getHeight();
+            	} else {
+            		Dimension d = ui.getHTMLSize(ui.textNode);
+            		textR.width = d.width;
+            		textR.height = d.height;
+            	}
+            	// Take into account the left and right side bearings.
                 // This gives more space than it is actually needed,
                 // but there are two reasons:
                 // 1. If we set the width to the actual bounds,

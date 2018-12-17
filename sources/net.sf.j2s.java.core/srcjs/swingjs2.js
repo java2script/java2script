@@ -12,7 +12,7 @@
  * Date: 2014-01-23T21:02Z
  */
 
-// modified by Bob Hanson for local MSIE 11 reading remote files
+// modified by Bob Hanson for local MSIE 11 reading remote files and skipping Opera test unless Opera
 
 (function( global, factory ) {
 
@@ -1251,8 +1251,11 @@ setDocument = Sizzle.setDocument = function( node ) {
 			}
 
 			// Opera 10-11 does not throw on post-comma invalid pseudos
-			div.querySelectorAll("*,:x");
-			rbuggyQSA.push(",.*:");
+			// BH 2018
+			if (navigator.userAgent && navigator.userAgent.indexOf("Opera") >= 0) {
+				div.querySelectorAll("*,:x");
+				rbuggyQSA.push(",.*:");
+			}
 		});
 	}
 
