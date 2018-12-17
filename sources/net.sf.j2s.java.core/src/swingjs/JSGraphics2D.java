@@ -82,6 +82,24 @@ public class JSGraphics2D // extends SunGraphics2D
 
 	// private Color currentColor;
 
+	private static float pixelRatio = /** @j2sNative
+	(function () {
+	    var ctx = document.createElement("canvas").getContext("2d"),
+	        dpr = window.devicePixelRatio || 1,
+	        bsr = ctx.webkitBackingStorePixelRatio ||
+	              ctx.mozBackingStorePixelRatio ||
+	              ctx.msBackingStorePixelRatio ||
+	              ctx.oBackingStorePixelRatio ||
+	              ctx.backingStorePixelRatio || 1;
+	    return dpr / bsr;
+	})() || */1;
+// this is 1.5 for Windows
+// nice, but now how would be do raw pixel setting, say, from images?
+//    can.width = w * pixelRatio;
+//    can.height = h * pixelRatio;
+//    can.getContext("2d").setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+
+	
 	public JSGraphics2D(Object canvas) { // this must be Object, because we are
 											// passing an actual HTML5 canvas
 		hints = new RenderingHints(new Hashtable());
