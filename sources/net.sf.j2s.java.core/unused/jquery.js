@@ -1,4 +1,7 @@
 /*!
+ * 
+ * BH SwingJS note -- this is not the jquery.js we use; that is in srcjs/js. 
+ * This is just a version I was using for testing along the way
  * jQuery JavaScript Library v1.11.0
  * http://jquery.com/
  *
