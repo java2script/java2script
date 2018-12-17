@@ -967,15 +967,13 @@ public class JSComponentUI extends ComponentUI
 			return;
 		}
 		if (prop == "text") {
-			if (centeringNode != null) {
 				String val = ((AbstractButton) c).getText();
 				if (val == null ? currentText != null : !val.equals(currentText))
 					setIconAndText(prop, currentIcon, currentGap, (String) val);
-			}
 			return;
 		}
 		if (prop == "iconTextGap") {
-			if (centeringNode != null) {
+			if (iconNode != null) {
 				int gap = ((AbstractButton) c).getIconTextGap();
 				if (currentGap != gap)
 					setIconAndText(prop, currentIcon, gap, currentText);
@@ -1984,7 +1982,7 @@ public class JSComponentUI extends ComponentUI
 
 	protected void setIconAndText(String prop, Icon icon, int gap, String text) {
 
-		if (centeringNode == null)
+		if (iconNode == null && textNode == null)
 			return;
 		
 		// TODO so, actually, icons replace the checkbox or radio button, they do not
