@@ -847,9 +847,10 @@ public class JPopupMenu extends JComponent implements MenuElement {
     public void setInvoker(Component invoker) {
         Component oldInvoker = this.invoker;
         this.invoker = invoker;
-        if ((oldInvoker != this.invoker) && (ui != null)) {
-        	((JSComponentUI) ui).reinstallUI(this, (JComponent) invoker);
-        }
+// SwingJS does not do this
+//        if ((oldInvoker != this.invoker) && (ui != null)) {
+//        	((JSComponentUI) ui).reinstallUI(this, (JComponent) invoker);
+//        }
         invalidate();
     }
 

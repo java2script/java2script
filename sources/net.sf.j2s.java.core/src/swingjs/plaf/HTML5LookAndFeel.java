@@ -1589,8 +1589,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// *** Table
 				"Table.font", dialogPlain12,
 				"Table.foreground", controlText, // cell text color
-				"Table.background",
-				window, // cell background color
+				"Table.background", white, // cell background color
 				"Table.selectionForeground", textHighlightText,
 				"Table.selectionBackground", textHighlight,
 			   "Table.dropLineColor", controlShadow,

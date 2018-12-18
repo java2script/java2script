@@ -202,20 +202,20 @@ public class JSTableUI extends JSPanelUI {
 	 * @param col
 	 * @return
 	 */
-	@SuppressWarnings("unused")
 	private JSComponent getCellComponent(TableCellRenderer renderer, int row, int col, int w, int h, DOMNode td, boolean fullPaint) {
-		
-		
+		// SwingJS adds the idea that the default renderers need only be prepared once the
+		// component is known. Other renderers may operate on a component so need a second 
+		// one.
 		JSComponent cNoPrep = /** @j2sNative renderer.getComponent$ && renderer.getComponent$() || */null;
 		JSComponent c = (cNoPrep == null ? (JSComponent) table.prepareRenderer(renderer, row, col) : cNoPrep);
 		if (c != null) {
 			JSComponentUI ui = ((JSComponentUI) c.getUI());
+			boolean wasDisabled = ui.isUIDisabled;
 			ui.setRenderer(c, w, h);
 			ui.targetParent = table;
-			boolean wasDisabled = fullPaint && ui.isUIDisabled || cNoPrep != null; 
-			if (wasDisabled) {
+			if (fullPaint && wasDisabled || cNoPrep != null) {
 				// repeat, now that the UI is enabled
-				if (ui.isUIDisabled)
+				if (wasDisabled)
 					ui.restoreCellNodes(td);
 				ui.setTainted();
 				table.prepareRenderer(renderer, row, col);
@@ -308,7 +308,7 @@ public class JSTableUI extends JSPanelUI {
 					continue;
 				DOMNode td = CellHolder.findCellNode(this, null, row, col);
 				if (td == null) {
-					td = CellHolder.getCellOuterNode(this, row, col);
+					td = CellHolder.createCellOuterNode(this, row, col);
 					tr.appendChild(td);
 				}
 				DOMNode.setStyles(td, "width", w + "px", "height", h + "px", "left", tx + "px", "top", ty + "px");
@@ -326,18 +326,24 @@ public class JSTableUI extends JSPanelUI {
 			CellHolder.updateCellNode(td, cell, 0, 0);
 	}
 
+	JComponent editorComp;
+	
 	public void prepareDOMEditor(boolean starting, int row, int col) {
-		JComponent editorComp = (JComponent) table.getEditorComponent();
 		if (editorComp != null) {
-			// force this issue
-			editorComp.setVisible(!starting);
-			editorComp.setVisible(starting);
+			editorComp.setVisible(true);
+			editorComp.setVisible(false);
 		}
+		editorComp = (JComponent) table.getEditorComponent();
 		if (starting) {
+			if (editorComp != null) {
+				editorComp.setVisible(false);
+				editorComp.setVisible(true);
+			}
 //			DOMNode td = CellHolder.findCellNode(this, null, row, col);
 		} else {
-//			DOMNode td = CellHolder.findCellNode(this, null, table.getEditingRow(), table.getEditingColumn());
-//			updateCellNode(td, row, col, 0, 0);
+			DOMNode td = CellHolder.findCellNode(this, null, table.getEditingRow(), table.getEditingColumn());
+			updateCellNode(td, row, col, 0, 0);
+			repaintCell(row, col);
 		}
 	}
 
@@ -1064,9 +1070,7 @@ public class JSTableUI extends JSPanelUI {
 			if (lr < 0 || lc < 0) {
 				return;
 			}
-
-			Rectangle dirtyRect = table.getCellRect(lr, lc, false);
-			table.repaint(dirtyRect);
+			repaintCell(lr, lc);
 		}
 
 		@Override
@@ -1570,6 +1574,11 @@ public class JSTableUI extends JSPanelUI {
 		return SwingUtilities2.pointOutsidePrefSize(table, row, column, p);
 	}
 
+	public void repaintCell(int lr, int lc) {
+		table.repaint(table.getCellRect(lr, lc, false));
+	}
+
+
 	//
 	// Factory methods for the Listeners
 	//
@@ -2040,7 +2049,7 @@ public class JSTableUI extends JSPanelUI {
 		int rMin0 = rMin;
 		int rMax0 = rMax;
 		
-		if (!repaintAll && draggedColumn == null) {
+		if (rMin != rMax && !repaintAll && draggedColumn == null) {
 			if (rMax > currentRowMax && rMin < currentRowMax) {
 				rMin = currentRowMax + 1;
 			} else if (rMin < currentRowMin && rMax > currentRowMin) {
@@ -2073,6 +2082,9 @@ public class JSTableUI extends JSPanelUI {
 		Rectangle cellRect;
 		TableColumn aColumn;
 		int columnWidth;
+
+		boolean forceNew = (dragging);// || rMin == rMax && cMin == cMax);
+
 		if (table.getComponentOrientation().isLeftToRight()) {
 			for (int row = rMin0; row <= rMax0; row++) {
 				cellRect = table.getCellRect(row, cMin, false);
@@ -2082,7 +2094,7 @@ public class JSTableUI extends JSPanelUI {
 					columnWidth = aColumn.getWidth();
 					cellRect.width = columnWidth - columnMargin;
 //					if (aColumn != draggedColumn) {
-						paintCell(g, cellRect, row, column, cw, h, tr);
+					paintCell(g, cellRect, row, column, cw, h, tr, forceNew);
 //					}
 					cellRect.x += columnWidth;
 				}
@@ -2096,7 +2108,7 @@ public class JSTableUI extends JSPanelUI {
 //					cellRect.width = columnWidth - columnMargin;
 //					paintCell(g, cellRect, row, cMin, cw, h);
 //				}
-					DOMNode tr = DOMNode.getElement(id + "_tab_row" + row);
+				DOMNode tr = DOMNode.getElement(id + "_tab_row" + row);
 				for (int column = cMin; column <= cMax; column++) {
 					aColumn = cm.getColumn(column);
 					columnWidth = aColumn.getWidth();
@@ -2104,7 +2116,7 @@ public class JSTableUI extends JSPanelUI {
 					if (column != cMin)
 						cellRect.x -= columnWidth;
 //					if (aColumn != draggedColumn) {
-						paintCell(g, cellRect, row, column, cw, h, tr);
+					paintCell(g, cellRect, row, column, cw, h, tr, forceNew);
 //					}
 				}
 			}
@@ -2116,13 +2128,13 @@ public class JSTableUI extends JSPanelUI {
 //		}
 
 		// Remove any renderers that may be left in the rendererPane.
-		//rendererPane.removeAll();
+		// rendererPane.removeAll();
 		isScrolling = false;
 		havePainted = true;
 	}
 
 
-	private void paintCell(Graphics g, Rectangle cellRect, int row, int col, int[] cw, int h, DOMNode tr) {
+	private void paintCell(Graphics g, Rectangle cellRect, int row, int col, int[] cw, int h, DOMNode tr, boolean forceNew) {
 		if (table.isEditing() && table.getEditingRow() == row && table.getEditingColumn() == col) {
 			Component component = table.getEditorComponent();
 			component.setBounds(cellRect);
@@ -2132,7 +2144,7 @@ public class JSTableUI extends JSPanelUI {
 			// and switch its ui domNode to the one for the
 			// given row and column. Painting the component
 			// then modifies this particular cell. and switch it back
-			DOMNode td = (dragging || tr == null ? null : CellHolder.findCellNode(this, null, row, col));
+			DOMNode td = (forceNew || tr == null ? null : CellHolder.findCellNode(this, null, row, col));
 			boolean newtd = (td == null);
 			if (newtd) {
 				td = addElements(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, cw, h, row,

@@ -247,55 +247,6 @@ public class JSComponentUI extends ComponentUI
 		scrollNode		= nodes[13];
 	}
 
-
-//	
-//	protected void setCellNodes(DOMNode td) {
-//		DOMNode[] nodes = new DOMNode[] {
-//				domNode,
-//				innerNode,
-//				centeringNode,
-//				
-//				iconNode,
-//				textNode,
-//				buttonNode,			
-//				enableNode,
-//				
-//				(enableNodes == null ? null : enableNodes[0]),
-//				(enableNodes == null ? null : enableNodes[1]),
-//				(enableNodes == null ? null : enableNodes[2]),
-//				
-//				focusNode,
-//				actionNode,
-//				valueNode,
-//				scrollNode,
-//		};	
-//		DOMNode.setAttr(td, "data-nodes", nodes);
-//	}
-//
-//	protected void getCellNodes(DOMNode td) {
-//		DOMNode[] nodes = (DOMNode[]) DOMNode.getAttr(td, "data-nodes");
-//		domNode 		= nodes[0];
-//		innerNode		= nodes[1];
-//		centeringNode 	= nodes[2];
-//		
-//		iconNode		= nodes[3];
-//		textNode		= nodes[4];
-//		buttonNode 		= nodes[5];
-//		enableNode 		= nodes[6];
-//		
-//		if (nodes[7] != null) {
-//			enableNodes[0] = nodes[7];
-//			enableNodes[1] = nodes[8];
-//			enableNodes[2] = nodes[9];
-//		}
-//		
-//		focusNode		= nodes[10];
-//		actionNode 		= nodes[11];
-//		valueNode		= nodes[12];
-//		scrollNode		= nodes[13];
-//	}
-//
-
 	/**
 	 * inner node for JButtonUI that needs to be cleared prior to calculating
 	 * preferred size
