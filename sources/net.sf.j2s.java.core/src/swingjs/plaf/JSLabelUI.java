@@ -124,13 +124,14 @@ public class JSLabelUI extends JSLightweightUI {
 			DOMNode.setStyles(imageNode, "visibility", null);
 			Rectangle r = imageNode.getBoundingClientRect();
 			DOMNode parent = null;
-			if (r.width == 0) {
+			boolean isHidden = (r.width == 0);
+			if (isHidden) {
 				parent = DOMNode.getParent(domNode);
 				$("body").append(domNode);
 				r = imageNode.getBoundingClientRect();
 			}
 			Rectangle r0 = domNode.getBoundingClientRect();
-			if (parent != null)
+			if (isHidden)
 				DOMNode.transferTo(domNode,  parent);				
 			DOMNode.setStyles(imageNode, "visibility", "hidden");
 			icon.paintIcon(c, g, (int) (r.x - r0.x), (int) (r.y - r0.y));

@@ -1018,7 +1018,16 @@ public class SwingUtilities implements SwingConstants
             		textR.width = fm.stringWidth(text);
             		textR.height = fm.getHeight();
             	} else {
+            		
+            		System.out.println("laying out " + /** @j2sNative document.body.children.length ||*/null);
+            		System.out.println("laying out " + /** @j2sNative ui.text ||*/null);
+            		
+            		
             		Dimension d = ui.getHTMLSize(ui.textNode);
+            		System.out.println("laying out done " + /** @j2sNative document.body.children.length ||*/null);
+            		System.out.println("laying out done " + /** @j2sNative ui.text ||*/null);
+            		
+
             		textR.width = d.width;
             		textR.height = d.height;
             	}
