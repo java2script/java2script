@@ -1670,7 +1670,7 @@ Clazz._getStackTrace = function(n) {
   s += estack.join("\n");
   if (Clazz._stack.length) {
 	  s += "\nsee Clazz._stack";
-	  console.log("Clazz._stack() = " + Clazz._stack());
+	  console.log("Clazz._stack = " + Clazz._stack);
 	  console.log("Use Clazz._showStack() or Clazz._showStack(n) to show parameters");
   }
   return s;
