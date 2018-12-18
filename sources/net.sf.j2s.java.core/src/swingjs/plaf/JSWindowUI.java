@@ -82,6 +82,8 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 		return domNode;
 	}
 	
+
+	
 	protected void setWindowClass() { 
 		DOMNode.setZ(domNode, z);
 		$(domNode).addClass("swingjs-window");
@@ -194,5 +196,16 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 	public Insets getInsets() {
 		return new Insets(0, 0, 0, 0);
 	}
+
+	@Override
+	public void setVisible(boolean b) {
+		hideAllMenus();
+		super.setVisible(b);
+	}
+
+	private void hideAllMenus() {
+		$(".ui-menu").hide();
+	}
+	
 
 }
