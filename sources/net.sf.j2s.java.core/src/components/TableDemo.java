@@ -40,6 +40,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -65,7 +66,8 @@ public class TableDemo extends JPanel {
 				int row, int column) {
 			setOpaque(true);
 			setBackground(colors[row % 3]);
-			setText("  " + row);
+			setText("" + row);
+			setHorizontalAlignment(SwingConstants.CENTER);
 			setBorder(new LineBorder(Color.white, 3));
 			return this;
 		}

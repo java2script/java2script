@@ -258,7 +258,7 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
 	}
 
 	@Override
-  protected Dimension setHTMLSize(DOMNode obj, boolean addCSS) {
+  protected Dimension setHTMLSizePreferred(DOMNode obj, boolean addCSS) {
 		// SwingJS for now: just designated container width/height 
 		return new Dimension(c.getWidth(), c.getHeight());
 	}

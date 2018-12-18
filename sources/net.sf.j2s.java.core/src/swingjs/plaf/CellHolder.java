@@ -17,7 +17,7 @@ public abstract class CellHolder extends JSLightweightUI {
     	return holder.id + "_tab" + (row >= 0 ? "_row" + row : "") + "_col" + col;
     }
 
-	static DOMNode getCellOuterNode(JSComponentUI tableOrHeader, int row, int col) {
+	static DOMNode createCellOuterNode(JSComponentUI tableOrHeader, int row, int col) {
 		String rcID = getRowColumnID(tableOrHeader, row, col);
 		DOMNode td = findCellNode(null, rcID, row, col);
 		if (td == null) {

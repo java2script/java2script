@@ -247,55 +247,6 @@ public class JSComponentUI extends ComponentUI
 		scrollNode		= nodes[13];
 	}
 
-
-//	
-//	protected void setCellNodes(DOMNode td) {
-//		DOMNode[] nodes = new DOMNode[] {
-//				domNode,
-//				innerNode,
-//				centeringNode,
-//				
-//				iconNode,
-//				textNode,
-//				buttonNode,			
-//				enableNode,
-//				
-//				(enableNodes == null ? null : enableNodes[0]),
-//				(enableNodes == null ? null : enableNodes[1]),
-//				(enableNodes == null ? null : enableNodes[2]),
-//				
-//				focusNode,
-//				actionNode,
-//				valueNode,
-//				scrollNode,
-//		};	
-//		DOMNode.setAttr(td, "data-nodes", nodes);
-//	}
-//
-//	protected void getCellNodes(DOMNode td) {
-//		DOMNode[] nodes = (DOMNode[]) DOMNode.getAttr(td, "data-nodes");
-//		domNode 		= nodes[0];
-//		innerNode		= nodes[1];
-//		centeringNode 	= nodes[2];
-//		
-//		iconNode		= nodes[3];
-//		textNode		= nodes[4];
-//		buttonNode 		= nodes[5];
-//		enableNode 		= nodes[6];
-//		
-//		if (nodes[7] != null) {
-//			enableNodes[0] = nodes[7];
-//			enableNodes[1] = nodes[8];
-//			enableNodes[2] = nodes[9];
-//		}
-//		
-//		focusNode		= nodes[10];
-//		actionNode 		= nodes[11];
-//		valueNode		= nodes[12];
-//		scrollNode		= nodes[13];
-//	}
-//
-
 	/**
 	 * inner node for JButtonUI that needs to be cleared prior to calculating
 	 * preferred size
@@ -454,7 +405,7 @@ public class JSComponentUI extends ComponentUI
 	 * flag for raw JButton used in setHTMLSize1 only
 	 * 
 	 */
-	protected boolean isSimpleButton;
+	protected boolean isSimpleButton, isLabel;
 
 	protected int x, y;
 
@@ -623,8 +574,8 @@ public class JSComponentUI extends ComponentUI
 		newID(false);
 		installUI(target); // need to do this immediately, not later
 		installJS();
-		if (needPreferred)
-			getHTMLSize();
+		if (needPreferred) // only slider needs this
+			setHTMLSizePreferred(updateDOMNode(), false);
 		return this;
 	}
 
@@ -967,9 +918,9 @@ public class JSComponentUI extends ComponentUI
 			return;
 		}
 		if (prop == "text") {
-			String val = ((AbstractButton) c).getText();
-			if (val == null ? currentText != null : !val.equals(currentText))
-				setIconAndText(prop, currentIcon, currentGap, (String) val);
+				String val = ((AbstractButton) c).getText();
+				if (val == null ? currentText != null : !val.equals(currentText))
+					setIconAndText(prop, currentIcon, currentGap, (String) val);
 			return;
 		}
 		if (prop == "iconTextGap") {
@@ -981,7 +932,7 @@ public class JSComponentUI extends ComponentUI
 			return;
 		}
 		if (prop == "icon") {
-			if (iconNode != null) {
+			if (centeringNode != null) {
 				// note that we use AbstractButton cast here just because
 				// it has a getIcon() method. JavaScript will not care if
 				// it is really a JLabel or JOptionPane, which also have icons
@@ -1128,6 +1079,14 @@ public class JSComponentUI extends ComponentUI
 
 	private boolean backgroundPainted;
 
+	/**
+	 * Label will render its image, drawing to the canvas; Button will not 
+	 * (as of this writing), so we need a flag to know when to not hide it.
+	 * 
+	 */
+	
+	protected boolean imagePersists;
+
 	public void setAllowPaintedBackground(boolean TF) {
 		// listCellRenderer does not allow this.
 		allowPaintedBackground = TF;
@@ -1249,7 +1208,7 @@ public class JSComponentUI extends ComponentUI
 //	protected Dimension setHTMLSize(DOMNode obj, boolean addCSS) {
 //		return setHTMLSize1(obj, addCSS, true);
 //	}
-	protected Dimension setHTMLSize(DOMNode obj, boolean addCSS) {
+	protected Dimension setHTMLSizePreferred(DOMNode obj, boolean addCSS) {
 		return setHTMLSize1(centeringNode == null || obj != domNode ? obj : centeringNode, addCSS, true);
 	}
 
@@ -1307,7 +1266,6 @@ public class JSComponentUI extends ComponentUI
 			DOMNode.setStyles(node, "position", null, "width", null, "height", null);
 			if (innerNode != null)
 				DOMNode.setStyles(innerNode, "width", null, "height", null);
-
 			DOMNode div;
 			if (DOMNode.getAttr(node, "tagName") == "DIV")
 				div = node;
@@ -1546,10 +1504,6 @@ public class JSComponentUI extends ComponentUI
 		return height = c.getHeight();
 	}
 
-	private Dimension getHTMLSize() {
-		return setHTMLSize(updateDOMNode(), false);
-	}
-
 	@Override
 	public void update(Graphics g, JComponent c) {
 		if (isUIDisabled)
@@ -1604,10 +1558,13 @@ public class JSComponentUI extends ComponentUI
 			g.fillRect(0, 0, c.getWidth(), c.getHeight());
 			setTransparent(domNode);
 		}
-		// Note that for now, button graphics
-		// are BEHIND the button. We will need to paint onto the
-		// glass pane for this to work, and then also manage
-		// mouse clicks and key clicks with that in mind.
+		if (textNode != null)
+			DOMNode.setStyles(textNode, "overflow", "hidden");
+		if (imageNode != null && !imagePersists) {
+			// the icon must paint itself; imageNode is just a placeholder
+			DOMNode.setStyles(imageNode, "visibility", "hidden");
+		}
+
 	}
 
 	@Override
@@ -1661,10 +1618,7 @@ public class JSComponentUI extends ComponentUI
 	 * @return
 	 */
 	Dimension getPreferredSize(JComponent jc) {
-		Dimension d = getHTMLSize();
-		if (debugging)
-			System.out.println("CUI >> getPrefSize >> " + d + " for " + this.id);
-		return d;
+		return setHTMLSizePreferred(updateDOMNode(), false);
 	}
 
 	Dimension getMaximumSize(JComponent jc) {
@@ -1977,128 +1931,11 @@ public class JSComponentUI extends ComponentUI
 						: (icon instanceof ImageIcon) ? (ImageIcon) icon : JSToolkit.createImageIcon(jc, icon, id + "tmpIcon"));
 	}
 
-	protected void setHorizontalButtonAlignments(AbstractButton b, int pos, int horizAlign) {
-		// We need the width of the text to position the button.
-		
-//		DOMNode.setAttr(textNode,  "innerHTML", pos);
-		
-		
-		int wIcon = (iconNode == null ? 0 : imageNode == null ? 20 : Math.max(0, setHTMLSize1(iconNode, false, false).width - 1));
-		if (isMenuItem && actionNode != null)
-			wIcon = 15;
-		int wText = setHTMLSize1(textNode, false, false).width - 1;
-
-		int gap = (wText == 0 || wIcon == 0 ? 0 : b.getIconTextGap());
-		
-		// But we need to slightly underestimate it so that the
-		// width of label + button does not go over the total calculated width
-
-		// horizontalTextAlignment leading,left-to-right:
-		// horizontalTextAlignment trailing,right-to-left:
-		//
-		// text [btn].....
-		//
-		
-		// horizontalTextAlignment trailing,left-to-right
-		//
-		// [btn] text.....
-		//
-		
-		// horizontalTextAlignment trailing,right-to-left:
-		//
-		// .....text [btn]
-		//
-
-		// horizontalTextAlignment leading,right-to-left
-		//
-		// .....[btn] text
-		//
-		
-		// horizontalTextAlignment center, valign top
-		// text
-		// [btn] 
-
-		// horizontalTextAlignment center, valign bottom
-		// [btn] 
-		// text
-
-		// horizontalTextAlignment center, valign center
-		// [btn/text] can be on top of each other
-
-		boolean ltr = jc.getComponentOrientation().isLeftToRight();
-		boolean alignLeft, alignRight, centered, text0;
-		String px0 = "0px";
-		if (menuAnchorNode == null) {
-			alignLeft = (horizAlign == SwingConstants.LEFT
-					|| horizAlign == (ltr ? SwingConstants.LEADING : SwingConstants.TRAILING));
-
-			alignRight = (horizAlign == SwingConstants.RIGHT
-					|| horizAlign == (ltr ? SwingConstants.TRAILING : SwingConstants.LEADING));
-
-			centered = (!alignLeft && !alignRight);
-
-			text0 = (alignRight
-					? (pos == SwingConstants.RIGHT || pos == (ltr ? SwingConstants.TRAILING : SwingConstants.LEADING))
-					: (pos == SwingConstants.LEFT || pos == (ltr ? SwingConstants.LEADING : SwingConstants.TRAILING)));
-		} else {
-			// menus are far simpler!
-			alignLeft = ltr;
-			alignRight = !ltr;
-			centered = false;
-			text0 = false;
-			if (alignRight) {
-				if (buttonNode != null) {
-					DOMNode.setStyles(buttonNode, "right","0");
-				}
-			}
-		}
-
-		String poslr = (alignRight ? "right" : "left");				
-		String alignlr = (alignLeft ? "left" : alignRight ? "right" : "center");
-
-		DOMNode.setStyles(textNode, "left", null, "right", null);
-		DOMNode.setStyles(iconNode, "left", null, "right", null);
-		DOMNode.setStyles(centeringNode, "text-align", null, "left", null, "right", null);
-		DOMNode.setStyles(centeringNode, poslr, "0px", "text-align", alignlr);
-		//if (buttonNode != null) {
-			DOMNode.setStyles(domNode, "text-align", null, "left", null, "right", null);
-			DOMNode.setStyles(domNode, "text-align", alignlr, poslr, px0);
-		//}
-		if (centered) {
-			int w = setHTMLSize1((buttonNode == null ? domNode : centeringNode), false, false).width;
-			int off = (w - wText - wIcon - gap) / 2;
-			if (text0) {
-				DOMNode.setStyles(textNode, "left", off + "px");
-				DOMNode.setStyles(iconNode, "left", (off + gap + wText) + "px");
-			} else {
-				DOMNode.setStyles(textNode, "left", (off + gap + wIcon) + "px");
-				DOMNode.setStyles(iconNode, "left", off + "px");
-			}
-		} else {
-			if (text0) {
-				DOMNode.setStyles(textNode, poslr, !isMenuItem || ltr || actionNode != null ? "0px" : actionItemOffset);
-				DOMNode.setStyles(iconNode, poslr, (wText + gap) + "px");
-			} else {
-				DOMNode.setStyles(textNode, poslr, (gap + wIcon) + "px");
-				DOMNode.setStyles(iconNode, poslr, (!isMenuItem ? "0px" : ltr ? actionItemOffset : "-3px"));
-			}
-		} 
-		
-				// make everything absolute to pass sizing info to all
-
-		DOMNode.setPositionAbsolute(iconNode);
-		DOMNode.setPositionAbsolute(textNode);
-		if (buttonNode != null) {
-			DOMNode.setPositionAbsolute(buttonNode);
-		} else if (centeringNode != null) {
-			// See test/Puzzle.java
-				DOMNode.setStyles(centeringNode, "width", "100%");
-		}
-
-	}
-
 	protected void setIconAndText(String prop, Icon icon, int gap, String text) {
 
+		if (iconNode == null && textNode == null)
+			return;
+		
 		// TODO so, actually, icons replace the checkbox or radio button, they do not
 		// complement them
 
@@ -2114,7 +1951,7 @@ public class JSComponentUI extends ComponentUI
 			$(iconNode).empty();
 			if (currentIcon != null) {
 				imageNode = DOMNode.getImageNode(currentIcon.getImage());
-				DOMNode.setStyles(imageNode, "display", null, "vertical-align", "middle"); // else
+				DOMNode.setStyles(imageNode, "visibility", (isLabel ? "hidden" : null), "vertical-align", "middle"); // else
 				iconNode.appendChild(imageNode);
 				iconHeight = icon.getIconHeight();
 			}
@@ -2125,6 +1962,7 @@ public class JSComponentUI extends ComponentUI
 			if (icon != null)
 				canAlignIcon = true;
 		} else {
+			DOMNode.setStyles(textNode, "white-space","nowrap");
 			if (icon == null) {				
 				// tool tip does not allow text alignment
 				canAlignText = allowTextAlignment;
@@ -2177,7 +2015,7 @@ public class JSComponentUI extends ComponentUI
 			// this new text
 		}
 		if (!boundsSet)
-			setHTMLSize(domNode, true);
+			setHTMLSizePreferred(domNode, true);
 		if (debugging)
 			System.out.println("JSComponentUI: setting " + id + " " + prop);
 	}
@@ -2272,11 +2110,7 @@ public class JSComponentUI extends ComponentUI
 				} else {				
 					DOMNode.setStyles(textNode, "left", textR.x + "px", "top", textR.y + "px");
 				}
-			}
-			
-			System.out.println("jcui iconR,textR " + b.getText() + " \n" + iconR + "\n" + textR);
-			
-
+			}			
 		if (buttonNode != null) {
 			DOMNode.setPositionAbsolute(buttonNode);
 			if (isSimpleButton)
@@ -2290,73 +2124,139 @@ public class JSComponentUI extends ComponentUI
 		//debugDump(centeringNode);
 	}
 
-	
-//	private void setOverallAlignment() {
-//		// old code
-//		if (this.c.getWidth() == 0)
-//			return;
-//		// OK, this is the alignment of the component, not the text
-//		int type = ((AbstractButton) c).getHorizontalAlignment();
-//		String prop = getCSSTextAlignment(type);
-//		// the centeringNode is not visible. It is a div that allows us to
-//		// position the text and icon of the image based on its preferred size
-//		// in the overall space around it.
-//		
-//		if (menuAnchorNode != null) {
-//		}
-//		if (jc.uiClassID == "LabelUI" && centeringNode != null) {
-//			int left = 0;
-//			int w = actualWidth;
-//			if (w == 0)
-//				w = setHTMLSize1(centeringNode, false, false).width;
-//			switch (type) {
-//			case SwingConstants.LEFT:
-//			case SwingConstants.LEADING:
-//				break;
-//			case SwingConstants.RIGHT:
-//			case SwingConstants.TRAILING:
-//				prop = "right";
-//				left = c.getWidth() - w;
-//				break;
-//			case SwingConstants.CENTER:
-//				left = (c.getWidth() - w) / 2;
-//				break;
-//			default:
-//				DOMNode.setStyles(domNode, "width", c.getWidth() + "px", "text-align", textAlign = prop);
-//				return;
-//			}
-//			DOMNode.setStyles(domNode, "width", c.getWidth() + "px", "text-align", textAlign = prop);
-//			// Problem:
-//			// edu_northwestern_physics_groups_atomic_applet_Mirror_applet.html
-//			// an initial paint shows checkboxes lower than they should be.
-//			// JalView panel checkboxes too low.
-//			// Solution: remove all setting of position:absolute for centeringNode
-//			// EXCEPT just before size testing with body.append().
-//			DOMNode.setStyles(centeringNode,
-////					"position", "absolute", 
-//					"left", left + "px");
-//		}
-//	}
+	protected void setHorizontalButtonAlignments(AbstractButton b, int hTextPos, int horizAlign) {
+		// We need the width of the text to position the button.
+		
+//		DOMNode.setAttr(textNode,  "innerHTML", pos);
+		
+		
+		int wIcon = (actionNode != null ? (isMenuItem ? 15 : 20) : iconNode == null ? 0 : imageNode == null ? 0 : Math.max(0, setHTMLSize1(iconNode, false, false).width - 1));
+		int wText = setHTMLSize1(textNode, false, false).width - 1;		
+		int gap = (wText == 0 || wIcon == 0 ? 0 : b.getIconTextGap());
+		
+		// But we need to slightly underestimate it so that the
+		// width of label + button does not go over the total calculated width
 
-//	protected String getCSSTextAlignment(int type) {
-//		String prop = null;
-//		switch (type) {
-//		case SwingConstants.RIGHT:
-//		case SwingConstants.TRAILING:
-//			prop = "right";
-//			break;
-//		case SwingConstants.LEFT:
-//		case SwingConstants.LEADING:
-//			prop = "left";
-//			break;
-//		case SwingConstants.CENTER:
-//			prop = "center";
-//			break;
-//		}
-//		return prop;
-//	}
+		// horizontalTextAlignment leading,left-to-right:
+		// horizontalTextAlignment trailing,right-to-left:
+		//
+		// text [btn].....
+		//
+		
+		// horizontalTextAlignment trailing,left-to-right
+		//
+		// [btn] text.....
+		//
+		
+		// horizontalTextAlignment trailing,right-to-left:
+		//
+		// .....text [btn]
+		//
+
+		// horizontalTextAlignment leading,right-to-left
+		//
+		// .....[btn] text
+		//
+		
+		// horizontalTextAlignment center, valign top
+		// text
+		// [btn] 
+
+		// horizontalTextAlignment center, valign bottom
+		// [btn] 
+		// text
+
+		// horizontalTextAlignment center, valign center
+		// [btn/text] can be on top of each other
+
+		boolean ltr = jc.getComponentOrientation().isLeftToRight();
+		boolean alignLeft, alignRight, centered, text0;
+		String px0 = "0px";
+		if (menuAnchorNode == null) {
+			alignLeft = (horizAlign == SwingConstants.LEFT
+					|| horizAlign == (ltr ? SwingConstants.LEADING : SwingConstants.TRAILING));
+
+			alignRight = (horizAlign == SwingConstants.RIGHT
+					|| horizAlign == (ltr ? SwingConstants.TRAILING : SwingConstants.LEADING));
+
+			centered = (!alignLeft && !alignRight);
+
+			text0 = (alignRight
+					? (hTextPos == SwingConstants.RIGHT || hTextPos == (ltr ? SwingConstants.TRAILING : SwingConstants.LEADING))
+					: (hTextPos == SwingConstants.LEFT || hTextPos == (ltr ? SwingConstants.LEADING : SwingConstants.TRAILING)));
+		} else {
+			// menus are far simpler!
+			alignLeft = ltr;
+			alignRight = !ltr;
+			centered = false;
+			text0 = false;
+			if (alignRight) {
+				if (buttonNode != null) {
+					DOMNode.setStyles(buttonNode, "right","0");
+				}
+			}
+		}
+
+		String poslr = (alignRight ? "right" : "left");				
+		String alignlr = (alignLeft ? "left" : alignRight ? "right" : "center");
+
+		DOMNode.setStyles(textNode, "left", null, "right", null);
+		DOMNode.setStyles(iconNode, "left", null, "right", null);
+		DOMNode.setStyles(centeringNode, "text-align", null, "left", null, "right", null);
+		DOMNode.setStyles(centeringNode, poslr, "0px", "text-align", alignlr);
+		//if (buttonNode != null) {
+			DOMNode.setStyles(domNode, "text-align", null, "left", null, "right", null);
+			DOMNode.setStyles(domNode, "text-align", alignlr, poslr, px0);
+		//}
+		if (centered) {
+			int w = cellComponent != null ? cellWidth : setHTMLSize1((buttonNode == null ? domNode : centeringNode), false, false).width;
+			switch (hTextPos) {
+			case SwingConstants.CENTER:
+			case SwingConstants.TOP:
+			case SwingConstants.BOTTOM:
+				if (w == 0)
+					w = Math.max(wText,  wIcon);
+				DOMNode.setStyles(textNode, "left", ((w - wText) / 2) + "px");
+				DOMNode.setStyles(iconNode, "left", ((w - wIcon) / 2) + "px");
+				break;
+			default:
+				int off = (w - wText - wIcon - gap) / 2;
+				if (text0) {
+					DOMNode.setStyles(textNode, "left", off + "px");
+					DOMNode.setStyles(iconNode, "left", (off + gap + wText) + "px");
+				} else {
+					DOMNode.setStyles(textNode, "left", (off + gap + wIcon) + "px");
+					DOMNode.setStyles(iconNode, "left", off + "px");
+				}
+				break;
+			}
+		} else {
+			if (text0) {
+				DOMNode.setStyles(textNode, poslr, !isMenuItem || ltr || actionNode != null ? "0px" : actionItemOffset);
+				DOMNode.setStyles(iconNode, poslr, (wText + gap) + "px");
+			} else {
+				DOMNode.setStyles(textNode, poslr, (gap + wIcon) + "px");
+				DOMNode.setStyles(iconNode, poslr, (!isMenuItem ? "0px" : ltr ? actionItemOffset : "-3px"));
+			}
+		} 
+		
+				// make everything absolute to pass sizing info to all
+
+		DOMNode.setPositionAbsolute(iconNode);
+		DOMNode.setPositionAbsolute(textNode);
+		if (buttonNode != null) {
+			DOMNode.setPositionAbsolute(buttonNode);
+		} else if (centeringNode != null) {
+			// See test/Puzzle.java
+				DOMNode.setStyles(centeringNode, "width", "100%");
+		}
+
+	}
 
 	protected void setVerticalAlignment(boolean isText) {
+		// TODO: Not yet supporting vertically-aligned text and icon
+		// (vertTextPos TOP or BOTTOM and vertAlign CENTER)
+		
 		int type = ((AbstractButton) c).getVerticalAlignment();
 		if (centeringNode == null || this.c.getHeight() == 0)
 			return;

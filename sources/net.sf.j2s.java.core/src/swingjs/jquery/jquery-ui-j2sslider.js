@@ -57,10 +57,11 @@
 				},
 
 				_create : function() {
-					var i, handleCount, o = this.options, existingHandles = this.element
-							.find(".ui-j2sslider-handle")
-							.addClass(
-									"ui-state-default ui-corner-all"), handle = "<a class='ui-j2sslider-handle ui-state-default ui-corner-all' href='#'></a>", handles = [];
+					var handleCount, 
+						o = this.options, 
+						existingHandles = this.element.find(".ui-j2sslider-handle").addClass("ui-state-default ui-corner-all"), 
+						handle = "<a class='ui-j2sslider-handle ui-state-default ui-corner-all' href='#'></a>", 
+						handles = [];
 					this.jslider || (this.jslider = o.jslider);
 					this._keySliding = false;
 					this._mouseSliding = false;
@@ -178,7 +179,7 @@
 
 					handleCount = (o.values && o.values.length) || 1;
 
-					for (i = 0; i < handleCount; i++) {
+					for (var i = 0; i < handleCount; i++) {
 						handles.push(handle);
 					}
 
@@ -186,7 +187,7 @@
 							handles.join(""))
 							.appendTo(this.element));
 
-					for (i = 0; i < handleCount; i++) {
+					for (var i = 0; i < handleCount; i++) {
 						handle = this.handles[i];
 						handle.index = i;
 						J2S.setDraggable(handle, [ fDown, fDrag,
@@ -236,7 +237,7 @@
 
 				_destroy : function() {
 					
-					for (i = 0; i < this.handles.length; i++) {
+					for (var i = 0; i < this.handles.length; i++) {
 						J2S.setDraggable(this.handles[i], false);
 					}
 					
@@ -511,7 +512,7 @@
 						if ($.isArray(arguments[0])) {
 							vals = this.options.values;
 							newValues = arguments[0];
-							for (i = 0; i < vals.length; i += 1) {
+							for (var i = 0; i < vals.length; i += 1) {
 								vals[i] = this
 										._trimAlignValue(newValues[i]);
 								this._change(null, i);
@@ -568,7 +569,7 @@
 					case "values":
 						this._animateOff = true;
 						this._refreshValue();
-						for (i = 0; i < valsLength; i += 1) {
+						for (var i = 0; i < valsLength; i += 1) {
 							this._change(null, i);
 						}
 						this._animateOff = false;
@@ -817,4 +818,4 @@
 	})(J2S.__$);
 
 })();
-// BH 9/15/2018
+// BH 12/17/2018

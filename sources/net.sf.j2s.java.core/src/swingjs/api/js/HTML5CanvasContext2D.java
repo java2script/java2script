@@ -1,5 +1,7 @@
 package swingjs.api.js;
 
+import java.awt.geom.AffineTransform;
+
 public abstract class HTML5CanvasContext2D {
 
 	public abstract void beginPath();
@@ -191,6 +193,19 @@ public abstract class HTML5CanvasContext2D {
 		 *            ctx.fillStyle = s;
 		 */
 		{}
+	}
+
+	public static double[] getMatrix(HTML5CanvasContext2D ctx, AffineTransform transform) {
+		double[] m = /**  @j2sNative ctx._m || */ null;
+		if (m == null) {
+			m = new double[6];
+			/**
+			 * @j2sNative
+			 * ctx._m = m;
+			 */
+			transform.getMatrix(m);
+		}
+		return m;
 	}
 
 

@@ -124,7 +124,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 	}
 
 	@Override
-	protected Dimension setHTMLSize(DOMNode obj, boolean addCSS) {
+	protected Dimension setHTMLSizePreferred(DOMNode obj, boolean addCSS) {
 		// "absolute" is required for positioning of button, but must not be there
 		// for setting the size.
 		DOMNode.setStyles(buttonNode, "position", null, "width", null, "height", null);
