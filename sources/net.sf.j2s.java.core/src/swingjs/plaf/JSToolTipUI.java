@@ -1,13 +1,10 @@
 package swingjs.plaf;
 
-import java.awt.Dimension;
 import java.awt.Insets;
 
 import javax.swing.JComponent;
 import javax.swing.JToolTip;
 import javax.swing.LookAndFeel;
-
-import swingjs.api.js.DOMNode;
 
 public class JSToolTipUI extends JSLabelUI {
 

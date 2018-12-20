@@ -11,7 +11,7 @@ public class JSRadioButtonMenuItemUI extends JSRadioButtonUI {
 		super();
 		isMenuItem = true;
 		allowPaintedBackground = false;
-		actionItemOffset = "-8px";
+		actionItemOffset = -8;
 	}
 	
 	@Override

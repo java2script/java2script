@@ -30,7 +30,7 @@ public class JSPanelUI extends JSLightweightUI {
 	}
 
 	@Override
-  protected Dimension setHTMLSizePreferred(DOMNode obj, boolean addCSS) {
+  protected Dimension getHTMLSizePreferred(DOMNode obj, boolean addCSS) {
 		// SwingJS for now: just designated container width/height 
 		return new Dimension(c.getWidth(), c.getHeight());
 	}

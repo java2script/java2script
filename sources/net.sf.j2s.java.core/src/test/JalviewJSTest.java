@@ -30,6 +30,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
+import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
@@ -143,14 +144,10 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		firstColumn.setLayout(new GridLayout(13, 1));
 		firstColumn.setBorder(new TitledBorder("column 1"));
 
-		/*
-		 * bug 21/08/18: - checkbox label and text extend outside the enclosing panel in
-		 * JS
-		 */
 		Font font = new Font("Verdana", Font.PLAIN, 11);
 
 		JLabel l1 = new JLabel(getImage("test2.png"));
-		l1.setText("trailling right");
+		l1.setText("trailing right");
 		l1.setHorizontalTextPosition(SwingConstants.TRAILING);
 		l1.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 		l1.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -164,6 +161,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		JButton b1 = new JButton("right left");
 		b1.setIcon(getImage("test2.png"));
 		b1.setFont(font);
+		b1.setBorder(new LineBorder(Color.red, 5));
 		b1.setHorizontalTextPosition(SwingConstants.RIGHT);
 		b1.setHorizontalAlignment(SwingConstants.LEFT);
 
@@ -212,59 +210,60 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 
 		font = new Font("Verdana", Font.PLAIN, 11);
 
-		JMenuItem cb3m = new JMenuItem("leading,left-to-right");
+		JMenuItem cb3m = new JMenuItem("XXleading,left-to-rightXX");
 		cb3m.setFont(font);
 		cb3m.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 		cb3m.setHorizontalTextPosition(SwingConstants.LEADING);
 		cb3m.addActionListener(listener);
 
-		JCheckBoxMenuItem cb4m = new JCheckBoxMenuItem("leading,right-to-left");
+		JCheckBoxMenuItem cb4m = new JCheckBoxMenuItem("XXleading,right-to-leftXX");
 		cb4m.setFont(font);
 		cb4m.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		cb4m.setHorizontalTextPosition(SwingConstants.LEADING);
 		cb4m.addActionListener(listener);
 
-		JCheckBoxMenuItem cb5m = new JCheckBoxMenuItem("trailing,left-to-right");
+		JCheckBoxMenuItem cb5m = new JCheckBoxMenuItem("XXtrailing,left-to-rightXX");
 		cb5m.setFont(font);
 		cb5m.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 		cb5m.setHorizontalTextPosition(SwingConstants.TRAILING);
 		cb5m.addActionListener(listener);
 
-		JCheckBoxMenuItem cb6m = new JCheckBoxMenuItem("trailing,right-to-left");
+		JCheckBoxMenuItem cb6m = new JCheckBoxMenuItem("XXtrailing,r2l1XX");
 		cb6m.setFont(font);
 		cb6m.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		cb6m.setHorizontalTextPosition(SwingConstants.TRAILING);
 		cb6m.addActionListener(listener);
 
-		JRadioButtonMenuItem rb1m = new JRadioButtonMenuItem("trailing,right-to-left");
+		JRadioButtonMenuItem rb1m = new JRadioButtonMenuItem("XXtrailing,r2l2XX");
 		rb1m.setFont(font);
 		rb1m.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		rb1m.setHorizontalTextPosition(SwingConstants.TRAILING);
 		rb1m.addActionListener(listener);
 
-		JRadioButtonMenuItem rb2m = new JRadioButtonMenuItem("right,left-to-right");
+		JRadioButtonMenuItem rb2m = new JRadioButtonMenuItem("XXright,left-to-rightXX");
 		rb2m.setFont(font);
 		rb2m.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 		rb2m.setHorizontalTextPosition(SwingConstants.RIGHT);
 		rb2m.addActionListener(listener);
 
-		JRadioButtonMenuItem rb3m = new JRadioButtonMenuItem("right,right-to-left1");
+		JRadioButtonMenuItem rb3m = new JRadioButtonMenuItem("XXright,r21XX");
 		rb3m.setFont(font);
 		rb3m.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		rb3m.setHorizontalTextPosition(SwingConstants.RIGHT);
 		rb3m.addActionListener(listener);
 
-		JMenuItem mb3 = new JMenuItem("right,right-to-left2");
+		JMenuItem mb3 = new JMenuItem("XXright,right-2-left2XX");
 		mb3.setFont(font);
 		mb3.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		mb3.setHorizontalTextPosition(SwingConstants.RIGHT);
 
-		JMenuItem mb4 = new JMenuItem("right,right-to-left3");
+		JMenuItem mb4 = new JMenuItem("XXright,right-to-left3XX");
 		mb4.setFont(font);
 		mb4.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		mb4.setHorizontalTextPosition(SwingConstants.RIGHT);
+		mb4.addItemListener(this);
 
-		mb5 = new JMenuItem("added");
+		mb5 = new JMenuItem("XXadded r2l,rXX");
 		mb5.addActionListener(listener);
 		mb5.setFont(font);
 		mb5.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
@@ -291,13 +290,12 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		m1.setFont(font);
 		m1.addMenuListener(this);
 		m1.add(rb2m);
+		menu.add(m1);
 
 		menu1.add(cb4m);
 		menu1.add(cb3m);
 		menu2.add(cb5m);
 
-		mb4.addItemListener(this);
-		menu.add(m1);
 		JMenuItem btn = new JMenuItem("-");
 		btn.setFont(font);
 		menu.add(btn);
@@ -369,7 +367,6 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		System.out.println("menuSelected " + e.getSource().toString());
 		JMenu menu = (JMenu) e.getSource();
 		menu.add(mb5);
-//	}
 	}
 
 	@Override

@@ -30,6 +30,7 @@ public class JSMenuUI extends JSMenuItemUI {
 			}
 			DOMNode.addJqueryHandledEvent(this, domNode, "mouseenter mouseleave");			
 		}
+
 		setCssFont(domNode, c.getFont()); 
 		DOMNode.setVisible(domNode, jc.isVisible());
 		return domNode;
