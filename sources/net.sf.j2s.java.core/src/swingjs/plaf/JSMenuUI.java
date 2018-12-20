@@ -107,4 +107,10 @@ public class JSMenuUI extends JSMenuItemUI {
 		return getPreferredSize();
 	}
 
+	@Override
+	protected String getPropertyPrefix() {
+		return "Menu.";
+	}
+
+
 }

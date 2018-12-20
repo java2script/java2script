@@ -1143,6 +1143,17 @@ public class JSComponentUI extends ComponentUI
 		return setHTMLSize1(obj, false, false);
 	}
 	
+	private Dimension getIconSize(AbstractButton b) {
+		return (iconNode == null || imageNode == null || b.getIcon() == null ? null
+				: getHTMLSize(iconNode));
+	}
+	
+	private Dimension getTextSize(AbstractButton b) {
+		String t;
+		return (textNode == null || (t = b.getText()) == null 
+				|| t == "" ? null : getHTMLSize(textNode));
+	}
+
 	/**
 	 * also called by JSRadioButtonUI so that it can calculate subset dimensions
 	 * 
@@ -2002,11 +2013,11 @@ public class JSComponentUI extends ComponentUI
 
 		getJSInsets();
 
-		Dimension dimIcon = setHTMLSize1(iconNode, false, false);
+		Dimension dimIcon = getIconSize(b);
+		Dimension dimText = getTextSize(b);
 		int wIcon = (actionNode != null ? (isMenuItem ? 15 : 20)
-				: iconNode == null ? 0 : imageNode == null ? 0 : Math.max(0, dimIcon.width));
-		Dimension dimText = setHTMLSize1(textNode, false, false);
-		int wText = dimText.width;
+				: dimIcon == null ? 0 : Math.max(0, dimIcon.width));
+		int wText = (dimText == null ? 0 : dimText.width);
 		int gap = (wText == 0 || wIcon == 0 ? 0 : b.getIconTextGap());
 		int w = cellComponent != null ? cellWidth : $(domNode).width();
 
@@ -2065,16 +2076,16 @@ public class JSComponentUI extends ComponentUI
 			textRight = ltr;
 		}
 		boolean alignVCenter = (vAlign == SwingConstants.CENTER);
-//
 		Insets margins = (isLabel ? insets : b.getMargin());
-
+		int h = (dimText == null ? 0 : dimText.height);
+		int ih = (dimIcon == null ? 0 : dimIcon.height);
+		int hCtr = Math.max(h, ih);
 		int wCtr = wIcon + gap + wText;
-		int hCtr = Math.max(dimText.height, dimIcon.height);
 		if (alignHCenter) {
 			switch (hTextPos) {
 			case SwingConstants.TOP:
 			case SwingConstants.BOTTOM:
-				hCtr = dimIcon.height + gap + dimText.height;
+				hCtr = ih + gap + h;
 				/* fall through */
 			case SwingConstants.CENTER:
 				wCtr = Math.max(wIcon, wText);
@@ -2151,19 +2162,19 @@ public class JSComponentUI extends ComponentUI
 			if (alignRight) {
 				DOMNode.setStyles(itemNode, "text-align", "right");
 				DOMNode.setStyles(centeringNode,  "right", "0px");
-				DOMNode.setStyles(textNode, "right", "28px");
+				DOMNode.setStyles(textNode, "right", "23px");
 				DOMNode.setStyles(iconNode, "right", "3px");
 			} else {
 				DOMNode.setStyles(itemNode, "text-align", "left");
 				DOMNode.setStyles(centeringNode,  "left", "0px");
-				DOMNode.setStyles(iconNode, "left", "-3px");
-				DOMNode.setStyles(textNode, "left", "25px");
+				DOMNode.setStyles(iconNode, "left", "3px");
+				DOMNode.setStyles(textNode, "left", "23px");
 			}
 		}
 
 		int top = margins.top;
 
-		int h = c.getHeight();
+		h = c.getHeight();
 		if (h == 0) {
 			h = 16;
 		}
@@ -2206,7 +2217,7 @@ public class JSComponentUI extends ComponentUI
 			DOMNode.setSize(menuAnchorNode, wCtr + margins.left + margins.right, h);
 			if (actionNode != null) {
 				DOMNode.setStyles(textNode, "top", "50%", "transform", "translateY(-80%)");
-				DOMNode.setStyles(iconNode, "top", "50%", "transform", "translateY(-90%) scale(0.6,0.6)");
+				DOMNode.setStyles(iconNode, "top", "50%", "transform", "translateY(-100%) scale(0.6,0.6)");
 			}
 		}
 	}
@@ -2758,10 +2769,6 @@ public class JSComponentUI extends ComponentUI
         	installJS();
         	installUI(newC);
         }
-	}
-
-	public int getTextWidth() {
-		return (textNode == null ? 0 : getHTMLSize(textNode).width);
 	}
 
 }
