@@ -2204,8 +2204,10 @@ public class JSComponentUI extends ComponentUI
 					"translateY(-" + itop + "%)" + (iscale == null ? "" : iscale));
 		} else {
 			DOMNode.setSize(menuAnchorNode, wCtr + margins.left + margins.right, h);
-			DOMNode.setStyles(textNode, "top", "50%", "transform", "translateY(-80%)");
-			DOMNode.setStyles(iconNode, "top", "50%", "transform", "translateY(-90%) scale(0.6,0.6)");
+			if (actionNode != null) {
+				DOMNode.setStyles(textNode, "top", "50%", "transform", "translateY(-80%)");
+				DOMNode.setStyles(iconNode, "top", "50%", "transform", "translateY(-90%) scale(0.6,0.6)");
+			}
 		}
 	}
 
