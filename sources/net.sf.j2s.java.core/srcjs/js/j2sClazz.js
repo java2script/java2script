@@ -7,6 +7,7 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 12/20/2018 3.2.4.05 fixes synthetic reference issue 
 // BH 12/13/2018 3.2.4.05 fixes Class.js field reflection, inner anonymous class of outer class creates wrong synthetic pointer 
 // BH 12/1/2018 3.2.4.04 fixes TypeError e.stack e not found
 // BH 11/11/2018 3.2.4.04 fixes String.CASE_INSENSITIVE_ORDER.compare$S$S
@@ -605,14 +606,15 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
 		// clone the map and overwrite with the correct values
       b = appendMap({},b);
 	  addB$Keys(clazz2, true, b, objThis, objThis);
+  } else if (isNew) {
+	  // it is new, save this map with the OUTER object as $b$
+	  // 12018.12.20 but only if it is clean 
+	  outerObj.$b$ = b;	  
   }
   
   // final objective: save this map for the inner object
   // add a flag to disallow any other same-class use of this map.
   b["$ " + innerName] = 1;
-  // it is new, save this map with the OUTER object as $b$
-  if (isNew)
-    outerObj.$b$ = b;
   objThis.b$ = b;
   clazz.$this$0 && (objThis.this$0 = b[clazz.$this$0]);
   clazz.$clinit$ && clazz.$clinit$();  
