@@ -44,7 +44,25 @@ try{
 	 this._on({
 		 "mousedown .ui-menu-item > a":function(e){e.preventDefault()},
 		 "click .ui-state-disabled > a":function(e){e.preventDefault()},
-		 "click .ui-menu-item:has(a)":function(t){var r=e(t.target).closest(".ui-menu-item");!n&&r.not(".ui-state-disabled").length&&(n=!0,this.select(t),r.has(".ui-menu").length?this.expand(t):this.element.is(":focus")||(this.element.trigger("focus",[!0]),this.active&&this.active.parents(".ui-menu").length===1&&clearTimeout(this.timer)))},
+		 "click .ui-menu-item:has(a)":function(t){
+
+
+// BH 12/20/2018 adds persistence for JMenu clicks
+
+if (this.active && this.active[0].attributes.name && this.active[0].attributes.name.value == "javax.swing.JMenu") {
+clearTimeout(this.timer);
+return 
+}
+
+var r=e(t.target).closest(".ui-menu-item");
+
+!n&&r.not(".ui-state-disabled").length&&(n=!0,this.select(t),r.has(".ui-menu").length?this.expand(t):this.element.is(":focus")||(this.element.trigger("focus",[!0]),this.active&&this.active.parents(".ui-menu").length===1&&clearTimeout(this.timer)))
+
+; $(".ui-menu").hide();
+
+
+
+},
 		 "mouseenter .ui-menu-item":function(t){var n=e(t.currentTarget);n.siblings().children(".ui-state-active").removeClass("ui-state-active"),this.focus(t,n)},
 		 mouseleave:"collapseAll",
 		 "mouseleave .ui-menu": "collapseAll",
@@ -72,7 +90,8 @@ try{
 		   .data("ui-menu-submenu-carat",!0);
 	   r.attr("aria-haspopup","true").prepend(i),t.attr("aria-labelledby",r.attr("id"))}),t=r.add(this.element),t.children(":not(.ui-menu-item):has(a)").addClass("ui-menu-item").attr("role","presentation").children("a").uniqueId().addClass("ui-corner-all").attr({tabIndex:-1,role:this._itemRole()}),t.children(":not(.ui-menu-item)").each(function(){var t=e(this);/[^\-+�G��G��+�G��G��\s]/.test(t.text())||t.addClass("ui-widget-content ui-menu-divider")}),t.children(".ui-state-disabled").attr("aria-disabled","true"),this.active&&!e.contains(this.element[0],this.active[0])&&this.blur()},
  _itemRole:function(){return{menu:"menuitem",listbox:"option"}[this.options.role]},
- focus:function(e,t){var n,r;this.blur(e,e&&e.type==="focus"),this._scrollIntoView(t),this.active=t.first(),r=this.active.children("a").addClass("ui-state-focus"),this.options.role&&this.element.attr("aria-activedescendant",r.attr("id")),this.active.parent().closest(".ui-menu-item").children("a:first").addClass("ui-state-active"),e&&e.type==="keydown"?this._close():this.timer=this._delay(function(){this._close()},this.delay),n=t.children(".ui-menu"),n.length&&/^mouse/.test(e.type)&&this._startOpening(n),this.activeMenu=t.parent(),this._trigger("focus",e,{item:t})},
+ focus:function(e,t){var n,r;this.blur(e,e&&e.type==="focus"),this._scrollIntoView(t),this.active=t.first(),r=this.active.children("a").addClass("ui-state-focus"),this.options.role&&this.element.attr("aria-activedescendant",r.attr("id")),this.active.parent().closest(".ui-menu-item").children("a:first").addClass("ui-state-active"),e&&e.type==="keydown"?this._close():
+this.timer=this._delay(function(){this._close()},this.delay),n=t.children(".ui-menu"),n.length&&/^mouse/.test(e.type)&&this._startOpening(n),this.activeMenu=t.parent(),this._trigger("focus",e,{item:t})},
  _scrollIntoView:function(t){var n,r,i,s,o,u;this._hasScroll()&&(n=parseFloat(e.css(this.activeMenu[0],"borderTopWidth"))||0,r=parseFloat(e.css(this.activeMenu[0],"paddingTop"))||0,i=t.offset().top-this.activeMenu.offset().top-n-r,s=this.activeMenu.scrollTop(),o=this.activeMenu.height(),u=t.height(),i<0?this.activeMenu.scrollTop(s+i):i+u>o&&this.activeMenu.scrollTop(s+i-o+u))},
  blur:function(e,t){
 	 
@@ -94,7 +113,20 @@ try{
 		 this.activeMenu=r
 	   }, this.delay)
  },
- _close:function(e){e||(e=this.active?this.active.parent():this.element),e.find(".ui-menu").hide().attr("aria-hidden","true").attr("aria-expanded","false").end().find("a.ui-state-active").removeClass("ui-state-active")},
+ _close:function(e){
+
+var e0= e;
+e||(e=this.active?this.active.parent():this.element),
+e.find(".ui-menu")
+.hide()
+.attr("aria-hidden","true")
+.attr("aria-expanded","false")
+.end()
+.find("a.ui-state-active")
+.removeClass("ui-state-active")
+
+
+},
  collapse:function(e){var t=this.active&&this.active.parent().closest(".ui-menu-item",this.element);t&&t.length&&(this._close(),this.focus(e,t))},
  expand:function(e){var t=this.active&&this.active.children(".ui-menu ").children(".ui-menu-item").first();t&&t.length&&(this._open(t.parent()),this._delay(function(){this.focus(e,t)}))},
  next:function(e){this._move("next","first",e)},
@@ -158,11 +190,19 @@ var bindMenuActionCommands = function(eventType, menu, isBind) {
   var children = (menu.uiClassID ? menu.ui.getChildren() : menu.getComponents());
 	for(var i = children.length; --i >= 0;)
 		bindMenuActionCommands(eventType, children[i], isBind);
+
+
+
+
   if (!menu.uiClassID || !menu["data-ui"])
     return;  
 	J2S.$documentOff(eventType, menu.id);
 	if (isBind)
 		J2S.$documentOn(eventType, menu.id, function(event) {
+
+
+
+
       if (menu.uiClassID) {
         System.out.println(["menu " + menu.ui.id , " clicked " , event.target.id , event.target.tagName, event.target["data-component"]]);
 				Swing.hideMenus(menu._applet);
