@@ -1178,15 +1178,20 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		repaint();
 	}
 
-	@Override
-	public void repaint() {
-		super.repaint();
-	}
-	
-	@Override
-	public void repaint(int x, int y, int width, int height) {
-		super.repaint(x, y, width, height);
-	}
+//	@Override
+//    protected void validateTree() {
+//		super.validateTree();
+//	}
+//
+//	@Override
+//	public void repaint() {
+//		super.repaint();
+//	}
+//	
+//	@Override
+//	public void repaint(int x, int y, int width, int height) {
+//		super.repaint(x, y, width, height);
+//	}
 	
 	/**
 	 * Sets whether the table draws horizontal lines between cells. If
@@ -5979,4 +5984,5 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		}
 	}
 
+	
 } // End of Class JTable

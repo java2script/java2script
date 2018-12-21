@@ -1,5 +1,6 @@
 // j2sCore.js (based on JmolCore.js
 
+// BH 12/20/2018 fixes mouse event extended modifiers for drag operation
 // BH 11/7/2018 adds J2S.addDirectDatabaseCall(domain)
 // BH 9/18/2018 fixes data.getBytes() not qualified
 // BH 8/12/2018 adding J2S.onClazzLoaded(i,msg) hook for customization
@@ -1804,24 +1805,28 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 
 	var getMouseModifiers = function(ev, id) {
 		// id needed to properly not assign the InputEvent.ButtonX_DOWN_MASK for an UP operation
+		// and also recognize a drag (503 + buttons pressed
 		var modifiers = 0;
-		if (id != 503)
-		switch (ev.button) {
-		default:
-			ev.button = 0;
-			// fall through
-		case 0:
-			modifiers = (1 << 4) | (id ? 0 : (1 << 10));// InputEvent.BUTTON1 +
-												// InputEvent.BUTTON1_DOWN_MASK;
-			break;
-		case 1:
-			modifiers = (1 << 3) | (id ? 0 : (1 << 11));// InputEvent.BUTTON2 +
-												// InputEvent.BUTTON2_DOWN_MASK;
-			break;
-		case 2:
-			modifiers = (1 << 2) | (id ? 0 : (1 << 12));// InputEvent.BUTTON3 +
-												// InputEvent.BUTTON3_DOWN_MASK;
-			break;
+		if (id == 503) {
+			modifiers = ev.buttons << 10;
+		} else {
+			switch (ev.button) {
+			default:
+				ev.button = 0;
+				// fall through
+			case 0:
+				modifiers = (1 << 4) | (id ? 0 : (1 << 10));// InputEvent.BUTTON1 +
+													// InputEvent.BUTTON1_DOWN_MASK;
+				break;
+			case 1:
+				modifiers = (1 << 3) | (id ? 0 : (1 << 11));// InputEvent.BUTTON2 +
+													// InputEvent.BUTTON2_DOWN_MASK;
+				break;
+			case 2:
+				modifiers = (1 << 2) | (id ? 0 : (1 << 12));// InputEvent.BUTTON3 +
+													// InputEvent.BUTTON3_DOWN_MASK;
+				break;
+			}
 		}
 		return modifiers | J2S.getKeyModifiers(ev);
 	}

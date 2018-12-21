@@ -53,7 +53,7 @@ public class SwingLazyValue implements UIDefaults.LazyValue {
         this(c, null, null);
     }
     public SwingLazyValue(String c, String m) {
-    	// new class.method()
+    	// new class.method() or $innerClass
         this(c, m, null);
     }
     public SwingLazyValue(String c, Object[] o) {
@@ -72,7 +72,15 @@ public class SwingLazyValue implements UIDefaults.LazyValue {
     @Override
 		public Object createValue(final UIDefaults table) {
         try {
-//            Object cl;
+        	if (className.indexOf("$") > 0) {
+        		String cname = className;
+        		// SwingJS preload inner classes
+        		/**
+        		 * @j2sNative
+        		 * 
+        		 * Clazz.load(cname.replace("$","$.").split("$"));
+        		 */
+        	}
             Class c = Class.forName(className, true, null);
             if (methodName != null) {
                 Class[] types = getClassArray(args);
