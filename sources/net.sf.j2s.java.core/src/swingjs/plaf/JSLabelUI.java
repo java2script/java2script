@@ -2,15 +2,12 @@ package swingjs.plaf;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
 import javax.swing.AbstractButton;
-import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.LookAndFeel;
-import javax.swing.SwingConstants;
 
 import swingjs.api.js.DOMNode;
 
@@ -26,12 +23,6 @@ public class JSLabelUI extends JSLightweightUI {
 	protected int gap;
 	protected String text;
 
-	/**
-	 * label for JLabel; null for JSTooltipUI subclass of JSLabelUI 
-	 */
-	private boolean isImageIcon;
-
-
 	public JSLabelUI() {
 		setDoc();
 		isLabel = true;
@@ -41,31 +32,19 @@ public class JSLabelUI extends JSLightweightUI {
 	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			domNode = newDOMObject("label", id);
-			textNode = newDOMObject("span", id + "_text");
-			iconNode = newDOMObject("span", id + "_icon");
+			textNode = iconNode = null;
 			// labels are different from buttons, because we allow them to have
 			// different centerings - left, top, middle, bottom, etc.
-			centeringNode = newDOMObject("span", id + "_cntr");
-			centeringNode.appendChild(iconNode);
-			centeringNode.appendChild(textNode);
-			domNode.appendChild(centeringNode);
+			addCentering(domNode);
 		}
 		getIconAndText(); // could be ToolTip
 		setIconAndText("label", icon, gap, text);
 		DOMNode.setStyles(domNode, "position", "absolute", "width", c.getWidth()
 				+ "px", "height", c.getHeight() + "px");
-		if (actualHeight > 0)
-			DOMNode.setStyles(centeringNode, "position", "absolute", "height",
-					actualHeight + "px");
-		if (actualWidth > 0)
-			DOMNode.setStyles(centeringNode, "position", "absolute", "width",
-					actualWidth + "px");
-		setCssFont(centeringNode, c.getFont());
+		updateCenteringNode();
 		if (allowTextAlignment) {
 			// not for JToolTip
-			setHorizontalButtonAlignments((AbstractButton) (JComponent) label, label.getHorizontalTextPosition(),
-						label.getHorizontalAlignment());
-			vCenter(textNode, -50, 0);
+			setAlignments((AbstractButton) (JComponent) label);
 		}
 		if (jc.isEnabled())
 			setBackground(jc.isOpaque() ? jc.getBackground() : null);
@@ -75,24 +54,12 @@ public class JSLabelUI extends JSLightweightUI {
 	protected void getIconAndText() {	
 		// overridden in JSToolTipUI
 		label = (JLabel) jc;
-		
-		
 		icon = label.getIcon();
-		isImageIcon = (icon != null && icon instanceof ImageIcon);
 		gap = label.getIconTextGap();
 		text = label.getText();
 	}
 
 
-//	/**
-//	 * adding in outer styles for text alignment of a label
-//	 */
-//	@Override
-//	protected DOMNode setHTMLElement() {
-//		setHTMLElementCUI();
-//		return outerNode;
-//	}
-	
 	@Override
 	public void installUI(JComponent jc) {
 		label = (JLabel) jc;

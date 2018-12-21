@@ -94,9 +94,10 @@ public class JSTableUI extends JSPanelUI {
 	private int oldrh;
 	int currentRowMin = -1, currentRowMax = -1;
 	
-	private boolean isScrolling;
+	private boolean isScrolling, justLaidOut;
 
 	public void setScrolling() {
+		// from JSScrollPane
 		isScrolling = true;
 	}
 
@@ -107,14 +108,25 @@ public class JSTableUI extends JSPanelUI {
 	}
 
 	@Override
+	public void beginLayout() {
+		super.beginLayout();
+		System.out.println("begin table layout");
+	}
+
+	@Override
 	public void endLayout() {
 		super.endLayout();
 		System.out.println("end table layout");
+		currentRowMin = currentRowMax = -1;
 		setHTMLElement();
+		justLaidOut = true;
+		isUIDisabled = getHeaderUI().isUIDisabled = false;
 	}
 
 	@Override
 	public void update(Graphics g, JComponent c) {
+		if (isUIDisabled)
+			return;
 		// create the DOM elements, if needed
 		if (!isScrolling)
 			setHTMLElement();
@@ -141,13 +153,28 @@ public class JSTableUI extends JSPanelUI {
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
+		System.out.println("JSTableUI prop=" + e);
 		switch (prop) {
+		case "model":
+			currentRowMin = currentRowMax = -1;
+			isLaidOut = false;
+			isUIDisabled = getHeaderUI().isUIDisabled = true;
+			JScrollPane sp = getScrollPane();
+			if (sp != null) {
+				sp.getVerticalScrollBar().setValue(0);
+			}				
+
+			return;
 		case "autoCreateRowSorter":
 		case "rowSorter":
 		case "sorter":
 		case "autoResizeMode":
-		case "ancestor":
-//		case "model":
+//		case "ancestor":
+//			if (havePainted) {
+//				setTainted();
+////					rebuildTable();
+//				table.repaint();
+//			}
 			return;
 		case "tableCellEditor":
 			return;
@@ -216,7 +243,7 @@ public class JSTableUI extends JSPanelUI {
 			if (fullPaint && wasDisabled || cNoPrep != null) {
 				// repeat, now that the UI is enabled
 				if (wasDisabled)
-					ui.restoreCellNodes(td);
+					CellHolder.restoreUI(ui, td, row, col, w, h);
 				ui.setTainted();
 				table.prepareRenderer(renderer, row, col);
 			}
@@ -1974,6 +2001,7 @@ public class JSTableUI extends JSPanelUI {
 
 		int rMin = table.rowAtPoint(upperLeft);
 		int rMax = table.rowAtPoint(lowerRight);
+		
 
 		// This should never happen (as long as our bounds intersect the clip,
 		// which is why we bail above if that is the case).
@@ -1989,6 +2017,8 @@ public class JSTableUI extends JSPanelUI {
 		}
 
 		Rectangle bounds = table.getVisibleRect();// table.getBounds();
+
+		System.out.println("JSTable paint " + rMin + " " + rMax + " " + bounds);
 
 		if (table.getRowCount() <= 0 || table.getColumnCount() <= 0 ||
 		// this check prevents us from painting the entire table
@@ -2016,7 +2046,7 @@ public class JSTableUI extends JSPanelUI {
 			repaintAll = true;
 			if (!was0) {
 				rebuildTable();
-				table.getTableHeader().getUI().paint(g, c);
+				getHeaderUI().paint(g, c);
 				table.repaint(bounds);
 				return;
 			}
@@ -2083,7 +2113,7 @@ public class JSTableUI extends JSPanelUI {
 		TableColumn aColumn;
 		int columnWidth;
 
-		boolean forceNew = (dragging);// || rMin == rMax && cMin == cMax);
+		boolean forceNew = (dragging || justLaidOut);// || rMin == rMax && cMin == cMax);
 
 		if (table.getComponentOrientation().isLeftToRight()) {
 			for (int row = rMin0; row <= rMax0; row++) {
@@ -2130,6 +2160,7 @@ public class JSTableUI extends JSPanelUI {
 		// Remove any renderers that may be left in the rendererPane.
 		// rendererPane.removeAll();
 		isScrolling = false;
+		justLaidOut = false;
 		havePainted = true;
 	}
 
@@ -2167,14 +2198,7 @@ public class JSTableUI extends JSPanelUI {
 			if (comp == null)
 				return;
 			JSComponentUI ui = (JSComponentUI) ((JComponent) comp).getUI();
-//			if (fullPaint) {
-//				ui.restoreCellNodes(td);
-//				rendererPane.paintComponent(g, comp, table, cellRect.x, cellRect.y, cellRect.width, cellRect.height,
-//						!isScrolling);
-//				ui.saveCellNodes(td);
-//			} else {
-				rendererPane.paintComponent(g, comp, table, cellRect.x, cellRect.y, cellRect.width, cellRect.height, fullPaint && !isScrolling);
-//			}
+			rendererPane.paintComponent(g, comp, table, cellRect.x, cellRect.y, cellRect.width, cellRect.height, fullPaint && !isScrolling);
 			ui.setRenderer(null, 0, 0);
 		}
 	}
@@ -2513,6 +2537,7 @@ public class JSTableUI extends JSPanelUI {
 //
 
 	public void rebuildTable() {
+		System.out.println("JSTable rebuild");
 		setTainted();
 		currentRowMin = -1;
 		setHTMLElement();
@@ -2520,10 +2545,15 @@ public class JSTableUI extends JSPanelUI {
 	}
 
 	private void rebuildHeader() {
-		JSComponentUI ui = (JSComponentUI) table.getTableHeader().getUI();
+		JSComponentUI ui = getHeaderUI();
 		ui.setTainted();
 		ui.setHTMLElement();
 		table.getTableHeader().repaint();
+	}
+
+
+	private JSTableHeaderUI getHeaderUI() {
+		return (JSTableHeaderUI) table.getTableHeader().getUI();
 	}
 	
 }

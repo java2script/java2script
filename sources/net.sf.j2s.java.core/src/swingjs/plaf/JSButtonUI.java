@@ -33,17 +33,14 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
-import javax.swing.JTable;
-import javax.swing.JToggleButton;
 import javax.swing.LookAndFeel;
-import javax.swing.SwingConstants;
 import javax.swing.UIManager;
-import javax.swing.plaf.TableUI;
 import javax.swing.plaf.UIResource;
 
 import swingjs.api.js.DOMNode;
@@ -78,7 +75,6 @@ public class JSButtonUI extends JSLightweightUI {
 	/**
 	 * a wrapper if this is not a menu item
 	 */
-    protected DOMNode itemNode;
 	protected JMenuItem menuItem;
 	protected AbstractButton button;
 
@@ -90,20 +86,16 @@ public class JSButtonUI extends JSLightweightUI {
 		// all subclasses will have their own version of this.
 		// this one is only for a simple button
 		if (domNode == null) {
-			domNode = buttonNode = newDOMObject ("button", id, "type", "button");
-			iconNode = newDOMObject("span", id + "_icon");
-			enableNode = buttonNode;
+			domNode = enableNode = buttonNode = newDOMObject ("button", id + "_dom", "type", "button");
+			iconNode = null;
 			createButton();
-			DOMNode.setStyles(domNode, "lineHeight", "0.8");
 		}
 		setupButton();
 		return updateDOMNodeCUI();
 	}
 
 	protected void createButton() {
-		textNode = newDOMObject ("span", id + "_txt");
-		buttonNode.appendChild(iconNode);
-		buttonNode.appendChild(textNode);
+		addCentering(buttonNode);
 		setDataComponent(domNode);
 		setDataComponent(iconNode); // needed for mac safari/chrome
 		setDataComponent(textNode); // needed for mac safari/chrome
@@ -114,11 +106,11 @@ public class JSButtonUI extends JSLightweightUI {
 	 * 
 	 * @param type
 	 *          "_item" or "_menu"
-	 * @param label
+	 * @param buttonNode
 	 *          will be a for-label for radio and checkbox only; otherwise null
 	 * @return
 	 */
-	protected DOMNode createItem(String type, DOMNode label) {
+	protected DOMNode createItem(String type, DOMNode buttonNode) {
 		// all subclasses will call this method, including
 		// standard MenuItem and Menu labels
 
@@ -128,34 +120,28 @@ public class JSButtonUI extends JSLightweightUI {
 		String text = button.getText();
 		ImageIcon icon = (ImageIcon) button.getIcon();
 		int gap = button.getIconTextGap();
-		if (("|").equals(text) || ("-").equals(text)) {
+		isMenuSep = (("|").equals(text) || ("-").equals(text));
+		if (isMenuSep) {
+			// separator masquerading as a menu item
 			text = null;
 		}
 		itemNode = newDOMObject("li", id + type);
 		if (text == null && icon == null)
 			return itemNode;
-		centeringNode = menuAnchorNode = newDOMObject("a", id + type + "_a");
+		menuAnchorNode = newDOMObject("a", id + type + "_a");
 		DOMNode.setStyles(menuAnchorNode, "margin", "1px 2px 1px 2px");
 		itemNode.appendChild(menuAnchorNode);
-		if (label == null) {
+		if (buttonNode == null) {
 			// not a radio or checkbox
-			// TODO: add vertical centering 
-			boolean hasIcon = (iconNode != null);
-			if (iconNode == null)
-				iconNode = newDOMObject("span", id + "_icon");
-			if (textNode == null)
-				textNode = newDOMObject("span", id + "_text");
+			addCentering(menuAnchorNode);
 			$(iconNode).attr("role", "menucloser");
 			$(textNode).attr("role", "menucloser");
 			setDataUI(iconNode);
 			setDataUI(textNode);
-			menuAnchorNode.appendChild(iconNode);
-			menuAnchorNode.appendChild(textNode);
-			setCssFont(menuAnchorNode, c.getFont());
 			enableNode = menuAnchorNode;
 			setIconAndText("btn", icon, gap, text);
 		} else {
-			menuAnchorNode.appendChild(label);
+			menuAnchorNode.appendChild(buttonNode);
 		}
 		// j2sMenu.js will set the mouse-up event for the <a> tag with the
 		// role=menuitem
@@ -169,14 +155,14 @@ public class JSButtonUI extends JSLightweightUI {
 	}
 
 	protected void setupButton() {
-		if (!isMenuItem)
-			setPadding(button.getMargin());
 		setIconAndText("button", (ImageIcon) button.getIcon(), button.getIconTextGap(), button.getText());
 		// "emptyBorder" is not really empty.
 		if (button.getBorder() == null || button.getBorder() == BorderFactory.emptyBorder)
 			DOMNode.setStyles(buttonNode, "border", "none");
 		else if (button.getBorder() == BorderFactory.html5Border)
 			DOMNode.setStyles(buttonNode, "border", null);
+		if (!isMenuSep)
+			setAlignments(button);
 	}
 
 	/**
@@ -744,7 +730,7 @@ public class JSButtonUI extends JSLightweightUI {
 	@Override
 	protected void setInnerComponentBounds(int width, int height) {
 		if (isSimpleButton && (imageNode == null || button.getText() == null))
-			DOMNode.setSize(innerNode = domNode, width, height);
+			DOMNode.setSize(domNode, width, height);
 	}
 
 	@Override
@@ -752,6 +738,13 @@ public class JSButtonUI extends JSLightweightUI {
 		Dimension d = getPreferredSize(c);
 		return d;
 	}
+	
+	@Override
+	protected Dimension getHTMLSizePreferred(DOMNode obj, boolean addCSS) {
+		// addCSS is always false
+		setAlignments(button, !addCSS);
+		return setHTMLSize1(obj, addCSS, true);
+ 	}
 
 	@Override
 	public void paint(Graphics g, JComponent c) {

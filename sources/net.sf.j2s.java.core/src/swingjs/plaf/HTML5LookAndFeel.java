@@ -557,8 +557,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		InsetsUIResource threeInsets = new InsetsUIResource(3, 3, 3, 3);
 
 		// // *** Shared Borders
-		// Object marginBorder = new SwingLazyValue(
-		// "javax.swing.plaf.basic.BasicBorders$MarginBorder");
+	Object marginBorder = new SwingLazyValue("javax.swing.plaf.basic.BasicBorders$MarginBorder");
 	Object etchedBorder = new BorderUIResource.EtchedBorderUIResource();
 		Object loweredBevelBorder = new SwingLazyValue(
 		"javax.swing.plaf.BorderUIResource",
@@ -1168,8 +1167,8 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// "MenuItem.acceleratorForeground", menuText,
 				// "MenuItem.acceleratorSelectionForeground", textHighlightText,
 				// "MenuItem.acceleratorDelimiter", menuItemAcceleratorDelimiter,
-				// "MenuItem.border", marginBorder,
-				// "MenuItem.borderPainted", Boolean.FALSE,
+				"MenuItem.border", marginBorder,
+				"MenuItem.borderPainted", Boolean.FALSE,
 				"MenuItem.margin",
 				twoInsets,
 				// "MenuItem.checkIcon", menuItemCheckIcon,
@@ -1188,7 +1187,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// "RadioButtonMenuItem.acceleratorForeground", menuText,
 				// "RadioButtonMenuItem.acceleratorSelectionForeground",
 				// textHighlightText,
-				// "RadioButtonMenuItem.border", marginBorder,
+				"RadioButtonMenuItem.border", marginBorder,
 				// "RadioButtonMenuItem.borderPainted", Boolean.FALSE,
 				"RadioButtonMenuItem.margin",
 				twoInsets,
@@ -1207,8 +1206,8 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// "CheckBoxMenuItem.disabledForeground", null,
 				// "CheckBoxMenuItem.acceleratorForeground", menuText,
 				// "CheckBoxMenuItem.acceleratorSelectionForeground", textHighlightText,
-				// "CheckBoxMenuItem.border", marginBorder,
-				// "CheckBoxMenuItem.borderPainted", Boolean.FALSE,
+				"CheckBoxMenuItem.border", marginBorder,
+				"CheckBoxMenuItem.borderPainted", Boolean.FALSE,
 				"CheckBoxMenuItem.margin",
 				twoInsets,
 				// "CheckBoxMenuItem.checkIcon", checkBoxMenuItemIcon,
@@ -1226,8 +1225,8 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// "Menu.disabledForeground", null,
 				// "Menu.acceleratorForeground", menuText,
 				// "Menu.acceleratorSelectionForeground", textHighlightText,
-				// "Menu.border", marginBorder,
-				// "Menu.borderPainted", Boolean.FALSE,
+				"Menu.border", marginBorder,
+				"Menu.borderPainted", Boolean.FALSE,
 				"Menu.margin",
 				twoInsets,
 				// "Menu.checkIcon", menuItemCheckIcon,

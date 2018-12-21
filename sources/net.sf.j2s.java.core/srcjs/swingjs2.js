@@ -10659,6 +10659,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sCore.js (based on JmolCore.js
 
+// BH 12/20/2018 fixes mouse event extended modifiers for drag operation
 // BH 11/7/2018 adds J2S.addDirectDatabaseCall(domain)
 // BH 9/18/2018 fixes data.getBytes() not qualified
 // BH 8/12/2018 adding J2S.onClazzLoaded(i,msg) hook for customization
@@ -12463,24 +12464,28 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 
 	var getMouseModifiers = function(ev, id) {
 		// id needed to properly not assign the InputEvent.ButtonX_DOWN_MASK for an UP operation
+		// and also recognize a drag (503 + buttons pressed
 		var modifiers = 0;
-		if (id != 503)
-		switch (ev.button) {
-		default:
-			ev.button = 0;
-			// fall through
-		case 0:
-			modifiers = (1 << 4) | (id ? 0 : (1 << 10));// InputEvent.BUTTON1 +
-												// InputEvent.BUTTON1_DOWN_MASK;
-			break;
-		case 1:
-			modifiers = (1 << 3) | (id ? 0 : (1 << 11));// InputEvent.BUTTON2 +
-												// InputEvent.BUTTON2_DOWN_MASK;
-			break;
-		case 2:
-			modifiers = (1 << 2) | (id ? 0 : (1 << 12));// InputEvent.BUTTON3 +
-												// InputEvent.BUTTON3_DOWN_MASK;
-			break;
+		if (id == 503) {
+			modifiers = ev.buttons << 10;
+		} else {
+			switch (ev.button) {
+			default:
+				ev.button = 0;
+				// fall through
+			case 0:
+				modifiers = (1 << 4) | (id ? 0 : (1 << 10));// InputEvent.BUTTON1 +
+													// InputEvent.BUTTON1_DOWN_MASK;
+				break;
+			case 1:
+				modifiers = (1 << 3) | (id ? 0 : (1 << 11));// InputEvent.BUTTON2 +
+													// InputEvent.BUTTON2_DOWN_MASK;
+				break;
+			case 2:
+				modifiers = (1 << 2) | (id ? 0 : (1 << 12));// InputEvent.BUTTON3 +
+													// InputEvent.BUTTON3_DOWN_MASK;
+				break;
+			}
 		}
 		return modifiers | J2S.getKeyModifiers(ev);
 	}
@@ -13559,6 +13564,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 12/20/2018 3.2.4.05 fixes synthetic reference issue 
 // BH 12/13/2018 3.2.4.05 fixes Class.js field reflection, inner anonymous class of outer class creates wrong synthetic pointer 
 // BH 12/1/2018 3.2.4.04 fixes TypeError e.stack e not found
 // BH 11/11/2018 3.2.4.04 fixes String.CASE_INSENSITIVE_ORDER.compare$S$S
@@ -14157,14 +14163,15 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
 		// clone the map and overwrite with the correct values
       b = appendMap({},b);
 	  addB$Keys(clazz2, true, b, objThis, objThis);
+  } else if (isNew) {
+	  // it is new, save this map with the OUTER object as $b$
+	  // 12018.12.20 but only if it is clean 
+	  outerObj.$b$ = b;	  
   }
   
   // final objective: save this map for the inner object
   // add a flag to disallow any other same-class use of this map.
   b["$ " + innerName] = 1;
-  // it is new, save this map with the OUTER object as $b$
-  if (isNew)
-    outerObj.$b$ = b;
   objThis.b$ = b;
   clazz.$this$0 && (objThis.this$0 = b[clazz.$this$0]);
   clazz.$clinit$ && clazz.$clinit$();  

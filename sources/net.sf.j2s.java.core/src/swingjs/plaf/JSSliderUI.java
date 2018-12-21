@@ -262,7 +262,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 				+ (isHoriz ? "-vert" : "-horiz");
 		$(domNode).find("." + tickClass).remove();
 		$(domNode).find(".jslider-labels").remove();
-		setHTMLSizePreferred(jqSlider, false);
+		getHTMLSizePreferred(jqSlider, false);
 		if (majorSpacing == 0 && minorSpacing == 0 || !paintTicks && !paintLabels)
 			return;
 		int margin = 10;
@@ -297,7 +297,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 				domNode.insertBefore(node, sliderTrack);
 			}
 			if (!paintLabels)
-				setHTMLSizePreferred(domNode, false);
+				getHTMLSizePreferred(domNode, false);
 		}
 		if (paintLabels) {
 			myHeight += 20;
@@ -351,12 +351,12 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		if (!isHoriz)
 			DOMNode.setStyles(sliderTrack, "height", length + "px");
 		}
-		setHTMLSizePreferred(domNode, false);
+		getHTMLSizePreferred(domNode, false);
 	}
 
 
 	@Override
-	protected Dimension setHTMLSizePreferred(DOMNode obj, boolean addCSS) {
+	protected Dimension getHTMLSizePreferred(DOMNode obj, boolean addCSS) {
 		int d = 20;
 		if (paintLabels)
 			d += 10;

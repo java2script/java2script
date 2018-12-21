@@ -30,6 +30,7 @@ public class JSMenuUI extends JSMenuItemUI {
 			}
 			DOMNode.addJqueryHandledEvent(this, domNode, "mouseenter mouseleave");			
 		}
+
 		setCssFont(domNode, c.getFont()); 
 		DOMNode.setVisible(domNode, jc.isVisible());
 		return domNode;
@@ -105,5 +106,11 @@ public class JSMenuUI extends JSMenuItemUI {
 	public Dimension getMaximumSize() {
 		return getPreferredSize();
 	}
+
+	@Override
+	protected String getPropertyPrefix() {
+		return "Menu.";
+	}
+
 
 }
