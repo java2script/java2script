@@ -135,6 +135,8 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 	 */
 	Container getVisualPaneContent(JMenu menu, JMenu menu1, JMenu menu2) {
 
+		Font font = new Font("Verdana", Font.PLAIN, 12);
+
 		JPanel panel = new JPanel();
 		panel.setPreferredSize(new Dimension(400, 500));
 		panel.setOpaque(true);
@@ -144,7 +146,6 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		firstColumn.setLayout(new GridLayout(13, 1));
 		firstColumn.setBorder(new TitledBorder("column 1"));
 
-		Font font = new Font("Verdana", Font.PLAIN, 11);
 
 		JLabel l1 = new JLabel(getImage("test2.png"));
 		l1.setText("trailing right");
@@ -207,8 +208,6 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		firstColumn.add(rb2);
 		firstColumn.add(rb3);
 		firstColumn.setBounds(100, 20, 200, 500);
-
-		font = new Font("Verdana", Font.PLAIN, 11);
 
 		JMenuItem cb3m = new JMenuItem("XXleading,left-to-rightXX");
 		cb3m.setFont(font);
@@ -309,8 +308,13 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		m2.addMenuListener(this);
 		m2.add(cb6m);
 		m2.add(rb1m);
-
+		btn = new JMenuItem("-");
+		btn.setFont(font);
+		m2.add(btn);
 		m2.add(rb3m);
+		btn = new JMenuItem("-");
+		btn.setFont(font);
+		m2.add(btn);
 		m2.add(mb3);
 		m2.add(mb4);
 

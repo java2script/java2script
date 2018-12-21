@@ -130,7 +130,7 @@ public class JSMenuBarUI extends JSPanelUI implements ContainerListener {
 	
 	@Override
 	protected int getContainerHeight() {
-		return height = 25;
+		return height = menuBar.getFont().getFontMetrics().getHeight();
 	}
 //	@Override
 //	protected Dimension setHTMLSize(DOMNode obj, boolean addCSS) {
@@ -142,7 +142,7 @@ public class JSMenuBarUI extends JSPanelUI implements ContainerListener {
 	public Dimension getPreferredSize() {
 		// layout manager will call this specifically for the height
 		// we could make this larger if it ends up being multilevel?
-  	Dimension d = new Dimension(0, 25);
+  	Dimension d = new Dimension(0, getContainerHeight());
   	return d;
 	}
 	

@@ -73,11 +73,12 @@ public class SwingLazyValue implements UIDefaults.LazyValue {
 		public Object createValue(final UIDefaults table) {
         try {
         	if (className.indexOf("$") > 0) {
+        		String cname = className;
         		// SwingJS preload inner classes
         		/**
         		 * @j2sNative
         		 * 
-        		 * Clazz.load(className.split("$"));
+        		 * Clazz.load(cname.replace("$","$.").split("$"));
         		 */
         	}
             Class c = Class.forName(className, true, null);

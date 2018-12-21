@@ -194,7 +194,7 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 
 	@Override
 	public Insets getInsets() {
-		return new Insets(0, 0, 0, 0);
+		return zeroInsets; 
 	}
 
 	@Override
