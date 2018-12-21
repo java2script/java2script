@@ -1410,7 +1410,7 @@ public class JSComponentUI extends ComponentUI
 			}
 			ui.parent = this;
 			if (ui.getOuterNode() == null) {
-				System.out.println("JSCUI could not add " + ui.c.getName() + " to " + c.getName());
+				System.out.println("JSCUI addChildren no outer node for " + ui.id);
 			} else {
 				if (ui.domNode != ui.outerNode && DOMNode.getParent(ui.domNode) == null)
 					ui.outerNode.appendChild(ui.domNode);
@@ -1943,6 +1943,8 @@ public class JSComponentUI extends ComponentUI
 
 	protected Dimension preferredDim;
 
+	protected static Insets zeroInsets = new Insets(0, 0, 0, 0);
+	
 	protected void getJSInsets() {
 		if (insets == null)
 			insets = new Insets(0, 0, 0, 0);
@@ -2077,6 +2079,8 @@ public class JSComponentUI extends ComponentUI
 		}
 		boolean alignVCenter = (vAlign == SwingConstants.CENTER);
 		Insets margins = (isLabel ? insets : b.getMargin());
+		if (margins == null)
+			margins = zeroInsets;
 		int h = (dimText == null ? 0 : dimText.height);
 		int ih = (dimIcon == null ? 0 : dimIcon.height);
 		int hCtr = Math.max(h, ih);
@@ -2215,10 +2219,10 @@ public class JSComponentUI extends ComponentUI
 					"translateY(-" + itop + "%)" + (iscale == null ? "" : iscale));
 		} else {
 			DOMNode.setSize(menuAnchorNode, wCtr + margins.left + margins.right, h);
-			if (actionNode != null) {
-				DOMNode.setStyles(textNode, "top", "50%", "transform", "translateY(-80%)");
-				DOMNode.setStyles(iconNode, "top", "50%", "transform", "translateY(-100%) scale(0.6,0.6)");
-			}
+//			if (actionNode != null) {
+				DOMNode.setStyles(textNode, "top", "50%", "transform", "translateY(-60%)");
+				DOMNode.setStyles(iconNode, "top", "50%", "transform", "translateY(-80%) scale(0.6,0.6)");
+//			}
 		}
 	}
 
@@ -2573,6 +2577,7 @@ public class JSComponentUI extends ComponentUI
 		// hide if not a panel and bounds have not been set.
 		if (!boundsSet && !isContainer)
 			setVisible(false);
+		isLaidOut = false;
 		layingOut = true;
 	}
 

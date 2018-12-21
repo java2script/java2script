@@ -537,7 +537,7 @@ public class TableColumn extends Object  {
      *
      * @param  preferredWidth the new preferred width
      * @see     #getPreferredWidth
-     * @see     JTable#doLayout()
+     * @see     JTable#	
      * @beaninfo
      *  bound: true
      *  description: The preferred width of the column.

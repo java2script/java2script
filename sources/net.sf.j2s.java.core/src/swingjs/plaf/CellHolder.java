@@ -54,5 +54,9 @@ public abstract class CellHolder extends JSLightweightUI {
 		ui.saveCellNodes(td);
 	}
 
+	public static void restoreUI(JSComponentUI ui, DOMNode td, int row, int col, int w, int h) {
+			ui.restoreCellNodes(td);
+	}
+
 
 }

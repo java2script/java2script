@@ -1048,4 +1048,10 @@ public class JSTableHeaderUI extends JSLightweightUI {
 			ui.changeColumnWidth(resizingColumn, th, oldWidth, newWidth);
 		}
 	}
+	
+	@Override
+	protected DOMNode setHTMLElement() {
+		return setHTMLElementCUI();
+	}
+
 }
