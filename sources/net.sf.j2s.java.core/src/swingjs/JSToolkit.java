@@ -569,25 +569,6 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		return (Document) JSUtil.getInstance("swingjs.JSPlainDocument");
 	}
 
-	public static String getClassNameForObject(Object c) {
-		/**
-		 * @j2sNative
-		 * 
-		 *            return c.__CLASS_NAME__;
-		 * 
-		 */
-		{
-			return null;
-		}
-	}
-
-	
-
-	
-
-	
-
-
 
 	//////////////// images ///////////////
 	
