@@ -284,15 +284,18 @@ public abstract class JSComponent extends Component {
 	}
 
 	protected void updateUIZOrder() {
-		if (uiClassID != "DesktopPaneUI")
-			return;
+		
+// developer could have created their own LayeredPane
+//       if (uiClassID != "DesktopPaneUI")
+//			return;
+		
 		// set the n by their position in the component list using the 
 		// same z orders that are already there - probably something like 
 		// 10000, 11000, 12000
     	int n = ((Container) this).getComponentCount();
-    	JSComponent[] components = (JSComponent[]) getChildArray((Container) this);
     	if (n < 2)
     		return;
+    	JSComponent[] components = (JSComponent[]) getChildArray((Container) this);
     	int[] zorders = new int[n];
         for (int i = 0; i < n; i++)
             zorders[i] = ((JSComponentUI) components[i].getUI()).getZIndex(null);

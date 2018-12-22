@@ -698,7 +698,6 @@ public abstract class JComponent extends Container {
 					jsg.setColor(jc.getForeground());
 					jsg.setFont(jc.getFont());
 					boolean shouldSetFlagBack = false;
-					// System.out.println("JC Painting " + comp.getName() + " " + cr);
 					try {
 //						if (isJComponent) {
 							// if (getFlag(ANCESTOR_USING_BUFFER)) {
@@ -3511,7 +3510,7 @@ public abstract class JComponent extends Container {
 			// }
 		} else {
 			// SwingJS throw new IllegalArgumentException
-			System.out.println(JSToolkit.getClassNameForObject(this) + " property \""
+			System.out.println(getClass().getName() + " property \""
 					+ propertyName + "\" cannot be set using this method"
 					+ JSUtil.getStackTrace(5));
 		}
@@ -3788,10 +3787,6 @@ public abstract class JComponent extends Container {
 					&& (y + height) <= (cy + ch) && child.isVisible()) {
 
 				if (child instanceof JComponent) {
-					// System.out.println("A) checking opaque: " +
-					// ((JComponent)child).isOpaque() + "  " + child);
-					// System.out.print("B) ");
-					// Thread.dumpStack();
 					return ((JComponent) child).isOpaque();
 				} else {
 					/**
@@ -4227,7 +4222,6 @@ public abstract class JComponent extends Container {
 		// internal structural change.
 		if (ui != null)
 			((JSComponentUI)ui).setTainted();
-		// System.out.println("revalidate on " + this);
 		if (getParent() == null) {
 			// Note: We don't bother invalidating here as once added
 			// to a valid parent invalidate will be invoked (addImpl
@@ -4238,11 +4232,9 @@ public abstract class JComponent extends Container {
 			return;
 		}
 		if (SwingUtilities.isEventDispatchThread()) {
-			// System.out.println("JC revalidate invalidating dispatch " + this);
 			invalidate();
 			RepaintManager.currentManager(this).addInvalidComponent(this);
 		} else {
-			// System.out.println("JC revalidate checking flag " +
 			// getFlag(REVALIDATE_RUNNABLE_SCHEDULED) + " " + this);
 			// To avoid a flood of Runnables when constructing GUIs off
 			// the EDT, a flag is maintained as to whether or not
@@ -4253,7 +4245,6 @@ public abstract class JComponent extends Container {
 				}
 				setFlag(REVALIDATE_RUNNABLE_SCHEDULED, true);
 			}
-			// System.out.println("JC revalidate invoking later " + this);
 			// final Object me = this;
 			Runnable callRevalidate = new Runnable() {
 				@Override
@@ -4261,7 +4252,6 @@ public abstract class JComponent extends Container {
 					synchronized (JComponent.this) {
 						setFlag(REVALIDATE_RUNNABLE_SCHEDULED, false);
 					}
-					// System.out.println("JC revalidating " + me);
 					revalidate();
 				}
 			};
@@ -4421,8 +4411,6 @@ public abstract class JComponent extends Container {
 		paintImmediatelyClip.y = y;
 		paintImmediatelyClip.width = w;
 		paintImmediatelyClip.height = h;
-
-		// System.out.println("1) ************* in _paintImmediately for " + this);
 
 		boolean ontop = alwaysOnTop() && isOpaque();
 		if (ontop) {
