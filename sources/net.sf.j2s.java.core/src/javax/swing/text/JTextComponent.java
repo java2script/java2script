@@ -318,17 +318,7 @@ public abstract class JTextComponent extends JComponent implements Scrollable
 	 * subsystem of text. The document model is set to <code>null</code>.
 	 * 
 	 */
-	public JTextComponent() {
-		this("ComponentUI");
-	}
-
-	/**
-	 * SwingJS sets UID from constructors without a static reference
-	 * 
-	 * @param uid
-	 */
-	protected JTextComponent(String uid) {
-		super();
+	protected JTextComponent() {
 		// enable InputMethodEvent for on-the-spot pre-editing
 		enableEvents(AWTEvent.KEY_EVENT_MASK | AWTEvent.INPUT_METHOD_EVENT_MASK);
 		caretEvent = new MutableCaretEvent(this);
@@ -337,11 +327,10 @@ public abstract class JTextComponent extends JComponent implements Scrollable
 		setEditable(true);
 		setDragEnabled(false);
 		setLayout(null); // layout is managed by View hierarchy
-		uiClassID = uid;
 		updateUI();
-    setOpaque(true);// BH not sure why this is not here
+		setOpaque(true);// BH not sure why this is not here
 	}
-
+	
 	/**
 	 * Reloads the pluggable UI. The key used to fetch the new interface is
 	 * <code>getUIClassID()</code>. The type of the UI is <code>TextUI</code>.

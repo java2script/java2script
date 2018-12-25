@@ -116,32 +116,34 @@ public class JPasswordField extends JTextField {
         this(null, text, columns);
     }
 
-    /**
-     * Constructs a new <code>JPasswordField</code> that uses the
-     * given text storage model and the given number of columns.
-     * This is the constructor through which the other constructors feed.
-     * The echo character is set to '*', but may be changed by the current
-     * Look and Feel.  If the document model is
-     * <code>null</code>, a default one will be created.
-     *
-     * @param doc  the text storage to use
-     * @param txt the text to be displayed, <code>null</code> if none
-     * @param columns  the number of columns to use to calculate
-     *   the preferred width >= 0; if columns is set to zero, the
-     *   preferred width will be whatever naturally results from
-     *   the component implementation
-     */
-    public JPasswordField(Document doc, String txt, int columns) {
-        super(doc, txt, columns);
-    		uiClassID = "PasswordFieldUI";
-    		updateUI();
-        // We could either leave this on, which wouldn't be secure,
-        // or obscure the composted text, which essentially makes displaying
-        // it useless. Therefore, we turn off input methods.
-        //enableInputMethods(false);
-    }
+	/**
+	 * Constructs a new <code>JPasswordField</code> that uses the given text storage
+	 * model and the given number of columns. This is the constructor through which
+	 * the other constructors feed. The echo character is set to '*', but may be
+	 * changed by the current Look and Feel. If the document model is
+	 * <code>null</code>, a default one will be created.
+	 *
+	 * @param doc     the text storage to use
+	 * @param txt     the text to be displayed, <code>null</code> if none
+	 * @param columns the number of columns to use to calculate the preferred width
+	 *                >= 0; if columns is set to zero, the preferred width will be
+	 *                whatever naturally results from the component implementation
+	 */
+	public JPasswordField(Document doc, String txt, int columns) {
+		super(doc, txt, columns);
+		updateUI();
+		// We could either leave this on, which wouldn't be secure,
+		// or obscure the composted text, which essentially makes displaying
+		// it useless. Therefore, we turn off input methods.
+		// enableInputMethods(false);
+	}
 
+	@Override
+	public String getUIClassID() {
+		return "PasswordFieldUI";
+	}
 
+    
     /**
      * {@inheritDoc}
      * @since 1.6

@@ -263,14 +263,9 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 	 * 
 	 */
 	public JFrame(String title, GraphicsConfiguration gc) {
-		this(title, gc, "FrameUI");
-	}
-	
-	public JFrame(String title, GraphicsConfiguration gc, String uiid) {
 		initTitleGC(title, gc);
 		enableEvents(AWTEvent.KEY_EVENT_MASK | AWTEvent.WINDOW_EVENT_MASK);
 		setLocale(JComponent.getDefaultLocale());
-		uiClassID = uiid;
 		setRootPane(createRootPane());
 		rootPane.setFrameViewer(setFrameViewer(null));
 		setBackground(UIManager.getColor("control"));
@@ -289,9 +284,13 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 	}
 
 	public JFrame(Object object, Object object2, Object object3, Object object4) {
-		uiClassID = "FrameUI";
-		
 	}
+
+	@Override
+	public String getUIClassID() {
+		return "FrameUI";
+	}
+
 
 	private static int frameCount;
 

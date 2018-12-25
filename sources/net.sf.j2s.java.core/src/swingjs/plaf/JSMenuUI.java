@@ -104,7 +104,12 @@ public class JSMenuUI extends JSMenuItemUI {
 
 	@Override
 	public Dimension getMaximumSize() {
-		return getPreferredSize();
+		return super.getPreferredSize();
+	}
+
+	@Override
+	public Dimension getPreferredSize() {
+		return super.getPreferredSize();
 	}
 
 	@Override

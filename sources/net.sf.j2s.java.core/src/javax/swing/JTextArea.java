@@ -202,7 +202,6 @@ public class JTextArea extends JTextComponent {
      *  arguments are negative.
      */
     public JTextArea(Document doc, String text, int rows, int columns) {
-        super("TextAreaUI");
         this.rows = rows;
         this.columns = columns;
         if (doc == null) {
@@ -228,6 +227,11 @@ public class JTextArea extends JTextComponent {
                                     JComponent.
                                     getManagingFocusBackwardTraversalKeys());
     }
+
+	@Override
+	public String getUIClassID() {
+		return "TextAreaUI";
+	}
 
     /**
      * Creates the default implementation of the model

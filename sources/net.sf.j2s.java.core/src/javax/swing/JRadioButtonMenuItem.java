@@ -160,11 +160,21 @@ public class JRadioButtonMenuItem extends JMenuItem {
      * @param icon  the image that the button should display
      */
     public JRadioButtonMenuItem(String text, Icon icon, boolean selected) {
-        super(text, icon, "RadioButtonMenuItemUI");
-        setModel(new JToggleButton.ToggleButtonModel());
+        super(text, icon);
         setSelected(selected);
         setFocusable(false);
     }
+
+	@Override
+	public String getUIClassID() {
+		return "RadioButtonMenuItemUI";
+	}
+
+	@Override
+	protected void setModel() {
+        setModel(new JToggleButton.ToggleButtonModel());
+	}
+
 
     /**
      * Overriden to return true, JRadioButtonMenuItem supports

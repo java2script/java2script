@@ -1,13 +1,12 @@
 package swingjs.plaf;
 
-import java.awt.JSDialog;
 import java.awt.Dialog;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.JSComponent;
-import java.awt.Toolkit;
+import java.awt.JSDialog;
 import java.awt.Window;
 import java.awt.image.BufferedImage;
 import java.awt.peer.WindowPeer;
@@ -45,7 +44,9 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 
 	private Graphics2D graphics;
 
-	private Object dialogBlocker;
+//	private Object dialogBlocker;
+
+	protected boolean isPopup;
 
 	/*
 	 * Not Lightweight; an independent space with RootPane, LayeredPane,
@@ -90,11 +91,6 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 	}
 
 	@Override
-	public Toolkit getToolkit() {
-		return Toolkit.getDefaultToolkit();
-	}
-
-	@Override
 	public FontMetrics getFontMetrics(Font font) {
 		if (!font.equals(this.font))
 			this.window.setFont(this.font = font);
@@ -113,7 +109,8 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 
 	@Override
 	public void toBack() {
-		System.out.println("window to back for " + id);
+		if (debugging)
+			System.out.println("window to back for " + id);
 		z = J2S.setWindowZIndex(domNode, Integer.MIN_VALUE);
 		if (modalNode != null)
 			DOMNode.setZ(modalNode, z - 1);		
@@ -139,13 +136,13 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 
 	@Override
 	public void setModalBlocked(Dialog blocker, boolean blocked) {
-		JSDialog b = ((JSDialog) (Object) blocker);
-		dialogBlocker = (blocked ? b : null);
+//		JSDialog b = ((JSDialog) (Object) blocker);
+//		dialogBlocker = (blocked ? b : null);
 	}
 
 	@Override
 	public void setModalBlocked(JSDialog blocker, boolean blocked) {
-		dialogBlocker = (blocked ? blocker : null);
+//		dialogBlocker = (blocked ? blocker : null);
 	}
 
 	@Override
@@ -199,12 +196,14 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 
 	@Override
 	public void setVisible(boolean b) {
-		hideAllMenus();
+		if (!isPopup)
+			hideAllMenus();
 		super.setVisible(b);
 	}
 
-	private void hideAllMenus() {
-		$(".ui-menu").hide();
+	public static void hideAllMenus() {
+		//System.out.println("window hide all menus\n" + JSUtil.getStackTrace());
+		JSUtil.jQuery.$(".ui-menu").hide();
 	}
 	
 

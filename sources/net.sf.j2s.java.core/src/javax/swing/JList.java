@@ -416,9 +416,13 @@ public class JList extends JComponent implements Scrollable//, Accessible
         selectionModel = createSelectionModel();
         setAutoscrolls(true);
         setOpaque(true);
-        uiClassID = "ListUI";
         updateUI();
     }
+
+	@Override
+	public String getUIClassID() {
+		return "ListUI";
+	}
 
 
     /**

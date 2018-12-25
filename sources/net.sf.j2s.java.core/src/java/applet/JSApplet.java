@@ -27,19 +27,13 @@
  */
 package java.applet;
 
-import java.awt.HeadlessException;
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import java.awt.Dimension;
+import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.JSPanel;
-import java.awt.Panel;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Locale;
-
-import swingjs.JSToolkit;
-import swingjs.JSUtil;
-import swingjs.api.js.HTML5Applet;
 
 /**
  * SwingJS note: This class is the original java.applet.Applet class. 

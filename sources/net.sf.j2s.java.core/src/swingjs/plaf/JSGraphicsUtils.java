@@ -24,20 +24,19 @@
  */
 package swingjs.plaf;
 
-import javax.swing.*;
 import java.awt.Component;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
-import java.awt.event.KeyEvent;
 import java.awt.event.InputEvent;
 
-import sun.swing.SwingUtilities2;
+import javax.swing.AbstractButton;
+import javax.swing.Icon;
+import javax.swing.JComponent;
+import javax.swing.SwingUtilities;
 
 
 /*
@@ -47,9 +46,9 @@ import sun.swing.SwingUtilities2;
 public class JSGraphicsUtils
 {
 
-    private static final Insets GROOVE_INSETS = new Insets(2, 2, 2, 2);
-    private static final Insets ETCHED_INSETS = new Insets(2, 2, 2, 2);
-
+//    private static final Insets GROOVE_INSETS = new Insets(2, 2, 2, 2);
+//    private static final Insets ETCHED_INSETS = new Insets(2, 2, 2, 2);
+//
 //    public static void drawEtchedRect(Graphics g, int x, int y, int w, int h,
 //                                      Color shadow, Color darkShadow,
 //                                      Color highlight, Color lightHighlight)

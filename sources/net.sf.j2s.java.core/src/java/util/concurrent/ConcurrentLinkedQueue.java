@@ -118,7 +118,7 @@ public class ConcurrentLinkedQueue<E> extends AbstractQueue<E>
             AtomicReferenceFieldUpdater.newUpdater
             (Node.class, Object.class, "item");
 
-        Node(E x) { item = x; }
+//        Node(E x) { item = x; }
 
         Node(E x, Node<E> n) { item = x; next = n; }
 

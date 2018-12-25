@@ -134,34 +134,41 @@ public class JApplet extends JSApplet implements /* Accessible ,*/
     public JApplet() {
     	super();
     	setFrameViewer(appletViewer);
-		uiClassID = "AppletUI";
     	setJApplet();
         updateUI();
     }
+    
+	@Override
+	public String getUIClassID() {
+		return "AppletUI";
+	}
+
+
+    
     protected void setPanelUIClassID() {
     	// bypass JPanel UI call
 	}
 
-    private void setJApplet() {
+	private void setJApplet() {
 //    // Check the timerQ and restart if necessary.
 //    TimerQueue q = TimerQueue.sharedInstance();
 //    if(q != null) {
 //        q.startIfNeeded();
 //    }
 
-    setRootPane(createRootPane());
-    rootPane.setFrameViewer(appletViewer);
-    setForeground(Color.black);
-    setBackground(Color.white);
-    setLocale( JComponent.getDefaultLocale() );
-    setLayout(new BorderLayout());
-    setRootPaneCheckingEnabled(true);
+		setRootPane(createRootPane());
+		rootPane.setFrameViewer(appletViewer);
+		setForeground(Color.black);
+		setBackground(Color.white);
+		setLocale(JComponent.getDefaultLocale());
+		setLayout(new BorderLayout());
+		setRootPaneCheckingEnabled(true);
 
-    setFocusTraversalPolicyProvider(true);
-    // SwingJS  ?? sun.awt.SunToolkit.checkAndSetPolicy(this, true);
+		setFocusTraversalPolicyProvider(true);
+		// SwingJS ?? sun.awt.SunToolkit.checkAndSetPolicy(this, true);
 
-    enableEvents(AWTEvent.KEY_EVENT_MASK);
-		}
+		enableEvents(AWTEvent.KEY_EVENT_MASK);
+	}
 
 
 		/** Called by the constructor methods to create the default rootPane. */

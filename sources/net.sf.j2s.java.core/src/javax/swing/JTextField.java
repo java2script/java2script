@@ -243,7 +243,6 @@ public class JTextField extends JTextComponent implements SwingConstants {
 	 *              if <code>columns</code> < 0
 	 */
 	public JTextField(Document doc, String text, int columns) {
-		super("TextFieldUI");
 		if (columns < 0) {
 			throw new IllegalArgumentException("columns less than zero.");
 		}
@@ -257,6 +256,11 @@ public class JTextField extends JTextComponent implements SwingConstants {
 		if (text != null) {
 			setText(text);
 		}
+	}
+
+	@Override
+	public String getUIClassID() {
+		return "TextFieldUI";
 	}
 
     /**

@@ -358,7 +358,7 @@ class FileTreeWalker implements Closeable {
                 try {
                     top.stream().close();
                 } catch (IOException e) {
-                    if (ioe != null) {
+                    if (ioe == null) {
                         ioe = e;
                     } else {
                         ioe.addSuppressed(e);

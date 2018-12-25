@@ -1750,6 +1750,8 @@ public abstract class AbstractButton extends JComponent implements ItemSelectabl
         return model;
     }
 
+    protected abstract void setModel();
+    
     /**
      * Sets the model that this button represents.
      * @param newModel the new <code>ButtonModel</code>
@@ -2174,7 +2176,7 @@ public abstract class AbstractButton extends JComponent implements ItemSelectabl
         return selectedObjects;
     }
 
-    protected void init(String text, Icon icon, String uid) {
+    protected void init(String text, Icon icon) {
         if(text != null) {
             setText(text);
         }
@@ -2183,14 +2185,12 @@ public abstract class AbstractButton extends JComponent implements ItemSelectabl
             setIcon(icon);
         }
 
-        uiClassID = uid;
         // Set the UI
         updateUI();
 
         setAlignmentX(LEFT_ALIGNMENT);
         setAlignmentY(CENTER_ALIGNMENT);
     }
-
 
     /**
      * This is overridden to return false if the current <code>Icon</code>'s

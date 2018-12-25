@@ -163,10 +163,15 @@ public class JRadioButton extends JToggleButton {
      * @param icon  the image that the button should display
      */
     public JRadioButton (String text, Icon icon, boolean selected) {
-        super(text, icon, selected, "RadioButtonUI");
+        super(text, icon, selected);
         setBorderPainted(false);
         setHorizontalAlignment(LEADING);
     }
+
+	@Override
+	public String getUIClassID() {
+		return "RadioButtonUI";
+	}
 
 
     /**

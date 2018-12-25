@@ -13689,10 +13689,12 @@ try {
 
 Clazz.setTVer = function(ver) {
 	if (Clazz._VERSION_T != ver) {
-		System.err.println("transpiler was " + Clazz._VERSION_T + " now " + ver);
+		System.err.println("transpiler was " + Clazz._VERSION_T + " now " + ver + " for " + lastLoaded);
 	}
 	Clazz._VERSION_T = ver;
 }
+
+var lastLoaded;
 
 Clazz.ClassFilesLoaded = [];
 
@@ -16113,6 +16115,7 @@ _Loader.loadClass = _Loader.prototype.loadClass = function (name, onLoaded, forc
 
   //System.out.println("loadClass " + name)
   var path = _Loader.getClasspathFor(name);
+  lastLoaded = name;
   Clazz.ClassFilesLoaded.push(name.replace(/\./g,"/") + ".js");
     Clazz.loadScript(path);//(n, n.path, n.requiredBy, false, onLoaded ? function(_loadClass){ isLoadingEntryClass = bSave; onLoaded()}: null);
 }

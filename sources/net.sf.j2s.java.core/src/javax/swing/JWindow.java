@@ -280,10 +280,14 @@ public class JWindow extends Window implements RootPaneContainer {
 		setRootPane(createRootPane());
 		rootPane.setFrameViewer(setFrameViewer(null));
 		setRootPaneCheckingEnabled(true);
-		uiClassID = "WindowUI";
 		updateUI();
 		addNotify(); // BH added; applet will not do this automatically
 		rootPane.addNotify(); // builds a peer for the root pane
+	}
+
+	@Override
+	public String getUIClassID() {
+		return "WindowUI";
 	}
 
 	static int windowCount;

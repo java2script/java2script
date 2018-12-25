@@ -31,12 +31,11 @@ package javax.swing;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.JSDialog;
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.JSFrame;
 import java.awt.HeadlessException;
-import java.awt.KeyboardFocusManager;
+import java.awt.JSDialog;
+import java.awt.JSFrame;
 import java.awt.Point;
 import java.awt.Window;
 import java.awt.event.ComponentAdapter;
@@ -1977,9 +1976,14 @@ public class JOptionPane extends JComponent {
 		setOptionType(optionType);
 		value = UNINITIALIZED_VALUE;
 		inputValue = UNINITIALIZED_VALUE;
-		uiClassID = "OptionPaneUI";
 		updateUI();
 	}
+
+	@Override
+	public String getUIClassID() {
+		return "OptionPaneUI";
+	}
+
 
 	/**
 	 * Sets the UI object which implements the L&F for this component.

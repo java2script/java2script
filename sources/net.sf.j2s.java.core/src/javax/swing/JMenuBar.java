@@ -97,9 +97,14 @@ public class JMenuBar extends JComponent implements MenuElement
         super();
         //setFocusTraversalKeysEnabled(false);
         setSelectionModel(new DefaultSingleSelectionModel());
-        uiClassID = "MenuBarUI";
         updateUI();
     }
+
+	@Override
+	public String getUIClassID() {
+		return "MenuBarUI";
+	}
+
 
 
     /**

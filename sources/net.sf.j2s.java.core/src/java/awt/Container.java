@@ -4558,7 +4558,7 @@ class LightweightDispatcher implements AWTEventListener {
     public void checkInternalFrameMouseDown(JSComponent c) {
     	JSFrameViewer fv = c.getFrameViewer();
     	JSComponent top = fv.getTopComponent();
-    	if (top.uiClassID == "InternalFrameUI")
+    	if (top.getUIClassID() == "InternalFrameUI")
 			try {
 				((JInternalFrame) top).setSelected(true);
 			} catch (PropertyVetoException e) {
@@ -4773,7 +4773,7 @@ class LightweightDispatcher implements AWTEventListener {
 		for (; component != null && component != nativeContainer; component = component.getParent()) {
 			x -= component.x;
 			y -= component.y;
-			if (((JSComponent) component).uiClassID == "PopupMenuUI")
+			if (((JSComponent) component).getUIClassID() == "PopupMenuUI")
 				break; // SwingJS not to worry
 		}
 		MouseEvent retargeted;

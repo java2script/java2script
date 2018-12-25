@@ -317,10 +317,15 @@ public class JSplitPane extends JComponent {
 			setLeftComponent(newLeftComponent);
 		if (newRightComponent != null)
 			setRightComponent(newRightComponent);
-		uiClassID = "SplitPaneUI";
 		updateUI();
 
 	}
+
+	@Override
+	public String getUIClassID() {
+		return "SplitPaneUI";
+	}
+
 
 	/**
 	 * Sets the size of the divider.

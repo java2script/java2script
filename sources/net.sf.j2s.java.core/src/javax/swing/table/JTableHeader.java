@@ -142,18 +142,19 @@ public class JTableHeader extends JComponent implements TableColumnModelListener
 
         //setFocusable(false); // for strict win/mac compatibility mode,
                                // this method should be invoked
-
         if (cm == null)
             cm = createDefaultColumnModel();
         setColumnModel(cm);
-
         // Initialize local ivars
         initializeLocalVars();
-
-        // Get UI going
-        uiClassID = "TableHeaderUI";
         updateUI();
     }
+
+	@Override
+	public String getUIClassID() {
+		return "TableHeaderUI";
+	}
+
 
 //
 // Local behavior attributes

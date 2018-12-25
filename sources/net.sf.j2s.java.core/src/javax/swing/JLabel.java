@@ -143,10 +143,15 @@ public class JLabel extends JComponent implements SwingConstants/*, Accessible*/
         setText(text);
         setIcon(icon);
         setHorizontalAlignment(horizontalAlignment);
-        uiClassID = "LabelUI";
         updateUI();
         setAlignmentX(LEFT_ALIGNMENT);
     }
+
+	@Override
+	public String getUIClassID() {
+		return "LabelUI";
+	}
+
 
     /**
      * Creates a <code>JLabel</code> instance with the specified

@@ -1047,17 +1047,17 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
         }
     }
 
-    /**
-     * This private constructor is for internal use and assumes that its
-     * arguments are correct.
-     */
-    private BigInteger(byte[] magnitude, int signum) {
-        this.signum = (magnitude.length == 0 ? 0 : signum);
-        this.mag = stripLeadingZeroBytes(magnitude);
-        if (mag.length >= MAX_MAG_LENGTH) {
-            checkRange();
-        }
-    }
+//    /**
+//     * This private constructor is for internal use and assumes that its
+//     * arguments are correct.
+//     */
+//    private BigInteger(byte[] magnitude, int signum) {
+//        this.signum = (magnitude.length == 0 ? 0 : signum);
+//        this.mag = stripLeadingZeroBytes(magnitude);
+//        if (mag.length >= MAX_MAG_LENGTH) {
+//            checkRange();
+//        }
+//    }
 
     /**
      * Throws an {@code ArithmeticException} if the {@code BigInteger} would be
@@ -1256,7 +1256,6 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
      * non-negative
      */
     private static int[] add(int[] x, long val) {
-        int[] y;
         long sum = 0;
         int xIndex = x.length;
         int[] result;
