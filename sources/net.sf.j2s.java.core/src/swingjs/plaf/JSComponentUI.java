@@ -710,10 +710,8 @@ public class JSComponentUI extends ComponentUI
 		 * @j2sNative
 		 * 
 		 * 			node.focus(function() {me.notifyFocus$Z(true)});
-		 *            node.blur(function() {me.notifyFocus$Z(false)});
+		 *            node.blur(function() {try{me.notifyFocus$Z(false)}catch(e){}});
 		 */
-		{
-		}
 	}
 
 	/**
@@ -1085,12 +1083,11 @@ public class JSComponentUI extends ComponentUI
 	protected DOMNode setCssFont(DOMNode obj, Font font) {
 		if (font != null) {
 			int istyle = font.getStyle();
-			String name = font.getFamily();
-			if (name == "Dialog" || name == "SansSerif")
-				name = "Arial";
-			DOMNode.setStyles(obj, "font-family", name, "font-size", font.getSize() + "px", "font-style",
-					((istyle & Font.ITALIC) == 0 ? "normal" : "italic"), "font-weight",
-					((istyle & Font.BOLD) == 0 ? "normal" : "bold"));
+			DOMNode.setStyles(obj, 
+					"font-family", JSToolkit.getCSSFontFamilyName(font.getFamily()), 
+					"font-size", font.getSize() + "px", 
+					"font-style", ((istyle & Font.ITALIC) == 0 ? "normal" : "italic"), 
+					"font-weight", ((istyle & Font.BOLD) == 0 ? "normal" : "bold"));
 		}
 
 		// if (c.isBackgroundSet())
@@ -1502,12 +1499,22 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public Dimension getMinimumSize() {
-		return getMinimumSize(jc);
+		return getPreferredSize();
 	}
 
-	@Override
-	public Dimension getMaximumSize() {
+	protected Dimension getMaximumSize() {
 		return getMaximumSize(jc);
+	}
+	
+	@Override
+	public Dimension getMaximumSize(JComponent jc) {
+		if (isToolbarFixed) { // default is true
+			Container parent = jc.getParent();
+			String parentClass = (parent == null ? null : parent.getUIClassID());
+			if ("ToolBarUI" == parentClass)
+				return getPreferredSize();
+		}
+		return getPreferredSize();
 	}
 
 	/**
@@ -1520,38 +1527,10 @@ public class JSComponentUI extends ComponentUI
 	 * Later, the LayoutManager will make a call to setBounds in order to complete
 	 * the transaction, after taking everything into consideration.
 	 * 
-	 * SwingJS: Do not override this method.
-	 * 
 	 */
 	@Override
 	public Dimension getPreferredSize() {
-		return getPreferredSize(jc);
-	}
-
-	// the following are likely to be called in the original BasicXXXUI classes
-
-	Dimension getMinimumSize(JComponent jc) {
-		return getPreferredSize(jc);
-	}
-
-	/**
-	 * SwingJS: Override this method to set preferred sizes
-	 * 
-	 * @param jc
-	 * @return
-	 */
-	Dimension getPreferredSize(JComponent jc) {
 		return getHTMLSizePreferred(updateDOMNode(), false);
-	}
-
-	Dimension getMaximumSize(JComponent jc) {
-		if (isToolbarFixed) { // default is true
-			Container parent = jc.getParent();
-			String parentClass = (parent == null ? null : parent.getUIClassID());
-			if ("ToolBarUI" == parentClass)
-				return getPreferredSize();
-		}
-		return null;
 	}
 
 	/**

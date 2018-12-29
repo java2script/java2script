@@ -1474,7 +1474,7 @@ public abstract class JComponent extends Container {
 
 	public Dimension getPrefSizeJComp() {
 		Dimension size = (isPreferredSizeSet() || ui == null ? null : ui
-				.getPreferredSize());
+				.getPreferredSize(this));
 		return (size == null ? preferredSize() : size);
 	}
 
@@ -1512,7 +1512,7 @@ public abstract class JComponent extends Container {
 		}
 		Dimension size = null;
 		if (ui != null) {
-			size = ui.getMaximumSize();
+			size = ui.getMaximumSize(this);
 		}
 		return (size != null) ? size : super.getMaximumSize();
 	}
@@ -1550,7 +1550,7 @@ public abstract class JComponent extends Container {
 		}
 		Dimension size = null;
 		if (ui != null) {
-			size = ui.getMinimumSize();
+			size = ui.getMinimumSize(this);
 		}
 		return (size != null) ? size : super.getMinimumSize();
 	}

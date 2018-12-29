@@ -186,9 +186,8 @@ public abstract class ComponentUI implements ComponentPeer {
 	 * @see javax.swing.JComponent#getPreferredSize
 	 * @see java.awt.LayoutManager#preferredLayoutSize
 	 */
-	@Override
-	public Dimension getPreferredSize() {
-		return null;
+	public Dimension getPreferredSize(JComponent c) {
+		return getPreferredSize();
 	}
 
 	/**
@@ -205,8 +204,7 @@ public abstract class ComponentUI implements ComponentPeer {
 	 * @see java.awt.LayoutManager#minimumLayoutSize
 	 * @see #getPreferredSize
 	 */
-	@Override
-	public Dimension getMinimumSize() {
+	public Dimension getMinimumSize(JComponent c) {
 		return getPreferredSize();
 	}
 
@@ -223,8 +221,8 @@ public abstract class ComponentUI implements ComponentPeer {
 	 * @see javax.swing.JComponent#getMaximumSize
 	 * @see java.awt.LayoutManager2#maximumLayoutSize
 	 */
-	public Dimension getMaximumSize() {
-		return null;// getPreferredSize(c);
+	public Dimension getMaximumSize(JComponent c) {
+		return getPreferredSize();
 	}
 
 	/**

@@ -671,13 +671,13 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
     }
 
     @Override
-	public Dimension getMinimumSize(JComponent c) {
+	public Dimension getMinimumSize() {
         // Default to LayoutManager's minimumLayoutSize
         return null;
     }
 
     @Override
-	public Dimension getMaximumSize(JComponent c) {
+	protected Dimension getMaximumSize() {
         // Default to LayoutManager's maximumLayoutSize
         return null;
     }

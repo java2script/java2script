@@ -911,7 +911,7 @@ public class JSTableHeaderUI extends JSLightweightUI {
 	 * maximum widths of each column (plus inter-cell spacing).
 	 */
 	@Override
-	public Dimension getMaximumSize() {
+	protected Dimension getMaximumSize() {
 		long width = 0;
 		Enumeration enumeration = tableHeader.getColumnModel().getColumns();
 		while (enumeration.hasMoreElements()) {

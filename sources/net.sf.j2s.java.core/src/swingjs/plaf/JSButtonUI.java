@@ -748,9 +748,8 @@ public class JSButtonUI extends JSLightweightUI {
 	}
 
 	@Override
-	public Dimension getMaximumSize(JComponent c) {
-		Dimension d = getPreferredSize(c);
-		return d;
+	protected Dimension getMaximumSize() {
+		return getPreferredSize();
 	}
 	
 	@Override

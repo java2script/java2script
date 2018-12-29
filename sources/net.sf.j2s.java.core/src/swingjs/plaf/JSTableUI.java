@@ -201,7 +201,7 @@ public class JSTableUI extends JSPanelUI {
 			currentRowMin = currentRowMax = -1;
 		}
 
-		Dimension d = getPreferredSize(jc);
+		Dimension d = getPreferredSize();
 		int w = d.width;// tcm.getTotalColumnWidth();
 		int h = d.height;// table.getVisibleRect().height - thh;
 
@@ -1951,7 +1951,7 @@ public class JSTableUI extends JSPanelUI {
 	 * preferred widths of each column.
 	 */
 	@Override
-	public Dimension getPreferredSize(JComponent c) {
+	public Dimension getPreferredSize() {
 		long width = 0;
 		Enumeration<TableColumn> enumeration = table.getColumnModel().getColumns();
 		while (enumeration.hasMoreElements()) {
@@ -1967,7 +1967,7 @@ public class JSTableUI extends JSPanelUI {
 	 * widths of each column.
 	 */
 	@Override
-	public Dimension getMaximumSize(JComponent c) {
+	protected Dimension getMaximumSize() {
 		long width = 0;
 		Enumeration<TableColumn> enumeration = table.getColumnModel().getColumns();
 		while (enumeration.hasMoreElements()) {

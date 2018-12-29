@@ -3,6 +3,7 @@ package swingjs.plaf;
 import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 
+import javax.swing.JComponent;
 import javax.swing.JScrollBar;
 import javax.swing.event.ChangeEvent;
 import swingjs.api.js.DOMNode;

@@ -52,7 +52,7 @@ public class JSPanelUI extends JSLightweightUI {
 
 	@Override
 	public Dimension getPreferredSize() {
-  	return null;
+		return null;
   }
 	
 	@Override

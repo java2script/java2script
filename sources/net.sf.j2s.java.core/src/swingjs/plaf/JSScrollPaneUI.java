@@ -262,7 +262,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 	 * @return new Dimension(Short.MAX_VALUE, Short.MAX_VALUE)
 	 */
 	@Override
-	public Dimension getMaximumSize(JComponent c) {
+	protected Dimension getMaximumSize() {
 		return new Dimension(Short.MAX_VALUE, Short.MAX_VALUE);
 	}
 

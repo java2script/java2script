@@ -851,7 +851,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	 * @return the size
 	 */
 	@Override
-	public Dimension getMaximumSize() {
+	protected Dimension getMaximumSize() {
 
 		return super.getMaximumSize();
 
@@ -2814,8 +2814,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		String val = getJSTextValue();
 		if (!val.equals(currentText)) {
 			String oldval = currentText;
-			System.out.println("from HTML: " + DOMNode.getAttr(domNode, "innerHTML"));
-			System.out.println("to editor: " + val.replace('\n', '.'));
+			//System.out.println("from HTML: " + DOMNode.getAttr(domNode, "innerHTML"));
+			//System.out.println("to editor: " + val.replace('\n', '.'));
 			editor.setText(val);
 			// TODO: why this?
 			editor.firePropertyChange("text", oldval, val);
@@ -2824,7 +2824,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	}
 
 	void setTextDelayed() {
-		setText(editor.getText());
+		updateDOMNode();
+//		setText(editor.getText());
 	}
 
 	@SuppressWarnings("unused")
@@ -2841,7 +2842,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		if (r1 == null || r2 == null)
 			return;
 		
-		System.out.println("setJSSelection to " + start + " " + end + " " + r1 + " " + r2);
+		//System.out.println("setJSSelection to " + start + " " + end + " " + r1 + " " + r2);
 
 		
 		jsSelect(r1, r2);
@@ -2862,13 +2863,18 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	protected boolean requestFocus() {
 		if (!super.requestFocus())
 			return false;
-		setJSSelection();
+		if (haveSelection()) {
+			
+		} else {
+			// need to transfer selection to this component
+			setJSSelection();
+		}
 		return true;
 	}
 		
-//	private boolean haveSelection() {
-//		return jquery.contains(domNode, /** @j2sNative window.getSelection().anchorNode || */ null);
-//	}
+	boolean haveSelection() {
+		return jquery.contains(domNode, /** @j2sNative window.getSelection().anchorNode || */ null);
+	}
 
 
 }
