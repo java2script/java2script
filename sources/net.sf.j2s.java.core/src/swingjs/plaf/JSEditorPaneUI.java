@@ -200,9 +200,8 @@ public class JSEditorPaneUI extends JSTextUI {
 		}
 		if (isSup)
 			sb.append("</sup>");
-		if (isSub)
+		else if (isSub)
 			sb.append("</sub>");
-		sb.append(isDiv ? "</div>" : "</span>");
 	}
 
 	private static String getCSSStyle(AttributeSet a, AttributeSet currAttr) {
@@ -282,12 +281,17 @@ public class JSEditorPaneUI extends JSTextUI {
 			lastTextNode = null;
 			off = 0;
 		}
+		// Must consider several cases for BR and DIV:
+		// <br>
+		// <div><br><div> --> [div, 0]
+		// <div>.....<br><div>
+		
 		/**
 		 * @j2sNative
 			var nodes = node.childNodes;
 			var n = nodes.length;
-			if (n == 1 && nodes[0].tagName == "BR" || node.tagName == "BR") {
-				return (pt == off ? [node, 0] : [null, 1]);
+			if (n > 0 && nodes[n - 1].tagName == "BR" || node.tagName == "BR") {
+				return (pt == off ? [node, n == 0 ? 0 : n - 1] : [null, 1]);
 			} 
 			var ipt = off;
 			var nlen = 0;
