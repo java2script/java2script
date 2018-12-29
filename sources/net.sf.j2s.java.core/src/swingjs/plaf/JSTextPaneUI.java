@@ -28,6 +28,8 @@ import java.beans.PropertyChangeEvent;
 
 import javax.swing.JComponent;
 
+import swingjs.api.js.DOMNode;
+
 
 /**
  * Provides the look and feel for a styled text editor.
@@ -52,6 +54,11 @@ public class JSTextPaneUI extends JSEditorPaneUI {
         super();
     }
 
+    
+    @Override
+    public DOMNode updateDOMNode() {
+    	return super.updateDOMNode();
+    }
     /**
      * Fetches the name used as a key to lookup properties through the
      * UIManager.  This is used as a prefix to all the standard

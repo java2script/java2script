@@ -487,7 +487,7 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected boolean allowTextAlignment = true;
 
-	private static JQuery jquery = JSUtil.getJQuery();
+	protected static JQuery jquery = JSUtil.getJQuery();
 
 	protected boolean isPopupMenu;
 
@@ -1662,7 +1662,7 @@ public class JSComponentUI extends ComponentUI
 	 * @return texat
 	 */
 	public String getJSTextValue() {
-		return (String) DOMNode.getAttr(domNode, valueNode == null ? "innerHTML" : "value");
+		return (String) DOMNode.getAttr(domNode, valueNode == null ? "innerText" : "value");
 	}
 
 	DOMNode getOuterNode() {
@@ -2397,13 +2397,16 @@ public class JSComponentUI extends ComponentUI
 	@Override
 	public boolean requestFocus(Component lightweightChild, boolean temporary, boolean focusedWindowChangeAllowed,
 			long time, Cause cause) {
+		if (lightweightChild == null)
+			return requestFocus();
+		else
+			return JSToolkit.requestFocus(lightweightChild);
+	}
+
+	protected boolean requestFocus() {
 		if (focusNode == null || isUIDisabled)
 			return false;
 		$(focusNode).focus();
-		if (textNode != null)
-			$(textNode).select();
-		else if (valueNode != null)
-			$(valueNode).select();
 		return true;
 	}
 

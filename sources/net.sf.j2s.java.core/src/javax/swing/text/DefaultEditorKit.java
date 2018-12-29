@@ -35,7 +35,8 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 
-import swingjs.JSPlainDocument;
+import swingjs.JSToolkit;
+//import swingjs.JSPlainDocument;
 import swingjs.api.Interface;
 
 import java.awt.ComponentOrientation;
@@ -146,8 +147,9 @@ public class DefaultEditorKit extends EditorKit {
      */
     @Override
 		public Document createDefaultDocument() {
-    	// SwingJS -- temporarily using JSPlainDocument here
-        return new JSPlainDocument();
+    	// SwingJS 
+    	return JSToolkit.getPlainDocument();
+//        return new PlainDocument();
     }
 
     /**

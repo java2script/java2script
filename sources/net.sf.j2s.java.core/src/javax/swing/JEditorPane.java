@@ -2213,6 +2213,7 @@ public class JEditorPane extends JTextComponent {
          */
         @Override
 				public View create(Element elem) {
+// SwingJS "i18n" not implemented
 //            Document doc = elem.getDocument();
 //            Object i18nFlag
 //                = doc.getProperty("i18n"/*AbstractDocument.I18NProperty*/);

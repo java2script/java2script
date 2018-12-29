@@ -534,7 +534,9 @@ public class StyleContext implements  AbstractDocument.AttributeContext {
     AttributeSet getImmutableUniqueSet() {
         // PENDING(prinz) should consider finding a alternative to
         // generating extra garbage on search key.
-//        SmallAttributeSet key = createSmallAttributeSet(search);
+        SmallAttributeSet key = createSmallAttributeSet(search);
+        return key;
+// SwingJS does not implement WeakReference
 //        WeakReference reference = (WeakReference)attributesPool.get(key);
 //        SmallAttributeSet a;
 //        if (reference == null
@@ -543,7 +545,6 @@ public class StyleContext implements  AbstractDocument.AttributeContext {
 //            attributesPool.put(a, new WeakReference(a));
 //        }
 //        return a;
-    	return null;
     }
 
     /**

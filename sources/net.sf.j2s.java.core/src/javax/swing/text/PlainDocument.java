@@ -84,8 +84,8 @@ public class PlainDocument extends AbstractDocument {
      * <code>GapContent</code> is constructed and set.
      */
     public PlainDocument() {
-    	this(null);
-//        this(new GapContent());
+//    	this(null);
+        this(new GapContent());
     }
 
     /**

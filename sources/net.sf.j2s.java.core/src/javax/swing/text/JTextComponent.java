@@ -73,7 +73,6 @@ import javax.swing.plaf.TextUI;
 import javax.swing.plaf.UIResource;
 
 import sun.awt.AppContext;
-import swingjs.JSPlainDocument;
 import swingjs.JSUtil;
 //import java.text.AttributedCharacterIterator;
 //import java.text.AttributedString;
@@ -1596,7 +1595,6 @@ public abstract class JTextComponent extends JComponent implements Scrollable
      *  used to initialize
      * @see EditorKit#createDefaultDocument
      * @see #setDocument
-     * @see JSPlainDocument
      */
     public void read(Reader in, Object desc) throws IOException {
         EditorKit kit = ((TextUI) getUI()).getEditorKit(this);
@@ -4427,7 +4425,6 @@ public abstract class JTextComponent extends JComponent implements Scrollable
             JTextComponent c = (JTextComponent) getSource();
             if (c != null) {
                 Caret caret = c.getCaret();
-                // SwingJS TODO -- no caret yet
                 if (caret != null) {
                 	dot = caret.getDot();
                 	mark = caret.getMark();

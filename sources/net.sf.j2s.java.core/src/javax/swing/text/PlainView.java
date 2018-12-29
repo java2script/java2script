@@ -27,7 +27,6 @@
  */
 package javax.swing.text;
 
-import swingjs.JSPlainDocument;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
@@ -35,6 +34,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.Shape;
+
 import javax.swing.event.DocumentEvent;
 
 /**
@@ -62,8 +62,7 @@ public class PlainView extends View implements TabExpander {
      * @return the tab size
      */
     protected int getTabSize() {
-    	// SwingJS -- temporarily using JSPlainDocument here
-        Integer i = (Integer) getDocument().getProperty(JSPlainDocument.tabSizeAttribute);
+        Integer i = (Integer) getDocument().getProperty(PlainDocument.tabSizeAttribute);
         int size = (i != null) ? i.intValue() : 8;
         return size;
     }

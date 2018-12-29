@@ -758,7 +758,7 @@ public abstract class AbstractDocument implements JSMinimalAbstractDocument {
         }
 
         // see if complex glyph layout support is needed
-        if( getProperty(I18NProperty).equals( Boolean.FALSE ) ) {
+//        if( getProperty(I18NProperty).equals( Boolean.FALSE ) ) {
 //            // if a default direction of right-to-left has been specified,
 //            // we want complex layout even if the text is all left to right.
 //            Object d = getProperty(TextAttribute.RUN_DIRECTION);
@@ -770,7 +770,7 @@ public abstract class AbstractDocument implements JSMinimalAbstractDocument {
 //                    putProperty( I18NProperty, Boolean.TRUE);
 //                }
 //            }
-        }
+//        }
 
         insertUpdate(e, a);
         // Mark the edit as done.
@@ -952,16 +952,16 @@ public abstract class AbstractDocument implements JSMinimalAbstractDocument {
      * <code>p1</code> is left to right.
      */
     boolean isLeftToRight(int p0, int p1) {
-        if(!getProperty(I18NProperty).equals(Boolean.TRUE)) {
-            return true;
-        }
-        Element bidiRoot = getBidiRootElement();
-        int index = bidiRoot.getElementIndex(p0);
-        Element bidiElem = bidiRoot.getElement(index);
-        if(bidiElem.getEndOffset() >= p1) {
-            AttributeSet bidiAttrs = bidiElem.getAttributes();
-            return ((StyleConstants.getBidiLevel(bidiAttrs) % 2) == 0);
-        }
+//        if(!getProperty(I18NProperty).equals(Boolean.TRUE)) {
+//            return true;
+//        }
+//        Element bidiRoot = getBidiRootElement();
+//        int index = bidiRoot.getElementIndex(p0);
+//        Element bidiElem = bidiRoot.getElement(index);
+//        if(bidiElem.getEndOffset() >= p1) {
+//            AttributeSet bidiAttrs = bidiElem.getAttributes();
+//            return ((StyleConstants.getBidiLevel(bidiAttrs) % 2) == 0);
+//        }
         return true;
     }
 
@@ -1288,7 +1288,7 @@ public abstract class AbstractDocument implements JSMinimalAbstractDocument {
      *
      * @return the content
      */
-    protected final Content getContent() {
+    public final Content getContent() {
         return data;
     }
 

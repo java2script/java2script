@@ -105,7 +105,7 @@ public class StyledEditorKit extends DefaultEditorKit {
      */
     @Override
 		public Document createDefaultDocument() {
-        return null;//new DefaultStyledDocument();
+        return new DefaultStyledDocument();
     }
 
     /**

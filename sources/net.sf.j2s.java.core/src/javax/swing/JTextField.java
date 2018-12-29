@@ -373,7 +373,7 @@ public class JTextField extends JTextComponent implements SwingConstants {
      */
     protected Document createDefaultModel() {
     	// SwingJS 
-    	return JSToolkit.getPlainDocument(this);
+    	return JSToolkit.getPlainDocument();
 //        return new PlainDocument();
     }
 

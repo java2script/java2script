@@ -83,7 +83,7 @@ public class GapContent extends GapVector implements AbstractDocument.Content {
 
         marks = new MarkVector();
         search = new MarkData(0);
-        //queue = new ReferenceQueue();
+        //SwingJS - no garbage collection -- implemnent? queue = new ReferenceQueue();
     }
 
     /**
