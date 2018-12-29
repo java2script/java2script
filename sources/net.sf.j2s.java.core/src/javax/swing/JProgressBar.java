@@ -322,7 +322,6 @@ public class JProgressBar extends JComponent implements SwingConstants
         //  I believe that it is the the most common usage of this
         //  component - it's what people will expect.
         setModel(new DefaultBoundedRangeModel(min, 0, min, max));
-        uiClassID = "ProgressBarUI";
         updateUI();
 
         setOrientation(orient);      // documented with set/getOrientation()
@@ -350,7 +349,6 @@ public class JProgressBar extends JComponent implements SwingConstants
     public JProgressBar(BoundedRangeModel newModel)
     {
         setModel(newModel);
-        uiClassID = "ProgressBarUI";
         updateUI();
 
         setOrientation(defaultOrientation);  // see setOrientation()
@@ -359,6 +357,13 @@ public class JProgressBar extends JComponent implements SwingConstants
         setString(null);                     // see getString
         setIndeterminate(false);             // see setIndeterminate
     }
+
+    @Override
+	public String getUIClassID() {
+		return "ProgressBarUI";
+	}
+
+
 
 
     /**

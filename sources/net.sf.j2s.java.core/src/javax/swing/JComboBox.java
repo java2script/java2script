@@ -248,10 +248,15 @@ implements ItemSelectable,ListDataListener,ActionListener {
 
     private void initComboBox() {
         installAncestorListener();
-        uiClassID = "ComboBoxUI";
         setUIProperty("opaque",true);
         updateUI();
     }
+
+	@Override
+	public String getUIClassID() {
+		return "ComboBoxUI";
+	}
+
 
     protected void installAncestorListener() {
         addAncestorListener(new AncestorListener(){

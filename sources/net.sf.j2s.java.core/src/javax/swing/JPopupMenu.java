@@ -189,10 +189,14 @@ public class JPopupMenu extends JComponent implements MenuElement {
         enableEvents(AWTEvent.MOUSE_EVENT_MASK);
         setOpaque(true); // BH  added
         //setFocusTraversalKeysEnabled(false);
-        uiClassID = "PopupMenuUI";
         updateUI();
 
     }
+
+	@Override
+	public String getUIClassID() {
+		return "PopupMenuUI";
+	}
 
 
     @Override
@@ -1479,9 +1483,16 @@ public class JPopupMenu extends JComponent implements MenuElement {
 	 */
 	static public class Separator extends JSeparator {
 		public Separator() {
-			super(JSeparator.HORIZONTAL, "PopupMenuSeparatorUI");
+			super(JSeparator.HORIZONTAL);
 		}
+		
+		@Override
+		public String getUIClassID() {
+			return "PopupMenuSeparatorUI";
+		}
+
 	}
+	
 
     /**
      * Returns true if the <code>MouseEvent</code> is considered a popup trigger

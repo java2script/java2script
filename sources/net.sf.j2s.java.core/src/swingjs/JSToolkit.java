@@ -294,7 +294,8 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 
 
 	public static String getCSSColor(Color c) {
-		String s = "000000" + Integer.toHexString(c.getRGB() & 0xFFFFFF);
+		int i = c.getRGB() & 0xFFFFFF;
+		String s = (i == 0 ? "000" : "000000" + Integer.toHexString(i));
 		return "#" + s.substring(s.length() - 6);
 	}
 
@@ -565,28 +566,9 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		return ui;
 	}
 
-	public static Document getPlainDocument(JComponent c) {
+	public static Document getPlainDocument() {
 		return (Document) JSUtil.getInstance("swingjs.JSPlainDocument");
 	}
-
-	public static String getClassNameForObject(Object c) {
-		/**
-		 * @j2sNative
-		 * 
-		 *            return c.__CLASS_NAME__;
-		 * 
-		 */
-		{
-			return null;
-		}
-	}
-
-	
-
-	
-
-	
-
 
 
 	//////////////// images ///////////////

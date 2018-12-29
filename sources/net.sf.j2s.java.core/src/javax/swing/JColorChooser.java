@@ -265,10 +265,15 @@ public class JColorChooser extends JComponent {
 	 */
 	public JColorChooser(ColorSelectionModel model) {
 		selectionModel = model;
-		uiClassID = "ColorChooserUI";
 		updateUI();
 		dragEnabled = false;
 	}
+
+	@Override
+	public String getUIClassID() {
+		return "ColorChooserUI";
+	}
+
 
 	/**
 	 * Gets the current color value from the color chooser. By default, this

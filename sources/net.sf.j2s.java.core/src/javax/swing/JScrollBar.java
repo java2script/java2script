@@ -150,11 +150,15 @@ public class JScrollBar extends JComponent implements Adjustable
         this.model = new DefaultBoundedRangeModel(value, extent, min, max);
         this.model.addChangeListener(fwdAdjustmentEvents = new ModelListener());
         setRequestFocusEnabled(false);
-        uiClassID = "ScrollBarUI";
         updateUI();
     }
 
-    
+	@Override
+	public String getUIClassID() {
+		return "ScrollBarUI";
+	}
+
+
     /**
      * Creates a scrollbar with the specified orientation
      * and the following initial values:

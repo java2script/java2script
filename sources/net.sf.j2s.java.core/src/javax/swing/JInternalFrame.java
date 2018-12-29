@@ -350,7 +350,7 @@ public class JInternalFrame extends JFrame
      */
     public JInternalFrame(String title, boolean resizable, boolean closable,
                                 boolean maximizable, boolean iconifiable) {
-    	super(title, null, "InternalFrameUI");
+    	super(title, null);
     	defaultCloseOperation = DISPOSE_ON_CLOSE;
     	this.resizable = resizable;
         this.closable = closable;
@@ -361,6 +361,12 @@ public class JInternalFrame extends JFrame
         desktopIcon = new JDesktopIcon(this);
         addPropertyChangeListenerIfNecessary();
     }
+
+	@Override
+	public String getUIClassID() {
+		return "InternalFrameUI";
+	}
+
 
     /**
      * Returns the look-and-feel object that renders this component.
@@ -1885,12 +1891,16 @@ public class JInternalFrame extends JFrame
          *              for which the icon is created
          */
         public JDesktopIcon(JInternalFrame f) {
-        	super();
-        	uiClassID = "DesktopIconUI"; 
             setVisible(false);
             setInternalFrame(f);
             updateUI();
         }
+
+    	@Override
+    	public String getUIClassID() {
+    		return "DesktopIconUI";
+    	}
+
 
 //        /**
 //         * Returns the look-and-feel object that renders this component.

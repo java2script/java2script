@@ -683,10 +683,14 @@ public class JTree extends JComponent implements Scrollable
         scrollsOnExpand = true;
         setOpaque(true);
         expandsSelectedPaths = true;
-        uiClassID = "TreeUI";
         updateUI();
         setModel(newModel);
     }
+
+	@Override
+	public String getUIClassID() {
+		return "TreeUI";
+	}
 
     /**
      * Sets the L&F object that renders this component.

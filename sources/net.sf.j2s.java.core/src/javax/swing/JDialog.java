@@ -717,11 +717,16 @@ public class JDialog extends JSDialog implements WindowConstants,
 				getRootPane().setWindowDecorationStyle(JRootPane.PLAIN_DIALOG);
 			}
 		}
-		uiClassID = "DialogUI";
 		updateUI();
 		addNotify(); // BH added; applet will not do this automatically
 		rootPane.addNotify(); // builds a peer for the root pane
 	}
+
+	@Override
+	public String getUIClassID() {
+		return "DialogUI";
+	}
+
 
   private static int dialogCount;
     

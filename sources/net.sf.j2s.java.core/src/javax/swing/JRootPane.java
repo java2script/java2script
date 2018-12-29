@@ -356,7 +356,6 @@ public class JRootPane extends JComponent {
 	public JRootPane(String prefix, boolean isApplet) {
 		// can come here from JApplet, JWindow, JDialog, or JFrame
 		// JApplet is special, because it means we are embedded.
-		uiClassID = "RootPaneUI";
 		setName(AppContext.getAppContext().getThreadGroup().getName() + prefix + (++paneCount)
 				+ ".JRootPane");
 
@@ -367,6 +366,13 @@ public class JRootPane extends JComponent {
 		// setDoubleBuffered(true);
 		updateUI();
 	}
+	
+	@Override
+	public String getUIClassID() {
+		return "RootPaneUI";
+	}
+
+
 
 	/**
 	 * {@inheritDoc}

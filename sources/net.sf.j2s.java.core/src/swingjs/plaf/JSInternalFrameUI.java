@@ -1,18 +1,10 @@
 package swingjs.plaf;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Container;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.IllegalComponentStateException;
-import java.awt.Insets;
-import java.awt.LayoutManager;
-import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
 import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.beans.PropertyChangeEvent;
@@ -23,8 +15,6 @@ import javax.swing.DesktopManager;
 import javax.swing.Icon;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
-import javax.swing.JDesktopPane;
-import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.LookAndFeel;
 import javax.swing.SwingConstants;
@@ -32,11 +22,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
-import javax.swing.event.MouseInputListener;
 import javax.swing.plaf.UIResource;
 
 import sun.swing.DefaultLookup;
-import sun.swing.UIAction;
 
 public class JSInternalFrameUI extends JSFrameUI {
 

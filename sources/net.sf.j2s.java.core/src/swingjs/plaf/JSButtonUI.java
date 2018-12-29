@@ -28,6 +28,7 @@
 
 package swingjs.plaf;
 
+import java.awt.Color;
 //import java.awt.FontMetrics;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -138,7 +139,7 @@ public class JSButtonUI extends JSLightweightUI {
 			$(textNode).attr("role", "menucloser");
 			setDataUI(iconNode);
 			setDataUI(textNode);
-			enableNode = menuAnchorNode;
+			enableNode = itemNode;
 			setIconAndText("btn", icon, gap, text);
 		} else {
 			menuAnchorNode.appendChild(buttonNode);
@@ -152,6 +153,19 @@ public class JSButtonUI extends JSLightweightUI {
 		setDataComponent(itemNode);
 		return itemNode;
 
+	}
+
+	@Override
+	protected void enableNode(DOMNode node, boolean b) {
+		if (isMenuItem) {
+			if (b) {
+				$(node).removeClass("ui-menu-disabled ui-state-disabled");
+			} else {
+				$(node).addClass("ui-menu-disabled ui-state-disabled");
+			}
+		} else {
+			super.enableNode(node, b);
+		}
 	}
 
 	protected void setupButton() {

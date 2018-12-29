@@ -125,7 +125,7 @@ public abstract class JSComponent extends Component {
 	public HTML5Canvas _canvas;
 	public ComponentUI ui;
 
-	public String uiClassID = "ComponentUI";
+	private String uiClassID;
 
 	Boolean peerVis;
 
@@ -202,7 +202,7 @@ public abstract class JSComponent extends Component {
 	 * @beaninfo expert: true description: UIClassID
 	 */
 	public String getUIClassID() {
-		return uiClassID;
+		return (uiClassID == null ? uiClassID = "ComponentUI" : uiClassID);
 	}
 
 	/**
@@ -213,11 +213,6 @@ public abstract class JSComponent extends Component {
 	 */
 	public void setUI(ComponentUI ui) {
 		this.ui = ui;
-//		if (ui != null) {
-//			// set up the ui as a PropertyChangeListener
-//			// and, if applicable, a ChangeListener
-//			ui.installJS();
-//		}
 	}
 
 	public ComponentUI getUI() {
@@ -248,6 +243,8 @@ public abstract class JSComponent extends Component {
 	 * @see JComponent#updateUI
 	 */
 	public void updateUI() {
+		if (uiClassID == null)
+			uiClassID = getUIClassID();
 		if (ui == null)
 			setUI(UIManager.getUI(this));
 	}
@@ -284,15 +281,18 @@ public abstract class JSComponent extends Component {
 	}
 
 	protected void updateUIZOrder() {
-		if (uiClassID != "DesktopPaneUI")
-			return;
+		
+// developer could have created their own LayeredPane
+//       if (uiClassID != "DesktopPaneUI")
+//			return;
+		
 		// set the n by their position in the component list using the 
 		// same z orders that are already there - probably something like 
 		// 10000, 11000, 12000
     	int n = ((Container) this).getComponentCount();
-    	JSComponent[] components = (JSComponent[]) getChildArray((Container) this);
     	if (n < 2)
     		return;
+    	JSComponent[] components = (JSComponent[]) getChildArray((Container) this);
     	int[] zorders = new int[n];
         for (int i = 0; i < n; i++)
             zorders[i] = ((JSComponentUI) components[i].getUI()).getZIndex(null);

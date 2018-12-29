@@ -24,22 +24,14 @@
  */
 package sun.awt;
 
-import java.awt.Component;
-import java.awt.KeyboardFocusManager;
-import java.awt.Window;
 import java.awt.Canvas;
-import java.awt.Scrollbar;
+import java.awt.Component;
 import java.awt.Panel;
-
+import java.awt.Scrollbar;
+import java.awt.Window;
 import java.awt.event.FocusEvent;
-
-import java.awt.peer.KeyboardFocusManagerPeer;
 import java.awt.peer.ComponentPeer;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
-import sun.util.logging.PlatformLogger;
+import java.awt.peer.KeyboardFocusManagerPeer;
 
 public abstract class KeyboardFocusManagerPeerImpl implements KeyboardFocusManagerPeer {
 

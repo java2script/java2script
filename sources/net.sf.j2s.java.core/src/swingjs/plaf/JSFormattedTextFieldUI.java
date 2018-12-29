@@ -16,7 +16,7 @@ public class JSFormattedTextFieldUI extends JSTextFieldUI {
 	 */
 	@Override
 	protected DOMNode setProp(DOMNode obj, String prop, String val) {
-		if(prop == "value" && val.length() >= 2) {
+		if(prop == "value" && val != null && val.length() >= 2) {
 			if (val.charAt(0) == 164)
 				val = "$" + val.substring(1);
 			else if (val.charAt(0) == '-' && val.charAt(1) == 164)

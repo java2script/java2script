@@ -137,9 +137,14 @@ public class JToolBar extends JComponent implements SwingConstants {
 		setLayout(layout);
 
 		addPropertyChangeListener(layout);
-		uiClassID = "ToolBarUI";
 		updateUI();
 	}
+
+	@Override
+	public String getUIClassID() {
+		return "ToolBarUI";
+	}
+
 
 	/**
 	 * Notification from the <code>UIFactory</code> that the L&F has changed.
@@ -528,9 +533,16 @@ public class JToolBar extends JComponent implements SwingConstants {
 		 *          the <code>Dimension</code> of the separator
 		 */
 		public Separator(Dimension size) {
-			super(JSeparator.HORIZONTAL, "ToolBarSeparatorUI");
+			super(JSeparator.HORIZONTAL);
 			setSeparatorSize(size);
 		}
+
+		@Override
+		public String getUIClassID() {
+			return "ToolBarSeparatorUI";
+		}
+
+
 
 		/**
 		 * Sets the size of the separator.

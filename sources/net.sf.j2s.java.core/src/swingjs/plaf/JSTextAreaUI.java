@@ -92,5 +92,16 @@ public class JSTextAreaUI extends JSTextUI {
 				"position", "absolute");
 	}
 
+	@Override
+	protected void jsSelect(Object[] r1, Object[] r2) {
+		/**
+		 * @j2sNative
+		 * 
+		 *   this.domNode.selectionStart = r1[1];
+		 *   this.domNode.selectionEnd = r2[1];
+		 */
+		
+	}
+
 
 }

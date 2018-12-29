@@ -158,27 +158,23 @@ public class JToggleButton extends AbstractButton {
      *                  otherwise, the button is initially unselected
      */
     public JToggleButton (String text, Icon icon, boolean selected) {
-    	this(text, icon, selected, "ToggleButtonUI");
-    }
-
-    /**
-     * Creates a toggle button with the specified text, image, and
-     * selection state.
-     *
-     * @param text the text of the toggle button
-     * @param icon  the image that the button should display
-     * @param selected  if true, the button is initially selected;
-     *                  otherwise, the button is initially unselected
-     */
-    public JToggleButton (String text, Icon icon, boolean selected, String uid) {
         // Create the model
-        setModel(new ToggleButtonModel());
-
+        setModel();
         model.setSelected(selected);
         // initialize
-        init(text, icon, uid);
+        init(text, icon);
         setOpaque(true);// BH not sure why this is not here
     }
+
+    @Override
+    protected void setModel() {
+    	setModel(new ToggleButtonModel());
+    }
+    
+	@Override
+	public String getUIClassID() {
+		return "ToggleButtonUI";
+	}
 
 
     /**

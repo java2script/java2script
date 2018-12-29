@@ -2290,7 +2290,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @since JDK1.1
 	 */
 	
-	@SuppressWarnings("unused")
+	@SuppressWarnings({ "unused", "null" })
 	public InputStream getResourceAsStream(String name) {
 		// allows an optional second argument to be a base directory in JavaScript
 	    @SuppressWarnings("unused")
@@ -3518,6 +3518,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 //		return annotationType;
 //	}
 	
+	@SuppressWarnings("null")
 	@Override
 	public int hashCode() {
 		String name = null;

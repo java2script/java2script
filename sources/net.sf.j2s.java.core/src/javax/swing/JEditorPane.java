@@ -310,29 +310,29 @@ public class JEditorPane extends JTextComponent {
         setPage(url);
     }
 
-    /**
-     * Creates a <code>JEditorPane</code> that has been initialized
-     * to the given text.  This is a convenience constructor that calls the
-     * <code>setContentType</code> and <code>setText</code> methods.
-     *
-     * @param type mime type of the given text
-     * @param text the text to initialize with; may be <code>null</code>
-     * @exception NullPointerException if the <code>type</code> parameter
-     *          is <code>null</code>
-     */
-    public JEditorPane(String type, String text) {
-        this(type, text, "EditorPaneUI");
-    }
+	/**
+	 * Creates a <code>JEditorPane</code> that has been initialized to the given
+	 * text. This is a convenience constructor that calls the
+	 * <code>setContentType</code> and <code>setText</code> methods.
+	 *
+	 * @param type mime type of the given text
+	 * @param text the text to initialize with; may be <code>null</code>
+	 * @exception NullPointerException if the <code>type</code> parameter is
+	 *                                 <code>null</code>
+	 */
+	public JEditorPane(String type, String text) {
+		if (type != null)
+			setContentType(type);
+		if (text != null)
+			setText(text);
+	}
 
-    public JEditorPane(String type, String text, String uid) {
-    	super(uid);
-    	if (type != null)
-    		setContentType(type);
-      if (text != null)
-      	setText(text);
-		}
+	@Override
+	public String getUIClassID() {
+		return "EditorPaneUI";
+	}
 
-		/**
+	/**
      * Adds a hyperlink listener for notification of any changes, for example
      * when a link is selected and entered.
      *
@@ -2213,6 +2213,7 @@ public class JEditorPane extends JTextComponent {
          */
         @Override
 				public View create(Element elem) {
+// SwingJS "i18n" not implemented
 //            Document doc = elem.getDocument();
 //            Object i18nFlag
 //                = doc.getProperty("i18n"/*AbstractDocument.I18NProperty*/);

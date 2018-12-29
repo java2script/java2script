@@ -144,11 +144,20 @@ public class JCheckBoxMenuItem extends JMenuItem implements SwingConstants
      * @param b the selected state of the check box menu item
      */
     public JCheckBoxMenuItem(String text, Icon icon, boolean b) {
-        super(text, icon, "CheckBoxMenuItemUI");
-        setModel(new JToggleButton.ToggleButtonModel());
+        super(text, icon);
         setSelected(b);
         setFocusable(false);
     }
+
+	@Override
+	public String getUIClassID() {
+		return "CheckBoxMenuItemUI";
+	}
+
+	@Override
+	protected void setModel() {
+        setModel(new JToggleButton.ToggleButtonModel());
+	}
 
      /**
       * Returns the selected-state of the item. This method

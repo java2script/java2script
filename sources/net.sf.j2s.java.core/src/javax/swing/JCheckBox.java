@@ -156,11 +156,17 @@ public class JCheckBox extends JToggleButton {
      *        state. If <code>true</code> the check box is selected
      */
     public JCheckBox (String text, Icon icon, boolean selected) {
-        super(text, icon, selected, "CheckBoxUI");
+        super(text, icon, selected);
         setUIProperty("borderPainted", Boolean.FALSE);
         setHorizontalAlignment(LEADING);
     }
 
+	@Override
+	public String getUIClassID() {
+		return "CheckBoxUI";
+	}
+
+    
     /**
      * Sets the <code>borderPaintedFlat</code> property,
      * which gives a hint to the look and feel as to the

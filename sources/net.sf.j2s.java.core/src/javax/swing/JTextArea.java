@@ -38,9 +38,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
+import javax.swing.text.PlainDocument;
 
-import swingjs.JSPlainDocument;
-import swingjs.JSToolkit;
 import swingjs.api.JSMinimalAbstractDocument;
 
 /**
@@ -202,7 +201,6 @@ public class JTextArea extends JTextComponent {
      *  arguments are negative.
      */
     public JTextArea(Document doc, String text, int rows, int columns) {
-        super("TextAreaUI");
         this.rows = rows;
         this.columns = columns;
         if (doc == null) {
@@ -229,6 +227,11 @@ public class JTextArea extends JTextComponent {
                                     getManagingFocusBackwardTraversalKeys());
     }
 
+	@Override
+	public String getUIClassID() {
+		return "TextAreaUI";
+	}
+
     /**
      * Creates the default implementation of the model
      * to be used at construction if one isn't explicitly
@@ -238,8 +241,8 @@ public class JTextArea extends JTextComponent {
      */
     protected Document createDefaultModel() {
     	// SwingJS 
-    	return JSToolkit.getPlainDocument(this);
-//        return new PlainDocument();
+//    	return JSToolkit.getPlainDocument(this);
+        return new PlainDocument();
     }
 
     /**
@@ -259,8 +262,7 @@ public class JTextArea extends JTextComponent {
         Document doc = getDocument();
         if (doc != null) {
             int old = getTabSize();
-          	// SwingJS -- temporarily using JSPlainDocument here
-            doc.putProperty(JSPlainDocument.tabSizeAttribute, new Integer(size));
+            doc.putProperty(PlainDocument.tabSizeAttribute, new Integer(size));
             firePropertyChange("tabSize", old, size);
         }
     }
@@ -275,8 +277,7 @@ public class JTextArea extends JTextComponent {
         int size = 8;
         Document doc = getDocument();
         if (doc != null) {
-        	// SwingJS -- temporarily using JSPlainDocument here
-            Integer i = (Integer) doc.getProperty(JSPlainDocument.tabSizeAttribute);
+            Integer i = (Integer) doc.getProperty(PlainDocument.tabSizeAttribute);
             if (i != null) {
                 size = i.intValue();
             }

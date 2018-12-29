@@ -38,6 +38,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.SwingUtilities;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -45,7 +47,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 
 public class TextListener implements MouseListener, MouseMotionListener, FocusListener, ChangeListener,
-		PropertyChangeListener, DocumentListener {
+		PropertyChangeListener, DocumentListener, CaretListener {
 
 	private JTextComponent txtComp;
 
@@ -68,8 +70,7 @@ public class TextListener implements MouseListener, MouseMotionListener, FocusLi
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
-		// System.out.println("JSTextListener property change: " + prop + " " +
-		// e.getSource());
+//		System.out.println("JSTextListener property change: " + prop + " " + e.getSource());
 		if ("font" == prop || "foreground" == prop || "preferredSize" == prop) {
 			JTextComponent txtComp = (JTextComponent) e.getSource();
 			((JSComponentUI) txtComp.getUI()).propertyChangedFromListener(prop);
@@ -106,18 +107,25 @@ public class TextListener implements MouseListener, MouseMotionListener, FocusLi
 
 	@Override
 	public void mousePressed(MouseEvent e) {
+		//System.out.println("textlistener mousepressed");
 		if (SwingUtilities.isLeftMouseButton(e)) {
 			JTextComponent txtComp = (JTextComponent) e.getSource();
 			if (!txtComp.contains(e.getX(), e.getY()))
 				return;
 			if (!txtComp.hasFocus() && txtComp.isRequestFocusEnabled()) {
 				txtComp.requestFocus();
+				ui.requestFocus(null,  false,  false,  0,  null);
 			}
 		}
+//		Object je = (/** @j2sNative e.bdata.jqevent || */ null);
+//		ui.handleJSEvent(e.getSource(), e.getID(), je);
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
+		//System.out.println("textlistener mouserelease");
+		Object je = (/** @j2sNative e.bdata.jqevent || */ null);
+		ui.handleJSEvent(e.getSource(), e.getID(), je);
 	}
 
 	@Override
@@ -126,15 +134,11 @@ public class TextListener implements MouseListener, MouseMotionListener, FocusLi
 
 	@Override
 	public void mouseExited(MouseEvent e) {
-//        JTextComponent b = (JTextComponent) e.getSource();
-//        ButtonModel model = b.getModel();
-//        if(b.isRolloverEnabled()) {
-//            model.setRollover(false);
-//        }
-//        model.setArmed(false);
 	}
 
 	private boolean selecting;
+
+	private boolean working;
 
 	/**
 	 * Called by JSTextUI.handleJSEvent
@@ -146,62 +150,73 @@ public class TextListener implements MouseListener, MouseMotionListener, FocusLi
 	 */
 	boolean handleJSTextEvent(JSTextUI ui, int eventType, Object jQueryEvent) {
 		int dot = 0, mark = 0;
-		String evType = null;
-		int keyCode = 0;
+		String evType = null, id=null;
+		
+		// JSEditorPaneUI will not indicate the target
 		/**
 		 * @j2sNative
 		 * 
-		 * 			mark = jQueryEvent.target.selectionStart; dot =
-		 *            jQueryEvent.target.selectionEnd; evType = jQueryEvent.type;
-		 *            keyCode = jQueryEvent.keyCode; if (keyCode == 13) keyCode = 10;
+		 * var s = jQueryEvent.target || jQueryEvent;
+		 * 			mark = s.selectionStart; 
+		 * 			dot = s.selectionEnd; 
+		 *          evType = jQueryEvent.type;
+		 *          id = s.id;
+		 *          
+		 *          
 		 */
-		{
-		}
-
+		
 		// HTML5 selection is always mark....dot
-		// but Java can be oldDot....oldMark
+		// but Java can be Dot....Mark
 
 		int oldDot = ui.editor.getCaret().getDot();
 		int oldMark = ui.editor.getCaret().getMark();
+		
+		 //System.out.println("textlist1 " + evType + " " + eventType + " " + id + " oldDot=" + oldDot + " oldmark=" + oldMark + " dot=" + dot + " mark=" + mark + " " + (dot > mark));       
+
+		 boolean doUpdate = true;
+
 		if (dot != mark && oldMark == dot) {
 			dot = mark;
 			mark = oldMark;
+			//System.out.println("textlist rev " + id + " dot=" + dot + " mark=" + mark);       
 		}
 		switch (eventType) {
 		case MouseEvent.MOUSE_WHEEL:
 			return false;
 		case MouseEvent.MOUSE_PRESSED:
 			selecting = true;
+			doUpdate = false;
 			break;
 		case MouseEvent.MOUSE_RELEASED:
 			if (!selecting)
 				return false; // yield to some drag-drop event?
 			selecting = false;
 			break;
+		case KeyEvent.KEY_PRESSED:
+			doUpdate = false;
+			break;
 		case MouseEvent.MOUSE_CLICKED:
 			break;
-		case KeyEvent.KEY_PRESSED:
 		case KeyEvent.KEY_RELEASED:
 		case KeyEvent.KEY_TYPED:
 			//System.out.println("textlistener " + keyCode + " " + eventType);
+			int keyCode = /**  @j2sNative jQueryEvent.keyCode || */0;
+			if (keyCode == 13) 
+				keyCode = KeyEvent.VK_ENTER;
 			if (keyCode == KeyEvent.VK_ENTER && ui.handleEnter(eventType))
 				break;
-			String val = ui.getJSTextValue();
-			if (!val.equals(ui.currentText)) {
-				String oldval = ui.currentText;
-				ui.editor.setText(val);
-				// the text may have been filtered, but we should not change it yet
-				// val = ui.getComponentText();
-				ui.editor.firePropertyChange("text", oldval, val);
-				ui.domNode.setSelectionRange(dot, dot);
-			}
+			working = true;
+			ui.checkEditorTextValue(dot);
+			working = false;
 			break;
 		}
+		if (doUpdate) {
 		if (dot != oldDot || mark != oldMark) {
-			ui.editor.getCaret().setDot(dot);
+			ui.editor.getCaret().setDot(mark);
 			if (dot != mark)
-				ui.editor.getCaret().moveDot(mark);
-			ui.editor.caretEvent.fire();
+				ui.editor.getCaret().moveDot(dot);
+				ui.editor.caretEvent.fire();
+			}
 		}
 		if (JSComponentUI.debugging)
 			System.out.println(ui.id + " TextListener handling event " + evType + " " + eventType + " "
@@ -211,19 +226,29 @@ public class TextListener implements MouseListener, MouseMotionListener, FocusLi
 
 	@Override
 	public void insertUpdate(DocumentEvent e) {
-		setText();
+		
+	//	System.out.println("textlistener insertupdate");
+		if (!working)
+			ui.setTextDelayed();
 	}
 
 	@Override
 	public void removeUpdate(DocumentEvent e) {
-		setText();
+	//	System.out.println("textlistener removeupdate");
+		if (!working)
+			ui.setTextDelayed();
 	}
 
 	@Override
 	public void changedUpdate(DocumentEvent e) {
+	//	System.out.println("textlistener change");
+		if (!working)
+			ui.setTextDelayed();
 	}
 
-	private void setText() {
-		ui.setText(txtComp.getText());
+	@Override
+	public void caretUpdate(CaretEvent e) {
+		ui.setJSSelection();
 	}
+
 }

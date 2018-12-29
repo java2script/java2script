@@ -141,7 +141,7 @@ public abstract class JSAbstractDocument implements JSMinimalAbstractDocument {
 				continue;
 			JSElement e = new JSElement();
 			e.start = ilast;
-			e.end = i;
+			e.end = i + 1;
 			ilast = i + 1;
 			root.addChild(e);
 		}
@@ -549,6 +549,11 @@ public abstract class JSAbstractDocument implements JSMinimalAbstractDocument {
 		@Override
 		public boolean isLeaf() {
 			return (parent != null);
+		}
+		
+		@Override
+		public String toString() {
+			return "JSElement " + getStartOffset() + "," + getEndOffset();
 		}
 
 	}

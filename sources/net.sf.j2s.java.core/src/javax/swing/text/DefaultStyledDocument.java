@@ -27,8 +27,8 @@ package javax.swing.text;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.font.TextAttribute;
-import java.lang.ref.ReferenceQueue;
-import java.lang.ref.WeakReference;
+//import java.lang.ref.ReferenceQueue;
+//import java.lang.ref.WeakReference;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -986,11 +986,11 @@ public class DefaultStyledDocument extends AbstractDocument implements StyledDoc
                 }
                 if (styleContextChangeListener != null) {
                     StyleContext styles = (StyleContext)getAttributeContext();
-                    List<ChangeListener> staleListeners =
-                        AbstractChangeHandler.getStaleListeners(styleContextChangeListener);
-                    for (ChangeListener l: staleListeners) {
-                        styles.removeChangeListener(l);
-                    }
+//                    List<ChangeListener> staleListeners =
+//                        AbstractChangeHandler.getStaleListeners(styleContextChangeListener);
+//                    for (ChangeListener l: staleListeners) {
+//                        styles.removeChangeListener(l);
+//                    }
                     styles.addChangeListener(styleContextChangeListener);
                 }
                 updateStylesListeningTo();
@@ -1050,17 +1050,17 @@ public class DefaultStyledDocument extends AbstractDocument implements StyledDoc
                 Enumeration styleNames = styles.getStyleNames();
                 Vector v = (Vector)listeningStyles.clone();
                 listeningStyles.removeAllElements();
-                List<ChangeListener> staleListeners =
-                    AbstractChangeHandler.getStaleListeners(styleChangeListener);
+//                List<ChangeListener> staleListeners =
+//                    AbstractChangeHandler.getStaleListeners(styleChangeListener);
                 while (styleNames.hasMoreElements()) {
                     String name = (String)styleNames.nextElement();
                     Style aStyle = styles.getStyle(name);
                     int index = v.indexOf(aStyle);
                     listeningStyles.addElement(aStyle);
                     if (index == -1) {
-                        for (ChangeListener l: staleListeners) {
-                            aStyle.removeChangeListener(l);
-                        }
+//                        for (ChangeListener l: staleListeners) {
+//                            aStyle.removeChangeListener(l);
+//                        }
                         aStyle.addChangeListener(styleChangeListener);
                     }
                     else {
@@ -2610,39 +2610,41 @@ public class DefaultStyledDocument extends AbstractDocument implements StyledDoc
      */
     abstract static class AbstractChangeHandler implements ChangeListener {
 
-        /* This has an implicit reference to the handler object.  */
-        private class DocReference extends WeakReference<DefaultStyledDocument> {
-
-            DocReference(DefaultStyledDocument d, ReferenceQueue<DefaultStyledDocument> q) {
-                super(d, q);
-            }
-
-            /**
-             * Return a reference to the style change handler object.
-             */
-            ChangeListener getListener() {
-                return AbstractChangeHandler.this;
-            }
-        }
-
-        /** Class-specific reference queues.  */
-        private final static Map<Class, ReferenceQueue<DefaultStyledDocument>> queueMap
-                = new HashMap<Class, ReferenceQueue<DefaultStyledDocument>>();
+//        /* This has an implicit reference to the handler object.  */
+//        private class DocReference {//extends WeakReference<DefaultStyledDocument> {
+//
+//            DocReference(DefaultStyledDocument d, ReferenceQueue<DefaultStyledDocument> q) {
+//                super(d, q);
+//            }
+//
+//            /**
+//             * Return a reference to the style change handler object.
+//             */
+//            ChangeListener getListener() {
+//                return AbstractChangeHandler.this;
+//            }
+//        }
+//
+//        /** Class-specific reference queues.  */
+//        private final static Map<Class, ReferenceQueue<DefaultStyledDocument>> queueMap
+//                = new HashMap<Class, ReferenceQueue<DefaultStyledDocument>>();
 
         /** A weak reference to the document object.  */
-        private DocReference doc;
+        //private DocReference doc;
+        private DefaultStyledDocument doc;
 
         AbstractChangeHandler(DefaultStyledDocument d) {
-            Class c = getClass();
-            ReferenceQueue<DefaultStyledDocument> q;
-            synchronized (queueMap) {
-                q = queueMap.get(c);
-                if (q == null) {
-                    q = new ReferenceQueue<DefaultStyledDocument>();
-                    queueMap.put(c, q);
-                }
-            }
-            doc = new DocReference(d, q);
+        	doc = d;
+//            Class c = getClass();
+//            ReferenceQueue<DefaultStyledDocument> q;
+//            synchronized (queueMap) {
+//                q = queueMap.get(c);
+//                if (q == null) {
+//                    q = new ReferenceQueue<DefaultStyledDocument>();
+//                    queueMap.put(c, q);
+//                }
+//            }
+//            doc = new DocReference(d, q);
         }
 
         /**
@@ -2650,27 +2652,27 @@ public class DefaultStyledDocument extends AbstractDocument implements StyledDoc
          *
          * A change listener becomes "stale" when its document is cleaned by GC.
          */
-        static List<ChangeListener> getStaleListeners(ChangeListener l) {
-            List<ChangeListener> staleListeners = new ArrayList<ChangeListener>();
-            ReferenceQueue<DefaultStyledDocument> q = queueMap.get(l.getClass());
-
-            if (q != null) {
-                DocReference r;
-                synchronized (q) {
-                    while ((r = (DocReference) q.poll()) != null) {
-                        staleListeners.add(r.getListener());
-                    }
-                }
-            }
-
-            return staleListeners;
-        }
+//        static List<ChangeListener> getStaleListeners(ChangeListener l) {
+//            List<ChangeListener> staleListeners = new ArrayList<ChangeListener>();
+//            ReferenceQueue<DefaultStyledDocument> q = queueMap.get(l.getClass());
+//
+//            if (q != null) {
+//                DocReference r;
+//                synchronized (q) {
+//                    while ((r = (DocReference) q.poll()) != null) {
+//                        staleListeners.add(r.getListener());
+//                    }
+//                }
+//            }
+//
+//            return staleListeners;
+//        }
 
         /**
          * The ChangeListener wrapper which guards against dead documents.
          */
         public void stateChanged(ChangeEvent e) {
-            DefaultStyledDocument d = doc.get();
+            DefaultStyledDocument d = doc;//.get();
             if (d != null) {
                 fireStateChanged(d, e);
             }

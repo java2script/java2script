@@ -92,15 +92,15 @@ public class JSeparator extends JComponent implements SwingConstants
 	 *              <code>SwingConstants.VERTICAL</code>
 	 */
 	public JSeparator(int orientation) {
-		this(orientation, "SeparatorUI");
-	}
-
-	public JSeparator(int orientation, String sid) {
 		checkOrientation(orientation);
 		this.orientation = orientation;
 		setFocusable(false);
-		uiClassID = sid;
 		updateUI();
+	}
+
+	@Override
+	public String getUIClassID() {
+		return "SeparatorUI";
 	}
 
 

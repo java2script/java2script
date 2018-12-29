@@ -114,11 +114,6 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 
 	private String inactiveBackgroundColor;
 
-	protected String getComponentText() {
-		JTextComponent jtc = (JTextComponent) jc;
-		return (jtc.getDocument() == null ? null : (currentText = ((JTextComponent) c).getText()));
-	}
-
 	/**
 	 * Initializes component properties, e.g. font, foreground, background, caret
 	 * color, selection color, selected text color, disabled text color, and
@@ -216,8 +211,10 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	 */
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
-		// System.out.println("Handling for " + id + " " + eventType + " " +
-		// jQueryEvent);
+//		String type = /** @j2sNative jQueryEvent.type || */null;
+//		System.out.println("JSTextUI handlejs "+type + " " + eventType);
+
+		int keyCode = /** @j2sNative jQueryEvent.keyCode || */ 0;
 		JTextComponent t = (JTextComponent) jc;
 		if (!t.isEditable())
 			return false;
@@ -228,7 +225,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 			if (keyEvent == null)
 				return true;
 			jc.dispatchEvent(keyEvent);
-			if (keyEvent.isConsumed()) {
+			if (keyCode == KeyEvent.VK_ALT || keyEvent.isConsumed()) {
 				/**
 				 * @j2sNative
 				 * 
@@ -237,8 +234,16 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 				 */
 				return true;
 			}
+			switch (keyCode) {
+			case KeyEvent.VK_ALT:
+			case KeyEvent.VK_SHIFT:
+			case KeyEvent.VK_CONTROL:
+				return true;
+			}
+			eventType = keyEvent.getID();
 			break;
 		}
+//		System.out.println("JSTextUI firing textListener ");
 		return textListener.handleJSTextEvent(this, eventType, jQueryEvent);
 	}
 
@@ -713,6 +718,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		b.addMouseMotionListener(listener);
 		b.addFocusListener(listener);
 		b.addPropertyChangeListener(listener);
+		b.addCaretListener(listener);
 		// SwingJS there won't be a document yet; this is in constructor
 		// b.getDocument().addDocumentListener(listener);
 	}
@@ -723,6 +729,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		b.removeMouseMotionListener(listener);
 		b.removeFocusListener(listener);
 		b.removePropertyChangeListener(listener);
+		b.removeCaretListener(listener); 
 		b.getDocument().removeDocumentListener(listener);
 	}
 
@@ -2761,6 +2768,11 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	// }
 	//
 
+	/**
+	 * overridden by JSEditorPanelUI
+	 * 
+	 * @param val
+	 */
 	public void setText(String val) {
 		String prop = null;
 		DOMNode obj = null;
@@ -2788,5 +2800,75 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		// In addition, if color == null, then no text is shown		
 		return (!editor.isEnabled() ? editor.getDisabledTextColor() : !editor.isEditable() ? inactiveForeground : fg);
 	}
+
+    void setSelectionRange(int mark, int dot) {
+		domNode.setSelectionRange(mark, dot);
+	}
+
+	protected String getComponentText() {
+		JTextComponent jtc = (JTextComponent) jc;
+		return (jtc.getDocument() == null ? null : (currentText = ((JTextComponent) c).getText()));
+	}
+
+	public void checkEditorTextValue(int dot) {
+		String val = getJSTextValue();
+		if (!val.equals(currentText)) {
+			String oldval = currentText;
+			System.out.println("from HTML: " + DOMNode.getAttr(domNode, "innerHTML"));
+			System.out.println("to editor: " + val.replace('\n', '.'));
+			editor.setText(val);
+			// TODO: why this?
+			editor.firePropertyChange("text", oldval, val);
+			setSelectionRange(dot, dot);
+		}
+	}
+
+	void setTextDelayed() {
+		setText(editor.getText());
+	}
+
+	@SuppressWarnings("unused")
+	protected void setJSSelection() {
+		int start = editor.getCaret().getMark();
+		int end = editor.getCaret().getDot();
+		if (start > end) {
+			int t = end;
+			end = start;
+			start = t;
+		}
+		Object[] r1 = getJSNodePt(domNode, -1, start);
+		Object[] r2 = getJSNodePt(domNode, -1, end);
+		if (r1 == null || r2 == null)
+			return;
+		
+		System.out.println("setJSSelection to " + start + " " + end + " " + r1 + " " + r2);
+
+		
+		jsSelect(r1, r2);
+	}
+
+	abstract protected void jsSelect(Object[] r1, Object[] r2);
+
+	protected Object[] getJSNodePt(DOMNode node, int offset, int pt) {
+		/**
+		 * @j2sNative return [node.childNodes[0], pt];
+		 */
+		{
+			return null;
+		}
+	}
+
+	@Override
+	protected boolean requestFocus() {
+		if (!super.requestFocus())
+			return false;
+		setJSSelection();
+		return true;
+	}
+		
+//	private boolean haveSelection() {
+//		return jquery.contains(domNode, /** @j2sNative window.getSelection().anchorNode || */ null);
+//	}
+
 
 }
