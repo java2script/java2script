@@ -14,6 +14,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JScrollBar;
 import javax.swing.JSlider;
+import javax.swing.LookAndFeel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import sun.swing.DefaultLookup;
@@ -126,6 +127,8 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	@Override
 	public void installUI(JComponent jc) {
 		setSliderFields();
+	    LookAndFeel.installColorsAndFont(jc, "Slider.background", "Slider.foreground",
+	            "Slider.font");
 	}
 	
 	private void setSliderFields() {
@@ -405,8 +408,8 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 
 	
 	@Override
-	public Dimension getMinimumSize(JComponent c) {
-		return (isScrollBar ? super.getMinimumSize(c) 
+	public Dimension getMinimumSize() {
+		return (isScrollBar ? super.getMinimumSize() 
 				: isHoriz ? getMinimumHorizontalSize() : getMinimumVerticalSize());
 	}
 
@@ -429,8 +432,8 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	}
 
 	@Override
-	public Dimension getPreferredSize(JComponent c) {
-		return (isScrollBar ? super.getPreferredSize(c) : isHoriz ? getPreferredHorizontalSize() : getPreferredVerticalSize());
+	public Dimension getPreferredSize() {
+		return (isScrollBar ? super.getPreferredSize() : isHoriz ? getPreferredHorizontalSize() : getPreferredVerticalSize());
 	}
 
 	public Dimension getPreferredHorizontalSize() {
@@ -525,8 +528,8 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 
 
 	@Override
-	Dimension getMaximumSize(JComponent jc) {
-		Dimension d = super.getMaximumSize(jc);
+	protected Dimension getMaximumSize() {
+		Dimension d = super.getMaximumSize();
 		return (d != null ? d : isHoriz ? new Dimension(Short.MAX_VALUE, 40) : new Dimension(40, Short.MAX_VALUE));
 	}
 

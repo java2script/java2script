@@ -1435,7 +1435,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				textText,
 
 				// *** Slider
-				// "Slider.font", dialogPlain12,
+				"Slider.font", dialogPlain12,
 				"Slider.foreground", control,
 				"Slider.background", control,
 				// "Slider.highlight", controlLtHighlight,
