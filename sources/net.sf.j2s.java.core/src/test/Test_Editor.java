@@ -13,6 +13,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
@@ -29,7 +30,7 @@ public class Test_Editor extends JFrame {
 
 	public Test_Editor() {
 
-		String test = "line1\nline2\nline3\n\nline5\n";
+		String test = "WA1B2C3 4\nXA1B2C3 4\nYA1B2C3 4\n\nZA1B2C3 4\n";
 
 		setTitle("testing editor");
 		setLocation(100, 100);
@@ -38,8 +39,9 @@ public class Test_Editor extends JFrame {
 		editor.setText(test);
 		System.out.println("count = " + editor.getDocument().getRootElements()[0].getElementCount());
 		editor.setBackground(new Color(200, 200, 200));
-		editor.setPreferredSize(new Dimension(300, 300));
-		editor.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 16));
+		editor.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
+		JScrollPane js = new JScrollPane(editor);
+		js.setPreferredSize(new Dimension(300, 300));
 
 		Style style = editor.addStyle("Red", null);
 		StyleConstants.setForeground(style, Color.red);
@@ -78,6 +80,15 @@ public class Test_Editor extends JFrame {
 		});
 
 		JTextField field = new JTextField("testing");
+		field.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("JTextField action");
+			}
+			
+		});
+		
 		field.addCaretListener(new CaretListener() {
 
 			@Override
@@ -86,13 +97,29 @@ public class Test_Editor extends JFrame {
 			}
 
 		});
+		add(js);
+		
+		js = new JScrollPane(area);
+		js.setPreferredSize(new Dimension(300, 300));
 
-		add(editor);
-		add(BorderLayout.EAST, area);
+		add(BorderLayout.EAST, js);
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-		JButton b = new JButton("caret+1");
+		JButton b;
+		
+		b = new JButton("clear");
+		b.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				editor.setText("");
+			}
+
+		});
+		panel.add(b);
+		
+		b = new JButton("caret+1");
 		b.addActionListener(new ActionListener() {
 
 			@Override
@@ -162,6 +189,8 @@ public class Test_Editor extends JFrame {
 				StyleConstants.setForeground(attrs, isBold ? Color.red : Color.black);
 				StyleConstants.setBold(attrs, isBold);
 				editor.getStyledDocument().setCharacterAttributes(start, end - start, attrs, false);
+				// note that text selection now disappears
+				System.out.println("caret now " + editor.getCaretPosition() + " " + editor.getSelectedText());
 			}
 
 		});

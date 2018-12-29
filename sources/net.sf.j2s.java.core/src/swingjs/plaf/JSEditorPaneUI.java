@@ -6,6 +6,8 @@ import java.awt.Insets;
 import java.beans.PropertyChangeEvent;
 
 import javax.swing.text.AbstractDocument.BranchElement;
+import javax.swing.JEditorPane;
+import javax.swing.JTextArea;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
@@ -48,18 +50,22 @@ public class JSEditorPaneUI extends JSTextUI {
 		super.propertyChange(e);
 	}
 
+	private int epTimer;
+	
 	@SuppressWarnings("unused")
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
+
 		if (target != null) {
 			// A first touch down may trigger on the wrong event target
 			// and not have set up window.getSelection() yet.
+			// 50-ms delay allows for multiple clicks, effecting word and line selection.
 			/**
 			 *
 			 * @j2sNative
 			 * 
-			 * 			var me = this; setTimeout(function(){me.handleJSEvent$O$I$O(null,
-			 *            eventType, jQueryEvent)},10);
+			 * 			var me = this; clearTimeout(this.epTimer);this.epTimer = setTimeout(function(){me.handleJSEvent$O$I$O(null,
+			 *            eventType, jQueryEvent)},50);
 			 * 
 			 */
 			return true;
@@ -67,21 +73,36 @@ public class JSEditorPaneUI extends JSTextUI {
 
 		int dot = 0, mark = 0, apt = 0, fpt = 0;
 		DOMNode anode = null, fnode = null;
+		String atag = null, ftag = null;
 		
 		/**
 		 * @j2sNative 
 		 * 
 		 * 
-		 * var s = window.getSelection(); anode = s.anchorNode; 
-		 * 			  fnode = s.focusNode; apt =
-		 *            s.anchorOffset; fpt = s.focusOffset;
+		 * var s = window.getSelection(); 
+		 * anode = s.anchorNode; 
+		 * apt = s.anchorOffset;
+		 * if (anode.tagName) {
+		 *   anode = anode.childNodes[apt];
+		 *   apt = 0;
+		 * }
+		 * fnode = s.focusNode; 
+		 * fpt = s.focusOffset;
+		 * if (fnode.tagName) {
+		 *   fnode = fnode.childNodes[fpt];
+		 *   fpt = 0;
+		 * }
 		 */
 
+		if (anode == null || fnode == null) {
+			System.out.println("JSEditorPaneUI anode or fnode is null ");
+			return false;
+		}
 		mark = getJSDocOffset(anode);
 		dot = (anode == fnode ? mark : getJSDocOffset(fnode)) + fpt;
 		mark += apt;
 		
-		//System.out.println("windows at " + mark + "-" + dot + "/" + apt + " " + fpt);
+		System.out.println("==windows at " + mark + "-" + dot + "/" + apt + " " + fpt);
 
 		/**
 		 * @j2sNative jQueryEvent.target = null; jQueryEvent.selectionStart = mark;
@@ -121,6 +142,7 @@ public class JSEditorPaneUI extends JSTextUI {
 	void setSelectionRange(int mark, int dot) {
 		editor.getCaret().setDot(mark);
 		editor.getCaret().moveDot(dot);
+		updateDataUI();
 	}
 
 	@Override
@@ -133,13 +155,10 @@ public class JSEditorPaneUI extends JSTextUI {
 			text = editor.getText();
 		currentText = text;
 		fromJava(text, sb, d.getRootElements()[0], true, null);
-		System.out.println("fromJava " + text.replace('\n', '.'));
-		System.out.println("toHTML" + sb);
+		//System.out.println("fromJava " + text.replace('\n', '.'));
+		//System.out.println("toHTML" + sb);
 		DOMNode.setAttr(domNode, "innerHTML", sb.toString());
-		
-		DOMNode[] divs = (DOMNode[]) (Object) $(domNode).find("*");
-		for (int i = divs.length; --i >= 0;)
-			DOMNode.setAttr(divs[i], "data-ui", this);
+		updateDataUI();
 		@SuppressWarnings("unused")
 		JSEditorPaneUI me = this;
 		/**
@@ -150,6 +169,16 @@ public class JSEditorPaneUI extends JSTextUI {
 		{
 			setJSSelection();
 		}
+	}
+
+	/**
+	 * after setting text, it is necessary to update all descendents to be clickable
+	 */
+	private void updateDataUI() {
+		DOMNode[] divs = (DOMNode[]) (Object) $(domNode).find("*");
+		//System.out.println("updateDataUI " + divs.length);
+		for (int i = divs.length; --i >= 0;)
+			DOMNode.setAttr(divs[i], "data-ui", this);
 	}
 
 	private final static int BOLD = 1;
@@ -215,7 +244,7 @@ public class JSEditorPaneUI extends JSTextUI {
 		if (checkAttr(ITALIC, a, currAttr))
 			style += "font-style:" + (StyleConstants.isItalic(a) ? "italic;" : "normal;");
 		if (checkAttr(FACE, a, currAttr))
-			style += "font-face:" + StyleConstants.getFontFamily(a) + ";";
+			style += "font-family:" + JSToolkit.getCSSFontFamilyName(StyleConstants.getFontFamily(a)) + ";";
 		if (checkAttr(SIZE, a, currAttr))
 			style += "font-size:" + StyleConstants.getFontSize(a) + "px;";
 		return style;
@@ -267,48 +296,60 @@ public class JSEditorPaneUI extends JSTextUI {
 	private DOMNode lastTextNode;
 
 	/**
-	 * Find the HTML node and offset for this caret point.
+	 * Find the HTML node and offset for this Java caret position.
 	 * 
-	 * @param node
-	 * @param off
-	 * @param pt
-	 * @return [node,offset]
+	 * @param node domNode or one of its descendants
+	 * @param off  document offset to start of this node
+	 * @param pt   target caret position
+	 * @return range information or length: [textNode,charOffset] or [nontextNode,charNodesOffset] or [null, nlen] 
 	 */
 	@Override
 	protected Object[] getJSNodePt(DOMNode node, int off, int pt) {
 		boolean isRoot = (off < 0);
-		if (isRoot) { 
+		if (isRoot) {
 			lastTextNode = null;
 			off = 0;
 		}
 		// Must consider several cases for BR and DIV:
 		// <br>
-		// <div><br><div> --> [div, 0]
-		// <div>.....<br><div>
+		// <div><br><div> where br counts as 1 character --> [div, 0] or [null, 1]
+		// <div>.....<br><div> where childNodes[i] is br, counts as 0 charactors --> [div, i] or [null, 0]
+		// as well as "raw" text in the root domNode:
+		// text....<br>...text...<br>.... where br counts as 1 character --> [node.parentNode, i] or [null, 1]
+		//
+		// also note that range can point to a character position only if the node is #text
+		// otherwise, it must point to a childNodes index in the parent node. So <br> must
+		// be indicated this second way.
 		
 		/**
 		 * @j2sNative
 			var nodes = node.childNodes;
 			var n = nodes.length;
-			if (n > 0 && nodes[n - 1].tagName == "BR" || node.tagName == "BR") {
-				return (pt == off ? [node, n == 0 ? 0 : n - 1] : [null, 1]);
+			if (n == 1 && nodes[0].tagName == "BR") {
+				return (pt == off ? [node, 0] : [null, 1]);
 			} 
 			var ipt = off;
 			var nlen = 0;
-			var i1 = (node.tagName == "DIV" || node.tagName == "P" ? 1 : 0);
+			var tag = node.tagName;
+			var i1 = (tag == "DIV" || tag == "P" ? 1 : 0);
 			for (var i = 0; i < n; i++) {
 				node = nodes[i];
 				if (node.innerText) {
 				  ret = this.getJSNodePt$swingjs_api_js_DOMNode$I$I(node, ipt, pt, false);
-				  if (ret[0] != null)
+				  if (ret[0] != null) {
 				  	return ret;
+				  	}
 				  nlen = ret[1];
+				} else if (node.tagName == "BR") {
+					if (ipt == pt)
+					  return [node.parentNode, i];
+					nlen = (isRoot ? 1 : 0);
 				} else if (ipt + i1 + (nlen = (this.lastTextNode = node).length) > pt) {
 					return [node, Math.max(0, pt - ipt)];	
 				}
 				ipt += nlen;
-			}			
-			return (isRoot ? [this.lastTextNode, ret[3] - 1] : [null, ipt + i1 - off, node, nlen]);
+			}
+			return (isRoot ? [this.lastTextNode, Math.max(0, ret[3] - 1)] : [null, ipt + i1 - off, node, nlen]);
 		 */
 		{
 			return null;
@@ -355,7 +396,6 @@ public class JSEditorPaneUI extends JSTextUI {
 	@Override
 	void setTextDelayed() {
 		// this timeout is critical and did not work with invokeLater
-		
 		JSTextUI u = this;
 		JTextComponent t = editor;
 		/** 
@@ -364,20 +404,21 @@ public class JSEditorPaneUI extends JSTextUI {
 		 *  if (this.timeoutID) {
 		 *  clearTimeout(this.timeoutID);
 		 *  }
-		 *  this.timeoutID = setTimeout(function(){u.timeoutID = 0;u.setText$S(t.getText$())},50);
+		 *  this.timeoutID = setTimeout(function(){u.timeoutID = 0;u.updateDOMNode$()},50);
 		 */
 	}
 
 	@Override
 	protected void jsSelect(Object[] r1, Object[] r2) {
-		//System.out.println("jsSelect " + r1 + r2);
+		System.out.println("jsSelect " + r1 + r2);
+		// range index may be NaN
 		/**
 		 * @j2sNative
 		 *
 		 *
 		 *  var range = document.createRange(); 
-		 * 			  range.setStart(r1[0], r1[1]);
-		 *            range.setEnd(r2[0], r2[1]); 
+		 * 			  range.setStart(r1[0], r1[1] || 0);
+		 *            range.setEnd(r2[0], r2[1] || 0); 
 		 *            var sel = window.getSelection();
 		 *            sel.removeAllRanges(); 
 		 *            sel.addRange(range);

@@ -1445,7 +1445,7 @@ public class JEditorPane extends JTextComponent {
             int prefHeight = d.height;
             if (! getScrollableTracksViewportWidth()) {
                 int w = port.getWidth();
-                Dimension min = ui.getMinimumSize();
+                Dimension min = ui.getMinimumSize(this);
                 if (w != 0 && w < min.width) {
                     // Only adjust to min if we have a valid size
                     prefWidth = min.width;
@@ -1453,7 +1453,7 @@ public class JEditorPane extends JTextComponent {
             }
             if (! getScrollableTracksViewportHeight()) {
                 int h = port.getHeight();
-                Dimension min = ui.getMinimumSize();
+                Dimension min = ui.getMinimumSize(this);
                 if (h != 0 && h < min.height) {
                     // Only adjust to min if we have a valid size
                     prefHeight = min.height;
@@ -1580,8 +1580,8 @@ public class JEditorPane extends JTextComponent {
             JViewport port = (JViewport)getParent();
             TextUI ui = (TextUI) getUI();
             int w = port.getWidth();
-            Dimension min = ui.getMinimumSize();
-            Dimension max = ui.getMaximumSize();
+            Dimension min = ui.getMinimumSize(this);
+            Dimension max = ui.getMaximumSize(this);
             if ((w >= min.width) && (w <= max.width)) {
                 return true;
             }
@@ -1603,9 +1603,9 @@ public class JEditorPane extends JTextComponent {
             JViewport port = (JViewport)getParent();
             TextUI ui = (TextUI) getUI();
             int h = port.getHeight();
-            Dimension min = ui.getMinimumSize();
+            Dimension min = ui.getMinimumSize(this);
             if (h >= min.height) {
-                Dimension max = ui.getMaximumSize();
+                Dimension max = ui.getMaximumSize(this);
                 if (h <= max.height) {
                     return true;
                 }
