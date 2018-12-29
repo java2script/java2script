@@ -152,8 +152,8 @@ public class JMenu extends JMenuItem implements MenuElement
      * Constructs a new <code>JMenu</code> with no text.
      */
     public JMenu() {
-    	super("", null, Integer.MIN_VALUE, "MenuUI");
-    }
+        this("");
+	}
 
     /**
      * Constructs a new <code>JMenu</code> with the supplied string
@@ -162,7 +162,7 @@ public class JMenu extends JMenuItem implements MenuElement
      * @param s  the text for the menu label
      */
     public JMenu(String s) {
-    	super(s, null, Integer.MIN_VALUE, "MenuUI");
+        super(s);
     }
 
     /**
@@ -173,7 +173,7 @@ public class JMenu extends JMenuItem implements MenuElement
      * @since 1.3
      */
     public JMenu(Action a) {
-    	super("", null, Integer.MIN_VALUE, "MenuUI");
+        this();
         setAction(a);
     }
 
@@ -185,9 +185,13 @@ public class JMenu extends JMenuItem implements MenuElement
      * @param b can the menu be torn off (not yet implemented)
      */
     public JMenu(String s, boolean b) {
-    	super(s, null, Integer.MIN_VALUE, "MenuUI");
+        this(s);
     }
 
+	@Override
+	public String getUIClassID() {
+		return "MenuUI";
+	}
 
     /**
      * Overriden to do nothing. We want JMenu to be focusable, but

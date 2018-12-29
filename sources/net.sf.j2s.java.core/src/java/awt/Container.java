@@ -808,7 +808,12 @@ public class Container extends JSComponent {
         checkTreeLock();
 
         // Check if moving between containers
-        if (curParent != this) {
+        if (curParent == this) {
+            if (index < component.size()) {
+                component.set(index, comp);
+                _childTainted = true;
+            }
+        } else {
             //index == -1 means add to the end.
             if (index == -1) {
                 component.add(comp);
@@ -823,11 +828,6 @@ public class Container extends JSComponent {
             adjustListeningChildren(AWTEvent.HIERARCHY_BOUNDS_EVENT_MASK,
                                     comp.numListening(AWTEvent.HIERARCHY_BOUNDS_EVENT_MASK));
             adjustDescendants(comp.countHierarchyMembers());
-        } else {
-            if (index < component.size()) {
-                component.set(index, comp);
-                _childTainted = true;
-            }
         }
 
         invalidateIfValid();
@@ -4558,7 +4558,7 @@ class LightweightDispatcher implements AWTEventListener {
     public void checkInternalFrameMouseDown(JSComponent c) {
     	JSFrameViewer fv = c.getFrameViewer();
     	JSComponent top = fv.getTopComponent();
-    	if (top.uiClassID == "InternalFrameUI")
+    	if (top.getUIClassID() == "InternalFrameUI")
 			try {
 				((JInternalFrame) top).setSelected(true);
 			} catch (PropertyVetoException e) {
@@ -4773,7 +4773,7 @@ class LightweightDispatcher implements AWTEventListener {
 		for (; component != null && component != nativeContainer; component = component.getParent()) {
 			x -= component.x;
 			y -= component.y;
-			if (((JSComponent) component).uiClassID == "PopupMenuUI")
+			if (((JSComponent) component).getUIClassID() == "PopupMenuUI")
 				break; // SwingJS not to worry
 		}
 		MouseEvent retargeted;

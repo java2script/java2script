@@ -161,11 +161,11 @@ public class JSComboBoxUI extends JSLightweightUI implements ItemListener, ListD
 //			System.out.println("JSComboBoxUI propertychange " + evt);
 //	}
 	
-	@Override
-  public boolean contains(JComponent c, int x, int y) {
-//		System.out.println("JSComboBoxUI contains check " + c);
-    return true; // do not accept responsibility for this one?
-  }
+//	@Override
+//  public boolean contains(JComponent c, int x, int y) {
+////		System.out.println("JSComboBoxUI contains check " + c);
+//    return true; // do not accept responsibility for this one?
+//  }
 
   /**
    * Set the visiblity of the popup

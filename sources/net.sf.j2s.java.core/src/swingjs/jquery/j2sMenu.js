@@ -1,6 +1,6 @@
 // J2SMenu.js from JSmolMenu.js
 // author: Bob Hanson, hansonr@stolaf.edu
-// last edited 12/20/2018
+// last edited 12/24/2018
 
 /*! jQuery UI - v1.9.2 - 2012-12-17
 * http://jqueryui.com
@@ -21,7 +21,39 @@ if (J2S.isResourceLoaded("swingjs/jquery/j2sMenu.js", true))return;
 
 if (!jQuery.ui.menu)
 try{
- (function(e,t){var n=!1;e.widget("ui.menu",{
+
+// local methods here for help with debugging 
+	
+ var delayMe = function(element, f, ms) {
+	 var id = element._delay(f, ms);
+	 return id;
+ }	
+ 
+ var clearMe = function(id) {
+	 return clearTimeout(id);
+ }
+
+ var doCmd = function(trigger,me,e,t,n) {
+	 switch(trigger) {
+	 case "open":
+		 t.show().removeAttr("aria-hidden")
+		 	.attr("aria-expanded","true")
+		 	.position(n);
+		 break;
+	 case "expand":
+		 me._open(t.parent());
+		 delayMe(this,function(){me.focus(e,t)});
+		 break;
+	 case "startOpening":
+		 me._close(),me._open(e);
+		 break;			 
+	 }
+ }
+ 
+ // BH note that swingjs.plaf.JSButton will set and clear ui-state-disabled on its own
+ 
+
+;(function(e,t){var n=!1;e.widget("ui.menu",{
  version:"1.9.2",
  defaultElement:"<ul>",
  delay:300,
@@ -51,13 +83,13 @@ try{
 // BH 12/20/2018 adds persistence for JMenu clicks
 
 if (this.active && this.active[0].attributes.name && this.active[0].attributes.name.value == "javax.swing.JMenu") {
-clearTimeout(this.timer);
+clearMe(this.timer);
 return 
 }
 
 var r=e(t.target).closest(".ui-menu-item");
 
-!n&&r.not(".ui-state-disabled").length&&(n=!0,this.select(t),r.has(".ui-menu").length?this.expand(t):this.element.is(":focus")||(this.element.trigger("focus",[!0]),this.active&&this.active.parents(".ui-menu").length===1&&clearTimeout(this.timer)))
+!n&&r.not(".ui-state-disabled").length&&(n=!0,this.select(t),r.has(".ui-menu").length?this.expand(t):this.element.is(":focus")||(this.element.trigger("focus",[!0]),this.active&&this.active.parents(".ui-menu").length===1&&clearMe(this.timer)))
 
 ; $(".ui-menu").hide();
 
@@ -77,7 +109,8 @@ var r=e(t.target).closest(".ui-menu-item");
 		 mouseleave:"collapseAll",
 		 "mouseleave .ui-menu": "collapseAll",
 		 focus:function(e,t){var n=this.active||this.element.children(".ui-menu-item").eq(0);t||this.focus(e,n)},
-		 blur:function(t){this._delay(function(){e.contains(this.element[0],this.document[0].activeElement)||this.collapseAll(t)})},
+		 blur:function(t){
+			 delayMe(this, function(){e.contains(this.element[0],this.document[0].activeElement)||this.collapseAll(t)})},
 		 keydown:"_keydown"
 	 }), 
 	 this.refresh(),
@@ -94,7 +127,8 @@ var r=e(t.target).closest(".ui-menu-item");
 	 .children("a").removeUniqueId().removeClass("ui-corner-all ui-state-hover")
 	 .removeAttr("tabIndex").removeAttr("role").removeAttr("aria-haspopup").children().each(function(){var t=e(this);t.data("ui-menu-submenu-carat")&&t.remove()}),this.element.find(".ui-menu-divider").removeClass("ui-menu-divider ui-widget-content")
 	 },
- _keydown:function(t){function a(e){return e.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g,"\\$&")}var n,r,i,s,o,u=!0;switch(t.keyCode){case e.ui.keyCode.PAGE_UP:this.previousPage(t);break;case e.ui.keyCode.PAGE_DOWN:this.nextPage(t);break;case e.ui.keyCode.HOME:this._move("first","first",t);break;case e.ui.keyCode.END:this._move("last","last",t);break;case e.ui.keyCode.UP:this.previous(t);break;case e.ui.keyCode.DOWN:this.next(t);break;case e.ui.keyCode.LEFT:this.collapse(t);break;case e.ui.keyCode.RIGHT:this.active&&!this.active.is(".ui-state-disabled")&&this.expand(t);break;case e.ui.keyCode.ENTER:case e.ui.keyCode.SPACE:this._activate(t);break;case e.ui.keyCode.ESCAPE:this.collapse(t);break;default:u=!1,r=this.previousFilter||"",i=String.fromCharCode(t.keyCode),s=!1,clearTimeout(this.filterTimer),i===r?s=!0:i=r+i,o=new RegExp("^"+a(i),"i"),n=this.activeMenu.children(".ui-menu-item").filter(function(){return o.test(e(this).children("a").text())}),n=s&&n.index(this.active.next())!==-1?this.active.nextAll(".ui-menu-item"):n,n.length||(i=String.fromCharCode(t.keyCode),o=new RegExp("^"+a(i),"i"),n=this.activeMenu.children(".ui-menu-item").filter(function(){return o.test(e(this).children("a").text())})),n.length?(this.focus(t,n),n.length>1?(this.previousFilter=i,this.filterTimer=this._delay(function(){delete this.previousFilter},1e3)):delete this.previousFilter):delete this.previousFilter}u&&t.preventDefault()},
+ _keydown:function(t){function a(e){return e.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g,"\\$&")}var n,r,i,s,o,u=!0;switch(t.keyCode){case e.ui.keyCode.PAGE_UP:this.previousPage(t);break;case e.ui.keyCode.PAGE_DOWN:this.nextPage(t);break;case e.ui.keyCode.HOME:this._move("first","first",t);break;case e.ui.keyCode.END:this._move("last","last",t);break;case e.ui.keyCode.UP:this.previous(t);break;case e.ui.keyCode.DOWN:this.next(t);break;case e.ui.keyCode.LEFT:this.collapse(t);break;case e.ui.keyCode.RIGHT:this.active&&!this.active.is(".ui-state-disabled")&&this.expand(t);break;case e.ui.keyCode.ENTER:case e.ui.keyCode.SPACE:this._activate(t);break;case e.ui.keyCode.ESCAPE:this.collapse(t);break;default:u=!1,r=this.previousFilter||"",i=String.fromCharCode(t.keyCode),s=!1,clearMe(this.filterTimer),i===r?s=!0:i=r+i,o=new RegExp("^"+a(i),"i"),n=this.activeMenu.children(".ui-menu-item").filter(function(){return o.test(e(this).children("a").text())}),n=s&&n.index(this.active.next())!==-1?this.active.nextAll(".ui-menu-item"):n,n.length||(i=String.fromCharCode(t.keyCode),o=new RegExp("^"+a(i),"i"),n=this.activeMenu.children(".ui-menu-item").filter(function(){return o.test(e(this).children("a").text())})),n.length?(this.focus(t,n),n.length>1?(this.previousFilter=i,
+		 	this.filterTimer=delayMe(function(){delete this.previousFilter},1e3)):delete this.previousFilter):delete this.previousFilter}u&&t.preventDefault()},
  _activate:function(e){this.active.is(".ui-state-disabled")||(this.active.children("a[aria-haspopup='true']").length?this.expand(e):this.select(e))},
  refresh:function(){
 	 var t,n=this.options.icons.submenu,role=this.options.role,
@@ -117,7 +151,7 @@ var r=e(t.target).closest(".ui-menu-item");
     		r.attr("id")),
     this.active.parent().closest(".ui-menu-item").children("a:first").addClass("ui-state-active"),
     e&&e.type==="keydown"?this._close():
-this.timer=this._delay(function(){this._close()},this.delay),
+this.timer=delayMe(this, function(){this._close()},this.delay),
 n=t.children(".ui-menu"),n.length&&/^mouse/.test(e.type)
 &&this._startOpening(n),this.activeMenu=t.parent(),
 this._trigger("focus",e,{item:t})},
@@ -127,17 +161,29 @@ this._trigger("focus",e,{item:t})},
 	 if (this.active && typeof t == "undefined" && e.relatedTarget && e.relatedTarget.getAttribute("role") != "presentation")	 {
 		 this.element.hide();
 	 }
-
-
-	 t||clearTimeout(this.timer);if(!this.active)return;
-	 
+	 t||clearMe(this.timer);
+	 if(!this.active)return;
 	 this.active
 	 //.children("a")
-	 .removeClass("ui-state-focus"),this.active=null,this._trigger("blur",e,{item:this.active})},
- _startOpening:function(e){clearTimeout(this.timer);if(e.attr("aria-hidden")!=="true")return;this.timer=this._delay(function(){this._close(),this._open(e)},this.delay)},
- _open:function(t){var n=e.extend({of:this.active},this.options.position);clearTimeout(this.timer),this.element.find(".ui-menu").not(t.parents(".ui-menu")).hide().attr("aria-hidden","true"),t.show().removeAttr("aria-hidden").attr("aria-expanded","true").position(n)},
+	 	.removeClass("ui-state-focus"),
+	 this.active=null,
+	 this._trigger("blur",e,{item:this.active});
+	},
+ _startOpening: function(e){
+	 clearMe(this.timer);
+	 if(e.attr("aria-hidden")!=="true")return;
+	 this.timer=delayMe(this, function(){doCmd("startOpening", this, e)},this.delay)
+ 	},
+ _open:function(t){
+	 var n=e.extend({of:this.active},this.options.position);
+	 clearMe(this.timer);
+	 this.element.find(".ui-menu").not(t.parents(".ui-menu")).hide()
+	 	.attr("aria-hidden","true");
+	 doCmd("open", 0, 0, t, n);
+	 },
  collapseAll:function(t,n){
-	 clearTimeout(this.timer),this.timer=this._delay(
+	 clearMe(this.timer),
+	 this.timer=delayMe(this,
        function(){
 		 var r=n?this.element:e(t&&t.target).closest(this.element.find(".ui-menu"));
 		 r.length||(r=this.element),
@@ -163,7 +209,11 @@ e.find(".ui-menu")
  collapse:function(e){var t=this.active&&this.active.parent().closest(".ui-menu-item",this.element);t&&t.length&&(this._close(),
 		 this.focus(e,t))
  },
- expand:function(e){var t=this.active&&this.active.children(".ui-menu ").children(".ui-menu-item").first();t&&t.length&&(this._open(t.parent()),this._delay(function(){this.focus(e,t)}))},
+ expand:function(e){
+	 var t=this.active&&this.active.children(".ui-menu ")
+	 	.children(".ui-menu-item").first();
+	 t&&t.length&&doCmd("expand", this, e, t);
+	 },
  next:function(e){this._move("next","first",e)},
  previous:function(e){this._move("prev","last",e)},
  isFirstItem:function(){return this.active&&!this.active.prevAll(".ui-menu-item").length},
@@ -221,36 +271,29 @@ Swing.__getMenuStyle = function(applet) { return '\
 
 var bindMenuActionCommands = function(eventType, menu, isBind) {
   // called internally
-  System.out.println("binding " + isBind + " " + menu.ui.id)
+  //System.out.println("binding " + isBind + " " + menu.ui.id)
   var children = (menu.uiClassID ? menu.ui.getChildren() : menu.getComponents());
 	for(var i = children.length; --i >= 0;)
 		bindMenuActionCommands(eventType, children[i], isBind);
-
-
-
-
-  if (!menu.uiClassID || !menu["data-ui"])
-    return;  
+	if (!menu.uiClassID || !menu["data-ui"])
+		return;  
 	J2S.$documentOff(eventType, menu.id);
-	if (isBind)
+	if (isBind) {
 		J2S.$documentOn(eventType, menu.id, function(event) {
-
-
-
-
-      if (menu.uiClassID) {
-        System.out.println(["menu " + menu.ui.id , " clicked " , event.target.id , event.target.tagName, event.target["data-component"]]);
+			if (menu.uiClassID) {
+		        System.out.println(["menu " + menu.ui.id , " clicked " , event.target.id , event.target.tagName, event.target["data-component"]]);
 				Swing.hideMenus(menu._applet);
-        menu["data-ui"].handleJSEvent$O$I$O(event);
+		        menu["data-ui"].handleJSEvent$O$I$O(event);
 			} else if (menu.itemListener) {
 				menu.selected = (menu.btnType == 2 /*javajs.swing.JMenuItem.TYPE_CHECKBOX*/ ? J2S.$prop(menu.id + "-cb", "checked") : true); 
 				Swing.hideMenus(menu._applet);
 				menu.itemListener.itemStateChanged$java_awt_event_ItemEvent({getSource:function(){return menu}});
-			}	else if (menu.actionListener) {
+			} else if (menu.actionListener) {
 				Swing.hideMenus(menu._applet);
 				menu.actionListener.actionPerformed$java_awt_event_ActionEvent({getSource:function(){return menu},getActionCommand:function(){return menu.actionCommand}});
 			}
 		});
+	}
 }
 
 Swing.setMenu = function(menu) {

@@ -292,13 +292,17 @@ public class JScrollPane extends JComponent implements ScrollPaneConstants
             setViewportView(view);
         }
         setUIProperty("opaque",true);
-        uiClassID = "ScrollPaneUI";
         updateUI();
 
         if (!this.getComponentOrientation().isLeftToRight()) {
             viewport.setViewPosition(new Point(Integer.MAX_VALUE, 0));
         }
     }
+
+	@Override
+	public String getUIClassID() {
+		return "ScrollPaneUI";
+	}
 
 
     /**

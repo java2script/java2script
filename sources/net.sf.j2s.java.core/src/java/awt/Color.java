@@ -109,6 +109,11 @@ public class Color implements Paint /*, java.io.Serializable*/ {
     public final static Color black     = new Color(0, 0, 0);
 
     /**
+     * SwingJS The color almost black; signifies none for styles
+     */
+    public final static Color none     = new Color(0, 0, 1); // SwingJS
+
+    /**
      * The color black.  In the default sRGB space.
      * @since 1.4
      */

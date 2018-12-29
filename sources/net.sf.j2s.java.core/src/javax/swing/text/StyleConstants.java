@@ -549,7 +549,7 @@ public class StyleConstants {
     public static Color getForeground(AttributeSet a) {
         Color fg = (Color) a.getAttribute(Foreground);
         if (fg == null) {
-            fg = Color.black;
+            fg = Color.none; // SwingJS black ??
         }
         return fg;
     }
@@ -573,7 +573,7 @@ public class StyleConstants {
     public static Color getBackground(AttributeSet a) {
         Color fg = (Color) a.getAttribute(Background);
         if (fg == null) {
-            fg = Color.black;
+            fg = Color.none; // Swingjs was black??
         }
         return fg;
     }

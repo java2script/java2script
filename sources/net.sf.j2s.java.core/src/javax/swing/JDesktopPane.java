@@ -142,11 +142,17 @@ public class JDesktopPane extends JLayeredPane //implements Accessible
 //        });
     }
 
+	@Override
 	protected void initLayeredPane() {
-        uiClassID = "DesktopPaneUI";
 		updateUI();
 		setLayout(null);
 	}
+
+	@Override
+	public String getUIClassID() {
+		return "DesktopPaneUI";
+	}
+
 
     /**
      * Returns the L&F object that renders this component.
@@ -154,7 +160,8 @@ public class JDesktopPane extends JLayeredPane //implements Accessible
      * @return the <code>DesktopPaneUI</code> object that
      *   renders this component
      */
-    public DesktopPaneUI getUI() {
+    @Override
+	public DesktopPaneUI getUI() {
         return (DesktopPaneUI)ui;
     }
 
@@ -232,18 +239,6 @@ public class JDesktopPane extends JLayeredPane //implements Accessible
         desktopManager = d;
         firePropertyChange("desktopManager", oldValue, desktopManager);
     }
-
-    /**
-     * Notification from the <code>UIManager</code> that the L&F has changed.
-     * Replaces the current UI object with the latest version from the
-     * <code>UIManager</code>.
-     *
-     * @see JComponent#updateUI
-     */
-    public void updateUI() {
-    	super.updateUI();
-    }
-
 
     /**
      * Returns all <code>JInternalFrames</code> currently displayed in the
@@ -338,6 +333,7 @@ public class JDesktopPane extends JLayeredPane //implements Accessible
         return results;
     }
     
+	@Override
 	public Component add(Component c) {
 		super.add(c);
 		if (c instanceof JInternalFrame) {
@@ -390,7 +386,8 @@ public class JDesktopPane extends JLayeredPane //implements Accessible
             this.zOrder = zOrder;
         }
 
-        public int compareTo(ComponentPosition o) {
+        @Override
+		public int compareTo(ComponentPosition o) {
             int delta = o.layer - layer;
             if (delta == 0) {
                 return zOrder - o.zOrder;
@@ -492,7 +489,8 @@ public class JDesktopPane extends JLayeredPane //implements Accessible
      * {@inheritDoc}
      * @since 1.6
      */
-    protected Component addImpl(Component comp, Object constraints, int index) {
+    @Override
+	protected Component addImpl(Component comp, Object constraints, int index) {
         super.addImpl(comp, constraints, index);
         if (componentOrderCheckingEnabled) {
             if (comp instanceof JInternalFrame ||
@@ -507,7 +505,8 @@ public class JDesktopPane extends JLayeredPane //implements Accessible
      * {@inheritDoc}
      * @since 1.6
      */
-    public void remove(int index) {
+    @Override
+	public void remove(int index) {
         if (componentOrderCheckingEnabled) {
             Component comp = getComponent(index);
             if (comp instanceof JInternalFrame ||
@@ -522,7 +521,8 @@ public class JDesktopPane extends JLayeredPane //implements Accessible
      * {@inheritDoc}
      * @since 1.6
      */
-    public void removeAll() {
+    @Override
+	public void removeAll() {
         if (componentOrderCheckingEnabled) {
             int count = getComponentCount();
             for (int i = 0; i < count; i++) {
@@ -541,7 +541,8 @@ public class JDesktopPane extends JLayeredPane //implements Accessible
      * {@inheritDoc}
      * @since 1.6
      */
-    public void setComponentZOrder(Component comp, int index) {
+    @Override
+	public void setComponentZOrder(Component comp, int index) {
         super.setComponentZOrder(comp, index);
         if (componentOrderCheckingEnabled) {
             if (comp instanceof JInternalFrame ||
@@ -567,7 +568,8 @@ public class JDesktopPane extends JLayeredPane //implements Accessible
 //        }
 //    }
 //
-    void setUIProperty(String propertyName, Object value) {
+    @Override
+	void setUIProperty(String propertyName, Object value) {
         if (propertyName == "dragMode") {
             if (!dragModeSet) {
                 setDragMode(((Integer)value).intValue());
@@ -587,7 +589,8 @@ public class JDesktopPane extends JLayeredPane //implements Accessible
      *
      * @return  a string representation of this <code>JDesktopPane</code>
      */
-    protected String paramString() {
+    @Override
+	protected String paramString() {
         String desktopManagerString = (desktopManager != null ?
                                        desktopManager.toString() : "");
 

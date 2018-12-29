@@ -213,9 +213,14 @@ public class JTabbedPane extends JComponent
         setTabLayoutPolicy(tabLayoutPolicy);
         pages = new ArrayList<Page>(1);
         setModel(new DefaultSingleSelectionModel());
-        uiClassID = "TabbedPaneUI";
         updateUI();
     }
+
+	@Override
+	public String getUIClassID() {
+		return "TabbedPaneUI";
+	}
+
 
 //    /**
 //     * Returns the UI object which implements the L&amp;F for this component.

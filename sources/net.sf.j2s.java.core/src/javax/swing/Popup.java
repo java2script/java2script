@@ -258,6 +258,11 @@ public class Popup {
             }
         }
 
+    	@Override
+    	public String getUIClassID() {
+    		return "PopupUI";
+    	}
+
         @Override
 				public void update(Graphics g) {
             paint(g);

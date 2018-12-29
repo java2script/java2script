@@ -89,6 +89,9 @@ import swingjs.api.JSMinimalAbstractDocument;
  */
 public class JTextPane extends JEditorPane {
 		
+	
+	// TODO SwingJS -- JSTextPaneUI has not been implemented
+	
 		
     /**
      * Creates a new <code>JTextPane</code>.  A new instance of
@@ -96,7 +99,6 @@ public class JTextPane extends JEditorPane {
      * created and set, and the document model set to <code>null</code>.
      */
     public JTextPane() {
-        super(null, null,"TextPaneUI");        
         EditorKit editorKit = createDefaultEditorKit();
         String contentType = editorKit.getContentType();
         if (contentType != null
@@ -106,6 +108,11 @@ public class JTextPane extends JEditorPane {
         }
         setEditorKit(editorKit);
     }
+
+	@Override
+	public String getUIClassID() {
+		return "TextPaneUI";
+	}
 
     /**
      * Creates a new <code>JTextPane</code>, with a specified document model.

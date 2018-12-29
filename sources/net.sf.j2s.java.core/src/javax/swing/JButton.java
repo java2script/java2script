@@ -113,13 +113,22 @@ public class JButton extends AbstractButton {
      * @param icon  the Icon image to display on the button
      */
     public JButton(String text, Icon icon) {
-        // Create the model
-        setModel(new DefaultButtonModel());
-
         // initialize
-        init(text, icon, "ButtonUI");
+        setModel();
+        init(text, icon);
         setOpaque(true);// BH not sure why this is not here
     }
+
+	@Override
+	protected void setModel() {
+        setModel(new DefaultButtonModel());
+	}
+
+	@Override
+	public String getUIClassID() {
+		return "ButtonUI";
+	}
+
 
     
     /**
@@ -211,6 +220,5 @@ public class JButton extends AbstractButton {
         return super.paramString() +
             ",defaultCapable=" + defaultCapableString;
     }
-
 
 }

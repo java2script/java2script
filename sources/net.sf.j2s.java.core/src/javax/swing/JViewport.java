@@ -276,9 +276,13 @@ public class JViewport extends JComponent
 		super();
 		setLayout(createLayoutManager());
 		setOpaque(true);
-		uiClassID = "ViewportUI";
 		updateUI();
 		setInheritsPopupMenu(true);
+	}
+
+	@Override
+	public String getUIClassID() {
+		return "ViewportUI";
 	}
 
 

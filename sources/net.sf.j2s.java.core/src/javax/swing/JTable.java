@@ -673,9 +673,14 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		setModel(dm);
 
 		initializeLocalVars();
-		uiClassID = "TableUI";
 		updateUI();
 	}
+
+	@Override
+	public String getUIClassID() {
+		return "TableUI";
+	}
+
 
 	/**
 	 * Constructs a <code>JTable</code> with <code>numRows</code> and

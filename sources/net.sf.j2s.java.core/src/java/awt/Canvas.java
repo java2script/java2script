@@ -24,10 +24,6 @@
  */
 package java.awt;
 
-import java.awt.image.BufferStrategy;
-import java.awt.peer.CanvasPeer;
-import javax.accessibility.*;
-
 /**
  * A <code>Canvas</code> component represents a blank rectangular
  * area of the screen onto which the application can draw or from

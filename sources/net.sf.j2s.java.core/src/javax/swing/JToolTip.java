@@ -71,9 +71,13 @@ public class JToolTip extends JComponent {
     /** Creates a tool tip. */
     public JToolTip() {
         setOpaque(true);
-        uiClassID = "ToolTipUI";
         updateUI();
     }
+
+	@Override
+	public String getUIClassID() {
+		return "ToolTipUI";
+	}
 
 
     /**

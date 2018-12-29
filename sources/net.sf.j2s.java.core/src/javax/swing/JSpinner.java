@@ -162,9 +162,13 @@ public class JSpinner extends JComponent
         this.model = model;
         this.editor = createEditor(model);
         setUIProperty("opaque",true);
-        uiClassID = "SpinnerUI";
         updateUI();
     }
+
+	@Override
+	public String getUIClassID() {
+		return "SpinnerUI";
+	}
 
 
     /**

@@ -5,5 +5,7 @@ public interface JQuery {
   JQueryObject $(Object selector);
 
   DOMNode parseXML(String xmlData);
+  
+  boolean contains(Object outer, Object inner);
 
 }

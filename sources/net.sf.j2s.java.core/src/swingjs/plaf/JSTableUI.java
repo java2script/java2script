@@ -153,7 +153,7 @@ public class JSTableUI extends JSPanelUI {
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
-		System.out.println("JSTableUI prop=" + e);
+		System.out.println("JSTableUI prop=" + prop);
 		switch (prop) {
 		case "model":
 			currentRowMin = currentRowMax = -1;

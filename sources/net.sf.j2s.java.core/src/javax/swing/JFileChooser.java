@@ -104,11 +104,11 @@ import swingjs.JSUtil;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class JFileChooser extends JComponent {
 
-    /**
-     * @see #getUIClassID
-     * @see #readObject
-     */
-    static final String uiClassID = "FileChooserUI";
+//    /**
+//     * @see #getUIClassID
+//     * @see #readObject
+//     */
+//    static final String uiClassID = "FileChooserUI";
 
     // ************************
     // ***** Dialog Types *****
@@ -272,6 +272,7 @@ public class JFileChooser extends JComponent {
 
     // uiFileView is not serialized, as it is initialized
     // by updateUI() after deserialization
+    // SwingJS will be null, as we do not implement JSFileChooserUI.java
     private transient FileView uiFileView = null;
 
     private boolean controlsShown = true;
@@ -359,6 +360,13 @@ public class JFileChooser extends JComponent {
     	this.currentDirectory = currentDirectory;
 //        this(currentDirectory, (FileSystemView) null);
     }
+
+    
+	@Override
+	public String getUIClassID() {
+		return "FileChooserUI";
+	}
+
 
 //    /**
 //     * Constructs a <code>JFileChooser</code> using the given

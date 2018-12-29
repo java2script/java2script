@@ -263,7 +263,6 @@ public class JSlider extends JComponent implements SwingConstants {
 		this.orientation = orientation;
 		sliderModel = new DefaultBoundedRangeModel(value, 0, min, max);
 		sliderModel.addChangeListener(changeListener);
-		uiClassID = "SliderUI";
 		updateUI();
 	}
 
@@ -274,9 +273,14 @@ public class JSlider extends JComponent implements SwingConstants {
 		this.orientation = JSlider.HORIZONTAL;
 		setModel(brm);
 		sliderModel.addChangeListener(changeListener);
-		uiClassID = "SliderUI";
 		updateUI();
 	}
+
+	@Override
+	public String getUIClassID() {
+		return "SliderUI";
+	}
+
 
 	/**
 	 * Resets the UI property to a value from the current look and feel.

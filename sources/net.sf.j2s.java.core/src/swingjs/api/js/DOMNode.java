@@ -72,6 +72,10 @@ public abstract class DOMNode {
 		return (/**  @j2sNative  node.parentNode ||*/ null);
 	}
 	
+	public static DOMNode getPreviousSibling(DOMNode node) {
+		return (/**  @j2sNative  node.previousSibling ||*/ null);
+	}
+	
 	public static DOMNode firstChild(DOMNode node) {
 		return 	(/**  @j2sNative node.firstChild ||*/ null);
 	}

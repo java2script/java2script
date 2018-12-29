@@ -251,7 +251,7 @@ public class ButtonListener implements MouseListener, MouseMotionListener,
 	public void mousePressed(MouseEvent e) {
 		if (SwingUtilities.isLeftMouseButton(e)) {
 			AbstractButton b = (AbstractButton) e.getSource();
-			if (b.uiClassID == "MenuUI" && ((JMenu)b).isTopLevelMenu())
+			if (b.getUIClassID() == "MenuUI" && ((JMenu)b).isTopLevelMenu())
 				((JMenu)b).setPopupMenuVisible (true);
 		}
 	}
@@ -260,7 +260,7 @@ public class ButtonListener implements MouseListener, MouseMotionListener,
 	public void mouseReleased(MouseEvent e) {
 		if (SwingUtilities.isLeftMouseButton(e)) {
 			AbstractButton b = (AbstractButton) e.getSource();
-			if (b.uiClassID == "MenuUI") {
+			if (b.getUIClassID() == "MenuUI") {
 				return;
 			}
 			b.doClick(0);
