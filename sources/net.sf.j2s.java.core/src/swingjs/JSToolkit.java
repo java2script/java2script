@@ -339,7 +339,8 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	}
 
 	/**
-	 * dispatch an event "on the event thread"
+	 * dispatch an event "on the event thread". ActiveEvent has no src but instead
+	 * a dispatch() method.
 	 * @param event
 	 * @param src
 	 * @param andWait
@@ -902,6 +903,7 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
     }
   }
 
+  @Override
   public void beep() {
   	System.out.println("JSToolkit.beep");
   }

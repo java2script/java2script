@@ -90,7 +90,7 @@ public abstract class AWTEvent extends EventObject {
 
 	private static int idnum; // SwingJS for testing
 
-    byte bdata[];
+    public byte bdata[];
     
     /**
      * The event's id.
@@ -605,8 +605,12 @@ public abstract class AWTEvent extends EventObject {
      * freed when the that is finalized. Upon completion,
      * this event is not changed.
      */
-    void copyPrivateDataInto(AWTEvent that) {
+    
+    // SwingJS allow JSDnD to do this.
+    
+    protected void copyPrivateDataInto(AWTEvent that) {
         that.bdata = bdata;
+        // For JSDnD, we need to also copy over the dispatch() method if it exists.
 //        // Copy canAccessSystemClipboard value from this into that.
 //        if (this instanceof InputEvent && that instanceof InputEvent) {
 ////            Field field = get_InputEvent_CanAccessSystemClipboard();
