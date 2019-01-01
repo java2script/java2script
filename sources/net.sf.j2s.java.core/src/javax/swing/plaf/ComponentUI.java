@@ -168,7 +168,7 @@ public abstract class ComponentUI implements ComponentPeer {
 	 * @see javax.swing.JComponent#paintComponent
 	 */
 	public void update(Graphics g, JComponent c) {
-// SwingJS overwritten
+// SwingJS overridden in JSComponentUI
 //       if (c.isOpaque()) {
 //            g.setColor(c.getBackground());
 //            g.fillRect(0, 0, c.getWidth(),c.getHeight());
@@ -187,9 +187,9 @@ public abstract class ComponentUI implements ComponentPeer {
 	 * @see java.awt.LayoutManager#preferredLayoutSize
 	 */
 	public Dimension getPreferredSize(JComponent c) {
-		return getPreferredSize();
+		return null;
 	}
-
+	
 	/**
 	 * Returns the specified component's minimum size appropriate for the look and
 	 * feel. If <code>null</code> is returned, the minimum size will be calculated
@@ -205,7 +205,7 @@ public abstract class ComponentUI implements ComponentPeer {
 	 * @see #getPreferredSize
 	 */
 	public Dimension getMinimumSize(JComponent c) {
-		return getPreferredSize();
+		return getPreferredSize(c);
 	}
 
 	/**
@@ -222,7 +222,7 @@ public abstract class ComponentUI implements ComponentPeer {
 	 * @see java.awt.LayoutManager2#maximumLayoutSize
 	 */
 	public Dimension getMaximumSize(JComponent c) {
-		return getPreferredSize();
+		return getPreferredSize(c);
 	}
 
 	/**

@@ -90,8 +90,9 @@ public interface ComponentPeer {
 
 	Point getLocationOnScreen();
 
+// SwingJS -- never called by Java
 	Dimension getPreferredSize();
-
+//
 	Dimension getMinimumSize();
 
 	ColorModel getColorModel();

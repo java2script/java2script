@@ -44,6 +44,16 @@ class Test_Array extends Test_ {
 
 	public static void main(String[] args) {
 	
+    	try {
+			System.out.println(Class.forName("[C").getName());
+			System.out.println(((new test.Test_Array[0]).getClass().getName()));
+			System.out.println(Class.forName("[Ltest.Test_Array;").getName());
+			assert(Class.forName("[C").getName().equals("[C"));
+			assert(Class.forName("[Ltest.Test_Array;").getName().equals("[Ltest.Test_Array;"));
+		} catch (ClassNotFoundException e1) {
+			assert(false);
+		}
+    			
 		char[] ca = new char[] { '1', '2', '3', '4' };
 
 		Class<?> c = i3.getClass().getComponentType();

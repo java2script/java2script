@@ -45,13 +45,13 @@ public class JSMenuUI extends JSMenuItemUI {
 				if (!jm.getParent().getUIClassID().equals("MenuBarUI"))
 					stopPopupMenuTimer();
 				jm.setSelected(true);
-				return true;
+				return UNHANDLED;
 			}
 			if (type.equals("mouseleave")) {
 				jm.setSelected(false);
 				if (jm.getParent().getUIClassID().equals("MenuBarUI"))
 					startPopupMenuTimer();
-				return true;
+				return UNHANDLED;
 			}
 		}
 		return super.handleJSEvent(target, eventType, jQueryEvent);

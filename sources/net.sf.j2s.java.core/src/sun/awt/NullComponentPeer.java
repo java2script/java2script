@@ -227,14 +227,6 @@ public class NullComponentPeer implements LightweightPeer,
         return 0;
     }
 
-    public Dimension preferredSize() {
-        return getPreferredSize();
-    }
-
-    public Dimension minimumSize() {
-        return getMinimumSize();
-    }
-
     @Override
 		public Point getLocationOnScreen() {
         return new Point(0,0);

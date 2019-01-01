@@ -195,7 +195,7 @@ public abstract class DataTransferer {
      */
     private static DataTransferer transferer;
 
-    private static final Logger dtLog = Logger.getLogger("sun.awt.datatransfer.DataTransfer");
+//    private static final Logger dtLog = Logger.getLogger("sun.awt.datatransfer.DataTransfer");
 
     static {
         Class tCharArrayClass = null, tByteArrayClass = null;
@@ -360,11 +360,11 @@ public abstract class DataTransferer {
      * "text".
      */
     public static boolean doesSubtypeSupportCharset(DataFlavor flavor) {
-        if (dtLog.isLoggable(Level.FINE)) {
-            if (!"text".equals(flavor.getPrimaryType())) {
-                dtLog.log(Level.FINE, "Assertion (\"text\".equals(flavor.getPrimaryType())) failed");
-            }
-        }
+//        if (dtLog.isLoggable(Level.FINE)) {
+//            if (!"text".equals(flavor.getPrimaryType())) {
+//                dtLog.log(Level.FINE, "Assertion (\"text\".equals(flavor.getPrimaryType())) failed");
+//            }
+//        }
 
         String subType = flavor.getSubType();
         if (subType == null) {

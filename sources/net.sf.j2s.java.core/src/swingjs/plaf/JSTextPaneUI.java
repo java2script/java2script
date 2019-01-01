@@ -68,7 +68,7 @@ public class JSTextPaneUI extends JSEditorPaneUI {
      */
     @Override
 	protected String getPropertyPrefix() {
-        return "TextPane";
+        return "TextPane.";
     }
 
     @Override

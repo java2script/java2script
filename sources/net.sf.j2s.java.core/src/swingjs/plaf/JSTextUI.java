@@ -112,7 +112,7 @@ import swingjs.api.js.DOMNode;
 public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFactory
 																											// {
 
-	private String inactiveBackgroundColor;
+	protected String inactiveBackgroundColor;
 
 	/**
 	 * Initializes component properties, e.g. font, foreground, background, caret
@@ -180,7 +180,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		// updateCursor();
 	}
 
-	private void installDefaults2() {
+	protected void installDefaults2() {
 		// editor.addMouseListener(dragListener);
 		// editor.addMouseMotionListener(dragListener);
 		//
@@ -216,14 +216,12 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 
 		int keyCode = /** @j2sNative jQueryEvent.keyCode || */ 0;
 		JTextComponent t = (JTextComponent) jc;
-		if (!t.isEditable())
-			return false;
 		switch (eventType) {
 		case KeyEvent.KEY_PRESSED:
 			// note that events are bundled here into one eventType
 			JSKeyEvent keyEvent = JSKeyEvent.newJSKeyEvent(jc, jQueryEvent, false);
 			if (keyEvent == null)
-				return true;
+				return UNHANDLED;
 			jc.dispatchEvent(keyEvent);
 			if (keyCode == KeyEvent.VK_ALT || keyEvent.isConsumed()) {
 				/**
@@ -232,13 +230,13 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 				 * jQueryEvent.preventDefault();
 				 * jQueryEvent.stopPropagation();
 				 */
-				return true;
+				return UNHANDLED;
 			}
 			switch (keyCode) {
 			case KeyEvent.VK_ALT:
 			case KeyEvent.VK_SHIFT:
 			case KeyEvent.VK_CONTROL:
-				return true;
+				return UNHANDLED;
 			}
 			eventType = keyEvent.getID();
 			break;
@@ -416,7 +414,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	// /**
 	// * As needed updates cursor for the target editor.
 	// */
-	// private void updateCursor() {
+	// protected void updateCursor() {
 	// if ((! editor.isCursorSet())
 	// || editor.getCursor() instanceof UIResource) {
 	// Cursor cursor = (editor.isEditable()) ? textCursor : null;
@@ -636,11 +634,10 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	 */
 	@Override
 	public void installUI(JComponent jc) {
-		isToolbarFixed = false;
+//		isToolbarFixed = false;
 		editor = (JTextComponent) jc;
 		textListener = new TextListener(this, editor);
 
-		// install defaults
 		installDefaults();
 		installDefaults2();
 
@@ -823,8 +820,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	 * @return the size
 	 */
 	@Override
-	public Dimension getMinimumSize() {
-		Dimension d = getPreferredSize();// new Dimension();
+	public Dimension getMinimumSize(JComponent jc) {
+		Dimension d = getPreferredSize(jc);// new Dimension();
 		// Document doc = editor.getDocument();
 		Insets i = jc.getInsets();
 		// if (doc instanceof AbstractDocument) {
@@ -851,9 +848,9 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	 * @return the size
 	 */
 	@Override
-	protected Dimension getMaximumSize() {
+	public Dimension getMaximumSize(JComponent jc) {
 
-		return super.getMaximumSize();
+		return super.getMaximumSize(jc);
 
 		// Document doc = editor.getDocument();
 		// Insets i = c.getInsets();
@@ -1193,22 +1190,22 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	// }
 	// }
 	//
-	// private static BasicCursor textCursor = new
+	// protected static BasicCursor textCursor = new
 	// BasicCursor(Cursor.TEXT_CURSOR);
 	// ----- member variables ---------------------------------------
 
-	private static final EditorKit defaultKit = new DefaultEditorKit();
+	protected static final EditorKit defaultKit = new DefaultEditorKit();
 	transient JTextComponent editor;
 	protected boolean editable = true;
 
 	// transient boolean painted;
 	// transient RootView rootView = new RootView();
 	// transient UpdateHandler updateHandler = new UpdateHandler();
-	// private static final TransferHandler defaultTransferHandler = new
+	// protected static final TransferHandler defaultTransferHandler = new
 	// TextTransferHandler();
-	// private final DragListener dragListener = getDragListener();
-	// private static final Position.Bias[] discardBias = new Position.Bias[1];
-	// private DefaultCaret dropCaret;
+	// protected final DragListener dragListener = getDragListener();
+	// protected static final Position.Bias[] discardBias = new Position.Bias[1];
+	// protected DefaultCaret dropCaret;
 
 	// /**
 	// * Root view that acts as a gateway between the component
@@ -1655,7 +1652,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	// return BasicTextUI.this;
 	// }
 	//
-	// private View view;
+	// protected View view;
 	//
 	// }
 
@@ -1713,7 +1710,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	// BasicTextUI.this.propertyChange(evt);
 	// }
 	//
-	// private void dropIndexChanged() {
+	// protected void dropIndexChanged() {
 	// if (editor.getDropMode() == DropMode.USE_SELECTION) {
 	// return;
 	// }
@@ -1964,9 +1961,9 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	// * These are View objects for those components that are represented
 	// * by a View in the View tree.
 	// */
-	// private Hashtable constraints;
+	// protected Hashtable constraints;
 	//
-	// private boolean i18nView = false;
+	// protected boolean i18nView = false;
 	// }
 
 	/**
@@ -2026,7 +2023,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		DOMNode.setAttr(domNode, "readOnly", editable ? null : "true");
 	}
 
-	// private static DragListener getDragListener() {
+	// protected static DragListener getDragListener() {
 	// synchronized(DragListener.class) {
 	// DragListener listener =
 	// (DragListener)AppContext.getAppContext().
@@ -2048,7 +2045,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	// static class DragListener extends MouseInputAdapter
 	// implements BeforeDrag {
 	//
-	// private boolean dragStarted;
+	// protected boolean dragStarted;
 	//
 	// public void dragStarting(MouseEvent me) {
 	// dragStarted = true;
@@ -2115,31 +2112,31 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	// static class TextTransferHandler extends TransferHandler implements
 	// UIResource {
 	//
-	// private JTextComponent exportComp;
-	// private boolean shouldRemove;
-	// private int p0;
-	// private int p1;
+	// protected JTextComponent exportComp;
+	// protected boolean shouldRemove;
+	// protected int p0;
+	// protected int p1;
 	//
 	// /**
 	// * Whether or not this is a drop using
 	// * <code>DropMode.INSERT</code>.
 	// */
-	// private boolean modeBetween = false;
+	// protected boolean modeBetween = false;
 	//
 	// /**
 	// * Whether or not this is a drop.
 	// */
-	// private boolean isDrop = false;
+	// protected boolean isDrop = false;
 	//
 	// /**
 	// * The drop action.
 	// */
-	// private int dropAction = MOVE;
+	// protected int dropAction = MOVE;
 	//
 	// /**
 	// * The drop bias.
 	// */
-	// private Position.Bias dropBias;
+	// protected Position.Bias dropBias;
 	//
 	// /**
 	// * Try to find a flavor that can be used to import a Transferable.
@@ -2699,7 +2696,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	// *
 	// * @param c the JTextComponent that needs its background color updated
 	// */
-	// private void updateBackground(JTextComponent c) {
+	// protected void updateBackground(JTextComponent c) {
 	// // This is a temporary workaround.
 	// // This code does not correctly deal with Synth (Synth doesn't use
 	// // properties like this), nor does it deal with the situation where
@@ -2810,26 +2807,31 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		return (jtc.getDocument() == null ? null : (currentText = ((JTextComponent) c).getText()));
 	}
 
-	public void checkEditorTextValue(int dot) {
+	void checkEditorTextValue(int dot) {
 		String val = getJSTextValue();
 		if (!val.equals(currentText)) {
 			String oldval = currentText;
+//			currentText = val;
 			//System.out.println("from HTML: " + DOMNode.getAttr(domNode, "innerHTML"));
 			//System.out.println("to editor: " + val.replace('\n', '.'));
 			editor.setText(val);
+//			getComponentText();
 			// TODO: why this?
-			editor.firePropertyChange("text", oldval, val);
-			setSelectionRange(dot, dot);
+			//editor.firePropertyChange("text", oldval, val);
+			if (dot >= 0)
+				setSelectionRange(dot, dot);
 		}
 	}
 
-	void setTextDelayed() {
+	void setJSTextDelayed() {
 		updateDOMNode();
-//		setText(editor.getText());
 	}
 
 	@SuppressWarnings("unused")
-	protected void setJSSelection() {
+	protected void setJSSelection(String why) {
+		System.out.println(id + " setJSSelection " + why);
+		if (editor.getText().length() == 0)
+			return;
 		int start = editor.getCaret().getMark();
 		int end = editor.getCaret().getDot();
 		if (start > end) {
@@ -2838,7 +2840,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 			start = t;
 		}
 		Object[] r1 = getJSNodePt(domNode, -1, start);
-		Object[] r2 = getJSNodePt(domNode, -1, end);
+		Object[] r2 = (end == start ? r1 : getJSNodePt(domNode, -1, end));
 		if (r1 == null || r2 == null)
 			return;
 		
@@ -2863,17 +2865,17 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	protected boolean requestFocus() {
 		if (!super.requestFocus())
 			return false;
-		if (haveSelection()) {
+		if (haveFocus()) {
 			
 		} else {
 			// need to transfer selection to this component
-			setJSSelection();
+			setJSSelection("focus");
 		}
 		return true;
 	}
 		
-	boolean haveSelection() {
-		return jquery.contains(domNode, /** @j2sNative window.getSelection().anchorNode || */ null);
+	boolean haveFocus() {
+		return jquery.contains(domNode, /** @j2sNative document.activeElement || */ null);
 	}
 
 

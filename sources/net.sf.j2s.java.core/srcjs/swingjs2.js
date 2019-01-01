@@ -10659,6 +10659,7 @@ return jQuery;
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
 // j2sCore.js (based on JmolCore.js
 
+// BH 12/30/2018 adds generic DND support, not just file drop
 // BH 12/20/2018 fixes mouse event extended modifiers for drag operation
 // BH 11/7/2018 adds J2S.addDirectDatabaseCall(domain)
 // BH 9/18/2018 fixes data.getBytes() not qualified
@@ -12659,6 +12660,8 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		J2S.$appEvent(me, node, "drop", function(e) {
 			var oe = e.originalEvent;
 			try {
+				var kind = oe.dataTransfer.items[0].kind;
+				var type = oe.dataTransfer.items[0].type;
 				var file = oe.dataTransfer.files[0];
 			} catch (e) {
 				return;
@@ -12666,6 +12669,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 				oe.stopPropagation();
 				oe.preventDefault();
 			}
+			System.out.println("DnD kind=" + kind + " type=" + type + " file=" + file);
 			var target = oe.target;
 			var c = target;
 			var comp;
@@ -12680,9 +12684,9 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 				// FF and Chrome will drop an image here
 				// but it will be only a URL, not an actual file.
 				Clazz.load("swingjs.JSDnD")
-						.drop$javax_swing_JComponent$S$BA$I$I(comp,
-								"" + oe.dataTransfer.getData("text"), null, x,
-								y);
+						.drop$javax_swing_JComponent$O$S$BA$I$I(comp,
+								oe.dataTransfer, null, null, x, y);
+				return;
 			}
 			// MSIE will drop an image this way, though, and load it!
 			var reader = new FileReader();
@@ -12691,8 +12695,8 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 					var target = oe.target;
 					var bytes = J2S._toBytes(evt.target.result);
 					Clazz.load("swingjs.JSDnD")
-							.drop$javax_swing_JComponent$S$BA$I$I(comp,
-									file.name, bytes, x, y);
+							.drop$javax_swing_JComponent$O$S$BA$I$I(comp,
+									oe.dataTransfer, file.name, bytes, x, y);
 				}
 			};
 			reader.readAsArrayBuffer(file);
@@ -13564,6 +13568,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 12/30/2018 3.2.4.05 adds Class.forName("[XXX")
 // BH 12/20/2018 3.2.4.05 fixes synthetic reference issue 
 // BH 12/13/2018 3.2.4.05 fixes Class.js field reflection, inner anonymous class of outer class creates wrong synthetic pointer 
 // BH 12/1/2018 3.2.4.04 fixes TypeError e.stack e not found
@@ -13711,6 +13716,15 @@ Clazz._assertFunction = null;
 
 
 //////// 16 methods called from code created by the transpiler ////////
+
+var getArrayClass = function(name){
+	// "[C"  "[[C"
+	var n = 0;
+	while (name.charAt(n) == "[") n++;
+	var type = name.substring(n);
+	var clazz = (type.length == 1 ? primTypes[type].TYPE : Clazz._4Name(type.split(";")[0].substring(1)).$clazz$); 
+	return Clazz.array(clazz,-n);
+}
 
 Clazz.array = function(baseClass, paramType, ndims, params, isClone) {
   // int[][].class Clazz.array(Integer.TYPE, -2)
@@ -16269,6 +16283,8 @@ var evaluate = function(file, js) {
 }
 
 Clazz._4Name = function(clazzName, applet, state, asClazz, initialize) {
+  if (clazzName.indexOf("[") == 0)
+	return getArrayClass(clazzName);
   if (clazzName.indexOf(".") < 0)
     clazzName = "java.lang." + clazzName;  
   var isok = Clazz.isClassDefined(clazzName);
@@ -17044,8 +17060,11 @@ Clazz._setDeclared("java.lang.Integer", java.lang.Integer=Integer=function(){
 if (typeof arguments[0] != "object")this.c$(arguments[0]);
 });
 
+var primTypes = {};
+
 var setJ2STypeclass = function(cl, type, paramCode) {
 // TODO -- should be a proper Java.lang.Class
+  primTypes[paramCode] = cl;
   cl.TYPE = {
     isPrimitive: function() { return true },
     type:type, 

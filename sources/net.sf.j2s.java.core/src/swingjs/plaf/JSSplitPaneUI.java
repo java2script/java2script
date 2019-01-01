@@ -901,7 +901,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 	 * to the current layoutmanager.
 	 */
 	@Override
-	public Dimension getPreferredSize() {
+	public Dimension getPreferredSize(JComponent jc) {
 		if (splitPane != null)
 			return layoutManager.preferredLayoutSize(splitPane);
 		return new Dimension(0, 0);
@@ -912,7 +912,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 	 * the current layoutmanager.
 	 */
 	@Override
-	public Dimension getMinimumSize() {
+	public Dimension getMinimumSize(JComponent jc) {
 		if (splitPane != null)
 			return layoutManager.minimumLayoutSize(splitPane);
 		return new Dimension(0, 0);
@@ -923,7 +923,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 	 * the current layoutmanager.
 	 */
 	@Override
-	protected Dimension getMaximumSize() {
+	public Dimension getMaximumSize(JComponent jc) {
 		if (splitPane != null)
 			return layoutManager.maximumLayoutSize(splitPane);
 		return new Dimension(0, 0);

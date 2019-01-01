@@ -21,7 +21,11 @@ import swingjs.api.js.DOMNode;
  */
 public class JSScrollBarUI extends JSSliderUI {
 
-	JSScrollPaneUI myScrollPaneUI;
+	private JSScrollPaneUI myScrollPaneUI;
+
+	void setScrollPaneUI(JSScrollPaneUI ui) {
+		myScrollPaneUI = ui;
+	}
 	
 	private boolean isInvisible;
 
@@ -53,7 +57,7 @@ public class JSScrollBarUI extends JSSliderUI {
 
 
 	@Override
-	public Dimension getPreferredSize() {
+	public Dimension getPreferredSize(JComponent jc) {
 		// thin because we are implementing jquery slider here
 		int wh = (myScrollPaneUI == null ? 15 : myScrollPaneUI.scrollBarUIDisabled ? 0 : 15);
 		// just used for width or height, but not both. I think.... 
@@ -141,6 +145,13 @@ public class JSScrollBarUI extends JSSliderUI {
     public void scrollDueToClickInTrack( int dir ) {
         scrollByBlock( dir );
     }
+    
+    @Override
+	protected void setOverflow() {
+		if (myScrollPaneUI != null && myScrollPaneUI.scrollBarUIDisabled)
+			DOMNode.setStyles(domNode, "display", "none");
+	}
+
 
 
 }

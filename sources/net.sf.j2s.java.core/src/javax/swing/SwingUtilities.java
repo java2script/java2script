@@ -35,6 +35,7 @@ import java.awt.EventQueue;
 import java.awt.FontMetrics;
 import java.awt.JSFrame;
 import java.awt.Graphics;
+import java.awt.GraphicsEnvironment;
 import java.awt.HeadlessException;
 import java.awt.IllegalComponentStateException;
 import java.awt.Image;
@@ -44,6 +45,7 @@ import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
+import java.awt.dnd.DropTarget;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -96,16 +98,16 @@ public class SwingUtilities implements SwingConstants
      */
     static void installSwingDropTargetAsNecessary(Component c,
                                                          TransferHandler t) {
-//
-//        if (!getSuppressDropTarget()) {
-//            DropTarget dropHandler = c.getDropTarget();
-//            if ((dropHandler == null) || (dropHandler instanceof UIResource)) {
-//                if (t == null) {
-//                    c.setDropTarget(null);
-//                } else if (!GraphicsEnvironment.isHeadless()) {
-//                    c.setDropTarget(new TransferHandler.SwingDropTarget(c));
-//                }
-//            }
+
+  //      if (!getSuppressDropTarget()) {
+            DropTarget dropHandler = c.getDropTarget();
+            if ((dropHandler == null) || (dropHandler instanceof UIResource)) {
+                if (t == null) {
+                    c.setDropTarget(null);
+                } else if (!GraphicsEnvironment.isHeadless()) {
+                    c.setDropTarget(new TransferHandler.SwingDropTarget(c));
+                }
+            }
 //        }
     }
 

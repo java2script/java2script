@@ -3274,6 +3274,8 @@ public abstract class JComponent extends Container {
 		}
 	};
 
+	private static final Object JComponent_TRANSFER_HANDLER = "transfer_handler";
+
 	/**
 	 * Returns the titled border text
 	 *
@@ -4760,7 +4762,55 @@ public abstract class JComponent extends Container {
 		return null;
 	}
 
-	public TransferHandler getTransferHandler() {
+    /**
+     * Sets the {@code TransferHandler}, which provides support for transfer
+     * of data into and out of this component via cut/copy/paste and drag
+     * and drop. This may be {@code null} if the component does not support
+     * data transfer operations.
+     * <p>
+     * If the new {@code TransferHandler} is not {@code null}, this method
+     * also installs a <b>new</b> {@code DropTarget} on the component to
+     * activate drop handling through the {@code TransferHandler} and activate
+     * any built-in support (such as calculating and displaying potential drop
+     * locations). If you do not wish for this component to respond in any way
+     * to drops, you can disable drop support entirely either by removing the
+     * drop target ({@code setDropTarget(null)}) or by de-activating it
+     * ({@code getDropTaget().setActive(false)}).
+     * <p>
+     * If the new {@code TransferHandler} is {@code null}, this method removes
+     * the drop target.
+     * <p>
+     * Under two circumstances, this method does not modify the drop target:
+     * First, if the existing drop target on this component was explicitly
+     * set by the developer to a {@code non-null} value. Second, if the
+     * system property {@code suppressSwingDropSupport} is {@code true}. The
+     * default value for the system property is {@code false}.
+     * <p>
+     * Please see
+     * <a href="https://docs.oracle.com/javase/tutorial/uiswing/dnd/index.html">
+     * How to Use Drag and Drop and Data Transfer</a>,
+     * a section in <em>The Java Tutorial</em>, for more information.
+     *
+     * @param newHandler the new {@code TransferHandler}
+     *
+     * @see TransferHandler
+     * @see #getTransferHandler
+     * @since 1.4
+     * @beaninfo
+     *        bound: true
+     *       hidden: true
+     *  description: Mechanism for transfer of data to and from the component
+     */
+    public void setTransferHandler(TransferHandler newHandler) {
+        TransferHandler oldHandler = (TransferHandler)getClientProperty(
+                                      JComponent_TRANSFER_HANDLER);
+        putClientProperty(JComponent_TRANSFER_HANDLER, newHandler);
+
+        SwingUtilities.installSwingDropTargetAsNecessary(this, newHandler);
+        firePropertyChange("transferHandler", oldHandler, newHandler);
+    }
+
+    public TransferHandler getTransferHandler() {
 		return null;
 	}
 

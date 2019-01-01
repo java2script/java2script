@@ -4,10 +4,25 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.DropTargetEvent;
+import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -21,28 +36,41 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
+import javax.swing.text.JTextComponent;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 
-public class Test_Editor extends JFrame {
+import javajs.util.AU;
+import javajs.util.OC;
+import javajs.util.Rdr;
+
+public class Test_Editor extends JFrame implements DropTargetListener {
 
 	public Test_Editor() {
 
-		String test = "WA1B2C3 4\nXA1B2C3 4\nYA1B2C3 4\n\nZA1B2C3 4\n";
+		String test = "  34567890\n1234567890\n  345\n     \n";
 
 		setTitle("testing editor");
 		setLocation(100, 100);
-		JTextPane editor = new JTextPane();
-		System.out.println(editor.getDocument());
+		JTextPane editor = new JTextPane() {
+		};
+		
+		editor.setPreferredSize(new Dimension(400,300));
+		System.out.println("Test_Editor " + editor.getDocument());
+		System.out.println("Test_Editor " + editor.getEditorKit());
 		editor.setText(test);
-		System.out.println("count = " + editor.getDocument().getRootElements()[0].getElementCount());
+		//editor.setEditable(false);
+		
+		System.out.println("Test_Editor Element count = " + editor.getDocument().getRootElements()[0].getElementCount());
 		editor.setBackground(new Color(200, 200, 200));
 		editor.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
+		System.out.println(editor.getPreferredSize());
+		
 		JScrollPane js = new JScrollPane(editor);
-		js.setPreferredSize(new Dimension(300, 300));
-
+		js.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+	
 		Style style = editor.addStyle("Red", null);
 		StyleConstants.setForeground(style, Color.red);
 
@@ -69,7 +97,7 @@ public class Test_Editor extends JFrame {
 		area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
 		area.setText(test);
 		area.setBackground(new Color(200, 200, 180));
-		area.setPreferredSize(new Dimension(300, 300));
+		//area.setEditable(false);
 		area.addCaretListener(new CaretListener() {
 
 			@Override
@@ -101,6 +129,8 @@ public class Test_Editor extends JFrame {
 		
 		js = new JScrollPane(area);
 		js.setPreferredSize(new Dimension(300, 300));
+		js.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		js.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 
 		add(BorderLayout.EAST, js);
 
@@ -130,6 +160,8 @@ public class Test_Editor extends JFrame {
 
 		});
 		panel.add(b);
+
+		
 		b = new JButton("sel7-10");
 		b.addActionListener(new ActionListener() {
 
@@ -144,6 +176,34 @@ public class Test_Editor extends JFrame {
 
 		});
 		panel.add(b);
+
+		
+		b = new JButton("top");
+		b.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				editor.setCaretPosition(0);
+				editor.requestFocus();
+			}
+
+		});
+		panel.add(b);
+
+		
+		b = new JButton("end");
+		b.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				editor.setCaretPosition(editor.getDocument().getLength());
+				editor.requestFocus();
+			}
+
+		});
+		panel.add(b);
+
+
 		b = new JButton("sel7-10-area");
 		b.addActionListener(new ActionListener() {
 
@@ -219,6 +279,9 @@ public class Test_Editor extends JFrame {
 		add(panel, BorderLayout.SOUTH);
 		pack();
 		setVisible(true);
+		
+		new DropTarget(editor, this);
+		new DropTarget(area, this);
 	}
 
 	protected void dumpRoot(Document document) {
@@ -235,4 +298,96 @@ public class Test_Editor extends JFrame {
 	public static void main(String[] args) {
 		new Test_Editor();
 	}
+
+	@Override
+	public void dragEnter(DropTargetDragEvent dtde) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void dragOver(DropTargetDragEvent dtde) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void dropActionChanged(DropTargetDragEvent dtde) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void dragExit(DropTargetEvent dte) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void drop(DropTargetDropEvent dtde) {
+		// TODO Auto-generated method stub
+		
+		
+		try {
+			Transferable tr = dtde.getTransferable();
+			DataFlavor[] flavors = tr.getTransferDataFlavors();
+			for (int i = 0; i < flavors.length; i++) {
+				if (flavors[i].isFlavorJavaFileListType()) {
+					dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+					List<File> list = (List<File>) tr.getTransferData(flavors[i]);
+					for (int j = 0; j < list.size(); j++) {
+						File file = (File) list.get(j);
+						byte[] data = getDroppedFileBytes(file);
+						JTextComponent target = (JTextComponent) ((DropTarget) dtde.getSource()).getComponent();
+						target.setText(new String(data));
+						break; // just first indicated file
+					}
+					dtde.dropComplete(true);					
+					return;
+				} else if (flavors[i].isFlavorTextType()) {
+					dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+					String data = (String) tr.getTransferData(flavors[i]);
+					JTextComponent target = (JTextComponent) ((DropTarget) dtde.getSource()).getComponent();
+					target.setText(data);
+					dtde.dropComplete(true);					
+				}
+			}
+			dtde.rejectDrop();
+		} catch (Exception e) {
+			e.printStackTrace();
+			dtde.rejectDrop();
+		}
+
+	}
+	
+	private byte[] getDroppedFileBytes(File file) {
+		Path p = file.toPath();
+		
+		
+		
+		
+		try {
+			return (byte[]) getStreamAsBytes(new BufferedInputStream(new FileInputStream(file)));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static byte[] getStreamAsBytes(BufferedInputStream bis) throws IOException {
+		byte[] buf = new byte[1024];
+		byte[] bytes = new byte[4096];
+		int len = 0;
+		int totalLen = 0;
+		while ((len = bis.read(buf, 0, 1024)) > 0) {
+			totalLen += len;
+			if (totalLen >= bytes.length)
+				bytes = Arrays.copyOf(bytes, totalLen * 2);
+			System.arraycopy(buf, 0, bytes, totalLen - len, len);
+		}
+		bis.close();
+		return (totalLen < bytes.length ? Arrays.copyOf(bytes, totalLen) : bytes);
+	}
+
 }

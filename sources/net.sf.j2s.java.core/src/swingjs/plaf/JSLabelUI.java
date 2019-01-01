@@ -74,8 +74,8 @@ public class JSLabelUI extends JSLightweightUI {
 	}
 
 	@Override
-	protected Dimension getMaximumSize() {
-		return getPreferredSize();
+	public Dimension getMaximumSize(JComponent jc) {
+		return getPreferredSize(jc);
 	}
 
 	@Override
@@ -106,8 +106,8 @@ public class JSLabelUI extends JSLightweightUI {
 	}
 
 	@Override
-	public Dimension getPreferredSize() {
-		return (label == null ? super.getPreferredSize() : JSGraphicsUtils.getPreferredButtonSize(((AbstractButton) jc), ((AbstractButton) jc).getIconTextGap()));
+	public Dimension getPreferredSize(JComponent jc) {
+		return (label == null ? super.getPreferredSize(jc) : JSGraphicsUtils.getPreferredButtonSize(((AbstractButton) jc), ((AbstractButton) jc).getIconTextGap()));
 	}
 
 }

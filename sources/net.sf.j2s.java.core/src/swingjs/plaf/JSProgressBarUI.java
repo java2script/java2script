@@ -50,7 +50,7 @@ public class JSProgressBarUI extends JSLightweightUI {
 	}
 
 	@Override
-	public Dimension getPreferredSize() {
+	public Dimension getPreferredSize(JComponent jc) {
   	return null;
   }
 

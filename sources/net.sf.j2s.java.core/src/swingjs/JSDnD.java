@@ -1,5 +1,7 @@
 package swingjs;
 
+import java.awt.AWTEvent;
+import java.awt.ActiveEvent;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
@@ -12,60 +14,97 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.InvalidDnDOperationException;
 import java.awt.dnd.peer.DropTargetContextPeer;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.JComponent;
 
+import swingjs.api.js.HTML5DataTransfer;
+
 public class JSDnD {
 
-	public static void drop(JComponent jc, String name, byte[] data, int x, int y) {
+	/**
+	 * File-specific. Called from j2sApplet J2S.setDragDropTarget upon receiving file data.
+	 * Called from j2sApplet J2S.setDragDropTarget if no file is indicated. 
+	 * Automatically converts URLs to files -- for example, for directory listings.
+	 * 
+	 * @param jc
+	 * @param name
+	 * @param data
+	 * @param x
+	 * @param y
+	 */
+	public static void drop(JComponent jc, Object html5DataTransfer, String name, byte[] data, int x, int y) {
+		JSTransferable t = new JSTransferable(html5DataTransfer);
+		if (name == null) {
+			String url = (String) t.getTransferData("text/uri-list");
+			if (url != null) {
+				drop(jc, t, url, JSUtil.getFileAsBytes(url), x, y);
+				return;
+			}
+		}
 		DropTarget target = jc.getDropTarget();
 		Point offset;
 		if (target != null) {
 		    offset = jc.getLocationOnScreen();
-			target.drop(JSDnD.createFileDropEvent(target, name, data, x, y));
+		    if (name == null)
+				target.drop(JSDnD.createDropEvent(target, t, name, data, x, y));
 			return;
 		}
 	    Component top = jc.getTopLevelAncestor();
 	    offset = top.getLocationOnScreen();
-	    top.dispatchEvent(new JSDropFileMouseEvent(jc, MouseEvent.MOUSE_RELEASED, x - offset.x, y - offset.y, name, data));
+	    top.dispatchEvent(new JSDropMouseEvent(jc, MouseEvent.MOUSE_RELEASED, x - offset.x, y - offset.y, t, name, data));
 	}
 		
-
 	@SuppressWarnings("serial")
-	static abstract class JSDropTargetEvent extends MouseEvent {
-		
-		protected JSDropTargetEvent(Component source, int id, long when, int modifiers, int x, int y, int clickCount) {
-			super(source, id, when, modifiers, x, y, clickCount, false, NOBUTTON);
-		}
-		
-		public abstract void dispatch();
-
-	}
-
-	@SuppressWarnings("serial")
-	public static class JSDropFileMouseEvent extends JSDropTargetEvent {
+	public static class JSDropMouseEvent extends MouseEvent implements ActiveEvent {
 
 	    public static final int MOUSE_DROPPED = MOUSE_RELEASED;
 		private String name;
+		private Transferable transferable;
 
-	    public JSDropFileMouseEvent(Component source, int id, int x, int y, String name, byte[] data) {
-	        super(source, id, System.currentTimeMillis(), 0, x, y, 0);
+	    public JSDropMouseEvent(Component source, int id, int x, int y, Transferable t, String name, byte[] data) {
+	        super(source, id, System.currentTimeMillis(), 0, x, y, 0, false, NOBUTTON);
+	        this.transferable = t;
 	        this.name = name;
-	        setBData(data);
+	        if (name != null)
+	        	setBData(data);
 	    }
 
+	    protected void copyPrivateDataInto(AWTEvent that) {
+
+	    	// in case this gets transferred. 
+	    	
+	        /**
+	         * @j2sNative
+	         * 
+	         * that.dispatch$ = this.dispatch$;
+	         * that.transferable = this.transferable;
+	         * that.name = this.name;
+	         * that.bdata = this.bdata;
+	         * 
+	         * 
+	         */
+	    		    	
+	    }
+	    
+	    /**
+	     * The dispatch event causes this to be an ActiveEvent and run this
+	     * method. 
+	     * 
+	     */
 	    @Override
-	    public void dispatch() {
+		public void dispatch() {
 	    	try {
 	    		DropTarget target = ((Component) getSource()).getDropTarget();
-	    		target.drop(JSDnD.createFileDropEvent(target, name, getBData(), getX(), getY()));	    		
+	    		if (name == null)
+		    		target.drop(JSDnD.createDropEvent(target, transferable, null, null, getX(), getY()));	
+	    		else
+		    		target.drop(JSDnD.createDropEvent(target, transferable, name, getBData(), getX(), getY()));	    		
 	    	} catch (Throwable e) {
-	    		System.out.println("Error creating Drop event "  + e);
+	    		System.out.println("JSDnD Error creating Drop event "  + e);
 	    	}
 	    }
 
@@ -89,21 +128,20 @@ public class JSDnD {
 
 	}
 
-	static DropTargetDropEvent createFileDropEvent(DropTarget target, String name, byte[] data, int x, int y) {
+	static DropTargetDropEvent createDropEvent(DropTarget target, Transferable t, String name, byte[] data, int x, int y) {
 		DropTargetContext context = new DropTargetContext(target);
-		context.addNotify(new FileDropTargetContextPeer(target, name, data));
-		
+		context.addNotify(new JSDropTargetContextPeer(target, t, name, data));	
 		return new DropTargetDropEvent(context, new Point(x, y), DnDConstants.ACTION_MOVE, DnDConstants.ACTION_LINK | DnDConstants.ACTION_COPY_OR_MOVE);
 	}
 
-	static class FileDropTargetContextPeer implements DropTargetContextPeer {
+	static class JSDropTargetContextPeer implements DropTargetContextPeer {
 
-		public FileDropTargetContextPeer (DropTarget target, String name, byte[] data) {
+		public JSDropTargetContextPeer (DropTarget target, Transferable t, String name, byte[] data) {
 			this.target = target;
-			fileTransferable = new FileTransferable(name, data);
+			transferable = (name == null ? t : new FileTransferable(name, data));
 		}
 		
-		private Transferable fileTransferable;
+		private Transferable transferable;
 		private DropTarget target;
 
 		@Override
@@ -123,12 +161,12 @@ public class JSDnD {
 
 		@Override
 		public DataFlavor[] getTransferDataFlavors() {
-			return fileTransferable.getTransferDataFlavors();
+			return transferable.getTransferDataFlavors();
 		}
 
 		@Override
 		public Transferable getTransferable() throws InvalidDnDOperationException {
-			return fileTransferable;
+			return transferable;
 		}
 
 		@Override
@@ -156,14 +194,81 @@ public class JSDnD {
 		public void dropComplete(boolean success) {
 		}
 	}
-	
-	static public class FileTransferable implements Transferable {
+
+	/**
+	 * A class for representing HTML5 event.dataTransfer objects. 
+	 * 
+	 * @author hansonr
+	 *
+	 */
+	public static class JSTransferable implements Transferable {
+
+		HTML5DataTransfer dataTransfer;
+		String[] mimeTypes;
+		DataFlavor[] flavors;
 		
-		private JSFileBytes file;
+		public JSTransferable(Object html5DataTransfer) {
+			dataTransfer = (HTML5DataTransfer)html5DataTransfer;
+			mimeTypes = /** @j2sNative html5DataTransfer && html5DataTransfer.types ||*/null;
+		}
+
+		@Override
+		public DataFlavor[] getTransferDataFlavors() {
+			return getFlavors();
+		}
+
+		private DataFlavor[] getFlavors() {
+			if (flavors == null) {
+				flavors = new DataFlavor[mimeTypes.length];
+				for (int i = 0; i < mimeTypes.length; i++) {
+					try {
+						flavors[i] = new DataFlavor(mimeTypes[i]);
+					} catch (ClassNotFoundException e) {
+						e.printStackTrace();
+					}					
+				}
+			}
+			return flavors;
+		}
+
+		@Override
+		public boolean isDataFlavorSupported(DataFlavor flavor) {
+			String type = fixType(flavor.getMimeType());
+			Object data = dataTransfer.getData(type);
+			return (data != null && !data.equals(""));
+		}
+
+		public boolean isDataFlavorSupported(String mimeType) {
+			Object data = dataTransfer.getData(fixType(mimeType));
+			return (data != null && !data.equals(""));
+		}
+
+		@Override
+		public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+			Object data = dataTransfer.getData(fixType(flavor.getMimeType()));
+			return (data == null || data.equals("") ? null : data);
+		}
+
+		public Object getTransferData(String mimeType) {
+			Object data = dataTransfer.getData(fixType(mimeType));
+			return (data == null || data.equals("") ? null : data);
+		}
+		
+		private static String fixType(String s) {
+			int i = s.indexOf(";");
+			return (i < 0 ? s : s.substring(0, i)).trim();
+		}
+
+	}
+
+	static public class FileTransferable extends JSTransferable {
+		
+		private File file;
 		
 		public FileTransferable(String name, byte[] data) {
-			file = new JSFileBytes(name, data);
-			JSUtil.cacheFileData(name, data);
+			super(null);
+			file = new File(name);
+			file._bytes = data;
 		}
 
 		@Override
@@ -180,12 +285,11 @@ public class JSDnD {
 
 		@Override
 		public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
-			List<JSFileBytes> list = new ArrayList<JSFileBytes>();
+			List<File> list = new ArrayList<File>();
 			list.add(file);
 			return list;
 		}
 		
 	}
-
 
 }

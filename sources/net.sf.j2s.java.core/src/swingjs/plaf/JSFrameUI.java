@@ -197,17 +197,17 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 					DOMNode tbar = titleBarNode;
 		  		J2S.setDraggable(tbar, false);
 		  		frameCloserAction();
-					return true;		  		
+					return UNHANDLED;		  		
 		  	} else if (type.equals("mouseout")) {
 			  	DOMNode.setStyles(closerNode, "background-color", toCSSString(c.getBackground()));
-					return true;
+					return UNHANDLED;
 		  	} else if (type.equals("mouseenter")) {
 			  	DOMNode.setStyles(closerNode, "background-color", "red");
-					return true;
+					return UNHANDLED;
 		  	}
 		  }			
 		}
-		return false;
+		return UNHANDLED;
 	}
 
 	

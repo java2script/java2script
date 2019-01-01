@@ -51,14 +51,14 @@ public class JSPanelUI extends JSLightweightUI {
 	}
 
 	@Override
-	public Dimension getPreferredSize() {
+	public Dimension getPreferredSize(JComponent jc) {
 		return null;
   }
 	
 	@Override
-	public Dimension getMinimumSize() {
+	public Dimension getMinimumSize(JComponent jc) {
 		LayoutManager man = jc.getLayout();
-		return (man == null ? super.getMinimumSize() : jc.getLayout().minimumLayoutSize(jc));
+		return (man == null ? super.getMinimumSize(jc) : jc.getLayout().minimumLayoutSize(jc));
 	}
 
 

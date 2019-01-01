@@ -6,8 +6,6 @@ import java.awt.Insets;
 import java.beans.PropertyChangeEvent;
 
 import javax.swing.text.AbstractDocument.BranchElement;
-import javax.swing.JEditorPane;
-import javax.swing.JTextArea;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
@@ -16,47 +14,93 @@ import javax.swing.text.StyleConstants;
 
 import javajs.util.SB;
 import swingjs.JSToolkit;
+import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 
-public class JSEditorPaneUI extends JSTextUI {
+/**
+ * Note that JEditorPane does not have a no-wrap option the way JTextArea does.
+ * I think this is because the concept is that you have a standard editor pane,
+ * which in most instances (Word, for example) you cannot set to wrap or not wrap.
+ * In this way, JTextArea is more like NotePad (can not wrap, but doesn't allow 
+ * character-specific formatting), and JTextPane is more like Word. 
+ * 
+ *  https://stackoverflow.com/questions/7156038/jtextpane-line-wrapping
+ *
+ * Note also that for getPreferredSize must return the actual unwrapped extent, 
+ * regardless of wrapping. 
+ * 
+ * HTML5 div with contenteditable is used here. 
+ * 
+ * 
+ * @author hansonr
+ *
+ */
+public class JSEditorPaneUI extends JSTextViewUI {
+
+
+	// https://stackoverflow.com/questions/2237497/how-to-make-the-tab-key-insert-a-tab-character-in-a-contenteditable-div	
+//		$(document).on('keyup', '.editor', function(e){
+//			  //detect 'tab' key
+//			  if(e.keyCode == 9){
+//			    //add tab
+//			    document.execCommand('insertHTML', false, '&#009');
+//			    //prevent focusing on next element
+//			    e.preventDefault()   
+//			  }
+//			});
 
 	@Override
 	public DOMNode updateDOMNode() {
+		System.out.println("update xxu dom");
+		/**
+		 * @j2sNative
+		 * 
+		 * xxu = this;
+		 * 
+
+		 */
+//		System.out.println("updatedom " + JSUtil.getStackTrace(4));
 		if (domNode == null) {
-			allowPaintedBackground = false;
-			focusNode = enableNode = textNode = domNode = newDOMObject("div", id);
-			DOMNode.setStyles(domNode, "resize", "none");
-			DOMNode.setAttr(domNode, "tabindex", "0");
+			mustWrap = true;
+			domNode = newDOMObject("div", id);
 			$(domNode).addClass("swingjs-doc");
-			setDataUI(domNode);
-			if (((JTextComponent) c).isEditable())
-				bindJSKeyEvents(domNode, true);
+			setupViewNode();
 		}
 		textListener.checkDocument();
 		setCssFont(domNode, c.getFont());
-		DOMNode.setAttr(domNode, "contentEditable", editable ? "true" : "false");
+		DOMNode.setAttr(domNode, "contentEditable", "true");
 		setText(null);
 		return updateDOMNodeCUI();
-	}
-
+	} 
+	 
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
-		//System.out.println("JSEditorPaneUI " + prop);
-		if (prop == "text") {
+		System.out.println(">>>>>>>>>>>>>>>JSEditorPaneUI " + prop);
+		switch(prop) {
+		case "text":
 			getComponentText();
 			return;
 		}
 		super.propertyChange(e);
 	}
 
+	@SuppressWarnings("unused")
 	private int epTimer;
+	private String currentHTML;
 	
 	@SuppressWarnings("unused")
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
 
+		String type = (/** @j2sNative jQueryEvent.type ||*/"");
+
 		if (target != null) {
+			Boolean b;
+			if ((b = checkAllowKey(jQueryEvent)) != null) {
+				return b.booleanValue();
+			}
+			
 			// A first touch down may trigger on the wrong event target
 			// and not have set up window.getSelection() yet.
 			// 50-ms delay allows for multiple clicks, effecting word and line selection.
@@ -68,7 +112,7 @@ public class JSEditorPaneUI extends JSTextUI {
 			 *            eventType, jQueryEvent)},50);
 			 * 
 			 */
-			return true;
+			return UNHANDLED;
 		}
 
 		int dot = 0, mark = 0, apt = 0, fpt = 0;
@@ -96,7 +140,7 @@ public class JSEditorPaneUI extends JSTextUI {
 
 		if (anode == null || fnode == null) {
 			System.out.println("JSEditorPaneUI anode or fnode is null ");
-			return false;
+			return UNHANDLED;
 		}
 		mark = getJSDocOffset(anode);
 		dot = (anode == fnode ? mark : getJSDocOffset(fnode)) + fpt;
@@ -107,6 +151,11 @@ public class JSEditorPaneUI extends JSTextUI {
 		/**
 		 * @j2sNative jQueryEvent.target = null; jQueryEvent.selectionStart = mark;
 		 *            jQueryEvent.selectionEnd = dot;
+		 *            
+		 *            if (type == "drop") {
+		 *              eventType = 402;
+		 *            }
+		 *            
 		 */
 		
 		return super.handleJSEvent(null, eventType, jQueryEvent);
@@ -157,17 +206,20 @@ public class JSEditorPaneUI extends JSTextUI {
 		fromJava(text, sb, d.getRootElements()[0], true, null);
 		//System.out.println("fromJava " + text.replace('\n', '.'));
 		//System.out.println("toHTML" + sb);
-		DOMNode.setAttr(domNode, "innerHTML", sb.toString());
+		String html = sb.toString();
+		if (html == currentHTML)
+			return;
+		DOMNode.setAttr(domNode, "innerHTML", currentHTML = html);
 		updateDataUI();
 		@SuppressWarnings("unused")
 		JSEditorPaneUI me = this;
 		/**
 		 * @j2sNative
 		 *   
-		 *   setTimeout(function(){me.setJSSelection$()},10);
+		 *   setTimeout(function(){me.setJSSelection$S("text")},10);
 		 */
 		{
-			setJSSelection();
+			setJSSelection("text");
 		}
 	}
 
@@ -190,7 +242,8 @@ public class JSEditorPaneUI extends JSTextUI {
 	private final static int FOREGROUND = 64;
 	private final static int BACKGROUND = 128;
 	
-	private static void fromJava(String text, SB sb, Element node, boolean allowBR, AttributeSet currAttr) {
+	private void fromJava(String text, SB sb, Element node, boolean allowBR, AttributeSet currAttr) {
+		setEditorAttrs();
 		int start = node.getStartOffset();
 		int end = node.getEndOffset();
 		if (end == start)
@@ -223,7 +276,18 @@ public class JSEditorPaneUI extends JSTextUI {
 		} else {
 			if (haveStyle)
 				sb.append("<span" + style + ">");
-			sb.append(text.substring(start, isDiv ? end - 1 : end));
+			String t = text.substring(start, isDiv ? end - 1 : end);
+			//if (start == 0) {
+			if (t.indexOf(' ') >= 0)
+				for (int i = 0; i < t.length(); i++) {
+					if (t.charAt(i) != ' ')
+						break;
+				    t = t.substring(0, i) + "&nbsp;" + t.substring(i + 1);
+					i += 5;
+				}
+			//System.out.println("text:'" + t + "'");
+			//}				
+			sb.append(t);
 			if (haveStyle)
 				sb.append("</span>");
 		}
@@ -233,43 +297,90 @@ public class JSEditorPaneUI extends JSTextUI {
 			sb.append("</sub>");
 	}
 
-	private static String getCSSStyle(AttributeSet a, AttributeSet currAttr) {
+	private String getCSSStyle(AttributeSet a, AttributeSet currAttr) {
 		String style = "";
 		if (checkAttr(BACKGROUND, a, currAttr))
-			style += "background:" + JSToolkit.getCSSColor(StyleConstants.getBackground(a)) + ";";
+			style += "background:" + JSToolkit.getCSSColor((Color) getBackground(a)) + ";";
 		if (checkAttr(FOREGROUND, a, currAttr))
-			style += "color:" + JSToolkit.getCSSColor(StyleConstants.getForeground(a)) + ";";
+			style += "color:" + JSToolkit.getCSSColor((Color) getForeground(a)) + ";";
 		if (checkAttr(BOLD, a, currAttr))
-			style += "font-weight:" + (StyleConstants.isBold(a) ? "bold;" : "normal;");
+			style += "font-weight:" + (isBold(a) ? "bold;" : "normal;");
 		if (checkAttr(ITALIC, a, currAttr))
-			style += "font-style:" + (StyleConstants.isItalic(a) ? "italic;" : "normal;");
+			style += "font-style:" + (isItalic(a) ? "italic;" : "normal;");
 		if (checkAttr(FACE, a, currAttr))
-			style += "font-family:" + JSToolkit.getCSSFontFamilyName(StyleConstants.getFontFamily(a)) + ";";
+			style += "font-family:" + JSToolkit.getCSSFontFamilyName(getFontFamily(a)) + ";";
 		if (checkAttr(SIZE, a, currAttr))
-			style += "font-size:" + StyleConstants.getFontSize(a) + "px;";
+			style += "font-size:" + getFontSize(a) + "px;";
 		return style;
 	}
 
-	private static boolean checkAttr(int attr, AttributeSet a, AttributeSet currAttr) {
+	String ffamily;
+	int fsize;
+	Color fback;
+	Color ffore;
+	boolean fbold, fital;
+	
+	private void setEditorAttrs() {
+		ffamily = editor.getFont().getFamily();
+		fsize = editor.getFont().getSize();
+		fback = editor.getBackground();
+		ffore = editor.getForeground();
+		fbold = editor.getFont().isBold();
+		fital = editor.getFont().isItalic();
+		
+	}
+	
+	private String getFontFamily(AttributeSet a) {
+		// TODO Auto-generated method stub
+		String f = (String) a.getAttribute(StyleConstants.Family);
+		return (f == null ? ffamily : f);
+	}
+
+	private int getFontSize(AttributeSet a) {
+		Integer f = (Integer) a.getAttribute(StyleConstants.Size);
+		return (f == null ? fsize : f.intValue());
+	}
+
+	private boolean isItalic(AttributeSet a) {
+		Boolean f = (Boolean) a.getAttribute(StyleConstants.Italic);
+		return (f == null ? fital : f.booleanValue());
+	}
+
+	private boolean isBold(AttributeSet a) {
+		Boolean f = (Boolean) a.getAttribute(StyleConstants.Bold);
+		return (f == null ? fbold : f.booleanValue());
+	}
+
+	private Color getForeground(AttributeSet a) {
+		Color f = (Color) a.getAttribute(StyleConstants.Foreground);
+		return (f == null ? ffore : f);
+	}
+
+	private Color getBackground(AttributeSet a) {
+		Color f = (Color) a.getAttribute(StyleConstants.Background);
+		return (f == null ? fback : f);
+	}
+
+	private boolean checkAttr(int attr, AttributeSet a, AttributeSet currAttr) {
 		switch (attr) {
 		case BOLD:
-			return (currAttr == null || StyleConstants.isBold(a) != StyleConstants.isBold(currAttr));
+			return (currAttr == null || isBold(a) != isBold(currAttr));
 		case ITALIC:
-			return (currAttr == null || StyleConstants.isItalic(a) != StyleConstants.isItalic(currAttr));
+			return (currAttr == null || isItalic(a) != isItalic(currAttr));
 		case SUB:
 			return StyleConstants.isSubscript(a);
 		case SUP:
 			return StyleConstants.isSuperscript(a);
 		case SIZE:
-			return (currAttr == null || StyleConstants.getFontSize(a) != StyleConstants.getFontSize(currAttr)); 
+			return (currAttr == null || getFontSize(a) != getFontSize(currAttr)); 
 		case FACE:
-			return (currAttr == null || StyleConstants.getFontFamily(a) != StyleConstants.getFontFamily(currAttr)); 
+			return (currAttr == null || getFontFamily(a) != getFontFamily(currAttr)); 
 		case FOREGROUND:
-			Color f = StyleConstants.getForeground(a);
-			return f != Color.none && (currAttr == null || !f.equals(StyleConstants.getForeground(currAttr))); 
+			Color f = getForeground(a);
+			return f != Color.none && (currAttr == null || !f.equals(getForeground(currAttr))); 
 		case BACKGROUND:
-			Color b = StyleConstants.getBackground(a);
-			return b != Color.none && (currAttr == null || !b.equals(StyleConstants.getBackground(currAttr))); 
+			Color b = getBackground(a);
+			return b != Color.none && (currAttr == null || !b.equals(getBackground(currAttr))); 
 		}
 		return false;
 	}
@@ -288,7 +399,7 @@ public class JSEditorPaneUI extends JSTextUI {
 
 	@Override
 	protected String getPropertyPrefix() {
-		return "EditablePane.";
+		return "EditorPane.";
 	}
 	
 	
@@ -344,7 +455,7 @@ public class JSEditorPaneUI extends JSTextUI {
 					if (ipt == pt)
 					  return [node.parentNode, i];
 					nlen = (isRoot ? 1 : 0);
-				} else if (ipt + i1 + (nlen = (this.lastTextNode = node).length) > pt) {
+				} else if (ipt + (nlen = (this.lastTextNode = node).length) >= pt) {
 					return [node, Math.max(0, pt - ipt)];	
 				}
 				ipt += nlen;
@@ -394,7 +505,7 @@ public class JSEditorPaneUI extends JSTextUI {
 	
 	@SuppressWarnings("unused")
 	@Override
-	void setTextDelayed() {
+	void setJSTextDelayed() {
 		// this timeout is critical and did not work with invokeLater
 		JSTextUI u = this;
 		JTextComponent t = editor;
@@ -407,6 +518,7 @@ public class JSEditorPaneUI extends JSTextUI {
 		 *  this.timeoutID = setTimeout(function(){u.timeoutID = 0;u.updateDOMNode$()},50);
 		 */
 	}
+
 
 	@Override
 	protected void jsSelect(Object[] r1, Object[] r2) {

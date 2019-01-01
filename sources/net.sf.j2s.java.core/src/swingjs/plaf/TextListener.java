@@ -123,7 +123,6 @@ public class TextListener implements MouseListener, MouseMotionListener, FocusLi
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		//System.out.println("textlistener mouserelease");
 //		Object je = (/** @j2sNative e.bdata.jqevent || */ null);
 //		ui.handleJSEvent(e.getSource(), e.getID(), je);
 	}
@@ -146,11 +145,12 @@ public class TextListener implements MouseListener, MouseMotionListener, FocusLi
 	 * @param ui
 	 * @param eventType
 	 * @param jQueryEvent
-	 * @return
+	 * @return false to indicate "handled and so don't pass on to window"
 	 */
 	boolean handleJSTextEvent(JSTextUI ui, int eventType, Object jQueryEvent) {
 		int dot = 0, mark = 0;
 		String evType = null, id = null;
+		boolean isEditable = ui.editor.isEditable();
 
 		// JSEditorPaneUI will not indicate the target
 		/**
@@ -173,8 +173,8 @@ public class TextListener implements MouseListener, MouseMotionListener, FocusLi
 		// oldDot=" + oldDot + " oldmark=" + oldMark + " dot=" + dot + " mark=" + mark +
 		// " " + (dot > mark));
 
-		boolean doUpdate = true;
-
+		boolean setCaret = true;
+		boolean handledorNot = JSComponentUI.UNHANDLED;
 		if (dot != mark && oldMark == dot) {
 			dot = mark;
 			mark = oldMark;
@@ -182,14 +182,14 @@ public class TextListener implements MouseListener, MouseMotionListener, FocusLi
 		}
 		switch (eventType) {
 		case MouseEvent.MOUSE_WHEEL:
-			return false;
+			return JSComponentUI.UNHANDLED;
 		case MouseEvent.MOUSE_PRESSED:
 			selecting = true;
-			doUpdate = false;
+			setCaret = false;
 			break;
 		case MouseEvent.MOUSE_RELEASED:
 			if (!selecting)
-				return false; // yield to some drag-drop event?
+				return JSComponentUI.UNHANDLED; // yield to some drag-drop event?
 			selecting = false;
 			break;
 		case MouseEvent.MOUSE_CLICKED:
@@ -197,14 +197,19 @@ public class TextListener implements MouseListener, MouseMotionListener, FocusLi
 		case KeyEvent.KEY_PRESSED:
 		case KeyEvent.KEY_RELEASED:
 		case KeyEvent.KEY_TYPED:
+			selecting = false;
 			int keyCode = /** @j2sNative jQueryEvent.keyCode || */
 					0;
 			if (keyCode == 13)
 				keyCode = KeyEvent.VK_ENTER;
-			if (keyCode == KeyEvent.VK_ENTER && ui.handleEnter(eventType))
-				break;
+			if (keyCode == KeyEvent.VK_ENTER) {
+				if (ui.handleEnter(eventType)) {
+					// JTextField
+					break;
+				}
+			}
 			if (eventType == KeyEvent.KEY_PRESSED) {
-				doUpdate = false;
+				setCaret = false;
 			} else {
 				working = true;
 				ui.checkEditorTextValue(dot);
@@ -212,7 +217,7 @@ public class TextListener implements MouseListener, MouseMotionListener, FocusLi
 			}
 			break;
 		}
-		if (doUpdate) {
+		if (setCaret) {
 			if (dot != oldDot || mark != oldMark) {
 				ui.editor.getCaret().setDot(mark);
 				if (dot != mark)
@@ -220,10 +225,10 @@ public class TextListener implements MouseListener, MouseMotionListener, FocusLi
 				ui.editor.caretEvent.fire();
 			}
 		}
-		if (JSComponentUI.debugging)
-			System.out.println(ui.id + " TextListener handling event " + evType + " " + eventType + " "
-					+ ui.editor.getCaret() + " " + ui.getComponentText().length());
-		return true;
+		
+//		handledorNot = ui.editor.isEditable();
+//
+		return handledorNot;
 	}
 
 	@Override
@@ -231,26 +236,26 @@ public class TextListener implements MouseListener, MouseMotionListener, FocusLi
 		
 	//	System.out.println("textlistener insertupdate");
 		if (!working)
-			ui.setTextDelayed();
+			ui.setJSTextDelayed();
 	}
 
 	@Override
 	public void removeUpdate(DocumentEvent e) {
 	//	System.out.println("textlistener removeupdate");
 		if (!working)
-			ui.setTextDelayed();
+			ui.setJSTextDelayed();
 	}
 
 	@Override
 	public void changedUpdate(DocumentEvent e) {
 	//	System.out.println("textlistener change");
 		if (!working)
-			ui.setTextDelayed();
+			ui.setJSTextDelayed();
 	}
 
 	@Override
 	public void caretUpdate(CaretEvent e) {
-		ui.setJSSelection();
+		ui.setJSSelection("caret");
 	}
 
 }

@@ -879,7 +879,7 @@ public class JSTableHeaderUI extends JSLightweightUI {
 	 * minimum widths of each column (plus inter-cell spacing).
 	 */
 	@Override
-	public Dimension getMinimumSize() {
+	public Dimension getMinimumSize(JComponent jc) {
 		long width = 0;
 		Enumeration enumeration = tableHeader.getColumnModel().getColumns();
 		while (enumeration.hasMoreElements()) {
@@ -896,7 +896,7 @@ public class JSTableHeaderUI extends JSLightweightUI {
 	 * column (plus inter-cell spacing).
 	 */
 	@Override
-	public Dimension getPreferredSize() {
+	public Dimension getPreferredSize(JComponent jc) {
 		long width = 0;
 		Enumeration enumeration = tableHeader.getColumnModel().getColumns();
 		while (enumeration.hasMoreElements()) {
@@ -911,7 +911,7 @@ public class JSTableHeaderUI extends JSLightweightUI {
 	 * maximum widths of each column (plus inter-cell spacing).
 	 */
 	@Override
-	protected Dimension getMaximumSize() {
+	public Dimension getMaximumSize(JComponent jc) {
 		long width = 0;
 		Enumeration enumeration = tableHeader.getColumnModel().getColumns();
 		while (enumeration.hasMoreElements()) {

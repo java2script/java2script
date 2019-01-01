@@ -9,9 +9,11 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+
 import javax.swing.BoundedRangeModel;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
+import javax.swing.JEditorPane;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
@@ -24,6 +26,7 @@ import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.UIResource;
+
 import sun.swing.DefaultLookup;
 import sun.swing.UIAction;
 import swingjs.api.js.DOMNode;
@@ -109,12 +112,11 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 			return false;
 		if (sc != scrolledComponent) {
 			scrolledComponent = sc;
-			// just experimenting  scrollBarUIDisabled = (sc.getUIClassID() == "TextAreaUI");
 			scrolledUI = (JSComponentUI) sc.ui;
+			scrollBarUIDisabled = (scrolledUI instanceof JSTextViewUI);
 			scrolledUI.scrollPaneUI = this;
-			scrollNode = scrolledUI.domNode; // why outer node?
 			if (setSize)
-				DOMNode.setSize(scrollNode, c.getWidth(), c.getHeight());
+				DOMNode.setSize(scrolledUI.domNode, c.getWidth(), c.getHeight());
 		}
 		return true;
 	}
@@ -145,7 +147,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 	}
 
 	@Override
-	public Dimension getPreferredSize() {
+	public Dimension getPreferredSize(JComponent jc) {
 		// System.out.println(id + " getpreferredSize");
 		return null;
 	}
@@ -178,11 +180,6 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 	 * orientation.
 	 */
 	boolean setValueCalled = false;
-
-	// public static ComponentUI createUI(JComponent x) {
-	// return new BasicScrollPaneUI();
-	// }
-	//
 	
 	static void loadActionMap(LazyActionMap map) {
 		map.put(new Actions(Actions.SCROLL_UP));
@@ -197,73 +194,88 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 		map.put(new Actions(Actions.UNIT_SCROLL_LEFT));
 	}
 
-	@Override
-	public void paint(Graphics g, JComponent c) {
-		super.paint(g, c);
-//		checkTextAreaHeight();
-//// unnecessary		updateScrollBarExtents();
-//		Border vpBorder = scrollpane.getViewportBorder();
-//		if (vpBorder != null) {
-//			Rectangle r = scrollpane.getViewportBorderBounds();
-//			vpBorder.paintBorder(scrollpane, g, r.x, r.y, r.width, r.height);
-//		}
-	}
-
-//	private void updateScrollBarExtents() {
-//		JViewport vp = scrollpane.getViewport();
-//		if (vp == null)
-//			return;
-//		JComponent sc = (JComponent) vp.getView();
-//		JScrollBar vsb = scrollpane.getVerticalScrollBar();
-//		JScrollBar hsb = scrollpane.getHorizontalScrollBar();
-//		if (vsb != null) {
-//			vsb.setVisibleAmount(vp.getHeight());
-//			((JSScrollBarUI) vsb.getUI()).setScrollBarExtentAndCSS();
-//		}
-//		if (hsb != null) {
-//			vsb.setVisibleAmount(vp.getWidth());
-//			((JSScrollBarUI) hsb.getUI()).setScrollBarExtentAndCSS();
-//		}
-//	}
-
-
-	private Dimension textAreaSize;
-	
-
-	/**
-	 * SwingJS: we need to make the scrollbar run the height of the text, not the
-	 * size of the textarea itself
-	 */
-	private void checkTextAreaHeight() {
+	private void updateScrollBarExtents() {
 		JViewport vp = scrollpane.getViewport();
 		if (vp == null)
 			return;
 		JComponent sc = (JComponent) vp.getView();
-		if (sc != null && sc.getUI() != null && sc.getUIClassID() == "TextAreaUI") {
-			int totalHeight = sc.getBounds().height;
-			int totalWidth = sc.getBounds().width; 
-			JScrollBar vsb = scrollpane.getVerticalScrollBar();
-			JScrollBar hsb = scrollpane.getHorizontalScrollBar();
-			if (textAreaSize == null)
-				textAreaSize = new Dimension();
-			((JSTextAreaUI) sc.getUI()).getTextAreaTextSize(textAreaSize);
-
-			boolean overHeight = textAreaSize.height > totalHeight;
-			boolean overWidth = textAreaSize.width > totalWidth;
-			if (vsb == null || !overHeight)
-				textAreaSize.height = totalHeight;
-			if (hsb == null || !overWidth)
-				textAreaSize.width = totalWidth;
-			sc.setSize(textAreaSize);
+		JScrollBar vsb = scrollpane.getVerticalScrollBar();
+		JScrollBar hsb = scrollpane.getHorizontalScrollBar();
+		if (vsb != null) {
+			vsb.setVisibleAmount(vp.getHeight());
+//			((JSScrollBarUI) vsb.getUI()).setScrollBarExtentAndCSS();
+		}
+		if (hsb != null) {
+			vsb.setVisibleAmount(vp.getWidth());
+//			((JSScrollBarUI) hsb.getUI()).setScrollBarExtentAndCSS();
 		}
 	}
+
+
+//	private Dimension textAreaSize;
+	
+
+//	/**
+//	 * SwingJS: we need to make the scrollbar run the height of the text, not the
+//	 * size of the textarea itself
+//	 */
+//	private void checkTextAreaHeight() {
+//		JViewport vp = scrollpane.getViewport();
+//		if (vp == null)
+//			return;
+//		JComponent sc = (JComponent) vp.getView();
+//		if (sc != null && sc.getUI() != null && sc.getUIClassID() == "TextAreaUI") {
+//			int totalHeight = sc.getBounds().height;
+//			int totalWidth = sc.getBounds().width; 
+//			JScrollBar vsb = scrollpane.getVerticalScrollBar();
+//			JScrollBar hsb = scrollpane.getHorizontalScrollBar();
+//			if (textAreaSize == null)
+//				textAreaSize = new Dimension();
+//			((JSTextAreaUI) sc.getUI()).getTextAreaTextSize(textAreaSize);
+//
+//			boolean overHeight = textAreaSize.height > totalHeight;
+//			boolean overWidth = textAreaSize.width > totalWidth;
+//			if (vsb == null || !overHeight)
+//				textAreaSize.height = totalHeight;
+//			if (hsb == null || !overWidth)
+//				textAreaSize.width = totalWidth;
+//			sc.setSize(textAreaSize);
+//		}
+//	}
 
 	/**
 	 * @return new Dimension(Short.MAX_VALUE, Short.MAX_VALUE)
 	 */
 	@Override
-	protected Dimension getMaximumSize() {
+	public Dimension getMaximumSize(JComponent jc) {
 		return new Dimension(Short.MAX_VALUE, Short.MAX_VALUE);
+	}
+
+	InputMap getInputMap(int condition) {
+		if (condition == JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT) {
+			InputMap keyMap = (InputMap) DefaultLookup.get(scrollpane, this,
+					"ScrollPane.ancestorInputMap");
+			InputMap rtlKeyMap;
+
+			if (scrollpane.getComponentOrientation().isLeftToRight()
+					|| ((rtlKeyMap = (InputMap) DefaultLookup.get(scrollpane, this,
+							"ScrollPane.ancestorInputMap.RightToLeft")) == null)) {
+				return keyMap;
+			} else {
+				rtlKeyMap.setParent(keyMap);
+				return rtlKeyMap;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public void installUI(JComponent jc) {
+		scrollpane = (JScrollPane) jc;
+
+		installDefaults(scrollpane);
+		installListeners(scrollpane);
+		installKeyboardActions(scrollpane);
 	}
 
 	protected void installDefaults(JScrollPane scrollpane) {
@@ -299,20 +311,49 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 		
 		horizBarUI = vertBarUI = null;
 		
-		if (vsb != null) {
-			vsb.getModel().addChangeListener(vsbChangeListener);
-			vsb.addPropertyChangeListener(vsbPropertyChangeListener);
-		}
-		if (hsb != null) {
-			hsb.getModel().addChangeListener(hsbChangeListener);
-			hsb.addPropertyChangeListener(hsbPropertyChangeListener);
-		}
+		updateScrollBar(null, vsb, vsbChangeListener, vsbPropertyChangeListener, true);			
+		updateScrollBar(null, hsb, hsbChangeListener, hsbPropertyChangeListener, false);
 
 		scrollpane.addPropertyChangeListener(spPropertyChangeListener);
 
 		// mouseScrollListener = createMouseWheelListener();
 		// scrollpane.addMouseWheelListener(mouseScrollListener);
 
+	}
+
+	private void updateScrollBar(JScrollBar sbOld, JScrollBar sbNew, ChangeListener cl,
+			PropertyChangeListener pcl, boolean isVertical) {
+		if (sbOld != null) {
+			if (isVertical) {
+				vertBarUI = null;
+				((JSScrollBarUI) sbOld.getUI()).setScrollPaneUI(null);
+			} else {
+				horizBarUI = null;
+				((JSScrollBarUI) sbOld.getUI()).setScrollPaneUI(null);
+			}
+			if (cl != null) {
+				sbOld.getModel().removeChangeListener(cl);
+			}
+			if (pcl != null) {
+				sbOld.removePropertyChangeListener(pcl);
+			}
+		}
+		if (sbNew != null) {
+			if (isVertical) {
+				vertBarUI = (JSScrollBarUI) sbNew.getUI();
+				vertBarUI.setScrollPaneUI(this);
+			} else {
+				horizBarUI = (JSScrollBarUI) sbNew.getUI();
+				horizBarUI.setScrollPaneUI(this);
+			}
+			
+			if (cl != null) {
+				sbNew.getModel().addChangeListener(cl);
+			}
+			if (pcl != null) {
+				sbNew.addPropertyChangeListener(pcl);
+			}
+		}
 	}
 
 	protected void installKeyboardActions(JScrollPane c) {
@@ -325,30 +366,12 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 				"ScrollPane.actionMap");
 	}
 
-	InputMap getInputMap(int condition) {
-		if (condition == JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT) {
-			InputMap keyMap = (InputMap) DefaultLookup.get(scrollpane, this,
-					"ScrollPane.ancestorInputMap");
-			InputMap rtlKeyMap;
-
-			if (scrollpane.getComponentOrientation().isLeftToRight()
-					|| ((rtlKeyMap = (InputMap) DefaultLookup.get(scrollpane, this,
-							"ScrollPane.ancestorInputMap.RightToLeft")) == null)) {
-				return keyMap;
-			} else {
-				rtlKeyMap.setParent(keyMap);
-				return rtlKeyMap;
-			}
-		}
-		return null;
-	}
-
 	@Override
-	public void installUI(JComponent jc) {
-		scrollpane = (JScrollPane) jc;
-		installDefaults(scrollpane);
-		installListeners(scrollpane);
-		installKeyboardActions(scrollpane);
+	public void uninstallUI(JComponent jc) {
+		uninstallDefaults(scrollpane);
+		uninstallListeners(scrollpane);
+		uninstallKeyboardActions(scrollpane);
+		scrollpane = null;
 	}
 
 	protected void uninstallDefaults(JScrollPane c) {
@@ -394,14 +417,6 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 		SwingUtilities.replaceUIActionMap(c, null);
 		SwingUtilities.replaceUIInputMap(c,
 				JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, null);
-	}
-
-	@Override
-	public void uninstallUI(JComponent jc) {
-		uninstallDefaults(scrollpane);
-		uninstallListeners(scrollpane);
-		uninstallKeyboardActions(scrollpane);
-		scrollpane = null;
 	}
 
 	Handler getHandler() {
@@ -760,44 +775,6 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 		}
 	}
 
-	void updateHorizontalScrollBar(PropertyChangeEvent pce) {
-		updateScrollBar(pce, hsbChangeListener, hsbPropertyChangeListener, false);
-	}
-
-	void updateVerticalScrollBar(PropertyChangeEvent pce) {
-		updateScrollBar(pce, vsbChangeListener, vsbPropertyChangeListener, true);
-	}
-
-	private void updateScrollBar(PropertyChangeEvent pce, ChangeListener cl,
-			PropertyChangeListener pcl, boolean isVertical) {
-		JScrollBar sb = (JScrollBar) pce.getOldValue();
-		if (sb != null) {
-			if (cl != null) {
-				sb.getModel().removeChangeListener(cl);
-			}
-			if (pcl != null) {
-				sb.removePropertyChangeListener(pcl);
-			}
-		}
-		sb = (JScrollBar) pce.getNewValue();
-		if (sb != null) {
-			if (isVertical) {
-				vertBarUI = (JSScrollBarUI) sb.getUI();
-				vertBarUI.myScrollPaneUI = this;
-			} else {
-				horizBarUI = (JSScrollBarUI) sb.getUI();
-				horizBarUI.myScrollPaneUI = this;
-			}
-
-			if (cl != null) {
-				sb.getModel().addChangeListener(cl);
-			}
-			if (pcl != null) {
-				sb.addPropertyChangeListener(pcl);
-			}
-		}
-	}
-
 	public class PropertyChangeHandler implements PropertyChangeListener {
 
 		// NOTE: This class exists only for backward compatability. All
@@ -992,12 +969,10 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 		// correct for it.
 		Rectangle r1 = viewport.getBounds();
 		Rectangle r2 = scrolledComponent.getBounds();
-		if (!r1.equals(r2) && !isViewportChange) // infinite loop if
-																											// resizing
+		if (!r1.equals(r2) && !isViewportChange) // infinite loop if resizing
 			scrolledComponent.setBounds(r1);
 		DOMNode.setStyles(scrolledUI.domNode, "overflow-x",
-				getScrollBarPolicyCSS(scrollpane.getHorizontalScrollBarPolicy()),
-				"overflow-y",
+				getScrollBarPolicyCSS(scrollpane.getHorizontalScrollBarPolicy()), "overflow-y",
 				getScrollBarPolicyCSS(scrollpane.getVerticalScrollBarPolicy()));
 		if (horizBarUI != null)
 			DOMNode.setVisible(horizBarUI.jqSlider, false);
@@ -1005,6 +980,26 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 			DOMNode.setVisible(vertBarUI.jqSlider, false);
 	}
 
+
+	public void notifyTableScrolling() {
+		if (scrolledComponent != null && scrolledComponent.getUIClassID() == "TableUI") {
+			((JSTableUI) scrolledComponent.ui).setScrolling();
+		}
+	}
+
+	@Override
+	public void paint(Graphics g, JComponent c) {
+		super.paint(g, c);
+//		checkTextAreaHeight();
+		updateScrollBarExtents();
+//		Border vpBorder = scrollpane.getViewportBorder();
+//		if (vpBorder != null) {
+//			Rectangle r = scrollpane.getViewportBorderBounds();
+//			vpBorder.paintBorder(scrollpane, g, r.x, r.y, r.width, r.height);
+//		}
+	}
+
+	
 	class Handler implements ChangeListener, PropertyChangeListener {// ,
 																																		// MouseWheelListener
 																																		// {
@@ -1177,7 +1172,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 		//
 		@Override
 		public void stateChanged(ChangeEvent e) {
-			textAreaSize = null;
+//			textAreaSize = null;
 			JViewport viewport = scrollpane.getViewport();
 			if (viewport != null) {
 				if (e.getSource() == viewport) {
@@ -1274,33 +1269,50 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 
 		private void scrollPanePropertyChange(PropertyChangeEvent e) {
 			String propertyName = e.getPropertyName();
-
-			if (propertyName == "verticalScrollBarDisplayPolicy") {
+			System.out.println("spane change " + propertyName);
+			switch (propertyName) {
+			case "verticalScrollBarDisplayPolicy": 
 				updateScrollBarDisplayPolicy(e);
-			} else if (propertyName == "horizontalScrollBarDisplayPolicy") {
+				break;
+			case "horizontalScrollBarDisplayPolicy":
 				updateScrollBarDisplayPolicy(e);
-			} else if (propertyName == "viewport") {
+				break;
+			case "viewport":
 				updateViewport(e);
-			} else if (propertyName == "rowHeader") {
+				break;
+			case "rowHeader":
 				updateRowHeader(e);
-			} else if (propertyName == "columnHeader") {
+				break;
+			case "columnHeader":
 				updateColumnHeader(e);
-			} else if (propertyName == "verticalScrollBar") {
+				break;
+			case "verticalScrollBar":
 				updateVerticalScrollBar(e);
-			} else if (propertyName == "horizontalScrollBar") {
+				break;
+			case "horizontalScrollBar":
 				updateHorizontalScrollBar(e);
-			} else if (propertyName == "componentOrientation") {
+				break;
+			case "componentOrientation":
 				scrollpane.revalidate();
 				scrollpane.repaint();
+				break;
 			}
+		}
+
+		void updateHorizontalScrollBar(PropertyChangeEvent pce) {
+			updateScrollBar((JScrollBar) pce.getOldValue(), (JScrollBar) pce.getNewValue(), hsbChangeListener, hsbPropertyChangeListener, false);
+		}
+
+		void updateVerticalScrollBar(PropertyChangeEvent pce) {
+			updateScrollBar((JScrollBar) pce.getOldValue(), (JScrollBar) pce.getNewValue(), vsbChangeListener, vsbPropertyChangeListener, true);
 		}
 
 		// PropertyChangeListener for the horizontal and vertical scrollbars.
 		private void sbPropertyChange(PropertyChangeEvent e) {
 			String propertyName = e.getPropertyName();
 			Object source = e.getSource();
-
-			if ("model" == propertyName) {
+			switch (propertyName) {
+			case "model":
 				JScrollBar sb = scrollpane.getVerticalScrollBar();
 				BoundedRangeModel oldModel = (BoundedRangeModel) e.getOldValue();
 				ChangeListener cl = null;
@@ -1319,7 +1331,8 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 						sb.getModel().addChangeListener(cl);
 					}
 				}
-			} else if ("componentOrientation" == propertyName) {
+				break;
+			case "componentOrientation":
 				if (source == scrollpane.getHorizontalScrollBar()) {
 					JScrollBar hsb = scrollpane.getHorizontalScrollBar();
 					JViewport viewport = scrollpane.getViewport();
@@ -1327,18 +1340,12 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 					if (scrollpane.getComponentOrientation().isLeftToRight()) {
 						p.x = hsb.getValue();
 					} else {
-						p.x = viewport.getViewSize().width - viewport.getExtentSize().width
-								- hsb.getValue();
+						p.x = viewport.getViewSize().width - viewport.getExtentSize().width - hsb.getValue();
 					}
 					viewport.setViewPosition(p);
 				}
+				break;
 			}
-		}
-	}
-
-	public void notifyTableScrolling() {
-		if (scrolledComponent != null && scrolledComponent.getUIClassID() == "TableUI") {
-			((JSTableUI) scrolledComponent.ui).setScrolling();
 		}
 	}
 

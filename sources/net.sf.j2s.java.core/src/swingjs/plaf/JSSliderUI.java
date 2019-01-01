@@ -408,8 +408,8 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 
 	
 	@Override
-	public Dimension getMinimumSize() {
-		return (isScrollBar ? super.getMinimumSize() 
+	public Dimension getMinimumSize(JComponent jc) {
+		return (isScrollBar ? super.getMinimumSize(jc) 
 				: isHoriz ? getMinimumHorizontalSize() : getMinimumVerticalSize());
 	}
 
@@ -432,8 +432,8 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	}
 
 	@Override
-	public Dimension getPreferredSize() {
-		return (isScrollBar ? super.getPreferredSize() : isHoriz ? getPreferredHorizontalSize() : getPreferredVerticalSize());
+	public Dimension getPreferredSize(JComponent jc) {
+		return (isScrollBar ? super.getPreferredSize(jc) : isHoriz ? getPreferredHorizontalSize() : getPreferredVerticalSize());
 	}
 
 	public Dimension getPreferredHorizontalSize() {
@@ -528,8 +528,8 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 
 
 	@Override
-	protected Dimension getMaximumSize() {
-		Dimension d = super.getMaximumSize();
+	public Dimension getMaximumSize(JComponent jc) {
+		Dimension d = super.getMaximumSize(jc);
 		return (d != null ? d : isHoriz ? new Dimension(Short.MAX_VALUE, 40) : new Dimension(40, Short.MAX_VALUE));
 	}
 
