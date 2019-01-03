@@ -274,13 +274,13 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
     /* Appease the serialization gods */
     private static final long serialVersionUID = 6108874887143696463L;
 
-    private static final ThreadLocal<StringBuilderHelper>
-        threadLocalStringBuilderHelper = new ThreadLocal<StringBuilderHelper>() {
+    private static final /*ThreadLocal<*/StringBuilderHelper/*>*/
+        threadLocalStringBuilderHelper = new /*ThreadLocal<*/StringBuilderHelper/*>*/() /*{
         @Override
         protected StringBuilderHelper initialValue() {
             return new StringBuilderHelper();
         }
-    };
+    }*/;
 
     // Cache of common small BigDecimal values.
     private static final BigDecimal zeroThroughTen[] = {
@@ -3437,7 +3437,7 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
                     StringBuilderHelper.DIGIT_ONES[lowInt]) ;
         }
 
-        StringBuilderHelper sbHelper = threadLocalStringBuilderHelper.get();
+        StringBuilderHelper sbHelper = threadLocalStringBuilderHelper;//.get();
         char[] coeff;
         int offset;  // offset is the starting index for coeff array
         // Get the significand as an absolute value
@@ -3465,7 +3465,7 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
                 buf.append('.');
                 for (; pad>0; pad--) {
                     buf.append('0');
-                }
+                } 
                 buf.append(coeff, offset, coeffLen);
             } else {                         // xx.xx form
                 buf.append(coeff, offset, -pad);
