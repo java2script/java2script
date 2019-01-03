@@ -1,41 +1,54 @@
 package swingjs;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.AsynchronousFileChannel;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.nio.file.AccessMode;
 import java.nio.file.CopyOption;
 import java.nio.file.DirectoryStream;
 import java.nio.file.DirectoryStream.Filter;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileStore;
 import java.nio.file.FileSystem;
 import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.WatchEvent.Kind;
 import java.nio.file.WatchEvent.Modifier;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.FileAttributeView;
+import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.UserPrincipalLookupService;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
 import javajs.util.AU;
-import javajs.util.Rdr;
-import swingjs.JSFileSystem.JSSeekableByteChannel;
+import swingjs.JSFileSystem.JSMappedByteBuffer;
 
 /**
  * very rough - not fleshed out.
@@ -45,84 +58,453 @@ import swingjs.JSFileSystem.JSSeekableByteChannel;
  */
 public class JSFileSystem extends FileSystem {
 
-	public static class JSSeekableByteChannel implements SeekableByteChannel {
+	public static class JSMappedByteBuffer extends MappedByteBuffer {
 
-		private JSPath path;
-		private byte[] _bytes;
-		private BufferedInputStream bis;
-		private int pos;
-		private boolean writing;
+		public JSMappedByteBuffer(byte[] hb, int mark, int pos, int lim, int cap, int off, FileDescriptor fd) {
+			super(hb, mark, pos, lim, cap, off, fd);
+		}
 
-		
-		public JSSeekableByteChannel(JSPath path) {
-			this.path = path;
+	}
+
+	public static class JSFileLock extends FileLock {
+
+		protected JSFileLock(AsynchronousFileChannel channel, long position, long size, boolean shared) {
+			super(channel, position, size, shared);
+		}
+
+		protected JSFileLock(FileChannel channel, long position, long size, boolean shared) {
+			super(channel, position, size, shared);
 		}
 
 		@Override
-		public boolean isOpen() {
+		public boolean isValid() {
 			return true;
 		}
 
 		@Override
-		public void close() throws IOException {
+		public void release() throws IOException {
+		}
+
+	}
+
+	public static class JSFileChannel extends FileChannel {
+
+		// Used by FileInputStream.getChannel() and RandomAccessFile.getChannel()
+		public static FileChannel open(FileDescriptor fd, String path, boolean readable, boolean writable,
+				Object parent) {
+			return new JSFileChannel(fd, path, readable, writable, false, parent);
+		}
+
+		// Used by FileOutputStream.getChannel
+		public static FileChannel open(FileDescriptor fd, String path, boolean readable, boolean writable,
+				boolean append, Object parent) {
+			return new JSFileChannel(fd, path, readable, writable, append, parent);
+		}
+
+		public JSFileChannel(Path path, Set<? extends OpenOption> options, FileAttribute<?>[] attrs) {
+			this.fd = null;
+			this.parent = null;
+			this.path= (JSPath) path;
+			try {
+				bc = new JSByteChannel(this.path, options, attrs);
+			} catch (FileAlreadyExistsException e) {
+			}
+		}
+
+		private FileDescriptor fd;
+		private Object parent; // possibly a FileOutputStream
+		private JSPath path;
+		private JSByteChannel bc;
+
+		private JSFileChannel(FileDescriptor fd, String path, boolean readable, boolean writable, boolean append,
+				Object parent) {
+			this.fd = fd;
+			this.parent = parent;
+			this.path = (JSPath) new File(path).toPath();
+
+			Set<StandardOpenOption> options = new HashSet<>();
+			if (readable)
+				options.add(StandardOpenOption.READ);
+			if (writable) {
+				options.add(StandardOpenOption.WRITE);
+				options.add(StandardOpenOption.CREATE);
+			}
+			if (append)
+				options.add(StandardOpenOption.APPEND);
+			try {
+				bc = new JSByteChannel(this.path, options, NO_ATTRIBUTES);
+			} catch (FileAlreadyExistsException e) {
+			}
+			// this.nd = new FileDispatcherImpl(append);
 		}
 
 		@Override
 		public int read(ByteBuffer dst) throws IOException {
-			int len = dst.remaining();
-			_bytes = AU.ensureLengthByte(getBytes(), pos + len);
-			byte[] a = dst.array();
-			System.arraycopy(_bytes, pos, a, dst.position(), len);
-			pos += len;
-			return len;
+			return bc.read(dst);
 		}
 
-		private byte[] getBytes() {
-			if (_bytes == null) {
-				if (writing)
+		@Override
+		public long read(ByteBuffer[] dsts, int offset, int length) throws IOException {
+			int ntotal = 0;
+			for (int n0 = length, i = offset; i < dsts.length && ntotal < n0; i++) {
+				int n = bc.read(dsts[i], length, bc.pos, true);
+				if (n < 0)
+					break;
+				ntotal += n;
+				length -= n;
+			}
+			return ntotal;
+		}
+
+		@Override
+		public int write(ByteBuffer src) throws IOException {
+			return bc.write(src);
+		}
+
+		@Override
+		public long write(ByteBuffer[] srcs, int offset, int length) throws IOException {
+			int ntotal = 0;
+			for (int n0 = length, i = offset; i < srcs.length && ntotal < n0; i++) {
+				int n = bc.write(srcs[i], Math.min(length, srcs[i].remaining()));
+				ntotal += n;
+				length -= n;
+			}
+			return ntotal;
+		}
+
+		@Override
+		public long position() throws IOException {
+			return bc.position();
+		}
+
+		@Override
+		public FileChannel position(long newPosition) throws IOException {
+			bc.position(newPosition);
+			return this;
+		}
+
+		@Override
+		public long size() throws IOException {
+			return bc.size();
+		}
+
+		@Override
+		public FileChannel truncate(long size) throws IOException {
+			bc.len = (int) size;
+			return this;
+		}
+
+		@Override
+		public void force(boolean metaData) throws IOException {
+			path._bytes = bc._bytes;
+			JSUtil.cacheFileData(path.name, path._bytes);
+		}
+
+		
+		@Override
+		public long transferTo(long position, long count, WritableByteChannel target) throws IOException {
+			long n = bc.transferTo((int) position, ((JSByteChannel) target), ((JSByteChannel) target).pos, (int) count, false);
+			return n;
+		}
+
+		@Override
+		public long transferFrom(ReadableByteChannel src, long position, long count) throws IOException {
+			return ((JSByteChannel) src).transferTo(((JSByteChannel) src).pos, bc, (int) position, (int) count, true);
+		}
+
+		@Override
+		public int read(ByteBuffer dst, long position) throws IOException {
+			return bc.read(dst, dst.position(), (int) position, false);
+		}
+
+		@Override
+		public int write(ByteBuffer src, long position) throws IOException {
+			return bc._get(src.array(), src.arrayOffset() + src.position(), (int) position, src.remaining(), false);
+		}
+
+		@Override
+		public MappedByteBuffer map(MapMode mode, long position, long size) throws IOException {
+			ni();
+			return new JSMappedByteBuffer(bc._bytes, -1, (int) position, (int) size, (int) size, 0, fd);
+		}
+
+		@Override
+		public FileLock lock(long position, long size, boolean shared) throws IOException {
+			ni();
+			return new JSFileLock(this, position, size, shared);
+		}
+
+		@Override
+		public FileLock tryLock(long position, long size, boolean shared) throws IOException {
+			ni();
+			return new JSFileLock(this, position, size, shared);
+		}
+
+		@Override
+		protected void implCloseChannel() throws IOException {
+			bc.close();
+		}
+
+	}
+
+	public static class JSFileAttributes implements BasicFileAttributes {
+
+		FileTime lastModified;
+		FileTime lastAccessed;
+		FileTime created;
+
+		private JSByteChannel channel;
+
+		JSFileAttributes() {
+		}
+
+		public JSFileAttributes(JSByteChannel channel) {
+			this.channel = channel;
+		}
+
+		@Override
+		public FileTime lastModifiedTime() {
+			return (lastModified == null ? FileTime.fromMillis(channel.tMod) : lastModified);
+		}
+
+		@Override
+		public FileTime lastAccessTime() {
+			return (lastAccessed == null ? FileTime.fromMillis(channel.tAccess) : lastAccessed);
+		}
+
+		@Override
+		public FileTime creationTime() {
+			return (created == null ? FileTime.fromMillis(channel.tCreate) : created);
+		}
+
+		@Override
+		public boolean isRegularFile() {
+			return true;
+		}
+
+		@Override
+		public boolean isDirectory() {
+			return false;
+		}
+
+		@Override
+		public boolean isSymbolicLink() {
+			return false;
+		}
+
+		@Override
+		public boolean isOther() {
+			return false;
+		}
+
+		@Override
+		public long size() {
+			try {
+				return channel.size();
+			} catch (IOException e) {
+				return 0;
+			}
+		}
+
+		@Override
+		public Object fileKey() {
+			return channel.path.name;
+		}
+
+	}
+
+	public static class JSFileAttribute<T> implements FileAttribute {
+
+		String name;
+		T value;
+
+		public JSFileAttribute(String name, T value) {
+			this.name = name;
+			this.value = value;
+		}
+
+		@Override
+		public String name() {
+			return name;
+		}
+
+		@Override
+		public T value() {
+			return value;
+		}
+
+	}
+
+	public static class JSByteChannel
+			implements SeekableByteChannel, WritableByteChannel, ReadableByteChannel, BasicFileAttributeView {
+
+		long tCreate, tMod, tAccess;
+		private JSPath path;
+		private byte[] _bytes;
+		private BufferedInputStream bis;
+		protected int pos, len;
+		private JSFileAttribute<?>[] attrs;
+		private boolean open, append, write, delete;
+		private JSFileAttributes fsAttrs;
+
+		public JSByteChannel(JSPath path, Set<? extends OpenOption> options, FileAttribute<?>[] attrs)
+				throws FileAlreadyExistsException {
+			this.path = path;
+			this.attrs = (JSFileAttribute<?>[]) attrs;
+
+			// APPEND, CREATE, CREATE_NEW, DELETE_ON_CLOSE,
+			// READ, TRUNCATE_EXISTING, WRITE,
+
+			write = options.contains(StandardOpenOption.WRITE);
+			append = options.contains(StandardOpenOption.APPEND);
+			delete = options.contains(StandardOpenOption.DELETE_ON_CLOSE);
+			boolean truncate = options.contains(StandardOpenOption.TRUNCATE_EXISTING);
+			boolean create = options.contains(StandardOpenOption.CREATE);
+			boolean createNew = options.contains(StandardOpenOption.CREATE_NEW);
+			if (append) {
+				write = true;
+				pos = len = getBytes().length;
+			} else if (write) {
+				if (create || createNew) {
+					if (createNew) {
+						byte[] b = JSUtil.getFileAsBytes(path.name, true);
+						if (b != null)
+							throw new FileAlreadyExistsException(path.name);
+					}
+					path._bytes = null;
+					JSUtil.cacheFileData(path.name, null);
+				} else if (truncate) {
+					path._bytes = null;
+				}
+				if (path._bytes == null) {
 					_bytes = new byte[4096];
-				else
-					_bytes = JSUtil.getFileAsBytes(path.toString());
-				
+				} else {
+					getBytes();
+				}
+			}
+		}
+
+
+		@Override
+		public boolean isOpen() {
+			return open;
+		}
+
+		@Override
+		public void close() throws IOException {
+			open = false;
+			if (delete) {
+				_bytes = null;
+				JSUtil.cacheFileData(path.name, null);
+			} else if (write) {
+				if (len < _bytes.length)
+					_bytes = Arrays.copyOf(_bytes, len);
+				path._bytes = _bytes;
+				JSUtil.cacheFileData(path.name, _bytes);
+				JSUtil.saveFile(path.name, _bytes, null, null);
+			}
+		}
+
+		@Override
+		public int read(ByteBuffer dst) throws IOException {
+			return read(dst, dst.remaining(), pos, true);
+		}
+
+		int read(ByteBuffer dst, int n, int pos, boolean updatePos) {
+			n = Math.min(dst.remaining(), Math.min(len - pos, n));
+			if (n <= 0)
+				return -1;
+			System.arraycopy(_bytes, pos, dst.array(), dst.arrayOffset() + dst.position(), n);
+			dst.position(dst.position() + n);
+			if (updatePos)
+				this.pos += n;
+			return n;
+		}
+
+		@Override
+		public int write(ByteBuffer src) throws IOException {
+			return write(src, src.remaining());
+		}
+
+		private int write(ByteBuffer src, int n) {
+			return _get(src.array(), src.position() + src.arrayOffset(), pos, n, true);
+		}
+
+		public long transferTo(int fromPos, JSByteChannel bc, int toPos, int n, boolean updatePos) {
+			n = Math.min(len - fromPos, n);
+			return bc._get(_bytes, fromPos, toPos, n, updatePos);
+		}
+
+		private int _get(byte[] array, int from, int to, int n, boolean updatePos) {
+			if (to + n > getBytes().length)
+				_bytes = AU.ensureLengthByte(_bytes, (to + n) * 2);
+			System.arraycopy(array, from, _bytes, to, n);
+			pos += n;
+			if (pos > len)
+				len = pos;
+			if (!updatePos)
+				pos -= n;
+			return n;
+		}
+
+
+		private byte[] getBytes() {
+			if (_bytes == null)
+				_bytes = path._bytes;
+			if (_bytes == null) {
+				_bytes = JSUtil.getFileAsBytes(path.toString());
+				len = _bytes.length;
 			}
 			return _bytes;
 		}
 
 		@Override
 		public long size() throws IOException {
-			return getBytes().length;
+			return len;
 		}
 
 		public InputStream getInputStream() {
-			return (bis == null ? (bis = Rdr.getBIS(getBytes())) : bis);
+			return (bis == null ? (bis = new BufferedInputStream(new ByteArrayInputStream(getBytes()))) : bis);
 		}
 
 		@Override
 		public SeekableByteChannel truncate(long size) throws IOException {
-			// TODO Auto-generated method stub
+			ni();
 			return null;
-		}
-
-		@Override
-		public int write(ByteBuffer src) throws IOException {
-			writing = true;			
-			int len = Math.min(src.remaining(), getBytes().length);
-			byte[] a = src.array();
-			System.arraycopy(a, src.position(), _bytes, pos, len);
-			pos += len;
-			return len;
 		}
 
 		@Override
 		public long position() throws IOException {
-			// TODO Auto-generated method stub
-			return 0;
+			return pos;
 		}
 
 		@Override
 		public SeekableByteChannel position(long newPosition) throws IOException {
-			// TODO Auto-generated method stub
-			return null;
+			pos = (int) newPosition;
+			return this;
+		}
+
+		@Override
+		public String name() {
+			return "basic";
+		}
+
+		@Override
+		public BasicFileAttributes readAttributes() throws IOException {
+			return getFileAttrs();
+		}
+
+		@Override
+		public void setTimes(FileTime lastModifiedTime, FileTime lastAccessTime, FileTime createTime)
+				throws IOException {
+			getFileAttrs();
+			fsAttrs.lastModified = lastModifiedTime;
+			fsAttrs.lastAccessed = lastAccessTime;
+			fsAttrs.created = createTime;
+		}
+
+		private JSFileAttributes getFileAttrs() {
+			return (fsAttrs == null ? (fsAttrs = new JSFileAttributes(this)) : fsAttrs);
 		}
 
 	}
@@ -156,13 +538,13 @@ public class JSFileSystem extends FileSystem {
 
 		private String[] nameArray;
 		public byte[] _bytes;
-		
+
 		private String[] getNameArray() {
 			if (nameArray == null)
-				nameArray = (/** @j2sNative name.split('/') || */null);
-				return nameArray;
+				nameArray = (/** @j2sNative name.split('/') || */
+				null);
+			return nameArray;
 		}
-
 
 		public JSPath(String name, JSFileSystem jsFileSystem) {
 			this.name = name;
@@ -231,7 +613,7 @@ public class JSFileSystem extends FileSystem {
 
 		@Override
 		public boolean startsWith(Path other) {
-			return (name.startsWith(((JSPath)other).name));
+			return (name.startsWith(((JSPath) other).name));
 		}
 
 		@Override
@@ -241,7 +623,7 @@ public class JSFileSystem extends FileSystem {
 
 		@Override
 		public boolean endsWith(Path other) {
-			return name.endsWith(((JSPath)other).name);
+			return name.endsWith(((JSPath) other).name);
 		}
 
 		@Override
@@ -301,7 +683,7 @@ public class JSFileSystem extends FileSystem {
 				// a/b/c/me
 				s = "/.";
 			} else {
-				// a/b/c/e/me 
+				// a/b/c/e/me
 				// a/b/d/other diff = 2, a.length = 4
 				s = "";
 				for (int i = a.length - firstDiff; --i >= 0;)
@@ -328,6 +710,7 @@ public class JSFileSystem extends FileSystem {
 
 		@Override
 		public Path toRealPath(LinkOption... options) throws IOException {
+			// ignoring symbolic link options
 			return this;
 		}
 
@@ -360,10 +743,15 @@ public class JSFileSystem extends FileSystem {
 			// TODO Auto-generated method stub
 			return 0;
 		}
-		
+
 		@Override
 		public String toString() {
 			return name;
+		}
+
+		public void setAttribute(String attribute, Object value) {
+			// TODO Auto-generated method stub
+
 		}
 
 	}
@@ -371,7 +759,7 @@ public class JSFileSystem extends FileSystem {
 	public static class JSFileSystemProvider extends FileSystemProvider {
 
 		private static Map<String, JSFileSystem> fsMap = new Hashtable<>();
-		
+
 		@Override
 		public String getScheme() {
 			return null;
@@ -405,46 +793,58 @@ public class JSFileSystem extends FileSystem {
 		@Override
 		public SeekableByteChannel newByteChannel(Path path, Set<? extends OpenOption> options,
 				FileAttribute<?>... attrs) throws IOException {
-			return new JSSeekableByteChannel((JSPath)path);
+			return new JSByteChannel((JSPath) path, options, attrs);
+		}
+
+		@Override
+		public FileChannel newFileChannel(Path path, Set<? extends OpenOption> options,
+				FileAttribute<?>... attrs) throws IOException {
+			return new JSFileChannel((JSPath) path, options, attrs);
 		}
 
 		@Override
 		public DirectoryStream<Path> newDirectoryStream(Path dir, Filter<? super Path> filter) throws IOException {
+			ni();
 			return null;
 		}
 
 		@Override
 		public void createDirectory(Path dir, FileAttribute<?>... attrs) throws IOException {
+			ni();
 			throw new IOException();
 		}
 
 		@Override
 		public void delete(Path path) throws IOException {
+			ni();
 		}
 
 		@Override
 		public void copy(Path source, Path target, CopyOption... options) throws IOException {
+			ni();
 			throw new IOException();
 		}
 
 		@Override
 		public void move(Path source, Path target, CopyOption... options) throws IOException {
+			ni();
 			throw new IOException();
 		}
 
 		@Override
 		public boolean isSameFile(Path path, Path path2) throws IOException {
-			throw new IOException();
+			return (path.toString() == path2.toString());
 		}
 
 		@Override
 		public boolean isHidden(Path path) throws IOException {
-			throw new IOException();
+			return false;
 		}
 
 		@Override
 		public FileStore getFileStore(Path path) throws IOException {
-			throw new IOException();
+			ni();
+			return null;
 		}
 
 		@Override
@@ -474,6 +874,7 @@ public class JSFileSystem extends FileSystem {
 
 		@Override
 		public void setAttribute(Path path, String attribute, Object value, LinkOption... options) throws IOException {
+			((JSPath) path).setAttribute(attribute, value);
 		}
 
 	}
@@ -486,6 +887,7 @@ public class JSFileSystem extends FileSystem {
 
 	@Override
 	public void close() throws IOException {
+		// ignore in SwingJS
 	}
 
 	@Override
@@ -515,16 +917,22 @@ public class JSFileSystem extends FileSystem {
 		return null;
 	}
 
+	private static Set<String> views;
+
 	@Override
 	public Set<String> supportedFileAttributeViews() {
-		ni();
-		return null;
+		if (views == null) {
+			views = new HashSet<>();
+			views.add("basic");
+		}
+		return views;
 	}
 
 	@Override
 	public Path getPath(String first, String... more) {
 		if (more != null)
-			first = (first == null ? "" : first + "/") + (/** @j2sNative more.join("/")||*/""); 
+			first = (first == null ? "" : first + "/") + (/** @j2sNative more.join("/")|| */
+			"");
 		return new JSPath(first, this);
 	}
 

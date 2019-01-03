@@ -123,7 +123,7 @@ public final class Channels {
      */
     public static InputStream newInputStream(ReadableByteChannel ch) {
         checkNotNull(ch, "ch");
-        return ((JSFileSystem.JSSeekableByteChannel) ch).getInputStream();
+        return ((JSFileSystem.JSByteChannel) ch).getInputStream();
 //        return new sun.nio.ch.ChannelInputStream(ch);
     }
 

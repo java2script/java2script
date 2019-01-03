@@ -1199,7 +1199,7 @@ public final class Files {
      *   <td> Attempts to copy the file attributes associated with this file to
      *     the target file. The exact file attributes that are copied is platform
      *     and file system dependent and therefore unspecified. Minimally, the
-     *     {@link BasicFileAttributes#lastModifiedTime last-modified-time} is
+     *     {@link BasicFileAttributes#lastModified last-modified-time} is
      *     copied to the target file if supported by both the source and target
      *     file stores. Copying of file timestamps may result in precision
      *     loss. </td>
@@ -1329,7 +1329,7 @@ public final class Files {
      * implementation specific options.
      *
      * <p> Moving a file will copy the {@link
-     * BasicFileAttributes#lastModifiedTime last-modified-time} to the target
+     * BasicFileAttributes#lastModified last-modified-time} to the target
      * file if supported by both source and target file stores. Copying of file
      * timestamps may result in precision loss. An implementation may also
      * attempt to copy other file attributes but is not required to fail if the
@@ -2258,7 +2258,7 @@ public final class Files {
      *          installed, its {@link SecurityManager#checkRead(String) checkRead}
      *          method denies read access to the file.
      *
-     * @see BasicFileAttributes#lastModifiedTime
+     * @see BasicFileAttributes#lastModified
      */
     public static FileTime getLastModifiedTime(Path path, LinkOption... options)
         throws IOException
