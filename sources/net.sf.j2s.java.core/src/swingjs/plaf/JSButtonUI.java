@@ -28,7 +28,6 @@
 
 package swingjs.plaf;
 
-import java.awt.Color;
 //import java.awt.FontMetrics;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -195,10 +194,10 @@ public class JSButtonUI extends JSLightweightUI {
 		 switch (eventType) {
 		 case MouseEvent.MOUSE_RELEASED:
 				menuItem.doClick(0);
-				return true;
+				return UNHANDLED;
 		 }
 		}
-		return false;
+		return UNHANDLED;
 	}
 
 
@@ -747,12 +746,6 @@ public class JSButtonUI extends JSLightweightUI {
 			DOMNode.setSize(domNode, width, height);
 	}
 
-	@Override
-	public Dimension getMaximumSize(JComponent c) {
-		Dimension d = getPreferredSize(c);
-		return d;
-	}
-	
 	@Override
 	protected Dimension getHTMLSizePreferred(DOMNode obj, boolean addCSS) {
 		// addCSS is always false

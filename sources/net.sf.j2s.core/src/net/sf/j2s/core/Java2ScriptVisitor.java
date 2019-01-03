@@ -1419,6 +1419,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				ASTNode resource = resources.get(i);
 				if (resource instanceof VariableDeclarationExpression) {
 					resource.accept(this);
+					buffer.append(";");
 				} else {
 					// Java 9 -- just a Name.
 					buffer.append("/* Java 9 resource " + resource + "*/\r\n");
@@ -4560,13 +4561,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		String s = getFinalInnerClassList(javaClassName);
 		if (doCache) {
 			Integer n = package_htIncludeNames.get(s);
-			if (n != null)
-				return "$I$(" + n + ")";
-			if (!s.endsWith("Exception'")) {
+			if (n == null && !s.endsWith("Exception'")) {
 				// count starts at 1, because i$[0] is the list
 				package_htIncludeNames.put(s, n = new Integer(++package_includeCount[0]));
 				package_includes.append(package_includeCount[0] == 1 ? ",I$=[[0," : ",").append(s);
 			}
+			if (n != null)
+				return "$I$(" + n + ")";
 		}
 		return "Clazz.load(" + s + ")";
 	}

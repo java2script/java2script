@@ -700,7 +700,7 @@ public class JSListUI extends JSLightweightUI {
 	 * @return The total size of the list.
 	 */
 	@Override
-	public Dimension getPreferredSize() {// JComponent c) {
+	public Dimension getPreferredSize(JComponent jc) {
 		maybeUpdateLayoutState();
 		return getListDimensions();
 	}

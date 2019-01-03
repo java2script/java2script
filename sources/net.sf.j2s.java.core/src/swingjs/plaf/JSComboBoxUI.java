@@ -67,7 +67,7 @@ public class JSComboBoxUI extends JSLightweightUI implements ItemListener, ListD
       	comboBox.setSelectedIndex(index);
 			break;
 		}
-		return true;
+		return UNHANDLED;
 	}
 
 	

@@ -97,24 +97,16 @@ public class JSSpinnerUI extends JSLightweightUI {
 	@Override
 	public boolean handleJSEvent(Object target, int eventID, Object jQueryEvent) {
 		
-		int keyCode = 0;
+		int keyCode = /** @j2sNative jQueryEvent.keyCode || */ 0;
+		if (keyCode == 13) keyCode = 10;
 		String id = (String) DOMNode.getAttr((DOMNode)target, "id");
-		/**
-		 * @j2sNative
-		 * 
-		 *            keyCode = jQueryEvent.keyCode; if (keyCode == 13) keyCode =
-		 *            10;
-		 *            
-		 */
-		{
-		}
 		switch (eventID) {
 		case Event.MOUSE_DOWN:
 			if (timer != null)
 				timer.stop();
 			incrementing = (id == this.id + "_up");
 			if (!incrementing && id != this.id + "_dn")
-				return true;
+				return UNHANDLED;
 			timer = new Timer(20, new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
@@ -140,7 +132,7 @@ public class JSSpinnerUI extends JSLightweightUI {
 		}
 			break;
 		}
-		return true;
+		return UNHANDLED;
 	}
 
 	void doAction() {

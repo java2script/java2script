@@ -192,8 +192,6 @@ public abstract class InputEvent extends ComponentEvent {
      */
     protected int modifiers;
     
-    public int[] bdata;
-
     /*
      * A flag that indicates that this instance can be used to access
      * the system clipboard.

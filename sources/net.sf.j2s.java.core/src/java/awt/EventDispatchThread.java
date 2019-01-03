@@ -423,6 +423,11 @@ class EventDispatchThread extends JSThread {
 				throw (RuntimeException) e;
 			} else if (e instanceof Error) {
 				throw (Error) e;
+			} else {
+				boolean isTypeError = (/**  @j2sNative !!e.stack || */false);
+				if (isTypeError) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}

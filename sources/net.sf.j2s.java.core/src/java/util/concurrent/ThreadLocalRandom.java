@@ -169,8 +169,13 @@ public class ThreadLocalRandom extends Random {
     private static final float  FLOAT_UNIT  = 0x1.0p-24f; // 1.0f / (1 << 24)
 
     /** Rarely-used holder for the second of a pair of Gaussians */
-    private static final ThreadLocal<Double> nextLocalGaussian =
-        new ThreadLocal<Double>();
+    private static 
+    //final ThreadLocal<
+    Double
+    //> 
+    nextLocalGaussian 
+    //= new ThreadLocal<Double()>
+    ;
 
     private static long mix64(long z) {
         z = (z ^ (z >>> 33)) * 0xff51afd7ed558ccdL;
@@ -498,9 +503,9 @@ public class ThreadLocalRandom extends Random {
 
     public double nextGaussian() {
         // Use nextLocalGaussian instead of nextGaussian field
-        Double d = nextLocalGaussian.get();
+        Double d = nextLocalGaussian;//.get();
         if (d != null) {
-            nextLocalGaussian.set(null);
+            nextLocalGaussian = /*.set*/(null);
             return d.doubleValue();
         }
         double v1, v2, s;
@@ -510,7 +515,7 @@ public class ThreadLocalRandom extends Random {
             s = v1 * v1 + v2 * v2;
         } while (s >= 1 || s == 0);
         double multiplier = StrictMath.sqrt(-2 * StrictMath.log(s)/s);
-        nextLocalGaussian.set(new Double(v2 * multiplier));
+        nextLocalGaussian/*.set*/=(new Double(v2 * multiplier));
         return v1 * multiplier;
     }
 

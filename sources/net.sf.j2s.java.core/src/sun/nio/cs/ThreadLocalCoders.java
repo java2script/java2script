@@ -26,7 +26,9 @@
 
 package sun.nio.cs;
 
-import java.nio.charset.*;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
 
 
 /**
@@ -40,7 +42,10 @@ public class ThreadLocalCoders {
     private static abstract class Cache {
 
         // Thread-local reference to array of cached objects, in LRU order
-        private ThreadLocal<Object[]> cache = new ThreadLocal<>();
+//        private ThreadLocal<Object[]> cache = new ThreadLocal<>();
+        
+        private Object[] cache; 
+        
         private final int size;
 
         Cache(int size) {
@@ -50,7 +55,7 @@ public class ThreadLocalCoders {
         abstract Object create(Object name);
 
         private void moveToFront(Object[] oa, int i) {
-            Object ob = oa[i];
+            Object ob = oa[i];            
             for (int j = i; j > 0; j--)
                 oa[j] = oa[j - 1];
             oa[0] = ob;
@@ -59,10 +64,10 @@ public class ThreadLocalCoders {
         abstract boolean hasName(Object ob, Object name);
 
         Object forName(Object name) {
-            Object[] oa = cache.get();
+            Object[] oa = cache;//.get();
             if (oa == null) {
                 oa = new Object[size];
-                cache.set(oa);
+                cache = oa;//.set(oa);
             } else {
                 for (int i = 0; i < oa.length; i++) {
                     Object ob = oa[i];

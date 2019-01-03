@@ -28,7 +28,7 @@ package java.io;
 import java.nio.channels.FileChannel;
 //import sun.nio.ch.FileChannelImpl;
 
-import swingjs.JSFileChannel;
+import swingjs.JSFileSystem.JSFileChannel;
 import swingjs.JSTempFile;
 import swingjs.JSUtil;
 

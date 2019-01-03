@@ -78,28 +78,33 @@ public class JSUtil {
 	@SuppressWarnings("unused")
 	private static Object getFileContents(Object uriOrJSFile, boolean asBytes) {
 		if (uriOrJSFile instanceof File) {
-			byte[] bytes = /** @j2sNative uriOrJSFile.bytes || */
+			byte[] bytes = /** @j2sNative uriOrJSFile._bytes || */
 					null;
 			if (bytes != null)
 				return bytes;
 		}
 		String uri = uriOrJSFile.toString();
+		Object data = null;
 		if (asBytes && uri.indexOf(":/") < 0) {
+			data = getCachedFileData(uri);
+			if (data != null)
+				return data;
 			// looking for "examples/xxxx.xxx" --> "./examples/xxxx.xxx"
 			if (!uri.startsWith("/"))
 				uri = "/" + uri;
 			uri = "http://." + uri;
 		}
-		Object data = getCachedFileData(uri);
+		if (data == null)
+			data = getCachedFileData(uri);
 		if (data == null && !uri.startsWith("./")) {
 			// Java applications may use "./" here
-				try {
-					BufferedInputStream stream = (BufferedInputStream) new URL(uri).getContent();
-					data = (asBytes ? Rdr.getStreamAsBytes(stream, null) : Rdr.streamToUTF8String(stream));
-				} catch (Exception e) {
-					// bypasses AjaxURLConnection
-					data = JSUtil.J2S.getFileData(uri, null, false, asBytes);
-				}
+			try {
+				BufferedInputStream stream = (BufferedInputStream) new URL(uri).getContent();
+				data = (asBytes ? Rdr.getStreamAsBytes(stream, null) : Rdr.streamToUTF8String(stream));
+			} catch (Exception e) {
+				// bypasses AjaxURLConnection
+				data = JSUtil.J2S.getFileData(uri, null, false, asBytes);
+			}
 		}
 		return data;
 	}
@@ -116,6 +121,25 @@ public class JSUtil {
 		return  JSUtil.ensureString(data);
 	}
 
+	public static byte[] getFileAsBytes(Object file, boolean checkNotFound) {
+		byte[] data = getFileAsBytes(file);
+		if (checkNotFound) {
+			if (data.length == 0) 
+				return null;
+			if (data.length == 2) {
+				// one empty line, from chemapps relay - not found 
+				if (data[0] == 13 && data[1] == 10)
+					return null;
+			}
+			if (data.length == 39) {
+				if (new String(data).equals("NetworkError: A network error occurred."))
+						return null;
+			}
+			System.out.println(new String(data));
+		}
+		return data;
+	}
+
 	/**
 	 * Regardless of how returned by Jmol.getFileContents(), 
 	 * this method ensures that we get signed bytes.
@@ -126,7 +150,7 @@ public class JSUtil {
 	public static byte[] getFileAsBytes(Object file) {
 		Object data = getFileContents(file, true);
 		byte[] b = null;
-		if (AU.isAB(data))
+		if (data instanceof byte[])
 			b = (byte[]) data;
 		else if (data instanceof String) 
 			b = ((String) data).getBytes();
@@ -176,8 +200,11 @@ public class JSUtil {
 						.endsWith(".js") ? JSUtil.processJS(sdata, resourceName) : sdata);
 	}
 
-	static void cacheFileData(String path, Object data) {		
-		getFileCache().put(path, data);
+	static void cacheFileData(String path, Object data) {
+		if (data == null)
+			getFileCache().remove(path);
+		else
+			getFileCache().put(path, data);
 	}
 
 	/**
@@ -256,7 +283,7 @@ public class JSUtil {
 	static String ensureString(Object data) {
 		if (data == null)
 			return null;
-		if (AU.isAB(data))
+		if (data instanceof byte[])
 			return Rdr.bytesToUTF8String((byte[]) data);
 		if (data instanceof String || data instanceof SB)
 			return data.toString();

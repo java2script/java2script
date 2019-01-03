@@ -30,10 +30,13 @@ package java.io;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Random;
 
+import swingjs.JSFileSystem.JSPath;
 import swingjs.JSTempFile;
 
 
@@ -139,7 +142,7 @@ public class File
 {
 	
 	
-	protected byte[] _bytes; // filled in by SwingJS ajax call
+	public byte[] _bytes; // filled in by SwingJS ajax call or drag-drop from JSDnD
 //
 //    /**
 //     * The FileSystem object representing the platform's local file system.
@@ -162,6 +165,7 @@ public class File
     private transient int prefixLength;
 
 	private long lastModified;
+	private Path filePath;
 
     /**
      * Returns the length of this abstract pathname's prefix.
@@ -1983,5 +1987,20 @@ public class File
     public String toString() {
         return getPath();
     }
-   
+ 
+    public Path toPath() {
+        Path result = filePath;
+        if (result == null) {
+            synchronized (this) {
+                result = filePath;
+                if (result == null) {
+                    result = FileSystems.getDefault().getPath(path);
+                    ((JSPath) result)._bytes = _bytes;
+                    filePath = result;
+                }
+            }
+        }
+        return result;
+    }
+
 }

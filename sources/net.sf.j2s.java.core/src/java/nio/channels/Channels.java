@@ -42,6 +42,7 @@ import java.util.concurrent.ExecutionException;
 import sun.nio.ch.ChannelInputStream;
 import sun.nio.cs.StreamDecoder;
 import sun.nio.cs.StreamEncoder;
+import swingjs.JSFileSystem;
 
 
 /**
@@ -122,7 +123,8 @@ public final class Channels {
      */
     public static InputStream newInputStream(ReadableByteChannel ch) {
         checkNotNull(ch, "ch");
-        return new sun.nio.ch.ChannelInputStream(ch);
+        return ((JSFileSystem.JSByteChannel) ch).getInputStream();
+//        return new sun.nio.ch.ChannelInputStream(ch);
     }
 
     /**

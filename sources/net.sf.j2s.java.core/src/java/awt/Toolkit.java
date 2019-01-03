@@ -1256,13 +1256,13 @@ public abstract class Toolkit {
         }
     }
 
-//
-//    /**
-//     * Emits an audio beep.
-//     * @since     JDK1.1
-//     */
-//    public abstract void beep();
-//
+
+    /**
+     * Emits an audio beep.
+     * @since     JDK1.1
+     */
+    public abstract void beep();
+
     /**
      * Gets the singleton instance of the system Clipboard which interfaces
      * with clipboard facilities provided by the native platform. This

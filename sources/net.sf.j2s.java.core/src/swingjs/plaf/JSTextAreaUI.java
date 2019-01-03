@@ -13,15 +13,13 @@ import swingjs.api.js.DOMNode;
  * @author Bob Hanson
  *
  */
-public class JSTextAreaUI extends JSTextUI {
+public class JSTextAreaUI extends JSTextViewUI {
 
 	@Override
 	public DOMNode updateDOMNode() {
 		if (domNode == null) {
-			allowPaintedBackground = false;
-			focusNode = enableNode = textNode = valueNode = domNode = newDOMObject("textarea", id);
-			DOMNode.setStyles(domNode, "resize", "none");
-			bindJSKeyEvents(domNode, true);
+			valueNode = domNode = newDOMObject("textarea", id);
+			setupViewNode();
 		}
 		if (((JTextArea) jc).getLineWrap())
 			domNode.removeAttribute("wrap");
@@ -36,6 +34,15 @@ public class JSTextAreaUI extends JSTextUI {
 		return updateDOMNodeCUI();
 	}
 
+	@Override
+	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
+		Boolean b;
+		if ((b = checkAllowKey(jQueryEvent)) != null)
+			return b.booleanValue();
+		return super.handleJSEvent(target, eventType, jQueryEvent);
+	}
+
+	
 	/**
 	 * Get the real height and width of the text in a JavaScript textarea
 	 * Used by JSScrollPaneUI
@@ -67,7 +74,7 @@ public class JSTextAreaUI extends JSTextUI {
 			d.height = sh;
 	}
 
-	private Insets myInsets = new Insets(0, 0, 5, 5); 
+	private Insets myInsets = new Insets(0, 0, 5, 5); //BH bottom,left?
 	@Override
 	public Insets getInsets() {
 		return myInsets;
@@ -75,7 +82,9 @@ public class JSTextAreaUI extends JSTextUI {
 	
 	@Override
 	protected Dimension getCSSAdjustment(boolean addingCSS) {
-		return (addingCSS ? new Dimension(-5, -12) : new Dimension(0, 0)); 
+		return (
+			//	addingCSS ? new Dimension(-5, -12) : 
+			new Dimension(0, 0)); 
 		// total hack -12 is to see full vertical scrollbar (Boltzmann)
 	}
 
