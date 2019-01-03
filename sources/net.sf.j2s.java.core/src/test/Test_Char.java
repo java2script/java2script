@@ -1,5 +1,10 @@
 package test;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Hashtable;
 
 class Test_Char extends Test_ {
@@ -191,8 +196,68 @@ class Test_Char extends Test_ {
         System.out.println(Ctoi);
         assert Ctoi == 315;      
         
+        
+        testCharSet();
+        
 
         System.out.println("Test_Char OK");
+	}
+
+	private static void testCharSet() {
+		
+		String s;
+		ByteBuffer b = ByteBuffer.allocate(16);
+		CharBuffer fb = b.asCharBuffer();		  
+        fb.put("abcdefgh");        
+        assert(b.array()[5] == 'c');
+        fb.position(0);
+        char[] fa = new char[8];
+        fb.get(fa, 0, 8);
+        s = new String(fa);
+		System.out.println("CharBuffer[]: " + s);
+		assert(s.equals("abcdefgh"));
+
+        try {
+        	s = new String(b.array(), "utf-16");
+            System.out.println("CharBuffer: " + s);
+            assert(s.equals("abcdefgh"));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			assert(false);
+		}      
+        
+        String[] tests = new String[] {
+        			"utf8","\u2195\u2194\u2091\u27a4","[-30, -122, -107, -30, -122, -108, -30, -126, -111, -30, -98, -92]",
+        			"utf16", "\u2195\u2194\u2091\u27a4","[-2, -1, 33, -107, 33, -108, 32, -111, 39, -92]",
+        			"us-ascii", "abcdefg","[97, 98, 99, 100, 101, 102, 103]",
+        			"iso-8859-1", "abcdefg\u00A2\u00A3\u00A4\u00C5\u00D5", "[97, 98, 99, 100, 101, 102, 103, -94, -93, -92, -59, -43]",
+        			"gb2312","\u6c49\u5b57\u5185\u7801\u6269\u5c55\u89c4\u8303", "[-70, -70, -41, -42, -60, -38, -62, -21, -64, -87, -43, -71, -71, -26, -73, -74]",
+        			"gb18030",">\uFE10<\u6c49\u5b57\u5185\u7801\u6269\u5c55\u89c4\u8303", 
+        				"[62, -124, 49, -126, 54, 60, -70, -70, -41, -42, -60, -38, -62, -21, -64, -87, -43, -71, -71, -26, -73, -74]",
+        			"GBK", "\u6c49\u5b57\u5185\u7801\u6269\u5c55\u89c4\u8303 \u20AC", "[-70, -70, -41, -42, -60, -38, -62, -21, -64, -87, -43, -71, -71, -26, -73, -74, 32, -94, -29]"
+        };
+        for (int i = 0; i < tests.length;)
+        	textCharSet(tests[i++], tests[i++], tests[i++]);
+        // note that getBytes prepends UTF-16 code "-2, -1"
+        // not so with UTF-8.
+
+		
+//		cb.position(0);
+//		cb.put("OK");
+//		System.out.println(b.remaining() + " " + cb.remaining() + " " + b.position() + " " + b.limit());
+//		System.out.println(Arrays.toString(cb.array()));
+		
+		
+	}
+
+	private static void textCharSet(String name, String s0, String b0) {
+		Charset cs = Charset.forName(name);
+        byte[] sb = s0.getBytes(cs);        
+        String s = new String(sb, cs);        
+		System.out.println("testing encode/decode for " + name + " (" + cs.name() + ") using " + s0 + " =?= " + s);
+		System.out.println(Arrays.toString(sb));
+        assert(Arrays.toString(sb).equals(b0));
+        assert(s.equals(s0));
 	}
 
 	private static int getIntFromInteger(Integer i) {

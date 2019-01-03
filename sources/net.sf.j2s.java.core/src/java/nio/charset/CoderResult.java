@@ -25,7 +25,7 @@
 
 package java.nio.charset;
 
-import java.lang.ref.WeakReference;
+//import java.lang.ref.WeakReference;
 import java.nio.*;
 import java.util.Map;
 import java.util.HashMap;
@@ -193,7 +193,7 @@ public class CoderResult {
 
     private static abstract class Cache {
 
-        private Map<Integer,WeakReference<CoderResult>> cache = null;
+        private Map<Integer,/*WeakReference<*/CoderResult/*>*/> cache = null;
 
         protected abstract CoderResult create(int len);
 
@@ -201,16 +201,16 @@ public class CoderResult {
             if (len <= 0)
                 throw new IllegalArgumentException("Non-positive length");
             Integer k = new Integer(len);
-            WeakReference<CoderResult> w;
+            /*WeakReference<*/CoderResult/*>*/ w;
             CoderResult e = null;
             if (cache == null) {
-                cache = new HashMap<Integer,WeakReference<CoderResult>>();
+                cache = new HashMap<Integer,/*WeakReference<*/CoderResult/*>*/>();
             } else if ((w = cache.get(k)) != null) {
-                e = w.get();
+                e = w;//.get();
             }
             if (e == null) {
                 e = create(len);
-                cache.put(k, new WeakReference<CoderResult>(e));
+                cache.put(k, /*new WeakReference<CoderResult>*/(e));
             }
             return e;
         }
