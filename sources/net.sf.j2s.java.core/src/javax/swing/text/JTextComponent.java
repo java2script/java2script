@@ -816,7 +816,7 @@ public abstract class JTextComponent extends JComponent implements Scrollable
      *        actual drop occurred
      * @return any saved state for this component, or <code>null</code> if none
      */
-    Object setDropLocation(/*TransferHandler.*/DropLocation location,
+    Object setDropLocation(TransferHandler.DropLocation location,
                            Object state,
                            boolean forDrop) {
 
@@ -3851,14 +3851,14 @@ public abstract class JTextComponent extends JComponent implements Scrollable
      * @see #getDropLocation
      * @since 1.6
      */
-    public static final class DropLocation {//extends TransferHandler.DropLocation {
+    public static final class DropLocation extends TransferHandler.DropLocation {
         private final int index;
         private final Position.Bias bias;
 				private Point dropPoint;
 
-        private DropLocation(Point p, int index, Position.Bias bias) {
+        public DropLocation(Point p, int index, Position.Bias bias) {
+            super(p);
         	this.dropPoint = new Point(p);
-//            super(p);
             this.index = index;
             this.bias = bias;
         }
@@ -3898,15 +3898,15 @@ public abstract class JTextComponent extends JComponent implements Scrollable
                    + "bias=" + bias + "]";
         }
 
-				public Point getDropPoint() {
-					return dropPoint;
-				}
+//				public Point getDropPoint() {
+//					return dropPoint;
+//				}
     }
 
-    /**
-     * TransferHandler used if one hasn't been supplied by the UI.
-     */
-    private static DefaultTransferHandler defaultTransferHandler;
+//    /**
+//     * TransferHandler used if one hasn't been supplied by the UI.
+//     */
+//    private static DefaultTransferHandler defaultTransferHandler;
 
     /**
      * Maps from class name to Boolean indicating if
@@ -3951,81 +3951,81 @@ public abstract class JTextComponent extends JComponent implements Scrollable
     }
 
 
-    /**
-     * A Simple TransferHandler that exports the data as a String, and
-     * imports the data from the String clipboard.  This is only used
-     * if the UI hasn't supplied one, which would only happen if someone
-     * hasn't subclassed Basic.
-     */
-    static class DefaultTransferHandler /*extends TransferHandler*/ implements
-                                        UIResource {
-//        public void exportToClipboard(JComponent comp, Clipboard clipboard,
-//                                      int action) throws IllegalStateException {
-//            if (comp instanceof JTextComponent) {
-//                JTextComponent text = (JTextComponent)comp;
-//                int p0 = text.getSelectionStart();
-//                int p1 = text.getSelectionEnd();
-//                if (p0 != p1) {
-//                    try {
-//                        Document doc = text.getDocument();
-//                        String srcData = doc.getText(p0, p1 - p0);
-//                        StringSelection contents =new StringSelection(srcData);
-//
-//                        // this may throw an IllegalStateException,
-//                        // but it will be caught and handled in the
-//                        // action that invoked this method
-//                        clipboard.setContents(contents, null);
-//
-//                        if (action == TransferHandler.MOVE) {
-//                            doc.remove(p0, p1 - p0);
-//                        }
-//                    } catch (BadLocationException ble) {}
-//                }
-//            }
-//        }
-//        public boolean importData(JComponent comp, Transferable t) {
-//            if (comp instanceof JTextComponent) {
-//                DataFlavor flavor = getFlavor(t.getTransferDataFlavors());
-//
-//                if (flavor != null) {
-////                    InputContext ic = comp.getInputContext();
-////                    if (ic != null) {
-////                        ic.endComposition();
+//    /**
+//     * A Simple TransferHandler that exports the data as a String, and
+//     * imports the data from the String clipboard.  This is only used
+//     * if the UI hasn't supplied one, which would only happen if someone
+//     * hasn't subclassed Basic.
+//     */
+//    static class DefaultTransferHandler extends TransferHandler implements
+//                                        UIResource {
+////        public void exportToClipboard(JComponent comp, Clipboard clipboard,
+////                                      int action) throws IllegalStateException {
+////            if (comp instanceof JTextComponent) {
+////                JTextComponent text = (JTextComponent)comp;
+////                int p0 = text.getSelectionStart();
+////                int p1 = text.getSelectionEnd();
+////                if (p0 != p1) {
+////                    try {
+////                        Document doc = text.getDocument();
+////                        String srcData = doc.getText(p0, p1 - p0);
+////                        StringSelection contents =new StringSelection(srcData);
+////
+////                        // this may throw an IllegalStateException,
+////                        // but it will be caught and handled in the
+////                        // action that invoked this method
+////                        clipboard.setContents(contents, null);
+////
+////                        if (action == TransferHandler.MOVE) {
+////                            doc.remove(p0, p1 - p0);
+////                        }
+////                    } catch (BadLocationException ble) {}
+////                }
+////            }
+////        }
+////        public boolean importData(JComponent comp, Transferable t) {
+////            if (comp instanceof JTextComponent) {
+////                DataFlavor flavor = getFlavor(t.getTransferDataFlavors());
+////
+////                if (flavor != null) {
+//////                    InputContext ic = comp.getInputContext();
+//////                    if (ic != null) {
+//////                        ic.endComposition();
+//////                    }
+////                    try {
+////                        String data = (String)t.getTransferData(flavor);
+////
+////                        ((JTextComponent)comp).replaceSelection(data);
+////                        return true;
+////                    } catch (UnsupportedFlavorException ufe) {
+////                    } catch (IOException ioe) {
 ////                    }
-//                    try {
-//                        String data = (String)t.getTransferData(flavor);
-//
-//                        ((JTextComponent)comp).replaceSelection(data);
-//                        return true;
-//                    } catch (UnsupportedFlavorException ufe) {
-//                    } catch (IOException ioe) {
-//                    }
-//                }
-//            }
-//            return false;
-//        }
-//        public boolean canImport(JComponent comp,
-//                                 DataFlavor[] transferFlavors) {
-//            JTextComponent c = (JTextComponent)comp;
-//            if (!(c.isEditable() && c.isEnabled())) {
-//                return false;
-//            }
-//            return (getFlavor(transferFlavors) != null);
-//        }
-//        public int getSourceActions(JComponent c) {
-//            return DnDConstants.ACTION_NONE;
-//        }
-//        private DataFlavor getFlavor(DataFlavor[] flavors) {
-//            if (flavors != null) {
-//                for (int counter = 0; counter < flavors.length; counter++) {
-//                    if (flavors[counter].equals(DataFlavor.stringFlavor)) {
-//                        return flavors[counter];
-//                    }
-//                }
-//            }
-//            return null;
-//        }
-    }
+////                }
+////            }
+////            return false;
+////        }
+////        public boolean canImport(JComponent comp,
+////                                 DataFlavor[] transferFlavors) {
+////            JTextComponent c = (JTextComponent)comp;
+////            if (!(c.isEditable() && c.isEnabled())) {
+////                return false;
+////            }
+////            return (getFlavor(transferFlavors) != null);
+////        }
+////        public int getSourceActions(JComponent c) {
+////            return DnDConstants.ACTION_NONE;
+////        }
+////        private DataFlavor getFlavor(DataFlavor[] flavors) {
+////            if (flavors != null) {
+////                for (int counter = 0; counter < flavors.length; counter++) {
+////                    if (flavors[counter].equals(DataFlavor.stringFlavor)) {
+////                        return flavors[counter];
+////                    }
+////                }
+////            }
+////            return null;
+////        }
+//    }
 
     /**
      * Returns the JTextComponent that most recently had focus. The returned

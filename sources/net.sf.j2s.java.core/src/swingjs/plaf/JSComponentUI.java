@@ -3,7 +3,6 @@ package swingjs.plaf;
 import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.Font;
@@ -209,7 +208,6 @@ public class JSComponentUI extends ComponentUI
 				focusNode,
 				actionNode,
 				valueNode,
-				scrollNode,
 		};	
 		DOMNode.setAttr(td, "data-nodes", nodes);
 		DOMNode node = DOMNode.firstChild(td);
@@ -242,7 +240,6 @@ public class JSComponentUI extends ComponentUI
 		focusNode		= nodes[10];
 		actionNode 		= nodes[11];
 		valueNode		= nodes[12];
-		scrollNode		= nodes[13];
 	}
 
 	/**
@@ -312,11 +309,6 @@ public class JSComponentUI extends ComponentUI
 	protected DOMNode valueNode;
 
 	/**
-	 * a component that is being scrolled by a JScrollPane
-	 */
-	protected DOMNode scrollNode;
-
-	/**
 	 * a component that is focusable
 	 */
 	protected DOMNode focusNode;
@@ -374,13 +366,13 @@ public class JSComponentUI extends ComponentUI
 
 	protected boolean isDummyFrame;
 	
-	/**
-	 * indicates that in a toolbar, this component should use its preferred size for
-	 * min and max
-	 * 
-	 */
-
-	protected boolean isToolbarFixed = true;
+//	/**
+//	 * indicates that in a toolbar, this component should use its preferred size for
+//	 * min and max
+//	 * 
+//	 */
+//
+//	protected boolean isToolbarFixed = true;
 
 	/**
 	 * indicates that we need a new outerNode
@@ -672,8 +664,6 @@ public class JSComponentUI extends ComponentUI
 	 */
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
-		// System.out.println(id + " handling event " + eventType +
-		// jQueryEvent);
 		return true;
 	}
 
@@ -710,12 +700,13 @@ public class JSComponentUI extends ComponentUI
 		 * @j2sNative
 		 * 
 		 * 			node.focus(function() {me.notifyFocus$Z(true)});
-		 *            node.blur(function() {me.notifyFocus$Z(false)});
+		 *            node.blur(function() {try{me.notifyFocus$Z(false)}catch(e){}});
 		 */
-		{
-		}
 	}
 
+	
+	protected final static boolean CONSUMED = false;
+	protected final static boolean UNHANDLED = true;
 	/**
 	 * Allows mouse and keyboard handling via an overridden method
 	 * 
@@ -746,7 +737,7 @@ public class JSComponentUI extends ComponentUI
 		/**
 		 * @j2sNative
 		 * 
-		 * 			f = function(event) { me.handleJSEvent$O$I$O(node, eventID, event)
+		 * 			f = function(event) { return me.handleJSEvent$O$I$O(node, eventID, event)
 		 *            }
 		 */
 		{
@@ -762,11 +753,9 @@ public class JSComponentUI extends ComponentUI
 	 * @param node
 	 * @param andFocusOut
 	 */
-	protected void bindJSKeyEvents(DOMNode node, boolean andFocusOut) {
+	protected void bindJSKeyEvents(DOMNode node, boolean isTextView) {
 		setDataUI(node);
-		bindJSEvents(node, "keydown keypress keyup" + (andFocusOut ? " focusout" : ""), Event.KEY_PRESS, false);
-		if (andFocusOut)
-			addJQueryFocusCallbacks();
+		bindJSEvents(node, "keydown keypress keyup" + (isTextView ? " focusout dragover drop" : ""), Event.KEY_PRESS, false);
 	}
 
 	/**
@@ -907,7 +896,7 @@ public class JSComponentUI extends ComponentUI
 		if (prop == "preferredSize") {
 			// size has been set by JComponent layout
 			preferredSize = c.getPreferredSize(); // may be null
-			getPreferredSize();
+			getPreferredSize(jc);
 			return;
 		}
 		if (prop == "background") {
@@ -1085,12 +1074,11 @@ public class JSComponentUI extends ComponentUI
 	protected DOMNode setCssFont(DOMNode obj, Font font) {
 		if (font != null) {
 			int istyle = font.getStyle();
-			String name = font.getFamily();
-			if (name == "Dialog" || name == "SansSerif")
-				name = "Arial";
-			DOMNode.setStyles(obj, "font-family", name, "font-size", font.getSize() + "px", "font-style",
-					((istyle & Font.ITALIC) == 0 ? "normal" : "italic"), "font-weight",
-					((istyle & Font.BOLD) == 0 ? "normal" : "bold"));
+			DOMNode.setStyles(obj, 
+					"font-family", JSToolkit.getCSSFontFamilyName(font.getFamily()), 
+					"font-size", font.getSize() + "px", 
+					"font-style", ((istyle & Font.ITALIC) == 0 ? "normal" : "italic"), 
+					"font-weight", ((istyle & Font.BOLD) == 0 ? "normal" : "bold"));
 		}
 
 		// if (c.isBackgroundSet())
@@ -1170,10 +1158,6 @@ public class JSComponentUI extends ComponentUI
 		int h, w;
 		String w0 = null, h0 = null, w0i = null, h0i = null, position = null;
 		DOMNode parentNode = null;
-// BH removed 12/7/18 because it prevents labels from having horizontal centering
-//		if (centeringNode != null && node == domNode) {
-//			node = centeringNode;
-//		}
 		if (scrollPaneUI != null) {
 			w = scrollPaneUI.c.getWidth();
 			h = scrollPaneUI.c.getHeight();
@@ -1480,14 +1464,18 @@ public class JSComponentUI extends ComponentUI
 			g.setColor(c.getBackground());
 			g.fillRect(0, 0, c.getWidth(), c.getHeight());
 			setTransparent(domNode);
-		}
-		if (textNode != null)
-			DOMNode.setStyles(textNode, "overflow", "hidden");
+		} 
+		setOverflow();
 		if (imageNode != null && !imagePersists) {
 			// the icon must paint itself; imageNode is just a placeholder
 			DOMNode.setStyles(imageNode, "visibility", "hidden");
 		}
 
+	}
+
+	protected void setOverflow() {
+		if (textNode != null)
+			DOMNode.setStyles(textNode, "overflow", "hidden");
 	}
 
 	@Override
@@ -1501,14 +1489,29 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	@Override
-	public Dimension getMinimumSize() {
+	public final Dimension getMinimumSize() {
+		// from ComponentPeer; convenience only
 		return getMinimumSize(jc);
 	}
-
+	
 	@Override
-	public Dimension getMaximumSize() {
-		return getMaximumSize(jc);
+	public final Dimension getPreferredSize() {
+		// from ComponentPeer; convenience only
+		return getPreferredSize(jc);
 	}
+
+
+// removed 12/31/18 -- does nothing
+//	@Override
+//	public Dimension getMaximumSize(JComponent jc) {
+//		if (isToolbarFixed) { // default is true; false only for TextUI
+//			Container parent = jc.getParent();
+//			String parentClass = (parent == null ? null : parent.getUIClassID());
+//			if ("ToolBarUI" == parentClass)
+//				return getPreferredSize();
+//		}
+//		return getPreferredSize();
+//	}
 
 	/**
 	 * getPreferredSize reports to a LayoutManager what the size is for this
@@ -1520,38 +1523,10 @@ public class JSComponentUI extends ComponentUI
 	 * Later, the LayoutManager will make a call to setBounds in order to complete
 	 * the transaction, after taking everything into consideration.
 	 * 
-	 * SwingJS: Do not override this method.
-	 * 
 	 */
 	@Override
-	public Dimension getPreferredSize() {
-		return getPreferredSize(jc);
-	}
-
-	// the following are likely to be called in the original BasicXXXUI classes
-
-	Dimension getMinimumSize(JComponent jc) {
-		return getPreferredSize(jc);
-	}
-
-	/**
-	 * SwingJS: Override this method to set preferred sizes
-	 * 
-	 * @param jc
-	 * @return
-	 */
-	Dimension getPreferredSize(JComponent jc) {
+	public Dimension getPreferredSize(JComponent jc) {
 		return getHTMLSizePreferred(updateDOMNode(), false);
-	}
-
-	Dimension getMaximumSize(JComponent jc) {
-		if (isToolbarFixed) { // default is true
-			Container parent = jc.getParent();
-			String parentClass = (parent == null ? null : parent.getUIClassID());
-			if ("ToolBarUI" == parentClass)
-				return getPreferredSize();
-		}
-		return null;
 	}
 
 	/**
@@ -1657,9 +1632,9 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	/**
-	 * overridden in JSPasswordFieldUI
+	 * overridden in JSPasswordFieldUI and JSEditorPane
 	 * 
-	 * @return texat
+	 * @return text
 	 */
 	public String getJSTextValue() {
 		return (String) DOMNode.getAttr(domNode, valueNode == null ? "innerText" : "value");

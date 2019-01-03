@@ -27,6 +27,11 @@
  */
 package javax.swing;
 
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Rectangle;
+import java.awt.Shape;
 import java.io.BufferedInputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -42,16 +47,11 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Rectangle;
-import java.awt.Shape;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.EventListenerList;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-import javax.swing.plaf.TextUI;
+import javax.swing.plaf.ComponentUI;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.BoxView;
 import javax.swing.text.Caret;
@@ -67,6 +67,7 @@ import javax.swing.text.StyledEditorKit;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 import javax.swing.text.WrappedPlainView;
+
 import swingjs.JSAbstractDocument;
 import swingjs.api.Interface;
 import swingjs.api.JSMinimalAbstractDocument;
@@ -1440,12 +1441,12 @@ public class JEditorPane extends JTextComponent {
         Dimension d = getPrefSizeJComp();
         if (getParent() instanceof JViewport) {
             JViewport port = (JViewport)getParent();
-            TextUI ui = (TextUI) getUI();
+            ComponentUI ui = getUI();
             int prefWidth = d.width;
             int prefHeight = d.height;
             if (! getScrollableTracksViewportWidth()) {
                 int w = port.getWidth();
-                Dimension min = ui.getMinimumSize();
+                Dimension min = ui.getMinimumSize(this);
                 if (w != 0 && w < min.width) {
                     // Only adjust to min if we have a valid size
                     prefWidth = min.width;
@@ -1453,7 +1454,7 @@ public class JEditorPane extends JTextComponent {
             }
             if (! getScrollableTracksViewportHeight()) {
                 int h = port.getHeight();
-                Dimension min = ui.getMinimumSize();
+                Dimension min = ui.getMinimumSize(this);
                 if (h != 0 && h < min.height) {
                     // Only adjust to min if we have a valid size
                     prefHeight = min.height;
@@ -1578,10 +1579,10 @@ public class JEditorPane extends JTextComponent {
 		public boolean getScrollableTracksViewportWidth() {
         if (getParent() instanceof JViewport) {
             JViewport port = (JViewport)getParent();
-            TextUI ui = (TextUI) getUI();
+            ComponentUI ui = getUI();
             int w = port.getWidth();
-            Dimension min = ui.getMinimumSize();
-            Dimension max = ui.getMaximumSize();
+            Dimension min = ui.getMinimumSize(this);
+            Dimension max = ui.getMaximumSize(this);
             if ((w >= min.width) && (w <= max.width)) {
                 return true;
             }
@@ -1601,11 +1602,11 @@ public class JEditorPane extends JTextComponent {
 		public boolean getScrollableTracksViewportHeight() {
         if (getParent() instanceof JViewport) {
             JViewport port = (JViewport)getParent();
-            TextUI ui = (TextUI) getUI();
+            ComponentUI ui = getUI();
             int h = port.getHeight();
-            Dimension min = ui.getMinimumSize();
+            Dimension min = ui.getMinimumSize(this);
             if (h >= min.height) {
-                Dimension max = ui.getMaximumSize();
+                Dimension max = ui.getMaximumSize(this);
                 if (h <= max.height) {
                     return true;
                 }

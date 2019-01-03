@@ -19,7 +19,8 @@ public class CorePlugin extends Plugin {
 	 * register the bundle version properly. So we use VERSION here instead.
 	 * 
 	 */
-	public static String VERSION = "3.2.4.05";
+	public static String VERSION = "3.2.4.06";
+	// BH 1/2/2019 -- 3.2.4.06 fixes try(resources) with more than one resource missing semicolon
 	// BH 12/13/2018 -- 3.2.4.05 fixes problem with OuterClass.this.foo() not using .apply()
 	// BH 11/10/2018 -- 3.2.4.04 additional support for JAXB
 	// BH 11/4/2018 -- 3.2.4.02 broad JAXB support

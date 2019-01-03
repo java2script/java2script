@@ -2462,7 +2462,7 @@ public abstract class Component implements ImageObserver/*
 			minSize =
 					// (peer != null) ?
 					// peer.minimumSize() :
-					getSize();
+					size();
 			dim = minSize;
 			// }
 		}
@@ -3766,8 +3766,11 @@ public abstract class Component implements ImageObserver/*
 		/*
 		 * 2. Allow the Toolkit to pass this to AWTEventListeners.
 		 */
-		// Toolkit toolkit = Toolkit.getDefaultToolkit();
-		// toolkit.notifyAWTEventListeners(e);
+		
+		// SwingJS: This allows a developer to watch any events they wish to follow.
+		
+		 Toolkit toolkit = Toolkit.getDefaultToolkit();
+		 toolkit.notifyAWTEventListeners(e);
 
 		/*
 		 * 3. If no one has consumed a key event, allow the KeyboardFocusManager to
@@ -5210,9 +5213,12 @@ public abstract class Component implements ImageObserver/*
 	}
 
 	protected void processEventComp(AWTEvent e) {
-		if (e instanceof FocusEvent) {
+		boolean isActiveRetarget = /**@j2sNative !!e.dispatch$ ||*/false;
+		if (isActiveRetarget || e instanceof ActiveEvent) {
+			// SwingJS added because we are bypassing the standard queue
+			((ActiveEvent) e).dispatch();
+		} else if (e instanceof FocusEvent) {
 			processFocusEvent((FocusEvent) e);
-
 		} else if (e instanceof MouseEvent) {
 			switch (e.getID()) {
 			case MouseEvent.MOUSE_PRESSED:
@@ -7008,10 +7014,6 @@ public abstract class Component implements ImageObserver/*
 	 *      java.beans.PropertyChangeListener)
 	 */
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
-		addPropChangeListenerComp(listener);
-	}
-
-	protected void addPropChangeListenerComp(PropertyChangeListener listener) {
 		synchronized (getChangeSupportLock()) {
 			if (listener == null) {
 				return;
@@ -7100,10 +7102,6 @@ public abstract class Component implements ImageObserver/*
 	 *      java.beans.PropertyChangeListener)
 	 */
 	public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
-		addPropChangeListComp(propertyName, listener);
-	}
-
-	protected void addPropChangeListComp(String propertyName, PropertyChangeListener listener) {
 		synchronized (getChangeSupportLock()) {
 			if (listener == null) {
 				return;

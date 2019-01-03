@@ -583,8 +583,7 @@ public class MemoryImageSource implements ImageProducer {
 	private void sendPixels(ImageConsumer ic, int x, int y, int w, int h) {
 		int off = pixeloffset + pixelscan * y + x;
 		if (isConsumer(ic)) {
-			boolean isbytes = AU.isAB(pixels);
-			if (isbytes) {
+			if (pixels instanceof byte[]) {
 				ic.setPixels(x, y, w, h, model, (byte[]) pixels, off, pixelscan);
 			} else {
 				ic.setPixels(x, y, w, h, model, (int[]) pixels, off, pixelscan);

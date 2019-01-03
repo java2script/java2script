@@ -245,13 +245,13 @@ public class JSOptionPaneUI extends JSPanelUI {
      * <code>getMinimumOptionPaneSize</code>.
      */
     @Override
-	public Dimension getPreferredSize(JComponent c) {
-        if (c == optionPane) {
+	public Dimension getPreferredSize(JComponent jc) {
+        if (jc == optionPane) {
             Dimension            ourMin = getMinimumOptionPaneSize();
-            LayoutManager        lm = c.getLayout();
+            LayoutManager        lm = jc.getLayout();
 
             if (lm != null) {
-                Dimension         lmSize = lm.preferredLayoutSize(c);
+                Dimension         lmSize = lm.preferredLayoutSize(jc);
 
                 if (ourMin != null)
                     return new Dimension

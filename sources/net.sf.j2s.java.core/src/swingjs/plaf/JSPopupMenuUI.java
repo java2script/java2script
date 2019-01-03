@@ -141,7 +141,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 	}
 
 	@Override
-	public Dimension getPreferredSize() {
+	public Dimension getPreferredSize(JComponent jc) {
 		// unnecessary  -- will never be subject to a layout manager
 		return null;
 	}

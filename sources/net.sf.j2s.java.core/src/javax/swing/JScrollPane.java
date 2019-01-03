@@ -34,8 +34,8 @@ import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.Point;
 import java.awt.Rectangle;
+
 import javax.swing.border.Border;
-import javax.swing.plaf.ScrollPaneUI;
 import javax.swing.plaf.UIResource;
 
 
@@ -291,12 +291,12 @@ public class JScrollPane extends JComponent implements ScrollPaneConstants
         if (view != null) {
             setViewportView(view);
         }
-        setUIProperty("opaque",true);
-        updateUI();
 
         if (!this.getComponentOrientation().isLeftToRight()) {
             viewport.setViewPosition(new Point(Integer.MAX_VALUE, 0));
         }
+        setUIProperty("opaque",true);
+        updateUI();
     }
 
 	@Override

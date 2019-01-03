@@ -339,7 +339,8 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	}
 
 	/**
-	 * dispatch an event "on the event thread"
+	 * dispatch an event "on the event thread". ActiveEvent has no src but instead
+	 * a dispatch() method.
 	 * @param event
 	 * @param src
 	 * @param andWait
@@ -833,13 +834,19 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 			strStyle += "italic ";
 		if (font.isBold())
 			strStyle += "bold ";
-		String family = font.getFamily();
-		if (family.equals("SansSerif") || family.equals("Dialog")
-				|| family.equals("DialogInput"))
-			family = "Arial";
+		String family = getCSSFontFamilyName(font.getFamily());
 		// for whatever reason, Java font points are much larger than HTML5 canvas
 		// points
 		return strStyle + font.getSize() + "px " + family;
+	}
+
+	public static String getCSSFontFamilyName(String family) {
+		if (family.equals("SansSerif") || family.equals("Dialog")
+				|| family.equals("DialogInput"))
+			family = "Arial";
+		else if (family.equals("Monospaced"))
+			family = "monospace";
+		return family;
 	}
 
 	/**
@@ -896,6 +903,7 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
     }
   }
 
+  @Override
   public void beep() {
   	System.out.println("JSToolkit.beep");
   }

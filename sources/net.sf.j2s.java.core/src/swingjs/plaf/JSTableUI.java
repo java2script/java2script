@@ -1935,7 +1935,7 @@ public class JSTableUI extends JSPanelUI {
 	 * of each column.
 	 */
 	@Override
-	public Dimension getMinimumSize() {
+	public Dimension getMinimumSize(JComponent jc) {
 		long width = 0;
 		Enumeration<TableColumn> enumeration = table.getColumnModel().getColumns();
 		while (enumeration.hasMoreElements()) {
@@ -1951,7 +1951,7 @@ public class JSTableUI extends JSPanelUI {
 	 * preferred widths of each column.
 	 */
 	@Override
-	public Dimension getPreferredSize(JComponent c) {
+	public Dimension getPreferredSize(JComponent jc) {
 		long width = 0;
 		Enumeration<TableColumn> enumeration = table.getColumnModel().getColumns();
 		while (enumeration.hasMoreElements()) {
@@ -1967,7 +1967,7 @@ public class JSTableUI extends JSPanelUI {
 	 * widths of each column.
 	 */
 	@Override
-	public Dimension getMaximumSize(JComponent c) {
+	public Dimension getMaximumSize(JComponent jc) {
 		long width = 0;
 		Enumeration<TableColumn> enumeration = table.getColumnModel().getColumns();
 		while (enumeration.hasMoreElements()) {

@@ -262,20 +262,19 @@ public abstract class ByteBuffer
     // reduce the number of virtual method invocations needed to access these
     // values, which is especially costly when coding small buffers.
     //
-    final byte[] hb;                  // Non-null only for heap buffers
-    final int offset;
+    final protected byte[] hb;                  // Non-null only for heap buffers
+    final protected int offset;
     boolean isReadOnly;                 // Valid only for heap buffers
 
-    // Creates a new buffer with the given mark, position, limit, capacity,
-    // backing array, and array offset
-    //
-    ByteBuffer(int mark, int pos, int lim, int cap,   // package-private
-                 byte[] hb, int offset)
-    {
-        super(mark, pos, lim, cap);
-        this.hb = hb;
-        this.offset = offset;
-    }
+	// Creates a new buffer with the given mark, position, limit, capacity,
+	// backing array, and array offset
+	//
+	public ByteBuffer(int mark, int pos, int lim, int cap, // package-private SwingJS -- NOT
+			byte[] hb, int offset) {
+		super(mark, pos, lim, cap);
+		this.hb = hb;
+		this.offset = offset;
+	}
 
     // Creates a new buffer with the given mark, position, limit, and capacity
     //
@@ -1042,8 +1041,8 @@ public abstract class ByteBuffer
 
     // Unchecked accessors, for use by ByteBufferAs-X-Buffer classes
     //
-    abstract byte _get(int i);                          // package-private
-    abstract void _put(int i, byte b);                  // package-private
+    public abstract byte _get(int i);                          // package-private SwingJS -- NOT
+    public abstract void _put(int i, byte b);                  // package-private SwingJS -- NOT
 
     // #BIN
     //

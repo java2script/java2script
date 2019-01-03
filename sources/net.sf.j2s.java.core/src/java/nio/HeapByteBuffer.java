@@ -143,7 +143,7 @@ class HeapByteBuffer extends ByteBuffer {
 		}
 		return this;
 	}
-
+	
 	public ByteBuffer compact() {
 
 		System.arraycopy(hb, ix(position()), hb, ix(0), remaining());
@@ -153,11 +153,11 @@ class HeapByteBuffer extends ByteBuffer {
 		return this;
 	}
 
-	byte _get(int i) { // package-private
+	public byte _get(int i) { // package-private
 		return hb[i];
 	}
 
-	void _put(int i, byte b) { // package-private
+	public void _put(int i, byte b) { // package-private
 
 		hb[i] = b;
 	}
@@ -334,6 +334,25 @@ class HeapByteBuffer extends ByteBuffer {
 		int off = offset + position();
 		return (bigEndian ? (DoubleBuffer) (new ByteBufferAsDoubleBufferB(this, -1, 0, size, size, off))
 				: (DoubleBuffer) (new ByteBufferAsDoubleBufferL(this, -1, 0, size, size, off)));
+	}
+
+	/**
+	 * SwingJS addition - presumes this is an array being filled unless position is
+	 * greater than 0, in which case it is flipped.
+	 * 
+	 * @return finalized truncated byte array
+	 * 
+	 */
+	public byte[] toArray() {
+		int pos = position();
+		int lim = limit();
+		if (pos > 0)
+			flip();
+		HeapByteBuffer b = new HeapByteBuffer(remaining(), remaining());
+		b.put(this);
+		position(pos);
+		limit(lim);
+		return b.array();
 	}
 
 }

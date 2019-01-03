@@ -45,13 +45,13 @@ public class JSMenuUI extends JSMenuItemUI {
 				if (!jm.getParent().getUIClassID().equals("MenuBarUI"))
 					stopPopupMenuTimer();
 				jm.setSelected(true);
-				return true;
+				return UNHANDLED;
 			}
 			if (type.equals("mouseleave")) {
 				jm.setSelected(false);
 				if (jm.getParent().getUIClassID().equals("MenuBarUI"))
 					startPopupMenuTimer();
-				return true;
+				return UNHANDLED;
 			}
 		}
 		return super.handleJSEvent(target, eventType, jQueryEvent);
@@ -102,15 +102,15 @@ public class JSMenuUI extends JSMenuItemUI {
 	}
 
 
-	@Override
-	public Dimension getMaximumSize() {
-		return super.getPreferredSize();
-	}
-
-	@Override
-	public Dimension getPreferredSize() {
-		return super.getPreferredSize();
-	}
+//	@Override
+//	public Dimension getMaximumSize(JComponent jc) {
+//		return super.getPreferredSize(jc);
+//	}
+//
+//	@Override
+//	public Dimension getPreferredSize(JComponent jc) {
+//		return super.getPreferredSize(jc);
+//	}
 
 	@Override
 	protected String getPropertyPrefix() {

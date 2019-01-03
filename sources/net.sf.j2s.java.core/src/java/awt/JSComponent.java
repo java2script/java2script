@@ -31,7 +31,6 @@ import java.awt.peer.ComponentPeer;
 import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 
-import javax.swing.ArrayTable;
 import javax.swing.JComponent;
 import javax.swing.RootPaneContainer;
 import javax.swing.UIDefaults;
@@ -42,7 +41,6 @@ import swingjs.JSAppletThread;
 import swingjs.JSAppletViewer;
 import swingjs.JSFrameViewer;
 import swingjs.JSGraphics2D;
-import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Canvas;
 import swingjs.plaf.JSComponentUI;
 

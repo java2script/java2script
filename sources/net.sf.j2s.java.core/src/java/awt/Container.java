@@ -1486,7 +1486,7 @@ public class Container extends JSComponent {
     	// The reason we don't care about w&h is that 
     	// we can be working just with preferences here. 
     	// This is when getPreferredSize() is copied to getSize()
-        if (layoutMgr != null)//BH out 11/16/18 && this.width > 0 && this.height > 0) {
+        if (layoutMgr != null)
         	layoutMgr.layoutContainer(this);
     }
 
@@ -3560,8 +3560,8 @@ public class Container extends JSComponent {
      * 
      */
     @Override
-		public void addPropertyChangeListener(PropertyChangeListener listener) {
-        addPropChangeListenerComp(listener);
+	public void addPropertyChangeListener(PropertyChangeListener listener) {
+    	super.addPropertyChangeListener(listener);
     }
 
     /**
@@ -3603,7 +3603,7 @@ public class Container extends JSComponent {
     @Override
 		public void addPropertyChangeListener(String propertyName,
                                           PropertyChangeListener listener) {
-        addPropChangeListComp(propertyName, listener);
+        super.addPropertyChangeListener(propertyName, listener);
     }
 
     // Serialization support. A Container is responsible for restoring the

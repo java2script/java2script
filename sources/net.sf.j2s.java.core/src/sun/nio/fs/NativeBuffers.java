@@ -37,8 +37,8 @@ class NativeBuffers {
     private static final Unsafe unsafe = Unsafe.getUnsafe();
 
     private static final int TEMP_BUF_POOL_SIZE = 3;
-    private static ThreadLocal<NativeBuffer[]> threadLocal =
-        new ThreadLocal<NativeBuffer[]>();
+    private static /*ThreadLocal<*/NativeBuffer[]/*> */threadLocal/*=
+        new ThreadLocal<NativeBuffer[]>()*/;
 
     /**
      * Allocates a native buffer, of at least the given size, from the heap.
@@ -55,7 +55,7 @@ class NativeBuffers {
      */
     static NativeBuffer getNativeBufferFromCache(int size) {
         // return from cache if possible
-        NativeBuffer[] buffers = threadLocal.get();
+        NativeBuffer[] buffers = threadLocal;//.get();
         if (buffers != null) {
             for (int i=0; i<TEMP_BUF_POOL_SIZE; i++) {
                 NativeBuffer buffer = buffers[i];
@@ -89,11 +89,11 @@ class NativeBuffers {
      */
     static void releaseNativeBuffer(NativeBuffer buffer) {
         // create cache if it doesn't exist
-        NativeBuffer[] buffers = threadLocal.get();
+        NativeBuffer[] buffers = threadLocal;//.get();
         if (buffers == null) {
             buffers = new NativeBuffer[TEMP_BUF_POOL_SIZE];
             buffers[0] = buffer;
-            threadLocal.set(buffers);
+            threadLocal = /*.set*/(buffers);
             return;
         }
         // Put it in an empty slot if such exists

@@ -288,7 +288,7 @@ public abstract class FileChannel
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"}) // generic array construction
-    private static final FileAttribute<?>[] NO_ATTRIBUTES = new FileAttribute[0];
+    protected static final FileAttribute<?>[] NO_ATTRIBUTES = new FileAttribute[0]; // SwingJS was private
 
     /**
      * Opens or creates a file, returning a file channel to access the file.

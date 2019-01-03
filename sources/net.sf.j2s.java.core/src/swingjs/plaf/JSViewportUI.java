@@ -65,7 +65,7 @@ ChangeListener {
 	}
 	
 	@Override
-	public Dimension getPreferredSize() {
+	public Dimension getPreferredSize(JComponent jc) {
 		if (debugging) 
 			System.out.println(id + " getPreferredSize");
   	return null;

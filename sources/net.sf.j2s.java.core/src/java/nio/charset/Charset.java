@@ -43,6 +43,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import swingjs.JSCharSet;
+import swingjs.JSUtil;
 import sun.misc.ASCIICaseInsensitiveComparator;
 import sun.nio.cs.StandardCharsets;
 import sun.nio.cs.ThreadLocalCoders;
@@ -319,7 +320,7 @@ public abstract class Charset
     }
 
     /* The standard set of charsets */
-    private static CharsetProvider standardProvider = new StandardCharsets();
+//    private static CharsetProvider standardProvider = new StandardCharsets();
 
     // Cache of the most-recently-returned charsets,
     // along with the names that were used to find them
@@ -383,77 +384,76 @@ public abstract class Charset
     }
 
     // Thread-local gate to prevent recursive provider lookups
-    private static ThreadLocal<ThreadLocal<?>> gate =
-            new ThreadLocal<ThreadLocal<?>>();
+//    private static ThreadLocal<ThreadLocal<?>> gate = new ThreadLocal<ThreadLocal<?>>();
 
-    private static Charset lookupViaProviders(final String charsetName) {
+//    private static Charset lookupViaProviders(final String charsetName) {
+//
+//        // The runtime startup sequence looks up standard charsets as a
+//        // consequence of the VM's invocation of System.initializeSystemClass
+//        // in order to, e.g., set system properties and encode filenames.  At
+//        // that point the application class loader has not been initialized,
+//        // however, so we can't look for providers because doing so will cause
+//        // that loader to be prematurely initialized with incomplete
+//        // information.
+//        //
+//        if (!sun.misc.VM.isBooted())
+//            return null;
+//
+//        if (gate.get() != null)
+//            // Avoid recursive provider lookups
+//            return null;
+//        try {
+//            gate.set(gate);
+//
+//            return AccessController.doPrivileged(
+//                new PrivilegedAction<Charset>() {
+//                    public Charset run() {
+//                        for (Iterator<CharsetProvider> i = providers();
+//                             i.hasNext();) {
+//                            CharsetProvider cp = i.next();
+//                            Charset cs = cp.charsetForName(charsetName);
+//                            if (cs != null)
+//                                return cs;
+//                        }
+//                        return null;
+//                    }
+//                });
+//
+//        } finally {
+//            gate.set(null);
+//        }
+//    }
+//
+//    /* The extended set of charsets */
+//    private static class ExtendedProviderHolder {
+//        static final CharsetProvider extendedProvider = extendedProvider();
+//        // returns ExtendedProvider, if installed
+//        private static CharsetProvider extendedProvider() {
+//            return AccessController.doPrivileged(
+//                       new PrivilegedAction<CharsetProvider>() {
+//                           public CharsetProvider run() {
+//                                try {
+//                                    Class<?> epc
+//                                        = Class.forName("sun.nio.cs.ext.ExtendedCharsets");
+//                                    return (CharsetProvider)epc.newInstance();
+//                                } catch (ClassNotFoundException x) {
+//                                    // Extended charsets not available
+//                                    // (charsets.jar not present)
+//                                } catch (InstantiationException |
+//                                         IllegalAccessException x) {
+//                                  throw new Error(x);
+//                                }
+//                                return null;
+//                            }
+//                        });
+//        }
+//    }
 
-        // The runtime startup sequence looks up standard charsets as a
-        // consequence of the VM's invocation of System.initializeSystemClass
-        // in order to, e.g., set system properties and encode filenames.  At
-        // that point the application class loader has not been initialized,
-        // however, so we can't look for providers because doing so will cause
-        // that loader to be prematurely initialized with incomplete
-        // information.
-        //
-        if (!sun.misc.VM.isBooted())
-            return null;
-
-        if (gate.get() != null)
-            // Avoid recursive provider lookups
-            return null;
-        try {
-            gate.set(gate);
-
-            return AccessController.doPrivileged(
-                new PrivilegedAction<Charset>() {
-                    public Charset run() {
-                        for (Iterator<CharsetProvider> i = providers();
-                             i.hasNext();) {
-                            CharsetProvider cp = i.next();
-                            Charset cs = cp.charsetForName(charsetName);
-                            if (cs != null)
-                                return cs;
-                        }
-                        return null;
-                    }
-                });
-
-        } finally {
-            gate.set(null);
-        }
-    }
-
-    /* The extended set of charsets */
-    private static class ExtendedProviderHolder {
-        static final CharsetProvider extendedProvider = extendedProvider();
-        // returns ExtendedProvider, if installed
-        private static CharsetProvider extendedProvider() {
-            return AccessController.doPrivileged(
-                       new PrivilegedAction<CharsetProvider>() {
-                           public CharsetProvider run() {
-                                try {
-                                    Class<?> epc
-                                        = Class.forName("sun.nio.cs.ext.ExtendedCharsets");
-                                    return (CharsetProvider)epc.newInstance();
-                                } catch (ClassNotFoundException x) {
-                                    // Extended charsets not available
-                                    // (charsets.jar not present)
-                                } catch (InstantiationException |
-                                         IllegalAccessException x) {
-                                  throw new Error(x);
-                                }
-                                return null;
-                            }
-                        });
-        }
-    }
-
-    private static Charset lookupExtendedCharset(String charsetName) {
-        CharsetProvider ecp = ExtendedProviderHolder.extendedProvider;
-        return (ecp != null) ? ecp.charsetForName(charsetName) : null;
-    }
-
+//    private static Charset lookupExtendedCharset(String charsetName) {
+//        CharsetProvider ecp = ExtendedProviderHolder.extendedProvider;
+//        return (ecp != null) ? ecp.charsetForName(charsetName) : null;
+//    }
+//
     private static Charset lookup(String charsetName) {
         if (charsetName == null)
             throw new IllegalArgumentException("Null charset name");
@@ -473,18 +473,26 @@ public abstract class Charset
             cache1 = a;
             return (Charset)a[1];
         }
-        Charset cs =  new JSCharSet(charsetName, null);
-        
-        if ((cs = standardProvider.charsetForName(charsetName)) != null ||
-            (cs = lookupExtendedCharset(charsetName))           != null ||
-            (cs = lookupViaProviders(charsetName))              != null)
-        {
+        String name = JSCharSet.lookupName(charsetName);
+        if (name == null)
+        	return null;
+        Charset cs;
+		try {
+			cs = (Charset) Class.forName("sun.nio.cs." + name).newInstance();
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			return null;
+		}
+        if (cs != null) {
+//        if ((cs = standardProvider.charsetForName(charsetName)) != null ||
+//            (cs = lookupExtendedCharset(charsetName))           != null ||
+//            (cs = lookupViaProviders(charsetName))              != null)
+//        {
             cache(charsetName, cs);
             return cs;
         }
 
         /* Only need to check the name if we didn't find a charset for it */
-        checkName(charsetName);
+//        checkName(charsetName);
         return null;
     }
 
@@ -572,23 +580,25 @@ public abstract class Charset
      *         to charset objects
      */
     public static SortedMap<String,Charset> availableCharsets() {
-        return AccessController.doPrivileged(
-            new PrivilegedAction<SortedMap<String,Charset>>() {
-                public SortedMap<String,Charset> run() {
-                    TreeMap<String,Charset> m =
-                        new TreeMap<String,Charset>(
-                            ASCIICaseInsensitiveComparator.CASE_INSENSITIVE_ORDER);
-                    put(standardProvider.charsets(), m);
-                    CharsetProvider ecp = ExtendedProviderHolder.extendedProvider;
-                    if (ecp != null)
-                        put(ecp.charsets(), m);
-                    for (Iterator<CharsetProvider> i = providers(); i.hasNext();) {
-                        CharsetProvider cp = i.next();
-                        put(cp.charsets(), m);
-                    }
-                    return Collections.unmodifiableSortedMap(m);
-                }
-            });
+    	JSUtil.notImplemented("Charset.availableCharsets");
+    	return null;
+////        return AccessController.doPrivileged(
+////            new PrivilegedAction<SortedMap<String,Charset>>() {
+////                public SortedMap<String,Charset> run() {
+//                    TreeMap<String,Charset> m =
+//                        new TreeMap<String,Charset>(
+//                            ASCIICaseInsensitiveComparator.CASE_INSENSITIVE_ORDER);
+//                    put(standardProvider.charsets(), m);
+//                    CharsetProvider ecp = ExtendedProviderHolder.extendedProvider;
+//                    if (ecp != null)
+//                        put(ecp.charsets(), m);
+//                    for (Iterator<CharsetProvider> i = providers(); i.hasNext();) {
+//                        CharsetProvider cp = i.next();
+//                        put(cp.charsets(), m);
+//                    }
+//                    return Collections.unmodifiableSortedMap(m);
+////                }
+////            });
     }
 
     private static volatile Charset defaultCharset;
@@ -640,10 +650,10 @@ public abstract class Charset
      *         If the canonical name or any of the aliases are illegal
      */
     protected Charset(String canonicalName, String[] aliases) {
-        checkName(canonicalName);
+//        checkName(canonicalName);
         String[] as = (aliases == null) ? new String[0] : aliases;
-        for (int i = 0; i < as.length; i++)
-            checkName(as[i]);
+//        for (int i = 0; i < as.length; i++)
+//            checkName(as[i]);
         this.name = canonicalName;
         this.aliases = as;
     }
@@ -777,6 +787,18 @@ public abstract class Charset
         return true;
     }
 
+    /**
+     * Added for convenience - SwingJS
+     *     
+     * @param b
+     * @return
+     * @throws CharacterCodingException
+     */
+	public final CharBuffer decode(byte[] b, int offset, int length) throws CharacterCodingException {
+		return decode(ByteBuffer.wrap(b, offset, length)); 
+	}
+	
+    
     /**
      * Convenience method that decodes bytes in this charset into Unicode
      * characters.

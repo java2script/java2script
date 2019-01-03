@@ -56,7 +56,7 @@ public class JSDesktopIconUI extends JSPanelUI {
 	}
 
 	@Override
-	public Dimension getPreferredSize() {
+	public Dimension getPreferredSize(JComponent jc) {
   	return null;
   }
 
