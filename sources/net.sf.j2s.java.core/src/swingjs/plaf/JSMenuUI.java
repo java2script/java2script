@@ -28,7 +28,7 @@ public class JSMenuUI extends JSMenuItemUI {
 				allowTextAlignment = false;
 				domNode = createItem("_item", null);
 			}
-			DOMNode.addJqueryHandledEvent(this, domNode, "mouseenter mouseleave");			
+			bindJQueryEvents(domNode, "mouseenter mouseleave", -1);			
 		}
 
 		setCssFont(domNode, c.getFont()); 
@@ -45,13 +45,13 @@ public class JSMenuUI extends JSMenuItemUI {
 				if (!jm.getParent().getUIClassID().equals("MenuBarUI"))
 					stopPopupMenuTimer();
 				jm.setSelected(true);
-				return UNHANDLED;
+				return HANDLED;
 			}
 			if (type.equals("mouseleave")) {
 				jm.setSelected(false);
 				if (jm.getParent().getUIClassID().equals("MenuBarUI"))
 					startPopupMenuTimer();
-				return UNHANDLED;
+				return HANDLED;
 			}
 		}
 		return super.handleJSEvent(target, eventType, jQueryEvent);

@@ -59,7 +59,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 		// j2sMenu.js will wrap this in a div with the appropriate
 		if (domNode == null) {
 			domNode = containerNode = newDOMObject("ul", id);
-			DOMNode.addJqueryHandledEvent(this, domNode, "mouseenter");
+			bindJQueryEvents(domNode, "mouseenter", -1);
 		}
 		return updateDOMNodeCUI();
 	}

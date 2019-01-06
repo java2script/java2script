@@ -40,7 +40,7 @@ public abstract class DOMNode {
 
 	public abstract DOMNode removeAttribute(String attr);
 	
-	public abstract void setSelectionRange(int pt0, int pt1);
+	public abstract void setSelectionRange(int start, int end, String direction);
 
 	public abstract Rectangle getBoundingClientRect();
 	
@@ -62,10 +62,6 @@ public abstract class DOMNode {
 
 	public static DOMNode createTextNode(String text) {
 		return (/** @j2sNative document.createTextNode(text) || */ null); 
-	}
-
-	public static void addJqueryHandledEvent(Object me, DOMNode node, String event) {
-		JSUtil.jQuery.$(node).on(event, /** @j2sNative  function(ev) {me.handleJSEvent$O$I$O(node, -1, ev)} || */null);
 	}
 
 	public static DOMNode getParent(DOMNode node) {

@@ -2,6 +2,7 @@ package swingjs.plaf;
 
 import java.awt.Dimension;
 import java.awt.Insets;
+import java.beans.PropertyChangeEvent;
 
 import javax.swing.JTextArea;
 
@@ -17,6 +18,13 @@ public class JSTextAreaUI extends JSTextViewUI {
 
 	@Override
 	public DOMNode updateDOMNode() {
+		
+		/**
+		 * @j2sNative
+		 * 
+		 * System.out.println("updateDOM textarea xxt");xxt = this;
+		 */
+		
 		if (domNode == null) {
 			valueNode = domNode = newDOMObject("textarea", id);
 			setupViewNode();
@@ -34,6 +42,15 @@ public class JSTextAreaUI extends JSTextViewUI {
 		return updateDOMNodeCUI();
 	}
 
+	@Override
+	public void propertyChange(PropertyChangeEvent e) {
+		String prop = e.getPropertyName();
+		if (prop == "ancestor") {
+			setJ2sMouseHandler(domNode);
+		}
+		super.propertyChange(e);
+	}
+	
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
 		Boolean b;
@@ -100,17 +117,5 @@ public class JSTextAreaUI extends JSTextViewUI {
 				"overflow", "hidden",
 				"position", "absolute");
 	}
-
-	@Override
-	protected void jsSelect(Object[] r1, Object[] r2) {
-		/**
-		 * @j2sNative
-		 * 
-		 *   this.domNode.selectionStart = r1[1];
-		 *   this.domNode.selectionEnd = r2[1];
-		 */
-		
-	}
-
 
 }

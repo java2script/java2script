@@ -448,7 +448,6 @@ public class JSGraphics2D // extends SunGraphics2D
 
 	public boolean drawImage(Image img, int x, int y, Color bgcolor, ImageObserver observer) {
 		backgroundPainted = true;
-		JSUtil.notImplemented(null);
 		return drawImage(img, x, y, observer);
 	}
 
@@ -456,7 +455,6 @@ public class JSGraphics2D // extends SunGraphics2D
 		if (width <= 0 || height <= 0)
 			return false;
 		backgroundPainted = true;
-		JSUtil.notImplemented(null);
 		return drawImage(img, x, y, width, height, observer);
 	}
 

@@ -34,7 +34,7 @@ public class JSTextFieldUI extends JSTextUI {
 			DOMNode.setAttrs(focusNode, "ui", this);
 			// not active; requires position:absolute; wrong for standard text box
 			// vCenter(domNode, -10);
-			setDataComponent(domNode);
+			//new 1/5/2019 setDataComponent(domNode);
 			bindJSKeyEvents(domNode, false);
 			addJQueryFocusCallbacks();
 		}
@@ -75,17 +75,5 @@ public class JSTextFieldUI extends JSTextUI {
 	protected String getPropertyPrefix() {
 		return "TextField.";
 	}
-
-	@Override
-	protected void jsSelect(Object[] r1, Object[] r2) {
-		/**
-		 * @j2sNative
-		 * 
-		 *   this.domNode.selectionStart = r1[1];
-		 *   this.domNode.selectionEnd = r2[1];
-		 */
-		
-	}
-
 
 }

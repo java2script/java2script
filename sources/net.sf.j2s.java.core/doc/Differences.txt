@@ -1,6 +1,7 @@
 Notes
 =====
-updated 9/15/19 -- adds integer 1/0 == 0
+updated 1/4/19 -- nio
+updated 9/15/18 -- adds integer 1/0 == 0
 updated 7/24/18 -- most classes replaced with https://github.com/frohoff/jdk8u-jdk
 updated 6/28/18 -- arrays do not inherit Object
 updated 2/26/18
@@ -21,7 +22,7 @@ implemented using older source code, and there are some missing methods.
 DESIGN PHILOSOPHY
 =================
 
-The SwingJS design goal is to recreate a recognizable, easily debuggable
+The java2script/SwingJS design goal is to recreate a recognizable, easily debuggable
 equivalent in JavaScript for as much of Java as practical. This means, for example, 
 that one can call in JavaScript 
 
@@ -49,8 +50,8 @@ Obviously, there are limitations. One is performance, but we have seen reproduci
 performance at 1/6 - 1/3 the speed of Java. Achieving this performance may require
 some refactoring of the Java to make it more efficient in both Java and JavaScript. 
 "for" loops need to be more carefully crafted; use of "new" and "instanceof" need to be
-minimized in critical areas; overloaded methods (methods with the same name but different
-signatures) should be renamed. 
+minimized in critical areas. Note that method overloading -- that is, the same method name
+with different parameters, such as read(int) and read(byte) -- is no longer any problem. 
   
 
 Threads
@@ -74,35 +75,6 @@ return PropertyChangeEvents to signal that they have been disposed of and contai
 More on this later....
 
 
-
-No Non-Swing AWT Components
----------------------------
-
-Swing was introduced into Java well after the Java Abstract Window Toolkit (AWT) was well
-established. As such, its designers chose to allow AWT controls such as Button and List to be used 
-alongside their Swing counterparts JButton and JList. Reading the code, it is clear that this 
-design choice posed a huge headache for Swing class developers. 
-
-For SwingJS, we decided from the beginning NOT to allow this mixed-mode programming and 
-instead to require that all components be Swing components. However...
- 
-The a2s Adapter Package
------------------------
-
-...originally, we thought that we would restrict ourselves to JApplets only. That is, only
-Swing-based applets. But as we worked, we discovered that there are a lot of great 
-applets out there that are pre-Swing pure-AWT java.applet.Applet applets. Our problem was 
-that we also wanted it to be possible to quickly adapt these applets to JavaScript as well.
- 
-The solution turned out to be simple: Write a package (a2s) that recreates the interface for 
-non-Swing components as subclasses of Swing components. Thus, a2s.Button subclasses javax.swing.JButton
-but also accepts all of the methods of java.awt.Button. It's not perfect, and the ultimate 
-solution is probably to just change java.awt.Xxxx itself to subclass javax.swing.JXxxx.
-In any case, it works -- mostly. By adding the a2s package to a project and changing the include
-statements to target a2s instead of java.awt, non-Swing applets can be easily converted to JavaScript.
-Certainly there will be issues such as missing methods. It is all a work in progress.
-
-
 Native calls
 ------------
 
@@ -119,7 +91,9 @@ Swing GUI Peers and UIClasses
 
 One of the biggest adaptations introduced in SwingJS is in the area of the graphical 
 user interface. The issue here is complex but workable. In Java there are two background 
-concepts -- the Component "peer" (one per component) and the Component "uiClass" (one per class).
+concepts -- the Component "peer" (one per "heavy-weight" component, such as a Frame) and the 
+component "uiClass" (one per component, such as JButton or JTextField).
+
 Peers are native objects of the operating system. These are the virtual buttons and text areas
 that the user is interacting with at a very base level. Their events are being passed on to 
 Java or the browser by the operating system. UI classes provide a consistent "look and feel" 
@@ -139,7 +113,7 @@ more adaptable, this approach allows far more versatility to SwingJS developers,
 to modify the GUI to suit their needs if desired.
 
 In SwingJS, since we have no access to native peers except through the browser DOM,
-it seemed logical to merge the peer and UI idea. So instead of having one peer per control and
+it seemed logical to merge the peer and UI idea. So instead of having one peer per heavy-weight control and
 one UI class instance for each control type, we just have one UI class instance per control, and
 that UI class instance is what is being referred to when a "peer" is notified. 
 
@@ -154,6 +128,40 @@ The origin of most issues (read "bugs") in relation to the GUI will probably be 
 swingjs.plaf JSxxxxUI.java code.
 
   
+Swing-only Components -- no longer an issue
+-------------------------------------------
+
+Swing was introduced into Java well after the Java Abstract Window Toolkit (AWT) was well
+established. As such, its designers chose to allow AWT controls such as Button and List to be used 
+alongside their Swing counterparts JButton and JList. Reading the code, it is clear that this 
+design choice posed a huge headache for Swing class developers. 
+
+For SwingJS, we decided from the beginning NOT to allow this mixed-mode programming and 
+instead to require that all components be Swing components. 
+
+However, this is no longer an issue. All AWT components in SwingJS are now subclasses of 
+javax.swing.JComponent. So far, we have found no problem with this.
+
+ 
+The a2s Adapter Package
+-----------------------
+
+Originally, we thought that we would restrict ourselves to JApplets only. That is, only
+Swing-based applets. But as we worked, we discovered that there are a lot of great 
+applets out there that are pre-Swing pure-AWT java.applet.Applet applets. Our problem was 
+that we also wanted it to be possible to quickly adapt these applets to JavaScript as well.
+ 
+The solution turned out to be simple: Write a package (a2s) that recreates the interface for 
+non-Swing components as subclasses of Swing components. Thus, a2s.Button subclasses javax.swing.JButton
+but also accepts all of the methods of java.awt.Button. It's not perfect, and the ultimate 
+solution is probably to just change java.awt.Xxxx itself to subclass javax.swing.JXxxx.
+In any case, it works -- mostly. By adding the a2s package to a project and changing the include
+statements to target a2s instead of java.awt, non-Swing applets can be easily converted to JavaScript.
+Certainly there will be issues such as missing methods. It is all a work in progress.
+
+All AWT components now subclass a2s components, which in turn subclass JComponet.
+
+
 
 UNIMPLEMENTED CLASSES BY DESIGN
 ===============================
@@ -167,9 +175,11 @@ keyboard accelerators
 TODO LIST FOR UNIMPLEMENTED CLASSES
 ===================================
 
-JEditorPane (minimal implementation)
-JSplitPane (in development, BH)
-JTabbedPane (in development, NEM)
+JEditorPane (minimal implementation) - DONE 12/2018
+JSplitPane - DONE 8/2018
+JTabbedPane - DONE 10/2018
+
+JTree 
 
 
 MINOR ISSUES--required some rewriting/refactoring by Bob and Udo  
@@ -233,6 +243,12 @@ as it is used to key for AppContexts. We will see if that use useful or not.
 
 PROGRESS
 ========
+
+1/4/2019
+
+Over the course of 7/2018 - 12/2018 there have been many updates to Java2Script/SwingJS. 
+
+
 
 6/28/2018
 

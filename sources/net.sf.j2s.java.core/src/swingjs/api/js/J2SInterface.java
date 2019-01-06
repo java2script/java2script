@@ -52,7 +52,7 @@ public interface J2SInterface {
 
 	void setDraggable(DOMNode tagNode, Object targetNodeOrFDown);
 	
-	void setMouse(DOMNode frameNode, boolean isSSwingJS);
+	void setMouse(DOMNode frameNode, boolean isSwingJS);
 
 	int setWindowZIndex(DOMNode domNode, int pos);
 

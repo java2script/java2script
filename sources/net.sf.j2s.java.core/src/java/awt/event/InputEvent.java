@@ -37,6 +37,7 @@ import java.awt.Toolkit;
 
 import javax.swing.JComponent;
 
+import swingjs.JSToolkit;
 import swingjs.plaf.JSComponentUI;
 
 /**
@@ -347,27 +348,18 @@ public abstract class InputEvent extends ComponentEvent {
         return modifiers & ~JDK_1_3_MODIFIERS;
     }
 
-    /**
-     * Consumes this event so that it will not be processed
-     * in the default manner by the source which originated it.
-     */
-    @Override
-		public void consume() {
-    	
-    	JSComponentUI ui = (JSComponentUI)((JComponent) source).getUI();
-    	if (bdata != null && ui != null && ui.buttonListener == null) {
-    	/**
-    	 * @j2sNative
-    	 * 
-    	 * if (this.bdata.jqevent) {
-    	 * 		this.bdata.jqevent.stopPropagation();
-    	 *      this.bdata.jqevent.preventDefault();
-    	 * }
-    	 */
-	
-    	}
-    	consumed = true;
-    }
+	/**
+	 * Consumes this event so that it will not be processed in the default manner by
+	 * the source which originated it.
+	 */
+	@Override
+	public void consume() {
+		JSComponentUI ui = (JSComponentUI) ((JComponent) source).getUI();
+		if (bdata != null && ui != null && ui.buttonListener == null && !ui.j2sDoPropagate) {
+			JSToolkit.consumeEvent(this);
+		}
+		consumed = true;
+	}
 
     /**
      * Returns whether or not this event has been consumed.

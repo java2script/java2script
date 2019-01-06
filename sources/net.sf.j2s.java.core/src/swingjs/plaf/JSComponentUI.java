@@ -8,6 +8,7 @@ import java.awt.Event;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.Image;
 import java.awt.Insets;
@@ -68,31 +69,58 @@ import swingjs.api.js.JQueryObject;
  * Essentially, at least for now, we are not implementing the HTML5LookAndFeel
  * as such. We'll see how that goes.
  * 
- * MOUSE EVENT HANDLING
+ * SwingJS MOUSE AND KEY EVENT HANDLING
  * 
- * In SwingJS, the domBtn DOM element will be given the "data-component"
- * attribute pointing to its corresponding AWT component.
- * 
- * A mouse action starts in j2sApplet.js as jQuery events, where it is processed
- * and then passed to JSFrameViewer's JSMouse object.
+ * A mouse action starts in j2sApplet.js as a jQuery event, 
+ * where it is processed and then passed to JSFrameViewer's JSMouse object.
  * 
  * In JSMouse the event is converted to a java.awt.event.MouseEvent, with the
- * jQuery event saved as event.bdata[].jqevent. This standard MouseEvent is then
- * posted just like a "real Java" event using
- * Toolkit.getEventQueue().postEvent(e), thus giving it its own "thread."
+ * jQuery event saved as event.bdata[].jqevent. 
  * 
- * The event is dispatched by java.awt.LightweightDispatcher (in
+ * methods involved include:
+ * 
+ * 		setDataComponent(DOMNode node)
+ * 
+ * 		setDataUI(node)
+ * 
+ *      bindJQueryEvents(node, [event name string], [MouseEvent id])
+ *      
+ *      bindJSKeyEvents(node, addFocusAndDnD)
+ *      
+ *      setJ2sMouseHandler(DOMNode node)
+ *      
+ * 	    ignoreAllMouseEvents(node)
+ *      
+ * 
+ * data-component [setDataComponent(DOMNode button)]
+ * --------------
+ * 
+ * The data-component attribute is necessary for canceling propagation and 
+ * default action of an event within the event processing sequence. It is current 
+ * invoked only for JButton, JList, and JSlider.
+ * 
+ * This standard MouseEvent in Java is dispatched using java.awt.EventQueue, 
+ * thus setting EventQueue.isDispatchThread() true. In SwingJS, we also do this,
+ * unless the DOM element is given the "data-component" attribute, 
+ * pointing to its corresponding AWT component directly. This attribute is stored
+ * in the event as bdata.jqevent.target["data-component"].
+ * 
+ * Either way, the event is dispatched by java.awt.LightweightDispatcher (in
  * Container.java), where the "nativeContainer" for this window (JApplet,
  * JFrame, JWindow, JDialog, or JPopupMenu) is identified. Java has to search
  * the native container for the right X,Y coordinate for this control, but in
- * SwingJS we already know the control that was clicked. We can find that from
- * bdata.jqevent.target["data-component"]
+ * SwingJS we can bypass that and already know the control that was clicked. 
+ * This more direct method is only invoked if "data-component" is set. 
  * 
- * Some UIs (JSComboBoxUI, JSFrameUI, and JSTextUI) set
- * jqevent.target["data-ui"] to point to themselves. This allows the control to
- * bypass the Java dispatch system entirely and just come here for processing.
+ * data-ui [setDataUI(node)]
+ * -------
+ * 
+ * Some UIs (JSButtonUI, JSSpinnerUI, JSComboBoxUI, JSFrameUI, and JSTextUI) set jqevent.target["data-ui"] 
+ * to point to themselves. This allows the control an option to handle the raw jQuery
+ * event directly, bypassing the Java dispatch system entirely, id desired.
+ * 
  * This method is used for specific operations, including JFrame closing,
- * JComboBox selection, and JSText action handling. This connection is set up in
+ * JComboBox selection, and JSText key action handling. This connection is set up in
  * JSComponentUI.setDataUI() and handled by overriding
  * JSComponentUI.handleJSEvent().
  * 
@@ -425,7 +453,7 @@ public class JSComponentUI extends ComponentUI
 	 * panels
 	 * 
 	 */
-	protected boolean isContainer, isWindow, isRootPane, 
+	protected boolean isContainer, isWindow, isRootPane, isPopupMenu,
 					  isContentPane, isPanel, isDesktop, isTable;
 
 	/**
@@ -481,7 +509,23 @@ public class JSComponentUI extends ComponentUI
 
 	protected static JQuery jquery = JSUtil.getJQuery();
 
-	protected boolean isPopupMenu;
+	/**
+	 * JavaScript menu timer id
+	 */
+	protected int menuTimer;
+
+	/**
+	 * checked by JavaScript in j2sApplet.js as well as in Java by InputEvent.consume()
+	 */
+	public boolean j2sDoPropagate;
+
+	/**
+	 * Set so that ui will handle all event stopPropagation() and preventDefault() action.
+	 */
+	protected void setDoPropagate() {
+		j2sDoPropagate = true; // so that we enable the JavaScript button or caret action
+ 	}
+
 
 	private boolean notImplemented;
 
@@ -612,7 +656,9 @@ public class JSComponentUI extends ComponentUI
 	 * is not necessary to check x and y for that. This ensures perfect
 	 * correspondence between a clicked button and its handling by SwingJS.
 	 * 
-	 * The action will be handled by a standard Java MouseListener.
+	 * The action will be handled by a standard Java MouseListener, but it 
+	 * will be on the system event queue, not the "AWT Event Queue" -- 
+	 * EventQueue.isDispatchThread() will be false. 
 	 * 
 	 * Includes Button, List, Slider, and TextField
 	 * 
@@ -654,31 +700,17 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	/**
-	 * handle an event set up by adding the data-ui attribute to a DOM node.
-	 * 
-	 * @param target      a DOMNode
-	 * @param eventType   a MouseEvent id, including 501, 502, 503, or 506 (pressed,
-	 *                    released, moved, and dragged, respectively)
-	 * @param jQueryEvent
-	 * @return false to prevent the default process
-	 */
-	@Override
-	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
-		return true;
-	}
-
-	/**
-	 * Used by JSFrameUI to indicate that it is to be the "currentTarget" for mouse
-	 * clicks that target one of its buttons. The DOM attributes applet and
-	 * _frameViewer will be set for the node, making it consistent with handling for
-	 * Jmol's applet canvas element.
-	 * 
+	 * Set j2sApplet to capture jQuery mouse events and turn them into Java MouseEvents. 
+	 * Used by JSFrameUI and JTextArea to indicate that it is to be the "currentTarget" for mouse 
+	 * clicks. 
 	 * @param node
 	 * @param isFrame
 	 */
-	protected void setJ2sMouseHandler(DOMNode frameNode) {
-		DOMNode.setAttrs(frameNode, "applet", applet, "_frameViewer", jc.getFrameViewer());
-		J2S.setMouse(frameNode, true);
+	protected void setJ2sMouseHandler(DOMNode node) {
+		// The DOM attributes applet and _frameViewer are necessary for proper 
+		// direction to the target
+		DOMNode.setAttrs(node, "applet", applet, "_frameViewer", jc.getFrameViewer());
+		J2S.setMouse(node, true);
 	}
 
 	public static JSComponentUI focusedUI;
@@ -705,8 +737,30 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	
+	/**
+	 * for jQuery return
+	 */
 	protected final static boolean CONSUMED = false;
-	protected final static boolean UNHANDLED = true;
+	protected final static boolean NOT_CONSUMED = true;
+	
+	/**
+	 * for SetMouse check
+	 */
+	protected final static boolean HANDLED = true;
+	protected final static boolean NOT_HANDLED = false;
+
+	/**
+	 * Set the node to accept key events and possibly focusout
+	 * 
+	 * @param node
+	 * @param andFocusOut
+	 */
+	protected void bindJSKeyEvents(DOMNode node, boolean addFocusAndDnD) {
+		setDataUI(node);
+		bindJQueryEvents(node, "keydown keypress keyup" + (addFocusAndDnD ? " focusout"// dragover drop"
+				: ""), Event.KEY_PRESS);
+	}
+
 	/**
 	 * Allows mouse and keyboard handling via an overridden method
 	 * 
@@ -722,42 +776,38 @@ public class JSComponentUI extends ComponentUI
 	 *                  space
 	 * @param eventID   an integer event type to return; can be anything, but
 	 *                  Event.XXXX is recommended
-	 * @param andSetCSS TODO
 	 */
-	protected void bindJSEvents(DOMNode node, String eventList, int eventID, boolean andSetCSS) {
-		JSFunction f = null;
-		@SuppressWarnings("unused")
+	protected void bindJQueryEvents(DOMNode node, String eventList, int eventID) {
 		JSEventHandler me = this;
-
-		if (andSetCSS) {
-			setDataUI(node);
-			ignoreAllMouseEvents(node);
-		}
-
+		JSFunction f = null;
+		setDataUI(node);
 		/**
 		 * @j2sNative
 		 * 
-		 * 			f = function(event) { return me.handleJSEvent$O$I$O(node, eventID, event)
-		 *            }
+		 * f = function(jqevent) { return me.handleJSEvent$O$I$O(node, eventID, jqevent) }
 		 */
 		{
-			handleJSEvent(null, 0, null); // Eclipse reference only; not in
+			me.handleJSEvent(null, 0, null); // Eclipse reference only; not in
 											// JavaScript
 		}
 		$(node).bind(eventList, f);
 	}
+	
 
 	/**
-	 * Set the node to accept key events and possibly focusout
+	 * handle an event set up by adding the data-ui attribute to a DOM node.
 	 * 
-	 * @param node
-	 * @param andFocusOut
+	 * @param target      a DOMNode
+	 * @param eventType   a MouseEvent id, including 501, 502, 503, or 506 (pressed,
+	 *                    released, moved, and dragged, respectively)
+	 * @param jQueryEvent
+	 * @return false to prevent the default process
 	 */
-	protected void bindJSKeyEvents(DOMNode node, boolean isTextView) {
-		setDataUI(node);
-		bindJSEvents(node, "keydown keypress keyup" + (isTextView ? " focusout dragover drop" : ""), Event.KEY_PRESS, false);
+	@Override
+	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
+		return NOT_CONSUMED; // aka HANDLED
 	}
-
+	
 	/**
 	 * Cause a new event to be scheduled for the rebuilding of this Swing
 	 * component's internal DOM structure using updateDOMNode.
@@ -1460,6 +1510,7 @@ public class JSComponentUI extends ComponentUI
 	 */
 	@Override
 	public void paint(Graphics g, JComponent c) {
+
 		if (doPaintBackground()) {
 			g.setColor(c.getBackground());
 			g.fillRect(0, 0, c.getWidth(), c.getHeight());
@@ -1935,7 +1986,7 @@ public class JSComponentUI extends ComponentUI
 		iconR.width = -1;
 		if (isMenuItem && actionNode != null) {
 			iconR.width = iconR.height = 15;
-		} else if (icon == null) {
+		} else if (icon == null && iconNode != null) {
 			Dimension d = getHTMLSize(iconNode);
 			iconR.width = d.width;
 			iconR.height = d.height;
@@ -2690,8 +2741,6 @@ public class JSComponentUI extends ComponentUI
 		}
 	}
 
-	protected int timer;
-
 	/**
 	 * Called from JSMenuUI in a JMenuBar to start a timer that closes the popup window after a short period.
 	 *  
@@ -2699,7 +2748,7 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected void startPopupMenuTimer() {
 		JSPopupMenuUI ui = (JSPopupMenuUI) ((JMenu) jc).getPopupMenu().getUI();
-		ui.timer = /** @j2sNative setTimeout(function() { ui.hideMenu$()},1000) || */0;
+		ui.menuTimer = /** @j2sNative setTimeout(function() { ui.hideMenu$()},1000) || */0;
 	}
 
 	/**
@@ -2709,12 +2758,13 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected void stopPopupMenuTimer() {
 		JSPopupMenuUI ui = (JSPopupMenuUI) (isPopupMenu ? this : jc.getParent().getUI());
-		if (ui.timer != 0) { 
+		int timer = ui.menuTimer;
+		if (timer != 0) { 
 		  /** @j2sNative
 		   *  
-		   *   clearTimeout(ui.timer); 
+		   *   clearTimeout(timer); 
 		   */
-		  ui.timer = 0;
+		  ui.menuTimer = 0;
 		}
 	}
 

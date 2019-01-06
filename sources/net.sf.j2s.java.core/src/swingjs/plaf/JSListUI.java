@@ -142,7 +142,7 @@ public class JSListUI extends JSLightweightUI {
 				jc.dispatchEvent(keyEvent);
 			break;
 		}
-		return true;
+		return HANDLED;
 	}
 
 	/**

@@ -1,3 +1,40 @@
+BH 1/2019 note: 
+
+swingjs.JSGraphics2D is nearly complete, only missing the following methods from Graphics2D:
+
+	public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2,
+			Color bgcolor, ImageObserver observer)
+			
+		bgcolor is ignored
+		
+	public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight)
+	public void fillRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight)
+	
+	    are implemented as drawRect/fillRect
+	    
+	public void drawString(AttributedCharacterIterator iterator, int x, int y)
+	public void drawString(AttributedCharacterIterator iterator, float x, float y)
+	public void translate(double tx, double ty)
+	public void shear(double shx, double shy)
+	public boolean hit(Rectangle rect, Shape s, boolean onStroke)
+	
+	    are not implemented
+		
+Note that JSGraphics2D does not implement Grpahics2D. I can't remember why.
+	    
+Note that it is critical that any use of g = x.createGraphics() is followed by g.dispose(). This 
+is important even in Java, but Java has a work-around. SwingJS does not. There is one and only one
+graphics context -- the canvas backing a window -- and although it is being managed carefully to
+allow mark and reset, that is not perfect. If code is calling x.createGraphics() on a component, 
+the developer is likely not calling repaint() properly. (Just my opinion.) Fixing this in Java
+is a good idea anyway.
+
+
+The following comments are old and out of date. There is no "SwingJS" object anymore.
+I think they were design ideas. Buttons can be painted to using icons; borders
+are handled using HTML5. 	    
+
+ 
 Classes requiring implementation for Graphics2D
 
 Panels and Canvases will be passed a Graphics2D object in their paint method. 

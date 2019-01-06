@@ -2732,7 +2732,6 @@ public class Container extends JSComponent {
     public void setDispatcher() {
     	if (dispatcher != null)
     		return;
-      //System.err.println("LWD dispatch for "+ this);
       dispatcher = new LightweightDispatcher(this);    	
     }
     /**
@@ -4428,6 +4427,7 @@ class LightweightDispatcher implements AWTEventListener {
 	 * movement events tend to come in large and frequent amounts.
 	 */
 	private boolean processMouseEvent(MouseEvent e) {
+
 		int id = e.getID();
 
 		// sensitive to mouse events
@@ -4586,6 +4586,10 @@ class LightweightDispatcher implements AWTEventListener {
 //            targetLastEntered = null;
 //        } else 
 //        	
+		if (e instanceof ActiveEvent) {
+			targetLastEntered = null;
+			return;
+		} 
 		if (id == MouseEvent.MOUSE_EXITED) {
 			isMouseInNativeContainer = false;
 			stopListeningForOtherDrags();
@@ -4832,6 +4836,12 @@ class LightweightDispatcher implements AWTEventListener {
 					}
 				} else {
 					target.dispatchEvent(retargeted);
+					/**
+					 * @j2sNative
+					 * 
+					 * if (e.bdata && e.bdata.jqevent && target.ui.j2sDoPropagate)
+					 *   e.bdata.jqevent.doPropagate = true;
+					 */
 				}
 			}
 		}

@@ -17,6 +17,10 @@ import swingjs.api.js.DOMNode;
  */
 public abstract class JSTextViewUI extends JSTextUI {
 
+	public JSTextViewUI() {
+		setDoPropagate();
+	}
+	
 	/**
 	 * set true for JEditorPane
 	 */
@@ -36,22 +40,22 @@ public abstract class JSTextViewUI extends JSTextUI {
 	 * editable.
 	 * 
 	 * @param jQueryEvent
-	 * @return null to continue processing, CONSUMED(false) to stop propagation, UNCONSUME(true) to ignore
+	 * @return null to continue processing, CONSUMED(false) to stop propagation, UNHANLDED(true) to ignore
 	 */
 	@SuppressWarnings("unused")
 	protected Boolean checkAllowKey(Object jQueryEvent) {
-		boolean b = UNHANDLED;
+		boolean b = HANDLED;
 		boolean checkEditable = false;
 		// note: all options are set in JSComponentUI.bindJSKeyEvents
-		switch (/** @j2sNative jQueryEvent.type || */
-		"") {
-		case "focusout":
-		case "dragover":
-			// ignore
-			break;
+		switch (/** @j2sNative jQueryEvent.type || */"") {
 		case "drop":
 			// accept if editable
 			checkEditable = true;
+			break;
+		case "focusout":
+		case "dragover":
+			b = NOT_CONSUMED;
+			System.out.println("jstextvui " + (/** @j2sNative jQueryEvent.type || */"") + editable);
 			break;
 		case "keydown":
 		case "keypress":
@@ -84,8 +88,6 @@ public abstract class JSTextViewUI extends JSTextUI {
 				return null;
 			b = CONSUMED;
 		}
-		System.out.println("checkallow " + (/** @j2sNative jQueryEvent.type || */
-		"") + " " + b);
 		return Boolean.valueOf(b);
 	}
 

@@ -86,6 +86,7 @@ public class JSButtonUI extends JSLightweightUI {
 		// all subclasses will have their own version of this.
 		// this one is only for a simple button
 		if (domNode == null) {
+			setDoPropagate();
 			domNode = enableNode = buttonNode = newDOMObject ("button", id + "_dom", "type", "button");
 			iconNode = null;
 			createButton();
@@ -187,17 +188,15 @@ public class JSButtonUI extends JSLightweightUI {
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
 		// from menus only - action is on mouse-up
 		// other controls use a ButtonListener
-		if (debugging)
-				System.out.println("JSButtonUI handleJSEvent for " + ((JSComponentUI)target).id);
-  	// checkbox or radio menuitem handle themselves
+    	// checkbox or radio menuitem handle themselves
 		if (menuItem != null && actionNode == null) {			
 		 switch (eventType) {
 		 case MouseEvent.MOUSE_RELEASED:
 				menuItem.doClick(0);
-				return UNHANDLED;
+				return HANDLED;
 		 }
 		}
-		return UNHANDLED;
+		return NOT_HANDLED;
 	}
 
 

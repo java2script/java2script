@@ -44,7 +44,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 		setEnabled(c.isEnabled());
 		if (isMenuItem) {
 			domNode = createItem("_item", buttonNode);
-			DOMNode.addJqueryHandledEvent(this, domNode, "mouseenter");			
+			bindJQueryEvents(domNode, "mouseenter", -1);			
 		} else {
 			domNode = newDOMObject("div", id + "_dom");
 			domNode.appendChild(buttonNode);

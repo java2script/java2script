@@ -37,6 +37,8 @@ public class JSDnD {
 	 * @param y
 	 */
 	public static void drop(JComponent jc, Object html5DataTransfer, String name, byte[] data, int x, int y) {
+		if (html5DataTransfer == null)
+			return;
 		JSTransferable t = new JSTransferable(html5DataTransfer);
 		if (name == null) {
 			String url = (String) t.getTransferData("text/uri-list");
@@ -46,6 +48,7 @@ public class JSDnD {
 			}
 		}
 		DropTarget target = jc.getDropTarget();
+		System.out.println("JSDnD drop for " +  jc.getUIClassID() + " target " + target);
 		Point offset;
 		if (target != null) {
 		    offset = jc.getLocationOnScreen();
@@ -55,7 +58,14 @@ public class JSDnD {
 		}
 	    Component top = jc.getTopLevelAncestor();
 	    offset = top.getLocationOnScreen();
-	    top.dispatchEvent(new JSDropMouseEvent(jc, MouseEvent.MOUSE_RELEASED, x - offset.x, y - offset.y, t, name, data));
+	    
+	    System.out.println("JSDnD drop for " + jc.getUIClassID() + " offset " + x + " " + y + "  -"+ offset);
+		
+	    top.dispatchEvent(new JSDropMouseEvent(jc, MouseEvent.MOUSE_RELEASED, x 
+	    		//- offset.x
+	    		, y 
+	    		//- offset.y
+	    		, t, name, data));
 	}
 		
 	@SuppressWarnings("serial")
@@ -67,6 +77,7 @@ public class JSDnD {
 
 	    public JSDropMouseEvent(Component source, int id, int x, int y, Transferable t, String name, byte[] data) {
 	        super(source, id, System.currentTimeMillis(), 0, x, y, 0, false, NOBUTTON);
+	        System.out.println("new JSDropMouseEvent for " + source);
 	        this.transferable = t;
 	        this.name = name;
 	        if (name != null)

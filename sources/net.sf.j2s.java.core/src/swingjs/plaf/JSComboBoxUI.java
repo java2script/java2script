@@ -38,7 +38,7 @@ public class JSComboBoxUI extends JSLightweightUI implements ItemListener, ListD
 			domNode = focusNode = DOMNode.setStyles(newDOMObject("select", id), 
 					"padding", "0px 0px","lineHeight", "0.8","box-sizing", "border-box");
 			ignoreAllMouseEvents(domNode);
-			DOMNode.addJqueryHandledEvent(this, domNode, "change");
+			bindJQueryEvents(domNode, "change", -1);
 			addJQueryFocusCallbacks();
 		}
 		populateList();
@@ -63,11 +63,11 @@ public class JSComboBoxUI extends JSLightweightUI implements ItemListener, ListD
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
 		switch (eventType) {
 		case -1:
-      int index = PT.parseInt("" + DOMNode.getAttr(domNode, "selectedIndex"));
-      	comboBox.setSelectedIndex(index);
+			int index = PT.parseInt("" + DOMNode.getAttr(domNode, "selectedIndex"));
+			comboBox.setSelectedIndex(index);
 			break;
 		}
-		return UNHANDLED;
+		return HANDLED;
 	}
 
 	

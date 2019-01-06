@@ -1,44 +1,10 @@
-// j2sCore.js (based on JmolCore.js
+// j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
-// BH 12/30/2018 adds generic DND support, not just file drop
-// BH 12/20/2018 fixes mouse event extended modifiers for drag operation
-// BH 11/7/2018 adds J2S.addDirectDatabaseCall(domain)
-// BH 9/18/2018 fixes data.getBytes() not qualified
-// BH 8/12/2018 adding J2S.onClazzLoaded(i,msg) hook for customization
-//   for example, the developer can look for i=1 (pre-core) and add core files selectively
-//   or set System.$props["user.home"] to a desired directory before (i=1) or just after (i=2) core file loading
-// BH 8/6/2018 fix for Java Application start-up when not headless in Java 8
-// BH 7/21/2018 fix for static{thisApplet.__Info.width=300} not working
-// BH 7/2/2018 10:00:49 PM fix logic for FileReader for Chrome
-// BH 7/1/2018 7:25:25 AM fixes drag-drop for first call in Firefox/win
-// BH 6/29/2018 9:48:13 AM fixes key info for mouse move
-// BH 6/27/2018 12:45:44 PM adds DND for frames
-// BH 6/20/2018 11:26:09 PM fix for menu bar not closable
-// BH 3/16/2018 5:25:09 AM fixes for dragging on phones
-// BH 2/20/2018 12:08:08 AM adds J2S.getKeyModifiers
-// BH 1/8/2018 10:27:46 PM SwingJS2
-// BH 12/22/2017 1:18:42 PM adds j2sargs for setting arguments
-// BH 11/19/2017 3:55:04 AM adding support for swingjs2.js; adds static j2sHeadless=true;
-// BH 10/4/2017 2:25:03 PM adds Clazz.loadClass("javajs.util.Base64")
-// BH 7/18/2017 10:46:44 AM adds J2S._canClickFileReader, fixing J2S.getFileFromDialog for Chrome and Safari
-// BH 7/15/2017 11:04:06 AM drag/up functions not found in draggable (not hoisted)
-// BH 3/5/2017 5:49:30 PM mouse wheel action
-// BH 1/11/2017 2:21:32 AM should allow uppercase binary formats WAV MP3 etc.
-// BH 1/8/2017 1:00:02 PM allows ".jpeg" as file name ext
-// BH 1/3/2017 11:06:10 PM adds binary types ".mp3",".ogg", ".wav"
-// BH 12/26/2016 5:22:45 PM adds j2sLang=la_CO_VA  e.g. en_US  or en-US, either is OK; capitalization ignored
-// BH 12/21/2016 5:01:07 PM moving getJavaResource to JSToolkit
-// BH 12/18/2016 7:16:54 AM GCC fix for trailing comma in J2S.db
-// BH 12/16/2016 8:43:11 AM adds icon+text for buttons
-// BH 12/15/2016 6:55:40 AM URL line switches:
-//     j2sdebugCode  do not use core files at all
-//     j2sdebugCore  use coreXXXX.js rather than coreXXXX.z.js and debugger if a class is defined twice
-//     j2sdebugName=java.util.Hashtable  debugger started for load or declareInterface
-// BH 12/3/2016 6:53:17 PM adds "master" for applet registration, allowing access during file loading
-// BH 10/23/2016 10:13:42 PM adds support for Info.main
-// BH 7/18/2016 4:51:52 PM adds frame title dragging and toFront(), toBack()
-// BH 7/25/2016 8:28:57 AM adds 3Dialog(fDone, asBytes)
-// Bob Hanson 7/13/2016 9:43:56 PM
+// J2S._version set to "3.2.4.07" 1/4/2019
+
+// BH 1/4/2019 moves window.thisApplet to J2S.thisApplet; 
+
+// see devnotes.txt for previous changes.
 
 if (typeof (jQuery) == "undefined")
 	alert("Note -- jQuery is required, but it's not defined.")
@@ -91,7 +57,7 @@ if (!J2S._version)
 
 		var j = {
 
-			_version : "$Date: 2015-12-20 16:06:27 -0600 (Sun, 20 Dec 2015) $", // svn.keywords:lastUpdated
+			_version : "3.2.4.07", // svn.keywords:lastUpdated
 			_alertNoBinary : true,
 			_allowedAppletSize : [ 25, 2048, 500 ], // min, max, default
 													// (pixels)
@@ -733,7 +699,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 	J2S._canSyncBinary = function(isSilent) {
 		if (J2S._isAsync)
 			return true;
-		if (self.VBArray)
+		if (self.VBArray) // VisualBasic array MSIE 6-10
 			return (J2S._syncBinaryOK = false);
 		if (J2S._syncBinaryOK != "?")
 			return J2S._syncBinaryOK;
@@ -836,7 +802,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 			isBinary = false;
 		}
 		isBinary && (isBinary = J2S._canSyncBinary(true));
-		return (isBinary ? J2S._strToBytes(data) : (self.JU || javajs.util).SB
+		return (isBinary ? J2S._strToBytes(data) : (self.JU || javajs && javajs.util).SB
 				.newS$S(data));
 	}
 
@@ -1163,14 +1129,18 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 	}
 
 	J2S._setConsoleDiv = function(d) {
-		if (!self.Clazz)
-			return;
-		Clazz.setConsoleDiv(d);
+		self.Clazz && Clazz.setConsoleDiv(d);
 	}
 
+	J2S.setWindowVar = function(id, applet) {
+		// could be modified for use in fully encapsulated version
+		window[id] = applet;
+	}
+	
 	J2S._registerApplet = function(id, applet) {
-		return thisApplet = window[id] = J2S._applets[id] = J2S._applets[id
-				+ "__" + J2S._syncId + "__"] = J2S._applets["master"] = applet;
+		// note - I am leaving thisApplet in for now, but it is to be deprecated 1/4/2019
+		return J2S.setWindowVar(id, thisApplet = J2S.thisApplet = J2S._applets[id] = J2S._applets[id
+				+ "__" + J2S._syncId + "__"] = J2S._applets["master"] = applet);
 	}
 
 	J2S.readyCallback = function(appId, fullId, isReady, javaApplet,
@@ -1477,18 +1447,22 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		// swingjs.api.J2SInterface
 
 		var doIgnore = function(ev) {
-			return (J2S._dmouseOwner || !ev.target || ("" + ev.target.className)
-					.indexOf("swingjs-ui") >= 0)
+			var ignore = (J2S._dmouseOwner || ev.originalEvent.handled || !ev.target || ("" + ev.target.className)
+					.indexOf("swingjs-ui") >= 0);
+			ev.originalEvent.handled = true;
+			return ignore;
 		};
 
 		var checkStopPropagation = function(ev, ui, handled, target) {
-			if (!ui || !handled || !ev.target.getAttribute("role")) {
-				if (!target || !target.ui.buttonListener) {
-					if (!ui || !ui.textListener)
-						ev.preventDefault();
+			if (ui && ui.checkStopPropagation$O$Z) {
+				handled = ui.checkStopPropagation$O$Z(ev, handled);
+			} else if (!ui || !handled || !ev.target.getAttribute("role")) {
+				if (!target || !target.ui.buttonListener) {					
+					ev.preventDefault();
 					ev.stopPropagation();
 				}
 			}
+			// handled -- we are done here
 			return handled;
 		};
 
@@ -1611,7 +1585,8 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 //							Integer.MAX_VALUE);
 				who.applet._processEvent(501, xym, ev, who._frameViewer); // MouseEvent.MOUSE_PRESSED
 			}
-			return !!target;
+			return !!(ui || target);
+//			return !!target || ui && ui.j2sDoPropagate;
 		});
 
 		J2S.$bind(who, 'mouseup touchend', function(ev) {
@@ -1856,8 +1831,13 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		// id 0, 502, or 503 only 
 		if (!who.applet._ready || J2S._touching && ev.type.indexOf("touch") < 0)
 			return false;
-		// ev.preventDefault(); // removed 5/9/2015 -- caused loss of focus on
 		// text-box clicking in SwingJS
+		if (ev.target == who) {
+			var ui = ev.target["data-ui"];
+			if (ui) {
+				who = ui.jc.getTopLevelAncestor$().ui.domNode;				
+			}
+		}
 		var offsets = J2S.$offset(who.id);
 		var x, y;
 		var oe = ev.originalEvent;
@@ -1992,14 +1972,29 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		}
 		// me can be the node if node is null
 		node || (node = null);
-		J2S.$appEvent(me, node, "dragover", function(e) {
+
+		
+		J2S.$appEvent(me, node, "dragover", function(e) { 
 			e = e.originalEvent;
 			e.stopPropagation();
 			e.preventDefault();
-			e.dataTransfer.dropEffect = 'copy';
+			if (e.target == J2S._mouseOwner) {
+				return; // for now
+				e.dataTransfer.dropEffect = 'move';				
+			} else {
+				e.dataTransfer.dropEffect = 'copy';				
+			}
 		});
 		J2S.$appEvent(me, node, "drop", function(e) {
+			J2S._mouseOwner && (J2S._mouseOwner.isDragging = false);
 			var oe = e.originalEvent;
+			if (e.target == J2S._mouseOwner) {
+				oe.preventDefault();
+				oe.stopPropagation();
+				return; // for now
+			}
+			if (!oe.dataTransfer)
+				return;
 			try {
 				var kind = oe.dataTransfer.items[0].kind;
 				var type = oe.dataTransfer.items[0].type;
@@ -2007,8 +2002,11 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 			} catch (e) {
 				return;
 			} finally {
-				oe.stopPropagation();
 				oe.preventDefault();
+				var doStop = (e.target != J2S._mouseOwner)
+				if (doStop) {				
+					oe.stopPropagation();
+				}
 			}
 			System.out.println("DnD kind=" + kind + " type=" + type + " file=" + file);
 			var target = oe.target;
@@ -2024,6 +2022,8 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 			if (file == null) {
 				// FF and Chrome will drop an image here
 				// but it will be only a URL, not an actual file.
+
+				
 				Clazz.load("swingjs.JSDnD")
 						.drop$javax_swing_JComponent$O$S$BA$I$I(comp,
 								oe.dataTransfer, null, null, x, y);
@@ -2193,7 +2193,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		this._platform = Info._platform || "";
 		if (checkOnly)
 			return this;
-		window[id] = this;
+		J2S.setWindowVar(id, this);
 		if (!this._isApp)
 			this._createCanvas(id, Info);
 		if (!this._isJNLP && (!J2S._document || this._deferApplet))
@@ -2219,7 +2219,6 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 			}
 	}
 
-	// See SwingJSApplet.js 
 	// The original Jmol "applet" was created as an 
 	// extension to a canvas. We still do that even
 	// though it doesn't make a lot of sense. Nonetheless,
@@ -2362,12 +2361,12 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		}
 
 		proto._setupJS = function() {
-			window["j2s.lib"] = {
+			J2S.setWindowVar("j2s.lib", {
 				base : this._j2sPath + "/",
 				alias : ".",
 				console : this._console,
 				monitorZIndex : J2S.getZ(this, "monitorZIndex")
-			};
+			});
 			var isFirst = (__execStack.length == 0);
 			if (isFirst)
 				J2S._addExec([ this, __loadClazz, null, "loadClazz" ]);
@@ -2409,7 +2408,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 					
 					var cl = Clazz.load(clazz);
 					if (clazz.indexOf("_.") == 0)
-						window[clazz.substring(2)] = cl;
+						J2S.setWindowVar(clazz.substring(2), cl);
 					if (isApp && cl.j2sHeadless)
 						applet.__Info.headless = true;
 				} catch (e) {
@@ -2466,7 +2465,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 					var h = applet.__Info.height;
 					if (w > 0 && h > 0 && (!applet._canvas || w != applet._canvas.width
 							|| h != applet._canvas.height)) {
-						// developer has used static { thisApplet.__Info.width=...}
+						// developer has used static { J2S.thisApplet.__Info.width=...}
 						J2S.$(applet, "appletinfotablediv").width(w).height(h);
 						applet._newCanvas(true);
 					}

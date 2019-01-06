@@ -111,10 +111,8 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			closerNode = newDOMObject("label", id + "_closer", "innerHTML", "X");
 			DOMNode.setStyles(closerNode, "width", "20px", "height", "20px", "position", "absolute", "text-align",
 					"center", "right", "0px");
-			DOMNode.addJqueryHandledEvent(this, closerNode, "click mouseenter mouseout");
-
+			bindJQueryEvents(closerNode, "click mouseenter mouseout", -1);
 			frameNode.appendChild(titleBarNode);
-
 			if (isModal) {
 				modalNode = DOMNode.createElement("div", id + "_modaldiv");
 				Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
@@ -182,32 +180,23 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
-	  String type = "";
-	  // we use == here because this will be JavaScript
-		if (target == closerNode) {
-			/**
-			 * @j2sNative
-			 * 
-			 * type = jQueryEvent.type;
-			 * 
-			 */
-			{}
-			if (eventType == -1) {
-		  	if (type == "click") {
-					DOMNode tbar = titleBarNode;
-		  		J2S.setDraggable(tbar, false);
-		  		frameCloserAction();
-					return UNHANDLED;		  		
-		  	} else if (type.equals("mouseout")) {
-			  	DOMNode.setStyles(closerNode, "background-color", toCSSString(c.getBackground()));
-					return UNHANDLED;
-		  	} else if (type.equals("mouseenter")) {
-			  	DOMNode.setStyles(closerNode, "background-color", "red");
-					return UNHANDLED;
-		  	}
-		  }			
+		// we use == here because this will be JavaScript
+		if (target == closerNode && eventType == -1) {
+			switch (/** @j2sNative jQueryEvent.type || */"") {
+			case "click":
+				DOMNode tbar = titleBarNode;
+				J2S.setDraggable(tbar, false);
+				frameCloserAction();
+				return HANDLED;
+			case "mouseout":
+				DOMNode.setStyles(closerNode, "background-color", toCSSString(c.getBackground()));
+				return HANDLED;
+			case "mouseenter":
+				DOMNode.setStyles(closerNode, "background-color", "red");
+				return HANDLED;
+			}
 		}
-		return UNHANDLED;
+		return NOT_HANDLED;
 	}
 
 	

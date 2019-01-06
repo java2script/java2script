@@ -71,11 +71,6 @@ public class JSTextPaneUI extends JSEditorPaneUI {
         return "TextPane.";
     }
 
-    @Override
-	public void installUI(JComponent c) {
-        super.installUI(c);
-    }
-
     /**
      * This method gets called when a bound property is changed
      * on the associated JTextComponent.  This is a hook

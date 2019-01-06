@@ -268,7 +268,7 @@ public class JSUtil {
 		 * @j2sNative
 		 * 
 		 * 
-		 * if (js.indexOf(";//# sourceURL=") < 0) js += ";//# sourceURL=" + thisApplet._j2sPath + "/" + resourceName;
+		 * if (js.indexOf(";//# sourceURL=") < 0) js += ";//# sourceURL=" + J2S.thisApplet._j2sPath + "/" + resourceName;
 		 * eval(js);
 		 * 
 		 */

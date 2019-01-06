@@ -297,22 +297,24 @@ public class JSMouse {
 		e.setBData(bdata);
 		Object jqevent = this.jqevent;
 		Component c = null;
+		 		// SwingJS stop any further processing of this (mouse) event in the J2S system
 		/**
 		 * @j2sNative 
 		 * 
 		 * bdata.jqevent = jqevent;
+		 * 
 		 * c = jqevent.target["data-component"];
 		 */
 		
-		// the key here is that if we have a data-component, we must go directly to its
+		// the key here is that if we have a data-component, go directly to its
 		// container and dispatch the event; if we go through the event queue, any e.consume()
 		// that occurs is too late to consume the event. 
 		
-//		if (c == null) {
-	//		Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(e);
-		//} else {
+		if (c == null) {
+			Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(e);
+		} else {
 		  ((Container) e.getSource()).dispatchEvent(e);
-	//	}
+		}
 	}
 
 	private long lasttime;

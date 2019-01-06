@@ -271,7 +271,6 @@ Swing.__getMenuStyle = function(applet) { return '\
 
 var bindMenuActionCommands = function(eventType, menu, isBind) {
   // called internally
-  //System.out.println("binding " + isBind + " " + menu.ui.id)
   var children = (menu.uiClassID ? menu.ui.getChildren() : menu.getComponents());
 	for(var i = children.length; --i >= 0;)
 		bindMenuActionCommands(eventType, children[i], isBind);
@@ -281,7 +280,6 @@ var bindMenuActionCommands = function(eventType, menu, isBind) {
 	if (isBind) {
 		J2S.$documentOn(eventType, menu.id, function(event) {
 			if (menu.uiClassID) {
-		        System.out.println(["menu " + menu.ui.id , " clicked " , event.target.id , event.target.tagName, event.target["data-component"]]);
 				Swing.hideMenus(menu._applet);
 		        menu["data-ui"].handleJSEvent$O$I$O(event);
 			} else if (menu.itemListener) {

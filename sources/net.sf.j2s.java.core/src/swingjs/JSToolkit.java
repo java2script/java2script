@@ -22,6 +22,7 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.InvalidDnDOperationException;
 import java.awt.dnd.peer.DragSourceContextPeer;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.im.InputMethodHighlight;
 import java.awt.image.ColorModel;
@@ -362,13 +363,17 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		 */
 		{
 		}
-		int ms = (event.getID() >= MouseEvent.MOUSE_FIRST && event.getID() <= MouseEvent.MOUSE_LAST ? -1 : 0);
+		int ms = (isMouseEvent(event.getID()) ? -1 : 0);
 		if (andWait)
 			invokeAndWait(f, id);
 		else
 			dispatch(f, ms, id);
 	}
 
+	public static boolean isMouseEvent(int id) {
+		return (id >= MouseEvent.MOUSE_FIRST && id <= MouseEvent.MOUSE_LAST);
+	}
+	
 	/**
 	 * encapsulate timeout with an anonymous function that re-instates the
 	 * "current thread" prior to execution. This is in case of multiple applets.
@@ -544,19 +549,14 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	}
 
 	public static JSComponentUI getUI(Component c, boolean isQuiet) {
-		JSComponentUI ui = null;
-		/**
-		 * @j2sNative
-		 * 
-		 *            ui = c.getUI$ && c.getUI$();
-		 */
-		{
+		JSComponentUI ui = /** @2sNative !!c.getUI$ &&*/(JSComponentUI)((JComponent) c).getUI();
+		if (ui == null && ((JComponent) c).getUIClassID() != "ComponentUI") {
+			((JComponent) c).updateUI();
 			ui = (JSComponentUI) ((JComponent) c).getUI();
 		}
 		if (ui == null) {
-			
 			String s = c.getClass().getName();
-			if (!PT.isOneOf(s, ";javax.swing.Box.Filler;")) 
+			if (!PT.isOneOf(s, ";javax.swing.Box$Filler;")) 
 				System.out.println("[JSToolkit] Component " + s  
 					+ " has no corresponding JSComponentUI, class " + c.getClass().getName());
 			// Coerce JSComponentUI for this peer.
@@ -961,6 +961,24 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		if (focusManager == null)
 			focusManager = new JSFocusManager();
 		return focusManager;
+	}
+
+	public static void consumeEvent(InputEvent e) {
+		// SwingJS stop any further processing at all within the browser
+		/**
+		 * @j2sNative
+		 * 
+		 *  if (e.bdata.jqevent) { 
+		 *  
+		 *  
+		 *  
+		 *  if (e.bdata.jqevent.type != "mousemove")
+System.out.println("JSToolkit consuming " + e.bdata.jqevent.type);
+		
+		 * 		e.bdata.jqevent.stopPropagation();
+		 *      e.bdata.jqevent.preventDefault(); 
+		 *  }
+		 */
 	}
 
 

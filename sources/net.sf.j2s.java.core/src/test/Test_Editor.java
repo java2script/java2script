@@ -14,6 +14,8 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedInputStream;
@@ -24,6 +26,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -34,6 +37,7 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
+import javax.swing.text.DefaultCaret;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
@@ -42,15 +46,11 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 
-import javajs.util.AU;
-import javajs.util.OC;
-import javajs.util.Rdr;
-
 public class Test_Editor extends JFrame implements DropTargetListener {
 
 	public Test_Editor() {
 
-		String test = "  34567890\n1234567890\n  345\n     \n";
+		String test = "  34567890\n1234567890\n  345\n     ";
 
 		setTitle("testing editor");
 		setLocation(100, 100);
@@ -92,8 +92,61 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 			}
 
 		});
+		
+		editor.addMouseListener(new MouseListener() {
 
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				System.out.println("editor mouse pressed");
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+
+		
+		DefaultCaret c = new DefaultCaret() {
+		};
+		c.install(editor);
+		editor.setCaret(c);
+		
 		JTextArea area = new JTextArea();
+		
+		
+		c = new DefaultCaret() {
+		    protected void fireStateChanged() {
+		    	System.out.println("Test_Editor area caret firestatechanged " + area.getCaretPosition());
+		    	super.fireStateChanged();
+		    }
+			
+		};
+		c.install(area);
+		area.setCaret(c);
+		
+		
+		
 		area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
 		area.setText(test);
 		area.setBackground(new Color(200, 200, 180));
@@ -105,6 +158,39 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 				System.out.println("JTextArea  caret:" + e);
 			}
 
+		});
+
+		area.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				System.out.println("JTextArea mouse pressed" + e.getX() + " " + e.getY());
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
 		});
 
 		JTextField field = new JTextField("testing");
@@ -125,17 +211,36 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 			}
 
 		});
-		add(js);
 		
-		js = new JScrollPane(area);
-		js.setPreferredSize(new Dimension(300, 300));
-		js.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		js.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		JScrollPane js2 = new JScrollPane(area);
+		js2.setPreferredSize(new Dimension(300, 300));
+		js2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		js2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 
-		add(BorderLayout.EAST, js);
+
+		Box box = Box.createHorizontalBox();
+		box.add(js);
+		box.add(Box.createHorizontalStrut(20));
+		box.add(js2);
+		add(box);
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+
+		
+		JButton btop = new JButton("top");
+		btop.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				editor.setCaretPosition(0);
+				area.setCaretPosition(0);
+				area.requestFocus();
+				editor.requestFocus();
+			}
+
+		});
+
 		JButton b;
 		
 		b = new JButton("clear");
@@ -144,6 +249,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				editor.setText("");
+//				btop.setEnabled(!btop.isEnabled());
 			}
 
 		});
@@ -178,17 +284,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 		panel.add(b);
 
 		
-		b = new JButton("top");
-		b.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				editor.setCaretPosition(0);
-				editor.requestFocus();
-			}
-
-		});
-		panel.add(b);
+		panel.add(btop);
 
 		
 		b = new JButton("end");
@@ -197,6 +293,8 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				editor.setCaretPosition(editor.getDocument().getLength());
+				area.setCaretPosition(area.getDocument().getLength());
+				area.requestFocus();
 				editor.requestFocus();
 			}
 

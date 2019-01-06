@@ -89,6 +89,15 @@ import swingjs.api.js.DOMNode;
  *
  */
 public class JSTableUI extends JSPanelUI {
+
+	private static final Rectangle tmpRect = new Rectangle()
+			, cellRect = new Rectangle()
+					, minCell = new Rectangle()
+							, maxCell = new Rectangle();
+
+
+
+
 	protected JTable table, header;
 	private int oldrc;
 	private int oldrh;
@@ -272,14 +281,14 @@ public class JSTableUI extends JSPanelUI {
 			int h = table.getRowHeight();
 			int[] cw = getColumnWidths();
 			int rminy, rmaxy, rminx, rmaxx;
-			Rectangle r = table.getVisibleRect();
-			rminx = r.x;
-			rmaxx = r.x + r.width;
+			table.computeVisibleRect(tmpRect);
+			rminx = tmpRect.x;
+			rmaxx = tmpRect.x + tmpRect.width;
 			// DOMNode.setStyles(outerNode, "overflow", "hidden", "height", th + "px");
 			$(domNode).empty();
-			rminy = r.y;
-			rmaxy = r.y + r.height;
-			if (r.height != 0) {
+			rminy = tmpRect.y;
+			rmaxy = tmpRect.y + tmpRect.height;
+			if (tmpRect.height != 0) {
 				currentRowMin = 0;
 				addElements(rminx, rminy, rmaxx, rmaxy, cw, h, 0, nrows, 0, ncols);
 			}			
@@ -728,31 +737,31 @@ public class JSTableUI extends JSPanelUI {
 					Dimension delta = table.getParent().getSize();
 
 					if (vertically) {
-						Rectangle r = table.getCellRect(leadRow, 0, true);
+						table._getCellRect(leadRow, 0, true, tmpRect);
 						if (forwards) {
 							// scroll by at least one cell
-							r.y += Math.max(delta.height, r.height);
+							tmpRect.y += Math.max(delta.height, tmpRect.height);
 						} else {
-							r.y -= delta.height;
+							tmpRect.y -= delta.height;
 						}
 
 						this.dx = 0;
-						int newRow = table.rowAtPoint(r.getLocation());
+						int newRow = table.rowAtPoint(tmpRect.getLocation());
 						if (newRow == -1 && forwards) {
 							newRow = table.getRowCount();
 						}
 						this.dy = newRow - leadRow;
 					} else {
-						Rectangle r = table.getCellRect(0, leadColumn, true);
+						table._getCellRect(0, leadColumn, true, tmpRect);
 
 						if (forwards) {
 							// scroll by at least one cell
-							r.x += Math.max(delta.width, r.width);
+							tmpRect.x += Math.max(delta.width, tmpRect.width);
 						} else {
-							r.x -= delta.width;
+							tmpRect.x -= delta.width;
 						}
 
-						int newColumn = table.columnAtPoint(r.getLocation());
+						int newColumn = table.columnAtPoint(tmpRect.getLocation());
 						if (newColumn == -1) {
 							boolean ltr = table.getComponentOrientation().isLeftToRight();
 
@@ -827,10 +836,8 @@ public class JSTableUI extends JSPanelUI {
 						}
 					}
 
-					Rectangle cellRect = table.getCellRect(leadRow, leadColumn, false);
-					if (cellRect != null) {
-						table.scrollRectToVisible(cellRect);
-					}
+					table._getCellRect(leadRow, leadColumn, false, tmpRect);
+					table.scrollRectToVisible(tmpRect);
 				} else if (!inSelection) {
 					moveWithinTableRange(table, dx, dy);
 					table.changeSelection(leadRow, leadColumn, false, extend);
@@ -855,7 +862,7 @@ public class JSTableUI extends JSPanelUI {
 							csm.removeSelectionInterval(leadColumn, leadColumn);
 						}
 
-						Rectangle cellRect = table.getCellRect(leadRow, leadColumn, false);
+						table._getCellRect(leadRow, leadColumn, false, cellRect);
 						if (cellRect != null) {
 							table.scrollRectToVisible(cellRect);
 						}
@@ -1602,7 +1609,8 @@ public class JSTableUI extends JSPanelUI {
 	}
 
 	public void repaintCell(int lr, int lc) {
-		table.repaint(table.getCellRect(lr, lc, false));
+		table._getCellRect(lr, lc, false, tmpRect);
+		table.repaint(tmpRect);
 	}
 
 
@@ -1917,8 +1925,8 @@ public class JSTableUI extends JSPanelUI {
 		int height = 0;
 		int rowCount = table.getRowCount();
 		if (rowCount > 0 && table.getColumnCount() > 0) {
-			Rectangle r = table.getCellRect(rowCount - 1, 0, true);
-			height = r.y + r.height;
+			table._getCellRect(rowCount - 1, 0, true, cellRect);
+			height = cellRect.y + cellRect.height;
 		}
 		// Width is always positive. The call to abs() is a workaround for
 		// a bug in the 1.1.6 JIT on Windows.
@@ -2002,6 +2010,7 @@ public class JSTableUI extends JSPanelUI {
 		int rMin = table.rowAtPoint(upperLeft);
 		int rMax = table.rowAtPoint(lowerRight);
 		
+//		System.out.println("JSTableUI " + clip + " " + rMin + " " + rMax);
 
 		// This should never happen (as long as our bounds intersect the clip,
 		// which is why we bail above if that is the case).
@@ -2016,20 +2025,20 @@ public class JSTableUI extends JSPanelUI {
 			rMax = table.getRowCount() - 1;
 		}
 
-		Rectangle bounds = table.getVisibleRect();// table.getBounds();
+		table.computeVisibleRect(tmpRect);
 
-		System.out.println("JSTable paint " + rMin + " " + rMax + " " + bounds);
+//		System.out.println("JSTable paint " + rMin + " " + rMax + " " + tmpRect);
 
 		if (table.getRowCount() <= 0 || table.getColumnCount() <= 0 ||
 		// this check prevents us from painting the entire table
 		// when the clip doesn't intersect our bounds at all
-				!bounds.intersects(clip)) {
+				!tmpRect.intersects(clip)) {
 
 			paintDropLines(g);
 			return;
 		}
 
-		resized = (bounds.width != lastWidth);
+		resized = (tmpRect.width != lastWidth);
 		if (resized) {
 			// table has been resized
 			if (rMax - rMin > 1) {
@@ -2042,12 +2051,12 @@ public class JSTableUI extends JSPanelUI {
 				}
 			}
 			boolean was0 = (lastWidth == 0);
-			lastWidth = bounds.width;
+			lastWidth = tmpRect.width;
 			repaintAll = true;
 			if (!was0) {
 				rebuildTable();
 				getHeaderUI().paint(g, c);
-				table.repaint(bounds);
+				table.repaint(tmpRect);
 				return;
 			}
 		}
@@ -2109,7 +2118,6 @@ public class JSTableUI extends JSPanelUI {
 		int h = table.getRowHeight();
 		int[] cw = getColumnWidths();
 
-		Rectangle cellRect;
 		TableColumn aColumn;
 		int columnWidth;
 
@@ -2117,7 +2125,7 @@ public class JSTableUI extends JSPanelUI {
 
 		if (table.getComponentOrientation().isLeftToRight()) {
 			for (int row = rMin0; row <= rMax0; row++) {
-				cellRect = table.getCellRect(row, cMin, false);
+				table._getCellRect(row, cMin, false, cellRect);
 				DOMNode tr = DOMNode.getElement(id + "_tab_row" + row);
 				for (int column = cMin; column <= cMax; column++) {
 					aColumn = cm.getColumn(column);
@@ -2131,7 +2139,7 @@ public class JSTableUI extends JSPanelUI {
 			}
 		} else {
 			for (int row = rMin0; row <= rMax0; row++) {
-				cellRect = table.getCellRect(row, cMin, false);
+				table._getCellRect(row, cMin, false, cellRect);
 				aColumn = cm.getColumn(cMin);
 //				if (aColumn != draggedColumn) {
 //					columnWidth = aColumn.getWidth();
@@ -2213,8 +2221,8 @@ public class JSTableUI extends JSPanelUI {
 	private void paintGrid(Graphics g, int rMin, int rMax, int cMin, int cMax) {
 		g.setColor(table.getGridColor());
 
-		Rectangle minCell = table.getCellRect(rMin, cMin, true);
-		Rectangle maxCell = table.getCellRect(rMax, cMax, true);
+		table._getCellRect(rMin, cMin, true, minCell);
+		table._getCellRect(rMax, cMax, true, maxCell);
 		Rectangle damagedArea = minCell.union(maxCell);
 
 		if (table.getShowHorizontalLines()) {
