@@ -62,7 +62,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 //		System.out.println("updatedom " + JSUtil.getStackTrace(4));
 		if (domNode == null) {
 			mustWrap = true;
-			domNode = newDOMObject("div", id);
+			domNode = newDOMObject("pre", id);
 			$(domNode).addClass("swingjs-doc");
 			setupViewNode();
 		}
