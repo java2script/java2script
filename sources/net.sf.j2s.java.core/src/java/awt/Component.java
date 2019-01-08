@@ -3778,11 +3778,12 @@ public abstract class Component implements ImageObserver/*
 		 */
 		if (!e.isConsumed()) {
 			if (e instanceof KeyEvent) {
+				// check for tab navigation:
 				// KeyboardFocusManager.getCurrentKeyboardFocusManager().
 				// processKeyEvent(this, (KeyEvent)e);
-				if (e.isConsumed()) {
-					return;
-				}
+				//if (e.isConsumed()) {
+				//	return;
+				//}
 			}
 		}
 
@@ -4055,7 +4056,7 @@ public abstract class Component implements ImageObserver/*
 		return eventTypeEnabled(e.id);
 	}
 
-	boolean eventTypeEnabled(int type) {
+	public boolean eventTypeEnabled(int type) { // SwingJS public
 		switch (type) {
 		case ComponentEvent.COMPONENT_MOVED:
 		case ComponentEvent.COMPONENT_RESIZED:
@@ -4546,11 +4547,11 @@ public abstract class Component implements ImageObserver/*
 		keyListener = AWTEventMulticaster.add(keyListener, l);
 		newEventsOnly = true;
 
-		// // if this is a lightweight component, enable key events
-		// // in the native container.
-		// if (peer instanceof LightweightPeer) {
-		// parent.proxyEnableEvents(AWTEvent.KEY_EVENT_MASK);
-		// }
+		 // if this is a lightweight component, enable key events
+		 // in the native container.
+//		 if (peer instanceof LightweightPeer) {
+//			 parent.proxyEnableEvents(AWTEvent.KEY_EVENT_MASK);
+//		 }
 	}
 
 	/**

@@ -56,6 +56,7 @@ import javax.swing.text.EditorKit;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.Position;
 import javax.swing.text.TextAction;
+import javax.swing.text.html.HTMLDocument;
 
 import swingjs.JSKeyEvent;
 import swingjs.JSToolkit;
@@ -736,7 +737,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 //		b.addMouseMotionListener(listener);
 		b.addFocusListener(listener);
 		b.addPropertyChangeListener(listener);
-		b.addCaretListener(listener);
+		//b.addCaretListener(listener);
 		// SwingJS there won't be a document yet; this is in constructor
 		// b.getDocument().addDocumentListener(listener);
 	}
@@ -747,7 +748,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 //		b.removeMouseMotionListener(listener);
 		b.removeFocusListener(listener);
 		b.removePropertyChangeListener(listener);
-		b.removeCaretListener(listener); 
+		//b.removeCaretListener(listener); 
 		b.getDocument().removeDocumentListener(listener);
 	}
 
@@ -2936,7 +2937,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
      * @param pt
      * @return
      */
-    boolean getJSMarkAndDot(Point pt) {
+    @SuppressWarnings("unused")
+	boolean getJSMarkAndDot(Point pt) {
     	DOMNode node = this.domNode;
     	int start = /** @j2sNative node.selectionStart || */ 0;
     	int end = /** @j2sNative node.selectionEnd || */ 1;
@@ -2959,15 +2961,17 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
 //		String type = /** @j2sNative jQueryEvent.type || */null;
 //		System.out.println("JSTextUI handlejs "+type + " " + eventType);
-		 
-		if (eventType >= 500 && eventType <= 510)
-			return HANDLED;
+		if (JSToolkit.isMouseEvent(eventType)) {
+			return NOT_HANDLED;
+		}
+		Boolean b = checkAllowKey(jQueryEvent);
+		if (b != null)
+			return b.booleanValue();
 		int keyCode = /** @j2sNative jQueryEvent.keyCode || */ 0;
-		JTextComponent t = (JTextComponent) jc;
 		switch (eventType) {
 		case KeyEvent.KEY_PRESSED:
 			// note that events are bundled here into one eventType
-			JSKeyEvent keyEvent = JSKeyEvent.newJSKeyEvent(jc, jQueryEvent, false);
+			JSKeyEvent keyEvent = JSKeyEvent.newJSKeyEvent(jc, jQueryEvent, KeyEvent.KEY_PRESSED, false);
 			if (keyEvent == null)
 				return HANDLED;
 			jc.dispatchEvent(keyEvent);
@@ -2995,6 +2999,65 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	}
 
 	/**
+	 * Enable only the keys that are appropriate for this component, editable or not
+	 * editable.
+	 * 
+	 * @param jQueryEvent
+	 * @return null to continue processing, CONSUMED(false) to stop propagation, UNHANLDED(true) to ignore
+	 */
+	@SuppressWarnings("unused")
+	protected Boolean checkAllowKey(Object jQueryEvent) {
+		boolean b = HANDLED;
+		boolean checkEditable = false;
+		// note: all options are set in JSComponentUI.bindJSKeyEvents
+		switch (/** @j2sNative jQueryEvent.type || */"") {
+		case "drop":
+			// accept if editable
+			checkEditable = true;
+			break;
+		case "focusout":
+		case "dragover":
+			b = NOT_CONSUMED;
+			System.out.println("jstextvui " + (/** @j2sNative jQueryEvent.type || */"") + editable);
+			break;
+		case "keydown":
+		case "keypress":
+		case "keyup":
+			switch (/** @j2sNative jQueryEvent.keyCode || */
+			0) {
+			case KeyEvent.VK_UP:
+			case KeyEvent.VK_DOWN:
+			case KeyEvent.VK_LEFT:
+			case KeyEvent.VK_RIGHT:
+			case KeyEvent.VK_PAGE_UP:
+			case KeyEvent.VK_PAGE_DOWN:
+				// accept only if neither ALT nor CTRL is down
+				if (/** @j2sNative !jQueryEvent.altKey && !jQueryEvent.ctrlKey || */
+				false)
+					return null;
+				b = CONSUMED;
+				break;
+			default:
+				// accept all others only if editable
+				checkEditable = true;
+				break;
+			}
+			break;
+		default:
+			return null;
+		}
+		if (checkEditable) {
+			// NEVER allowing editing of HTMLDocument
+			if (editor.isEditable() 
+					&& !(editor.getDocument() instanceof HTMLDocument))
+				return null;
+			b = CONSUMED; // this will cancel the jQuery event
+		}
+		return Boolean.valueOf(b);
+	}
+
+
+	/**
 	 * Get the current selection point for the Java model.
 	 * 
 	 * @param t
@@ -3005,11 +3068,11 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
     public int viewToModel(JTextComponent t, Point pt,
             Position.Bias[] biasReturn) {
     	
-    	/**
-    	 * @j2sNative console.log("-----");
-    	 * console.log(document.getSelection());
-    	 * 
-    	 */
+//    	/**
+//    	 * @j2sNative console.log("-----");
+//    	 * console.log(document.getSelection());
+//    	 * 
+//    	 */
     	// from DefaultCursor mouse event
     	pt.x = Integer.MAX_VALUE;
     	getJSMarkAndDot(pt);

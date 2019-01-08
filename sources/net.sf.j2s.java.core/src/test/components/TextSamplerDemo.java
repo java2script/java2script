@@ -29,7 +29,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */ 
 
-package components;
+package test.components;
 
 // see https://docs.oracle.com/javase/tutorial/uiswing/examples/components/index.html#TextSamplerDemo
 /*

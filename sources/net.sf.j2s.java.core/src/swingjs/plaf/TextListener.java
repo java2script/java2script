@@ -35,16 +35,16 @@ import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import javax.swing.event.CaretEvent;
-import javax.swing.event.CaretListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 
+import swingjs.JSKeyEvent;
+
 public class TextListener implements FocusListener, ChangeListener,
-		PropertyChangeListener, DocumentListener, CaretListener {
+		PropertyChangeListener, DocumentListener {
 
 	private JTextComponent txtComp;
 
@@ -100,72 +100,55 @@ public class TextListener implements FocusListener, ChangeListener,
 	 * @param jQueryEvent
 	 * @return false to indicate "handled and so don't pass on to window"
 	 */
-	boolean handleJSTextEvent(JSTextUI ui, int eventType, Object jQueryEvent) {
+	boolean handleJSTextEvent(JSTextUI ui, int eventType, Object jqevent) {
 		Point markDot = ui.getNewCaretPosition(null);
 		int mark = markDot.x;
 		int dot = markDot.y;
 		boolean setCaret = (mark != Integer.MIN_VALUE);
-		boolean handledOrNot = JSComponentUI.HANDLED;
+		eventType = JSKeyEvent.fixEventType(jqevent, eventType);
 		switch (eventType) {
 		case KeyEvent.KEY_PRESSED:
-		case KeyEvent.KEY_RELEASED:
-		case KeyEvent.KEY_TYPED:
-			int keyCode = /** @j2sNative jQueryEvent.keyCode || */
+			int keyCode = /** @j2sNative jqevent.keyCode || */
 					0;
-			if (keyCode == 13)
-				keyCode = KeyEvent.VK_ENTER;
-			if (keyCode == KeyEvent.VK_ENTER) {
-				if (ui.handleEnter(eventType)) {
-					// JTextField
-					break;
+			if (keyCode == 13 || keyCode == KeyEvent.VK_ENTER)
+				ui.handleEnter(eventType);
+			// fall through
+		case KeyEvent.KEY_TYPED:
+			setCaret = false;
+			break;
+		case KeyEvent.KEY_RELEASED:
+			working = true;
+			if (ui.checkNewEditorTextValue()) {
+				if (dot >= 0) {
+					System.out.println("textListener text change");
+					ui.setJSMarkAndDot(dot, dot, false);
+					setCaret = false;
 				}
 			}
-			if (eventType == KeyEvent.KEY_PRESSED) {
-				setCaret = false;
-			} else {
-				working = true;
-				if (ui.checkNewEditorTextValue())
-					if (dot >= 0) {
-						System.out.println("textListener text change");
-						ui.setJSMarkAndDot(dot, dot, false);
-						return handledOrNot;
-					}
-				working = false;
-			}
+			working = false;
 			break;
 		}
-	
 		if (setCaret)
 			ui.setJavaMarkAndDot(markDot);
-
-		return handledOrNot;
+		return JSComponentUI.HANDLED;
 	}
 
 	@Override
 	public void insertUpdate(DocumentEvent e) {
-		
-	//	System.out.println("textlistener insertupdate");
 		if (!working)
 			ui.setJSTextDelayed();
 	}
 
 	@Override
 	public void removeUpdate(DocumentEvent e) {
-	//	System.out.println("textlistener removeupdate");
 		if (!working)
 			ui.setJSTextDelayed();
 	}
 
 	@Override
 	public void changedUpdate(DocumentEvent e) {
-	//	System.out.println("textlistener change");
 		if (!working)
 			ui.setJSTextDelayed();
-	}
-
-	@Override
-	public void caretUpdate(CaretEvent e) {
-//		ui.updateJSCursor("caret");
 	}
 
 }

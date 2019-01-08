@@ -91,7 +91,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			DOMNode.setSize(frameNode, w, h);
 			DOMNode.setAttr(frameNode, "ui", this);
 			DOMNode.setTopLeftAbsolute(frameNode, 0, 0);
-			setJ2sMouseHandler(frameNode);
+			setJ2sMouseHandler();
 			titleBarNode = newDOMObject("div", id + "_titlebar");
 			DOMNode.setTopLeftAbsolute(titleBarNode, 0, 0);
 			DOMNode.setStyles(titleBarNode, "background-color", "#E0E0E0", "height", "20px", "font-size", "14px",

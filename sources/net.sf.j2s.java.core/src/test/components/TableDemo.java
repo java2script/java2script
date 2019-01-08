@@ -29,7 +29,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package components;
+package test.components;
 
 /*
  * TableDemo.java requires no other files.
@@ -44,8 +44,6 @@ import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
-
-import components.TableDemo.DemoColor;
 
 import java.awt.Color;
 import java.awt.Component;

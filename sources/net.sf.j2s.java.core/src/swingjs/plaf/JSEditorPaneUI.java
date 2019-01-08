@@ -93,21 +93,13 @@ public class JSEditorPaneUI extends JSTextViewUI {
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
 
-		String type = (/** @j2sNative jQueryEvent.type || */"");
-
 		if (JSToolkit.isMouseEvent(eventType)) {
-			if (type == "drop") {
-				// do something about that - was eventType = 402;
-			}
-			// let DefaultCaret handle these
 			return NOT_HANDLED;
 		}
-
 		if (target != null) {
-			Boolean b;
-			if ((b = checkAllowKey(jQueryEvent)) != null) {
+			Boolean b = checkAllowKey(jQueryEvent);
+			if (b != null)
 				return b.booleanValue();
-			}
 
 			// A first touch down may trigger on the wrong event target
 			// and not have set up window.getSelection() yet.

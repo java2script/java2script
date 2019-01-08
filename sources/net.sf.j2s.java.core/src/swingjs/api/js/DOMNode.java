@@ -26,6 +26,8 @@ public abstract class DOMNode {
 
 	public abstract String getAttribute(String name);
 
+	public abstract void setAttribute(String attr, String val);
+
 	// "abstract" in the sense that these are the exact calls to JavaScript
 	
 	public abstract void appendChild(DOMNode node);

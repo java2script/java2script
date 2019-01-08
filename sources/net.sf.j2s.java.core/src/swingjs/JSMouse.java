@@ -26,13 +26,18 @@
  */
 package swingjs;
 
-import java.awt.event.InputEvent;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Event;
 import java.awt.Toolkit;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
+
+import javax.swing.JComponent;
+
+import swingjs.plaf.JSComponentUI;
 
 /**
  * JavaScript interface from JmolJSmol.js via handleOldJvm10Event (for now)
@@ -50,6 +55,13 @@ public class JSMouse {
 
 	public boolean processEvent(int id, int x, int y, int modifiers, long time, Object jqevent, int scroll) {
 		this.jqevent = jqevent;
+		switch (id) {
+		case KeyEvent.KEY_PRESSED:
+		case KeyEvent.KEY_TYPED:
+		case KeyEvent.KEY_RELEASED:
+			return JSKeyEvent.processKeyEvent(id, modifiers, jqevent, time);
+		}
+				
 		if (id != MouseEvent.MOUSE_WHEEL && id != MouseEvent.MOUSE_MOVED)
 			modifiers = applyLeftMouse(modifiers);
 		switch (id) {	
@@ -297,7 +309,6 @@ public class JSMouse {
 		e.setBData(bdata);
 		Object jqevent = this.jqevent;
 		Component c = null;
-		 		// SwingJS stop any further processing of this (mouse) event in the J2S system
 		/**
 		 * @j2sNative 
 		 * 
@@ -316,7 +327,7 @@ public class JSMouse {
 		  ((Container) e.getSource()).dispatchEvent(e);
 		}
 	}
-
+	
 	private long lasttime;
 	private int lastx, lasty, clickCount;
 	

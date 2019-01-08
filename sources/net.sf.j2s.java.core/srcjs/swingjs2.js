@@ -12100,17 +12100,64 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		return B;
 	}
 
-	// ////////////////// mouse events //////////////////////
+	// ////////////////// mouse and key events //////////////////////
 
+	var doIgnore = function(ev) {
+		var ignore = (J2S._dmouseOwner || ev.originalEvent.handled || !ev.target || ("" + ev.target.className)
+				.indexOf("swingjs-ui") >= 0);
+		ev.originalEvent.handled = true;
+		return ignore;
+	};
+
+	var getKeyModifiers = function(ev) {
+		var modifiers = 0;
+		if (ev.shiftKey)
+			modifiers |= (1 << 0) | (1 << 6); // InputEvent.SHIFT_MASK +
+												// InputEvent.SHIFT_DOWN_MASK;
+		if (ev.ctrlKey)
+			modifiers |= (1 << 1) | (1 << 7); // InputEvent.CTRL_MASK +
+												// InputEvent.CTRL_DOWN_MASK;
+		if (ev.metaKey)
+			modifiers |= (1 << 2) | (1 << 8); // InputEvent.META_MASK +
+												// InputEvent.META_DOWN_MASK;
+		if (ev.altKey)
+			modifiers |= (1 << 3) | (1 << 9); // InputEvent.ALT_MASK +
+												// InputEvent.ALT_DOWN_MASK;
+		if (ev.altGraphKey)
+			modifiers |= (1 << 5) | (1 << 13); // InputEvent.ALT_GRAPH_MASK +
+												// InputEvent.ALT_GRAPH_DOWN_MASK;
+		return modifiers;
+	}
+
+	J2S.setKeyListener = function(who) {
+		J2S.$bind(who, 'keydown keypress keyup', function(ev) {
+			if (doIgnore(ev))
+				return true;
+			if (ev.target.getAttribute("role")) {
+				// TODO -- check this
+				return true;
+			}
+			var target = ev.target["data-keycomponent"];
+			var who = ev.target;
+			var id;
+			switch (ev.type) {
+			case "keypress":
+				id = 400;
+				break;
+			case "keydown":
+				id = 401;
+				break;
+			case "keyup":
+				id = 402;
+				break;
+			}
+			who.applet._processEvent(id, [0,0,getKeyModifiers(ev)], ev, who._frameViewer);
+			return !!(target);
+		});
+	}
+	
 	J2S.setMouse = function(who, isSwingJS) {
 		// swingjs.api.J2SInterface
-
-		var doIgnore = function(ev) {
-			var ignore = (J2S._dmouseOwner || ev.originalEvent.handled || !ev.target || ("" + ev.target.className)
-					.indexOf("swingjs-ui") >= 0);
-			ev.originalEvent.handled = true;
-			return ignore;
-		};
 
 		var checkStopPropagation = function(ev, ui, handled, target) {
 			if (ui && ui.checkStopPropagation$O$Z) {
@@ -12176,7 +12223,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 			}
 
 			J2S.setMouseOwner(null);
-			var xym = J2S._jsGetXY(who, ev, 0);
+			var xym = getXY(who, ev, 0);
 			if (!xym)
 				return false;
 			who.applet._processEvent(500, xym, ev, who._frameViewer);// MouseEvent.MOUSE_CLICK
@@ -12206,7 +12253,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 			var scroll = (oe.detail ? oe.detail
 					: (J2S.featureDetection.os == "mac" ? 1 : -1)
 							* oe.wheelDelta); // Mac and PC are reverse; but
-			var xym = J2S._jsGetXY(who, ev, 0);
+			var xym = getXY(who, ev, 0);
 
 			if (xym) {
 				xym.push(scroll < 0 ? -1 : 1)
@@ -12235,7 +12282,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 			if ((ev.type == "touchstart") && J2S._gestureUpdate(who, ev))
 				return !!target;
 			J2S._setConsoleDiv(who.applet._console);
-			var xym = J2S._jsGetXY(who, ev, 0);
+			var xym = getXY(who, ev, 0);
 			if (xym) {
 				if (ev.button != 2 && J2S.Swing && J2S.Swing.hideMenus)
 					J2S.Swing.hideMenus(who.applet);
@@ -12288,7 +12335,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 			who.isDragging = false;
 			
 			if (ev.type != "touchend" || !J2S._gestureUpdate(who, ev)) {
-				var xym = J2S._jsGetXY(who, ev, 502);
+				var xym = getXY(who, ev, 502);
 				if (xym)
 					who.applet._processEvent(502, xym, ev, who._frameViewer);// MouseEvent.MOUSE_RELEASED
 			}
@@ -12310,7 +12357,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 				who.applet._appletPanel.startHoverWatcher$Z(true);
 			if (J2S._mouseOwner && !J2S._mouseOwner.isDragging)
 				J2S.setMouseOwner(null);
-			var xym = J2S._jsGetXY(who, ev, 0);
+			var xym = getXY(who, ev, 0);
 			if (!xym)
 				return false;
 			who.applet._processEvent(504, xym, ev, who._frameViewer);// MouseEvent.MOUSE_ENTERED
@@ -12331,7 +12378,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 				J2S.setMouseOwner(null);
 			if (who.applet._appletPanel)
 				who.applet._appletPanel.startHoverWatcher$Z(false);
-			var xym = J2S._jsGetXY(who, ev, 0);
+			var xym = getXY(who, ev, 0);
 			if (!xym)
 				return false;
 			who.applet._processEvent(505, xym, ev);// MouseEvent.MOUSE_EXITED
@@ -12393,7 +12440,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		var isTouch = (ev.type == "touchmove");
 		if (isTouch && J2S._gestureUpdate(who, ev))
 			return false;
-		var xym = J2S._jsGetXY(who, ev, id);
+		var xym = getXY(who, ev, id);
 		if (!xym)
 			return false;
 
@@ -12463,30 +12510,10 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 				break;
 			}
 		}
-		return modifiers | J2S.getKeyModifiers(ev);
+		return modifiers | getKeyModifiers(ev);
 	}
 
-	J2S.getKeyModifiers = function(ev) {
-		var modifiers = 0;
-		if (ev.shiftKey)
-			modifiers |= (1 << 0) | (1 << 6); // InputEvent.SHIFT_MASK +
-												// InputEvent.SHIFT_DOWN_MASK;
-		if (ev.ctrlKey)
-			modifiers |= (1 << 1) | (1 << 7); // InputEvent.CTRL_MASK +
-												// InputEvent.CTRL_DOWN_MASK;
-		if (ev.metaKey)
-			modifiers |= (1 << 2) | (1 << 8); // InputEvent.META_MASK +
-												// InputEvent.META_DOWN_MASK;
-		if (ev.altKey)
-			modifiers |= (1 << 3) | (1 << 9); // InputEvent.ALT_MASK +
-												// InputEvent.ALT_DOWN_MASK;
-		if (ev.altGraphKey)
-			modifiers |= (1 << 5) | (1 << 13); // InputEvent.ALT_GRAPH_MASK +
-												// InputEvent.ALT_GRAPH_DOWN_MASK;
-		return modifiers;
-	}
-
-	J2S._jsGetXY = function(who, ev, id) {
+	var getXY = function(who, ev, id) {
 		// id 0, 502, or 503 only 
 		if (!who.applet._ready || J2S._touching && ev.type.indexOf("touch") < 0)
 			return false;
@@ -13174,6 +13201,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 
 		proto._processEvent = function(type, xym, ev, frameViewer) {
 			// xym is [x,y,modifiers,wheelScroll]
+			// also processes key events
 			(frameViewer || this._appletPanel).processMouseEvent$I$I$I$I$J$O$I(
 					type, xym[0], xym[1], xym[2], System.currentTimeMillis$(),
 					ev, xym[3]);

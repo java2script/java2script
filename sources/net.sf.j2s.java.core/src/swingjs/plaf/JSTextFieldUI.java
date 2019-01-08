@@ -8,6 +8,7 @@ import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JTextField;
 
+import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
 
 /**
@@ -36,7 +37,6 @@ public class JSTextFieldUI extends JSTextUI {
 			// vCenter(domNode, -10);
 			//new 1/5/2019 setDataComponent(domNode);
 			bindJSKeyEvents(domNode, false);
-			addJQueryFocusCallbacks();
 		}
 		setPadding(editor.getMargin());
 		textListener.checkDocument();
@@ -63,9 +63,11 @@ public class JSTextFieldUI extends JSTextUI {
 	boolean handleEnter(int eventType) {
 		if (eventType == KeyEvent.KEY_PRESSED) {
 			Action a = getActionMap().get(JTextField.notifyAction);
-			if (a != null) {				
+			if (a != null) {
+				JSToolkit.setIsDispatchThread(true);
 				a.actionPerformed(new ActionEvent(c, ActionEvent.ACTION_PERFORMED,
 						JTextField.notifyAction, System.currentTimeMillis(), 0));
+				JSToolkit.setIsDispatchThread(false);
 			}
 		}
 		return true;

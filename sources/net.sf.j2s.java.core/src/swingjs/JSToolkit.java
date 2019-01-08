@@ -361,13 +361,12 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		 *            };
 		 * 
 		 */
-		{
-		}
-		int ms = (isMouseEvent(event.getID()) ? -1 : 0);
-		if (andWait)
+		if (andWait) {
 			invokeAndWait(f, id);
-		else
+		} else {
+			int ms = (isMouseEvent(event.getID()) ? -1 : 0);
 			dispatch(f, ms, id);
+		}
 	}
 
 	public static boolean isMouseEvent(int id) {
@@ -455,9 +454,6 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	}
 
 	public static boolean isDispatchThread() {
-//		 *            System.out.println("checking dispatch thread " +
-//		 *            SwingJS.eventID); 
-//		 *            
 		/**
 		 * @j2sNative
 		 * 
@@ -467,6 +463,20 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		{
 			return false;
 		}
+	}
+
+	/**
+	 * Fake a dispatch thread -- see JSTextUI
+	 * 
+	 * @param b
+	 */
+	public static void setIsDispatchThread(boolean b) {
+		/**
+		 * @j2sNative
+		 * 
+		 *            SwingJS.eventID = (b ? 1 : 0);
+		 * 
+		 */
 	}
 
 //	public static void forceRepaint(Component c) {
@@ -963,21 +973,21 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		return focusManager;
 	}
 
-	public static void consumeEvent(InputEvent e) {
+	public static void consumeEvent(Object e) {
 		// SwingJS stop any further processing at all within the browser
+		Object jqevent = null;
+		if (e instanceof InputEvent) {
+			jqevent = /** @j2sNative e.bdata.jqevent || */null; 
+		} else {
+			jqevent = e;
+		}
+		if (jqevent == null)
+			return;
 		/**
-		 * @j2sNative
+		 * @j2sNative 
+		 * 		jqevent.stopPropagation();
+		 *      jqevent.preventDefault(); 
 		 * 
-		 *  if (e.bdata.jqevent) { 
-		 *  
-		 *  
-		 *  
-		 *  if (e.bdata.jqevent.type != "mousemove")
-System.out.println("JSToolkit consuming " + e.bdata.jqevent.type);
-		
-		 * 		e.bdata.jqevent.stopPropagation();
-		 *      e.bdata.jqevent.preventDefault(); 
-		 *  }
 		 */
 	}
 

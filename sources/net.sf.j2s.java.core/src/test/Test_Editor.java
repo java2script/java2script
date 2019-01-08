@@ -14,6 +14,13 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
@@ -29,6 +36,7 @@ import java.util.List;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -50,6 +58,47 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 	public Test_Editor() {
 
+		JPanel ptop = new JPanel();
+		ptop.setPreferredSize(new Dimension(300,100));
+		ptop.setBackground(Color.LIGHT_GRAY);
+//		ptop.setOpaque(true);
+		KeyListener ka = new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				showKeyEvent(e);
+			}
+			@Override
+			public void keyTyped(KeyEvent e) {
+				showKeyEvent(e);
+			}
+			@Override
+			public void keyReleased(KeyEvent e) {
+				showKeyEvent(e);
+			}
+		};
+		ptop.addKeyListener(ka);
+		ptop.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				System.out.println("Test_Editor ptop mouse pressed");
+				ptop.requestFocusInWindow();
+			}
+			
+		});
+		ptop.addFocusListener(new FocusListener() {
+
+			@Override
+			public void focusGained(FocusEvent e) {
+				ptop.setBackground(Color.LIGHT_GRAY);
+			}
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				ptop.setBackground(Color.MAGENTA);
+			}
+			
+		});
+		add(ptop, BorderLayout.NORTH);
 		String test = "  34567890\n1234567890\n  345\n     ";
 
 		setTitle("testing editor");
@@ -87,7 +136,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 			@Override
 			public void caretUpdate(CaretEvent e) {
-				System.out.println("JTextPane caret:" + e);
+				System.out.println("Test_Editor JTextPane caret:" + e);
 				// dumpRoot(editor.getDocument());
 			}
 
@@ -103,7 +152,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				System.out.println("editor mouse pressed");
+				System.out.println("Test_Editor editor mouse pressed");
 			}
 
 			@Override
@@ -136,7 +185,8 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 		
 		
 		c = new DefaultCaret() {
-		    protected void fireStateChanged() {
+		    @Override
+			protected void fireStateChanged() {
 		    	System.out.println("Test_Editor area caret firestatechanged " + area.getCaretPosition());
 		    	super.fireStateChanged();
 		    }
@@ -155,7 +205,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 			@Override
 			public void caretUpdate(CaretEvent e) {
-				System.out.println("JTextArea  caret:" + e);
+				System.out.println("Test_Editor JTextArea  caret:" + e);
 			}
 
 		});
@@ -170,7 +220,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				System.out.println("JTextArea mouse pressed" + e.getX() + " " + e.getY());
+				System.out.println("Test_Editor JTextArea mouse pressed" + e.getX() + " " + e.getY());
 			}
 
 			@Override
@@ -198,7 +248,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("JTextField action");
+				System.out.println("Test_Editor JTextField action");
 			}
 			
 		});
@@ -207,7 +257,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 			@Override
 			public void caretUpdate(CaretEvent e) {
-				System.out.println("JTextField  caret:" + e);
+				System.out.println("Test_Editor JTextField  caret:" + e);
 			}
 
 		});
@@ -348,7 +398,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 				StyleConstants.setBold(attrs, isBold);
 				editor.getStyledDocument().setCharacterAttributes(start, end - start, attrs, false);
 				// note that text selection now disappears
-				System.out.println("caret now " + editor.getCaretPosition() + " " + editor.getSelectedText());
+				System.out.println("Test_Editor caret now " + editor.getCaretPosition() + " " + editor.getSelectedText());
 			}
 
 		});
@@ -380,6 +430,19 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 		
 		new DropTarget(editor, this);
 		new DropTarget(area, this);
+	}
+
+	protected void showKeyEvent(KeyEvent e) {		
+		System.out.println("Test_Editor keyEvent id=" + e.getID() 
+				+ " " + ((JComponent) e.getSource()).getUIClassID() 
+				+ " char=" + e.getKeyChar() 
+				+ " code=" + e.getKeyCode() 
+				+ " loc=" + e.getKeyLocation()
+				+ "\n mod=" + e.getModifiers()
+				+ " " + KeyEvent.getKeyModifiersText(e.getModifiers())
+				+ " modx=" + e.getModifiersEx()
+				+ " " + KeyEvent.getKeyModifiersText(e.getModifiersEx())
+		);
 	}
 
 	protected void dumpRoot(Document document) {

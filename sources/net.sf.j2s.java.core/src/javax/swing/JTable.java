@@ -3102,6 +3102,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 			r.width = 0;
 			valid = false;
 		} else {
+			r.x = 0;
 			TableColumnModel cm = getColumnModel();
 			if (getComponentOrientation().isLeftToRight()) {
 				for (int i = 0; i < column; i++) {

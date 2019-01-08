@@ -54,6 +54,8 @@ public interface J2SInterface {
 	
 	void setMouse(DOMNode frameNode, boolean isSwingJS);
 
+	void setKeyListener(DOMNode node);
+	
 	int setWindowZIndex(DOMNode domNode, int pos);
 
 	void unsetMouse(DOMNode frameNode);

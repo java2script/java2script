@@ -19,6 +19,7 @@ import java.awt.Toolkit;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.peer.DropTargetPeer;
 import java.awt.event.FocusEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.PaintEvent;
 import java.awt.image.ColorModel;
 import java.awt.image.ImageObserver;
@@ -635,9 +636,13 @@ public class JSComponentUI extends ComponentUI
 		}
 	}
 
+	/**
+	 * This must remain the only place that domNode is set to null;
+	 */
 	public void reInit() {
 		setTainted();
 		domNode = null;
+		keysEnabled = false;
 		newID(true);
 	}
 
@@ -666,6 +671,11 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected void setDataComponent(DOMNode button) {
 		DOMNode.setAttr(button, "data-component", c);
+	}
+
+	
+	protected void setDataKeyComponent(DOMNode node) {
+		DOMNode.setAttr(node, "data-keycomponent", c);
 	}
 
 	/**
@@ -706,11 +716,26 @@ public class JSComponentUI extends ComponentUI
 	 * @param node
 	 * @param isFrame
 	 */
-	protected void setJ2sMouseHandler(DOMNode node) {
+	protected void setJ2sMouseHandler() {
 		// The DOM attributes applet and _frameViewer are necessary for proper 
 		// direction to the target
-		DOMNode.setAttrs(node, "applet", applet, "_frameViewer", jc.getFrameViewer());
-		J2S.setMouse(node, true);
+		DOMNode.setAttrs(domNode, "applet", applet, "_frameViewer", jc.getFrameViewer());
+		J2S.setMouse(domNode, true);
+	}
+
+	protected void setJ2SKeyHandler() {
+		keysEnabled = true;
+		if (focusNode == null)
+			focusNode = domNode;
+		DOMNode.setAttrs(focusNode, "applet", applet, "_frameViewer", jc.getFrameViewer());
+		setDataKeyComponent(focusNode);
+		J2S.setKeyListener(focusNode);
+		setTabIndex(0);
+	}
+	
+	protected void setTabIndex(int i) {
+		if (focusNode != null)
+			focusNode.setAttribute("tabindex", "" + i);
 	}
 
 	public static JSComponentUI focusedUI;
@@ -731,12 +756,26 @@ public class JSComponentUI extends ComponentUI
 		/**
 		 * @j2sNative
 		 * 
-		 * 			node.focus(function() {me.notifyFocus$Z(true)});
-		 *            node.blur(function() {try{me.notifyFocus$Z(false)}catch(e){}});
+		 * 			node.focus(function() {
+		 * 				System.out.println("focus " + me.id);
+		 * 				me.notifyFocus$Z(true);
+		 * 				System.out.println("focus " + me.id);
+		 * 			});
+		 *            node.blur(function() {
+		 *            try{
+		 * 				System.out.println("focus blur " + me.id);
+		 *            me.notifyFocus$Z(false);
+		 * 				System.out.println("focus blur " + me.id);
+		 *            }catch(e){
+		 *              System.out.println("focus error blur " + me.id);
+		 *            }
+		 *            });
 		 */
 	}
 
 	
+	private boolean keysEnabled;
+
 	/**
 	 * for jQuery return
 	 */
@@ -757,8 +796,11 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected void bindJSKeyEvents(DOMNode node, boolean addFocusAndDnD) {
 		setDataUI(node);
+		keysEnabled = true;
 		bindJQueryEvents(node, "keydown keypress keyup" + (addFocusAndDnD ? " focusout"// dragover drop"
 				: ""), Event.KEY_PRESS);
+		addJQueryFocusCallbacks();
+
 	}
 
 	/**
@@ -1084,10 +1126,14 @@ public class JSComponentUI extends ComponentUI
 		}
 		return domNode;
 	}
-	
+				
 	protected DOMNode updateDOMNodeCUI() {
 		if (cellComponent != null) {
 			updateCell(cellWidth, cellHeight);
+		}
+		
+		if (!keysEnabled && jc.eventTypeEnabled(KeyEvent.KEY_PRESSED)) {
+			setJ2SKeyHandler();
 		}
 		return domNode;
 	}
@@ -2530,22 +2576,25 @@ public class JSComponentUI extends ComponentUI
 			// early,
 			// before focus has been obtained.
 			focusedUI = this;
-			Toolkit.getEventQueue().postEvent(e);
+			//Toolkit.getEventQueue().postEvent(e);
 		} else {
 			focusedUI = null;
-			/**
-			 * @j2xxsNative
-			 * 
-			 * 				this.c.processEvent(e);
-			 * 
-			 */
-			{
-				// We must be certain that the lost message arrives before the
-				// gained.
-				Toolkit.getEventQueue().dispatchEventAndWait(e, c);
-			}
-
 		}
+//			/**
+//			 * @j2sNative
+//			 * 
+//			 * 				this.c.processEvent(e);
+//			 * 
+//			 */
+//			{
+//				// We must be certain that the lost message arrives before the
+//				// gained.
+//				Toolkit.getEventQueue().dispatchEventAndWait(e, c);
+//			}
+//
+//		}
+		System.out.println("focus for " + jc.getUIClassID() + " " + focusGained);
+		jc.dispatchEvent(e);
 	}
 
 	public int getZIndex(String what) {

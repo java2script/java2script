@@ -12,6 +12,8 @@ import javax.swing.JSpinner;
 import javax.swing.LookAndFeel;
 import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
+
+import swingjs.JSKeyEvent;
 import swingjs.api.js.DOMNode;
 
 /**
@@ -43,7 +45,6 @@ public class JSSpinnerUI extends JSLightweightUI {
 			domNode.appendChild(up);
 			domNode.appendChild(dn);
 			enableNodes = new DOMNode[] { valueNode, up, dn };
-			addJQueryFocusCallbacks();
 		}
 		setCssFont(setValue(), c.getFont());
 		int w = spinner.getWidth();//(spinner.isPreferredSizeSet() ? spinner.getPreferredSize().width : 70);
@@ -125,11 +126,13 @@ public class JSSpinnerUI extends JSLightweightUI {
 			break;
 		case KeyEvent.KEY_PRESSED:
 			if (keyCode == KeyEvent.VK_ENTER) {
-				try {
-					spinner.setValue(new Integer(Integer.parseInt("" + DOMNode.getAttr(valueNode, "value"))));
-				} catch (Throwable e) {
-					// ignore
-				}
+				if ((/** @j2sNative jQueryEvent.type || */
+				"keydown") == "keydown")
+					try {
+						spinner.setValue(new Integer(Integer.parseInt("" + DOMNode.getAttr(valueNode, "value"))));
+					} catch (Throwable e) {
+						// ignore
+					}
 				return CONSUMED; // not sure on this?
 			}
 			break;

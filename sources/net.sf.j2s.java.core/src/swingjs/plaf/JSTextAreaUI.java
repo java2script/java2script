@@ -6,6 +6,7 @@ import java.beans.PropertyChangeEvent;
 
 import javax.swing.JTextArea;
 
+import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
 
 /**
@@ -46,19 +47,10 @@ public class JSTextAreaUI extends JSTextViewUI {
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
 		if (prop == "ancestor") {
-			setJ2sMouseHandler(domNode);
+			setJ2sMouseHandler();
 		}
 		super.propertyChange(e);
 	}
-	
-	@Override
-	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
-		Boolean b;
-		if ((b = checkAllowKey(jQueryEvent)) != null)
-			return b.booleanValue();
-		return super.handleJSEvent(target, eventType, jQueryEvent);
-	}
-
 	
 	/**
 	 * Get the real height and width of the text in a JavaScript textarea
