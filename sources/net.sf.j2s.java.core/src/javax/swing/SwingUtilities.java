@@ -1019,10 +1019,18 @@ public class SwingUtilities implements SwingConstants
             	if (ui.textNode == null) {
             		textR.width = fm.stringWidth(text);
             		textR.height = fm.getHeight();
+            	} else if (text.length() == 0) {
+            		textR.width = 1;
+            		textR.height = fm.getHeight();
             	} else {
+            		String t = text.replace(' ', '\u00A0'); // no-break space
+            		if (t != text)
+            			DOMNode.setAttr(ui.textNode, "innerHTML", t);
             		Dimension d = ui.getHTMLSize(ui.textNode);
-            		textR.width = d.width;
-            		textR.height = d.height;
+            		if (t != text)
+            			DOMNode.setAttr(ui.textNode, "innerHTML", text);            			
+            		textR.width = (d.width == 0 ? 1 : d.width);
+            		textR.height = (d.height == 0 ? fm.getHeight() : d.height);
             	}
             	// Take into account the left and right side bearings.
                 // This gives more space than it is actually needed,
