@@ -355,7 +355,8 @@ public abstract class InputEvent extends ComponentEvent {
 	@Override
 	public void consume() {
 		JSComponentUI ui = (JSComponentUI) ((JComponent) source).getUI();
-		if (bdata != null && ui != null && ui.buttonListener == null && !ui.j2sDoPropagate) {
+		if (bdata != null && ui != null && ui.buttonListener == null 
+				&& ((/** @j2sNative !this.bdata.doPropagate || */false))) {
 			JSToolkit.consumeEvent(this);
 		}
 		consumed = true;

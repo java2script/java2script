@@ -313,9 +313,11 @@ public class JSMouse {
 		 * @j2sNative 
 		 * 
 		 * bdata.jqevent = jqevent;
-		 * 
-		 * c = jqevent.target["data-component"];
+		 * bdata.source = c = jqevent.target["data-component"];
+		 * bdata.doPropagate = c && c.ui.j2sDoPropagate;
 		 */
+		
+		// bdata.doPropagate will be tested in InputEvent.doConsume.
 		
 		// the key here is that if we have a data-component, go directly to its
 		// container and dispatch the event; if we go through the event queue, any e.consume()
