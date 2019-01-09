@@ -723,6 +723,21 @@ public class JSComponentUI extends ComponentUI
 		J2S.setMouse(domNode, true);
 	}
 
+	/**
+	 * fired by JSComponent when key listeners are registered
+	 * 
+	 * @param on
+	 */
+	public void enableJSKeys(boolean on) {
+		if (!on) {
+			setTabIndex(-1);
+		} else if (keysEnabled) {
+			setTabIndex(0);
+		} else {
+			setJ2SKeyHandler();
+		}
+	}
+
 	protected void setJ2SKeyHandler() {
 		keysEnabled = true;
 		if (focusNode == null)
@@ -734,7 +749,11 @@ public class JSComponentUI extends ComponentUI
 	}
 	
 	protected void setTabIndex(int i) {
-		if (focusNode != null)
+		if (focusNode == null)
+			return;
+		if (i < 0)
+			focusNode.removeAttribute("tabindex");
+		else
 			focusNode.setAttribute("tabindex", "" + i);
 	}
 
@@ -1128,16 +1147,10 @@ public class JSComponentUI extends ComponentUI
 	}
 				
 	protected DOMNode updateDOMNodeCUI() {
-		if (cellComponent != null) {
-			updateCell(cellWidth, cellHeight);
-		}
-		
-		if (!keysEnabled && jc.eventTypeEnabled(KeyEvent.KEY_PRESSED)) {
-			setJ2SKeyHandler();
-		}
+		if (cellComponent != null)
+			updateCell(cellWidth, cellHeight);		
 		return domNode;
 	}
-
 
 	private void updateCell(int width, int height) {
 		DOMNode.setStyles(domNode, "width", "100%", "height", "100%");
@@ -2125,9 +2138,9 @@ public class JSComponentUI extends ComponentUI
 		boolean ltr = jc.getComponentOrientation().isLeftToRight();
 		boolean alignLeft, alignRight, alignHCenter, textRight;
 		if (menuAnchorNode == null) {
-			alignLeft = (hAlign == SwingConstants.LEFT
+			alignLeft = (w == 0 || hAlign == SwingConstants.LEFT
 					|| hAlign == (ltr ? SwingConstants.LEADING : SwingConstants.TRAILING));
-			alignRight = (hAlign == SwingConstants.RIGHT
+			alignRight = w != 0 && (hAlign == SwingConstants.RIGHT
 					|| hAlign == (ltr ? SwingConstants.TRAILING : SwingConstants.LEADING));
 			alignHCenter = (!alignLeft && !alignRight);
 			textRight = (hTextPos == SwingConstants.RIGHT
