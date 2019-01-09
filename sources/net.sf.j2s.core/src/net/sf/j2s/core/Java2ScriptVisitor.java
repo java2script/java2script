@@ -2600,7 +2600,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	public boolean visit(Assignment node) {
 		// note that this is not
-		// var x = .....
+		// var x = ..... -- that is a visit(VariableDeclaration)
 		//
 		// includes: =
 		// +=, -=, *=, /=, %=
@@ -2611,6 +2611,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		Expression left = node.getLeftHandSide();
 		Expression right = node.getRightHandSide();
+		
+//		buffer.append("/* assign left=" + left  + " " + left.getClass().getName() + " right=" + right + right.getClass().getName() + "*/");
+
 		ITypeBinding leftTypeBinding = left.resolveTypeBinding();
 		ITypeBinding rightTypeBinding = right.resolveTypeBinding();
 		String rightName = (rightTypeBinding == null ? null : rightTypeBinding.getName());
@@ -3216,14 +3219,17 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * </pre>
 	 */
 	public boolean visit(PrefixExpression node) {
-		if (getConstantValue(node, true))
-			return false;
+		Expression exp = node.getOperand();
+// NO! Don't do this! !(/** @j2sNative true||*/false  does not work 
+//		if (getConstantValue(node, true))
+//			return false;
 		String op = node.getOperator().toString();
+		
 		if ("~".equals(op)) {
 			buffer.append(op);
 			return true;
 		}
-		return addPrePost(node, node.getOperand(), node.getOperator().toString(), false);
+		return addPrePost(node, exp, node.getOperator().toString(), false);
 	}
 
 	public boolean visit(QualifiedName node) {
@@ -3876,6 +3882,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @param isToString
 	 */
 	private void addOperand(Expression exp, boolean isToString) {
+		
 		boolean needRtParen = false;//(exp instanceof ParenthesizedExpression && getJ2sJavadoc(exp, DOC_CHECK_ONLY) != null);
 		ITypeBinding binding = exp.resolveTypeBinding();
 		String name = binding.getName();
@@ -3998,6 +4005,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		String classIntArray = null;
 		String more = null;
+		
 		String prefix = (isAssignment ? "=" : "");
 		boolean fromChar = ("char".equals(rightName));
 		boolean fromIntType = ("long int short byte".indexOf(rightName) >= 0);
@@ -4252,8 +4260,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					buffer.append(toCharCode && name == "char" ? ")" + CHARCODEAT0 : ")." + name + "Value$()");
 					return true;
 				}
-			}
-			if (!(element instanceof ParenthesizedExpression) && getConstantValue(exp, true)) {
+			}			
+			if (!(element instanceof ParenthesizedExpression) && !(element instanceof PrefixExpression) && getConstantValue(exp, true)) {
 				return false;
 			}
 		}
@@ -5172,7 +5180,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private Object getConstant(Expression exp) {
 		boolean isOK = (getJ2sJavadoc(exp, DOC_CHECK_ONLY) == null);
 		if (!isOK) {
-			isOK = !(exp instanceof InfixExpression || exp instanceof ParenthesizedExpression);			
+			isOK = !(exp instanceof InfixExpression || exp instanceof PrefixExpression || exp instanceof ParenthesizedExpression);			
 		}
 		return (isOK ? exp.resolveConstantExpressionValue() : null); 
 	}
@@ -5295,9 +5303,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			// normal termination from item after last j2sjavadoc
 		}
 
-//		for (int i = 0, n = list.size(); i < n; i++) {
-//			System. out.println(i + "  " + (list.get(i) == null ? null : list.get(i).getClass().getName() + " " + list.get(i).getStartPosition() + "..." + (list.get(i).getStartPosition() + list.get(i).getLength())));
-//		}
+		//System.out.println("/**** list ****/");
+		//for (int i = 0, n = list.size(); i < n; i++) {
+		//	System. out.println(i + "  " + (list.get(i) == null ? null : list.get(i).getClass().getName() + " " + list.get(i).getStartPosition() + "..." + (list.get(i).getStartPosition() + list.get(i).getLength())));
+		//}
 
 		// and link javadoc to its closest block
 
@@ -5313,11 +5322,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					item = list.get(++i);
 				}
 				i++;
-				//System.out.println(">>>1 " + item.getStartPosition() + " " + item);
-				//if (item instanceof ParenthesizedExpression)
-				//	item = ((ParenthesizedExpression) item).getExpression();
 				Integer pt = Integer.valueOf(item.getStartPosition() * factor);
-				//System.out.println(">>>2 " + pt + " " + item);
 				List<Javadoc> docs = package_mapBlockJavadoc.get(pt);
 				if (docs == null)
 					package_mapBlockJavadoc.put(pt, docs = new ArrayList<Javadoc>());
