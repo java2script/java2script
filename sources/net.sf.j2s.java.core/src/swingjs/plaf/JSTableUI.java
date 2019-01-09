@@ -63,6 +63,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+import javax.swing.ToolTipManager;
 import javax.swing.TransferHandler;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
@@ -363,6 +364,11 @@ public class JSTableUI extends JSPanelUI {
 	}
 
 	JComponent editorComp;
+
+
+
+
+	private Boolean ttipEnabled;
 	
 	public void prepareDOMEditor(boolean starting, int row, int col) {
 		if (editorComp != null) {
@@ -371,15 +377,20 @@ public class JSTableUI extends JSPanelUI {
 		}
 		editorComp = (JComponent) table.getEditorComponent();
 		if (starting) {
+			boolean haveToolTip = /** @j2sNative !!javax.swing.ToolTipManager || */false;
+			ttipEnabled = new Boolean(haveToolTip && ToolTipManager.sharedInstance().isEnabled());
+			ToolTipManager.sharedInstance().setEnabled(false);
 			if (editorComp != null) {
 				editorComp.setVisible(false);
 				editorComp.setVisible(true);
 			}
-//			DOMNode td = CellHolder.findCellNode(this, null, row, col);
 		} else {
 			DOMNode td = CellHolder.findCellNode(this, null, table.getEditingRow(), table.getEditingColumn());
 			updateCellNode(td, row, col, 0, 0);
 			repaintCell(row, col);
+			if (ttipEnabled == Boolean.TRUE)
+				ToolTipManager.sharedInstance().setEnabled(true);
+			ttipEnabled = null;
 		}
 	}
 
