@@ -27,6 +27,7 @@
  */
 package java.awt;
 
+import java.awt.event.KeyListener;
 import java.awt.peer.ComponentPeer;
 import java.beans.PropertyChangeListener;
 import java.util.Arrays;
@@ -309,9 +310,9 @@ public abstract class JSComponent extends Component {
   }
   
   @Override
-  public void validateComponent() {
+  public void validate() {
 	  boolean wasValid = isValid();
-	  super.validateComponent();
+	  super.validate();
 	  if (ui != null && !wasValid)
 		  ((JSComponentUI)ui).endValidate();
 	  
@@ -329,5 +330,18 @@ public abstract class JSComponent extends Component {
 		checkBackgroundPainted(getJSGraphic2D(g));
 	}
 
+	@Override
+	public void addKeyListener(KeyListener l) {
+		super.addKeyListener(l);
+		if (l != null && ui != null)
+			((JSComponentUI)ui).enableJSKeys(true);
+	}
+
+	@Override
+	public void removeKeyListener(KeyListener l) {
+		super.removeKeyListener(l);
+		if (keyListener == null && ui != null)
+			((JSComponentUI)ui).enableJSKeys(false);
+	}
 
 }

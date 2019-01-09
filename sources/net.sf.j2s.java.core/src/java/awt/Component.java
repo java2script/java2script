@@ -2634,10 +2634,6 @@ public abstract class Component implements ImageObserver/*
 	 * @since JDK1.0
 	 */
 	public void validate() {
-		validateComponent();
-	}
-
-	public void validateComponent() {
 		synchronized (getTreeLock()) {
 			ComponentPeer peer = this.peer;
 			boolean wasValid = isValid();

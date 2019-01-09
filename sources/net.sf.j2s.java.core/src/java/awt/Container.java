@@ -1614,7 +1614,7 @@ public class Container extends JSComponent {
                 ((ContainerPeer)peer).endLayout();
             }
         }
-        validateComponent();
+        super.validate();
     }
 
     /**
