@@ -36,8 +36,10 @@ public abstract class DOMNode {
 	
 	public abstract DOMNode removeChild(DOMNode node);
 
+	public abstract void focus();
 	public abstract boolean hasFocus();
-
+	public abstract void blur();
+	
 	public abstract boolean play();
 
 	public abstract DOMNode removeAttribute(String attr);
@@ -278,6 +280,10 @@ public abstract class DOMNode {
 			p.removeChild(node);
 	}
 
+	/**
+	 * just detaches all the nodes; doesn't remove their listeners
+	 * @param node
+	 */
 	public static void detachAll(DOMNode node) {
 		/**
 		 * @j2sNative
@@ -309,5 +315,11 @@ public abstract class DOMNode {
 		 JSUtil.jQuery.$(container).append(node);
 		return container;
 	}
+
+	public static Component getComponentFor(DOMNode node) {
+		JSComponentUI ui = (JSComponentUI) (/** @j2sNative node.ui || node["data-ui"] || node["data-component"] || node["data-textcomponent"] || */  null);
+		return (ui == null ? null : ui.jc);
+	}
+
 
 }
