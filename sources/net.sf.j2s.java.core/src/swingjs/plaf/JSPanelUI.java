@@ -19,13 +19,15 @@ public class JSPanelUI extends JSLightweightUI {
 	
 	@Override
 	public DOMNode updateDOMNode() {
+		JRootPane root = jc.getRootPane();
 		if (domNode == null) {
-			JRootPane root = jc.getRootPane();
-			isContentPane = (root != null && jc == root.getContentPane());
 			domNode = newDOMObject("div", id);
 			if (root != null && root.getGlassPane() == c)
 				DOMNode.setVisible(domNode,  false);
 		}
+		isContentPane = (root != null && jc == root.getContentPane());
+		if (isContentPane) 
+			checkAllowDivOverflow();
 		return updateDOMNodeCUI();
 	}
 

@@ -89,7 +89,6 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			if (h == 0)
 				h = defaultHeight;
 			DOMNode.setSize(frameNode, w, h);
-			DOMNode.setAttr(frameNode, "ui", this);
 			DOMNode.setTopLeftAbsolute(frameNode, 0, 0);
 			setJ2sMouseHandler();
 			titleBarNode = newDOMObject("div", id + "_titlebar");

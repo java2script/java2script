@@ -26,7 +26,6 @@ public class JSDesktopIconUI extends JSPanelUI {
 	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			JRootPane root = jc.getRootPane();
-			isContentPane = (root != null && jc == root.getContentPane());
 			domNode = newDOMObject("div", id);
 			if (root != null && root.getGlassPane() == c)
 				DOMNode.setVisible(domNode,  false);

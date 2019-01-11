@@ -24,7 +24,7 @@ public class JSRootPaneUI extends JSLightweightUI {
 		if (domNode == null) {
 			domNode = newDOMObject("div", id);
 		}
-		// add code here for adjustments when changes in bounds or other properties occur.
+		checkAllowDivOverflow();
 		return domNode;
 	}
 
