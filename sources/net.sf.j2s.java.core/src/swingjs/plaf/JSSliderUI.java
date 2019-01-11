@@ -98,7 +98,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		if (isNew) {
 			domNode = wrap("div", id + "_wrap",
 					jqSlider = DOMNode.createElement("div", id));
-			$(domNode).addClass("swingjs");
+			$(domNode).addClass("swingjs"); //??
 			setJQuerySliderAndEvents();
 			setTainted();
 		} else if (isChanged) {
@@ -288,7 +288,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			myHeight += 10;
 			for (int i = 0; i < numTicks; i++) {
 				DOMNode node = DOMNode.createElement("div", id + "_t" + i);
-				$(node).addClass("swingjs");
+				$(node).addClass("swingjs");//??
 				$(node).addClass(tickClass);
 				boolean isMajor = (i % check == 0); 
 				float frac = (isHoriz == isInverted ? 1 - fracSpacing * i : fracSpacing

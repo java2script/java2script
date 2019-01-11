@@ -20,11 +20,11 @@ public class JSTextAreaUI extends JSTextViewUI {
 	@Override
 	public DOMNode updateDOMNode() {
 		
-		/**
-		 * @j2sNative
-		 * 
-		 * System.out.println("updateDOM textarea xxt");xxt = this;
-		 */
+//		/**
+//		 * @j2sNative
+//		 * 
+//		 * System.out.println("updateDOM textarea xxt");xxt = this;
+//		 */
 		
 		if (domNode == null) {
 			valueNode = domNode = newDOMObject("textarea", id);
@@ -83,19 +83,19 @@ public class JSTextAreaUI extends JSTextViewUI {
 			d.height = sh;
 	}
 
-	private Insets myInsets = new Insets(0, 0, 5, 5); //BH bottom,left?
+	private Insets myInsets = new Insets(0, 0, 0, 0); 
 	@Override
 	public Insets getInsets() {
 		return myInsets;
 	}
 	
-	@Override
-	protected Dimension getCSSAdjustment(boolean addingCSS) {
-		return (
-			//	addingCSS ? new Dimension(-5, -12) : 
-			new Dimension(0, 0)); 
-		// total hack -12 is to see full vertical scrollbar (Boltzmann)
-	}
+//	@Override
+//	protected Dimension getCSSAdjustment(boolean addingCSS) {
+//		return (
+//			//	addingCSS ? new Dimension(-5, -12) : 
+//			new Dimension(0, 0)); 
+//		// total hack -12 is to see full vertical scrollbar (Boltzmann)
+//	}
 
 	@Override
 	protected String getPropertyPrefix() {

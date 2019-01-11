@@ -67,7 +67,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
-import java.util.logging.Level;
 
 import javax.swing.JInternalFrame;
 
@@ -748,18 +747,17 @@ public abstract class Component implements ImageObserver/*
 	// return comp.backgroundEraseDisabled;
 	// }
 	//
-	// public Rectangle getBounds(Component comp) {
-	// return new Rectangle(comp.x, comp.y, comp.width, comp.height);
-	// }
-	//
-	// public boolean requestFocusInWindow(Component comp,
-	// CausedFocusEvent.Cause cause) {
-	// return comp.requestFocusInWindow(cause);
-	// }
-	//
-	// public void requestFocus(Component comp, CausedFocusEvent.Cause cause) {
-	// comp.requestFocus(cause);
-	// }
+	public Rectangle getBounds(Component comp) {
+		return new Rectangle(comp.x, comp.y, comp.width, comp.height);
+	}
+	
+	public boolean requestFocusInWindow(Component comp, CausedFocusEvent.Cause cause) {
+		return comp.requestFocusInWindow(cause);
+	}
+	
+	public void requestFocus(Component comp, CausedFocusEvent.Cause cause) {
+		comp.requestFocus(cause);
+	}
 	//
 	// public void setMixingCutoutShape(Component comp, Shape shape) {
 	// Region region = shape == null ? null :
@@ -1356,7 +1354,7 @@ public abstract class Component implements ImageObserver/*
 	@Deprecated
 	public void disable() {
 		if (enabled) {
-			// KeyboardFocusManager.clearMostRecentFocusOwner(this);
+			KeyboardFocusManager.clearMostRecentFocusOwner(this);
 			// synchronized (getTreeLock()) {
 			enabled = false;
 			// A disabled lw container is allowed to contain a focus owner.
@@ -1397,47 +1395,45 @@ public abstract class Component implements ImageObserver/*
 		return false;
 	}
 
-	// /**
-	// * Enables or disables input method support for this component. If input
-	// * method support is enabled and the component also processes key events,
-	// * incoming events are offered to
-	// * the current input method and will only be processed by the component or
-	// * dispatched to its listeners if the input method does not consume them.
-	// * By default, input method support is enabled.
-	// *
-	// * @param enable true to enable, false to disable
-	// * @see #processKeyEvent
-	// * @since 1.2
-	// */
-	// public void enableInputMethods(boolean enable) {
-	// if (enable) {
-	// if ((eventMask & AWTEvent.INPUT_METHODS_ENABLED_MASK) != 0)
-	// return;
-	//
-	// // If this component already has focus, then activate the
-	// // input method by dispatching a synthesized focus gained
-	// // event.
-	// if (isFocusOwner()) {
-	// InputContext inputContext = getInputContext();
-	// if (inputContext != null) {
-	// FocusEvent focusGainedEvent =
-	// new FocusEvent(this, FocusEvent.FOCUS_GAINED);
-	// inputContext.dispatchEvent(focusGainedEvent);
-	// }
-	// }
-	//
-	// eventMask |= AWTEvent.INPUT_METHODS_ENABLED_MASK;
-	// } else {
-	// if ((eventMask & AWTEvent.INPUT_METHODS_ENABLED_MASK) != 0) {
-	// InputContext inputContext = getInputContext();
-	// if (inputContext != null) {
-	// inputContext.endComposition();
-	// inputContext.removeNotify(this);
-	// }
-	// }
-	// eventMask &= ~AWTEvent.INPUT_METHODS_ENABLED_MASK;
-	// }
-	// }
+	/**
+	 * Enables or disables input method support for this component. If input method
+	 * support is enabled and the component also processes key events, incoming
+	 * events are offered to the current input method and will only be processed by
+	 * the component or dispatched to its listeners if the input method does not
+	 * consume them. By default, input method support is enabled.
+	 *
+	 * @param enable true to enable, false to disable
+	 * @see #processKeyEvent
+	 * @since 1.2
+	 */
+	public void enableInputMethods(boolean enable) {
+		if (enable) {
+			if ((eventMask & AWTEvent.INPUT_METHODS_ENABLED_MASK) != 0)
+				return;
+
+			// If this component already has focus, then activate the
+			// input method by dispatching a synthesized focus gained
+			// event.
+			if (isFocusOwner()) {
+//				InputContext inputContext = getInputContext();
+//				if (inputContext != null) {
+//					FocusEvent focusGainedEvent = new FocusEvent(this, FocusEvent.FOCUS_GAINED);
+//					inputContext.dispatchEvent(focusGainedEvent);
+//				}
+			}
+
+			eventMask |= AWTEvent.INPUT_METHODS_ENABLED_MASK;
+		} else {
+			if ((eventMask & AWTEvent.INPUT_METHODS_ENABLED_MASK) != 0) {
+//				InputContext inputContext = getInputContext();
+//				if (inputContext != null) {
+//					inputContext.endComposition();
+//					inputContext.removeNotify(this);
+//				}
+			}
+			eventMask &= ~AWTEvent.INPUT_METHODS_ENABLED_MASK;
+		}
+	}
 
 	/**
 	 * Shows or hides this component depending on the value of parameter
@@ -3762,11 +3758,11 @@ public abstract class Component implements ImageObserver/*
 		/*
 		 * 2. Allow the Toolkit to pass this to AWTEventListeners.
 		 */
-		
+
 		// SwingJS: This allows a developer to watch any events they wish to follow.
-		
-		 Toolkit toolkit = Toolkit.getDefaultToolkit();
-		 toolkit.notifyAWTEventListeners(e);
+
+		Toolkit toolkit = Toolkit.getDefaultToolkit();
+		toolkit.notifyAWTEventListeners(e);
 
 		/*
 		 * 3. If no one has consumed a key event, allow the KeyboardFocusManager to
@@ -3777,9 +3773,9 @@ public abstract class Component implements ImageObserver/*
 				// check for tab navigation:
 				// KeyboardFocusManager.getCurrentKeyboardFocusManager().
 				// processKeyEvent(this, (KeyEvent)e);
-				//if (e.isConsumed()) {
-				//	return;
-				//}
+				// if (e.isConsumed()) {
+				// return;
+				// }
 			}
 		}
 
@@ -4543,8 +4539,8 @@ public abstract class Component implements ImageObserver/*
 		keyListener = AWTEventMulticaster.add(keyListener, l);
 		newEventsOnly = true;
 
-		 // if this is a lightweight component, enable key events
-		 // in the native container.
+		// if this is a lightweight component, enable key events
+		// in the native container.
 //		 if (peer instanceof LightweightPeer) {
 //			 parent.proxyEnableEvents(AWTEvent.KEY_EVENT_MASK);
 //		 }
@@ -5210,7 +5206,8 @@ public abstract class Component implements ImageObserver/*
 	}
 
 	protected void processEventComp(AWTEvent e) {
-		boolean isActiveRetarget = /**@j2sNative !!e.dispatch$ ||*/false;
+		boolean isActiveRetarget = /** @j2sNative !!e.dispatch$ || */
+				false;
 		if (isActiveRetarget || e instanceof ActiveEvent) {
 			// SwingJS added because we are bypassing the standard queue
 			((ActiveEvent) e).dispatch();
@@ -5841,9 +5838,9 @@ public abstract class Component implements ImageObserver/*
 			//
 			peerFont = getFont();
 
-			if (getContainer() != null && !isAddNotifyComplete) {
-				getContainer().increaseComponentCount(this);
-			}
+//			if (getContainer() != null && !isAddNotifyComplete) {
+//				getContainer().increaseComponentCount(this);
+//			}
 
 			// Update stacking order
 			if (parent != null && parent.peer != null) {
@@ -5926,9 +5923,9 @@ public abstract class Component implements ImageObserver/*
 			// transferFocus(true);
 			// }
 
-			if (getContainer() != null && isAddNotifyComplete) {
-				getContainer().decreaseComponentCount(this);
-			}
+//			if (getContainer() != null && isAddNotifyComplete) {
+//				getContainer().decreaseComponentCount(this);
+//			}
 
 			// int npopups = (popups != null? popups.size() : 0);
 			// SwingJS TODO for (int i = 0 ; i < npopups ; i++) {
@@ -6564,8 +6561,7 @@ public abstract class Component implements ImageObserver/*
 		if (!success) {
 			KeyboardFocusManager.getCurrentKeyboardFocusManager(appContext).dequeueKeyEvents(time, this);
 		} else {
-			
-			
+
 		}
 		return success;
 	}
@@ -6852,7 +6848,6 @@ public abstract class Component implements ImageObserver/*
 	 * @since 1.2
 	 */
 	public boolean hasFocus() {
-//		return JSToolkit.hasFocus(this);
 		return (KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner() == this);
 	}
 

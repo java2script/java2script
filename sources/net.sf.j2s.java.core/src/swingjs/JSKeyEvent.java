@@ -43,21 +43,26 @@ public class JSKeyEvent extends KeyEvent {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			c = jqevent.target["data-keycomponent"]; ui = c.ui;
+		 * 			c = jqevent.target["data-keycomponent"]; ui = c && c.ui;
 		 */
-		if (c == null)
-			return false;
-		KeyEvent e = newJSKeyEvent(c, jqevent, 0, false);
-		// create our own KEY_PRESSED event
-		c.dispatchEvent(e);
-		if (!ui.j2sDoPropagate)
-			JSToolkit.consumeEvent(e);
-		if (!e.isConsumed() && id == KeyEvent.KEY_PRESSED && e.getKeyChar() != KeyEvent.CHAR_UNDEFINED) {
-			c.dispatchEvent(e = newJSKeyEvent(c, jqevent, KeyEvent.KEY_TYPED, false));
+		if (c != null) {
+			KeyEvent e = newJSKeyEvent(c, jqevent, 0, false);
+			// create our own KEY_PRESSED event
+			c.dispatchEvent(e);
 			if (!ui.j2sDoPropagate)
 				JSToolkit.consumeEvent(e);
+			if (!e.isConsumed() && id == KeyEvent.KEY_PRESSED && e.getKeyChar() != KeyEvent.CHAR_UNDEFINED) {
+				c.dispatchEvent(e = newJSKeyEvent(c, jqevent, KeyEvent.KEY_TYPED, false));
+				if (!ui.j2sDoPropagate)
+					JSToolkit.consumeEvent(e);
+			}
 		}
-
+		/**
+		 * @j2sNative
+		 * 
+		 * 			c = jqevent.target["data-keycomponent"]; ui = c.ui;
+		 */
+	
 		return true;
 	}
 

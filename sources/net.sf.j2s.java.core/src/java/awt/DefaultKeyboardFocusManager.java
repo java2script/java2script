@@ -1043,21 +1043,21 @@ public class DefaultKeyboardFocusManager extends KeyboardFocusManager {
          * If it is active we should redispatch key events after
          * we detected its correct target.
          */
-        if (KeyboardFocusManager.isProxyActive(ke)) {
-            Component source = (Component)ke.getSource();
-            Container target = source.getNativeContainer();
-            if (target != null) {
-                ComponentPeer peer = target.getPeer();
-                if (peer != null) {
-                    peer.handleEvent(ke);
-                    /**
-                     * Fix for 4478780 - consume event after it was dispatched by peer.
-                     */
-                    ke.consume();
-                }
-            }
-            return true;
-        }
+//        if (KeyboardFocusManager.isProxyActive(ke)) { // SwingJS false
+//            Component source = (Component)ke.getSource();
+//            Container target = source.getNativeContainer();
+//            if (target != null) {
+//                ComponentPeer peer = target.getPeer();
+//                if (peer != null) {
+//                    peer.handleEvent(ke);
+//                    /**
+//                     * Fix for 4478780 - consume event after it was dispatched by peer.
+//                     */
+//                    ke.consume();
+//                }
+//            }
+//            return true;
+//        }
 
         java.util.List<KeyEventDispatcher> dispatchers = getKeyEventDispatchers();
         if (dispatchers != null) {

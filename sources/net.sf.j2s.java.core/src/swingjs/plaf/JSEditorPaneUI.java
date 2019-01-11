@@ -51,18 +51,18 @@ public class JSEditorPaneUI extends JSTextViewUI {
 
 	@Override
 	public DOMNode updateDOMNode() {
-		System.out.println("update xxu dom");
-		/**
-		 * @j2sNative
-		 * 
-		 * xxu = this;
-		 * 
-
-		 */
-//		System.out.println("updatedom " + JSUtil.getStackTrace(4));
+//		System.out.println("update xxu dom");
+//		/**
+//		 * @j2sNative
+//		 * 
+//		 * xxu = this;
+//		 * 
+//
+//		 */
 		if (domNode == null) {
 			mustWrap = true;
-			domNode = newDOMObject("pre", id);
+			domNode = newDOMObject("div", id);
+			DOMNode.setStyles(domNode, "margin", "0px"); // default for pre is font-height
 			$(domNode).addClass("swingjs-doc");
 			setupViewNode();
 		}
@@ -338,7 +338,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		return false;
 	}
 
-	private Insets myInsets = new Insets(0, 0, 5, 5);
+	private Insets myInsets = new Insets(0, 0, 0, 0);
 
 	@Override
 	public Insets getInsets() {

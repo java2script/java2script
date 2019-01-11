@@ -1263,22 +1263,22 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// "PopupMenu.border", popupMenuBorder,
 				// Internal Frame Auditory Cue Mappings
 				// "PopupMenu.popupSound", null,
-				// // These window InputMap bindings are used when the Menu is
-				// // selected.
-				// "PopupMenu.selectedWindowInputMapBindings", new Object[] {
-				// "ESCAPE", "cancel",
-				// "DOWN", "selectNext",
-				// "KP_DOWN", "selectNext",
-				// "UP", "selectPrevious",
-				// "KP_UP", "selectPrevious",
-				// "LEFT", "selectParent",
-				// "KP_LEFT", "selectParent",
-				// "RIGHT", "selectChild",
-				// "KP_RIGHT", "selectChild",
-				// "ENTER", "return",
-				// "ctrl ENTER", "return",
-				// "SPACE", "return"
-				// },
+				 // These window InputMap bindings are used when the Menu is
+				 // selected.
+				 "PopupMenu.selectedWindowInputMapBindings", new Object[] {
+				 "ESCAPE", "cancel",
+				 "DOWN", "selectNext",
+				 "KP_DOWN", "selectNext",
+				 "UP", "selectPrevious",
+				 "KP_UP", "selectPrevious",
+				 "LEFT", "selectParent",
+				 "KP_LEFT", "selectParent",
+				 "RIGHT", "selectChild",
+				 "KP_RIGHT", "selectChild",
+				 "ENTER", "return",
+				 "ctrl ENTER", "return",
+				 "SPACE", "return"
+				 },
 				// "PopupMenu.selectedWindowInputMapBindings.RightToLeft", new Object[]
 				// {
 				// "LEFT", "selectChild",

@@ -572,14 +572,14 @@ public class Container extends JSComponent {
         {
             return false;
         }
-//        if (isFocusCycleRoot()) {
-//            FocusTraversalPolicy policy = getFocusTraversalPolicy();
-//            if (policy instanceof DefaultFocusTraversalPolicy) {
-//                if (!((DefaultFocusTraversalPolicy)policy).accept(focusOwnerCandidate)) {
-//                    return false;
-//                }
-//            }
-//        }
+        if (isFocusCycleRoot()) {
+            FocusTraversalPolicy policy = getFocusTraversalPolicy();
+            if (policy instanceof DefaultFocusTraversalPolicy) {
+                if (!((DefaultFocusTraversalPolicy)policy).accept(focusOwnerCandidate)) {
+                    return false;
+                }
+            }
+        }
         synchronized(getTreeLock()) {
             if (parent != null) {
                 return parent.canContainFocusOwner(focusOwnerCandidate);
@@ -596,6 +596,7 @@ public class Container extends JSComponent {
      */
     final boolean hasHeavyweightDescendants() {
         //checkTreeLock();
+    	// SwingJS we do not care
         return numOfHWComponents > 0;
     }
 
@@ -607,6 +608,7 @@ public class Container extends JSComponent {
      */
     final boolean hasLightweightDescendants() {
         //checkTreeLock();
+    	// SwingJS we do not care
         return numOfLWComponents > 0;
     }
 
@@ -2768,11 +2770,11 @@ public class Container extends JSComponent {
             // If some of the children had focus before disposal then it still has.
             // Auto-transfer focus to the next (or previous) component if auto-transfer
             // is enabled.
-//SwingJS            if (containsFocus() && KeyboardFocusManager.isAutoFocusTransferEnabledFor(this)) {
-//                if (!transferFocus(false)) {
-//                    transferFocusBackward(true);
-//                }
-//            }
+            if (containsFocus() && KeyboardFocusManager.isAutoFocusTransferEnabledFor(this)) {
+                if (!transferFocus(false)) {
+                    transferFocusBackward(true);
+                }
+            }
             if ( dispatcher != null ) {
                 dispatcher.dispose();
                 dispatcher = null;
@@ -3083,13 +3085,13 @@ public class Container extends JSComponent {
     public void setFocusTraversalKeys(int id,
                                       Set<? extends AWTKeyStroke> keystrokes)
     {
-//        if (id < 0 || id >= KeyboardFocusManager.TRAVERSAL_KEY_LENGTH) {
-//            throw new IllegalArgumentException("invalid focus traversal key identifier");
-//        }
-//
-//        // Don't call super.setFocusTraversalKey. The Component parameter check
-//        // does not allow DOWN_CYCLE_TRAVERSAL_KEYS, but we do.
-//        setFocusTraversalKeys_NoIDCheck(id, keystrokes);
+        if (id < 0 || id >= KeyboardFocusManager.TRAVERSAL_KEY_LENGTH) {
+            throw new IllegalArgumentException("invalid focus traversal key identifier");
+        }
+
+        // Don't call super.setFocusTraversalKey. The Component parameter check
+        // does not allow DOWN_CYCLE_TRAVERSAL_KEYS, but we do.
+        setFocusTraversalKeys_NoIDCheck(id, keystrokes);
     }
 
     /**
@@ -3605,138 +3607,6 @@ public class Container extends JSComponent {
         super.addPropertyChangeListener(propertyName, listener);
     }
 
-    // Serialization support. A Container is responsible for restoring the
-    // parent fields of its component children.
-
-//    /**
-//     * Container Serial Data Version.
-//     */
-//    private int containerSerializedDataVersion = 1;
-//
-//    /**
-//     * Serializes this <code>Container</code> to the specified
-//     * <code>ObjectOutputStream</code>.
-//     * <ul>
-//     *    <li>Writes default serializable fields to the stream.</li>
-//     *    <li>Writes a list of serializable ContainerListener(s) as optional
-//     *        data. The non-serializable ContainerListner(s) are detected and
-//     *        no attempt is made to serialize them.</li>
-//     *    <li>Write this Container's FocusTraversalPolicy if and only if it
-//     *        is Serializable; otherwise, <code>null</code> is written.</li>
-//     * </ul>
-//     *
-//     * @param s the <code>ObjectOutputStream</code> to write
-//     * @serialData <code>null</code> terminated sequence of 0 or more pairs;
-//     *   the pair consists of a <code>String</code> and <code>Object</code>;
-//     *   the <code>String</code> indicates the type of object and
-//     *   is one of the following:
-//     *   <code>containerListenerK</code> indicating an
-//     *     <code>ContainerListener</code> object;
-//     *   the <code>Container</code>'s <code>FocusTraversalPolicy</code>,
-//     *     or <code>null</code>
-//     *
-//     * @see AWTEventMulticaster#save(java.io.ObjectOutputStream, java.lang.String, java.util.EventListener)
-//     * @see Container#containerListenerK
-//     * @see #readObject(ObjectInputStream)
-//     */
-//    private void writeObject(ObjectOutputStream s) throws IOException {
-//        ObjectOutputStream.PutField f = s.putFields();
-//        f.put("ncomponents", component.size());
-//        f.put("component", component.toArray(EMPTY_ARRAY));
-//        f.put("layoutMgr", layoutMgr);
-//        f.put("dispatcher", dispatcher);
-//        f.put("maxSize", maxSize);
-//        f.put("focusCycleRoot", focusCycleRoot);
-//        f.put("containerSerializedDataVersion", containerSerializedDataVersion);
-//        f.put("focusTraversalPolicyProvider", focusTraversalPolicyProvider);
-//        s.writeFields();
-//
-//        AWTEventMulticaster.save(s, containerListenerK, containerListener);
-//        s.writeObject(null);
-//
-//        if (focusTraversalPolicy instanceof java.io.Serializable) {
-//            s.writeObject(focusTraversalPolicy);
-//        } else {
-//            s.writeObject(null);
-//        }
-//    }
-//
-//    /**
-//     * Deserializes this <code>Container</code> from the specified
-//     * <code>ObjectInputStream</code>.
-//     * <ul>
-//     *    <li>Reads default serializable fields from the stream.</li>
-//     *    <li>Reads a list of serializable ContainerListener(s) as optional
-//     *        data. If the list is null, no Listeners are installed.</li>
-//     *    <li>Reads this Container's FocusTraversalPolicy, which may be null,
-//     *        as optional data.</li>
-//     * </ul>
-//     *
-//     * @param s the <code>ObjectInputStream</code> to read
-//     * @serial
-//     * @see #addContainerListener
-//     * @see #writeObject(ObjectOutputStream)
-//     */
-//    private void readObject(ObjectInputStream s)
-//        throws ClassNotFoundException, IOException
-//    {
-//        ObjectInputStream.GetField f = s.readFields();
-//        Component [] tmpComponent = (Component[])f.get("component", EMPTY_ARRAY);
-//        int ncomponents = (Integer) f.get("ncomponents", 0);
-//        component = new java.util.ArrayList<Component>(ncomponents);
-//        for (int i = 0; i < ncomponents; ++i) {
-//            component.add(tmpComponent[i]);
-//        }
-//        layoutMgr = (LayoutManager)f.get("layoutMgr", null);
-//        dispatcher = (LightweightDispatcher)f.get("dispatcher", null);
-//        // Old stream. Doesn't contain maxSize among Component's fields.
-//        if (maxSize == null) {
-//            maxSize = (Dimension)f.get("maxSize", null);
-//        }
-//        focusCycleRoot = f.get("focusCycleRoot", false);
-//        containerSerializedDataVersion = f.get("containerSerializedDataVersion", 1);
-//        focusTraversalPolicyProvider = f.get("focusTraversalPolicyProvider", false);
-//        java.util.List<Component> component = this.component;
-//        for(Component comp : component) {
-//            comp.parent = this;
-//            adjustListeningChildren(AWTEvent.HIERARCHY_EVENT_MASK,
-//                                    comp.numListening(AWTEvent.HIERARCHY_EVENT_MASK));
-//            adjustListeningChildren(AWTEvent.HIERARCHY_BOUNDS_EVENT_MASK,
-//                                    comp.numListening(AWTEvent.HIERARCHY_BOUNDS_EVENT_MASK));
-//            adjustDescendants(comp.countHierarchyMembers());
-//        }
-//
-//        Object keyOrNull;
-//        while(null != (keyOrNull = s.readObject())) {
-//            String key = ((String)keyOrNull).intern();
-//
-//            if (containerListenerK == key) {
-//                addContainerListener((ContainerListener)(s.readObject()));
-//            } else {
-//                // skip value for unrecognized key
-//                s.readObject();
-//            }
-//        }
-//
-//        try {
-//            Object policy = s.readObject();
-//            if (policy instanceof FocusTraversalPolicy) {
-//                focusTraversalPolicy = (FocusTraversalPolicy)policy;
-//            }
-//        } catch (java.io.OptionalDataException e) {
-//            // JDK 1.1/1.2/1.3 instances will not have this optional data.
-//            // e.eof will be true to indicate that there is no more data
-//            // available for this object. If e.eof is not true, throw the
-//            // exception as it might have been caused by reasons unrelated to
-//            // focusTraversalPolicy.
-//
-//            if (!e.eof) {
-//                throw e;
-//            }
-//        }
-//    }
-//
-//    /*
 //     * --- Accessibility Support ---
 //     */
 //
@@ -3943,61 +3813,61 @@ public class Container extends JSComponent {
 
     // ************************** MIXING CODE *******************************
 
-    final void increaseComponentCount(Component c) {
-//        synchronized (getTreeLock()) {
-            if (!c.isDisplayable()) {
-                throw new IllegalStateException(
-                    "Peer does not exist while invoking the increaseComponentCount() method"
-                );
-            }
+//    final void increaseComponentCount(Component c) {
+////        synchronized (getTreeLock()) {
+//            if (!c.isDisplayable()) {
+//                throw new IllegalStateException(
+//                    "Peer does not exist while invoking the increaseComponentCount() method"
+//                );
+//            }
+//
+//            int addHW = 0;
+//            int addLW = 0;
+//
+//            if (c instanceof Container) {
+//                addLW = ((Container)c).numOfLWComponents;
+//                addHW = ((Container)c).numOfHWComponents;
+//            }
+//            if (c.isLightweight()) {
+//                addLW++;
+//            } else {
+//                addHW++;
+//            }
+//
+//            for (Container cont = this; cont != null; cont = cont.getContainer()) {
+//                cont.numOfLWComponents += addLW;
+//                cont.numOfHWComponents += addHW;
+//            }
+//  //      }
+//    }
 
-            int addHW = 0;
-            int addLW = 0;
-
-            if (c instanceof Container) {
-                addLW = ((Container)c).numOfLWComponents;
-                addHW = ((Container)c).numOfHWComponents;
-            }
-            if (c.isLightweight()) {
-                addLW++;
-            } else {
-                addHW++;
-            }
-
-            for (Container cont = this; cont != null; cont = cont.getContainer()) {
-                cont.numOfLWComponents += addLW;
-                cont.numOfHWComponents += addHW;
-            }
-  //      }
-    }
-
-    final void decreaseComponentCount(Component c) {
-    //    synchronized (getTreeLock()) {
-            if (!c.isDisplayable()) {
-                throw new IllegalStateException(
-                    "Peer does not exist while invoking the decreaseComponentCount() method"
-                );
-            }
-
-            int subHW = 0;
-            int subLW = 0;
-
-            if (c instanceof Container) {
-                subLW = ((Container)c).numOfLWComponents;
-                subHW = ((Container)c).numOfHWComponents;
-            }
-            if (c.isLightweight()) {
-                subLW++;
-            } else {
-                subHW++;
-            }
-
-            for (Container cont = this; cont != null; cont = cont.getContainer()) {
-                cont.numOfLWComponents -= subLW;
-                cont.numOfHWComponents -= subHW;
-            }
-      //  }
-    }
+//    final void decreaseComponentCount(Component c) {
+//    //    synchronized (getTreeLock()) {
+//            if (!c.isDisplayable()) {
+//                throw new IllegalStateException(
+//                    "Peer does not exist while invoking the decreaseComponentCount() method"
+//                );
+//            }
+//
+//            int subHW = 0;
+//            int subLW = 0;
+//
+//            if (c instanceof Container) {
+//                subLW = ((Container)c).numOfLWComponents;
+//                subHW = ((Container)c).numOfHWComponents;
+//            }
+//            if (c.isLightweight()) {
+//                subLW++;
+//            } else {
+//                subHW++;
+//            }
+//
+//            for (Container cont = this; cont != null; cont = cont.getContainer()) {
+//                cont.numOfLWComponents -= subLW;
+//                cont.numOfHWComponents -= subHW;
+//            }
+//      //  }
+//   }
 //
 //    private int getTopmostComponentIndex() {
 //        checkTreeLock();

@@ -31,7 +31,6 @@ public abstract class JSTextViewUI extends JSTextUI {
 		allowPaintedBackground = false;
 		focusNode = enableNode = textNode = domNode;
 		DOMNode.setStyles(domNode, "resize", "none", "padding", "0px","scrollbar-width", "thin"); // otherwise it overflows
-		setTabIndex(0);
 		bindJSKeyEvents(domNode, true);
 	}
 

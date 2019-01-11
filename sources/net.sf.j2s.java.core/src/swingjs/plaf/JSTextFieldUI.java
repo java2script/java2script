@@ -32,11 +32,10 @@ public class JSTextFieldUI extends JSTextUI {
 			focusNode = enableNode = valueNode = domNode = DOMNode.setStyles(
 					newDOMObject("input", id, "type", inputType),
 					"lineHeight", "0.8", "box-sizing", "border-box");
-			DOMNode.setAttrs(focusNode, "ui", this);
 			// not active; requires position:absolute; wrong for standard text box
 			// vCenter(domNode, -10);
 			//new 1/5/2019 setDataComponent(domNode);
-			bindJSKeyEvents(domNode, false);
+			bindJSKeyEvents(domNode, true);
 		}
 		setPadding(editor.getMargin());
 		textListener.checkDocument();

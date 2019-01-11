@@ -8,7 +8,6 @@ import java.awt.Event;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.Image;
 import java.awt.Insets;
@@ -19,7 +18,6 @@ import java.awt.Toolkit;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.peer.DropTargetPeer;
 import java.awt.event.FocusEvent;
-import java.awt.event.KeyEvent;
 import java.awt.event.PaintEvent;
 import java.awt.image.ColorModel;
 import java.awt.image.ImageObserver;
@@ -175,7 +173,7 @@ public class JSComponentUI extends ComponentUI
 	 * the associated JComponent; for which this is c.ui
 	 * 
 	 */
-	protected JComponent jc;
+	public JComponent jc;
 
 	/**
 	 * the associated JLabel, if this is one
@@ -290,7 +288,7 @@ public class JSComponentUI extends ComponentUI
 	 * for a JLabel or AbstractButton, including JMenuItems
 	 * 
 	 */
-	private DOMNode centeringNode;
+	protected DOMNode centeringNode;
 
 	/**
 	 * an icon image -- non-null means we do have an icon
@@ -340,7 +338,7 @@ public class JSComponentUI extends ComponentUI
 	/**
 	 * a component that is focusable
 	 */
-	protected DOMNode focusNode;
+	public DOMNode focusNode;
 
 	/**
 	 * menu li node
@@ -641,6 +639,8 @@ public class JSComponentUI extends ComponentUI
 	 */
 	public void reInit() {
 		setTainted();
+		if (domNode != null)
+			DOMNode.dispose(domNode);
 		domNode = null;
 		keysEnabled = false;
 		newID(true);
@@ -689,6 +689,14 @@ public class JSComponentUI extends ComponentUI
 		$(node).addClass("swingjs-ui");
 	}
 
+	protected static void hideAllMenus() {
+		JSUtil.jQuery.$(".ui-menu").hide();
+	}
+	
+	protected void addClass(DOMNode node, String cl) {
+		$(node).addClass(cl);
+	}
+	
 	/**
 	 * J2S mouse event handling (in j2sApplet.js) will look for the data-ui
 	 * attribute of a jQuery event target and, if found, reroute the event to
@@ -729,6 +737,8 @@ public class JSComponentUI extends ComponentUI
 	 * @param on
 	 */
 	public void enableJSKeys(boolean on) {
+		if (domNode == null)
+			return; // too early
 		if (!on) {
 			setTabIndex(-1);
 		} else if (keysEnabled) {
@@ -739,22 +749,27 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	protected void setJ2SKeyHandler() {
-		keysEnabled = true;
 		if (focusNode == null)
 			focusNode = domNode;
+		if (focusNode == null)
+			return;
+		keysEnabled = true;
 		DOMNode.setAttrs(focusNode, "applet", applet, "_frameViewer", jc.getFrameViewer());
 		setDataKeyComponent(focusNode);
 		J2S.setKeyListener(focusNode);
 		setTabIndex(0);
 	}
 	
-	protected void setTabIndex(int i) {
+	private void setTabIndex(int i) {
 		if (focusNode == null)
 			return;
-		if (i < 0)
+		if (i < 0) {
 			focusNode.removeAttribute("tabindex");
-		else
+			DOMNode.setAttr(focusNode, "ui", null);
+		} else {
 			focusNode.setAttribute("tabindex", "" + i);
+			DOMNode.setAttr(focusNode, "ui", this);
+		}
 	}
 
 	public static JSComponentUI focusedUI;
@@ -769,30 +784,70 @@ public class JSComponentUI extends ComponentUI
 	 */
 	@SuppressWarnings("unused")
 	protected void addJQueryFocusCallbacks() {
+		setTabIndex(0);
 		JQueryObject node = $(focusNode);
+		node.unbind("focus blur");
 		Object me = this;
 
 		/**
 		 * @j2sNative
 		 * 
 		 * 			node.focus(function() {
-		 * 				System.out.println("focus " + me.id);
-		 * 				me.notifyFocus$Z(true);
-		 * 				System.out.println("focus " + me.id);
+		 * 				System.out.println("JSSCUI focus " + me.id);
+		 * 				me.handleJSFocus$Z(true);
+		 * 				System.out.println("JSSCUI focus " + me.id);
 		 * 			});
 		 *            node.blur(function() {
 		 *            try{
-		 * 				System.out.println("focus blur " + me.id);
-		 *            me.notifyFocus$Z(false);
-		 * 				System.out.println("focus blur " + me.id);
+		 * 				System.out.println("JSSCUI focus blur " + me.id);
+		 *            me.handleJSFocus$Z(false);
+		 * 				System.out.println("JSSCUI focus blur " + me.id);
 		 *            }catch(e){
-		 *              System.out.println("focus error blur " + me.id);
+		 *              System.out.println("JSSCUI focus error blur " + me.id);
 		 *            }
 		 *            });
 		 */
 	}
 
-	
+	public boolean hasFocus() {
+		return focusNode != null && focusNode == DOMNode.getAttr(document, "activeElement");
+	}
+
+	/**
+	 * comes from jQuery callback
+	 * @param focusGained
+	 */
+	public void handleJSFocus(boolean focusGained) {
+		// unfortunately, this will be TOO LATE
+		// TODO: This should be handed by DefaultFocusManager
+
+		AWTEvent e = new FocusEvent(c, focusGained ? FocusEvent.FOCUS_GAINED : FocusEvent.FOCUS_LOST);
+		if (focusGained) {
+			// The problem here is that we are getting an activate signal too
+			// early, before focus has been obtained.
+			// Java does not assign focus gained/lost until after a mouse press, for example.
+			focusedUI = this;
+			//Toolkit.getEventQueue().postEvent(e);
+		} else {
+			focusedUI = null;
+		}
+//			/**
+//			 * @j2sNative
+//			 * 
+//			 * 				this.c.processEvent(e);
+//			 * 
+//			 */
+//			{
+//				// We must be certain that the lost message arrives before the
+//				// gained.
+//				Toolkit.getEventQueue().dispatchEventAndWait(e, c);
+//			}
+//
+//		}
+		System.out.println("focus for " + jc.getUIClassID() + " " + focusGained);
+		jc.dispatchEvent(e);
+	}
+
 	private boolean keysEnabled;
 
 	/**
@@ -813,13 +868,16 @@ public class JSComponentUI extends ComponentUI
 	 * @param node
 	 * @param andFocusOut
 	 */
-	protected void bindJSKeyEvents(DOMNode node, boolean addFocusAndDnD) {
+	protected void bindJSKeyEvents(DOMNode node, boolean addFocus) {
 		setDataUI(node);
 		keysEnabled = true;
-		bindJQueryEvents(node, "keydown keypress keyup" + (addFocusAndDnD ? " focusout"// dragover drop"
+		bindJQueryEvents(node, "keydown keypress keyup" + (addFocus ? " focusout"// dragover drop"
 				: ""), Event.KEY_PRESS);
-		addJQueryFocusCallbacks();
-
+		
+		if (addFocus) {
+			setTabIndex(0);
+			addJQueryFocusCallbacks();
+		}
 	}
 
 	/**
@@ -1116,6 +1174,23 @@ public class JSComponentUI extends ComponentUI
 	 */
 	
 	protected boolean imagePersists;
+
+	private boolean allowDivOverflow;
+
+
+	/**
+	 * we can allow frames -- particularly JInternalFrames -- to overflow.
+	 * 
+	 * To do this, we need to make this indication for both the Root pane and the
+	 * contentPane for the parent JFrame:
+	 * 
+	 * this.getRootPane().putClientProperty("swingjs.overflow.hidden", "false");
+	 * 
+	 * 
+	 */
+	protected void checkAllowDivOverflow() {
+		allowDivOverflow = "false".equals(jc.getRootPane().getClientProperty("swingjs.overflow.hidden"));
+	}
 
 	public void setAllowPaintedBackground(boolean TF) {
 		// listCellRenderer does not allow this.
@@ -1439,10 +1514,9 @@ public class JSComponentUI extends ComponentUI
 				int w = getContainerWidth();
 				int h = getContainerHeight();
 				DOMNode.setSize(outerNode, w, h);				
-				// not clear why this does not always work:
 				if (isPanel || isContentPane || isRootPane) {
 					DOMNode.setStyles(outerNode, "overflow",
-							"false".equals(jc.getClientProperty("swingjs.overflow.hidden")) ? "visible" : "hidden");
+							 allowDivOverflow ? "visible" : "hidden");
 					if (isRootPane) {
 						if (jc.getFrameViewer().isApplet) {
 							// If the applet's root pane, we insert it into the applet's
@@ -1454,7 +1528,8 @@ public class JSComponentUI extends ComponentUI
 					}
 				}
 			}
-			addChildrenToDOM(children, n);
+			if (n > 0)
+				addChildrenToDOM(children, n);
 			if (isWindow && jc.getUIClassID() != "InternalFrameUI" && jc.getWidth() > 0) {
 				DOMNode.transferTo(outerNode, body);
 			}
@@ -2574,40 +2649,6 @@ public class JSComponentUI extends ComponentUI
 	public Rectangle getBounds() {
 		JSUtil.notImplemented("");
 		return null;
-	}
-
-	public boolean hasFocus() {
-		return focusNode != null && focusNode == DOMNode.getAttr(document, "activeElement");
-	}
-
-	public void notifyFocus(boolean focusGained) {
-		// unfortunately, this will be TOO LATE
-
-		AWTEvent e = new FocusEvent(c, focusGained ? FocusEvent.FOCUS_GAINED : FocusEvent.FOCUS_LOST);
-		if (focusGained) {
-			// The problem here is that we are getting an activate signal too
-			// early,
-			// before focus has been obtained.
-			focusedUI = this;
-			//Toolkit.getEventQueue().postEvent(e);
-		} else {
-			focusedUI = null;
-		}
-//			/**
-//			 * @j2sNative
-//			 * 
-//			 * 				this.c.processEvent(e);
-//			 * 
-//			 */
-//			{
-//				// We must be certain that the lost message arrives before the
-//				// gained.
-//				Toolkit.getEventQueue().dispatchEventAndWait(e, c);
-//			}
-//
-//		}
-		System.out.println("focus for " + jc.getUIClassID() + " " + focusGained);
-		jc.dispatchEvent(e);
 	}
 
 	public int getZIndex(String what) {

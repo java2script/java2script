@@ -1479,7 +1479,9 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 				return true;
 			}
 			var target = ev.target["data-keycomponent"];
-			var who = ev.target;
+if (!target) {
+  return;
+}
 			var id;
 			switch (ev.type) {
 			case "keypress":
@@ -1499,6 +1501,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 	
 	J2S.setMouse = function(who, isSwingJS) {
 		// swingjs.api.J2SInterface
+
 
 		var checkStopPropagation = function(ev, ui, handled, target) {
 			if (ui && ui.checkStopPropagation$O$Z) {
@@ -1632,6 +1635,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 //							Integer.MAX_VALUE);
 				who.applet._processEvent(501, xym, ev, who._frameViewer); // MouseEvent.MOUSE_PRESSED
 			}
+
 			return !!(ui || target);
 //			return !!target || ui && ui.j2sDoPropagate;
 		});
@@ -1771,6 +1775,35 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 
 	}
 
+	J2S.unsetMouse = function(who) {
+		if (!who)
+			return;
+		// swingjs.api.J2SInterface
+		who.applet = null;
+		J2S
+				.$bind(
+						who,
+						'click mousedown touchstart mousemove touchmove mouseup touchend DOMMouseScroll mousewheel contextmenu mouseleave mouseenter mousemoveoutjsmol',
+						null);
+		J2S.setMouseOwner(null);
+	}
+
+	J2S.setMouseOwner = function(who, doSet, target) {
+		// called for mousedown, mouseup, mouse, jsUnsetMouse, 
+		// and outsideEvent.teardown, outsideEvent.mouseUp
+		if (!who && J2S._mouseOwner)
+			J2S._mouseOwner.isDragging = false;
+
+		who && who.focus();
+
+		if (!who || doSet)
+			J2S._mouseOwner = who;
+		else if (J2S._mouseOwner == who)
+			J2S._mouseOwner = who = null;
+		if (target || !who)
+			J2S._mouseTarget = target || null;
+	}
+
 	J2S._drag = function(who, ev, id) {
 
 		if (id != 503) {
@@ -1798,32 +1831,6 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 				who._frameViewer); // MouseEvent.MOUSE_DRAGGED :
 									// MouseEvent.MOUSE_MOVED
 		return !!(ui || target);
-	}
-
-	J2S.unsetMouse = function(who) {
-		if (!who)
-			return;
-		// swingjs.api.J2SInterface
-		who.applet = null;
-		J2S
-				.$bind(
-						who,
-						'click mousedown touchstart mousemove touchmove mouseup touchend DOMMouseScroll mousewheel contextmenu mouseleave mouseenter mousemoveoutjsmol',
-						null);
-		J2S.setMouseOwner(null);
-	}
-
-	J2S.setMouseOwner = function(who, doSet, target) {
-		// called for mousedown, mouseup, mouse, jsUnsetMouse, 
-		// and outsideEvent.teardown, outsideEvent.mouseUp
-		if (!who && J2S._mouseOwner)
-			J2S._mouseOwner.isDragging = false;
-		if (!who || doSet)
-			J2S._mouseOwner = who;
-		else if (J2S._mouseOwner == who)
-			J2S._mouseOwner = who = null;
-		if (target || !who)
-			J2S._mouseTarget = target || null;
 	}
 
 	var getMouseModifiers = function(ev, id) {
@@ -1862,7 +1869,10 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		if (ev.target == who) {
 			var ui = ev.target["data-ui"];
 			if (ui) {
-				who = ui.jc.getTopLevelAncestor$().ui.domNode;				
+				var top = ui.jc.getTopLevelAncestor$();
+				if (top)
+					who = top.ui.domNode;
+				// else we have a popup menu	
 			}
 		}
 		var offsets = J2S.$offset(who.id);

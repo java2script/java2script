@@ -106,7 +106,7 @@ public class JSButtonUI extends JSLightweightUI {
 	/**
 	 * 
 	 * @param type
-	 *          "_item" or "_menu"
+	 *          "_item" or "_menu" (unused)
 	 * @param buttonNode
 	 *          will be a for-label for radio and checkbox only; otherwise null
 	 * @return
@@ -114,10 +114,6 @@ public class JSButtonUI extends JSLightweightUI {
 	protected DOMNode createItem(String type, DOMNode buttonNode) {
 		// all subclasses will call this method, including
 		// standard MenuItem and Menu labels
-
-		// unnecessary? if (label == null)
-		// hasOuterDiv = false;
-
 		String text = button.getText();
 		ImageIcon icon = (ImageIcon) button.getIcon();
 		int gap = button.getIconTextGap();
@@ -126,10 +122,10 @@ public class JSButtonUI extends JSLightweightUI {
 			// separator masquerading as a menu item
 			text = null;
 		}
-		itemNode = newDOMObject("li", id + type);
+		itemNode = newDOMObject("li", id);
 		if (text == null && icon == null)
 			return itemNode;
-		menuAnchorNode = newDOMObject("a", id + type + "_a");
+		menuAnchorNode = newDOMObject("a", id + "_a");
 		DOMNode.setStyles(menuAnchorNode, "margin", "1px 2px 1px 2px");
 		itemNode.appendChild(menuAnchorNode);
 		if (buttonNode == null) {
@@ -152,7 +148,6 @@ public class JSButtonUI extends JSLightweightUI {
 		setDataComponent(menuAnchorNode);
 		setDataComponent(itemNode);
 		return itemNode;
-
 	}
 
 	@Override

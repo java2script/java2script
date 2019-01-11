@@ -88,6 +88,8 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 	protected void setWindowClass() { 
 		DOMNode.setZ(domNode, z);
 		$(domNode).addClass("swingjs-window");
+		focusNode = domNode;
+		addJQueryFocusCallbacks();
 	}
 
 	@Override
@@ -201,10 +203,5 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 		super.setVisible(b);
 	}
 
-	public static void hideAllMenus() {
-		//System.out.println("window hide all menus\n" + JSUtil.getStackTrace());
-		JSUtil.jQuery.$(".ui-menu").hide();
-	}
-	
 
 }
