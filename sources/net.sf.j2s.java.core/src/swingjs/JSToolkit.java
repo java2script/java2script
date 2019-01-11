@@ -964,13 +964,11 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		return null;
 	}
 
-	private KeyboardFocusManagerPeer focusManager;
+	private static KeyboardFocusManagerPeer focusManager;
 	
 	@Override
 	public KeyboardFocusManagerPeer getKeyboardFocusManagerPeer() {
-		if (focusManager == null)
-			focusManager = new JSFocusManager();
-		return focusManager;
+		return (focusManager == null ? focusManager = new JSFocusPeer() : focusManager);
 	}
 
 	public static void consumeEvent(Object e) {
@@ -989,6 +987,10 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		 *      jqevent.preventDefault(); 
 		 * 
 		 */
+	}
+	
+	public static JSComponentUI getFocusedUI() {
+		return ( /** @j2sNative	document.activeElement && document.activeElement.ui || */ null);
 	}
 
 
