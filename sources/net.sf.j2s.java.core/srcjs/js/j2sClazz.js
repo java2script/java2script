@@ -1591,7 +1591,7 @@ Clazz._getStackTrace = function(n) {
   s += estack.join("\n");
   if (Clazz._stack.length) {
 	  s += "\nsee Clazz._stack";
-	  console.log("Clazz._stack = " + Clazz._stack);
+	  console.log("Clazz.stack = \n" + estack.join("\n"));
 	  console.log("Use Clazz._showStack() or Clazz._showStack(n) to show parameters");
   }
   return s;
@@ -4558,8 +4558,8 @@ sp.replace$C$C = sp.replace$CharSequence$CharSequence = sp.replace$;
 sp.toUpperCase$ = sp.toUpperCase;
 sp.toLowerCase$ = sp.toLowerCase;
 sp.trim$ = sp.trim;
-sp.toLowerCase$java_util_Locale = sp.toLocaleLowerCase ? function(loc) {return this.valueOf().toLocaleLowerCase(loc.toString()) } : sp.toLowerCase;
-sp.toUpperCase$java_util_Locale = sp.toLocaleUpperCase ? function(loc) {return this.valueOf().toLocaleUpperCase(loc.toString()) } : sp.toUpperCase;
+sp.toLowerCase$java_util_Locale = sp.toLocaleLowerCase ? function(loc) {loc = loc.toString(); var s = this.valueOf(); return (loc ? s.toLocaleLowerCase(loc.replace(/_/g,'-')) : s.toLocaleLowerCase()) } : sp.toLowerCase;
+sp.toUpperCase$java_util_Locale = sp.toLocaleUpperCase ? function(loc) {loc = loc.toString(); var s = this.valueOf(); return (loc ? s.toLocaleUpperCase(loc.replace(/_/g,'-')) : s.toLocaleUpperCase()) } : sp.toUpperCase;
 sp.length$ = function() {return this.length};
 
 //sp.chars$ = CharSequence.prototype.chars$;
