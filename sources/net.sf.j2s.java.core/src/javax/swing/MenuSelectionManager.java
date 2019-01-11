@@ -27,7 +27,9 @@
  */
 package javax.swing;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
+//import java.util.Vector;
 
 import java.awt.Component;
 import java.awt.Point;
@@ -39,15 +41,15 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 import sun.awt.AppContext;
+import swingjs.JSMenuManager;
 
 /**
  * A MenuSelectionManager owns the selection in menu hierarchy.
  *
  * @author Arnaud Weber
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
 public class MenuSelectionManager {
-    private Vector selection = new Vector();
+    private List<MenuElement> selection = new ArrayList<MenuElement>();//Vector();
 
 //    /* diagnostic aids -- should be false for production builds. */
 //    private static final boolean TRACE =   false; // trace creates and disposes
@@ -67,7 +69,7 @@ public class MenuSelectionManager {
             MenuSelectionManager msm = (MenuSelectionManager)context.get(
                                                  MENU_SELECTION_MANAGER_KEY);
             if (msm == null) {
-                msm = new MenuSelectionManager();
+                msm = new JSMenuManager();
                 context.put(MENU_SELECTION_MANAGER_KEY, msm);
             }
 
@@ -109,21 +111,21 @@ public class MenuSelectionManager {
 //        }
 //
         for(i=0,c=path.length;i<c;i++) {
-            if(i < currentSelectionCount && (MenuElement)selection.elementAt(i) == path[i])
+            if(i < currentSelectionCount && selection.get(i) == path[i])
                 firstDifference++;
             else
                 break;
         }
 
         for(i=currentSelectionCount - 1 ; i >= firstDifference ; i--) {
-            MenuElement me = (MenuElement)selection.elementAt(i);
-            selection.removeElementAt(i);
+            MenuElement me = selection.get(i);
+            selection.remove(i);
             me.menuSelectionChanged(false);
         }
 
         for(i = firstDifference, c = path.length ; i < c ; i++) {
             if (path[i] != null) {
-                selection.addElement(path[i]);
+                selection.add(path[i]);
                 path[i].menuSelectionChanged(true);
             }
         }
@@ -140,7 +142,7 @@ public class MenuSelectionManager {
         MenuElement res[] = new MenuElement[selection.size()];
         int i,c;
         for(i=0,c=selection.size();i<c;i++)
-            res[i] = (MenuElement) selection.elementAt(i);
+            res[i] = selection.get(i);
         return res;
     }
 
@@ -223,7 +225,7 @@ public class MenuSelectionManager {
         MenuElement menuElement;
         MenuElement subElements[];
         MenuElement path[];
-        Vector tmp;
+        //List tmp;
         int selectionSize;
         p = event.getPoint();
 
@@ -250,11 +252,11 @@ public class MenuSelectionManager {
         screenX = p.x;
         screenY = p.y;
 
-        tmp = (Vector)selection.clone();
-        selectionSize = tmp.size();
+        //tmp = (Vector)selection.clone();
+        selectionSize = selection.size();//tmp.size();
         boolean success = false;
         for (i=selectionSize - 1;i >= 0 && success == false; i--) {
-            menuElement = (MenuElement) tmp.elementAt(i);
+            menuElement = (MenuElement) selection.get(i);
             subElements = menuElement.getSubElements();
 
             path = null;
@@ -285,7 +287,7 @@ public class MenuSelectionManager {
                     if(path == null) {
                         path = new MenuElement[i+2];
                         for(k=0;k<=i;k++)
-                            path[k] = (MenuElement)tmp.elementAt(k);
+                            path[k] = (MenuElement)selection.get(k);
                     }
                     path[i+1] = subElements[j];
                     MenuElement currentSelection[] = getSelectedPath();
@@ -385,7 +387,7 @@ public class MenuSelectionManager {
         int cWidth,cHeight;
         MenuElement menuElement;
         MenuElement subElements[];
-        Vector tmp;
+        //Vector tmp;
         int selectionSize;
 
         SwingUtilities.convertPointToScreen(p,source);
@@ -393,10 +395,10 @@ public class MenuSelectionManager {
         screenX = p.x;
         screenY = p.y;
 
-        tmp = (Vector)selection.clone();
-        selectionSize = tmp.size();
+        //tmp = (Vector)selection.clone();
+        selectionSize = selection.size();
         for(i=selectionSize - 1 ; i >= 0 ; i--) {
-            menuElement = (MenuElement) tmp.elementAt(i);
+            menuElement = (MenuElement) selection.get(i);
             subElements = menuElement.getSubElements();
 
             for(j = 0, d = subElements.length ; j < d ; j++) {
@@ -481,7 +483,7 @@ public class MenuSelectionManager {
      */
     public boolean isComponentPartOfCurrentMenu(Component c) {
         if(selection.size() > 0) {
-            MenuElement me = (MenuElement)selection.elementAt(0);
+            MenuElement me = (MenuElement)selection.get(0);
             return isComponentPartOfCurrentMenu(me,c);
         } else
             return false;
@@ -505,4 +507,7 @@ public class MenuSelectionManager {
         }
         return false;
     }
+    
+    
+    
 }

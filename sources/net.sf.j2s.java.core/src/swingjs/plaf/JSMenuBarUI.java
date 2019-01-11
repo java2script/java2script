@@ -32,6 +32,7 @@ package swingjs.plaf;
 import java.awt.Dimension;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
+import java.beans.PropertyChangeEvent;
 
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
@@ -75,7 +76,20 @@ public class JSMenuBarUI extends JSPanelUI implements ContainerListener {
 		return updateDOMNodeCUI();
 	}
 
-//	private void setMenu() {
+	@Override
+	public void propertyChangedFromListener(String prop) {
+		System.out.println("JSMenuBarUI prop = " + prop );
+		super.propertyChangedFromListener(prop);
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent e) {
+		String prop = e.getPropertyName();
+		System.out.println("JSMenuBarUI prop " + prop);
+		super.propertyChange(e);
+	}
+
+	//	private void setMenu() {
 //		
 //		/**
 //		 * @j2sNative
@@ -150,14 +164,15 @@ public class JSMenuBarUI extends JSPanelUI implements ContainerListener {
 	public void componentAdded(ContainerEvent e) {
 		// OK, the idea here is that we detach all child nodes
 		// and then reattach them. 
-		DOMNode.detachAll(outerNode);
-		setTainted();
-		setHTMLElement();
+		// (already done)
+//		DOMNode.detachAll(domNode);
+//		setTainted();
+//		setHTMLElement();
 	}
 
 	@Override
 	public void componentRemoved(ContainerEvent e) {
-		DOMNode.detachAll(outerNode);
+		DOMNode.detachAll(domNode);
 		setTainted();
 		setHTMLElement();
 	}

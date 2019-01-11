@@ -7,6 +7,8 @@ import java.beans.PropertyChangeEvent;
 
 import javax.swing.JComponent;
 import javax.swing.JMenu;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 
 import swingjs.api.js.DOMNode;
 public class JSMenuUI extends JSMenuItemUI {
@@ -20,17 +22,21 @@ public class JSMenuUI extends JSMenuItemUI {
 
 	@Override
 	public DOMNode updateDOMNode() {
+		boolean isMenuBarMenu = jm.isTopLevelMenu();
+		if (domNode != null && isMenuItem == isMenuBarMenu) {
+			// we have changed the type of menu, from popup to menubar or something like that. 
+			// the outerNode for a menu item is its domNode, the <li> tag. But a MenuBar needs 
+			// the outerNode. The domNode should be fine. The big change is the containerNode
+			outerNode = null;
+			if (isMenuBarMenu)
+				DOMNode.detachAll(((JSComponentUI)jc.getParent().ui).domNode);
+		}
 		if (domNode == null) {
-			isMenuItem = !jm.isTopLevelMenu();
-			if (isMenuItem) {
-				containerNode = domNode = createItem("_menu", null);
-			} else {
-				allowTextAlignment = false;
-				domNode = createItem("_item", null);
-			}
+			domNode = createItem("_elem", null);
 			bindJQueryEvents(domNode, "mouseenter mouseleave", -1);			
 		}
-
+		allowTextAlignment = isMenuItem = !isMenuBarMenu;
+		containerNode = (isMenuBarMenu ? null : domNode);
 		setCssFont(domNode, c.getFont()); 
 		DOMNode.setVisible(domNode, jc.isVisible());
 		return domNode;
@@ -55,29 +61,66 @@ public class JSMenuUI extends JSMenuItemUI {
 			}
 		}
 		return super.handleJSEvent(target, eventType, jQueryEvent);
+	} 
+	
+	@Override
+	public void propertyChangedFromListener(String prop) {
+		System.out.println("JSMenuUI prop = " + prop + " " + jm.getText());
+		super.propertyChangedFromListener(prop);
 	}
 
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
+		System.out.println("JSMenuUI prop " + prop);
 		if (jc.isVisible()) {
 			if (prop == "ancestor") {
-				if (jc.getParent() != null) {
-					if (domNode != null && isMenuItem == jm.isTopLevelMenu()) {
-						reInit();
-						outerNode = null;
-						updateDOMNode();
-						return;
-					}
-				}
+				rebuild();
 			}
 		}
 		super.propertyChange(e);
 	}
 	
+	private void rebuild() {
+		if (jc.getParent() != null) {
+			if (domNode != null && isMenuItem == jm.isTopLevelMenu()) {
+				reInit();
+				outerNode = null;						
+				updateDOMNode();
+				return;
+			}
+		}
+	}
+
+	
 	@Override
 	public void installUI(JComponent jc) {
 		jm = (JMenu) jc;
+
+//		jm.addMenuListener(new MenuListener() {
+//
+//			@Override
+//			public void menuSelected(MenuEvent e) {
+//				// TODO Auto-generated method stub
+//				
+//			}
+//
+//			@Override
+//			public void menuDeselected(MenuEvent e) {
+//				if (jm == null)
+//					return;
+//				System.out.println("check");
+//	//			$(domNode)e.ch.children()[1].hide();
+//				// TODO Auto-generated method stub
+//				
+//			}
+//
+//			@Override
+//			public void menuCanceled(MenuEvent e) {
+//				hideAllMenus();
+//			}
+//			
+//		});
 		super.installUI(jc);
 	}
 

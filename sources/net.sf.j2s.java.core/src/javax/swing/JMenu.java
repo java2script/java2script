@@ -562,7 +562,9 @@ public class JMenu extends JMenuItem implements MenuElement
      */
     public JMenuItem add(JMenuItem menuItem) {
         ensurePopupMenuCreated();
-        return popupMenu.add(menuItem);
+        popupMenu.add(menuItem);
+        firePropertyChange("JSitem", null, menuItem);
+        return menuItem;
     }
 
     /**
@@ -576,6 +578,7 @@ public class JMenu extends JMenuItem implements MenuElement
 		public Component add(Component c) {
         ensurePopupMenuCreated();
         popupMenu.add(c);
+        firePropertyChange("JSitem", null, c);
         return c;
     }
 
@@ -593,6 +596,7 @@ public class JMenu extends JMenuItem implements MenuElement
 		public Component add(Component c, int index) {
         ensurePopupMenuCreated();
         popupMenu.add(c, index);
+        firePropertyChange("JSitem", null, c);
         return c;
     }
 
@@ -828,11 +832,9 @@ public class JMenu extends JMenuItem implements MenuElement
      */
     @Override
 		public void remove(Component c) {
-//  why did I add this? BH 2018  	if (c instanceof JMenuItem)
-//        if (popupMenu != null)
-//            popupMenu.remove(c);
         if (popupMenu != null)
             popupMenu.remove(c);
+        firePropertyChange("JSitem", c, null);
     }
 
     /**
@@ -842,6 +844,7 @@ public class JMenu extends JMenuItem implements MenuElement
 		public void removeAll() {
         if (popupMenu != null)
             popupMenu.removeAll();
+        firePropertyChange("JSitem", this, null);
     }
 
     /**

@@ -190,6 +190,7 @@ public class JPopupMenu extends JComponent implements MenuElement {
         setOpaque(true); // BH  added
         //setFocusTraversalKeysEnabled(false);
         updateUI();
+        // no peer for JPopupMenus // getOrCreatePeer();
 
     }
 
