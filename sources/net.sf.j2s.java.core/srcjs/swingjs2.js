@@ -12138,7 +12138,9 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 				return true;
 			}
 			var target = ev.target["data-keycomponent"];
-			var who = ev.target;
+if (!target) {
+  return;
+}
 			var id;
 			switch (ev.type) {
 			case "keypress":
@@ -12158,6 +12160,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 	
 	J2S.setMouse = function(who, isSwingJS) {
 		// swingjs.api.J2SInterface
+
 
 		var checkStopPropagation = function(ev, ui, handled, target) {
 			if (ui && ui.checkStopPropagation$O$Z) {
@@ -12291,6 +12294,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 //							Integer.MAX_VALUE);
 				who.applet._processEvent(501, xym, ev, who._frameViewer); // MouseEvent.MOUSE_PRESSED
 			}
+
 			return !!(ui || target);
 //			return !!target || ui && ui.j2sDoPropagate;
 		});
@@ -12430,6 +12434,35 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 
 	}
 
+	J2S.unsetMouse = function(who) {
+		if (!who)
+			return;
+		// swingjs.api.J2SInterface
+		who.applet = null;
+		J2S
+				.$bind(
+						who,
+						'click mousedown touchstart mousemove touchmove mouseup touchend DOMMouseScroll mousewheel contextmenu mouseleave mouseenter mousemoveoutjsmol',
+						null);
+		J2S.setMouseOwner(null);
+	}
+
+	J2S.setMouseOwner = function(who, doSet, target) {
+		// called for mousedown, mouseup, mouse, jsUnsetMouse, 
+		// and outsideEvent.teardown, outsideEvent.mouseUp
+		if (!who && J2S._mouseOwner)
+			J2S._mouseOwner.isDragging = false;
+
+		who && who.focus();
+
+		if (!who || doSet)
+			J2S._mouseOwner = who;
+		else if (J2S._mouseOwner == who)
+			J2S._mouseOwner = who = null;
+		if (target || !who)
+			J2S._mouseTarget = target || null;
+	}
+
 	J2S._drag = function(who, ev, id) {
 
 		if (id != 503) {
@@ -12457,32 +12490,6 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 				who._frameViewer); // MouseEvent.MOUSE_DRAGGED :
 									// MouseEvent.MOUSE_MOVED
 		return !!(ui || target);
-	}
-
-	J2S.unsetMouse = function(who) {
-		if (!who)
-			return;
-		// swingjs.api.J2SInterface
-		who.applet = null;
-		J2S
-				.$bind(
-						who,
-						'click mousedown touchstart mousemove touchmove mouseup touchend DOMMouseScroll mousewheel contextmenu mouseleave mouseenter mousemoveoutjsmol',
-						null);
-		J2S.setMouseOwner(null);
-	}
-
-	J2S.setMouseOwner = function(who, doSet, target) {
-		// called for mousedown, mouseup, mouse, jsUnsetMouse, 
-		// and outsideEvent.teardown, outsideEvent.mouseUp
-		if (!who && J2S._mouseOwner)
-			J2S._mouseOwner.isDragging = false;
-		if (!who || doSet)
-			J2S._mouseOwner = who;
-		else if (J2S._mouseOwner == who)
-			J2S._mouseOwner = who = null;
-		if (target || !who)
-			J2S._mouseTarget = target || null;
 	}
 
 	var getMouseModifiers = function(ev, id) {
@@ -12521,7 +12528,10 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		if (ev.target == who) {
 			var ui = ev.target["data-ui"];
 			if (ui) {
-				who = ui.jc.getTopLevelAncestor$().ui.domNode;				
+				var top = ui.jc.getTopLevelAncestor$();
+				if (top)
+					who = top.ui.domNode;
+				// else we have a popup menu	
 			}
 		}
 		var offsets = J2S.$offset(who.id);
@@ -13597,6 +13607,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 
 // TODO: still a lot of references to window[...]
 
+// BH 1/8/2019 3.2.4.07 fixes String.prototype.to[Upper|Lower]Case$java_util_Locale - using toLocal[Upper|Lower]Case()
 // BH 1/3/2019 3.2.4.07 adds ByteBuffer/CharBuffer support, proper CharSet encoding, including GBK (Standard Chinese)
 
 // see earlier notes at net.sf.j2s.java.core.srcjs/js/devnotes.txt
@@ -14422,49 +14433,27 @@ Clazz.setConsoleDiv = function(d) {
 // which could be a bottle-neck for function calling.
 // This is critical for performance optimization.
 
-var _profile = null;
-var _profileNoOpt = false;  // setting this true will remove Bob's signature optimization
-
 var __signatures = ""; 
 var profilet0;
 var _profileNew = null;
 var _jsid0 = 0;
 
 Clazz.startProfiling = function(doProfile) {
+  _profileNew = {};
   if (typeof doProfile == "number") {
-    _profileNew = (arguments[1] ? {} : null);
     _jsid0 = _jsid;
     setTimeout(function() { var s = "total wall time: " + doProfile + " sec\n" + Clazz.getProfile(); console.log(s); System.out.println(s)}, doProfile * 1000);
+  } else if (!doProfile) {
+	  _jsid = 0;
+	  _profileNew = null;
   }
-  _profile = ((doProfile || arguments.length == 0) && self.JSON && window.performance ? {} : null);
-  return (_profile ? "use Clazz.getProfile() to show results" : "profiling stopped and cleared")
+  return (_profileNew ? "use Clazz.getProfile() to show results" : "profiling stopped and cleared")
 }
 
 var tabN = function(n) { n = ("" + n).split(".")[0]; return "..........".substring(n.length) + n + "\t" };
 
 Clazz.getProfile = function() {
   var s = "run  Clazz.startProfiling() first";
-  if (_profile) {
-    var l = [];
-    var totalcount = 0;
-    var totalprep = 0;
-    var totaltime = 0;
-    for (var name in _profile) {
-      var n = _profile[name][0];
-      var t1 = _profile[name][1];
-      var t2 = _profile[name][2];
-      l.push(tabN(n) + tabN(t1) + tabN(t2) + name);
-      totalcount += n
-      totalprep += t1
-      totaltime += t2
-    }
-    s = "\ncount   \tprep(ms)\texec(ms)\n" 
-      + "--------\t--------\t--------\n" 
-      + tabN(totalcount)+ tabN(totalprep)+tabN(totaltime) + "\n"
-      + "--------\t--------\t--------\n" 
-      + l.sort().reverse().join("\n")
-      ;
-    _profile = null;
     
     if (_profileNew) {
       s += "\n\n Total new objects: " + (_jsid - _jsid0) + "\n";
@@ -14472,30 +14461,21 @@ Clazz.getProfile = function() {
       s += "--------\t--------\t------------------------------\n";
       totalcount = 0;
       totaltime = 0;
+      var rows = [];
       for (var key in _profileNew) {
         var count = _profileNew[key][0];
         var tnano = _profileNew[key][1];
-        totalcount += count
-        totaltime += tnano
-        s += tabN(count) + tabN(tnano) + "\t" +key + "\n";
+        totalcount += count;
+        totaltime += tnano;
+        rows.push(tabN(count) + tabN(tnano) + "\t" +key + "\n");
       }
-      s+= tabN(totalcount)+tabN(totaltime) + "\n"
+      rows.sort();
+      rows.reverse();
+      s += rows.join("");
+      s+= tabN(totalcount)+tabN(totaltime) + "\n";
     }
-  }
   _profileNew = null;
   return s; //+ __signatures;
-}
-
-
-var addProfile = function(c, f, p, t1, t2) {
-  var s = c.__CLASS_NAME__ + " " + f + " ";// + JSON.stringify(p);
-  if (__signatures.indexOf(s) < 0)
-    __signatures += s + "\n";
-  var p = _profile[s];
-  p || (p = _profile[s] = [0,0,0]);
-  p[0]++;
-  p[1] += t1;
-  p[2] += t2;
 }
 
 var addProfileNew = function(c, t) {
@@ -15209,7 +15189,7 @@ Clazz._getStackTrace = function(n) {
   s += estack.join("\n");
   if (Clazz._stack.length) {
 	  s += "\nsee Clazz._stack";
-	  console.log("Clazz._stack = " + Clazz._stack);
+	  console.log("Clazz.stack = \n" + estack.join("\n"));
 	  console.log("Use Clazz._showStack() or Clazz._showStack(n) to show parameters");
   }
   return s;
@@ -18173,10 +18153,11 @@ sp.charCodeAt$I = sp.charCodeAt;
 sp.charAt$I = sp.charAt;
 sp.substring$I = sp.substring$I$I = sp.subSequence$I$I = sp.substring;
 sp.replace$C$C = sp.replace$CharSequence$CharSequence = sp.replace$;
-sp.toUpperCase$ = sp.toUpperCase$java_util_locale = sp.toUpperCase;
-sp.toLowerCase$ = sp.toLowerCase$java_util_locale = sp.toLowerCase;
+sp.toUpperCase$ = sp.toUpperCase;
+sp.toLowerCase$ = sp.toLowerCase;
 sp.trim$ = sp.trim;
-
+sp.toLowerCase$java_util_Locale = sp.toLocaleLowerCase ? function(loc) {loc = loc.toString(); var s = this.valueOf(); return (loc ? s.toLocaleLowerCase(loc.replace(/_/g,'-')) : s.toLocaleLowerCase()) } : sp.toLowerCase;
+sp.toUpperCase$java_util_Locale = sp.toLocaleUpperCase ? function(loc) {loc = loc.toString(); var s = this.valueOf(); return (loc ? s.toLocaleUpperCase(loc.replace(/_/g,'-')) : s.toLocaleUpperCase()) } : sp.toUpperCase;
 sp.length$ = function() {return this.length};
 
 //sp.chars$ = CharSequence.prototype.chars$;
