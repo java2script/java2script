@@ -12,6 +12,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -19,7 +21,9 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -48,6 +52,11 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 	private JMenuItem mb5;
 	private JMenuItem testbtn;
 
+	JMenuBar mb = new JMenuBar();
+	JFrame frame = new JFrame();
+
+	JMenu mRight = new JMenu("right");
+
 	ActionListener listener = new ActionListener() {
 
 		@Override
@@ -61,21 +70,41 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 	 * Put some content in a JFrame and show it
 	 */
 	void doTest() {
-		JFrame main = new JFrame();
-		main.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+		// JInternalFrame main = new JInternalFrame();
+
+		frame.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+				System.out.println(e);
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				System.out.println(e);
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				System.out.println(e);
+			}
+
+		});
+
+		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
 		JMenu menu = new JMenu("testing");
 		JMenu menu1 = new JMenu("testing1");
 		JMenu menu2 = new JMenu("testing2");
-
 		menu.setHorizontalAlignment(SwingConstants.RIGHT);
-		main.setJMenuBar(new JMenuBar());
-		main.getJMenuBar().add(menu);
-		main.setContentPane(getVisualPaneContent(menu, menu1, menu2));
-		main.getJMenuBar().add(menu1);
-		main.getJMenuBar().add(menu2);
-		main.pack();
-		main.setVisible(true);
+
+		frame.setJMenuBar(mb);
+		mb.add(menu);
+		mb.add(menu1);
+		mb.add(menu2);
+		frame.setContentPane(getVisualPaneContent(menu, menu1, menu2));
+		frame.pack();
 
 		JPopupMenu pmenu = new JPopupMenu();
 		JMenuItem b = new JMenuItem("testing1");
@@ -88,7 +117,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		b.addActionListener(listener);
 		pmenu.add(b);
 
-		main.addMouseListener(new MouseListener() {
+		frame.addMouseListener(new MouseListener() {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -97,7 +126,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 				int n = pmenu.getComponentCount();
 				if (n > 1)
 					pmenu.remove(n - 1);
-				pmenu.show(main, 100, 100);
+				pmenu.show(frame, 100, 100);
 				// TODO Auto-generated method stub
 
 			}
@@ -127,6 +156,18 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 			}
 
 		});
+
+		frame.setVisible(true);
+
+//		JDesktopPane d = new JDesktopPane();
+//		d.setPreferredSize(new Dimension(600,300));
+//		d.add(main);
+//		JFrame top = new JFrame();
+//		top.setContentPane(d);
+//		top.setBounds(100,100, 600, 600);
+//		top.pack();
+//		top.setVisible(true);
+
 	}
 
 	/**
@@ -147,7 +188,6 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		JPanel firstColumn = new JPanel();
 		firstColumn.setLayout(new GridLayout(13, 1));
 		firstColumn.setBorder(new TitledBorder("column 1"));
-
 
 		JLabel l1 = new JLabel(getImage("test2.png"));
 		l1.setText("trailing right");
@@ -301,34 +341,42 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		btn.setFont(font);
 		menu.add(btn);
 		testbtn = new JMenuItem("testing");
-		testbtn.setFont(font);
+		testbtn.setFont(font); 
+		testbtn.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("You pressed button " + ((JMenuItem)e.getSource()).getText());
+			}
+			
+		});
 		menu.add(testbtn);
 
-		JMenu m2 = new JMenu("right");
-		menu.add(m2);
-		m2.setFont(font);
-		m2.addMenuListener(this);
-		m2.add(cb6m);
-		m2.add(rb1m);
+		menu.add(mRight);
+		mRight.setFont(font);
+		mRight.addMenuListener(this);
+		mRight.add(cb6m);
+		mRight.add(rb1m);
 		btn = new JMenuItem("-");
 		btn.setFont(font);
-		m2.add(btn);
-		m2.add(rb3m);
+		mRight.add(btn);
+		mRight.add(rb3m);
 		btn = new JMenuItem("-");
 		btn.setFont(font);
-		m2.add(btn);
-		m2.add(mb3);
-		m2.add(mb4);
+		mRight.add(btn);
+		mRight.add(mb3);
+		mRight.add(mb4);
 
 		JPanel theTab = new JPanel();
 
-		firstColumn.add(new JButton("remove 'testbtn'") {
+		firstColumn.add(new JButton("<html>remove <i>testbtn</i></html>") {
 			{
 				this.addActionListener(new ActionListener() {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						menu.remove(testbtn);
+						System.out.println("removing testbtn");
 					}
 
 				});
@@ -340,9 +388,23 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						testbtn.setText("testbtn");
+						testbtn.setText("test" + ++ntest);
 						menu.add(testbtn);
 
+					}
+
+				});
+			}
+		});
+		firstColumn.add(new JButton("menu bar add 'right'") {
+			{
+				this.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						mb.add(mRight);
+						mb.invalidate();
+						frame.pack();
 					}
 
 				});
@@ -356,6 +418,8 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		return panel;
 	}
 
+	int ntest = 0;
+
 	private ImageIcon getImage(String name) {
 		ImageIcon icon = new ImageIcon(getClass().getResource(name));
 
@@ -367,12 +431,13 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		return icon;
 	}
 
-
 	@Override
 	public void menuSelected(MenuEvent e) {
 		System.out.println("menuSelected " + e.getSource().toString());
 		JMenu menu = (JMenu) e.getSource();
+		System.out.println("adding mb5");
 		menu.add(mb5);
+		System.out.println("mb5 added");
 	}
 
 	@Override

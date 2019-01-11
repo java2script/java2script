@@ -1,5 +1,7 @@
 package test;
 
+import java.awt.event.InputEvent;
+
 class Test_Native2 extends Test_ {
 
 	public static void main(String[] args) {
@@ -9,7 +11,7 @@ class Test_Native2 extends Test_ {
 		
 //		if (true ||false) System.out.println$S("OK");
 
-		
+
 		boolean b = !(/** @j2sNative true || */false);
 		
 //		var b=!(true ||false);
