@@ -30,16 +30,6 @@ package javax.swing;
 import static javax.swing.ClientPropertyKey.JComponent_ANCESTOR_NOTIFIER;
 import static javax.swing.ClientPropertyKey.JComponent_INPUT_VERIFIER;
 
-import java.util.Enumeration;
-import java.util.EventListener;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Set;
-
-import javajs.util.Lst;
-
-import javax.swing.SortingFocusTraversalPolicy;
-
 import java.applet.JSApplet;
 import java.awt.AWTEvent;
 import java.awt.AWTKeyStroke;
@@ -61,7 +51,13 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Enumeration;
+import java.util.EventListener;
+import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Locale;
+import java.util.Set;
+
 import javax.swing.TransferHandler.DropLocation;
 import javax.swing.border.AbstractBorder;
 import javax.swing.border.Border;
@@ -71,9 +67,10 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.event.EventListenerList;
 import javax.swing.plaf.ComponentUI;
+
+import javajs.util.Lst;
 import sun.font.FontDesignMetrics;
 import swingjs.JSGraphics2D;
-import swingjs.JSToolkit;
 import swingjs.JSUtil;
 import swingjs.plaf.JSComponentUI;
 

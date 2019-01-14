@@ -30,7 +30,9 @@ import java.awt.Component;
  * questions.
  */
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.KeyboardFocusManager;
+import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ContainerEvent;
@@ -68,6 +70,8 @@ import javax.swing.plaf.UIResource;
 
 import sun.awt.AppContext;
 import sun.swing.UIAction;
+import swingjs.JSKeyEvent;
+import swingjs.JSMenuManager;
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.JSSwingMenu;
@@ -81,6 +85,19 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 		String prop = e.getPropertyName();
 		System.out.println("jspopiupmenuui prop " + prop);
 		super.propertyChange(e);
+	}
+
+	public void setPathTo(Object comp, Object jqKeyEvent) {
+		if (comp == null)
+			return;
+		JSMenuManager msm = (JSMenuManager) MenuSelectionManager.defaultManager();
+        msm.setCurrentPath((JComponent) comp);
+        if (jqKeyEvent != null) {
+        	KeyEvent e = JSKeyEvent.newJSKeyEvent((JComponent) comp, jqKeyEvent, 0, false);
+        	msm.processKeyEvent(e);
+        	if (e.isConsumed())
+        		hideAllMenus();
+        }
 	}
 
 	static {
@@ -99,22 +116,6 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 	private MenuKeyListener menuKeyListener;
 	
 
-	@Override
-	public void componentAdded(ContainerEvent e) {
-		// OK, the idea here is that we detach all child nodes
-		// and then reattach them. 
-		DOMNode.detachAll(outerNode);
-		setTainted();
-		setHTMLElement();
-	}
-
-	@Override
-	public void componentRemoved(ContainerEvent e) {
-		DOMNode.detachAll(outerNode);
-		setTainted();
-		setHTMLElement();
-	}
-
 	public JSPopupMenuUI() {
 		if (j2sSwingMenu == null) {
 			JSUtil.loadStaticResource("swingjs/jquery/j2sMenu.js");
@@ -130,10 +131,32 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 	public DOMNode updateDOMNode() {
 		// j2sMenu.js will wrap this in a div with the appropriate
 		if (domNode == null) {
-			domNode = containerNode = newDOMObject("ul", id);
+			containerNode = domNode = newDOMObject("ul", id);
 			bindJQueryEvents(domNode, "mouseenter", -1);
 		}
 		return updateDOMNodeCUI();
+	}
+
+	@Override
+	public void componentAdded(ContainerEvent e) {
+		// OK, the idea here is that we detach all child nodes
+		// and then reattach them. 
+		DOMNode.detachAll(outerNode);
+		setTainted();
+		setHTMLElement();
+		Component child = e.getChild();
+		if (child instanceof JMenuItem)
+			((JMenuItem) e.getChild()).addMenuKeyListener(menuKeyListener);
+	}
+
+	@Override
+	public void componentRemoved(ContainerEvent e) {
+		DOMNode.detachAll(outerNode);
+		setTainted();
+		setHTMLElement();
+		Component child = e.getChild();
+		if (child instanceof JMenuItem)
+			((JMenuItem) e.getChild()).removeMenuKeyListener(menuKeyListener);
 	}
 
 	@Override
@@ -270,7 +293,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 //        popupMenu.addPopupMenuListener(popupMenuListener);
 
         if (menuKeyListener == null) {
-            menuKeyListener = new BasicMenuKeyListener();
+            menuKeyListener = new JSMenuKeyListener();
         }
         popupMenu.addMenuKeyListener(menuKeyListener);
 
@@ -390,100 +413,125 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
      * Handles mnemonic for children JMenuItems.
      * @since 1.5
      */
-    private class BasicMenuKeyListener implements MenuKeyListener {
+    private class JSMenuKeyListener implements MenuKeyListener {
         MenuElement menuToOpen = null;
 
         @Override
 		public void menuKeyTyped(MenuKeyEvent e) {
-            if (menuToOpen != null) {
-                // we have a submenu to open
-                JPopupMenu subpopup = ((JMenu)menuToOpen).getPopupMenu();
-                MenuElement subitem = findEnabledChild(
-                        subpopup.getSubElements(), -1, true);
-
-                ArrayList<MenuElement> lst = new ArrayList<MenuElement>(Arrays.asList(e.getPath()));
-                lst.add(menuToOpen);
-                lst.add(subpopup);
-                if (subitem != null) {
-                    lst.add(subitem);
-                }
-                MenuElement newPath[] = new MenuElement[0];
-                newPath = lst.toArray(newPath);
-                MenuSelectionManager.defaultManager().setSelectedPath(newPath);
-                e.consume();
-            }
-            menuToOpen = null;
+//            if (menuToOpen != null) {
+//                // we have a submenu to open
+//                JPopupMenu subpopup = ((JMenu)menuToOpen).getPopupMenu();
+//                MenuElement subitem = findEnabledChild(
+//                        subpopup.getSubElements(), -1, true);
+//
+//                ArrayList<MenuElement> lst = new ArrayList<MenuElement>(Arrays.asList(e.getPath()));
+//                lst.add(menuToOpen);
+//                lst.add(subpopup);
+//                if (subitem != null) {
+//                    lst.add(subitem);
+//                }
+//                MenuElement newPath[] = new MenuElement[0];
+//                newPath = lst.toArray(newPath);
+//                MenuSelectionManager.defaultManager().setSelectedPath(newPath);
+//                e.consume();
+//            }
+//            menuToOpen = null;
         }
 
         @Override
 		public void menuKeyPressed(MenuKeyEvent e) {
-            char keyChar = e.getKeyChar();
-
-            // Handle the case for Escape or Enter...
-            if (!Character.isLetterOrDigit(keyChar)) {
-                return;
-            }
-
-            MenuSelectionManager manager = e.getMenuSelectionManager();
-            MenuElement path[] = e.getPath();
-            MenuElement items[] = popupMenu.getSubElements();
-            int currentIndex = -1;
-            int matches = 0;
-            int firstMatch = -1;
-            int indexes[] = null;
-
-            for (int j = 0; j < items.length; j++) {
-                if (! (items[j] instanceof JMenuItem)) {
-                    continue;
-                }
-                JMenuItem item = (JMenuItem)items[j];
-                int mnemonic = item.getMnemonic();
-                if (item.isEnabled() &&
-                    item.isVisible() && lower(keyChar) == lower(mnemonic)) {
-                    if (matches == 0) {
-                        firstMatch = j;
-                        matches++;
-                    } else {
-                        if (indexes == null) {
-                            indexes = new int[items.length];
-                            indexes[0] = firstMatch;
-                        }
-                        indexes[matches++] = j;
-                    }
-                }
-                if (item.isArmed() || item.isSelected()) {
-                    currentIndex = matches - 1;
-                }
-            }
-
-            if (matches == 0) {
-                // no op
-            } else if (matches == 1) {
-                // Invoke the menu action
-                JMenuItem item = (JMenuItem)items[firstMatch];
-                if (item instanceof JMenu) {
-                    // submenus are handled in menuKeyTyped
-                    menuToOpen = item;
-                } else if (item.isEnabled()) {
-                    // we have a menu item
-                    manager.clearSelectedPath();
-                    item.doClick();
-                }
-                e.consume();
+        	// In Java, this is returning a pointer to the JPopupMenu
+        	MenuElement[] path = e.getPath();
+        	MenuElement item = (path.length == 0 ? null : path[path.length - 1]);
+        	if (item instanceof JMenuItem) {
+        		((JMenuItem) item).doClick();
+            	e.consume();
             } else {
-                // Select the menu item with the matching mnemonic. If
-                // the same mnemonic has been invoked then select the next
-                // menu item in the cycle.
-                MenuElement newItem;
-
-                newItem = items[indexes[(currentIndex + 1) % matches]];
-
-                MenuElement newPath[] = new MenuElement[path.length+1];
-                System.arraycopy(path, 0, newPath, 0, path.length);
-                newPath[path.length] = newItem;
-                manager.setSelectedPath(newPath);
-                e.consume();
-            }
+              // Select the menu item with the matching mnemonic. If
+              // the same mnemonic has been invoked then select the next
+              // menu item in the cycle. 
+            	  
+             // really not useful
+//            	MenuElement[] path = e.getPath();
+//              MenuElement newPath[] = new MenuElement[path.length+1];
+//              System.arraycopy(path, 0, newPath, 0, path.length);
+//              MenuSelectionManager manager = e.getMenuSelectionManager();
+//              //newPath[path.length] = newItem;
+//              manager.setSelectedPath(newPath);
+//        	
+        	}
+        	return;
+        	
+//            char keyChar = e.getKeyChar();
+//
+//            // Handle the case for Escape or Enter...
+//            if (!Character.isLetterOrDigit(keyChar)) {
+//                return;
+//            }
+//
+//            MenuSelectionManager manager = e.getMenuSelectionManager();
+//            MenuElement path[] = e.getPath();
+//            MenuElement items[] = popupMenu.getSubElements();
+//            int currentIndex = -1;
+//            int matches = 0;
+//            int firstMatch = -1;
+//            int indexes[] = null;
+//
+//            char lc = lower(keyChar);
+//            for (int j = 0; j < items.length; j++) {
+//                if (! (items[j] instanceof JMenuItem)) {
+//                    continue;
+//                }
+//                JMenuItem item = (JMenuItem)items[j];
+//                int mnemonic = item.getMnemonic();
+//                if (mnemonic > 0  // Swingjs - added
+//                		&& 
+//                		item.isEnabled() &&
+//                    item.isVisible() && lc == lower(mnemonic)) {
+//                    if (matches == 0) {
+//                        firstMatch = j;
+//                        matches++;
+//                    } else {
+//                        if (indexes == null) {
+//                            indexes = new int[items.length];
+//                            indexes[0] = firstMatch;
+//                        }
+//                        indexes[matches++] = j;
+//                    }
+//                }
+//                if (item.isArmed() || item.isSelected()) {
+//                    currentIndex = matches - 1;
+//                }
+//            }
+//
+//            if (matches == 0) {
+//                // no op
+//            } else if (matches == 1) {
+//                // Invoke the menu action
+//                JMenuItem item = (JMenuItem)items[firstMatch];
+//                if (item instanceof JMenu) {
+//                    // submenus are handled in menuKeyTyped
+//                    menuToOpen = item;
+//                } else if (item.isEnabled()) {
+//                    // we have a menu item
+//                    manager.clearSelectedPath();
+//                    item.doClick();
+//                }
+//                e.consume();
+//            } else {
+//                // Select the menu item with the matching mnemonic. If
+//                // the same mnemonic has been invoked then select the next
+//                // menu item in the cycle.
+//                MenuElement newItem;
+//
+//                newItem = items[indexes[(currentIndex + 1) % matches]];
+//
+//                MenuElement newPath[] = new MenuElement[path.length+1];
+//                System.arraycopy(path, 0, newPath, 0, path.length);
+//                newPath[path.length] = newItem;
+//                manager.setSelectedPath(newPath);
+//                e.consume();
+//            }
         }
 
         @Override
@@ -965,91 +1013,91 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
         @Override
 		public void stateChanged(ChangeEvent ev) {
 
-System.out.println("jspopup state changed!");        	
-        	
-//        	if (!(UIManager.getLookAndFeel() instanceof BasicLookAndFeel)) {
-//                uninstall();
+//System.out.println("jspopup state changed!");        	
+//        	
+////        	if (!(UIManager.getLookAndFeel() instanceof BasicLookAndFeel)) {
+////                uninstall();
+////                return;
+////            }
+//            MenuSelectionManager msm = (MenuSelectionManager)ev.getSource();
+//            MenuElement[] p = msm.getSelectedPath();
+//            JPopupMenu popup = getActivePopup(p);
+//            if (popup != null && !popup.isFocusable()) {
+//                // Do nothing for non-focusable popups
 //                return;
 //            }
-            MenuSelectionManager msm = (MenuSelectionManager)ev.getSource();
-            MenuElement[] p = msm.getSelectedPath();
-            JPopupMenu popup = getActivePopup(p);
-            if (popup != null && !popup.isFocusable()) {
-                // Do nothing for non-focusable popups
-                return;
-            }
-
-            if (lastPathSelected.length != 0 && p.length != 0 ) {
-                if (!checkInvokerEqual(p[0],lastPathSelected[0])) {
-                    removeItems();
-                    lastPathSelected = new MenuElement[0];
-                }
-            }
-
-            if (lastPathSelected.length == 0 && p.length > 0) {
-                // menu posted
-                JComponent invoker;
-
-                if (popup == null) {
-                    if (p.length == 2 && p[0] instanceof JMenuBar &&
-                        p[1] instanceof JMenu) {
-                        // a menu has been selected but not open
-                        invoker = (JComponent)p[1];
-                        popup = ((JMenu)invoker).getPopupMenu();
-                    } else {
-                        return;
-                    }
-                } else {
-                    Component c = popup.getInvoker();
-                    if(c instanceof JFrame) {
-                        invoker = ((JFrame)c).getRootPane();
-                    } else if(c instanceof JDialog) {
-                        invoker = ((JDialog)c).getRootPane();
-                    } else if(c instanceof JApplet) {
-                        invoker = ((JApplet)c).getRootPane();
-                    } else {
-                        while (!(c instanceof JComponent)) {
-                            if (c == null) {
-                                return;
-                            }
-                            c = c.getParent();
-                        }
-                        invoker = (JComponent)c;
-                    }
-                }
-
-                // remember current focus owner
-                lastFocused = KeyboardFocusManager.
-                    getCurrentKeyboardFocusManager().getFocusOwner();
-
-                // request focus on root pane and install keybindings
-                // used for menu navigation
-                invokerRootPane = SwingUtilities.getRootPane(invoker);
-                if (invokerRootPane != null) {
-                    invokerRootPane.addFocusListener(rootPaneFocusListener);
-                    invokerRootPane.requestFocus(true);
-                    invokerRootPane.addKeyListener(this);
-                    focusTraversalKeysEnabled = invokerRootPane.
-                                      getFocusTraversalKeysEnabled();
-                    invokerRootPane.setFocusTraversalKeysEnabled(false);
-
-                    menuInputMap = getInputMap(popup, invokerRootPane);
-                    addUIInputMap(invokerRootPane, menuInputMap);
-//                    addUIActionMap(invokerRootPane, menuActionMap);
-                }
-            } else if (lastPathSelected.length != 0 && p.length == 0) {
-                // menu hidden -- return focus to where it had been before
-                // and uninstall menu keybindings
-                   removeItems();
-            } else {
-                if (popup != lastPopup) {
-                    receivedKeyPressed = false;
-                }
-            }
-
-            // Remember the last path selected
-            lastPathSelected = p;
-            lastPopup = popup;
+//
+//            if (lastPathSelected.length != 0 && p.length != 0 ) {
+//                if (!checkInvokerEqual(p[0],lastPathSelected[0])) {
+//                    removeItems();
+//                    lastPathSelected = new MenuElement[0];
+//                }
+//            }
+//
+//            if (lastPathSelected.length == 0 && p.length > 0) {
+//                // menu posted
+//                JComponent invoker;
+//
+//                if (popup == null) {
+//                    if (p.length == 2 && p[0] instanceof JMenuBar &&
+//                        p[1] instanceof JMenu) {
+//                        // a menu has been selected but not open
+//                        invoker = (JComponent)p[1];
+//                        popup = ((JMenu)invoker).getPopupMenu();
+//                    } else {
+//                        return;
+//                    }
+//                } else {
+//                    Component c = popup.getInvoker();
+//                    if(c instanceof JFrame) {
+//                        invoker = ((JFrame)c).getRootPane();
+//                    } else if(c instanceof JDialog) {
+//                        invoker = ((JDialog)c).getRootPane();
+//                    } else if(c instanceof JApplet) {
+//                        invoker = ((JApplet)c).getRootPane();
+//                    } else {
+//                        while (!(c instanceof JComponent)) {
+//                            if (c == null) {
+//                                return;
+//                            }
+//                            c = c.getParent();
+//                        }
+//                        invoker = (JComponent)c;
+//                    }
+//                }
+//
+//                // remember current focus owner
+//                lastFocused = KeyboardFocusManager.
+//                    getCurrentKeyboardFocusManager().getFocusOwner();
+//
+//                // request focus on root pane and install keybindings
+//                // used for menu navigation
+//                invokerRootPane = SwingUtilities.getRootPane(invoker);
+//                if (invokerRootPane != null) {
+//                    invokerRootPane.addFocusListener(rootPaneFocusListener);
+//                    invokerRootPane.requestFocus(true);
+//                    invokerRootPane.addKeyListener(this);
+//                    focusTraversalKeysEnabled = invokerRootPane.
+//                                      getFocusTraversalKeysEnabled();
+//                    invokerRootPane.setFocusTraversalKeysEnabled(false);
+//
+//                    menuInputMap = getInputMap(popup, invokerRootPane);
+//                    addUIInputMap(invokerRootPane, menuInputMap);
+////                    addUIActionMap(invokerRootPane, menuActionMap);
+//                }
+//            } else if (lastPathSelected.length != 0 && p.length == 0) {
+//                // menu hidden -- return focus to where it had been before
+//                // and uninstall menu keybindings
+//                   removeItems();
+//            } else {
+//                if (popup != lastPopup) {
+//                    receivedKeyPressed = false;
+//                }
+//            }
+//
+//            // Remember the last path selected
+//            lastPathSelected = p;
+//            lastPopup = popup;
         }
 
         @Override

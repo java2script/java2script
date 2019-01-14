@@ -46,6 +46,7 @@ import javax.swing.plaf.UIResource;
 import javajs.api.JSFunction;
 import javajs.util.PT;
 import sun.awt.CausedFocusEvent.Cause;
+import swingjs.JSFocusPeer;
 import swingjs.JSGraphics2D;
 import swingjs.JSToolkit;
 import swingjs.JSUtil;
@@ -114,9 +115,13 @@ import swingjs.api.js.JQueryObject;
  * data-ui [setDataUI(node)]
  * -------
  * 
- * Some UIs (JSButtonUI, JSSpinnerUI, JSComboBoxUI, JSFrameUI, and JSTextUI) set jqevent.target["data-ui"] 
+ * Some UIs (JSSpinnerUI, JSComboBoxUI, JSFrameUI, and JSTextUI) set jqevent.target["data-ui"] 
  * to point to themselves. This allows the control an option to handle the raw jQuery
  * event directly, bypassing the Java dispatch system entirely, id desired.
+ * 
+ * TODO: We should not use this method. It bypasses the normal Java LightWeightDispatcher,
+ * which has a protected processEvent(AWTEvent) method that 
+ * users can use to do custom processing. Maybe think about this more?
  * 
  * This method is used for specific operations, including JFrame closing,
  * JComboBox selection, and JSText key action handling. This connection is set up in
@@ -140,6 +145,9 @@ public class JSComponentUI extends ComponentUI
 	private static final int MENUITEM_OFFSET = 11;
 
 	final J2SInterface J2S = JSUtil.J2S;
+	
+	public boolean isNull;
+
 	/**
 	 * provides a unique id for any component; set on instantiation
 	 */
@@ -345,6 +353,12 @@ public class JSComponentUI extends ComponentUI
 	 */
     protected DOMNode itemNode;
 
+    /**
+     * the node to put children into; defaulting (and set) to outerNode 
+     * when initially null, but sometimes domNode
+     */
+	protected DOMNode containerNode;
+
 	
 	/**
 	 * "left" "right" "center" if defined
@@ -449,6 +463,18 @@ public class JSComponentUI extends ComponentUI
 	protected Dimension preferredSize;
 
 	/**
+	 * used by JSListUI to give it the correct scrollable size for its JViewPort
+	 */
+	protected int jsActualWidth, jsActualHeight;
+
+	private Object dropTarget = this; // unactivated
+
+	protected int actionItemOffset;
+
+	private int mnemonicIndex = -1;
+
+
+	/**
 	 * panels
 	 * 
 	 */
@@ -494,11 +520,18 @@ public class JSComponentUI extends ComponentUI
 	protected int width;
 	protected int height;
 
-	protected DOMNode containerNode;
-
-	public boolean isNull;
-
 	private DOMNode waitImage;
+
+	private final Color colorUNKNOWN = new Color();
+
+	protected Color inactiveForeground = colorUNKNOWN, inactiveBackground = colorUNKNOWN;
+
+	private boolean enabled = true;
+
+	/**
+	 * processed text (local to setIconAndText) is HTML
+	 */
+	private boolean isHTML;
 
 	/**
 	 * set false for tool tip or other non-label object that has text
@@ -686,7 +719,7 @@ public class JSComponentUI extends ComponentUI
 	 * @param node
 	 */
 	protected void ignoreAllMouseEvents(DOMNode node) {
-		$(node).addClass("swingjs-ui");
+		addClass(node, "swingjs-ui");
 	}
 
 	protected static void hideAllMenus() {
@@ -695,6 +728,10 @@ public class JSComponentUI extends ComponentUI
 	
 	protected void addClass(DOMNode node, String cl) {
 		$(node).addClass(cl);
+	}
+	
+	protected void removeClass(DOMNode node, String cl) {
+		$(node).removeClass(cl);
 	}
 	
 	/**
@@ -715,6 +752,7 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected void setDataUI(DOMNode node) {
 		DOMNode.setAttr(node, "data-ui", this);
+		addClass(node, "data-ui");
 	}
 
 	/**
@@ -740,7 +778,7 @@ public class JSComponentUI extends ComponentUI
 		if (domNode == null)
 			return; // too early
 		if (!on) {
-			setTabIndex(-1);
+			setTabIndex(Integer.MIN_VALUE);
 		} else if (keysEnabled) {
 			setTabIndex(0);
 		} else {
@@ -763,7 +801,7 @@ public class JSComponentUI extends ComponentUI
 	private void setTabIndex(int i) {
 		if (focusNode == null)
 			return;
-		if (i < 0) {
+		if (i == Integer.MIN_VALUE) {
 			focusNode.removeAttribute("tabindex");
 			DOMNode.setAttr(focusNode, "ui", null);
 		} else {
@@ -772,41 +810,76 @@ public class JSComponentUI extends ComponentUI
 		}
 	}
 
-	public static JSComponentUI focusedUI;
+	@Override
+	public boolean requestFocus(Component lightweightChild, boolean temporary, boolean focusedWindowChangeAllowed,
+			long time, Cause cause) {
+		if (lightweightChild == null)
+			return requestFocus();
+//		System.out.println(">>>>JSCUI requestFocus " + this.id);
+		//System.out.println(JSUtil.getStackTrace());
+			return JSToolkit.requestFocus(lightweightChild);
+	}
 
-	JSComponentUI getFocusedUI() {
-		return focusedUI;
+	public boolean requestFocus() {
+		if (focusNode == null || isUIDisabled)
+			return false;
+		/** @j2sNative this.focusNode.focus(); */
+		return true;
+	}
+
+	@Override
+	public boolean isFocusable() {
+		return (focusNode != null);
 	}
 
 	/**
 	 * Add the $().focus() and $().blur() events to a DOM button
 	 * 
 	 */
-	@SuppressWarnings("unused")
 	protected void addJQueryFocusCallbacks() {
 		setTabIndex(0);
 		JQueryObject node = $(focusNode);
 		node.unbind("focus blur");
-		Object me = this;
+		JSComponentUI me = this;
 
 		/**
 		 * @j2sNative
 		 * 
-		 * 			node.focus(function() {
-		 * 				System.out.println("JSSCUI focus " + me.id);
-		 * 				me.handleJSFocus$Z(true);
-		 * 				System.out.println("JSSCUI focus " + me.id);
+		 * 			node.focus(function(e) {
+		 * 				//System.out.println("JSSCUI node.focus() callback " + me.id + "  " + document.activeElement.id);
+		 * 				me.handleJSFocus$O$O$Z(me.jc, e.relatedTarget, true);
+		 * 				//System.out.println("JSSCUI focus " + me.id);
 		 * 			});
-		 *            node.blur(function() {
+		 *            node.blur(function(e) {
 		 *            try{
-		 * 				System.out.println("JSSCUI focus blur " + me.id);
-		 *            me.handleJSFocus$Z(false);
-		 * 				System.out.println("JSSCUI focus blur " + me.id);
+		 * 				//System.out.println("JSSCUI node.blur() callback " + me.id + "  " + document.activeElement.id);
+		 *            me.handleJSFocus$O$O$Z(me.jc, e.relatedTarget, false);
+		 * 				//System.out.println("JSSCUI focus blur " + me.id + "  " + document.activeElement.id);
 		 *            }catch(e){
-		 *              System.out.println("JSSCUI focus error blur " + me.id);
+		 *              //System.out.println("JSSCUI focus error blur " + me.id);
 		 *            }
 		 *            });
 		 */
+		{
+			// Eclipse reference only
+			me.handleJSFocus(this.jc, null, true);
+		}
+	}
+
+	/**
+	 * hack a way to transfer focus to this button
+	 */
+	@SuppressWarnings("unused")
+	public void abstractButtonFocusHack() {    	
+		JComponent focused = (JComponent) JSToolkit.getCurrentFocusOwner(null);
+    	JSComponentUI focusedUI = /** @j2sNative focused && focused.ui || */ null;
+    	// This is important for a button that is responding to a formatted text box input.
+    	// I cannot figure out how to get the blur message before this one.
+    	// See Micrometer.java
+    	if (focusedUI != null && focusedUI != this) {
+    		focusedUI.handleJSFocus(jc, null, false);
+    		handleJSFocus(jc, null, true);
+    	}
 	}
 
 	public boolean hasFocus() {
@@ -814,41 +887,34 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	/**
-	 * comes from jQuery callback
+	 * comes from jQuery callback; checks for complementary event
+	 * 
 	 * @param focusGained
 	 */
-	public void handleJSFocus(boolean focusGained) {
-		// unfortunately, this will be TOO LATE
-		// TODO: This should be handed by DefaultFocusManager
-
-		AWTEvent e = new FocusEvent(c, focusGained ? FocusEvent.FOCUS_GAINED : FocusEvent.FOCUS_LOST);
-		if (focusGained) {
-			// The problem here is that we are getting an activate signal too
-			// early, before focus has been obtained.
-			// Java does not assign focus gained/lost until after a mouse press, for example.
-			focusedUI = this;
-			//Toolkit.getEventQueue().postEvent(e);
-		} else {
-			focusedUI = null;
+	public void handleJSFocus(Object jco, Object related, boolean focusGained) {
+		JComponent c0 = (JComponent) jco;
+		AWTEvent e = new FocusEvent(c0, focusGained ? FocusEvent.FOCUS_GAINED : FocusEvent.FOCUS_LOST);
+		if (related == this) {
+			c0.dispatchEvent(e);
+			return;
 		}
-//			/**
-//			 * @j2sNative
-//			 * 
-//			 * 				this.c.processEvent(e);
-//			 * 
-//			 */
-//			{
-//				// We must be certain that the lost message arrives before the
-//				// gained.
-//				Toolkit.getEventQueue().dispatchEventAndWait(e, c);
-//			}
-//
-//		}
-		System.out.println("focus for " + jc.getUIClassID() + " " + focusGained);
-		jc.dispatchEvent(e);
+		JComponent other;
+		if (focusGained) {
+			other = (JComponent) JSFocusPeer.getAccessibleComponentFor((DOMNode) related);
+			if (other != null && other != c0)
+				handleJSFocus(other, this, false);
+			c0.dispatchEvent(e);
+		} else {
+			other = (JComponent) JSToolkit.getCurrentFocusOwner(related);
+			c0.dispatchEvent(e);
+			if (other != null && other != c0)
+				handleJSFocus(other, this, true);
+		}
 	}
 
 	private boolean keysEnabled;
+
+	private int mnemonic;
 
 	/**
 	 * for jQuery return
@@ -870,6 +936,7 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected void bindJSKeyEvents(DOMNode node, boolean addFocus) {
 		setDataUI(node);
+		addClass(node, "ui-key");
 		keysEnabled = true;
 		bindJQueryEvents(node, "keydown keypress keyup" + (addFocus ? " focusout"// dragover drop"
 				: ""), Event.KEY_PRESS);
@@ -900,6 +967,7 @@ public class JSComponentUI extends ComponentUI
 		JSEventHandler me = this;
 		JSFunction f = null;
 		setDataUI(node);
+		addClass(node, "ui-events");
 		/**
 		 * @j2sNative
 		 * 
@@ -1037,68 +1105,64 @@ public class JSComponentUI extends ComponentUI
 			if (isDisposed && c.visible && e.getNewValue() != null)
 				setVisible(true);
 		}
-		propertyChangedCUI(prop);
+		propertyChangedCUI(e, prop);
 	}
 	
 	/**
 	 * plaf ButtonListener and TextListener will call this to update common
 	 * properties such as "text".
-	 * 
+	 * @param e TODO
 	 * @param prop
 	 */
-	void propertyChangedFromListener(String prop) {
+	void propertyChangedFromListener(PropertyChangeEvent e, String prop) {
 		if (isUIDisabled)
 			return;
-		if (prop == "ancestor") {
+		switch (prop) {
+		case "ancestor":
 			if (cellComponent != null)
 				return;
 			updatePropertyAncestor(true);
+			break;
 		}
-		propertyChangedCUI(prop);
+		propertyChangedCUI(e, prop);
 	}
 	
-	protected void propertyChangedCUI(String prop) {
+	protected void propertyChangedCUI(PropertyChangeEvent e, String prop) {
 		// don't want to update a menu until we have to, after its place is set
 		// and we know it is not a JMenuBar menu
 		if (!isMenu)
 			getDOMNode();
-		if (prop == "preferredSize") {
+		switch (prop) {
+		case "preferredSize":
 			// size has been set by JComponent layout
 			preferredSize = c.getPreferredSize(); // may be null
 			getPreferredSize(jc);
 			return;
-		}
-		if (prop == "background") {
+		case "background":
 			setBackground(c.getBackground());
 			return;
-		}
-		if (prop == "foreground") {
+		case "foreground":
 			setForeground(c.getForeground());
 			return;
-		}
-		if (prop == "opaque") {
+		case "opaque":
 			setBackground(c.getBackground());
 			return;
-		}
-		if (prop == "inverted") {
+		case "inverted":
 			updateDOMNode();
 			return;
-		}
-		if (prop == "text") {
-				String val = ((AbstractButton) c).getText();
-				if (val == null ? currentText != null : !val.equals(currentText))
-					setIconAndText(prop, currentIcon, currentGap, (String) val);
+		case "text":
+			String val = ((AbstractButton) c).getText();
+			if (val == null ? currentText != null : !val.equals(currentText))
+				setIconAndText(prop, currentIcon, currentGap, (String) val);
 			return;
-		}
-		if (prop == "iconTextGap") {
+		case "iconTextGap":
 			if (iconNode != null) {
 				int gap = ((AbstractButton) c).getIconTextGap();
 				if (currentGap != gap)
 					setIconAndText(prop, currentIcon, gap, currentText);
 			}
 			return;
-		}
-		if (prop == "icon") {
+		case "icon":
 			if (centeringNode != null) {
 				// note that we use AbstractButton cast here just because
 				// it has a getIcon() method. JavaScript will not care if
@@ -1108,15 +1172,37 @@ public class JSComponentUI extends ComponentUI
 					setIconAndText(prop, icon, currentGap, currentText);
 			}
 			return;
-		}
-		if (prop == "horizontalAlignment" || prop == "verticalAlignment") {
-			//setAlignment();
+		case "mnemonic":
+			int newValue = ((Integer) e.getNewValue()).intValue();
+			setMnemonic(newValue);
+			setIconAndText(prop, currentIcon, currentGap, currentText);
 			return;
+		case "displayedMnemonicIndex":
+			mnemonicIndex = ((Integer) e.getNewValue()).intValue();
+			setIconAndText(prop, currentIcon, currentGap, currentText);
+			return;
+		default:
+			if (debugging)
+				System.out.println("JSComponentUI: unrecognized prop: " + this.id + " " + prop);
 		}
-		if (debugging)
-			System.out.println("JSComponentUI: unrecognized prop: " + this.id + " " + prop);
 	}	
 	
+	protected void setMnemonic(int newValue) {
+		// need to handle non-menu mnemonics as well
+		if (domNode == null || newValue == mnemonic)
+			return;
+		if (newValue < 0) {
+			newValue = (isLabel ? (label == null ? 0 : label.getDisplayedMnemonic()) 
+					: /** @j2sNative this.jc.getMnemonic$ && this.jc.getMnemonic$() ||*/ 0);
+			}
+		DOMNode node = (menuAnchorNode == null ? domNode : menuAnchorNode);
+		if (newValue != mnemonic)
+			removeClass(node, "ui-mnem-" + Character.toLowerCase(mnemonic));
+		if (newValue != 0)
+			addClass(node, "ui-mnem-" + Character.toLowerCase(newValue));
+		mnemonic = newValue;	
+	}
+
 	private String createMsgs = "";
 
 	/**
@@ -1403,6 +1489,9 @@ public class JSComponentUI extends ComponentUI
 
 			$(body).after(div);
 			Rectangle r = div.getBoundingClientRect();
+			
+			//System.out.println("JSCUI " + (int) (r.width + 0.) + " " + (/** @j2sNative div.innerHTML ||*/""));
+			
 			// From the DOM; Will be Rectangle2D.double, actually.
 			// This is preferable to $(text).width() because that is rounded
 			// DOWN.
@@ -1879,12 +1968,6 @@ public class JSComponentUI extends ComponentUI
 				enableNode(enableNodes[i], b);
 	}
 
-	private final Color colorUNKNOWN = new Color();
-
-	protected Color inactiveForeground = colorUNKNOWN, inactiveBackground = colorUNKNOWN;
-
-	private boolean enabled = true;
-
 	protected void enableNode(DOMNode node, boolean b) {
 		if (node == null)
 			return;
@@ -1967,21 +2050,6 @@ public class JSComponentUI extends ComponentUI
 		setInnerComponentBounds(width, height);
 	}
 
-	/**
-	 * used by JSListUI to give it the correct scrollable size for its JViewPort
-	 */
-	protected int jsActualWidth, jsActualHeight;
-
-	private Object dropTarget = this; // unactivated
-
-	protected int actionItemOffset;
-
-	/**
-	 * used by JSTableUI to know if we need to do anything with this cell.
-	 * 
-	 */
-	
-
 	protected void setJSDimensions(int width, int height) {
 		if (jsActualWidth > 0)
 			width = jsActualWidth;
@@ -1991,9 +2059,9 @@ public class JSComponentUI extends ComponentUI
 		if (outerNode != null) {
 			DOMNode.setSize(outerNode, width, height);
 		}
-		if (menuAnchorNode != null) {
-			DOMNode.setSize(menuAnchorNode, width, height);
-		}
+//		if (menuAnchorNode != null) {
+//			DOMNode.setSize(menuAnchorNode, width, height);
+//		}
 	}
 
 	protected void setInnerComponentBounds(int width, int height) {
@@ -2012,10 +2080,11 @@ public class JSComponentUI extends ComponentUI
 
 		if (iconNode == null && textNode == null)
 			return;
-		
+
 		// TODO so, actually, icons replace the checkbox or radio button, they do not
 		// complement them
 
+		setMnemonic(-1);
 		actualWidth = actualHeight = 0;
 		currentText = text;
 		currentGap = gap;
@@ -2032,12 +2101,11 @@ public class JSComponentUI extends ComponentUI
 				DOMNode.setStyles(iconNode, "height", iconHeight + "px", "width", icon.getIconWidth() + "px");
 			}
 		}
-		boolean isHTML = false;
 		if (text == null || text.length() == 0) {
 			text = "";
 		} else {
-			DOMNode.setStyles(textNode, "white-space","nowrap");
-			if (icon == null) {				
+			DOMNode.setStyles(textNode, "white-space", "nowrap");
+			if (icon == null) {
 				// tool tip does not allow text alignment
 				if (iconNode != null && isMenuItem && actionNode == null && text != null) {
 					DOMNode.addHorizontalGap(iconNode, gap + MENUITEM_OFFSET);
@@ -2050,6 +2118,7 @@ public class JSComponentUI extends ComponentUI
 				if (gap != 0 && text != null)
 					DOMNode.addHorizontalGap(iconNode, gap);
 			}
+			isHTML = false;
 			if (text.indexOf("<html>") == 0) {
 				isHTML = true;
 				// PhET uses <html> in labels and uses </br>
@@ -2058,6 +2127,11 @@ public class JSComponentUI extends ComponentUI
 				text = PT.rep(text, "href=", "target=_blank href=");
 			} else if (jc.getClientProperty("html") != null) {
 				isHTML = true;
+			} else if (mnemonicIndex >= 0) {
+				int i = mnemonicIndex;
+				isHTML = true;
+				if (i < text.length())
+					text = text.substring(0, i) + "<u>" + text.substring(i, i + 1) + "</u>" + text.substring(i + 1);
 			}
 		}
 		DOMNode obj = null;
@@ -2235,6 +2309,7 @@ public class JSComponentUI extends ComponentUI
 		int ih = (dimIcon == null ? 0 : dimIcon.height);
 		int hCtr = Math.max(h, ih);
 		int wCtr = wIcon + gap + wText;
+		
 		if (alignHCenter) {
 			switch (hTextPos) {
 			case SwingConstants.TOP:
@@ -2368,8 +2443,10 @@ public class JSComponentUI extends ComponentUI
 			DOMNode.setStyles(iconNode, "top", top + "%", "transform",
 					"translateY(-" + itop + "%)" + (iscale == null ? "" : iscale));
 		} else {
-			DOMNode.setSize(menuAnchorNode, wCtr + margins.left + margins.right, h);
-//			if (actionNode != null) {
+			
+			DOMNode.setSize(menuAnchorNode, 25 + wCtr + margins.left + margins.right, h);
+
+			//			if (actionNode != null) {
 				DOMNode.setStyles(textNode, "top", "50%", "transform", "translateY(-60%)");
 				DOMNode.setStyles(iconNode, "top", "50%", "transform", "translateY(-80%) scale(0.6,0.6)");
 //			}
@@ -2552,27 +2629,6 @@ public class JSComponentUI extends ComponentUI
 			$(waitImage).show();
 		else
 			$(waitImage).hide();
-	}
-
-	@Override
-	public boolean requestFocus(Component lightweightChild, boolean temporary, boolean focusedWindowChangeAllowed,
-			long time, Cause cause) {
-		if (lightweightChild == null)
-			return requestFocus();
-		else
-			return JSToolkit.requestFocus(lightweightChild);
-	}
-
-	protected boolean requestFocus() {
-		if (focusNode == null || isUIDisabled)
-			return false;
-		$(focusNode).focus();
-		return true;
-	}
-
-	@Override
-	public boolean isFocusable() {
-		return (focusNode != null);
 	}
 
 	@Override

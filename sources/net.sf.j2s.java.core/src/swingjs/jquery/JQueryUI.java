@@ -10,16 +10,18 @@ package swingjs.jquery;
  * @author Bob Hanson
  *
  */
-public class JQueryUI {  
+public class JQueryUI { 
 
-	public JQueryUI() {
+	public JQueryUI() { 
+		int k = 333;
 		
 		// for reflection
 	}
 	static {
 		
 		/**
-		 * @j2sNative
+		 * 
+		 * @j2sNative 
 		 * 
 if (!jQuery.ui)
 try{

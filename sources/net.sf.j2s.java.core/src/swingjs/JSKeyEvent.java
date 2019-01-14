@@ -95,7 +95,7 @@ public class JSKeyEvent extends KeyEvent {
 		char keyChar = getJavaKeyChar(keyCode, jskey);
 		return (keyChar == CHAR_UNDEFINED && id == KEY_TYPED ? null
 				: new JSKeyEvent(source, jqevent, id, 
-						(id == KEY_TYPED ? JSKeyEvent.VK_UNDEFINED : keyCode),
+						(id == KEY_TYPED ? VK_UNDEFINED : keyCode),
 						keyChar,
 						(id == KEY_TYPED ? KEY_LOCATION_UNKNOWN : jskeyLocation + 1))
 				);
@@ -103,24 +103,16 @@ public class JSKeyEvent extends KeyEvent {
 	
 	private JSKeyEvent(JComponent source, Object ev, int id, int keyCode, char keyChar, int location) {
 		super(source, id, System.currentTimeMillis(), 0, keyCode, keyChar, location);
-		boolean shift = false, ctrl = false, meta = false, alt = false, altGraph = false;
 		byte[] bdata = new byte[0];
 		/**
 		 * @j2sNative
 		 * 
-		 *            shift = ev.shiftKey;
-		 *            ctrl = ev.ctrlKey;
-		 *            alt = ev.altKey;
-		 *            meta = ev.metaKey;
-		 *            altGraph = ev.altGraphKey;
-		 *            
 		 *            
 		 * bdata.jqevent = ev;
 		 * 
 		 */
-
 		setBData(bdata);
-		modifiers = JSKeyEvent.getModifiers(shift, ctrl, alt, meta, altGraph);
+		modifiers = getModifiers(ev);
 	}
 
 	private static int getJavaKeyCode(int jskeyCode, String jskey) {
@@ -193,6 +185,20 @@ public class JSKeyEvent extends KeyEvent {
 		
 	}
 
+	public static int getModifiers(Object ev) {
+		boolean shift = false, ctrl = false, meta = false, alt = false, altGraph = false;
+		/**
+		 * @j2sNative
+		 * 
+		 *            shift = ev.shiftKey;
+		 *            ctrl = ev.ctrlKey;
+		 *            alt = ev.altKey;
+		 *            meta = ev.metaKey;
+		 *            altGraph = ev.altGraphKey;
+		 */
+		return getModifiers(shift, ctrl, alt, meta, altGraph);
+
+	}
 	private static int getModifiers(boolean shift, boolean ctrl, boolean alt, boolean meta, boolean altGraph) {
 		 int modifiers = 0; 
 		if (shift)

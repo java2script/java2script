@@ -34,6 +34,9 @@ import javax.swing.BorderFactory;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.LookAndFeel;
 import javax.swing.UIDefaults;
@@ -42,6 +45,8 @@ import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.DimensionUIResource;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.plaf.InsetsUIResource;
+
+import sun.awt.SunToolkit;
 //import java.awt.Component;
 //import java.awt.Dimension;
 //import java.awt.Font;
@@ -172,6 +177,14 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		return table;
 	}
 
+//    static int getFocusAcceleratorKeyMask() {
+//        Toolkit tk = Toolkit.getDefaultToolkit();
+//        if (tk instanceof SunToolkit) {
+//            return ((SunToolkit)tk).getFocusAcceleratorKeyMask();
+//        }
+//        return ActionEvent.ALT_MASK;
+//    }
+//
 	/**
 	 * {@inheritDoc}
 	 */

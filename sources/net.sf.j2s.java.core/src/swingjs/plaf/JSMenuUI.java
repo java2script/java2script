@@ -32,47 +32,55 @@ public class JSMenuUI extends JSMenuItemUI {
 				DOMNode.detachAll(((JSComponentUI)jc.getParent().ui).domNode);
 		}
 		if (domNode == null) {
-			domNode = createItem("_elem", null);
-			bindJQueryEvents(domNode, "mouseenter mouseleave", -1);			
+			domNode = createItem(isMenuBarMenu ? "_bar" : "_elem", null);
+			bindJQueryEvents(domNode, "mouseenter mouseleave", -1);
 		}
 		allowTextAlignment = isMenuItem = !isMenuBarMenu;
 		containerNode = (isMenuBarMenu ? null : domNode);
+		addClass(domNode, isMenuBarMenu ? "j2s-menuBar-menu" : "j2s-popup-menu");
+		removeClass(domNode, !isMenuBarMenu ? "j2s-menuBar-menu" : "j2s-popup-menu");
+		if (isMenuBarMenu)
+			removeClass(menuAnchorNode, "a");
+		else
+			addClass(menuAnchorNode, "a");
 		setCssFont(domNode, c.getFont()); 
 		DOMNode.setVisible(domNode, jc.isVisible());
+		//domNode.setAttribute("tabindex", isMenuBarMenu ? "0" : null);
 		return domNode;
 	}
 
-	@Override
-	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
-		// we use == here because this will be JavaScript
-		if (target == domNode && eventType == -1) {
-			String type = (/** @j2sNative jQueryEvent.type || */ "");
-			if (type.equals("mouseenter")) {
-				if (!jm.getParent().getUIClassID().equals("MenuBarUI"))
-					stopPopupMenuTimer();
-				jm.setSelected(true);
-				return HANDLED;
-			}
-			if (type.equals("mouseleave")) {
-				jm.setSelected(false);
-				if (jm.getParent().getUIClassID().equals("MenuBarUI"))
-					startPopupMenuTimer();
-				return HANDLED;
-			}
-		}
-		return super.handleJSEvent(target, eventType, jQueryEvent);
-	} 
+//	@Override
+//	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
+//		System.out.println("JSMenuUI this is not working, right? ");// RIGHT
+//		// we use == here because this will be JavaScript
+//		if (target == domNode && eventType == -1) {
+//			String type = (/** @j2sNative jQueryEvent.type || */ "");
+//			if (type.equals("mouseenter")) {
+//				if (!jm.getParent().getUIClassID().equals("MenuBarUI"))
+//					stopPopupMenuTimer();
+//				jm.setSelected(true);
+//				return HANDLED;
+//			}
+//			if (type.equals("mouseleave")) {
+//				jm.setSelected(false);
+//				if (jm.getParent().getUIClassID().equals("MenuBarUI"))
+//					startPopupMenuTimer();
+//				return HANDLED;
+//			}
+//		}
+//		return super.handleJSEvent(target, eventType, jQueryEvent);
+//	} 
 	
 	@Override
-	public void propertyChangedFromListener(String prop) {
-		System.out.println("JSMenuUI prop = " + prop + " " + jm.getText());
-		super.propertyChangedFromListener(prop);
+	public void propertyChangedFromListener(PropertyChangeEvent e, String prop) {
+		//System.out.println("JSMenuUI prop = " + prop + " " + jm.getText());
+		super.propertyChangedFromListener(e, prop);
 	}
 
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
-		System.out.println("JSMenuUI prop " + prop);
+		//System.out.println("JSMenuUI prop " + prop);
 		if (jc.isVisible()) {
 			if (prop == "ancestor") {
 				rebuild();

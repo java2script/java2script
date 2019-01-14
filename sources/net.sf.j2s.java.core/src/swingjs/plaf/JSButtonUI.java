@@ -71,6 +71,8 @@ public class JSButtonUI extends JSLightweightUI {
 	//               |__JSRadioButtonMenuItemUI
 	//
 	//
+	// mousePress --> Frame(Component).dispatchEvent 
+	//   --> LightWeightDispatcher --> [data-component] 
 	
 	/**
 	 * a wrapper if this is not a menu item
@@ -97,7 +99,7 @@ public class JSButtonUI extends JSLightweightUI {
 
 	protected void createButton() {
 		addCentering(buttonNode);
-		setDataComponent(domNode);
+		setDataComponent(buttonNode);
 		setDataComponent(iconNode); // needed for mac safari/chrome
 		setDataComponent(textNode); // needed for mac safari/chrome
 		setEnabled(c.isEnabled());
@@ -125,16 +127,21 @@ public class JSButtonUI extends JSLightweightUI {
 		itemNode = newDOMObject("li", id);
 		if (text == null && icon == null)
 			return itemNode;
-		menuAnchorNode = newDOMObject("a", id + "_a");
-		DOMNode.setStyles(menuAnchorNode, "margin", "1px 2px 1px 2px");
+		menuAnchorNode = newDOMObject("div", id + "_a", "tabindex", "8");
+		if (type != "_bar") {
+			addClass(menuAnchorNode, "a");
+			DOMNode.setStyles(menuAnchorNode, "margin", "1px 2px 1px 2px");
+		}
 		itemNode.appendChild(menuAnchorNode);
 		if (buttonNode == null) {
 			// not a radio or checkbox
 			addCentering(menuAnchorNode);
 			$(iconNode).attr("role", "menucloser");
 			$(textNode).attr("role", "menucloser");
-			setDataUI(iconNode);
-			setDataUI(textNode);
+			setDataComponent(iconNode); // needed for mac safari/chrome
+			setDataComponent(textNode); // needed for mac safari/chrome
+//			setDataUI(iconNode);
+//			setDataUI(textNode);
 			enableNode = itemNode;
 			setIconAndText("btn", icon, gap, text);
 		} else {
@@ -144,7 +151,7 @@ public class JSButtonUI extends JSLightweightUI {
 		// role=menuitem
 		// attribute via j2sApplet.setMouse().
 		// That event will then fire handleJSEvent
-		setDataUI(menuAnchorNode);
+//		setDataUI(menuAnchorNode);
 		setDataComponent(menuAnchorNode);
 		setDataComponent(itemNode);
 		return itemNode;
@@ -154,9 +161,9 @@ public class JSButtonUI extends JSLightweightUI {
 	protected void enableNode(DOMNode node, boolean b) {
 		if (isMenuItem) {
 			if (b) {
-				$(node).removeClass("ui-menu-disabled ui-state-disabled");
+				removeClass(node, "ui-menu-disabled ui-state-disabled");
 			} else {
-				$(node).addClass("ui-menu-disabled ui-state-disabled");
+				addClass(node, "ui-menu-disabled ui-state-disabled");
 			}
 		} else {
 			super.enableNode(node, b);
@@ -170,8 +177,10 @@ public class JSButtonUI extends JSLightweightUI {
 			DOMNode.setStyles(buttonNode, "border", "none");
 		else if (button.getBorder() == BorderFactory.html5Border)
 			DOMNode.setStyles(buttonNode, "border", null);
-		if (!isMenuSep)
+		if (!isMenuSep) {
+			setMnemonic(-1);
 			setAlignments(button);
+		}
 	}
 
 	/**

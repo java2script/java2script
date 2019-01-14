@@ -100,13 +100,14 @@ public class ButtonListener implements MouseListener, MouseMotionListener,
 		// e.getSource());
 		AbstractButton b = (AbstractButton) e.getSource();
 		
+		if (prop == AbstractButton.CONTENT_AREA_FILLED_CHANGED_PROPERTY) {
+			checkOpacity(b);
+			return;
+		}
 		if (prop == AbstractButton.MNEMONIC_CHANGED_PROPERTY) {
 			updateMnemonicBinding(b);
-		} else if (prop == AbstractButton.CONTENT_AREA_FILLED_CHANGED_PROPERTY) {
-			checkOpacity(b);
-		} else {
-			ui.propertyChangedFromListener(prop);
 		}
+		ui.propertyChangedFromListener(e, prop);
 	}
 
 	protected void checkOpacity(AbstractButton b) {
@@ -251,8 +252,14 @@ public class ButtonListener implements MouseListener, MouseMotionListener,
 	public void mousePressed(MouseEvent e) {
 		if (SwingUtilities.isLeftMouseButton(e)) {
 			AbstractButton b = (AbstractButton) e.getSource();
-			if (b.getUIClassID() == "MenuUI" && ((JMenu)b).isTopLevelMenu())
+			if (b.getUIClassID() == "MenuUI" && ((JMenu)b).isTopLevelMenu()) {
 				((JMenu)b).setPopupMenuVisible (true);
+				JComponent root = ((JComponent) b.getTopLevelAncestor()).getRootPane();
+				root.requestFocus();
+				
+				/** @j2sNative   root.ui.focusNode.focus(); */
+				
+			}
 		}
 	}
 

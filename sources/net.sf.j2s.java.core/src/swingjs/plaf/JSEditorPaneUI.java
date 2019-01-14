@@ -62,7 +62,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		if (domNode == null) {
 			mustWrap = true;
 			domNode = newDOMObject("div", id);
-			DOMNode.setStyles(domNode, "margin", "0px"); // default for pre is font-height
+			DOMNode.setStyles(domNode); // default for pre is font-height
 			$(domNode).addClass("swingjs-doc");
 			setupViewNode();
 		}
@@ -76,7 +76,6 @@ public class JSEditorPaneUI extends JSTextViewUI {
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
-		System.out.println(">>>>>>>>>>>>>>>JSEditorPaneUI " + prop);
 		switch(prop) {
 		case "text":
 			getComponentText();
@@ -89,7 +88,6 @@ public class JSEditorPaneUI extends JSTextViewUI {
 	private int epTimer;
 	private String currentHTML;
 		
-	@SuppressWarnings("unused")
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
 
@@ -129,7 +127,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 			}
 			node = DOMNode.getParent(node);
 		}
-		System.out.println("JSEditor docoffset " + pt);
+		//System.out.println("JSEditor docoffset " + pt);
 		return pt;
 	}
 
@@ -182,7 +180,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		DOMNode[] divs = (DOMNode[]) (Object) $(domNode).find("*");
 		//System.out.println("updateDataUI " + divs.length);
 		for (int i = divs.length; --i >= 0;)
-			DOMNode.setAttr(divs[i], "data-ui", this);
+			setDataUI(divs[i]);
 	}
 
 	private final static int BOLD = 1;
@@ -477,7 +475,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 	@SuppressWarnings("unused")
 	@Override
 	protected void jsSelect(Object[] r1, Object[] r2, boolean andScroll) {
-		System.out.println("jsSelect " + r1 + r2);
+		//System.out.println("jsSelect " + r1 + r2);
 		// range index may be NaN
 		/**
 		 * @j2sNative
@@ -492,7 +490,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		 */
 		
 		if (andScroll) {
-			System.out.println("JSEditorPane scrolling to " + r2);
+			//System.out.println("JSEditorPane scrolling to " + r2);
 			DOMNode node = (DOMNode) r2[0];
 			/**
 			 * @j2sNative
@@ -546,7 +544,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		dot = (anode == fnode ? mark : getJSDocOffset(fnode)) + fpt;
 		mark += apt;
 		
-		System.out.println("==windows at " + mark + "-" + dot + "/" + apt + " " + fpt);
+		//System.out.println("==windows at " + mark + "-" + dot + "/" + apt + " " + fpt);
 
 		pt.x = mark;
 		pt.y = dot;

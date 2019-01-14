@@ -7,12 +7,15 @@ import java.beans.PropertyChangeEvent;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.LookAndFeel;
+import javax.swing.event.MenuKeyListener;
 
 import swingjs.api.js.DOMNode;
 
 public class JSMenuItemUI extends JSButtonUI {
 	
-	/**
+    protected MenuKeyListener menuKeyListener;
+
+    /**
 	 * Just a simple menu item -- not radio or checkbox
 	 */
 	public JSMenuItemUI() {

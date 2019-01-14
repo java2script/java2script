@@ -37,7 +37,6 @@ import java.awt.event.FocusListener;
 import java.awt.event.HierarchyBoundsListener;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
-import java.awt.event.InputEvent;
 import java.awt.event.InputMethodEvent;
 import java.awt.event.InputMethodListener;
 import java.awt.event.ItemEvent;
@@ -1511,9 +1510,9 @@ public abstract class Component implements ImageObserver/*
 		return isFocusOwner();
 	}
 
-	// void clearMostRecentFocusOwnerOnHide() {
-	// KeyboardFocusManager.clearMostRecentFocusOwner(this);
-	// }
+	 void clearMostRecentFocusOwnerOnHide() {
+		 KeyboardFocusManager.clearMostRecentFocusOwner(this);
+	 }
 
 	void clearCurrentFocusCycleRootOnHide() {
 		/* do nothing */
@@ -1527,14 +1526,13 @@ public abstract class Component implements ImageObserver/*
 		isPacked = false;
 		if (visible) {
 			clearCurrentFocusCycleRootOnHide();
-			// clearMostRecentFocusOwnerOnHide();
+			clearMostRecentFocusOwnerOnHide();
 			// synchronized (getTreeLock()) {
 			visible = false;
 			mixOnHiding(isLightweight());
-			// if (containsFocus() &&
-			// KeyboardFocusManager.isAutoFocusTransferEnabled()) {
-			// transferFocus(true);
-			// }
+			if (containsFocus() && KeyboardFocusManager.isAutoFocusTransferEnabled()) {
+				transferFocus(true);
+			}
 
 			updatePeerVisibility(false);
 
@@ -3706,17 +3704,16 @@ public abstract class Component implements ImageObserver/*
 		/*
 		 * 0. Set timestamp and modifiers of current event.
 		 */
-		EventQueue.setCurrentEventAndMostRecentTime(e);
+		if (!(e instanceof KeyEvent)) {
+			// Timestamp of a key event is set later in DKFM.preDispatchKeyEvent(KeyEvent).
+			EventQueue.setCurrentEventAndMostRecentTime(e);
+		}
 
 		/*
 		 * 1. Pre-dispatchers. Do any necessary retargeting/reordering here before we
 		 * notify AWTEventListeners.
 		 */
 
-		// if (e instanceof JSDnD.JSDropTargetEvent) {
-		// ((JSDnD.JSDropFileMouseEvent) e).dispatch();
-		// return;
-		// }
 		// if (e instanceof SunDropTargetEvent) {
 		// ((SunDropTargetEvent)e).dispatch();
 		// return;
@@ -3726,18 +3723,16 @@ public abstract class Component implements ImageObserver/*
 			// Invoke the private focus retargeting method which provides
 			// lightweight Component support
 			if (e.isPosted) {
-				// e = KeyboardFocusManager.retargetFocusEvent(e);
+				e = KeyboardFocusManager.retargetFocusEvent(e);
 				e.isPosted = true;
 			}
 
 			// Now, with the event properly targeted to a lightweight
 			// descendant if necessary, invoke the public focus retargeting
 			// and dispatching function
-			// if (KeyboardFocusManager.getCurrentKeyboardFocusManager().
-			// dispatchEvent(e))
-			// {
-			// return;
-			// }
+			if (KeyboardFocusManager.getCurrentKeyboardFocusManager().dispatchEvent(e)) {
+				return;
+			}
 		}
 		// if ((e instanceof FocusEvent) && focusLog.isLoggable(Level.FINEST)) {
 		// focusLog.log(Level.FINEST, "" + e);
@@ -3771,60 +3766,58 @@ public abstract class Component implements ImageObserver/*
 		if (!e.isConsumed()) {
 			if (e instanceof KeyEvent) {
 				// check for tab navigation:
-				// KeyboardFocusManager.getCurrentKeyboardFocusManager().
-				// processKeyEvent(this, (KeyEvent)e);
-				// if (e.isConsumed()) {
-				// return;
-				// }
+				KeyboardFocusManager.getCurrentKeyboardFocusManager().processKeyEvent(this, (KeyEvent) e);
+				if (e.isConsumed()) {
+					return;
+				}
 			}
 		}
 
 		/*
 		 * 4. Allow input methods to process the event
 		 */
-		if (areInputMethodsEnabled()) {
-			// We need to pass on InputMethodEvents since some host
-			// input method adapters send them through the Java
-			// event queue instead of directly to the component,
-			// and the input context also handles the Java composition window
-			if (
-			// ((e instanceof InputMethodEvent) && !(this instanceof
-			// CompositionArea))
-			// ||
-			// Otherwise, we only pass on input and focus events, because
-			// a) input methods shouldn't know about semantic or component-level
-			// events
-			// b) passing on the events takes time
-			// c) isConsumed() is always true for semantic events.
-			(e instanceof InputEvent) || (e instanceof FocusEvent)) {
-				// InputContext inputContext = getInputContext();
-				//
-				//
-				// if (inputContext != null) {
-				// inputContext.dispatchEvent(e);
-				// if (e.isConsumed()) {
-				// // if ((e instanceof FocusEvent) &&
-				// focusLog.isLoggable(Level.FINEST)) {
-				// // focusLog.log(Level.FINEST, "3579: Skipping " + e);
-				// // }
-				// return;
-				// }
-				// }
-			}
-		} else {
-			// When non-clients get focus, we need to explicitly disable the
-			// native
-			// input method. The native input method is actually not disabled
-			// when
-			// the active/passive/peered clients loose focus.
-			if (id == FocusEvent.FOCUS_GAINED) {
-				// InputContext inputContext = getInputContext();
-				// if (inputContext != null && inputContext instanceof
-				// sun.awt.im.InputContext) {
-				// ((sun.awt.im.InputContext)inputContext).disableNativeIM();
-				// }
-			}
-		}
+//		if (areInputMethodsEnabled()) {
+//			// We need to pass on InputMethodEvents since some host
+//			// input method adapters send them through the Java
+//			// event queue instead of directly to the component,
+//			// and the input context also handles the Java composition window
+//			if (
+//			// ((e instanceof InputMethodEvent) && !(this instanceof
+//			// CompositionArea))
+//			// ||
+//			// Otherwise, we only pass on input and focus events, because
+//			// a) input methods shouldn't know about semantic or component-level
+//			// events
+//			// b) passing on the events takes time
+//			// c) isConsumed() is always true for semantic events.
+//			(e instanceof InputEvent) || (e instanceof FocusEvent)) {
+//				InputContext inputContext = getInputContext();
+//
+//				if (inputContext != null) {
+//					inputContext.dispatchEvent(e);
+//					if (e.isConsumed()) {
+//						// if ((e instanceof FocusEvent) &&
+//						// focusLog.isLoggable(Level.FINEST)) {
+//						// focusLog.log(Level.FINEST, "3579: Skipping " + e);
+//						// }
+//						return;
+//					}
+//				}
+//			}
+//		} else {
+//			// When non-clients get focus, we need to explicitly disable the
+//			// native
+//			// input method. The native input method is actually not disabled
+//			// when
+//			// the active/passive/peered clients loose focus.
+//			if (id == FocusEvent.FOCUS_GAINED) {
+//				// InputContext inputContext = getInputContext();
+//				// if (inputContext != null && inputContext instanceof
+//				// sun.awt.im.InputContext) {
+//				// ((sun.awt.im.InputContext)inputContext).disableNativeIM();
+//				// }
+//			}
+//		}
 
 		/*
 		 * 5. Pre-process any special events before delivery
@@ -5909,19 +5902,15 @@ public abstract class Component implements ImageObserver/*
 	}
 
 	protected void removeNotifyComp() {
-		// KeyboardFocusManager.clearMostRecentFocusOwner(this);
-		// if (KeyboardFocusManager.getCurrentKeyboardFocusManager().
-		// getPermanentFocusOwner() == this)
-		// {
-		// KeyboardFocusManager.getCurrentKeyboardFocusManager().
-		// setGlobalPermanentFocusOwner(null);
-		// }
+		KeyboardFocusManager.clearMostRecentFocusOwner(this);
+		if (KeyboardFocusManager.getCurrentKeyboardFocusManager().getPermanentFocusOwner() == this) {
+			KeyboardFocusManager.getCurrentKeyboardFocusManager().setGlobalPermanentFocusOwner(null);
+		}
 
-		synchronized (getTreeLock()) {
-			// if (isFocusOwner() &&
-			// KeyboardFocusManager.isAutoFocusTransferEnabledFor(this)) {
-			// transferFocus(true);
-			// }
+//		synchronized (getTreeLock()) {
+			if (isFocusOwner() && KeyboardFocusManager.isAutoFocusTransferEnabledFor(this)) {
+				transferFocus(true);
+			}
 
 //			if (getContainer() != null && isAddNotifyComplete) {
 //				getContainer().decreaseComponentCount(this);
@@ -5963,8 +5952,7 @@ public abstract class Component implements ImageObserver/*
 				// peerFont = null;
 
 				Toolkit.getEventQueue().removeSourceEvents(this, false);
-				// KeyboardFocusManager.getCurrentKeyboardFocusManager().
-				// discardKeyEvents(this);
+				 KeyboardFocusManager.getCurrentKeyboardFocusManager().discardKeyEvents(this);
 
 				p.dispose();
 
@@ -5984,7 +5972,7 @@ public abstract class Component implements ImageObserver/*
 								| ((isRecursivelyVisible()) ? HierarchyEvent.SHOWING_CHANGED : 0));
 				dispatchEvent(e);
 			}
-		}
+//		}
 	}
 
 	/**
@@ -6050,13 +6038,12 @@ public abstract class Component implements ImageObserver/*
 		isFocusTraversableOverridden = FOCUS_TRAVERSABLE_SET;
 
 		firePropertyChange("focusable", Boolean.valueOf(oldFocusable), Boolean.valueOf(focusable));
-		// if (oldFocusable && !focusable) {
-		// if (isFocusOwner() &&
-		// KeyboardFocusManager.isAutoFocusTransferEnabled()) {
-		// transferFocus(true);
-		// }
-		// KeyboardFocusManager.clearMostRecentFocusOwner(this);
-		// }
+		if (oldFocusable && !focusable) {
+			if (isFocusOwner() && KeyboardFocusManager.isAutoFocusTransferEnabled()) {
+				transferFocus(true);
+			}
+			KeyboardFocusManager.clearMostRecentFocusOwner(this);
+		}
 	}
 
 	final boolean isFocusTraversableOverridden() {

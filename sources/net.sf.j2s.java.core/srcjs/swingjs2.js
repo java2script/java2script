@@ -12453,7 +12453,7 @@ if (!target) {
 		if (!who && J2S._mouseOwner)
 			J2S._mouseOwner.isDragging = false;
 
-		who && who.focus();
+		//who && who.focus();
 
 		if (!who || doSet)
 			J2S._mouseOwner = who;
@@ -13607,6 +13607,7 @@ if (!target) {
 
 // TODO: still a lot of references to window[...]
 
+// BH 1/13/2019 3.2.4.07 adds Character.to[Title|Lower|Upper]Case(int)
 // BH 1/8/2019 3.2.4.07 fixes String.prototype.to[Upper|Lower]Case$java_util_Locale - using toLocal[Upper|Lower]Case()
 // BH 1/3/2019 3.2.4.07 adds ByteBuffer/CharBuffer support, proper CharSet encoding, including GBK (Standard Chinese)
 
@@ -18371,6 +18372,18 @@ function(c){
 m$(C$,"toUpperCase$C",
 function(c){
 return(""+c).toUpperCase().charAt(0);
+}, 1);
+m$(C$,"toLowerCase$I",
+function(i){
+return String.fromCodePoint(i).toLowerCase().codePointAt(0);
+}, 1);
+m$(C$,"toTitleCase$I",
+function(i){
+return String.fromCodePoint(i).toTitleCase().codePointAt(0);
+}, 1);
+m$(C$,"toUpperCase$I",
+function(i){
+return String.fromCodePoint(i).toUpperCase().codePointAt(0);
 }, 1);
 m$(C$,["isDigit$C","isDigit$I"],
 function(c){

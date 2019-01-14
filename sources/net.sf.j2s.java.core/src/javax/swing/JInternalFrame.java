@@ -266,10 +266,14 @@ public class JInternalFrame extends JFrame
     private static void updateLastFocusOwner(Component component) {
         if (component != null) {
             Component parent = component;
-            while (parent != null && !(parent instanceof Window)) {
+            while (parent != null 
+            		// in SwingJS, JInternalFrames are Windows
+            		// && !(parent instanceof Window)
+            		) {
                 if (parent instanceof JInternalFrame) {
                     // Update lastFocusOwner for parent.
                     ((JInternalFrame)parent).setLastFocusOwner(component);
+                    break; // BH added
                 }
                 parent = parent.getParent();
             }
@@ -1095,6 +1099,8 @@ public class JInternalFrame extends JFrame
      * @since 1.3
      */
     public void restoreSubcomponentFocus() {
+    	if (true)
+    		return;
         if (isIcon()) {
             SwingUtilities2.compositeRequestFocus(getDesktopIcon());
         }

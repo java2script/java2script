@@ -4454,7 +4454,7 @@ public abstract class JTextComponent extends JComponent implements Scrollable
 
         @Override
 				public final void stateChanged(ChangeEvent e) {
-            System.out.println("JTextComp mut cur evt 2 - state ch active=" + dragActive);
+            //System.out.println("JTextComp mut cur evt 2 - state ch active=" + dragActive);
             if (! dragActive) {
                 fire();
             }
@@ -4494,7 +4494,7 @@ public abstract class JTextComponent extends JComponent implements Scrollable
         @Override
 				public final void mouseReleased(MouseEvent e) {
             dragActive = false;
-            System.out.println("JTextComp mut cur evt 2 - release");
+            //System.out.println("JTextComp mut cur evt 2 - release");
             fire();
         }
 

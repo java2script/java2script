@@ -159,15 +159,6 @@ class Test_Native extends Test_ {
 //		new Test_Native().test2();
 		
 		
-		
-		boolean b = !(/** j2sNative true || */false);
-		assert(!b);
-		
-		
-		
-		
-		
-		
 		/** 
 		 * @j2sNative
 		 *  

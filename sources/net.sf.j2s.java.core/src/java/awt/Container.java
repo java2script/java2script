@@ -2216,10 +2216,11 @@ public class Container extends JSComponent {
             // gets forwarded.  If the native host has been removed
             // as a result of the sending the lightweight event,
             // the peer reference will be null.
-            e.consume();
-            if (peer != null) {
-                peer.handleEvent(e);
-            }
+// SwingJS why this? true return indicates consumed            e.consume();
+// SwingJS next is unnecessary for JavaScript
+//            if (peer != null) {
+//                peer.handleEvent(e);
+//            }
             return;
         }
 

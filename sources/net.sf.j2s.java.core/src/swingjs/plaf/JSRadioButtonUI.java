@@ -24,6 +24,13 @@ public class JSRadioButtonUI extends JSButtonUI {
 
 	protected void createButton(JToggleButton b, String myType) {
 		buttonNode = newDOMObject("label", id + "btn");
+		if (isMenuItem) {
+			domNode = createItem("_item", buttonNode);
+			bindJQueryEvents(domNode, "mouseenter", -1);			
+		} else {
+			domNode = newDOMObject("div", id + "_dom");
+			domNode.appendChild(buttonNode);
+		}
 		iconNode = null;
 		if (b.getIcon() == null) {
 			iconNode = actionNode = newDOMObject("input", id, "type", myType, "name", id);
@@ -34,26 +41,19 @@ public class JSRadioButtonUI extends JSButtonUI {
 				DOMNode.dispose(actionNode);
 		}
 		enableNodes = new DOMNode[] { actionNode, buttonNode, null };
-		setDataComponent(actionNode);
+//		setDataComponent(actionNode);
 		createButton();
 	}
 	
-	@Override
-	protected void createButton() {
-		setDataComponent(buttonNode);
-		setEnabled(c.isEnabled());
-		if (isMenuItem) {
-			domNode = createItem("_item", buttonNode);
-			bindJQueryEvents(domNode, "mouseenter", -1);			
-		} else {
-			domNode = newDOMObject("div", id + "_dom");
-			domNode.appendChild(buttonNode);
-		}
-		addCentering(buttonNode);
-		setDataComponent(iconNode); // needed for mac safari/chrome
-		setDataComponent(textNode); // needed for mac safari/chrome
-	}
-	
+//	@Override
+//	protected void createButton() {
+//		addCentering(buttonNode);
+//		setDataComponent(iconNode); // needed for mac safari/chrome
+//		setDataComponent(textNode); // needed for mac safari/chrome
+//		setDataComponent(buttonNode);
+//		setEnabled(c.isEnabled());
+//	}
+//	
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
 		// we use == here because this will be JavaScript

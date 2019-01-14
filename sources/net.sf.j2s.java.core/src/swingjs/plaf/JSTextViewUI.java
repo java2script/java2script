@@ -30,7 +30,7 @@ public abstract class JSTextViewUI extends JSTextUI {
 	protected void setupViewNode() {
 		allowPaintedBackground = false;
 		focusNode = enableNode = textNode = domNode;
-		DOMNode.setStyles(domNode, "resize", "none", "padding", "0px","scrollbar-width", "thin"); // otherwise it overflows
+		DOMNode.setStyles(domNode, "resize", "none", "margin", "0px", "padding", "0px","scrollbar-width", "thin"); // otherwise it overflows
 		bindJSKeyEvents(domNode, true);
 	}
 

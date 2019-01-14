@@ -81,15 +81,30 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 			setWindowClass();
 		}
 		return domNode;
-	}
+	}   
 	
 
+//	@Override
+//	protected void addJQueryFocusCallbacks() {
+//		// no focus for Window objects, only what they contain.
+//	}
+//
+//	@Override
+//	public boolean requestFocus() {
+//		return true;
+//	}
+//
+	
 	
 	protected void setWindowClass() { 
 		DOMNode.setZ(domNode, z);
 		$(domNode).addClass("swingjs-window");
-		focusNode = domNode;
-		addJQueryFocusCallbacks();
+		
+		System.out.println("JSWIndowUI ????");
+		
+		// these next two lines are what allow the FocusManager to work.
+//		focusNode = domNode;
+//		addJQueryFocusCallbacks();
 	}
 
 	@Override

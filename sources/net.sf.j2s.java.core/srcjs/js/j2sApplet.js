@@ -1794,7 +1794,7 @@ if (!target) {
 		if (!who && J2S._mouseOwner)
 			J2S._mouseOwner.isDragging = false;
 
-		who && who.focus();
+		//who && who.focus();
 
 		if (!who || doSet)
 			J2S._mouseOwner = who;

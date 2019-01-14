@@ -1,6 +1,8 @@
 package swingjs.plaf;
 
 import java.awt.Dimension;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 import javax.swing.JComponent;
 
@@ -22,7 +24,8 @@ public class JSRootPaneUI extends JSLightweightUI {
 	@Override
 	public DOMNode updateDOMNode() {
 		if (domNode == null) {
-			domNode = newDOMObject("div", id);
+			focusNode = domNode = newDOMObject("div", id);
+			setJ2SKeyHandler();
 		}
 		checkAllowDivOverflow();
 		return domNode;
@@ -31,6 +34,7 @@ public class JSRootPaneUI extends JSLightweightUI {
 	@Override
 	public void installUI(JComponent jc) {
 	}
+
 
 	@Override
 	public void uninstallUI(JComponent jc) {

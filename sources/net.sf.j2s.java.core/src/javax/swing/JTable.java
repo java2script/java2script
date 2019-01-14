@@ -3740,7 +3740,6 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 				@Override
 				public void run() {
 					comp.requestFocus();
-					((JSComponentUI) comp.getUI()).handleJSFocus(true);
 				}
 			});
 

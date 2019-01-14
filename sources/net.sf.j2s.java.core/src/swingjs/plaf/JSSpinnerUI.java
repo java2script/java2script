@@ -3,7 +3,7 @@ package swingjs.plaf;
 import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.event.KeyEvent;
-
+import java.beans.PropertyChangeEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -148,8 +148,8 @@ public class JSSpinnerUI extends JSLightweightUI {
 	}
 
 	@Override
-	public void propertyChangedFromListener(String prop) {
-			propertyChangedCUI(prop);
+	public void propertyChangedFromListener(PropertyChangeEvent e, String prop) {
+			propertyChangedCUI(e, prop);
 	}
 
 	@Override

@@ -2842,7 +2842,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 
 	
 	@Override
-	protected boolean requestFocus() {
+	public boolean requestFocus() {
 		if (!super.requestFocus())
 			return false;
 		if (haveFocus()) {
@@ -2874,7 +2874,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 			return;
 		int start = editor.getCaret().getMark();
 		int end = editor.getCaret().getDot();
-		System.out.println(id + " updateJSCursor " + why + "  " + start + " " + end);
+		//System.out.println(id + " updateJSCursor " + why + "  " + start + " " + end);
 //		if (start > end) {
 //			int t = end;
 //			end = start;
@@ -2927,7 +2927,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
      * @param dot
      */
     void setJSMarkAndDot(int mark, int dot, boolean andScroll) {
-    	System.out.println("JSTextUI setJSMarkAndDot " + mark + " " + dot);
+    	//System.out.println("JSTextUI setJSMarkAndDot " + mark + " " + dot);
 		domNode.setSelectionRange(Math.min(mark, dot), Math.max(mark, dot), (mark == dot ? "none" : mark < dot ? "forward" : "backward"));
 	}
 
@@ -2943,7 +2943,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
     	int start = /** @j2sNative node.selectionStart || */ 0;
     	int end = /** @j2sNative node.selectionEnd || */ 1;
     	boolean reversed = /** @j2sNative node.selectionDirection == "backward" || */false;
-    	System.out.println("getJSMarkAndDot " + start + "  " + end + " " + reversed);
+    	//System.out.println("getJSMarkAndDot " + start + "  " + end + " " + reversed);
     	pt.x = start;
     	pt.y = end;
     	return true;
@@ -3018,7 +3018,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		case "focusout":
 		case "dragover":
 			b = NOT_CONSUMED;
-			System.out.println("jstextvui " + (/** @j2sNative jQueryEvent.type || */"") + editable);
+			//System.out.println("jstextvui " + (/** @j2sNative jQueryEvent.type || */"") + editable);
 			break;
 		case "keydown":
 		case "keypress":

@@ -168,7 +168,10 @@ public abstract class DOMNode {
 		 * @j2sNative
 		 * 
 		 *            if (node) for (var i = 0; i < attr.length;) {
-		 *             node.style[attr[i++]] = attr[i++]; }
+		 *             //
+		 *             node.style[attr[i++]] = attr[i++]; 
+		 *             //
+		 *             }
 		 * 
 		 */
 		return node;
@@ -317,6 +320,8 @@ public abstract class DOMNode {
 	}
 
 	public static Component getComponentFor(DOMNode node) {
+		if (node == null)
+			return null;
 		JSComponentUI ui = (JSComponentUI) (/** @j2sNative node.ui || node["data-ui"] || node["data-component"] || node["data-textcomponent"] || */  null);
 		return (ui == null ? null : ui.jc);
 	}

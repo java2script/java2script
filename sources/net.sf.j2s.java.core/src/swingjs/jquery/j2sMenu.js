@@ -49,6 +49,30 @@ try{
 		 break;			 
 	 }
  }
+
+ var overMe = function(me, e, t, all) {
+	 // BH 2018
+	 // -- added stopPropagation
+	 // -- changed to mouseover from mouseenter, since we have children
+	 
+	 System.out.println("j2sm1 " + t.target.id + " " + t.currentTarget.id);
+	 var a = $(t.target).closest(".a");
+	 a[0] && a[0].focus();
+	 System.out.println("j2sm11 " + t.target.id + " " + t.target.getAttribute("tabindex") + " " + document.activeElement.id)
+	 if (false && !all)
+		 return;
+	 var n=e(t.currentTarget).closest(".ui-menu-item");
+	 n.siblings().children(".ui-state-active").removeClass("ui-state-active");
+	 t.stopPropagation();
+	 me.focus(t,n);
+ }
+ 
+ var setPathTo = function(t, andFire) {
+	 var jc = t.target["data-component"];
+	 if (jc) {
+		 jc.parent.ui.setPathTo$O$O(jc, (andFire ? t : null));
+	 }
+ }
  
  // BH note that swingjs.plaf.JSButton will set and clear ui-state-disabled on its own
  
@@ -75,9 +99,9 @@ try{
 	 this.activeMenu=this.element,this.element.uniqueId().addClass("ui-menu ui-widget ui-widget-content ui-corner-all").toggleClass("ui-menu-icons",!!this.element.find(".ui-icon").length)
 	 .attr({role:this.options.role,tabIndex:0}).bind("click"+this.eventNamespace,e.proxy(function(e){this.options.disabled&&e.preventDefault()},this)),this.options.disabled&&this.element.addClass("ui-state-disabled").attr("aria-disabled","true"),
 	 this._on({
-		 "mousedown .ui-menu-item > a":function(e){e.preventDefault()},
-		 "click .ui-state-disabled > a":function(e){e.preventDefault()},
-		 "click .ui-menu-item:has(a)":function(t){
+		 "mousedown .ui-menu-item > .a":function(e){e.preventDefault()},
+		 "click .ui-state-disabled > .a":function(e){e.preventDefault()},
+		 "click .ui-menu-item:has(.a)":function(t){
 
 
 // BH 12/20/2018 adds persistence for JMenu clicks
@@ -96,16 +120,8 @@ var r=e(t.target).closest(".ui-menu-item");
 
 
 },
-		 "mouseover .ui-menu-item":function(t){
-			 // BH 2018
-			 // -- added stopPropagation
-			 // -- changed to mouseover from mouseenter, since we have children
-			 t.stopPropagation();
-			 var n=e(t.currentTarget);
-			 n.siblings().children(".ui-state-active").removeClass("ui-state-active"),
-			 this.focus(t,n)
-		
-		 },
+		 "mousemove .swingjsPopupMenu .data-ui":function(t){ overMe(this, e, t); },
+		 "mouseover .ui-menu-item":function(t){ overMe(this, e, t, 1); },
 		 mouseleave:"collapseAll",
 		 "mouseleave .ui-menu": "collapseAll",
 		 focus:function(e,t){var n=this.active||this.element.children(".ui-menu-item").eq(0);t||this.focus(e,n)},
@@ -124,32 +140,36 @@ var r=e(t.target).closest(".ui-menu-item");
 	 .removeAttr("aria-hidden").removeAttr("aria-disabled").removeUniqueId().show(),
 	 this.element.find(".ui-menu-item").removeClass("ui-menu-item")
 	 .removeAttr("role").removeAttr("aria-disabled")
-	 .children("a").removeUniqueId().removeClass("ui-corner-all ui-state-hover")
+	 .children(".a").removeUniqueId().removeClass("ui-corner-all ui-state-hover")
 	 .removeAttr("tabIndex").removeAttr("role").removeAttr("aria-haspopup").children().each(function(){var t=e(this);t.data("ui-menu-submenu-carat")&&t.remove()}),this.element.find(".ui-menu-divider").removeClass("ui-menu-divider ui-widget-content")
 	 },
- _keydown:function(t){function a(e){return e.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g,"\\$&")}var n,r,i,s,o,u=!0;switch(t.keyCode){case e.ui.keyCode.PAGE_UP:this.previousPage(t);break;case e.ui.keyCode.PAGE_DOWN:this.nextPage(t);break;case e.ui.keyCode.HOME:this._move("first","first",t);break;case e.ui.keyCode.END:this._move("last","last",t);break;case e.ui.keyCode.UP:this.previous(t);break;case e.ui.keyCode.DOWN:this.next(t);break;case e.ui.keyCode.LEFT:this.collapse(t);break;case e.ui.keyCode.RIGHT:this.active&&!this.active.is(".ui-state-disabled")&&this.expand(t);break;case e.ui.keyCode.ENTER:case e.ui.keyCode.SPACE:this._activate(t);break;case e.ui.keyCode.ESCAPE:this.collapse(t);break;default:u=!1,r=this.previousFilter||"",i=String.fromCharCode(t.keyCode),s=!1,clearMe(this.filterTimer),i===r?s=!0:i=r+i,o=new RegExp("^"+a(i),"i"),n=this.activeMenu.children(".ui-menu-item").filter(function(){return o.test(e(this).children("a").text())}),n=s&&n.index(this.active.next())!==-1?this.active.nextAll(".ui-menu-item"):n,n.length||(i=String.fromCharCode(t.keyCode),o=new RegExp("^"+a(i),"i"),n=this.activeMenu.children(".ui-menu-item").filter(function(){return o.test(e(this).children("a").text())})),n.length?(this.focus(t,n),n.length>1?(this.previousFilter=i,
-		 	this.filterTimer=delayMe(function(){delete this.previousFilter},1e3)):delete this.previousFilter):delete this.previousFilter}u&&t.preventDefault()},
- _activate:function(e){this.active.is(".ui-state-disabled")||(this.active.children("a[aria-haspopup='true']").length?this.expand(e):this.select(e))},
+ _keydown:function(t){
+	 setPathTo(t, true);
+	 function a(e){return e.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g,"\\$&")}var n,r,i,s,o,u=!0;switch(t.keyCode){case e.ui.keyCode.PAGE_UP:this.previousPage(t);break;case e.ui.keyCode.PAGE_DOWN:this.nextPage(t);break;case e.ui.keyCode.HOME:this._move("first","first",t);break;case e.ui.keyCode.END:this._move("last","last",t);break;case e.ui.keyCode.UP:this.previous(t);break;case e.ui.keyCode.DOWN:this.next(t);break;case e.ui.keyCode.LEFT:this.collapse(t);break;case e.ui.keyCode.RIGHT:this.active&&!this.active.is(".ui-state-disabled")&&this.expand(t);break;case e.ui.keyCode.ENTER:case e.ui.keyCode.SPACE:this._activate(t);break;case e.ui.keyCode.ESCAPE:this.collapse(t);break;default:u=!1,r=this.previousFilter||"",i=String.fromCharCode(t.keyCode),s=!1,clearMe(this.filterTimer),i===r?s=!0:i=r+i,o=new RegExp("^"+a(i),"i"),n=this.activeMenu.children(".ui-menu-item").filter(function(){return o.test(e(this).children(".a").text())}),n=s&&n.index(this.active.next())!==-1?this.active.nextAll(".ui-menu-item"):n,n.length||(i=String.fromCharCode(t.keyCode),o=new RegExp("^"+a(i),"i"),n=this.activeMenu.children(".ui-menu-item").filter(function(){return o.test(e(this).children(".a").text())})),n.length?(this.focus(t,n),n.length>1?(this.previousFilter=i,
+		 	this.filterTimer=delayMe(function(){delete this.previousFilter},1e3)):delete this.previousFilter):delete this.previousFilter}u&&t.preventDefault()
+		 	
+ },
+ _activate:function(e){this.active.is(".ui-state-disabled")||(this.active.children(".a[aria-haspopup='true']").length?this.expand(e):this.select(e))},
  refresh:function(){
 	 var t,n=this.options.icons.submenu,role=this.options.role,
 	 r=this.element.find(this.options.menus);
 	 r.filter(":not(.ui-menu)")
 	   .addClass("ui-menu ui-widget ui-widget-content ui-corner-all")
 	   .hide().attr({role:this.options.role,"aria-hidden":"true","aria-expanded":"false"})
-	   .each(function(){var t=e(this),r=t.prev("a"),
+	   .each(function(){var t=e(this),r=t.prev(".a"),
 		   i=e("<span>").addClass("ui-menu-icon ui-icon "+n)
 		   .attr({role:role})
 		   .data("ui-menu-submenu-carat",!0);
-	   r.attr("aria-haspopup","true").prepend(i),t.attr("aria-labelledby",r.attr("id"))}),t=r.add(this.element),t.children(":not(.ui-menu-item):has(a)").addClass("ui-menu-item").attr("role","presentation").children("a").uniqueId().addClass("ui-corner-all").attr({tabIndex:-1,role:this._itemRole()}),t.children(":not(.ui-menu-item)").each(function(){var t=e(this);/[^\-+�G��G��+�G��G��\s]/.test(t.text())||t.addClass("ui-widget-content ui-menu-divider")}),t.children(".ui-state-disabled").attr("aria-disabled","true"),this.active&&!e.contains(this.element[0],this.active[0])&&this.blur()},
+	   r.attr("aria-haspopup","true").prepend(i),t.attr("aria-labelledby",r.attr("id"))}),t=r.add(this.element),t.children(":not(.ui-menu-item):has(.a)").addClass("ui-menu-item").attr("role","presentation").children(".a").uniqueId().addClass("ui-corner-all").attr({tabIndex:-1,role:this._itemRole()}),t.children(":not(.ui-menu-item)").each(function(){var t=e(this);/[^\-+�G��G��+�G��G��\s]/.test(t.text())||t.addClass("ui-widget-content ui-menu-divider")}),t.children(".ui-state-disabled").attr("aria-disabled","true"),this.active&&!e.contains(this.element[0],this.active[0])&&this.blur()},
  _itemRole:function(){return{menu:"menuitem",listbox:"option"}[this.options.role]},
  
  focus:function(e,t){var n,r;this.blur(e,e&&e.type==="focus"),this._scrollIntoView(t),this.active=t.first(),
  r=this.active
- //.children("a")
+ //.children(".a")
     .addClass("ui-state-focus"),
     this.options.role&&this.element.attr("aria-activedescendant",
     		r.attr("id")),
-    this.active.parent().closest(".ui-menu-item").children("a:first").addClass("ui-state-active"),
+    this.active.parent().closest(".ui-menu-item").children(".a:first").addClass("ui-state-active"),
     e&&e.type==="keydown"?this._close():
 this.timer=delayMe(this, function(){this._close()},this.delay),
 n=t.children(".ui-menu"),n.length&&/^mouse/.test(e.type)
@@ -164,7 +184,7 @@ this._trigger("focus",e,{item:t})},
 	 t||clearMe(this.timer);
 	 if(!this.active)return;
 	 this.active
-	 //.children("a")
+	 //.children(".a")
 	 	.removeClass("ui-state-focus"),
 	 this.active=null,
 	 this._trigger("blur",e,{item:this.active});
@@ -177,6 +197,7 @@ this._trigger("focus",e,{item:t})},
  _open:function(t){
 	 var n=e.extend({of:this.active},this.options.position);
 	 clearMe(this.timer);
+	 this.refresh();
 	 this.element.find(".ui-menu").not(t.parents(".ui-menu")).hide()
 	 	.attr("aria-hidden","true");
 	 doCmd("open", 0, 0, t, n);
@@ -201,7 +222,7 @@ e.find(".ui-menu")
 .attr("aria-hidden","true")
 .attr("aria-expanded","false")
 .end()
-.find("a.ui-state-active")
+.find(".a .ui-state-active")
 .removeClass("ui-state-active")
 
 
@@ -244,29 +265,29 @@ Swing.__getMenuStyle = function(applet) { return '\
 	.swingjsPopupMenu{font-family:Arial,sans-serif;font-size:11px;position:absolute;z-index:'+J2S.getZ(applet, "menu")+'}\
 	.swingjsPopupMenu,.swingjsPopupMenu .ui-corner-all{border-radius:5px}\
 	.swingjsPopupMenu,.swingjsPopupMenu .ui-widget-content{border:1px solid #a6c9e2;background-color:#fcfdfd;color:#222}\
-	.swingjsPopupMenu a{color:#222;font-size:10px;}\
+	.swingjsPopupMenu .a{color:#222;font-size:10px;}\
 	.swingjsPopupMenu input[type="checkbox"]{vertical-align:middle;}\
 	.swingjsPopupMenu,.swingjsPopupMenu .ui-menu{list-style:none;padding:2px;margin:0;display:block;outline:none;box-shadow:1px 1px 5px rgba(50,50,50,0.75)}\
 	.swingjsPopupMenu .ui-menu{margin-top:-3px;position:absolute}\
 	.swingjsPopupMenu .ui-menu-item{cursor:pointer;margin:0 0 0 0;padding:0;width:100%}\
 	.swingjsPopupMenu .ui-menu-divider{margin:3px 1px;height:0;transform:translateY(-4px);position:absolute;font-size:0;line-height:0px;border-width:2px 0 0 0;width:93%;}\
-	.swingjsPopupMenu .ui-menu-item a{text-decoration:none;display:block;padding:0.05em 0.4em;white-space:nowrap;border:1px solid transparent}\
+	.swingjsPopupMenu .ui-menu-item .a{display:block;padding:0.05em 0.4em;white-space:nowrap;border:1px solid transparent}\
 	.swingjsPopupMenu .ui-menu-icons{position:relative}\
-	.swingjsPopupMenu .ui-menu-icons .ui-menu-item a{position:relative;padding-left:2em}\
+	.swingjsPopupMenu .ui-menu-icons .ui-menu-item .a{position:relative;padding-left:2em}\
 	.swingjsPopupMenu .ui-icon{display:block;text-indent:-99999px;overflow:hidden;background-repeat:no-repeat;position:absolute;top:.2em;left:.2em}\
 	.swingjsPopupMenu .ui-menu-icon{position:static;float:right}\
 	.swingjsPopupMenu .ui-icon-carat-1-e{min-width:10ex;text-align:right;background-image:none;background-position:0 0}\
 	.swingjsPopupMenu .ui-icon-carat-1-e:after{content:"\\0025B6"}\
 	.swingjsPopupMenu .ui-state-default{border:1px solid #c5dbec;background:#dfeffc;color:#2e6e9e}\
-	.swingjsPopupMenu .ui-state-default a{color:#2e6e9e;text-decoration:none}\
+	.swingjsPopupMenu .ui-state-default .a{color:#2e6e9e;}\
 	.swingjsPopupMenu .ui-state-hover,.swingjsPopupMenu .ui-state-focus{background:#d0e5f5;color:#1d5987}\
-	.swingjsPopupMenu .ui-state-hover a{color:#1d5987;text-decoration:none}\
+	.swingjsPopupMenu .ui-state-hover .a{color:#1d5987;cursor:pointer;}\
 	.swingjsPopupMenu .ui-state-active{border:1px solid #79b7e7;background:#f5f8f9;color:#e17009}\
-	.swingjsPopupMenu .ui-state-active a{color:#e17009;text-decoration:none}\
+	.swingjsPopupMenu .ui-state-active .a{color:#e17009;cursor:pointer;}\
 	.swingjsPopupMenu .ui-state-highlight{border:1px solid #fad42e;background:#fbec88;color:#363636}\
-	.swingjsPopupMenu .ui-state-highlight a{color:#363636}\
+	.swingjsPopupMenu .ui-state-highlight .a{color:#363636}\
 	.swingjsPopupMenu .ui-state-disabled *{color:#d6d6d6!important;font-weight:normal;cursor:default}\
-	.swingjsPopupMenu .ui-state-disabled a:hover{background-color:transparent!important;border-color:transparent!important}\
+	.swingjsPopupMenu .ui-state-disabled .a:hover{background-color:transparent!important;border-color:transparent!important}\
 	.swingjsPopupMenu .ui-state-disabled .ui-icon{filter:Alpha(Opacity=35)}'};
 
 var bindMenuActionCommands = function(eventType, menu, isBind) {
@@ -312,7 +333,7 @@ Swing.setMenu = function(menu) {
     proto.dragBind || ( proto.dragBind = function(isBind){} );
     proto.setContainer || ( proto.setContainer = function(c){ this.$ulTop = c } );
     proto.setPosition || ( proto.setPosition = function(x,y) {
-      this.$ulTop.css({left:x+"px",top:(y+8)+"px",position:"absolute"});
+      this.$ulTop.css({left:x+"px",top:y+"px",position:"absolute"});
     } );    
     // delay addition to the DOM 
   } else {

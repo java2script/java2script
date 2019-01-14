@@ -27,20 +27,13 @@ package java.awt;
 import java.awt.event.FocusEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.WindowEvent;
-
 import java.awt.peer.KeyboardFocusManagerPeer;
 import java.awt.peer.LightweightPeer;
-
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyVetoException;
 import java.beans.VetoableChangeListener;
 import java.beans.VetoableChangeSupport;
-
-//import java.lang.ref.WeakReference;
-
-import java.lang.reflect.Field;
 
 //import java.security.AccessController;
 //import java.security.PrivilegedAction;
@@ -54,13 +47,17 @@ import java.util.Set;
 import java.util.StringTokenizer;
 //import java.util.WeakHashMap;
 
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+
+import sun.awt.AWTAccessor;
+
 //import sun.util.logging.PlatformLogger;
 
 import sun.awt.AppContext;
-import sun.awt.SunToolkit;
 import sun.awt.CausedFocusEvent;
 import sun.awt.KeyboardFocusManagerPeerProvider;
-import sun.awt.AWTAccessor;
+import sun.awt.SunToolkit;
 
 /**
  * The KeyboardFocusManager is responsible for managing the active and focused
@@ -234,7 +231,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 	 *                           replace the current KeyboardFocusManager
 	 */
 	public static void setCurrentKeyboardFocusManager(KeyboardFocusManager newManager) throws SecurityException {
-		checkReplaceKFMPermission();
+//		checkReplaceKFMPermission();
 
 		KeyboardFocusManager oldManager = null;
 
@@ -496,7 +493,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 		boolean shouldFire = false;
 
 		if (focusOwner == null || focusOwner.isFocusable()) {
-			synchronized (KeyboardFocusManager.class) {
+//			synchronized (KeyboardFocusManager.class) {
 				checkKFMSecurity();
 
 				oldFocusOwner = getFocusOwner();
@@ -523,7 +520,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 
 				shouldFire = true;
 			}
-		}
+//		}
 
 		if (shouldFire) {
 			firePropertyChange("focusOwner", oldFocusOwner, focusOwner);
@@ -577,7 +574,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 	 *                           "replaceKeyboardFocusManager" permission
 	 */
 	public void clearGlobalFocusOwner() throws SecurityException {
-		checkReplaceKFMPermission();
+		//checkReplaceKFMPermission();
 		if (!GraphicsEnvironment.isHeadless()) {
 			// Toolkit must be fully initialized, otherwise
 			// _clearGlobalFocusOwner will crash or throw an exception
@@ -1178,7 +1175,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 	 * @beaninfo bound: true
 	 */
 	public void setGlobalCurrentFocusCycleRoot(Container newFocusCycleRoot) throws SecurityException {
-		checkReplaceKFMPermission();
+		//checkReplaceKFMPermission();
 
 		Container oldFocusCycleRoot;
 
@@ -1736,14 +1733,14 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 			return;
 		}
 
-		synchronized (comp.getTreeLock()) {
+//		synchronized (comp.getTreeLock()) {
 			window = comp.getParent();
 			while (window != null && !(window instanceof Window)) {
 				window = window.getParent();
 			}
-		}
+//		}
 
-		synchronized (KeyboardFocusManager.class) {
+//		synchronized (KeyboardFocusManager.class) {
 			if ((window != null) && (getMostRecentFocusOwner((Window) window) == comp)) {
 				setMostRecentFocusOwner((Window) window, null);
 			}
@@ -1754,7 +1751,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 					realWindow.setTemporaryLostComponent(null);
 				}
 			}
-		}
+//		}
 	}
 
 	/*
@@ -2360,7 +2357,8 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 			Component activeWindow = ((hwFocusRequest != null)
 					? SunToolkit.getContainingWindow(hwFocusRequest.heavyweight)
 					: nativeFocusedWindow);
-			while (activeWindow != null && !((activeWindow instanceof JSFrame) || (activeWindow instanceof JSDialog))) {
+			// SwingJS was JSFrame and JSDialog, but in SwingJS those subclass JFrame and JDialog
+			while (activeWindow != null && !((activeWindow instanceof JFrame) || (activeWindow instanceof JDialog))) {
 				activeWindow = activeWindow.getParent_NoClientCode();
 			}
 
@@ -2879,15 +2877,15 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 		}
 	}
 
-	private static void checkReplaceKFMPermission() throws SecurityException {
-//		SecurityManager security = System.getSecurityManager();
-//		if (security != null) {
-//			if (replaceKeyboardFocusManagerPermission == null) {
-//				replaceKeyboardFocusManagerPermission = new AWTPermission("replaceKeyboardFocusManager");
-//			}
-//			security.checkPermission(replaceKeyboardFocusManagerPermission);
-//		}
-	}
+//	private static void checkReplaceKFMPermission() throws SecurityException {
+////		SecurityManager security = System.getSecurityManager();
+////		if (security != null) {
+////			if (replaceKeyboardFocusManagerPermission == null) {
+////				replaceKeyboardFocusManagerPermission = new AWTPermission("replaceKeyboardFocusManager");
+////			}
+////			security.checkPermission(replaceKeyboardFocusManagerPermission);
+////		}
+//	}
 
 	// Checks if this KeyboardFocusManager instance is the current KFM,
 	// or otherwise checks if the calling thread has "replaceKeyboardFocusManager"

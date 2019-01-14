@@ -636,8 +636,8 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
 		public void mousePressed(MouseEvent e) {
 //    	   getPosition(e, biasRet);
 //        int nclicks = SwingUtilities2.getAdjustedClickCount(getComponent(), e);
-    	System.out.println("defaultcurs mousePressed " + e.isConsumed() +
-    			/** @j2sNative this.component.ui.domNode.selectionStart || */0);
+    	//System.out.println("defaultcaret mousePressed " + e.isConsumed() +
+    	//		/** @j2sNative this.component.ui.domNode.selectionStart || */0);
 
         if (SwingUtilities.isLeftMouseButton(e)) {
             if (e.isConsumed()) {

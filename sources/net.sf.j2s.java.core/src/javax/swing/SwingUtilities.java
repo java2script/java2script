@@ -1010,7 +1010,7 @@ public class SwingUtilities implements SwingConstants
             else {
                 availTextWidth = viewR.width - (iconR.width + gap);
             }
-            v = (c != null) ? (View) c.getClientProperty("html") : null;
+            v = (c != null ? (View) c.getClientProperty("html") : null);
             if (v != null) {
                 textR.width = Math.min(availTextWidth,
                                        (int) v.getPreferredSpan(View.X_AXIS));
