@@ -5083,7 +5083,7 @@ m$(C$, 'getCause$', function () {
 return (this.cause === this ? null : this.cause);
 });
 
-m$(C$, 'initCause$Throwable$', function (cause) {
+m$(C$, 'initCause$Throwable', function (cause) {
 if (this.cause !== this) throw Clazz.new_(IllegalStateException.c$$S,["Can't overwrite cause"]);
 if (cause === this) throw Clazz.new_(IllegalArgumentException.c$$S,["Self-causation not permitted"]);
 this.cause = cause;
