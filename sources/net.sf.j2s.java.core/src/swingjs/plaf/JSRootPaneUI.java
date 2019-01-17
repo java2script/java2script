@@ -24,8 +24,8 @@ public class JSRootPaneUI extends JSLightweightUI {
 	@Override
 	public DOMNode updateDOMNode() {
 		if (domNode == null) {
-			focusNode = domNode = newDOMObject("div", id);
-			setJ2SKeyHandler();
+			domNode = newDOMObject("div", id);
+			addJ2SKeyHandler();
 		}
 		checkAllowDivOverflow();
 		return domNode;

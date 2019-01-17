@@ -328,7 +328,7 @@ public class JMenu extends JMenuItem implements MenuElement
         boolean isVisible = isPopupMenuVisible();
         if (b != isVisible && (isEnabled() || !b)) {
             ensurePopupMenuCreated();
-            if ((b==true) && isShowing()) {
+            if (b && isShowing()) {
                 // Set location of popupMenu (pulldown or pullright)
                 Point p = getCustomMenuLocation();
                 if (p == null) {
@@ -893,10 +893,7 @@ public class JMenu extends JMenuItem implements MenuElement
      *         on another menu
      */
     public boolean isTopLevelMenu() {
-        if (getParent() instanceof JMenuBar)
-            return true;
-
-        return false;
+       return (getParent() instanceof JMenuBar);
     }
 
     /**

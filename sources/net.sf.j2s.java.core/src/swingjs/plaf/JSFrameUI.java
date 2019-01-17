@@ -8,7 +8,9 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.awt.peer.FramePeer;
 import java.beans.PropertyChangeEvent;
 
@@ -131,6 +133,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			 * 		case 1:
 			 *  	         if (mode == 501)
 			 *      	        me.selected$();  
+			 *     me.hideMenu$();
 			 *          	 return $(fnode).parent();
 			 *      case 3:
 			 *      		 if (mode == 506) {
@@ -138,9 +141,14 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			 *      			return null;
 			 *               }
 			 *     }
+			 *     
 			 *     return null;
 			 * }
-			 */
+			 */ 
+			{
+				 hideMenu();
+			}
+			 
 			
 			J2S.setDraggable(titleBarNode, fGetFrameParent);
 			titleBarNode.appendChild(titleNode);
@@ -150,6 +158,8 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			DOMNode.setTopLeftAbsolute(frameNode, 0, 0);
 			DOMNode.setAttrs(frameNode, "width", "" + frame.getWidth() + s.left + s.right, "height",
 					"" + frame.getHeight() + s.top + s.bottom);
+			
+			addJ2SKeyHandler();
 		}
 		String strColor = toCSSString(c.getBackground());
 		DOMNode.setStyles(domNode, "background-color", strColor);
@@ -160,6 +170,14 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		setTitle(frame.getTitle());
 		return domNode;
 	}
+
+	/**
+	 * referenced by j2sNative, above
+	 */
+	/*not private*/ void hideMenu() {
+		hideAllMenus();
+	}
+
 
 	void moveFrame(int x, int y) {
 		frame.setLocation(x, y);
@@ -221,6 +239,8 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		frame = (JFrame) c;	
 		isDummyFrame = /** @j2sNative jc.__CLASS_NAME__ == "javax.swing.SwingUtilities.SharedOwnerFrame" || */false;
 		
+		frame.addWindowListener(this);
+		frame.addComponentListener(this);
 		 LookAndFeel.installColors(jc,
 		 "Frame.background",
 		 "Frame.foreground");
@@ -230,6 +250,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	public void uninstallUI(JComponent jc) {
 		// never called
 		closeFrame();
+		frame.removeWindowListener(this);
 	}
 
 

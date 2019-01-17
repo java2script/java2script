@@ -24,7 +24,7 @@ public class JSKeyEvent extends KeyEvent {
 	public static final int KEY_UNKNOWN = 403;
 
 	/**
-	 * From JSMouse
+	 * From j2sApplet vis JSMouse
 	 * 
 	 * @param id
 	 * @param modifiers
@@ -32,7 +32,7 @@ public class JSKeyEvent extends KeyEvent {
 	 * @param time
 	 * @return
 	 */
-	public static boolean processKeyEvent(int id, int modifiers, Object jqevent, long time) {
+	public static boolean dispatchKeyEvent(int id, int modifiers, Object jqevent, long time) {
 		if (id == KeyEvent.KEY_TYPED) {
 			// HTML5 keypress is no longer reliable
 			JSToolkit.consumeEvent(jqevent);
@@ -52,20 +52,27 @@ public class JSKeyEvent extends KeyEvent {
 			if (!ui.j2sDoPropagate)
 				JSToolkit.consumeEvent(e);
 			if (!e.isConsumed() && id == KeyEvent.KEY_PRESSED && e.getKeyChar() != KeyEvent.CHAR_UNDEFINED) {
-				c.dispatchEvent(e = newJSKeyEvent(c, jqevent, KeyEvent.KEY_TYPED, false));
+				e = newJSKeyEvent(c, jqevent, KeyEvent.KEY_TYPED, false);
+				
+				// yield to keyboard focus manager
+				c.dispatchEvent(e);
+
 				if (!ui.j2sDoPropagate)
 					JSToolkit.consumeEvent(e);
 			}
 		}
-		/**
-		 * @j2sNative
-		 * 
-		 * 			c = jqevent.target["data-keycomponent"]; ui = c.ui;
-		 */
-	
 		return true;
 	}
 
+	/**
+	 * Create a value-added KeyEvent that can trace back to the original system event.
+	 * 
+	 * @param source
+	 * @param jqevent
+	 * @param id
+	 * @param isList
+	 * @return
+	 */
 	public static JSKeyEvent newJSKeyEvent(JComponent source, Object jqevent, int id, boolean isList) {
 
 		// JavaScript: keydown      keypress    keyup

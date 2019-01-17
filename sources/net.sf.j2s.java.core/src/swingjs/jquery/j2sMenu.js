@@ -35,42 +35,149 @@ try{
 
  var doCmd = function(trigger,me,e,t,n) {
 	 switch(trigger) {
-	 case "open":
-		 t.show().removeAttr("aria-hidden")
-		 	.attr("aria-expanded","true")
-		 	.position(n);
+	 case "over":
+		 // BH 2018
+		 // -- added stopPropagation
+		 // -- changed to mouseover from mouseenter, since we have children
+		 
+		 var a = jQuery(t.target).closest(".a");
+		 a[0] && a[0].focus();
+		 var n=e(t.currentTarget).closest(".ui-menu-item");
+		 n.siblings().children(".ui-state-active").removeClass("ui-state-active");
+		 t.stopPropagation();
+		 me.focus(t,n);
 		 break;
-	 case "expand":
-		 me._open(t.parent());
-		 delayMe(this,function(){me.focus(e,t)});
+	 case "click":
+		 
+		// BH 12/20/2018 adds persistence for JMenu clicks
+
+		if (this.active && this.active[0].attributes.name && this.active[0].attributes.name.value == "javax.swing.JMenu") {
+			clearMe(this.timer);
+			return 
+		}
+		var r=e(t.target).closest(".ui-menu-item");
+		!n&&r.not(".ui-state-disabled").length&&(n=!0,me.select(t),r.has(".ui-menu").length?me.expand(t):me.element.is(":focus")
+				||(me.element.trigger("focus",[!0]),me.active&&me.active.parents(".ui-menu").length===1&&clearMe(me.timer))); 
+		e(".ui-menu").hide();
+		break;
+	 case "_open":
+		 n||(n = me.active || me.activeMenu);
+		 n = e.extend({of:n},me.options.position);
+		 clearMe(me.timer);
+		 me.refresh();
+		 me.element.find(".ui-menu").not(t.parents(".ui-menu")).hide()
+		 	.attr("aria-hidden","true");
+		 try {
+			 t.show().removeAttr("aria-hidden")
+		 		.attr("aria-expanded","true")
+		 		.position(n);
+		 } catch(err){
+			 System.out.println("j2sMenu error: " + err);
+		 }
 		 break;
 	 case "startOpening":
 		 me._close(),me._open(e);
-		 break;			 
-	 }
- }
-
- var overMe = function(me, e, t, all) {
-	 // BH 2018
-	 // -- added stopPropagation
-	 // -- changed to mouseover from mouseenter, since we have children
-	 
-	 System.out.println("j2sm1 " + t.target.id + " " + t.currentTarget.id);
-	 var a = $(t.target).closest(".a");
-	 a[0] && a[0].focus();
-	 System.out.println("j2sm11 " + t.target.id + " " + t.target.getAttribute("tabindex") + " " + document.activeElement.id)
-	 if (false && !all)
-		 return;
-	 var n=e(t.currentTarget).closest(".ui-menu-item");
-	 n.siblings().children(".ui-state-active").removeClass("ui-state-active");
-	 t.stopPropagation();
-	 me.focus(t,n);
- }
- 
- var setPathTo = function(t, andFire) {
-	 var jc = t.target["data-component"];
-	 if (jc) {
-		 jc.parent.ui.setPathTo$O$O(jc, (andFire ? t : null));
+		 break;
+	 case "_close":
+		 var e0= t;
+		 t||(t=me.active?me.active.parent():me.element),
+		 t.find(".ui-menu").hide()
+		 	.attr("aria-hidden","true").attr("aria-expanded","false").end()
+		 	.find(".a .ui-state-active").removeClass("ui-state-active");
+		 break;
+	 case "collapse":
+		 var v=me.active&&me.active.parent().closest(".ui-menu-item",me.element);
+		 me._close();
+		 (v&&v.length?me.focus(t,v):e(".ui-menu").hide());
+		 break;
+	 case "collapseAll":
+		 clearMe(me.timer),
+		 me.timer=delayMe(me,
+	       function(){
+			 var r=n?me.element:e(t&&t.target).closest(me.element.find(".ui-menu"));
+			 r.length||(r=me.element);
+			 me._close(r);
+			 me.blur(t);
+			 me.activeMenu=r;
+		   }, me.delay); 
+		 break;
+	 case "expand":
+		 n = this.active&&this.active.children(".ui-menu ").children(".ui-menu-item").first();
+		 if (n&&n.length()) {
+			 me._open(n.parent());
+			 delayMe(me,function(){me.focus(t,n)});
+		 }
+		 break;
+	 case "focus":
+		 me.blur(e,e&&e.type==="focus");
+		 me._scrollIntoView(t);
+		 me.active=t.first();
+		 var r=me.active
+		 //.children(".a")
+		    .addClass("ui-state-focus");
+		 me.options.role&&me.element.attr("aria-activedescendant", r.attr("id"));
+		 me.active.parent().closest(".ui-menu-item").children(".a:first").addClass("ui-state-active");
+		 e&&e.type==="keydown"?me._close() : me.timer=delayMe(me, function(){me._close()},me.delay);
+		 n=t.children(".ui-menu");
+		 n.length&&/^mouse/.test(e.type)&&me._startOpening(n);
+		 me.activeMenu=t.parent();
+		 me._trigger("focus",e,{item:t});
+		 break;
+	 case "blur":
+		 if (me.active && typeof t == "undefined" && e.relatedTarget && e.relatedTarget.getAttribute("role") != "presentation")	 {
+			 me.element.hide();
+		 }
+		 t||clearMe(me.timer);
+		 if(!me.active)return;
+		 me.active
+		 //.children(".a")
+		 	.removeClass("ui-state-focus"),
+		 me.active=null,
+		 me._trigger("blur",e,{item:me.active});
+				 break;
+	 case "refresh":
+		 n=me.options.icons.submenu;
+		 var role=me.options.role, r=me.element.find(me.options.menus);
+		 r.filter(":not(.ui-menu)")
+		   .addClass("ui-menu ui-widget ui-widget-content ui-corner-all")
+		   .hide().attr({role:me.options.role,"aria-hidden":"true","aria-expanded":"false"})
+		   .each(function(){
+			   var t=e(me),r=t.prev(".a"),
+			   i=e("<span>").addClass("ui-menu-icon ui-icon "+n)
+			   .attr({role:role})
+			   .data("ui-menu-submenu-carat",!0);
+			   r.attr("aria-haspopup","true").prepend(i);
+			   t.attr("aria-labelledby",r.attr("id"));
+		   });
+		   t=r.add(me.element);
+		   t.children(":not(.ui-menu-item):has(.a)").addClass("ui-menu-item")
+		   		.attr("role","presentation").children(".a").uniqueId()
+		   		.addClass("ui-corner-all").attr({tabIndex:-1,role:me._itemRole()});
+		   t.children(":not(.ui-menu-item)").each(function(){
+			   	var t=e(me);
+			   	/[^\-+�G��G��+�G��G��\s]/.test(t.text())
+			   		||t.addClass("ui-widget-content ui-menu-divider")
+			   	});
+		   t.children(".ui-state-disabled").attr("aria-disabled","true");
+		   me.active&&!e.contains(me.element[0],me.active[0])&&me.blur();
+		   break;
+	 case "keyActivate":
+		 
+		 // BH 1/15/2019 key mnemonics
+		 
+		 var node = e(".j2s-popup-menu  > :visible.ui-mnem-" + Character.toLowerCase$I(t.keyCode));
+		 switch (node.length) {
+		 case 0:
+			 doCmd("click", me, e, t);
+			 break;
+		 case 1:
+			 doCmd("_open", me, e, node.next("ul"), node);
+			 break;
+		 default:
+			 // ignore multiple hits
+			 break;
+		 }
+		 break;
 	 }
  }
  
@@ -101,27 +208,9 @@ try{
 	 this._on({
 		 "mousedown .ui-menu-item > .a":function(e){e.preventDefault()},
 		 "click .ui-state-disabled > .a":function(e){e.preventDefault()},
-		 "click .ui-menu-item:has(.a)":function(t){
-
-
-// BH 12/20/2018 adds persistence for JMenu clicks
-
-if (this.active && this.active[0].attributes.name && this.active[0].attributes.name.value == "javax.swing.JMenu") {
-clearMe(this.timer);
-return 
-}
-
-var r=e(t.target).closest(".ui-menu-item");
-
-!n&&r.not(".ui-state-disabled").length&&(n=!0,this.select(t),r.has(".ui-menu").length?this.expand(t):this.element.is(":focus")||(this.element.trigger("focus",[!0]),this.active&&this.active.parents(".ui-menu").length===1&&clearMe(this.timer)))
-
-; $(".ui-menu").hide();
-
-
-
-},
-		 "mousemove .swingjsPopupMenu .data-ui":function(t){ overMe(this, e, t); },
-		 "mouseover .ui-menu-item":function(t){ overMe(this, e, t, 1); },
+		 "click .ui-menu-item:has(.a)":function(t){ doCmd("click", this, e, t);},
+		 "mousemove .swingjsPopupMenu .data-ui":function(t){ doCmd("over", this, e, t, 0); },
+		 "mouseover .ui-menu-item":function(t){ doCmd("over", this, e, t, 1); },
 		 mouseleave:"collapseAll",
 		 "mouseleave .ui-menu": "collapseAll",
 		 focus:function(e,t){var n=this.active||this.element.children(".ui-menu-item").eq(0);t||this.focus(e,n)},
@@ -131,7 +220,8 @@ var r=e(t.target).closest(".ui-menu-item");
 	 }), 
 	 this.refresh(),
 	 this._on(this.document,{
-		 click:function(t){e(t.target).closest(".ui-menu").length||this.collapseAll(t),n=!1}})
+		 click:function(t){e(t.target).closest(".ui-menu").length||this.collapseAll(t),n=!1}
+	 })
  },
  
  _destroy:function(){this.element.removeAttr("aria-activedescendant").find(".ui-menu").andSelf()
@@ -144,106 +234,104 @@ var r=e(t.target).closest(".ui-menu-item");
 	 .removeAttr("tabIndex").removeAttr("role").removeAttr("aria-haspopup").children().each(function(){var t=e(this);t.data("ui-menu-submenu-carat")&&t.remove()}),this.element.find(".ui-menu-divider").removeClass("ui-menu-divider ui-widget-content")
 	 },
  _keydown:function(t){
-	 setPathTo(t, true);
-	 function a(e){return e.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g,"\\$&")}var n,r,i,s,o,u=!0;switch(t.keyCode){case e.ui.keyCode.PAGE_UP:this.previousPage(t);break;case e.ui.keyCode.PAGE_DOWN:this.nextPage(t);break;case e.ui.keyCode.HOME:this._move("first","first",t);break;case e.ui.keyCode.END:this._move("last","last",t);break;case e.ui.keyCode.UP:this.previous(t);break;case e.ui.keyCode.DOWN:this.next(t);break;case e.ui.keyCode.LEFT:this.collapse(t);break;case e.ui.keyCode.RIGHT:this.active&&!this.active.is(".ui-state-disabled")&&this.expand(t);break;case e.ui.keyCode.ENTER:case e.ui.keyCode.SPACE:this._activate(t);break;case e.ui.keyCode.ESCAPE:this.collapse(t);break;default:u=!1,r=this.previousFilter||"",i=String.fromCharCode(t.keyCode),s=!1,clearMe(this.filterTimer),i===r?s=!0:i=r+i,o=new RegExp("^"+a(i),"i"),n=this.activeMenu.children(".ui-menu-item").filter(function(){return o.test(e(this).children(".a").text())}),n=s&&n.index(this.active.next())!==-1?this.active.nextAll(".ui-menu-item"):n,n.length||(i=String.fromCharCode(t.keyCode),o=new RegExp("^"+a(i),"i"),n=this.activeMenu.children(".ui-menu-item").filter(function(){return o.test(e(this).children(".a").text())})),n.length?(this.focus(t,n),n.length>1?(this.previousFilter=i,
-		 	this.filterTimer=delayMe(function(){delete this.previousFilter},1e3)):delete this.previousFilter):delete this.previousFilter}u&&t.preventDefault()
+	t.preventDefault();
 		 	
+	 var n,r,i,s,o,u=!0;
+	 switch(t.keyCode){
+	 case 16:
+	 case 17:
+	 case 18: // CTRL ALT SHIFT alone
+		 break;
+	 case e.ui.keyCode.PAGE_UP:
+		 this.previousPage(t);
+		 break;
+	 case e.ui.keyCode.PAGE_DOWN:
+		 this.nextPage(t);
+		 break;
+	 case e.ui.keyCode.HOME:
+		 this._move("first","first",t);
+		 break;
+	 case e.ui.keyCode.END:
+		 this._move("last","last",t);
+		 break;
+	 case e.ui.keyCode.UP:
+		 this.previous(t);
+		 break;
+	 case e.ui.keyCode.DOWN:
+		 this.next(t);
+		 break;
+	 case e.ui.keyCode.LEFT:
+		 this.collapse(t);
+		 break;
+	 case e.ui.keyCode.RIGHT:
+		 this.active&&!this.active.is(".ui-state-disabled")&&this.expand(t);
+		 break;
+	 case e.ui.keyCode.ENTER:
+	 case e.ui.keyCode.SPACE:
+		 this._activate(t);
+		 break;
+	 case e.ui.keyCode.ESCAPE:
+		 
+		 this.collapse(t);
+		 break;
+	 default:
+//		 function a(e){return e.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g,"\\$&")}
+//		 u=!1,
+//		 r=this.previousFilter||"",
+//		 i=String.fromCharCode(t.keyCode),
+//		 s=!1,clearMe(this.filterTimer),
+//		 i===r?s=!0:i=r+i,
+//		 o=new RegExp("^"+a(i),"i"),
+//		 n=this.activeMenu.children(".ui-menu-item").filter(function(){return o.test(e(this).children(".a").text())}),
+//		 n=s&&n.index(this.active.next())!==-1?this.active.nextAll(".ui-menu-item"):n,
+//		 n.length||(
+//				 i=String.fromCharCode(t.keyCode),
+//				 o=new RegExp("^"+a(i),"i"),
+//				 n=this.activeMenu.children(".ui-menu-item").filter(
+//						 function(){
+//							 return o.test(e(this).children(".a").text())
+//						 }
+//				 )),
+//		 n.length?(
+//				 this.focus(t,n),
+//				 n.length>1?(
+//						 this.previousFilter=i,
+//						 this.filterTimer=delayMe(function(){delete this.previousFilter},1e3)
+//				 	):delete this.previousFilter
+//			  	):delete this.previousFilter;
+		doCmd("keyActivate",this, e, t, true);
+		break;
+	}
  },
  _activate:function(e){this.active.is(".ui-state-disabled")||(this.active.children(".a[aria-haspopup='true']").length?this.expand(e):this.select(e))},
- refresh:function(){
-	 var t,n=this.options.icons.submenu,role=this.options.role,
-	 r=this.element.find(this.options.menus);
-	 r.filter(":not(.ui-menu)")
-	   .addClass("ui-menu ui-widget ui-widget-content ui-corner-all")
-	   .hide().attr({role:this.options.role,"aria-hidden":"true","aria-expanded":"false"})
-	   .each(function(){var t=e(this),r=t.prev(".a"),
-		   i=e("<span>").addClass("ui-menu-icon ui-icon "+n)
-		   .attr({role:role})
-		   .data("ui-menu-submenu-carat",!0);
-	   r.attr("aria-haspopup","true").prepend(i),t.attr("aria-labelledby",r.attr("id"))}),t=r.add(this.element),t.children(":not(.ui-menu-item):has(.a)").addClass("ui-menu-item").attr("role","presentation").children(".a").uniqueId().addClass("ui-corner-all").attr({tabIndex:-1,role:this._itemRole()}),t.children(":not(.ui-menu-item)").each(function(){var t=e(this);/[^\-+�G��G��+�G��G��\s]/.test(t.text())||t.addClass("ui-widget-content ui-menu-divider")}),t.children(".ui-state-disabled").attr("aria-disabled","true"),this.active&&!e.contains(this.element[0],this.active[0])&&this.blur()},
- _itemRole:function(){return{menu:"menuitem",listbox:"option"}[this.options.role]},
- 
- focus:function(e,t){var n,r;this.blur(e,e&&e.type==="focus"),this._scrollIntoView(t),this.active=t.first(),
- r=this.active
- //.children(".a")
-    .addClass("ui-state-focus"),
-    this.options.role&&this.element.attr("aria-activedescendant",
-    		r.attr("id")),
-    this.active.parent().closest(".ui-menu-item").children(".a:first").addClass("ui-state-active"),
-    e&&e.type==="keydown"?this._close():
-this.timer=delayMe(this, function(){this._close()},this.delay),
-n=t.children(".ui-menu"),n.length&&/^mouse/.test(e.type)
-&&this._startOpening(n),this.activeMenu=t.parent(),
-this._trigger("focus",e,{item:t})},
+ _itemRole:function(){return{menu:"menuitem",listbox:"option"}[this.options.role]}, 
  _scrollIntoView:function(t){var n,r,i,s,o,u;this._hasScroll()&&(n=parseFloat(e.css(this.activeMenu[0],"borderTopWidth"))||0,r=parseFloat(e.css(this.activeMenu[0],"paddingTop"))||0,i=t.offset().top-this.activeMenu.offset().top-n-r,s=this.activeMenu.scrollTop(),o=this.activeMenu.height(),u=t.height(),i<0?this.activeMenu.scrollTop(s+i):i+u>o&&this.activeMenu.scrollTop(s+i-o+u))},
- blur:function(e,t){
-	 
-	 if (this.active && typeof t == "undefined" && e.relatedTarget && e.relatedTarget.getAttribute("role") != "presentation")	 {
-		 this.element.hide();
-	 }
-	 t||clearMe(this.timer);
-	 if(!this.active)return;
-	 this.active
-	 //.children(".a")
-	 	.removeClass("ui-state-focus"),
-	 this.active=null,
-	 this._trigger("blur",e,{item:this.active});
-	},
  _startOpening: function(e){
-	 clearMe(this.timer);
+	 var me = this;
+	 clearMe(me.timer);
 	 if(e.attr("aria-hidden")!=="true")return;
-	 this.timer=delayMe(this, function(){doCmd("startOpening", this, e)},this.delay)
+	 this.timer=delayMe(me, function(){me._close(),me._open(e);},me.delay);
  	},
- _open:function(t){
-	 var n=e.extend({of:this.active},this.options.position);
-	 clearMe(this.timer);
-	 this.refresh();
-	 this.element.find(".ui-menu").not(t.parents(".ui-menu")).hide()
-	 	.attr("aria-hidden","true");
-	 doCmd("open", 0, 0, t, n);
-	 },
- collapseAll:function(t,n){
-	 clearMe(this.timer),
-	 this.timer=delayMe(this,
-       function(){
-		 var r=n?this.element:e(t&&t.target).closest(this.element.find(".ui-menu"));
-		 r.length||(r=this.element),
-		 this._close(r),
-		 this.blur(t),
-		 this.activeMenu=r
-	   }, this.delay)
- },
- _close:function(e){
-
-var e0= e;
-e||(e=this.active?this.active.parent():this.element),
-e.find(".ui-menu")
-.hide()
-.attr("aria-hidden","true")
-.attr("aria-expanded","false")
-.end()
-.find(".a .ui-state-active")
-.removeClass("ui-state-active")
-
-
-},
- collapse:function(e){var t=this.active&&this.active.parent().closest(".ui-menu-item",this.element);t&&t.length&&(this._close(),
-		 this.focus(e,t))
- },
- expand:function(e){
-	 var t=this.active&&this.active.children(".ui-menu ")
-	 	.children(".ui-menu-item").first();
-	 t&&t.length&&doCmd("expand", this, e, t);
-	 },
+ 
+ focus:function(e,t){       doCmd("focus", this, e, t) },
+ blur:function(e,t){        doCmd("blur", this, e, t);},
+ _open:function(t){         doCmd("_open", this, e, t);},
+ _close:function(t){        doCmd("_close", this, e, t, n);},
+ collapseAll:function(t,n){ doCmd("collapseAll",this, e, t, n);},
+ collapse:function(t){      doCmd("collapse", this, e, t);},
+ refresh:function(){        doCmd("refresh", this, e); },
+ expand:function(t){        doCmd("expand", this, e, t);},
+ 
  next:function(e){this._move("next","first",e)},
  previous:function(e){this._move("prev","last",e)},
  isFirstItem:function(){return this.active&&!this.active.prevAll(".ui-menu-item").length},
  isLastItem:function(){return this.active&&!this.active.nextAll(".ui-menu-item").length},
- _move:function(e,t,n){var r;this.active&&(e==="first"||e==="last"?r=this.active[e==="first"?"prevAll":"nextAll"](".ui-menu-item").eq(-1):r=this.active[e+"All"](".ui-menu-item").eq(0));if(!r||!r.length||!this.active)r=this.activeMenu.children(".ui-menu-item")[t]();this.focus(n,r)},
  nextPage:function(t){var n,r,i;if(!this.active){this.next(t);return}if(this.isLastItem())return;this._hasScroll()?(r=this.active.offset().top,i=this.element.height(),this.active.nextAll(".ui-menu-item").each(function(){return n=e(this),n.offset().top-r-i<0}),this.focus(t,n)):this.focus(t,this.activeMenu.children(".ui-menu-item")[this.active?"last":"first"]())},
  previousPage:function(t){var n,r,i;if(!this.active){this.next(t);return}if(this.isFirstItem())return;this._hasScroll()?(r=this.active.offset().top,i=this.element.height(),this.active.prevAll(".ui-menu-item").each(function(){return n=e(this),n.offset().top-r+i>0}),this.focus(t,n)):this.focus(t,this.activeMenu.children(".ui-menu-item").first())},
- _hasScroll:function(){return this.element.outerHeight()<this.element.prop("scrollHeight")},
- select:function(t){this.active=this.active||e(t.target).closest(".ui-menu-item");var n={item:this.active};this.active.has(".ui-menu").length||this.collapseAll(t,!0),this._trigger("select",t,n)}
+ select:function(t){this.active=this.active||e(t.target).closest(".ui-menu-item");var n={item:this.active};this.active.has(".ui-menu").length||this.collapseAll(t,!0),this._trigger("select",t,n)},
+
+ _move:function(e,t,n){var r;this.active&&(e==="first"||e==="last"?r=this.active[e==="first"?"prevAll":"nextAll"](".ui-menu-item").eq(-1):r=this.active[e+"All"](".ui-menu-item").eq(0));if(!r||!r.length||!this.active)r=this.activeMenu.children(".ui-menu-item")[t]();this.focus(n,r)},
+ _hasScroll:function(){return this.element.outerHeight()<this.element.prop("scrollHeight")}
  })
  })(jQuery);
 }catch (e) {
@@ -367,10 +455,8 @@ Swing.updateMenu = function(menu, andShow) {
 	        menu.setContainer(J2S.$(node));
 	        J2S.$(node).addClass("swingjsPopupMenu");
 	    }
+    	node.style.display = (andShow ? "block" : "none");
 	    J2S.$after("body",node);
-		if (andShow) {
-	    	node.style.display = "block";
-	    }
     } else {
   		menu.$ulTop.html(menu.toHTML());
   		bindMenuActionCommands(menu._actionEvent, menu, true);
@@ -379,6 +465,10 @@ Swing.updateMenu = function(menu, andShow) {
     if (menu.uiClassID)
         menu.$ulTop.find("[role=menuitem]").each(function(){Swing.updateMenuItem(menu, this);});
 	menu._tainted = false;
+}
+
+Swing.getInstance = function(menu) {
+	return menu.$ulTop.data("ui-menu");
 }
 
 Swing.updateMenuItem = function(menu, node) {

@@ -266,7 +266,15 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		cb3m.setHorizontalTextPosition(SwingConstants.LEADING);
 		cb3m.addActionListener(listener);
 
-		JCheckBoxMenuItem cb4m = new JCheckBoxMenuItem("XXleading,right-to-leftXX");
+		JCheckBoxMenuItem cb4m = new JCheckBoxMenuItem("XXleading,right-to-leftXX") {
+			@Override
+			public void doClick() {
+				super.doClick();
+				System.out.println("JalviewJSTest checkbox Clicked!"  + getState());				
+			}
+		};
+		cb4m.setMnemonic('X');
+		cb4m.setDisplayedMnemonicIndex(1);
 		cb4m.setFont(font);
 		cb4m.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		cb4m.setHorizontalTextPosition(SwingConstants.LEADING);

@@ -503,7 +503,7 @@ class Java2ScriptCompiler {
 				"getClassList = function(){J2S._saveFile('_j2sclasslist.txt', Clazz.ClassFilesLoaded.sort().join('\\n'))}\n" + 
 				"</script>\n" + 
 				"<div style=\"position:absolute;left:900px;top:30px;width:600px;height:300px;\">\n" + 
-				"<div id=\"sysoutdiv\" style=\"border:1px solid green;width:100%;height:95%;overflow:auto\"></div>\n" + 
+				"<div id=\"sysoutdiv\" contentEditable=\"true\" style=\"border:1px solid green;width:100%;height:95%;overflow:auto\"></div>\n" + 
 				"This is System.out. <a href=\"javascript:testApplet._clearConsole()\">clear it</a> <br>Add ?j2snocore to URL to see full class list; ?j2sdebug to use uncompressed j2s/core files <br><a href=\"javascript:getClassList()\">get _j2sClassList.txt</a>\n" + 
 				"</div>\n" + 
 				"</body>\n" + 

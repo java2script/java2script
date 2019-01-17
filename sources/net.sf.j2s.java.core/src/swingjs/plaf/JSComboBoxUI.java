@@ -100,7 +100,7 @@ public class JSComboBoxUI extends JSLightweightUI implements ItemListener, ListD
 
 	@Override
 	protected String getPropertyPrefix() {
-		return "ComboBox.";
+		return "ComboBox";
 	}
 
 

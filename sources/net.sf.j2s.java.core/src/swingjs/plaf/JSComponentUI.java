@@ -17,7 +17,7 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.peer.DropTargetPeer;
-import java.awt.event.FocusEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.PaintEvent;
 import java.awt.image.ColorModel;
 import java.awt.image.ImageObserver;
@@ -34,8 +34,10 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable.BooleanRenderer;
+import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
@@ -233,6 +235,7 @@ public class JSComponentUI extends ComponentUI
 				
 				iconNode,
 				textNode,
+				accelNode,
 				buttonNode,			
 				enableNode,
 				
@@ -263,18 +266,19 @@ public class JSComponentUI extends ComponentUI
 		
 		iconNode		= nodes[3];
 		textNode		= nodes[4];
-		buttonNode 		= nodes[5];
-		enableNode 		= nodes[6];
+		accelNode       = nodes[5];
+		buttonNode 		= nodes[6];
+		enableNode 		= nodes[7];
 		
-		if (nodes[7] != null) {
-			enableNodes[0] = nodes[7];
-			enableNodes[1] = nodes[8];
-			enableNodes[2] = nodes[9];
+		if (nodes[8] != null) {
+			enableNodes[0] = nodes[8];
+			enableNodes[1] = nodes[9];
+			enableNodes[2] = nodes[10];
 		}
 		
-		focusNode		= nodes[10];
-		actionNode 		= nodes[11];
-		valueNode		= nodes[12];
+		focusNode		= nodes[11];
+		actionNode 		= nodes[12];
+		valueNode		= nodes[13];
 	}
 
 	/**
@@ -337,6 +341,11 @@ public class JSComponentUI extends ComponentUI
 	 * the part of a component that can hold text
 	 */
 	public DOMNode textNode;
+
+	/**
+	 * the place flushed right for alt-X
+	 */
+	public DOMNode accelNode;
 
 	/**
 	 * the subcomponent with the value field
@@ -775,29 +784,32 @@ public class JSComponentUI extends ComponentUI
 	 * @param on
 	 */
 	public void enableJSKeys(boolean on) {
-		if (domNode == null)
+		if (getDOMNode() == null)
 			return; // too early
 		if (!on) {
 			setTabIndex(Integer.MIN_VALUE);
 		} else if (keysEnabled) {
-			setTabIndex(0);
+			setTabIndex(-1);
 		} else {
-			setJ2SKeyHandler();
+			addJ2SKeyHandler();
 		}
 	}
 
-	protected void setJ2SKeyHandler() {
-		if (focusNode == null)
-			focusNode = domNode;
-		if (focusNode == null)
+	protected void addJ2SKeyHandler() {
+		if (focusNode == null && (focusNode = domNode) == null)
 			return;
 		keysEnabled = true;
 		DOMNode.setAttrs(focusNode, "applet", applet, "_frameViewer", jc.getFrameViewer());
 		setDataKeyComponent(focusNode);
 		J2S.setKeyListener(focusNode);
-		setTabIndex(0);
+		setTabIndex(-1);
 	}
 	
+	/**
+	 * enable JavaScript .focus() and .blur() reporting
+	 * 
+	 * @param i
+	 */
 	private void setTabIndex(int i) {
 		if (focusNode == null)
 			return;
@@ -811,36 +823,61 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	@Override
-	public boolean requestFocus(Component lightweightChild, boolean temporary, boolean focusedWindowChangeAllowed,
-			long time, Cause cause) {
-		if (lightweightChild == null)
-			return requestFocus();
-//		System.out.println(">>>>JSCUI requestFocus " + this.id);
-		//System.out.println(JSUtil.getStackTrace());
-			return JSToolkit.requestFocus(lightweightChild);
-	}
-
-	public boolean requestFocus() {
-		if (focusNode == null || isUIDisabled)
-			return false;
-		/** @j2sNative this.focusNode.focus(); */
-		return true;
-	}
-
-	@Override
 	public boolean isFocusable() {
 		return (focusNode != null);
 	}
 
+	public boolean hasFocus() {
+		return focusNode != null && focusNode == getActiveElement();
+	}
+
+	private DOMNode getActiveElement() {
+		return (DOMNode) DOMNode.getAttr(document, "activeElement");
+	}
+
+	@Override
+	public boolean requestFocus(Component lightweightChild, boolean temporary, boolean focusedWindowChangeAllowed,
+			long time, Cause cause) {
+		if (lightweightChild == null)
+			return focus();
+		return JSToolkit.requestFocus(lightweightChild);
+	}
+
 	/**
-	 * Add the $().focus() and $().blur() events to a DOM button
+	 * Outgoing: Initiate a focus() event in the system directly
+	 * 
+	 * @return
+	 */
+	public boolean focus() {
+		if (focusNode == null || isUIDisabled)
+			return false;
+		JSFocusPeer.focus(focusNode);
+		return true;
+	}
+
+	/**
+	 * Add the $().focus() and $().blur() events to a DOM button.
+	 * 
+	 * Added in JSFrameUI
+	 * Added in JSComboBoxUI?
+	 * 
+	 * Also from bindJSKeyEvents
 	 * 
 	 */
 	protected void addJQueryFocusCallbacks() {
-		setTabIndex(0);
+		if (focusNode == null)
+			focusNode = domNode;
+		setTabIndex(-1);
 		JQueryObject node = $(focusNode);
 		node.unbind("focus blur");
 		JSComponentUI me = this;
+
+		// initial idea involved
+		// 
+		//    node.mousedown(function(e) { e.target.focus() });
+		//
+		// but that is not quite right. We need to let KeyboardFocusManager handle all of this.
+		
 
 		/**
 		 * @j2sNative
@@ -867,7 +904,18 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	/**
-	 * hack a way to transfer focus to this button
+	 * Incoming: From jQuery callback; checks for complementary event
+	 * 
+	 * @param jco       initiating JComponent
+	 * @param related   partner in focus loss/gain
+	 * @param focusGained 
+	 */
+	public void handleJSFocus(Object jco, Object related, boolean focusGained) {
+		JSFocusPeer.handleJSFocus(jco, related, focusGained);
+	}
+
+	/**
+	 * Internal: Directly fire KFM events for button press from JComponent.doClick() 
 	 */
 	@SuppressWarnings("unused")
 	public void abstractButtonFocusHack() {    	
@@ -882,36 +930,7 @@ public class JSComponentUI extends ComponentUI
     	}
 	}
 
-	public boolean hasFocus() {
-		return focusNode != null && focusNode == DOMNode.getAttr(document, "activeElement");
-	}
-
-	/**
-	 * comes from jQuery callback; checks for complementary event
-	 * 
-	 * @param focusGained
-	 */
-	public void handleJSFocus(Object jco, Object related, boolean focusGained) {
-		JComponent c0 = (JComponent) jco;
-		AWTEvent e = new FocusEvent(c0, focusGained ? FocusEvent.FOCUS_GAINED : FocusEvent.FOCUS_LOST);
-		if (related == this) {
-			c0.dispatchEvent(e);
-			return;
-		}
-		JComponent other;
-		if (focusGained) {
-			other = (JComponent) JSFocusPeer.getAccessibleComponentFor((DOMNode) related);
-			if (other != null && other != c0)
-				handleJSFocus(other, this, false);
-			c0.dispatchEvent(e);
-		} else {
-			other = (JComponent) JSToolkit.getCurrentFocusOwner(related);
-			c0.dispatchEvent(e);
-			if (other != null && other != c0)
-				handleJSFocus(other, this, true);
-		}
-	}
-
+	
 	private boolean keysEnabled;
 
 	private int mnemonic;
@@ -942,7 +961,6 @@ public class JSComponentUI extends ComponentUI
 				: ""), Event.KEY_PRESS);
 		
 		if (addFocus) {
-			setTabIndex(0);
 			addJQueryFocusCallbacks();
 		}
 	}
@@ -1189,7 +1207,7 @@ public class JSComponentUI extends ComponentUI
 	
 	protected void setMnemonic(int newValue) {
 		// need to handle non-menu mnemonics as well
-		if (domNode == null || newValue == mnemonic)
+		if (newValue == mnemonic || domNode == null)
 			return;
 		if (newValue < 0) {
 			newValue = (isLabel ? (label == null ? 0 : label.getDisplayedMnemonic()) 
@@ -1972,9 +1990,8 @@ public class JSComponentUI extends ComponentUI
 		if (node == null)
 			return;
 		DOMNode.setAttr(node, "disabled", (b ? null : "TRUE"));
-		String pp = getPropertyPrefix();
 		if (!b && inactiveForeground == colorUNKNOWN)
-			getDisabledColors(pp);
+			getDisabledColors(getPropertyPrefix());
 		if (jc.isOpaque()) {
 			Color bg = c.getBackground();
 			setBackground(b || !(bg instanceof UIResource) || inactiveBackground == null ? bg : inactiveBackground);
@@ -1989,8 +2006,8 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	protected void getDisabledColors(String pp) {
-		inactiveBackground = UIManager.getColor(pp + "inactiveBackground");
-		inactiveForeground = UIManager.getColor(pp + "inactiveForeground");
+		inactiveBackground = UIManager.getColor(pp + ".inactiveBackground");
+		inactiveForeground = UIManager.getColor(pp + ".inactiveForeground");
 	}
 
 	@Override
@@ -2107,7 +2124,8 @@ public class JSComponentUI extends ComponentUI
 			DOMNode.setStyles(textNode, "white-space", "nowrap");
 			if (icon == null) {
 				// tool tip does not allow text alignment
-				if (iconNode != null && isMenuItem && actionNode == null && text != null) {
+				if (iconNode != null && allowTextAlignment 
+						&& isMenuItem && actionNode == null && text != null) {
 					DOMNode.addHorizontalGap(iconNode, gap + MENUITEM_OFFSET);
 				}
 			} else {
@@ -2238,7 +2256,6 @@ public class JSComponentUI extends ComponentUI
 		int vTextPos = b.getVerticalTextPosition();
 
 		getJSInsets();
-
 		Dimension dimIcon = getIconSize(b);
 		Dimension dimText = getTextSize(b);
 		int wIcon = (actionNode != null ? (isMenuItem ? 15 : 20)
@@ -2246,7 +2263,25 @@ public class JSComponentUI extends ComponentUI
 		int wText = (dimText == null ? 0 : dimText.width);
 		int gap = (wText == 0 || wIcon == 0 ? 0 : b.getIconTextGap());
 		int w = cellComponent != null ? cellWidth : $(domNode).width();
-
+		int wAccel = 0;
+		String accel = (b instanceof JMenuItem ? getAccelStr((JMenuItem) b): null);
+		DOMNode accelNode = /** @j2sNative this.centeringNode.children[2] || */null;
+		if ((accelNode == null) != (accel == null)) {
+			if (accel == null) {
+				DOMNode.remove(accelNode);
+			} else { 
+				centeringNode.appendChild(accelNode = DOMNode.createElement("span", id + "_acc"));
+				addClass(accelNode, ".ui-accel");
+				DOMNode.setStyles(accelNode,  "font-size", "10px");
+			}
+		}
+		if (accel != null) {
+			DOMNode.setStyles(accelNode, "float", null);
+			DOMNode.setAttr(accelNode, "innerHTML", accel = accel + "\u00A0\u00A0");
+			wAccel = getAccelWidth(accel);
+			DOMNode.setStyles(accelNode, "float", "right");
+		}
+		
 		// setHTMLSize1((buttonNode == null ? domNode : centeringNode), false,
 		// false).width;
 		// But we need to slightly underestimate it so that the
@@ -2308,8 +2343,10 @@ public class JSComponentUI extends ComponentUI
 		int h = (dimText == null ? 0 : dimText.height);
 		int ih = (dimIcon == null ? 0 : dimIcon.height);
 		int hCtr = Math.max(h, ih);
-		int wCtr = wIcon + gap + wText;
+		int ext = (menuAnchorNode == null ? 0 : 30);
+		int wCtr = wIcon + gap + wText + ext + wAccel;
 		
+
 		if (alignHCenter) {
 			switch (hTextPos) {
 			case SwingConstants.TOP:
@@ -2343,6 +2380,7 @@ public class JSComponentUI extends ComponentUI
 		DOMNode.setStyles(iconNode, "position", "absolute", "top", null, "left", null, "transform", null);
 		DOMNode.setStyles(textNode, "position", "absolute", "top", null, "left", null, "transform", null);
 
+		
 		int left = -1;
 
 		if (menuAnchorNode == null) {
@@ -2444,13 +2482,34 @@ public class JSComponentUI extends ComponentUI
 					"translateY(-" + itop + "%)" + (iscale == null ? "" : iscale));
 		} else {
 			
-			DOMNode.setSize(menuAnchorNode, 25 + wCtr + margins.left + margins.right, h);
+			DOMNode.setSize(menuAnchorNode, wCtr + margins.left + margins.right, h);
 
-			//			if (actionNode != null) {
+				if (accelNode != null)
+					DOMNode.setStyles(accelNode, "transform", "translateY(15%)");
 				DOMNode.setStyles(textNode, "top", "50%", "transform", "translateY(-60%)");
 				DOMNode.setStyles(iconNode, "top", "50%", "transform", "translateY(-80%) scale(0.6,0.6)");
 //			}
 		}
+		
+		//System.out.println("JSCUI textNode " + (/** @j2sNative  this.iconNode && this.iconNode.outerHTML  || */""));
+		
+	}
+
+	private int getAccelWidth(String accel) {
+		String s = currentText;
+		DOMNode.setAttr(textNode, "innerHTML", " " + accel);
+		Dimension d = getHTMLSize(textNode);
+		DOMNode.setAttr(textNode, "innerHTML", s);		
+		return d.width;
+	}
+
+	private String getAccelStr(JMenuItem b) {
+		KeyStroke ks = b.getAccelerator();
+		if (ks != null) {
+			return KeyEvent.getKeyModifiersText(ks.getModifiers()) + "-" +
+		               KeyEvent.getKeyText(ks.getKeyCode());
+		}
+		return null;
 	}
 
 	@Override

@@ -3777,6 +3777,7 @@ public abstract class Component implements ImageObserver/*
 		 * 4. Allow input methods to process the event
 		 */
 //		if (areInputMethodsEnabled()) {
+//   SwingJS - Nah...
 //			// We need to pass on InputMethodEvents since some host
 //			// input method adapters send them through the Java
 //			// event queue instead of directly to the component,
@@ -3837,6 +3838,7 @@ public abstract class Component implements ImageObserver/*
 			break;
 
 		case WindowEvent.WINDOW_CLOSING:
+			// SwingJS could do this, but it doesn't seem to be necessary
 			// if (toolkit instanceof WindowClosingListener) {
 			// windowClosingException = ((WindowClosingListener)
 			// toolkit).windowClosingNotify((WindowEvent)e);
@@ -3854,6 +3856,8 @@ public abstract class Component implements ImageObserver/*
 		 * 6. Deliver event for normal processing
 		 */
 		if (newEventsOnly) {
+			// that is -- we have some sort of listener attached
+			
 			// Filtering needs to really be moved to happen at a lower
 			// level in order to get maximum performance gain; it is
 			// here temporarily to ensure the API spec is honored.
@@ -3866,7 +3870,10 @@ public abstract class Component implements ImageObserver/*
 			// MouseWheelEvents still need to be dispatched to it so scrolling
 			// can be done.
 			autoProcessMouseWheel((MouseWheelEvent) e);
-		} else if (!(e instanceof MouseEvent && !postsOldMouseEvents())) {
+		} 
+		
+		//else if (!(e instanceof MouseEvent) || postsOldMouseEvents()) {
+			// SwingJS could be useful? Backward meaning what, exactly? Really old? 
 			// //
 			// // backward compatibility
 			// //
@@ -3898,45 +3905,46 @@ public abstract class Component implements ImageObserver/*
 			// break;
 			// }
 			// }
-		}
+		//}
 
-		/*
-		 * 8. Special handling for 4061116 : Hook for browser to close modal dialogs.
-		 */
-		if (id == WindowEvent.WINDOW_CLOSING && !e.isConsumed()) {
-			// if (toolkit instanceof WindowClosingListener) {
-			// windowClosingException =
-			// ((WindowClosingListener)toolkit).
-			// windowClosingDelivered((WindowEvent)e);
-			// if (checkWindowClosingException()) {
-			// return;
-			// }
-			// }
-		}
-
-		/*
-		 * 9. Allow the peer to process the event. Except KeyEvents, they will be
-		 * processed by peer after all KeyEventPostProcessors (see
-		 * DefaultKeyboardFocusManager.dispatchKeyEvent())
-		 */
-		if (!(e instanceof KeyEvent)) {
-			// ComponentPeer tpeer = peer;
-			// if (e instanceof FocusEvent && (tpeer == null || tpeer instanceof
-			// LightweightPeer)) {
-			// // if focus owner is lightweight then its native container
-			// // processes event
-			// Component source = (Component)e.getSource();
-			// if (source != null) {
-			// Container target = source.getNativeContainer();
-			// if (target != null) {
-			// tpeer = target.getPeer();
-			// }
-			// }
-			// }
-			// if (tpeer != null) {
-			// tpeer.handleEvent(e);
-			// }
-		}
+//		/*
+//		 * 8. Special handling for 4061116 : Hook for browser to close modal dialogs.
+//		 */
+//		if (id == WindowEvent.WINDOW_CLOSING && !e.isConsumed()) {
+//			// if (toolkit instanceof WindowClosingListener) {
+//			// windowClosingException =
+//			// ((WindowClosingListener)toolkit).
+//			// windowClosingDelivered((WindowEvent)e);
+//			// if (checkWindowClosingException()) {
+//			// return;
+//			// }
+//			// }
+//		}
+//
+//		/*
+//		 * 9. Allow the peer to process the event. Except KeyEvents, they will be
+//		 * processed by peer after all KeyEventPostProcessors (see
+//		 * DefaultKeyboardFocusManager.dispatchKeyEvent())
+//		 */
+//		if (!(e instanceof KeyEvent)) {
+//			// SwingJS -- no need for this?
+//			// ComponentPeer tpeer = peer;
+//			// if (e instanceof FocusEvent && (tpeer == null || tpeer instanceof
+//			// LightweightPeer)) {
+//			// // if focus owner is lightweight then its native container
+//			// // processes event
+//			// Component source = (Component)e.getSource();
+//			// if (source != null) {
+//			// Container target = source.getNativeContainer();
+//			// if (target != null) {
+//			// tpeer = target.getPeer();
+//			// }
+//			// }
+//			// }
+//			// if (tpeer != null) {
+//			// tpeer.handleEvent(e);
+//			// }
+//		}
 	} // dispatchEventImpl()
 
 	/*
@@ -4366,13 +4374,13 @@ public abstract class Component implements ImageObserver/*
 			return;
 		}
 		boolean notifyAncestors;
-		synchronized (this) {
+//		synchronized (this) {
 			notifyAncestors = (hierarchyBoundsListener == null
 					&& (eventMask & AWTEvent.HIERARCHY_BOUNDS_EVENT_MASK) == 0);
 			hierarchyBoundsListener = AWTEventMulticaster.add(hierarchyBoundsListener, l);
 			notifyAncestors = (notifyAncestors && hierarchyBoundsListener != null);
 			newEventsOnly = true;
-		}
+//		}
 		if (notifyAncestors) {
 			synchronized (getTreeLock()) {
 				adjustListeningChildrenOnParent(AWTEvent.HIERARCHY_BOUNDS_EVENT_MASK, 1);
@@ -5529,6 +5537,7 @@ public abstract class Component implements ImageObserver/*
 	}
 
 	boolean postsOldMouseEvents() {
+		// SwingJS - this could be used for a2s method.
 		return false;
 	}
 

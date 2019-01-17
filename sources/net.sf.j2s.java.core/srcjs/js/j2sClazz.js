@@ -3898,7 +3898,7 @@ function(num){
 return isNaN(arguments.length == 1 ? num : this.valueOf());
 });
 
-m$(Float,"isInfinite$F",
+Float.isInfinite$ = m$(Float,"isInfinite$F",
 function(num){
 return !Number.isFinite(arguments.length == 1 ? num : this.valueOf());
 }, 1);

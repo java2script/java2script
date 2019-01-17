@@ -27,12 +27,14 @@
  */
 package java.awt;
 
+import java.applet.JSApplet;
 import java.awt.event.KeyListener;
 import java.awt.peer.ComponentPeer;
 import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 
 import javax.swing.JComponent;
+import javax.swing.JPopupMenu;
 import javax.swing.RootPaneContainer;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;

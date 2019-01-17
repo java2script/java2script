@@ -28,15 +28,12 @@
 
 package swingjs.plaf;
 
-//import java.awt.AWTEvent;
-import javax.swing.BorderFactory;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
 
+//import java.awt.AWTEvent;
+import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.LookAndFeel;
 import javax.swing.UIDefaults;
@@ -46,7 +43,6 @@ import javax.swing.plaf.DimensionUIResource;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.plaf.InsetsUIResource;
 
-import sun.awt.SunToolkit;
 //import java.awt.Component;
 //import java.awt.Dimension;
 //import java.awt.Font;
@@ -1156,12 +1152,9 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				 }),
 				//
 				// *** Menus
-			  "MenuBar.font", 
-			  dialogPlain12,
-				"MenuBar.background",
-				menu,
-				"MenuBar.foreground",
-				menuText,
+			  "MenuBar.font", dialogPlain12,
+				"MenuBar.background", menu,
+				"MenuBar.foreground", menuText,
 				// "MenuBar.shadow", controlShadow,
 				// "MenuBar.highlight", controlLtHighlight,
 				// "MenuBar.border", menuBarBorder,
@@ -1249,7 +1242,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// "Menu.submenuPopupOffsetX", new Integer(0),
 				// "Menu.submenuPopupOffsetY", new Integer(0),
 				// "Menu.shortcutKeys", new int[] {KeyEvent.ALT_MASK},
-				// "Menu.crossMenuMnemonic", Boolean.TRUE,
+				 "Menu.crossMenuMnemonic", Boolean.FALSE,//SwingJS using Windows version // Boolean.TRUE,
 				// Menu.cancelMode affects the cancel menu action behaviour;
 				// currently supports:
 				// "hideLastSubmenu" (default)

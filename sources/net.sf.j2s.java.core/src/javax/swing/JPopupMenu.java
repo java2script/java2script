@@ -51,6 +51,7 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.plaf.PopupMenuUI;
 
 import swingjs.plaf.JSComponentUI;
+import swingjs.plaf.JSPopupMenuUI;
 
 /**
  * An implementation of a popup menu -- a small window that pops up
@@ -110,7 +111,7 @@ public class JPopupMenu extends JComponent implements MenuElement {
     transient  Popup popup;
     transient  JSFrame frame;
     private    int desiredLocationX,desiredLocationY;
-
+    public boolean haveLoc;
     private    String     label                   = null;
     private    boolean   paintBorder              = true;
     private    Insets    margin                   = null;
@@ -124,6 +125,7 @@ public class JPopupMenu extends JComponent implements MenuElement {
      * Model for the selected subcontrol.
      */
     private SingleSelectionModel selectionModel;
+
 
 //    /* Lock object used in place of class object for synchronization.
 //     * (4187686)
@@ -684,66 +686,62 @@ public class JPopupMenu extends JComponent implements MenuElement {
 	 */
 	@Override
 	public void setVisible(boolean b) {
-//        if (DEBUG) {
-//            System.out.println("JPopupMenu.setVisible " + b);
-//        }
-
-		// Is it a no-op?
 		if (b == isVisible())
 			return;
-
 		this.getUI().setVisible(true);
-		/**
-		 * @j2sNative
-		 * 
-		 * 
-		 */
-		{
-			// not implemented in SwingJS 
-			
-			// if closing, first close all Submenus
-			if (b == false) {
-
-				// 4234793: This is a workaround because JPopupMenu.firePopupMenuCanceled is
-				// a protected method and cannot be called from BasicPopupMenuUI directly
-				// The real solution could be to make
-				// firePopupMenuCanceled public and call it directly.
-				Boolean doCanceled = (Boolean) getClientProperty("JPopupMenu.firePopupMenuCanceled");
-				if (doCanceled != null && doCanceled == Boolean.TRUE) {
-					putClientProperty("JPopupMenu.firePopupMenuCanceled", Boolean.FALSE);
-					firePopupMenuCanceled();
-				}
-				getSelectionModel().clearSelection();
-
-			} else {
-				// This is a popup menu with MenuElement children,
-				// set selection path before popping up!
-				if (isPopupMenu()) {
-					MenuElement me[] = new MenuElement[1];
-					me[0] = (MenuElement) this;
-					MenuSelectionManager.defaultManager().setSelectedPath(me);
-				}
-			}
-
-			if (b) {
-				firePopupMenuWillBecomeVisible();
-				popup = getPopup();
-				firePropertyChange("visible", Boolean.FALSE, Boolean.TRUE);
-
-			} else if (popup != null) {
-				firePopupMenuWillBecomeInvisible();
-				popup.hide();
-				popup = null;
-				firePropertyChange("visible", Boolean.TRUE, Boolean.FALSE);
-				// 4694797: When popup menu is made invisible, selected path
-				// should be cleared
-				if (isPopupMenu()) {
-					MenuSelectionManager.defaultManager().clearSelectedPath();
-				}
-			}
-
-		}
-
+		if (!b)
+			popup = null;
+//		/**
+//		 * @j2sNative
+//		 * 
+//		 * 
+//		 */
+//		{
+//			// not implemented in SwingJS 
+//			
+//			// if closing, first close all Submenus
+//			if (b == false) {
+//
+//				// 4234793: This is a workaround because JPopupMenu.firePopupMenuCanceled is
+//				// a protected method and cannot be called from BasicPopupMenuUI directly
+//				// The real solution could be to make
+//				// firePopupMenuCanceled public and call it directly.
+//				Boolean doCanceled = (Boolean) getClientProperty("JPopupMenu.firePopupMenuCanceled");
+//				if (doCanceled != null && doCanceled == Boolean.TRUE) {
+//					putClientProperty("JPopupMenu.firePopupMenuCanceled", Boolean.FALSE);
+//					firePopupMenuCanceled();
+//				}
+//				getSelectionModel().clearSelection();
+//
+//			} else {
+//				// This is a popup menu with MenuElement children,
+//				// set selection path before popping up!
+//				if (isPopupMenu()) {
+//					MenuElement me[] = new MenuElement[1];
+//					me[0] = (MenuElement) this;
+//					MenuSelectionManager.defaultManager().setSelectedPath(me);
+//				}
+//			}
+//
+//			if (b) {
+//				firePopupMenuWillBecomeVisible();
+//				popup = getPopup();
+//				firePropertyChange("visible", Boolean.FALSE, Boolean.TRUE);
+//
+//			} else if (popup != null) {
+//				firePopupMenuWillBecomeInvisible();
+//				popup.hide();
+//				popup = null;
+//				firePropertyChange("visible", Boolean.TRUE, Boolean.FALSE);
+//				// 4694797: When popup menu is made invisible, selected path
+//				// should be cleared
+//				if (isPopupMenu()) {
+//					MenuSelectionManager.defaultManager().clearSelectedPath();
+//				}
+//			}
+//
+//		}
+//
 	}
 
     /**
@@ -775,6 +773,7 @@ public class JPopupMenu extends JComponent implements MenuElement {
         Point p = adjustPopupLocationToFitScreen(desiredLocationX,desiredLocationY);
         desiredLocationX = p.x;
         desiredLocationY = p.y;
+        haveLoc = true;
 
         Popup newPopup = ((PopupMenuUI)getUI()).getPopup(this, desiredLocationX,
                                           desiredLocationY);
@@ -790,12 +789,13 @@ public class JPopupMenu extends JComponent implements MenuElement {
      */
     @Override
 		public boolean isVisible() {
-        if(popup != null)
-            return true;
-        else
-            return false;
+    	return ((JSPopupMenuUI) ui).isJSPopupVisible();
+//        if(popup != null)
+//            return true;
+//        else
+//            return false;
     }
-
+    
     /**
      * Sets the location of the upper left corner of the
      * popup menu using x, y coordinates.
@@ -811,6 +811,7 @@ public class JPopupMenu extends JComponent implements MenuElement {
 		public void setLocation(int x, int y) {
         int oldX = desiredLocationX;
         int oldY = desiredLocationY;
+        haveLoc = true;
 
         desiredLocationX = x;
         desiredLocationY = y;
@@ -852,10 +853,9 @@ public class JPopupMenu extends JComponent implements MenuElement {
     public void setInvoker(Component invoker) {
         Component oldInvoker = this.invoker;
         this.invoker = invoker;
-// SwingJS does not do this
-//        if ((oldInvoker != this.invoker) && (ui != null)) {
-//        	((JSComponentUI) ui).reinstallUI(this, (JComponent) invoker);
-//        }
+        if ((oldInvoker != this.invoker) && (ui != null)) {
+        	((JSComponentUI) ui).reinstallUI(this, (JComponent) invoker);
+        }
         invalidate();
     }
 
@@ -1334,6 +1334,7 @@ public class JPopupMenu extends JComponent implements MenuElement {
                                              e.getWhen(), e.getModifiers(),
                                              e.getKeyCode(), e.getKeyChar(),
                                              path, manager);
+		mke.bdata = /** @j2sNative e.bdata ||*/null;
         processMenuKeyEvent(mke);
 
         if (mke.isConsumed())  {

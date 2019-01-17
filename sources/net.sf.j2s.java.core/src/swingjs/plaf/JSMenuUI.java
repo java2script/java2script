@@ -1,18 +1,17 @@
 package swingjs.plaf;
 
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.JSComponent;
 import java.beans.PropertyChangeEvent;
 
 import javax.swing.JComponent;
 import javax.swing.JMenu;
-import javax.swing.event.MenuEvent;
-import javax.swing.event.MenuListener;
+import javax.swing.UIManager;
 
 import swingjs.api.js.DOMNode;
+
 public class JSMenuUI extends JSMenuItemUI {
-	
+
 	private JMenu jm;
 
 	public JSMenuUI() {
@@ -24,12 +23,15 @@ public class JSMenuUI extends JSMenuItemUI {
 	public DOMNode updateDOMNode() {
 		boolean isMenuBarMenu = jm.isTopLevelMenu();
 		if (domNode != null && isMenuItem == isMenuBarMenu) {
-			// we have changed the type of menu, from popup to menubar or something like that. 
-			// the outerNode for a menu item is its domNode, the <li> tag. But a MenuBar needs 
-			// the outerNode. The domNode should be fine. The big change is the containerNode
+			// we have changed the type of menu, from popup to menubar or something like
+			// that.
+			// the outerNode for a menu item is its domNode, the <li> tag. But a MenuBar
+			// needs
+			// the outerNode. The domNode should be fine. The big change is the
+			// containerNode
 			outerNode = null;
 			if (isMenuBarMenu)
-				DOMNode.detachAll(((JSComponentUI)jc.getParent().ui).domNode);
+				DOMNode.detachAll(((JSComponentUI) jc.getParent().ui).domNode);
 		}
 		if (domNode == null) {
 			domNode = createItem(isMenuBarMenu ? "_bar" : "_elem", null);
@@ -43,9 +45,9 @@ public class JSMenuUI extends JSMenuItemUI {
 			removeClass(menuAnchorNode, "a");
 		else
 			addClass(menuAnchorNode, "a");
-		setCssFont(domNode, c.getFont()); 
+		setCssFont(domNode, c.getFont());
 		DOMNode.setVisible(domNode, jc.isVisible());
-		//domNode.setAttribute("tabindex", isMenuBarMenu ? "0" : null);
+		setIconAndText("menu", currentIcon, currentGap, currentText);
 		return domNode;
 	}
 
@@ -70,17 +72,17 @@ public class JSMenuUI extends JSMenuItemUI {
 //		}
 //		return super.handleJSEvent(target, eventType, jQueryEvent);
 //	} 
-	
+
 	@Override
 	public void propertyChangedFromListener(PropertyChangeEvent e, String prop) {
-		//System.out.println("JSMenuUI prop = " + prop + " " + jm.getText());
+		// System.out.println("JSMenuUI prop = " + prop + " " + jm.getText());
 		super.propertyChangedFromListener(e, prop);
 	}
 
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
-		//System.out.println("JSMenuUI prop " + prop);
+		// System.out.println("JSMenuUI prop " + prop);
 		if (jc.isVisible()) {
 			if (prop == "ancestor") {
 				rebuild();
@@ -88,48 +90,23 @@ public class JSMenuUI extends JSMenuItemUI {
 		}
 		super.propertyChange(e);
 	}
-	
+
 	private void rebuild() {
 		if (jc.getParent() != null) {
 			if (domNode != null && isMenuItem == jm.isTopLevelMenu()) {
 				reInit();
-				outerNode = null;						
+				outerNode = null;
 				updateDOMNode();
 				return;
 			}
 		}
 	}
 
-	
 	@Override
 	public void installUI(JComponent jc) {
 		jm = (JMenu) jc;
-
-//		jm.addMenuListener(new MenuListener() {
-//
-//			@Override
-//			public void menuSelected(MenuEvent e) {
-//				// TODO Auto-generated method stub
-//				
-//			}
-//
-//			@Override
-//			public void menuDeselected(MenuEvent e) {
-//				if (jm == null)
-//					return;
-//				System.out.println("check");
-//	//			$(domNode)e.ch.children()[1].hide();
-//				// TODO Auto-generated method stub
-//				
-//			}
-//
-//			@Override
-//			public void menuCanceled(MenuEvent e) {
-//				hideAllMenus();
-//			}
-//			
-//		});
 		super.installUI(jc);
+		((JMenu) menuItem).setDelay(200);
 	}
 
 	@Override
@@ -137,21 +114,19 @@ public class JSMenuUI extends JSMenuItemUI {
 		super.uninstallUI(jc);
 	}
 
-	
-	/** note that the last element is null if array is oversize
+	/**
+	 * note that the last element is null if array is oversize
 	 * 
 	 */
 	@Override
 	protected Component[] getChildren() {
-		return (isMenuItem ? new Component[] { jm.getPopupMenu() } : 
-			JSComponent.getChildArray(jm));
+		return (isMenuItem ? new Component[] { jm.getPopupMenu() } : JSComponent.getChildArray(jm));
 	}
 
 	@Override
 	protected int getChildCount() {
 		return (isMenuItem ? 1 : jc.getComponentCount());
 	}
-
 
 //	@Override
 //	public Dimension getMaximumSize(JComponent jc) {
@@ -165,8 +140,7 @@ public class JSMenuUI extends JSMenuItemUI {
 
 	@Override
 	protected String getPropertyPrefix() {
-		return "Menu.";
+		return "Menu";
 	}
-
 
 }

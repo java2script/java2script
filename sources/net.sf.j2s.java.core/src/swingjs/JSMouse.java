@@ -59,9 +59,8 @@ public class JSMouse {
 		case KeyEvent.KEY_PRESSED:
 		case KeyEvent.KEY_TYPED:
 		case KeyEvent.KEY_RELEASED:
-			return JSKeyEvent.processKeyEvent(id, modifiers, jqevent, time);
-		}
-				
+			return keyAction(id, modifiers, jqevent, time);
+		}	
 		if (id != MouseEvent.MOUSE_WHEEL && id != MouseEvent.MOUSE_MOVED)
 			modifiers = applyLeftMouse(modifiers);
 		switch (id) {	
@@ -275,6 +274,65 @@ public class JSMouse {
 		mouseAction(id, time, x, y, 0, 0, 0);
 	}
 
+	
+	private long lasttime;
+	private int lastx, lasty, clickCount;
+	
+	private final static int DBL_CLICK_MAX_MS = 500;
+	private final static int DBL_CLICK_DX = 3; // verified in Windows
+
+	// count ms x y
+	// CirSim java clicked(5,323,573,177) 0
+	// CirSim java clicked(7,415,573,178) 0
+	// CirSim java clicked(8,217,573,178) 0
+	// CirSim java clicked(9,180,573,178) 0
+	// CirSim java clicked(10,158,573,178) 0
+	// CirSim java clicked(11,331,573,175) 0
+	// CirSim java clicked(12,416,573,174) 0
+
+	// interesting that clicks are being combined and skipped
+
+	private int updateClickCount(int id, long time, int x, int y) {
+		boolean reset = (time - lasttime > DBL_CLICK_MAX_MS
+				|| Math.abs(x - lastx) > DBL_CLICK_DX || Math.abs(y - lasty) > DBL_CLICK_DX);
+		lasttime = time;
+		lastx = x;
+		lasty = y;
+		int ret = clickCount;
+		switch (id) {
+		case Event.MOUSE_DOWN:
+			ret = clickCount = (reset ? 1 : clickCount + 1);
+			break;
+		case Event.MOUSE_ENTER:
+		case Event.MOUSE_EXIT:
+			clickCount = 0;
+			break;
+		case Event.MOUSE_MOVE:
+			if (reset)
+				clickCount = 0;
+			break;
+		case Event.MOUSE_UP:
+		case Event.MOUSE_DRAG:
+		case -1: // JavaScript wheeled
+			break;
+		}
+//		System.out.println("setting mouse click to " + clickCount + " returning  "
+	//			+ ret);
+		return ret;
+	}
+
+	// All events in this class end up in one of these two methods.
+
+	/**
+	 * 
+	 * @param id
+	 * @param time
+	 * @param x
+	 * @param y
+	 * @param xcount
+	 * @param modifiers
+	 * @param dy
+	 */
 	@SuppressWarnings("unused")
 	private void mouseAction(int id, long time, int x, int y, int xcount,
 			int modifiers, int dy) {
@@ -329,51 +387,9 @@ public class JSMouse {
 		  ((Container) e.getSource()).dispatchEvent(e);
 		}
 	}
-	
-	private long lasttime;
-	private int lastx, lasty, clickCount;
-	
-	private final static int DBL_CLICK_MAX_MS = 500;
-	private final static int DBL_CLICK_DX = 3; // verified in Windows
 
-	// count ms x y
-	// CirSim java clicked(5,323,573,177) 0
-	// CirSim java clicked(7,415,573,178) 0
-	// CirSim java clicked(8,217,573,178) 0
-	// CirSim java clicked(9,180,573,178) 0
-	// CirSim java clicked(10,158,573,178) 0
-	// CirSim java clicked(11,331,573,175) 0
-	// CirSim java clicked(12,416,573,174) 0
-
-	// interesting that clicks are being combined and skipped
-
-	private int updateClickCount(int id, long time, int x, int y) {
-		boolean reset = (time - lasttime > DBL_CLICK_MAX_MS
-				|| Math.abs(x - lastx) > DBL_CLICK_DX || Math.abs(y - lasty) > DBL_CLICK_DX);
-		lasttime = time;
-		lastx = x;
-		lasty = y;
-		int ret = clickCount;
-		switch (id) {
-		case Event.MOUSE_DOWN:
-			ret = clickCount = (reset ? 1 : clickCount + 1);
-			break;
-		case Event.MOUSE_ENTER:
-		case Event.MOUSE_EXIT:
-			clickCount = 0;
-			break;
-		case Event.MOUSE_MOVE:
-			if (reset)
-				clickCount = 0;
-			break;
-		case Event.MOUSE_UP:
-		case Event.MOUSE_DRAG:
-		case -1: // JavaScript wheeled
-			break;
-		}
-//		System.out.println("setting mouse click to " + clickCount + " returning  "
-	//			+ ret);
-		return ret;
+	private boolean keyAction(int id, int modifiers, Object jqevent2, long time) {
+		return JSKeyEvent.dispatchKeyEvent(id, modifiers, jqevent, time);
 	}
 
 }

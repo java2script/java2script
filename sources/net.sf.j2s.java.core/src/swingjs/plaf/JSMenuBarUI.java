@@ -84,15 +84,17 @@ public class JSMenuBarUI extends JSPanelUI implements ContainerListener {
 
 	public JSMenuBarUI() {
 		isContainer = true;
+		allowPaintedBackground = false;
 		setDoc();
 	}
 
 	@Override
 	public DOMNode updateDOMNode() {
 		if (domNode == null) {
-			containerNode = domNode = newDOMObject("div", id, "tabindex", "0");
+			containerNode = domNode = newDOMObject("div", id);//???, "tabindex", "0");
 			DOMNode.setTopLeftAbsolute(domNode, 0, 0); // after title bar
 		}
+		setBackground(jc.isOpaque() ? jc.getBackground() : null);
 		return updateDOMNodeCUI();
 	}
 
@@ -166,7 +168,7 @@ public class JSMenuBarUI extends JSPanelUI implements ContainerListener {
 		LookAndFeel.installProperty(menuBar, "opaque", Boolean.TRUE);
 		LookAndFeel.installBorder(menuBar, "MenuBar.border");
 		LookAndFeel.installColorsAndFont(menuBar, "MenuBar.background", "MenuBar.foreground", "MenuBar.font");
-
+		menuBar.setOpaque(true);
 	}
 
 	protected void installListeners() {
@@ -295,8 +297,6 @@ public class JSMenuBarUI extends JSPanelUI implements ContainerListener {
 			JSMenuManager msm = (JSMenuManager) MenuSelectionManager.defaultManager();
 	        msm.setCurrentPath(null);
 	        msm.processKeyEvent(e);
-	        if (e.isConsumed())
-	        	hideAllMenus();
 		}
 
 		@Override

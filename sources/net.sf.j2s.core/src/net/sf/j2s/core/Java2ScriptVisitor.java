@@ -3009,7 +3009,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		Expression right = node.getRightOperand();
 		List<?> extendedOperands = node.extendedOperands();
 
-		if (getConstantValue(node, true)) {
+		if (noDocProblem(left) && noDocProblem(right) && getConstantValue(node, true)) {
 			return false;
 		}
 		ITypeBinding expTypeBinding = node.resolveTypeBinding();
@@ -3105,9 +3105,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 		buffer.append(' ');
 		// right
-		if (right instanceof ParenthesizedExpression && getJ2sJavadoc(right, DOC_CHECK_ONLY) != null) {
+		if (right instanceof ParenthesizedExpression || getJ2sJavadoc(right, DOC_CHECK_ONLY) != null) {
 			buffer.append("(");
-			addOperand(((ParenthesizedExpression) right).getExpression(), isToString && !isBitwise);
+			addJ2SDoc(right);
+			if (right instanceof ParenthesizedExpression)
+				right = ((ParenthesizedExpression) right).getExpression();
+			addOperand(right, isToString && !isBitwise);
 			buffer.append(")");
 		} else {
 			addOperand(right, isToString && !isBitwise);			
@@ -4233,6 +4236,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// Double > x will be unboxed
 		// Character == 'c' will be unboxed
 		// f$Integer(int) will be boxed
+		//buffer.append("/* ?? " + (element instanceof Expression) + " " + element.getClass().getName() + " " + element + " ?? */");
 		if (element instanceof Expression) {
 			Expression exp = (Expression) element;
 			if (exp.resolveBoxing()) {
@@ -4261,11 +4265,20 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					return true;
 				}
 			}			
-			if (!(element instanceof ParenthesizedExpression) && !(element instanceof PrefixExpression) && getConstantValue(exp, true)) {
+			if (!(exp instanceof ParenthesizedExpression) 
+					&& !(exp instanceof PrefixExpression) 
+					&& !(exp instanceof InfixExpression) 
+					&& !(exp instanceof PostfixExpression) 
+					&& getConstantValue(exp, true)) {
+				
+			//	buffer.append("/* !!! */");
+				
 				return false;
 			}
 		}
+		//buffer.append("/* >>> "+ element.getClass().getName() + "*/");
 		element.accept(this);
+		//buffer.append("/* <<< */");
 		return false;
 	}
 
@@ -5178,12 +5191,17 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	private Object getConstant(Expression exp) {
-		boolean isOK = (getJ2sJavadoc(exp, DOC_CHECK_ONLY) == null);
-		if (!isOK) {
-			isOK = !(exp instanceof InfixExpression || exp instanceof PrefixExpression || exp instanceof ParenthesizedExpression);			
-		}
-		return (isOK ? exp.resolveConstantExpressionValue() : null); 
+		return (noDocProblem(exp) ? exp.resolveConstantExpressionValue() : null); 
 	}
+	private boolean noDocProblem(Expression exp) {
+		return (getJ2sJavadoc(exp, DOC_CHECK_ONLY) == null
+				 || !(exp instanceof PrefixExpression  
+					|| exp instanceof InfixExpression 
+					|| exp instanceof PostfixExpression 
+					|| exp instanceof ParenthesizedExpression)
+				);
+	}
+
 	/**
 	 * If given expression is constant value expression, return its value string; or
 	 * character or return null.
@@ -5303,10 +5321,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			// normal termination from item after last j2sjavadoc
 		}
 
-		//System.out.println("/**** list ****/");
-		//for (int i = 0, n = list.size(); i < n; i++) {
-		//	System. out.println(i + "  " + (list.get(i) == null ? null : list.get(i).getClass().getName() + " " + list.get(i).getStartPosition() + "..." + (list.get(i).getStartPosition() + list.get(i).getLength())));
-		//}
+//??		System.out.println("/**** list ****/");
+//??		for (int i = 0, n = list.size(); i < n; i++) {
+//??			System. out.println(i + "  " + (list.get(i) == null ? null : list.get(i).getClass().getName() + " " + list.get(i).getStartPosition() + "..." + (list.get(i).getStartPosition() + list.get(i).getLength())));
+//??		}
 
 		// and link javadoc to its closest block
 
@@ -5377,8 +5395,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				NativeDoc.addJ2sJavadocs(buffer, docs, false);
 		} else {
 			docs = package_mapBlockJavadoc.get(Integer.valueOf(node.getStartPosition()));
-//			buffer.append("\n/** looking for " + node + " " + Integer.valueOf(node.getStartPosition())
-//			+ " " + (docs != null) + " " + node.getClass().getName() + "*/\n");
+//??			buffer.append("\n/** looking for " + node + " " + Integer.valueOf(node.getStartPosition())
+//??			+ " " + (docs != null) + " " + node.getClass().getName() + "*/\n");
 		}
 		return docs;
 	}

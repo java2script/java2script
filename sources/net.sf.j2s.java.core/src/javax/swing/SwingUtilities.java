@@ -1575,53 +1575,54 @@ public class SwingUtilities implements SwingConstants
         return applet;
     }
 
-    /**
-     * Process the key bindings for the <code>Component</code> associated with
-     * <code>event</code>. This method is only useful if
-     * <code>event.getComponent()</code> does not descend from
-     * <code>JComponent</code>, or your are not invoking
-     * <code>super.processKeyEvent</code> from within your
-     * <code>JComponent</code> subclass. <code>JComponent</code>
-     * automatically processes bindings from within its
-     * <code>processKeyEvent</code> method, hence you rarely need
-     * to directly invoke this method.
-     *
-     * @param event KeyEvent used to identify which bindings to process, as
-     *              well as which Component has focus.
-     * @return true if a binding has found and processed
-     * @since 1.4
-     */
-    public static boolean processKeyBindings(KeyEvent event) {
-        if (event != null) {
-            if (event.isConsumed()) {
-                return false;
-            }
-
-            Component component = event.getComponent();
-            boolean pressed = (event.getID() == KeyEvent.KEY_PRESSED);
-
-            if (!isValidKeyEventForKeyBindings(event)) {
-                return false;
-            }
-            // Find the first JComponent in the ancestor hierarchy, and
-            // invoke processKeyBindings on it
-            while (component != null) {
-                if (component instanceof JComponent) {
-                    return ((JComponent)component).processKeyBindings(
-                                                   event, pressed);
-                }
-                if ((component instanceof JSApplet) ||
-                    (component instanceof Window)) {
-                    // No JComponents, if Window or Applet parent, process
-                    // WHEN_IN_FOCUSED_WINDOW bindings.
-                    return JComponent.processKeyBindingsForAllComponents(
-                                  event, (Container)component, pressed);
-                }
-                component = component.getParent();
-            }
-        }
-        return false;
-    }
+ // SwingJS never used - see JComponent   
+//    /**
+//     * Process the key bindings for the <code>Component</code> associated with
+//     * <code>event</code>. This method is only useful if
+//     * <code>event.getComponent()</code> does not descend from
+//     * <code>JComponent</code>, or your are not invoking
+//     * <code>super.processKeyEvent</code> from within your
+//     * <code>JComponent</code> subclass. <code>JComponent</code>
+//     * automatically processes bindings from within its
+//     * <code>processKeyEvent</code> method, hence you rarely need
+//     * to directly invoke this method.
+//     *
+//     * @param event KeyEvent used to identify which bindings to process, as
+//     *              well as which Component has focus.
+//     * @return true if a binding has found and processed
+//     * @since 1.4
+//     */
+//    public static boolean processKeyBindings(KeyEvent event) {
+//        if (event != null) {
+//            if (event.isConsumed()) {
+//                return false;
+//            }
+//
+//            Component component = event.getComponent();
+//            boolean pressed = (event.getID() == KeyEvent.KEY_PRESSED);
+//
+//            if (!isValidKeyEventForKeyBindings(event)) {
+//                return false;
+//            }
+//            // Find the first JComponent in the ancestor hierarchy, and
+//            // invoke processKeyBindings on it
+//            while (component != null) {
+//                if (component instanceof JComponent) {
+//                    return ((JComponent)component).processKeyBindings(
+//                                                   event, pressed);
+//                }
+//                if ((component instanceof JSApplet) ||
+//                    (component instanceof Window)) {
+//                    // No JComponents, if Window or Applet parent, process
+//                    // WHEN_IN_FOCUSED_WINDOW bindings.
+//                    return JComponent.processKeyBindingsForAllComponents(
+//                                  event, (Container)component, pressed);
+//                }
+//                component = component.getParent();
+//            }
+//        }
+//        return false;
+//    }
 
     /**
      * Returns true if the <code>e</code> is a valid KeyEvent to use in
@@ -1636,6 +1637,15 @@ public class SwingUtilities implements SwingConstants
                 // with AltGr, and not control characters
                 return false;
             }
+        } else {
+        	switch (e.getKeyCode()) {
+        	case KeyEvent.VK_SHIFT:
+        	case KeyEvent.VK_CONTROL:
+        	case KeyEvent.VK_ALT:
+        	case KeyEvent.VK_ALT_GRAPH:
+        	case KeyEvent.VK_META:
+        		return false;
+        	}
         }
         return true;
     }
@@ -1741,7 +1751,9 @@ public class SwingUtilities implements SwingConstants
 
         while (map != null) {
             ActionMap parent = map.getParent();
-            if (parent == null || (parent instanceof UIResource)) {
+            if (parent == null || (parent instanceof UIResource) && (!(uiActionMap instanceof UIResource) || 
+            		/** @j2sNative uiActionMap._key == parent._key || */false)) {
+            	// SwingJS change to allow both ButtonListener and JMenuItemUI to both create UIResources for the same component
                 map.setParent(uiActionMap);
                 return;
             }

@@ -120,7 +120,7 @@ public class TextListener implements FocusListener, ChangeListener,
 			working = true;
 			if (ui.checkNewEditorTextValue()) {
 				if (dot >= 0) {
-					System.out.println("textListener text change");
+					//System.out.println("textListener text change");
 					ui.setJSMarkAndDot(dot, dot, false);
 					setCaret = false;
 				}

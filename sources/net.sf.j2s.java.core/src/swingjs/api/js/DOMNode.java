@@ -271,7 +271,7 @@ public abstract class DOMNode {
 	}
 
 	/**
-	 * Just remove the node; don't 
+	 * Just remove the node, keeping its events and data 
 	 * @param node
 	 */
 	public static void remove(DOMNode node) {

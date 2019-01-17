@@ -17,7 +17,7 @@ public class JSCheckBoxUI extends JSRadioButtonUI {
 
 	@Override
 	protected String getPropertyPrefix() {
-		return "CheckBox.";
+		return "CheckBox";
 	}
 
 }

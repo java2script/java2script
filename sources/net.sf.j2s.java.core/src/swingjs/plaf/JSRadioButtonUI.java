@@ -19,7 +19,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 
 	@Override
 	protected String getPropertyPrefix() {
-		return "RadioButton.";
+		return "RadioButton";
 	}
 
 	protected void createButton(JToggleButton b, String myType) {

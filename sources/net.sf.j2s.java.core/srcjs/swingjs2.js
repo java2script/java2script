@@ -17496,7 +17496,7 @@ function(num){
 return isNaN(arguments.length == 1 ? num : this.valueOf());
 });
 
-m$(Float,"isInfinite$F",
+Float.isInfinite$ = m$(Float,"isInfinite$F",
 function(num){
 return !Number.isFinite(arguments.length == 1 ? num : this.valueOf());
 }, 1);
@@ -18681,7 +18681,7 @@ m$(C$, 'getCause$', function () {
 return (this.cause === this ? null : this.cause);
 });
 
-m$(C$, 'initCause$Throwable$', function (cause) {
+m$(C$, 'initCause$Throwable', function (cause) {
 if (this.cause !== this) throw Clazz.new_(IllegalStateException.c$$S,["Can't overwrite cause"]);
 if (cause === this) throw Clazz.new_(IllegalArgumentException.c$$S,["Self-causation not permitted"]);
 this.cause = cause;

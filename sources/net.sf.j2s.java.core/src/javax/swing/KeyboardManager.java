@@ -28,14 +28,15 @@
 package javax.swing;
 
 
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
 import java.applet.JSApplet;
 import java.awt.Container;
 import java.awt.Window;
 import java.awt.event.KeyEvent;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
+
+import swingjs.JSFocusPeer;
 
 /**
   * The KeyboardManager class is used to help dispatch keyboard actions for the
@@ -66,7 +67,7 @@ import java.awt.event.KeyEvent;
   * @see InputMap
   */
 @SuppressWarnings({"rawtypes", "unchecked"})
-class KeyboardManager {
+public class KeyboardManager {
 
     static KeyboardManager currentManager = new KeyboardManager();
 
@@ -96,16 +97,14 @@ class KeyboardManager {
       * That simplifies some potentially hairy stuff.
       */
      public void registerKeyStroke(KeyStroke k, JComponent c) {
-         Container topContainer = getTopAncestor(c);
-         if (topContainer == null) {
-             return;
-         }
-         Hashtable keyMap = (Hashtable)containerMap.get(topContainer);
-
-         if (keyMap ==  null) {  // lazy evaluate one
-             keyMap = registerNewTopContainer(topContainer);
-         }
-
+    	 
+ 
+//System.out.println(">>>>>>>KM>>>>>reg " + k + " " + c);    	 
+    	 
+    	 
+    	 Hashtable keyMap = getKeyMap(c, k);
+    	 if (keyMap == null)
+    		 return;
          Object tmp = keyMap.get(k);
          if (tmp == null) {
              keyMap.put(k,c);
@@ -129,8 +128,6 @@ class KeyboardManager {
              Thread.dumpStack();
          }
 
-         componentKeyStrokeMap.put(new ComponentKeyStrokePair(c,k), topContainer);
-
          // Check for EmbeddedFrame case, they know how to process accelerators even
          // when focus is not in Java
 //         if (topContainer instanceof EmbeddedFrame) {
@@ -138,23 +135,7 @@ class KeyboardManager {
 //         }
      }
 
-     /**
-       * Find the top focusable Window, Applet, or InternalFrame
-       */
-     private static Container getTopAncestor(JComponent c) {
-        for(Container p = c.getParent(); p != null; p = p.getParent()) {
-            if (p instanceof Window && ((Window)p).isFocusableWindow() ||
-                p instanceof JSApplet
-                //|| p instanceof JInternalFrame
-                ) {
-
-                return p;
-            }
-        }
-        return null;
-     }
-
-     public void unregisterKeyStroke(KeyStroke ks, JComponent c) {
+	public void unregisterKeyStroke(KeyStroke ks, JComponent c) {
 
        // component may have already been removed from the hierarchy, we
        // need to look up the container using the componentKeyStrokeMap.
@@ -296,18 +277,11 @@ class KeyboardManager {
     }
 
     public void registerMenuBar(JMenuBar mb) {
-        Container top = getTopAncestor(mb);
-        if (top == null) {
-            return;
-        }
-        Hashtable keyMap = (Hashtable)containerMap.get(top);
-
-        if (keyMap ==  null) {  // lazy evaluate one
-             keyMap = registerNewTopContainer(top);
-        }
+    	Hashtable keyMap = getKeyMap(mb, null);
+    	if (keyMap == null)
+    		return;
         // use the menubar class as the key
         Vector menuBars = (Vector)keyMap.get(JMenuBar.class);
-
         if (menuBars == null) {  // if we don't have a list of menubars,
                                  // then make one.
             menuBars = new Vector();
@@ -320,12 +294,28 @@ class KeyboardManager {
     }
 
 
-    public void unregisterMenuBar(JMenuBar mb) {
-        Object topContainer = getTopAncestor(mb);
-        if (topContainer == null) {
+    private Hashtable getKeyMap(JComponent c, KeyStroke k) {    	
+        Container top = JSFocusPeer.getTopInvokableAncestor(c);
+        if (top == null) {
+            return null;
+        }
+        Hashtable keyMap = (Hashtable)containerMap.get(top);
+
+        if (keyMap ==  null) {  // lazy evaluate one
+             keyMap = registerNewTopContainer(top);
+        }
+        
+        if (k != null)
+        	componentKeyStrokeMap.put(new ComponentKeyStrokePair(c,k), top);
+        return keyMap;
+	}
+
+	public void unregisterMenuBar(JMenuBar mb) {
+        Object top = JSFocusPeer.getTopInvokableAncestor(mb);
+        if (top == null) {
             return;
         }
-        Hashtable keyMap = (Hashtable)containerMap.get(topContainer);
+        Hashtable keyMap = (Hashtable)containerMap.get(top);
         if (keyMap!=null) {
             Vector v = (Vector)keyMap.get(JMenuBar.class);
             if (v != null) {
@@ -334,7 +324,7 @@ class KeyboardManager {
                     keyMap.remove(JMenuBar.class);
                     if (keyMap.isEmpty()) {
                         // remove table to enable GC
-                        containerMap.remove(topContainer);
+                        containerMap.remove(top);
                     }
                 }
             }

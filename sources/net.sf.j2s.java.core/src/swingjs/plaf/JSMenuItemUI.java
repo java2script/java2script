@@ -6,7 +6,6 @@ import java.beans.PropertyChangeEvent;
 
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
-import javax.swing.LookAndFeel;
 import javax.swing.event.MenuKeyListener;
 
 import swingjs.api.js.DOMNode;
@@ -57,10 +56,8 @@ public class JSMenuItemUI extends JSButtonUI {
 	public void installUI(JComponent jc) {
 		menuItem = (JMenuItem) jc;
 		super.installUI(jc);
-//    LookAndFeel.installColorsAndFont(jc, "MenuItem.background", "MenuItem.foreground",
-//        "MenuItem.font");		
-	}
-	
+	}	
+
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		super.propertyChange(e);
@@ -76,7 +73,7 @@ public class JSMenuItemUI extends JSButtonUI {
 
 	@Override
 	protected String getPropertyPrefix() {
-		return "MenuItem.";
+		return "MenuItem";
 	}
 
 }

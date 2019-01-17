@@ -70,6 +70,8 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 
+import swingjs.JSToolkit;
+
 public class Test_Editor extends JFrame implements DropTargetListener {
 
 	String test = "  34567890\n1234567890\n  345\n     ";
@@ -82,9 +84,12 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 		logger.addHandler(consoleHandler);
 	}
 
+	private static boolean allowLogging = false;
+	private static boolean allowEventInfo = true;
+
 	private void setLogging() {
 		if ((/** @j2sNative false || */
-		false)) {
+		allowLogging)) {
 
 			Logger rootLogger = Logger.getLogger("");
 			rootLogger.setLevel(Level.ALL);
@@ -102,13 +107,14 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 		KeyboardFocusManager.setCurrentKeyboardFocusManager(new DefaultKeyboardFocusManager() {
 			@Override
 			public boolean dispatchEvent(AWTEvent e) {
-				if (e.getID() != MouseEvent.MOUSE_MOVED) {
+				if (allowEventInfo && e.getID() != MouseEvent.MOUSE_MOVED) {
 					if (e.getID() == MouseEvent.MOUSE_PRESSED) { //
 						System.out.println("FocusMan mousepreseed event");
 					}
-					System.out.println("FocusMan dispatching activeElement=" 
-					+ (/** @j2sNative document.getActiveElement.id || */null));
-					System.out.println("FocusMan dispatching event Source " + e.getSource()); 
+					System.out.println(
+							"FocusMan dispatching activeElement=" + (/** @j2sNative document.getActiveElement.id || */
+					null));
+					System.out.println("FocusMan dispatching event Source " + e.getSource());
 					System.out.println("FocusMan dispatching event " + e);
 				}
 				return super.dispatchEvent(e);
@@ -125,7 +131,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 		setLocation(100, 100);
 
 		JPanel ptop = getTopPanel();
-		//ptop.setFocusable(false);
+		// ptop.setFocusable(false);
 		JTextPane editor = getEditor();
 		JScrollPane js = new JScrollPane(editor);
 		// js.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -167,9 +173,6 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 		editor.addFocusListener(fl);
 		area.addFocusListener(fl);
 
-		
-		
-		
 		boolean asInternalFrame = true;
 
 		if (asInternalFrame) {
@@ -177,28 +180,70 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 			d.setPreferredSize(new Dimension(800, 600));
 
 			JInternalFrame main = new JInternalFrame();
+			
+			main.addMouseListener(new MouseListener() {
+
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mousePressed(MouseEvent e) {
+//					main.requestFocus();
+				}
+
+				@Override
+				public void mouseReleased(MouseEvent e) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mouseEntered(MouseEvent e) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mouseExited(MouseEvent e) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+			});
+			main.addKeyListener(ka);
+
+			
+			KeyStroke[] a = ((JComponent) mb.getComponent(0)).getRegisteredKeyStrokes();
+			System.out.println("menubar menu registration: " + a.length);
+
 			main.setJMenuBar(mb);
+
+			a = ((JComponent) mb.getComponent(0)).getRegisteredKeyStrokes();
+			System.out.println("menubar menu registration: " + a.length);
+
 			main.add(full);
 			main.addFocusListener(fl);
 			main.setTitle("main");
 			main.pack();
 			main.setVisible(true);
 			d.add(main);
-			
-			JInternalFrame main2 = new JInternalFrame();
-			main.add(new JPanel() {
-				public Dimension getPreferredSize() {
-					return new Dimension(100,300);
-				}
-			});
-			
-			main2.setTitle("main2");
-			main2.pack();
-			main2.setVisible(true);
-			d.add(main2);
-			
-			
-			
+
+//			JInternalFrame main2 = new JInternalFrame();
+//			main.add(new JPanel() {
+//				public Dimension getPreferredSize() {
+//					return new Dimension(100,300);
+//				}
+//			});
+//			
+//			main2.setTitle("main2");
+//			main2.pack();
+//			main2.setVisible(true);
+//			d.add(main2);
+//			
+
 			setContentPane(d);
 			// these next two allow floating frames outside the JDesktopPane
 			getRootPane().putClientProperty("swingjs.overflow.hidden", "false");
@@ -218,29 +263,34 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 			setVisible(true);
 //			ptop.setFocusable(false);
 		}
-		
-		
+
+		showFocusTimer();
+	}
+
+	private void showFocusTimer() {
 		Timer t = new Timer(100, new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String s = /** @j2sNative document.activeElement.id || */ null;
-				
+				String s = /** @j2sNative document.activeElement.id || */
+						null;
+
 				s += " " + (++n);
-				
+
 //				System.out.println(s);
 				/** @j2sNative document.title = s; */
 			}
-			
+
 		});
 
 		t.setRepeats(true);
-		if (/** @j2sNative true || */ false)
+		if (/** @j2sNative true || */
+		false)
 			t.start();
 	}
 
 	int n;
-	
+
 	private JPanel getButtonPanel(JTextPane editor, JTextArea area, JTextField field) {
 		JPanel panel = new JPanel();
 
@@ -361,6 +411,8 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 		panel.add(b);
 
 		b = new JButton("bold");
+		b.setMnemonic('b');
+
 		b.addActionListener(new ActionListener() {
 
 			@Override
@@ -386,6 +438,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 		panel.add(b);
 
 		b = new JButton("ital");
+		b.setMnemonic('i');
 		b.addActionListener(new ActionListener() {
 
 			@Override
@@ -525,7 +578,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 			showKeyEvent(e);
 		}
 	};
-	
+
 	MouseListener ml = new MouseListener() {
 
 		@Override
@@ -546,7 +599,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 		@Override
 		public void mouseReleased(MouseEvent e) {
 			// TODO Auto-generated method stub
-			System.out.println("Test_Editor JTextArea mouse released" + e.getX() + " " + e.getY());
+			System.out.println("Test_Editor  mouse released" + e.getX() + " " + e.getY());
 
 		}
 
@@ -563,7 +616,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 		}
 
 	};
-	
+
 	private FocusListener fl = new FocusListener() {
 
 		@Override
@@ -575,8 +628,8 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 		@Override
 		public void focusLost(FocusEvent e) {
-			System.out
-					.println("Test_Editor focus LOST " + getID(e.getSource()) + " opp:" + getID(e.getOppositeComponent()));
+			System.out.println(
+					"Test_Editor focus LOST " + getID(e.getSource()) + " opp:" + getID(e.getOppositeComponent()));
 			// ptop.setBackground(Color.MAGENTA);
 		}
 
@@ -586,17 +639,25 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 		JMenuBar mb = new JMenuBar() {
 			@Override
 			public void processKeyEvent(KeyEvent e, MenuElement[] path, MenuSelectionManager m) {
-				System.out.println("Test_Editor path length=" + path.length); 	
+				System.out.println("Test_Editor path length=" + path.length);
 				super.processKeyEvent(e, path, m);
 			}
 		};
-		JMenu mb1 = new JMenu("Test"){
+		JMenu mb1 = new JMenu("Test") {
 			@Override
 			public void processKeyEvent(KeyEvent e, MenuElement[] path, MenuSelectionManager m) {
-				System.out.println("Test_Editor JMenu path length=" + path.length); 	
+				System.out.println("Test_Editor JMenu path length=" + path.length);
 				super.processKeyEvent(e, path, m);
 			}
+
+			@Override
+			public void addNotify() {
+				System.out.println("Test_Editor JMenu addNotify");
+				super.addNotify();
+			}
+
 		};
+
 		JMenuItem mb1a = new JMenuItem("test-1");
 		JMenuItem mb1b = new JMenuItem("test-2");
 		JMenuItem mb1c = new JMenuItem("test-3");
@@ -605,17 +666,28 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 		mb1.setMnemonic('t');
 		mb1a.setMnemonic('1');
-		mb1b.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.CTRL_MASK));
+		mb1b.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, KeyEvent.CTRL_MASK));
 		mb1c.setMnemonic('3');
 		mb1d.setMnemonic('4');
+		mb1d.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.CTRL_MASK));
 		mb1e.setMnemonic('5');
+		mb1e.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, KeyEvent.CTRL_MASK));
 
 		mb1.add(mb1a);
 		mb1.add(mb1b);
 		mb1.add(mb1c);
 		mb1.add(mb1d);
 		mb1.add(mb1e);
+
+		KeyStroke[] a = mb1.getRegisteredKeyStrokes();
+		System.out.println("menubar menu registration: " + a.length);
+		for (int i = 0; i < a.length; i++)
+			System.out.println(a[i]);
+
 		mb.add(mb1);
+
+		a = mb1.getRegisteredKeyStrokes();
+		System.out.println("menubar menu registration: " + a.length);
 
 		ActionListener al = new ActionListener() {
 
@@ -657,7 +729,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 	}
 
 	protected String getID(Object jc) {
-		return (jc == null ? null : jc instanceof JComponent ?  /** @j2sNative jc.ui.id || */
+		return (jc == null ? null : jc instanceof JComponent ? /** @j2sNative jc.ui.id || */
 				((JComponent) jc).getUIClassID() : jc.getClass().getName());
 	}
 
@@ -667,27 +739,25 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 		ptop.setMaximumSize(new Dimension(400, 100));
 		ptop.setBackground(Color.LIGHT_GRAY);
 		ptop.setOpaque(true);
-
-		ptop.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mousePressed(MouseEvent e) {
-				System.out.println("Test_Editor ptop mouse pressed");
-				ptop.requestFocusInWindow();
-				updateTitle();
-			}
-
-		});
-		
+//
+//		ptop.addMouseListener(new MouseAdapter() {
+//			@Override
+//			public void mousePressed(MouseEvent e) {
+//				System.out.println("Test_Editor ptop mouse pressed");
+//				ptop.requestFocusInWindow();
+//				updateTitle();
+//			}
+//
+//		});
+//
 		return ptop;
 	}
 
-	protected void updateTitle() 
-	{
-		Component c = DefaultKeyboardFocusManager 
-				.getCurrentKeyboardFocusManager().getFocusOwner();
-		
-		System.out.println("Test_Editor focus owner is " + (c== null ? null : c.getClass().getName()));
-	setTitle((++n) + "  " + (c == null ? null : c.getClass().getName()));		
+	protected void updateTitle() {
+		Component c = DefaultKeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+
+		System.out.println("Test_Editor focus owner is " + (c == null ? null : c.getClass().getName()));
+		setTitle((++n) + "  " + (c == null ? null : c.getClass().getName()));
 	}
 
 	protected void showKeyEvent(KeyEvent e) {

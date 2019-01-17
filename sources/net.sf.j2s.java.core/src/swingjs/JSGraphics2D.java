@@ -281,6 +281,10 @@ public class JSGraphics2D // extends SunGraphics2D
 		backgroundPainted = true;
 //		if (!isShifted)
 //			ctx.translate(0.5, 0.5);
+		Color c = this.foregroundColor;
+		setGraphicsColor(Color.white);
+		ctx.fillRect(x, y, width, height);
+		setGraphicsColor(c);
 		ctx.fillRect(x, y, width, height);
 //		if (!isShifted)
 //			ctx.translate(-0.5, -0.5);

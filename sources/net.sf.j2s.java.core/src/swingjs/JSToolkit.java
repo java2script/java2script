@@ -975,6 +975,10 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		return getFocusPeer();
 	}
 
+	public static JComponent getCurrentFocusOwner(Object related) {
+		return  (JComponent) ((JSFocusPeer) getFocusPeer()).getCurrentFocusOwner(related);
+	}
+
 	public static void consumeEvent(Object e) {
 		// SwingJS stop any further processing at all within the browser
 		Object jqevent = null;
@@ -993,8 +997,4 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		 */
 	}
 
-	public static JComponent getCurrentFocusOwner(Object related) {
-		return  (JComponent) ((JSFocusPeer) getFocusPeer()).getCurrentFocusOwner(related);
-	}
-	
 }

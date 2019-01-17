@@ -2492,12 +2492,12 @@ public class Container extends JSComponent {
     @Override
 		@Deprecated
     public Component locate(int x, int y) {
-//        if (!contains(x, y)) {
-//            return null;
-//        }
-//        synchronized (getTreeLock()) {
-//            // Two passes: see comment in sun.awt.SunGraphicsCallback
-//            for (int i = 0; i < component.size(); i++) {
+        if (!contains(x, y)) {
+            return null;
+        }
+        synchronized (getTreeLock()) {
+            // Two passes: see comment in sun.awt.SunGraphicsCallback
+//SwingJS not relevant            for (int i = 0; i < component.size(); i++) {
 //                Component comp = component.get(i);
 //                if (comp != null &&
 //                    !(comp.peer instanceof LightweightPeer)) {
@@ -2506,16 +2506,16 @@ public class Container extends JSComponent {
 //                    }
 //                }
 //            }
-//            for (int i = 0; i < component.size(); i++) {
-//                Component comp = component.get(i);
-//                if (comp != null &&
-//                    comp.peer instanceof LightweightPeer) {
-//                    if (comp.contains(x - comp.x, y - comp.y)) {
-//                        return comp;
-//                    }
-//                }
-//            }
-//        }
+            for (int i = 0; i < component.size(); i++) {
+                Component comp = component.get(i);
+                if (comp != null &&
+                    comp.peer instanceof LightweightPeer) {
+                    if (comp.contains(x - comp.x, y - comp.y)) {
+                        return comp;
+                    }
+                }
+            }
+        }
         return this;
     }
 
@@ -2701,7 +2701,7 @@ public class Container extends JSComponent {
      */
     @Override
 		public void addNotify() {
-        synchronized (getTreeLock()) {
+//        synchronized (getTreeLock()) {
             // addNotify() on the children may cause proxy event enabling
             // on this instance, so we first call addNotifyComp() and
             // possibly create an lightweight event dispatcher before calling
@@ -2726,7 +2726,7 @@ public class Container extends JSComponent {
 //            }
 
 
-        }
+//        }
     }
 
     /**

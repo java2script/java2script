@@ -10,6 +10,6 @@ void setMenu(JPopupMenu menu);
 void showMenu(JPopupMenu menu, int x, int y);
 void updateMenu(JPopupMenu menu, boolean andShow);
 void updateMenuItem(JPopupMenu menu, DOMNode domNode);
-
-
+JSSwingMenu getInstance(JPopupMenu menu);
+void _keydown(Object jqevent);
 }

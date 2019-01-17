@@ -70,6 +70,7 @@ import javax.swing.plaf.ComponentUI;
 
 import javajs.util.Lst;
 import sun.font.FontDesignMetrics;
+import swingjs.JSFocusPeer;
 import swingjs.JSGraphics2D;
 import swingjs.JSUtil;
 import swingjs.plaf.JSComponentUI;
@@ -1906,29 +1907,40 @@ public abstract class JComponent extends Container {
 		}
 	}
 
+	
+	/**
+	 * SwingJS addition -- from swingjs.plaf
+	 */
+	public void registerWithKM() { 
+		registerWithKeyboardManager(false);
+	}
+	
 	/**
 	 * Registers any bound <code>WHEN_IN_FOCUSED_WINDOW</code> actions with the
-	 * <code>KeyboardManager</code>. If <code>onlyIfNew</code> is true only
-	 * actions that haven't been registered are pushed to the
-	 * <code>KeyboardManager</code>; otherwise all actions are pushed to the
-	 * <code>KeyboardManager</code>.
+	 * <code>KeyboardManager</code>. If <code>onlyIfNew</code> is true only actions
+	 * that haven't been registered are pushed to the <code>KeyboardManager</code>;
+	 * otherwise all actions are pushed to the <code>KeyboardManager</code>.
 	 * 
-	 * @param onlyIfNew
-	 *          if true, only actions that haven't been registered are pushed to
-	 *          the <code>KeyboardManager</code>
+	 * @param onlyIfNew if true, only actions that haven't been registered are
+	 *                  pushed to the <code>KeyboardManager</code>
 	 */
 	private void registerWithKeyboardManager(boolean onlyIfNew) {
+		if (JSFocusPeer.getTopInvokableAncestor(this) == null)
+			return;
+
 		InputMap inputMap = getInputMap(WHEN_IN_FOCUSED_WINDOW, false);
 		KeyStroke[] strokes;
 		Hashtable registered = (Hashtable) getClientProperty(WHEN_IN_FOCUSED_WINDOW_BINDINGS);
 
+		System.out.println(">>>>JComponent registering " + this + " " + inputMap);
+
 		if (inputMap != null) {
 			// Push any new KeyStrokes to the KeyboardManager.
 			strokes = inputMap.allKeys();
+
 			if (strokes != null) {
 				for (int counter = strokes.length - 1; counter >= 0; counter--) {
-					if (!onlyIfNew || registered == null
-							|| registered.get(strokes[counter]) == null) {
+					if (!onlyIfNew || registered == null || registered.get(strokes[counter]) == null) {
 						registerWithKeyboardManager(strokes[counter]);
 					}
 					if (registered != null) {
@@ -1997,6 +2009,7 @@ public abstract class JComponent extends Container {
 			km = (ComponentInputMap) km.getParent();
 		}
 		if (km != null) {
+			// inputMap was found
 			registerWithKeyboardManager(false);
 		}
 	}
@@ -4116,6 +4129,7 @@ public abstract class JComponent extends Container {
 	@Override
 	public void addNotify() {
 		super.addNotify();
+//		System.out.println(">>>addnotify for " + getUIClassID() + " " +  this);
 		firePropertyChange("ancestor", null, getParent());
 
 		registerWithKeyboardManager(false);

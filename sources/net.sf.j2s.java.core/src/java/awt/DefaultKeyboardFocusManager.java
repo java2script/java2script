@@ -46,6 +46,7 @@ import sun.awt.SunToolkit;
 import sun.awt.AWTAccessor;
 import sun.awt.CausedFocusEvent;
 import sun.awt.TimedWindowEvent;
+import swingjs.JSFocusPeer;
 import swingjs.plaf.JSComponentUI;
 
 /**
@@ -313,6 +314,7 @@ public class DefaultKeyboardFocusManager extends KeyboardFocusManager {
 //        }
 		switch (e.getID()) {
 		case MouseEvent.MOUSE_PRESSED:
+			((JSFocusPeer) peer).checkFrameFocusOnMouseDown(e);
 			//jcMouseDown = (Component) e.getSource();
 			return false;
 		case MouseEvent.MOUSE_RELEASED:

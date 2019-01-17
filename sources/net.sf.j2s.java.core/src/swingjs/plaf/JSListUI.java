@@ -120,7 +120,8 @@ public class JSListUI extends JSLightweightUI {
 		list = (JList) jc;
 		if (domNode == null) {
 			domNode = focusNode = enableNode = newDOMObject("div", id);
-			DOMNode.setAttrInt(domNode, "tabIndex", 1);
+// maybe
+//			DOMNode.setAttrInt(domNode, "tabIndex", 1);
 			innerNode = newDOMObject("div", id + "_inner");
 			domNode.appendChild(innerNode);
 			// tell j2sApplet.js that we will handle all the mouse clicks here

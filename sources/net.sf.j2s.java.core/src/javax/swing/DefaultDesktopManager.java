@@ -26,11 +26,9 @@
 
 package javax.swing;
 
-import com.sun.awt.AWTUtilities;
-import sun.awt.AWTAccessor;
-import sun.awt.SunToolkit;
-
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Rectangle;
 import java.beans.PropertyVetoException;
 
 /** This is an implementation of the <code>DesktopManager</code>.
@@ -47,6 +45,7 @@ import java.beans.PropertyVetoException;
   * @author David Kloba
   * @author Steve Wilson
   */
+@SuppressWarnings("serial")
 public class DefaultDesktopManager implements DesktopManager, java.io.Serializable {
     final static String HAS_BEEN_ICONIFIED_PROPERTY = "wasIconOnce";
 
@@ -56,23 +55,24 @@ public class DefaultDesktopManager implements DesktopManager, java.io.Serializab
 
     int dragMode = DEFAULT_DRAG_MODE;
 
-    private transient Rectangle currentBounds = null;
-    private transient Graphics desktopGraphics = null;
-    private transient Rectangle desktopBounds = null;
-    private transient Rectangle[] floatingItems = {};
-
-    /**
-     * Set to true when the user actually drags a frame vs clicks on it
-     * to start the drag operation.  This is only used when dragging with
-     * FASTER_DRAG_MODE.
-     */
-    private transient boolean didDrag;
+//    private transient Rectangle currentBounds = null;
+//    private transient Graphics desktopGraphics = null;
+//    private transient Rectangle desktopBounds = null;
+//    private transient Rectangle[] floatingItems = {};
+//
+//    /**
+//     * Set to true when the user actually drags a frame vs clicks on it
+//     * to start the drag operation.  This is only used when dragging with
+//     * FASTER_DRAG_MODE.
+//     */
+//    private transient boolean didDrag;
 
     /** Normally this method will not be called. If it is, it
       * try to determine the appropriate parent from the desktopIcon of the frame.
       * Will remove the desktopIcon from its parent if it successfully adds the frame.
       */
-    public void openFrame(JInternalFrame f) {
+    @Override
+	public void openFrame(JInternalFrame f) {
 //        if(f.getDesktopIcon().getParent() != null) {
 //            f.getDesktopIcon().getParent().add(f);
 //            removeIconFor(f);
@@ -84,7 +84,8 @@ public class DefaultDesktopManager implements DesktopManager, java.io.Serializab
      * <code>desktopIcon</code>, from its parent.
      * @param f the <code>JInternalFrame</code> to be removed
      */
-    public void closeFrame(JInternalFrame f) {
+    @Override
+	public void closeFrame(JInternalFrame f) {
         JDesktopPane d = f.getDesktopPane();
         if (d == null) {
             return;
@@ -118,7 +119,8 @@ public class DefaultDesktopManager implements DesktopManager, java.io.Serializab
      * Resizes the frame to fill its parents bounds.
      * @param f the frame to be resized
      */
-    public void maximizeFrame(JInternalFrame f) {
+    @Override
+	public void maximizeFrame(JInternalFrame f) {
 //        if (f.isIcon()) {
 //            try {
 //                // In turn calls deiconifyFrame in the desktop manager.
@@ -145,7 +147,8 @@ public class DefaultDesktopManager implements DesktopManager, java.io.Serializab
      * to a <code>maximizeFrame</code> call.
      * @param f the <code>JInternalFrame</code> to be restored
      */
-    public void minimizeFrame(JInternalFrame f) {
+    @Override
+	public void minimizeFrame(JInternalFrame f) {
 //        // If the frame was an icon restore it back to an icon.
 //        if (f.isIcon()) {
 //            iconifyFrame(f);
@@ -165,7 +168,8 @@ public class DefaultDesktopManager implements DesktopManager, java.io.Serializab
      * <code>desktopIcon</code> to the parent.
      * @param f the <code>JInternalFrame</code> to be iconified
      */
-    public void iconifyFrame(JInternalFrame f) {
+    @Override
+	public void iconifyFrame(JInternalFrame f) {
 //        JInternalFrame.JDesktopIcon desktopIcon;
 //        Container c = f.getParent();
 //        JDesktopPane d = f.getDesktopPane();
@@ -213,7 +217,8 @@ public class DefaultDesktopManager implements DesktopManager, java.io.Serializab
      * to the parent.
      * @param f the <code>JInternalFrame</code> to be de-iconified
      */
-    public void deiconifyFrame(JInternalFrame f) {
+    @Override
+	public void deiconifyFrame(JInternalFrame f) {
 //        JInternalFrame.JDesktopIcon desktopIcon = f.getDesktopIcon();
 //        Container c = desktopIcon.getParent();
 //        JDesktopPane d = f.getDesktopPane();
@@ -249,9 +254,9 @@ public class DefaultDesktopManager implements DesktopManager, java.io.Serializab
       * There can be only one active frame across all Layers.
       * @param f the <code>JInternalFrame</code> to be activated
       */
-    public void activateFrame(JInternalFrame f) {
+    @Override
+	public void activateFrame(JInternalFrame f) {
         Container p = f.getParent();
-        Component[] c;
         JDesktopPane d = f.getDesktopPane();
         JInternalFrame currentlyActiveFrame =
           (d == null) ? null : d.getSelectedFrame();
@@ -280,7 +285,8 @@ public class DefaultDesktopManager implements DesktopManager, java.io.Serializab
     }
 
     // implements javax.swing.DesktopManager
-    public void deactivateFrame(JInternalFrame f) {
+    @Override
+	public void deactivateFrame(JInternalFrame f) {
       JDesktopPane d = f.getDesktopPane();
       JInternalFrame currentlyActiveFrame =
           (d == null) ? null : d.getSelectedFrame();
@@ -289,7 +295,8 @@ public class DefaultDesktopManager implements DesktopManager, java.io.Serializab
     }
 
     // implements javax.swing.DesktopManager
-    public void beginDraggingFrame(JComponent f) {
+    @Override
+	public void beginDraggingFrame(JComponent f) {
 //        setupDragMode(f);
 //
 //        if (dragMode == FASTER_DRAG_MODE) {
@@ -348,7 +355,8 @@ public class DefaultDesktopManager implements DesktopManager, java.io.Serializab
       * on the dragging algorithm being used.  The actual logical location of the frame
       * might not change until <code>endDraggingFrame</code> is called.
       */
-    public void dragFrame(JComponent f, int newX, int newY) {
+    @Override
+	public void dragFrame(JComponent f, int newX, int newY) {
 //
 //        if (dragMode == OUTLINE_DRAG_MODE) {
 //            JDesktopPane desktopPane = getDesktopPane(f);
@@ -387,7 +395,8 @@ public class DefaultDesktopManager implements DesktopManager, java.io.Serializab
     }
 
     // implements javax.swing.DesktopManager
-    public void endDraggingFrame(JComponent f) {
+    @Override
+	public void endDraggingFrame(JComponent f) {
 //        if ( dragMode == OUTLINE_DRAG_MODE && currentLoc != null) {
 //            setBoundsForFrame(f, currentLoc.x, currentLoc.y, f.getWidth(), f.getHeight() );
 //            currentLoc = null;
@@ -403,7 +412,8 @@ public class DefaultDesktopManager implements DesktopManager, java.io.Serializab
     }
 
     // implements javax.swing.DesktopManager
-    public void beginResizingFrame(JComponent f, int direction) {
+    @Override
+	public void beginResizingFrame(JComponent f, int direction) {
 //        setupDragMode(f);
     }
 
@@ -415,7 +425,8 @@ public class DefaultDesktopManager implements DesktopManager, java.io.Serializab
      * @param newWidth the new width
      * @param newHeight the new height
      */
-    public void resizeFrame(JComponent f, int newX, int newY, int newWidth, int newHeight) {
+    @Override
+	public void resizeFrame(JComponent f, int newX, int newY, int newWidth, int newHeight) {
 //
 //        if ( dragMode == DEFAULT_DRAG_MODE || dragMode == FASTER_DRAG_MODE ) {
 //            setBoundsForFrame(f, newX, newY, newWidth, newHeight);
@@ -445,7 +456,8 @@ public class DefaultDesktopManager implements DesktopManager, java.io.Serializab
     }
 
     // implements javax.swing.DesktopManager
-    public void endResizingFrame(JComponent f) {
+    @Override
+	public void endResizingFrame(JComponent f) {
 //        if ( dragMode == OUTLINE_DRAG_MODE && currentBounds != null) {
 //            setBoundsForFrame(f, currentBounds.x, currentBounds.y, currentBounds.width, currentBounds.height );
 //            currentBounds = null;
@@ -454,7 +466,8 @@ public class DefaultDesktopManager implements DesktopManager, java.io.Serializab
 
 
     /** This moves the <code>JComponent</code> and repaints the damaged areas. */
-    public void setBoundsForFrame(JComponent f, int newX, int newY, int newWidth, int newHeight) {
+    @Override
+	public void setBoundsForFrame(JComponent f, int newX, int newY, int newWidth, int newHeight) {
 //        f.setBounds(newX, newY, newWidth, newHeight);
 //        // we must validate the hierarchy to not break the hw/lw mixing
 //        f.revalidate();
@@ -748,26 +761,26 @@ public class DefaultDesktopManager implements DesktopManager, java.io.Serializab
 //          AWTAccessor.getWindowAccessor().updateWindow(topLevel);
 //      }
 //   }
-
-   private boolean isFloaterCollision(Rectangle moveFrom, Rectangle moveTo) {
-      if (floatingItems.length == 0) {
-        // System.out.println("no floaters");
-         return false;
-      }
-
-      for (int i = 0; i < floatingItems.length; i++) {
-         boolean intersectsFrom = moveFrom.intersects(floatingItems[i]);
-         if (intersectsFrom) {
-            return true;
-         }
-         boolean intersectsTo = moveTo.intersects(floatingItems[i]);
-         if (intersectsTo) {
-            return true;
-         }
-      }
-
-      return false;
-   }
+//
+//   private boolean isFloaterCollision(Rectangle moveFrom, Rectangle moveTo) {
+//      if (floatingItems.length == 0) {
+//        // System.out.println("no floaters");
+//         return false;
+//      }
+//
+//      for (int i = 0; i < floatingItems.length; i++) {
+//         boolean intersectsFrom = moveFrom.intersects(floatingItems[i]);
+//         if (intersectsFrom) {
+//            return true;
+//         }
+//         boolean intersectsTo = moveTo.intersects(floatingItems[i]);
+//         if (intersectsTo) {
+//            return true;
+//         }
+//      }
+//
+//      return false;
+//   }
 
 //   private Rectangle[] findFloatingItems(JComponent f) {
 //      Container desktop = f.getParent();
@@ -788,32 +801,32 @@ public class DefaultDesktopManager implements DesktopManager, java.io.Serializab
 //      return floaters;
 //   }
 
-   /**
-     * This method is here to clean up problems associated
-     * with a race condition which can occur when the full contents
-     * of a copyArea's source argument is not available onscreen.
-     * This uses brute force to clean up in case of possible damage
-     */
-   private void emergencyCleanup(final JComponent f) {
-//
-//        if ( ((JInternalFrame)f).danger ) {
-//
-//           SwingUtilities.invokeLater( new Runnable(){
-//                                       public void run(){
-//
-//                                       ((JInternalFrame)f).isDragging = false;
-//                                       f.paintImmediately(0,0,
-//                                                          f.getWidth(),
-//                                                          f.getHeight());
-//
-//                                        //finalFrame.repaint();
-//                                        ((JInternalFrame)f).isDragging = true;
-//                                        // System.out.println("repair complete");
-//                                       }});
-//
-//             ((JInternalFrame)f).danger = false;
-//        }
-//
-   }
+//   /**
+//     * This method is here to clean up problems associated
+//     * with a race condition which can occur when the full contents
+//     * of a copyArea's source argument is not available onscreen.
+//     * This uses brute force to clean up in case of possible damage
+//     */
+//   private void emergencyCleanup(final JComponent f) {
+////
+////        if ( ((JInternalFrame)f).danger ) {
+////
+////           SwingUtilities.invokeLater( new Runnable(){
+////                                       public void run(){
+////
+////                                       ((JInternalFrame)f).isDragging = false;
+////                                       f.paintImmediately(0,0,
+////                                                          f.getWidth(),
+////                                                          f.getHeight());
+////
+////                                        //finalFrame.repaint();
+////                                        ((JInternalFrame)f).isDragging = true;
+////                                        // System.out.println("repair complete");
+////                                       }});
+////
+////             ((JInternalFrame)f).danger = false;
+////        }
+////
+//   }
 
 }

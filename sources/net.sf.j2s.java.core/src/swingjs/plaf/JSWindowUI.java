@@ -8,6 +8,10 @@ import java.awt.Insets;
 import java.awt.JSComponent;
 import java.awt.JSDialog;
 import java.awt.Window;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
 import java.awt.peer.WindowPeer;
 
@@ -17,7 +21,7 @@ import swingjs.JSAppletViewer;
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 
-public class JSWindowUI extends JSComponentUI implements WindowPeer {
+public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListener, ComponentListener  {
 
 	protected DOMNode  
 	/**************/ frameNode, /*********************/
@@ -218,5 +222,73 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 		super.setVisible(b);
 	}
 
+
+
+	@Override
+	public void windowOpened(WindowEvent e) {
+		System.out.println("JSWindowUI windowOpened " + c.isVisible());
+		c.requestFocus();
+	}
+
+
+	@Override
+	public void windowClosing(WindowEvent e) {
+		hideAllMenus();
+	}
+
+
+	@Override
+	public void windowClosed(WindowEvent e) {
+		hideAllMenus();
+	}
+
+
+	@Override
+	public void windowIconified(WindowEvent e) {
+		hideAllMenus();
+	}
+
+
+	@Override
+	public void windowDeiconified(WindowEvent e) {
+		hideAllMenus();
+	}
+
+
+	@Override
+	public void windowActivated(WindowEvent e) {
+		System.out.println("JSFrameUI windowOpened " + c.isVisible());
+		c.requestFocus();
+	}
+
+
+	@Override
+	public void windowDeactivated(WindowEvent e) {
+		hideAllMenus();
+	}
+
+
+	@Override
+	public void componentResized(ComponentEvent e) {
+		hideAllMenus();
+	}
+
+
+	@Override
+	public void componentMoved(ComponentEvent e) {
+		hideAllMenus();
+	}
+
+
+	@Override
+	public void componentShown(ComponentEvent e) {
+		hideAllMenus();
+	}
+
+
+	@Override
+	public void componentHidden(ComponentEvent e) {
+		hideAllMenus();
+	}
 
 }

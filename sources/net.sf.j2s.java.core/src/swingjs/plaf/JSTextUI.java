@@ -155,42 +155,42 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		String prefix = getPropertyPrefix();
 		Font f = editor.getFont();
 		if ((f == null) || (f instanceof UIResource)) {
-			editor.setFont(UIManager.getFont(prefix + "font"));
+			editor.setFont(UIManager.getFont(prefix + ".font"));
 		}
 
 		Color bg = editor.getBackground();
 		if ((bg == null) || (bg instanceof UIResource)) {
-			editor.setBackground(UIManager.getColor(prefix + "background"));
+			editor.setBackground(UIManager.getColor(prefix + ".background"));
 		}
 
 		Color fg = editor.getForeground();
 		if ((fg == null) || (fg instanceof UIResource)) {
-			editor.setForeground(UIManager.getColor(prefix + "foreground"));
+			editor.setForeground(UIManager.getColor(prefix + ".foreground"));
 		}
 		//
 		// Color color = editor.getCaretColor();
 		// if ((color == null) || (color instanceof UIResource)) {
-		// editor.setCaretColor(UIManager.getColor(prefix + "caretForeground"));
+		// editor.setCaretColor(UIManager.getColor(prefix + ".caretForeground"));
 		// }
 		//
 		// Color s = editor.getSelectionColor();
 		// if ((s == null) || (s instanceof UIResource)) {
 		// editor.setSelectionColor(UIManager.getColor(prefix +
-		// "selectionBackground"));
+		// ".selectionBackground"));
 		// }
 		//
 		// Color sfg = editor.getSelectedTextColor();
 		// if ((sfg == null) || (sfg instanceof UIResource)) {
 		// editor.setSelectedTextColor(UIManager.getColor(prefix +
-		// "selectionForeground"));
+		// ".selectionForeground"));
 		// }
 		//
 		Color dfg = editor.getDisabledTextColor();
 		if ((dfg == null) || (dfg instanceof UIResource)) {
 			editor.setDisabledTextColor(UIManager.getColor(prefix
-					+ "inactiveForeground"));
+					+ ".inactiveForeground"));
 		}
-		dfg = UIManager.getColor(prefix + "inactiveBackground");
+		dfg = UIManager.getColor(prefix + ".inactiveBackground");
 		inactiveBackgroundColor = (dfg == null ? null : JSToolkit.getCSSColor(dfg));
 
 		//
@@ -2842,8 +2842,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 
 	
 	@Override
-	public boolean requestFocus() {
-		if (!super.requestFocus())
+	public boolean focus() {
+		if (!super.focus())
 			return false;
 		if (haveFocus()) {
 			

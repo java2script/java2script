@@ -350,7 +350,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 
 	@Override
 	protected String getPropertyPrefix() {
-		return "EditorPane.";
+		return "EditorPane";
 	}
 	
 	
