@@ -704,13 +704,6 @@ public class Test_Event extends JFrame implements DropTargetListener {
 		JMenuItem mb1c2 = new JMenuItem("test-5");
 
 		mb1.setMnemonic('t');
-		mb1a.setMnemonic('1');
-		mb1b.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, KeyEvent.CTRL_MASK));
-		mb1c.setMnemonic('3');
-		mb1c1.setMnemonic('4');
-		mb1c1.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.CTRL_MASK));
-		mb1c2.setMnemonic('5');
-		mb1c2.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, KeyEvent.CTRL_MASK));
 
 		mb1.add(mb1a);
 		mb1.add(mb1b);
@@ -734,11 +727,16 @@ public class Test_Event extends JFrame implements DropTargetListener {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Test_Editor action " + getID(e.getSource()));
 				ptop.setBackground(Color.red);
+				label.setText(e.getActionCommand());
 			}
 
 		};
 
 		mb1a.addActionListener(al);
+		mb1a.setMnemonic('1');
+		mb1a.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, KeyEvent.ALT_MASK));
+
+		
 
 		mb1b.addActionListener(new ActionListener() {
 
@@ -746,9 +744,11 @@ public class Test_Event extends JFrame implements DropTargetListener {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Test_Editor action " + getID(e.getSource()));
 				ptop.setBackground(Color.YELLOW);
+				label.setText(e.getActionCommand());
 			}
 
 		});
+		mb1b.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, KeyEvent.CTRL_MASK|KeyEvent.ALT_MASK|KeyEvent.SHIFT_MASK));
 
 		ActionListener a2 = new ActionListener() {
 
@@ -756,13 +756,20 @@ public class Test_Event extends JFrame implements DropTargetListener {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Test_Editor action " + getID(e.getSource()));
 				ptop.setBackground(Color.white);
+				label.setText(e.getActionCommand());
 			}
 
 		};
 
 		mb1c.addActionListener(al);
+		mb1c.setMnemonic('3');
+
 		mb1c1.addActionListener(al);
+		mb1c1.setMnemonic('4');
+		mb1c1.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.CTRL_MASK));
 		mb1c2.addActionListener(a2);
+		mb1c2.setMnemonic('5');
+		mb1c2.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, KeyEvent.CTRL_MASK));
 
 		return mb;
 	}

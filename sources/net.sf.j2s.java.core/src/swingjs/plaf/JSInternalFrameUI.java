@@ -526,7 +526,8 @@ public class JSInternalFrameUI extends JSFrameUI {
 
         @Override
 		public void internalFrameDeactivated(InternalFrameEvent e) {
-        	hideAllMenus();
+        	// TODO deactivated message from DeskTop is not appropriate yet
+        	//hideAllMenus();
         }
 
         @Override

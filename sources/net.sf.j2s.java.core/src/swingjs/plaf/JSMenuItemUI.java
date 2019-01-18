@@ -9,6 +9,7 @@ import javax.swing.JMenuItem;
 import javax.swing.event.MenuKeyListener;
 
 import swingjs.api.js.DOMNode;
+import swingjs.api.js.JSSwingMenu;
 
 public class JSMenuItemUI extends JSButtonUI {
 	
@@ -74,6 +75,11 @@ public class JSMenuItemUI extends JSButtonUI {
 	@Override
 	protected String getPropertyPrefix() {
 		return "MenuItem";
+	}
+	
+	
+	public void processJ2SMenuCmd(Object[] data) {
+		JSPopupMenuUI.processJ2SMenuCmd(data);
 	}
 
 }

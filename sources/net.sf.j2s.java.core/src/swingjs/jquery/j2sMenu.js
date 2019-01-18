@@ -47,19 +47,25 @@ try{
 		 t.stopPropagation();
 		 me.focus(t,n);
 		 break;
+	 case "press":
+		 break;
 	 case "click":
 		 
 		// BH 12/20/2018 adds persistence for JMenu clicks
 
-		if (this.active && this.active[0].attributes.name && this.active[0].attributes.name.value == "javax.swing.JMenu") {
-			clearMe(this.timer);
-			return 
+		if (me.active && me.active[0].attributes.name && me.active[0].attributes.name.value == "javax.swing.JMenu") {
+			clearMe(me.timer);
+			break; 
 		}
 		var r=e(t.target).closest(".ui-menu-item");
 		!n&&r.not(".ui-state-disabled").length&&(n=!0,me.select(t),r.has(".ui-menu").length?me.expand(t):me.element.is(":focus")
 				||(me.element.trigger("focus",[!0]),me.active&&me.active.parents(".ui-menu").length===1&&clearMe(me.timer))); 
 		e(".ui-menu").hide();
 		break;
+	 case "click_out":
+		 e(t.target).closest(".j2s-menuBar-menu").length == 0 
+		    && e(t.target).closest(".ui-menu").length||this.collapseAll(t);
+	 	break;
 	 case "_open":
 		 n||(n = me.active || me.activeMenu);
 		 n = e.extend({of:n},me.options.position);
@@ -91,9 +97,11 @@ try{
 		 (v&&v.length?me.focus(t,v):e(".ui-menu").hide());
 		 break;
 	 case "collapseAll":
+		 System.out.println("j2sMenu.collapseAll");
 		 clearMe(me.timer),
 		 me.timer=delayMe(me,
 	       function(){
+			 System.out.println("j2sMenu timer collapseAll"); 
 			 var r=n?me.element:e(t&&t.target).closest(me.element.find(".ui-menu"));
 			 r.length||(r=me.element);
 			 me._close(r);
@@ -134,7 +142,7 @@ try{
 		 	.removeClass("ui-state-focus"),
 		 me.active=null,
 		 me._trigger("blur",e,{item:me.active});
-				 break;
+		 break;
 	 case "refresh":
 		 n=me.options.icons.submenu;
 		 var role=me.options.role, r=me.element.find(me.options.menus);
@@ -142,25 +150,21 @@ try{
 		   .addClass("ui-menu ui-widget ui-widget-content ui-corner-all")
 		   .hide().attr({role:me.options.role,"aria-hidden":"true","aria-expanded":"false"})
 		   .each(function(){
-			   var t=e(me),r=t.prev(".a"),
+			   var t=e(this),r=t.prev(".a"),
 			   i=e("<span>").addClass("ui-menu-icon ui-icon "+n)
 			   .attr({role:role})
 			   .data("ui-menu-submenu-carat",!0);
 			   r.attr("aria-haspopup","true").prepend(i);
 			   t.attr("aria-labelledby",r.attr("id"));
 		   });
-		   t=r.add(me.element);
-		   t.children(":not(.ui-menu-item):has(.a)").addClass("ui-menu-item")
+		 t=r.add(me.element);
+		 t.children(":not(.ui-menu-item):has(.a)").addClass("ui-menu-item")
 		   		.attr("role","presentation").children(".a").uniqueId()
 		   		.addClass("ui-corner-all").attr({tabIndex:-1,role:me._itemRole()});
-		   t.children(":not(.ui-menu-item)").each(function(){
-			   	var t=e(me);
-			   	/[^\-+�G��G��+�G��G��\s]/.test(t.text())
-			   		||t.addClass("ui-widget-content ui-menu-divider")
-			   	});
-		   t.children(".ui-state-disabled").attr("aria-disabled","true");
-		   me.active&&!e.contains(me.element[0],me.active[0])&&me.blur();
-		   break;
+		 t.children(":not(.ui-menu-item)").addClass("ui-widget-content ui-menu-divider");
+		 t.children(".ui-state-disabled").attr("aria-disabled","true");
+		 me.active&&!e.contains(me.element[0],me.active[0])&&me.blur();
+		 break;
 	 case "keyActivate":
 		 
 		 // BH 1/15/2019 key mnemonics
@@ -179,6 +183,8 @@ try{
 		 }
 		 break;
 	 }
+	 var ui = me.activeMenu && me.activeMenu[0] && me.activeMenu[0]["data-ui"];
+ 	 ui && ui.processJ2SMenuCmd$OA([trigger,me,e,t,n]);
  }
  
  // BH note that swingjs.plaf.JSButton will set and clear ui-state-disabled on its own
@@ -194,7 +200,8 @@ try{
  role:"menu",
  blur:null,
  focus:null,
- select:null
+ select:null,
+ jPopupMenu:null
  },
  
  
@@ -206,8 +213,8 @@ try{
 	 this.activeMenu=this.element,this.element.uniqueId().addClass("ui-menu ui-widget ui-widget-content ui-corner-all").toggleClass("ui-menu-icons",!!this.element.find(".ui-icon").length)
 	 .attr({role:this.options.role,tabIndex:0}).bind("click"+this.eventNamespace,e.proxy(function(e){this.options.disabled&&e.preventDefault()},this)),this.options.disabled&&this.element.addClass("ui-state-disabled").attr("aria-disabled","true"),
 	 this._on({
-		 "mousedown .ui-menu-item > .a":function(e){e.preventDefault()},
-		 "click .ui-state-disabled > .a":function(e){e.preventDefault()},
+		 "mousedown .ui-menu-item > .a":function(t){t.preventDefault();doCmd("press", this, e, t)},
+		 "click .ui-state-disabled > .a":function(t){t.preventDefault()},
 		 "click .ui-menu-item:has(.a)":function(t){ doCmd("click", this, e, t);},
 		 "mousemove .swingjsPopupMenu .data-ui":function(t){ doCmd("over", this, e, t, 0); },
 		 "mouseover .ui-menu-item":function(t){ doCmd("over", this, e, t, 1); },
@@ -219,11 +226,8 @@ try{
 		 keydown:"_keydown"
 	 }), 
 	 this.refresh(),
-	 this._on(this.document,{
-		 click:function(t){e(t.target).closest(".ui-menu").length||this.collapseAll(t),n=!1}
-	 })
- },
- 
+	 this._on(this.document,{ click:function(t){  doCmd("click_out", this, e, t),n=!1}})
+ 	},
  _destroy:function(){this.element.removeAttr("aria-activedescendant").find(".ui-menu").andSelf()
 	 .removeClass("ui-menu ui-widget ui-widget-content ui-corner-all ui-menu-icons")
 	 .removeAttr("role").removeAttr("tabIndex").removeAttr("aria-labelledby").removeAttr("aria-expanded")
@@ -364,6 +368,10 @@ Swing.__getMenuStyle = function(applet) { return '\
 	.swingjsPopupMenu .ui-menu-icons .ui-menu-item .a{position:relative;padding-left:2em}\
 	.swingjsPopupMenu .ui-icon{display:block;text-indent:-99999px;overflow:hidden;background-repeat:no-repeat;position:absolute;top:.2em;left:.2em}\
 	.swingjsPopupMenu .ui-menu-icon{position:static;float:right}\
+	.swingjsPopupMenu .ui-icon-alt-y{min-width:30ex;text-align:right;background-image:none;background-position:0 0}\
+	.swingjsPopupMenu .ui-icon-alt-y:after{content:"alt-Y"}\
+	.swingjsPopupMenu .ui-icon-alt-shift-x:{min-width:130ex;text-align:right;background-image:none;background-position:0 0}\
+	.swingjsPopupMenu .ui-icon-alt-shift-x:after{content:"alt-shift-X"}\
 	.swingjsPopupMenu .ui-icon-carat-1-e{min-width:10ex;text-align:right;background-image:none;background-position:0 0}\
 	.swingjsPopupMenu .ui-icon-carat-1-e:after{content:"\\0025B6"}\
 	.swingjsPopupMenu .ui-state-default{border:1px solid #c5dbec;background:#dfeffc;color:#2e6e9e}\
@@ -461,7 +469,7 @@ Swing.updateMenu = function(menu, andShow) {
   		menu.$ulTop.html(menu.toHTML());
   		bindMenuActionCommands(menu._actionEvent, menu, true);
     }
-    menu.$ulTop.menu({delay:300}).menu('refresh');  
+    menu.$ulTop.menu({delay:300, jPopupMenu: menu}).menu('refresh');  
     if (menu.uiClassID)
         menu.$ulTop.find("[role=menuitem]").each(function(){Swing.updateMenuItem(menu, this);});
 	menu._tainted = false;

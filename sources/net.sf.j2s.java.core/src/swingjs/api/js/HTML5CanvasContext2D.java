@@ -4,6 +4,23 @@ import java.awt.geom.AffineTransform;
 
 public abstract class HTML5CanvasContext2D {
 
+	public class ImageData {
+		public int[] data; 
+	}
+
+	public ImageData imageData;
+	
+	public Object[][] _aSaved;
+	
+	public double lineWidth;
+
+	public String font, fillStyle, strokeStyle;
+
+	public abstract void drawImage(DOMNode img, int sx,
+			int sy, int swidth, int sheight, int dx, int dy, int dwidth, int dheight);
+
+	public abstract ImageData getImageData(int x, int y, int width, int height);
+
 	public abstract void beginPath();
 
 	public abstract void moveTo(double x0, double y0);
@@ -46,26 +63,7 @@ public abstract class HTML5CanvasContext2D {
 
 	public abstract void drawImage(DOMNode img, int x, int y, int width, int height);
 
-	public static int[] getBuf8(Object imageData) {
-		/**
-		 * @j2sNative
-		 * 
-		 *   return imageData.data
-		 */
-		{
-			return null;
-		}
-	}
-
-	public static void putImageData(HTML5CanvasContext2D ctx, Object imageData, int x, int y) {
-		/**
-		 * @j2sNative
-		 * 
-		 *   ctx.putImageData(imageData, x, y);
-		 */
-		{
-		}
-	}
+	public abstract void putImageData(Object imageData, int x, int y);
 
 	/**
 	 * pull one save structure onto the stack array ctx._aSaved
@@ -102,16 +100,6 @@ public abstract class HTML5CanvasContext2D {
 		}
 	}
 
-	public static Object[][] getSaveStack(HTML5CanvasContext2D ctx) {
-		/**
-		 * @j2sNative
-		 * 
-		 * return ctx._aSaved; 
-		 */
-		{
-			return null;
-		}
-	}
 	public static int getSavedLevel(HTML5CanvasContext2D ctx) {
 		/**
 		 * @j2sNative
@@ -121,78 +109,6 @@ public abstract class HTML5CanvasContext2D {
 		{
 			return 0;
 		}
-	}
-
-	/**
-	 * Static because there is no "stretchImage" function for Context2d.
-	 * @param ctx
-	 * @param img
-	 * @param sx
-	 * @param sy
-	 * @param swidth
-	 * @param sheight
-	 * @param dx
-	 * @param dy
-	 * @param dwidth
-	 * @param dheight
-	 */
-	public static void stretchImage(HTML5CanvasContext2D ctx, DOMNode img, int sx,
-			int sy, int swidth, int sheight, int dx, int dy, int dwidth, int dheight) {
-		/**
-		 * @j2sNative
-		 * 
-		 * 		ctx.drawImage(img, sx, sy, swidth, sheight, dx, dy, dwidth, dheight);
-		 * 
-		 */
-		{}
-	}
-
-	public static Object getImageData(HTML5CanvasContext2D ctx, int x, int y, int width, int height) {
-		/**
-		 * @j2sNative
-		 * 
-		 *   return ctx.getImageData(x, y, width, height);
-		 */
-		{
-			return null;
-		}
-	}
-	
-	public static void setLineWidth(HTML5CanvasContext2D ctx, double d) {
-		/**
-		 * @j2sNative
-		 * 
-		 *    ctx.lineWidth = d;
-		 *            
-		 */
-		{}
-	}
-
-	public static void setFont(HTML5CanvasContext2D ctx, String canvasFont) {
-		/**
-		 * @j2sNative
-		 * 
-		 *            ctx.font = canvasFont;
-		 */
-		{}
-	}
-
-	public static void setColor(HTML5CanvasContext2D ctx, String s) {
-		/**
-		 * @j2sNative
-		 * 
-		 *            ctx.fillStyle = ctx.strokeStyle = s;
-		 */
-		{}
-	}
-
-	public static void setFillStyle(HTML5CanvasContext2D ctx, String s) {
-		/**
-		 * @j2sNative
-		 * 
-		 *            ctx.fillStyle = s;
-		 */
-		{}
 	}
 
 	public static double[] getMatrix(HTML5CanvasContext2D ctx, AffineTransform transform) {

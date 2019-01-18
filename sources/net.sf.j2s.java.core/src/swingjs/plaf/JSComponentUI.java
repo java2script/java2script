@@ -765,6 +765,17 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	/**
+	 * Set attributes and data for action in j2sMenu
+	 * 
+	 * @param node icon, text, or accelerator node
+	 */
+	protected void setMenuItem(DOMNode node) {
+		$(node).attr("role", "menucloser");
+		setDataComponent(node);
+//		setDataUI(iconNode);
+	}
+
+	/**
 	 * Set j2sApplet to capture jQuery mouse events and turn them into Java MouseEvents. 
 	 * Used by JSFrameUI and JTextArea to indicate that it is to be the "currentTarget" for mouse 
 	 * clicks. 
@@ -2263,25 +2274,16 @@ public class JSComponentUI extends ComponentUI
 		int wText = (dimText == null ? 0 : dimText.width);
 		int gap = (wText == 0 || wIcon == 0 ? 0 : b.getIconTextGap());
 		int w = cellComponent != null ? cellWidth : $(domNode).width();
+		boolean alignVCenter = (vAlign == SwingConstants.CENTER);
+		Insets margins = (isLabel ? insets : b.getMargin());
+		if (margins == null)
+			margins = zeroInsets;
+		int h = (dimText == null ? 0 : dimText.height);
+		int ih = (dimIcon == null ? 0 : dimIcon.height);
+		int hCtr = Math.max(h, ih);
+		int wCtr = wIcon + gap + wText;
 		int wAccel = 0;
-		String accel = (b instanceof JMenuItem ? getAccelStr((JMenuItem) b): null);
-		DOMNode accelNode = /** @j2sNative this.centeringNode.children[2] || */null;
-		if ((accelNode == null) != (accel == null)) {
-			if (accel == null) {
-				DOMNode.remove(accelNode);
-			} else { 
-				centeringNode.appendChild(accelNode = DOMNode.createElement("span", id + "_acc"));
-				addClass(accelNode, ".ui-accel");
-				DOMNode.setStyles(accelNode,  "font-size", "10px");
-			}
-		}
-		if (accel != null) {
-			DOMNode.setStyles(accelNode, "float", null);
-			DOMNode.setAttr(accelNode, "innerHTML", accel = accel + "\u00A0\u00A0");
-			wAccel = getAccelWidth(accel);
-			DOMNode.setStyles(accelNode, "float", "right");
-		}
-		
+		String accel = null;
 		// setHTMLSize1((buttonNode == null ? domNode : centeringNode), false,
 		// false).width;
 		// But we need to slightly underestimate it so that the
@@ -2335,17 +2337,32 @@ public class JSComponentUI extends ComponentUI
 			alignRight = !ltr;
 			alignHCenter = false;
 			textRight = ltr;
+			accel = (b instanceof JMenuItem ? getAccelStr((JMenuItem) b): null);
+			DOMNode accelNode = menuAnchorNode;
+			accelNode = /** @j2sNative accelNode.children[1] || */null;
+			if ((accelNode == null) != (accel == null)) {
+				if (accel == null) {
+					DOMNode.remove(accelNode);
+				} else { 
+					menuAnchorNode.appendChild(accelNode = DOMNode.createElement("span", id + "_acc"));
+					addClass(accelNode, "ui-menu-accel");
+					DOMNode.setAttr(accelNode, "role", "menuitem");
+					DOMNode.setStyles(accelNode,  "font-size", "10px");
+					setMenuItem(accelNode);
+				}
+			}
+			if (accel != null) {
+				DOMNode.setStyles(accelNode, "float", null);
+				DOMNode.setAttr(accelNode, "innerHTML", accel);// = accel + "\u00A0\u00A0");
+				wAccel = getHTMLSize(accelNode).width; 
+				DOMNode.setStyles(accelNode, 
+						"float", ltr ? "right" : "left", 
+						"text-align", ltr ? "right" : "left",
+						"margin", "0px 5px",
+						"transform", "translateY(15%)");
+			}
+			DOMNode.setStyles(menuAnchorNode, "width", "95%", "min-width", (wCtr + wAccel + margins.left + margins.right) + "px");			
 		}
-		boolean alignVCenter = (vAlign == SwingConstants.CENTER);
-		Insets margins = (isLabel ? insets : b.getMargin());
-		if (margins == null)
-			margins = zeroInsets;
-		int h = (dimText == null ? 0 : dimText.height);
-		int ih = (dimIcon == null ? 0 : dimIcon.height);
-		int hCtr = Math.max(h, ih);
-		int ext = (menuAnchorNode == null ? 0 : 30);
-		int wCtr = wIcon + gap + wText + ext + wAccel;
-		
 
 		if (alignHCenter) {
 			switch (hTextPos) {
@@ -2480,27 +2497,11 @@ public class JSComponentUI extends ComponentUI
 			DOMNode.setStyles(textNode, "top", top + "%", "transform", "translateY(-" + top + "%)");
 			DOMNode.setStyles(iconNode, "top", top + "%", "transform",
 					"translateY(-" + itop + "%)" + (iscale == null ? "" : iscale));
-		} else {
-			
-			DOMNode.setSize(menuAnchorNode, wCtr + margins.left + margins.right, h);
-
-				if (accelNode != null)
-					DOMNode.setStyles(accelNode, "transform", "translateY(15%)");
-				DOMNode.setStyles(textNode, "top", "50%", "transform", "translateY(-60%)");
-				DOMNode.setStyles(iconNode, "top", "50%", "transform", "translateY(-80%) scale(0.6,0.6)");
-//			}
+		} else {			
+			DOMNode.setStyles(menuAnchorNode, "height", h + "px");
+			DOMNode.setStyles(textNode, "top", "50%", "transform", "translateY(-60%)");
+			DOMNode.setStyles(iconNode, "top", "50%", "transform", "translateY(-80%) scale(0.6,0.6)");
 		}
-		
-		//System.out.println("JSCUI textNode " + (/** @j2sNative  this.iconNode && this.iconNode.outerHTML  || */""));
-		
-	}
-
-	private int getAccelWidth(String accel) {
-		String s = currentText;
-		DOMNode.setAttr(textNode, "innerHTML", " " + accel);
-		Dimension d = getHTMLSize(textNode);
-		DOMNode.setAttr(textNode, "innerHTML", s);		
-		return d.width;
 	}
 
 	private String getAccelStr(JMenuItem b) {

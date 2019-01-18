@@ -1932,8 +1932,6 @@ public abstract class JComponent extends Container {
 		KeyStroke[] strokes;
 		Hashtable registered = (Hashtable) getClientProperty(WHEN_IN_FOCUSED_WINDOW_BINDINGS);
 
-		System.out.println(">>>>JComponent registering " + this + " " + inputMap);
-
 		if (inputMap != null) {
 			// Push any new KeyStrokes to the KeyboardManager.
 			strokes = inputMap.allKeys();

@@ -1131,5 +1131,34 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 		return menu != null && menu.haveLoc && DOMNode.getStyle(domNode, "display") != "none";
 	}
 
+	public static void processJ2SMenuCmd(Object[] data) {
+		String trigger = (String) data[0];
+		JSSwingMenu j2smenu = (JSSwingMenu) data[1];
+		Object e = data[2];
+		Object t = data[3];
+		Object n = data[4];
+		System.out.println("JSPopupMenuUI processing " + trigger + " for " + j2smenu.activeMenu);
+		switch (trigger) {
+		 case "over":
+		 case "_open":
+		 case "startOpening":
+		 case "_close":
+		 case "collapse":
+		 case "expand":
+		 case "focus":
+		 case "blur":
+		 case "refresh":
+		 case "keyActivate":
+		 case "click":
+		 case "press":
+			 break;		 
+		 case "collapseAll":
+			 hideAllMenus();
+			 j2smenu.options.jPopupMenu.visible = false;
+			 ((JComponent) j2smenu.options.jPopupMenu.getInvoker()).getRootPane().requestFocus();				 
+			 break;
+		}
+	}
+
 
 }

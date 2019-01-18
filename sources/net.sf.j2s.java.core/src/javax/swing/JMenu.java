@@ -223,6 +223,17 @@ public class JMenu extends JMenuItem implements MenuElement
 
 	}
 
+	/**
+	 * SwingJS added
+	 */
+	@Override
+	public void addNotify() {
+		super.addNotify();
+		if (popupMenu != null)
+			popupMenu.addNotify();
+	}
+
+
 
     //    public void repaint(long tm, int x, int y, int width, int height) {
     //        Thread.currentThread().dumpStack();
@@ -531,6 +542,7 @@ public class JMenu extends JMenuItem implements MenuElement
             this.popupMenu = new JPopupMenu();
             popupMenu.setInvoker(this);
             popupListener = createWinListener(popupMenu);
+            popupMenu.addNotify();// BH SwingJS 
         }
     }
 
@@ -596,6 +608,7 @@ public class JMenu extends JMenuItem implements MenuElement
 		public Component add(Component c, int index) {
         ensurePopupMenuCreated();
         popupMenu.add(c, index);
+        
         firePropertyChange("JSitem", null, c);
         return c;
     }

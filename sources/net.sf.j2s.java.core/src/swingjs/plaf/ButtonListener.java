@@ -120,12 +120,16 @@ public class ButtonListener
 		if (prop == AbstractButton.MNEMONIC_CHANGED_PROPERTY) { // "mnemonic"
 			updateMnemonicBinding(b);
 		} 
-		if (prop == "labelFor" || prop == "displayedMnemonic" || prop == "accelerator") {
-			if (ui.isMenuItem || ui.isMenu)
+		if (ui.isMenuItem || ui.isMenu) {
+			switch (prop) {
+			case "labelFor":
+			case "displayedMnemonic":
+			case "accelerator":
+			case "ancestor":
 				updateAcceleratorBinding(b);
-		} else if (prop == "ancestor" && ui.isMenu) {
-			updateMnemonicBinding(b);
-			updateAcceleratorBinding(b);
+				updateMnemonicBinding(b);
+			break;
+			}
 		}
 		ui.propertyChangedFromListener(e, prop);
 	}
@@ -484,7 +488,6 @@ public class ButtonListener
 		} else {
 			a = ui.menuItem.getAccelerator();
 		}
-		System.out.println("ButtonListener accel " + a + " " + ui.id);
 		InputMap map = SwingUtilities.getUIInputMap(jc, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		if (map != null) {
@@ -495,6 +498,7 @@ public class ButtonListener
 				map = createInputMap(jc);
 				SwingUtilities.replaceUIInputMap(jc, JComponent.WHEN_IN_FOCUSED_WINDOW, map);
 			}
+			System.out.println(">>>>>>>>>ButtonListener accel added for " + a + " " + ui.id);
 			map.put(a, "doClick");
 		}
 	}

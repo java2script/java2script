@@ -99,7 +99,6 @@ public class KeyboardManager {
      public void registerKeyStroke(KeyStroke k, JComponent c) {
     	 
  
-//System.out.println(">>>>>>>KM>>>>>reg " + k + " " + c);    	 
     	 
     	 
     	 Hashtable keyMap = getKeyMap(c, k);
@@ -107,6 +106,7 @@ public class KeyboardManager {
     		 return;
          Object tmp = keyMap.get(k);
          if (tmp == null) {
+             System.out.println(">>>>>>>KM>>>>>reg " + k + " " + c);    	 
              keyMap.put(k,c);
          } else if (tmp instanceof Vector) {  // if there's a Vector there then add to it.
              Vector v = (Vector)tmp;

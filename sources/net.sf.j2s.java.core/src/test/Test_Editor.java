@@ -85,7 +85,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 	}
 
 	private static boolean allowLogging = false;
-	private static boolean allowEventInfo = true;
+	private static boolean allowEventInfo = false;
 
 	private void setLogging() {
 		if ((/** @j2sNative false || */
@@ -112,7 +112,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 						System.out.println("FocusMan mousepreseed event");
 					}
 					System.out.println(
-							"FocusMan dispatching activeElement=" + (/** @j2sNative document.getActiveElement.id || */
+							"FocusMan dispatching activeElement=" + (/** @j2sNative document.activeElement.id	  || */
 					null));
 					System.out.println("FocusMan dispatching event Source " + e.getSource());
 					System.out.println("FocusMan dispatching event " + e);

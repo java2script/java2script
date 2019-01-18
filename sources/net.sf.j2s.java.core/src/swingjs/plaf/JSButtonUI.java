@@ -134,12 +134,8 @@ public class JSButtonUI extends JSLightweightUI {
 		if (buttonNode == null) {
 			// not a radio or checkbox
 			addCentering(menuAnchorNode);
-			$(iconNode).attr("role", "menucloser");
-			$(textNode).attr("role", "menucloser");
-			setDataComponent(iconNode); // needed for mac safari/chrome
-			setDataComponent(textNode); // needed for mac safari/chrome
-//			setDataUI(iconNode);
-//			setDataUI(textNode);
+			setMenuItem(iconNode);
+			setMenuItem(textNode);
 			enableNode = itemNode;
 			setIconAndText("btn", icon, gap, text);
 		} else {
