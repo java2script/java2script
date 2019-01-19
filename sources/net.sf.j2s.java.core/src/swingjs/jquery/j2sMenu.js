@@ -64,7 +64,7 @@ try{
 		break;
 	 case "click_out":
 		 e(t.target).closest(".j2s-menuBar-menu").length == 0 
-		    && e(t.target).closest(".ui-menu").length||this.collapseAll(t);
+		    && (e(t.target).closest(".ui-menu").length||me.collapseAll(t));
 	 	break;
 	 case "_open":
 		 n||(n = me.active || me.activeMenu);
