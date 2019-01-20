@@ -67,7 +67,9 @@ try {
 try {
 	 // will alert in system.out.println with a message
 	Clazz._traceOutput = 
-	(document.location.href.indexOf("j2strace=") >= 0 ? document.location.href.split("j2strace=")[1].split("&")[0] : null)
+	(document.location.href.indexOf("j2strace=") >= 0 ? decodeURI(document.location.href.split("j2strace=")[1].split("&")[0]) : null);
+	Clazz._traceFilter = 
+	(document.location.href.indexOf("j2sfilter=") >= 0 ? decodeURI(document.location.href.split("j2sfilter=")[1].split("&")[0]) : null);
 } catch (e) {}
 
 Clazz.setTVer = function(ver) {
@@ -3267,12 +3269,9 @@ Sys.out.printf = Sys.out.printf$S$OA = Sys.out.format = Sys.out.format$S$OA = fu
 Sys.out.flush$ = function() {}
 
 Sys.out.println = Sys.out.println$O = Sys.out.println$Z = Sys.out.println$I = Sys.out.println$J = Sys.out.println$S = Sys.out.println$C = Sys.out.println = function(s) {
-
-if (("" + s).indexOf("TypeError") >= 0) {
-   doDebugger();
-}
-  if (Clazz._nooutput) return;
-  if (Clazz._traceOutput && s && ("" + s).indexOf(Clazz._traceOutput) >= 0) {
+ s = (typeof s == "undefined" ? "" : "" + s);
+  if (Clazz._nooutput || Clazz._traceFilter && s.indexOf(Clazz._traceFilter) < 0) return;
+  if (!Clazz._traceFilter && Clazz._traceOutput && s && (s.indexOf(Clazz._traceOutput) >= 0 || '"' + s + '"' == Clazz._traceOutput)) {
     alert(s + "\n\n" + Clazz._getStackTrace());
     doDebugger();
   }

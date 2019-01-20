@@ -1558,7 +1558,7 @@ if (!target) {
 
 		J2S.$bind(who, 'click', function(ev) {
 			if (J2S._traceMouse)
-				J2S.traceMouse("CLICK " + ev.originalEvent.detail, ev);
+				J2S.traceMouse("CLICK", ev);
 
 			if (doIgnore(ev))
 				return true;
@@ -1571,7 +1571,7 @@ if (!target) {
 			if (!xym)
 				return false;
 			who.applet._processEvent(500, xym, ev, who._frameViewer);// MouseEvent.MOUSE_CLICK
-			return false;
+			return true; // was false
 		});
 		
 		J2S.$bind(who, 'DOMMouseScroll mousewheel', function(ev) { // Zoom
