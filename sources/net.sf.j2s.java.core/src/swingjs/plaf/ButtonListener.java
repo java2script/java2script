@@ -193,14 +193,13 @@ public class ButtonListener
 	void updateMnemonicBinding(AbstractButton b) {
 		int m = b.getMnemonic();
 		
-		System.out.println("ButtonListener mnemonic " + m + " " + ui.id);
-
 		ui.updateDOMNode();
 		if (ui.isMenu && m != 0 && lastMnemonic != 0) {
 			ui.setMnemonic(m);
 		}
 		if (m == lastMnemonic)
 			return;
+//		System.out.println("ButtonListener mnemonic " + m + " " + ui.id);
 		if (ui.isMenuItem || ui.isMenu) {
 			int[] shortcutKeys = (int[]) DefaultLookup.get(ui.menuItem, ui, "Menu.shortcutKeys");
 			if (shortcutKeys == null) {
@@ -498,7 +497,7 @@ public class ButtonListener
 				map = createInputMap(jc);
 				SwingUtilities.replaceUIInputMap(jc, JComponent.WHEN_IN_FOCUSED_WINDOW, map);
 			}
-			System.out.println(">>>>>>>>>ButtonListener accel added for " + a + " " + ui.id);
+//			System.out.println(">>>>>>>>>ButtonListener accel added for " + a + " " + ui.id);
 			map.put(a, "doClick");
 		}
 	}

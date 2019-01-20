@@ -67,18 +67,51 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 				System.out.println("[" + i + "]" + path[i].getClass().getName()  + "  "+ (path[i] instanceof JMenuItem ? ((JMenuItem) path[i]).getText() : ""));
 			super.processKeyEvent(e, path, m);
 		}
-	}
-;
+	};
+
+	
+	
+int nAction = 0;
 
 	ActionListener listener = new ActionListener() {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			System.out.println("actionPerformed: " + e);
+			System.out.println("actionPerformed: " + (++nAction) + " " + e);
 		}
 
 	};
 
+	MouseListener mlistener = new MouseListener() {
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			System.out.println("mouseEvent: " + e);
+		}
+
+		@Override
+		public void mousePressed(MouseEvent e) {
+			System.out.println("mouseEvent: " + e);
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			System.out.println("mouseEvent: " + e);
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mouseExited(MouseEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+		
+	};
 	/**
 	 * Put some content in a JFrame and show it
 	 */
@@ -144,13 +177,13 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				System.out.println(e.getButton());
+				//System.out.println(e.getButton());
 				if (e.getButton() != MouseEvent.BUTTON3)
 					return;
 				int n = pmenu.getComponentCount();
 				if (n > 1)
 					pmenu.remove(n - 1);
-				pmenu.show(frame, 100, 100);
+				pmenu.show(frame, e.getX(), e.getY() - 10);
 			}
 
 			@Override
@@ -293,6 +326,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		cb5m.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 		cb5m.setHorizontalTextPosition(SwingConstants.TRAILING);
 		cb5m.addActionListener(listener);
+		cb5m.addMouseListener(mlistener);
 
 		JCheckBoxMenuItem cb6m = new JCheckBoxMenuItem("XXtrailing,r2l1XX");
 		cb6m.setFont(font);
@@ -323,36 +357,21 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		mb3.setFont(font);
 		mb3.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		mb3.setHorizontalTextPosition(SwingConstants.RIGHT);
+		mb3.addActionListener(listener);
 
 		JMenuItem mb4 = new JMenuItem("XXright,right-to-left3XX");
 		mb4.setFont(font);
 		mb4.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		mb4.setHorizontalTextPosition(SwingConstants.RIGHT);
-		mb4.addItemListener(this);
+		mb4.addActionListener(listener);
 
 		mb5 = new JMenuItem("XXadded r2l,rXX");
-		mb5.addActionListener(listener);
 		mb5.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, ActionEvent.ALT_MASK));
 		mb5.setFont(font);
 		mb5.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		mb5.setHorizontalTextPosition(SwingConstants.RIGHT);
+		mb5.addActionListener(listener);
 
-		cb4m.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				System.out.println("actionPerformed: " + e);
-			}
-
-		});
-		cb3m.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				System.out.println("actionPerformed: " + e);
-			}
-
-		});
 		cb4m.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.ALT_MASK | ActionEvent.CTRL_MASK | ActionEvent.SHIFT_MASK));
 
 		JMenu m1 = new JMenu("left")
@@ -409,8 +428,13 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		btn = new JMenuItem("-");
 		btn.setFont(font);
 		mRight.add(btn);
-		mRight.add(mb3);
-		mRight.add(mb4);
+		
+		JMenu mRight2 = new JMenu("right2");
+
+		mRight.add(mRight2);
+		mRight2.add(mb3);
+		mRight2.add(mb4);
+
 
 		JPanel theTab = new JPanel();
 

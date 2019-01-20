@@ -51,10 +51,14 @@ import javax.swing.event.MenuKeyListener;
 
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
+import swingjs.api.js.JQueryObject;
 import swingjs.api.js.JSSwingMenu;
 import swingjs.jquery.JQueryUI;
 
 public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
+
+
+	public static final String UI_DISABLED = "ui-j2smenu-disabled ui-state-disabled";
 
 
 	@Override
@@ -1131,26 +1135,40 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 		return menu != null && menu.haveLoc && DOMNode.getStyle(domNode, "display") != "none";
 	}
 
+	@SuppressWarnings("unused")
 	public static void processJ2SMenuCmd(Object[] data) {
 		String trigger = (String) data[0];
 		JSSwingMenu j2smenu = (JSSwingMenu) data[1];
 		Object e = data[2];
 		Object t = data[3];
 		Object n = data[4];
-		System.out.println("JSPopupMenuUI processing " + trigger + " for " + j2smenu.activeMenu);
+		JQueryObject m = j2smenu.activeMenu;
+		String mid = (/**@j2sNative m && m[0] && m[0].id || */null);
+		System.out.println("JSPopupMenuUI processing " + trigger + " for " + mid);
 		switch (trigger) {
-		 case "over":
-		 case "_open":
-		 case "startOpening":
+		 case "_activate":
 		 case "_close":
+		 case "_hide":
+		 case "_open":
+		 case "_show":
+		 case "_startOpening":
+		 case "blur":
 		 case "collapse":
 		 case "expand":
 		 case "focus":
-		 case "blur":
-		 case "refresh":
 		 case "keyActivate":
-		 case "click":
-		 case "press":
+		 case "onblur":
+		 case "onclick":
+		 case "onclick_out":
+		 case "onfocus":
+		 case "onleave":
+		 case "onover":
+		 case "onover1":
+		 case "onover2":
+		 case "onover3":
+		 case "onpress":
+		 case "refresh":
+		 case "select":
 			 break;		 
 		 case "collapseAll":
 			 hideAllMenus();

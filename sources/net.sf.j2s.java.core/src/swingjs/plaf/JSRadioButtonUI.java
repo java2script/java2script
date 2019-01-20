@@ -41,8 +41,11 @@ public class JSRadioButtonUI extends JSButtonUI {
 				DOMNode.dispose(actionNode);
 		}
 		enableNodes = new DOMNode[] { actionNode, buttonNode, null };
-//		setDataComponent(actionNode);
 		createButton();
+		if (isMenuItem)
+			setMenuItem();
+//		setDataComponent(actionNode);
+
 	}
 	
 //	@Override

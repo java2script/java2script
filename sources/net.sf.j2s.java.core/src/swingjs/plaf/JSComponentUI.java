@@ -732,7 +732,7 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	protected static void hideAllMenus() {
-		JSUtil.jQuery.$(".ui-menu").hide();
+		JSUtil.jQuery.$(".ui-j2smenu").hide();
 	}
 	
 	protected void addClass(DOMNode node, String cl) {
@@ -770,7 +770,9 @@ public class JSComponentUI extends ComponentUI
 	 * @param node icon, text, or accelerator node
 	 */
 	protected void setMenuItem(DOMNode node) {
-		$(node).attr("role", "menucloser");
+		if (node == null)
+			return;
+		addClass(node, "ui-j2smenu-node");
 		setDataComponent(node);
 //		setDataUI(iconNode);
 	}
@@ -2345,7 +2347,7 @@ public class JSComponentUI extends ComponentUI
 					DOMNode.remove(accelNode);
 				} else { 
 					menuAnchorNode.appendChild(accelNode = DOMNode.createElement("span", id + "_acc"));
-					addClass(accelNode, "ui-menu-accel");
+					addClass(accelNode, "ui-j2smenu-accel");
 					DOMNode.setAttr(accelNode, "role", "menuitem");
 					DOMNode.setStyles(accelNode,  "font-size", "10px");
 					setMenuItem(accelNode);

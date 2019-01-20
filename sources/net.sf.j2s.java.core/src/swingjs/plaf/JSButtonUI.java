@@ -131,33 +131,41 @@ public class JSButtonUI extends JSLightweightUI {
 			DOMNode.setStyles(menuAnchorNode, "margin", "1px 2px 1px 2px");
 		}
 		itemNode.appendChild(menuAnchorNode);
+		setDoPropagate();
 		if (buttonNode == null) {
 			// not a radio or checkbox
 			addCentering(menuAnchorNode);
-			setMenuItem(iconNode);
-			setMenuItem(textNode);
 			enableNode = itemNode;
 			setIconAndText("btn", icon, gap, text);
 		} else {
 			menuAnchorNode.appendChild(buttonNode);
+			setMenuItem(buttonNode);
 		}
+		setMenuItem(menuAnchorNode);
+		setMenuItem();
 		// j2sMenu.js will set the mouse-up event for the <a> tag with the
 		// role=menuitem
 		// attribute via j2sApplet.setMouse().
 		// That event will then fire handleJSEvent
-//		setDataUI(menuAnchorNode);
 		setDataComponent(menuAnchorNode);
 		setDataComponent(itemNode);
 		return itemNode;
+	}
+
+	protected void setMenuItem() {
+		setMenuItem(itemNode);
+		setMenuItem(iconNode);
+		setMenuItem(textNode);
+		setMenuItem(centeringNode);
 	}
 
 	@Override
 	protected void enableNode(DOMNode node, boolean b) {
 		if (isMenuItem) {
 			if (b) {
-				removeClass(node, "ui-menu-disabled ui-state-disabled");
+				removeClass(node, JSPopupMenuUI.UI_DISABLED);
 			} else {
-				addClass(node, "ui-menu-disabled ui-state-disabled");
+				addClass(node, JSPopupMenuUI.UI_DISABLED);
 			}
 		} else {
 			super.enableNode(node, b);

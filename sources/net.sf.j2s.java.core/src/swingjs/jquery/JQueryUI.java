@@ -7,17 +7,18 @@ package swingjs.jquery;
  * Note that if you change one of the JavaScript files in this directory, 
  * the transpiler will not transfer it to the site directory unless you touch this java file.
  * 
- * @author Bob Hanson
- *
- */
-public class JQueryUI {
-	
-	public JQueryUI() { 
+ * @author Bob Hanson   
+ *  
+ *    
+ */  
+public class JQueryUI {  
+ 
+	public JQueryUI() {  
 		// for reflection 
 	}
 	static { 
-		
-		/**
+	  
+		/**      
 		 * 
 		 * @j2sNative 
 		 * 
