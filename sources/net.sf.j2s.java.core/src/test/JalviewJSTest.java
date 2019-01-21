@@ -71,7 +71,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 
 	
 	
-int nAction = 0;
+	int nAction = 0;
 
 	ActionListener listener = new ActionListener() {
 

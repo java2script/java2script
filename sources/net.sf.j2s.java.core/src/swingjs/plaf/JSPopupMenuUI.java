@@ -34,6 +34,8 @@ import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.peer.PopupMenuPeer;
 import java.beans.PropertyChangeEvent;
 
 import javax.swing.InputMap;
@@ -175,11 +177,6 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
             popupMenu.removeMenuKeyListener(menuKeyListener);
         }
     }
-
-	public Object getPopup() {
-		// TODO: this causes an uncaught error. 
-		return null;		
-	}
 
 	@Override
 	public void setVisible(boolean b) {
@@ -1178,5 +1175,8 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 		}
 	}
 
+    public boolean isPopupTrigger(MouseEvent e) {
+        return e.isPopupTrigger();
+    }
 
 }

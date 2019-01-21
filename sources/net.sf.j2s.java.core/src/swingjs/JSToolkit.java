@@ -73,13 +73,16 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	/**
 	 * for JSMouse only
 	 */
-	public static boolean isMac;
+	public static boolean isMac, isLinux, isUnix, isWin;
 		
 	static {
 		/**
 		 * @j2sNative
 		 * 
-		 * swingjs.JSToolkit.isMac = (J2S.featureDetection.os == "mac");
+		 * C$.isMac = (J2S.featureDetection.os == "mac");
+		 * C$.isLinux = (J2S.featureDetection.os == "linux");
+		 * C$.isUnix = (J2S.featureDetection.os == "unix");
+		 * C$.isWin = (J2S.featureDetection.os == "win");
 		 * 
 		 */
 		{
@@ -93,7 +96,7 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	 */
 
 	public JSToolkit() {
-		super();		
+		super();
 		System.out.println("JSToolkit initialized");
 	}
 

@@ -337,22 +337,13 @@ public class JSMouse {
 	private void mouseAction(int id, long time, int x, int y, int xcount,
 			int modifiers, int dy) {
 
-		// Oddly, Windows returns InputEvent.META_DOWN_MASK on release, though
-		// BUTTON3_DOWN_MASK for pressed. So here we just accept both when not a
-		// mac.
-		// A bit of a kludge.
-
-		int extended = modifiers & EXTENDED_MASK;
-		boolean popupTrigger = (
-				extended == InputEvent.BUTTON3_DOWN_MASK	|| 
-				extended == InputEvent.META_DOWN_MASK ||
-				JSToolkit.isMac && extended == (InputEvent.CTRL_DOWN_MASK | InputEvent.BUTTON1_DOWN_MASK));
 		int button = getButton(modifiers);
 		int count = (xcount > 1 && id == MouseEvent.MOUSE_CLICKED ? xcount : updateClickCount(id, time, x, y));
+		boolean popupTrigger = isPopupTrigger(id, modifiers, JSToolkit.isWin);
 
 		Component source = viewer.getTopComponent(); // may be a JFrame
 		MouseEvent e;
-		if (id == MouseEvent.MOUSE_WHEEL) {
+		if (id == MouseEvent.MOUSE_WHEEL) { 
 			e = new MouseWheelEvent(source, id, time, modifiers, x, y, x, y, count, 
 							popupTrigger, MouseWheelEvent.WHEEL_UNIT_SCROLL, 1, dy);
 		} else {
@@ -387,9 +378,34 @@ public class JSMouse {
 		  ((Container) e.getSource()).dispatchEvent(e);
 		}
 	}
+	
+	private static boolean isPopupTrigger(int id, int mods, boolean isWin) {
+		boolean rt = ((mods & InputEvent.BUTTON3_MASK) != 0);
+		if (isWin) {
+			if (id != MouseEvent.MOUSE_RELEASED)
+				return false;
+//
+//			// Oddly, Windows returns InputEvent.META_DOWN_MASK on release, though
+//			// BUTTON3_DOWN_MASK for pressed. So here we just accept both.
+//
+// actually, we can use XXX_MASK, not XXX_DOWN_MASK and avoid this issue, because
+// J2S adds the appropriate extended (0xFFFFC000) and simple (0x3F) modifiers. 
+//			final boolean isMetaDown = ((jmodifiers & InputEvent.META_DOWN_MASK) != 0);
+//
+			return rt;// || isMetaDown;
+		} else {
+			// mac, linux, unix
+			if (id != MouseEvent.MOUSE_PRESSED)
+				return false;
+			boolean lt = ((mods & InputEvent.BUTTON1_MASK) != 0);
+			boolean ctrl = ((mods & InputEvent.CTRL_MASK) != 0);
+			return rt || (ctrl && lt);
+		}
+	}
 
 	private boolean keyAction(int id, int modifiers, Object jqevent2, long time) {
 		return JSKeyEvent.dispatchKeyEvent(id, modifiers, jqevent, time);
 	}
+
 
 }
