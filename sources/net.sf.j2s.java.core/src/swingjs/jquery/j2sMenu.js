@@ -58,6 +58,7 @@ try{
 		 // BH 2018
 		 // -- added stopPropagation
 		 // -- changed to mouseover from mouseenter, since we have children
+		 me.clickoutDiasabled = false;
 		 var a = e(t.target).closest("li")
 		 if (a.hasClass(".ui-state-focus"))
 			 return;		 
@@ -80,10 +81,14 @@ try{
 				||(me.element.trigger("focus",[!0]),me.active&&me.active.parents(".ui-j2smenu").length===1&&clearMe(me.timer, trigger))); 
 		doCmd("_hide", me, e, e(".ui-j2smenu"));
 		break;
+	 case "noclickout":
+		 me.clickoutDiasabled = true;
+		 setTimeout(function(){me.clickoutDiasabled = false;},50);
+		 return;
 	 case "onclick_out":
-		 e(t.target).closest(".j2s-menuBar-menu").length == 0 
+		 me.clickoutDiasabled || e(t.target).closest(".j2s-menuBar-menu").length == 0 
 		    && (e(t.target).closest(".ui-j2smenu").length||me.collapseAll(t));
-	 	break;
+	 	return;
 	 case "onleave":
 		 me.collapseAll(t);
 		 break;
@@ -280,6 +285,8 @@ try{
  
  _create:function(){
 	 
+	 this.clickoutDiasabled = true;
+	 
 	 if (typeof this.options.delay == "number")
 		 this.delay = this.options.delay;
 	 
@@ -391,7 +398,7 @@ try{
  refresh:function(t,n){        doCmd("refresh", this, e, t, n); },
  expand:function(t){        doCmd("expand", this, e, t);},
  select:function(t){ doCmd("select", this, e, t); },
- 
+ noclickout:function() { doCmd("noclickout", this); }, 
  next:function(t){this._move("next","first",t)},
  previous:function(t){this._move("prev","last",t)},
  isFirstItem:function(){return this.active&&!this.active.prevAll(".ui-j2smenu-item").length},
@@ -478,6 +485,9 @@ Swing.setMenu = function(menu) {
 	Swing.__getMenuStyle && J2S.$after("head", '<style>'+Swing.__getMenuStyle(menu._applet)+'</style>');  
 	Swing.__getMenuStyle = null; // "static"
   if (menu.uiClassID) {
+	  
+	// TODO: We can't be creating fields in JPopupMenu! This is ancient stuff.
+	  
     menu._visible = false;
     menu._j2sname = menu.id = menu.ui.id + '_' + (++Swing.menuCounter);
     menu.$ulTop = J2S.__$(); // empty jQuery selector
@@ -554,10 +564,13 @@ Swing.showMenu = function(menu, x, y) {
   if (J2S._showMenuCallback)
 	J2S._showMenuCallback(menu, x, y);
   var wasTainted = menu._tainted;
+  
+  // TODO: We can't be creating fields in JPopupMenu!
+  
   if (menu._tainted)
 	  Swing.updateMenu(menu);
   menu.setPosition(x, y);
-  menu.$ulTop.hide().j2smenu().show();  
+  menu.$ulTop.hide().j2smenu("noclickout").show();  
   menu._visible = true;
   menu.timestamp = System.currentTimeMillis$();
   menu.dragBind(true);

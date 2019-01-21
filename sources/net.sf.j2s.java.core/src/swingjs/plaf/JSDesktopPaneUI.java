@@ -26,7 +26,6 @@ import javax.swing.plaf.UIResource;
 
 import sun.swing.DefaultLookup;
 import sun.swing.UIAction;
-import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 
 public class JSDesktopPaneUI extends JSPanelUI {
@@ -49,6 +48,7 @@ public class JSDesktopPaneUI extends JSPanelUI {
 		if (isNew) {
 			$(domNode).addClass("swingjs-desktop");
 		}		
+		checkAllowDivOverflow();
 		return domNode;
 	}
 

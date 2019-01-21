@@ -30,6 +30,7 @@ package swingjs.plaf;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
@@ -120,6 +121,12 @@ public class JSMenuBarUI extends JSPanelUI implements ContainerListener {
 		return height = menuBar.getFont().getFontMetrics().getHeight();
 	}
 
+	@Override
+	public Insets getInsets() {
+		return new Insets(2,10,2,10);
+		
+	}
+	
 	@Override
 	public Dimension getPreferredSize(JComponent jc) {
 		// layout manager will call this specifically for the height

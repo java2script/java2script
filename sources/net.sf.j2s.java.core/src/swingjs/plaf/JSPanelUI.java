@@ -26,7 +26,7 @@ public class JSPanelUI extends JSLightweightUI {
 				DOMNode.setVisible(domNode,  false);
 		}
 		isContentPane = (root != null && jc == root.getContentPane());
-		if (isContentPane) 
+		if (isContentPane)
 			checkAllowDivOverflow();
 		return updateDOMNodeCUI();
 	}

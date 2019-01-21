@@ -173,6 +173,9 @@ public class Test_Event extends JFrame implements DropTargetListener {
 
 		if (asInternalFrame) {
 			JDesktopPane d = new JDesktopPane();
+			// this next allows floating frames outside the JDesktopPane in SwingJS
+			d.putClientProperty("swingjs.overflow.hidden", "false");
+
 			d.setPreferredSize(new Dimension(800, 600));
 
 			JInternalFrame main = new JInternalFrame();
@@ -252,9 +255,7 @@ public class Test_Event extends JFrame implements DropTargetListener {
 			d.add(main2);
 			
 
-			setContentPane(d);
-			// these next two allow floating frames outside the JDesktopPane
-			getRootPane().putClientProperty("swingjs.overflow.hidden", "false");
+			add(d);
 			pack();
 			setVisible(true);
 

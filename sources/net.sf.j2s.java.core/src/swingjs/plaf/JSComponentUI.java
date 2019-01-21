@@ -36,6 +36,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JRootPane;
 import javax.swing.JTable.BooleanRenderer;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
@@ -1292,21 +1293,23 @@ public class JSComponentUI extends ComponentUI
 	
 	protected boolean imagePersists;
 
-	private boolean allowDivOverflow;
+	protected boolean allowDivOverflow;
 
 
 	/**
-	 * we can allow frames -- particularly JInternalFrames -- to overflow.
+	 * we can allow frames -- particularly JInternalFrames in a JDesktopFrame -- to overflow.
 	 * 
 	 * To do this, we need to make this indication for both the Root pane and the
-	 * contentPane for the parent JFrame:
+	 * contentPane for the parent JFrame, as well as the JDesktopPane, if that pane is not the contentPane. 
+	 * The developer need only indicate this for the rootPane
 	 * 
 	 * this.getRootPane().putClientProperty("swingjs.overflow.hidden", "false");
 	 * 
 	 * 
 	 */
 	protected void checkAllowDivOverflow() {
-		allowDivOverflow = "false".equals(jc.getRootPane().getClientProperty("swingjs.overflow.hidden"));
+		JRootPane root = jc.getRootPane();
+		allowDivOverflow = (root != null && "false".equals(root.getClientProperty("swingjs.overflow.hidden")));
 	}
 
 	public void setAllowPaintedBackground(boolean TF) {
@@ -2363,7 +2366,7 @@ public class JSComponentUI extends ComponentUI
 						"margin", "0px 5px",
 						"transform", "translateY(15%)");
 			}
-			DOMNode.setStyles(menuAnchorNode, "width", "95%", "min-width", (wCtr + wAccel + margins.left + margins.right) + "px");			
+			DOMNode.setStyles(menuAnchorNode, "width", "90%", "min-width", Math.max(75,(wCtr + wAccel + margins.left + margins.right)*1.1) + "px");			
 		}
 
 		if (alignHCenter) {

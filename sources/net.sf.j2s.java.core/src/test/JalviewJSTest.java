@@ -171,12 +171,6 @@ int nAction = 0;
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
 				//System.out.println(e.getButton());
 				if (e.getButton() != MouseEvent.BUTTON3)
 					return;
@@ -184,6 +178,17 @@ int nAction = 0;
 				if (n > 1)
 					pmenu.remove(n - 1);
 				pmenu.show(frame, e.getX(), e.getY() - 10);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+//				//System.out.println(e.getButton());
+//				if (e.getButton() != MouseEvent.BUTTON3)
+//					return;
+//				int n = pmenu.getComponentCount();
+//				if (n > 1)
+//					pmenu.remove(n - 1);
+//				pmenu.show(frame, e.getX(), e.getY() - 10);
 			}
 
 			@Override
@@ -224,7 +229,7 @@ int nAction = 0;
 		Font font = new Font("Verdana", Font.PLAIN, 12);
 
 		JPanel panel = new JPanel();
-		panel.setPreferredSize(new Dimension(400, 500));
+		panel.setPreferredSize(new Dimension(400, 600));
 		panel.setOpaque(true);
 		panel.setLayout(new BorderLayout());
 
@@ -291,7 +296,7 @@ int nAction = 0;
 		firstColumn.add(rb1);
 		firstColumn.add(rb2);
 		firstColumn.add(rb3);
-		firstColumn.setBounds(100, 40, 200, 300);
+		firstColumn.setBounds(100, 40, 200, 500);
 
 		JMenuItem cb3m = new JMenuItem("XXleading,left-to-rightXX");
 		cb3m.setFont(font);
@@ -445,7 +450,7 @@ int nAction = 0;
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						menu.remove(testbtn);
-						System.out.println("removing testbtn");
+						System.out.println("JalviewJSTest removing testbtn");
 					}
 
 				});
@@ -458,6 +463,8 @@ int nAction = 0;
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						testbtn.setText("test" + ++ntest);
+						System.out.println("JalviewJSTest adding testbtn");
+						
 						menu.add(testbtn);
 
 					}
