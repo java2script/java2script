@@ -1,4 +1,8 @@
 /*
+ * 
+ * Adapted for SwingJS by Bob Hanson to allow two UI sources to both contribute. In 
+ * my case it was ButtonListener and JSMenuItemUI
+ * 
  * Some portions of this file have been modified by Robert Hanson hansonr.at.stolaf.edu 2012-2017
  * for use in SwingJS via transpilation into JavaScript using Java2Script.
  *
@@ -47,7 +51,8 @@ class LazyActionMap extends ActionMapUIResource {
      * Object to invoke <code>loadActionMap</code> on. This may be
      * a Class object.
      */
-    private transient Object _loader;
+    Object _loader;
+    String _key; // SwingJS added to allow ButtonListener and JMenuItemUI both to contribute
 
     /**
      * Installs an ActionMap that will be populated by invoking the
@@ -66,7 +71,7 @@ class LazyActionMap extends ActionMapUIResource {
                                      String defaultsKey) {
         ActionMap map = (ActionMap)UIManager.get(defaultsKey);
         if (map == null) {
-            map = new LazyActionMap(loaderClass);
+            map = new LazyActionMap(loaderClass, defaultsKey);
             UIManager.getLookAndFeelDefaults().put(defaultsKey, map);
         }
         SwingUtilities.replaceUIActionMap(c, map);
@@ -89,16 +94,17 @@ class LazyActionMap extends ActionMapUIResource {
                                   String defaultsKey) {
         ActionMap map = (ActionMap)UIManager.get(defaultsKey);
         if (map == null) {
-            map = new LazyActionMap(loaderClass);
+            map = new LazyActionMap(loaderClass, defaultsKey);
             UIManager.getLookAndFeelDefaults().put(defaultsKey, map);
         }
         return map;
     }
 
 
-    private LazyActionMap(Class loader) {
+    private LazyActionMap(Class loader, String key) {
         _loader = loader;
-    }
+        _key = key;
+    }	
 
     public void put(Action action) {
         put(action.getValue(Action.NAME), action);

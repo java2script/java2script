@@ -223,6 +223,17 @@ public class JMenu extends JMenuItem implements MenuElement
 
 	}
 
+	/**
+	 * SwingJS added
+	 */
+	@Override
+	public void addNotify() {
+		super.addNotify();
+		if (popupMenu != null)
+			popupMenu.addNotify();
+	}
+
+
 
     //    public void repaint(long tm, int x, int y, int width, int height) {
     //        Thread.currentThread().dumpStack();
@@ -328,7 +339,7 @@ public class JMenu extends JMenuItem implements MenuElement
         boolean isVisible = isPopupMenuVisible();
         if (b != isVisible && (isEnabled() || !b)) {
             ensurePopupMenuCreated();
-            if ((b==true) && isShowing()) {
+            if (b && isShowing()) {
                 // Set location of popupMenu (pulldown or pullright)
                 Point p = getCustomMenuLocation();
                 if (p == null) {
@@ -531,6 +542,7 @@ public class JMenu extends JMenuItem implements MenuElement
             this.popupMenu = new JPopupMenu();
             popupMenu.setInvoker(this);
             popupListener = createWinListener(popupMenu);
+            popupMenu.addNotify();// BH SwingJS 
         }
     }
 
@@ -562,7 +574,9 @@ public class JMenu extends JMenuItem implements MenuElement
      */
     public JMenuItem add(JMenuItem menuItem) {
         ensurePopupMenuCreated();
-        return popupMenu.add(menuItem);
+        popupMenu.add(menuItem);
+        firePropertyChange("JSitem", null, menuItem);
+        return menuItem;
     }
 
     /**
@@ -576,6 +590,7 @@ public class JMenu extends JMenuItem implements MenuElement
 		public Component add(Component c) {
         ensurePopupMenuCreated();
         popupMenu.add(c);
+        firePropertyChange("JSitem", null, c);
         return c;
     }
 
@@ -593,6 +608,8 @@ public class JMenu extends JMenuItem implements MenuElement
 		public Component add(Component c, int index) {
         ensurePopupMenuCreated();
         popupMenu.add(c, index);
+        
+        firePropertyChange("JSitem", null, c);
         return c;
     }
 
@@ -828,11 +845,9 @@ public class JMenu extends JMenuItem implements MenuElement
      */
     @Override
 		public void remove(Component c) {
-//  why did I add this? BH 2018  	if (c instanceof JMenuItem)
-//        if (popupMenu != null)
-//            popupMenu.remove(c);
         if (popupMenu != null)
             popupMenu.remove(c);
+        firePropertyChange("JSitem", c, null);
     }
 
     /**
@@ -842,6 +857,7 @@ public class JMenu extends JMenuItem implements MenuElement
 		public void removeAll() {
         if (popupMenu != null)
             popupMenu.removeAll();
+        firePropertyChange("JSitem", this, null);
     }
 
     /**
@@ -890,10 +906,7 @@ public class JMenu extends JMenuItem implements MenuElement
      *         on another menu
      */
     public boolean isTopLevelMenu() {
-        if (getParent() instanceof JMenuBar)
-            return true;
-
-        return false;
+       return (getParent() instanceof JMenuBar);
     }
 
     /**

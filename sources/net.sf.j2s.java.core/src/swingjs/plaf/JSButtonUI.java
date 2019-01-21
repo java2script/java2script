@@ -56,29 +56,30 @@ public class JSButtonUI extends JSLightweightUI {
 
 	// Hierarchy:
 	//
-	//   JSButtonUI
-	//       |
-	//       |__JSMenuItemUI
-	//       |        |
-	//       |        |__JSMenuUI
-	//       |
-	//       |__JSRadioButtonUI
-	//               |
-	//               |__JSCheckBoxUI
-	//               |      |
-	//               |      |__JSCheckBoxMenuItemUI
-	//               |
-	//               |__JSRadioButtonMenuItemUI
+	// JSButtonUI
+	// |
+	// |__JSMenuItemUI
+	// | |
+	// | |__JSMenuUI
+	// |
+	// |__JSRadioButtonUI
+	// |
+	// |__JSCheckBoxUI
+	// | |
+	// | |__JSCheckBoxMenuItemUI
+	// |
+	// |__JSRadioButtonMenuItemUI
 	//
 	//
-	
+	// mousePress --> Frame(Component).dispatchEvent
+	// --> LightWeightDispatcher --> [data-component]
+
 	/**
 	 * a wrapper if this is not a menu item
 	 */
 	protected JMenuItem menuItem;
 	protected AbstractButton button;
 
-	
 	@Override
 	public DOMNode updateDOMNode() {
 		isSimpleButton = true;
@@ -86,7 +87,8 @@ public class JSButtonUI extends JSLightweightUI {
 		// all subclasses will have their own version of this.
 		// this one is only for a simple button
 		if (domNode == null) {
-			domNode = enableNode = buttonNode = newDOMObject ("button", id + "_dom", "type", "button");
+			setDoPropagate();
+			domNode = enableNode = buttonNode = newDOMObject("button", id + "_dom", "type", "button");
 			iconNode = null;
 			createButton();
 		}
@@ -96,7 +98,7 @@ public class JSButtonUI extends JSLightweightUI {
 
 	protected void createButton() {
 		addCentering(buttonNode);
-		setDataComponent(domNode);
+		setDataComponent(buttonNode);
 		setDataComponent(iconNode); // needed for mac safari/chrome
 		setDataComponent(textNode); // needed for mac safari/chrome
 		setEnabled(c.isEnabled());
@@ -104,19 +106,14 @@ public class JSButtonUI extends JSLightweightUI {
 
 	/**
 	 * 
-	 * @param type
-	 *          "_item" or "_menu"
-	 * @param buttonNode
-	 *          will be a for-label for radio and checkbox only; otherwise null
+	 * @param type       "_item" or "_menu" (unused)
+	 * @param buttonNode will be a for-label for radio and checkbox only; otherwise
+	 *                   null
 	 * @return
 	 */
 	protected DOMNode createItem(String type, DOMNode buttonNode) {
 		// all subclasses will call this method, including
 		// standard MenuItem and Menu labels
-
-		// unnecessary? if (label == null)
-		// hasOuterDiv = false;
-
 		String text = button.getText();
 		ImageIcon icon = (ImageIcon) button.getIcon();
 		int gap = button.getIconTextGap();
@@ -125,42 +122,50 @@ public class JSButtonUI extends JSLightweightUI {
 			// separator masquerading as a menu item
 			text = null;
 		}
-		itemNode = newDOMObject("li", id + type);
+		itemNode = newDOMObject("li", id);
 		if (text == null && icon == null)
 			return itemNode;
-		menuAnchorNode = newDOMObject("a", id + type + "_a");
-		DOMNode.setStyles(menuAnchorNode, "margin", "1px 2px 1px 2px");
+		menuAnchorNode = newDOMObject("div", id + "_a");// this needed? , "tabindex", "8");
+		if (type != "_bar") {
+			addClass(menuAnchorNode, "a");
+			DOMNode.setStyles(menuAnchorNode, "margin", "1px 2px 1px 2px");
+		}
 		itemNode.appendChild(menuAnchorNode);
+		setDoPropagate();
 		if (buttonNode == null) {
 			// not a radio or checkbox
 			addCentering(menuAnchorNode);
-			$(iconNode).attr("role", "menucloser");
-			$(textNode).attr("role", "menucloser");
-			setDataUI(iconNode);
-			setDataUI(textNode);
 			enableNode = itemNode;
 			setIconAndText("btn", icon, gap, text);
 		} else {
 			menuAnchorNode.appendChild(buttonNode);
+			setMenuItem(buttonNode);
 		}
+		setMenuItem(menuAnchorNode);
+		setMenuItem();
 		// j2sMenu.js will set the mouse-up event for the <a> tag with the
 		// role=menuitem
 		// attribute via j2sApplet.setMouse().
 		// That event will then fire handleJSEvent
-		setDataUI(menuAnchorNode);
 		setDataComponent(menuAnchorNode);
 		setDataComponent(itemNode);
 		return itemNode;
+	}
 
+	protected void setMenuItem() {
+		setMenuItem(itemNode);
+		setMenuItem(iconNode);
+		setMenuItem(textNode);
+		setMenuItem(centeringNode);
 	}
 
 	@Override
 	protected void enableNode(DOMNode node, boolean b) {
 		if (isMenuItem) {
 			if (b) {
-				$(node).removeClass("ui-menu-disabled ui-state-disabled");
+				removeClass(node, JSPopupMenuUI.UI_DISABLED);
 			} else {
-				$(node).addClass("ui-menu-disabled ui-state-disabled");
+				addClass(node, JSPopupMenuUI.UI_DISABLED);
 			}
 		} else {
 			super.enableNode(node, b);
@@ -174,8 +179,10 @@ public class JSButtonUI extends JSLightweightUI {
 			DOMNode.setStyles(buttonNode, "border", "none");
 		else if (button.getBorder() == BorderFactory.html5Border)
 			DOMNode.setStyles(buttonNode, "border", null);
-		if (!isMenuSep)
+		if (!isMenuSep) {
+			setMnemonic(-1);
 			setAlignments(button);
+		}
 	}
 
 	/**
@@ -187,28 +194,25 @@ public class JSButtonUI extends JSLightweightUI {
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
 		// from menus only - action is on mouse-up
 		// other controls use a ButtonListener
-		if (debugging)
-				System.out.println("JSButtonUI handleJSEvent for " + ((JSComponentUI)target).id);
-  	// checkbox or radio menuitem handle themselves
-		if (menuItem != null && actionNode == null) {			
-		 switch (eventType) {
-		 case MouseEvent.MOUSE_RELEASED:
+		// checkbox or radio menuitem handle themselves
+		if (menuItem != null && actionNode == null) {
+			switch (eventType) {
+			case MouseEvent.MOUSE_RELEASED:
 				menuItem.doClick(0);
-				return UNHANDLED;
-		 }
+				return HANDLED;
+			}
 		}
-		return UNHANDLED;
+		return NOT_HANDLED;
 	}
-
 
 	// from BasicButtonUI
 
 	@Override
 	public void installUI(JComponent jc) {
-		// response to general button actions 
+		// response to general button actions
 		// takes place through the standard Java
-		// pathway involving Component.LightweightDispatcher 
-		// posting to the event queue 
+		// pathway involving Component.LightweightDispatcher
+		// posting to the event queue
 		button = (AbstractButton) jc;
 		installDefaults(button);
 		installListeners(button);
@@ -219,12 +223,12 @@ public class JSButtonUI extends JSLightweightUI {
 	public void uninstallUI(JComponent jc) {
 		uninstallKeyboardActions(button);
 		uninstallListeners(button);
-			
+
 		// uninstallDefaults((AbstractButton) c);
 	}
 
-	protected void installListeners(AbstractButton b) {	
-		buttonListener = new ButtonListener(this, isMenuItem);
+	protected void installListeners(AbstractButton b) {
+		buttonListener = new ButtonListener(this);
 		if (buttonListener != null) {
 			b.addMouseListener(buttonListener);
 			b.addMouseMotionListener(buttonListener);
@@ -260,8 +264,8 @@ public class JSButtonUI extends JSLightweightUI {
 	}
 
 	/**
-	 * Returns the ButtonListener for the passed in Button, or null if one could
-	 * not be found.
+	 * Returns the ButtonListener for the passed in Button, or null if one could not
+	 * be found.
 	 */
 	protected ButtonListener getButtonListener(AbstractButton b) {
 		MouseMotionListener[] listeners = b.getMouseMotionListeners();
@@ -315,13 +319,11 @@ public class JSButtonUI extends JSLightweightUI {
 	 * The value of this comes from the defaults table.
 	 */
 	protected int defaultTextShiftOffset;
-	
 
 	@Override
 	protected String getPropertyPrefix() {
-		return "Button.";
+		return "Button";
 	}
-
 
 	//
 	// protected String propertyPrefix = "Button.";
@@ -358,7 +360,7 @@ public class JSButtonUI extends JSLightweightUI {
 		// load shared instance defaults
 		String pp = getPropertyPrefix();
 
-		defaultTextShiftOffset = UIManager.getInt(pp + "textShiftOffset");
+		defaultTextShiftOffset = UIManager.getInt(pp + ".textShiftOffset");
 
 		// // set the following defaults on the button
 		// if (b.isContentAreaFilled()) {
@@ -368,12 +370,11 @@ public class JSButtonUI extends JSLightweightUI {
 		// }
 
 		if (b.getMargin() == null || (b.getMargin() instanceof UIResource)) {
-			b.setMargin(UIManager.getInsets(pp + "margin"));
+			b.setMargin(UIManager.getInsets(pp + ".margin"));
 		}
-		LookAndFeel.installColorsAndFont(b, pp + "background", pp + "foreground",
-				pp + "font");
-		
-		LookAndFeel.installBorder(b, pp + "border");
+		LookAndFeel.installColorsAndFont(b, pp + ".background", pp + ".foreground", pp + ".font");
+
+		LookAndFeel.installBorder(b, pp + ".border");
 		//
 		// Object rollover = UIManager.get(pp + "rollover");
 		// if (rollover != null) {
@@ -734,12 +735,11 @@ public class JSButtonUI extends JSLightweightUI {
 	//
 	//
 
-
 	@Override
 	protected Dimension getCSSAdjustment(boolean addingCSS) {
 		return new Dimension((itemNode == null ? 0 : 10), 0);
 	}
-	
+
 	@Override
 	protected void setInnerComponentBounds(int width, int height) {
 		if (isSimpleButton && (imageNode == null || button.getText() == null))
@@ -751,11 +751,11 @@ public class JSButtonUI extends JSLightweightUI {
 		// addCSS is always false
 		setAlignments(button, !addCSS);
 		return setHTMLSize1(obj, addCSS, true);
- 	}
+	}
 
 	@Override
 	public void paint(Graphics g, JComponent c) {
-		imagePersists = true; // at least for now. 
+		imagePersists = true; // at least for now.
 		super.paint(g, c);
 	}
 

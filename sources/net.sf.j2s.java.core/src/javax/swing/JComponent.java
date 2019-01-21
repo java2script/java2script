@@ -30,16 +30,6 @@ package javax.swing;
 import static javax.swing.ClientPropertyKey.JComponent_ANCESTOR_NOTIFIER;
 import static javax.swing.ClientPropertyKey.JComponent_INPUT_VERIFIER;
 
-import java.util.Enumeration;
-import java.util.EventListener;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Set;
-
-import javajs.util.Lst;
-
-import javax.swing.SortingFocusTraversalPolicy;
-
 import java.applet.JSApplet;
 import java.awt.AWTEvent;
 import java.awt.AWTKeyStroke;
@@ -61,7 +51,13 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Enumeration;
+import java.util.EventListener;
+import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Locale;
+import java.util.Set;
+
 import javax.swing.TransferHandler.DropLocation;
 import javax.swing.border.AbstractBorder;
 import javax.swing.border.Border;
@@ -71,9 +67,11 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.event.EventListenerList;
 import javax.swing.plaf.ComponentUI;
+
+import javajs.util.Lst;
 import sun.font.FontDesignMetrics;
+import swingjs.JSFocusPeer;
 import swingjs.JSGraphics2D;
-import swingjs.JSToolkit;
 import swingjs.JSUtil;
 import swingjs.plaf.JSComponentUI;
 
@@ -689,10 +687,8 @@ public abstract class JComponent extends Container {
 				// and probably not do this.
 				// SwingJS TODO -- allow JSpecView-like layer for writing over buttons
 				if (jc != null && jc.isVisible()) {
-					jc.getBounds(tmpRect);
-					Rectangle vr = jc.getVisibleRect();
-					
-					
+					jc.getBounds(tmpRect);					
+					Rectangle vr = (jc instanceof JTable ? jc.getVisibleRect() : tmpRect);
 					JSGraphics2D jsg = (JSGraphics2D) (Object) sg.create(tmpRect.x, 
 							(jc.isContentPane ? 0 : tmpRect.y), vr.width, vr.height); 
 					jsg.setColor(jc.getForeground());
@@ -1911,18 +1907,27 @@ public abstract class JComponent extends Container {
 		}
 	}
 
+	
+	/**
+	 * SwingJS addition -- from swingjs.plaf
+	 */
+	public void registerWithKM() { 
+		registerWithKeyboardManager(false);
+	}
+	
 	/**
 	 * Registers any bound <code>WHEN_IN_FOCUSED_WINDOW</code> actions with the
-	 * <code>KeyboardManager</code>. If <code>onlyIfNew</code> is true only
-	 * actions that haven't been registered are pushed to the
-	 * <code>KeyboardManager</code>; otherwise all actions are pushed to the
-	 * <code>KeyboardManager</code>.
+	 * <code>KeyboardManager</code>. If <code>onlyIfNew</code> is true only actions
+	 * that haven't been registered are pushed to the <code>KeyboardManager</code>;
+	 * otherwise all actions are pushed to the <code>KeyboardManager</code>.
 	 * 
-	 * @param onlyIfNew
-	 *          if true, only actions that haven't been registered are pushed to
-	 *          the <code>KeyboardManager</code>
+	 * @param onlyIfNew if true, only actions that haven't been registered are
+	 *                  pushed to the <code>KeyboardManager</code>
 	 */
 	private void registerWithKeyboardManager(boolean onlyIfNew) {
+		if (JSFocusPeer.getTopInvokableAncestor(this) == null)
+			return;
+
 		InputMap inputMap = getInputMap(WHEN_IN_FOCUSED_WINDOW, false);
 		KeyStroke[] strokes;
 		Hashtable registered = (Hashtable) getClientProperty(WHEN_IN_FOCUSED_WINDOW_BINDINGS);
@@ -1930,10 +1935,10 @@ public abstract class JComponent extends Container {
 		if (inputMap != null) {
 			// Push any new KeyStrokes to the KeyboardManager.
 			strokes = inputMap.allKeys();
+
 			if (strokes != null) {
 				for (int counter = strokes.length - 1; counter >= 0; counter--) {
-					if (!onlyIfNew || registered == null
-							|| registered.get(strokes[counter]) == null) {
+					if (!onlyIfNew || registered == null || registered.get(strokes[counter]) == null) {
 						registerWithKeyboardManager(strokes[counter]);
 					}
 					if (registered != null) {
@@ -2002,6 +2007,7 @@ public abstract class JComponent extends Container {
 			km = (ComponentInputMap) km.getParent();
 		}
 		if (km != null) {
+			// inputMap was found
 			registerWithKeyboardManager(false);
 		}
 	}
@@ -2628,7 +2634,6 @@ public abstract class JComponent extends Container {
 	protected void processComponentKeyEvent(KeyEvent e) {
 	}
 
-	/** Overrides <code>processKeyEvent</code> to process events. **/
 	@Override
 	protected void processKeyEvent(KeyEvent e) {
 		// boolean result;
@@ -3857,7 +3862,6 @@ public abstract class JComponent extends Container {
 	 */
 	public Rectangle getVisibleRect() {
 		Rectangle visibleRect = new Rectangle();
-
 		computeVisibleRect(visibleRect);
 		return visibleRect;
 	}
@@ -4123,6 +4127,7 @@ public abstract class JComponent extends Container {
 	@Override
 	public void addNotify() {
 		super.addNotify();
+//		System.out.println(">>>addnotify for " + getUIClassID() + " " +  this);
 		firePropertyChange("ancestor", null, getParent());
 
 		registerWithKeyboardManager(false);

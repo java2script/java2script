@@ -30,7 +30,7 @@ import java.net.URL;
 
 public class Logger {
 
-	public void addHandler(ConsoleHandler handler) {
+	public void addHandler(Handler handler) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -8,6 +8,7 @@ import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JTextField;
 
+import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
 
 /**
@@ -31,12 +32,10 @@ public class JSTextFieldUI extends JSTextUI {
 			focusNode = enableNode = valueNode = domNode = DOMNode.setStyles(
 					newDOMObject("input", id, "type", inputType),
 					"lineHeight", "0.8", "box-sizing", "border-box");
-			DOMNode.setAttrs(focusNode, "ui", this);
 			// not active; requires position:absolute; wrong for standard text box
 			// vCenter(domNode, -10);
-			setDataComponent(domNode);
-			bindJSKeyEvents(domNode, false);
-			addJQueryFocusCallbacks();
+			//new 1/5/2019 setDataComponent(domNode);
+			bindJSKeyEvents(domNode, true);
 		}
 		setPadding(editor.getMargin());
 		textListener.checkDocument();
@@ -63,9 +62,11 @@ public class JSTextFieldUI extends JSTextUI {
 	boolean handleEnter(int eventType) {
 		if (eventType == KeyEvent.KEY_PRESSED) {
 			Action a = getActionMap().get(JTextField.notifyAction);
-			if (a != null) {				
+			if (a != null) {
+				JSToolkit.setIsDispatchThread(true);
 				a.actionPerformed(new ActionEvent(c, ActionEvent.ACTION_PERFORMED,
 						JTextField.notifyAction, System.currentTimeMillis(), 0));
+				JSToolkit.setIsDispatchThread(false);
 			}
 		}
 		return true;
@@ -73,19 +74,7 @@ public class JSTextFieldUI extends JSTextUI {
 
 	@Override
 	protected String getPropertyPrefix() {
-		return "TextField.";
+		return "TextField";
 	}
-
-	@Override
-	protected void jsSelect(Object[] r1, Object[] r2) {
-		/**
-		 * @j2sNative
-		 * 
-		 *   this.domNode.selectionStart = r1[1];
-		 *   this.domNode.selectionEnd = r2[1];
-		 */
-		
-	}
-
 
 }

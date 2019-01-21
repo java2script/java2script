@@ -281,6 +281,8 @@ public class Event {
      */
     public static final int WINDOW_MOVED        = 5 + WINDOW_EVENT;
 
+    // but see WINDOW_EVENT for more
+    
     /* Base for all keyboard events. */
     private static final int KEY_EVENT          = 400;
 
@@ -455,6 +457,10 @@ public class Event {
      * A component lost the focus.
      */
     public static final int LOST_FOCUS          = 5 + MISC_EVENT;
+
+    
+    // SequenceEvent is 1006
+    // SentEvent is 1007
 
     /**
      * The target component. This indicates the component over which the

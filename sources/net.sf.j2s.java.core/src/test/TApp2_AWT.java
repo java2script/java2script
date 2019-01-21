@@ -42,7 +42,9 @@ public class TApp2_AWT extends Applet {
 		super.paint(g);
 		((Graphics2D) g).setStroke((new BasicStroke(0)));
 		g.drawRect(130, 150, 40, 60);
+		g.drawString("fill", 145, 15);
 		g.fillRect(140, 5, 1, 200);
+		g.drawString("draw", 165, 15);
 		g.drawRect(160, 5, 1, 200);
 		g.drawLine(150, 150, 150, 350);
 		g.drawString("testing123", 50, 200);

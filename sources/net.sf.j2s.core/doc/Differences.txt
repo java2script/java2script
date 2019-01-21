@@ -1,6 +1,10 @@
 Notes
 =====
 
+update 12/4/2019 -- 3.2.4.07
+
+this update advances JTextArea, JTextPane, and JEditorPane, and adds many more classes of java.nio.
+
 update 10/1/2018 -- 3.2.4.01
 
 AWT components in SwingJS:

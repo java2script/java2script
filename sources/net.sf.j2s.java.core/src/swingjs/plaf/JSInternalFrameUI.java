@@ -457,7 +457,8 @@ public class JSInternalFrameUI extends JSFrameUI {
 
         @Override
 		public void windowLostFocus(WindowEvent e) {
-            // Cancel a resize which may be in progress, when a
+        	hideAllMenus();
+        	// Cancel a resize which may be in progress, when a
             // WINDOW_LOST_FOCUS event occurs, which may be
             // caused by an Alt-Tab or a modal dialog popup.
 //            cancelResize();
@@ -466,6 +467,7 @@ public class JSInternalFrameUI extends JSFrameUI {
         // ComponentHandler methods
         /** Invoked when a JInternalFrame's parent's size changes. */
         public void componentResized(ComponentEvent e) {
+        	hideAllMenus();
 //            // Get the JInternalFrame's parent container size
 //            Rectangle parentNewBounds = ((Component) e.getSource()).getBounds();
 //            JInternalFrame.JDesktopIcon icon = null;
@@ -498,19 +500,21 @@ public class JSInternalFrameUI extends JSFrameUI {
 //            if (frame != null) frame.validate();
         }
 
-        public void componentMoved(ComponentEvent e) {}
-        public void componentShown(ComponentEvent e) {}
-        public void componentHidden(ComponentEvent e) {}
+        public void componentMoved(ComponentEvent e) {hideAllMenus();}
+        public void componentShown(ComponentEvent e) {hideAllMenus();}
+        public void componentHidden(ComponentEvent e) {hideAllMenus();}
 
 
         // InternalFrameListener
         @Override
 		public void internalFrameClosed(InternalFrameEvent e) {
-            iframe.removeInternalFrameListener(getHandler());
+        	hideAllMenus();
+        	iframe.removeInternalFrameListener(getHandler());
         }
 
         @Override
 		public void internalFrameActivated(InternalFrameEvent e) {
+        	hideAllMenus();
 //            if (!isKeyBindingRegistered()){
 //                setKeyBindingRegistered(true);
 //                setupMenuOpenKey();
@@ -522,17 +526,18 @@ public class JSInternalFrameUI extends JSFrameUI {
 
         @Override
 		public void internalFrameDeactivated(InternalFrameEvent e) {
-//            setKeyBindingActive(false);
+        	// TODO deactivated message from DeskTop is not appropriate yet
+        	//hideAllMenus();
         }
 
         @Override
-		public void internalFrameClosing(InternalFrameEvent e) { }
+		public void internalFrameClosing(InternalFrameEvent e) { hideAllMenus(); }
         @Override
-		public void internalFrameOpened(InternalFrameEvent e) { }
+		public void internalFrameOpened(InternalFrameEvent e) { hideAllMenus();}
         @Override
-		public void internalFrameIconified(InternalFrameEvent e) { }
+		public void internalFrameIconified(InternalFrameEvent e) { hideAllMenus();}
         @Override
-		public void internalFrameDeiconified(InternalFrameEvent e) { }
+		public void internalFrameDeiconified(InternalFrameEvent e) { hideAllMenus();}
 
 
 

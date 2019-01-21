@@ -26,13 +26,18 @@
  */
 package swingjs;
 
-import java.awt.event.InputEvent;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Event;
 import java.awt.Toolkit;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
+
+import javax.swing.JComponent;
+
+import swingjs.plaf.JSComponentUI;
 
 /**
  * JavaScript interface from JmolJSmol.js via handleOldJvm10Event (for now)
@@ -50,6 +55,12 @@ public class JSMouse {
 
 	public boolean processEvent(int id, int x, int y, int modifiers, long time, Object jqevent, int scroll) {
 		this.jqevent = jqevent;
+		switch (id) {
+		case KeyEvent.KEY_PRESSED:
+		case KeyEvent.KEY_TYPED:
+		case KeyEvent.KEY_RELEASED:
+			return keyAction(id, modifiers, jqevent, time);
+		}	
 		if (id != MouseEvent.MOUSE_WHEEL && id != MouseEvent.MOUSE_MOVED)
 			modifiers = applyLeftMouse(modifiers);
 		switch (id) {	
@@ -263,58 +274,7 @@ public class JSMouse {
 		mouseAction(id, time, x, y, 0, 0, 0);
 	}
 
-	@SuppressWarnings("unused")
-	private void mouseAction(int id, long time, int x, int y, int xcount,
-			int modifiers, int dy) {
-
-		// Oddly, Windows returns InputEvent.META_DOWN_MASK on release, though
-		// BUTTON3_DOWN_MASK for pressed. So here we just accept both when not a
-		// mac.
-		// A bit of a kludge.
-
-		int extended = modifiers & EXTENDED_MASK;
-		boolean popupTrigger = (
-				extended == InputEvent.BUTTON3_DOWN_MASK	|| 
-				extended == InputEvent.META_DOWN_MASK ||
-				JSToolkit.isMac && extended == (InputEvent.CTRL_DOWN_MASK | InputEvent.BUTTON1_DOWN_MASK));
-		int button = getButton(modifiers);
-		int count = (xcount > 1 && id == MouseEvent.MOUSE_CLICKED ? xcount : updateClickCount(id, time, x, y));
-
-		Component source = viewer.getTopComponent(); // may be a JFrame
-		MouseEvent e;
-		if (id == MouseEvent.MOUSE_WHEEL) {
-			e = new MouseWheelEvent(source, id, time, modifiers, x, y, x, y, count, 
-							popupTrigger, MouseWheelEvent.WHEEL_UNIT_SCROLL, 1, dy);
-		} else {
-		// Component source, int id, long when, int modifiers,
-    // int x, int y, int xAbs, int yAbs, int clickCount, boolean popupTrigger,
-    // int scrollType, int scrollAmount, int wheelRotation
-			
-		e = new MouseEvent(source, id, time, modifiers, x, y, x, y,
-				count, popupTrigger, button);
-		}
-		byte[] bdata = new byte[0];
-		e.setBData(bdata);
-		Object jqevent = this.jqevent;
-		Component c = null;
-		/**
-		 * @j2sNative 
-		 * 
-		 * bdata.jqevent = jqevent;
-		 * c = jqevent.target["data-component"];
-		 */
-		
-		// the key here is that if we have a data-component, we must go directly to its
-		// container and dispatch the event; if we go through the event queue, any e.consume()
-		// that occurs is too late to consume the event. 
-		
-//		if (c == null) {
-	//		Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(e);
-		//} else {
-		  ((Container) e.getSource()).dispatchEvent(e);
-	//	}
-	}
-
+	
 	private long lasttime;
 	private int lastx, lasty, clickCount;
 	
@@ -359,6 +319,77 @@ public class JSMouse {
 //		System.out.println("setting mouse click to " + clickCount + " returning  "
 	//			+ ret);
 		return ret;
+	}
+
+	// All events in this class end up in one of these two methods.
+
+	/**
+	 * 
+	 * @param id
+	 * @param time
+	 * @param x
+	 * @param y
+	 * @param xcount
+	 * @param modifiers
+	 * @param dy
+	 */
+	@SuppressWarnings("unused")
+	private void mouseAction(int id, long time, int x, int y, int xcount,
+			int modifiers, int dy) {
+
+		// Oddly, Windows returns InputEvent.META_DOWN_MASK on release, though
+		// BUTTON3_DOWN_MASK for pressed. So here we just accept both when not a
+		// mac.
+		// A bit of a kludge.
+
+		int extended = modifiers & EXTENDED_MASK;
+		boolean popupTrigger = (
+				extended == InputEvent.BUTTON3_DOWN_MASK	|| 
+				extended == InputEvent.META_DOWN_MASK ||
+				JSToolkit.isMac && extended == (InputEvent.CTRL_DOWN_MASK | InputEvent.BUTTON1_DOWN_MASK));
+		int button = getButton(modifiers);
+		int count = (xcount > 1 && id == MouseEvent.MOUSE_CLICKED ? xcount : updateClickCount(id, time, x, y));
+
+		Component source = viewer.getTopComponent(); // may be a JFrame
+		MouseEvent e;
+		if (id == MouseEvent.MOUSE_WHEEL) {
+			e = new MouseWheelEvent(source, id, time, modifiers, x, y, x, y, count, 
+							popupTrigger, MouseWheelEvent.WHEEL_UNIT_SCROLL, 1, dy);
+		} else {
+		// Component source, int id, long when, int modifiers,
+    // int x, int y, int xAbs, int yAbs, int clickCount, boolean popupTrigger,
+    // int scrollType, int scrollAmount, int wheelRotation
+			
+		e = new MouseEvent(source, id, time, modifiers, x, y, x, y,
+				count, popupTrigger, button);
+		}
+		byte[] bdata = new byte[0];
+		e.setBData(bdata);
+		Object jqevent = this.jqevent;
+		Component c = null;
+		/**
+		 * @j2sNative 
+		 * 
+		 * bdata.jqevent = jqevent;
+		 * bdata.source = c = jqevent.target["data-component"];
+		 * bdata.doPropagate = c && c.ui.j2sDoPropagate;
+		 */
+		
+		// bdata.doPropagate will be tested in InputEvent.doConsume.
+		
+		// the key here is that if we have a data-component, go directly to its
+		// container and dispatch the event; if we go through the event queue, any e.consume()
+		// that occurs is too late to consume the event. 
+		
+		if (c == null) {
+			Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(e);
+		} else {
+		  ((Container) e.getSource()).dispatchEvent(e);
+		}
+	}
+
+	private boolean keyAction(int id, int modifiers, Object jqevent2, long time) {
+		return JSKeyEvent.dispatchKeyEvent(id, modifiers, jqevent, time);
 	}
 
 }

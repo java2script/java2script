@@ -6,13 +6,16 @@ import java.beans.PropertyChangeEvent;
 
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
-import javax.swing.LookAndFeel;
+import javax.swing.event.MenuKeyListener;
 
 import swingjs.api.js.DOMNode;
+import swingjs.api.js.JSSwingMenu;
 
 public class JSMenuItemUI extends JSButtonUI {
 	
-	/**
+    protected MenuKeyListener menuKeyListener;
+
+    /**
 	 * Just a simple menu item -- not radio or checkbox
 	 */
 	public JSMenuItemUI() {
@@ -25,7 +28,7 @@ public class JSMenuItemUI extends JSButtonUI {
 	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			domNode = createItem("_item", null);
-			DOMNode.addJqueryHandledEvent(this, domNode, "mouseenter");
+			bindJQueryEvents(domNode, "mouseenter", -1);
 		}
 		// add code here for adjustments when changes in bounds or other properties occur.
 		DOMNode.setVisible(domNode, jc.isVisible());
@@ -54,10 +57,8 @@ public class JSMenuItemUI extends JSButtonUI {
 	public void installUI(JComponent jc) {
 		menuItem = (JMenuItem) jc;
 		super.installUI(jc);
-//    LookAndFeel.installColorsAndFont(jc, "MenuItem.background", "MenuItem.foreground",
-//        "MenuItem.font");		
-	}
-	
+	}	
+
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		super.propertyChange(e);
@@ -73,7 +74,12 @@ public class JSMenuItemUI extends JSButtonUI {
 
 	@Override
 	protected String getPropertyPrefix() {
-		return "MenuItem.";
+		return "MenuItem";
+	}
+	
+	
+	public void processJ2SMenuCmd(Object[] data) {
+		JSPopupMenuUI.processJ2SMenuCmd(data);
 	}
 
 }

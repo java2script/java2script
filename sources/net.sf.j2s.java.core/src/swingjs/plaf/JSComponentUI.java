@@ -17,7 +17,7 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.peer.DropTargetPeer;
-import java.awt.event.FocusEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.PaintEvent;
 import java.awt.image.ColorModel;
 import java.awt.image.ImageObserver;
@@ -34,8 +34,11 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JRootPane;
 import javax.swing.JTable.BooleanRenderer;
+import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
@@ -46,6 +49,7 @@ import javax.swing.plaf.UIResource;
 import javajs.api.JSFunction;
 import javajs.util.PT;
 import sun.awt.CausedFocusEvent.Cause;
+import swingjs.JSFocusPeer;
 import swingjs.JSGraphics2D;
 import swingjs.JSToolkit;
 import swingjs.JSUtil;
@@ -68,31 +72,62 @@ import swingjs.api.js.JQueryObject;
  * Essentially, at least for now, we are not implementing the HTML5LookAndFeel
  * as such. We'll see how that goes.
  * 
- * MOUSE EVENT HANDLING
+ * SwingJS MOUSE AND KEY EVENT HANDLING
  * 
- * In SwingJS, the domBtn DOM element will be given the "data-component"
- * attribute pointing to its corresponding AWT component.
- * 
- * A mouse action starts in j2sApplet.js as jQuery events, where it is processed
- * and then passed to JSFrameViewer's JSMouse object.
+ * A mouse action starts in j2sApplet.js as a jQuery event, 
+ * where it is processed and then passed to JSFrameViewer's JSMouse object.
  * 
  * In JSMouse the event is converted to a java.awt.event.MouseEvent, with the
- * jQuery event saved as event.bdata[].jqevent. This standard MouseEvent is then
- * posted just like a "real Java" event using
- * Toolkit.getEventQueue().postEvent(e), thus giving it its own "thread."
+ * jQuery event saved as event.bdata[].jqevent. 
  * 
- * The event is dispatched by java.awt.LightweightDispatcher (in
+ * methods involved include:
+ * 
+ * 		setDataComponent(DOMNode node)
+ * 
+ * 		setDataUI(node)
+ * 
+ *      bindJQueryEvents(node, [event name string], [MouseEvent id])
+ *      
+ *      bindJSKeyEvents(node, addFocusAndDnD)
+ *      
+ *      setJ2sMouseHandler(DOMNode node)
+ *      
+ * 	    ignoreAllMouseEvents(node)
+ *      
+ * 
+ * data-component [setDataComponent(DOMNode button)]
+ * --------------
+ * 
+ * The data-component attribute is necessary for canceling propagation and 
+ * default action of an event within the event processing sequence. It is current 
+ * invoked only for JButton, JList, and JSlider.
+ * 
+ * This standard MouseEvent in Java is dispatched using java.awt.EventQueue, 
+ * thus setting EventQueue.isDispatchThread() true. In SwingJS, we also do this,
+ * unless the DOM element is given the "data-component" attribute, 
+ * pointing to its corresponding AWT component directly. This attribute is stored
+ * in the event as bdata.jqevent.target["data-component"].
+ * 
+ * Either way, the event is dispatched by java.awt.LightweightDispatcher (in
  * Container.java), where the "nativeContainer" for this window (JApplet,
  * JFrame, JWindow, JDialog, or JPopupMenu) is identified. Java has to search
  * the native container for the right X,Y coordinate for this control, but in
- * SwingJS we already know the control that was clicked. We can find that from
- * bdata.jqevent.target["data-component"]
+ * SwingJS we can bypass that and already know the control that was clicked. 
+ * This more direct method is only invoked if "data-component" is set. 
  * 
- * Some UIs (JSComboBoxUI, JSFrameUI, and JSTextUI) set
- * jqevent.target["data-ui"] to point to themselves. This allows the control to
- * bypass the Java dispatch system entirely and just come here for processing.
+ * data-ui [setDataUI(node)]
+ * -------
+ * 
+ * Some UIs (JSSpinnerUI, JSComboBoxUI, JSFrameUI, and JSTextUI) set jqevent.target["data-ui"] 
+ * to point to themselves. This allows the control an option to handle the raw jQuery
+ * event directly, bypassing the Java dispatch system entirely, id desired.
+ * 
+ * TODO: We should not use this method. It bypasses the normal Java LightWeightDispatcher,
+ * which has a protected processEvent(AWTEvent) method that 
+ * users can use to do custom processing. Maybe think about this more?
+ * 
  * This method is used for specific operations, including JFrame closing,
- * JComboBox selection, and JSText action handling. This connection is set up in
+ * JComboBox selection, and JSText key action handling. This connection is set up in
  * JSComponentUI.setDataUI() and handled by overriding
  * JSComponentUI.handleJSEvent().
  * 
@@ -113,6 +148,9 @@ public class JSComponentUI extends ComponentUI
 	private static final int MENUITEM_OFFSET = 11;
 
 	final J2SInterface J2S = JSUtil.J2S;
+	
+	public boolean isNull;
+
 	/**
 	 * provides a unique id for any component; set on instantiation
 	 */
@@ -146,7 +184,7 @@ public class JSComponentUI extends ComponentUI
 	 * the associated JComponent; for which this is c.ui
 	 * 
 	 */
-	protected JComponent jc;
+	public JComponent jc;
 
 	/**
 	 * the associated JLabel, if this is one
@@ -198,6 +236,7 @@ public class JSComponentUI extends ComponentUI
 				
 				iconNode,
 				textNode,
+				accelNode,
 				buttonNode,			
 				enableNode,
 				
@@ -228,18 +267,19 @@ public class JSComponentUI extends ComponentUI
 		
 		iconNode		= nodes[3];
 		textNode		= nodes[4];
-		buttonNode 		= nodes[5];
-		enableNode 		= nodes[6];
+		accelNode       = nodes[5];
+		buttonNode 		= nodes[6];
+		enableNode 		= nodes[7];
 		
-		if (nodes[7] != null) {
-			enableNodes[0] = nodes[7];
-			enableNodes[1] = nodes[8];
-			enableNodes[2] = nodes[9];
+		if (nodes[8] != null) {
+			enableNodes[0] = nodes[8];
+			enableNodes[1] = nodes[9];
+			enableNodes[2] = nodes[10];
 		}
 		
-		focusNode		= nodes[10];
-		actionNode 		= nodes[11];
-		valueNode		= nodes[12];
+		focusNode		= nodes[11];
+		actionNode 		= nodes[12];
+		valueNode		= nodes[13];
 	}
 
 	/**
@@ -261,7 +301,7 @@ public class JSComponentUI extends ComponentUI
 	 * for a JLabel or AbstractButton, including JMenuItems
 	 * 
 	 */
-	private DOMNode centeringNode;
+	protected DOMNode centeringNode;
 
 	/**
 	 * an icon image -- non-null means we do have an icon
@@ -304,6 +344,11 @@ public class JSComponentUI extends ComponentUI
 	public DOMNode textNode;
 
 	/**
+	 * the place flushed right for alt-X
+	 */
+	public DOMNode accelNode;
+
+	/**
 	 * the subcomponent with the value field
 	 */
 	protected DOMNode valueNode;
@@ -311,12 +356,18 @@ public class JSComponentUI extends ComponentUI
 	/**
 	 * a component that is focusable
 	 */
-	protected DOMNode focusNode;
+	public DOMNode focusNode;
 
 	/**
 	 * menu li node
 	 */
     protected DOMNode itemNode;
+
+    /**
+     * the node to put children into; defaulting (and set) to outerNode 
+     * when initially null, but sometimes domNode
+     */
+	protected DOMNode containerNode;
 
 	
 	/**
@@ -422,10 +473,22 @@ public class JSComponentUI extends ComponentUI
 	protected Dimension preferredSize;
 
 	/**
+	 * used by JSListUI to give it the correct scrollable size for its JViewPort
+	 */
+	protected int jsActualWidth, jsActualHeight;
+
+	private Object dropTarget = this; // unactivated
+
+	protected int actionItemOffset;
+
+	private int mnemonicIndex = -1;
+
+
+	/**
 	 * panels
 	 * 
 	 */
-	protected boolean isContainer, isWindow, isRootPane, 
+	protected boolean isContainer, isWindow, isRootPane, isPopupMenu,
 					  isContentPane, isPanel, isDesktop, isTable;
 
 	/**
@@ -467,11 +530,18 @@ public class JSComponentUI extends ComponentUI
 	protected int width;
 	protected int height;
 
-	protected DOMNode containerNode;
-
-	public boolean isNull;
-
 	private DOMNode waitImage;
+
+	private final Color colorUNKNOWN = new Color();
+
+	protected Color inactiveForeground = colorUNKNOWN, inactiveBackground = colorUNKNOWN;
+
+	private boolean enabled = true;
+
+	/**
+	 * processed text (local to setIconAndText) is HTML
+	 */
+	private boolean isHTML;
 
 	/**
 	 * set false for tool tip or other non-label object that has text
@@ -481,7 +551,23 @@ public class JSComponentUI extends ComponentUI
 
 	protected static JQuery jquery = JSUtil.getJQuery();
 
-	protected boolean isPopupMenu;
+	/**
+	 * JavaScript menu timer id
+	 */
+	protected int menuTimer;
+
+	/**
+	 * checked by JavaScript in j2sApplet.js as well as in Java by InputEvent.consume()
+	 */
+	public boolean j2sDoPropagate;
+
+	/**
+	 * Set so that ui will handle all event stopPropagation() and preventDefault() action.
+	 */
+	protected void setDoPropagate() {
+		j2sDoPropagate = true; // so that we enable the JavaScript button or caret action
+ 	}
+
 
 	private boolean notImplemented;
 
@@ -591,9 +677,15 @@ public class JSComponentUI extends ComponentUI
 		}
 	}
 
+	/**
+	 * This must remain the only place that domNode is set to null;
+	 */
 	public void reInit() {
 		setTainted();
+		if (domNode != null)
+			DOMNode.dispose(domNode);
 		domNode = null;
+		keysEnabled = false;
 		newID(true);
 	}
 
@@ -612,7 +704,9 @@ public class JSComponentUI extends ComponentUI
 	 * is not necessary to check x and y for that. This ensures perfect
 	 * correspondence between a clicked button and its handling by SwingJS.
 	 * 
-	 * The action will be handled by a standard Java MouseListener.
+	 * The action will be handled by a standard Java MouseListener, but it 
+	 * will be on the system event queue, not the "AWT Event Queue" -- 
+	 * EventQueue.isDispatchThread() will be false. 
 	 * 
 	 * Includes Button, List, Slider, and TextField
 	 * 
@@ -620,6 +714,11 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected void setDataComponent(DOMNode button) {
 		DOMNode.setAttr(button, "data-component", c);
+	}
+
+	
+	protected void setDataKeyComponent(DOMNode node) {
+		DOMNode.setAttr(node, "data-keycomponent", c);
 	}
 
 	/**
@@ -630,9 +729,21 @@ public class JSComponentUI extends ComponentUI
 	 * @param node
 	 */
 	protected void ignoreAllMouseEvents(DOMNode node) {
-		$(node).addClass("swingjs-ui");
+		addClass(node, "swingjs-ui");
 	}
 
+	protected static void hideAllMenus() {
+		JSUtil.jQuery.$(".ui-j2smenu").hide();
+	}
+	
+	protected void addClass(DOMNode node, String cl) {
+		$(node).addClass(cl);
+	}
+	
+	protected void removeClass(DOMNode node, String cl) {
+		$(node).removeClass(cl);
+	}
+	
 	/**
 	 * J2S mouse event handling (in j2sApplet.js) will look for the data-ui
 	 * attribute of a jQuery event target and, if found, reroute the event to
@@ -651,62 +762,223 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected void setDataUI(DOMNode node) {
 		DOMNode.setAttr(node, "data-ui", this);
+		addClass(node, "data-ui");
 	}
 
 	/**
-	 * handle an event set up by adding the data-ui attribute to a DOM node.
+	 * Set attributes and data for action in j2sMenu
 	 * 
-	 * @param target      a DOMNode
-	 * @param eventType   a MouseEvent id, including 501, 502, 503, or 506 (pressed,
-	 *                    released, moved, and dragged, respectively)
-	 * @param jQueryEvent
-	 * @return false to prevent the default process
+	 * @param node icon, text, or accelerator node
 	 */
+	protected void setMenuItem(DOMNode node) {
+		if (node == null)
+			return;
+		addClass(node, "ui-j2smenu-node");
+		setDataComponent(node);
+//		setDataUI(iconNode);
+	}
+
+	/**
+	 * Set j2sApplet to capture jQuery mouse events and turn them into Java MouseEvents. 
+	 * Used by JSFrameUI and JTextArea to indicate that it is to be the "currentTarget" for mouse 
+	 * clicks. 
+	 * @param node
+	 * @param isFrame
+	 */
+	protected void setJ2sMouseHandler() {
+		// The DOM attributes applet and _frameViewer are necessary for proper 
+		// direction to the target
+		DOMNode.setAttrs(domNode, "applet", applet, "_frameViewer", jc.getFrameViewer());
+		J2S.setMouse(domNode, true);
+	}
+
+	/**
+	 * fired by JSComponent when key listeners are registered
+	 * 
+	 * @param on
+	 */
+	public void enableJSKeys(boolean on) {
+		if (getDOMNode() == null)
+			return; // too early
+		if (!on) {
+			setTabIndex(Integer.MIN_VALUE);
+		} else if (keysEnabled) {
+			setTabIndex(-1);
+		} else {
+			addJ2SKeyHandler();
+		}
+	}
+
+	protected void addJ2SKeyHandler() {
+		if (focusNode == null && (focusNode = domNode) == null)
+			return;
+		keysEnabled = true;
+		DOMNode.setAttrs(focusNode, "applet", applet, "_frameViewer", jc.getFrameViewer());
+		setDataKeyComponent(focusNode);
+		J2S.setKeyListener(focusNode);
+		setTabIndex(-1);
+	}
+	
+	/**
+	 * enable JavaScript .focus() and .blur() reporting
+	 * 
+	 * @param i
+	 */
+	private void setTabIndex(int i) {
+		if (focusNode == null)
+			return;
+		if (i == Integer.MIN_VALUE) {
+			focusNode.removeAttribute("tabindex");
+			DOMNode.setAttr(focusNode, "ui", null);
+		} else {
+			focusNode.setAttribute("tabindex", "" + i);
+			DOMNode.setAttr(focusNode, "ui", this);
+		}
+	}
+
 	@Override
-	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
+	public boolean isFocusable() {
+		return (focusNode != null);
+	}
+
+	public boolean hasFocus() {
+		return focusNode != null && focusNode == getActiveElement();
+	}
+
+	private DOMNode getActiveElement() {
+		return (DOMNode) DOMNode.getAttr(document, "activeElement");
+	}
+
+	@Override
+	public boolean requestFocus(Component lightweightChild, boolean temporary, boolean focusedWindowChangeAllowed,
+			long time, Cause cause) {
+		if (lightweightChild == null)
+			return focus();
+		return JSToolkit.requestFocus(lightweightChild);
+	}
+
+	/**
+	 * Outgoing: Initiate a focus() event in the system directly
+	 * 
+	 * @return
+	 */
+	public boolean focus() {
+		if (focusNode == null || isUIDisabled)
+			return false;
+		JSFocusPeer.focus(focusNode);
 		return true;
 	}
 
 	/**
-	 * Used by JSFrameUI to indicate that it is to be the "currentTarget" for mouse
-	 * clicks that target one of its buttons. The DOM attributes applet and
-	 * _frameViewer will be set for the node, making it consistent with handling for
-	 * Jmol's applet canvas element.
+	 * Add the $().focus() and $().blur() events to a DOM button.
 	 * 
-	 * @param node
-	 * @param isFrame
-	 */
-	protected void setJ2sMouseHandler(DOMNode frameNode) {
-		DOMNode.setAttrs(frameNode, "applet", applet, "_frameViewer", jc.getFrameViewer());
-		J2S.setMouse(frameNode, true);
-	}
-
-	public static JSComponentUI focusedUI;
-
-	JSComponentUI getFocusedUI() {
-		return focusedUI;
-	}
-
-	/**
-	 * Add the $().focus() and $().blur() events to a DOM button
+	 * Added in JSFrameUI
+	 * Added in JSComboBoxUI?
+	 * 
+	 * Also from bindJSKeyEvents
 	 * 
 	 */
-	@SuppressWarnings("unused")
 	protected void addJQueryFocusCallbacks() {
+		if (focusNode == null)
+			focusNode = domNode;
+		setTabIndex(-1);
 		JQueryObject node = $(focusNode);
-		Object me = this;
+		node.unbind("focus blur");
+		JSComponentUI me = this;
+
+		// initial idea involved
+		// 
+		//    node.mousedown(function(e) { e.target.focus() });
+		//
+		// but that is not quite right. We need to let KeyboardFocusManager handle all of this.
+		
 
 		/**
 		 * @j2sNative
 		 * 
-		 * 			node.focus(function() {me.notifyFocus$Z(true)});
-		 *            node.blur(function() {try{me.notifyFocus$Z(false)}catch(e){}});
+		 * 			node.focus(function(e) {
+		 * 				//System.out.println("JSSCUI node.focus() callback " + me.id + "  " + document.activeElement.id);
+		 * 				me.handleJSFocus$O$O$Z(me.jc, e.relatedTarget, true);
+		 * 				//System.out.println("JSSCUI focus " + me.id);
+		 * 			});
+		 *            node.blur(function(e) {
+		 *            try{
+		 * 				//System.out.println("JSSCUI node.blur() callback " + me.id + "  " + document.activeElement.id);
+		 *            me.handleJSFocus$O$O$Z(me.jc, e.relatedTarget, false);
+		 * 				//System.out.println("JSSCUI focus blur " + me.id + "  " + document.activeElement.id);
+		 *            }catch(e){
+		 *              //System.out.println("JSSCUI focus error blur " + me.id);
+		 *            }
+		 *            });
 		 */
+		{
+			// Eclipse reference only
+			me.handleJSFocus(this.jc, null, true);
+		}
+	}
+
+	/**
+	 * Incoming: From jQuery callback; checks for complementary event
+	 * 
+	 * @param jco       initiating JComponent
+	 * @param related   partner in focus loss/gain
+	 * @param focusGained 
+	 */
+	public void handleJSFocus(Object jco, Object related, boolean focusGained) {
+		JSFocusPeer.handleJSFocus(jco, related, focusGained);
+	}
+
+	/**
+	 * Internal: Directly fire KFM events for button press from JComponent.doClick() 
+	 */
+	@SuppressWarnings("unused")
+	public void abstractButtonFocusHack() {    	
+		JComponent focused = (JComponent) JSToolkit.getCurrentFocusOwner(null);
+    	JSComponentUI focusedUI = /** @j2sNative focused && focused.ui || */ null;
+    	// This is important for a button that is responding to a formatted text box input.
+    	// I cannot figure out how to get the blur message before this one.
+    	// See Micrometer.java
+    	if (focusedUI != null && focusedUI != this) {
+    		focusedUI.handleJSFocus(jc, null, false);
+    		handleJSFocus(jc, null, true);
+    	}
 	}
 
 	
+	private boolean keysEnabled;
+
+	private int mnemonic;
+
+	/**
+	 * for jQuery return
+	 */
 	protected final static boolean CONSUMED = false;
-	protected final static boolean UNHANDLED = true;
+	protected final static boolean NOT_CONSUMED = true;
+	
+	/**
+	 * for SetMouse check
+	 */
+	protected final static boolean HANDLED = true;
+	protected final static boolean NOT_HANDLED = false;
+
+	/**
+	 * Set the node to accept key events and possibly focusout
+	 * 
+	 * @param node
+	 * @param andFocusOut
+	 */
+	protected void bindJSKeyEvents(DOMNode node, boolean addFocus) {
+		setDataUI(node);
+		addClass(node, "ui-key");
+		keysEnabled = true;
+		bindJQueryEvents(node, "keydown keypress keyup" + (addFocus ? " focusout"// dragover drop"
+				: ""), Event.KEY_PRESS);
+		
+		if (addFocus) {
+			addJQueryFocusCallbacks();
+		}
+	}
+
 	/**
 	 * Allows mouse and keyboard handling via an overridden method
 	 * 
@@ -722,42 +994,39 @@ public class JSComponentUI extends ComponentUI
 	 *                  space
 	 * @param eventID   an integer event type to return; can be anything, but
 	 *                  Event.XXXX is recommended
-	 * @param andSetCSS TODO
 	 */
-	protected void bindJSEvents(DOMNode node, String eventList, int eventID, boolean andSetCSS) {
-		JSFunction f = null;
-		@SuppressWarnings("unused")
+	protected void bindJQueryEvents(DOMNode node, String eventList, int eventID) {
 		JSEventHandler me = this;
-
-		if (andSetCSS) {
-			setDataUI(node);
-			ignoreAllMouseEvents(node);
-		}
-
+		JSFunction f = null;
+		setDataUI(node);
+		addClass(node, "ui-events");
 		/**
 		 * @j2sNative
 		 * 
-		 * 			f = function(event) { return me.handleJSEvent$O$I$O(node, eventID, event)
-		 *            }
+		 * f = function(jqevent) { return me.handleJSEvent$O$I$O(node, eventID, jqevent) }
 		 */
 		{
-			handleJSEvent(null, 0, null); // Eclipse reference only; not in
+			me.handleJSEvent(null, 0, null); // Eclipse reference only; not in
 											// JavaScript
 		}
 		$(node).bind(eventList, f);
 	}
+	
 
 	/**
-	 * Set the node to accept key events and possibly focusout
+	 * handle an event set up by adding the data-ui attribute to a DOM node.
 	 * 
-	 * @param node
-	 * @param andFocusOut
+	 * @param target      a DOMNode
+	 * @param eventType   a MouseEvent id, including 501, 502, 503, or 506 (pressed,
+	 *                    released, moved, and dragged, respectively)
+	 * @param jQueryEvent
+	 * @return false to prevent the default process
 	 */
-	protected void bindJSKeyEvents(DOMNode node, boolean isTextView) {
-		setDataUI(node);
-		bindJSEvents(node, "keydown keypress keyup" + (isTextView ? " focusout dragover drop" : ""), Event.KEY_PRESS, false);
+	@Override
+	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
+		return NOT_CONSUMED; // aka HANDLED
 	}
-
+	
 	/**
 	 * Cause a new event to be scheduled for the rebuilding of this Swing
 	 * component's internal DOM structure using updateDOMNode.
@@ -868,68 +1137,64 @@ public class JSComponentUI extends ComponentUI
 			if (isDisposed && c.visible && e.getNewValue() != null)
 				setVisible(true);
 		}
-		propertyChangedCUI(prop);
+		propertyChangedCUI(e, prop);
 	}
 	
 	/**
 	 * plaf ButtonListener and TextListener will call this to update common
 	 * properties such as "text".
-	 * 
+	 * @param e TODO
 	 * @param prop
 	 */
-	void propertyChangedFromListener(String prop) {
+	void propertyChangedFromListener(PropertyChangeEvent e, String prop) {
 		if (isUIDisabled)
 			return;
-		if (prop == "ancestor") {
+		switch (prop) {
+		case "ancestor":
 			if (cellComponent != null)
 				return;
 			updatePropertyAncestor(true);
+			break;
 		}
-		propertyChangedCUI(prop);
+		propertyChangedCUI(e, prop);
 	}
 	
-	protected void propertyChangedCUI(String prop) {
+	protected void propertyChangedCUI(PropertyChangeEvent e, String prop) {
 		// don't want to update a menu until we have to, after its place is set
 		// and we know it is not a JMenuBar menu
 		if (!isMenu)
 			getDOMNode();
-		if (prop == "preferredSize") {
+		switch (prop) {
+		case "preferredSize":
 			// size has been set by JComponent layout
 			preferredSize = c.getPreferredSize(); // may be null
 			getPreferredSize(jc);
 			return;
-		}
-		if (prop == "background") {
+		case "background":
 			setBackground(c.getBackground());
 			return;
-		}
-		if (prop == "foreground") {
+		case "foreground":
 			setForeground(c.getForeground());
 			return;
-		}
-		if (prop == "opaque") {
+		case "opaque":
 			setBackground(c.getBackground());
 			return;
-		}
-		if (prop == "inverted") {
+		case "inverted":
 			updateDOMNode();
 			return;
-		}
-		if (prop == "text") {
-				String val = ((AbstractButton) c).getText();
-				if (val == null ? currentText != null : !val.equals(currentText))
-					setIconAndText(prop, currentIcon, currentGap, (String) val);
+		case "text":
+			String val = ((AbstractButton) c).getText();
+			if (val == null ? currentText != null : !val.equals(currentText))
+				setIconAndText(prop, currentIcon, currentGap, (String) val);
 			return;
-		}
-		if (prop == "iconTextGap") {
+		case "iconTextGap":
 			if (iconNode != null) {
 				int gap = ((AbstractButton) c).getIconTextGap();
 				if (currentGap != gap)
 					setIconAndText(prop, currentIcon, gap, currentText);
 			}
 			return;
-		}
-		if (prop == "icon") {
+		case "icon":
 			if (centeringNode != null) {
 				// note that we use AbstractButton cast here just because
 				// it has a getIcon() method. JavaScript will not care if
@@ -939,15 +1204,37 @@ public class JSComponentUI extends ComponentUI
 					setIconAndText(prop, icon, currentGap, currentText);
 			}
 			return;
-		}
-		if (prop == "horizontalAlignment" || prop == "verticalAlignment") {
-			//setAlignment();
+		case "mnemonic":
+			int newValue = ((Integer) e.getNewValue()).intValue();
+			setMnemonic(newValue);
+			setIconAndText(prop, currentIcon, currentGap, currentText);
 			return;
+		case "displayedMnemonicIndex":
+			mnemonicIndex = ((Integer) e.getNewValue()).intValue();
+			setIconAndText(prop, currentIcon, currentGap, currentText);
+			return;
+		default:
+			if (debugging)
+				System.out.println("JSComponentUI: unrecognized prop: " + this.id + " " + prop);
 		}
-		if (debugging)
-			System.out.println("JSComponentUI: unrecognized prop: " + this.id + " " + prop);
 	}	
 	
+	protected void setMnemonic(int newValue) {
+		// need to handle non-menu mnemonics as well
+		if (newValue == mnemonic || domNode == null)
+			return;
+		if (newValue < 0) {
+			newValue = (isLabel ? (label == null ? 0 : label.getDisplayedMnemonic()) 
+					: /** @j2sNative this.jc.getMnemonic$ && this.jc.getMnemonic$() ||*/ 0);
+			}
+		DOMNode node = (menuAnchorNode == null ? domNode : menuAnchorNode);
+		if (newValue != mnemonic)
+			removeClass(node, "ui-mnem-" + Character.toLowerCase(mnemonic));
+		if (newValue != 0)
+			addClass(node, "ui-mnem-" + Character.toLowerCase(newValue));
+		mnemonic = newValue;	
+	}
+
 	private String createMsgs = "";
 
 	/**
@@ -1006,6 +1293,25 @@ public class JSComponentUI extends ComponentUI
 	
 	protected boolean imagePersists;
 
+	protected boolean allowDivOverflow;
+
+
+	/**
+	 * we can allow frames -- particularly JInternalFrames in a JDesktopFrame -- to overflow.
+	 * 
+	 * To do this, we need to make this indication for both the Root pane and the
+	 * contentPane for the parent JFrame, as well as the JDesktopPane, if that pane is not the contentPane. 
+	 * The developer need only indicate this for the rootPane
+	 * 
+	 * this.getRootPane().putClientProperty("swingjs.overflow.hidden", "false");
+	 * 
+	 * 
+	 */
+	protected void checkAllowDivOverflow() {
+		JRootPane root = jc.getRootPane();
+		allowDivOverflow = (root != null && "false".equals(root.getClientProperty("swingjs.overflow.hidden")));
+	}
+
 	public void setAllowPaintedBackground(boolean TF) {
 		// listCellRenderer does not allow this.
 		allowPaintedBackground = TF;
@@ -1034,14 +1340,12 @@ public class JSComponentUI extends ComponentUI
 		}
 		return domNode;
 	}
-	
+				
 	protected DOMNode updateDOMNodeCUI() {
-		if (cellComponent != null) {
-			updateCell(cellWidth, cellHeight);
-		}
+		if (cellComponent != null)
+			updateCell(cellWidth, cellHeight);		
 		return domNode;
 	}
-
 
 	private void updateCell(int width, int height) {
 		DOMNode.setStyles(domNode, "width", "100%", "height", "100%");
@@ -1219,6 +1523,9 @@ public class JSComponentUI extends ComponentUI
 
 			$(body).after(div);
 			Rectangle r = div.getBoundingClientRect();
+			
+			//System.out.println("JSCUI " + (int) (r.width + 0.) + " " + (/** @j2sNative div.innerHTML ||*/""));
+			
 			// From the DOM; Will be Rectangle2D.double, actually.
 			// This is preferable to $(text).width() because that is rounded
 			// DOWN.
@@ -1330,10 +1637,9 @@ public class JSComponentUI extends ComponentUI
 				int w = getContainerWidth();
 				int h = getContainerHeight();
 				DOMNode.setSize(outerNode, w, h);				
-				// not clear why this does not always work:
 				if (isPanel || isContentPane || isRootPane) {
 					DOMNode.setStyles(outerNode, "overflow",
-							"false".equals(jc.getClientProperty("swingjs.overflow.hidden")) ? "visible" : "hidden");
+							 allowDivOverflow ? "visible" : "hidden");
 					if (isRootPane) {
 						if (jc.getFrameViewer().isApplet) {
 							// If the applet's root pane, we insert it into the applet's
@@ -1345,7 +1651,8 @@ public class JSComponentUI extends ComponentUI
 					}
 				}
 			}
-			addChildrenToDOM(children, n);
+			if (n > 0)
+				addChildrenToDOM(children, n);
 			if (isWindow && jc.getUIClassID() != "InternalFrameUI" && jc.getWidth() > 0) {
 				DOMNode.transferTo(outerNode, body);
 			}
@@ -1460,6 +1767,7 @@ public class JSComponentUI extends ComponentUI
 	 */
 	@Override
 	public void paint(Graphics g, JComponent c) {
+
 		if (doPaintBackground()) {
 			g.setColor(c.getBackground());
 			g.fillRect(0, 0, c.getWidth(), c.getHeight());
@@ -1694,19 +2002,12 @@ public class JSComponentUI extends ComponentUI
 				enableNode(enableNodes[i], b);
 	}
 
-	private final Color colorUNKNOWN = new Color();
-
-	protected Color inactiveForeground = colorUNKNOWN, inactiveBackground = colorUNKNOWN;
-
-	private boolean enabled = true;
-
 	protected void enableNode(DOMNode node, boolean b) {
 		if (node == null)
 			return;
 		DOMNode.setAttr(node, "disabled", (b ? null : "TRUE"));
-		String pp = getPropertyPrefix();
 		if (!b && inactiveForeground == colorUNKNOWN)
-			getDisabledColors(pp);
+			getDisabledColors(getPropertyPrefix());
 		if (jc.isOpaque()) {
 			Color bg = c.getBackground();
 			setBackground(b || !(bg instanceof UIResource) || inactiveBackground == null ? bg : inactiveBackground);
@@ -1721,8 +2022,8 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	protected void getDisabledColors(String pp) {
-		inactiveBackground = UIManager.getColor(pp + "inactiveBackground");
-		inactiveForeground = UIManager.getColor(pp + "inactiveForeground");
+		inactiveBackground = UIManager.getColor(pp + ".inactiveBackground");
+		inactiveForeground = UIManager.getColor(pp + ".inactiveForeground");
 	}
 
 	@Override
@@ -1782,21 +2083,6 @@ public class JSComponentUI extends ComponentUI
 		setInnerComponentBounds(width, height);
 	}
 
-	/**
-	 * used by JSListUI to give it the correct scrollable size for its JViewPort
-	 */
-	protected int jsActualWidth, jsActualHeight;
-
-	private Object dropTarget = this; // unactivated
-
-	protected int actionItemOffset;
-
-	/**
-	 * used by JSTableUI to know if we need to do anything with this cell.
-	 * 
-	 */
-	
-
 	protected void setJSDimensions(int width, int height) {
 		if (jsActualWidth > 0)
 			width = jsActualWidth;
@@ -1806,9 +2092,9 @@ public class JSComponentUI extends ComponentUI
 		if (outerNode != null) {
 			DOMNode.setSize(outerNode, width, height);
 		}
-		if (menuAnchorNode != null) {
-			DOMNode.setSize(menuAnchorNode, width, height);
-		}
+//		if (menuAnchorNode != null) {
+//			DOMNode.setSize(menuAnchorNode, width, height);
+//		}
 	}
 
 	protected void setInnerComponentBounds(int width, int height) {
@@ -1827,10 +2113,11 @@ public class JSComponentUI extends ComponentUI
 
 		if (iconNode == null && textNode == null)
 			return;
-		
+
 		// TODO so, actually, icons replace the checkbox or radio button, they do not
 		// complement them
 
+		setMnemonic(-1);
 		actualWidth = actualHeight = 0;
 		currentText = text;
 		currentGap = gap;
@@ -1847,14 +2134,14 @@ public class JSComponentUI extends ComponentUI
 				DOMNode.setStyles(iconNode, "height", iconHeight + "px", "width", icon.getIconWidth() + "px");
 			}
 		}
-		boolean isHTML = false;
 		if (text == null || text.length() == 0) {
 			text = "";
 		} else {
-			DOMNode.setStyles(textNode, "white-space","nowrap");
-			if (icon == null) {				
+			DOMNode.setStyles(textNode, "white-space", "nowrap");
+			if (icon == null) {
 				// tool tip does not allow text alignment
-				if (iconNode != null && isMenuItem && actionNode == null && text != null) {
+				if (iconNode != null && allowTextAlignment 
+						&& isMenuItem && actionNode == null && text != null) {
 					DOMNode.addHorizontalGap(iconNode, gap + MENUITEM_OFFSET);
 				}
 			} else {
@@ -1865,6 +2152,7 @@ public class JSComponentUI extends ComponentUI
 				if (gap != 0 && text != null)
 					DOMNode.addHorizontalGap(iconNode, gap);
 			}
+			isHTML = false;
 			if (text.indexOf("<html>") == 0) {
 				isHTML = true;
 				// PhET uses <html> in labels and uses </br>
@@ -1873,6 +2161,11 @@ public class JSComponentUI extends ComponentUI
 				text = PT.rep(text, "href=", "target=_blank href=");
 			} else if (jc.getClientProperty("html") != null) {
 				isHTML = true;
+			} else if (mnemonicIndex >= 0) {
+				int i = mnemonicIndex;
+				isHTML = true;
+				if (i < text.length())
+					text = text.substring(0, i) + "<u>" + text.substring(i, i + 1) + "</u>" + text.substring(i + 1);
 			}
 		}
 		DOMNode obj = null;
@@ -1935,7 +2228,7 @@ public class JSComponentUI extends ComponentUI
 		iconR.width = -1;
 		if (isMenuItem && actionNode != null) {
 			iconR.width = iconR.height = 15;
-		} else if (icon == null) {
+		} else if (icon == null && iconNode != null) {
 			Dimension d = getHTMLSize(iconNode);
 			iconR.width = d.width;
 			iconR.height = d.height;
@@ -1979,7 +2272,6 @@ public class JSComponentUI extends ComponentUI
 		int vTextPos = b.getVerticalTextPosition();
 
 		getJSInsets();
-
 		Dimension dimIcon = getIconSize(b);
 		Dimension dimText = getTextSize(b);
 		int wIcon = (actionNode != null ? (isMenuItem ? 15 : 20)
@@ -1987,7 +2279,16 @@ public class JSComponentUI extends ComponentUI
 		int wText = (dimText == null ? 0 : dimText.width);
 		int gap = (wText == 0 || wIcon == 0 ? 0 : b.getIconTextGap());
 		int w = cellComponent != null ? cellWidth : $(domNode).width();
-
+		boolean alignVCenter = (vAlign == SwingConstants.CENTER);
+		Insets margins = (isLabel ? insets : b.getMargin());
+		if (margins == null)
+			margins = zeroInsets;
+		int h = (dimText == null ? 0 : dimText.height);
+		int ih = (dimIcon == null ? 0 : dimIcon.height);
+		int hCtr = Math.max(h, ih);
+		int wCtr = wIcon + gap + wText;
+		int wAccel = 0;
+		String accel = null;
 		// setHTMLSize1((buttonNode == null ? domNode : centeringNode), false,
 		// false).width;
 		// But we need to slightly underestimate it so that the
@@ -2028,9 +2329,9 @@ public class JSComponentUI extends ComponentUI
 		boolean ltr = jc.getComponentOrientation().isLeftToRight();
 		boolean alignLeft, alignRight, alignHCenter, textRight;
 		if (menuAnchorNode == null) {
-			alignLeft = (hAlign == SwingConstants.LEFT
+			alignLeft = (w == 0 || hAlign == SwingConstants.LEFT
 					|| hAlign == (ltr ? SwingConstants.LEADING : SwingConstants.TRAILING));
-			alignRight = (hAlign == SwingConstants.RIGHT
+			alignRight = w != 0 && (hAlign == SwingConstants.RIGHT
 					|| hAlign == (ltr ? SwingConstants.TRAILING : SwingConstants.LEADING));
 			alignHCenter = (!alignLeft && !alignRight);
 			textRight = (hTextPos == SwingConstants.RIGHT
@@ -2041,15 +2342,33 @@ public class JSComponentUI extends ComponentUI
 			alignRight = !ltr;
 			alignHCenter = false;
 			textRight = ltr;
+			accel = (b instanceof JMenuItem ? getAccelStr((JMenuItem) b): null);
+			DOMNode accelNode = menuAnchorNode;
+			accelNode = /** @j2sNative accelNode.children[1] || */null;
+			if ((accelNode == null) != (accel == null)) {
+				if (accel == null) {
+					DOMNode.remove(accelNode);
+				} else { 
+					menuAnchorNode.appendChild(accelNode = DOMNode.createElement("span", id + "_acc"));
+					addClass(accelNode, "ui-j2smenu-accel");
+					DOMNode.setAttr(accelNode, "role", "menuitem");
+					DOMNode.setStyles(accelNode,  "font-size", "10px");
+					setMenuItem(accelNode);
+				}
+			}
+			if (accel != null) {
+				DOMNode.setStyles(accelNode, "float", null);
+				DOMNode.setAttr(accelNode, "innerHTML", accel);// = accel + "\u00A0\u00A0");
+				wAccel = getHTMLSize(accelNode).width; 
+				DOMNode.setStyles(accelNode, 
+						"float", ltr ? "right" : "left", 
+						"text-align", ltr ? "right" : "left",
+						"margin", "0px 5px",
+						"transform", "translateY(15%)");
+			}
+			DOMNode.setStyles(menuAnchorNode, "width", "90%", "min-width", Math.max(75,(wCtr + wAccel + margins.left + margins.right)*1.1) + "px");			
 		}
-		boolean alignVCenter = (vAlign == SwingConstants.CENTER);
-		Insets margins = (isLabel ? insets : b.getMargin());
-		if (margins == null)
-			margins = zeroInsets;
-		int h = (dimText == null ? 0 : dimText.height);
-		int ih = (dimIcon == null ? 0 : dimIcon.height);
-		int hCtr = Math.max(h, ih);
-		int wCtr = wIcon + gap + wText;
+
 		if (alignHCenter) {
 			switch (hTextPos) {
 			case SwingConstants.TOP:
@@ -2083,6 +2402,7 @@ public class JSComponentUI extends ComponentUI
 		DOMNode.setStyles(iconNode, "position", "absolute", "top", null, "left", null, "transform", null);
 		DOMNode.setStyles(textNode, "position", "absolute", "top", null, "left", null, "transform", null);
 
+		
 		int left = -1;
 
 		if (menuAnchorNode == null) {
@@ -2182,13 +2502,20 @@ public class JSComponentUI extends ComponentUI
 			DOMNode.setStyles(textNode, "top", top + "%", "transform", "translateY(-" + top + "%)");
 			DOMNode.setStyles(iconNode, "top", top + "%", "transform",
 					"translateY(-" + itop + "%)" + (iscale == null ? "" : iscale));
-		} else {
-			DOMNode.setSize(menuAnchorNode, wCtr + margins.left + margins.right, h);
-//			if (actionNode != null) {
-				DOMNode.setStyles(textNode, "top", "50%", "transform", "translateY(-60%)");
-				DOMNode.setStyles(iconNode, "top", "50%", "transform", "translateY(-80%) scale(0.6,0.6)");
-//			}
+		} else {			
+			DOMNode.setStyles(menuAnchorNode, "height", h + "px");
+			DOMNode.setStyles(textNode, "top", "50%", "transform", "translateY(-60%)");
+			DOMNode.setStyles(iconNode, "top", "50%", "transform", "translateY(-80%) scale(0.6,0.6)");
 		}
+	}
+
+	private String getAccelStr(JMenuItem b) {
+		KeyStroke ks = b.getAccelerator();
+		if (ks != null) {
+			return KeyEvent.getKeyModifiersText(ks.getModifiers()) + "-" +
+		               KeyEvent.getKeyText(ks.getKeyCode());
+		}
+		return null;
 	}
 
 	@Override
@@ -2370,27 +2697,6 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	@Override
-	public boolean requestFocus(Component lightweightChild, boolean temporary, boolean focusedWindowChangeAllowed,
-			long time, Cause cause) {
-		if (lightweightChild == null)
-			return requestFocus();
-		else
-			return JSToolkit.requestFocus(lightweightChild);
-	}
-
-	protected boolean requestFocus() {
-		if (focusNode == null || isUIDisabled)
-			return false;
-		$(focusNode).focus();
-		return true;
-	}
-
-	@Override
-	public boolean isFocusable() {
-		return (focusNode != null);
-	}
-
-	@Override
 	public Image createImage(ImageProducer producer) {
 		JSUtil.notImplemented("");
 		return null;
@@ -2464,37 +2770,6 @@ public class JSComponentUI extends ComponentUI
 	public Rectangle getBounds() {
 		JSUtil.notImplemented("");
 		return null;
-	}
-
-	public boolean hasFocus() {
-		return focusNode != null && focusNode == DOMNode.getAttr(document, "activeElement");
-	}
-
-	public void notifyFocus(boolean focusGained) {
-		// unfortunately, this will be TOO LATE
-
-		AWTEvent e = new FocusEvent(c, focusGained ? FocusEvent.FOCUS_GAINED : FocusEvent.FOCUS_LOST);
-		if (focusGained) {
-			// The problem here is that we are getting an activate signal too
-			// early,
-			// before focus has been obtained.
-			focusedUI = this;
-			Toolkit.getEventQueue().postEvent(e);
-		} else {
-			focusedUI = null;
-			/**
-			 * @j2xxsNative
-			 * 
-			 * 				this.c.processEvent(e);
-			 * 
-			 */
-			{
-				// We must be certain that the lost message arrives before the
-				// gained.
-				Toolkit.getEventQueue().dispatchEventAndWait(e, c);
-			}
-
-		}
 	}
 
 	public int getZIndex(String what) {
@@ -2690,8 +2965,6 @@ public class JSComponentUI extends ComponentUI
 		}
 	}
 
-	protected int timer;
-
 	/**
 	 * Called from JSMenuUI in a JMenuBar to start a timer that closes the popup window after a short period.
 	 *  
@@ -2699,7 +2972,7 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected void startPopupMenuTimer() {
 		JSPopupMenuUI ui = (JSPopupMenuUI) ((JMenu) jc).getPopupMenu().getUI();
-		ui.timer = /** @j2sNative setTimeout(function() { ui.hideMenu$()},1000) || */0;
+		ui.menuTimer = /** @j2sNative setTimeout(function() { ui.hideMenu$()},1000) || */0;
 	}
 
 	/**
@@ -2709,12 +2982,13 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected void stopPopupMenuTimer() {
 		JSPopupMenuUI ui = (JSPopupMenuUI) (isPopupMenu ? this : jc.getParent().getUI());
-		if (ui.timer != 0) { 
+		int timer = ui.menuTimer;
+		if (timer != 0) { 
 		  /** @j2sNative
 		   *  
-		   *   clearTimeout(ui.timer); 
+		   *   clearTimeout(timer); 
 		   */
-		  ui.timer = 0;
+		  ui.menuTimer = 0;
 		}
 	}
 

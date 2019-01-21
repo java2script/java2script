@@ -26,6 +26,8 @@ public abstract class DOMNode {
 
 	public abstract String getAttribute(String name);
 
+	public abstract void setAttribute(String attr, String val);
+
 	// "abstract" in the sense that these are the exact calls to JavaScript
 	
 	public abstract void appendChild(DOMNode node);
@@ -34,13 +36,15 @@ public abstract class DOMNode {
 	
 	public abstract DOMNode removeChild(DOMNode node);
 
+	public abstract void focus();
 	public abstract boolean hasFocus();
-
+	public abstract void blur();
+	
 	public abstract boolean play();
 
 	public abstract DOMNode removeAttribute(String attr);
 	
-	public abstract void setSelectionRange(int pt0, int pt1);
+	public abstract void setSelectionRange(int start, int end, String direction);
 
 	public abstract Rectangle getBoundingClientRect();
 	
@@ -62,10 +66,6 @@ public abstract class DOMNode {
 
 	public static DOMNode createTextNode(String text) {
 		return (/** @j2sNative document.createTextNode(text) || */ null); 
-	}
-
-	public static void addJqueryHandledEvent(Object me, DOMNode node, String event) {
-		JSUtil.jQuery.$(node).on(event, /** @j2sNative  function(ev) {me.handleJSEvent$O$I$O(node, -1, ev)} || */null);
 	}
 
 	public static DOMNode getParent(DOMNode node) {
@@ -168,7 +168,10 @@ public abstract class DOMNode {
 		 * @j2sNative
 		 * 
 		 *            if (node) for (var i = 0; i < attr.length;) {
-		 *             node.style[attr[i++]] = attr[i++]; }
+		 *             //
+		 *             node.style[attr[i++]] = attr[i++]; 
+		 *             //
+		 *             }
 		 * 
 		 */
 		return node;
@@ -268,7 +271,7 @@ public abstract class DOMNode {
 	}
 
 	/**
-	 * Just remove the node; don't 
+	 * Just remove the node, keeping its events and data 
 	 * @param node
 	 */
 	public static void remove(DOMNode node) {
@@ -280,6 +283,10 @@ public abstract class DOMNode {
 			p.removeChild(node);
 	}
 
+	/**
+	 * just detaches all the nodes; doesn't remove their listeners
+	 * @param node
+	 */
 	public static void detachAll(DOMNode node) {
 		/**
 		 * @j2sNative
@@ -311,5 +318,13 @@ public abstract class DOMNode {
 		 JSUtil.jQuery.$(container).append(node);
 		return container;
 	}
+
+	public static Component getComponentFor(DOMNode node) {
+		if (node == null)
+			return null;
+		JSComponentUI ui = (JSComponentUI) (/** @j2sNative node.ui || node["data-ui"] || node["data-component"] || node["data-textcomponent"] || */  null);
+		return (ui == null ? null : ui.jc);
+	}
+
 
 }

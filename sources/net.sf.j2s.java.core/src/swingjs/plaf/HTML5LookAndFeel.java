@@ -28,12 +28,12 @@
 
 package swingjs.plaf;
 
-//import java.awt.AWTEvent;
-import javax.swing.BorderFactory;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+
+//import java.awt.AWTEvent;
+import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.LookAndFeel;
 import javax.swing.UIDefaults;
@@ -42,6 +42,7 @@ import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.DimensionUIResource;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.plaf.InsetsUIResource;
+
 //import java.awt.Component;
 //import java.awt.Dimension;
 //import java.awt.Font;
@@ -172,6 +173,14 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		return table;
 	}
 
+//    static int getFocusAcceleratorKeyMask() {
+//        Toolkit tk = Toolkit.getDefaultToolkit();
+//        if (tk instanceof SunToolkit) {
+//            return ((SunToolkit)tk).getFocusAcceleratorKeyMask();
+//        }
+//        return ActionEvent.ALT_MASK;
+//    }
+//
 	/**
 	 * {@inheritDoc}
 	 */
@@ -1143,12 +1152,9 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				 }),
 				//
 				// *** Menus
-			  "MenuBar.font", 
-			  dialogPlain12,
-				"MenuBar.background",
-				menu,
-				"MenuBar.foreground",
-				menuText,
+			  "MenuBar.font", dialogPlain12,
+				"MenuBar.background", menu,
+				"MenuBar.foreground", menuText,
 				// "MenuBar.shadow", controlShadow,
 				// "MenuBar.highlight", controlLtHighlight,
 				// "MenuBar.border", menuBarBorder,
@@ -1236,7 +1242,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// "Menu.submenuPopupOffsetX", new Integer(0),
 				// "Menu.submenuPopupOffsetY", new Integer(0),
 				// "Menu.shortcutKeys", new int[] {KeyEvent.ALT_MASK},
-				// "Menu.crossMenuMnemonic", Boolean.TRUE,
+				 "Menu.crossMenuMnemonic", Boolean.FALSE,//SwingJS using Windows version // Boolean.TRUE,
 				// Menu.cancelMode affects the cancel menu action behaviour;
 				// currently supports:
 				// "hideLastSubmenu" (default)
@@ -1263,22 +1269,22 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// "PopupMenu.border", popupMenuBorder,
 				// Internal Frame Auditory Cue Mappings
 				// "PopupMenu.popupSound", null,
-				// // These window InputMap bindings are used when the Menu is
-				// // selected.
-				// "PopupMenu.selectedWindowInputMapBindings", new Object[] {
-				// "ESCAPE", "cancel",
-				// "DOWN", "selectNext",
-				// "KP_DOWN", "selectNext",
-				// "UP", "selectPrevious",
-				// "KP_UP", "selectPrevious",
-				// "LEFT", "selectParent",
-				// "KP_LEFT", "selectParent",
-				// "RIGHT", "selectChild",
-				// "KP_RIGHT", "selectChild",
-				// "ENTER", "return",
-				// "ctrl ENTER", "return",
-				// "SPACE", "return"
-				// },
+				 // These window InputMap bindings are used when the Menu is
+				 // selected.
+				 "PopupMenu.selectedWindowInputMapBindings", new Object[] {
+				 "ESCAPE", "cancel",
+				 "DOWN", "selectNext",
+				 "KP_DOWN", "selectNext",
+				 "UP", "selectPrevious",
+				 "KP_UP", "selectPrevious",
+				 "LEFT", "selectParent",
+				 "KP_LEFT", "selectParent",
+				 "RIGHT", "selectChild",
+				 "KP_RIGHT", "selectChild",
+				 "ENTER", "return",
+				 "ctrl ENTER", "return",
+				 "SPACE", "return"
+				 },
 				// "PopupMenu.selectedWindowInputMapBindings.RightToLeft", new Object[]
 				// {
 				// "LEFT", "selectChild",

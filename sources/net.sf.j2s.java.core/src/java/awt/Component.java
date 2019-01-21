@@ -37,7 +37,6 @@ import java.awt.event.FocusListener;
 import java.awt.event.HierarchyBoundsListener;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
-import java.awt.event.InputEvent;
 import java.awt.event.InputMethodEvent;
 import java.awt.event.InputMethodListener;
 import java.awt.event.ItemEvent;
@@ -67,7 +66,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
-import java.util.logging.Level;
 
 import javax.swing.JInternalFrame;
 
@@ -748,18 +746,17 @@ public abstract class Component implements ImageObserver/*
 	// return comp.backgroundEraseDisabled;
 	// }
 	//
-	// public Rectangle getBounds(Component comp) {
-	// return new Rectangle(comp.x, comp.y, comp.width, comp.height);
-	// }
-	//
-	// public boolean requestFocusInWindow(Component comp,
-	// CausedFocusEvent.Cause cause) {
-	// return comp.requestFocusInWindow(cause);
-	// }
-	//
-	// public void requestFocus(Component comp, CausedFocusEvent.Cause cause) {
-	// comp.requestFocus(cause);
-	// }
+	public Rectangle getBounds(Component comp) {
+		return new Rectangle(comp.x, comp.y, comp.width, comp.height);
+	}
+	
+	public boolean requestFocusInWindow(Component comp, CausedFocusEvent.Cause cause) {
+		return comp.requestFocusInWindow(cause);
+	}
+	
+	public void requestFocus(Component comp, CausedFocusEvent.Cause cause) {
+		comp.requestFocus(cause);
+	}
 	//
 	// public void setMixingCutoutShape(Component comp, Shape shape) {
 	// Region region = shape == null ? null :
@@ -1356,7 +1353,7 @@ public abstract class Component implements ImageObserver/*
 	@Deprecated
 	public void disable() {
 		if (enabled) {
-			// KeyboardFocusManager.clearMostRecentFocusOwner(this);
+			KeyboardFocusManager.clearMostRecentFocusOwner(this);
 			// synchronized (getTreeLock()) {
 			enabled = false;
 			// A disabled lw container is allowed to contain a focus owner.
@@ -1397,47 +1394,45 @@ public abstract class Component implements ImageObserver/*
 		return false;
 	}
 
-	// /**
-	// * Enables or disables input method support for this component. If input
-	// * method support is enabled and the component also processes key events,
-	// * incoming events are offered to
-	// * the current input method and will only be processed by the component or
-	// * dispatched to its listeners if the input method does not consume them.
-	// * By default, input method support is enabled.
-	// *
-	// * @param enable true to enable, false to disable
-	// * @see #processKeyEvent
-	// * @since 1.2
-	// */
-	// public void enableInputMethods(boolean enable) {
-	// if (enable) {
-	// if ((eventMask & AWTEvent.INPUT_METHODS_ENABLED_MASK) != 0)
-	// return;
-	//
-	// // If this component already has focus, then activate the
-	// // input method by dispatching a synthesized focus gained
-	// // event.
-	// if (isFocusOwner()) {
-	// InputContext inputContext = getInputContext();
-	// if (inputContext != null) {
-	// FocusEvent focusGainedEvent =
-	// new FocusEvent(this, FocusEvent.FOCUS_GAINED);
-	// inputContext.dispatchEvent(focusGainedEvent);
-	// }
-	// }
-	//
-	// eventMask |= AWTEvent.INPUT_METHODS_ENABLED_MASK;
-	// } else {
-	// if ((eventMask & AWTEvent.INPUT_METHODS_ENABLED_MASK) != 0) {
-	// InputContext inputContext = getInputContext();
-	// if (inputContext != null) {
-	// inputContext.endComposition();
-	// inputContext.removeNotify(this);
-	// }
-	// }
-	// eventMask &= ~AWTEvent.INPUT_METHODS_ENABLED_MASK;
-	// }
-	// }
+	/**
+	 * Enables or disables input method support for this component. If input method
+	 * support is enabled and the component also processes key events, incoming
+	 * events are offered to the current input method and will only be processed by
+	 * the component or dispatched to its listeners if the input method does not
+	 * consume them. By default, input method support is enabled.
+	 *
+	 * @param enable true to enable, false to disable
+	 * @see #processKeyEvent
+	 * @since 1.2
+	 */
+	public void enableInputMethods(boolean enable) {
+		if (enable) {
+			if ((eventMask & AWTEvent.INPUT_METHODS_ENABLED_MASK) != 0)
+				return;
+
+			// If this component already has focus, then activate the
+			// input method by dispatching a synthesized focus gained
+			// event.
+			if (isFocusOwner()) {
+//				InputContext inputContext = getInputContext();
+//				if (inputContext != null) {
+//					FocusEvent focusGainedEvent = new FocusEvent(this, FocusEvent.FOCUS_GAINED);
+//					inputContext.dispatchEvent(focusGainedEvent);
+//				}
+			}
+
+			eventMask |= AWTEvent.INPUT_METHODS_ENABLED_MASK;
+		} else {
+			if ((eventMask & AWTEvent.INPUT_METHODS_ENABLED_MASK) != 0) {
+//				InputContext inputContext = getInputContext();
+//				if (inputContext != null) {
+//					inputContext.endComposition();
+//					inputContext.removeNotify(this);
+//				}
+			}
+			eventMask &= ~AWTEvent.INPUT_METHODS_ENABLED_MASK;
+		}
+	}
 
 	/**
 	 * Shows or hides this component depending on the value of parameter
@@ -1515,9 +1510,9 @@ public abstract class Component implements ImageObserver/*
 		return isFocusOwner();
 	}
 
-	// void clearMostRecentFocusOwnerOnHide() {
-	// KeyboardFocusManager.clearMostRecentFocusOwner(this);
-	// }
+	 void clearMostRecentFocusOwnerOnHide() {
+		 KeyboardFocusManager.clearMostRecentFocusOwner(this);
+	 }
 
 	void clearCurrentFocusCycleRootOnHide() {
 		/* do nothing */
@@ -1531,14 +1526,13 @@ public abstract class Component implements ImageObserver/*
 		isPacked = false;
 		if (visible) {
 			clearCurrentFocusCycleRootOnHide();
-			// clearMostRecentFocusOwnerOnHide();
+			clearMostRecentFocusOwnerOnHide();
 			// synchronized (getTreeLock()) {
 			visible = false;
 			mixOnHiding(isLightweight());
-			// if (containsFocus() &&
-			// KeyboardFocusManager.isAutoFocusTransferEnabled()) {
-			// transferFocus(true);
-			// }
+			if (containsFocus() && KeyboardFocusManager.isAutoFocusTransferEnabled()) {
+				transferFocus(true);
+			}
 
 			updatePeerVisibility(false);
 
@@ -2634,10 +2628,6 @@ public abstract class Component implements ImageObserver/*
 	 * @since JDK1.0
 	 */
 	public void validate() {
-		validateComponent();
-	}
-
-	public void validateComponent() {
 		synchronized (getTreeLock()) {
 			ComponentPeer peer = this.peer;
 			boolean wasValid = isValid();
@@ -3714,17 +3704,16 @@ public abstract class Component implements ImageObserver/*
 		/*
 		 * 0. Set timestamp and modifiers of current event.
 		 */
-		EventQueue.setCurrentEventAndMostRecentTime(e);
+		if (!(e instanceof KeyEvent)) {
+			// Timestamp of a key event is set later in DKFM.preDispatchKeyEvent(KeyEvent).
+			EventQueue.setCurrentEventAndMostRecentTime(e);
+		}
 
 		/*
 		 * 1. Pre-dispatchers. Do any necessary retargeting/reordering here before we
 		 * notify AWTEventListeners.
 		 */
 
-		// if (e instanceof JSDnD.JSDropTargetEvent) {
-		// ((JSDnD.JSDropFileMouseEvent) e).dispatch();
-		// return;
-		// }
 		// if (e instanceof SunDropTargetEvent) {
 		// ((SunDropTargetEvent)e).dispatch();
 		// return;
@@ -3734,18 +3723,16 @@ public abstract class Component implements ImageObserver/*
 			// Invoke the private focus retargeting method which provides
 			// lightweight Component support
 			if (e.isPosted) {
-				// e = KeyboardFocusManager.retargetFocusEvent(e);
+				e = KeyboardFocusManager.retargetFocusEvent(e);
 				e.isPosted = true;
 			}
 
 			// Now, with the event properly targeted to a lightweight
 			// descendant if necessary, invoke the public focus retargeting
 			// and dispatching function
-			// if (KeyboardFocusManager.getCurrentKeyboardFocusManager().
-			// dispatchEvent(e))
-			// {
-			// return;
-			// }
+			if (KeyboardFocusManager.getCurrentKeyboardFocusManager().dispatchEvent(e)) {
+				return;
+			}
 		}
 		// if ((e instanceof FocusEvent) && focusLog.isLoggable(Level.FINEST)) {
 		// focusLog.log(Level.FINEST, "" + e);
@@ -3766,11 +3753,11 @@ public abstract class Component implements ImageObserver/*
 		/*
 		 * 2. Allow the Toolkit to pass this to AWTEventListeners.
 		 */
-		
+
 		// SwingJS: This allows a developer to watch any events they wish to follow.
-		
-		 Toolkit toolkit = Toolkit.getDefaultToolkit();
-		 toolkit.notifyAWTEventListeners(e);
+
+		Toolkit toolkit = Toolkit.getDefaultToolkit();
+		toolkit.notifyAWTEventListeners(e);
 
 		/*
 		 * 3. If no one has consumed a key event, allow the KeyboardFocusManager to
@@ -3778,8 +3765,8 @@ public abstract class Component implements ImageObserver/*
 		 */
 		if (!e.isConsumed()) {
 			if (e instanceof KeyEvent) {
-				// KeyboardFocusManager.getCurrentKeyboardFocusManager().
-				// processKeyEvent(this, (KeyEvent)e);
+				// check for tab navigation:
+				KeyboardFocusManager.getCurrentKeyboardFocusManager().processKeyEvent(this, (KeyEvent) e);
 				if (e.isConsumed()) {
 					return;
 				}
@@ -3789,49 +3776,49 @@ public abstract class Component implements ImageObserver/*
 		/*
 		 * 4. Allow input methods to process the event
 		 */
-		if (areInputMethodsEnabled()) {
-			// We need to pass on InputMethodEvents since some host
-			// input method adapters send them through the Java
-			// event queue instead of directly to the component,
-			// and the input context also handles the Java composition window
-			if (
-			// ((e instanceof InputMethodEvent) && !(this instanceof
-			// CompositionArea))
-			// ||
-			// Otherwise, we only pass on input and focus events, because
-			// a) input methods shouldn't know about semantic or component-level
-			// events
-			// b) passing on the events takes time
-			// c) isConsumed() is always true for semantic events.
-			(e instanceof InputEvent) || (e instanceof FocusEvent)) {
-				// InputContext inputContext = getInputContext();
-				//
-				//
-				// if (inputContext != null) {
-				// inputContext.dispatchEvent(e);
-				// if (e.isConsumed()) {
-				// // if ((e instanceof FocusEvent) &&
-				// focusLog.isLoggable(Level.FINEST)) {
-				// // focusLog.log(Level.FINEST, "3579: Skipping " + e);
-				// // }
-				// return;
-				// }
-				// }
-			}
-		} else {
-			// When non-clients get focus, we need to explicitly disable the
-			// native
-			// input method. The native input method is actually not disabled
-			// when
-			// the active/passive/peered clients loose focus.
-			if (id == FocusEvent.FOCUS_GAINED) {
-				// InputContext inputContext = getInputContext();
-				// if (inputContext != null && inputContext instanceof
-				// sun.awt.im.InputContext) {
-				// ((sun.awt.im.InputContext)inputContext).disableNativeIM();
-				// }
-			}
-		}
+//		if (areInputMethodsEnabled()) {
+//   SwingJS - Nah...
+//			// We need to pass on InputMethodEvents since some host
+//			// input method adapters send them through the Java
+//			// event queue instead of directly to the component,
+//			// and the input context also handles the Java composition window
+//			if (
+//			// ((e instanceof InputMethodEvent) && !(this instanceof
+//			// CompositionArea))
+//			// ||
+//			// Otherwise, we only pass on input and focus events, because
+//			// a) input methods shouldn't know about semantic or component-level
+//			// events
+//			// b) passing on the events takes time
+//			// c) isConsumed() is always true for semantic events.
+//			(e instanceof InputEvent) || (e instanceof FocusEvent)) {
+//				InputContext inputContext = getInputContext();
+//
+//				if (inputContext != null) {
+//					inputContext.dispatchEvent(e);
+//					if (e.isConsumed()) {
+//						// if ((e instanceof FocusEvent) &&
+//						// focusLog.isLoggable(Level.FINEST)) {
+//						// focusLog.log(Level.FINEST, "3579: Skipping " + e);
+//						// }
+//						return;
+//					}
+//				}
+//			}
+//		} else {
+//			// When non-clients get focus, we need to explicitly disable the
+//			// native
+//			// input method. The native input method is actually not disabled
+//			// when
+//			// the active/passive/peered clients loose focus.
+//			if (id == FocusEvent.FOCUS_GAINED) {
+//				// InputContext inputContext = getInputContext();
+//				// if (inputContext != null && inputContext instanceof
+//				// sun.awt.im.InputContext) {
+//				// ((sun.awt.im.InputContext)inputContext).disableNativeIM();
+//				// }
+//			}
+//		}
 
 		/*
 		 * 5. Pre-process any special events before delivery
@@ -3851,6 +3838,7 @@ public abstract class Component implements ImageObserver/*
 			break;
 
 		case WindowEvent.WINDOW_CLOSING:
+			// SwingJS could do this, but it doesn't seem to be necessary
 			// if (toolkit instanceof WindowClosingListener) {
 			// windowClosingException = ((WindowClosingListener)
 			// toolkit).windowClosingNotify((WindowEvent)e);
@@ -3868,6 +3856,8 @@ public abstract class Component implements ImageObserver/*
 		 * 6. Deliver event for normal processing
 		 */
 		if (newEventsOnly) {
+			// that is -- we have some sort of listener attached
+			
 			// Filtering needs to really be moved to happen at a lower
 			// level in order to get maximum performance gain; it is
 			// here temporarily to ensure the API spec is honored.
@@ -3880,7 +3870,10 @@ public abstract class Component implements ImageObserver/*
 			// MouseWheelEvents still need to be dispatched to it so scrolling
 			// can be done.
 			autoProcessMouseWheel((MouseWheelEvent) e);
-		} else if (!(e instanceof MouseEvent && !postsOldMouseEvents())) {
+		} 
+		
+		//else if (!(e instanceof MouseEvent) || postsOldMouseEvents()) {
+			// SwingJS could be useful? Backward meaning what, exactly? Really old? 
 			// //
 			// // backward compatibility
 			// //
@@ -3912,45 +3905,46 @@ public abstract class Component implements ImageObserver/*
 			// break;
 			// }
 			// }
-		}
+		//}
 
-		/*
-		 * 8. Special handling for 4061116 : Hook for browser to close modal dialogs.
-		 */
-		if (id == WindowEvent.WINDOW_CLOSING && !e.isConsumed()) {
-			// if (toolkit instanceof WindowClosingListener) {
-			// windowClosingException =
-			// ((WindowClosingListener)toolkit).
-			// windowClosingDelivered((WindowEvent)e);
-			// if (checkWindowClosingException()) {
-			// return;
-			// }
-			// }
-		}
-
-		/*
-		 * 9. Allow the peer to process the event. Except KeyEvents, they will be
-		 * processed by peer after all KeyEventPostProcessors (see
-		 * DefaultKeyboardFocusManager.dispatchKeyEvent())
-		 */
-		if (!(e instanceof KeyEvent)) {
-			// ComponentPeer tpeer = peer;
-			// if (e instanceof FocusEvent && (tpeer == null || tpeer instanceof
-			// LightweightPeer)) {
-			// // if focus owner is lightweight then its native container
-			// // processes event
-			// Component source = (Component)e.getSource();
-			// if (source != null) {
-			// Container target = source.getNativeContainer();
-			// if (target != null) {
-			// tpeer = target.getPeer();
-			// }
-			// }
-			// }
-			// if (tpeer != null) {
-			// tpeer.handleEvent(e);
-			// }
-		}
+//		/*
+//		 * 8. Special handling for 4061116 : Hook for browser to close modal dialogs.
+//		 */
+//		if (id == WindowEvent.WINDOW_CLOSING && !e.isConsumed()) {
+//			// if (toolkit instanceof WindowClosingListener) {
+//			// windowClosingException =
+//			// ((WindowClosingListener)toolkit).
+//			// windowClosingDelivered((WindowEvent)e);
+//			// if (checkWindowClosingException()) {
+//			// return;
+//			// }
+//			// }
+//		}
+//
+//		/*
+//		 * 9. Allow the peer to process the event. Except KeyEvents, they will be
+//		 * processed by peer after all KeyEventPostProcessors (see
+//		 * DefaultKeyboardFocusManager.dispatchKeyEvent())
+//		 */
+//		if (!(e instanceof KeyEvent)) {
+//			// SwingJS -- no need for this?
+//			// ComponentPeer tpeer = peer;
+//			// if (e instanceof FocusEvent && (tpeer == null || tpeer instanceof
+//			// LightweightPeer)) {
+//			// // if focus owner is lightweight then its native container
+//			// // processes event
+//			// Component source = (Component)e.getSource();
+//			// if (source != null) {
+//			// Container target = source.getNativeContainer();
+//			// if (target != null) {
+//			// tpeer = target.getPeer();
+//			// }
+//			// }
+//			// }
+//			// if (tpeer != null) {
+//			// tpeer.handleEvent(e);
+//			// }
+//		}
 	} // dispatchEventImpl()
 
 	/*
@@ -4055,7 +4049,7 @@ public abstract class Component implements ImageObserver/*
 		return eventTypeEnabled(e.id);
 	}
 
-	boolean eventTypeEnabled(int type) {
+	public boolean eventTypeEnabled(int type) { // SwingJS public
 		switch (type) {
 		case ComponentEvent.COMPONENT_MOVED:
 		case ComponentEvent.COMPONENT_RESIZED:
@@ -4380,13 +4374,13 @@ public abstract class Component implements ImageObserver/*
 			return;
 		}
 		boolean notifyAncestors;
-		synchronized (this) {
+//		synchronized (this) {
 			notifyAncestors = (hierarchyBoundsListener == null
 					&& (eventMask & AWTEvent.HIERARCHY_BOUNDS_EVENT_MASK) == 0);
 			hierarchyBoundsListener = AWTEventMulticaster.add(hierarchyBoundsListener, l);
 			notifyAncestors = (notifyAncestors && hierarchyBoundsListener != null);
 			newEventsOnly = true;
-		}
+//		}
 		if (notifyAncestors) {
 			synchronized (getTreeLock()) {
 				adjustListeningChildrenOnParent(AWTEvent.HIERARCHY_BOUNDS_EVENT_MASK, 1);
@@ -4546,11 +4540,11 @@ public abstract class Component implements ImageObserver/*
 		keyListener = AWTEventMulticaster.add(keyListener, l);
 		newEventsOnly = true;
 
-		// // if this is a lightweight component, enable key events
-		// // in the native container.
-		// if (peer instanceof LightweightPeer) {
-		// parent.proxyEnableEvents(AWTEvent.KEY_EVENT_MASK);
-		// }
+		// if this is a lightweight component, enable key events
+		// in the native container.
+//		 if (peer instanceof LightweightPeer) {
+//			 parent.proxyEnableEvents(AWTEvent.KEY_EVENT_MASK);
+//		 }
 	}
 
 	/**
@@ -5213,7 +5207,8 @@ public abstract class Component implements ImageObserver/*
 	}
 
 	protected void processEventComp(AWTEvent e) {
-		boolean isActiveRetarget = /**@j2sNative !!e.dispatch$ ||*/false;
+		boolean isActiveRetarget = /** @j2sNative !!e.dispatch$ || */
+				false;
 		if (isActiveRetarget || e instanceof ActiveEvent) {
 			// SwingJS added because we are bypassing the standard queue
 			((ActiveEvent) e).dispatch();
@@ -5542,6 +5537,7 @@ public abstract class Component implements ImageObserver/*
 	}
 
 	boolean postsOldMouseEvents() {
+		// SwingJS - this could be used for a2s method.
 		return false;
 	}
 
@@ -5844,9 +5840,9 @@ public abstract class Component implements ImageObserver/*
 			//
 			peerFont = getFont();
 
-			if (getContainer() != null && !isAddNotifyComplete) {
-				getContainer().increaseComponentCount(this);
-			}
+//			if (getContainer() != null && !isAddNotifyComplete) {
+//				getContainer().increaseComponentCount(this);
+//			}
 
 			// Update stacking order
 			if (parent != null && parent.peer != null) {
@@ -5915,23 +5911,19 @@ public abstract class Component implements ImageObserver/*
 	}
 
 	protected void removeNotifyComp() {
-		// KeyboardFocusManager.clearMostRecentFocusOwner(this);
-		// if (KeyboardFocusManager.getCurrentKeyboardFocusManager().
-		// getPermanentFocusOwner() == this)
-		// {
-		// KeyboardFocusManager.getCurrentKeyboardFocusManager().
-		// setGlobalPermanentFocusOwner(null);
-		// }
+		KeyboardFocusManager.clearMostRecentFocusOwner(this);
+		if (KeyboardFocusManager.getCurrentKeyboardFocusManager().getPermanentFocusOwner() == this) {
+			KeyboardFocusManager.getCurrentKeyboardFocusManager().setGlobalPermanentFocusOwner(null);
+		}
 
-		synchronized (getTreeLock()) {
-			// if (isFocusOwner() &&
-			// KeyboardFocusManager.isAutoFocusTransferEnabledFor(this)) {
-			// transferFocus(true);
-			// }
-
-			if (getContainer() != null && isAddNotifyComplete) {
-				getContainer().decreaseComponentCount(this);
+//		synchronized (getTreeLock()) {
+			if (isFocusOwner() && KeyboardFocusManager.isAutoFocusTransferEnabledFor(this)) {
+				transferFocus(true);
 			}
+
+//			if (getContainer() != null && isAddNotifyComplete) {
+//				getContainer().decreaseComponentCount(this);
+//			}
 
 			// int npopups = (popups != null? popups.size() : 0);
 			// SwingJS TODO for (int i = 0 ; i < npopups ; i++) {
@@ -5969,8 +5961,7 @@ public abstract class Component implements ImageObserver/*
 				// peerFont = null;
 
 				Toolkit.getEventQueue().removeSourceEvents(this, false);
-				// KeyboardFocusManager.getCurrentKeyboardFocusManager().
-				// discardKeyEvents(this);
+				 KeyboardFocusManager.getCurrentKeyboardFocusManager().discardKeyEvents(this);
 
 				p.dispose();
 
@@ -5990,7 +5981,7 @@ public abstract class Component implements ImageObserver/*
 								| ((isRecursivelyVisible()) ? HierarchyEvent.SHOWING_CHANGED : 0));
 				dispatchEvent(e);
 			}
-		}
+//		}
 	}
 
 	/**
@@ -6056,13 +6047,12 @@ public abstract class Component implements ImageObserver/*
 		isFocusTraversableOverridden = FOCUS_TRAVERSABLE_SET;
 
 		firePropertyChange("focusable", Boolean.valueOf(oldFocusable), Boolean.valueOf(focusable));
-		// if (oldFocusable && !focusable) {
-		// if (isFocusOwner() &&
-		// KeyboardFocusManager.isAutoFocusTransferEnabled()) {
-		// transferFocus(true);
-		// }
-		// KeyboardFocusManager.clearMostRecentFocusOwner(this);
-		// }
+		if (oldFocusable && !focusable) {
+			if (isFocusOwner() && KeyboardFocusManager.isAutoFocusTransferEnabled()) {
+				transferFocus(true);
+			}
+			KeyboardFocusManager.clearMostRecentFocusOwner(this);
+		}
 	}
 
 	final boolean isFocusTraversableOverridden() {
@@ -6567,8 +6557,7 @@ public abstract class Component implements ImageObserver/*
 		if (!success) {
 			KeyboardFocusManager.getCurrentKeyboardFocusManager(appContext).dequeueKeyEvents(time, this);
 		} else {
-			
-			
+
 		}
 		return success;
 	}
@@ -6855,7 +6844,6 @@ public abstract class Component implements ImageObserver/*
 	 * @since 1.2
 	 */
 	public boolean hasFocus() {
-//		return JSToolkit.hasFocus(this);
 		return (KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner() == this);
 	}
 

@@ -46,6 +46,8 @@ public class Resizer {
 	}
 
 	public void show() {
+		if (!enabled)
+			return;
 		if (resizer == null) 
 			createAndShowResizer();
 		else
@@ -173,6 +175,10 @@ public class Resizer {
 
 	public void setEnabled(boolean b) {
 		enabled  = b;
+		if (b)
+			show();
+		else
+			hide();
 	}
 
 }

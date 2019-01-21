@@ -2,9 +2,11 @@ package swingjs.plaf;
 
 import java.awt.Dimension;
 import java.awt.Insets;
+import java.beans.PropertyChangeEvent;
 
 import javax.swing.JTextArea;
 
+import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
 
 /**
@@ -17,6 +19,13 @@ public class JSTextAreaUI extends JSTextViewUI {
 
 	@Override
 	public DOMNode updateDOMNode() {
+		
+//		/**
+//		 * @j2sNative
+//		 * 
+//		 * System.out.println("updateDOM textarea xxt");xxt = this;
+//		 */
+		
 		if (domNode == null) {
 			valueNode = domNode = newDOMObject("textarea", id);
 			setupViewNode();
@@ -35,13 +44,13 @@ public class JSTextAreaUI extends JSTextViewUI {
 	}
 
 	@Override
-	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
-		Boolean b;
-		if ((b = checkAllowKey(jQueryEvent)) != null)
-			return b.booleanValue();
-		return super.handleJSEvent(target, eventType, jQueryEvent);
+	public void propertyChange(PropertyChangeEvent e) {
+		String prop = e.getPropertyName();
+		if (prop == "ancestor") {
+			setJ2sMouseHandler();
+		}
+		super.propertyChange(e);
 	}
-
 	
 	/**
 	 * Get the real height and width of the text in a JavaScript textarea
@@ -74,23 +83,23 @@ public class JSTextAreaUI extends JSTextViewUI {
 			d.height = sh;
 	}
 
-	private Insets myInsets = new Insets(0, 0, 5, 5); //BH bottom,left?
+	private Insets myInsets = new Insets(0, 0, 0, 0); 
 	@Override
 	public Insets getInsets() {
 		return myInsets;
 	}
 	
-	@Override
-	protected Dimension getCSSAdjustment(boolean addingCSS) {
-		return (
-			//	addingCSS ? new Dimension(-5, -12) : 
-			new Dimension(0, 0)); 
-		// total hack -12 is to see full vertical scrollbar (Boltzmann)
-	}
+//	@Override
+//	protected Dimension getCSSAdjustment(boolean addingCSS) {
+//		return (
+//			//	addingCSS ? new Dimension(-5, -12) : 
+//			new Dimension(0, 0)); 
+//		// total hack -12 is to see full vertical scrollbar (Boltzmann)
+//	}
 
 	@Override
 	protected String getPropertyPrefix() {
-		return "TextArea.";
+		return "TextArea";
 	}
 
 	@Override
@@ -100,17 +109,5 @@ public class JSTextAreaUI extends JSTextViewUI {
 				"overflow", "hidden",
 				"position", "absolute");
 	}
-
-	@Override
-	protected void jsSelect(Object[] r1, Object[] r2) {
-		/**
-		 * @j2sNative
-		 * 
-		 *   this.domNode.selectionStart = r1[1];
-		 *   this.domNode.selectionEnd = r2[1];
-		 */
-		
-	}
-
 
 }

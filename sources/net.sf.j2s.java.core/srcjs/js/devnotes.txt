@@ -1,0 +1,265 @@
+j2sClazz and j2sApplet older development notes
+
+j2sClazz.js (formerly j2s.lib.js)
+-----------
+
+// BH 12/30/2018 3.2.4.05 adds Class.forName("[XXX")
+// BH 12/20/2018 3.2.4.05 fixes synthetic reference issue 
+// BH 12/13/2018 3.2.4.05 fixes Class.js field reflection, inner anonymous class of outer class creates wrong synthetic pointer 
+// BH 12/1/2018 3.2.4.04 fixes TypeError e.stack e not found
+// BH 11/11/2018 3.2.4.04 fixes String.CASE_INSENSITIVE_ORDER.compare$S$S
+// BH 11/10/2018 3.2.4.04 fixes inner class synthetic references to interfaces
+// BH 11/10/2018 3.2.4.04 fixes String.prototype.split$S and.split$S$I to remove trailing ""
+// BH 11/6/2018 3.2.4.03 adds TypeError.prototype.printStackTrace$java_io_PrintStream
+// BH 11/4/2018 3.2.4.02 fixes problem with new Date("10/20/2018") and missing date.equals()
+// BH 10/1/2018 3.2.4.01 fixes problem with AWT mouseXxx(Event) not activating in children of Applet
+// BH 9/29/2018 3.2.4.00 adds JAXB support
+// BH 9/23/2018 3.2.3.00 adds direct non-Swing applet support (java.applet.Applet and java.awt.*); no need for converting source to a2s.*
+// BH 9/15/2018 3.2.2.06 adds JScrollBar block and unit increments; fixes JLabel ui getMaximumSize
+// BH 9/15/2018 3.2.2.05 fixes Math.IEEEremainder
+// BH 8/21/2018 3.2.2.04 fixes ?j2strace=xxx  message; sets user.home to https://./, not https://.//; Boolean upgrade and fix
+// BH 8/20/2018 3.2.2.04 adds character.isJavaIdentifierPart$C and several Character...$I equivalents, fixes newEnumConst(), System.getBoolean$S
+// BH 8/19/2018 3.2.2.04 fixes Enum .name being .$name
+// BH 8/16/2018 3.2.2.04 fixes Character.toTitleCase$C, [Integer,Long,Short,Byte].toString(i,radix)
+// BH 8/13/2018 3.2.2.04 $finals to $finals$ -- basically variables are $xxx, methods are xxx$, and special values are $xxx$
+// BH 8/12/2018 3.2.2 adding J2S.onClazzLoaded hook for Clazz loaded
+// BH 8/11/2018 3.2.2 Clazz.newLambda removed
+// BH 8/9/2018  3.2.2 adds newLambda(...'S')
+// BH 8/6/2018  3.2.2 sets user.home to be "https://.//"
+// BH 8/6/2018  3.2.2 adds ?j2sverbose option -- lists all files loaded; sets Clazz._quiet = false
+// BH 8/5/2018  3.2.2 adds Clazz.newLambda(...)
+// BH 8/4/2018  3.2.2 cleans up String $-qualified methods headless and javax tests pass
+// BH 8/1/2018  3.2.2 adds default interface methods as C$.$defaults$
+// BH 7/28/2018 3.2.2 upgrade to all-qualified methods. 
+// BH 7/28/2018 adds Character.getName(codepoint)
+// BH 7/26/2018 fix for Array.getComponentType() only returning the base element type
+// BH 7/26/2018 private methods moved to p$<n>, not loaded into prototype
+// BH 7/26/2018 fix for inner classes that extend other object having incorrect object references
+//              when the outer class and the superclass both extend the same class (Test_Call)
+// BH 7/25/2018 adds bit twiddles to Integer
+// BH 7/23/2018 fixes __NDIM in array classes written as "__NDIMS"
+// BH 7/23/2018 adds Character.$valueOf
+// BH 7/22/2018 adds Swing.CASE_INSENSITIVE_ORDER comparator
+// BH 7/22/2018 adds Boolean.prototype.objectValue()
+// BH 7/22/2018 adds System.getProperty("java.vendor") == "SwingJS/OpenJDK"
+// BH 7/22/2018 adds Math.IEEEremainder
+// BH 7/20/2018 removes def of Closeable, DataInput, DataOutput, Iterable, Comparator
+// BH 7/19/2018 removes Constructor, Method, and Field code here -- now in their .js files 
+// BH 7/18/2018 adds Java 8 default interface method support
+// BH 7/6/2018 adds J2S.stack to stack traces
+// BH 7/5/2018 2:57:51 PM array.equals$O, for simple arrays
+// BH 7/2/2018 12:50:55 PM Character.prototype.objectValue() and Character.prototype.intValue(), for enhanced FOR in transpiler
+// BH 6/29/2018 10:13:51 AM array.equals$O, fixes array.clone
+// BH 6/28/2018 7:34:58 AM fix for array.clone not copying array in the case of objects
+// BH 6/27/2018 3:11:50 PM fix for class String not indicating its name 
+// BH 6/25/2018 3:06:30 PM adds String.concat$S
+// BH 6/25/2018 12:10:25 PM Character.toTitleCase, isTitleCase as ...UpperCase
+// BH 6/25/2018 10:23:24 AM really fixing new int[] {'a'} using .$c() see Test_Byte.java
+// BH 6/21/2018 1:08:58 PM missing mysterious Integer.prototype.objectValue() 
+// BH 6/20/2018 6:00:23 AM missing printStackTrace(PrintStream)
+// BH 6/19/2018 8:49:57 AM fix for checkDeclared
+// BH 5/19/2018 8:22:25 PM fix for new int[] {'a'}
+// BH 4/16/2018 6:14:10 PM msie flag in monitor
+// BH 2/22/2018 12:34:07 AM array.clone() fix
+// BH 2/20/2018 12:59:28 AM adds Character.isISOControl
+// BH 2/13/2018 6:24:44 AM adds String.copyValueOf (two forms)
+// BH 2/7/2018 7:47:07 PM adds System.out.flush and System.err.flush
+// BH 2/1/2018 12:14:20 AM fix for new int[128][] not nulls
+// BH 1/9/2018 8:40:52 AM fully running SwingJS2; adds String.isEmpty()
+// BH 12/16/2017 5:53:47 PM refactored; removed older unused parts
+// BH 11/16/2017 10:52:53 PM adds method name aliasing for generics; adds String.contains$CharSequence(cs)
+// BH 10/14/2017 8:17:57 AM removing all node-based dependency class loading; fix String.initialize with four arguments (arr->byte)
+// BH 6/10/2016 4:20:15 PM removed Clazz.dateToString
+// BH 6/10/2016 5:53:20 AM aligned with SwingJS; combined with j2sJmol.js (same as j2sSwingjs)
+// BH 3/9/2016 6:25:08 PM at least allow Error() by itself to work as before (inchi.js uses this)
+// BH 12/21/2015 6:14:59 PM adding typeArray.buffer.slice to be compatible with Safari
+// BH 12/21/2015 1:31:41 PM fixing String.instantialize for generic typed array
+// BH 12/20/2015 6:13:52 AM adding Int8Array; streamlining array checking
+// BH 12/18/2015 5:02:52 PM adding .slice and also better array copy
+// BH 9/19/2015 11:05:45 PM Float.isInfinite(), Float.isNaN(), Double.isInfinite(), Double.isNaN() all not implemented
+// BH 7/24/2015 6:48:50 AM adding optional ?j2sdebug flag on page URL
+//                      -- switches to using j2s/core/corexxx.js, not j2s/core/corexxx.z.js 
+//                      -- adds ";//# sourceURL="+file  in eval(js)
+//                      -- enables DebugJS.$(msg) call to debugger;
+//  see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/debugger
+//  see https://developer.mozilla.org/en-US/docs/Tools/Debugger/How_to/Debug_eval_sources
+// BH 7/23/2015 6:45:55 PM added sourceURL in each js class eval(), allowing full 
+//                         breakpoint debugging and code checking in Firefox and Chrome
+// BH 7/19/2015 6:18:17 PM added os.name, line.separator, etc. to System.getProperty()
+// BH 7/19/2015 5:39:10 PM added java.lang.System = System
+// BH 7/19/2015 10:33:10 AM fix for SAEM equating "null" with number or boolean
+// BH 7/18/2015 6:08:05 PM for Jmol I was able to remove the $private/$fx business, but now
+//    I see that in general that cannot be done. Thinking about a strategy...
+// BH 7/18/2015 4:43:38 PM better handling of TypeError and InternalError for e.getMessage() and e.getStackTrace()
+// BH 7/17/2015 11:51:15 AM adds class.getResource(name) and class.getResourceAsStream(name) 
+// BH 7/16/2015 7:56:49 PM general instantiation using any constructor (in Java here):
+// BH  x = class.forName("my.class.name").newInstance()
+// BH or
+// BH  x = class.forName("my.class.name").getConstructor(String.class,String.class).newInstance(new Object[] {"test", "now"})
+// BH 7/15/2015 11:34:58 PM adding System.lineSeparator()
+// BH 7/15/2015 7:32:41 AM adding class.getCanonicalName == getName
+// BH 5/31/2015 5:38:14 PM  NPEExceptionPredicate fix
+// BH 5/31/2015 5:53:04 PM Number.compareTo added
+// BH 5/21/2015 5:46:30 PM Number("0xFFFFFFFF") is not -1
+// BH 5/11/2015 5:58:42 AM adding __signatures for debugging SAEM issues 
+// BH 4/25/2015 9:16:12 AM SAEM misrepresnting Number as Object in parameters and Integer as Number 
+// BH 4/24/2015 7:32:54 AM Object.hashCode() and System.getIdentityHashCode() fail. changed to:     return this._$hashcode || (this._$hashcode = ++Clazz._hashCode)
+// BH 4/23/2015 9:08:59 AM Clazz.instanceOf(a, b) needs to check for a == b.   
+// BH 4/23/2015 9:08:59 AM xx.getContentType() is nonfunctional. Array.newInstance now defines a wrapper for .getClass().getComponentType() that works  
+// BH 4/23/2015 9:08:59 AM xx.getComponentType() is nonfunctional. Array.newInstance now defines a wrapper for .getClass().getComponentType() that works  
+// BH 4/12/2015 11:48:03 AM added Clazz.getStackTrace(-n) -- reports actual parameter values for n levels
+// BH 4/12/2015 1:37:44 PM adding Math.rint = Math.round
+// BH 4/10/2015 8:23:05 AM adding Int32Array.prototype.clone and Float64.prototype.clone
+// BH 4/5/2015 8:12:57 AM refactoring j2slib (this file) to make private functions really private using var
+// BH 4/3/2015 6:14:34 AM adding anonymous local "ClazzLoader" (Clazz._Loader) --> "_Loader"
+// BH 4/3/2015 6:14:34 AM adding Clazz._Loader._classPending, Clazz._Loader._classCount
+// BH 4/3/2015 6:14:34 AM adding Clazz._Loader._checkLoad 
+//  -- forces asynchronous class loading
+//  -- builds Clazz._Loader._classPending and Clazz._classCount
+//  -- allows reporting 
+// BH 3/29/2015 8:12:44 PM System.getProperty(x, "") does not return ""
+// BH 3/24/2015 4:11:26 AM better file load failure message in _Loader.evaluate 
+// BH 2/28/2015 7:30:25 AM corrects newIntArray32() and newArray() for pre-defined arrays 
+//   		int[] a =  new int[] {1,2,3,343};
+//   		int[][] b = new int[][] {new int[]{4,5},new int[]{5,6}}; 
+// BH 1/16/2015 10:09:38 AM Chrome failure jqGrig due to new String("x").toString() not being a simple string
+// BH 9/29/2014 11:34:19 PM removing support for getClass().isArray() 
+// BH 8/29/2014 9:15:57 AM total reworking of Java2Script in preparation for all-asynchronous loading
+//                         (currently sync loading is only for 
+// 												   LOAD command and load() function without ASYNC
+//                            getInterface() 
+//                         see JSmol.js and Jmol._isAsync flag
+// BH 8/23/2014 10:04:19 AM cleaning up a few general methods; Clazz.removeArrayItem
+// BH 8/14/2014 6:49:22 PM Character class efficiencies
+// BH 7/24/2014 9:02:18 AM most browsers do not support String.codePointAt()
+// BH 7/11/2014 4:17:22 PM fix for Boolean.valueOf("false") not being false 
+// BH 6/1/2014 10:58:46 AM fix for Clazz.isAP() not working
+// BH 5/27/2014 6:29:59 AM ensure floats and doubles have decimal point in toString
+// BH 5/26/2014 5:19:29 PM removing superConstructor call in creating Enum constants
+// BH 4/1/2014 12:23:41 PM Encoding moved to Clazz._Encoding; 
+// BH 4/1/2014 7:51:46 AM removing java.lang.B00lean
+// BH 4/1/2014 7:55:54 PM removing all $fz references and instances where sub/super classes have same private function names
+// BH 4/1/2014 4:47:30 PM all $_X removed; this is taken care of by Google Closure Compiler
+// BH 4/1/2014 6:40:08 AM removing ClassLoader -- equals Clazz._Loader
+// BH 4/1/2014 6:40:08 AM removing ClassLoaderProgressMonitor -- equals _LoaderProgressMonitor
+// BH 4/1/2014 6:17:21 AM removing Class  -- only used for "Class.forName" in Jmol, which ANT will now change to "Clazz._4Name"
+// BH 3/7/2014 9:05:06 AM Array.prototype.toString should not be aliased. -- http://sourceforge.net/p/jmol/bugs/560/ with Google Visualization
+// BH 3/7/2014 9:17:10 AM removing Array.toString; moving that code here from j2sJmol.js
+// BH 1/30/2014 12:54:22 PM gave all field variables prefix underscore. This allows Google Closure Compiler to skip them.  
+// BH 1/30/2014 9:04:25 AM adding Throwable.getStackTrace() as a STRING
+// BH 12/4/2013 9:20:44 PM fix for reassigning Date.prototype.toString()
+// BH 12/3/2013 11:43:10 AM bizarre Safari bug in reassigning Boolean (OK, I admit, we shouldn't have done that...) 
+// BH 12/3/2013 3:39:57 PM window["j2s.lib"].base implemented
+// BH 12/1/2013 5:34:21 AM removed _LoaderProgressMonitor.initialize and all Clazz.event business; handled by Jmol.clearVars()
+// BH 12/1/2013 6:50:16 AM evit Number.prototype.toString assignment removed!
+// BH 11/30/2013 1:46:31 PM fixing Byte, Short, Long, Integer, Float, Double to reflect proper bounds and error conditions
+// BH 11/30/2013 12:43:58 PM adding Clazz.arrayIs() -- avoids Number.constructor.toString() infinite recursion
+// BH 11/29/2013 8:58:49 PM removing Boolean.toString(boolean)
+// BH 11/29/2013 6:33:51 AM adding Clazz._profiler -- reports use of SAEM
+// BH 11/10/2013 9:02:20 AM fixing fading in MSIE  
+// BH 11/4/2013 7:34:26 AM changing "var nativeClazz" to "var nativeClass" to avoid ANT replacement of "nativeClazz." to "nativeClazz_"
+// BH 11/3/2013 7:21:39 AM additional wrapping functions for better compressibility
+// BH 10/30/2013 8:10:58 AM added getClass().getResource() -- returning a relative string, not a URL
+// BH 10/30/2013 6:43:00 AM removed second System def and added System.$props and default System.property "line.separator" 
+// BH 10/19/2013 1:29:27 PM fixed String.$replace()
+// BH 10/18/2013 6:09:23 PM fixed (Double|Float).valueOf(NaN).valueOf(), which should return NaN, not throw an error
+// BH 10/12/2013 11:18:44 AM fixed bug in Double(String) and Float(String) that was returning typeof "string"
+// BH 10/10/2013 2:40:20 PM  added Math.log10   
+// BH 7/23/2013 7:24:01 AM fixing Number.shortValue() and Number.byteValue() for negative values
+// BH 6/16/2013 1:31:30 PM adding /| in String.replace -- thank you David Koes
+// BH 6/15/2013 8:02:07 AM corrections to Class.isAS to return true if first element is null
+// BH 6/14/2013 4:41:09 PM corrections to Clazz.isAI and related methods to include check for null object
+// BH 3/17/2013 11:54:28 AM adds stackTrace for ERROR 
+// BH 3/13/2013 12:49:23 PM setting Boolean.valueOf() "@" 
+// BH 3/13/2013 6:58:26 PM adds Clazz.clone(me) for BS clone 
+// BH 3/12/2013 6:30:53 AM fixes Clazz.exceptionOf for ERROR condition trapping
+// BH 3/2/2013 10:46:45 PM removed Double.valueOf(String)
+// BH 3/2/2013 9:09:53 AM delete globals c$ and $fz
+// BH 3/2/2013 9:10:45 AM optimizing defineMethod using "look no further" "@" parameter designation (see "\\@" below -- removed 3/23/13)
+// BH 2/27/2013 optimizing Clazz.getParamsType for common cases () and (Number)
+// BH 2/27/2013 optimizing SAEM delegation for hashCode and equals -- disallows overloading of equals(Object) 
+// BH 2/23/2013 found String.replaceAll does not work -- solution was to never call it.
+// BH 2/9/2013 9:18:03 PM Int32Array/Float64Array fixed for MSIE9
+// BH 1/25/2013 1:55:31 AM moved package.js from j2s/java to j2s/core 
+// BH 1/17/2013 4:37:17 PM String.compareTo() added
+// BH 1/17/2013 4:52:22 PM Int32Array and Float64Array may not have .prototype.sort method
+// BH 1/16/2013 6:20:34 PM Float64Array not available in Safari 5.1
+// BH 1/14/2013 11:28:58 PM  Going to all doubles in JavaScript (Float64Array, not Float32Array)
+//   so that (new float[] {13.48f})[0] == 13.48f, effectively
+// BH 1/14/2013 12:53:41 AM  Fix for Opera 10 not loading any files
+// BH 1/13/2013 11:50:11 PM  Fix for MSIE not loading (nonbinary) files locally
+// BH 1/7/2013 7:40:06 AM added Clazz.dateToString
+// BH 12/1/2012 9:52:26 AM Compiler note: Thread.start() cannot be executed within the constructor;
+// BH 11/24/2012 11:08:39 AM removed unneeded sections
+// BH 11/24/2012 10:23:22 AM  all XHR uses sync loading (_Loader.setLoadingMode)
+// BH 11/21/2012 7:30:06 PM 	if (base)	map["@" + pkg] = base;  critical for multiple applets
+// BH 11/6/2012 8:26:33 PM added instanceof Int32Array in String.instantialize
+// BH 11/1/2012 added Short
+// BH 10/13/2012 11:38:07 PM corrected Integer.parseInt to allow only +-0123456789; created Integer.parseIntRadix
+// BH 10/8/2012 3:27:41 PM         if (clazzName.indexOf("Array") >= 0) return "Array"; in Clazz.getClassName for function
+// BH 9/10/2012 6:27:21 AM added java.net.URL... classes
+// BH removed Clazz.ie$plit = "\\2".split (/\\/).length == 1; unnecessary; using RegEx slows process significantly in all browsers
+// BH 10/6/12 added Int32Array, Float32Array, newArrayBH, upgraded java.lang and java.io
+// BH added Integer.bitCount in core.z.js
+// BH changed alert to Clazz.alert in java.lang.Class.js *.ClassLoader.js, java.lang.thread.js
+// BH removed toString from innerFunctionNames due to infinite recursion
+// BH note: Logger.error(null, e) does not work -- get no constructor for (String) (TypeError)
+// BH added j2s.lib.console
+// BH allowed for alias="."
+// BH removed alert def --> Clazz.alert
+// BH added wrapper at line 2856 
+// BH newArray fix at line 2205
+// BH System.getProperty fix at line 6693
+// BH added Enum .value() method at line 2183
+// BH added System.getSecurityManager() at end
+// BH added String.contains() at end
+// BH added System.gc() at end
+// BH added Clazz.exceptionOf = updated
+// BH added String.getBytes() at end
+ 
+
+
+
+
+j2sApplet.js
+------------
+
+// BH 12/30/2018 adds generic DND support, not just file drop
+// BH 12/20/2018 fixes mouse event extended modifiers for drag operation
+// BH 11/7/2018 adds J2S.addDirectDatabaseCall(domain)
+// BH 9/18/2018 fixes data.getBytes() not qualified
+// BH 8/12/2018 adding J2S.onClazzLoaded(i,msg) hook for customization
+//   for example, the developer can look for i=1 (pre-core) and add core files selectively
+//   or set System.$props["user.home"] to a desired directory before (i=1) or just after (i=2) core file loading
+// BH 8/6/2018 fix for Java Application start-up when not headless in Java 8
+// BH 7/21/2018 fix for static{thisApplet.__Info.width=300} not working
+// BH 7/2/2018 10:00:49 PM fix logic for FileReader for Chrome
+// BH 7/1/2018 7:25:25 AM fixes drag-drop for first call in Firefox/win
+// BH 6/29/2018 9:48:13 AM fixes key info for mouse move
+// BH 6/27/2018 12:45:44 PM adds DND for frames
+// BH 6/20/2018 11:26:09 PM fix for menu bar not closable
+// BH 3/16/2018 5:25:09 AM fixes for dragging on phones
+// BH 2/20/2018 12:08:08 AM adds J2S.getKeyModifiers
+// BH 1/8/2018 10:27:46 PM SwingJS2
+// BH 12/22/2017 1:18:42 PM adds j2sargs for setting arguments
+// BH 11/19/2017 3:55:04 AM adding support for swingjs2.js; adds static j2sHeadless=true;
+// BH 10/4/2017 2:25:03 PM adds Clazz.loadClass("javajs.util.Base64")
+// BH 7/18/2017 10:46:44 AM adds J2S._canClickFileReader, fixing J2S.getFileFromDialog for Chrome and Safari
+// BH 7/15/2017 11:04:06 AM drag/up functions not found in draggable (not hoisted)
+// BH 3/5/2017 5:49:30 PM mouse wheel action
+// BH 1/11/2017 2:21:32 AM should allow uppercase binary formats WAV MP3 etc.
+// BH 1/8/2017 1:00:02 PM allows ".jpeg" as file name ext
+// BH 1/3/2017 11:06:10 PM adds binary types ".mp3",".ogg", ".wav"
+// BH 12/26/2016 5:22:45 PM adds j2sLang=la_CO_VA  e.g. en_US  or en-US, either is OK; capitalization ignored
+// BH 12/21/2016 5:01:07 PM moving getJavaResource to JSToolkit
+// BH 12/18/2016 7:16:54 AM GCC fix for trailing comma in J2S.db
+// BH 12/16/2016 8:43:11 AM adds icon+text for buttons
+// BH 12/15/2016 6:55:40 AM URL line switches:
+//     j2sdebugCode  do not use core files at all
+//     j2sdebugCore  use coreXXXX.js rather than coreXXXX.z.js and debugger if a class is defined twice
+//     j2sdebugName=java.util.Hashtable  debugger started for load or declareInterface
+// BH 12/3/2016 6:53:17 PM adds "master" for applet registration, allowing access during file loading
+// BH 10/23/2016 10:13:42 PM adds support for Info.main
+// BH 7/18/2016 4:51:52 PM adds frame title dragging and toFront(), toBack()
+// BH 7/25/2016 8:28:57 AM adds 3Dialog(fDone, asBytes)
+// Bob Hanson 7/13/2016 9:43:56 PM

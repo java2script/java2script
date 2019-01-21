@@ -46,7 +46,7 @@ class SentEvent extends AWTEvent implements ActiveEvent {
     private static final long serialVersionUID = -383615247028828931L;
 
     static final int ID =
-        java.awt.event.FocusEvent.FOCUS_LAST + 2;
+        java.awt.event.FocusEvent.FOCUS_LAST + 2; // 1007
 
     boolean dispatched;
     private AWTEvent nested;

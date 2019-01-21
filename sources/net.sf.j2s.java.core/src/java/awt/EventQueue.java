@@ -996,7 +996,7 @@ public class EventQueue {
 		}
 	}
 
-	static void setCurrentEventAndMostRecentTime(AWTEvent e) {
+	/*SwingJS needed this public*/public static void setCurrentEventAndMostRecentTime(AWTEvent e) {
 		Toolkit.getEventQueue().setCurrentEventAndMostRecentTimeImpl(e);
 	}
 

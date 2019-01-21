@@ -91,6 +91,7 @@ public class Box extends JComponent {
     public Box(int axis) {
         super();
         super.setLayout(new BoxLayout(this, axis));
+        updateUI();
     }
 
     /**
@@ -124,6 +125,12 @@ public class Box extends JComponent {
     public static Box createVerticalBox() {
         return new Box(BoxLayout.Y_AXIS);
     }
+
+	@Override
+	public String getUIClassID() {
+		return "BoxUI";
+	}
+
 
     /**
      * Creates an invisible component that's always the specified size.

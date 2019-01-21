@@ -15,7 +15,7 @@ public class JSCheckBoxMenuItemUI extends JSCheckBoxUI {
 	
 	@Override
 	protected String getPropertyPrefix() {
-		return "CheckBoxMenuItem.";
+		return "CheckBoxMenuItem";
 	}
 
 	@Override
