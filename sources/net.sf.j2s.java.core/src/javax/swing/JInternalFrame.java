@@ -256,7 +256,8 @@ public class JInternalFrame extends JFrame
 
     private static class FocusPropertyChangeListener implements
         PropertyChangeListener {
-        public void propertyChange(PropertyChangeEvent e) {
+        @Override
+		public void propertyChange(PropertyChangeEvent e) {
             if (e.getPropertyName() == "permanentFocusOwner") {
                 updateLastFocusOwner((Component)e.getNewValue());
             }
@@ -266,10 +267,14 @@ public class JInternalFrame extends JFrame
     private static void updateLastFocusOwner(Component component) {
         if (component != null) {
             Component parent = component;
-            while (parent != null && !(parent instanceof Window)) {
+            while (parent != null 
+            		// in SwingJS, JInternalFrames are Windows
+            		// && !(parent instanceof Window)
+            		) {
                 if (parent instanceof JInternalFrame) {
                     // Update lastFocusOwner for parent.
                     ((JInternalFrame)parent).setLastFocusOwner(component);
+                    break; // BH added
                 }
                 parent = parent.getParent();
             }
@@ -374,7 +379,8 @@ public class JInternalFrame extends JFrame
      * @return the <code>InternalFrameUI</code> object that renders
      *          this component
      */
-    public InternalFrameUI getUI() {
+    @Override
+	public InternalFrameUI getUI() {
         return (InternalFrameUI)ui;
     }
 
@@ -406,7 +412,8 @@ public class JInternalFrame extends JFrame
      *
      * @see JComponent#updateUI
      */
-    public void updateUI() {
+    @Override
+	public void updateUI() {
     	super.updateUI();
     	invalidate();
         if (desktopIcon != null) {
@@ -861,7 +868,8 @@ public class JInternalFrame extends JFrame
      * {@inheritDoc}
      * @since 1.6
      */
-    public void setCursor(Cursor cursor) {
+    @Override
+	public void setCursor(Cursor cursor) {
         if (cursor == null) {
             lastCursor = null;
             super.setCursor(cursor);
@@ -1036,7 +1044,8 @@ public class JInternalFrame extends JFrame
      * @return the component with focus, or <code>null</code> if no children have focus
      * @since 1.3
      */
-    public Component getFocusOwner() {
+    @Override
+	public Component getFocusOwner() {
         if (isSelected()) {
             return lastFocusOwner;
         }
@@ -1064,7 +1073,8 @@ public class JInternalFrame extends JFrame
      * @see #isSelected
      * @since 1.4
      */
-    public Component getMostRecentFocusOwner() {
+    @Override
+	public Component getMostRecentFocusOwner() {
         if (isSelected()) {
             return getFocusOwner();
         }
@@ -1131,7 +1141,8 @@ public class JInternalFrame extends JFrame
      * @param width  an integer giving the component's new width in pixels
      * @param height an integer giving the component's new height in pixels
      */
-    public void reshape(int x, int y, int width, int height) {
+    @Override
+	public void reshape(int x, int y, int width, int height) {
         super.reshape(x, y, width, height);
 //        validate();
 //        repaint();
@@ -1391,7 +1402,8 @@ public class JInternalFrame extends JFrame
      * @see #dispose
      * @see InternalFrameEvent#INTERNAL_FRAME_CLOSING
      */
-    public void setDefaultCloseOperation(int operation) {
+    @Override
+	public void setDefaultCloseOperation(int operation) {
         this.defaultCloseOperation = operation;
     }
 
@@ -1402,7 +1414,8 @@ public class JInternalFrame extends JFrame
     *         frame
     * @see #setDefaultCloseOperation
     */
-    public int getDefaultCloseOperation() {
+    @Override
+	public int getDefaultCloseOperation() {
         return defaultCloseOperation;
     }
 
@@ -1415,7 +1428,8 @@ public class JInternalFrame extends JFrame
      *
      * @see       java.awt.Window#pack
      */
-    public void pack() {
+    @Override
+	public void pack() {
         try {
             if (isIcon()) {
                 setIcon(false);
@@ -1446,7 +1460,8 @@ public class JInternalFrame extends JFrame
      * @see InternalFrameEvent#INTERNAL_FRAME_OPENED
      * @see #setVisible
      */
-    public void show() {
+    @Override
+	public void show() {
         // bug 4312922
         if (isVisible()) {
             //match the behavior of setVisible(true): do nothing
@@ -1477,7 +1492,8 @@ public class JInternalFrame extends JFrame
         }
     }
 
-    public void hide() {
+    @Override
+	public void hide() {
         if (isIcon()) {
             getDesktopIcon().setVisible(false);
         }
@@ -1501,7 +1517,8 @@ public class JInternalFrame extends JFrame
      * @see #setSelected
      * @see #setClosed
      */
-    public void dispose() {
+    @Override
+	public void dispose() {
         if (isVisible()) {
             setVisible(false);
         }
@@ -1526,7 +1543,8 @@ public class JInternalFrame extends JFrame
      * @see       java.awt.Window#toFront
      * @see       #moveToFront
      */
-    public void toFront() {
+    @Override
+	public void toFront() {
         moveToFront();
     }
 
@@ -1539,7 +1557,8 @@ public class JInternalFrame extends JFrame
      * @see       java.awt.Window#toBack
      * @see       #moveToBack
      */
-    public void toBack() {
+    @Override
+	public void toBack() {
         moveToBack();
     }
 
@@ -1553,7 +1572,8 @@ public class JInternalFrame extends JFrame
      * @see java.awt.Container#getFocusTraversalPolicy
      * @since 1.4
      */
-    public void setFocusCycleRoot(boolean focusCycleRoot) {
+    @Override
+	public void setFocusCycleRoot(boolean focusCycleRoot) {
     }
 
     /**
@@ -1566,7 +1586,8 @@ public class JInternalFrame extends JFrame
      * @see java.awt.Container#getFocusTraversalPolicy
      * @since 1.4
      */
-    public final boolean isFocusCycleRoot() {
+    @Override
+	public final boolean isFocusCycleRoot() {
         return true;
     }
 
@@ -1579,7 +1600,8 @@ public class JInternalFrame extends JFrame
      * @see java.awt.Container#isFocusCycleRoot()
      * @since 1.4
      */
-    public final Container getFocusCycleRootAncestor() {
+    @Override
+	public final Container getFocusCycleRootAncestor() {
         return null;
     }
 
@@ -1591,7 +1613,8 @@ public class JInternalFrame extends JFrame
      * @return    <code>null</code>
      * @see       java.awt.Window#getWarningString
      */
-    public final String getWarningString() {
+    @Override
+	public final String getWarningString() {
         return null;
     }
 
@@ -1701,7 +1724,8 @@ public class JInternalFrame extends JFrame
      * Overridden to allow optimized painting when the
      * internal frame is being dragged.
      */
-    protected void paintComponent(Graphics g) {
+    @Override
+	protected void paintComponent(Graphics g) {
 
      // this is not called, I think.
     	
@@ -1965,7 +1989,8 @@ public class JInternalFrame extends JFrame
          *
          * @see JComponent#updateUI
          */
-        public void updateUI() {
+        @Override
+		public void updateUI() {
             super.updateUI();
             invalidate();
 

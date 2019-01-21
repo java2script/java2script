@@ -199,6 +199,8 @@ public class JSTableHeaderUI extends JSLightweightUI {
 	// The column that should be highlighted when the table header has the focus.
 	private int selectedColumnIndex = 0; // Read ONLY via getSelectedColumnIndex!
 
+	private final static Rectangle tmpRect = new Rectangle(), cellBounds = new Rectangle();;
+
 	private static FocusListener focusListener = new FocusListener() {
 		@Override
 		public void focusGained(FocusEvent e) {
@@ -625,11 +627,11 @@ public class JSTableHeaderUI extends JSLightweightUI {
 		}
 
 		// Now scroll, if necessary.
-		Rectangle vis = table.getVisibleRect();
-		Rectangle cellBounds = table.getCellRect(0, col, true);
-		vis.x = cellBounds.x;
-		vis.width = cellBounds.width;
-		table.scrollRectToVisible(vis);
+		table.computeVisibleRect(tmpRect);
+		table._getCellRect(0, col, true, cellBounds);
+		tmpRect.x = cellBounds.x;
+		tmpRect.width = cellBounds.width;
+		table.scrollRectToVisible(tmpRect);
 	}
 
 	private int getSelectedColumnIndex() {

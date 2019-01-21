@@ -19,6 +19,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
 import java.util.regex.Pattern;
@@ -449,7 +450,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			if (javadoc != null) {
 				List<Javadoc> list = new ArrayList<Javadoc>();
 				list.add(javadoc);
-				return !NativeDoc.checkJ2sJavadocs(buffer, list, false);
+				return !NativeDoc.addJ2sJavadocs(buffer, list, false);
 			}
 		}
 		return true;
@@ -459,7 +460,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (inNewLambdaExpression)
 			return;
 		// look for trailing j2sNative block just before the end of a block
-		getJ2sJavadoc(node, false);
+		getJ2sJavadoc(node, DOC_ADD_POST);
 		buffer.append("}");
 		clearVariables(package_finalVars);
 		package_blockLevel--;
@@ -1524,7 +1525,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		List<ASTNode> fragments = node.fragments();
 		for (Iterator<ASTNode> iter = fragments.iterator(); iter.hasNext();) {
 			buffer.append("var ");
-			iter.next().accept(this);
+			ASTNode next = iter.next();
+			next.accept(this);
 			buffer.append(";\r\n");
 		}
 		return false;
@@ -2068,7 +2070,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			}
 		}
 
-		getJ2sJavadoc(node, false);
+		getJ2sJavadoc(node, DOC_ADD_POST);
 
 		if (!isTopLevel) {
 			addAnonymousFunctionWrapper(false);
@@ -2202,7 +2204,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		boolean checkFinalConstant = (isStatic && Modifier.isFinal(field.getModifiers()) && var != null
 				&& !var.getType().getQualifiedName().equals("java.lang.Object"));
 		if (needDefault)
-			checkForJ2SDoc(field);
+			addJ2SDoc(field);
 		int len0 = buffer.length();
 		for (Iterator<?> iter = fragments.iterator(); iter.hasNext();) {
 			VariableDeclarationFragment fragment = (VariableDeclarationFragment) iter.next();
@@ -2598,7 +2600,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	public boolean visit(Assignment node) {
 		// note that this is not
-		// var x = .....
+		// var x = ..... -- that is a visit(VariableDeclaration)
 		//
 		// includes: =
 		// +=, -=, *=, /=, %=
@@ -2609,6 +2611,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		Expression left = node.getLeftHandSide();
 		Expression right = node.getRightHandSide();
+		
+//		buffer.append("/* assign left=" + left  + " " + left.getClass().getName() + " right=" + right + right.getClass().getName() + "*/");
+
 		ITypeBinding leftTypeBinding = left.resolveTypeBinding();
 		ITypeBinding rightTypeBinding = right.resolveTypeBinding();
 		String rightName = (rightTypeBinding == null ? null : rightTypeBinding.getName());
@@ -2623,6 +2628,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		String opType = (op.length() == 1 ? null : op.substring(0, op.length() - 1));
 		boolean needNewStaticParenthesis = false;
 		boolean isParenthesized = (right instanceof ParenthesizedExpression);
+//		boolean haveDocRight = (getJ2sJavadoc(right, DOC_CHECK_ONLY) != null);
 		if (isStaticBinding(toBinding)) {
 			// Static def new Test_Static().y++;
 			needNewStaticParenthesis = (!haveDirectStaticAccess(left)) && !(node.getParent() instanceof Statement);
@@ -2689,7 +2695,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						} else {
 							if (isParenthesized)
 								buffer.append("(");
-							checkForJ2SDoc(right);
+							addJ2SDoc(right);
 							buffer.append(0 + ((CharacterLiteral) right).charValue());
 							if (isParenthesized)
 								buffer.append(")");
@@ -2708,7 +2714,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					}
 				} else {
 					// just add the right operand
-					addOperand(right, leftIsString);
+					addOperandWithDoc(right, leftIsString);
 				}
 				if (needNewStaticParenthesis) {
 					buffer.append(")");
@@ -2743,7 +2749,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				buffer.append(")");
 			}
 		} else if ("char".equals(rightName)) {
-			Object constValue = right.resolveConstantExpressionValue();
+			Object constValue = getConstant(right);
 			if (constValue != null && constValue instanceof Character) {
 				buffer.append(((Character) constValue).charValue() + 0);
 			} else {
@@ -2751,7 +2757,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						|| right instanceof PrefixExpression || right instanceof PostfixExpression);
 				if (needParenthesis) {
 					buffer.append("(");
-					checkForJ2SDoc(right);
+					addJ2SDoc(right);
 				}
 				needCharCode = appendBoxingNode(right, false);
 				if (needParenthesis) {
@@ -2995,13 +3001,17 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// < > <= >= == !=
 		// ^ & |
 		// && ||
+		// (  a == b )
+		// (/** j2snative xxxx ||*/ a) == b
 
+		
 		Expression left = node.getLeftOperand();
 		Expression right = node.getRightOperand();
 		List<?> extendedOperands = node.extendedOperands();
 
-		if (getConstantValue(node, true))
+		if (noDocProblem(left) && noDocProblem(right) && getConstantValue(node, true)) {
 			return false;
+		}
 		ITypeBinding expTypeBinding = node.resolveTypeBinding();
 		if (expTypeBinding == null)
 			return false;
@@ -3084,7 +3094,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// s += 'c' | 'd';
 
 		// left
-		addOperand(left, isToString && !isBitwise);
+		
+		addOperandWithDoc(left, isToString && !isBitwise);
 		buffer.append(' ');
 		// op
 		buffer.append(operator);
@@ -3094,7 +3105,16 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 		buffer.append(' ');
 		// right
-		addOperand(right, isToString && !isBitwise);
+		if (right instanceof ParenthesizedExpression || getJ2sJavadoc(right, DOC_CHECK_ONLY) != null) {
+			buffer.append("(");
+			addJ2SDoc(right);
+			if (right instanceof ParenthesizedExpression)
+				right = ((ParenthesizedExpression) right).getExpression();
+			addOperand(right, isToString && !isBitwise);
+			buffer.append(")");
+		} else {
+			addOperand(right, isToString && !isBitwise);			
+		}
 
 		// The extended operands is the preferred way of representing deeply
 		// nested expressions of the form L op R op R2 op R3... where the same
@@ -3109,6 +3129,17 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (toBoolean)
 			buffer.append(post);
 		return false;
+	}
+
+	private void addOperandWithDoc(Expression exp, boolean toString) {		
+		if (exp instanceof ParenthesizedExpression) {
+			buffer.append("(");
+			addJ2SDoc(exp);
+			addOperand(((ParenthesizedExpression) exp).getExpression(), toString);
+			buffer.append(")");
+		} else {
+			addOperand(exp, toString);			
+		}
 	}
 
 	public boolean visit(InstanceofExpression node) {
@@ -3158,7 +3189,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	public boolean visit(ParenthesizedExpression node) {
 		buffer.append("(");
-		checkForJ2SDoc(node);
+		addJ2SDoc(node);
 		node.getExpression().accept(this);
 		buffer.append(")");
 		return false;
@@ -3191,14 +3222,17 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * </pre>
 	 */
 	public boolean visit(PrefixExpression node) {
-		if (getConstantValue(node, true))
-			return false;
+		Expression exp = node.getOperand();
+// NO! Don't do this! !(/** @j2sNative true||*/false  does not work 
+//		if (getConstantValue(node, true))
+//			return false;
 		String op = node.getOperator().toString();
+		
 		if ("~".equals(op)) {
 			buffer.append(op);
 			return true;
 		}
-		return addPrePost(node, node.getOperand(), node.getOperator().toString(), false);
+		return addPrePost(node, exp, node.getOperator().toString(), false);
 	}
 
 	public boolean visit(QualifiedName node) {
@@ -3454,6 +3488,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (rightBinding == null)
 			return false;
 		buffer.append("=");// no space here -- need to check for last char "=" in lambda
+		
 		addExpressionAsTargetType(right, name.resolveTypeBinding(), "v", null);
 		return false;
 	}
@@ -3695,34 +3730,33 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private void addExpressionAsTargetType(Expression exp, Object targetType, String op, List<?> extendedOperands) {
 		if (targetType == null
 				|| exp instanceof CastExpression && ((CastExpression) exp).getExpression() instanceof NullLiteral) {
-			checkForJ2SDoc(exp);
+			addJ2SDoc(exp);
 			buffer.append("null");
 			return;
 		}
 		ITypeBinding expTypeBinding = exp.resolveTypeBinding();
-		if (expTypeBinding != null) {
-			// BH: Question: When does typeBinding == null?
-			// A: when there is a compilation error, I think.
-			// OK, now we have the same situation as any operand.
-			String rightName = expTypeBinding.getName();
-			if (rightName.equals("char") && op == "q") {
-				appendBoxingNode(exp, false);
-				return;
-			}
-			String paramName = (exp.resolveTypeBinding().isArray() ? ";"
-					: targetType instanceof ITypeBinding ? ((ITypeBinding) targetType).getName()
-							: targetType.toString());
-			boolean isNumeric = isIntegerType(paramName);
-			if ((isNumeric || paramName.equals("char")) && !isBoxTyped(exp)) {
-				// using operator "m" to limit int application of $i$
+		if (expTypeBinding == null)
+			return;
+		// BH: Question: When does typeBinding == null?
+		// A: when there is a compilation error, I think.
+		// OK, now we have the same situation as any operand.
+		String rightName = expTypeBinding.getName();
+		if (rightName.equals("char") && op == "q") {
+			appendBoxingNode(exp, false);
+			return;
+		}
+		String paramName = (exp.resolveTypeBinding().isArray() ? ";"
+				: targetType instanceof ITypeBinding ? ((ITypeBinding) targetType).getName() : targetType.toString());
+		boolean isNumeric = isIntegerType(paramName);
+		if ((isNumeric || paramName.equals("char")) && !isBoxTyped(exp)) {
+			// using operator "m" to limit int application of $i$
 
-				addPrimitiveTypedExpression(null, null, paramName, op, exp, rightName, extendedOperands, false);
-			} else {
-				// char f() { return Character }
-				// Character f() { return char }
-				// int f() { return Character }
-				appendBoxingNode(exp, isNumeric);
-			}
+			addPrimitiveTypedExpression(null, null, paramName, op, exp, rightName, extendedOperands, false);
+		} else {
+			// char f() { return Character }
+			// Character f() { return char }
+			// int f() { return Character }
+			appendBoxingNode(exp, isNumeric);
 		}
 	}
 
@@ -3851,6 +3885,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @param isToString
 	 */
 	private void addOperand(Expression exp, boolean isToString) {
+		
+		boolean needRtParen = false;//(exp instanceof ParenthesizedExpression && getJ2sJavadoc(exp, DOC_CHECK_ONLY) != null);
 		ITypeBinding binding = exp.resolveTypeBinding();
 		String name = binding.getName();
 		if (isToString) {
@@ -3878,40 +3914,40 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				buffer.append(suffix);
 				buffer.append(".toString()");
 			}
-			return;
-		}
-		if (!binding.isPrimitive() || !"char".equals(name)) {
+		} else if (!binding.isPrimitive() || !"char".equals(name)) {
 			appendBoxingNode(exp, !isToString);
-			return;
-		}
-		// to numeric only
-		// oddly enough, 'c' is considered a simple
-		Object constValue = null;
-		if (exp instanceof CharacterLiteral) {
-			buffer.append(0 + ((CharacterLiteral) exp).charValue());
-		} else if ((constValue = exp.resolveConstantExpressionValue()) != null && constValue instanceof Character) {
-			buffer.append(0 + ((Character) constValue).charValue());
-		} else if (exp instanceof SimpleName || exp instanceof QualifiedName) {
-			int pt = buffer.length();
-			appendBoxingNode(exp, false);
-			if (pt == buffer.length() - 3 && buffer.charAt(pt) == '\'') {
-				char c = buffer.charAt(pt + 1);
-				buffer.setLength(pt);
-				buffer.append((int) c);
-			} else {
-				buffer.append(CHARCODEAT0);
-			}
-		} else if (exp instanceof PrefixExpression || exp instanceof PostfixExpression
-				|| exp instanceof ParenthesizedExpression) {
-			appendBoxingNode(exp, false);
-			buffer.append(CHARCODEAT0);
 		} else {
-			int pt = buffer.length();
-			buffer.append("(");
-			appendBoxingNode(exp, false);
-			buffer.append(")");
-			addCharCodeAt(exp, pt);
+			// to numeric only
+			// oddly enough, 'c' is considered a simple
+			Object constValue = null;
+			if (exp instanceof CharacterLiteral) {
+				buffer.append(0 + ((CharacterLiteral) exp).charValue());
+			} else if ((constValue = getConstant(exp)) != null && constValue instanceof Character) {
+				buffer.append(0 + ((Character) constValue).charValue());
+			} else if (exp instanceof SimpleName || exp instanceof QualifiedName) {
+				int pt = buffer.length();
+				appendBoxingNode(exp, false);
+				if (pt == buffer.length() - 3 && buffer.charAt(pt) == '\'') {
+					char c = buffer.charAt(pt + 1);
+					buffer.setLength(pt);
+					buffer.append((int) c);
+				} else {
+					buffer.append(CHARCODEAT0);
+				}
+			} else if (exp instanceof PrefixExpression || exp instanceof PostfixExpression
+					|| exp instanceof ParenthesizedExpression) {
+				appendBoxingNode(exp, false);
+				buffer.append(CHARCODEAT0);
+			} else {
+				int pt = buffer.length();
+				buffer.append("(");
+				appendBoxingNode(exp, false);
+				buffer.append(")");
+				addCharCodeAt(exp, pt);
+			}
 		}
+		if (needRtParen)
+			buffer.append(")");
 	}
 
 //	/**
@@ -3972,10 +4008,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		String classIntArray = null;
 		String more = null;
+		
 		String prefix = (isAssignment ? "=" : "");
 		boolean fromChar = ("char".equals(rightName));
 		boolean fromIntType = ("long int short byte".indexOf(rightName) >= 0);
-		boolean addParens = (op != "r" || fromChar);
+		boolean addParens = (op != "r" || fromChar || right instanceof ParenthesizedExpression);
 		boolean isDiv = "/".equals(op);
 		boolean toChar = false;
 		switch (leftName) {
@@ -4199,6 +4236,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// Double > x will be unboxed
 		// Character == 'c' will be unboxed
 		// f$Integer(int) will be boxed
+		//buffer.append("/* ?? " + (element instanceof Expression) + " " + element.getClass().getName() + " " + element + " ?? */");
 		if (element instanceof Expression) {
 			Expression exp = (Expression) element;
 			if (exp.resolveBoxing()) {
@@ -4226,11 +4264,21 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					buffer.append(toCharCode && name == "char" ? ")" + CHARCODEAT0 : ")." + name + "Value$()");
 					return true;
 				}
-			}
-			if (getConstantValue(exp, true))
+			}			
+			if (!(exp instanceof ParenthesizedExpression) 
+					&& !(exp instanceof PrefixExpression) 
+					&& !(exp instanceof InfixExpression) 
+					&& !(exp instanceof PostfixExpression) 
+					&& getConstantValue(exp, true)) {
+				
+			//	buffer.append("/* !!! */");
+				
 				return false;
+			}
 		}
+		//buffer.append("/* >>> "+ element.getClass().getName() + "*/");
 		element.accept(this);
+		//buffer.append("/* <<< */");
 		return false;
 	}
 
@@ -5142,6 +5190,18 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		return (superclass != null && !"java.lang.Object".equals(superclass.getQualifiedName()));
 	}
 
+	private Object getConstant(Expression exp) {
+		return (noDocProblem(exp) ? exp.resolveConstantExpressionValue() : null); 
+	}
+	private boolean noDocProblem(Expression exp) {
+		return (getJ2sJavadoc(exp, DOC_CHECK_ONLY) == null
+				 || !(exp instanceof PrefixExpression  
+					|| exp instanceof InfixExpression 
+					|| exp instanceof PostfixExpression 
+					|| exp instanceof ParenthesizedExpression)
+				);
+	}
+
 	/**
 	 * If given expression is constant value expression, return its value string; or
 	 * character or return null.
@@ -5152,10 +5212,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private boolean getConstantValue(Expression node, boolean andWrite) {
 		if (node == null)
 			return false;
-		Object constValue = node.resolveConstantExpressionValue();
+		Object constValue = getConstant(node);
 		StringBuffer sb = null;
 		if (constValue != null
-				&& (constValue instanceof Number || constValue instanceof Character || constValue instanceof Boolean)) {
+				&& (constValue instanceof Number || 
+						constValue instanceof Character || 
+						constValue instanceof Boolean)) {
 			sb = new StringBuffer();
 			if (constValue instanceof Character) {
 				sb.append('"');
@@ -5163,6 +5225,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				sb.append('"');
 			} else {
 				// Number or Boolean
+				
 				sb.append(constValue);
 			}
 		} else if (constValue instanceof String) {
@@ -5181,7 +5244,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			boolean needParen = (node instanceof ParenthesizedExpression);
 			if (needParen)
 				buffer.append("(");
-			checkForJ2SDoc(node);
+			addJ2SDoc(node);
 			buffer.append(sb);
 			if (needParen)
 				buffer.append(")");
@@ -5258,9 +5321,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			// normal termination from item after last j2sjavadoc
 		}
 
-//		for (int i = 0, n = list.size(); i < n; i++) {
-//			System. out.println(i + "  " + (list.get(i) == null ? null : list.get(i).getClass().getName() + " " + list.get(i).getStartPosition() + "..." + (list.get(i).getStartPosition() + list.get(i).getLength())));
-//		}
+//??		System.out.println("/**** list ****/");
+//??		for (int i = 0, n = list.size(); i < n; i++) {
+//??			System. out.println(i + "  " + (list.get(i) == null ? null : list.get(i).getClass().getName() + " " + list.get(i).getStartPosition() + "..." + (list.get(i).getStartPosition() + list.get(i).getLength())));
+//??		}
 
 		// and link javadoc to its closest block
 
@@ -5290,27 +5354,50 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * or @j2sIgnore
 	 */
 	public boolean preVisit2(ASTNode node) {
-		// will do this for ParenthesizedExpression after the "("
-		return (node instanceof ParenthesizedExpression || checkForJ2SDoc(node));
+		return (node instanceof ParenthesizedExpression 
+				|| !addJ2SDoc(node) || !(node instanceof Block));
 	}
-
-	private boolean checkForJ2SDoc(ASTNode node) {
+	
+	private final static int DOC_CHECK_ONLY = 0;
+	private final static int DOC_ADD_PRE    = 1;
+	private final static int DOC_ADD_POST   = 2;
+	
+	/**
+	 * 
+	 * @param node
+	 * @return true if code was added
+	 */
+	private boolean addJ2SDoc(ASTNode node) {
 		List<Javadoc> j2sJavadoc;
-		if (package_mapBlockJavadoc == null || node instanceof MethodDeclaration || node instanceof Initializer
-				|| (j2sJavadoc = getJ2sJavadoc(node, true)) == null)
-			return true;
-		boolean isBlock = (node instanceof Block);
-		return !NativeDoc.checkJ2sJavadocs(buffer, j2sJavadoc, isBlock) || !isBlock;
+		if (package_mapBlockJavadoc == null 
+				|| node instanceof MethodDeclaration 
+				|| node instanceof Initializer
+				|| (j2sJavadoc = getJ2sJavadoc(node, DOC_CHECK_ONLY)) == null
+				|| node instanceof InfixExpression && ((InfixExpression) node).getLeftOperand() instanceof ParenthesizedExpression
+				)
+			return false;
+		boolean ret = NativeDoc.addJ2sJavadocs(buffer, j2sJavadoc, node instanceof Block);
+		j2sJavadoc.clear();
+		return ret;
 	}
 
-	private List<Javadoc> getJ2sJavadoc(ASTNode node, boolean isPre) {
+	private List<Javadoc> getJ2sJavadoc(ASTNode node, int mode) {
+		
+		// package_mapBlockJavadoc will be null for a no-package class like VARNA.java,
+		// which are not allowed to use @j2sNative
+		
 		if (package_mapBlockJavadoc == null)
 			return null;
-		// package_mapBlockJavadoc will be null for a no-package class like VARNA.java
-		List<Javadoc> docs = package_mapBlockJavadoc
-				.remove(Integer.valueOf((isPre ? 1 : -1) * node.getStartPosition()));
-		if (!isPre && docs != null)
-			NativeDoc.checkJ2sJavadocs(buffer, docs, false);
+		List<Javadoc> docs;
+		if (mode == DOC_ADD_POST) {
+			docs = package_mapBlockJavadoc.remove(Integer.valueOf(-1 * node.getStartPosition()));
+			if (docs != null)
+				NativeDoc.addJ2sJavadocs(buffer, docs, false);
+		} else {
+			docs = package_mapBlockJavadoc.get(Integer.valueOf(node.getStartPosition()));
+//??			buffer.append("\n/** looking for " + node + " " + Integer.valueOf(node.getStartPosition())
+//??			+ " " + (docs != null) + " " + node.getClass().getName() + "*/\n");
+		}
 		return docs;
 	}
 
@@ -6514,17 +6601,19 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		 * @param isBlock
 		 * @return true if code was added
 		 */
-		static boolean checkJ2sJavadocs(StringBuffer buffer, List<Javadoc> list, boolean isBlock) {
+		static boolean addJ2sJavadocs(StringBuffer buffer, List<Javadoc> list, boolean isBlock) {
 			boolean didAdd = false;
-			for (int i = 0, n = list.size(); i < n; i++) {
+			int n = list.size();
+			for (int i = 0; i < n; i++) {
 				Javadoc javadoc = list.get(i);
 				List<?> tags = javadoc.tags();
 				if (tags != null && tags.size() > 0
 						&& (isBlock && getTag(tags, "@j2sIgnore") != null
-								|| global_j2sFlag_isDebugging && addJ2SSourceForTag(buffer, getTag(tags, "@j2sDebug"),
-										isBlock && i == 0, isBlock && i == n - 1)
-								|| addJ2SSourceForTag(buffer, getTag(tags, "@j2sNative"), isBlock && i == 0,
-										isBlock && i == n - 1))) {
+						|| isBlock && global_j2sFlag_isDebugging && addJ2SSourceForTag(buffer, getTag(tags, "@j2sDebug"),
+										i == 0, i == n - 1, false)
+								|| 
+								    addJ2SSourceForTag(buffer, getTag(tags, "@j2sNative"), isBlock && i == 0,
+										isBlock && i == n - 1, false))) {
 					didAdd = true;
 				}
 			}
@@ -6543,7 +6632,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 
 		private static boolean addJ2SSourceForTag(StringBuffer buffer, TagElement tag, boolean addPrefix,
-				boolean addPostfix) {
+				boolean addPostfix, boolean addPreParen) {
 			if (tag == null)
 				return false;
 			StringBuffer buf = new StringBuffer();
@@ -6586,7 +6675,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			// /** @j2sNative true || */()
 
 			boolean isInline = code.endsWith("|") || code.endsWith("&") || code.endsWith(":") || code.endsWith("!");
-			buffer.append(isInline ? "" : addPrefix ? "{\r\n" : "\r\n");
+			buffer.append(isInline ? (addPreParen ? "(" : "") : addPrefix ? "{\r\n" : "\r\n");
 			buffer.append(code);
 			buffer.append(isInline ? "" : addPostfix ? "\r\n}\r\n" : "\r\n");
 			return true;

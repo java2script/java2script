@@ -68,12 +68,7 @@ public class JSTextPaneUI extends JSEditorPaneUI {
      */
     @Override
 	protected String getPropertyPrefix() {
-        return "TextPane.";
-    }
-
-    @Override
-	public void installUI(JComponent c) {
-        super.installUI(c);
+        return "TextPane";
     }
 
     /**

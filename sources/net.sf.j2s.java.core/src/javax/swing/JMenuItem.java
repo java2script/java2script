@@ -413,6 +413,7 @@ public class JMenuItem extends AbstractButton implements MenuElement {
 //        }
 		MenuKeyEvent mke = new MenuKeyEvent(e.getComponent(), e.getID(), e.getWhen(), e.getModifiers(), e.getKeyCode(),
 				e.getKeyChar(), path, manager);
+		mke.bdata = /** @j2sNative e.bdata ||*/null;
 		processMenuKeyEvent(mke);
 
 		if (mke.isConsumed()) {

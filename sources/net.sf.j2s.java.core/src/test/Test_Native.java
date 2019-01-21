@@ -158,6 +158,7 @@ class Test_Native extends Test_ {
 	public static void main(String[] args) {
 //		new Test_Native().test2();
 		
+		
 		/** 
 		 * @j2sNative
 		 *  

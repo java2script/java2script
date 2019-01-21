@@ -84,7 +84,7 @@ public class FocusEvent extends ComponentEvent {
      * This event indicates that the Component is no longer the focus owner.
      */
     public static final int FOCUS_LOST = 1 + FOCUS_FIRST; //Event.LOST_FOCUS
-
+    
     /**
      * A focus event can have two different levels, permanent and temporary.
      * It will be set to true if some operation takes away the focus

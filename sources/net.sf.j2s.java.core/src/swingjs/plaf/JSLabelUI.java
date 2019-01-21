@@ -3,6 +3,7 @@ package swingjs.plaf;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.beans.PropertyChangeEvent;
 
 import javax.swing.AbstractButton;
 import javax.swing.JComponent;
@@ -58,7 +59,6 @@ public class JSLabelUI extends JSLightweightUI {
 		gap = label.getIconTextGap();
 		text = label.getText();
 	}
-
 
 	@Override
 	public void installUI(JComponent jc) {

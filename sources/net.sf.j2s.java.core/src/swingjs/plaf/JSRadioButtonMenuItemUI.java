@@ -16,7 +16,7 @@ public class JSRadioButtonMenuItemUI extends JSRadioButtonUI {
 	
 	@Override
 	protected String getPropertyPrefix() {
-		return "RadioButtonMenuItem.";
+		return "RadioButtonMenuItem";
 	}
 	
 	@Override

@@ -47,7 +47,7 @@ import swingjs.JSUtil;
  */
 @SuppressWarnings({"rawtypes", "unchecked", "serial"})
 class SequencedEvent extends AWTEvent implements ActiveEvent {
-    private static final int ID =
+    private static final int ID = 
         java.awt.event.FocusEvent.FOCUS_LAST + 1;
     private static final LinkedList list = new LinkedList();
 

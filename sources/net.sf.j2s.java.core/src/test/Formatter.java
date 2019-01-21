@@ -1839,7 +1839,7 @@ import java.text.NumberFormat;
  * @since 1.5
  */
 @SuppressWarnings({"rawtypes", "unchecked", "unused"})
-public final class Formatter implements Flushable {
+public class Formatter implements Flushable {
     Appendable a;
     private Locale l;
 

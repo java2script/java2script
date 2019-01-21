@@ -1269,7 +1269,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 
 		private void scrollPanePropertyChange(PropertyChangeEvent e) {
 			String propertyName = e.getPropertyName();
-			System.out.println("spane change " + propertyName);
+			//System.out.println("spane change " + propertyName);
 			switch (propertyName) {
 			case "verticalScrollBarDisplayPolicy": 
 				updateScrollBarDisplayPolicy(e);

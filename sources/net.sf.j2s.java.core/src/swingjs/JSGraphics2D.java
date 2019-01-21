@@ -34,6 +34,7 @@ import java.util.Map.Entry;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Canvas;
 import swingjs.api.js.HTML5CanvasContext2D;
+import swingjs.api.js.HTML5CanvasContext2D.ImageData;
 
 // BH 9/18/2018 fill3DRect fix
 // BH 6/2018 adds g.copyArea(x,y,width,height,dx,dy)
@@ -82,24 +83,21 @@ public class JSGraphics2D // extends SunGraphics2D
 
 	// private Color currentColor;
 
-	private static float pixelRatio = /** @j2sNative
-	(function () {
-	    var ctx = document.createElement("canvas").getContext("2d"),
-	        dpr = window.devicePixelRatio || 1,
-	        bsr = ctx.webkitBackingStorePixelRatio ||
-	              ctx.mozBackingStorePixelRatio ||
-	              ctx.msBackingStorePixelRatio ||
-	              ctx.oBackingStorePixelRatio ||
-	              ctx.backingStorePixelRatio || 1;
-	    return dpr / bsr;
-	})() || */1;
+	private static float pixelRatio = /**
+										 * @j2sNative (function () { var ctx =
+										 *            document.createElement("canvas").getContext("2d"), dpr =
+										 *            window.devicePixelRatio || 1, bsr =
+										 *            ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio
+										 *            || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio ||
+										 *            ctx.backingStorePixelRatio || 1; return dpr / bsr; })() ||
+										 */
+			1;
 // this is 1.5 for Windows
 // nice, but now how would be do raw pixel setting, say, from images?
 //    can.width = w * pixelRatio;
 //    can.height = h * pixelRatio;
 //    can.getContext("2d").setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
 
-	
 	public JSGraphics2D(Object canvas) { // this must be Object, because we are
 											// passing an actual HTML5 canvas
 		hints = new RenderingHints(new Hashtable());
@@ -122,15 +120,16 @@ public class JSGraphics2D // extends SunGraphics2D
 	}
 
 	public void setAntialias(boolean tf) {
-		if (tf) {
-			if (!isShifted)
-				ctx.translate(0.5, 0.5);
-		} else {
-			if (isShifted)
-				ctx.translate(-0.5, -0.5);
-		}
+//		if (tf) {
+//			if (!isShifted)
+//				ctx.translate(0.5, 0.5);
+//		} else {
+//			if (isShifted)
+//				ctx.translate(-0.5, -0.5);
+//		}
 		// this is important if images are being drawn - test/TAPP6
-		// see also http://vaughnroyko.com/state-of-nearest-neighbor-interpolation-in-canvas/
+		// see also
+		// http://vaughnroyko.com/state-of-nearest-neighbor-interpolation-in-canvas/
 		/**
 		 * @j2sNative
 		 * 
@@ -142,7 +141,7 @@ public class JSGraphics2D // extends SunGraphics2D
 		 */
 		isShifted = tf;
 	}
-	
+
 	/**
 	 * the SwingJS object
 	 */
@@ -153,50 +152,51 @@ public class JSGraphics2D // extends SunGraphics2D
 	public void drawLine(int x0, int y0, int x1, int y1) {
 		boolean inPath = this.inPath;
 		if (!inPath)
-			ctx.beginPath();
+			doStroke(true);
 		ctx.moveTo(x0, y0);
 		ctx.lineTo(x1, y1);
 		if (!inPath)
-			ctx.stroke();
+			doStroke(false);
 	}
 
 	public void drawOval(int left, int top, int width, int height) {
+		doStroke(true);
 		if (width == height)
-			doCirc(left, top, width, false);
+			doCirc(left, top, width);
 		else
 			doArc(left, top, width, height, 0, 360, false);
+		doStroke(false);
 	}
 
 	public void fillOval(int left, int top, int width, int height) {
+		ctx.beginPath();
 		if (width == height)
-			doCirc(left, top, width, true);
+			doCirc(left, top, width);
 		else
 			doArc(left, top, width, height, 0, 360, true);
+		ctx.fill();
 	}
 
 	public void drawArc(int x, int y, int width, int height, int startAngle, int arcAngle) {
+		doStroke(true);
 		doArc(x, y, width, height, startAngle, arcAngle, false);
+		doStroke(false);
 	}
 
 	public void fillArc(int centerX, int centerY, int width, int height, int startAngle, int arcAngle) {
+		ctx.beginPath();
 		doArc(centerX, centerY, width, height, startAngle, arcAngle, true);
+		ctx.fill();
 	}
 
-	private void doCirc(int left, int top, int diameter, boolean fill) {
+	private void doCirc(int left, int top, int diameter) {
 		if (diameter <= 0)
 			return;
 		double r = diameter / 2f;
-		ctx.beginPath();
 		ctx.arc(left + r, top + r, r, 0, 2 * Math.PI, false);
-		ctx.closePath();
-		if (fill)
-			ctx.fill();
-		else
-			ctx.stroke();
 	}
 
-	private void doArc(double x, double y, double width, double height, double startAngle, double arcAngle,
-			boolean fill) {
+	private void doArc(double x, double y, double width, double height, double startAngle, double arcAngle, boolean fill) {
 		if (width <= 0 || height <= 0)
 			return;
 		// boolean doClose = (arcAngle - startAngle == 360);
@@ -214,10 +214,6 @@ public class JSGraphics2D // extends SunGraphics2D
 				ctx.lineTo(1, 1);
 		}
 		ctx.restore();
-		if (fill)
-			ctx.fill();
-		else
-			ctx.stroke();
 	}
 
 	private double toRad(double a) {
@@ -232,39 +228,19 @@ public class JSGraphics2D // extends SunGraphics2D
 		clearRect(0, 0, width, height);
 	}
 
+	public void clearRect(int x, int y, int width, int height) {
+		ctx.clearRect(x, y, width, height);
+		setGraphicsColor(backgroundColor == null ? Color.WHITE : backgroundColor);
+		fillRect(x, y, width, height);
+		setGraphicsColor(foregroundColor);
+	}
+
 	public void drawPolygon(Polygon p) {
 		doPoly(p.xpoints, p.ypoints, p.npoints, false);
 	}
 
 	public void drawPolygon(int[] axPoints, int[] ayPoints, int nPoints) {
 		doPoly(axPoints, ayPoints, nPoints, false);
-	}
-
-	/**
-	 * @param axPoints
-	 * @param ayPoints
-	 * @param nPoints
-	 * @param doFill
-	 */
-	private void doPoly(int[] axPoints, int[] ayPoints, int nPoints, boolean doFill) {
-		ctx.beginPath();
-		ctx.moveTo(axPoints[0], ayPoints[0]);
-		for (int i = 1; i < nPoints; i++)
-			ctx.lineTo(axPoints[i], ayPoints[i]);
-		if (doFill) {
-			ctx.fill();
-		} else {
-			ctx.lineTo(axPoints[0], ayPoints[0]);
-			ctx.stroke();
-		}
-	}
-
-	public void drawRect(int x, int y, int width, int height) {
-		if (width <= 0 || height <= 0)
-			return;
-		ctx.beginPath();
-		ctx.rect(x, y, width, height);
-		ctx.stroke();
 	}
 
 	public void fillPolygon(Polygon p) {
@@ -275,21 +251,53 @@ public class JSGraphics2D // extends SunGraphics2D
 		doPoly(axPoints, ayPoints, nPoints, true);
 	}
 
+	/**
+	 * @param axPoints
+	 * @param ayPoints
+	 * @param nPoints
+	 * @param doFill
+	 */
+	private void doPoly(int[] axPoints, int[] ayPoints, int nPoints, boolean fill) {
+		ctx.beginPath();
+		ctx.translate(0.5, 0.5);
+		ctx.moveTo(axPoints[0], ayPoints[0]);
+		for (int i = 1; i < nPoints; i++) {
+			ctx.lineTo(axPoints[i], ayPoints[i]);
+		}
+		ctx.lineTo(axPoints[0], ayPoints[0]);
+		if (fill) {
+			ctx.fill();
+		} else {
+			ctx.stroke();
+		}
+		ctx.translate(-0.5, -0.5);
+	}
+
+	public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
+		JSUtil.notImplemented(null);
+		drawRect(x, y, width, height);
+	}
+
+	public void drawRect(int x, int y, int width, int height) {
+		if (width <= 0 || height <= 0)
+			return;
+		ctx.translate(0.5, 0.5);
+		ctx.beginPath();
+		ctx.rect(x, y, width, height);
+		ctx.stroke();
+		ctx.translate(-0.5, -0.5);
+	}
+
+	public void fillRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
+		JSUtil.notImplemented(null);
+		fillRect(x, y, width, height);
+	}
+
 	public void fillRect(int x, int y, int width, int height) {
 		if (width <= 0 || height <= 0)
 			return;
 		backgroundPainted = true;
-//		if (!isShifted)
-//			ctx.translate(0.5, 0.5);
 		ctx.fillRect(x, y, width, height);
-//		if (!isShifted)
-//			ctx.translate(-0.5, -0.5);
-//
-//		if (width == 1)
-//			drawLine(x, y, x, y + height);
-//		else if (height == 1)
-//			drawLine(x, y, x + width, y);
-//		else
 	}
 
 	public void draw3DRect(int x, int y, int width, int height, boolean raised) {
@@ -335,7 +343,7 @@ public class JSGraphics2D // extends SunGraphics2D
 			return;
 		this.font = font;
 		if (font != null)
-			HTML5CanvasContext2D.setFont(ctx, JSToolkit.getCanvasFont(font));
+			ctx.font = JSToolkit.getCanvasFont(font);
 	}
 
 	public void setStrokeBold(boolean tf) {
@@ -343,7 +351,7 @@ public class JSGraphics2D // extends SunGraphics2D
 	}
 
 	private void setLineWidth(double d) {
-		HTML5CanvasContext2D.setLineWidth(ctx, d);
+		ctx.lineWidth = d;
 	}
 
 	public boolean canDoLineTo() {
@@ -357,29 +365,38 @@ public class JSGraphics2D // extends SunGraphics2D
 	public void doStroke(boolean isBegin) {
 		inPath = isBegin;
 		if (isBegin) {
+			ctx.translate(0.5, 0.5);
 			ctx.beginPath();
 		} else {
 			ctx.stroke();
+			ctx.translate(-0.5, -0.5);
 		}
 	}
 
 	public void lineTo(int x2, int y2) {
-		ctx.lineTo(x2, y2);
+		if (inPath) {
+			ctx.lineTo(x2, y2);
+		} else {
+			ctx.translate(0.5, 0.5);
+			ctx.lineTo(x2, y2);
+			ctx.translate(-0.5, -0.5);		
+		}
 	}
 
 	public void clip(Shape s) {
+		ctx.beginPath();
 		doShape(s);
 		currentClip = s;
 		ctx.clip();
 	}
 
 	public void draw(Shape s) {
+		doStroke(true);
 		doShape(s);
-		ctx.stroke();
+		doStroke(false);
 	}
 
 	private int doShape(Shape s) {
-		ctx.beginPath();
 		double[] pts = new double[6];
 		PathIterator pi = s.getPathIterator(null);
 		while (!pi.isDone()) {
@@ -407,6 +424,7 @@ public class JSGraphics2D // extends SunGraphics2D
 	}
 
 	public void fill(Shape s) {
+		ctx.beginPath();
 		if (doShape(s) == Path2D.WIND_EVEN_ODD)
 		/**
 		 * @j2sNative
@@ -448,7 +466,6 @@ public class JSGraphics2D // extends SunGraphics2D
 
 	public boolean drawImage(Image img, int x, int y, Color bgcolor, ImageObserver observer) {
 		backgroundPainted = true;
-		JSUtil.notImplemented(null);
 		return drawImage(img, x, y, observer);
 	}
 
@@ -456,7 +473,6 @@ public class JSGraphics2D // extends SunGraphics2D
 		if (width <= 0 || height <= 0)
 			return false;
 		backgroundPainted = true;
-		JSUtil.notImplemented(null);
 		return drawImage(img, x, y, width, height, observer);
 	}
 
@@ -469,8 +485,7 @@ public class JSGraphics2D // extends SunGraphics2D
 			byte[] bytes = null;
 			DOMNode imgNode = getImageNode(img);
 			if (imgNode != null)
-				HTML5CanvasContext2D.stretchImage(ctx, imgNode, sx1, sy1, sx2 - sx1, sy2 - sy1, dx1, dy1, dx2 - dx1,
-						dy2 - dy1);
+				ctx.drawImage(imgNode, sx1, sy1, sx2 - sx1, sy2 - sy1, dx1, dy1, dx2 - dx1, dy2 - dy1);
 			if (observer != null)
 				observe(img, observer, imgNode != null);
 		}
@@ -503,7 +518,7 @@ public class JSGraphics2D // extends SunGraphics2D
 		return ret;
 	}
 
-	private Object imageData;
+	private ImageData imageData;
 	private int[] buf8;
 	private int lastx, lasty, nx, ny;
 
@@ -522,8 +537,7 @@ public class JSGraphics2D // extends SunGraphics2D
 			DOMNode imgNode = null;
 			int width = ((BufferedImage) img).getRaster().getWidth();
 			int height = ((BufferedImage) img).getRaster().getHeight();
-			
-			
+
 			if (pixels == null) {
 				if ((imgNode = getImageNode(img)) != null)
 					ctx.drawImage(imgNode, x, y, width, height);
@@ -544,8 +558,8 @@ public class JSGraphics2D // extends SunGraphics2D
 
 	private void drawDirect(int[] pixels, int x, int y, int width, int height, boolean isRGB) {
 		if (buf8 == null || x != lastx || y != lasty || nx != width || ny != height) {
-			imageData = HTML5CanvasContext2D.getImageData(ctx, x, y, width, height);
-			buf8 = HTML5CanvasContext2D.getBuf8(imageData);
+			imageData = ctx.getImageData(x, y, width, height);
+			buf8 = imageData.data;
 			lastx = x;
 			lasty = y;
 			nx = width;
@@ -569,7 +583,7 @@ public class JSGraphics2D // extends SunGraphics2D
 			System.err.println("Unsupported transform");
 		x += m[4];
 		y += m[5];
-		HTML5CanvasContext2D.putImageData(ctx, imageData, x, y);
+		ctx.putImageData(imageData, x, y);
 	}
 
 	public boolean hit(Rectangle rect, Shape s, boolean onStroke) {
@@ -716,42 +730,14 @@ public class JSGraphics2D // extends SunGraphics2D
 		ctx.clip();
 	}
 
-	public void clearRect(int x, int y, int width, int height) {
-		ctx.clearRect(x, y, width, height);
-		setGraphicsColor(backgroundColor == null ? Color.WHITE : backgroundColor);
-		fillRect(x, y, width, height);
-		setGraphicsColor(foregroundColor);
-	}
-
 	private void setGraphicsColor(Color c) {
 		if (c == null)
 			return; // this was the case with a JRootPanel graphic call
-		HTML5CanvasContext2D.setColor(ctx, JSToolkit.getCSSColor(c));
+		ctx.fillStyle = ctx.strokeStyle = JSToolkit.getCSSColor(c);
 	}
 
 	public void copyArea(int x, int y, int width, int height, int dx, int dy) {
-		HTML5CanvasContext2D.putImageData(ctx, HTML5CanvasContext2D.getImageData(ctx, x, y, width, height), x + dx,
-				y + dy);
-	}
-
-	public void drawPolyline(int[] xPoints, int[] yPoints, int nPoints) {
-		if (nPoints < 2)
-			return;
-		ctx.moveTo(xPoints[0], yPoints[0]);
-		for (int i = 1; i < nPoints; i++) {
-			ctx.lineTo(xPoints[i], yPoints[i]);
-		}
-		ctx.stroke();
-	}
-
-	public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
-		JSUtil.notImplemented(null);
-		drawRect(x, y, width, height);
-	}
-
-	public void fillRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
-		JSUtil.notImplemented(null);
-		fillRect(x, y, width, height);
+		ctx.putImageData(ctx.getImageData(x, y, width, height), x + dx,	y + dy);
 	}
 
 	public Shape getClip() {

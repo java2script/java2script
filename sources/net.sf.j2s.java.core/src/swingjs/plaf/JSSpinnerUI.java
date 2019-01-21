@@ -1,8 +1,9 @@
 package swingjs.plaf;
 
+import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.event.KeyEvent;
-
+import java.beans.PropertyChangeEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -11,6 +12,8 @@ import javax.swing.JSpinner;
 import javax.swing.LookAndFeel;
 import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
+
+import swingjs.JSKeyEvent;
 import swingjs.api.js.DOMNode;
 
 /**
@@ -32,51 +35,48 @@ public class JSSpinnerUI extends JSLightweightUI {
 			
 			// input box
 			focusNode = valueNode = DOMNode.setStyles(
-					newDOMObject("input", id, "type", "text"), "padding", "0px 1px",
+					newDOMObject("input", id, "type", "text"),// "padding", "0px 1px",
 					"width", "30px", "text-align", "right");
-			vCenter(valueNode, -10, 0);
+			//vCenter(valueNode, -5, 0);
 			bindJSKeyEvents(valueNode, false);
-
-			// increment button
-			DOMNode up = DOMNode.setStyles(newDOMObject("div", id + "_updiv"),
-					"left", "33px", "top", "-5px", "position", "absolute");
-			DOMNode upNode = DOMNode.setStyles(
-					newDOMObject("input", id + "_up", "type", "button", "value", ""),
-					"transform", "scaleY(.5)", "width", "20px", "height", "20px");
-			DOMNode.setAttr(upNode, "value",  "\u25b2");
-			up.appendChild(upNode);
-			bindJSEvents(upNode, "mousedown touchstart", Event.MOUSE_DOWN, true);
-			bindJSEvents(upNode, "mouseup touchend", Event.MOUSE_UP, true);
-
-			// decrement button
-			DOMNode dn = DOMNode.setStyles(newDOMObject("div", id + "_dndiv"),
-					"left", "33px", "top", "5px", "position", "absolute");
-			DOMNode dnNode = DOMNode.setStyles(
-					newDOMObject("input", id + "_dn", "type", "button", "value", ""),
-					"transform", "scaleY(.5)", "width", "20px", "height",
-					"20px");
-			DOMNode.setAttr(dnNode, "value",  "\u25bc");
-			dn.appendChild(dnNode);
-			bindJSEvents(dnNode, "mousedown touchstart", Event.MOUSE_DOWN, true);
-			bindJSEvents(dnNode, "mouseup touchend", Event.MOUSE_UP, true);
-
+			DOMNode up = addButton(true);
+			DOMNode dn = addButton(false);
 			domNode.appendChild(valueNode);
 			domNode.appendChild(up);
 			domNode.appendChild(dn);
-
 			enableNodes = new DOMNode[] { valueNode, up, dn };
-
-			addJQueryFocusCallbacks();
-			
 		}
 		setCssFont(setValue(), c.getFont());
-		int w = (spinner.isPreferredSizeSet() ? spinner.getPreferredSize().width : 70);
-		DOMNode.setStyles(enableNodes[0], "width", (w - 38) + "px");
-		DOMNode.setStyles(enableNodes[1], "left", (w - 34)  + "px");
-		DOMNode.setStyles(enableNodes[2], "left", (w - 34)  + "px");
+		int w = spinner.getWidth();//(spinner.isPreferredSizeSet() ? spinner.getPreferredSize().width : 70);
+		DOMNode.setStyles(enableNodes[0], "position", "absolute", "left","1px","top","2px", "width", (w - 25) + "px");
+		DOMNode.setStyles(enableNodes[1], "left", (w - 20)  + "px");
+		DOMNode.setStyles(enableNodes[2], "left", (w - 20)  + "px");
 		return updateDOMNodeCUI();
 	}
 
+	private DOMNode addButton(boolean isUp) {
+		String key = id + "_" + (isUp ? "up" : "dn");
+		String top = (isUp ? "-5px" : "5px");
+		DOMNode div = DOMNode.setStyles(newDOMObject("div", key + "div"),
+				"left", "33px", "top", top, "position", "absolute");
+		DOMNode node = DOMNode.setStyles(
+				newDOMObject("input", key, "type", "button", "value", ""),
+				"transform", "scaleY(.5)", "width", "20px", "height", "20px");
+		String label = (isUp ?  "\u25b2" : "\u25bc");
+		DOMNode.setAttr(node, "value",  label);
+		setDataUI(node);
+		ignoreAllMouseEvents(node);
+		bindJQueryEvents(node, "mousedown touchstart", Event.MOUSE_DOWN);
+		bindJQueryEvents(node, "mouseup touchend", Event.MOUSE_UP);
+		div.appendChild(node);
+		return div;
+	}
+
+	@Override
+	public Dimension getPreferredSize(JComponent jc) {
+		return new Dimension(50,20);
+	}
+	
 	private DOMNode setValue() {
 		setProp(valueNode, "value", "" + spinner.getValue());
 		return valueNode;
@@ -84,11 +84,12 @@ public class JSSpinnerUI extends JSLightweightUI {
 	
 	private Timer timer;
 	private boolean incrementing;
+
 	/**
 	 * called by j2sApplet.js based on bindJSEvents
 	 * 
-	 * Handling mousedown (start incrementing) and mouseup (stop incrementing)
-	 * on the buttons
+	 * Handling mousedown (start incrementing) and mouseup (stop incrementing) on
+	 * the buttons
 	 * 
 	 * Handling ENTER pressed on text input
 	 * 
@@ -96,18 +97,20 @@ public class JSSpinnerUI extends JSLightweightUI {
 	 */
 	@Override
 	public boolean handleJSEvent(Object target, int eventID, Object jQueryEvent) {
-		
-		int keyCode = /** @j2sNative jQueryEvent.keyCode || */ 0;
-		if (keyCode == 13) keyCode = 10;
-		String id = (String) DOMNode.getAttr((DOMNode)target, "id");
+
+		int keyCode = /** @j2sNative jQueryEvent.keyCode || */
+				0;
+		if (keyCode == 13)
+			keyCode = 10;
+		String id = (String) DOMNode.getAttr((DOMNode) target, "id");
 		switch (eventID) {
 		case Event.MOUSE_DOWN:
 			if (timer != null)
 				timer.stop();
 			incrementing = (id == this.id + "_up");
 			if (!incrementing && id != this.id + "_dn")
-				return UNHANDLED;
-			timer = new Timer(20, new ActionListener() {
+				return HANDLED;
+			timer = new Timer(200, new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					doAction();
@@ -122,17 +125,19 @@ public class JSSpinnerUI extends JSLightweightUI {
 			timer = null;
 			break;
 		case KeyEvent.KEY_PRESSED:
-			if (keyCode == 10) {
-			try {
-					int n = Integer.parseInt("" + DOMNode.getAttr(valueNode, "value"));
-				spinner.setValue(new Integer(n));
-			} catch (Throwable e) {
-				// ignore
+			if (keyCode == KeyEvent.VK_ENTER) {
+				if ((/** @j2sNative jQueryEvent.type || */
+				"keydown") == "keydown")
+					try {
+						spinner.setValue(new Integer(Integer.parseInt("" + DOMNode.getAttr(valueNode, "value"))));
+					} catch (Throwable e) {
+						// ignore
+					}
+				return CONSUMED; // not sure on this?
 			}
-		}
 			break;
 		}
-		return UNHANDLED;
+		return HANDLED; // aka NOT_CONSUMED
 	}
 
 	void doAction() {
@@ -143,8 +148,8 @@ public class JSSpinnerUI extends JSLightweightUI {
 	}
 
 	@Override
-	public void propertyChangedFromListener(String prop) {
-			propertyChangedCUI(prop);
+	public void propertyChangedFromListener(PropertyChangeEvent e, String prop) {
+			propertyChangedCUI(e, prop);
 	}
 
 	@Override

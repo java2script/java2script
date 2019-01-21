@@ -41,6 +41,7 @@ import java.awt.Panel;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.Window;
+import java.awt.event.InputEvent;
 import java.awt.event.WindowEvent;
 import java.awt.image.ImageObserver;
 //import java.awt.image.ImageProducer;
@@ -1139,6 +1140,13 @@ public abstract class SunToolkit extends Toolkit implements
 	// public Window createInputMethodWindow(String title, InputContext context) {
 	// return new sun.awt.im.SimpleInputMethodWindow(title, context);
 	// }
+
+    /**
+     * Returns key modifiers used by Swing to set up a focus accelerator key stroke.
+     */
+    public int getFocusAcceleratorKeyMask() {
+        return InputEvent.ALT_MASK;
+    }
 
 	/**
 	 * Returns whether enableInputMethods should be set to true for peered

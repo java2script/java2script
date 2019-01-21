@@ -8,7 +8,9 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.awt.peer.FramePeer;
 import java.beans.PropertyChangeEvent;
 
@@ -75,7 +77,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			// we have to give it some sort of border, or it blends in with the
 			// page too much.
 			// a Windows applet has a sort of fuzzy shadowy border
-			domNode = frameNode = newDOMObject("div", id + "_frame");
+			containerNode = frameNode = domNode = newDOMObject("div", id + "_frame");
 			if (isDummyFrame) {
 				DOMNode.setStyles(domNode, "display", "hidden");
 				return domNode;
@@ -89,9 +91,8 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			if (h == 0)
 				h = defaultHeight;
 			DOMNode.setSize(frameNode, w, h);
-			DOMNode.setAttr(frameNode, "ui", this);
 			DOMNode.setTopLeftAbsolute(frameNode, 0, 0);
-			setJ2sMouseHandler(frameNode);
+			setJ2sMouseHandler();
 			titleBarNode = newDOMObject("div", id + "_titlebar");
 			DOMNode.setTopLeftAbsolute(titleBarNode, 0, 0);
 			DOMNode.setStyles(titleBarNode, "background-color", "#E0E0E0", "height", "20px", "font-size", "14px",
@@ -111,10 +112,8 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			closerNode = newDOMObject("label", id + "_closer", "innerHTML", "X");
 			DOMNode.setStyles(closerNode, "width", "20px", "height", "20px", "position", "absolute", "text-align",
 					"center", "right", "0px");
-			DOMNode.addJqueryHandledEvent(this, closerNode, "click mouseenter mouseout");
-
+			bindJQueryEvents(closerNode, "click mouseenter mouseout", -1);
 			frameNode.appendChild(titleBarNode);
-
 			if (isModal) {
 				modalNode = DOMNode.createElement("div", id + "_modaldiv");
 				Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
@@ -134,6 +133,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			 * 		case 1:
 			 *  	         if (mode == 501)
 			 *      	        me.selected$();  
+			 *     me.hideMenu$();
 			 *          	 return $(fnode).parent();
 			 *      case 3:
 			 *      		 if (mode == 506) {
@@ -141,9 +141,14 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			 *      			return null;
 			 *               }
 			 *     }
+			 *     
 			 *     return null;
 			 * }
-			 */
+			 */ 
+			{
+				 hideMenu();
+			}
+			 
 			
 			J2S.setDraggable(titleBarNode, fGetFrameParent);
 			titleBarNode.appendChild(titleNode);
@@ -153,7 +158,8 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			DOMNode.setTopLeftAbsolute(frameNode, 0, 0);
 			DOMNode.setAttrs(frameNode, "width", "" + frame.getWidth() + s.left + s.right, "height",
 					"" + frame.getHeight() + s.top + s.bottom);
-			containerNode = frameNode;
+			
+			addJ2SKeyHandler();
 		}
 		String strColor = toCSSString(c.getBackground());
 		DOMNode.setStyles(domNode, "background-color", strColor);
@@ -164,6 +170,14 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		setTitle(frame.getTitle());
 		return domNode;
 	}
+
+	/**
+	 * referenced by j2sNative, above
+	 */
+	/*not private*/ void hideMenu() {
+		hideAllMenus();
+	}
+
 
 	void moveFrame(int x, int y) {
 		frame.setLocation(x, y);
@@ -182,32 +196,23 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
-	  String type = "";
-	  // we use == here because this will be JavaScript
-		if (target == closerNode) {
-			/**
-			 * @j2sNative
-			 * 
-			 * type = jQueryEvent.type;
-			 * 
-			 */
-			{}
-			if (eventType == -1) {
-		  	if (type == "click") {
-					DOMNode tbar = titleBarNode;
-		  		J2S.setDraggable(tbar, false);
-		  		frameCloserAction();
-					return UNHANDLED;		  		
-		  	} else if (type.equals("mouseout")) {
-			  	DOMNode.setStyles(closerNode, "background-color", toCSSString(c.getBackground()));
-					return UNHANDLED;
-		  	} else if (type.equals("mouseenter")) {
-			  	DOMNode.setStyles(closerNode, "background-color", "red");
-					return UNHANDLED;
-		  	}
-		  }			
+		// we use == here because this will be JavaScript
+		if (target == closerNode && eventType == -1) {
+			switch (/** @j2sNative jQueryEvent.type || */"") {
+			case "click":
+				DOMNode tbar = titleBarNode;
+				J2S.setDraggable(tbar, false);
+				frameCloserAction();
+				return HANDLED;
+			case "mouseout":
+				DOMNode.setStyles(closerNode, "background-color", toCSSString(c.getBackground()));
+				return HANDLED;
+			case "mouseenter":
+				DOMNode.setStyles(closerNode, "background-color", "red");
+				return HANDLED;
+			}
 		}
-		return UNHANDLED;
+		return NOT_HANDLED;
 	}
 
 	
@@ -234,6 +239,8 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		frame = (JFrame) c;	
 		isDummyFrame = /** @j2sNative jc.__CLASS_NAME__ == "javax.swing.SwingUtilities.SharedOwnerFrame" || */false;
 		
+		frame.addWindowListener(this);
+		frame.addComponentListener(this);
 		 LookAndFeel.installColors(jc,
 		 "Frame.background",
 		 "Frame.foreground");
@@ -243,6 +250,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	public void uninstallUI(JComponent jc) {
 		// never called
 		closeFrame();
+		frame.removeWindowListener(this);
 	}
 
 

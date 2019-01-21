@@ -742,6 +742,7 @@ public class JTextArea extends JTextComponent {
      */
     @Override
 		public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+    	// SwingJS: Note that we are just using the HTML5 narrow-width scrollbar here. 
         switch (orientation) {
         case SwingConstants.VERTICAL:
             return getRowHeight();

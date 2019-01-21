@@ -22,6 +22,7 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.InvalidDnDOperationException;
 import java.awt.dnd.peer.DragSourceContextPeer;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.im.InputMethodHighlight;
 import java.awt.image.ColorModel;
@@ -360,15 +361,18 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		 *            };
 		 * 
 		 */
-		{
-		}
-		int ms = (event.getID() >= MouseEvent.MOUSE_FIRST && event.getID() <= MouseEvent.MOUSE_LAST ? -1 : 0);
-		if (andWait)
+		if (andWait) {
 			invokeAndWait(f, id);
-		else
+		} else {
+			int ms = (isMouseEvent(event.getID()) ? -1 : 0);
 			dispatch(f, ms, id);
+		}
 	}
 
+	public static boolean isMouseEvent(int id) {
+		return (id >= MouseEvent.MOUSE_FIRST && id <= MouseEvent.MOUSE_LAST);
+	}
+	
 	/**
 	 * encapsulate timeout with an anonymous function that re-instates the
 	 * "current thread" prior to execution. This is in case of multiple applets.
@@ -450,9 +454,6 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	}
 
 	public static boolean isDispatchThread() {
-//		 *            System.out.println("checking dispatch thread " +
-//		 *            SwingJS.eventID); 
-//		 *            
 		/**
 		 * @j2sNative
 		 * 
@@ -462,6 +463,20 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		{
 			return false;
 		}
+	}
+
+	/**
+	 * Fake a dispatch thread -- see JSTextUI
+	 * 
+	 * @param b
+	 */
+	public static void setIsDispatchThread(boolean b) {
+		/**
+		 * @j2sNative
+		 * 
+		 *            SwingJS.eventID = (b ? 1 : 0);
+		 * 
+		 */
 	}
 
 //	public static void forceRepaint(Component c) {
@@ -544,19 +559,14 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	}
 
 	public static JSComponentUI getUI(Component c, boolean isQuiet) {
-		JSComponentUI ui = null;
-		/**
-		 * @j2sNative
-		 * 
-		 *            ui = c.getUI$ && c.getUI$();
-		 */
-		{
+		JSComponentUI ui = /** @2sNative !!c.getUI$ &&*/(JSComponentUI)((JComponent) c).getUI();
+		if (ui == null && ((JComponent) c).getUIClassID() != "ComponentUI") {
+			((JComponent) c).updateUI();
 			ui = (JSComponentUI) ((JComponent) c).getUI();
 		}
 		if (ui == null) {
-			
 			String s = c.getClass().getName();
-			if (!PT.isOneOf(s, ";javax.swing.Box.Filler;")) 
+			if (!PT.isOneOf(s, ";javax.swing.Box$Filler;")) 
 				System.out.println("[JSToolkit] Component " + s  
 					+ " has no corresponding JSComponentUI, class " + c.getClass().getName());
 			// Coerce JSComponentUI for this peer.
@@ -954,14 +964,37 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		return null;
 	}
 
-	private KeyboardFocusManagerPeer focusManager;
+	private static KeyboardFocusManagerPeer focusManager;
+	private static KeyboardFocusManagerPeer getFocusPeer() {
+		return (focusManager == null ? focusManager = new JSFocusPeer() : focusManager);
+	}
+
 	
 	@Override
 	public KeyboardFocusManagerPeer getKeyboardFocusManagerPeer() {
-		if (focusManager == null)
-			focusManager = new JSFocusManager();
-		return focusManager;
+		return getFocusPeer();
 	}
 
+	public static JComponent getCurrentFocusOwner(Object related) {
+		return  (JComponent) ((JSFocusPeer) getFocusPeer()).getCurrentFocusOwner(related);
+	}
+
+	public static void consumeEvent(Object e) {
+		// SwingJS stop any further processing at all within the browser
+		Object jqevent = null;
+		if (e instanceof InputEvent) {
+			jqevent = /** @j2sNative e.bdata.jqevent || */null; 
+		} else {
+			jqevent = e;
+		}
+		if (jqevent == null)
+			return;
+		/**
+		 * @j2sNative 
+		 * 		jqevent.stopPropagation();
+		 *      jqevent.preventDefault(); 
+		 * 
+		 */
+	}
 
 }

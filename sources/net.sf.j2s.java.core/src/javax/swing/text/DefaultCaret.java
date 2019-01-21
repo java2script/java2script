@@ -50,6 +50,9 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.EventListenerList;
 import javax.swing.plaf.TextUI;
 //import javax.swing.Timer;
+import javax.swing.text.Position.Bias;
+
+import swingjs.plaf.JSTextUI;
 
 /**
  * A default implementation of Caret.  The caret is rendered as
@@ -156,10 +159,128 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
      */
     public static final int ALWAYS_UPDATE = 2;
 
+	private boolean working;
+
     /**
      * Constructs a default caret.
      */
     public DefaultCaret() {
+    }
+
+    /**
+     * Called when the UI is being installed into the
+     * interface of a JTextComponent.  This can be used
+     * to gain access to the model that is being navigated
+     * by the implementation of this interface.  Sets the dot
+     * and mark to 0, and establishes document, property change,
+     * focus, mouse, and mouse motion listeners.
+     *
+     * @param c the component
+     * @see Caret#install
+     */
+    @Override
+		public void install(JTextComponent c) {
+        component = c;
+        Document doc = c.getDocument();
+        dot = mark = 0;
+        dotLTR = markLTR = true;
+        dotBias = markBias = Position.Bias.Forward;
+        if (doc != null) {
+            doc.addDocumentListener(handler);
+        }
+        c.addPropertyChangeListener(handler);
+        c.addFocusListener(this);
+        c.addMouseListener(this);
+        c.addMouseMotionListener(this);
+
+        // if the component already has focus, it won't
+        // be notified.
+        if (component.hasFocus()) {
+            focusGained(null);
+        }
+
+//        Number ratio = (Number) c.getClientProperty("caretAspectRatio");
+//        if (ratio != null) {
+//            aspectRatio = ratio.floatValue();
+//        } else {
+//            aspectRatio = -1;
+//        }
+//
+//        Integer width = (Integer) c.getClientProperty("caretWidth");
+//        if (width != null) {
+//            caretWidth = width.intValue();
+//        } else {
+//            caretWidth = -1;
+//        }
+    }
+
+    /**
+     * Called when the UI is being removed from the
+     * interface of a JTextComponent.  This is used to
+     * unregister any listeners that were attached.
+     *
+     * @param c the component
+     * @see Caret#deinstall
+     */
+    @Override
+		public void deinstall(JTextComponent c) {
+        c.removeMouseListener(this);
+        c.removeMouseMotionListener(this);
+        c.removeFocusListener(this);
+        c.removePropertyChangeListener(handler);
+        Document doc = c.getDocument();
+        if (doc != null) {
+            doc.removeDocumentListener(handler);
+        }
+        synchronized(this) {
+            component = null;
+        }
+//        if (flasher != null) {
+//            flasher.stop();
+//        }
+
+
+    }
+
+    /**
+     * Adds a listener to track whenever the caret position has
+     * been changed.
+     *
+     * @param l the listener
+     * @see Caret#addChangeListener
+     */
+    @Override
+		public void addChangeListener(ChangeListener l) {
+        listenerList.add(ChangeListener.class, l);
+    }
+
+    /**
+     * Removes a listener that was tracking caret position changes.
+     *
+     * @param l the listener
+     * @see Caret#removeChangeListener
+     */
+    @Override
+		public void removeChangeListener(ChangeListener l) {
+        listenerList.remove(ChangeListener.class, l);
+    }
+
+    /**
+     * Returns an array of all the change listeners
+     * registered on this caret.
+     *
+     * @return all of this caret's <code>ChangeListener</code>s
+     *         or an empty
+     *         array if no change listeners are currently registered
+     *
+     * @see #addChangeListener
+     * @see #removeChangeListener
+     *
+     * @since 1.4
+     */
+    public ChangeListener[] getChangeListeners() {
+        return (ChangeListener[])listenerList.getListeners(
+                ChangeListener.class);
     }
 
     /**
@@ -256,31 +377,31 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
      * to Use Threads</A> for more information.
      */
     protected final synchronized void repaint() {
-        if (component != null) {
-            component.repaint(x, y, width, height);
-        }
+//        if (component != null) {
+//            component.repaint(x, y, width, height);
+//        }
     }
 
-    /**
-     * Damages the area surrounding the caret to cause
-     * it to be repainted in a new location.  If paint()
-     * is reimplemented, this method should also be
-     * reimplemented.  This method should update the
-     * caret bounds (x, y, width, and height).
-     *
-     * @param r  the current location of the caret
-     * @see #paint
-     */
-    protected synchronized void damage(Rectangle r) {
-        if (r != null) {
-            int damageWidth = getCaretWidth(r.height);
-            x = r.x - 4 - (damageWidth >> 1);
-            y = r.y;
-            width = 9 + damageWidth;
-            height = r.height;
-            repaint();
-        }
-    }
+//    /**
+//     * Damages the area surrounding the caret to cause
+//     * it to be repainted in a new location.  If paint()
+//     * is reimplemented, this method should also be
+//     * reimplemented.  This method should update the
+//     * caret bounds (x, y, width, and height).
+//     *
+//     * @param r  the current location of the caret
+//     * @see #paint
+//     */
+//    protected synchronized void damage(Rectangle r) {
+//        if (r != null) {
+//            int damageWidth = getCaretWidth(r.height);
+//            x = r.x - 4 - (damageWidth >> 1);
+//            y = r.y;
+//            width = 9 + damageWidth;
+//            height = r.height;
+//            repaint();
+//        }
+//    }
 
     /**
      * Scrolls the associated view (if necessary) to make
@@ -309,8 +430,10 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
      * @return the painter
      */
     protected Highlighter.HighlightPainter getSelectionPainter() {
-        return DefaultHighlighter.DefaultPainter;
+        return null;//DefaultHighlighter.DefaultPainter;
     }
+
+    final static Position.Bias[] biasRet = new Position.Bias[1];
 
     /**
      * Tries to set the position of the caret from
@@ -320,16 +443,24 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
      */
     protected void positionCaret(MouseEvent e) {
         Point pt = new Point(e.getX(), e.getY());
-        Position.Bias[] biasRet = new Position.Bias[1];
-        int pos = ((TextUI) component.getUI()).viewToModel(component, pt, biasRet);
-        if(biasRet[0] == null)
-            biasRet[0] = Position.Bias.Forward;
-        if (pos >= 0) {
-            setDot(pos, biasRet[0]);
+        ((TextUI) component.getUI()).viewToModel(component, pt, biasRet);
+        if (pt.x >= 0) {
+            if(biasRet[0] == null)
+                biasRet[0] = Position.Bias.Forward;
+            setDot(pt.x, biasRet[0]);
+            if (pt.y != pt.x)
+            	moveDot(pt.y, biasRet[0]);
         }
     }
 
-    /**
+    private int getPosition(MouseEvent e, Bias[] biasret) {
+        Point pt = new Point(e.getX(), e.getY());
+        int pos = ((TextUI) component.getUI()).viewToModel(component, pt, biasRet);
+        System.out.println("def caret getPos " + e.getID() + " " + pt);
+        return pos;
+	}
+
+	/**
      * Tries to move the position of the caret from
      * the coordinates of a mouse event, using viewToModel().
      * This will cause a selection if the dot and mark
@@ -338,14 +469,14 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
      * @param e the mouse event
      */
     protected void moveCaret(MouseEvent e) {
-        Point pt = new Point(e.getX(), e.getY());
-        Position.Bias[] biasRet = new Position.Bias[1];
-        int pos = ((TextUI) component.getUI()).viewToModel(component, pt, biasRet);
-        if(biasRet[0] == null)
-            biasRet[0] = Position.Bias.Forward;
-        if (pos >= 0) {
-            moveDot(pos, biasRet[0]);
-        }
+    	positionCaret(e);
+//        Point pt = new Point(e.getX(), e.getY());
+//        int pos = ((TextUI) component.getUI()).viewToModel(component, pt, biasRet);
+//        if (pos >= 0) {
+//            if(biasRet[0] == null)
+//                biasRet[0] = Position.Bias.Forward;
+//            moveDot(pos, biasRet[0]);
+//        }
     }
 
     // --- FocusListener methods --------------------------
@@ -421,72 +552,72 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
      */
     @Override
 		public void mouseClicked(MouseEvent e) {
-        int nclicks = e.getClickCount();
-        
-		// SwingJS n/a SwingUtilities2.getAdjustedClickCount(getComponent(), e);
-
-        if (! e.isConsumed()) {
-            if (SwingUtilities.isLeftMouseButton(e)) {
-                // mouse 1 behavior
-                if(nclicks == 1) {
-                    selectedWordEvent = null;
-//                } else if(nclicks == 2
-//                          && SwingUtilities2.canEventAccessSystemClipboard(e)) {
-//                    selectWord(e);
+//        int nclicks = e.getClickCount();
+//        
+//		// SwingJS n/a SwingUtilities2.getAdjustedClickCount(getComponent(), e);
+//
+//        if (! e.isConsumed()) {
+//            if (SwingUtilities.isLeftMouseButton(e)) {
+//                // mouse 1 behavior
+//                if(nclicks == 1) {
 //                    selectedWordEvent = null;
-//                } else if(nclicks == 3
-//                          && SwingUtilities2.canEventAccessSystemClipboard(e)) {
-//                    Action a = null;
-//                    ActionMap map = getComponent().getActionMap();
-//                    if (map != null) {
-//                        a = map.get(DefaultEditorKit.selectLineAction);
-//                    }
-//                    if (a == null) {
-//                        if (selectLine == null) {
-//                            selectLine = new DefaultEditorKit.SelectLineAction();
-//                        }
-//                        a = selectLine;
-//                    }
-//                    a.actionPerformed(new ActionEvent(getComponent(),
-//                                                      ActionEvent.ACTION_PERFORMED, null, e.getWhen(), e.getModifiers()));
-                }
-            } else if (SwingUtilities.isMiddleMouseButton(e)) {
-                // mouse 2 behavior
-//                if (nclicks == 1 && component.isEditable() && component.isEnabled()
-//                    && SwingUtilities2.canEventAccessSystemClipboard(e)) {
-//                    // paste system selection, if it exists
-//                    JTextComponent c = (JTextComponent) e.getSource();
-//                    if (c != null) {
-//                        try {
-//                            Toolkit tk = c.getToolkit();
-//                            Clipboard buffer = tk.getSystemSelection();
-//                            if (buffer != null) {
-//                                // platform supports system selections, update it.
-//                                adjustCaret(e);
-//                                TransferHandler th = c.getTransferHandler();
-//                                if (th != null) {
-//                                    Transferable trans = null;
-//
-//                                    try {
-//                                        trans = buffer.getContents(null);
-//                                    } catch (IllegalStateException ise) {
-//                                        // clipboard was unavailable
-//                                        UIManager.getLookAndFeel().provideErrorFeedback(c);
-//                                    }
-//
-//                                    if (trans != null) {
-//                                        th.importData(c, trans);
-//                                    }
-//                                }
-//                                adjustFocus(true);
-//                            }
-//                        } catch (HeadlessException he) {
-//                            // do nothing... there is no system clipboard
-//                        }
-//                    }
+////                } else if(nclicks == 2
+////                          && SwingUtilities2.canEventAccessSystemClipboard(e)) {
+////                    selectWord(e);
+////                    selectedWordEvent = null;
+////                } else if(nclicks == 3
+////                          && SwingUtilities2.canEventAccessSystemClipboard(e)) {
+////                    Action a = null;
+////                    ActionMap map = getComponent().getActionMap();
+////                    if (map != null) {
+////                        a = map.get(DefaultEditorKit.selectLineAction);
+////                    }
+////                    if (a == null) {
+////                        if (selectLine == null) {
+////                            selectLine = new DefaultEditorKit.SelectLineAction();
+////                        }
+////                        a = selectLine;
+////                    }
+////                    a.actionPerformed(new ActionEvent(getComponent(),
+////                                                      ActionEvent.ACTION_PERFORMED, null, e.getWhen(), e.getModifiers()));
 //                }
-            }
-        }
+//            } else if (SwingUtilities.isMiddleMouseButton(e)) {
+//                // mouse 2 behavior
+////                if (nclicks == 1 && component.isEditable() && component.isEnabled()
+////                    && SwingUtilities2.canEventAccessSystemClipboard(e)) {
+////                    // paste system selection, if it exists
+////                    JTextComponent c = (JTextComponent) e.getSource();
+////                    if (c != null) {
+////                        try {
+////                            Toolkit tk = c.getToolkit();
+////                            Clipboard buffer = tk.getSystemSelection();
+////                            if (buffer != null) {
+////                                // platform supports system selections, update it.
+////                                adjustCaret(e);
+////                                TransferHandler th = c.getTransferHandler();
+////                                if (th != null) {
+////                                    Transferable trans = null;
+////
+////                                    try {
+////                                        trans = buffer.getContents(null);
+////                                    } catch (IllegalStateException ise) {
+////                                        // clipboard was unavailable
+////                                        UIManager.getLookAndFeel().provideErrorFeedback(c);
+////                                    }
+////
+////                                    if (trans != null) {
+////                                        th.importData(c, trans);
+////                                    }
+////                                }
+////                                adjustFocus(true);
+////                            }
+////                        } catch (HeadlessException he) {
+////                            // do nothing... there is no system clipboard
+////                        }
+////                    }
+////                }
+//            }
+//        }
     }
 
     /**
@@ -503,7 +634,10 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
      */
     @Override
 		public void mousePressed(MouseEvent e) {
+//    	   getPosition(e, biasRet);
 //        int nclicks = SwingUtilities2.getAdjustedClickCount(getComponent(), e);
+    	//System.out.println("defaultcaret mousePressed " + e.isConsumed() +
+    	//		/** @j2sNative this.component.ui.domNode.selectionStart || */0);
 
         if (SwingUtilities.isLeftMouseButton(e)) {
             if (e.isConsumed()) {
@@ -517,11 +651,14 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
 //                }
             }
         }
+		working = false;
     }
 
     void adjustCaretAndFocus(MouseEvent e) {
+		working = true;
         adjustCaret(e);
         adjustFocus(false);
+        working = false;
     }
 
     /**
@@ -561,9 +698,11 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
      */
     @Override
 		public void mouseReleased(MouseEvent e) {
+// 	   getPosition(e, biasRet);
+    	boolean isLeft = SwingUtilities.isLeftMouseButton(e);
         if (!e.isConsumed()
                 && shouldHandleRelease
-                && SwingUtilities.isLeftMouseButton(e)) {
+                && isLeft) {
 
             adjustCaretAndFocus(e);
         }
@@ -639,174 +778,58 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
     @Override
 		public void paint(Graphics g) {
         if(isVisible()) {
-            try {
-                TextUI mapper = (TextUI) component.getUI();
-                Rectangle r = mapper.modelToView(component, dot, dotBias);
-
-                if ((r == null) || ((r.width == 0) && (r.height == 0))) {
-                    return;
-                }
-                if (width > 0 && height > 0 &&
-                                !this._contains(r.x, r.y, r.width, r.height)) {
-                    // We seem to have gotten out of sync and no longer
-                    // contain the right location, adjust accordingly.
-                    Rectangle clip = g.getClipBounds();
-
-                    if (clip != null && !clip.contains(this)) {
-                        // Clip doesn't contain the old location, force it
-                        // to be repainted lest we leave a caret around.
-                        repaint();
-                    }
-                    // This will potentially cause a repaint of something
-                    // we're already repainting, but without changing the
-                    // semantics of damage we can't really get around this.
-                    damage(r);
-                }
-                g.setColor(component.getCaretColor());
-                int paintWidth = getCaretWidth(r.height);
-                r.x -= paintWidth  >> 1;
-                g.fillRect(r.x, r.y, paintWidth, r.height);
-
-                // see if we should paint a flag to indicate the bias
-                // of the caret.
-                // PENDING(prinz) this should be done through
-                // protected methods so that alternative LAF
-                // will show bidi information.
-                Document doc = component.getDocument();
-                if (doc instanceof AbstractDocument) {
-                    Element bidi = ((AbstractDocument)doc).getBidiRootElement();
-                    if ((bidi != null) && (bidi.getElementCount() > 1)) {
-                        // there are multiple directions present.
-                        flagXPoints[0] = r.x + ((dotLTR) ? paintWidth : 0);
-                        flagYPoints[0] = r.y;
-                        flagXPoints[1] = flagXPoints[0];
-                        flagYPoints[1] = flagYPoints[0] + 4;
-                        flagXPoints[2] = flagXPoints[0] + ((dotLTR) ? 4 : -4);
-                        flagYPoints[2] = flagYPoints[0];
-                        g.fillPolygon(flagXPoints, flagYPoints, 3);
-                    }
-                }
-            } catch (BadLocationException e) {
-                // can't render I guess
-                //System.err.println("Can't render cursor");
-            }
+//            try {
+//                TextUI mapper = (TextUI) component.getUI();
+//                Rectangle r = mapper.modelToView(component, dot, dotBias);
+//
+//                if ((r == null) || ((r.width == 0) && (r.height == 0))) {
+//                    return;
+//                }
+//                if (width > 0 && height > 0 &&
+//                                !this._contains(r.x, r.y, r.width, r.height)) {
+//                    // We seem to have gotten out of sync and no longer
+//                    // contain the right location, adjust accordingly.
+//                    Rectangle clip = g.getClipBounds();
+//
+//                    if (clip != null && !clip.contains(this)) {
+//                        // Clip doesn't contain the old location, force it
+//                        // to be repainted lest we leave a caret around.
+//                        repaint();
+//                    }
+//                    // This will potentially cause a repaint of something
+//                    // we're already repainting, but without changing the
+//                    // semantics of damage we can't really get around this.
+//                    damage(r);
+//                }
+//                g.setColor(component.getCaretColor());
+//                int paintWidth = getCaretWidth(r.height);
+//                r.x -= paintWidth  >> 1;
+//                g.fillRect(r.x, r.y, paintWidth, r.height);
+//
+//                // see if we should paint a flag to indicate the bias
+//                // of the caret.
+//                // PENDING(prinz) this should be done through
+//                // protected methods so that alternative LAF
+//                // will show bidi information.
+//                Document doc = component.getDocument();
+//                if (doc instanceof AbstractDocument) {
+//                    Element bidi = ((AbstractDocument)doc).getBidiRootElement();
+//                    if ((bidi != null) && (bidi.getElementCount() > 1)) {
+//                        // there are multiple directions present.
+//                        flagXPoints[0] = r.x + ((dotLTR) ? paintWidth : 0);
+//                        flagYPoints[0] = r.y;
+//                        flagXPoints[1] = flagXPoints[0];
+//                        flagYPoints[1] = flagYPoints[0] + 4;
+//                        flagXPoints[2] = flagXPoints[0] + ((dotLTR) ? 4 : -4);
+//                        flagYPoints[2] = flagYPoints[0];
+//                        g.fillPolygon(flagXPoints, flagYPoints, 3);
+//                    }
+//                }
+//            } catch (BadLocationException e) {
+//                // can't render I guess
+//                //System.err.println("Can't render cursor");
+//            }
         }
-    }
-
-    /**
-     * Called when the UI is being installed into the
-     * interface of a JTextComponent.  This can be used
-     * to gain access to the model that is being navigated
-     * by the implementation of this interface.  Sets the dot
-     * and mark to 0, and establishes document, property change,
-     * focus, mouse, and mouse motion listeners.
-     *
-     * @param c the component
-     * @see Caret#install
-     */
-    @Override
-		public void install(JTextComponent c) {
-        component = c;
-        Document doc = c.getDocument();
-        dot = mark = 0;
-        dotLTR = markLTR = true;
-        dotBias = markBias = Position.Bias.Forward;
-        if (doc != null) {
-            doc.addDocumentListener(handler);
-        }
-        c.addPropertyChangeListener(handler);
-        c.addFocusListener(this);
-        c.addMouseListener(this);
-        c.addMouseMotionListener(this);
-
-        // if the component already has focus, it won't
-        // be notified.
-        if (component.hasFocus()) {
-            focusGained(null);
-        }
-
-        Number ratio = (Number) c.getClientProperty("caretAspectRatio");
-        if (ratio != null) {
-            aspectRatio = ratio.floatValue();
-        } else {
-            aspectRatio = -1;
-        }
-
-        Integer width = (Integer) c.getClientProperty("caretWidth");
-        if (width != null) {
-            caretWidth = width.intValue();
-        } else {
-            caretWidth = -1;
-        }
-    }
-
-    /**
-     * Called when the UI is being removed from the
-     * interface of a JTextComponent.  This is used to
-     * unregister any listeners that were attached.
-     *
-     * @param c the component
-     * @see Caret#deinstall
-     */
-    @Override
-		public void deinstall(JTextComponent c) {
-        c.removeMouseListener(this);
-        c.removeMouseMotionListener(this);
-        c.removeFocusListener(this);
-        c.removePropertyChangeListener(handler);
-        Document doc = c.getDocument();
-        if (doc != null) {
-            doc.removeDocumentListener(handler);
-        }
-        synchronized(this) {
-            component = null;
-        }
-//        if (flasher != null) {
-//            flasher.stop();
-//        }
-
-
-    }
-
-    /**
-     * Adds a listener to track whenever the caret position has
-     * been changed.
-     *
-     * @param l the listener
-     * @see Caret#addChangeListener
-     */
-    @Override
-		public void addChangeListener(ChangeListener l) {
-        listenerList.add(ChangeListener.class, l);
-    }
-
-    /**
-     * Removes a listener that was tracking caret position changes.
-     *
-     * @param l the listener
-     * @see Caret#removeChangeListener
-     */
-    @Override
-		public void removeChangeListener(ChangeListener l) {
-        listenerList.remove(ChangeListener.class, l);
-    }
-
-    /**
-     * Returns an array of all the change listeners
-     * registered on this caret.
-     *
-     * @return all of this caret's <code>ChangeListener</code>s
-     *         or an empty
-     *         array if no change listeners are currently registered
-     *
-     * @see #addChangeListener
-     * @see #removeChangeListener
-     *
-     * @since 1.4
-     */
-    public ChangeListener[] getChangeListeners() {
-        return (ChangeListener[])listenerList.getListeners(
-                ChangeListener.class);
     }
 
     /**
@@ -879,30 +902,30 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
      */
     @Override
 		public void setSelectionVisible(boolean vis) {
-        if (vis != selectionVisible) {
-            selectionVisible = vis;
-            if (selectionVisible) {
-                // show
-                Highlighter h = component.getHighlighter();
-                if ((dot != mark) && (h != null) && (selectionTag == null)) {
-                    int p0 = Math.min(dot, mark);
-                    int p1 = Math.max(dot, mark);
-                    Highlighter.HighlightPainter p = getSelectionPainter();
-                    try {
-                        selectionTag = h.addHighlight(p0, p1, p);
-                    } catch (BadLocationException bl) {
-                        selectionTag = null;
-                    }
-                }
-            } else {
-                // hide
-                if (selectionTag != null) {
-                    Highlighter h = component.getHighlighter();
-                    h.removeHighlight(selectionTag);
-                    selectionTag = null;
-                }
-            }
-        }
+//        if (vis != selectionVisible) {
+//            selectionVisible = vis;
+//            if (selectionVisible) {
+//                // show
+//                Highlighter h = component.getHighlighter();
+//                if ((dot != mark) && (h != null) && (selectionTag == null)) {
+//                    int p0 = Math.min(dot, mark);
+//                    int p1 = Math.max(dot, mark);
+//                    Highlighter.HighlightPainter p = getSelectionPainter();
+//                    try {
+//                        selectionTag = h.addHighlight(p0, p1, p);
+//                    } catch (BadLocationException bl) {
+//                        selectionTag = null;
+//                    }
+//                }
+//            } else {
+//                // hide
+//                if (selectionTag != null) {
+//                    Highlighter h = component.getHighlighter();
+//                    h.removeHighlight(selectionTag);
+//                    selectionTag = null;
+//                }
+//            }
+//        }
     }
 
     /**
@@ -1000,12 +1023,12 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
             if (visible != e) {
                 visible = e;
                 // repaint the caret
-                try {
-                    Rectangle loc = mapper.modelToView(component, dot,dotBias);
-                    damage(loc);
-                } catch (BadLocationException badloc) {
-                    // hmm... not legally positioned
-                }
+//                try {
+//                    Rectangle loc = mapper.modelToView(component, dot,dotBias);
+//                    damage(loc);
+//                } catch (BadLocationException badloc) {
+//                    // hmm... not legally positioned
+//                }
             }
         }
 //        if (flasher != null) {
@@ -1102,70 +1125,68 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
         moveDot(dot, Position.Bias.Forward);
     }
 
-    // ---- Bidi methods (we could put these in a subclass)
+	// ---- Bidi methods (we could put these in a subclass)
 
-    /**
-     * Moves the caret position to the specified position, with the
-     * specified bias.
-     *
-     * @param dot the position &gt;= 0
-     * @param dotBias the bias for this position, not <code>null</code>
-     * @throws IllegalArgumentException if the bias is <code>null</code>
-     * @see Caret#moveDot
-     * @since 1.6
-     */
-    public void moveDot(int dot, Position.Bias dotBias) {
-        if (dotBias == null) {
-            throw new IllegalArgumentException("null bias");
-        }
+	/**
+	 * Moves the caret position to the specified position, with the specified bias.
+	 *
+	 * @param dot     the position &gt;= 0
+	 * @param dotBias the bias for this position, not <code>null</code>
+	 * @throws IllegalArgumentException if the bias is <code>null</code>
+	 * @see Caret#moveDot
+	 * @since 1.6
+	 */
+	public void moveDot(int dot, Position.Bias dotBias) {
+		if (dotBias == null) {
+			throw new IllegalArgumentException("null bias");
+		}
 
-        if (! component.isEnabled()) {
-            // don't allow selection on disabled components.
-            setDot(dot, dotBias);
-            return;
-        }
-        if (dot != this.dot) {
-            NavigationFilter filter = component.getNavigationFilter();
+		if (!component.isEnabled()) {
+			// don't allow selection on disabled components.
+			setDot(dot, dotBias);
+			return;
+		}
+		if (dot != this.dot) {
+			NavigationFilter filter = component.getNavigationFilter();
 
-            if (filter != null) {
-                filter.moveDot(getFilterBypass(), dot, dotBias);
-            }
-            else {
-                handleMoveDot(dot, dotBias);
-            }
-        }
-    }
+			if (filter == null) {
+				handleMoveDot(dot, dotBias);
+			} else {
+				filter.moveDot(getFilterBypass(), dot, dotBias);
+			}
+		}
+	}
 
     void handleMoveDot(int dot, Position.Bias dotBias) {
         changeCaretPosition(dot, dotBias);
-
-        if (selectionVisible) {
-            Highlighter h = component.getHighlighter();
-            if (h != null) {
-                int p0 = Math.min(dot, mark);
-                int p1 = Math.max(dot, mark);
-
-                // if p0 == p1 then there should be no highlight, remove it if necessary
-                if (p0 == p1) {
-                    if (selectionTag != null) {
-                        h.removeHighlight(selectionTag);
-                        selectionTag = null;
-                    }
-                // otherwise, change or add the highlight
-                } else {
-                    try {
-                        if (selectionTag != null) {
-                            h.changeHighlight(selectionTag, p0, p1);
-                        } else {
-                            Highlighter.HighlightPainter p = getSelectionPainter();
-                            selectionTag = h.addHighlight(p0, p1, p);
-                        }
-                    } catch (BadLocationException e) {
-                        throw new StateInvariantError("Bad caret position");
-                    }
-                }
-            }
-        }
+//
+//        if (selectionVisible) {
+//            Highlighter h = component.getHighlighter();
+//            if (h != null) {
+//                int p0 = Math.min(dot, mark);
+//                int p1 = Math.max(dot, mark);
+//
+//                // if p0 == p1 then there should be no highlight, remove it if necessary
+//                if (p0 == p1) {
+//                    if (selectionTag != null) {
+//                        h.removeHighlight(selectionTag);
+//                        selectionTag = null;
+//                    }
+//                // otherwise, change or add the highlight
+//                } else {
+//                    try {
+//                        if (selectionTag != null) {
+//                            h.changeHighlight(selectionTag, p0, p1);
+//                        } else {
+//                            Highlighter.HighlightPainter p = getSelectionPainter();
+//                            selectionTag = h.addHighlight(p0, p1, p);
+//                        }
+//                    } catch (BadLocationException e) {
+//                        throw new StateInvariantError("Bad caret position");
+//                    }
+//                }
+//            }
+//        }
     }
 
     /**
@@ -1213,11 +1234,11 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
         }
         this.markBias = this.dotBias;
         this.markLTR = dotLTR;
-        Highlighter h = component.getHighlighter();
-        if ((h != null) && (selectionTag != null)) {
-            h.removeHighlight(selectionTag);
-            selectionTag = null;
-        }
+//        Highlighter h = component.getHighlighter();
+//        if ((h != null) && (selectionTag != null)) {
+//            h.removeHighlight(selectionTag);
+//            selectionTag = null;
+//        }
     }
 
     /**
@@ -1300,7 +1321,7 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
     void changeCaretPosition(int dot, Position.Bias dotBias) {
         // repaint the old position and set the new value of
         // the dot.
-        repaint();
+//        repaint();
 
 
 //        // Make sure the caret is visible if this window has the focus.
@@ -1315,22 +1336,23 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
         dotLTR = isPositionLTR(dot, dotBias);
         fireStateChanged();
 
-        updateSystemSelection();
+        if (false && !working)
+        	updateSystemSelection();
 
         setMagicCaretPosition(null);
 
-        // We try to repaint the caret later, since things
-        // may be unstable at the time this is called
-        // (i.e. we don't want to depend upon notification
-        // order or the fact that this might happen on
-        // an unsafe thread).
-        Runnable callRepaintNewCaret = new Runnable() {
-            @Override
-						public void run() {
-                repaintNewCaret();
-            }
-        };
-        SwingUtilities.invokeLater(callRepaintNewCaret);
+//        // We try to repaint the caret later, since things
+//        // may be unstable at the time this is called
+//        // (i.e. we don't want to depend upon notification
+//        // order or the fact that this might happen on
+//        // an unsafe thread).
+//        Runnable callRepaintNewCaret = new Runnable() {
+//            @Override
+//						public void run() {
+//                repaintNewCaret();
+//            }
+//        };
+//        SwingUtilities.invokeLater(callRepaintNewCaret);
     }
 
     /**
@@ -1340,33 +1362,37 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
      * is safe.
      */
     void repaintNewCaret() {
-        if (component != null) {
-            TextUI mapper = (TextUI) component.getUI();
-            Document doc = component.getDocument();
-            if ((mapper != null) && (doc != null)) {
-                // determine the new location and scroll if
-                // not visible.
-                Rectangle newLoc;
-                try {
-                    newLoc = mapper.modelToView(component, this.dot, this.dotBias);
-                } catch (BadLocationException e) {
-                    newLoc = null;
-                }
-                if (newLoc != null) {
-                    adjustVisibility(newLoc);
-                    // If there is no magic caret position, make one
-                    if (getMagicCaretPosition() == null) {
-                        setMagicCaretPosition(new Point(newLoc.x, newLoc.y));
-                    }
-                }
-
-                // repaint the new position
-                damage(newLoc);
-            }
-        }
+//        if (component != null) {
+//            TextUI mapper = (TextUI) component.getUI();
+//            Document doc = component.getDocument();
+//            if ((mapper != null) && (doc != null)) {
+//                // determine the new location and scroll if
+//                // not visible.
+//                Rectangle newLoc;
+//                try {
+//                    newLoc = mapper.modelToView(component, this.dot, this.dotBias);
+//                } catch (BadLocationException e) {
+//                    newLoc = null;
+//                }
+//                if (newLoc != null) {
+//                    adjustVisibility(newLoc);
+//                    // If there is no magic caret position, make one
+//                    if (getMagicCaretPosition() == null) {
+//                        setMagicCaretPosition(new Point(newLoc.x, newLoc.y));
+//                    }
+//                }
+//
+//                // repaint the new position
+//                damage(newLoc);
+//            }
+//        }
     }
 
     private void updateSystemSelection() {
+    	((JSTextUI) component.ui).updateJSCursorFromCaret();
+    	
+    	
+    	
 //        if ( ! SwingUtilities2.canCurrentEventAccessSystemClipboard() ) {
 //            return;
 //        }
@@ -1541,14 +1567,14 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
     }
 
     int getCaretWidth(int height) {
-        if (aspectRatio > -1) {
-            return (int) (aspectRatio * height) + 1;
-        }
-
-        if (caretWidth > -1) {
-            return caretWidth;
-        }
-
+//        if (aspectRatio > -1) {
+//            return (int) (aspectRatio * height) + 1;
+//        }
+//
+//        if (caretWidth > -1) {
+//            return caretWidth;
+//        }
+//
         return 1;
     }
 
@@ -1601,8 +1627,8 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
     int updatePolicy = UPDATE_WHEN_ON_EDT;
     boolean visible;
     boolean active;
-    int dot;
-    int mark;
+    protected int dot;
+    protected int mark;
     Object selectionTag;
     boolean selectionVisible;
     //Timer flasher;
@@ -1645,11 +1671,11 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
      */
     private transient MouseEvent selectedWordEvent = null;
 
-    /**
-     * The width of the caret in pixels.
-     */
-    protected int caretWidth = -1;
-    protected float aspectRatio = -1;
+//    /**
+//     * The width of the caret in pixels.
+//     */
+//    protected int caretWidth = -1;
+//    protected float aspectRatio = -1;
 
     class SafeScroller implements Runnable {
 
@@ -1685,19 +1711,19 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
                 // setVisible(true) will cause a scroll, only do this if the
                 // new location is really valid.
                 if (component != null) {
-                    TextUI mapper = (TextUI) component.getUI();
-                    try {
-                        Rectangle r = mapper.modelToView(component, dot,
-                                                         dotBias);
-                        if (r != null && r.width != 0 && r.height != 0) {
-                            damage(r);
-                        }
-                    } catch (BadLocationException ble) {
-                    }
+//                    TextUI mapper = (TextUI) component.getUI();
+//                    try {
+//                        Rectangle r = mapper.modelToView(component, dot,
+//                                                         dotBias);
+//                        if (r != null && r.width != 0 && r.height != 0) {
+//                            damage(r);
+//                        }
+//                    } catch (BadLocationException ble) {
+//                    }
                 }
             }
             visible = !visible;
-            repaint();
+//            repaint();
         }
 
         // --- DocumentListener methods --------------------------------
@@ -1916,22 +1942,22 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
                         setSelectionVisible(false);
                     }
                 }
-            } else if("caretWidth".equals(evt.getPropertyName())) {
-                Integer newWidth = (Integer) evt.getNewValue();
-                if (newWidth != null) {
-                    caretWidth = newWidth.intValue();
-                } else {
-                    caretWidth = -1;
-                }
-                repaint();
-            } else if("caretAspectRatio".equals(evt.getPropertyName())) {
-                Number newRatio = (Number) evt.getNewValue();
-                if (newRatio != null) {
-                    aspectRatio = newRatio.floatValue();
-                } else {
-                    aspectRatio = -1;
-                }
-                repaint();
+//            } else if("caretWidth".equals(evt.getPropertyName())) {
+//                Integer newWidth = (Integer) evt.getNewValue();
+//                if (newWidth != null) {
+//                    caretWidth = newWidth.intValue();
+//                } else {
+//                    caretWidth = -1;
+//                }
+//                repaint();
+//            } else if("caretAspectRatio".equals(evt.getPropertyName())) {
+//                Number newRatio = (Number) evt.getNewValue();
+//                if (newRatio != null) {
+//                    aspectRatio = newRatio.floatValue();
+//                } else {
+//                    aspectRatio = -1;
+//                }
+//                repaint();
             }
         }
 

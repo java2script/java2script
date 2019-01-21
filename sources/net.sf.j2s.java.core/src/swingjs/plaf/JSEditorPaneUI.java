@@ -3,6 +3,7 @@ package swingjs.plaf;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Insets;
+import java.awt.Point;
 import java.beans.PropertyChangeEvent;
 
 import javax.swing.text.AbstractDocument.BranchElement;
@@ -14,7 +15,6 @@ import javax.swing.text.StyleConstants;
 
 import javajs.util.SB;
 import swingjs.JSToolkit;
-import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 
 /**
@@ -51,18 +51,18 @@ public class JSEditorPaneUI extends JSTextViewUI {
 
 	@Override
 	public DOMNode updateDOMNode() {
-		System.out.println("update xxu dom");
-		/**
-		 * @j2sNative
-		 * 
-		 * xxu = this;
-		 * 
-
-		 */
-//		System.out.println("updatedom " + JSUtil.getStackTrace(4));
+//		System.out.println("update xxu dom");
+//		/**
+//		 * @j2sNative
+//		 * 
+//		 * xxu = this;
+//		 * 
+//
+//		 */
 		if (domNode == null) {
 			mustWrap = true;
 			domNode = newDOMObject("div", id);
+			DOMNode.setStyles(domNode); // default for pre is font-height
 			$(domNode).addClass("swingjs-doc");
 			setupViewNode();
 		}
@@ -76,7 +76,6 @@ public class JSEditorPaneUI extends JSTextViewUI {
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
-		System.out.println(">>>>>>>>>>>>>>>JSEditorPaneUI " + prop);
 		switch(prop) {
 		case "text":
 			getComponentText();
@@ -88,19 +87,18 @@ public class JSEditorPaneUI extends JSTextViewUI {
 	@SuppressWarnings("unused")
 	private int epTimer;
 	private String currentHTML;
-	
-	@SuppressWarnings("unused")
+		
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
 
-		String type = (/** @j2sNative jQueryEvent.type ||*/"");
-
+		if (JSToolkit.isMouseEvent(eventType)) {
+			return NOT_HANDLED;
+		}
 		if (target != null) {
-			Boolean b;
-			if ((b = checkAllowKey(jQueryEvent)) != null) {
+			Boolean b = checkAllowKey(jQueryEvent);
+			if (b != null)
 				return b.booleanValue();
-			}
-			
+
 			// A first touch down may trigger on the wrong event target
 			// and not have set up window.getSelection() yet.
 			// 50-ms delay allows for multiple clicks, effecting word and line selection.
@@ -108,56 +106,14 @@ public class JSEditorPaneUI extends JSTextViewUI {
 			 *
 			 * @j2sNative
 			 * 
-			 * 			var me = this; clearTimeout(this.epTimer);this.epTimer = setTimeout(function(){me.handleJSEvent$O$I$O(null,
-			 *            eventType, jQueryEvent)},50);
+			 * 			var me = this; clearTimeout(this.epTimer);this.epTimer =
+			 *            setTimeout(function(){me.handleJSEvent$O$I$O(null, eventType,
+			 *            jQueryEvent)},50);
 			 * 
 			 */
-			return UNHANDLED;
+			return HANDLED;
 		}
 
-		int dot = 0, mark = 0, apt = 0, fpt = 0;
-		DOMNode anode = null, fnode = null;
-		String atag = null, ftag = null;
-		
-		/**
-		 * @j2sNative 
-		 * 
-		 * 
-		 * var s = window.getSelection(); 
-		 * anode = s.anchorNode; 
-		 * apt = s.anchorOffset;
-		 * if (anode.tagName) {
-		 *   anode = anode.childNodes[apt];
-		 *   apt = 0;
-		 * }
-		 * fnode = s.focusNode; 
-		 * fpt = s.focusOffset;
-		 * if (fnode.tagName) {
-		 *   fnode = fnode.childNodes[fpt];
-		 *   fpt = 0;
-		 * }
-		 */
-
-		if (anode == null || fnode == null) {
-			System.out.println("JSEditorPaneUI anode or fnode is null ");
-			return UNHANDLED;
-		}
-		mark = getJSDocOffset(anode);
-		dot = (anode == fnode ? mark : getJSDocOffset(fnode)) + fpt;
-		mark += apt;
-		
-		System.out.println("==windows at " + mark + "-" + dot + "/" + apt + " " + fpt);
-
-		/**
-		 * @j2sNative jQueryEvent.target = null; jQueryEvent.selectionStart = mark;
-		 *            jQueryEvent.selectionEnd = dot;
-		 *            
-		 *            if (type == "drop") {
-		 *              eventType = 402;
-		 *            }
-		 *            
-		 */
-		
 		return super.handleJSEvent(null, eventType, jQueryEvent);
 	}
 
@@ -171,6 +127,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 			}
 			node = DOMNode.getParent(node);
 		}
+		//System.out.println("JSEditor docoffset " + pt);
 		return pt;
 	}
 
@@ -188,13 +145,6 @@ public class JSEditorPaneUI extends JSTextViewUI {
 	}
 		
 	@Override
-	void setSelectionRange(int mark, int dot) {
-		editor.getCaret().setDot(mark);
-		editor.getCaret().moveDot(dot);
-		updateDataUI();
-	}
-
-	@Override
 	public void setText(String text) {
 		SB sb = new SB();
 		Document d = editor.getDocument();
@@ -202,13 +152,13 @@ public class JSEditorPaneUI extends JSTextViewUI {
 			return;
 		if (text == null)
 			text = editor.getText();
-		currentText = text;
 		fromJava(text, sb, d.getRootElements()[0], true, null);
 		//System.out.println("fromJava " + text.replace('\n', '.'));
 		//System.out.println("toHTML" + sb);
 		String html = sb.toString();
 		if (html == currentHTML)
 			return;
+		currentText = text;
 		DOMNode.setAttr(domNode, "innerHTML", currentHTML = html);
 		updateDataUI();
 		@SuppressWarnings("unused")
@@ -216,10 +166,10 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		/**
 		 * @j2sNative
 		 *   
-		 *   setTimeout(function(){me.setJSSelection$S("text")},10);
+		 *   setTimeout(function(){me.updateJSCursor$S("text")},10);
 		 */
 		{
-			setJSSelection("text");
+			updateJSCursor("text");
 		}
 	}
 
@@ -230,7 +180,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		DOMNode[] divs = (DOMNode[]) (Object) $(domNode).find("*");
 		//System.out.println("updateDataUI " + divs.length);
 		for (int i = divs.length; --i >= 0;)
-			DOMNode.setAttr(divs[i], "data-ui", this);
+			setDataUI(divs[i]);
 	}
 
 	private final static int BOLD = 1;
@@ -261,6 +211,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		boolean haveStyle = (style.length() > 0);
 		if (haveStyle)
 			style = " style=\"" + style + "\"";
+		//haveStyle = true; // for now
 		boolean isSub = checkAttr(SUB, a, null);
 		boolean isSup = !isSub && checkAttr(SUP, a, null);
 		if (isSub)
@@ -385,7 +336,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		return false;
 	}
 
-	private Insets myInsets = new Insets(0, 0, 5, 5);
+	private Insets myInsets = new Insets(0, 0, 0, 0);
 
 	@Override
 	public Insets getInsets() {
@@ -399,7 +350,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 
 	@Override
 	protected String getPropertyPrefix() {
-		return "EditorPane.";
+		return "EditorPane";
 	}
 	
 	
@@ -435,13 +386,13 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		/**
 		 * @j2sNative
 			var nodes = node.childNodes;
+			var tag = node.tagName;
 			var n = nodes.length;
-			if (n == 1 && nodes[0].tagName == "BR") {
+			if (tag == "BR" || n == 1 && nodes[0].tagName == "BR") {
 				return (pt == off ? [node, 0] : [null, 1]);
 			} 
 			var ipt = off;
 			var nlen = 0;
-			var tag = node.tagName;
 			var i1 = (tag == "DIV" || tag == "P" ? 1 : 0);
 			for (var i = 0; i < n; i++) {
 				node = nodes[i];
@@ -469,25 +420,27 @@ public class JSEditorPaneUI extends JSTextViewUI {
 	
 	@Override
 	public String getJSTextValue() {
-		return getInnerTextSafely(domNode, true, null);
+		return getInnerTextSafely(domNode, false, null).toString().replace('\u00A0',' '); // &nbsp;
 	}
 
-	private static String getInnerTextSafely(DOMNode node, boolean isRoot, SB sb) {
-		boolean retStr = (sb == null);
-		if (sb == null)
+	private static Object getInnerTextSafely(DOMNode node, boolean isLast, SB sb) {
+		boolean isRoot = (sb == null);
+		if (isRoot)
 			sb = new SB();
+		Boolean ret;
 		String tagName = (String) DOMNode.getAttr(node, "tagName");
 		if (tagName == null) {
 			sb.append((String) DOMNode.getAttr(node, "data"));
+			ret = Boolean.TRUE;
 		} else {
+			ret = Boolean.FALSE;
 			DOMNode[] nodes = (DOMNode[]) DOMNode.getAttr(node, "childNodes");
-			if (nodes.length == 1
-					&& tagName == "DIV" && DOMNode.getAttr(nodes[0], "tagName") == "BR") {
+			if (tagName == "BR" || nodes.length == 1 && DOMNode.getAttr(nodes[0], "tagName") == "BR") {
 				sb.append("\n");
 			} else {
 				for (int i = 0, n = nodes.length; i < n; i++)
-					getInnerTextSafely(nodes[i], isRoot ? i == n - 1 : false, sb);
-				if (!isRoot) {
+					ret = (Boolean) getInnerTextSafely(nodes[i], i == n - 1, sb);
+				if ((!isRoot || isLast) && ret == Boolean.TRUE) {
 					switch (tagName) {
 					case "DIV":
 					case "BR":
@@ -498,7 +451,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 				}
 			}
 		}
-		return (retStr ? sb.toString() : null);
+		return (isRoot ? sb.toString() : ret);
 	}
 
 	int timeoutID;
@@ -519,10 +472,10 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		 */
 	}
 
-
+	@SuppressWarnings("unused")
 	@Override
-	protected void jsSelect(Object[] r1, Object[] r2) {
-		System.out.println("jsSelect " + r1 + r2);
+	protected void jsSelect(Object[] r1, Object[] r2, boolean andScroll) {
+		//System.out.println("jsSelect " + r1 + r2);
 		// range index may be NaN
 		/**
 		 * @j2sNative
@@ -535,6 +488,79 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		 *            sel.removeAllRanges(); 
 		 *            sel.addRange(range);
 		 */
+		
+		if (andScroll) {
+			//System.out.println("JSEditorPane scrolling to " + r2);
+			DOMNode node = (DOMNode) r2[0];
+			/**
+			 * @j2sNative
+			 * 
+			 * if (node.scrollIntoView) {
+			 *   node.scrollIntoView();
+			 * } else {
+			 *   node.parentElement.scrollIntoView();
+			 * }
+			 * 
+			 */
+		}
 	}
+
+	@Override
+	public void updateJSCursorFromCaret() {
+		updateJSCursor("default");
+	}
+
+    @SuppressWarnings("unused")
+	@Override
+	boolean getJSMarkAndDot(Point pt) {
+		int dot = 0, mark = 0, apt = 0, fpt = 0;
+		DOMNode anode = null, fnode = null;
+		String atag = null, ftag = null;
+		
+		/**
+		 * @j2sNative 
+		 * 
+		 * 
+		 * var s = window.getSelection(); 
+		 * anode = s.anchorNode; 
+		 * apt = s.anchorOffset;
+		 * if (anode.tagName) {
+		 *   anode = anode.childNodes[apt];
+		 *   apt = 0;
+		 * }
+		 * fnode = s.focusNode; 
+		 * fpt = s.focusOffset;
+		 * if (fnode.tagName) {
+		 *   fnode = fnode.childNodes[fpt];
+		 *   fpt = 0;
+		 * }
+		 */
+
+		if (anode == null || fnode == null) {
+			System.out.println("JSEditorPaneUI anode or fnode is null ");
+			return false;
+		}
+		mark = getJSDocOffset(anode);
+		dot = (anode == fnode ? mark : getJSDocOffset(fnode)) + fpt;
+		mark += apt;
+		
+		//System.out.println("==windows at " + mark + "-" + dot + "/" + apt + " " + fpt);
+
+		pt.x = mark;
+		pt.y = dot;
+
+		return true;
+	}
+
+
+	@Override
+	void setJSMarkAndDot(int mark, int dot, boolean andScroll) {
+		// key up with text change -- need to refresh data-ui attributes
+		// for all childNodes and also set the java caret, which will then
+		// update that in JavaScript. Mark is not used here.
+		editor.getCaret().setDot(dot);
+		updateDataUI();
+	}
+
 
 }

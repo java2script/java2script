@@ -242,6 +242,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		ListSelectionListener, CellEditorListener, /* Accessible, */ RowSorterListener {
 
 	
+	private final static Rectangle r = new Rectangle();
 	//
 	// Static Constants
 	//
@@ -271,6 +272,8 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 
 	/** During all resize operations, proportionately resize all columns. */
 	public static final int AUTO_RESIZE_ALL_COLUMNS = 4;
+
+	private static final Rectangle tmpRect = new Rectangle();
 
 	/**
 	 * Printing modes, used in printing <code>JTable</code>s.
@@ -3072,12 +3075,18 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 	 */
 	public Rectangle getCellRect(int row, int column, boolean includeSpacing) {
 		Rectangle r = new Rectangle();
+		_getCellRect(row, column, includeSpacing, r);
+		return r;
+	}
+
+	public Rectangle _getCellRect(int row, int column, boolean includeSpacing, Rectangle r) {
 		boolean valid = true;
 		if (row < 0) {
-			// y = height = 0;
+			r.y = r.height = 0;
 			valid = false;
 		} else if (row >= getRowCount()) {
 			r.y = getHeight();
+			r.height = 0;
 			valid = false;
 		} else {
 			r.height = getRowHeight(row);
@@ -3085,18 +3094,15 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		}
 
 		if (column < 0) {
-			if (!getComponentOrientation().isLeftToRight()) {
-				r.x = getWidth();
-			}
-			// otherwise, x = width = 0;
+			r.x = (getComponentOrientation().isLeftToRight() ? 0 : getWidth());
+			r.width = 0;
 			valid = false;
 		} else if (column >= getColumnCount()) {
-			if (getComponentOrientation().isLeftToRight()) {
-				r.x = getWidth();
-			}
-			// otherwise, x = width = 0;
+			r.x = (getComponentOrientation().isLeftToRight() ? getWidth() : 0);
+			r.width = 0;
 			valid = false;
 		} else {
+			r.x = 0;
 			TableColumnModel cm = getColumnModel();
 			if (getComponentOrientation().isLeftToRight()) {
 				for (int i = 0; i < column; i++) {
@@ -3717,13 +3723,13 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 				removeEditor();
 				return false;
 			}
-			Rectangle rect = getCellRect(row, column, false);
+			_getCellRect(row, column, false, tmpRect);
 			if (comp instanceof JTextField) {
-				rect.y -= 3;
-				rect.width -= 2;
-				rect.height -= 3;
+				tmpRect.y -= 3;
+				tmpRect.width -= 2;
+				tmpRect.height -= 3;
 			}
-			comp.setBounds(rect);
+			comp.setBounds(tmpRect);
 			add(comp);
 			comp.validate();
 			comp.repaint();
@@ -3734,7 +3740,6 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 				@Override
 				public void run() {
 					comp.requestFocus();
-					((JSComponentUI) comp.getUI()).notifyFocus(true);
 				}
 			});
 
@@ -4359,14 +4364,14 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		while (modelIndex <= change.endModelIndex) {
 			int viewIndex = convertRowIndexToView(modelIndex++);
 			if (viewIndex != -1) {
-				Rectangle dirty = getCellRect(viewIndex, columnViewIndex, false);
-				int x = dirty.x;
-				int w = dirty.width;
+				_getCellRect(viewIndex, columnViewIndex, false, tmpRect);
+				int x = tmpRect.x;
+				int w = tmpRect.width;
 				if (eventColumn == TableModelEvent.ALL_COLUMNS) {
 					x = 0;
 					w = getWidth();
 				}
-				repaint(x, dirty.y, w, dirty.height);
+				repaint(x, tmpRect.y, w, tmpRect.height);
 			}
 		}
 	}

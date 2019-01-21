@@ -3,6 +3,7 @@ package test;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -83,19 +84,29 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 	public void onDialogReturn(Object value) {
 		if (value instanceof UIResource)
 			return;
-		System.out.println("object value is " + value);
+		status.setText(value.toString());
 	}
 
+	JLabel status;
 	
 	
 	public Test_Dialog() {
 		super();
 		this.setTitle("testing dialogs");
-		Container contentPane = this.getContentPane();
-		contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
+
+		JPanel m = new JPanel(new GridLayout());
+		status = new JLabel("testing");
+		m.add(status, null);
+		add(m,BorderLayout.SOUTH);
+		
+
+		JPanel p = new JPanel();
+		p.setLayout(new BoxLayout(p, BoxLayout.X_AXIS));
+		add(p, BorderLayout.CENTER);
 		this.setLocation(300, 300);
 		JButton b;
 
+		
 		b = new JButton("ConfirmDialog");
 		final JPanel content = new JPanel();
 		content.setLayout(new BorderLayout());
@@ -103,12 +114,15 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 		b.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Test_Dialog.this.onDialogReturn(JOptionPane.showConfirmDialog(Test_Dialog.this, "OK"/* content */,
+				Test_Dialog.this.onDialogReturn(JOptionPane.showConfirmDialog(
+						Test_Dialog.this, 
+						"The frame is now " + (isResizable() ? "NOT " : "") + "resizable.",
 						"Testing JOptionPane", JOptionPane.OK_CANCEL_OPTION));
+				setResizable(!isResizable());
 			}
 
 		});
-		this.add(b);
+		p.add(b);
 
 		b = new JButton("MessageDialog");
 		final JPanel message = new JPanel();
@@ -122,7 +136,7 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 			}
 
 		});
-		this.add(b);
+		p.add(b);
 
 		b = new JButton("InputDialog");
 		final JPanel input = new JPanel();
@@ -136,7 +150,7 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 			}
 
 		});
-		this.add(b);
+		p.add(b);
 
 		
 		
@@ -150,7 +164,7 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 			}
 
 		});
-		this.add(b);
+		p.add(b);
 
 		b = new JButton("ColorDialog");
 		b.addActionListener(new ActionListener() {
@@ -164,9 +178,10 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 			}
 
 		});
-		this.add(b);
-		this.pack();
-		this.setVisible(true);
+		p.add(b);
+		
+		pack();
+		setVisible(true);
 
 	}
 

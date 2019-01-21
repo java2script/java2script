@@ -817,8 +817,10 @@ public class ScrollPaneLayout
 
         Rectangle vsbR = new Rectangle(0, availR.y - vpbInsets.top, 0, 0);
 
+        // SwingJS: scrollbars are internal
+        boolean nobars = (view instanceof JEditorPane || view instanceof JTextArea);
         boolean vsbNeeded;
-        if (isEmpty) {
+        if (isEmpty || nobars) {
             vsbNeeded = false;
         }
         else if (vsbPolicy == VERTICAL_SCROLLBAR_ALWAYS) {
@@ -830,7 +832,6 @@ public class ScrollPaneLayout
         else {  // vsbPolicy == VERTICAL_SCROLLBAR_AS_NEEDED
             vsbNeeded = !viewTracksViewportHeight && (viewPrefSize.height > extentSize.height);
         }
-
 
         if ((vsb != null) && vsbNeeded) {
             adjustForVSB(true, availR, vsbR, vpbInsets, leftToRight);
@@ -844,7 +845,7 @@ public class ScrollPaneLayout
 
         Rectangle hsbR = new Rectangle(availR.x - vpbInsets.left, 0, 0, 0);
         boolean hsbNeeded;
-        if (isEmpty) {
+        if (isEmpty || nobars) {
             hsbNeeded = false;
         }
         else if (hsbPolicy == HORIZONTAL_SCROLLBAR_ALWAYS) {

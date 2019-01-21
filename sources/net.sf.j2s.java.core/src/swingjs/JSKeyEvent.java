@@ -6,6 +6,8 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.JComponent;
 
+import swingjs.plaf.JSComponentUI;
+
 /**
  * Handle the conversion between JavaScript and Java key events.
  *
@@ -19,7 +21,59 @@ import javax.swing.JComponent;
 @SuppressWarnings({"serial", "unused"})
 public class JSKeyEvent extends KeyEvent {
 
-	public static JSKeyEvent newJSKeyEvent(JComponent source, Object jQueryEvent, boolean isList) {
+	public static final int KEY_UNKNOWN = 403;
+
+	/**
+	 * From j2sApplet vis JSMouse
+	 * 
+	 * @param id
+	 * @param modifiers
+	 * @param jqevent
+	 * @param time
+	 * @return
+	 */
+	public static boolean dispatchKeyEvent(int id, int modifiers, Object jqevent, long time) {
+		if (id == KeyEvent.KEY_TYPED) {
+			// HTML5 keypress is no longer reliable
+			JSToolkit.consumeEvent(jqevent);
+			return false;
+		}
+		JComponent c = null;
+		JSComponentUI ui = null;
+		/**
+		 * @j2sNative
+		 * 
+		 * 			c = jqevent.target["data-keycomponent"]; ui = c && c.ui;
+		 */
+		if (c != null) {
+			KeyEvent e = newJSKeyEvent(c, jqevent, 0, false);
+			// create our own KEY_PRESSED event
+			c.dispatchEvent(e);
+			if (!ui.j2sDoPropagate)
+				JSToolkit.consumeEvent(e);
+			if (!e.isConsumed() && id == KeyEvent.KEY_PRESSED && e.getKeyChar() != KeyEvent.CHAR_UNDEFINED) {
+				e = newJSKeyEvent(c, jqevent, KeyEvent.KEY_TYPED, false);
+				
+				// yield to keyboard focus manager
+				c.dispatchEvent(e);
+
+				if (!ui.j2sDoPropagate)
+					JSToolkit.consumeEvent(e);
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Create a value-added KeyEvent that can trace back to the original system event.
+	 * 
+	 * @param source
+	 * @param jqevent
+	 * @param id
+	 * @param isList
+	 * @return
+	 */
+	public static JSKeyEvent newJSKeyEvent(JComponent source, Object jqevent, int id, boolean isList) {
 
 		// JavaScript: keydown      keypress    keyup
 		// Java:       KEY_PRESSED  KEY_TYPED*  KEY_RELEASED
@@ -29,8 +83,7 @@ public class JSKeyEvent extends KeyEvent {
 
 		String evType = null, jskey = null;
 		int jskeyCode = 0, jskeyLocation = 0;
-		Object ev = jQueryEvent;
-
+		Object ev = jqevent;
 		/**
 		 * @j2sNative
 		 * 
@@ -41,17 +94,15 @@ public class JSKeyEvent extends KeyEvent {
 		 *            ev.originalEvent.preventDefault();
 		 */
 
-		int id = (evType == "keydown" ? KEY_PRESSED
-				: evType == "keypress" ? KEY_TYPED 
-				: evType == "keyup" ? KEY_RELEASED 
-				: 0);
+		if (id == 0)
+			id = fixEventType(jqevent, 0);
 		if (id == 0)
 			return null;
 		int keyCode = getJavaKeyCode(jskeyCode, jskey);
 		char keyChar = getJavaKeyChar(keyCode, jskey);
 		return (keyChar == CHAR_UNDEFINED && id == KEY_TYPED ? null
-				: new JSKeyEvent(source, jQueryEvent, id, 
-						(id == KEY_TYPED ? JSKeyEvent.VK_UNDEFINED : keyCode),
+				: new JSKeyEvent(source, jqevent, id, 
+						(id == KEY_TYPED ? VK_UNDEFINED : keyCode),
 						keyChar,
 						(id == KEY_TYPED ? KEY_LOCATION_UNKNOWN : jskeyLocation + 1))
 				);
@@ -59,17 +110,16 @@ public class JSKeyEvent extends KeyEvent {
 	
 	private JSKeyEvent(JComponent source, Object ev, int id, int keyCode, char keyChar, int location) {
 		super(source, id, System.currentTimeMillis(), 0, keyCode, keyChar, location);
-		boolean shift = false, ctrl = false, meta = false, alt = false, altGraph = false;
+		byte[] bdata = new byte[0];
 		/**
 		 * @j2sNative
 		 * 
-		 *            shift = ev.shiftKey;
-		 *            ctrl = ev.ctrlKey;
-		 *            alt = ev.altKey;
-		 *            meta = ev.metaKey;
-		 *            altGraph = ev.altGraphKey;
+		 *            
+		 * bdata.jqevent = ev;
+		 * 
 		 */
-		modifiers = JSKeyEvent.getModifiers(shift, ctrl, alt, meta, altGraph);
+		setBData(bdata);
+		modifiers = getModifiers(ev);
 	}
 
 	private static int getJavaKeyCode(int jskeyCode, String jskey) {
@@ -123,7 +173,7 @@ public class JSKeyEvent extends KeyEvent {
 		case VK_ESCAPE:
 			return (char) jsKeyCode;
 		default:
-			return '\uFFFF';
+			return KeyEvent.CHAR_UNDEFINED; //'\uFFFF';
 		}
 	}
 
@@ -142,6 +192,20 @@ public class JSKeyEvent extends KeyEvent {
 		
 	}
 
+	public static int getModifiers(Object ev) {
+		boolean shift = false, ctrl = false, meta = false, alt = false, altGraph = false;
+		/**
+		 * @j2sNative
+		 * 
+		 *            shift = ev.shiftKey;
+		 *            ctrl = ev.ctrlKey;
+		 *            alt = ev.altKey;
+		 *            meta = ev.metaKey;
+		 *            altGraph = ev.altGraphKey;
+		 */
+		return getModifiers(shift, ctrl, alt, meta, altGraph);
+
+	}
 	private static int getModifiers(boolean shift, boolean ctrl, boolean alt, boolean meta, boolean altGraph) {
 		 int modifiers = 0; 
 		if (shift)
@@ -154,10 +218,15 @@ public class JSKeyEvent extends KeyEvent {
 			modifiers |= InputEvent.META_MASK + InputEvent.META_DOWN_MASK;
 		if (altGraph)
 			modifiers |= InputEvent.ALT_GRAPH_MASK + InputEvent.ALT_GRAPH_DOWN_MASK;
+		return modifiers;
+	}
 
-		
-		// TODO Auto-generated method stub
-		return 0;
+	public static int fixEventType(Object jqevent, int eventType) {
+		String evType = /**@j2sNative jqevent.type ||*/"";
+		return (evType == "keydown" ? KEY_PRESSED
+				: evType == "keypress" ? KEY_TYPED 
+				: evType == "keyup" ? KEY_RELEASED 
+				: eventType);
 	}
 
 }

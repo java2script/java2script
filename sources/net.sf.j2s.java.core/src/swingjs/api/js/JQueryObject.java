@@ -8,6 +8,8 @@ public interface JQueryObject {
 	public abstract JQueryObject append(Object span);
 
 	public abstract void bind(String actions, JSFunction f);
+	public abstract void unbind(String actions);
+
 	public abstract void on(String eventName, Object f);
 
 	public abstract JQueryObject focus();

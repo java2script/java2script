@@ -7,75 +7,13 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
-// BH 1/3/2019 3.2.4.06 adds ByteBuffer/CharBuffer support, proper CharSet encoding, including GBK (Standard Chinese)
-// BH 12/30/2018 3.2.4.05 adds Class.forName("[XXX")
-// BH 12/20/2018 3.2.4.05 fixes synthetic reference issue 
-// BH 12/13/2018 3.2.4.05 fixes Class.js field reflection, inner anonymous class of outer class creates wrong synthetic pointer 
-// BH 12/1/2018 3.2.4.04 fixes TypeError e.stack e not found
-// BH 11/11/2018 3.2.4.04 fixes String.CASE_INSENSITIVE_ORDER.compare$S$S
-// BH 11/10/2018 3.2.4.04 fixes inner class synthetic references to interfaces
-// BH 11/10/2018 3.2.4.04 fixes String.prototype.split$S and.split$S$I to remove trailing ""
-// BH 11/6/2018 3.2.4.03 adds TypeError.prototype.printStackTrace$java_io_PrintStream
-// BH 11/4/2018 3.2.4.02 fixes problem with new Date("10/20/2018") and missing date.equals()
-// BH 10/1/2018 3.2.4.01 fixes problem with AWT mouseXxx(Event) not activating in children of Applet
-// BH 9/29/2018 3.2.4.00 adds JAXB support
-// BH 9/23/2018 3.2.3.00 adds direct non-Swing applet support (java.applet.Applet and java.awt.*); no need for converting source to a2s.*
-// BH 9/15/2018 3.2.2.06 adds JScrollBar block and unit increments; fixes JLabel ui getMaximumSize
-// BH 9/15/2018 3.2.2.05 fixes Math.IEEEremainder
-// BH 8/21/2018 3.2.2.04 fixes ?j2strace=xxx  message; sets user.home to https://./, not https://.//; Boolean upgrade and fix
-// BH 8/20/2018 3.2.2.04 adds character.isJavaIdentifierPart$C and several Character...$I equivalents, fixes newEnumConst(), System.getBoolean$S
-// BH 8/19/2018 3.2.2.04 fixes Enum .name being .$name
-// BH 8/16/2018 3.2.2.04 fixes Character.toTitleCase$C, [Integer,Long,Short,Byte].toString(i,radix)
-// BH 8/13/2018 3.2.2.04 $finals to $finals$ -- basically variables are $xxx, methods are xxx$, and special values are $xxx$
-// BH 8/12/2018 3.2.2 adding J2S.onClazzLoaded hook for Clazz loaded
-// BH 8/11/2018 3.2.2 Clazz.newLambda removed
-// BH 8/9/2018  3.2.2 adds newLambda(...'S')
-// BH 8/6/2018  3.2.2 sets user.home to be "https://.//"
-// BH 8/6/2018  3.2.2 adds ?j2sverbose option -- lists all files loaded; sets Clazz._quiet = false
-// BH 8/5/2018  3.2.2 adds Clazz.newLambda(...)
-// BH 8/4/2018  3.2.2 cleans up String $-qualified methods headless and javax tests pass
-// BH 8/1/2018  3.2.2 adds default interface methods as C$.$defaults$
-// BH 7/28/2018 3.2.2 upgrade to all-qualified methods. 
-// BH 7/28/2018 adds Character.getName(codepoint)
-// BH 7/26/2018 fix for Array.getComponentType() only returning the base element type
-// BH 7/26/2018 private methods moved to p$<n>, not loaded into prototype
-// BH 7/26/2018 fix for inner classes that extend other object having incorrect object references
-//              when the outer class and the superclass both extend the same class (Test_Call)
-// BH 7/25/2018 adds bit twiddles to Integer
-// BH 7/23/2018 fixes __NDIM in array classes written as "__NDIMS"
-// BH 7/23/2018 adds Character.$valueOf
-// BH 7/22/2018 adds Swing.CASE_INSENSITIVE_ORDER comparator
-// BH 7/22/2018 adds Boolean.prototype.objectValue()
-// BH 7/22/2018 adds System.getProperty("java.vendor") == "SwingJS/OpenJDK"
-// BH 7/22/2018 adds Math.IEEEremainder
-// BH 7/20/2018 removes def of Closeable, DataInput, DataOutput, Iterable, Comparator
-// BH 7/19/2018 removes Constructor, Method, and Field code here -- now in their .js files 
-// BH 7/18/2018 adds Java 8 default interface method support
-// BH 7/6/2018 adds J2S.stack to stack traces
-// BH 7/5/2018 2:57:51 PM array.equals$O, for simple arrays
-// BH 7/2/2018 12:50:55 PM Character.prototype.objectValue() and Character.prototype.intValue(), for enhanced FOR in transpiler
-// BH 6/29/2018 10:13:51 AM array.equals$O, fixes array.clone
-// BH 6/28/2018 7:34:58 AM fix for array.clone not copying array in the case of objects
-// BH 6/27/2018 3:11:50 PM fix for class String not indicating its name 
-// BH 6/25/2018 3:06:30 PM adds String.concat$S
-// BH 6/25/2018 12:10:25 PM Character.toTitleCase, isTitleCase as ...UpperCase
-// BH 6/25/2018 10:23:24 AM really fixing new int[] {'a'} using .$c() see Test_Byte.java
-// BH 6/21/2018 1:08:58 PM missing mysterious Integer.prototype.objectValue() 
-// BH 6/20/2018 6:00:23 AM missing printStackTrace(PrintStream)
-// BH 6/19/2018 8:49:57 AM fix for checkDeclared
-// BH 5/19/2018 8:22:25 PM fix for new int[] {'a'}
-// BH 4/16/2018 6:14:10 PM msie flag in monitor
-// BH 2/22/2018 12:34:07 AM array.clone() fix
-// BH 2/20/2018 12:59:28 AM adds Character.isISOControl
-// BH 2/13/2018 6:24:44 AM adds String.copyValueOf (two forms)
-// BH 2/7/2018 7:47:07 PM adds System.out.flush and System.err.flush
-// BH 2/1/2018 12:14:20 AM fix for new int[128][] not nulls
-// BH 1/9/2018 8:40:52 AM fully running SwingJS2; adds String.isEmpty()
-// BH 12/16/2017 5:53:47 PM refactored; removed older unused parts
-// BH 11/16/2017 10:52:53 PM adds method name aliasing for generics; adds String.contains$CharSequence(cs)
-// BH 10/14/2017 8:17:57 AM removing all node-based dependency class loading; fix String.initialize with four arguments (arr->byte)
+// TODO: still a lot of references to window[...]
 
-// see earlier notes at swingjs/doc/j2snotes.txt
+// BH 1/13/2019 3.2.4.07 adds Character.to[Title|Lower|Upper]Case(int)
+// BH 1/8/2019 3.2.4.07 fixes String.prototype.to[Upper|Lower]Case$java_util_Locale - using toLocal[Upper|Lower]Case()
+// BH 1/3/2019 3.2.4.07 adds ByteBuffer/CharBuffer support, proper CharSet encoding, including GBK (Standard Chinese)
+
+// see earlier notes at net.sf.j2s.java.core.srcjs/js/devnotes.txt
  
 LoadClazz = function() {
 
@@ -114,8 +52,8 @@ window["j2s.clazzloaded"] = true;
   _debugging: false,
   _loadcore: true,
   _nooutput: 0,
-  _VERSION_R: "3.2.4.06",
-  _VERSION_T: "3.2.4.06",
+  _VERSION_R: "3.2.4.07", //runtime
+  _VERSION_T: "3.2.4.06", //transpiler
 };
 
 ;(function(Clazz, J2S) {
@@ -129,7 +67,9 @@ try {
 try {
 	 // will alert in system.out.println with a message
 	Clazz._traceOutput = 
-	(document.location.href.indexOf("j2strace=") >= 0 ? document.location.href.split("j2strace=")[1].split("&")[0] : null)
+	(document.location.href.indexOf("j2strace=") >= 0 ? decodeURI(document.location.href.split("j2strace=")[1].split("&")[0]) : null);
+	Clazz._traceFilter = 
+	(document.location.href.indexOf("j2sfilter=") >= 0 ? decodeURI(document.location.href.split("j2sfilter=")[1].split("&")[0]) : null);
 } catch (e) {}
 
 Clazz.setTVer = function(ver) {
@@ -898,49 +838,27 @@ Clazz.setConsoleDiv = function(d) {
 // which could be a bottle-neck for function calling.
 // This is critical for performance optimization.
 
-var _profile = null;
-var _profileNoOpt = false;  // setting this true will remove Bob's signature optimization
-
 var __signatures = ""; 
 var profilet0;
 var _profileNew = null;
 var _jsid0 = 0;
 
 Clazz.startProfiling = function(doProfile) {
+  _profileNew = {};
   if (typeof doProfile == "number") {
-    _profileNew = (arguments[1] ? {} : null);
     _jsid0 = _jsid;
     setTimeout(function() { var s = "total wall time: " + doProfile + " sec\n" + Clazz.getProfile(); console.log(s); System.out.println(s)}, doProfile * 1000);
+  } else if (!doProfile) {
+	  _jsid = 0;
+	  _profileNew = null;
   }
-  _profile = ((doProfile || arguments.length == 0) && self.JSON && window.performance ? {} : null);
-  return (_profile ? "use Clazz.getProfile() to show results" : "profiling stopped and cleared")
+  return (_profileNew ? "use Clazz.getProfile() to show results" : "profiling stopped and cleared")
 }
 
 var tabN = function(n) { n = ("" + n).split(".")[0]; return "..........".substring(n.length) + n + "\t" };
 
 Clazz.getProfile = function() {
   var s = "run  Clazz.startProfiling() first";
-  if (_profile) {
-    var l = [];
-    var totalcount = 0;
-    var totalprep = 0;
-    var totaltime = 0;
-    for (var name in _profile) {
-      var n = _profile[name][0];
-      var t1 = _profile[name][1];
-      var t2 = _profile[name][2];
-      l.push(tabN(n) + tabN(t1) + tabN(t2) + name);
-      totalcount += n
-      totalprep += t1
-      totaltime += t2
-    }
-    s = "\ncount   \tprep(ms)\texec(ms)\n" 
-      + "--------\t--------\t--------\n" 
-      + tabN(totalcount)+ tabN(totalprep)+tabN(totaltime) + "\n"
-      + "--------\t--------\t--------\n" 
-      + l.sort().reverse().join("\n")
-      ;
-    _profile = null;
     
     if (_profileNew) {
       s += "\n\n Total new objects: " + (_jsid - _jsid0) + "\n";
@@ -948,30 +866,21 @@ Clazz.getProfile = function() {
       s += "--------\t--------\t------------------------------\n";
       totalcount = 0;
       totaltime = 0;
+      var rows = [];
       for (var key in _profileNew) {
         var count = _profileNew[key][0];
         var tnano = _profileNew[key][1];
-        totalcount += count
-        totaltime += tnano
-        s += tabN(count) + tabN(tnano) + "\t" +key + "\n";
+        totalcount += count;
+        totaltime += tnano;
+        rows.push(tabN(count) + tabN(tnano) + "\t" +key + "\n");
       }
-      s+= tabN(totalcount)+tabN(totaltime) + "\n"
+      rows.sort();
+      rows.reverse();
+      s += rows.join("");
+      s+= tabN(totalcount)+tabN(totaltime) + "\n";
     }
-  }
   _profileNew = null;
   return s; //+ __signatures;
-}
-
-
-var addProfile = function(c, f, p, t1, t2) {
-  var s = c.__CLASS_NAME__ + " " + f + " ";// + JSON.stringify(p);
-  if (__signatures.indexOf(s) < 0)
-    __signatures += s + "\n";
-  var p = _profile[s];
-  p || (p = _profile[s] = [0,0,0]);
-  p[0]++;
-  p[1] += t1;
-  p[2] += t2;
 }
 
 var addProfileNew = function(c, t) {
@@ -1685,7 +1594,7 @@ Clazz._getStackTrace = function(n) {
   s += estack.join("\n");
   if (Clazz._stack.length) {
 	  s += "\nsee Clazz._stack";
-	  console.log("Clazz._stack = " + Clazz._stack);
+	  console.log("Clazz.stack = \n" + estack.join("\n"));
 	  console.log("Use Clazz._showStack() or Clazz._showStack(n) to show parameters");
   }
   return s;
@@ -3360,12 +3269,9 @@ Sys.out.printf = Sys.out.printf$S$OA = Sys.out.format = Sys.out.format$S$OA = fu
 Sys.out.flush$ = function() {}
 
 Sys.out.println = Sys.out.println$O = Sys.out.println$Z = Sys.out.println$I = Sys.out.println$J = Sys.out.println$S = Sys.out.println$C = Sys.out.println = function(s) {
-
-if (("" + s).indexOf("TypeError") >= 0) {
-   doDebugger();
-}
-  if (Clazz._nooutput) return;
-  if (Clazz._traceOutput && s && ("" + s).indexOf(Clazz._traceOutput) >= 0) {
+ s = (typeof s == "undefined" ? "" : "" + s);
+  if (Clazz._nooutput || Clazz._traceFilter && s.indexOf(Clazz._traceFilter) < 0) return;
+  if (!Clazz._traceFilter && Clazz._traceOutput && s && (s.indexOf(Clazz._traceOutput) >= 0 || '"' + s + '"' == Clazz._traceOutput)) {
     alert(s + "\n\n" + Clazz._getStackTrace());
     doDebugger();
   }
@@ -3991,7 +3897,7 @@ function(num){
 return isNaN(arguments.length == 1 ? num : this.valueOf());
 });
 
-m$(Float,"isInfinite$F",
+Float.isInfinite$ = m$(Float,"isInfinite$F",
 function(num){
 return !Number.isFinite(arguments.length == 1 ? num : this.valueOf());
 }, 1);
@@ -4649,10 +4555,11 @@ sp.charCodeAt$I = sp.charCodeAt;
 sp.charAt$I = sp.charAt;
 sp.substring$I = sp.substring$I$I = sp.subSequence$I$I = sp.substring;
 sp.replace$C$C = sp.replace$CharSequence$CharSequence = sp.replace$;
-sp.toUpperCase$ = sp.toUpperCase$java_util_locale = sp.toUpperCase;
-sp.toLowerCase$ = sp.toLowerCase$java_util_locale = sp.toLowerCase;
+sp.toUpperCase$ = sp.toUpperCase;
+sp.toLowerCase$ = sp.toLowerCase;
 sp.trim$ = sp.trim;
-
+sp.toLowerCase$java_util_Locale = sp.toLocaleLowerCase ? function(loc) {loc = loc.toString(); var s = this.valueOf(); return (loc ? s.toLocaleLowerCase(loc.replace(/_/g,'-')) : s.toLocaleLowerCase()) } : sp.toLowerCase;
+sp.toUpperCase$java_util_Locale = sp.toLocaleUpperCase ? function(loc) {loc = loc.toString(); var s = this.valueOf(); return (loc ? s.toLocaleUpperCase(loc.replace(/_/g,'-')) : s.toLocaleUpperCase()) } : sp.toUpperCase;
 sp.length$ = function() {return this.length};
 
 //sp.chars$ = CharSequence.prototype.chars$;
@@ -4866,6 +4773,18 @@ function(c){
 m$(C$,"toUpperCase$C",
 function(c){
 return(""+c).toUpperCase().charAt(0);
+}, 1);
+m$(C$,"toLowerCase$I",
+function(i){
+return String.fromCodePoint(i).toLowerCase().codePointAt(0);
+}, 1);
+m$(C$,"toTitleCase$I",
+function(i){
+return String.fromCodePoint(i).toTitleCase().codePointAt(0);
+}, 1);
+m$(C$,"toUpperCase$I",
+function(i){
+return String.fromCodePoint(i).toUpperCase().codePointAt(0);
 }, 1);
 m$(C$,["isDigit$C","isDigit$I"],
 function(c){
@@ -5163,7 +5082,7 @@ m$(C$, 'getCause$', function () {
 return (this.cause === this ? null : this.cause);
 });
 
-m$(C$, 'initCause$Throwable$', function (cause) {
+m$(C$, 'initCause$Throwable', function (cause) {
 if (this.cause !== this) throw Clazz.new_(IllegalStateException.c$$S,["Can't overwrite cause"]);
 if (cause === this) throw Clazz.new_(IllegalArgumentException.c$$S,["Self-causation not permitted"]);
 this.cause = cause;

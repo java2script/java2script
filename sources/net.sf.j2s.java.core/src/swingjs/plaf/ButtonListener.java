@@ -28,30 +28,43 @@
 
 package swingjs.plaf;
 
+import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+
 import javax.swing.AbstractButton;
 import javax.swing.ButtonModel;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
+import javax.swing.MenuElement;
+import javax.swing.MenuSelectionManager;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.ComponentInputMapUIResource;
+
+import sun.swing.DefaultLookup;
 import sun.swing.UIAction;
+import swingjs.JSFocusPeer;
 import swingjs.api.js.DOMNode;
 
 /**
- * A Button Listener for SwingJS that is one instantialization per button.
+ * A Button Listener for SwingJS that is one instantialization per button, for
+ * all AbstractButtons, including menu items.
  * 
  * 
  * 
@@ -59,16 +72,16 @@ import swingjs.api.js.DOMNode;
  * @author Arnaud Weber (keyboard UI support)
  * 
  * 
- *         Note that in Swingjs a JavaScript button press is routed directly
- *         to the button via a link to the UI, not routed through the
- *         underlying panel based on xy position. 
+ *         Note that in Swingjs a JavaScript button press is routed directly to
+ *         the button via a link to the UI, not routed through the underlying
+ *         panel based on xy position.
  * 
  * @author Bob Hanson
  */
 
-public class ButtonListener implements MouseListener, MouseMotionListener,
-		FocusListener, ChangeListener, PropertyChangeListener {
-	
+public class ButtonListener
+		implements MouseListener, MouseMotionListener, FocusListener, ChangeListener, PropertyChangeListener {
+
 	private JSButtonUI ui;
 
 	/**
@@ -77,14 +90,14 @@ public class ButtonListener implements MouseListener, MouseMotionListener,
 	static void loadActionMap(LazyActionMap map) {
 		map.put(new Actions(Actions.PRESS));
 		map.put(new Actions(Actions.RELEASE));
+		map.put(new Actions(Actions.SELECT, null, true)); // for JMenu
+		map.put(new Actions(Actions.CLICK)); // for JMenu and JMenuItem
 	}
 
-	public ButtonListener(JSButtonUI ui, boolean isMenuItem) {
+	public ButtonListener(JSButtonUI ui) {
 		this.ui = ui;
 	}
 
-
-	
 //	static String labelprops = AbstractButton.MARGIN_CHANGED_PROPERTY + ";"
 //			+ AbstractButton.VERTICAL_ALIGNMENT_CHANGED_PROPERTY + ";"
 //			+ AbstractButton.HORIZONTAL_ALIGNMENT_CHANGED_PROPERTY + ";"
@@ -99,14 +112,26 @@ public class ButtonListener implements MouseListener, MouseMotionListener,
 		// System.out.println("JSButtonListener property change: " + prop + " " +
 		// e.getSource());
 		AbstractButton b = (AbstractButton) e.getSource();
-		
-		if (prop == AbstractButton.MNEMONIC_CHANGED_PROPERTY) {
-			updateMnemonicBinding(b);
-		} else if (prop == AbstractButton.CONTENT_AREA_FILLED_CHANGED_PROPERTY) {
+
+		if (prop == AbstractButton.CONTENT_AREA_FILLED_CHANGED_PROPERTY) {
 			checkOpacity(b);
-		} else {
-			ui.propertyChangedFromListener(prop);
+			return;
 		}
+		if (prop == AbstractButton.MNEMONIC_CHANGED_PROPERTY) { // "mnemonic"
+			updateMnemonicBinding(b);
+		} 
+		if (ui.isMenuItem || ui.isMenu) {
+			switch (prop) {
+			case "labelFor":
+			case "displayedMnemonic":
+			case "accelerator":
+			case "ancestor":
+				updateAcceleratorBinding(b);
+				updateMnemonicBinding(b);
+			break;
+			}
+		}
+		ui.propertyChangedFromListener(e, prop);
 	}
 
 	protected void checkOpacity(AbstractButton b) {
@@ -118,41 +143,46 @@ public class ButtonListener implements MouseListener, MouseMotionListener,
 	 * registring the keyboard mnemonic (if any).
 	 */
 	public void installKeyboardActions(JComponent c) {
-		AbstractButton button = (AbstractButton) c;
-		// Update the mnemonic binding.
-		updateMnemonicBinding(button);
+		LazyActionMap.installLazyActionMap(c, ButtonListener.class, "Button.actionMap");
+		if (!ui.isMenu && !ui.isMenuItem) {
+			AbstractButton button = (AbstractButton) c;
+			// Update the mnemonic binding.
+			updateMnemonicBinding(button);
+			InputMap km = getInputMap(JComponent.WHEN_FOCUSED, c);
+			SwingUtilities.replaceUIInputMap(c, JComponent.WHEN_FOCUSED, km);
+			return;
+		}
+		if (ui.isMenu)
+			crossMenuMnemonic = UIManager.getBoolean("Menu.crossMenuMnemonic");
+		createInputMap(c);
+		updateAcceleratorBinding((JMenuItem) c);
+	}
 
-		LazyActionMap.installLazyActionMap(c, ButtonListener.class,
-				"Button.actionMap");
-
-		InputMap km = getInputMap(JComponent.WHEN_FOCUSED, c);
-
-		SwingUtilities.replaceUIInputMap(c, JComponent.WHEN_FOCUSED, km);
+	InputMap createInputMap(JComponent c) {
+		return new ComponentInputMapUIResource(c);
 	}
 
 	/**
 	 * Unregister's default key actions
 	 */
 	public void uninstallKeyboardActions(JComponent c) {
-		SwingUtilities
-				.replaceUIInputMap(c, JComponent.WHEN_IN_FOCUSED_WINDOW, null);
+		SwingUtilities.replaceUIInputMap(c, JComponent.WHEN_IN_FOCUSED_WINDOW, null);
 		SwingUtilities.replaceUIInputMap(c, JComponent.WHEN_FOCUSED, null);
 		SwingUtilities.replaceUIActionMap(c, null);
 	}
 
 	/**
-	 * Returns the InputMap for condition <code>condition</code>. Called as part
-	 * of <code>installKeyboardActions</code>.
+	 * Returns the InputMap for condition <code>condition</code>. Called as part of
+	 * <code>installKeyboardActions</code>.
 	 */
 	InputMap getInputMap(int condition, JComponent c) {
-		// if (condition == JComponent.WHEN_FOCUSED) {
-		// BasicButtonUI ui = (BasicButtonUI)BasicLookAndFeel.getUIOfType(
-		// ((AbstractButton)c).getUI(), BasicButtonUI.class);
-		// if (ui != null) {
-		// return (InputMap)DefaultLookup.get(
-		// c, ui, ui.getPropertyPrefix() + "focusInputMap");
-		// }
-		// }
+		if (condition == JComponent.WHEN_FOCUSED) {
+			JSComponentUI ui = (JSComponentUI) c.getUI();
+			if (ui instanceof JSButtonUI) {
+				// SwingJS - there was a mistake here -- missing '.' ??
+				return (InputMap) DefaultLookup.get(c, ui, ui.getPropertyPrefix() + ".focusInputMap");
+			}
+		}
 		return null;
 	}
 
@@ -162,25 +192,52 @@ public class ButtonListener implements MouseListener, MouseMotionListener,
 	 */
 	void updateMnemonicBinding(AbstractButton b) {
 		int m = b.getMnemonic();
+		
+		ui.updateDOMNode();
+		if (ui.isMenu && m != 0 && lastMnemonic != 0) {
+			ui.setMnemonic(m);
+		}
+		if (m == lastMnemonic)
+			return;
+//		System.out.println("ButtonListener mnemonic " + m + " " + ui.id);
+		if (ui.isMenuItem || ui.isMenu) {
+			int[] shortcutKeys = (int[]) DefaultLookup.get(ui.menuItem, ui, "Menu.shortcutKeys");
+			if (shortcutKeys == null) {
+				shortcutKeys = new int[] { KeyEvent.ALT_MASK };
+			}
+			InputMap map = SwingUtilities.getUIInputMap(ui.menuItem, JComponent.WHEN_IN_FOCUSED_WINDOW);
+			if (lastMnemonic != 0 && map != null) {
+				for (int shortcutKey : shortcutKeys) {
+					map.remove(KeyStroke.getKeyStroke(lastMnemonic, shortcutKey, false));
+				}
+			}
+			if (m != 0) {
+				if (map == null) {
+					map = createInputMap(ui.menuItem);
+					SwingUtilities.replaceUIInputMap(ui.menuItem, JComponent.WHEN_IN_FOCUSED_WINDOW, map);
+				}
+				for (int i = shortcutKeys.length; --i >= 0;) {
+					map.put(KeyStroke.getKeyStroke(m, shortcutKeys[i], false), ui.isMenu ? "selectMenu" : "doClick");
+				}
+			}
+		}
+		lastMnemonic = m;
+		if (ui.isMenuItem || ui.isMenu) {
+			return;
+		}
+		// non-menu only
+		InputMap map = SwingUtilities.getUIInputMap(b, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		if (m != 0) {
-			InputMap map = SwingUtilities.getUIInputMap(b,
-					JComponent.WHEN_IN_FOCUSED_WINDOW);
-
 			if (map == null) {
 				map = new ComponentInputMapUIResource(b);
-				SwingUtilities.replaceUIInputMap(b, JComponent.WHEN_IN_FOCUSED_WINDOW,
-						map);
+				SwingUtilities.replaceUIInputMap(b, JComponent.WHEN_IN_FOCUSED_WINDOW, map);
 			}
 			map.clear();
 			map.put(KeyStroke.getKeyStroke(m, InputEvent.ALT_MASK, false), "pressed");
 			map.put(KeyStroke.getKeyStroke(m, InputEvent.ALT_MASK, true), "released");
 			map.put(KeyStroke.getKeyStroke(m, 0, true), "released");
-		} else {
-			InputMap map = SwingUtilities.getUIInputMap(b,
-					JComponent.WHEN_IN_FOCUSED_WINDOW);
-			if (map != null) {
-				map.clear();
-			}
+		} else if (map != null) {
+			map.clear();
 		}
 	}
 
@@ -192,47 +249,14 @@ public class ButtonListener implements MouseListener, MouseMotionListener,
 
 	@Override
 	public void focusGained(FocusEvent e) {
-		// AbstractButton b = (AbstractButton) e.getSource();
-		// if (b instanceof JButton && ((JButton)b).isDefaultCapable()) {
-		// JRootPane root = b.getRootPane();
-		// if (root != null) {
-		// BasicButtonUI ui = (BasicButtonUI)BasicLookAndFeel.getUIOfType(
-		// ((AbstractButton)b).getUI(), BasicButtonUI.class);
-		// if (ui != null && DefaultLookup.getBoolean(b, ui,
-		// ui.getPropertyPrefix() +
-		// "defaultButtonFollowsFocus", true)) {
-		// root.putClientProperty("temporaryDefaultButton", b);
-		// root.setDefaultButton((JButton)b);
-		// root.putClientProperty("temporaryDefaultButton", null);
-		// }
-		// }
-		// }
-		// b.repaint();
 	}
 
 	@Override
 	public void focusLost(FocusEvent e) {
 		AbstractButton b = (AbstractButton) e.getSource();
-		// JRootPane root = b.getRootPane();
-		// if (root != null) {
-		// JButton initialDefault =
-		// (JButton)root.getClientProperty("initialDefaultButton");
-		// if (b != initialDefault) {
-		// BasicButtonUI ui = (BasicButtonUI)BasicLookAndFeel.getUIOfType(
-		// ((AbstractButton)b).getUI(), BasicButtonUI.class);
-		// if (ui != null && DefaultLookup.getBoolean(b, ui,
-		// ui.getPropertyPrefix() +
-		// "defaultButtonFollowsFocus", true)) {
-		// root.setDefaultButton(initialDefault);
-		// }
-		// }
-		// }
-		//
 		ButtonModel model = b.getModel();
 		model.setArmed(false);
 		model.setPressed(false);
-		//
-		// b.repaint();
 	}
 
 	@Override
@@ -251,8 +275,12 @@ public class ButtonListener implements MouseListener, MouseMotionListener,
 	public void mousePressed(MouseEvent e) {
 		if (SwingUtilities.isLeftMouseButton(e)) {
 			AbstractButton b = (AbstractButton) e.getSource();
-			if (b.getUIClassID() == "MenuUI" && ((JMenu)b).isTopLevelMenu())
-				((JMenu)b).setPopupMenuVisible (true);
+			if (b.getUIClassID() == "MenuUI" && ((JMenu) b).isTopLevelMenu()) {
+				((JMenu) b).setPopupMenuVisible(!((JMenu) b).isPopupMenuVisible());
+				JComponent root = ((JComponent) b.getTopLevelAncestor()).getRootPane();
+				root.requestFocus();
+				JSFocusPeer.focus(((JSComponentUI) root.getUI()).focusNode);
+			}
 		}
 	}
 
@@ -265,53 +293,6 @@ public class ButtonListener implements MouseListener, MouseMotionListener,
 			}
 			b.doClick(0);
 			verifyButtonClick(b);
-
-			// // if (!isMenuItem && !b.contains(e.getX(), e.getY()))
-			// // return;
-			// // We need to check the state before and after the button click
-			// // for radio and checkboxes to make sure the DOM button actually got
-			// hit.
-			// // mousePress is an "arm"; mouseRelease is a "click"
-			//
-			// long multiClickThreshhold = b.getMultiClickThreshhold();
-			// long lastTime = lastPressedTimestamp;
-			// long currentTime = lastPressedTimestamp = e.getWhen();
-			// if (lastTime != -1 && currentTime - lastTime < multiClickThreshhold) {
-			// shouldDiscardRelease = true;
-			// return;
-			// }
-			//
-			// //System.out.println("JSButtonListener press " + b.getName() + " " +
-			// e);
-			//
-			// ButtonModel model = b.getModel();
-			// if (!model.isEnabled()) {
-			// // Disabled buttons ignore all input...
-			// return;
-			// }
-			// if (!model.isArmed()) {
-			// // button not armed, should be
-			// model.setArmed(true);
-			// }
-			// model.setPressed(true);
-			// if (!b.hasFocus() && b.isRequestFocusEnabled()) {
-			// b.requestFocus();
-			// }
-			// // Support for multiClickThreshhold
-			// if (shouldDiscardRelease) {
-			// shouldDiscardRelease = false;
-			// return;
-			// }
-			// AbstractButton b = (AbstractButton) e.getSource();
-			// ButtonModel model = b.getModel();
-			// //necessary? ((JSButtonUI) (ComponentUI)
-			// b.getUI()).verifyButtonClick(model);
-			//
-			// //System.out.println("JSButtonListener released " + b.getName() + " " +
-			// e);
-			//
-			// model.setPressed(false);
-			// model.setArmed(false);
 		}
 	}
 
@@ -337,8 +318,8 @@ public class ButtonListener implements MouseListener, MouseMotionListener,
 	}
 
 	/**
-	 * Just ensure the button is in sync by forcing the 
-	 * HTML5 DOM button to the same setting as Java. 
+	 * Just ensure the button is in sync by forcing the HTML5 DOM button to the same
+	 * setting as Java.
 	 * 
 	 * @param m
 	 * 
@@ -352,10 +333,10 @@ public class ButtonListener implements MouseListener, MouseMotionListener,
 		/**
 		 * @j2sNative
 		 * 
-		 *            setTimeout(function(){btn && (btn.checked = state)}, 0);
+		 * 			setTimeout(function(){btn && (btn.checked = state)}, 0);
 		 */
 		{
-		  System.out.println("" + btn + state);
+			System.out.println("" + btn + state);
 		}
 		return true;
 	}
@@ -367,6 +348,8 @@ public class ButtonListener implements MouseListener, MouseMotionListener,
 	private static class Actions extends UIAction {
 		private static final String PRESS = "pressed";
 		private static final String RELEASE = "released";
+		private static final String CLICK = "doClick"; // JMenuItem only
+		private static final String SELECT = "selectMenu"; // JMenu only
 
 		Actions(String name) {
 			super(name);
@@ -375,29 +358,148 @@ public class ButtonListener implements MouseListener, MouseMotionListener,
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			AbstractButton b = (AbstractButton) e.getSource();
-			String key = getName();
-			if (key == PRESS) {
-				ButtonModel model = b.getModel();
+			ButtonModel model = b.getModel();
+			switch (getName()) {
+			case PRESS:
 				model.setArmed(true);
 				model.setPressed(true);
 				if (!b.hasFocus()) {
 					b.requestFocus();
 				}
-			} else if (key == RELEASE) {
-				ButtonModel model = b.getModel();
+				break;
+			case RELEASE:
 				model.setPressed(false);
 				model.setArmed(false);
+				break;
+			case CLICK:
+				JMenuItem mi = (JMenuItem) e.getSource();
+				JSMenuItemUI ui = (JSMenuItemUI) (Object) mi.getUI();
+				MenuSelectionManager.defaultManager().clearSelectedPath();
+				if (!ui.isMenu) {
+					mi.doClick();
+					break;
+				}
+				// fall through
+			case SELECT:
+				JMenu menu = getMenu(e);
+				if (menu.isTopLevelMenu()) {
+					JSComponentUI.hideAllMenus();
+					JPopupMenu p = menu.getPopupMenu();
+					menu.setPopupMenuVisible(!p.isVisible());
+					return;
+				}
+
+				if (!crossMenuMnemonic) {
+					JPopupMenu pm = JSPopupMenuUI.getLastPopup();
+					if (pm != null && pm != menu.getParent()) {
+						return;
+					}
+				}
+
+				final MenuSelectionManager defaultManager = MenuSelectionManager.defaultManager();
+				if (force) {
+					Container cnt = menu.getParent();
+					if (cnt != null && cnt instanceof JMenuBar) {
+						MenuElement me[];
+						MenuElement subElements[];
+
+						subElements = menu.getPopupMenu().getSubElements();
+						if (subElements.length > 0) {
+							me = new MenuElement[4];
+							me[0] = (MenuElement) cnt;
+							me[1] = menu;
+							me[2] = menu.getPopupMenu();
+							me[3] = subElements[0];
+						} else {
+							me = new MenuElement[3];
+							me[0] = (MenuElement) cnt;
+							me[1] = menu;
+							me[2] = menu.getPopupMenu();
+						}
+						defaultManager.setSelectedPath(me);
+					}
+				} else {
+					MenuElement path[] = defaultManager.getSelectedPath();
+					if (path.length > 0 && path[path.length - 1] == menu) {
+						appendPath(path, menu.getPopupMenu());
+					}
+				}
+				break;
 			}
 		}
 
 		@Override
 		public boolean isEnabled(Object sender) {
-			if (sender != null && (sender instanceof AbstractButton)
-					&& !((AbstractButton) sender).getModel().isEnabled()) {
-				return false;
-			} else {
-				return true;
+			if (sender instanceof JMenu) {
+				return ((JMenu) sender).isEnabled();
 			}
+			if (sender instanceof JMenuItem) {
+				return ((JMenuItem) sender).isEnabled();
+			}
+			if (sender instanceof AbstractButton && !((AbstractButton) sender).getModel().isEnabled()) {
+				return false;
+			}
+			return true;
+		}
+
+		///// menu:::
+
+		// NOTE: This will be null if the action is registered in the
+		// ActionMap. For the timer use it will be non-null.
+		private JMenu menu;
+		private boolean force = false;
+
+		Actions(String key, JMenu menu, boolean shouldForce) {
+			super(key);
+			this.menu = menu;
+			this.force = shouldForce;
+		}
+
+		private JMenu getMenu(ActionEvent e) {
+			if (e.getSource() instanceof JMenu) {
+				return (JMenu) e.getSource();
+			}
+			return menu;
+		}
+
+		private static void appendPath(MenuElement[] path, MenuElement elem) {
+			MenuElement newPath[] = new MenuElement[path.length + 1];
+			System.arraycopy(path, 0, newPath, 0, path.length);
+			newPath[path.length] = elem;
+			MenuSelectionManager.defaultManager().setSelectedPath(newPath);
+		}
+
+	}
+
+	private int lastMnemonic;
+	private static boolean crossMenuMnemonic;
+
+//// menuitem:::	
+
+	void updateAcceleratorBinding(JComponent jc) {
+		KeyStroke a;
+		if (ui.isMenu && ((JMenu) ui.jc).isTopLevelMenu()) {
+			int i = ((JMenu) ui.jc).getMnemonic();
+			if (i == 0)
+				return;
+			a = KeyStroke.getKeyStroke(i, KeyEvent.ALT_MASK, false);
+//			updateMnemonicBinding(ui.menuItem);
+		} else {
+			a = ui.menuItem.getAccelerator();
+		}
+		InputMap map = SwingUtilities.getUIInputMap(jc, JComponent.WHEN_IN_FOCUSED_WINDOW);
+
+		if (map != null) {
+			map.clear();
+		}
+		if (a != null) {
+			if (map == null) {
+				map = createInputMap(jc);
+				SwingUtilities.replaceUIInputMap(jc, JComponent.WHEN_IN_FOCUSED_WINDOW, map);
+			}
+//			System.out.println(">>>>>>>>>ButtonListener accel added for " + a + " " + ui.id);
+			map.put(a, "doClick");
 		}
 	}
+
 }

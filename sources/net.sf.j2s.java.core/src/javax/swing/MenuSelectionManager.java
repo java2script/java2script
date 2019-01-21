@@ -27,7 +27,9 @@
  */
 package javax.swing;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
+//import java.util.Vector;
 
 import java.awt.Component;
 import java.awt.Point;
@@ -39,15 +41,15 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 import sun.awt.AppContext;
+import swingjs.JSMenuManager;
 
 /**
  * A MenuSelectionManager owns the selection in menu hierarchy.
  *
  * @author Arnaud Weber
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
 public class MenuSelectionManager {
-    private Vector selection = new Vector();
+    private List<MenuElement> selection = new ArrayList<MenuElement>();//Vector();
 
 //    /* diagnostic aids -- should be false for production builds. */
 //    private static final boolean TRACE =   false; // trace creates and disposes
@@ -67,7 +69,7 @@ public class MenuSelectionManager {
             MenuSelectionManager msm = (MenuSelectionManager)context.get(
                                                  MENU_SELECTION_MANAGER_KEY);
             if (msm == null) {
-                msm = new MenuSelectionManager();
+                msm = new JSMenuManager();
                 context.put(MENU_SELECTION_MANAGER_KEY, msm);
             }
 
@@ -109,21 +111,21 @@ public class MenuSelectionManager {
 //        }
 //
         for(i=0,c=path.length;i<c;i++) {
-            if(i < currentSelectionCount && (MenuElement)selection.elementAt(i) == path[i])
+            if(i < currentSelectionCount && selection.get(i) == path[i])
                 firstDifference++;
             else
                 break;
         }
 
         for(i=currentSelectionCount - 1 ; i >= firstDifference ; i--) {
-            MenuElement me = (MenuElement)selection.elementAt(i);
-            selection.removeElementAt(i);
+            MenuElement me = selection.get(i);
+            selection.remove(i);
             me.menuSelectionChanged(false);
         }
 
         for(i = firstDifference, c = path.length ; i < c ; i++) {
             if (path[i] != null) {
-                selection.addElement(path[i]);
+                selection.add(path[i]);
                 path[i].menuSelectionChanged(true);
             }
         }
@@ -140,7 +142,7 @@ public class MenuSelectionManager {
         MenuElement res[] = new MenuElement[selection.size()];
         int i,c;
         for(i=0,c=selection.size();i<c;i++)
-            res[i] = (MenuElement) selection.elementAt(i);
+            res[i] = selection.get(i);
         return res;
     }
 
@@ -214,125 +216,125 @@ public class MenuSelectionManager {
      * @param event  a MouseEvent object
      */
     public void processMouseEvent(MouseEvent event) {
-        int screenX,screenY;
-        Point p;
-        int i,j,d;
-        Component mc;
-        Rectangle r2;
-        int cWidth,cHeight;
-        MenuElement menuElement;
-        MenuElement subElements[];
-        MenuElement path[];
-        Vector tmp;
-        int selectionSize;
-        p = event.getPoint();
-
-        Component source = (Component)event.getSource();
-
-        if (!source.isShowing()) {
-            // This can happen if a mouseReleased removes the
-            // containing component -- bug 4146684
-            return;
-        }
-
-        int type = event.getID();
-        int modifiers = event.getModifiers();
-        // 4188027: drag enter/exit added in JDK 1.1.7A, JDK1.2
-        if ((type==MouseEvent.MOUSE_ENTERED||
-             type==MouseEvent.MOUSE_EXITED)
-            && ((modifiers & (InputEvent.BUTTON1_MASK |
-                              InputEvent.BUTTON2_MASK | InputEvent.BUTTON3_MASK)) !=0 )) {
-            return;
-        }
-
-        SwingUtilities.convertPointToScreen(p,source);
-
-        screenX = p.x;
-        screenY = p.y;
-
-        tmp = (Vector)selection.clone();
-        selectionSize = tmp.size();
-        boolean success = false;
-        for (i=selectionSize - 1;i >= 0 && success == false; i--) {
-            menuElement = (MenuElement) tmp.elementAt(i);
-            subElements = menuElement.getSubElements();
-
-            path = null;
-            for (j = 0, d = subElements.length;j < d && success == false; j++) {
-                if (subElements[j] == null)
-                    continue;
-                mc = subElements[j].getComponent();
-                if(!mc.isShowing())
-                    continue;
-                if(mc instanceof JComponent) {
-                    cWidth  = ((JComponent)mc).getWidth();
-                    cHeight = ((JComponent)mc).getHeight();
-                } else {
-                    r2 = mc.getBounds();
-                    cWidth  = r2.width;
-                    cHeight = r2.height;
-                }
-                p.x = screenX;
-                p.y = screenY;
-                SwingUtilities.convertPointFromScreen(p,mc);
-
-                /** Send the event to visible menu element if menu element currently in
-                 *  the selected path or contains the event location
-                 */
-                if(
-                   (p.x >= 0 && p.x < cWidth && p.y >= 0 && p.y < cHeight)) {
-                    int k;
-                    if(path == null) {
-                        path = new MenuElement[i+2];
-                        for(k=0;k<=i;k++)
-                            path[k] = (MenuElement)tmp.elementAt(k);
-                    }
-                    path[i+1] = subElements[j];
-                    MenuElement currentSelection[] = getSelectedPath();
-
-                    // Enter/exit detection -- needs tuning...
-                    if (currentSelection[currentSelection.length-1] !=
-                        path[i+1] &&
-                        (currentSelection.length < 2 ||
-                         currentSelection[currentSelection.length-2] !=
-                         path[i+1])) {
-                        Component oldMC = currentSelection[currentSelection.length-1].getComponent();
-
-                        MouseEvent exitEvent = new MouseEvent(oldMC, MouseEvent.MOUSE_EXITED,
-                                                              event.getWhen(),
-                                                              event.getModifiers(), p.x, p.y,
-                                                              event.getXOnScreen(),
-                                                              event.getYOnScreen(),
-                                                              event.getClickCount(),
-                                                              event.isPopupTrigger(),
-                                                              MouseEvent.NOBUTTON);
-                        currentSelection[currentSelection.length-1].
-                            processMouseEvent(exitEvent, path, this);
-
-                        MouseEvent enterEvent = new MouseEvent(mc,
-                                                               MouseEvent.MOUSE_ENTERED,
-                                                               event.getWhen(),
-                                                               event.getModifiers(), p.x, p.y,
-                                                               event.getXOnScreen(),
-                                                               event.getYOnScreen(),
-                                                               event.getClickCount(),
-                                                               event.isPopupTrigger(),
-                                                               MouseEvent.NOBUTTON);
-                        subElements[j].processMouseEvent(enterEvent, path, this);
-                    }
-                    MouseEvent mouseEvent = new MouseEvent(mc, event.getID(),event. getWhen(),
-                                                           event.getModifiers(), p.x, p.y,
-                                                           event.getXOnScreen(),
-                                                           event.getYOnScreen(),
-                                                           event.getClickCount(),
-                                                           event.isPopupTrigger(),
-                                                           MouseEvent.NOBUTTON);
-                    subElements[j].processMouseEvent(mouseEvent, path, this);
-                    success = true;
-                    event.consume();
-                }
-            }
-        }
+//        int screenX,screenY;
+//        Point p;
+//        int i,j,d;
+//        Component mc;
+//        Rectangle r2;
+//        int cWidth,cHeight;
+//        MenuElement menuElement;
+//        MenuElement subElements[];
+//        MenuElement path[];
+//        //List tmp;
+//        int selectionSize;
+//        p = event.getPoint();
+//
+//        Component source = (Component)event.getSource();
+//
+//        if (!source.isShowing()) {
+//            // This can happen if a mouseReleased removes the
+//            // containing component -- bug 4146684
+//            return;
+//        }
+//
+//        int type = event.getID();
+//        int modifiers = event.getModifiers();
+//        // 4188027: drag enter/exit added in JDK 1.1.7A, JDK1.2
+//        if ((type==MouseEvent.MOUSE_ENTERED||
+//             type==MouseEvent.MOUSE_EXITED)
+//            && ((modifiers & (InputEvent.BUTTON1_MASK |
+//                              InputEvent.BUTTON2_MASK | InputEvent.BUTTON3_MASK)) !=0 )) {
+//            return;
+//        }
+//
+//        SwingUtilities.convertPointToScreen(p,source);
+//
+//        screenX = p.x;
+//        screenY = p.y;
+//
+//        //tmp = (Vector)selection.clone();
+//        selectionSize = selection.size();//tmp.size();
+//        boolean success = false;
+//        for (i=selectionSize - 1;i >= 0 && success == false; i--) {
+//            menuElement = (MenuElement) selection.get(i);
+//            subElements = menuElement.getSubElements();
+//
+//            path = null;
+//            for (j = 0, d = subElements.length;j < d && success == false; j++) {
+//                if (subElements[j] == null)
+//                    continue;
+//                mc = subElements[j].getComponent();
+//                if(!mc.isShowing())
+//                    continue;
+//                if(mc instanceof JComponent) {
+//                    cWidth  = ((JComponent)mc).getWidth();
+//                    cHeight = ((JComponent)mc).getHeight();
+//                } else {
+//                    r2 = mc.getBounds();
+//                    cWidth  = r2.width;
+//                    cHeight = r2.height;
+//                }
+//                p.x = screenX;
+//                p.y = screenY;
+//                SwingUtilities.convertPointFromScreen(p,mc);
+//
+//                /** Send the event to visible menu element if menu element currently in
+//                 *  the selected path or contains the event location
+//                 */
+//                if(
+//                   (p.x >= 0 && p.x < cWidth && p.y >= 0 && p.y < cHeight)) {
+//                    int k;
+//                    if(path == null) {
+//                        path = new MenuElement[i+2];
+//                        for(k=0;k<=i;k++)
+//                            path[k] = (MenuElement)selection.get(k);
+//                    }
+//                    path[i+1] = subElements[j];
+//                    MenuElement currentSelection[] = getSelectedPath();
+//
+//                    // Enter/exit detection -- needs tuning...
+//                    if (currentSelection[currentSelection.length-1] !=
+//                        path[i+1] &&
+//                        (currentSelection.length < 2 ||
+//                         currentSelection[currentSelection.length-2] !=
+//                         path[i+1])) {
+//                        Component oldMC = currentSelection[currentSelection.length-1].getComponent();
+//
+//                        MouseEvent exitEvent = new MouseEvent(oldMC, MouseEvent.MOUSE_EXITED,
+//                                                              event.getWhen(),
+//                                                              event.getModifiers(), p.x, p.y,
+//                                                              event.getXOnScreen(),
+//                                                              event.getYOnScreen(),
+//                                                              event.getClickCount(),
+//                                                              event.isPopupTrigger(),
+//                                                              MouseEvent.NOBUTTON);
+//                        currentSelection[currentSelection.length-1].
+//                            processMouseEvent(exitEvent, path, this);
+//
+//                        MouseEvent enterEvent = new MouseEvent(mc,
+//                                                               MouseEvent.MOUSE_ENTERED,
+//                                                               event.getWhen(),
+//                                                               event.getModifiers(), p.x, p.y,
+//                                                               event.getXOnScreen(),
+//                                                               event.getYOnScreen(),
+//                                                               event.getClickCount(),
+//                                                               event.isPopupTrigger(),
+//                                                               MouseEvent.NOBUTTON);
+//                        subElements[j].processMouseEvent(enterEvent, path, this);
+//                    }
+//                    MouseEvent mouseEvent = new MouseEvent(mc, event.getID(),event. getWhen(),
+//                                                           event.getModifiers(), p.x, p.y,
+//                                                           event.getXOnScreen(),
+//                                                           event.getYOnScreen(),
+//                                                           event.getClickCount(),
+//                                                           event.isPopupTrigger(),
+//                                                           MouseEvent.NOBUTTON);
+//                    subElements[j].processMouseEvent(mouseEvent, path, this);
+//                    success = true;
+//                    event.consume();
+//                }
+//            }
+//        }
     }
 
 //    private void printMenuElementArray(MenuElement path[]) {
@@ -377,54 +379,54 @@ public class MenuSelectionManager {
      *         on the currently selected path, null is returned.
      */
     public Component componentForPoint(Component source, Point sourcePoint) {
-        int screenX,screenY;
-        Point p = sourcePoint;
-        int i,j,d;
-        Component mc;
-        Rectangle r2;
-        int cWidth,cHeight;
-        MenuElement menuElement;
-        MenuElement subElements[];
-        Vector tmp;
-        int selectionSize;
-
-        SwingUtilities.convertPointToScreen(p,source);
-
-        screenX = p.x;
-        screenY = p.y;
-
-        tmp = (Vector)selection.clone();
-        selectionSize = tmp.size();
-        for(i=selectionSize - 1 ; i >= 0 ; i--) {
-            menuElement = (MenuElement) tmp.elementAt(i);
-            subElements = menuElement.getSubElements();
-
-            for(j = 0, d = subElements.length ; j < d ; j++) {
-                if (subElements[j] == null)
-                    continue;
-                mc = subElements[j].getComponent();
-                if(!mc.isShowing())
-                    continue;
-                if(mc instanceof JComponent) {
-                    cWidth  = ((JComponent)mc).getWidth();
-                    cHeight = ((JComponent)mc).getHeight();
-                } else {
-                    r2 = mc.getBounds();
-                    cWidth  = r2.width;
-                    cHeight = r2.height;
-                }
-                p.x = screenX;
-                p.y = screenY;
-                SwingUtilities.convertPointFromScreen(p,mc);
-
-                /** Return the deepest component on the selection
-                 *  path in whose bounds the event's point occurs
-                 */
-                if (p.x >= 0 && p.x < cWidth && p.y >= 0 && p.y < cHeight) {
-                    return mc;
-                }
-            }
-        }
+//        int screenX,screenY;
+//        Point p = sourcePoint;
+//        int i,j,d;
+//        Component mc;
+//        Rectangle r2;
+//        int cWidth,cHeight;
+//        MenuElement menuElement;
+//        MenuElement subElements[];
+//        //Vector tmp;
+//        int selectionSize;
+//
+//        SwingUtilities.convertPointToScreen(p,source);
+//
+//        screenX = p.x;
+//        screenY = p.y;
+//
+//        //tmp = (Vector)selection.clone();
+//        selectionSize = selection.size();
+//        for(i=selectionSize - 1 ; i >= 0 ; i--) {
+//            menuElement = (MenuElement) selection.get(i);
+//            subElements = menuElement.getSubElements();
+//
+//            for(j = 0, d = subElements.length ; j < d ; j++) {
+//                if (subElements[j] == null)
+//                    continue;
+//                mc = subElements[j].getComponent();
+//                if(!mc.isShowing())
+//                    continue;
+//                if(mc instanceof JComponent) {
+//                    cWidth  = ((JComponent)mc).getWidth();
+//                    cHeight = ((JComponent)mc).getHeight();
+//                } else {
+//                    r2 = mc.getBounds();
+//                    cWidth  = r2.width;
+//                    cHeight = r2.height;
+//                }
+//                p.x = screenX;
+//                p.y = screenY;
+//                SwingUtilities.convertPointFromScreen(p,mc);
+//
+//                /** Return the deepest component on the selection
+//                 *  path in whose bounds the event's point occurs
+//                 */
+//                if (p.x >= 0 && p.x < cWidth && p.y >= 0 && p.y < cHeight) {
+//                    return mc;
+//                }
+//            }
+//        }
         return null;
     }
 
@@ -435,45 +437,45 @@ public class MenuSelectionManager {
      * @param e  a KeyEvent object
      */
     public void processKeyEvent(KeyEvent e) {
-        MenuElement[] sel2 = new MenuElement[0];
-        sel2 = (MenuElement[])selection.toArray(sel2);
-        int selSize = sel2.length;
-        MenuElement[] path;
-
-        if (selSize < 1) {
-            return;
-        }
-
-        for (int i=selSize-1; i>=0; i--) {
-            MenuElement elem = sel2[i];
-            MenuElement[] subs = elem.getSubElements();
-            path = null;
-
-            for (int j=0; j<subs.length; j++) {
-                if (subs[j] == null || !subs[j].getComponent().isShowing()
-                    || !subs[j].getComponent().isEnabled()) {
-                    continue;
-                }
-
-                if(path == null) {
-                    path = new MenuElement[i+2];
-                    System.arraycopy(sel2, 0, path, 0, i+1);
-                    }
-                path[i+1] = subs[j];
-                subs[j].processKeyEvent(e, path, this);
-                if (e.isConsumed()) {
-                    return;
-            }
-        }
-    }
-
-        // finally dispatch event to the first component in path
-        path = new MenuElement[1];
-        path[0] = sel2[0];
-        path[0].processKeyEvent(e, path, this);
-        if (e.isConsumed()) {
-            return;
-        }
+//        MenuElement[] sel2 = new MenuElement[0];
+//        sel2 = (MenuElement[])selection.toArray(sel2);
+//        int selSize = sel2.length;
+//        MenuElement[] path;
+//
+//        if (selSize < 1) {
+//            return;
+//        }
+//
+//        for (int i=selSize-1; i>=0; i--) {
+//            MenuElement elem = sel2[i];
+//            MenuElement[] subs = elem.getSubElements();
+//            path = null;
+//
+//            for (int j=0; j<subs.length; j++) {
+//                if (subs[j] == null || !subs[j].getComponent().isShowing()
+//                    || !subs[j].getComponent().isEnabled()) {
+//                    continue;
+//                }
+//
+//                if(path == null) {
+//                    path = new MenuElement[i+2];
+//                    System.arraycopy(sel2, 0, path, 0, i+1);
+//                    }
+//                path[i+1] = subs[j];
+//                subs[j].processKeyEvent(e, path, this);
+//                if (e.isConsumed()) {
+//                    return;
+//            }
+//        }
+//    }
+//
+//        // finally dispatch event to the first component in path
+//        path = new MenuElement[1];
+//        path[0] = sel2[0];
+//        path[0].processKeyEvent(e, path, this);
+//        if (e.isConsumed()) {
+//            return;
+//        }
     }
 
     /**
@@ -481,7 +483,7 @@ public class MenuSelectionManager {
      */
     public boolean isComponentPartOfCurrentMenu(Component c) {
         if(selection.size() > 0) {
-            MenuElement me = (MenuElement)selection.elementAt(0);
+            MenuElement me = (MenuElement)selection.get(0);
             return isComponentPartOfCurrentMenu(me,c);
         } else
             return false;
@@ -505,4 +507,7 @@ public class MenuSelectionManager {
         }
         return false;
     }
+    
+    
+    
 }
