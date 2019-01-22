@@ -25,25 +25,22 @@ public class JSTextFieldUI extends JSTextUI {
 
 	@Override
 	public DOMNode updateDOMNode() {
-		textField = (JTextField) jc;
+		textField = (JTextField) editor;
 		if (domNode == null) {
 			allowPaintedBackground = false;
 			// no textNode here, because in input does not have that.
 			focusNode = enableNode = valueNode = domNode = DOMNode.setStyles(
 					newDOMObject("input", id, "type", inputType),
 					"lineHeight", "0.8", "box-sizing", "border-box");
-			// not active; requires position:absolute; wrong for standard text box
-			// vCenter(domNode, -10);
-			//new 1/5/2019 setDataComponent(domNode);
-			bindJSKeyEvents(domNode, true);
+			bindJSKeyEvents(focusNode, true);
 		}
 		setPadding(editor.getMargin());
 		textListener.checkDocument();
-		setCssFont(setProp(domNode, "value", getComponentText()), c.getFont());
+		setCssFont(setProp(focusNode, "value", getComponentText()), c.getFont());
 		// setTextAlignment();
 		setEditable(editable);
-		if (jc.isOpaque() && jc.isEnabled())
-			setBackground(jc.getBackground());
+		if (textField.isOpaque() && textField.isEnabled())
+			setBackground(textField.getBackground());
 		return updateDOMNodeCUI();
 	}
 

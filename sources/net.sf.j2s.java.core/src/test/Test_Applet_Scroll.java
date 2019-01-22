@@ -12,18 +12,22 @@ package test;
 import java.awt.Adjustable;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.text.DecimalFormat;
-import java.util.Dictionary;
+import java.text.ParseException;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JApplet;
@@ -36,17 +40,14 @@ import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
-import javax.swing.JViewport;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.plaf.ViewportUI;
-import javax.swing.plaf.basic.BasicSliderUI;
 
 public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 
-	static {MouseEvent m;
+	static {
 		/**
 		 * @j2sNative
 		 * 
@@ -60,8 +61,6 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 
 	private JScrollBar hsb;
 
-	private JScrollBar sbar;
-
 	void setSize(JComponent c, int x, int y) {
 		if (preferred)
 			c.setPreferredSize(new Dimension(x, y));
@@ -71,8 +70,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 
 	@Override
 	public void init() {
-		BasicSliderUI ui;
-
+	
 		final JLabel label = new JLabel("hello");
 		// label.setBounds(0, 60, 200, 60);
 		setSize(label, 80, 50);
@@ -298,10 +296,29 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		p.add(button3);
 		
 		JSpinner spinner = new JSpinner();
+		SpinnerNumberModel model = new SpinnerNumberModel(5,0,10,2);
+		spinner.setModel(model);
 		//spinner.setPreferredSize(new Dimension(50,20));
-		
 		p.add(spinner);
-		
+		spinner.addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				System.out.println(spinner.getValue());
+			}
+			
+		});
+
+		JTextField field = ((JSpinner.DefaultEditor) spinner.getEditor()).getTextField();
+		spinner.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24));
+		field.setEditable(false);
+		field.addActionListener(new ActionListener( ) {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("action " + field.getText() + " " + spinner.getValue());
+			}
+		});		
 		
 		p.setBackground(Color.blue);
 		button2.setToolTipText("this is Button 2");
@@ -321,6 +338,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
         redSlider.setMinorTickSpacing( 17 );
         redSlider.setPaintTicks( true );
         redSlider.setPaintLabels( true );
+        
 		p.add(redSlider);
 		
 		
@@ -356,7 +374,6 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		bar.setUnitIncrement(100);
 		bar.setOpaque(true);
 		p.add(bar);
-		sbar = bar;
 		bar.setVisibleAmount(80);
 		return bar;
 	}

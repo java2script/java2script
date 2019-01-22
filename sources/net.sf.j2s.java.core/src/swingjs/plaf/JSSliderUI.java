@@ -99,6 +99,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			domNode = wrap("div", id + "_wrap",
 					jqSlider = DOMNode.createElement("div", id));
 			$(domNode).addClass("swingjs"); //??
+			$(domNode).addClass("ui-j2sslider-wrap"); //??
 			setJQuerySliderAndEvents();
 			setTainted();
 		} else if (isChanged) {
@@ -226,6 +227,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		if (isNew) {
 			ignoreAllMouseEvents(sliderHandle);
 			ignoreAllMouseEvents(sliderTrack);
+			setDataComponent(domNode);
 			setDataComponent(sliderHandle);
 		}
 	}
@@ -487,7 +489,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
     }
     
     public void scrollDueToClickInTrack(int dir) {
-        scrollByUnit(dir);
+        scrollByBlock(dir);
     }
 
     private int getTickSpacing() {

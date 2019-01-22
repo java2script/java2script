@@ -32,6 +32,7 @@ import javax.swing.*;
 import javax.swing.plaf.UIResource;
 
 /**
+ * 
  * JButton object that draws a scaled Arrow in one of the cardinal directions.
  * <p>
  * <strong>Warning:</strong>
@@ -115,68 +116,69 @@ public class BasicArrowButton extends JButton implements SwingConstants
             this.direction = direction;
         }
 
-    	@Override
-        public void paint(Graphics g) {
-            Color origColor;
-            boolean isPressed, isEnabled;
-            int w, h, size;
+	@Override
+	public void paint(Graphics g) {
+		Color origColor;
+		boolean isPressed, isEnabled;
+		int w, h, size;
 
-            w = getSize().width;
-            h = getSize().height;
-            origColor = g.getColor();
-            isPressed = getModel().isPressed();
-            isEnabled = isEnabled();
+		w = getSize().width;
+		h = getSize().height;
 
-            g.setColor(getBackground());
-            g.fillRect(1, 1, w-2, h-2);
+		origColor = g.getColor();
+		isPressed = getModel().isPressed();
+		isEnabled = isEnabled();
 
-            /// Draw the proper Border
-            if (getBorder() != null && !(getBorder() instanceof UIResource)) {
-                paintBorder(g);
-            } else if (isPressed) {
-                g.setColor(shadow);
-                g.drawRect(0, 0, w-1, h-1);
-            } else {
-                // Using the background color set above
-                g.drawLine(0, 0, 0, h-1);
-                g.drawLine(1, 0, w-2, 0);
+		g.setColor(getBackground());
+		g.fillRect(1, 1, w - 2, h - 2);
 
-                g.setColor(highlight);    // inner 3D border
-                g.drawLine(1, 1, 1, h-3);
-                g.drawLine(2, 1, w-3, 1);
+		/// Draw the proper Border
+		if (getBorder() != null && !(getBorder() instanceof UIResource)) {
+			paintBorder(g);
+		} else if (isPressed) {
+			g.setColor(shadow);
+			g.drawRect(0, 0, w - 1, h - 1);
+		} else {
+			// Using the background color set above
+			g.drawLine(0, 0, 0, h - 1);
+			g.drawLine(1, 0, w - 2, 0);
 
-                g.setColor(shadow);       // inner 3D border
-                g.drawLine(1, h-2, w-2, h-2);
-                g.drawLine(w-2, 1, w-2, h-3);
+			g.setColor(highlight); // inner 3D border
+			g.drawLine(1, 1, 1, h - 3);
+			g.drawLine(2, 1, w - 3, 1);
 
-                g.setColor(darkShadow);     // black drop shadow  __|
-                g.drawLine(0, h-1, w-1, h-1);
-                g.drawLine(w-1, h-1, w-1, 0);
-            }
+			g.setColor(shadow); // inner 3D border
+			g.drawLine(1, h - 2, w - 2, h - 2);
+			g.drawLine(w - 2, 1, w - 2, h - 3);
 
-            // If there's no room to draw arrow, bail
-            if(h < 5 || w < 5)      {
-                g.setColor(origColor);
-                return;
-            }
+			g.setColor(darkShadow); // black drop shadow __|
+			g.drawLine(0, h - 1, w - 1, h - 1);
+			g.drawLine(w - 1, h - 1, w - 1, 0);
+		}
 
-            if (isPressed) {
-                g.translate(1, 1);
-            }
+		// If there's no room to draw arrow, bail
+//            if(h < 5 || w < 5)      {
+//                g.setColor(origColor);
+//                return;
+//            }
+//
+		if (h >= 5 && w >= 5) {
+			if (isPressed) {
+				g.translate(1, 1);
+			}
 
-            // Draw the arrow
-            size = Math.min((h - 4) / 3, (w - 4) / 3);
-            size = Math.max(size, 2);
-            paintTriangle(g, (w - size) / 2, (h - size) / 2,
-                                size, direction, isEnabled);
+			// Draw the arrow
+			size = Math.min((h - 4) / 3, (w - 4) / 3);
+			size = Math.max(size, 2);
+			paintTriangle(g, (w - size) / 2, (h - size) / 2, size, direction, isEnabled);
 
-            // Reset the Graphics back to it's original settings
-            if (isPressed) {
-                g.translate(-1, -1);
-            }
-            g.setColor(origColor);
-
-        }
+			// Reset the Graphics back to it's original settings
+			if (isPressed) {
+				g.translate(-1, -1);
+			}
+		}
+		g.setColor(origColor);
+	}
 
         /**
          * Returns the preferred size of the {@code BasicArrowButton}.
@@ -237,6 +239,7 @@ public class BasicArrowButton extends JButton implements SwingConstants
          */
         public void paintTriangle(Graphics g, int x, int y, int size,
                                         int direction, boolean isEnabled) {
+        	
             Color oldColor = g.getColor();
             int mid, i, j;
 

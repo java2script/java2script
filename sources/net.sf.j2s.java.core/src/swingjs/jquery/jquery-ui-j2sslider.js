@@ -30,8 +30,165 @@
 			e.removeClass("ui-j2sslider-at-bottom");
 			e.removeClass("ui-j2sslider-at-left");
 			e.removeClass("ui-j2sslider-at-right");
-		};
+		}
+
+		var OBJ_WRAP = 0;
+		var OBJ_TRACK = 1;
+		var OBJ_HANDLE = 2;
 		
+		var doMouseCapture = function(me, event, obj, isEndCheck) {
+			
+			var that = me, o = me.options;
+
+			if (o.disabled) {
+				return false;
+			}
+
+			var position = me._getPosition(event);
+
+			index = event.target.index;
+
+			closestHandle = $(event.target);// handles[index];//$(
+											// me );
+
+			// workaround for bug #3736 (if both handles of
+			// a range are at 0,
+			// the first is always used as the one with
+			// least distance,
+			// and moving it is obviously prevented by
+			// preventing negative ranges)
+			if (o.range === true
+					&& me.values(1) === o.min) {
+				index += 1;
+				closestHandle = $(me.handles[index]);
+			}
+
+			allowed = me._start(event, index);
+			if (allowed === false) {
+				return false;
+			}
+			me._mouseSliding = true;
+
+			me._handleIndex = index;
+
+			if (obj == OBJ_HANDLE)
+			closestHandle.addClass("ui-state-active")
+					.focus();
+
+
+			offset = closestHandle.offset();
+			var mouseOverHandle = (obj == OBJ_HANDLE) && $(event.target).parents()
+					.andSelf().is(".ui-j2sslider-handle");
+			me.closestHandle = closestHandle;
+			me._clickOffset = (mouseOverHandle ? 
+				{
+				left : position.x
+						- offset.left
+						- (closestHandle.width() / 2 * o.scaleX)
+						,
+				top : position.y
+						- offset.top
+						- (closestHandle.height() / 2 * o.scaleY)
+						- (parseInt(closestHandle
+								.css("borderTopWidth"), 10) || 0)
+						- (parseInt(closestHandle
+								.css("borderBottomWidth"),
+								10) || 0)
+						+ (parseInt(closestHandle
+								.css("marginTop"), 10) || 0)
+				} : {
+					left : 0,
+					top : 0
+				});
+			var val = normValueFromMouse(me, position, obj);
+			var pixmouse = getPixelMouse(me, position, false);
+			var isAtEnd = !mouseOverHandle && (!me.isScrollBar ? 0 : 
+				pixmouse < 5 ? -1 : pixmouse > getPixelTotal(me) - 5 ? 1 : 0);
+			
+			if (isAtEnd) {
+				me.element.addClass(me.orientation === "horizontal" ? 
+						(isAtEnd == 1 ? "ui-j2sslider-at-right" : "ui-j2sslider-at-left")
+						: (isAtEnd == 1 ? "ui-j2sslider-at-bottom" : "ui-j2sslider-at-top"));
+			} else {
+				clearEnds(me.element);
+			}
+			if (isEndCheck) {
+				return;
+			}
+			var dir = Math.signum(!isAtEnd ? val - me.jslider.getValue$() : isAtEnd);
+			if (!me.handles.hasClass("ui-state-hover")) {
+				if (isAtEnd) {
+					me.jslider.ui.scrollByUnit$I(dir);
+				} else if (obj != OBJ_HANDLE) {
+					me.jslider.ui.scrollDueToClickInTrack$I(dir);
+				}
+			}
+			me._animateOff = true;
+			return true;
+		}
+
+		var normValueFromMouse = function(me, position, obj) {
+			var pixelMouse = getPixelMouse(me, position, me.isScrollBar);
+			var fMouse = (pixelMouse / getPixelTotal(me));						
+			if (fMouse > 1) {
+				fMouse = 1;
+			}
+			if (fMouse < 0) {
+				fMouse = 0;
+			}
+			if (me.orientation === "vertical") {
+				fMouse = 1 - fMouse;
+			}
+			if (me.options.inverted) {
+				fMouse = 1 - fMouse;
+			}
+			var valueTotal = me._valueMax()
+					- me._valueMin();
+			var valueMouse = me._valueMin() + fMouse * valueTotal;
+			return me._trimAlignValue(valueMouse);
+		}
+
+		var getPixelMouse = function(me, position, offsetHandle) {
+			var offset = me.element.offset();
+			var p = (me.orientation === "horizontal" ?
+					position.x
+						- offset.left
+						- (me._clickOffset ? me._clickOffset.left : 0)
+				 : position.y
+						- offset.top
+						- (me._clickOffset ? me._clickOffset.top : 0));
+			return p -me.handleSize / 2;
+		}
+		
+		var getPixelTotal = function(me) {
+			return (me.orientation == "horizontal" ? width(me) : height(me)) || 100;	
+		}
+
+		var postMouseEvent = function(me, xye, id) {
+			// set target to the handle
+			xye.ev.currentTarget
+				&& (xye.ev.target = xye.ev.currentTarget);
+			// pass event to JSlider in case there is a
+			// mouse listener implemented for that
+			// InputEvent.BUTTON1 +
+			// InputEvent.BUTTON1_DOWN_MASK;
+			// same call here as in j2sApplet
+			me.jslider.getFrameViewer$()
+				.processMouseEvent$I$I$I$I$J$O$I(
+						id, xye.x, xye.y, 1040,
+						System.currentTimeMillis$(),
+						xye.ev);
+		}
+		
+		var width = function(me) {
+			return Math.max(0, me.element.width() || me.element.parent().width() - me.marginX || 0);
+		}
+		
+		var height = function(me) {
+			return Math.max(0, me.element.height() || me.element.parent().height() - me.marginY || 0);
+		}
+		
+
 		$.widget(
 			"ui.j2sslider",
 			$.ui.mouse,
@@ -99,58 +256,39 @@
 						}
 
 						this.range = $("<div></div>")
-								.appendTo(this.element)
-								.addClass(
-										"ui-j2sslider-range"
-												+
-												// note: this isn't
-												// the most
-												// fittingly
-												// semantic
-												// framework class
-												// for this element,
-												// but worked best
-												// visually with a
-												// variety of themes
-												" ui-widget-header"
-												+ ((o.range === "min" || o.range === "max") ? " ui-j2sslider-range-"
-														+ o.range
-														: ""));
-								}
+							.appendTo(this.element)
+							.addClass(
+									"ui-j2sslider-range"
+										+
+										// note: this isn't
+										// the most
+										// fittingly
+										// semantic
+										// framework class
+										// for this element,
+										// but worked best
+										// visually with a
+										// variety of themes
+										" ui-widget-header"
+										+ ((o.range === "min" || o.range === "max") ? " ui-j2sslider-range-" + o.range : "")
+							);
+					}
 
-						var me = this;
-						var postMouseEvent = function(xye, id) {
-									// set target to the handle
-						xye.ev.currentTarget
-								&& (xye.ev.target = xye.ev.currentTarget);
-						// pass event to JSlider in case there is a
-						// mouse listener implemented for that
-						// InputEvent.BUTTON1 +
-						// InputEvent.BUTTON1_DOWN_MASK;
-						// same call here as in j2sApplet
-						me.jslider.getFrameViewer$()
-								.processMouseEvent$I$I$I$I$J$O$I(
-										id, xye.x, xye.y, 1040,
-										System.currentTimeMillis$(),
-										xye.ev);
-					};
+					var me = this;
 
 					var fDown = function(xye, id) {
-						me._doMouseCapture(xye.ev, false, false);
-						postMouseEvent(xye, id);
+						doMouseCapture(me, xye.ev, OBJ_HANDLE, false);
+						postMouseEvent(me, xye, id);
 					};
 
 					var fDownTrack = function(event, id) {
-						me._doMouseCapture(event, true, false);
+						doMouseCapture(me, event, OBJ_TRACK, false);
 						me._mouseSliding = false;
 					};
 
-					var fOutTrack = function(event, id) {
-						clearEnds(me.element);
-					};
-
-					var fMoveTrack = function(event, id) {
-							me._doMouseCapture(event, true, true);
+					var fDownWrap = function(event, id) {
+						doMouseCapture(me, event, OBJ_WRAP, false);
+						me._mouseSliding = false;
 					};
 
 					var fDrag = function(xye, id) {
@@ -158,9 +296,9 @@
 							return;
 						var event = xye.ev;
 						var position = me._getPosition(event);
-						var normValue = me._normValueFromMouse(position);
+						var normValue = normValueFromMouse(me, position, OBJ_HANDLE);
 						me._slide(event, me._handleIndex, normValue);
-						postMouseEvent(xye, id);
+						postMouseEvent(me, xye, id);
 					};
 
 					var fUp = function(xye, id) {
@@ -174,7 +312,15 @@
 						me._handleIndex = null;
 						me._clickOffset = null;
 						me._animateOff = false;
-						postMouseEvent(xye, id);
+						postMouseEvent(me, xye, id);
+					};
+
+					var fOutTrack = function(event, id) {
+						clearEnds(me.element);
+					};
+
+					var fMoveTrack = function(event, id) {
+						doMouseCapture(me, event, OBJ_TRACK, true);
 					};
 
 					handleCount = (o.values && o.values.length) || 1;
@@ -190,8 +336,7 @@
 					for (var i = 0; i < handleCount; i++) {
 						handle = this.handles[i];
 						handle.index = i;
-						J2S.setDraggable(handle, [ fDown, fDrag,
-								fUp ]);
+						J2S.setDraggable(handle, [ fDown, fDrag, fUp ]);
 					}
 					
 					if (handleCount == 1) {
@@ -199,42 +344,18 @@
 						if (this.isScrollBar) {
 							$(this.element).mousemove(fMoveTrack);
 							$(this.element).mouseout(fOutTrack);
+						} else {
+							$(this.element).closest(".ui-j2sslider-wrap").mousedown(fDownWrap);
 						}
 					}
 					
 					this.handle = this.handles.eq(0);
-
-					this.handles.add(this.range).filter("a").click(
-							function(event) {
-								event.preventDefault();
-							})
-					this.handles.each(function(i) {
-						$(this)
-								.data("ui-j2sslider-handle-index",
-										i);
-					});
-
+					this.handles.add(this.range).filter("a").click(function(event) {event.preventDefault();})
+					this.handles.each(function(i) {$(this).data("ui-j2sslider-handle-index", i);});
 					this._refreshValue();
 					this._animateOff = false;
 				},
 				
-				_width() {
-					return Math.max(0, this.element.width() || this.element.parent().width() - this.marginX || 0);
-				},
-				
-				_height() {
-					return Math.max(0, this.element.height() || this.element.parent().height() - this.marginY || 0);
-				},
-				
-				_getPixelTotal() {
-					return (this.orientation == "horizontal" ? this._width()
-//							- (true || this.isScrollBar ? 0 : this.handle.width()/2)
-							: this._height()
-//							- (true || this.isScrollBar ? 0 : this.handle.height()/2)
-					) || 100;
-					
-				},
-
 				_destroy : function() {
 					
 					for (var i = 0; i < this.handles.length; i++) {
@@ -259,97 +380,6 @@
 					this._mouseDestroy();
 				},
 
-				_doMouseCapture : function(event, isTrackClick, isEndCheck) {
-					
-					var that = this, o = this.options;
-
-					if (o.disabled) {
-						return false;
-					}
-
-					var position = this._getPosition(event);
-
-					index = event.target.index;
-
-					closestHandle = $(event.target);// handles[index];//$(
-													// this );
-
-					// workaround for bug #3736 (if both handles of
-					// a range are at 0,
-					// the first is always used as the one with
-					// least distance,
-					// and moving it is obviously prevented by
-					// preventing negative ranges)
-					if (o.range === true
-							&& this.values(1) === o.min) {
-						index += 1;
-						closestHandle = $(this.handles[index]);
-					}
-
-					allowed = this._start(event, index);
-					if (allowed === false) {
-						return false;
-					}
-					this._mouseSliding = true;
-
-					this._handleIndex = index;
-
-					if (!isTrackClick)
-					closestHandle.addClass("ui-state-active")
-							.focus();
-
-
-					offset = closestHandle.offset();
-					var mouseOverHandle = !isTrackClick && $(event.target).parents()
-							.andSelf().is(".ui-j2sslider-handle");
-					this.closestHandle = closestHandle;
-					this._clickOffset = (mouseOverHandle ? 
-						{
-						left : position.x
-								- offset.left
-								- (closestHandle.width() / 2 * o.scaleX)
-								,
-						top : position.y
-								- offset.top
-								- (closestHandle.height() / 2 * o.scaleY)
-								- (parseInt(closestHandle
-										.css("borderTopWidth"), 10) || 0)
-								- (parseInt(closestHandle
-										.css("borderBottomWidth"),
-										10) || 0)
-								+ (parseInt(closestHandle
-										.css("marginTop"), 10) || 0)
-						} : {
-							left : 0,
-							top : 0
-						});
-					var val = this._normValueFromMouse(position, isTrackClick);
-					var pixmouse = this._getPixelMouse(position, false);
-					var isAtEnd = !mouseOverHandle && (!this.isScrollBar ? 0 : 
-						pixmouse < 5 ? -1 : pixmouse > this._getPixelTotal() - 5 ? 1 : 0);
-					
-					if (isAtEnd) {
-						this.element.addClass(this.orientation === "horizontal" ? 
-								(isAtEnd == 1 ? "ui-j2sslider-at-right" : "ui-j2sslider-at-left")
-								: (isAtEnd == 1 ? "ui-j2sslider-at-bottom" : "ui-j2sslider-at-top"));
-					} else {
-						clearEnds(this.element);
-					}
-					if (isEndCheck) {
-						return;
-					}
-					var dir = Math.signum(!isAtEnd ? val - this.jslider.getValue$() : isAtEnd);
-					if (!this.handles.hasClass("ui-state-hover")) {
-						if (isAtEnd) {
-							this.jslider.ui.scrollByUnit$I(dir);
-						} else if (isTrackClick) {
-							this.jslider.ui.scrollDueToClickInTrack$I(dir);
-						}
-					}
-					this._animateOff = true;
-					return true;
-				},
-
 				_detectOrientation : function() {
 					this.orientation = (this.options.orientation === "vertical") ? "vertical"
 							: "horizontal";
@@ -365,28 +395,6 @@
 					if (this.isScrollBar)
 						this.element.removeClass("ui-widget-content");
 				},
-				_normValueFromMouse : function(position, isTrackClick) {
-					var pixelMouse = this._getPixelMouse(position, this.isScrollBar);
-					var fMouse = (pixelMouse / this._getPixelTotal());						
-					if (fMouse > 1) {
-						fMouse = 1;
-					}
-					if (fMouse < 0) {
-						fMouse = 0;
-					}
-					if (this.orientation === "vertical") {
-						fMouse = 1 - fMouse;
-					}
-					if (this.options.inverted) {
-						fMouse = 1 - fMouse;
-					}
-					var valueTotal = this._valueMax()
-							- this._valueMin();
-					var valueMouse = this._valueMin() + fMouse
-							* valueTotal;
-					return this._trimAlignValue(valueMouse);
-				},
-
 				_start : function(event, index) {
 					var uiHash = {
 						handle : this.handles[index],
@@ -584,9 +592,9 @@
 						this.isScrollBar = true;
 						this.handleFraction = value;
 						if (this.orientation === "horizontal")
-							$(this.handles[0]).width(this.handleSize = value * this._width());
+							$(this.handles[0]).width(this.handleSize = value * width(this));
 						else
-							$(this.handles[0]).height(this.handleSize = value * this._height());
+							$(this.handles[0]).height(this.handleSize = value * height(this));
 						this._animateOff = true;
 						this._resetClass();
 						this._refreshValue();
@@ -634,29 +642,13 @@
 					return position;
 				},
 				
-				_getPixelMouse : function(position, offsetHandle) {
-					var offset = this.element.offset();
-					var p = (this.orientation === "horizontal" ?
-							position.x
-								- offset.left
-								- (this._clickOffset ? this._clickOffset.left : 0)
-						 : position.y
-								- offset.top
-								- (this._clickOffset ? this._clickOffset.top : 0));
-					return p - this.handleSize / 2;
-				},
-
-				_getRealMax : function() {
-					return Math.round((this._valueMax() - this._valueMin()) * (1-this.handleFraction) + this._valueMin());
-				},
-				
 				// returns the step-aligned value that val is
 				// closest to, between (inclusive) min and max
 				_trimAlignValue : function(val) {
 					if (val <= this._valueMin()) {
 						return this._valueMin();
 					}
-					var max = this._getRealMax();
+					var max = Math.round((this._valueMax() - this._valueMin()) * (1-this.handleFraction) + this._valueMin());
 					if (val >= max) {
 						return max;
 					}
@@ -770,7 +762,7 @@
 						// just one handle
 						valPercent = this._getValPercent(-1);
 						var isHorizontal = (this.orientation === "horizontal");
-						var val = (valPercent * this._getPixelTotal()/100) + "px";									
+						var val = (valPercent * getPixelTotal(this)/100) + "px";									
 						_set[isHorizontal ? "left"
 								: this.isScrollBar ? "top" : "bottom"] = val;
 						this.handle.stop(1, 1)[animate ? "animate"

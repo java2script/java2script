@@ -2816,6 +2816,8 @@ if (!target) {
 		}, drag = function(ev) {
 			// we will move the frame's parent node and take the frame along
 			// with it
+			if (ev.buttons == 0 && ev.button == 0)
+				tag.isDragging = false;
 			var mode = (tag.isDragging ? 506 : 503);
 			if (!J2S._dmouseOwner || tag.isDragging && J2S._dmouseOwner == tag) {
 				x = pageX0 + (dx = ev.pageX - pageX);

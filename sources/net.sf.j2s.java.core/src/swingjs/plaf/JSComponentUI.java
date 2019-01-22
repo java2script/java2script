@@ -432,6 +432,12 @@ public class JSComponentUI extends ComponentUI
 	protected boolean isTainted = true;
 
 	/**
+	 * indicates not to add it to the DOM
+	 */
+	private boolean isPaintedOnly;
+	
+
+	/**
 	 * prevents premature visualization
 	 * 
 	 */
@@ -1695,7 +1701,7 @@ public class JSComponentUI extends ComponentUI
 			if (!isTable && children[i] == null)
 				break;
 			JSComponentUI ui = JSToolkit.getUI(children[i], false);
-			if (ui == null || ui.isNull) {
+			if (ui == null || ui.isNull || ui.isPaintedOnly) {
 				// Box.Filler has no ui.
 				continue;
 			}
@@ -1974,6 +1980,8 @@ public class JSComponentUI extends ComponentUI
 	}
 	
 	public void setVisible(DOMNode node, boolean b) {
+		if (isPaintedOnly)
+			b = false;
 		if (!b && cellComponent != null)
 			return;
 		if (node == null)
@@ -2137,6 +2145,9 @@ public class JSComponentUI extends ComponentUI
 		if (text == null || text.length() == 0) {
 			text = "";
 		} else {
+			if (text == "\0") {
+				isPaintedOnly = true; // this cannot be undone
+			}
 			DOMNode.setStyles(textNode, "white-space", "nowrap");
 			if (icon == null) {
 				// tool tip does not allow text alignment
@@ -2825,7 +2836,7 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	boolean isLaidOut;
-	
+
 	@Override
 	public void endLayout() {
 		layingOut = false;
@@ -3016,6 +3027,10 @@ public class JSComponentUI extends ComponentUI
         	installJS();
         	installUI(newC);
         }
+	}
+
+	public void setPaintedOnly() {
+		isPaintedOnly = true;
 	}
 
 }
