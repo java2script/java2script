@@ -317,7 +317,7 @@ public class JSComponentUI extends ComponentUI
 	protected DOMNode actionNode;
 
 	/**
-	 * the "FOR" label for a radio button
+	 * the "FOR" label for a radio button; the Button element itself for simple buttons 
 	 * 
 	 */
 	protected DOMNode buttonNode;
@@ -2015,7 +2015,7 @@ public class JSComponentUI extends ComponentUI
 			return;
 		DOMNode.setAttr(node, "disabled", (b ? null : "TRUE"));
 		if (!b && inactiveForeground == colorUNKNOWN)
-			getDisabledColors(getPropertyPrefix());
+			getDisabledColors(buttonNode == null ? getPropertyPrefix() : "Button");
 		if (jc.isOpaque()) {
 			Color bg = c.getBackground();
 			setBackground(b || !(bg instanceof UIResource) || inactiveBackground == null ? bg : inactiveBackground);

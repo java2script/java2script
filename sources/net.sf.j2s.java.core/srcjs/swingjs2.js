@@ -17497,10 +17497,10 @@ function(num){
 return isNaN(arguments.length == 1 ? num : this.valueOf());
 });
 
-Float.isInfinite$ = m$(Float,"isInfinite$F",
+Float.isInfinite$F = m$(Float,"isInfinite$",
 function(num){
 return !Number.isFinite(arguments.length == 1 ? num : this.valueOf());
-}, 1);
+});
 
 m$(Float,"equals$O",
 function(s){

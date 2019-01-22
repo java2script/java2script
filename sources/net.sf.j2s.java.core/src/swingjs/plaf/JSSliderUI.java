@@ -466,7 +466,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
                 }
             }
 
-            int delta = blockIncrement * ((direction > 0) ? POSITIVE_SCROLL : NEGATIVE_SCROLL);
+            int delta = blockIncrement * ((direction > 0) ? POSITIVE_SCROLL : direction == 0 ? 0 : NEGATIVE_SCROLL);
             slider.setValue(slider.getValue() + delta);
         }
     }

@@ -310,8 +310,8 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		});
 
 		JTextField field = ((JSpinner.DefaultEditor) spinner.getEditor()).getTextField();
-		spinner.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24));
-		field.setEditable(false);
+		//spinner.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24));
+		//field.setEditable(false);
 		field.addActionListener(new ActionListener( ) {
 
 			@Override
@@ -335,7 +335,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		
         JSlider redSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, 100);
         redSlider.setMajorTickSpacing( 85 );
-        redSlider.setMinorTickSpacing( 17 );
+        redSlider.setMinorTickSpacing( -90 );
         redSlider.setPaintTicks( true );
         redSlider.setPaintLabels( true );
         
@@ -379,7 +379,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 	}
 
 	JSlider mkSlider(JPanel p, final JTextField tf, int orient, int x, int y) {
-		final JSlider bar = new JSlider(orient, 300, 1000, 500);
+		final JSlider bar = new JSlider(orient, -300, 1000, 500);
 		bar.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
