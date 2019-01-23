@@ -991,7 +991,7 @@ public class JSlider extends JComponent implements SwingConstants {
 	 * @return true if the value snaps to the nearest slider value, else false
 	 * @see #setSnapToValue
 	 */
-	boolean getSnapToValue() {
+	public boolean getSnapToValue() {
 		return snapToValue;
 	}
 
@@ -1369,10 +1369,12 @@ public class JSlider extends JComponent implements SwingConstants {
 		@Override
 		public Font getFont() {
 			Font font = super.getFont();
-			if (font != null && !(font instanceof UIResource)) {
+			boolean isUI = font instanceof UIResource;
+			if (font != null && !isUI) {
 				return font;
 			}
-			return JSlider.this.getFont();
+			Font f = JSlider.this.getFont();
+			return (f == null ? font : f);
 		}
 
 		@Override

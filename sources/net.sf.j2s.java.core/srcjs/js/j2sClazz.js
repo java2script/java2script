@@ -1555,7 +1555,8 @@ Clazz._showStack = function(n) {
 Clazz._getStackTrace = function(n) {
 	  Clazz._stack = [];
   //  need to limit this, as JavaScript call stack may be recursive
-  n || (n = 25);
+  var haven = !!n
+  haven || (n = 25);
   var showParams = (n < 0);
   if (showParams)
     n = -n;
@@ -1591,7 +1592,8 @@ Clazz._getStackTrace = function(n) {
     }
   }
   } catch(e){}  
-  s += estack.join("\n");
+  if (!haven)
+	  s += estack.join("\n");
   if (Clazz._stack.length) {
 	  s += "\nsee Clazz._stack";
 	  console.log("Clazz.stack = \n" + estack.join("\n"));

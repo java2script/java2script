@@ -2679,7 +2679,7 @@ public abstract class Component implements ImageObserver/*
 		if (!isMaximumSizeSet()) {
 			maxSize = null;
 		}
-		if (parent != null) {
+		if (parent != null && !_j2sInvalidateOnAdd) {
 			parent.invalidateIfValid();
 		}
 		// }
@@ -5046,7 +5046,9 @@ public abstract class Component implements ImageObserver/*
 	 * @see #isCoalescingEnabled
 	 * @see #checkCoalescing
 	 */
-	transient private boolean coalescingEnabled = checkCoalescing();
+	transient private boolean coalescingEnabled = checkCoalescing(); 
+
+	public boolean _j2sInvalidateOnAdd = true; // not for menu items?
 
 	/**
 	 * Weak map of known coalesceEvent overriders. Value indicates whether
@@ -5827,7 +5829,8 @@ public abstract class Component implements ImageObserver/*
 			// relocateComponent();
 			// }
 			// }
-			invalidate();
+			if (_j2sInvalidateOnAdd )
+				invalidate();
 
 			// int npopups = (popups != null? popups.size() : 0);
 			// SwingJS TODO

@@ -1659,12 +1659,12 @@ if (!target) {
 			if (J2S._mouseOwner)
 				who = J2S._mouseOwner;
 
-			if (ev.target.getAttribute("role")) { // JSButtonUI adds
-													// role=menucloser to icon
-													// and text
-				var m = (ev.target._menu || ev.target.parentElement._menu);
-				m && m._hideJSMenu();
-			}
+//			if (ev.target.getAttribute("role")) { // JSButtonUI adds
+//													// role=menucloser to icon
+//													// and text
+//				var m = (ev.target._menu || ev.target.parentElement._menu);
+//				m && m._hideJSMenu();
+//			}
 
 			J2S.setMouseOwner(null);
 

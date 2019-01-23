@@ -40,6 +40,7 @@ import javax.swing.JRootPane;
 import javax.swing.JTable.BooleanRenderer;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -738,8 +739,12 @@ public class JSComponentUI extends ComponentUI
 		addClass(node, "swingjs-ui");
 	}
 
+	@SuppressWarnings("unused")
 	protected static void hideAllMenus() {
+		System.out.println("JSCUI hideAllMenus" + JSUtil.getStackTrace(-3));
 		JSUtil.jQuery.$(".ui-j2smenu").hide();
+		if (/** @j2sNative javax.swing.ToolTipManager ||*/false)
+			ToolTipManager.j2sHideToolTip();
 	}
 	
 	protected void addClass(DOMNode node, String cl) {
@@ -2523,8 +2528,11 @@ public class JSComponentUI extends ComponentUI
 	private String getAccelStr(JMenuItem b) {
 		KeyStroke ks = b.getAccelerator();
 		if (ks != null) {
-			return KeyEvent.getKeyModifiersText(ks.getModifiers()) + "-" +
-		               KeyEvent.getKeyText(ks.getKeyCode());
+			String k = KeyEvent.getKeyText(ks.getKeyCode());
+			if (k == "Escape")
+				k = "Esc";
+			String s = KeyEvent.getKeyModifiersText(ks.getModifiers());
+			return s + (s == "" ? "" : "-") + k;
 		}
 		return null;
 	}

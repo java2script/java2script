@@ -196,7 +196,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 					updateMenu(true);
 				}
 			}
-			jc.addNotify();
+			// issue here?? jc.addNotify();
 			//have to cheat here; these values are private to JMenu.
 			int x = /** @j2sNative this.menu.desiredLocationX || */0;
 			int y = /** @j2sNative this.menu.desiredLocationY || */0;
@@ -1132,6 +1132,8 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 		return menu != null && menu.haveLoc && DOMNode.getStyle(domNode, "display") != "none";
 	}
 
+	private static int np=0;
+	
 	@SuppressWarnings("unused")
 	public static void processJ2SMenuCmd(Object[] data) {
 		String trigger = (String) data[0];
@@ -1141,7 +1143,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 		Object n = data[4];
 		JQueryObject m = j2smenu.activeMenu;
 		String mid = (/**@j2sNative m && m[0] && m[0].id || */null);
-		System.out.println("JSPopupMenuUI processing " + trigger + " for " + mid);
+		System.out.println("JSPopupMenuUI processing " + (np++) + " " + trigger + " for " + mid);
 		switch (trigger) {
 		 case "_activate":
 		 case "_close":

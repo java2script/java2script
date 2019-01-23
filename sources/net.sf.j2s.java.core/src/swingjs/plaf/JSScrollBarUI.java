@@ -142,7 +142,7 @@ public class JSScrollBarUI extends JSSliderUI {
 
 
     @Override
-    public void scrollDueToClickInTrack( int dir ) {
+    public void scrollDueToClickInTrack( int dir, int val ) {
         scrollByBlock( dir );
     }
     

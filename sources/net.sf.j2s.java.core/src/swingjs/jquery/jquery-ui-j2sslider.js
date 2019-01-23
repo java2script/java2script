@@ -120,7 +120,7 @@
 				if (isAtEnd) {
 					me.jslider.ui.scrollByUnit$I(dir);
 				} else if (obj != OBJ_HANDLE) {
-					me.jslider.ui.scrollDueToClickInTrack$I(dir);
+					me.jslider.ui.scrollDueToClickInTrack$I$I(dir, val);
 				}
 			}
 			me._animateOff = true;
@@ -128,7 +128,7 @@
 		}
 
 		var normValueFromMouse = function(me, position, obj) {
-			var pixelMouse = getPixelMouse(me, position, me.isScrollBar);
+			var pixelMouse = getPixelMouse(me, position, true);
 			var fMouse = (pixelMouse / getPixelTotal(me));						
 			if (fMouse > 1) {
 				fMouse = 1;
@@ -157,7 +157,7 @@
 				 : position.y
 						- offset.top
 						- (me._clickOffset ? me._clickOffset.top : 0));
-			return p -me.handleSize / 2;
+			return p - (offsetHandle ? me.handleSize / 2 : 0);
 		}
 		
 		var getPixelTotal = function(me) {

@@ -262,12 +262,12 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 
 			@Override
 			public void mouseDragged(MouseEvent e) {
-				System.out.println("panel DRAG " + e);
+				//System.out.println("panel DRAG " + e);
 			}
 
 			@Override
 			public void mouseMoved(MouseEvent e) {
-				System.out.println("panel Move " + e);
+				//System.out.println("panel Move " + e);
 				
 			}
 			
@@ -333,13 +333,18 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 //		framesPerSecond.setLabelTable(labels);
 		
 		
-        JSlider redSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, 100);
-        redSlider.setMajorTickSpacing( 85 );
-        redSlider.setMinorTickSpacing( -90 );
-        redSlider.setPaintTicks( true );
-        redSlider.setPaintLabels( true );
-        
-		p.add(redSlider);
+        JSlider colorSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, 100) {
+        	public boolean getSnapToValue() {
+        		return false;
+        	}
+        };
+        colorSlider.setMajorTickSpacing( 60 );
+        colorSlider.setMinorTickSpacing( 15 );
+        colorSlider.setPaintTicks( true );
+        colorSlider.setPaintLabels( true );
+		colorSlider.setSnapToTicks(true);
+
+		p.add(colorSlider);
 		
 		
 		
@@ -379,7 +384,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 	}
 
 	JSlider mkSlider(JPanel p, final JTextField tf, int orient, int x, int y) {
-		final JSlider bar = new JSlider(orient, -300, 1000, 500);
+		final JSlider bar = new JSlider(orient, -300, 1000, 522);
 		bar.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -398,6 +403,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		bar.setBackground(Color.orange);
 		bar.setForeground(Color.green);
 		bar.setOpaque(true);
+		bar.setSnapToTicks(true);
 		p.add(bar);
 		return bar;
 	}

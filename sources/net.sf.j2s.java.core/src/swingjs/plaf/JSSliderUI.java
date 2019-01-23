@@ -60,6 +60,8 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	private boolean isHoriz;
 	private boolean isVerticalScrollBar;
 	private boolean isInverted;
+	private int[] ticks;
+	private boolean noSnapping;
 	
 	public JSSliderUI() {		
 		needPreferred = true;
@@ -187,6 +189,8 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	 */
 	public void jqueryStop(Object event, Object ui) {
 	    slider.setValueIsAdjusting(false);
+	    if (!isScrollBar && slider.getSnapToTicks())
+	    	jqueryCallback(event, ui);
 	}
 	
 	/**
@@ -196,17 +200,9 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	 * @param ui
 	 */
 	public void jqueryCallback(Object event, Object ui) {
-		int value = 0;
-		
-		/**
-		 * @j2sNative
-		 * 
-		 * value = ui.value;
-		 * 
-		 */
-		{}
-		
-		slider.setValue(val = Math.round(value));
+		val = Math.round(/** @j2sNative ui.value || */0);
+		boolean ok = (noSnapping || !slider.getSnapToValue() || slider.getValueIsAdjusting());
+		slider.setValue(ok ? val : snapTo(val));
 	}
 
 	@Override
@@ -238,19 +234,20 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	 * @param val
 	 */
 	protected void setSliderAttr(String key, float val) {
-	
+		noSnapping = true;
 		String id = null;
 		try {
-		Object slider = $(jqSlider);
+		Object jsslider = $(jqSlider);
 		/**
 		 * @j2sNative
 		 *   id = this.jqSlider.id;
-		 *  slider.j2sslider("option",key,val);
+		 *  jsslider.j2sslider("option",key,val);
 		 */
 		} catch (Throwable t) {
 			System.out.println(key + ":" + val + " could not be set for " + id);
 			// ignore -- disposal problem?
 		}
+		noSnapping = isScrollBar;
 	}
 
 	public void setSlider() {
@@ -288,11 +285,13 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			float fracSpacing = minorSpacing * 1f / (max - min);
 			int numTicks = ((max - min) / minorSpacing) + 1;
 			myHeight += 10;
+			ticks = new int[numTicks];
 			for (int i = 0; i < numTicks; i++) {
 				DOMNode node = DOMNode.createElement("div", id + "_t" + i);
 				$(node).addClass("swingjs");//??
 				$(node).addClass(tickClass);
-				boolean isMajor = (i % check == 0); 
+				boolean isMajor = (i % check == 0);
+				ticks[i] = minorSpacing * i + min;
 				float frac = (isHoriz == isInverted ? 1 - fracSpacing * i : fracSpacing
 						* i);
 				String spt = (frac * length + margin) + "px";
@@ -449,29 +448,61 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 				"Slider.verticalSize");
 		return new Dimension(Math.max(vertDim.height, myHeight), vertDim.width);
 	}
-	
-    public void scrollByBlock(int direction)    {
-        synchronized(slider)    {
-            int blockIncrement =
-                (slider.getMaximum() - slider.getMinimum()) / 10;
-            if (blockIncrement == 0) {
-                blockIncrement = 1;
-            }
 
-            if (slider.getSnapToTicks()) {
-                int tickSpacing = getTickSpacing();
-
-                if (blockIncrement < tickSpacing) {
-                    blockIncrement = tickSpacing;
-                }
-            }
-
-            int delta = blockIncrement * ((direction > 0) ? POSITIVE_SCROLL : direction == 0 ? 0 : NEGATIVE_SCROLL);
-            slider.setValue(slider.getValue() + delta);
-        }
+	/**
+	 * called from JSSliderUI
+	 * 
+	 * @param dir
+	 * @param val
+	 */
+    public void scrollDueToClickInTrack(int dir, int val) {
+        scrollByBlock(dir, val);
     }
 
-    public void scrollByUnit(int direction) {
+	public void scrollByBlock(int direction) {
+		scrollByBlock(direction, Integer.MAX_VALUE);
+	}
+	public void scrollByBlock(int direction, int val0) {
+
+//		synchronized (slider) {
+			int val = 0, blockIncrement = -1;
+			if (slider.getSnapToTicks()) {
+				Object jsslider = $(jqSlider);
+				if (slider.getSnapToValue()) {
+					val = val0;
+				} else {
+					blockIncrement = getTickSpacing();
+				}
+			} else {
+				blockIncrement = (slider.getMaximum() - slider.getMinimum()) / 10;
+                if (blockIncrement == 0) {
+                    blockIncrement = 1;
+                }
+			}
+			if (blockIncrement >= 0)
+                val = slider.getValue() + blockIncrement * ((direction > 0) ? POSITIVE_SCROLL : direction == 0 ? 0 : NEGATIVE_SCROLL);
+			slider.setValue(snapTo(val));
+		}
+//	}
+
+    private int snapTo(int val) {
+    	System.out.println("jsslider snapto " + val);
+    	if (ticks != null && ticks.length > 2 && slider.getSnapToTicks()) {
+    	  int dc = Integer.MAX_VALUE;
+    	  int v = val;
+    	  for (int i = ticks.length; --i >= 0;) {
+    		  int d = Math.abs(ticks[i] - val);
+    		  if (d < dc) {
+    			  dc = d;
+    			  v = ticks[i];
+    		  }
+    	  }
+    	  val = v;
+    	}
+    	return val;
+	}
+
+	public void scrollByUnit(int direction) {
         synchronized(slider)    {
             int delta = ((direction > 0) ? POSITIVE_SCROLL : NEGATIVE_SCROLL);
 
@@ -488,10 +519,6 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
     	return -1;
     }
     
-    public void scrollDueToClickInTrack(int dir) {
-        scrollByBlock(dir);
-    }
-
     private int getTickSpacing() {
         int majorTickSpacing = slider.getMajorTickSpacing();
         int minorTickSpacing = slider.getMinorTickSpacing();
