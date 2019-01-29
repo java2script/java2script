@@ -3,6 +3,7 @@ package swingjs.plaf;
 import javajs.api.JSFunction;
 
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Rectangle;
@@ -137,7 +138,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			 *          	 return $(fnode).parent();
 			 *      case 3:
 			 *      		 if (mode == 506) {
-			 *      			me.moveFrame$I$I(x,y);
+			 *      			me.moveFrame$I$I(x, y);
 			 *      			return null;
 			 *               }
 			 *     }
@@ -179,7 +180,12 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	}
 
 
+	
 	void moveFrame(int x, int y) {
+		if (!isInternalFrame) {
+			x = Math.max(30 - frame.getWidth(), x);
+			y = Math.max(0, y);
+		}
 		frame.setLocation(x, y);
 	}
 	
