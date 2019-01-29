@@ -877,6 +877,8 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
         }
     }
 
+    
+
     /**
      * Paints the tabs in the tab area.
      * Invoked by paint().
@@ -3586,6 +3588,7 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
         }
     }
 
+    
     private class ScrollableTabButton extends BasicArrowButton implements UIResource,
                                                                             SwingConstants {
         public ScrollableTabButton(int direction) {

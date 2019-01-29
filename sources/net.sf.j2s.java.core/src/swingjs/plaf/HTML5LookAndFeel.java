@@ -1533,13 +1533,13 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// }),
 				//
 				// *** TabbedPane
-				// "TabbedPane.font", dialogPlain12,
+				"TabbedPane.font", dialogPlain12,
 				"TabbedPane.background", control,
 				"TabbedPane.foreground", controlText,
-				// "TabbedPane.highlight", controlLtHighlight,
-				// "TabbedPane.light", controlHighlight,
-				// "TabbedPane.shadow", controlShadow,
-				// "TabbedPane.darkShadow", controlDkShadow,
+				"TabbedPane.highlight", controlLtHighlight,
+				"TabbedPane.light", controlHighlight,
+				"TabbedPane.shadow", controlShadow,
+				"TabbedPane.darkShadow", controlDkShadow,
 				"TabbedPane.selected",
 				null,
 				// "TabbedPane.focus", controlText,
