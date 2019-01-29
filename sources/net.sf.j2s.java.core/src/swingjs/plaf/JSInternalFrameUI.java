@@ -33,7 +33,6 @@ public class JSInternalFrameUI extends JSFrameUI {
 		isInternalFrame = true;
 	}
 
-	
 	@Override
 	protected void frameCloserAction() {
 		JInternalFrame jif = (JInternalFrame) iframe;

@@ -741,7 +741,7 @@ public class JSComponentUI extends ComponentUI
 
 	@SuppressWarnings("unused")
 	protected static void hideAllMenus() {
-		System.out.println("JSCUI hideAllMenus" + JSUtil.getStackTrace(-3));
+		//System.out.println("JSCUI hideAllMenus" + JSUtil.getStackTrace(-3));
 		JSUtil.jQuery.$(".ui-j2smenu").hide();
 		if (/** @j2sNative javax.swing.ToolTipManager ||*/false)
 			ToolTipManager.j2sHideToolTip();
