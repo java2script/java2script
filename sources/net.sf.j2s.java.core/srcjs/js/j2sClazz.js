@@ -9,6 +9,8 @@
 
 // TODO: still a lot of references to window[...]
 
+// BH 1/29/2019  adds String.join$CharSequence$Iterable, String.join$CharSequence$CharSequenceA
+
 // BH 1/13/2019 3.2.4.07 adds Character.to[Title|Lower|Upper]Case(int)
 // BH 1/8/2019 3.2.4.07 fixes String.prototype.to[Upper|Lower]Case$java_util_Locale - using toLocal[Upper|Lower]Case()
 // BH 1/3/2019 3.2.4.07 adds ByteBuffer/CharBuffer support, proper CharSet encoding, including GBK (Standard Chinese)
@@ -3744,7 +3746,7 @@ function(s){
 return Clazz.new_(Float.c$, [s]);
 }, 1);
 
-Float.isNaN$F = m$(Float,"isNaN",
+Float.isNaN$F = m$(Float,"isNaN$",
 function(num){
 return isNaN(arguments.length == 1 ? num : this.valueOf());
 });
@@ -4552,6 +4554,26 @@ String.copyValueOf$CA$I$I = function(data,offset,count) {
 }
 String.copyValueOf$CA = function(data) {
  return sp.copyValueOf$CA$I$I(data, 0, data.length);
+}
+
+String.join$CharSequence$CharSequenceA = function(sep,array) {
+ var ret = "";
+ var s = "";
+ for (var i = 0; i < array.length; i++) {
+	 ret += s + array[i].toString();
+	 s || (s = sep);	 
+ }
+ return ret;
+}
+
+String.join$CharSequence$Iterable = function(sep,iter) {
+ var ret = "";
+ var s = "";
+ while (iter.hasNext$()) {
+	 ret += s + iter.next$().toString();
+	 s || (s = sep);	 
+ }
+ return ret;
 }
  
 var C$=Clazz.newClass(java.lang,"Character",function(){
