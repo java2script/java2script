@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dialog;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -125,36 +126,25 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 
 	// ////// java.awt.Toolkit /////////
 
+	public static void getScreenSize(Dimension d) {
+		JQuery jq = JSUtil.jQuery;
+		d.width = /** @j2sNative jq.$(window).width() || */0;
+		d.height = /** @j2sNative jq.$(window).height() || */0;
+	}
+
+
 	@Override
 	protected int getScreenWidth() {
 		@SuppressWarnings("unused")
 		JQuery jq = JSUtil.jQuery;
-		int w = 0;
-		/**
-		 * @j2sNative
-		 * 
-		 * w = jq.$(window).width(); 
-		 * 
-		 */
-		{
-		}
-		return w;
+		return /** @j2sNative jq.$(window).width() || */0;
 	}
 
 	@Override
 	protected int getScreenHeight() {
 		@SuppressWarnings("unused")
 		JQuery jq = JSUtil.jQuery;
-		int h = 0;
-		/**
-		 * @j2sNative
-		 * 
-		 * h = jq.$(window).height();
-		 * 
-		 */
-		{
-		}
-		return h;
+		return /** @j2sNative jq.$(window).height() || */0;
 	}
 
 
