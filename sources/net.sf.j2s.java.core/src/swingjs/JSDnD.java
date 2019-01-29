@@ -52,7 +52,7 @@ public class JSDnD {
 		Point offset;
 		if (target != null) {
 		    offset = jc.getLocationOnScreen();
-		    if (name == null)
+//		    if (name == null)
 				target.drop(JSDnD.createDropEvent(target, t, name, data, x, y));
 			return;
 		}
