@@ -112,7 +112,7 @@ public class JSScrollBarUI extends JSSliderUI {
 	}
 
     @Override
-    public void scrollByBlock(int direction) {
+    public void scrollByBlock(int direction, int val0) {
     	// general click in track
 		JScrollBar sb = (JScrollBar) jc; 
         int delta = sb.getBlockIncrement();

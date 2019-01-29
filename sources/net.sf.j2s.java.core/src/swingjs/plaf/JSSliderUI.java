@@ -462,8 +462,10 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	public void scrollByBlock(int direction) {
 		scrollByBlock(direction, Integer.MAX_VALUE);
 	}
+	
 	public void scrollByBlock(int direction, int val0) {
 
+//		 -- slider only code
 //		synchronized (slider) {
 			int val = 0, blockIncrement = -1;
 			if (slider.getSnapToTicks()) {

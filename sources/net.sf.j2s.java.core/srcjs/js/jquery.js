@@ -773,6 +773,8 @@ try {
 	};
 }
 
+var invalidSelectors = "";
+
 function Sizzle( selector, context, results, seed ) {
 	var match, elem, m, nodeType,
 		// QSA vars
@@ -864,11 +866,15 @@ function Sizzle( selector, context, results, seed ) {
 
 			if ( newSelector ) {
 				try {
-					push.apply( results,
-						newContext.querySelectorAll( newSelector )
-					);
-					return results;
+					 // SwingJS addition
+					 if (invalidSelectors.indexOf(";" + newSelector + ";") < 0) {					
+						push.apply( results,
+							newContext.querySelectorAll( newSelector )
+						);
+						return results;
+					 }
 				} catch(qsaError) {
+					invalidSelectors += ";" + newSelector + ";";
 				} finally {
 					if ( !old ) {
 						context.removeAttribute("id");
