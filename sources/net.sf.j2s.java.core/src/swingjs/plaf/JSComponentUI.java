@@ -1235,13 +1235,13 @@ public class JSComponentUI extends ComponentUI
 		if (newValue == mnemonic || domNode == null)
 			return;
 		if (newValue < 0) {
-			newValue = (isLabel ? (label == null ? 0 : label.getDisplayedMnemonic()) 
-					: /** @j2sNative this.jc.getMnemonic$ && this.jc.getMnemonic$() ||*/ 0);
+			newValue = (isLabel ? (label == null ? -1 : label.getDisplayedMnemonic()) 
+					: /** @j2sNative this.jc.getMnemonic$ && this.jc.getMnemonic$() ||*/ -1);
 			}
 		DOMNode node = (menuAnchorNode == null ? domNode : menuAnchorNode);
-		if (newValue != mnemonic)
+		if (mnemonic > 0 && newValue != mnemonic)
 			removeClass(node, "ui-mnem-" + Character.toLowerCase(mnemonic));
-		if (newValue != 0)
+		if (newValue > 0)
 			addClass(node, "ui-mnem-" + Character.toLowerCase(newValue));
 		mnemonic = newValue;	
 	}
