@@ -2679,7 +2679,7 @@ public abstract class Component implements ImageObserver/*
 		if (!isMaximumSizeSet()) {
 			maxSize = null;
 		}
-		if (parent != null && !_j2sInvalidateOnAdd) {
+		if (parent != null && _j2sInvalidateOnAdd) {
 			parent.invalidateIfValid();
 		}
 		// }

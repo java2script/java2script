@@ -687,10 +687,11 @@ public abstract class JComponent extends Container {
 				// and probably not do this.
 				// SwingJS TODO -- allow JSpecView-like layer for writing over buttons
 				if (jc != null && jc.isVisible()) {
-					jc.getBounds(tmpRect);					
+					jc.getBounds(tmpRect);
+					boolean isContentPane = jc.getRootPane().getContentPane() == jc;
 					Rectangle vr = (jc instanceof JTable ? jc.getVisibleRect() : tmpRect);
 					JSGraphics2D jsg = (JSGraphics2D) (Object) sg.create(tmpRect.x, 
-							(jc.isContentPane ? 0 : tmpRect.y), vr.width, vr.height); 
+							(isContentPane ? 0 : tmpRect.y), vr.width, vr.height); 
 					jsg.setColor(jc.getForeground());
 					jsg.setFont(jc.getFont());
 					boolean shouldSetFlagBack = false;
