@@ -98,6 +98,7 @@ if (!J2S._version)
 					".ebi.ac.uk" : null,
 					"pubchem.ncbi.nlm.nih.gov" : null,
 					"www.nmrdb.org/tools/jmol/predict.php" : null,
+					"jalview.org/" : null,
 					"$" : "https://cactus.nci.nih.gov/chemical/structure/%FILENCI/file?format=sdf&get3d=True",
 					"$$" : "https://cactus.nci.nih.gov/chemical/structure/%FILENCI/file?format=sdf",
 					"=" : "https://files.rcsb.org/download/%FILE.pdb",
@@ -741,6 +742,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		if (info === true)
 			info = {isBinary: true};
 		info || (info = {});
+		var isTyped = !!info.dataType;
 		var isBinary = info.isBinary;
 		// swingjs.api.J2SInterface
 		// use host-server PHP relay if not from this host
@@ -776,7 +778,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 					asBase64, true, info);
 		} else {
 			fileName = fileName.replace(/file:\/\/\/\//, "file://"); // opera
-			info.dataType = (isBinary ? "binary" : "text");
+			if (!isTyped)info.dataType = (isBinary ? "binary" : "text");
 			info.async = !!fSuccess;
 			if (isPost) {
 				info.type = "POST";
@@ -802,17 +804,18 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 			isBinary = false;
 		}
 		isBinary && (isBinary = J2S._canSyncBinary(true));
-		return (isBinary ? J2S._strToBytes(data) : (self.JU || javajs && javajs.util).SB
-				.newS$S(data));
+		return (isTyped ? data : isBinary ? J2S._strToBytes(data) : (self.JU || javajs && javajs.util).SB.newS$S(data));
 	}
 
 	J2S._xhrReturn = function(xhr) {
-		if (!xhr.responseText || self.Clazz
+		if (!xhr.responseText && !xhr.responseJSON || self.Clazz
 				&& Clazz.instanceOf(xhr.response, self.ArrayBuffer)) {
 			// Safari or error
 			return xhr.response || xhr.statusText;
 		}
-		return xhr.responseText;
+	    if (xhr.responesJSON)
+	    	xhr.responseText = null;
+		return xhr.responseJSON || xhr.responseText;
 	}
 
 	J2S._isDirectCall = function(url) {
