@@ -222,7 +222,7 @@ public final class StringJoiner {
         if (value != null) {
             value.append(delimiter);
         } else {
-            value = (StringBuilder) new StringBuilder().append(prefix);
+            value = new StringBuilder().append(prefix);
         }
         return value;
     }
