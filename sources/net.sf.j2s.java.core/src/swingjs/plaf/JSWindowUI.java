@@ -257,8 +257,8 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 
 	@Override
 	public void windowActivated(WindowEvent e) {
-		System.out.println("JSFrameUI windowOpened " + c.isVisible());
-		c.requestFocus();
+		System.out.println("JSFrameUI windowActivated " + c.isVisible());
+//		c.requestFocus(); // caused problem with combobox focus
 	}
 
 
