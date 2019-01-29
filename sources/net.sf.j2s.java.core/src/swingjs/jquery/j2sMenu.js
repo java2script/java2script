@@ -1,7 +1,7 @@
 // J2SMenu.js from JSmolMenu.js
 // Original version for JSmol Bob Hanson 2/17/2014 
 // author: Bob Hanson, hansonr@stolaf.edu
-// last edited 1/23/2019
+// last edited 1/23/2019 -- fixes for mouse-down effector (mac) operation
 
 // TODO: test for dynamic update of menu items, as in Jmol
 
@@ -16,16 +16,17 @@ if (J2S.isResourceLoaded("swingjs/jquery/j2sMenu.js", true))return;
 
 ;(function(jQuery) {
 
-/*! jQuery UI - v1.9.2 - 2012-12-17
-* http://jqueryui.com
-* Includes: jquery.ui.core.css, jquery.ui.menu.css
-* To view and modify this theme, visit http://jqueryui.com/themeroller/?ffDefault=Lucida%20Grande%2CLucida%20Sans%2CArial%2Csans-serif&fwDefault=bold&fsDefault=1.1em&cornerRadius=5px&bgColorHeader=5c9ccc&bgTextureHeader=12_gloss_wave.png&bgImgOpacityHeader=55&borderColorHeader=4297d7&fcHeader=ffffff&iconColorHeader=d8e7f3&bgColorContent=fcfdfd&bgTextureContent=06_inset_hard.png&bgImgOpacityContent=100&borderColorContent=a6c9e2&fcContent=222222&iconColorContent=469bdd&bgColorDefault=dfeffc&bgTextureDefault=03_highlight_soft.png&bgImgOpacityDefault=85&borderColorDefault=c5dbec&fcDefault=2e6e9e&iconColorDefault=6da8d5&bgColorHover=d0e5f5&bgTextureHover=03_highlight_soft.png&bgImgOpacityHover=75&borderColorHover=79b7e7&fcHover=1d5987&iconColorHover=217bc0&bgColorActive=f5f8f9&bgTextureActive=06_inset_hard.png&bgImgOpacityActive=100&borderColorActive=79b7e7&fcActive=e17009&iconColorActive=f9bd01&bgColorHighlight=fbec88&bgTextureHighlight=01_flat.png&bgImgOpacityHighlight=55&borderColorHighlight=fad42e&fcHighlight=363636&iconColorHighlight=2e83ff&bgColorError=fef1ec&bgTextureError=02_glass.png&bgImgOpacityError=95&borderColorError=cd0a0a&fcError=cd0a0a&iconColorError=cd0a0a&bgColorOverlay=aaaaaa&bgTextureOverlay=01_flat.png&bgImgOpacityOverlay=0&opacityOverlay=30&bgColorShadow=aaaaaa&bgTextureShadow=01_flat.png&bgImgOpacityShadow=0&opacityShadow=30&thicknessShadow=8px&offsetTopShadow=-8px&offsetLeftShadow=-8px&cornerRadiusShadow=8px
-* Copyright (c) 2012 jQuery Foundation and other contributors Licensed MIT */
+/*
+ * ! jQuery UI - v1.9.2 - 2012-12-17 http://jqueryui.com Includes:
+ * jquery.ui.core.css, jquery.ui.menu.css To view and modify this theme, visit
+ * http://jqueryui.com/themeroller/?ffDefault=Lucida%20Grande%2CLucida%20Sans%2CArial%2Csans-serif&fwDefault=bold&fsDefault=1.1em&cornerRadius=5px&bgColorHeader=5c9ccc&bgTextureHeader=12_gloss_wave.png&bgImgOpacityHeader=55&borderColorHeader=4297d7&fcHeader=ffffff&iconColorHeader=d8e7f3&bgColorContent=fcfdfd&bgTextureContent=06_inset_hard.png&bgImgOpacityContent=100&borderColorContent=a6c9e2&fcContent=222222&iconColorContent=469bdd&bgColorDefault=dfeffc&bgTextureDefault=03_highlight_soft.png&bgImgOpacityDefault=85&borderColorDefault=c5dbec&fcDefault=2e6e9e&iconColorDefault=6da8d5&bgColorHover=d0e5f5&bgTextureHover=03_highlight_soft.png&bgImgOpacityHover=75&borderColorHover=79b7e7&fcHover=1d5987&iconColorHover=217bc0&bgColorActive=f5f8f9&bgTextureActive=06_inset_hard.png&bgImgOpacityActive=100&borderColorActive=79b7e7&fcActive=e17009&iconColorActive=f9bd01&bgColorHighlight=fbec88&bgTextureHighlight=01_flat.png&bgImgOpacityHighlight=55&borderColorHighlight=fad42e&fcHighlight=363636&iconColorHighlight=2e83ff&bgColorError=fef1ec&bgTextureError=02_glass.png&bgImgOpacityError=95&borderColorError=cd0a0a&fcError=cd0a0a&iconColorError=cd0a0a&bgColorOverlay=aaaaaa&bgTextureOverlay=01_flat.png&bgImgOpacityOverlay=0&opacityOverlay=30&bgColorShadow=aaaaaa&bgTextureShadow=01_flat.png&bgImgOpacityShadow=0&opacityShadow=30&thicknessShadow=8px&offsetTopShadow=-8px&offsetLeftShadow=-8px&cornerRadiusShadow=8px
+ * Copyright (c) 2012 jQuery Foundation and other contributors Licensed MIT
+ */
 
 if (!jQuery.ui.j2smenu)
 try{
 
-// local methods here for help with debugging 
+// local methods here for help with debugging
 	
  var delayMe = function(element, f, ms) {
 	 var id = element._delay(f, ms);
@@ -49,7 +50,9 @@ try{
 	 return n && n.innerText.replace(/\n/g,"|");
  }
  
- var CLICK_OUT_DELAY = 100;//ms
+ var CLICK_OUT_DELAY = 100;// ms
+ 
+ var outActive;
  
  var doCmd = function(trigger,me,e,t,n,why) {
 	 why || (why = "");
@@ -65,7 +68,7 @@ try{
 		 if (a.hasClass(".ui-state-focus"))
 			 return;		 
 		 if (!a.hasClass("j2s-popup-menu")) {
-			 me._close(a.parent());			 
+			 me._closeSubmenus(a.parent());			 
 		 }
 		 a = a.find(".a");
 		 a[0] && a[0].focus();
@@ -76,8 +79,8 @@ try{
 		 break;
 	 case "onrelease":
 	 case "onpress":
-		 //t.preventDefault();
-//		 break;
+		 // t.preventDefault();
+// break;
 	 case "onclick":
 		var n=e(t.target).closest(".ui-j2smenu-item");
 		if (n.has(".ui-state-disabled").length)
@@ -93,19 +96,31 @@ try{
 				me.active&&me.active.parents(".ui-j2smenu").length===1&&clearMe(me.timer, trigger);
 			} 
    		 doCmd("collapseAll", me, e, 0, 1);			 
-//			doCmd("_hide", me, e, e(".ui-j2smenu"));
+// doCmd("_hide", me, e, e(".ui-j2smenu"));
 		}
 		break;
+	 case "clearOut":
+		 System.err.println("click removed " + me.uuid);
+		 me._off(me.document, "click");
+		 outActive = null;
+		 return;
 	 case "noclickout":
-		 System.err.println("noclickout " + (+new Date));
+		 System.err.println("noclickout " + me.uuid + " " + (+new Date));
+		 if (outActive)
+			 doCmd("clearOut", outActive);
 		 setTimeout(function(){	
-			 
+			 System.err.println("click added " + me.uuid);
+			 outActive = me;
 			 me._on(me.document,{ "click":function(t){doCmd("onclick_out", me, $, t),n=!1}});			 
 			 
 		 },CLICK_OUT_DELAY);
 		 return;
 	 case "onclick_out":
-		 System.err.println("onclick_out " + (+new Date));
+		 if (outActive != me || !someMenuOpen(e)) {
+			 doCmd("clearOut", me);
+			 return;
+		 }		 
+		 System.err.println("onclick_out " + me.uuid + " " + (+new Date));
 		 e(t.target).closest(".j2s-menuBar-menu").length == 0 
 		    && (e(t.target).closest(".ui-j2smenu").length||me.collapseAll(t));
 	 	return;
@@ -118,11 +133,13 @@ try{
 	 case "onblur":
 		 me.timer = delayMe(me, function(){e.contains(me.element[0],me.document[0].activeElement)||me.collapseAll(t)});
 		 break;
-	 case "_open":
+	 case "_openSubmenu":
 		 n||(n = me.active || me.activeMenu);
+		 if (n.is(".ui-state-disabled"))
+			 return;
 		 n = e.extend({of:n},me.options.position);
 		 clearMe(me.timer, trigger);
-		 me.refresh("_open",n);
+		 me.refresh("_openSubmenu",n);
 		 var v = me.element.find(".ui-j2smenu").not(t.parents(".ui-j2smenu"));
 		 doCmd("_hide", me, e, v);
 		 v.attr("aria-hidden","true");
@@ -138,9 +155,9 @@ try{
 		 break;
 	 case "_startOpening":
 		 if(t.attr("aria-hidden")!=="true")return;
-		 me.timer=delayMe(me, function(){me._close(),me._open(t);},me.delay);
+		 me.timer=delayMe(me, function(){me._closeSubmenus(),me._openSubmenu(t);},me.delay);
 		 return;
-	 case "_close":
+	 case "_closeSubmenus":
 		 t||(t=me.active?me.active.parent():me.element);
 		 t.closest("ul").find(".ui-state-active").removeClass("ui-state-active");
 		 var v = t.find(".ui-j2smenu");
@@ -157,59 +174,56 @@ try{
 				   : me.active[a+"All"](".ui-j2smenu-item").eq(0));
 		 if(!r||!r.length||!me.active)
 			 r=me.activeMenu.children(".ui-j2smenu-item")[b]();
-		 me._close(r);
+		 me._closeSubmenus(r);
 		 me.focus(t,r);
 		 return;
 	 case "_show":
-		 if (t.length == 0)
-			 return;
 		 t.show();
 		 break;
 	 case "_hide":
-		 if (t.length == 0)
-			 return;
 		 t.hide();
 		 break;
 	 case "expand":
-		 if (!someMenuOpen(e))
+		 if (!someMenuOpen(e) || me.active && me.active.is(".ui-state-disabled"))
 			 return;
 		 n = me.active&&me.active.children(".ui-j2smenu").children(".ui-j2smenu-item").first();
 		 if (n&&n.length) {
-			 me._open(n.parent());
+			 me._openSubmenu(n.parent());
 			 me.timer = delayMe(me,function(){me.focus(t,n)});
 		 }
 		 break;
 	 case "collapse":
 		 if (!someMenuOpen(e))
 			 return;
-		 me._close();
+		 me._closeSubmenus();
 		 var v=me.active&&me.active.parent().closest(".ui-j2smenu-item",me.element);
 		 if (v && v.length) {
 			 me.focus(t,v);
-			 me._close(v);
+			 me._closeSubmenus(v);
 		 } else {
-//			 doCmd("_hide", me, e, e(".ui-j2smenu"));			 
+// doCmd("_hide", me, e, e(".ui-j2smenu"));
 			 doCmd("collapseAll", me, e, 0, 1);			 
 		 }
 		 break;
 	 case "collapseAll":
 		 var u;
-		 if ( !n && (!someMenuOpen(e) ||
+		 if ( me.closed || !n && (!someMenuOpen(e) ||
 			  ((u=e(t&&t.target)).hasClass("ui-j2smenu-node") || u.hasClass("ui-j2smenu"))
 			))
 			 return;
+		 System.err.println("collapseAll " + me.uuid);
 		 clearMe(me.timer, trigger),
 		 me.timer = delayMe(me,
 	       function(){
-			 me._off(me.document, "click");			 
+			 doCmd("clearOut", me);
 			 if (!someMenuOpen(e))
 				 return;
 			 var r=n?me.element:e(t&&t.target).closest(me.element.find(".ui-j2smenu"));
 			 r.length||(r=me.element);
-			 me._close(r);
+			 me._closeSubmenus(r);
 			 me.blur(t);
 			 me.activeMenu=r;
-			 
+			 me.closed = true;
 		   }, me.delay); 
 		 break;
 	 case "focus":
@@ -220,7 +234,8 @@ try{
 		 var r=me.active.children(".a").addClass("ui-state-focus");
 		 me.options.role&&me.element.attr("aria-activedescendant", r.attr("id"));
 		 me.active.parent().closest(".ui-j2smenu-item").children(".a:first").addClass("ui-state-active");
-//no!		 t&&t.type==="keydown"?me._close() : me.timer=delayMe(me, function(){me._close()},me.delay);
+// no! t&&t.type==="keydown"?me._closeSubmenus() : me.timer=delayMe(me,
+// function(){me._closeSubmenus()},me.delay);
 		 var u=n.children(".ui-j2smenu");
 		 u.length&&/^mouse/.test(t.type)&&me._startOpening(u);
 		 me.activeMenu=n.parent();
@@ -276,7 +291,7 @@ try{
 			 doCmd("onclick", me, e, t);
 			 break;
 		 case 1:
-			 doCmd("_open", me, e, node.next("ul"), node);
+			 doCmd("_openSubmenu", me, e, node.next("ul"), node);
 			 break;
 		 default:
 			 // ignore multiple hits
@@ -288,7 +303,8 @@ try{
  	 ui && ui.processJ2SMenuCmd$OA([trigger,me,e,t,n,why]);
  }
  
- // BH note that swingjs.plaf.JSButton will set and clear ui-state-disabled on its own
+ // BH note that swingjs.plaf.JSButton will set and clear ui-state-disabled
+	// on its own
  
 
 ;(function(e,t){var n=!1;e.widget("ui.j2smenu",{
@@ -307,6 +323,8 @@ try{
  
  
  _create:function(){
+
+	 this.closed = false;
 	 
 	 if (typeof this.options.delay == "number")
 		 this.delay = this.options.delay;
@@ -383,49 +401,50 @@ try{
 		 this.collapse(t);
 		 break;
 	 default:
-//		 function a(e){return e.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g,"\\$&")}
-//		 u=!1,
-//		 r=this.previousFilter||"",
-//		 i=String.fromCharCode(t.keyCode),
-//		 s=!1,clearMe(this.filterTimer),
-//		 i===r?s=!0:i=r+i,
-//		 o=new RegExp("^"+a(i),"i"),
-//		 n=this.activeMenu.children(".ui-j2smenu-item").filter(function(){return o.test(e(this).children(".a").text())}),
-//		 n=s&&n.index(this.active.next())!==-1?this.active.nextAll(".ui-j2smenu-item"):n,
-//		 n.length||(
-//				 i=String.fromCharCode(t.keyCode),
-//				 o=new RegExp("^"+a(i),"i"),
-//				 n=this.activeMenu.children(".ui-j2smenu-item").filter(
-//						 function(){
-//							 return o.test(e(this).children(".a").text())
-//						 }
-//				 )),
-//		 n.length?(
-//				 this.focus(t,n),
-//				 n.length>1?(
-//						 this.previousFilter=i,
-//						 this.filterTimer=delayMe(function(){delete this.previousFilter},1e3)
-//				 	):delete this.previousFilter
-//			  	):delete this.previousFilter;
+// function a(e){return e.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g,"\\$&")}
+// u=!1,
+// r=this.previousFilter||"",
+// i=String.fromCharCode(t.keyCode),
+// s=!1,clearMe(this.filterTimer),
+// i===r?s=!0:i=r+i,
+// o=new RegExp("^"+a(i),"i"),
+// n=this.activeMenu.children(".ui-j2smenu-item").filter(function(){return
+// o.test(e(this).children(".a").text())}),
+// n=s&&n.index(this.active.next())!==-1?this.active.nextAll(".ui-j2smenu-item"):n,
+// n.length||(
+// i=String.fromCharCode(t.keyCode),
+// o=new RegExp("^"+a(i),"i"),
+// n=this.activeMenu.children(".ui-j2smenu-item").filter(
+// function(){
+// return o.test(e(this).children(".a").text())
+// }
+// )),
+// n.length?(
+// this.focus(t,n),
+// n.length>1?(
+// this.previousFilter=i,
+// this.filterTimer=delayMe(function(){delete this.previousFilter},1e3)
+// ):delete this.previousFilter
+// ):delete this.previousFilter;
 		doCmd("keyActivate",this, e, t, true);
 		break;
 	}
  },
  _activate:function(t){     doCmd("_activate", this, e, t); },
- _scrollIntoView:function(t){var n,r,i,s,o,u;this._hasScroll()&&(n=parseFloat(e.css(this.activeMenu[0],"borderTopWidth"))||0,r=parseFloat(e.css(this.activeMenu[0],"paddingTop"))||0,i=t.offset().top-this.activeMenu.offset().top-n-r,s=this.activeMenu.scrollTop(),o=this.activeMenu.height(),u=t.height(),i<0?this.activeMenu.scrollTop(s+i):i+u>o&&this.activeMenu.scrollTop(s+i-o+u))},
  _startOpening: function(t){ doCmd("_startOpening", this, e, t); },
  focus:function(t,n){       doCmd("focus", this, e, t, n) },
  blur:function(t,n){        doCmd("blur", this, e, t, n);},
- _open:function(t){         doCmd("_open", this, e, t);},
- _close:function(t){        doCmd("_close", this, e, t, n);},
+ _openSubmenu:function(t){  doCmd("_openSubmenu", this, e, t);},
+ _closeSubmenus:function(t){doCmd("_closeSubmenus", this, e, t, n);},
  collapseAll:function(t,n,why){ doCmd("collapseAll",this, e, t, n, why);},
  collapse:function(t){      doCmd("collapse", this, e, t);},
- refresh:function(t,n){        doCmd("refresh", this, e, t, n); },
+ refresh:function(t,n){     doCmd("refresh", this, e, t, n); },
  expand:function(t){        doCmd("expand", this, e, t);},
- select:function(t){ doCmd("select", this, e, t); },
- noclickout:function() { doCmd("noclickout", this); }, 
+ select:function(t){        doCmd("select", this, e, t); },
+ noclickout:function() {    doCmd("noclickout", this); }, 
  next:function(t){this._move("next","first",t)},
  previous:function(t){this._move("prev","last",t)},
+ _scrollIntoView:function(t){var n,r,i,s,o,u;this._hasScroll()&&(n=parseFloat(e.css(this.activeMenu[0],"borderTopWidth"))||0,r=parseFloat(e.css(this.activeMenu[0],"paddingTop"))||0,i=t.offset().top-this.activeMenu.offset().top-n-r,s=this.activeMenu.scrollTop(),o=this.activeMenu.height(),u=t.height(),i<0?this.activeMenu.scrollTop(s+i):i+u>o&&this.activeMenu.scrollTop(s+i-o+u))},
  isFirstItem:function(){return this.active&&!this.active.prevAll(".ui-j2smenu-item").length},
  isLastItem:function(){return this.active&&!this.active.nextAll(".ui-j2smenu-item").length},
  nextPage:function(t){var n,r,i;if(!this.active){this.next(t);return}if(this.isLastItem())return;this._hasScroll()?(r=this.active.offset().top,i=this.element.height(),this.active.nextAll(".ui-j2smenu-item").each(function(){return n=e(this),n.offset().top-r-i<0}),this.focus(t,n)):this.focus(t,this.activeMenu.children(".ui-j2smenu-item")[this.active?"last":"first"]())},
@@ -475,41 +494,47 @@ Swing.__getMenuStyle = function(applet) { return '\
 	.swingjsPopupMenu .ui-state-disabled .a:hover{background-color:transparent!important;border-color:transparent!important}\
 	.swingjsPopupMenu .ui-state-disabled .ui-icon{filter:Alpha(Opacity=35)}'};
 
-//var bindMenuActionCommands = function(eventType, menu, isBind) {
-//  // called internally
-//  var children = (menu.uiClassID ? menu.ui.getChildren() : menu.getComponents());
-//	for(var i = children.length; --i >= 0;)
-//		bindMenuActionCommands(eventType, children[i], isBind);
-//	if (!menu.uiClassID || !menu["data-ui"])
-//		return;  
-//	J2S.$documentOff(eventType, menu.id);
-//	if (isBind) {
-//		J2S.$documentOn(eventType, menu.id, function(event) {
-//			if (menu.uiClassID) {
-//				Swing.hideMenus(menu._applet);
-//		        menu["data-ui"].handleJSEvent$O$I$O(event);
-//			} else if (menu.itemListener) {
-//				menu.selected = (menu.btnType == 2 /*javajs.swing.JMenuItem.TYPE_CHECKBOX*/ ? J2S.$prop(menu.id + "-cb", "checked") : true); 
-//				Swing.hideMenus(menu._applet);
-//				menu.itemListener.itemStateChanged$java_awt_event_ItemEvent({getSource:function(){return menu}});
-//			} else if (menu.actionListener) {
-//				Swing.hideMenus(menu._applet);
-//				menu.actionListener.actionPerformed$java_awt_event_ActionEvent({getSource:function(){return menu},getActionCommand:function(){return menu.actionCommand}});
-//			}
-//		});
-//	}
-//}
+// var bindMenuActionCommands = function(eventType, menu, isBind) {
+// // called internally
+// var children = (menu.uiClassID ? menu.ui.getChildren() :
+// menu.getComponents());
+// for(var i = children.length; --i >= 0;)
+// bindMenuActionCommands(eventType, children[i], isBind);
+// if (!menu.uiClassID || !menu["data-ui"])
+// return;
+// J2S.$documentOff(eventType, menu.id);
+// if (isBind) {
+// J2S.$documentOn(eventType, menu.id, function(event) {
+// if (menu.uiClassID) {
+// Swing.hideMenus(menu._applet);
+// menu["data-ui"].handleJSEvent$O$I$O(event);
+// } else if (menu.itemListener) {
+// menu.selected = (menu.btnType == 2 /*javajs.swing.JMenuItem.TYPE_CHECKBOX*/ ?
+// J2S.$prop(menu.id + "-cb", "checked") : true);
+// Swing.hideMenus(menu._applet);
+// menu.itemListener.itemStateChanged$java_awt_event_ItemEvent({getSource:function(){return
+// menu}});
+// } else if (menu.actionListener) {
+// Swing.hideMenus(menu._applet);
+// menu.actionListener.actionPerformed$java_awt_event_ActionEvent({getSource:function(){return
+// menu},getActionCommand:function(){return menu.actionCommand}});
+// }
+// });
+// }
+// }
 
 Swing.setMenu = function(menu) {
   // the object will be installed using $(body).after()
   
-  // called by javajs.swing.JPopupMenu or swingjs.plaf.JSPopupMenuUI (menu.uiClassID)
-  // note that the z-index is only set by the FIRST applet accessing this method
+  // called by javajs.swing.JPopupMenu or swingjs.plaf.JSPopupMenuUI
+	// (menu.uiClassID)
+  // note that the z-index is only set by the FIRST applet accessing this
+	// method
   // this is an oversight.
   menu._applet = (menu.ui ? menu.ui.applet : menu.applet); // SwingJS vs JSmol
 	Swing.__getMenuStyle && J2S.$after("head", '<style>'+Swing.__getMenuStyle(menu._applet)+'</style>');  
 	Swing.__getMenuStyle = null; // "static"
-//  if (menu.uiClassID) {
+// if (menu.uiClassID) {
 	  
 	// TODO: We can't be creating fields in JPopupMenu! This is ancient stuff.
 	  
@@ -523,33 +548,35 @@ Swing.setMenu = function(menu) {
     proto.setPosition || ( proto.setPosition = function(x,y) {
       this.$ulTop.css({left:x+"px",top:y+"px",position:"absolute"});
     } );    
-    // delay addition to the DOM 
-//  } else {
-//    menu._actionEvent = 'click';
-//  	menu.popupMenu = menu;
-//	  menu.id = menu.popupMenu._applet._id + "_" + menu.popupMenu.name + "_top_" + (++Swing.menuCounter);
-//    menu._j2sname = menu.name;
-//  	J2S.$after("body",'<ul id="' + menu.id + '" class="swingJSPopupMenu"></ul>');
-//    menu.setContainer(J2S.$('#' + menu.id));
-//  }
+    // delay addition to the DOM
+// } else {
+// menu._actionEvent = 'click';
+// menu.popupMenu = menu;
+// menu.id = menu.popupMenu._applet._id + "_" + menu.popupMenu.name + "_top_" +
+// (++Swing.menuCounter);
+// menu._j2sname = menu.name;
+// J2S.$after("body",'<ul id="' + menu.id + '" class="swingJSPopupMenu"></ul>');
+// menu.setContainer(J2S.$('#' + menu.id));
+// }
 	menu._applet._menus || (menu._applet._menus = {});
 	menu._applet._menus[menu._j2sname] = menu;
 	menu._tainted = true;
 }
-//Swing.initMenuItem = function(item) {
-//  // called by javajs.swing.AbstractButton only (Jmol)
-//  item._applet = item.popupMenu._applet;
-//  item.id = Swing.getMenuID(item);
-//  item.icon && (item.icon = '<img src="' + item._applet._j2sPath + '/' + item.icon + '" style="max-height: 20px;" />')
-//}
+// Swing.initMenuItem = function(item) {
+// // called by javajs.swing.AbstractButton only (Jmol)
+// item._applet = item.popupMenu._applet;
+// item.id = Swing.getMenuID(item);
+// item.icon && (item.icon = '<img src="' + item._applet._j2sPath + '/' +
+// item.icon + '" style="max-height: 20px;" />')
+// }
 
 Swing.updateMenu = function(menu, andShow) {
-//    if (menu.uiClassID) {
-	    // for SwingJS the top node is domNode itself, which is already <ul> 
+// if (menu.uiClassID) {
+	    // for SwingJS the top node is domNode itself, which is already <ul>
     var node = menu.ui.domNode;
     if (node != menu.$ulTop[0]) {
         if (menu.$ulTop) {
-          //bindMenuActionCommands(menu._actionEvent, menu, false);
+          // bindMenuActionCommands(menu._actionEvent, menu, false);
           menu.$ulTop.remove();
         }
         menu.setContainer(J2S.$(node));
@@ -557,14 +584,14 @@ Swing.updateMenu = function(menu, andShow) {
     }
 	node.style.display = (andShow ? "block" : "none");
     J2S.$after("body",node);
-//    } else {
-//  		menu.$ulTop.html(menu.toHTML());
-//  		bindMenuActionCommands(menu._actionEvent, menu, true);
-//    }
+// } else {
+// menu.$ulTop.html(menu.toHTML());
+// bindMenuActionCommands(menu._actionEvent, menu, true);
+// }
     var m = menu.$ulTop.j2smenu({delay:100, jPopupMenu: menu});
     m.j2smenu('refresh');  
     // this next is critical for SwingJS
-//    if (menu.uiClassID)
+// if (menu.uiClassID)
     var v = menu.$ulTop.find("[role=menuitem]");
     for (var i = v.length; --i >= 0;)
     	setMouseMenuItem(menu, v[i]);
@@ -584,9 +611,10 @@ var setMouseMenuItem = function(menu, node) {
 }
 
 Swing.showMenu = function(menu, x, y) {
-  // called by javajs.swing.JPopupMenu and swingjs.plaf.JSPopupMenuUI (menu.uiClassID)
+  // called by javajs.swing.JPopupMenu and swingjs.plaf.JSPopupMenuUI
+	// (menu.uiClassID)
   // allow for a user callback for customization of menu
- //  debugger;
+ // debugger;
  
   for (var i in menu._applet._menus)
     Swing.hideMenu(menu._applet._menus[i], true);  
@@ -603,19 +631,20 @@ Swing.showMenu = function(menu, x, y) {
   menu._visible = true;
   menu.timestamp = System.currentTimeMillis$();
   menu.dragBind(true);
-//  menu.$ulTop.unbind('clickoutjsmol mousemoveoutjsmol');
-//  if (!J2S._persistentMenu)
-//  	menu.$ulTop.bind('clickoutjsmol mousemoveoutjsmol', function(evspecial, target, ev) {
-//	  if (System.currentTimeMillis$() - menu.timestamp > 500)
-//		  Swing.hideMenu(menu);
-//	});
+// menu.$ulTop.unbind('clickoutjsmol mousemoveoutjsmol');
+// if (!J2S._persistentMenu)
+// menu.$ulTop.bind('clickoutjsmol mousemoveoutjsmol', function(evspecial,
+// target, ev) {
+// if (System.currentTimeMillis$() - menu.timestamp > 500)
+// Swing.hideMenu(menu);
+// });
   menu.$ulTop.bind("contextmenu", function() {return false;});
 } 
 
 Swing.hideMenu = function(menu, force) {
   // called internally often -- even on mouse moves
 	if (menu._visible === false && !force) return;
-	//menu.$ulTop.unbind('clickoutjsmol');
+	// menu.$ulTop.unbind('clickoutjsmol');
 	menu.dragBind(false);
 	menu.$ulTop.hide();
 	menu._visible = menu.isDragging = false;
@@ -627,15 +656,15 @@ Swing.disposeMenu = function(menu) {
   	return
   Swing.hideMenu(menu);
   menu.$ulTop.j2smenu().destroy && menu.$ulTop.j2smenu().destroy();
-//  if (menu.uiClassID) {      
+// if (menu.uiClassID) {
 	    var v = menu.$ulTop.find("[role=menuitem]");
 	    for (var i = v.length; --i >= 0;) {
 	        v[i].applet = menu.ui.applet;
 	        J2S.unsetMouse(v[i]);
 	    }
-//  } else {
-//   	Swing.bindMenuActionCommands(menu, false);
-//  }
+// } else {
+// Swing.bindMenuActionCommands(menu, false);
+// }
 	delete menu._applet._menus[menu._j2sname];
 }
 
