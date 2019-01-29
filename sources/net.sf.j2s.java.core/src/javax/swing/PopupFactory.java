@@ -358,21 +358,25 @@ public class PopupFactory {
                 }
             }
 
-            if (popup == null ||
-                ((JWindow) popup.getComponent())
-                 .getFocusableWindowState() != focusPopup) {
+            if (popup == null 
+            		
+//            		||
+//                ((JWindow) popup.getComponent())
+//                 .getFocusableWindowState() != focusPopup 
+//            
 
-                if(popup != null) {
-                    // The recycled popup can't serve us well
-                    // dispose it and create new one
-                    popup._dispose();
-                }
+            		)            {
+//
+//                if(popup != null) {
+//                    // The recycled popup can't serve us well
+//                    // dispose it and create new one
+//                    popup._dispose();
+//                }
 
                 popup = new HeavyWeightPopup();
             }
 
             popup.reset(owner, contents, ownerX, ownerY);
-
             if(focusPopup) {
                 JWindow wnd = (JWindow) popup.getComponent();
                 wnd.setFocusableWindowState(true);
