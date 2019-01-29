@@ -1,6 +1,7 @@
 package swingjs.plaf;
 
 import java.awt.Insets;
+import java.beans.PropertyChangeEvent;
 
 import javax.swing.JComponent;
 import javax.swing.JToolTip;
@@ -19,12 +20,23 @@ public class JSToolTipUI extends JSLabelUI {
 	
 	protected JToolTip toolTip;
 
+	
+	@Override
+	public void propertyChange(PropertyChangeEvent e) {
+		String prop = e.getPropertyName();
+		if (prop == "component") {
+			return;
+		}
+		super.propertyChangedCUI(e, prop);
+	}
+
 	@Override
 	protected void getIconAndText() {		
 		icon = null;
 		iconNode = null; // not an Abstract Button
 		gap = 0;
-		text = toolTip.getTipText();		
+		text = toolTip.getTipText();	
+		
 	}
 
 	@Override
