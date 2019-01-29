@@ -17,9 +17,6 @@
 
 package java.lang;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 /**
@@ -135,7 +132,8 @@ public final class StringBuilder extends AbstractStringBuilder implements
      * 
      * @see String#valueOf(char)
      */
-    public StringBuilder append(char c) {
+    @Override
+	public StringBuilder append(char c) {
         append0(c);
         return this;
     }
@@ -153,7 +151,7 @@ public final class StringBuilder extends AbstractStringBuilder implements
      * @see String#valueOf(int)
      */
     public StringBuilder append(int i) {
-        append0(Integer.toString(i));
+    	append0(i);
         return this;
     }
 
@@ -170,7 +168,7 @@ public final class StringBuilder extends AbstractStringBuilder implements
      * @see String#valueOf(long)
      */
     public StringBuilder append(long lng) {
-        append0(Long.toString(lng));
+    	append0(lng);
         return this;
     }
 
@@ -312,7 +310,8 @@ public final class StringBuilder extends AbstractStringBuilder implements
      *        object.
      * @return A reference to this object.
      */
-    public StringBuilder append(CharSequence csq) {
+    @Override
+	public StringBuilder append(CharSequence csq) {
         if (csq == null) {
             appendNull();
         } else {
@@ -335,7 +334,8 @@ public final class StringBuilder extends AbstractStringBuilder implements
      * @param end The ending index of the subsequence.
      * @return A reference to this object.
      */
-    public StringBuilder append(CharSequence csq, int start, int end) {
+    @Override
+	public StringBuilder append(CharSequence csq, int start, int end) {
         append0(csq, start, end);
         return this;
     }
@@ -453,7 +453,7 @@ public final class StringBuilder extends AbstractStringBuilder implements
      * @see String#valueOf(int)
      */
     public StringBuilder insert(int offset, int i) {
-        insert0(offset, Integer.toString(i));
+    	super.insert0(offset, i);
         return this;
     }
 
@@ -475,7 +475,7 @@ public final class StringBuilder extends AbstractStringBuilder implements
      * @see String#valueOf(long)
      */
     public StringBuilder insert(int offset, long l) {
-        insert0(offset, Long.toString(l));
+    	super.insert0(offset, l);
         return this;
     }
 
@@ -703,53 +703,53 @@ public final class StringBuilder extends AbstractStringBuilder implements
         return this;
     }
 
-    /**
-     * Answers the contents of this StringBuilder.
-     * 
-     * @return a String containing the characters in this StringBuilder
-     */
-    @Override
-    public String toString() {
-        /* Note: This method is required to workaround a compiler bug
-         * in the RI javac (at least in 1.5.0_06) that will generate a
-         * reference to the non-public AbstractStringBuilder if we don't
-         * override it here.
-         */
-        return super.toString();
-    }
-
-    /**
-     * <p>
-     * Reads the state of a <code>StringBuilder</code> from the passed stream
-     * and restores it to this instance.
-     * </p>
-     * 
-     * @param in The stream to read the state from.
-     * @throws IOException if the stream throws it during the read.
-     * @throws ClassNotFoundException if the stream throws it during the read.
-     */
-    private void readObject(ObjectInputStream in) throws IOException,
-            ClassNotFoundException {
-        in.defaultReadObject();
-        int count = in.readInt();
-        char[] value = (char[]) in.readObject();
-        set(value, count);
-    }
-
-    /**
-     * <p>
-     * Writes the state of this object to the stream passed.
-     * </p>
-     * 
-     * @param out The stream to write the state to.
-     * @throws IOException if the stream throws it during the write.
-     * @serialData <code>int</code> - The length of this object.
-     *             <code>char[]</code> - The buffer from this object, which
-     *             may be larger than the length field.
-     */
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-        out.writeInt(length());
-        out.writeObject(getValue());
-    }
+//    /**
+//     * Answers the contents of this StringBuilder.
+//     * 
+//     * @return a String containing the characters in this StringBuilder
+//     */
+//    @Override
+//    public String toString() {
+//        /* Note: This method is required to workaround a compiler bug
+//         * in the RI javac (at least in 1.5.0_06) that will generate a
+//         * reference to the non-public AbstractStringBuilder if we don't
+//         * override it here.
+//         */
+//        return super.toString();
+//    }
+//
+//    /**
+//     * <p>
+//     * Reads the state of a <code>StringBuilder</code> from the passed stream
+//     * and restores it to this instance.
+//     * </p>
+//     * 
+//     * @param in The stream to read the state from.
+//     * @throws IOException if the stream throws it during the read.
+//     * @throws ClassNotFoundException if the stream throws it during the read.
+//     */
+//    private void readObject(ObjectInputStream in) throws IOException,
+//            ClassNotFoundException {
+//        in.defaultReadObject();
+//        int count = in.readInt();
+//        char[] value = (char[]) in.readObject();
+//        set(value, count);
+//    }
+//
+//    /**
+//     * <p>
+//     * Writes the state of this object to the stream passed.
+//     * </p>
+//     * 
+//     * @param out The stream to write the state to.
+//     * @throws IOException if the stream throws it during the write.
+//     * @serialData <code>int</code> - The length of this object.
+//     *             <code>char[]</code> - The buffer from this object, which
+//     *             may be larger than the length field.
+//     */
+//    private void writeObject(ObjectOutputStream out) throws IOException {
+//        out.defaultWriteObject();
+//        out.writeInt(length());
+//        out.writeObject(getValue());
+//    }
 }

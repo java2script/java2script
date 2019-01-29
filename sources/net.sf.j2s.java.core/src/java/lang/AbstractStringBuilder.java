@@ -17,10 +17,8 @@
 
 package java.lang;
 
-import java.io.InvalidObjectException;
 //import java.util.Arrays;
-
-import org.apache.harmony.luni.util.Msg;
+import java.nio.charset.Charset;
 
 /**
  * <p>
@@ -36,798 +34,419 @@ import org.apache.harmony.luni.util.Msg;
  */
 abstract class AbstractStringBuilder {
 
-    static final int INITIAL_CAPACITY = 16;
+	String s; // used by JavaScript only; no Java references
 
-    private char[] value;
+	// TODO: JS experiment with using array and .push() here
 
-    private int count;
+	public AbstractStringBuilder() {
+		/**
+		 * @j2sNative
+		 * 
+		 * 			this.s = "";
+		 * 
+		 */
+	}
 
-    private boolean shared;
+	public AbstractStringBuilder(int n) {
+		this();
+	}
 
-    /*
-     * Returns the character array.
-     */
-    final char[] getValue() {
-        return value;
-    }
+	public AbstractStringBuilder(String s) {
+		this.s = s;
+	}
 
-    /*
-     * Returns the underlying buffer and sets the shared flag.
-     */
-    final char[] shareValue() {
-        shared = true;
-        return value;
-    }
+	final void appendNull() {
+		s += "null";
+	}
 
-    /*
-     * Restores internal state after deserialization.
-     */
-    final void set(char[] val, int len) throws InvalidObjectException {
-        if (val == null)
-            val = new char[0];
-        if (val.length < len)
-            throw new InvalidObjectException(Msg.getString("K0199"));
 
-        shared = false;
-        value = val;
-        count = len;
-    }
+		public void append0(CharSequence csq) {
+			append0(csq.toString());
+		}
 
-    AbstractStringBuilder() {
-        value = new char[INITIAL_CAPACITY];
-    }
+		//	final void append0(String string) {
+		public void append0(String s) {
+			/**
+			 * @j2sNative
+			 * 
+			 * 			this.s += s
+			 * 
+			 */
+		}
 
-    AbstractStringBuilder(int capacity) {
-        if (capacity < 0)
-            throw new NegativeArraySizeException();
-        value = new char[capacity];
-    }
+//		final void append0(char ch) {
+		public void append0(char c) {
+			/**
+			 * @j2sNative
+			 * 
+			 * 			this.s += c;
+			 */
+		}
 
-    AbstractStringBuilder(String string) {
-    	if (string == null) // BH added
-    		throw new NullPointerException(); // BH added
-        count = string.length();
-        shared = false;
-        value = new char[count + INITIAL_CAPACITY];
-        string.getChars(0, count, value, 0);
-    }
+		public void append0(int i) {
+			/**
+			 * @j2sNative
+			 * 
+			 * 			this.s += i
+			 * 
+			 */
+		}
 
-    private void enlargeBuffer(int min) {
-        int twice = (value.length << 1) + 2;
-        char[] newData = new char[min > twice ? min : twice];
-        System.arraycopy(value, 0, newData, 0, count);
-        value = newData;
-        shared = false;
-    }
+		public void append0(long l) {
+			/**
+			 * @j2sNative
+			 * 
+			 * 			this.s += l
+			 * 
+			 */
+		}
 
-    final void appendNull() {
-        int newSize = count + 4;
-        if (newSize > value.length) {
-            enlargeBuffer(newSize);
-        } else if (shared) {
-            value = value.clone();
-            shared = false;
-        }
-        value[count++] = 'n';
-        value[count++] = 'u';
-        value[count++] = 'l';
-        value[count++] = 'l';
-    }
+		public void append0(StringBuilder buf) {
+			/**
+			 * @j2sNative
+			 * 
+			 * 			this.s += buf.s;
+			 * 
+			 */
+		}
 
-    final void append0(char chars[]) {
-        int newSize = count + chars.length;
-        if (newSize > value.length) {
-            enlargeBuffer(newSize);
-        } else if (shared) {
-            value = value.clone();
-            shared = false;
-        }
-        System.arraycopy(chars, 0, value, count, chars.length);
-        count = newSize;
-    }
+		public void append0(StringBuffer buf) {
+			/**
+			 * @j2sNative
+			 * 
+			 * 			this.s += (buf === null ? "null" : buf.s);
+			 * 
+			 */
+		}
 
-    final void append0(char chars[], int start, int length) {
-        if (chars == null) {
-            throw new NullPointerException();
-        }
-        // start + length could overflow, start/length maybe MaxInt
-        if (start >= 0 && 0 <= length && length <= chars.length - start) {
-            int newSize = count + length;
-            if (newSize > value.length) {
-                enlargeBuffer(newSize);
-            } else if (shared) {
-                value = value.clone();
-                shared = false;
-            }
-            System.arraycopy(chars, start, value, count, length);
-            count = newSize;
-        } else {
-            throw new ArrayIndexOutOfBoundsException();
-        }
-    }
+		public void append0(Object data) {
+			/**
+			 * @j2sNative
+			 * 
+			 * 			this.s += (data === null ? "null" : data.toString());
+			 * 
+			 */
+		}
 
-    final void append0(char ch) {
-        if (count == value.length) {
-            enlargeBuffer(count + 1);
-        }
-        if (shared) {
-            value = value.clone();
-            shared = false;
-        }
-        value[count++] = ch;
-    }
+//		final void append0(char chars[]) {
+		final void append0(char chars[]) {
+			/**
+			 * @j2sNative
+			 * 
+			 * 			this.s += chars.join("");
+			 * 
+			 */
+		}
+			
+			
 
-    final void append0(String string) {
-        if (string == null) {
-            appendNull();
-            return;
-        }
-        int adding = string.length();
-        int newSize = count + adding;
-        if (newSize > value.length) {
-            enlargeBuffer(newSize);
-        } else if (shared) {
-            value = value.clone();
-            shared = false;
-        }
-        string.getChars(0, adding, value, count);
-        count = newSize;
-    }
+//	final void append0(char chars[], int start, int length) {
+		public void append0(char[] cb, int off, int len) {
+			/**
+			 * @j2sNative
+			 * 
+			 * 			this.s += cb.slice(off,off+len).join("");
+			 * 
+			 */
+		}
 
-    final void append0(CharSequence s, int start, int end) {
-        if (s == null)
-            s = "null";
-        if (start < 0 || end < 0 || start > end || end > s.length())
-            throw new IndexOutOfBoundsException();
+//	final void append0(CharSequence s, int start, int end) {
+		public void append0(CharSequence csq, int start, int end) {
+			append0(csq.subSequence(start, end).toString());
+		}
 
-        append0(s.subSequence(start, end).toString());
-    }
+	//////////////////////
+	/////////////////// new
 
-    /**
-     * Answers the number of characters this StringBuffer can hold without
-     * growing.
-     * 
-     * @return the capacity of this StringBuffer
-     * 
-     * @see #ensureCapacity
-     * @see #length
-     */
-    public int capacity() {
-        return value.length;
-    }
+	public int capacity() {
+		return Integer.MAX_VALUE;
+	}
 
-    /**
-     * <p>
-     * Retrieves the character at the <code>index</code>.
-     * </p>
-     * 
-     * @param The index of character in this object to retrieve.
-     * @return The char value.
-     * @throws IndexOutOfBoundsException if <code>index</code> is negative or
-     *         greater than or equal to the current {@link #length()}.
-     */
-    public char charAt(int index) {
-        if (index < 0 || index >= count)
-            throw new StringIndexOutOfBoundsException(index);
-        return value[index];
-    }
+	public char charAt(int i) {
+		/**
+		 * @j2sNative
+		 * 
+		 * 			return this.s.charAt(i);
+		 * 
+		 */
+		{
+			return 0;
+		}
+	}
 
-    final void delete0(int start, int end) {
-        if (start >= 0) {
-            if (end > count) {
-                end = count;
-            }
-            if (end == start) {
-                return;
-            }
-            if (end > start) {
-                int length = count - end;
-                if (length > 0) {
-                    if (!shared) {
-                        System.arraycopy(value, end, value, start, length);
-                    } else {
-                        char[] newData = new char[value.length];
-                        System.arraycopy(value, 0, newData, 0, start);
-                        System.arraycopy(value, end, newData, start, length);
-                        value = newData;
-                        shared = false;
-                    }
-                }
-                count -= end - start;
-                return;
-            }
-        }
-        throw new StringIndexOutOfBoundsException();
-    }
+	public int charCodeAt(int i) {
+		/**
+		 * @j2sNative
+		 * 
+		 * 			return this.s.charCodeAt(i);
+		 * 
+		 */
+		{
+			return 0;
+		}
+	}
 
-    final void deleteCharAt0(int location) {
-        if (0 > location || location >= count)
-            throw new StringIndexOutOfBoundsException(location);
-        int length = count - location - 1;
-        if (length > 0) {
-            if (!shared) {
-                System.arraycopy(value, location + 1, value, location, length);
-            } else {
-                char[] newData = new char[value.length];
-                System.arraycopy(value, 0, newData, 0, location);
-                System
-                        .arraycopy(value, location + 1, newData, location,
-                                length);
-                value = newData;
-                shared = false;
-            }
-        }
-        count--;
-    }
+	public void delete0(int start, int end) {
+		/**
+		 * @j2sNative
+		 * 
+		 * 			this.s = this.s.substring(0, start) + this.s.substring(end);
+		 */
+	}
 
-    /**
-     * <p>
-     * Ensures that this object has a minimum capacity available before
-     * requiring the internal buffer to be enlarged. The general policy of this
-     * method is that if the <code>minimumCapacity</code> is larger than the
-     * current {@link #capacity()}, then the capacity will be increased to the
-     * largest value of either the <code>minimumCapacity</code> or the current
-     * capacity multiplied by two plus two. Although this is the general policy,
-     * there is no guarantee that the capacity will change.
-     * </p>
-     * 
-     * @param minimumCapacity The new minimum capacity to set.
-     */
-    public void ensureCapacity(int min) {
-        if (min > value.length) {
-            enlargeBuffer(min);
-        }
-    }
+	final void deleteCharAt0(int index) {
+		/**
+		 * @j2sNative
+		 * 
+		 * 			this.s = this.s.substring(0, start) + this.s.substring(end);
+		 */
+	}
 
-    /**
-     * <p>
-     * Copies the requested sequence of characters to be copied to the
-     * <code>char[]</code> passed.
-     * </p>
-     * 
-     * @param start The inclusive start index of the characters to copy from
-     *        this object.
-     * @param end The exclusive end index of the characters to copy from this
-     *        object.
-     * @param dest The <code>char[]</code> to copy the characters to.
-     * @param destStart The inclusive start index of the <code>dest</code>
-     *        parameter to begin copying to.
-     * @throws IndexOutOfBoundsException if the <code>start</code> is
-     *         negative, the <code>destStart</code> is negative, the
-     *         <code>start</code> is greater than <code>end</code>, the
-     *         <code>end</code> is greater than the current {@link #length()}
-     *         or <code>destStart + end - begin</code> is greater than
-     *         <code>dest.length</code>.
-     */
-    public void getChars(int start, int end, char[] dest, int destStart) {
-        if (start > count || end > count || start > end) {
-            throw new StringIndexOutOfBoundsException();
-        }
-        System.arraycopy(value, start, dest, destStart, end - start);
-    }
+	public void insert0(int offset, int i) {
+		insert0(offset, /** @j2sNative i || */
+				"0");
+	}
 
-    final void insert0(int index, char[] chars) {
-        if (0 > index || index > count) {
-            throw new StringIndexOutOfBoundsException(index);
-        }
-        if (chars.length != 0) {
-            move(chars.length, index);
-            System.arraycopy(chars, 0, value, index, chars.length);
-            count += chars.length;
-        }
-    }
+	public void insert0(int offset, long l) {
+		insert0(offset, /** @j2sNative l || */
+				"0");
+	}
 
-    final void insert0(int index, char chars[], int start, int length) {
-        if (0 <= index && index <= count) {
-            // start + length could overflow, start/length maybe MaxInt
-            if (start >= 0 && 0 <= length && length <= chars.length - start) {
-                if (length != 0) {
-                    move(length, index);
-                    System.arraycopy(chars, start, value, index, length);
-                    count += length;
-                }
-                return;
-            }
-            throw new StringIndexOutOfBoundsException("offset " + start + ", len " + length + ", array.length " + chars.length);
-        }
-        throw new StringIndexOutOfBoundsException(index);
-    }
+	public void insert0(int offset, Object o) {
+		replace0(offset, offset, (o == null ? null : o.toString()));
+	}
 
-    final void insert0(int index, char ch) {
-        if (0 > index || index > count) {
-            // RI compatible exception type
-            throw new ArrayIndexOutOfBoundsException(index);
-        }
-        move(1, index);
-        value[index] = ch;
-        count++;
-    }
+	public void insert0(int offset, CharSequence s, int start, int end) {
+		replace0(offset, offset, (s == null ? null : s.subSequence(start, end).toString()));
+	}
 
-    final void insert0(int index, String string) {
-        if (0 <= index && index <= count) {
-            if (string == null)
-                string = "null";
-            int min = string.length();
-            if (min != 0) {
-                move(min, index);
-                string.getChars(0, min, value, index);
-                count += min;
-            }
-        } else {
-            throw new StringIndexOutOfBoundsException(index);
-        }
-    }
+//      final void insert0(int index, char ch) {
+	public void insert0(int offset, char c) {
+		replace0(offset, offset, (String) (Object) c);
+	}
 
-    final void insert0(int index, CharSequence s, int start, int end) {
-        if (s == null)
-            s = "null";
-        if (index < 0 || index > count || start < 0 || end < 0 || start > end
-                || end > s.length())
-            throw new IndexOutOfBoundsException();
-        insert0(index, s.subSequence(start, end).toString());
-    }
+//      final void insert0(int index, CharSequence s, int start, int end) {
+	public void insert0(int offset, CharSequence s) {
+		insert0(offset, (Object) s);
+	}
 
-    /**
-     * <p>
-     * The current length of this object.
-     * </p>
-     * 
-     * @return the number of characters in this StringBuffer
-     */
-    public int length() {
-        return count;
-    }
+//          final void insert0(int index, String string) {
+	public void insert0(int offset, String c) {
+		replace0(offset, offset, c);
+	}
 
-    private void move(int size, int index) {
-        int newSize;
-        if (value.length - count >= size) {
-            if (!shared) {
-                System.arraycopy(value, index, value, index + size, count
-                        - index); // index == count case is no-op
-                return;
-            }
-            newSize = value.length;
-        } else {
-            int a = count + size, b = (value.length << 1) + 2;
-            newSize = a > b ? a : b;
-        }
+//        final void insert0(int index, char[] chars) {
+	public void insert0(int offset, char[] str) {
+		replace0(offset, offset, /** j2sNative str.join("") || */
+				"");
+	}
 
-        char[] newData = new char[newSize];
-        System.arraycopy(value, 0, newData, 0, index);
-        // index == count case is no-op
-        System.arraycopy(value, index, newData, index + size, count - index);
-        value = newData;
-        shared = false;
-    }
+//    final void insert0(int index, char chars[], int start, int length) {
+	public void insert0(int offset, char[] str, int off, int len) {
+		replace0(offset, offset, /** j2sNative str.slice(off, off+len).join("") || */
+				"");
+	}
 
-    final void replace0(int start, int end, String string) {
-        if (start >= 0) {
-            if (end > count)
-                end = count;
-            if (end > start) {
-                int stringLength = string.length();
-                int diff = end - start - stringLength;
-                if (diff > 0) { // replacing with fewer characters
-                    if (!shared) {
-                        // index == count case is no-op
-                        System.arraycopy(value, end, value, start
-                                + stringLength, count - end);
-                    } else {
-                        char[] newData = new char[value.length];
-                        System.arraycopy(value, 0, newData, 0, start);
-                        // index == count case is no-op
-                        System.arraycopy(value, end, newData, start
-                                + stringLength, count - end);
-                        value = newData;
-                        shared = false;
-                    }
-                } else if (diff < 0) {
-                    // replacing with more characters...need some room
-                    move(-diff, end);
-                } else if (shared) {
-                    value = value.clone();
-                    shared = false;
-                }
-                string.getChars(0, stringLength, value, start);
-                count -= diff;
-                return;
-            }
-            if (start == end) {
-                if (string == null)
-                    throw new NullPointerException();
-                insert0(start, string);
-                return;
-            }
-        }
-        throw new StringIndexOutOfBoundsException();
-    }
+	public int length() {
+		/**
+		 * @j2sNative
+		 * 
+		 * 			return this.s.length;
+		 * 
+		 */
+		{
+			return 0;
+		}
+	}
 
-    final void reverse0() {
-        if (count < 2) {
-            return;
-        }
-        if (!shared) {
-            for (int i = 0, end = count, mid = count / 2; i < mid; i++) {
-                char temp = value[--end];
-                value[end] = value[i];
-                value[i] = temp;
-            }
-        } else {
-            char[] newData = new char[value.length];
-            for (int i = 0, end = count; i < count; i++) {
-                newData[--end] = value[i];
-            }
-            value = newData;
-            shared = false;
-        }
-    }
+	final void replace0(int start, int end, String string) {
 
-    /**
-     * <p>
-     * Sets the character at the <code>index</code> in this object.
-     * </p>
-     * 
-     * @param index the zero-based index of the character to replace.
-     * @param ch the character to set.
-     * @throws IndexOutOfBoundsException if <code>index</code> is negative or
-     *         greater than or equal to the current {@link #length()}.
-     */
-    public void setCharAt(int index, char ch) {
-        if (0 > index || index >= count) {
-            throw new StringIndexOutOfBoundsException(index);
-        }
-        if (shared) {
-            value = value.clone();
-            shared = false;
-        }
-        value[index] = ch;
-    }
+		/**
+		 * @j2sNative
+		 * 
+		 * 			this.s = this.s.substring(0, start) + str + this.s.substring(end);
+		 */
+	}
 
-    /**
-     * <p>
-     * Sets the current length to a new value. If the new length is larger than
-     * the current length, then the new characters at the end of this object
-     * will contain the <code>char</code> value of <code>\u0000</code>.
-     * </p>
-     * 
-     * @param length the new length of this StringBuffer
-     * 
-     * @exception IndexOutOfBoundsException when <code>length < 0</code>
-     * 
-     * @see #length
-     */
-    public void setLength(int length) {
-        if (length < 0)
-            throw new StringIndexOutOfBoundsException(length);
-        if (count < length) {
-            if (length > value.length) {
-                enlargeBuffer(length);
-            } else {
-                if (shared) {
-                    char[] newData = new char[value.length];
-                    System.arraycopy(value, 0, newData, 0, count);
-                    value = newData;
-                    shared = false;
-                } else {
-                    //Arrays.fill(value, count, length, (char) 0);
-                    for (int i = count; i < length; i++) {
-						value[i] = 0;
-					}
-                }
-            }
-        }
-        count = length;
-    }
+	public void reverse0() {
+		/**
+		 * @j2sNative s.toCharArray$().reverse().join("");
+		 */
+	}
 
-    /**
-     * <p>
-     * Returns the String value of the subsequence of this object from the
-     * <code>start</code> index to the current end.
-     * </p>
-     * 
-     * @param start The inclusive start index to begin the subsequence.
-     * @return A String containing the subsequence.
-     * @throws StringIndexOutOfBoundsException if <code>start</code> is
-     *         negative or greater than the current {@link #length()}.
-     */
-    public String substring(int start) {
-        if (0 <= start && start <= count) {
-            if (start == count)
-                return "";
+	public void setLength(int n) {
+		/**
+		 * @j2sNative
+		 * 
+		 * 			this.s = this.s.substring(0, n);
+		 */
+	}
 
-            shared = true;
-            return new String(value, start, count - start);
-        }
-        throw new StringIndexOutOfBoundsException(start);
-    }
+	public String substring(int i) {
+		/**
+		 * @j2sNative
+		 * 
+		 * 			return this.s.substring(i);
+		 */
+		{
+			return null;
+		}
+	}
 
-    /**
-     * <p>
-     * Returns the String value of the subsequence of this object from the
-     * <code>start</code> index to the <code>start</code> index.
-     * </p>
-     * 
-     * @param start The inclusive start index to begin the subsequence.
-     * @param end The exclusive end index to end the subsequence.
-     * @return A String containing the subsequence.
-     * @throws StringIndexOutOfBoundsException if <code>start</code> is
-     *         negative, greater than the current {@link #length()} or greater
-     *         than <code>end</code>.
-     */
-    public String substring(int start, int end) {
-        if (0 <= start && start <= end && end <= count) {
-            if (start == end)
-                return "";
+	public String substring(int i, int j) {
+		/**
+		 * @j2sNative
+		 * 
+		 * 			return this.s.substring(i, j);
+		 */
+		{
+			return null;
+		}
+	}
 
-            shared = true;
-            return new String(value, start, end - start);
-        }
-        throw new StringIndexOutOfBoundsException();
-    }
+	@Override
+	public String toString() {
+		/**
+		 * @j2sNative
+		 * 
+		 * 			return this.s;
+		 * 
+		 */
+		{
+			return null;
+		}
+	}
 
-    /**
-     * <p>
-     * Returns the current String representation of this object.
-     * </p>
-     * 
-     * @return a String containing the characters in this StringBuilder.
-     */
-    @Override
-    public String toString() {
-        if (count == 0)
-            return "";
+	public CharSequence subSequence(int start, int end) {
+		return substring(start, end);
+	}
 
-        if (count >= 256 && count <= (value.length >> 1))
-            return new String(value, 0, count);
-        shared = true;
-        return new String(value, 0, count);
-    }
+	public int indexOf(String s) {
+		/**
+		 * @j2sNative
+		 * 
+		 * 			return this.s.indexOf(s);
+		 * 
+		 */
+		{
+			return 0;
+		}
+	}
 
-    /**
-     * <p>
-     * Returns a <code>CharSequence</code> of the subsequence of this object
-     * from the <code>start</code> index to the <code>start</code> index.
-     * </p>
-     * 
-     * @param start The inclusive start index to begin the subsequence.
-     * @param end The exclusive end index to end the subsequence.
-     * @return A CharSequence containing the subsequence.
-     * @throws IndexOutOfBoundsException if <code>start</code> is negative,
-     *         greater than the current {@link #length()} or greater than
-     *         <code>end</code>.
-     * 
-     * @since 1.4
-     */
-    public CharSequence subSequence(int start, int end) {
-        return substring(start, end);
-    }
+	public int indexOf(String s, int i) {
+		/**
+		 * @j2sNative
+		 * 
+		 * 			return this.s.indexOf(s, i);
+		 */
+		{
+			return 0;
+		}
+	}
 
-    /**
-     * Searches in this StringBuffer for the first index of the specified
-     * character. The search for the character starts at the beginning and moves
-     * towards the end.
-     * 
-     * 
-     * @param string the string to find
-     * @return the index in this StringBuffer of the specified character, -1 if
-     *         the character isn't found
-     * 
-     * @see #lastIndexOf(String)
-     * 
-     * @since 1.4
-     */
-    public int indexOf(String string) {
-        return indexOf(string, 0);
-    }
+	public int lastIndexOf(String s) {
+		/**
+		 * @j2sNative
+		 * 
+		 * 			return this.s.lastIndexOf(s);
+		 */
+		{
+			return 0;
+		}
+	}
 
-    /**
-     * Searches in this StringBuffer for the index of the specified character.
-     * The search for the character starts at the specified offset and moves
-     * towards the end.
-     * 
-     * @param subString the string to find
-     * @param start the starting offset
-     * @return the index in this StringBuffer of the specified character, -1 if
-     *         the character isn't found
-     * 
-     * @see #lastIndexOf(String,int)
-     * 
-     * @since 1.4
-     */
-    public int indexOf(String subString, int start) {
-        if (start < 0)
-            start = 0;
-        int subCount = subString.length();
-        if (subCount > 0) {
-            if (subCount + start > count)
-                return -1;
-            // TODO optimize charAt to direct array access
-            char firstChar = subString.charAt(0);
-            while (true) {
-                int i = start;
-                boolean found = false;
-                for (; i < count; i++)
-                    if (value[i] == firstChar) {
-                        found = true;
-                        break;
-                    }
-                if (!found || subCount + i > count)
-                    return -1; // handles subCount > count || start >= count
-                int o1 = i, o2 = 0;
-                while (++o2 < subCount && value[++o1] == subString.charAt(o2)) {
-                    // Intentionally empty
-                }
-                if (o2 == subCount)
-                    return i;
-                start = i + 1;
-            }
-        }
-        return (start < count || start == 0) ? start : count;
-    }
+	public int lastIndexOf(String s, int i) {
+		/**
+		 * @j2sNative
+		 * 
+		 * 			return this.s.lastIndexOf(s, i);
+		 */
+		{
+			return 0;
+		}
+	}
 
-    /**
-     * Searches in this StringBuffer for the last index of the specified
-     * character. The search for the character starts at the end and moves
-     * towards the beginning.
-     * 
-     * @param string the string to find
-     * @return the index in this StringBuffer of the specified character, -1 if
-     *         the character isn't found
-     * @throws NullPointerException if the <code>string</code> parameter is
-     *         <code>null</code>.
-     * 
-     * @see String#lastIndexOf(java.lang.String)
-     * 
-     * @since 1.4
-     */
-    public int lastIndexOf(String string) {
-        return lastIndexOf(string, count);
-    }
+	final char[] shareValue() {
+		return getValue();
+	}
 
-    /**
-     * Searches in this StringBuffer for the index of the specified character.
-     * The search for the character starts at the specified offset and moves
-     * towards the beginning.
-     * 
-     * @param subString the string to find
-     * @param start the starting offset
-     * @return the index in this StringBuffer of the specified character, -1 if
-     *         the character isn't found
-     * @throws NullPointerException if the <code>subString</code> parameter is
-     *         <code>null</code>.
-     * @see String#lastIndexOf(java.lang.String,int)
-     * @since 1.4
-     */
-    public int lastIndexOf(String subString, int start) {
-        int subCount = subString.length();
-        if (subCount <= count && start >= 0) {
-            if (subCount > 0) {
-                if (start > count - subCount)
-                    start = count - subCount; // count and subCount are both
-                // >= 1
-                // TODO optimize charAt to direct array access
-                char firstChar = subString.charAt(0);
-                while (true) {
-                    int i = start;
-                    boolean found = false;
-                    for (; i >= 0; --i)
-                        if (value[i] == firstChar) {
-                            found = true;
-                            break;
-                        }
-                    if (!found)
-                        return -1;
-                    int o1 = i, o2 = 0;
-                    while (++o2 < subCount
-                            && value[++o1] == subString.charAt(o2)) {
-                        // Intentionally empty
-                    }
-                    if (o2 == subCount)
-                        return i;
-                    start = i - 1;
-                }
-            }
-            return start < count ? start : count;
-        }
-        return -1;
-    }
+	final char[] getValue() {
+		return s.toCharArray();
+	}
 
-    /**
-     * <p>
-     * Trims off any extra capacity beyond the current length. Note, this method
-     * is NOT guaranteed to change the capacity of this object.
-     * </p>
-     * 
-     * @since 1.5
-     */
-    public void trimToSize() {
-        if (count < value.length) {
-            char[] newValue = new char[count];
-            System.arraycopy(value, 0, newValue, 0, count);
-            value = newValue;
-            shared = false;
-        }
-    }
+	public synchronized void trimToSize() {
+		// interesting idea!
+	}
 
-    /**
-     * <p>
-     * Retrieves the Unicode code point value at the <code>index</code>.
-     * </p>
-     * 
-     * @param index The index to the <code>char</code> code unit within this
-     *        object.
-     * @return The Unicode code point value.
-     * @throws IndexOutOfBoundsException if <code>index</code> is negative or
-     *         greater than or equal to {@link #length()}.
-     * @see Character
-     * @see Character#codePointAt(char[], int, int)
-     * @since 1.5
-     */
-    public int codePointAt(int index) {
-        if (index < 0 || index >= count)
-            throw new StringIndexOutOfBoundsException(index);
-        return Character.codePointAt(value, index, count);
-    }
+	public void ensureCapacity(int min) {
+		// unnec.
+	}
 
-    /**
-     * <p>
-     * Retrieves the Unicode code point value that precedes the
-     * <code>index</code>.
-     * </p>
-     * 
-     * @param index The index to the <code>char</code> code unit within this
-     *        object.
-     * @return The Unicode code point value.
-     * @throws IndexOutOfBoundsException if <code>index</code> is less than 1
-     *         or greater than {@link #length()}.
-     * @see Character
-     * @see Character#codePointBefore(char[], int, int)
-     * @since 1.5
-     */
-    public int codePointBefore(int index) {
-        if (index < 1 || index > count)
-            throw new StringIndexOutOfBoundsException(index);
-        return Character.codePointBefore(value, index);
-    }
+	public int codePointCount(int beginIndex, int endIndex) {
+		return beginIndex - endIndex;
+	}
 
-    /**
-     * <p>
-     * Calculates the number of Unicode code points between
-     * <code>beginIndex</code> and <code>endIndex</code>.
-     * </p>
-     * 
-     * @param beginIndex The inclusive beginning index of the subsequence.
-     * @param endIndex The exclusive end index of the subsequence.
-     * @return The number of Unicode code points in the subsequence.
-     * @throws IndexOutOfBoundsException if <code>beginIndex</code> is
-     *         negative or greater than <code>endIndex</code> or
-     *         <code>endIndex</code> is greater than {@link #length()}.
-     * @since 1.5
-     */
-    public int codePointCount(int beginIndex, int endIndex) {
-        if (beginIndex < 0 || endIndex > count || beginIndex > endIndex)
-            throw new StringIndexOutOfBoundsException();
-        return Character.codePointCount(value, beginIndex, endIndex
-                - beginIndex);
-    }
+	public int codePointBefore(int i) {
+		if (i < 1 || i > s.length())
+			throw new IndexOutOfBoundsException();
+		return s.codePointAt(i);
+	}
 
-    /**
-     * <p>
-     * Returns the index within this object that is offset from
-     * <code>index</code> by <code>codePointOffset</code> code points.
-     * </p>
-     * 
-     * @param index The index within this object to calculate the offset from.
-     * @param codePointOffset The number of code points to count.
-     * @return The index within this object that is the offset.
-     * @throws IndexOutOfBoundsException if <code>index</code> is negative or
-     *         greater than {@link #length()} or if there aren't enough code
-     *         points before or after <code>index</code> to match
-     *         <code>codePointOffset</code>.
-     * @since 1.5
-     */
-    public int offsetByCodePoints(int index, int codePointOffset) {
-        return Character.offsetByCodePoints(value, 0, count, index,
-                codePointOffset);
-    }
+	public void getChars(int start, int end, char[] buffer, int idx) {
+		for (int i = start; i < end; i++)
+			buffer[idx++] = s.charAt(i);
+	}
+
+	public int offsetByCodePoints(int index, int codePointOffset) {
+		return index + codePointOffset;
+	}
+
+	public int codePointAt(int index) {
+		return s.codePointAt(index);
+	}
+
+	//// ???
+	
+	/**
+	 * simple byte conversion properly implementing UTF-8. * Used for base64
+	 * conversion and allows for offset
+	 * 
+	 * @param off
+	 * @param len or -1 for full length (then off must = 0)
+	 * @return byte[]
+	 */
+	public byte[] toBytes(int off, int len) {
+		if (len == 0)
+			return new byte[0];
+		Charset cs;
+		/**
+		 * 
+		 * just a string in JavaScript
+		 * 
+		 * @j2sNative
+		 * 
+		 * 			cs = "UTF-8";
+		 * 
+		 */
+		{
+			cs = Charset.forName("UTF-8");
+		}
+		return (len > 0 ? substring(off, off + len) : off == 0 ? toString() : substring(off, length() - off))
+				.getBytes(cs);
+	}
+
+	public void setCharAt(int offset, char ch) {
+		insert0(offset, ch);
+	}
+
+	public void appendCodePoint0(int i) {
+		/**
+		 * @j2sNative
+		 * 
+		 * 			this.s += String.fromCharCode(i);
+		 * 
+		 */
+	}
+
+
 }
