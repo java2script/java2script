@@ -2,6 +2,8 @@ package test;
 
 import java.io.UnsupportedEncodingException;
 
+import javajs.util.SB;
+
 public class Test_String extends Test_ {
 	
 
@@ -30,6 +32,58 @@ public class Test_String extends Test_ {
 	  assert(String.valueOf(1.5).equals("1.5"));
 	  assert(String.valueOf(1.5f).equals("1.5"));
 	  assert(new Test_String().toString().equals("testing test.Test_String"));
+
+	  long t0;	  
+	  t0 = System.currentTimeMillis(); 
+	  String s = "";
+	  for (int i = 0; i < 10000; i++) {
+		  s += i;
+	  }
+	  System.out.println("ms " + (System.currentTimeMillis() - t0) + "\t s+=");
+	  
+
+
+	  t0 = System.currentTimeMillis();
+	  StringBuffer Sb = new StringBuffer();
+	  for (int i = 0; i < 10000; i++) {
+		  Sb.append(i);
+	  }
+	  s = Sb.toString();
+	  System.out.println("ms " + (System.currentTimeMillis() - t0) + "\t one StringBuffer");
+	 
+
+	  t0 = System.currentTimeMillis();
+	  StringBuilder S = new StringBuilder();
+	  for (int i = 0; i < 10000; i++) {
+		  S.append(i);
+	  }
+	  s = S.toString();
+	  System.out.println("ms " + (System.currentTimeMillis() - t0) + "\t one StringBuilder");
+	 
+
+	  t0 = System.currentTimeMillis();
+	  for (int i = 0; i < 10000; i++) {
+		  StringBuilder SB = new StringBuilder();
+		  SB.append(i);
+		  s = SB.toString();
+	  }
+	  System.out.println("ms " + (System.currentTimeMillis() - t0) + "\t many StringBuilder");
+	 
+
+
+	  
+	  
+	  t0 = System.currentTimeMillis();
+	  SB b = new SB();
+	  for (int i = 0; i < 10000; i++) {
+		  b.appendI(i);
+	  }
+	  s = b.toString();
+	  System.out.println("ms " + (System.currentTimeMillis() - t0) + "\t javajs.util.SB");
+	 
+	  
+	  
+	  
 	  System.out.println("Test_String OK");
   }
 

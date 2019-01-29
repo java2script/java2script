@@ -121,7 +121,7 @@ public class Test_Event extends JFrame {
 		if (asInternalFrame) {
 			JDesktopPane d = new JDesktopPane();
 			// this next allows floating frames outside the JDesktopPane in SwingJS
-			d.putClientProperty("swingjs.overflow.hidden", "false");
+			getRootPane().putClientProperty("swingjs.overflow.hidden", "false");
 
 			d.setPreferredSize(new Dimension(800, 600));
 
