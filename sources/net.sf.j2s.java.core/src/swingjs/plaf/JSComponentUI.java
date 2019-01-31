@@ -793,8 +793,6 @@ public class JSComponentUI extends ComponentUI
 	 * Set j2sApplet to capture jQuery mouse events and turn them into Java MouseEvents. 
 	 * Used by JSFrameUI and JTextArea to indicate that it is to be the "currentTarget" for mouse 
 	 * clicks. 
-	 * @param node
-	 * @param isFrame
 	 */
 	protected void setJ2sMouseHandler() {
 		// The DOM attributes applet and _frameViewer are necessary for proper 
@@ -2688,6 +2686,7 @@ public class JSComponentUI extends ComponentUI
 		setHTMLElement();
 		String curs = JSToolkit.getCursorName(c.getCursor());
 		DOMNode.setStyles(outerNode, "cursor", curs);
+		DOMNode.setStyles(domNode, "cursor", curs);
 		setWaitImage(curs == "wait");
 	}
 
