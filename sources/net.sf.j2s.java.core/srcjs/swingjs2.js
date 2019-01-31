@@ -12606,6 +12606,12 @@ if (!target) {
 	var lastDragx = 99999;
 	var lastDragy = 99999;
 
+	J2S.getMousePosition = function(p) {
+		p.x = lastDragx;
+		p.y = lastDragy;
+		return p;
+	}
+	
 	J2S._track = function(applet) {
 		// this function inserts an iFrame that can be used to track your page's
 		// applet use.

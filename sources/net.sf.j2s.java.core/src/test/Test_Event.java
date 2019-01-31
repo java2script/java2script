@@ -35,6 +35,8 @@ import javax.swing.MenuElement;
 import javax.swing.MenuSelectionManager;
 import javax.swing.Timer;
 
+import swingjs.plaf.JSInternalFrameUI;
+
 public class Test_Event extends JFrame {
 
 	
