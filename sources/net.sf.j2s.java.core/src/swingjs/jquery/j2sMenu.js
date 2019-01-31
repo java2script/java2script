@@ -50,7 +50,7 @@ try{
 	 return n && n.innerText.replace(/\n/g,"|");
  }
  
- var CLICK_OUT_DELAY = 100;// ms
+ var CLICK_OUT_DELAY = 200;// ms; 100 was too fast
  
  var outActive;
  
