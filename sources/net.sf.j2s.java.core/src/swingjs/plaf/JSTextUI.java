@@ -2971,7 +2971,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		switch (eventType) {
 		case KeyEvent.KEY_PRESSED:
 			// note that events are bundled here into one eventType
-			JSKeyEvent keyEvent = JSKeyEvent.newJSKeyEvent(editor, jQueryEvent, KeyEvent.KEY_PRESSED, false);
+			// 0 param here says "get the real event type from jQueryEvent
+			JSKeyEvent keyEvent = JSKeyEvent.newJSKeyEvent(editor, jQueryEvent, 0, false);
 			if (keyEvent == null)
 				return HANDLED;
 			editor.dispatchEvent(keyEvent);
