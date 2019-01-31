@@ -833,12 +833,12 @@ public class JSFrame extends Window {
      */
     public void setUndecorated(boolean undecorated) {
         /* Make sure we don't run in the middle of peer creation.*/
-        synchronized (getTreeLock()) {
-            if (isDisplayable()) {
-                throw new IllegalComponentStateException("The frame is displayable.");
-            }
+//        synchronized (getTreeLock()) {
+//            if (isDisplayable()) {
+//                throw new IllegalComponentStateException("The frame is displayable.");
+//            }
             this.undecorated = undecorated;
-        }
+//        }
     }
 
     /**

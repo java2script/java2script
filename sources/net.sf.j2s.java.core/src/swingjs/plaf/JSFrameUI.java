@@ -1,29 +1,25 @@
 package swingjs.plaf;
 
-import javajs.api.JSFunction;
-
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.awt.peer.FramePeer;
 import java.beans.PropertyChangeEvent;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.LookAndFeel;
-import javax.swing.SwingUtilities;
 
-import swingjs.JSUtil;
+import javajs.api.JSFunction;
 import swingjs.api.js.DOMNode;
 
 public class JSFrameUI extends JSWindowUI implements FramePeer {
+	
+	private static final Insets ZERO_INSETS = new Insets(0, 0, 0, 0);
 	
 	// a window with a border and optional menubar and (though not here) min and max buttons
 
@@ -114,7 +110,8 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			DOMNode.setStyles(closerNode, "width", "20px", "height", "20px", "position", "absolute", "text-align",
 					"center", "right", "0px");
 			bindJQueryEvents(closerNode, "click mouseenter mouseout", -1);
-			frameNode.appendChild(titleBarNode);
+			if (!frame.isUndecorated())
+				frameNode.appendChild(titleBarNode);
 			if (isModal) {
 				modalNode = DOMNode.createElement("div", id + "_modaldiv");
 				Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
@@ -314,7 +311,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 
 	@Override
 	public Insets getInsets() {
-		return (isDummyFrame ? null : jc.getFrameViewer().getInsets());
+		return (isDummyFrame ? null : frame.isUndecorated() ? ZERO_INSETS : jc.getFrameViewer().getInsets());
 	}
 
 	@Override

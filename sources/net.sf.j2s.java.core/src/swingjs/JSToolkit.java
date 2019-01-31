@@ -17,6 +17,7 @@ import java.awt.JSComponent;
 import java.awt.JSFrame;
 import java.awt.JobAttributes;
 import java.awt.PageAttributes;
+import java.awt.Point;
 import java.awt.PrintJob;
 import java.awt.Window;
 import java.awt.datatransfer.Clipboard;
@@ -988,6 +989,10 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		 *      jqevent.preventDefault(); 
 		 * 
 		 */
+	}
+
+	public static Point getMouseLocation() {
+		return JSUtil.J2S.getMousePosition(new Point());
 	}
 
 }
