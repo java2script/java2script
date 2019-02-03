@@ -1,7 +1,9 @@
 package swingjs.plaf;
 
 
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.LayoutManager;
 
 import javax.swing.JComponent;
@@ -59,8 +61,11 @@ public class JSPanelUI extends JSLightweightUI {
 	
 	@Override
 	public Dimension getMinimumSize(JComponent jc) {
-		LayoutManager man = jc.getLayout();
-		return (man == null ? super.getMinimumSize(jc) : jc.getLayout().minimumLayoutSize(jc));
+		return null;
+//		// in our capacity as peer here, not UI.
+//		LayoutManager man = jc.getLayout();
+//		Dimension d = (man == null ? super.getMinimumSize(jc) : jc.getLayout().minimumLayoutSize(jc));
+//		return d;
 	}
 
 
