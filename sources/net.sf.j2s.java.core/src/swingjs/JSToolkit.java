@@ -152,7 +152,7 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	@Override
 	public int getScreenResolution() {
 		// n/a
-		return 0;
+		return 96;
 	}
 
 	@Override
