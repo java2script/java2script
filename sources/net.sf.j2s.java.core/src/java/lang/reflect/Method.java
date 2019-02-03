@@ -116,7 +116,7 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 		 * if (!this.isProxy) c = c.$clazz$;
 		 * m= c[this.signature] || c.prototype && c.prototype[this.signature];
 		 * if (m != null) {
-		 *   m = this.wrap(m.apply(receiver,a));
+		 *   m = this.wrap$O(m.apply(receiver,a));
 		 *  }
 		 */
 		if (m == null) {
