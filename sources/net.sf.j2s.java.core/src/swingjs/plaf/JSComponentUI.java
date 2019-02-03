@@ -2402,13 +2402,14 @@ public class JSComponentUI extends ComponentUI
 			return;
 		}
 		preferredDim = null;
-
+		// fix for button vertical alignment -- should offset just by the ascent
+		String yoff = (wIcon == 0 ? "-" + (jc.getFont().getFontMetrics().getAscent()>>1) + "px" : "-50%");
 		DOMNode.setStyles(centeringNode, "position", "absolute", "top", null, "left", null, "transform", null);
 		if (alignHCenter && alignVCenter && wIcon == 0
 				|| wText == 0 && margins.left == margins.right && margins.top == margins.bottom) {
 			// simple totally centered label or button
 			DOMNode.setStyles(centeringNode, "top", "50%", "left", "50%", "transform",
-					"translateX(-50%)translateY(-50%)");
+					"translateX(-50%)translateY("+ yoff + ")");
 			return;
 		}
 
