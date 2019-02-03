@@ -4,12 +4,12 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +22,18 @@ public class Test_JSON extends Test_ {
 	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 		try {
+//
+//			System.out.println(Double.valueOf(Double.MIN_NORMAL + "1"));
+//			System.out.println(Long.valueOf(Long.MAX_VALUE+"1"));
+//			BigInteger bi = new BigInteger(Long.MAX_VALUE+"");
+//			System.out.println(bi.longValue());
+//			BigDecimal bd = new BigDecimal(Double.MAX_VALUE + "1");
+//			System.out.println(bi.doubleValue());
+
+			
+			org.json.JSONObject o = new org.json.JSONObject(new Test_JSON());
+			System.out.println(o.toString());
+						
 			URL url = new URL("http://www.ebi.ac.uk/pdbe/api/pdb/entry/summary/1cbs");
 
 			JSUtil.setAjax(url);
@@ -88,12 +100,51 @@ public class Test_JSON extends Test_ {
 //				for (int i = 0; i < list.size(); i++)
 //					dumpVal(list.get(i));
 			}
+			
 			System.out.println("Test_JSON OK");
 		} catch (MalformedURLException e) {
 		} catch (IOException e) {
 		}
 	}
 
+	public int getValue() {
+		return 3;
+	}
+	
+	public double getValueD() {
+		return 3;
+	}
+	
+	public boolean getValueBtrue() {
+		return true;
+	}
+	
+	public boolean getValueBfalse() {
+		return false;
+	}
+	
+	public String getValueS() {
+		return "s";
+	}
+	
+	
+	public char[] getValueCA() {
+		return new char[] {'o','k'};
+	}
+
+	public BigInteger getValueBI() {
+		return new BigInteger("123456789012345678901234567890");
+	}
+
+	public BigDecimal getValueBD() {
+		return new BigDecimal("123456789012345.678901234567890E456");
+	}
+
+	public BigDecimal getValueLD() {
+		return new BigDecimal("123456789012345.678901234567890E-1456");
+	}
+
+	
 	private static void dumpVal(Object object) {
 		if (object instanceof Map) {
 		   Map<String, Object> m = (Map<String, Object>) object;

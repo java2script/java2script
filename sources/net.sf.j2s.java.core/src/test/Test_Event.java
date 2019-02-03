@@ -7,6 +7,7 @@ import java.awt.Component;
 import java.awt.DefaultKeyboardFocusManager;
 import java.awt.Dimension;
 import java.awt.KeyboardFocusManager;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -42,6 +43,7 @@ public class Test_Event extends JFrame {
 	
 	static {
 		System.out.println("os:"+ System.getProperty("os.name"));
+		System.out.println("dpr:" + Toolkit.getDefaultToolkit().getScreenResolution());
 	}
 	
 	String test = "  34567890\n1234567890\n  345\n     ";
