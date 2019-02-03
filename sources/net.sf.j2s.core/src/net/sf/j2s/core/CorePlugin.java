@@ -19,7 +19,9 @@ public class CorePlugin extends Plugin {
 	 * register the bundle version properly. So we use VERSION here instead.
 	 * 
 	 */
-	public static String VERSION = "3.2.4.06";
+	public static String VERSION = "3.2.4.07";
+	// TODO/NOTE final static int FOO = (/**@j2sNative 5 || */3) stated but not recognized when used as its new value 
+	// BH 2/3/2019 -- 3.2.4.07 fixes "final static Float = (float)" missing definition
 	// BH 1/2/2019 -- 3.2.4.06 fixes try(resources) with more than one resource missing semicolon
 	// BH 12/13/2018 -- 3.2.4.05 fixes problem with OuterClass.this.foo() not using .apply()
 	// BH 11/10/2018 -- 3.2.4.04 additional support for JAXB
