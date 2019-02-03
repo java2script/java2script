@@ -1408,7 +1408,8 @@ public class JSONObject {
 	}
 
 	private String getKeyNameFromMethod(Method method) {
-		final int ignoreDepth = -1;// getAnnotationDepth(method, JSONPropertyIgnore.class);
+// SwingJS - no annotations
+//		final int ignoreDepth = -1;// getAnnotationDepth(method, JSONPropertyIgnore.class);
 //        if (ignoreDepth > 0) {
 //            final int forcedNameDepth = getAnnotationDepth(method, JSONPropertyName.class);
 //            if (forcedNameDepth < 0 || ignoreDepth <= forcedNameDepth) {
@@ -1959,20 +1960,15 @@ public class JSONObject {
 		if ((initial >= '0' && initial <= '9') || initial == '-') {
 			// decimal representation
 			if (isDecimalNotation(val)) {
+				Double d;
 				// quick dirty way to see if we need a BigDecimal instead of a Double
 				// this only handles some cases of overflow or underflow
-				if (val.length() > 14) {
-					return new BigDecimal(val);
-				}
-				final Double d = Double.valueOf(val);
-				if (d.isInfinite() || d.isNaN()) {
-					// if we can't parse it as a double, go up to BigDecimal
-					// this is probably due to underflow like 4.32e-678
-					// or overflow like 4.65e5324. The size of the string is small
-					// but can't be held in a Double.
-					return new BigDecimal(val);
-				}
-				return d;
+				// if we can't parse it as a double, go up to BigDecimal
+				// this is probably due to underflow like 4.32e-678
+				// or overflow like 4.65e5324. The size of the string is small
+				// but can't be held in a Double.
+				return (val.length() <= 14 && !(d = Double.valueOf(val)).isInfinite() && !d.isNaN() ? d
+						: new BigDecimal(val));
 			}
 			// integer representation.
 			// This will narrow any values to the smallest reasonable Object representation
@@ -1983,27 +1979,31 @@ public class JSONObject {
 			// but leads to smaller integers being placed in larger wrappers even though not
 			// needed. i.e. 1,000,000,000 -> Long even though it's an Integer
 			// 1,000,000,000,000,000,000 -> BigInteger even though it's a Long
-			// if(val.length()<=9){
-			// return Integer.valueOf(val);
-			// }
-			// if(val.length()<=18){
-			// return Long.valueOf(val);
-			// }
-			// return new BigInteger(val);
-
-			// BigInteger version: We use a similar bitLenth compare as
-			// BigInteger#intValueExact uses. Increases GC, but objects hold
-			// only what they need. i.e. Less runtime overhead if the value is
-			// long lived. Which is the better tradeoff? This is closer to what's
-			// in stringToValue.
-			BigInteger bi = new BigInteger(val);
-			if (bi.bitLength() <= 31) {
-				return Integer.valueOf(bi.intValue());
+			int n = (/** @j2sNative 1 ? parseInt(val) : */
+			0);
+			if (n >= Integer.MIN_VALUE && n <= Integer.MAX_VALUE) {
+				// if(val.length()<=9){
+				return Integer.valueOf(val);
 			}
-			if (bi.bitLength() <= 63) {
-				return Long.valueOf(bi.longValue());
+			if (val.equals("" + n)) {
+				// if(val.length()<=18){
+				return Long.valueOf(val);
 			}
-			return bi;
+			return new BigInteger(val);
+//
+//			// BigInteger version: We use a similar bitLenth compare as
+//			// BigInteger#intValueExact uses. Increases GC, but objects hold
+//			// only what they need. i.e. Less runtime overhead if the value is
+//			// long lived. Which is the better tradeoff? This is closer to what's
+//			// in stringToValue.
+//			BigInteger bi = new BigInteger(val);
+//			if (bi.bitLength() <= 31) {
+//				return Integer.valueOf(bi.intValue());
+//			}
+//			if (bi.bitLength() <= 63) {
+//				return Long.valueOf(bi.longValue());
+//			}
+//			return bi;
 		}
 		throw new NumberFormatException("val [" + val + "] is not a valid number.");
 	}
@@ -2223,8 +2223,9 @@ public class JSONObject {
 				return new JSONObject(map);
 			}
 			// SwingJS does not implement java.lang.Package class
-			//Package objectPackage = (Package) object.getClass().getPackage();
-			//String objectPackageName = //objectPackage != null ? objectPackage.getName() : "";
+			// Package objectPackage = (Package) object.getClass().getPackage();
+			// String objectPackageName = //objectPackage != null ? objectPackage.getName()
+			// : "";
 //			if (objectPackageName.startsWith("java.") || objectPackageName.startsWith("javax.")
 //					|| object.getClass().getClassLoader() == null) {
 			String className = object.getClass().getName();
@@ -2254,32 +2255,6 @@ public class JSONObject {
 			throws JSONException, IOException {
 		if (value == null || value.equals(null)) {
 			writer.write("null");
-		} else if (value instanceof JSONString) {
-			Object o;
-			try {
-				o = ((JSONString) value).toJSONString();
-			} catch (Exception e) {
-				throw new JSONException(e);
-			}
-			writer.write(o != null ? o.toString() : quote(value.toString()));
-		} else if (value instanceof Number) {
-			// not all Numbers may match actual JSON Numbers. i.e. fractions or Imaginary
-			final String numberAsString = numberToString((Number) value);
-			try {
-				// Use the BigDecimal constructor for its parser to validate the format.
-				@SuppressWarnings("unused")
-				BigDecimal testNum = new BigDecimal(numberAsString);
-				// Close enough to a JSON number that we will use it unquoted
-				writer.write(numberAsString);
-			} catch (NumberFormatException ex) {
-				// The Number value is not a valid JSON number.
-				// Instead we will quote it as a string
-				quote(numberAsString, writer);
-			}
-		} else if (value instanceof Boolean) {
-			writer.write(value.toString());
-		} else if (value instanceof Enum<?>) {
-			writer.write(quote(((Enum<?>) value).name()));
 		} else if (value instanceof JSONObject) {
 			((JSONObject) value).write(writer, indentFactor, indent);
 		} else if (value instanceof JSONArray) {
@@ -2293,7 +2268,7 @@ public class JSONObject {
 		} else if (value.getClass().isArray()) {
 			new JSONArray(value).write(writer, indentFactor, indent);
 		} else {
-			quote(value.toString(), writer);
+			writer.write(JSONWriter.valueToString(value));
 		}
 		return writer;
 	}

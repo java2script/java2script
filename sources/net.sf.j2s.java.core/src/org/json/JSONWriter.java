@@ -2,6 +2,7 @@ package org.json;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Map;
 
@@ -339,18 +340,9 @@ public class JSONWriter {
         }
         if (value instanceof Number) {
             // not all Numbers may match actual JSON Numbers. i.e. Fractions or Complex
-            final String numberAsString = JSONObject.numberToString((Number) value);
-            try {
-                // Use the BigDecimal constructor for it's parser to validate the format.
-                @SuppressWarnings("unused")
-                BigDecimal unused = new BigDecimal(numberAsString);
-                // Close enough to a JSON number that we will return it unquoted
-                return numberAsString;
-            } catch (NumberFormatException ex){
-                // The Number value is not a valid JSON number.
-                // Instead we will quote it as a string
-                return JSONObject.quote(numberAsString);
-            }
+			// this next call throws an error for nonfinite or isNaN Double or Float
+            final String s = JSONObject.numberToString((Number) value);
+            return (JSONWriter.isNumberOK(value, s) ? s : JSONObject.quote(s));
         }
         if (value instanceof Boolean || value instanceof JSONObject
                 || value instanceof JSONArray) {
@@ -415,4 +407,46 @@ public class JSONWriter {
     public JSONWriter value(Object object) throws JSONException {
         return this.append(valueToString(object));
     }
+
+	/**
+	 * Added for SwingJS
+	 * 
+	 * @param value
+	 * @param s
+	 * @return
+	 * @author hansonr@stolaf.edu Bob Hanson
+	 */
+	public static boolean isNumberOK(Object value, String s) {
+		if (value instanceof BigInteger) {
+			try {
+				long l = Long.parseLong(s);
+				return (l <= 9007199254740991L && l >= -9007199254740991L);
+				// JavaScript Number.MAX_SAFE_INTEGER and JavaScript.Number.MIN_SAFE_INTEGER
+			} catch (NumberFormatException e) {
+			}
+			return false;
+		}
+		if (value instanceof BigDecimal) {
+			double d = Double.parseDouble(s);
+			return Double.isFinite(d) && (s.indexOf("E-") < 0 || d != 0);
+
+			// SwingJS No! This is a huge performance hit, and it is wrong.
+			// It makes no sense to take an Integer, Long, BigDecimal or BigInteger and just
+			// turn it back into
+			// BigDecimal to see if it parses. We already know it is finite. Why would it
+			// not parse?
+			// try {
+			// // Use the BigDecimal constructor for its parser to validate the format.
+			// @SuppressWarnings("unused")
+			// BigDecimal testNum = new BigDecimal(numberAsString);
+			// // Close enough to a JSON number that we will use it unquoted
+			// writer.write(numberAsString);
+			// } catch (NumberFormatException ex) {
+			// // The Number value is not a valid JSON number.
+			// // Instead we will quote it as a string
+			// quote(numberAsString, writer);
+			// }
+		}
+		return true;
+	}
 }
