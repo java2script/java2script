@@ -127,7 +127,7 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 		return m;
 	}
 
-	private Object wrap(Object o) {
+	Object wrap(Object o) {
 		switch (/** @j2sNative typeof o || */"") {
 		case "number":
 			double d = (/** @j2sNative 1 ? o : */0);
