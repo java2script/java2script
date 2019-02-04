@@ -103,7 +103,10 @@ public class JSON {
 	}
 
 	public static Object parse(Reader br) {
-		return ((JSONReader) br).data;
+		if (br instanceof JSONReader)
+			return ((JSONReader) br).data;
+		InputStream is = /** @j2sNative br.$in || */null;
+		return parse(is);
 	}
 
 	/**
@@ -164,11 +167,14 @@ public class JSON {
 		Object data;
 
 		public JSONReader(InputStream in) {
-			super((Reader) (Object) in);
+			super((Reader) (Object) "");
 			// could be buffered
 			data = toObject(/** @j2sNative $in._ajaxData || $in.$in && $in.$in._ajaxData || */
 					null);
-
+			if (data == null) {
+				String json = (/** @j2sNative $in.str || $in.$in && $in.$in.str || */null);
+				data = toObject(JSUtil.parseJSONRaw(json));
+			}
 		}
 
 		public JSONReader(Reader in) {
