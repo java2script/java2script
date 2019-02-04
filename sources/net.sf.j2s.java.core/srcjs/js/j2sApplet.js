@@ -30,6 +30,7 @@ try {
 	J2S._traceEvents = (document.location.href.indexOf("j2sevents") >= 0)
 	J2S._traceMouse = (document.location.href.indexOf("j2smouse") >= 0)
 	J2S._traceMouseMove = (document.location.href.indexOf("j2smousemove") >= 0)
+	J2S._startProfiling = 	(document.location.href.indexOf("j2sprofile") >= 0)
 } catch (e) {}
 
 J2S.onClazzLoaded || (J2S.onClazzLoaded = function(i, msg) {console.log([i,msg])});
@@ -2147,6 +2148,8 @@ if (!target) {
 			__clazzLoaded = true;
 			// create the Clazz object
 			LoadClazz();
+			if (J2S._startProfiling) 
+				Clazz.startProfiling();
 			if (applet._noMonitor)
 				Clazz._LoaderProgressMonitor.showStatus = function() {
 				}

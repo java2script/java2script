@@ -863,7 +863,7 @@ Clazz.startProfiling = function(doProfile) {
   if (typeof doProfile == "number") {
     _jsid0 = _jsid;
     setTimeout(function() { var s = "total wall time: " + doProfile + " sec\n" + Clazz.getProfile(); console.log(s); System.out.println(s)}, doProfile * 1000);
-  } else if (!doProfile) {
+  } else if (doProfile === false) {
 	  _jsid = 0;
 	  _profileNew = null;
   }
