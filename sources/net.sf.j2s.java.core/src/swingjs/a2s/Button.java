@@ -15,7 +15,7 @@ public class Button extends JButton {
 		super(text);
 	}
 	
-	private static Insets awtInsets = new Insets(0, 6, 0, 6);
+	private static Insets awtInsets = new Insets(3, 6, 3, 6);
 	// awt.Button has an unadjustable horizontal inset of what appears to be about 6 pixels
 	@Override
 	public Insets getMargin() {
