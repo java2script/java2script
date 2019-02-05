@@ -6875,31 +6875,34 @@ public abstract class Component implements ImageObserver/*
 		return autoFocusTransferOnDisposal;
 	}
 
-	// /**
-	// * Adds the specified popup menu to the component.
-	// * @param popup the popup menu to be added to the component.
-	// * @see #remove(MenuComponent)
-	// * @exception NullPointerException if {@code popup} is {@code null}
-	// * @since JDK1.1
-	// */
-	// public void add(PopupMenu popup) {
-	// synchronized (getTreeLock()) {
-	// if (popup.parent != null) {
-	// popup.parent.remove(popup);
-	// }
-	// if (popups == null) {
-	// popups = new Vector();
-	// }
-	// popups.addElement(popup);
-	// popup.parent = this;
-	//
-	// if (peer != null) {
-	// if (popup.peer == null) {
-	// popup.addNotify();
-	// }
-	// }
-	// }
-	// }
+	/**
+	 * Adds the specified popup menu to the component.
+	 * 
+	 * @param popup the popup menu to be added to the component.
+	 * @see #remove(MenuComponent)
+	 * @exception NullPointerException if {@code popup} is {@code null}
+	 * @since JDK1.1
+	 */
+	public void add(PopupMenu popup) {
+		popup.setInvoker(this); 
+//		synchronized (getTreeLock()) {
+//			if (popup.parent != null) {
+//				popup.parent.remove(popup);
+//			}
+//			if (popups == null) {
+//				popups = new Vector();
+//			}
+//			popups.addElement(popup);
+//			popup.setInvoker(this);
+////			popup.parent = (JComponent) this;
+//
+//			if (peer != null) {
+//				if (popup.peer == null) {
+//					popup.addNotify();
+//				}
+//			}
+//		}
+	}
 
 	// /**
 	// * Removes the specified popup menu from the component.
