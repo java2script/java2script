@@ -747,7 +747,6 @@ public class JSComponentUI extends ComponentUI
 
 	@SuppressWarnings("unused")
 	protected static void hideAllMenus() {
-		//System.out.println("JSCUI hideAllMenus" + JSUtil.getStackTrace(-3));
 		JSUtil.jQuery.$(".ui-j2smenu").hide();
 		if (/** @j2sNative javax.swing.ToolTipManager ||*/false)
 			ToolTipManager.j2sHideToolTip();
@@ -1542,8 +1541,6 @@ public class JSComponentUI extends ComponentUI
 			$(body).after(div);
 			Rectangle r = div.getBoundingClientRect();
 			
-			//System.out.println("JSCUI " + (int) (r.width + 0.) + " " + (/** @j2sNative div.innerHTML ||*/""));
-			
 			// From the DOM; Will be Rectangle2D.double, actually.
 			// This is preferable to $(text).width() because that is rounded
 			// DOWN.
@@ -1556,9 +1553,6 @@ public class JSComponentUI extends ComponentUI
 				actualWidth = w;
 				actualHeight = h;
 			}
-			// h = preferredHeight;// (iconHeight > 0 ? iconHeight :
-			// centerHeight);
-			// TODO what if centerHeight is > prefHeight?
 			$(div).detach();
 		}
 		// allow a UI to slightly adjust its dimension
@@ -2307,7 +2301,7 @@ public class JSComponentUI extends ComponentUI
 		int gap = (wText == 0 || wIcon == 0 ? 0 : b.getIconTextGap());
 		int w = cellComponent != null ? cellWidth : $(domNode).width();
 		boolean alignVCenter = (vAlign == SwingConstants.CENTER);
-		Insets margins = (isLabel ? insets : b.getMargin());
+		Insets margins = (isAWT ? b.getInsets() : isLabel ? insets : b.getMargin());
 		if (margins == null)
 			margins = zeroInsets;
 		int h = (dimText == null ? 0 : dimText.height);
@@ -2416,7 +2410,7 @@ public class JSComponentUI extends ComponentUI
 		}
 		preferredDim = null;
 		// fix for button vertical alignment -- should offset just by the ascent
-		String yoff = (wIcon == 0 ? "-" + (jc.getFont().getFontMetrics().getAscent()>>1) + "px" : "-50%");
+		String yoff = "-50%";
 		DOMNode.setStyles(centeringNode, "position", "absolute", "top", null, "left", null, "transform", null);
 		if (alignHCenter && alignVCenter && wIcon == 0
 				|| wText == 0 && margins.left == margins.right && margins.top == margins.bottom) {
@@ -2514,6 +2508,7 @@ public class JSComponentUI extends ComponentUI
 			switch (vTextPos) {
 			case SwingConstants.TOP:
 				top = itop = 0;
+				yoff = null;
 				break;
 			default:
 			case SwingConstants.CENTER:
@@ -2522,12 +2517,14 @@ public class JSComponentUI extends ComponentUI
 					itop = 70;
 					iscale = "scale(0.6,0.6)";
 				}
+				yoff = (wIcon == 0 ? "-" + ((jc.getFont().getFontMetrics().getAscent()>>1)+1) + "px" : "-50%");
 				break;
 			case SwingConstants.BOTTOM:
 				top = itop = 100;
+				yoff = null;
 				break;
 			}
-			DOMNode.setStyles(textNode, "top", top + "%", "transform", "translateY(-" + top + "%)");
+			DOMNode.setStyles(textNode, "top", top + "%", "transform", "translateY(" + (yoff == null ? "-" + top + "%" : yoff + ")"));
 			DOMNode.setStyles(iconNode, "top", top + "%", "transform",
 					"translateY(-" + itop + "%)" + (iscale == null ? "" : iscale));
 		} else {			
