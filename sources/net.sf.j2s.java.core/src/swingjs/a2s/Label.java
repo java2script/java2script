@@ -1,6 +1,8 @@
 package swingjs.a2s;
 
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Insets;
 
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
@@ -39,6 +41,22 @@ public class Label extends JLabel {
 		setOpaque(c != null);
 	}
 	
+	private static Insets awtInsets = new Insets(3, 6, 2, 6);
+	// awt.Label has an unadjustable horizontal inset of what appears to be about 6 pixels
+	@Override
+	public Insets getInsets() {
+		return awtInsets;
+	}
+
+	@Override
+	public Insets getInsets(Insets s) {
+		s.top = awtInsets.top;
+		s.left = awtInsets.left;
+		s.bottom = awtInsets.bottom;
+		s.right = awtInsets.right;
+		return s;
+	}
+
 	public void setAlignment(int alignment) {
 		float xAlignment = 0f;
 		float yAlignment = 0.5f;
