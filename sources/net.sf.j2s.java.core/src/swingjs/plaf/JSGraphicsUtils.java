@@ -272,6 +272,8 @@ public class JSGraphicsUtils
         ui.setTainted();
         Icon icon = b.getIcon();
         String text = b.getText();
+        if (ui.isAWT && text == "")
+        	text = "\u00A0"; // nonbreaking space for java.awt.Label
 
         Font font = b.getFont();
         FontMetrics fm = b.getFontMetrics(font);

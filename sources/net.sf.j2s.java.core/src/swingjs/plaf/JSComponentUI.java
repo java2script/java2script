@@ -411,6 +411,12 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected int num;
 
+	/**
+	 * a flag to indicate that this is an AWT component
+	 * 
+	 */
+	public boolean isAWT;
+
 	// /**
 	// * a flag to indicate that it is not visible, but not according to Java
 	// */
@@ -1450,9 +1456,12 @@ public class JSComponentUI extends ComponentUI
 	}
 	
 	private Dimension getTextSize(AbstractButton b) {
-		String t;
-		return (textNode == null || (t = b.getText()) == null 
-				|| t == "" ? null : getHTMLSize(textNode));
+		if (textNode == null)
+			return null;
+		String t = b.getText();
+		if (isAWT && t == "")
+			t = "\u00A0"; // AWT labels do not hide if ""
+		return (t == null || t == "" ? null : getHTMLSize(textNode));
 	}
 
 	/**
@@ -2145,9 +2154,13 @@ public class JSComponentUI extends ComponentUI
 				DOMNode.setStyles(iconNode, "height", iconHeight + "px", "width", icon.getIconWidth() + "px");
 			}
 		}
-		if (text == null || text.length() == 0) {
+		if (text == null) {
 			text = "";
-		} else {
+		} else if (text == "") {
+			if (isAWT)
+				text = "\u00A0"; // AWT labels do not hide if ""
+		}
+		if (text != "") {
 			if (text == "\0") {
 				isPaintedOnly = true; // this cannot be undone
 			}
