@@ -1198,6 +1198,7 @@ public class JSComponentUI extends ComponentUI
 			return;
 		case "text":
 			String val = ((AbstractButton) c).getText();
+			System.out.println(val + " -vs- " + currentText);
 			if (val == null ? currentText != null : !val.equals(currentText))
 				setIconAndText(prop, currentIcon, currentGap, (String) val);
 			return;
@@ -2412,6 +2413,7 @@ public class JSComponentUI extends ComponentUI
 		// fix for button vertical alignment -- should offset just by the ascent
 		String yoff = "-50%";
 		DOMNode.setStyles(centeringNode, "position", "absolute", "top", null, "left", null, "transform", null);
+		DOMNode.setStyles(centeringNode, "width", wCtr + "px", "height", hCtr + "px");
 		if (alignHCenter && alignVCenter && wIcon == 0
 				|| wText == 0 && margins.left == margins.right && margins.top == margins.bottom) {
 			// simple totally centered label or button
@@ -2420,7 +2422,6 @@ public class JSComponentUI extends ComponentUI
 			return;
 		}
 
-		DOMNode.setStyles(centeringNode, "width", wCtr + "px", "height", hCtr + "px");
 		DOMNode.setStyles(iconNode, "position", "absolute", "top", null, "left", null, "transform", null);
 		DOMNode.setStyles(textNode, "position", "absolute", "top", null, "left", null, "transform", null);
 
