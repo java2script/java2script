@@ -109,18 +109,33 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 		// proxy does 
 		Object[] a = Class.getArgumentArray(parameterTypes, args, isProxy);
 		Object c = (isProxy ? receiver : this.Class_);
+		Object m = null;
 		/** 
 		 * @j2sNative
 		 * 
 		 * if (!this.isProxy) c = c.$clazz$;
-		 * var m= c[this.signature] || c.prototype && c.prototype[this.signature];
-		 * if (m != null)
-		 *   return m.apply(receiver,a);
+		 * m= c[this.signature] || c.prototype && c.prototype[this.signature];
+		 * if (m != null) {
+		 *   m = this.wrap$O(m.apply(receiver,a));
+		 *  }
 		 */
-
+		if (m == null) {
 		  String message = "Method " + getDeclaringClass().getName()
 				  + "." + signature + " was not found";
-		  throw new IllegalArgumentException(message);  
+		  throw new IllegalArgumentException(message); 
+		}
+		return m;
+	}
+
+	Object wrap(Object o) {
+		switch (/** @j2sNative typeof o || */"") {
+		case "number":
+			double d = (/** @j2sNative 1 ? o : */0);
+			return (d == (int) d ? Integer.valueOf((int) d) : Double.valueOf(d));
+		case "boolean":
+			return Boolean.valueOf(/** @j2sNative o || */false);
+		}
+		return o;
 	}
 
 	public TypeVariable<Method>[] getTypeParameters() {

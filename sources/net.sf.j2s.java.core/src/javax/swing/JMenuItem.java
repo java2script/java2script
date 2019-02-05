@@ -187,6 +187,7 @@ public class JMenuItem extends AbstractButton implements MenuElement {
 	 */
 	@Override
 	protected void init(String text, Icon icon) {
+		_j2sInvalidateOnAdd = false;
 		updateUI();
 		if (text != null)
 			setText(text);

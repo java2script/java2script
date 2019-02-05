@@ -773,6 +773,8 @@ try {
 	};
 }
 
+var invalidSelectors = "";
+
 function Sizzle( selector, context, results, seed ) {
 	var match, elem, m, nodeType,
 		// QSA vars
@@ -864,11 +866,15 @@ function Sizzle( selector, context, results, seed ) {
 
 			if ( newSelector ) {
 				try {
-					push.apply( results,
-						newContext.querySelectorAll( newSelector )
-					);
-					return results;
+					 // SwingJS addition
+					 if (invalidSelectors.indexOf(";" + newSelector + ";") < 0) {					
+						push.apply( results,
+							newContext.querySelectorAll( newSelector )
+						);
+						return results;
+					 }
 				} catch(qsaError) {
+					invalidSelectors += ";" + newSelector + ";";
 				} finally {
 					if ( !old ) {
 						context.removeAttribute("id");
@@ -10689,6 +10695,7 @@ try {
 	J2S._traceEvents = (document.location.href.indexOf("j2sevents") >= 0)
 	J2S._traceMouse = (document.location.href.indexOf("j2smouse") >= 0)
 	J2S._traceMouseMove = (document.location.href.indexOf("j2smousemove") >= 0)
+	J2S._startProfiling = 	(document.location.href.indexOf("j2sprofile") >= 0)
 } catch (e) {}
 
 J2S.onClazzLoaded || (J2S.onClazzLoaded = function(i, msg) {console.log([i,msg])});
@@ -10757,6 +10764,7 @@ if (!J2S._version)
 					".ebi.ac.uk" : null,
 					"pubchem.ncbi.nlm.nih.gov" : null,
 					"www.nmrdb.org/tools/jmol/predict.php" : null,
+					"jalview.org/" : null,
 					"$" : "https://cactus.nci.nih.gov/chemical/structure/%FILENCI/file?format=sdf&get3d=True",
 					"$$" : "https://cactus.nci.nih.gov/chemical/structure/%FILENCI/file?format=sdf",
 					"=" : "https://files.rcsb.org/download/%FILE.pdb",
@@ -11400,6 +11408,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		if (info === true)
 			info = {isBinary: true};
 		info || (info = {});
+		var isTyped = !!info.dataType;
 		var isBinary = info.isBinary;
 		// swingjs.api.J2SInterface
 		// use host-server PHP relay if not from this host
@@ -11435,7 +11444,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 					asBase64, true, info);
 		} else {
 			fileName = fileName.replace(/file:\/\/\/\//, "file://"); // opera
-			info.dataType = (isBinary ? "binary" : "text");
+			if (!isTyped)info.dataType = (isBinary ? "binary" : "text");
 			info.async = !!fSuccess;
 			if (isPost) {
 				info.type = "POST";
@@ -11461,17 +11470,18 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 			isBinary = false;
 		}
 		isBinary && (isBinary = J2S._canSyncBinary(true));
-		return (isBinary ? J2S._strToBytes(data) : (self.JU || javajs && javajs.util).SB
-				.newS$S(data));
+		return (isTyped ? data : isBinary ? J2S._strToBytes(data) : (self.JU || javajs && javajs.util).SB.newS$S(data));
 	}
 
 	J2S._xhrReturn = function(xhr) {
-		if (!xhr.responseText || self.Clazz
+		if (!xhr.responseText && !xhr.responseJSON || self.Clazz
 				&& Clazz.instanceOf(xhr.response, self.ArrayBuffer)) {
 			// Safari or error
 			return xhr.response || xhr.statusText;
 		}
-		return xhr.responseText;
+	    if (xhr.responesJSON)
+	    	xhr.responseText = null;
+		return xhr.responseJSON || xhr.responseText;
 	}
 
 	J2S._isDirectCall = function(url) {
@@ -12318,12 +12328,12 @@ if (!target) {
 			if (J2S._mouseOwner)
 				who = J2S._mouseOwner;
 
-			if (ev.target.getAttribute("role")) { // JSButtonUI adds
-													// role=menucloser to icon
-													// and text
-				var m = (ev.target._menu || ev.target.parentElement._menu);
-				m && m._hideJSMenu();
-			}
+//			if (ev.target.getAttribute("role")) { // JSButtonUI adds
+//													// role=menucloser to icon
+//													// and text
+//				var m = (ev.target._menu || ev.target.parentElement._menu);
+//				m && m._hideJSMenu();
+//			}
 
 			J2S.setMouseOwner(null);
 
@@ -12597,6 +12607,12 @@ if (!target) {
 	var lastDragx = 99999;
 	var lastDragy = 99999;
 
+	J2S.getMousePosition = function(p) {
+		p.x = lastDragx;
+		p.y = lastDragy;
+		return p;
+	}
+	
 	J2S._track = function(applet) {
 		// this function inserts an iFrame that can be used to track your page's
 		// applet use.
@@ -12797,6 +12813,8 @@ if (!target) {
 			__clazzLoaded = true;
 			// create the Clazz object
 			LoadClazz();
+			if (J2S._startProfiling) 
+				Clazz.startProfiling();
 			if (applet._noMonitor)
 				Clazz._LoaderProgressMonitor.showStatus = function() {
 				}
@@ -13475,6 +13493,8 @@ if (!target) {
 		}, drag = function(ev) {
 			// we will move the frame's parent node and take the frame along
 			// with it
+			if (ev.buttons == 0 && ev.button == 0)
+				tag.isDragging = false;
 			var mode = (tag.isDragging ? 506 : 503);
 			if (!J2S._dmouseOwner || tag.isDragging && J2S._dmouseOwner == tag) {
 				x = pageX0 + (dx = ev.pageX - pageX);
@@ -13607,6 +13627,8 @@ if (!target) {
 
 // TODO: still a lot of references to window[...]
 
+// BH 1/29/2019  adds String.join$CharSequence$Iterable, String.join$CharSequence$CharSequenceA
+
 // BH 1/13/2019 3.2.4.07 adds Character.to[Title|Lower|Upper]Case(int)
 // BH 1/8/2019 3.2.4.07 fixes String.prototype.to[Upper|Lower]Case$java_util_Locale - using toLocal[Upper|Lower]Case()
 // BH 1/3/2019 3.2.4.07 adds ByteBuffer/CharBuffer support, proper CharSet encoding, including GBK (Standard Chinese)
@@ -13651,7 +13673,7 @@ window["j2s.clazzloaded"] = true;
   _loadcore: true,
   _nooutput: 0,
   _VERSION_R: "3.2.4.07", //runtime
-  _VERSION_T: "3.2.4.06", //transpiler
+  _VERSION_T: "3.2.4.07", //transpiler
 };
 
 ;(function(Clazz, J2S) {
@@ -13705,6 +13727,19 @@ var getArrayClass = function(name){
 }
 
 Clazz.array = function(baseClass, paramType, ndims, params, isClone) {
+	
+	var t0 = (_profileNew ? window.performance.now() : 0);
+
+	var ret = _array.apply(null, arguments);
+	
+	  _profileNew && addProfileNew(baseClass, t0 - window.performance.now() - 0.01);
+
+	return ret;
+}
+
+var _array = function(baseClass, paramType, ndims, params, isClone) {
+	
+
   // int[][].class Clazz.array(Integer.TYPE, -2)
   // new int[] {3, 4, 5} Clazz.array(Integer.TYPE, -1, [3, 4, 5])    
   // new int[][]{new int[] {3, 4, 5}, {new int[] {3, 4, 5}} 
@@ -13746,10 +13781,10 @@ Clazz.array = function(baseClass, paramType, ndims, params, isClone) {
     if (haveDims && ndims >= -1) {
       if (ndims == -1) {
         // new int[] {3, 4, 5};
-        return Clazz.array(baseClass, prim + "A", -1, vals);
+        return _array(baseClass, prim + "A", -1, vals);
       }
       // Array.newInstance(int[][].class, 3);  
-      return Clazz.array(baseClass, prim + "A", (cl.__NDIM || 0) + 1, [ndims]);
+      return _array(baseClass, prim + "A", (cl.__NDIM || 0) + 1, [ndims]);
     }      
     params = vals;
     paramType = prim;
@@ -14446,7 +14481,7 @@ Clazz.startProfiling = function(doProfile) {
   if (typeof doProfile == "number") {
     _jsid0 = _jsid;
     setTimeout(function() { var s = "total wall time: " + doProfile + " sec\n" + Clazz.getProfile(); console.log(s); System.out.println(s)}, doProfile * 1000);
-  } else if (!doProfile) {
+  } else if (doProfile === false) {
 	  _jsid = 0;
 	  _profileNew = null;
   }
@@ -14469,20 +14504,22 @@ Clazz.getProfile = function() {
         var count = _profileNew[key][0];
         var tnano = _profileNew[key][1];
         totalcount += count;
-        totaltime += tnano;
-        rows.push(tabN(count) + tabN(tnano) + "\t" +key + "\n");
+        totaltime += Math.abs(tnano);
+        rows.push(tabN(count) + tabN(Math.round(tnano)) + "\t" +key + "\n");
       }
       rows.sort();
       rows.reverse();
       s += rows.join("");
-      s+= tabN(totalcount)+tabN(totaltime) + "\n";
+      s+= tabN(totalcount)+tabN(Math.round(totaltime)) + "\n";
     }
   _profileNew = null;
   return s; //+ __signatures;
 }
 
 var addProfileNew = function(c, t) {
-  var s = c.__CLASS_NAME__;
+  var s = c.__CLASS_NAME__ || c.__PARAMCODE;
+  if (t < 0)
+	  s += "[]";
   var p = _profileNew[s]; 
   p || (p = _profileNew[s] = [0,0]);
   p[0]++;
@@ -15153,7 +15190,8 @@ Clazz._showStack = function(n) {
 Clazz._getStackTrace = function(n) {
 	  Clazz._stack = [];
   //  need to limit this, as JavaScript call stack may be recursive
-  n || (n = 25);
+  var haven = !!n
+  haven || (n = 25);
   var showParams = (n < 0);
   if (showParams)
     n = -n;
@@ -15189,7 +15227,8 @@ Clazz._getStackTrace = function(n) {
     }
   }
   } catch(e){}  
-  s += estack.join("\n");
+  if (!haven)
+	  s += estack.join("\n");
   if (Clazz._stack.length) {
 	  s += "\nsee Clazz._stack";
 	  console.log("Clazz.stack = \n" + estack.join("\n"));
@@ -15316,15 +15355,8 @@ var needPackage = function(pkg) {
     _Loader.loadPackage("java");
 
 Clazz.newPackage("java.io");
-//Clazz.newPackage("java.lang");
-//Clazz.newPackage("java.lang.annotation");
-//Clazz.newPackage("java.lang.instrument");
-//Clazz.newPackage("java.lang.management");
 Clazz.newPackage("java.lang.reflect");
-//Clazz.newPackage("java.lang.ref");
-///*???*/java.lang.ref.reflect = java.lang.reflect;
 Clazz.newPackage("java.util");
-//Clazz.newPackage("java.security");
 
 
 // NOTE: Any changes to this list must also be 
@@ -15338,164 +15370,6 @@ Clazz.newInterface(java.lang,"Comparable");
 Clazz.newInterface(java.lang,"Runnable");
 
 
-//Clazz.newInterface(java.io,"Closeable");
-//Clazz.newInterface(java.io,"DataInput");
-//Clazz.newInterface(java.io,"DataOutput");
-//Clazz.newInterface(java.lang,"Iterable");
-//Clazz.newInterface(java.util,"Comparator");
-
-// TODO note that we are adding me = this, this.b$ = {CharSequence: me}, and this.b$['CharSequence'].length$()
-// This is a hack, just to get started, not desirable long term. 
-
-//(function(){var P$=java.lang,I$=[[0,'java.util.stream.StreamSupport','java.util.Spliterators']],$I$=function(i){return I$[i]||(I$[i]=Clazz.load(I$[0][i]))};
-//var C$=Clazz.newInterface(P$, "CharSequence");
-//var me;
-//
-//C$.$defaults$ = function(C$){
-//
-//// not quite...
-//	Clazz.newMeth(C$, 'chars$', function () {
-//		return $I$(1).intStream$java_util_function_Supplier$I$Z(
-//				Clazz.newLambda(
-//						function(){
-//							{ return($I$(2).spliterator$java_util_PrimitiveIterator_OfInt$J$I(
-//									Clazz.new_(CharSequence$1CharIterator.$init$, [b$['CharSequence'], {CharSequence:this.$finals$.CharSequence}]), 
-//									b$['CharSequence'].length$(), 
-//									16));
-//							}
-//						},0,'S'), 16464, false);
-//		});
-//
-//	
-////	
-////Clazz.newMeth(C$, 'chars$', function () {
-////	me = this;
-////return $I$(1).intStream$java_util_function_Supplier$I$Z(((P$.CharSequence$lambda1||
-////(function(){var C$=Clazz.newClass(P$, "CharSequence$lambda1", function(){Clazz.newInstance(this, arguments[0],1,C$);}, null, 'java.util.function.Supplier', 1);
-////
-////C$.$clinit$ = function() {Clazz.load(C$, 1);
-////}
-////
-////Clazz.newMeth(C$, '$init$', function () {
-////	this.b$ = {CharSequence: me};
-////}, 1);
-/////*lambda_E*/
-////Clazz.newMeth(C$, 'get$', function () { return($I$(2).spliterator$java_util_PrimitiveIterator_OfInt$J$I(Clazz.new_(CharSequence$1CharIterator.$init$, [this, null]), this.b$['CharSequence'].length$(), 16));});
-////})()
-////), Clazz.new_(CharSequence$lambda1.$init$, [this, null])), 16464, false);
-////});
-//
-//Clazz.newMeth(C$, 'codePoints$', function () {
-//me = this;
-//return $I$(1).intStream$java_util_function_Supplier$I$Z(((P$.CharSequence$lambda2||
-//(function(){var C$=Clazz.newClass(P$, "CharSequence$lambda2", function(){Clazz.newInstance(this, arguments[0],1,C$);}, null, 'java.util.function.Supplier', 1);
-//
-//C$.$clinit$ = function() {Clazz.load(C$, 1);
-//}
-//
-//Clazz.newMeth(C$, '$init$', function () {
-//	this.b$ = {CharSequence: me};
-//}, 1);
-///*lambda_E*/
-//Clazz.newMeth(C$, 'get$', function () { return($I$(2).spliteratorUnknownSize$java_util_PrimitiveIterator_OfInt$I(Clazz.new_(CharSequence$1CodePointIterator.$init$, [this, null]), 16));});
-//})()
-//), Clazz.new_(CharSequence$lambda2.$init$, [this, null])), 16, false);
-//});
-//};;
-//(function(){var C$=Clazz.newClass(P$, "CharSequence$1CharIterator", function(){
-//Clazz.newInstance(this, arguments[0],true,C$);
-//}, null, [['java.util.PrimitiveIterator','java.util.PrimitiveIterator.OfInt']], 2);
-//
-//C$.$clinit$ = function() {Clazz.load(C$, 1);
-//}
-//
-//Clazz.newMeth(C$, '$init0$', function () {
-//var c;if((c = C$.superclazz) && (c = c.$init0$))c.apply(this);
-//this.cur = 0;
-//}, 1);
-//
-//Clazz.newMeth(C$, '$init$', function () {
-//this.cur = 0;
-//}, 1);
-//
-//Clazz.newMeth(C$, 'hasNext$', function () {
-//return this.cur < this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []);
-//});
-//
-//Clazz.newMeth(C$, 'nextInt$', function () {
-//if (this.hasNext$()) {
-//return this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [this.cur++]).$c();
-//} else {
-//throw Clazz.new_(Clazz.load('java.util.NoSuchElementException'));
-//}});
-//
-//Clazz.newMeth(C$, ['forEachRemaining$java_util_function_IntConsumer','forEachRemaining$TT_CONS'], function (block) {
-//for (; this.cur < this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []); this.cur++) {
-//block.accept$(this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [this.cur]).$c());
-//}
-//});
-//
-//Clazz.newMeth(C$);
-//})()
-//;
-//(function(){var C$=Clazz.newClass(P$, "CharSequence$1CodePointIterator", function(){
-//Clazz.newInstance(this, arguments[0],true,C$);
-//}, null, [['java.util.PrimitiveIterator','java.util.PrimitiveIterator.OfInt']], 2);
-//
-//C$.$clinit$ = function() {Clazz.load(C$, 1);
-//}
-//
-//Clazz.newMeth(C$, '$init0$', function () {
-//var c;if((c = C$.superclazz) && (c = c.$init0$))c.apply(this);
-//this.cur = 0;
-//}, 1);
-//
-//Clazz.newMeth(C$, '$init$', function () {
-//this.cur = 0;
-//}, 1);
-//
-//Clazz.newMeth(C$, ['forEachRemaining$java_util_function_IntConsumer','forEachRemaining$TT_CONS'], function (block) {
-//var length = this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []);
-//var i = this.cur;
-//try {
-//while (i < length){
-//var c1 = this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [i++]);
-//if (!Character.isHighSurrogate$C(c1) || i >= length ) {
-//block.accept$(c1.$c());
-//} else {
-//var c2 = this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [i]);
-//if (Character.isLowSurrogate$C(c2)) {
-//i++;
-//block.accept$(Character.toCodePoint$C$C(c1, c2));
-//} else {
-//block.accept$(c1.$c());
-//}}}
-//} finally {
-//this.cur=i;
-//}
-//});
-//
-//Clazz.newMeth(C$, 'hasNext$', function () {
-//return this.cur < this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []);
-//});
-//
-//Clazz.newMeth(C$, 'nextInt$', function () {
-//var length = this.b$['CharSequence'].length$.apply(this.b$['CharSequence'], []);
-//if (this.cur >= length) {
-//throw Clazz.new_(Clazz.load('java.util.NoSuchElementException'));
-//}var c1 = this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [this.cur++]);
-//if (Character.isHighSurrogate$C(c1) && this.cur < length ) {
-//var c2 = this.b$['CharSequence'].charAt$I.apply(this.b$['CharSequence'], [this.cur]);
-//if (Character.isLowSurrogate$C(c2)) {
-//this.cur++;
-//return Character.toCodePoint$C$C(c1, c2);
-//}}return c1.$c();
-//});
-//
-//Clazz.newMeth(C$);
-//})()
-//})();
-//;Clazz.setTVer('3.2.4.04');//Created 2018-08-09 18:57:20 Java2ScriptVisitor version 3.2.2.03 net.sf.j2s.core.jar version 3.2.2.03
 
 (function(){var P$=java.lang,I$=[[0,'java.util.stream.StreamSupport','java.util.Spliterators','java.lang.CharSequence$lambda1','java.lang.CharSequence$lambda2']],$I$=function(i){return I$[i]||(I$[i]=Clazz.load(I$[0][i]))};
 var C$=Clazz.newInterface(P$, "CharSequence");
@@ -16866,7 +16740,7 @@ Sys.out.printf = Sys.out.printf$S$OA = Sys.out.format = Sys.out.format$S$OA = fu
 
 Sys.out.flush$ = function() {}
 
-Sys.out.println = Sys.out.println$O = Sys.out.println$Z = Sys.out.println$I = Sys.out.println$J = Sys.out.println$S = Sys.out.println$C = Sys.out.println = function(s) {
+Sys.out.println = Sys.out.println$ = Sys.out.println$O = Sys.out.println$Z = Sys.out.println$I = Sys.out.println$J = Sys.out.println$S = Sys.out.println$C = function(s) {
  s = (typeof s == "undefined" ? "" : "" + s);
   if (Clazz._nooutput || Clazz._traceFilter && s.indexOf(Clazz._traceFilter) < 0) return;
   if (!Clazz._traceFilter && Clazz._traceOutput && s && (s.indexOf(Clazz._traceOutput) >= 0 || '"' + s + '"' == Clazz._traceOutput)) {
@@ -17490,15 +17364,15 @@ function(s){
 return Clazz.new_(Float.c$, [s]);
 }, 1);
 
-Float.isNaN$F = m$(Float,"isNaN",
+Float.isNaN$F = m$(Float,"isNaN$",
 function(num){
 return isNaN(arguments.length == 1 ? num : this.valueOf());
 });
 
-Float.isInfinite$ = m$(Float,"isInfinite$F",
+Float.isInfinite$F = m$(Float,"isInfinite$",
 function(num){
 return !Number.isFinite(arguments.length == 1 ? num : this.valueOf());
-}, 1);
+});
 
 m$(Float,"equals$O",
 function(s){
@@ -18298,6 +18172,26 @@ String.copyValueOf$CA$I$I = function(data,offset,count) {
 }
 String.copyValueOf$CA = function(data) {
  return sp.copyValueOf$CA$I$I(data, 0, data.length);
+}
+
+String.join$CharSequence$CharSequenceA = function(sep,array) {
+ var ret = "";
+ var s = "";
+ for (var i = 0; i < array.length; i++) {
+	 ret += s + array[i].toString();
+	 s || (s = sep);	 
+ }
+ return ret;
+}
+
+String.join$CharSequence$Iterable = function(sep,iter) {
+ var ret = "";
+ var s = "";
+ while (iter.hasNext$()) {
+	 ret += s + iter.next$().toString();
+	 s || (s = sep);	 
+ }
+ return ret;
 }
  
 var C$=Clazz.newClass(java.lang,"Character",function(){

@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -20,10 +19,13 @@ public class AjaxURLConnection extends HttpURLConnection {
 
   protected AjaxURLConnection(URL url) {
     super(url);
+    ajax = /** @j2sNative url.ajax || */ null;
   }
 
   byte[] bytesOut;
   String postOut = "";
+
+  private Object ajax;
 
   /**
    * 
@@ -48,7 +50,14 @@ public class AjaxURLConnection extends HttpURLConnection {
   @SuppressWarnings("null")
   private Object doAjax(boolean isBinary) {
     J2SObjectInterface J2S = /** @j2sNative self.J2S || */ null;
-    Object info = (/** @j2sNative {isBinary: isBinary } || */null);
+    Object info = null;
+    /** @j2sNative
+     * 
+     *  info = this.ajax || {};
+     *  if (!info.dataType) {
+     *    info.isBinary = !!isBinary;
+     *  }
+     */
     Object result = J2S.doAjax(url.toString(), postOut, bytesOut, info);
     boolean isEmpty = false;
     // the problem is that jsmol.php is still returning crlf even if output is 0 bytes
@@ -91,7 +100,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 		BufferedInputStream is = getAttachedStreamData(url, false);
 		if (is != null || getUseCaches() && (is = getCachedStream(url, allowNWError)) != null)
 			return is;
-		is = attachStreamData(url, doAjax(true));
+		is = attachStreamData(url, doAjax(ajax == null));
 		if (getUseCaches() && is != null)
 			setCachedStream(url);
 		isNetworkError(is);
@@ -104,8 +113,23 @@ public class AjaxURLConnection extends HttpURLConnection {
 		Object data = urlCache.get(url.toString());
 		if (data == null)
 			return null;
-		BufferedInputStream bis = Rdr.toBIS(data);
+		boolean isAjax = /** @j2sNative url.ajax || */false;
+		BufferedInputStream bis = getBIS(data, isAjax);
 		return (allowNWError || !isNetworkError(bis) ? bis : null);
+	}
+
+	private static BufferedInputStream getBIS(Object data, boolean isAjax) {
+		if (data == null)
+			return null;
+		if (!isAjax)
+			return Rdr.toBIS(data);
+		BufferedInputStream bis = Rdr.toBIS("");
+		/**
+		 * @j2sNative
+		 * 
+		 * 			bis._ajaxData = data;
+		 */
+		return bis;
 	}
 
 	private void setCachedStream(URL url) {
@@ -114,7 +138,10 @@ public class AjaxURLConnection extends HttpURLConnection {
 			urlCache.put(url.toString(), data);
 	}
 
+	@SuppressWarnings("unused")
 	private boolean isNetworkError(BufferedInputStream is) {
+		if (/** @j2sNative is._ajaxData || */ false)
+			return false;
         is.mark(15);
         byte[] bytes = new byte[13];
         try {
@@ -138,29 +165,36 @@ public class AjaxURLConnection extends HttpURLConnection {
 	 * the first time in Java is usually just to see if it exists. 
 	 * 
 	 * @param url
-	 * @return String, SB, or byte[]
+	 * @return String, SB, or byte[], or JSON dat
 	 */
+	@SuppressWarnings("unused")
 	public static BufferedInputStream getAttachedStreamData(URL url, boolean andDelete) {
 	
 		Object data = null;
+		boolean isAjax = false;
 		/**
 		 * @j2sNative
-		 * 
 		 *       data = url._streamData;
 		 *       if (andDelete) url._streamData = null;
+		 *       isAjax = (data && url.ajax && url.ajax.dataType == "json")
 		 */
-		return (data == null ? null : Rdr.toBIS(data));
+		return getBIS(data, isAjax);
 	}
 
+	/**
+	 * 
+	 * @param url
+	 * @param o
+	 * @return InputStream or possibly a wrapper for an empty string, but also with JSON data.
+	 */
    public static BufferedInputStream attachStreamData(URL url, Object o) {
-	   
-	   /**
-	    * @j2sNative
-	    * 
-	    *   url._streamData = o;
-	    */
-	   
-	    return (o == null ? null : Rdr.toBIS(o));
+	    /**
+	     * @j2sNative
+	     * 
+	     *   url._streamData = o;
+	     */
+
+	    return getBIS(o, /** @j2sNative url.ajax || */false);
   }
 
   /**

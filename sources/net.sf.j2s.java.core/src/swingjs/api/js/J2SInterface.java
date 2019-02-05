@@ -1,6 +1,7 @@
 package swingjs.api.js;
 
 import java.awt.JSComponent;
+import java.awt.Point;
 import java.util.Hashtable;
 
 import javajs.api.JSFunction;
@@ -22,6 +23,8 @@ public interface J2SInterface {
 	Object getFileData(String fileName, Object fSuccess, boolean doProcess, boolean isBinary);
 
 	void getFileFromDialog(JSFunction f, String type);
+
+	Point getMousePosition(Point p);
 
 	Object getJavaResource(String resourceName, boolean isJavaPath);
 

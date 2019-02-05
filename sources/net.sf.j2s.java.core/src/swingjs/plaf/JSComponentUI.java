@@ -40,6 +40,7 @@ import javax.swing.JRootPane;
 import javax.swing.JTable.BooleanRenderer;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -317,7 +318,7 @@ public class JSComponentUI extends ComponentUI
 	protected DOMNode actionNode;
 
 	/**
-	 * the "FOR" label for a radio button
+	 * the "FOR" label for a radio button; the Button element itself for simple buttons 
 	 * 
 	 */
 	protected DOMNode buttonNode;
@@ -410,6 +411,12 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected int num;
 
+	/**
+	 * a flag to indicate that this is an AWT component
+	 * 
+	 */
+	public boolean isAWT;
+
 	// /**
 	// * a flag to indicate that it is not visible, but not according to Java
 	// */
@@ -430,6 +437,12 @@ public class JSComponentUI extends ComponentUI
 	 * 
 	 */
 	protected boolean isTainted = true;
+
+	/**
+	 * indicates not to add it to the DOM
+	 */
+	private boolean isPaintedOnly;
+	
 
 	/**
 	 * prevents premature visualization
@@ -732,8 +745,12 @@ public class JSComponentUI extends ComponentUI
 		addClass(node, "swingjs-ui");
 	}
 
+	@SuppressWarnings("unused")
 	protected static void hideAllMenus() {
+		//System.out.println("JSCUI hideAllMenus" + JSUtil.getStackTrace(-3));
 		JSUtil.jQuery.$(".ui-j2smenu").hide();
+		if (/** @j2sNative javax.swing.ToolTipManager ||*/false)
+			ToolTipManager.j2sHideToolTip();
 	}
 	
 	protected void addClass(DOMNode node, String cl) {
@@ -782,8 +799,6 @@ public class JSComponentUI extends ComponentUI
 	 * Set j2sApplet to capture jQuery mouse events and turn them into Java MouseEvents. 
 	 * Used by JSFrameUI and JTextArea to indicate that it is to be the "currentTarget" for mouse 
 	 * clicks. 
-	 * @param node
-	 * @param isFrame
 	 */
 	protected void setJ2sMouseHandler() {
 		// The DOM attributes applet and _frameViewer are necessary for proper 
@@ -1224,13 +1239,13 @@ public class JSComponentUI extends ComponentUI
 		if (newValue == mnemonic || domNode == null)
 			return;
 		if (newValue < 0) {
-			newValue = (isLabel ? (label == null ? 0 : label.getDisplayedMnemonic()) 
-					: /** @j2sNative this.jc.getMnemonic$ && this.jc.getMnemonic$() ||*/ 0);
+			newValue = (isLabel ? (label == null ? -1 : label.getDisplayedMnemonic()) 
+					: /** @j2sNative this.jc.getMnemonic$ && this.jc.getMnemonic$() ||*/ -1);
 			}
 		DOMNode node = (menuAnchorNode == null ? domNode : menuAnchorNode);
-		if (newValue != mnemonic)
+		if (mnemonic > 0 && newValue != mnemonic)
 			removeClass(node, "ui-mnem-" + Character.toLowerCase(mnemonic));
-		if (newValue != 0)
+		if (newValue > 0)
 			addClass(node, "ui-mnem-" + Character.toLowerCase(newValue));
 		mnemonic = newValue;	
 	}
@@ -1441,9 +1456,12 @@ public class JSComponentUI extends ComponentUI
 	}
 	
 	private Dimension getTextSize(AbstractButton b) {
-		String t;
-		return (textNode == null || (t = b.getText()) == null 
-				|| t == "" ? null : getHTMLSize(textNode));
+		if (textNode == null)
+			return null;
+		String t = b.getText();
+		if (isAWT && t == "")
+			t = "\u00A0"; // AWT labels do not hide if ""
+		return (t == null || t == "" ? null : getHTMLSize(textNode));
 	}
 
 	/**
@@ -1695,7 +1713,7 @@ public class JSComponentUI extends ComponentUI
 			if (!isTable && children[i] == null)
 				break;
 			JSComponentUI ui = JSToolkit.getUI(children[i], false);
-			if (ui == null || ui.isNull) {
+			if (ui == null || ui.isNull || ui.isPaintedOnly) {
 				// Box.Filler has no ui.
 				continue;
 			}
@@ -1974,6 +1992,8 @@ public class JSComponentUI extends ComponentUI
 	}
 	
 	public void setVisible(DOMNode node, boolean b) {
+		if (isPaintedOnly)
+			b = false;
 		if (!b && cellComponent != null)
 			return;
 		if (node == null)
@@ -2007,7 +2027,7 @@ public class JSComponentUI extends ComponentUI
 			return;
 		DOMNode.setAttr(node, "disabled", (b ? null : "TRUE"));
 		if (!b && inactiveForeground == colorUNKNOWN)
-			getDisabledColors(getPropertyPrefix());
+			getDisabledColors(buttonNode == null ? getPropertyPrefix() : "Button");
 		if (jc.isOpaque()) {
 			Color bg = c.getBackground();
 			setBackground(b || !(bg instanceof UIResource) || inactiveBackground == null ? bg : inactiveBackground);
@@ -2134,9 +2154,16 @@ public class JSComponentUI extends ComponentUI
 				DOMNode.setStyles(iconNode, "height", iconHeight + "px", "width", icon.getIconWidth() + "px");
 			}
 		}
-		if (text == null || text.length() == 0) {
+		if (text == null) {
 			text = "";
-		} else {
+		} else if (text == "") {
+			if (isAWT)
+				text = "\u00A0"; // AWT labels do not hide if ""
+		}
+		if (text != "") {
+			if (text == "\0") {
+				isPaintedOnly = true; // this cannot be undone
+			}
 			DOMNode.setStyles(textNode, "white-space", "nowrap");
 			if (icon == null) {
 				// tool tip does not allow text alignment
@@ -2388,13 +2415,14 @@ public class JSComponentUI extends ComponentUI
 			return;
 		}
 		preferredDim = null;
-
+		// fix for button vertical alignment -- should offset just by the ascent
+		String yoff = (wIcon == 0 ? "-" + (jc.getFont().getFontMetrics().getAscent()>>1) + "px" : "-50%");
 		DOMNode.setStyles(centeringNode, "position", "absolute", "top", null, "left", null, "transform", null);
 		if (alignHCenter && alignVCenter && wIcon == 0
 				|| wText == 0 && margins.left == margins.right && margins.top == margins.bottom) {
 			// simple totally centered label or button
 			DOMNode.setStyles(centeringNode, "top", "50%", "left", "50%", "transform",
-					"translateX(-50%)translateY(-50%)");
+					"translateX(-50%)translateY("+ yoff + ")");
 			return;
 		}
 
@@ -2512,8 +2540,11 @@ public class JSComponentUI extends ComponentUI
 	private String getAccelStr(JMenuItem b) {
 		KeyStroke ks = b.getAccelerator();
 		if (ks != null) {
-			return KeyEvent.getKeyModifiersText(ks.getModifiers()) + "-" +
-		               KeyEvent.getKeyText(ks.getKeyCode());
+			String k = KeyEvent.getKeyText(ks.getKeyCode());
+			if (k == "Escape")
+				k = "Esc";
+			String s = KeyEvent.getKeyModifiersText(ks.getModifiers());
+			return s + (s == "" ? "" : "-") + k;
 		}
 		return null;
 	}
@@ -2669,6 +2700,7 @@ public class JSComponentUI extends ComponentUI
 		setHTMLElement();
 		String curs = JSToolkit.getCursorName(c.getCursor());
 		DOMNode.setStyles(outerNode, "cursor", curs);
+		DOMNode.setStyles(domNode, "cursor", curs);
 		setWaitImage(curs == "wait");
 	}
 
@@ -2825,7 +2857,7 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	boolean isLaidOut;
-	
+
 	@Override
 	public void endLayout() {
 		layingOut = false;
@@ -3016,6 +3048,10 @@ public class JSComponentUI extends ComponentUI
         	installJS();
         	installUI(newC);
         }
+	}
+
+	public void setPaintedOnly() {
+		isPaintedOnly = true;
 	}
 
 }

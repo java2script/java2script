@@ -109,8 +109,7 @@ public class ButtonListener
 		String prop = e.getPropertyName();
 		if (ui.isUIDisabled)
 			return;
-		// System.out.println("JSButtonListener property change: " + prop + " " +
-		// e.getSource());
+		 //System.out.println("JSButtonListener property change: " + prop + " " +e.getSource());
 		AbstractButton b = (AbstractButton) e.getSource();
 
 		if (prop == AbstractButton.CONTENT_AREA_FILLED_CHANGED_PROPERTY) {

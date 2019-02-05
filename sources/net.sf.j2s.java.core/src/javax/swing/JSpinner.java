@@ -28,7 +28,6 @@
 
 package javax.swing;
 
-//TODO import java.text.DateFormat;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -37,9 +36,12 @@ import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -48,13 +50,10 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.DateFormatter;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.DocumentFilter;
 import javax.swing.text.NumberFormatter;
-//import java.text.SimpleDateFormat;
-//import java.util.HashMap;
-//import java.util.Map;
-//TODO import javax.swing.text.DateFormatter;
 
 import sun.util.resources.LocaleData;
 
@@ -159,6 +158,9 @@ public class JSpinner extends JComponent
      * and an editor for the <code>SpinnerModel</code>.
      */
     public JSpinner(SpinnerModel model) {
+        if (model == null) {
+            throw new NullPointerException("model cannot be null");
+        }
         this.model = model;
         this.editor = createEditor(model);
         setUIProperty("opaque",true);
@@ -205,11 +207,10 @@ public class JSpinner extends JComponent
      * @see #setEditor
      */
     protected JComponent createEditor(SpinnerModel model) {
-//        if (model instanceof SpinnerDateModel) {
-//            return new DateEditor(this);
-//        }
-//        else 
-        if (model instanceof SpinnerListModel) {
+        if (model instanceof SpinnerDateModel) {
+            return new DateEditor(this);
+        }
+        else if (model instanceof SpinnerListModel) {
             return new ListEditor(this);
         }
         else if (model instanceof SpinnerNumberModel) {
@@ -511,7 +512,7 @@ public class JSpinner extends JComponent
      * call if forwarded to the editor, otherwise this does nothing.
      *
      * @throws ParseException if the currently edited value couldn't
-     *         be commited.
+     *         be committed.
      */
     public void commitEdit() throws ParseException {
         JComponent editor = getEditor();
@@ -818,9 +819,9 @@ public class JSpinner extends JComponent
             // If the value in the JFormattedTextField is legal, this will have
             // the result of pushing the value to the SpinnerModel
             // by way of the <code>propertyChange</code> method.
-            //JFormattedTextField ftf = getTextField();
+            JFormattedTextField ftf = getTextField();
 
-            //ftf.commitEdit();
+            ftf.commitEdit();
         }
 
         /**
@@ -862,183 +863,185 @@ public class JSpinner extends JComponent
 
 
 
-// SwingJS 
-// TODO /**
-//     * This subclass of javax.swing.DateFormatter maps the minimum/maximum
-//     * properties to te start/end properties of a SpinnerDateModel.
-//     */
-//    private static class DateEditorFormatter extends DateFormatter {
-//        private final SpinnerDateModel model;
-//
-//        DateEditorFormatter(SpinnerDateModel model, DateFormat format) {
-//            super(format);
-//            this.model = model;
-//        }
-//
-//        public void setMinimum(Comparable min) {
-//            model.setStart(min);
-//        }
-//
-//        public Comparable getMinimum() {
-//            return  model.getStart();
-//        }
-//
-//        public void setMaximum(Comparable max) {
-//            model.setEnd(max);
-//        }
-//
-//        public Comparable getMaximum() {
-//            return model.getEnd();
-//        }
-//    }
+    /**
+     * This subclass of javax.swing.DateFormatter maps the minimum/maximum
+     * properties to the start/end properties of a SpinnerDateModel.
+     */
+    private static class DateEditorFormatter extends DateFormatter {
+        private final SpinnerDateModel model;
+
+        DateEditorFormatter(SpinnerDateModel model, DateFormat format) {
+            super(format);
+            this.model = model;
+        }
+
+        @Override
+		public void setMinimum(Comparable min) {
+            model.setStart(min);
+        }
+
+        @Override
+		public Comparable getMinimum() {
+            return  model.getStart();
+        }
+
+        @Override
+		public void setMaximum(Comparable max) {
+            model.setEnd(max);
+        }
+
+        @Override
+		public Comparable getMaximum() {
+            return model.getEnd();
+        }
+    }
 
 
-//    /**
-//     * An editor for a <code>JSpinner</code> whose model is a
-//     * <code>SpinnerDateModel</code>.  The value of the editor is
-//     * displayed with a <code>JFormattedTextField</code> whose format
-//     * is defined by a <code>DateFormatter</code> instance whose
-//     * <code>minimum</code> and <code>maximum</code> properties
-//     * are mapped to the <code>SpinnerDateModel</code>.
-//     * @since 1.4
-//     */
-//    // PENDING(hmuller): more example javadoc
-//    public static class DateEditor extends DefaultEditor
-//
-//      { // TODO
-//    	
-//        // This is here until SimpleDateFormat gets a constructor that
-//        // takes a Locale: 4923525
-//        private static String getDefaultPattern(Locale loc) {
-////            ResourceBundle r = LocaleData.getDateFormatData(loc);
-////            String[] dateTimePatterns = r.getStringArray("DateTimePatterns");
-////            Object[] dateTimeArgs = {dateTimePatterns[DateFormat.SHORT],
-////                                     dateTimePatterns[DateFormat.SHORT + 4]};
-////            return MessageFormat.format(dateTimePatterns[8], dateTimeArgs);
-//        	return null;
-//        }
-//
-////        /**
-////         * Construct a <code>JSpinner</code> editor that supports displaying
-////         * and editing the value of a <code>SpinnerDateModel</code>
-////         * with a <code>JFormattedTextField</code>.  <code>This</code>
-////         * <code>DateEditor</code> becomes both a <code>ChangeListener</code>
-////         * on the spinners model and a <code>PropertyChangeListener</code>
-////         * on the new <code>JFormattedTextField</code>.
-////         *
-////         * @param spinner the spinner whose model <code>this</code> editor will monitor
-////         * @exception IllegalArgumentException if the spinners model is not
-////         *     an instance of <code>SpinnerDateModel</code>
-////         *
-////         * @see #getModel
-////         * @see #getFormat
-////         * @see SpinnerDateModel
-////         */
-////        public DateEditor(JSpinner spinner) {
-////            this(spinner, getDefaultPattern(spinner.getLocale()));
-////        }
-////
-////
-////        /**
-////         * Construct a <code>JSpinner</code> editor that supports displaying
-////         * and editing the value of a <code>SpinnerDateModel</code>
-////         * with a <code>JFormattedTextField</code>.  <code>This</code>
-////         * <code>DateEditor</code> becomes both a <code>ChangeListener</code>
-////         * on the spinner and a <code>PropertyChangeListener</code>
-////         * on the new <code>JFormattedTextField</code>.
-////         *
-////         * @param spinner the spinner whose model <code>this</code> editor will monitor
-////         * @param dateFormatPattern the initial pattern for the
-////         *     <code>SimpleDateFormat</code> object that's used to display
-////         *     and parse the value of the text field.
-////         * @exception IllegalArgumentException if the spinners model is not
-////         *     an instance of <code>SpinnerDateModel</code>
-////         *
-////         * @see #getModel
-////         * @see #getFormat
-////         * @see SpinnerDateModel
-////         * @see java.text.SimpleDateFormat
-////         */
-////        public DateEditor(JSpinner spinner, String dateFormatPattern) {
-////            this(spinner, new SimpleDateFormat(dateFormatPattern,
-////                                               spinner.getLocale()));
-////        }
-////
-////        /**
-////         * Construct a <code>JSpinner</code> editor that supports displaying
-////         * and editing the value of a <code>SpinnerDateModel</code>
-////         * with a <code>JFormattedTextField</code>.  <code>This</code>
-////         * <code>DateEditor</code> becomes both a <code>ChangeListener</code>
-////         * on the spinner and a <code>PropertyChangeListener</code>
-////         * on the new <code>JFormattedTextField</code>.
-////         *
-////         * @param spinner the spinner whose model <code>this</code> editor
-////         *        will monitor
-////         * @param format <code>DateFormat</code> object that's used to display
-////         *     and parse the value of the text field.
-////         * @exception IllegalArgumentException if the spinners model is not
-////         *     an instance of <code>SpinnerDateModel</code>
-////         *
-////         * @see #getModel
-////         * @see #getFormat
-////         * @see SpinnerDateModel
-////         * @see java.text.SimpleDateFormat
-////         */
-////        private DateEditor(JSpinner spinner, DateFormat format) {
-////            super(spinner);
-////            if (!(spinner.getModel() instanceof SpinnerDateModel)) {
-////                throw new IllegalArgumentException(
-////                                 "model not a SpinnerDateModel");
-////            }
-////
-////            SpinnerDateModel model = (SpinnerDateModel)spinner.getModel();
-////            DateFormatter formatter = new DateEditorFormatter(model, format);
-////            DefaultFormatterFactory factory = new DefaultFormatterFactory(
-////                                                  formatter);
-////            JFormattedTextField ftf = getTextField();
-////            ftf.setEditable(true);
-////            ftf.setFormatterFactory(factory);
-////
-////            /* TBD - initializing the column width of the text field
-////             * is imprecise and doing it here is tricky because
-////             * the developer may configure the formatter later.
-////             */
-////            try {
-////                String maxString = formatter.valueToString(model.getStart());
-////                String minString = formatter.valueToString(model.getEnd());
-////                ftf.setColumns(Math.max(maxString.length(),
-////                                        minString.length()));
-////            }
-////            catch (ParseException e) {
-////                // PENDING: hmuller
-////            }
-////        }
-////
-////        /**
-////         * Returns the <code>java.text.SimpleDateFormat</code> object the
-////         * <code>JFormattedTextField</code> uses to parse and format
-////         * numbers.
-////         *
-////         * @return the value of <code>getTextField().getFormatter().getFormat()</code>.
-////         * @see #getTextField
-////         * @see java.text.SimpleDateFormat
-////         */
-////        public SimpleDateFormat getFormat() {
-////            return (SimpleDateFormat)((DateFormatter)(getTextField().getFormatter())).getFormat();
-////        }
-//
-//
-//        /**
-//         * Return our spinner ancestor's <code>SpinnerDateModel</code>.
-//         *
-//         * @return <code>getSpinner().getModel()</code>
-//         * @see #getSpinner
-//         * @see #getTextField
-//         */
-//        public SpinnerDateModel getModel() {
-//            return (SpinnerDateModel)(getSpinner().getModel());
-//        }
-//    }
+    /**
+     * An editor for a <code>JSpinner</code> whose model is a
+     * <code>SpinnerDateModel</code>.  The value of the editor is
+     * displayed with a <code>JFormattedTextField</code> whose format
+     * is defined by a <code>DateFormatter</code> instance whose
+     * <code>minimum</code> and <code>maximum</code> properties
+     * are mapped to the <code>SpinnerDateModel</code>.
+     * @since 1.4
+     */
+    // PENDING(hmuller): more example javadoc
+    public static class DateEditor extends DefaultEditor
+
+      { // TODO
+    	
+        // This is here until SimpleDateFormat gets a constructor that
+        // takes a Locale: 4923525
+        private static String getDefaultPattern(Locale loc) {
+            ResourceBundle r = LocaleData.getDateFormatData(loc);
+            String[] dateTimePatterns = r.getStringArray("DateTimePatterns");
+            Object[] dateTimeArgs = {dateTimePatterns[DateFormat.SHORT],
+                                     dateTimePatterns[DateFormat.SHORT + 4]};
+            return MessageFormat.format(dateTimePatterns[8], dateTimeArgs);
+        }
+
+        /**
+         * Construct a <code>JSpinner</code> editor that supports displaying
+         * and editing the value of a <code>SpinnerDateModel</code>
+         * with a <code>JFormattedTextField</code>.  <code>This</code>
+         * <code>DateEditor</code> becomes both a <code>ChangeListener</code>
+         * on the spinners model and a <code>PropertyChangeListener</code>
+         * on the new <code>JFormattedTextField</code>.
+         *
+         * @param spinner the spinner whose model <code>this</code> editor will monitor
+         * @exception IllegalArgumentException if the spinners model is not
+         *     an instance of <code>SpinnerDateModel</code>
+         *
+         * @see #getModel
+         * @see #getFormat
+         * @see SpinnerDateModel
+         */
+        public DateEditor(JSpinner spinner) {
+            this(spinner, getDefaultPattern(spinner.getLocale()));
+        }
+
+
+        /**
+         * Construct a <code>JSpinner</code> editor that supports displaying
+         * and editing the value of a <code>SpinnerDateModel</code>
+         * with a <code>JFormattedTextField</code>.  <code>This</code>
+         * <code>DateEditor</code> becomes both a <code>ChangeListener</code>
+         * on the spinner and a <code>PropertyChangeListener</code>
+         * on the new <code>JFormattedTextField</code>.
+         *
+         * @param spinner the spinner whose model <code>this</code> editor will monitor
+         * @param dateFormatPattern the initial pattern for the
+         *     <code>SimpleDateFormat</code> object that's used to display
+         *     and parse the value of the text field.
+         * @exception IllegalArgumentException if the spinners model is not
+         *     an instance of <code>SpinnerDateModel</code>
+         *
+         * @see #getModel
+         * @see #getFormat
+         * @see SpinnerDateModel
+         * @see java.text.SimpleDateFormat
+         */
+        public DateEditor(JSpinner spinner, String dateFormatPattern) {
+            this(spinner, new SimpleDateFormat(dateFormatPattern,
+                                               spinner.getLocale()));
+        }
+
+        /**
+         * Construct a <code>JSpinner</code> editor that supports displaying
+         * and editing the value of a <code>SpinnerDateModel</code>
+         * with a <code>JFormattedTextField</code>.  <code>This</code>
+         * <code>DateEditor</code> becomes both a <code>ChangeListener</code>
+         * on the spinner and a <code>PropertyChangeListener</code>
+         * on the new <code>JFormattedTextField</code>.
+         *
+         * @param spinner the spinner whose model <code>this</code> editor
+         *        will monitor
+         * @param format <code>DateFormat</code> object that's used to display
+         *     and parse the value of the text field.
+         * @exception IllegalArgumentException if the spinners model is not
+         *     an instance of <code>SpinnerDateModel</code>
+         *
+         * @see #getModel
+         * @see #getFormat
+         * @see SpinnerDateModel
+         * @see java.text.SimpleDateFormat
+         */
+        private DateEditor(JSpinner spinner, DateFormat format) {
+            super(spinner);
+            if (!(spinner.getModel() instanceof SpinnerDateModel)) {
+                throw new IllegalArgumentException(
+                                 "model not a SpinnerDateModel");
+            }
+
+            SpinnerDateModel model = (SpinnerDateModel)spinner.getModel();
+            DateFormatter formatter = new DateEditorFormatter(model, format);
+            DefaultFormatterFactory factory = new DefaultFormatterFactory(
+                                                  formatter);
+            JFormattedTextField ftf = getTextField();
+            ftf.setEditable(true);
+            ftf.setFormatterFactory(factory);
+
+            /* TBD - initializing the column width of the text field
+             * is imprecise and doing it here is tricky because
+             * the developer may configure the formatter later.
+             */
+            try {
+                String maxString = formatter.valueToString(model.getStart());
+                String minString = formatter.valueToString(model.getEnd());
+                ftf.setColumns(Math.max(maxString.length(),
+                                        minString.length()));
+            }
+            catch (ParseException e) {
+                // PENDING: hmuller
+            }
+        }
+
+        /**
+         * Returns the <code>java.text.SimpleDateFormat</code> object the
+         * <code>JFormattedTextField</code> uses to parse and format
+         * numbers.
+         *
+         * @return the value of <code>getTextField().getFormatter().getFormat()</code>.
+         * @see #getTextField
+         * @see java.text.SimpleDateFormat
+         */
+        public SimpleDateFormat getFormat() {
+            return (SimpleDateFormat)((DateFormatter)(getTextField().getFormatter())).getFormat();
+        }
+
+
+        /**
+         * Return our spinner ancestor's <code>SpinnerDateModel</code>.
+         *
+         * @return <code>getSpinner().getModel()</code>
+         * @see #getSpinner
+         * @see #getTextField
+         */
+        public SpinnerDateModel getModel() {
+            return (SpinnerDateModel)(getSpinner().getModel());
+        }
+    }
 
 
     /**

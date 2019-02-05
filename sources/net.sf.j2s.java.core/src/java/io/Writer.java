@@ -50,7 +50,7 @@ public abstract class Writer implements Appendable, Closeable, Flushable {
      */
     protected Writer(Object lock) {
         if (lock != null) {
-            this.lock = lock;
+            this.lock = ""; // swingjs no real object here
         } else {
             throw new NullPointerException();
         }

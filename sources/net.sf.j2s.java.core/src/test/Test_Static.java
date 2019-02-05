@@ -23,6 +23,16 @@ class Test_Static extends Test_ implements Test_int3, Test_int2, Test_int1 {
 	
 	private static byte[] bytearray = {1,2,127};
 	
+	private final static Integer iI = 11;
+	private final static Integer iI1 = new Integer(13);
+	private final static Float fF2 = 12f;
+	private final static Float fF1 = new Float(12);
+
+	private final static String st = "testing";
+	static {
+		assert (iI == 11);
+	}
+	private static String st1 = st;
 	private static boolean b = false;
 	private static int y;
 	private static char c = 'c';
@@ -86,7 +96,7 @@ class Test_Static extends Test_ implements Test_int3, Test_int2, Test_int1 {
 		new Test_Static().test();
 		new Test_Static().b ^= true;
 		System.out.println(bytearray[2]);
-		
+
 		new Test_Static().bytearray[--y]++;
 		
 		

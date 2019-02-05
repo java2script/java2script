@@ -482,7 +482,9 @@ public class JPopupMenu extends JComponent implements MenuElement {
      * Appends a new separator at the end of the menu.
      */
     public void addSeparator() {
-        add( new JPopupMenu.Separator() );
+    	Separator sep = new JPopupMenu.Separator();
+    	sep._j2sInvalidateOnAdd = false;
+        add(sep);
     }
 
     /**

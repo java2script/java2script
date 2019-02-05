@@ -2036,9 +2036,9 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 
 	public void setEditable(boolean editable) {		
 		this.editable = editable;
-		if (domNode == null)
+		if (focusNode == null)
 			return;
-		DOMNode.setAttr(domNode, "readOnly", editable ? null : "true");
+		DOMNode.setAttr(focusNode, "readOnly", editable ? null : "true");
 	}
 
 	// protected static DragListener getDragListener() {
@@ -2817,7 +2817,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	}
 
 	protected String getComponentText() {
-		return (((JTextComponent) jc).getDocument() == null ? null : (currentText = ((JTextComponent) jc).getText()));
+		return (editor.getDocument() == null ? null : (currentText = editor.getText()));
 	}
 
 	boolean checkNewEditorTextValue() {
@@ -2855,7 +2855,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	}
 		
 	boolean haveFocus() {
-		return jquery.contains(domNode, /** @j2sNative document.activeElement || */ null);
+		return jquery.contains(focusNode, /** @j2sNative document.activeElement || */ null);
 	}
 
 	
@@ -2880,8 +2880,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 //			end = start;
 //			start = t;
 //		}
-		Object[] r1 = getJSNodePt(domNode, -1, start);
-		Object[] r2 = (end == start ? r1 : getJSNodePt(domNode, -1, end));
+		Object[] r1 = getJSNodePt(focusNode, -1, start);
+		Object[] r2 = (end == start ? r1 : getJSNodePt(focusNode, -1, end));
 		if (r1 == null || r2 == null)
 			return;
 		
@@ -2928,7 +2928,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
      */
     void setJSMarkAndDot(int mark, int dot, boolean andScroll) {
     	//System.out.println("JSTextUI setJSMarkAndDot " + mark + " " + dot);
-		domNode.setSelectionRange(Math.min(mark, dot), Math.max(mark, dot), (mark == dot ? "none" : mark < dot ? "forward" : "backward"));
+		focusNode.setSelectionRange(Math.min(mark, dot), Math.max(mark, dot), (mark == dot ? "none" : mark < dot ? "forward" : "backward"));
 	}
 
 	/**
@@ -2939,7 +2939,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
      */
     @SuppressWarnings("unused")
 	boolean getJSMarkAndDot(Point pt) {
-    	DOMNode node = this.domNode;
+    	DOMNode node = focusNode;
     	int start = /** @j2sNative node.selectionStart || */ 0;
     	int end = /** @j2sNative node.selectionEnd || */ 1;
     	boolean reversed = /** @j2sNative node.selectionDirection == "backward" || */false;
@@ -2971,10 +2971,11 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		switch (eventType) {
 		case KeyEvent.KEY_PRESSED:
 			// note that events are bundled here into one eventType
-			JSKeyEvent keyEvent = JSKeyEvent.newJSKeyEvent(jc, jQueryEvent, KeyEvent.KEY_PRESSED, false);
+			// 0 param here says "get the real event type from jQueryEvent
+			JSKeyEvent keyEvent = JSKeyEvent.newJSKeyEvent(editor, jQueryEvent, 0, false);
 			if (keyEvent == null)
 				return HANDLED;
-			jc.dispatchEvent(keyEvent);
+			editor.dispatchEvent(keyEvent);
 			if (keyCode == KeyEvent.VK_ALT || keyEvent.isConsumed()) {
 				/**
 				 * @j2sNative

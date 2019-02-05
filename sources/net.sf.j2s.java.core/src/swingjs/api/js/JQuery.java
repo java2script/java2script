@@ -8,4 +8,6 @@ public interface JQuery {
   
   boolean contains(Object outer, Object inner);
 
+  Object parseJSON(String json);
+
 }

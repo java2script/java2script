@@ -25,23 +25,23 @@
 
 package javax.swing;
 
-import java.awt.*;
-
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.JSComponent;
+import java.awt.Rectangle;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
 import java.beans.VetoableChangeListener;
 import java.beans.VetoableChangeSupport;
-import java.beans.PropertyChangeEvent;
 
-import javax.swing.event.EventListenerList;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
-import javax.swing.plaf.*;
+import javax.swing.plaf.InternalFrameUI;
 
-import javax.accessibility.*;
-
-import java.io.ObjectOutputStream;
-import java.io.IOException;
-import java.beans.PropertyChangeListener;
 import sun.awt.AppContext;
 import sun.swing.SwingUtilities2;
 
