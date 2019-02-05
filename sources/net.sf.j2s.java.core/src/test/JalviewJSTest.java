@@ -7,6 +7,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Label;
 import java.awt.MediaTracker;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -78,6 +79,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			System.err.println("actionPerformed: " + (++nAction) + " " + e);
+			status.setText(status.getText() == "" ? "OK" : "");
 		}
 
 	};
@@ -112,6 +114,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		}
 		
 	};
+	private Label status;
 	/**
 	 * Put some content in a JFrame and show it
 	 */
@@ -232,6 +235,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		panel.setPreferredSize(new Dimension(400, 600));
 		panel.setOpaque(true);
 		panel.setLayout(new BorderLayout());
+		panel.add(status = new Label("ok"), BorderLayout.SOUTH);
 
 		JPanel firstColumn = new JPanel();
 		firstColumn.setLayout(new GridLayout(13, 1));
