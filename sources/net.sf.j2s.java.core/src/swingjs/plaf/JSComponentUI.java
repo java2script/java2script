@@ -1198,7 +1198,6 @@ public class JSComponentUI extends ComponentUI
 			return;
 		case "text":
 			String val = ((AbstractButton) c).getText();
-			System.out.println(val + " -vs- " + currentText);
 			if (val == null ? currentText != null : !val.equals(currentText))
 				setIconAndText(prop, currentIcon, currentGap, (String) val);
 			return;
