@@ -109,22 +109,21 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 		// proxy does 
 		Object[] a = Class.getArgumentArray(parameterTypes, args, isProxy);
 		Object c = (isProxy ? receiver : this.Class_);
-		Object m = null;
+		Object m = null, val = null;
 		/** 
 		 * @j2sNative
 		 * 
 		 * if (!this.isProxy) c = c.$clazz$;
 		 * m= c[this.signature] || c.prototype && c.prototype[this.signature];
-		 * if (m != null) {
-		 *   m = this.wrap$O(m.apply(receiver,a));
-		 *  }
+		 * val = (m == null ? null : m.apply(receiver,a));
+		 * if (val != null && !this.isProxy) val = this.wrap$O(val);
 		 */
 		if (m == null) {
 		  String message = "Method " + getDeclaringClass().getName()
 				  + "." + signature + " was not found";
 		  throw new IllegalArgumentException(message); 
 		}
-		return m;
+		return val;
 	}
 
 	Object wrap(Object o) {
