@@ -7,6 +7,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Label;
 import java.awt.MediaTracker;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -71,13 +72,14 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 
 	
 	
-int nAction = 0;
+	int nAction = 0;
 
 	ActionListener listener = new ActionListener() {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			System.out.println("actionPerformed: " + (++nAction) + " " + e);
+			System.err.println("actionPerformed: " + (++nAction) + " " + e);
+			status.setText(status.getText() == "" ? "OK" : "");
 		}
 
 	};
@@ -112,6 +114,7 @@ int nAction = 0;
 		}
 		
 	};
+	private Label status;
 	/**
 	 * Put some content in a JFrame and show it
 	 */
@@ -232,6 +235,7 @@ int nAction = 0;
 		panel.setPreferredSize(new Dimension(400, 600));
 		panel.setOpaque(true);
 		panel.setLayout(new BorderLayout());
+		panel.add(status = new Label("ok"), BorderLayout.SOUTH);
 
 		JPanel firstColumn = new JPanel();
 		firstColumn.setLayout(new GridLayout(13, 1));
@@ -330,52 +334,51 @@ int nAction = 0;
 		cb5m.setFont(font);
 		cb5m.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 		cb5m.setHorizontalTextPosition(SwingConstants.TRAILING);
-		cb5m.addActionListener(listener);
-		cb5m.addMouseListener(mlistener);
+		addListeners(cb5m);
 
 		JCheckBoxMenuItem cb6m = new JCheckBoxMenuItem("XXtrailing,r2l1XX");
 		cb6m.setFont(font);
 		cb6m.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		cb6m.setHorizontalTextPosition(SwingConstants.TRAILING);
-		cb6m.addActionListener(listener);
+		addListeners(cb6m);
 
 		JRadioButtonMenuItem rb1m = new JRadioButtonMenuItem("XXtrailing,r2l2XX");
 		rb1m.setFont(font);
 		rb1m.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		rb1m.setHorizontalTextPosition(SwingConstants.TRAILING);
-		rb1m.addActionListener(listener);
+		addListeners(rb1m);
 
 		JRadioButtonMenuItem rb2m = new JRadioButtonMenuItem("XXright,left-to-rightXX");
 		rb2m.setFont(font);
 		rb2m.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 		rb2m.setHorizontalTextPosition(SwingConstants.RIGHT);
-		rb2m.addActionListener(listener);
+		addListeners(rb2m);
 		rb2m.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_B, ActionEvent.CTRL_MASK));
 
 		JRadioButtonMenuItem rb3m = new JRadioButtonMenuItem("XXright,r21XX");
 		rb3m.setFont(font);
 		rb3m.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		rb3m.setHorizontalTextPosition(SwingConstants.RIGHT);
-		rb3m.addActionListener(listener);
+		addListeners(rb3m);
 
 		JMenuItem mb3 = new JMenuItem("XXright,right-2-left2XX");
 		mb3.setFont(font);
 		mb3.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		mb3.setHorizontalTextPosition(SwingConstants.RIGHT);
-		mb3.addActionListener(listener);
+		addListeners(mb3);
 
 		JMenuItem mb4 = new JMenuItem("XXright,right-to-left3XX");
 		mb4.setFont(font);
 		mb4.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		mb4.setHorizontalTextPosition(SwingConstants.RIGHT);
-		mb4.addActionListener(listener);
+		addListeners(mb4);
 
 		mb5 = new JMenuItem("XXadded r2l,rXX");
 		mb5.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, ActionEvent.ALT_MASK));
 		mb5.setFont(font);
 		mb5.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		mb5.setHorizontalTextPosition(SwingConstants.RIGHT);
-		mb5.addActionListener(listener);
+		addListeners(mb5);
 
 		cb4m.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.ALT_MASK | ActionEvent.CTRL_MASK | ActionEvent.SHIFT_MASK));
 
@@ -492,6 +495,11 @@ int nAction = 0;
 		panel.add(theTab);
 
 		return panel;
+	}
+
+	private void addListeners(AbstractButton c) {
+		c.addActionListener(listener);
+		c.addMouseListener(mlistener);
 	}
 
 	int ntest = 0;

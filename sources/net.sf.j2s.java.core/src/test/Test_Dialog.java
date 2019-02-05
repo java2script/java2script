@@ -116,7 +116,7 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 			public void actionPerformed(ActionEvent e) {
 				Test_Dialog.this.onDialogReturn(JOptionPane.showConfirmDialog(
 						Test_Dialog.this, 
-						"The frame is now " + (isResizable() ? "NOT " : "") + "resizable.",
+						"<html>The frame is now " + (isResizable() ? "<b>NOT</b> " : "") + "resizable.</html>",
 						"Testing JOptionPane", JOptionPane.OK_CANCEL_OPTION));
 				setResizable(!isResizable());
 			}

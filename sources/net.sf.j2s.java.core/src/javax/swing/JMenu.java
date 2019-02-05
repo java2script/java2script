@@ -45,6 +45,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeListener;
+
+import javax.swing.JPopupMenu.Separator;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
@@ -755,7 +757,9 @@ public class JMenu extends JMenuItem implements MenuElement
         }
 
         ensurePopupMenuCreated();
-        popupMenu.insert( new JPopupMenu.Separator(), index );
+        Separator sep = new JPopupMenu.Separator();
+        sep._j2sInvalidateOnAdd = false;
+        popupMenu.insert(sep, index );
     }
 
     /**

@@ -55,7 +55,10 @@ public class JSFocusPeer implements KeyboardFocusManagerPeer {
 	 * @return
 	 */
 	public Component getCurrentFocusOwner(Object related) {
-		return currentFocusOwner = getAccessibleComponentFor(related == null ? getAccessibleActiveElement() : (DOMNode) related);
+	  currentFocusOwner = getAccessibleComponentFor(related == null ? getAccessibleActiveElement() : (DOMNode) related);
+	  if (currentFocusOwner == null)
+	    currentWindow = null;
+	  return currentFocusOwner;
 	}
 
 	@Override
@@ -99,6 +102,13 @@ public class JSFocusPeer implements KeyboardFocusManagerPeer {
 		return getCurrentFocusOwner(null);
 	}
 
+	/**
+	 * send focus events out as though via SystemEventQueue
+	 * 
+	 * @param jco
+	 * @param related
+	 * @param focusGained
+	 */
 	public static void handleJSFocus(Object jco, Object related, boolean focusGained) {
 		JComponent c0 = (JComponent) jco;
 		AWTEvent e;
@@ -124,19 +134,19 @@ public class JSFocusPeer implements KeyboardFocusManagerPeer {
 
 	public void checkFrameFocusOnMouseDown(AWTEvent e) {
 		Container p = (Container) getTopInvokableAncestor((Container) e.getSource());
-		if (p != currentWindow) {
-			handleJSFocus(p, currentWindow, true);
-			setCurrentFocusedWindow((Window) p);
-			if (p instanceof JInternalFrame) {
-				try {
-					((JInternalFrame) p).setSelected(true);
-				} catch (PropertyVetoException e1) {
-					e1.printStackTrace();
-				}
-		    } else if (p instanceof Window) {
-				((Window) p).toFront();
-			}			
-		}		
+		if (getCurrentFocusOwner() != null && p == currentWindow)
+			return;
+		handleJSFocus(p, currentWindow, true);
+		setCurrentFocusedWindow((Window) p);
+		if (p instanceof JInternalFrame) {
+			try {
+				((JInternalFrame) p).setSelected(true);
+			} catch (PropertyVetoException e1) {
+				e1.printStackTrace();
+			}
+		} else if (p instanceof Window) {
+			((Window) p).toFront();
+		}
 	}
 
  	/**

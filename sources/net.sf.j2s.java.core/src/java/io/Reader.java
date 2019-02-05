@@ -51,7 +51,7 @@ public abstract class Reader implements Readable, Closeable {
 	 */
 	protected Reader(Object lock) {
 		if (lock != null)
-			this.lock = lock;
+			this.lock = "";// swingjs no real object here
 		else
 			throw new NullPointerException();
 	}

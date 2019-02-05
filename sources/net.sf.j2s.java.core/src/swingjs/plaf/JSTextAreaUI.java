@@ -36,7 +36,7 @@ public class JSTextAreaUI extends JSTextViewUI {
 			DOMNode.setAttr(domNode, "wrap", "off");
 		textListener.checkDocument();
 		setCssFont(
-				DOMNode.setAttr(domNode, "innerHTML", getComponentText()),
+				DOMNode.setAttr(domNode, "value", getComponentText()),
 				c.getFont());
 		if (!editable)
 			DOMNode.setAttr(domNode, "readOnly", "true");		

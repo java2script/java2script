@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.IllegalComponentStateException;
-import java.awt.event.ComponentEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.beans.PropertyChangeEvent;
@@ -15,6 +14,7 @@ import javax.swing.DesktopManager;
 import javax.swing.Icon;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
+import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 import javax.swing.LookAndFeel;
 import javax.swing.SwingConstants;
@@ -25,6 +25,7 @@ import javax.swing.event.InternalFrameListener;
 import javax.swing.plaf.UIResource;
 
 import sun.swing.DefaultLookup;
+import swingjs.api.js.DOMNode;
 
 public class JSInternalFrameUI extends JSFrameUI {
 
@@ -33,6 +34,14 @@ public class JSInternalFrameUI extends JSFrameUI {
 		isInternalFrame = true;
 	}
 
+	
+	@Override
+	public DOMNode updateDOMNode() {
+	  super.updateDOMNode();	
+
+	  return domNode;
+	  
+	}
 	
 	@Override
 	protected void frameCloserAction() {
@@ -62,6 +71,7 @@ public class JSInternalFrameUI extends JSFrameUI {
 	private Handler handler;
 	private Handler internalFrameListener;
 	private PropertyChangeListener propertyChangeListener;
+	private boolean titleBarHidden;
 	private static DesktopManager sharedDesktopManager;
 	
     @Override
@@ -188,13 +198,7 @@ public class JSInternalFrameUI extends JSFrameUI {
 //        }
     }
 
-    // Provide a FocusListener to listen for a WINDOW_LOST_FOCUS event,
-    // so that a resize can be cancelled if the focus is lost while resizing
-    // when an Alt-Tab, modal dialog popup, iconify, dispose, or remove
-    // of the internal frame occurs.
-    private WindowFocusListener getWindowFocusListener(){
-        return getHandler();
-    }
+    
 
 //    // Cancel a resize in progress by calling finishMouseReleased().
 //    private void cancelResize() {
@@ -464,47 +468,6 @@ public class JSInternalFrameUI extends JSFrameUI {
 //            cancelResize();
         }
 
-        // ComponentHandler methods
-        /** Invoked when a JInternalFrame's parent's size changes. */
-        public void componentResized(ComponentEvent e) {
-        	hideAllMenus();
-//            // Get the JInternalFrame's parent container size
-//            Rectangle parentNewBounds = ((Component) e.getSource()).getBounds();
-//            JInternalFrame.JDesktopIcon icon = null;
-//
-//            if (frame != null) {
-//                icon = frame.getDesktopIcon();
-//                // Resize the internal frame if it is maximized and relocate
-//                // the associated icon as well.
-//                if (frame.isMaximum()) {
-//                    frame.setBounds(0, 0, parentNewBounds.width,
-//                        parentNewBounds.height);
-//                }
-//            }
-//
-//            // Relocate the icon base on the new parent bounds.
-//            if (icon != null) {
-//                Rectangle iconBounds = icon.getBounds();
-//                int y = iconBounds.y +
-//                        (parentNewBounds.height - parentBounds.height);
-//                icon.setBounds(iconBounds.x, y,
-//                        iconBounds.width, iconBounds.height);
-//            }
-//
-//            // Update the new parent bounds for next resize.
-////            if (!parentBounds.equals(parentNewBounds)) {
-////                parentBounds = parentNewBounds;
-////            }
-//
-//            // Validate the component tree for this container.
-//            if (frame != null) frame.validate();
-        }
-
-        public void componentMoved(ComponentEvent e) {hideAllMenus();}
-        public void componentShown(ComponentEvent e) {hideAllMenus();}
-        public void componentHidden(ComponentEvent e) {hideAllMenus();}
-
-
         // InternalFrameListener
         @Override
 		public void internalFrameClosed(InternalFrameEvent e) {
@@ -514,7 +477,7 @@ public class JSInternalFrameUI extends JSFrameUI {
 
         @Override
 		public void internalFrameActivated(InternalFrameEvent e) {
-        	hideAllMenus();
+//        	hideAllMenus();
 //            if (!isKeyBindingRegistered()){
 //                setKeyBindingRegistered(true);
 //                setupMenuOpenKey();
@@ -579,6 +542,14 @@ public class JSInternalFrameUI extends JSFrameUI {
                     deactivateFrame(f);
                 }
             } else if (prop == "ancestor") {
+            	if (frame.getParent() != null) {
+            		boolean allowResize = frame.isResizable() && frame.getParent() instanceof JDesktopPane;
+            	   Resizer r = frame.getFrameViewer().resizer;
+            	   if (r != null) {
+            		   r.setEnabled(allowResize);
+            		   r.setAllowResize(allowResize);
+            	   }
+            	}
 //                if (newValue == null) {
 //                    // Cancel a resize in progress, if the internal frame
 //                    // gets a remove(), removeNotify() or setIcon(true).
@@ -603,6 +574,12 @@ public class JSInternalFrameUI extends JSFrameUI {
                 }
             }
         }
+    }
+
+    public void setNorthPane(JComponent c) {
+    	frame.setUndecorated(true);
+    	//DOMNode.setVisible(titleBarNode, c != null);
+    	setTainted();
     }
 
 }

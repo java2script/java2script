@@ -111,6 +111,7 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 
 	ToolTipManager() {
 		enterTimer = new Timer(750, new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (insideComponent != null && insideComponent.isShowing()) {
 					//System.out.println("enterTimer fired " + (/** @j2sNative this.__JSID__ ||*/0));
@@ -135,6 +136,7 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 		enterTimer.setRepeats(false);
 
 		exitTimer = new Timer(500, new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				//System.out.println("exitTimer fired " + (/** @j2sNative this.__JSID__ ||*/0));
 				showImmediately = false;
@@ -143,6 +145,7 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 		exitTimer.setRepeats(false);
 
 		insideTimer = new Timer(4000, new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				//System.out.println("insideTimer fired " + (/** @j2sNative this.__JSID__ ||*/0));
 				hideTipWindow();
@@ -158,6 +161,9 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 //		accessibilityKeyListener = new AccessibilityKeyListener();
 	}
 
+	public static void j2sHideToolTip() {
+		sharedInstance().hideTipWindow();
+	}
 	/**
 	 * Enables or disables the tooltip.
 	 *
@@ -460,6 +466,7 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 	 *
 	 * @param event the event in question
 	 */
+	@Override
 	public void mouseEntered(MouseEvent event) {
 		initiateToolTip(event);
 	}
@@ -518,6 +525,7 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 	 *
 	 * @param event the event in question
 	 */
+	@Override
 	public void mouseExited(MouseEvent event) {
 		hasFired = true;
 		boolean shouldHide = true;
@@ -587,6 +595,7 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 	 *
 	 * @param event the event in question
 	 */
+	@Override
 	public void mousePressed(MouseEvent event) {
 		hideTipWindow();
 		insideTimer.stop();
@@ -603,6 +612,7 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 	 *
 	 * @param event the event in question
 	 */
+	@Override
 	public void mouseDragged(MouseEvent event) {
 	}
 
@@ -613,6 +623,7 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 	 *
 	 * @param event the event in question
 	 */
+	@Override
 	public void mouseMoved(MouseEvent event) {
 		
 		if (tipShowing) {
@@ -703,6 +714,7 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 	 * rely solely on mouse-entered to initiate the tooltip.
 	 */
 	private class MoveBeforeEnterListener extends MouseMotionAdapter {
+		@Override
 		public void mouseMoved(MouseEvent e) {
 			initiateToolTip(e);
 		}
@@ -715,120 +727,121 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 		return (JSFrame) component;
 	}
 
-	private FocusListener createFocusChangeListener() {
-		return new FocusAdapter() {
-			public void focusLost(FocusEvent evt) {
-				hideTipWindow();
-				insideComponent = null;
-				JComponent c = (JComponent) evt.getSource();
-				c.removeFocusListener(focusChangeListener);
-			}
-		};
-	}
-
-	// Returns: 0 no adjust
-	// -1 can't fit
-	// >0 adjust value by amount returned
-	private int getPopupFitWidth(Rectangle popupRectInScreen, Component invoker) {
-		if (invoker != null) {
-			Container parent;
-			for (parent = invoker.getParent(); parent != null; parent = parent.getParent()) {
-				// fix internal frame size bug: 4139087 - 4159012
-				if (parent instanceof JFrame || parent instanceof JDialog || parent instanceof JWindow) { // no check
-																											// for
-																											// awt.Frame
-																											// since we
-																											// use Heavy
-																											// tips
-					return getWidthAdjust(parent.getBounds(), popupRectInScreen);
-				} else if (parent instanceof JApplet) {// || parent instanceof JInternalFrame) {
-					if (popupFrameRect == null) {
-						popupFrameRect = new Rectangle();
-					}
-					Point p = parent.getLocationOnScreen();
-					popupFrameRect.setBounds(p.x, p.y, parent.getBounds().width, parent.getBounds().height);
-					return getWidthAdjust(popupFrameRect, popupRectInScreen);
-				}
-			}
-		}
-		return 0;
-	}
-
-	// Returns: 0 no adjust
-	// >0 adjust by value return
-	private int getPopupFitHeight(Rectangle popupRectInScreen, Component invoker) {
-		if (invoker != null) {
-			Container parent;
-			for (parent = invoker.getParent(); parent != null; parent = parent.getParent()) {
-				if (parent instanceof JFrame || parent instanceof JDialog || parent instanceof JWindow) {
-					return getHeightAdjust(parent.getBounds(), popupRectInScreen);
-				} else if (parent instanceof JApplet) {// || parent instanceof JInternalFrame) {
-					if (popupFrameRect == null) {
-						popupFrameRect = new Rectangle();
-					}
-					Point p = parent.getLocationOnScreen();
-					popupFrameRect.setBounds(p.x, p.y, parent.getBounds().width, parent.getBounds().height);
-					return getHeightAdjust(popupFrameRect, popupRectInScreen);
-				}
-			}
-		}
-		return 0;
-	}
-
-	private int getHeightAdjust(Rectangle a, Rectangle b) {
-		if (b.y >= a.y && (b.y + b.height) <= (a.y + a.height))
-			return 0;
-		else
-			return (((b.y + b.height) - (a.y + a.height)) + 5);
-	}
-
-	// Return the number of pixels over the edge we are extending.
-	// If we are over the edge the ToolTipManager can adjust.
-	// REMIND: what if the Tooltip is just too big to fit at all - we currently will
-	// just clip
-	private int getWidthAdjust(Rectangle a, Rectangle b) {
-		// System.out.println("width b.x/b.width: " + b.x + "/" + b.width +
-		// "a.x/a.width: " + a.x + "/" + a.width);
-		if (b.x >= a.x && (b.x + b.width) <= (a.x + a.width)) {
-			return 0;
-		} else {
-			return (((b.x + b.width) - (a.x + a.width)) + 5);
-		}
-	}
-
-	//
-	// Actions
-	//
-	private void show(JComponent source) {
-		if (tipWindow != null) { // showing we unshow
-			hideTipWindow();
-			insideComponent = null;
-		} else {
-			hideTipWindow(); // be safe
-			enterTimer.stop();
-			exitTimer.stop();
-			insideTimer.stop();
-			insideComponent = source;
-			if (insideComponent != null) {
-				toolTipText = insideComponent.getToolTipText();
-				preferredLocation = new Point(10, insideComponent.getHeight() + 10); // manual set
-				showTipWindow();
-				// put a focuschange listener on to bring the tip down
-				if (focusChangeListener == null) {
-					focusChangeListener = createFocusChangeListener();
-				}
-				insideComponent.addFocusListener(focusChangeListener);
-			}
-		}
-	}
-
-	private void hide(JComponent source) {
-		hideTipWindow();
-		source.removeFocusListener(focusChangeListener);
-		preferredLocation = null;
-		insideComponent = null;
-	}
-
+//	private FocusListener createFocusChangeListener() {
+//		return new FocusAdapter() {
+//			@Override
+//			public void focusLost(FocusEvent evt) {
+//				hideTipWindow();
+//				insideComponent = null;
+//				JComponent c = (JComponent) evt.getSource();
+//				c.removeFocusListener(focusChangeListener);
+//			}
+//		};
+//	}
+//
+//	// Returns: 0 no adjust
+//	// -1 can't fit
+//	// >0 adjust value by amount returned
+//	private int getPopupFitWidth(Rectangle popupRectInScreen, Component invoker) {
+//		if (invoker != null) {
+//			Container parent;
+//			for (parent = invoker.getParent(); parent != null; parent = parent.getParent()) {
+//				// fix internal frame size bug: 4139087 - 4159012
+//				if (parent instanceof JFrame || parent instanceof JDialog || parent instanceof JWindow) { // no check
+//																											// for
+//																											// awt.Frame
+//																											// since we
+//																											// use Heavy
+//																											// tips
+//					return getWidthAdjust(parent.getBounds(), popupRectInScreen);
+//				} else if (parent instanceof JApplet) {// || parent instanceof JInternalFrame) {
+//					if (popupFrameRect == null) {
+//						popupFrameRect = new Rectangle();
+//					}
+//					Point p = parent.getLocationOnScreen();
+//					popupFrameRect.setBounds(p.x, p.y, parent.getBounds().width, parent.getBounds().height);
+//					return getWidthAdjust(popupFrameRect, popupRectInScreen);
+//				}
+//			}
+//		}
+//		return 0;
+//	}
+//
+//	// Returns: 0 no adjust
+//	// >0 adjust by value return
+//	private int getPopupFitHeight(Rectangle popupRectInScreen, Component invoker) {
+//		if (invoker != null) {
+//			Container parent;
+//			for (parent = invoker.getParent(); parent != null; parent = parent.getParent()) {
+//				if (parent instanceof JFrame || parent instanceof JDialog || parent instanceof JWindow) {
+//					return getHeightAdjust(parent.getBounds(), popupRectInScreen);
+//				} else if (parent instanceof JApplet) {// || parent instanceof JInternalFrame) {
+//					if (popupFrameRect == null) {
+//						popupFrameRect = new Rectangle();
+//					}
+//					Point p = parent.getLocationOnScreen();
+//					popupFrameRect.setBounds(p.x, p.y, parent.getBounds().width, parent.getBounds().height);
+//					return getHeightAdjust(popupFrameRect, popupRectInScreen);
+//				}
+//			}
+//		}
+//		return 0;
+//	}
+//
+//	private int getHeightAdjust(Rectangle a, Rectangle b) {
+//		if (b.y >= a.y && (b.y + b.height) <= (a.y + a.height))
+//			return 0;
+//		else
+//			return (((b.y + b.height) - (a.y + a.height)) + 5);
+//	}
+//
+//	// Return the number of pixels over the edge we are extending.
+//	// If we are over the edge the ToolTipManager can adjust.
+//	// REMIND: what if the Tooltip is just too big to fit at all - we currently will
+//	// just clip
+//	private int getWidthAdjust(Rectangle a, Rectangle b) {
+//		// System.out.println("width b.x/b.width: " + b.x + "/" + b.width +
+//		// "a.x/a.width: " + a.x + "/" + a.width);
+//		if (b.x >= a.x && (b.x + b.width) <= (a.x + a.width)) {
+//			return 0;
+//		} else {
+//			return (((b.x + b.width) - (a.x + a.width)) + 5);
+//		}
+//	}
+//
+//	//
+//	// Actions
+//	//
+//	private void show(JComponent source) {
+//		if (tipWindow != null) { // showing we unshow
+//			hideTipWindow();
+//			insideComponent = null;
+//		} else {
+//			hideTipWindow(); // be safe
+//			enterTimer.stop();
+//			exitTimer.stop();
+//			insideTimer.stop();
+//			insideComponent = source;
+//			if (insideComponent != null) {
+//				toolTipText = insideComponent.getToolTipText();
+//				preferredLocation = new Point(10, insideComponent.getHeight() + 10); // manual set
+//				showTipWindow();
+//				// put a focuschange listener on to bring the tip down
+//				if (focusChangeListener == null) {
+//					focusChangeListener = createFocusChangeListener();
+//				}
+//				insideComponent.addFocusListener(focusChangeListener);
+//			}
+//		}
+//	}
+//
+//	private void hide(JComponent source) {
+//		hideTipWindow();
+//		source.removeFocusListener(focusChangeListener);
+//		preferredLocation = null;
+//		insideComponent = null;
+//	}
+//
 //	/*
 //	 * This listener is registered when the tooltip is first registered on a
 //	 * component in order to process accessibility keybindings. This will apply

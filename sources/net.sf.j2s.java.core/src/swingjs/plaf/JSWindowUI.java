@@ -104,9 +104,9 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 		DOMNode.setZ(domNode, z);
 		$(domNode).addClass("swingjs-window");
 		
-		System.out.println("JSWIndowUI ????");
+		System.out.println("JSWIndowUI testing?");
 		
-		// these next two lines are what allow the FocusManager to work.
+		// these next two lines are what allow the FocusManager to work....or not
 //		focusNode = domNode;
 //		addJQueryFocusCallbacks();
 	}
@@ -257,8 +257,8 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 
 	@Override
 	public void windowActivated(WindowEvent e) {
-		System.out.println("JSFrameUI windowOpened " + c.isVisible());
-		c.requestFocus();
+//		System.out.println("JSFrameUI windowActivated " + c.isVisible());
+//		c.requestFocus(); // caused problem with combobox focus
 	}
 
 

@@ -30,6 +30,7 @@ try {
 	J2S._traceEvents = (document.location.href.indexOf("j2sevents") >= 0)
 	J2S._traceMouse = (document.location.href.indexOf("j2smouse") >= 0)
 	J2S._traceMouseMove = (document.location.href.indexOf("j2smousemove") >= 0)
+	J2S._startProfiling = 	(document.location.href.indexOf("j2sprofile") >= 0)
 } catch (e) {}
 
 J2S.onClazzLoaded || (J2S.onClazzLoaded = function(i, msg) {console.log([i,msg])});
@@ -98,6 +99,7 @@ if (!J2S._version)
 					".ebi.ac.uk" : null,
 					"pubchem.ncbi.nlm.nih.gov" : null,
 					"www.nmrdb.org/tools/jmol/predict.php" : null,
+					"jalview.org/" : null,
 					"$" : "https://cactus.nci.nih.gov/chemical/structure/%FILENCI/file?format=sdf&get3d=True",
 					"$$" : "https://cactus.nci.nih.gov/chemical/structure/%FILENCI/file?format=sdf",
 					"=" : "https://files.rcsb.org/download/%FILE.pdb",
@@ -741,6 +743,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		if (info === true)
 			info = {isBinary: true};
 		info || (info = {});
+		var isTyped = !!info.dataType;
 		var isBinary = info.isBinary;
 		// swingjs.api.J2SInterface
 		// use host-server PHP relay if not from this host
@@ -776,7 +779,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 					asBase64, true, info);
 		} else {
 			fileName = fileName.replace(/file:\/\/\/\//, "file://"); // opera
-			info.dataType = (isBinary ? "binary" : "text");
+			if (!isTyped)info.dataType = (isBinary ? "binary" : "text");
 			info.async = !!fSuccess;
 			if (isPost) {
 				info.type = "POST";
@@ -802,17 +805,18 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 			isBinary = false;
 		}
 		isBinary && (isBinary = J2S._canSyncBinary(true));
-		return (isBinary ? J2S._strToBytes(data) : (self.JU || javajs && javajs.util).SB
-				.newS$S(data));
+		return (isTyped ? data : isBinary ? J2S._strToBytes(data) : (self.JU || javajs && javajs.util).SB.newS$S(data));
 	}
 
 	J2S._xhrReturn = function(xhr) {
-		if (!xhr.responseText || self.Clazz
+		if (!xhr.responseText && !xhr.responseJSON || self.Clazz
 				&& Clazz.instanceOf(xhr.response, self.ArrayBuffer)) {
 			// Safari or error
 			return xhr.response || xhr.statusText;
 		}
-		return xhr.responseText;
+	    if (xhr.responesJSON)
+	    	xhr.responseText = null;
+		return xhr.responseJSON || xhr.responseText;
 	}
 
 	J2S._isDirectCall = function(url) {
@@ -1659,12 +1663,12 @@ if (!target) {
 			if (J2S._mouseOwner)
 				who = J2S._mouseOwner;
 
-			if (ev.target.getAttribute("role")) { // JSButtonUI adds
-													// role=menucloser to icon
-													// and text
-				var m = (ev.target._menu || ev.target.parentElement._menu);
-				m && m._hideJSMenu();
-			}
+//			if (ev.target.getAttribute("role")) { // JSButtonUI adds
+//													// role=menucloser to icon
+//													// and text
+//				var m = (ev.target._menu || ev.target.parentElement._menu);
+//				m && m._hideJSMenu();
+//			}
 
 			J2S.setMouseOwner(null);
 
@@ -1938,6 +1942,12 @@ if (!target) {
 	var lastDragx = 99999;
 	var lastDragy = 99999;
 
+	J2S.getMousePosition = function(p) {
+		p.x = lastDragx;
+		p.y = lastDragy;
+		return p;
+	}
+	
 	J2S._track = function(applet) {
 		// this function inserts an iFrame that can be used to track your page's
 		// applet use.
@@ -2138,6 +2148,8 @@ if (!target) {
 			__clazzLoaded = true;
 			// create the Clazz object
 			LoadClazz();
+			if (J2S._startProfiling) 
+				Clazz.startProfiling();
 			if (applet._noMonitor)
 				Clazz._LoaderProgressMonitor.showStatus = function() {
 				}
@@ -2816,6 +2828,8 @@ if (!target) {
 		}, drag = function(ev) {
 			// we will move the frame's parent node and take the frame along
 			// with it
+			if (ev.buttons == 0 && ev.button == 0)
+				tag.isDragging = false;
 			var mode = (tag.isDragging ? 506 : 503);
 			if (!J2S._dmouseOwner || tag.isDragging && J2S._dmouseOwner == tag) {
 				x = pageX0 + (dx = ev.pageX - pageX);

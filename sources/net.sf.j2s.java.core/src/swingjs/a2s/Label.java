@@ -4,6 +4,9 @@ import java.awt.Color;
 
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+import javax.swing.plaf.ComponentUI;
+
+import swingjs.plaf.JSLabelUI;
 
 public class Label extends JLabel {
 
@@ -17,10 +20,19 @@ public class Label extends JLabel {
 	
 	public Label(String text, int center) {
 		super(text);
+		/**
+		 * @j2sNative
+		 * this.getUI$().isAWT = true;
+		 */
 		super.setBackground(null);
 		setAlignment(center);
 	}
 
+	@Override
+	public void setText(String text) {
+	  super.setText(text);
+	}
+	
 	@Override
 	public void setBackground(Color c) {
 		super.setBackground(c);

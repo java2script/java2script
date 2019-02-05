@@ -33,11 +33,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
-import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JViewport;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -50,9 +48,9 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		/**
 		 * @j2sNative
 		 * 
-		 * 	thisApplet.__Info.width = 500;
-		 *  thisApplet.__Info.height = 400;
-		 *  thisApplet.__Info.isResizable = true;
+		 * 	J2S.thisApplet.__Info.width = 500;
+		 *  J2S.thisApplet.__Info.height = 400;
+		 *  J2S.thisApplet.__Info.isResizable = true;
 		 */
 	}
 	static DecimalFormat df = new DecimalFormat("0.00");
@@ -69,6 +67,17 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 			c.setSize(x, y);
 	}
 
+	@Override
+	public void layout() {
+		super.layout();
+		
+	}
+		
+	public void test(Iterable i) {
+		
+	}
+
+	
 	@Override
 	public void init() {
 		BasicSliderUI ui;
@@ -135,7 +144,8 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 			public void mouseClicked(MouseEvent e) {
 				
 				System.out.println("BTN2 clicked " + e.getClickCount());
-				
+
+
 			}
 
 			@Override
@@ -296,13 +306,6 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		p.add(button);
 		p.add(button2);
 		p.add(button3);
-		
-		JSpinner spinner = new JSpinner();
-		//spinner.setPreferredSize(new Dimension(50,20));
-		
-		p.add(spinner);
-		
-		
 		p.setBackground(Color.blue);
 		button2.setToolTipText("this is Button 2");
 		button3.setToolTipText("this is Button 3");
@@ -314,18 +317,6 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		framesPerSecond.setPaintTicks(true);
 		framesPerSecond.setPaintLabels(true);
 //		framesPerSecond.setLabelTable(labels);
-		
-		
-        JSlider redSlider = new JSlider(JSlider.HORIZONTAL, 0, 255, 100);
-        redSlider.setMajorTickSpacing( 85 );
-        redSlider.setMinorTickSpacing( 17 );
-        redSlider.setPaintTicks( true );
-        redSlider.setPaintLabels( true );
-		p.add(redSlider);
-		
-		
-		
-		
 		
 		mkSlider(p, tf, Adjustable.HORIZONTAL, 100, 20).setInverted(true);
 		repaint();

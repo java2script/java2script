@@ -1,9 +1,9 @@
 package swingjs;
 
-import java.awt.Container;
 import java.awt.JSComponent;
 import java.awt.Toolkit;
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,6 +21,7 @@ import javajs.util.ZipTools;
 import swingjs.api.Interface;
 import swingjs.api.js.J2SInterface;
 import swingjs.api.js.JQuery;
+import swingjs.json.JSON;
 
 public class JSUtil {
 
@@ -314,6 +315,10 @@ public class JSUtil {
 	
 	public static JQuery jQuery = getJQuery();
 
+	public static Object parseJSONRaw(String json) {
+		return getJQuery().parseJSON(json);
+	}
+	
 	public static String getStackTrace(int n) {
 		return /** @j2sNative Clazz._getStackTrace(n) || */null;
 	}
@@ -540,4 +545,21 @@ public class JSUtil {
 		}
 	}
 
+	public static void setAjax(Object url) {
+		setAjax("url", url, "dataType", "json", "async", Boolean.FALSE);	
+	}
+
+	public static Object setAjax(Object... params) {
+		return params.length == 1 ? JSON.setAjax((URL) params[0]) : JSON.setAjax(params);
+	}
+	
+	public static Object parseJSON(Object o) {
+		return JSON.parse(o);
+	}
+
+	public static BufferedReader getJSONReader(Object is) {
+		return JSON.getJSONReader((InputStream) is);
+	}
+
 }
+

@@ -807,6 +807,7 @@ class Test_2Controls extends JPanel implements ItemListener {
 		bg.add(c = new JRadioButton(text, b));
 		c.setName(text);
 		add(c);
+		c.setForeground(Color.BLACK);
 		c.setOpaque(false);//c.setBackground(Color.blue);
 		System.out.println("radio is opaque " + c.isOpaque());
 		c.setEnabled(false);

@@ -28,6 +28,7 @@ public class Resizer {
 	@SuppressWarnings("unused")
 	private int titleHeight;
 	private boolean enabled = true;
+	private boolean allowResize = true;
 
 	public Resizer() {
 	}
@@ -46,7 +47,7 @@ public class Resizer {
 	}
 
 	public void show() {
-		if (!enabled)
+		if (!allowResize  || !enabled)
 			return;
 		if (resizer == null) 
 			createAndShowResizer();
@@ -108,7 +109,7 @@ public class Resizer {
 	 * @param type
 	 */
 	protected void fHandleResizer(int dx, int dy, int type) {
-		if (!enabled)
+		if (!enabled || !allowResize)
 			return;
 		switch (type) {
 		case MouseEvent.MOUSE_MOVED:
@@ -173,8 +174,17 @@ public class Resizer {
 			return r;
 	}
 
+    /**
+     * Embedded frames can do this
+     * 
+     * @param b
+     */
+    public void setAllowResize(boolean b) {
+    	allowResize = b;
+    }
+    
 	public void setEnabled(boolean b) {
-		enabled  = b;
+		enabled = b;
 		if (b)
 			show();
 		else

@@ -2198,13 +2198,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		VariableDeclarationFragment identifier = (VariableDeclarationFragment) fragments.get(0);
 		IVariableBinding var = identifier.resolveBinding();
 		Type nodeType = (var != null && var.getType().isArray() ? null : field.getType());
-		Code code = (nodeType == null || !nodeType.isPrimitiveType() ? null
-				: ((PrimitiveType) nodeType).getPrimitiveTypeCode());
+		boolean isPrimitive = (nodeType != null && nodeType.isPrimitiveType());
+		Code code = (isPrimitive ? ((PrimitiveType) nodeType).getPrimitiveTypeCode() : null);
 		// have to check here for final Object = "foo", as that must not be ignored.
-		boolean checkFinalConstant = (isStatic && Modifier.isFinal(field.getModifiers()) && var != null
-				&& !var.getType().getQualifiedName().equals("java.lang.Object"));
+		boolean checkFinalConstant = ((isPrimitive || var != null && var.getType().getQualifiedName().equals("java.lang.String")) 
+				&& isStatic && Modifier.isFinal(field.getModifiers()));
 		if (needDefault)
-			addJ2SDoc(field);
+			addJ2SDoc(field);		
 		int len0 = buffer.length();
 		for (Iterator<?> iter = fragments.iterator(); iter.hasNext();) {
 			VariableDeclarationFragment fragment = (VariableDeclarationFragment) iter.next();

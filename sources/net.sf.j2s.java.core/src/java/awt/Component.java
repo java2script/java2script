@@ -2679,7 +2679,7 @@ public abstract class Component implements ImageObserver/*
 		if (!isMaximumSizeSet()) {
 			maxSize = null;
 		}
-		if (parent != null) {
+		if (parent != null && _j2sInvalidateOnAdd) {
 			parent.invalidateIfValid();
 		}
 		// }
@@ -5046,7 +5046,9 @@ public abstract class Component implements ImageObserver/*
 	 * @see #isCoalescingEnabled
 	 * @see #checkCoalescing
 	 */
-	transient private boolean coalescingEnabled = checkCoalescing();
+	transient private boolean coalescingEnabled = checkCoalescing(); 
+
+	public boolean _j2sInvalidateOnAdd = true; // not for menu items?
 
 	/**
 	 * Weak map of known coalesceEvent overriders. Value indicates whether
@@ -5827,7 +5829,8 @@ public abstract class Component implements ImageObserver/*
 			// relocateComponent();
 			// }
 			// }
-			invalidate();
+			if (_j2sInvalidateOnAdd )
+				invalidate();
 
 			// int npopups = (popups != null? popups.size() : 0);
 			// SwingJS TODO
@@ -6872,31 +6875,34 @@ public abstract class Component implements ImageObserver/*
 		return autoFocusTransferOnDisposal;
 	}
 
-	// /**
-	// * Adds the specified popup menu to the component.
-	// * @param popup the popup menu to be added to the component.
-	// * @see #remove(MenuComponent)
-	// * @exception NullPointerException if {@code popup} is {@code null}
-	// * @since JDK1.1
-	// */
-	// public void add(PopupMenu popup) {
-	// synchronized (getTreeLock()) {
-	// if (popup.parent != null) {
-	// popup.parent.remove(popup);
-	// }
-	// if (popups == null) {
-	// popups = new Vector();
-	// }
-	// popups.addElement(popup);
-	// popup.parent = this;
-	//
-	// if (peer != null) {
-	// if (popup.peer == null) {
-	// popup.addNotify();
-	// }
-	// }
-	// }
-	// }
+	/**
+	 * Adds the specified popup menu to the component.
+	 * 
+	 * @param popup the popup menu to be added to the component.
+	 * @see #remove(MenuComponent)
+	 * @exception NullPointerException if {@code popup} is {@code null}
+	 * @since JDK1.1
+	 */
+	public void add(PopupMenu popup) {
+		popup.setInvoker(this); 
+//		synchronized (getTreeLock()) {
+//			if (popup.parent != null) {
+//				popup.parent.remove(popup);
+//			}
+//			if (popups == null) {
+//				popups = new Vector();
+//			}
+//			popups.addElement(popup);
+//			popup.setInvoker(this);
+////			popup.parent = (JComponent) this;
+//
+//			if (peer != null) {
+//				if (popup.peer == null) {
+//					popup.addNotify();
+//				}
+//			}
+//		}
+	}
 
 	// /**
 	// * Removes the specified popup menu from the component.
