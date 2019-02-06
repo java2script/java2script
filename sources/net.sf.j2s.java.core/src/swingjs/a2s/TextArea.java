@@ -1,11 +1,12 @@
 package swingjs.a2s;
 
-import java.awt.Font;
-
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 public class TextArea extends JScrollPane {
+
+	public  boolean isAWT = true;
+	
 	private JTextArea ta;
 
   /**
@@ -84,6 +85,7 @@ public class TextArea extends JScrollPane {
 	}
 
 	void awtDefaults() {
+
 		// setAutoscrolls(true);
 		// setContentType("text/plain");
 	}
@@ -147,10 +149,4 @@ public class TextArea extends JScrollPane {
 		return ta.getRows();
 	}
 	
-    @Override
-    public Font getFont() {
-    	return getFontAWT();
-    }
-
-
 }

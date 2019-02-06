@@ -67,12 +67,6 @@ public class Menu extends JMenu implements AWTMenu {
 		setAccelerator(null);
 	}
 
-	
-    @Override
-    public Font getFont() {
-    	return getFontAWT();
-    }
-
 
 
 }

@@ -8,6 +8,8 @@ import javax.swing.JPanel;
 
 public class Panel extends JPanel {
 
+	public  boolean isAWT = true;
+
 	public Panel(LayoutManager layout) {
 		super(layout);
 		subclassSetup();
@@ -31,11 +33,6 @@ public class Panel extends JPanel {
 		super.setBackground(c);
 		setOpaque(c != null);
 	}
-	
-    @Override
-    public Font getFont() {
-    	return getFontAWT();
-    }
 
 
 }

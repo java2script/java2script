@@ -1,7 +1,7 @@
 package swingjs.a2s;
 
 import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.FlowLayout;
 import java.awt.HeadlessException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -22,6 +22,7 @@ public class Applet extends JApplet implements A2SContainer {
 		listener = new A2SListener();
 		addMouseListener(listener);
 		addMouseMotionListener(listener);
+		setLayout(new FlowLayout());
     }
 
 	@Override

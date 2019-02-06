@@ -1,11 +1,11 @@
 package swingjs.a2s;
 
-import java.awt.Font;
-
 import javax.swing.JComboBox;
 
 public class Choice extends JComboBox {
 
+	public  boolean isAWT = true;
+	
 	public void select(int index) {
 		setSelectedIndex(index);
 	}
@@ -26,11 +26,6 @@ public class Choice extends JComboBox {
 	public void removeAll() {
 		removeAllItems();
 	}
-	
-    @Override
-    public Font getFont() {
-    	return getFontAWT();
-    }
 
 
 }

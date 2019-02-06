@@ -1,6 +1,5 @@
 package swingjs.a2s;
 
-import java.awt.Font;
 import java.awt.MenuComponent;
 import java.awt.MenuShortcut;
 import java.awt.event.ActionEvent;
@@ -12,6 +11,8 @@ import javax.swing.KeyStroke;
 
 public class MenuItem extends JMenuItem implements AWTMenuItem {
 
+	public  boolean isAWT = true;
+	
 	public MenuItem() {
 		super();
 	}
@@ -46,10 +47,5 @@ public class MenuItem extends JMenuItem implements AWTMenuItem {
 	public void deleteShortcut() {
 		setAccelerator(null);
 	}
-
-    @Override
-    public Font getFont() {
-    	return getFontAWT();
-    }
 
 }

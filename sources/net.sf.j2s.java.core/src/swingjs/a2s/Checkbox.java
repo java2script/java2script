@@ -1,6 +1,5 @@
 package swingjs.a2s;
 
-import java.awt.Font;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 
@@ -10,6 +9,8 @@ import javax.swing.JRadioButton;
 
 public class Checkbox extends JCheckBox {
 
+	
+	public  boolean isAWT = true;
 	
 	// added to (slightly) simplify converting code that uses Checkbox radio buttons
 	public static JRadioButton newRadioButton(String string, ButtonGroup bg, boolean b) {
@@ -64,11 +65,5 @@ public class Checkbox extends JCheckBox {
     	A2SEvent.addListener(null, this);
     	super.fireActionPerformed(event);
     }
-
-    @Override
-    public Font getFont() {
-    	return getFontAWT();
-    }
-
 
 }

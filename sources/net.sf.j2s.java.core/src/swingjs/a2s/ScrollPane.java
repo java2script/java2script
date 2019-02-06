@@ -1,7 +1,6 @@
 package swingjs.a2s;
 
 import java.awt.Component;
-import java.awt.Font;
 
 import javax.swing.JScrollPane;
 
@@ -26,6 +25,8 @@ public class ScrollPane extends JScrollPane {
   */
  public static final int SCROLLBARS_NEVER = 2;
 
+	public  boolean isAWT = true;
+	
 	public ScrollPane() {
 		super();
 	}
@@ -52,11 +53,5 @@ public class ScrollPane extends JScrollPane {
 		return c;
 	}
 	
-    @Override
-    public Font getFont() {
-    	return getFontAWT();
-    }
-
-
 	
 }

@@ -1,6 +1,5 @@
 package swingjs.a2s;
 
-import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 
@@ -8,6 +7,8 @@ import javax.swing.JButton;
 
 public class Button extends JButton {
 
+	public  boolean isAWT = true; // prevents LookAndFeel.installColorsAndFont()
+	
 	public Button() {
 		super();
 	}
@@ -29,10 +30,5 @@ public class Button extends JButton {
     	super.fireActionPerformed(event);
     }
     
-    @Override
-    public Font getFont() {
-    	return getFontAWT();
-    }
-
 
 }

@@ -1,6 +1,5 @@
 package swingjs.a2s;
 
-import java.awt.Font;
 import java.awt.GraphicsConfiguration;
 
 import javax.swing.JFrame;
@@ -53,11 +52,5 @@ public class Frame extends JFrame implements A2SContainer {
 	public MenuBar getMenubar() {
 		return (MenuBar) getJMenuBar();
 	}
-
-    @Override
-    public Font getFontAWT() {
-    	return getFont();
-    }
-
 
 }

@@ -10,9 +10,4 @@ public class List extends JList {
 		super();
 	}
 
-    @Override
-    public Font getFont() {
-    	return getFontAWT();
-    }
-
 }

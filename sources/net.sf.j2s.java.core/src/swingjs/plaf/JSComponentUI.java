@@ -593,7 +593,7 @@ public class JSComponentUI extends ComponentUI
 		 * @j2sNative
 		 * 
 		 * 			this.document = document; this.body = document.body;
-		 * 
+		 *          this.isAWT = this.jc.isAWT;
 		 * 
 		 */
 		{
@@ -2301,7 +2301,7 @@ public class JSComponentUI extends ComponentUI
 		int gap = (wText == 0 || wIcon == 0 ? 0 : b.getIconTextGap());
 		int w = cellComponent != null ? cellWidth : $(domNode).width();
 		boolean alignVCenter = (vAlign == SwingConstants.CENTER);
-		Insets margins = (isAWT ? b.getInsets() : isLabel ? insets : b.getMargin());
+		Insets margins = (isLabel ? (isAWT ? b.getInsets() : insets) : b.getMargin());
 		if (margins == null)
 			margins = zeroInsets;
 		int h = (dimText == null ? 0 : dimText.height);

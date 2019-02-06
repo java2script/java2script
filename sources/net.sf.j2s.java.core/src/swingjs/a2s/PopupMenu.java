@@ -117,12 +117,5 @@ public class PopupMenu extends JPopupMenu implements AWTPopupMenu {
 		// artifact of Menu superclass
 		return null;
 	}
-	
-    @Override
-    public Font getFontAWT() {
-    	return getFont();
-    }
-
-
 
 }

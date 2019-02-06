@@ -1,11 +1,11 @@
 package swingjs.a2s;
 
-import java.awt.Font;
-
 import javax.swing.JCheckBoxMenuItem;
 
 public class CheckboxMenuItem extends JCheckBoxMenuItem {
 
+	public  boolean isAWT = true;
+	
 	public CheckboxMenuItem(String string) {
 		super(string);
 	}
@@ -28,10 +28,6 @@ public class CheckboxMenuItem extends JCheckBoxMenuItem {
 		setSelected(tf);
 	}
 
-    @Override
-    public Font getFont() {
-    	return getFontAWT();
-    }
 
 
 }

@@ -1,6 +1,5 @@
 package swingjs.a2s;
 
-import java.awt.Font;
 import java.awt.event.TextEvent;
 import java.awt.event.TextListener;
 
@@ -10,6 +9,8 @@ import javax.swing.event.DocumentListener;
 
 public class TextField extends JTextField {
 
+	public  boolean isAWT = true;
+	
 	public TextField() {
 		this("", 0);
 	}
@@ -46,11 +47,5 @@ public class TextField extends JTextField {
 			}
 		});
 	}
-
-    @Override
-    public Font getFont() {
-    	return getFontAWT();
-    }
-
 
 }
