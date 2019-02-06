@@ -1,5 +1,6 @@
 package swingjs.a2s;
 
+import java.awt.Font;
 import java.awt.GraphicsConfiguration;
 import java.awt.Window;
 
@@ -101,6 +102,11 @@ public class Dialog extends JDialog {
     public Dialog(Window owner, String title, java.awt.Dialog.ModalityType modalityType,
                   GraphicsConfiguration gc) {
         super(owner, title, modalityType, gc);
+    }
+
+    @Override
+    public Font getFontAWT() {
+    	return getFont();
     }
 
 

@@ -2,6 +2,7 @@ package swingjs.a2s;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Insets;
 
 import javax.swing.JLabel;
@@ -81,5 +82,11 @@ public class Label extends JLabel {
 		setVerticalAlignment(SwingConstants.CENTER);
 		setVerticalTextPosition(SwingConstants.CENTER);
 	}
+
+    @Override
+    public Font getFont() {
+    	return getFontAWT();
+    }
+
 
 }

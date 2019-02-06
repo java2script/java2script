@@ -1,5 +1,7 @@
 package swingjs.a2s;
 
+import java.awt.Font;
+
 import javax.swing.JComboBox;
 
 public class Choice extends JComboBox {
@@ -25,4 +27,10 @@ public class Choice extends JComboBox {
 		removeAllItems();
 	}
 	
+    @Override
+    public Font getFont() {
+    	return getFontAWT();
+    }
+
+
 }

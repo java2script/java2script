@@ -1,5 +1,6 @@
 package swingjs.a2s;
 
+import java.awt.Font;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 
@@ -62,6 +63,11 @@ public class Checkbox extends JCheckBox {
 	protected void fireActionPerformed(ActionEvent event) {
     	A2SEvent.addListener(null, this);
     	super.fireActionPerformed(event);
+    }
+
+    @Override
+    public Font getFont() {
+    	return getFontAWT();
     }
 
 

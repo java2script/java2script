@@ -1,6 +1,7 @@
 package swingjs.a2s;
 
 import java.awt.Component;
+import java.awt.Font;
 
 import javax.swing.JScrollPane;
 
@@ -50,5 +51,12 @@ public class ScrollPane extends JScrollPane {
 		getViewport().add(c);
 		return c;
 	}
+	
+    @Override
+    public Font getFont() {
+    	return getFontAWT();
+    }
+
+
 	
 }

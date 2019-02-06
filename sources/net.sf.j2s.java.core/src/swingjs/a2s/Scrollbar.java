@@ -1,5 +1,6 @@
 package swingjs.a2s;
 
+import java.awt.Font;
 import java.awt.event.AdjustmentEvent;
 
 import javax.swing.JScrollBar;

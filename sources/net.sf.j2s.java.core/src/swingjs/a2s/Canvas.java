@@ -1,6 +1,7 @@
 package swingjs.a2s;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
 
@@ -46,4 +47,11 @@ public class Canvas extends Panel {
 		if (/** @j2sNative this.paintComponent$java_awt_Graphics || */false)
 			paintComponent(g);
 	}
+
+	@Override
+    public Font getFont() {
+    	return getFontAWT();
+    }
+
+
 }

@@ -1,5 +1,7 @@
 package swingjs.a2s;
 
+import java.awt.Font;
+
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
@@ -145,4 +147,10 @@ public class TextArea extends JScrollPane {
 		return ta.getRows();
 	}
 	
+    @Override
+    public Font getFont() {
+    	return getFontAWT();
+    }
+
+
 }

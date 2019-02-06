@@ -1,6 +1,7 @@
 package swingjs.a2s;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.LayoutManager;
 
 import javax.swing.JPanel;
@@ -31,5 +32,10 @@ public class Panel extends JPanel {
 		setOpaque(c != null);
 	}
 	
+    @Override
+    public Font getFont() {
+    	return getFontAWT();
+    }
+
 
 }

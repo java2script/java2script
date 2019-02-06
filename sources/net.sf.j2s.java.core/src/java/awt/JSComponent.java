@@ -27,18 +27,17 @@
  */
 package java.awt;
 
-import java.applet.JSApplet;
 import java.awt.event.KeyListener;
 import java.awt.peer.ComponentPeer;
 import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 
 import javax.swing.JComponent;
-import javax.swing.JPopupMenu;
 import javax.swing.RootPaneContainer;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
+import javax.swing.plaf.FontUIResource;
 
 import swingjs.JSAppletThread;
 import swingjs.JSAppletViewer;
@@ -345,5 +344,23 @@ public abstract class JSComponent extends Component {
 		if (keyListener == null && ui != null)
 			((JSComponentUI)ui).enableJSKeys(false);
 	}
+	
+	/**
+	 * For AWT components, first try nondefault font, and then, 
+	 * only as a last resort, use the default font.
+	 * 
+	 * @return
+	 */
+    public Font getFontAWT() {
+        Font font = this.font;
+        if (font != null && !(font instanceof FontUIResource)) {
+            return font;
+        }
+        Container parent = this.parent;
+        font = (parent == null ? null : parent.getFontAWT());
+        return (font != null ? font : getFont_NoClientCode());
+    }
+
+
 
 }

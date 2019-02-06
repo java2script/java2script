@@ -1,6 +1,7 @@
 package swingjs.a2s;
 
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.MenuComponent;
 import java.awt.MenuItem;
 import java.awt.MenuShortcut;
@@ -116,5 +117,12 @@ public class PopupMenu extends JPopupMenu implements AWTPopupMenu {
 		// artifact of Menu superclass
 		return null;
 	}
+	
+    @Override
+    public Font getFontAWT() {
+    	return getFont();
+    }
+
+
 
 }

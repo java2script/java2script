@@ -1,5 +1,6 @@
 package swingjs.a2s;
 
+import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 
@@ -27,5 +28,11 @@ public class Button extends JButton {
     	A2SEvent.addListener(null, this);
     	super.fireActionPerformed(event);
     }
+    
+    @Override
+    public Font getFont() {
+    	return getFontAWT();
+    }
+
 
 }
