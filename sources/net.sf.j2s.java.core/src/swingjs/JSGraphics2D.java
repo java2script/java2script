@@ -259,7 +259,8 @@ public class JSGraphics2D // extends SunGraphics2D
 	 */
 	private void doPoly(int[] axPoints, int[] ayPoints, int nPoints, boolean fill) {
 		ctx.beginPath();
-		ctx.translate(0.5, 0.5);
+		if (!fill)
+			ctx.translate(0.5, 0.5);
 		ctx.moveTo(axPoints[0], ayPoints[0]);
 		for (int i = 1; i < nPoints; i++) {
 			ctx.lineTo(axPoints[i], ayPoints[i]);
@@ -269,8 +270,8 @@ public class JSGraphics2D // extends SunGraphics2D
 			ctx.fill();
 		} else {
 			ctx.stroke();
+			ctx.translate(-0.5, -0.5);
 		}
-		ctx.translate(-0.5, -0.5);
 	}
 
 	public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
