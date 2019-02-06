@@ -742,6 +742,10 @@ public class JSGraphics2D // extends SunGraphics2D
 		fillText(s, x, y);
 	}
 
+	public void drawChars(char[] chars, int x, int y) {
+		fillText(String.valueOf(chars), x, y);
+	}
+
 	public void drawString(String str, float x, float y) {
 		fillText(str, x, y);
 	}
