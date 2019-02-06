@@ -1,5 +1,7 @@
 package swingjs.a2s;
 
+import java.awt.Color;
+
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
@@ -35,35 +37,32 @@ public class TextArea extends JScrollPane {
 
 
 	public TextArea(int rows, int cols) {
-		super();
-		setViewportView(ta = new JTextArea(rows, cols));
-		awtDefaults();
+		this(null, rows, cols, SCROLLBARS_BOTH);
 	}
 
 	public TextArea() {
-		super();
-		setViewportView(ta = new JTextArea());
-		awtDefaults();
+		this(null, 0, 0, SCROLLBARS_BOTH);
 	}
 
 	public TextArea(String text) {
-		super();
-		setViewportView(ta = new JTextArea(text, 0, 9));
-		awtDefaults();
+		this(text, 0, 0, SCROLLBARS_BOTH);
 	}
 
 	public TextArea(String text, int rows, int cols) {
-		super();
-		setViewportView(ta = new JTextArea(text, rows, cols));
-		awtDefaults();
+		this(text, rows, cols, SCROLLBARS_BOTH);
 	}
 	
 	public TextArea(String text, int rows, int columns, int scrollbars) {
-		this(text, rows, columns);
+		super();
+		if (rows < 0)
+			rows = 0;
+		if (columns < 0)
+			columns = 0;
+		setViewportView(ta = new JTextArea(text, rows, columns));
 		switch (scrollbars) {
 		case SCROLLBARS_BOTH:
-	    	setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
-	    	setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
+	    	setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_ALWAYS);
+	    	setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_ALWAYS);
 	    	break;			
 		case SCROLLBARS_VERTICAL_ONLY:
 	    	setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_ALWAYS);
@@ -79,6 +78,20 @@ public class TextArea extends JScrollPane {
 	    	break;			
 		}
 	}
+
+    public int getScrollbarVisibility() {
+    	int vp = getVerticalScrollBarPolicy();
+    	int hp = getHorizontalScrollBarPolicy();
+    	if (vp == VERTICAL_SCROLLBAR_ALWAYS && hp == HORIZONTAL_SCROLLBAR_ALWAYS)
+    		return SCROLLBARS_BOTH;
+    	if (vp == VERTICAL_SCROLLBAR_ALWAYS)
+    		return SCROLLBARS_VERTICAL_ONLY;
+    	if (hp == HORIZONTAL_SCROLLBAR_ALWAYS)
+    		return SCROLLBARS_HORIZONTAL_ONLY;
+    	return SCROLLBARS_NONE;
+
+    }
+
 
 	public void setCaretPosition(int pos) {
 		ta.setCaretPosition(pos);
@@ -148,5 +161,17 @@ public class TextArea extends JScrollPane {
 	public int getRows() {
 		return ta.getRows();
 	}
+
+	@Override
+	public void setBackground(Color c) {
+		if (ta != null)
+			ta.setBackground(c);
+	}
 	
+	@Override
+	public void setForeground(Color c) {
+		if (ta != null)
+			ta.setForeground(c);
+	}
+
 }
