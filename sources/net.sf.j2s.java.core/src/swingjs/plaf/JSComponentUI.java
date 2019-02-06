@@ -2229,15 +2229,9 @@ public class JSComponentUI extends ComponentUI
 	protected static Insets zeroInsets = new Insets(0, 0, 0, 0);
 	
 	protected void getJSInsets() {
-		String s = /** @j2sNative this.jc.getInsets$.exClazz.__CLASS_NAME__ || */"";
-		boolean overwritten = s.indexOf("java") != 0 && s.indexOf("swingjs") != 0;
-		if (overwritten) {
-			insets = jc.getInsets();
-		} else { 
-			if (insets == null)
-				insets = new Insets(0, 0, 0, 0);
-			jc.getInsets(insets);
-		}
+		if (insets == null)
+			insets = new Insets(0, 0, 0, 0);
+		insets = jc.getInsets(insets);
 	}
 
 	public void setButtonRectangles(boolean isPreferred) {
@@ -2527,7 +2521,8 @@ public class JSComponentUI extends ComponentUI
 					itop = 70;
 					iscale = "scale(0.6,0.6)";
 				}
-				yoff = (wIcon == 0 ? "-" + ((jc.getFont().getFontMetrics().getAscent()>>1)+1) + "px" : "-50%");
+				// +3 here is a fudge factor for the AWT applets
+				yoff = (wIcon == 0 ? "-" + ((jc.getFont().getFontMetrics().getAscent()>>1)+3) + "px" : "-50%");
 				break;
 			case SwingConstants.BOTTOM:
 				top = itop = 100;
