@@ -358,7 +358,7 @@ public class JRootPane extends JComponent {
 		// JApplet is special, because it means we are embedded.
 		setName(AppContext.getAppContext().getThreadGroup().getName() + prefix + (++paneCount)
 				+ ".JRootPane");
-
+		
 		setGlassPane(createGlassPane());
 		setLayeredPane(createLayeredPane());
 		setContentPane(createContentPane());
@@ -1032,6 +1032,15 @@ public class JRootPane extends JComponent {
 	@Override
 	protected String paramString() {
 		return super.paramString();
+	}
+
+	@Override
+	public Insets getInsets() {
+		Container top = getTopLevelAncestor();
+		if (top instanceof java.applet.Applet) {
+			return top.getInsets();
+		}
+		return super.getInsets();
 	}
 
 	@Override
