@@ -593,7 +593,6 @@ public class JSComponentUI extends ComponentUI
 		 * @j2sNative
 		 * 
 		 * 			this.document = document; this.body = document.body;
-		 *          this.isAWT = this.jc.isAWT;
 		 * 
 		 */
 		{
@@ -672,6 +671,11 @@ public class JSComponentUI extends ComponentUI
 		// but it will always be a JSComponent, and
 		// we do not care if it is not a JComponent.
 		setComponent(target);
+		/**
+		 * @j2sNative
+		 *           this.isAWT = this.jc.isAWT;
+		 */
+
 		applet = JSToolkit.getHTML5Applet(c);
 		newID(false);
 		installUI(target); // need to do this immediately, not later
@@ -1293,7 +1297,7 @@ public class JSComponentUI extends ComponentUI
 	 * can be set false to never draw a background, primarily because Mac OS will
 	 * paint a non-rectangular object.
 	 * 
-	 * (textfield, textarea, button, combobox, menuitem)
+	 * (textfield, textarea, button, combobox, menuitem, scrollbar)
 	 */
 	protected boolean allowPaintedBackground = true;
 
@@ -2225,9 +2229,15 @@ public class JSComponentUI extends ComponentUI
 	protected static Insets zeroInsets = new Insets(0, 0, 0, 0);
 	
 	protected void getJSInsets() {
-		if (insets == null)
-			insets = new Insets(0, 0, 0, 0);
-		jc.getInsets(insets);
+		String s = /** @j2sNative this.jc.getInsets$.exClazz.__CLASS_NAME__ || */"";
+		boolean overwritten = s.indexOf("java") != 0 && s.indexOf("swingjs") != 0;
+		if (overwritten) {
+			insets = jc.getInsets();
+		} else { 
+			if (insets == null)
+				insets = new Insets(0, 0, 0, 0);
+			jc.getInsets(insets);
+		}
 	}
 
 	public void setButtonRectangles(boolean isPreferred) {
