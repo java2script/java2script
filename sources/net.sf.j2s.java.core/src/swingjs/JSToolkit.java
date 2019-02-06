@@ -995,4 +995,9 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		return JSUtil.J2S.getMousePosition(new Point());
 	}
 
+	public static boolean isOverWritten(JComponent jc, String method) {
+		String s = /** @j2sNative jc[method].exClazz.__CLASS_NAME__ || */"";
+	    return s.indexOf("java") != 0 && s.indexOf("swingjs") != 0;
+	}
+
 }
