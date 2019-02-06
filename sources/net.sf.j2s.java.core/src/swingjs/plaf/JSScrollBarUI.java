@@ -1,11 +1,14 @@
 package swingjs.plaf;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 
 import javax.swing.JComponent;
 import javax.swing.JScrollBar;
 import javax.swing.event.ChangeEvent;
+
+import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
 
 /**
@@ -34,6 +37,13 @@ public class JSScrollBarUI extends JSSliderUI {
 	public JSScrollBarUI() {
 		super();
 		isScrollBar = true;
+		allowPaintedBackground = false;
+	}
+
+	@Override
+	public void setBackground(Color background) {
+	  if (background != null)
+		DOMNode.setStyles(sliderTrack, "background-color", JSToolkit.getCSSColor(background));
 	}
 
 	@Override

@@ -6,6 +6,7 @@ import java.util.Enumeration;
 
 import javax.swing.SwingConstants;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -113,9 +114,13 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		}
 		setup(isNew || isChanged);
 		setSlider();
-		if (jc.isOpaque())
-			setBackground(jc.getBackground());
+		setBackground(jc.getBackground());
 		return updateDOMNodeCUI();
+	}
+
+	public void setBackground(Color background) {
+		if (jc.isOpaque())
+			super.setBackground(background);
 	}
 
 	private void disposeSlider() {
