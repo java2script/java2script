@@ -16,6 +16,10 @@ public class Applet extends JApplet implements A2SContainer {
 
     public Applet() throws HeadlessException {
     	super();
+    	getRootPane().isAWTApplet = true;
+    	/**@j2sNative 
+    	 * this.getContentPane$().isAWTApplet = true;
+    	 */
 		// Note: applet.paint(g) needs to include super.paint(g), or buttons will not
 		// show. So we do that in fixAppletPaint().
 		fixAppletPaint();

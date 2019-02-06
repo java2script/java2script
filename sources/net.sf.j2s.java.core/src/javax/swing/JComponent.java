@@ -72,6 +72,7 @@ import javajs.util.Lst;
 import sun.font.FontDesignMetrics;
 import swingjs.JSFocusPeer;
 import swingjs.JSGraphics2D;
+import swingjs.JSToolkit;
 import swingjs.JSUtil;
 import swingjs.plaf.JSComponentUI;
 
@@ -1636,35 +1637,46 @@ public abstract class JComponent extends Container {
 
 	/**
 	 * Returns an <code>Insets</code> object containing this component's inset
-	 * values. The passed-in <code>Insets</code> object will be reused if
-	 * possible. Calling methods cannot assume that the same object will be
-	 * returned, however. All existing values within this object are overwritten.
-	 * If <code>insets</code> is null, this will allocate a new one.
+	 * values. The passed-in <code>Insets</code> object will be reused if possible.
+	 * Calling methods cannot assume that the same object will be returned, however.
+	 * All existing values within this object are overwritten. If
+	 * <code>insets</code> is null, this will allocate a new one.
 	 * 
-	 * @param insets
-	 *          the <code>Insets</code> object, which can be reused
+	 * @param insets the <code>Insets</code> object, which can be reused
 	 * @return the <code>Insets</code> object
 	 * @see #getInsets
 	 * @beaninfo expert: true
 	 */
+	@SuppressWarnings("unused")
 	public Insets getInsets(Insets insets) {
+		Insets in = null;
 		if (insets == null) {
 			insets = new Insets(0, 0, 0, 0);
 		}
-		if (border != null) {
-			if (border instanceof AbstractBorder) {
-				return ((AbstractBorder) border).getBorderInsets(this, insets);
+		if (/** @j2sNative this.isAWT || this.isAWTApplet || */false) {
+			// because AWT components do not have this method
+			in = getInsets();
+		} else {
+			if (border == null) {
+				// super.getInsets() always returns an Insets object with
+				// all of its value zeroed. No need for a new object here.
+				insets.left = insets.top = insets.right = insets.bottom = 0;
 			} else {
+				if (border instanceof AbstractBorder) {
+					in = ((AbstractBorder) border).getBorderInsets(this, insets);
+				}
 				// Can't reuse border insets because the Border interface
 				// can't be enhanced.
-				return border.getBorderInsets(this);
+				in = border.getBorderInsets(this);
 			}
-		} else {
-			// super.getInsets() always returns an Insets object with
-			// all of its value zeroed. No need for a new object here.
-			insets.left = insets.top = insets.right = insets.bottom = 0;
-			return insets;
 		}
+		if (in != null) {
+			insets.left = in.left;
+			insets.right = in.right;
+			insets.top = in.top;
+			insets.bottom = in.bottom;
+		}
+		return insets;
 	}
 
 	/**

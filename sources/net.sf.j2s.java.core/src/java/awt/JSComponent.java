@@ -135,7 +135,7 @@ public abstract class JSComponent extends Component {
 	 */
 	public boolean _isBackgroundPainted;
 
-	
+	private Insets tempInsets;
 
 	public JSComponent() {
 		super();
@@ -153,12 +153,23 @@ public abstract class JSComponent extends Component {
 	public Graphics getGraphics() {
 		if (width == 0 || height == 0 || !isVisible())
 			return null;
-		if (frameViewer != null)
-			return frameViewer.getGraphics().create();
+		Graphics g;
+		if (frameViewer != null) {
+			g = frameViewer.getGraphics().create();
+			if (isContentPane) {
+				if (tempInsets == null)
+					tempInsets = new Insets(0,0,0,0);
+				((JComponent) this).getRootPane().getInsets(tempInsets);
+				if (tempInsets.left != 0 || tempInsets.top != 0)
+					g.translate(tempInsets.left, tempInsets.top);
+				// when user has inset the applet -- should clip? 
+			}
+			return g;
+		}
 		if (parent == null) {
 			return null;
 		}
-		Graphics g = parent.getGraphics();
+		g = parent.getGraphics();
 		if (g == null)
 			return null;
 		// if (g instanceof ConstrainableGraphics) {

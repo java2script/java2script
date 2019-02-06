@@ -1034,11 +1034,12 @@ public class JRootPane extends JComponent {
 		return super.paramString();
 	}
 
+	public boolean isAWTApplet = false;
+	
 	@Override
 	public Insets getInsets() {
-		Container top = getTopLevelAncestor();
-		if (top instanceof java.applet.Applet) {
-			return top.getInsets();
+		if (isAWTApplet) {
+			return getTopLevelAncestor().getInsets();
 		}
 		return super.getInsets();
 	}
