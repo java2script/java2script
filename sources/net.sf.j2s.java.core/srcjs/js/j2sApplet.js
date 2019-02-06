@@ -1,7 +1,8 @@
 // j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
-// J2S._version set to "3.2.4.07" 1/4/2019
+// J2S._version set to "3.2.4.07" 2019.01.04; 2019.02.06
 
+// BH 2/6/2019 adds check for non-DOM event handler in getXY
 // BH 1/4/2019 moves window.thisApplet to J2S.thisApplet; 
 
 // see devnotes.txt for previous changes.
@@ -1880,6 +1881,11 @@ if (!target) {
 			}
 		}
 		var offsets = J2S.$offset(who.id);
+		if (!offsets) {
+			// someone forgot to remove the event handlers for an object removed from the DOM
+			J2S.unsetMouse(who);
+			return;
+		}
 		var x, y;
 		var oe = ev.originalEvent;
 		// drag-drop jQuery event is missing pageX
