@@ -9,7 +9,7 @@ import javax.swing.event.DocumentListener;
 
 public class TextField extends JTextField {
 
-	public  boolean isAWT = true;
+	public void isAWT() {}
 	
 	public TextField() {
 		this("", 0);
@@ -47,5 +47,24 @@ public class TextField extends JTextField {
 			}
 		});
 	}
+	
+//	A2SListener listener = null;
+//
+//	@Override
+//	public A2SListener getA2SListener() {
+//		if (listener == null)
+//			listener = new A2SListener();
+//		return listener;
+//	}
+//
+    @Override
+	protected void fireActionPerformed() {
+    	A2SEvent.addListener(this);
+    	super.fireActionPerformed();
+    }
+    
+    
+
+
 
 }

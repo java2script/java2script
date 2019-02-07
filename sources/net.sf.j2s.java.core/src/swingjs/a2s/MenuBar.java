@@ -6,7 +6,7 @@ import javax.swing.JMenuBar;
 
 public class MenuBar extends JMenuBar {
 	
-	public  boolean isAWT = true;
+	public void isAWT() {}
 	
     public MenuBar() throws HeadlessException {
     	super();

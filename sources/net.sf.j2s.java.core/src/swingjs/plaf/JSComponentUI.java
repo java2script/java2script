@@ -2197,7 +2197,7 @@ public class JSComponentUI extends ComponentUI
 		if (textNode != null) {
 			prop = "innerHTML";
 			obj = textNode;
-			setCssFont(textNode, c.getFont());
+			setCssFont(textNode, getFont());
 			if (!isHTML)
 				text = PT.rep(text, "<", "&lt;");
 		} else if (valueNode != null) {
@@ -2522,7 +2522,7 @@ public class JSComponentUI extends ComponentUI
 					iscale = "scale(0.6,0.6)";
 				}
 				// +3 here is a fudge factor for the AWT applets
-				yoff = (wIcon == 0 ? "-" + ((jc.getFont().getFontMetrics().getAscent()>>1)+3) + "px" : "-50%");
+				yoff = (wIcon == 0 ? "-" + ((getFont().getFontMetrics().getAscent()>>1)+3) + "px" : "-50%");
 				break;
 			case SwingConstants.BOTTOM:
 				top = itop = 100;
@@ -2537,6 +2537,12 @@ public class JSComponentUI extends ComponentUI
 			DOMNode.setStyles(textNode, "top", "50%", "transform", "translateY(-60%)");
 			DOMNode.setStyles(iconNode, "top", "50%", "transform", "translateY(-80%) scale(0.6,0.6)");
 		}
+	}
+
+	Font getFont() {
+		// for AWT components before they are connected
+		Font f = c.getFont();
+		return (f == null ? (Font) HTML5LookAndFeel.dialogPlain12 : f);
 	}
 
 	private String getAccelStr(JMenuItem b) {

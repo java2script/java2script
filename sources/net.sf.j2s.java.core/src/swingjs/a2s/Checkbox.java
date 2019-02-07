@@ -10,7 +10,7 @@ import javax.swing.JRadioButton;
 public class Checkbox extends JCheckBox {
 
 	
-	public  boolean isAWT = true;
+	public void isAWT() {}
 	
 	// added to (slightly) simplify converting code that uses Checkbox radio buttons
 	public static JRadioButton newRadioButton(String string, ButtonGroup bg, boolean b) {
@@ -62,7 +62,7 @@ public class Checkbox extends JCheckBox {
 
     @Override
 	protected void fireActionPerformed(ActionEvent event) {
-    	A2SEvent.addListener(null, this);
+    	A2SEvent.addListener(this);
     	super.fireActionPerformed(event);
     }
 

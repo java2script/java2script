@@ -7,7 +7,7 @@ import javax.swing.JTextArea;
 
 public class TextArea extends JScrollPane {
 
-	public  boolean isAWT = true;
+	public void isAWT() {}
 	
 	private JTextArea ta;
 

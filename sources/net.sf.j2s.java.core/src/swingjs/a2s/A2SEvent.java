@@ -24,6 +24,29 @@ import javax.swing.JComponent;
 import javax.swing.JScrollBar;
 
 
+/**
+ * The A2SEvent class converts Swing events to AWT events and sets up
+ * appropriate listeners.
+ * 
+ * Each a2s control that needs a listener of any type can be set up here. Just
+ * include a method in that control that looks like this:
+ * 
+ * protected void fireActionEvent() {
+ * 
+ *           A2SEvent.addListener(this);
+ * 
+ *           super.fireActionEvent();
+ * 
+ *           }
+ * 
+ * (or whatever method is involve in the superclass)
+ * 
+ * In this way, if an event is fired, we can catch it here, and it will pass up the 
+ * component hierarchy until it finds its listener.
+ * 
+ * @author hansonr
+ *
+ */
 public class A2SEvent implements Runnable {
 
   private Event e;
@@ -233,15 +256,14 @@ public class A2SEvent implements Runnable {
 		return null;
 	}
   
-	public static Component addListener(JComponent container, Component comp) {
-		A2SContainer top = (container == null ? null : ((A2SContainer) container.getTopLevelAncestor()));
-		if (top == null)
-			top = ((A2SContainer) ((JComponent) comp).getTopLevelAncestor());
-		if (top == null)
-			if (comp instanceof A2SContainer)
-				top = (A2SContainer) comp;
-			else
-				return comp;
+	public static void addListener(Component comp) {
+		A2SContainer top = ((A2SContainer) ((JComponent) comp).getTopLevelAncestor());
+		if (top == null) {
+			return;
+//			if (!(comp instanceof A2SContainer))
+//				return;
+//			top = (A2SContainer) comp;
+		}
 		A2SListener listener = top.getA2SListener();
 		if (comp instanceof AbstractButton) {
 			if (!isListener(((AbstractButton) comp).getActionListeners(), listener))
@@ -256,7 +278,6 @@ public class A2SEvent implements Runnable {
 			if (!isListener(((JScrollBar) comp).getAdjustmentListeners(), listener))
 				((JScrollBar) comp).addAdjustmentListener((AdjustmentListener) listener);
 		}
-		return comp;
 	}
 
 
@@ -268,5 +289,5 @@ public class A2SEvent implements Runnable {
 				return true;
 		return false;
 	}
-  
+
 }

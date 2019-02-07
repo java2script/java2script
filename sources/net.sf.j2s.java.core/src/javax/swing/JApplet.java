@@ -173,7 +173,7 @@ public class JApplet extends JSApplet implements /* Accessible ,*/
 
 		/** Called by the constructor methods to create the default rootPane. */
     protected JRootPane createRootPane() {
-        JRootPane rp = new JRootPane("", true);
+        JRootPane rp = new JRootPane("", true, this);
         // NOTE: this uses setOpaque vs LookAndFeel.installProperty as there
         // is NO reason for the RootPane not to be opaque. For painting to
         // work the contentPane must be opaque, therefor the RootPane can

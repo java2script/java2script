@@ -969,7 +969,7 @@ public class PopupFactory {
 				Component createComponent(Component owner) {
             Panel component = new MediumWeightComponent();
             
-            rootPane = new JRootPane("_Popup" + (++popupCount), false);
+            rootPane = new JRootPane("_Popup" + (++popupCount), false, component);
             rootPane.setFrameViewer(((JSComponent) owner).getFrameViewer());
             // NOTE: this uses setOpaque vs LookAndFeel.installProperty as
             // there is NO reason for the RootPane not to be opaque. For

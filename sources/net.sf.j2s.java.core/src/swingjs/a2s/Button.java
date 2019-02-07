@@ -7,7 +7,7 @@ import javax.swing.JButton;
 
 public class Button extends JButton {
 
-	public  boolean isAWT = true; // prevents LookAndFeel.installColorsAndFont()
+	public void isAWT() {} // prevents LookAndFeel.installColorsAndFont()
 	
 	public Button() {
 		super();
@@ -26,7 +26,7 @@ public class Button extends JButton {
 
     @Override
 	protected void fireActionPerformed(ActionEvent event) {
-    	A2SEvent.addListener(null, this);
+    	A2SEvent.addListener(this);
     	super.fireActionPerformed(event);
     }
     

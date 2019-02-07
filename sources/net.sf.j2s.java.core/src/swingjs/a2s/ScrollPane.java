@@ -25,7 +25,7 @@ public class ScrollPane extends JScrollPane {
   */
  public static final int SCROLLBARS_NEVER = 2;
 
-	public  boolean isAWT = true;
+	public void isAWT() {}
 	
 	public ScrollPane() {
 		super();

@@ -7,7 +7,7 @@ import java.awt.GraphicsConfiguration;
 
 public class Canvas extends Panel {
 	
-	public  boolean isAWT = true;
+	public void isAWT() {}
 	
 	public Canvas() {
 		super();

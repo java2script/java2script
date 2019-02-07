@@ -1,5 +1,8 @@
 package swingjs.plaf;
 
+import javax.swing.JComponent;
+import javax.swing.LookAndFeel;
+
 import swingjs.api.js.DOMNode;
 
 public class JSAppletUI extends JSLightweightUI {
@@ -11,5 +14,12 @@ public class JSAppletUI extends JSLightweightUI {
 		}
 		return updateDOMNodeCUI();
 	}
+	
+	@Override
+	public void installUI(JComponent jc) {
+    LookAndFeel.installColorsAndFont(jc,
+        null, null, "Panel.font");
+	}
+
 	
 }

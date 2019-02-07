@@ -8,7 +8,7 @@ import javax.swing.JPanel;
 
 public class Panel extends JPanel {
 
-	public  boolean isAWT = true;
+	public void isAWT() {}
 
 	public Panel(LayoutManager layout) {
 		super(layout);

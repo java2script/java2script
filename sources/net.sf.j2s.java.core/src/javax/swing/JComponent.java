@@ -1653,7 +1653,7 @@ public abstract class JComponent extends Container {
 		if (insets == null) {
 			insets = new Insets(0, 0, 0, 0);
 		}
-		if (/** @j2sNative this.isAWT || this.isAWTApplet || */false) {
+		if (/** @j2sNative this.isAWT || this.isAWTContainer || */false) {
 			// because AWT components do not have this method
 			in = getInsets();
 		} else {

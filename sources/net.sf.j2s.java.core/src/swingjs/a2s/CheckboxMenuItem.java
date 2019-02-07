@@ -4,7 +4,7 @@ import javax.swing.JCheckBoxMenuItem;
 
 public class CheckboxMenuItem extends JCheckBoxMenuItem {
 
-	public  boolean isAWT = true;
+	public void isAWT() {}
 	
 	public CheckboxMenuItem(String string) {
 		super(string);

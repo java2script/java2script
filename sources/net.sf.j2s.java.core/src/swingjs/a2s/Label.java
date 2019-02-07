@@ -8,7 +8,7 @@ import javax.swing.SwingConstants;
 
 public class Label extends JLabel {
 
-	public  boolean isAWT = true;
+	public void isAWT() {}
 	
 	public Label() {
 		this("", java.awt.Label.LEFT);

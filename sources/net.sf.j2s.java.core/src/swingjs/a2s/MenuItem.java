@@ -11,7 +11,7 @@ import javax.swing.KeyStroke;
 
 public class MenuItem extends JMenuItem implements AWTMenuItem {
 
-	public  boolean isAWT = true;
+	public void isAWT() {}
 	
 	public MenuItem() {
 		super();

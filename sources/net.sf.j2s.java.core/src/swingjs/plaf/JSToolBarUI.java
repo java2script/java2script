@@ -448,7 +448,7 @@ public class JSToolBarUI extends JSPanelUI {
 			// the frame when contents change
 			@Override
 			protected JRootPane createRootPane() {
-				JRootPane rootPane = new JRootPane(id + (++toolbarCount), false) {
+				JRootPane rootPane = new JRootPane(id + (++toolbarCount), false, this) {
 					private boolean packing = false;
 
 					@Override
@@ -502,7 +502,7 @@ public class JSToolBarUI extends JSPanelUI {
 			// the frame when contents change
 			@Override
 			protected JRootPane createRootPane() {
-				JRootPane rootPane = new JRootPane(id + (++toolbarCount), false) {
+				JRootPane rootPane = new JRootPane(id + (++toolbarCount), false, this) {
 					private boolean packing = false;
 
 					@Override

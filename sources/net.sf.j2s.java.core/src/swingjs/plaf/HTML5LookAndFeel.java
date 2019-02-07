@@ -498,6 +498,8 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		// "com.sun.swing.internal.plaf.basic.resources.basic" );
 	}
 
+	static final Object dialogPlain12 = new FontUIResource(Font.DIALOG, Font.PLAIN, 12); 
+
 	/**
 	 * Populates {@code table} with the defaults for the basic look and feel.
 	 * 
@@ -528,7 +530,6 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		Object serifPlain12 = new FontUIResource(Font.SERIF, Font.PLAIN, 12);
 		Object sansSerifPlain12 = new FontUIResource(Font.SANS_SERIF, Font.PLAIN,
 				12);
-		Object dialogPlain12 = new FontUIResource(Font.DIALOG, Font.PLAIN, 12);
 		Object monospacedPlain12 = new FontUIResource(Font.MONOSPACED, Font.PLAIN, 12);
 		// Object dialogBold12 = new SwingLazyValue(
 		// "javax.swing.plaf.FontUIResource",

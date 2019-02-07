@@ -43,6 +43,7 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import sun.awt.AppContext;
 import swingjs.JSFrameViewer;
+import swingjs.a2s.A2SContainer;
 
 /**
  * A lightweight container used behind the scenes by <code>JFrame</code>,
@@ -351,9 +352,13 @@ public class JRootPane extends JComponent {
 	/**
 	 * Creates a <code>JRootPane</code>, setting up its <code>glassPane</code>,
 	 * <code>layeredPane</code>, and <code>contentPane</code>.
+	 * @param container TODO
 	 * @param c 
 	 */
-	public JRootPane(String prefix, boolean isApplet) {
+	public JRootPane(String prefix, boolean isApplet, Container container) {
+		
+    	isAWT =  container instanceof A2SContainer;
+    	
 		// can come here from JApplet, JWindow, JDialog, or JFrame
 		// JApplet is special, because it means we are embedded.
 		setName(AppContext.getAppContext().getThreadGroup().getName() + prefix + (++paneCount)
@@ -451,7 +456,7 @@ public class JRootPane extends JComponent {
 	 * @return the default <code>layeredPane</code>
 	 */
 	protected JLayeredPane createLayeredPane() {
-		JLayeredPane p = new JLayeredPane();
+		JLayeredPane p = new JLayeredPane(isAWT);
 		p.setName(this.getName() + ".layeredPane");
 		return p;
 	}
@@ -459,14 +464,14 @@ public class JRootPane extends JComponent {
 	/**
 	 * Called by the constructor methods to create the default
 	 * <code>contentPane</code>. By default this method creates a new
-	 * <code>JComponent</code> add sets a <code>BorderLayout</code> as its
+	 * <code>JComponent</code> and sets a <code>BorderLayout</code> as its
 	 * <code>LayoutManager</code>.
 	 * 
 	 * @return the default <code>contentPane</code>
 	 */
 	@SuppressWarnings("serial")
 	protected Container createContentPane() {
-		JComponent c = new JPanel();
+		JComponent c = new JPanel(true, isAWT);
 		c.setName(this.getName() + ".contentPane");
 		c.setLayout(new BorderLayout() {
 			/*
@@ -1034,11 +1039,11 @@ public class JRootPane extends JComponent {
 		return super.paramString();
 	}
 
-	public boolean isAWTApplet = false;
+	public boolean isAWT = false;
 	
 	@Override
 	public Insets getInsets() {
-		if (isAWTApplet) {
+		if (isAWT) {
 			return getTopLevelAncestor().getInsets();
 		}
 		return super.getInsets();
