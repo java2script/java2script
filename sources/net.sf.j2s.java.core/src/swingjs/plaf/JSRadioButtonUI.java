@@ -88,7 +88,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 		// actionNode, iconNode, textNode, centeringNode, buttonNode
 				
 		if (b.isSelected())
-			DOMNode.setAttr(actionNode, "checked", "true");
+			DOMNode.setAttr(actionNode, "checked", "TRUE");
 		else
 			DOMNode.setAttr(actionNode, "checked",  null);
 		

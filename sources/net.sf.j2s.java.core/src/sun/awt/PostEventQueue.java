@@ -46,7 +46,7 @@ public class PostEventQueue {
                  * different threads tempQueue will be null for one of them.
                  */
                 while (tempQueue != null) {
-                	 System.out.println("PostEventQueue posting tempEvent " + tempQueue.event);
+//                	 System.out.println("PostEventQueue posting tempEvent " + tempQueue.event);
                     eventQueue.postEvent(tempQueue.event);
                     tempQueue = tempQueue.next;
                 }

@@ -74,7 +74,7 @@ public class JSFocusPeer implements KeyboardFocusManagerPeer {
 		/**
 		 * @j2sNative
 		 * node = document.activeElement;
-		 * if (!node || node == document.body || !node.ui) {
+		 * if (!node || node == document.body || !node.ui && !node["data-component"]) {
 		 *   return null;
 		 * }
 		 */
@@ -89,7 +89,7 @@ public class JSFocusPeer implements KeyboardFocusManagerPeer {
 	 * @return
 	 */
 	public static JSComponent getAccessibleComponentFor(DOMNode node) {
-		JSComponent c = /** @j2sNative node && node.ui && node.ui.jc || */null;
+		JSComponent c = /** @j2sNative node && node.ui && node.ui.jc || node && node["data-component"]||*/null;
 		return (c != null && c.getAppContext().getThreadGroup() == Thread.currentThread().getThreadGroup() ? c : null);
 	}
 

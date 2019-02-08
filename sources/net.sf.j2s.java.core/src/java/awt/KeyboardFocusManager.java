@@ -24,6 +24,7 @@
  */
 package java.awt;
 
+import java.applet.JSApplet;
 import java.awt.event.FocusEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -456,7 +457,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 	 */
 	protected Component getGlobalFocusOwner() throws SecurityException {
 		// synchronized (KeyboardFocusManager.class) {
-		checkKFMSecurity();
+//		checkKFMSecurity();
 		return focusOwner;
 		// }
 	}
@@ -2358,7 +2359,8 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 					? SunToolkit.getContainingWindow(hwFocusRequest.heavyweight)
 					: nativeFocusedWindow);
 			// SwingJS was JSFrame and JSDialog, but in SwingJS those subclass JFrame and JDialog
-			while (activeWindow != null && !((activeWindow instanceof JFrame) || (activeWindow instanceof JDialog))) {
+			while (activeWindow != null && !(activeWindow instanceof JFrame || activeWindow instanceof JDialog
+					|| activeWindow instanceof JSApplet)) {
 				activeWindow = activeWindow.getParent_NoClientCode();
 			}
 

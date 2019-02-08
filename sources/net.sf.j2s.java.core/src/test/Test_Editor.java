@@ -2,12 +2,14 @@ package test;
 
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
+import java.awt.Button;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.DefaultKeyboardFocusManager;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.KeyboardFocusManager;
+import java.awt.TextArea;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
@@ -132,6 +134,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 		JPanel ptop = getTopPanel();
 		// ptop.setFocusable(false);
+
 		JTextPane editor = getEditor();
 		JScrollPane js = new JScrollPane(editor);
 		// js.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -146,7 +149,10 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 		JMenuBar mb = getMenuBar(ptop);
 
-		JPanel panel = getButtonPanel(editor, area, field);
+		TextArea area1 = new TextArea();
+		area1.setPreferredSize(new Dimension(300, 300));
+
+		JPanel panel = getButtonPanel(editor, area, area1, field);
 
 		new DropTarget(editor, this);
 		new DropTarget(area, this);
@@ -155,6 +161,8 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 		box.add(js);
 		box.add(Box.createHorizontalStrut(1));
 		box.add(js2);
+		box.add(Box.createHorizontalStrut(1));
+		box.add(area1);
 
 		JPanel full = new JPanel(new BorderLayout());
 		full.add(ptop, BorderLayout.NORTH);
@@ -173,11 +181,11 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 		editor.addFocusListener(fl);
 		area.addFocusListener(fl);
 
-		boolean asInternalFrame = true;
+		boolean asInternalFrame = false;
 
 		if (asInternalFrame) {
 			JDesktopPane d = new JDesktopPane();
-			d.setPreferredSize(new Dimension(800, 600));
+			d.setPreferredSize(new Dimension(1210, 600));
 
 			JInternalFrame main = new JInternalFrame();
 			
@@ -291,7 +299,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 	int n;
 
-	private JPanel getButtonPanel(JTextPane editor, JTextArea area, JTextField field) {
+	private JPanel getButtonPanel(JTextPane editor, JTextArea area, TextArea area1, JTextField field) {
 		JPanel panel = new JPanel();
 
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
@@ -306,6 +314,8 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 				area.setCaretPosition(0);
 				area.requestFocus();
 				editor.requestFocus();
+				area1.setCaretPosition(0);
+				area1.requestFocus();
 			}
 
 		});
@@ -360,23 +370,37 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 		btop.addFocusListener(fl);
 		panel.add(btop);
 
-		b = new JButton("end");
+		b = new JButton("end1");
 		b.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Test_Editor action " + getID(e.getSource()));
-				editor.setCaretPosition(editor.getDocument().getLength());
+//				editor.setCaretPosition(editor.getDocument().getLength());
 				area.setCaretPosition(area.getDocument().getLength());
 				area.requestFocus();
-				editor.requestFocus();
+//				editor.requestFocus();
 			}
 
 		});
 		b.addFocusListener(fl);
 		panel.add(b);
 
-		b = new JButton("sel7-10-area");
+		b = new JButton("end2");
+		b.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("Test_Editor action " + getID(e.getSource()));
+				area1.setCaretPosition(area1.getText().length());
+				area1.requestFocus();
+			}
+
+		});
+		b.addFocusListener(fl);
+		panel.add(b);
+
+		b = new Button("sel7-10-area");
 		b.addActionListener(new ActionListener() {
 
 			@Override
@@ -393,6 +417,37 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 		b.addFocusListener(fl);
 		panel.add(b);
 
+		b = new Button("app1");
+		b.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("Test_Editor action " + getID(e.getSource()));
+				area.append("\ntesting" + ++n); 
+//				area.requestFocus();
+			}
+
+		});
+		b.addFocusListener(fl);
+		panel.add(b);
+
+		b = new JButton("app2");
+		b.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("Test_Editor action " + getID(e.getSource()));
+				area1.requestFocus();
+				area1.append("\ntesting" + ++n); 
+			}
+
+		});
+		b.addFocusListener(fl);
+		panel.add(b);
+
+
+		
+		
 		b = new JButton("sel3-5-field");
 		b.addActionListener(new ActionListener() {
 

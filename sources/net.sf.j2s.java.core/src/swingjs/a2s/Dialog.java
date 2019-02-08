@@ -5,104 +5,134 @@ import java.awt.Window;
 
 import javax.swing.JDialog;
 
-public class Dialog extends JDialog {
+public class Dialog extends JDialog implements A2SContainer {
 
-     public Dialog(java.awt.Frame owner) {
-    	 super(owner);
-     }
+	public Dialog(java.awt.Frame owner) {
+		super(owner);
+		setListener();
+	}
 
-     public Dialog(Frame owner) {
-    	 super(owner);
-     }
+	private void setListener() {
+		listener = new A2SListener();
+		addMouseListener(listener);
+		addMouseMotionListener(listener);
+	}
 
-     public Dialog(java.awt.Frame owner, boolean modal) {
-         super(owner, modal);
-     }
+	public Dialog(Frame owner) {
+		super(owner);
+		setListener();
+	}
 
-     public Dialog(Frame owner, boolean modal) {
-         super(owner, modal);
-     }
+	public Dialog(java.awt.Frame owner, boolean modal) {
+		super(owner, modal);
+		setListener();
+	}
 
-     public Dialog(java.awt.Frame owner, String title) {
-         super(owner, title);
-     }
+	public Dialog(Frame owner, boolean modal) {
+		super(owner, modal);
+		setListener();
+	}
 
-     public Dialog(Frame owner, String title) {
-         super(owner, title);
-     }
+	public Dialog(java.awt.Frame owner, String title) {
+		super(owner, title);
+		setListener();
+	}
 
-     public Dialog(java.awt.Frame owner, String title, boolean modal) {
-         super(owner, title, modal);
-     }
+	public Dialog(Frame owner, String title) {
+		super(owner, title);
+		setListener();
+	}
 
-     public Dialog(Frame owner, String title, boolean modal) {
-         super(owner, title, modal);
-     }
+	public Dialog(java.awt.Frame owner, String title, boolean modal) {
+		super(owner, title, modal);
+		setListener();
+	}
 
-     public Dialog(java.awt.Frame owner, String title, boolean modal,
-                   GraphicsConfiguration gc) {
-    	 super(owner, title, modal, gc);
-     }
+	public Dialog(Frame owner, String title, boolean modal) {
+		super(owner, title, modal);
+		setListener();
+	}
 
-     public Dialog(Frame owner, String title, boolean modal,
-             GraphicsConfiguration gc) {
-    	 super(owner, title, modal, gc);
-     }
+	public Dialog(java.awt.Frame owner, String title, boolean modal, GraphicsConfiguration gc) {
+		super(owner, title, modal, gc);
+		setListener();
+	}
 
-     public Dialog(java.awt.Dialog owner) {
-    	 super(owner);
-     }
+	public Dialog(Frame owner, String title, boolean modal, GraphicsConfiguration gc) {
+		super(owner, title, modal, gc);
+		setListener();
+	}
 
-     public Dialog(Dialog owner) {
-    	 super(owner);
-     }
+	public Dialog(java.awt.Dialog owner) {
+		super(owner);
+		setListener();
+	}
 
-     public Dialog(java.awt.Dialog owner, String title) {
-         super(owner, title, false);
-     }
+	public Dialog(Dialog owner) {
+		super(owner);
+		setListener();
+	}
 
-     public Dialog(Dialog owner, String title) {
-         super(owner, title, false);
-     }
+	public Dialog(java.awt.Dialog owner, String title) {
+		super(owner, title, false);
+		setListener();
+	}
+
+	public Dialog(Dialog owner, String title) {
+		super(owner, title, false);
+		setListener();
+	}
 
 	public Dialog(java.awt.Dialog owner, String title, boolean modal) {
-         super(owner, title, modal);
-     }
+		super(owner, title, modal);
+		setListener();
+	}
 
 	public Dialog(Dialog owner, String title, boolean modal) {
-        super(owner, title, modal);
-    }
+		super(owner, title, modal);
+		setListener();
+	}
 
-     public Dialog(java.awt.Dialog owner, String title, boolean modal,
-                   GraphicsConfiguration gc) {
-         super(owner, title, modal, gc);
-     }
+	public Dialog(java.awt.Dialog owner, String title, boolean modal, GraphicsConfiguration gc) {
+		super(owner, title, modal, gc);
+		setListener();
+	}
 
 	public Dialog(Dialog owner, String title, boolean modal, GraphicsConfiguration gc) {
 		super(owner, title, modal, gc);
+		setListener();
 	}
 
-    public Dialog(Window owner) {
-        super(owner);
-    }
+	public Dialog(Window owner) {
+		super(owner);
+		setListener();
+	}
 
-    public Dialog(Window owner, String title) {
-        super(owner, title);
-    }
+	public Dialog(Window owner, String title) {
+		super(owner, title);
+		setListener();
+	}
 
-    public Dialog(Window owner, java.awt.Dialog.ModalityType modalityType) {
-        super(owner, modalityType);
-    }
+	public Dialog(Window owner, java.awt.Dialog.ModalityType modalityType) {
+		super(owner, modalityType);
+		setListener();
+	}
 
-    public Dialog(Window owner, String title, java.awt.Dialog.ModalityType modalityType) {
-        super(owner, title, modalityType);
-    }
+	public Dialog(Window owner, String title, java.awt.Dialog.ModalityType modalityType) {
+		super(owner, title, modalityType);
+		setListener();
+	}
 
-    public Dialog(Window owner, String title, java.awt.Dialog.ModalityType modalityType,
-                  GraphicsConfiguration gc) {
-        super(owner, title, modalityType, gc);
-    }
+	public Dialog(Window owner, String title, java.awt.Dialog.ModalityType modalityType, GraphicsConfiguration gc) {
+		super(owner, title, modalityType, gc);
+		setListener();
+	}
 
+	A2SListener listener;
 
+	@Override
+	public A2SListener getA2SListener() {
+		return listener;
+	}
 
 }

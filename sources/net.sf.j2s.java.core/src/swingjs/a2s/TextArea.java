@@ -61,16 +61,16 @@ public class TextArea extends JScrollPane {
 		setViewportView(ta = new JTextArea(text, rows, columns));
 		switch (scrollbars) {
 		case SCROLLBARS_BOTH:
-	    	setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_ALWAYS);
-	    	setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_ALWAYS);
+	    	setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_AS_NEEDED);
+	    	setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_AS_NEEDED);
 	    	break;			
 		case SCROLLBARS_VERTICAL_ONLY:
-	    	setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_ALWAYS);
+	    	setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_AS_NEEDED);
 	    	setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
 	    	break;			
 		case SCROLLBARS_HORIZONTAL_ONLY:
 	    	setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
-	    	setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_ALWAYS);
+	    	setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_AS_NEEDED);
 	    	break;			
 		case SCROLLBARS_NONE:
 	    	setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
@@ -80,21 +80,17 @@ public class TextArea extends JScrollPane {
 	}
 
     public int getScrollbarVisibility() {
-    	int vp = getVerticalScrollBarPolicy();
-    	int hp = getHorizontalScrollBarPolicy();
-    	if (vp == VERTICAL_SCROLLBAR_ALWAYS && hp == HORIZONTAL_SCROLLBAR_ALWAYS)
-    		return SCROLLBARS_BOTH;
-    	if (vp == VERTICAL_SCROLLBAR_ALWAYS)
-    		return SCROLLBARS_VERTICAL_ONLY;
-    	if (hp == HORIZONTAL_SCROLLBAR_ALWAYS)
-    		return SCROLLBARS_HORIZONTAL_ONLY;
-    	return SCROLLBARS_NONE;
-
+    	boolean v = (getVerticalScrollBarPolicy() != VERTICAL_SCROLLBAR_NEVER);
+    	boolean h = (getHorizontalScrollBarPolicy() != HORIZONTAL_SCROLLBAR_NEVER);
+    	return (v && h ? SCROLLBARS_BOTH 
+    			: v ? SCROLLBARS_VERTICAL_ONLY
+    			: h ? SCROLLBARS_HORIZONTAL_ONLY
+    					: SCROLLBARS_NONE);
     }
-
 
 	public void setCaretPosition(int pos) {
 		ta.setCaretPosition(pos);
+		ta.requestFocusInWindow();
 	}
 
 	void awtDefaults() {
@@ -130,11 +126,18 @@ public class TextArea extends JScrollPane {
 	}
 	
 	public void appendText(String str) {
-		ta.append(str);		
+		ta.append(str);
+		toEnd();
 	}
 	
+	private void toEnd() {
+		ta.setCaretPosition(ta.getText().length());
+		ta.requestFocusInWindow();
+	}
+
 	public void append(String str) {
-		ta.append(str);		
+		ta.append(str);
+		toEnd();
 	}
 
 	public void replaceRange(String str, int start, int end) {
@@ -173,5 +176,12 @@ public class TextArea extends JScrollPane {
 		if (ta != null)
 			ta.setForeground(c);
 	}
+
+
+	@Override
+	public void requestFocus() {
+		ta.requestFocus();
+	}
+
 
 }

@@ -2522,7 +2522,7 @@ public class JSComponentUI extends ComponentUI
 					iscale = "scale(0.6,0.6)";
 				}
 				// +3 here is a fudge factor for the AWT applets
-				yoff = (wIcon == 0 ? "-" + ((getFont().getFontMetrics().getAscent()>>1)+3) + "px" : "-50%");
+				yoff = (wIcon == 0 ? "-" + ((getFont().getFontMetrics().getAscent()>>1) + (isAWT ? 3 : 0)) + "px" : "-50%");
 				break;
 			case SwingConstants.BOTTOM:
 				top = itop = 100;

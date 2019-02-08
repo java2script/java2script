@@ -27,6 +27,7 @@
  */
 package java.awt;
 
+import java.applet.JSApplet;
 import java.awt.dnd.DropTarget;
 import java.awt.event.ActionEvent;
 import java.awt.event.AdjustmentEvent;
@@ -1112,7 +1113,7 @@ public abstract class Component implements ImageObserver/*
 	 * @see Window#dispose
 	 * @since 1.2
 	 */
-	public boolean isDisplayable() {
+	public boolean isDisplayable() { 
 		// return getPeer() != null;
 		return true;
 	}
@@ -5891,7 +5892,7 @@ public abstract class Component implements ImageObserver/*
 	 */
 	Container getNativeContainer() {
 		Container p = parent;
-		while (p != null && p.peer instanceof LightweightPeer) {
+		while (p != null && !(p instanceof JSApplet) && p.peer instanceof LightweightPeer) {
 			p = p.getParent();
 		}
 		return p;
@@ -6537,7 +6538,7 @@ public abstract class Component implements ImageObserver/*
 		KeyboardFocusManager.setMostRecentFocusOwner(this);
 
 		Component window = this;
-		while ((window != null) && !(window instanceof Window)) {
+		while ((window != null) && !(window instanceof Window || window instanceof JSApplet)) { 
 			if (!window.isVisible()) {
 				return false;
 			}
@@ -6577,7 +6578,7 @@ public abstract class Component implements ImageObserver/*
 		}
 
 		Window window = getContainingWindow();
-		if (window == null || !((Window) window).isFocusableWindow()) {
+		if (window == null || !((Window) window).isFocusableWindow() ) {
 			return false;
 		}
 
@@ -7666,7 +7667,7 @@ public abstract class Component implements ImageObserver/*
 		setComponentOrientation(orientation);
 	}
 
-	final boolean canBeFocusOwner() {
+	public final boolean canBeFocusOwner() {
 		// It is enabled, visible, focusable.
 		if (isEnabled() && isDisplayable() && isVisible() && isFocusable()) {
 			return true;

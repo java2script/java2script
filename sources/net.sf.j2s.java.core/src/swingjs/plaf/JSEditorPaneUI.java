@@ -68,7 +68,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		}
 		textListener.checkDocument();
 		setCssFont(domNode, c.getFont());
-		DOMNode.setAttr(domNode, "contentEditable", "true");
+		DOMNode.setAttr(domNode, "contentEditable", "TRUE");
 		setText(null);
 		return updateDOMNodeCUI();
 	} 

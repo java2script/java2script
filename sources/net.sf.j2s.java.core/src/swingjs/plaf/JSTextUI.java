@@ -2038,7 +2038,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		this.editable = editable;
 		if (focusNode == null)
 			return;
-		DOMNode.setAttr(focusNode, "readOnly", editable ? null : "true");
+		DOMNode.setAttr(focusNode, "readOnly", editable ? null : "TRUE");
 	}
 
 	// protected static DragListener getDragListener() {

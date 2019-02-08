@@ -257,13 +257,10 @@ public class A2SEvent implements Runnable {
 	}
   
 	public static void addListener(Component comp) {
-		A2SContainer top = ((A2SContainer) ((JComponent) comp).getTopLevelAncestor());
-		if (top == null) {
+		JComponent jc = (JComponent) ((JComponent) comp).getTopLevelAncestor();
+		if (jc == null || !(jc instanceof A2SContainer))
 			return;
-//			if (!(comp instanceof A2SContainer))
-//				return;
-//			top = (A2SContainer) comp;
-		}
+		A2SContainer top = (A2SContainer) jc;
 		A2SListener listener = top.getA2SListener();
 		if (comp instanceof AbstractButton) {
 			if (!isListener(((AbstractButton) comp).getActionListeners(), listener))

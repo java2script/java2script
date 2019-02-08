@@ -27,7 +27,7 @@ public class JSTextAreaUI extends JSTextViewUI {
 //		 */
 		
 		if (domNode == null) {
-			valueNode = domNode = newDOMObject("textarea", id);
+			valueNode = domNode = newDOMObject("textarea", id, "spellcheck", "FALSE");
 			setupViewNode();
 		}
 		if (((JTextArea) jc).getLineWrap())
@@ -39,7 +39,7 @@ public class JSTextAreaUI extends JSTextViewUI {
 				DOMNode.setAttr(domNode, "value", getComponentText()),
 				c.getFont());
 		if (!editable)
-			DOMNode.setAttr(domNode, "readOnly", "true");		
+			DOMNode.setAttr(domNode, "readOnly", "TRUE");		
 		return updateDOMNodeCUI();
 	}
 
@@ -108,6 +108,11 @@ public class JSTextAreaUI extends JSTextViewUI {
 		return DOMNode.setStyles(setHTMLElementCUI(), 
 				"overflow", "hidden",
 				"position", "absolute");
+	}
+
+	protected Dimension getCSSAdjustment(boolean addingCSS) {
+		// textarea seems to run over
+		return new Dimension(0, 5);
 	}
 
 }

@@ -11,6 +11,7 @@ public class JSAppletUI extends JSLightweightUI {
 	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			containerNode = domNode = newDOMObject("div", id);
+			addClass(domNode, "swingjs-window");
 		}
 		return updateDOMNodeCUI();
 	}

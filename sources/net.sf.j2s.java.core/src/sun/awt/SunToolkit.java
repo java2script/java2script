@@ -28,6 +28,7 @@
 
 package sun.awt;
 
+import java.applet.JSApplet;
 import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.Container;
@@ -1939,7 +1940,7 @@ public abstract class SunToolkit extends Toolkit implements
 	 *         Window; null, if component is not a part of window hierarchy
 	 */
 	public static Window getContainingWindow(Component comp) {
-		while (comp != null && !(comp instanceof Window)) {
+		while (comp != null && !(comp instanceof Window || comp instanceof JSApplet)) {
 			comp = comp.getParent();
 		}
 		return (Window) comp;

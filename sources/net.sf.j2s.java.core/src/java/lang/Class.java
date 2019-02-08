@@ -2292,9 +2292,8 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	
 	@SuppressWarnings({ "unused", "null" })
 	public InputStream getResourceAsStream(String name) {
-		// allows an optional second argument to be a base directory in JavaScript
-	    @SuppressWarnings("unused")
-		String clazzName = $clazz$.__CLASS_NAME__;
+		// allows an optional second argument to be a base directory in JavaScript 
+		String clazzName = /** @j2sNative this.$clazz$.__CLASS_NAME$__ ||  this.$clazz$.__CLASS_NAME__ ||*/ "";
 	    Object data = null, fname = null;
 		/**
 		 * @j2sNative
