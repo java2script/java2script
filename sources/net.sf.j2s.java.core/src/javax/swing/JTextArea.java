@@ -627,8 +627,13 @@ public class JTextArea extends JTextComponent {
      */
     @Override
 		public Dimension getPreferredSize() {
-        Dimension d = getPrefSizeJComp();
-        d = (d == null) ? new Dimension(400,400) : d;
+    	return getSizeJS(getPrefSizeJComp(), 400, rows, columns);
+    }
+
+    public Dimension getSizeJS(Dimension d, int n, int rows, int columns) {
+    	if (d == null)
+    		d = new Dimension(n,n);
+        
         Insets insets = getInsets();
 
         if (columns != 0) {
@@ -640,9 +645,9 @@ public class JTextArea extends JTextComponent {
                                 insets.top + insets.bottom);
         }
         return d;
-    }
+	}
 
-    /**
+	/**
      * Sets the current font.  This removes cached row height and column
      * width so the new font will be reflected, and calls revalidate().
      *
@@ -756,11 +761,11 @@ public class JTextArea extends JTextComponent {
 
     // --- variables -------------------------------------------------
 
-    private int rows;
-    private int columns;
-    private int columnWidth;
-    private int rowHeight;
-    private boolean wrap;
-    private boolean word;
+    public int rows;
+    public int columns;
+    protected int columnWidth;
+    protected int rowHeight;
+    protected boolean wrap;
+    protected boolean word;
 
 }

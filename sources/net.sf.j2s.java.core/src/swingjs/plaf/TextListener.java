@@ -35,6 +35,8 @@ import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -44,7 +46,7 @@ import javax.swing.text.JTextComponent;
 import swingjs.JSKeyEvent;
 
 public class TextListener implements FocusListener, ChangeListener,
-		PropertyChangeListener, DocumentListener {
+		PropertyChangeListener, DocumentListener, CaretListener {
 
 	private JTextComponent txtComp;
 
@@ -149,6 +151,11 @@ public class TextListener implements FocusListener, ChangeListener,
 	public void changedUpdate(DocumentEvent e) {
 		if (!working)
 			ui.setJSTextDelayed();
+	}
+
+	@Override
+	public void caretUpdate(CaretEvent e) {
+		ui.caretUpdatedByProgram(e);
 	}
 
 }

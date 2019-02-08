@@ -5,8 +5,6 @@ import java.awt.Container;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
 
-import com.sun.glass.events.KeyEvent;
-
 import swingjs.api.js.DOMNode;
 
 /**

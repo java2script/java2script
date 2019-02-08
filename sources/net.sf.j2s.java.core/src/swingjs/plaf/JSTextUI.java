@@ -28,10 +28,12 @@
 package swingjs.plaf;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Insets;
+import java.awt.KeyboardFocusManager;
 import java.awt.LayoutManager;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -44,6 +46,7 @@ import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.event.CaretEvent;
 import javax.swing.plaf.ActionMapUIResource;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.InputMapUIResource;
@@ -737,7 +740,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 //		b.addMouseMotionListener(listener);
 		b.addFocusListener(listener);
 		b.addPropertyChangeListener(listener);
-		//b.addCaretListener(listener);
+		b.addCaretListener(listener);
 		// SwingJS there won't be a document yet; this is in constructor
 		// b.getDocument().addDocumentListener(listener);
 	}
@@ -2038,7 +2041,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		this.editable = editable;
 		if (focusNode == null)
 			return;
-		DOMNode.setAttr(focusNode, "readOnly", editable ? null : "TRUE");
+		DOMNode.setAttr(focusNode, "readOnly", editable ? null : TRUE);
 	}
 
 	// protected static DragListener getDragListener() {
@@ -2916,6 +2919,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	 */
 
 	protected void jsSelect(Object[] r1, Object[] r2, boolean andScroll) {
+		System.out.println("scrolling to " + r1 + " " + r2 + " " + editor.getText());
 		setJSMarkAndDot(/** @j2sNative r1[1] || */0, /** @j2sNative r2[1] || */0, andScroll);
 	}
 	
@@ -2927,7 +2931,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
      * @param dot
      */
     void setJSMarkAndDot(int mark, int dot, boolean andScroll) {
-    	//System.out.println("JSTextUI setJSMarkAndDot " + mark + " " + dot);
+    	System.out.println(">>JSTextUI setJSMarkAndDot " + mark + " " + dot + " for " + editor.getText());
 		focusNode.setSelectionRange(Math.min(mark, dot), Math.max(mark, dot), (mark == dot ? "none" : mark < dot ? "forward" : "backward"));
 	}
 
@@ -3090,7 +3094,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 			c.setDot(mark);
 		if (c.getDot() != dot)
 			c.moveDot(dot);
-//		editor.caretEvent.fire();
+		//editor.caretEvent.fire();
 	}
 
 	/**
@@ -3123,6 +3127,15 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	}
 
 	public void updateJSCursorFromCaret() {
+	}
+
+	public void caretUpdatedByProgram(CaretEvent e) {
+		// AWT components need to show the change, but not Swing components.
+		if (isAWT) { 
+			Component fc = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+			jc.requestFocus();
+			fc.requestFocus();
+		}
 	}
 	
 

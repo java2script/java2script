@@ -847,7 +847,7 @@ public class JTextField extends JTextComponent implements SwingConstants {
 
         @Override
 				public void actionPerformed(ActionEvent e) {
-            JTextComponent target = getFocusedComponent();
+            JTextComponent target = (JTextComponent) e.getSource();//getFocusedComponent();
             if (target instanceof JTextField) {
                 JTextField field = (JTextField) target;
                 field.postActionEvent();
