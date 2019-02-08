@@ -968,6 +968,11 @@ public class JSComponentUI extends ComponentUI
 	private int mnemonic;
 
 	/**
+	 * for DOMNode will be turning into boolean true/false for attribute
+	 */
+	protected final static String TRUE = "TRUE";
+	protected final static String FALSE = "FALSE";
+	/**
 	 * for jQuery return
 	 */
 	protected final static boolean CONSUMED = false;
@@ -2023,7 +2028,7 @@ public class JSComponentUI extends ComponentUI
 	protected void enableNode(DOMNode node, boolean b) {
 		if (node == null)
 			return;
-		DOMNode.setAttr(node, "disabled", (b ? null : "TRUE"));
+		DOMNode.setAttr(node, "disabled", (b ? null : TRUE));
 		if (!b && inactiveForeground == colorUNKNOWN)
 			getDisabledColors(buttonNode == null ? getPropertyPrefix() : "Button");
 		if (jc.isOpaque()) {

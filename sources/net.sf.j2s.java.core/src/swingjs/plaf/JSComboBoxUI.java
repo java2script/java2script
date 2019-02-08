@@ -50,7 +50,7 @@ public class JSComboBoxUI extends JSLightweightUI implements ItemListener, ListD
 		if (comboBox.isEnabled())
 			domNode.removeAttribute("disabled");
 		else
-			DOMNode.setAttr(domNode, "disabled", "TRUE");			
+			DOMNode.setAttr(domNode, "disabled", TRUE);			
 	}
 
 	
@@ -80,7 +80,7 @@ public class JSComboBoxUI extends JSLightweightUI implements ItemListener, ListD
 			DOMNode option = DOMNode.createElement("option", id + "_" + (++incr));
 			DOMNode.setAttr(option,  "innerHTML", item);
 			if (i == iselect)
-				DOMNode.setAttr(option, "selected", "TRUE");
+				DOMNode.setAttr(option, "selected", TRUE);
 			domNode.appendChild(option);
 		}		
 	}
