@@ -9,6 +9,7 @@
 
 // TODO: still a lot of references to window[...]
 
+// BH 2019.02.07 fixes radix|10 should be radix||10  
 // BH 1/29/2019  adds String.join$CharSequence$Iterable, String.join$CharSequence$CharSequenceA
 
 // BH 1/13/2019 3.2.4.07 adds Character.to[Title|Lower|Upper]Case(int)
@@ -3397,37 +3398,26 @@ var radixChar = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 m$(Integer,"parseIntRadix$S$I",
 function(s,radix){
-if(s==null || s.length == 0){
-throw Clazz.new_(NumberFormatException.c$$S, ["null"]);
-}if(radix<2){
-throw Clazz.new_(NumberFormatException.c$$S, ["radix "+radix+" less than Character.MIN_RADIX (2)"]);
-}if(radix>36){
-throw Clazz.new_(NumberFormatException.c$$S, ["radix "+radix+" greater than Character.MAX_RADIX (16)"]);
-}
-s = s.toLowerCase();
-var c = s.charAt(0);
-var i0 = (c == '+' || c == '-' ? 1 : 0);
-for (var i = s.length; --i >= i0;) {
-    var n = radixChar.indexOf(s.charAt(i));
-    if (n < 0 || n >= radix)
-     throw Clazz.new_(NumberFormatException.c$$S, ["Not a Number : "+s]);
-}
-
-var i=parseInt(s,radix);
-if(isNaN(i)){
-throw Clazz.new_(NumberFormatException.c$$S, ["Not a Number : "+s]);
-}
-return i;
+ var v = parseInt(s, radix);
+ if (isNaN(v)){
+	throw Clazz.new_(NumberFormatException.c$$S, ["parsing " + s + " radix " + radix]);
+ }
+return v;
 }, 1);
 
-m$(Integer,["parseInt$S","parseInt$S$I"],
+m$(Integer,["parseInt$S","parseInt$S$FI"],
 function(s,radix){
 return Integer.parseIntRadix$S$I(s, radix || 10);
 }, 1);
 
-m$(Integer,["valueOf$S","valueOf$I","valueOf$S$I"],
+m$(Integer,["valueOf$S","valueOf$I"],
 function(s, radix){
-  return Clazz.new_(Integer.c$, [s, radix|10]);
+  return Clazz.new_(Integer.c$, [s]);
+}, 1);
+
+m$(Integer,["valueOf$S$I"],
+function(s, radix){
+  return Integer.parseIntRadix$S$I(s, radix || 10);
 }, 1);
 
 m$(Integer,"equals$O",
@@ -3507,7 +3497,7 @@ function(s,radix){
 
 m$(Long,["valueOf$S","valueOf$J","valueOf$S$I"],
 function(s, radix){
-return Clazz.new_(Long.c$, [s, radix|10]);
+return Clazz.new_(Long.c$, [s, radix||10]);
 }, 1);
 
 m$(Long,"equals$O",
@@ -3549,7 +3539,7 @@ m$(Short, ["c$", "c$$S", "c$$H"],
 function (v,radix) {
  v == null && (v = 0);
  if (typeof v != "number")
-  v = Integer.parseIntRadix$S$I(v, radix|10);
+  v = Integer.parseIntRadix$S$I(v, radix||10);
  v = v.shortValue();
  this.valueOf = function () {return v;};
 }, 1);
@@ -3580,7 +3570,7 @@ return Short.parseShortRadix$S$I(s, 10);
 
 m$(Short, ["valueOf$S","valueOf$H","valueOf$S$I"],
 function (s,radix) {
-  return Clazz.new_(Short.c$, [s,radix|10]);
+  return Clazz.new_(Short.c$, [s,radix||10]);
 }, 1);
 
 m$(Short, "equals$O",
@@ -3612,7 +3602,7 @@ decorateAsNumber(Byte,"Byte", "byte", "B");
 
 m$(Byte, ["c$", "c$$S", "c$$B"], function(v,radix){
  if (typeof v != "number")
-   v = Integer.parseIntRadix$S$I(v, radix|10);
+   v = Integer.parseIntRadix$S$I(v, radix||10);
  v = v.byteValue();
 this.valueOf=function(){return v;};
 this.byteValue = function(){return v};
@@ -3647,7 +3637,7 @@ return Byte.parseByteRadix$S$I(s,10);
 
 m$(Byte, ["valueOf$S","valueOf$B","valueOf$S$I"],
 function (s,radix) {
-  return Clazz.new_(Byte.c$, [s, radix|10]);
+  return Clazz.new_(Byte.c$, [s, radix||10]);
 }, 1);
 
 m$(Byte,"equals$O",
