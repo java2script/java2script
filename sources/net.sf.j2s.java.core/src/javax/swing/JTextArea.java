@@ -630,21 +630,23 @@ public class JTextArea extends JTextComponent {
     	return getSizeJS(getPrefSizeJComp(), 400, rows, columns);
     }
 
-    public Dimension getSizeJS(Dimension d, int n, int rows, int columns) {
-    	if (d == null)
-    		d = new Dimension(n,n);
-        
-        Insets insets = getInsets();
+	public Dimension getSizeJS(Dimension d, int n, int rows, int columns) {
+		int w = 10, h = 10;
+		if (d == null) {
+			d = new Dimension(n, n);
+		} else {
+			w = d.width;
+			h = d.height;
+		}
+		Insets insets = getInsets();
 
-        if (columns != 0) {
-            d.width = Math.max(d.width, columns * getColumnWidth() +
-                    insets.left + insets.right);
-        }
-        if (rows != 0) {
-            d.height = Math.max(d.height, rows * getRowHeight() +
-                                insets.top + insets.bottom);
-        }
-        return d;
+		if (columns != 0) {
+			d.width = Math.max(w, columns * getColumnWidth() + insets.left + insets.right);
+		}
+		if (rows != 0) {
+			d.height = Math.max(h, rows * getRowHeight() + insets.top + insets.bottom);
+		}
+		return d;
 	}
 
 	/**

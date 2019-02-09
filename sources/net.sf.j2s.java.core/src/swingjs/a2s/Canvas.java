@@ -26,7 +26,8 @@ public class Canvas extends Panel {
 	
 	@Override
 	public void paint(Graphics g) {
-		
+      g.clearRect(0, 0, width, height);
+  
 	// see	http://www.oracle.com/technetwork/java/painting-140037.html#awt_summary
 			
 	//BH AWT called canvas.update(g), but Swing will call canvas.paint(g) instead. 

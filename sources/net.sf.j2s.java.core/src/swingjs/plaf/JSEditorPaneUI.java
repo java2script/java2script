@@ -78,7 +78,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		String prop = e.getPropertyName();
 		switch(prop) {
 		case "text":
-			getComponentText();
+			setCurrentText();
 			return;
 		}
 		super.propertyChange(e);
@@ -158,7 +158,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		String html = sb.toString();
 		if (html == currentHTML)
 			return;
-		currentText = text;
+		text = fixText(currentText = text);
 		DOMNode.setAttr(domNode, "innerHTML", currentHTML = html);
 		updateDataUI();
 		@SuppressWarnings("unused")

@@ -2132,6 +2132,10 @@ public class JSComponentUI extends ComponentUI
 						: (icon instanceof ImageIcon) ? (ImageIcon) icon : JSToolkit.createImageIcon(jc, icon, id + "tmpIcon"));
 	}
 
+	protected String fixText(String t) {
+		return (t != null && t.indexOf("\u0000") >= 0 ? PT.rep(t, "\u0000", "") : t);
+	}
+
 	protected void setIconAndText(String prop, Icon icon, int gap, String text) {
 
 		if (iconNode == null && textNode == null)
@@ -2139,10 +2143,9 @@ public class JSComponentUI extends ComponentUI
 
 		// TODO so, actually, icons replace the checkbox or radio button, they do not
 		// complement them
-
 		setMnemonic(-1);
 		actualWidth = actualHeight = 0;
-		currentText = text;
+		text = fixText(currentText = text);
 		currentGap = gap;
 		currentIcon = null;
 		imageNode = null;
@@ -2664,7 +2667,8 @@ public class JSComponentUI extends ComponentUI
 			setTransparent(node);
 		else
 			checkTransparent(node);
-		
+		if (jc._gtemp != null)
+			jc._gtemp.setBackground(color);
 	}
 
 	public boolean selfOrParentBackgroundPainted() {

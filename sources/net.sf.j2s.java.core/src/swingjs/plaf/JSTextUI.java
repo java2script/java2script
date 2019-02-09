@@ -2819,20 +2819,20 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		return (!editor.isEnabled() ? editor.getDisabledTextColor() : !editor.isEditable() ? inactiveForeground : fg);
 	}
 
-	protected String getComponentText() {
+	protected String setCurrentText() {
 		return (editor.getDocument() == null ? null : (currentText = editor.getText()));
 	}
 
 	boolean checkNewEditorTextValue() {
 		String val = getJSTextValue();
-		if (val.equals(currentText))
+		if (val.equals(fixText(currentText)))
 			return false;
 //		String oldval = currentText;
 //			currentText = val;
 		// System.out.println("from HTML: " + DOMNode.getAttr(domNode, "innerHTML"));
 		// System.out.println("to editor: " + val.replace('\n', '.'));
 		editor.setText(val);
-		getComponentText();
+		setCurrentText();
 //			getComponentText();
 		// TODO: why this?
 		// editor.firePropertyChange("text", oldval, val);
@@ -2919,7 +2919,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	 */
 
 	protected void jsSelect(Object[] r1, Object[] r2, boolean andScroll) {
-		System.out.println("scrolling to " + r1 + " " + r2 + " " + editor.getText());
+		//System.out.println("scrolling to " + r1 + " " + r2 + " " + editor.getText());
 		setJSMarkAndDot(/** @j2sNative r1[1] || */0, /** @j2sNative r2[1] || */0, andScroll);
 	}
 	
@@ -2931,7 +2931,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
      * @param dot
      */
     void setJSMarkAndDot(int mark, int dot, boolean andScroll) {
-    	System.out.println(">>JSTextUI setJSMarkAndDot " + mark + " " + dot + " for " + editor.getText());
+    	//System.out.println(">>JSTextUI setJSMarkAndDot " + mark + " " + dot + " for " + editor.getText());
 		focusNode.setSelectionRange(Math.min(mark, dot), Math.max(mark, dot), (mark == dot ? "none" : mark < dot ? "forward" : "backward"));
 	}
 

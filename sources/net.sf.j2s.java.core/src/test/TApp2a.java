@@ -51,9 +51,10 @@ public class TApp2a extends Applet {
 		panel2.setBounds(200, 150, 100, 150);
 //		add(panel2);
 		
-		TextArea ta = new TextArea("This one is not scrolling down to the bottom\nA text\nwithsomeverylongline\nlines and\n no content.") {
-			
-		};
+		
+		
+		
+		TextArea ta = new TextArea("ta\n\n");//This one is not scrolling down to the bottom\nA text\nwithsomeverylongline\nlines and\n no content.");
 		ta.setBounds(200, 70, 100, 80);
 		
 		/**
@@ -62,7 +63,35 @@ public class TApp2a extends Applet {
 		add(ta);
 //		ta.getSelectionEnd();
 		ta.setBackground(Color.red);
-		ta.appendText("A text\nwith some\nlines and\n no content.");
+		ta.appendText("A text");//\nwith some\nlines and\n no content.");
+		
+		
+		TextArea ta1 = new TextArea("A text\n");//with some\nlines and\n no content.");
+		ta1.setBounds(300, 70, 100, 80);
+		add(ta1);
+//		ta.getSelectionEnd();
+		ta1.setBackground(Color.green);
+		ta1.appendText("A text\nnext line\n");//with some\nlines and\n no content.This one is OK vertically, but not horizontally.");
+		
+
+		/**
+		 * @j2sNative xxta1 = ta1;
+		 */
+
+		JButton bb = new JButton("move caret") {
+			
+		};
+		bb.setBounds(300, 150, 100, 80);
+		bb.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ta1.setCaretPosition(ta1.getCaretPosition() == 0 ? ta1.getText().length() : 0);
+				//	tb.requestFocus();
+			}
+			
+		});
+		add(bb);
 		
 		
 		JTextArea tb = new JTextArea("Jtextarea") {
@@ -88,31 +117,7 @@ public class TApp2a extends Applet {
 		});
 		
 		
-		TextArea ta1 = new TextArea("A text\nwith some\nlines and\n no content.");
-		ta1.setBounds(300, 70, 100, 80);
-		add(ta1);
-//		ta.getSelectionEnd();
-		ta1.setBackground(Color.green);
-		ta1.appendText("A text\nwith some\nlines and\n no content.This one is OK vertically, but not horizontally.");
 
-		/**
-		 * @j2sNative xxta1 = ta1;
-		 */
-
-		JButton bb = new JButton("move caret") {
-			
-		};
-		bb.setBounds(300, 150, 100, 80);
-		bb.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				ta1.setCaretPosition(Math.random()  > 0.5 ? ta1.getText().length() : 0);
-				//	tb.requestFocus();
-			}
-			
-		});
-		add(bb);
 //		tb.getSelectionEnd();
 		tb.setBackground(Color.yellow);
 		tb.append(" a jtextarea and a lot\n more text here to see what happens");

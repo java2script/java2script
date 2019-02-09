@@ -648,9 +648,6 @@ public abstract class JComponent extends Container {
 	 * @see java.awt.Container#paint
 	 */
 	protected void paintChildren(Graphics g) {
-		//boolean isJComponent;
-		Graphics sg = g;
-
 		synchronized (getTreeLock()) {
 			int i = getComponentCount() - 1;
 			if (i < 0) {
@@ -691,7 +688,7 @@ public abstract class JComponent extends Container {
 					jc.getBounds(tmpRect);
 					boolean isContentPane = jc.getRootPane().getContentPane() == jc;
 					Rectangle vr = (jc instanceof JTable ? jc.getVisibleRect() : tmpRect);
-					JSGraphics2D jsg = (JSGraphics2D) (Object) sg.create(tmpRect.x, 
+					JSGraphics2D jsg = (JSGraphics2D) (Object) g.create(tmpRect.x, 
 							(isContentPane ? 0 : tmpRect.y), vr.width, vr.height); 
 					jsg.setColor(jc.getForeground());
 					jsg.setFont(jc.getFont());
@@ -707,9 +704,9 @@ public abstract class JComponent extends Container {
 							// shouldSetFlagBack = true;
 							// }
 							// if (!printing) {
-							jc.checkBackgroundPainted(null);
+							jc.checkBackgroundPainted(jsg, true);
 							jc.paint((Graphics) (Object) jsg);
-							jc.checkBackgroundPainted(getJSGraphic2D((Graphics) (Object) jsg));
+							jc.checkBackgroundPainted(getJSGraphic2D((Graphics) (Object) jsg), false);
 							// } else {
 							// if (!getFlag(IS_PRINTING_ALL)) {
 							// comp.print(cg);
@@ -4858,11 +4855,11 @@ public abstract class JComponent extends Container {
 	private void paintComponentSafely(Graphics g) {
 		JSGraphics2D jsg = getJSGraphic2D(g);		
 		int nSave = (jsg == null ? 0 : jsg.mark());
-		checkBackgroundPainted(null);
+		checkBackgroundPainted(jsg, true);
 		// note that paintComponent may be overridden.
 		paintComponent(g);
+		checkBackgroundPainted(jsg, false);
 		if (jsg != null) {
-			checkBackgroundPainted(jsg);
 			jsg.reset(nSave);
 		}
 

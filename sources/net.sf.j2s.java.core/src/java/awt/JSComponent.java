@@ -136,6 +136,7 @@ public abstract class JSComponent extends Component {
 	public boolean _isBackgroundPainted;
 
 	private Insets tempInsets;
+	public JSGraphics2D _gtemp; // indicates that we are painting, so that g.setBackground() should also be set 
 
 	public JSComponent() {
 		super();
@@ -271,11 +272,13 @@ public abstract class JSComponent extends Component {
 	 *
 	 * @param jsg
 	 */
-	public void checkBackgroundPainted(JSGraphics2D jsg) {
-		if (jsg == null) {
+	public void checkBackgroundPainted(JSGraphics2D jsg, boolean init) {
+		if (jsg == null || init) {
 			_isBackgroundPainted = false;
+			_gtemp = jsg;
 			return;
 		}
+		_gtemp = null;
 		_isBackgroundPainted = jsg.isBackgroundPainted();
 		if (_isBackgroundPainted) {
 			((JSComponentUI) ui).setPainted(null);
@@ -337,9 +340,9 @@ public abstract class JSComponent extends Component {
      * @param g
      */
 	public void paintWithBackgroundCheck(Graphics g) {
-		checkBackgroundPainted(null);
+		checkBackgroundPainted(null, true);
 		paint(g);
-		checkBackgroundPainted(getJSGraphic2D(g));
+		checkBackgroundPainted(getJSGraphic2D(g), false);
 	}
 
 	@Override

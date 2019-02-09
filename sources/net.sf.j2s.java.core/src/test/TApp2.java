@@ -8,24 +8,18 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Label;
-import java.awt.List;
-import java.awt.Polygon;
-import java.awt.Scrollbar;
 import java.awt.TextArea;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import swingjs.JSGraphics2D;
-
-
 public class TApp2 extends Applet {
+	
+	TextArea ta;
+	
 	public void init() {
-		List l = new List();
-		l.add("Text");
-		System.out.println(l.getItems());
-
-		setBackground(Color.white);
+		setSize(400, 400);
+		setBackground(Color.yellow);
 		setLayout(null);
 		JPanel panel = new JPanel();
 		panel.setBounds(10, 10, 100, 150);
@@ -35,7 +29,7 @@ public class TApp2 extends Applet {
 		JLabel label = new JLabel("OK");
 		label.setBounds(10, 10, 50, 60);
 		panel.add(label);
-		
+
 		JPanel panel2 = new JPanel();
 		panel2.setLayout(new GridLayout(2, 1));
 		Label label2 = new Label("1");
@@ -44,39 +38,56 @@ public class TApp2 extends Applet {
 		panel2.add(new JLabel("2"));
 		panel2.setBounds(200, 150, 100, 150);
 //		add(panel2);
-		
-		TextArea ta = new TextArea("A text\nwith some\nlines and\n no content.");
-		ta.setBounds(200, 70, 100, 80);
+
+//		// the scrolling to the bottom is only with TextArea, not JTextArea
+		// and then only if the append is AFTER the add
+		ta = new TextArea("A text\nwith some\nlines and\n no content.");
 		add(ta);
-//		ta.getSelectionEnd();
+		ta.setBounds(200, 70, 100, 80);
+
+		
+//		TextArea ta = new TextArea("A text\nwith some\nlines and\n no content.");
+//		JScrollPane sp = new JScrollPane(ta);
+//		sp.setBounds(200, 70, 100, 80);
+//		add(sp);
+
+		
+		//		ta.getSelectionEnd();
 		ta.setBackground(Color.red);
 		ta.appendText("A text\nwith some\nlines and\n no content.");
-		
+		ta.requestFocus();
 //		Scrollbar sb = new Scrollbar(0, 10, 0, 0, 1);
 	}
-	
+
 	public void paint(Graphics g) {
 		super.paint(g);
-//		((Graphics2D) g).setStroke((new BasicStroke(0)));
-//		g.drawRect(130, 150, 40, 60);
-//		g.fillRect(140, 5, 1, 200);
-//		g.drawLine(150, 150, 150, 350);
-//
-//		
-//		
-		
-		
-		
-		
-		
+		g.fillRect(20, 330, 100, 10);
+		((Graphics2D) g).setStroke((new BasicStroke(0)));
+		g.drawRect(130, 150, 40, 60);
+		g.fillRect(140, 5, 1, 200);
+		g.drawLine(150, 150, 150, 350);
+
+		g.setColor(Color.blue);
+		g.drawRoundRect(120, 200, 80, 150, 20, 20);
+
+		g.fillRoundRect(210, 200, 80, 150, 20, 20);
+
+		// test AlphaComposite.Clear
+
 		g.setColor(Color.red);
 		g.fillRect(10, 200, 100, 100);
-		((Graphics2D)g).setComposite(AlphaComposite.Clear);
-		g.setColor(Color.white);
+		((Graphics2D) g).setComposite(AlphaComposite.Clear);
+		// save the foreground color, but don't use it.
+		g.setColor(Color.orange);
+		// paints a black rectangle
 		g.fillRect(10, 200, 100, 100);
-	    g.setPaintMode();
-		
-		
+		g.setPaintMode();
+		g.fillRect(20, 220, 100, 100);
+
+		// test g.clearRect();
+
+		g.clearRect(0, 240, 150, 20);
+
 //		
 //		
 //		Polygon poly = new Polygon();
@@ -90,10 +101,6 @@ public class TApp2 extends Applet {
 //		g.fillPolygon(poly);
 //
 
-		
-		
-		
-		
 //		g.fillRect(10, 200, 100, 100);
 //
 //		
