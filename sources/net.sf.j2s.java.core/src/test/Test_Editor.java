@@ -25,7 +25,6 @@ import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
@@ -43,7 +42,6 @@ import java.util.logging.Logger;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.FocusManager;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
@@ -71,8 +69,6 @@ import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
-
-import swingjs.JSToolkit;
 
 public class Test_Editor extends JFrame implements DropTargetListener {
 

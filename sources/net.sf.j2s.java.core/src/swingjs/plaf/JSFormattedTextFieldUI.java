@@ -15,7 +15,7 @@ public class JSFormattedTextFieldUI extends JSTextFieldUI {
 	 * override JSComponentUI; check for currency and implied ( )
 	 */
 	@Override
-	protected DOMNode setProp(DOMNode obj, String prop, String val) {
+	protected DOMNode setJSText(DOMNode obj, String prop, String val) {
 		if(prop == "value" && val != null && val.length() >= 2) {
 			if (val.charAt(0) == 164)
 				val = "$" + val.substring(1);

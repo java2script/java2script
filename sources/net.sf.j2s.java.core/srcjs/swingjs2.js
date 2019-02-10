@@ -11804,7 +11804,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 
 	J2S.setWindowVar = function(id, applet) {
 		// could be modified for use in fully encapsulated version
-		window[id] = applet;
+		return window[id] = applet;
 	}
 	
 	J2S._registerApplet = function(id, applet) {

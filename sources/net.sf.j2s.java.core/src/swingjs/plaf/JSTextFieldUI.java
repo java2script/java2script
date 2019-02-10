@@ -36,7 +36,7 @@ public class JSTextFieldUI extends JSTextUI {
 		}
 		setPadding(editor.getMargin());
 		textListener.checkDocument();
-		setCssFont(setProp(focusNode, "value", setCurrentText()), c.getFont());
+		setCssFont(setJSText(focusNode, "value", setCurrentText()), c.getFont());
 		// setTextAlignment();
 		setEditable(editable);
 		if (textField.isOpaque() && textField.isEnabled())

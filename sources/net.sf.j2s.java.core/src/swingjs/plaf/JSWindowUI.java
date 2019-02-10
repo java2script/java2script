@@ -226,8 +226,8 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 
 	@Override
 	public void windowOpened(WindowEvent e) {
-		System.out.println("JSWindowUI windowOpened " + c.isVisible());
-		c.requestFocus();
+		System.out.println("JSWindowUI windowOpened " + c.isVisible() + " " + id);
+//		c.requestFocus();
 	}
 
 

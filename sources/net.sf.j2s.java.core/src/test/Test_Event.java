@@ -9,8 +9,10 @@ import java.awt.DefaultKeyboardFocusManager;
 import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.KeyboardFocusManager;
+import java.awt.TextArea;
 import java.awt.TextField;
 import java.awt.Toolkit;
+import java.awt.event.AWTEventListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -90,7 +92,8 @@ public class Test_Event extends JFrame {
 							"FocusMan dispatching activeElement=" + (/** @j2sNative document.activeElement.id || */
 					getFocusOwner()));
 					System.out.println("FocusMan dispatching event Source " + e.getSource());
-					System.out.println("FocusMan dispatching event " + e);
+//					if (e.toString().indexOf("GAINED") >= 0)
+						System.out.println("FocusMan dispatching event " + e);
 				}
 				return super.dispatchEvent(e);
 			}
@@ -100,6 +103,14 @@ public class Test_Event extends JFrame {
 
 	public Test_Event() {
 
+		Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
+
+			@Override
+			public void eventDispatched(AWTEvent event) {
+				//System.out.println("AWTEVEnt dispatched " + event);
+			}
+			
+		}, -1);
 		this.setContentPane(new JPanel() {
 
 		});
@@ -115,7 +126,7 @@ public class Test_Event extends JFrame {
 		JMenuBar mb = getMenuBar(ptop);
 
 		JPanel full = new JPanel(new BorderLayout());
-		full.setPreferredSize(new Dimension(300, 50));
+		full.setPreferredSize(new Dimension(300, 300));
 		full.setBackground(Color.green);
 		full.add(ptop, BorderLayout.NORTH);
 		ptop.setBackground(Color.orange);
@@ -210,6 +221,9 @@ public class Test_Event extends JFrame {
 			add(d);
 			pack();
 			setVisible(true);
+			tarea.append("this \n\nis a test");
+			tarea.requestFocus();
+
 
 		} else {
 			setJMenuBar(mb);
@@ -324,6 +338,8 @@ public class Test_Event extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			System.out.println("Test_Event action for " + e.getActionCommand() + " " + e.getSource());
+			if (e.getSource() == btnj)
+				tarea.requestFocus();
 		}
 
 	};
@@ -335,7 +351,8 @@ public class Test_Event extends JFrame {
 
 	protected JButton btnj;
 	protected Button btn;
-
+	TextArea tarea;
+	
 	protected TextField field;
 	protected JTextField fieldj;
 
@@ -501,10 +518,15 @@ public class Test_Event extends JFrame {
 
 	private JPanel getTopPanel() {
 		JPanel ptop = new JPanel();
-		ptop.setPreferredSize(new Dimension(300, 100));
-		ptop.setMaximumSize(new Dimension(400, 100));
+		ptop.setPreferredSize(new Dimension(300, 300));
+		ptop.setMaximumSize(new Dimension(400, 400));
 		ptop.setBackground(Color.LIGHT_GRAY);
 		ptop.setOpaque(true);
+		
+		tarea = new TextArea(2,15);
+		tarea.addFocusListener(fl);
+		ptop.add(tarea);
+		
 
 		btnj = new JButton("btnj");
 		btnj.setName("btnj");
@@ -519,7 +541,6 @@ public class Test_Event extends JFrame {
 		field.addActionListener(al);
 		btn = new Button("test");
 		btn.setName("btn");
-		btn.setOpaque(true);
 		btn.setBackground(Color.orange);
 		btn.addMouseListener(ml);
 		btn.addActionListener(al);

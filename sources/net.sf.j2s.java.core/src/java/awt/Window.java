@@ -3543,16 +3543,16 @@ public class Window extends JComponent {
 } // class Window
 
 
-/**
- * This class is no longer used, but is maintained for Serialization
- * backward-compatibility.
- */
-class FocusManager {
-    Container focusRoot;
-    Component focusOwner;
-
-    /*
-     * JDK 1.1 serialVersionUID
-     */
-    static final long serialVersionUID = 2491878825643557906L;
-}
+///**
+// * This class is no longer used, but is maintained for Serialization
+// * backward-compatibility.
+// */
+//class FocusManager {
+//    Container focusRoot;
+//    Component focusOwner;
+//
+//    /*
+//     * JDK 1.1 serialVersionUID
+//     */
+//    static final long serialVersionUID = 2491878825643557906L;
+//}

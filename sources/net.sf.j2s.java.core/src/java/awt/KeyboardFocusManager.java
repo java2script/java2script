@@ -789,8 +789,8 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 		boolean shouldFire = false;
 
 		if (focusedWindow == null || focusedWindow.isFocusableWindow()) {
-			synchronized (KeyboardFocusManager.class) {
-				checkKFMSecurity();
+			//synchronized (KeyboardFocusManager.class) {
+				//checkKFMSecurity();
 
 				oldFocusedWindow = getFocusedWindow();
 
@@ -803,7 +803,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 
 				KeyboardFocusManager.focusedWindow = focusedWindow;
 				shouldFire = true;
-			}
+			//}
 		}
 
 		if (shouldFire) {
@@ -1705,9 +1705,9 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 		return (keyEventPostProcessors != null) ? (java.util.List) keyEventPostProcessors.clone() : null;
 	}
 
-	static void setMostRecentFocusOwner(Component component) {
+	public static void setMostRecentFocusOwner(Component component) {
 		Component window = component;
-		while (window != null && !(window instanceof Window)) {
+		while (window != null && !(window instanceof Window) && !(window instanceof JSApplet)) {
 			window = window.parent;
 		}
 		if (window != null) {
@@ -1715,7 +1715,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 		}
 	}
 
-	static synchronized void setMostRecentFocusOwner(Window window, Component component) {
+	public static synchronized void setMostRecentFocusOwner(Window window, Component component) {
 		// ATTN: component has a strong reference to window via chain
 		// of Component.parent fields. Since WeakHasMap refers to its
 		// values strongly, we need to break the strong link from the
@@ -1727,7 +1727,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 		mostRecentFocusOwners.put(window, component);// weakValue);
 	}
 
-	static void clearMostRecentFocusOwner(Component comp) {
+	public static void clearMostRecentFocusOwner(Component comp) {
 		Container window;
 
 		if (comp == null) {
@@ -1759,7 +1759,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 	 * Please be careful changing this method! It is called from
 	 * javax.swing.JComponent.runInputVerifier() using reflection.
 	 */
-	static synchronized Component getMostRecentFocusOwner(Window window) {
+	public static synchronized Component getMostRecentFocusOwner(Window window) {
 //        WeakReference<Component> weakValue =
 //            (WeakReference)mostRecentFocusOwners.get(window);
 		return mostRecentFocusOwners.get(window);

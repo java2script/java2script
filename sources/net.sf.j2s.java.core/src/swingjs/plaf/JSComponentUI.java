@@ -1973,7 +1973,14 @@ public class JSComponentUI extends ComponentUI
 		return (outerNode == null && !isUIDisabled ? setHTMLElement() : outerNode);
 	}
 
-	protected DOMNode setProp(DOMNode obj, String prop, String val) {
+	/**
+	 * Overwritten by JSTextFieldUI
+	 * @param obj
+	 * @param prop
+	 * @param val
+	 * @return
+	 */
+	protected DOMNode setJSText(DOMNode obj, String prop, String val) {
 		return DOMNode.setAttr(obj, prop, val);
 	}
 
@@ -2214,8 +2221,10 @@ public class JSComponentUI extends ComponentUI
 			if (iconNode != null)
 				DOMNode.setVisible(obj, text != null);
 		}
-		if (obj != null)
-			setProp(obj, prop, text);
+		if (obj != null) {
+//			System.out.println("JSCUI setText " + id + " " + prop + " " + text);
+			setJSText(obj, prop, text);
+		}
 		if (valueNode != null) {
 			setBackgroundFor(valueNode, c.getBackground());
 		}

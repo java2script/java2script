@@ -5,11 +5,13 @@ import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.JSComponent;
+import java.awt.KeyboardFocusManager;
 import java.awt.Window;
 import java.awt.event.FocusEvent;
 import java.awt.peer.KeyboardFocusManagerPeer;
 import java.beans.PropertyVetoException;
 
+import javax.swing.JApplet;
 import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
 import javax.swing.JPopupMenu;
@@ -125,6 +127,7 @@ public class JSFocusPeer implements KeyboardFocusManagerPeer {
 			}
 			c0.dispatchEvent(new FocusEvent(c0, FocusEvent.FOCUS_GAINED, false, other));
 		} else {
+			//System.out.println("JSFocusPeer lost " + ((JSComponentUI)c0.getUI()).getId());
 			other = (JComponent) JSToolkit.getCurrentFocusOwner(related);
 			c0.dispatchEvent(new FocusEvent(c0, FocusEvent.FOCUS_LOST, false, other));
 			if (other != null && other != c0)
@@ -184,9 +187,21 @@ public class JSFocusPeer implements KeyboardFocusManagerPeer {
     		 return p;
  	}
 
-
 	public static void focus(DOMNode focusNode) {
 		/** @j2sNative focusNode.focus(); */
+	}
+
+	public static void setFocusLast(JSApplet applet) {
+		// this works because appendText for AWT TextArea fires a
+		// requestFocus, and that method caches its most recent 
+		// component for a window (so only saved if the component has
+		// been added. JSAppletViewer now requests focus from JSFocusPeer 
+		// for the most recent request and executes it after the 
+		// window has been made visible.
+
+		Component c = KeyboardFocusManager.getMostRecentFocusOwner((Window) (Object) applet);
+		if (c != null)
+			c.requestFocus();
 	}
 
 }

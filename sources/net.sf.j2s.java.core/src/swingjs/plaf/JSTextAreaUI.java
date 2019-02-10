@@ -27,7 +27,7 @@ public class JSTextAreaUI extends JSTextViewUI {
 //		 */
 		
 		if (domNode == null) {
-			valueNode = domNode = newDOMObject("textarea", id, "spellcheck", FALSE);
+			valueNode = domNode = newDOMObject("textarea", id, "spellcheck", FALSE,  "autocomplete", "off");
 			setupViewNode();
 		}
 		if (((JTextArea) jc).getLineWrap())
@@ -38,6 +38,7 @@ public class JSTextAreaUI extends JSTextViewUI {
 		setCssFont(
 				DOMNode.setAttr(domNode, "value", setCurrentText()),
 				c.getFont());
+		updateJSCursor("rewrite");
 		if (!editable)
 			DOMNode.setAttr(domNode, "readOnly", TRUE);		
 		return updateDOMNodeCUI();

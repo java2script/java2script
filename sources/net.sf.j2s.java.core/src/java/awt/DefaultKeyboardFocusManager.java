@@ -309,6 +309,12 @@ public class DefaultKeyboardFocusManager extends KeyboardFocusManager {
 	 *         <code>false</code> otherwise
 	 */
 	public boolean dispatchEvent(AWTEvent e) {
+		
+//		/**
+//		 * @j2sNative 			System.out.println("DKFM test xxd = " + (xxd=this));
+//		 */
+//
+
 //        if (focusLog.isLoggable(PlatformLogger.Level.FINE) && (e instanceof WindowEvent || e instanceof FocusEvent)) {
 //            focusLog.fine("" + e);
 //        }
@@ -470,12 +476,14 @@ public class DefaultKeyboardFocusManager extends KeyboardFocusManager {
 		}
 
 		case FocusEvent.FOCUS_GAINED: {
+			// from the browser via JSFocusPeer
 			FocusEvent fe = (FocusEvent) e;
 			CausedFocusEvent.Cause cause = (fe instanceof CausedFocusEvent) ? ((CausedFocusEvent) fe).getCause()
 					: CausedFocusEvent.Cause.UNKNOWN;
 			Component oldFocusOwner = getGlobalFocusOwner();
 			Component newFocusOwner = fe.getComponent();
-			if (oldFocusOwner == newFocusOwner) {
+			
+			if (oldFocusOwner == newFocusOwner) { 
 //                    if (focusLog.isLoggable(PlatformLogger.Level.FINE)) {
 //                        focusLog.fine("Skipping {0} because focus owner is the same", e);
 //                    }
@@ -586,6 +594,7 @@ public class DefaultKeyboardFocusManager extends KeyboardFocusManager {
 
 		case FocusEvent.FOCUS_LOST: {
 			
+			// from the browser via JSFocusPeer
 			
 			//System.out.println("DefaultFM lost " + (/** @j2sNative (xxde = e, document.activeElement) || */null));
 			

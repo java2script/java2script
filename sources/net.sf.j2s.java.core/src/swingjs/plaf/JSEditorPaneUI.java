@@ -144,7 +144,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		return n + (/** @j2sNative sib.textContent && sib.textContent.length || */ 0);
 	}
 		
-	@Override
+//	@Override
 	public void setText(String text) {
 		SB sb = new SB();
 		Document d = editor.getDocument();

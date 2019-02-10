@@ -2786,27 +2786,29 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	// }
 	//
 
-	/**
-	 * overridden by JSEditorPanelUI
-	 * 
-	 * @param val
-	 */
-	public void setText(String val) {
-		String prop = null;
-		DOMNode obj = null;
-		if (val == null ? currentText != null : !val.equals(currentText)) {
-			currentText = val;			
-			if (textNode != null) {
-				prop = "innerHTML";
-				obj = textNode;
-			} else if (valueNode != null) {
-				prop = "value";
-				obj = valueNode;
-			}
-			if (obj != null)
-				setProp(obj, prop, val);
-		}
-	}
+//	/**
+//	 * overridden by JSEditorPanelUI
+//	 * 
+//	 * @param val
+//	 */
+//	public void setText(String val) {
+//		String prop = null;
+//		DOMNode obj = null;
+//		if (val == null ? currentText != null : !val.equals(currentText)) {
+//			currentText = val;			
+//			if (textNode != null) {
+//				prop = "innerHTML";
+//				obj = textNode;
+//			} else if (valueNode != null) {
+//				prop = "value";
+//				obj = valueNode;
+//			}
+//			if (obj != null) {
+//				System.out.println("JSTextUI setting text " + val);
+//				setJSText(obj, prop, val);
+//			}
+//		}
+//	}
 	
 	@Override
 	protected Color getInactiveTextColor(Color fg) {
@@ -2873,7 +2875,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	 * @param why
 	 */
 	public void updateJSCursor(String why) {	
-		if (editor.getText().length() == 0)
+		if (editor.getDocument() == null || editor.getText().length() == 0)
 			return;
 		int start = editor.getCaret().getMark();
 		int end = editor.getCaret().getDot();
@@ -2919,7 +2921,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	 */
 
 	protected void jsSelect(Object[] r1, Object[] r2, boolean andScroll) {
-		//System.out.println("scrolling to " + r1 + " " + r2 + " " + editor.getText());
+//		System.out.println("scrolling to " + r1 + " " + r2 + " " + editor.getText());
 		setJSMarkAndDot(/** @j2sNative r1[1] || */0, /** @j2sNative r2[1] || */0, andScroll);
 	}
 	

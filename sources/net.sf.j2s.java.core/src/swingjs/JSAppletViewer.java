@@ -465,6 +465,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 					if (resizer != null)
 						resizer.show();
 				}
+				JSFocusPeer.setFocusLast(applet);
 				applet.repaint();
 				break;
 			case APPLET_STOP:

@@ -44,6 +44,7 @@ public class TApp2 extends Applet {
 		ta = new TextArea("A text\nwith some\nlines and\n no content.");
 		add(ta);
 		ta.setBounds(200, 70, 100, 80);
+		ta.appendText("A text\nwith some\nlines and\n no content.");
 
 		
 //		TextArea ta = new TextArea("A text\nwith some\nlines and\n no content.");
@@ -54,8 +55,6 @@ public class TApp2 extends Applet {
 		
 		//		ta.getSelectionEnd();
 		ta.setBackground(Color.red);
-		ta.appendText("A text\nwith some\nlines and\n no content.");
-		ta.requestFocus();
 //		Scrollbar sb = new Scrollbar(0, 10, 0, 0, 1);
 	}
 
