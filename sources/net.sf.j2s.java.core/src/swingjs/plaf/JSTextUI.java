@@ -3136,7 +3136,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		if (isAWT) { 
 			Component fc = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
 			jc.requestFocus();
-			fc.requestFocus();
+			if (fc != null)
+				fc.requestFocus();
 		}
 	}
 	

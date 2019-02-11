@@ -673,7 +673,7 @@ public class JSComponentUI extends ComponentUI
 		setComponent(target);
 		/**
 		 * @j2sNative
-		 *           this.isAWT = this.jc.isAWT;
+		 *           this.isAWT = this.jc.isAWT$;
 		 */
 
 		applet = JSToolkit.getHTML5Applet(c);
@@ -2139,8 +2139,19 @@ public class JSComponentUI extends ComponentUI
 						: (icon instanceof ImageIcon) ? (ImageIcon) icon : JSToolkit.createImageIcon(jc, icon, id + "tmpIcon"));
 	}
 
+	/**
+	 * remove 0x0000 and replace space with nonbreaking space
+	 * @param t
+	 * @return
+	 */
 	protected String fixText(String t) {
-		return (t != null && t.indexOf("\u0000") >= 0 ? PT.rep(t, "\u0000", "") : t);
+		t = (t != null && t.indexOf("\u0000") >= 0 ? PT.rep(t, "\u0000", "") : t);
+		if (isHTML) {
+			// 
+		} else {
+			t = t.replace(' ', '\u00A0'); 
+		}
+		return t;
 	}
 
 	protected void setIconAndText(String prop, Icon icon, int gap, String text) {
@@ -2539,7 +2550,7 @@ public class JSComponentUI extends ComponentUI
 					iscale = "scale(0.6,0.6)";
 				}
 				// +3 here is a fudge factor for the AWT applets
-				yoff = (wIcon == 0 ? "-" + ((getFont().getFontMetrics().getAscent()>>1) + (isAWT ? 3 : 0)) + "px" : "-50%");
+				yoff = (wIcon == 0 ? "-" + ((getFont().getFontMetrics().getAscent()>>1) + (isAWT ? 0 : 0)) + "px" : "-50%");
 				break;
 			case SwingConstants.BOTTOM:
 				top = itop = 100;

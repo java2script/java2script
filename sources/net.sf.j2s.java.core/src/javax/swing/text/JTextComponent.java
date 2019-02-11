@@ -35,6 +35,7 @@ import java.awt.HeadlessException;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.TextComponent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.InputMethodListener;
@@ -308,7 +309,7 @@ import swingjs.api.JSMinimalAbstractDocument;
  * @see ViewFactory
  */
 @SuppressWarnings({"rawtypes", "unchecked", "unused"})
-public abstract class JTextComponent extends JComponent implements Scrollable
+public abstract class JTextComponent extends JComponent implements TextComponent, Scrollable
 {
 	/**
 	 * Creates a new <code>JTextComponent</code>. Listeners for caret events are
