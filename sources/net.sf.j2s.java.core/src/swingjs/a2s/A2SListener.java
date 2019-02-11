@@ -76,7 +76,7 @@ public class A2SListener  implements AdjustmentListener, ActionListener, KeyList
 	public void adjustmentValueChanged(AdjustmentEvent e) {
 		new A2SEvent(e).run();
 		if (e.getSource() instanceof Scrollbar)
-			((Scrollbar) e.getSource()).processAdjustmentEvent(e);
+			((Scrollbar) e.getSource()).processAdjustmentEventA2S(e);
 	}
 
 	@Override

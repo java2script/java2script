@@ -16,8 +16,10 @@ import swingjs.api.js.DOMNode;
  * capabilities. It adds an variable extent (handle size) and also has 
  * a different appearance. 
  * 
- *  TODO: block and unit increments. Right now it just tracks to where the 
- *  mouse was clicked. 
+ * AWT version difference: An AdjustmentEvent is reported for the initial
+ * mousedown event, as for Swing; Java does not report that.
+ * 
+ * TODO AWT,Swing difference: mouseup off the control does not call setValueIsAdjusting(false)
  *  
  * @author hansonr
  *
@@ -38,6 +40,14 @@ public class JSScrollBarUI extends JSSliderUI {
 		super();
 		isScrollBar = true;
 		allowPaintedBackground = false;
+	}
+
+	@Override
+	public DOMNode updateDOMNode() {
+		super.updateDOMNode();
+		if (isAWT && !jc.isBackgroundSet())
+			jc.setBackground(Color.LIGHT_GRAY);
+		return domNode;
 	}
 
 	@Override
@@ -65,6 +75,26 @@ public class JSScrollBarUI extends JSSliderUI {
 //		}		
 	}
 
+	@Override
+	protected void setValue(int val) { 
+		if (!isAWT) {
+			super.setValue(val);
+			return;
+		}
+		JScrollBar sb = (JScrollBar) jc; 
+		if (val != sb.getValue())
+		((swingjs.a2s.Scrollbar) jc).setValueFromUI(val);
+	}
+
+
+    @Override
+	protected void setValueIsAdjusting(boolean b) {
+    	if (!isAWT) {
+    		super.setValueIsAdjusting(b);
+    		return;
+    	}
+		((swingjs.a2s.Scrollbar) jc).setValueIsAdjustingFromUI(b);
+	}
 
 	@Override
 	public Dimension getPreferredSize(JComponent jc) {
@@ -129,8 +159,28 @@ public class JSScrollBarUI extends JSSliderUI {
         if (delta == Integer.MIN_VALUE && direction > 0)
         	return;
         delta *= (direction > 0 ? POSITIVE_SCROLL : NEGATIVE_SCROLL);
-        sb.setValue(sb.getValue() + delta);
+        setValue(sb.getValue() + delta);
     }
+//
+//	/**
+//	 * called from JavaScript via the hook added in setJQuerySliderAndEvents  
+//	 * 
+//	 * @param event
+//	 * @param ui
+//	 */
+//	@Override
+//	public void jqueryStart(Object event, Object ui) {
+//	}
+//
+//	/**
+//	 * called from JavaScript via the hook added in setJQuerySliderAndEvents  
+//	 * 
+//	 * @param event
+//	 * @param ui
+//	 */
+//	@Override
+//	public void jqueryStop(Object event, Object ui) {
+//	}
 
     @Override
     public void scrollByUnit(int direction) {
@@ -140,7 +190,7 @@ public class JSScrollBarUI extends JSSliderUI {
         if (delta == Integer.MIN_VALUE && direction > 0)
         	return;
         delta *= (direction > 0 ? POSITIVE_SCROLL : NEGATIVE_SCROLL);
-        sb.setValue(sb.getValue() + delta);
+        setValue(sb.getValue() + delta);
     }
 
     @Override
@@ -161,7 +211,6 @@ public class JSScrollBarUI extends JSSliderUI {
 		if (myScrollPaneUI != null && myScrollPaneUI.scrollBarUIDisabled)
 			DOMNode.setStyles(domNode, "display", "none");
 	}
-
 
 
 }

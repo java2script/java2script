@@ -39,7 +39,10 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	}
 
 	protected JSlider slider;
-	private int min, max, val, majorSpacing, minorSpacing;
+	private int min, max;
+	protected int val;
+	private int majorSpacing;
+	private int minorSpacing;
 	protected boolean paintTicks;
 	protected boolean paintLabels;
 	private boolean snapToTicks;
@@ -183,7 +186,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	 * @param ui
 	 */
 	public void jqueryStart(Object event, Object ui) {
-	    slider.setValueIsAdjusting(true);
+	    setValueIsAdjusting(true);
 	}
 
 	/**
@@ -193,11 +196,15 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	 * @param ui
 	 */
 	public void jqueryStop(Object event, Object ui) {
-	    slider.setValueIsAdjusting(false);
-	    if (!isScrollBar && slider.getSnapToTicks())
+	    setValueIsAdjusting(false);
+	    if (isScrollBar || slider.getSnapToTicks())
 	    	jqueryCallback(event, ui);
 	}
 	
+	protected void setValueIsAdjusting(boolean b) {
+		slider.setValueIsAdjusting(b);
+	}
+
 	/**
 	 * called from JavaScript via the hook added in setJQuerySliderAndEvents  
 	 * 
@@ -207,7 +214,13 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	public void jqueryCallback(Object event, Object ui) {
 		val = Math.round(/** @j2sNative ui.value || */0);
 		boolean ok = (noSnapping || !slider.getSnapToValue() || slider.getValueIsAdjusting());
-		slider.setValue(ok ? val : snapTo(val));
+		setValue(ok ? val : snapTo(val));
+	}
+
+	protected void setValue(int val) {
+		if (val == slider.getValue())
+			return;
+		slider.setValue(val);
 	}
 
 	@Override
@@ -488,7 +501,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			}
 			if (blockIncrement >= 0)
                 val = slider.getValue() + blockIncrement * ((direction > 0) ? POSITIVE_SCROLL : direction == 0 ? 0 : NEGATIVE_SCROLL);
-			slider.setValue(snapTo(val));
+			setValue(snapTo(val));
 		}
 //	}
 
@@ -517,7 +530,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
                 delta *= getTickSpacing();
             }
 
-            slider.setValue(slider.getValue() + delta);
+            setValue(slider.getValue() + delta);
         }
     }
     
