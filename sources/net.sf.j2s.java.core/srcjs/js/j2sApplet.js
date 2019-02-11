@@ -1449,9 +1449,14 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 	// ////////////////// mouse and key events //////////////////////
 
 	var doIgnore = function(ev) {
-		var ignore = (J2S._dmouseOwner || ev.originalEvent.handled || !ev.target || ("" + ev.target.className)
-				.indexOf("swingjs-ui") >= 0);
-		ev.originalEvent.handled = true;
+		var ignore = (
+				//J2S._dmouseOwner
+				//|| 
+				ev.originalEvent.xhandled 
+				|| !ev.target 
+				|| ("" + ev.target.className).indexOf("swingjs-ui") >= 0
+			);
+		ev.originalEvent.xhandled = true;
 		return ignore;
 	};
 
@@ -1850,16 +1855,17 @@ if (!target) {
 				ev.button = 0;
 				// fall through
 			case 0:
-				modifiers = (1 << 4) | (id ? 0 : (1 << 10));// InputEvent.BUTTON1 +
-													// InputEvent.BUTTON1_DOWN_MASK;
+				modifiers = (1 << 4) | (id ? 0 : (1 << 10));// InputEvent.BUTTON1 +					
+															// InputEvent.BUTTON1_DOWN_MASK;
+				
 				break;
 			case 1:
 				modifiers = (1 << 3) | (id ? 0 : (1 << 11));// InputEvent.BUTTON2 +
-													// InputEvent.BUTTON2_DOWN_MASK;
+															// InputEvent.BUTTON2_DOWN_MASK;
 				break;
 			case 2:
 				modifiers = (1 << 2) | (id ? 0 : (1 << 12));// InputEvent.BUTTON3 +
-													// InputEvent.BUTTON3_DOWN_MASK;
+															// InputEvent.BUTTON3_DOWN_MASK;
 				break;
 			}
 		}

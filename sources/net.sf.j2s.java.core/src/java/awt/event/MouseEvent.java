@@ -806,54 +806,60 @@ public class MouseEvent extends InputEvent {
      * Also sets button.
      */
     private void setNewModifiers() {
-        if ((modifiers & BUTTON1_MASK) != 0) {
-            modifiers |= BUTTON1_DOWN_MASK;
-        }
-        if ((modifiers & BUTTON2_MASK) != 0) {
-            modifiers |= BUTTON2_DOWN_MASK;
-        }
-        if ((modifiers & BUTTON3_MASK) != 0) {
-            modifiers |= BUTTON3_DOWN_MASK;
-        }
+    	// this is just not how it is done in Java!!!
         if (id == MOUSE_PRESSED
-            || id == MOUSE_RELEASED
-            || id == MOUSE_CLICKED)
-        {
-            if ((modifiers & BUTTON1_MASK) != 0) {
-                button = BUTTON1;
-                modifiers &= ~BUTTON2_MASK & ~BUTTON3_MASK;
-                if (id != MOUSE_PRESSED) {
-                    modifiers &= ~BUTTON1_DOWN_MASK;
+                || id == MOUSE_RELEASED
+                || id == MOUSE_CLICKED)
+            {
+                if ((modifiers & BUTTON1_MASK) != 0) {
+                    button = BUTTON1;
+                    modifiers &= //No, this removes ALT ~BUTTON2_MASK 
+                    		//&
+                    		~BUTTON3_MASK;
+                    if (id != MOUSE_PRESSED) {
+                        modifiers &= ~BUTTON1_DOWN_MASK;
+                    }
+                } else if ((modifiers & BUTTON3_MASK) != 0) {
+                    button = BUTTON3;
+                    modifiers &= ~BUTTON1_MASK;//no, this removes ALT & ~BUTTON2_MASK;
+                    if (id != MOUSE_PRESSED) {
+                        modifiers &= ~(BUTTON3_DOWN_MASK | META_DOWN_MASK);
+                    }
+                } else if ((modifiers & BUTTON2_MASK) != 0) {
+                    button = BUTTON2;
+                    modifiers &= ~BUTTON1_MASK;// no, this removes ALT & ~BUTTON3_MASK;
+                    if (id != MOUSE_PRESSED) {
+                        modifiers &= ~BUTTON2_DOWN_MASK;
+                    }
                 }
-            } else if ((modifiers & BUTTON2_MASK) != 0) {
-                button = BUTTON2;
-                modifiers &= ~BUTTON1_MASK & ~BUTTON3_MASK;
-                if (id != MOUSE_PRESSED) {
-                    modifiers &= ~BUTTON2_DOWN_MASK;
+                if ((modifiers & InputEvent.ALT_MASK) != 0) {
+                    modifiers |= InputEvent.ALT_DOWN_MASK;
                 }
-            } else if ((modifiers & BUTTON3_MASK) != 0) {
-                button = BUTTON3;
-                modifiers &= ~BUTTON1_MASK & ~BUTTON2_MASK;
-                if (id != MOUSE_PRESSED) {
-                    modifiers &= ~BUTTON3_DOWN_MASK;
+                if ((modifiers & InputEvent.SHIFT_MASK) != 0) {
+                    modifiers |= InputEvent.SHIFT_DOWN_MASK;
+                }
+                if ((modifiers & InputEvent.CTRL_MASK) != 0) {
+                    modifiers |= InputEvent.CTRL_DOWN_MASK;
+                }
+                if ((modifiers & InputEvent.ALT_GRAPH_MASK) != 0) {
+                    modifiers |= InputEvent.ALT_GRAPH_DOWN_MASK;
+                }
+                // ALT == BUTTON2 (right) ; META == BUTTON3 (middle)
+                if (id == MOUSE_PRESSED) {
+                    if ((modifiers & BUTTON1_MASK) != 0) {
+                        modifiers |= BUTTON1_DOWN_MASK;
+                    }
+                    if ((modifiers & BUTTON2_MASK) != 0) {
+                        modifiers |= BUTTON2_DOWN_MASK;
+                    }
+                    if ((modifiers & BUTTON3_MASK) != 0) {
+                        modifiers |= BUTTON3_DOWN_MASK;
+                    }
+                    if ((modifiers & InputEvent.META_MASK) != 0) {
+                        modifiers |= InputEvent.META_DOWN_MASK;
+                    }
                 }
             }
-        }
-        if ((modifiers & InputEvent.ALT_MASK) != 0) {
-            modifiers |= InputEvent.ALT_DOWN_MASK;
-        }
-        if ((modifiers & InputEvent.META_MASK) != 0) {
-            modifiers |= InputEvent.META_DOWN_MASK;
-        }
-        if ((modifiers & InputEvent.SHIFT_MASK) != 0) {
-            modifiers |= InputEvent.SHIFT_DOWN_MASK;
-        }
-        if ((modifiers & InputEvent.CTRL_MASK) != 0) {
-            modifiers |= InputEvent.CTRL_DOWN_MASK;
-        }
-        if ((modifiers & InputEvent.ALT_GRAPH_MASK) != 0) {
-            modifiers |= InputEvent.ALT_GRAPH_DOWN_MASK;
-        }
     }
 
     /**
