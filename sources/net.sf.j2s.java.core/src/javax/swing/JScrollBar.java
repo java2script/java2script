@@ -655,7 +655,7 @@ public class JScrollBar extends JComponent implements Adjustable
      * @see #addAdjustmentListener
      * @see EventListenerList
      */
-    private void fireAdjustmentValueChanged(int id, int type, int value,
+    protected/*needed by SwingJS subclass*/ void fireAdjustmentValueChanged(int id, int type, int value,
                                             boolean isAdjusting) {
         Object[] listeners = listenerList.getListenerList();
         AdjustmentEvent e = null;

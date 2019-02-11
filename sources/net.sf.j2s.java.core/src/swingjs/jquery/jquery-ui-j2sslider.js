@@ -3,6 +3,7 @@
  * Includes: jquery.ui.slider.js
  * Copyright 2015 jQuery Foundation and other contributors; Licensed MIT */
 
+// BH 2/10/2019 fix for AWT scrollbar differences from Swing
 // BH 7/21/2018 fix for ScrollPane scroll bars not clicking on tracks 
 // note -- still no support for unit (deprecated anyway) or block increments
 // BH 2/28/2017 7:06:57 AM fix for vertical inverted and slider jump when clicked
@@ -39,8 +40,8 @@
 		var doMouseCapture = function(me, event, obj, isEndCheck) {
 			
 			var that = me, o = me.options;
-
-			if (o.disabled) {
+			
+			if (o.disabled || event.type == "mousemove" && event.buttons == 0) {
 				return false;
 			}
 
@@ -286,6 +287,11 @@
 						me._mouseSliding = false;
 					};
 
+					var fUpTrack = function(event, id) {
+						me._stop(event, me._handleIndex);
+						me._change(event, me._handleIndex);
+					};
+
 					var fDownWrap = function(event, id) {
 						doMouseCapture(me, event, OBJ_WRAP, false);
 						me._mouseSliding = false;
@@ -343,6 +349,7 @@
 						$(this.element).mousedown(fDownTrack);
 						if (this.isScrollBar) {
 							$(this.element).mousemove(fMoveTrack);
+							$(this.element).mouseup(fUpTrack);
 							$(this.element).mouseout(fOutTrack);
 						} else {
 							$(this.element).closest(".ui-j2sslider-wrap").mousedown(fDownWrap);
