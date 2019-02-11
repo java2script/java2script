@@ -749,6 +749,10 @@ public class JSGraphics2D implements
 	}
 
 	public void setClip(Shape clip) {
+		if (clip == null) {
+			setClip(0, 0, width, height);
+			return;
+		}
 		currentClip = clip;
 		ctx.beginPath();
 		doShape(clip);
