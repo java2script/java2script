@@ -9,6 +9,8 @@ import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Label;
 import java.awt.TextArea;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -26,7 +28,7 @@ public class TApp2 extends Applet {
 		add(panel);
 		panel.setLayout(null);
 		panel.setBackground(Color.red);
-		JLabel label = new JLabel("OK");
+		Label label = new Label("OK", Label.RIGHT);
 		label.setBounds(10, 10, 50, 60);
 		panel.add(label);
 
@@ -114,5 +116,38 @@ public class TApp2 extends Applet {
 //		g.drawString("SwingJS", 200, 30);
 //		g.setColor(Color.white);
 //		g.drawString("SwingJS", 200, 30);
+		
+		
+		addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				System.out.println(">>>>mouseClicked: " + e.getModifiers() + " " + e.getModifiersEx() + " " + e);
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				System.out.println(">>>>mousePressed: " + e.getModifiers() + " " + e.getModifiersEx() + " " + e);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				System.out.println(">>>>mouseReleased: " + e.getModifiers() + " " + e.getModifiersEx() + " " + e);
+			}
+			
+		});
+
 	}
 }
