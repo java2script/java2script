@@ -2833,7 +2833,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 //			currentText = val;
 		// System.out.println("from HTML: " + DOMNode.getAttr(domNode, "innerHTML"));
 		// System.out.println("to editor: " + val.replace('\n', '.'));
-		editor.setText(val);
+		editor.setTextFromUI(val);
 		setCurrentText();
 //			getComponentText();
 		// TODO: why this?

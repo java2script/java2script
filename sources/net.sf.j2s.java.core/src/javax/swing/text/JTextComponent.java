@@ -4993,6 +4993,12 @@ public abstract class JTextComponent extends JComponent implements TextComponent
         return (composedTextStart != null);
     }
 
+	public void setTextFromUI(String val) {
+		// SwingJS
+		setText(val);
+		// overridden in a2s.JSTextUI		
+	}
+
 //    //
 //    // Caret implementation for editing the composed text.
 //    //

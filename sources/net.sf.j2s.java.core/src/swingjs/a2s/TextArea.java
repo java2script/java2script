@@ -259,8 +259,15 @@ public class TextArea extends JScrollPane {
 		ta.selectAll();
 	}
 
-	public void setText(String t) {
+	public void setTextFromUI(String t) {
 		ta.setText(t);
+	}
+	
+	public void setText(String t) {
+		@SuppressWarnings("unused")
+		int top = /** @j2sNative this.ta.ui.domNode.scrollTop ||*/0;
+		ta.setText(t);
+		/** @j2sNative this.ta.ui.domNode.scrollTop = top */		
 	}
 
 	public void insertText(String str, int pos) {
