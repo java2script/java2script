@@ -64,7 +64,7 @@
 				closestHandle = $(me.handles[index]);
 			}
 
-			allowed = me._start(event, index);
+			allowed = (obj == OBJ_HANDLE ? me._start(event, index) : true);
 			if (allowed === false) {
 				return false;
 			}
@@ -288,7 +288,7 @@
 					};
 
 					var fUpTrack = function(event, id) {
-						me._stop(event, me._handleIndex);
+						//me._stop(event, me._handleIndex);
 						me._change(event, me._handleIndex);
 					};
 
