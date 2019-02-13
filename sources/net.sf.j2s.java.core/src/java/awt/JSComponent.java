@@ -340,9 +340,10 @@ public abstract class JSComponent extends Component {
      * @param g
      */
 	public void paintWithBackgroundCheck(Graphics g) {
-		checkBackgroundPainted(null, true);
+		JSGraphics2D jcg = getJSGraphic2D(g);
+		checkBackgroundPainted(jcg, true);
 		paint(g);
-		checkBackgroundPainted(getJSGraphic2D(g), false);
+		checkBackgroundPainted(jcg, false);
 	}
 
 	@Override
