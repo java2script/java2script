@@ -2140,7 +2140,7 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	/**
-	 * remove 0x0000 and replace space with nonbreaking space
+	 * remove 0x0000 and replace space with nonbreaking space if not a textarea
 	 * @param t
 	 * @return
 	 */
@@ -2148,7 +2148,7 @@ public class JSComponentUI extends ComponentUI
 		t = (t != null && t.indexOf("\u0000") >= 0 ? PT.rep(t, "\u0000", "") : t);
 		if (isHTML) {
 			// 
-		} else {
+		} else if (valueNode == null) {
 			t = t.replace(' ', '\u00A0'); 
 		}
 		return t;

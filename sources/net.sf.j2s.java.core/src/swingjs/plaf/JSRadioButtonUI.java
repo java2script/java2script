@@ -2,6 +2,7 @@ package swingjs.plaf;
 
 import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JToggleButton;
 
 import swingjs.api.js.DOMNode;
@@ -13,8 +14,34 @@ public class JSRadioButtonUI extends JSButtonUI {
 
 	@Override
 	public DOMNode updateDOMNode() {
-		updateButton("radio");
-		return updateDOMNodeCUI();
+		JToggleButton b = (JToggleButton) jc;
+		boolean doAll = false;
+		if (domNode == null) {
+			doAll = true;
+			buttonNode = newDOMObject("label", id + "btn");
+			if (isMenuItem) {
+				domNode = createItem("_item", buttonNode);
+				bindJQueryEvents(domNode, "mouseenter", -1);			
+			} else {
+				domNode = newDOMObject("div", id + "_dom");
+				domNode.appendChild(buttonNode);
+			}
+			iconNode = null;
+			if (b.getIcon() == null) {
+				iconNode = actionNode = newDOMObject("input", id, "type", (getPropertyPrefix() == "RadioButton" ? "radio" : "checkbox"), "name", id);
+				DOMNode.setAttr(buttonNode, "htmlFor", id);
+			} else {
+				// don't we need an icon node here??
+				if (actionNode != null)
+					DOMNode.dispose(actionNode);
+			}
+			enableNodes = new DOMNode[] { actionNode, buttonNode, null };
+			createButton();
+			if (isMenuItem)
+				setMenuItem();
+		}
+		setupButton(b, doAll);
+		return domNode;
 	}
 
 	@Override
@@ -22,32 +49,12 @@ public class JSRadioButtonUI extends JSButtonUI {
 		return "RadioButton";
 	}
 
-	protected void createButton(JToggleButton b, String myType) {
-		buttonNode = newDOMObject("label", id + "btn");
-		if (isMenuItem) {
-			domNode = createItem("_item", buttonNode);
-			bindJQueryEvents(domNode, "mouseenter", -1);			
-		} else {
-			domNode = newDOMObject("div", id + "_dom");
-			domNode.appendChild(buttonNode);
-		}
-		iconNode = null;
-		if (b.getIcon() == null) {
-			iconNode = actionNode = newDOMObject("input", id, "type", myType, "name", id);
-			DOMNode.setAttr(buttonNode, "htmlFor", id);
-		} else {
-			// don't we need an icon node here??
-			if (actionNode != null)
-				DOMNode.dispose(actionNode);
-		}
-		enableNodes = new DOMNode[] { actionNode, buttonNode, null };
-		createButton();
-		if (isMenuItem)
-			setMenuItem();
-//		setDataComponent(actionNode);
-
+	@Override
+	public void installUI(JComponent jc) {
+		getPropertyPrefix();
+		super.installUI(jc);	
 	}
-	
+
 //	@Override
 //	protected void createButton() {
 //		addCentering(buttonNode);
@@ -66,24 +73,6 @@ public class JSRadioButtonUI extends JSButtonUI {
 
 
 
-	/**
-	 * 
-	 * 
-	 * @param myType "radio" or "checkbox"
-	 * 
-	 * @return
-	 */
-	protected DOMNode updateButton(String myType) {
-		JToggleButton b = (JToggleButton) jc;
-		boolean doAll = false;
-		if (domNode == null) {
-			doAll = true;
-			createButton(b, myType);
-		}
-		setupButton(b, doAll);
-		return domNode;
-	}
-	
 	protected void setupButton(JToggleButton b, boolean doAll) {
 		// actionNode, iconNode, textNode, centeringNode, buttonNode
 				

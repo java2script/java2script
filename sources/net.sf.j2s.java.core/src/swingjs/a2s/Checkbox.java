@@ -4,12 +4,17 @@ import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 
 import javax.swing.ButtonGroup;
+import javax.swing.Icon;
 import javax.swing.JCheckBox;
 import javax.swing.JRadioButton;
 
 public class Checkbox extends JCheckBox {
 
 	
+	private static Boolean isRadioTemp;
+	private boolean isRadio;
+
+
 	public void isAWT() {}
 	
 	// added to (slightly) simplify converting code that uses Checkbox radio buttons
@@ -27,17 +32,33 @@ public class Checkbox extends JCheckBox {
 		super(string, b);
 	}
 
-    public Checkbox(String label, boolean state, java.awt.CheckboxGroup group)
-            throws HeadlessException {
-            setText(label);
-            setState(state);
-            if (group != null)
-            	group.add(this);
-            if (state && (group != null)) {
-            	setSelected(state);
-            }
-        }
-    public Checkbox(String label, java.awt.CheckboxGroup group, boolean state)
+	public Checkbox(String label, boolean state, java.awt.CheckboxGroup group) throws HeadlessException {
+		super(label, setIsRadio(), false);
+		setState(state);
+		if (group != null)
+			group.add(this);
+		if (state && (group != null)) {
+			setSelected(state);
+		}
+	}
+    
+	/**
+	 * transiently flag this as a radio button
+	 * @return
+	 */
+    private static Icon setIsRadio() {
+    	isRadioTemp = true;
+    	return null;
+	}
+    
+    public boolean isRadio() {
+    	boolean b = (isRadioTemp == null ? isRadio : isRadioTemp);
+    	isRadio = b;
+    	isRadioTemp = null;
+    	return b;
+    }
+
+	public Checkbox(String label, java.awt.CheckboxGroup group, boolean state)
             throws HeadlessException {
             this(label, state, group);
         }	
