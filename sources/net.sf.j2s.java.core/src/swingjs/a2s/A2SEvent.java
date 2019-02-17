@@ -13,6 +13,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
@@ -62,7 +63,7 @@ public class A2SEvent implements Runnable {
 	public void run() {
 	  Event e = this.e;
 	  Component target = (Component) this.target;
-	  if (target instanceof Container) {
+	  if (target instanceof A2SContainer) {
 		  Component parent = ((Container)target).getMouseEventTarget(e.x, e.y, true, null, false);
 		  // on a focus-out event, e.x or e.y may be negative
 		  if (parent != null)
@@ -197,14 +198,14 @@ public class A2SEvent implements Runnable {
 
 		case ActionEvent.ACTION_PERFORMED:
 			ActionEvent ae = (ActionEvent) e;
-            String cmd;
-            if (src instanceof AbstractButton) {
-                cmd = ((AbstractButton)src).getText();
-            } else if (src instanceof MenuItem) {
-                cmd = ((MenuItem)src).getText();
-            } else {
-                cmd = ae.getActionCommand();
-            }
+			String cmd;
+			if (src instanceof AbstractButton) {
+				cmd = ((AbstractButton) src).getText();
+			} else if (src instanceof MenuItem) {
+				cmd = ((MenuItem) src).getText();
+			} else {
+				cmd = ae.getActionCommand();
+			}
 			return new Event(src, 0, newid, 0, 0, 0, ae.getModifiers(), cmd);
 
 		case ItemEvent.ITEM_STATE_CHANGED:
@@ -213,14 +214,12 @@ public class A2SEvent implements Runnable {
 			if (src instanceof List) {
 				newid = (ie.getStateChange() == ItemEvent.SELECTED ? Event.LIST_SELECT : Event.LIST_DESELECT);
 				arg = ie.getItem();
-			} else {
+			} else if (src instanceof Choice) {
+				// leave it as an ItemEvent
+				arg = ie.getItem();
+			} else { // Checkbox
 				newid = Event.ACTION_EVENT;
-				if (src instanceof Choice) {
-					arg = ie.getItem();
-
-				} else { // Checkbox
-					arg = Boolean.valueOf(ie.getStateChange() == ItemEvent.SELECTED);
-				}
+				arg = Boolean.valueOf(ie.getStateChange() == ItemEvent.SELECTED);
 			}
 			return new Event(src, newid, arg);
 
@@ -271,6 +270,8 @@ public class A2SEvent implements Runnable {
 		} else if (comp instanceof JComboBox) {
 			if (!isListener(((JComboBox) comp).getActionListeners(), listener))
 				((JComboBox) comp).addActionListener((ActionListener) listener);
+			if (!isListener(((JComboBox) comp).getItemListeners(), listener))
+				((JComboBox) comp).addItemListener((ItemListener) listener);
 		} else if (comp instanceof JScrollBar) {
 			if (!isListener(((JScrollBar) comp).getAdjustmentListeners(), listener))
 				((JScrollBar) comp).addAdjustmentListener((AdjustmentListener) listener);
