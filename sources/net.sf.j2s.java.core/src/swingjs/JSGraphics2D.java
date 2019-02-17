@@ -158,8 +158,14 @@ public class JSGraphics2D implements
 
 	public void drawLine(int x0, int y0, int x1, int y1) {
 		boolean inPath = this.inPath;
-		if (!inPath)
+		if (!inPath) {
+			if (x0 == x1 && y0 == y1) {
+				// meaning is to draw a point
+				fillRect(x0, y0, 1, 1);
+				return;
+			}
 			doStroke(true);
+		}
 		ctx.moveTo(x0, y0);
 		ctx.lineTo(x1, y1);
 		if (!inPath)
