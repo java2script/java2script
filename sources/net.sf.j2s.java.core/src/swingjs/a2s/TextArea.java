@@ -359,9 +359,9 @@ public class TextArea extends JTextArea {
 	
 	public void setText(String t) {
 		@SuppressWarnings("unused")
-		int top = /** @j2sNative this.super.ui.domNode.scrollTop ||*/0;
+		int top = /** @j2sNative this.ui.domNode.scrollTop ||*/0;
 		super.setText(t);
-		/** @j2sNative this.super.ui.domNode.scrollTop = top */		
+		/** @j2sNative this.ui.domNode.scrollTop = top */		
 	}
 
 	public void insertText(String str, int pos) {

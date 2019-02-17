@@ -2934,7 +2934,11 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
      */
     void setJSMarkAndDot(int mark, int dot, boolean andScroll) {
     	//System.out.println(">>JSTextUI setJSMarkAndDot " + mark + " " + dot + " for " + editor.getText());
+    	try {
 		focusNode.setSelectionRange(Math.min(mark, dot), Math.max(mark, dot), (mark == dot ? "none" : mark < dot ? "forward" : "backward"));
+    	} catch (Throwable e) {
+    		// ignore - probably we are not attached to the body -- SeaMonkey failure here
+    	}
 	}
 
 	/**
