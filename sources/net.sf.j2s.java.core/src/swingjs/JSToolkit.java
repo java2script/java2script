@@ -845,10 +845,11 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	}
 
 	public static String getCSSFontFamilyName(String family) {
-		if (family.equals("SansSerif") || family.equals("Dialog")
-				|| family.equals("DialogInput"))
+		family = family.toLowerCase();
+		if (family.equals("sansserif") || family.equals("dialog")
+				|| family.equals("dialoginput"))
 			family = "Arial";
-		else if (family.equals("Monospaced"))
+		else if (family.equals("monospaced"))
 			family = "monospace";
 		return family;
 	}
