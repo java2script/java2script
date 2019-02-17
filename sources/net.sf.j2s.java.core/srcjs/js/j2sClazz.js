@@ -9,6 +9,7 @@
 
 // TODO: still a lot of references to window[...]
 
+// BH 2019.02.16 fixes typo in Integer.parseInt(s,radix)
 // BH 2019.02.07 fixes radix|10 should be radix||10  
 // BH 1/29/2019  adds String.join$CharSequence$Iterable, String.join$CharSequence$CharSequenceA
 
@@ -3405,7 +3406,7 @@ function(s,radix){
 return v;
 }, 1);
 
-m$(Integer,["parseInt$S","parseInt$S$FI"],
+m$(Integer,["parseInt$S","parseInt$S$I"],
 function(s,radix){
 return Integer.parseIntRadix$S$I(s, radix || 10);
 }, 1);
