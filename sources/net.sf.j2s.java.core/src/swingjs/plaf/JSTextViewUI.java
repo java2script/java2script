@@ -29,6 +29,7 @@ public abstract class JSTextViewUI extends JSTextUI {
 		allowPaintedBackground = false;
 		focusNode = enableNode = textNode = domNode;
 		DOMNode.setStyles(domNode, "resize", "none", "margin", "0px", "padding", "0px","scrollbar-width", "thin"); // otherwise it overflows
+		DOMNode.setStyles(domNode, "box-sizing", "border-box");
 		bindJSKeyEvents(domNode, true);
 	}
 
@@ -38,7 +39,9 @@ public abstract class JSTextViewUI extends JSTextUI {
 	@Override
 	protected void setOverflow() {
 		Container parent = jc.getParent();
-		if (!(parent instanceof JViewport) || !((parent = parent.getParent()) instanceof JScrollPane)) {
+		if (jc instanceof java.awt.TextArea) {
+			parent = jc;
+		} else if (!(parent instanceof JViewport) || !((parent = parent.getParent()) instanceof JScrollPane)) {
 			super.setOverflow();
 			return;
 		}
