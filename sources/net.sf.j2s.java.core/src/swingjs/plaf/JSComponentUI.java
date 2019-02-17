@@ -2547,7 +2547,7 @@ public class JSComponentUI extends ComponentUI
 				top = itop = 50;
 				if (iconNode == actionNode) {
 					itop = 70;
-					iscale = "scale(0.6,0.6)";
+					iscale = "scale(0.8,0.8)";
 				}
 				// +3 here is a fudge factor for the AWT applets
 				yoff = (wIcon == 0 ? "-" + ((getFont().getFontMetrics().getAscent()>>1) + (isAWT ? 0 : 0)) + "px" : "-50%");
