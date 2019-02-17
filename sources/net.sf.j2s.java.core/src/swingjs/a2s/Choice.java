@@ -1,6 +1,6 @@
 package swingjs.a2s;
 
-import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
 
 import javax.swing.JComboBox;
 
@@ -60,6 +60,12 @@ public class Choice extends JComboBox {
     	super.fireActionEvent();
     }
     
+    @Override
+    protected void fireItemStateChanged(ItemEvent event) {
+    	A2SEvent.addListener(this);
+    	super.fireItemStateChanged(event);
+    }
+
     
     @Override
     public String getActionCommand() {
