@@ -12,8 +12,8 @@ import java.awt.TextArea;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import java.awt.Label;
+import java.awt.Panel;
 
 public class TApp2 extends Applet {
 	
@@ -23,7 +23,7 @@ public class TApp2 extends Applet {
 		setSize(400, 400);
 		setBackground(Color.yellow);
 		setLayout(null);
-		JPanel panel = new JPanel();
+		Panel panel = new Panel();
 		panel.setBounds(10, 10, 100, 150);
 		add(panel);
 		panel.setLayout(null);
@@ -32,12 +32,12 @@ public class TApp2 extends Applet {
 		label.setBounds(10, 10, 50, 60);
 		panel.add(label);
 
-		JPanel panel2 = new JPanel();
+		Panel panel2 = new Panel();
 		panel2.setLayout(new GridLayout(2, 1));
 		Label label2 = new Label("1");
 		label2.setAlignment(Label.CENTER);
 		panel2.add(label2);
-		panel2.add(new JLabel("2"));
+		panel2.add(new Label("2"));
 		panel2.setBounds(200, 150, 100, 150);
 //		add(panel2);
 
