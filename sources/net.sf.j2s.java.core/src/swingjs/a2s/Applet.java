@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.swing.JApplet;
+import javax.swing.JComponent;
 
 public class Applet extends JApplet implements A2SContainer {
 	
@@ -23,6 +24,8 @@ public class Applet extends JApplet implements A2SContainer {
 		addMouseListener(listener);
 		addMouseMotionListener(listener);
 		setLayout(new FlowLayout());
+		//getRootPane().setOpaque(false);
+		((JComponent) getContentPane()).setOpaque(false);
     }
 
 	@Override
