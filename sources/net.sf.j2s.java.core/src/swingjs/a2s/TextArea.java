@@ -7,12 +7,18 @@ import java.awt.Font;
 import java.awt.event.TextListener;
 import java.awt.im.InputMethodRequests;
 
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
 
-public class TextArea extends JScrollPane {
+public class TextArea extends JTextArea {
 
 	transient protected TextListener textListener;
+
+	private int horizontalScrollBarPolicy;
+
+	private int verticalScrollBarPolicy;
 
 	public synchronized void addTextListener(TextListener l) {
 		if (l == null) {
@@ -39,7 +45,7 @@ public class TextArea extends JScrollPane {
 
 	@Deprecated
 	public Dimension preferredSize(int rows, int columns) {
-		return ta.getSizeJS(null, 400, rows, columns);
+		return super.getSizeJS(null, 400, rows, columns);
 	}
 
 	@Override
@@ -55,7 +61,7 @@ public class TextArea extends JScrollPane {
 	@Deprecated
 	public Dimension preferredSize() {
 		synchronized (getTreeLock()) {
-			return ((ta.rows > 0) && (ta.columns > 0)) ? preferredSize(ta.rows, ta.columns) : ta.preferredSize();
+			return ((super.rows > 0) && (super.columns > 0)) ? preferredSize(super.rows, super.columns) : super.preferredSize();
 		}
 	}
 
@@ -80,10 +86,10 @@ public class TextArea extends JScrollPane {
 	 */
 	@Deprecated
 	public Dimension minimumSize(int rows, int columns) {
-		return ta.getSizeJS(null, 100, rows, columns);
+		return super.getSizeJS(null, 100, rows, columns);
 //		synchronized (getTreeLock()) {
-//			TextAreaPeer peer = (TextAreaPeer) ta.getPeer();
-//			return (peer != null) ? peer.getMinimumSize(rows, columns) : ta.minimumSize();
+//			TextAreaPeer peer = (TextAreaPeer) super.getPeer();
+//			return (peer != null) ? peer.getMinimumSize(rows, columns) : super.minimumSize();
 //		}
 	}
 
@@ -106,7 +112,7 @@ public class TextArea extends JScrollPane {
 	@Deprecated
 	public Dimension minimumSize() {
 		synchronized (getTreeLock()) {
-			return ((ta.rows > 0) && (ta.columns > 0)) ? minimumSize(ta.rows, ta.columns) : super.minimumSize();
+			return ((super.rows > 0) && (super.columns > 0)) ? minimumSize(super.rows, super.columns) : super.minimumSize();
 		}
 	}
 
@@ -116,35 +122,45 @@ public class TextArea extends JScrollPane {
 	}
 
 	public String getSelectedText() {
-		return ta.getSelectedText();
+		return super.getSelectedText();
 	}
 
 	public boolean isEditable() {
-		return ta.isEditable();
+		return super.isEditable();
 	}
 
 	public int getSelectionStart() {
-		return ta.getSelectionStart();
+		return super.getSelectionStart();
 	}
 
 	public void setSelectionStart(int selectionStart) {
-		ta.setSelectionStart(selectionStart);
+		super.setSelectionStart(selectionStart);
 	}
 
+	@Override
+	public void setFont(Font f) {
+		super.setFont(f);
+	}
+	
+	@Override
+	public Font getFont() {
+		return super.getFont();
+	}
+	
 	public int getSelectionEnd() {
-		return ta.getSelectionEnd();
+		return super.getSelectionEnd();
 	}
 
 	public void setSelectionEnd(int selectionEnd) {
-		ta.setSelectionEnd(selectionEnd);
+		super.setSelectionEnd(selectionEnd);
 	}
 
 	public void select(int selectionStart, int selectionEnd) {
-		ta.select(selectionStart, selectionEnd);
+		super.select(selectionStart, selectionEnd);
 	}
 
 	public int getCaretPosition() {
-		return ta.getCaretPosition();
+		return super.getCaretPosition();
 	}
 
 	public void isAWT() {
@@ -153,8 +169,6 @@ public class TextArea extends JScrollPane {
 		// static of fields avoids the fact that the default boolean 
 		// won't yet be "true"
 	}
-
-	private JTextArea ta;
 
 	/**
 	 * Create and display both vertical and horizontal scrollbars.
@@ -206,37 +220,117 @@ public class TextArea extends JScrollPane {
 			rows = 0;
 		if (columns < 0)
 			columns = 0;
-		setViewportView(ta = new JTextArea(text, rows, columns));
+		//setViewportView(new JTextArea(text, rows, columns));
 		switch (scrollbars) {
 		case SCROLLBARS_BOTH:
-			setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_AS_NEEDED);
-			setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+			setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 			break;
 		case SCROLLBARS_VERTICAL_ONLY:
-			setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_AS_NEEDED);
-			setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
+			setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+			setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 			break;
 		case SCROLLBARS_HORIZONTAL_ONLY:
-			setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
-			setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+			setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 			break;
 		case SCROLLBARS_NONE:
-			setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
-			setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
+			setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+			setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 			break;
 		}
 	}
 
-	public int getScrollbarVisibility() {
-		boolean v = (getVerticalScrollBarPolicy() != VERTICAL_SCROLLBAR_NEVER);
-		boolean h = (getHorizontalScrollBarPolicy() != HORIZONTAL_SCROLLBAR_NEVER);
+    /**
+     * Returns the vertical scroll bar policy value.
+     * @return the <code>verticalScrollBarPolicy</code> property
+     * @see #setVerticalScrollBarPolicy
+     */
+    public int getVerticalScrollBarPolicy() {
+        return verticalScrollBarPolicy;
+    }
+
+
+    /**
+     * Determines when the vertical scrollbar appears in the scrollpane.
+     * Legal values are:
+     * <ul>
+     * <li><code>ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED</code>
+     * <li><code>ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER</code>
+     * <li><code>ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS</code>
+     * </ul>
+     *
+     * @param policy one of the three values listed above
+     * @exception IllegalArgumentException if <code>policy</code>
+     *                          is not one of the legal values shown above
+     * @see #getVerticalScrollBarPolicy
+     *
+     * @beaninfo
+     *   preferred: true
+     *       bound: true
+     * description: The scrollpane vertical scrollbar policy
+     *        enum: VERTICAL_SCROLLBAR_AS_NEEDED ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED
+     *              VERTICAL_SCROLLBAR_NEVER ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER
+     *              VERTICAL_SCROLLBAR_ALWAYS ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS
+     */
+    private void setVerticalScrollBarPolicy(int policy) {
+        int old = verticalScrollBarPolicy;
+        verticalScrollBarPolicy = policy;
+        firePropertyChange("verticalScrollBarPolicy", old, policy);
+        revalidate();
+        repaint();
+    }
+
+
+    /**
+     * Returns the horizontal scroll bar policy value.
+     * @return the <code>horizontalScrollBarPolicy</code> property
+     * @see #setHorizontalScrollBarPolicy
+     */
+    public int getHorizontalScrollBarPolicy() {
+        return horizontalScrollBarPolicy;
+    }
+
+
+    /**
+     * Determines when the horizontal scrollbar appears in the scrollpane.
+     * The options are:<ul>
+     * <li><code>ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED</code>
+     * <li><code>ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER</code>
+     * <li><code>ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS</code>
+     * </ul>
+     *
+     * @param policy one of the three values listed above
+     * @exception IllegalArgumentException if <code>policy</code>
+     *                          is not one of the legal values shown above
+     * @see #getHorizontalScrollBarPolicy
+     *
+     * @beaninfo
+     *   preferred: true
+     *       bound: true
+     * description: The scrollpane scrollbar policy
+     *        enum: HORIZONTAL_SCROLLBAR_AS_NEEDED ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED
+     *              HORIZONTAL_SCROLLBAR_NEVER ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
+     *              HORIZONTAL_SCROLLBAR_ALWAYS ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS
+     */
+    private void setHorizontalScrollBarPolicy(int policy) {
+        int old = horizontalScrollBarPolicy;
+        horizontalScrollBarPolicy = policy;
+        firePropertyChange("horizontalScrollBarPolicy", old, policy);
+        revalidate();
+        repaint();
+    }
+
+    public int getScrollbarVisibility() {
+		boolean v = (getVerticalScrollBarPolicy() != ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+		boolean h = (getHorizontalScrollBarPolicy() != ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		return (v && h ? SCROLLBARS_BOTH
 				: v ? SCROLLBARS_VERTICAL_ONLY : h ? SCROLLBARS_HORIZONTAL_ONLY : SCROLLBARS_NONE);
 	}
 
 	public void setCaretPosition(int pos) {
-		ta.setCaretPosition(pos);
-		ta.requestFocusInWindow();
+		super.setCaretPosition(pos);
+		super.requestFocusInWindow();
 	}
 
 	void awtDefaults() {
@@ -248,90 +342,88 @@ public class TextArea extends JScrollPane {
 	// API
 
 	public String getText() {
-		return ta.getText();
+		return super.getText();
 	}
 
 	public void setEditable(boolean b) {
-		ta.setEditable(b);
+		super.setEditable(b);
 	}
 
 	public void selectAll() {
-		ta.selectAll();
+		super.selectAll();
 	}
 
 	public void setTextFromUI(String t) {
-		ta.setText(t);
+		super.setText(t);
 	}
 	
 	public void setText(String t) {
 		@SuppressWarnings("unused")
-		int top = /** @j2sNative this.ta.ui.domNode.scrollTop ||*/0;
-		ta.setText(t);
-		/** @j2sNative this.ta.ui.domNode.scrollTop = top */		
+		int top = /** @j2sNative this.super.ui.domNode.scrollTop ||*/0;
+		super.setText(t);
+		/** @j2sNative this.super.ui.domNode.scrollTop = top */		
 	}
 
 	public void insertText(String str, int pos) {
-		ta.insert(str, pos);
+		super.insert(str, pos);
 	}
 
 	public void insert(String str, int pos) {
-		ta.insert(str, pos);
+		super.insert(str, pos);
 	}
 
 	public void appendText(String str) {
-		ta.append(str);
+		super.append(str);
 		toEnd();
 	}
 
 	private void toEnd() {
-		ta.setCaretPosition(ta.getText().length());
-		ta.requestFocusInWindow();
+		super.setCaretPosition(super.getText().length());
+		super.requestFocusInWindow();
 	}
 
 	public void append(String str) {
-		ta.append(str);
+		super.append(str);
 		toEnd();
 	}
 
 	public void replaceRange(String str, int start, int end) {
-		ta.replaceRange(str, start, end);
+		super.replaceRange(str, start, end);
 	}
 
 	public void replaceText(String str, int start, int end) {
-		ta.replaceRange(str, start, end);
+		super.replaceRange(str, start, end);
 	}
 
 	public void setColumns(int columns) {
-		ta.setColumns(columns);
+		super.setColumns(columns);
 	}
 
 	public void setRows(int rows) {
-		ta.setRows(rows);
+		super.setRows(rows);
 	}
 
 	public int getColumns() {
-		return ta.getColumns();
+		return super.getColumns();
 	}
 
 	public int getRows() {
-		return ta.getRows();
+		return super.getRows();
 	}
 
 	@Override
 	public void setBackground(Color c) {
-		if (ta != null)
-			ta.setBackground(c);
+			super.setBackground(c);
 	}
 
 	@Override
 	public void setForeground(Color c) {
-		if (ta != null)
-			ta.setForeground(c);
+			super.setForeground(c);
 	}
 
 	@Override
 	public void requestFocus() {
-		ta.requestFocus();
+		super.requestFocus();
 	}
 
 }
