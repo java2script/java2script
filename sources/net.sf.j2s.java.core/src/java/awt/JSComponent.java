@@ -360,6 +360,17 @@ public abstract class JSComponent extends Component {
 			((JSComponentUI)ui).enableJSKeys(false);
 	}
 	
+	public Font getFont() {
+		if (/** @j2sNative this.isAWT$ || */ false) {
+			return getFontAWT();
+		}
+		return getFont_NoClientCode();
+	}
+	
+	public boolean isFontSet() {
+		return (font != null && (/** @j2sNative this.isAWT$ || */false ? !(font instanceof FontUIResource) : false));
+	}
+
 	/**
 	 * For AWT components, first try nondefault font, and then, 
 	 * only as a last resort, use the default font.
@@ -375,7 +386,5 @@ public abstract class JSComponent extends Component {
         font = (parent == null ? null : parent.getFontAWT());
         return (font != null ? font : getFont_NoClientCode());
     }
-
-
 
 }
