@@ -92,8 +92,8 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		label.setVerticalAlignment(SwingConstants.CENTER);
 
 		final JTextField tf = new JTextField("12.5", 8);
-		tf.setBackground(Color.black);
-		tf.setForeground(Color.yellow);
+//		tf.setBackground(Color.black);
+//		tf.setForeground(Color.yellow);
 		tf.setOpaque(true);
 		setSize(tf, 80, 40);
 		tf.addActionListener(new java.awt.event.ActionListener() {
@@ -101,7 +101,6 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 			public void actionPerformed(ActionEvent event) {
 				label.setBackground(Color.white);
 				label.setText(tf.getText());
-				// repaint();
 			}
 		});
 		tf.addFocusListener(new FocusListener() {

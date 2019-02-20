@@ -3,22 +3,30 @@ package test;
 import java.applet.Applet;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
+import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Label;
 import java.awt.TextArea;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+
+import javax.swing.JCheckBox;
 
 import java.awt.Label;
 import java.awt.Panel;
 
 public class TApp2 extends Applet {
-	
+
 	TextArea ta;
-	
+	protected int counter;
+
 	public void init() {
 		setSize(400, 400);
 		setBackground(Color.yellow);
@@ -41,21 +49,68 @@ public class TApp2 extends Applet {
 		panel2.setBounds(200, 150, 100, 150);
 //		add(panel2);
 
+		Checkbox cbawt = new Checkbox("cbAWT");
+		cbawt.setBounds(200, 175, 100, 20);
+		add(cbawt);
+		cbawt.addItemListener(new ItemListener() {
+
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				System.out.println(
+						"cbAWT state " + ++counter + " " + e.getItem() + " " + e.getItem().getClass().getName());
+
+			}
+
+		});
+
+		JCheckBox cbswing = new JCheckBox("cbSwing");
+		cbswing.setBounds(200, 150, 100, 20);
+		add(cbswing);
+		cbswing.addItemListener(new ItemListener() {
+
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				System.out.println("cbSwing state " + ++counter);
+			}
+
+		});
+
 //		// the scrolling to the bottom is only with TextArea, not JTextArea
 		// and then only if the append is AFTER the add
 		ta = new TextArea("A text\nwith some\nlines and\n no content.");
 		add(ta);
 		ta.setBounds(200, 70, 100, 80);
 		ta.appendText("A text\nwith some\nlines and\n no content.");
+		ta.addKeyListener(new KeyListener() {
 
-		
+			@Override
+			public void keyTyped(KeyEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if (e.getKeyCode() == 10) {
+					cbawt.setState(!cbawt.getState());
+					cbswing.setSelected(!cbswing.isSelected());
+				}
+			}
+
+		});
+
 //		TextArea ta = new TextArea("A text\nwith some\nlines and\n no content.");
 //		JScrollPane sp = new JScrollPane(ta);
 //		sp.setBounds(200, 70, 100, 80);
 //		add(sp);
 
-		
-		//		ta.getSelectionEnd();
+		// ta.getSelectionEnd();
 		ta.setBackground(Color.red);
 //		Scrollbar sb = new Scrollbar(0, 10, 0, 0, 1);
 	}
@@ -116,8 +171,7 @@ public class TApp2 extends Applet {
 //		g.drawString("SwingJS", 200, 30);
 //		g.setColor(Color.white);
 //		g.drawString("SwingJS", 200, 30);
-		
-		
+
 		addMouseListener(new MouseListener() {
 
 			@Override
@@ -128,13 +182,13 @@ public class TApp2 extends Applet {
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				// TODO Auto-generated method stub
-				
+
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
 				// TODO Auto-generated method stub
-				
+
 			}
 
 			@Override
@@ -146,7 +200,7 @@ public class TApp2 extends Applet {
 			public void mouseReleased(MouseEvent e) {
 				System.out.println(">>>>mouseReleased: " + e.getModifiers() + " " + e.getModifiersEx() + " " + e);
 			}
-			
+
 		});
 
 	}

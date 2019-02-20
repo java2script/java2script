@@ -72,15 +72,19 @@ public class JSFocusPeer implements KeyboardFocusManagerPeer {
 	}
 
 	private DOMNode getAccessibleActiveElement() {
-		DOMNode node = null;
+		DOMNode node = getActiveElement();
+		return (node == null || getAccessibleComponentFor(node) == null ? null : node);
+	}
+
+	public static DOMNode getActiveElement() {
 		/**
 		 * @j2sNative
-		 * node = document.activeElement;
-		 * if (!node || node == document.body || !node.ui && !node["data-component"]) {
-		 *   return null;
-		 * }
+		 * var node = document.activeElement;
+		 * return  (!node || node == document.body || !node.ui && !node["data-component"] ? null : node);
 		 */
-		return (getAccessibleComponentFor(node) == null ? null : node);
+		{
+		return null;
+		}
 	}
 
 	/**

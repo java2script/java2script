@@ -39,9 +39,7 @@ public class JSTextAreaUI extends JSTextViewUI {
 				DOMNode.setAttr(domNode, "value", setCurrentText()),
 				c.getFont());
 		updateJSCursor("rewrite");
-		if (!editable)
-			DOMNode.setAttr(domNode, "readOnly", TRUE);		
-		return updateDOMNodeCUI();
+		return super.updateDOMNode();
 	}
 
 	@Override

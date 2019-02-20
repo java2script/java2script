@@ -72,7 +72,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		setText(null);
 		return updateDOMNodeCUI();
 	} 
-	 
+
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();

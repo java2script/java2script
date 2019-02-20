@@ -4256,19 +4256,19 @@ public abstract class JComponent extends Container {
 			// To avoid a flood of Runnables when constructing GUIs off
 			// the EDT, a flag is maintained as to whether or not
 			// a Runnable has been scheduled.
-			synchronized (this) {
+			//synchronized (this) {
 				if (getFlag(REVALIDATE_RUNNABLE_SCHEDULED)) {
 					return;
 				}
 				setFlag(REVALIDATE_RUNNABLE_SCHEDULED, true);
-			}
+			//}
 			// final Object me = this;
 			Runnable callRevalidate = new Runnable() {
 				@Override
 				public void run() {
-					synchronized (JComponent.this) {
+					//synchronized (JComponent.this) {
 						setFlag(REVALIDATE_RUNNABLE_SCHEDULED, false);
-					}
+					//}
 					revalidate();
 				}
 			};

@@ -252,6 +252,19 @@ public class DefaultButtonModel implements ButtonModel {
 
     }
 
+	public void setStateNoFire(boolean b) {
+        if (this.isSelected() == b) {
+            return;
+        }
+
+        if (b) {
+            stateMask |= SELECTED;
+        } else {
+            stateMask &= ~SELECTED;
+        }
+
+	}
+
 
     /**
      * {@inheritDoc}
@@ -563,4 +576,5 @@ public class DefaultButtonModel implements ButtonModel {
     void setMenuItem(boolean menuItem) {
         this.menuItem = menuItem;
     }
+
 }

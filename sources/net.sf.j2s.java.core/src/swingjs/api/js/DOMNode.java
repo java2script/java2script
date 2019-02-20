@@ -221,6 +221,15 @@ public abstract class DOMNode {
 		domNode.appendChild(label);
 	}
 
+	public static void appendChildSafely(DOMNode parent, DOMNode node) {
+		/**
+		 * @j2sNative
+		 * if (!parent || node.parentElement == parent)
+		 *   return;
+		 */
+		parent.appendChild(node);
+	}
+	
 	public static AudioClip getAudioElement(String filePath, boolean isLoop) {
 		AudioClip clip = (AudioClip) DOMNode.setAttrs(DOMNode.createElement("audio", null), 
 				"controls", "true", (isLoop ? "loop" : null), (isLoop ? "true" : null), "src", filePath);

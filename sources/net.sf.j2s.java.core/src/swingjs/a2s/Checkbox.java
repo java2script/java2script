@@ -4,6 +4,7 @@ import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultButtonModel;
 import javax.swing.Icon;
 import javax.swing.JCheckBox;
 import javax.swing.JRadioButton;
@@ -72,7 +73,7 @@ public class Checkbox extends JCheckBox {
 	}
 
 	public void setState(boolean b) {
-		setSelected(b);
+		((DefaultButtonModel) model).setStateNoFire(b);
 	}   
 	
 	public void setCheckboxGroup(java.awt.CheckboxGroup group) throws HeadlessException {

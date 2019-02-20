@@ -34,7 +34,6 @@ import java.awt.event.MouseWheelListener;
 import java.text.DecimalFormat;
 
 import javax.swing.JSlider;
-import javax.swing.JToggleButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -80,8 +79,9 @@ public class Test_Applet_Scroll_AWT extends Applet implements ChangeListener {
 //		label.setAlignment(Label.RIGHT);
 
 		final TextField tf = new TextField("12.5", 8);
-		tf.setBackground(Color.black);
-		tf.setForeground(Color.yellow);
+//		tf.setBackground(Color.red);
+		tf.setForeground(Color.orange);
+		tf.setEditable(false);
 		//tf.setOpaque(true);
 		setSize(tf, 80, 40);
 		tf.addActionListener(new java.awt.event.ActionListener() {
@@ -90,14 +90,14 @@ public class Test_Applet_Scroll_AWT extends Applet implements ChangeListener {
 				label.setBackground(Color.white);
 				label.setText(tf.getText());
 				System.out.println("textfield action");
-				// repaint();
+				//repaint();
 			}
 		});
 		tf.addFocusListener(new FocusListener() {
 
 			@Override
 			public void focusGained(FocusEvent e) {
-				tf.setBackground(Color.BLUE);
+//				tf.setBackground(Color.BLUE);
 			}
 
 			@Override
@@ -299,11 +299,13 @@ public class Test_Applet_Scroll_AWT extends Applet implements ChangeListener {
 		p.add(label);
 //		label.setToolTipText("this is label");
 		p.add(tf);
+		TextField tf1 = new TextField("testing");
+		p.add(tf1);
 //		tf.setToolTipText("this is tf");
 		p.add(button);
 		p.add(button2);
 		p.add(button3);
-		p.setBackground(Color.blue);
+		p.setBackground(Color.CYAN);
 //		button2.setToolTipText("this is Button 2");
 //		button3.setToolTipText("this is Button 3");
 		mkBar(p, tf, Adjustable.HORIZONTAL, 100, 40);
