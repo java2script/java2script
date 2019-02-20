@@ -38,10 +38,7 @@ public class JSTextFieldUI extends JSTextUI {
 		textListener.checkDocument();
 		setCssFont(setJSText(focusNode, "value", setCurrentText()), c.getFont());
 		// setTextAlignment();
-		setEditable(editable);
-		if (textField.isOpaque() && textField.isEnabled())
-			setBackground(textField.getBackground());
-		return updateDOMNodeCUI();
+		return super.updateDOMNode();
 	}
 
 	@Override
@@ -57,7 +54,7 @@ public class JSTextFieldUI extends JSTextUI {
 
 	@Override
 	boolean handleEnter(int eventType) {
-		if (eventType == KeyEvent.KEY_PRESSED) {
+		if (eventType == SOME_KEY_EVENT) {
 			Action a = getActionMap().get(JTextField.notifyAction);
 			if (a != null) {
 				JSToolkit.setIsDispatchThread(true);

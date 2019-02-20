@@ -126,6 +126,16 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	transient JTextComponent editor;
 	protected boolean editable = true;
 
+	@Override
+	public DOMNode updateDOMNode() {
+		if (editor.isOpaque() && editor.isEnabled())
+			setBackground(editor.getBackground());
+		setEditable(editable);
+		return updateDOMNodeCUI();
+	}
+	
+	
+	
 	/**
 	 * Handle stopPropagation and preventDefault here.
 	 * 
@@ -141,8 +151,6 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		// ev.preventDefault();
 		return false;
 	}
-
-	protected String inactiveBackgroundColor;
 
 	/**
 	 * Initializes component properties, e.g. font, foreground, background, caret
@@ -194,7 +202,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 					+ ".inactiveForeground"));
 		}
 		dfg = UIManager.getColor(prefix + ".inactiveBackground");
-		inactiveBackgroundColor = (dfg == null ? null : JSToolkit.getCSSColor(dfg));
+		if (dfg != null)
+			inactiveBackground = dfg;
 
 		//
 		// Border b = editor.getBorder();
@@ -2041,8 +2050,20 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		this.editable = editable;
 		if (focusNode == null)
 			return;
+		setEditableCSS();
+		if (jc.isOpaque()) {
+			Color bg = c.getBackground();
+			setBackground(editable || !(bg instanceof UIResource) || inactiveBackground == null ? bg : inactiveBackground);
+		}		
+	}
+	
+	protected void setEditableCSS() {
+		// could be subclassed
 		DOMNode.setAttr(focusNode, "readOnly", editable ? null : TRUE);
 	}
+
+
+
 
 	// protected static DragListener getDragListener() {
 	// synchronized(DragListener.class) {
@@ -2809,7 +2830,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 //			}
 //		}
 //	}
-	
+
+
 	@Override
 	protected Color getInactiveTextColor(Color fg) {
 		// For TextComponents:
@@ -2960,10 +2982,10 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
     }
 
 
-    /**
+	/**
 	 * called by JSComponentUI.bindJSEvents
 	 * 
-	 * @return handled 
+	 * @return handled
 	 * 
 	 * 
 	 */
@@ -2977,36 +2999,47 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		Boolean b = checkAllowKey(jQueryEvent);
 		if (b != null)
 			return b.booleanValue();
-		int keyCode = /** @j2sNative jQueryEvent.keyCode || */ 0;
+		int keyCode = /** @j2sNative jQueryEvent.keyCode || */
+				0;
+		JSKeyEvent keyEvent = null;
+		boolean ret = NOT_HANDLED;
 		switch (eventType) {
-		case KeyEvent.KEY_PRESSED:
+		case SOME_KEY_EVENT:
 			// note that events are bundled here into one eventType
 			// 0 param here says "get the real event type from jQueryEvent
-			JSKeyEvent keyEvent = JSKeyEvent.newJSKeyEvent(editor, jQueryEvent, 0, false);
+			keyEvent = JSKeyEvent.newJSKeyEvent(editor, jQueryEvent, 0, false);
 			if (keyEvent == null)
 				return HANDLED;
-			editor.dispatchEvent(keyEvent);
-			if (keyCode == KeyEvent.VK_ALT || keyEvent.isConsumed()) {
+			switch (keyCode) {
+			case KeyEvent.VK_ALT:
 				/**
 				 * @j2sNative
 				 * 
-				 * jQueryEvent.preventDefault();
-				 * jQueryEvent.stopPropagation();
+				 * 			jQueryEvent.preventDefault(); jQueryEvent.stopPropagation();
 				 */
-				return HANDLED;
-			}
-			switch (keyCode) {
-			case KeyEvent.VK_ALT:
+				// fall through
 			case KeyEvent.VK_SHIFT:
 			case KeyEvent.VK_CONTROL:
-				return HANDLED;
+				ret = HANDLED;
 			}
 			eventType = keyEvent.getID();
 			break;
 		}
-		
-//		System.out.println("JSTextUI firing textListener ");
-		return textListener.handleJSTextEvent(this, eventType, jQueryEvent);
+
+		if (ret != HANDLED)
+			ret = textListener.handleJSTextEvent(this, eventType, jQueryEvent);
+		if (keyEvent != null) {
+			editor.dispatchEvent(keyEvent);
+			if (keyEvent.isConsumed()) {
+				/**
+				 * @j2sNative
+				 * 
+				 * 			jQueryEvent.preventDefault(); jQueryEvent.stopPropagation();
+				 */
+				ret = HANDLED;
+			}
+		}
+		return ret;
 	}
 
 	/**
