@@ -94,6 +94,8 @@ public class TextListener implements FocusListener, ChangeListener,
 
 	private boolean working;
 
+	private int lastKeyEvent;
+
 	/**
 	 * Called by JSTextUI.handleJSEvent
 	 * 
@@ -109,15 +111,18 @@ public class TextListener implements FocusListener, ChangeListener,
 		boolean setCaret = (mark != Integer.MIN_VALUE);
 		eventType = JSKeyEvent.fixEventType(jqevent, eventType);
 		switch (eventType) {
+		case KeyEvent.KEY_TYPED:
+			setCaret = false;
+			break;
 		case KeyEvent.KEY_PRESSED:
 			int keyCode = /** @j2sNative jqevent.keyCode || */
 					0;
 			if (keyCode == 13 || keyCode == KeyEvent.VK_ENTER)
 				ui.handleEnter(eventType);
-			// fall through
-		case KeyEvent.KEY_TYPED:
 			setCaret = false;
-			break;
+			if (lastKeyEvent != KeyEvent.KEY_TYPED)
+			  break;
+			// fall through if this is a continuation press
 		case KeyEvent.KEY_RELEASED:
 			working = true;
 			if (ui.checkNewEditorTextValue()) {
@@ -130,6 +135,7 @@ public class TextListener implements FocusListener, ChangeListener,
 			working = false;
 			break;
 		}
+		lastKeyEvent = eventType;
 		if (setCaret)
 			ui.setJavaMarkAndDot(markDot);
 		return JSComponentUI.HANDLED;

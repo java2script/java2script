@@ -534,22 +534,26 @@ public class Test_Event extends JFrame {
 		btnj.setBackground(Color.white);
 		btnj.addMouseListener(ml);
 		btnj.addActionListener(al);
+		btnj.addKeyListener(kl);
 		ptop.add(btnj);
 		field = new TextField("field");
 		field.setName("field");
 		field.addMouseListener(ml);
 		field.addActionListener(al);
+		field.addKeyListener(kl);
 		btn = new Button("test");
 		btn.setName("btn");
 		btn.setBackground(Color.orange);
 		btn.addMouseListener(ml);
 		btn.addActionListener(al);
+		btn.addKeyListener(kl);
 		ptop.add(btn);
 		ptop.add(field);
 		fieldj = new JTextField("fieldj");
 		fieldj.setName("fieldj");
 		fieldj.addMouseListener(ml);
 		fieldj.addActionListener(al);
+		fieldj.addKeyListener(kl);
 		ptop.add(fieldj);
 
 		return ptop;
