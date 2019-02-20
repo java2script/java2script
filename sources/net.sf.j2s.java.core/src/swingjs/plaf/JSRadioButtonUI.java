@@ -21,7 +21,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 			buttonNode = newDOMObject("label", id + "btn");
 			if (isMenuItem) {
 				domNode = createItem("_item", buttonNode);
-				bindJQueryEvents(domNode, "mouseenter", -1);			
+				bindJQueryEvents(domNode, "mouseenter", SOME_MOUSE_EVENT);			
 			} else {
 				domNode = newDOMObject("div", id + "_dom");
 				domNode.appendChild(buttonNode);
@@ -76,10 +76,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 	protected void setupButton(JToggleButton b, boolean doAll) {
 		// actionNode, iconNode, textNode, centeringNode, buttonNode
 				
-		if (b.isSelected())
-			DOMNode.setAttr(actionNode, "checked", TRUE);
-		else
-			DOMNode.setAttr(actionNode, "checked",  null);
+		DOMNode.setAttr(actionNode, "checked", b.isSelected() ? TRUE : null);
 		
 		setCssFont(textNode, c.getFont());
 		// TODO: not allowing radio/checkbox icons (custom buttons)

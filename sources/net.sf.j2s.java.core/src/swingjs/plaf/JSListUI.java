@@ -137,7 +137,7 @@ public class JSListUI extends JSLightweightUI {
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
 		switch (eventType) {
-		case KeyEvent.KEY_PRESSED:
+		case SOME_KEY_EVENT:
 			JSKeyEvent keyEvent = JSKeyEvent.newJSKeyEvent(jc, jQueryEvent, 0, true);
 			if (keyEvent != null)
 				jc.dispatchEvent(keyEvent);

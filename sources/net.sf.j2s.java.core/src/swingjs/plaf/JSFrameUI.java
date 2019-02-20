@@ -109,7 +109,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			closerNode = newDOMObject("label", id + "_closer", "innerHTML", "X");
 			DOMNode.setStyles(closerNode, "width", "20px", "height", "20px", "position", "absolute", "text-align",
 					"center", "right", "0px");
-			bindJQueryEvents(closerNode, "click mouseenter mouseout", -1);
+			bindJQueryEvents(closerNode, "click mouseenter mouseout", SOME_MOUSE_EVENT);
 			if (!frame.isUndecorated())
 				frameNode.appendChild(titleBarNode);
 			if (isModal) {
@@ -157,7 +157,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			DOMNode.setAttrs(frameNode, "width", "" + frame.getWidth() + s.left + s.right, "height",
 					"" + frame.getHeight() + s.top + s.bottom);
 			
-			addJ2SKeyHandler();
+			addFocusHandler();
 		}
 		String strColor = toCSSString(c.getBackground());
 		DOMNode.setStyles(domNode, "background-color", strColor);
