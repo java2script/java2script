@@ -1706,9 +1706,9 @@ public abstract class Component implements ImageObserver/*
 		Font oldFont, newFont;
 		oldFont = font;
 		newFont = font = f;
-		synchronized (getTreeLock()) {
-			synchronized (this) {
-			}
+//		synchronized (getTreeLock()) {
+//			synchronized (this) {
+//			}
 			ComponentPeer peer = getOrCreatePeer();
 			if (peer != null) {
 				f = getFont();
@@ -1717,7 +1717,7 @@ public abstract class Component implements ImageObserver/*
 					peerFont = f;
 				}
 			}
-		}
+//		}
 		// This is a bound property, so report the change to
 		// any registered listeners. (Cheap if there are none.)
 		firePropertyChange("font", oldFont, newFont);
@@ -1740,7 +1740,7 @@ public abstract class Component implements ImageObserver/*
 	 * @since 1.4
 	 */
 	public boolean isFontSet() {
-		return (font != null);
+		return font != null;
 	}
 
 	/**
