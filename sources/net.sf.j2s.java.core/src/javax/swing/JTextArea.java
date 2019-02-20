@@ -638,15 +638,19 @@ public class JTextArea extends JTextComponent {
 			w = d.width;
 			h = d.height;
 		}
-		Insets insets = getInsets();
-
 		if (columns != 0) {
-			d.width = Math.max(w, columns * getColumnWidth() + insets.left + insets.right);
+			d.width = Math.max(w, getJ2SWidth(columns));
 		}
 		if (rows != 0) {
+			Insets insets = getInsets();
 			d.height = Math.max(h, rows * getRowHeight() + insets.top + insets.bottom);
 		}
 		return d;
+	}
+
+    protected int getJ2SWidth(int columns) {
+		Insets insets = getInsets();
+		return  columns * getColumnWidth() + insets.left + insets.right;
 	}
 
 	/**

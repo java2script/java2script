@@ -14,6 +14,13 @@ import javax.swing.ScrollPaneConstants;
 
 public class TextArea extends JTextArea {
 
+	public void isAWT() {
+		// a good JavaScript trick here:
+		// existance of isAWT$ checked prior to initialization 
+		// static of fields avoids the fact that the default boolean 
+		// won't yet be "true"
+	}
+
 	transient protected TextListener textListener;
 
 	private int horizontalScrollBarPolicy;
@@ -93,6 +100,13 @@ public class TextArea extends JTextArea {
 //		}
 	}
 
+	@Override
+    protected int getJ2SWidth(int columns) {
+		return  columns * getColumnWidth() + 24;
+	}
+
+
+
 	/**
 	 * Determines the minimum size of this text area.
 	 * 
@@ -121,18 +135,22 @@ public class TextArea extends JTextArea {
 
 	}
 
+	@Override
 	public String getSelectedText() {
 		return super.getSelectedText();
 	}
 
+	@Override
 	public boolean isEditable() {
 		return super.isEditable();
 	}
 
+	@Override
 	public int getSelectionStart() {
 		return super.getSelectionStart();
 	}
 
+	@Override
 	public void setSelectionStart(int selectionStart) {
 		super.setSelectionStart(selectionStart);
 	}
@@ -147,27 +165,24 @@ public class TextArea extends JTextArea {
 		return super.getFont();
 	}
 	
+	@Override
 	public int getSelectionEnd() {
 		return super.getSelectionEnd();
 	}
 
+	@Override
 	public void setSelectionEnd(int selectionEnd) {
 		super.setSelectionEnd(selectionEnd);
 	}
 
+	@Override
 	public void select(int selectionStart, int selectionEnd) {
 		super.select(selectionStart, selectionEnd);
 	}
 
+	@Override
 	public int getCaretPosition() {
 		return super.getCaretPosition();
-	}
-
-	public void isAWT() {
-		// a good JavaScript trick here:
-		// existance of isAWT$ checked prior to initialization 
-		// static of fields avoids the fact that the default boolean 
-		// won't yet be "true"
 	}
 
 	/**
@@ -215,12 +230,7 @@ public class TextArea extends JTextArea {
 	}
 
 	public TextArea(String text, int rows, int columns, int scrollbars) {
-		super();
-		if (rows < 0)
-			rows = 0;
-		if (columns < 0)
-			columns = 0;
-		//setViewportView(new JTextArea(text, rows, columns));
+		super(text, rows < 0 ? 0 : rows, columns < 0 ? 0 : columns);
 		switch (scrollbars) {
 		case SCROLLBARS_BOTH:
 			setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -328,6 +338,7 @@ public class TextArea extends JTextArea {
 				: v ? SCROLLBARS_VERTICAL_ONLY : h ? SCROLLBARS_HORIZONTAL_ONLY : SCROLLBARS_NONE);
 	}
 
+	@Override
 	public void setCaretPosition(int pos) {
 		super.setCaretPosition(pos);
 		super.requestFocusInWindow();
@@ -341,22 +352,27 @@ public class TextArea extends JTextArea {
 
 	// API
 
+	@Override
 	public String getText() {
 		return super.getText();
 	}
 
+	@Override
 	public void setEditable(boolean b) {
 		super.setEditable(b);
 	}
 
+	@Override
 	public void selectAll() {
 		super.selectAll();
 	}
 
+	@Override
 	public void setTextFromUI(String t) {
 		super.setText(t);
 	}
 	
+	@Override
 	public void setText(String t) {
 		@SuppressWarnings("unused")
 		int top = /** @j2sNative this.ui.domNode.scrollTop ||*/0;
@@ -368,6 +384,7 @@ public class TextArea extends JTextArea {
 		super.insert(str, pos);
 	}
 
+	@Override
 	public void insert(String str, int pos) {
 		super.insert(str, pos);
 	}
@@ -382,11 +399,13 @@ public class TextArea extends JTextArea {
 		super.requestFocusInWindow();
 	}
 
+	@Override
 	public void append(String str) {
 		super.append(str);
 		toEnd();
 	}
 
+	@Override
 	public void replaceRange(String str, int start, int end) {
 		super.replaceRange(str, start, end);
 	}
@@ -395,18 +414,22 @@ public class TextArea extends JTextArea {
 		super.replaceRange(str, start, end);
 	}
 
+	@Override
 	public void setColumns(int columns) {
 		super.setColumns(columns);
 	}
 
+	@Override
 	public void setRows(int rows) {
 		super.setRows(rows);
 	}
 
+	@Override
 	public int getColumns() {
 		return super.getColumns();
 	}
 
+	@Override
 	public int getRows() {
 		return super.getRows();
 	}
