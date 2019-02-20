@@ -533,7 +533,7 @@ public class JSComponentUI extends ComponentUI
 	protected static int frameZ = 19000;
 
 	protected DOMNode body;
-	private DOMNode document;
+//	private DOMNode document;
 	protected HTML5Applet applet; // used in getting z value, setting frame
 									// mouse
 									// actions
@@ -547,7 +547,8 @@ public class JSComponentUI extends ComponentUI
 
 	private final Color colorUNKNOWN = new Color();
 
-	protected Color inactiveForeground = colorUNKNOWN, inactiveBackground = colorUNKNOWN;
+	protected Color inactiveForeground = colorUNKNOWN, 
+			inactiveBackground = colorUNKNOWN;
 
 	private boolean enabled = true;
 
@@ -589,10 +590,11 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	protected void setDoc() {
+		  			//this.document = document; 
 		/**
 		 * @j2sNative
 		 * 
-		 * 			this.document = document; this.body = document.body;
+		 *          this.body = document.body;
 		 * 
 		 */
 		{
@@ -806,6 +808,7 @@ public class JSComponentUI extends ComponentUI
 	protected void setJ2sMouseHandler() {
 		// The DOM attributes applet and _frameViewer are necessary for proper 
 		// direction to the target
+		J2S.unsetMouse(domNode);
 		DOMNode.setAttrs(domNode, "applet", applet, "_frameViewer", jc.getFrameViewer());
 		J2S.setMouse(domNode, true);
 	}
@@ -823,11 +826,11 @@ public class JSComponentUI extends ComponentUI
 		} else if (keysEnabled) {
 			setTabIndex(-1);
 		} else {
-			addJ2SKeyHandler();
+			addFocusHandler();
 		}
 	}
 
-	protected void addJ2SKeyHandler() {
+	protected void addFocusHandler() {
 		if (focusNode == null && (focusNode = domNode) == null)
 			return;
 		keysEnabled = true;
@@ -856,15 +859,19 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public boolean isFocusable() {
+		return (jc.isFocusable() && setFocusable());
+	}
+
+	private boolean setFocusable() {
+		if (focusNode == null)
+		  addFocusHandler();
 		return (focusNode != null);
 	}
 
 	public boolean hasFocus() {
-		return focusNode != null && focusNode == getActiveElement();
-	}
-
-	private DOMNode getActiveElement() {
-		return (DOMNode) DOMNode.getAttr(document, "activeElement");
+		return /**
+				 * @j2sNative document.activeElement == this.focusNode||
+				 */false;
 	}
 
 	@Override
@@ -916,8 +923,10 @@ public class JSComponentUI extends ComponentUI
 		 * 
 		 * 			node.focus(function(e) {
 		 * 				//System.out.println("JSSCUI node.focus() callback " + me.id + "  " + document.activeElement.id);
+		 *              if (!me.ignoreFocus)
 		 * 				me.handleJSFocus$O$O$Z(me.jc, e.relatedTarget, true);
-		 * 				//System.out.println("JSSCUI focus " + me.id);
+		 * 				me.ignoreFocus = false;
+		 * //System.out.println("JSSCUI focus " + me.id);
 		 * 			});
 		 *            node.blur(function(e) {
 		 *            try{
@@ -984,6 +993,9 @@ public class JSComponentUI extends ComponentUI
 	protected final static boolean HANDLED = true;
 	protected final static boolean NOT_HANDLED = false;
 
+    protected static final int SOME_MOUSE_EVENT = -1;
+    protected static final int SOME_KEY_EVENT = -2;
+
 	/**
 	 * Set the node to accept key events and possibly focusout
 	 * 
@@ -995,7 +1007,7 @@ public class JSComponentUI extends ComponentUI
 		addClass(node, "ui-key");
 		keysEnabled = true;
 		bindJQueryEvents(node, "keydown keypress keyup" + (addFocus ? " focusout"// dragover drop"
-				: ""), Event.KEY_PRESS);
+				: ""), SOME_KEY_EVENT);
 		
 		if (addFocus) {
 			addJQueryFocusCallbacks();
@@ -1199,6 +1211,9 @@ public class JSComponentUI extends ComponentUI
 		case "foreground":
 			setForeground(c.getForeground());
 			return;
+		case "focusable":
+		    setFocusable();
+			return;
 		case "opaque":
 			setBackground(c.getBackground());
 			return;
@@ -1317,6 +1332,8 @@ public class JSComponentUI extends ComponentUI
 	protected boolean imagePersists;
 
 	protected boolean allowDivOverflow;
+
+	private boolean ignoreFocus;
 
 
 	/**
@@ -1488,20 +1505,22 @@ public class JSComponentUI extends ComponentUI
 		int h, w;
 		String w0 = null, h0 = null, w0i = null, h0i = null, position = null;
 		DOMNode parentNode = null;
+		boolean hasFocus = false;
 		if (scrollPaneUI != null) {
 			w = scrollPaneUI.c.getWidth();
 			h = scrollPaneUI.c.getHeight();
 		} else if (usePreferred && preferredSize != null) {
-			// user has set preferred size
+			// preferred size has been set by JComponent layout
 			w = preferredSize.width;
 			h = preferredSize.height;
 		} else if (usePreferred && preferredDim != null) {
-			// user has set preferred size
+			// has been set by setAlignments
 			w = preferredDim.width;
 			h = preferredDim.height;
 		} else {
 			// determine the natural size of this object
 			// save the parent node -- we will need to reset that.
+			hasFocus = hasFocus();
 			parentNode = DOMNode.transferTo(node, null);
 
 			// remove position, width, and height, because those are what we are
@@ -1575,8 +1594,13 @@ public class JSComponentUI extends ComponentUI
 		if (w0i != null) {
 			DOMNode.setStyles(domNode, "width", w0i, "height", h0i);
 		}
-		if (parentNode != null)
+		if (parentNode != null) {
 			parentNode.appendChild(node);
+			if (hasFocus) {
+				ignoreFocus = true;
+				node.focus();
+			}
+		}
 		return dim;
 	}
 
@@ -1666,8 +1690,7 @@ public class JSComponentUI extends ComponentUI
 							// If the applet's root pane, we insert it into the applet's
 							// content
 							DOMNode cdiv = swingjs.JSToolkit.getHTML5Applet(jc)._getContentLayer();
-							if (cdiv != null)
-								cdiv.appendChild(outerNode);
+								DOMNode.appendChildSafely(cdiv, outerNode);
 						}
 					}
 				}
@@ -1694,7 +1717,7 @@ public class JSComponentUI extends ComponentUI
 			// before children are formed. So here we can add them later.
 			if (parent == null && jc.getParent() != null && (parent = (JSComponentUI) jc.getParent().getUI()) != null
 					&& parent.outerNode != null)
-				parent.outerNode.appendChild(outerNode);
+				DOMNode.appendChildSafely(parent.outerNode, outerNode);
 			DOMNode.setPositionAbsolute(outerNode);
 			DOMNode.setStyles(outerNode, "left", (x = c.getX()) + "px", "top", (y = c.getY()) + "px");
 		}
@@ -1726,7 +1749,7 @@ public class JSComponentUI extends ComponentUI
 			} else {
 				if (ui.domNode != ui.outerNode && DOMNode.getParent(ui.domNode) == null)
 					ui.outerNode.appendChild(ui.domNode);
-				containerNode.appendChild(ui.outerNode);
+				DOMNode.appendChildSafely(containerNode, ui.outerNode);
 			}
 		}
 	}
