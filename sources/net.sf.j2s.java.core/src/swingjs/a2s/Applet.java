@@ -1,6 +1,7 @@
 package swingjs.a2s;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.HeadlessException;
 import java.net.MalformedURLException;
@@ -19,7 +20,7 @@ public class Applet extends JApplet implements A2SContainer {
     	super();
 		// Note: applet.paint(g) needs to include super.paint(g), or buttons will not
 		// show. So we do that in fixAppletPaint().
-		fixAppletPaint();
+		fixAWTPaint(this, Applet.class);
 		listener = new A2SListener();
 		addMouseListener(listener);
 		addMouseMotionListener(listener);
@@ -28,27 +29,21 @@ public class Applet extends JApplet implements A2SContainer {
 		((JComponent) getContentPane()).setOpaque(false);
     }
 
-	@Override
-	public void setBackground(Color c) {
-		super.setBackground(c);
-		getContentPane().setBackground(c);
-	}
-	
 	/**
 	 * Effectively add "super.paint(g)" the user's method.
 	 * 
 	 */
-	private void fixAppletPaint() {
+	static void fixAWTPaint(Component c, Class<?> cl) {
     	
 		/**@j2sNative
 		 * 
 		 * try{
-		 * if (this.paint$java_awt_Graphics.exClazz != C$
-		 *   && this.paint$java_awt_Graphics.toString().indexOf("C$.superclazz.prototype.paint$java_awt_Graphics.apply(this") < 0) {
-		 *      var oldPaint = this.paint$java_awt_Graphics;
-		 *      this.paint$java_awt_Graphics = function(g) {
-		 *        C$.prototype.paint$java_awt_Graphics.apply(this,[g]);
-		 *        oldPaint.apply(this,[g]);
+		 * var f = c.paint$java_awt_Graphics; 
+		 * if (f.exClazz != cl.$clazz$ && f.toString().indexOf("C$.superclazz.prototype.paint$java_awt_Graphics.apply(this") < 0) {
+		 *      var oldPaint = f;
+		 *      c.paint$java_awt_Graphics = function(g) {
+		 *        cl.$clazz$.prototype.paint$java_awt_Graphics.apply(c,[g]);
+		 *        oldPaint.apply(c,[g]);
 		 *      };
 		 * }
 		 * } catch(e) {
@@ -57,6 +52,14 @@ public class Applet extends JApplet implements A2SContainer {
 		 */
 	}
 
+
+    
+	@Override
+	public void setBackground(Color c) {
+		super.setBackground(c);
+		getContentPane().setBackground(c);
+	}
+	
 	protected A2SListener listener;
 
 	@Override
