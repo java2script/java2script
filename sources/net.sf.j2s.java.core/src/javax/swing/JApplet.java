@@ -577,6 +577,16 @@ public class JApplet extends JSApplet implements /* Accessible ,*/
     	repaint(100, 0, 0, getWidth(), getHeight());
     }
 
+    @Override
+	public void validateTree() {
+    	// otherwise
+    	getContentPane().validateTree();
+    }
+    
+    @Override
+    public void invalidate() {
+    	getContentPane().invalidate();
+    }
     /**
      * Returns a string representation of this JApplet. This method
      * is intended to be used only for debugging purposes, and the

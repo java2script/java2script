@@ -1595,7 +1595,7 @@ public class Container extends JSComponent {
      * @see #doLayout
      * @see #validate
      */
-    protected void validateTree() {
+    public void validateTree() {
         if (!isValid()) {
             if (peer instanceof ContainerPeer) {
                 ((ContainerPeer)peer).beginLayout();
