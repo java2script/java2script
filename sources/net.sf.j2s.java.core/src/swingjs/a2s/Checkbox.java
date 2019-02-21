@@ -9,6 +9,8 @@ import javax.swing.Icon;
 import javax.swing.JCheckBox;
 import javax.swing.JRadioButton;
 
+import swingjs.plaf.JSCheckBoxUI;
+
 public class Checkbox extends JCheckBox {
 
 	
@@ -73,7 +75,8 @@ public class Checkbox extends JCheckBox {
 	}
 
 	public void setState(boolean b) {
-		((DefaultButtonModel) model).setStateNoFire(b);
+		if (((DefaultButtonModel) model).setStateNoFire(b))
+			((JSCheckBoxUI) (Object) getUI()).updateDOMNode();
 	}   
 	
 	public void setCheckboxGroup(java.awt.CheckboxGroup group) throws HeadlessException {
