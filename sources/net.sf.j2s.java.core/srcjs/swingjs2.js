@@ -12455,11 +12455,10 @@ if (!target) {
 			return;
 		// swingjs.api.J2SInterface
 		who.applet = null;
-		J2S
-				.$bind(
-						who,
-						'click mousedown touchstart mousemove touchmove mouseup touchend DOMMouseScroll mousewheel contextmenu mouseleave mouseenter mousemoveoutjsmol',
-						null);
+		who._frameViewer = null;
+		J2S.$bind(who,
+				'mouseupoutjsmol click mousedown touchstart mousemove touchmove mouseup touchend DOMMouseScroll mousewheel contextmenu mouseleave mouseenter mousemoveoutjsmol',
+				null);
 		J2S.setMouseOwner(null);
 	}
 
