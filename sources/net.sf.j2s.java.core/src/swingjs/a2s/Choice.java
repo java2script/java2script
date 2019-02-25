@@ -1,11 +1,18 @@
 package swingjs.a2s;
 
+import java.awt.Color;
 import java.awt.event.ItemEvent;
 
 import javax.swing.JComboBox;
 
 public class Choice extends JComboBox {
 
+	
+	public Choice() {
+		super();
+		setBackground(Color.white);
+	}
+	
 	public void isAWT() {}
 	
 	public void select(int index) {
