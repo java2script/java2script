@@ -324,7 +324,18 @@ public class JSUtil {
 	}
 
 	public static String getStackTrace() {
-		return /** @j2sNative Clazz._getStackTrace() || */null;
+		/**
+		 * @j2sNative return Clazz._getStackTrace();
+		 * 
+		 */
+		{
+			try {
+				throw new NullPointerException();
+			} catch (Exception e) {
+				e.printStackTrace();
+				return e.getStackTrace().toString();
+			}
+		}
 	}
 
 	/**
