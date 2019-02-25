@@ -556,7 +556,7 @@ public class Window extends JComponent {
      * name is null.
      */
     @Override
-		String constructComponentName() {
+		protected String constructComponentName() {
         synchronized (Window.class) {
             return base + nameCounter++;
         }
