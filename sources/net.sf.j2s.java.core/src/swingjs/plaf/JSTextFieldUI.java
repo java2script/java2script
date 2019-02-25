@@ -53,15 +53,13 @@ public class JSTextFieldUI extends JSTextUI {
 	}
 
 	@Override
-	boolean handleEnter(int eventType) {
-		if (eventType == SOME_KEY_EVENT) {
-			Action a = getActionMap().get(JTextField.notifyAction);
-			if (a != null) {
-				JSToolkit.setIsDispatchThread(true);
-				a.actionPerformed(new ActionEvent(c, ActionEvent.ACTION_PERFORMED,
-						JTextField.notifyAction, System.currentTimeMillis(), 0));
-				JSToolkit.setIsDispatchThread(false);
-			}
+	boolean handleEnter() {
+		Action a = getActionMap().get(JTextField.notifyAction);
+		if (a != null) {
+			JSToolkit.setIsDispatchThread(true);
+			a.actionPerformed(new ActionEvent(c, ActionEvent.ACTION_PERFORMED,
+					JTextField.notifyAction, System.currentTimeMillis(), 0));
+			JSToolkit.setIsDispatchThread(false);
 		}
 		return true;
 	}

@@ -129,7 +129,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	@Override
 	public DOMNode updateDOMNode() {
 		if (editor.isOpaque() && editor.isEnabled())
-			setBackground(editor.getBackground());
+			setBackgroundCUI(getBackground());
 		setEditable(editable);
 		return updateDOMNodeCUI();
 	}
@@ -169,14 +169,32 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 			editor.setFont(UIManager.getFont(prefix + ".font"));
 		}
 
+		setColors(prefix);
+		//
+		// Border b = editor.getBorder();
+		// if ((b == null) || (b instanceof UIResource)) {
+		// editor.setBorder(UIManager.getBorder(prefix + ".border"));
+		// }
+		//
+		Insets margin = editor.getMargin();
+		if (margin == null || margin instanceof UIResource) {
+			editor.setMargin(UIManager.getInsets(prefix + ".margin"));
+		}
+		//
+		// updateCursor();
+	}
+
+	protected void setColors(String prefix) {
 		Color bg = editor.getBackground();
 		if ((bg == null) || (bg instanceof UIResource)) {
 			editor.setBackground(UIManager.getColor(prefix + ".background"));
 		}
 
-		Color fg = editor.getForeground();
-		if ((fg == null) || (fg instanceof UIResource)) {
-			editor.setForeground(UIManager.getColor(prefix + ".foreground"));
+		if (!isAWT) {
+			Color fg = editor.getForeground();
+			if ((fg == null) || (fg instanceof UIResource)) {
+				editor.setForeground(UIManager.getColor(prefix + ".foreground"));
+			}
 		}
 		//
 		// Color color = editor.getCaretColor();
@@ -198,26 +216,15 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		//
 		Color dfg = editor.getDisabledTextColor();
 		if ((dfg == null) || (dfg instanceof UIResource)) {
-			editor.setDisabledTextColor(UIManager.getColor(prefix
-					+ ".inactiveForeground"));
+			editor.setDisabledTextColor(UIManager.getColor(prefix + ".inactiveForeground"));
 		}
 		dfg = UIManager.getColor(prefix + ".inactiveBackground");
 		if (dfg != null)
 			inactiveBackground = dfg;
 
-		//
-		// Border b = editor.getBorder();
-		// if ((b == null) || (b instanceof UIResource)) {
-		// editor.setBorder(UIManager.getBorder(prefix + ".border"));
-		// }
-		//
-		Insets margin = editor.getMargin();
-		if (margin == null || margin instanceof UIResource) {
-			editor.setMargin(UIManager.getInsets(prefix + ".margin"));
-		}
-		//
-		// updateCursor();
 	}
+
+
 
 	protected void installDefaults2() {
 		// editor.addMouseListener(dragListener);
@@ -2042,7 +2049,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		}
 	}
 
-	boolean handleEnter(int eventType) {
+	boolean handleEnter() {
 		return false;
 	}
 
@@ -2052,8 +2059,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 			return;
 		setEditableCSS();
 		if (jc.isOpaque()) {
-			Color bg = c.getBackground();
-			setBackground(editable || !(bg instanceof UIResource) || inactiveBackground == null ? bg : inactiveBackground);
+			Color bg = getBackground();
+			setBackgroundCUI(editable || !(bg instanceof UIResource) || inactiveBackground == null ? bg : inactiveBackground);
 		}		
 	}
 	
