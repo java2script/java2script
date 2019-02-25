@@ -499,6 +499,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 	}
 
 	static final Object dialogPlain12 = new FontUIResource(Font.DIALOG, Font.PLAIN, 12); 
+	static final Object dialogBold12 = new FontUIResource(Font.DIALOG, Font.BOLD, 12); 
 
 	/**
 	 * Populates {@code table} with the defaults for the basic look and feel.
@@ -791,6 +792,27 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		//
 		// // *** Component Defaults
 		//
+		
+
+// from MetalTheme, which is the Windows default:
+//
+//	    static final int CONTROL_TEXT_FONT = 0;
+//	    static final int SYSTEM_TEXT_FONT = 1;
+//	    static final int USER_TEXT_FONT = 2;
+//	    static final int MENU_TEXT_FONT = 3;
+//	    static final int WINDOW_TITLE_FONT = 4;
+//	    static final int SUB_TEXT_FONT = 5;
+//	    private static final int[] fontStyles = {
+//	            Font.BOLD, Font.PLAIN, Font.PLAIN, Font.BOLD, Font.BOLD, Font.PLAIN
+//	        };
+//	        /**
+//	         * Sizes for the fonts.
+//	         */
+//	        private static final int[] fontSizes = {
+//	            12, 12, 12, 12, 12, 10
+//	        };
+//
+		
 		Object[] defaults = {
 				"*.font",
 				dialogPlain12,
@@ -1041,10 +1063,10 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// }),
 
 				// *** Label
-				"Label.font", dialogPlain12,
+				"Label.font", dialogBold12,
 				"Label.background", control,
 				"Label.foreground", controlText,
-				// "Label.disabledForeground", white,
+			    "Label.inactiveForeground", disabledTextColor,
 				// "Label.disabledShadow", controlShadow,
 				"Label.border",
 				null,
