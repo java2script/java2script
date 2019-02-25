@@ -2904,4 +2904,9 @@ public class JSListUI extends JSLightweightUI {
 	//
 	// }
 
+    public void makeVisible(int index) {
+    	
+    }
+
+
 }
