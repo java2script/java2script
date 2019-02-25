@@ -117,13 +117,13 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		}
 		setup(isNew || isChanged);
 		setSlider();
-		setBackground(jc.getBackground());
+		setBackgroundCUI(getBackground());
 		return updateDOMNodeCUI();
 	}
 
-	public void setBackground(Color background) {
+	public void setBackgroundCUI(Color background) {
 		if (jc.isOpaque())
-			super.setBackground(background);
+			super.setBackgroundCUI(background);
 	}
 
 	private void disposeSlider() {

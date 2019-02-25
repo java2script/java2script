@@ -20,6 +20,7 @@ public class Scrollbar extends JScrollBar {
 	public Scrollbar(int orientation, int value, int extent, int min, int max) {
 		super(orientation, Math.max(Math.min(value,  max), min), extent, min, max);
 		setOpaque(true);
+		setBlockIncrement(10);
 //		A2SEvent.addListener(this);
 	}
 
@@ -48,7 +49,7 @@ public class Scrollbar extends JScrollBar {
 		A2SEvent.addListener(this);
 		if (!fromUI)
 			return;
-		System.out.println("a2sscrollbar adjusting " + adjusting);
+		//System.out.println("a2sscrollbar adjusting " + adjusting);
 		super.fireAdjustmentValueChanged(id, type, value, adjusting);
 	}
 

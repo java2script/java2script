@@ -45,15 +45,17 @@ public class JSScrollBarUI extends JSSliderUI {
 	@Override
 	public DOMNode updateDOMNode() {
 		super.updateDOMNode();
-		if (isAWT && !jc.isBackgroundSet())
+		if (isAWT && !jc.isBackgroundSet()) {
 			jc.setBackground(Color.LIGHT_GRAY);
+		}
 		return domNode;
 	}
 
 	@Override
-	public void setBackground(Color background) {
-	  if (background != null)
+	public void setBackgroundCUI(Color background) {
+	  if (background != null) {
 		DOMNode.setStyles(sliderTrack, "background-color", JSToolkit.getCSSColor(background));
+	  }
 	}
 
 	@Override
@@ -124,12 +126,12 @@ public class JSScrollBarUI extends JSSliderUI {
 		String left, top, thickness;
 		JScrollBar sb = (JScrollBar) jc; 
 		int extent = sb.getVisibleAmount();
-		int max = sb.getMaximum();
-		int min = sb.getMinimum();
-		
-		float f = (extent > 0 && max > min && extent <= max - min 
-				? extent * 1f / (max - min) : 0.1f);
-		setSliderAttr("handleSize", f);
+//		int max = sb.getMaximum();
+//		int min = sb.getMinimum();
+//		
+//		float f = (extent > 0 && min + extent <= max 
+//				? extent * 1f / (max - min) : 0.1f);
+		setSliderAttr("visibleAmount", extent);
 		boolean isVertical = (orientation == "vertical");
 		if (myScrollPaneUI == null) {
 			// in 
@@ -143,10 +145,10 @@ public class JSScrollBarUI extends JSSliderUI {
 			thickness = "12px";
 		}
 		if (isVertical) {
-			DOMNode.setStyles(sliderTrack, "left", left, "width", thickness, "background", "lightgrey");
+			DOMNode.setStyles(sliderTrack, "left", left, "width", thickness, "background", toCSSString(getBackground()));
 			DOMNode.setStyles(sliderHandle, "left", "-1px", "margin-bottom", "0px");
 		} else {
-			DOMNode.setStyles(sliderTrack, "top", top, "height", thickness, "background", "lightgrey");
+			DOMNode.setStyles(sliderTrack, "top", top, "height", thickness, "background", toCSSString(getBackground()));
 			DOMNode.setStyles(sliderHandle, "top", "-1px", "margin-left", "0px");
 		}
 	}
