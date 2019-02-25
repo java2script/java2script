@@ -118,7 +118,7 @@ public class TextListener implements FocusListener, ChangeListener,
 			int keyCode = /** @j2sNative jqevent.keyCode || */
 					0;
 			if (keyCode == 13 || keyCode == KeyEvent.VK_ENTER)
-				ui.handleEnter(eventType);
+				ui.handleEnter();
 			setCaret = false;
 			if (lastKeyEvent != KeyEvent.KEY_TYPED)
 			  break;
