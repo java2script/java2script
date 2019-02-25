@@ -32,7 +32,7 @@ public class JSLabelUI extends JSLightweightUI {
 	@Override
 	public DOMNode updateDOMNode() {
 		if (domNode == null) {
-			domNode = newDOMObject("label", id);
+			enableNode = domNode = newDOMObject("label", id);
 			textNode = iconNode = null;
 			// labels are different from buttons, because we allow them to have
 			// different centerings - left, top, middle, bottom, etc.
@@ -48,7 +48,7 @@ public class JSLabelUI extends JSLightweightUI {
 			setAlignments((AbstractButton) (JComponent) label);
 		}
 		if (jc.isEnabled())
-			setBackground(jc.isOpaque() ? jc.getBackground() : null);
+			setBackgroundCUI(jc.isOpaque() ? getBackground() : null);
 		return updateDOMNodeCUI();
 	}
 
