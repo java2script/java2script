@@ -58,8 +58,6 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 
 	private JScrollBar hsb;
 
-	private JScrollBar sbar;
-
 	void setSize(JComponent c, int x, int y) {
 		if (preferred)
 			c.setPreferredSize(new Dimension(x, y));
@@ -327,7 +325,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 	}
 
 	JScrollBar mkBar(JPanel p, final JTextField tf, int orient, int x, int y) {
-		final JScrollBar bar = new JScrollBar(orient, 500, 10, 300, 1000);
+		final JScrollBar bar = new JScrollBar(orient, 500, 10, 300, 10000);
 		bar.addAdjustmentListener(new AdjustmentListener() {
 
 			@Override
@@ -346,14 +344,13 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 			}
 		});
 		setSize(bar, x, y);
-		bar.setBackground(Color.orange);
+		bar.setBackground(Color.red);
 		bar.setForeground(Color.green);
 		bar.setBlockIncrement(10);
 		bar.setUnitIncrement(100);
 		bar.setOpaque(true);
 		p.add(bar);
-		sbar = bar;
-		bar.setVisibleAmount(80);
+		bar.setVisibleAmount(100);
 		return bar;
 	}
 
