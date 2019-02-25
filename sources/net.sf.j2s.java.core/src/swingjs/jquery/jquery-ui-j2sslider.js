@@ -103,9 +103,9 @@
 				});
 			var val = normValueFromMouse(me, position, obj);
 			var pixmouse = getPixelMouse(me, position, false);
+			
 			var isAtEnd = !mouseOverHandle && (!me.isScrollBar ? 0 : 
 				pixmouse < 5 ? -1 : pixmouse > getPixelTotal(me) - 5 ? 1 : 0);
-			
 			if (isAtEnd) {
 				me.element.addClass(me.orientation === "horizontal" ? 
 						(isAtEnd == 1 ? "ui-j2sslider-at-right" : "ui-j2sslider-at-left")
@@ -162,7 +162,7 @@
 		}
 		
 		var getPixelTotal = function(me) {
-			return (me.orientation == "horizontal" ? width(me) : height(me)) || 100;	
+			return (me.orientation == "horizontal" ? width(me) : height(me)) - me.visibleAdjust || 100;	
 		}
 
 		var postMouseEvent = function(me, xye, id) {
@@ -229,6 +229,9 @@
 					this._mouseInit();
 					this.isScrollBar = o.isScrollBar;
 					this.handleSize = 0; // scrollbar only
+					this.visibleAmount = 0;
+					this.visibleAdjust = 0;
+					this.visibleFraction = 0;
 					this.handleFraction = 0;
 					this.marginX = (o.isScrollBar ? 0 : 19); // from CSS - margin * 2 + border
 					this.marginY = (o.isScrollBar ? 0 : 0);
@@ -595,13 +598,23 @@
 						this._refreshValue();
 						this._animateOff = false;
 					break;
-					case "handleSize":
+					case "visibleAmount":
 						this.isScrollBar = true;
-						this.handleFraction = value;
+						this.visibleAmount = value;
+						var min = this._valueMin();
+						var max = this._valueMax();
+						var f = (value >= 0 && min + value <= max ? 
+							 value * 1 / (max - min) : 0.1);
+						this.visibleFraction = f;
+						if (f < 0.1)
+							f = 0.1;
+						this.handleFraction = f;
+						var hw = (this.orientation === "horizontal" ? width(this) : height(this));
 						if (this.orientation === "horizontal")
-							$(this.handles[0]).width(this.handleSize = value * width(this));
+							$(this.handles[0]).width(this.handleSize = f * hw);
 						else
-							$(this.handles[0]).height(this.handleSize = value * height(this));
+							$(this.handles[0]).height(this.handleSize = f * hw);
+						this.visibleAdjust = (f - this.visibleFraction) * hw;
 						this._animateOff = true;
 						this._resetClass();
 						this._refreshValue();
@@ -655,7 +668,7 @@
 					if (val <= this._valueMin()) {
 						return this._valueMin();
 					}
-					var max = Math.round((this._valueMax() - this._valueMin()) * (1-this.handleFraction) + this._valueMin());
+					var max = Math.round(this._valueMax() - this.visibleAmount); //* (1-this.handleFraction)
 					if (val >= max) {
 						return max;
 					}
@@ -696,8 +709,12 @@
 				},
 
 				_refreshValue : function() {
-					var lastValPercent, valPercent, value, valueMin, valueMax, oRange = this.options.range, o = this.options, that = this, animate = (!this._animateOff) ? o.animate
-							: false, _set = {};
+					var lastValPercent, valPercent, value, valueMin, valueMax;
+					var o = this.options;
+					var oRange = o.range;
+					var that = this;
+					var animate = (!this._animateOff) ? o.animate : false;
+					var _set = {};
 					if (this.options.values
 							&& this.options.values.length) {
 						this.handles
