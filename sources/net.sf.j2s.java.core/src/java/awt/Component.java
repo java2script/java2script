@@ -819,7 +819,7 @@ public abstract class Component implements ImageObserver/*
 	 * Constructs a name for this component. Called by <code>getName</code> when the
 	 * name is <code>null</code>.
 	 */
-	String constructComponentName() {
+	protected String constructComponentName() {
 		return null; // For strict compliance with prior platform versions, a
 						// Component
 						// that doesn't set its name should return null from
@@ -1560,6 +1560,10 @@ public abstract class Component implements ImageObserver/*
 	 * @beaninfo bound: true
 	 */
 	public Color getForeground() {
+		return getForeground_NoClient();
+	}
+
+	protected Color getForeground_NoClient() {
 		Color foreground = this.foreground;
 		if (foreground != null) {
 			return foreground;
@@ -1614,6 +1618,10 @@ public abstract class Component implements ImageObserver/*
 	 * @since JDK1.0
 	 */
 	public Color getBackground() {
+		return getBackground_NoClient();
+	}
+
+	protected Color getBackground_NoClient() {
 		Color background = this.background;
 		if (background != null) {
 			return background;
