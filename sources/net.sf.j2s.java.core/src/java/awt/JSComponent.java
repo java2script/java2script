@@ -27,17 +27,20 @@
  */
 package java.awt;
 
+import java.applet.JSApplet;
 import java.awt.event.KeyListener;
 import java.awt.peer.ComponentPeer;
 import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 
 import javax.swing.JComponent;
+import javax.swing.JPopupMenu;
 import javax.swing.RootPaneContainer;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.FontUIResource;
+import javax.swing.plaf.UIResource;
 
 import swingjs.JSAppletThread;
 import swingjs.JSAppletViewer;
@@ -281,19 +284,77 @@ public abstract class JSComponent extends Component {
 		_gtemp = null;
 		_isBackgroundPainted = jsg.isBackgroundPainted();
 		if (_isBackgroundPainted) {
-			((JSComponentUI) ui).setPainted(null);
+			((JSComponentUI) ui).setPainted(jsg);
 			// It's all one canvas, and it is behind the root pane (bad design?)
 			// so if it is painted, we should make the root pane transparent
-			((JSComponentUI) ((JComponent) this).getRootPane().getUI()).setPainted(null);
+			((JSComponentUI) ((JComponent) this).getRootPane().getUI()).setPainted(jsg);
 		}
 	}
 
 	@Override
 	public boolean isBackgroundSet() {
-		return background != null;// false;// TODO (background != null &&
-									// !isBackgroundPainted);
+		return (background == null ? false 
+				: /** @j2sNative this.isAWT$ || */false ? !(background instanceof UIResource) : true);
 	}
 
+	@Override
+	public boolean isForegroundSet() {
+		return (foreground == null ? false 
+				: /** @j2sNative this.isAWT$ || */false ? !(foreground instanceof UIResource) : true);
+	}
+
+	@Override
+	public boolean isFontSet() {
+		return (font == null ? null : /** @j2sNative this.isAWT$ || */false ? !(font instanceof FontUIResource) : true);
+	}
+
+//	@Override
+//	@SuppressWarnings("unused")
+//	public Color getBackground() {
+//		if (/** @j2sNative !this.isAWT$ || */ false) {
+//			return getBackground_NoClient();
+//		}
+//		// AWT only - don't use Swing's UIResource
+//		Color background = this.background;
+//        if (background!= null && !(background instanceof UIResource)) {
+//			return background;
+//		}
+//		background = (parent != null) ? parent.getBackground() : null;
+//        return (background == null ? getBackground_NoClient() : background);
+//	}
+//
+//	@Override
+//	@SuppressWarnings("unused")
+//	public Color getForeground() {
+//		if (/** @j2sNative !this.isAWT$  || */ false) {
+//			return getForeground_NoClient();
+//		}
+//		// AWT only - don't use Swing's UIResource
+//		Color foreground = this.foreground;
+//        if (foreground!= null && !(foreground instanceof UIResource)) {
+//			return foreground;
+//		}
+//		foreground = (parent != null) ? parent.getForeground() : null;
+//        return (foreground == null ? getForeground_NoClient() : foreground);
+//	}
+//
+//	
+//	@SuppressWarnings("unused")
+//	@Override
+//	public Font getFont() {
+//		if (/** @j2sNative !this.isAWT$ || */ false) {
+//			return getFont_NoClientCode();
+//		}
+//		// AWT only - don't use Swing's UIResource
+//        Font font = this.font;
+//        if (font != null && !(font instanceof FontUIResource)) {
+//            return font;
+//        }
+//        font = (parent == null ? null : parent.getFont());
+//        return (font == null ? getFont_NoClientCode() : font);
+//    }
+//
+	
 	protected void updateUIZOrder() {
 		
 // developer could have created their own LayeredPane
@@ -360,31 +421,44 @@ public abstract class JSComponent extends Component {
 			((JSComponentUI)ui).enableJSKeys(false);
 	}
 	
-	public Font getFont() {
-		if (/** @j2sNative this.isAWT$ || */ false) {
-			return getFontAWT();
-		}
-		return getFont_NoClientCode();
-	}
 	
-	public boolean isFontSet() {
-		return (font != null && (/** @j2sNative this.isAWT$ || */false ? !(font instanceof FontUIResource) : false));
-	}
-
+ 	/**
+ 	 * Invoker must be focusable and could cross from popupmenu to associated component
+ 	 * SwingJS from KeyboardManager. Brought here because it is smarter to do this
+ 	 * before going through all the keys first. And I want to debug this only
+ 	 * when it's necessary! BH
+ 	 * 
+ 	 * @param c
+ 	 * @param focusable TODO
+ 	 * @return
+ 	 */
+ 	public static Container getTopInvokableAncestor(Component c, boolean andFocusable) {
+ 	    for(Component p = c; p != null; p = nextHigher(p)) { 
+ 	        if (p instanceof Window && (!andFocusable || ((Window)p).isFocusableWindow()) 
+ 	        		|| p instanceof JSApplet
+ 	            ) {
+ 	            return (Container) p;
+ 	        }
+ 	    }
+ 	    return null;
+ 	 }
+ 	
 	/**
-	 * For AWT components, first try nondefault font, and then, 
-	 * only as a last resort, use the default font.
+	 * SwingJS -- this was in KeyboardManager, way too late in the process. It was
+	 * just parent(), but in SwingJS the popup windows do not have parents, only
+	 * invokers. Perhaps that is a mistake. But it has to do with the fact that we
+	 * do not have to repaint anything relating to the popup -- of course, the
+	 * browser does that for us!
 	 * 
+	 * @param c
 	 * @return
 	 */
-    public Font getFontAWT() {
-        Font font = this.font;
-        if (font != null && !(font instanceof FontUIResource)) {
-            return font;
-        }
-        Container parent = this.parent;
-        font = (parent == null ? null : parent.getFontAWT());
-        return (font != null ? font : getFont_NoClientCode());
-    }
+	public static Container nextHigher(Component c) {
+		Container p = c.getParent();
+		if (p == null && c instanceof JPopupMenu)
+			p = (Container) ((JPopupMenu) c).getInvoker();
+		return p;
+	}
+
 
 }

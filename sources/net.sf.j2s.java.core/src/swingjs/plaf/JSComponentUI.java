@@ -3,8 +3,8 @@ package swingjs.plaf;
 import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Event;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -253,7 +253,7 @@ public class JSComponentUI extends ComponentUI
 		DOMNode node = DOMNode.firstChild(td);
 		if (node != domNode) {
 			$(td).empty();
-			td.appendChild(domNode);
+			appendChild(td, domNode);
 		}
 		domNode = outerNode = null;
 	}
@@ -631,6 +631,8 @@ public class JSComponentUI extends ComponentUI
 	 */
 	private void uninstallJS() {
 
+		System.out.println("uninstallJS " + id);
+		
 		// window closing will fire this with c == null
 
 		/**
@@ -1162,12 +1164,15 @@ public class JSComponentUI extends ComponentUI
 	public void propertyChange(PropertyChangeEvent e) {
 		if (isUIDisabled)
 			return;
+		Object value = e.getNewValue();
 		String prop = e.getPropertyName();
 		if (prop == "ancestor") {
+			if (isAWT) 
+				setAWTFontAndColor((Container) value);
 			if (cellComponent != null)
 				return;
 			updatePropertyAncestor(false);
-			if (e.getNewValue() == null)
+			if (value == null)
 				return;
 			if (isDisposed && c.visible && e.getNewValue() != null)
 				setVisible(true);
@@ -1175,6 +1180,31 @@ public class JSComponentUI extends ComponentUI
 		propertyChangedCUI(e, prop);
 	}
 	
+	private Container awttop;
+	private Color awtPeerBG, awtPeerFG;
+	
+	/**
+	 * AWT component background, foreground, and font are all set at the
+	 * time of addition to the top-level ancestor -- Applet or Frame, usually.
+	 * Maybe PopupMenu? 
+	 * 
+	 * So we track the top ancestor and only do the setting when that has changed.
+	 * 
+	 * @param value
+	 */
+	private void setAWTFontAndColor(Container value) {
+		Container top = JSComponent.getTopInvokableAncestor(value, false);
+		 if (top == this.awttop || (this.awttop = top) == null) {
+			 if (top == null) {
+				 awtPeerBG = awtPeerFG = null;
+			 }
+			 return;
+		 }
+		setBackgroundFor(domNode, awtPeerBG = getBackground());
+		setForegroundFor(domNode, awtPeerFG = getForeground());
+		setFont(c.getFont());
+	}
+
 	/**
 	 * plaf ButtonListener and TextListener will call this to update common
 	 * properties such as "text".
@@ -1215,7 +1245,7 @@ public class JSComponentUI extends ComponentUI
 		    setFocusable();
 			return;
 		case "opaque":
-			setBackground(c.getBackground());
+			setBackgroundCUI(c.getBackground());
 			return;
 		case "inverted":
 			updateDOMNode();
@@ -1425,9 +1455,6 @@ public class JSComponentUI extends ComponentUI
 					"font-weight", ((istyle & Font.BOLD) == 0 ? "normal" : "bold"));
 		}
 
-		// if (c.isBackgroundSet())
-		// setBackground(c.getBackground());
-		// setForeground(c.getForeground());
 		enabled = !c.isEnabled();
 		setEnabled(c.isEnabled());
 		return obj;
@@ -1445,7 +1472,7 @@ public class JSComponentUI extends ComponentUI
 	protected DOMNode wrap(String type, String id, DOMNode... elements) {
 		DOMNode obj = newDOMObject(type, id + type);
 		for (int i = 0; i < elements.length; i++) {
-			obj.appendChild(elements[i]);
+			appendChild(obj, elements[i]);
 		}
 		return obj;
 	}
@@ -1595,7 +1622,7 @@ public class JSComponentUI extends ComponentUI
 			DOMNode.setStyles(domNode, "width", w0i, "height", h0i);
 		}
 		if (parentNode != null) {
-			parentNode.appendChild(node);
+			appendChild(parentNode, node);
 			if (hasFocus) {
 				ignoreFocus = true;
 				node.focus();
@@ -1747,8 +1774,8 @@ public class JSComponentUI extends ComponentUI
 			if (ui.getOuterNode() == null) {
 				System.out.println("JSCUI addChildren no outer node for " + ui.id);
 			} else {
-				if (ui.domNode != ui.outerNode && DOMNode.getParent(ui.domNode) == null)
-					ui.outerNode.appendChild(ui.domNode);
+				if (ui.domNode != ui.outerNode && DOMNode.getParent(ui.domNode) == null)				
+					appendChild(ui.outerNode, ui.domNode);
 				DOMNode.appendChildSafely(containerNode, ui.outerNode);
 			}
 		}
@@ -1788,12 +1815,17 @@ public class JSComponentUI extends ComponentUI
 	}
 	
 	/**
-	 * This flag is set by border painting and background painting detection
-	 * to indicate that a cell renderer must do that painting.
+	 * This flag is set by border painting and background painting detection to
+	 * indicate that a cell renderer must do that painting.
 	 */
-	public void setPainted(Graphics g) {
-		backgroundPainted = true;
-		if (allowPaintedBackground) {
+	public void setPainted(Object g) {
+		if (g == null) {
+			// reset
+			backgroundPainted = false;
+			if (allowPaintedBackground)
+				DOMNode.setStyles(domNode, "background", null);
+		} else {
+			backgroundPainted = true;
 			setTransparent(domNode);
 		}
 	}
@@ -1813,7 +1845,7 @@ public class JSComponentUI extends ComponentUI
 	public void paint(Graphics g, JComponent c) {
 
 		if (doPaintBackground()) {
-			g.setColor(c.getBackground());
+			g.setColor(getBackground());
 			g.fillRect(0, 0, c.getWidth(), c.getHeight());
 			setTransparent(domNode);
 		} 
@@ -2058,15 +2090,24 @@ public class JSComponentUI extends ComponentUI
 	protected void enableNode(DOMNode node, boolean b) {
 		if (node == null)
 			return;
+		
 		DOMNode.setAttr(node, "disabled", (b ? null : TRUE));
 		if (!b && inactiveForeground == colorUNKNOWN)
 			getDisabledColors(buttonNode == null ? getPropertyPrefix() : "Button");
 		if (jc.isOpaque()) {
-			Color bg = c.getBackground();
-			setBackground(b || !(bg instanceof UIResource) || inactiveBackground == null ? bg : inactiveBackground);
+			Color bg = getBackground();
+			setBackgroundFor(domNode, b || !(bg instanceof UIResource) || inactiveBackground == null ? bg : inactiveBackground);
 		}
-		Color fg = c.getForeground();
-		setForeground(b ? fg : getInactiveTextColor(fg));
+		Color fg = getForeground();
+		setForegroundFor(domNode, b ? fg : getInactiveTextColor(fg));
+	}
+
+	protected Color getBackground() {
+		return (awtPeerBG == null ? c.getBackground() : awtPeerBG);
+	}
+
+	protected Color getForeground() {
+		return (awtPeerFG == null ? c.getForeground() : awtPeerFG);
 	}
 
 	protected Color getInactiveTextColor(Color fg) {
@@ -2678,24 +2719,43 @@ public class JSComponentUI extends ComponentUI
 		if (c.getParent() != null) {
 			JSComponentUI ui = (JSComponentUI) c.getParent().getUI();
 			if (ui.containerNode != null)
-				ui.containerNode.appendChild(node);
+				appendChild(ui.containerNode, node);
 		}
+		
 		// menu separators have domNode == outerNode
 		// cell renderers will set their domNode to null;
 		if (outerNode != null && domNode != null && domNode != outerNode)
-			outerNode.appendChild(domNode);
+			appendChild(outerNode, domNode);
 		isDisposed = false;
 	}
 
-	@Override
-	public void setForeground(Color color) {
-		if (domNode != null)
-			DOMNode.setStyles(domNode, "color",
-					(color == null ? "rgba(0,0,0,0)" : JSToolkit.getCSSColor(color == null ? Color.black : color)));
+	private void appendChild(DOMNode containerNode, DOMNode node) {
+		containerNode.appendChild(node);
+	}
+
+	public void setForegroundCUI(Color c) {
+		setForegroundFor(domNode, c);
 	}
 
 	@Override
-	public void setBackground(Color color) {
+	public void setForeground(Color c) {
+		awtPeerFG = null;
+		setForegroundFor(domNode, c);
+	}
+
+	@Override
+	public void setBackground(Color c) {
+		awtPeerBG = null;
+		setBackgroundFor(domNode, c);
+	}
+	
+	private void setForegroundFor(DOMNode node, Color color) {
+		if (node != null)
+			DOMNode.setStyles(node, "color",
+					(color == null ? "rgba(0,0,0,0)" : JSToolkit.getCSSColor(color == null ? Color.black : color)));
+	}
+
+	public void setBackgroundCUI(Color color) {
 		setBackgroundFor(domNode, color);
 	}
 
@@ -2903,7 +2963,7 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public void endValidate() {
-		if (!isUIDisabled)
+		if (!isUIDisabled && jc.getUIClassID() != "AppletUI")
 			setHTMLElement();
 	}
 
@@ -2999,7 +3059,8 @@ public class JSComponentUI extends ComponentUI
 	 */
 
 	protected String getPropertyPrefix() {
-		return null;
+		String s = jc.getUIClassID();
+		return (s == null ? null : s.substring(0, s.length() - 2));
 	}
 
 	protected void setPadding(Insets padding) {
