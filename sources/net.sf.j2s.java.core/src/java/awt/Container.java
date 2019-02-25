@@ -290,6 +290,7 @@ public class Container extends JSComponent {
     	component = new Lst<Component>();
     }
 
+		@Override
 		void initializeFocusTraversalKeys() {
         //focusTraversalKeys = new Set[4];
     }
@@ -1292,8 +1293,17 @@ public class Container extends JSComponent {
                                            HierarchyEvent.PARENT_CHANGED,
                                            Toolkit.enabledOnToolkit(AWTEvent.HIERARCHY_EVENT_MASK));
             }
-            if (peer != null && layoutMgr == null && isVisible()) {
-                updateCursorImmediately();
+            if (peer != null) {
+            	if (layoutMgr == null && isVisible()) {
+                    updateCursorImmediately();
+            	}	
+            	if (isVisible()) {
+            		// this did not work -- see _mpEnigma_Applets_textana_Textanalyzer2_node4.htm
+                	Graphics g = getGraphics();
+                	if (g != null)
+                		g.clearRect(0, 0,  width, height);
+
+            	}
             }
             invalidateIfValid();
         }
@@ -3083,7 +3093,8 @@ public class Container extends JSComponent {
      * @beaninfo
      *       bound: true
      */
-    public void setFocusTraversalKeys(int id,
+    @Override
+	public void setFocusTraversalKeys(int id,
                                       Set<? extends AWTKeyStroke> keystrokes)
     {
         if (id < 0 || id >= KeyboardFocusManager.TRAVERSAL_KEY_LENGTH) {
@@ -3124,7 +3135,8 @@ public class Container extends JSComponent {
      *         KeyboardFocusManager.DOWN_CYCLE_TRAVERSAL_KEYS
      * @since 1.4
      */
-    public Set<AWTKeyStroke> getFocusTraversalKeys(int id) {
+    @Override
+	public Set<AWTKeyStroke> getFocusTraversalKeys(int id) {
         if (id < 0 || id >= KeyboardFocusManager.TRAVERSAL_KEY_LENGTH) {
             throw new IllegalArgumentException("invalid focus traversal key identifier");
         }
@@ -3155,7 +3167,8 @@ public class Container extends JSComponent {
      *        KeyboardFocusManager.DOWN_CYCLE_TRAVERSAL_KEYS
      * @since 1.4
      */
-    public boolean areFocusTraversalKeysSet(int id) {
+    @Override
+	public boolean areFocusTraversalKeysSet(int id) {
         if (id < 0 || id >= KeyboardFocusManager.TRAVERSAL_KEY_LENGTH) {
             throw new IllegalArgumentException("invalid focus traversal key identifier");
         }
@@ -3240,7 +3253,8 @@ public class Container extends JSComponent {
         }
     }
 
-    void clearMostRecentFocusOwnerOnHide() {
+    @Override
+	void clearMostRecentFocusOwnerOnHide() {
         boolean reset = false;
         Window window = null;
 
@@ -3276,7 +3290,8 @@ public class Container extends JSComponent {
 //        }
     }
 
-    final Container getTraversalRoot() {
+    @Override
+	final Container getTraversalRoot() {
 //        if (isFocusCycleRoot()) {
 //            return findTraversalRoot();
 //        }

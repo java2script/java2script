@@ -18,8 +18,8 @@ public class JSToggleButtonUI extends JSButtonUI {
 		if (debugging) 
 			System.out.println(id + " stateChange " + dumpEvent(e));
 		ButtonModel model = button.getModel();
-	  setBackground(model.isArmed() && model.isPressed() || model.isSelected() ? UIManager.getColor(getPropertyPrefix() + ".highlight")
-	  		: button.getBackground());
+	  setBackgroundCUI(model.isArmed() && model.isPressed() || model.isSelected() ? UIManager.getColor(getPropertyPrefix() + ".highlight")
+	  		: getBackground());
 	}
 
 }

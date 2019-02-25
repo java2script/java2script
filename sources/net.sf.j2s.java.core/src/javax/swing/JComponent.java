@@ -1935,7 +1935,7 @@ public abstract class JComponent extends Container {
 	 *                  pushed to the <code>KeyboardManager</code>
 	 */
 	private void registerWithKeyboardManager(boolean onlyIfNew) {
-		if (JSFocusPeer.getTopInvokableAncestor(this) == null)
+		if (getTopInvokableAncestor(this, true) == null)
 			return;
 
 		InputMap inputMap = getInputMap(WHEN_IN_FOCUSED_WINDOW, false);
@@ -3998,6 +3998,7 @@ public abstract class JComponent extends Container {
 	 *         <code>null</code> if not in any container
 	 */
 	public Container getTopLevelAncestor() {
+		// See also JSComponent getTopInvokableAncestor
 		for (Container p = this; p != null; p = p.getParent()) {
 			if (p instanceof Window || p instanceof JSApplet) {
 				return p;

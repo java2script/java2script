@@ -11,27 +11,27 @@ public class Frame extends JFrame implements A2SContainer {
 	
 	@Override
 	public A2SListener getA2SListener() {
-		// TODO Auto-generated method stub
-		return null;
+		return listener;
 	}
 
 		
 	public Frame() {
-		super();
-		listener = new A2SListener();
+		this(null, null);
 	}
 
 	public Frame(String title) {
-		super(title);
+		this(title, null);
 	}
 
 	
 	public Frame(GraphicsConfiguration gc) {
-		super(gc);
+		this(null, gc);
 	}
 
 	public Frame(String title, GraphicsConfiguration gc) {
 		super(title, gc);
+		listener = new A2SListener();
+		//Util.setAWTWindowDefaults(this);
 	}
 
 

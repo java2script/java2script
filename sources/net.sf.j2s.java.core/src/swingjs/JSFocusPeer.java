@@ -140,8 +140,8 @@ public class JSFocusPeer implements KeyboardFocusManagerPeer {
 	}
 
 	public void checkFrameFocusOnMouseDown(AWTEvent e) {
-		Container p = (Container) getTopInvokableAncestor((Container) e.getSource());
-		if (getCurrentFocusOwner() != null && p == currentWindow)
+		Container p = JSComponent.getTopInvokableAncestor((Container) e.getSource(), true);
+		if (getCurrentFocusOwner() != null && p == currentWindow) 
 			return;
 		handleJSFocus(p, currentWindow, true);
 		setCurrentFocusedWindow((Window) p);
@@ -155,41 +155,6 @@ public class JSFocusPeer implements KeyboardFocusManagerPeer {
 			((Window) p).toFront();
 		}
 	}
-
- 	/**
- 	 * SwingJS from KeyboardManager. Brought here because it is smarter to do this
- 	 * before going through all the keys first. And I want to debug this only
- 	 * when it's necessary! BH
- 	 * 
- 	 * @param c
- 	 * @return
- 	 */
- 	public static Container getTopInvokableAncestor(Container c) {
- 	    for(Container p = c; p != null; p = nextHigher(p)) {
- 	        if (p instanceof Window && ((Window)p).isFocusableWindow() ||
- 	            p instanceof JSApplet
- 	            ) {
- 	            return p;
- 	        }
- 	    }
- 	    return null;
- 	 }
- 	
- 	/** SwingJS -- this was in KeyboardManager, way too late in the process.
-      * It was just parent(), but in SwingJS the popup windows do not have 
-      * parents, only invokers. Perhaps that is a mistake. But it has to do
-      * with the fact that we do not have to repaint anything relating to the 
-      * popup -- of course, the browser does that for us!
-      * 
-      * @param c
-      * @return
-      */
-     private static Container nextHigher(Container c) {
-    	 Container p = c.getParent();
-    	 if (p == null && c instanceof JPopupMenu)
-    		 p = (Container) ((JPopupMenu) c).getInvoker();
-    		 return p;
- 	}
 
 	public static void focus(DOMNode focusNode) {
 		/** @j2sNative focusNode.focus(); */

@@ -668,7 +668,7 @@ public class JSDialog extends Window {
      * name is null.
      */
     @Override
-		String constructComponentName() {
+		protected String constructComponentName() {
         //synchronized (Dialog.class) {
             return base + nameCounter++;
         //}

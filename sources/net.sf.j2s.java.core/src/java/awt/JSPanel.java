@@ -83,7 +83,7 @@ public class JSPanel extends Container {
      * name is null.
      */
     @Override
-		String constructComponentName() {
+		protected String constructComponentName() {
  //       synchronized (JSPanel.class) {
             return base + nameCounter++;
  //       }

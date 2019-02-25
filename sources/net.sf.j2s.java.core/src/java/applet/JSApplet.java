@@ -36,6 +36,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 
+import javax.swing.JApplet;
+import javax.swing.JComponent;
+import javax.swing.JRootPane;
+import javax.swing.RepaintManager;
+
+import swingjs.plaf.JSComponentUI;
+
 /**
  * SwingJS note: This class is the original java.applet.Applet class. 
  * It is subclassed by JApplet. The replacement java.applet.Applet class
@@ -258,8 +265,17 @@ public class JSApplet extends JSPanel {
     }
 
 	public void resizeHTML(int width, int height) {
-		if (appletViewer != null)
+		if (appletViewer != null) {
 			appletViewer.html5Applet._resizeApplet(new int[] {width, height});
+			if (stub != null) {
+				// Added 2/23/2019 to force layout prior to Canvas painting in mpFrakta.Applets.Geomet
+				JRootPane root = ((JApplet) this).getRootPane();
+				root.invalidate();
+				((JSComponentUI)root.getUI()).setPainted(null);
+				root._isBackgroundPainted = false;
+				RepaintManager.currentManager(this).addInvalidComponent(root);
+			}
+		}
     }
 
     @SuppressWarnings("deprecation")

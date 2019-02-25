@@ -19,7 +19,7 @@ public class Applet extends JApplet implements A2SContainer {
     public Applet() throws HeadlessException {
     	super();
 		// Note: applet.paint(g) needs to include super.paint(g), or buttons will not
-		// show. So we do that in fixAppletPaint().
+		// show. So we do that in fixAWTPaint().
 		fixAWTPaint(this, Applet.class);
 		listener = new A2SListener();
 		addMouseListener(listener);
