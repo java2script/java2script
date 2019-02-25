@@ -12113,15 +12113,15 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 
 	// ////////////////// mouse and key events //////////////////////
 
-	var doIgnore = function(ev) {
+	var doIgnore = function(ev,test) {
 		var ignore = (
-				//J2S._dmouseOwner
-				//|| 
-				ev.originalEvent.xhandled 
+				J2S._dmouseOwner && J2S._dmouseOwner.className == "swingjs-resizer"
+				|| ev.originalEvent.xhandled 
 				|| !ev.target 
 				|| ("" + ev.target.className).indexOf("swingjs-ui") >= 0
 			);
-		ev.originalEvent.xhandled = true;
+		if (!test)
+			ev.originalEvent.xhandled = true;
 		return ignore;
 	};
 
@@ -12199,7 +12199,7 @@ if (!target) {
 				,"\n  relatedtarget.id:",ev.originalEvent.relatedTarget && ev.originalEvent.relatedTarget.id
 				,"\n  who:", who.id
 				,"\n  dragging:", J2S._mouseOwner && J2S._mouseOwner.isDragging
-				,"doignore:",doIgnore(ev)
+				,"doignore:",doIgnore(ev,1)
 				,"role:",ev.target.getAttribute("role")
 				,"data-ui:",ev.target["data-ui"]
 				,"data-component:",ev.target["data-component"]
@@ -12208,6 +12208,11 @@ if (!target) {
 		}
 
 		J2S.$bind(who, 'mousemove touchmove', function(ev) { // touchmove
+			
+			
+			if (J2S._dmouseOwner) {
+				J2S._dmouseDrag(ev);
+			}
 			
 			if (J2S._traceMouseMove)
 				J2S.traceMouse("MOVE", ev);
@@ -13479,6 +13484,8 @@ if (!target) {
 
 		var down = function(ev) {
 			J2S._dmouseOwner = tag;
+			J2S._dmouseDrag = drag;
+
 			tag.isDragging = true; // used by J2S mouse event business
 			pageX = ev.pageX;
 			pageY = ev.pageY;
@@ -13504,7 +13511,8 @@ if (!target) {
 		}, drag = function(ev) {
 			// we will move the frame's parent node and take the frame along
 			// with it
-			if (ev.buttons == 0 && ev.button == 0)
+			var ev0 = ev.ev0 || ev;
+			if (ev0.buttons == 0 && ev0.button == 0)
 				tag.isDragging = false;
 			var mode = (tag.isDragging ? 506 : 503);
 			if (!J2S._dmouseOwner || tag.isDragging && J2S._dmouseOwner == tag) {
@@ -13525,6 +13533,7 @@ if (!target) {
 				}
 			}
 		}, up = function(ev) {
+			J2S._dmouseDrag = null;
 			if (J2S._dmouseOwner == tag) {
 				tag.isDragging = false;
 				J2S._dmouseOwner = null
