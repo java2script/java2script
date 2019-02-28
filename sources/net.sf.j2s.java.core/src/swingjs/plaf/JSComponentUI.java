@@ -37,6 +37,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JRootPane;
+import javax.swing.JTable;
 import javax.swing.JTable.BooleanRenderer;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
