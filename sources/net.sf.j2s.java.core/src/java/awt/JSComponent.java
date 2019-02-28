@@ -105,6 +105,11 @@ public abstract class JSComponent extends Component {
 		}
 	}
 
+	/**
+	 * Note that the length of this array may be longer than getComponentCount()
+	 * @param c
+	 * @return
+	 */
 	public static Component[] getChildArray(Container c) {
 		return (c == null ? Container.EMPTY_ARRAY : c.getChildArray());
 	}
@@ -137,6 +142,18 @@ public abstract class JSComponent extends Component {
 	 * 
 	 */
 	public boolean _isBackgroundPainted;
+	protected boolean _alwaysPaint;
+
+	public boolean selfOrChildIsPainted() {
+		if (_alwaysPaint || _isBackgroundPainted)
+			return true;
+		Component[] a = JSComponent.getChildArray((Container) this);
+		for (int i = ((Container) this).getComponentCount(); --i >= 0;)
+			if (((JSComponent) a[i]).selfOrChildIsPainted())
+				return true;
+		return false;
+	}
+
 
 	private Insets tempInsets;
 	public JSGraphics2D _gtemp; // indicates that we are painting, so that g.setBackground() should also be set 
@@ -282,7 +299,7 @@ public abstract class JSComponent extends Component {
 			return;
 		}
 		_gtemp = null;
-		_isBackgroundPainted = jsg.isBackgroundPainted();
+		_isBackgroundPainted = _alwaysPaint || jsg.isBackgroundPainted();
 		if (_isBackgroundPainted) {
 			((JSComponentUI) ui).setPainted(jsg);
 			// It's all one canvas, and it is behind the root pane (bad design?)
@@ -434,9 +451,7 @@ public abstract class JSComponent extends Component {
  	 */
  	public static Container getTopInvokableAncestor(Component c, boolean andFocusable) {
  	    for(Component p = c; p != null; p = nextHigher(p)) { 
- 	        if (p instanceof Window && (!andFocusable || ((Window)p).isFocusableWindow()) 
- 	        		|| p instanceof JSApplet
- 	            ) {
+ 	        if (p.isWindowOrJSApplet() && (!andFocusable || ((Window)p).isFocusableWindow())) {
  	            return (Container) p;
  	        }
  	    }
