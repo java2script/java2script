@@ -511,7 +511,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 				if (focusOwner != null && (getCurrentFocusCycleRoot() == null
 						|| !focusOwner.isFocusCycleRoot(getCurrentFocusCycleRoot()))) {
 					Container rootAncestor = focusOwner.getFocusCycleRootAncestor();
-					if (rootAncestor == null && (focusOwner instanceof Window)) {
+					if (rootAncestor == null && focusOwner.isWindowOrJSApplet()) {
 						rootAncestor = (Container) focusOwner;
 					}
 					if (rootAncestor != null) {
@@ -1707,7 +1707,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 
 	public static void setMostRecentFocusOwner(Component component) {
 		Component window = component;
-		while (window != null && !(window instanceof Window) && !(window instanceof JSApplet)) {
+		while (window != null && !window.isWindowOrJSApplet()) {
 			window = window.parent;
 		}
 		if (window != null) {
@@ -1736,7 +1736,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 
 //		synchronized (comp.getTreeLock()) {
 			window = comp.getParent();
-			while (window != null && !(window instanceof Window)) {
+			while (window != null && !window.isWindowOrJSApplet()) {
 				window = window.getParent();
 			}
 //		}

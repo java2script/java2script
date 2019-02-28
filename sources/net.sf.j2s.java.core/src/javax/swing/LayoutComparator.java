@@ -75,7 +75,7 @@ final class LayoutComparator implements Comparator, Serializable {
 
             for(aAncestory = new LinkedList(); a != null; a = a.getParent()) {
                 aAncestory.add(a);
-                if (a instanceof Window) {
+                if (a.isWindowOrJSApplet()) {
                     break;
                 }
             }
@@ -86,7 +86,7 @@ final class LayoutComparator implements Comparator, Serializable {
 
             for(bAncestory = new LinkedList(); b != null; b = b.getParent()) {
                 bAncestory.add(b);
-                if (b instanceof Window) {
+                if (b.isWindowOrJSApplet()) {
                     break;
                 }
             }
