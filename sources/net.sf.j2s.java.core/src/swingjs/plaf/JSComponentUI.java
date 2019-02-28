@@ -199,7 +199,12 @@ public class JSComponentUI extends ComponentUI
 	 * we can send the coordinates to the retrieve the row and cell
 	 * 
 	 */
-	protected JComponent targetParent;
+	private JComponent targetParent;
+
+	public void setTargetParent(JComponent table) {
+		targetParent = table;
+	}
+
 
 	public JComponent getTargetParent() {
 		return targetParent;
@@ -2786,7 +2791,6 @@ public class JSComponentUI extends ComponentUI
 		}
 		return false;
 	}
-
 
 	/**
 	 * If a control is transparent, then set that in HTML for its node
