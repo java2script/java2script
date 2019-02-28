@@ -124,6 +124,7 @@ public class JSGraphics2D implements
 //		// reduce antialiasing, thank you,
 //		// http://www.rgraph.net/docs/howto-get-crisp-lines-with-no- antialias.html
 		setAntialias(true);
+		setClip(0, 0, width, height);
 	}
 
 	public void setAntialias(boolean tf) {
