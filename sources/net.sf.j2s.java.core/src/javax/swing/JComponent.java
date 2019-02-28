@@ -529,7 +529,7 @@ public abstract class JComponent extends Container {
 				if (parent instanceof JComponent) {
 					return ((JComponent) parent).getComponentPopupMenu();
 				}
-				if (parent instanceof Window || parent instanceof JSApplet) {
+				if (parent.isWindowOrJSApplet()) {
 					// Reached toplevel, break and return null
 					break;
 				}
@@ -2747,8 +2747,7 @@ public abstract class JComponent extends Container {
 		 * component twice.
 		 */
 		Container parent = this;
-		while (parent != null && !(parent instanceof Window)
-				&& !(parent instanceof JSApplet)) {
+		while (parent != null && !parent.isWindowOrJSApplet()) {
 			if (parent instanceof JComponent) {
 				if (((JComponent) parent).processKeyBinding(ks, e,
 						WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, pressed))
@@ -3836,7 +3835,7 @@ public abstract class JComponent extends Container {
 		Container p = c.getParent();
 		Rectangle bounds = c.getBounds();
 
-		if (p == null || p instanceof Window || p instanceof JSApplet) {
+		if (p == null || p.isWindowOrJSApplet()) {
 			visibleRect.setBounds(0, 0, bounds.width, bounds.height);
 		} else {
 			computeVisibleRect(p, visibleRect);
@@ -4000,7 +3999,7 @@ public abstract class JComponent extends Container {
 	public Container getTopLevelAncestor() {
 		// See also JSComponent getTopInvokableAncestor
 		for (Container p = this; p != null; p = p.getParent()) {
-			if (p instanceof Window || p instanceof JSApplet) {
+			if (p.isWindowOrJSApplet()) {
 				return p;
 			}
 		}
@@ -4440,8 +4439,7 @@ public abstract class JComponent extends Container {
 			}
 		}
 		Component child;
-		for (c = this, child = null; c != null && !(c instanceof Window)
-				&& !(c instanceof JSApplet); child = c, c = c.getParent()) {
+		for (c = this, child = null; c != null && !c.isWindowOrJSApplet(); child = c, c = c.getParent()) {
 			JComponent jc = (c instanceof JComponent) ? (JComponent) c : null;
 			path.add(c);
 			if (!ontop && jc != null && !jc.isOptimizedDrawingEnabled()) {
@@ -4558,13 +4556,13 @@ public abstract class JComponent extends Container {
 						rm.endPaint();
 					}
 				} else {
-					// SwingJS not clipping for better performance
-					g.setClip(paintImmediatelyClip.x, paintImmediatelyClip.y,
+					// For some reason painting of the root pane causes a persistent clip in AWT. 
+					
+					// SwingJS early on was not clipping for better performance
+					 if (!isRootPane)
+						 g.setClip(paintImmediatelyClip.x, paintImmediatelyClip.y,
                             paintImmediatelyClip.width, paintImmediatelyClip.height);
 
-					// g.setClip(paintImmediatelyClip.x,paintImmediatelyClip.y,
-					// paintImmediatelyClip.width,paintImmediatelyClip.height);
-					
 					// this sequence assures that if the developer called 
 					// jpanel.repaint() and then draws on the background,
 					// the JPanel's background is made transparent
