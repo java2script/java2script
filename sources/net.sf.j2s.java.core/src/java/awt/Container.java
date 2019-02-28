@@ -452,14 +452,14 @@ public class Container extends JSComponent {
         }
     }
 
-    /**
-     * Checks that the component is not a Window instance.
-     */
-    private void checkNotAWindow(Component comp){
-        if (comp instanceof Window && ((JSComponent) comp).getUIClassID() != "InternalFrameUI") {
-            throw new IllegalArgumentException("adding a window to a container");
-        }
-    }
+//    /**
+//     * Checks that the component is not a Window instance.
+//     */
+//    private void checkNotAWindow(Component comp){
+//        if (comp instanceof Window && ((JSComponent) comp).getUIClassID() != "InternalFrameUI") {
+//            throw new IllegalArgumentException("adding a window to a container");
+//        }
+//    }
 
 //    /**
 //     * Checks that the component comp can be added to this container
@@ -1085,7 +1085,12 @@ public class Container extends JSComponent {
                         "illegal component position");
           }
           checkAddToSelf(comp);
-          checkNotAWindow(comp);
+      	// Here we do not allow JSApplet, but we do allow JInternalFrame, which is a JFrame now
+          if (comp.isJ2SWindowButNotJInternalFrame()) {
+              throw new IllegalArgumentException("adding a window to a container");
+          }
+
+//          checkNotAWindow(comp);
 //      if (thisGC != null) {
 //          comp.checkGD(thisGC.getDevice().getIDstring());
 //      }
@@ -1144,6 +1149,8 @@ public class Container extends JSComponent {
       }
       return comp;
 		}
+
+    
 
 		/**
      * Checks that all Components that this Container contains are on
@@ -3245,12 +3252,12 @@ public class Container extends JSComponent {
      * @param comp a component in test, must not be null
      */
     private boolean isParentOf(Component comp) {
-        synchronized(getTreeLock()) {
-            while (comp != null && comp != this && !(comp instanceof Window)) {
+//        synchronized(getTreeLock()) {
+            while (comp != null && comp != this && !comp.isWindowOrJSApplet()) {
                 comp = comp.getParent();
             }
             return (comp == this);
-        }
+//        }
     }
 
     @Override
@@ -4575,7 +4582,8 @@ class LightweightDispatcher implements AWTEventListener {
             // see 5083555
             // check if srcComponent is in any modal blocked window
             Component c = nativeContainer;
-            while ((c != null) && !(c instanceof Window)) {
+            //SwingJS TODO Q: no check for applet here?
+            while (c != null && !(c instanceof Window)) {
                 c = c.getParent_NoClientCode();
             }
             if ((c == null) || ((Window)c).isModalBlocked()) {

@@ -2094,7 +2094,7 @@ public abstract class Component implements ImageObserver/*
 				// windows here as it is done from peer or native code when
 				// the window is really resized or moved, otherwise some
 				// events may be sent twice
-				if (this instanceof Window && !(this instanceof JInternalFrame)) {
+				if (isJ2SWindowButNotJInternalFrame()) {
 					needNotify = false;
 				}
 				// }
@@ -3995,7 +3995,7 @@ public abstract class Component implements ImageObserver/*
 				newX += anc.getX();
 				newY += anc.getY();
 
-				if (!(anc instanceof Window)) {
+				if (!anc.isWindowOrJSApplet()) {
 					anc = anc.getParent();
 				} else {
 					break;
@@ -6546,7 +6546,7 @@ public abstract class Component implements ImageObserver/*
 		KeyboardFocusManager.setMostRecentFocusOwner(this);
 
 		Component window = this;
-		while ((window != null) && !(window instanceof Window || window instanceof JSApplet)) { 
+		while ((window != null) && !window.isWindowOrJSApplet()) { 
 			if (!window.isVisible()) {
 				return false;
 			}
@@ -6572,6 +6572,15 @@ public abstract class Component implements ImageObserver/*
 
 		}
 		return success;
+	}
+
+	public boolean isWindowOrJSApplet() {
+		// SwingJS treating embedded applet as window here
+		return this instanceof Window || this instanceof JSApplet;
+	}
+
+	public boolean isJ2SWindowButNotJInternalFrame() {
+		return this instanceof Window && ((JSComponent) this).getUIClassID() != "InternalFrameUI";
 	}
 
 	private boolean isRequestFocusAccepted(boolean temporary, boolean focusedWindowChangeAllowed,
@@ -7948,8 +7957,9 @@ public abstract class Component implements ImageObserver/*
 		// checkTreeLock();
 		Point curLocation = getLocation();
 
+		// BH changed this to include applet here
 		for (Container parent = getContainer(); parent != null
-				&& !(parent instanceof Window); parent = parent.getContainer()) {
+				&& !parent.isWindowOrJSApplet(); parent = parent.getContainer()) {
 			curLocation.x += parent.getX();
 			curLocation.y += parent.getY();
 		}
