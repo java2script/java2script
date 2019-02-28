@@ -338,8 +338,10 @@ public class Test_Event extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			System.out.println("Test_Event action for " + e.getActionCommand() + " " + e.getSource());
-			if (e.getSource() == btnj)
-				tarea.requestFocus();
+			if (e.getSource() == btnj) {
+				//tarea.requestFocus();
+				tarea.setCaretPosition((int)(Math.random() * tarea.getText().length()));
+			}
 		}
 
 	};

@@ -14,6 +14,8 @@ import java.awt.TextArea;
 import java.awt.TextField;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -38,6 +40,19 @@ public class TApp2 extends Applet {
 		TextField tf = new TextField("Text");
 		tf.setBounds(5, 5, 50, 24);
 		tf.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 20));
+		tf.addFocusListener(new FocusListener() {
+
+			@Override
+			public void focusGained(FocusEvent e) {
+				System.out.println("tf " + e.paramString());
+			}
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				System.out.println("tf " + e.paramString());
+			}
+			
+		});
 		panel.add(tf);
 //		Label label = new Label("blue", Label.RIGHT);
 //		label.setBounds(10, 10, 50, 60);
@@ -55,9 +70,22 @@ public class TApp2 extends Applet {
 		// and then only if the append is AFTER the add
 		ta = new TextArea("A text\nwith some\nlines and\n no content.");
 		add(ta);
-		ta.setBounds(200, 70, 150, 150);
+		ta.setBounds(200,  70, 200,200);
 		ta.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
 		ta.appendText("A text\nwith some\nlines and\n no content.");
+		ta.addFocusListener(new FocusListener() {
+
+			@Override
+			public void focusGained(FocusEvent e) {
+				System.out.println("ta " + e.paramString());
+			}
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				System.out.println("ta " + e.paramString());
+			}
+			
+		});
 
 		
 //		TextArea ta = new TextArea("A text\nwith some\nlines and\n no content.");
