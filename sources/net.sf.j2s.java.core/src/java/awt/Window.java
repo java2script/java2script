@@ -2976,12 +2976,12 @@ public class Window extends JComponent {
         Container root=null;
 
         if (c != null) {
-            if (c instanceof Window || c instanceof JSApplet) {
+            if (c.isWindowOrJSApplet()) {
                 root = (Container)c;
             } else {
                 Container parent;
                 for(parent = c.getParent() ; parent != null ; parent = parent.getParent()) {
-                    if (parent instanceof Window || parent instanceof JSApplet) {
+                    if (parent.isWindowOrJSApplet()) {
                         root = parent;
                         break;
                     }

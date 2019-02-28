@@ -28,6 +28,8 @@
 
 package java.awt.event;
 
+import java.applet.JSApplet;
+import java.awt.Component;
 import java.awt.Window;
 import sun.awt.AppContext;
 import sun.awt.SunToolkit;
@@ -282,7 +284,8 @@ public class WindowEvent extends ComponentEvent {
      * @return the Window object that originated the event
      */
     public Window getWindow() {
-        return (source instanceof Window) ? (Window)source : null;
+    	// SwingJS we are saying that embedded applets are windows here
+        return (((Component)source).isWindowOrJSApplet()) ? (Window)source : null;
     }
 
     /**

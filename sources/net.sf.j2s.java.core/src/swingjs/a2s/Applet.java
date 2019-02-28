@@ -10,6 +10,8 @@ import java.net.URL;
 import javax.swing.JApplet;
 import javax.swing.JComponent;
 
+import swingjs.JSUtil;
+
 public class Applet extends JApplet implements A2SContainer {
 	
 
@@ -34,22 +36,17 @@ public class Applet extends JApplet implements A2SContainer {
 	 * 
 	 */
 	static void fixAWTPaint(Component c, Class<?> cl) {
-    	
+		Object f = JSUtil.getJ2SAlias(c, "paint$java_awt_Graphics");
+		if (JSUtil.isOverridden(f, cl)
+				&& f.toString().indexOf("C$.superclazz.prototype.paint$java_awt_Graphics.apply(this") < 0) {
 		/**@j2sNative
 		 * 
-		 * try{
-		 * var f = c.paint$java_awt_Graphics; 
-		 * if (f.exClazz != cl.$clazz$ && f.toString().indexOf("C$.superclazz.prototype.paint$java_awt_Graphics.apply(this") < 0) {
-		 *      var oldPaint = f;
 		 *      c.paint$java_awt_Graphics = function(g) {
 		 *        cl.$clazz$.prototype.paint$java_awt_Graphics.apply(c,[g]);
-		 *        oldPaint.apply(c,[g]);
-		 *      };
-		 * }
-		 * } catch(e) {
-		 * System.out.println("java.applet.Applet.fixAppletPaint() exception: " + e);
-		 * }
+		 *        f.apply(c,[g]);
+		 *      }
 		 */
+		}
 	}
 
 
