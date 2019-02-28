@@ -8,6 +8,10 @@ public class Test_BigInt extends Test_ {
 
 	public static void main(String[] args) {
 
+		BigInteger m = BigInteger.valueOf(4);
+		m = m.modPow(BigInteger.valueOf(3), BigInteger.valueOf(8));
+		System.out.println(m);
+		//4^3 mod 8, 6^5 mod 2
 		BigDecimal e = new BigDecimal("200.05");
 		System.out.println(e);
 		BigDecimal f = new BigDecimal(45000);

@@ -3473,7 +3473,7 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
                 int i,b;
                 for (i=0; (b = getInt(i)) == 0; i++)
                     ;
-                lsb += (i * BITS_PER_INT) + Integer.numberOfTrailingZeros(b) - SPARE_BITS_INT;
+                lsb += (i * BITS_PER_INT) + Integer.numberOfTrailingZeros(b);
             }
             lowestSetBit = lsb + 2;
         }
