@@ -28,6 +28,7 @@
 package java.applet;
 
 import java.awt.Component;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
 import java.awt.Image;
@@ -97,6 +98,12 @@ public class JSApplet extends JSPanel {
     	return true;
     }
     
+    public Dialog getModalBlocker() {
+    	// mascarading as Window here
+        return null; //??
+    }
+
+
     /**
      * Holds the reference to the component which last had focus in this window
      * before it lost focus.
