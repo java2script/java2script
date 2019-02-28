@@ -249,7 +249,7 @@ public class JSTableUI extends JSPanelUI {
 			JSComponentUI ui = ((JSComponentUI) c.getUI());
 			boolean wasDisabled = ui.isUIDisabled;
 			ui.setRenderer(c, w, h);
-			ui.targetParent = table;
+			ui.setTargetParent(table);
 			if (fullPaint && wasDisabled || cNoPrep != null) {
 				// repeat, now that the UI is enabled
 				if (wasDisabled)
