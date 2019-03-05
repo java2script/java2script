@@ -892,7 +892,11 @@ public abstract class Component implements ImageObserver/*
 	 */
 	@Deprecated
 	public ComponentPeer getPeer() {
-		return peer;
+		// SwingJS: In Java, peers are only available if the 
+		// component is a heavy-weight component AND it is connected to the DOM
+		// via its ancestors. We shall see how this goes....
+		
+		return (isDisplayable() ? peer : null);
 	}
 
 	/**
@@ -1053,22 +1057,6 @@ public abstract class Component implements ImageObserver/*
 	 * @since JDK1.0
 	 */
 	public Toolkit getToolkit() {
-		return getToolkitImpl();
-	}
-
-	/*
-	 * This is called by the native code, so client code can't be called on the
-	 * toolkit thread.
-	 */
-	final Toolkit getToolkitImpl() {
-		ComponentPeer peer = this.peer;
-		if ((peer != null) && !(peer instanceof LightweightPeer)) {
-			return peer.getToolkit();
-		}
-		Container parent = this.parent;
-		if (parent != null) {
-			return parent.getToolkitImpl();
-		}
 		return Toolkit.getDefaultToolkit();
 	}
 
@@ -1114,7 +1102,8 @@ public abstract class Component implements ImageObserver/*
 	 * @since 1.2
 	 */
 	public boolean isDisplayable() { 
-		// return getPeer() != null;
+		// that is, if this component is connected to a top-level ancestor
+		// see JSComponent
 		return true;
 	}
 
@@ -3232,7 +3221,7 @@ public abstract class Component implements ImageObserver/*
 		// if ((peer != null) && ! (peer instanceof LightweightPeer)) {
 		// return peer.createImage(producer);
 		// }
-		return getToolkit().createImage(producer);
+		return (isDisplayable() ? ((JSToolkit) getToolkit()).createImage(this, producer) : null);
 	}
 
 	/**
@@ -3250,7 +3239,7 @@ public abstract class Component implements ImageObserver/*
 	 * @since JDK1.0
 	 */
 	public Image createImage(int width, int height) {
-		return Toolkit.getDefaultToolkit().createImage(null, width, height);
+		return (isDisplayable() ? ((JSToolkit) getToolkit()).createImage(this, width, height) : null);
 		// ComponentPeer peer = this.peer;
 		// if (peer instanceof LightweightPeer) {
 		// if (parent != null) { return parent.createImage(width, height); }
@@ -3276,6 +3265,7 @@ public abstract class Component implements ImageObserver/*
 	 * @since 1.4
 	 */
 	public VolatileImage createVolatileImage(int width, int height) {
+		// SwingJS TODO
 		// ComponentPeer peer = this.peer;
 		// if (peer instanceof LightweightPeer) {
 		// if (parent != null) {
@@ -3306,7 +3296,7 @@ public abstract class Component implements ImageObserver/*
 	 * @since 1.4
 	 */
 	public VolatileImage createVolatileImage(int width, int height, ImageCapabilities caps) throws AWTException {
-		// REMIND : check caps
+		// SwingJS TODO
 		return createVolatileImage(width, height);
 	}
 
@@ -3346,6 +3336,7 @@ public abstract class Component implements ImageObserver/*
 	 * @since JDK1.0
 	 */
 	public boolean prepareImage(Image image, int width, int height, ImageObserver observer) {
+		// SwingJS TODO
 		// ComponentPeer peer = this.peer;
 		// if (peer instanceof LightweightPeer) {
 		// return (parent != null)

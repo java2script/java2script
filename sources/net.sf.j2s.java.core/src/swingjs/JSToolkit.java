@@ -232,24 +232,6 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		return false;
 	}
 
-	/**
-	 * generates proper font name for JSGraphics2d Apparently Java sizes are
-	 * pixels, not points. Not sure on this...
-	 * 
-	 * @param font
-	 * @return "italic bold 10pt Helvetica"
-	 */
-	public static String getCSSFont(Font font) {
-		String css = "";
-		if (font.isItalic())
-			css += "font-style:italic;";
-		if (font.isBold())
-			css += "font-weight:bold;";
-		css += "font-size:" + font.getSize() + "px;";
-		css += "font-family:" + font.getFamily() + ";";
-		return css;
-	}
-
 	private static HTML5CanvasContext2D defaultContext;
 
 	public static float getStringWidth(HTML5CanvasContext2D context, Font font,
@@ -606,6 +588,11 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		return kit.getCreatedImage();
 	}
 
+	public Image createImage(Component c, ImageProducer producer) {
+		return ((JSImage) createImage(producer)).setComponent(c);
+	}
+
+
 	public static ImageIcon createImageIcon(Component c, Icon icon, String id) {
 		return JSImagekit.createImageIcon(c, icon, id);
 	}
@@ -629,6 +616,10 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		return getImagekit().createImageFromBytes(data, imageoffset, imagelength, null);
 	}
 	
+	public Image createImage(Component c, int width, int height) {
+		return ((JSImage) createImage((byte[]) null, width, height)).setComponent(c);
+	}
+
 	@Override
 	public int checkImage(Image image, int width, int height,
 			ImageObserver observer) {
@@ -830,7 +821,7 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	 * pixels, not points. Not sure on this...
 	 * 
 	 * @param font
-	 * @return "italic bold 10pt Helvetica"
+	 * @return "italic bold 10pt Arial"
 	 */
 	public static String getCanvasFont(Font font) {
 		String strStyle = "";
@@ -846,7 +837,9 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 
 	public static String getCSSFontFamilyName(String family) {
 		family = family.toLowerCase();
-		if (family.equals("sansserif") || family.equals("dialog")
+		if (family.equals("sansserif") 
+				|| family.equals("helvetica") 
+				|| family.equals("dialog")
 				|| family.equals("dialoginput"))
 			family = "Arial";
 		else if (family.equals("monospaced"))
