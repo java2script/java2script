@@ -252,6 +252,11 @@ public abstract class JSComponent extends Component {
 	}
 
 	@Override
+	public boolean isDisplayable() { 
+		return getTopInvokableAncestor(this, false) != null;
+	}
+
+	@Override
 	protected void updatePeerVisibility(boolean isVisible) {
 		// check for visibility set prior to creation of ui.
 		if (getOrCreatePeer() == null)
