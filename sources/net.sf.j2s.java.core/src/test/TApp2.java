@@ -3,11 +3,13 @@ package test;
 import java.applet.Applet;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
+import java.awt.Button;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.Label;
 import java.awt.Scrollbar;
 import java.awt.TextArea;
@@ -23,7 +25,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 public class TApp2 extends Applet {
-	
+
 	TextArea ta;
 	
 	public void init() {
@@ -107,7 +109,54 @@ public class TApp2 extends Applet {
 			}
 			
 		});
+
+		new TestGraphic(this).testGraphic();
 	}
+	
+    static class TestGraphic{
+	private TApp2 tApp2;
+
+	public TestGraphic(TApp2 tApp2) {
+		this.tApp2 = tApp2;
+		}
+
+	static {
+		ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
+	}
+
+	void testGraphic() {
+    	Button b = new Button("g");
+    	b.setBounds(300,300,20,20);
+    	// images are created only when a button is displayable
+    	Image i1 = b.createImage(100, 100);
+    	System.out.println("b.isDisplayable " + b.isDisplayable() + " " + i1);
+    	assert(i1 == null);
+    	tApp2.add(b);
+    	i1 = b.createImage(100, 100);
+    	System.out.println("b.isDisplayable " + b.isDisplayable() + " " + i1);
+    	b.setFont(new Font(Font.SERIF, Font.BOLD, 10));
+    	Graphics g = i1.getGraphics();
+    	Font f = g.getFont();
+    	System.out.println(f);
+
+    	// font/background/foreground are set when the graphic is created
+    	Font f0 = new Font(Font.DIALOG, Font.PLAIN, 30);
+    	b.setFont(f0);
+    	b.setBackground(Color.red);
+    	b.setForeground(Color.green);
+    	g = i1.getGraphics();
+    	b.setFont(new Font(Font.SERIF, Font.BOLD, 10));
+    	b.setBackground(Color.white);
+    	b.setForeground(Color.black);
+    	System.out.println("img font=" + g.getFont());
+    	System.out.println("img bg=" + ((Graphics2D) g).getBackground());
+    	System.out.println("img fg=" + g.getColor());
+    	assert(g.getFont().equals(f0));
+    	assert(g.getColor() == Color.green);
+    	assert(((Graphics2D) g).getBackground() == Color.red);
+    	System.out.println("Tapp2 OK");	
+	}
+    }
 
 	public void paint(Graphics g) {
 		super.paint(g);
