@@ -2962,7 +2962,7 @@ if (!target) {
 	J2S.getResourcePath = function(path, isJavaPath) {
 		if (!path || path.indexOf("https:/") != 0
 				&& path.indexOf("https:/") != 0 && path.indexOf("file:/") != 0) {
-			var applet = J2S._applets[java.lang.Thread.currentThread$()
+			var applet = J2S._applets[Clazz.loadClass("java.lang.Thread").currentThread$()
 					.getName$()];
 			path = (!isJavaPath && applet.__Info.resourcePath || applet.__Info.j2sPath)
 					+ "/" + (path || "");
