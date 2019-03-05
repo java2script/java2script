@@ -1047,17 +1047,17 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
         }
     }
 
-//    /**
-//     * This private constructor is for internal use and assumes that its
-//     * arguments are correct.
-//     */
-//    private BigInteger(byte[] magnitude, int signum) {
-//        this.signum = (magnitude.length == 0 ? 0 : signum);
-//        this.mag = stripLeadingZeroBytes(magnitude);
-//        if (mag.length >= MAX_MAG_LENGTH) {
-//            checkRange();
-//        }
-//    }
+    /**
+     * This private constructor is for internal use and assumes that its
+     * arguments are correct.
+     */
+    private BigInteger(byte[] magnitude, int signum) {
+        this.signum = (magnitude.length == 0 ? 0 : signum);
+        this.mag = stripLeadingZeroBytes(magnitude);
+        if (mag.length >= MAX_MAG_LENGTH) {
+            checkRange();
+        }
+    }
 
     /**
      * Throws an {@code ArithmeticException} if the {@code BigInteger} would be
@@ -1256,6 +1256,7 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
      * non-negative
      */
     private static int[] add(int[] x, long val) {
+        int[] y;
         long sum = 0;
         int xIndex = x.length;
         int[] result;
@@ -1576,10 +1577,6 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
         int xstart = xlen - 1;
         int ystart = ylen - 1;
 
-        dumpBits(x, "mul0x");
-        dumpBits(y, "mul0y");
-
-
         if (z == null || z.length < (xlen+ ylen))
             z = new int[xlen+ylen];
 
@@ -1588,11 +1585,9 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
             long product = (y[j] & LONG_MASK) *
                            (x[xstart] & LONG_MASK) + carry;
             z[k] = (int)product;
-            z[k-1] = (int) (carry = product >>> 32);
-            dumpBits(z, "mul jk=" + j + " " + k);
+            carry = product >>> 32;
         }
         z[xstart] = (int)carry;
-        System.out.println("z" + xstart + " = " + carry);
 
         for (int i = xstart-1; i >= 0; i--) {
             carry = 0;
@@ -1601,38 +1596,12 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
                                (x[i] & LONG_MASK) +
                                (z[k] & LONG_MASK) + carry;
                 z[k] = (int)product;
-                z[k-1] = (int) (carry = product >>> 32);
-
-                System.out.println("product " + product + " carry " + carry);
-                dumpBits(z, "mul1 ijk=" + i + " " + j + " " + k);
-
+                carry = product >>> 32;
             }
             z[i] = (int)carry;
-            System.out.println("z" + i + " = " + carry);            
-
         }
-        dumpBits(z, "mul1");
         return z;
     }
-
-    void dumpBits(int[] val, String msg) {
-    	if (val == null)
-    		val = mag;
-    	System.out.println("java bigint:" + msg);
-    	for (int i = 0; i < val.length; i++) {
-    		String s = "00000000000000000000000000000000000000000000000000000000000000000000" + Integer.toBinaryString(val[i]);
-    		s = s.substring(s.length() - 32);
-    		for (int j = 0; j < 32; j += 8)
-    			System.out.print(s.substring(j, j+8) + " ");
-    		System.out.println("");
-    	}
-	}
-
-
-    void dumpBits() {
-    	dumpBits(null, "mag");
-	}
-
 
     /**
      * Multiplies two BigIntegers using the Karatsuba multiplication
@@ -1905,7 +1874,7 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
      *
      * @return {@code this<sup>2</sup>}
      */
-    private BigInteger square() {
+    public BigInteger square() {
         if (signum == 0) {
             return ZERO;
         }
@@ -2630,6 +2599,7 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
 
         // Compute the modular inverse
         int inv = -MutableBigInteger.inverseMod32(mod[modLen-1]);
+        //System.out.println("Java BigInteger inv = " + inv + " " + (((-inv) * mod[modLen-1]) % (1L<<32)));
 
         // Convert base to Montgomery form
         int[] a = leftShift(base, base.length, modLen << 5);
@@ -2771,9 +2741,12 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
         int offset=0;
 
         do {
+        	//System.out.println("montred " + n[0] + " " + n[1]);
             int nEnd = n[n.length-1-offset];
             int carry = mulAdd(n, mod, offset, mlen, inv * nEnd);
+        	//System.out.println("montred " + n[0] + " " + n[1]);
             c += addOne(n, offset, mlen, carry);
+        	//System.out.println("montred " + n[0] + " " + n[1]);
             offset++;
         } while (--len > 0);
 
@@ -2783,6 +2756,7 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
         while (intArrayCmpToLen(n, mod, mlen) >= 0)
             subN(n, mod, mlen);
 
+        //System.out.println("Montg: " + n.length + " " + n[0] + "  " + n[1]);
         return n;
     }
 

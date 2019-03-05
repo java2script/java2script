@@ -294,8 +294,8 @@ class MutableBigInteger {
         // comparison.
         int[] bval = b.value;
         for (int i = offset, j = b.offset; i < alen + offset; i++, j++) {
-            int b1 = value[i] + 0x80000000;
-            int b2 = bval[j]  + 0x80000000;
+            int b1 = value[i];// SwingJS 24-bit ints are unsigned  + Integer.MIN_VALUE;
+            int b2 = bval[j];//  + Integer.MIN_VALUE;
             if (b1 < b2)
                 return -1;
             if (b1 > b2)
@@ -326,7 +326,7 @@ class MutableBigInteger {
         if (len != blen) { // len == blen - 1
             if (bval[bstart] == 1) {
                 ++bstart;
-                carry = 0x80000000;
+                carry = BigInteger.CARRY_BIT;
             } else
                 return -1;
         }
@@ -339,7 +339,7 @@ class MutableBigInteger {
             long v = BigInteger.getLowBits(val[i++]);
             if (v != hb)
                 return v < hb ? -1 : 1;
-            carry = ((bv & 1) == 1 ? (int)BigInteger.TWO_TO_THE[BigInteger.BITS_PER_INT - 1] : 0);
+            carry = ((bv & 1) == 1 ? BigInteger.CARRY_BIT : 0);
             // (bv & 1) << BigInteger.BITS_PER_INT - 1; // carry will be either 0x80000000 or 0
         }
         return carry == 0 ? 0 : -1;
@@ -1369,7 +1369,11 @@ class MutableBigInteger {
 
         MutableBigInteger r;
         MutableBigInteger d;
+       
+        
         if (compareShifted(b, n) < 0) {
+        	
+        	
             // step 3a: if a1<b1, let quotient=a12/b1 and r=a12%b1
             r = a12.divide2n1n(b1, quotient);
 
@@ -2035,13 +2039,13 @@ class MutableBigInteger {
         if (k > 64)
             return euclidModInverse(k);
 
-        int t = inverseMod32(value[offset+intLen-1]);
+        int t = inverseMod24(value[offset+intLen-1]);
 
         if (k <= BigInteger.BITS_PER_INT) {
             t = (k == BigInteger.BITS_PER_INT ? t : t & ((1 << k) - 1));
             return new MutableBigInteger(t);
         }
-
+        
         long pLong = BigInteger.getLowBits(value[offset+intLen-1]);
         if (intLen > 1)
             pLong +=  BigInteger.toHighBits(value[offset+intLen-2]);
@@ -2057,17 +2061,30 @@ class MutableBigInteger {
         return result;
     }
 
+//    /**
+//     * Returns the multiplicative inverse of val mod 2^32.  Assumes val is odd.
+//     */
+//    static int inverseMod32(int val) {
+//        // Newton's iteration!
+//        int t = val;
+//        t *= 2 - val*t;
+//        t *= 2 - val*t;
+//        t *= 2 - val*t;
+//        t *= 2 - val*t;
+//        return t;
+//    }
+
     /**
-     * Returns the multiplicative inverse of val mod 2^32.  Assumes val is odd.
+     * SwingJS: Returns the multiplicative inverse of val mod 2^24.  Assumes val is odd.
      */
-    static int inverseMod32(int val) {
+    static int inverseMod24(int val) {
+    	// we must use 24 bits in SwingJS for 24-bit integer
+    	// see http://marc-b-reynolds.github.io/math/2017/09/18/ModInverse.html
         // Newton's iteration!
         int t = val;
-        t *= 2 - val*t;
-        t *= 2 - val*t;
-        t *= 2 - val*t;
-        t *= 2 - val*t;
-        return t;
+        t = (t * ((2 - val*t)&0xFFFFFF))&0xFFFFFF;
+        t = (t * ((2 - val*t)&0xFFFFFF))&0xFFFFFF;
+        return (t * ((2 - val*t)&0xFFFFFF))&0xFFFFFF;
     }
 
     /**
@@ -2149,7 +2166,7 @@ class MutableBigInteger {
                                                                       int k) {
         MutableBigInteger temp = new MutableBigInteger();
         // Set r to the multiplicative inverse of p mod 2^32
-        int r = -inverseMod32(p.value[p.offset+p.intLen-1]);
+        int r = -inverseMod24(p.value[p.offset+p.intLen-1]);
 
         for (int i=0, numWords = k / BigInteger.BITS_PER_INT; i < numWords; i++) {
             // V = R * c (mod 2^j)

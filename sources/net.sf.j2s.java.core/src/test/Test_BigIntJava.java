@@ -2,144 +2,173 @@ package test;
 
 import test.math.BigDecimal;
 import test.math.BigInteger;
+import test.math.MathContext;
+import java.util.GregorianCalendar;
+
+import org.apache.xerces.jaxp.datatype.XMLGregorianCalendarImpl;
 
 
 public class Test_BigIntJava extends Test_ {
 
 	public static void main(String[] args) {
 
-		BigInteger x = new BigInteger("100000000");
-		BigInteger y = new BigInteger("101000000");
+		System.out.println(inverseMod32(5));
+		
+//		testMulOdd();
+//		testMulEven();
+//
+//		testSquare();
+//		testPow10();
+//		
+//		testBI();
+//		
+//		testMul();
+		testModPow2();
+//		testModPow();
+//		testShift();
+//
+//		testCalendar();
+//
+//		testBDMul();
+		
+		
+	}
+
+	private static void testMulEven() {
+		BigInteger x = new BigInteger("6");
+		BigInteger y = new BigInteger("18");
+		for (int i = 0; i < 100; i++) {
 		BigInteger z = x.multiply(y);
-		System.out.println(z);
-		if (true) return;
-		
+		System.out.println(i + "." + z.toString());
+		assert(z.divide(y).equals(x));
+		assert(z.divide(x).equals(y));
+		x = z;
+		}
+	}
 
-		System.out.println(3 + 0x80000000 < 0);
-		
-//		dumpRadixTable64();
-//		dumpRadixTable48();
-//		dumpRadixTable32();
-//		dumpRadixTable24();
-//		if (true) return;
+	private static void testMulOdd() {
+		BigInteger x = new BigInteger("7");
+		BigInteger y = new BigInteger("13");
+		for (int i = 0; i < 100; i++) {
+		BigInteger z = x.multiply(y);
+		System.out.println(i + "." + z.toString());
+		assert(z.divide(y).equals(x));
+		assert(z.divide(x).equals(y));
+		x = z;
+		}
+	}
 
-		
+	private static void testSquare() {
+		BigInteger m = BigInteger.valueOf(0x1FFFFFF);
+		for (int i = 0; i < 8; i++) {
+			String s = m.square().toString();
+			String t = (m = m.multiply(m)).toString();
+			System.out.println(i + "." + s);
+			System.out.println(i + "." + t);
+			assert(s.equals(t));
+		}
+	}
+
+	private static void testPow10() {
+		BigInteger m = BigInteger.ONE;
+		for (int i = 0; i < 100; i++) {
+			m = m.multiply(BigInteger.TEN);
+			System.out.println(i + "." + m); 
+		}
+	}
+
+	private static void testBDMul() {
+		BigDecimal g;
+//		g = new BigDecimal(200.05);
+//		System.out.println(g.toBigInteger());
+//		System.out.println(g);
+		g = new BigDecimal(200.05, new MathContext(6));
+		System.out.println(g);
+
+		if (true)
+			return;
+		long time = 1538673122263L;//System.currentTimeMillis();
+		g = BigDecimal.valueOf(time, 3);
+		System.out.println(time + " " + g);
+		assert (g.toString().equals("1538673122.263"));
+
+		BigDecimal e = new BigDecimal("200.05");
+		System.out.println(e);
+		BigDecimal f = new BigDecimal(45000);
+		System.out.println(f);
+		g = f.multiply(e);
+		System.out.println(g);
+		assert(g.toString().equals("9002250.00"));
+		assert(f.compareTo(new BigDecimal(45000)) == 0);
+
+		f = f.movePointLeft(3);
+		System.out.println(f);
+		assert(f.compareTo(new BigDecimal(45000)) == -1);
+		f = new BigDecimal(45000000L);
+		System.out.println(f);
+		f = f.movePointLeft(6);
+		System.out.println(f);
+		assert(f.compareTo(new BigDecimal("4500.00")) == -1);
+		assert(f.compareTo(new BigDecimal("0.00450000")) == 1);
+	}
+
+	private static void testCalendar() {
+		GregorianCalendar gc = new GregorianCalendar();
+		System.out.println(gc);
+		XMLGregorianCalendarImpl cc = new XMLGregorianCalendarImpl(gc);
+		String ccf = cc.toXMLFormat();
+		System.out.println(ccf.toString());
+	}
+
+	private static void testBI() {
 		BigInteger b = BigInteger.valueOf(25);
 		BigInteger c = new BigInteger("12345678901234567");//BigInteger.valueOf(2000);
 		System.out.println(c);
 		BigInteger d = b.add(c);
-//		System.out.println(d);
-//		System.out.println(d.toString(2));
+		System.out.println(d);
+		System.out.println(d.toString(2));
 		d = d.multiply(c);
 		System.out.println(d.toString(2));
-		if (true) return;
-//		System.out.println(d);
+		d = d.multiply(c);
+		System.out.println(d);
+		System.out.println(d.toString(2));
 		d = d.multiply(c);
 		System.out.println(d.toString(2));
-//		System.out.println(d);
-		d = d.multiply(c);
-		System.out.println(d.toString(2));
 
-		
-		System.out.println(3 + 0x80000000 < 0);
-//		dumpRadixTable48();
-
-		// multiply
-		
-		BigInteger m;
-		// SwingJS integerizes long values, so we have to build them from ints:
-		//		m = BigInteger.valueOf((long) Math.pow(2, 40)); 
-		m = BigInteger.valueOf((long) Math.pow(2, 20) * (long) Math.pow(2, 20)); 
-		System.out.println(m);		
-
-
-		System.out.println("A x B");
-				
-		m = new BigInteger("11");
-		m = m.multiply(m);
-		System.out.println(m);
-		m = m.multiply(m);
-		System.out.println(m);
-		m = m.multiply(m);
-		System.out.println(m);
-		m = m.multiply(m);
-		System.out.println(m);
-		m = m.multiply(m);
-		System.out.println(m);
-		
-
-		// and, or, andNot, negate, abs 
-		
-		System.out.println("A & B");
-		m = BigInteger.valueOf((long) Math.pow(2, 45)); 
-		System.out.println(m);		
-		b = BigInteger.valueOf((long)Math.pow(2, 15));
-		System.out.println(b);		
-		m = BigInteger.valueOf((long) Math.pow(2, 24)); 
-		System.out.println(m);		
-		m = BigInteger.valueOf((long) Math.pow(2, 26)); 
-		System.out.println(m);		
-		m = BigInteger.valueOf((long) Math.pow(2, 28)); 
-		System.out.println(m);		
-		m = BigInteger.valueOf((long) Math.pow(2, 45)); 
-		System.out.println(m);		
-		m = BigInteger.valueOf((long) Math.pow(2, 46)); 
-		System.out.println(m);		
-		m = BigInteger.valueOf((long) Math.pow(2, 47)); 
-		System.out.println(m);		
-		m = BigInteger.valueOf((long) Math.pow(2, 48)); 
-		System.out.println(m);		
-		m = BigInteger.valueOf(0x567890123456L); // 
-		BigInteger m1 = m.and(b);
-		System.out.println(m1);		
-		m1 = m.or(b);
-		System.out.println(m1);		
-		m1 = m.andNot(b);
-		System.out.println(m1);		
-		m1 = m.negate();
-		System.out.println(m1);		
-		m1 = m.negate().abs();
-		System.out.println(m1);		
-		m = m.setBit(133);
-		System.out.println(m);
-		m = m.clearBit(133);
-		System.out.println(m);		
-//		if (true)return;
-		
 		
 		test("192000000000000000000");
 		BigInteger b1;
 		test( "96000000000000000000");
 		b1 = new BigInteger("96000000000000000000");
 		System.out.println(b1.toString(10));
-		System.out.println(b1.toString(16));
-		System.out.println(b1.toString(2));
+//		System.out.println(b1.toString(16));
+//		System.out.println(b1.toString(2));
 		b1 = b1.multiply(BigInteger.valueOf(2));
 		System.out.println(b1.toString(10));
-		System.out.println(b1.toString(16));
-		System.out.println(b1.toString(2));
+//		System.out.println(b1.toString(16));
+//		System.out.println(b1.toString(2));
 		b1 = b1.multiply(BigInteger.valueOf(2));
 		System.out.println(b1.toString(10));
-		System.out.println(b1.toString(16));
-		System.out.println(b1.toString(2));
+//		System.out.println(b1.toString(16));
+//		System.out.println(b1.toString(2));
 		b1 = b1.multiply(BigInteger.valueOf(2));
 		System.out.println(b1.toString(10));
-		System.out.println(b1.toString(16));
-		System.out.println(b1.toString(2));
+//		System.out.println(b1.toString(16));
+//		System.out.println(b1.toString(2));
 		b1 = b1.multiply(BigInteger.valueOf(2));
 		System.out.println(b1.toString(10));
-		System.out.println(b1.toString(16));
-		System.out.println(b1.toString(2));
+//		System.out.println(b1.toString(16));
+//		System.out.println(b1.toString(2));
 		b1 = b1.multiply(BigInteger.valueOf(5));
 		System.out.println(b1.toString(10));
-		System.out.println(b1.toString(16));
-		System.out.println(b1.toString(2));
+//		System.out.println(b1.toString(16));
+//		System.out.println(b1.toString(2));
 		assert b1.toString(10).equals("7680000000000000000000");
 		b = BigInteger.valueOf(25);
 		b1 = b1.multiply(b);
 		System.out.println(b1.toString(10));
-		System.out.println(b1.toString(16));
-		System.out.println(b1.toString(2));
+//		System.out.println(b1.toString(16));
+//		System.out.println(b1.toString(2));
 
 		d = d.multiply(c);
 		System.out.println(d);
@@ -153,6 +182,7 @@ public class Test_BigIntJava extends Test_ {
 		System.out.println(d);
 		d = d.multiply(c);
 		System.out.println(d);
+		assert (d.toString().equals("539659488879945019969144096149744253082822996305278833191693886734593196177571980115737100546042293708933808976540048777354725216"));
 		d = d.divide(c);
 		System.out.println(d);
 		d = d.divide(c);
@@ -171,20 +201,79 @@ public class Test_BigIntJava extends Test_ {
 		System.out.println(d);
 		assert(d.toString().equals("1"));
 		
-//		BigDecimal e = new BigDecimal(20000);
-//		BigDecimal f = new BigDecimal(45000);
-//		BigDecimal g = f.divide(e);
+//		g = f.divide(e);
 //		System.out.println(g);
-//		System.out.println(g);
+//		assert(g.toString().equals("2.5"));
 		
+//		System.out.println("Test_BigInt still testing");
+	}
+
+    static int inverseMod32(int val) {
+        // Newton's iteration!
+        int t = val;
+        t *= 2 - val*t;
+        t *= 2 - val*t;
+        t *= 2 - val*t;
+        t *= 2 - val*t;
+        return t;
+    }
+
+	private static void testMul() {
+		BigInteger x = new BigInteger("100000000");
+		BigInteger y = new BigInteger("101000000");
+		BigInteger z = x.multiply(y);
+		System.out.println(z.toString());
+		assert(z.toString().equals("10100000000000000"));
+	}
+
+	private static void testModPow() {
+		int v = 7;
+		int n = 5;
+		BigInteger m = BigInteger.valueOf(v);
+		for (int i = 0; i <= 100; i++) {
+			String s = i + "." + m.modPow(BigInteger.valueOf(i), BigInteger.valueOf(n)) + "." + m.pow(i);
+			System.out.println(s);
+			assert(s.equals(modPowTest[i]));
+		}
+	}
+
+//	private static void testModPow2() {
+//		int v = 9;
+//		int n = 6;
+//		BigInteger m = BigInteger.valueOf(v);
+//		for (int i = 0; i <= 100; i++) {
+//			String s = i + "." + m.modPow(BigInteger.valueOf(i), BigInteger.valueOf(i+n)) + "." + m.pow(i);
+//			System.out.println(s);
+//			assert(s.equals(modPowTest2[i]));
+//		}
+//	}
+
+	private static void testModPow2() {
+		int v = 9;
+		int n = 6;
+		BigInteger m = BigInteger.valueOf(v);
+		for (int i = 0; i <= 100; i++) {
+			
+			String s = i + "." + m.modPow(BigInteger.valueOf(i), BigInteger.valueOf(i+n)) + "." + m.pow(i);
+			System.out.println(s + " = m.modPow("+ i + "," + (i+n));
+			System.out.println(modPowTest2[i]);
+			assert(s.equals(modPowTest2[i]));
+		}
+	}
+
+	/**
+	 * Ensure m.shiftLeft(n).shiftRight(n) == m
+	 * 
+	 * @param m
+	 */
+	private static void testShift() {
+		BigInteger m = BigInteger.valueOf(7).pow(63);
+		for (int i = 0; i < 100; i++) {
+			BigInteger r = m.shiftLeft(i).shiftRight(i);
+			System.out.println(r);
+			assert(r.equals(m));			
+		}
 		
-		
-		// OK through 48000000000000
-//		d = d.multiply(c);
-//		System.out.println(d);
-//		d = d.multiply(c);
-//		System.out.println(d);
-		System.out.println("Test_BigInt OK");
 	}
 
 	private static void test(String s) {
@@ -209,7 +298,7 @@ public class Test_BigIntJava extends Test_ {
 		System.out.println("///");
 	}
 	
-	private static void dumpRadixTable64() {
+	private static void dumpRadixTable() {
 		long max = 0x7FFFFFFFFFFFFFFFL;
 		for (int n = 2; n <= 36; n++) {
 			int pow = 0;
@@ -220,44 +309,6 @@ public class Test_BigIntJava extends Test_ {
 			}
 			System.out.println("// " + n + "\t" + pow + "\t" + Long.toHexString(val));
 		}
-	}
-
-	private static void dumpRadixTable24() {
-		int max = 0xFFFFFF;
-		String s1 = "";
-		String s2 = "";
-		for (int n = 2; n <= 36; n++) {
-			int pow = 0;
-			long v, val = 0;
-			for (int p = 0; (v = (int) Math.pow(n, p)) <= max; p++) {
-				pow = p;
-				val = v;
-			}
-			System.out.println("// " + n + "\t" + pow + "\t" + Long.toHexString(val));
-			s1 += "/* " + n + " */ " + pow + ", ";
-			s2 += "/* " + n + " */ 0x" + Long.toHexString(val) + ", \n";		
-		}
-		System.out.println(s1);
-		System.out.println(s2);
-	}
-
-	private static void dumpRadixTable32() {
-		long max = 0x7FFFFFFFL;
-		String s1 = "";
-		String s2 = "";
-		for (int n = 2; n <= 36; n++) {
-			int pow = 0;
-			long v, val = 0;
-			for (int p = 0; (v = (long) Math.pow(n, p)) <= max && v > 0; p++) {
-				pow = p;
-				val = v;
-			}
-			System.out.println("// " + n + "\t" + pow + "\t" + Long.toHexString(val));
-			s1 += "/* " + n + " */ " + pow + ", ";
-			s2 += "/* " + n + " */ 0x" + Long.toHexString(val) + ", \n";		
-		}
-		System.out.println(s1);
-		System.out.println(s2);
 	}
 
 	private static void dumpRadixTable48() {
@@ -302,5 +353,211 @@ public class Test_BigIntJava extends Test_ {
 			System.out.print(s.substring(j, j+8) + (j == 24 ? "\n" : " "));
 		System.out.println("\n");
 	}
+	
+	final static String[] modPowTest = new String[]{"0.1.1"
+			,"1.2.7"
+			,"2.4.49"
+			,"3.3.343"
+			,"4.1.2401"
+			,"5.2.16807"
+			,"6.4.117649"
+			,"7.3.823543"
+			,"8.1.5764801"
+			,"9.2.40353607"
+			,"10.4.282475249"
+			,"11.3.1977326743"
+			,"12.1.13841287201"
+			,"13.2.96889010407"
+			,"14.4.678223072849"
+			,"15.3.4747561509943"
+			,"16.1.33232930569601"
+			,"17.2.232630513987207"
+			,"18.4.1628413597910449"
+			,"19.3.11398895185373143"
+			,"20.1.79792266297612001"
+			,"21.2.558545864083284007"
+			,"22.4.3909821048582988049"
+			,"23.3.27368747340080916343"
+			,"24.1.191581231380566414401"
+			,"25.2.1341068619663964900807"
+			,"26.4.9387480337647754305649"
+			,"27.3.65712362363534280139543"
+			,"28.1.459986536544739960976801"
+			,"29.2.3219905755813179726837607"
+			,"30.4.22539340290692258087863249"
+			,"31.3.157775382034845806615042743"
+			,"32.1.1104427674243920646305299201"
+			,"33.2.7730993719707444524137094407"
+			,"34.4.54116956037952111668959660849"
+			,"35.3.378818692265664781682717625943"
+			,"36.1.2651730845859653471779023381601"
+			,"37.2.18562115921017574302453163671207"
+			,"38.4.129934811447123020117172145698449"
+			,"39.3.909543680129861140820205019889143"
+			,"40.1.6366805760909027985741435139224001"
+			,"41.2.44567640326363195900190045974568007"
+			,"42.4.311973482284542371301330321821976049"
+			,"43.3.2183814375991796599109312252753832343"
+			,"44.1.15286700631942576193765185769276826401"
+			,"45.2.107006904423598033356356300384937784807"
+			,"46.4.749048330965186233494494102694564493649"
+			,"47.3.5243338316756303634461458718861951455543"
+			,"48.1.36703368217294125441230211032033660188801"
+			,"49.2.256923577521058878088611477224235621321607"
+			,"50.4.1798465042647412146620280340569649349251249"
+			,"51.3.12589255298531885026341962383987545444758743"
+			,"52.1.88124787089723195184393736687912818113311201"
+			,"53.2.616873509628062366290756156815389726793178407"
+			,"54.4.4318114567396436564035293097707728087552248849"
+			,"55.3.30226801971775055948247051683954096612865741943"
+			,"56.1.211587613802425391637729361787678676290060193601"
+			,"57.2.1481113296616977741464105532513750734030421355207"
+			,"58.4.10367793076318844190248738727596255138212949486449"
+			,"59.3.72574551534231909331741171093173785967490646405143"
+			,"60.1.508021860739623365322188197652216501772434524836001"
+			,"61.2.3556153025177363557255317383565515512407041673852007"
+			,"62.4.24893071176241544900787221684958608586849291716964049"
+			,"63.3.174251498233690814305510551794710260107945042018748343"
+			,"64.1.1219760487635835700138573862562971820755615294131238401"
+			,"65.2.8538323413450849900970017037940802745289307058918668807"
+			,"66.4.59768263894155949306790119265585619217025149412430681649"
+			,"67.3.418377847259091645147530834859099334519176045887014771543"
+			,"68.1.2928644930813641516032715844013695341634232321209103400801"
+			,"69.2.20500514515695490612229010908095867391439626248463723805607"
+			,"70.4.143503601609868434285603076356671071740077383739246066639249"
+			,"71.3.1004525211269079039999221534496697502180541686174722466474743"
+			,"72.1.7031676478883553279994550741476882515263791803223057265323201"
+			,"73.2.49221735352184872959961855190338177606846542622561400857262407"
+			,"74.4.344552147465294110719732986332367243247925798357929806000836849"
+			,"75.3.2411865032257058775038130904326570702735480588505508642005857943"
+			,"76.1.16883055225799411425266916330285994919148364119538560494041005601"
+			,"77.2.118181386580595879976868414312001964434038548836769923458287039207"
+			,"78.4.827269706064171159838078900184013751038269841857389464208009274449"
+			,"79.3.5790887942449198118866552301288096257267888893001726249456064921143"
+			,"80.1.40536215597144386832065866109016673800875222251012083746192454448001"
+			,"81.2.283753509180010707824461062763116716606126555757084586223347181136007"
+			,"82.4.1986274564260074954771227439341817016242885890299592103563430267952049"
+			,"83.3.13903921949820524683398592075392719113700201232097144724944011875664343"
+			,"84.1.97327453648743672783790144527749033795901408624680013074608083129650401"
+			,"85.2.681292175541205709486531011694243236571309860372760091522256581907552807"
+			,"86.4.4769045228788439966405717081859702655999169022609320640655796073352869649"
+			,"87.3.33383316601519079764840019573017918591994183158265244484590572513470087543"
+			,"88.1.233683216210633558353880137011125430143959282107856711392134007594290612801"
+			,"89.2.1635782513474434908477160959077878011007714974754996979744938053160034289607"
+			,"90.4.11450477594321044359340126713545146077054004823284978858214566372120240027249"
+			,"91.3.80153343160247310515380886994816022539378033762994852007501964604841680190743"
+			,"92.1.561073402121731173607666208963712157775646236340963964052513752233891761335201"
+			,"93.2.3927513814852118215253663462745985104429523654386747748367596265637242329346407"
+			,"94.4.27492596703964827506775644239221895731006665580707234238573173859460696305424849"
+			,"95.3.192448176927753792547429509674553270117046659064950639670012217016224874137973943"
+			,"96.1.1347137238494276547832006567721872890819326613454654477690085519113574118965817601"
+			,"97.2.9429960669459935834824045974053110235735286294182581343830598633795018832760723207"
+			,"98.4.66009724686219550843768321818371771650147004059278069406814190436565131829325062449"
+			,"99.3.462068072803536855906378252728602401551029028414946485847699333055955922805275437143"
+			,"100.1.3234476509624757991344647769100216810857203198904625400933895331391691459636928060001"
+			};
+
+	final static String[] modPowTest2 = new String[]{"0.1.1"
+	,"1.2.9"
+	,"2.1.81"
+	,"3.0.729"
+	,"4.1.6561"
+	,"5.1.59049"
+	,"6.9.531441"
+	,"7.9.4782969"
+	,"8.11.43046721"
+	,"9.9.387420489"
+	,"10.1.3486784401"
+	,"11.15.31381059609"
+	,"12.9.282429536481"
+	,"13.6.2541865828329"
+	,"14.1.22876792454961"
+	,"15.15.205891132094649"
+	,"16.9.1853020188851841"
+	,"17.3.16677181699666569"
+	,"18.9.150094635296999121"
+	,"19.14.1350851717672992089"
+	,"20.3.12157665459056928801"
+	,"21.0.109418989131512359209"
+	,"22.9.984770902183611232881"
+	,"23.6.8862938119652501095929"
+	,"24.21.79766443076872509863361"
+	,"25.5.717897987691852588770249"
+	,"26.17.6461081889226673298932241"
+	,"27.15.58149737003040059690390169"
+	,"28.33.523347633027360537213511521"
+	,"29.4.4710128697246244834921603689"
+	,"30.9.42391158275216203514294433201"
+	,"31.12.381520424476945831628649898809"
+	,"32.35.3433683820292512484657849089281"
+	,"33.27.30903154382632612361920641803529"
+	,"34.1.278128389443693511257285776231761"
+	,"35.32.2503155504993241601315571986085849"
+	,"36.15.22528399544939174411840147874772641"
+	,"37.13.202755595904452569706561330872953769"
+	,"38.25.1824800363140073127359051977856583921"
+	,"39.9.16423203268260658146231467800709255289"
+	,"40.27.147808829414345923316083210206383297601"
+	,"41.36.1330279464729113309844748891857449678409"
+	,"42.33.11972515182562019788602740026717047105681"
+	,"43.9.107752636643058178097424660240453423951129"
+	,"44.11.969773729787523602876821942164080815560161"
+	,"45.42.8727963568087712425891397479476727340041449"
+	,"46.9.78551672112789411833022577315290546060373041"
+	,"47.38.706965049015104706497203195837614914543357369"
+	,"48.27.6362685441135942358474828762538534230890216321"
+	,"49.49.57264168970223481226273458862846808078011946889"
+	,"50.25.515377520732011331036461129765621272702107522001"
+	,"51.30.4638397686588101979328150167890591454318967698009"
+	,"52.25.41745579179292917813953351511015323088870709282081"
+	,"53.53.375710212613636260325580163599137907799836383538729"
+	,"54.21.3381391913522726342930221472392241170198527451848561"
+	,"55.1.30432527221704537086371993251530170531786747066637049"
+	,"56.45.273892744995340833777347939263771534786080723599733441"
+	,"57.36.2465034704958067503996131453373943813074726512397600969"
+	,"58.17.22185312344622607535965183080365494317672538611578408721"
+	,"59.29.199667811101603467823686647723289448859052847504205678489"
+	,"60.45.1797010299914431210413179829509605039731475627537851106401"
+	,"61.64.16173092699229880893718618465586445357583280647840659957609"
+	,"62.21.145557834293068928043467566190278008218249525830565939618481"
+	,"63.36.1310020508637620352391208095712502073964245732475093456566329"
+	,"64.51.11790184577738583171520872861412518665678211592275841109096961"
+	,"65.37.106111661199647248543687855752712667991103904330482569981872649"
+	,"66.9.955004950796825236893190701774414011919935138974343129836853841"
+	,"67.9.8595044557171427132038716315969726107279416250769088168531684569"
+	,"68.71.77355401014542844188348446843727534965514746256921793516785161121"
+	,"69.39.696198609130885597695136021593547814689632716312296141651066450089"
+	,"70.61.6265787482177970379256224194341930332206694446810665274859598050801"
+	,"71.53.56392087339601733413306017749077372989860250021295987473736382457209"
+	,"72.27.507528786056415600719754159741696356908742250191663887263627442114881"
+	,"73.11.4567759074507740406477787437675267212178680251724974985372646979033929"
+	,"74.1.41109831670569663658300086939077404909608122265524774868353822811305361"
+	,"75.0.369988485035126972924700782451696644186473100389722973815184405301748249"
+	,"76.1.3329896365316142756322307042065269797678257903507506764336659647715734241"
+	,"77.30.29969067287845284806900763378587428179104321131567560879029936829441608169"
+	,"78.57.269721605590607563262106870407286853611938890184108047911269431464974473521"
+	,"79.19.2427494450315468069358961833665581682507450011656972431201424883184770261689"
+	,"80.31.21847450052839212624230656502990235142567050104912751880812823948662932355201"
+	,"81.51.196627050475552913618075908526912116283103450944214766927315415537966391196809"
+	,"82.81.1769643454279976222562683176742209046547931058497932902345838739841697520771281"
+	,"83.53.15926791088519786003064148590679881418931379526481396121112548658575277686941529"
+	,"84.81.143341119796678074027577337316118932770382415738332565090012937927177499182473761"
+	,"85.9.1290070078170102666248196035845070394933441741644993085810116441344597492642263849"
+	,"86.25.11610630703530923996233764322605633554400975674804937772291047972101377433780374641"
+	,"87.33.104495676331778315966103878903450701989608781073244439950619431748912396904023371769"
+	,"88.89.940461086986004843694934910131056317906479029659199959555574885740211572136210345921"
+	,"89.74.8464149782874043593254414191179506861158311266932799636000173971661904149225893113289"
+	,"90.81.76177348045866392339289727720615561750424801402395196724001565744957137343033038019601"
+	,"91.4.685596132412797531053607549485540055753823212621556770516014091704614236087297342176409"
+	,"92.25.6170365191715177779482467945369860501784408913594010934644126825341528124785676079587681"
+	,"93.36.55533286725436600015342211508328744516059680222346098411797141428073753123071084716289129"
+	,"94.61.499799580528929400138079903574958700644537122001114885706174272852663778107639762446602161"
+	,"95.14.4498196224760364601242719132174628305800834098010033971355568455673974002968757862019419449"
+	,"96.69.40483766022843281411184472189571654752207506882090305742200116101065766026718820758174775041"
+	,"97.79.364353894205589532700660249706144892769867561938812751679801044909591894240469386823572975369"
+	,"98.81.3279185047850305794305942247355304034928808057449314765118209404186327048164224481412156778321"
+	,"99.99.29512665430652752148753480226197736314359272517043832886063884637676943433478020332709411004889"
+	,"100.77.265613988875874769338781322035779626829233452653394495974574961739092490901302182994384699044001"
+};
 }
 

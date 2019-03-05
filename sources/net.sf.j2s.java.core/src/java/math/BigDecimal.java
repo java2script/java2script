@@ -217,6 +217,10 @@ import java.util.Arrays;
  * @author  Sergey V. Kuksenko
  */
 public class BigDecimal extends Number implements Comparable<BigDecimal> {
+	
+	private final static long long_MAX_VALUE = 1L<<48;
+	private final static long long_MIN_VALUE = -(1L<<48);
+	
     /**
      * The unscaled value of this BigDecimal, as returned by {@link
      * #unscaledValue}.
@@ -255,13 +259,13 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      * Sentinel value for {@link #intCompact} indicating the
      * significand information is only available from {@code intVal}.
      */
-    static final long INFLATED = Long.MIN_VALUE;
+    static final long INFLATED = long_MIN_VALUE;
 
     private static final BigInteger INFLATED_BIGINT = BigInteger.valueOf(INFLATED);
 
     /**
      * If the absolute value of the significand of this BigDecimal is
-     * less than or equal to {@code Long.MAX_VALUE}, the value can be
+     * less than or equal to {@code long_MAX_VALUE}, the value can be
      * compactly stored in this field and used in computations.
      */
     private transient long intCompact;
@@ -318,9 +322,9 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
         new BigDecimal(BigInteger.ZERO, 0, 15, 1),
     };
 
-    // Half of Long.MIN_VALUE & Long.MAX_VALUE.
-    private static final long HALF_LONG_MAX_VALUE = Long.MAX_VALUE / 2;
-    private static final long HALF_LONG_MIN_VALUE = Long.MIN_VALUE / 2;
+    // Half of long_MIN_VALUE & long_MAX_VALUE.
+    private static final long HALF_LONG_MAX_VALUE = long_MAX_VALUE / 2;
+    private static final long HALF_LONG_MIN_VALUE = long_MIN_VALUE / 2;
 
     // Constants
     /**
@@ -911,13 +915,21 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
             throw new NumberFormatException("Infinite or NaN");
         // Translate the double into sign, exponent and significand, according
         // to the formulae in JLS, Section 20.10.22.
-        long valBits = Double.doubleToLongBits(val);
-        int sign = ((valBits >> 63) == 0 ? 1 : -1);
-        int exponent = (int) ((valBits >> 52) & 0x7ffL);
-        long significand = (exponent == 0
-                ? (valBits & ((1L << 52) - 1)) << 1
-                : (valBits & ((1L << 52) - 1)) | (1L << 52));
-        exponent -= 1075;
+        int[] valBits = doubleToInt2(val);
+        System.out.println(Integer.toBinaryString(valBits[0]));
+        System.out.println(Integer.toBinaryString(valBits[1]));
+        int sign = (val < 0 ? -1 : 1);
+        int exponent = (int) ((valBits[1] >> 20) & 0x7ff) - 1075;
+        int highBits = (exponent == -1075
+                ? (valBits[1] & ((1 << 20) - 1)) << 1
+                : (valBits[1] & ((1 << 20) - 1)) | (1 << 20));
+
+        long significand = BigInteger.longLeftShift(highBits, 32) + valBits[0];
+        
+        
+        System.out.println("" + sign + "  " + exponent + " " + significand);
+
+
         // At this point, val == sign * significand * 2**exponent.
 
         /*
@@ -933,24 +945,26 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
         }
         // Normalize
         while ((significand & 1) == 0) { // i.e., significand is even
-            significand >>= 1;
+            significand = (/** @j2sNative 1 ? significand / 2 :*/0); // no >> as this is 48-bit
             exponent++;
         }
         int scale = 0;
         // Calculate intVal and scale
-        BigInteger intVal;
-        long compactVal = sign * significand;
+        BigInteger intVal = BigInteger.valueOf(sign * significand);
+        intVal.signum = sign;
+        System.out.println(intVal);
         if (exponent == 0) {
-            intVal = (compactVal == INFLATED) ? INFLATED_BIGINT : null;
         } else {
             if (exponent < 0) {
-                intVal = BigInteger.valueOf(5).pow(-exponent).multiply(compactVal);
+            	BigInteger bn = BigInteger.valueOf(5).pow(-exponent);
+            	System.out.println(bn);
+                intVal = intVal.multiply(bn);
                 scale = -exponent;
             } else { //  (exponent > 0)
-                intVal = BigInteger.valueOf(2).pow(exponent).multiply(compactVal);
+                intVal = intVal.multiply(BigInteger.valueOf(2).pow(exponent));
             }
-            compactVal = compactValFor(intVal);
         }
+        long compactVal = compactValFor(intVal);
         int prec = 0;
         int mcp = mc.precision;
         if (mcp > 0) { // do rounding
@@ -986,9 +1000,34 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
         this.intCompact = compactVal;
         this.scale = scale;
         this.precision = prec;
+        System.out.println(intVal == null ? null : intVal.toString());
+        System.out.println("--");
     }
 
-    /**
+    private final static double[] bufd;    
+    private final static int[] bufi2;
+    private final static byte[] bufb8;
+    
+    static {
+        @SuppressWarnings("unused")
+		Object buf8 = /** @j2sNative new ArrayBuffer(8) || */null;
+    	bufd = /** @j2sNative new Float64Array(buf8) || */null;
+    	bufi2 = /** @j2sNative new Uint32Array(buf8) || */null;
+    	bufb8 = /** @j2sNative new Uint8Array(buf8) || */null;
+    }
+
+    private static int[] doubleToInt2(double val) {
+    	bufd[0] = val;
+    	return bufi2; 
+    }
+
+    private static byte[] int2ToByte8(int high, int low) {
+    	bufi2[0] = low;
+    	bufi2[1] = high;
+    	return bufb8; 
+    }
+
+	/**
      * Translates a {@code BigInteger} into a {@code BigDecimal}.
      * The scale of the {@code BigDecimal} is zero.
      *
@@ -2618,9 +2657,9 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
         if (intCompact == 0 || (intVal != null && intVal.signum() == 0)) {
             return BigDecimal.ZERO;
         } else if (intCompact != INFLATED) {
-            return createAndStripZerosToMatchScale(intCompact, scale, Long.MIN_VALUE);
+            return createAndStripZerosToMatchScale(intCompact, scale, long_MIN_VALUE);
         } else {
-            return createAndStripZerosToMatchScale(intVal, scale, Long.MIN_VALUE);
+            return createAndStripZerosToMatchScale(intVal, scale, long_MIN_VALUE);
         }
     }
 
@@ -3117,11 +3156,11 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
     }
 
     private static class LongOverflow {
-        /** BigInteger equal to Long.MIN_VALUE. */
-        private static final BigInteger LONGMIN = BigInteger.valueOf(Long.MIN_VALUE);
+        /** BigInteger equal to long_MIN_VALUE. */
+        private static final BigInteger LONGMIN = BigInteger.valueOf(long_MIN_VALUE);
 
-        /** BigInteger equal to Long.MAX_VALUE. */
-        private static final BigInteger LONGMAX = BigInteger.valueOf(Long.MAX_VALUE);
+        /** BigInteger equal to long_MAX_VALUE. */
+        private static final BigInteger LONGMAX = BigInteger.valueOf(long_MAX_VALUE);
 
         public static void check(BigDecimal num) {
             BigInteger intVal = num.inflated();
@@ -3597,75 +3636,111 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
         }
     }
 
-    private static final long[] LONG_TEN_POWERS_TABLE = {
-        1,                     // 0 / 10^0
-        10,                    // 1 / 10^1
-        100,                   // 2 / 10^2
-        1000,                  // 3 / 10^3
-        10000,                 // 4 / 10^4
-        100000,                // 5 / 10^5
-        1000000,               // 6 / 10^6
-        10000000,              // 7 / 10^7
-        100000000,             // 8 / 10^8
-        1000000000,            // 9 / 10^9
-        10000000000L,          // 10 / 10^10
-        100000000000L,         // 11 / 10^11
-        1000000000000L,        // 12 / 10^12
-        10000000000000L,       // 13 / 10^13
-        100000000000000L,      // 14 / 10^14
-        1000000000000000L,     // 15 / 10^15
+    private static final long[] LONG_TEN_POWERS_TABLE;
+    private static BigInteger[] BIG_TEN_POWERS_TABLE;
+    private static final long[] THRESHOLDS_TABLE;
+    
+    static {
+    	LONG_TEN_POWERS_TABLE = /** @j2sNative 1 ? [] : */new long[16];
+    	BIG_TEN_POWERS_TABLE = new BigInteger[16];
+    	THRESHOLDS_TABLE = /** @j2sNative 1 ? [] : */new long[16];
+
+    	long v = 1, vm = long_MAX_VALUE;
+    	BigInteger vb = BigInteger.ONE;
+    	for (int i = 0; i < 16; i++) {
+    		LONG_TEN_POWERS_TABLE[i] = v;
+    		THRESHOLDS_TABLE[i] = vm;
+    		BIG_TEN_POWERS_TABLE[i] = vb;
+    		v = /** @j2sNative 1 ? v * 10 : */0;
+    		vm = /** @j2sNative 1 ? Math.floor(vm / 10) : */0; 
+    		vb = vb.multiply(BigInteger.TEN);
+    	}
+   }
 //        10000000000000000L,    // 16 / 10^16
 //        100000000000000000L,   // 17 / 10^17
 //        1000000000000000000L   // 18 / 10^18
-    };
-    private static volatile BigInteger BIG_TEN_POWERS_TABLE[] = {
-        BigInteger.ONE,
-        BigInteger.valueOf(10),
-        BigInteger.valueOf(100),
-        BigInteger.valueOf(1000),
-        BigInteger.valueOf(10000),
-        BigInteger.valueOf(100000),
-        BigInteger.valueOf(1000000),
-        BigInteger.valueOf(10000000),
-        BigInteger.valueOf(100000000),
-        BigInteger.valueOf(1000000000),
-        BigInteger.valueOf(10000000000L),
-        BigInteger.valueOf(100000000000L),
-        BigInteger.valueOf(1000000000000L),
-        BigInteger.valueOf(10000000000000L),
-        BigInteger.valueOf(100000000000000L),
-        BigInteger.valueOf(1000000000000000L),
-//        BigInteger.valueOf(10000000000000000L),
-//        BigInteger.valueOf(100000000000000000L),
-//        BigInteger.valueOf(1000000000000000000L)
-    };
 
     private static final int BIG_TEN_POWERS_TABLE_INITLEN =
         BIG_TEN_POWERS_TABLE.length;
     private static final int BIG_TEN_POWERS_TABLE_MAX =
         16 * BIG_TEN_POWERS_TABLE_INITLEN;
 
-    private static final long THRESHOLDS_TABLE[] = {
-        Long.MAX_VALUE,                     // 0
-        Long.MAX_VALUE/10L,                 // 1
-        Long.MAX_VALUE/100L,                // 2
-        Long.MAX_VALUE/1000L,               // 3
-        Long.MAX_VALUE/10000L,              // 4
-        Long.MAX_VALUE/100000L,             // 5
-        Long.MAX_VALUE/1000000L,            // 6
-        Long.MAX_VALUE/10000000L,           // 7
-        Long.MAX_VALUE/100000000L,          // 8
-        Long.MAX_VALUE/1000000000L,         // 9
-        Long.MAX_VALUE/10000000000L,        // 10
-        Long.MAX_VALUE/100000000000L,       // 11
-        Long.MAX_VALUE/1000000000000L,      // 12
-        Long.MAX_VALUE/10000000000000L,     // 13
-        Long.MAX_VALUE/100000000000000L,    // 14
-        Long.MAX_VALUE/1000000000000000L,   // 15
-//        Long.MAX_VALUE/10000000000000000L,  // 16
-//        Long.MAX_VALUE/100000000000000000L, // 17
-//        Long.MAX_VALUE/1000000000000000000L // 18
+//    private static final long THRESHOLDS_TABLE[] = {
+//        long_MAX_VALUE,                     // 0
+//        long_MAX_VALUE/10L,                 // 1
+//        long_MAX_VALUE/100L,                // 2
+//        long_MAX_VALUE/1000L,               // 3
+//        long_MAX_VALUE/10000L,              // 4
+//        long_MAX_VALUE/100000L,             // 5
+//        long_MAX_VALUE/1000000L,            // 6
+//        long_MAX_VALUE/10000000L,           // 7
+//        long_MAX_VALUE/100000000L,          // 8
+//        long_MAX_VALUE/1000000000L,         // 9
+//        long_MAX_VALUE/10000000000L,        // 10
+//        long_MAX_VALUE/100000000000L,       // 11
+//        long_MAX_VALUE/1000000000000L,      // 12
+//        long_MAX_VALUE/10000000000000L,     // 13
+//        long_MAX_VALUE/100000000000000L,    // 14
+//        long_MAX_VALUE/1000000000000000L,   // 15
+//        long_MAX_VALUE/10000000000000000L,  // 16
+//        long_MAX_VALUE/100000000000000000L, // 17
+//        long_MAX_VALUE/1000000000000000000L // 18
+//    };
+
+    // SwingJS we will have to worry about this when we get to it
+    // all of these are unrepresentable in JavaScript
+    // used for precision(long,long) only
+    private static final long[][] LONGLONG_TEN_POWERS_TABLE = {
+    		    		
+    		
+            {   0L, 0x2386f26fc10000L },  //10^16
+    		
+            {   0L, 0x16345785d8a0000L },  //10^17
+    		
+            {   0L, 0xde0b6b3a7640000L },  //10^18
+    		
+        {   0L, 0x8AC7230489E80000L },  //10^19
+        {       0x5L, 0x6bc75e2d63100000L },  //10^20
+        {       0x36L, 0x35c9adc5dea00000L },  //10^21
+        {       0x21eL, 0x19e0c9bab2400000L  },  //10^22
+        {       0x152dL, 0x02c7e14af6800000L  },  //10^23
+        {       0xd3c2L, 0x1bcecceda1000000L  },  //10^24
+        {       0x84595L, 0x161401484a000000L  },  //10^25
+        {       0x52b7d2L, 0xdcc80cd2e4000000L  },  //10^26
+        {       0x33b2e3cL, 0x9fd0803ce8000000L  },  //10^27
+        {       0x204fce5eL, 0x3e25026110000000L  },  //10^28
+        {       0x1431e0faeL, 0x6d7217caa0000000L  },  //10^29
+        {       0xc9f2c9cd0L, 0x4674edea40000000L  },  //10^30
+        {       0x7e37be2022L, 0xc0914b2680000000L  },  //10^31
+        {       0x4ee2d6d415bL, 0x85acef8100000000L  },  //10^32
+        {       0x314dc6448d93L, 0x38c15b0a00000000L  },  //10^33
+        {       0x1ed09bead87c0L, 0x378d8e6400000000L  },  //10^34
+        {       0x13426172c74d82L, 0x2b878fe800000000L  },  //10^35
+        {       0xc097ce7bc90715L, 0xb34b9f1000000000L  },  //10^36
+        {       0x785ee10d5da46d9L, 0x00f436a000000000L  },  //10^37
+        {       0x4b3b4ca85a86c47aL, 0x098a224000000000L  },  //10^38
     };
+
+	/*
+	 * returns precision of 128-bit value
+	 */
+	private static int precision(long hi, long lo) {
+		if (hi == 0) {
+			if (lo >= 0) {
+				return longDigitLength(lo);
+			}
+			return (unsignedLongCompareEq(lo, LONGLONG_TEN_POWERS_TABLE[0][1])) ? 17 : 16;
+			// 0x8AC7230489E80000L = unsigned 10^19
+		}
+		int r = (int) BigInteger.longRightShift((128 - BigInteger.longNumberOfLeadingZeros(hi) + 1) * 1233, 12);
+		int idx = r - 16;
+		return (idx >= LONGLONG_TEN_POWERS_TABLE.length 
+				|| longLongCompareMagnitude(hi, lo,
+				LONGLONG_TEN_POWERS_TABLE[idx][0], 
+				LONGLONG_TEN_POWERS_TABLE[idx][1])
+				) ? r : r + 1;
+	}
+
 
     /**
      * Compute val * 10 ^ n; return this product if it is
@@ -3866,21 +3941,26 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
     }
 
    /**
+    * SwingJS note: BigInteger is limited to 24-bits, so this 
+    * limits to 48 bits, which is within the JavaScript double limit
      * Returns the compact value for given {@code BigInteger}, or
      * INFLATED if too big. Relies on internal representation of
      * {@code BigInteger}.
      */
     private static long compactValFor(BigInteger b) {
+    	if (b.isOneInt())
+    		return b.intValue();
         int[] m = b.mag;
         int len = m.length;
         if (len == 0)
             return 0;
         int d = m[0];
-        if (len > 2 || (len == 2 && d < 0))
+        if (len > 2)
             return INFLATED;
-        long u = (len == 2 ?
-            BigInteger.toLongBits(d, m[1]) : BigInteger.getLowBits(d));
-        return (b.signum < 0)? -u : u;
+        return b.longValue();
+//        long u = (len == 2 ?
+//            BigInteger.toLongBits(d, m[1]) : BigInteger.getLowBits(d));
+//        return (b.signum < 0)? -u : u;
     }
 
     private static int longCompareMagnitude(long x, long y) {
@@ -4994,11 +5074,11 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
     }
 
     private static boolean unsignedLongCompare(long one, double two) {
-        return (one+Long.MIN_VALUE) > (two+Long.MIN_VALUE);
+        return (one+long_MIN_VALUE) > (two+long_MIN_VALUE);
     }
 
     private static boolean unsignedLongCompareEq(long one, double two) {
-        return (one+Long.MIN_VALUE) >= (two+Long.MIN_VALUE);
+        return (one+long_MIN_VALUE) >= (two+long_MIN_VALUE);
     }
 
 
@@ -5157,48 +5237,6 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
         return null;
     }
 
-    // SwingJS -- this is broken. I do not know what these numbers are
-    // but we have to do something with 10^16-10^18
-    private static final double[][] LONGLONG_TEN_POWERS_TABLE = {
-        {   0L, 0x8AC7230489E80000L },  //10^19
-        {       0x5L, 0x6bc75e2d63100000L },  //10^20
-        {       0x36L, 0x35c9adc5dea00000L },  //10^21
-        {       0x21eL, 0x19e0c9bab2400000L  },  //10^22
-        {       0x152dL, 0x02c7e14af6800000L  },  //10^23
-        {       0xd3c2L, 0x1bcecceda1000000L  },  //10^24
-        {       0x84595L, 0x161401484a000000L  },  //10^25
-        {       0x52b7d2L, 0xdcc80cd2e4000000L  },  //10^26
-        {       0x33b2e3cL, 0x9fd0803ce8000000L  },  //10^27
-        {       0x204fce5eL, 0x3e25026110000000L  },  //10^28
-        {       0x1431e0faeL, 0x6d7217caa0000000L  },  //10^29
-        {       0xc9f2c9cd0L, 0x4674edea40000000L  },  //10^30
-        {       0x7e37be2022L, 0xc0914b2680000000L  },  //10^31
-        {       0x4ee2d6d415bL, 0x85acef8100000000L  },  //10^32
-        {       0x314dc6448d93L, 0x38c15b0a00000000L  },  //10^33
-        {       0x1ed09bead87c0L, 0x378d8e6400000000L  },  //10^34
-        {       0x13426172c74d82L, 0x2b878fe800000000L  },  //10^35
-        {       0xc097ce7bc90715L, 0xb34b9f1000000000L  },  //10^36
-        {       0x785ee10d5da46d9L, 0x00f436a000000000L  },  //10^37
-        {       0x4b3b4ca85a86c47aL, 0x098a224000000000L  },  //10^38
-    };
-
-	/*
-	 * returns precision of 128-bit value
-	 */
-	private static int precision(long hi, long lo) {
-		if (hi == 0) {
-			if (lo >= 0) {
-				return longDigitLength(lo);
-			}
-			return (unsignedLongCompareEq(lo, LONGLONG_TEN_POWERS_TABLE[0][1])) ? 20 : 19;
-			// 0x8AC7230489E80000L = unsigned 10^19
-		}
-		int r = ((128 - BigInteger.longNumberOfLeadingZeros(hi) + 1) * 1233) >>> 12;
-		int idx = r - 19;
-		return (idx >= LONGLONG_TEN_POWERS_TABLE.length || longLongCompareMagnitude(hi, lo,
-				LONGLONG_TEN_POWERS_TABLE[idx][0], LONGLONG_TEN_POWERS_TABLE[idx][1])) ? r : r + 1;
-	}
-
     /*
      * returns true if 128 bit number <hi0,lo0> is less then <hi1,lo1>
      * hi0 & hi1 should be non-negative
@@ -5207,7 +5245,7 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
         if(hi0!=hi1) {
             return hi0<hi1;
         }
-        return (lo0+Long.MIN_VALUE) <(lo1+Long.MIN_VALUE);
+        return (lo0+long_MIN_VALUE) <(lo1+long_MIN_VALUE);
     }
 
     private static BigDecimal divide(long dividend, int dividendScale, long divisor, int divisorScale, int scale, int roundingMode) {
