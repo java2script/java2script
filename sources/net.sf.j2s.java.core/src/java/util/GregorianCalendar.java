@@ -665,7 +665,7 @@ public class GregorianCalendar extends Calendar {
      * in the calendar.
      * @param millis the value used to set the <code>MILLISECOND</code> calendar field
      */
-    GregorianCalendar(int year, int month, int dayOfMonth,
+    public GregorianCalendar(int year, int month, int dayOfMonth,
                       int hourOfDay, int minute, int second, int millis) {
         super();
         gdate = (BaseCalendar.Date) getGcal().newCalendarDate(getZone());
