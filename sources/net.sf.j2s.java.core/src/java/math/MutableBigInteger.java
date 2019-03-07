@@ -46,9 +46,10 @@ package java.math;
  */
 
 import static java.math.BigDecimal.INFLATED;
+
 import java.util.Arrays;
 
-class MutableBigInteger {
+public class MutableBigInteger {
     /**
      * Holds the magnitude of this MutableBigInteger in big endian order.
      * The magnitude may start at an offset into the value array, and it may
@@ -516,7 +517,8 @@ class MutableBigInteger {
     /**
      * Returns a String representation of this MutableBigInteger in radix 10.
      */
-    public String toString() {
+    @Override
+	public String toString() {
         BigInteger b = toBigInteger(1);
         return b.toString();
     }
@@ -2077,7 +2079,7 @@ class MutableBigInteger {
     /**
      * SwingJS: Returns the multiplicative inverse of val mod 2^24.  Assumes val is odd.
      */
-    static int inverseMod24(int val) {
+    public static int inverseMod24(int val) {
     	// we must use 24 bits in SwingJS for 24-bit integer
     	// see http://marc-b-reynolds.github.io/math/2017/09/18/ModInverse.html
         // Newton's iteration!

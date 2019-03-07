@@ -3,6 +3,7 @@ package test;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
+import java.math.MutableBigInteger;
 import java.util.GregorianCalendar;
 
 import org.apache.xerces.jaxp.datatype.XMLGregorianCalendarImpl;
@@ -10,43 +11,28 @@ import org.apache.xerces.jaxp.datatype.XMLGregorianCalendarImpl;
 
 public class Test_BigInt extends Test_ {
 
-    static int inverseMod24(int val) {
-        // Newton's iteration!
-        int t = val;
-        /**
-         * @j2sNative
-         * 
-         * t = (t * (2 - (val*t)&0xFFFFFF))&0xFFFFFF;
-         * t = (t * (2 - (val*t)&0xFFFFFF))&0xFFFFFF;
-         * t = (t * (2 - (val*t)&0xFFFFFF))&0xFFFFFF;
-         */
-        return t;
-    }
     
     public static void main(String[] args) {
 
-// failing		testBDMul();
-		
-		
-
-    	assert(((inverseMod24(5) * 5)&0xFFFFFF) == 1);
-
+    	testInverseMod();
 		testSub();
 		testDiv3();
 		testSquare();
 		testPow10();
-		
 		testBI();
-		
 		testMulOdd();
 		testMulEven();
 		testModPow2();
 		testModPow();
-
 		testShift();
-
 		testCalendar();
 
+	}
+
+	private static void testInverseMod() {
+		for (int n = 1; n < 10000; n+=2)
+			assert(((MutableBigInteger.inverseMod24(n) * n)&0xFFFFFF) == 1);
+		System.out.println("testInverseMod OK");
 	}
 
 	private static void testDiv3() {
@@ -210,48 +196,6 @@ public class Test_BigInt extends Test_ {
 		System.out.println("testBigInt OK");
 	}
 
-	private static void testBDMul() {
-		BigDecimal g;
-		
-//		g = new BigDecimal(200.05);
-//		System.out.println(g.toBigInteger());
-//		System.out.println(g);
-		g = new BigDecimal(200.05, new MathContext(6));
-		System.out.println(g);
-		long time = 1538673122263L;//System.currentTimeMillis();
-		g = BigDecimal.valueOf(time, 3);
-		System.out.println(time + " " + g);
-		assert (g.toString().equals("1538673122.263"));
-
-		BigDecimal e = new BigDecimal("200.05");
-		System.out.println(e);
-		BigDecimal f = new BigDecimal(45000);
-		System.out.println(f);
-		g = f.multiply(e);
-		System.out.println(g);
-		assert(g.toString().equals("9002250.00"));
-		assert(f.compareTo(new BigDecimal(45000)) == 0);
-
-		f = f.movePointLeft(3);
-		System.out.println(f);
-		assert(f.compareTo(new BigDecimal(45000)) == -1);
-		f = new BigDecimal(45000000L);
-		System.out.println(f);
-		f = f.movePointLeft(6);
-		System.out.println(f);
-		assert(f.compareTo(new BigDecimal("4500.00")) == -1);
-		assert(f.compareTo(new BigDecimal("0.00450000")) == 1);
-		System.out.println("testBDMul OK");
-	}
-
-	private static void testBDDiv() {
-		BigDecimal g;
-		g = BigDecimal.valueOf(5).divide(BigDecimal.valueOf(2));
-		System.out.println(g);
-		assert(g.toString().equals("2.5"));
-		System.out.println("testBDDiv OK");
-	}
-	
 	private static void testMulOdd() {
 		BigInteger x = new BigInteger("7");
 		BigInteger y = new BigInteger("13");

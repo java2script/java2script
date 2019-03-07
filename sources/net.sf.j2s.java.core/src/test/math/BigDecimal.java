@@ -896,6 +896,9 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
         // Translate the double into sign, exponent and significand, according
         // to the formulae in JLS, Section 20.10.22.
         long valBits = Double.doubleToLongBits(val);
+
+        System.out.println("BigDecimal val " + Long.toBinaryString(valBits));
+
         int sign = ((valBits >> 63) == 0 ? 1 : -1);
         int exponent = (int) ((valBits >> 52) & 0x7ffL);
         long significand = (exponent == 0
@@ -903,6 +906,8 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
                 : (valBits & ((1L << 52) - 1)) | (1L << 52));
         exponent -= 1075;
         // At this point, val == sign * significand * 2**exponent.
+
+        System.out.println("BigDecimal sign/exp/sign " + sign + "  " + exponent + " " + significand);
 
         /*
          * Special case zero to supress nonterminating normalization and bogus
@@ -929,17 +934,17 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
         } else {
             if (exponent < 0) {
                 intVal = BigInteger.valueOf(5).pow(-exponent).multiply(compactVal);
-                
-                System.out.println(BigInteger.valueOf(5).pow(-exponent).multiply(compactVal));
-                System.out.println(BigInteger.valueOf(5).pow(-exponent).multiply(BigInteger.valueOf(compactVal)));
-                System.out.println(BigInteger.valueOf(compactVal).multiply(BigInteger.valueOf(5).pow(-exponent)));
-                
+
+            	BigInteger bn = BigInteger.valueOf(5).pow(-exponent);
+            	System.out.println("5^" + -exponent + " = " + bn + "\n" + intVal + " " + compactVal);
+
                 scale = -exponent;
             } else { //  (exponent > 0)
                 intVal = BigInteger.valueOf(2).pow(exponent).multiply(compactVal);
             }
             compactVal = compactValFor(intVal);
         }
+        System.out.println("BigDecimal intVal " + intVal);
         int prec = 0;
         int mcp = mc.precision;
         if (mcp > 0) { // do rounding

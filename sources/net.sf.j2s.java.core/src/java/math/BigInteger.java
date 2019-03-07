@@ -518,15 +518,24 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
         } else {
             signum = 1;
         }
-
+        if (val + 1 == val) {
+        	throw new IllegalArgumentException("SwingJS BigInteger(long) value too large");
+        }
         int highWord = getHighBits(val);
-        if (highWord == 0) {
-            mag = new int[1];
-            mag[0] = getLowBits(val);
-        } else {
+        int lowWord = getLowBits(val);
+        long extra = val / TWO_TO_THE[48];
+        if (extra != 0) {
+            mag = new int[3];
+            mag[0] = (int) extra;
+            mag[1] = highWord;
+            mag[2] = lowWord;
+        } else if (highWord != 0) {
             mag = new int[2];
             mag[0] = highWord;
-            mag[1] = getLowBits(val);
+            mag[1] = lowWord;
+        } else {
+            mag = new int[1];
+            mag[0] = lowWord;
         }
     }
 
