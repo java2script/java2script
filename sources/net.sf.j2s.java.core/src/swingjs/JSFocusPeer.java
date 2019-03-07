@@ -35,7 +35,7 @@ public class JSFocusPeer implements KeyboardFocusManagerPeer {
 	@Override
 	public void setCurrentFocusedWindow(Window win) {
 		currentWindow = win;
-		setCurrentFocusOwner(win);
+//		setCurrentFocusOwner(win);
 	}
 
 	@Override
@@ -143,7 +143,8 @@ public class JSFocusPeer implements KeyboardFocusManagerPeer {
 		Container p = JSComponent.getTopInvokableAncestor((Container) e.getSource(), true);
 		if (getCurrentFocusOwner() != null && p == currentWindow) 
 			return;
-		handleJSFocus(p, currentWindow, true);
+		//oops, windows do not report focus gained 
+		// handleJSFocus(p, currentWindow, true);
 		setCurrentFocusedWindow((Window) p);
 		if (p instanceof JInternalFrame) {
 			try {
