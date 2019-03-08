@@ -916,8 +916,8 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
         // Translate the double into sign, exponent and significand, according
         // to the formulae in JLS, Section 20.10.22.
         int[] valBits = doubleToInt2(val);
-        System.out.println("BigDecimal val[0] " + Integer.toBinaryString(valBits[0]));
-        System.out.println("BigDecimal val[1] " + Integer.toBinaryString(valBits[1]));
+        //System.out.println("BigDecimal val[0] " + Integer.toBinaryString(valBits[0]));
+        //System.out.println("BigDecimal val[1] " + Integer.toBinaryString(valBits[1]));
         int sign = (val < 0 ? -1 : 1);
         int exponent = (int) ((valBits[1] >> 20) & 0x7ff) - 1075;
         int highBits = (exponent == -1075
@@ -927,7 +927,7 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
         long significand = BigInteger.longLeftShift(highBits, 32) + valBits[0];
         
         
-        System.out.println("BigDecimal sign/exp/sign " + sign + "  " + exponent + " " + significand);
+        //System.out.println("BigDecimal sign/exp/sign " + sign + "  " + exponent + " " + significand);
 
 
         // At this point, val == sign * significand * 2**exponent.
@@ -952,17 +952,17 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
         // Calculate intVal and scale
         BigInteger intVal = BigInteger.valueOf(sign * significand);
         intVal.signum = sign;
-        System.out.println("BigDecimal intVal " + intVal);
+        //System.out.println("BigDecimal intVal " + intVal);
         if (exponent == 0) {
         } else {
             if (exponent < 0) {
             	BigInteger bn = BigInteger.valueOf(5).pow(-exponent);
 //                intVal = intVal.multiply(bn);
-            	System.out.println(intVal.multiply(bn));
-            	System.out.println(bn.multiply(intVal));
+            	//System.out.println(intVal.multiply(bn));
+            	//System.out.println(bn.multiply(intVal));
             	intVal = bn.multiply(intVal);
-            	System.out.println(intVal);
-            	System.out.println(bn);
+            	//System.out.println(intVal);
+            	//System.out.println(bn);
                 scale = -exponent;
             } else { //  (exponent > 0)
                 intVal = intVal.multiply(BigInteger.valueOf(2).pow(exponent));
@@ -1004,8 +1004,8 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
         this.intCompact = compactVal;
         this.scale = scale;
         this.precision = prec;
-        System.out.println("BigDecimal intVal " + (intVal == null ? null : intVal.toString()));
-        System.out.println("--");
+        //System.out.println("BigDecimal intVal " + (intVal == null ? null : intVal.toString()));
+        //System.out.println("--");
     }
 
     private final static double[] bufd;    
@@ -3427,7 +3427,7 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
 
             // Get 2 digits/iteration using longs until quotient fits into an int
             while (intCompact > Integer.MAX_VALUE) {
-                q = intCompact / 100;
+                q = /** @j2sNative Math.floor(intCompact / 100) || */0;
                 r = (int)(intCompact - q * 100);
                 intCompact = q;
                 cmpCharArray[--charPos] = DIGIT_ONES[r];

@@ -264,14 +264,20 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
 			TWO_TO_THE[i] = TWO_TO_THE[i - 1] * 2;
 	}
 
+	/**
+	 * SwingJS addition, for BigDecimal
+	 * @param x
+	 * @return
+	 */
 	static int longNumberOfLeadingZeros(long x) {    	
-		int n = -SPARE_BITS_INT;
+		int n;
 		long y = getHighBits(x); 
 		if (y == 0) {
 			x = getLowBits(x);
+			n = 32;
 		} else {
-			n = BITS_PER_INT - 2 * SPARE_BITS_INT;
-			x = y;   		
+			x = y;
+			n = 0;
 		}
 		return n + Integer.numberOfLeadingZeros((int) x);
 	}
@@ -3994,13 +4000,13 @@ public class BigInteger extends Number implements Comparable<BigInteger> {
     }
 
     static void dumpBits(int[] val, String msg) {
-    	System.out.println("js bigint:" + msg);
+    	System.err.println("js bigint:" + msg);
     	for (int i = 0; i < val.length; i++) {
     		String s = "00000000000000000000000000000000000000000000000000000000000000000000" + Integer.toBinaryString(val[i]);
     		s = s.substring(s.length() - 32);
     		for (int j = 0; j < 32; j += 8)
-    			System.out.print(s.substring(j, j+8) + " ");
-    		System.out.println(" " +  Integer.toHexString(val[i]));
+    			System.err.print(s.substring(j, j+8) + " ");
+    		System.err.println(" " +  Integer.toHexString(val[i]));
     	}
 	}
 

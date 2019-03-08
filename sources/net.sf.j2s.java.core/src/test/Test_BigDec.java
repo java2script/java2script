@@ -26,6 +26,10 @@ public class Test_BigDec extends Test_ {
 
 	private static void testBDMul() {
 		BigDecimal g;
+		g = new BigDecimal(200.05, new MathContext(6));
+		System.out.println("200.050 == " + g.toString());
+		assert(g.toString().equals("200.050"));
+
 		g = new BigDecimal(1);
 		g = new BigDecimal(200.05);
 		System.out.println("200.05 = " + g);
@@ -56,13 +60,8 @@ public class Test_BigDec extends Test_ {
 		
 		long time = 1538673122263L;//System.currentTimeMillis();
 		g = BigDecimal.valueOf(time, 3);
-		System.out.println(time + " " + g);
+		System.out.println(time + " " + g.toString());
 		assert (g.toString().equals("1538673122.263"));
-
-		g = new BigDecimal(200.05, new MathContext(6));
-		System.out.println(g);
-		assert(g.toString().equals("200.050"));
-
 
 		System.out.println("testBDMul OK");
 	}

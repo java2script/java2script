@@ -21,6 +21,11 @@ public class Test_BigDecJava extends Test_ {
 	private static void testBDMul() {
 		BigDecimal g;
 		
+		g = new BigDecimal(200.05, new MathContext(6));
+		System.out.println("200.050 == " + g.toString());
+		assert(g.toString().equals("200.050"));
+
+		
 		g = new BigDecimal(200.05);
 		System.out.println("200.05 = " + g);
 		System.out.println("200 = " + g.toBigInteger());

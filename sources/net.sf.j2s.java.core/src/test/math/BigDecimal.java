@@ -3805,7 +3805,8 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
             x = -x;
         if (x < 10) // must screen for 0, might as well 10
             return 1;
-        int r = ((64 - Long.numberOfLeadingZeros(x) + 1) * 1233) >>> 12;
+        int n = Long.numberOfLeadingZeros(x);
+        int r = ((64 - n + 1) * 1233) >>> 12;
         long[] tab = LONG_TEN_POWERS_TABLE;
         // if r >= length, must have max possible digits for long
         return (r >= tab.length || x < tab[r]) ? r : r + 1;
