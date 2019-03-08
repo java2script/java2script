@@ -5,6 +5,7 @@ import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Button;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -21,6 +22,7 @@ import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -28,11 +30,38 @@ public class TApp2 extends Applet {
 
 	TextArea ta;
 	
+    private void addButtonTest() {
+    	for (int i = 0; i < 4; i++) {
+    		for (int j = 0; j < 4; j++) {
+    			Button b = new Button("XyX");
+    			Label l = new Label("XyX", Label.CENTER);
+    			setLBBounds((Component) b, (Component) l, i, j);
+    		}
+    	}
+	}
+
+    private void setLBBounds(Component b, Component l, int i, int j) {
+		int x = 40 + i * 170;
+		int y = 350 + j * 40;
+		int w = 70 + i * 10;
+		int h = 25 + j * 4;
+		b.setBounds(x, y, w, h);
+		l.setBounds(x + 105, y, w - 30, h);
+		b.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10 + i * 3));
+		l.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10 + i * 3));
+			l.setBackground(Color.cyan);
+		add(b);
+		add(l);
+	}
+
 	public void init() {
-		setSize(400, 400);
+		setSize(800, 600);
 		setFont(new Font(Font.MONOSPACED, Font.PLAIN, 14));
 		setBackground(Color.yellow);
 		setLayout(null);
+		
+		addButtonTest();
+		
 		JPanel panel = new JPanel();
 		panel.setBounds(10, 10, 100, 150);
 		add(panel);
@@ -113,7 +142,7 @@ public class TApp2 extends Applet {
 		new TestGraphic(this).testGraphic();
 	}
 	
-    static class TestGraphic{
+	static class TestGraphic{
 	private TApp2 tApp2;
 
 	public TestGraphic(TApp2 tApp2) {
@@ -126,7 +155,7 @@ public class TApp2 extends Applet {
 
 	void testGraphic() {
     	Button b = new Button("g");
-    	b.setBounds(300,300,20,20);
+    	b.setBounds(300,300,40,20);
     	// images are created only when a button is displayable
     	Image i1 = b.createImage(100, 100);
     	System.out.println("b.isDisplayable " + b.isDisplayable() + " " + i1);

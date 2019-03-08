@@ -2,12 +2,15 @@ package test;
 
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
+import java.awt.Button;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.Label;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.FocusEvent;
@@ -27,8 +30,34 @@ public class TApp2_Swing extends JApplet {
 
 	JTextArea ta;
 	
-	public void init() {
-		setSize(400, 400);
+    private void addButtonTest() {
+    	for (int i = 0; i < 4; i++) {
+    		for (int j = 0; j < 4; j++) {
+    			JButton b = new JButton("XyX");
+    			JLabel l = new JLabel("XyX", JLabel.CENTER);
+    			setLBBounds((Component) b, (Component) l, i, j);
+    		}
+    	}
+	}
+
+    private void setLBBounds(Component b, Component l, int i, int j) {
+		int x = 40 + i * 170;
+		int y = 350 + j * 40;
+		int w = 70 + i * 10;
+		int h = 25 + j * 4;
+		b.setBounds(x, y, w, h);
+		l.setBounds(x + 105, y, w - 30, h);
+		b.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10 + i * 3));
+		l.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10 + i * 3));
+			l.setBackground(Color.cyan);
+		add(b);
+		add(l);
+	}
+
+
+    public void init() {
+		setSize(800, 600);
+		addButtonTest();
 		setFont(new Font(Font.MONOSPACED, Font.PLAIN, 14));
 		setBackground(Color.yellow);
 		setLayout(null);
@@ -125,7 +154,7 @@ public class TApp2_Swing extends JApplet {
 
 	void testGraphic() {
     	JButton b = new JButton("g");
-    	b.setBounds(300,300,20,20);
+    	b.setBounds(300,300,40,20);
     	// images are created only when a button is displayable
     	Image i1 = b.createImage(100, 100);
     	System.out.println("b.isDisplayable " + b.isDisplayable() + " " + i1);
