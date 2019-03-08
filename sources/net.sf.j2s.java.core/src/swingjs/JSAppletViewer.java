@@ -465,6 +465,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 					if (resizer != null)
 						resizer.show();
 				}
+				JSFocusPeer.setFocusLast(applet);
 				applet.repaint();
 				break;
 			case APPLET_STOP:
@@ -506,7 +507,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 				Object args = params.get("args");
 				if (args instanceof String)
 					args = PT.split((String) args, " ");
-				((JSApplet) applet).runMain(main, (String[]) args);
+				((JSDummyApplet) applet).runMain(main, (String[]) args);
 				JSUtil.readyCallback(appletName, fullName, applet, this);
 				break;
 			case APPLET_QUIT:

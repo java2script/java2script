@@ -3,6 +3,7 @@
  * Includes: jquery.ui.slider.js
  * Copyright 2015 jQuery Foundation and other contributors; Licensed MIT */
 
+// BH 2/10/2019 fix for AWT scrollbar differences from Swing
 // BH 7/21/2018 fix for ScrollPane scroll bars not clicking on tracks 
 // note -- still no support for unit (deprecated anyway) or block increments
 // BH 2/28/2017 7:06:57 AM fix for vertical inverted and slider jump when clicked
@@ -39,8 +40,8 @@
 		var doMouseCapture = function(me, event, obj, isEndCheck) {
 			
 			var that = me, o = me.options;
-
-			if (o.disabled) {
+			
+			if (o.disabled || event.type == "mousemove" && event.buttons == 0) {
 				return false;
 			}
 
@@ -63,7 +64,7 @@
 				closestHandle = $(me.handles[index]);
 			}
 
-			allowed = me._start(event, index);
+			allowed = (obj == OBJ_HANDLE ? me._start(event, index) : true);
 			if (allowed === false) {
 				return false;
 			}
@@ -102,9 +103,9 @@
 				});
 			var val = normValueFromMouse(me, position, obj);
 			var pixmouse = getPixelMouse(me, position, false);
+			
 			var isAtEnd = !mouseOverHandle && (!me.isScrollBar ? 0 : 
 				pixmouse < 5 ? -1 : pixmouse > getPixelTotal(me) - 5 ? 1 : 0);
-			
 			if (isAtEnd) {
 				me.element.addClass(me.orientation === "horizontal" ? 
 						(isAtEnd == 1 ? "ui-j2sslider-at-right" : "ui-j2sslider-at-left")
@@ -161,7 +162,7 @@
 		}
 		
 		var getPixelTotal = function(me) {
-			return (me.orientation == "horizontal" ? width(me) : height(me)) || 100;	
+			return (me.orientation == "horizontal" ? width(me) : height(me)) - me.visibleAdjust || 100;	
 		}
 
 		var postMouseEvent = function(me, xye, id) {
@@ -228,6 +229,9 @@
 					this._mouseInit();
 					this.isScrollBar = o.isScrollBar;
 					this.handleSize = 0; // scrollbar only
+					this.visibleAmount = 0;
+					this.visibleAdjust = 0;
+					this.visibleFraction = 0;
 					this.handleFraction = 0;
 					this.marginX = (o.isScrollBar ? 0 : 19); // from CSS - margin * 2 + border
 					this.marginY = (o.isScrollBar ? 0 : 0);
@@ -284,6 +288,11 @@
 					var fDownTrack = function(event, id) {
 						doMouseCapture(me, event, OBJ_TRACK, false);
 						me._mouseSliding = false;
+					};
+
+					var fUpTrack = function(event, id) {
+						//me._stop(event, me._handleIndex);
+						me._change(event, me._handleIndex);
 					};
 
 					var fDownWrap = function(event, id) {
@@ -343,6 +352,7 @@
 						$(this.element).mousedown(fDownTrack);
 						if (this.isScrollBar) {
 							$(this.element).mousemove(fMoveTrack);
+							$(this.element).mouseup(fUpTrack);
 							$(this.element).mouseout(fOutTrack);
 						} else {
 							$(this.element).closest(".ui-j2sslider-wrap").mousedown(fDownWrap);
@@ -588,13 +598,23 @@
 						this._refreshValue();
 						this._animateOff = false;
 					break;
-					case "handleSize":
+					case "visibleAmount":
 						this.isScrollBar = true;
-						this.handleFraction = value;
+						this.visibleAmount = value;
+						var min = this._valueMin();
+						var max = this._valueMax();
+						var f = (value >= 0 && min + value <= max ? 
+							 value * 1 / (max - min) : 0.1);
+						this.visibleFraction = f;
+						if (f < 0.1)
+							f = 0.1;
+						this.handleFraction = f;
+						var hw = (this.orientation === "horizontal" ? width(this) : height(this));
 						if (this.orientation === "horizontal")
-							$(this.handles[0]).width(this.handleSize = value * width(this));
+							$(this.handles[0]).width(this.handleSize = f * hw);
 						else
-							$(this.handles[0]).height(this.handleSize = value * height(this));
+							$(this.handles[0]).height(this.handleSize = f * hw);
+						this.visibleAdjust = (f - this.visibleFraction) * hw;
 						this._animateOff = true;
 						this._resetClass();
 						this._refreshValue();
@@ -648,7 +668,7 @@
 					if (val <= this._valueMin()) {
 						return this._valueMin();
 					}
-					var max = Math.round((this._valueMax() - this._valueMin()) * (1-this.handleFraction) + this._valueMin());
+					var max = Math.round(this._valueMax() - this.visibleAmount); //* (1-this.handleFraction)
 					if (val >= max) {
 						return max;
 					}
@@ -689,8 +709,12 @@
 				},
 
 				_refreshValue : function() {
-					var lastValPercent, valPercent, value, valueMin, valueMax, oRange = this.options.range, o = this.options, that = this, animate = (!this._animateOff) ? o.animate
-							: false, _set = {};
+					var lastValPercent, valPercent, value, valueMin, valueMax;
+					var o = this.options;
+					var oRange = o.range;
+					var that = this;
+					var animate = (!this._animateOff) ? o.animate : false;
+					var _set = {};
 					if (this.options.values
 							&& this.options.values.length) {
 						this.handles

@@ -90,31 +90,31 @@ public interface ScrollPaneConstants
      * Used to set the vertical scroll bar policy so that
      * vertical scrollbars are displayed only when needed.
      */
-    int VERTICAL_SCROLLBAR_AS_NEEDED = 20;
+    public int VERTICAL_SCROLLBAR_AS_NEEDED = 20;
     /**
      * Used to set the vertical scroll bar policy so that
      * vertical scrollbars are never displayed.
      */
-    int VERTICAL_SCROLLBAR_NEVER = 21;
+    public int VERTICAL_SCROLLBAR_NEVER = 21;
     /**
      * Used to set the vertical scroll bar policy so that
      * vertical scrollbars are always displayed.
      */
-    int VERTICAL_SCROLLBAR_ALWAYS = 22;
+    public int VERTICAL_SCROLLBAR_ALWAYS = 22;
 
     /**
      * Used to set the horizontal scroll bar policy so that
      * horizontal scrollbars are displayed only when needed.
      */
-    int HORIZONTAL_SCROLLBAR_AS_NEEDED = 30;
+    public int HORIZONTAL_SCROLLBAR_AS_NEEDED = 30;
     /**
      * Used to set the horizontal scroll bar policy so that
      * horizontal scrollbars are never displayed.
      */
-    int HORIZONTAL_SCROLLBAR_NEVER = 31;
+    public int HORIZONTAL_SCROLLBAR_NEVER = 31;
     /**
      * Used to set the horizontal scroll bar policy so that
      * horizontal scrollbars are always displayed.
      */
-    int HORIZONTAL_SCROLLBAR_ALWAYS = 32;
+    public int HORIZONTAL_SCROLLBAR_ALWAYS = 32;
 }

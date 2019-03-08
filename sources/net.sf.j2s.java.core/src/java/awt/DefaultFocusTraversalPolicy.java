@@ -103,7 +103,7 @@ public class DefaultFocusTraversalPolicy
         // Verify that the Component is recursively enabled. Disabling a
         // heavyweight Container disables its children, whereas disabling
         // a lightweight Container does not.
-        if (!(aComponent instanceof Window)) {
+        if (!aComponent.isWindowOrJSApplet()) {
             for (Container enableTest = aComponent.getParent();
                  enableTest != null;
                  enableTest = enableTest.getParent())
@@ -111,7 +111,7 @@ public class DefaultFocusTraversalPolicy
                 if (!(enableTest.isEnabled() || enableTest.isLightweight())) {
                     return false;
                 }
-                if (enableTest instanceof Window) {
+                if (enableTest.isWindowOrJSApplet()) {
                     break;
                 }
             }

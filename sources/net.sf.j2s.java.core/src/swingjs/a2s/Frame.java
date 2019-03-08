@@ -1,8 +1,13 @@
 package swingjs.a2s;
 
+import java.awt.Component;
 import java.awt.GraphicsConfiguration;
+import java.awt.MenuBar;
+import java.awt.MenuComponent;
+//import java.awt.peer.FramePeer;
 
 import javax.swing.JFrame;
+import javax.swing.JMenuBar;
 
 public class Frame extends JFrame implements A2SContainer {
 
@@ -11,27 +16,27 @@ public class Frame extends JFrame implements A2SContainer {
 	
 	@Override
 	public A2SListener getA2SListener() {
-		// TODO Auto-generated method stub
-		return null;
+		return listener;
 	}
 
 		
 	public Frame() {
-		super();
-		listener = new A2SListener();
+		this(null, null);
 	}
 
 	public Frame(String title) {
-		super(title);
+		this(title, null);
 	}
 
 	
 	public Frame(GraphicsConfiguration gc) {
-		super(gc);
+		this(null, gc);
 	}
 
 	public Frame(String title, GraphicsConfiguration gc) {
 		super(title, gc);
+		listener = new A2SListener();
+		Util.setAWTWindowDefaults(this);
 	}
 
 
@@ -44,13 +49,33 @@ public class Frame extends JFrame implements A2SContainer {
 		setJMenuBar(m);
 	}
 
-  public void unsetMenuBar() {
-  	setJMenuBar(null);
+	public void remove(MenuComponent m) {
+		JMenuBar mb = super.getJMenuBar();
+		if (mb != null)
+			mb.remove((Component) m);
+	}
+	
+    public void unsetMenuBar() {
+    	setJMenuBar(null);
 	}
 
 
 	public MenuBar getMenubar() {
 		return (MenuBar) getJMenuBar();
 	}
+
+    @Override
+	public void addNotify() {
+        synchronized (getTreeLock()) {
+        	getOrCreatePeer();
+//            FramePeer p = (FramePeer)peer;
+            if (getMenubar() != null) {
+            	getMenubar().addNotify();
+//                p.setMenuBar(menuBar);
+            }
+//            p.setMaximizedBounds(maximizedBounds);
+            super.addNotify();
+        }
+    }
 
 }

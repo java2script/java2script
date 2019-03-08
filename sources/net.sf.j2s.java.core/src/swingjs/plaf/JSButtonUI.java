@@ -31,6 +31,7 @@ package swingjs.plaf;
 //import java.awt.FontMetrics;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 
@@ -195,13 +196,24 @@ public class JSButtonUI extends JSLightweightUI {
 		// from menus only - action is on mouse-up
 		// other controls use a ButtonListener
 		// checkbox or radio menuitem handle themselves
-		if (menuItem != null && actionNode == null) {
-			switch (eventType) {
-			case MouseEvent.MOUSE_RELEASED:
-				menuItem.doClick(0);
-				return HANDLED;
+		if (actionNode == null)
+			if (menuItem == null) {
+				switch (eventType) {
+				case KeyEvent.KEY_RELEASED:
+					int keyCode = /** @j2sNative jQueryEvent.keyCode || */
+							0;
+					if (keyCode == 13 || keyCode == 32) {
+						button.doClick();
+						return HANDLED;
+					}
+				}
+			} else {
+				switch (eventType) {
+				case MouseEvent.MOUSE_RELEASED:
+					menuItem.doClick(0);
+					return HANDLED;
+				}
 			}
-		}
 		return NOT_HANDLED;
 	}
 

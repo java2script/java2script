@@ -4,6 +4,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -15,7 +17,7 @@ import java.awt.event.TextListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-public class A2SListener  implements AdjustmentListener, ActionListener, KeyListener, MouseListener, MouseMotionListener, TextListener, ChangeListener {
+public class A2SListener  implements AdjustmentListener, ActionListener, KeyListener, MouseListener, MouseMotionListener, TextListener, ChangeListener, ItemListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -73,10 +75,15 @@ public class A2SListener  implements AdjustmentListener, ActionListener, KeyList
 	}
 
 	@Override
+	public void itemStateChanged(ItemEvent e) {
+		new A2SEvent(e).run();
+	}
+
+	@Override
 	public void adjustmentValueChanged(AdjustmentEvent e) {
 		new A2SEvent(e).run();
 		if (e.getSource() instanceof Scrollbar)
-			((Scrollbar) e.getSource()).processAdjustmentEvent(e);
+			((Scrollbar) e.getSource()).processAdjustmentEventA2S(e);
 	}
 
 	@Override

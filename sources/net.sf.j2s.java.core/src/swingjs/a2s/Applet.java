@@ -1,12 +1,16 @@
 package swingjs.a2s;
 
 import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.HeadlessException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.swing.JApplet;
+import javax.swing.JComponent;
+
+import swingjs.JSUtil;
 
 public class Applet extends JApplet implements A2SContainer {
 	
@@ -17,42 +21,42 @@ public class Applet extends JApplet implements A2SContainer {
     public Applet() throws HeadlessException {
     	super();
 		// Note: applet.paint(g) needs to include super.paint(g), or buttons will not
-		// show. So we do that in fixAppletPaint().
-		fixAppletPaint();
+		// show. So we do that in fixAWTPaint().
+		fixAWTPaint(this, Applet.class);
 		listener = new A2SListener();
 		addMouseListener(listener);
 		addMouseMotionListener(listener);
+		setLayout(new FlowLayout());
+		//getRootPane().setOpaque(false);
+		((JComponent) getContentPane()).setOpaque(false);
     }
 
+	/**
+	 * Effectively add "super.paint(g)" the user's method.
+	 * 
+	 */
+	static void fixAWTPaint(Component c, Class<?> cl) {
+		Object f = JSUtil.getJ2SAlias(c, "paint$java_awt_Graphics");
+		if (JSUtil.isOverridden(f, cl)
+				&& f.toString().indexOf("C$.superclazz.prototype.paint$java_awt_Graphics.apply(this") < 0) {
+		/**@j2sNative
+		 * 
+		 *      c.paint$java_awt_Graphics = function(g) {
+		 *        cl.$clazz$.prototype.paint$java_awt_Graphics.apply(c,[g]);
+		 *        f.apply(c,[g]);
+		 *      }
+		 */
+		}
+	}
+
+
+    
 	@Override
 	public void setBackground(Color c) {
 		super.setBackground(c);
 		getContentPane().setBackground(c);
 	}
 	
-	/**
-	 * Effectively add "super.paint(g)" the user's method.
-	 * 
-	 */
-	private void fixAppletPaint() {
-    	
-		/**@j2sNative
-		 * 
-		 * try{
-		 * if (this.paint$java_awt_Graphics.exClazz != C$
-		 *   && this.paint$java_awt_Graphics.toString().indexOf("C$.superclazz.prototype.paint$java_awt_Graphics.apply(this") < 0) {
-		 *      var oldPaint = this.paint$java_awt_Graphics;
-		 *      this.paint$java_awt_Graphics = function(g) {
-		 *        C$.prototype.paint$java_awt_Graphics.apply(this,[g]);
-		 *        oldPaint.apply(this,[g]);
-		 *      };
-		 * }
-		 * } catch(e) {
-		 * System.out.println("java.applet.Applet.fixAppletPaint() exception: " + e);
-		 * }
-		 */
-	}
-
 	protected A2SListener listener;
 
 	@Override

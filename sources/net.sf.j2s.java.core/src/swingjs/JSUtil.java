@@ -1,5 +1,6 @@
 package swingjs;
 
+import java.awt.Component;
 import java.awt.JSComponent;
 import java.awt.Toolkit;
 import java.io.BufferedInputStream;
@@ -324,7 +325,18 @@ public class JSUtil {
 	}
 
 	public static String getStackTrace() {
-		return /** @j2sNative Clazz._getStackTrace() || */null;
+		/**
+		 * @j2sNative return Clazz._getStackTrace();
+		 * 
+		 */
+		{
+			try {
+				throw new NullPointerException();
+			} catch (Exception e) {
+				e.printStackTrace();
+				return e.getStackTrace().toString();
+			}
+		}
 	}
 
 	/**
@@ -559,6 +571,30 @@ public class JSUtil {
 
 	public static BufferedReader getJSONReader(Object is) {
 		return JSON.getJSONReader((InputStream) is);
+	}
+
+	/**
+	 * Retrieve the JavaScript method or field aliasing this component's method or field
+	 * @param c the component
+	 * @param name the method's fully qualified name, such as paint$java_awt_Graphics
+	 * @return the JavaScript function backing this method name
+	 */
+	public static Object getJ2SAlias(Component c, String name) {
+		return (/** @j2sNative c[name] || */null);
+	}
+
+	/**
+	 * 
+	 * @param f  the JavaScript function aliasing the Java method
+	 * @param cl
+	 * @return
+	 */
+	public static boolean isOverridden(Object f, Class<?> cl) {
+		return (/** @j2sNative f && f.exClazz != cl.$clazz$ || */false);
+	}
+
+	public static boolean isOverridden(Component c, String name, Class<?> cl) {
+		return isOverridden(getJ2SAlias(c, name), cl);
 	}
 
 }

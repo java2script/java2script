@@ -28,6 +28,7 @@
 
 package java.awt.image;
 
+import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
@@ -82,6 +83,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	protected int width, height;
 	protected boolean _havePix;
 	protected Object _canvas; // created in setRGB
+	public Component _component; // for context from component.createImage()
 	private int[] _pixSaved;
     JSGraphics2D _g; // a JSGraphics2D instance
 	//private static int rangeIndex;
@@ -1780,7 +1782,13 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			}
 			_pix = null;
 		}
-		return (Graphics2D) (Object)_g;
+		Graphics2D g2d = (Graphics2D) (Object)_g;
+		if (_component != null) {
+			g2d.setFont(_component.getFont());
+			g2d.setBackground(_component.getBackground());
+			g2d.setColor(_component.getForeground());
+		}
+		return g2d;
 	}
 
 

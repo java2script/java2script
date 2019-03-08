@@ -145,7 +145,7 @@ public class SwingUtilities implements SwingConstants
      */
     public static Window getWindowAncestor(Component c) {
         for(Container p = c.getParent(); p != null; p = p.getParent()) {
-            if (p instanceof Window) {
+            if (p.isWindowOrJSApplet()) {
                 return (Window)p;
             }
         }
@@ -158,7 +158,7 @@ public class SwingUtilities implements SwingConstants
      */
     static Point convertScreenLocationToParent(Container parent,int x, int y) {
         for (Container p = parent; p != null; p = p.getParent()) {
-            if (p instanceof Window) {
+            if (p != null && p.isWindowOrJSApplet()) {
                 Point point = new Point(x, y);
 
                 SwingUtilities.convertPointFromScreen(point, parent);
@@ -380,13 +380,12 @@ public class SwingUtilities implements SwingConstants
     public static void convertPointToScreen(Point p,Component c) {
 //            Rectangle b;
             int x,y;
-
+            boolean done = false;
             do {
                 if(c instanceof JComponent) {
                     x = ((JComponent)c).getX();
                     y = ((JComponent)c).getY();
-                } else if(c instanceof JSApplet ||
-                          c instanceof Window) {
+                } else if((done = c.isWindowOrJSApplet())) {
                     try {
                         Point pp = c.getLocationOnScreen();
                         x = pp.x;
@@ -402,11 +401,8 @@ public class SwingUtilities implements SwingConstants
 
                 p.x += x;
                 p.y += y;
-
-                if(c instanceof Window || c instanceof JSApplet)
-                    break;
                 c = c.getParent();
-            } while(c != null);
+            } while(c != null && !done);
         }
 
     /**
@@ -424,8 +420,7 @@ public class SwingUtilities implements SwingConstants
             if(c instanceof JComponent) {
                 x = ((JComponent)c).getX();
                 y = ((JComponent)c).getY();
-            }  else if(c instanceof JSApplet ||
-                       c instanceof Window) {
+            }  else if(c.isWindowOrJSApplet()) {
                 try {
                     Point pp = c.getLocationOnScreen();
                     x = pp.x;
@@ -442,7 +437,7 @@ public class SwingUtilities implements SwingConstants
             p.x -= x;
             p.y -= y;
 
-            if(c instanceof Window || c instanceof JSApplet)
+            if(c.isWindowOrJSApplet())
                 break;
             c = c.getParent();
         } while(c != null);
@@ -1530,7 +1525,7 @@ public class SwingUtilities implements SwingConstants
 
         // verify focusOwner is a descendant of c
         for (Component temp = focusOwner; temp != null;
-             temp = (temp instanceof Window) ? null : temp.getParent())
+             temp = (temp.isWindowOrJSApplet() ? null : temp.getParent()))
         {
             if (temp == c) {
                 return focusOwner;
@@ -1563,16 +1558,12 @@ public class SwingUtilities implements SwingConstants
      * @return the first ancestor of c that's a Window or the last Applet ancestor
      */
     public static Component getRoot(Component c) {
-        Component applet = null;
         for(Component p = c; p != null; p = p.getParent()) {
-            if (p instanceof Window) {
+            if (p.isWindowOrJSApplet()) {
                 return p;
             }
-            if (p instanceof JSApplet) {
-                applet = p;
-            }
         }
-        return applet;
+        return null;
     }
 
  // SwingJS never used - see JComponent   

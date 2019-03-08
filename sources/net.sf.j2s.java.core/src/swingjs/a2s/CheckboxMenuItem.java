@@ -4,6 +4,8 @@ import javax.swing.JCheckBoxMenuItem;
 
 public class CheckboxMenuItem extends JCheckBoxMenuItem {
 
+	public void isAWT() {}
+	
 	public CheckboxMenuItem(String string) {
 		super(string);
 	}
@@ -25,6 +27,7 @@ public class CheckboxMenuItem extends JCheckBoxMenuItem {
 	public void setState(boolean tf) {
 		setSelected(tf);
 	}
+
 
 
 }

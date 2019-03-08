@@ -28,7 +28,7 @@ public class JSMenuItemUI extends JSButtonUI {
 	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			domNode = createItem("_item", null);
-			bindJQueryEvents(domNode, "mouseenter", -1);
+			bindJQueryEvents(domNode, "mouseenter", SOME_MOUSE_EVENT);
 		}
 		// add code here for adjustments when changes in bounds or other properties occur.
 		DOMNode.setVisible(domNode, jc.isVisible());

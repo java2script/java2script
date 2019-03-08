@@ -36,12 +36,9 @@ public class JSTextFieldUI extends JSTextUI {
 		}
 		setPadding(editor.getMargin());
 		textListener.checkDocument();
-		setCssFont(setProp(focusNode, "value", getComponentText()), c.getFont());
+		setCssFont(setJSText(focusNode, "value", setCurrentText()), c.getFont());
 		// setTextAlignment();
-		setEditable(editable);
-		if (textField.isOpaque() && textField.isEnabled())
-			setBackground(textField.getBackground());
-		return updateDOMNodeCUI();
+		return super.updateDOMNode();
 	}
 
 	@Override
@@ -56,15 +53,13 @@ public class JSTextFieldUI extends JSTextUI {
 	}
 
 	@Override
-	boolean handleEnter(int eventType) {
-		if (eventType == KeyEvent.KEY_PRESSED) {
-			Action a = getActionMap().get(JTextField.notifyAction);
-			if (a != null) {
-				JSToolkit.setIsDispatchThread(true);
-				a.actionPerformed(new ActionEvent(c, ActionEvent.ACTION_PERFORMED,
-						JTextField.notifyAction, System.currentTimeMillis(), 0));
-				JSToolkit.setIsDispatchThread(false);
-			}
+	boolean handleEnter() {
+		Action a = getActionMap().get(JTextField.notifyAction);
+		if (a != null) {
+			JSToolkit.setIsDispatchThread(true);
+			a.actionPerformed(new ActionEvent(c, ActionEvent.ACTION_PERFORMED,
+					JTextField.notifyAction, System.currentTimeMillis(), 0));
+			JSToolkit.setIsDispatchThread(false);
 		}
 		return true;
 	}

@@ -2,21 +2,16 @@ package test;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.util.Map;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -24,15 +19,13 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.plaf.UIResource;
 
-@SuppressWarnings("serial")
 public class Test_Dialog extends JFrame implements PropertyChangeListener {
 
 	public static int ii;
-	
-	public static Object o = new Object();
-	public static Color c = new Color(1,2,3);
 
-	
+	public static Object o = new Object();
+	public static Color c = new Color(1, 2, 3);
+
 	// @Override
 	public void propertyChange(PropertyChangeEvent event) {
 		Object val = event.getNewValue();
@@ -63,7 +56,8 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 			switch (name) {
 			case "SelectedFile":
 				File file = (File) val;
-				byte[] array = (val == null ? null : /** @j2sNative file._bytes || */ null);
+				byte[] array = (val == null ? null : /** @j2sNative file._bytes || */
+						null);
 				onDialogReturn("fileName is '" + file.getName() + "'\n\n" + new String(array));
 				return;
 			}
@@ -73,23 +67,22 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 				event.getSource().getClass().getName() + " " + event.getPropertyName() + ": " + event.getNewValue());
 	}
 
-	// JSCOmponent.DialogCaller interface
+	// JSComponent.DialogCaller interface
 	public void onDialogReturn(int value) {
 		if (value != Math.floor(value))
 			return; // in JavaScript, this will be NaN
 		System.out.println("int value is " + value);
 	}
 
-	// JSCOmponent.DialogCaller interface
+	// JSComponent.DialogCaller interface
 	public void onDialogReturn(Object value) {
-		if (value instanceof UIResource)
+		if (value == null || value instanceof UIResource)
 			return;
 		status.setText(value.toString());
 	}
 
 	JLabel status;
-	
-	
+
 	public Test_Dialog() {
 		super();
 		this.setTitle("testing dialogs");
@@ -97,8 +90,7 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 		JPanel m = new JPanel(new GridLayout());
 		status = new JLabel("testing");
 		m.add(status, null);
-		add(m,BorderLayout.SOUTH);
-		
+		add(m, BorderLayout.SOUTH);
 
 		JPanel p = new JPanel();
 		p.setLayout(new BoxLayout(p, BoxLayout.X_AXIS));
@@ -106,7 +98,6 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 		this.setLocation(300, 300);
 		JButton b;
 
-		
 		b = new JButton("ConfirmDialog");
 		final JPanel content = new JPanel();
 		content.setLayout(new BorderLayout());
@@ -114,8 +105,7 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 		b.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Test_Dialog.this.onDialogReturn(JOptionPane.showConfirmDialog(
-						Test_Dialog.this, 
+				Test_Dialog.this.onDialogReturn(JOptionPane.showConfirmDialog(Test_Dialog.this,
 						"<html>The frame is now " + (isResizable() ? "<b>NOT</b> " : "") + "resizable.</html>",
 						"Testing JOptionPane", JOptionPane.OK_CANCEL_OPTION));
 				setResizable(!isResizable());
@@ -152,8 +142,6 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 		});
 		p.add(b);
 
-		
-		
 		b = new JButton("FileOpenDialog");
 		b.addActionListener(new ActionListener() {
 
@@ -179,7 +167,7 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 
 		});
 		p.add(b);
-		
+
 		pack();
 		setVisible(true);
 
@@ -193,6 +181,5 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 		}
 
 	}
-
 
 }

@@ -88,7 +88,7 @@ if (typeof(SwingJS) == "undefined") {
 		var DefaultInfo = {
       code: null,//"swingjs.test.TanSugd3S",
       uncompressed: true,
-			color: "#FFFFFF", // applet object background color
+			//color: "#FFFFFF", // applet object background color
 			width: 300,
 			height: 300,
 			serverURL: "http://your.server.here/jsmol.php",

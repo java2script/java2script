@@ -274,13 +274,13 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
     /* Appease the serialization gods */
     private static final long serialVersionUID = 6108874887143696463L;
 
-    private static final /*ThreadLocal<*/StringBuilderHelper/*>*/
-        threadLocalStringBuilderHelper = new /*ThreadLocal<*/StringBuilderHelper/*>*/() /*{
+    private static final ThreadLocal<StringBuilderHelper>
+        threadLocalStringBuilderHelper = new ThreadLocal<StringBuilderHelper>() {
         @Override
         protected StringBuilderHelper initialValue() {
             return new StringBuilderHelper();
         }
-    }*/;
+    };
 
     // Cache of common small BigDecimal values.
     private static final BigDecimal zeroThroughTen[] = {
@@ -896,6 +896,9 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
         // Translate the double into sign, exponent and significand, according
         // to the formulae in JLS, Section 20.10.22.
         long valBits = Double.doubleToLongBits(val);
+
+        System.out.println("BigDecimal val " + Long.toBinaryString(valBits));
+
         int sign = ((valBits >> 63) == 0 ? 1 : -1);
         int exponent = (int) ((valBits >> 52) & 0x7ffL);
         long significand = (exponent == 0
@@ -903,6 +906,8 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
                 : (valBits & ((1L << 52) - 1)) | (1L << 52));
         exponent -= 1075;
         // At this point, val == sign * significand * 2**exponent.
+
+        System.out.println("BigDecimal sign/exp/sign " + sign + "  " + exponent + " " + significand);
 
         /*
          * Special case zero to supress nonterminating normalization and bogus
@@ -929,12 +934,17 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
         } else {
             if (exponent < 0) {
                 intVal = BigInteger.valueOf(5).pow(-exponent).multiply(compactVal);
+
+            	BigInteger bn = BigInteger.valueOf(5).pow(-exponent);
+            	System.out.println("5^" + -exponent + " = " + bn + "\n" + intVal + " " + compactVal);
+
                 scale = -exponent;
             } else { //  (exponent > 0)
                 intVal = BigInteger.valueOf(2).pow(exponent).multiply(compactVal);
             }
             compactVal = compactValFor(intVal);
         }
+        System.out.println("BigDecimal intVal " + intVal);
         int prec = 0;
         int mcp = mc.precision;
         if (mcp > 0) { // do rounding
@@ -1913,7 +1923,7 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      *         rounding mode is {@code UNNECESSARY}, or {@code mc.precision}
      *         {@literal >} 0 and the result of {@code this.divideToIntgralValue(divisor)} would
      *         require a precision of more than {@code mc.precision} digits.
-     * @see    #divideToIntegralValue(test.math.BigDecimal, test.math.MathContext)
+     * @see    #divideToIntegralValue(java.math.BigDecimal, java.math.MathContext)
      * @since  1.5
      */
     public BigDecimal remainder(BigDecimal divisor, MathContext mc) {
@@ -1937,8 +1947,8 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      *         (the result of {@code divideToIntegralValue}) is the initial element
      *         and the remainder is the final element.
      * @throws ArithmeticException if {@code divisor==0}
-     * @see    #divideToIntegralValue(test.math.BigDecimal, test.math.MathContext)
-     * @see    #remainder(test.math.BigDecimal, test.math.MathContext)
+     * @see    #divideToIntegralValue(java.math.BigDecimal, java.math.MathContext)
+     * @see    #remainder(java.math.BigDecimal, java.math.MathContext)
      * @since  1.5
      */
     public BigDecimal[] divideAndRemainder(BigDecimal divisor) {
@@ -1972,8 +1982,8 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      *         rounding mode is {@code UNNECESSARY}, or {@code mc.precision}
      *         {@literal >} 0 and the result of {@code this.divideToIntgralValue(divisor)} would
      *         require a precision of more than {@code mc.precision} digits.
-     * @see    #divideToIntegralValue(test.math.BigDecimal, test.math.MathContext)
-     * @see    #remainder(test.math.BigDecimal, test.math.MathContext)
+     * @see    #divideToIntegralValue(java.math.BigDecimal, java.math.MathContext)
+     * @see    #remainder(java.math.BigDecimal, java.math.MathContext)
      * @since  1.5
      */
     public BigDecimal[] divideAndRemainder(BigDecimal divisor, MathContext mc) {
@@ -2701,7 +2711,7 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      * @return {@code true} if and only if the specified {@code Object} is a
      *         {@code BigDecimal} whose value and scale are equal to this
      *         {@code BigDecimal}'s.
-     * @see    #compareTo(test.math.BigDecimal)
+     * @see    #compareTo(java.math.BigDecimal)
      * @see    #hashCode
      */
     @Override
@@ -2734,7 +2744,7 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      *         {@code BigDecimal} and {@code val}.  If they are equal,
      *         as defined by the {@link #compareTo(BigDecimal) compareTo}
      *         method, {@code this} is returned.
-     * @see    #compareTo(test.math.BigDecimal)
+     * @see    #compareTo(java.math.BigDecimal)
      */
     public BigDecimal min(BigDecimal val) {
         return (compareTo(val) <= 0 ? this : val);
@@ -2748,7 +2758,7 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      *         {@code BigDecimal} and {@code val}.  If they are equal,
      *         as defined by the {@link #compareTo(BigDecimal) compareTo}
      *         method, {@code this} is returned.
-     * @see    #compareTo(test.math.BigDecimal)
+     * @see    #compareTo(java.math.BigDecimal)
      */
     public BigDecimal max(BigDecimal val) {
         return (compareTo(val) >= 0 ? this : val);
@@ -3437,7 +3447,7 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
                     StringBuilderHelper.DIGIT_ONES[lowInt]) ;
         }
 
-        StringBuilderHelper sbHelper = threadLocalStringBuilderHelper;//.get();
+        StringBuilderHelper sbHelper = threadLocalStringBuilderHelper.get();
         char[] coeff;
         int offset;  // offset is the starting index for coeff array
         // Get the significand as an absolute value
@@ -3465,7 +3475,7 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
                 buf.append('.');
                 for (; pad>0; pad--) {
                     buf.append('0');
-                } 
+                }
                 buf.append(coeff, offset, coeffLen);
             } else {                         // xx.xx form
                 buf.append(coeff, offset, -pad);
@@ -3795,7 +3805,8 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
             x = -x;
         if (x < 10) // must screen for 0, might as well 10
             return 1;
-        int r = ((64 - Long.numberOfLeadingZeros(x) + 1) * 1233) >>> 12;
+        int n = Long.numberOfLeadingZeros(x);
+        int r = ((64 - n + 1) * 1233) >>> 12;
         long[] tab = LONG_TEN_POWERS_TABLE;
         // if r >= length, must have max possible digits for long
         return (r >= tab.length || x < tab[r]) ? r : r + 1;

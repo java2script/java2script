@@ -2,12 +2,17 @@ package test;
 
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
+import java.awt.Button;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.DefaultKeyboardFocusManager;
 import java.awt.Dimension;
+import java.awt.Event;
 import java.awt.KeyboardFocusManager;
+import java.awt.TextArea;
+import java.awt.TextField;
 import java.awt.Toolkit;
+import java.awt.event.AWTEventListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -31,6 +36,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.MenuElement;
 import javax.swing.MenuSelectionManager;
@@ -40,12 +46,11 @@ import swingjs.plaf.JSInternalFrameUI;
 
 public class Test_Event extends JFrame {
 
-	
 	static {
-		System.out.println("os:"+ System.getProperty("os.name"));
+		System.out.println("os:" + System.getProperty("os.name"));
 		System.out.println("dpr:" + Toolkit.getDefaultToolkit().getScreenResolution());
 	}
-	
+
 	String test = "  34567890\n1234567890\n  345\n     ";
 
 	private static void logClass(String name) {
@@ -87,7 +92,8 @@ public class Test_Event extends JFrame {
 							"FocusMan dispatching activeElement=" + (/** @j2sNative document.activeElement.id || */
 					getFocusOwner()));
 					System.out.println("FocusMan dispatching event Source " + e.getSource());
-					System.out.println("FocusMan dispatching event " + e);
+//					if (e.toString().indexOf("GAINED") >= 0)
+						System.out.println("FocusMan dispatching event " + e);
 				}
 				return super.dispatchEvent(e);
 			}
@@ -97,10 +103,18 @@ public class Test_Event extends JFrame {
 
 	public Test_Event() {
 
-		this.setContentPane(new JPanel() {
+		Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
+
+			@Override
+			public void eventDispatched(AWTEvent event) {
+				//System.out.println("AWTEVEnt dispatched " + event);
+			}
 			
+		}, -1);
+		this.setContentPane(new JPanel() {
+
 		});
-		
+
 		setLogging();
 
 		this.setName("Test_Event_Frame");
@@ -112,7 +126,7 @@ public class Test_Event extends JFrame {
 		JMenuBar mb = getMenuBar(ptop);
 
 		JPanel full = new JPanel(new BorderLayout());
-		full.setPreferredSize(new Dimension(200,50));
+		full.setPreferredSize(new Dimension(300, 300));
 		full.setBackground(Color.green);
 		full.add(ptop, BorderLayout.NORTH);
 		ptop.setBackground(Color.orange);
@@ -130,9 +144,9 @@ public class Test_Event extends JFrame {
 			d.setPreferredSize(new Dimension(800, 600));
 
 			JInternalFrame main = new JInternalFrame();
-			
+
 			main.setContentPane(new JPanel() {
-				
+
 			});
 
 			main.setBackground(Color.blue);
@@ -146,7 +160,7 @@ public class Test_Event extends JFrame {
 				@Override
 				public void mouseClicked(MouseEvent e) {
 					// TODO Auto-generated method stub
-					
+
 				}
 
 				@Override
@@ -161,23 +175,22 @@ public class Test_Event extends JFrame {
 				@Override
 				public void mouseReleased(MouseEvent e) {
 					// TODO Auto-generated method stub
-					
+
 				}
 
 				@Override
 				public void mouseEntered(MouseEvent e) {
 					// TODO Auto-generated method stub
-					
+
 				}
 
 				@Override
 				public void mouseExited(MouseEvent e) {
 					// TODO Auto-generated method stub
-					
+
 				}
-				
+
 			};
-			
 
 			KeyStroke[] a = ((JComponent) mb.getComponent(0)).getRegisteredKeyStrokes();
 			System.out.println("menubar menu registration: " + a.length);
@@ -196,19 +209,20 @@ public class Test_Event extends JFrame {
 
 			JInternalFrame main2 = new JInternalFrame();
 			JPanel p = new JPanel();
-			p.setPreferredSize(new Dimension(100,300));
-			p.setMinimumSize(new Dimension(100,300));
+			p.setPreferredSize(new Dimension(100, 300));
+			p.setMinimumSize(new Dimension(100, 300));
 
 			main2.add(p);
 			main2.setTitle("main2");
 			main2.pack();
 			main2.setVisible(true);
 			d.add(main2);
-			
 
 			add(d);
 			pack();
 			setVisible(true);
+			tarea.append("this \n\nis a test");
+			tarea.requestFocus();
 
 
 		} else {
@@ -248,21 +262,19 @@ public class Test_Event extends JFrame {
 	protected void showKeyEvent(KeyEvent e) {
 		String source = /** @j2sNative (xxx = e).bdata.jqevent.originalEvent.target.id || */
 				"";
-		System.out.println(
-				"Test_Editor keyEvent id=" + e.getID() + " " 
-						+ " src=" + ((Component) e.getSource()).getName() + " "
-						+ ((Component) e.getSource()).getClass().getName() + " "
-						+ source + " char=" + e.getKeyChar() + " code=" + e.getKeyCode() + " loc=" + e.getKeyLocation()
-						+ "\n mod=" + e.getModifiers() + " " + KeyEvent.getKeyModifiersText(e.getModifiers()) + " modx="
-						+ e.getModifiersEx() + " " + KeyEvent.getKeyModifiersText(e.getModifiersEx()));
+		System.out.println("Test_Editor keyEvent id=" + e.getID() + " " + " src="
+				+ ((Component) e.getSource()).getName() + " " + ((Component) e.getSource()).getClass().getName() + " "
+				+ source + " char=" + e.getKeyChar() + " code=" + e.getKeyCode() + " loc=" + e.getKeyLocation()
+				+ "\n mod=" + e.getModifiers() + " " + KeyEvent.getKeyModifiersText(e.getModifiers()) + " modx="
+				+ e.getModifiersEx() + " " + KeyEvent.getKeyModifiersText(e.getModifiersEx()));
 	}
-
 
 	protected void showMouseEvent(MouseEvent e) {
 		Component c = DefaultKeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
-		System.out.println("Test_Editor " + " mouse event " + getIdString(e.getID())+ " " + e.getX() + "," + e.getY() 
-		+ " " + Integer.toHexString(e.getModifiers()) + " " + MouseEvent.getMouseModifiersText(e.getModifiers()) + " "  + InputEvent.getModifiersExText(e.getModifiersEx())
-		+ "\n  trigger? " + e.isPopupTrigger() + " focus owner was " + (c == null ? null : c.getName() + " " + c.getClass().getName()));
+		System.out.println("Test_Editor " + " mouse event " + getIdString(e.getID()) + " " + e.getX() + "," + e.getY()
+				+ " " + Integer.toHexString(e.getModifiers()) + " " + MouseEvent.getMouseModifiersText(e.getModifiers())
+				+ " " + InputEvent.getModifiersExText(e.getModifiersEx()) + "\n  trigger? " + e.isPopupTrigger()
+				+ " focus owner was " + (c == null ? null : c.getName() + " " + c.getClass().getName()));
 
 	}
 
@@ -326,11 +338,25 @@ public class Test_Event extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			System.out.println("Test_Event action for " + e.getActionCommand() + " " + e.getSource());
+			if (e.getSource() == btnj) {
+				//tarea.requestFocus();
+				tarea.setCaretPosition((int)(Math.random() * tarea.getText().length()));
+			}
 		}
-		
+
 	};
+
+	public boolean action(Event ae, Object s) {
+		System.out.println("AWT action " + s + " " +ae);
+		return false;
+	}
+
+	protected JButton btnj;
+	protected Button btn;
+	TextArea tarea;
 	
-	protected JButton label;
+	protected TextField field;
+	protected JTextField fieldj;
 
 	MouseListener ml = new MouseListener() {
 
@@ -372,9 +398,11 @@ public class Test_Event extends JFrame {
 			System.out.println(
 					"Test_Editor focus GAINED " + getID(e.getSource()) + " opp:" + getID(e.getOppositeComponent()));
 			// ptop.setBackground(Color.LIGHT_GRAY);
-			
-			System.out.println("Test_Editor Active = " + KeyboardFocusManager.getCurrentKeyboardFocusManager().getActiveWindow());
-			System.out.println("Test_Editor Focused = " + KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow());
+
+			System.out.println(
+					"Test_Editor Active = " + KeyboardFocusManager.getCurrentKeyboardFocusManager().getActiveWindow());
+			System.out.println("Test_Editor Focused = "
+					+ KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow());
 		}
 
 		@Override
@@ -439,7 +467,7 @@ public class Test_Event extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Test_Editor action " + getID(e.getSource()));
 				ptop.setBackground(Color.red);
-				label.setText(e.getActionCommand());
+				btnj.setText(e.getActionCommand());
 			}
 
 		};
@@ -448,19 +476,18 @@ public class Test_Event extends JFrame {
 		mb1a.setMnemonic('1');
 		mb1a.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, KeyEvent.ALT_MASK));
 
-		
-
 		mb1b.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Test_Editor action " + getID(e.getSource()));
 				ptop.setBackground(Color.YELLOW);
-				label.setText(e.getActionCommand());
+				btnj.setText(e.getActionCommand());
 			}
 
 		});
-		mb1b.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, KeyEvent.CTRL_MASK|KeyEvent.ALT_MASK|KeyEvent.SHIFT_MASK));
+		mb1b.setAccelerator(
+				KeyStroke.getKeyStroke(KeyEvent.VK_Y, KeyEvent.CTRL_MASK | KeyEvent.ALT_MASK | KeyEvent.SHIFT_MASK));
 
 		ActionListener a2 = new ActionListener() {
 
@@ -468,7 +495,7 @@ public class Test_Event extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Test_Editor action " + getID(e.getSource()));
 				ptop.setBackground(Color.white);
-				label.setText(e.getActionCommand());
+				btnj.setText(e.getActionCommand());
 			}
 
 		};
@@ -493,17 +520,44 @@ public class Test_Event extends JFrame {
 
 	private JPanel getTopPanel() {
 		JPanel ptop = new JPanel();
-		ptop.setPreferredSize(new Dimension(300, 100));
-		ptop.setMaximumSize(new Dimension(400, 100));
+		ptop.setPreferredSize(new Dimension(300, 300));
+		ptop.setMaximumSize(new Dimension(400, 400));
 		ptop.setBackground(Color.LIGHT_GRAY);
 		ptop.setOpaque(true);
+		
+		tarea = new TextArea(2,15);
+		tarea.addFocusListener(fl);
+		ptop.add(tarea);
+		
 
-	    label = new JButton("test");
-		label.setOpaque(true);
-		label.setBackground(Color.white);
-		label.addMouseListener(ml);
-		label.addActionListener(al);
-		ptop.add(label);
+		btnj = new JButton("btnj");
+		btnj.setName("btnj");
+		btnj.setOpaque(true);
+		btnj.setBackground(Color.white);
+		btnj.addMouseListener(ml);
+		btnj.addActionListener(al);
+		btnj.addKeyListener(kl);
+		ptop.add(btnj);
+		field = new TextField("field");
+		field.setName("field");
+		field.addMouseListener(ml);
+		field.addActionListener(al);
+		field.addKeyListener(kl);
+		btn = new Button("test");
+		btn.setName("btn");
+		btn.setBackground(Color.orange);
+		btn.addMouseListener(ml);
+		btn.addActionListener(al);
+		btn.addKeyListener(kl);
+		ptop.add(btn);
+		ptop.add(field);
+		fieldj = new JTextField("fieldj");
+		fieldj.setName("fieldj");
+		fieldj.addMouseListener(ml);
+		fieldj.addActionListener(al);
+		fieldj.addKeyListener(kl);
+		ptop.add(fieldj);
+
 		return ptop;
 	}
 
@@ -513,6 +567,5 @@ public class Test_Event extends JFrame {
 		System.out.println("Test_Editor focus owner is " + (c == null ? null : c.getClass().getName()));
 		setTitle((++n) + "  " + (c == null ? null : c.getClass().getName()));
 	}
-
 
 }

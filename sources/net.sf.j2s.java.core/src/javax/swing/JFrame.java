@@ -299,7 +299,7 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 	 * <code>rootPane</code>.
 	 */
 	protected JRootPane createRootPane() {
-		JRootPane rp = new JRootPane("_Frame" + (++frameCount), false);
+		JRootPane rp = new JRootPane("_Frame" + (++frameCount), false, this);
 		// NOTE: this uses setOpaque vs LookAndFeel.installProperty as there
 		// is NO reason for the RootPane not to be opaque. For painting to
 		// work the contentPane must be opaque, therefor the RootPane can

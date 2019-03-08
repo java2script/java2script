@@ -35,10 +35,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 
-import javax.swing.JComponent;
-
-import swingjs.plaf.JSComponentUI;
-
 /**
  * JavaScript interface from JmolJSmol.js via handleOldJvm10Event (for now)
  * 
@@ -70,7 +66,7 @@ public class JSMouse {
 		case MouseEvent.MOUSE_PRESSED:
 			xWhenPressed = x;
 			yWhenPressed = y;
-			modifiersWhenPressed10 = modifiers;
+			modifiersWhenPressed10 = modifiers & ~EXTENDED_MASK;
 			pressed(time, x, y, modifiers, false);
 			break;
 		case MouseEvent.MOUSE_DRAGGED:
@@ -84,17 +80,26 @@ public class JSMouse {
 			moved(time, x, y, modifiers);
 			break;
 		case MouseEvent.MOUSE_RELEASED:
-			released(time, x, y, modifiers);
+			released(time, x, y, modifiers & ~EXTENDED_MASK);
 			// simulate a mouseClicked event for us
-//			if (x == xWhenPressed && y == yWhenPressed
-//					&& modifiers == modifiersWhenPressed10) {
-//				// the underlying code will turn this into dbl clicks for us
-//				clicked(time, x, y, modifiers, 1);
-//			}
+			if (x == xWhenPressed && y == yWhenPressed
+					&& (modifiers & ~EXTENDED_MASK) == modifiersWhenPressed10 
+					&& getButton(id) != MouseEvent.BUTTON1) {
+				// the underlying code will turn this into dbl clicks for us
+				// note that double-right-click is not supported.
+				// note that original event type field is read-only
+				/**
+				 * @j2sNative 
+				 * 
+				 *    jqevent.type = jqevent.originalEvent.j2stype = "click";
+				 */
+				clicked(time, x, y, modifiers & ~EXTENDED_MASK, 1);
+			}
 			break;
 		case MouseEvent.MOUSE_CLICKED:
+			// left-mouse only?
 			int n = /** @j2sNative jqevent.originalEvent.detail || */ 0;
-			clicked(time, x, y, modifiers, n);
+			clicked(time, x, y, modifiers & ~EXTENDED_MASK, n);
 			break;
 		default:
 			return false;
@@ -238,7 +243,7 @@ public class JSMouse {
 	private void released(long time, int x, int y, int modifiers) {
 		isCtrlShiftMouseDown = false;
 		wheeling = false;
-		mouseAction(MouseEvent.MOUSE_RELEASED, time, x, y, 0, modifiers, 0);
+		mouseAction(MouseEvent.MOUSE_RELEASED, time, x, y, 0, modifiers & ~EXTENDED_MASK, 0);
 	}
 
 	private void dragged(long time, int x, int y, int modifiers) {
@@ -257,17 +262,61 @@ public class JSMouse {
 
 	private int xWhenPressed, yWhenPressed, modifiersWhenPressed10;
 
-	private int getButton(int modifiers) {
-		switch (modifiers & BUTTON_MASK) {
-		case MOUSE_LEFT:
-			return MouseEvent.BUTTON1;
-		case MOUSE_MIDDLE:
-			return MouseEvent.BUTTON2;
-		case MOUSE_RIGHT:
-			return MouseEvent.BUTTON3;
-		default:
-			return MouseEvent.NOBUTTON;
+	private int getButton(int id) {
+//
+// Firefox MDN notes:
+//
+//		button:
+//
+//
+//		    0: Main button pressed, usually the left button or the un-initialized state
+//		    1: Auxiliary button pressed, usually the wheel button or the middle button (if present)
+//		    2: Secondary button pressed, usually the right button
+//		    3: Fourth button, typically the Browser Back button
+//		    4: Fifth button, typically the Browser Forward button
+//
+//
+//		buttons:
+//
+//		    0 : No button or un-initialized
+//		    1 : Primary button (usually the left button)
+//		    2 : Secondary button (usually the right button)
+//		    4 : Auxilary button (usually the mouse wheel button or middle button)
+//		    8 : 4th button (typically the "Browser Back" button)
+//		    16 : 5th button (typically the "Browser Forward" button)
+//
+//
+//	    On Mac OS X 10.5, the buttons attribute always returns 0 because there is no platform API for implementing this feature.
+// 
+//	    Utilities allow customization of button actions. Therefore, primary might not be the the left button on the device, 
+		// secondary might not be the right button, and so on. Moreover, the middle
+		// (wheel) button, 4th button, and 5th button might
+		// not be assigned a value, even when they are pressed.
+//	    Single-button devices may emulate additional buttons with combinations of button and keyboard presses.
+//	    Touch devices may emulate buttons with configurable gestures (e.g., one-finger touch for primary, two-finger touch for secondary, etc.).
+//	    On Linux (GTK), the 4th button and the 5th button are not supported. 
+//      In addition, a mouseup event always includes the releasing button information in the buttons value.
+
+// And, I would add: 
+//
+// On Windows, e.button will be 0 on a mouseup if it is the left mouse button 
+
+		if (id != MouseEvent.MOUSE_MOVED) {
+			@SuppressWarnings("unused")
+			Object e = jqevent;
+			switch (/** @j2sNative e.button || e.buttons && (8 << e.buttons) || */ 1) {
+			case 1:
+			case 8 << 1:
+				return MouseEvent.BUTTON1; // left
+			case 3:
+			case 8 << 4:
+				return MouseEvent.BUTTON2; // middle
+			case 2:
+			case 8 << 2:
+				return MouseEvent.BUTTON3; // right
+			}
 		}
+		return MouseEvent.NOBUTTON;
 	}
 
 	private void mouseEnterExit(long time, int x, int y, int id) {
@@ -316,8 +365,6 @@ public class JSMouse {
 		case -1: // JavaScript wheeled
 			break;
 		}
-//		System.out.println("setting mouse click to " + clickCount + " returning  "
-	//			+ ret);
 		return ret;
 	}
 
@@ -334,48 +381,48 @@ public class JSMouse {
 	 * @param dy
 	 */
 	@SuppressWarnings("unused")
-	private void mouseAction(int id, long time, int x, int y, int xcount,
-			int modifiers, int dy) {
+	private void mouseAction(int id, long time, int x, int y, int xcount, int modifiers, int dy) {
 
-		int button = getButton(modifiers);
+		int button = getButton(id);
 		int count = (xcount > 1 && id == MouseEvent.MOUSE_CLICKED ? xcount : updateClickCount(id, time, x, y));
 		boolean popupTrigger = isPopupTrigger(id, modifiers, JSToolkit.isWin);
 
 		Component source = viewer.getTopComponent(); // may be a JFrame
 		MouseEvent e;
-		if (id == MouseEvent.MOUSE_WHEEL) { 
-			e = new MouseWheelEvent(source, id, time, modifiers, x, y, x, y, count, 
-							popupTrigger, MouseWheelEvent.WHEEL_UNIT_SCROLL, 1, dy);
+		if (id == MouseEvent.MOUSE_WHEEL) {
+			e = new MouseWheelEvent(source, id, time, modifiers, x, y, x, y, count, popupTrigger,
+					MouseWheelEvent.WHEEL_UNIT_SCROLL, 1, dy);
 		} else {
-		// Component source, int id, long when, int modifiers,
-    // int x, int y, int xAbs, int yAbs, int clickCount, boolean popupTrigger,
-    // int scrollType, int scrollAmount, int wheelRotation
-			
-		e = new MouseEvent(source, id, time, modifiers, x, y, x, y,
-				count, popupTrigger, button);
+			// Component source, int id, long when, int modifiers,
+			// int x, int y, int xAbs, int yAbs, int clickCount, boolean popupTrigger,
+			// int scrollType, int scrollAmount, int wheelRotation
+
+			e = new MouseEvent(source, id, time, modifiers, x, y, x, y, count, popupTrigger, button);
+
 		}
 		byte[] bdata = new byte[0];
 		e.setBData(bdata);
 		Object jqevent = this.jqevent;
 		Component c = null;
 		/**
-		 * @j2sNative 
+		 * @j2sNative
 		 * 
-		 * bdata.jqevent = jqevent;
-		 * bdata.source = c = jqevent.target["data-component"];
-		 * bdata.doPropagate = c && c.ui.j2sDoPropagate;
+		 * 			bdata.jqevent = jqevent; bdata.source = c =
+		 *            jqevent.target["data-component"]; bdata.doPropagate = c &&
+		 *            c.ui.j2sDoPropagate;
 		 */
-		
+
 		// bdata.doPropagate will be tested in InputEvent.doConsume.
-		
+
 		// the key here is that if we have a data-component, go directly to its
-		// container and dispatch the event; if we go through the event queue, any e.consume()
-		// that occurs is too late to consume the event. 
-		
+		// container and dispatch the event; if we go through the event queue, any
+		// e.consume()
+		// that occurs is too late to consume the event.
+
 		if (c == null) {
 			Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(e);
 		} else {
-		  ((Container) e.getSource()).dispatchEvent(e);
+			((Container) e.getSource()).dispatchEvent(e);
 		}
 	}
 	
@@ -389,10 +436,9 @@ public class JSMouse {
 //			// BUTTON3_DOWN_MASK for pressed. So here we just accept both.
 //
 // actually, we can use XXX_MASK, not XXX_DOWN_MASK and avoid this issue, because
-// J2S adds the appropriate extended (0xFFFFC000) and simple (0x3F) modifiers. 
-//			final boolean isMetaDown = ((jmodifiers & InputEvent.META_DOWN_MASK) != 0);
+// J2S adds the appropriate extended (0x3FC0) and simple (0x3F) modifiers. 
 //
-			return rt;// || isMetaDown;
+			return rt;
 		} else {
 			// mac, linux, unix
 			if (id != MouseEvent.MOUSE_PRESSED)

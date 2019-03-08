@@ -102,7 +102,7 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 	
 	protected void setWindowClass() { 
 		DOMNode.setZ(domNode, z);
-		$(domNode).addClass("swingjs-window");
+		addClass(domNode, "swingjs-window");
 		
 		System.out.println("JSWIndowUI testing?");
 		
@@ -226,8 +226,8 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 
 	@Override
 	public void windowOpened(WindowEvent e) {
-		System.out.println("JSWindowUI windowOpened " + c.isVisible());
-		c.requestFocus();
+		System.out.println("JSWindowUI windowOpened " + c.isVisible() + " " + id);
+//		c.requestFocus();
 	}
 
 

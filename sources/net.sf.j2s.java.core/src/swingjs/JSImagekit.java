@@ -276,6 +276,5 @@ public class JSImagekit implements ImageConsumer {
 		return new ImageIcon(img, "paintedIcon");
 	}
 
-	
 
 }

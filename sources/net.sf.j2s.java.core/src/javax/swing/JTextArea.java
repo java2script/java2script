@@ -563,7 +563,7 @@ public class JTextArea extends JTextComponent {
     protected int getRowHeight() {
         if (rowHeight == 0) {
             FontMetrics metrics = getFontMetrics(getFont());
-            rowHeight = metrics.getHeight();
+            rowHeight = metrics.getHeight() + 2; // SwingJS adds +2 here
         }
         return rowHeight;
     }
@@ -627,22 +627,33 @@ public class JTextArea extends JTextComponent {
      */
     @Override
 		public Dimension getPreferredSize() {
-        Dimension d = getPrefSizeJComp();
-        d = (d == null) ? new Dimension(400,400) : d;
-        Insets insets = getInsets();
-
-        if (columns != 0) {
-            d.width = Math.max(d.width, columns * getColumnWidth() +
-                    insets.left + insets.right);
-        }
-        if (rows != 0) {
-            d.height = Math.max(d.height, rows * getRowHeight() +
-                                insets.top + insets.bottom);
-        }
-        return d;
+    	return getSizeJS(getPrefSizeJComp(), 400, rows, columns);
     }
 
-    /**
+	public Dimension getSizeJS(Dimension d, int n, int rows, int columns) {
+		int w = 10, h = 10;
+		if (d == null) {
+			d = new Dimension(n, n);
+		} else {
+			w = d.width;
+			h = d.height;
+		}
+		if (columns != 0) {
+			d.width = Math.max(w, getJ2SWidth(columns));
+		}
+		if (rows != 0) {
+			Insets insets = getInsets();
+			d.height = Math.max(h, (rows + 1) * getRowHeight() + insets.top + insets.bottom);
+		}
+		return d;
+	}
+
+    protected int getJ2SWidth(int columns) {
+		Insets insets = getInsets();
+		return  columns * getColumnWidth() + insets.left + insets.right;
+	}
+
+	/**
      * Sets the current font.  This removes cached row height and column
      * width so the new font will be reflected, and calls revalidate().
      *
@@ -756,11 +767,11 @@ public class JTextArea extends JTextComponent {
 
     // --- variables -------------------------------------------------
 
-    private int rows;
-    private int columns;
-    private int columnWidth;
-    private int rowHeight;
-    private boolean wrap;
-    private boolean word;
+    public int rows;
+    public int columns;
+    protected int columnWidth;
+    protected int rowHeight;
+    protected boolean wrap;
+    protected boolean word;
 
 }

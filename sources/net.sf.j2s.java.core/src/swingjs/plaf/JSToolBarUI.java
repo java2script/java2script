@@ -448,7 +448,7 @@ public class JSToolBarUI extends JSPanelUI {
 			// the frame when contents change
 			@Override
 			protected JRootPane createRootPane() {
-				JRootPane rootPane = new JRootPane(id + (++toolbarCount), false) {
+				JRootPane rootPane = new JRootPane(id + (++toolbarCount), false, this) {
 					private boolean packing = false;
 
 					@Override
@@ -502,7 +502,7 @@ public class JSToolBarUI extends JSPanelUI {
 			// the frame when contents change
 			@Override
 			protected JRootPane createRootPane() {
-				JRootPane rootPane = new JRootPane(id + (++toolbarCount), false) {
+				JRootPane rootPane = new JRootPane(id + (++toolbarCount), false, this) {
 					private boolean packing = false;
 
 					@Override
@@ -542,9 +542,9 @@ public class JSToolBarUI extends JSPanelUI {
 		Window frame = null;
 		if (toolBar != null) {
 			Container p;
-			for (p = toolBar.getParent(); p != null && !(p instanceof Window); p = p.getParent())
+			for (p = toolBar.getParent(); p != null && !p.isWindowOrJSApplet(); p = p.getParent())
 				;
-			if (p != null && p instanceof Window)
+			if (p != null && p.isWindowOrJSApplet())
 				frame = (Window) p;
 		}
 		if (floatingToolBar == null) {

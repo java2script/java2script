@@ -35,6 +35,8 @@ import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -44,7 +46,7 @@ import javax.swing.text.JTextComponent;
 import swingjs.JSKeyEvent;
 
 public class TextListener implements FocusListener, ChangeListener,
-		PropertyChangeListener, DocumentListener {
+		PropertyChangeListener, DocumentListener, CaretListener {
 
 	private JTextComponent txtComp;
 
@@ -92,6 +94,8 @@ public class TextListener implements FocusListener, ChangeListener,
 
 	private boolean working;
 
+	private int lastKeyEvent;
+
 	/**
 	 * Called by JSTextUI.handleJSEvent
 	 * 
@@ -107,15 +111,18 @@ public class TextListener implements FocusListener, ChangeListener,
 		boolean setCaret = (mark != Integer.MIN_VALUE);
 		eventType = JSKeyEvent.fixEventType(jqevent, eventType);
 		switch (eventType) {
+		case KeyEvent.KEY_TYPED:
+			setCaret = false;
+			break;
 		case KeyEvent.KEY_PRESSED:
 			int keyCode = /** @j2sNative jqevent.keyCode || */
 					0;
 			if (keyCode == 13 || keyCode == KeyEvent.VK_ENTER)
-				ui.handleEnter(eventType);
-			// fall through
-		case KeyEvent.KEY_TYPED:
+				ui.handleEnter();
 			setCaret = false;
-			break;
+			if (lastKeyEvent != KeyEvent.KEY_TYPED)
+			  break;
+			// fall through if this is a continuation press
 		case KeyEvent.KEY_RELEASED:
 			working = true;
 			if (ui.checkNewEditorTextValue()) {
@@ -128,6 +135,7 @@ public class TextListener implements FocusListener, ChangeListener,
 			working = false;
 			break;
 		}
+		lastKeyEvent = eventType;
 		if (setCaret)
 			ui.setJavaMarkAndDot(markDot);
 		return JSComponentUI.HANDLED;
@@ -149,6 +157,11 @@ public class TextListener implements FocusListener, ChangeListener,
 	public void changedUpdate(DocumentEvent e) {
 		if (!working)
 			ui.setJSTextDelayed();
+	}
+
+	@Override
+	public void caretUpdate(CaretEvent e) {
+		ui.caretUpdatedByProgram(e);
 	}
 
 }

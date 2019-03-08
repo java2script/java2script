@@ -7,6 +7,7 @@ import java.awt.Composite;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.Image;
 import java.awt.Paint;
@@ -21,6 +22,7 @@ import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
+import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ImageObserver;
@@ -46,8 +48,13 @@ import swingjs.api.js.HTML5CanvasContext2D.ImageData;
  */
 
 @SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
-public class JSGraphics2D // extends SunGraphics2D
-		implements Cloneable {
+public class JSGraphics2D implements
+		// Graphics2D,
+		Cloneable {
+
+	private static final int DRAW_NOCLOSE = 0;
+	private static final int DRAW_CLOSE = 1;
+	private static final int FILL = 2;
 
 	private boolean backgroundPainted;
 
@@ -64,7 +71,7 @@ public class JSGraphics2D // extends SunGraphics2D
 	private BasicStroke currentStroke;
 	private Shape currentClip;
 
-	private AlphaComposite currentComposite;
+	private AlphaComposite alphaComposite;
 	private int initialState;
 
 	// public int strokeState;
@@ -117,6 +124,7 @@ public class JSGraphics2D // extends SunGraphics2D
 //		// reduce antialiasing, thank you,
 //		// http://www.rgraph.net/docs/howto-get-crisp-lines-with-no- antialias.html
 		setAntialias(true);
+		setClip(0, 0, width, height);
 	}
 
 	public void setAntialias(boolean tf) {
@@ -151,8 +159,14 @@ public class JSGraphics2D // extends SunGraphics2D
 
 	public void drawLine(int x0, int y0, int x1, int y1) {
 		boolean inPath = this.inPath;
-		if (!inPath)
+		if (!inPath) {
+			if (x0 == x1 && y0 == y1) {
+				// meaning is to draw a point
+				fillRect(x0, y0, 1, 1);
+				return;
+			}
 			doStroke(true);
+		}
 		ctx.moveTo(x0, y0);
 		ctx.lineTo(x1, y1);
 		if (!inPath)
@@ -164,7 +178,7 @@ public class JSGraphics2D // extends SunGraphics2D
 		if (width == height)
 			doCirc(left, top, width);
 		else
-			doArc(left, top, width, height, 0, 360, false);
+			doArc(left, top, width, height, 0, 360, DRAW_NOCLOSE);
 		doStroke(false);
 	}
 
@@ -173,19 +187,7 @@ public class JSGraphics2D // extends SunGraphics2D
 		if (width == height)
 			doCirc(left, top, width);
 		else
-			doArc(left, top, width, height, 0, 360, true);
-		ctx.fill();
-	}
-
-	public void drawArc(int x, int y, int width, int height, int startAngle, int arcAngle) {
-		doStroke(true);
-		doArc(x, y, width, height, startAngle, arcAngle, false);
-		doStroke(false);
-	}
-
-	public void fillArc(int centerX, int centerY, int width, int height, int startAngle, int arcAngle) {
-		ctx.beginPath();
-		doArc(centerX, centerY, width, height, startAngle, arcAngle, true);
+			doArc(left, top, width, height, 0, 360, DRAW_CLOSE);
 		ctx.fill();
 	}
 
@@ -196,7 +198,19 @@ public class JSGraphics2D // extends SunGraphics2D
 		ctx.arc(left + r, top + r, r, 0, 2 * Math.PI, false);
 	}
 
-	private void doArc(double x, double y, double width, double height, double startAngle, double arcAngle, boolean fill) {
+	public void drawArc(int x, int y, int width, int height, int startAngle, int arcAngle) {
+		doStroke(true);
+		doArc(x, y, width, height, startAngle, arcAngle, DRAW_NOCLOSE);
+		doStroke(false);
+	}
+
+	public void fillArc(int centerX, int centerY, int width, int height, int startAngle, int arcAngle) {
+		ctx.beginPath();
+		doArc(centerX, centerY, width, height, startAngle, arcAngle, DRAW_CLOSE);
+		ctx.fill();
+	}
+
+	private void doArc(double x, double y, double width, double height, double startAngle, double arcAngle, int mode) {
 		if (width <= 0 || height <= 0)
 			return;
 		// boolean doClose = (arcAngle - startAngle == 360);
@@ -210,7 +224,7 @@ public class JSGraphics2D // extends SunGraphics2D
 			ctx.scale(width / 2, height / 2);
 			ctx.beginPath();
 			ctx.arc(1, 1, 1, toRad(360 - startAngle), toRad(360 - arcAngle - startAngle), true);
-			if (fill)
+			if (mode == DRAW_CLOSE)
 				ctx.lineTo(1, 1);
 		}
 		ctx.restore();
@@ -220,35 +234,40 @@ public class JSGraphics2D // extends SunGraphics2D
 		return a * (Math.PI / 180);
 	}
 
-	public void background(Color bgcolor) {
-		backgroundColor = bgcolor;
-		if (bgcolor == null) {
-			return;
-		}
-		clearRect(0, 0, width, height);
+	public void clearRect(int x, int y, int width, int height) {
+		backgroundPainted = true;
+		clearRectPriv(x, y, width, height);
 	}
 
-	public void clearRect(int x, int y, int width, int height) {
-		ctx.clearRect(x, y, width, height);
-		setGraphicsColor(backgroundColor == null ? Color.WHITE : backgroundColor);
-		fillRect(x, y, width, height);
-		setGraphicsColor(foregroundColor);
+	private void clearRectPriv(int x, int y, int w, int h) {
+		ctx.clearRect(x, y, w, h);
+		if (!clearing)
+			setGraphicsColor(backgroundColor == null ? Color.WHITE : backgroundColor);
+		fillRect(x, y, w, h);
+		if (!clearing)
+			setGraphicsColor(foregroundColor);
 	}
 
 	public void drawPolygon(Polygon p) {
-		doPoly(p.xpoints, p.ypoints, p.npoints, false);
+		// from Graphics
+		doPoly(p.xpoints, p.ypoints, p.npoints, DRAW_CLOSE);
 	}
 
 	public void drawPolygon(int[] axPoints, int[] ayPoints, int nPoints) {
-		doPoly(axPoints, ayPoints, nPoints, false);
+		doPoly(axPoints, ayPoints, nPoints, DRAW_CLOSE);
+	}
+
+	public void drawPolyline(int[] xPoints, int[] yPoints, int nPoints) {
+		doPoly(xPoints, yPoints, nPoints, DRAW_NOCLOSE);
 	}
 
 	public void fillPolygon(Polygon p) {
-		doPoly(p.xpoints, p.ypoints, p.npoints, true);
+		// from Graphics
+		doPoly(p.xpoints, p.ypoints, p.npoints, FILL);
 	}
 
 	public void fillPolygon(int[] axPoints, int[] ayPoints, int nPoints) {
-		doPoly(axPoints, ayPoints, nPoints, true);
+		doPoly(axPoints, ayPoints, nPoints, FILL);
 	}
 
 	/**
@@ -257,28 +276,26 @@ public class JSGraphics2D // extends SunGraphics2D
 	 * @param nPoints
 	 * @param doFill
 	 */
-	private void doPoly(int[] axPoints, int[] ayPoints, int nPoints, boolean fill) {
+	private void doPoly(int[] axPoints, int[] ayPoints, int nPoints, int mode) {
 		ctx.beginPath();
-		ctx.translate(0.5, 0.5);
+		if (mode != FILL)
+			ctx.translate(0.5, 0.5);
 		ctx.moveTo(axPoints[0], ayPoints[0]);
 		for (int i = 1; i < nPoints; i++) {
 			ctx.lineTo(axPoints[i], ayPoints[i]);
 		}
-		ctx.lineTo(axPoints[0], ayPoints[0]);
-		if (fill) {
-			ctx.fill();
-		} else {
+		if (mode != DRAW_NOCLOSE)
+			ctx.lineTo(axPoints[0], ayPoints[0]);
+		if (mode != FILL) {
 			ctx.stroke();
+			ctx.translate(-0.5, -0.5);
+		} else {
+			ctx.fill();
 		}
-		ctx.translate(-0.5, -0.5);
-	}
-
-	public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
-		JSUtil.notImplemented(null);
-		drawRect(x, y, width, height);
 	}
 
 	public void drawRect(int x, int y, int width, int height) {
+		// from Graphics
 		if (width <= 0 || height <= 0)
 			return;
 		ctx.translate(0.5, 0.5);
@@ -286,11 +303,6 @@ public class JSGraphics2D // extends SunGraphics2D
 		ctx.rect(x, y, width, height);
 		ctx.stroke();
 		ctx.translate(-0.5, -0.5);
-	}
-
-	public void fillRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
-		JSUtil.notImplemented(null);
-		fillRect(x, y, width, height);
 	}
 
 	public void fillRect(int x, int y, int width, int height) {
@@ -301,14 +313,14 @@ public class JSGraphics2D // extends SunGraphics2D
 	}
 
 	public void draw3DRect(int x, int y, int width, int height, boolean raised) {
-		do3DRect(x, y, width, height, raised, false);
+		do3DRect(x, y, width, height, raised, DRAW_CLOSE);
 	}
 
 	public void fill3DRect(int x, int y, int width, int height, boolean raised) {
-		do3DRect(x, y, width, height, raised, true);
+		do3DRect(x, y, width, height, raised, FILL);
 	}
 
-	private void do3DRect(int x, int y, int width, int height, boolean raised, boolean isFill) {
+	private void do3DRect(int x, int y, int width, int height, boolean raised, int mode) {
 		if (width <= 0 || height <= 0)
 			return;
 		Paint p = getPaint();
@@ -321,9 +333,8 @@ public class JSGraphics2D // extends SunGraphics2D
 		} else if (p != c) {
 			setColor(c);
 		}
-		if (isFill) {
+		if (mode == FILL)
 			fillRect(x + 1, y + 1, width - 2, height - 2);
-		}
 		setColor(raised ? brighter : darker);
 		// drawLine(x, y, x, y + height - 1);
 		fillRect(x, y, 1, height);
@@ -379,7 +390,7 @@ public class JSGraphics2D // extends SunGraphics2D
 		} else {
 			ctx.translate(0.5, 0.5);
 			ctx.lineTo(x2, y2);
-			ctx.translate(-0.5, -0.5);		
+			ctx.translate(-0.5, -0.5);
 		}
 	}
 
@@ -434,6 +445,27 @@ public class JSGraphics2D // extends SunGraphics2D
 		{
 		} else
 			ctx.fill();
+	}
+
+	public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
+		doRoundRect(x, y, width, height, arcWidth, arcHeight, DRAW_CLOSE);
+	}
+
+	public void fillRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
+		doRoundRect(x, y, width, height, arcWidth, arcHeight, FILL);
+	}
+
+	RoundRectangle2D.Double rrect;
+
+	private void doRoundRect(int x, int y, int w, int h, int aw, int ah, int mode) {
+		if (rrect == null || rrect.getX() != x || rrect.getY() != y || rrect.getWidth() != w || rrect.getHeight() != h
+				|| rrect.getArcWidth() != aw || rrect.getArcHeight() != ah) {
+			rrect = new RoundRectangle2D.Double(x, y, w, h, aw, ah);
+		}
+		if (mode == FILL)
+			fill(rrect);
+		else
+			draw(rrect);
 	}
 
 	public boolean drawImage(Image img, int x, int y, ImageObserver observer) {
@@ -663,8 +695,9 @@ public class JSGraphics2D // extends SunGraphics2D
 		return hints;
 	}
 
-	public void setBackground(Color color) {
-		background(color);
+	public void setBackground(Color c) {
+		// for clearRect only
+			backgroundColor = c;
 	}
 
 	public Color getBackground() {
@@ -676,8 +709,12 @@ public class JSGraphics2D // extends SunGraphics2D
 	}
 
 	public void setColor(Color c) {
-		foregroundColor = c;
-		setGraphicsColor(c);
+		if (clearing) {
+			clearColorSaved = c;
+		} else {
+			foregroundColor = c;
+			setGraphicsColor(c);
+		}
 	}
 
 	public void setPaint(Paint paint) {
@@ -691,6 +728,7 @@ public class JSGraphics2D // extends SunGraphics2D
 	}
 
 	public FontMetrics getFontMetrics() {
+		// from Graphics
 		return getFontMetrics(getFont());
 	}
 
@@ -724,10 +762,27 @@ public class JSGraphics2D // extends SunGraphics2D
 	}
 
 	public void setClip(Shape clip) {
+		if (clip == null) {
+			setClip(0, 0, width, height);
+			return;
+		}
 		currentClip = clip;
 		ctx.beginPath();
 		doShape(clip);
 		ctx.clip();
+	}
+
+	public boolean hitClip(int x, int y, int width, int height) {
+		// from Graphics
+
+		// Note, this implementation is not very efficient.
+		// Subclasses should override this method and calculate
+		// the results more directly.
+		Rectangle clipRect = getClipBounds();
+		if (clipRect == null) {
+			return true;
+		}
+		return clipRect.intersects(x, y, width, height);
 	}
 
 	private void setGraphicsColor(Color c) {
@@ -737,7 +792,7 @@ public class JSGraphics2D // extends SunGraphics2D
 	}
 
 	public void copyArea(int x, int y, int width, int height, int dx, int dy) {
-		ctx.putImageData(ctx.getImageData(x, y, width, height), x + dx,	y + dy);
+		ctx.putImageData(ctx.getImageData(x, y, width, height), x + dx, y + dy);
 	}
 
 	public Shape getClip() {
@@ -746,6 +801,20 @@ public class JSGraphics2D // extends SunGraphics2D
 
 	public void drawString(String s, int x, int y) {
 		fillText(s, x, y);
+	}
+
+	public void drawChars(char[] chars, int x, int y) {
+		fillText(String.valueOf(chars), x, y);
+	}
+
+	public void drawChars(char[] data, int offset, int length, int x, int y) {
+		// from Graphics
+		drawString(new String(data, offset, length), x, y);
+	}
+
+	public void drawBytes(byte[] data, int offset, int length, int x, int y) {
+		// from Graphics
+		drawString(new String(data, offset, length), x, y);
 	}
 
 	public void drawString(String str, float x, float y) {
@@ -866,6 +935,11 @@ public class JSGraphics2D // extends SunGraphics2D
 		setComposite(AlphaComposite.Xor);
 	}
 
+	public Rectangle getClipRect() {
+		// from Graphics
+		return getClipBounds();
+	}
+
 	public Rectangle getClipBounds() {
 		return getClipBounds(null);
 	}
@@ -890,22 +964,40 @@ public class JSGraphics2D // extends SunGraphics2D
 		return currentClip.getBounds();
 	}
 
+	private Color clearColorSaved;
+	private boolean clearing;
+
+	/**
+	 * 
+	 * @param comp AlphaComposite or XORComposite
+	 */
 	public void setComposite(Composite comp) {
+		// TODO -- XORComposite
 		// this equality check speeds mark/reset significantly
-		if (comp == this.currentComposite)
+		if (comp == this.alphaComposite)
 			return;
 		// alpha composite only here
-		int newRule = 0;
-		boolean isValid = (comp == null || currentComposite == null || (comp instanceof AlphaComposite)
-				&& (newRule = ((AlphaComposite) comp).getRule()) != currentComposite.getRule());
+		boolean isAlpha = comp instanceof AlphaComposite;
+		int newRule = (!isAlpha ? 0 : ((AlphaComposite) comp).getRule());
+		boolean isValid = (isAlpha && alphaComposite == null || newRule != alphaComposite.getRule());
 		if (isValid && JSGraphicsCompositor.setGraphicsCompositeAlpha(this, newRule)) {
-			currentComposite = (AlphaComposite) comp;
+			alphaComposite = (AlphaComposite) comp;
 		}
+		if (newRule == AlphaComposite.CLEAR) {
+			clearColorSaved = foregroundColor;
+			setColor(Color.black);
+			clearing = true;
+		} else if (clearing) {
+			clearing = false;
+			setColor(clearColorSaved);
+			clearColorSaved = null;
+		}
+
 		setAlpha(comp == null ? 1 : ((AlphaComposite) comp).getAlpha());
 	}
 
 	public Composite getComposite() {
-		return currentComposite;
+		return alphaComposite;
 	}
 
 	public void drawImage(BufferedImage img, BufferedImageOp op, int x, int y) {
@@ -970,7 +1062,7 @@ public class JSGraphics2D // extends SunGraphics2D
 		{
 		}
 		map[SAVE_ALPHA] = Float.valueOf(alpha);
-		map[SAVE_COMPOSITE] = currentComposite;
+		map[SAVE_COMPOSITE] = alphaComposite;
 		map[SAVE_STROKE] = currentStroke;
 		map[SAVE_TRANSFORM] = transform;
 		map[SAVE_FONT] = font;
@@ -1004,6 +1096,7 @@ public class JSGraphics2D // extends SunGraphics2D
 	}
 
 	public Graphics create(int x, int y, int width, int height) {
+		// from Graphics
 		// cell renderer pane and JComponent
 		Graphics g = create();
 		if (g == null)

@@ -1,7 +1,10 @@
 package swingjs;
 
-import javajs.util.Base64;
+import java.awt.Component;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
+
+import javajs.util.Base64;
 import swingjs.api.js.DOMNode;
 
 /**
@@ -65,6 +68,15 @@ public class JSImage extends BufferedImage {
 		{}
 		_imgNode = img;
 	}
-		
+
+    /**
+     * font will be derived from this component when graphics is created
+     * @param c
+     * @return
+     */
+	public Image setComponent(Component c) {
+		_component = c;
+		return this;
+	}
 
 }

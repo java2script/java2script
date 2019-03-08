@@ -68,17 +68,17 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		}
 		textListener.checkDocument();
 		setCssFont(domNode, c.getFont());
-		DOMNode.setAttr(domNode, "contentEditable", "true");
+		DOMNode.setAttr(domNode, "contentEditable", TRUE);
 		setText(null);
 		return updateDOMNodeCUI();
 	} 
-	 
+
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
 		switch(prop) {
 		case "text":
-			getComponentText();
+			setCurrentText();
 			return;
 		}
 		super.propertyChange(e);
@@ -144,7 +144,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		return n + (/** @j2sNative sib.textContent && sib.textContent.length || */ 0);
 	}
 		
-	@Override
+//	@Override
 	public void setText(String text) {
 		SB sb = new SB();
 		Document d = editor.getDocument();
@@ -158,7 +158,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		String html = sb.toString();
 		if (html == currentHTML)
 			return;
-		currentText = text;
+		text = fixText(currentText = text);
 		DOMNode.setAttr(domNode, "innerHTML", currentHTML = html);
 		updateDataUI();
 		@SuppressWarnings("unused")

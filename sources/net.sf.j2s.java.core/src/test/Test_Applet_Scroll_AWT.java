@@ -34,7 +34,6 @@ import java.awt.event.MouseWheelListener;
 import java.text.DecimalFormat;
 
 import javax.swing.JSlider;
-import javax.swing.JToggleButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -54,7 +53,7 @@ public class Test_Applet_Scroll_AWT extends Applet implements ChangeListener {
 		/**
 		 * @j2sNative
 		 * 
-		 * 	thisApplet.__Info.width = 500;
+		 * 	thisApplet.__Info.width = 800;
 		 *  thisApplet.__Info.height = 400;
 		 *  thisApplet.__Info.isResizable = true;
 		 */
@@ -71,17 +70,18 @@ public class Test_Applet_Scroll_AWT extends Applet implements ChangeListener {
 
 	@Override
 	public void init() {
-
-		final Label label = new Label("hello");
+		setSize(800,300);
+		final Label label = new Label("hello", Label.CENTER);
 		// label.setBounds(0, 60, 200, 60);
 		setSize(label, 80, 50);
 		label.setBackground(Color.yellow);
 		label.setForeground(Color.BLUE);
-		label.setAlignment(Label.RIGHT);
+//		label.setAlignment(Label.RIGHT);
 
 		final TextField tf = new TextField("12.5", 8);
-		tf.setBackground(Color.black);
-		tf.setForeground(Color.yellow);
+//		tf.setBackground(Color.red);
+		tf.setForeground(Color.orange);
+		tf.setEditable(false);
 		//tf.setOpaque(true);
 		setSize(tf, 80, 40);
 		tf.addActionListener(new java.awt.event.ActionListener() {
@@ -89,14 +89,15 @@ public class Test_Applet_Scroll_AWT extends Applet implements ChangeListener {
 			public void actionPerformed(ActionEvent event) {
 				label.setBackground(Color.white);
 				label.setText(tf.getText());
-				// repaint();
+				System.out.println("textfield action");
+				//repaint();
 			}
 		});
 		tf.addFocusListener(new FocusListener() {
 
 			@Override
 			public void focusGained(FocusEvent e) {
-				tf.setBackground(Color.BLUE);
+//				tf.setBackground(Color.BLUE);
 			}
 
 			@Override
@@ -190,6 +191,10 @@ public class Test_Applet_Scroll_AWT extends Applet implements ChangeListener {
 			
 		});
 
+
+		Panel p = new Panel();
+		Scrollbar hbar = mkBar(p, tf, Adjustable.VERTICAL, 20, 200);
+
 		// the first two buttons act like radio buttons; only one is ever ON
 		
 //		ButtonGroup bg = new ButtonGroup();
@@ -199,7 +204,7 @@ public class Test_Applet_Scroll_AWT extends Applet implements ChangeListener {
 		// the third button is not part of the group
 		// note that JButtonUI does not need to know anything about the groups
 
-		final JToggleButton button3 = new JToggleButton("btn3");
+		final Button button3 = new Button("btn3");
 		// BasicToggleButtonUI us; just using this to get access to code for
 		// BasicToggleButtonUI
 		setSize(button3, 80, 20);
@@ -207,14 +212,16 @@ public class Test_Applet_Scroll_AWT extends Applet implements ChangeListener {
 		button3.addActionListener(new java.awt.event.ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
-				label.setBackground(button3.isSelected() ? Color.green : Color.yellow);
+				//label.setBackground(button3.isSelected() ? Color.green : Color.yellow);
 				tf.setBackground(Color.black);
 				label.setText("btn3");
+				System.out.print(hbar.getValue());
+				hbar.setValue(hbar.getValue() + 20);
+				System.out.println(" " + hbar.getValue());
 				// repaint();
 			}
 		});
-
-		Panel p = new Panel();
+		
 		
 		p.addMouseListener(new MouseListener() {
 
@@ -266,7 +273,7 @@ public class Test_Applet_Scroll_AWT extends Applet implements ChangeListener {
 
 			@Override
 			public void mouseMoved(MouseEvent e) {
-				System.out.println("panel Move " + e);
+//				System.out.println("panel Move " + e);
 				
 			}
 			
@@ -285,20 +292,22 @@ public class Test_Applet_Scroll_AWT extends Applet implements ChangeListener {
 //		hsb.setUnitIncrement(100);
 //		button2.setToolTipText("this is hsb");
 
-		mkBar(p, tf, Adjustable.VERTICAL, 20, 200);
+		
 		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200);
 
 		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200).setInverted(true);
 		p.add(label);
 //		label.setToolTipText("this is label");
 		p.add(tf);
+		TextField tf1 = new TextField("testing");
+		p.add(tf1);
 //		tf.setToolTipText("this is tf");
 		p.add(button);
 		p.add(button2);
 		p.add(button3);
-		p.setBackground(Color.blue);
+		p.setBackground(Color.CYAN);
 //		button2.setToolTipText("this is Button 2");
-		button3.setToolTipText("this is Button 3");
+//		button3.setToolTipText("this is Button 3");
 		mkBar(p, tf, Adjustable.HORIZONTAL, 100, 40);
 		JSlider framesPerSecond = mkSlider(p, tf, Adjustable.HORIZONTAL, 300, 40);
 		framesPerSecond.setForeground(Color.BLACK);
@@ -319,6 +328,7 @@ public class Test_Applet_Scroll_AWT extends Applet implements ChangeListener {
 			@Override
 			public void adjustmentValueChanged(AdjustmentEvent e) {
 				tf.setText(df.format(e.getValue() / 100.0));
+				System.out.println("adjusting " + bar.getValueIsAdjusting() + " " + bar.getValue());
 			}
 
 		});
@@ -331,8 +341,8 @@ public class Test_Applet_Scroll_AWT extends Applet implements ChangeListener {
 			}
 		});
 		setSize(bar, x, y);
-		bar.setBackground(Color.orange);
-		bar.setForeground(Color.green);
+//		bar.setBackground(Color.orange);
+//		bar.setForeground(Color.green);
 		bar.setBlockIncrement(10);
 		bar.setUnitIncrement(100);
 		p.add(bar);

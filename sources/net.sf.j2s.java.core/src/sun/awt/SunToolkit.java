@@ -28,6 +28,7 @@
 
 package sun.awt;
 
+import java.applet.JSApplet;
 import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.Container;
@@ -1488,28 +1489,28 @@ public abstract class SunToolkit extends Toolkit implements
 	// End Plug-in code
 	// /////////////////////////////////////////////////////////////////////////
 
-	public static boolean isLightweightOrUnknown(Component comp) {
-		// SwingJS - not tested; probably never called
-		// if (false || !true)...
-		if (comp.isLightweight() || !(getDefaultToolkit() instanceof SunToolkit)) {
-			return true;
-		}
-		// SwingJS no idea what this is for
-		return !(
-		// comp instanceof Button
-		// || comp instanceof Canvas
-		// || comp instanceof Checkbox
-		// || comp instanceof Choice
-		// || comp instanceof Label
-		// || comp instanceof List
-		// ||
-		comp instanceof Panel
-		// || comp instanceof Scrollbar
-		// || comp instanceof ScrollPane
-		// || comp instanceof TextArea
-		// || comp instanceof TextField
-		|| comp instanceof Window);
-	}
+//	public static boolean isLightweightOrUnknown(Component comp) {
+//		// SwingJS - not tested; probably never called
+//		// if (false || !true)...
+//		if (comp.isLightweight() || !(getDefaultToolkit() instanceof SunToolkit)) {
+//			return true;
+//		}
+//		// SwingJS no idea what this is for
+//		return !(
+//		// comp instanceof Button
+//		// || comp instanceof Canvas
+//		// || comp instanceof Checkbox
+//		// || comp instanceof Choice
+//		// || comp instanceof Label
+//		// || comp instanceof List
+//		// ||
+//		comp instanceof Panel
+//		// || comp instanceof Scrollbar
+//		// || comp instanceof ScrollPane
+//		// || comp instanceof TextArea
+//		// || comp instanceof TextField
+//		|| comp.isWindowOrJSApplet());
+//	}
 
 	// public static class OperationTimedOut extends RuntimeException {
 	// public OperationTimedOut(String msg) {
@@ -1939,7 +1940,7 @@ public abstract class SunToolkit extends Toolkit implements
 	 *         Window; null, if component is not a part of window hierarchy
 	 */
 	public static Window getContainingWindow(Component comp) {
-		while (comp != null && !(comp instanceof Window)) {
+		while (comp != null && !comp.isWindowOrJSApplet()) {
 			comp = comp.getParent();
 		}
 		return (Window) comp;

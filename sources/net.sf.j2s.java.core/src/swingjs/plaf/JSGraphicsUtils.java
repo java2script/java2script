@@ -275,7 +275,10 @@ public class JSGraphicsUtils
         if (ui.isAWT && text == "")
         	text = "\u00A0"; // nonbreaking space for java.awt.Label
 
-        Font font = b.getFont();
+        Font font = ui.getFont();
+        if (font == null)
+        	return new Dimension(10,12);
+        
         FontMetrics fm = b.getFontMetrics(font);
 
         ui.setButtonRectangles(true);

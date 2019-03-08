@@ -4,8 +4,12 @@ import java.awt.event.AdjustmentEvent;
 
 import javax.swing.JScrollBar;
 
-public class Scrollbar extends JScrollBar implements A2SContainer {
+public class Scrollbar extends JScrollBar {
 
+	private boolean fromUI;
+
+	public void isAWT() {}
+	
 	public Scrollbar() {
 		this(java.awt.Scrollbar.VERTICAL);
 	}
@@ -14,52 +18,61 @@ public class Scrollbar extends JScrollBar implements A2SContainer {
 		this(direction, 0, 10, 0, 100);
 	}
 	public Scrollbar(int orientation, int value, int extent, int min, int max) {
-		super(orientation, value, extent, min, max);
+		super(orientation, Math.max(Math.min(value,  max), min), extent, min, max);
 		setOpaque(true);
-		A2SEvent.addListener(null, this);
+		setBlockIncrement(10);
+//		A2SEvent.addListener(this);
 	}
 
+//	@Override
+//	public void setValue(int n) {
+//		super.setValue(n);
+//	}
+//
+//	@Override
+//	public int getMinimum() {
+//		return super.getMinimum();
+//	}
+//
+//	@Override
+//	public int getMaximum() {
+//		return super.getMaximum();
+//	}
+//
+//	@Override
+//	public int getValue() {
+//		return super.getValue();
+//	}
+
+	@Override
+	protected void fireAdjustmentValueChanged(int id, int type, int value, boolean adjusting) {
+		A2SEvent.addListener(this);
+		if (!fromUI)
+			return;
+		//System.out.println("a2sscrollbar adjusting " + adjusting);
+		super.fireAdjustmentValueChanged(id, type, value, adjusting);
+	}
+
+	public void setValueFromUI(int val) {
+		fromUI = true;
+		setValue(val);
+		fromUI = false;
+	}
+
+	public void processAdjustmentEventA2S(AdjustmentEvent e) {
+		if (fromUI)
+			processAdjustmentEvent(e);
+	}
+    
 	protected void processAdjustmentEvent(AdjustmentEvent e) {
 		// subclass only
 	}
 
-	@Override
-	public void setValue(int n) {
-		super.setValue(n);
+	public void setValueIsAdjustingFromUI(boolean b) {
+		fromUI = true;
+		setValueIsAdjusting(b);
+		fromUI = false;
 	}
 
-	@Override
-	public int getMinimum() {
-		return super.getMinimum();
-	}
-
-	@Override
-	public int getMaximum() {
-		return super.getMaximum();
-	}
-
-	@Override
-	public int getValue() {
-		return super.getValue();
-	}
-
-	// JCheckBox does not allow access to fireAdjustmentChanged.
-	// It really does not matter who holds the listener, actually.
-	A2SListener listener = null;
-
-	@Override
-	public A2SListener getA2SListener() {
-		if (listener == null)
-			listener = new A2SListener();
-		return listener;
-	}
-
-	// public void addMouseListener(MouseListener c) {
-	// //super.addMouseListener(c);
-	//
-	// }
-	// public void addMouseMotionListener(MouseMotionListener c) {
-	// //super.addMouseMotionListener(c);
-	// }
 
 }

@@ -1,6 +1,7 @@
 package swingjs.a2s;
 
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.MenuComponent;
 import java.awt.MenuItem;
 import java.awt.MenuShortcut;
