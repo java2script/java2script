@@ -244,9 +244,8 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		
 		frame.addWindowListener(this);
 		frame.addComponentListener(this);
-		 LookAndFeel.installColors(jc,
-		 "Frame.background",
-		 "Frame.foreground");
+		 LookAndFeel.installColorsAndFont(jc, "Frame.background",
+		 "Frame.foreground", "Frame.font");
 	}
 
 	@Override
