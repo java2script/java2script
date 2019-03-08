@@ -309,7 +309,7 @@ public class JSListUI extends JSLightweightUI {
 		/**
 		 * @j2sNative
 		 * 
-		 *            if (!rendererComponent.getUI) { alert(
+		 *            if (!rendererComponent.getUI$) { alert(
 		 *            "swingjs.JListUI -- Developer! All list cell renderers in SwingJS must be Swing components"
 		 *            ); } 
 		 *            

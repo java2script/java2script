@@ -167,7 +167,7 @@ public class List extends JList implements ItemSelectable  {
      */
     @Deprecated
     public synchronized void addItem(String item, int index) {
-    	if (index < 0 || index >= awtmodel.getSize())
+    	if (index >= 0 && index < awtmodel.getSize())
     		awtmodel.add(index, item);
     	else
     		awtmodel.addElement(item);
