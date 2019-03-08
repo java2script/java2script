@@ -13941,8 +13941,19 @@ Clazz.exceptionOf = function(e, clazz) {
     || clazz == NullPointerException && _isNPEExceptionPredicate(e));
 };
 
-Clazz.forName = function(name, initialize, loader) {
-  return Clazz._4Name(name, null, null, false, initialize);
+Clazz.forName = function(name, initialize, loader, isQuiet) {
+  // we need to consider loading a class from the path of the calling class. 
+ var cl = null;
+ if (loader) {
+	try {
+		isQuiet = true;
+		var className = loader.baseClass.getName$(); // set in java.lang.Class.getClassLoader$()
+		var i = className.lastIndexOf(".");
+		var name1 = className.substring(0, i + 1) + name;
+		cl = Clazz._4Name(name1, null, null, false, initialize, true);
+	} catch (e) {}
+ }
+ return cl || Clazz._4Name(name, null, null, false, initialize, isQuiet);
 }
 
 Clazz.getClass = function(cl, methodList) {
@@ -16125,7 +16136,7 @@ var evaluate = function(file, js) {
   }
 }
 
-Clazz._4Name = function(clazzName, applet, state, asClazz, initialize) {
+Clazz._4Name = function(clazzName, applet, state, asClazz, initialize, isQuiet) {
   if (clazzName.indexOf("[") == 0)
 	return getArrayClass(clazzName);
   if (clazzName.indexOf(".") < 0)
@@ -16162,6 +16173,8 @@ Clazz._4Name = function(clazzName, applet, state, asClazz, initialize) {
   }
   var cl = evalType(clazzName);
   if (!cl){
+	if (isQuiet)
+		return null;
     alert(clazzName + " could not be loaded");
     doDebugger();
   }
