@@ -625,8 +625,7 @@ public class PopupFactory {
                         r.x = p.x;
                         r.y = p.y;
                         return r.contains(x, y, width, height);
-                    } else if (parent instanceof Window ||
-                               parent instanceof JSApplet) {
+                    } else if (parent instanceof Window) {
                         // No suitable swing component found
                         break;
                     }
@@ -938,8 +937,7 @@ public class PopupFactory {
               if it has a layered pane,
               add to that, otherwise
               add to the window. */
-            while (!(parent instanceof Window || parent instanceof JSApplet) &&
-                   (parent!=null)) {
+            while (parent != null && !parent.isWindowOrJSApplet()) {
                 parent = parent.getParent();
             }
             // Set the visibility to false before adding to workaround a
@@ -969,7 +967,7 @@ public class PopupFactory {
 				Component createComponent(Component owner) {
             Panel component = new MediumWeightComponent();
             
-            rootPane = new JRootPane("_Popup" + (++popupCount), false);
+            rootPane = new JRootPane("_Popup" + (++popupCount), false, component);
             rootPane.setFrameViewer(((JSComponent) owner).getFrameViewer());
             // NOTE: this uses setOpaque vs LookAndFeel.installProperty as
             // there is NO reason for the RootPane not to be opaque. For

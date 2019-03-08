@@ -1001,8 +1001,7 @@ Glyph/composite/outline fonts are not supported
 specific AWT components not implemented
 ---------------------------------------
 
-The only AWT components implemented are Dialog, Frame, Panel, and Window
-They are subclassed as JDialog, JFrame, JPanel/JApplet, and JWindow, respectively
+all AWT components are now implemented as subclasses of Swing counterparts. 2019.02.13 BH
 
 
 threads

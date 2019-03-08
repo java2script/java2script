@@ -11,13 +11,17 @@ class Test_Byte extends Test_ {
 	  public static void main(String[] args) {
 		
 		  
-		byte s = v++; 
+		byte s = v++;
 		System.out.println(s + " " + v);
 		assert((s + " " + v).equals("127 -128"));
 		  
-		
+		char co = '\220';
+		assert (co == 144);
 		v = 127;
-		
+		byte byte0 = 20;
+		int i10 = 228;
+        int l1 = ((i10 * 100) / 4805) * (100 / byte0);
+        int i12 = 100 / byte0;
 	    byte b2 = test1();
 	 
 		assert((b2 + " " + v).equals("127 -128"));

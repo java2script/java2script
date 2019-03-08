@@ -1249,6 +1249,9 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 
 		private void viewportStateChanged(ChangeEvent e) {
 			syncScrollPaneWithViewport();
+			// painted label, button, or canvas anywhere in the tree will need to be repainted after the shift in origin.
+			if (jc.selfOrChildIsPainted())
+				jc.repaint();
 		}
 
 		//

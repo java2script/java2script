@@ -3047,6 +3047,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			return false;
 		String leftName = leftTypeBinding.getName();
 		String rightName = rightTypeBinding.getName();
+		
 		boolean leftIsInt = leftTypeBinding.isPrimitive() && isIntegerType(leftName);
 		boolean rightIsInt = rightTypeBinding.isPrimitive() && isIntegerType(rightName);
 		if ("/".equals(operator) && leftIsInt && rightIsInt) {
@@ -4055,13 +4056,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			}
 			break;
 		case "int":
-			if (op != null && (!isDiv && fromIntType) || fromChar || rightName.equals("short")
-					|| rightName.equals("byte")) {
+			if (!isDiv && (op != null && (!isDiv && fromIntType) || fromChar || rightName.equals("short")
+					|| rightName.equals("byte"))) {
 				left = null;
-				break;
+			} else {
+				more = "|0)";
+				addParens = true;
 			}
-			more = "|0)";
-			addParens = true;
 			break;
 		case "short":
 			if ((rightName.equals("short") || rightName.equals("byte")) && !isDiv) {

@@ -24,6 +24,7 @@
  */
 package java.awt;
 
+import java.applet.JSApplet;
 import java.awt.event.FocusEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -456,7 +457,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 	 */
 	protected Component getGlobalFocusOwner() throws SecurityException {
 		// synchronized (KeyboardFocusManager.class) {
-		checkKFMSecurity();
+//		checkKFMSecurity();
 		return focusOwner;
 		// }
 	}
@@ -510,7 +511,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 				if (focusOwner != null && (getCurrentFocusCycleRoot() == null
 						|| !focusOwner.isFocusCycleRoot(getCurrentFocusCycleRoot()))) {
 					Container rootAncestor = focusOwner.getFocusCycleRootAncestor();
-					if (rootAncestor == null && (focusOwner instanceof Window)) {
+					if (rootAncestor == null && focusOwner.isWindowOrJSApplet()) {
 						rootAncestor = (Container) focusOwner;
 					}
 					if (rootAncestor != null) {
@@ -788,8 +789,8 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 		boolean shouldFire = false;
 
 		if (focusedWindow == null || focusedWindow.isFocusableWindow()) {
-			synchronized (KeyboardFocusManager.class) {
-				checkKFMSecurity();
+			//synchronized (KeyboardFocusManager.class) {
+				//checkKFMSecurity();
 
 				oldFocusedWindow = getFocusedWindow();
 
@@ -802,7 +803,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 
 				KeyboardFocusManager.focusedWindow = focusedWindow;
 				shouldFire = true;
-			}
+			//}
 		}
 
 		if (shouldFire) {
@@ -1704,9 +1705,9 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 		return (keyEventPostProcessors != null) ? (java.util.List) keyEventPostProcessors.clone() : null;
 	}
 
-	static void setMostRecentFocusOwner(Component component) {
+	public static void setMostRecentFocusOwner(Component component) {
 		Component window = component;
-		while (window != null && !(window instanceof Window)) {
+		while (window != null && !window.isWindowOrJSApplet()) {
 			window = window.parent;
 		}
 		if (window != null) {
@@ -1714,7 +1715,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 		}
 	}
 
-	static synchronized void setMostRecentFocusOwner(Window window, Component component) {
+	public static synchronized void setMostRecentFocusOwner(Window window, Component component) {
 		// ATTN: component has a strong reference to window via chain
 		// of Component.parent fields. Since WeakHasMap refers to its
 		// values strongly, we need to break the strong link from the
@@ -1726,7 +1727,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 		mostRecentFocusOwners.put(window, component);// weakValue);
 	}
 
-	static void clearMostRecentFocusOwner(Component comp) {
+	public static void clearMostRecentFocusOwner(Component comp) {
 		Container window;
 
 		if (comp == null) {
@@ -1735,7 +1736,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 
 //		synchronized (comp.getTreeLock()) {
 			window = comp.getParent();
-			while (window != null && !(window instanceof Window)) {
+			while (window != null && !window.isWindowOrJSApplet()) {
 				window = window.getParent();
 			}
 //		}
@@ -1758,7 +1759,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 	 * Please be careful changing this method! It is called from
 	 * javax.swing.JComponent.runInputVerifier() using reflection.
 	 */
-	static synchronized Component getMostRecentFocusOwner(Window window) {
+	public static synchronized Component getMostRecentFocusOwner(Window window) {
 //        WeakReference<Component> weakValue =
 //            (WeakReference)mostRecentFocusOwners.get(window);
 		return mostRecentFocusOwners.get(window);
@@ -2358,7 +2359,8 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 					? SunToolkit.getContainingWindow(hwFocusRequest.heavyweight)
 					: nativeFocusedWindow);
 			// SwingJS was JSFrame and JSDialog, but in SwingJS those subclass JFrame and JDialog
-			while (activeWindow != null && !((activeWindow instanceof JFrame) || (activeWindow instanceof JDialog))) {
+			while (activeWindow != null && !(activeWindow instanceof JFrame || activeWindow instanceof JDialog
+					|| activeWindow instanceof JSApplet)) {
 				activeWindow = activeWindow.getParent_NoClientCode();
 			}
 

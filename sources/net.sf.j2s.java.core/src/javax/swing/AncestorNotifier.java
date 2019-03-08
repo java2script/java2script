@@ -154,11 +154,11 @@ class AncestorNotifier implements ComponentListener, PropertyChangeListener
                     jAncestor.addPropertyChangeListener(this);
                 }
             }
-            if (!a.isVisible() || a.getParent() == null || a instanceof Window) {
+            if (!a.isVisible() || a.getParent() == null || a.isWindowOrJSApplet()) {
                 firstInvisibleAncestor = a;
             }
         }
-        if (firstInvisibleAncestor instanceof Window &&
+        if (firstInvisibleAncestor != null && firstInvisibleAncestor.isWindowOrJSApplet() &&
             firstInvisibleAncestor.isVisible()) {
             firstInvisibleAncestor = null;
         }
@@ -172,7 +172,7 @@ class AncestorNotifier implements ComponentListener, PropertyChangeListener
                 JComponent jAncestor = (JComponent)a;
                 jAncestor.removePropertyChangeListener(this);
             }
-            if (a == firstInvisibleAncestor || a instanceof Window) {
+            if (a == firstInvisibleAncestor || a.isWindowOrJSApplet()) {
                 break;
             }
         }
@@ -207,7 +207,7 @@ class AncestorNotifier implements ComponentListener, PropertyChangeListener
         Component ancestor = e.getComponent();
         boolean needsNotify = firstInvisibleAncestor == null;
 
-        if ( !(ancestor instanceof Window) ) {
+        if ( !ancestor.isWindowOrJSApplet() ) {
             removeListeners(ancestor.getParent());
         }
         firstInvisibleAncestor = ancestor;

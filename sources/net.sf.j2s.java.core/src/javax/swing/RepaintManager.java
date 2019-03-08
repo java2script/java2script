@@ -379,7 +379,7 @@ public class RepaintManager {
 				//System.out.println("RM noVisibleParent");
 				return;
 			}
-			if ((c instanceof Window) || (c instanceof JSApplet)) {
+			if (c.isWindowOrJSApplet()) {
 				root = c;
 				break;
 			}
@@ -413,13 +413,14 @@ public class RepaintManager {
 	}
 
 	/**
-	 * The deal here is that I added Window to subclass JComponent so that 
+	 * SwingJS The deal here is that I added Window to subclass JComponent so that 
 	 * JInternalFrame could subclass Frame and still be a JComponent
 	 * 
 	 * @param c
 	 * @return
 	 */
 	private boolean isStandardJComponent(Component c) {
+		// TODO Q How about Applet here?
 		return (c instanceof JComponent && !(c instanceof Window));
 	}
 
@@ -474,7 +475,7 @@ public class RepaintManager {
 			if (!p.isVisible() || p.getPeer() == null) {
 				return;
 			}
-			if ((p instanceof Window) || (p instanceof JSApplet)) {
+			if (p.isWindowOrJSApplet()) {
 				// Iconified frames are still visible!
 				if (p instanceof JSFrame
 						&& (((JSFrame) p).getExtendedState() & JSFrame.ICONIFIED) == JSFrame.ICONIFIED) {
@@ -580,10 +581,8 @@ public class RepaintManager {
 		}
 		for (Container hw : hws.keySet()) {
 			Rectangle dirty = hws.get(hw);
-			if (hw instanceof Window) {
+			if (hw.isWindowOrJSApplet()) {
 				addDirtyRegion((Window) hw, dirty.x, dirty.y, dirty.width, dirty.height);
-			} else if (hw instanceof JSApplet) {
-				addDirtyRegion((JSApplet) hw, dirty.x, dirty.y, dirty.width, dirty.height);
 			} else { // SwingHeavyWeight
 				addDirtyRegion0(hw, dirty.x, dirty.y, dirty.width, dirty.height);
 			}
@@ -776,7 +775,7 @@ public class RepaintManager {
 		Set<Component> dirtyComps = dirtyComponents.keySet();
 		for (Iterator<Component> it = dirtyComps.iterator(); it.hasNext();) {
 			Component dirty = it.next();
-			Window window = dirty instanceof Window ? (Window) dirty : SwingUtilities
+			Window window = dirty.isWindowOrJSApplet() ? (Window) dirty : SwingUtilities
 					.getWindowAncestor(dirty);
 
 			if (window != null && !AWTAccessor.getWindowAccessor().isOpaque(window)) {

@@ -4,11 +4,21 @@ import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultButtonModel;
+import javax.swing.Icon;
 import javax.swing.JCheckBox;
 import javax.swing.JRadioButton;
 
+import swingjs.plaf.JSCheckBoxUI;
+
 public class Checkbox extends JCheckBox {
 
+	
+	private static Boolean isRadioTemp;
+	private boolean isRadio;
+
+
+	public void isAWT() {}
 	
 	// added to (slightly) simplify converting code that uses Checkbox radio buttons
 	public static JRadioButton newRadioButton(String string, ButtonGroup bg, boolean b) {
@@ -25,17 +35,33 @@ public class Checkbox extends JCheckBox {
 		super(string, b);
 	}
 
-    public Checkbox(String label, boolean state, java.awt.CheckboxGroup group)
-            throws HeadlessException {
-            setText(label);
-            setState(state);
-            if (group != null)
-            	group.add(this);
-            if (state && (group != null)) {
-            	setSelected(state);
-            }
-        }
-    public Checkbox(String label, java.awt.CheckboxGroup group, boolean state)
+	public Checkbox(String label, boolean state, java.awt.CheckboxGroup group) throws HeadlessException {
+		super(label, setIsRadio(), false);
+		setState(state);
+		if (group != null)
+			group.add(this);
+		if (state && (group != null)) {
+			setSelected(state);
+		}
+	}
+    
+	/**
+	 * transiently flag this as a radio button
+	 * @return
+	 */
+    private static Icon setIsRadio() {
+    	isRadioTemp = true;
+    	return null;
+	}
+    
+    public boolean isRadio() {
+    	boolean b = (isRadioTemp == null ? isRadio : isRadioTemp);
+    	isRadio = b;
+    	isRadioTemp = null;
+    	return b;
+    }
+
+	public Checkbox(String label, java.awt.CheckboxGroup group, boolean state)
             throws HeadlessException {
             this(label, state, group);
         }	
@@ -49,7 +75,8 @@ public class Checkbox extends JCheckBox {
 	}
 
 	public void setState(boolean b) {
-		setSelected(b);
+		if (((DefaultButtonModel) model).setStateNoFire(b))
+			((JSCheckBoxUI) (Object) getUI()).updateDOMNode();
 	}   
 	
 	public void setCheckboxGroup(java.awt.CheckboxGroup group) throws HeadlessException {
@@ -60,9 +87,8 @@ public class Checkbox extends JCheckBox {
 
     @Override
 	protected void fireActionPerformed(ActionEvent event) {
-    	A2SEvent.addListener(null, this);
+    	A2SEvent.addListener(this);
     	super.fireActionPerformed(event);
     }
-
 
 }

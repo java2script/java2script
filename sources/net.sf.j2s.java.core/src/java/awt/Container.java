@@ -290,6 +290,7 @@ public class Container extends JSComponent {
     	component = new Lst<Component>();
     }
 
+		@Override
 		void initializeFocusTraversalKeys() {
         //focusTraversalKeys = new Set[4];
     }
@@ -451,14 +452,14 @@ public class Container extends JSComponent {
         }
     }
 
-    /**
-     * Checks that the component is not a Window instance.
-     */
-    private void checkNotAWindow(Component comp){
-        if (comp instanceof Window && ((JSComponent) comp).getUIClassID() != "InternalFrameUI") {
-            throw new IllegalArgumentException("adding a window to a container");
-        }
-    }
+//    /**
+//     * Checks that the component is not a Window instance.
+//     */
+//    private void checkNotAWindow(Component comp){
+//        if (comp instanceof Window && ((JSComponent) comp).getUIClassID() != "InternalFrameUI") {
+//            throw new IllegalArgumentException("adding a window to a container");
+//        }
+//    }
 
 //    /**
 //     * Checks that the component comp can be added to this container
@@ -553,7 +554,7 @@ public class Container extends JSComponent {
             comp.createHierarchyEvents(HierarchyEvent.HIERARCHY_CHANGED, comp,
                                        this, HierarchyEvent.PARENT_CHANGED,
                                        Toolkit.enabledOnToolkit(AWTEvent.HIERARCHY_EVENT_MASK));
-            if (peer != null && layoutMgr == null && isVisible()) {
+            if (layoutMgr == null && isDisplayable() && isVisible()) {
                 updateCursorImmediately();
             }
         }
@@ -1084,7 +1085,12 @@ public class Container extends JSComponent {
                         "illegal component position");
           }
           checkAddToSelf(comp);
-          checkNotAWindow(comp);
+      	// Here we do not allow JSApplet, but we do allow JInternalFrame, which is a JFrame now
+          if (comp.isJ2SWindowButNotJInternalFrame()) {
+              throw new IllegalArgumentException("adding a window to a container");
+          }
+
+//          checkNotAWindow(comp);
 //      if (thisGC != null) {
 //          comp.checkGD(thisGC.getDevice().getIDstring());
 //      }
@@ -1143,6 +1149,8 @@ public class Container extends JSComponent {
       }
       return comp;
 		}
+
+    
 
 		/**
      * Checks that all Components that this Container contains are on
@@ -1292,8 +1300,17 @@ public class Container extends JSComponent {
                                            HierarchyEvent.PARENT_CHANGED,
                                            Toolkit.enabledOnToolkit(AWTEvent.HIERARCHY_EVENT_MASK));
             }
-            if (peer != null && layoutMgr == null && isVisible()) {
-                updateCursorImmediately();
+            if (peer != null) {
+            	if (layoutMgr == null && isVisible()) {
+                    updateCursorImmediately();
+            	}	
+            	if (isVisible()) {
+            		// this did not work -- see _mpEnigma_Applets_textana_Textanalyzer2_node4.htm
+                	Graphics g = getGraphics();
+                	if (g != null)
+                		g.clearRect(0, 0,  width, height);
+
+            	}
             }
             invalidateIfValid();
         }
@@ -1595,7 +1612,7 @@ public class Container extends JSComponent {
      * @see #doLayout
      * @see #validate
      */
-    protected void validateTree() {
+    public void validateTree() {
         if (!isValid()) {
             if (peer instanceof ContainerPeer) {
                 ((ContainerPeer)peer).beginLayout();
@@ -3083,7 +3100,8 @@ public class Container extends JSComponent {
      * @beaninfo
      *       bound: true
      */
-    public void setFocusTraversalKeys(int id,
+    @Override
+	public void setFocusTraversalKeys(int id,
                                       Set<? extends AWTKeyStroke> keystrokes)
     {
         if (id < 0 || id >= KeyboardFocusManager.TRAVERSAL_KEY_LENGTH) {
@@ -3124,7 +3142,8 @@ public class Container extends JSComponent {
      *         KeyboardFocusManager.DOWN_CYCLE_TRAVERSAL_KEYS
      * @since 1.4
      */
-    public Set<AWTKeyStroke> getFocusTraversalKeys(int id) {
+    @Override
+	public Set<AWTKeyStroke> getFocusTraversalKeys(int id) {
         if (id < 0 || id >= KeyboardFocusManager.TRAVERSAL_KEY_LENGTH) {
             throw new IllegalArgumentException("invalid focus traversal key identifier");
         }
@@ -3155,7 +3174,8 @@ public class Container extends JSComponent {
      *        KeyboardFocusManager.DOWN_CYCLE_TRAVERSAL_KEYS
      * @since 1.4
      */
-    public boolean areFocusTraversalKeysSet(int id) {
+    @Override
+	public boolean areFocusTraversalKeysSet(int id) {
         if (id < 0 || id >= KeyboardFocusManager.TRAVERSAL_KEY_LENGTH) {
             throw new IllegalArgumentException("invalid focus traversal key identifier");
         }
@@ -3232,15 +3252,16 @@ public class Container extends JSComponent {
      * @param comp a component in test, must not be null
      */
     private boolean isParentOf(Component comp) {
-        synchronized(getTreeLock()) {
-            while (comp != null && comp != this && !(comp instanceof Window)) {
+//        synchronized(getTreeLock()) {
+            while (comp != null && comp != this && !comp.isWindowOrJSApplet()) {
                 comp = comp.getParent();
             }
             return (comp == this);
-        }
+//        }
     }
 
-    void clearMostRecentFocusOwnerOnHide() {
+    @Override
+	void clearMostRecentFocusOwnerOnHide() {
         boolean reset = false;
         Window window = null;
 
@@ -3276,7 +3297,8 @@ public class Container extends JSComponent {
 //        }
     }
 
-    final Container getTraversalRoot() {
+    @Override
+	final Container getTraversalRoot() {
 //        if (isFocusCycleRoot()) {
 //            return findTraversalRoot();
 //        }
@@ -4560,7 +4582,8 @@ class LightweightDispatcher implements AWTEventListener {
             // see 5083555
             // check if srcComponent is in any modal blocked window
             Component c = nativeContainer;
-            while ((c != null) && !(c instanceof Window)) {
+            //SwingJS TODO Q: no check for applet here?
+            while (c != null && !(c instanceof Window)) {
                 c = c.getParent_NoClientCode();
             }
             if ((c == null) || ((Window)c).isModalBlocked()) {

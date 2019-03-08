@@ -186,6 +186,7 @@ public class JLayeredPane extends JComponent /* implements Accessible */ {
     // Hashtable to store layer values for non-JComponent components
     private Hashtable<Component,Integer> componentToLayer;
     private boolean optimizedDrawingPossible = true;
+	boolean isAWT;
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -193,9 +194,14 @@ public class JLayeredPane extends JComponent /* implements Accessible */ {
 //////////////////////////////////////////////////////////////////////////////
     /** Create a new JLayeredPane */
     public JLayeredPane() {
+    	this(false);
+    }
+
+	public JLayeredPane(boolean isAWTContainer) {
     	super();
         initLayeredPane();
-    }
+		this.isAWT = isAWTContainer;
+	}
 
 	protected void initLayeredPane() {
 		updateUI();

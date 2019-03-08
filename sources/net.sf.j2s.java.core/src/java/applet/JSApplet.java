@@ -27,6 +27,8 @@
  */
 package java.applet;
 
+import java.awt.Component;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
 import java.awt.Image;
@@ -35,10 +37,21 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 
+import javax.swing.JApplet;
+import javax.swing.JComponent;
+import javax.swing.JRootPane;
+import javax.swing.RepaintManager;
+
+import swingjs.plaf.JSComponentUI;
+
 /**
  * SwingJS note: This class is the original java.applet.Applet class. 
  * It is subclassed by JApplet. The replacement java.applet.Applet class
- * subclassed java.applet.Applet, which subclasses JApplet.
+ * subclassed java.applet.Applet, which subclasses JApplet. In addition, 
+ * it includes methods from Window allowing it to be treated as a window
+ * with respect to focus.
+ * 
+ *
  * 
  * An applet is a small program that is intended not to be run on
  * its own, but rather to be embedded inside another application.
@@ -74,6 +87,47 @@ public class JSApplet extends JSPanel {
 //        }
     }
 
+ 
+    /**
+     * SwingJS -- from Window
+     * 
+     * @return true
+     */
+    public boolean isFocusableWindow() {
+    	// mascarading as Window here
+    	return true;
+    }
+    
+    public Dialog getModalBlocker() {
+    	// mascarading as Window here
+        return null; //??
+    }
+
+
+    /**
+     * Holds the reference to the component which last had focus in this window
+     * before it lost focus.
+     */
+    private transient Component temporaryLostComponent;
+
+    Component getTemporaryLostComponent() { 
+        return temporaryLostComponent;
+    }
+    Component setTemporaryLostComponent(Component component) {
+        Component previousComp = temporaryLostComponent;
+        // Check that "component" is an acceptable focus owner and don't store it otherwise
+        // - or later we will have problems with opposite while handling  WINDOW_GAINED_FOCUS
+        if (component == null || component.canBeFocusOwner()) {
+            temporaryLostComponent = component;
+        } else {
+            temporaryLostComponent = null;
+        }
+        return previousComp;
+    }
+
+
+    
+    
     /**
      * Applets can be serialized but the following conventions MUST be followed:
      *
@@ -218,8 +272,17 @@ public class JSApplet extends JSPanel {
     }
 
 	public void resizeHTML(int width, int height) {
-		if (appletViewer != null)
+		if (appletViewer != null) {
 			appletViewer.html5Applet._resizeApplet(new int[] {width, height});
+			if (stub != null) {
+				// Added 2/23/2019 to force layout prior to Canvas painting in mpFrakta.Applets.Geomet
+				JRootPane root = ((JApplet) this).getRootPane();
+				root.invalidate();
+				((JSComponentUI)root.getUI()).setPainted(null);
+				root._isBackgroundPainted = false;
+				RepaintManager.currentManager(this).addInvalidComponent(root);
+			}
+		}
     }
 
     @SuppressWarnings("deprecation")

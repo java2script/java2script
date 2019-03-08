@@ -95,7 +95,7 @@ public class JSMenuBarUI extends JSPanelUI implements ContainerListener {
 			containerNode = domNode = newDOMObject("div", id);//???, "tabindex", "0");
 			DOMNode.setTopLeftAbsolute(domNode, 0, 0); // after title bar
 		}
-		setBackground(jc.isOpaque() ? jc.getBackground() : null);
+		setBackgroundCUI(jc.isOpaque() ? getBackground() : null);
 		return updateDOMNodeCUI();
 	}
 

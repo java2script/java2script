@@ -173,7 +173,7 @@ public class JApplet extends JSApplet implements /* Accessible ,*/
 
 		/** Called by the constructor methods to create the default rootPane. */
     protected JRootPane createRootPane() {
-        JRootPane rp = new JRootPane("", true);
+        JRootPane rp = new JRootPane("", true, this);
         // NOTE: this uses setOpaque vs LookAndFeel.installProperty as there
         // is NO reason for the RootPane not to be opaque. For painting to
         // work the contentPane must be opaque, therefor the RootPane can
@@ -577,6 +577,21 @@ public class JApplet extends JSApplet implements /* Accessible ,*/
     	repaint(100, 0, 0, getWidth(), getHeight());
     }
 
+//    @Override
+//	public void validateTree() {
+//    	// was necessary for mpEnigma.Applet.TextAnalyzer2
+////     no, Bob, don't do this! It causes repaint() to fail.
+////    	getContentPane().validateTree();
+//    	//System.out.println("JApplet validateTree");
+//    	super.validateTree();
+//    }
+//
+//    @Override
+//    public void invalidate() {
+//    	//System.out.println("JApplet invalidate");
+//    	super.invalidate();
+////    	getContentPane().invalidate();
+//    }
     /**
      * Returns a string representation of this JApplet. This method
      * is intended to be used only for debugging purposes, and the

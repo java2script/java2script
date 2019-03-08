@@ -1,9 +1,11 @@
 package swingjs.a2s;
 
+import java.awt.Font;
 import java.awt.MenuComponent;
 import java.awt.MenuShortcut;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.util.Enumeration;
 
 import javax.swing.JComponent;
 import javax.swing.JMenu;
@@ -65,6 +67,17 @@ public class Menu extends JMenu implements AWTMenu {
 	public void deleteShortcut() {
 		setAccelerator(null);
 	}
+
+	public Enumeration<MenuShortcut> shortcuts() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void deleteShortcut(MenuShortcut s) {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 
 }

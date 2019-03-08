@@ -72,6 +72,7 @@ import javajs.util.Lst;
 import sun.font.FontDesignMetrics;
 import swingjs.JSFocusPeer;
 import swingjs.JSGraphics2D;
+import swingjs.JSToolkit;
 import swingjs.JSUtil;
 import swingjs.plaf.JSComponentUI;
 
@@ -528,7 +529,7 @@ public abstract class JComponent extends Container {
 				if (parent instanceof JComponent) {
 					return ((JComponent) parent).getComponentPopupMenu();
 				}
-				if (parent instanceof Window || parent instanceof JSApplet) {
+				if (parent.isWindowOrJSApplet()) {
 					// Reached toplevel, break and return null
 					break;
 				}
@@ -647,9 +648,6 @@ public abstract class JComponent extends Container {
 	 * @see java.awt.Container#paint
 	 */
 	protected void paintChildren(Graphics g) {
-		//boolean isJComponent;
-		Graphics sg = g;
-
 		synchronized (getTreeLock()) {
 			int i = getComponentCount() - 1;
 			if (i < 0) {
@@ -690,7 +688,7 @@ public abstract class JComponent extends Container {
 					jc.getBounds(tmpRect);
 					boolean isContentPane = jc.getRootPane().getContentPane() == jc;
 					Rectangle vr = (jc instanceof JTable ? jc.getVisibleRect() : tmpRect);
-					JSGraphics2D jsg = (JSGraphics2D) (Object) sg.create(tmpRect.x, 
+					JSGraphics2D jsg = (JSGraphics2D) (Object) g.create(tmpRect.x, 
 							(isContentPane ? 0 : tmpRect.y), vr.width, vr.height); 
 					jsg.setColor(jc.getForeground());
 					jsg.setFont(jc.getFont());
@@ -706,9 +704,9 @@ public abstract class JComponent extends Container {
 							// shouldSetFlagBack = true;
 							// }
 							// if (!printing) {
-							jc.checkBackgroundPainted(null);
+							jc.checkBackgroundPainted(jsg, true);
 							jc.paint((Graphics) (Object) jsg);
-							jc.checkBackgroundPainted(getJSGraphic2D((Graphics) (Object) jsg));
+							jc.checkBackgroundPainted(getJSGraphic2D((Graphics) (Object) jsg), false);
 							// } else {
 							// if (!getFlag(IS_PRINTING_ALL)) {
 							// comp.print(cg);
@@ -1636,35 +1634,46 @@ public abstract class JComponent extends Container {
 
 	/**
 	 * Returns an <code>Insets</code> object containing this component's inset
-	 * values. The passed-in <code>Insets</code> object will be reused if
-	 * possible. Calling methods cannot assume that the same object will be
-	 * returned, however. All existing values within this object are overwritten.
-	 * If <code>insets</code> is null, this will allocate a new one.
+	 * values. The passed-in <code>Insets</code> object will be reused if possible.
+	 * Calling methods cannot assume that the same object will be returned, however.
+	 * All existing values within this object are overwritten. If
+	 * <code>insets</code> is null, this will allocate a new one.
 	 * 
-	 * @param insets
-	 *          the <code>Insets</code> object, which can be reused
+	 * @param insets the <code>Insets</code> object, which can be reused
 	 * @return the <code>Insets</code> object
 	 * @see #getInsets
 	 * @beaninfo expert: true
 	 */
+	@SuppressWarnings("unused")
 	public Insets getInsets(Insets insets) {
+		Insets in = null;
 		if (insets == null) {
 			insets = new Insets(0, 0, 0, 0);
 		}
-		if (border != null) {
-			if (border instanceof AbstractBorder) {
-				return ((AbstractBorder) border).getBorderInsets(this, insets);
+		if (/** @j2sNative this.isAWT || this.isAWTContainer || */false) {
+			// because AWT components do not have this method
+			in = getInsets();
+		} else {
+			if (border == null) {
+				// super.getInsets() always returns an Insets object with
+				// all of its value zeroed. No need for a new object here.
+				insets.left = insets.top = insets.right = insets.bottom = 0;
 			} else {
+				if (border instanceof AbstractBorder) {
+					in = ((AbstractBorder) border).getBorderInsets(this, insets);
+				}
 				// Can't reuse border insets because the Border interface
 				// can't be enhanced.
-				return border.getBorderInsets(this);
+				in = border.getBorderInsets(this);
 			}
-		} else {
-			// super.getInsets() always returns an Insets object with
-			// all of its value zeroed. No need for a new object here.
-			insets.left = insets.top = insets.right = insets.bottom = 0;
-			return insets;
 		}
+		if (in != null) {
+			insets.left = in.left;
+			insets.right = in.right;
+			insets.top = in.top;
+			insets.bottom = in.bottom;
+		}
+		return insets;
 	}
 
 	/**
@@ -1926,7 +1935,7 @@ public abstract class JComponent extends Container {
 	 *                  pushed to the <code>KeyboardManager</code>
 	 */
 	private void registerWithKeyboardManager(boolean onlyIfNew) {
-		if (JSFocusPeer.getTopInvokableAncestor(this) == null)
+		if (getTopInvokableAncestor(this, true) == null)
 			return;
 
 		InputMap inputMap = getInputMap(WHEN_IN_FOCUSED_WINDOW, false);
@@ -2738,8 +2747,7 @@ public abstract class JComponent extends Container {
 		 * component twice.
 		 */
 		Container parent = this;
-		while (parent != null && !(parent instanceof Window)
-				&& !(parent instanceof JSApplet)) {
+		while (parent != null && !parent.isWindowOrJSApplet()) {
 			if (parent instanceof JComponent) {
 				if (((JComponent) parent).processKeyBinding(ks, e,
 						WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, pressed))
@@ -3827,7 +3835,7 @@ public abstract class JComponent extends Container {
 		Container p = c.getParent();
 		Rectangle bounds = c.getBounds();
 
-		if (p == null || p instanceof Window || p instanceof JSApplet) {
+		if (p == null || p.isWindowOrJSApplet()) {
 			visibleRect.setBounds(0, 0, bounds.width, bounds.height);
 		} else {
 			computeVisibleRect(p, visibleRect);
@@ -3989,8 +3997,9 @@ public abstract class JComponent extends Container {
 	 *         <code>null</code> if not in any container
 	 */
 	public Container getTopLevelAncestor() {
+		// See also JSComponent getTopInvokableAncestor
 		for (Container p = this; p != null; p = p.getParent()) {
-			if (p instanceof Window || p instanceof JSApplet) {
+			if (p.isWindowOrJSApplet()) {
 				return p;
 			}
 		}
@@ -4247,19 +4256,19 @@ public abstract class JComponent extends Container {
 			// To avoid a flood of Runnables when constructing GUIs off
 			// the EDT, a flag is maintained as to whether or not
 			// a Runnable has been scheduled.
-			synchronized (this) {
+			//synchronized (this) {
 				if (getFlag(REVALIDATE_RUNNABLE_SCHEDULED)) {
 					return;
 				}
 				setFlag(REVALIDATE_RUNNABLE_SCHEDULED, true);
-			}
+			//}
 			// final Object me = this;
 			Runnable callRevalidate = new Runnable() {
 				@Override
 				public void run() {
-					synchronized (JComponent.this) {
+					//synchronized (JComponent.this) {
 						setFlag(REVALIDATE_RUNNABLE_SCHEDULED, false);
-					}
+					//}
 					revalidate();
 				}
 			};
@@ -4430,8 +4439,7 @@ public abstract class JComponent extends Container {
 			}
 		}
 		Component child;
-		for (c = this, child = null; c != null && !(c instanceof Window)
-				&& !(c instanceof JSApplet); child = c, c = c.getParent()) {
+		for (c = this, child = null; c != null && !c.isWindowOrJSApplet(); child = c, c = c.getParent()) {
 			JComponent jc = (c instanceof JComponent) ? (JComponent) c : null;
 			path.add(c);
 			if (!ontop && jc != null && !jc.isOptimizedDrawingEnabled()) {
@@ -4548,13 +4556,13 @@ public abstract class JComponent extends Container {
 						rm.endPaint();
 					}
 				} else {
-					// SwingJS not clipping for better performance
-					g.setClip(paintImmediatelyClip.x, paintImmediatelyClip.y,
+					// For some reason painting of the root pane causes a persistent clip in AWT. 
+					
+					// SwingJS early on was not clipping for better performance
+					 if (!isRootPane)
+						 g.setClip(paintImmediatelyClip.x, paintImmediatelyClip.y,
                             paintImmediatelyClip.width, paintImmediatelyClip.height);
 
-					// g.setClip(paintImmediatelyClip.x,paintImmediatelyClip.y,
-					// paintImmediatelyClip.width,paintImmediatelyClip.height);
-					
 					// this sequence assures that if the developer called 
 					// jpanel.repaint() and then draws on the background,
 					// the JPanel's background is made transparent
@@ -4846,11 +4854,11 @@ public abstract class JComponent extends Container {
 	private void paintComponentSafely(Graphics g) {
 		JSGraphics2D jsg = getJSGraphic2D(g);		
 		int nSave = (jsg == null ? 0 : jsg.mark());
-		checkBackgroundPainted(null);
+		checkBackgroundPainted(jsg, true);
 		// note that paintComponent may be overridden.
 		paintComponent(g);
+		checkBackgroundPainted(jsg, false);
 		if (jsg != null) {
-			checkBackgroundPainted(jsg);
 			jsg.reset(nSave);
 		}
 

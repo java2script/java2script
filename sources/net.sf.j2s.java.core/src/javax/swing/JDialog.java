@@ -735,7 +735,7 @@ public class JDialog extends JSDialog implements WindowConstants,
      * <code>rootPane</code>.
      */
 	protected JRootPane createRootPane() {
-        JRootPane rp = new JRootPane("_Dialog" + (++dialogCount), false);
+        JRootPane rp = new JRootPane("_Dialog" + (++dialogCount), false, this);
         // NOTE: this uses setOpaque vs LookAndFeel.installProperty as there
         // is NO reason for the RootPane not to be opaque. For painting to
         // work the contentPane must be opaque, therefore the RootPane can

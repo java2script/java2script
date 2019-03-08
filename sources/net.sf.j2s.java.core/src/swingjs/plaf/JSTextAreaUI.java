@@ -27,20 +27,19 @@ public class JSTextAreaUI extends JSTextViewUI {
 //		 */
 		
 		if (domNode == null) {
-			valueNode = domNode = newDOMObject("textarea", id);
+			valueNode = domNode = newDOMObject("textarea", id, "spellcheck", FALSE,  "autocomplete", "off");
 			setupViewNode();
 		}
 		if (((JTextArea) jc).getLineWrap())
 			domNode.removeAttribute("wrap");
 		else
-			DOMNode.setAttr(domNode, "wrap", "off");
+			DOMNode.setStyles(domNode, "white-space", "pre");
 		textListener.checkDocument();
 		setCssFont(
-				DOMNode.setAttr(domNode, "value", getComponentText()),
+				DOMNode.setAttr(domNode, "value", setCurrentText()),
 				c.getFont());
-		if (!editable)
-			DOMNode.setAttr(domNode, "readOnly", "true");		
-		return updateDOMNodeCUI();
+		updateJSCursor("rewrite");
+		return super.updateDOMNode();
 	}
 
 	@Override

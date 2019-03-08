@@ -232,16 +232,8 @@ public class DefaultButtonModel implements ButtonModel {
      */
     @Override
 		public void setSelected(boolean b) {
-        if (this.isSelected() == b) {
-            return;
-        }
-
-        if (b) {
-            stateMask |= SELECTED;
-        } else {
-            stateMask &= ~SELECTED;
-        }
-
+    	if (!setStateNoFire(b))
+    		return;
         fireItemStateChanged(
                 new ItemEvent(this,
                               ItemEvent.ITEM_STATE_CHANGED,
@@ -251,6 +243,18 @@ public class DefaultButtonModel implements ButtonModel {
         fireStateChanged();
 
     }
+
+	public boolean setStateNoFire(boolean b) {
+        if (this.isSelected() == b) {
+            return false;
+        }
+        if (b) {
+            stateMask |= SELECTED;
+        } else {
+            stateMask &= ~SELECTED;
+        }
+        return true;
+	}
 
 
     /**
@@ -563,4 +567,5 @@ public class DefaultButtonModel implements ButtonModel {
     void setMenuItem(boolean menuItem) {
         this.menuItem = menuItem;
     }
+
 }

@@ -439,14 +439,31 @@ public class JTextField extends JTextComponent implements SwingConstants {
     }
 
     protected Dimension getPrefSizeJTF() {
-      Dimension size = getPrefSizeJComp();
-      if (columns != 0) {
-          Insets insets = getInsets();
-          size.width = columns * getColumnWidth() +
-              insets.left + insets.right;
-      }
-      return size;
+    	return getPrefSizeJTF(columns);
+	}
+
+	protected Dimension getPrefSizeJTF(int columns) {
+		Dimension size = getPrefSizeJComp();
+		if (columns != 0) {
+			size.width = getJ2SWidth(columns);
 		}
+		return size;
+	}
+	
+    protected int getJ2SWidth(int columns) {
+		Insets insets = getInsets();
+		return  columns * getColumnWidth() + insets.left + insets.right;
+	}
+
+	protected Dimension getMinimumSizeJTF(int columns) {
+    	// for java.awt.JextField only
+    	Dimension size = getMinimumSize();
+		if (columns != 0) {
+			size.width = getJ2SWidth(columns);
+		}
+		return size;
+	}
+
 
 		/**
      * Sets the current font.  This removes cached row height and column
@@ -828,8 +845,8 @@ public class JTextField extends JTextComponent implements SwingConstants {
 
 //    private BoundedRangeModel visibility;
     private int horizontalAlignment = LEADING;
-    private int columns;
-    private int columnWidth;
+    protected int columns;
+    protected int columnWidth;
     private String command;
 
     private static final Action[] defaultActions = {
@@ -847,7 +864,7 @@ public class JTextField extends JTextComponent implements SwingConstants {
 
         @Override
 				public void actionPerformed(ActionEvent e) {
-            JTextComponent target = getFocusedComponent();
+            JTextComponent target = (JTextComponent) e.getSource();//getFocusedComponent();
             if (target instanceof JTextField) {
                 JTextField field = (JTextField) target;
                 field.postActionEvent();

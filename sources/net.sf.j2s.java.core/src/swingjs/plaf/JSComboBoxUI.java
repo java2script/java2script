@@ -38,7 +38,7 @@ public class JSComboBoxUI extends JSLightweightUI implements ItemListener, ListD
 			domNode = focusNode = DOMNode.setStyles(newDOMObject("select", id), 
 					"padding", "0px 0px","lineHeight", "0.8","box-sizing", "border-box");
 			ignoreAllMouseEvents(domNode);
-			bindJQueryEvents(domNode, "change", -1);
+			bindJQueryEvents(domNode, "change", SOME_MOUSE_EVENT);
 			addJQueryFocusCallbacks();
 		}
 		populateList();
@@ -50,7 +50,7 @@ public class JSComboBoxUI extends JSLightweightUI implements ItemListener, ListD
 		if (comboBox.isEnabled())
 			domNode.removeAttribute("disabled");
 		else
-			DOMNode.setAttr(domNode, "disabled", "true");			
+			DOMNode.setAttr(domNode, "disabled", TRUE);			
 	}
 
 	
@@ -80,7 +80,7 @@ public class JSComboBoxUI extends JSLightweightUI implements ItemListener, ListD
 			DOMNode option = DOMNode.createElement("option", id + "_" + (++incr));
 			DOMNode.setAttr(option,  "innerHTML", item);
 			if (i == iselect)
-				DOMNode.setAttr(option, "selected", "true");
+				DOMNode.setAttr(option, "selected", TRUE);
 			domNode.appendChild(option);
 		}		
 	}

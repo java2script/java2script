@@ -5,11 +5,13 @@ import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.JSComponent;
+import java.awt.KeyboardFocusManager;
 import java.awt.Window;
 import java.awt.event.FocusEvent;
 import java.awt.peer.KeyboardFocusManagerPeer;
 import java.beans.PropertyVetoException;
 
+import javax.swing.JApplet;
 import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
 import javax.swing.JPopupMenu;
@@ -33,7 +35,7 @@ public class JSFocusPeer implements KeyboardFocusManagerPeer {
 	@Override
 	public void setCurrentFocusedWindow(Window win) {
 		currentWindow = win;
-		setCurrentFocusOwner(win);
+//		setCurrentFocusOwner(win);
 	}
 
 	@Override
@@ -70,15 +72,19 @@ public class JSFocusPeer implements KeyboardFocusManagerPeer {
 	}
 
 	private DOMNode getAccessibleActiveElement() {
-		DOMNode node = null;
+		DOMNode node = getActiveElement();
+		return (node == null || getAccessibleComponentFor(node) == null ? null : node);
+	}
+
+	public static DOMNode getActiveElement() {
 		/**
 		 * @j2sNative
-		 * node = document.activeElement;
-		 * if (!node || node == document.body || !node.ui) {
-		 *   return null;
-		 * }
+		 * var node = document.activeElement;
+		 * return  (!node || node == document.body || !node.ui && !node["data-component"] ? null : node);
 		 */
-		return (getAccessibleComponentFor(node) == null ? null : node);
+		{
+		return null;
+		}
 	}
 
 	/**
@@ -89,7 +95,7 @@ public class JSFocusPeer implements KeyboardFocusManagerPeer {
 	 * @return
 	 */
 	public static JSComponent getAccessibleComponentFor(DOMNode node) {
-		JSComponent c = /** @j2sNative node && node.ui && node.ui.jc || */null;
+		JSComponent c = /** @j2sNative node && node.ui && node.ui.jc || node && node["data-component"]||*/null;
 		return (c != null && c.getAppContext().getThreadGroup() == Thread.currentThread().getThreadGroup() ? c : null);
 	}
 
@@ -125,6 +131,7 @@ public class JSFocusPeer implements KeyboardFocusManagerPeer {
 			}
 			c0.dispatchEvent(new FocusEvent(c0, FocusEvent.FOCUS_GAINED, false, other));
 		} else {
+			//System.out.println("JSFocusPeer lost " + ((JSComponentUI)c0.getUI()).getId());
 			other = (JComponent) JSToolkit.getCurrentFocusOwner(related);
 			c0.dispatchEvent(new FocusEvent(c0, FocusEvent.FOCUS_LOST, false, other));
 			if (other != null && other != c0)
@@ -133,10 +140,11 @@ public class JSFocusPeer implements KeyboardFocusManagerPeer {
 	}
 
 	public void checkFrameFocusOnMouseDown(AWTEvent e) {
-		Container p = (Container) getTopInvokableAncestor((Container) e.getSource());
-		if (getCurrentFocusOwner() != null && p == currentWindow)
+		Container p = JSComponent.getTopInvokableAncestor((Container) e.getSource(), true);
+		if (getCurrentFocusOwner() != null && p == currentWindow) 
 			return;
-		handleJSFocus(p, currentWindow, true);
+		//oops, windows do not report focus gained 
+		// handleJSFocus(p, currentWindow, true);
 		setCurrentFocusedWindow((Window) p);
 		if (p instanceof JInternalFrame) {
 			try {
@@ -149,44 +157,21 @@ public class JSFocusPeer implements KeyboardFocusManagerPeer {
 		}
 	}
 
- 	/**
- 	 * SwingJS from KeyboardManager. Brought here because it is smarter to do this
- 	 * before going through all the keys first. And I want to debug this only
- 	 * when it's necessary! BH
- 	 * 
- 	 * @param c
- 	 * @return
- 	 */
- 	public static Container getTopInvokableAncestor(Container c) {
- 	    for(Container p = c; p != null; p = nextHigher(p)) {
- 	        if (p instanceof Window && ((Window)p).isFocusableWindow() ||
- 	            p instanceof JSApplet
- 	            ) {
- 	            return p;
- 	        }
- 	    }
- 	    return null;
- 	 }
- 	
- 	/** SwingJS -- this was in KeyboardManager, way too late in the process.
-      * It was just parent(), but in SwingJS the popup windows do not have 
-      * parents, only invokers. Perhaps that is a mistake. But it has to do
-      * with the fact that we do not have to repaint anything relating to the 
-      * popup -- of course, the browser does that for us!
-      * 
-      * @param c
-      * @return
-      */
-     private static Container nextHigher(Container c) {
-    	 Container p = c.getParent();
-    	 if (p == null && c instanceof JPopupMenu)
-    		 p = (Container) ((JPopupMenu) c).getInvoker();
-    		 return p;
- 	}
-
-
 	public static void focus(DOMNode focusNode) {
 		/** @j2sNative focusNode.focus(); */
+	}
+
+	public static void setFocusLast(JSApplet applet) {
+		// this works because appendText for AWT TextArea fires a
+		// requestFocus, and that method caches its most recent 
+		// component for a window (so only saved if the component has
+		// been added. JSAppletViewer now requests focus from JSFocusPeer 
+		// for the most recent request and executes it after the 
+		// window has been made visible.
+
+		Component c = KeyboardFocusManager.getMostRecentFocusOwner((Window) (Object) applet);
+		if (c != null)
+			c.requestFocus();
 	}
 
 }

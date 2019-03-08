@@ -3,80 +3,219 @@ package test;
 import java.applet.Applet;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
+import java.awt.Button;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.Label;
-import java.awt.List;
-import java.awt.Polygon;
 import java.awt.Scrollbar;
 import java.awt.TextArea;
+import java.awt.TextField;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import swingjs.JSGraphics2D;
-
-
 public class TApp2 extends Applet {
-	public void init() {
-		List l = new List();
-		l.add("Text");
-		System.out.println(l.getItems());
 
-		setBackground(Color.white);
+	TextArea ta;
+	
+    private void addButtonTest() {
+    	for (int i = 0; i < 4; i++) {
+    		for (int j = 0; j < 4; j++) {
+    			Button b = new Button("XyX");
+    			Label l = new Label("XyX", Label.CENTER);
+    			setLBBounds((Component) b, (Component) l, i, j);
+    		}
+    	}
+	}
+
+    private void setLBBounds(Component b, Component l, int i, int j) {
+		int x = 40 + i * 170;
+		int y = 350 + j * 40;
+		int w = 70 + i * 10;
+		int h = 25 + j * 4;
+		b.setBounds(x, y, w, h);
+		l.setBounds(x + 105, y, w - 30, h);
+		b.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10 + i * 3));
+		l.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10 + i * 3));
+			l.setBackground(Color.cyan);
+		add(b);
+		add(l);
+	}
+
+	public void init() {
+		setSize(800, 600);
+		setFont(new Font(Font.MONOSPACED, Font.PLAIN, 14));
+		setBackground(Color.yellow);
 		setLayout(null);
+		
+		addButtonTest();
+		
 		JPanel panel = new JPanel();
 		panel.setBounds(10, 10, 100, 150);
 		add(panel);
 		panel.setLayout(null);
 		panel.setBackground(Color.red);
-		JLabel label = new JLabel("OK");
-		label.setBounds(10, 10, 50, 60);
-		panel.add(label);
-		
-		JPanel panel2 = new JPanel();
-		panel2.setLayout(new GridLayout(2, 1));
-		Label label2 = new Label("1");
-		label2.setAlignment(Label.CENTER);
-		panel2.add(label2);
-		panel2.add(new JLabel("2"));
-		panel2.setBounds(200, 150, 100, 150);
-//		add(panel2);
-		
-		TextArea ta = new TextArea("A text\nwith some\nlines and\n no content.");
-		ta.setBounds(200, 70, 100, 80);
+		panel.setForeground(Color.green);
+		TextField tf = new TextField("Text");
+		tf.setBounds(5, 5, 50, 24);
+		tf.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 20));
+		tf.addFocusListener(new FocusListener() {
+
+			@Override
+			public void focusGained(FocusEvent e) {
+				System.out.println("tf " + e.paramString());
+			}
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				System.out.println("tf " + e.paramString());
+			}
+			
+		});
+		panel.add(tf);
+//		Label label = new Label("blue", Label.RIGHT);
+//		label.setBounds(10, 10, 50, 60);
+//		panel.add(label);
+//		JPanel panel2 = new JPanel();
+//		panel2.setLayout(new GridLayout(2, 1));
+//		Label label2 = new Label("1");
+//		label2.setAlignment(Label.CENTER);
+//		panel2.add(label2);
+//		panel2.add(new JLabel("2"));
+//		panel2.setBounds(200, 150, 100, 150);
+////		add(panel2);
+//
+//		// the scrolling to the bottom is only with TextArea, not JTextArea
+		// and then only if the append is AFTER the add
+		ta = new TextArea("A text\nwith some\nlines and\n no content.");
 		add(ta);
-//		ta.getSelectionEnd();
-		ta.setBackground(Color.red);
+		ta.setBounds(200,  70, 200,200);
+		ta.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
 		ta.appendText("A text\nwith some\nlines and\n no content.");
+		ta.addFocusListener(new FocusListener() {
+
+			@Override
+			public void focusGained(FocusEvent e) {
+				System.out.println("ta " + e.paramString());
+			}
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				System.out.println("ta " + e.paramString());
+			}
+			
+		});
+
 		
-//		Scrollbar sb = new Scrollbar(0, 10, 0, 0, 1);
+//		TextArea ta = new TextArea("A text\nwith some\nlines and\n no content.");
+//		JScrollPane sp = new JScrollPane(ta);
+//		sp.setBounds(200, 70, 100, 80);
+//		add(sp);
+
+		
+		//		ta.getSelectionEnd();
+		ta.setBackground(Color.red);
+		Scrollbar sb = new Scrollbar(0, 30, 0, 0, 100);
+		sb.setBounds(300, 20, 100, 20);
+		add(sb);
+		sb.addAdjustmentListener(new AdjustmentListener() {
+
+			@Override
+			public void adjustmentValueChanged(AdjustmentEvent e) {
+				System.out.println("TApp2 sb value " + e.getValue());
+			}
+			
+		});
+
+		new TestGraphic(this).testGraphic();
 	}
 	
+	static class TestGraphic{
+	private TApp2 tApp2;
+
+	public TestGraphic(TApp2 tApp2) {
+		this.tApp2 = tApp2;
+		}
+
+	static {
+		ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
+	}
+
+	void testGraphic() {
+    	Button b = new Button("g");
+    	b.setBounds(300,300,40,20);
+    	// images are created only when a button is displayable
+    	Image i1 = b.createImage(100, 100);
+    	System.out.println("b.isDisplayable " + b.isDisplayable() + " " + i1);
+    	assert(i1 == null);
+    	tApp2.add(b);
+    	i1 = b.createImage(100, 100);
+    	System.out.println("b.isDisplayable " + b.isDisplayable() + " " + i1);
+    	b.setFont(new Font(Font.SERIF, Font.BOLD, 10));
+    	Graphics g = i1.getGraphics();
+    	Font f = g.getFont();
+    	System.out.println(f);
+
+    	// font/background/foreground are set when the graphic is created
+    	Font f0 = new Font(Font.DIALOG, Font.PLAIN, 30);
+    	b.setFont(f0);
+    	b.setBackground(Color.red);
+    	b.setForeground(Color.green);
+    	g = i1.getGraphics();
+    	b.setFont(new Font(Font.SERIF, Font.BOLD, 10));
+    	b.setBackground(Color.white);
+    	b.setForeground(Color.black);
+    	System.out.println("img font=" + g.getFont());
+    	System.out.println("img bg=" + ((Graphics2D) g).getBackground());
+    	System.out.println("img fg=" + g.getColor());
+    	assert(g.getFont().equals(f0));
+    	assert(g.getColor() == Color.green);
+    	assert(((Graphics2D) g).getBackground() == Color.red);
+    	System.out.println("Tapp2 OK");	
+	}
+    }
+
 	public void paint(Graphics g) {
 		super.paint(g);
-//		((Graphics2D) g).setStroke((new BasicStroke(0)));
-//		g.drawRect(130, 150, 40, 60);
-//		g.fillRect(140, 5, 1, 200);
-//		g.drawLine(150, 150, 150, 350);
-//
-//		
-//		
-		
-		
-		
-		
-		
+		g.fillRect(20, 330, 100, 10);
+		((Graphics2D) g).setStroke((new BasicStroke(0)));
+		g.drawRect(130, 150, 40, 60);
+		g.fillRect(140, 5, 1, 200);
+		g.drawLine(150, 150, 150, 350);
+
+		g.setColor(Color.blue);
+		g.drawRoundRect(120, 200, 80, 150, 20, 20);
+
+		g.fillRoundRect(210, 200, 80, 150, 20, 20);
+
+		// test AlphaComposite.Clear
+
 		g.setColor(Color.red);
 		g.fillRect(10, 200, 100, 100);
-		((Graphics2D)g).setComposite(AlphaComposite.Clear);
-		g.setColor(Color.white);
+		((Graphics2D) g).setComposite(AlphaComposite.Clear);
+		// save the foreground color, but don't use it.
+		g.setColor(Color.orange);
+		// paints a black rectangle
 		g.fillRect(10, 200, 100, 100);
-	    g.setPaintMode();
-		
-		
+		g.setPaintMode();
+		g.fillRect(20, 220, 100, 100);
+
+		// test g.clearRect();
+
+		g.clearRect(0, 240, 150, 20);
+
 //		
 //		
 //		Polygon poly = new Polygon();
@@ -90,10 +229,6 @@ public class TApp2 extends Applet {
 //		g.fillPolygon(poly);
 //
 
-		
-		
-		
-		
 //		g.fillRect(10, 200, 100, 100);
 //
 //		
@@ -108,5 +243,38 @@ public class TApp2 extends Applet {
 //		g.drawString("SwingJS", 200, 30);
 //		g.setColor(Color.white);
 //		g.drawString("SwingJS", 200, 30);
+		
+		
+		addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				System.out.println(">>>>mouseClicked: " + e.getModifiers() + " " + e.getModifiersEx() + " " + e);
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				System.out.println(">>>>mousePressed: " + e.getModifiers() + " " + e.getModifiersEx() + " " + e);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				System.out.println(">>>>mouseReleased: " + e.getModifiers() + " " + e.getModifiersEx() + " " + e);
+			}
+			
+		});
+
 	}
 }

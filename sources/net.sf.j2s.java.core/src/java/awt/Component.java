@@ -27,6 +27,7 @@
  */
 package java.awt;
 
+import java.applet.JSApplet;
 import java.awt.dnd.DropTarget;
 import java.awt.event.ActionEvent;
 import java.awt.event.AdjustmentEvent;
@@ -818,7 +819,7 @@ public abstract class Component implements ImageObserver/*
 	 * Constructs a name for this component. Called by <code>getName</code> when the
 	 * name is <code>null</code>.
 	 */
-	String constructComponentName() {
+	protected String constructComponentName() {
 		return null; // For strict compliance with prior platform versions, a
 						// Component
 						// that doesn't set its name should return null from
@@ -891,7 +892,11 @@ public abstract class Component implements ImageObserver/*
 	 */
 	@Deprecated
 	public ComponentPeer getPeer() {
-		return peer;
+		// SwingJS: In Java, peers are only available if the 
+		// component is a heavy-weight component AND it is connected to the DOM
+		// via its ancestors. We shall see how this goes....
+		
+		return (isDisplayable() ? peer : null);
 	}
 
 	/**
@@ -909,7 +914,7 @@ public abstract class Component implements ImageObserver/*
 		DropTarget old;
 
 		if ((old = dropTarget) != null) {
-			getOrCreatePeer();
+//			getOrCreatePeer();
 			if (peer != null)
 				dropTarget.removeNotify(peer);
 
@@ -1052,22 +1057,6 @@ public abstract class Component implements ImageObserver/*
 	 * @since JDK1.0
 	 */
 	public Toolkit getToolkit() {
-		return getToolkitImpl();
-	}
-
-	/*
-	 * This is called by the native code, so client code can't be called on the
-	 * toolkit thread.
-	 */
-	final Toolkit getToolkitImpl() {
-		ComponentPeer peer = this.peer;
-		if ((peer != null) && !(peer instanceof LightweightPeer)) {
-			return peer.getToolkit();
-		}
-		Container parent = this.parent;
-		if (parent != null) {
-			return parent.getToolkitImpl();
-		}
 		return Toolkit.getDefaultToolkit();
 	}
 
@@ -1112,8 +1101,9 @@ public abstract class Component implements ImageObserver/*
 	 * @see Window#dispose
 	 * @since 1.2
 	 */
-	public boolean isDisplayable() {
-		// return getPeer() != null;
+	public boolean isDisplayable() { 
+		// that is, if this component is connected to a top-level ancestor
+		// see JSComponent
 		return true;
 	}
 
@@ -1317,7 +1307,7 @@ public abstract class Component implements ImageObserver/*
 		if (!enabled) {
 			// synchronized (getTreeLock()) {
 			enabled = true;
-			ComponentPeer peer = getOrCreatePeer();// this.peer;
+//			ComponentPeer peer = getOrCreatePeer();// this.peer;
 			if (peer != null) {
 				peer.setEnabled(true);// SwingJS was enable();
 				if (visible) {
@@ -1366,7 +1356,7 @@ public abstract class Component implements ImageObserver/*
 			// // makes sense to the user.
 			// transferFocus(false);
 			// }
-			ComponentPeer peer = getOrCreatePeer();
+			//ComponentPeer peer = getOrCreatePeer();
 			if (peer != null) {
 				peer.setEnabled(false); // SwingJS was disable();
 				if (visible) {
@@ -1559,6 +1549,10 @@ public abstract class Component implements ImageObserver/*
 	 * @beaninfo bound: true
 	 */
 	public Color getForeground() {
+		return getForeground_NoClient();
+	}
+
+	protected Color getForeground_NoClient() {
 		Color foreground = this.foreground;
 		if (foreground != null) {
 			return foreground;
@@ -1578,7 +1572,7 @@ public abstract class Component implements ImageObserver/*
 	 */
 	public void setForeground(Color c) {
 		Color oldColor = foreground;
-		ComponentPeer peer = getOrCreatePeer();
+		//ComponentPeer peer = getOrCreatePeer();
 		foreground = c;
 		if (peer != null) {
 			c = getForeground();
@@ -1613,6 +1607,10 @@ public abstract class Component implements ImageObserver/*
 	 * @since JDK1.0
 	 */
 	public Color getBackground() {
+		return getBackground_NoClient();
+	}
+
+	protected Color getBackground_NoClient() {
 		Color background = this.background;
 		if (background != null) {
 			return background;
@@ -1637,7 +1635,7 @@ public abstract class Component implements ImageObserver/*
 	 */
 	public void setBackground(Color c) {
 		Color oldColor = background;
-		ComponentPeer peer = getOrCreatePeer();
+		//ComponentPeer peer = getOrCreatePeer();
 		background = c;
 		if (peer != null) {
 			c = getBackground();
@@ -1705,10 +1703,10 @@ public abstract class Component implements ImageObserver/*
 		Font oldFont, newFont;
 		oldFont = font;
 		newFont = font = f;
-		synchronized (getTreeLock()) {
-			synchronized (this) {
-			}
-			ComponentPeer peer = getOrCreatePeer();
+//		synchronized (getTreeLock()) {
+//			synchronized (this) {
+//			}
+			//ComponentPeer peer = getOrCreatePeer();
 			if (peer != null) {
 				f = getFont();
 				if (f != null) {
@@ -1716,7 +1714,7 @@ public abstract class Component implements ImageObserver/*
 					peerFont = f;
 				}
 			}
-		}
+//		}
 		// This is a bound property, so report the change to
 		// any registered listeners. (Cheap if there are none.)
 		firePropertyChange("font", oldFont, newFont);
@@ -1739,7 +1737,7 @@ public abstract class Component implements ImageObserver/*
 	 * @since 1.4
 	 */
 	public boolean isFontSet() {
-		return (font != null);
+		return font != null;
 	}
 
 	/**
@@ -2085,7 +2083,7 @@ public abstract class Component implements ImageObserver/*
 				// windows here as it is done from peer or native code when
 				// the window is really resized or moved, otherwise some
 				// events may be sent twice
-				if (this instanceof Window && !(this instanceof JInternalFrame)) {
+				if (isJ2SWindowButNotJInternalFrame()) {
 					needNotify = false;
 				}
 				// }
@@ -3223,7 +3221,7 @@ public abstract class Component implements ImageObserver/*
 		// if ((peer != null) && ! (peer instanceof LightweightPeer)) {
 		// return peer.createImage(producer);
 		// }
-		return getToolkit().createImage(producer);
+		return (isDisplayable() ? ((JSToolkit) getToolkit()).createImage(this, producer) : null);
 	}
 
 	/**
@@ -3241,7 +3239,7 @@ public abstract class Component implements ImageObserver/*
 	 * @since JDK1.0
 	 */
 	public Image createImage(int width, int height) {
-		return Toolkit.getDefaultToolkit().createImage(null, width, height);
+		return (isDisplayable() ? ((JSToolkit) getToolkit()).createImage(this, width, height) : null);
 		// ComponentPeer peer = this.peer;
 		// if (peer instanceof LightweightPeer) {
 		// if (parent != null) { return parent.createImage(width, height); }
@@ -3267,6 +3265,7 @@ public abstract class Component implements ImageObserver/*
 	 * @since 1.4
 	 */
 	public VolatileImage createVolatileImage(int width, int height) {
+		// SwingJS TODO
 		// ComponentPeer peer = this.peer;
 		// if (peer instanceof LightweightPeer) {
 		// if (parent != null) {
@@ -3297,7 +3296,7 @@ public abstract class Component implements ImageObserver/*
 	 * @since 1.4
 	 */
 	public VolatileImage createVolatileImage(int width, int height, ImageCapabilities caps) throws AWTException {
-		// REMIND : check caps
+		// SwingJS TODO
 		return createVolatileImage(width, height);
 	}
 
@@ -3337,6 +3336,7 @@ public abstract class Component implements ImageObserver/*
 	 * @since JDK1.0
 	 */
 	public boolean prepareImage(Image image, int width, int height, ImageObserver observer) {
+		// SwingJS TODO
 		// ComponentPeer peer = this.peer;
 		// if (peer instanceof LightweightPeer) {
 		// return (parent != null)
@@ -3986,7 +3986,7 @@ public abstract class Component implements ImageObserver/*
 				newX += anc.getX();
 				newY += anc.getY();
 
-				if (!(anc instanceof Window)) {
+				if (!anc.isWindowOrJSApplet()) {
 					anc = anc.getParent();
 				} else {
 					break;
@@ -5891,7 +5891,7 @@ public abstract class Component implements ImageObserver/*
 	 */
 	Container getNativeContainer() {
 		Container p = parent;
-		while (p != null && p.peer instanceof LightweightPeer) {
+		while (p != null && !(p instanceof JSApplet) && p.peer instanceof LightweightPeer) {
 			p = p.getParent();
 		}
 		return p;
@@ -6537,7 +6537,7 @@ public abstract class Component implements ImageObserver/*
 		KeyboardFocusManager.setMostRecentFocusOwner(this);
 
 		Component window = this;
-		while ((window != null) && !(window instanceof Window)) {
+		while ((window != null) && !window.isWindowOrJSApplet()) { 
 			if (!window.isVisible()) {
 				return false;
 			}
@@ -6565,6 +6565,15 @@ public abstract class Component implements ImageObserver/*
 		return success;
 	}
 
+	public boolean isWindowOrJSApplet() {
+		// SwingJS treating embedded applet as window here
+		return this instanceof Window || this instanceof JSApplet;
+	}
+
+	public boolean isJ2SWindowButNotJInternalFrame() {
+		return this instanceof Window && ((JSComponent) this).getUIClassID() != "InternalFrameUI";
+	}
+
 	private boolean isRequestFocusAccepted(boolean temporary, boolean focusedWindowChangeAllowed,
 			CausedFocusEvent.Cause cause) {
 		if (!isFocusable() || !isVisible()) {
@@ -6577,7 +6586,7 @@ public abstract class Component implements ImageObserver/*
 		}
 
 		Window window = getContainingWindow();
-		if (window == null || !((Window) window).isFocusableWindow()) {
+		if (window == null || !((Window) window).isFocusableWindow() ) {
 			return false;
 		}
 
@@ -7666,7 +7675,7 @@ public abstract class Component implements ImageObserver/*
 		setComponentOrientation(orientation);
 	}
 
-	final boolean canBeFocusOwner() {
+	public final boolean canBeFocusOwner() {
 		// It is enabled, visible, focusable.
 		if (isEnabled() && isDisplayable() && isVisible() && isFocusable()) {
 			return true;
@@ -7939,8 +7948,9 @@ public abstract class Component implements ImageObserver/*
 		// checkTreeLock();
 		Point curLocation = getLocation();
 
+		// BH changed this to include applet here
 		for (Container parent = getContainer(); parent != null
-				&& !(parent instanceof Window); parent = parent.getContainer()) {
+				&& !parent.isWindowOrJSApplet(); parent = parent.getContainer()) {
 			curLocation.x += parent.getX();
 			curLocation.y += parent.getY();
 		}

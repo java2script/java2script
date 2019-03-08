@@ -190,10 +190,13 @@ public abstract class LookAndFeel
      * @see UIManager#getColor
      * @see UIManager#getFont
      */
-    public static void installColorsAndFont(JComponent c,
+    @SuppressWarnings("unused")
+	public static void installColorsAndFont(JComponent c,
                                          String defaultBgName,
                                          String defaultFgName,
                                          String defaultFontName) {
+    	if (/** @j2sNative c.isAWT || c.isAWT$ || */false)
+    		return;
         Font f = c.getFont();
         if (f == null || f instanceof UIResource) {
             c.setFont(UIManager.getFont(defaultFontName));

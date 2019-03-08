@@ -463,7 +463,7 @@ public class JViewport extends JComponent
             if (!c.isLightweight()) {
                 return;
             }
-            if ((c instanceof Window) || (c instanceof JSApplet)) {
+            if (c.isWindowOrJSApplet()) {
                 root = c;
                 break;
             }

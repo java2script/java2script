@@ -39,6 +39,8 @@ import javax.swing.RootPaneContainer;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
+import javax.swing.plaf.FontUIResource;
+import javax.swing.plaf.UIResource;
 
 import swingjs.JSAppletThread;
 import swingjs.JSAppletViewer;
@@ -103,6 +105,11 @@ public abstract class JSComponent extends Component {
 		}
 	}
 
+	/**
+	 * Note that the length of this array may be longer than getComponentCount()
+	 * @param c
+	 * @return
+	 */
 	public static Component[] getChildArray(Container c) {
 		return (c == null ? Container.EMPTY_ARRAY : c.getChildArray());
 	}
@@ -135,8 +142,21 @@ public abstract class JSComponent extends Component {
 	 * 
 	 */
 	public boolean _isBackgroundPainted;
+	protected boolean _alwaysPaint;
 
-	
+	public boolean selfOrChildIsPainted() {
+		if (_alwaysPaint || _isBackgroundPainted)
+			return true;
+		Component[] a = JSComponent.getChildArray((Container) this);
+		for (int i = ((Container) this).getComponentCount(); --i >= 0;)
+			if (((JSComponent) a[i]).selfOrChildIsPainted())
+				return true;
+		return false;
+	}
+
+
+	private Insets tempInsets;
+	public JSGraphics2D _gtemp; // indicates that we are painting, so that g.setBackground() should also be set 
 
 	public JSComponent() {
 		super();
@@ -154,12 +174,23 @@ public abstract class JSComponent extends Component {
 	public Graphics getGraphics() {
 		if (width == 0 || height == 0 || !isVisible())
 			return null;
-		if (frameViewer != null)
-			return frameViewer.getGraphics().create();
+		Graphics g;
+		if (frameViewer != null) {
+			g = frameViewer.getGraphics().create();
+			if (isContentPane) {
+				if (tempInsets == null)
+					tempInsets = new Insets(0,0,0,0);
+				((JComponent) this).getRootPane().getInsets(tempInsets);
+				if (tempInsets.left != 0 || tempInsets.top != 0)
+					g.translate(tempInsets.left, tempInsets.top);
+				// when user has inset the applet -- should clip? 
+			}
+			return g;
+		}
 		if (parent == null) {
 			return null;
 		}
-		Graphics g = parent.getGraphics();
+		g = parent.getGraphics();
 		if (g == null)
 			return null;
 		// if (g instanceof ConstrainableGraphics) {
@@ -221,6 +252,11 @@ public abstract class JSComponent extends Component {
 	}
 
 	@Override
+	public boolean isDisplayable() { 
+		return getTopInvokableAncestor(this, false) != null;
+	}
+
+	@Override
 	protected void updatePeerVisibility(boolean isVisible) {
 		// check for visibility set prior to creation of ui.
 		if (getOrCreatePeer() == null)
@@ -261,26 +297,86 @@ public abstract class JSComponent extends Component {
 	 *
 	 * @param jsg
 	 */
-	public void checkBackgroundPainted(JSGraphics2D jsg) {
-		if (jsg == null) {
+	public void checkBackgroundPainted(JSGraphics2D jsg, boolean init) {
+		if (jsg == null || init) {
 			_isBackgroundPainted = false;
+			_gtemp = jsg;
 			return;
 		}
-		_isBackgroundPainted = jsg.isBackgroundPainted();
+		_gtemp = null;
+		_isBackgroundPainted = _alwaysPaint || jsg.isBackgroundPainted();
 		if (_isBackgroundPainted) {
-			((JSComponentUI) ui).setPainted(null);
+			((JSComponentUI) ui).setPainted(jsg);
 			// It's all one canvas, and it is behind the root pane (bad design?)
 			// so if it is painted, we should make the root pane transparent
-			((JSComponentUI) ((JComponent) this).getRootPane().getUI()).setPainted(null);
+			((JSComponentUI) ((JComponent) this).getRootPane().getUI()).setPainted(jsg);
 		}
 	}
 
 	@Override
 	public boolean isBackgroundSet() {
-		return background != null;// false;// TODO (background != null &&
-									// !isBackgroundPainted);
+		return (background == null ? false 
+				: /** @j2sNative this.isAWT$ || */false ? !(background instanceof UIResource) : true);
 	}
 
+	@Override
+	public boolean isForegroundSet() {
+		return (foreground == null ? false 
+				: /** @j2sNative this.isAWT$ || */false ? !(foreground instanceof UIResource) : true);
+	}
+
+	@Override
+	public boolean isFontSet() {
+		return (font == null ? null : /** @j2sNative this.isAWT$ || */false ? !(font instanceof FontUIResource) : true);
+	}
+
+//	@Override
+//	@SuppressWarnings("unused")
+//	public Color getBackground() {
+//		if (/** @j2sNative !this.isAWT$ || */ false) {
+//			return getBackground_NoClient();
+//		}
+//		// AWT only - don't use Swing's UIResource
+//		Color background = this.background;
+//        if (background!= null && !(background instanceof UIResource)) {
+//			return background;
+//		}
+//		background = (parent != null) ? parent.getBackground() : null;
+//        return (background == null ? getBackground_NoClient() : background);
+//	}
+//
+//	@Override
+//	@SuppressWarnings("unused")
+//	public Color getForeground() {
+//		if (/** @j2sNative !this.isAWT$  || */ false) {
+//			return getForeground_NoClient();
+//		}
+//		// AWT only - don't use Swing's UIResource
+//		Color foreground = this.foreground;
+//        if (foreground!= null && !(foreground instanceof UIResource)) {
+//			return foreground;
+//		}
+//		foreground = (parent != null) ? parent.getForeground() : null;
+//        return (foreground == null ? getForeground_NoClient() : foreground);
+//	}
+//
+//	
+//	@SuppressWarnings("unused")
+//	@Override
+//	public Font getFont() {
+//		if (/** @j2sNative !this.isAWT$ || */ false) {
+//			return getFont_NoClientCode();
+//		}
+//		// AWT only - don't use Swing's UIResource
+//        Font font = this.font;
+//        if (font != null && !(font instanceof FontUIResource)) {
+//            return font;
+//        }
+//        font = (parent == null ? null : parent.getFont());
+//        return (font == null ? getFont_NoClientCode() : font);
+//    }
+//
+	
 	protected void updateUIZOrder() {
 		
 // developer could have created their own LayeredPane
@@ -327,9 +423,10 @@ public abstract class JSComponent extends Component {
      * @param g
      */
 	public void paintWithBackgroundCheck(Graphics g) {
-		checkBackgroundPainted(null);
+		JSGraphics2D jcg = getJSGraphic2D(g);
+		checkBackgroundPainted(jcg, true);
 		paint(g);
-		checkBackgroundPainted(getJSGraphic2D(g));
+		checkBackgroundPainted(jcg, false);
 	}
 
 	@Override
@@ -345,5 +442,43 @@ public abstract class JSComponent extends Component {
 		if (keyListener == null && ui != null)
 			((JSComponentUI)ui).enableJSKeys(false);
 	}
+	
+	
+ 	/**
+ 	 * Invoker must be focusable and could cross from popupmenu to associated component
+ 	 * SwingJS from KeyboardManager. Brought here because it is smarter to do this
+ 	 * before going through all the keys first. And I want to debug this only
+ 	 * when it's necessary! BH
+ 	 * 
+ 	 * @param c
+ 	 * @param focusable TODO
+ 	 * @return
+ 	 */
+ 	public static Container getTopInvokableAncestor(Component c, boolean andFocusable) {
+ 	    for(Component p = c; p != null; p = nextHigher(p)) { 
+ 	        if (p.isWindowOrJSApplet() && (!andFocusable || ((Window)p).isFocusableWindow())) {
+ 	            return (Container) p;
+ 	        }
+ 	    }
+ 	    return null;
+ 	 }
+ 	
+	/**
+	 * SwingJS -- this was in KeyboardManager, way too late in the process. It was
+	 * just parent(), but in SwingJS the popup windows do not have parents, only
+	 * invokers. Perhaps that is a mistake. But it has to do with the fact that we
+	 * do not have to repaint anything relating to the popup -- of course, the
+	 * browser does that for us!
+	 * 
+	 * @param c
+	 * @return
+	 */
+	public static Container nextHigher(Component c) {
+		Container p = c.getParent();
+		if (p == null && c instanceof JPopupMenu)
+			p = (Container) ((JPopupMenu) c).getInvoker();
+		return p;
+	}
+
 
 }

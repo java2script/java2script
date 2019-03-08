@@ -462,7 +462,7 @@ public class JSFrame extends Window {
      * name is null.
      */
     @Override
-		String constructComponentName() {
+		protected String constructComponentName() {
 //        synchronized (JSFrame.class) {
             return base + nameCounter++;
 //        }

@@ -556,7 +556,7 @@ public class Window extends JComponent {
      * name is null.
      */
     @Override
-		String constructComponentName() {
+		protected String constructComponentName() {
         synchronized (Window.class) {
             return base + nameCounter++;
         }
@@ -2976,12 +2976,12 @@ public class Window extends JComponent {
         Container root=null;
 
         if (c != null) {
-            if (c instanceof Window || c instanceof JSApplet) {
+            if (c.isWindowOrJSApplet()) {
                 root = (Container)c;
             } else {
                 Container parent;
                 for(parent = c.getParent() ; parent != null ; parent = parent.getParent()) {
-                    if (parent instanceof Window || parent instanceof JSApplet) {
+                    if (parent.isWindowOrJSApplet()) {
                         root = parent;
                         break;
                     }
@@ -3543,16 +3543,16 @@ public class Window extends JComponent {
 } // class Window
 
 
-/**
- * This class is no longer used, but is maintained for Serialization
- * backward-compatibility.
- */
-class FocusManager {
-    Container focusRoot;
-    Component focusOwner;
-
-    /*
-     * JDK 1.1 serialVersionUID
-     */
-    static final long serialVersionUID = 2491878825643557906L;
-}
+///**
+// * This class is no longer used, but is maintained for Serialization
+// * backward-compatibility.
+// */
+//class FocusManager {
+//    Container focusRoot;
+//    Component focusOwner;
+//
+//    /*
+//     * JDK 1.1 serialVersionUID
+//     */
+//    static final long serialVersionUID = 2491878825643557906L;
+//}

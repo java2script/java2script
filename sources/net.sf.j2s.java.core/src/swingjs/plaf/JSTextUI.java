@@ -28,10 +28,12 @@
 package swingjs.plaf;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Insets;
+import java.awt.KeyboardFocusManager;
 import java.awt.LayoutManager;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -44,6 +46,7 @@ import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.event.CaretEvent;
 import javax.swing.plaf.ActionMapUIResource;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.InputMapUIResource;
@@ -123,6 +126,76 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	transient JTextComponent editor;
 	protected boolean editable = true;
 
+	@Override
+	public DOMNode updateDOMNode() {
+		if (editor.isOpaque() && editor.isEnabled())
+			setBackgroundCUI(getBackground());
+		setEditable(editable);
+		return updateDOMNodeCUI();
+	}
+	
+	
+	/**
+	 * called by JSComponentUI.bindJSEvents
+	 * 
+	 * @return handled
+	 * 
+	 * 
+	 */
+	@Override
+	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
+		String type = /** @j2sNative jQueryEvent.type || */null;
+		System.out.println("JSTextUI handlejs "+type + " " + eventType);
+		if (JSToolkit.isMouseEvent(eventType)) {
+			return NOT_HANDLED;
+		}
+		Boolean b = checkAllowKey(jQueryEvent);
+		if (b != null)
+			return b.booleanValue();
+		int keyCode = /** @j2sNative jQueryEvent.keyCode || */
+				0;
+		JSKeyEvent keyEvent = null;
+		boolean ret = NOT_HANDLED;
+		switch (eventType) {
+		case SOME_KEY_EVENT:
+			// note that events are bundled here into one eventType
+			// 0 param here says "get the real event type from jQueryEvent
+			keyEvent = JSKeyEvent.newJSKeyEvent(editor, jQueryEvent, 0, false);
+			if (keyEvent == null)
+				return HANDLED;
+			switch (keyCode) {
+			case KeyEvent.VK_ALT:
+				/**
+				 * @j2sNative
+				 * 
+				 * 			jQueryEvent.preventDefault(); jQueryEvent.stopPropagation();
+				 */
+				// fall through
+			case KeyEvent.VK_SHIFT:
+			case KeyEvent.VK_CONTROL:
+				ret = HANDLED;
+			}
+			eventType = keyEvent.getID();
+			break;
+		}
+
+		if (ret != HANDLED)
+			ret = textListener.handleJSTextEvent(this, eventType, jQueryEvent);
+		if (keyEvent != null) {
+			editor.dispatchEvent(keyEvent);
+			if (keyEvent.isConsumed()) {
+				/**
+				 * @j2sNative
+				 * 
+				 * 			jQueryEvent.preventDefault(); jQueryEvent.stopPropagation();
+				 */
+				ret = HANDLED;
+			}
+		}
+		return ret;
+	}
+
+	
 	/**
 	 * Handle stopPropagation and preventDefault here.
 	 * 
@@ -138,8 +211,6 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		// ev.preventDefault();
 		return false;
 	}
-
-	protected String inactiveBackgroundColor;
 
 	/**
 	 * Initializes component properties, e.g. font, foreground, background, caret
@@ -158,14 +229,32 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 			editor.setFont(UIManager.getFont(prefix + ".font"));
 		}
 
+		setColors(prefix);
+		//
+		// Border b = editor.getBorder();
+		// if ((b == null) || (b instanceof UIResource)) {
+		// editor.setBorder(UIManager.getBorder(prefix + ".border"));
+		// }
+		//
+		Insets margin = editor.getMargin();
+		if (margin == null || margin instanceof UIResource) {
+			editor.setMargin(UIManager.getInsets(prefix + ".margin"));
+		}
+		//
+		// updateCursor();
+	}
+
+	protected void setColors(String prefix) {
 		Color bg = editor.getBackground();
 		if ((bg == null) || (bg instanceof UIResource)) {
 			editor.setBackground(UIManager.getColor(prefix + ".background"));
 		}
 
-		Color fg = editor.getForeground();
-		if ((fg == null) || (fg instanceof UIResource)) {
-			editor.setForeground(UIManager.getColor(prefix + ".foreground"));
+		if (!isAWT) {
+			Color fg = editor.getForeground();
+			if ((fg == null) || (fg instanceof UIResource)) {
+				editor.setForeground(UIManager.getColor(prefix + ".foreground"));
+			}
 		}
 		//
 		// Color color = editor.getCaretColor();
@@ -187,25 +276,15 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		//
 		Color dfg = editor.getDisabledTextColor();
 		if ((dfg == null) || (dfg instanceof UIResource)) {
-			editor.setDisabledTextColor(UIManager.getColor(prefix
-					+ ".inactiveForeground"));
+			editor.setDisabledTextColor(UIManager.getColor(prefix + ".inactiveForeground"));
 		}
 		dfg = UIManager.getColor(prefix + ".inactiveBackground");
-		inactiveBackgroundColor = (dfg == null ? null : JSToolkit.getCSSColor(dfg));
+		if (dfg != null)
+			inactiveBackground = dfg;
 
-		//
-		// Border b = editor.getBorder();
-		// if ((b == null) || (b instanceof UIResource)) {
-		// editor.setBorder(UIManager.getBorder(prefix + ".border"));
-		// }
-		//
-		Insets margin = editor.getMargin();
-		if (margin == null || margin instanceof UIResource) {
-			editor.setMargin(UIManager.getInsets(prefix + ".margin"));
-		}
-		//
-		// updateCursor();
 	}
+
+
 
 	protected void installDefaults2() {
 		// editor.addMouseListener(dragListener);
@@ -353,105 +432,6 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		return map;
 	}
 
-	// /**
-	// * Invoked when the focus accelerator changes, this will update the
-	// * key bindings as necessary.
-	// */
-	// void updateFocusAcceleratorBinding(boolean changed) {
-	// char accelerator = editor.getFocusAccelerator();
-	//
-	// if (changed || accelerator != '\0') {
-	// InputMap km = SwingUtilities.getUIInputMap
-	// (editor, JComponent.WHEN_IN_FOCUSED_WINDOW);
-	//
-	// if (km == null && accelerator != '\0') {
-	// km = new ComponentInputMapUIResource(editor);
-	// SwingUtilities.replaceUIInputMap(editor, JComponent.
-	// WHEN_IN_FOCUSED_WINDOW, km);
-	// ActionMap am = getActionMap();
-	// SwingUtilities.replaceUIActionMap(editor, am);
-	// }
-	// if (km != null) {
-	// km.clear();
-	// if (accelerator != '\0') {
-	// km.put(KeyStroke.getKeyStroke(accelerator,
-	// ActionEvent.ALT_MASK),
-	// "requestFocus");
-	// }
-	// }
-	// }
-	// }
-	//
-	//
-	// /**
-	// * Invoked when editable property is changed.
-	// *
-	// * removing 'TAB' and 'SHIFT-TAB' from traversalKeysSet in case
-	// * editor is editable
-	// * adding 'TAB' and 'SHIFT-TAB' to traversalKeysSet in case
-	// * editor is non editable
-	// */
-	//
-	// void updateFocusTraversalKeys() {
-	// /*
-	// * Fix for 4514331 Non-editable JTextArea and similar
-	// * should allow Tab to keyboard - accessibility
-	// */
-	// EditorKit editorKit = getEditorKit(editor);
-	// if ( editorKit != null
-	// && editorKit instanceof DefaultEditorKit) {
-	// Set storedForwardTraversalKeys = editor.
-	// getFocusTraversalKeys(KeyboardFocusManager.
-	// FORWARD_TRAVERSAL_KEYS);
-	// Set storedBackwardTraversalKeys = editor.
-	// getFocusTraversalKeys(KeyboardFocusManager.
-	// BACKWARD_TRAVERSAL_KEYS);
-	// Set forwardTraversalKeys =
-	// new HashSet(storedForwardTraversalKeys);
-	// Set backwardTraversalKeys =
-	// new HashSet(storedBackwardTraversalKeys);
-	// if (editor.isEditable()) {
-	// forwardTraversalKeys.
-	// remove(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0));
-	// backwardTraversalKeys.
-	// remove(KeyStroke.getKeyStroke(KeyEvent.VK_TAB,
-	// InputEvent.SHIFT_MASK));
-	// } else {
-	// forwardTraversalKeys.add(KeyStroke.
-	// getKeyStroke(KeyEvent.VK_TAB, 0));
-	// backwardTraversalKeys.
-	// add(KeyStroke.
-	// getKeyStroke(KeyEvent.VK_TAB, InputEvent.SHIFT_MASK));
-	// }
-	// LookAndFeel.installProperty(editor,
-	// "focusTraversalKeysForward",
-	// forwardTraversalKeys);
-	// LookAndFeel.installProperty(editor,
-	// "focusTraversalKeysBackward",
-	// backwardTraversalKeys);
-	// }
-	//
-	// }
-
-	// /**
-	// * As needed updates cursor for the target editor.
-	// */
-	// protected void updateCursor() {
-	// if ((! editor.isCursorSet())
-	// || editor.getCursor() instanceof UIResource) {
-	// Cursor cursor = (editor.isEditable()) ? textCursor : null;
-	// editor.setCursor(cursor);
-	// }
-	// }
-	//
-	// /**
-	// * Returns the <code>TransferHandler</code> that will be installed if
-	// * their isn't one installed on the <code>JTextComponent</code>.
-	// */
-	// TransferHandler getTransferHandler() {
-	// return defaultTransferHandler;
-	// }
-	//
 	/**
 	 * Fetch an action map to use.
 	 */
@@ -466,34 +446,6 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		}
 		return map;
 	}
-	// ActionMap componentMap = new ActionMapUIResource();
-	// componentMap.put("requestFocus", new FocusAction());
-	// /*
-	// * fix for bug 4515750
-	// * JTextField & non-editable JTextArea bind return key - default btn not
-	// accessible
-	// *
-	// * Wrap the return action so that it is only enabled when the
-	// * component is editable. This allows the default button to be
-	// * processed when the text component has focus and isn't editable.
-	// *
-	// */
-	// if (getEditorKit(editor) instanceof DefaultEditorKit) {
-	// if (map != null) {
-	// Object obj = map.get(DefaultEditorKit.insertBreakAction);
-	// if (obj != null
-	// && obj instanceof DefaultEditorKit.InsertBreakAction) {
-	// Action action = new TextActionWrapper((TextAction)obj);
-	// componentMap.put(action.getValue(Action.NAME),action);
-	// }
-	// }
-	// }
-	// if (map != null) {
-	// componentMap.setParent(map);
-	// }
-	// return componentMap;
-	// }
-	//
 	/**
 	 * Create a default action map. This is basically the set of actions found
 	 * exported by the component.
@@ -527,19 +479,6 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		SwingUtilities.replaceUIActionMap(editor, null);
 	}
 
-	// /**
-	// * Paints a background for the view. This will only be
-	// * called if isOpaque() on the associated component is
-	// * true. The default is to paint the background color
-	// * of the component.
-	// *
-	// * @param g the graphics context
-	// */
-	// protected void paintBackground(Graphics g) {
-	// g.setColor(editor.getBackground());
-	// g.fillRect(0, 0, editor.getWidth(), editor.getHeight());
-	// }
-	//
 	/**
 	 * Fetches the text component associated with this UI implementation. This
 	 * will be null until the ui has been installed.
@@ -549,86 +488,6 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	protected final JTextComponent getComponent() {
 		return editor;
 	}
-
-	// /**
-	// * Flags model changes.
-	// * This is called whenever the model has changed.
-	// * It is implemented to rebuild the view hierarchy
-	// * to represent the default root element of the
-	// * associated model.
-	// */
-	// protected void modelChanged() {
-	// // create a view hierarchy
-	// ViewFactory f = rootView.getViewFactory();
-	// Document doc = editor.getDocument();
-	// Element elem = doc.getDefaultRootElement();
-	// setView(f.create(elem));
-	// }
-	//
-	// /**
-	// * Sets the current root of the view hierarchy and calls invalidate().
-	// * If there were any child components, they will be removed (i.e.
-	// * there are assumed to have come from components embedded in views).
-	// *
-	// * @param v the root view
-	// */
-	// protected final void setView(View v) {
-	// rootView.setView(v);
-	// painted = false;
-	// editor.revalidate();
-	// editor.repaint();
-	// }
-	//
-	// /**
-	// * Paints the interface safely with a guarantee that
-	// * the model won't change from the view of this thread.
-	// * This does the following things, rendering from
-	// * back to front.
-	// * <ol>
-	// * <li>
-	// * If the component is marked as opaque, the background
-	// * is painted in the current background color of the
-	// * component.
-	// * <li>
-	// * The highlights (if any) are painted.
-	// * <li>
-	// * The view hierarchy is painted.
-	// * <li>
-	// * The caret is painted.
-	// * </ol>
-	// *
-	// * @param g the graphics context
-	// */
-	// protected void paintSafely(Graphics g) {
-	// painted = true;
-	// Highlighter highlighter = editor.getHighlighter();
-	// Caret caret = editor.getCaret();
-	//
-	// // paint the background
-	// if (editor.isOpaque()) {
-	// paintBackground(g);
-	// }
-	//
-	// // paint the highlights
-	// if (highlighter != null) {
-	// highlighter.paint(g);
-	// }
-	//
-	// // paint the view hierarchy
-	// Rectangle alloc = getVisibleEditorRect();
-	// if (alloc != null) {
-	// rootView.paint(g, alloc);
-	// }
-	//
-	// // paint the caret
-	// if (caret != null) {
-	// caret.paint(g);
-	// }
-	//
-	// if (dropCaret != null) {
-	// dropCaret.paint(g);
-	// }
-	// }
 
 	// --- ComponentUI methods --------------------------------------------
 
@@ -737,7 +596,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 //		b.addMouseMotionListener(listener);
 		b.addFocusListener(listener);
 		b.addPropertyChangeListener(listener);
-		//b.addCaretListener(listener);
+		b.addCaretListener(listener);
 		// SwingJS there won't be a document yet; this is in constructor
 		// b.getDocument().addDocumentListener(listener);
 	}
@@ -751,90 +610,6 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		//b.removeCaretListener(listener); 
 		b.getDocument().removeDocumentListener(listener);
 	}
-
-	// /**
-	// * Superclass paints background in an uncontrollable way
-	// * (i.e. one might want an image tiled into the background).
-	// * To prevent this from happening twice, this method is
-	// * reimplemented to simply paint.
-	// * <p>
-	// * <em>NOTE:</em> Superclass is also not thread-safe in
-	// * it's rendering of the background, although that's not
-	// * an issue with the default rendering.
-	// */
-	// public void update(Graphics g, JComponent c) {
-	// paint(g, c);
-	// }
-	//
-	// /**
-	// * Paints the interface. This is routed to the
-	// * paintSafely method under the guarantee that
-	// * the model won't change from the view of this thread
-	// * while it's rendering (if the associated model is
-	// * derived from AbstractDocument). This enables the
-	// * model to potentially be updated asynchronously.
-	// *
-	// * @param g the graphics context
-	// * @param c the editor component
-	// */
-	// public final void paint(Graphics g, JComponent c) {
-	// if ((rootView.getViewCount() > 0) && (rootView.getView(0) != null)) {
-	// Document doc = editor.getDocument();
-	// if (doc instanceof AbstractDocument) {
-	// ((AbstractDocument)doc).readLock();
-	// }
-	// try {
-	// paintSafely(g);
-	// } finally {
-	// if (doc instanceof AbstractDocument) {
-	// ((AbstractDocument)doc).readUnlock();
-	// }
-	// }
-	// }
-	// }
-
-	// /**
-	// * Gets the preferred size for the editor component. If the component
-	// * has been given a size prior to receiving this request, it will
-	// * set the size of the view hierarchy to reflect the size of the component
-	// * before requesting the preferred size of the view hierarchy. This
-	// * allows formatted views to format to the current component size before
-	// * answering the request. Other views don't care about currently formatted
-	// * size and give the same answer either way.
-	// *
-	// * @param c the editor component
-	// * @return the size
-	// */
-	// public Dimension getPreferredSize(JComponent c) {
-	// Dimension d = c.getSize();
-	// // Document doc = editor.getDocument();
-	// // Insets i = c.getInsets();
-	// //
-	// // if (doc instanceof AbstractDocument) {
-	// // ((AbstractDocument)doc).readLock();
-	// // }
-	// // try {
-	// // if ((d.width > (i.left + i.right)) && (d.height > (i.top + i.bottom))) {
-	// // rootView.setSize(d.width - i.left - i.right, d.height - i.top -
-	// i.bottom);
-	// // }
-	// // else if (d.width == 0 && d.height == 0) {
-	// // // Probably haven't been layed out yet, force some sort of
-	// // // initial sizing.
-	// // rootView.setSize(Integer.MAX_VALUE, Integer.MAX_VALUE);
-	// // }
-	// // d.width = (int) Math.min((long) rootView.getPreferredSpan(View.X_AXIS) +
-	// // (long) i.left + (long) i.right, Integer.MAX_VALUE);
-	// // d.height = (int) Math.min((long) rootView.getPreferredSpan(View.Y_AXIS)
-	// +
-	// // (long) i.top + (long) i.bottom, Integer.MAX_VALUE);
-	// // } finally {
-	// // if (doc instanceof AbstractDocument) {
-	// // ((AbstractDocument)doc).readUnlock();
-	// // }
-	// // }
-	// return d;
-	// }
 
 	/**
 	 * Gets the minimum size for the editor component.
@@ -864,36 +639,497 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		return d;
 	}
 
+	// ---- TextUI methods -------------------------------------------
+
 	/**
-	 * Gets the maximum size for the editor component.
+	 * Fetches the EditorKit for the UI.
 	 * 
-	 * @return the size
+	 * @param tc
+	 *          the text component for which this UI is installed
+	 * @return the editor capabilities
+	 * @see TextUI#getEditorKit
 	 */
-	@Override
-	public Dimension getMaximumSize(JComponent jc) {
-
-		return super.getMaximumSize(jc);
-
-		// Document doc = editor.getDocument();
-		// Insets i = c.getInsets();
-		// Dimension d = new Dimension();
-		// if (doc instanceof AbstractDocument) {
-		// ((AbstractDocument)doc).readLock();
-		// }
-		// try {
-		// d.width = (int) Math.min((long) rootView.getMaximumSpan(View.X_AXIS) +
-		// (long) i.left + (long) i.right, Integer.MAX_VALUE);
-		// d.height = (int) Math.min((long) rootView.getMaximumSpan(View.Y_AXIS) +
-		// (long) i.top + (long) i.bottom, Integer.MAX_VALUE);
-		// } finally {
-		// if (doc instanceof AbstractDocument) {
-		// ((AbstractDocument)doc).readUnlock();
-		// }
-		// }
-		// return d;
+	public EditorKit getEditorKit(JTextComponent tc) {
+		return defaultKit;
 	}
 
-	// ---- TextUI methods -------------------------------------------
+
+	/**
+	 * Wrapper for text actions to return isEnabled false in case editor is non
+	 * editable
+	 */
+	class TextActionWrapper extends TextAction {
+		public TextActionWrapper(TextAction action) {
+			super((String) action.getValue(Action.NAME));
+			this.action = action;
+		}
+
+		/**
+		 * The operation to perform when this action is triggered.
+		 * 
+		 * @param e
+		 *          the action event
+		 */
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			action.actionPerformed(e);
+		}
+
+		@Override
+		public boolean isEnabled() {
+			return (editor == null || editor.isEditable()) ? action.isEnabled()
+					: false;
+		}
+
+		TextAction action = null;
+	}
+
+	/**
+	 * Registered in the ActionMap.
+	 */
+	class FocusAction extends AbstractAction {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			editor.requestFocus();
+		}
+
+		@Override
+		public boolean isEnabled() {
+			return editor.isEditable();
+		}
+	}
+
+	boolean handleEnter() {
+		return false;
+	}
+
+	public void setEditable(boolean editable) {		
+		this.editable = editable;
+		if (focusNode == null)
+			return;
+		setEditableCSS();
+		if (jc.isOpaque()) {
+			Color bg = getBackground();
+			setBackgroundCUI(editable || !(bg instanceof UIResource) || inactiveBackground == null ? bg : inactiveBackground);
+		}		
+	}
+	
+	protected void setEditableCSS() {
+		// could be subclassed
+		DOMNode.setAttr(focusNode, "readOnly", editable ? null : TRUE);
+	}
+
+	@Override
+	protected Color getInactiveTextColor(Color fg) {
+		// For TextComponents:
+		// !enabled: c.getDisabledTextColor();
+		// enabled and editable: c.getForeground();
+		// enabled but !editable: inactiveForeground
+		// 
+		// In addition, if color == null, then no text is shown		
+		return (!editor.isEnabled() ? editor.getDisabledTextColor() : !editor.isEditable() ? inactiveForeground : fg);
+	}
+
+	protected String setCurrentText() {
+		return (editor.getDocument() == null ? null : (currentText = editor.getText()));
+	}
+
+	boolean checkNewEditorTextValue() {
+		String val = getJSTextValue();
+		if (val.equals(fixText(currentText)))
+			return false;
+//		String oldval = currentText;
+//			currentText = val;
+		// System.out.println("from HTML: " + DOMNode.getAttr(domNode, "innerHTML"));
+		// System.out.println("to editor: " + val.replace('\n', '.'));
+		editor.setTextFromUI(val);
+		setCurrentText();
+//			getComponentText();
+		// TODO: why this?
+		// editor.firePropertyChange("text", oldval, val);
+		return true;
+	}
+
+	void setJSTextDelayed() {
+		updateDOMNode();
+	}
+
+	
+	@Override
+	public boolean focus() {
+		if (!super.focus())
+			return false;
+		if (haveFocus()) {
+			
+		} else {
+			// need to transfer selection to this component
+			updateJSCursor("focus");
+		}
+		return true;
+	}
+		
+	boolean haveFocus() {
+		return jquery.contains(focusNode, /** @j2sNative document.activeElement || */ null);
+	}
+
+	
+	////////////////////// cursor and selection methods //////////////
+	
+
+	
+	/// from Java ///
+	
+	/**
+	 * update the JavaScript selection/cursor
+	 * @param why
+	 */
+	public void updateJSCursor(String why) {	
+		if (editor.getDocument() == null || editor.getText().length() == 0)
+			return;
+		int start = editor.getCaret().getMark();
+		int end = editor.getCaret().getDot();
+		//System.out.println(id + " updateJSCursor " + why + "  " + start + " " + end);
+//		if (start > end) {
+//			int t = end;
+//			end = start;
+//			start = t;
+//		}
+		Object[] r1 = getJSNodePt(focusNode, -1, start);
+		Object[] r2 = (end == start ? r1 : getJSNodePt(focusNode, -1, end));
+		if (r1 == null || r2 == null)
+			return;
+		
+		jsSelect(r1, r2, start == end && why == "default");
+	}
+
+	/**
+	 * create a range array [node, pt]
+	 * 
+	 * Overridden in JSEditorPaneUI
+	 * 
+	 * @param node
+	 * @param offset
+	 * @param pt
+	 * @return
+	 */
+	protected Object[] getJSNodePt(DOMNode node, int offset, int pt) {
+		/**
+		 * @j2sNative return [null, pt];
+		 */
+		{
+			return null;
+		}
+	}
+
+	/**
+	 * Given two JavaScript ranges, set the JavaScript cursor/selection object;
+	 * Overridden in JSEditorPaneUI.
+	 * 
+	 * @param r1
+	 * @param r2
+	 */
+
+	protected void jsSelect(Object[] r1, Object[] r2, boolean andScroll) {
+//		System.out.println("scrolling to " + r1 + " " + r2 + " " + editor.getText());
+		setJSMarkAndDot(/** @j2sNative r1[1] || */0, /** @j2sNative r2[1] || */0, andScroll);
+	}
+	
+    /**
+     * Set the selection range in the HTML5 node.
+     * Overridden in JSEditorPaneUI.
+     * 
+     * @param mark
+     * @param dot
+     */
+    void setJSMarkAndDot(int mark, int dot, boolean andScroll) {
+    	//System.out.println(">>JSTextUI setJSMarkAndDot " + mark + " " + dot + " for " + editor.getText());
+    	try {
+		focusNode.setSelectionRange(Math.min(mark, dot), Math.max(mark, dot), (mark == dot ? "none" : mark < dot ? "forward" : "backward"));
+    	} catch (Throwable e) {
+    		// ignore - probably we are not attached to the body -- SeaMonkey failure here
+    	}
+	}
+
+	/**
+     * overridden in JSEditorPaneUI
+     * 
+     * @param pt
+     * @return
+     */
+    @SuppressWarnings("unused")
+	boolean getJSMarkAndDot(Point pt) {
+    	DOMNode node = focusNode;
+    	int start = /** @j2sNative node.selectionStart || */ 0;
+    	int end = /** @j2sNative node.selectionEnd || */ 1;
+    	boolean reversed = /** @j2sNative node.selectionDirection == "backward" || */false;
+    	//System.out.println("getJSMarkAndDot " + start + "  " + end + " " + reversed);
+    	pt.x = start;
+    	pt.y = end;
+    	return true;
+    }
+
+
+	/**
+	 * Enable only the keys that are appropriate for this component, editable or not
+	 * editable.
+	 * 
+	 * @param jQueryEvent
+	 * @return null to continue processing, CONSUMED(false) to stop propagation, UNHANLDED(true) to ignore
+	 */
+	@SuppressWarnings("unused")
+	protected Boolean checkAllowKey(Object jQueryEvent) {
+		boolean b = HANDLED;
+		boolean checkEditable = false;
+		// note: all options are set in JSComponentUI.bindJSKeyEvents
+		switch (/** @j2sNative jQueryEvent.type || */"") {
+		case "drop":
+			// accept if editable
+			checkEditable = true;
+			break;
+		case "focusout":
+		case "dragover":
+			b = NOT_CONSUMED;
+			//System.out.println("jstextvui " + (/** @j2sNative jQueryEvent.type || */"") + editable);
+			break;
+		case "keydown":
+		case "keypress":
+		case "keyup":
+			switch (/** @j2sNative jQueryEvent.keyCode || */
+			0) {
+			case KeyEvent.VK_UP:
+			case KeyEvent.VK_DOWN:
+			case KeyEvent.VK_LEFT:
+			case KeyEvent.VK_RIGHT:
+			case KeyEvent.VK_PAGE_UP:
+			case KeyEvent.VK_PAGE_DOWN:
+				// accept only if neither ALT nor CTRL is down
+				if (/** @j2sNative !jQueryEvent.altKey && !jQueryEvent.ctrlKey || */
+				false)
+					return null;
+				b = CONSUMED;
+				break;
+			default:
+				// accept all others only if editable
+				checkEditable = true;
+				break;
+			}
+			break;
+		default:
+			return null;
+		}
+		if (checkEditable) {
+			// NEVER allowing editing of HTMLDocument
+			if (editor.isEditable() 
+					&& !(editor.getDocument() instanceof HTMLDocument))
+				return null;
+			b = CONSUMED; // this will cancel the jQuery event
+		}
+		return Boolean.valueOf(b);
+	}
+
+
+	/**
+	 * Get the current selection point for the Java model.
+	 * 
+	 * @param t
+	 * @param pt
+	 * @param biasReturn
+	 * @return 
+	 */
+    public int viewToModel(JTextComponent t, Point pt,
+            Position.Bias[] biasReturn) {
+    	
+//    	/**
+//    	 * @j2sNative console.log("-----");
+//    	 * console.log(document.getSelection());
+//    	 * 
+//    	 */
+    	// from DefaultCursor mouse event
+    	pt.x = Integer.MAX_VALUE;
+    	getJSMarkAndDot(pt);
+    	return pt.y;    	
+    }
+    
+	void setJavaMarkAndDot(Point markDot) {
+		int mark = markDot.x;
+		int dot = markDot.y;
+		Caret c = editor.getCaret();
+		if (c.getMark() == mark && c.getDot() == dot)
+			return;
+		if (c.getMark() != mark)
+			c.setDot(mark);
+		if (c.getDot() != dot)
+			c.moveDot(dot);
+		//editor.caretEvent.fire();
+	}
+
+	/**
+	 * get the new Java cursor position after a key event
+	 * 
+	 * @param pt
+	 * @return a new dot (y) and, if they are changed, a new mark (x), or if not
+	 *         changed, x will be Integer.MIN_VALUE
+	 */
+	Point getNewCaretPosition(Point pt) {
+		if (pt == null)
+			pt = JSTextUI.markDot;
+		pt.x = 0;
+		getJSMarkAndDot(pt);
+		
+		int mark = pt.x, dot = pt.y; 
+
+		// HTML5 selection is always mark....dot
+		// but Java can be Dot....Mark
+
+		int oldMark = editor.getCaret().getMark();
+		int oldDot = editor.getCaret().getDot();
+		if (dot != mark && oldMark == dot) {
+			dot = mark;
+			mark = oldMark;
+		}
+		pt.x = (dot == oldDot && mark == oldMark ? Integer.MIN_VALUE : mark);
+		pt.y = dot;
+		return pt;
+	}
+
+	public void updateJSCursorFromCaret() {
+	}
+
+	public void caretUpdatedByProgram(CaretEvent e) {
+		// AWT components need to show the change, but not Swing components.
+		if (false && isAWT && !jc.hasFocus()) { 
+			Component fc = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+			jc.requestFocus();
+			if (fc != null)
+				fc.requestFocus();
+		}
+	}
+	
+
+
+
+//	/**
+//	 * Gets the maximum size for the editor component.
+//	 * 
+//	 * @return the size
+//	 */
+//	@Override
+//	public Dimension getMaximumSize(JComponent jc) {
+//
+//		return super.getMaximumSize(jc);
+//
+//		// Document doc = editor.getDocument();
+//		// Insets i = c.getInsets();
+//		// Dimension d = new Dimension();
+//		// if (doc instanceof AbstractDocument) {
+//		// ((AbstractDocument)doc).readLock();
+//		// }
+//		// try {
+//		// d.width = (int) Math.min((long) rootView.getMaximumSpan(View.X_AXIS) +
+//		// (long) i.left + (long) i.right, Integer.MAX_VALUE);
+//		// d.height = (int) Math.min((long) rootView.getMaximumSpan(View.Y_AXIS) +
+//		// (long) i.top + (long) i.bottom, Integer.MAX_VALUE);
+//		// } finally {
+//		// if (doc instanceof AbstractDocument) {
+//		// ((AbstractDocument)doc).readUnlock();
+//		// }
+//		// }
+//		// return d;
+//	}
+
+	// /**
+	// * Paints a background for the view. This will only be
+	// * called if isOpaque() on the associated component is
+	// * true. The default is to paint the background color
+	// * of the component.
+	// *
+	// * @param g the graphics context
+	// */
+	// protected void paintBackground(Graphics g) {
+	// g.setColor(editor.getBackground());
+	// g.fillRect(0, 0, editor.getWidth(), editor.getHeight());
+	// }
+	//
+	// /**
+	// * Flags model changes.
+	// * This is called whenever the model has changed.
+	// * It is implemented to rebuild the view hierarchy
+	// * to represent the default root element of the
+	// * associated model.
+	// */
+	// protected void modelChanged() {
+	// // create a view hierarchy
+	// ViewFactory f = rootView.getViewFactory();
+	// Document doc = editor.getDocument();
+	// Element elem = doc.getDefaultRootElement();
+	// setView(f.create(elem));
+	// }
+	//
+	// /**
+	// * Sets the current root of the view hierarchy and calls invalidate().
+	// * If there were any child components, they will be removed (i.e.
+	// * there are assumed to have come from components embedded in views).
+	// *
+	// * @param v the root view
+	// */
+	// protected final void setView(View v) {
+	// rootView.setView(v);
+	// painted = false;
+	// editor.revalidate();
+	// editor.repaint();
+	// }
+	//
+	// /**
+	// * Paints the interface safely with a guarantee that
+	// * the model won't change from the view of this thread.
+	// * This does the following things, rendering from
+	// * back to front.
+	// * <ol>
+	// * <li>
+	// * If the component is marked as opaque, the background
+	// * is painted in the current background color of the
+	// * component.
+	// * <li>
+	// * The highlights (if any) are painted.
+	// * <li>
+	// * The view hierarchy is painted.
+	// * <li>
+	// * The caret is painted.
+	// * </ol>
+	// *
+	// * @param g the graphics context
+	// */
+	// protected void paintSafely(Graphics g) {
+	// painted = true;
+	// Highlighter highlighter = editor.getHighlighter();
+	// Caret caret = editor.getCaret();
+	//
+	// // paint the background
+	// if (editor.isOpaque()) {
+	// paintBackground(g);
+	// }
+	//
+	// // paint the highlights
+	// if (highlighter != null) {
+	// highlighter.paint(g);
+	// }
+	//
+	// // paint the view hierarchy
+	// Rectangle alloc = getVisibleEditorRect();
+	// if (alloc != null) {
+	// rootView.paint(g, alloc);
+	// }
+	//
+	// // paint the caret
+	// if (caret != null) {
+	// caret.paint(g);
+	// }
+	//
+	// if (dropCaret != null) {
+	// dropCaret.paint(g);
+	// }
+	// }
 
 	//
 	// /**
@@ -1098,18 +1334,6 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	// }
 	// }
 	// }
-
-	/**
-	 * Fetches the EditorKit for the UI.
-	 * 
-	 * @param tc
-	 *          the text component for which this UI is installed
-	 * @return the editor capabilities
-	 * @see TextUI#getEditorKit
-	 */
-	public EditorKit getEditorKit(JTextComponent tc) {
-		return defaultKit;
-	}
 
 	// /**
 	// * Fetches a View with the allocation of the associated
@@ -1983,64 +2207,6 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	//
 	// protected boolean i18nView = false;
 	// }
-
-	/**
-	 * Wrapper for text actions to return isEnabled false in case editor is non
-	 * editable
-	 */
-	class TextActionWrapper extends TextAction {
-		public TextActionWrapper(TextAction action) {
-			super((String) action.getValue(Action.NAME));
-			this.action = action;
-		}
-
-		/**
-		 * The operation to perform when this action is triggered.
-		 * 
-		 * @param e
-		 *          the action event
-		 */
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			action.actionPerformed(e);
-		}
-
-		@Override
-		public boolean isEnabled() {
-			return (editor == null || editor.isEditable()) ? action.isEnabled()
-					: false;
-		}
-
-		TextAction action = null;
-	}
-
-	/**
-	 * Registered in the ActionMap.
-	 */
-	class FocusAction extends AbstractAction {
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			editor.requestFocus();
-		}
-
-		@Override
-		public boolean isEnabled() {
-			return editor.isEditable();
-		}
-	}
-
-	boolean handleEnter(int eventType) {
-		return false;
-	}
-
-	public void setEditable(boolean editable) {		
-		this.editable = editable;
-		if (focusNode == null)
-			return;
-		DOMNode.setAttr(focusNode, "readOnly", editable ? null : "true");
-	}
-
 	// protected static DragListener getDragListener() {
 	// synchronized(DragListener.class) {
 	// DragListener listener =
@@ -2783,349 +2949,241 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	// }
 	//
 
-	/**
-	 * overridden by JSEditorPanelUI
-	 * 
-	 * @param val
-	 */
-	public void setText(String val) {
-		String prop = null;
-		DOMNode obj = null;
-		if (val == null ? currentText != null : !val.equals(currentText)) {
-			currentText = val;			
-			if (textNode != null) {
-				prop = "innerHTML";
-				obj = textNode;
-			} else if (valueNode != null) {
-				prop = "value";
-				obj = valueNode;
-			}
-			if (obj != null)
-				setProp(obj, prop, val);
-		}
-	}
-	
-	@Override
-	protected Color getInactiveTextColor(Color fg) {
-		// For TextComponents:
-		// !enabled: c.getDisabledTextColor();
-		// enabled and editable: c.getForeground();
-		// enabled but !editable: inactiveForeground
-		// 
-		// In addition, if color == null, then no text is shown		
-		return (!editor.isEnabled() ? editor.getDisabledTextColor() : !editor.isEditable() ? inactiveForeground : fg);
-	}
-
-	protected String getComponentText() {
-		return (editor.getDocument() == null ? null : (currentText = editor.getText()));
-	}
-
-	boolean checkNewEditorTextValue() {
-		String val = getJSTextValue();
-		if (val.equals(currentText))
-			return false;
-//		String oldval = currentText;
-//			currentText = val;
-		// System.out.println("from HTML: " + DOMNode.getAttr(domNode, "innerHTML"));
-		// System.out.println("to editor: " + val.replace('\n', '.'));
-		editor.setText(val);
-		getComponentText();
-//			getComponentText();
-		// TODO: why this?
-		// editor.firePropertyChange("text", oldval, val);
-		return true;
-	}
-
-	void setJSTextDelayed() {
-		updateDOMNode();
-	}
-
-	
-	@Override
-	public boolean focus() {
-		if (!super.focus())
-			return false;
-		if (haveFocus()) {
-			
-		} else {
-			// need to transfer selection to this component
-			updateJSCursor("focus");
-		}
-		return true;
-	}
-		
-	boolean haveFocus() {
-		return jquery.contains(focusNode, /** @j2sNative document.activeElement || */ null);
-	}
-
-	
-	////////////////////// cursor and selection methods //////////////
-	
-
-	
-	/// from Java ///
-	
-	/**
-	 * update the JavaScript selection/cursor
-	 * @param why
-	 */
-	public void updateJSCursor(String why) {	
-		if (editor.getText().length() == 0)
-			return;
-		int start = editor.getCaret().getMark();
-		int end = editor.getCaret().getDot();
-		//System.out.println(id + " updateJSCursor " + why + "  " + start + " " + end);
-//		if (start > end) {
-//			int t = end;
-//			end = start;
-//			start = t;
+//	/**
+//	 * overridden by JSEditorPanelUI
+//	 * 
+//	 * @param val
+//	 */
+//	public void setText(String val) {
+//		String prop = null;
+//		DOMNode obj = null;
+//		if (val == null ? currentText != null : !val.equals(currentText)) {
+//			currentText = val;			
+//			if (textNode != null) {
+//				prop = "innerHTML";
+//				obj = textNode;
+//			} else if (valueNode != null) {
+//				prop = "value";
+//				obj = valueNode;
+//			}
+//			if (obj != null) {
+//				System.out.println("JSTextUI setting text " + val);
+//				setJSText(obj, prop, val);
+//			}
 //		}
-		Object[] r1 = getJSNodePt(focusNode, -1, start);
-		Object[] r2 = (end == start ? r1 : getJSNodePt(focusNode, -1, end));
-		if (r1 == null || r2 == null)
-			return;
-		
-		jsSelect(r1, r2, start == end && why == "default");
-	}
-
-	/**
-	 * create a range array [node, pt]
-	 * 
-	 * Overridden in JSEditorPaneUI
-	 * 
-	 * @param node
-	 * @param offset
-	 * @param pt
-	 * @return
-	 */
-	protected Object[] getJSNodePt(DOMNode node, int offset, int pt) {
-		/**
-		 * @j2sNative return [null, pt];
-		 */
-		{
-			return null;
-		}
-	}
-
-	/**
-	 * Given two JavaScript ranges, set the JavaScript cursor/selection object;
-	 * Overridden in JSEditorPaneUI.
-	 * 
-	 * @param r1
-	 * @param r2
-	 */
-
-	protected void jsSelect(Object[] r1, Object[] r2, boolean andScroll) {
-		setJSMarkAndDot(/** @j2sNative r1[1] || */0, /** @j2sNative r2[1] || */0, andScroll);
-	}
-	
-    /**
-     * Set the selection range in the HTML5 node.
-     * Overridden in JSEditorPaneUI.
-     * 
-     * @param mark
-     * @param dot
-     */
-    void setJSMarkAndDot(int mark, int dot, boolean andScroll) {
-    	//System.out.println("JSTextUI setJSMarkAndDot " + mark + " " + dot);
-		focusNode.setSelectionRange(Math.min(mark, dot), Math.max(mark, dot), (mark == dot ? "none" : mark < dot ? "forward" : "backward"));
-	}
-
-	/**
-     * overridden in JSEditorPaneUI
-     * 
-     * @param pt
-     * @return
-     */
-    @SuppressWarnings("unused")
-	boolean getJSMarkAndDot(Point pt) {
-    	DOMNode node = focusNode;
-    	int start = /** @j2sNative node.selectionStart || */ 0;
-    	int end = /** @j2sNative node.selectionEnd || */ 1;
-    	boolean reversed = /** @j2sNative node.selectionDirection == "backward" || */false;
-    	//System.out.println("getJSMarkAndDot " + start + "  " + end + " " + reversed);
-    	pt.x = start;
-    	pt.y = end;
-    	return true;
-    }
+//	}
 
 
-    /**
-	 * called by JSComponentUI.bindJSEvents
-	 * 
-	 * @return handled 
-	 * 
-	 * 
-	 */
-	@Override
-	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
-//		String type = /** @j2sNative jQueryEvent.type || */null;
-//		System.out.println("JSTextUI handlejs "+type + " " + eventType);
-		if (JSToolkit.isMouseEvent(eventType)) {
-			return NOT_HANDLED;
-		}
-		Boolean b = checkAllowKey(jQueryEvent);
-		if (b != null)
-			return b.booleanValue();
-		int keyCode = /** @j2sNative jQueryEvent.keyCode || */ 0;
-		switch (eventType) {
-		case KeyEvent.KEY_PRESSED:
-			// note that events are bundled here into one eventType
-			// 0 param here says "get the real event type from jQueryEvent
-			JSKeyEvent keyEvent = JSKeyEvent.newJSKeyEvent(editor, jQueryEvent, 0, false);
-			if (keyEvent == null)
-				return HANDLED;
-			editor.dispatchEvent(keyEvent);
-			if (keyCode == KeyEvent.VK_ALT || keyEvent.isConsumed()) {
-				/**
-				 * @j2sNative
-				 * 
-				 * jQueryEvent.preventDefault();
-				 * jQueryEvent.stopPropagation();
-				 */
-				return HANDLED;
-			}
-			switch (keyCode) {
-			case KeyEvent.VK_ALT:
-			case KeyEvent.VK_SHIFT:
-			case KeyEvent.VK_CONTROL:
-				return HANDLED;
-			}
-			eventType = keyEvent.getID();
-			break;
-		}
-		
-//		System.out.println("JSTextUI firing textListener ");
-		return textListener.handleJSTextEvent(this, eventType, jQueryEvent);
-	}
+	// /**
+	// * Superclass paints background in an uncontrollable way
+	// * (i.e. one might want an image tiled into the background).
+	// * To prevent this from happening twice, this method is
+	// * reimplemented to simply paint.
+	// * <p>
+	// * <em>NOTE:</em> Superclass is also not thread-safe in
+	// * it's rendering of the background, although that's not
+	// * an issue with the default rendering.
+	// */
+	// public void update(Graphics g, JComponent c) {
+	// paint(g, c);
+	// }
+	//
+	// /**
+	// * Paints the interface. This is routed to the
+	// * paintSafely method under the guarantee that
+	// * the model won't change from the view of this thread
+	// * while it's rendering (if the associated model is
+	// * derived from AbstractDocument). This enables the
+	// * model to potentially be updated asynchronously.
+	// *
+	// * @param g the graphics context
+	// * @param c the editor component
+	// */
+	// public final void paint(Graphics g, JComponent c) {
+	// if ((rootView.getViewCount() > 0) && (rootView.getView(0) != null)) {
+	// Document doc = editor.getDocument();
+	// if (doc instanceof AbstractDocument) {
+	// ((AbstractDocument)doc).readLock();
+	// }
+	// try {
+	// paintSafely(g);
+	// } finally {
+	// if (doc instanceof AbstractDocument) {
+	// ((AbstractDocument)doc).readUnlock();
+	// }
+	// }
+	// }
+	// }
 
-	/**
-	 * Enable only the keys that are appropriate for this component, editable or not
-	 * editable.
-	 * 
-	 * @param jQueryEvent
-	 * @return null to continue processing, CONSUMED(false) to stop propagation, UNHANLDED(true) to ignore
-	 */
-	@SuppressWarnings("unused")
-	protected Boolean checkAllowKey(Object jQueryEvent) {
-		boolean b = HANDLED;
-		boolean checkEditable = false;
-		// note: all options are set in JSComponentUI.bindJSKeyEvents
-		switch (/** @j2sNative jQueryEvent.type || */"") {
-		case "drop":
-			// accept if editable
-			checkEditable = true;
-			break;
-		case "focusout":
-		case "dragover":
-			b = NOT_CONSUMED;
-			//System.out.println("jstextvui " + (/** @j2sNative jQueryEvent.type || */"") + editable);
-			break;
-		case "keydown":
-		case "keypress":
-		case "keyup":
-			switch (/** @j2sNative jQueryEvent.keyCode || */
-			0) {
-			case KeyEvent.VK_UP:
-			case KeyEvent.VK_DOWN:
-			case KeyEvent.VK_LEFT:
-			case KeyEvent.VK_RIGHT:
-			case KeyEvent.VK_PAGE_UP:
-			case KeyEvent.VK_PAGE_DOWN:
-				// accept only if neither ALT nor CTRL is down
-				if (/** @j2sNative !jQueryEvent.altKey && !jQueryEvent.ctrlKey || */
-				false)
-					return null;
-				b = CONSUMED;
-				break;
-			default:
-				// accept all others only if editable
-				checkEditable = true;
-				break;
-			}
-			break;
-		default:
-			return null;
-		}
-		if (checkEditable) {
-			// NEVER allowing editing of HTMLDocument
-			if (editor.isEditable() 
-					&& !(editor.getDocument() instanceof HTMLDocument))
-				return null;
-			b = CONSUMED; // this will cancel the jQuery event
-		}
-		return Boolean.valueOf(b);
-	}
+	// /**
+	// * Gets the preferred size for the editor component. If the component
+	// * has been given a size prior to receiving this request, it will
+	// * set the size of the view hierarchy to reflect the size of the component
+	// * before requesting the preferred size of the view hierarchy. This
+	// * allows formatted views to format to the current component size before
+	// * answering the request. Other views don't care about currently formatted
+	// * size and give the same answer either way.
+	// *
+	// * @param c the editor component
+	// * @return the size
+	// */
+	// public Dimension getPreferredSize(JComponent c) {
+	// Dimension d = c.getSize();
+	// // Document doc = editor.getDocument();
+	// // Insets i = c.getInsets();
+	// //
+	// // if (doc instanceof AbstractDocument) {
+	// // ((AbstractDocument)doc).readLock();
+	// // }
+	// // try {
+	// // if ((d.width > (i.left + i.right)) && (d.height > (i.top + i.bottom))) {
+	// // rootView.setSize(d.width - i.left - i.right, d.height - i.top -
+	// i.bottom);
+	// // }
+	// // else if (d.width == 0 && d.height == 0) {
+	// // // Probably haven't been layed out yet, force some sort of
+	// // // initial sizing.
+	// // rootView.setSize(Integer.MAX_VALUE, Integer.MAX_VALUE);
+	// // }
+	// // d.width = (int) Math.min((long) rootView.getPreferredSpan(View.X_AXIS) +
+	// // (long) i.left + (long) i.right, Integer.MAX_VALUE);
+	// // d.height = (int) Math.min((long) rootView.getPreferredSpan(View.Y_AXIS)
+	// +
+	// // (long) i.top + (long) i.bottom, Integer.MAX_VALUE);
+	// // } finally {
+	// // if (doc instanceof AbstractDocument) {
+	// // ((AbstractDocument)doc).readUnlock();
+	// // }
+	// // }
+	// return d;
+	// }
 
+	// /**
+	// * Invoked when the focus accelerator changes, this will update the
+	// * key bindings as necessary.
+	// */
+	// void updateFocusAcceleratorBinding(boolean changed) {
+	// char accelerator = editor.getFocusAccelerator();
+	//
+	// if (changed || accelerator != '\0') {
+	// InputMap km = SwingUtilities.getUIInputMap
+	// (editor, JComponent.WHEN_IN_FOCUSED_WINDOW);
+	//
+	// if (km == null && accelerator != '\0') {
+	// km = new ComponentInputMapUIResource(editor);
+	// SwingUtilities.replaceUIInputMap(editor, JComponent.
+	// WHEN_IN_FOCUSED_WINDOW, km);
+	// ActionMap am = getActionMap();
+	// SwingUtilities.replaceUIActionMap(editor, am);
+	// }
+	// if (km != null) {
+	// km.clear();
+	// if (accelerator != '\0') {
+	// km.put(KeyStroke.getKeyStroke(accelerator,
+	// ActionEvent.ALT_MASK),
+	// "requestFocus");
+	// }
+	// }
+	// }
+	// }
+	//
+	//
+	// /**
+	// * Invoked when editable property is changed.
+	// *
+	// * removing 'TAB' and 'SHIFT-TAB' from traversalKeysSet in case
+	// * editor is editable
+	// * adding 'TAB' and 'SHIFT-TAB' to traversalKeysSet in case
+	// * editor is non editable
+	// */
+	//
+	// void updateFocusTraversalKeys() {
+	// /*
+	// * Fix for 4514331 Non-editable JTextArea and similar
+	// * should allow Tab to keyboard - accessibility
+	// */
+	// EditorKit editorKit = getEditorKit(editor);
+	// if ( editorKit != null
+	// && editorKit instanceof DefaultEditorKit) {
+	// Set storedForwardTraversalKeys = editor.
+	// getFocusTraversalKeys(KeyboardFocusManager.
+	// FORWARD_TRAVERSAL_KEYS);
+	// Set storedBackwardTraversalKeys = editor.
+	// getFocusTraversalKeys(KeyboardFocusManager.
+	// BACKWARD_TRAVERSAL_KEYS);
+	// Set forwardTraversalKeys =
+	// new HashSet(storedForwardTraversalKeys);
+	// Set backwardTraversalKeys =
+	// new HashSet(storedBackwardTraversalKeys);
+	// if (editor.isEditable()) {
+	// forwardTraversalKeys.
+	// remove(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0));
+	// backwardTraversalKeys.
+	// remove(KeyStroke.getKeyStroke(KeyEvent.VK_TAB,
+	// InputEvent.SHIFT_MASK));
+	// } else {
+	// forwardTraversalKeys.add(KeyStroke.
+	// getKeyStroke(KeyEvent.VK_TAB, 0));
+	// backwardTraversalKeys.
+	// add(KeyStroke.
+	// getKeyStroke(KeyEvent.VK_TAB, InputEvent.SHIFT_MASK));
+	// }
+	// LookAndFeel.installProperty(editor,
+	// "focusTraversalKeysForward",
+	// forwardTraversalKeys);
+	// LookAndFeel.installProperty(editor,
+	// "focusTraversalKeysBackward",
+	// backwardTraversalKeys);
+	// }
+	//
+	// }
 
-	/**
-	 * Get the current selection point for the Java model.
-	 * 
-	 * @param t
-	 * @param pt
-	 * @param biasReturn
-	 * @return 
-	 */
-    public int viewToModel(JTextComponent t, Point pt,
-            Position.Bias[] biasReturn) {
-    	
-//    	/**
-//    	 * @j2sNative console.log("-----");
-//    	 * console.log(document.getSelection());
-//    	 * 
-//    	 */
-    	// from DefaultCursor mouse event
-    	pt.x = Integer.MAX_VALUE;
-    	getJSMarkAndDot(pt);
-    	return pt.y;    	
-    }
-    
-	void setJavaMarkAndDot(Point markDot) {
-		int mark = markDot.x;
-		int dot = markDot.y;
-		Caret c = editor.getCaret();
-		if (c.getMark() == mark && c.getDot() == dot)
-			return;
-		if (c.getMark() != mark)
-			c.setDot(mark);
-		if (c.getDot() != dot)
-			c.moveDot(dot);
-//		editor.caretEvent.fire();
-	}
-
-	/**
-	 * get the new Java cursor position after a key event
-	 * 
-	 * @param pt
-	 * @return a new dot (y) and, if they are changed, a new mark (x), or if not
-	 *         changed, x will be Integer.MIN_VALUE
-	 */
-	Point getNewCaretPosition(Point pt) {
-		if (pt == null)
-			pt = JSTextUI.markDot;
-		pt.x = 0;
-		getJSMarkAndDot(pt);
-		
-		int mark = pt.x, dot = pt.y; 
-
-		// HTML5 selection is always mark....dot
-		// but Java can be Dot....Mark
-
-		int oldMark = editor.getCaret().getMark();
-		int oldDot = editor.getCaret().getDot();
-		if (dot != mark && oldMark == dot) {
-			dot = mark;
-			mark = oldMark;
-		}
-		pt.x = (dot == oldDot && mark == oldMark ? Integer.MIN_VALUE : mark);
-		pt.y = dot;
-		return pt;
-	}
-
-	public void updateJSCursorFromCaret() {
-	}
-	
-
-
+	// /**
+	// * As needed updates cursor for the target editor.
+	// */
+	// protected void updateCursor() {
+	// if ((! editor.isCursorSet())
+	// || editor.getCursor() instanceof UIResource) {
+	// Cursor cursor = (editor.isEditable()) ? textCursor : null;
+	// editor.setCursor(cursor);
+	// }
+	// }
+	//
+	// /**
+	// * Returns the <code>TransferHandler</code> that will be installed if
+	// * their isn't one installed on the <code>JTextComponent</code>.
+	// */
+	// TransferHandler getTransferHandler() {
+	// return defaultTransferHandler;
+	// }
+	//
+	// ActionMap componentMap = new ActionMapUIResource();
+	// componentMap.put("requestFocus", new FocusAction());
+	// /*
+	// * fix for bug 4515750
+	// * JTextField & non-editable JTextArea bind return key - default btn not
+	// accessible
+	// *
+	// * Wrap the return action so that it is only enabled when the
+	// * component is editable. This allows the default button to be
+	// * processed when the text component has focus and isn't editable.
+	// *
+	// */
+	// if (getEditorKit(editor) instanceof DefaultEditorKit) {
+	// if (map != null) {
+	// Object obj = map.get(DefaultEditorKit.insertBreakAction);
+	// if (obj != null
+	// && obj instanceof DefaultEditorKit.InsertBreakAction) {
+	// Action action = new TextActionWrapper((TextAction)obj);
+	// componentMap.put(action.getValue(Action.NAME),action);
+	// }
+	// }
+	// }
+	// if (map != null) {
+	// componentMap.setParent(map);
+	// }
+	// return componentMap;
+	// }
+	//
 
 }
