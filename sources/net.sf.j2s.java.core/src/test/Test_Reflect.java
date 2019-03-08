@@ -1,5 +1,6 @@
 package test;
 
+import java.awt.Button;
 import java.lang.reflect.Field;
 
 class Test_Reflect extends Test_ {
@@ -68,6 +69,22 @@ test.Test_Reflect.getMethod$S$ClassA ("test", [String, Clazz.arrayType('float[][
 	 */
 
 	public static void main(String[] args) {
+		
+		String name = "";
+		try {
+			Test_Path tp = (Test_Path) Class.forName(name = "Test_Path", true, Test_Reflect.class.getClassLoader()).newInstance();
+			assert(tp != null);
+			System.out.println("class loaded: " + tp.getClass().getName());
+
+			Button b = (Button) Class.forName(name = "java.awt.Button", true, Test_Reflect.class.getClassLoader()).newInstance();
+			assert(b != null);
+			System.out.println("class loaded: " + b.getClass().getName());
+
+		} catch (Throwable t) {
+			System.out.println("problems loading " + name);
+			assert(false);
+		}
+		
 		Test_Reflect tr = new Test_Reflect();
   		  // Field is not implemented
 //			Field f = Test_Reflect.class.getDeclaredField("s");

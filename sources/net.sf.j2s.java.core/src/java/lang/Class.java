@@ -720,7 +720,12 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @see java.lang.RuntimePermission
 	 */
 	public ClassLoader getClassLoader() {
-		return getClassLoader0();
+		ClassLoader cl = getClassLoader0();
+		/**
+		 * @j2sNative
+		 * cl.baseClass = this;
+		 */
+		return cl;
 //		SecurityManager sm = System.getSecurityManager();
 //		if (sm != null) {
 //			ClassLoader ccl = ClassLoader.getCallerClassLoader();
