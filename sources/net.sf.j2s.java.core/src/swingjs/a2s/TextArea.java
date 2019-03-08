@@ -135,56 +135,56 @@ public class TextArea extends JTextArea {
 
 	}
 
-	@Override
-	public String getSelectedText() {
-		return super.getSelectedText();
-	}
-
-	@Override
-	public boolean isEditable() {
-		return super.isEditable();
-	}
-
-	@Override
-	public int getSelectionStart() {
-		return super.getSelectionStart();
-	}
-
-	@Override
-	public void setSelectionStart(int selectionStart) {
-		super.setSelectionStart(selectionStart);
-	}
-
-	@Override
-	public void setFont(Font f) {
-		super.setFont(f);
-	}
-	
-	@Override
-	public Font getFont() {
-		return super.getFont();
-	}
-	
-	@Override
-	public int getSelectionEnd() {
-		return super.getSelectionEnd();
-	}
-
-	@Override
-	public void setSelectionEnd(int selectionEnd) {
-		super.setSelectionEnd(selectionEnd);
-	}
-
-	@Override
-	public void select(int selectionStart, int selectionEnd) {
-		super.select(selectionStart, selectionEnd);
-	}
-
-	@Override
-	public int getCaretPosition() {
-		return super.getCaretPosition();
-	}
-
+//	@Override
+//	public String getSelectedText() {
+//		return super.getSelectedText();
+//	}
+//
+//	@Override
+//	public boolean isEditable() {
+//		return super.isEditable();
+//	}
+//
+//	@Override
+//	public int getSelectionStart() {
+//		return super.getSelectionStart();
+//	}
+//
+//	@Override
+//	public void setSelectionStart(int selectionStart) {
+//		super.setSelectionStart(selectionStart);
+//	}
+//
+//	@Override
+//	public void setFont(Font f) {
+//		super.setFont(f);
+//	}
+//	
+//	@Override
+//	public Font getFont() {
+//		return super.getFont();
+//	}
+//	
+//	@Override
+//	public int getSelectionEnd() {
+//		return super.getSelectionEnd();
+//	}
+//
+//	@Override
+//	public void setSelectionEnd(int selectionEnd) {
+//		super.setSelectionEnd(selectionEnd);
+//	}
+//
+//	@Override
+//	public void select(int selectionStart, int selectionEnd) {
+//		super.select(selectionStart, selectionEnd);
+//	}
+//
+//	@Override
+//	public int getCaretPosition() {
+//		return super.getCaretPosition();
+//	}
+//
 	/**
 	 * Create and display both vertical and horizontal scrollbars.
 	 * 
@@ -352,21 +352,21 @@ public class TextArea extends JTextArea {
 
 	// API
 
-	@Override
-	public String getText() {
-		return super.getText();
-	}
-
-	@Override
-	public void setEditable(boolean b) {
-		super.setEditable(b);
-	}
-
-	@Override
-	public void selectAll() {
-		super.selectAll();
-	}
-
+//	@Override
+//	public String getText() {
+//		return super.getText();
+//	}
+//
+//	@Override
+//	public void setEditable(boolean b) {
+//		super.setEditable(b);
+//	}
+//
+//	@Override
+//	public void selectAll() {
+//		super.selectAll();
+//	}
+//
 	@Override
 	public void setTextFromUI(String t) {
 		super.setText(t);
@@ -380,15 +380,15 @@ public class TextArea extends JTextArea {
 		/** @j2sNative this.ui.domNode.scrollTop = top */		
 	}
 
-	public void insertText(String str, int pos) {
-		super.insert(str, pos);
-	}
-
-	@Override
-	public void insert(String str, int pos) {
-		super.insert(str, pos);
-	}
-
+//	public void insertText(String str, int pos) {
+//		super.insert(str, pos);
+//	}
+//
+//	@Override
+//	public void insert(String str, int pos) {
+//		super.insert(str, pos);
+//	}
+//
 	public void appendText(String str) {
 		super.append(str);
 		toEnd();
@@ -405,48 +405,48 @@ public class TextArea extends JTextArea {
 		toEnd();
 	}
 
-	@Override
-	public void replaceRange(String str, int start, int end) {
-		super.replaceRange(str, start, end);
-	}
-
+//	@Override
+//	public void replaceRange(String str, int start, int end) {
+//		super.replaceRange(str, start, end);
+//	}
+//
 	public void replaceText(String str, int start, int end) {
 		super.replaceRange(str, start, end);
 	}
 
-	@Override
-	public void setColumns(int columns) {
-		super.setColumns(columns);
-	}
-
-	@Override
-	public void setRows(int rows) {
-		super.setRows(rows);
-	}
-
-	@Override
-	public int getColumns() {
-		return super.getColumns();
-	}
-
-	@Override
-	public int getRows() {
-		return super.getRows();
-	}
-
-	@Override
-	public void setBackground(Color c) {
-			super.setBackground(c);
-	}
-
-	@Override
-	public void setForeground(Color c) {
-			super.setForeground(c);
-	}
-
-	@Override
-	public void requestFocus() {
-		super.requestFocus();
-	}
-
+//	@Override
+//	public void setColumns(int columns) {
+//		super.setColumns(columns);
+//	}
+//
+//	@Override
+//	public void setRows(int rows) {
+//		super.setRows(rows);
+//	}
+//
+//	@Override
+//	public int getColumns() {
+//		return super.getColumns();
+//	}
+//
+//	@Override
+//	public int getRows() {
+//		return super.getRows();
+//	}
+//
+//	@Override
+//	public void setBackground(Color c) {
+//			super.setBackground(c);
+//	}
+//
+//	@Override
+//	public void setForeground(Color c) {
+//			super.setForeground(c);
+//	}
+//
+//	@Override
+//	public void requestFocus() {
+//		super.requestFocus();
+//	}
+//
 }
