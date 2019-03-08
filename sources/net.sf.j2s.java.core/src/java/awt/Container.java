@@ -554,7 +554,7 @@ public class Container extends JSComponent {
             comp.createHierarchyEvents(HierarchyEvent.HIERARCHY_CHANGED, comp,
                                        this, HierarchyEvent.PARENT_CHANGED,
                                        Toolkit.enabledOnToolkit(AWTEvent.HIERARCHY_EVENT_MASK));
-            if (peer != null && layoutMgr == null && isVisible()) {
+            if (layoutMgr == null && isDisplayable() && isVisible()) {
                 updateCursorImmediately();
             }
         }

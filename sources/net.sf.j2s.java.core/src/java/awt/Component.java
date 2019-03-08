@@ -914,7 +914,7 @@ public abstract class Component implements ImageObserver/*
 		DropTarget old;
 
 		if ((old = dropTarget) != null) {
-			getOrCreatePeer();
+//			getOrCreatePeer();
 			if (peer != null)
 				dropTarget.removeNotify(peer);
 
@@ -1307,7 +1307,7 @@ public abstract class Component implements ImageObserver/*
 		if (!enabled) {
 			// synchronized (getTreeLock()) {
 			enabled = true;
-			ComponentPeer peer = getOrCreatePeer();// this.peer;
+//			ComponentPeer peer = getOrCreatePeer();// this.peer;
 			if (peer != null) {
 				peer.setEnabled(true);// SwingJS was enable();
 				if (visible) {
@@ -1356,7 +1356,7 @@ public abstract class Component implements ImageObserver/*
 			// // makes sense to the user.
 			// transferFocus(false);
 			// }
-			ComponentPeer peer = getOrCreatePeer();
+			//ComponentPeer peer = getOrCreatePeer();
 			if (peer != null) {
 				peer.setEnabled(false); // SwingJS was disable();
 				if (visible) {
@@ -1572,7 +1572,7 @@ public abstract class Component implements ImageObserver/*
 	 */
 	public void setForeground(Color c) {
 		Color oldColor = foreground;
-		ComponentPeer peer = getOrCreatePeer();
+		//ComponentPeer peer = getOrCreatePeer();
 		foreground = c;
 		if (peer != null) {
 			c = getForeground();
@@ -1635,7 +1635,7 @@ public abstract class Component implements ImageObserver/*
 	 */
 	public void setBackground(Color c) {
 		Color oldColor = background;
-		ComponentPeer peer = getOrCreatePeer();
+		//ComponentPeer peer = getOrCreatePeer();
 		background = c;
 		if (peer != null) {
 			c = getBackground();
@@ -1706,7 +1706,7 @@ public abstract class Component implements ImageObserver/*
 //		synchronized (getTreeLock()) {
 //			synchronized (this) {
 //			}
-			ComponentPeer peer = getOrCreatePeer();
+			//ComponentPeer peer = getOrCreatePeer();
 			if (peer != null) {
 				f = getFont();
 				if (f != null) {
