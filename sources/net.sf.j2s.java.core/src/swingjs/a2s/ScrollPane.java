@@ -33,6 +33,9 @@ public class ScrollPane extends JScrollPane {
 	public void isAWT() {
 	}
 
+	public void isAWTContainer() {}
+
+
 	public ScrollPane() {
         this(SCROLLBARS_AS_NEEDED);
 	}
