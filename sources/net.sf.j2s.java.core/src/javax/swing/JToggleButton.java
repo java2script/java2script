@@ -262,7 +262,7 @@ public class JToggleButton extends AbstractButton {
                 return;
             }
 
-            if (b == false && isArmed()) {
+            if (!b && isArmed()) {
                 setSelected(!this.isSelected());
             }
 
