@@ -1541,15 +1541,19 @@ public class JSComponentUI extends ComponentUI
 		boolean hasFocus = false;
 		if (scrollPaneUI != null) {
 			w = scrollPaneUI.c.getWidth();
-			h = scrollPaneUI.c.getHeight();
+			h = scrollPaneUI.c.getHeight(); 
 		} else if (usePreferred && preferredSize != null) {
 			// preferred size has been set by JComponent layout
+			// and delivered via a property change "preferredSize"
 			w = preferredSize.width;
 			h = preferredSize.height;
+			// frame resizeing will be here
+			position = /** @j2sNative node.style.position || */null;
 		} else if (usePreferred && preferredDim != null) {
 			// has been set by setAlignments
 			w = preferredDim.width;
 			h = preferredDim.height;
+			position = /** @j2sNative node.style.position || */null;
 		} else {
 			// determine the natural size of this object
 			// save the parent node -- we will need to reset that.
@@ -1622,7 +1626,10 @@ public class JSComponentUI extends ComponentUI
 		dim.height += h;
 		DOMNode.setStyles(node, "position", null);
 		if (w0 != null) {
-			DOMNode.setStyles(node, "width", w0, "height", h0, "position", position);
+			DOMNode.setStyles(node, "width", w0, "height", h0);
+		}
+		if (position != null) {
+			DOMNode.setStyles(node, "position", position);
 		}
 		if (w0i != null) {
 			DOMNode.setStyles(domNode, "width", w0i, "height", h0i);

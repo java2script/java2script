@@ -76,7 +76,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			// a Windows applet has a sort of fuzzy shadowy border
 			containerNode = frameNode = domNode = newDOMObject("div", id + "_frame");
 			if (isDummyFrame) {
-				DOMNode.setStyles(domNode, "display", "hidden");
+				DOMNode.setVisible(domNode,  false);
 				return domNode;
 			}
 			DOMNode.setStyles(frameNode, "box-shadow", "0px 0px 10px gray", "box-sizing", "content-box");
@@ -166,6 +166,10 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		DOMNode.setStyles(closerNode, "background-color", strColor);
 		setInnerComponentBounds(width, height);
 		setTitle(frame.getTitle());
+		if (!isDummyFrame) {
+			DOMNode.setVisible(domNode,  jc.isVisible());
+
+		}
 		return domNode;
 	}
 
@@ -336,7 +340,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			  addClass(modalNode, "swingjs-window"); // so as to slip into z-index ranking
 			  String sz = DOMNode.getStyle(domNode, "z-index");
 			  int z = (( /** @j2sNative +sz || */getZIndex(null))) - 1;
-			  DOMNode.setStyles(modalNode, "z-index", "" + z);
+			  DOMNode.setZ(modalNode, z);
 		  }
 		  DOMNode.setVisible(modalNode, b);
 	  }
