@@ -1,6 +1,7 @@
 package swingjs.a2s;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
@@ -15,6 +16,17 @@ public class Canvas extends Panel {
 		super();
 		_alwaysPaint = true;
 	}
+
+	public Dimension getPreferredSize() {
+		// must bypass JComponent here because we subclass Panel
+		return preferredSize();
+	}
+
+	public Dimension preferredSize() {
+		// must bypass JComponent here because we subclass Panel
+		return prefSizeComp();
+	}
+
 
 	@Override
 	public void setBackground(Color c) {
