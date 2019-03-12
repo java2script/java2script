@@ -1,6 +1,9 @@
 package swingjs.a2s;
 
+import javax.swing.DefaultButtonModel;
 import javax.swing.JCheckBoxMenuItem;
+
+import swingjs.plaf.JSCheckBoxUI;
 
 public class CheckboxMenuItem extends JCheckBoxMenuItem {
 
@@ -24,10 +27,10 @@ public class CheckboxMenuItem extends JCheckBoxMenuItem {
 	
 	
 	@Override
-	public void setState(boolean tf) {
-		setSelected(tf);
-	}
-
-
+	public void setState(boolean b) {
+		if (((DefaultButtonModel) model).setStateNoFire(b))
+			((JSCheckBoxUI) (Object) getUI()).updateDOMNode();
+	}   
+	
 
 }

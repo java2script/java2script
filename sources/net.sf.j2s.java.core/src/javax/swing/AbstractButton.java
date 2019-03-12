@@ -1760,8 +1760,11 @@ public abstract class AbstractButton extends JComponent implements ItemSelectabl
         }
 
         model = newModel;
-
         if (newModel != null) {
+            /** @j2sNative
+             * this.model.isAWT$ = !!this.isAWT$
+             */
+
             changeListener = createChangeListener();
             actionListener = createActionListener();
             itemListener = createItemListener();
