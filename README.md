@@ -33,7 +33,7 @@ SwingJS is now more than just "Swing"-JS. AWT applets and applications are now s
 
 Examples include:
 
-MathePrisma (http://www.matheprisma.uni-wuppertal.de/) This site is still using the Java applets as of 2019.03.12; JavaScript verions still in development. 
+MathePrisma (http://www.matheprisma.uni-wuppertal.de/) This site is still using the Java applets as of 2019.03.12; JavaScript versions still in development. 
 
 # History - 2017-
 
