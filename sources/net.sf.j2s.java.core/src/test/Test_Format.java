@@ -1,5 +1,7 @@
 package test;
 
+import java.awt.Font;
+
 public class Test_Format extends Test_ {
 	public static void main(String[] args) {
 
@@ -9,7 +11,6 @@ public class Test_Format extends Test_ {
 		assert(s.equals("testing 3"));
 		
         assert(String.format("%s %d-%d", "testing", 3, 4).equals("testing 3-4"));
-
 
 		s = test(100 * Math.pow(10, -6), 2);
 		System.out.println(s);

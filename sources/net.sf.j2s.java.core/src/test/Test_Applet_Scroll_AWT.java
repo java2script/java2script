@@ -33,10 +33,6 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.text.DecimalFormat;
 
-import javax.swing.JSlider;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 /**
  * Creates a ScrollPane with a mix of SwingJS and AWT components. 
  * 
@@ -44,7 +40,7 @@ import javax.swing.event.ChangeListener;
  *
  */
 
-public class Test_Applet_Scroll_AWT extends Applet implements ChangeListener {
+public class Test_Applet_Scroll_AWT extends Applet {
 
 	static {
 		
@@ -53,9 +49,9 @@ public class Test_Applet_Scroll_AWT extends Applet implements ChangeListener {
 		/**
 		 * @j2sNative
 		 * 
-		 * 	thisApplet.__Info.width = 800;
-		 *  thisApplet.__Info.height = 400;
-		 *  thisApplet.__Info.isResizable = true;
+		 * 	J2S.thisApplet.__Info.width = 500;
+		 *  J2S.thisApplet.__Info.height = 250;
+		 *  J2S.thisApplet.__Info.isResizable = true;
 		 */
 	}
 	static DecimalFormat df = new DecimalFormat("0.00");
@@ -67,10 +63,11 @@ public class Test_Applet_Scroll_AWT extends Applet implements ChangeListener {
 		else
 			c.setSize(x, y);
 	}
-
+	
+	
 	@Override
 	public void init() {
-		setSize(800,300);
+		setSize(500,250);
 		final Label label = new Label("hello", Label.CENTER);
 		// label.setBounds(0, 60, 200, 60);
 		setSize(label, 80, 50);
@@ -247,17 +244,15 @@ public class Test_Applet_Scroll_AWT extends Applet implements ChangeListener {
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				// TODO Auto-generated method stub
 				
-				System.out.println("in panel");
+//				System.out.println("in panel");
 				
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				// TODO Auto-generated method stub
 				
-				System.out.println("out panel");
+//				System.out.println("out panel");
 			}
 		
 			
@@ -284,6 +279,9 @@ public class Test_Applet_Scroll_AWT extends Applet implements ChangeListener {
 		ScrollPane sp = new ScrollPane(ScrollPane.SCROLLBARS_ALWAYS);
 		sp.add(p);
 		sp.setSize(500, 250);
+		Dimension d = sp.getPreferredSize();
+		System.out.println(sp.getPeer() + " " + sp.getLayout());
+ 		System.out.println("sp pref size " + d);
 //		sp.getViewport().add(p);
 //		getContentPane().add(sp);
 		add(sp);
@@ -295,7 +293,7 @@ public class Test_Applet_Scroll_AWT extends Applet implements ChangeListener {
 		
 		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200);
 
-		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200).setInverted(true);
+		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200);
 		p.add(label);
 //		label.setToolTipText("this is label");
 		p.add(tf);
@@ -306,23 +304,16 @@ public class Test_Applet_Scroll_AWT extends Applet implements ChangeListener {
 		p.add(button2);
 		p.add(button3);
 		p.setBackground(Color.CYAN);
-//		button2.setToolTipText("this is Button 2");
-//		button3.setToolTipText("this is Button 3");
 		mkBar(p, tf, Adjustable.HORIZONTAL, 100, 40);
-		JSlider framesPerSecond = mkSlider(p, tf, Adjustable.HORIZONTAL, 300, 40);
-		framesPerSecond.setForeground(Color.BLACK);
-		framesPerSecond.setMajorTickSpacing(500);
-		framesPerSecond.setMinorTickSpacing(100);
-		framesPerSecond.setPaintTicks(true);
-		framesPerSecond.setPaintLabels(true);
-//		framesPerSecond.setLabelTable(labels);
-		
-		mkSlider(p, tf, Adjustable.HORIZONTAL, 100, 20).setInverted(true);
+//		Scrollbar framesPerSecond = mkSlider(p, tf, Adjustable.HORIZONTAL, 300, 40);
+//		framesPerSecond.setForeground(Color.BLACK);
+//		
+		mkSlider(p, tf, Adjustable.HORIZONTAL, 100, 20);
 		repaint();
 	}
 
 	Scrollbar mkBar(Panel p, final TextField tf, int orient, int x, int y) {
-		final Scrollbar bar = new Scrollbar(orient, 500, 10, 300, 1000);
+		Scrollbar bar = new Scrollbar(orient, 500, 10, 300, 1000);
 		bar.addAdjustmentListener(new AdjustmentListener() {
 
 			@Override
@@ -341,23 +332,17 @@ public class Test_Applet_Scroll_AWT extends Applet implements ChangeListener {
 			}
 		});
 		setSize(bar, x, y);
-//		bar.setBackground(Color.orange);
-//		bar.setForeground(Color.green);
-		bar.setBlockIncrement(10);
-		bar.setUnitIncrement(100);
+		bar.setForeground(Color.green); // does nothing
+		bar.setBackground(Color.red);
+//		bar.setBlockIncrement(10);
+//		bar.setUnitIncrement(100);
 		p.add(bar);
-		bar.setVisibleAmount(80);
+		bar.setVisibleAmount(5);
 		return bar;
 	}
 
-	JSlider mkSlider(Panel p, final TextField tf, int orient, int x, int y) {
-		final JSlider bar = new JSlider(orient, 300, 1000, 500);
-		bar.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				tf.setText(df.format(((JSlider) e.getSource()).getValue() / 100.0));
-			}
-		});
+	Scrollbar mkSlider(Panel p, final TextField tf, int orient, int x, int y) {
+		final Scrollbar bar = new Scrollbar(orient, 300, 30, 0, 1500);
 		bar.addMouseWheelListener(new MouseWheelListener() {
 			@Override
 			public void mouseWheelMoved(MouseWheelEvent e) {
@@ -367,23 +352,11 @@ public class Test_Applet_Scroll_AWT extends Applet implements ChangeListener {
 			}
 		});
 		setSize(bar, x, y);
-		bar.setBackground(Color.orange);
 		bar.setForeground(Color.green);
-		bar.setOpaque(true);
+		bar.setBackground(Color.yellow);
+		bar.setVisibleAmount(5);
 		p.add(bar);
 		return bar;
-	}
-
-	@Override
-	public void stateChanged(ChangeEvent e) {
-		// Viewport has scrolled
-//		JViewport v = (JViewport) e.getSource();
-//		System.out.println("extent " +v.getExtentSize() + " " + v.getViewPosition());
-//		if (v.getViewRect().x > 0)
-//			System.out.println("view change: " + v.getViewRect());
-//		System.out.println(v.getWidth() + " " + v.getHeight() + " " + v.getView().getBounds());
-//		System.out.println(sbar.getValue() + "  "+ sbar.getVisibleAmount() + " " + sbar.getMaximum());
-
 	}
 
 }
