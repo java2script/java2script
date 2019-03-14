@@ -1468,9 +1468,9 @@ public abstract class JComponent extends Container {
 	}
 
 	public Dimension getPrefSizeJComp() {
-		Dimension size = (isPreferredSizeSet() || ui == null ? null : ui
-				.getPreferredSize(this));
-		return (size == null ? preferredSize() : size);
+		Dimension size = (!isPreferredSizeSet() && ui != null ? ui
+				.getPreferredSize(this) : null);
+		return (size == null ? super.preferredSize() : size);
 	}
 
 	/**

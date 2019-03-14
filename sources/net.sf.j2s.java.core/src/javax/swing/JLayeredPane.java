@@ -243,7 +243,7 @@ public class JLayeredPane extends JComponent /* implements Accessible */ {
     }
 
     @Override
-		protected Component addImpl(Component comp, Object constraints, int index) {
+		protected void addImpl(Component comp, Object constraints, int index) {
         int layer = DEFAULT_LAYER.intValue();
         int pos;
 
@@ -258,7 +258,6 @@ public class JLayeredPane extends JComponent /* implements Accessible */ {
         comp.validate();
         comp.repaint();
         validateOptimizedDrawing();
-        return comp;
     }
 
     /**

@@ -13,7 +13,6 @@ import java.beans.PropertyChangeListener;
 import javax.swing.BoundedRangeModel;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
-import javax.swing.JEditorPane;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
@@ -70,7 +69,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 
 	// all are required:
 
-	// children[0] viewport
+	// children[0] viewpor
 	// children[1] vert scrollbar
 	// children[2] horiz scrollbar
 
@@ -148,8 +147,8 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 
 	@Override
 	public Dimension getPreferredSize(JComponent jc) {
-		// System.out.println(id + " getpreferredSize");
-		return null;
+		return (isAWT && (jc.getWidth() != 0 || jc.getHeight() != 0) ? new Dimension(jc.getWidth(), jc.getHeight())
+				: null);
 	}
 
 	// //////////////////////////////////////// end SwingJS
@@ -1272,7 +1271,6 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 
 		private void scrollPanePropertyChange(PropertyChangeEvent e) {
 			String propertyName = e.getPropertyName();
-			//System.out.println("spane change " + propertyName);
 			switch (propertyName) {
 			case "verticalScrollBarDisplayPolicy": 
 				updateScrollBarDisplayPolicy(e);
