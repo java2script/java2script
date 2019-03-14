@@ -1187,7 +1187,9 @@ public class JSComponentUI extends ComponentUI
 	}
 	
 	private Container awttop;
-	private Color awtPeerBG, awtPeerFG;
+	protected Color awtPeerBG;
+
+	private Color awtPeerFG;
 	
 	/**
 	 * AWT component background, foreground, and font are all set at the
@@ -1251,7 +1253,7 @@ public class JSComponentUI extends ComponentUI
 		    setFocusable();
 			return;
 		case "opaque":
-			setBackgroundCUI(c.getBackground());
+			setBackground(c.getBackground());// BH was CUI??
 			return;
 		case "inverted":
 			updateDOMNode();
@@ -1584,7 +1586,8 @@ public class JSComponentUI extends ComponentUI
 			if (innerNode != null) // JSListUI only
 				DOMNode.setStyles(innerNode, "width", null, "height", null);
 			DOMNode div;
-			if (DOMNode.getAttr(node, "tagName") == "DIV")
+			String s = (String) DOMNode.getAttr(node, "tagName");
+			if (s == "DIV" || s == "SPAN")
 				div = node;
 			else
 				div = wrap("div", id + "_temp", node);
@@ -2768,11 +2771,11 @@ public class JSComponentUI extends ComponentUI
 					(color == null ? "rgba(0,0,0,0)" : JSToolkit.getCSSColor(color == null ? Color.black : color)));
 	}
 
-	public void setBackgroundCUI(Color color) {
+	protected void setBackgroundCUI(Color color) {
 		setBackgroundFor(domNode, color);
 	}
 
-	private void setBackgroundFor(DOMNode node, Color color) {
+	protected void setBackgroundFor(DOMNode node, Color color) {
 		// Don't allow color for Menu and MenuItem. This is taken care of by
 		// jQuery
 		if (node == null || isMenuItem || isUIDisabled)
