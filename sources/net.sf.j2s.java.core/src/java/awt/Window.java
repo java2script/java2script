@@ -1022,18 +1022,25 @@ public class Window extends JComponent {
      */
     void disposeImpl() {
         dispose();
-//        if (getPeer() != null) {
-//            doDispose();
-//        }
+        if (!_disposed && getPeer() != null) {
+            doDispose();
+        }
     }
 
+    private boolean _disposed;
+    
 	void doDispose() {
-		final JComponent me = this;
+		_disposed = true;
+		final Window me = this;
 
 		Runnable action = new Runnable() {
 			@Override
 			public void run() {
 
+				 Window parent = getOwner();
+				 if (parent != null) {
+					 parent.removeOwnedWindow(me);
+				 }
 				JSComponentUI ui = (JSComponentUI) me.getUI();
 				if (ui != null) {
 					ui.reinstallUI(me, null);
@@ -2588,8 +2595,6 @@ public class Window extends JComponent {
     void addOwnedWindow(Window weakWindow) {
         if (weakWindow != null) {
             synchronized(ownedWindowList) {
-                // this if statement should really be an assert, but we don't
-                // have asserts...
                 if (!ownedWindowList.contains(weakWindow)) {
                     ownedWindowList.addElement(weakWindow);
                 }
