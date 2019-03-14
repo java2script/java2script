@@ -2041,4 +2041,18 @@ public class SwingUtilities implements SwingConstants
             SwingUtilities.updateComponentTreeUI(component);
         }
     }
+
+    /**
+     * Java 1.7 
+     * @param component
+     * @return
+     */
+    public static Container getUnwrappedParent(Component component) {
+        Container parent = component.getParent();
+        while(parent instanceof JLayer) {
+            parent = parent.getParent();
+        }
+        return parent;
+    }
+
 }
