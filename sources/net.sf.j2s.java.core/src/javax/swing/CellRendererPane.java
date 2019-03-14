@@ -106,13 +106,9 @@ public class CellRendererPane extends JPanel
      * renderer components (CellRendererPane doesn't paint anyway).<
      */
     @Override
-		protected Component addImpl(Component x, Object constraints, int index) {
-        if (x.getParent() == this) {
-            return null;
-        }
-        else {
-            return addImplCont(x, constraints, index);
-        }
+		protected void addImpl(Component x, Object constraints, int index) {
+        if (x.getParent() != this)
+        	addImplCont(x, constraints, index);
     }
 
 

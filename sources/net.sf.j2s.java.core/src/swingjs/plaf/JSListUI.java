@@ -43,6 +43,7 @@ import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
+import java.awt.peer.ListPeer;
 //import java.awt.geom.Point2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -52,6 +53,7 @@ import javax.swing.DefaultListSelectionModel;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JList;
+import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
@@ -104,7 +106,8 @@ import swingjs.api.js.JQueryObject;
  * 
  * 
  */
-public class JSListUI extends JSLightweightUI {
+public class JSListUI extends JSLightweightUI //true, but unnecessary implements ListPeer
+{
 
 	protected boolean needFilling = true;
 
@@ -115,21 +118,36 @@ public class JSListUI extends JSLightweightUI {
 
 	String itemHTML = null;
 
+	private JScrollPane scrollPane;
+
 	@Override
 	public DOMNode updateDOMNode() {
 		list = (JList) jc;
 		if (domNode == null) {
-			domNode = focusNode = enableNode = newDOMObject("div", id);
-// maybe
-//			DOMNode.setAttrInt(domNode, "tabIndex", 1);
+
+			
+			/**@j2sNative xxL = this.jc; */
+			
+			
+			focusNode = enableNode = newDOMObject("div", id);
+			// maybe DOMNode.setAttrInt(domNode, "tabIndex", 1);
 			innerNode = newDOMObject("div", id + "_inner");
-			domNode.appendChild(innerNode);
+			domNode = focusNode;
+
+			focusNode.appendChild(innerNode);
 			// tell j2sApplet.js that we will handle all the mouse clicks here
-			setDataComponent(domNode);
-			bindJSKeyEvents(domNode, false);
+			setDataComponent(focusNode);
+			bindJSKeyEvents(focusNode, false);
 		}
 		if (needFilling) {
 			fillDOM();
+		}
+		
+		if (isAWT && scrollPane == null && list.getParent() != null) {
+			JComponent parent = (JComponent) list.getParent();
+			scrollPane = new JScrollPane();
+			scrollPane.getViewport().setView(list);
+			parent.add(scrollPane);
 		}
 		return updateDOMNodeCUI();
 	}
@@ -303,7 +321,9 @@ public class JSListUI extends JSLightweightUI {
 		boolean cellHasFocus = list.hasFocus() && (index == leadIndex);
 		boolean isSelected = selModel.isSelectedIndex(index);
 
-		JComponent rendererComponent = (JComponent) cellRenderer
+		//System.out.println("jslistui paint " + index + " " + rowBounds + " " + leadIndex + " " + value);
+
+		Component rendererComponent = cellRenderer
 				.getListCellRendererComponent(list, value, index, isSelected,
 						cellHasFocus);
 		/**
@@ -333,34 +353,46 @@ public class JSListUI extends JSLightweightUI {
 
 		rendererPane.paintComponent(g, rendererComponent, list, cx, cy, cw, ch,
 				true);
-		updateItemHTML(rendererComponent, index, cx, cy, cw,
-				ch);
+		updateItemHTML(rendererComponent, index, cx, cy, cw, getRowHeight(index));
 
 		
 		/**
 		 * @j2sNative
-		 * 
+		 *            rendererComponent.ui.domNode = null;
 		 *            rendererComponent.ui.reInit$();
 		 */
 		{}
 
 	}
 
-	private void updateItemHTML(JComponent c, int index, int left, int top,
-			int width, int height) {
-		DOMNode node = ((JSComponentUI)c.ui).getDOMNode();
+	private void updateItemHTML(Component c, int index, int left, int top, int width, int height) {
+		DOMNode node = (c == null ? null : ((JSComponentUI) ((JComponent) c).ui).getDOMNode());
+	    //System.out.println("updateitemhtml " + index + " " + getRowHeight(index));
 		String myid = id + "_" + index;
 		JQueryObject jnode = $((DOMNode) (Object) ("#" + myid));
 		if (((DOMNode[]) (Object) jnode)[0] == null) {
-			DOMNode div = newDOMObject("div", myid);
-			DOMNode.setTopLeftAbsolute(div, top, left);
-			div.appendChild(node);
-			innerNode.appendChild(div);
+			if (node != null) {
+				DOMNode div = newDOMObject("div", myid);
+				DOMNode.setTopLeftAbsolute(div, top, left);
+				div.appendChild(node);
+				innerNode.appendChild(div);
+			}
 		} else {
 			jnode.empty();
-			jnode.append(node);
+			if (node != null)
+				jnode.append(node);
 		}
+		//System.out.println("updateItem " + index + " " + height);
+		Rectangle r = getCellBounds1(list, index);
 		DOMNode.setSize(node, width, height);
+//		DOMNode.setTopLeftAbsolute(node, r.y, r.x);
+	}
+
+	protected void removeItemHTML(int i0, int i1) {
+		int n = list.getModel().getSize();
+		//System.out.println("listui remove " + " " + i0 + " " + i1 + " " + n);
+		for (int i = i0; i <= i1; i++)
+			updateItemHTML(null, n++, 0, 0, 0, 0);
 	}
 
 	/**
@@ -602,7 +634,7 @@ public class JSListUI extends JSLightweightUI {
 		super.getBaseline(c, width, height);
 		int rowHeight = list.getFixedCellHeight();
 		UIDefaults lafDefaults = UIManager.getLookAndFeelDefaults();
-		JComponent baselineComponent = (JComponent) lafDefaults
+		Component baselineComponent = (Component) lafDefaults
 				.get(BASELINE_COMPONENT_KEY);
 		if (baselineComponent == null) {
 			ListCellRenderer lcr = (ListCellRenderer) UIManager
@@ -1453,7 +1485,12 @@ public class JSListUI extends JSLightweightUI {
 					Component c = renderer.getListCellRendererComponent(list, value,
 							index, false, false);
 					rendererPane.add(c);
+					((JSComponentUI) ((JComponent) c).getUI()).updateDOMNode();
+					((JComponent) c).getInsets();
 					Dimension cellSize = c.getPreferredSize();
+					
+					//System.out.println("udpatelayout " + cellSize + " " + value);
+					
 					if (fixedCellWidth == -1) {
 						cellWidth = Math.max(cellSize.width, cellWidth);
 					}
@@ -1503,7 +1540,7 @@ public class JSListUI extends JSLightweightUI {
 		Dimension d = getListDimensions();
 		jsActualWidth = d.width;
 		jsActualHeight = d.height;
-		System.out.println("ListUI Actual size is " + d);
+//		System.out.println("ListUI Actual size is " + d);
 	}
 
 	private void getWrappedListDimensions(int visRows, int fixedCellWidth,
@@ -1829,6 +1866,11 @@ public class JSListUI extends JSLightweightUI {
 		public void propertyChange(PropertyChangeEvent e) {
 			getHandler().propertyChange(e);
 		}
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent e) {
+		super.propertyChange(e);
 	}
 
 	/**
@@ -2440,6 +2482,7 @@ public class JSListUI extends JSLightweightUI {
 		 */
 		@Override
 		public void keyPressed(KeyEvent e) {
+			System.out.println("pressed " + isNavigationKey(e) + " " + e);
 			if (isNavigationKey(e)) {
 				prefix = "";
 				typedString = "";
@@ -2453,6 +2496,7 @@ public class JSListUI extends JSLightweightUI {
 		 */
 		@Override
 		public void keyReleased(KeyEvent e) {
+			System.out.println("released " + e);
 		}
 
 		/**
@@ -2477,7 +2521,6 @@ public class JSListUI extends JSLightweightUI {
 		@Override
 		public void propertyChange(PropertyChangeEvent e) {
 			String propertyName = e.getPropertyName();
-
 			/*
 			 * If the JList.model property changes, remove our listener,
 			 * listDataListener from the old model and add it to the new one.
@@ -2585,7 +2628,6 @@ public class JSListUI extends JSLightweightUI {
 
 			int minIndex = Math.min(e.getIndex0(), e.getIndex1());
 			int maxIndex = Math.max(e.getIndex0(), e.getIndex1());
-
 			/*
 			 * Sync the SelectionModel with the DataModel.
 			 */
@@ -2605,14 +2647,16 @@ public class JSListUI extends JSLightweightUI {
 		@Override
 		public void intervalRemoved(ListDataEvent e) {
 			updateLayoutStateNeeded = modelChanged;
-
 			/*
 			 * Sync the SelectionModel with the DataModel.
 			 */
 
 			ListSelectionModel sm = list.getSelectionModel();
 			if (sm != null) {
-				sm.removeIndexInterval(e.getIndex0(), e.getIndex1());
+				int minIndex = Math.min(e.getIndex0(), e.getIndex1());
+				int maxIndex = Math.max(e.getIndex0(), e.getIndex1());
+				sm.removeIndexInterval(minIndex, maxIndex);
+				removeItemHTML(minIndex, maxIndex);
 			}
 
 			/*
@@ -2904,9 +2948,79 @@ public class JSListUI extends JSLightweightUI {
 	//
 	// }
 
+	// ListPeer 
+	
     public void makeVisible(int index) {
+		System.out.println("JSListUI makeVisible "+ index);
+
     	
     }
+
+	public int[] getSelectedIndexes() {
+		System.out.println("JSListUI getselected");
+		return new int[] {};
+	}
+
+	public void add(String item, int index) {
+		System.out.println("JSListUI add item " + item + " at "+ index);
+	}
+
+	public void delItems(int start, int end) {
+		System.out.println("JSListUI delItems " + start + " " + end);
+	}
+
+	public void removeAll() {
+		System.out.println("JSListUI removeAll");
+	}
+
+	public void select(int index) {
+		System.out.println("JSListUI select " + index);
+	}
+
+	public void deselect(int index) {
+		System.out.println("JSListUI deselect " + index);
+	}
+
+	public void setMultipleMode(boolean m) {
+		System.out.println("JSListUI setMultipleMode " + m);
+	}
+
+	/**
+	 *
+	 * AWT list only
+	 * 
+	 * @param rows
+	 * @return
+	 */
+	public Dimension getPreferredSize(int rows) {
+		int h = 4, w = 0;
+		for (int i = 0; i < rows; i++)
+			h += getRowHeight(i);
+		ListModel m = list.getModel();
+		for (int i = m.getSize(); --i >= 0; ) {
+			Object o = m.getElementAt(i);
+			if (o instanceof Component) {
+				w += ((Component) o).getPreferredSize().width;
+			} else if (o != null) {
+				int d = list.getFontMetrics(list.getFont()).stringWidth(o.toString());
+				if (d > w)
+					w = d;
+			}
+		}
+		return new Dimension(w + 24, h); 
+	}
+
+	/**
+	 * AWT list only
+	 * @param rows
+	 * @return
+	 */
+	public Dimension getMinimumSize(int rows) {
+		int h = 4;
+		for (int i = 0; i < rows; i++)
+			h += getRowHeight(i);
+		return new Dimension(list.getFont().getSize() * 10, h); 
+	}
 
 
 }

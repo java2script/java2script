@@ -78,6 +78,7 @@ import javax.swing.table.TableRowSorter;
 
 import sun.swing.SwingLazyValue;
 import sun.swing.SwingUtilities2;
+import swingjs.plaf.CellHolder;
 // SwingJS  TODO import java.text.DateFormat;
 //import sun.swing.SwingLazyValue;
 import swingjs.plaf.JSComponentUI;
@@ -1403,15 +1404,14 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 	/**
 	 * Returns the cell renderer to be used when no renderer has been set in a
 	 * <code>TableColumn</code>. During the rendering of cells the renderer is
-	 * fetched from a <code>Hashtable</code> of entries according to the class
-	 * of the cells in the column. If there is no entry for this
-	 * <code>columnClass</code> the method returns the entry for the most
-	 * specific superclass. The <code>JTable</code> installs entries for
-	 * <code>Object</code>, <code>Number</code>, and <code>Boolean</code>, all
-	 * of which can be modified or replaced.
+	 * fetched from a <code>Hashtable</code> of entries according to the class of
+	 * the cells in the column. If there is no entry for this
+	 * <code>columnClass</code> the method returns the entry for the most specific
+	 * superclass. The <code>JTable</code> installs entries for <code>Object</code>,
+	 * <code>Number</code>, and <code>Boolean</code>, all of which can be modified
+	 * or replaced.
 	 *
-	 * @param columnClass
-	 *            return the default cell renderer for this columnClass
+	 * @param columnClass return the default cell renderer for this columnClass
 	 * @return the renderer for this columnClass
 	 * @see #setDefaultRenderer
 	 * @see #getColumnClass
@@ -1421,28 +1421,10 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 			return null;
 		} else {
 			Object renderer = defaultRenderersByColumnClass.get(columnClass);
-			if (renderer != null) {
+			if (renderer != null)
 				return (TableCellRenderer) renderer;
-			} else {
-				Class c = null;
-				/**
-				 * 
-				 * @j2sNative
-				 * 
-				 * 			c = columnClass.getSuperclass$ &&
-				 *            columnClass.getSuperclass$();
-				 */
-				{
-					columnClass.getSuperclass();
-				}
-				if (c == null && columnClass != Object.class) {
-					c = Object.class;
-				}
-				return getDefaultRenderer(c);
-			}
-			//
 			// return getDefaultRenderer(columnClass.getSuperclass());
-			// }
+			return getDefaultRenderer(Class.getJ2SSuperclassFor(columnClass));
 		}
 	}
 
@@ -5956,7 +5938,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		// jComp.setNextFocusableComponent(this);
 		// }
 		// }
-		((JSComponentUI) comp.getUI()).setRenderer(comp, 0, 0);
+		CellHolder.setJ2SRendererComponent(comp);
 		return comp;
 	}
 

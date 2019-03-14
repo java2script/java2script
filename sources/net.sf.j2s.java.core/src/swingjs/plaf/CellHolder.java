@@ -2,6 +2,8 @@ package swingjs.plaf;
 
 import java.awt.JSComponent;
 
+import javax.swing.JComponent;
+
 import swingjs.api.js.DOMNode;
 
 /**
@@ -56,6 +58,10 @@ public abstract class CellHolder extends JSLightweightUI {
 
 	public static void restoreUI(JSComponentUI ui, DOMNode td, int row, int col, int w, int h) {
 			ui.restoreCellNodes(td);
+	}
+
+	public static void setJ2SRendererComponent(JComponent comp) {
+		((JSComponentUI) comp.getUI()).setRenderer(comp, 0, 0);
 	}
 
 

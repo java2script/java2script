@@ -242,6 +242,19 @@ public class List extends JList implements ItemSelectable  {
     public void delItem(int position) {
         delItems(position, position);
     }
+    
+    /**
+     * @deprecated As of JDK version 1.1,
+     * Not for public use in the future.
+     * This method is expected to be retained only as a package
+     * private method.
+     */
+    @Deprecated
+    public synchronized void delItems(int start, int end) {
+    	awtmodel.removeRange(start, end);
+    }
+
+
 
 //    /**
 //     * Gets the index of the selected item on the list,
@@ -258,7 +271,7 @@ public class List extends JList implements ItemSelectable  {
 //        return (sel.length == 1) ? sel[0] : -1;
 //    }
 
-    /**
+	/**
      * Gets the selected indexes on the list.
      *
      * @return        an array of the selected indexes on this scrolling list;
@@ -454,10 +467,7 @@ public class List extends JList implements ItemSelectable  {
      */
     public synchronized void makeVisible(int index) {    	
         visibleIndex = index;
-        ListPeer peer = (ListPeer)this.peer;
-        if (peer != null) {
-            peer.makeVisible(index);
-        }
+        ensureIndexIsVisible(index);
     }
 
     /**
@@ -862,17 +872,6 @@ public class List extends JList implements ItemSelectable  {
      */
     protected String paramString() {
         return super.paramString() + ",selected=" + getSelectedItem();
-    }
-
-    /**
-     * @deprecated As of JDK version 1.1,
-     * Not for public use in the future.
-     * This method is expected to be retained only as a package
-     * private method.
-     */
-    @Deprecated
-    public synchronized void delItems(int start, int end) {
-    	getSelectionModel().removeIndexInterval(start, end);
     }
 
 }
