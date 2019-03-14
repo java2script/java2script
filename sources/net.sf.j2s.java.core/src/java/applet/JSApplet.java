@@ -33,6 +33,8 @@ import java.awt.Dimension;
 import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.JSPanel;
+import java.awt.Window;
+import java.awt.event.WindowListener;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
@@ -94,15 +96,25 @@ public class JSApplet extends JSPanel {
      * @return true
      */
     public boolean isFocusableWindow() {
-    	// mascarading as Window here
+    	// masquerading as Window here
     	return true;
     }
     
     public Dialog getModalBlocker() {
-    	// mascarading as Window here
+    	// masquerading as Window here
         return null; //??
     }
 
+    
+    public void addWindowListener(WindowListener w) {
+    	// from popup
+    }
+    public void addOwnedWindow(Window w) {
+    	// from popup
+    }
+
+    void removeOwnedWindow(Window weakWindow) {
+    }
 
     /**
      * Holds the reference to the component which last had focus in this window
