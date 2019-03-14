@@ -16,7 +16,9 @@ public class JQueryUI {
 	}
 	static { 
 	  
+		int i = 1;
 		/**      
+		 * 
 		 * 
 		 * @j2sNative 
 		 * 

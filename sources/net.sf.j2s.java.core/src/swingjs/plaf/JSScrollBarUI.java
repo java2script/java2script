@@ -26,8 +26,6 @@ import swingjs.api.js.DOMNode;
  */
 public class JSScrollBarUI extends JSSliderUI {
 
-	private JSScrollPaneUI myScrollPaneUI;
-
 	void setScrollPaneUI(JSScrollPaneUI ui) {
 		myScrollPaneUI = ui;
 	}
@@ -49,13 +47,6 @@ public class JSScrollBarUI extends JSSliderUI {
 			jc.setBackground(Color.LIGHT_GRAY);
 		}
 		return domNode;
-	}
-
-	@Override
-	public void setBackgroundCUI(Color background) {
-	  if (background != null) {
-		DOMNode.setStyles(sliderTrack, "background-color", JSToolkit.getCSSColor(background));
-	  }
 	}
 
 	@Override
@@ -123,7 +114,7 @@ public class JSScrollBarUI extends JSSliderUI {
 	 */
 	@Override
 	void setScrollBarExtentAndCSS() {
-		String left, top, thickness;
+		String left, top, thickness, transform, leftt;
 		JScrollBar sb = (JScrollBar) jc; 
 		int extent = sb.getVisibleAmount();
 //		int max = sb.getMaximum();
@@ -137,19 +128,23 @@ public class JSScrollBarUI extends JSSliderUI {
 			// in 
 			int d = (isVertical ? sb.getWidth() : sb.getHeight());
 			int t = (int) Math.min(d * 0.8, 12);
-			left = top = ((d - t)/2 + 1) + "px";
-			thickness = t + "px";
+			left = top = "50%";//((d - t)/2 + 1) + "px";
+			thickness = (Math.floor(t/2)*2-1) + "px";
+			leftt = "50%";
+			transform = "translate(" + (isVertical ? "X":"Y") + ")";
 		} else {
 			left = "0px";
-			top = "0px";
+			leftt = "0px";
+			top = (isAWT ? "4px" : "0px");
 			thickness = "12px";
+			transform = null;
 		}
 		if (isVertical) {
-			DOMNode.setStyles(sliderTrack, "left", left, "width", thickness, "background", toCSSString(getBackground()));
-			DOMNode.setStyles(sliderHandle, "left", "-1px", "margin-bottom", "0px");
+			DOMNode.setStyles(sliderTrack, "transform", transform, "left", left, "width", thickness);//, "background", toCSSString(getBackground()));
+			DOMNode.setStyles(sliderHandle, "box-sizing", "border-box", "left", leftt, "margin-bottom", "0px");
 		} else {
-			DOMNode.setStyles(sliderTrack, "top", top, "height", thickness, "background", toCSSString(getBackground()));
-			DOMNode.setStyles(sliderHandle, "top", "-1px", "margin-left", "0px");
+			DOMNode.setStyles(sliderTrack, "top", top, "height", thickness);//, "background", toCSSString(getBackground()));
+			DOMNode.setStyles(sliderHandle, "box-sizing", "border-box", "top", leftt, "margin-left", "0px");
 		}
 	}
 
