@@ -3430,14 +3430,12 @@ public class Window extends JComponent {
     private static final Color TRANSPARENT_BACKGROUND_COLOR = new Color(0, 0, 0, 0);
 
 	private static void setLayersOpaque(Component component, boolean isOpaque) {
-		// Shouldn't use instanceof to avoid loading Swing classes
-		// if it's a pure AWT application.
 		if (component instanceof RootPaneContainer) {
 			RootPaneContainer rpc = (RootPaneContainer) component;
 			JRootPane root = rpc.getRootPane();
 			JLayeredPane lp = root.getLayeredPane();
 			Container c = root.getContentPane();
-			JComponent content = (c instanceof JComponent) ? (JComponent) c : null;
+			JComponent content = (c instanceof JComponent ? (JComponent) c : null);
 //			JComponent gp = (rpc.getGlassPane() instanceof JComponent) ? (JComponent) rpc
 //					.getGlassPane() : null;
 			// if (gp != null) {
