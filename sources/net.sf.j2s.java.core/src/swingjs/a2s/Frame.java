@@ -36,6 +36,7 @@ public class Frame extends JFrame implements A2SContainer {
 	public Frame(String title, GraphicsConfiguration gc) {
 		super(title, gc);
 		listener = new A2SListener();
+		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		Util.setAWTWindowDefaults(this);
 	}
 

@@ -344,7 +344,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		  }
 		  DOMNode.setVisible(modalNode, b);
 	  }
-		  
+	  DOMNode.setVisible(domNode, b);		  
 	}
 
 }
