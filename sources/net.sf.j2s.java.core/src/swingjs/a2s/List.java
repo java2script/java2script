@@ -14,6 +14,9 @@ import java.util.EventListener;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.LineBorder;
+
+import com.sun.prism.paint.Color;
 
 public class List extends JList implements ItemSelectable  {
 
@@ -32,15 +35,16 @@ public class List extends JList implements ItemSelectable  {
     final static int    DEFAULT_VISIBLE_ROWS = 4;
 
         
-	public List() {
-		super(new DefaultListModel<String>());
-		awtmodel = (DefaultListModel<String>) getModel();
-	}
-
 	public List(int rows, boolean multipleMode) {
 		this();
 		setMultipleMode(multipleMode);
         setVisibleRowCount(rows == 0 ?  DEFAULT_VISIBLE_ROWS : rows);
+	}
+
+	public List() {
+		super(new DefaultListModel<String>());
+		awtmodel = (DefaultListModel<String>) getModel();
+		setBorder(LineBorder.createBlackLineBorder());
 	}
 
     @Override
