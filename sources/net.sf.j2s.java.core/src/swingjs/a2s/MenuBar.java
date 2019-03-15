@@ -3,14 +3,16 @@ package swingjs.a2s;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.HeadlessException;
+import java.awt.Insets;
 import java.awt.MenuComponent;
+import java.awt.MenuContainer;
 import java.awt.MenuShortcut;
 import java.util.Enumeration;
 import java.util.Vector;
 
 import javax.swing.JMenuBar;
 
-public class MenuBar extends JMenuBar {
+public class MenuBar extends JMenuBar implements MenuContainer {
 
 	public void isAWT() {
 	}
@@ -20,6 +22,13 @@ public class MenuBar extends JMenuBar {
 		setBackground(new Color(0xEEEEEE));
 	}
 
+	private static Insets awtInsets = new Insets(6, 10, 6, 10);
+
+	@Override
+	public Insets getInsets() {
+	    return awtInsets;
+	}
+	
 	public void add(java.awt.Menu m) {
 		super.add((Component) m);
 	}
@@ -47,17 +56,38 @@ public class MenuBar extends JMenuBar {
 		return shortcuts.elements();
 	}
 
-	Menu helpMenu = null;
+	java.awt.Menu helpMenu = null;
 
 	@Override
 	public Menu getHelpMenu() {
-		return helpMenu;
+		return (Menu) helpMenu;
 	}
 
 	public void setHelpMenu(java.awt.Menu m) {
-		helpMenu = m;
+      if (helpMenu == m) {
+          return;
+      }
+      if (helpMenu != null) {
+          remove((MenuComponent) helpMenu);
+      }
+      if (m.getParent() != this) {
+          add(m);
+      }
+      helpMenu = m;
+      if (m != null) {
+          m.isHelpMenu = true;
+          m.parent = this;
+//          MenuBarPeer peer = (MenuBarPeer)this.peer;
+//          if (peer != null) {
+//              if (m.peer == null) {
+//                  m.addNotify();
+//              }
+//              peer.addHelpMenu(m);
+//          }
+      }
 	}
 
+	@Override
 	public void remove(MenuComponent m) {
 		super.remove((Component) m);
 	}
