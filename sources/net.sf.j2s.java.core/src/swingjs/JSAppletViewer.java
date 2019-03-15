@@ -456,11 +456,11 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 																			// setContentPane()
 																			// was
 																			// used
-				applet.setVisible(true);
+				applet.setVisible(true); 
 				applet.validate(); // one last validation necessary for PolyhedronApplet
 				showAppletStatus("ready");
 				JSUtil.readyCallback(appletName, fullName, applet, this);
-				if (isResizable && !addFrame) {
+				if (isResizable && !addFrame && resizer == null) {
 					resizer = ((Resizer) JSUtil.getInstance("swingjs.plaf.Resizer")).set(this, top);
 					if (resizer != null)
 						resizer.show();

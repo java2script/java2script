@@ -490,7 +490,7 @@ public class JDesktopPane extends JLayeredPane //implements Accessible
      * @since 1.6
      */
     @Override
-	protected Component addImpl(Component comp, Object constraints, int index) {
+	protected void addImpl(Component comp, Object constraints, int index) {
         super.addImpl(comp, constraints, index);
         if (componentOrderCheckingEnabled) {
             if (comp instanceof JInternalFrame ||
@@ -498,7 +498,6 @@ public class JDesktopPane extends JLayeredPane //implements Accessible
                 componentOrderChanged = true;
             }
         }
-        return comp;
     }
 
     /**

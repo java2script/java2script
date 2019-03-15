@@ -538,7 +538,7 @@ public class DefaultListModel<E> extends AbstractListModel<E>
         fireIntervalRemoved(this, fromIndex, toIndex);
     }
 
-    /*
+    /*  (commented out in JDK8)
     public void addAll(Collection c) {
     }
 

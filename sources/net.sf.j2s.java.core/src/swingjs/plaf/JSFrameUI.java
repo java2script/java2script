@@ -39,9 +39,9 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	
 
 	protected JFrame frame;
-	private String title;
+//	private String title;
 	private int state;
-	private boolean resizeable;
+//	private boolean resizeable;
 	private DOMNode closerWrap;
 	protected boolean isModal;
 	protected int zModal;
@@ -76,7 +76,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			// a Windows applet has a sort of fuzzy shadowy border
 			containerNode = frameNode = domNode = newDOMObject("div", id + "_frame");
 			if (isDummyFrame) {
-				DOMNode.setStyles(domNode, "display", "hidden");
+				DOMNode.setVisible(domNode,  false);
 				return domNode;
 			}
 			DOMNode.setStyles(frameNode, "box-shadow", "0px 0px 10px gray", "box-sizing", "content-box");
@@ -100,7 +100,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 
 			titleNode = newDOMObject("label", id + "_title");
 			DOMNode.setTopLeftAbsolute(titleNode, 2, 4);
-			DOMNode.setStyles(titleNode, "height", "20px", "overflow", "hidden");
+			DOMNode.setStyles(titleNode, "background-color", "#E0E0E0", "height", "20px", "overflow", "hidden");
 
 			closerWrap = newDOMObject("div", id + "_closerwrap");
 			DOMNode.setTopLeftAbsolute(closerWrap, 0, 0);
@@ -161,11 +161,15 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		}
 		String strColor = toCSSString(c.getBackground());
 		DOMNode.setStyles(domNode, "background-color", strColor);
-		DOMNode.setStyles(frameNode, "background", strColor);
+		DOMNode.setStyles(frameNode, "background", "#DDD");//strColor);
 		DOMNode.setStyles(frameNode, "color", toCSSString(c.getForeground()));
-		DOMNode.setStyles(closerNode, "background-color", strColor);
+		DOMNode.setStyles(closerNode, "background-color", "#DDD");//strColor);
 		setInnerComponentBounds(width, height);
 		setTitle(frame.getTitle());
+		if (!isDummyFrame) {
+			DOMNode.setVisible(domNode,  jc.isVisible());
+
+		}
 		return domNode;
 	}
 
@@ -208,7 +212,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 				frameCloserAction();
 				return HANDLED;
 			case "mouseout":
-				DOMNode.setStyles(closerNode, "background-color", toCSSString(c.getBackground()));
+				DOMNode.setStyles(closerNode, "background-color", "#DDD");//toCSSString(c.getBackground()));
 				return HANDLED;
 			case "mouseenter":
 				DOMNode.setStyles(closerNode, "background-color", "red");
@@ -258,7 +262,6 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 
 	@Override
 	public void setTitle(String title) {
-		this.title = title;
 		if (titleNode != null)
 			DOMNode.setAttr(titleNode, "innerHTML", title);
 	}
@@ -269,7 +272,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 
 	@Override
 	public void setResizable(boolean resizeable) {
-		this.resizeable = resizeable;
+//		this.resizeable = resizeable;
 	}
 
 	@Override
@@ -336,11 +339,11 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			  addClass(modalNode, "swingjs-window"); // so as to slip into z-index ranking
 			  String sz = DOMNode.getStyle(domNode, "z-index");
 			  int z = (( /** @j2sNative +sz || */getZIndex(null))) - 1;
-			  DOMNode.setStyles(modalNode, "z-index", "" + z);
+			  DOMNode.setZ(modalNode, z);
 		  }
 		  DOMNode.setVisible(modalNode, b);
 	  }
-		  
+	  DOMNode.setVisible(domNode, b);		  
 	}
 
 }

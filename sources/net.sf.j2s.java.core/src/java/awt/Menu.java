@@ -103,7 +103,9 @@ public class Menu extends swingjs.a2s.Menu {//MenuItem implements MenuContainer,
 //     */
 //     private static final long serialVersionUID = -8809584163345499784L;
 
-    /**
+    public boolean isHelpMenu;
+
+	/**
      * Constructs a new menu with an empty label. This menu is not
      * a tear-off menu.
      * @exception HeadlessException if GraphicsEnvironment.isHeadless()

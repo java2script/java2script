@@ -2,6 +2,7 @@ package swingjs.a2s;
 
 import java.awt.Dimension;
 import java.awt.FontMetrics;
+import java.awt.Insets;
 import java.awt.event.TextEvent;
 import java.awt.event.TextListener;
 
@@ -27,6 +28,13 @@ public class TextField extends JTextField {
 
     public TextField(String text, int width) {
 		super(text, width);
+	}
+
+	private static Insets awtInsets = new Insets(5, 2, 5, 2);
+	// awt.Button has an unadjustable horizontal inset of what appears to be about 6 pixels
+	@Override
+	public Insets getMargin() {
+		return awtInsets;
 	}
 
 	public void addTextListener(final TextListener textListener) {

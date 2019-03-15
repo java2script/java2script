@@ -101,11 +101,8 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 	
 	
 	protected void setWindowClass() { 
-		DOMNode.setZ(domNode, z);
+		setZOrder(z);
 		addClass(domNode, "swingjs-window");
-		
-		System.out.println("JSWIndowUI testing?");
-		
 		// these next two lines are what allow the FocusManager to work....or not
 //		focusNode = domNode;
 //		addJQueryFocusCallbacks();
@@ -124,6 +121,7 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 		if (debugging)
 			System.out.println("window to front for " + id);
 		z = J2S.setWindowZIndex(domNode, Integer.MAX_VALUE);
+		DOMNode.setPositionAbsolute(domNode);
 		if (modalNode != null)
 			DOMNode.setZ(modalNode, z - 1);
 	}

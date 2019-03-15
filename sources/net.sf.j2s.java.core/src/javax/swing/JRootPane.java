@@ -861,7 +861,7 @@ public class JRootPane extends JComponent {
 	 *          the index
 	 */
 	@Override
-	protected Component addImpl(Component comp, Object constraints, int index) {
+	protected void addImpl(Component comp, Object constraints, int index) {
 		addImplCont(comp, constraints, index);
 
 		// / We are making sure the glassPane is on top.
@@ -869,7 +869,6 @@ public class JRootPane extends JComponent {
 				&& getComponent(0) != glassPane) {
 			add(glassPane, 0);
 		}
-		return comp;
 	}
 
 	// /////////////////////////////////////////////////////////////////////////////
@@ -1043,9 +1042,9 @@ public class JRootPane extends JComponent {
 	
 	@Override
 	public Insets getInsets() {
-		if (isAWT) {
-			return getTopLevelAncestor().getInsets();
-		}
+//		if (isAWT) {
+//			return getTopLevelAncestor().getInsets();
+//		}
 		return super.getInsets();
 	}
 

@@ -40,6 +40,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.TreeCellEditor;
 
+import swingjs.plaf.CellHolder;
 import swingjs.plaf.JSComponentUI;
 
 /**
@@ -104,11 +105,6 @@ public class DefaultCellEditor extends AbstractCellEditor
         };
         textField.addActionListener(delegate);
     }
-
-    private void setComponent(JComponent comp) {
-        editorComponent = comp;
-		((JSComponentUI) (Object) comp.getUI()).setRenderer(comp, 0, 0);
-	}
 
 	/**
      * Constructs a <code>DefaultCellEditor</code> object that uses a check box.
@@ -423,5 +419,10 @@ public class DefaultCellEditor extends AbstractCellEditor
             DefaultCellEditor.this.stopCellEditing();
         }
     }
+
+    private void setComponent(JComponent comp) {
+        CellHolder.setJ2SRendererComponent(editorComponent = comp);
+	}
+
 
 } // End of class JCellEditor

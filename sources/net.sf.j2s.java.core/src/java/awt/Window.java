@@ -1022,18 +1022,25 @@ public class Window extends JComponent {
      */
     void disposeImpl() {
         dispose();
-//        if (getPeer() != null) {
-//            doDispose();
-//        }
+        if (!_disposed && getPeer() != null) {
+            doDispose();
+        }
     }
 
+    private boolean _disposed;
+    
 	void doDispose() {
-		final JComponent me = this;
+		_disposed = true;
+		final Window me = this;
 
 		Runnable action = new Runnable() {
 			@Override
 			public void run() {
 
+				 Window parent = getOwner();
+				 if (parent != null) {
+					 parent.removeOwnedWindow(me);
+				 }
 				JSComponentUI ui = (JSComponentUI) me.getUI();
 				if (ui != null) {
 					ui.reinstallUI(me, null);
@@ -2588,8 +2595,6 @@ public class Window extends JComponent {
     void addOwnedWindow(Window weakWindow) {
         if (weakWindow != null) {
             synchronized(ownedWindowList) {
-                // this if statement should really be an assert, but we don't
-                // have asserts...
                 if (!ownedWindowList.contains(weakWindow)) {
                     ownedWindowList.addElement(weakWindow);
                 }
@@ -3425,14 +3430,12 @@ public class Window extends JComponent {
     private static final Color TRANSPARENT_BACKGROUND_COLOR = new Color(0, 0, 0, 0);
 
 	private static void setLayersOpaque(Component component, boolean isOpaque) {
-		// Shouldn't use instanceof to avoid loading Swing classes
-		// if it's a pure AWT application.
 		if (component instanceof RootPaneContainer) {
 			RootPaneContainer rpc = (RootPaneContainer) component;
 			JRootPane root = rpc.getRootPane();
 			JLayeredPane lp = root.getLayeredPane();
 			Container c = root.getContentPane();
-			JComponent content = (c instanceof JComponent) ? (JComponent) c : null;
+			JComponent content = (c instanceof JComponent ? (JComponent) c : null);
 //			JComponent gp = (rpc.getGlassPane() instanceof JComponent) ? (JComponent) rpc
 //					.getGlassPane() : null;
 			// if (gp != null) {

@@ -18,10 +18,11 @@ public class Button extends JButton {
 	public Button(String text) {
 		super(text);
 		if (!isBackgroundSet())
-			setBackground(bgcolor );
+			setBackground(bgcolor);
+		
 	}
 	
-	private static Insets awtInsets = new Insets(3, 6, 3, 6);
+	private static Insets awtInsets = new Insets(5, 6, 5, 6);
 	// awt.Button has an unadjustable horizontal inset of what appears to be about 6 pixels
 	@Override
 	public Insets getMargin() {

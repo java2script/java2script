@@ -392,7 +392,8 @@ public class Container extends JSComponent {
      * 
      */
     public Component add(Component comp) {
-        return addImpl(comp, null, -1);
+        addImpl(comp, null, -1);
+        return comp;
     }
 
     /**
@@ -406,7 +407,8 @@ public class Container extends JSComponent {
      * 
      */
     public Component add(String name, Component comp) {
-        return addImpl(comp, name, -1);
+        addImpl(comp, name, -1);
+        return comp;
     }
 
     /**
@@ -435,7 +437,8 @@ public class Container extends JSComponent {
      * 
      */
     public Component add(Component comp, int index) {
-        return addImpl(comp, null, index);
+        addImpl(comp, null, index);
+        return comp;
     }
 
     /**
@@ -998,7 +1001,8 @@ public class Container extends JSComponent {
      */
     
     public Component add(Component comp, Object constraints, int index) {
-       return addImpl(comp, constraints, index);
+       addImpl(comp, constraints, index);
+       return comp;
     }
 
     /**
@@ -1062,93 +1066,86 @@ public class Container extends JSComponent {
      * @see       LayoutManager2
      * @since     JDK1.1
      */
-    protected Component addImpl(Component comp, Object constraints, int index) {
-    	return addImplCont(comp, constraints, index);
+    protected void addImpl(Component comp, Object constraints, int index) {
+    	addImplCont(comp, constraints, index);
     }
 
-    protected Component addImplCont(Component comp, Object constraints, int index) {
-      synchronized (getTreeLock()) {
-      	
-      	//SwingJS used for all add methods
-      	
-          /* Check for correct arguments:  index in bounds,
-           * comp cannot be one of this container's parents,
-           * and comp cannot be a window.
-           * comp and container must be on the same GraphicsDevice.
-           * if comp is container, all sub-components must be on
-           * same GraphicsDevice.
-           */
+	protected void addImplCont(Component comp, Object constraints, int index) {
+		synchronized (getTreeLock()) {
+
+			// SwingJS used for all add methods
+
+			/*
+			 * Check for correct arguments: index in bounds, comp cannot be one of this
+			 * container's parents, and comp cannot be a window. comp and container must be
+			 * on the same GraphicsDevice. if comp is container, all sub-components must be
+			 * on same GraphicsDevice.
+			 */
 //          GraphicsConfiguration thisGC = this.getGraphicsConfiguration();
 
-          if (index > component.size() || (index < 0 && index != -1)) {
-              throw new IllegalArgumentException(
-                        "illegal component position");
-          }
-          checkAddToSelf(comp);
-      	// Here we do not allow JSApplet, but we do allow JInternalFrame, which is a JFrame now
-          if (comp.isJ2SWindowButNotJInternalFrame()) {
-              throw new IllegalArgumentException("adding a window to a container");
-          }
+			if (index > component.size() || (index < 0 && index != -1)) {
+				throw new IllegalArgumentException("illegal component position");
+			}
+			checkAddToSelf(comp);
+			// Here we do not allow JSApplet, but we do allow JInternalFrame, which is a
+			// JFrame now
+			if (comp.isJ2SWindowButNotJInternalFrame()) {
+				throw new IllegalArgumentException("adding a window to a container");
+			}
 
 //          checkNotAWindow(comp);
 //      if (thisGC != null) {
 //          comp.checkGD(thisGC.getDevice().getIDstring());
 //      }
 
-          /* Reparent the component and tidy up the tree's state. */
-          if (comp.parent != null) {
-              comp.parent.remove(comp);
-                  if (index > component.size()) {
-                      throw new IllegalArgumentException("illegal component position");
-                  }
-          }
+			/* Reparent the component and tidy up the tree's state. */
+			if (comp.parent != null) {
+				comp.parent.remove(comp);
+				if (index > component.size()) {
+					throw new IllegalArgumentException("illegal component position");
+				}
+			}
 
-          //index == -1 means add to the end.
-          if (index == -1) {
-              component.add(comp);
-          } else {
-              component.add(index, comp);
-          }
-          _childTainted = true;
-          comp.parent = this;
+			// index == -1 means add to the end.
+			if (index == -1) {
+				component.add(comp);
+			} else {
+				component.add(index, comp);
+			}
+			_childTainted = true;
+			comp.parent = this;
 
-          adjustListeningChildren(AWTEvent.HIERARCHY_EVENT_MASK,
-              comp.numListening(AWTEvent.HIERARCHY_EVENT_MASK));
-          adjustListeningChildren(AWTEvent.HIERARCHY_BOUNDS_EVENT_MASK,
-              comp.numListening(AWTEvent.HIERARCHY_BOUNDS_EVENT_MASK));
-          adjustDescendants(comp.countHierarchyMembers());
+			adjustListeningChildren(AWTEvent.HIERARCHY_EVENT_MASK, comp.numListening(AWTEvent.HIERARCHY_EVENT_MASK));
+			adjustListeningChildren(AWTEvent.HIERARCHY_BOUNDS_EVENT_MASK,
+					comp.numListening(AWTEvent.HIERARCHY_BOUNDS_EVENT_MASK));
+			adjustDescendants(comp.countHierarchyMembers());
 
-          invalidateIfValid();
-          if (peer != null) {
-              comp.addNotify();
-          }
+			invalidateIfValid();
+			if (peer != null) {
+				comp.addNotify();
+			}
 
-          /* Notify the layout manager of the added component. */
-          if (layoutMgr != null) {
-              if (layoutMgr instanceof LayoutManager2) {
-                  ((LayoutManager2)layoutMgr).addLayoutComponent(comp, constraints);
-              } else if (constraints instanceof String) {
-                  layoutMgr.addLayoutComponent((String)constraints, comp);
-              }
-          }
-          if (containerListener != null ||
-              (eventMask & AWTEvent.CONTAINER_EVENT_MASK) != 0 ||
-              Toolkit.enabledOnToolkit(AWTEvent.CONTAINER_EVENT_MASK)) {
-              ContainerEvent e = new ContainerEvent(this,
-                                   ContainerEvent.COMPONENT_ADDED,
-                                   comp);
-              dispatchEvent(e);
-          }
+			/* Notify the layout manager of the added component. */
+			if (layoutMgr != null) {
+				if (layoutMgr instanceof LayoutManager2) {
+					((LayoutManager2) layoutMgr).addLayoutComponent(comp, constraints);
+				} else if (constraints instanceof String) {
+					layoutMgr.addLayoutComponent((String) constraints, comp);
+				}
+			}
+			if (containerListener != null || (eventMask & AWTEvent.CONTAINER_EVENT_MASK) != 0
+					|| Toolkit.enabledOnToolkit(AWTEvent.CONTAINER_EVENT_MASK)) {
+				ContainerEvent e = new ContainerEvent(this, ContainerEvent.COMPONENT_ADDED, comp);
+				dispatchEvent(e);
+			}
 
-          comp.createHierarchyEvents(HierarchyEvent.HIERARCHY_CHANGED, comp,
-                                     this, HierarchyEvent.PARENT_CHANGED,
-                                     Toolkit.enabledOnToolkit(AWTEvent.HIERARCHY_EVENT_MASK));
-          if (peer != null && layoutMgr == null && isVisible()) {
-              updateCursorImmediately();
-          }
-      }
-      return comp;
+			comp.createHierarchyEvents(HierarchyEvent.HIERARCHY_CHANGED, comp, this, HierarchyEvent.PARENT_CHANGED,
+					Toolkit.enabledOnToolkit(AWTEvent.HIERARCHY_EVENT_MASK));
+			if (peer != null && layoutMgr == null && isVisible()) {
+				updateCursorImmediately();
+			}
 		}
+	}
 
     
 
@@ -1716,9 +1713,9 @@ public class Container extends JSComponent {
         Dimension dim = prefSize;
         if (dim == null || !(isPreferredSizeSet() || isValid())) {
             synchronized (getTreeLock()) {
-                prefSize = (layoutMgr != null) ?
+                prefSize = (layoutMgr != null ?
                     layoutMgr.preferredLayoutSize(this) :
-                    prefSizeComp();
+                    prefSizeComp());
                 dim = prefSize;
             }
         }

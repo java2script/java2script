@@ -180,7 +180,7 @@ public abstract class Component implements ImageObserver/*
 	 * 
 	 * @see #getParent
 	 */
-	protected transient Container parent;
+	public transient Container parent;
 
 	/**
 	 * The <code>AppContext</code> of the component. Applets/Plugin may change the
@@ -2385,10 +2385,13 @@ public abstract class Component implements ImageObserver/*
 		Dimension dim = prefSize;
 		if (dim == null || !(isPreferredSizeSet() || isValid())) {
 			// synchronized (getTreeLock()) {
+			
+			// SwingJS TODO: it is not clear that we should deliver getMinimumSize here. 
+			// 
 			prefSize = // (
 						// peer != null) ?
 						// peer.preferredSize() :
-					getMinimumSize();
+					(width == 0 && height == 0 ? getMinimumSize() : new Dimension(width, height));
 			dim = prefSize;
 		}
 		// }

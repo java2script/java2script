@@ -139,6 +139,8 @@ public class TApp2 extends Applet {
 			
 		});
 
+		sb.setBackground(Color.blue);
+		sb.setForeground(Color.red);
 		new TestGraphic(this).testGraphic();
 	}
 	

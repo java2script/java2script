@@ -855,7 +855,7 @@ public class JSplitPane extends JComponent {
 	 * @see java.awt.Container#addImpl(Component, Object, int)
 	 */
 	@Override
-	protected Component addImpl(Component comp, Object constraints, int index) {
+	protected void addImpl(Component comp, Object constraints, int index) {
 		Component toRemove;
 
 		if (constraints != null && !(constraints instanceof String)) {
@@ -904,7 +904,6 @@ public class JSplitPane extends JComponent {
 		// Update the JSplitPane on the screen
 		revalidate();
 		repaint();
-		return comp;
 	}
 
 	/**

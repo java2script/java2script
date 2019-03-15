@@ -99,7 +99,8 @@ public class JSTableUI extends JSPanelUI {
 
 
 
-	protected JTable table, header;
+	protected JTable header;
+	protected JTable table;
 	private int oldrc;
 	private int oldrh;
 	int currentRowMin = -1, currentRowMax = -1;

@@ -1,7 +1,4 @@
 /*
- * Some portions of this file have been modified by Robert Hanson hansonr.at.stolaf.edu 2012-2017
- * for use in SwingJS via transpilation into JavaScript using Java2Script.
- *
  * Copyright (c) 1997, 2005, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -28,17 +25,21 @@
 
 package javax.swing;
 
+import java.awt.Component;
+
+
 /**
  * Identifies components that can be used as "rubber stamps" to paint
  * the cells in a JList.  For example, to use a JLabel as a
  * ListCellRenderer, you would write something like this:
  * <pre>
- * class MyCellRenderer extends JLabel implements ListCellRenderer {
+ * {@code
+ * class MyCellRenderer extends JLabel implements ListCellRenderer<Object> {
  *     public MyCellRenderer() {
  *         setOpaque(true);
  *     }
  *
- *     public Component getListCellRendererComponent(JList list,
+ *     public Component getListCellRendererComponent(JList<?> list,
  *                                                   Object value,
  *                                                   int index,
  *                                                   boolean isSelected,
@@ -75,19 +76,19 @@ package javax.swing;
  *         return this;
  *     }
  * }
+ * }
  * </pre>
+ *
+ * @param <E> the type of values this renderer can be used for
  *
  * @see JList
  * @see DefaultListCellRenderer
  *
  * @author Hans Muller
  */
-public interface ListCellRenderer
+public interface ListCellRenderer<E>
 {
     /**
-     * 
-     * SWINGJS CHANGES THIS TO JComponent, not Component
-     * 
      * Return a component that has been configured to display the specified
      * value. That component's <code>paint</code> method is then called to
      * "render" the cell.  If it is necessary to compute the dimensions
@@ -106,6 +107,10 @@ public interface ListCellRenderer
      * @see ListSelectionModel
      * @see ListModel
      */
-
-	JComponent getListCellRendererComponent(JList jList, Object value, int i, boolean b, boolean c);
+    Component getListCellRendererComponent(
+        JList<? extends E> list,
+        E value,
+        int index,
+        boolean isSelected,
+        boolean cellHasFocus);
 }

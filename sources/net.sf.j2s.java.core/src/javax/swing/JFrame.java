@@ -589,11 +589,12 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 	 * @see javax.swing.RootPaneContainer
 	 */
 	@Override
-	protected Component addImpl(Component comp, Object constraints, int index) {
+	protected void addImpl(Component comp, Object constraints, int index) {
 		if (isRootPaneCheckingEnabled()) {
-			return getContentPane().add(comp, constraints, index);
+			getContentPane().add(comp, constraints, index);
+			return;
 		}
-		return addImplCont(comp, constraints, index);
+		addImplCont(comp, constraints, index);
 	}
 
 	/**

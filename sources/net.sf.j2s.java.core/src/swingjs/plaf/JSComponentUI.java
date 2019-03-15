@@ -1187,7 +1187,9 @@ public class JSComponentUI extends ComponentUI
 	}
 	
 	private Container awttop;
-	private Color awtPeerBG, awtPeerFG;
+	protected Color awtPeerBG;
+
+	private Color awtPeerFG;
 	
 	/**
 	 * AWT component background, foreground, and font are all set at the
@@ -1251,7 +1253,7 @@ public class JSComponentUI extends ComponentUI
 		    setFocusable();
 			return;
 		case "opaque":
-			setBackgroundCUI(c.getBackground());
+			setBackground(c.getBackground());// BH was CUI??
 			return;
 		case "inverted":
 			updateDOMNode();
@@ -1541,15 +1543,19 @@ public class JSComponentUI extends ComponentUI
 		boolean hasFocus = false;
 		if (scrollPaneUI != null) {
 			w = scrollPaneUI.c.getWidth();
-			h = scrollPaneUI.c.getHeight();
+			h = scrollPaneUI.c.getHeight(); 
 		} else if (usePreferred && preferredSize != null) {
 			// preferred size has been set by JComponent layout
+			// and delivered via a property change "preferredSize"
 			w = preferredSize.width;
 			h = preferredSize.height;
+			// frame resizeing will be here
+			position = /** @j2sNative node.style.position || */null;
 		} else if (usePreferred && preferredDim != null) {
 			// has been set by setAlignments
 			w = preferredDim.width;
 			h = preferredDim.height;
+			position = /** @j2sNative node.style.position || */null;
 		} else {
 			// determine the natural size of this object
 			// save the parent node -- we will need to reset that.
@@ -1580,7 +1586,8 @@ public class JSComponentUI extends ComponentUI
 			if (innerNode != null) // JSListUI only
 				DOMNode.setStyles(innerNode, "width", null, "height", null);
 			DOMNode div;
-			if (DOMNode.getAttr(node, "tagName") == "DIV")
+			String s = (String) DOMNode.getAttr(node, "tagName");
+			if (s == "DIV" || s == "SPAN")
 				div = node;
 			else
 				div = wrap("div", id + "_temp", node);
@@ -1622,7 +1629,10 @@ public class JSComponentUI extends ComponentUI
 		dim.height += h;
 		DOMNode.setStyles(node, "position", null);
 		if (w0 != null) {
-			DOMNode.setStyles(node, "width", w0, "height", h0, "position", position);
+			DOMNode.setStyles(node, "width", w0, "height", h0);
+		}
+		if (position != null) {
+			DOMNode.setStyles(node, "position", position);
 		}
 		if (w0i != null) {
 			DOMNode.setStyles(domNode, "width", w0i, "height", h0i);
@@ -2511,7 +2521,6 @@ public class JSComponentUI extends ComponentUI
 			return;
 		}
 		preferredDim = null;
-		// fix for button vertical alignment -- should offset just by the ascent
 		String yoff = "-50%";
 		DOMNode.setStyles(centeringNode, "position", "absolute", "top", null, "left", null, "transform", null);
 		DOMNode.setStyles(centeringNode, "width", wCtr + "px", "height", hCtr + "px");
@@ -2576,11 +2585,11 @@ public class JSComponentUI extends ComponentUI
 				DOMNode.setStyles(itemNode, "text-align", "right");
 				DOMNode.setStyles(centeringNode,  "right", "0px");
 				DOMNode.setStyles(textNode, "right", "23px");
-				DOMNode.setStyles(iconNode, "right", "3px");
+				DOMNode.setStyles(iconNode, "right", "0px"); // was 3
 			} else {
 				DOMNode.setStyles(itemNode, "text-align", "left");
 				DOMNode.setStyles(centeringNode,  "left", "0px");
-				DOMNode.setStyles(iconNode, "left", "3px");
+				DOMNode.setStyles(iconNode, "left", "0px"); // was 3
 				DOMNode.setStyles(textNode, "left", "23px");
 			}
 		}
@@ -2632,8 +2641,8 @@ public class JSComponentUI extends ComponentUI
 					"translateY(-" + itop + "%)" + (iscale == null ? "" : iscale));
 		} else {			
 			DOMNode.setStyles(menuAnchorNode, "height", h + "px");
-			DOMNode.setStyles(textNode, "top", "50%", "transform", "translateY(-60%)");
-			DOMNode.setStyles(iconNode, "top", "50%", "transform", "translateY(-80%) scale(0.6,0.6)");
+			DOMNode.setStyles(textNode, "top", "50%", "transform", "translateY(-50%)");
+			DOMNode.setStyles(iconNode, "top", "50%", "transform", "translateY(-65%) scale(0.6,0.6)");
 		}
 	}
 
@@ -2761,11 +2770,11 @@ public class JSComponentUI extends ComponentUI
 					(color == null ? "rgba(0,0,0,0)" : JSToolkit.getCSSColor(color == null ? Color.black : color)));
 	}
 
-	public void setBackgroundCUI(Color color) {
+	protected void setBackgroundCUI(Color color) {
 		setBackgroundFor(domNode, color);
 	}
 
-	private void setBackgroundFor(DOMNode node, Color color) {
+	protected void setBackgroundFor(DOMNode node, Color color) {
 		// Don't allow color for Menu and MenuItem. This is taken care of by
 		// jQuery
 		if (node == null || isMenuItem || isUIDisabled)

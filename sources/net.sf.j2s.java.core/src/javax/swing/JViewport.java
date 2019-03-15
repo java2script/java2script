@@ -286,23 +286,21 @@ public class JViewport extends JComponent
 	}
 
 
-    /**
-     * Sets the <code>JViewport</code>'s one lightweight child,
-     * which can be <code>null</code>.
-     * (Since there is only one child which occupies the entire viewport,
-     * the <code>constraints</code> and <code>index</code>
-     * arguments are ignored.)
-     *
-     * @param child       the lightweight <code>child</code> of the viewport
-     * @param constraints the <code>constraints</code> to be respected
-     * @param index       the index
-     * @see #setView
-     */
-    @Override
-		protected Component addImpl(Component child, Object constraints, int index) {
-      setView(child);
-      return child;
-    }
+	/**
+	 * Sets the <code>JViewport</code>'s one lightweight child, which can be
+	 * <code>null</code>. (Since there is only one child which occupies the entire
+	 * viewport, the <code>constraints</code> and <code>index</code> arguments are
+	 * ignored.)
+	 *
+	 * @param child       the lightweight <code>child</code> of the viewport
+	 * @param constraints the <code>constraints</code> to be respected
+	 * @param index       the index
+	 * @see #setView
+	 */
+	@Override
+	protected void addImpl(Component child, Object constraints, int index) {
+		setView(child);
+	}
 
 
     /**

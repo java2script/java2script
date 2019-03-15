@@ -112,7 +112,7 @@ public final class FontDesignMetrics extends FontMetrics {
 
 //    // These fields are all part of the old serialization representation
 //private Font  font;
-private float ascent;
+private float ascent = -1;
 private float descent;
 private float leading;
 //    private float maxAdvance;
@@ -513,8 +513,7 @@ private float leading;
    */
     @Override
 		public int getAscent() {
-    	if (ascent == 0)
-    		ascent = font.getFontMetrics().getAscent();
+    	_getMetrics();
         return (int)(roundingUpValue + ascent);
     }
 
@@ -524,14 +523,22 @@ private float leading;
    */
     @Override
 		public int getDescent() {
-    	if (descent == 0)
-    		descent = font.getFontMetrics().getDescent();
+    	_getMetrics();
         return (int)(roundingUpValue + descent);
     }
 
-    @Override
+    private void _getMetrics() {
+    	if (ascent >= 0)
+    		return;
+		ascent = font.getFontMetrics().getAscent();
+		descent = font.getFontMetrics().getDescent();
+		leading = font.getFontMetrics().getLeading();
+	}
+
+	@Override
 		public int getLeading() {
-        // nb this ensures the sum of the results of the public methods
+    	_getMetrics();
+    	// nb this ensures the sum of the results of the public methods
         // for leading, ascent & descent sum to height.
         // if the calculations in any other methods change this needs
         // to be changed too.
