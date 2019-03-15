@@ -1,5 +1,6 @@
 package swingjs.a2s;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.HeadlessException;
 import java.awt.MenuComponent;
@@ -16,6 +17,7 @@ public class MenuBar extends JMenuBar {
 
 	public MenuBar() throws HeadlessException {
 		super();
+		setBackground(new Color(0xEEEEEE));
 	}
 
 	public void add(java.awt.Menu m) {
