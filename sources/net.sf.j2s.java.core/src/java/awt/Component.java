@@ -180,7 +180,7 @@ public abstract class Component implements ImageObserver/*
 	 * 
 	 * @see #getParent
 	 */
-	protected transient Container parent;
+	public transient Container parent;
 
 	/**
 	 * The <code>AppContext</code> of the component. Applets/Plugin may change the
