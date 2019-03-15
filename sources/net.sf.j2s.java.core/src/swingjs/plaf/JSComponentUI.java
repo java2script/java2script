@@ -2521,7 +2521,6 @@ public class JSComponentUI extends ComponentUI
 			return;
 		}
 		preferredDim = null;
-		// fix for button vertical alignment -- should offset just by the ascent
 		String yoff = "-50%";
 		DOMNode.setStyles(centeringNode, "position", "absolute", "top", null, "left", null, "transform", null);
 		DOMNode.setStyles(centeringNode, "width", wCtr + "px", "height", hCtr + "px");
@@ -2586,11 +2585,11 @@ public class JSComponentUI extends ComponentUI
 				DOMNode.setStyles(itemNode, "text-align", "right");
 				DOMNode.setStyles(centeringNode,  "right", "0px");
 				DOMNode.setStyles(textNode, "right", "23px");
-				DOMNode.setStyles(iconNode, "right", "3px");
+				DOMNode.setStyles(iconNode, "right", "0px"); // was 3
 			} else {
 				DOMNode.setStyles(itemNode, "text-align", "left");
 				DOMNode.setStyles(centeringNode,  "left", "0px");
-				DOMNode.setStyles(iconNode, "left", "3px");
+				DOMNode.setStyles(iconNode, "left", "0px"); // was 3
 				DOMNode.setStyles(textNode, "left", "23px");
 			}
 		}
@@ -2642,8 +2641,8 @@ public class JSComponentUI extends ComponentUI
 					"translateY(-" + itop + "%)" + (iscale == null ? "" : iscale));
 		} else {			
 			DOMNode.setStyles(menuAnchorNode, "height", h + "px");
-			DOMNode.setStyles(textNode, "top", "50%", "transform", "translateY(-60%)");
-			DOMNode.setStyles(iconNode, "top", "50%", "transform", "translateY(-80%) scale(0.6,0.6)");
+			DOMNode.setStyles(textNode, "top", "50%", "transform", "translateY(-50%)");
+			DOMNode.setStyles(iconNode, "top", "50%", "transform", "translateY(-65%) scale(0.6,0.6)");
 		}
 	}
 
