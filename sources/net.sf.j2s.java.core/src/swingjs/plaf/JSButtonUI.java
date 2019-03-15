@@ -90,6 +90,7 @@ public class JSButtonUI extends JSLightweightUI {
 		if (domNode == null) {
 			setDoPropagate();
 			domNode = enableNode = buttonNode = newDOMObject("button", id + "_dom", "type", "button");
+			DOMNode.setPositionAbsolute(domNode);
 			iconNode = null;
 			createButton();
 		}

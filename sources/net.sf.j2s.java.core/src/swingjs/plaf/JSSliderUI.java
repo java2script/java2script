@@ -19,6 +19,7 @@ import javax.swing.LookAndFeel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import sun.swing.DefaultLookup;
+import swingjs.JSToolkit;
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 import swingjs.jquery.JQueryUI;
@@ -55,6 +56,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	private BoundedRangeModel model;
 	private boolean paintTrack = true;
 
+	protected JSScrollPaneUI myScrollPaneUI;
 	protected boolean isScrollBar;
 	private JScrollBar jScrollBar;
 	protected DOMNode sliderTrack;
@@ -117,13 +119,22 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		}
 		setup(isNew || isChanged);
 		setSlider();
-		setBackgroundCUI(getBackground());
+		setBackground(getBackground());
 		return updateDOMNodeCUI();
 	}
 
-	public void setBackgroundCUI(Color background) {
-		if (jc.isOpaque())
-			super.setBackgroundCUI(background);
+	@Override
+	public void setBackground(Color background) {
+		if (awtPeerBG != null && !jc.isDisplayable() && !awtPeerBG.equals(background))
+			awtPeerBG = null;
+		if (isScrollBar ? background != null : jc.isOpaque())
+			DOMNode.setStyles(myScrollPaneUI == null && !paintTicks ? jqSlider : sliderTrack, "background-color", JSToolkit.getCSSColor(background));
+		if (paintTicks)
+			DOMNode.setStyles(jqSlider, "background-color", "black");
+	}	
+
+	protected void setBackgroundFor(DOMNode node, Color color) {
+		setBackground(color);
 	}
 
 	private void disposeSlider() {
@@ -278,19 +289,28 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		if (isHoriz && slider.getBorder() != null)
 			barPlace += 10;
 
-		String tickClass = "ui-j2sslider-tick-mark"
-				+ (isHoriz ? "-vert" : "-horiz");
+		String tickClass = "ui-j2sslider-tick-mark" + (isHoriz ? "-vert" : "-horiz");
 		$(domNode).find("." + tickClass).remove();
 		$(domNode).find(".jslider-labels").remove();
 		getHTMLSizePreferred(jqSlider, false);
-		if (majorSpacing == 0 && minorSpacing == 0 || !paintTicks && !paintLabels)
+		if (majorSpacing == 0 && minorSpacing == 0 || !paintTicks && !paintLabels) {
+			if (myScrollPaneUI != null) {
+				DOMNode.setStyles(sliderHandle, "transform", null);
+				DOMNode.setStyles(sliderTrack, "transform", null);
+			} else if( isHoriz) {
+				DOMNode.setStyles(sliderHandle, "top", "50%", "transform", "translateY(-50%)");
+				DOMNode.setStyles(sliderTrack, "top", "50%", "transform", "translateY(-50%)");
+			} else {
+				DOMNode.setStyles(sliderHandle, "left", "50%", "transform", "translateX(-50%)");
+				DOMNode.setStyles(sliderTrack, "left", "50%", "transform", "translateX(-50%)");
+			}
 			return;
+		}
 		int margin = 10;
 
 		int length = (isHoriz ? slider.getWidth() : slider.getHeight());
 		if (length <= 0)
-			length = (isHoriz ? getPreferredHorizontalSize().width
-					: getPreferredVerticalSize().height);
+			length = (isHoriz ? getPreferredHorizontalSize().width : getPreferredVerticalSize().height);
 		if (isHoriz)
 			actualWidth = length;
 		else
@@ -306,12 +326,11 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			ticks = new int[numTicks];
 			for (int i = 0; i < numTicks; i++) {
 				DOMNode node = DOMNode.createElement("div", id + "_t" + i);
-				$(node).addClass("swingjs");//??
+				$(node).addClass("swingjs");// ??
 				$(node).addClass(tickClass);
 				boolean isMajor = (i % check == 0);
 				ticks[i] = minorSpacing * i + min;
-				float frac = (isHoriz == isInverted ? 1 - fracSpacing * i : fracSpacing
-						* i);
+				float frac = (isHoriz == isInverted ? 1 - fracSpacing * i : fracSpacing * i);
 				String spt = (frac * length + margin) + "px";
 				if (isMajor)
 					$(node).css(isHoriz ? "height" : "width", "8px");
@@ -346,21 +365,17 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 				DOMNode.setTopLeftAbsolute(labelNode, top, left);
 				domNode.insertBefore(labelNode, sliderTrack);
 			}
-			
+
 		}
 		if (paintTicks) {
 			if (isHoriz) {
-				DOMNode.setStyles(sliderHandle, "transform",
-						"scaleX(0.5) rotateZ(45deg)", "top", "-8px");
-				DOMNode.setStyles(sliderTrack, "height", "1px", "background", "black",
-						"top", "10px");
+				DOMNode.setStyles(sliderHandle, "transform", "scaleX(0.5) rotateZ(45deg)", "top", "-8px");
+				DOMNode.setStyles(sliderTrack, "height", "1px", "background", "black", "top", "12px", "border", "none");
 				setSliderAttr("scaleX", 0.5f);
 			} else {
-				DOMNode.setStyles(sliderHandle, "transform",
-						"scaleY(0.5) rotateZ(45deg)", "left", "-10px", "margin-bottom",
-						"-7px");
-				DOMNode.setStyles(sliderTrack, "width", "1px", "left", "12px",
-						"background", "black");
+				DOMNode.setStyles(sliderHandle, "transform", "scaleY(0.5) rotateZ(45deg)", "left", "-10px",
+						"margin-bottom", "-7px");
+				DOMNode.setStyles(sliderTrack, "width", "1px", "left", "12px", "background", "black", "border", "none");
 				setSliderAttr("scaleY", 0.5f);
 			}
 
@@ -370,8 +385,8 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		if (isScrollBar) {
 			setScrollBarExtentAndCSS();
 		} else {
-		if (!isHoriz)
-			DOMNode.setStyles(sliderTrack, "height", length + "px");
+			if (!isHoriz)
+				DOMNode.setStyles(sliderTrack, "height", length + "px");
 		}
 		getHTMLSizePreferred(domNode, false);
 	}
@@ -506,7 +521,6 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 //	}
 
     private int snapTo(int val) {
-    	System.out.println("jsslider snapto " + val);
     	if (ticks != null && ticks.length > 2 && slider.getSnapToTicks()) {
     	  int dc = Integer.MAX_VALUE;
     	  int v = val;

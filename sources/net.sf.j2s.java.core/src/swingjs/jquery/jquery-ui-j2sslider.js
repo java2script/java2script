@@ -217,8 +217,8 @@
 				_create : function() {
 					var handleCount, 
 						o = this.options, 
-						existingHandles = this.element.find(".ui-j2sslider-handle").addClass("ui-state-default ui-corner-all"), 
-						handle = "<a class='ui-j2sslider-handle ui-state-default ui-corner-all' href='#'></a>", 
+						existingHandles = this.element.find(".ui-j2sslider-handle").addClass("ui-state-default"),// ui-corner-all"), 
+						handle = "<a class='ui-j2sslider-handle ui-state-default' href='#'></a>", // was ui-corner-all 
 						handles = [];
 					this.jslider || (this.jslider = o.jslider);
 					this._keySliding = false;

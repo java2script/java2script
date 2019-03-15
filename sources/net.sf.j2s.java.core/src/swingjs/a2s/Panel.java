@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 public class Panel extends JPanel {
 
 	public void isAWT() {}
+	public void isAWTContainer() {}
 
 	public Panel() {
 		this(new FlowLayout());

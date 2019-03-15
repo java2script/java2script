@@ -17,7 +17,7 @@ in Java. Using the java2script/SwingJS Eclipse plug-in, both Java .class files a
 
 
 java2script/SwingJS includes an Eclipse plug-in (technically a "drop-in"), net.sf.j2s.core.zip
-(see https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/dropins), 
+(see https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/swingjs), 
 along with a JavaScript version of the Java Virtual Machine (SwingJS, https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.java.core/SwingJS-site.zip) 
 to allow the rapid and
 automated production of browser-ready JavaScript versions of Java applications and applets. 
@@ -27,12 +27,20 @@ automated production of browser-ready JavaScript versions of Java applications a
 
 See https://github.com/BobHanson/java2script/tree/master/sources/net.sf.j2s.core/dist and the README file in that directory.
 
+# History - 2019-
+
+SwingJS is now more than just "Swing"-JS. AWT applets and applications are now supported. A test suite of over 500 AWT applets has been used to refine the AWT runtime classes with great success. Many thanks to Karsten Blankenagel (University of Wuppertal) for access to this source code set.
+
+Examples include:
+
+MathePrisma (http://www.matheprisma.uni-wuppertal.de/) This site is still using the Java applets as of 2019.03.12; JavaScript versions still in development. 
+
 # History - 2017-
 
 
 https://github.com/BobHanson/java2script (development master)
 
-Current development "Version 3 development master" involve a completely rewritten transpiler (2017) “CompilationParticipant” that follows the Eclipse Java compiler. The implementation nearly perfectly emulates the Java Virtual Machine. It includes fully qualified methods, compile-time method binding, generic methods and classes, Java 8 lambda functions and streams, Java reflection and dynamic class loading for efficient modular just-in-time performance, Java Swing components, modal and nonmodel dialogs, audio, jpdf, the AWT event thread, and many other added packages. Java applications and applets can both be run in JavaScript in any browser. 
+Current development "Version 3 development master" involves a completely rewritten transpiler (2017) “CompilationParticipant” that follows the Eclipse Java compiler. The implementation nearly perfectly emulates the Java Virtual Machine. It includes fully qualified methods, compile-time method binding, generic methods and classes, Java 8 lambda functions and streams, Java reflection and dynamic class loading for efficient modular just-in-time performance, Java Swing components, modal and nonmodel dialogs, audio, jpdf, the AWT event thread, and many other added packages. Java applications and applets can both be run in JavaScript in any browser. 
 
 Version 3 also implements real-time creation of HTML test files for immediate JavaScript testing of any changes made to the Java code. Basically, when the source file is saved in Eclipse (Photon), the JavaScript updates automatically, and a reload of the page in the browser shows the changes immediately. This makes for very easy side-by-side Java and JavaScript debugging. 
 
@@ -65,8 +73,13 @@ However, this version did not produce "fully qualified" method signatures, resul
 
 Synchronized with https://github.com/BobHanson/java2script as the stable master version in 2018.
 
-Examples can be found at https://chemapps.stolaf.edu/swingjs/phet/site/swingjs/examples
-and https://chemapps.stolaf.edu/jmol/jsmol
+Examples include:
+
+Phet, Falstad, and other tests https://chemapps.stolaf.edu/swingjs/phet/site/swingjs/examples  Initial SwingJS tests converting AWT to Swing in Java, then transpiling.
+
+JSmol: https://chemapps.stolaf.edu/jmol/jsmol  Non-AWT, Non-Swing version, our initial application of Java2Script technology.
+  
+Falstad Math and Physics Applets (https://www.falstad.com/mathphysics.html) Source available.  
   
 # History - 2005-2010
 

@@ -3570,4 +3570,21 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		return null;
 	}
 
+	public static Class<?> getJ2SSuperclassFor(Class<?> cl) {
+		Class<?> c = null;
+		/**
+		 * 
+		 * @j2sNative
+		 * 
+		 * 			c = cl.getSuperclass$ && cl.getSuperclass$();
+		 */
+		{
+			cl.getSuperclass();
+		}
+		if (c == null && cl != Object.class) {
+			c = Object.class;
+		}
+		return c;
+	}
+
 }

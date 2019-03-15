@@ -287,12 +287,24 @@ public class ButtonListener
 	public void mouseReleased(MouseEvent e) {
 		if (SwingUtilities.isLeftMouseButton(e)) {
 			AbstractButton b = (AbstractButton) e.getSource();
-			if (b.getUIClassID() == "MenuUI") {
+			if (checkHideMenus(b))
 				return;
-			}
 			b.doClick(0);
 			verifyButtonClick(b);
 		}
+	}
+
+	/**
+	 * @param b
+	 * @return true if MenuUI
+	 */
+	private static boolean checkHideMenus(AbstractButton b) {
+		String s = b.getUIClassID();
+		if (s == "MenuUI")
+			return true;
+		if (s.indexOf("MenuItemUI") >= 0)
+			JSComponentUI.hideAllMenus();
+		return false;
 	}
 
 	@Override
@@ -372,9 +384,8 @@ public class ButtonListener
 				break;
 			case CLICK:
 				JMenuItem mi = (JMenuItem) e.getSource();
-				JSMenuItemUI ui = (JSMenuItemUI) (Object) mi.getUI();
 				MenuSelectionManager.defaultManager().clearSelectedPath();
-				if (!ui.isMenu) {
+				if (!checkHideMenus(mi)) {
 					mi.doClick();
 					break;
 				}

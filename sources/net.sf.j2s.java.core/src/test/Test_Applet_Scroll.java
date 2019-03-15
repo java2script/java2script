@@ -289,6 +289,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		p.setToolTipText("this is the panel");
 		// p.setLayout(new GridLayout(2, 2, 2, 2));
 		JScrollPane sp = new JScrollPane();
+		sp.setSize(500, 250);
 		sp.getViewport().add(p);
 		getContentPane().add(sp);
 		sp.getViewport().addChangeListener(this);
@@ -354,7 +355,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		return bar;
 	}
 
-	JSlider mkSlider(JPanel p, final JTextField tf, int orient, int x, int y) {
+	JSlider mkSlider(JPanel p, final JTextField tf, int orient, int w, int h) {
 		final JSlider bar = new JSlider(orient, 300, 1000, 500);
 		bar.addChangeListener(new ChangeListener() {
 			@Override
@@ -370,7 +371,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 				// e.consume(); not necessary for sliders
 			}
 		});
-		setSize(bar, x, y);
+		setSize(bar, w, h);
 		bar.setBackground(Color.orange);
 		bar.setForeground(Color.green);
 		bar.setOpaque(true);

@@ -2,6 +2,7 @@ package swingjs.a2s;
 
 import java.awt.Font;
 import java.awt.MenuComponent;
+import java.awt.MenuContainer;
 import java.awt.MenuShortcut;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -12,7 +13,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
-public class Menu extends JMenu implements AWTMenu {
+public class Menu extends JMenu implements AWTMenu, MenuContainer {
 
 	public Menu(String title) {
 		this(title, false);

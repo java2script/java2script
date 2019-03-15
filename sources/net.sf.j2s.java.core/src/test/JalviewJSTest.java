@@ -50,6 +50,7 @@ import javax.swing.event.MenuListener;
  * class, allowing comparison between Java and Javascript execution.
  */
 public class JalviewJSTest extends JPanel implements MenuListener, ItemListener {
+
 	public static void main(String[] args) {
 		new JalviewJSTest().doTest();
 	}
@@ -58,8 +59,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 	private JMenuItem testbtn;
 
 	JMenuBar mb = new JMenuBar();
-	JFrame frame = new JFrame();
-
+	JFrame frame = new JFrame("JalviewJSTest");
 	JMenu mRight = new JMenu("right") 		{
 		@Override
 		public void processKeyEvent(KeyEvent e, MenuElement[] path, MenuSelectionManager m) {
@@ -115,6 +115,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		
 	};
 	private Label status;
+	private JMenu menu, menu1, menu2;
 	/**
 	 * Put some content in a JFrame and show it
 	 */
@@ -143,9 +144,9 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-		JMenu menu = new JMenu("testing");
-		JMenu menu1 = new JMenu("testing1");
-		JMenu menu2 = new JMenu("testing2");
+		menu = new JMenu("TESTING");
+		menu1 = new JMenu("testing1");
+		menu2 = new JMenu("testing2");
 		menu.setHorizontalAlignment(SwingConstants.RIGHT);
 
 		frame.setJMenuBar(mb);
@@ -154,7 +155,8 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		mb.add(menu2);
 		frame.setContentPane(getVisualPaneContent(menu, menu1, menu2));
 		frame.pack();
-
+		//frame.setBackground(Color.blue);
+		// note -- this blue color is never seen
 		JPopupMenu pmenu = new JPopupMenu();
 		JMenuItem b = new JMenuItem("testing1");
 		b.addActionListener(listener);
@@ -165,11 +167,16 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		b = new JMenuItem("testing3");
 		b.addActionListener(listener);
 		pmenu.add(b);
+		final JMenuItem bb = b;
 
 		frame.addMouseListener(new MouseListener() {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				
+				System.out.println(menu.getHeight() + " " + menu.getMargin());
+				
+				
 			}
 
 			@Override
@@ -411,7 +418,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		JMenuItem btn = new JMenuItem("-");
 		btn.setFont(font);
 		menu.add(btn);
-		testbtn = new JMenuItem("testing");
+		testbtn = new JMenuItem("testingbtn");
 		testbtn.setFont(font); 
 		testbtn.addActionListener(new ActionListener() {
 

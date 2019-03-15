@@ -2,7 +2,7 @@
  * Some portions of this file have been modified by Robert Hanson hansonr.at.stolaf.edu 2012-2017
  * for use in SwingJS via transpilation into JavaScript using Java2Script.
  *
- * Copyright (c) 1997, 2007, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,21 +29,30 @@
 package javax.swing;
 
 import java.awt.HeadlessException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Vector;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
+import java.io.Serializable;
+
 import javax.swing.event.EventListenerList;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.plaf.ListUI;
 import javax.swing.text.Position;
+
+import sun.swing.SwingUtilities2;
+import sun.swing.SwingUtilities2.Section;
 
 
 /**
@@ -55,27 +64,29 @@ import javax.swing.text.Position;
  * constructor that automatically builds a read-only {@code ListModel} instance
  * for you:
  * <pre>
+ * {@code
  * // Create a JList that displays strings from an array
  *
  * String[] data = {"one", "two", "three", "four"};
- * JList myList = new JList(data);
+ * JList<String> myList = new JList<String>(data);
  *
  * // Create a JList that displays the superclasses of JList.class, by
  * // creating it with a Vector populated with this data
  *
- * Vector superClasses = new Vector();
- * Class rootClass = javax.swing.JList.class;
- * for(Class cls = rootClass; cls != null; cls = cls.getSuperclass()) {
+ * Vector<Class<?>> superClasses = new Vector<Class<?>>();
+ * Class<JList> rootClass = javax.swing.JList.class;
+ * for(Class<?> cls = rootClass; cls != null; cls = cls.getSuperclass()) {
  *     superClasses.addElement(cls);
  * }
- * JList myList = new JList(superClasses);
+ * JList<Class<?>> myList = new JList<Class<?>>(superClasses);
  *
  * // The automatically created model is stored in JList's "model"
  * // property, which you can retrieve
  *
- * ListModel model = myList.getModel();
+ * ListModel<Class<?>> model = myList.getModel();
  * for(int i = 0; i < model.getSize(); i++) {
  *     System.out.println(model.getElementAt(i));
+ * }
  * }
  * </pre>
  * <p>
@@ -99,12 +110,14 @@ import javax.swing.text.Position;
  * notifying listeners. For example, a read-only implementation of
  * {@code AbstractListModel}:
  * <pre>
+ * {@code
  * // This list model has about 2^16 elements.  Enjoy scrolling.
  *
- * ListModel bigData = new AbstractListModel() {
+ * ListModel<String> bigData = new AbstractListModel<String>() {
  *     public int getSize() { return Short.MAX_VALUE; }
- *     public Object getElementAt(int index) { return "Index " + index; }
+ *     public String getElementAt(int index) { return "Index " + index; }
  * };
+ * }
  * </pre>
  * <p>
  * The selection state of a {@code JList} is managed by another separate
@@ -135,7 +148,7 @@ import javax.swing.text.Position;
  * Responsibility for listening to selection changes in order to keep the list's
  * visual representation up to date lies with the list's {@code ListUI}.
  * <p>
- * <a name="renderer">
+ * <a name="renderer"></a>
  * Painting of cells in a {@code JList} is handled by a delegate called a
  * cell renderer, installed on the list as the {@code cellRenderer} property.
  * The renderer provides a {@code java.awt.Component} that is used
@@ -146,9 +159,10 @@ import javax.swing.text.Position;
  * component to render, is installed by the lists's {@code ListUI}. You can
  * substitute your own renderer using code like this:
  * <pre>
+ * {@code
  *  // Display an icon and a string for each object in the list.
  *
- * class MyCellRenderer extends JLabel implements ListCellRenderer {
+ * class MyCellRenderer extends JLabel implements ListCellRenderer<Object> {
  *     final static ImageIcon longIcon = new ImageIcon("long.gif");
  *     final static ImageIcon shortIcon = new ImageIcon("short.gif");
  *
@@ -156,7 +170,7 @@ import javax.swing.text.Position;
  *     // We just reconfigure the JLabel each time we're called.
  *
  *     public Component getListCellRendererComponent(
- *       JList list,              // the list
+ *       JList<?> list,           // the list
  *       Object value,            // value to display
  *       int index,               // cell index
  *       boolean isSelected,      // is the cell selected
@@ -180,6 +194,7 @@ import javax.swing.text.Position;
  * }
  *
  * myList.setCellRenderer(new MyCellRenderer());
+ * }
  * </pre>
  * <p>
  * Another job for the cell renderer is in helping to determine sizing
@@ -189,9 +204,10 @@ import javax.swing.text.Position;
  * To avoid these calculations, you can set a {@code fixedCellWidth} and
  * {@code fixedCellHeight} on the list, or have these values calculated
  * automatically based on a single prototype value:
- * <a name="prototype_example">
+ * <a name="prototype_example"></a>
  * <pre>
- * JList bigDataList = new JList(bigData);
+ * {@code
+ * JList<String> bigDataList = new JList<String>(bigData);
  *
  * // We don't want the JList implementation to compute the width
  * // or height of all of the list cells, so we give it a string
@@ -200,6 +216,7 @@ import javax.swing.text.Position;
  * // properties.
  *
  * bigDataList.setPrototypeCellValue("Index 1234567890");
+ * }
  * </pre>
  * <p>
  * {@code JList} doesn't implement scrolling directly. To create a list that
@@ -238,15 +255,13 @@ import javax.swing.text.Position;
  * future Swing releases. The current serialization support is
  * appropriate for short term storage or RMI between applications running
  * the same version of Swing.  As of 1.4, support for long term storage
- * of all JavaBeans<sup><font size="-2">TM</font></sup>
+ * of all JavaBeans&trade;
  * has been added to the <code>java.beans</code> package.
  * Please see {@link java.beans.XMLEncoder}.
  * <p>
- * See <a href="http://java.sun.com/docs/books/tutorial/uiswing/components/list.html">How to Use Lists</a>
- * in <a href="http://java.sun.com/Series/Tutorial/index.html"><em>The Java Tutorial</em></a>
+ * See <a href="https://docs.oracle.com/javase/tutorial/uiswing/components/list.html">How to Use Lists</a>
+ * in <a href="https://docs.oracle.com/javase/tutorial/"><em>The Java Tutorial</em></a>
  * for further documentation.
- * Also see the article <a href="http://java.sun.com/products/jfc/tsc/tech_topics/jlist_1/jlist.html">Advanced JList Programming</a>
- * in <a href="http://java.sun.com/products/jfc/tsc"><em>The Swing Connection</em></a>.
  * <p>
  * @see ListModel
  * @see AbstractListModel
@@ -256,13 +271,15 @@ import javax.swing.text.Position;
  * @see ListCellRenderer
  * @see DefaultListCellRenderer
  *
+ * @param <E> the type of the elements of this list
+ *
  * @beaninfo
  *   attribute: isContainer false
  * description: A component which allows for the selection of one or more objects from a list.
  *
  * @author Hans Muller
  */
-public class JList extends JComponent implements Scrollable//, Accessible
+public class JList<E> extends JComponent implements Scrollable//, Accessible
 {
     /**
      * Indicates a vertical layout of cells, in a single column;
@@ -291,15 +308,15 @@ public class JList extends JComponent implements Scrollable//, Accessible
     private int fixedCellWidth = -1;
     private int fixedCellHeight = -1;
     private int horizontalScrollIncrement = -1;
-    private Object prototypeCellValue;
+    private E prototypeCellValue;
     private int visibleRowCount = 8;
     private Color selectionForeground;
     private Color selectionBackground;
     private boolean dragEnabled;
 
     private ListSelectionModel selectionModel;
-    private ListModel dataModel;
-    private ListCellRenderer cellRenderer;
+    private ListModel<E> dataModel;
+    private ListCellRenderer<? super E> cellRenderer;
     private ListSelectionListener selectionListener;
 
     /**
@@ -324,18 +341,12 @@ public class JList extends JComponent implements Scrollable//, Accessible
      * @see #getDropLocation
      * @since 1.6
      */
-    public static final class DropLocation {// extends TransferHandler.DropLocation {
+    public static final class DropLocation extends TransferHandler.DropLocation {
         private final int index;
         private final boolean isInsert;
-				private Point dropPoint;
-
-				public Point getDropPoint() {
-					return dropPoint;
-				}
 
         private DropLocation(Point p, int index, boolean isInsert) {
-        	this.dropPoint = new Point(p);
-//            super(p);
+            super(p);
             this.index = index;
             this.isInsert = isInsert;
         }
@@ -379,10 +390,10 @@ public class JList extends JComponent implements Scrollable//, Accessible
          *
          * @return a string representation of this drop location
          */
-        public String toString() {
+        @Override
+		public String toString() {
             return getClass().getName()
-                   + "[" 
-//                   "dropPoint=" + getDropPoint() + ","
+                   + "[dropPoint=" + getDropPoint() + ","
                    + "index=" + index + ","
                    + "insert=" + isInsert + "]";
         }
@@ -399,7 +410,7 @@ public class JList extends JComponent implements Scrollable//, Accessible
      * @param dataModel the model for the list
      * @exception IllegalArgumentException if the model is {@code null}
      */
-    public JList(ListModel dataModel)
+    public JList(ListModel<E> dataModel)
     {
         if (dataModel == null) {
             throw new IllegalArgumentException("dataModel must be non null");
@@ -407,8 +418,8 @@ public class JList extends JComponent implements Scrollable//, Accessible
 
         // Register with the ToolTipManager so that tooltips from the
         // renderer show through.
-//        ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
-//        toolTipManager.registerComponent(this);
+        ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
+        toolTipManager.registerComponent(this);
 
         layoutOrientation = VERTICAL;
 
@@ -439,14 +450,14 @@ public class JList extends JComponent implements Scrollable//, Accessible
      * @param  listData  the array of Objects to be loaded into the data model,
      *                   {@code non-null}
      */
-    public JList(final Object[] listData)
+    public JList(final E[] listData)
     {
         this (
-            new AbstractListModel() {
+            new AbstractListModel<E>() {
                 @Override
-								public int getSize() { return listData.length; }
+				public int getSize() { return listData.length; }
                 @Override
-								public Object getElementAt(int i) { return listData[i]; }
+				public E getElementAt(int i) { return listData[i]; }
             }
         );
     }
@@ -466,13 +477,13 @@ public class JList extends JComponent implements Scrollable//, Accessible
      * @param  listData  the <code>Vector</code> to be loaded into the
      *                   data model, {@code non-null}
      */
-    public JList(final Vector<?> listData) {
+    public JList(final Vector<? extends E> listData) {
         this (
-            new AbstractListModel() {
+            new AbstractListModel<E>() {
                 @Override
-								public int getSize() { return listData.size(); }
+				public int getSize() { return listData.size(); }
                 @Override
-								public Object getElementAt(int i) { return listData.elementAt(i); }
+				public E getElementAt(int i) { return listData.elementAt(i); }
             }
         );
     }
@@ -483,15 +494,14 @@ public class JList extends JComponent implements Scrollable//, Accessible
      */
     public JList() {
         this (
-            new AbstractListModel() {
+            new AbstractListModel<E>() {
               @Override
-							public int getSize() { return 0; }
+			public int getSize() { return 0; }
               @Override
-							public Object getElementAt(int i) { return "No Data Model"; }
+			public E getElementAt(int i) { throw new IndexOutOfBoundsException("No Data Model"); }
             }
         );
     }
-
 
 
     /**
@@ -505,9 +515,9 @@ public class JList extends JComponent implements Scrollable//, Accessible
      * @see SwingUtilities#updateComponentTreeUI
      */
     @Override
-		public void updateUI() {
+	public void updateUI() {
     	super.updateUI();
-        ListCellRenderer renderer = getCellRenderer();
+        ListCellRenderer<? super E> renderer = getCellRenderer();
         if (renderer instanceof Component) {
             SwingUtilities.updateComponentTreeUI((Component)renderer);
         }
@@ -527,11 +537,11 @@ public class JList extends JComponent implements Scrollable//, Accessible
      */
     private void updateFixedCellSize()
     {
-        ListCellRenderer cr = getCellRenderer();
-        Object value = getPrototypeCellValue();
+        ListCellRenderer<? super E> cr = getCellRenderer();
+        E value = getPrototypeCellValue();
 
         if ((cr != null) && (value != null)) {
-            JComponent c = cr.getListCellRendererComponent(this, value, 0, false, false);
+            Component c = cr.getListCellRendererComponent(this, value, 0, false, false);
 
             /* The ListUI implementation will add Component c to its private
              * CellRendererPane however we can't assume that's already
@@ -559,7 +569,7 @@ public class JList extends JComponent implements Scrollable//, Accessible
      * @return the value of the {@code prototypeCellValue} property
      * @see #setPrototypeCellValue
      */
-    public Object getPrototypeCellValue() {
+    public E getPrototypeCellValue() {
         return prototypeCellValue;
     }
 
@@ -599,8 +609,8 @@ public class JList extends JComponent implements Scrollable//, Accessible
      *   attribute: visualUpdate true
      * description: The cell prototype value, used to compute cell width and height.
      */
-    public void setPrototypeCellValue(Object prototypeCellValue) {
-        Object oldValue = this.prototypeCellValue;
+    public void setPrototypeCellValue(E prototypeCellValue) {
+        E oldValue = this.prototypeCellValue;
         this.prototypeCellValue = prototypeCellValue;
 
         /* If the prototypeCellValue has changed and is non-null,
@@ -693,7 +703,7 @@ public class JList extends JComponent implements Scrollable//, Accessible
      * @return the value of the {@code cellRenderer} property
      * @see #setCellRenderer
      */
-    public ListCellRenderer getCellRenderer() {
+    public ListCellRenderer<? super E> getCellRenderer() {
         return cellRenderer;
     }
 
@@ -721,8 +731,8 @@ public class JList extends JComponent implements Scrollable//, Accessible
      *   attribute: visualUpdate true
      * description: The component used to draw the cells.
      */
-    public void setCellRenderer(ListCellRenderer cellRenderer) {
-        ListCellRenderer oldValue = this.cellRenderer;
+    public void setCellRenderer(ListCellRenderer<? super E> cellRenderer) {
+        ListCellRenderer<? super E> oldValue = this.cellRenderer;
         this.cellRenderer = cellRenderer;
 
         /* If the cellRenderer has changed and prototypeCellValue
@@ -905,7 +915,7 @@ public class JList extends JComponent implements Scrollable//, Accessible
     /**
      * Defines the way list cells are layed out. Consider a {@code JList}
      * with five cells. Cells can be layed out in one of the following ways:
-     * <p>
+     *
      * <pre>
      * VERTICAL:          0
      *                    1
@@ -925,7 +935,7 @@ public class JList extends JComponent implements Scrollable//, Accessible
      *
      * <table border="1"
      *  summary="Describes layouts VERTICAL, HORIZONTAL_WRAP, and VERTICAL_WRAP">
-     *   <tr><th><p align="left">Value</p></th><th><p align="left">Description</p></th></tr>
+     *   <tr><th><p style="text-align:left">Value</p></th><th><p style="text-align:left">Description</p></th></tr>
      *   <tr><td><code>VERTICAL</code>
      *       <td>Cells are layed out vertically in a single column.
      *   <tr><td><code>HORIZONTAL_WRAP</code>
@@ -1139,6 +1149,9 @@ public class JList extends JComponent implements Scrollable//, Accessible
      *        bound: false
      */
     public void setDragEnabled(boolean b) {
+//        if (b && GraphicsEnvironment.isHeadless()) {
+//            throw new HeadlessException();
+//        }
         dragEnabled = b;
     }
 
@@ -1181,7 +1194,7 @@ public class JList extends JComponent implements Scrollable//, Accessible
      * @since 1.6
      */
     @SuppressWarnings("incomplete-switch")
-	public final void setDropMode(DropMode dropMode) {
+    public final void setDropMode(DropMode dropMode) {
         if (dropMode != null) {
             switch (dropMode) {
                 case USE_SELECTION:
@@ -1196,213 +1209,215 @@ public class JList extends JComponent implements Scrollable//, Accessible
         throw new IllegalArgumentException(dropMode + ": Unsupported drop mode for list");
     }
 
-//    /**
-//     * Returns the drop mode for this component.
-//     *
-//     * @return the drop mode for this component
-//     * @see #setDropMode
-//     * @since 1.6
-//     */
-//    public final DropMode getDropMode() {
-//        return dropMode;
-//    }
-//
-//    /**
-//     * Calculates a drop location in this component, representing where a
-//     * drop at the given point should insert data.
-//     *
-//     * @param p the point to calculate a drop location for
-//     * @return the drop location, or <code>null</code>
-//     */
-//    DropLocation dropLocationForPoint(Point p) {
-//        DropLocation location = null;
-//        Rectangle rect = null;
-//
-//        int index = locationToIndex(p);
-//        if (index != -1) {
-//            rect = getCellBounds(index, index);
-//        }
-//
-//        switch(dropMode) {
-//            case USE_SELECTION:
-//            case ON:
-//                location = new DropLocation(p,
-//                    (rect != null && rect.contains(p)) ? index : -1,
-//                    false);
-//
-//                break;
-//            case INSERT:
-//                if (index == -1) {
-//                    location = new DropLocation(p, getModel().getSize(), true);
-//                    break;
-//                }
-//
-//                if (layoutOrientation == HORIZONTAL_WRAP) {
-//                    boolean ltr = getComponentOrientation().isLeftToRight();
-//
-//                    if (SwingUtilities2.liesInHorizontal(rect, p, ltr, false) == TRAILING) {
-//                        index++;
-//                    // special case for below all cells
-//                    } else if (index == getModel().getSize() - 1 && p.y >= rect.y + rect.height) {
-//                        index++;
-//                    }
-//                } else {
-//                    if (SwingUtilities2.liesInVertical(rect, p, false) == TRAILING) {
-//                        index++;
-//                    }
-//                }
-//
-//                location = new DropLocation(p, index, true);
-//
-//                break;
-//            case ON_OR_INSERT:
-//                if (index == -1) {
-//                    location = new DropLocation(p, getModel().getSize(), true);
-//                    break;
-//                }
-//
-//                boolean between = false;
-//
-//                if (layoutOrientation == HORIZONTAL_WRAP) {
-//                    boolean ltr = getComponentOrientation().isLeftToRight();
-//
-//                    Section section = SwingUtilities2.liesInHorizontal(rect, p, ltr, true);
-//                    if (section == TRAILING) {
-//                        index++;
-//                        between = true;
-//                    // special case for below all cells
-//                    } else if (index == getModel().getSize() - 1 && p.y >= rect.y + rect.height) {
-//                        index++;
-//                        between = true;
-//                    } else if (section == LEADING) {
-//                        between = true;
-//                    }
-//                } else {
-//                    Section section = SwingUtilities2.liesInVertical(rect, p, true);
-//                    if (section == LEADING) {
-//                        between = true;
-//                    } else if (section == TRAILING) {
-//                        index++;
-//                        between = true;
-//                    }
-//                }
-//
-//                location = new DropLocation(p, index, between);
-//
-//                break;
-//            default:
-//                assert false : "Unexpected drop mode";
-//        }
-//
-//        return location;
-//    }
-//
-//    /**
-//     * Called to set or clear the drop location during a DnD operation.
-//     * In some cases, the component may need to use it's internal selection
-//     * temporarily to indicate the drop location. To help facilitate this,
-//     * this method returns and accepts as a parameter a state object.
-//     * This state object can be used to store, and later restore, the selection
-//     * state. Whatever this method returns will be passed back to it in
-//     * future calls, as the state parameter. If it wants the DnD system to
-//     * continue storing the same state, it must pass it back every time.
-//     * Here's how this is used:
-//     * <p>
-//     * Let's say that on the first call to this method the component decides
-//     * to save some state (because it is about to use the selection to show
-//     * a drop index). It can return a state object to the caller encapsulating
-//     * any saved selection state. On a second call, let's say the drop location
-//     * is being changed to something else. The component doesn't need to
-//     * restore anything yet, so it simply passes back the same state object
-//     * to have the DnD system continue storing it. Finally, let's say this
-//     * method is messaged with <code>null</code>. This means DnD
-//     * is finished with this component for now, meaning it should restore
-//     * state. At this point, it can use the state parameter to restore
-//     * said state, and of course return <code>null</code> since there's
-//     * no longer anything to store.
-//     *
-//     * @param location the drop location (as calculated by
-//     *        <code>dropLocationForPoint</code>) or <code>null</code>
-//     *        if there's no longer a valid drop location
-//     * @param state the state object saved earlier for this component,
-//     *        or <code>null</code>
-//     * @param forDrop whether or not the method is being called because an
-//     *        actual drop occurred
-//     * @return any saved state for this component, or <code>null</code> if none
-//     */
-//    Object setDropLocation(TransferHandler.DropLocation location,
-//                           Object state,
-//                           boolean forDrop) {
-//
-//        Object retVal = null;
-//        DropLocation listLocation = (DropLocation)location;
-//
-//        if (dropMode == DropMode.USE_SELECTION) {
-//            if (listLocation == null) {
-//                if (!forDrop && state != null) {
-//                    setSelectedIndices(((int[][])state)[0]);
-//
-//                    int anchor = ((int[][])state)[1][0];
-//                    int lead = ((int[][])state)[1][1];
-//
-//                    SwingUtilities2.setLeadAnchorWithoutSelection(
-//                            getSelectionModel(), lead, anchor);
-//                }
-//            } else {
-//                if (dropLocation == null) {
-//                    int[] inds = getSelectedIndices();
-//                    retVal = new int[][] {inds, {getAnchorSelectionIndex(),
-//                                                 getLeadSelectionIndex()}};
-//                } else {
-//                    retVal = state;
-//                }
-//
-//                int index = listLocation.getIndex();
-//                if (index == -1) {
-//                    clearSelection();
-//                    getSelectionModel().setAnchorSelectionIndex(-1);
-//                    getSelectionModel().setLeadSelectionIndex(-1);
-//                } else {
-//                    setSelectionInterval(index, index);
-//                }
-//            }
-//        }
-//
-//        DropLocation old = dropLocation;
-//        dropLocation = listLocation;
-//        firePropertyChange("dropLocation", old, dropLocation);
-//
-//        return retVal;
-//    }
-//
-//    /**
-//     * Returns the location that this component should visually indicate
-//     * as the drop location during a DnD operation over the component,
-//     * or {@code null} if no location is to currently be shown.
-//     * <p>
-//     * This method is not meant for querying the drop location
-//     * from a {@code TransferHandler}, as the drop location is only
-//     * set after the {@code TransferHandler}'s <code>canImport</code>
-//     * has returned and has allowed for the location to be shown.
-//     * <p>
-//     * When this property changes, a property change event with
-//     * name "dropLocation" is fired by the component.
-//     * <p>
-//     * By default, responsibility for listening for changes to this property
-//     * and indicating the drop location visually lies with the list's
-//     * {@code ListUI}, which may paint it directly and/or install a cell
-//     * renderer to do so. Developers wishing to implement custom drop location
-//     * painting and/or replace the default cell renderer, may need to honor
-//     * this property.
-//     *
-//     * @return the drop location
-//     * @see #setDropMode
-//     * @see TransferHandler#canImport(TransferHandler.TransferSupport)
-//     * @since 1.6
-//     */
-//    public final DropLocation getDropLocation() {
-//        return dropLocation;
-//    }
+    /**
+     * Returns the drop mode for this component.
+     *
+     * @return the drop mode for this component
+     * @see #setDropMode
+     * @since 1.6
+     */
+    public final DropMode getDropMode() {
+        return dropMode;
+    }
+
+    /**
+     * Calculates a drop location in this component, representing where a
+     * drop at the given point should insert data.
+     *
+     * @param p the point to calculate a drop location for
+     * @return the drop location, or <code>null</code>
+     */
+    @Override
+	DropLocation dropLocationForPoint(Point p) {
+        DropLocation location = null;
+        Rectangle rect = null;
+
+        int index = locationToIndex(p);
+        if (index != -1) {
+            rect = getCellBounds(index, index);
+        }
+
+        switch(dropMode) {
+            case USE_SELECTION:
+            case ON:
+                location = new DropLocation(p,
+                    (rect != null && rect.contains(p)) ? index : -1,
+                    false);
+
+                break;
+            case INSERT:
+                if (index == -1) {
+                    location = new DropLocation(p, getModel().getSize(), true);
+                    break;
+                }
+
+                if (layoutOrientation == HORIZONTAL_WRAP) {
+                    boolean ltr = getComponentOrientation().isLeftToRight();
+
+                    if (SwingUtilities2.liesInHorizontal(rect, p, ltr, false) == Section.TRAILING) {
+                        index++;
+                    // special case for below all cells
+                    } else if (index == getModel().getSize() - 1 && p.y >= rect.y + rect.height) {
+                        index++;
+                    }
+                } else {
+                    if (SwingUtilities2.liesInVertical(rect, p, false) == Section.TRAILING) {
+                        index++;
+                    }
+                }
+
+                location = new DropLocation(p, index, true);
+
+                break;
+            case ON_OR_INSERT:
+                if (index == -1) {
+                    location = new DropLocation(p, getModel().getSize(), true);
+                    break;
+                }
+
+                boolean between = false;
+
+                if (layoutOrientation == HORIZONTAL_WRAP) {
+                    boolean ltr = getComponentOrientation().isLeftToRight();
+
+                    Section section = SwingUtilities2.liesInHorizontal(rect, p, ltr, true);
+                    if (section == Section.TRAILING) {
+                        index++;
+                        between = true;
+                    // special case for below all cells
+                    } else if (index == getModel().getSize() - 1 && p.y >= rect.y + rect.height) {
+                        index++;
+                        between = true;
+                    } else if (section == Section.LEADING) {
+                        between = true;
+                    }
+                } else {
+                    Section section = SwingUtilities2.liesInVertical(rect, p, true);
+                    if (section == Section.LEADING) {
+                        between = true;
+                    } else if (section == Section.TRAILING) {
+                        index++;
+                        between = true;
+                    }
+                }
+
+                location = new DropLocation(p, index, between);
+
+                break;
+            default:
+                assert false : "Unexpected drop mode";
+        }
+
+        return location;
+    }
+
+    /**
+     * Called to set or clear the drop location during a DnD operation.
+     * In some cases, the component may need to use it's internal selection
+     * temporarily to indicate the drop location. To help facilitate this,
+     * this method returns and accepts as a parameter a state object.
+     * This state object can be used to store, and later restore, the selection
+     * state. Whatever this method returns will be passed back to it in
+     * future calls, as the state parameter. If it wants the DnD system to
+     * continue storing the same state, it must pass it back every time.
+     * Here's how this is used:
+     * <p>
+     * Let's say that on the first call to this method the component decides
+     * to save some state (because it is about to use the selection to show
+     * a drop index). It can return a state object to the caller encapsulating
+     * any saved selection state. On a second call, let's say the drop location
+     * is being changed to something else. The component doesn't need to
+     * restore anything yet, so it simply passes back the same state object
+     * to have the DnD system continue storing it. Finally, let's say this
+     * method is messaged with <code>null</code>. This means DnD
+     * is finished with this component for now, meaning it should restore
+     * state. At this point, it can use the state parameter to restore
+     * said state, and of course return <code>null</code> since there's
+     * no longer anything to store.
+     *
+     * @param location the drop location (as calculated by
+     *        <code>dropLocationForPoint</code>) or <code>null</code>
+     *        if there's no longer a valid drop location
+     * @param state the state object saved earlier for this component,
+     *        or <code>null</code>
+     * @param forDrop whether or not the method is being called because an
+     *        actual drop occurred
+     * @return any saved state for this component, or <code>null</code> if none
+     */
+    @Override
+	Object setDropLocation(TransferHandler.DropLocation location,
+                           Object state,
+                           boolean forDrop) {
+
+        Object retVal = null;
+        DropLocation listLocation = (DropLocation)location;
+
+        if (dropMode == DropMode.USE_SELECTION) {
+            if (listLocation == null) {
+                if (!forDrop && state != null) {
+                    setSelectedIndices(((int[][])state)[0]);
+
+                    int anchor = ((int[][])state)[1][0];
+                    int lead = ((int[][])state)[1][1];
+
+                    SwingUtilities2.setLeadAnchorWithoutSelection(
+                            getSelectionModel(), lead, anchor);
+                }
+            } else {
+                if (dropLocation == null) {
+                    int[] inds = getSelectedIndices();
+                    retVal = new int[][] {inds, {getAnchorSelectionIndex(),
+                                                 getLeadSelectionIndex()}};
+                } else {
+                    retVal = state;
+                }
+
+                int index = listLocation.getIndex();
+                if (index == -1) {
+                    clearSelection();
+                    getSelectionModel().setAnchorSelectionIndex(-1);
+                    getSelectionModel().setLeadSelectionIndex(-1);
+                } else {
+                    setSelectionInterval(index, index);
+                }
+            }
+        }
+
+        DropLocation old = dropLocation;
+        dropLocation = listLocation;
+        firePropertyChange("dropLocation", old, dropLocation);
+
+        return retVal;
+    }
+
+    /**
+     * Returns the location that this component should visually indicate
+     * as the drop location during a DnD operation over the component,
+     * or {@code null} if no location is to currently be shown.
+     * <p>
+     * This method is not meant for querying the drop location
+     * from a {@code TransferHandler}, as the drop location is only
+     * set after the {@code TransferHandler}'s <code>canImport</code>
+     * has returned and has allowed for the location to be shown.
+     * <p>
+     * When this property changes, a property change event with
+     * name "dropLocation" is fired by the component.
+     * <p>
+     * By default, responsibility for listening for changes to this property
+     * and indicating the drop location visually lies with the list's
+     * {@code ListUI}, which may paint it directly and/or install a cell
+     * renderer to do so. Developers wishing to implement custom drop location
+     * painting and/or replace the default cell renderer, may need to honor
+     * this property.
+     *
+     * @return the drop location
+     * @see #setDropMode
+     * @see TransferHandler#canImport(TransferHandler.TransferSupport)
+     * @since 1.6
+     */
+    public final DropLocation getDropLocation() {
+        return dropLocation;
+    }
 
     /**
      * Returns the next list element whose {@code toString} value
@@ -1419,7 +1434,7 @@ public class JList extends JComponent implements Scrollable//, Accessible
      * @since 1.4
      */
     public int getNextMatch(String prefix, int startIndex, Position.Bias bias) {
-        ListModel model = getModel();
+        ListModel<E> model = getModel();
         int max = model.getSize();
         if (prefix == null) {
             throw new IllegalArgumentException();
@@ -1433,16 +1448,16 @@ public class JList extends JComponent implements Scrollable//, Accessible
         int increment = (bias == Position.Bias.Forward) ? 1 : -1;
         int index = startIndex;
         do {
-            Object o = model.getElementAt(index);
+            E element = model.getElementAt(index);
 
-            if (o != null) {
+            if (element != null) {
                 String string;
 
-                if (o instanceof String) {
-                    string = ((String)o).toUpperCase();
+                if (element instanceof String) {
+                    string = ((String)element).toUpperCase();
                 }
                 else {
-                    string = o.toString();
+                    string = element.toString();
                     if (string != null) {
                         string = string.toUpperCase();
                     }
@@ -1465,7 +1480,7 @@ public class JList extends JComponent implements Scrollable//, Accessible
      * tooltip text on the cell level, by using {@code setToolTipText} on your
      * cell renderer component.
      * <p>
-     * <bold>Note:</bold> For <code>JList</code> to properly display the
+     * <strong>Note:</strong> For <code>JList</code> to properly display the
      * tooltips of its renderers in this manner, <code>JList</code> must be a
      * registered component with the <code>ToolTipManager</code>. This registration
      * is done automatically in the constructor. However, if at a later point
@@ -1477,24 +1492,24 @@ public class JList extends JComponent implements Scrollable//, Accessible
      * @see JComponent#getToolTipText
      */
     @Override
-		public String getToolTipText(MouseEvent event) {
+	public String getToolTipText(MouseEvent event) {
         if(event != null) {
             Point p = event.getPoint();
             int index = locationToIndex(p);
-            ListCellRenderer r = getCellRenderer();
+            ListCellRenderer<? super E> r = getCellRenderer();
             Rectangle cellBounds;
 
             if (index != -1 && r != null && (cellBounds =
                                getCellBounds(index, index)) != null &&
                                cellBounds.contains(p.x, p.y)) {
                 ListSelectionModel lsm = getSelectionModel();
-                JComponent rComponent = r.getListCellRendererComponent(
+                Component rComponent = r.getListCellRendererComponent(
                            this, getModel().getElementAt(index), index,
                            lsm.isSelectedIndex(index),
                            (hasFocus() && (lsm.getLeadSelectionIndex() ==
                                            index)));
 
-//                if(rComponent instanceof JComponent) {
+                if(rComponent instanceof JComponent) {
                     MouseEvent      newEvent;
 
                     p.translate(-cellBounds.x, -cellBounds.y);
@@ -1514,7 +1529,7 @@ public class JList extends JComponent implements Scrollable//, Accessible
                     if (tip != null) {
                         return tip;
                     }
-//                }
+                }
             }
         }
         return super.getToolTipText();
@@ -1599,7 +1614,7 @@ public class JList extends JComponent implements Scrollable//, Accessible
      *                          list of items
      * @see #setModel
      */
-    public ListModel getModel() {
+    public ListModel<E> getModel() {
         return dataModel;
     }
 
@@ -1621,11 +1636,11 @@ public class JList extends JComponent implements Scrollable//, Accessible
      *   attribute: visualUpdate true
      * description: The object that contains the data to be drawn by this JList.
      */
-    public void setModel(ListModel model) {
+    public void setModel(ListModel<E> model) {
         if (model == null) {
             throw new IllegalArgumentException("model must be non null");
         }
-        ListModel oldValue = dataModel;
+        ListModel<E> oldValue = dataModel;
         dataModel = model;
         firePropertyChange("model", oldValue, dataModel);
         clearSelection();
@@ -1633,7 +1648,7 @@ public class JList extends JComponent implements Scrollable//, Accessible
 
 
     /**
-     * Constructs a read-only <code>ListModel</code> from an array of objects,
+     * Constructs a read-only <code>ListModel</code> from an array of items,
      * and calls {@code setModel} with this model.
      * <p>
      * Attempts to pass a {@code null} value to this method results in
@@ -1641,15 +1656,15 @@ public class JList extends JComponent implements Scrollable//, Accessible
      * references the given array directly. Attempts to modify the array
      * after invoking this method results in undefined behavior.
      *
-     * @param listData an array of {@code Objects} containing the items to
+     * @param listData an array of {@code E} containing the items to
      *        display in the list
      * @see #setModel
      */
-    public void setListData(final Object[] listData) {
+    public void setListData(final E[] listData) {
         setModel (
             new AbstractListModel() {
                 @Override
-								public int getSize() { return listData.length; }
+                public int getSize() { return listData.length; }
                 @Override
 								public Object getElementAt(int i) { return listData[i]; }
             }
@@ -1670,13 +1685,13 @@ public class JList extends JComponent implements Scrollable//, Accessible
      *                                          display in the list
      * @see #setModel
      */
-    public void setListData(final Vector<?> listData) {
+    public void setListData(final Vector<? extends E> listData) {
         setModel (
-            new AbstractListModel() {
+            new AbstractListModel<E>() {
                 @Override
-								public int getSize() { return listData.size(); }
+				public int getSize() { return listData.size(); }
                 @Override
-								public Object getElementAt(int i) { return listData.elementAt(i); }
+				public E getElementAt(int i) { return listData.elementAt(i); }
             }
         );
     }
@@ -1762,10 +1777,11 @@ public class JList extends JComponent implements Scrollable//, Accessible
      * forwarded events only differ from the originals in that their
      * source is the JList instead of the selectionModel itself.
      */
-    private class ListSelectionHandler implements ListSelectionListener
+    @SuppressWarnings("serial")
+	private class ListSelectionHandler implements ListSelectionListener, Serializable
     {
         @Override
-				public void valueChanged(ListSelectionEvent e) {
+		public void valueChanged(ListSelectionEvent e) {
             fireSelectionValueChanged(e.getFirstIndex(),
                                       e.getLastIndex(),
                                       e.getValueIsAdjusting());
@@ -1818,8 +1834,7 @@ public class JList extends JComponent implements Scrollable//, Accessible
      * @since 1.4
      */
     public ListSelectionListener[] getListSelectionListeners() {
-        return (ListSelectionListener[])listenerList.getListeners(
-                ListSelectionListener.class);
+        return listenerList.getListeners(ListSelectionListener.class);
     }
 
 
@@ -2205,10 +2220,13 @@ public class JList extends JComponent implements Scrollable//, Accessible
      * @see #isSelectedIndex
      * @see #getModel
      * @see #addListSelectionListener
+     *
+     * @deprecated As of JDK 1.7, replaced by {@link #getSelectedValuesList()}
      */
+    @Deprecated
     public Object[] getSelectedValues() {
         ListSelectionModel sm = getSelectionModel();
-        ListModel dm = getModel();
+        ListModel<E> dm = getModel();
 
         int iMin = sm.getMinSelectionIndex();
         int iMax = sm.getMaxSelectionIndex();
@@ -2227,6 +2245,37 @@ public class JList extends JComponent implements Scrollable//, Accessible
         Object[] rv = new Object[n];
         System.arraycopy(rvTmp, 0, rv, 0, n);
         return rv;
+    }
+
+    /**
+     * Returns a list of all the selected items, in increasing order based
+     * on their indices in the list.
+     *
+     * @return the selected items, or an empty list if nothing is selected
+     * @see #isSelectedIndex
+     * @see #getModel
+     * @see #addListSelectionListener
+     *
+     * @since 1.7
+     */
+    public List<E> getSelectedValuesList() {
+        ListSelectionModel sm = getSelectionModel();
+        ListModel<E> dm = getModel();
+
+        int iMin = sm.getMinSelectionIndex();
+        int iMax = sm.getMaxSelectionIndex();
+
+        if ((iMin < 0) || (iMax < 0)) {
+            return Collections.emptyList();
+        }
+
+        List<E> selectedItems = new ArrayList<E>();
+        for(int i = iMin; i <= iMax; i++) {
+            if (sm.isSelectedIndex(i)) {
+                selectedItems.add(dm.getElementAt(i));
+            }
+        }
+        return selectedItems;
     }
 
 
@@ -2261,7 +2310,7 @@ public class JList extends JComponent implements Scrollable//, Accessible
      * @see #getModel
      * @see #addListSelectionListener
      */
-    public Object getSelectedValue() {
+    public E getSelectedValue() {
         int i = getMinSelectionIndex();
         return (i == -1) ? null : getModel().getElementAt(i);
     }
@@ -2279,7 +2328,7 @@ public class JList extends JComponent implements Scrollable//, Accessible
             setSelectedIndex(-1);
         else if(!anObject.equals(getSelectedValue())) {
             int i,c;
-            ListModel dm = getModel();
+            ListModel<E> dm = getModel();
             for(i=0,c=dm.getSize();i<c;i++)
                 if(anObject.equals(dm.getElementAt(i))){
                     setSelectedIndex(i);
@@ -2351,7 +2400,7 @@ public class JList extends JComponent implements Scrollable//, Accessible
      * @see #setPrototypeCellValue
      */
     @Override
-		public Dimension getPreferredScrollableViewportSize()
+	public Dimension getPreferredScrollableViewportSize()
     {
         if (getLayoutOrientation() != VERTICAL) {
             return getPreferredSize();
@@ -2412,7 +2461,7 @@ public class JList extends JComponent implements Scrollable//, Accessible
      *         {@code SwingConstants.HORIZONTAL}
      */
     @Override
-		public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction)
+	public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction)
     {
         checkScrollableParameters(visibleRect, orientation);
 
@@ -2559,7 +2608,7 @@ public class JList extends JComponent implements Scrollable//, Accessible
      *         {@code SwingConstants.HORIZONTAL}
      */
     @Override
-		public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+	public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
         checkScrollableParameters(visibleRect, orientation);
         if (orientation == SwingConstants.VERTICAL) {
             int inc = visibleRect.height;
@@ -2691,13 +2740,14 @@ public class JList extends JComponent implements Scrollable//, Accessible
      * @see Scrollable#getScrollableTracksViewportWidth
      */
     @Override
-		public boolean getScrollableTracksViewportWidth() {
+	public boolean getScrollableTracksViewportWidth() {
         if (getLayoutOrientation() == HORIZONTAL_WRAP &&
                                       getVisibleRowCount() <= 0) {
             return true;
         }
-        if (getParent() instanceof JViewport) {
-            return (((JViewport)getParent()).getWidth() > getPreferredSize().width);
+        Container parent = SwingUtilities.getUnwrappedParent(this);
+        if (parent instanceof JViewport) {
+            return parent.getWidth() > getPreferredSize().width;
         }
         return false;
     }
@@ -2717,13 +2767,14 @@ public class JList extends JComponent implements Scrollable//, Accessible
      * @see Scrollable#getScrollableTracksViewportHeight
      */
     @Override
-		public boolean getScrollableTracksViewportHeight() {
+	public boolean getScrollableTracksViewportHeight() {
         if (getLayoutOrientation() == VERTICAL_WRAP &&
                      getVisibleRowCount() <= 0) {
             return true;
         }
-        if (getParent() instanceof JViewport) {
-            return (((JViewport)getParent()).getHeight() > getPreferredSize().height);
+        Container parent = SwingUtilities.getUnwrappedParent(this);
+        if (parent instanceof JViewport) {
+            return parent.getHeight() > getPreferredSize().height;
         }
         return false;
     }
@@ -2743,7 +2794,7 @@ public class JList extends JComponent implements Scrollable//, Accessible
 //            }
 //        }
 //    }
-//
+
 
     /**
      * Returns a {@code String} representation of this {@code JList}.
@@ -2755,7 +2806,7 @@ public class JList extends JComponent implements Scrollable//, Accessible
      * @return  a {@code String} representation of this {@code JList}.
      */
     @Override
-		protected String paramString() {
+	protected String paramString() {
         String selectionForegroundString = (selectionForeground != null ?
                                             selectionForeground.toString() :
                                             "");
@@ -2772,6 +2823,7 @@ public class JList extends JComponent implements Scrollable//, Accessible
         ",visibleRowCount=" + visibleRowCount +
         ",layoutOrientation=" + layoutOrientation;
     }
+
 
 //
 //    /**
@@ -2806,7 +2858,7 @@ public class JList extends JComponent implements Scrollable//, Accessible
 //     * future Swing releases. The current serialization support is
 //     * appropriate for short term storage or RMI between applications running
 //     * the same version of Swing.  As of 1.4, support for long term storage
-//     * of all JavaBeans<sup><font size="-2">TM</font></sup>
+//     * of all JavaBeans&trade;
 //     * has been added to the <code>java.beans</code> package.
 //     * Please see {@link java.beans.XMLEncoder}.
 //     */
@@ -3112,14 +3164,14 @@ public class JList extends JComponent implements Scrollable//, Accessible
 //           */
 //        protected class AccessibleJListChild extends AccessibleContext
 //                implements Accessible, AccessibleComponent {
-//            private JList     parent = null;
+//            private JList<E>     parent = null;
 //            private int       indexInParent;
 //            private Component component = null;
 //            private AccessibleContext accessibleContext = null;
-//            private ListModel listModel;
-//            private ListCellRenderer cellRenderer = null;
+//            private ListModel<E> listModel;
+//            private ListCellRenderer<? super E> cellRenderer = null;
 //
-//            public AccessibleJListChild(JList parent, int indexInParent) {
+//            public AccessibleJListChild(JList<E> parent, int indexInParent) {
 //                this.parent = parent;
 //                this.setAccessibleParent(parent);
 //                this.indexInParent = indexInParent;
@@ -3136,7 +3188,7 @@ public class JList extends JComponent implements Scrollable//, Accessible
 //            private AccessibleContext getCurrentAccessibleContext() {
 //                Component c = getComponentAtIndex(indexInParent);
 //                if (c instanceof Accessible) {
-//                    return ((Accessible) c).getAccessibleContext();
+//                    return c.getAccessibleContext();
 //                } else {
 //                    return null;
 //                }
@@ -3149,7 +3201,7 @@ public class JList extends JComponent implements Scrollable//, Accessible
 //                if ((parent != null)
 //                        && (listModel != null)
 //                        && cellRenderer != null) {
-//                    Object value = listModel.getElementAt(index);
+//                    E value = listModel.getElementAt(index);
 //                    boolean isSelected = parent.isSelectedIndex(index);
 //                    boolean isFocussed = parent.isFocusOwner()
 //                            && (index == parent.getLeadSelectionIndex());

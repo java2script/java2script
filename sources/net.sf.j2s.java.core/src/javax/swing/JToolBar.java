@@ -496,7 +496,7 @@ public class JToolBar extends JComponent implements SwingConstants {
 	 * 
 	 */
 	@Override
-	protected Component addImpl(Component comp, Object constraints, int index) {
+	protected void addImpl(Component comp, Object constraints, int index) {
 		if (comp instanceof Separator) {
 			if (getOrientation() == VERTICAL) {
 				((Separator) comp).setOrientation(JSeparator.HORIZONTAL);
@@ -508,7 +508,6 @@ public class JToolBar extends JComponent implements SwingConstants {
 		if (comp instanceof JButton) {
 			((JButton) comp).setDefaultCapable(false);
 		}
-		return comp;
 	}
 
 	/**

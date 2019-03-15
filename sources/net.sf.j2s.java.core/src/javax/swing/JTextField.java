@@ -456,8 +456,8 @@ public class JTextField extends JTextComponent implements SwingConstants {
 	}
 
 	protected Dimension getMinimumSizeJTF(int columns) {
-    	// for java.awt.JextField only
-    	Dimension size = getMinimumSize();
+    	// for java.awt.TextField only
+    	Dimension size = super.getMinimumSize();
 		if (columns != 0) {
 			size.width = getJ2SWidth(columns);
 		}
