@@ -100,16 +100,16 @@ try{
 		}
 		break;
 	 case "clearOut":
-		 System.err.println("click removed " + me.uuid);
+		 //System.err.println("click removed " + me.uuid);
 		 me._off(me.document, "click");
 		 outActive = null;
 		 return;
 	 case "noclickout":
-		 System.err.println("noclickout " + me.uuid + " " + (+new Date));
+		 //System.err.println("noclickout " + me.uuid + " " + (+new Date));
 		 if (outActive)
 			 doCmd("clearOut", outActive);
 		 setTimeout(function(){	
-			 System.err.println("click added " + me.uuid);
+			 //System.err.println("click added " + me.uuid);
 			 outActive = me;
 			 me._on(me.document,{ "click":function(t){doCmd("onclick_out", me, $, t),n=!1}});			 
 			 
@@ -120,7 +120,7 @@ try{
 			 doCmd("clearOut", me);
 			 return;
 		 }		 
-		 System.err.println("onclick_out " + me.uuid + " " + (+new Date));
+		 //System.err.println("onclick_out " + me.uuid + " " + (+new Date));
 		 e(t.target).closest(".j2s-menuBar-menu").length == 0 
 		    && (e(t.target).closest(".ui-j2smenu").length||me.collapseAll(t));
 	 	return;
@@ -211,7 +211,7 @@ try{
 			  ((u=e(t&&t.target)).hasClass("ui-j2smenu-node") || u.hasClass("ui-j2smenu"))
 			))
 			 return;
-		 System.err.println("collapseAll " + me.uuid);
+		 //System.err.println("collapseAll " + me.uuid);
 		 clearMe(me.timer, trigger),
 		 me.timer = delayMe(me,
 	       function(){
