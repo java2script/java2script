@@ -1042,9 +1042,9 @@ public class JRootPane extends JComponent {
 	
 	@Override
 	public Insets getInsets() {
-		if (isAWT) {
-			return getTopLevelAncestor().getInsets();
-		}
+//		if (isAWT) {
+//			return getTopLevelAncestor().getInsets();
+//		}
 		return super.getInsets();
 	}
 
