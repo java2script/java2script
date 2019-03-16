@@ -118,16 +118,10 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 
 	String itemHTML = null;
 
-	private JScrollPane scrollPane;
-
 	@Override
 	public DOMNode updateDOMNode() {
 		list = (JList) jc;
 		if (domNode == null) {
-
-			
-			/**@j2sNative xxL = this.jc; */
-			
 			
 			focusNode = enableNode = newDOMObject("div", id);
 			// maybe DOMNode.setAttrInt(domNode, "tabIndex", 1);
@@ -143,12 +137,6 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 			fillDOM();
 		}
 		
-		if (isAWT && scrollPane == null && list.getParent() != null) {
-			JComponent parent = (JComponent) list.getParent();
-			scrollPane = new JScrollPane();
-			scrollPane.getViewport().setView(list);
-			parent.add(scrollPane);
-		}
 		return updateDOMNodeCUI();
 	}
 
@@ -2245,7 +2233,7 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 					type = CHANGE_SELECTION;
 				}
 
-				// IMPORTANT - This needs to happen before the index is changed.
+				// importANT - This needs to happen before the index is changed.
 				// This is because JFileChooser, which uses JList, also scrolls
 				// the selected item into view. If that happens first, then
 				// this method becomes a no-op.
