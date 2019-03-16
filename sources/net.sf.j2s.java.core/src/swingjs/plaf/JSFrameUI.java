@@ -89,7 +89,6 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 				h = defaultHeight;
 			DOMNode.setSize(frameNode, w, h);
 			DOMNode.setTopLeftAbsolute(frameNode, 0, 0);
-			setJ2sMouseHandler();
 			titleBarNode = newDOMObject("div", id + "_titlebar");
 			DOMNode.setTopLeftAbsolute(titleBarNode, 0, 0);
 			DOMNode.setStyles(titleBarNode, "background-color", "#E0E0E0", "height", "20px", "font-size", "14px",
@@ -106,12 +105,13 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			DOMNode.setTopLeftAbsolute(closerWrap, 0, 0);
 			DOMNode.setStyles(closerWrap, "text-align", "right");
 
-			closerNode = newDOMObject("label", id + "_closer", "innerHTML", "X");
-			DOMNode.setStyles(closerNode, "width", "20px", "height", "20px", "position", "absolute", "text-align",
-					"center", "right", "0px");
-			bindJQueryEvents(closerNode, "click mouseenter mouseout", SOME_MOUSE_EVENT);
-			if (!frame.isUndecorated())
+			if (!frame.isUndecorated()) {
+				closerNode = newDOMObject("label", id + "_closer", "innerHTML", "X");
+				DOMNode.setStyles(closerNode, "width", "20px", "height", "20px", "position", "absolute", "text-align",
+						"center", "right", "0px");
 				frameNode.appendChild(titleBarNode);
+			}
+			bindWindowEvents();
 			if (isModal) {
 				modalNode = DOMNode.createElement("div", id + "_modaldiv");
 				Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
@@ -332,18 +332,20 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	public void setVisible(boolean b) {
 		if (isDummyFrame)
 			b = false;
-	  super.setVisible(b);
-	  if (isModal) {
-		  if (b) {
-			  $(body).after(modalNode);
-			  addClass(modalNode, "swingjs-window"); // so as to slip into z-index ranking
-			  String sz = DOMNode.getStyle(domNode, "z-index");
-			  int z = (( /** @j2sNative +sz || */getZIndex(null))) - 1;
-			  DOMNode.setZ(modalNode, z);
-		  }
-		  DOMNode.setVisible(modalNode, b);
-	  }
-	  DOMNode.setVisible(domNode, b);		  
+		super.setVisible(b);
+		if (isModal) {
+			if (b) {
+				$(body).after(modalNode);
+				addClass(modalNode, "swingjs-window"); // so as to slip into z-index ranking
+				@SuppressWarnings("unused")
+				String sz = DOMNode.getStyle(domNode, "z-index");
+				int z = (( /** @j2sNative +sz || */
+				getZIndex(null))) - 1;
+				DOMNode.setZ(modalNode, z);
+			}
+			DOMNode.setVisible(modalNode, b);
+		}
+		DOMNode.setVisible(domNode, b);
 	}
 
 }

@@ -15,6 +15,7 @@ import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
 import java.awt.peer.WindowPeer;
 
+import javax.swing.JComponent;
 import javax.swing.JWindow;
 
 import swingjs.JSAppletViewer;
@@ -83,6 +84,7 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 		if (domNode == null) {
 			containerNode = domNode = newDOMObject("div", id);
 			setWindowClass();
+			bindWindowEvents();
 		}
 		return domNode;
 	}   
@@ -202,10 +204,46 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 
 	@Override
 	public void dispose() {
+		System.out.println("window disposed");
 		J2S.unsetMouse(domNode);
-		DOMNode.dispose(outerNode);
 		if (modalNode != null)
 			DOMNode.dispose(modalNode);
+		super.dispose();
+	}	
+	
+	@Override
+	public void beginValidate() {
+		if (isDisposed) {
+			setChildVisibilities(window);
+		}
+	}
+
+	@Override
+	public void endValidate() {
+		if (isDisposed) {
+			undisposeUI(null);
+			bindWindowEvents();
+			isDisposed = false;
+		}
+	}
+
+	protected void bindWindowEvents() {
+		setJ2sMouseHandler();
+		if (closerNode != null)
+			bindJQueryEvents(closerNode, "click mouseenter mouseout", SOME_MOUSE_EVENT);
+	}
+
+	private static void setChildVisibilities(JComponent jc) {
+		for (int i = jc.getComponentCount(); --i >= 0;) {
+			JComponent c = (JComponent) jc.getComponent(i);
+			setChildVisibilities(c);
+		}
+		JSComponentUI ui = (JSComponentUI) jc.ui;
+//		ui.isTainted = true;
+//		ui.domNode = null;
+//		ui.updateDOMNode();
+		if (jc.isVisible())
+			ui.setVisible(true);
 	}
 
 	@Override

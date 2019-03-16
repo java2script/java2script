@@ -42,6 +42,12 @@ public class JSTextFieldUI extends JSTextUI {
 	}
 
 	@Override
+	protected void undisposeUI(DOMNode node) {
+		super.undisposeUI(node);
+		bindJSKeyEvents(focusNode, true);		
+	}
+
+	@Override
 	protected Dimension getCSSAdjustment(boolean addingCSS) {
 		return new Dimension(0, addingCSS ? 0 : -2);
 	}

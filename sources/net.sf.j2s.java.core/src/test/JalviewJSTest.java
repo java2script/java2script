@@ -34,6 +34,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.MenuElement;
 import javax.swing.MenuSelectionManager;
@@ -59,7 +60,14 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 	private JMenuItem testbtn;
 
 	JMenuBar mb = new JMenuBar();
-	JFrame frame = new JFrame("JalviewJSTest");
+	JFrame frame = new JFrame("JalviewJSTest") {
+		
+		public void invalidate() {
+			System.out.println("frame invalidate");
+			super.invalidate();
+		}
+		
+	};
 	JMenu mRight = new JMenu("right") 		{
 		@Override
 		public void processKeyEvent(KeyEvent e, MenuElement[] path, MenuSelectionManager m) {
@@ -174,8 +182,9 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				
-				System.out.println(menu.getHeight() + " " + menu.getMargin());
-				
+				frame.dispose();
+				System.out.println("frame after dispose " + frame.isValid());
+				frame.show();
 				
 			}
 
@@ -248,6 +257,18 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		firstColumn.setLayout(new GridLayout(13, 1));
 		firstColumn.setBorder(new TitledBorder("column 1"));
 
+		JTextField t1 = new JTextField("testing");
+		t1.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("t1 is " + t1.getText());
+			}
+			
+		});
+		
+
+
 		JLabel l1 = new JLabel(getImage("test2.png"));
 		l1.setText("trailing right");
 		l1.setHorizontalTextPosition(SwingConstants.TRAILING);
@@ -298,6 +319,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		rb3.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		rb3.setHorizontalTextPosition(SwingConstants.RIGHT);
 
+		firstColumn.add(t1);
 		firstColumn.add(l1);
 		firstColumn.add(l2);
 		firstColumn.add(b1);
@@ -315,7 +337,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		cb3m.setHorizontalTextPosition(SwingConstants.LEADING);
 		cb3m.addActionListener(listener);
 
-		JCheckBoxMenuItem cb4m = new JCheckBoxMenuItem("XXleading,right-to-leftXX") {
+		JCheckBoxMenuItem cb4m = new JCheckBoxMenuItem("CB4XXleading,right-to-leftXX") {
 			@Override
 			public void doClick() {
 				super.doClick();

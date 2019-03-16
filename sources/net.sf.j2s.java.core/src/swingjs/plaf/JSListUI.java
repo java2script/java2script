@@ -141,6 +141,13 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 	}
 
 	@Override
+	protected void undisposeUI(DOMNode node) {
+		super.undisposeUI(node);
+		bindJSKeyEvents(focusNode, true);		
+	}
+
+
+	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
 		switch (eventType) {
 		case SOME_KEY_EVENT:
