@@ -216,7 +216,7 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 	@Override
 	public void setVisible(boolean b) {
 		if (!isPopup)
-			hideAllMenus();
+			hideMenusAndToolTip();
 		super.setVisible(b);
 	}
 
@@ -231,25 +231,25 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 
 	@Override
 	public void windowClosing(WindowEvent e) {
-		hideAllMenus();
+		hideMenusAndToolTip();
 	}
 
 
 	@Override
 	public void windowClosed(WindowEvent e) {
-		hideAllMenus();
+		hideMenusAndToolTip();
 	}
 
 
 	@Override
 	public void windowIconified(WindowEvent e) {
-		hideAllMenus();
+		hideMenusAndToolTip();
 	}
 
 
 	@Override
 	public void windowDeiconified(WindowEvent e) {
-		hideAllMenus();
+		hideMenusAndToolTip();
 	}
 
 
@@ -262,31 +262,31 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 
 	@Override
 	public void windowDeactivated(WindowEvent e) {
-		hideAllMenus();
+		hideMenusAndToolTip();
 	}
 
 
 	@Override
 	public void componentResized(ComponentEvent e) {
-		hideAllMenus();
+		hideMenusAndToolTip();
 	}
 
 
 	@Override
 	public void componentMoved(ComponentEvent e) {
-		hideAllMenus();
+		hideMenusAndToolTip();
 	}
 
 
 	@Override
 	public void componentShown(ComponentEvent e) {
-		hideAllMenus();
+		hideMenusAndToolTip();
 	}
 
 
 	@Override
 	public void componentHidden(ComponentEvent e) {
-		hideAllMenus();
+		hideMenusAndToolTip();
 	}
 
 }

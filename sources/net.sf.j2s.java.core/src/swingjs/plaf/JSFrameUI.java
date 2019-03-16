@@ -177,7 +177,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	 * referenced by j2sNative, above
 	 */
 	/*not private*/ void hideMenu() {
-		hideAllMenus();
+		hideMenusAndToolTip();
 	}
 
 

@@ -572,6 +572,11 @@ public class JSComponentUI extends ComponentUI
 	protected static JQuery jquery = JSUtil.getJQuery();
 
 	/**
+	 * A static flag indicating that we have a menu open
+	 */
+	protected static boolean isMenuOpen;
+
+	/**
 	 * JavaScript menu timer id
 	 */
 	protected int menuTimer;
@@ -760,8 +765,9 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	@SuppressWarnings("unused")
-	protected static void hideAllMenus() {
-		JSUtil.jQuery.$(".ui-j2smenu").hide();
+	protected static void hideMenusAndToolTip() {
+		if (isMenuOpen)
+			JSPopupMenuUI.closeAllMenus();
 		if (/** @j2sNative javax.swing.ToolTipManager ||*/false)
 			ToolTipManager.j2sHideToolTip();
 	}
