@@ -1070,9 +1070,13 @@ public class Container extends JSComponent {
     	addImplCont(comp, constraints, index);
     }
 
+	@SuppressWarnings("unused")
 	protected void addImplCont(Component comp, Object constraints, int index) {
 		synchronized (getTreeLock()) {
-
+			
+			if (/** @j2sNative comp.getWrap$  && !this.isWrapper$ || */ false) {
+				comp = ((A2SWrappedComponent) comp).getWrap$();
+			}
 			// SwingJS used for all add methods
 
 			/*
@@ -1246,8 +1250,15 @@ public class Container extends JSComponent {
      * @see #validate
      * @see #remove(int)
      */
-    public void remove(Component comp) {
+    @SuppressWarnings("unused")
+	public void remove(Component comp) {
 		synchronized (getTreeLock()) {
+
+			if (/** @j2sNative comp.getWrap$ && !this.isWrapper$ || */ false) {
+				comp = ((A2SWrappedComponent) comp).getWrap$();
+			}
+
+			
 			if (comp.parent == this) {
 				int index = component.indexOf(comp);
 				if (index >= 0) {
