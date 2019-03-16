@@ -842,7 +842,7 @@ public class Window extends JComponent {
 		
 	@Override
 	public Dimension getPreferredSize() {
-		return preferredSizeContainer();
+		return preferredSize();// for AWT classes
 	}
 	
 	
