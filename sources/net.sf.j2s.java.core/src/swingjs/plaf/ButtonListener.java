@@ -303,7 +303,7 @@ public class ButtonListener
 		if (s == "MenuUI")
 			return true;
 		if (s.indexOf("MenuItemUI") >= 0)
-			JSComponentUI.hideAllMenus();
+			JSComponentUI.hideMenusAndToolTip();
 		return false;
 	}
 
@@ -393,7 +393,7 @@ public class ButtonListener
 			case SELECT:
 				JMenu menu = getMenu(e);
 				if (menu.isTopLevelMenu()) {
-					JSComponentUI.hideAllMenus();
+					JSComponentUI.hideMenusAndToolTip();
 					JPopupMenu p = menu.getPopupMenu();
 					menu.setPopupMenuVisible(!p.isVisible());
 					return;

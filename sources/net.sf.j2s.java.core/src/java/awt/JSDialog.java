@@ -27,6 +27,7 @@
  */
 package java.awt;
 
+import java.awt.Dialog.ModalityType;
 import java.awt.event.ComponentEvent;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.WindowEvent;
@@ -34,6 +35,8 @@ import java.awt.peer.ComponentPeer;
 import java.awt.peer.DialogPeer;
 import java.util.ArrayList;
 import java.util.Iterator;
+
+import swingjs.plaf.JSDialogUI;
 
 /**
  * A Dialog is a top-level window with a title and a border
@@ -839,10 +842,14 @@ public class JSDialog extends Window {
 
 		closeSplashScreen();
 
-		// synchronized (getTreeLock()) {
+    	if (ui != null && ((JSDialogUI) ui).isDisposed)
+    		addNotify();
+    	// synchronized (getTreeLock()) {
 		// if (peer == null) {
 		// addNotify();
 		// }
+		
+		
 		validate();
 		if (visible) {
 			toFront();

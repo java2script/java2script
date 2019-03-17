@@ -114,9 +114,14 @@ import swingjs.JSGraphics2D;
  * @author Philip Milne
  * @see JScrollPane
  */
-public class JViewport extends JComponent
+public class JViewport extends JComponent implements JSComponent.A2SComponentWrapper
 {
-    /** Property used to indicate window blitting should not be done.
+
+	// BH for SwingJS
+	public void isWrapper$() {};
+	
+
+	/** Property used to indicate window blitting should not be done.
      */
     static final Object EnableWindowBlit = "EnableWindowBlit";
 

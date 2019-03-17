@@ -58,6 +58,7 @@ import swingjs.JSToolkit;
 //import java.util.logging.Logger;
 import swingjs.JSUtil;
 import swingjs.plaf.JSComponentUI;
+import swingjs.plaf.JSWindowUI;
 
 /**
  * 
@@ -842,7 +843,7 @@ public class Window extends JComponent {
 		
 	@Override
 	public Dimension getPreferredSize() {
-		return preferredSizeContainer();
+		return preferredSize();// for AWT classes
 	}
 	
 	
@@ -890,6 +891,9 @@ public class Window extends JComponent {
     @Override
 		@Deprecated
     public void show() {
+    	
+    	if (ui != null && ((JSWindowUI) ui).isDisposed)
+    		addNotify();
 //        if (peer == null) {
 //            addNotify();
 //        }

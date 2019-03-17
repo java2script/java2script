@@ -40,6 +40,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import javax.swing.event.EventListenerList;
 import javax.swing.event.TreeExpansionEvent;
@@ -61,6 +62,9 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+
+import sun.swing.SwingUtilities2;
+import sun.swing.SwingUtilities2.Section;
 
 
 /**
@@ -326,137 +330,137 @@ public class JTree extends JComponent implements Scrollable
     /** If true, mouse presses on selections initiate a drag operation. */
     private boolean dragEnabled;
 
-//    /**
-//     * The drop mode for this component.
-//     */
-//    private DropMode dropMode = DropMode.USE_SELECTION;
-//
-//    /**
-//     * The drop location.
-//     */
-//    private transient DropLocation dropLocation;
-//
-//    /**
-//     * A subclass of <code>TransferHandler.DropLocation</code> representing
-//     * a drop location for a <code>JTree</code>.
-//     *
-//     * @see #getDropLocation
-//     * @since 1.6
-//     */
-//    public static final class DropLocation extends TransferHandler.DropLocation {
-//        private final TreePath path;
-//        private final int index;
-//
-//        private DropLocation(Point p, TreePath path, int index) {
-//            super(p);
-//            this.path = path;
-//            this.index = index;
-//        }
-//
-//        /**
-//         * Returns the index where the dropped data should be inserted
-//         * with respect to the path returned by <code>getPath()</code>.
-//         * <p>
-//         * For drop modes <code>DropMode.USE_SELECTION</code> and
-//         * <code>DropMode.ON</code>, this index is unimportant (and it will
-//         * always be <code>-1</code>) as the only interesting data is the
-//         * path over which the drop operation occurred.
-//         * <p>
-//         * For drop mode <code>DropMode.INSERT</code>, this index
-//         * indicates the index at which the data should be inserted into
-//         * the parent path represented by <code>getPath()</code>.
-//         * <code>-1</code> indicates that the drop occurred over the
-//         * parent itself, and in most cases should be treated as inserting
-//         * into either the beginning or the end of the parent's list of
-//         * children.
-//         * <p>
-//         * For <code>DropMode.ON_OR_INSERT</code>, this value will be
-//         * an insert index, as described above, or <code>-1</code> if
-//         * the drop occurred over the path itself.
-//         *
-//         * @return the child index
-//         * @see #getPath
-//         */
-//        public int getChildIndex() {
-//            return index;
-//        }
-//
-//        /**
-//         * Returns the path where dropped data should be placed in the
-//         * tree.
-//         * <p>
-//         * Interpretation of this value depends on the drop mode set on the
-//         * component. If the drop mode is <code>DropMode.USE_SELECTION</code>
-//         * or <code>DropMode.ON</code>, the return value is the path in the
-//         * tree over which the data has been (or will be) dropped.
-//         * <code>null</code> indicates that the drop is over empty space,
-//         * not associated with a particular path.
-//         * <p>
-//         * If the drop mode is <code>DropMode.INSERT</code>, the return value
-//         * refers to the path that should become the parent of the new data,
-//         * in which case <code>getChildIndex()</code> indicates where the
-//         * new item should be inserted into this parent path. A
-//         * <code>null</code> path indicates that no parent path has been
-//         * determined, which can happen for multiple reasons:
-//         * <ul>
-//         *    <li>The tree has no model
-//         *    <li>There is no root in the tree
-//         *    <li>The root is collapsed
-//         *    <li>The root is a leaf node
-//         * </ul>
-//         * It is up to the developer to decide if and how they wish to handle
-//         * the <code>null</code> case.
-//         * <p>
-//         * If the drop mode is <code>DropMode.ON_OR_INSERT</code>,
-//         * <code>getChildIndex</code> can be used to determine whether the
-//         * drop is on top of the path itself (<code>-1</code>) or the index
-//         * at which it should be inserted into the path (values other than
-//         * <code>-1</code>).
-//         *
-//         * @return the drop path
-//         * @see #getChildIndex
-//         */
-//        public TreePath getPath() {
-//            return path;
-//        }
-//
-//        /**
-//         * Returns a string representation of this drop location.
-//         * This method is intended to be used for debugging purposes,
-//         * and the content and format of the returned string may vary
-//         * between implementations.
-//         *
-//         * @return a string representation of this drop location
-//         */
-//        public String toString() {
-//            return getClass().getName()
-//                   + "[dropPoint=" + getDropPoint() + ","
-//                   + "path=" + path + ","
-//                   + "childIndex=" + index + "]";
-//        }
-//    }
+    /**
+     * The drop mode for this component.
+     */
+    private DropMode dropMode = DropMode.USE_SELECTION;
+
+    /**
+     * The drop location.
+     */
+    private transient DropLocation dropLocation;
+
+    /**
+     * A subclass of <code>TransferHandler.DropLocation</code> representing
+     * a drop location for a <code>JTree</code>.
+     *
+     * @see #getDropLocation
+     * @since 1.6
+     */
+    public static final class DropLocation extends TransferHandler.DropLocation {
+        private final TreePath path;
+        private final int index;
+
+        private DropLocation(Point p, TreePath path, int index) {
+            super(p);
+            this.path = path;
+            this.index = index;
+        }
+
+        /**
+         * Returns the index where the dropped data should be inserted
+         * with respect to the path returned by <code>getPath()</code>.
+         * <p>
+         * For drop modes <code>DropMode.USE_SELECTION</code> and
+         * <code>DropMode.ON</code>, this index is unimportant (and it will
+         * always be <code>-1</code>) as the only interesting data is the
+         * path over which the drop operation occurred.
+         * <p>
+         * For drop mode <code>DropMode.INSERT</code>, this index
+         * indicates the index at which the data should be inserted into
+         * the parent path represented by <code>getPath()</code>.
+         * <code>-1</code> indicates that the drop occurred over the
+         * parent itself, and in most cases should be treated as inserting
+         * into either the beginning or the end of the parent's list of
+         * children.
+         * <p>
+         * For <code>DropMode.ON_OR_INSERT</code>, this value will be
+         * an insert index, as described above, or <code>-1</code> if
+         * the drop occurred over the path itself.
+         *
+         * @return the child index
+         * @see #getPath
+         */
+        public int getChildIndex() {
+            return index;
+        }
+
+        /**
+         * Returns the path where dropped data should be placed in the
+         * tree.
+         * <p>
+         * Interpretation of this value depends on the drop mode set on the
+         * component. If the drop mode is <code>DropMode.USE_SELECTION</code>
+         * or <code>DropMode.ON</code>, the return value is the path in the
+         * tree over which the data has been (or will be) dropped.
+         * <code>null</code> indicates that the drop is over empty space,
+         * not associated with a particular path.
+         * <p>
+         * If the drop mode is <code>DropMode.INSERT</code>, the return value
+         * refers to the path that should become the parent of the new data,
+         * in which case <code>getChildIndex()</code> indicates where the
+         * new item should be inserted into this parent path. A
+         * <code>null</code> path indicates that no parent path has been
+         * determined, which can happen for multiple reasons:
+         * <ul>
+         *    <li>The tree has no model
+         *    <li>There is no root in the tree
+         *    <li>The root is collapsed
+         *    <li>The root is a leaf node
+         * </ul>
+         * It is up to the developer to decide if and how they wish to handle
+         * the <code>null</code> case.
+         * <p>
+         * If the drop mode is <code>DropMode.ON_OR_INSERT</code>,
+         * <code>getChildIndex</code> can be used to determine whether the
+         * drop is on top of the path itself (<code>-1</code>) or the index
+         * at which it should be inserted into the path (values other than
+         * <code>-1</code>).
+         *
+         * @return the drop path
+         * @see #getChildIndex
+         */
+        public TreePath getPath() {
+            return path;
+        }
+
+        /**
+         * Returns a string representation of this drop location.
+         * This method is intended to be used for debugging purposes,
+         * and the content and format of the returned string may vary
+         * between implementations.
+         *
+         * @return a string representation of this drop location
+         */
+        public String toString() {
+            return getClass().getName()
+                   + "[dropPoint=" + getDropPoint() + ","
+                   + "path=" + path + ","
+                   + "childIndex=" + index + "]";
+        }
+    }
 
     /**
      * The row to expand during DnD.
      */
-//    private int expandRow = -1;
+    private int expandRow = -1;
 
-//    private class TreeTimer extends Timer {
-//        public TreeTimer() {
-//            super(2000, null);
-//            setRepeats(false);
-//        }
-//
-//        public void fireActionPerformed(ActionEvent ae) {
-//            JTree.this.expandRow(expandRow);
-//        }
-//    }
-//
-//    /**
-//     * A timer to expand nodes during drop.
-//     */
-//    private TreeTimer dropTimer;
-//
+    private class TreeTimer extends Timer {
+        public TreeTimer() {
+            super(2000, null);
+            setRepeats(false);
+        }
+
+        public void fireActionPerformed(ActionEvent ae) {
+            JTree.this.expandRow(expandRow);
+        }
+    }
+
+    /**
+     * A timer to expand nodes during drop.
+     */
+    private TreeTimer dropTimer;
+
     /**
      * When <code>addTreeExpansionListener</code> is invoked,
      * and <code>settingUI</code> is true, this ivar gets set to the passed in
@@ -1204,277 +1208,278 @@ public class JTree extends JComponent implements Scrollable
         return dragEnabled;
     }
 
-//    /**
-//     * Sets the drop mode for this component. For backward compatibility,
-//     * the default for this property is <code>DropMode.USE_SELECTION</code>.
-//     * Usage of one of the other modes is recommended, however, for an
-//     * improved user experience. <code>DropMode.ON</code>, for instance,
-//     * offers similar behavior of showing items as selected, but does so without
-//     * affecting the actual selection in the tree.
-//     * <p>
-//     * <code>JTree</code> supports the following drop modes:
-//     * <ul>
-//     *    <li><code>DropMode.USE_SELECTION</code></li>
-//     *    <li><code>DropMode.ON</code></li>
-//     *    <li><code>DropMode.INSERT</code></li>
-//     *    <li><code>DropMode.ON_OR_INSERT</code></li>
-//     * </ul>
-//     * <p>
-//     * The drop mode is only meaningful if this component has a
-//     * <code>TransferHandler</code> that accepts drops.
-//     *
-//     * @param dropMode the drop mode to use
-//     * @throws IllegalArgumentException if the drop mode is unsupported
-//     *         or <code>null</code>
-//     * @see #getDropMode
-//     * @see #getDropLocation
-//     * @see #setTransferHandler
-//     * @see TransferHandler
-//     * @since 1.6
-//     */
-//    public final void setDropMode(DropMode dropMode) {
-//        if (dropMode != null) {
-//            switch (dropMode) {
-//                case USE_SELECTION:
-//                case ON:
-//                case INSERT:
-//                case ON_OR_INSERT:
-//                    this.dropMode = dropMode;
-//                    return;
-//            }
-//        }
-//
-//        throw new IllegalArgumentException(dropMode + ": Unsupported drop mode for tree");
-//    }
-//
-//    /**
-//     * Returns the drop mode for this component.
-//     *
-//     * @return the drop mode for this component
-//     * @see #setDropMode
-//     * @since 1.6
-//     */
-//    public final DropMode getDropMode() {
-//        return dropMode;
-//    }
-//
-//    /**
-//     * Calculates a drop location in this component, representing where a
-//     * drop at the given point should insert data.
-//     *
-//     * @param p the point to calculate a drop location for
-//     * @return the drop location, or <code>null</code>
-//     */
-//    DropLocation dropLocationForPoint(Point p) {
-//        DropLocation location = null;
-//
-//        int row = getClosestRowForLocation(p.x, p.y);
-//        Rectangle bounds = getRowBounds(row);
-//        TreeModel model = getModel();
-//        Object root = (model == null) ? null : model.getRoot();
-//        TreePath rootPath = (root == null) ? null : new TreePath(root);
-//
-//        TreePath child = null;
-//        TreePath parent = null;
-//        boolean outside = row == -1
-//                          || p.y < bounds.y
-//                          || p.y >= bounds.y + bounds.height;
-//
-//        switch(dropMode) {
-//            case USE_SELECTION:
-//            case ON:
-//                if (outside) {
-//                    location = new DropLocation(p, null, -1);
-//                } else {
-//                    location = new DropLocation(p, getPathForRow(row), -1);
-//                }
-//
-//                break;
-//            case INSERT:
-//            case ON_OR_INSERT:
-//                if (row == -1) {
-//                    if (root != null && !model.isLeaf(root) && isExpanded(rootPath)) {
-//                        location = new DropLocation(p, rootPath, 0);
-//                    } else {
-//                        location = new DropLocation(p, null, -1);
-//                    }
-//
-//                    break;
-//                }
-//
-//                boolean checkOn = dropMode == DropMode.ON_OR_INSERT
-//                                  || !model.isLeaf(getPathForRow(row).getLastPathComponent());
-//
-//                Section section = SwingUtilities2.liesInVertical(bounds, p, checkOn);
-//                if(section == LEADING) {
-//                    child = getPathForRow(row);
-//                    parent = child.getParentPath();
-//                } else if (section == TRAILING) {
-//                    int index = row + 1;
-//                    if (index >= getRowCount()) {
-//                        if (model.isLeaf(root) || !isExpanded(rootPath)) {
-//                            location = new DropLocation(p, null, -1);
-//                        } else {
-//                            parent = rootPath;
-//                            index = model.getChildCount(root);
-//                            location = new DropLocation(p, parent, index);
-//                        }
-//
-//                        break;
-//                    }
-//
-//                    child = getPathForRow(index);
-//                    parent = child.getParentPath();
-//                } else {
-//                    assert checkOn;
-//                    location = new DropLocation(p, getPathForRow(row), -1);
-//                    break;
-//                }
-//
-//                if (parent != null) {
-//                    location = new DropLocation(p, parent,
-//                        model.getIndexOfChild(parent.getLastPathComponent(),
-//                                              child.getLastPathComponent()));
-//                } else if (checkOn || !model.isLeaf(root)) {
-//                    location = new DropLocation(p, rootPath, -1);
-//                } else {
-//                    location = new DropLocation(p, null, -1);
-//                }
-//
-//                break;
-//            default:
-//                assert false : "Unexpected drop mode";
-//        }
-//
-//        if (outside || row != expandRow) {
-//            cancelDropTimer();
-//        }
-//
-//        if (!outside && row != expandRow) {
-//            if (isCollapsed(row)) {
-//                expandRow = row;
-//                startDropTimer();
-//            }
-//        }
-//
-//        return location;
-//    }
-//
-//    /**
-//     * Called to set or clear the drop location during a DnD operation.
-//     * In some cases, the component may need to use it's internal selection
-//     * temporarily to indicate the drop location. To help facilitate this,
-//     * this method returns and accepts as a parameter a state object.
-//     * This state object can be used to store, and later restore, the selection
-//     * state. Whatever this method returns will be passed back to it in
-//     * future calls, as the state parameter. If it wants the DnD system to
-//     * continue storing the same state, it must pass it back every time.
-//     * Here's how this is used:
-//     * <p>
-//     * Let's say that on the first call to this method the component decides
-//     * to save some state (because it is about to use the selection to show
-//     * a drop index). It can return a state object to the caller encapsulating
-//     * any saved selection state. On a second call, let's say the drop location
-//     * is being changed to something else. The component doesn't need to
-//     * restore anything yet, so it simply passes back the same state object
-//     * to have the DnD system continue storing it. Finally, let's say this
-//     * method is messaged with <code>null</code>. This means DnD
-//     * is finished with this component for now, meaning it should restore
-//     * state. At this point, it can use the state parameter to restore
-//     * said state, and of course return <code>null</code> since there's
-//     * no longer anything to store.
-//     *
-//     * @param location the drop location (as calculated by
-//     *        <code>dropLocationForPoint</code>) or <code>null</code>
-//     *        if there's no longer a valid drop location
-//     * @param state the state object saved earlier for this component,
-//     *        or <code>null</code>
-//     * @param forDrop whether or not the method is being called because an
-//     *        actual drop occurred
-//     * @return any saved state for this component, or <code>null</code> if none
-//     */
-//    Object setDropLocation(TransferHandler.DropLocation location,
-//                           Object state,
-//                           boolean forDrop) {
-//
-//        Object retVal = null;
-//        DropLocation treeLocation = (DropLocation)location;
-//
-//        if (dropMode == DropMode.USE_SELECTION) {
-//            if (treeLocation == null) {
-//                if (!forDrop && state != null) {
-//                    setSelectionPaths(((TreePath[][])state)[0]);
-//                    setAnchorSelectionPath(((TreePath[][])state)[1][0]);
-//                    setLeadSelectionPath(((TreePath[][])state)[1][1]);
-//                }
-//            } else {
-//                if (dropLocation == null) {
-//                    TreePath[] paths = getSelectionPaths();
-//                    if (paths == null) {
-//                        paths = new TreePath[0];
-//                    }
-//
-//                    retVal = new TreePath[][] {paths,
-//                            {getAnchorSelectionPath(), getLeadSelectionPath()}};
-//                } else {
-//                    retVal = state;
-//                }
-//
-//                setSelectionPath(treeLocation.getPath());
-//            }
-//        }
-//
-//        DropLocation old = dropLocation;
-//        dropLocation = treeLocation;
-//        firePropertyChange("dropLocation", old, dropLocation);
-//
-//        return retVal;
-//    }
+    /**
+     * Sets the drop mode for this component. For backward compatibility,
+     * the default for this property is <code>DropMode.USE_SELECTION</code>.
+     * Usage of one of the other modes is recommended, however, for an
+     * improved user experience. <code>DropMode.ON</code>, for instance,
+     * offers similar behavior of showing items as selected, but does so without
+     * affecting the actual selection in the tree.
+     * <p>
+     * <code>JTree</code> supports the following drop modes:
+     * <ul>
+     *    <li><code>DropMode.USE_SELECTION</code></li>
+     *    <li><code>DropMode.ON</code></li>
+     *    <li><code>DropMode.INSERT</code></li>
+     *    <li><code>DropMode.ON_OR_INSERT</code></li>
+     * </ul>
+     * <p>
+     * The drop mode is only meaningful if this component has a
+     * <code>TransferHandler</code> that accepts drops.
+     *
+     * @param dropMode the drop mode to use
+     * @throws IllegalArgumentException if the drop mode is unsupported
+     *         or <code>null</code>
+     * @see #getDropMode
+     * @see #getDropLocation
+     * @see #setTransferHandler
+     * @see TransferHandler
+     * @since 1.6
+     */
+    public final void setDropMode(DropMode dropMode) {
+        if (dropMode != null) {
+            switch (dropMode) {
+                case USE_SELECTION:
+                case ON:
+                case INSERT:
+                case ON_OR_INSERT:
+                    this.dropMode = dropMode;
+                    return;
+            }
+        }
 
-//    /**
-//     * Called to indicate to this component that DnD is done.
-//     * Allows for us to cancel the expand timer.
-//     */
-//    void dndDone() {
-//        cancelDropTimer();
-//        dropTimer = null;
-//    }
-//
-//    /**
-//     * Returns the location that this component should visually indicate
-//     * as the drop location during a DnD operation over the component,
-//     * or {@code null} if no location is to currently be shown.
-//     * <p>
-//     * This method is not meant for querying the drop location
-//     * from a {@code TransferHandler}, as the drop location is only
-//     * set after the {@code TransferHandler}'s <code>canImport</code>
-//     * has returned and has allowed for the location to be shown.
-//     * <p>
-//     * When this property changes, a property change event with
-//     * name "dropLocation" is fired by the component.
-//     *
-//     * @return the drop location
-//     * @see #setDropMode
-//     * @see TransferHandler#canImport(TransferHandler.TransferSupport)
-//     * @since 1.6
-//     */
-//    public final DropLocation getDropLocation() {
-//        return dropLocation;
-//    }
+        throw new IllegalArgumentException(dropMode + ": Unsupported drop mode for tree");
+    }
 
-//    private void startDropTimer() {
-//        if (dropTimer == null) {
-//            dropTimer = new TreeTimer();
-//        }
-//        dropTimer.start();
-//    }
-//
-//    private void cancelDropTimer() {
-//        if (dropTimer != null && dropTimer.isRunning()) {
-//            expandRow = -1;
-//            dropTimer.stop();
-//        }
-//    }
+    /**
+     * Returns the drop mode for this component.
+     *
+     * @return the drop mode for this component
+     * @see #setDropMode
+     * @since 1.6
+     */
+    public final DropMode getDropMode() {
+        return dropMode;
+    }
+
+    /**
+     * Calculates a drop location in this component, representing where a
+     * drop at the given point should insert data.
+     *
+     * @param p the point to calculate a drop location for
+     * @return the drop location, or <code>null</code>
+     */
+    DropLocation dropLocationForPoint(Point p) {
+        DropLocation location = null;
+
+        int row = getClosestRowForLocation(p.x, p.y);
+        Rectangle bounds = getRowBounds(row);
+        TreeModel model = getModel();
+        Object root = (model == null) ? null : model.getRoot();
+        TreePath rootPath = (root == null) ? null : new TreePath(root);
+
+        TreePath child = null;
+        TreePath parent = null;
+        boolean outside = row == -1
+                          || p.y < bounds.y
+                          || p.y >= bounds.y + bounds.height;
+
+        switch(dropMode) {
+            case USE_SELECTION:
+            case ON:
+                if (outside) {
+                    location = new DropLocation(p, null, -1);
+                } else {
+                    location = new DropLocation(p, getPathForRow(row), -1);
+                }
+
+                break;
+            case INSERT:
+            case ON_OR_INSERT:
+                if (row == -1) {
+                    if (root != null && !model.isLeaf(root) && isExpanded(rootPath)) {
+                        location = new DropLocation(p, rootPath, 0);
+                    } else {
+                        location = new DropLocation(p, null, -1);
+                    }
+
+                    break;
+                }
+
+                boolean checkOn = dropMode == DropMode.ON_OR_INSERT
+                                  || !model.isLeaf(getPathForRow(row).getLastPathComponent());
+
+                Section section = SwingUtilities2.liesInVertical(bounds, p, checkOn);
+                if(section == Section.LEADING) {
+                    child = getPathForRow(row);
+                    parent = child.getParentPath();
+                } else if (section == Section.TRAILING) {
+                    int index = row + 1;
+                    if (index >= getRowCount()) {
+                        if (model.isLeaf(root) || !isExpanded(rootPath)) {
+                            location = new DropLocation(p, null, -1);
+                        } else {
+                            parent = rootPath;
+                            index = model.getChildCount(root);
+                            location = new DropLocation(p, parent, index);
+                        }
+
+                        break;
+                    }
+
+                    child = getPathForRow(index);
+                    parent = child.getParentPath();
+                } else {
+                    assert checkOn;
+                    location = new DropLocation(p, getPathForRow(row), -1);
+                    break;
+                }
+
+                if (parent != null) {
+                    location = new DropLocation(p, parent,
+                        model.getIndexOfChild(parent.getLastPathComponent(),
+                                              child.getLastPathComponent()));
+                } else if (checkOn || !model.isLeaf(root)) {
+                    location = new DropLocation(p, rootPath, -1);
+                } else {
+                    location = new DropLocation(p, null, -1);
+                }
+
+                break;
+            default:
+                assert false : "Unexpected drop mode";
+        }
+
+        if (outside || row != expandRow) {
+            cancelDropTimer();
+        }
+
+        if (!outside && row != expandRow) {
+            if (isCollapsed(row)) {
+                expandRow = row;
+                startDropTimer();
+            }
+        }
+
+        return location;
+    }
+
+    /**
+     * Called to set or clear the drop location during a DnD operation.
+     * In some cases, the component may need to use it's internal selection
+     * temporarily to indicate the drop location. To help facilitate this,
+     * this method returns and accepts as a parameter a state object.
+     * This state object can be used to store, and later restore, the selection
+     * state. Whatever this method returns will be passed back to it in
+     * future calls, as the state parameter. If it wants the DnD system to
+     * continue storing the same state, it must pass it back every time.
+     * Here's how this is used:
+     * <p>
+     * Let's say that on the first call to this method the component decides
+     * to save some state (because it is about to use the selection to show
+     * a drop index). It can return a state object to the caller encapsulating
+     * any saved selection state. On a second call, let's say the drop location
+     * is being changed to something else. The component doesn't need to
+     * restore anything yet, so it simply passes back the same state object
+     * to have the DnD system continue storing it. Finally, let's say this
+     * method is messaged with <code>null</code>. This means DnD
+     * is finished with this component for now, meaning it should restore
+     * state. At this point, it can use the state parameter to restore
+     * said state, and of course return <code>null</code> since there's
+     * no longer anything to store.
+     *
+     * @param location the drop location (as calculated by
+     *        <code>dropLocationForPoint</code>) or <code>null</code>
+     *        if there's no longer a valid drop location
+     * @param state the state object saved earlier for this component,
+     *        or <code>null</code>
+     * @param forDrop whether or not the method is being called because an
+     *        actual drop occurred
+     * @return any saved state for this component, or <code>null</code> if none
+     */
+    Object setDropLocation(TransferHandler.DropLocation location,
+                           Object state,
+                           boolean forDrop) {
+
+        Object retVal = null;
+        DropLocation treeLocation = (DropLocation)location;
+
+        if (dropMode == DropMode.USE_SELECTION) {
+            if (treeLocation == null) {
+                if (!forDrop && state != null) {
+                    setSelectionPaths(((TreePath[][])state)[0]);
+                    setAnchorSelectionPath(((TreePath[][])state)[1][0]);
+                    setLeadSelectionPath(((TreePath[][])state)[1][1]);
+                }
+            } else {
+                if (dropLocation == null) {
+                    TreePath[] paths = getSelectionPaths();
+                    if (paths == null) {
+                        paths = new TreePath[0];
+                    }
+
+                    retVal = new TreePath[][] {paths,
+                            {getAnchorSelectionPath(), getLeadSelectionPath()}};
+                } else {
+                    retVal = state;
+                }
+
+                setSelectionPath(treeLocation.getPath());
+            }
+        }
+
+        DropLocation old = dropLocation;
+        dropLocation = treeLocation;
+        firePropertyChange("dropLocation", old, dropLocation);
+
+        return retVal;
+    }
+
+    /**
+     * Called to indicate to this component that DnD is done.
+     * Allows for us to cancel the expand timer.
+     * @return 
+     */
+    public void dndDone() {
+        cancelDropTimer();
+        dropTimer = null;
+    }
+
+    /**
+     * Returns the location that this component should visually indicate
+     * as the drop location during a DnD operation over the component,
+     * or {@code null} if no location is to currently be shown.
+     * <p>
+     * This method is not meant for querying the drop location
+     * from a {@code TransferHandler}, as the drop location is only
+     * set after the {@code TransferHandler}'s <code>canImport</code>
+     * has returned and has allowed for the location to be shown.
+     * <p>
+     * When this property changes, a property change event with
+     * name "dropLocation" is fired by the component.
+     *
+     * @return the drop location
+     * @see #setDropMode
+     * @see TransferHandler#canImport(TransferHandler.TransferSupport)
+     * @since 1.6
+     */
+    public final DropLocation getDropLocation() {
+        return dropLocation;
+    }
+
+    private void startDropTimer() {
+        if (dropTimer == null) {
+            dropTimer = new TreeTimer();
+        }
+        dropTimer.start();
+    }
+
+    private void cancelDropTimer() {
+        if (dropTimer != null && dropTimer.isRunning()) {
+            expandRow = -1;
+            dropTimer.stop();
+        }
+    }
 
     /**
      * Returns <code>isEditable</code>. This is invoked from the UI before

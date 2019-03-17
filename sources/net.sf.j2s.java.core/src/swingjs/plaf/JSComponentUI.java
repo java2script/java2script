@@ -15,6 +15,7 @@ import java.awt.JSComponent;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.peer.DropTargetPeer;
 import java.awt.event.KeyEvent;
@@ -572,6 +573,11 @@ public class JSComponentUI extends ComponentUI
 	protected static JQuery jquery = JSUtil.getJQuery();
 
 	/**
+	 * A static flag indicating that we have a menu open
+	 */
+	protected static boolean isMenuOpen;
+
+	/**
 	 * JavaScript menu timer id
 	 */
 	protected int menuTimer;
@@ -637,7 +643,7 @@ public class JSComponentUI extends ComponentUI
 	 */
 	private void uninstallJS() {
 
-		System.out.println("uninstallJS " + id);
+		//System.out.println("uninstallJS " + id);
 		
 		// window closing will fire this with c == null
 
@@ -653,7 +659,7 @@ public class JSComponentUI extends ComponentUI
 		if (outerNode != null) {
 			DOMNode.dispose(outerNode);
 			outerNode = null;
-		}
+	    }
 	}
 
 	protected JQueryObject $(Object node) {
@@ -760,8 +766,9 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	@SuppressWarnings("unused")
-	protected static void hideAllMenus() {
-		JSUtil.jQuery.$(".ui-j2smenu").hide();
+	protected static void hideMenusAndToolTip() {
+		if (isMenuOpen)
+			JSPopupMenuUI.closeAllMenus();
 		if (/** @j2sNative javax.swing.ToolTipManager ||*/false)
 			ToolTipManager.j2sHideToolTip();
 	}
@@ -1139,32 +1146,6 @@ public class JSComponentUI extends ComponentUI
 			p = (JComponent) p.getParent();
 		}
 	}
-	
-	
-//	
-//	@Override
-//	public void propertyChange(PropertyChangeEvent e) {
-//		// old
-//		String prop = e.getPropertyName();
-//		if (prop == "ancestor") {
-//			JComponent p = (JComponent) jc.getParent();
-//			while (p != null) {
-//				JSComponentUI parentui = (JSComponentUI) (p == null ? null : p.getUI());
-//				if (parentui != null)
-//					parentui.setTainted();
-//				p = (JComponent) p.getParent();
-//			}
-//
-//			if (e.getNewValue() == null)
-//				return;
-//			if (isDisposed && c.visible && e.getNewValue() != null)
-//				setVisible(true);
-//		}
-//		propertyChangedCUI(prop);
-//	}
-//
-//	
-
 
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
@@ -1325,7 +1306,7 @@ public class JSComponentUI extends ComponentUI
 	 * has been disposed; will need to reattach it if it ever becomes visible again.
 	 * 
 	 */
-	private boolean isDisposed;
+	public boolean isDisposed;
 
 	/**
 	 * table cell renderer component
@@ -2710,6 +2691,7 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public void dispose() {
+		//System.out.println("JSCUI dispose " + id);
 		if (isUIDisabled)
 			return;
 		if (cellComponent != null) {
@@ -2717,6 +2699,8 @@ public class JSComponentUI extends ComponentUI
 			return;
 		}
 		isDisposed = true;
+		// notice that we do not delete domNode, only detach it
+		// and remove its listeners. 
 		DOMNode.dispose(domNode);
 		if (domNode != outerNode)
 			DOMNode.dispose(outerNode);
@@ -2728,19 +2712,22 @@ public class JSComponentUI extends ComponentUI
 	 * This control has been added back to some other node after being disposed of.
 	 * So now we need to undo that.
 	 * 
-	 * @param node
+	 * @param nodef
 	 */
-	private void undisposeUI(DOMNode node) {
-		if (c.getParent() != null) {
+	protected void undisposeUI(DOMNode node) {
+		Container parent = c.getParent();
+		// node will be null for Window, including Dialog
+		if (node != null && parent != null) {
 			JSComponentUI ui = (JSComponentUI) c.getParent().getUI();
 			if (ui.containerNode != null)
 				appendChild(ui.containerNode, node);
 		}
-		
 		// menu separators have domNode == outerNode
 		// cell renderers will set their domNode to null;
-		if (outerNode != null && domNode != null && domNode != outerNode)
+		if (outerNode != null && domNode != null && domNode != outerNode) {
 			appendChild(outerNode, domNode);
+			//System.out.println("JSCUI undispose reattached");
+		}
 		isDisposed = false;
 	}
 
@@ -2971,8 +2958,7 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public void beginValidate() {
-		// TODO Auto-generated method stub
-
+		System.out.println("JSCUI beginValidate " + id);
 	}
 
 	@Override
@@ -3178,7 +3164,15 @@ public class JSComponentUI extends ComponentUI
 	public void reinstallUI(JComponent oldC, JComponent newC) {
         uninstallUI(oldC);
         uninstallJS();
-        if (newC != null) {
+        if (newC== null) {
+//        	// Frame or Dialog.dispose()
+//    		if (outerNode != null) {
+//    			DOMNode.dispose(outerNode);
+//    			outerNode = null;
+//    			domNode = null;
+//    			isDisposed = true;
+//    		}
+        } else {
         	// JPopupMenu
         	installJS();
         	installUI(newC);

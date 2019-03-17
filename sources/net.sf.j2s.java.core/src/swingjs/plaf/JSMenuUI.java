@@ -8,6 +8,7 @@ import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.UIManager;
 
+import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 
 public class JSMenuUI extends JSMenuItemUI {
@@ -50,28 +51,6 @@ public class JSMenuUI extends JSMenuItemUI {
 		setIconAndText("menu", currentIcon, currentGap, currentText);
 		return domNode;
 	}
-
-//	@Override
-//	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
-//		System.out.println("JSMenuUI this is not working, right? ");// RIGHT
-//		// we use == here because this will be JavaScript
-//		if (target == domNode && eventType == -1) {
-//			String type = (/** @j2sNative jQueryEvent.type || */ "");
-//			if (type.equals("mouseenter")) {
-//				if (!jm.getParent().getUIClassID().equals("MenuBarUI"))
-//					stopPopupMenuTimer();
-//				jm.setSelected(true);
-//				return HANDLED;
-//			}
-//			if (type.equals("mouseleave")) {
-//				jm.setSelected(false);
-//				if (jm.getParent().getUIClassID().equals("MenuBarUI"))
-//					startPopupMenuTimer();
-//				return HANDLED;
-//			}
-//		}
-//		return super.handleJSEvent(target, eventType, jQueryEvent);
-//	} 
 
 	@Override
 	public void propertyChangedFromListener(PropertyChangeEvent e, String prop) {

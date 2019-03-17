@@ -27,7 +27,6 @@
  */
 package java.awt;
 
-import java.applet.JSApplet;
 import java.awt.event.KeyListener;
 import java.awt.peer.ComponentPeer;
 import java.beans.PropertyChangeListener;
@@ -67,6 +66,32 @@ import swingjs.plaf.JSComponentUI;
  */
 public abstract class JSComponent extends Component {
 
+	/**
+	 * A marker for the SwingJS version of JViewPort to indicate that it 
+	 * can add an A2SWrappedComponent, not pass it back for wrapping.
+	 * 
+	 * @author hansonr
+	 *
+	 */
+	public interface A2SComponentWrapper {
+
+		public void isWrapper$();
+	}
+
+	/**
+	 * For JViewPort. 
+	 * 
+	 * Implementations of java.awt.List require a JScrollPane/JViewPort
+	 * wrapper.  
+	 * 
+	 * @author hansonr
+	 *
+	 */
+	public interface A2SWrappedComponent {
+
+	   public Component getWrap$();
+
+	}
 	/**
 	 * overridden in Applet
 	 * 

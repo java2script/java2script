@@ -183,6 +183,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 		// TODO: We are not setting vis false when closing
 		//if (b && menu != null && menu.isVisible())
 			//b = false;
+		closeAllMenus();
 		if (b) {
 			if (isTainted || menu == null || outerNode == null || DOMNode.firstChild(outerNode) == null) {
 				if (menu == null) {
@@ -201,8 +202,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 			int x = /** @j2sNative this.menu.desiredLocationX || */0;
 			int y = /** @j2sNative this.menu.desiredLocationY || */0;
 			j2sSwingMenu.showMenu(menu, x, y);
-		} else {
-			hideAllMenus();
+//		} else {
 //			hideMenu();
 		}
 	}
@@ -507,7 +507,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
         	} else if (item instanceof JMenuItem) {
         		((JMenuItem) item).doClick();
             	e.consume();
-    	        hideAllMenus();
+    	        hideMenusAndToolTip();
         	}
         }
 
@@ -1134,6 +1134,11 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 
 	private static int np=0;
 	
+	/**
+	 * from j2sMenu.js
+	 * 
+	 * @param data
+	 */
 	@SuppressWarnings("unused")
 	public static void processJ2SMenuCmd(Object[] data) {
 		String trigger = (String) data[0];
@@ -1146,16 +1151,18 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 		System.out.println("JSPopupMenuUI processing " + (np++) + " " + trigger + " for " + mid);
 		switch (trigger) {
 		 case "_activate":
-		 case "_close":
+		 case "_closeSubmenus":
 		 case "_hide":
-		 case "_open":
+		 case "_move":
+		 case "_openSubmenu":
 		 case "_show":
 		 case "_startOpening":
 		 case "blur":
+		 case "clearOut":
 		 case "collapse":
 		 case "expand":
-		 case "focus":
 		 case "keyActivate":
+		 case "noclickout":
 		 case "onblur":
 		 case "onclick":
 		 case "onclick_out":
@@ -1166,11 +1173,16 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 		 case "onover2":
 		 case "onover3":
 		 case "onpress":
+		 case "onrelease":
 		 case "refresh":
 		 case "select":
 			 break;		 
+		 case "focus":
+			 isMenuOpen = true;
+			 break;
 		 case "collapseAll":
-			 hideAllMenus();
+			 closeAllMenus();
+			 isMenuOpen = false;
 			 j2smenu.options.jPopupMenu.visible = false;
 			 ((JComponent) j2smenu.options.jPopupMenu.getInvoker()).getRootPane().requestFocus();				 
 			 break;
@@ -1180,5 +1192,15 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
     public boolean isPopupTrigger(MouseEvent e) {
         return e.isPopupTrigger();
     }
+    
+	public static void closeAllMenus() {
+		if (isMenuOpen) {
+			// top-level or submenu:
+			JSUtil.jQuery.$(".ui-j2smenu").hide();
+			JSUtil.jQuery.$(".ui-j2smenu-node").removeClass("ui-state-active").removeClass("ui-state-focus");
+		}
+	}
+
+
 
 }
