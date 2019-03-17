@@ -461,7 +461,7 @@ public class JSInternalFrameUI extends JSFrameUI {
 
         @Override
 		public void windowLostFocus(WindowEvent e) {
-        	hideAllMenus();
+        	hideMenusAndToolTip();
         	// Cancel a resize which may be in progress, when a
             // WINDOW_LOST_FOCUS event occurs, which may be
             // caused by an Alt-Tab or a modal dialog popup.
@@ -471,7 +471,7 @@ public class JSInternalFrameUI extends JSFrameUI {
         // InternalFrameListener
         @Override
 		public void internalFrameClosed(InternalFrameEvent e) {
-        	hideAllMenus();
+        	hideMenusAndToolTip();
         	iframe.removeInternalFrameListener(getHandler());
         }
 
@@ -494,13 +494,13 @@ public class JSInternalFrameUI extends JSFrameUI {
         }
 
         @Override
-		public void internalFrameClosing(InternalFrameEvent e) { hideAllMenus(); }
+		public void internalFrameClosing(InternalFrameEvent e) { hideMenusAndToolTip(); }
         @Override
-		public void internalFrameOpened(InternalFrameEvent e) { hideAllMenus();}
+		public void internalFrameOpened(InternalFrameEvent e) { hideMenusAndToolTip();}
         @Override
-		public void internalFrameIconified(InternalFrameEvent e) { hideAllMenus();}
+		public void internalFrameIconified(InternalFrameEvent e) { hideMenusAndToolTip();}
         @Override
-		public void internalFrameDeiconified(InternalFrameEvent e) { hideAllMenus();}
+		public void internalFrameDeiconified(InternalFrameEvent e) { hideMenusAndToolTip();}
 
 
 

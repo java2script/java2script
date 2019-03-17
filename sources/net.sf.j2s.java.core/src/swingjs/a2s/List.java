@@ -2,6 +2,7 @@ package swingjs.a2s;
 
 import java.awt.AWTEvent;
 import java.awt.AWTEventMulticaster;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.ItemSelectable;
 import java.awt.event.ActionEvent;
@@ -13,12 +14,11 @@ import java.util.EventListener;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
+import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.LineBorder;
-
-import com.sun.prism.paint.Color;
-
-public class List extends JList implements ItemSelectable  {
+import java.awt.JSComponent;
+public class List extends JList implements ItemSelectable, JSComponent.A2SWrappedComponent  {
 
 	public void isAWT() {} // for SwingJS isAWT$
 	
@@ -34,6 +34,10 @@ public class List extends JList implements ItemSelectable  {
 
     final static int    DEFAULT_VISIBLE_ROWS = 4;
 
+	@Override
+	public Component getWrap$() {
+		return new JScrollPane(this);
+	}
         
 	public List(int rows, boolean multipleMode) {
 		this();
@@ -493,12 +497,12 @@ public class List extends JList implements ItemSelectable  {
      */
     @Deprecated
     public Dimension preferredSize(int rows) {
-        synchronized (getTreeLock()) {
+//        synchronized (getTreeLock()) {
             ListPeer peer = (ListPeer)this.peer;
-            return (peer != null) ?
-                       peer.getPreferredSize(rows) :
-                       super.preferredSize();
-        }
+            if (peer != null)
+            	return peer.getPreferredSize(rows);
+            return preferredSize();
+//        }
     }
 
     /**
@@ -511,18 +515,21 @@ public class List extends JList implements ItemSelectable  {
         return preferredSize();
     }
 
-    /**
-     * @deprecated As of JDK version 1.1,
-     * replaced by <code>getPreferredSize()</code>.
-     */
-    @Deprecated
-    public Dimension preferredSize() {
-     //   synchronized (getTreeLock()) {
-    	int rows = awtmodel.getSize();
-            return (rows > 0) ?
-                       preferredSize(rows) :
-                       super.preferredSize();
-        }
+	/**
+	 * @deprecated As of JDK version 1.1, replaced by
+	 *             <code>getPreferredSize()</code>.
+	 */
+	@Deprecated
+	public Dimension preferredSize() {
+		// synchronized (getTreeLock()) {
+		int rows = awtmodel.getSize();
+		if (rows > 0) {
+			ListPeer peer = (ListPeer) this.peer;
+			if (peer != null)
+				return peer.getPreferredSize(rows);
+		}
+		return super.preferredSize();
+	}
    // }
 
     /**

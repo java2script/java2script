@@ -136,4 +136,5 @@ public class Dialog extends JDialog implements A2SContainer {
 		return listener;
 	}
 
+	
 }

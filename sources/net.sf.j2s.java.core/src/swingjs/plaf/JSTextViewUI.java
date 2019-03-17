@@ -30,8 +30,15 @@ public abstract class JSTextViewUI extends JSTextUI {
 		focusNode = enableNode = textNode = domNode;
 		DOMNode.setStyles(domNode, "resize", "none", "margin", "0px", "padding", "0px","scrollbar-width", "thin"); // otherwise it overflows
 		DOMNode.setStyles(domNode, "box-sizing", "border-box");
-		bindJSKeyEvents(domNode, true);
+		bindJSKeyEvents(focusNode, true);
 	}
+
+	@Override
+	protected void undisposeUI(DOMNode node) {
+		super.undisposeUI(node);
+		bindJSKeyEvents(focusNode, true);		
+	}
+
 
 	//                                               AS_NEEDED  NEVER    ALWAYS
 	private final String[] overflows = new String[] { "auto", "hidden", "scroll" };
