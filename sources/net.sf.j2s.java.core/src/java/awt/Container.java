@@ -1076,6 +1076,7 @@ public class Container extends JSComponent {
 			
 			if (/** @j2sNative comp.getWrap$  && !this.isWrapper$ || */ false) {
 				comp = ((A2SWrappedComponent) comp).getWrap$();
+				comp.background = comp.foreground = null; // this parent should not set the background color				
 			}
 			// SwingJS used for all add methods
 

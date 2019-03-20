@@ -1168,9 +1168,7 @@ public class JSComponentUI extends ComponentUI
 	}
 	
 	private Container awttop;
-	protected Color awtPeerBG;
-
-	private Color awtPeerFG;
+	protected Color awtPeerBG, awtPeerFG;
 	
 	/**
 	 * AWT component background, foreground, and font are all set at the
