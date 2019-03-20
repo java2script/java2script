@@ -29,6 +29,7 @@ package swingjs.plaf;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -36,6 +37,8 @@ import java.awt.Insets;
 import java.awt.KeyboardFocusManager;
 import java.awt.LayoutManager;
 import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
@@ -44,6 +47,7 @@ import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
+import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.CaretEvent;
@@ -52,13 +56,20 @@ import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.InputMapUIResource;
 import javax.swing.plaf.TextUI;
 import javax.swing.plaf.UIResource;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.Caret;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.DefaultEditorKit;
+import javax.swing.text.Document;
 import javax.swing.text.EditorKit;
+import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.Position;
+import javax.swing.text.Position.Bias;
 import javax.swing.text.TextAction;
+import javax.swing.text.View;
 import javax.swing.text.html.HTMLDocument;
 
 import swingjs.JSKeyEvent;
@@ -125,7 +136,14 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		
 	transient JTextComponent editor;
 	protected boolean editable = true;
+    protected RootView rootView = new RootView();
 
+    TextListener textListener; // referred to in j2sApplet.js
+
+	protected boolean useRootView = false; // TextArea only?
+
+
+	
 	@Override
 	public DOMNode updateDOMNode() {
 		if (editor.isOpaque() && editor.isEnabled())
@@ -145,7 +163,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
 		String type = /** @j2sNative jQueryEvent.type || */null;
-		System.out.println("JSTextUI handlejs "+type + " " + eventType);
+		//System.out.println("JSTextUI handlejs "+type + " " + eventType);
 		if (JSToolkit.isMouseEvent(eventType)) {
 			return NOT_HANDLED;
 		}
@@ -491,8 +509,6 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 
 	// --- ComponentUI methods --------------------------------------------
 
-	TextListener textListener; // referred to in j2sApplet.js
-
 	/**
 	 * Installs the UI for a component. This does the following things.
 	 * <ol>
@@ -611,6 +627,10 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		b.getDocument().removeDocumentListener(listener);
 	}
 
+	protected void updateRootView() {
+		// only TextArea for now
+	}
+
 	/**
 	 * Gets the minimum size for the editor component.
 	 * 
@@ -639,8 +659,316 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		return d;
 	}
 
-	// ---- TextUI methods -------------------------------------------
+	
+    public View getRootView(JTextComponent tc) {
+        return rootView;
+    }
 
+    protected View create(Element elem) {
+    	// See TextArea
+		return null;
+	}
+
+
+	@Override
+	public Dimension getPreferredSize(JComponent c) {
+		if (!useRootView)
+			return super.getPreferredSize(c);
+        Insets i = c.getInsets();
+        Dimension d = c.getSize();
+        
+            if ((d.width > (i.left + i.right)) && (d.height > (i.top + i.bottom))) {
+                rootView.setSize(d.width - i.left - i.right, d.height - i.top - i.bottom);
+            }
+            else if (d.width == 0 && d.height == 0) {
+                // Probably haven't been laid out yet, force some sort of
+                // initial sizing.
+                rootView.setSize(Integer.MAX_VALUE, Integer.MAX_VALUE);
+            }
+            d.width = (int) Math.min((long) rootView.getPreferredSpan(View.X_AXIS) +
+                                     (long) i.left + (long) i.right, Integer.MAX_VALUE);
+            d.height = (int) Math.min((long) rootView.getPreferredSpan(View.Y_AXIS) +
+                                      (long) i.top + (long) i.bottom, Integer.MAX_VALUE);
+        return d;
+    }
+
+    
+    class RootView extends View {
+
+        private View view;
+
+		RootView() {
+            super(null);
+        }
+
+        /**
+         * Returns the document model underlying the view.
+         *
+         * @return the model
+         */
+        public Document getDocument() {
+            return editor.getDocument();
+        }
+
+        /**
+         * Returns the starting offset into the model for this view.
+         *
+         * @return the starting offset
+         */
+        public int getStartOffset() {
+            if (view != null) {
+                return view.getStartOffset();
+            }
+            return getElement().getStartOffset();
+        }
+
+        /**
+         * Returns the ending offset into the model for this view.
+         *
+         * @return the ending offset
+         */
+        public int getEndOffset() {
+            if (view != null) {
+                return view.getEndOffset();
+            }
+            return getElement().getEndOffset();
+        }
+
+        /**
+         * Gets the element that this view is mapped to.
+         *
+         * @return the view
+         */
+        public Element getElement() {
+            if (view != null) {
+                return view.getElement();
+            }
+            return editor.getDocument().getDefaultRootElement();
+        }
+
+        /**
+         * Sets the view size.
+         *
+         * @param width the width
+         * @param height the height
+         */
+        public void setSize(float width, float height) {
+            if (view != null) {
+                view.setSize(width, height);
+            }
+        }
+
+        /**
+         * Fetches the container hosting the view.  This is useful for
+         * things like scheduling a repaint, finding out the host
+         * components font, etc.  The default implementation
+         * of this is to forward the query to the parent view.
+         *
+         * @return the container
+         */
+        public Container getContainer() { 
+            return editor;
+        }
+
+        void setView(View v) {
+            View oldView = view;
+            view = null;
+            if (oldView != null) {
+                // get rid of back reference so that the old
+                // hierarchy can be garbage collected.
+                oldView.setParent(null);
+            }
+            if (v != null) {
+                v.setParent(this);
+            }
+            view = v;
+        }
+
+        /**
+         * Fetches the attributes to use when rendering.  At the root
+         * level there are no attributes.  If an attribute is resolved
+         * up the view hierarchy this is the end of the line.
+         */
+        public AttributeSet getAttributes() {
+            return null;
+        }
+
+        /**
+         * Determines the preferred span for this view along an axis.
+         *
+         * @param axis may be either X_AXIS or Y_AXIS
+         * @return the span the view would like to be rendered into.
+         *         Typically the view is told to render into the span
+         *         that is returned, although there is no guarantee.
+         *         The parent may choose to resize or break the view.
+         */
+        public float getPreferredSpan(int axis) {
+        	switch (axis) {
+        	case View.X_AXIS:
+        		return (view == null ? 10 : view.getPreferredSpan(axis));
+        	default:
+        	case View.Y_AXIS:
+            	JTextArea area = (JTextArea) editor;
+            	int h = area.getFont().getFontMetrics().getHeight();
+            	int r = area.getRows();
+            	return  h * (r > 0 ? r : isAWT ? 10 : h * 6);
+        	}
+        }
+
+        /**
+         * Determines the minimum span for this view along an axis.
+         *
+         * @param axis may be either X_AXIS or Y_AXIS
+         * @return the span the view would like to be rendered into.
+         *         Typically the view is told to render into the span
+         *         that is returned, although there is no guarantee.
+         *         The parent may choose to resize or break the view.
+         */
+        public float getMinimumSpan(int axis) {
+            if (view != null) {
+                return view.getMinimumSpan(axis);
+            }
+            return 10;
+        }
+
+        /**
+         * Determines the maximum span for this view along an axis.
+         *
+         * @param axis may be either X_AXIS or Y_AXIS
+         * @return the span the view would like to be rendered into.
+         *         Typically the view is told to render into the span
+         *         that is returned, although there is no guarantee.
+         *         The parent may choose to resize or break the view.
+         */
+        public float getMaximumSpan(int axis) {
+            return Integer.MAX_VALUE;
+        }
+
+        /**
+         * Specifies that a preference has changed.
+         * Child views can call this on the parent to indicate that
+         * the preference has changed.  The root view routes this to
+         * invalidate on the hosting component.
+         * <p>
+         * This can be called on a different thread from the
+         * event dispatching thread and is basically unsafe to
+         * propagate into the component.  To make this safe,
+         * the operation is transferred over to the event dispatching
+         * thread for completion.  It is a design goal that all view
+         * methods be safe to call without concern for concurrency,
+         * and this behavior helps make that true.
+         *
+         * @param child the child view
+         * @param width true if the width preference has changed
+         * @param height true if the height preference has changed
+         */
+        public void preferenceChanged(View child, boolean width, boolean height) {
+            editor.revalidate();
+        }
+
+        /**
+         * Determines the desired alignment for this view along an axis.
+         *
+         * @param axis may be either X_AXIS or Y_AXIS
+         * @return the desired alignment, where 0.0 indicates the origin
+         *     and 1.0 the full span away from the origin
+         */
+        public float getAlignment(int axis) {
+            if (view != null) {
+                return view.getAlignment(axis);
+            }
+            return 0;
+        }
+
+        /**
+         * Renders the view.
+         *
+         * @param g the graphics context
+         * @param allocation the region to render into
+         */
+        public void paint(Graphics g, Shape allocation) {
+            if (view != null) {
+                Rectangle alloc = (allocation instanceof Rectangle) ?
+                          (Rectangle)allocation : allocation.getBounds();
+                setSize(alloc.width, alloc.height);
+                view.paint(g, allocation);
+            }
+        }
+
+        /**
+         * Sets the view parent.
+         *
+         * @param parent the parent view
+         */
+        public void setParent(View parent) {
+            throw new Error("Can't set parent on root view");
+        }
+
+        /**
+         * Returns the number of views in this view.  Since
+         * this view simply wraps the root of the view hierarchy
+         * it has exactly one child.
+         *
+         * @return the number of views
+         * @see #getView
+         */
+        public int getViewCount() {
+            return 1;
+        }
+
+        /**
+         * Gets the n-th view in this container.
+         *
+         * @param n the number of the view to get
+         * @return the view
+         */
+        public View getView(int n) {
+            return view;
+        }
+
+        /**
+         * Returns the child view index representing the given position in
+         * the model.  This is implemented to return the index of the only
+         * child.
+         *
+         * @param pos the position &gt;= 0
+         * @return  index of the view representing the given position, or
+         *   -1 if no view represents that position
+         * @since 1.3
+         */
+        public int getViewIndex(int pos, Position.Bias b) {
+            return 0;
+        }
+
+        /**
+         * Fetches the allocation for the given child view.
+         * This enables finding out where various views
+         * are located, without assuming the views store
+         * their location.  This returns the given allocation
+         * since this view simply acts as a gateway between
+         * the view hierarchy and the associated component.
+         *
+         * @param index the index of the child
+         * @param a  the allocation to this view.
+         * @return the allocation to the child
+         */
+        public Shape getChildAllocation(int index, Shape a) {
+            return a;
+        }
+
+		@Override
+		public Shape modelToView(int pos, Shape a, Bias b) throws BadLocationException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public int viewToModel(float x, float y, Shape a, Bias[] biasReturn) {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+    }
+    
 	/**
 	 * Fetches the EditorKit for the UI.
 	 * 
