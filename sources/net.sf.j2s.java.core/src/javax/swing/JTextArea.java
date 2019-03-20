@@ -39,7 +39,6 @@ import javax.swing.text.Document;
 import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.PlainDocument;
-
 import swingjs.api.JSMinimalAbstractDocument;
 
 /**
@@ -240,8 +239,6 @@ public class JTextArea extends JTextComponent {
      * @return the default document model
      */
     protected Document createDefaultModel() {
-    	// SwingJS 
-//    	return JSToolkit.getPlainDocument(this);
         return new PlainDocument();
     }
 

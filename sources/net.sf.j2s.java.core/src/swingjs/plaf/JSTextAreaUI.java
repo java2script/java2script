@@ -5,6 +5,12 @@ import java.awt.Insets;
 import java.beans.PropertyChangeEvent;
 
 import javax.swing.JTextArea;
+import javax.swing.text.Document;
+import javax.swing.text.Element;
+import javax.swing.text.JTextComponent;
+import javax.swing.text.PlainView;
+import javax.swing.text.View;
+import javax.swing.text.WrappedPlainView;
 
 import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
@@ -45,12 +51,20 @@ public class JSTextAreaUI extends JSTextViewUI {
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
-		if (prop == "ancestor") {
+//		Object newValue = e.getNewValue();
+//        Object oldValue = e.getOldValue();
+		switch(prop) {
+		case "ancestor":
 			setJ2sMouseHandler();
-		}
+			break;
+		} 
 		super.propertyChange(e);
 	}
-	
+
+	protected void updateRootView() {
+		useRootView = true;
+        rootView.setView(create(editor.getDocument().getDefaultRootElement()));// does not take into account nested documents like HTML (I guess)		
+	}
 	/**
 	 * Get the real height and width of the text in a JavaScript textarea
 	 * Used by JSScrollPaneUI
@@ -107,6 +121,24 @@ public class JSTextAreaUI extends JSTextViewUI {
 		return DOMNode.setStyles(setHTMLElementCUI(), 
 				"overflow", "hidden",
 				"position", "absolute");
+	}
+
+    /**
+	 * Creates the view for an element. Returns a WrappedPlainView or PlainView.
+	 *
+	 * @param elem the element
+	 * @return the view
+	 */
+	@Override
+	public View create(Element elem) {
+		JTextArea area = (JTextArea) c;
+		View v;
+		if (area.getLineWrap()) {
+			v = new WrappedPlainView(elem, area.getWrapStyleWord());
+		} else {
+			v = new PlainView(elem);
+		}
+		return v;
 	}
 
 }
