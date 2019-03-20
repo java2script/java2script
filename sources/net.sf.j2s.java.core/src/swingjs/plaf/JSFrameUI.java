@@ -253,7 +253,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	@Override
 	protected void setInnerComponentBounds(int width, int height) {
 		DOMNode.setStyles(closerWrap, "text-align", "right", "width", width + "px");
-		DOMNode.setStyles(titleNode, "width", width + "px", "height", "20px");
+		DOMNode.setStyles(titleNode, "width", (width-4) + "px", "height", "20px");
 	}
 	
 	@Override
