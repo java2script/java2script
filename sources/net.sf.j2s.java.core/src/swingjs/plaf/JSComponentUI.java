@@ -2958,7 +2958,7 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public void beginValidate() {
-		System.out.println("JSCUI beginValidate " + id);
+		//System.out.println("JSCUI beginValidate " + id);
 	}
 
 	@Override

@@ -2385,17 +2385,15 @@ public abstract class Component implements ImageObserver/*
 		Dimension dim = prefSize;
 		if (dim == null || !(isPreferredSizeSet() || isValid())) {
 			// synchronized (getTreeLock()) {
-			
-			// SwingJS TODO: it is not clear that we should deliver getMinimumSize here. 
-			// 
-			prefSize = // (
+			dim = (width != 0 || height != 0 ? null 
+					: isDisplayable() ? //
 						// peer != null) ?
-						// peer.preferredSize() :
-					(width == 0 && height == 0 ? getMinimumSize() : new Dimension(width, height));
-			dim = prefSize;
+						peer.getPreferredSize() :
+					getMinimumSize());
+			prefSize = dim;
 		}
 		// }
-		return new Dimension(dim);
+		return (dim == null ? new Dimension(width, height) : new Dimension(dim));
 	}
 
 	/**

@@ -3,24 +3,36 @@ package test;
 import java.applet.Applet;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
+import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Label;
+import java.awt.Panel;
 import java.awt.Scrollbar;
 import java.awt.TextArea;
 import java.awt.TextField;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -280,3 +292,4 @@ public class TApp2 extends Applet {
 
 	}
 }
+

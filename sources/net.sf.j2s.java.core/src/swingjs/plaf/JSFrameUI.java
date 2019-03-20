@@ -59,10 +59,6 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	}
 
 	
-	protected void selected() {
-		((JFrame) jc).toFront();
-	}
-	
 	// public void notifyFrameMoved() {
 	// Toolkit.getEventQueue().postEvent(new ComponentEvent(frame,
 	// ComponentEvent.COMPONENT_MOVED));
@@ -119,36 +115,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 				DOMNode.setTopLeftAbsolute(modalNode, 0, 0);
 				DOMNode.setSize(modalNode, screen.width, screen.height);
 			}
-			// we have to wait until the frame is wrapped.
-			@SuppressWarnings("unused")
-			DOMNode fnode = frameNode;
-			
-			JSFunction fGetFrameParent = null; 
-			/**
-			 * @j2sNative var me = this; 
-			 * fGetFrameParent = function(mode, x, y) {
-			 * 		switch(arguments.length) {
-			 * 		case 1:
-			 *  	         if (mode == 501)
-			 *      	        me.selected$();  
-			 *     me.hideMenu$();
-			 *          	 return $(fnode).parent();
-			 *      case 3:
-			 *      		 if (mode == 506) {
-			 *      			me.moveFrame$I$I(x, y);
-			 *      			return null;
-			 *               }
-			 *     }
-			 *     
-			 *     return null;
-			 * }
-			 */ 
-			{
-				 hideMenu();
-			}
-			 
-			
-			J2S.setDraggable(titleBarNode, fGetFrameParent);
+			setDraggableEvents();
 			titleBarNode.appendChild(titleNode);
 			titleBarNode.appendChild(closerWrap);
 			closerWrap.appendChild(closerNode);
@@ -173,7 +140,51 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		return domNode;
 	}
 
+	@Override
+	protected void setDraggableEvents() {
+		@SuppressWarnings("unused")
+		DOMNode fnode = frameNode;		
+		JSFunction fGetFrameParent = null; 
+		/**
+		 * @j2sNative var me = this; 
+		 * fGetFrameParent = function(mode, x, y) {
+		 * 		switch(arguments.length) {
+		 * 		case 1:
+		 *  	         if (mode == 501)
+		 *      	        me.selected$();  
+		 *     me.hideMenu$();
+		 *          	 return $(fnode).parent();
+		 *      case 3:
+		 *      		 if (mode == 506) {
+		 *      			me.moveFrame$I$I(x, y);
+		 *      			return null;
+		 *               }
+		 *     }
+		 *     
+		 *     return null;
+		 * }
+		 */ 
+		{
+			 selected();
+ 			 moveFrame(0,0);
+			 hideMenu();
+		}
+		 
+		J2S.setDraggable(titleBarNode, fGetFrameParent);
+	}
+
+
 	/**
+	 * Do not change this method name
+	 * referenced by j2sNative, above
+	 */
+	protected void selected() {
+		// subclassed by JSInternalFrameUI
+		((JFrame) jc).toFront();
+	}
+	
+	/**
+	 * Do not change this method name
 	 * referenced by j2sNative, above
 	 */
 	/*not private*/ void hideMenu() {
@@ -182,7 +193,13 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 
 
 	
-	void moveFrame(int x, int y) {
+	/**
+	 * Do not change this method name
+	 * referenced by j2sNative, above
+	 * @param x
+	 * @param y
+	 */
+	/*not private*/ void moveFrame(int x, int y) {
 		if (!isInternalFrame) {
 			x = Math.max(30 - frame.getWidth(), x);
 			y = Math.max(0, y);

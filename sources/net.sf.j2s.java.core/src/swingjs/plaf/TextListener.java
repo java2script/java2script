@@ -70,12 +70,22 @@ public class TextListener implements FocusListener, ChangeListener,
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
 //		System.out.println("JSTextListener property change: " + prop + " " + e.getSource());
-		if ("font" == prop || "foreground" == prop || "preferredSize" == prop) {
+		switch (prop) {
+		case "font":
+		case "foreground":
+		case "preferredSize":
 			JTextComponent txtComp = (JTextComponent) e.getSource();
 			((JSComponentUI) txtComp.getUI()).propertyChangedFromListener(e, prop);
-		}
-		if ("editable" == prop)
+			break;
+		case "editable":
 			ui.setEditable(((Boolean) e.getNewValue()).booleanValue());
+			break;
+		case "document":
+			if (e.getNewValue() != null)
+				ui.updateRootView();
+			break;
+		}		
+
 	}
 
 	@Override
