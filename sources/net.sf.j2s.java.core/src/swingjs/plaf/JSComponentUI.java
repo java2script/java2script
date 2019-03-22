@@ -15,7 +15,6 @@ import java.awt.JSComponent;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
-import java.awt.Window;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.peer.DropTargetPeer;
 import java.awt.event.KeyEvent;
@@ -38,7 +37,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JRootPane;
-import javax.swing.JTable;
 import javax.swing.JTable.BooleanRenderer;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
@@ -552,7 +550,7 @@ public class JSComponentUI extends ComponentUI
 
 	private DOMNode waitImage;
 
-	private final Color colorUNKNOWN = new Color();
+	protected final Color colorUNKNOWN = new Color();
 
 	protected Color inactiveForeground = colorUNKNOWN, 
 			inactiveBackground = colorUNKNOWN;
@@ -643,8 +641,6 @@ public class JSComponentUI extends ComponentUI
 	 */
 	private void uninstallJS() {
 
-		//System.out.println("uninstallJS " + id);
-		
 		// window closing will fire this with c == null
 
 		/**
@@ -1290,7 +1286,6 @@ public class JSComponentUI extends ComponentUI
 		mnemonic = newValue;	
 	}
 
-	private String createMsgs = "";
 
 	/**
 	 * set to TRUE by Container.validateTree at the beginning of its laying out and
@@ -1384,16 +1379,13 @@ public class JSComponentUI extends ComponentUI
 	 * @return the DOM element's node and, if the DOM element already exists,
 	 */
 	public DOMNode updateDOMNode() {
-		if (notImplemented) {
-			String msg = "Swingjs WARNING: default JSComponentUI.updateDOMNode() is being used for "
-					+ getClass().getName();
-			if (debugging && createMsgs.indexOf(msg) < 0) {
-				createMsgs += msg;
-				JSUtil.alert(msg);
+		if (domNode == null) {
+			if (notImplemented) {
+				String msg = "Swingjs WARNING: default JSComponentUI.updateDOMNode() is being used for "
+						+ getClass().getName();
+				System.out.println(msg);
 			}
-			System.out.println(msg);
-			if (domNode != null)
-				domNode = DOMNode.createElement("div", id);
+			domNode = DOMNode.createElement("div", id);
 		}
 		return domNode;
 	}
@@ -2292,7 +2284,6 @@ public class JSComponentUI extends ComponentUI
 				DOMNode.setVisible(obj, text != null);
 		}
 		if (obj != null) {
-//			System.out.println("JSCUI setText " + id + " " + prop + " " + text);
 			setJSText(obj, prop, text);
 		}
 		if (valueNode != null) {
@@ -2391,6 +2382,10 @@ public class JSComponentUI extends ComponentUI
 		int wText = (dimText == null ? 0 : dimText.width);
 		int gap = (wText == 0 || wIcon == 0 ? 0 : b.getIconTextGap());
 		int w = cellComponent != null ? cellWidth : $(domNode).width();
+		if (w < wIcon + wText) {
+			// jQuery method can fail that may not have worked.
+			w = wIcon + wText;
+		}
 		boolean alignVCenter = (vAlign == SwingConstants.CENTER);
 		Insets margins = (isLabel ? (isAWT ? b.getInsets() : insets) : b.getMargin());
 		if (margins == null)
@@ -2500,14 +2495,18 @@ public class JSComponentUI extends ComponentUI
 			return;
 		}
 		preferredDim = null;
-		String yoff = "-50%";
 		DOMNode.setStyles(centeringNode, "position", "absolute", "top", null, "left", null, "transform", null);
 		DOMNode.setStyles(centeringNode, "width", wCtr + "px", "height", hCtr + "px");
 		if (alignHCenter && alignVCenter && wIcon == 0
 				|| wText == 0 && margins.left == margins.right && margins.top == margins.bottom) {
 			// simple totally centered label or button
-			DOMNode.setStyles(centeringNode, "top", "50%", "left", "50%", "transform",
-					"translateX(-50%)translateY("+ yoff + ")");
+			// can't have width or height here --- let the browser figure that out
+			DOMNode.setStyles(centeringNode, "width",null,"top", "50%", "left", "50%", "transform",
+					"translateX(-50%)translateY(-50%)", "position", "absolute");
+			DOMNode.setStyles(iconNode, "top", "50%", "left", "50%", "transform",
+					"translateX(-50%)translateY(-50%)", "position", "absolute");
+			DOMNode.setStyles(textNode, "top", "50%", "left", "50%", "transform",
+					"translateX(-50%)translateY(-50%)", "position", "absolute");
 			return;
 		}
 
@@ -2594,11 +2593,14 @@ public class JSComponentUI extends ComponentUI
 			}
 			DOMNode.setStyles(centeringNode, "top", top + "px");
 			int itop;
+			String yoff = null;
 			String iscale = null;
 			switch (vTextPos) {
 			case SwingConstants.TOP:
 				top = itop = 0;
-				yoff = null;
+				break;
+			case SwingConstants.BOTTOM:
+				top = itop = 100;
 				break;
 			default:
 			case SwingConstants.CENTER:
@@ -2607,12 +2609,7 @@ public class JSComponentUI extends ComponentUI
 					itop = 70;
 					iscale = "scale(0.8,0.8)";
 				}
-				// +3 here is a fudge factor for the AWT applets
-				yoff = "-50%";//(wIcon == 0 && false ? "-" + ((getFont().getFontMetrics().getAscent()>>1) + (isAWT ? 0 : 0)) + "px" : "-50%");
-				break;
-			case SwingConstants.BOTTOM:
-				top = itop = 100;
-				yoff = null;
+				yoff = "-50%";
 				break;
 			}
 			DOMNode.setStyles(textNode, "top", top + "%", "transform", "translateY(" + (yoff == null ? "-" + top + "%" : yoff + ")"));
@@ -2689,7 +2686,6 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public void dispose() {
-		//System.out.println("JSCUI dispose " + id);
 		if (isUIDisabled)
 			return;
 		if (cellComponent != null) {
@@ -2724,7 +2720,6 @@ public class JSComponentUI extends ComponentUI
 		// cell renderers will set their domNode to null;
 		if (outerNode != null && domNode != null && domNode != outerNode) {
 			appendChild(outerNode, domNode);
-			//System.out.println("JSCUI undispose reattached");
 		}
 		isDisposed = false;
 	}
