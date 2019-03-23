@@ -46,16 +46,15 @@ public abstract class JSTextViewUI extends JSTextUI {
 	@Override
 	protected void setOverflow() {
 		Container parent = jc.getParent();
-		if (jc instanceof java.awt.TextArea) {
+		if (isAWT) {
 			parent = jc;
 		} else if (!(parent instanceof JViewport) || !((parent = parent.getParent()) instanceof JScrollPane)) {
-			super.setOverflow();
+			DOMNode.setStyles(domNode, "overflow", "hidden", "overflow-x", null, "overflow-y", null);
 			return;
-		}
+		} 
 		JScrollPane sp = (JScrollPane) parent;
 		DOMNode.setStyles(domNode, "overflow", null);
-			DOMNode.setStyles(domNode, "overflow-x", overflows[sp.getHorizontalScrollBarPolicy() % 10]);
-		//no - this turns entry of <CR> to <space> , "white-space", "nowrap");
+		DOMNode.setStyles(domNode, "overflow-x", overflows[sp.getHorizontalScrollBarPolicy() % 10]);
 		DOMNode.setStyles(domNode, "overflow-y", overflows[sp.getVerticalScrollBarPolicy() % 10]);
 	}
 	
