@@ -3,6 +3,7 @@ package swingjs.a2s;
 import java.awt.Color;
 import java.awt.event.ItemEvent;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 
 public class Choice extends JComboBox {
@@ -69,6 +70,8 @@ public class Choice extends JComboBox {
     
     @Override
     protected void fireItemStateChanged(ItemEvent event) {
+    	if (!_trigger) 
+    		return;
     	A2SEvent.addListener(this);
     	super.fireItemStateChanged(event);
     }

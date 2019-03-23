@@ -1039,7 +1039,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		setEditableCSS();
 		if (jc.isOpaque()) {
 			Color bg = getBackground();
-			setBackgroundCUI(editable || !(bg instanceof UIResource) || inactiveBackground == null ? bg : inactiveBackground);
+			setBackgroundCUI(editable || !(bg instanceof UIResource) 
+					|| inactiveBackground == colorUNKNOWN ? bg : inactiveBackground);
 		}		
 	}
 	

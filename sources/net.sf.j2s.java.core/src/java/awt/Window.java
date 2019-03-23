@@ -1168,6 +1168,12 @@ public class Window extends JComponent {
             if (isModalBlocked()) {
                 modalBlocker.toFront_NoClientCode();
             }
+            
+            for (int i = 0; i < ownedWindowList.size(); i++) {
+            	if (ownedWindowList.get(i).isVisible())
+            		ownedWindowList.get(i).toFront();
+            }
+            
         }
     }
 

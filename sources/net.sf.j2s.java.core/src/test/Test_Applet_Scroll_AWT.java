@@ -20,6 +20,7 @@ import java.awt.Label;
 import java.awt.Panel;
 import java.awt.ScrollPane;
 import java.awt.Scrollbar;
+import java.awt.TextArea;
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.AdjustmentEvent;
@@ -32,6 +33,8 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.text.DecimalFormat;
+
+import javax.swing.JTextArea;
 
 /**
  * Creates a ScrollPane with a mix of SwingJS and AWT components. 
@@ -190,6 +193,22 @@ public class Test_Applet_Scroll_AWT extends Applet {
 
 
 		Panel p = new Panel();
+		
+		
+		TextArea area = new TextArea("testing", 10,20) {
+			protected int getColumnWidth() {
+				int i = super.getColumnWidth();
+				System.out.println("colwidth is " + i + " " + p.getFontMetrics(p.getFont()).stringWidth("m"));
+				return i;
+			}
+			protected int getRowHeight() {
+				int i = super.getRowHeight();
+				System.out.println("rowHeight is " + i + " " + p.getFontMetrics(p.getFont()).getHeight());
+				return i;
+			}
+		};
+		p.add(area);
+ 
 		Scrollbar hbar = mkBar(p, tf, Adjustable.VERTICAL, 20, 200);
 
 		// the first two buttons act like radio buttons; only one is ever ON
@@ -280,15 +299,7 @@ public class Test_Applet_Scroll_AWT extends Applet {
 		sp.add(p);
 		sp.setSize(500, 250);
 		Dimension d = sp.getPreferredSize();
-		System.out.println(sp.getPeer() + " " + sp.getLayout());
- 		System.out.println("sp pref size " + d);
-//		sp.getViewport().add(p);
-//		getContentPane().add(sp);
 		add(sp);
-//		sp.getViewport().addChangeListener(this);
-//		hsb = sp.getHorizontalScrollBar();
-//		hsb.setUnitIncrement(100);
-//		button2.setToolTipText("this is hsb");
 
 		
 		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200);
@@ -309,7 +320,7 @@ public class Test_Applet_Scroll_AWT extends Applet {
 //		framesPerSecond.setForeground(Color.BLACK);
 //		
 		mkSlider(p, tf, Adjustable.HORIZONTAL, 100, 20);
-		repaint();
+		System.out.println("tas " + area.getPreferredSize());
 	}
 
 	Scrollbar mkBar(Panel p, final TextField tf, int orient, int x, int y) {

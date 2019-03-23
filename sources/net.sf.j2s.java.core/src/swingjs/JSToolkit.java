@@ -128,6 +128,7 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	// ////// java.awt.Toolkit /////////
 
 	public static void getScreenSize(Dimension d) {
+		@SuppressWarnings("unused")
 		JQuery jq = JSUtil.jQuery;
 		d.width = /** @j2sNative jq.$(window).width() || */0;
 		d.height = /** @j2sNative jq.$(window).height() || */0;
@@ -285,8 +286,9 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	}
 
 	public static JSComponentUI getComponentUI(JComponent target) {
+		String id = ((JSComponent) target).getUIClassID();
 		JSComponentUI ui = (JSComponentUI) Interface.getInstance("swingjs.plaf.JS"
-				+ ((JSComponent) target).getUIClassID(), true);
+				+ id, true);
 		if (ui != null)
 			ui.set(target);
 		return ui;
@@ -536,7 +538,7 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 
 	public static JSComponentUI getUI(Component c, boolean isQuiet) {
 		JSComponentUI ui = /** @2sNative !!c.getUI$ &&*/(JSComponentUI)((JComponent) c).getUI();
-		if (ui == null && ((JComponent) c).getUIClassID() != "ComponentUI") {
+		if (ui == null) {
 			((JComponent) c).updateUI();
 			ui = (JSComponentUI) ((JComponent) c).getUI();
 		}

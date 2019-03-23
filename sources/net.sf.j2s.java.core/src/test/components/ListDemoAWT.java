@@ -58,7 +58,7 @@ public class ListDemoAWT extends Panel {
 		super(new BorderLayout());
 
 		String[] names = new String[] {"Jane Doe", "John Smith", 
-				"Kathy Green", "Rose Red", "Negro Black", "Blanco White" };
+				"Kathy Green", "Rose Red", "Nearly Black", "Pearly White" };
 		// Create the list and put it in a scroll pane.
 		list = new List(5);
 		for (int i = 0; i < names.length; i++)

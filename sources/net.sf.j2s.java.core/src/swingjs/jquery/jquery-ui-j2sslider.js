@@ -3,6 +3,7 @@
  * Includes: jquery.ui.slider.js
  * Copyright 2015 jQuery Foundation and other contributors; Licensed MIT */
 
+// BH 3/23/2019 adds timer for mouse down for track and end
 // BH 2/10/2019 fix for AWT scrollbar differences from Swing
 // BH 7/21/2018 fix for ScrollPane scroll bars not clicking on tracks 
 // note -- still no support for unit (deprecated anyway) or block increments
@@ -24,9 +25,41 @@
 		// (how many times can you page 3/down to go through the whole range)
 		var numPages = 5;
 
-		var closestHandle, index, allowed, offset;
+		var closestHandle, index, allowed, offset, dir;
 
-		var clearEnds = function(e) {
+		var actionTimer, actionTimer2;
+		var actionDelay = 60, actionDelay0 = 200;
+		var startAction = function(me, dir) {
+			if (actionTimer)
+				return;
+			me.jslider.ui.scrollByUnit$I(dir)
+			actionTimer = setTimeout(function(){
+				actionTimer = setInterval(function() {
+					me.jslider.ui.scrollByUnit$I(dir)
+				}, actionDelay);
+			}, actionDelay0);
+		}
+		
+		var startAction2 = function(me, dir, val) {
+			me.jslider.ui.scrollDueToClickInTrack$I$I(dir, val);
+			if (!me.isScrollBar)
+				return;
+			actionTimer2 = 
+				setTimeout(function(){
+					actionTimer2 = setInterval(function() {
+						me.jslider.ui.scrollDueToClickInTrack$I$I(dir);
+					}, actionDelay);
+				}, actionDelay0);
+		}
+		
+		var clearEnds = function(me) {
+			var e = me.element;
+			if (actionTimer)
+				clearInterval(actionTimer);
+			if (actionTimer2)
+				clearInterval(actionTimer2);
+			actionTimer = 0;
+			actionTimer2 = 0;
 			e.removeClass("ui-j2sslider-at-top");
 			e.removeClass("ui-j2sslider-at-bottom");
 			e.removeClass("ui-j2sslider-at-left");
@@ -38,7 +71,7 @@
 		var OBJ_HANDLE = 2;
 		
 		var doMouseCapture = function(me, event, obj, isEndCheck) {
-			
+
 			var that = me, o = me.options;
 			
 			if (o.disabled || event.type == "mousemove" && event.buttons == 0) {
@@ -68,14 +101,13 @@
 			if (allowed === false) {
 				return false;
 			}
+			
 			me._mouseSliding = true;
 
 			me._handleIndex = index;
 
 			if (obj == OBJ_HANDLE)
-			closestHandle.addClass("ui-state-active")
-					.focus();
-
+				closestHandle.addClass("ui-state-active").focus();
 
 			offset = closestHandle.offset();
 			var mouseOverHandle = (obj == OBJ_HANDLE) && $(event.target).parents()
@@ -105,23 +137,22 @@
 			var pixmouse = getPixelMouse(me, position, false);
 			
 			var isAtEnd = !mouseOverHandle && (!me.isScrollBar ? 0 : 
-				pixmouse < 5 ? -1 : pixmouse > getPixelTotal(me) - 5 ? 1 : 0);
+				pixmouse < 5 ? -1 : pixmouse > length(me) + 5 ? 1 : 0);
+			var dir = Math.signum(!isAtEnd ? val - me.jslider.getValue$() : isAtEnd);
 			if (isAtEnd) {
 				me.element.addClass(me.orientation === "horizontal" ? 
 						(isAtEnd == 1 ? "ui-j2sslider-at-right" : "ui-j2sslider-at-left")
 						: (isAtEnd == 1 ? "ui-j2sslider-at-bottom" : "ui-j2sslider-at-top"));
+				startAction(me, dir);	
 			} else {
-				clearEnds(me.element);
-			}
-			if (isEndCheck) {
-				return;
-			}
-			var dir = Math.signum(!isAtEnd ? val - me.jslider.getValue$() : isAtEnd);
-			if (!me.handles.hasClass("ui-state-hover")) {
-				if (isAtEnd) {
-					me.jslider.ui.scrollByUnit$I(dir);
-				} else if (obj != OBJ_HANDLE) {
-					me.jslider.ui.scrollDueToClickInTrack$I$I(dir, val);
+				clearEnds(me);				
+				if (isEndCheck) {
+					return;
+				}
+//				if (!me.handles.hasClass("ui-state-hover")) {
+					if (obj != OBJ_HANDLE) {
+						startAction2(me, dir, val);
+//					}
 				}
 			}
 			me._animateOff = true;
@@ -161,8 +192,12 @@
 			return p - (offsetHandle ? me.handleSize / 2 : 0);
 		}
 		
+		var length = function(me) {
+			return (me.orientation == "horizontal" ? width(me) : height(me))
+		}
+		
 		var getPixelTotal = function(me) {
-			return (me.orientation == "horizontal" ? width(me) : height(me)) - me.visibleAdjust || 100;	
+			return length(me) - me.visibleAdjust || 100;	
 		}
 
 		var postMouseEvent = function(me, xye, id) {
@@ -182,7 +217,8 @@
 		}
 		
 		var width = function(me) {
-			return Math.max(0, me.element.width() || me.element.parent().width() - me.marginX || 0);
+			var w = Math.max(0, me.element.width() || me.element.parent().width() - me.marginX || 0);
+			return w;
 		}
 		
 		var height = function(me) {
@@ -293,6 +329,7 @@
 					var fUpTrack = function(event, id) {
 						//me._stop(event, me._handleIndex);
 						me._change(event, me._handleIndex);
+						clearEnds(me);
 					};
 
 					var fDownWrap = function(event, id) {
@@ -325,7 +362,7 @@
 					};
 
 					var fOutTrack = function(event, id) {
-						clearEnds(me.element);
+						clearEnds(me);
 					};
 
 					var fMoveTrack = function(event, id) {
@@ -609,7 +646,7 @@
 						if (f < 0.1)
 							f = 0.1;
 						this.handleFraction = f;
-						var hw = (this.orientation === "horizontal" ? width(this) : height(this));
+						var hw = length(this);
 						if (this.orientation === "horizontal")
 							$(this.handles[0]).width(this.handleSize = f * hw);
 						else

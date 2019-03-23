@@ -50,6 +50,7 @@ ChangeListener {
 	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			domNode = newDOMObject("div", id);
+			DOMNode.setStyles(domNode,  "margin", "1px");
 			ignoreAllMouseEvents(domNode);
 		}
 		return updateDOMNodeCUI();
@@ -66,15 +67,13 @@ ChangeListener {
 	
 	@Override
 	public Dimension getPreferredSize(JComponent jc) {
-		if (debugging) 
-			System.out.println(id + " getPreferredSize");
   	return null;
   }
 
-
 	@Override
 	protected DOMNode setHTMLElement() {
-		return DOMNode.setStyles(setHTMLElementCUI(), "overflow", "hidden");
+		return DOMNode.setStyles(setHTMLElementCUI(), "overflow", "hidden", "margin", "1px"
+		,"width", (width - 2) + "px", "height", (height-2) + "px");
 	}
 
 }

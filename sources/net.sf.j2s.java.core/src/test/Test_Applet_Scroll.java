@@ -10,6 +10,7 @@ package test;
 //web_Features= graphics, AWT-to-Swing
 
 import java.awt.Adjustable;
+import java.awt.Choice;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -33,6 +34,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JViewport;
@@ -57,7 +59,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 	boolean preferred = true;
 
 	private JScrollBar hsb;
-
+	
 	void setSize(JComponent c, int x, int y) {
 		if (preferred)
 			c.setPreferredSize(new Dimension(x, y));
@@ -78,8 +80,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 	
 	@Override
 	public void init() {
-		BasicSliderUI ui;
-
+		
 		final JLabel label = new JLabel("hello");
 		// label.setBounds(0, 60, 200, 60);
 		setSize(label, 80, 50);
@@ -201,7 +202,22 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		});
 
 		JPanel p = new JPanel();
+
+		JTextArea area = new JTextArea("testing", 10,20) {
+			protected int getColumnWidth() {
+				int i = super.getColumnWidth();
+				System.out.println("colwidth is " + i + " " + p.getFontMetrics(p.getFont()).stringWidth("m"));
+				return i;
+			}
+			protected int getRowHeight() {
+				int i = super.getRowHeight();
+				System.out.println("rowHeight is " + i + " " + p.getFontMetrics(p.getFont()).getHeight());
+				return i;
+			}
+		};
+		p.add(area);
 		
+
 		// the first two buttons act like radio buttons; only one is ever ON
 		JScrollBar hbar = mkBar(p, tf, Adjustable.VERTICAL, 20, 200);
 
@@ -301,7 +317,9 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		hbar.setToolTipText("this is scrollbar 1");
 		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200).setToolTipText("this is slider 2");
 
-		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200).setInverted(true);
+	    JSlider s = mkSlider(p, tf, Adjustable.VERTICAL, 20, 200);
+		s.setInverted(true);
+		s.setSnapToTicks(true);
 		p.add(label);
 		label.setToolTipText("this is label");
 		p.add(tf);

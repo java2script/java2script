@@ -61,6 +61,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 		isContainer = true;
 		if (domNode == null) {
 			domNode = newDOMObject("div", id);
+			DOMNode.setStyles(domNode,  "border", "solid black 1px", "box-sizing", "border-box");
 		}
 		// add code here for adjustments when changes in bounds or other properties
 		// occur.
@@ -197,16 +198,13 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 		JViewport vp = scrollpane.getViewport();
 		if (vp == null)
 			return;
-		JComponent sc = (JComponent) vp.getView();
 		JScrollBar vsb = scrollpane.getVerticalScrollBar();
 		JScrollBar hsb = scrollpane.getHorizontalScrollBar();
 		if (vsb != null) {
 			vsb.setVisibleAmount(vp.getHeight());
-//			((JSScrollBarUI) vsb.getUI()).setScrollBarExtentAndCSS();
 		}
 		if (hsb != null) {
 			vsb.setVisibleAmount(vp.getWidth());
-//			((JSScrollBarUI) hsb.getUI()).setScrollBarExtentAndCSS();
 		}
 	}
 

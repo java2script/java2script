@@ -17,30 +17,33 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.Line2D;
 
 import javax.swing.JApplet;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 public class TApp2_Swing extends JApplet {
 
 	JTextArea ta;
-	
-    private void addButtonTest() {
-    	for (int i = 0; i < 4; i++) {
-    		for (int j = 0; j < 4; j++) {
-    			JButton b = new JButton("XyX");
-    			JLabel l = new JLabel("XyX", JLabel.CENTER);
-    			setLBBounds((Component) b, (Component) l, i, j);
-    		}
-    	}
+
+	private void addButtonTest() {
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
+				JButton b = new JButton("XyX");
+				JLabel l = new JLabel("XyX", JLabel.CENTER);
+				setLBBounds((Component) b, (Component) l, i, j);
+			}
+		}
 	}
 
-    private void setLBBounds(Component b, Component l, int i, int j) {
+	private void setLBBounds(Component b, Component l, int i, int j) {
 		int x = 40 + i * 170;
 		int y = 350 + j * 40;
 		int w = 70 + i * 10;
@@ -49,13 +52,12 @@ public class TApp2_Swing extends JApplet {
 		l.setBounds(x + 105, y, w - 30, h);
 		b.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10 + i * 3));
 		l.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10 + i * 3));
-			l.setBackground(Color.cyan);
+		l.setBackground(Color.cyan);
 		add(b);
 		add(l);
 	}
 
-
-    public void init() {
+	public void init() {
 		setSize(800, 600);
 		addButtonTest();
 		setFont(new Font(Font.MONOSPACED, Font.PLAIN, 14));
@@ -67,6 +69,24 @@ public class TApp2_Swing extends JApplet {
 		panel.setLayout(null);
 		panel.setBackground(Color.red);
 		panel.setForeground(Color.green);
+
+		JComponent jc = new JComponent() {
+	  		private static final long serialVersionUID = 1L;
+
+				@Override
+				public void paintComponent(Graphics g) {
+	                Graphics2D g2 = (Graphics2D) g;
+	                g2.setColor(Color.white);
+//	                g2.setStroke(new BasicStroke(10));
+	                g2.draw(new Line2D.Float(30, 20, 80, 90));
+	                g2.fillRect(30, 20, 10, 100);
+	            }
+	        };
+		jc.setBounds(50,50,150,150);
+		jc.setBackground(Color.blue);
+		jc.setOpaque(true);
+		panel.add(jc);
+
 		JTextField tf = new JTextField("Text");
 		tf.setBounds(5, 5, 50, 24);
 		tf.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 20));
@@ -81,7 +101,7 @@ public class TApp2_Swing extends JApplet {
 			public void focusLost(FocusEvent e) {
 				System.out.println("tf " + e.paramString());
 			}
-			
+
 		});
 		panel.add(tf);
 //		Label label = new Label("blue", Label.RIGHT);
@@ -98,10 +118,19 @@ public class TApp2_Swing extends JApplet {
 //
 //		// the scrolling to the bottom is only with TextArea, not JTextArea
 		// and then only if the append is AFTER the add
-		ta = new JTextArea("A text\nwith some\nlines and\n no content.");
-		add(ta);
-		ta.setBounds(200,  70, 200,200);
+		ta = new JTextArea("Averyveryveryveryveryveryveryverylongword\n" + "Averyveryveryveryveryveryveryverylongword\n"
+				+ "Averyveryveryveryveryveryveryverylongword\n" + "Averyveryveryveryveryveryveryverylongword\n"
+				+ "A text\nwith some\nlines and\n no content.");
+		JScrollPane jsp = new JScrollPane(ta);
+		add(jsp);
+		jsp.setBounds(200, 70, 200, 200);
+		ta.setWrapStyleWord(true);
+		// add(ta);
+		// ta.setBounds(200, 70, 200,200);
 		ta.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
+		//ta.setLineWrap(true);
+		ta.setWrapStyleWord(false);
+		jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		ta.append("A text\nwith some\nlines and\n no content.");
 		ta.addFocusListener(new FocusListener() {
 
@@ -114,17 +143,15 @@ public class TApp2_Swing extends JApplet {
 			public void focusLost(FocusEvent e) {
 				System.out.println("ta " + e.paramString());
 			}
-			
+
 		});
 
-		
 //		TextArea ta = new TextArea("A text\nwith some\nlines and\n no content.");
 //		JScrollPane sp = new JScrollPane(ta);
 //		sp.setBounds(200, 70, 100, 80);
 //		add(sp);
 
-		
-		//		ta.getSelectionEnd();
+		// ta.getSelectionEnd();
 		ta.setBackground(Color.red);
 		JScrollBar sb = new JScrollBar(0, 30, 0, 0, 100);
 		sb.setBounds(300, 20, 100, 20);
@@ -135,56 +162,88 @@ public class TApp2_Swing extends JApplet {
 			public void adjustmentValueChanged(AdjustmentEvent e) {
 				System.out.println("TApp2 sb value " + e.getValue());
 			}
+
+		});
+
+		addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				System.out.println(">>>>mouseClicked: " + e.getModifiers() + " " + e.getModifiersEx() + " " + e);
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				System.out.println(">>>>mousePressed: " + e.getModifiers() + " " + e.getModifiersEx() + " " + e);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				System.out.println(">>>>mouseReleased: " + e.getModifiers() + " " + e.getModifiersEx() + " " + e);
+			}
 			
 		});
 
+
 		new TestGraphic2(this).testGraphic();
 	}
-	
-    static class TestGraphic2{
-	private TApp2_Swing tApp2;
 
-	public TestGraphic2(TApp2_Swing tApp2) {
-		this.tApp2 = tApp2;
+	static class TestGraphic2 {
+		private TApp2_Swing tApp2;
+
+		public TestGraphic2(TApp2_Swing tApp2) {
+			this.tApp2 = tApp2;
 		}
 
-	static {
-		ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
+		static {
+			ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
+		}
+
+		void testGraphic() {
+			JButton b = new JButton("g");
+			b.setBounds(300, 300, 40, 20);
+			// images are created only when a button is displayable
+			Image i1 = b.createImage(100, 100);
+			System.out.println("b.isDisplayable " + b.isDisplayable() + " " + i1);
+
+			tApp2.add(b);
+			i1 = b.createImage(100, 100);
+			System.out.println("b.isDisplayable " + b.isDisplayable() + " " + i1);
+			b.setFont(new Font(Font.SERIF, Font.BOLD, 10));
+			Graphics g = i1.getGraphics();
+			Font f = g.getFont();
+			System.out.println(f);
+
+			// font/background/foreground are set when the graphic is created
+			Font f0 = new Font(Font.DIALOG, Font.PLAIN, 30);
+			b.setFont(f0);
+			b.setBackground(Color.red);
+			b.setForeground(Color.green);
+			g = i1.getGraphics();
+			b.setFont(new Font(Font.SERIF, Font.BOLD, 10));
+			b.setBackground(Color.white);
+			b.setForeground(Color.black);
+			System.out.println("img font=" + g.getFont());
+			System.out.println("img bg=" + ((Graphics2D) g).getBackground());
+			System.out.println("img fg=" + g.getColor());
+			assert (g.getFont().equals(f0));
+			assert (g.getColor() == Color.green);
+			assert (((Graphics2D) g).getBackground() == Color.red);
+			System.out.println("Tapp2 OK");
+		}
 	}
-
-	void testGraphic() {
-    	JButton b = new JButton("g");
-    	b.setBounds(300,300,40,20);
-    	// images are created only when a button is displayable
-    	Image i1 = b.createImage(100, 100);
-    	System.out.println("b.isDisplayable " + b.isDisplayable() + " " + i1);
-
-    	tApp2.add(b);
-    	i1 = b.createImage(100, 100);
-    	System.out.println("b.isDisplayable " + b.isDisplayable() + " " + i1);
-    	b.setFont(new Font(Font.SERIF, Font.BOLD, 10));
-    	Graphics g = i1.getGraphics();
-    	Font f = g.getFont();
-    	System.out.println(f);
-
-    	// font/background/foreground are set when the graphic is created
-    	Font f0 = new Font(Font.DIALOG, Font.PLAIN, 30);
-    	b.setFont(f0);
-    	b.setBackground(Color.red);
-    	b.setForeground(Color.green);
-    	g = i1.getGraphics();
-    	b.setFont(new Font(Font.SERIF, Font.BOLD, 10));
-    	b.setBackground(Color.white);
-    	b.setForeground(Color.black);
-    	System.out.println("img font=" + g.getFont());
-    	System.out.println("img bg=" + ((Graphics2D) g).getBackground());
-    	System.out.println("img fg=" + g.getColor());
-    	assert(g.getFont().equals(f0));
-    	assert(g.getColor() == Color.green);
-    	assert(((Graphics2D) g).getBackground() == Color.red);
-    	System.out.println("Tapp2 OK");	
-	}
-    }
 
 	public void paint(Graphics g) {
 		super.paint(g);
@@ -197,7 +256,7 @@ public class TApp2_Swing extends JApplet {
 		g.setColor(Color.blue);
 		g.drawRoundRect(120, 200, 80, 150, 20, 20);
 
-		g.fillRoundRect(210, 200, 80, 150, 20, 20);
+		g.fillRoundRect(510, 200, 80, 150, 20, 20);
 
 		// test AlphaComposite.Clear
 
@@ -242,38 +301,6 @@ public class TApp2_Swing extends JApplet {
 //		g.drawString("SwingJS", 200, 30);
 //		g.setColor(Color.white);
 //		g.drawString("SwingJS", 200, 30);
-		
-		
-		addMouseListener(new MouseListener() {
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				System.out.println(">>>>mouseClicked: " + e.getModifiers() + " " + e.getModifiersEx() + " " + e);
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-				System.out.println(">>>>mousePressed: " + e.getModifiers() + " " + e.getModifiersEx() + " " + e);
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				System.out.println(">>>>mouseReleased: " + e.getModifiers() + " " + e.getModifiersEx() + " " + e);
-			}
-			
-		});
 
 	}
 }

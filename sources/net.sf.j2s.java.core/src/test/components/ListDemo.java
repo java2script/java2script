@@ -74,8 +74,8 @@ public class ListDemo extends JPanel implements ListSelectionListener {
 		listModel.addElement("John Smith");
 		listModel.addElement("Kathy Green");
 		listModel.addElement("Rose Red");
-		listModel.addElement("Negro Black");
-		listModel.addElement("Blanco White");
+		listModel.addElement("Nearly Black");
+		listModel.addElement("Pearly White");
 		// Create the list and put it in a scroll pane.
 		list = new JList(listModel);
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

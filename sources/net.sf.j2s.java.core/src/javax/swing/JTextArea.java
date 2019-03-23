@@ -560,7 +560,7 @@ public class JTextArea extends JTextComponent {
     protected int getRowHeight() {
         if (rowHeight == 0) {
             FontMetrics metrics = getFontMetrics(getFont());
-            rowHeight = metrics.getHeight() + 2; // SwingJS adds +2 here
+            rowHeight = metrics.getHeight();// + 2; // SwingJS adds +2 here
         }
         return rowHeight;
     }
@@ -640,7 +640,7 @@ public class JTextArea extends JTextComponent {
 		}
 		if (rows != 0) {
 			Insets insets = getInsets();
-			d.height = Math.max(h, (rows + 1) * getRowHeight() + insets.top + insets.bottom);
+			d.height = Math.max(h, rows * getRowHeight() + insets.top + insets.bottom);
 		}
 		return d;
 	}
