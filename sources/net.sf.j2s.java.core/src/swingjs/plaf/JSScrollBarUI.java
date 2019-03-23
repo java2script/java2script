@@ -8,7 +8,6 @@ import javax.swing.JComponent;
 import javax.swing.JScrollBar;
 import javax.swing.event.ChangeEvent;
 
-import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
 
 /**
@@ -46,26 +45,26 @@ public class JSScrollBarUI extends JSSliderUI {
 		if (isAWT && !jc.isBackgroundSet()) {
 			jc.setBackground(Color.LIGHT_GRAY);
 		}
-		return domNode;
-	}
+//		String bgcolor = null;
+//		//if (myScrollPaneUI == null) {
+//			bgcolor = toCSSString(getBackground());
+////
+////		} else {
+////			
+////		}
+//		DOMNode.setStyles(sliderTrack, "background", bgcolor);
+		return domNode;	
+		}
 
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		super.propertyChange(e);		
-		if (debugging) 
-					System.out.println(id + " propertyChange " + dumpEvent(e));
 	}
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
-//		if (!isAdjusting) {
-//			isAdjusting = true;
 			super.stateChanged(e);
 			setScrollBarExtentAndCSS();
-//			isAdjusting = false;
-			if (debugging) 
-				System.out.println(id + " stateChange " + dumpEvent(e));
-//		}		
 	}
 
 	@Override
@@ -92,7 +91,7 @@ public class JSScrollBarUI extends JSSliderUI {
 	@Override
 	public Dimension getPreferredSize(JComponent jc) {
 		// thin because we are implementing jquery slider here
-		int wh = (myScrollPaneUI == null ? 15 : myScrollPaneUI.scrollBarUIDisabled ? 0 : 15);
+		int wh = (myScrollPaneUI == null ? 15 : myScrollPaneUI.scrollBarUIDisabled ? 0 : 13);
 		// just used for width or height, but not both. I think.... 
 		return new Dimension(wh, wh);
 	}
@@ -117,11 +116,6 @@ public class JSScrollBarUI extends JSSliderUI {
 		String left, top, thickness, transform, leftt;
 		JScrollBar sb = (JScrollBar) jc; 
 		int extent = sb.getVisibleAmount();
-//		int max = sb.getMaximum();
-//		int min = sb.getMinimum();
-//		
-//		float f = (extent > 0 && min + extent <= max 
-//				? extent * 1f / (max - min) : 0.1f);
 		setSliderAttr("visibleAmount", extent);
 		boolean isVertical = (orientation == "vertical");
 		if (myScrollPaneUI == null) {
@@ -134,17 +128,19 @@ public class JSScrollBarUI extends JSSliderUI {
 			transform = "translate(" + (isVertical ? "X":"Y") + ")";
 		} else {
 			left = "0px";
-			leftt = "0px";
+			// 2 here and 2 for top is to allow for scrollpane to have a 
+			// 1-pixel border. Better would be to reduce the viewport
+			leftt = "0px"; 
 			top = (isAWT ? "4px" : "0px");
 			thickness = "12px";
 			transform = null;
 		}
 		if (isVertical) {
-			DOMNode.setStyles(sliderTrack, "transform", transform, "left", left, "width", thickness);//, "background", toCSSString(getBackground()));
-			DOMNode.setStyles(sliderHandle, "box-sizing", "border-box", "left", leftt, "margin-bottom", "0px");
+			DOMNode.setStyles(sliderTrack, "transform", transform, "left", left, "width", thickness);
+			DOMNode.setStyles(sliderHandle, "border", "none", "left", leftt, "margin-bottom", "0px","width", thickness);
 		} else {
-			DOMNode.setStyles(sliderTrack, "top", top, "height", thickness);//, "background", toCSSString(getBackground()));
-			DOMNode.setStyles(sliderHandle, "box-sizing", "border-box", "top", leftt, "margin-left", "0px");
+			DOMNode.setStyles(sliderTrack, "top", top, "height", thickness);
+			DOMNode.setStyles(sliderHandle, "border", "none", "top", leftt, "margin-left", "0px","height", thickness);
 		}
 	}
 
