@@ -30,7 +30,6 @@ package javax.swing;
 import static javax.swing.ClientPropertyKey.JComponent_ANCESTOR_NOTIFIER;
 import static javax.swing.ClientPropertyKey.JComponent_INPUT_VERIFIER;
 
-import java.applet.JSApplet;
 import java.awt.AWTEvent;
 import java.awt.AWTKeyStroke;
 import java.awt.Color;
@@ -70,9 +69,7 @@ import javax.swing.plaf.ComponentUI;
 
 import javajs.util.Lst;
 import sun.font.FontDesignMetrics;
-import swingjs.JSFocusPeer;
 import swingjs.JSGraphics2D;
-import swingjs.JSToolkit;
 import swingjs.JSUtil;
 import swingjs.plaf.JSComponentUI;
 

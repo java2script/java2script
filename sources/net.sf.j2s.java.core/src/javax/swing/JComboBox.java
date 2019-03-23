@@ -305,6 +305,9 @@ implements ItemSelectable,ListDataListener,ActionListener {
         }
         dataModel = aModel;
         dataModel.addListDataListener(this);
+        /** @j2sNative
+         * aModel.isAWT$ = this.isAWT$
+         */
 
         // set the current selected item.
         selectedItemReminder = dataModel.getSelectedItem();
@@ -544,7 +547,8 @@ implements ItemSelectable,ListDataListener,ActionListener {
      *    preferred:   true
      *    description: Sets the selected item in the JComboBox.
      */
-    public void setSelectedItem(Object anObject) {
+    @SuppressWarnings("unused")
+	public void setSelectedItem(Object anObject) {
         Object oldSelection = selectedItemReminder;
         Object objectToSelect = anObject;
         if (oldSelection == null || !oldSelection.equals(anObject)) {
@@ -569,7 +573,11 @@ implements ItemSelectable,ListDataListener,ActionListener {
             // Must toggle the state of this flag since this method
             // call may result in ListDataEvents being fired.
             selectingItem = true;
-            dataModel.setSelectedItem(objectToSelect);
+            if (_trigger || /** @j2sNative !this.isAWT$ &&*/true) {
+            	dataModel.setSelectedItem(objectToSelect);
+            } else {
+            	((DefaultComboBoxModel)dataModel)._setSelectedItemQuiet(objectToSelect);
+            }
             selectingItem = false;
 
             if (selectedItemReminder != dataModel.getSelectedItem()) {
@@ -1025,6 +1033,7 @@ implements ItemSelectable,ListDataListener,ActionListener {
 
     private Action action;
     private PropertyChangeListener actionPropertyChangeListener;
+	protected boolean _trigger;
 
     /**
      * Sets the <code>Action</code> for the <code>ActionEvent</code> source.
@@ -1268,7 +1277,7 @@ implements ItemSelectable,ListDataListener,ActionListener {
      * or override.
      */
     protected void selectedItemChanged() {
-        if (selectedItemReminder != null ) {
+        if (selectedItemReminder != null && /** @j2sNative !this.isAWT$ && */true) {
             fireItemStateChanged(new ItemEvent(this,ItemEvent.ITEM_STATE_CHANGED,
                                                selectedItemReminder,
                                                ItemEvent.DESELECTED));
@@ -1586,6 +1595,10 @@ implements ItemSelectable,ListDataListener,ActionListener {
         ",maximumRowCount=" + maximumRowCount +
         ",selectedItemReminder=" + selectedItemReminderString;
     }
+
+	public void _setTrigger(boolean b) {
+		_trigger = b;
+	}
 
 
 ///////////////////

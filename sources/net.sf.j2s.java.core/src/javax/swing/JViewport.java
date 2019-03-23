@@ -28,7 +28,6 @@
 
 package javax.swing;
 
-import java.applet.JSApplet;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -39,14 +38,15 @@ import java.awt.JSComponent;
 import java.awt.LayoutManager;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Window;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+
 import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
+
 import swingjs.JSGraphics2D;
 
 
@@ -118,6 +118,7 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
 {
 
 	// BH for SwingJS
+	@Override
 	public void isWrapper$() {};
 	
 
@@ -574,7 +575,7 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
      */
     @Override
 		public final Insets getInsets() {
-        return Container.NULL_INSETS;
+        return new Insets(1, 1, 1, 1);//Container.NULL_INSETS;
     }
 
     /**

@@ -4,6 +4,7 @@ import java.awt.AWTEventMulticaster;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.event.TextListener;
 import java.awt.im.InputMethodRequests;
 
@@ -26,6 +27,106 @@ public class TextArea extends JTextArea {
 	private int horizontalScrollBarPolicy;
 
 	private int verticalScrollBarPolicy;
+
+	/**
+	 * Create and display both vertical and horizontal scrollbars.
+	 * 
+	 * @since JDK1.1
+	 */
+	public static final int SCROLLBARS_BOTH = 0;
+
+	/**
+	 * Create and display vertical scrollbar only.
+	 * 
+	 * @since JDK1.1
+	 */
+	public static final int SCROLLBARS_VERTICAL_ONLY = 1;
+
+	/**
+	 * Create and display horizontal scrollbar only.
+	 * 
+	 * @since JDK1.1
+	 */
+	public static final int SCROLLBARS_HORIZONTAL_ONLY = 2;
+
+	/**
+	 * Do not create or display any scrollbars for the text area.
+	 * 
+	 * @since JDK1.1
+	 */
+	public static final int SCROLLBARS_NONE = 3;
+
+	public TextArea(int rows, int cols) {
+		this(null, rows, cols, SCROLLBARS_BOTH);
+	}
+
+	public TextArea() {
+		this(null, 0, 0, SCROLLBARS_BOTH);
+	}
+
+	public TextArea(String text) {
+		this(text, 0, 0, SCROLLBARS_BOTH);
+	}
+
+	public TextArea(String text, int rows, int cols) {
+		this(text, rows, cols, SCROLLBARS_BOTH);
+	}
+
+	public TextArea(String text, int rows, int columns, int scrollbars) {
+		super(text, rows < 0 ? 0 : rows, columns < 0 ? 0 : columns);
+		setWrapStyleWord(false);
+		setLineWrap(false);
+		switch (scrollbars) {
+		case SCROLLBARS_BOTH:
+			setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+			setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			break;
+		case SCROLLBARS_VERTICAL_ONLY:
+			setLineWrap(true);
+			setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+			setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+			break;
+		case SCROLLBARS_HORIZONTAL_ONLY:
+			setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+			setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			break;
+		case SCROLLBARS_NONE:
+			setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+			setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+			break;
+		}
+	}
+
+    public int getVerticalScrollBarPolicy() {
+        return verticalScrollBarPolicy;
+    }
+
+    private void setVerticalScrollBarPolicy(int policy) {
+        int old = verticalScrollBarPolicy;
+        verticalScrollBarPolicy = policy;
+        firePropertyChange("verticalScrollBarPolicy", old, policy);
+        revalidate();
+        repaint();
+    }
+
+    public int getHorizontalScrollBarPolicy() {
+        return horizontalScrollBarPolicy;
+    }
+
+    private void setHorizontalScrollBarPolicy(int policy) {
+        int old = horizontalScrollBarPolicy;
+        horizontalScrollBarPolicy = policy;
+        firePropertyChange("horizontalScrollBarPolicy", old, policy);
+        revalidate();
+        repaint();
+    }
+
+    public int getScrollbarVisibility() {
+		boolean v = (getVerticalScrollBarPolicy() != ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+		boolean h = (getHorizontalScrollBarPolicy() != ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		return (v && h ? SCROLLBARS_BOTH
+				: v ? SCROLLBARS_VERTICAL_ONLY : h ? SCROLLBARS_HORIZONTAL_ONLY : SCROLLBARS_NONE);
+	}
 
 	public synchronized void addTextListener(TextListener l) {
 		if (l == null) {
@@ -67,11 +168,24 @@ public class TextArea extends JTextArea {
 	@Override
 	@Deprecated
 	public Dimension preferredSize() {
-		synchronized (getTreeLock()) {
+//		synchronized (getTreeLock()) {
 			return ((super.rows > 0) && (super.columns > 0)) ? preferredSize(super.rows, super.columns) : super.preferredSize();
 		}
-	}
+//	}
 
+    @Override
+	protected int getColumnWidth() {
+    	
+    	//A column is an approximate average character width that is platform-dependent. 
+    	//
+    	// We will call that "n" -- it is pretty close
+    	// 
+        if (columnWidth == 0) {
+            FontMetrics metrics = getFontMetrics(getFont());
+            columnWidth = metrics.charWidth('n');
+        }
+        return columnWidth;
+    }
 	/**
 	 * Determines the minimum size of a text area with the specified number of rows
 	 * and columns.
@@ -185,159 +299,6 @@ public class TextArea extends JTextArea {
 //		return super.getCaretPosition();
 //	}
 //
-	/**
-	 * Create and display both vertical and horizontal scrollbars.
-	 * 
-	 * @since JDK1.1
-	 */
-	public static final int SCROLLBARS_BOTH = 0;
-
-	/**
-	 * Create and display vertical scrollbar only.
-	 * 
-	 * @since JDK1.1
-	 */
-	public static final int SCROLLBARS_VERTICAL_ONLY = 1;
-
-	/**
-	 * Create and display horizontal scrollbar only.
-	 * 
-	 * @since JDK1.1
-	 */
-	public static final int SCROLLBARS_HORIZONTAL_ONLY = 2;
-
-	/**
-	 * Do not create or display any scrollbars for the text area.
-	 * 
-	 * @since JDK1.1
-	 */
-	public static final int SCROLLBARS_NONE = 3;
-
-	public TextArea(int rows, int cols) {
-		this(null, rows, cols, SCROLLBARS_BOTH);
-	}
-
-	public TextArea() {
-		this(null, 0, 0, SCROLLBARS_BOTH);
-	}
-
-	public TextArea(String text) {
-		this(text, 0, 0, SCROLLBARS_BOTH);
-	}
-
-	public TextArea(String text, int rows, int cols) {
-		this(text, rows, cols, SCROLLBARS_BOTH);
-	}
-
-	public TextArea(String text, int rows, int columns, int scrollbars) {
-		super(text, rows < 0 ? 0 : rows, columns < 0 ? 0 : columns);
-		switch (scrollbars) {
-		case SCROLLBARS_BOTH:
-			setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-			setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-			break;
-		case SCROLLBARS_VERTICAL_ONLY:
-			setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-			setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-			break;
-		case SCROLLBARS_HORIZONTAL_ONLY:
-			setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-			setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-			break;
-		case SCROLLBARS_NONE:
-			setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-			setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-			break;
-		}
-	}
-
-    /**
-     * Returns the vertical scroll bar policy value.
-     * @return the <code>verticalScrollBarPolicy</code> property
-     * @see #setVerticalScrollBarPolicy
-     */
-    public int getVerticalScrollBarPolicy() {
-        return verticalScrollBarPolicy;
-    }
-
-
-    /**
-     * Determines when the vertical scrollbar appears in the scrollpane.
-     * Legal values are:
-     * <ul>
-     * <li><code>ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED</code>
-     * <li><code>ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER</code>
-     * <li><code>ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS</code>
-     * </ul>
-     *
-     * @param policy one of the three values listed above
-     * @exception IllegalArgumentException if <code>policy</code>
-     *                          is not one of the legal values shown above
-     * @see #getVerticalScrollBarPolicy
-     *
-     * @beaninfo
-     *   preferred: true
-     *       bound: true
-     * description: The scrollpane vertical scrollbar policy
-     *        enum: VERTICAL_SCROLLBAR_AS_NEEDED ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED
-     *              VERTICAL_SCROLLBAR_NEVER ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER
-     *              VERTICAL_SCROLLBAR_ALWAYS ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS
-     */
-    private void setVerticalScrollBarPolicy(int policy) {
-        int old = verticalScrollBarPolicy;
-        verticalScrollBarPolicy = policy;
-        firePropertyChange("verticalScrollBarPolicy", old, policy);
-        revalidate();
-        repaint();
-    }
-
-
-    /**
-     * Returns the horizontal scroll bar policy value.
-     * @return the <code>horizontalScrollBarPolicy</code> property
-     * @see #setHorizontalScrollBarPolicy
-     */
-    public int getHorizontalScrollBarPolicy() {
-        return horizontalScrollBarPolicy;
-    }
-
-
-    /**
-     * Determines when the horizontal scrollbar appears in the scrollpane.
-     * The options are:<ul>
-     * <li><code>ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED</code>
-     * <li><code>ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER</code>
-     * <li><code>ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS</code>
-     * </ul>
-     *
-     * @param policy one of the three values listed above
-     * @exception IllegalArgumentException if <code>policy</code>
-     *                          is not one of the legal values shown above
-     * @see #getHorizontalScrollBarPolicy
-     *
-     * @beaninfo
-     *   preferred: true
-     *       bound: true
-     * description: The scrollpane scrollbar policy
-     *        enum: HORIZONTAL_SCROLLBAR_AS_NEEDED ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED
-     *              HORIZONTAL_SCROLLBAR_NEVER ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
-     *              HORIZONTAL_SCROLLBAR_ALWAYS ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS
-     */
-    private void setHorizontalScrollBarPolicy(int policy) {
-        int old = horizontalScrollBarPolicy;
-        horizontalScrollBarPolicy = policy;
-        firePropertyChange("horizontalScrollBarPolicy", old, policy);
-        revalidate();
-        repaint();
-    }
-
-    public int getScrollbarVisibility() {
-		boolean v = (getVerticalScrollBarPolicy() != ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-		boolean h = (getHorizontalScrollBarPolicy() != ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		return (v && h ? SCROLLBARS_BOTH
-				: v ? SCROLLBARS_VERTICAL_ONLY : h ? SCROLLBARS_HORIZONTAL_ONLY : SCROLLBARS_NONE);
-	}
-
 	@Override
 	public void setCaretPosition(int pos) {
 		super.setCaretPosition(pos);

@@ -1,5 +1,6 @@
 package swingjs.plaf;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.beans.PropertyChangeEvent;
@@ -25,25 +26,22 @@ public class JSTextAreaUI extends JSTextViewUI {
 
 	@Override
 	public DOMNode updateDOMNode() {
-		
-//		/**
-//		 * @j2sNative
-//		 * 
-//		 * System.out.println("updateDOM textarea xxt");xxt = this;
-//		 */
-		
+
 		if (domNode == null) {
-			valueNode = domNode = newDOMObject("textarea", id, "spellcheck", FALSE,  "autocomplete", "off");
+			valueNode = domNode = newDOMObject("textarea", id, "spellcheck", FALSE, "autocomplete", "off");
 			setupViewNode();
 		}
-		if (((JTextArea) jc).getLineWrap())
-			domNode.removeAttribute("wrap");
-		else
+		JTextArea area = (JTextArea) jc;
+		if (isAWT && !area.isBackgroundSet())
+			area.setBackground(new Color(240,240,240));
+		DOMNode.setStyles(domNode, "white-space", null, "overflow-wrap", null);
+		if (area.getLineWrap()) {
+			DOMNode.setStyles(domNode, "overflow-wrap", area.getWrapStyleWord() ? null : "anywhere");
+		} else {
 			DOMNode.setStyles(domNode, "white-space", "pre");
+		}
 		textListener.checkDocument();
-		setCssFont(
-				DOMNode.setAttr(domNode, "value", setCurrentText()),
-				c.getFont());
+		setCssFont(DOMNode.setAttr(domNode, "value", setCurrentText()), c.getFont());
 		updateJSCursor("rewrite");
 		return super.updateDOMNode();
 	}
@@ -51,8 +49,6 @@ public class JSTextAreaUI extends JSTextViewUI {
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
-//		Object newValue = e.getNewValue();
-//        Object oldValue = e.getOldValue();
 		switch(prop) {
 		case "ancestor":
 			setJ2sMouseHandler();
@@ -119,7 +115,7 @@ public class JSTextAreaUI extends JSTextViewUI {
 	protected DOMNode setHTMLElement() {
 		// handled by JScrollPane
 		return DOMNode.setStyles(setHTMLElementCUI(), 
-				"overflow", "hidden",
+//				"overflow", "hidden",
 				"position", "absolute");
 	}
 

@@ -1546,7 +1546,10 @@ if (!target) {
 			
 			
 			if (J2S._dmouseOwner) {
-				J2S._dmouseDrag(ev);
+				if (J2S._dmouseDrag)
+					J2S._dmouseDrag(ev);
+				else
+					J2S._dmouseOwner = null;
 			}
 			
 			if (J2S._traceMouseMove)

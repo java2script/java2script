@@ -297,6 +297,7 @@ public class JScrollPane extends JComponent implements ScrollPaneConstants
         }
         setUIProperty("opaque",true);
         updateUI();
+        System.out.println("jscrollpanecolor " + getBackground());
     }
 
 	@Override

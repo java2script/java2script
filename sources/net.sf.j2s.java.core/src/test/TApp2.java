@@ -41,18 +41,18 @@ import javax.swing.JPanel;
 public class TApp2 extends Applet {
 
 	TextArea ta;
-	
-    private void addButtonTest() {
-    	for (int i = 0; i < 4; i++) {
-    		for (int j = 0; j < 4; j++) {
-    			Button b = new Button("XyX");
-    			Label l = new Label("XyX", Label.CENTER);
-    			setLBBounds((Component) b, (Component) l, i, j);
-    		}
-    	}
+
+	private void addButtonTest() {
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
+				Button b = new Button("XyX");
+				Label l = new Label("XyX", Label.CENTER);
+				setLBBounds((Component) b, (Component) l, i, j);
+			}
+		}
 	}
 
-    private void setLBBounds(Component b, Component l, int i, int j) {
+	private void setLBBounds(Component b, Component l, int i, int j) {
 		int x = 40 + i * 170;
 		int y = 350 + j * 40;
 		int w = 70 + i * 10;
@@ -61,19 +61,21 @@ public class TApp2 extends Applet {
 		l.setBounds(x + 105, y, w - 30, h);
 		b.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10 + i * 3));
 		l.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10 + i * 3));
-			l.setBackground(Color.cyan);
+		l.setBackground(Color.cyan);
 		add(b);
 		add(l);
 	}
 
+	long t;
+	
 	public void init() {
 		setSize(800, 600);
 		setFont(new Font(Font.MONOSPACED, Font.PLAIN, 14));
 		setBackground(Color.yellow);
 		setLayout(null);
-		
+
 		addButtonTest();
-		
+
 		JPanel panel = new JPanel();
 		panel.setBounds(10, 10, 100, 150);
 		add(panel);
@@ -94,7 +96,7 @@ public class TApp2 extends Applet {
 			public void focusLost(FocusEvent e) {
 				System.out.println("tf " + e.paramString());
 			}
-			
+
 		});
 		panel.add(tf);
 //		Label label = new Label("blue", Label.RIGHT);
@@ -111,9 +113,11 @@ public class TApp2 extends Applet {
 //
 //		// the scrolling to the bottom is only with TextArea, not JTextArea
 		// and then only if the append is AFTER the add
-		ta = new TextArea("A text\nwith some\nlines and\n no content.");
+		ta = new TextArea("Averyveryveryveryveryveryveryverylongword\n" + "Averyveryveryveryveryveryveryverylongword\n"
+				+ "Averyveryveryveryveryveryveryverylongword\n" + "Averyveryveryveryveryveryveryverylongword\n"
+				+ "A text\nwith some\nlines and\n no content.", 40, 40, TextArea.SCROLLBARS_VERTICAL_ONLY);
 		add(ta);
-		ta.setBounds(200,  70, 200,200);
+		ta.setBounds(200, 70, 200, 200);
 		ta.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
 		ta.appendText("A text\nwith some\nlines and\n no content.");
 		ta.addFocusListener(new FocusListener() {
@@ -127,79 +131,113 @@ public class TApp2 extends Applet {
 			public void focusLost(FocusEvent e) {
 				System.out.println("ta " + e.paramString());
 			}
-			
+
 		});
 
-		
 //		TextArea ta = new TextArea("A text\nwith some\nlines and\n no content.");
 //		JScrollPane sp = new JScrollPane(ta);
 //		sp.setBounds(200, 70, 100, 80);
 //		add(sp);
 
-		
-		//		ta.getSelectionEnd();
+		// ta.getSelectionEnd();
 		ta.setBackground(Color.red);
 		Scrollbar sb = new Scrollbar(0, 30, 0, 0, 100);
 		sb.setBounds(300, 20, 100, 20);
 		add(sb);
+		sb.setBackground(Color.white); // can be set after!
 		sb.addAdjustmentListener(new AdjustmentListener() {
 
 			@Override
 			public void adjustmentValueChanged(AdjustmentEvent e) {
-				System.out.println("TApp2 sb value " + e.getValue());
+				long time = System.currentTimeMillis();
+				System.out.println("TApp2 sb value " + e.getValue() + " " + (time - t));
+				t = time;
+			}
+
+		});
+
+		sb.setForeground(Color.red);
+		
+		
+		
+		addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				System.out.println(">>>>mouseClicked: " + e.getModifiers() + " " + e.getModifiersEx() + " " + e);
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				System.out.println(">>>>mousePressed: " + e.getModifiers() + " " + e.getModifiersEx() + " " + e);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				System.out.println(">>>>mouseReleased: " + e.getModifiers() + " " + e.getModifiersEx() + " " + e);
 			}
 			
 		});
 
-		sb.setBackground(Color.blue);
-		sb.setForeground(Color.red);
 		new TestGraphic(this).testGraphic();
 	}
-	
-	static class TestGraphic{
-	private TApp2 tApp2;
 
-	public TestGraphic(TApp2 tApp2) {
-		this.tApp2 = tApp2;
+	static class TestGraphic {
+		private TApp2 tApp2;
+
+		public TestGraphic(TApp2 tApp2) {
+			this.tApp2 = tApp2;
 		}
 
-	static {
-		ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
-	}
+		static {
+			ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
+		}
 
-	void testGraphic() {
-    	Button b = new Button("g");
-    	b.setBounds(300,300,40,20);
-    	// images are created only when a button is displayable
-    	Image i1 = b.createImage(100, 100);
-    	System.out.println("b.isDisplayable " + b.isDisplayable() + " " + i1);
-    	assert(i1 == null);
-    	tApp2.add(b);
-    	i1 = b.createImage(100, 100);
-    	System.out.println("b.isDisplayable " + b.isDisplayable() + " " + i1);
-    	b.setFont(new Font(Font.SERIF, Font.BOLD, 10));
-    	Graphics g = i1.getGraphics();
-    	Font f = g.getFont();
-    	System.out.println(f);
+		void testGraphic() {
+			Button b = new Button("g");
+			b.setBounds(300, 300, 40, 20);
+			// images are created only when a button is displayable
+			Image i1 = b.createImage(100, 100);
+			System.out.println("b.isDisplayable " + b.isDisplayable() + " " + i1);
+			assert (i1 == null);
+			tApp2.add(b);
+			i1 = b.createImage(100, 100);
+			System.out.println("b.isDisplayable " + b.isDisplayable() + " " + i1);
+			b.setFont(new Font(Font.SERIF, Font.BOLD, 10));
+			Graphics g = i1.getGraphics();
+			Font f = g.getFont();
+			System.out.println(f);
 
-    	// font/background/foreground are set when the graphic is created
-    	Font f0 = new Font(Font.DIALOG, Font.PLAIN, 30);
-    	b.setFont(f0);
-    	b.setBackground(Color.red);
-    	b.setForeground(Color.green);
-    	g = i1.getGraphics();
-    	b.setFont(new Font(Font.SERIF, Font.BOLD, 10));
-    	b.setBackground(Color.white);
-    	b.setForeground(Color.black);
-    	System.out.println("img font=" + g.getFont());
-    	System.out.println("img bg=" + ((Graphics2D) g).getBackground());
-    	System.out.println("img fg=" + g.getColor());
-    	assert(g.getFont().equals(f0));
-    	assert(g.getColor() == Color.green);
-    	assert(((Graphics2D) g).getBackground() == Color.red);
-    	System.out.println("Tapp2 OK");	
+			// font/background/foreground are set when the graphic is created
+			Font f0 = new Font(Font.DIALOG, Font.PLAIN, 30);
+			b.setFont(f0);
+			b.setBackground(Color.red);
+			b.setForeground(Color.green);
+			g = i1.getGraphics();
+			b.setFont(new Font(Font.SERIF, Font.BOLD, 10));
+			b.setBackground(Color.white);
+			b.setForeground(Color.black);
+			System.out.println("img font=" + g.getFont());
+			System.out.println("img bg=" + ((Graphics2D) g).getBackground());
+			System.out.println("img fg=" + g.getColor());
+			assert (g.getFont().equals(f0));
+			assert (g.getColor() == Color.green);
+			assert (((Graphics2D) g).getBackground() == Color.red);
+			System.out.println("Tapp2 OK");
+		}
 	}
-    }
 
 	public void paint(Graphics g) {
 		super.paint(g);
@@ -257,39 +295,6 @@ public class TApp2 extends Applet {
 //		g.drawString("SwingJS", 200, 30);
 //		g.setColor(Color.white);
 //		g.drawString("SwingJS", 200, 30);
-		
-		
-		addMouseListener(new MouseListener() {
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				System.out.println(">>>>mouseClicked: " + e.getModifiers() + " " + e.getModifiersEx() + " " + e);
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-				System.out.println(">>>>mousePressed: " + e.getModifiers() + " " + e.getModifiersEx() + " " + e);
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				System.out.println(">>>>mouseReleased: " + e.getModifiers() + " " + e.getModifiersEx() + " " + e);
-			}
-			
-		});
 
 	}
 }
-

@@ -67,7 +67,7 @@ public class TextField extends JTextField {
     @Override
 	@Deprecated
     public Dimension preferredSize() {
-    	return getPreferredSize(columns);
+    	return preferredSize(columns);
     }
 
     

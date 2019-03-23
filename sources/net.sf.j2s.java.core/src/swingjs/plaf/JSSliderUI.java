@@ -125,14 +125,22 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 
 	@Override
 	public void setBackground(Color background) {
-		if (awtPeerBG != null && !jc.isDisplayable() && !awtPeerBG.equals(background))
+		if (awtPeerBG != null 
+				// not for scrollbar && !jc.isDisplayable() 
+				&& !awtPeerBG.equals(background))
 			awtPeerBG = null;
-		if (isScrollBar ? background != null : jc.isOpaque())
-			DOMNode.setStyles(myScrollPaneUI == null && !paintTicks ? jqSlider : sliderTrack, "background-color", JSToolkit.getCSSColor(background));
+		if (isScrollBar ? background != null : jc.isOpaque()) {
+			DOMNode node = (myScrollPaneUI == null && !paintTicks ? jqSlider : sliderTrack);
+			DOMNode.setStyles(node, "background-color", JSToolkit.getCSSColor(background));
+			if (isScrollBar && Color.WHITE.equals(background))
+				DOMNode.setStyles(sliderHandle, "background", "#ccc");
+
+		}
 		if (paintTicks)
 			DOMNode.setStyles(jqSlider, "background-color", "black");
 	}	
 
+	@Override
 	protected void setBackgroundFor(DOMNode node, Color color) {
 		setBackground(color);
 	}
@@ -281,6 +289,8 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 
 	public void setSlider() {
 		setSliderAttr("min", min);
+		// hack is for list to not show bottom line
+		int max = this.max;//(myScrollPaneUI == null ? this.max : this.max - 1);
 		setSliderAttr("max", max);
 		setSliderAttr("value", val);
 

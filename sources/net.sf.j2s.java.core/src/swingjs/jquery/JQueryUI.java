@@ -13,10 +13,10 @@ package swingjs.jquery;
  */  
 public class JQueryUI {
 	public JQueryUI() {
+		int j = 1;
 	}
 	static { 
 	  
-		int i = 2;
 		/**      
 		 * 
 		 * 

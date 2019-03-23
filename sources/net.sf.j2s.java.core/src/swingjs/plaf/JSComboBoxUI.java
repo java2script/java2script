@@ -62,9 +62,11 @@ public class JSComboBoxUI extends JSLightweightUI implements ItemListener, ListD
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
 		switch (eventType) {
-		case -1:
+		case SOME_MOUSE_EVENT:
 			int index = PT.parseInt("" + DOMNode.getAttr(domNode, "selectedIndex"));
+			comboBox._setTrigger(true);
 			comboBox.setSelectedIndex(index);
+			comboBox._setTrigger(false);
 			break;
 		}
 		return HANDLED;

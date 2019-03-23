@@ -2680,7 +2680,9 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 			int lastIndex = Math.min(size - 1, Math.max(e.getLastIndex(), 0));
 
 			Rectangle bounds = getCellBounds(list, firstIndex, lastIndex);
-
+			list.ensureIndexIsVisible(firstIndex);
+			if (lastIndex != firstIndex)
+				list.ensureIndexIsVisible(lastIndex);
 			if (bounds != null) {
 				list.repaint(bounds.x, bounds.y, bounds.width, bounds.height);
 			}
@@ -2946,38 +2948,36 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 	// ListPeer 
 	
     public void makeVisible(int index) {
-		System.out.println("JSListUI makeVisible "+ index);
-
-    	
+//		System.out.println("JSListUI makeVisible "+ index);
     }
 
 	public int[] getSelectedIndexes() {
-		System.out.println("JSListUI getselected");
+//		System.out.println("JSListUI getselected");
 		return new int[] {};
 	}
 
 	public void add(String item, int index) {
-		System.out.println("JSListUI add item " + item + " at "+ index);
+//		System.out.println("JSListUI add item " + item + " at "+ index);
 	}
 
 	public void delItems(int start, int end) {
-		System.out.println("JSListUI delItems " + start + " " + end);
+//		System.out.println("JSListUI delItems " + start + " " + end);
 	}
 
 	public void removeAll() {
-		System.out.println("JSListUI removeAll");
+//		System.out.println("JSListUI removeAll");
 	}
 
 	public void select(int index) {
-		System.out.println("JSListUI select " + index);
+//		System.out.println("JSListUI select " + index);
 	}
 
 	public void deselect(int index) {
-		System.out.println("JSListUI deselect " + index);
+//		System.out.println("JSListUI deselect " + index);
 	}
 
 	public void setMultipleMode(boolean m) {
-		System.out.println("JSListUI setMultipleMode " + m);
+//		System.out.println("JSListUI setMultipleMode " + m);
 	}
 
 	/**

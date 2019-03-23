@@ -263,6 +263,15 @@ public abstract class JSComponent extends Component {
 	}
 
 	/**
+	 * for JSToolkit use only
+	 * @param id
+	 */
+	public void setUIClassID(String id) {
+		uiClassID = id;
+	}
+
+
+	/**
 	 * required by Container, but not actually ever called, 
 	 * because all Containers are JComponents in SwingJS
 	 * 

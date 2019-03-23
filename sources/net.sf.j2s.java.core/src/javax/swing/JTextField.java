@@ -443,7 +443,10 @@ public class JTextField extends JTextComponent implements SwingConstants {
 	}
 
 	protected Dimension getPrefSizeJTF(int columns) {
-		Dimension size = getPrefSizeJComp();
+		Dimension size = (!isPreferredSizeSet() && ui != null ? ui
+				.getPreferredSize(this) : null);
+		if (size == null)
+			size = super.preferredSize();
 		if (columns != 0) {
 			size.width = getJ2SWidth(columns);
 		}
