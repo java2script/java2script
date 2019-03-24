@@ -1347,6 +1347,7 @@ public class JSComponentUI extends ComponentUI
 
 	private boolean ignoreFocus;
 
+	protected DOMNode embeddingNode;
 
 	/**
 	 * we can allow frames -- particularly JInternalFrames in a JDesktopFrame -- to overflow.
@@ -1704,7 +1705,7 @@ public class JSComponentUI extends ComponentUI
 							// If the applet's root pane, we insert it into the applet's
 							// content
 							DOMNode cdiv = swingjs.JSToolkit.getHTML5Applet(jc)._getContentLayer();
-								DOMNode.appendChildSafely(cdiv, outerNode);
+							DOMNode.appendChildSafely(cdiv, outerNode);
 						}
 					}
 				}
@@ -1716,6 +1717,9 @@ public class JSComponentUI extends ComponentUI
 			}
 		}
 		isTainted = false;
+		
+		if (embeddingNode != null)
+			DOMNode.appendChildSafely(embeddingNode, outerNode);
 		return outerNode;
 	}
 
@@ -1763,7 +1767,8 @@ public class JSComponentUI extends ComponentUI
 			} else {
 				if (ui.domNode != ui.outerNode && DOMNode.getParent(ui.domNode) == null)				
 					appendChild(ui.outerNode, ui.domNode);
-				DOMNode.appendChildSafely(containerNode, ui.outerNode);
+				if (ui.embeddingNode == null)
+					DOMNode.appendChildSafely(containerNode, ui.outerNode);
 			}
 		}
 	}
@@ -2128,7 +2133,7 @@ public class JSComponentUI extends ComponentUI
 		case SET_LOCATION:
 			x = c.getX();
 			y = c.getY();
-			if (this.x != x || this.y != y) {
+			if (embeddingNode == null && (this.x != x || this.y != y)) {
 				this.x = x;
 				this.y = y;
 			}
@@ -2192,15 +2197,17 @@ public class JSComponentUI extends ComponentUI
 
 	/**
 	 * remove 0x0000 and replace space with nonbreaking space if not a textarea
+	 * 
 	 * @param t
 	 * @return
 	 */
 	protected String fixText(String t) {
-		t = (t != null && t.indexOf("\u0000") >= 0 ? PT.rep(t, "\u0000", "") : t);
-		if (isHTML) {
-			// 
-		} else if (valueNode == null) {
-			t = t.replace(' ', '\u00A0'); 
+		if (t != null) {
+			if (isHTML) {
+				//
+			} else if (valueNode == null) {
+				t = (t.indexOf("\u0000") >= 0 ? PT.rep(t, "\u0000", "") : t).replace(' ', '\u00A0');
+			}
 		}
 		return t;
 	}
