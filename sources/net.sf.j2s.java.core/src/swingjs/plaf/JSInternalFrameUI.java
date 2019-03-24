@@ -36,14 +36,6 @@ public class JSInternalFrameUI extends JSFrameUI {
 
 	
 	@Override
-	public DOMNode updateDOMNode() {
-	  super.updateDOMNode();	
-
-	  return domNode;
-	  
-	}
-	
-	@Override
 	protected void frameCloserAction() {
 		JInternalFrame jif = (JInternalFrame) iframe;
          if(jif.isClosable())

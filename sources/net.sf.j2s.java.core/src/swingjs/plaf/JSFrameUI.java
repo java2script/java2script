@@ -17,6 +17,33 @@ import javax.swing.LookAndFeel;
 import javajs.api.JSFunction;
 import swingjs.api.js.DOMNode;
 
+/**
+ * New! Frame, JFrame, and JInternalFrame embedding on a web page:
+ * 
+ * 1) In the constructor, set the frame to be undecorated:
+ * 
+ * 
+ * this.setUndecorated(true);
+ * 
+ * 2) In the constructor, give the frame a name of your choice
+ * 
+ * this.setName("myframe");
+ * 
+ * 
+ * 3) On the web page somewhere, create a div with id (name + "-div")
+ * and styles position:absolute, left, and right. If you wish, you can
+ * set the width and height, but that is optional. All four of these
+ * values override whatever is given in the constructor.
+ * 
+ * &lt;div id="myframe-div" 
+style="position:absolute;left:100px;top:200px;width:400px;height:300px"
+&gt;&lt;/div&gt;
+ * 
+ * That's all there is to it! The frame will not be sizable.
+ * 
+ * @author hansonr
+ *
+ */
 public class JSFrameUI extends JSWindowUI implements FramePeer {
 	
 	private static final Insets ZERO_INSETS = new Insets(0, 0, 0, 0);
@@ -41,7 +68,6 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	protected JFrame frame;
 //	private String title;
 	private int state;
-//	private boolean resizeable;
 	private DOMNode closerWrap;
 	protected boolean isModal;
 	protected int zModal;
@@ -72,10 +98,9 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			// a Windows applet has a sort of fuzzy shadowy border
 			containerNode = frameNode = domNode = newDOMObject("div", id + "_frame");
 			if (isDummyFrame) {
-				DOMNode.setVisible(domNode,  false);
+				DOMNode.setVisible(domNode, false);
 				return domNode;
 			}
-			DOMNode.setStyles(frameNode, "box-shadow", "0px 0px 10px gray", "box-sizing", "content-box");
 			setWindowClass();
 			int w = c.getWidth();
 			int h = c.getHeight();
@@ -85,27 +110,46 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 				h = defaultHeight;
 			DOMNode.setSize(frameNode, w, h);
 			DOMNode.setTopLeftAbsolute(frameNode, 0, 0);
-			titleBarNode = newDOMObject("div", id + "_titlebar");
-			DOMNode.setTopLeftAbsolute(titleBarNode, 0, 0);
-			DOMNode.setStyles(titleBarNode, "background-color", "#E0E0E0", "height", "20px", "font-size", "14px",
-					"font-family", "sans-serif", "font-weight", "bold"// ,
-			// "border-style", "solid",
-			// "border-width", "1px"
-			);
-
-			titleNode = newDOMObject("label", id + "_title");
-			DOMNode.setTopLeftAbsolute(titleNode, 2, 4);
-			DOMNode.setStyles(titleNode, "background-color", "#E0E0E0", "height", "20px", "overflow", "hidden");
-
-			closerWrap = newDOMObject("div", id + "_closerwrap");
-			DOMNode.setTopLeftAbsolute(closerWrap, 0, 0);
-			DOMNode.setStyles(closerWrap, "text-align", "right");
-
+			if (frame.getName() != null) {
+				DOMNode node = DOMNode.getElement(frame.getName() + "-div");
+				if (node != null) {
+					frame.setUndecorated(true);
+					frame.setLocation(0, 0);
+					embeddingNode = node;
+					int ew = DOMNode.getWidth(node);
+					int eh = DOMNode.getHeight(node);
+					if (ew > 0 && eh > 0) {
+						frame._freezeBounds(ew, eh);
+					}
+				}
+			}
 			if (!frame.isUndecorated()) {
+				DOMNode.setStyles(frameNode, "box-shadow", "0px 0px 10px gray", "box-sizing", "content-box");
+				titleBarNode = newDOMObject("div", id + "_titlebar");
+				DOMNode.setTopLeftAbsolute(titleBarNode, 0, 0);
+				DOMNode.setStyles(titleBarNode, "background-color", "#E0E0E0", "height", "20px", "font-size", "14px",
+						"font-family", "sans-serif", "font-weight", "bold"// ,
+				// "border-style", "solid",
+				// "border-width", "1px"
+				);
+
+				titleNode = newDOMObject("label", id + "_title");
+				DOMNode.setTopLeftAbsolute(titleNode, 2, 4);
+				DOMNode.setStyles(titleNode, "background-color", "#E0E0E0", "height", "20px", "overflow", "hidden");
+
+				closerWrap = newDOMObject("div", id + "_closerwrap");
+				DOMNode.setTopLeftAbsolute(closerWrap, 0, 0);
+				DOMNode.setStyles(closerWrap, "text-align", "right");
+
 				closerNode = newDOMObject("label", id + "_closer", "innerHTML", "X");
 				DOMNode.setStyles(closerNode, "width", "20px", "height", "20px", "position", "absolute", "text-align",
 						"center", "right", "0px");
 				frameNode.appendChild(titleBarNode);
+				setDraggableEvents();
+				titleBarNode.appendChild(titleNode);
+				titleBarNode.appendChild(closerWrap);
+				closerWrap.appendChild(closerNode);
+				DOMNode.setStyles(closerNode, "background-color", "#DDD");// strColor);
 			}
 			bindWindowEvents();
 			if (isModal) {
@@ -115,33 +159,29 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 				DOMNode.setTopLeftAbsolute(modalNode, 0, 0);
 				DOMNode.setSize(modalNode, screen.width, screen.height);
 			}
-			setDraggableEvents();
-			titleBarNode.appendChild(titleNode);
-			titleBarNode.appendChild(closerWrap);
-			closerWrap.appendChild(closerNode);
 			Insets s = getInsets();
 			DOMNode.setTopLeftAbsolute(frameNode, 0, 0);
 			DOMNode.setAttrs(frameNode, "width", "" + frame.getWidth() + s.left + s.right, "height",
 					"" + frame.getHeight() + s.top + s.bottom);
-			
+
 			addFocusHandler();
 		}
 		String strColor = toCSSString(c.getBackground());
 		DOMNode.setStyles(domNode, "background-color", strColor);
-		DOMNode.setStyles(frameNode, "background", "#DDD");//strColor);
+		DOMNode.setStyles(frameNode, "background", "#DDD");// strColor);
 		DOMNode.setStyles(frameNode, "color", toCSSString(c.getForeground()));
-		DOMNode.setStyles(closerNode, "background-color", "#DDD");//strColor);
 		setInnerComponentBounds(width, height);
 		setTitle(frame.getTitle());
 		if (!isDummyFrame) {
-			DOMNode.setVisible(domNode,  jc.isVisible());
-
+			DOMNode.setVisible(domNode, jc.isVisible());
 		}
 		return domNode;
 	}
 
 	@Override
 	protected void setDraggableEvents() {
+		if (embeddingNode != null)
+			return;
 		@SuppressWarnings("unused")
 		DOMNode fnode = frameNode;		
 		JSFunction fGetFrameParent = null; 
@@ -289,7 +329,6 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 
 	@Override
 	public void setResizable(boolean resizeable) {
-//		this.resizeable = resizeable;
 	}
 
 	@Override

@@ -1476,7 +1476,13 @@ class Thread implements Runnable {
      */
     public ClassLoader getContextClassLoader() {
     	// here if a static call during load
-     	 return JSUtil.class.getClassLoader();
+     	 ClassLoader cl = JSUtil.class.getClassLoader();
+     	 /**
+     	  * @j2sNative
+     	  * 
+     	  * cl.baseClass = {getName$:function(){return "swingjs"}};
+     	  */
+     	 return cl;
   	}
 
     /**
