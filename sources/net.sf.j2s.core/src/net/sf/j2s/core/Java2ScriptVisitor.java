@@ -198,6 +198,21 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	private IJavaProject global_project;
 
+	/**
+	 * multipurpose flag for testing development ideas.
+	 * 
+	 */
+	private boolean global_testing; 
+	// make private fields properties of p1$ ? 
+	// the problem only shows up with a2s subclasses of Swing components
+	// because they could declare the same private variable and not get
+	// caught by the compiler, since they do not subclass that class.  
+	//
+	// possible issues: 
+	// 1) We may have changed some awt, sun, and javax fields from private to public
+	// 2) Is there an issue with inner classes referencing outer-class private fields? 
+	
+
 	private String package_name;
 	private int package_blockLevel = 0;
 	private int package_currentBlockForVisit = -1;
@@ -305,6 +320,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 */
 	private boolean haveDefaultConstructor;
 
+	
 	private static IType appletType;
 
 	public Java2ScriptVisitor() {
@@ -318,7 +334,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 //		}
 	}
 
-	public Java2ScriptVisitor setProject(IJavaProject project) {
+	public Java2ScriptVisitor setProject(IJavaProject project, boolean testing) {
+		this.global_testing = testing;
 		this.global_project = project;
 		return this;
 	}
@@ -1626,7 +1643,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 			Java2ScriptVisitor tempVisitor = null;
 			try {
-				tempVisitor = getClass().newInstance().setProject(global_project).setInnerGlobals(this, node);
+				tempVisitor = getClass().newInstance().setProject(global_project, global_testing).setInnerGlobals(this, node);
 			} catch (@SuppressWarnings("unused") Exception e) {
 				// impossible
 			}

@@ -19426,13 +19426,13 @@ if (typeof(SwingJS) == "undefined") {
 	}
 	
 	proto._addCoreFiles = function() {
-		if (this.__Info.core != "NONE" && this.__Info.core != "none")
+		if (this.__Info.core != "NONE" && this.__Info.core != "none" && !J2S._debugCode)
 			J2S._addCoreFile((this.__Info.core || "swingjs"), this._j2sPath, this.__Info.preloadCore);
-		if (J2S._debugCode) {
-		// no min package for that
-			J2S._addExec([this, null, "swingjs.JSAppletViewer", "load " + this.__Info.code]);
-      
-		}
+//		if (J2S._debugCode) {
+//		// no min package for that
+//			J2S._addExec([this, null, "swingjs.JSAppletViewer", "load " + this.__Info.code]);
+//      
+//		}
   }
   
 	proto._create = function(id, Info){

@@ -201,11 +201,13 @@ public abstract class JComponent extends Container {
 	/*
 	 * The following fields support set methods for the corresponding
 	 * java.awt.Component properties.
+	 * 
+	 * SwingJS
 	 */
-	private boolean isAlignmentXSet;
-	private float alignmentX;
-	private boolean isAlignmentYSet;
-	private float alignmentY;
+	private boolean _isAlignmentXSet;
+	private float _alignmentX;
+	private boolean _isAlignmentYSet;
+	private float _alignmentY;
 
 	/**
 	 * Backing store for JComponent properties and listeners
@@ -220,9 +222,9 @@ public abstract class JComponent extends Container {
 	/**
 	 * Whether or not autoscroll has been enabled.
 	 */
-	private boolean autoscrolls;
-	private Border border;
-	private int flags;
+	private boolean _autoscrolls;
+	private Border _border;
+	private int _flags;
 
 	/* Input verifier for this component */
 	// private InputVerifier inputVerifier = null;
@@ -285,7 +287,7 @@ public abstract class JComponent extends Container {
 	/**
 	 * <code>JPopupMenu</code> assigned to this component and all of its childrens
 	 */
-	private JPopupMenu popupMenu;
+	private JPopupMenu _popupMenu;
 
 	/** Private flags **/
 	private static final int IS_DOUBLE_BUFFERED = 0;
@@ -323,7 +325,7 @@ public abstract class JComponent extends Container {
 	/**
 	 * Temporary rectangles.
 	 */
-	private static Lst<Rectangle> tempRectangles = new Lst<Rectangle>();
+	private static Lst<Rectangle> _tempRect = new Lst<Rectangle>();
 
 	/** Used for <code>WHEN_FOCUSED</code> bindings. */
 	private InputMap focusInputMap;
@@ -420,11 +422,11 @@ public abstract class JComponent extends Container {
 	}
 
 	private static Rectangle fetchRectangle() {
-		synchronized (tempRectangles) {
+		synchronized (_tempRect) {
 			Rectangle rect;
-			int size = tempRectangles.size();
+			int size = _tempRect.size();
 			if (size > 0) {
-				rect = (Rectangle) tempRectangles.removeItemAt(size - 1);
+				rect = (Rectangle) _tempRect.removeItemAt(size - 1);
 			} else {
 				rect = new Rectangle(0, 0, 0, 0);
 			}
@@ -433,8 +435,8 @@ public abstract class JComponent extends Container {
 	}
 
 	private static void recycleRectangle(Rectangle rect) {
-		synchronized (tempRectangles) {
-			tempRectangles.addLast(rect);
+		synchronized (_tempRect) {
+			_tempRect.addLast(rect);
 		}
 	}
 
@@ -496,8 +498,8 @@ public abstract class JComponent extends Container {
 		if (popup != null) {
 			enableEvents(AWTEvent.MOUSE_EVENT_MASK);
 		}
-		JPopupMenu oldPopup = this.popupMenu;
-		this.popupMenu = popup;
+		JPopupMenu oldPopup = this._popupMenu;
+		this._popupMenu = popup;
 		firePropertyChange("componentPopupMenu", oldPopup, popup);
 	}
 
@@ -516,10 +518,10 @@ public abstract class JComponent extends Container {
 	public JPopupMenu getComponentPopupMenu() {
 
 		if (!getInheritsPopupMenu()) {
-			return popupMenu;
+			return _popupMenu;
 		}
 
-		if (popupMenu == null) {
+		if (_popupMenu == null) {
 			// Search parents for its popup
 			Container parent = getParent();
 			while (parent != null) {
@@ -535,7 +537,7 @@ public abstract class JComponent extends Container {
 			return null;
 		}
 
-		return popupMenu;
+		return _popupMenu;
 	}
 
 	/**
@@ -1588,9 +1590,9 @@ public abstract class JComponent extends Container {
 	 *           description: The component's border.
 	 */
 	public void setBorder(Border border) {
-		Border oldBorder = this.border;
+		Border oldBorder = this._border;
 
-		this.border = border;
+		this._border = border;
 		firePropertyChange("border", oldBorder, border);
 		if (border != oldBorder) {
 			if (border == null
@@ -1611,7 +1613,7 @@ public abstract class JComponent extends Container {
 	 * @see #setBorder
 	 */
 	public Border getBorder() {
-		return border;
+		return _border;
 	}
 
 	/**
@@ -1623,8 +1625,8 @@ public abstract class JComponent extends Container {
 	 */
 	@Override
 	public Insets getInsets() {
-		if (border != null) {
-			return border.getBorderInsets(this);
+		if (_border != null) {
+			return _border.getBorderInsets(this);
 		}
 		return super.getInsets();
 	}
@@ -1651,17 +1653,17 @@ public abstract class JComponent extends Container {
 			// because AWT components do not have this method
 			in = getInsets();
 		} else {
-			if (border == null) {
+			if (_border == null) {
 				// super.getInsets() always returns an Insets object with
 				// all of its value zeroed. No need for a new object here.
 				insets.left = insets.top = insets.right = insets.bottom = 0;
 			} else {
-				if (border instanceof AbstractBorder) {
-					in = ((AbstractBorder) border).getBorderInsets(this, insets);
+				if (_border instanceof AbstractBorder) {
+					in = ((AbstractBorder) _border).getBorderInsets(this, insets);
 				}
 				// Can't reuse border insets because the Border interface
 				// can't be enhanced.
-				in = border.getBorderInsets(this);
+				in = _border.getBorderInsets(this);
 			}
 		}
 		if (in != null) {
@@ -1683,8 +1685,8 @@ public abstract class JComponent extends Container {
 	 */
 	@Override
 	public float getAlignmentY() {
-		if (isAlignmentYSet) {
-			return alignmentY;
+		if (_isAlignmentYSet) {
+			return _alignmentY;
 		}
 		return super.getAlignmentY();
 	}
@@ -1698,9 +1700,9 @@ public abstract class JComponent extends Container {
 	 * @beaninfo description: The preferred vertical alignment of the component.
 	 */
 	public void setAlignmentY(float alignmentY) {
-		this.alignmentY = alignmentY > 1.0f ? 1.0f : alignmentY < 0.0f ? 0.0f
+		this._alignmentY = alignmentY > 1.0f ? 1.0f : alignmentY < 0.0f ? 0.0f
 				: alignmentY;
-		isAlignmentYSet = true;
+		_isAlignmentYSet = true;
 	}
 
 	/**
@@ -1713,8 +1715,8 @@ public abstract class JComponent extends Container {
 	 */
 	@Override
 	public float getAlignmentX() {
-		if (isAlignmentXSet) {
-			return alignmentX;
+		if (_isAlignmentXSet) {
+			return _alignmentX;
 		}
 		return super.getAlignmentX();
 	}
@@ -1728,9 +1730,9 @@ public abstract class JComponent extends Container {
 	 * @beaninfo description: The preferred horizontal alignment of the component.
 	 */
 	public void setAlignmentX(float alignmentX) {
-		this.alignmentX = alignmentX > 1.0f ? 1.0f : alignmentX < 0.0f ? 0.0f
+		this._alignmentX = alignmentX > 1.0f ? 1.0f : alignmentX < 0.0f ? 0.0f
 				: alignmentX;
-		isAlignmentXSet = true;
+		_isAlignmentXSet = true;
 	}
 
 	/**
@@ -2958,8 +2960,8 @@ public abstract class JComponent extends Container {
 	 */
 	public void setAutoscrolls(boolean autoscrolls) {
 		setFlag(AUTOSCROLLS_SET, true);
-		if (this.autoscrolls != autoscrolls) {
-			this.autoscrolls = autoscrolls;
+		if (this._autoscrolls != autoscrolls) {
+			this._autoscrolls = autoscrolls;
 			if (autoscrolls) {
 				enableEvents(AWTEvent.MOUSE_EVENT_MASK);
 				enableEvents(AWTEvent.MOUSE_MOTION_EVENT_MASK);
@@ -2977,7 +2979,7 @@ public abstract class JComponent extends Container {
 	 * @see #setAutoscrolls
 	 */
 	public boolean getAutoscrolls() {
-		return autoscrolls;
+		return _autoscrolls;
 	}
 
 	/**
@@ -2993,7 +2995,7 @@ public abstract class JComponent extends Container {
 	 */
 	@Override
 	protected void processMouseEvent(MouseEvent e) {
-		if (autoscrolls && e.getID() == MouseEvent.MOUSE_RELEASED) {
+		if (_autoscrolls && e.getID() == MouseEvent.MOUSE_RELEASED) {
 			Autoscroller.stop(this);
 		}
 		super.processMouseEvent(e);
@@ -3009,7 +3011,7 @@ public abstract class JComponent extends Container {
 	@Override
 	protected void processMouseMotionEvent(MouseEvent e) {
 		boolean dispatch = true;
-		if (autoscrolls && e.getID() == MouseEvent.MOUSE_DRAGGED) {
+		if (_autoscrolls && e.getID() == MouseEvent.MOUSE_DRAGGED) {
 			// We don't want to do the drags when the mouse moves if we're
 			// autoscrolling. It makes it feel spastic.
 			dispatch = !Autoscroller.isRunning(this);
@@ -4164,7 +4166,7 @@ public abstract class JComponent extends Container {
 			RepaintManager.currentManager(this).resetDoubleBuffer();
 			setCreatedDoubleBuffer(false);
 		}
-	  if (autoscrolls) {
+	  if (_autoscrolls) {
 	  	Autoscroller.stop(this);
 	  }
 	}
@@ -4680,15 +4682,15 @@ public abstract class JComponent extends Container {
 
 	private void setFlag(int aFlag, boolean aValue) {
 		if (aValue) {
-			flags |= (1 << aFlag);
+			_flags |= (1 << aFlag);
 		} else {
-			flags &= ~(1 << aFlag);
+			_flags &= ~(1 << aFlag);
 		}
 	}
 
 	private boolean getFlag(int aFlag) {
 		int mask = (1 << aFlag);
-		return ((flags & mask) == mask);
+		return ((_flags & mask) == mask);
 	}
 
 	// // These functions must be static so that they can be called from
@@ -4754,11 +4756,11 @@ public abstract class JComponent extends Container {
 				.toString() : "");
 		String maximumSizeString = (isMaximumSizeSet() ? getMaximumSize()
 				.toString() : "");
-		String borderString = (border == null ? "" : (border == this ? "this"
-				: border.toString()));
+		String borderString = (_border == null ? "" : (_border == this ? "this"
+				: _border.toString()));
 
-		return super.paramString() + ",alignmentX=" + alignmentX + ",alignmentY="
-				+ alignmentY + ",border=" + borderString + ",flags=" + flags
+		return super.paramString() + ",alignmentX=" + _alignmentX + ",alignmentY="
+				+ _alignmentY + ",border=" + borderString + ",flags=" + _flags
 				+ // should beef this up a bit
 				",maximumSize=" + maximumSizeString + ",minimumSize="
 				+ minimumSizeString + ",preferredSize=" + preferredSizeString;
