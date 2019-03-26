@@ -145,7 +145,6 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 				DOMNode.setStyles(closerNode, "width", "20px", "height", "20px", "position", "absolute", "text-align",
 						"center", "right", "0px");
 				frameNode.appendChild(titleBarNode);
-				setDraggableEvents();
 				titleBarNode.appendChild(titleNode);
 				titleBarNode.appendChild(closerWrap);
 				closerWrap.appendChild(closerNode);
@@ -180,7 +179,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 
 	@Override
 	protected void setDraggableEvents() {
-		if (embeddingNode != null)
+		if (embeddingNode != null || frame.isUndecorated())
 			return;
 		@SuppressWarnings("unused")
 		DOMNode fnode = frameNode;		

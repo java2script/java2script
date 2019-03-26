@@ -180,7 +180,7 @@ public abstract class JSComponent extends Component {
 	}
 
 
-	private Insets tempInsets;
+	private Insets _tempInsets;
 	public JSGraphics2D _gtemp; // indicates that we are painting, so that g.setBackground() should also be set 
 
 	public JSComponent() {
@@ -203,11 +203,11 @@ public abstract class JSComponent extends Component {
 		if (frameViewer != null) {
 			g = frameViewer.getGraphics().create();
 			if (isContentPane) {
-				if (tempInsets == null)
-					tempInsets = new Insets(0,0,0,0);
-				((JComponent) this).getRootPane().getInsets(tempInsets);
-				if (tempInsets.left != 0 || tempInsets.top != 0)
-					g.translate(tempInsets.left, tempInsets.top);
+				if (_tempInsets == null)
+					_tempInsets = new Insets(0,0,0,0);
+				((JComponent) this).getRootPane().getInsets(_tempInsets);
+				if (_tempInsets.left != 0 || _tempInsets.top != 0)
+					g.translate(_tempInsets.left, _tempInsets.top);
 				// when user has inset the applet -- should clip? 
 			}
 			return g;
