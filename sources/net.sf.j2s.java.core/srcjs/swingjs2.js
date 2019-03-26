@@ -19179,16 +19179,15 @@ var newMethodNotFoundException = function (clazz, method) {
 //Clazz._Loader.loadZJar(Clazz._Loader.getJ2SLibBase() + "core/coreswingjs.z.js", "swingjs.JSUtil");
 
   //if (!J2S._isAsync) {
-  if (!Clazz._loadcore || J2S._coreFiles.length == 0) {
+if (!Clazz._loadcore || J2S._coreFiles.length == 0) {
 	if (!Clazz._quiet)System.out.println("Clazz: No core files to load -- check Info.core"); 
-  }
-  
+} else {  
   J2S.onClazzLoaded && J2S.onClazzLoaded(1, "Clazz loaded; loading J2S._coreFiles " + J2S._coreFiles.length);
   for (var i = 0; i < J2S._coreFiles.length; i++) {
 	Clazz.loadScript(J2S._coreFiles[i]);
   }
   J2S.onClazzLoaded && J2S.onClazzLoaded(2, "Clazz loaded; core files loaded");
-
+}
 
 })(Clazz, J2S); 
 }; // called by external application 
