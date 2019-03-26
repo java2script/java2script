@@ -28,9 +28,12 @@
   	<!-- location of third-party jar contents as precompiled zipped .js files to copy to site/ -->
   	<property name="libjs.dir" value="libjs" />
  
-  	<!-- non-Java resources to copy to site/ -->
+  	<!-- non-Java resources to copy to site/swingjs/j2s -->
     <property name="resource.dir" value="resources" />  	
   	
+  	<!-- non-Java resources to copy to site/ -->
+    <property name="site-resource.dir" value="site-resources" />  	  	
+
 	<!-- output directories -->
 
   	<property name="site.dir" value="site" />
@@ -75,6 +78,14 @@
   	</fileset>
     </copy>
       		
+  	<echo> Copying ${site-resource.dir} files into ${site.dir} </echo>
+  	<copy todir="${site.dir}">
+      <fileset dir="${site-resource.dir}">
+      	<include name="**"/>
+  	</fileset>
+    </copy>
+      		
+
 </target>
 	
 

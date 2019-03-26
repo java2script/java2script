@@ -56,16 +56,16 @@ public class JSUtil {
 
 	
 	private static Map<String, Object> getFileCache() {
-		if (JSUtil.fileCache == null && (JSUtil.fileCache = JSUtil.J2S.getSetJavaFileCache(null)) == null) {
-			JSUtil.fileCache = new Hashtable<String, Object>();
-			JSUtil.J2S.getSetJavaFileCache(JSUtil.fileCache);
+		if (fileCache == null && (fileCache = J2S.getSetJavaFileCache(null)) == null) {
+			fileCache = new Hashtable<String, Object>();
+			J2S.getSetJavaFileCache(fileCache);
 		}
-		return JSUtil.fileCache;
+		return fileCache;
 	}
 
 	private static Object getCachedFileData(String path) {
-		return (JSUtil.useCache && JSUtil.fileCache != null ?
-					JSUtil.fileCache.get(path) : null);
+		return (useCache && fileCache != null ?
+					fileCache.get(path) : null);
 	}
 
 	/**
@@ -105,7 +105,7 @@ public class JSUtil {
 				data = (asBytes ? Rdr.getStreamAsBytes(stream, null) : Rdr.streamToUTF8String(stream));
 			} catch (Exception e) {
 				// bypasses AjaxURLConnection
-				data = JSUtil.J2S.getFileData(uri, null, false, asBytes);
+				data = J2S.getFileData(uri, null, false, asBytes);
 			}
 		}
 		return data;
@@ -120,7 +120,7 @@ public class JSUtil {
 	 */
 	public static String getFileAsString(String filename) {
 		Object data = getFileContents(filename, false);
-		return  JSUtil.ensureString(data);
+		return  ensureString(data);
 	}
 
 	public static byte[] getFileAsBytes(Object file, boolean checkNotFound) {
@@ -167,7 +167,7 @@ public class JSUtil {
 	}
 
 	public static boolean haveCachedResource(String resourceName, boolean isJavaPath) {
-		String path = JSUtil.J2S.getResourcePath(resourceName, isJavaPath);
+		String path = J2S.getResourcePath(resourceName, isJavaPath);
 		return (path != null && getCachedFileData(path) != null);
 	}
 
@@ -192,14 +192,14 @@ public class JSUtil {
 		if (data == null
 				&& (data = J2S.getFileData(path, null, false, false)) != null
 				&& useCache && doCache)
-			JSUtil.cacheFileData(path, data);
-		String sdata = JSUtil.ensureString(data);
+			cacheFileData(path, data);
+		String sdata = ensureString(data);
 		boolean ok = (sdata != null && sdata.indexOf("[Exception") != 0);
 		System.out.println("Processing " + path + " ["
 				+ (ok ? "" + sdata.length() : sdata) + "]");
 		return (!ok ? null : !doProcess ? sdata
-				: path.endsWith(".css") ? JSUtil.processCSS(sdata, path) : path
-						.endsWith(".js") ? JSUtil.processJS(sdata, resourceName) : sdata);
+				: path.endsWith(".css") ? processCSS(sdata, path) : path
+						.endsWith(".js") ? processJS(sdata, resourceName) : sdata);
 	}
 
 	static void cacheFileData(String path, Object data) {
@@ -224,7 +224,7 @@ public class JSUtil {
 		try {
 			BufferedInputStream bis = new BufferedInputStream(cl.getResourceAsStream(zipFileName));
 			String prefix = J2S.getResourcePath(null, true); // will end with /
-			fileList = JSUtil.getZipTools().cacheZipContentsStatic(bis, prefix, mapByteData, false);
+			fileList = getZipTools().cacheZipContentsStatic(bis, prefix, mapByteData, false);
 		} catch (Exception e) {
 			System.out.println("JSUtil could not cache files from " + zipFileName);
 			return;
@@ -260,7 +260,7 @@ public class JSUtil {
 			path = path.substring(0, path.lastIndexOf("/") + 1) + "images/";
 			css = PT.rep(css, "images/", path);
 		}
-		JSUtil.jQuery.$("head").append(JSUtil.jQuery.$("<style type='text/css'>" + css + "</style>"));
+		jQuery.$("head").append(jQuery.$("<style type='text/css'>" + css + "</style>"));
 	return css;
 	}
 
@@ -276,7 +276,7 @@ public class JSUtil {
 		 */
 		{}
 	} catch (Throwable e) {
-		JSUtil.alert("error processing " + js);
+		alert("error processing " + js);
 	  return null;
 	}
 	return js;
@@ -348,8 +348,8 @@ public class JSUtil {
 	 */
 	public static void notImplemented(String msg) {
 		String s = null;
-		if (JSUtil.mapNotImpl == null)
-			JSUtil.mapNotImpl = new Hashtable<String, Boolean>();
+		if (mapNotImpl == null)
+			mapNotImpl = new Hashtable<String, Boolean>();
 		/**
 		 * @j2sNative
 		 * 
@@ -360,9 +360,9 @@ public class JSUtil {
 		 */
 		{
 		}
-		if (JSUtil.mapNotImpl.containsKey(s))
+		if (mapNotImpl.containsKey(s))
 			return;
-		JSUtil.mapNotImpl.put(s, Boolean.TRUE);
+		mapNotImpl.put(s, Boolean.TRUE);
 		System.out.println(s + " has not been implemented in SwingJS. "
 				+ (msg == "" ? "" : (msg == null ? "" : msg) + getStackTrace(-5)));
 	
@@ -509,7 +509,7 @@ public class JSUtil {
 	 * @param msg
 	 */
 	public static void warn(String msg) {
-		JSUtil.alert(msg);
+		alert(msg);
 	}
 
 	/**

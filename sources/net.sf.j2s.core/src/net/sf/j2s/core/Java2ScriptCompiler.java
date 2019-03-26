@@ -67,6 +67,8 @@ class Java2ScriptCompiler {
 
 	private String siteFolder;
 
+	private boolean testing;
+	
 	private List<String> lstExcludedPaths;
 
 	private boolean isCleanBuild;
@@ -187,6 +189,8 @@ class Java2ScriptCompiler {
 				lstExcludedPaths = null;
 		}
 
+		testing = "true".equals(getProperty("j2s.testing"));
+
 		String prop = getProperty("j2s.compiler.nonqualified.packages");
 		// older version of the name
 		String nonqualifiedPackages = getProperty("j2s.compiler.nonqualified.classes");
@@ -249,7 +253,7 @@ class Java2ScriptCompiler {
 		CompilationUnit root = (CompilationUnit) astParser.createAST(null);
 		// If the Java2ScriptVisitor is ever extended, it is important to set the project.
 		// Java2ScriptVisitor#addClassOrInterface uses getClass().newInstance().setproject(project). 
-		Java2ScriptVisitor visitor = new Java2ScriptVisitor().setProject(project);
+		Java2ScriptVisitor visitor = new Java2ScriptVisitor().setProject(project, testing);
 
 		try {
 

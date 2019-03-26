@@ -27,25 +27,22 @@
  */
 package javax.swing;
 
-import java.awt.HeadlessException;
-
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.JSFrame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
+import java.awt.HeadlessException;
 import java.awt.Image;
+import java.awt.JSFrame;
 import java.awt.LayoutManager;
 import java.awt.event.WindowEvent;
 //
 
-import swingjs.JSUtil;
-import swingjs.plaf.JSComponentUI;
-
 //BH: Added rootPane.addNotify(); // builds a peer for the root pane
+//BH: Added ability to embed the frame in a div of the web page.
 
 /**
  * An extended version of <code>java.awt.Frame</code> that adds support for
@@ -153,7 +150,8 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 	 */
 	protected JRootPane rootPane;
 
-    public void add(Component comp, Object constraints) {
+    @Override
+	public void add(Component comp, Object constraints) {
     	if (comp instanceof JApplet) {
     		isAppletFrame = true;
     		((JApplet) comp).getLayeredPane().isFramedApplet = true;
@@ -171,6 +169,8 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 	 * @see javax.swing.RootPaneContainer
 	 */
 	protected boolean rootPaneCheckingEnabled = false;
+
+	private boolean _boundsFrozen;
 
 	/**
 	 * Constructs a new frame that is initially invisible.
@@ -284,6 +284,7 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 	}
 
 	public JFrame(Object object, Object object2, Object object3, Object object4) {
+		// For SwingJS JInternalFrame constructor
 	}
 
 	@Override
@@ -463,6 +464,7 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 	 * @beaninfo bound: true hidden: true description: Mechanism for transfer of
 	 *           data into the component
 	 */
+	@Override
 	public void setTransferHandler(TransferHandler newHandler) {
 		TransferHandler oldHandler = transferHandler;
 		transferHandler = newHandler;
@@ -479,6 +481,7 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 	 * @see #setTransferHandler
 	 * @since 1.6
 	 */
+	@Override
 	public TransferHandler getTransferHandler() {
 		return transferHandler;
 	}
@@ -914,4 +917,18 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 				+ defaultCloseOperationString + ",rootPane=" + rootPaneString
 				+ ",rootPaneCheckingEnabled=" + rootPaneCheckingEnabledString;
 	}
+
+	public void _freezeBounds(int w, int h) {
+		setSize(w, h);
+		_boundsFrozen = true;
+		resizable = false;
+	}
+	
+	@Override
+	public void reshape(int x, int y, int width, int height) {
+		if (!_boundsFrozen)
+			super.reshape(x, y, width, height);
+	}
+
+	
 }

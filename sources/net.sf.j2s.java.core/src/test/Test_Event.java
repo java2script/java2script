@@ -117,7 +117,6 @@ public class Test_Event extends JFrame {
 
 		setLogging();
 
-		this.setName("Test_Event_Frame");
 		setTitle("testing editor");
 		setLocation(100, 100);
 
@@ -141,10 +140,10 @@ public class Test_Event extends JFrame {
 			// this next allows floating frames outside the JDesktopPane in SwingJS
 			getRootPane().putClientProperty("swingjs.overflow.hidden", "false");
 
-			d.setPreferredSize(new Dimension(800, 600));
+			d.setPreferredSize(new Dimension(800, 1));
 
 			JInternalFrame main = new JInternalFrame();
-
+			main.setName("main-frame");
 			main.setContentPane(new JPanel() {
 
 			});
@@ -207,16 +206,16 @@ public class Test_Event extends JFrame {
 			main.setVisible(true);
 			d.add(main);
 
-			JInternalFrame main2 = new JInternalFrame();
-			JPanel p = new JPanel();
-			p.setPreferredSize(new Dimension(100, 300));
-			p.setMinimumSize(new Dimension(100, 300));
-
-			main2.add(p);
-			main2.setTitle("main2");
-			main2.pack();
-			main2.setVisible(true);
-			d.add(main2);
+//			JInternalFrame main2 = new JInternalFrame();
+//			JPanel p = new JPanel();
+//			p.setPreferredSize(new Dimension(100, 300));
+//			p.setMinimumSize(new Dimension(100, 300));
+//
+//			main2.add(p);
+//			main2.setTitle("main2");
+//			main2.pack();
+//			main2.setVisible(true);
+//			d.add(main2);
 
 			add(d);
 			pack();
@@ -232,7 +231,7 @@ public class Test_Event extends JFrame {
 			setVisible(true);
 		}
 
-		showFocusTimer();
+		//showFocusTimer();
 	}
 
 	private void showFocusTimer() {

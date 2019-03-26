@@ -55,13 +55,15 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 	private JSScrollBarUI horizBarUI;
 	private JSScrollBarUI vertBarUI;
 
+	@SuppressWarnings("unused")
 	@Override
 	public DOMNode updateDOMNode() {
 		scrollpane = (JScrollPane) jc;
 		isContainer = true;
 		if (domNode == null) {
 			domNode = newDOMObject("div", id);
-			DOMNode.setStyles(domNode,  "border", "solid black 1px", "box-sizing", "border-box");
+			if (scrolledComponent != null && (/** @j2sNative this.scrolledComponent.isAWT$ || */false))
+				DOMNode.setStyles(domNode,  "border", "solid black 1px", "box-sizing", "border-box");
 		}
 		// add code here for adjustments when changes in bounds or other properties
 		// occur.
