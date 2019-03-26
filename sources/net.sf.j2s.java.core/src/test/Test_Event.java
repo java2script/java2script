@@ -143,7 +143,6 @@ public class Test_Event extends JFrame {
 			d.setPreferredSize(new Dimension(800, 1));
 
 			JInternalFrame main = new JInternalFrame();
-			main.setUndecorated(true);
 			main.setName("main-frame");
 			main.setContentPane(new JPanel() {
 
