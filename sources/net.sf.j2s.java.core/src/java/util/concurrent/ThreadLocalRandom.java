@@ -178,9 +178,11 @@ public class ThreadLocalRandom extends Random {
     ;
 
     private static long mix64(long z) {
-        z = (z ^ (z >>> 33)) * 0xff51afd7ed558ccdL;
-        z = (z ^ (z >>> 33)) * 0xc4ceb9fe1a85ec53L;
-        return z ^ (z >>> 33);
+    	return mix32(z); // sorry -- just ints in JavaScript
+//    	
+//        z = (z ^ (z >>> 33)) * 0xff51afd7ed558ccdL;
+//        z = (z ^ (z >>> 33)) * 0xc4ceb9fe1a85ec53L;
+//        return z ^ (z >>> 33);
     }
 
     private static int mix32(long z) {
