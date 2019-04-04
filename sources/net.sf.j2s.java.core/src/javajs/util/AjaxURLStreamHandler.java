@@ -23,7 +23,7 @@ public class AjaxURLStreamHandler extends URLStreamHandler {
 
 	@Override
 	protected URLConnection openConnection(URL url) throws IOException {
-		return new AjaxURLConnection(url);
+		return AjaxURLConnection.newConnection(url);
 	}
 
 

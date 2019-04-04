@@ -811,7 +811,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
             	JTextArea area = (JTextArea) editor;
             	int h = area.getFont().getFontMetrics().getHeight();
             	int r = area.getRows();
-            	return  h * (r > 0 ? r : isAWT ? 10 : h * 6);
+            	return  h * (r > 0 ? r : isAWT ? 10 : 6);
         	}
         }
 

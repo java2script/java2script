@@ -82,6 +82,7 @@ public class JSON {
 		return new JSONReader(is);
 	}
 
+	@SuppressWarnings("resource")
 	public static Object parse(Object o) {
 		if (o instanceof String)
 			return parse((String) o);
@@ -89,7 +90,10 @@ public class JSON {
 			return parse((InputStream) o);
 		if (o instanceof Reader)
 			return parse((Reader) o);
-		return null;
+		if (o instanceof URL) {
+			return parse((URL) o);
+		}
+		return new JSONReader(o).data;
 	}
 
 	@SuppressWarnings("resource")
@@ -109,6 +113,17 @@ public class JSON {
 		return parse(is);
 	}
 
+	@SuppressWarnings("resource")
+	public static Object parse(URL url) {
+		JSUtil.setAjax(url);
+		try {
+			return new JSONReader(JSUtil.parseJSON((InputStream) url.getContent())).data;
+		} catch (IOException e) {
+			return null;
+		}
+	}
+		
+			
 	/**
 	 * Get an object in the JSON associative array.
 	 * 
@@ -169,7 +184,7 @@ public class JSON {
 		public JSONReader(InputStream in) {
 			super((Reader) (Object) "");
 			// could be buffered
-			data = toObject(/** @j2sNative $in._ajaxData || $in.$in && $in.$in._ajaxData || */
+			data = toObject(/** @j2sNative $in._jsonData || $in.$in && $in.$in._jsonData || */
 					null);
 			if (data == null) {
 				String json = (/** @j2sNative $in.str || $in.$in && $in.$in.str || */null);
@@ -180,7 +195,7 @@ public class JSON {
 		public JSONReader(Reader in) {
 			super(in);
 			// could be buffered
-			data = toObject(/** @j2sNative $in._ajaxData || $in.$in && $in.$in._ajaxData || */
+			data = toObject(/** @j2sNative $in._jsonData || $in.$in && $in.$in._jsonData || */
 					null);
 		}
 
@@ -189,12 +204,17 @@ public class JSON {
 			data = toObject(JSUtil.parseJSONRaw(json));
 		}
 
+		public JSONReader(Object jsObject) {
+			super((Reader) (Object) "");
+			data = toObject(jsObject);
+		}
+
 		@Override
 		public void close() {
 			data = null;
 			try {
 				super.close();
-			} catch (IOException e) {
+			} catch (Throwable e) {
 				// ignore, especially if we set $in to a string!
 			}
 		}

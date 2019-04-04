@@ -14,7 +14,7 @@ public class JSLayeredPaneUI extends JSLightweightUI {
 	@Override
 	public DOMNode updateDOMNode() {
 		if (domNode == null) {
-			domNode = newDOMObject("div", id);
+			containerNode = domNode = newDOMObject("div", id);
 		}
 		// add code here for adjustments when changes in bounds or other properties occur.
     return domNode;
