@@ -71,6 +71,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	private DOMNode closerWrap;
 	protected boolean isModal;
 	protected int zModal;
+	private boolean isDesktop;
 
 	protected boolean isInternalFrame;
 
@@ -101,7 +102,6 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 				DOMNode.setVisible(domNode, false);
 				return domNode;
 			}
-			setWindowClass();
 			int w = c.getWidth();
 			int h = c.getHeight();
 			if (w == 0)
@@ -110,19 +110,19 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 				h = defaultHeight;
 			DOMNode.setSize(frameNode, w, h);
 			DOMNode.setTopLeftAbsolute(frameNode, 0, 0);
-			if (frame.getName() != null) {
-				DOMNode node = DOMNode.getElement(frame.getName() + "-div");
-				if (node != null) {
-					frame.setUndecorated(true);
-					frame.setLocation(0, 0);
-					embeddingNode = node;
-					int ew = DOMNode.getWidth(node);
-					int eh = DOMNode.getHeight(node);
-					if (ew > 0 && eh > 0) {
-						frame._freezeBounds(ew, eh);
-					}
+			String fname = frame.getName();
+			DOMNode node = DOMNode.getElement(fname + "-div");
+			if (node != null) {
+				frame.setUndecorated(true);
+				frame.setLocation(0, 0);
+				embeddingNode = node;
+				int ew = DOMNode.getWidth(node);
+				int eh = DOMNode.getHeight(node);
+				if (ew > 0 && eh > 0) {
+					frame._freezeBounds(ew, eh);
 				}
 			}
+			setWindowClass();
 			if (!frame.isUndecorated()) {
 				DOMNode.setStyles(frameNode, "box-shadow", "0px 0px 10px gray", "box-sizing", "content-box");
 				titleBarNode = newDOMObject("div", id + "_titlebar");
@@ -175,6 +175,13 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			DOMNode.setVisible(domNode, jc.isVisible());
 		}
 		return domNode;
+	}
+
+	@Override
+	public void setZOrder(int z) {
+		if (embeddingNode != null)
+			z = 999;
+		super.setZOrder(z);
 	}
 
 	@Override

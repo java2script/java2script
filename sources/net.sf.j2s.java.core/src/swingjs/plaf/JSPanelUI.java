@@ -1,14 +1,12 @@
 package swingjs.plaf;
 
 
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Insets;
-import java.awt.LayoutManager;
 
 import javax.swing.JComponent;
 import javax.swing.JRootPane;
 import javax.swing.LookAndFeel;
+
 import swingjs.api.js.DOMNode;
 
 public class JSPanelUI extends JSLightweightUI {
@@ -23,7 +21,7 @@ public class JSPanelUI extends JSLightweightUI {
 	public DOMNode updateDOMNode() {
 		JRootPane root = jc.getRootPane();
 		if (domNode == null) {
-			domNode = newDOMObject("div", id);
+			containerNode = domNode = newDOMObject("div", id);
 			if (root != null && root.getGlassPane() == c)
 				DOMNode.setVisible(domNode,  false);
 		}
