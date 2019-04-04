@@ -1749,7 +1749,7 @@ public class File
     private static File generateFile(String prefix, String suffix, File dir)
         throws IOException
     {
-        long n = new Random().nextLong();
+        long n = new Random().nextInt(); // was nextLong()
         if (n == Long.MIN_VALUE) {
             n = 0;      // corner case
         } else {
