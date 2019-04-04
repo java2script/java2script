@@ -37,16 +37,11 @@ public class Test_JSON extends Test_ {
 			URL url = new URL("http://www.ebi.ac.uk/pdbe/api/pdb/entry/summary/1cbs");
 
 			JSUtil.setAjax(url);
-			/**
-			 * @j2sNative
-			 * 
-			 * 			url.ajax = {dataType:"json"};
-			 */
 			Object data = url.getContent();
 			/**
 			 * @j2sNative
 			 * 
-			 * 			data = data._ajaxData;
+			 * 			data = data._jsonData;
 			 * 
 			 *            data = data["1cbs"][0].title;
 			 */
@@ -68,11 +63,7 @@ public class Test_JSON extends Test_ {
 			false) {
 				// JavaScript-only code
 				url = new URL("http://www.ebi.ac.uk/pdbe/api/pdb/entry/summary/1d66");
-				JSUtil.setAjax(url);
-				
-				
-				BufferedReader br = JSUtil.getJSONReader((InputStream) url.getContent());
-				data = JSUtil.parseJSON(br);
+				data = JSUtil.parseJSON(url);
 				String title = (((Map<String, java.util.List<Map<String, String>>>) data).get("1d66")).get(0)
 						.get("title");
 				System.out.println(title);
