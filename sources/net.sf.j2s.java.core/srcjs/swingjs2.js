@@ -11462,6 +11462,8 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 			info.xhr = J2S.$ajax(info);
 			if (!fSuccess) {
 				data = J2S._xhrReturn(info.xhr);
+				if (data == null)
+					doProcess = null; 
 			}
 		}
 		if (!doProcess)
@@ -11475,6 +11477,8 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 	}
 
 	J2S._xhrReturn = function(xhr) {
+		if (xhr.state() == "rejected")
+			return null;
 		if (!xhr.responseText && !xhr.responseJSON || self.Clazz
 				&& Clazz.instanceOf(xhr.response, self.ArrayBuffer)) {
 			// Safari or error
@@ -13587,11 +13591,15 @@ if (!target) {
 			return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0
 		})
 		var z0 = zbase;
+		var z0 = zbase;
 		for (var i = 0; i < a.length; i++) {
-			a[i][1].style.zIndex = zbase;
+			if (!a[i][1].ui || !a[i][1].ui.embeddingNode)
+			  a[i][1].style.zIndex = zbase;
 			zbase += 1000;
 		}
-		z = (node.style.zIndex = (z > 0 ? zbase : z0));
+		z = (z > 0 ? zbase : z0);
+		if (!node.ui || !node.ui.embeddingNode) // could be popupMenu, with no ui
+			node.style.zIndex = z;
 		node.style.position = "absolute";
 		if (J2S._checkLoading) 
 			System.out.println("setting z-index to " + z + " for " + node.id);

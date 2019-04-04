@@ -1,10 +1,13 @@
 package javajs.util;
 
 import java.io.BufferedInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.HttpsURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -16,6 +19,18 @@ import javajs.api.js.J2SObjectInterface;
  * 
  */
 public class AjaxURLConnection extends HttpURLConnection {
+	
+  public static class AjaxHttpsURLConnection extends AjaxURLConnection implements HttpsURLConnection {
+
+	protected AjaxHttpsURLConnection(URL url) {
+		super(url);
+	}
+	  
+  }
+
+  public static URLConnection newConnection(URL url) {
+		return (url.getProtocol() == "https" ? new AjaxHttpsURLConnection(url) : new AjaxURLConnection(url));
+	}
 
   protected AjaxURLConnection(URL url) {
     super(url);
@@ -91,18 +106,25 @@ public class AjaxURLConnection extends HttpURLConnection {
   }
 
 	@Override
-	public InputStream getInputStream() {
+	public InputStream getInputStream() throws FileNotFoundException {
 		responseCode = -1;
-		return getInputStreamAndResponse(url, false);
+		InputStream is = getInputStreamAndResponse(url, false);
+		if (is == null)
+			throw new FileNotFoundException("opening " + url);
+		return is;
 	}
 
 	private InputStream getInputStreamAndResponse(URL url, boolean allowNWError) {
 		BufferedInputStream is = getAttachedStreamData(url, false);
-		if (is != null || getUseCaches() && (is = getCachedStream(url, allowNWError)) != null)
+		if (is != null || getUseCaches() && (is = getCachedStream(url, allowNWError)) != null) {
 			return is;
+		}
 		is = attachStreamData(url, doAjax(ajax == null));
-		if (getUseCaches() && is != null)
+		if (getUseCaches() && is != null) {
+			isNetworkError(is);
 			setCachedStream(url);
+			return is;
+		}
 		isNetworkError(is);
 		return is;
 	}
@@ -115,45 +137,54 @@ public class AjaxURLConnection extends HttpURLConnection {
 			return null;
 		boolean isAjax = /** @j2sNative url.ajax || */false;
 		BufferedInputStream bis = getBIS(data, isAjax);
-		return (allowNWError || !isNetworkError(bis) ? bis : null);
+		return (!isNetworkError(bis) || allowNWError ? bis : null);
 	}
 
-	private static BufferedInputStream getBIS(Object data, boolean isAjax) {
+	private static BufferedInputStream getBIS(Object data, boolean isJSON) {
 		if (data == null)
 			return null;
-		if (!isAjax)
+		if (!isJSON)
 			return Rdr.toBIS(data);
 		BufferedInputStream bis = Rdr.toBIS("");
 		/**
 		 * @j2sNative
 		 * 
-		 * 			bis._ajaxData = data;
+		 * 			bis._jsonData = data;
 		 */
 		return bis;
 	}
 
 	private void setCachedStream(URL url) {
 		Object data = url._streamData;
-		if (data != null)
+		if (data != null) {
+			int code = this.responseCode;
+			/**
+			 * @j2sNative data._responseCode = code; 
+			 */
 			urlCache.put(url.toString(), data);
+		}
 	}
 
 	@SuppressWarnings("unused")
 	private boolean isNetworkError(BufferedInputStream is) {
-		if (/** @j2sNative is._ajaxData || */ false)
-			return false;
-        is.mark(15);
-        byte[] bytes = new byte[13];
-        try {
-			is.read(bytes);
-	        is.reset();
-	        for (int i = NETWORK_ERROR.length; --i >= 0;)
-	        	if (bytes[i] != NETWORK_ERROR[i])
-	        		return false;
-		} catch (IOException e) {
+		if (is != null) {
+			responseCode = HTTP_OK;
+			if (/** @j2sNative is._jsonData || */
+			false)
+				return false;
+			is.mark(15);
+			byte[] bytes = new byte[13];
+			try {
+				is.read(bytes);
+				is.reset();
+				for (int i = NETWORK_ERROR.length; --i >= 0;)
+					if (bytes[i] != NETWORK_ERROR[i])
+						return false;
+			} catch (IOException e) {
+			}
 		}
 		responseCode = HTTP_NOT_FOUND;
-        return true;
+		return true;
 	}
 
 	final private static int[] NETWORK_ERROR = new int[] { 78, 101, 116, 119, 111, 114, 107, 69, 114, 114, 111, 114 };
@@ -171,14 +202,14 @@ public class AjaxURLConnection extends HttpURLConnection {
 	public static BufferedInputStream getAttachedStreamData(URL url, boolean andDelete) {
 	
 		Object data = null;
-		boolean isAjax = false;
+		boolean isJSON = false;
 		/**
 		 * @j2sNative
 		 *       data = url._streamData;
 		 *       if (andDelete) url._streamData = null;
-		 *       isAjax = (data && url.ajax && url.ajax.dataType == "json")
+		 *       isJSON = (data && url.ajax && url.ajax.dataType == "json")
 		 */
-		return getBIS(data, isAjax);
+		return getBIS(data, isJSON);
 	}
 
 	/**
@@ -231,6 +262,16 @@ public void disconnect() {
 public boolean usingProxy() {
 	// TODO Auto-generated method stub
 	return false;
+}
+
+@Override
+public int getContentLength() {
+	try {
+		InputStream is = getInputStream();
+		return is.available();
+	} catch (IOException e) {
+		return -1;
+	}
 }
 
 }

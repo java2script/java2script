@@ -557,8 +557,8 @@ public class JSUtil {
 		}
 	}
 
-	public static void setAjax(Object url) {
-		setAjax("url", url, "dataType", "json", "async", Boolean.FALSE);	
+	public static void setAjax(URL url) {
+		JSON.setAjax(url);	
 	}
 
 	public static Object setAjax(Object... params) {

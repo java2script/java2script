@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -1444,183 +1445,183 @@ public abstract class URLConnection {
 
 
 
-// /**
-// * Returns the value of the <code>content-length</code> header field.
-// *
-// * @return the content length of the resource that this connection's URL
-// * references, or <code>-1</code> if the content length is
-// * not known.
-// */
-// public int getContentLength() {
-// return getHeaderFieldInt("content-length", -1);
-// }
-//
-// /**
-// * Returns the value of the <code>content-type</code> header field.
-// *
-// * @return the content type of the resource that the URL references,
-// * or <code>null</code> if not known.
-// * @see java.net.URLConnection#getHeaderField(java.lang.String)
-// */
-// public String getContentType() {
-// return getHeaderField("content-type");
-// }
-//
-// /**
-// * Returns the value of the <code>content-encoding</code> header field.
-// *
-// * @return the content encoding of the resource that the URL references,
-// * or <code>null</code> if not known.
-// * @see java.net.URLConnection#getHeaderField(java.lang.String)
-// */
-// public String getContentEncoding() {
-// return getHeaderField("content-encoding");
-// }
-//
-// /**
-// * Returns the value of the <code>expires</code> header field.
-// *
-// * @return the expiration date of the resource that this URL references,
-// * or 0 if not known. The value is the number of milliseconds since
-// * January 1, 1970 GMT.
-// * @see java.net.URLConnection#getHeaderField(java.lang.String)
-// */
-// public long getExpiration() {
-// return getHeaderFieldDate("expires", 0);
-// }
-//
-// /**
-// * Returns the value of the <code>date</code> header field.
-// *
-// * @return the sending date of the resource that the URL references,
-// * or <code>0</code> if not known. The value returned is the
-// * number of milliseconds since January 1, 1970 GMT.
-// * @see java.net.URLConnection#getHeaderField(java.lang.String)
-// */
-// public long getDate() {
-// return getHeaderFieldDate("date", 0);
-// }
-//
-// /**
-// * Returns the value of the <code>last-modified</code> header field.
-// * The result is the number of milliseconds since January 1, 1970 GMT.
-// *
-// * @return the date the resource referenced by this
-// * <code>URLConnection</code> was last modified, or 0 if not known.
-// * @see java.net.URLConnection#getHeaderField(java.lang.String)
-// */
-// public long getLastModified() {
-// return getHeaderFieldDate("last-modified", 0);
-// }
-//
-// /**
-// * Returns the value of the named header field.
-// * <p>
-// * If called on a connection that sets the same header multiple times
-// * with possibly different values, only the last value is returned.
-// *
-// *
-// * @param name the name of a header field.
-// * @return the value of the named header field, or <code>null</code>
-// * if there is no such field in the header.
-// */
-// public String getHeaderField(String name) {
-// return null;
-// }
-//
-// /**
-// * Returns an unmodifiable Map of the header fields.
-// * The Map keys are Strings that represent the
-// * response-header field names. Each Map value is an
-// * unmodifiable List of Strings that represents
-// * the corresponding field values.
-// *
-// * @return a Map of header fields
-// * @since 1.4
-// */
-// public Map<String,List<String>> getHeaderFields() {
-// return Collections.EMPTY_MAP;
-// }
-//
-// /**
-// * Returns the value of the named field parsed as a number.
-// * <p>
-// * This form of <code>getHeaderField</code> exists because some
-// * connection types (e.g., <code>http-ng</code>) have pre-parsed
-// * headers. Classes for that connection type can override this method
-// * and short-circuit the parsing.
-// *
-// * @param name the name of the header field.
-// * @param Default the default value.
-// * @return the value of the named field, parsed as an integer. The
-// * <code>Default</code> value is returned if the field is
-// * missing or malformed.
-// */
-// public int getHeaderFieldInt(String name, int Default) {
-// String value = getHeaderField(name);
-// try {
-// return Integer.parseInt(value);
-// } catch (Exception e) { }
-// return Default;
-// }
-//
-// /**
-// * Returns the value of the named field parsed as date.
-// * The result is the number of milliseconds since January 1, 1970 GMT
-// * represented by the named field.
-// * <p>
-// * This form of <code>getHeaderField</code> exists because some
-// * connection types (e.g., <code>http-ng</code>) have pre-parsed
-// * headers. Classes for that connection type can override this method
-// * and short-circuit the parsing.
-// *
-// * @param name the name of the header field.
-// * @param Default a default value.
-// * @return the value of the field, parsed as a date. The value of the
-// * <code>Default</code> argument is returned if the field is
-// * missing or malformed.
-// */
-// public long getHeaderFieldDate(String name, long Default) {
-// String value = getHeaderField(name);
-// try {
-// return Date.parse(value);
-// } catch (Exception e) { }
-// return Default;
-// }
-//
-// /**
-// * Returns the key for the <code>n</code><sup>th</sup> header field.
-// * It returns <code>null</code> if there are fewer than <code>n+1</code>
-// fields.
-// *
-// * @param n an index, where n>=0
-// * @return the key for the <code>n</code><sup>th</sup> header field,
-// * or <code>null</code> if there are fewer than <code>n+1</code>
-// * fields.
-// */
-// public String getHeaderFieldKey(int n) {
-// return null;
-// }
-//
-// /**
-// * Returns the value for the <code>n</code><sup>th</sup> header field.
-// * It returns <code>null</code> if there are fewer than
-// * <code>n+1</code>fields.
-// * <p>
-// * This method can be used in conjunction with the
-// * {@link #getHeaderFieldKey(int) getHeaderFieldKey} method to iterate through
-// all
-// * the headers in the message.
-// *
-// * @param n an index, where n>=0
-// * @return the value of the <code>n</code><sup>th</sup> header field
-// * or <code>null</code> if there are fewer than <code>n+1</code> fields
-// * @see java.net.URLConnection#getHeaderFieldKey(int)
-// */
-// public String getHeaderField(int n) {
-// return null;
-// }
-//
+ /**
+ * Returns the value of the <code>content-length</code> header field.
+ *
+ * @return the content length of the resource that this connection's URL
+ * references, or <code>-1</code> if the content length is
+ * not known.
+ */
+ public int getContentLength() {
+ return getHeaderFieldInt("content-length", -1);
+ }
+
+ /**
+ * Returns the value of the <code>content-type</code> header field.
+ *
+ * @return the content type of the resource that the URL references,
+ * or <code>null</code> if not known.
+ * @see java.net.URLConnection#getHeaderField(java.lang.String)
+ */
+ public String getContentType() {
+ return getHeaderField("content-type");
+ }
+
+ /**
+ * Returns the value of the <code>content-encoding</code> header field.
+ *
+ * @return the content encoding of the resource that the URL references,
+ * or <code>null</code> if not known.
+ * @see java.net.URLConnection#getHeaderField(java.lang.String)
+ */
+ public String getContentEncoding() {
+ return getHeaderField("content-encoding");
+ }
+
+ /**
+ * Returns the value of the <code>expires</code> header field.
+ *
+ * @return the expiration date of the resource that this URL references,
+ * or 0 if not known. The value is the number of milliseconds since
+ * January 1, 1970 GMT.
+ * @see java.net.URLConnection#getHeaderField(java.lang.String)
+ */
+ public long getExpiration() {
+ return getHeaderFieldDate("expires", 0);
+ }
+
+ /**
+ * Returns the value of the <code>date</code> header field.
+ *
+ * @return the sending date of the resource that the URL references,
+ * or <code>0</code> if not known. The value returned is the
+ * number of milliseconds since January 1, 1970 GMT.
+ * @see java.net.URLConnection#getHeaderField(java.lang.String)
+ */
+ public long getDate() {
+ return getHeaderFieldDate("date", 0);
+ }
+
+ /**
+ * Returns the value of the <code>last-modified</code> header field.
+ * The result is the number of milliseconds since January 1, 1970 GMT.
+ *
+ * @return the date the resource referenced by this
+ * <code>URLConnection</code> was last modified, or 0 if not known.
+ * @see java.net.URLConnection#getHeaderField(java.lang.String)
+ */
+ public long getLastModified() {
+ return getHeaderFieldDate("last-modified", 0);
+ }
+
+ /**
+ * Returns the value of the named header field.
+ * <p>
+ * If called on a connection that sets the same header multiple times
+ * with possibly different values, only the last value is returned.
+ *
+ *
+ * @param name the name of a header field.
+ * @return the value of the named header field, or <code>null</code>
+ * if there is no such field in the header.
+ */
+ public String getHeaderField(String name) {
+ return null;
+ }
+
+ /**
+ * Returns an unmodifiable Map of the header fields.
+ * The Map keys are Strings that represent the
+ * response-header field names. Each Map value is an
+ * unmodifiable List of Strings that represents
+ * the corresponding field values.
+ *
+ * @return a Map of header fields
+ * @since 1.4
+ */
+ public Map<String,List<String>> getHeaderFields() {
+ return Collections.EMPTY_MAP;
+ }
+
+ /**
+ * Returns the value of the named field parsed as a number.
+ * <p>
+ * This form of <code>getHeaderField</code> exists because some
+ * connection types (e.g., <code>http-ng</code>) have pre-parsed
+ * headers. Classes for that connection type can override this method
+ * and short-circuit the parsing.
+ *
+ * @param name the name of the header field.
+ * @param Default the default value.
+ * @return the value of the named field, parsed as an integer. The
+ * <code>Default</code> value is returned if the field is
+ * missing or malformed.
+ */
+ public int getHeaderFieldInt(String name, int Default) {
+ String value = getHeaderField(name);
+ try {
+ return Integer.parseInt(value);
+ } catch (Exception e) { }
+ return Default;
+ }
+
+ /**
+ * Returns the value of the named field parsed as date.
+ * The result is the number of milliseconds since January 1, 1970 GMT
+ * represented by the named field.
+ * <p>
+ * This form of <code>getHeaderField</code> exists because some
+ * connection types (e.g., <code>http-ng</code>) have pre-parsed
+ * headers. Classes for that connection type can override this method
+ * and short-circuit the parsing.
+ *
+ * @param name the name of the header field.
+ * @param Default a default value.
+ * @return the value of the field, parsed as a date. The value of the
+ * <code>Default</code> argument is returned if the field is
+ * missing or malformed.
+ */
+ public long getHeaderFieldDate(String name, long Default) {
+ String value = getHeaderField(name);
+ try {
+ return Date.parse(value);
+ } catch (Exception e) { }
+ return Default;
+ }
+
+ /**
+ * Returns the key for the <code>n</code><sup>th</sup> header field.
+ * It returns <code>null</code> if there are fewer than <code>n+1</code>
+ fields.
+ *
+ * @param n an index, where n>=0
+ * @return the key for the <code>n</code><sup>th</sup> header field,
+ * or <code>null</code> if there are fewer than <code>n+1</code>
+ * fields.
+ */
+ public String getHeaderFieldKey(int n) {
+ return null;
+ }
+
+ /**
+ * Returns the value for the <code>n</code><sup>th</sup> header field.
+ * It returns <code>null</code> if there are fewer than
+ * <code>n+1</code>fields.
+ * <p>
+ * This method can be used in conjunction with the
+ * {@link #getHeaderFieldKey(int) getHeaderFieldKey} method to iterate through
+ all
+ * the headers in the message.
+ *
+ * @param n an index, where n>=0
+ * @return the value of the <code>n</code><sup>th</sup> header field
+ * or <code>null</code> if there are fewer than <code>n+1</code> fields
+ * @see java.net.URLConnection#getHeaderFieldKey(int)
+ */
+ public String getHeaderField(int n) {
+ return null;
+ }
+
 // /**
 // * Retrieves the contents of this URL connection.
 // * <p>

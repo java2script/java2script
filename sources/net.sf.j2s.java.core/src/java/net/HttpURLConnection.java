@@ -479,7 +479,8 @@ abstract public class HttpURLConnection extends URLConnection {
         try {
             getInputStream();
         } catch (Exception e) {
-            exc = e;
+        	return responseCode = HTTP_NOT_FOUND;
+//            exc = e;
         }
 
         

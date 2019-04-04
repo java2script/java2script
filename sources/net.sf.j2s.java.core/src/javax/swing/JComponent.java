@@ -2309,6 +2309,7 @@ public abstract class JComponent extends Container {
 			if (create) {
 				InputMap km = new InputMap();
 				setInputMap(condition, km);
+				jsInputMapSet();
 				return km;
 			}
 			break;

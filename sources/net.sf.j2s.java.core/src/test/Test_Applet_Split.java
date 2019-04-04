@@ -58,8 +58,10 @@ public class Test_Applet_Split extends JApplet {
 					pleft.setEnabled(false);
 					lblBottom.setText("disabled");
 					cb.setEnabled(false);
-					if (p.getDividerLocation() > p.getWidth() * 0.75)
-						p.setDividerLocation(0.75);
+					if (p.getDividerLocation() > p.getWidth() * 0.75) {
+						//p.setDividerLocation(0.75);
+						p.setDividerLocation((int)(p.getWidth() * 0.45));
+					}
 					break;
 				case "lastDividerLocation":
 					break;

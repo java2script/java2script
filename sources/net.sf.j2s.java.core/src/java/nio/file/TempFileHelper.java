@@ -55,7 +55,7 @@ class TempFileHelper {
     // file name generation, same as java.io.File for now
     private static final SecureRandom random = new SecureRandom();
     private static Path generatePath(String prefix, String suffix, Path dir) {
-        long n = random.nextLong();
+        long n = random.nextInt();// was nextLong();
         n = (n == Long.MIN_VALUE) ? 0 : Math.abs(n);
         Path name = dir.getFileSystem().getPath(prefix + Long.toString(n) + suffix);
         // the generated name should be a simple file name

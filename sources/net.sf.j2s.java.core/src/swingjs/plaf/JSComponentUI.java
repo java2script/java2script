@@ -844,6 +844,7 @@ public class JSComponentUI extends ComponentUI
 	protected void addFocusHandler() {
 		if (focusNode == null && (focusNode = domNode) == null)
 			return;
+		System.out.println("JSCUI.addingFocusHandler " + id);
 		keysEnabled = true;
 		DOMNode.setAttrs(focusNode, "applet", applet, "_frameViewer", jc.getFrameViewer());
 		setDataKeyComponent(focusNode);

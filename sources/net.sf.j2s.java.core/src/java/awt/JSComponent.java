@@ -477,6 +477,12 @@ public abstract class JSComponent extends Component {
 			((JSComponentUI)ui).enableJSKeys(false);
 	}
 	
+	protected void jsInputMapSet() {
+		if (ui != null)
+			((JSComponentUI)ui).enableJSKeys(true);		
+	}
+
+	
 	
  	/**
  	 * Invoker must be focusable and could cross from popupmenu to associated component
