@@ -203,10 +203,13 @@ public class JSUtil {
 	}
 
 	static void cacheFileData(String path, Object data) {
-		if (data == null)
+		if (data == null) {
+			System.out.println("JSUtil releasing cached bytes for " + path);
 			getFileCache().remove(path);
-		else
+		} else {
+			System.out.println("JSUtil caching bytes for " + path);
 			getFileCache().put(path, data);
+		}
 	}
 
 	/**
