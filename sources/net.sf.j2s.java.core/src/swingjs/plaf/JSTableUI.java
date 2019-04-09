@@ -63,7 +63,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-import javax.swing.ToolTipManager;
 import javax.swing.TransferHandler;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
@@ -121,17 +120,17 @@ public class JSTableUI extends JSPanelUI {
 	@Override
 	public void beginLayout() {
 		super.beginLayout();
-		System.out.println("begin table layout");
+//		System.out.println("begin table layout");
 	}
 
 	@Override
 	public void endLayout() {
 		super.endLayout();
-		System.out.println("end table layout");
+//		System.out.println("end table layout");
 		currentRowMin = currentRowMax = -1;
-		setHTMLElement();
+//		setHTMLElement();
 		justLaidOut = true;
-		isUIDisabled = getHeaderUI().isUIDisabled = false;
+		setUIDisabled(getHeaderUI().setUIDisabled(false));
 	}
 
 	@Override
@@ -164,12 +163,12 @@ public class JSTableUI extends JSPanelUI {
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
-		System.out.println("JSTableUI prop=" + prop);
+		//System.out.println("JSTableUI prop=" + prop);
 		switch (prop) {
 		case "model":
 			currentRowMin = currentRowMax = -1;
 			isLaidOut = false;
-			isUIDisabled = getHeaderUI().isUIDisabled = true;
+			setUIDisabled(getHeaderUI().setUIDisabled(true));
 			JScrollPane sp = getScrollPane();
 			if (sp != null) {
 				sp.getVerticalScrollBar().setValue(0);
@@ -249,8 +248,9 @@ public class JSTableUI extends JSPanelUI {
 		if (c != null) {
 			JSComponentUI ui = ((JSComponentUI) c.getUI());
 			boolean wasDisabled = ui.isUIDisabled;
-			ui.setRenderer(c, w, h);
+			ui.setRenderer(c, w, h, null);
 			ui.setTargetParent(table);
+			//System.out.println("JSTableUI getCellComponent " + row + "_" + col + " " + wasDisabled + " " + fullPaint + " " + cNoPrep);;
 			if (fullPaint && wasDisabled || cNoPrep != null) {
 				// repeat, now that the UI is enabled
 				if (wasDisabled)
@@ -277,6 +277,7 @@ public class JSTableUI extends JSPanelUI {
 	@Override
 	protected void addChildrenToDOM(Component[] children, int n) {
 		if (currentRowMin == -1) {
+			setHidden(true);
 			havePainted = false;
 			int nrows = table.getRowCount();
 			int ncols = table.getColumnCount();
@@ -295,6 +296,10 @@ public class JSTableUI extends JSPanelUI {
 				addElements(rminx, rminy, rmaxx, rmaxy, cw, h, 0, nrows, 0, ncols);
 			}			
 		}
+	}
+
+	private void setHidden(boolean b) {
+		DOMNode.setStyles(domNode, "visibility", b ? "hidden" : "visible");
 	}
 
 	private int[] cw = new int[10];
@@ -368,8 +373,13 @@ public class JSTableUI extends JSPanelUI {
 
 
 
-
-	private Boolean ttipEnabled;
+//
+//	private Boolean ttipEnabled;
+//
+//
+//
+//
+//	private MouseEvent me;
 	
 	public void prepareDOMEditor(boolean starting, int row, int col) {
 		if (editorComp != null) {
@@ -378,20 +388,23 @@ public class JSTableUI extends JSPanelUI {
 		}
 		editorComp = (JComponent) table.getEditorComponent();
 		if (starting) {
-			boolean haveToolTip = /** @j2sNative !!javax.swing.ToolTipManager || */false;
-			ttipEnabled = new Boolean(haveToolTip && ToolTipManager.sharedInstance().isEnabled());
-			ToolTipManager.sharedInstance().setEnabled(false);
+//		  
+//			boolean haveToolTip = /** @j2sNative !!javax.swing.ToolTipManager || */false;
+//			ttipEnabled = new Boolean(haveToolTip && ToolTipManager.sharedInstance().isEnabled());
+//			ToolTipManager.sharedInstance().setEnabled(false);
 			if (editorComp != null) {
 				editorComp.setVisible(false);
 				editorComp.setVisible(true);
+				notifyEntry(false);
 			}
 		} else {
 			DOMNode td = CellHolder.findCellNode(this, null, table.getEditingRow(), table.getEditingColumn());
 			updateCellNode(td, row, col, 0, 0);
 			repaintCell(row, col);
-			if (ttipEnabled == Boolean.TRUE)
-				ToolTipManager.sharedInstance().setEnabled(true);
-			ttipEnabled = null;
+			notifyEntry(true);
+//			if (ttipEnabled == Boolean.TRUE)
+//				ToolTipManager.sharedInstance().setEnabled(true);
+//			ttipEnabled = null;
 		}
 	}
 
@@ -418,6 +431,10 @@ public class JSTableUI extends JSPanelUI {
 	 * 95054 USA or visit www.sun.com if you need additional information or have any
 	 * questions.
 	 */
+
+	private void notifyEntry(boolean isEntry) {
+    table.dispatchEvent(new MouseEvent(table, (isEntry? MouseEvent.MOUSE_ENTERED :  MouseEvent.MOUSE_EXITED ), System.currentTimeMillis(), 0, -1, -1, 0, false));
+	}
 
 	private static final StringBuilder BASELINE_COMPONENT_KEY = new StringBuilder("Table.baselineComponent");
 
@@ -1208,6 +1225,9 @@ public class JSTableUI extends JSPanelUI {
 		private boolean repostEvent(MouseEvent e) {
 			// Check for isEditing() in case another event has
 			// caused the editor to be removed. See bug #4306499.
+			
+//			System.out.println("JSTableUI repost " + table.isEditing() + " " + dispatchComponent + "\n" + e);
+			
 			if (dispatchComponent == null || !table.isEditing()) {
 				return false;
 			}
@@ -1442,6 +1462,8 @@ public class JSTableUI extends JSPanelUI {
 			repostEvent(e);
 			dispatchComponent = null;
 			setValueIsAdjusting(false);
+			// SwingJS: for some reason this is important to keep the tooltips active
+      notifyEntry(true);
 		}
 
 		private void mouseReleasedDND(MouseEvent e) {
@@ -1542,7 +1564,10 @@ public class JSTableUI extends JSPanelUI {
 		public void propertyChange(PropertyChangeEvent event) {
 			String changeName = event.getPropertyName();
 			if ("tableCellEditor" == changeName) {
-				prepareDOMEditor(event.getNewValue() != null, pressedRow, pressedCol);
+			  
+//			  System.err.println("JSTABLEUI TABLECELLEDITOR " + event.getNewValue());
+
+			  prepareDOMEditor(event.getNewValue() != null, pressedRow, pressedCol);
 			} else if ("componentOrientation" == changeName) {
 				InputMap inputMap = getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
@@ -1658,13 +1683,13 @@ public class JSTableUI extends JSPanelUI {
 		return getHandler();
 	}
 
-	//
-	// The installation/uninstall procedures and support
-	//
-
-	public static JSComponentUI createUI(JComponent c) {
-		return new JSTableUI();
-	}
+//	//
+//	// The installation/uninstall procedures and support
+//	//
+//
+//	public static JSComponentUI createUI(JComponent c) {
+//		return new JSTableUI();
+//	}
 
 	// Installation
 
@@ -2120,6 +2145,7 @@ public class JSTableUI extends JSPanelUI {
 		working = false;
 		dragging = false;
 		repaintAll = false;
+		setHidden(false);
 	}
 
 	private void paintCells(Graphics g, int rMin0, int rMax0, int rMin, int rMax, int cMin, int cMax) {
@@ -2219,7 +2245,7 @@ public class JSTableUI extends JSPanelUI {
 				return;
 			JSComponentUI ui = (JSComponentUI) ((JComponent) comp).getUI();
 			rendererPane.paintComponent(g, comp, table, cellRect.x, cellRect.y, cellRect.width, cellRect.height, fullPaint && !isScrolling);
-			ui.setRenderer(null, 0, 0);
+			ui.setRenderer(null, 0, 0, td);
 		}
 	}
 	
@@ -2557,7 +2583,7 @@ public class JSTableUI extends JSPanelUI {
 //
 
 	public void rebuildTable() {
-		System.out.println("JSTable rebuild");
+		//System.out.println("JSTable rebuild");
 		setTainted();
 		currentRowMin = -1;
 		setHTMLElement();

@@ -816,7 +816,7 @@ public class JSTableHeaderUI extends JSLightweightUI {
 	private void paintCell(Graphics g, Rectangle cellRect, int columnIndex) {
 		// System.out.println("paintCell header" + columnIndex);
 		JComponent component = (JComponent) getHeaderComponent(columnIndex);
-		((JSComponentUI) component.getUI()).setRenderer(component, cellRect.width, cellRect.height);
+		((JSComponentUI) component.getUI()).setRenderer(component, cellRect.width, cellRect.height, null);
 		rendererPane.paintComponent(g, component, tableHeader, cellRect.x, cellRect.y, cellRect.width, cellRect.height,
 				true);
 	}

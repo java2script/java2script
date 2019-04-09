@@ -49,7 +49,9 @@ public abstract class CellHolder extends JSLightweightUI {
 			width = DOMNode.getWidth(td);
 			height = DOMNode.getHeight(td);
 		}
-		ui.setRenderer(c, width, height);
+		ui.tableID = (String) DOMNode.getAttr(td, "id");
+		//System.out.println("CellHolder.updateCell " + ui.tableID);
+		ui.setRenderer(c, width, height, null);
 		ui.outerNode = null;
 		ui.reInit();
 		ui.updateDOMNode();
@@ -61,7 +63,7 @@ public abstract class CellHolder extends JSLightweightUI {
 	}
 
 	public static void setJ2SRendererComponent(JComponent comp) {
-		((JSComponentUI) comp.getUI()).setRenderer(comp, 0, 0);
+		((JSComponentUI) comp.getUI()).setRenderer(comp, 0, 0, null);
 	}
 
 
