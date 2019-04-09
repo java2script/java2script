@@ -137,7 +137,13 @@ try{
 		 n||(n = me.active || me.activeMenu);
 		 if (n.is(".ui-state-disabled"))
 			 return;
+
 		 n = e.extend({of:n},me.options.position);
+
+		 var ui = me.activeMenu && me.activeMenu[0] && me.activeMenu[0]["data-ui"];
+	 	 ui && ui.processJ2SMenuCmd$OA([trigger,me,e,t,n,why]);
+
+
 		 clearMe(me.timer, trigger);
 		 me.refresh("_openSubmenu",n);
 		 var v = me.element.find(".ui-j2smenu").not(t.parents(".ui-j2smenu"));
@@ -149,7 +155,7 @@ try{
 		 } catch(err){
 			 System.out.println("j2sMenu error: " + err);
 		 }
-		 break;
+		 return;
 	 case "_activate":
 		 me.active.is(".ui-state-disabled")||(me.active.children(".a[aria-haspopup='true']").length?me.expand(t):me.select(t));
 		 break;
@@ -299,6 +305,7 @@ try{
 		 }
 		 break;
 	 }
+	 
 	 var ui = me.activeMenu && me.activeMenu[0] && me.activeMenu[0]["data-ui"];
  	 ui && ui.processJ2SMenuCmd$OA([trigger,me,e,t,n,why]);
  }
