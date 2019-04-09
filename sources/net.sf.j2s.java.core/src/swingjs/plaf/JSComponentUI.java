@@ -38,6 +38,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JRootPane;
 import javax.swing.JTable.BooleanRenderer;
+import javax.swing.border.CompoundBorder;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.ToolTipManager;
@@ -255,15 +256,28 @@ public class JSComponentUI extends ComponentUI
 				valueNode,
 		};	
 		DOMNode.setAttr(td, "data-nodes", nodes);
+		
+		//System.err.println("JSCUI td saved " + tableID);
+		
+		updateTableCell(td);
+	}
+
+	/**
+	 * We must make sure that the table cell actually holds this dom node
+	 * @param td
+	 */
+	private void updateTableCell(DOMNode td) {
 		DOMNode node = DOMNode.firstChild(td);
 		if (node != domNode) {
 			$(td).empty();
-			appendChild(td, domNode);
+			td.appendChild(domNode);
 		}
-		domNode = outerNode = null;
+		domNode = outerNode = null;		
 	}
 
+
 	protected void restoreCellNodes(DOMNode td) {
+		//System.out.println("JSCUI restore "+ id + " " + hashCode() + " " + DOMNode.getAttrInt(td,  "id") + " " + tableID);
 		DOMNode[] nodes = (DOMNode[]) DOMNode.getAttr(td, "data-nodes");
 		if (nodes == null)
 			return;
@@ -276,6 +290,8 @@ public class JSComponentUI extends ComponentUI
 		accelNode       = nodes[5];
 		buttonNode 		= nodes[6];
 		enableNode 		= nodes[7];
+		
+//		System.out.println("JCSUInode " + DOMNode.getAttr(domNode,  "outerHTML"));
 		
 		if (nodes[8] != null) {
 			enableNodes[0] = nodes[8];
@@ -670,10 +686,7 @@ public class JSComponentUI extends ComponentUI
 	 */
 	private void setComponent(JComponent comp) {
 		c = jc = comp;
-		isUIDisabled = (comp == null);
-		if (isUIDisabled)
-			domNode = outerNode = null;		
-
+		setUIDisabled(comp == null);
 	}
 
 	public JSComponentUI set(JComponent target) {
@@ -844,7 +857,7 @@ public class JSComponentUI extends ComponentUI
 	protected void addFocusHandler() {
 		if (focusNode == null && (focusNode = domNode) == null)
 			return;
-		System.out.println("JSCUI.addingFocusHandler " + id);
+		//System.out.println("JSCUI.adding FocusHandler " + id);
 		keysEnabled = true;
 		DOMNode.setAttrs(focusNode, "applet", applet, "_frameViewer", jc.getFrameViewer());
 		setDataKeyComponent(focusNode);
@@ -938,7 +951,7 @@ public class JSComponentUI extends ComponentUI
 		 *              if (!me.ignoreFocus)
 		 * 				me.handleJSFocus$O$O$Z(me.jc, e.relatedTarget, true);
 		 * 				me.ignoreFocus = false;
-		 * //System.out.println("JSSCUI focus " + me.id);
+		 *              //System.out.println("JSSCUI focus " + me.id);
 		 * 			});
 		 *            node.blur(function(e) {
 		 *            try{
@@ -1306,18 +1319,25 @@ public class JSComponentUI extends ComponentUI
 	 * table cell renderer component
 	 * 
 	 */
-	protected JSComponent cellComponent;
+	protected JComponent cellComponent;
 	
 	/**
 	 * table cell width and height
 	 */
 	private int cellWidth, cellHeight;
+	
+	String tableID;
 
 	/**
 	 * this ui has been disabled from receiving any events; see JTableUI
 	 */
 	protected boolean isUIDisabled;
-	
+
+	protected boolean setUIDisabled(boolean b) {
+		return isUIDisabled = b;
+	}
+
+
 
 	/**
 	 * Calculated by temporarily setting the node on the page and measuring its
@@ -1394,38 +1414,10 @@ public class JSComponentUI extends ComponentUI
 				
 	protected DOMNode updateDOMNodeCUI() {
 		if (cellComponent != null)
-			updateCell(cellWidth, cellHeight);		
+			updateCellNode();
 		return domNode;
 	}
 
-	private void updateCell(int width, int height) {
-		DOMNode.setStyles(domNode, "width", "100%", "height", "100%");
-		if (allowPaintedBackground)
-			DOMNode.setStyles(domNode, "background", "transparent");
-		if (cellComponent instanceof BooleanRenderer) {
-			DOMNode.setStyles(centeringNode, "width", "100%", "height", "100%");
-			DOMNode.setStyles(buttonNode, "width", "100%", "height", "100%");
-			DOMNode.setStyles(actionNode, "position", "absolute", "width", "14px", "height", "14px", "top",
-					(height / 2) + "px");
-			int textAlign = ((BooleanRenderer) cellComponent).getHorizontalAlignment();
-			switch (textAlign) {
-			case SwingConstants.RIGHT:
-			case SwingConstants.TRAILING:
-				DOMNode.setStyles(actionNode, "left", width + "px", "transform",
-						"scale(0.75,0.75) translate(-25px,-16px)");
-				break;
-			case SwingConstants.LEFT:
-			case SwingConstants.LEADING:
-				DOMNode.setStyles(actionNode, "left", "0px", "transform", "scale(0.75,0.75) translate(-5px,-16px)");
-				break;
-			case SwingConstants.CENTER:
-				DOMNode.setStyles(actionNode, "left", (width / 2) + "px", "transform",
-						"scale(0.75,0.75) translate(-15px,-16px)");
-				break;
-			}
-		}
-	}
-	
 	protected DOMNode setCssFont(DOMNode obj, Font font) {
 		if (font != null) {
 			int istyle = font.getStyle();
@@ -1441,19 +1433,17 @@ public class JSComponentUI extends ComponentUI
 		return obj;
 	}
 
-	protected DOMNode newDOMObject(String key, String id, String... attr) {
+	protected static DOMNode newDOMObject(String key, String id, String... attr) {
 		DOMNode obj = DOMNode.createElement(key, id);
 		for (int i = 0; i < attr.length;)
 			DOMNode.setAttr(obj, attr[i++], attr[i++]);
-		if (!c.isEnabled())
-			setEnabled(false);
 		return obj;
 	}
 
-	protected DOMNode wrap(String type, String id, DOMNode... elements) {
+	protected static DOMNode wrap(String type, String id, DOMNode... elements) {
 		DOMNode obj = newDOMObject(type, id + type);
 		for (int i = 0; i < elements.length; i++) {
-			appendChild(obj, elements[i]);
+			obj.appendChild(elements[i]);
 		}
 		return obj;
 	}
@@ -1611,7 +1601,7 @@ public class JSComponentUI extends ComponentUI
 			DOMNode.setStyles(domNode, "width", w0i, "height", h0i);
 		}
 		if (parentNode != null) {
-			appendChild(parentNode, node);
+			parentNode.appendChild(node);
 			if (hasFocus) {
 				ignoreFocus = true;
 				node.focus();
@@ -1767,7 +1757,7 @@ public class JSComponentUI extends ComponentUI
 				System.out.println("JSCUI addChildren no outer node for " + ui.id);
 			} else {
 				if (ui.domNode != ui.outerNode && DOMNode.getParent(ui.domNode) == null)				
-					appendChild(ui.outerNode, ui.domNode);
+					ui.outerNode.appendChild(ui.domNode);
 				if (ui.embeddingNode == null)
 					DOMNode.appendChildSafely(containerNode, ui.outerNode);
 			}
@@ -2143,7 +2133,7 @@ public class JSComponentUI extends ComponentUI
 				break;
 			//$FALL-THROUGH$
 		case SET_CLIENT_SIZE: // is supposed to be without insets
-		case SET_SIZE:
+		case SET_SIZE:			
 			if (scrollPaneUI != null) {
 				width = Math.min(width, scrollPaneUI.c.getWidth());
 				height = Math.min(height, scrollPaneUI.c.getHeight());
@@ -2266,7 +2256,7 @@ public class JSComponentUI extends ComponentUI
 			if (text.indexOf("<html>") == 0) {
 				isHTML = true;
 				// PhET uses <html> in labels and uses </br>
-				text = PT.rep(text.substring(6, text.length() - 7), "</br>", "");
+				text = PT.rep(text.substring(6), "</br>", "");
 				text = PT.rep(text, "</html>", "");
 				text = PT.rep(text, "href=", "target=_blank href=");
 			} else if (jc.getClientProperty("html") != null) {
@@ -2349,7 +2339,7 @@ public class JSComponentUI extends ComponentUI
 	
 	protected void setAlignment() {
 		if (allowTextAlignment && centeringNode != null)
-			setAlignments((AbstractButton)jc);
+			setAlignments((AbstractButton)jc, false);
 	}
 
 	protected void addCentering(DOMNode node) {
@@ -2372,10 +2362,6 @@ public class JSComponentUI extends ComponentUI
 //					actualWidth + "px");
 	}
 
-	protected void setAlignments(AbstractButton b) {
-		setAlignments(b, false);
-	}
-	
 	protected void setAlignments(AbstractButton b, boolean justGetPreferred) {
 		int hTextPos = b.getHorizontalTextPosition();
 		int hAlign = b.getHorizontalAlignment();
@@ -2385,19 +2371,23 @@ public class JSComponentUI extends ComponentUI
 		getJSInsets();
 		Dimension dimIcon = getIconSize(b);
 		Dimension dimText = getTextSize(b);
-		int wIcon = (actionNode != null ? (isMenuItem ? 15 : 20)
-				: dimIcon == null ? 0 : Math.max(0, dimIcon.width));
+		int wIcon = (actionNode != null ? (isMenuItem ? 15 : 20) : dimIcon == null ? 0 : Math.max(0, dimIcon.width));
 		int wText = (dimText == null ? 0 : dimText.width);
 		int gap = (wText == 0 || wIcon == 0 ? 0 : b.getIconTextGap());
-		int w = cellComponent != null ? cellWidth : $(domNode).width();
-		if (w < wIcon + wText) {
-			// jQuery method can fail that may not have worked.
-			w = wIcon + wText;
+		int w0 = cellComponent != null ? cellWidth : $(domNode).width();
+	    int w = w0;
+	    if (w < wIcon + wText) {
+				// jQuery method can fail that may not have worked.
+				w = wIcon + wText;
 		}
 		boolean alignVCenter = (vAlign == SwingConstants.CENTER);
-		Insets margins = (isLabel ? (isAWT ? b.getInsets() : insets) : b.getMargin());
+		Insets margins = (isLabel ? (isAWT ? b.getInsets() : insets) : 
+			getButtonMargins(b, justGetPreferred));
 		if (margins == null)
 			margins = zeroInsets;
+		Insets insets = (isLabel || !isSimpleButton || justGetPreferred ? zeroInsets :
+			getButtonOuterInsets(b));
+		//System.out.println("JSCUI margins " + justGetPreferred + " " + b.getText() + " " + margins + " " + insets);
 		int h = (dimText == null ? 0 : dimText.height);
 		int ih = (dimIcon == null ? 0 : dimIcon.height);
 		int hCtr = Math.max(h, ih);
@@ -2448,6 +2438,7 @@ public class JSComponentUI extends ComponentUI
 					|| hAlign == (ltr ? SwingConstants.LEADING : SwingConstants.TRAILING));
 			alignRight = w != 0 && (hAlign == SwingConstants.RIGHT
 					|| hAlign == (ltr ? SwingConstants.TRAILING : SwingConstants.LEADING));
+
 			alignHCenter = (!alignLeft && !alignRight);
 			textRight = (hTextPos == SwingConstants.RIGHT
 					|| hTextPos == (ltr ? SwingConstants.TRAILING : SwingConstants.LEADING));
@@ -2457,31 +2448,30 @@ public class JSComponentUI extends ComponentUI
 			alignRight = !ltr;
 			alignHCenter = false;
 			textRight = ltr;
-			accel = (b instanceof JMenuItem ? getAccelStr((JMenuItem) b): null);
+			accel = (b instanceof JMenuItem ? getAccelStr((JMenuItem) b) : null);
 			DOMNode accelNode = menuAnchorNode;
-			accelNode = /** @j2sNative accelNode.children[1] || */null;
+			accelNode = /** @j2sNative accelNode.children[1] || */
+					null;
 			if ((accelNode == null) != (accel == null)) {
 				if (accel == null) {
 					DOMNode.remove(accelNode);
-				} else { 
+				} else {
 					menuAnchorNode.appendChild(accelNode = DOMNode.createElement("span", id + "_acc"));
 					addClass(accelNode, "ui-j2smenu-accel");
 					DOMNode.setAttr(accelNode, "role", "menuitem");
-					DOMNode.setStyles(accelNode,  "font-size", "10px");
+					DOMNode.setStyles(accelNode, "font-size", "10px");
 					setMenuItem(accelNode);
 				}
 			}
 			if (accel != null) {
 				DOMNode.setStyles(accelNode, "float", null);
 				DOMNode.setAttr(accelNode, "innerHTML", accel);// = accel + "\u00A0\u00A0");
-				wAccel = getHTMLSize(accelNode).width; 
-				DOMNode.setStyles(accelNode, 
-						"float", ltr ? "right" : "left", 
-						"text-align", ltr ? "right" : "left",
-						"margin", "0px 5px",
-						"transform", "translateY(15%)");
+				wAccel = getHTMLSize(accelNode).width;
+				DOMNode.setStyles(accelNode, "float", ltr ? "right" : "left", "text-align", ltr ? "right" : "left",
+						"margin", "0px 5px", "transform", "translateY(15%)");
 			}
-			DOMNode.setStyles(menuAnchorNode, "width", "90%", "min-width", Math.max(75,(wCtr + wAccel + margins.left + margins.right)*1.1) + "px");			
+			DOMNode.setStyles(menuAnchorNode, "width", "90%", "min-width",
+					Math.max(75, (wCtr + wAccel + margins.left + margins.right) * 1.1) + "px");
 		}
 
 		if (alignHCenter) {
@@ -2492,9 +2482,11 @@ public class JSComponentUI extends ComponentUI
 				/* fall through */
 			case SwingConstants.CENTER:
 				wCtr = Math.max(wIcon, wText);
+				if (w0 > 0 && w0 < w)
+					w = w0;
 				break;
 			}
-		}
+		} 
 		if (justGetPreferred) {
 			if (preferredDim == null)
 				preferredDim = new Dimension();
@@ -2505,130 +2497,201 @@ public class JSComponentUI extends ComponentUI
 		preferredDim = null;
 		DOMNode.setStyles(centeringNode, "position", "absolute", "top", null, "left", null, "transform", null);
 		DOMNode.setStyles(centeringNode, "width", wCtr + "px", "height", hCtr + "px");
+
 		if (alignHCenter && alignVCenter && wIcon == 0
-				|| wText == 0 && margins.left == margins.right && margins.top == margins.bottom) {
+				|| wText == 0 && margins.left == margins.right && margins.top == margins.bottom
+				&& insets.left == insets.right && insets.top == insets.bottom) {
+
 			// simple totally centered label or button
 			// can't have width or height here --- let the browser figure that out
-			DOMNode.setStyles(centeringNode, "width",null,"top", "50%", "left", "50%", "transform",
+			DOMNode.setStyles(centeringNode, "width", null, "top", "50%", "left", "50%", "transform",
 					"translateX(-50%)translateY(-50%)", "position", "absolute");
-			DOMNode.setStyles(iconNode, "top", "50%", "left", "50%", "transform",
-					"translateX(-50%)translateY(-50%)", "position", "absolute");
-			DOMNode.setStyles(textNode, "top", "50%", "left", "50%", "transform",
-					"translateX(-50%)translateY(-50%)", "position", "absolute");
-			return;
-		}
+			DOMNode.setStyles(iconNode, "top", "50%", "left", "50%", "transform", "translateX(-50%)translateY(-50%)",
+					"position", "absolute");
+			DOMNode.setStyles(textNode, "top", "50%", "left", "50%", "transform", "translateX(-50%)translateY(-50%)",
+					"position", "absolute");
+		} else {
 
-		DOMNode.setStyles(iconNode, "position", "absolute", "top", null, "left", null, "transform", null);
-		DOMNode.setStyles(textNode, "position", "absolute", "top", null, "left", null, "transform", null);
+			DOMNode.setStyles(iconNode, "position", "absolute", "top", null, "left", null, "transform", null);
+			DOMNode.setStyles(textNode, "position", "absolute", "top", null, "left", null, "transform", null);
 
-		
-		int left = -1;
+			int left = -1;
 
-		if (menuAnchorNode == null) {
-			if (alignHCenter) {
-				switch (hTextPos) {
+			if (menuAnchorNode == null) {
+				if (alignHCenter) {
+					switch (hTextPos) {
+					case SwingConstants.TOP:
+					case SwingConstants.BOTTOM:
+					case SwingConstants.CENTER:
+						DOMNode.setStyles(textNode, "left", ((wCtr - wText) / 2) + "px");
+						DOMNode.setStyles(iconNode, "left", ((wCtr - wIcon) / 2) + "px");
+						break;
+					default:
+						int off = wCtr / 2;
+						if (textRight) {
+							DOMNode.setStyles(iconNode, "left", "0px");
+							DOMNode.setStyles(textNode, "left", (gap + wIcon) + "px");
+						} else {
+							DOMNode.setStyles(textNode, "left", off + "px");
+							DOMNode.setStyles(iconNode, "left", (gap + wText) + "px");
+						}
+						break;
+					}
+					left = (w - wCtr + margins.left - margins.right - insets.left - insets.right) / 2;
+				} else if (alignRight) {
+					left = w - wCtr - margins.right - insets.right - (cellComponent == null ? 0 : 2);// table fudge
+					if (textRight) {
+						DOMNode.setStyles(textNode, "left", (wCtr - wText) + "px");
+						DOMNode.setStyles(iconNode, "left", "0px");
+					} else {
+						DOMNode.setStyles(textNode, "left", "0px");
+						DOMNode.setStyles(iconNode, "left", (wCtr - wIcon) + "px");
+					}
+				} else {
+					left = margins.left + insets.left - (cellComponent == null ? 0 : 1);
+					if (textRight) {
+						int off = (!isMenuItem || ltr || actionNode != null ? 0 : actionItemOffset);
+						DOMNode.setStyles(iconNode, "left", off + "px");
+						DOMNode.setStyles(textNode, "left", (wIcon + gap) + "px");
+					} else {
+						DOMNode.setStyles(textNode, "left", (!isMenuItem ? 0 : ltr ? actionItemOffset : -3) + "px");
+						DOMNode.setStyles(iconNode, "left", (wText + gap) + "px");
+					}
+				}
+				DOMNode.setStyles(centeringNode, "left", left + "px");
+			} else {
+				if (alignRight) {
+					DOMNode.setStyles(itemNode, "text-align", "right");
+					DOMNode.setStyles(centeringNode, "right", "0px");
+					DOMNode.setStyles(textNode, "right", "23px");
+					DOMNode.setStyles(iconNode, "right", "0px"); // was 3
+				} else {
+					DOMNode.setStyles(itemNode, "text-align", "left");
+					DOMNode.setStyles(centeringNode, "left", "0px");
+					DOMNode.setStyles(iconNode, "left", "0px"); // was 3
+					DOMNode.setStyles(textNode, "left", "23px");
+				}
+			}
+
+			h = c.getHeight();
+
+			if (h == 0) {
+				h = 16;
+			}
+
+			if (menuAnchorNode == null) {
+				int top;
+				switch (vAlign) {
 				case SwingConstants.TOP:
+					top = margins.top + insets.top;
+					break;
 				case SwingConstants.BOTTOM:
-				case SwingConstants.CENTER:
-					DOMNode.setStyles(textNode, "left", ((wCtr - wText) / 2) + "px");
-					DOMNode.setStyles(iconNode, "left", ((wCtr - wIcon) / 2) + "px");
+					top = h - margins.bottom - insets.bottom - hCtr;
 					break;
 				default:
-					int off = wCtr / 2;
-					if (textRight) {
-						DOMNode.setStyles(iconNode, "left", "0px");
-						DOMNode.setStyles(textNode, "left", (gap + wIcon) + "px");
-					} else {
-						DOMNode.setStyles(textNode, "left", off + "px");
-						DOMNode.setStyles(iconNode, "left", (gap + wText) + "px");
-					}
+				case SwingConstants.CENTER:
+					top = (h - hCtr + margins.top - margins.bottom - insets.top - insets.bottom) / 2;
 					break;
 				}
-				left = (w - wCtr + margins.left - margins.right) / 2;
-			} else if (alignRight) {
-				left = w - wCtr - margins.right;
-				if (textRight) {
-					DOMNode.setStyles(textNode, "left", (wCtr - wText) + "px");
-					DOMNode.setStyles(iconNode, "left", "0px");
-				} else {
-					DOMNode.setStyles(textNode, "left", "0px");
-					DOMNode.setStyles(iconNode, "left", (wCtr - wIcon) + "px");
+
+				DOMNode.setStyles(centeringNode, "top", top + "px");
+				int itop;
+				String yoff = null;
+				String iscale = null;
+				switch (vTextPos) {
+				case SwingConstants.TOP:
+					top = itop = 0;
+					break;
+				case SwingConstants.BOTTOM:
+					top = itop = 100;
+					break;
+				default:
+				case SwingConstants.CENTER:
+					top = itop = 50;
+					if (iconNode == actionNode) {
+						itop = 70;
+						iscale = "scale(0.8,0.8)";
+					}
+					yoff = "-50%";
+					break;
 				}
+				DOMNode.setStyles(centeringNode, "overflow","none");
+				DOMNode.setStyles(textNode, "top", top + "%", "transform",
+						"translateY(" + (yoff == null ? "-" + top + "%" : yoff + ")"));
+				DOMNode.setStyles(iconNode, "top", top + "%", "transform",
+						"translateY(-" + itop + "%)" + (iscale == null ? "" : iscale));
 			} else {
-				left = margins.left;
-				if (textRight) {
-					int off = (!isMenuItem || ltr || actionNode != null ? 0 : actionItemOffset);
-					DOMNode.setStyles(iconNode, "left", off + "px");
-					DOMNode.setStyles(textNode, "left", (wIcon + gap) + "px");
-				} else {
-					DOMNode.setStyles(textNode, "left", (!isMenuItem ? 0 : ltr ? actionItemOffset : -3) + "px");
-					DOMNode.setStyles(iconNode, "left", (wText + gap) + "px");
-				}
+				DOMNode.setStyles(menuAnchorNode, "height", h + "px");
+				DOMNode.setStyles(textNode, "top", "50%", "transform", "translateY(-50%)");
+				DOMNode.setStyles(iconNode, "top", "50%", "transform", "translateY(-65%) scale(0.6,0.6)");
 			}
-			DOMNode.setStyles(centeringNode, "left", left + "px");
-		} else {
-			if (alignRight) {
-				DOMNode.setStyles(itemNode, "text-align", "right");
-				DOMNode.setStyles(centeringNode,  "right", "0px");
-				DOMNode.setStyles(textNode, "right", "23px");
-				DOMNode.setStyles(iconNode, "right", "0px"); // was 3
-			} else {
-				DOMNode.setStyles(itemNode, "text-align", "left");
-				DOMNode.setStyles(centeringNode,  "left", "0px");
-				DOMNode.setStyles(iconNode, "left", "0px"); // was 3
-				DOMNode.setStyles(textNode, "left", "23px");
-			}
-		}
 
-		int top = margins.top;
-
-		h = c.getHeight();
-		if (h == 0) {
-			h = 16;
 		}
-
-		if (menuAnchorNode == null) {
-			switch (vAlign) {
-			case SwingConstants.TOP:
-				break;
-			case SwingConstants.BOTTOM:
-				top = h - margins.bottom - hCtr;
-				break;
-			default:
-			case SwingConstants.CENTER:
-				top = (h - hCtr + margins.top - margins.bottom) / 2;
-				break;
-			}
-			DOMNode.setStyles(centeringNode, "top", top + "px");
-			int itop;
-			String yoff = null;
-			String iscale = null;
-			switch (vTextPos) {
-			case SwingConstants.TOP:
-				top = itop = 0;
-				break;
-			case SwingConstants.BOTTOM:
-				top = itop = 100;
-				break;
-			default:
-			case SwingConstants.CENTER:
-				top = itop = 50;
-				if (iconNode == actionNode) {
-					itop = 70;
-					iscale = "scale(0.8,0.8)";
-				}
-				yoff = "-50%";
-				break;
-			}
-			DOMNode.setStyles(textNode, "top", top + "%", "transform", "translateY(" + (yoff == null ? "-" + top + "%" : yoff + ")"));
-			DOMNode.setStyles(iconNode, "top", top + "%", "transform",
-					"translateY(-" + itop + "%)" + (iscale == null ? "" : iscale));
-		} else {			
-			DOMNode.setStyles(menuAnchorNode, "height", h + "px");
-			DOMNode.setStyles(textNode, "top", "50%", "transform", "translateY(-50%)");
-			DOMNode.setStyles(iconNode, "top", "50%", "transform", "translateY(-65%) scale(0.6,0.6)");
-		}
+		if (cellComponent != null)
+			updateCellNode();
 	}
+
+	private void updateCellNode() {
+		// could be editor or cell
+		if (cellWidth == 0 || cellHeight == 0) {
+			// this does not work
+			//DOMNode.setVisible(domNode,  false);
+			return;
+		}
+//		DOMNode.setStyles(domNode, "width", "100%", "height", "100%");
+		if (allowPaintedBackground)
+			DOMNode.setStyles(domNode, "background", "transparent");
+		if (cellComponent instanceof BooleanRenderer || cellComponent.getClientProperty("_jsBooleanEditor") != null) {
+			//System.out.println("boolean");
+			//System.out.println("JSCUI updateCell " + (jc == null ? null : jc.isVisible()) + " " + tableID + " " + cellComponent);
+			DOMNode.setStyles(centeringNode, "width", "100%", "height", "100%");
+			DOMNode.setStyles(buttonNode, "width", "100%", "height", "100%");
+			DOMNode.setStyles(actionNode, "position", "absolute", "width", "14px", "height", "14px", "top",
+					(cellHeight / 2) + "px");
+			int textAlign = ((BooleanRenderer) cellComponent).getHorizontalAlignment();
+			int width = cellWidth;
+			switch (textAlign) {
+			case SwingConstants.RIGHT:
+			case SwingConstants.TRAILING:
+				DOMNode.setStyles(actionNode, "left", width + "px", "transform",
+						"scale(0.75,0.75) translate(-25px,-20px)");
+				break;
+			case SwingConstants.LEFT:
+			case SwingConstants.LEADING:
+				DOMNode.setStyles(actionNode, "left", "0px", "transform", "scale(0.75,0.75) translate(-5px,-20px)");
+				break;
+			case SwingConstants.CENTER:
+				DOMNode.setStyles(actionNode, "left", (width / 2) + "px", "transform",
+						"scale(0.75,0.75) translate(-15px,-20px)");
+				break;
+			}
+			//System.out.println(DOMNode.getAttr(actionNode, "outerHTML"));
+		}
+
+	}
+
+
+	private Insets getButtonMargins(AbstractButton b, boolean includeOuter) {
+		return (includeOuter ? b.getInsets() // will include margins
+				: b.getBorder() instanceof CompoundBorder
+						? ((CompoundBorder) b.getBorder()).getInsideBorder().getBorderInsets(b)
+						: null);
+	}
+
+
+	/**
+	 * Compound borders
+	 * 
+	 * @param b
+	 * @return
+	 */
+	protected Insets getButtonOuterInsets(AbstractButton b) {
+			if (b.getBorder() instanceof CompoundBorder) {
+				return ((CompoundBorder) b.getBorder()).getOutsideBorder().getBorderInsets(b);
+			}
+			return b.getInsets();
+	}
+
 
 	Font getFont() {
 		// for AWT components before they are connected
@@ -2722,18 +2785,14 @@ public class JSComponentUI extends ComponentUI
 		if (node != null && parent != null) {
 			JSComponentUI ui = (JSComponentUI) c.getParent().getUI();
 			if (ui.containerNode != null)
-				appendChild(ui.containerNode, node);
+				ui.containerNode.appendChild(node);
 		}
 		// menu separators have domNode == outerNode
 		// cell renderers will set their domNode to null;
 		if (outerNode != null && domNode != null && domNode != outerNode) {
-			appendChild(outerNode, domNode);
+			outerNode.appendChild(domNode);
 		}
 		isDisposed = false;
-	}
-
-	private void appendChild(DOMNode containerNode, DOMNode node) {
-		containerNode.appendChild(node);
 	}
 
 	public void setForegroundCUI(Color c) {
@@ -3146,15 +3205,17 @@ public class JSComponentUI extends ComponentUI
 		}
 	}
 
-	public void setRenderer(JSComponent rendererComponent, int width, int height) {
+	public void setRenderer(JSComponent rendererComponent, int width, int height, DOMNode td) {
 		// We must disable the UI after painting so that when 
 		// the next cell is chosen we do not act on the previous cell
 		// in table.prepareRenderer(...) prior to assigning the desired table cell.
 		//System.out.println(this.id + " " + rendererComponent + " " + width + " " + height);
 		setComponent((JComponent) rendererComponent);
-		if (isUIDisabled)
+		if (isUIDisabled) {
+			updateTableCell(td);
 			return;
-		cellComponent = rendererComponent;		
+		}
+		cellComponent = (JComponent) rendererComponent;		
 		backgroundPainted = false;
 		if (width == 0)
 			return;

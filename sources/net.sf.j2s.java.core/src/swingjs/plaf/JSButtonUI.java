@@ -31,6 +31,7 @@ package swingjs.plaf;
 //import java.awt.FontMetrics;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Insets;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
@@ -42,6 +43,7 @@ import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
+import javax.swing.border.CompoundBorder;
 import javax.swing.plaf.UIResource;
 
 import swingjs.api.js.DOMNode;
@@ -183,7 +185,7 @@ public class JSButtonUI extends JSLightweightUI {
 			DOMNode.setStyles(buttonNode, "border", null);
 		if (!isMenuSep) {
 			setMnemonic(-1);
-			setAlignments(button);
+			setAlignments(button, false);
 		}
 	}
 
@@ -755,8 +757,15 @@ public class JSButtonUI extends JSLightweightUI {
 
 	@Override
 	protected void setInnerComponentBounds(int width, int height) {
-		if (isSimpleButton && (imageNode == null || button.getText() == null))
-			DOMNode.setSize(domNode, width, height);
+		if (isSimpleButton) {// && (imageNode == null || button.getText() == null)) {
+			Insets i = getButtonOuterInsets(button);
+			if (!(button.getBorder() instanceof UIResource)) {
+				DOMNode.setTopLeftAbsolute(domNode, i.left, i.top);
+				DOMNode.setSize(domNode, width-i.left - i.right, height-i.top - i.bottom);
+				DOMNode.setStyles(domNode, "border", 
+					i.left + i.right + i.top + i.bottom > 0 ? "none" : null);
+			}
+		}
 	}
 
 	@Override

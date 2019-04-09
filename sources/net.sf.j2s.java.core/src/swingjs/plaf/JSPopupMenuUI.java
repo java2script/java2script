@@ -48,6 +48,7 @@ import javax.swing.LookAndFeel;
 import javax.swing.MenuElement;
 import javax.swing.MenuSelectionManager;
 import javax.swing.UIManager;
+import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuKeyEvent;
 import javax.swing.event.MenuKeyListener;
 
@@ -1139,7 +1140,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 	 * 
 	 * @param data
 	 */
-	@SuppressWarnings("unused")
+	@SuppressWarnings({ "unused", "null" })
 	public static void processJ2SMenuCmd(Object[] data) {
 		String trigger = (String) data[0];
 		JSSwingMenu j2smenu = (JSSwingMenu) data[1];
@@ -1147,45 +1148,63 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 		Object t = data[3];
 		Object n = data[4];
 		JQueryObject m = j2smenu.activeMenu;
-		String mid = (/**@j2sNative m && m[0] && m[0].id || */null);
+		String mid = (/** @j2sNative m && m[0] && m[0].id || */
+		null);
 		System.out.println("JSPopupMenuUI processing " + (np++) + " " + trigger + " for " + mid);
+		JMenu menu = null;
+		JSComponentUI ui;
+
 		switch (trigger) {
-		 case "_activate":
-		 case "_closeSubmenus":
-		 case "_hide":
-		 case "_move":
-		 case "_openSubmenu":
-		 case "_show":
-		 case "_startOpening":
-		 case "blur":
-		 case "clearOut":
-		 case "collapse":
-		 case "expand":
-		 case "keyActivate":
-		 case "noclickout":
-		 case "onblur":
-		 case "onclick":
-		 case "onclick_out":
-		 case "onfocus":
-		 case "onleave":
-		 case "onover":
-		 case "onover1":
-		 case "onover2":
-		 case "onover3":
-		 case "onpress":
-		 case "onrelease":
-		 case "refresh":
-		 case "select":
-			 break;		 
-		 case "focus":
-			 isMenuOpen = true;
-			 break;
-		 case "collapseAll":
-			 closeAllMenus();
-			 isMenuOpen = false;
-			 j2smenu.options.jPopupMenu.visible = false;
-			 ((JComponent) j2smenu.options.jPopupMenu.getInvoker()).getRootPane().requestFocus();				 
-			 break;
+		case "_openSubmenu":
+			/**
+			 * @j2sNative ui = t[0].parentElement["data-ui"]; 
+			 * menu = ui && ui.jc;
+			 */
+			if (menu != null)
+				menu.setSelected(true);
+			break;
+		case "_closeSubmenus":
+			/**
+			 * @j2sNative ui = t[0].parentElement["data-ui"]; 
+			 * menu = ui && ui.jc;
+			 */
+			if (menu != null)
+				menu.setSelected(false);
+			break;
+		case "_activate":
+		case "_hide":
+		case "_move":
+		case "_show":
+		case "_startOpening":
+		case "blur":
+		case "clearOut":
+		case "collapse":
+		case "expand":
+		case "keyActivate":
+		case "noclickout":
+		case "onblur":
+		case "onclick":
+		case "onclick_out":
+		case "onfocus":
+		case "onleave":
+		case "onover":
+		case "onover1":
+		case "onover2":
+		case "onover3":
+		case "onpress":
+		case "onrelease":
+		case "refresh":
+		case "select":
+			break;
+		case "focus":
+			isMenuOpen = true;
+			break;
+		case "collapseAll":
+			closeAllMenus();
+			isMenuOpen = false;
+			j2smenu.options.jPopupMenu.visible = false;
+			((JComponent) j2smenu.options.jPopupMenu.getInvoker()).getRootPane().requestFocus();
+			break;
 		}
 	}
 

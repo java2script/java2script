@@ -34,8 +34,6 @@ public class JSLabelUI extends JSLightweightUI {
 		if (domNode == null) {
 			enableNode = domNode = newDOMObject("label", id);
 			textNode = iconNode = null;
-			// labels are different from buttons, because we allow them to have
-			// different centerings - left, top, middle, bottom, etc.
 			addCentering(domNode);
 		}
 		getIconAndText(); // could be ToolTip
@@ -45,7 +43,7 @@ public class JSLabelUI extends JSLightweightUI {
 		updateCenteringNode();
 		if (allowTextAlignment) {
 			// not for JToolTip
-			setAlignments((AbstractButton) (JComponent) label);
+			setAlignments((AbstractButton) (JComponent) label, false);
 		}
 		if (jc.isEnabled())
 			setBackgroundCUI(jc.isOpaque() ? getBackground() : null);
