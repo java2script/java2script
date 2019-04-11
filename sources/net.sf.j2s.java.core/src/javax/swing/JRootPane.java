@@ -369,6 +369,7 @@ public class JRootPane extends JComponent {
 		setContentPane(createContentPane());
 		setLayout(createRootLayout());
 		// setDoubleBuffered(true);
+		setFocusable(false);
 		updateUI();
 	}
 	

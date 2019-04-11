@@ -520,5 +520,10 @@ public abstract class JSComponent extends Component {
 		return p;
 	}
 
+    final public boolean _isFocusSetAndEnabled() {
+        return _isFocusableSet && isFocusable();
+    }
+
+
 
 }

@@ -7,6 +7,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.Label;
 import java.awt.MediaTracker;
 import java.awt.event.ActionEvent;
@@ -40,6 +41,7 @@ import javax.swing.MenuElement;
 import javax.swing.MenuSelectionManager;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.MenuEvent;
@@ -68,8 +70,9 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		}
 		
 	};
-	JMenu mRight = new JMenu("right") 		{
+	JMenu mRight = new JMenu("right") {
 		@Override
+		// TODO NOT WORKING IN JAVASCRIPT
 		public void processKeyEvent(KeyEvent e, MenuElement[] path, MenuSelectionManager m) {
 			System.out.println("RIGHT JMenu path length=" + path.length + " key=" + e.getKeyCode()); 	
 			for (int i = 0; i < path.length; i++)
@@ -124,6 +127,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 	};
 	private Label status;
 	private JMenu menu, menu1, menu2;
+	private JCheckBoxMenuItem cb4m;
 	/**
 	 * Put some content in a JFrame and show it
 	 */
@@ -280,14 +284,29 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		l2.setFont(font);
 		l2.setHorizontalTextPosition(SwingConstants.LEADING);
 		l2.setHorizontalAlignment(SwingConstants.LEFT);
-
+		l2.setBorder(new LineBorder(Color.red, 7));
+		
 		JButton b1 = new JButton("right left");
 		b1.setIcon(getImage("test2.png"));
 		b1.setFont(font);
-		b1.setBorder(new LineBorder(Color.red, 5));
+		// totally ignored
+		//b1.setMargin(new Insets(5,35,5,5));
+		//b1.setBorder(null);
 		b1.setHorizontalTextPosition(SwingConstants.RIGHT);
 		b1.setHorizontalAlignment(SwingConstants.LEFT);
+		Insets i = (b1.getBorder() instanceof CompoundBorder ? 
+				((CompoundBorder) b1.getBorder()).getOutsideBorder().getBorderInsets(b1) :   
+				b1.getInsets());
 
+		Insets ii = (b1.getBorder() instanceof CompoundBorder ? 
+				((CompoundBorder) b1.getBorder()).getInsideBorder().getBorderInsets(b1) :   
+				null);
+
+		System.out.println(b1.getBorder() + "\n" + 
+		
+				i + "\n" + ii + "\n" + b1.getInsets() + "\n" + b1.getMargin());
+		
+		System.out.println(b1.getPreferredSize());
 		JCheckBox cb3 = new JCheckBox("leading,left-to-right,rt");
 		cb3.setFont(font);
 		cb3.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
@@ -337,7 +356,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		cb3m.setHorizontalTextPosition(SwingConstants.LEADING);
 		cb3m.addActionListener(listener);
 
-		JCheckBoxMenuItem cb4m = new JCheckBoxMenuItem("CB4XXleading,right-to-leftXX") {
+		cb4m = new JCheckBoxMenuItem("CB4XXleading,right-to-leftXX") {
 			@Override
 			public void doClick() {
 				super.doClick();
@@ -360,6 +379,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 				super.processKeyEvent(e, path, m);
 			}
 		};
+		
 		cb5m.setFont(font);
 		cb5m.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 		cb5m.setHorizontalTextPosition(SwingConstants.TRAILING);
@@ -426,6 +446,36 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 			}
 		}
 		;
+		m1.addMenuListener(new MenuListener() {
+
+			private boolean haveCb4m;
+			private JMenuItem cb4m2;
+
+			@Override
+			public void menuSelected(MenuEvent e) {
+				JMenu m = (JMenu) e.getSource();
+				if (haveCb4m) {
+					m.remove(cb4m);
+				} else {
+					m.add(cb4m);
+					m.add(cb4m);
+					cb4m2 = new JMenuItem("testing");
+					m.add(cb4m2);
+				}
+				haveCb4m = !haveCb4m;
+				
+			}
+
+			@Override
+			public void menuDeselected(MenuEvent e) {
+			}
+
+			@Override
+			public void menuCanceled(MenuEvent e) {
+			}
+		  	
+		});
+		
 		m1.setMnemonic('l');
 		m1.setFont(font);
 		m1.addMenuListener(this);
@@ -455,9 +505,10 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		menu.add(mRight);
 		mRight.setMnemonic('r');
 		mRight.setFont(font);
-		mRight.addMenuListener(this);
 		mRight.add(cb6m);
 		mRight.add(rb1m);
+//		mRight.addMenuListener(this);
+
 		btn = new JMenuItem("-");
 		btn.setFont(font);
 		mRight.add(btn);
@@ -469,13 +520,16 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		JMenu mRight2 = new JMenu("right2");
 
 		mRight.add(mRight2);
+		mRight.addMenuListener(this);
 		mRight2.add(mb3);
 		mRight2.add(mb4);
+		mRight2.addMenuListener(this);
 
 
 		JPanel theTab = new JPanel();
 
-		firstColumn.add(new JButton("<html>remove <i>testbtn</i></html>") {
+
+		JButton bh = new JButton("<html>remove <i>testbtn</i></html>") {
 			{
 				this.addActionListener(new ActionListener() {
 
@@ -487,7 +541,9 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 
 				});
 			}
-		});
+		};
+		bh.setBorder(new LineBorder(Color.red, 14));
+		firstColumn.add(bh);
 		firstColumn.add(new JButton("add 'testbtn'") {
 			{
 				this.addActionListener(new ActionListener() {
@@ -546,22 +602,22 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 
 	@Override
 	public void menuSelected(MenuEvent e) {
-		System.out.println("menuSelected " + e.getSource().toString());
-		JMenu menu = (JMenu) e.getSource();
-		System.out.println("adding mb5");
-		menu.add(mb5);
-		System.out.println("mb5 added");
+		System.err.println("JalviewJSTest menuSelected " + ((JMenu) e.getSource()).getText());
+//		JMenu menu = (JMenu) e.getSource();
+//		System.out.println("adding mb5");
+//		menu.add(mb5);
+//		System.out.println("mb5 added");
 	}
 
 	@Override
 	public void menuDeselected(MenuEvent e) {
-		System.out.println("menuDeselected " + e.getSource().toString());
+		System.err.println("JalviewJSTest menuDeselected " + ((JMenu) e.getSource()).getText());
 
 	}
 
 	@Override
 	public void menuCanceled(MenuEvent e) {
-		System.out.println("menuCanceled " + e.getSource().toString());
+		System.err.println("menuCanceled " + e.getSource().toString());
 
 	}
 

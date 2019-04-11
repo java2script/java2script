@@ -480,6 +480,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 	 * The drop mode for this component.
 	 */
 	private DropMode dropMode = DropMode.USE_SELECTION;
+	private boolean _addingEditor;
 
 	// /**
 	// * The drop location.
@@ -1423,7 +1424,6 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 			Object renderer = defaultRenderersByColumnClass.get(columnClass);
 			if (renderer != null)
 				return (TableCellRenderer) renderer;
-			// return getDefaultRenderer(columnClass.getSuperclass());
 			return getDefaultRenderer(Class.getJ2SSuperclassFor(columnClass));
 		}
 	}
@@ -3712,6 +3712,8 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 				tmpRect.height -= 3;
 			}
 			comp.setBounds(tmpRect);
+			_addingEditor = true;
+			// SwingJS don't invalidate the table itself
 			add(comp);
 			comp.validate();
 			comp.repaint();
@@ -3734,11 +3736,25 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 			// setEditingColumn(column);
 			editor.removeCellEditorListener(this);
 			editor.addCellEditorListener(this);
+			_addingEditor = false;
 
 			return true;
 		}
 		return false;
 	}
+	
+	@Override
+	public void invalidate() {
+		if (!_addingEditor)
+			super.invalidate();
+	}
+	
+	@Override
+	protected void invalidateComp() {
+		if (!_addingEditor)
+			super.invalidateComp();
+	}
+
 
 	/**
 	 * Returns true if a cell is being edited.
@@ -5510,6 +5526,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 			super();
 		}
 
+		@Override
 		public void setValue(Object value) {
 			if (formatter == null) {
 				formatter = DateFormat.getDateInstance();
@@ -5668,8 +5685,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 	static class BooleanEditor extends DefaultCellEditor {
 		public BooleanEditor() {
 			super(new JCheckBox());
-			JCheckBox checkBox = (JCheckBox) getComponent();
-			checkBox.setHorizontalAlignment(JCheckBox.CENTER);
+			((JCheckBox) getComponent()).setHorizontalAlignment(JCheckBox.CENTER);
 		}
 	}
 
@@ -5781,9 +5797,14 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 	 * @beaninfo bound: true description: The table's active cell editor.
 	 */
 	public void setCellEditor(TableCellEditor anEditor) {
+		System.out.println("JTable setting Cell Editor " + anEditor);
 		TableCellEditor oldEditor = cellEditor;
 		cellEditor = anEditor;
+		boolean a = _addingEditor;
+		_addingEditor = true;
 		firePropertyChange("tableCellEditor", oldEditor, anEditor);
+		_addingEditor = a;
+
 	}
 
 	/**
@@ -5932,6 +5953,10 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		Object value = getValueAt(row, column);
 		boolean isSelected = isCellSelected(row, column);
 		JComponent comp = (JComponent) editor.getTableCellEditorComponent(this, value, isSelected, row, column);
+		if (editor.getClass().getName() == "javax.swing.JTable$BooleanEditor")
+			comp.putClientProperty("_jsBooleanEditor", Boolean.TRUE);
+		
+		
 		// if (comp instanceof JComponent) {
 		// JComponent jComp = (JComponent)comp;
 		// if (jComp.getNextFocusableComponent() == null) {
@@ -5950,7 +5975,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		// KeyboardFocusManager.getCurrentKeyboardFocusManager().
 		// removePropertyChangeListener("permanentFocusOwner", editorRemover);
 		editorRemover = null;
-
+		_addingEditor = true;
 		TableCellEditor editor = getCellEditor();
 		if (editor != null) {
 			editor.removeCellEditorListener(this);
@@ -5971,6 +5996,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 			setEditingColumn(-1);
 			setEditingRow(-1);
 			editorComp = null;
+			_addingEditor = false;
 
 			repaint(cellRect);
 		}

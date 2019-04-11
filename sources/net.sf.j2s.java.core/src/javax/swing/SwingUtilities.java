@@ -382,10 +382,7 @@ public class SwingUtilities implements SwingConstants
             int x,y;
             boolean done = false;
             do {
-                if(c instanceof JComponent) {
-                    x = ((JComponent)c).getX();
-                    y = ((JComponent)c).getY();
-                } else if((done = c.isWindowOrJSApplet())) {
+                if((done = c.isWindowOrJSApplet())) {
                     try {
                         Point pp = c.getLocationOnScreen();
                         x = pp.x;
@@ -417,10 +414,7 @@ public class SwingUtilities implements SwingConstants
         int x,y;
 
         do {
-            if(c instanceof JComponent) {
-                x = ((JComponent)c).getX();
-                y = ((JComponent)c).getY();
-            }  else if(c.isWindowOrJSApplet()) {
+            if(c.isWindowOrJSApplet()) {
                 try {
                     Point pp = c.getLocationOnScreen();
                     x = pp.x;
@@ -429,7 +423,7 @@ public class SwingUtilities implements SwingConstants
                     x = c.getX();
                     y = c.getY();
                 }
-            } else {
+            }  else {
                 x = c.getX();
                 y = c.getY();
             }

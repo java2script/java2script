@@ -358,6 +358,8 @@ public abstract class Component implements ImageObserver/*
 	 */
 	private int isFocusTraversableOverridden = FOCUS_TRAVERSABLE_UNKNOWN;
 
+	protected boolean _isFocusableSet; // SwingJS added
+	
 	/**
 	 * The focus traversal keys. These keys will generate focus traversal behavior
 	 * for Components for which focus traversal keys are enabled. If a value of null
@@ -5400,7 +5402,7 @@ public abstract class Component implements ImageObserver/*
 	 */
 	protected void processKeyEvent(KeyEvent e) {
 		KeyListener listener = keyListener;
-		if (listener != null) {
+		if (listener != null && (/** @j2sNative this.isAWT$ || */ _isFocusableSet)) {
 			int id = e.getID();
 			switch (id) {
 			case KeyEvent.KEY_TYPED:
@@ -6049,6 +6051,8 @@ public abstract class Component implements ImageObserver/*
 			this.focusable = focusable;
 		}
 		isFocusTraversableOverridden = FOCUS_TRAVERSABLE_SET;
+		
+		_isFocusableSet = true;
 
 		firePropertyChange("focusable", Boolean.valueOf(oldFocusable), Boolean.valueOf(focusable));
 		if (oldFocusable && !focusable) {

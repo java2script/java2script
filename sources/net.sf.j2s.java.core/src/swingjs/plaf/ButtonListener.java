@@ -278,7 +278,7 @@ public class ButtonListener
 				((JMenu) b).setPopupMenuVisible(!((JMenu) b).isPopupMenuVisible());
 				JComponent root = ((JComponent) b.getTopLevelAncestor()).getRootPane();
 				root.requestFocus();
-				JSFocusPeer.focus(((JSComponentUI) root.getUI()).focusNode);
+				//JSFocusPeer.focus(((JSComponentUI) root.getUI()).focusNode);
 			}
 		}
 	}

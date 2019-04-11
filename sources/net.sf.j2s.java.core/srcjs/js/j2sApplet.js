@@ -828,7 +828,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		for ( var key in J2S.db._DirectDatabaseCalls) {
 			if (key.indexOf(".") >= 0 && url.indexOf(key) >= 0) {
 				// hack because ebi is not returning ajax calls
-				return url.indexOf(".ebi.ac.") < 0 || url.indexOf("dbfetch/dbfetch") < 0;
+				return true;//url.indexOf(".ebi.ac.") < 0 || url.indexOf("dbfetch/dbfetch") < 0;
 								
 			}
 		}

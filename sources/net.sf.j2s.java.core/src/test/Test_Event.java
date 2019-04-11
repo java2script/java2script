@@ -61,8 +61,8 @@ public class Test_Event extends JFrame {
 		logger.addHandler(consoleHandler);
 	}
 
-	private static boolean allowLogging = false;
-	private static boolean allowEventInfo = false;
+	private static boolean allowLogging = true;
+	private static boolean allowEventInfo = true;
 
 	private void setLogging() {
 		if ((/** @j2sNative false && */

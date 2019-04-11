@@ -17,6 +17,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 		JToggleButton b = (JToggleButton) jc;
 		boolean doAll = false;
 		if (domNode == null) {
+			//System.out.println("JSRadioButton new dom node for " + id + " " + tableID);
 			doAll = true;
 			buttonNode = newDOMObject("label", id + "btn");
 			if (isMenuItem) {
@@ -41,7 +42,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 				setMenuItem();
 		}
 		setupButton(b, doAll);
-		return domNode;
+		return updateDOMNodeCUI();
 	}
 
 	@Override
@@ -81,7 +82,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 		setCssFont(textNode, c.getFont());
 		// TODO: not allowing radio/checkbox icons (custom buttons)
 		setIconAndText("radio", (ImageIcon) null/* button.getIcon() */, button.getIconTextGap(), button.getText());
-		setAlignments(b);
+		setAlignments(b, false);
 
 		if (doAll && !isMenuItem)
 			DOMNode.setPositionAbsolute(domNode);

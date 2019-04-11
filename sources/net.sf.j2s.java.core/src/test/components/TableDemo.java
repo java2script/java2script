@@ -51,6 +51,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GridLayout;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 /**
  * TableDemo is just like SimpleTableDemo, except that it uses a custom
@@ -88,6 +90,38 @@ public class TableDemo extends JPanel {
 
 
 		JTable table = new JTable(new MyTableModel());
+		table.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				System.out.println("Table mouse entered " + e.getSource().getClass().getName());
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				System.out.println("Table mouse exited " + e.getSource().getClass().getName());
+			}
+			
+		});
+		table.setRowHeight(40);
 		table.setPreferredScrollableViewportSize(new Dimension(500, 70));
 		table.setFillsViewportHeight(true);
 
@@ -125,7 +159,8 @@ public class TableDemo extends JPanel {
 				{ ++i,  color, "John", "Doe", "Rowing", new Integer(3), new Boolean(true) },
 				{ ++i,  color, "Sue", "Black", "Knitting", new Integer(2), new Boolean(false) },
 				{ ++i,  color, "Jane", "White", "Speed reading", new Integer(20), new Boolean(true) },
-				{ ++i,  color, "Joe", "Brown", "Pool", new Integer(10), new Boolean(false) } };
+				{ ++i,  color, "Joe", "Brown", "Pool", new Integer(10), new Boolean(false) } 
+				};
 
 		public int getColumnCount() {
 			return columnNames.length;

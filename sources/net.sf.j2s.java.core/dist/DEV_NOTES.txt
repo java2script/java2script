@@ -1,5 +1,10 @@
-BH 2018.10.01
+This is sources/net.sf.j2s.java.core/dist/DEV_NOTES.txt
 
-fix for AWT applets and frames not automatically 
-activating their childrens' mouse listeners.
+_j2sclasslist.txt 
 
+the list of .js files concatenated into coreswingjs.js and minified to coreswingjs.z.js
+
+
+SwingJS-site.zip
+
+the full site directory for SwingJS including all files not in the test/ directory.

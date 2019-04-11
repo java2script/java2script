@@ -20,6 +20,8 @@
  */
 package test.components;
 
+import java.awt.AWTEvent;
+
 /*
  * Copyright (c) 1995, 2008, Oracle and/or its affiliates. All rights reserved.
  *
@@ -56,9 +58,13 @@ package test.components;
 */
 
 import java.awt.Color;
+import java.awt.DefaultKeyboardFocusManager;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridLayout;
+import java.awt.KeyboardFocusManager;
+import java.awt.Toolkit;
+import java.awt.event.AWTEventListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -68,6 +74,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -88,6 +97,9 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 
+
+
+
 /**
  * Sourced from Oracle and adapted
  * 
@@ -95,6 +107,40 @@ import javax.swing.border.EtchedBorder;
  *      ://docs.oracle.com/javase/tutorial/uiswing/events/mouselistener.html
  */
 public class MouseEventDemo extends JPanel implements MouseListener {
+
+	// both rootpane and contentpane focusable --> rootpane gets the keystrokes and focus
+	
+	// default: rootpane and contentpane are focusable
+	// but they must be given a direct setFocusable(true) or getInputMap() anyway to activate key listening
+	// they do not just do that with a key listener
+	
+	private static void logClass(String name) {
+		ConsoleHandler consoleHandler = new ConsoleHandler();
+		consoleHandler.setLevel(Level.ALL);
+		Logger logger = Logger.getLogger(name);
+		logger.setLevel(Level.ALL);
+		logger.addHandler(consoleHandler);
+	}
+
+	private static boolean allowLogging = true;
+	private static boolean allowEventInfo = true;
+
+	private void setLogging() {
+		if ((/** @j2sNative false && */
+		allowLogging)) {
+
+			Logger rootLogger = Logger.getLogger("");
+			rootLogger.setLevel(Level.ALL);
+			logClass("java.awt.EventDispatchThread");
+			logClass("java.awt.EventQueue");
+			logClass("java.awt.Component");
+			logClass("java.awt.focus.Component");
+			logClass("java.awt.focus.DefaultKeyboardFocusManager");
+
+		}
+
+	}
+
 	private class BlankArea extends JLabel {
 		Dimension minSize = new Dimension(200, 100);
 
@@ -123,129 +169,81 @@ public class MouseEventDemo extends JPanel implements MouseListener {
 
 	static final String NEWLINE = System.getProperty("line.separator");
 
-	/**
-	 * 
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		// Schedule a job for the event dispatch thread:
-		// creating and showing this application's GUI.
-		javax.swing.SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				createAndShowGUI();
-			}
-		});
-	}
-
-	/**
-	 * Create the GUI and show it. For thread safety, this method should be invoked
-	 * from the event dispatch thread.
-	 */
-	private static void createAndShowGUI() {
-		// Create and set up the window.
-		JFrame frame = new JFrame("MouseEventDemo (C to clear)");
-		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
-		// Create and set up the content pane.
-		JComponent newContentPane = new MouseEventDemo();
-		newContentPane.setOpaque(true); // content panes must be opaque
-		frame.setContentPane(newContentPane);
-
-		frame.addFocusListener(new FocusListener() {
-
-			@Override
-			public void focusGained(FocusEvent e) {
-				System.out.println("MED.frame focus gained from " + e.getOppositeComponent());
-			}
-
-			@Override
-			public void focusLost(FocusEvent e) {
-				System.out.println("MED.frame focus lost to " + e.getOppositeComponent());
-			}
-			
-		});
-		
-		frame.getRootPane().		addFocusListener(new FocusListener() {
-
-			@Override
-			public void focusGained(FocusEvent e) {
-				System.out.println("MEDroot focus gained from " + e.getOppositeComponent());
-			}
-
-			@Override
-			public void focusLost(FocusEvent e) {
-				System.out.println("MEDroot focus lost to " + e.getOppositeComponent());
-			}
-			
-		});
-		
-
-		
-		// Display the window.
-		frame.pack();
-		frame.setVisible(true);
-	}
-
 	public MouseEventDemo() {
 		super(new GridLayout(0, 1));
 
-		textArea = new JTextArea();
-		textArea.setEditable(false);
-		JScrollPane scrollPane = new JScrollPane(textArea);
-		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-		scrollPane.setPreferredSize(new Dimension(400, 75));
-
-		
-		blankArea = new BlankArea(Color.YELLOW);
-		JPanel panel = new JPanel() {
-			protected void paintBorder(Graphics g) {
-				System.out.println("MED JPanel painting border " + getBorder());
-				super.paintBorder(g);
-			}
-			public void setBorder(Border b) {
-				super.setBorder(b);
-			}
-		};
-		
-		System.out.println(UIManager.getBorder("Panel.border") + " " + panel.getBorder());
-//		panel.setBorder(new BevelBorder(1));
-		panel.add(blankArea);
-		JButton btn = new JButton("clear");
-		btn.setMnemonic('l');
-		btn.addActionListener(new ActionListener() {
+		setPreferredSize(new Dimension(300,300));
+		Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
 
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				textArea.setText("");
-				log("");
+			public void eventDispatched(AWTEvent event) {
+				System.out.println("AWTEVEnt dispatched " + event);
 			}
 			
-		});
+		}, -1);
+
+		setLogging();
 		
-		panel.add(btn);
-//		JPanel scrollPane = new JPanel() {
+		textArea = new JTextArea();
+//		textArea.setEditable(false);
+//		JScrollPane scrollPane = new JScrollPane(textArea);
+//		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+//		scrollPane.setPreferredSize(new Dimension(400, 75));
+//
+//		
+//		blankArea = new BlankArea(Color.YELLOW);
+//		JPanel panel = new JPanel() {
 //			protected void paintBorder(Graphics g) {
-//				System.out.println("MED.scrollPanePanel painting border " + getBorder());
+//				System.out.println("MED JPanel painting border " + getBorder());
 //				super.paintBorder(g);
 //			}
+//			public void setBorder(Border b) {
+//				super.setBorder(b);
+//			}
 //		};
-//		scrollPane.add(j);
-		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, panel, scrollPane);
-		splitPane.setVisible(true);
-		splitPane.setDividerLocation(0.2d);
-		splitPane.setResizeWeight(0.5d);
-		add(splitPane);
-
-		addKeyBinding();
-
+//		
+//		System.out.println(UIManager.getBorder("Panel.border") + " " + panel.getBorder());
+////		panel.setBorder(new BevelBorder(1));
+//		panel.add(blankArea);
+//		JButton btn = new JButton("clear");
+//		btn.setMnemonic('l');
+//		btn.addActionListener(new ActionListener() {
+//
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				textArea.setText("");
+//				log("");
+//			}
+//			
+//		});
+//		
+//		panel.add(btn);
+////		JPanel scrollPane = new JPanel() {
+////			protected void paintBorder(Graphics g) {
+////				System.out.println("MED.scrollPanePanel painting border " + getBorder());
+////				super.paintBorder(g);
+////			}
+////		};
+////		scrollPane.add(j);
+//		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, panel, scrollPane);
+//		splitPane.setVisible(true);
+//		splitPane.setDividerLocation(0.2d);
+//		splitPane.setResizeWeight(0.5d);
+//		add(splitPane);
+//
+//
+		// getInputMap enables key events in Swing
+		// if not, then the frame gets the event
+		
+		// in AWT, key events are fired regardless of whether
+		// there is a listener or not.
 		addKeyListener(new KeyListener() {
 
 			@Override
 			public void keyTyped(KeyEvent e) {
 				System.out.println(e);
-				System.out.println(FocusManager.getCurrentManager().getFocusOwner().getClass().getName());
-						}
+				System.out.println(e.getSource());
+			}
 
 			@Override
 			public void keyPressed(KeyEvent e) {
@@ -253,17 +251,15 @@ public class MouseEventDemo extends JPanel implements MouseListener {
 
 			@Override
 			public void keyReleased(KeyEvent e) {
-				// TODO Auto-generated method stub
-				
 			}
 			
 		});
-		blankArea.addMouseListener(this);
-		addMouseListener(this);
-		setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+//		blankArea.addMouseListener(this);
+//		addMouseListener(this);
+//		setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 	}
 
-	private void addKeyBinding() {
+	void addKeyBinding() {
 		addKeyBinding(KeyStroke.getKeyStroke('C'));
 		addKeyBinding(KeyStroke.getKeyStroke('c'));
 	}
@@ -273,25 +269,11 @@ public class MouseEventDemo extends JPanel implements MouseListener {
 	 */
 	void addKeyBinding(final KeyStroke ks) {
 		
-		addFocusListener(new FocusListener() {
-
-			@Override
-			public void focusGained(FocusEvent e) {
-				System.out.println("MED focus gained from " + e.getOppositeComponent());
-			}
-
-			@Override
-			public void focusLost(FocusEvent e) {
-				System.out.println("MED focus lost to " + e.getOppositeComponent());
-			}
-			
-		});
-		
-		InputMap inputMap = this.getInputMap(JComponent.WHEN_FOCUSED);
-		inputMap.put(ks, ks);
-		this.getActionMap().put(ks, new AbstractAction() {
+		getInputMap(JComponent.WHEN_FOCUSED).put(ks, "clear");
+		this.getActionMap().put("clear", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				System.out.println("CLEAR");
 				textArea.setText("");
 				log("");
 			}
@@ -327,6 +309,7 @@ public class MouseEventDemo extends JPanel implements MouseListener {
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		logEvent("Mouse released", e);
+		System.out.println(KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner().getClass().getName());
 		e.consume();
 	}
 
@@ -343,4 +326,155 @@ public class MouseEventDemo extends JPanel implements MouseListener {
 		logEvent("Mouse clicked", e);
 		e.consume();
 	}
+
+	/**
+	 * 
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		KeyboardFocusManager.setCurrentKeyboardFocusManager(new DefaultKeyboardFocusManager() {
+			@Override
+			public boolean dispatchEvent(AWTEvent e) {
+				if (allowEventInfo && e.getID() != MouseEvent.MOUSE_MOVED) {
+					if (e.getID() == MouseEvent.MOUSE_PRESSED) { //
+						System.out.println("FocusMan mousepreseed event");
+					}
+					System.out.println(
+							"FocusMan dispatching activeElement=" + (/** @j2sNative document.activeElement.id || */
+					getFocusOwner()));
+					System.out.println("FocusMan dispatching event Source " + e.getSource());
+					System.out.println("FocusMan dispatching event " + e);
+				}
+				return super.dispatchEvent(e);
+			}
+		});
+		// Schedule a job for the event dispatch thread:
+		// creating and showing this application's GUI.
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				createAndShowGUI();
+			}
+		});
+	}
+
+	/**
+	 * Create the GUI and show it. For thread safety, this method should be invoked
+	 * from the event dispatch thread.
+	 */
+	private static void createAndShowGUI() {
+		// Create and set up the window.
+
+		
+		JFrame frame0 = new JFrame("Second Frame") {
+		};
+		frame0.setSize(new Dimension(300,300));
+		frame0.setVisible(true);
+		
+		JFrame frame = new JFrame("MouseEventDemo (C to clear)") {
+		};
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+		
+		// Create and set up the content pane.
+		MouseEventDemo newContentPane = new MouseEventDemo();
+		newContentPane.setOpaque(true); // content panes must be opaque
+		frame.setContentPane(newContentPane);
+
+		frame.addFocusListener(new FocusListener() {
+
+			@Override
+			public void focusGained(FocusEvent e) {
+				System.out.println("MED.frame focus gained from " + e.getOppositeComponent());
+			}
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				System.out.println("MED.frame focus lost to " + e.getOppositeComponent());
+			}
+
+		});
+
+		frame.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+				System.out.println("frame " + e);
+				System.out.println("frame " + e.getSource());
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+		});
+		
+		frame.getRootPane().addFocusListener(new FocusListener() {
+
+			@Override
+			public void focusGained(FocusEvent e) {
+				System.out.println("MEDroot focus gained from " + e.getOppositeComponent());
+			}
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				System.out.println("MEDroot focus lost to " + e.getOppositeComponent());
+			}
+
+		});
+
+		frame.getRootPane().addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+				System.out.println("root " + e);
+				System.out.println("root " + e.getSource());
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+		});
+
+		// Display the window.
+		frame.pack();
+		frame.setVisible(true);
+
+// contentPane keyListener fires:
+//		
+//		newContentPane.addKeyBinding();
+
+// or		
+
+//		newContentPane.setFocusable(true);
+
+// note that key bindings are processed AFTER key listeners
+// so e.consume() in keyTyped() will disable the key binding
+
+// firing only in root pane:		
+		// frame.getRootPane().setFocusable(true);
+
+// no firing
+		frame.setFocusable(false);
+
+// firing in frame only		
+		// no additional code necessary
+
+		
+
+	}
+
 }

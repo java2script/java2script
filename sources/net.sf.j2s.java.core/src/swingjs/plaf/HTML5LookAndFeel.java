@@ -601,7 +601,22 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		//
 		// // *** Button value objects
 		//
-		Object buttonBorder = BorderFactory.createHTML5Border(); // an empty border, but really just the browser's border
+//		Object buttonBorder = BorderFactory.createHTML5Border(); // an empty border, but really just the browser's border
+	        Object buttonBorder =
+	                new SwingLazyValue(
+	                                "javax.swing.plaf.basic.BasicBorders",
+	                                "getButtonBorder$");
+
+	            Object buttonToggleBorder =
+	                new SwingLazyValue(
+	                                "javax.swing.plaf.basic.BasicBorders",
+	                                "getToggleButtonBorder$");
+
+	            Object radioButtonBorder =
+	                new SwingLazyValue(
+	                                "javax.swing.plaf.basic.BasicBorders",
+	                                "getRadioButtonBorder$");
+
 		//
 //		Object buttonToggleBorder = buttonBorder;//new SwingLazyValue("javax.swing.plaf.basic.BasicBorders", "getToggleButtonBorder");
 		//

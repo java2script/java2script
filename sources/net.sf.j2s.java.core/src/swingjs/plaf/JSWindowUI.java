@@ -227,6 +227,7 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 	protected void bindWindowEvents() {
 		setJ2sMouseHandler();
 		setDraggableEvents();
+		addJQueryFocusCallbacks();
 		if (closerNode != null)
 			bindJQueryEvents(closerNode, "click mouseenter mouseout", SOME_MOUSE_EVENT);
 	}
