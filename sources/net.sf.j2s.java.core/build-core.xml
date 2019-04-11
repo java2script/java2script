@@ -25,7 +25,7 @@
 	
 	core: "none"     // do not use any core files - useful for debugging and core construction
 	core: null       // (or just no "core" entry) - use coreswingjs.z.js
-	core: "_xxx"     // use my created core_xxx.z.js file 
+	core: "_xxx"     // use a core_xxx.z.js file that you have created
 	
 	Creating a customized core_xxx file
 	- - - - - - - - - - - - - - - - - -
