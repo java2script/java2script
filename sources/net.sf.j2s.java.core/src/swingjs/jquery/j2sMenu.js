@@ -70,12 +70,14 @@ try{
 		 if (!a.hasClass("j2s-popup-menu")) {
 			 me._closeSubmenus(a.parent());			 
 		 }
+		 var m = a;
 		 a = a.find(".a");
 		 a[0] && a[0].focus();
 		 var n=e(t.currentTarget).closest(".ui-j2smenu-item");
 		 n.siblings().children(".ui-state-active").removeClass("ui-state-active");
 		 t.stopPropagation();
 		 me.focus(t,n);
+		 t = m;
 		 break;
 	 case "onrelease":
 	 case "onpress":
@@ -133,44 +135,54 @@ try{
 	 case "onblur":
 		 me.timer = delayMe(me, function(){e.contains(me.element[0],me.document[0].activeElement)||me.collapseAll(t)});
 		 break;
+	 case "_activate":
+		 me.active.is(".ui-state-disabled")||(me.active.children(".a[aria-haspopup='true']").length?me.expand(t):me.select(t));
+		 break;
+	 case "_startOpening":
+		 if(t.attr("aria-hidden")!=="true") {
+			 return;
+		 }
+		 me.timer=delayMe(me, function(){me._closeSubmenus(),me._openSubmenu(t);},me.delay);
+		 return;
+	 case "_hideAllMenus":
+		 // trigger Java to deselect these - the JMenu class
+		 t = me.element.find(".ui-j2smenu[aria-hidden!=true]").attr("aria-hidden","true").parent();
+		 if (!t[0])
+			 return;
+		 break;
 	 case "_openSubmenu":
 		 n||(n = me.active || me.activeMenu);
 		 if (n.is(".ui-state-disabled"))
 			 return;
-
 		 n = e.extend({of:n},me.options.position);
-
 		 var ui = me.activeMenu && me.activeMenu[0] && me.activeMenu[0]["data-ui"];
-	 	 ui && ui.processJ2SMenuCmd$OA([trigger,me,e,t,n,why]);
-
-
+	 	 ui && ui.processJ2SMenuCmd$OA([trigger,me,e,t.parent(),n,why]);
 		 clearMe(me.timer, trigger);
 		 me.refresh("_openSubmenu",n);
 		 var v = me.element.find(".ui-j2smenu").not(t.parents(".ui-j2smenu"));
 		 doCmd("_hide", me, e, v);
-		 v.attr("aria-hidden","true");
 		 try {
+			 // required if menu has been modified
+			 doCmd("_show", me, e, me.activeMenu);
 			 doCmd("_show", me, e, t);
 			 t.removeAttr("aria-hidden").attr("aria-expanded","true").position(n);
 		 } catch(err){
 			 System.out.println("j2sMenu error: " + err);
 		 }
 		 return;
-	 case "_activate":
-		 me.active.is(".ui-state-disabled")||(me.active.children(".a[aria-haspopup='true']").length?me.expand(t):me.select(t));
-		 break;
-	 case "_startOpening":
-		 if(t.attr("aria-hidden")!=="true")return;
-		 me.timer=delayMe(me, function(){me._closeSubmenus(),me._openSubmenu(t);},me.delay);
-		 return;
 	 case "_closeSubmenus":
+		 var a = me.active;
+		 if (a && a[0] && a[0]["data-component"].uiClassID != "MenuUI")
+			return;
 		 t||(t=me.active?me.active.parent():me.element);
-		 t.closest("ul").find(".ui-state-active").removeClass("ui-state-active");
+		 var m = t.closest("ul").find(".ui-state-active")
+		 m.removeClass("ui-state-active");
 		 var v = t.find(".ui-j2smenu");
 		 if (!v.length)
 			 return;
 		 doCmd("_hide", me, e, v);
 		 v.attr("aria-hidden","true").attr("aria-expanded","false");
+		 t = v.parent();
 		 break;
 	 case "_move":
 		 var a = n[0];
@@ -187,6 +199,8 @@ try{
 		 t.show();
 		 break;
 	 case "_hide":
+		 if (!t[0])
+			 return;
 		 t.hide();
 		 break;
 	 case "expand":
@@ -217,6 +231,7 @@ try{
 			  ((u=e(t&&t.target)).hasClass("ui-j2smenu-node") || u.hasClass("ui-j2smenu"))
 			))
 			 return;
+		 doCmd("_hideAllMenus", me, e);
 		 //System.err.println("collapseAll " + me.uuid);
 		 clearMe(me.timer, trigger),
 		 me.timer = delayMe(me,
@@ -233,6 +248,7 @@ try{
 		   }, me.delay); 
 		 break;
 	 case "focus":
+		 //System.out.println("j2smenu " + document.activeElement.id);
 		 me.blur(t,t&&t.type==="focus");
 		 me._scrollIntoView(n);
 		 me.active=n.first();
@@ -246,22 +262,30 @@ try{
 		 u.length&&/^mouse/.test(t.type)&&me._startOpening(u);
 		 me.activeMenu=n.parent();
 		 me._trigger("focus",t,{item:n});
+		 t = n;
+		 //System.out.println("j2smenu " + document.activeElement.id);
 		 break;
 	 case "blur":
+		 //System.out.println("j2smenu " + document.activeElement.id);
 		 if (me.active && t && typeof n == "undefined" && t.relatedTarget && t.relatedTarget.getAttribute("role") != "presentation")	 {
 			 doCmd("_hide", me, t, me.element);
 		 }
 		 n||clearMe(me.timer, trigger);
 		 if(!me.active)return;
-		 me.active.removeClass("ui-state-focus"),
-		 me.active.children(".a").removeClass("ui-state-focus"),
-		 me.active=null,
-		 me._trigger("blur",t,{item:me.active});
+		 me.active.removeClass("ui-state-focus");
+		 me.active.children(".a").removeClass("ui-state-focus");
+		 var a = me.active;
+		 me.active=null;
+		 me._trigger("blur",t,{item:a});
+		 t = a;
+		 //System.out.println("j2smenu " + document.activeElement.id);
 		 break;
 	 case "select":
 		 me.active=me.active||e(t.target).closest(".ui-j2smenu-item");
 		 me.active.has(".ui-j2smenu").length||me.collapseAll(t,!0);
-		 me._trigger("select",t,{item:me.active})
+		 me._trigger("select",t,{item:me.active});
+		 if (!t[0])
+			 return;
 		 break;
 	 case "refresh":
 		 n=me.options.icons.submenu;
