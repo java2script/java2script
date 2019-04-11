@@ -30,6 +30,9 @@
    	<loadresource property="coreclasses">
        <file file="_j2sclasslist.txt"/>
     </loadresource>
+   	
+   	<echo>copying _j2sclasslist.txt into dist/</echo>
+    <copy todir="dist" file="_j2sclasslist.txt" />
  
     <antcall target="call-core">
         <param name="call-core.name" value="swingjs" />

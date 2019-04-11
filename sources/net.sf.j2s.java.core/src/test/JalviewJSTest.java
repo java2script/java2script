@@ -70,8 +70,9 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		}
 		
 	};
-	JMenu mRight = new JMenu("right") 		{
+	JMenu mRight = new JMenu("right") {
 		@Override
+		// TODO NOT WORKING IN JAVASCRIPT
 		public void processKeyEvent(KeyEvent e, MenuElement[] path, MenuSelectionManager m) {
 			System.out.println("RIGHT JMenu path length=" + path.length + " key=" + e.getKeyCode()); 	
 			for (int i = 0; i < path.length; i++)
@@ -126,6 +127,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 	};
 	private Label status;
 	private JMenu menu, menu1, menu2;
+	private JCheckBoxMenuItem cb4m;
 	/**
 	 * Put some content in a JFrame and show it
 	 */
@@ -354,7 +356,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		cb3m.setHorizontalTextPosition(SwingConstants.LEADING);
 		cb3m.addActionListener(listener);
 
-		JCheckBoxMenuItem cb4m = new JCheckBoxMenuItem("CB4XXleading,right-to-leftXX") {
+		cb4m = new JCheckBoxMenuItem("CB4XXleading,right-to-leftXX") {
 			@Override
 			public void doClick() {
 				super.doClick();
@@ -446,19 +448,30 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		;
 		m1.addMenuListener(new MenuListener() {
 
+			private boolean haveCb4m;
+			private JMenuItem cb4m2;
+
 			@Override
 			public void menuSelected(MenuEvent e) {
-				System.out.println("JalviewJSTest menu selected");
+				JMenu m = (JMenu) e.getSource();
+				if (haveCb4m) {
+					m.remove(cb4m);
+				} else {
+					m.add(cb4m);
+					m.add(cb4m);
+					cb4m2 = new JMenuItem("testing");
+					m.add(cb4m2);
+				}
+				haveCb4m = !haveCb4m;
+				
 			}
 
 			@Override
 			public void menuDeselected(MenuEvent e) {
-				System.out.println("JalviewJSTest menu deselected");
 			}
 
 			@Override
 			public void menuCanceled(MenuEvent e) {
-				System.out.println("JalviewJSTest menu canceled");
 			}
 		  	
 		});
@@ -492,9 +505,10 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		menu.add(mRight);
 		mRight.setMnemonic('r');
 		mRight.setFont(font);
-		mRight.addMenuListener(this);
 		mRight.add(cb6m);
 		mRight.add(rb1m);
+//		mRight.addMenuListener(this);
+
 		btn = new JMenuItem("-");
 		btn.setFont(font);
 		mRight.add(btn);
@@ -506,8 +520,10 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		JMenu mRight2 = new JMenu("right2");
 
 		mRight.add(mRight2);
+		mRight.addMenuListener(this);
 		mRight2.add(mb3);
 		mRight2.add(mb4);
+		mRight2.addMenuListener(this);
 
 
 		JPanel theTab = new JPanel();
@@ -586,22 +602,22 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 
 	@Override
 	public void menuSelected(MenuEvent e) {
-		System.out.println("menuSelected " + e.getSource().toString());
-		JMenu menu = (JMenu) e.getSource();
-		System.out.println("adding mb5");
-		menu.add(mb5);
-		System.out.println("mb5 added");
+		System.err.println("JalviewJSTest menuSelected " + ((JMenu) e.getSource()).getText());
+//		JMenu menu = (JMenu) e.getSource();
+//		System.out.println("adding mb5");
+//		menu.add(mb5);
+//		System.out.println("mb5 added");
 	}
 
 	@Override
 	public void menuDeselected(MenuEvent e) {
-		System.out.println("menuDeselected " + e.getSource().toString());
+		System.err.println("JalviewJSTest menuDeselected " + ((JMenu) e.getSource()).getText());
 
 	}
 
 	@Override
 	public void menuCanceled(MenuEvent e) {
-		System.out.println("menuCanceled " + e.getSource().toString());
+		System.err.println("menuCanceled " + e.getSource().toString());
 
 	}
 
