@@ -8,6 +8,7 @@ import java.awt.JSComponent;
 import java.awt.KeyboardFocusManager;
 import java.awt.Window;
 import java.awt.event.FocusEvent;
+import java.awt.event.WindowEvent;
 import java.awt.peer.KeyboardFocusManagerPeer;
 import java.beans.PropertyVetoException;
 
@@ -143,6 +144,9 @@ public class JSFocusPeer implements KeyboardFocusManagerPeer {
 		Container p = JSComponent.getTopInvokableAncestor((Container) e.getSource(), true);
 		if (getCurrentFocusOwner() != null && p == currentWindow) 
 			return;
+		Window w = currentWindow;
+		p.dispatchEvent(new WindowEvent((Window) p, WindowEvent.WINDOW_ACTIVATED));
+
 		//oops, windows do not report focus gained 
 		// handleJSFocus(p, currentWindow, true);
 		setCurrentFocusedWindow((Window) p);
@@ -154,6 +158,10 @@ public class JSFocusPeer implements KeyboardFocusManagerPeer {
 			}
 		} else if (p instanceof Window) {
 			((Window) p).toFront();
+		}
+		if (p._isFocusSetAndEnabled()) {
+			((JSComponentUI)((JSComponent) p).ui).focus(); 
+			handleJSFocus(p, w, true);
 		}
 	}
 

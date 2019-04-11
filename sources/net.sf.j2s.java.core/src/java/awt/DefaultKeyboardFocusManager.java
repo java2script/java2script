@@ -320,6 +320,7 @@ public class DefaultKeyboardFocusManager extends KeyboardFocusManager {
 //        }
 		switch (e.getID()) {
 		case MouseEvent.MOUSE_PRESSED:
+		case MouseEvent.MOUSE_CLICKED: // for frames?? BH added
 			((JSFocusPeer) peer).checkFrameFocusOnMouseDown(e);
 			//jcMouseDown = (Component) e.getSource();
 			return false;

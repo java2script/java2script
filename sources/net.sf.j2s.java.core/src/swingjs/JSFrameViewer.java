@@ -241,7 +241,7 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 		DOMNode.setTopLeftAbsolute(canvas, iTop, 0);
 		DOMNode.setStyles(canvas, "width", width + "px", "height", height + "px");
 		if (width > 0) {
-			System.out.println("JSFrameViewer creating new canvas " + canvasId + ": " + width + "  " + height);
+			//System.out.println("JSFrameViewer creating new canvas " + canvasId + ": " + width + "  " + height);
 			// ensures one last update for a frame
 			JSComponentUI ui = (JSComponentUI) root.getParent().getUI();
 			if (ui != null)

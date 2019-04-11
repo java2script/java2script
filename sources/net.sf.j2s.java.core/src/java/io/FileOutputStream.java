@@ -325,7 +325,8 @@ class FileOutputStream extends OutputStream
      * @param      b   the byte to be written.
      * @exception  IOException  if an I/O error occurs.
      */
-    public void write(int b) throws IOException {
+    @Override
+	public void write(int b) throws IOException {
 		out.writeByteAsInt(b);
     }
 
@@ -336,7 +337,8 @@ class FileOutputStream extends OutputStream
      * @param      b   the data.
      * @exception  IOException  if an I/O error occurs.
      */
-    public void write(byte b[]) throws IOException {
+    @Override
+	public void write(byte b[]) throws IOException {
 		writeBytes(b, 0, b.length);
     }
 
@@ -349,7 +351,8 @@ class FileOutputStream extends OutputStream
      * @param      len   the number of bytes to write.
      * @exception  IOException  if an I/O error occurs.
      */
-    public void write(byte b[], int off, int len) throws IOException {
+    @Override
+	public void write(byte b[], int off, int len) throws IOException {
 		writeBytes(b, off, len);
     }
 
@@ -366,10 +369,11 @@ class FileOutputStream extends OutputStream
      * @revised 1.4
      * @spec JSR-51
      */
-    public void close() throws IOException {
+    @Override
+	public void close() throws IOException {
     	out.closeChannel();
     	_bytes = out.toByteArray();
-    	if (_file != null)
+    	if (_file != null && _bytes != null)
     		_file._bytes = _bytes;
     	if (_file instanceof JSTempFile)
     		((JSTempFile) _file).cacheBytes();
@@ -385,7 +389,8 @@ class FileOutputStream extends OutputStream
         }
 
         fd.closeAll(new Closeable() {
-            public void close() throws IOException {
+            @Override
+			public void close() throws IOException {
                close0();
            }
         });
@@ -441,7 +446,8 @@ class FileOutputStream extends OutputStream
      * @exception  IOException  if an I/O error occurs.
      * @see        java.io.FileInputStream#close()
      */
-    protected void finalize() throws IOException {
+    @Override
+	protected void finalize() throws IOException {
         if (fd != null) {
             if (fd == FileDescriptor.out || fd == FileDescriptor.err) {
                 flush();

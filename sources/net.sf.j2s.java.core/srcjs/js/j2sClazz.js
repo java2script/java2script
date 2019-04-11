@@ -3013,9 +3013,7 @@ Con.clear = function () {
     var console = o && o.console;
     if (!console || !(console = document.getElementById (console)))
       return;
-    var childNodes = console.childNodes;
-    for (var i = childNodes.length; --i >= 0;)
-      console.removeChild (childNodes[i]);
+    console.innerHTML = "";
     Con.linesCount = 0;
   } catch(e){};
 };
@@ -3365,16 +3363,6 @@ Integer.reverseBytes = m$(Integer,"reverseBytes$I",
 
 m$(Integer,"signum$I", function(i){ return i < 0 ? -1 : i > 0 ? 1 : 0; }, 1);
 
-m$(Integer,"min$I$I",
-		function(a,b) { return Math.min(a,b); }, 1);
-
-m$(Integer,"max$I$I",
-		function(a,b) { return Math.max(a,b); }, 1);
-
-
-m$(Integer,"sum$I$I",
-		function(a,b) { return a + b; }, 1);
-
 m$(Integer,"bitCount$I",
 	function(i) {
 	  i = i - ((i >>> 1) & 0x55555555);
@@ -3536,10 +3524,7 @@ function(n){
   return Clazz.new_(Long.c$, [n]);
 }, 1);
 
-// Java 8
 
-Long.min$J$J = Integer.min$I$I;
-Long.max$J$J = Integer.max$I$I;
 Long.sum$J$J = Integer.sum$I$I;
 
 m$(Long,"signum$J", function(i){ return i < 0 ? -1 : i > 0 ? 1 : 0; }, 1);
@@ -3901,7 +3886,7 @@ return(typeof name == "string" ? name.equalsIgnoreCase$S("true") : !!name);
 
 m$(Boolean,"from",
 function(name){
-return Clazz.new_(Boolean.c$, [Boolean.toBoolean(name)]);
+return Boolean.toBoolean(name) ? Boolean.TRUE : Boolean.FALSE;
 }, 1);
 
 Boolean.TRUE=Boolean.prototype.TRUE=Clazz.new_(Boolean.c$, [true]);
@@ -4826,6 +4811,12 @@ Boolean.prototype.objectValue$ =
 Character.prototype.objectValue$ = function() { return this.value };
 
 Character.prototype.intValue$  = function() { return this.value.codePointAt(0) };
+
+Integer.min$I$I = Long.min$J$J = Float.min$F$F = Double.min$D$D = 	function(a,b) { return Math.min(a,b); };
+
+Integer.max$I$I = Long.max$J$J = Float.max$F$F = Double.max$D$D = 	function(a,b) { return Math.max(a,b); };
+
+Integer.sum$I$I = Long.sum$J$J = Float.sum$F$F = Double.sum$D$D = 		function(a,b) { return a + b; };
 
 
 // TODO: Only asking for problems declaring Date. This is not necessary

@@ -244,7 +244,7 @@ public class BasicBorders {
         }
     }
 
-   public static class ButtonBorder extends AbstractBorder implements UIResource {
+   public static class ButtonBorder extends EmptyBorder implements UIResource {
         protected Color shadow;
         protected Color darkShadow;
         protected Color highlight;
@@ -252,43 +252,44 @@ public class BasicBorders {
 
         public ButtonBorder(Color shadow, Color darkShadow,
                             Color highlight, Color lightHighlight) {
-            this.shadow = shadow;
-            this.darkShadow = darkShadow;
-            this.highlight = highlight;
-            this.lightHighlight = lightHighlight;
+        	super(1, 1, 1, 1);
+//            this.shadow = shadow;
+//            this.darkShadow = darkShadow;
+//            this.highlight = highlight;
+//            this.lightHighlight = lightHighlight;
         }
 
-        public void paintBorder(Component c, Graphics g, int x, int y,
-                            int width, int height) {
-            boolean isPressed = false;
-            boolean isDefault = false;
-
-            if (c instanceof AbstractButton) {
-                AbstractButton b = (AbstractButton)c;
-                ButtonModel model = b.getModel();
-
-                isPressed = model.isPressed() && model.isArmed();
-
-                if (c instanceof JButton) {
-                    isDefault = ((JButton)c).isDefaultButton();
-                }
-            }
-            BasicGraphicsUtils.drawBezel(g, x, y, width, height,
-                                   isPressed, isDefault, shadow,
-                                   darkShadow, highlight, lightHighlight);
-        }
-
-        public Insets getBorderInsets(Component c)       {
-            return getBorderInsets(c, new Insets(0,0,0,0));
-        }
-
-        public Insets getBorderInsets(Component c, Insets insets)       {
-            // leave room for default visual
-            insets.top = 2;
-            insets.left = insets.bottom = insets.right = 3;
-            return insets;
-        }
-
+//        public void paintBorder(Component c, Graphics g, int x, int y,
+//                            int width, int height) {
+//            boolean isPressed = false;
+//            boolean isDefault = false;
+//
+//            if (c instanceof AbstractButton) {
+//                AbstractButton b = (AbstractButton)c;
+//                ButtonModel model = b.getModel();
+//
+//                isPressed = model.isPressed() && model.isArmed();
+//
+//                if (c instanceof JButton) {
+//                    isDefault = ((JButton)c).isDefaultButton();
+//                }
+//            }
+//            BasicGraphicsUtils.drawBezel(g, x, y, width, height,
+//                                   isPressed, isDefault, shadow,
+//                                   darkShadow, highlight, lightHighlight);
+//        }
+//
+//        public Insets getBorderInsets(Component c)       {
+//            return getBorderInsets(c, new Insets(0,0,0,0));
+//        }
+//
+//        public Insets getBorderInsets(Component c, Insets insets)       {
+//            // leave room for default visual
+//            insets.top = 2;
+//            insets.left = insets.bottom = insets.right = 3;
+//            return insets;
+//        }
+//
     }
 
     public static class ToggleButtonBorder extends ButtonBorder {
@@ -298,22 +299,22 @@ public class BasicBorders {
             super(shadow, darkShadow, highlight, lightHighlight);
         }
 
-        public void paintBorder(Component c, Graphics g, int x, int y,
-                                int width, int height) {
-                BasicGraphicsUtils.drawBezel(g, x, y, width, height,
-                                             false, false,
-                                             shadow, darkShadow,
-                                             highlight, lightHighlight);
-        }
-
-        public Insets getBorderInsets(Component c)       {
-            return new Insets(2, 2, 2, 2);
-        }
-
-        public Insets getBorderInsets(Component c, Insets insets)       {
-            insets.top = insets.left = insets.bottom = insets.right = 2;
-            return insets;
-        }
+//        public void paintBorder(Component c, Graphics g, int x, int y,
+//                                int width, int height) {
+//                BasicGraphicsUtils.drawBezel(g, x, y, width, height,
+//                                             false, false,
+//                                             shadow, darkShadow,
+//                                             highlight, lightHighlight);
+//        }
+//
+//        public Insets getBorderInsets(Component c)       {
+//            return new Insets(2, 2, 2, 2);
+//        }
+//
+//        public Insets getBorderInsets(Component c, Insets insets)       {
+//            insets.top = insets.left = insets.bottom = insets.right = 2;
+//            return insets;
+//        }
     }
 
     public static class RadioButtonBorder extends ButtonBorder {
@@ -326,34 +327,34 @@ public class BasicBorders {
 
         public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
 
-            if (c instanceof AbstractButton) {
-                AbstractButton b = (AbstractButton)c;
-                ButtonModel model = b.getModel();
-
-                if (model.isArmed() && model.isPressed() || model.isSelected()) {
-                    BasicGraphicsUtils.drawLoweredBezel(g, x, y, width, height,
-                                                        shadow, darkShadow,
-                                                        highlight, lightHighlight);
-                } else {
-                    BasicGraphicsUtils.drawBezel(g, x, y, width, height,
-                                               false, b.isFocusPainted() && b.hasFocus(),
-                                                 shadow, darkShadow,
-                                                 highlight, lightHighlight);
-                }
-            } else {
-                BasicGraphicsUtils.drawBezel(g, x, y, width, height, false, false,
-                                             shadow, darkShadow, highlight, lightHighlight);
-            }
+//            if (c instanceof AbstractButton) {
+//                AbstractButton b = (AbstractButton)c;
+//                ButtonModel model = b.getModel();
+//
+//                if (model.isArmed() && model.isPressed() || model.isSelected()) {
+//                    BasicGraphicsUtils.drawLoweredBezel(g, x, y, width, height,
+//                                                        shadow, darkShadow,
+//                                                        highlight, lightHighlight);
+//                } else {
+//                    BasicGraphicsUtils.drawBezel(g, x, y, width, height,
+//                                               false, b.isFocusPainted() && b.hasFocus(),
+//                                                 shadow, darkShadow,
+//                                                 highlight, lightHighlight);
+//                }
+//            } else {
+//                BasicGraphicsUtils.drawBezel(g, x, y, width, height, false, false,
+//                                             shadow, darkShadow, highlight, lightHighlight);
+//            }
         }
 
-        public Insets getBorderInsets(Component c)       {
-            return getBorderInsets(c, new Insets(0,0,0,0));
-        }
-
-        public Insets getBorderInsets(Component c, Insets insets)       {
-            insets.top = insets.left = insets.bottom = insets.right = 2;
-            return insets;
-        }
+//        public Insets getBorderInsets(Component c)       {
+//            return getBorderInsets(c, new Insets(0,0,0,0));
+//        }
+//
+//        public Insets getBorderInsets(Component c, Insets insets)       {
+//            insets.top = insets.left = insets.bottom = insets.right = 2;
+//            return insets;
+//        }
     }
 
     public static class MenuBarBorder extends AbstractBorder implements UIResource {
