@@ -40,25 +40,21 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import javajs.api.GenericZipInputStream;
-import javajs.api.GenericZipTools;
-import javajs.api.Interface;
 import javajs.api.ZInputStream;
-
-import org.apache.tools.bzip2.CBZip2InputStreamFactory;
 
 
 /**
  * Note the JSmol/HTML5 must use its own version of java.util.zip.ZipOutputStream.
  * 
  */
-public class ZipTools implements GenericZipTools {
+public class ZipTools {//implements GenericZipTools {
 
-  public ZipTools() {
-    // for reflection
-  }
-  
-  @Override
-  public ZInputStream newZipInputStream(InputStream is) {
+//  public ZipTools() {
+//    // for reflection
+//  }
+//  
+  //@Override
+  public static ZInputStream newZipInputStream(InputStream is) {
     return newZIS(is);
   }
 
@@ -83,10 +79,11 @@ public class ZipTools implements GenericZipTools {
    * @param binaryFileList
    *        |-separated list of files that should be saved as xx xx xx hex byte
    *        strings. The directory listing is appended with ":asBinaryString"
+   * @param exclude 
    * @param fileData
    */
-  @Override
-  public void getAllZipData(InputStream is, String[] subfileList,
+//  @Override
+  public static void getAllZipData(InputStream is, String[] subfileList,
                                           String name0, String binaryFileList, String exclude,
                                           Map<String, String> fileData) {
     ZipInputStream zis = (ZipInputStream) newZIS(is);
@@ -129,7 +126,7 @@ public class ZipTools implements GenericZipTools {
     fileData.put("#Directory_Listing", listing.toString());
   }
 
-  private String getBinaryStringForBytes(byte[] bytes) {
+  private static String getBinaryStringForBytes(byte[] bytes) {
     SB ret = new SB();
     for (int i = 0; i < bytes.length; i++)
       ret.append(Integer.toHexString(bytes[i] & 0xFF)).appendC(' ');
@@ -149,13 +146,13 @@ public class ZipTools implements GenericZipTools {
    *        for Pmesh
    * @return directory listing or subfile contents
    */
-  @Override
-  public Object getZipFileDirectory(BufferedInputStream bis, String[] list,
+//  @Override
+  public static Object getZipFileDirectory(BufferedInputStream bis, String[] list,
                                     int listPtr, boolean asBufferedInputStream) {
     SB ret;
     if (list == null || listPtr >= list.length)
       return getZipDirectoryAsStringAndClose(bis);
-    bis = Rdr.getPngZipStream(bis, true);
+    bis = getPngZipStream(bis, true);
     String fileName = list[listPtr];
     ZipInputStream zis = new ZipInputStream(bis);
     ZipEntry ze;
@@ -205,15 +202,15 @@ public class ZipTools implements GenericZipTools {
     }
   }
 
-  @Override
-  public byte[] getZipFileContentsAsBytes(BufferedInputStream bis,
+//  @Override
+  public static byte[] getZipFileContentsAsBytes(BufferedInputStream bis,
                                           String[] list, int listPtr) {
     byte[] ret = new byte[0];
     String fileName = list[listPtr];
     if (fileName.lastIndexOf("/") == fileName.length() - 1)
       return ret;
     try {
-      bis = Rdr.getPngZipStream(bis, true);
+      bis = getPngZipStream(bis, true);
       ZipInputStream zis = new ZipInputStream(bis);
       ZipEntry ze;
       while ((ze = zis.getNextEntry()) != null) {
@@ -228,8 +225,8 @@ public class ZipTools implements GenericZipTools {
     return ret;
   }
   
-  @Override
-  public String getZipDirectoryAsStringAndClose(BufferedInputStream bis) {
+//  @Override
+  public static String getZipDirectoryAsStringAndClose(BufferedInputStream bis) {
     SB sb = new SB();
     String[] s = new String[0];
     try {
@@ -243,8 +240,8 @@ public class ZipTools implements GenericZipTools {
     return sb.toString();
   }
 
-  @Override
-  public String[] getZipDirectoryAndClose(BufferedInputStream bis,
+//  @Override
+  public static String[] getZipDirectoryAndClose(BufferedInputStream bis,
                                                  String manifestID) {
     String[] s = new String[0];
     try {
@@ -256,10 +253,10 @@ public class ZipTools implements GenericZipTools {
     return s;
   }
 
-  private String[] getZipDirectoryOrErrorAndClose(BufferedInputStream bis,
+  private static String[] getZipDirectoryOrErrorAndClose(BufferedInputStream bis,
                                                   String manifestID)
       throws IOException {
-    bis = Rdr.getPngZipStream(bis, true);
+    bis = getPngZipStream(bis, true);
     Lst<String> v = new Lst<String>();
     ZipInputStream zis = new ZipInputStream(bis);
     ZipEntry ze;
@@ -281,39 +278,135 @@ public class ZipTools implements GenericZipTools {
     return Rdr.fixUTF(Rdr.getLimitedStreamBytes(is, -1));
   }
 
-  @Override
-  public InputStream newGZIPInputStream(InputStream is) throws IOException {
+//  @Override
+  public static InputStream newGZIPInputStream(InputStream is) throws IOException {
     return new BufferedInputStream(new GZIPInputStream(is, 512));
   }
 
-  @Override
-  public InputStream newBZip2InputStream(InputStream is) throws IOException {
-    return new BufferedInputStream(((CBZip2InputStreamFactory) Interface.getInterface("org.apache.tools.bzip2.CBZip2InputStreamFactory")).getStream(is));
+//  @Override
+  public static InputStream newBZip2InputStream(InputStream is) throws IOException {
+    is.read(new byte[2], 0, 2);
+    return new BufferedInputStream(new CBZip2InputStream(is));
   }
 
-  @Override
-  public BufferedInputStream getUnGzippedInputStream(byte[] bytes) {
+//  @Override
+  public static BufferedInputStream getUnGzippedInputStream(byte[] bytes) {
     try {
-      return Rdr.getUnzippedInputStream(this, Rdr.getBIS(bytes));
+      return getUnzippedInputStream(Rdr.getBIS(bytes));
     } catch (Exception e) {
       return null;
     }
   }
 
-  @Override
-  public void addZipEntry(Object zos, String fileName) throws IOException {
+  public static String getGzippedBytesAsString(byte[] bytes) {
+	String s;
+    try {
+      BufferedInputStream bis = getUnGzippedInputStream(bytes);
+      s = getStreamAsString(bis);
+      bis.close();
+    } catch (Exception e) {
+      s = "";
+    }
+    return s;
+  }
+
+ 
+  /**
+   * Drill down into a GZIP stack until no more layers.
+   * @param bis
+   * @return non-gzipped buffered input stream.
+   * 
+   * @throws IOException
+   */
+  public static BufferedInputStream getUnzippedInputStream(BufferedInputStream bis) throws IOException {
+    while (Rdr.isGzipS(bis))
+      bis = new BufferedInputStream(ZipTools.newGZIPInputStream(bis));
+    return bis;
+  }
+
+  public static BufferedInputStream getUnzippedInputStreamBZip2(BufferedInputStream bis) throws IOException  {
+    while (Rdr.isBZip2S(bis))
+      bis = new BufferedInputStream(newBZip2InputStream(bis));
+    return bis;
+  }
+
+
+  /**
+   * Retrieve the two numbers in a PNG iTXt tag indicating the 
+   * file pointer for the start of the ZIP data as well as its length.
+   * 
+   * @param bis
+   * @param pt_count
+   */
+  static void getPngZipPointAndCount(BufferedInputStream bis, int[] pt_count) {
+    bis.mark(75);
+    try {
+      byte[] data = Rdr.getLimitedStreamBytes(bis, 74);
+      bis.reset();
+      int pt = 0;
+      for (int i = 64, f = 1; --i > 54; f *= 10)
+        pt += (data[i] - '0') * f;
+      int n = 0;
+      for (int i = 74, f = 1; --i > 64; f *= 10)
+        n += (data[i] - '0') * f;
+      pt_count[0] = pt;
+      pt_count[1] = n;
+    } catch (Throwable e) {
+      pt_count[1] = 0;
+    }
+  }
+
+  /**
+   * Either advance a PNGJ stream to its zip file data or pull out the ZIP data
+   * bytes and create a new stream for them from which a ZIP utility can start
+   * extracting files.
+   * 
+   * @param bis
+   * @param asNewStream  
+   * @return new buffered ByteArrayInputStream, possibly with no data if there is an error
+   */
+  public static BufferedInputStream getPngZipStream(BufferedInputStream bis, boolean asNewStream) {
+    if (!Rdr.isPngZipStream(bis))
+      return bis;
+    byte[] data = new byte[0];
+    bis.mark(75);
+    try {
+      int pt_count[] = new int[2];
+      getPngZipPointAndCount(bis, pt_count);
+      if (pt_count[1] != 0) {
+        int pt = pt_count[0];
+        while (pt > 0)
+          pt -= bis.skip(pt);
+        if (!asNewStream)
+          return bis;
+        data = Rdr.getLimitedStreamBytes(bis, pt_count[1]);
+      }
+    } catch (Throwable e) {
+    } finally {
+      try {
+        if (asNewStream)
+          bis.close();
+      } catch (Exception e) {
+        // ignore
+      }
+    }
+    return Rdr.getBIS(data);
+  }
+
+  //@Override
+  public static void addZipEntry(Object zos, String fileName) throws IOException {
     ((ZipOutputStream) zos).putNextEntry(new ZipEntry(fileName));
   }
 
-  @Override
-  public void closeZipEntry(Object zos) throws IOException {
+//  @Override
+  public static void closeZipEntry(Object zos) throws IOException {
     ((ZipOutputStream) zos).closeEntry();
   }
 
-  @Override
-  public Object getZipOutputStream(Object bos) {
+  //@Override
+  public static Object getZipOutputStream(Object bos) {
 //    /**
-//     * xxxxj2sNative
+//     * @j2sNative
 //     * 
 //     *            return javajs.api.Interface.getInterface(
 //     *            "java.util.zip.ZipOutputStream").setZOS(bos);
@@ -324,15 +417,15 @@ public class ZipTools implements GenericZipTools {
 //    }
   }
 
-  @Override
-  public int getCrcValue(byte[] bytes) {
+  //@Override
+  public static int getCrcValue(byte[] bytes) {
     CRC32 crc = new CRC32();
     crc.update(bytes, 0, bytes.length);
     return (int) crc.getValue();
   }
 
-  @Override
-  public void readFileAsMap(BufferedInputStream bis, Map<String, Object> bdata, String name) {
+  //@Override
+  public static void readFileAsMap(BufferedInputStream bis, Map<String, Object> bdata, String name) {
   	readFileAsMapStatic(bis, bdata, name);
   }
 
@@ -361,8 +454,8 @@ public class ZipTools implements GenericZipTools {
     }
   }
 
-  @Override
-  public String cacheZipContents(BufferedInputStream bis,
+  //@Override
+  public static String cacheZipContents(BufferedInputStream bis,
                                         String fileName,
                                         Map<String, Object> cache, 
                                         boolean asByteArray) {
@@ -375,7 +468,7 @@ public class ZipTools implements GenericZipTools {
 	 * @param fileName may end with "/" for a prefix or contain "|xxxx.xxx" for a specific file or be null
 	 * @param cache
 	 * @param asByteArray
-	 * @return
+	 * @return contents as a String
 	 */
   public static String cacheZipContentsStatic(BufferedInputStream bis,
 			String fileName, Map<String, Object> cache, boolean asByteArray) {
@@ -431,7 +524,7 @@ public class ZipTools implements GenericZipTools {
     try {
       if (Rdr.isPngZipStream(bis)) {
         int pt_count[] = new int[2];
-        Rdr.getPngZipPointAndCount(bis, pt_count);
+        getPngZipPointAndCount(bis, pt_count);
         if (pt_count[1] != 0)
           return deActivatePngZipB(Rdr.getLimitedStreamBytes(bis, pt_count[0]));
       }
@@ -456,7 +549,5 @@ public class ZipTools implements GenericZipTools {
       bytes[51] = 32;
     return bytes;
   }
-
-
 
 }

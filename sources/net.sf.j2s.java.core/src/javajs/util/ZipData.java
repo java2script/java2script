@@ -25,52 +25,32 @@
 
 package javajs.util;
 
-import java.io.BufferedInputStream;
-
-import javajs.api.GenericZipTools;
-
-
-
-
 public class ZipData {
-  boolean isEnabled = true;
-  byte[] buf;
-  int pt;
-  int nBytes;
-  
-  public ZipData(int nBytes) {
-    this.nBytes = nBytes;
-  }
-  
-  public int addBytes(byte[] byteBuf, int nSectorBytes, int nBytesRemaining) {
-    if (pt == 0) {
-      if (!Rdr.isGzipB(byteBuf)) {
-        isEnabled = false;
-        return -1;
-      }
-      buf = new byte[nBytesRemaining];
-    }
-    int nToAdd = Math.min(nSectorBytes, nBytesRemaining);
-    System.arraycopy(byteBuf, 0, buf, pt, nToAdd);
-    pt += nToAdd;
-    return nBytesRemaining - nToAdd;
-  }    
+	boolean isEnabled = true;
+	byte[] buf;
+	int pt;
+	int nBytes;
 
-  public void addTo(GenericZipTools jzt, SB data) {
-    data.append(getGzippedBytesAsString(jzt, buf));
-  }
+	public ZipData(int nBytes) {
+		this.nBytes = nBytes;
+	}
 
-  static String getGzippedBytesAsString(GenericZipTools jzt, byte[] bytes) {
-    try {
-      BufferedInputStream bis = jzt.getUnGzippedInputStream(bytes);
-      String s = ZipTools.getStreamAsString(bis);
-      bis.close();
-      return s;
-    } catch (Exception e) {
-      return "";
-    }
-  }
+	public int addBytes(byte[] byteBuf, int nSectorBytes, int nBytesRemaining) {
+		if (pt == 0) {
+			if (!Rdr.isGzipB(byteBuf)) {
+				isEnabled = false;
+				return -1;
+			}
+			buf = new byte[nBytesRemaining];
+		}
+		int nToAdd = Math.min(nSectorBytes, nBytesRemaining);
+		System.arraycopy(byteBuf, 0, buf, pt, nToAdd);
+		pt += nToAdd;
+		return nBytesRemaining - nToAdd;
+	}
 
- 
+	public void addTo(SB data) {
+		data.append(ZipTools.getGzippedBytesAsString(buf));
+	}
+
 }
-
