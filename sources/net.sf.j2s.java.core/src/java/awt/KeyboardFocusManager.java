@@ -148,7 +148,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 	/**
 	 * Initialize JNI field and method IDs
 	 */
-	private static native void initIDs();
+//	private static native void initIDs();
 
 //    private static final PlatformLogger log = PlatformLogger.getLogger("java.awt.KeyboardFocusManager");
 
