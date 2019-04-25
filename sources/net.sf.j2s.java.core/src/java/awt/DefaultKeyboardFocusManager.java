@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Set;
 
+import javax.swing.JApplet;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 
@@ -111,8 +112,19 @@ public class DefaultKeyboardFocusManager extends KeyboardFocusManager {
 		}
 	}
 
+	/**
+	 * SwingJS treats JApplet as a window. I know... just how it is.
+	 * 
+	 * @param window
+	 * @return
+	 */
 	private Window getOwningFrameDialog(Window window) {
-		while (window != null && !(window instanceof JSFrame || window instanceof JSDialog)) {
+		@SuppressWarnings("unused")
+		Object owindow;
+		while (window != null && !(
+				   (owindow = window) instanceof JApplet
+				|| window instanceof JSFrame 
+				|| window instanceof JSDialog)) {
 			window = (Window) window.getParent();
 		}
 		return window;
@@ -238,25 +250,27 @@ public class DefaultKeyboardFocusManager extends KeyboardFocusManager {
 			if (targetAppContext.isDisposed()) {
 				return false;
 			}
-			SunToolkit.postEvent(targetAppContext, se);
-			if (EventQueue.isDispatchThread()) {
-				EventDispatchThread edt = (EventDispatchThread) Thread.currentThread();
-				edt.pumpEvents(SentEvent.ID, new Conditional() {
-					public boolean evaluate() {
-						return !se.dispatched && !targetAppContext.isDisposed();
-					}
-				});
-			} else {
-				synchronized (se) {
-					while (!se.dispatched && !targetAppContext.isDisposed()) {
-						try {
-							se.wait(1000);
-						} catch (InterruptedException ie) {
-							break;
-						}
-					}
-				}
-			}
+			// SwingJS - do we care?
+			se.dispatch();
+//			SunToolkit.postEvent(targetAppContext, se);
+//			if (EventQueue.isDispatchThread()) {
+//				EventDispatchThread edt = (EventDispatchThread) Thread.currentThread();
+//				edt.pumpEvents(SentEvent.ID, new Conditional() {
+//					public boolean evaluate() {
+//						return !se.dispatched && !targetAppContext.isDisposed();
+//					}
+//				});
+//			} else {
+//				synchronized (se) {
+//					while (!se.dispatched && !targetAppContext.isDisposed()) {
+//						try {
+//							se.wait(1000);
+//						} catch (InterruptedException ie) {
+//							break;
+//						}
+//					}
+//				}
+//			}
 		}
 		return se.dispatched;
 	}
