@@ -1,0 +1,168 @@
+<project name="JSmol" default="toJs" basedir=".">
+
+	<!-- 
+	
+	An important issue with SwingJS is that it requires several hundred Java
+	classes to be loaded. While in development mode this may be no problem, 
+	it is not desirable for distribution. 
+	
+	To solve this problem, SwingJS is designed to read one or more "core" 
+	files when loading. (And, in the future, when accessing specific packages
+	or classes, but that work has not been completed, as of 2019.05.) 
+	
+	The core file is simply a Google Closure Compiler minified concatenation
+	of all or most of the files needed for your application. This compiler is 
+	in the tools folder you need to have copied to your project from the 
+	sources/net.sf.j2s.java.core/dist directory of the java2script GitHub project. 
+	
+	This ANT task, build-core.xml, creates a core file in site/swingjs/j2s/core/ 
+	with the name core_xxx.js and its minified version, core_xxx.z.js, where you
+	can indicate what "_xxx" is, below. (The _ is not significant, but I recommend it.)  
+	
+	This core file can be used to replace coreswingjs.z.js in the default
+	loading sequence. SwingJS will look for the value of the Info.core 
+	key passed to the system from the HTML page. Possible values:
+	
+	core: "none"     // do not use any core files - useful for debugging and core construction
+	core: null       // (or just no "core" entry) - use coreswingjs.z.js
+	core: "_xxx"     // use a core_xxx.z.js file that you have created
+	
+	Creating a customized core_xxx file
+	- - - - - - - - - - - - - - - - - -
+	
+	1) Prepare _j2sclasslist.txt, a list of site/swingjs/j2s files for inclusion.
+	
+	You can do this by:
+	
+	   a) Just creating it by hand.
+	   b) Fully exercising your application via the site/*.html file
+	      that is produced by the j2s transpiler and based on template.html 
+	      in your project directory, then clicking the get _j2sclasslist.txt link.
+	   c) appending to the _j2sclasslist.txt that was used to create coreswingjs.z.js
+	      (provided in the distribution).
+	   d) Some combination of the above, or any other process of your design.
+	   
+	_j2sclasslist.txt can have duplicate entries. build-core.xml will ignore the duplicates.
+	
+	If you need to, you can provide every file needed by your application 
+	in _j2sclasslist.txt. However, that is not really necesssary if you are willing to 
+	put the full swingjs/j2s directory on your site, allowing occasional additional 
+	classes to be loaded on demand. It's totally up to you. 
+	
+	2. Edit build-core.xml, providing a meaningful core.name parameter, such as "_project".
+	
+	3. Run build-core.xml. This will create the swingjs/j2s/core/ file. 
+	
+	4. In your HTML5 file, indicate
+	
+	     Info = {
+	     ...
+	     core: "_project",
+	     ...
+	     }
+	     
+    If you change the project template.html file to this and then do a 
+    Project...Clean Build, all the test html files in site/ will be updated. 
+	
+	That's it! 
+	
+	If you want to not use the core at any time during testing, add
+	
+	?j2snocore
+	
+	to the URL. 
+	
+	If you want to see all the files being loaded, just to see if anything unexpected
+	is being loaded, use
+	
+	?j2sverbose
+	
+	Any combination of these is fine, either in the query or the # reference:
+		
+	?j2snocore j2sverbose
+	
+	or
+	
+	#j2snocore,j2sverbose
+	
+	for example.
+
+	Bob Hanson hansonr@stolaf.edu 2015.05.11
+		
+	-->
+	
+    <property name="core.name" value="swingjs" />
+	
+	
+   <property name="j2s.class.list.file" value="_j2sclasslist.txt" />	
+   <property name="site.path" value="site/swingjs" />
+
+   <target name="toJs" id="toJs">
+  			
+  	<!-- create a NON svn local directory only containing JS files
+  	
+  	<echo>Deleting the site directory.</echo>
+   	 	<delete quiet="true" dir="site" />
+    -->
+   	
+   	<!-- make core files -->
+
+   	<echo>creating and compressing core files - warnings are OK; "does not exist" is trouble</echo>
+   	<echo>reading core class list from file coreclasses</echo>   	
+   	<loadresource property="coreclasses">
+       <file file="${j2s.class.list.file}"/>
+    </loadresource>
+    <resourcecount property="line.count" count="0" when="eq">
+      <tokens>
+        <concat>
+          <filterchain>
+            <tokenfilter>
+              <stringtokenizer delims="${line.separator}" />
+            </tokenfilter>
+          </filterchain>
+          <propertyresource name="coreclasses" />
+        </concat>
+      </tokens>
+    </resourcecount>
+    <echo message="${j2s.class.list.file} has ${line.count} unique lines" />
+   	
+   	<!-- not including			core/coreswingjs.js -->
+   	
+    <antcall target="call-core">
+        <param name="call-core.name" value="${core.name}" />
+        <param name="call-core.list" value="
+         	${coreclasses}
+        	" />
+    </antcall>
+   	
+
+  </target>
+
+
+	  <target name="call-core" id="call-core">
+	   	<echo>......Creating core${call-core.name}.js</echo>
+	   	<concat destfile="${site.path}/js/core/tmp.js">
+	   		<filelist dir="${site.path}/j2s" files="${call-core.list}" />
+	   	</concat> 
+
+	  	<replace dir="${site.path}/js/core" includes="tmp.js" token="Clazz." value="Clazz_"/>
+	  	<replace dir="${site.path}/js/core" includes="tmp.js" token="Clazz__" value="Clazz._"/>
+	   	<echo>......Generating ${site.path}/j2s/core/core${call-core.name}.js</echo> 	
+	   	<concat destfile="${site.path}/j2s/core/core${call-core.name}.js"><filelist dir="${site.path}/js" files="
+	   		core/coretop2.js
+	   		core/tmp.js
+	   		core/corebottom2.js
+	   		" />
+	   	</concat>
+	   	<echo>......Generating ${site.path}/j2s/core/core${call-core.name}.z.js</echo> 	
+	   	<java jar="jars/closure_compiler.jar" fork="true" dir="${site.path}/j2s/core" failonerror="false">
+	   		<arg line="--js core${call-core.name}.js --js_output_file core${call-core.name}.z.js" />
+	    </java>
+	 	<delete quiet="true" file="${site.path}/js/core/tmp.js" />
+	  	<length file="${site.path}/j2s/core/core${call-core.name}.z.js" property="core.length"/>
+		<echo>... ${site.path}/j2s/core/core${call-core.name}.z.js created [${core.length} bytes]</echo>
+	  </target>
+
+		
+	
+</project>
