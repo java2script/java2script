@@ -2424,15 +2424,10 @@ public abstract class ResourceBundle {
 				// }
 			} else if (format.equals("java.properties")) {
 				final String resourceName = toResourceName0(bundleName, "properties");
-				if (resourceName == null) {
+				InputStream stream;
+				if (resourceName == null || (stream = JSUtil.getCachedResourceAsStream(resourceName)) == null)
 					return null;
-				}
-				// final ClassLoader ClassLoader = loader;
-				// final boolean reloadFlag = reload;
-				String data = JSUtil.getJavaResource(resourceName, false, true, false);
 
-				InputStream stream = (data == null ? null
-						: new BufferedInputStream(new ByteArrayInputStream(data.getBytes())));
 				// // try {
 				// stream = AccessController.doPrivileged(
 				// new PrivilegedAction<InputStream>() {
