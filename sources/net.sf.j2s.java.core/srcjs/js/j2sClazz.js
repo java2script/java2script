@@ -3222,25 +3222,117 @@ Math.signum||(Math.signum=function(d){return(d==0.0||isNaN(d))?d:d < 0 ? -1 : 1}
 
 Math.scalb||(Math.scalb=function(d,scaleFactor){return d*Math.pow(2,scaleFactor)});
 
-//the following Math functions rely on datatypes nonexistant in javascript
-Math.nextAfter||(Math.nextAfter=function(start,direction){return 0});
-Math.nextUp||(Math.nextUp=function(d){return 0});
-Math.ulp||(Math.ulp=function(d){return 0});
-Math.getExponent||(Math.getExponent=function(d){return 0});
-Math.IEEEremainder||(Math.IEEEremainder=function (x, y) {
-	if (Double.isNaN$D(x) || Double.isNaN$D(y) || Double.isInfinite$D(x) || y == 0) 
-		return NaN;
-	if (!Double.isInfinite$D(x) && Double.isInfinite$D(y))
-		return x;
-	var modxy = x % y;
-	if (modxy == 0) return modxy;
-	var rem = modxy - Math.abs(y) * Math.signum(x);
-	if (Math.abs(rem) == Math.abs(modxy)) {
-		var div = x / y;
-		return (Math.abs(Math.round(div)) > Math.abs(div) ? rem : modxy);
+//var 
+a64 = null, a32 = null, i32 = null, i64 = null;
+
+Math.nextAfter||
+(Math.nextAfter=function(start,direction){
+    if (isNaN(start) || isNaN(direction))
+    	return NaN;
+    if (direction == start)
+    	return start;
+    if (start == Double.MAX_VALUE && direction == Double.POSITIVE_INFINITY)
+    	return Double.POSITIVE_INFINITY;
+    if (start == -Double.MAX_VALUE && direction == Double.NEGATIVE_INFINITY)
+    	return Double.NEGATIVE_INFINITY;
+    if (start == Double.POSITIVE_INFINITY && direction == Double.NEGATIVE_INFINITY)
+    	return Double.MAX_VALUE;
+    if (start == Double.NEGATIVE_INFINITY && direction == Double.POSITIVE_INFINITY)
+    	return -Double.MAX_VALUE;
+    if (start == 0) 
+    	return (direction > 0 ? Double.MIN_VALUE : -Double.MIN_VALUE);
+
+	if (!a64) {
+		a64 = new Float64Array(1);
+		i64 = new Uint32Array(a64.buffer);
 	}
-	return (Math.abs(rem) < Math.abs(modxy) ? rem : modxy);
+	a64[0] = start;
+	var i0 = i64[0];
+	var i1 = i64[1];
+	var carry;
+	if ((direction > start) == (start >= 0)) {
+		i64[0]++;
+		carry = (i64[0] == 0 ? 1 : 0);
+	} else {
+		i64[0]--;
+		carry = (i64[0] == 4294967295 ? -1 : 0);
+	} 
+	if (carry)
+		i64[1]+=carry;
+	return a64[0];
 });
+
+Math.nextAfter$D$D = Math.nextAfter;
+
+Math.nextAfter$F$D =function(start,direction){
+    if (isNaN(start) || isNaN(direction))
+    	return NaN;
+    if (direction == start)
+    	return start;
+    if (start == Float.MAX_VALUE && direction == Float.POSITIVE_INFINITY)
+    	return Float.POSITIVE_INFINITY;
+    if (start == -Float.MAX_VALUE && direction == Float.NEGATIVE_INFINITY)
+    	return Float.NEGATIVE_INFINITY;
+    if (start == Float.POSITIVE_INFINITY && direction == Float.NEGATIVE_INFINITY)
+    	return Float.MAX_VALUE;
+    if (start == Float.NEGATIVE_INFINITY && direction == Float.POSITIVE_INFINITY)
+    	return -Float.MAX_VALUE;
+    if (start == 0 && direction < 0)
+    	return -Float.MIN_VALUE;
+    if (start == 0) 
+    	return (direction > 0 ? Float.MIN_VALUE : -Float.MIN_VALUE);
+    
+	if (!i32) {
+		a32 = new Float32Array(1);
+		i32 = new Int32Array(a32.buffer);
+	}
+	a32[0] = start;
+	i32[0] += ((direction > start) == (start >= 0) ? 1 : -1); 
+	return a32[0];
+};
+
+
+Math.nextUp||(Math.nextUp=function(d){ return Math.nextAfter(d, Double.POSITIVE_INFINITY); });
+
+Math.nextUP$D=Math.nextUp;
+
+Math.nextUp$F = function(f){ return Math.nextAfter$F$D(f, Double.NEGATIVE_INFINITY); };
+
+
+Math.nextDown||(Math.nextDown=function(d){ return Math.nextAfter(d, Double.NEGATIVE_INFINITY); });
+
+Math.nextDown$D=Math.nextDown;
+
+Math.nextDown$F = function(f){ return Math.nextAfter$F$D(f, Double.NEGATIVE_INFINITY); };
+
+
+Math.ulp||(Math.ulp=function(d){
+        if (isNaN(d)) {
+            return Double.NaN;
+        } 
+        if (isInfinite(d)) {
+            return Double.POSITIVE_INFINITY;
+        } 
+        if (d == Double.MAX_VALUE || d == -Double.MAX_VALUE) {
+            return Math.pow(2, 971);
+        }
+        return Math.nextUp(Math.abs(d));
+});
+
+Math.ulp$D = Math.ulp;
+
+Math.ulp$F = function(f){
+    if (isNaN(f)) {
+        return Float.NaN;
+    } 
+    if (isInfinite(f)) {
+        return Float.POSITIVE_INFINITY;
+    } 
+    if (f == Float.MAX_VALUE || f == -Float.MAX_VALUE) {
+        return Math.pow(2, 104);
+    }
+    return Math.nextUp$F(Math.abs(f));
+};
 
 
 Clazz._setDeclared("java.lang.Number", java.lang.Number=Number);
@@ -3695,18 +3787,18 @@ return"class java.lang.Float";
 return Clazz._floatToString(this.valueOf());
 };
 
-Clazz._a32 = null;
+var a32, i32;
 
 Float.floatToIntBits$F = function(f) {
-var a = Clazz._a32 || (Clazz._a32 = new Float32Array(1));
-a[0] = f;
-return new Int32Array(a.buffer)[0]; 
+i32 || (a32 = new Float32Array(1), i32 = new Int32Array(a32.buffer));
+a32[0] = f;
+return i32[0]; 
 }
 
 Float.intBitsToFloat$I = function(i) {
-	var a = Clazz._i32 || (Clazz._i32 = new Int32Array(1));
-	a[0] = i;
-	return new Float32Array(a.buffer)[0]; 
+	i32 || (a32 = new Float32Array(1), i32 = new Int32Array(a32.buffer));
+	i32[0] = i;
+	return a32[0]; 
 }
 
 Float.serialVersionUID=Float.prototype.serialVersionUID=-2671257302660747028;
