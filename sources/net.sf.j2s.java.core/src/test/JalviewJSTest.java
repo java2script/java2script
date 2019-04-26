@@ -18,6 +18,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
@@ -228,6 +230,14 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 
 		});
 
+		frame.addMouseWheelListener(new MouseWheelListener() {
+
+			@Override
+			public void mouseWheelMoved(MouseWheelEvent e) {
+	
+					System.out.println("mouse wheel " + e.getModifiers() + " " + e.isShiftDown());
+			}});
+		
 		frame.setVisible(true);
 
 //		JDesktopPane d = new JDesktopPane();

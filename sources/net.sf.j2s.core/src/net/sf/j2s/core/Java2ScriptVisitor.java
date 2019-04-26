@@ -5230,16 +5230,19 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			return false;
 		Object constValue = getConstant(node);
 		StringBuffer sb = null;
-		if (constValue != null
-				&& (constValue instanceof Number || constValue instanceof Character || constValue instanceof Boolean)) {
+		if (constValue instanceof Number) {
 			sb = new StringBuffer();
-			if (constValue instanceof Character) {
+			String s = constValue.toString();
+			if (s.startsWith("-") && buffer.charAt(buffer.length() - 1) == '-')
+				sb.append(' ');
+			sb.append(s);
+		} else if (constValue instanceof Character || constValue instanceof Boolean) {
+			sb = new StringBuffer();
+  			if (constValue instanceof Character) {
 				sb.append('"');
 				addChar(((Character) constValue).charValue(), sb);
 				sb.append('"');
 			} else {
-				// Number or Boolean
-
 				sb.append(constValue);
 			}
 		} else if (constValue instanceof String) {

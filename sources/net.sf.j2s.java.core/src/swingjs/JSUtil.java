@@ -5,6 +5,7 @@ import java.awt.JSComponent;
 import java.awt.Toolkit;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -201,8 +202,30 @@ public class JSUtil {
 				: path.endsWith(".css") ? processCSS(sdata, path) : path
 						.endsWith(".js") ? processJS(sdata, resourceName) : sdata);
 	}
+	
+	public static InputStream getCachedResourceAsStream(String name) {
+		
+		
+//		, isjavapath false, docachetrue, doprocefalse)
+		
+		System.out.println("JSUtil getting Java resource " + name);
+		String path = J2S.getResourcePath(name, false);
+		if (path == null)
+			return null;
+		InputStream stream;
+		Object data = getCachedFileData(path);
+		if (data == null) {
+			stream = getResourceAsStream(name);
+			data = /** @j2sNative stream.$in.buf ||*/null;
+		} else {
+			stream = new BufferedInputStream(new ByteArrayInputStream((byte[]) data));
+		}
+		if (stream != null && useCache)
+			cacheFileData(path, data);
+		return stream;
+	}
 
-	static void cacheFileData(String path, Object data) {
+	public static void cacheFileData(String path, Object data) {
 		if (data == null) {
 			System.out.println("JSUtil releasing cached bytes for " + path);
 			getFileCache().remove(path);
@@ -437,7 +460,8 @@ public class JSUtil {
 	public static InputStream getResourceAsStream(String name) {
 		return Toolkit.getDefaultToolkit().getClass().getClassLoader().getResourceAsStream(name);
 	}
-
+	
+	
 	/**
 	 * All classes created by Clazz have static class loaders which are just minimal
 	 * objects in Clazz var inF.

@@ -35,7 +35,7 @@ public class Test_Applet_1 extends JApplet implements AdjustmentListener, Proper
 		JScrollBar bar = new JScrollBar(JScrollBar.HORIZONTAL);
 		bar.addAdjustmentListener(this);
 		bar.addPropertyChangeListener(this);
-		JLabel label = new JLabel("hello");
+		JLabel label = new JLabel("hello\ud83d\udd01");
 		((JPanel) getContentPane()).setBorder(new LineBorder(Color.blue,2));
 		label.setBorder(new LineBorder(Color.red, 3));
 		label.setBounds(0, 60, 200, 60);

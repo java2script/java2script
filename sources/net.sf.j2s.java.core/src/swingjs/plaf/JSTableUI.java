@@ -80,6 +80,7 @@ import javax.swing.table.TableColumnModel;
 import sun.swing.DefaultLookup;
 import sun.swing.SwingUtilities2;
 import sun.swing.UIAction;
+import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 
 /**
@@ -133,6 +134,11 @@ public class JSTableUI extends JSPanelUI {
 		setUIDisabled(getHeaderUI().setUIDisabled(false));
 	}
 
+	@Override
+	public void endValidate() {
+		// no need to update HTML upon validation of a table. 
+	}
+	
 	@Override
 	public void update(Graphics g, JComponent c) {
 		if (isUIDisabled)

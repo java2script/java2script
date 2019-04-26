@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.HttpsURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Hashtable;
@@ -20,8 +19,14 @@ import javajs.api.js.J2SObjectInterface;
  */
 public class AjaxURLConnection extends HttpURLConnection {
 	
-  public static class AjaxHttpsURLConnection extends AjaxURLConnection implements HttpsURLConnection {
+  public static class AjaxHttpsURLConnection extends AjaxURLConnection {
 
+	static {
+		/**
+		 * @j2sNative  C$.implementz = [Clazz.load("javax.net.ssl.HttpsURLConnection")];
+		 * 
+		 */
+	}
 	protected AjaxHttpsURLConnection(URL url) {
 		super(url);
 	}
@@ -154,8 +159,9 @@ public class AjaxURLConnection extends HttpURLConnection {
 		return bis;
 	}
 
+	@SuppressWarnings("unused")
 	private void setCachedStream(URL url) {
-		Object data = url._streamData;
+		Object data = /** @j2sNative url._streamData || */null;
 		if (data != null) {
 			int code = this.responseCode;
 			/**

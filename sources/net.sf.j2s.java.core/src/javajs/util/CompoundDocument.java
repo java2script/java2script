@@ -27,13 +27,9 @@
 package javajs.util;
 
 
-import java.io.DataInputStream;
 import java.io.BufferedInputStream;
-
-
+import java.io.DataInputStream;
 import java.util.Map;
-
-import javajs.api.GenericZipTools;
 
 
 
@@ -60,8 +56,6 @@ public class CompoundDocument extends BinaryDocument{
   Lst<CompoundDocDirEntry> directory = new  Lst<CompoundDocDirEntry>();
   CompoundDocDirEntry rootEntry;
 
-  protected GenericZipTools jzt;
-
   int[] SAT;
   int[] SSAT;
   int sectorSize;
@@ -77,8 +71,7 @@ public class CompoundDocument extends BinaryDocument{
     this.isBigEndian = true;
   }
   
-  public void setDocStream(GenericZipTools jzt, BufferedInputStream bis) {
-    this.jzt = jzt;
+  public void setDocStream(BufferedInputStream bis) {
     if (!isRandom) {
       stream = new DataInputStream(bis);
     }
@@ -316,6 +309,7 @@ public class CompoundDocument extends BinaryDocument{
             thisEntry.SIDfirstSector, thisEntry.lenStream, asBinaryString)
             : getShortStringData(thisEntry.SIDfirstSector, thisEntry.lenStream, asBinaryString));
   }
+  
   private SB getStandardStringData(int thisSID, int nBytes,
                                              boolean asBinaryString) {
     SB data = new SB();
@@ -333,7 +327,7 @@ public class CompoundDocument extends BinaryDocument{
       System.out.println(e.toString());
     }
     if (gzipData.isEnabled)
-      gzipData.addTo(jzt, data);
+      gzipData.addTo(data);
     return data;
   }
 
@@ -389,7 +383,7 @@ public class CompoundDocument extends BinaryDocument{
       System.out.println("reader error in CompoundDocument " + e.toString());
     }
     if (gzipData.isEnabled)
-      gzipData.addTo(jzt, data);
+      gzipData.addTo(data);
     return data;
   }  
 }
