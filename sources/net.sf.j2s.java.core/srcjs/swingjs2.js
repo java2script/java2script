@@ -12288,9 +12288,6 @@ if (!target) {
 
 			if (xym) {
 				xym.push(scroll < 0 ? -1 : 1)
-				
-				System.out.println("j2sApplet " + xym);
-				
 				who.applet._processEvent(507, xym, ev, who._frameViewer);
 			}
 			return !!(ui || target);
@@ -16187,7 +16184,7 @@ Clazz._4Name = function(clazzName, applet, state, asClazz, initialize, isQuiet) 
   }
   var cl = evalType(clazzName);
   if (!cl){
-	if (isQuiet)
+	if (isQuiet || Clazz._isQuiet)
 		return null;
     alert(clazzName + " could not be loaded");
     doDebugger();

@@ -2407,7 +2407,7 @@ public abstract class ResourceBundle {
 			String bundleName = toBundleName(baseName, locale);
 			ResourceBundle bundle = null;
 			if (format.equals("java.class")) {
-				bundle = (ResourceBundle) Interface.getInstance(bundleName, false);
+				bundle = (ResourceBundle) Interface.getInstance(bundleName, true);
 				// try {
 				// Class<? extends ResourceBundle> bundleClass
 				// = (Class<? extends ResourceBundle>)loader.loadClass(bundleName);

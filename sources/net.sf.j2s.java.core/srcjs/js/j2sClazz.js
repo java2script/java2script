@@ -2535,7 +2535,7 @@ Clazz._4Name = function(clazzName, applet, state, asClazz, initialize, isQuiet) 
   }
   var cl = evalType(clazzName);
   if (!cl){
-	if (isQuiet)
+	if (isQuiet || Clazz._isQuiet)
 		return null;
     alert(clazzName + " could not be loaded");
     doDebugger();
