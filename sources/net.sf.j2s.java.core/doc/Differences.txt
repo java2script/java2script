@@ -66,6 +66,75 @@ they must allow full exit and re-entry of Thread.run(), not the typical while/sl
 The key is to create a state-based run() that can be exited and re-entered in JavaScript.
 
 
+Static fields
+-------------
+
+Final static primitive "constant" fields (String, boolean, int, etc.) such as 
+
+static final int TEST = 3;
+static final String MY_STRING = "my " + "string";
+
+are converted to their primitive form automatically by the Eclipse Java compiler 
+and do not appear in the JavaScript by their names. 
+
+Other static fields are properties of their class and can be used as expected.
+
+Note, however, that SwingJS runs all "Java" code on a page in a common "jvm" 
+(like older versions of Java). So, like the older Java schema, the JavaScript 
+equivalents of both applets and applications will share all of their static 
+fields and methods. This includes java.lang.System. 
+
+Basically, SwingJS implementations of Java run in a browser page-based sandbox 
+instead of an applet-specific one.
+
+In general, this is no problem. But if we are to implement pages with 
+multiple applets present, we must be sure to only have static references 
+that are "final" or specifically meant to be shared in a JavaScript 
+environment only (since they will not be shared in Java).
+
+A simple solution, if static non-constant references are needed, is to attach the 
+field to Thread.currentThread.threadGroup(), which is an applet-specific reference.
+Be sure, if you do this, that you use explicit setters and getters:
+
+For example, 
+
+private static String myvar;
+
+...
+
+public void setMyVar(String x) {
+  ThreadGroup g = Thread.currentThread().threadGroup();
+  /**
+   * @j2sNative g._myvar = x;
+   * 
+   */
+   {
+     myvar = x;
+   }
+}
+
+public String getMyVar() {
+  ThreadGroup g = Thread.currentThread().threadGroup();
+  /**
+   * @j2sNative return(g._myvar == null ? null : g._myvar);
+   * 
+   */
+   {
+     return myvar;
+   }
+}
+ 
+ in Java will get and set x the same in JavaScript and in Java. 
+ 
+ 
+A convenient way to do this in general is to supply a singleton class with
+explicitly private-only constructors and then refer to it in Java and in JavaScript
+instead of using static field, referring to myclass.getIntance().xxx instead of 
+myclass.xxx in Java (and JavaScript). 
+
+This was done extensively in the Jalview project. See jalview.bin.Instance.
+
+
 Modal Dialogs
 -------------
 

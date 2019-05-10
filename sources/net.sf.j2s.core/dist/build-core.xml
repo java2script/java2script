@@ -35,7 +35,7 @@
 	You can do this by:
 	
 	   a) Just creating it by hand.
-	   b) Fully exercizing your application via the site/*.html file
+	   b) Fully exercising your application via the site/*.html file
 	      that is produced by the j2s transpiler and based on template.html 
 	      in your project directory, then clicking the get _j2sclasslist.txt link.
 	   c) appending to the _j2sclasslist.txt that was used to create coreswingjs.z.js

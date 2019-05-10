@@ -12,8 +12,12 @@ public class Test_Ints extends Test_ {
 		assert(ints.length == 0 || ints[0] == 3);
 	};
 
+	private final static int USER = -13;
+	private final static int ALT = 16;
+	
 	public static void main(String[] args) {
 		int i3 = new Integer("3");
+		int it = +USER;
 		new Test_Ints();
 		new Test_Ints(3,5,6);
 		new Test_Ints(3.5f,5.5f,6.5f);

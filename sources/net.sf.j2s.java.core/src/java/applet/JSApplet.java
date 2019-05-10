@@ -40,7 +40,6 @@ import java.net.URL;
 import java.util.Locale;
 
 import javax.swing.JApplet;
-import javax.swing.JComponent;
 import javax.swing.JRootPane;
 import javax.swing.RepaintManager;
 
@@ -480,35 +479,35 @@ public class JSApplet extends JSPanel {
     public String[][] getParameterInfo() {
         return null;
     }
-//
-//    /**
-//     * Plays the audio clip at the specified absolute URL. Nothing
-//     * happens if the audio clip cannot be found.
-//     *
-//     * @param   url   an absolute URL giving the location of the audio clip.
-//     */
-//    public void play(URL url) {
-//        AudioClip clip = getAudioClip(url);
-//        if (clip != null) {
-//            clip.play();
-//        }
-//    }
 
-//    /**
-//     * Plays the audio clip given the URL and a specifier that is
-//     * relative to it. Nothing happens if the audio clip cannot be found.
-//     *
-//     * @param   url    an absolute URL giving the base location of the
-//     *                 audio clip.
-//     * @param   name   the location of the audio clip, relative to the
-//     *                 <code>url</code> argument.
-//     */
-//    public void play(URL url, String name) {
-//        AudioClip clip = getAudioClip(url, name);
-//        if (clip != null) {
-//            clip.play();
-//        }
-//    }
+    /**
+     * Plays the audio clip at the specified absolute URL. Nothing
+     * happens if the audio clip cannot be found.
+     *
+     * @param   url   an absolute URL giving the location of the audio clip.
+     */
+    public void play(URL url) {
+        AudioClip clip = getAudioClip(url);
+        if (clip != null) {
+            clip.play();
+        }
+    }
+
+    /**
+     * Plays the audio clip given the URL and a specifier that is
+     * relative to it. Nothing happens if the audio clip cannot be found.
+     *
+     * @param   url    an absolute URL giving the base location of the
+     *                 audio clip.
+     * @param   name   the location of the audio clip, relative to the
+     *                 <code>url</code> argument.
+     */
+    public void play(URL url, String name) {
+        AudioClip clip = getAudioClip(url, name);
+        if (clip != null) {
+            clip.play();
+        }
+    }
 
     /**
      * Called by the browser or applet viewer to inform

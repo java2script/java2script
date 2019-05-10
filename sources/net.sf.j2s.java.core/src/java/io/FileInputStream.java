@@ -215,7 +215,8 @@ class FileInputStream extends InputStream
      *             file is reached.
      * @exception  IOException  if an I/O error occurs.
      */
-    public int read() throws IOException {
+    @Override
+	public int read() throws IOException {
       return is.read();	
     }
 
@@ -241,7 +242,8 @@ class FileInputStream extends InputStream
      *             the file has been reached.
      * @exception  IOException  if an I/O error occurs.
      */
-    public int read(byte b[]) throws IOException {
+    @Override
+	public int read(byte b[]) throws IOException {
         return readBytes(b, 0, b.length);
     }
 
@@ -263,7 +265,8 @@ class FileInputStream extends InputStream
      * <code>b.length - off</code>
      * @exception  IOException  if an I/O error occurs.
      */
-    public int read(byte b[], int off, int len) throws IOException {
+    @Override
+	public int read(byte b[], int off, int len) throws IOException {
         return readBytes(b, off, len);
     }
 
@@ -291,7 +294,8 @@ class FileInputStream extends InputStream
      * @exception  IOException  if n is negative, if the stream does not
      *             support seek, or if an I/O error occurs.
      */
-    public long skip(long n) throws IOException {
+    @Override
+	public long skip(long n) throws IOException {
         return is.skip(n);    	
     	
     }
@@ -313,7 +317,8 @@ class FileInputStream extends InputStream
      * @exception  IOException  if this file input stream has been closed by calling
      *             {@code close} or an I/O error occurs.
      */
-    public int available() throws IOException {
+    @Override
+	public int available() throws IOException {
     	return is.available();    	
     }
 
@@ -329,7 +334,8 @@ class FileInputStream extends InputStream
      * @revised 1.4
      * @spec JSR-51
      */
-    public void close() throws IOException {
+    @Override
+	public void close() throws IOException {
 //        synchronized (closeLock) {
             if (closed) {
                 return;
@@ -342,8 +348,9 @@ class FileInputStream extends InputStream
         }
 
         fd.closeAll(new Closeable() {
-            public void close() throws IOException {
-               close0();
+            @Override
+			public void close() throws IOException {
+               //close0();
            }
         });
     }
@@ -390,9 +397,9 @@ class FileInputStream extends InputStream
         }
     }
 
-    private static native void initIDs();
-
-    private native void close0() throws IOException;
+//    private static native void initIDs();
+//
+//    private native void close0() throws IOException;
 
     /**
      * Ensures that the <code>close</code> method of this file input stream is
@@ -401,7 +408,8 @@ class FileInputStream extends InputStream
      * @exception  IOException  if an I/O error occurs.
      * @see        java.io.FileInputStream#close()
      */
-    protected void finalize() throws IOException {
+    @Override
+	protected void finalize() throws IOException {
         if ((fd != null) &&  (fd != FileDescriptor.in)) {
             /* if fd is shared, the references in FileDescriptor
              * will ensure that finalizer is only called when

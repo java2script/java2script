@@ -3023,8 +3023,8 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public void endValidate() {
-		if (!isUIDisabled && jc.getUIClassID() != "AppletUI")
-			setHTMLElement();
+//		if (!isUIDisabled && jc.getUIClassID() != "AppletUI")
+//			setHTMLElement();
 	}
 
 	@Override

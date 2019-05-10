@@ -205,7 +205,8 @@ public class JSAudioThread extends JSThread {
 	@Override
 	protected void whenDone() {
 		done = true;
-		resetAudio();
+		// BH 2019.04.25 check? Problem was premature clipping of sounds
+		//resetAudio();
 	}
 
 	@Override

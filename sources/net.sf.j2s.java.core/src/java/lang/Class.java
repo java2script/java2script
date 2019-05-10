@@ -29,8 +29,6 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericSignatureFormatError;
-//import java.lang.reflect.GenericSignatureFormatError;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -901,7 +899,10 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 *
 	 * @return an array of interfaces implemented by this class.
 	 */
-	public native Class<?>[] getInterfaces();
+	public Class<?>[] getInterfaces() {
+		JSUtil.notImplemented(null);
+		return new Class<?>[0];
+	}
 
 //	/**
 //	 * Returns the {@code Type}s representing the interfaces directly
@@ -1012,12 +1013,17 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 *         primitive type or void.
 	 * @since JDK1.1
 	 */
-	public native Object[] getSigners();
+	public Object[] getSigners() {
+		JSUtil.notImplemented(null);
+		return new Object[0];
+	}
 
 	/**
 	 * Set the signers of this class.
 	 */
-	native void setSigners(Object[] signers);
+	void setSigners(Object[] signers) {
+		JSUtil.notImplemented(null);
+	};
 
 //	/**
 //	 * If this {@code Class} object represents a local or anonymous class within
@@ -1220,7 +1226,10 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @return the declaring class for this class
 	 * @since JDK1.1
 	 */
-	public native Class<?> getDeclaringClass();
+	public Class<?> getDeclaringClass() {
+		JSUtil.notImplemented(null);
+		return null;
+	};
 
 	// /**
 	// * Returns the immediately enclosing class of the underlying class. If the
