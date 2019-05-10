@@ -116,7 +116,7 @@ public void setMyVar(String x) {
 public String getMyVar() {
   ThreadGroup g = Thread.currentThread().threadGroup();
   /**
-   * @j2sNative return g._myvar || null;
+   * @j2sNative return(g._myvar == null ? null : g._myvar);
    * 
    */
    {
