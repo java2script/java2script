@@ -1038,8 +1038,15 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		info || (info = {});
 		// called by org.J2S.awtjs2d.JmolURLConnection.doAjax()
 		url = url.toString();
-		if (dataOut != null)
-			return J2S.saveFile(url, dataOut);
+		if (dataOut) {
+			if (url.indexOf("http://") != 0 && url.indexOf("https://") != 0)
+				return J2S.saveFile(url, dataOut);
+			var info = {async:false,url:url,type:"POST", processData:false,
+				data:(typeof data == "string" ? dataOut 
+					: ";base64," + Clazz.load("javajs.util.Base64").getBase64$BA(dataOut).toString())
+			};
+			return J2S.$ajax(info).responseText;
+		}
 		if (postOut)
 			url += "?POST?" + postOut;
 		return J2S.getFileData(url, null, true, info);
@@ -1494,8 +1501,13 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 			}
 			var target = ev.target["data-keycomponent"];
 if (!target) {
-  return;
+	  return;
 }
+if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
+	ev.stopPropagation();
+	ev.preventDefault();
+}
+
 			var id;
 			switch (ev.type) {
 			case "keypress":

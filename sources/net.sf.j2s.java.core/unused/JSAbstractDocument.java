@@ -19,6 +19,7 @@ import javax.swing.text.Document;
 import javax.swing.text.DocumentFilter;
 import javax.swing.text.DocumentFilter.FilterBypass;
 import javax.swing.text.Element;
+import javax.swing.text.JTextComponent;
 
 public abstract class JSAbstractDocument implements JSMinimalAbstractDocument {
 	protected Map<Object, Object> props;
@@ -31,6 +32,10 @@ public abstract class JSAbstractDocument implements JSMinimalAbstractDocument {
 
 	protected SB sb;
 	protected char[] tempChar;
+	private JTextComponent editor;
+	private int currentDot;
+	private int currentMark;
+	private boolean isAWT;
 
 	/**
 	 * Name of elements used to represent paragraphs
@@ -123,6 +128,26 @@ public abstract class JSAbstractDocument implements JSMinimalAbstractDocument {
 				remove(offset, length);
 			if (text != null && text.length() > 0)
 				insertString(offset, text, attrs);
+		}
+	}
+	
+	@Override
+	public void replace(int offset, int length, String text, AttributeSet attrs, JTextComponent c)
+			throws BadLocationException {
+		editor = c;
+		isAWT = /** @j2sNative c.isAWT$ || */false;
+		if (isAWT) {
+			currentDot = c.getCaret().getDot();
+			currentMark = c.getCaret().getMark();
+		}
+		replace(offset, length, text, attrs);
+	}
+
+	public void resetAWTScroll() {
+		// called by swingjs.plaf.TextListener
+		if (isAWT) {
+			editor.getCaret().setDot(currentMark);
+			editor.getCaret().moveDot(currentDot);
 		}
 	}
 

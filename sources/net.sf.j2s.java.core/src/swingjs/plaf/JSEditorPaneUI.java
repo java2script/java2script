@@ -166,10 +166,10 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		/**
 		 * @j2sNative
 		 *   
-		 *   setTimeout(function(){me.updateJSCursor$S("text")},10);
+		 *   setTimeout(function(){me.updateJSCursor$S("editortext")},10);
 		 */
 		{
-			updateJSCursor("text");
+			updateJSCursor("editortext");
 		}
 	}
 
@@ -507,7 +507,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 
 	@Override
 	public void updateJSCursorFromCaret() {
-		updateJSCursor("default");
+		updateJSCursor("editordefault");
 	}
 
     @SuppressWarnings("unused")

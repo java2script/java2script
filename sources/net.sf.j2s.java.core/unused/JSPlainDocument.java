@@ -15,6 +15,8 @@ import javax.swing.text.Segment;
  * Needs to be adapted further, with final moving to javax.swing
  * and no "JS" 
  * 
+ * Currently used only for TextFields
+ * 
  * 
  * @author Bob Hanson
  * 

@@ -1649,6 +1649,7 @@ public abstract class JComponent extends Container {
 		if (insets == null) {
 			insets = new Insets(0, 0, 0, 0);
 		}
+		// OK, is this isAWT or isAWT$? I stupidly used isAWT itself for JLayeredPane and JPanel and JRootPane
 		if (/** @j2sNative this.isAWT || this.isAWTContainer || */false) {
 			// because AWT components do not have this method
 			in = getInsets();

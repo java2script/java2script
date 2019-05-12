@@ -266,7 +266,8 @@ public class OC extends OutputStream implements GenericOutputChannel {
     }
   }
 
-  public void write(int b) {
+  @Override
+public void write(int b) {
     // required by standard ZipOutputStream -- do not use, as it will break JavaScript methods
     if (os == null)
       initOS();
@@ -277,7 +278,8 @@ public class OC extends OutputStream implements GenericOutputChannel {
     byteCount++;
   }
 
-  public void write(byte[] b) {
+  @Override
+public void write(byte[] b) {
     // not used in JavaScript due to overloading problem there
     write(b, 0, b.length);
   }
@@ -327,6 +329,12 @@ public class OC extends OutputStream implements GenericOutputChannel {
       return (sb == null ? null : sb.toString());
     }
     closed = true;
+	if (!isLocalFile) {
+	    String ret = postByteArray(); // unsigned applet could do this
+	    if (ret.startsWith("java.net"))
+	      byteCount = -1;
+	    return ret;
+	}
     J2SObjectInterface J2S = null;
     Object _function = null;
     /**
@@ -336,14 +344,6 @@ public class OC extends OutputStream implements GenericOutputChannel {
      *            this.fileName : null);
      * 
      */
-    {
-      if (!isLocalFile) {
-        String ret = postByteArray(); // unsigned applet could do this
-        if (ret.startsWith("java.net"))
-          byteCount = -1;
-        return ret;
-      }
-    }
     if (J2S != null && !isTemp) {
     	
       // action here generally will be for the browser to display a download message

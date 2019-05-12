@@ -34,12 +34,12 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.TextComponent;
 
+import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.PlainDocument;
-import swingjs.api.JSMinimalAbstractDocument;
 
 /**
  * A <code>JTextArea</code> is a multi-line area that displays plain text.
@@ -507,9 +507,9 @@ public class JTextArea extends JTextComponent {
         Document doc = getDocument();
         if (doc != null) {
             try {
-                if (doc instanceof JSMinimalAbstractDocument) {
-                    ((JSMinimalAbstractDocument)doc).replace(start, end - start, str,
-                                                    null);
+                if (doc instanceof AbstractDocument) {
+                    ((AbstractDocument)doc).replace(start, end - start, str,
+                                                    null, this);
                 }
                 else {
                     doc.remove(start, end - start);

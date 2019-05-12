@@ -39,6 +39,8 @@ import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JViewport;
 import javax.swing.SwingConstants;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.ViewportUI;
@@ -106,14 +108,22 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 
 			@Override
 			public void focusGained(FocusEvent e) {
-				tf.setBackground(Color.BLUE);
+				tf.setBackground(Color.WHITE);
 			}
 
 			@Override
 			public void focusLost(FocusEvent e) {
-				tf.setBackground(Color.BLACK);
+				tf.setBackground(Color.yellow);
 			}
 
+		});
+		tf.addCaretListener(new CaretListener() {
+
+			@Override
+			public void caretUpdate(CaretEvent e) {
+				System.out.println(e);
+			}
+			
 		});
 		tf.addMouseWheelListener(new MouseWheelListener() {
 			@Override
@@ -202,7 +212,6 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		});
 
 		JPanel p = new JPanel();
-
 		JTextArea area = new JTextArea("testing", 10,20) {
 			protected int getColumnWidth() {
 				int i = super.getColumnWidth();
@@ -215,6 +224,16 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 				return i;
 			}
 		};
+		area.addCaretListener(new CaretListener() {
+
+			@Override
+			public void caretUpdate(CaretEvent e) {
+				System.out.println(e);
+			}
+			
+		});
+
+		p.setBackground(Color.yellow);
 		p.add(area);
 		
 

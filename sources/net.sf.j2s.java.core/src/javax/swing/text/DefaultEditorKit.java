@@ -36,7 +36,6 @@ import java.io.Reader;
 import java.io.Writer;
 
 import swingjs.JSToolkit;
-//import swingjs.JSPlainDocument;
 import swingjs.api.Interface;
 
 import java.awt.ComponentOrientation;
@@ -147,9 +146,9 @@ public class DefaultEditorKit extends EditorKit {
      */
     @Override
 		public Document createDefaultDocument() {
-    	// SwingJS 
-    	return JSToolkit.getPlainDocument();
-//        return new PlainDocument();
+//    	// SwingJS 
+//    	return JSToolkit.getPlainDocument();
+        return new PlainDocument();
     }
 
     /**

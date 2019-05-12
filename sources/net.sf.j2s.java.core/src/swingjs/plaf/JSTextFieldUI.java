@@ -1,6 +1,7 @@
 package swingjs.plaf;
 
 import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
@@ -34,7 +35,8 @@ public class JSTextFieldUI extends JSTextUI {
 					"lineHeight", "0.8", "box-sizing", "border-box");
 			bindJSKeyEvents(focusNode, true);
 		}
-		setPadding(editor.getMargin());
+		Insets insets = editor.getMargin();
+		setPadding(insets);
 		textListener.checkDocument();
 		setCssFont(setJSText(focusNode, "value", setCurrentText()), c.getFont());
 		// setTextAlignment();

@@ -555,10 +555,10 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		return ui;
 	}
 
-	public static Document getPlainDocument() {
-		return (Document) JSUtil.getInstance("swingjs.JSPlainDocument");
-	}
-
+//	public static Document getPlainDocument() {
+//		return (Document) JSUtil.getInstance("swingjs.JSPlainDocument");
+//	}
+//
 
 	//////////////// images ///////////////
 	

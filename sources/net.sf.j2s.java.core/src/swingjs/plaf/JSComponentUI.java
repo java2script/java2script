@@ -763,6 +763,10 @@ public class JSComponentUI extends ComponentUI
 		DOMNode.setAttr(node, "data-keycomponent", c);
 	}
 
+	protected void setDataFocusComponent(DOMNode node) {
+		DOMNode.setAttr(node, "data-focuscomponent", c);
+	}
+
 	/**
 	 * Indicate to J2S to completely ignore all mouse events for this control. It
 	 * will be handled by the control directly using a jQuery callback that is
@@ -887,7 +891,7 @@ public class JSComponentUI extends ComponentUI
 		return (jc.isFocusable() && setFocusable());
 	}
 
-	private boolean setFocusable() {
+	protected boolean setFocusable() {
 		if (focusNode == null)
 		  addFocusHandler();
 		return (focusNode != null);
@@ -1703,7 +1707,9 @@ public class JSComponentUI extends ComponentUI
 			}
 			if (n > 0)
 				addChildrenToDOM(children, n);
-			if (isWindow && jc.getUIClassID() != "InternalFrameUI" && jc.getWidth() > 0) {
+			if (isWindow 
+					&& jc.getWidth() > 0
+					&& isFrameIndependent()) {
 				DOMNode.transferTo(outerNode, body);
 			}
 		}
@@ -1712,6 +1718,10 @@ public class JSComponentUI extends ComponentUI
 		if (embeddingNode != null)
 			DOMNode.appendChildSafely(embeddingNode, outerNode);
 		return outerNode;
+	}
+
+	protected boolean isFrameIndependent() {
+		return true;
 	}
 
 	private void setOuterLocationFromComponent() {

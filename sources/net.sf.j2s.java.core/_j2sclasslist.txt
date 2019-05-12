@@ -331,12 +331,10 @@ swingjs/api/js/HTML5CanvasContext2D.js
 swingjs/api/js/JSInterface.js
 swingjs/api/JSMinimalAbstractDocument.js
 swingjs/jquery/JQueryUI.js
-swingjs/JSAbstractDocument.js
 swingjs/JSApp.js
 swingjs/JSApplet.js
 swingjs/JSAppletThread.js
 swingjs/JSAppletViewer.js
-swingjs/JSDocumentEvent.js
 swingjs/JSFocusPeer.js
 swingjs/JSFontMetrics.js
 swingjs/JSFrameViewer.js
@@ -345,7 +343,6 @@ swingjs/JSGraphicsConfiguration.js
 swingjs/JSGraphicsEnvironment.js
 swingjs/JSMouse.js
 swingjs/JSNullComponentPeer.js
-swingjs/JSPlainDocument.js
 swingjs/JSScreenDevice.js
 swingjs/JSThreadGroup.js
 swingjs/JSToolkit.js
