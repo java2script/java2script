@@ -1,10 +1,10 @@
 Notes
 =====
+updated 5/13/19 -- Mandarin U+79D8 reserved character; Missing Math methods; int and long
+updated 5/10/19 -- adds a section on static issues in multi-(duplicate)-applet pages
 updated 1/4/19 -- nio
 updated 9/15/18 -- adds integer 1/0 == 0
 updated 7/24/18 -- most classes replaced with https://github.com/frohoff/jdk8u-jdk
-updated 6/28/18 -- arrays do not inherit Object
-updated 2/26/18
 updated 6/5/17 -- reserved package name "window"
 updated 3/11/17 -- myClass.getField
 updated 3/7/17 -- overloading of JSplitPane.setDividerLocation
@@ -238,7 +238,6 @@ UNIMPLEMENTED CLASSES BY DESIGN
 accessibility
 security
 serialization
-keyboard accelerators
 
 
 TODO LIST FOR UNIMPLEMENTED CLASSES
@@ -260,7 +259,7 @@ Thread.currentThread() == dispatchThread
 MINOR ISSUES--requiring some rewriting/refactoring outside of SwingJS  
 =====================================================================
 
-array.equals(Object) not present -- arrays do not subclass Object
+
 ArrayIndexOutOfBounds
 java.awt.Color
 native methods
@@ -271,6 +270,7 @@ System.exit(0) does not stop all processes
 list cell renderers must be JComponents
 myClass.getField not implemented
 "window" and other reserved JavaScript names
+
 
 MAJOR ISSUES--for Bob and Udo within SwingJS
 ============================================
@@ -288,12 +288,12 @@ specific AWT components not implemented
 threads
 modal dialogs
 image loading
-no BigInteger; no BigDecimal 
+BigDecimal not fully implemented 
 no format internationalization
 no winding rules
 text-related field implementation
 Formatter/Regex limitations
-integer 1/0 == 0
+integer 1/0 == Infinity
 
 ======================================================================== 
 
@@ -310,521 +310,7 @@ We now have jsjava.lang.Thread and jsjava.lang.ThreadGroup. These should be usef
 figuring out what we want to do with those. ThreadGroup in particular is interesting,
 as it is used to key for AppContexts. We will see if that use useful or not.
 
-PROGRESS
-========
-
-1/4/2019
-
-Over the course of 7/2018 - 12/2018 there have been many updates to Java2Script/SwingJS. 
-
-
-
-6/28/2018
-
-Major bug fixing session in Dundee, Scotland, is finding subtle issues and some missing
-classes, mostly because this group is using Java 7+. Generally running very well.
-
-
-2/26/2018
-
-Relatively full implementation of Java in JavaScript is complete, with all methods
-"fully qualified," meaning there is never an issue of which method is being called when
-two methods have the same name. This work was started during the summer of 2017
-by Andrew Lee, Tahir Ahsan, and Nikesh Yadev, and completed by Bob Hanson during the
-fall of 2017.
-  
-7/23/2016
-
-We (Andreas Raduege, Nadia ElMouldi, and Bob Hanson) have now converted 24 Falstad applets, 
-including Circuit. These applets are running approximately 3-6 times slower than in Java, 
-in some cases after a bit of for-loop optimization. 
-
-No significant issues have been found, though we continue to find mostly minor j2s
-compiler bugs. Mostly what is taking time is the addition of missing features, such
-as audio, pop-up menus, menu bars, sliders, graphics2D capability, 
-independent frames and dialogs, and threading.
-
-At this point we have a good variety of common controls. Events are being handled properly
-through the "java" event queue. Mouse operation is smooth.  
-
-BH 11/2/2016 8:53:44 AM  -- bug #38 in compiler -- if a class has a constructor such as JButton() that calls
-                                                   this(null, null), and that class is subclassed with a
-                                                   class such as ToggleButton that contains a constructor
-                                                   such as ToggleButton(String,String), then the call to JButton()
-                                                   will improperly call that subclass's constructor. This is a
-                                                   problem due to the fact that in Java "this" in a superclass
-                                                   DURING CONSTRUCTION does not refer to the "this" of the 
-                                                   subclass.    
-BH 7/23/2016 6:16:30 PM  -- bug #27 in compiler -- need Boolean.from(string) not new Boolean(string)
-BH 7/23/2016 6:17:31 PM  -- but #26 in compiler -- compiler can inappropriately use Clazz.overrideMethod
-BH 7/22/2016 1:29:12 PM  -- bug #25 in compiler for int f() { return 'o' }  -- will return a string, not int
-BH 7/20/2016 2:58:17 PM  -- bug #24 in compiler found for files with both interfaces and classes present
-
-BH 7/20/2016 2:57:36 PM  -- basic audio (8- and 16-bit mono/stereo once-through or streamed)
-BH 7/7/2016 2:28:59 PM  -- Formatter/Regex implemented
-
-BH 7/7/2016 11:21:48 AM --  j2s bug #3 is still a serious issue 
-BH 7/4/2016 1:36:20 PM  --  j2s bug #23 inner/anonymous class may reference wrong superclass instance
-BH 7/4/2016 10:22:39 AM  -- j2s bug #22 final vars not passed to local class	
-
-
-6/01/2015 BH -- development has shifted for the summer to the "near" branch.
-                working applet development can be followed at
-                http://chemapps.stolaf.edu/jmol/swingjs/site/swingjs/examples
-                
-
-12/20/2015 BH -- j2s bug #21 (byte) ignored so that 0xFF remains 0xFF 
-
-7/19/2015 BH -- j2s bug #20 no implicit primitive from wrapped primitive (int/Integer) in SAEM
-
-7/18/2015 BH -- j2s bug #19 improper signature identification in SAEM with untyped null parameter
-
-7/17/2015 BH -- j2s bug #18 (jalview.commands.EditCommand)
-
-7/15/2015 BH -- j2s bug #17 (jalview.analysis.RNA)
-
-6/3/2015 BH
-
-JTextField ENTER action enabled
-JPasswordField working using simple HTML5 type="password"
-JFormattedTextField working; proper validation enabled for number formatters with FocusLost action
-
-see http://chemapps.stolaf.edu/jmol/swingjs/site/swingjs/examples/oracle/formattedfield.htm
-    and swingjs/test/FormattedTextFieldDemo.java
-
-see http://chemapps.stolaf.edu/jmol/swingjs/site/swingjs/examples/oracle/converter.htm
-   (this app still needs selection boxes
-
-SwingJS J2S bug #16 NumberFormat.js includes the inner public class NumberFormat.Field, which is called here by instanceOf 
-
-Solution was to change the requirement to the outer class:
-@J2SRequireImport(NumberFormat.class)
-@J2SIgnoreImport(NumberFormat.Field.class)
-public class NumberFormatter extends InternationalFormatter...
-
-
-5/30/2015 BH
-
-jQuery Slider is implemented for JSlider
-
--- see site/swingjs/seethroughimage.htm 
-
-jQueryUI files may be found in swingjs.jquery:
-  
-  jquery-ui-slider.css
-  jquery-ui-slider.js
-  JQueryUI.js
-  
-
-JQueryUI.js is just a shell Java class; 
-loading of jQueryUI occurs when a class utilizes
-
-  @J2SRequireImport(swingjs.jquery.JQueryUI.class)
-
-and then also has a static block such as:
-
-static {
-  swingjs.JSToolkit.getJavaResource ("swingjs/jquery/jquery-ui-slider.css");
-  swingjs.JSToolkit.getJavaResource ("swingjs/jquery/jquery-ui-slider.js");
-}
-
-method in the loading a css style block or executing JavaScript, as appropriate.
-
-The CSS for the slider widget is scoped as "swingjs". On the page, a slider
-gets implemented as:
-
- <div id="testApplet_SliderUI_13_5div" style="position: absolute; left: 0px; top: 150px;">
-   <div id="testApplet_SliderUI_13_5_wrapdiv" class="swingjs" style="width: 200px; height: 20px;">
-      <div id="testApplet_SliderUI_13_5" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all swingjs-ui">
-	    <a class="ui-slider-handle ui-state-default ui-corner-all swingjs-ui" href="#" style="left: 50%;"></a>
-      </div>
-   </div>
- </div>
-
-The className "swingjs-ui" tells SwingJS (in JSmolCore.js) to ignore all mouse
-action and work directly with jQuery events. These events fire a method in 
-the component UI class that looks like this:
-
-Clazz.defineMethod (c$, "jqueryCallback", 
-function (event, ui) {
-  var value = 0;
-  value = ui.value;
-  this.jSlider.setValue (this.val = value);
-}, "~O,swingjs.api.DOMNode");
-
-The widget itself is created using a standard jQuery widget constructor:
-
-me.$(me.jqSlider).slider({
-  orientation: me.orientation,
-  range: false,
-  min: me.min,
-  max: me.max,
-  value: me.val,
-  change: function( event, handle ) {
-    me.jqueryCallback(event, handle);
-  },
-  slide: function( event, handle ) {
-    me.jqueryCallback(event, handle);
-  }
-});
-
-It is nice to see that the jQuery bindings to key actions (UP, DOWN,
-LEFT, RIGHT, HOME, END, PGUP, PGDN all work properly.
-
-There is a complication with z-index, because jQuery sets that, and 
-we need to have it correct in the heirarchy of applets and dialogs. 
-So to implement that, we catch the "ancestor" change property event, and 
-hope that somewhere up the chain the z-index is set. I am not sure this is 
-completely correct. We probably need to adjust the z-index for all DOM child
-nodes when this happens.
-
-It seems that it is also possible to lose an event, in which case the 
-handle image just floats away from the handle with the user's mouse, and 
-a click is required to reset that.
- 
-I have not tried tics and labels on sliders 
-
-
-5/25/2015 BH
-
-- found J2S bug #13,#14,#15
-
-- java.awt.image.BufferedImage implemented; RescaleOp working for alpha scaling
-- see seethroughimage.htm
-
-- working on SeeThroughImageApplet (slider, image filtering)
-
-5/24/2015 BH
-
-- fix for "south" button not spanning full width
-
-5/23/2015 BH
-
-- fix for java.util.Random.nextInt(bits)
-
-- adds loadimage.htm and jumbledimage.htm 
-
-- Q: What sets the "south" button to be the full width?
-
-- reading and drawing of PNG, JPG, GIF, and BMP image formats
-    
-    java.awt.Toolkit.getDefaultToolkit().getImage(String filename)
-    java.awt.Toolkit.getDefaultToolkit().getImage(URL)
-    java.awt.Toolkit.getDefaultToolkit().createImage(String filename)
-    java.awt.Toolkit.getDefaultToolkit().createImage(URL)
-    java.awt.Toolkit.getDefaultToolkit().createImage(byte[], intOffset, intLength)
-    javax.imageio.ImageIO.read(URL)
-
-	java.awt.Graphics2D.drawImage(...)
-    
-- implementation of focus, though not traversal:
-
-    java.awt.Component.hasFocus()
-    java.awt.Component.isFocusable()
-    java.awt.Component.requestFocus()
-    java.awt.Component.requestFocusInWindow()  // same as requestFocus here
-
-- reading files, both binary and ASCII
-    
-    java.net.URL.getInputStream() -- works for binary and ascii files
-    swingjs.JSToolkit.getFileAsBytes(String filename)
-    swingjs.JSToolkit.ensureSignedBytes(byte[])
-    
-========
-5/21/2015 BH
-
-- fixes JSmol bug in JSmolJavaExt for Integer.parseRadix
-
-- adds "metal ocean" LookAndFeel theme to match generic Java LookAndFeel
-- TODO: text alignments
-- TODO: icons
-
-5/17/2015 BH
-
-- adds SAX XML parsing (needed for VARNA) 
-- uses sax2r3(final) from http://sourceforge.net/projects/sax/files/sax/	
-- implements org.xml.sax and javax.xml.sax
-- includes swingjs.JSSAXParser, swingjs.JSSAXContentHandler, swingjs.JSSAXAttributes
-- see swingjs.test.TestXML.java
-	    String s = "<testing></testing>"
-		InputSource is = new InputSource(Rdr.getBR(s));
-	    javax.xml.parsers.SAXParserFactory.newInstance().newSAXParser()
-					.parse(is, new JSSAXContentHandler());
-- to test, from a developer console, enter: 
-
-  Clazz.loadClass("swingjs.test.TestXML", function() { new swingjs.test.TestXML([]) })
-  
-
-5/16/2015 BH
-
-- basic JTextArea/JScrollPane combination working
-- height problem solved for JTextFields (HTML5 default 3px padding removed)
-- background/foreground colors enabled
-- JSThread adds JSThread.JSEVENT = 2000 to EventQueue for very low (after painting) processing
-- Boltzmann.java working; did require reduction of repaint frequency for performance
-- see http://chemapps.stolaf.edu/jmol/swingjs/site/swingjs/Boltzmann.htm
-
-Note: it is quite nice to see that from the developer console you can issue
-
-  testApplet._applet.tCollisions.setSize(80,30)
-  
-and it will do it. 
-
-5/15/2015 BH
-
-- better JLabel/JTextField positioning
-- GridBagLayout working
-- winding rules: in javax.swing.border.LineBorder 
-           Path2D path = new Path2D.Float(Path2D.WIND_EVEN_ODD);
-  needs checking with browsers that ctx.fill("evenodd") works  
-
-5/11/2015 BH
-
-BH working on Boltzmann
-- found j2s bug #12; easy fix
-- JSThread 
-
-5/10/2015 BH
-
-JTextFields responding to DocumentListeners
-JLabel default font and baseline considerations
-see test_3.htm
-
-
-5/9/2015 BH
-
-JTextField works, including tracking selection caret -- see test_3.htm
-JSPlainDocument implemented (roughly)
-JSAbstractDocument implemented (roughly)
-CaretListener working
-
-5/7/2015 BH
-
-Problem with duplicate Event queue dispatches for every mouse event found. 
-  (JSComponentUI.installUI() needs to be empty)
-  
-very preliminary JTextField added -- not functional yet
-
-5/5/2015 BH
-
-Now implemented, at least minimally:
-
-JButton
-JCheckBox
-JRadioButton, with ButtonGroup
-
-Control of components is now completely handled by swingjs.plaf.JSComponentUI and its subclasses.
-These classes implement the LightweightPeer interface, which should take care of just about 
-everything we need. They are also component change listeners. 
-
-Mouse clicks on buttons are being properly retargeted by jsjava.awt.Container and 
-then are passed on to swingjs.plaf.JSButtonListener for processing as Item.    
-
-Event queues are working, although it appears to me that we are getting two dispatches for
-every mouse event. So something is odd there.
-
-Repainting is working properly.
-
-Possible next steps:
-
-1. Filling in the missing pieces in the LightweightPeer interface 
-   so that all program actions are reflected properly in HTML5. 
-
-2. Adding text boxes and starting in on handling keyboard events. 
-
-3. Adding icons for buttons.
-
-4. Implementing additional details in button classes.
- 
-among about 1000 other possibilities....
-  
-
-4/30/2015 BH
-
-adjustments in JSmol made to be compatible with SwingJS
-
-JSCheckBoxUI added; not tested 
-Verification added that the actual DOM button was clicked for checkboxes and radio buttons.
-
-4/25/2015 BH
-
-Mouse callback action is very smooth and fast as long as 
-clipping is not carried out for each component as created.
- 
-JRadiobuttons are working with ItemEvent (retargeted from MouseEvent)
-
-repaint() is now completely handled using synthetic JavaScript AWT EventQueue
-
-So this means:
-
--- we have working HTML5 components in swingjs.plaf
--- we have a working "Java" AWT event queue
--- basic Thread operations are working - just not sleep, wait, or notify
-   but these can be handled by other means using swingjs.JSThread
-
-
-
----------   
-4/21/2015 BH
-
-MouseListener working; ItemListener still not working
-MouseMotionListener working
-
-Component properties are not adjustable ("isTainted" is not set back to TRUE
-in swingjs.plaf.JSComponentUI
-
----------   
-4/19/2015 BH
-
-FlowLayout reporting proper positions and sizes for JRadioButtons
-HTML alignment may be a bit off. 
-HTML5 implementation of panels and buttons working. 
-ButtonGroups working.
-
-code: "super.xxx" out in Component, Container, and JComponent
-
----------   
-4/18/2015 BH
-
-JSAppletPanel uses swingjs.JSThread, much like sun.applet.AppletPanel
-
-/**
- * JSAppletPanel 
- * 
- * SwingJS class to start an applet. Note that this must be a JApplet,
- * not just java.awt.Applet. The implementation (for now) does not allow
- * "mixed" contents -- That is, no non-Swing Applet components are allowed.
- * 
- * The basic start up in JavaScript involves:
- * 
- * Clazz.loadClass("swingjs.JSAppletPanel"); 
- * var _appletPanel = new JSAppletPanel(viewerOptions);
- * _appletPanel.start();
- * 
- * where viewerOptions holds critical information needed to create this applet
- * 
- * 
- * @author Bob Hanson
- * 
- */
-
----------   
-4/16/2015 BH
-
-SimpleDateFormat was being excluded in JSmolJavaExt.js
-
-swingjs.JSThread extends jsjava.lang.Thread and shows how to add a thread that 
-can be run or started and can continue indefinitely or upon "notification"
-using setTimeout calls with anonymous function callbacks to return to the loop
-
-AWTEvent dispatch thread working properly
-revalidation working
-peer preferredSize (w,h) working for radio buttons but not for panels; no positioning (x,y) yet
-
- 
-JSToolkit JavaScript methods alert, log, prompt, and confirm added
-
----------   
-4/15/2015 BH
-
-AWT Events reintroduced. Just about ready for JApplet painting via 
-
-  testApplet._appletPanel.paint(null)
-  
-The "EventQueue" is really an immediate setTimeout dispatcher.
-The "current thread" (which identifies which applet this is in its name)
-is maintained by anonymous function wrapping.
-  
----------   
-4/14/2015 BH
-
--- preliminary "native" user interface components implemented -- see swingjs.plaf
-   
-abstract class swingjs.api.DOMObject 
-abstract class HTML5Canvas extends DOMObject
-interface swingjs.api.JQuery 
-interface swingjs.api.JQueryObject
-
-These APIs allow considerable manipulation of page HTML5 without
-the need for @j2sNative blocks. For example, in swingjs.plaf.JSComponentUI:
-
-	protected Dimension getDimension(DOMObject span) {
-		String div = JSToolkit.getSwingDivId();
-		JQuery jq = JSToolkit.getJQuery();
-		JQueryObject jo = jq.$("#" + div);
-		jo.append(span);
-		int w = jq.$(span).width();
-		int h = jq.$(span).height();
-		jo.html("");
-		return new Dimension(w, h);
-	}
-
----------   
-4/12/2015 BH
-
-basic very limited graphics working; no AffineTransform
-still no layout
-
----------   
-4/4/2015 BH
-
-j2sjmol.js updated due to problems with incomplete loading
-
-several issues found in getting SimpleDateFormat working
-
- -- integer /=
- -- current-date processing
- -- missing inner class constructors
- -- cyclic static references
- -- detailing of J2S bugs
- -- SimpleDateFormat working
- -- fixed sb.append(int) --> sb.append("" + i)
-
----------   
-4/3/2015 BH
-
-ResourceBundle working with property loading. 
-But ResourceBundle.Control calls new PropertyResourceBundle(), and that 
-causes a loading loop. Solution is to give PropertyResourceBundle() an empty
-constructor and to call it with reflection.
-
----------   
-4/2/2015 BH
-
-JApplet loading successful
-
-ResourceBundle working with Java class loading
-DecimalFormat working
-
-Thread.currentThread() working. For example, this works:
-
-  SwingJS.getJavaResource = function(path) {
-   // path looks like jssun.util...., for example
-    var appId = jsjava.lang.Thread.currentThread().getName();
-    path = Jmol._applets[appId].__Info.j2sPath + "/" + path;
-    var s = Jmol._getFileData(path);
-    return (s.startsWith("[Exception") ? null : s);
-  }
-  
-  
-ThreadGroup points to objects unique to an applet. 
-This will allow easy access to applet-specific quantities
-  
----------   
-3/19/2015 BH
-
-Project initiated - files from GrepCode
-
 ========================================================================== 
-J2S tips
---------
-
-
-J2S bugs identified
--------------------
-   
-
-  
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -971,30 +457,12 @@ Note that LookAndFeel determines canvas size in a Frame because diffent operatin
 systems (Mac OS vs Windows vs HTML5) will have different edge sizes on their frames. 
 
 
-
-toString() may need to be explicit (Can't convert .... to primitive type)
--------------------------------------------------------------------------
-JavaScript will use its own method of creating a string form of an object. So if you
-have implemented a toString() method for x instanceof X, then you should use it 
-explicitly as "foo " + x.toString(), not "foo " + x. 
-
-This problem was first seen in the original form of java.awt.image.BufferedImage.toString() 
-where we got the JavaScript error "Can't convert .... to primitive type" in an error message
-due to " " + this.raster, where this.raster was a sun.awt.image.IntegerInterleavedRaster.
- 
-
 System.exit(0) does not stop all processes
 ------------------------------------------
 
 Although System.ext(int) has been implemented in JavaScript, it may not stop all "threads."
 Applications are responsible for shutting down prior to executing it. 
 
-
-
-list cell renderers must be JComponents
----------------------------------------
-
-JList requires cell renderers to be JComponents, same as all other components.
 
 myClass.getField not implemented
 --------------------------------
@@ -1015,6 +483,19 @@ using:
 No reserved top-level JavaScript name is allowed for a package name. So, for example, 
 one must rename packages such as "window" or "document" to names such as "win" or "doc".
 
+qualified field and method names
+--------------------------------
+
+In order to minimize the chance of added SwingJS field and method names colliding with
+ones developers might use in subclassing Java classes, we have added U+79D8 (Mandarin "secrect") 
+to the characaters already disrecommended by Java documentation ("$" and "_"). The only problem
+would be if you use that character followed by certain English words in certain classes. For example
+\u79D8canvas for JComponents (in java.awt.JSComponent) and \u79D8byte (in java.io.File).
+
+missing Math methods
+--------------------
+
+A few java.lang.Math 
 
 MAJOR ISSUES--for Bob and Udo within SwingJS
 ============================================
@@ -1159,6 +640,8 @@ action through an asynchronous function run1(mode). For example:
 image loading
 -------------
 - All image loading in SwingJS is synchronous. A MediaTracker call will immediately return "complete".
+  However, it still may take one system clock tick to fully load images. Thus, it is recommended that
+  images be preloaded in the static block of the applet if it is necessary that they be available in init().
 
 - Applet.getImage(path, name) will return null if the image does not exist. 
 
@@ -1169,7 +652,7 @@ image loading
 no BigInteger; no BigDecimal
 ----------------------------
 
-BigInteger and BigDecimal are not supported
+BigInteger if fully supported; BigDecimal is roughed in and not fully supported
 
 
 no format internationalization
@@ -1197,16 +680,14 @@ JEditorPane  NOT IMPLEMENTED
 For the initial implementation, we don't implement infinite undo/redo, and the abstract 
 document model is much less elaborate. Only PlainDocument (in the form of JSPlainDocument)
 is implemented. 
-Thus, the Document returned by JTextField.getDocument() is a javax.swing.text.Document, but it
-is a swingjs.JSPlainDocument (extending swingjs.JSAbstractDocument)
-rather than a javax.swing.text.PlainDocument (extending javax.swing.text.AbstractDocument).
+The Document returned by JTextField.getDocument() is a javax.swing.text.Document.
 
 all scrolling is handled by HTML5
 javax.swing.AutoScroller is not implemented
 public static methods .stop, .isRunning, .processMouseDragged require true Java threading
 javax.swing.text.View and its subclasses are not implemented. 
 
-The JS document model does not allow two fields to address the same underlying document. 
+The JS document model does not allow two text fields to address the same underlying document. 
 
 
 Formatter/Regex limitations
@@ -1221,6 +702,6 @@ java.util.Formatter will function correctly for all standard %... patterns.
 integer 1/0 == 0
 ----------------
 
-1/0 in Java throws java.lang.ArithmeticException: / by zero but in JavaScript is just 0. 
+1/0 in Java throws "java.lang.ArithmeticException: / by zero", but in JavaScript is just Infinity. 
  
-
+ 

@@ -9,6 +9,7 @@
 
 // TODO: still a lot of references to window[...]
 
+// BH 2019.05.13 fixes for Math.getExponent, Math.IEEERemainder, Array.equals(Object)
 // BH 2019.02.16 fixes typo in Integer.parseInt(s,radix)
 // BH 2019.02.07 fixes radix|10 should be radix||10  
 // BH 1/29/2019  adds String.join$CharSequence$Iterable, String.join$CharSequence$CharSequenceA
@@ -972,7 +973,7 @@ Clazz.isClassDefined = function(clazzName) {
   vals.hashCode$ = function() {return this.toString().hashCode$()}
 
   vals.equals$O = function (a) { 
-    if (a.__ARRAYTYPE != this.__ARRAYTYPE || a.length != this.length)
+    if (!a || a.__ARRAYTYPE != this.__ARRAYTYPE || a.length != this.length)
       return false;
     if (a.length == 0)
     	return true;
