@@ -979,7 +979,7 @@ public class JSOptionPaneUI extends JSPanelUI {
 		@Override
 		public void layoutContainer(Container container) {
 			int numChildren = container.getComponentCount();
-			Component[] children = JSComponent.getChildArray(container);
+			Component[] children = JSComponent.秘getChildArray(container);
 
 			if (numChildren > 0) {
 				Insets insets = container.getInsets();
@@ -1046,7 +1046,7 @@ public class JSOptionPaneUI extends JSPanelUI {
         @Override
 		public Dimension minimumLayoutSize(Container c) {
             if(c != null) {
-                Component[]       children = JSComponent.getChildArray(c);
+                Component[]       children = JSComponent.秘getChildArray(c);
                 int           numChildren = c.getComponentCount();
 
                 if(numChildren > 0) {

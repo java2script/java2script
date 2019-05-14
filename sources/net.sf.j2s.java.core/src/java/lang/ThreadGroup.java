@@ -73,7 +73,7 @@ class ThreadGroup implements Thread.UncaughtExceptionHandler {
 
     int ngroups;
     ThreadGroup groups[];
-    protected HTML5Applet html5Applet;
+    protected HTML5Applet 秘html5Applet;
 
 //    /**
 //     * Creates an empty Thread group that is not in any Thread group.
@@ -1039,7 +1039,7 @@ class ThreadGroup implements Thread.UncaughtExceptionHandler {
      */
     @Override
 		public String toString() {
-        return getClass().getName() + "[name=" + getName() + ",maxpri=" + maxPriority + ",html5Applet=" + html5Applet + "]";
+        return getClass().getName() + "[name=" + getName() + ",maxpri=" + maxPriority + ",html5Applet=" + 秘html5Applet + "]";
     }
 
 

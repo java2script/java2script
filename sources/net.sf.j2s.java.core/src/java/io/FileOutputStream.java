@@ -90,10 +90,10 @@ class FileOutputStream extends OutputStream
     	return _file;
     }
 
-	public byte[] _bytes;
+	public byte[] 秘bytes;
 	
     public byte[] _getBytes() {
-    	return _bytes;
+    	return 秘bytes;
     }
 
 
@@ -288,9 +288,9 @@ class FileOutputStream extends OutputStream
     		out = new OC();
     		ByteArrayOutputStream bos = null;
     		// append is an interesting option here! -- temp files?
-    		if (append && _file != null && _file._bytes != null) {
+    		if (append && _file != null && _file.秘bytes != null) {
     			bos = new ByteArrayOutputStream();
-    			bos.write(_file._bytes, 0, _file._bytes.length);
+    			bos.write(_file.秘bytes, 0, _file.秘bytes.length);
     		}
     		out.setParams(null, name, false, bos);
     		out.setTemp(_file != null && _file instanceof JSTempFile);
@@ -372,9 +372,9 @@ class FileOutputStream extends OutputStream
     @Override
 	public void close() throws IOException {
     	out.closeChannel();
-    	_bytes = out.toByteArray();
-    	if (_file != null && _bytes != null)
-    		_file._bytes = _bytes;
+    	秘bytes = out.toByteArray();
+    	if (_file != null && 秘bytes != null)
+    		_file.秘bytes = 秘bytes;
     	if (_file instanceof JSTempFile)
     		((JSTempFile) _file).cacheBytes();
         synchronized (closeLock) {

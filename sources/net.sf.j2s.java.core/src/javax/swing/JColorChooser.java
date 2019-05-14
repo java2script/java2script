@@ -663,7 +663,7 @@ class ColorChooserDialog extends JDialog {
 		}
 
 		if (okListener == null && cancelListener == null) 
-			ensurePropertyChangeListener(this, c);
+			秘ensurePropertyChangeListener(this, c);
 
         this.chooserPane = chooserPane;
 

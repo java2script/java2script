@@ -467,11 +467,11 @@ public class MemoryImageSource implements ImageProducer {
     	
     	Object pixels = this.pixels;
     	BufferedImage img = /** @j2sNative pixels.img || */ null;
-    	JSGraphics2D g = (img == null ? null : img._g);
+    	JSGraphics2D g = (img == null ? null : img.秘g);
     	if (img != null && g != null) {
-    		img._pix = (int[]) pixels;
+    		img.秘pix = (int[]) pixels;
        	    g.drawImage(img, 0, 0, null);
-        	img._pix = null;
+        	img.秘pix = null;
     	}
 
     	if (animating) {

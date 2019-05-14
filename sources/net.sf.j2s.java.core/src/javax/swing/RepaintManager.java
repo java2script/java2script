@@ -860,7 +860,7 @@ public class RepaintManager {
 					if (g != null) {
 						// SwingJS not clipping, for performance g.setClip(rect.x, rect.y, rect.width, rect.height);
 						try {
-							((Container) dirtyComponent).paintWithBackgroundCheck(g); // SwingJS was paintContainer, but that bypasses user's paint(g) and does not do the background check?? 9/15/18
+							((Container) dirtyComponent).秘paintWithBackgroundCheck(g); // SwingJS was paintContainer, but that bypasses user's paint(g) and does not do the background check?? 9/15/18
 						} finally {
 							g.dispose();
 						}

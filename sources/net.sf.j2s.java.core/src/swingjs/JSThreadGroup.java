@@ -59,16 +59,16 @@ class JSThreadGroup extends ThreadGroup {
 
 	public JSThreadGroup(String name) {
 		super(name);
-		html5Applet = /** @j2sNative J2S._applets[name] || */null; 
+		秘html5Applet = /** @j2sNative J2S._applets[name] || */null; 
 	}
 
 	public JSThreadGroup(ThreadGroup parent, String name) {
 		super(parent, name);
-		html5Applet = /** @j2sNative J2S._applets[name] || */null; 
+		秘html5Applet = /** @j2sNative J2S._applets[name] || */null; 
 	}
 
 	public HTML5Applet getHtmlApplet() {
-		return html5Applet;
+		return 秘html5Applet;
 	}
 
 }

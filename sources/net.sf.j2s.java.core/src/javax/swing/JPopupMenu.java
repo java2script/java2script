@@ -483,7 +483,7 @@ public class JPopupMenu extends JComponent implements MenuElement {
      */
     public void addSeparator() {
     	Separator sep = new JPopupMenu.Separator();
-    	sep._j2sInvalidateOnAdd = false;
+    	sep.秘j2sInvalidateOnAdd = false;
         add(sep);
     }
 
@@ -953,7 +953,7 @@ public class JPopupMenu extends JComponent implements MenuElement {
      */
     public int getComponentIndex(Component c) {
         int ncomponents = this.getComponentCount();
-        Component[] components = JSComponent.getChildArray(this);
+        Component[] components = JSComponent.秘getChildArray(this);
         for (int i = 0 ; i < ncomponents ; i++) {
             Component comp = components[i];
             if (comp == c)
@@ -1076,7 +1076,7 @@ public class JPopupMenu extends JComponent implements MenuElement {
      */
     boolean isSubPopupMenu(JPopupMenu popup) {
         int ncomponents = this.getComponentCount();
-        Component[] components = JSComponent.getChildArray(this);
+        Component[] components = JSComponent.秘getChildArray(this);
         for (int i = 0 ; i < ncomponents ; i++) {
             Component comp = components[i];
             if (comp instanceof JMenu) {

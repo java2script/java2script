@@ -133,7 +133,7 @@ public class JApplet extends JSApplet implements /* Accessible ,*/
      */
     public JApplet() {
     	super();
-    	setFrameViewer(appletViewer);
+    	setFrameViewer(秘appletViewer);
     	setJApplet();
         updateUI();
     }
@@ -157,7 +157,7 @@ public class JApplet extends JSApplet implements /* Accessible ,*/
 //    }
 
 		setRootPane(createRootPane());
-		rootPane.setFrameViewer(appletViewer);
+		rootPane.setFrameViewer(秘appletViewer);
 		setForeground(Color.black);
 		setBackground(Color.white);
 		setLocale(JComponent.getDefaultLocale());
@@ -243,7 +243,7 @@ public class JApplet extends JSApplet implements /* Accessible ,*/
 			((Graphics2D) g).setColor(getForeground());
 			this.rootPane.paint(g);
 //			super.paint(g);// this will call SunGraphicsCallback on the rootPanel
-//    	JSAppletViewer p = appletViewer;//getAppletViewer();
+//    	JSAppletViewer p = 秘appletViewer;//getAppletViewer();
 //    	if (p.allWindows != null)
 //    		for (int i = p.allWindows.size(); --i >= 0;) {
 //    			Window c = p.allWindows.get(i);

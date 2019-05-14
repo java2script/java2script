@@ -97,9 +97,9 @@ public class Container extends JSComponent {
      */
     private Lst<Component> component;
     
-    private Component[] _childArray;
+    private Component[] 秘childArray;
 	
-    private boolean _childTainted;
+    private boolean 秘childTainted;
 
 
     /**
@@ -111,11 +111,11 @@ public class Container extends JSComponent {
 		int n = component.size();
 		if (n == 0)
 			return EMPTY_ARRAY;
-		if (_childArray != null && !_childTainted)
-			return _childArray;
-		_childTainted = false;
-		return component.toArray(_childArray != null 
-				&& _childArray.length > n ? _childArray : (_childArray = new Component[n * 2]));
+		if (秘childArray != null && !秘childTainted)
+			return 秘childArray;
+		秘childTainted = false;
+		return component.toArray(秘childArray != null 
+				&& 秘childArray.length > n ? 秘childArray : (秘childArray = new Component[n * 2]));
     }
 
     /**
@@ -531,7 +531,7 @@ public class Container extends JSComponent {
 
             comp.parent = null;
             component.removeItemAt(index);
-            _childTainted = true;
+            秘childTainted = true;
 
             invalidateIfValid();
         } else {
@@ -542,7 +542,7 @@ public class Container extends JSComponent {
             // 4->2: 012345 -> 014235
             component.removeItemAt(index);
             component.add(newIndex, comp);
-            _childTainted = true;
+            秘childTainted = true;
         }
         if (comp.parent == null) { // was actually removed
             if (containerListener != null ||
@@ -751,7 +751,7 @@ public class Container extends JSComponent {
                  comp.mixOnZOrderChanging(oldZindex, index);
              }
              
-             updateUIZOrder();
+             秘updateUIZOrder();
              
          }
     }
@@ -817,7 +817,7 @@ public class Container extends JSComponent {
         if (curParent == this) {
             if (index < component.size()) {
                 component.set(index, comp);
-                _childTainted = true;
+                秘childTainted = true;
             }
         } else {
             //index == -1 means add to the end.
@@ -826,7 +826,7 @@ public class Container extends JSComponent {
             } else {
                 component.add(index, comp);
             }
-            _childTainted = true;
+            秘childTainted = true;
             comp.parent = this;
 
             adjustListeningChildren(AWTEvent.HIERARCHY_EVENT_MASK,
@@ -1075,7 +1075,7 @@ public class Container extends JSComponent {
 		synchronized (getTreeLock()) {
 			
 			if (/** @j2sNative comp.getWrap$  && !this.isWrapper$ || */ false) {
-				comp = ((A2SWrappedComponent) comp).getWrap$();
+				comp = ((A2SWrappedComponent) comp).秘getWrap();
 				comp.background = comp.foreground = null; // this parent should not set the background color				
 			}
 			// SwingJS used for all add methods
@@ -1117,7 +1117,7 @@ public class Container extends JSComponent {
 			} else {
 				component.add(index, comp);
 			}
-			_childTainted = true;
+			秘childTainted = true;
 			comp.parent = this;
 
 			adjustListeningChildren(AWTEvent.HIERARCHY_EVENT_MASK, comp.numListening(AWTEvent.HIERARCHY_EVENT_MASK));
@@ -1212,7 +1212,7 @@ public class Container extends JSComponent {
 
 			comp.parent = null;
 			component.removeItemAt(index);
-            _childTainted = true;
+            秘childTainted = true;
 
 			invalidateIfValid();
 			if (containerListener != null
@@ -1256,7 +1256,7 @@ public class Container extends JSComponent {
 		synchronized (getTreeLock()) {
 
 			if (/** @j2sNative comp.getWrap$ && !this.isWrapper$ || */ false) {
-				comp = ((A2SWrappedComponent) comp).getWrap$();
+				comp = ((A2SWrappedComponent) comp).秘getWrap();
 			}
 
 			

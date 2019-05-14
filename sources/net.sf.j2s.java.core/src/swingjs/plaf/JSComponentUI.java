@@ -1194,7 +1194,7 @@ public class JSComponentUI extends ComponentUI
 	 * @param value
 	 */
 	private void setAWTFontAndColor(Container value) {
-		Container top = JSComponent.getTopInvokableAncestor(value, false);
+		Container top = JSComponent.秘getTopInvokableAncestor(value, false);
 		 if (top == this.awttop || (this.awttop = top) == null) {
 			 if (top == null) {
 				 awtPeerBG = awtPeerFG = null;
@@ -1744,7 +1744,7 @@ public class JSComponentUI extends ComponentUI
 
 	protected Component[] getChildren() {
 		// but see JSMenuUI and JTableUI
-		return JSComponent.getChildArray(jc);
+		return JSComponent.秘getChildArray(jc);
 	}
 
 	protected int getChildCount() {
@@ -2842,15 +2842,15 @@ public class JSComponentUI extends ComponentUI
 			setTransparent(node);
 		else
 			checkTransparent(node);
-		if (jc._gtemp != null)
-			jc._gtemp.setBackground(color);
+		if (jc.秘gtemp != null)
+			jc.秘gtemp.setBackground(color);
 	}
 
 	public boolean selfOrParentBackgroundPainted() {
 		JSComponent c = jc;
 		JSComponent p = targetParent;
 		while (c != null) {
-			if (c._isBackgroundPainted)
+			if (c.秘isBackgroundPainted)
 				return true;
 			c = (JSComponent) (p == null ? c.getParent() : p);
 			p = null;

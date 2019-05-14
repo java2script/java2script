@@ -24,24 +24,24 @@ public class JSTempFile extends File {
   }
 
 	public void cacheBytes() {
-		JSUtil.cacheFileData(path, _bytes);
+		JSUtil.cacheFileData(path, 秘bytes);
 	}
 	
 	public boolean setBytes(Object isOrBytes) {
 		if (isOrBytes instanceof InputStream) {
-			_bytes = /**
+			秘bytes = /**
 						 * @j2sNative (isOrBytes.$in.$in || isOrBytes.$in).buf ||
 						 */
 					null;
 		} else if (isOrBytes instanceof byte[]) {
-			_bytes = /**
+			秘bytes = /**
 						 * @j2sNative isOrBytes ||
 						 */
 				null;
 		} else {
-			_bytes = null;
+			秘bytes = null;
 		}
-		return _bytes != null;
+		return 秘bytes != null;
 	}
 
 

@@ -75,7 +75,7 @@ public abstract class JSComponent extends Component {
 	 */
 	public interface A2SComponentWrapper {
 
-		public void isWrapper$();
+		public void 秘isWrapper();
 	}
 
 	/**
@@ -89,7 +89,7 @@ public abstract class JSComponent extends Component {
 	 */
 	public interface A2SWrappedComponent {
 
-	   public Component getWrap$();
+	   public Component 秘getWrap();
 
 	}
 	/**
@@ -105,7 +105,7 @@ public abstract class JSComponent extends Component {
 	 * @param height
 	 */
 	@SuppressWarnings("deprecation")
-	public void resizeOriginal(int width, int height) {
+	public void 秘resizeOriginal(int width, int height) {
 		// o
 		resize(width, height);
 	}
@@ -118,7 +118,7 @@ public abstract class JSComponent extends Component {
 	 * @param c
 	 * @param listener
 	 */
-	public static void ensurePropertyChangeListener(Component c, Component listener) {
+	public static void 秘ensurePropertyChangeListener(Component c, Component listener) {
 		if (listener instanceof PropertyChangeListener) {
 			// BH SwingJS: We remove, then add, the parentComponent.
 			// If it is not really a listener, there will be a notification
@@ -135,7 +135,7 @@ public abstract class JSComponent extends Component {
 	 * @param c
 	 * @return
 	 */
-	public static Component[] getChildArray(Container c) {
+	public static Component[] 秘getChildArray(Container c) {
 		return (c == null ? Container.EMPTY_ARRAY : c.getChildArray());
 	}
 	/**
@@ -144,35 +144,38 @@ public abstract class JSComponent extends Component {
 	 * 
 	 */
 
-	protected boolean isAppletFrame;
-	public boolean isFramedApplet;
+	protected boolean 秘isAppletFrame;
+	public boolean 秘isFramedApplet;
 
-	public String htmlName;
-	protected int _num;
-	private static int _incr;
+	public String 秘htmlName;
 
-	public boolean isRootPane, isContentPane;
-	public HTML5Canvas canvas;
-	public JSAppletViewer appletViewer = ((JSAppletThread) Thread.currentThread()).appletViewer;
-	private JSFrameViewer frameViewer, topFrameViewer;
-	public HTML5Canvas _canvas;
-	public ComponentUI ui;
+	protected int 秘num;
+	private static int 秘incr;
+	public boolean 秘isBackgroundPainted;
+	protected boolean 秘alwaysPaint;
+	private Insets 秘tempInsets;
+	public JSGraphics2D 秘gtemp; // indicates that we are painting, so that g.setBackground() should also be set 
 
-	private String uiClassID;
 
-	Boolean peerVis;
+	public boolean 秘isRootPane, 秘isContentPane;
+	public JSAppletViewer 秘appletViewer = ((JSAppletThread) Thread.currentThread()).秘appletViewer;
+	private JSFrameViewer 秘frameViewer, 秘topFrameViewer;
+	public HTML5Canvas 秘canvas;
+	public ComponentUI ui; // from JComponent
+
+	private String 秘uiClassID;
+
+	Boolean 秘peerVis;
 
 	/**
 	 * not totally successful; triggered for images, background, and fillBox
 	 * 
 	 */
-	public boolean _isBackgroundPainted;
-	protected boolean _alwaysPaint;
 
 	public boolean selfOrChildIsPainted() {
-		if (_alwaysPaint || _isBackgroundPainted)
+		if (秘alwaysPaint || 秘isBackgroundPainted)
 			return true;
-		Component[] a = JSComponent.getChildArray((Container) this);
+		Component[] a = JSComponent.秘getChildArray((Container) this);
 		for (int i = ((Container) this).getComponentCount(); --i >= 0;)
 			if (((JSComponent) a[i]).selfOrChildIsPainted())
 				return true;
@@ -180,12 +183,9 @@ public abstract class JSComponent extends Component {
 	}
 
 
-	private Insets _tempInsets;
-	public JSGraphics2D _gtemp; // indicates that we are painting, so that g.setBackground() should also be set 
-
 	public JSComponent() {
 		super();
-		_num = ++_incr;
+		秘num = ++秘incr;
 	}
 
 	/**
@@ -200,14 +200,14 @@ public abstract class JSComponent extends Component {
 		if (width == 0 || height == 0 || !isVisible())
 			return null;
 		Graphics g;
-		if (frameViewer != null) {
-			g = frameViewer.getGraphics().create();
-			if (isContentPane) {
-				if (_tempInsets == null)
-					_tempInsets = new Insets(0,0,0,0);
-				((JComponent) this).getRootPane().getInsets(_tempInsets);
-				if (_tempInsets.left != 0 || _tempInsets.top != 0)
-					g.translate(_tempInsets.left, _tempInsets.top);
+		if (秘frameViewer != null) {
+			g = 秘frameViewer.getGraphics().create();
+			if (秘isContentPane) {
+				if (秘tempInsets == null)
+					秘tempInsets = new Insets(0,0,0,0);
+				((JComponent) this).getRootPane().getInsets(秘tempInsets);
+				if (秘tempInsets.left != 0 || 秘tempInsets.top != 0)
+					g.translate(秘tempInsets.left, 秘tempInsets.top);
 				// when user has inset the applet -- should clip? 
 			}
 			return g;
@@ -221,7 +221,7 @@ public abstract class JSComponent extends Component {
 		// if (g instanceof ConstrainableGraphics) {
 		// ((ConstrainableGraphics) g).constrain(x, y, width, height);
 		// } else {
-		g.translate(x, (isContentPane ? 0 : y));
+		g.translate(x, (秘isContentPane ? 0 : y));
 		g.clipRect(0, 0, width, height); // BH changed 2018.12.05 was setClip
 		// }
 		g.setFont(getFont());
@@ -230,18 +230,18 @@ public abstract class JSComponent extends Component {
 
 	public JSFrameViewer setFrameViewer(JSFrameViewer viewer) {
 		// JApplet, JDialog, JFrame (including JInternalFrame), JRootPane, JWindow
-		return frameViewer = (viewer == null ? viewer = new JSFrameViewer().setForWindow((RootPaneContainer) this) : viewer);
+		return 秘frameViewer = (viewer == null ? viewer = new JSFrameViewer().setForWindow((RootPaneContainer) this) : viewer);
 	}
 
 	public JSFrameViewer getFrameViewer() {
 		JSComponent parent = null;
-		return (topFrameViewer != null ? topFrameViewer
-				: frameViewer != null ? topFrameViewer = frameViewer
-						: (parent = getParent()) == null ? null : (topFrameViewer = parent.getFrameViewer()));
+		return (秘topFrameViewer != null ? 秘topFrameViewer
+				: 秘frameViewer != null ? 秘topFrameViewer = 秘frameViewer
+						: (parent = getParent()) == null ? null : (秘topFrameViewer = parent.getFrameViewer()));
 	}
 
 	public String getHTMLName(String uid) {
-		return (htmlName == null ? htmlName = appContext.getThreadGroup().getName() + "_" + uid + "_" + _num : htmlName);
+		return (秘htmlName == null ? 秘htmlName = appContext.getThreadGroup().getName() + "_" + uid + "_" + 秘num : 秘htmlName);
 	}
 
 	/**
@@ -259,7 +259,7 @@ public abstract class JSComponent extends Component {
 	 * @beaninfo expert: true description: UIClassID
 	 */
 	public String getUIClassID() {
-		return (uiClassID == null ? uiClassID = "ComponentUI" : uiClassID);
+		return (秘uiClassID == null ? 秘uiClassID = "ComponentUI" : 秘uiClassID);
 	}
 
 	/**
@@ -267,7 +267,7 @@ public abstract class JSComponent extends Component {
 	 * @param id
 	 */
 	public void setUIClassID(String id) {
-		uiClassID = id;
+		秘uiClassID = id;
 	}
 
 
@@ -287,14 +287,14 @@ public abstract class JSComponent extends Component {
 
 	@Override
 	public boolean isDisplayable() { 
-		return getTopInvokableAncestor(this, false) != null;
+		return 秘getTopInvokableAncestor(this, false) != null;
 	}
 
 	@Override
 	protected void updatePeerVisibility(boolean isVisible) {
 		// check for visibility set prior to creation of ui.
 		if (getOrCreatePeer() == null)
-			peerVis = (isVisible ? Boolean.TRUE : Boolean.FALSE);
+			秘peerVis = (isVisible ? Boolean.TRUE : Boolean.FALSE);
 		else
 			updatePeerVisibilityOrig(isVisible);
 	}
@@ -314,13 +314,13 @@ public abstract class JSComponent extends Component {
 	 * @see JComponent#updateUI
 	 */
 	public void updateUI() {
-		if (uiClassID == null)
-			uiClassID = getUIClassID();
+		if (秘uiClassID == null)
+			秘uiClassID = getUIClassID();
 		if (ui == null)
 			setUI(UIManager.getUI(this));
 	}
 
-	protected JSGraphics2D getJSGraphic2D(Graphics g) {
+	protected JSGraphics2D 秘getJSGraphic2D(Graphics g) {
 		return (/** @j2sNative g.mark$ ? g : */ null);
 	}
 
@@ -331,15 +331,15 @@ public abstract class JSComponent extends Component {
 	 *
 	 * @param jsg
 	 */
-	public void checkBackgroundPainted(JSGraphics2D jsg, boolean init) {
+	public void 秘checkBackgroundPainted(JSGraphics2D jsg, boolean init) {
 		if (jsg == null || init) {
-			_isBackgroundPainted = false;
-			_gtemp = jsg;
+			秘isBackgroundPainted = false;
+			秘gtemp = jsg;
 			return;
 		}
-		_gtemp = null;
-		_isBackgroundPainted = _alwaysPaint || jsg.isBackgroundPainted();
-		if (_isBackgroundPainted) {
+		秘gtemp = null;
+		秘isBackgroundPainted = 秘alwaysPaint || jsg.isBackgroundPainted();
+		if (秘isBackgroundPainted) {
 			((JSComponentUI) ui).setPainted(jsg);
 			// It's all one canvas, and it is behind the root pane (bad design?)
 			// so if it is painted, we should make the root pane transparent
@@ -411,7 +411,7 @@ public abstract class JSComponent extends Component {
 //    }
 //
 	
-	protected void updateUIZOrder() {
+	protected void 秘updateUIZOrder() {
 		
 // developer could have created their own LayeredPane
 //       if (uiClassID != "DesktopPaneUI")
@@ -423,7 +423,7 @@ public abstract class JSComponent extends Component {
     	int n = ((Container) this).getComponentCount();
     	if (n < 2)
     		return;
-    	JSComponent[] components = (JSComponent[]) getChildArray((Container) this);
+    	JSComponent[] components = (JSComponent[]) 秘getChildArray((Container) this);
     	int[] zorders = new int[n];
         for (int i = 0; i < n; i++)
             zorders[i] = ((JSComponentUI) components[i].getUI()).getZIndex(null);
@@ -456,11 +456,11 @@ public abstract class JSComponent extends Component {
      *  
      * @param g
      */
-	public void paintWithBackgroundCheck(Graphics g) {
-		JSGraphics2D jcg = getJSGraphic2D(g);
-		checkBackgroundPainted(jcg, true);
+	public void 秘paintWithBackgroundCheck(Graphics g) {
+		JSGraphics2D jcg = 秘getJSGraphic2D(g);
+		秘checkBackgroundPainted(jcg, true);
 		paint(g);
-		checkBackgroundPainted(jcg, false);
+		秘checkBackgroundPainted(jcg, false);
 	}
 
 	@Override
@@ -477,7 +477,7 @@ public abstract class JSComponent extends Component {
 			((JSComponentUI)ui).enableJSKeys(false);
 	}
 	
-	protected void jsInputMapSet() {
+	protected void 秘jsInputMapSet() {
 		if (ui != null)
 			((JSComponentUI)ui).enableJSKeys(true);		
 	}
@@ -494,8 +494,8 @@ public abstract class JSComponent extends Component {
  	 * @param focusable TODO
  	 * @return
  	 */
- 	public static Container getTopInvokableAncestor(Component c, boolean andFocusable) {
- 	    for(Component p = c; p != null; p = nextHigher(p)) { 
+ 	public static Container 秘getTopInvokableAncestor(Component c, boolean andFocusable) {
+ 	    for(Component p = c; p != null; p = 秘nextHigher(p)) { 
  	        if (p.isWindowOrJSApplet() && (!andFocusable || ((Window)p).isFocusableWindow())) {
  	            return (Container) p;
  	        }
@@ -513,15 +513,15 @@ public abstract class JSComponent extends Component {
 	 * @param c
 	 * @return
 	 */
-	public static Container nextHigher(Component c) {
+	public static Container 秘nextHigher(Component c) {
 		Container p = c.getParent();
 		if (p == null && c instanceof JPopupMenu)
 			p = (Container) ((JPopupMenu) c).getInvoker();
 		return p;
 	}
 
-    final public boolean _isFocusSetAndEnabled() {
-        return _isFocusableSet && isFocusable();
+    final public boolean 秘isFocusSetAndEnabled() {
+        return 秘isFocusableSet && isFocusable();
     }
 
 

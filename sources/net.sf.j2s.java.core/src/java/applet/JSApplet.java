@@ -279,25 +279,25 @@ public class JSApplet extends JSPanel {
 	public void resize(int width, int height) {
 		// no resizing if we have a stub -- embedded in a page
 		if (stub == null)
-	    	resizeOriginal(width, height);
+	    	秘resizeOriginal(width, height);
     }
 
 	public void resizeHTML(int width, int height) {
-		if (appletViewer != null) {
-			appletViewer.html5Applet._resizeApplet(new int[] {width, height});
+		if (秘appletViewer != null) {
+			秘appletViewer.html5Applet._resizeApplet(new int[] {width, height});
 			if (stub != null) {
 				// Added 2/23/2019 to force layout prior to Canvas painting in mpFrakta.Applets.Geomet
 				JRootPane root = ((JApplet) this).getRootPane();
 				root.invalidate();
 				((JSComponentUI)root.getUI()).setPainted(null);
-				root._isBackgroundPainted = false;
+				root.秘isBackgroundPainted = false;
 				RepaintManager.currentManager(this).addInvalidComponent(root);
 			}
 		}
     }
 
     @SuppressWarnings("deprecation")
-    public void resizeOriginal(int width, int height) {
+    public void 秘resizeOriginal(int width, int height) {
         Dimension d = size();
         if ((d.width != width) || (d.height != height)) {
             super.resize(width, height);

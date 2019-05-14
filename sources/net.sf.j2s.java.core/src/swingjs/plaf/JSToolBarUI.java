@@ -269,7 +269,7 @@ public class JSToolBarUI extends JSPanelUI {
 
 		if (toolBarFocusListener != null) {
 			// Put focus listener on all components in toolbar
-			Component[] components = JSComponent.getChildArray(toolBar);
+			Component[] components = JSComponent.秘getChildArray(toolBar);
 
 			for (int i = 0, n = toolBar.getComponentCount(); i < n; ++i) {
 				components[i].addFocusListener(toolBarFocusListener);
@@ -297,7 +297,7 @@ public class JSToolBarUI extends JSPanelUI {
 
 		if (toolBarFocusListener != null) {
 			// Remove focus listener from all components in toolbar
-			Component[] components = JSComponent.getChildArray(toolBar);
+			Component[] components = JSComponent.秘getChildArray(toolBar);
 			for (int i = 0, n = toolBar.getComponentCount(); i < n; ++i) {
 				components[i].removeFocusListener(toolBarFocusListener);
 			}
@@ -598,7 +598,7 @@ public class JSToolBarUI extends JSPanelUI {
 	 */
 	protected void installRolloverBorders(JComponent c) {
 		// Put rollover borders on buttons
-		Component[] components = JSComponent.getChildArray(c);
+		Component[] components = JSComponent.秘getChildArray(c);
 		for (int i = 0, n = c.getComponentCount(); i < n; ++i) {
 //			if (components[i] instanceof JComponent) {
 			((JComponent) components[i]).updateUI();
@@ -620,7 +620,7 @@ public class JSToolBarUI extends JSPanelUI {
 	 */
 	protected void installNonRolloverBorders(JComponent c) {
 		// Put non-rollover borders on buttons. These borders reduce the margin.
-		Component[] components = JSComponent.getChildArray(c);
+		Component[] components = JSComponent.秘getChildArray(c);
 
 		for (int i = 0, n = toolBar.getComponentCount(); i < n; ++i) {
 			if (components[i] instanceof JComponent) {
@@ -644,7 +644,7 @@ public class JSToolBarUI extends JSPanelUI {
 	 */
 	protected void installNormalBorders(JComponent c) {
 		// Put back the normal borders on buttons
-		Component[] components = JSComponent.getChildArray(c);
+		Component[] components = JSComponent.秘getChildArray(c);
 
 		for (int i = 0, n = c.getComponentCount(); i < n; ++i) {
 			setBorderToNormal(components[i]);
@@ -1180,7 +1180,7 @@ public class JSToolBarUI extends JSPanelUI {
 			} else if (propertyName == "orientation") {
 				// Search for JSeparator components and change it's orientation
 				// to match the toolbar and flip it's orientation.
-				Component[] components = JSComponent.getChildArray(toolBar);
+				Component[] components = JSComponent.秘getChildArray(toolBar);
 				int n = toolBar.getComponentCount();
 				int orientation = ((Integer) evt.getNewValue()).intValue();
 				JToolBar.Separator separator;

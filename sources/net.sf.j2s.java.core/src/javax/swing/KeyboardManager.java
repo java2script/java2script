@@ -296,7 +296,7 @@ public class KeyboardManager {
 
 
     private Hashtable getKeyMap(JComponent c, KeyStroke k) {    	
-        Container top = JSComponent.getTopInvokableAncestor(c, true);
+        Container top = JSComponent.秘getTopInvokableAncestor(c, true);
         if (top == null) {
             return null;
         }
@@ -312,7 +312,7 @@ public class KeyboardManager {
 	}
 
 	public void unregisterMenuBar(JMenuBar mb) {
-        Object top = JSComponent.getTopInvokableAncestor(mb, true);
+        Object top = JSComponent.秘getTopInvokableAncestor(mb, true);
         if (top == null) {
             return;
         }

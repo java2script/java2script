@@ -60,7 +60,7 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 		// JApplet, JDialog, JFrame (including JInternalFrame), JRootPane, JWindow
 		isFrame = true;
 		top = c;
-		appletViewer = ((JSComponent)top).appletViewer;
+		appletViewer = ((JSComponent)top).秘appletViewer;
 		if (c instanceof JApplet)
 			applet = (JApplet) c;
 		fullName = appletViewer.fullName;
@@ -139,7 +139,7 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 	public void setScreenDimension(int width, int height) {
 		setGraphics((Graphics) (Object) (jsgraphics = null), width, height, top);
 		if (top != null)
-			((JSComponent) top).resizeOriginal(width, height);
+			((JSComponent) top).秘resizeOriginal(width, height);
 	}
 
 	/**
@@ -191,16 +191,16 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 			hNew = Math.max(0, window.getContentPane().getHeight());
 		}
 		int wOld = 0, hOld = 0;
-		if (c._canvas != null) {
+		if (c.秘canvas != null) {
 			/**
 			 * @j2sNative
 			 * 
-			 * 			wOld = c._canvas.width; hOld = c._canvas.height;
+			 * 			wOld = c.秘canvas.width; hOld = c.秘canvas.height;
 			 * 
 			 */
 		}
-		if (wNew >= 0 && hNew >= 0 && (wOld != wNew || hOld != hNew || c._canvas == null || jsgraphics == null)) {
-			jsgraphics = new JSGraphics2D(c._canvas = newCanvas(wNew, hNew, window));
+		if (wNew >= 0 && hNew >= 0 && (wOld != wNew || hOld != hNew || c.秘canvas == null || jsgraphics == null)) {
+			jsgraphics = new JSGraphics2D(c.秘canvas = newCanvas(wNew, hNew, window));
 		}
 		// coerse jsgraphics to Graphics
 		return (Graphics) (Object) jsgraphics;
@@ -231,7 +231,7 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 		DOMNode rootNode = (root == null ? null : ((JSComponentUI) root.getUI()).domNode);
 		if (rootNode != null)
 			DOMNode.dispose(canvas);
-		display = canvasId = appletViewer.appletName + "_canvas" + ++canvasCount;
+		display = canvasId = appletViewer.appletName + "秘canvas" + ++canvasCount;
 		canvas = (HTML5Canvas) DOMNode.createElement("canvas", canvasId);
 		if (userFramedApplet != null) {
 			JSFrameViewer appViewer = userFramedApplet.getFrameViewer();

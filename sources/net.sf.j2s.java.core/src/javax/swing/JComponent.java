@@ -624,11 +624,11 @@ public abstract class JComponent extends Container {
 				// note that this update will fill the component's background, but  
 				// that is not what we are worried about. What we are worried about
 				// is if this method is overridden and is written to.
-				_isBackgroundPainted = false;
+				秘isBackgroundPainted = false;
 				ui.update(scratchGraphics, this);
 				// BH TODO CHECK THIS 
-				JSGraphics2D jsg = getJSGraphic2D(scratchGraphics);		
-				_isBackgroundPainted = (jsg != null && jsg.isBackgroundPainted());
+				JSGraphics2D jsg = 秘getJSGraphic2D(scratchGraphics);		
+				秘isBackgroundPainted = (jsg != null && jsg.isBackgroundPainted());
 			} finally {
 				scratchGraphics.dispose();
 			}
@@ -703,9 +703,9 @@ public abstract class JComponent extends Container {
 							// shouldSetFlagBack = true;
 							// }
 							// if (!printing) {
-							jc.checkBackgroundPainted(jsg, true);
+							jc.秘checkBackgroundPainted(jsg, true);
 							jc.paint((Graphics) (Object) jsg);
-							jc.checkBackgroundPainted(getJSGraphic2D((Graphics) (Object) jsg), false);
+							jc.秘checkBackgroundPainted(秘getJSGraphic2D((Graphics) (Object) jsg), false);
 							// } else {
 							// if (!getFlag(IS_PRINTING_ALL)) {
 							// comp.print(cg);
@@ -1935,7 +1935,7 @@ public abstract class JComponent extends Container {
 	 *                  pushed to the <code>KeyboardManager</code>
 	 */
 	private void registerWithKeyboardManager(boolean onlyIfNew) {
-		if (getTopInvokableAncestor(this, true) == null)
+		if (秘getTopInvokableAncestor(this, true) == null)
 			return;
 
 		InputMap inputMap = getInputMap(WHEN_IN_FOCUSED_WINDOW, false);
@@ -2310,7 +2310,7 @@ public abstract class JComponent extends Container {
 			if (create) {
 				InputMap km = new InputMap();
 				setInputMap(condition, km);
-				jsInputMapSet();
+				秘jsInputMapSet();
 				return km;
 			}
 			break;
@@ -4459,7 +4459,7 @@ public abstract class JComponent extends Container {
 						resetPC = true;
 					} else {
 						
-						Component[] children = JSComponent.getChildArray(c);
+						Component[] children = JSComponent.秘getChildArray(c);
 						int i = 0;
 						for (int n = c.getComponentCount(); i < n; i++) {
 							if (children[i] == child)
@@ -4560,7 +4560,7 @@ public abstract class JComponent extends Container {
 					// For some reason painting of the root pane causes a persistent clip in AWT. 
 					
 					// SwingJS early on was not clipping for better performance
-					 if (!isRootPane)
+					 if (!秘isRootPane)
 						 g.setClip(paintImmediatelyClip.x, paintImmediatelyClip.y,
                             paintImmediatelyClip.width, paintImmediatelyClip.height);
 
@@ -4568,7 +4568,7 @@ public abstract class JComponent extends Container {
 					// jpanel.repaint() and then draws on the background,
 					// the JPanel's background is made transparent
 					// (so that the underlying JRootPane canvas can show).
-					paintingComponent.paintWithBackgroundCheck(g);
+					paintingComponent.秘paintWithBackgroundCheck(g);
 				}
 			} finally {
 				g.dispose();
@@ -4853,12 +4853,12 @@ public abstract class JComponent extends Container {
 	 * @param g
 	 */
 	private void paintComponentSafely(Graphics g) {
-		JSGraphics2D jsg = getJSGraphic2D(g);		
+		JSGraphics2D jsg = 秘getJSGraphic2D(g);		
 		int nSave = (jsg == null ? 0 : jsg.mark());
-		checkBackgroundPainted(jsg, true);
+		秘checkBackgroundPainted(jsg, true);
 		// note that paintComponent may be overridden.
 		paintComponent(g);
-		checkBackgroundPainted(jsg, false);
+		秘checkBackgroundPainted(jsg, false);
 		if (jsg != null) {
 			jsg.reset(nSave);
 		}
@@ -4878,7 +4878,7 @@ public abstract class JComponent extends Container {
 	 * @param g
 	 */
 	private void printComponentSafely(Graphics g) {
-		JSGraphics2D jsg = getJSGraphic2D(g);		
+		JSGraphics2D jsg = 秘getJSGraphic2D(g);		
 		int nSave = (jsg == null ? 0 : jsg.mark());
 		printComponent(g);
 		if (jsg != null)
@@ -4900,7 +4900,7 @@ public abstract class JComponent extends Container {
 	private void paintBorderSafely(Graphics g) {
 		if (getBorder() == null)
 			return;
-		JSGraphics2D jsg = getJSGraphic2D(g);		
+		JSGraphics2D jsg = 秘getJSGraphic2D(g);		
 		int nSave = (jsg == null ? 0 : jsg.mark());
 		paintBorder(g);
 		if (jsg != null)
@@ -4922,8 +4922,8 @@ public abstract class JComponent extends Container {
 	private void printBorderSafely(Graphics g) {
 		if (getBorder() == null)
 			return;
-		_isBackgroundPainted=true;
-		JSGraphics2D jsg = getJSGraphic2D(g);		
+		秘isBackgroundPainted=true;
+		JSGraphics2D jsg = 秘getJSGraphic2D(g);		
 		int nSave = (jsg == null ? 0 : jsg.mark());
 		printBorder(g);
 		if (jsg != null)

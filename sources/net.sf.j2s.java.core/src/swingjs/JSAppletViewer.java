@@ -160,7 +160,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 	 * using setAppletListener(x), where x.appletStateChanged(AppletEvent evt)
 	 * exists
 	 * e
-	 * next command on page should be appletViewer.start();
+	 * next command on page should be 秘appletViewer.start();
 	 * 
 	 * @param params
 	 */
@@ -417,7 +417,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 				}
 				System.out.println("JSAppletViewer init");
 				applet.setFont(new Font(Font.DIALOG, Font.PLAIN, 12));
-				applet.resizeOriginal(defaultAppletSize.width, defaultAppletSize.height);
+				applet.秘resizeOriginal(defaultAppletSize.width, defaultAppletSize.height);
 				applet.init();
 				// Need the default(fallback) font to be created in this
 				// AppContext
@@ -436,7 +436,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 				applet.getRootPane().addNotify();
 				// force peer creation now
 				System.out.println("JSAppletViewer start" + currentAppletSize);
-				applet.resizeOriginal(currentAppletSize.width, currentAppletSize.height);
+				applet.秘resizeOriginal(currentAppletSize.width, currentAppletSize.height);
 				applet.start();
 				// applet.repaint();
 				status = APPLET_START;

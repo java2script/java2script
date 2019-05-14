@@ -195,7 +195,7 @@ class FileInputStream extends InputStream
 		byte[] bytes = JSUtil.getFileAsBytes(file);
 		if (bytes == null)
 		  throw new FileNotFoundException("Opening file " + file);
-		file._bytes = bytes;
+		file.秘bytes = bytes;
     	is = new ByteArrayInputStream(bytes);    	
     }
 

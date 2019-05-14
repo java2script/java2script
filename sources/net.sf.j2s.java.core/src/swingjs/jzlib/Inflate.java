@@ -107,7 +107,7 @@ final class Inflate {
 
   private int flags;
 
-  private int need_bytes = -1;
+  private int need秘bytes = -1;
   private byte[] crcbuf = new byte[4];
 
   GZIPHeader gheader = null;
@@ -124,7 +124,7 @@ final class Inflate {
     z.total_in = z.total_out = 0;
     z.msg = null;
     this.mode = HEAD;
-    this.need_bytes = -1;
+    this.need秘bytes = -1;
     this.blocks.reset();
     return Z_OK;
   }
@@ -679,11 +679,11 @@ final class Inflate {
   }
 
   private int readBytes(int n, int r, int f) throws Return {
-    if (need_bytes == -1) {
-      need_bytes = n;
+    if (need秘bytes == -1) {
+      need秘bytes = n;
       this.need = 0;
     }
-    while (need_bytes > 0) {
+    while (need秘bytes > 0) {
       if (z.avail_in == 0) {
         throw new Return(r);
       }
@@ -691,15 +691,15 @@ final class Inflate {
       z.avail_in--;
       z.total_in++;
       this.need = this.need
-          | ((z.next_in[z.next_in_index++] & 0xff) << ((n - need_bytes) * 8));
-      need_bytes--;
+          | ((z.next_in[z.next_in_index++] & 0xff) << ((n - need秘bytes) * 8));
+      need秘bytes--;
     }
     if (n == 2) {
       this.need &= 0xffffL;
     } else if (n == 4) {
       this.need &= 0xffffffffL;
     }
-    need_bytes = -1;
+    need秘bytes = -1;
     return r;
   }
 

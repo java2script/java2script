@@ -312,7 +312,7 @@ public class JSGraphicsCompositor {
 	  /**
 	   * @j2sNative
 	   * 
-	   * imgNode = img._imgNode;
+	   * imgNode = img.秘imgNode;
 	   * 
 	   */
 	  {}
@@ -322,10 +322,10 @@ public class JSGraphicsCompositor {
 		  /**
 		   * @j2sNative
 		   * 
-		   * var canvas = img._canvas;
+		   * var canvas = img.秘canvas;
 		   * if (canvas == null) {
 		   *   img.getGraphics$();
-		   *   canvas = img._canvas;
+		   *   canvas = img.秘canvas;
 		   * }
 		   * imgNode = canvas;
 		   * imgNode.style.width = w + "px";

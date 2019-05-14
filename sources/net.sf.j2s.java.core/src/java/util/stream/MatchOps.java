@@ -77,9 +77,11 @@ final class MatchOps {
      *         criteria
      */
     public static <T> TerminalOp<T, Boolean> makeRef(Predicate<? super T> predicate,
-            MatchKind matchKind) {
+            MatchKind matchKind0) {
+    	final MatchKind matchKind = matchKind0;
         Objects.requireNonNull(predicate);
         Objects.requireNonNull(matchKind);
+        
         class MatchSink extends BooleanTerminalSink<T> {
             MatchSink() {
                 super(matchKind);
@@ -93,7 +95,7 @@ final class MatchOps {
                 }
             }
         }
-
+        
         return new MatchOp<>(StreamShape.REFERENCE, matchKind, MatchSink::new);
     }
 

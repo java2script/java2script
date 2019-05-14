@@ -118,7 +118,7 @@ public class Test_Applet_DropFile extends JApplet implements DropTargetListener 
 	private byte[] getDroppedFileBytes(File file) {
 		/**
 		 * @j2sNative
-		 * return file._bytes;
+		 * return file.秘bytes;
 		 */
 		{
 			try {

@@ -1012,7 +1012,7 @@ public class JTabbedPane extends JComponent
         // remove the correct child!
         if (component != null) {
             int n = this.getComponentCount();
-            Component[] components = JSComponent.getChildArray(this);
+            Component[] components = JSComponent.秘getChildArray(this);
             for (int i = n; --i >= 0; ) {
                 if (components[i] == component) {
                     super.remove(i);
@@ -1048,7 +1048,7 @@ public class JTabbedPane extends JComponent
             // Container#remove(comp) invokes Container#remove(int)
             // so make sure JTabbedPane#remove(int) isn't called here
             int n = this.getComponentCount();
-            Component[] components = JSComponent.getChildArray(this);
+            Component[] components = JSComponent.秘getChildArray(this);
             for (int i=0; i < n; i++) {
                 if (component == components[i]) {
                     super.remove(i);
@@ -1573,7 +1573,7 @@ public class JTabbedPane extends JComponent
                 // why not if (page.component.getParent() == this) remove(component)
                 synchronized(getTreeLock()) {
                     int count = getComponentCount();
-                    Component[] components = JSComponent.getChildArray(this);
+                    Component[] components = JSComponent.秘getChildArray(this);
                     for (int i = 0; i < count; i++) {
                         if (components[i] == page.component) {
                             super.remove(i);

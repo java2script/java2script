@@ -972,7 +972,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 					case "java.io.File":
 						var f = Clazz.new_(Clazz.load("java.io.File").c$$S,
 								[ file.name ]);
-						f._bytes = J2S._toBytes(data);
+						f.秘bytes = J2S._toBytes(data);
 						return fDone(f);
 					case "ArrayBuffer":
 						break;

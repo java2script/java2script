@@ -279,7 +279,7 @@ public class JSDnD {
 		public FileTransferable(String name, byte[] data) {
 			super(null);
 			file = new File(name);
-			file._bytes = data;
+			file.秘bytes = data;
 		}
 
 		@Override
