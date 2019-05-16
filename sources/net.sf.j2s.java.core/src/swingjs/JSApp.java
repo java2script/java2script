@@ -56,18 +56,15 @@ public class JSApp {
 	/**
 	 * @param params
 	 */
-	protected void setAppParams(Hashtable<String, Object> params) {
-		this.params = params;
+	protected void setAppParams(Hashtable<String, Object> params0) {
+		params = params0;
 		// Although we allow params to hold mixed-case keys, 
 		// we need to ensure that it has the lower-case version
 		// It was an early design flaw, unfortunately.
 		// At least for now, this is the solution.
-		for (Entry<String, Object> e: params.entrySet()) {
-			String key = e.getKey();
-			String lckey = key.toLowerCase();
-			if (!key.equals(lckey))
-				params.put(lckey, e.getValue());
-		}
+		params = new Hashtable<String, Object>();
+		for (Entry<String, Object> e: params0.entrySet())
+			params.put(e.getKey().toLowerCase(), e.getValue());
 		String language = getParameter("language");
 		if (language == null)
 			language = JSUtil.J2S.getDefaultLanguage(false);
