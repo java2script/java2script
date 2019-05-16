@@ -10667,6 +10667,7 @@ return jQuery;
 
 // J2S._version set to "3.2.4.07" 2019.01.04; 2019.02.06
 
+// BH 5/16/2019 fixes POST method for OuputStream
 // BH 2/6/2019 adds check for non-DOM event handler in getXY
 // BH 1/4/2019 moves window.thisApplet to J2S.thisApplet; 
 
@@ -11710,8 +11711,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 			info.url = url;
 			info.type = "POST";
 			info.processData = false;
-			info.data = (typeof data == "string" ? dataOut 
-					: ";base64," + Clazz.load("javajs.util.Base64").getBase64$BA(dataOut).toString());
+			info.data = dataOut;//(typeof data == "string" ? dataOut : ";base64," + Clazz.load("javajs.util.Base64").getBase64$BA(dataOut).toString());
 			info.xhr = J2S.$ajax(info);
 			return info.xhr.responseText;
 		}
