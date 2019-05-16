@@ -1768,7 +1768,7 @@ public class JSComponentUI extends ComponentUI
 			} else {
 				if (ui.domNode != ui.outerNode && DOMNode.getParent(ui.domNode) == null)				
 					ui.outerNode.appendChild(ui.domNode);
-				if (ui.embeddingNode == null)
+				if (ui.embeddingNode == null && (!ui.isWindow || !ui.isFrameIndependent()))
 					DOMNode.appendChildSafely(containerNode, ui.outerNode);
 			}
 		}
