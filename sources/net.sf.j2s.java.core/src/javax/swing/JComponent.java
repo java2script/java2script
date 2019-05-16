@@ -204,10 +204,10 @@ public abstract class JComponent extends Container {
 	 * 
 	 * SwingJS
 	 */
-	private boolean _isAlignmentXSet;
-	private float _alignmentX;
-	private boolean _isAlignmentYSet;
-	private float _alignmentY;
+	private boolean 秘isAlignmentXSet;
+	private float 秘alignmentX;
+	private boolean 秘isAlignmentYSet;
+	private float 秘alignmentY;
 
 	/**
 	 * Backing store for JComponent properties and listeners
@@ -222,9 +222,9 @@ public abstract class JComponent extends Container {
 	/**
 	 * Whether or not autoscroll has been enabled.
 	 */
-	private boolean _autoscrolls;
-	private Border _border;
-	private int _flags;
+	private boolean autoscrolls;
+	private Border border;
+	private int flags;
 
 	/* Input verifier for this component */
 	// private InputVerifier inputVerifier = null;
@@ -287,7 +287,7 @@ public abstract class JComponent extends Container {
 	/**
 	 * <code>JPopupMenu</code> assigned to this component and all of its childrens
 	 */
-	private JPopupMenu _popupMenu;
+	private JPopupMenu 秘popupMenu;
 
 	/** Private flags **/
 	private static final int IS_DOUBLE_BUFFERED = 0;
@@ -498,8 +498,8 @@ public abstract class JComponent extends Container {
 		if (popup != null) {
 			enableEvents(AWTEvent.MOUSE_EVENT_MASK);
 		}
-		JPopupMenu oldPopup = this._popupMenu;
-		this._popupMenu = popup;
+		JPopupMenu oldPopup = this.秘popupMenu;
+		this.秘popupMenu = popup;
 		firePropertyChange("componentPopupMenu", oldPopup, popup);
 	}
 
@@ -518,10 +518,10 @@ public abstract class JComponent extends Container {
 	public JPopupMenu getComponentPopupMenu() {
 
 		if (!getInheritsPopupMenu()) {
-			return _popupMenu;
+			return 秘popupMenu;
 		}
 
-		if (_popupMenu == null) {
+		if (秘popupMenu == null) {
 			// Search parents for its popup
 			Container parent = getParent();
 			while (parent != null) {
@@ -537,7 +537,7 @@ public abstract class JComponent extends Container {
 			return null;
 		}
 
-		return _popupMenu;
+		return 秘popupMenu;
 	}
 
 	/**
@@ -1590,9 +1590,9 @@ public abstract class JComponent extends Container {
 	 *           description: The component's border.
 	 */
 	public void setBorder(Border border) {
-		Border oldBorder = this._border;
+		Border oldBorder = this.border;
 
-		this._border = border;
+		this.border = border;
 		firePropertyChange("border", oldBorder, border);
 		if (border != oldBorder) {
 			if (border == null
@@ -1613,7 +1613,7 @@ public abstract class JComponent extends Container {
 	 * @see #setBorder
 	 */
 	public Border getBorder() {
-		return _border;
+		return border;
 	}
 
 	/**
@@ -1625,8 +1625,8 @@ public abstract class JComponent extends Container {
 	 */
 	@Override
 	public Insets getInsets() {
-		if (_border != null) {
-			return _border.getBorderInsets(this);
+		if (border != null) {
+			return border.getBorderInsets(this);
 		}
 		return super.getInsets();
 	}
@@ -1654,17 +1654,17 @@ public abstract class JComponent extends Container {
 			// because AWT components do not have this method
 			in = getInsets();
 		} else {
-			if (_border == null) {
+			if (border == null) {
 				// super.getInsets() always returns an Insets object with
 				// all of its value zeroed. No need for a new object here.
 				insets.left = insets.top = insets.right = insets.bottom = 0;
 			} else {
-				if (_border instanceof AbstractBorder) {
-					in = ((AbstractBorder) _border).getBorderInsets(this, insets);
+				if (border instanceof AbstractBorder) {
+					in = ((AbstractBorder) border).getBorderInsets(this, insets);
 				}
 				// Can't reuse border insets because the Border interface
 				// can't be enhanced.
-				in = _border.getBorderInsets(this);
+				in = border.getBorderInsets(this);
 			}
 		}
 		if (in != null) {
@@ -1686,8 +1686,8 @@ public abstract class JComponent extends Container {
 	 */
 	@Override
 	public float getAlignmentY() {
-		if (_isAlignmentYSet) {
-			return _alignmentY;
+		if (秘isAlignmentYSet) {
+			return 秘alignmentY;
 		}
 		return super.getAlignmentY();
 	}
@@ -1701,9 +1701,9 @@ public abstract class JComponent extends Container {
 	 * @beaninfo description: The preferred vertical alignment of the component.
 	 */
 	public void setAlignmentY(float alignmentY) {
-		this._alignmentY = alignmentY > 1.0f ? 1.0f : alignmentY < 0.0f ? 0.0f
+		this.秘alignmentY = alignmentY > 1.0f ? 1.0f : alignmentY < 0.0f ? 0.0f
 				: alignmentY;
-		_isAlignmentYSet = true;
+		秘isAlignmentYSet = true;
 	}
 
 	/**
@@ -1716,8 +1716,8 @@ public abstract class JComponent extends Container {
 	 */
 	@Override
 	public float getAlignmentX() {
-		if (_isAlignmentXSet) {
-			return _alignmentX;
+		if (秘isAlignmentXSet) {
+			return 秘alignmentX;
 		}
 		return super.getAlignmentX();
 	}
@@ -1731,9 +1731,9 @@ public abstract class JComponent extends Container {
 	 * @beaninfo description: The preferred horizontal alignment of the component.
 	 */
 	public void setAlignmentX(float alignmentX) {
-		this._alignmentX = alignmentX > 1.0f ? 1.0f : alignmentX < 0.0f ? 0.0f
+		this.秘alignmentX = alignmentX > 1.0f ? 1.0f : alignmentX < 0.0f ? 0.0f
 				: alignmentX;
-		_isAlignmentXSet = true;
+		秘isAlignmentXSet = true;
 	}
 
 	/**
@@ -2962,8 +2962,8 @@ public abstract class JComponent extends Container {
 	 */
 	public void setAutoscrolls(boolean autoscrolls) {
 		setFlag(AUTOSCROLLS_SET, true);
-		if (this._autoscrolls != autoscrolls) {
-			this._autoscrolls = autoscrolls;
+		if (this.autoscrolls != autoscrolls) {
+			this.autoscrolls = autoscrolls;
 			if (autoscrolls) {
 				enableEvents(AWTEvent.MOUSE_EVENT_MASK);
 				enableEvents(AWTEvent.MOUSE_MOTION_EVENT_MASK);
@@ -2981,7 +2981,7 @@ public abstract class JComponent extends Container {
 	 * @see #setAutoscrolls
 	 */
 	public boolean getAutoscrolls() {
-		return _autoscrolls;
+		return autoscrolls;
 	}
 
 	/**
@@ -2997,7 +2997,7 @@ public abstract class JComponent extends Container {
 	 */
 	@Override
 	protected void processMouseEvent(MouseEvent e) {
-		if (_autoscrolls && e.getID() == MouseEvent.MOUSE_RELEASED) {
+		if (autoscrolls && e.getID() == MouseEvent.MOUSE_RELEASED) {
 			Autoscroller.stop(this);
 		}
 		super.processMouseEvent(e);
@@ -3013,7 +3013,7 @@ public abstract class JComponent extends Container {
 	@Override
 	protected void processMouseMotionEvent(MouseEvent e) {
 		boolean dispatch = true;
-		if (_autoscrolls && e.getID() == MouseEvent.MOUSE_DRAGGED) {
+		if (autoscrolls && e.getID() == MouseEvent.MOUSE_DRAGGED) {
 			// We don't want to do the drags when the mouse moves if we're
 			// autoscrolling. It makes it feel spastic.
 			dispatch = !Autoscroller.isRunning(this);
@@ -4168,7 +4168,7 @@ public abstract class JComponent extends Container {
 			RepaintManager.currentManager(this).resetDoubleBuffer();
 			setCreatedDoubleBuffer(false);
 		}
-	  if (_autoscrolls) {
+	  if (autoscrolls) {
 	  	Autoscroller.stop(this);
 	  }
 	}
@@ -4684,15 +4684,15 @@ public abstract class JComponent extends Container {
 
 	private void setFlag(int aFlag, boolean aValue) {
 		if (aValue) {
-			_flags |= (1 << aFlag);
+			flags |= (1 << aFlag);
 		} else {
-			_flags &= ~(1 << aFlag);
+			flags &= ~(1 << aFlag);
 		}
 	}
 
 	private boolean getFlag(int aFlag) {
 		int mask = (1 << aFlag);
-		return ((_flags & mask) == mask);
+		return ((flags & mask) == mask);
 	}
 
 	// // These functions must be static so that they can be called from
@@ -4758,11 +4758,11 @@ public abstract class JComponent extends Container {
 				.toString() : "");
 		String maximumSizeString = (isMaximumSizeSet() ? getMaximumSize()
 				.toString() : "");
-		String borderString = (_border == null ? "" : (_border == this ? "this"
-				: _border.toString()));
+		String borderString = (border == null ? "" : (border == this ? "this"
+				: border.toString()));
 
-		return super.paramString() + ",alignmentX=" + _alignmentX + ",alignmentY="
-				+ _alignmentY + ",border=" + borderString + ",flags=" + _flags
+		return super.paramString() + ",alignmentX=" + 秘alignmentX + ",alignmentY="
+				+ 秘alignmentY + ",border=" + borderString + ",flags=" + flags
 				+ // should beef this up a bit
 				",maximumSize=" + maximumSizeString + ",minimumSize="
 				+ minimumSizeString + ",preferredSize=" + preferredSizeString;
