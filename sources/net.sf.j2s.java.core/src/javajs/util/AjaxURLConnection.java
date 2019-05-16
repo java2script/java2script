@@ -1,12 +1,15 @@
 package javajs.util;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownServiceException;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -14,40 +17,43 @@ import javajs.api.js.J2SObjectInterface;
 
 /**
  * 
- * A method to allow a JavaScript Ajax 
+ * A method to allow a JavaScript Ajax
  * 
  */
 public class AjaxURLConnection extends HttpURLConnection {
-	
-  public static class AjaxHttpsURLConnection extends AjaxURLConnection {
 
-	static {
-		/**
-		 * @j2sNative  C$.implementz = [Clazz.load("javax.net.ssl.HttpsURLConnection")];
-		 * 
-		 */
-	}
-	protected AjaxHttpsURLConnection(URL url) {
-		super(url);
-	}
-	  
-  }
+	public static class AjaxHttpsURLConnection extends AjaxURLConnection {
 
-  public static URLConnection newConnection(URL url) {
+		static {
+			/**
+			 * @j2sNative C$.implementz = [Clazz.load("javax.net.ssl.HttpsURLConnection")];
+			 * 
+			 */
+		}
+
+		protected AjaxHttpsURLConnection(URL url) {
+			super(url);
+		}
+
+	}
+
+	public static URLConnection newConnection(URL url) {
 		return (url.getProtocol() == "https" ? new AjaxHttpsURLConnection(url) : new AjaxURLConnection(url));
 	}
 
-  protected AjaxURLConnection(URL url) {
-    super(url);
-    ajax = /** @j2sNative url.ajax || */ null;
-  }
+	protected AjaxURLConnection(URL url) {
+		super(url);
+		ajax = /** @j2sNative url.ajax || */
+				null;
+	}
 
-  byte[] bytesOut;
-  String postOut = "";
+	byte[] bytesOut;
+	String postOut = "";
+	ByteArrayOutputStream streamOut;
 
-  private Object ajax;
+	private Object ajax;
 
-  /**
+	/**
    * 
    * doAjax() is where the synchronous call to AJAX is to happen. or at least
    * where we wait for the asynchronous call to return. This method should fill
@@ -69,6 +75,10 @@ public class AjaxURLConnection extends HttpURLConnection {
    */
   @SuppressWarnings("null")
   private Object doAjax(boolean isBinary) {
+	if (streamOut != null) {
+		bytesOut = streamOut.toByteArray();
+		streamOut = null;
+	}
     J2SObjectInterface J2S = /** @j2sNative self.J2S || */ null;
     Object info = null;
     /** @j2sNative
@@ -95,20 +105,25 @@ public class AjaxURLConnection extends HttpURLConnection {
     return result;
   }
 
-  @Override
-  public void connect() throws IOException {
-    // not expected to be used. 
-  }
+	@Override
+	public void connect() throws IOException {
+		// not expected to be used.
+	}
 
-  public void outputBytes(byte[] bytes) {
-    //      type = "application/octet-stream;";
-    bytesOut = bytes;
-  }
+	public void outputBytes(byte[] bytes) {
+		// type = "application/octet-stream;";
+		bytesOut = bytes;
+	}
 
-  public void outputString(String post) {
-    postOut = post;
-    //     type = "application/x-www-form-urlencoded";
-  }
+	public void outputString(String post) {
+		postOut = post;
+		// type = "application/x-www-form-urlencoded";
+	}
+
+	@Override
+	public OutputStream getOutputStream() throws IOException {
+		return streamOut = new ByteArrayOutputStream();
+	}
 
 	@Override
 	public InputStream getInputStream() throws FileNotFoundException {
@@ -135,12 +150,13 @@ public class AjaxURLConnection extends HttpURLConnection {
 	}
 
 	static Map<String, Object> urlCache = new Hashtable<String, Object>();
-	
+
 	private BufferedInputStream getCachedStream(URL url, boolean allowNWError) {
 		Object data = urlCache.get(url.toString());
 		if (data == null)
 			return null;
-		boolean isAjax = /** @j2sNative url.ajax || */false;
+		boolean isAjax = /** @j2sNative url.ajax || */
+				false;
 		BufferedInputStream bis = getBIS(data, isAjax);
 		return (!isNetworkError(bis) || allowNWError ? bis : null);
 	}
@@ -161,11 +177,12 @@ public class AjaxURLConnection extends HttpURLConnection {
 
 	@SuppressWarnings("unused")
 	private void setCachedStream(URL url) {
-		Object data = /** @j2sNative url._streamData || */null;
+		Object data = /** @j2sNative url._streamData || */
+				null;
 		if (data != null) {
 			int code = this.responseCode;
 			/**
-			 * @j2sNative data._responseCode = code; 
+			 * @j2sNative data._responseCode = code;
 			 */
 			urlCache.put(url.toString(), data);
 		}
@@ -194,26 +211,24 @@ public class AjaxURLConnection extends HttpURLConnection {
 	}
 
 	final private static int[] NETWORK_ERROR = new int[] { 78, 101, 116, 119, 111, 114, 107, 69, 114, 114, 111, 114 };
-	
+
 	/**
-	 * J2S will attach the data (String, SB, or byte[]) to any URL that is 
-	 * retrieved using a ClassLoader. This improves performance by
-	 * not going back to the server every time a second time, since
-	 * the first time in Java is usually just to see if it exists. 
+	 * J2S will attach the data (String, SB, or byte[]) to any URL that is retrieved
+	 * using a ClassLoader. This improves performance by not going back to the
+	 * server every time a second time, since the first time in Java is usually just
+	 * to see if it exists.
 	 * 
 	 * @param url
 	 * @return String, SB, or byte[], or JSON dat
 	 */
 	@SuppressWarnings("unused")
 	public static BufferedInputStream getAttachedStreamData(URL url, boolean andDelete) {
-	
+
 		Object data = null;
 		boolean isJSON = false;
 		/**
-		 * @j2sNative
-		 *       data = url._streamData;
-		 *       if (andDelete) url._streamData = null;
-		 *       isJSON = (data && url.ajax && url.ajax.dataType == "json")
+		 * @j2sNative data = url._streamData; if (andDelete) url._streamData = null;
+		 *            isJSON = (data && url.ajax && url.ajax.dataType == "json")
 		 */
 		return getBIS(data, isJSON);
 	}
@@ -222,24 +237,26 @@ public class AjaxURLConnection extends HttpURLConnection {
 	 * 
 	 * @param url
 	 * @param o
-	 * @return InputStream or possibly a wrapper for an empty string, but also with JSON data.
+	 * @return InputStream or possibly a wrapper for an empty string, but also with
+	 *         JSON data.
 	 */
-   public static BufferedInputStream attachStreamData(URL url, Object o) {
-	    /**
-	     * @j2sNative
-	     * 
-	     *   url._streamData = o;
-	     */
+	public static BufferedInputStream attachStreamData(URL url, Object o) {
+		/**
+		 * @j2sNative
+		 * 
+		 * 			url._streamData = o;
+		 */
 
-	    return getBIS(o, /** @j2sNative url.ajax || */false);
-  }
+		return getBIS(o, /** @j2sNative url.ajax || */
+				false);
+	}
 
-  /**
-   * @return javajs.util.SB or byte[], depending upon the file type
-   */
-  public Object getContents() {
-    return doAjax(false);
-  }
+	/**
+	 * @return javajs.util.SB or byte[], depending upon the file type
+	 */
+	public Object getContents() {
+		return doAjax(false);
+	}
 
 	@Override
 	public int getResponseCode() throws IOException {
@@ -258,26 +275,27 @@ public class AjaxURLConnection extends HttpURLConnection {
 		}
 		return responseCode;
 	}
-@Override
-public void disconnect() {
-	// TODO Auto-generated method stub
-	
-}
 
-@Override
-public boolean usingProxy() {
-	// TODO Auto-generated method stub
-	return false;
-}
+	@Override
+	public void disconnect() {
+		// TODO Auto-generated method stub
 
-@Override
-public int getContentLength() {
-	try {
-		InputStream is = getInputStream();
-		return is.available();
-	} catch (IOException e) {
-		return -1;
 	}
-}
+
+	@Override
+	public boolean usingProxy() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public int getContentLength() {
+		try {
+			InputStream is = getInputStream();
+			return is.available();
+		} catch (IOException e) {
+			return -1;
+		}
+	}
 
 }
