@@ -9,6 +9,7 @@
 
 // TODO: still a lot of references to window[...]
 
+// BH 2019.05.13 fixes for Math.getExponent, Math.IEEERemainder, Array.equals(Object)
 // BH 2019.02.16 fixes typo in Integer.parseInt(s,radix)
 // BH 2019.02.07 fixes radix|10 should be radix||10  
 // BH 1/29/2019  adds String.join$CharSequence$Iterable, String.join$CharSequence$CharSequenceA
@@ -972,7 +973,7 @@ Clazz.isClassDefined = function(clazzName) {
   vals.hashCode$ = function() {return this.toString().hashCode$()}
 
   vals.equals$O = function (a) { 
-    if (a.__ARRAYTYPE != this.__ARRAYTYPE || a.length != this.length)
+    if (!a || a.__ARRAYTYPE != this.__ARRAYTYPE || a.length != this.length)
       return false;
     if (a.length == 0)
     	return true;
@@ -3334,6 +3335,34 @@ Math.ulp$F = function(f){
     return Math.nextUp$F(Math.abs(f));
 };
 
+Math.getExponent = Math.getExponent$D = function(d) {
+	if (!a64) {
+		a64 = new Float64Array(1);
+		i64 = new Uint32Array(a64.buffer);
+	}
+	a64[0] = d;
+    return ((i64[1] & 0x7ff00000) >> 20) - 1023;
+};
+
+Math.getExponent$F=function(f){
+    return ((Float.floatToRawIntBits$F(f) & 0x7f800000) >> 23) - 127;
+}
+
+Math.IEEEremainder||(Math.IEEEremainder=function (x, y) {
+	if (Double.isNaN$D(x) || Double.isNaN$D(y) || Double.isInfinite$D(x) || y == 0) 
+		return NaN;
+	if (!Double.isInfinite$D(x) && Double.isInfinite$D(y))
+		return x;
+	var modxy = x % y;
+	if (modxy == 0) return modxy;
+	var rem = modxy - Math.abs(y) * Math.signum(x);
+	if (Math.abs(rem) == Math.abs(modxy)) {
+		var div = x / y;
+		return (Math.abs(Math.round(div)) > Math.abs(div) ? rem : modxy);
+	}
+	return (Math.abs(rem) < Math.abs(modxy) ? rem : modxy);
+});
+
 
 Clazz._setDeclared("java.lang.Number", java.lang.Number=Number);
 Number.prototype._numberToString=Number.prototype.toString;
@@ -3790,9 +3819,15 @@ return Clazz._floatToString(this.valueOf());
 var a32, i32;
 
 Float.floatToIntBits$F = function(f) {
-i32 || (a32 = new Float32Array(1), i32 = new Int32Array(a32.buffer));
-a32[0] = f;
-return i32[0]; 
+	if (isNaN(f))
+		return 
+	return Float.floatToRawIntBits$F(f);
+}
+
+Float.floatToRawIntBits$F = function(f) {
+	i32 || (a32 = new Float32Array(1), i32 = new Int32Array(a32.buffer));
+	a32[0] = f;
+	return i32[0]; 
 }
 
 Float.intBitsToFloat$I = function(i) {

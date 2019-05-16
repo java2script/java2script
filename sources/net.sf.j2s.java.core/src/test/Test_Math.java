@@ -50,6 +50,25 @@ class Test_Math extends Test_ {
 		// How about max value?
 		ShowRemainders(Double.MAX_VALUE, 4.1, 1.4678815408981212);
 		ShowRemainders(4.1, Double.MAX_VALUE, 4.1);
+		
+		int n;
+		double d = 1;
+		for (int j = 0; j < 85; j++) {
+			n = Math.getExponent(d);
+			System.out.println(n + "\t" + d); 
+			d *= 3;
+		}
+		
+		float f = Math.abs(1);
+		for (int j = 0; j < 85; j++) {
+			n = Math.getExponent(f); 
+			System.out.println(n + "\t" + f);
+			f *= -3;
+		}
+
+		//		n = Math.getExponent(1e230d);
+//		System.out.println(n);
+		
 		System.out.println("Test_Math OK");
 	}
 

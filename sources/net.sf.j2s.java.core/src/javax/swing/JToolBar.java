@@ -175,7 +175,7 @@ public class JToolBar extends JComponent implements SwingConstants {
 	 */
 	public int getComponentIndex(Component c) {
 		int ncomponents = this.getComponentCount();
-		Component[] component = JSComponent.getChildArray(this);
+		Component[] component = JSComponent.秘getChildArray(this);
 		for (int i = 0; i < ncomponents; i++) {
 			Component comp = component[i];
 			if (comp == c)
@@ -194,7 +194,7 @@ public class JToolBar extends JComponent implements SwingConstants {
 	 * 
 	 */
 	public Component getComponentAtIndex(int i) {
-		return (i >= 0 && i < getComponentCount() ? JSComponent.getChildArray(this)[i] : null);
+		return (i >= 0 && i < getComponentCount() ? JSComponent.秘getChildArray(this)[i] : null);
 	}
 
 	/**

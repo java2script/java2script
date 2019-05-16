@@ -563,7 +563,7 @@ public class JSGraphics2D implements
 			/**
 			 * @j2sNative
 			 * 
-			 * 			pixels = img._pix; isRGB = (img.imageType == 1);
+			 * 			pixels = img.秘pix; isRGB = (img.imageType == 1);
 			 *
 			 */
 			DOMNode imgNode = null;

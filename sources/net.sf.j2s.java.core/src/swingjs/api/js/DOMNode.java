@@ -211,7 +211,7 @@ public abstract class DOMNode {
 		// note that canvas takes precedence over imgNode, because
 		// imgNode is a placeholder for the original image, but canvas
 		// will be an op-filtered image
-		return (/** @j2sNative img._canvas || img._imgNode ||*/ null);
+		return (/** @j2sNative img.秘canvas || img.秘imgNode ||*/ null);
 	}
 
 	public static void addHorizontalGap(DOMNode domNode, int gap) {

@@ -18,7 +18,7 @@ import java.util.Hashtable;
  * JSGraphicsConfiguration is a critical innovation for SwingJS. It
  * maintains information about the associated HTML5 applet. It is 
  * passed to new threads as they are created such that Thread.currentThread()
- * always has the current appletViewer field, and appletViewer.getGraphicsConfiguration()
+ * always has the current 秘appletViewer field, and 秘appletViewer.getGraphicsConfiguration()
  * (or actually any component involved) always returns this same configuration.
  * 
  * In this way, we can produce a graphics configuration for any JDialog or JFrame.

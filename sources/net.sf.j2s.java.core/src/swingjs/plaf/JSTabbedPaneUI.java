@@ -3944,7 +3944,7 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
         }
 
         private void removeUnusedTabComponents() {
-        	Component[] components = JSComponent.getChildArray(this);
+        	Component[] components = JSComponent.秘getChildArray(this);
         	for (int i = 0, n = getComponentCount(); i < n; i++) {
         		Component c = components[i];
                 if (!(c instanceof UIResource)) {

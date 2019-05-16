@@ -1565,7 +1565,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 			}
 
 			/* Find the divider. */
-			Component[] children = JSComponent.getChildArray(splitPane);
+			Component[] children = JSComponent.秘getChildArray(splitPane);
 			Component oldDivider = components[2];
 
 			components[2] = null;

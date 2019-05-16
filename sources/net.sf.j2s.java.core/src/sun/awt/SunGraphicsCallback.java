@@ -170,7 +170,7 @@ public abstract class SunGraphicsCallback {
                 comp.paintAll(cg);
             } else if (comp instanceof Container) {
                 runComponents(((Container) comp).getComponentCount(), 
-                		JSComponent.getChildArray((Container)comp), cg,
+                		JSComponent.秘getChildArray((Container)comp), cg,
                               LIGHTWEIGHTS | HEAVYWEIGHTS);
             }
         }

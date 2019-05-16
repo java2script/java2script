@@ -141,7 +141,7 @@ public class JSFocusPeer implements KeyboardFocusManagerPeer {
 	}
 
 	public void checkFrameFocusOnMouseDown(AWTEvent e) {
-		Container p = JSComponent.getTopInvokableAncestor((Container) e.getSource(), true);
+		Container p = JSComponent.秘getTopInvokableAncestor((Container) e.getSource(), true);
 		if (getCurrentFocusOwner() != null && p == currentWindow) 
 			return;
 		Window w = currentWindow;
@@ -159,7 +159,7 @@ public class JSFocusPeer implements KeyboardFocusManagerPeer {
 		} else if (p instanceof Window) {
 			((Window) p).toFront();
 		}
-		if (p._isFocusSetAndEnabled()) {
+		if (p.秘isFocusSetAndEnabled()) {
 			((JSComponentUI)((JSComponent) p).ui).focus(); 
 			handleJSFocus(p, w, true);
 		}

@@ -206,7 +206,7 @@ public class PopupFactory {
 // SwingJS -- this did not work -- tooltip window removeNotify hides rootpane, layerpane, and contentpane
         
         if (isToolTip && lastToolTipPopUp != null) {
-        	((JSComponent) popup.getComponent())._canvas = ((JSComponent) lastToolTipPopUp.getComponent())._canvas;
+        	((JSComponent) popup.getComponent()).秘canvas = ((JSComponent) lastToolTipPopUp.getComponent()).秘canvas;
         }
     	lastToolTipPopUp = popup;
         return popup;
@@ -347,7 +347,7 @@ public class PopupFactory {
             if(contents != null && contents.isFocusable()) {
                 if(contents instanceof JPopupMenu) {
                     JPopupMenu jpm = (JPopupMenu) contents;
-                    Component popComps[] = JSComponent.getChildArray(jpm);
+                    Component popComps[] = JSComponent.秘getChildArray(jpm);
                     for(int i = 0, n = jpm.getComponentCount(); i < n; i++) {
                         if(!(popComps[i] instanceof MenuElement) &&
                            !(popComps[i] instanceof JSeparator)) {

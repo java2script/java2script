@@ -10667,6 +10667,7 @@ return jQuery;
 
 // J2S._version set to "3.2.4.07" 2019.01.04; 2019.02.06
 
+// BH 5/16/2019 fixes POST method for OuputStream
 // BH 2/6/2019 adds check for non-DOM event handler in getXY
 // BH 1/4/2019 moves window.thisApplet to J2S.thisApplet; 
 
@@ -11637,7 +11638,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 					case "java.io.File":
 						var f = Clazz.new_(Clazz.load("java.io.File").c$$S,
 								[ file.name ]);
-						f._bytes = J2S._toBytes(data);
+						f.秘bytes = J2S._toBytes(data);
 						return fDone(f);
 					case "ArrayBuffer":
 						break;
@@ -11703,8 +11704,17 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		info || (info = {});
 		// called by org.J2S.awtjs2d.JmolURLConnection.doAjax()
 		url = url.toString();
-		if (dataOut != null)
-			return J2S.saveFile(url, dataOut);
+		if (dataOut) {
+			if (url.indexOf("http://") != 0 && url.indexOf("https://") != 0)
+				return J2S.saveFile(url, dataOut);
+			info.async = false;
+			info.url = url;
+			info.type = "POST";
+			info.processData = false;
+			info.data = dataOut;//(typeof data == "string" ? dataOut : ";base64," + Clazz.load("javajs.util.Base64").getBase64$BA(dataOut).toString());
+			info.xhr = J2S.$ajax(info);
+			return info.xhr.responseText;
+		}
 		if (postOut)
 			url += "?POST?" + postOut;
 		return J2S.getFileData(url, null, true, info);
@@ -12159,8 +12169,13 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 			}
 			var target = ev.target["data-keycomponent"];
 if (!target) {
-  return;
+	  return;
 }
+if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
+	ev.stopPropagation();
+	ev.preventDefault();
+}
+
 			var id;
 			switch (ev.type) {
 			case "keypress":
@@ -12940,20 +12955,20 @@ if (!target) {
 	};
 
 	J2S._setAppletParams = function(availableParams, params, Info, isHashtable) {
-		for ( var i in Info)
+		for (var i in Info) {
+			var lci = i.toLowerCase();
 			if (!availableParams
-					|| availableParams.indexOf(";" + i.toLowerCase() + ";") >= 0) {
-				if (Info[i] == null || i == "language"
+					|| availableParams.indexOf(";" + lci + ";") >= 0) {
+				if (Info[i] == null || lci == "language"
 						&& !J2S.featureDetection.supportsLocalization())
 					continue;
-				// params.put$TK$TV(i, (Info[i] === true ? Boolean.TRUE: Info[i]
-				// === false ? Boolean.FALSE : Info[i]))
 				if (isHashtable)
 					params.put$TK$TV(i, (Info[i] === true ? Boolean.TRUE
 							: Info[i] === false ? Boolean.FALSE : Info[i]))
 				else
 					params[i] = Info[i];
 			}
+		}
 	}
 
 	// The original Jmol "applet" was created as an 
@@ -13658,6 +13673,7 @@ if (!target) {
 
 // TODO: still a lot of references to window[...]
 
+// BH 2019.05.13 fixes for Math.getExponent, Math.IEEERemainder, Array.equals(Object)
 // BH 2019.02.16 fixes typo in Integer.parseInt(s,radix)
 // BH 2019.02.07 fixes radix|10 should be radix||10  
 // BH 1/29/2019  adds String.join$CharSequence$Iterable, String.join$CharSequence$CharSequenceA
@@ -14621,7 +14637,7 @@ Clazz.isClassDefined = function(clazzName) {
   vals.hashCode$ = function() {return this.toString().hashCode$()}
 
   vals.equals$O = function (a) { 
-    if (a.__ARRAYTYPE != this.__ARRAYTYPE || a.length != this.length)
+    if (!a || a.__ARRAYTYPE != this.__ARRAYTYPE || a.length != this.length)
       return false;
     if (a.length == 0)
     	return true;
@@ -16983,6 +16999,34 @@ Math.ulp$F = function(f){
     return Math.nextUp$F(Math.abs(f));
 };
 
+Math.getExponent = Math.getExponent$D = function(d) {
+	if (!a64) {
+		a64 = new Float64Array(1);
+		i64 = new Uint32Array(a64.buffer);
+	}
+	a64[0] = d;
+    return ((i64[1] & 0x7ff00000) >> 20) - 1023;
+};
+
+Math.getExponent$F=function(f){
+    return ((Float.floatToRawIntBits$F(f) & 0x7f800000) >> 23) - 127;
+}
+
+Math.IEEEremainder||(Math.IEEEremainder=function (x, y) {
+	if (Double.isNaN$D(x) || Double.isNaN$D(y) || Double.isInfinite$D(x) || y == 0) 
+		return NaN;
+	if (!Double.isInfinite$D(x) && Double.isInfinite$D(y))
+		return x;
+	var modxy = x % y;
+	if (modxy == 0) return modxy;
+	var rem = modxy - Math.abs(y) * Math.signum(x);
+	if (Math.abs(rem) == Math.abs(modxy)) {
+		var div = x / y;
+		return (Math.abs(Math.round(div)) > Math.abs(div) ? rem : modxy);
+	}
+	return (Math.abs(rem) < Math.abs(modxy) ? rem : modxy);
+});
+
 
 Clazz._setDeclared("java.lang.Number", java.lang.Number=Number);
 Number.prototype._numberToString=Number.prototype.toString;
@@ -17439,9 +17483,15 @@ return Clazz._floatToString(this.valueOf());
 var a32, i32;
 
 Float.floatToIntBits$F = function(f) {
-i32 || (a32 = new Float32Array(1), i32 = new Int32Array(a32.buffer));
-a32[0] = f;
-return i32[0]; 
+	if (isNaN(f))
+		return 
+	return Float.floatToRawIntBits$F(f);
+}
+
+Float.floatToRawIntBits$F = function(f) {
+	i32 || (a32 = new Float32Array(1), i32 = new Int32Array(a32.buffer));
+	a32[0] = f;
+	return i32[0]; 
 }
 
 Float.intBitsToFloat$I = function(i) {

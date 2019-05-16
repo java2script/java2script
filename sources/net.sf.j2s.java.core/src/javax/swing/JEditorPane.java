@@ -52,6 +52,7 @@ import javax.swing.event.EventListenerList;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.plaf.ComponentUI;
+import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.BoxView;
 import javax.swing.text.Caret;
@@ -68,9 +69,9 @@ import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 import javax.swing.text.WrappedPlainView;
 
-import swingjs.JSAbstractDocument;
+//import swingjs.JSAbstractDocument;
 import swingjs.api.Interface;
-import swingjs.api.JSMinimalAbstractDocument;
+//import swingjs.api.JSMinimalAbstractDocument;
 //import java.io.ObjectOutputStream;
 
 /**
@@ -557,8 +558,8 @@ public class JEditorPane extends JTextComponent {
      * Return load priority for the document or -1 if priority not supported.
      */
     private int getAsynchronousLoadPriority(Document doc) {
-        return (doc instanceof JSMinimalAbstractDocument ?
-            ((JSMinimalAbstractDocument) doc).getAsynchronousLoadPriority() : -1);
+        return (doc instanceof AbstractDocument ?
+            ((AbstractDocument) doc).getAsynchronousLoadPriority() : -1);
     }
 
     /**
@@ -1244,9 +1245,9 @@ public class JEditorPane extends JTextComponent {
                 Caret caret = getCaret();
                 int p0 = Math.min(caret.getDot(), caret.getMark());
                 int p1 = Math.max(caret.getDot(), caret.getMark());
-                if (doc instanceof JSMinimalAbstractDocument) {
-                    ((JSMinimalAbstractDocument)doc).replace(p0, p1 - p0, content,
-                              ((StyledEditorKit)kit).getInputAttributes());
+                if (doc instanceof AbstractDocument) {
+                    ((AbstractDocument)doc).replace(p0, p1 - p0, content,
+                              ((StyledEditorKit)kit).getInputAttributes(), this);
                 }
                 else {
                     if (p0 != p1) {
@@ -2229,9 +2230,9 @@ public class JEditorPane extends JTextComponent {
         View createI18N(Element elem) {
             String kind = elem.getName();
             if (kind != null) {
-                if (kind.equals(JSAbstractDocument.ContentElementName)) {
+                if (kind.equals(AbstractDocument.ContentElementName)) {
                     return new PlainParagraph(elem);
-                } else if (kind.equals(JSAbstractDocument.ParagraphElementName)){
+                } else if (kind.equals(AbstractDocument.ParagraphElementName)){
                     return new BoxView(elem, View.Y_AXIS);
                 }
             }

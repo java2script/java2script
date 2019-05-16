@@ -27,10 +27,6 @@
  */
 package javax.swing;
 
-//import java.text.AttributedCharacterIterator;
-//TODO import java.text.DateFormat;
-import java.util.Date;
-
 import java.awt.AWTEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
@@ -40,9 +36,14 @@ import java.text.DecimalFormat;
 import java.text.Format;
 import java.text.NumberFormat;
 import java.text.ParseException;
+//import java.text.AttributedCharacterIterator;
+//TODO import java.text.DateFormat;
+import java.util.Date;
+
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.plaf.UIResource;
+import javax.swing.text.AbstractDocument;
 import javax.swing.text.DateFormatter;
 import javax.swing.text.DefaultFormatter;
 import javax.swing.text.DefaultFormatterFactory;
@@ -55,8 +56,6 @@ import javax.swing.text.NumberFormatter;
 import javax.swing.text.TextAction;
 
 import swingjs.JSUtil;
-//import javax.swing.text.InternationalFormatter;
-import swingjs.api.JSMinimalAbstractDocument;
 
 /**
  * <code>JFormattedTextField</code> extends <code>JTextField</code> adding
@@ -1119,8 +1118,8 @@ public class JFormattedTextField extends JTextField {
             if (ftf != null) {
                 Document doc = ftf.getDocument();
 
-                if (doc instanceof JSMinimalAbstractDocument) {
-                    ((JSMinimalAbstractDocument)doc).setDocumentFilter(filter);
+                if (doc instanceof AbstractDocument) {
+                    ((AbstractDocument)doc).setDocumentFilter(filter);
                 }
                 doc.putProperty(DocumentFilter.class, null);
             }

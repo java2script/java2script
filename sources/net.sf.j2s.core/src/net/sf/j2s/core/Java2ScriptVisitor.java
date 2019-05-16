@@ -19,12 +19,9 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
 import java.util.regex.Pattern;
-
-import javax.xml.bind.annotation.XmlElement;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
@@ -137,6 +134,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// BH 2019.05.13 fix for Math.getExponent, ulp, nextDown, nextUp, nextAfter needing qualification
+// BH 2019.05.13 fix for Function reference in   new Foo()::test(...)
 // BH 2019.04.03 fix for @j2sIgnore not including {}
 // note to self: It is an annoyance that Eclipse does not recognize an annotation edit
 //               as a need to recompile automatically
@@ -148,7 +147,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
  * @author Bob Hanson 2017-08,09,10
  *
  * 
- * 
+ *
  */
 public class Java2ScriptVisitor extends ASTVisitor {
 
@@ -528,10 +527,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private void addConstructor(ITypeBinding javaClass,
 			// Type type,
 			IMethodBinding constructorMethodBinding, List<?> arguments, int lambdaArity) {
-//		String javaClassName = getClassJavaNameForType(type);
 		String javaClassName = getJavaClassNameQualified(javaClass);
-//		if (!javaClassName.equals(testName))
-//				System.out.println("!!! " + javaClassName + " != " + testName);
 		if ("java.lang.Object".equals(javaClassName)) {
 			buffer.append(" Clazz.new_()");
 			return;
@@ -559,9 +555,17 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			prefix = ",[";
 			postfix = "]";
 		}
-		if (lambdaArity >= 0)
-			buffer.append(",[" + this.getLambdaParamList(constructorMethodBinding, lambdaArity) + "]");
-		else if (!isDefault) {
+		if (lambdaArity >= 0) {
+			buffer.append(",[");
+			String finals = htLocalFinals.get(getNormalizedKey(javaClass));
+			String params = getLambdaParamList(constructorMethodBinding, lambdaArity);
+			if (finals != null) {
+				buffer.append("this,").append(finals);
+				if (params.length() > 0)
+					buffer.append(",");
+			}
+			buffer.append(params).append("]");
+		} else if (!isDefault) {
 			IMethodBinding constructorMethodDeclaration = (constructorMethodBinding == null ? null
 					: constructorMethodBinding.getMethodDeclaration());
 			addMethodParameterList(arguments, constructorMethodDeclaration, prefix, postfix, METHOD_CONSTRUCTOR);
@@ -662,6 +666,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 //		localName = null;
 		String finals;
+		
 		if (isClassTrulyLocal) {
 			// predefined by class creation step
 			finals = htLocalFinals.get(getNormalizedKey(binding));
@@ -733,17 +738,18 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			buffer.append(", ");
 		}
 		package_methodStackForFinals.pop();
-
 		// create the finals list {width: width; height: height} and add all
 		// newly visited variables to class_visitedVars;
 		String finals = listFinalVariables(myVisitedVars, lastVisitedVars, currentBlock);
-
 		// restore class/package parameters
 		class_visitedVars = lastVisitedVars;
 		package_currentBlockForVisit = currentBlock;
 		class_isAnonymousOrLocal = wasAnonymous;
 		return finals;
 	}
+	
+	static int test = 0;
+	
 
 	/**
 	 * Generated final variable list for anonymous class creation. Update the
@@ -1236,7 +1242,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				// in using "t.apply" is that t must be non-null.
 				// if this does not work, then we can go to ($class$.prototype || t)
 				//
-				boolean classIsTarget = ((isStatic || isVariableBinding(expression))
+				boolean classIsTarget = ((isStatic || isVariableBinding(expression)
+						|| expression instanceof ClassInstanceCreation) // BH Added 2019.05.13
 						&& lambdaArity == mBinding.getParameterTypes().length);
 				buffer.append((classIsTarget ? "$class$." : "t.") + finalMethodNameWith$Params + ".apply("
 						+ (isStatic ? "null" : classIsTarget ? "$class$" : "t") + ",[");
@@ -2322,6 +2329,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// add constructor application arguments: [object, parameters]
 
 		buffer.append(", [");
+		
+		
 		if (outerClassExpr == null)
 			buffer.append("this");
 		else
@@ -5408,8 +5417,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				NativeDoc.addJ2sJavadocs(buffer, docs, false);
 		} else {
 			docs = package_mapBlockJavadoc.get(Integer.valueOf(node.getStartPosition()));
-//??			buffer.append("\n/** looking for " + node + " " + Integer.valueOf(node.getStartPosition())
-//??			+ " " + (docs != null) + " " + node.getClass().getName() + "*/\n");
 		}
 		return docs;
 	}
@@ -6074,12 +6081,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		private final static String defaultNonQualified
 		// Math and Date both are minor extensions
 		// of JavaScript, so they are not qualified
-				= "java.lang.Math;"
+				= //"java.lang.Math;" +
 						// MAYBE NOT! + "java.util.Date;"
 						// swingjs.api.js and javajs.api.js contain
 						// interfaces to JavaScript methods and so
 						// are not parameterized.
-						+ "*.api.js;"
+						
+						"*.api.js;"
 		// netscape.JSObject interface includes 8 methods
 		// that do not need to be parameterized.
 		// + "netscape.*;"
@@ -6130,6 +6138,18 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		 * @param methodName not used but could be
 		 */
 		static boolean isMethodNonqualified(String className, String methodName) {
+			if (className.equals("java.lang.Math")) {
+				switch (methodName) {
+				case "ulp":
+				case "nextDown":
+				case "nextUp":
+				case "nextAfter":
+				case "getExponent":
+					return false;
+				default:
+					return true;
+				}
+			}
 			return (isPackageOrClassNonqualified(className));
 		}
 
@@ -6276,9 +6296,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		private String qName;
 
 		protected ClassAnnotation(String qName, Annotation annotation, ASTNode node) {
-			// System.out.println(">>>>" + qName + " "
-			// + annotation.getClass().getName()
-			// + " " + annotation);
 			this.qName = qName;
 			this.annotation = annotation;
 			this.node = node;
@@ -6297,8 +6314,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			for (int i = 0; i < class_annotations.size(); i++) {
 				ClassAnnotation a = class_annotations.get(i);
 				String str = a.annotation.toString();
-				// System.out.println(">>>str " + str);
-				// System.out.println(">>>ann " + a.annotation.getClass().getName());
 				if (a.annotation instanceof NormalAnnotation) {
 					// @XmlElement(name="test",type=Integer.class)
 					// remove commas, add quotes
@@ -6312,7 +6327,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					// add quotes
 					List<ASTNode> expressions = null;
 					Expression e = ((SingleMemberAnnotation) a.annotation).getValue();
-					// System.out.println(">>>e " + e.getClass().getName());
 					if (e instanceof TypeLiteral) {
 						expressions = new ArrayList<ASTNode>();
 						expressions.add(e);
@@ -6400,8 +6414,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		}
 
 		private static String annotationNameValue(String name, Object value) {
-			// System.out.println(">>>value " + value + " " + value.getClass().getName() + "
-			// = " + value.toString());
 			String str = (name == null ? "" : name + "=");
 			if (value instanceof TypeLiteral) {
 				str += "\"" + ((TypeLiteral) value).getType().resolveBinding().getQualifiedName() + ".class\"";
@@ -6733,17 +6745,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 */
 	public boolean visit(CreationReference node) {
 //		// lambda_C
-//		buffer.append("Clazz.newLambda(function(t){return ");
-//		Type classType = node.getType();
-//		ITypeBinding tbinding = classType.resolveBinding();
-//		if (classType instanceof ArrayType) {
-//			addArrayConstructor(tbinding, null);
-//		} else {
-//			IMethodBinding mBinding = node.resolveMethodBinding();
-//			addConstructor(classType, mBinding, null);
-//		}
-//		buffer.append("},0,'S')");
-// was:
 		ITypeBinding binding = node.resolveTypeBinding();
 		processLocalInstance(node, null, binding, null, null, LAMBDA_CREATION, false);
 		return false;
@@ -6898,6 +6899,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	private void addLambdaBody(ASTNode body) {
+		
+		
 		if (body instanceof Block) {
 			body.accept(this);
 		} else {
@@ -6938,18 +6941,17 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			return;
 		}
 		if (lnode instanceof CreationReference) {
-			// int[]::new;
 			buffer.append("/*lambda_C*/");
 			processMethodDeclaration(mBinding, null, null, false, LAMBDA_CREATION);
 			CreationReference node = (CreationReference) lnode;
 			Type ctype = node.getType();
 			ITypeBinding binding = ctype.resolveBinding();
 			if (ctype instanceof ArrayType) {
+				// int[]::new;
 				addArrayConstructor(binding, null);
 			} else {
-				addConstructor(binding,
-						// ctype,
-						mBinding, null, mBinding.getParameterTypes().length);
+				// MatchSink::new;
+				addConstructor(binding, mBinding, null, mBinding.getParameterTypes().length);
 			}
 			buffer.append("});\r\n");
 			return;

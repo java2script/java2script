@@ -215,7 +215,7 @@ public class JMenuBar extends JComponent implements MenuElement
      */
     public int getComponentIndex(Component c) {
         int ncomponents = this.getComponentCount();
-        Component[] components = JSComponent.getChildArray(this);
+        Component[] components = JSComponent.秘getChildArray(this);
         for (int i = 0 ; i < ncomponents ; i++) {
             Component comp = components[i];
             if (comp == c)

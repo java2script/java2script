@@ -155,7 +155,7 @@ class SmartGridLayout implements LayoutManager {
 
   private void buildLayoutGrid(Container c) {
 
-      Component[] children = JSComponent.getChildArray(c);
+      Component[] children = JSComponent.秘getChildArray(c);
 
       for (int i = 0, n = c.getComponentCount(); i < n; i++) {
         //      System.out.println("Children: " +componentCount);

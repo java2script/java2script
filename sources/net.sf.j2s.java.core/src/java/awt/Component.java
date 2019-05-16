@@ -358,7 +358,7 @@ public abstract class Component implements ImageObserver/*
 	 */
 	private int isFocusTraversableOverridden = FOCUS_TRAVERSABLE_UNKNOWN;
 
-	protected boolean _isFocusableSet; // SwingJS added
+	protected boolean 秘isFocusableSet; // SwingJS added
 	
 	/**
 	 * The focus traversal keys. These keys will generate focus traversal behavior
@@ -2680,7 +2680,7 @@ public abstract class Component implements ImageObserver/*
 		if (!isMaximumSizeSet()) {
 			maxSize = null;
 		}
-		if (parent != null && _j2sInvalidateOnAdd) {
+		if (parent != null && 秘j2sInvalidateOnAdd) {
 			parent.invalidateIfValid();
 		}
 		// }
@@ -5051,7 +5051,7 @@ public abstract class Component implements ImageObserver/*
 	 */
 	transient private boolean coalescingEnabled = checkCoalescing(); 
 
-	public boolean _j2sInvalidateOnAdd = true; // not for menu items?
+	public boolean 秘j2sInvalidateOnAdd = true; // not for menu items?
 
 	/**
 	 * Weak map of known coalesceEvent overriders. Value indicates whether
@@ -5402,7 +5402,7 @@ public abstract class Component implements ImageObserver/*
 	 */
 	protected void processKeyEvent(KeyEvent e) {
 		KeyListener listener = keyListener;
-		if (listener != null && (/** @j2sNative this.isAWT$ || */ _isFocusableSet)) {
+		if (listener != null && (/** @j2sNative this.isAWT$ || */ 秘isFocusableSet)) {
 			int id = e.getID();
 			switch (id) {
 			case KeyEvent.KEY_TYPED:
@@ -5832,7 +5832,7 @@ public abstract class Component implements ImageObserver/*
 			// relocateComponent();
 			// }
 			// }
-			if (_j2sInvalidateOnAdd )
+			if (秘j2sInvalidateOnAdd )
 				invalidate();
 
 			// int npopups = (popups != null? popups.size() : 0);
@@ -6052,7 +6052,7 @@ public abstract class Component implements ImageObserver/*
 		}
 		isFocusTraversableOverridden = FOCUS_TRAVERSABLE_SET;
 		
-		_isFocusableSet = true;
+		秘isFocusableSet = true;
 
 		firePropertyChange("focusable", Boolean.valueOf(oldFocusable), Boolean.valueOf(focusable));
 		if (oldFocusable && !focusable) {

@@ -733,7 +733,7 @@ public class JScrollBar extends JComponent implements Adjustable
 		public void setEnabled(boolean x)  {
         super.setEnabled(x);
         int n = this.getComponentCount();
-        Component[] components = JSComponent.getChildArray(this);
+        Component[] components = JSComponent.秘getChildArray(this);
         for(int i = 0; i < n; i++) {
             components[i].setEnabled(x);
         }

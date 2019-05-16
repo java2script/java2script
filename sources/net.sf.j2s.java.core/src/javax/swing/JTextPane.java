@@ -29,6 +29,7 @@ package javax.swing;
 
 import java.awt.Component;
 
+import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Caret;
@@ -40,8 +41,6 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import javax.swing.text.StyledEditorKit;
-
-import swingjs.api.JSMinimalAbstractDocument;
 
 /**
  * A text component that can be marked up with attributes that are
@@ -197,8 +196,8 @@ public class JTextPane extends JEditorPane {
                 int p0 = Math.min(caret.getDot(), caret.getMark());
                 int p1 = Math.max(caret.getDot(), caret.getMark());
                 AttributeSet attr = getInputAttributes().copyAttributes();
-                if (doc instanceof JSMinimalAbstractDocument) {
-                    ((JSMinimalAbstractDocument)doc).replace(p0, p1 - p0, content,attr);
+                if (doc instanceof AbstractDocument) {
+                    ((AbstractDocument)doc).replace(p0, p1 - p0, content,attr, this);
                 }
                 else {
                     if (p0 != p1) {

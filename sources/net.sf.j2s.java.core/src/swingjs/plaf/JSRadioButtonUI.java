@@ -26,6 +26,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 			} else {
 				domNode = newDOMObject("div", id + "_dom");
 				domNode.appendChild(buttonNode);
+				focusNode = buttonNode;
 			}
 			iconNode = null;
 			if (b.getIcon() == null) {
