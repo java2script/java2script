@@ -758,7 +758,7 @@ public class JMenu extends JMenuItem implements MenuElement
 
         ensurePopupMenuCreated();
         Separator sep = new JPopupMenu.Separator();
-        sep._j2sInvalidateOnAdd = false;
+        sep.秘j2sInvalidateOnAdd = false;
         popupMenu.insert(sep, index );
     }
 
@@ -898,7 +898,7 @@ public class JMenu extends JMenuItem implements MenuElement
     }
     
     public Component[] getMenuArray() {
-    	return JSComponent.getChildArray(popupMenu);
+    	return JSComponent.秘getChildArray(popupMenu);
     }
 
     /**

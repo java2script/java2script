@@ -119,7 +119,7 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
 
 	// BH for SwingJS
 	@Override
-	public void isWrapper$() {};
+	public void 秘isWrapper() {};
 	
 
 	/** Property used to indicate window blitting should not be done.
@@ -1700,7 +1700,7 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
 
             if(lastParent != null && parent instanceof JComponent &&
                !((JComponent)parent).isOptimizedDrawingEnabled()) {
-                Component comps[] = JSComponent.getChildArray(parent);
+                Component comps[] = JSComponent.秘getChildArray(parent);
                 int index = 0;
                 for(int i = parent.getComponentCount() - 1 ;i >= 0; i--) {
                     if(comps[i] == lastParent) {

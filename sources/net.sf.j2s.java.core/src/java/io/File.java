@@ -142,7 +142,7 @@ public class File
 {
 	
 	
-	public byte[] _bytes; // filled in by SwingJS ajax call or drag-drop from JSDnD
+	public byte[] 秘bytes; // filled in by SwingJS ajax call or drag-drop from JSDnD
 //
 //    /**
 //     * The FileSystem object representing the platform's local file system.
@@ -898,7 +898,7 @@ public class File
 //            security.checkRead(path);
 //        }
 //        return fs.getLength(this);
-    	return (/** @j2sNative this._bytes ? this._bytes.length : */0);
+    	return (/** @j2sNative this.秘bytes ? this.秘bytes.length : */0);
     	
     }
 
@@ -1995,7 +1995,7 @@ public class File
                 result = filePath;
                 if (result == null) {
                     result = FileSystems.getDefault().getPath(path);
-                    ((JSPath) result)._bytes = _bytes;
+                    ((JSPath) result).秘bytes = 秘bytes;
                     filePath = result;
                 }
             }

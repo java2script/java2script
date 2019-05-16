@@ -195,7 +195,7 @@ public class Test_Applet_Scroll_AWT extends Applet {
 		Panel p = new Panel();
 		
 		
-		TextArea area = new TextArea("testing", 10,20) {
+		TextArea area = new TextArea("testingColor", 10,20) {
 			protected int getColumnWidth() {
 				int i = super.getColumnWidth();
 				System.out.println("colwidth is " + i + " " + p.getFontMetrics(p.getFont()).stringWidth("m"));
@@ -297,6 +297,8 @@ public class Test_Applet_Scroll_AWT extends Applet {
 		// p.setLayout(new GridLayout(2, 2, 2, 2));
 		ScrollPane sp = new ScrollPane(ScrollPane.SCROLLBARS_ALWAYS);
 		sp.add(p);
+		sp.setBackground(Color.yellow);
+
 		sp.setSize(500, 250);
 		Dimension d = sp.getPreferredSize();
 		add(sp);

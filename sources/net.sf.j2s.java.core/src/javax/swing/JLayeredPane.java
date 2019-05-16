@@ -218,7 +218,7 @@ public class JLayeredPane extends JComponent /* implements Accessible */ {
         boolean layeredComponentFound = false;
         synchronized(getTreeLock()) {
             Integer layer = null;
-            Component[] children = JSComponent.getChildArray(this);
+            Component[] children = JSComponent.秘getChildArray(this);
             int n = getComponentCount();
             for (int i = 0; i < n; i++) {
             	Component c = children[i];
@@ -284,7 +284,7 @@ public class JLayeredPane extends JComponent /* implements Accessible */ {
      */
     @Override
 		public void removeAll() {
-        Component[] children = JSComponent.getChildArray(this);
+        Component[] children = JSComponent.秘getChildArray(this);
         int n = getComponentCount();
         Hashtable cToL = getComponentToLayer();
         for (int counter = n - 1; counter >= 0; counter--) {
@@ -391,7 +391,7 @@ public class JLayeredPane extends JComponent /* implements Accessible */ {
         layerObj = getObjectForLayer(layer);
 
         if(layer == getLayer(c) && position == getPosition(c)) {
-            updateUIZOrder();
+            秘updateUIZOrder();
             //SwingJS - not necessary    repaint(c.getBounds());
             return;
         }

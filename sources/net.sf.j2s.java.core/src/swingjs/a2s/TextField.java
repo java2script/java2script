@@ -30,8 +30,7 @@ public class TextField extends JTextField {
 		super(text, width);
 	}
 
-	private static Insets awtInsets = new Insets(5, 2, 5, 2);
-	// awt.Button has an unadjustable horizontal inset of what appears to be about 6 pixels
+	private static Insets awtInsets = new Insets(0, 1, 0, 1);
 	@Override
 	public Insets getMargin() {
 		return awtInsets;

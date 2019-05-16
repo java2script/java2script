@@ -1,6 +1,10 @@
 package test;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
+
+import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 
 import javajs.util.SB;
 
@@ -70,8 +74,9 @@ public class Test_String extends Test_ {
 	  System.out.println("ms " + (System.currentTimeMillis() - t0) + "\t many StringBuilder");
 	 
 
-
+	  boolean \u79d8 = true; // Mandarin "secret" 秘 
 	  
+	  System.out.println(\u79d8 && false);
 	  
 	  t0 = System.currentTimeMillis();
 	  SB b = new SB();
@@ -81,6 +86,17 @@ public class Test_String extends Test_ {
 	  s = b.toString();
 	  System.out.println("ms " + (System.currentTimeMillis() - t0) + "\t javajs.util.SB");
 	 
+	  
+	  java.awt.image.BufferedImage bais = new java.awt.image.BufferedImage(10, 10, 1) {
+//		public String toString() {
+//			return "this is BAIS2";
+//		}
+	  };
+	  
+//	  /** @j2sNative xxb = bais */
+	  
+	  System.out.println("testing " + bais);
+	  
 	  
 	  
 	  

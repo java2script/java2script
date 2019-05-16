@@ -14,7 +14,7 @@ public class Canvas extends Panel {
 
 	public Canvas() {
 		super();
-		_alwaysPaint = true;
+		秘alwaysPaint = true;
 	}
 
 	public Dimension getPreferredSize() {

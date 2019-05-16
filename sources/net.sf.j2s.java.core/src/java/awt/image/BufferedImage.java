@@ -78,14 +78,14 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 
 	boolean isAlphaPremultiplied;// If true, alpha has been premultiplied in
 	// color channels
-	protected int[] _pix;
-	protected Object _imgNode; // used by JSGraphics2D directly
+	protected int[] 秘pix;
+	protected Object 秘imgNode; // used by JSGraphics2D directly
 	protected int width, height;
-	protected boolean _havePix;
-	protected Object _canvas; // created in setRGB
-	public Component _component; // for context from component.createImage()
-	private int[] _pixSaved;
-    JSGraphics2D _g; // a JSGraphics2D instance
+	private boolean 秘havePix;
+	protected Object 秘canvas; // created in setRGB
+	public Component 秘component; // for context from component.createImage()
+	private int[] 秘pixSaved;
+    JSGraphics2D 秘g; // a JSGraphics2D instance
 	//private static int rangeIndex;
 
 	/**
@@ -325,7 +325,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			);
 			raster = colorModel.createCompatibleWritableRaster(width, height);
 			raster.setImage(this);
-			_pix = ((DataBufferInt) raster.getDataBuffer()).data;
+			秘pix = ((DataBufferInt) raster.getDataBuffer()).data;
 		}
 			break;
 
@@ -334,7 +334,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			colorModel = ColorModel.getRGBdefault();
 			raster = colorModel.createCompatibleWritableRaster(width, height);
 			raster.setImage(this);
-			_pix = ((DataBufferInt) raster.getDataBuffer()).data;
+			秘pix = ((DataBufferInt) raster.getDataBuffer()).data;
 		}
 			break;
 
@@ -636,7 +636,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		colorModel = cm;
 		this.raster = raster;
 		raster.setImage(this);
-		_pix = ((DataBufferInt) raster.getDataBuffer()).data;
+		秘pix = ((DataBufferInt) raster.getDataBuffer()).data;
 		this.properties = properties;
 		// int numBands = raster.getNumBands();
 		// boolean isAlphaPre = cm.isAlphaPremultiplied();
@@ -897,9 +897,9 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 */
 	public int getRGB(int x, int y) {
 		checkHavePixels();
-		if (_pix == null)
-			_pix = _pixSaved;
-		return _pix[y * this.width + x];
+		if (秘pix == null)
+			秘pix = 秘pixSaved;
+		return 秘pix[y * this.width + x];
 	}
 
 	/**
@@ -941,8 +941,8 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 */
 	public int[] getRGB(int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize) {
 		checkHavePixels();
-		if (_pix == null)
-			_pix = _pixSaved;
+		if (秘pix == null)
+			秘pix = 秘pixSaved;
 		return getRangeRGB(startX, startY, w, h, rgbArray, offset, scansize);
 	}
 
@@ -951,7 +951,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @return true if pixels had to be set
 	 */
 	public boolean checkHavePixels() {
-		if ((_imgNode != null || _g != null) && !_havePix) {
+		if ((秘imgNode != null || 秘g != null) && !秘havePix) {
 			setPixels();
 			return true;
 		}
@@ -960,9 +960,9 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 
 	public int[] getRangeRGB(int startX, int startY, int w, int h,
 			int[] rgbArray, int offset, int scansize) {
-		if (_pix == null && _pixSaved == null)
+		if (秘pix == null && 秘pixSaved == null)
 			checkHavePixels();
-		int[] pixels = (_pix == null ? _pixSaved : _pix);
+		int[] pixels = (秘pix == null ? 秘pixSaved : 秘pix);
 		for (int y = startY, yoff=offset; y < startY + h; y++, yoff += scansize)
 			for (int off = yoff, x = startX; x < startX + w; x++)
 				rgbArray[off++] = pixels[y * this.width + x];
@@ -991,8 +991,8 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 */
 	public synchronized void setRGB(int x, int y, int rgb) {
 		if (checkHavePixels())
-		  _imgNode = null;
-		int[] pixels = (_pix == null ? _pixSaved : _pix);
+		  秘imgNode = null;
+		int[] pixels = (秘pix == null ? 秘pixSaved : 秘pix);
 		pixels[y * this.width + x] = rgb;
 	}
 
@@ -1037,17 +1037,17 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	public void setRGB(int startX, int startY, int w, int h, int[] rgbArray,
 			int offset, int scansize) {
 		if (checkHavePixels())
-			  _imgNode = null;
-		int[] pixels = (_pix == null ? _pixSaved : _pix);
+			  秘imgNode = null;
+		int[] pixels = (秘pix == null ? 秘pixSaved : 秘pix);
 		int width = this.width;
 		for (int y = startY, yoff = offset; y < startY + h; y++, yoff += scansize) 
 			for (int x = startX, off = yoff; x < startX + w; x++) 
 				pixels[y * width + x] = rgbArray[off++];
-		_pix = _pixSaved = pixels;
-		// _pix is used by getGraphics()
-		// _pixSaved is kept in case we need to do this again
-		_g = null; // forces new this._canvas to be created in getGraphics()
-		getImageGraphic(); // sets _pix = null and creates _canvas 
+		秘pix = 秘pixSaved = pixels;
+		// 秘pix is used by getGraphics()
+		// 秘pixSaved is kept in case we need to do this again
+		秘g = null; // forces new this.秘canvas to be created in getGraphics()
+		getImageGraphic(); // sets 秘pix = null and creates 秘canvas 
 		
 	}
 
@@ -1675,7 +1675,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 */
 	
 	public void setImageFromHTML5Canvas(JSGraphics2D g) {
-		this._g = g;
+		this.秘g = g;
 		width = raster.width;
 		height = raster.height;
 		setPixels();
@@ -1689,7 +1689,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 */
 	@SuppressWarnings("unused")
 	public void setPixels() {
-		DOMNode canvas = (_g == null ? null : /** @j2sNative this._g.canvas || */null);
+		DOMNode canvas = (秘g == null ? null : /** @j2sNative this.秘g.canvas || */null);
 		if (canvas == null)
 			canvas = DOMNode.createElement("canvas", null);
 		int w = width;
@@ -1699,22 +1699,22 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		 * note that setting canvas.width clears it
 		 * @j2sNative
 		 * 
-		 * if (!this._g) {
+		 * if (!this.秘g) {
 		 *   canvas.width = w;
 		 *   canvas.height = h;
 		 * }
 		 * var ctx = canvas.getContext("2d");
-		 * if (!this._g)
-		 *   ctx.drawImage(this._imgNode, 0, 0, w, h);
+		 * if (!this.秘g)
+		 *   ctx.drawImage(this.秘imgNode, 0, 0, w, h);
 		 * data = ctx.getImageData(0, 0, w, h).data;
 		 * 
 		 */
 		{
 		}
 		DataBufferInt buffer = (DataBufferInt) raster.getDataBuffer();
-	    toIntARGB(data, _pix = buffer.data);
-		_imgNode = canvas;
-		_havePix = true;
+	    toIntARGB(data, 秘pix = buffer.data);
+		秘imgNode = canvas;
+		秘havePix = true;
 	}
 
 	/**
@@ -1752,7 +1752,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
    */
 	@SuppressWarnings("unused")
 	public Graphics2D getImageGraphic() {
-		if (_g == null) {
+		if (秘g == null) {
 			HTML5Canvas canvas = (HTML5Canvas) DOMNode.createElement("canvas", "img" + System.currentTimeMillis());
 			int w = getWidth();
 			int h = getHeight();
@@ -1763,15 +1763,15 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			 * canvas.height = h;
 			 * 	
 			 */
-			 _canvas = canvas;
-			Object pix =  _pix;
-			_g = new JSGraphics2D(canvas);
+			 秘canvas = canvas;
+			Object pix =  秘pix;
+			秘g = new JSGraphics2D(canvas);
 			// we need to draw the image now, because it might
 			// have pixels. Note that Java actually does not
 			// allow creating a Graphics from MemoryImageSource
 			// so pixels would never be there. 
 			if (pix != null)
-				_g.drawImagePriv(this, 0, 0, null);
+				秘g.drawImagePriv(this, 0, 0, null);
 			/**
 			 * @j2sNative
 			 * if (pix)
@@ -1780,13 +1780,13 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			 */
 			{
 			}
-			_pix = null;
+			秘pix = null;
 		}
-		Graphics2D g2d = (Graphics2D) (Object)_g;
-		if (_component != null) {
-			g2d.setFont(_component.getFont());
-			g2d.setBackground(_component.getBackground());
-			g2d.setColor(_component.getForeground());
+		Graphics2D g2d = (Graphics2D) (Object)秘g;
+		if (秘component != null) {
+			g2d.setFont(秘component.getFont());
+			g2d.setBackground(秘component.getBackground());
+			g2d.setColor(秘component.getForeground());
 		}
 		return g2d;
 	}

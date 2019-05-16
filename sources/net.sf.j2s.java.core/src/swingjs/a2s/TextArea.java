@@ -333,13 +333,13 @@ public class TextArea extends JTextArea {
 		super.setText(t);
 	}
 	
-	@Override
-	public void setText(String t) {
-		@SuppressWarnings("unused")
-		int top = /** @j2sNative this.ui.domNode.scrollTop ||*/0;
-		super.setText(t);
-		/** @j2sNative this.ui.domNode.scrollTop = top */		
-	}
+//	@Override
+//	public void setText(String t) {
+//		@SuppressWarnings("unused")
+//		int top = /** @j2sNative this.ui.domNode.scrollTop ||*/0;
+//		super.setText(t);
+//		/** @j2sNative this.ui.domNode.scrollTop = top */		
+//	}
 
 //	public void insertText(String str, int pos) {
 //		super.insert(str, pos);
@@ -355,15 +355,15 @@ public class TextArea extends JTextArea {
 		toEnd();
 	}
 
-	private void toEnd() {
-		super.setCaretPosition(super.getText().length());
-		super.requestFocusInWindow();
-	}
-
 	@Override
 	public void append(String str) {
 		super.append(str);
 		toEnd();
+	}
+
+	private void toEnd() {
+		super.setCaretPosition(super.getText().length());
+		super.requestFocusInWindow();
 	}
 
 //	@Override

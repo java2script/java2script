@@ -81,7 +81,7 @@ public class JSUtil {
 	@SuppressWarnings("unused")
 	private static Object getFileContents(Object uriOrJSFile, boolean asBytes) {
 		if (uriOrJSFile instanceof File) {
-			byte[] bytes = /** @j2sNative uriOrJSFile._bytes || */
+			byte[] bytes = /** @j2sNative uriOrJSFile.秘bytes || */
 					null;
 			if (bytes != null)
 				return bytes;
@@ -421,7 +421,7 @@ public class JSUtil {
 	}
 
 	public static JSAppletViewer getAppletViewer() {
-		return ((JSAppletThread) Thread.currentThread()).appletViewer;
+		return ((JSAppletThread) Thread.currentThread()).秘appletViewer;
 	}
 
 	public static void readyCallback(String aname, String fname, JSComponent applet,

@@ -17,6 +17,20 @@ public abstract class Test_Inner extends Test_ {
 
 	@Override
 	public String showt2() {
+		
+		boolean ok = true;
+		int n = 25;
+		
+		class Showt2Inner {
+
+			public String getString() {
+				return "inner " + ok + " " + n;
+			}
+			
+			
+		}
+		
+		System.out.println(new Showt2Inner().getString());
 		System.out.println("test_Inner.showt2()" + this + " " + this.t_test);
 		return "Test_Inner";
 	}

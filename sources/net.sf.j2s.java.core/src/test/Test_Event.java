@@ -133,7 +133,7 @@ public class Test_Event extends JFrame {
 		full.setName("full");
 		ptop.setName("ptop");
 
-		boolean asInternalFrame = true;
+		boolean asInternalFrame = false;
 
 		if (asInternalFrame) {
 			JDesktopPane d = new JDesktopPane();
@@ -206,16 +206,16 @@ public class Test_Event extends JFrame {
 			main.setVisible(true);
 			d.add(main);
 
-//			JInternalFrame main2 = new JInternalFrame();
-//			JPanel p = new JPanel();
-//			p.setPreferredSize(new Dimension(100, 300));
-//			p.setMinimumSize(new Dimension(100, 300));
-//
-//			main2.add(p);
-//			main2.setTitle("main2");
-//			main2.pack();
-//			main2.setVisible(true);
-//			d.add(main2);
+			JInternalFrame main2 = new JInternalFrame();
+			JPanel p = new JPanel();
+			p.setPreferredSize(new Dimension(100, 300));
+			p.setMinimumSize(new Dimension(100, 300));
+
+			main2.add(p);
+			main2.setTitle("main2");
+			main2.pack();
+			main2.setVisible(true);
+			d.add(main2);
 
 			add(d);
 			pack();
@@ -524,7 +524,15 @@ public class Test_Event extends JFrame {
 		ptop.setBackground(Color.LIGHT_GRAY);
 		ptop.setOpaque(true);
 		
-		tarea = new TextArea(2,15);
+		tarea = new TextArea(2,15) {
+			public boolean getFocusTraversalKeysEnabled() {
+				System.out.println("checking textarea traversalkeys " + super.getFocusTraversalKeysEnabled());
+				return super.getFocusTraversalKeysEnabled();
+			}
+
+		};
+		tarea.setFocusTraversalKeysEnabled(false);
+		
 		tarea.addFocusListener(fl);
 		ptop.add(tarea);
 		

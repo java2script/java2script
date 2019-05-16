@@ -81,7 +81,7 @@ import swingjs.JSUtil;
 //import java.util.Collections;
 //import java.security.AccessController;
 //import java.security.PrivilegedAction;
-import swingjs.api.JSMinimalAbstractDocument;
+//import swingjs.api.JSMinimalAbstractDocument;
 
 /**
  * <code>JTextComponent</code> is the base class for swing text
@@ -1356,8 +1356,8 @@ public abstract class JTextComponent extends JComponent implements TextComponent
                 boolean composedTextSaved = saveComposedText(caret.getDot());
                 int p0 = Math.min(caret.getDot(), caret.getMark());
                 int p1 = Math.max(caret.getDot(), caret.getMark());
-                if (doc instanceof JSMinimalAbstractDocument) {
-                    ((JSMinimalAbstractDocument)doc).replace(p0, p1 - p0, content,null);
+                if (doc instanceof AbstractDocument) {
+                    ((AbstractDocument)doc).replace(p0, p1 - p0, content,null, this);
                 }
                 else {
                     if (p0 != p1) {
@@ -1699,8 +1699,8 @@ public abstract class JTextComponent extends JComponent implements TextComponent
     public void setText(String t) {
         try {
             Document doc = getDocument();
-            if (doc instanceof JSMinimalAbstractDocument) {
-                ((JSMinimalAbstractDocument)doc).replace(0, doc.getLength(), t,null);
+            if (doc instanceof AbstractDocument) {
+                ((AbstractDocument)doc).replace(0, doc.getLength(), t,null, this);
             }
             else {
                 doc.remove(0, doc.getLength());

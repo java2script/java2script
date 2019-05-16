@@ -14,19 +14,19 @@ import swingjs.api.js.DOMNode;
  * from byte[] or from loading a GIF, PNG, or JPG image.
  * 
  * The difference is that when from byte[] data, the 
- * field _pix will be initialized to the raster data, 
- * but _imgNode will be null; when an image is used, then
- * _pix will be there, but it will not be populated unless
+ * field 秘pix will be initialized to the raster data, 
+ * but 秘imgNode will be null; when an image is used, then
+ * 秘pix will be there, but it will not be populated unless
  * a call to setRGB is made. Until then, JSGraphics2D.drawImage will
- * simply use the image itself. But the _pix data will still
- * be available as _imgNode.pbuf32.
+ * simply use the image itself. But the 秘pix data will still
+ * be available as 秘imgNode.pbuf32.
  * 
  * Only integer raster data RGB and ARGB have been implemented.
  * 
  * useful states:
  * 
  * _domNode != null ==> came from an image node (image file)
- * _canvas != null ==> an image has been created from raster data 
+ * 秘canvas != null ==> an image has been created from raster data 
  * 
  * 
  * 
@@ -45,7 +45,7 @@ public class JSImage extends BufferedImage {
 	public JSImage(int[] argb, int width, int height, String src) {
 		super(width, height, TYPE_INT_ARGB);
 		this.src = src;
-		_pix = argb;		
+		秘pix = argb;		
 	}
 	
   
@@ -66,7 +66,7 @@ public class JSImage extends BufferedImage {
 		 *   img.src = dataurl;
 		 */
 		{}
-		_imgNode = img;
+		秘imgNode = img;
 	}
 
     /**
@@ -75,7 +75,7 @@ public class JSImage extends BufferedImage {
      * @return
      */
 	public Image setComponent(Component c) {
-		_component = c;
+		秘component = c;
 		return this;
 	}
 

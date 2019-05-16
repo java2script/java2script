@@ -555,10 +555,10 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		return ui;
 	}
 
-	public static Document getPlainDocument() {
-		return (Document) JSUtil.getInstance("swingjs.JSPlainDocument");
-	}
-
+//	public static Document getPlainDocument() {
+//		return (Document) JSUtil.getInstance("swingjs.JSPlainDocument");
+//	}
+//
 
 	//////////////// images ///////////////
 	
@@ -584,7 +584,7 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		JSImagekit kit = (JSImagekit) Interface.getInstance("swingjs.JSImagekit", true);
 		producer.startProduction(kit); // JSImageKit is the ImageConsumer here
 		// we may create an image, but then later generate its pixels
-		// and then also draw to it using img._g
+		// and then also draw to it using img.秘g
 		// If we are drawing to it and it has pixels, then we need to 
 		// "fix" those pixels to the image. 
 		return kit.getCreatedImage();

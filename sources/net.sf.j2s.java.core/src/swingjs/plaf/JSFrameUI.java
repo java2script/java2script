@@ -75,7 +75,8 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 
 	protected boolean isInternalFrame;
 
-
+  boolean doEmbed;
+  
 	public JSFrameUI() {
 		frameZ += 1000;
 		z = frameZ;
@@ -113,10 +114,14 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			String fname = frame.getName();
 			DOMNode node = DOMNode.getElement(fname + "-div");
 			if (node != null) {
-				frame.setUndecorated(true);
-				frame.setLocation(0, 0);
 				embeddingNode = node;
-				int ew = DOMNode.getWidth(node);
+			  doEmbed = (DOMNode.getWidth(embeddingNode) > 0);
+			  if (doEmbed) {
+		       frame.setUndecorated(true);
+		       frame.setLocation(0, 0);
+			  }
+
+			  int ew = DOMNode.getWidth(node);
 				int eh = DOMNode.getHeight(node);
 				if (ew > 0 && eh > 0) {
 					frame._freezeBounds(ew, eh);
@@ -177,16 +182,23 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		return domNode;
 	}
 
+	 @Override
+	  protected boolean isFrameIndependent() {
+		 	return (!isInternalFrame || embeddingNode == null || !doEmbed); 
+	  }
+
+
+
 	@Override
 	public void setZOrder(int z) {
-		if (embeddingNode != null)
+		if (doEmbed)
 			z = 999;
 		super.setZOrder(z);
 	}
 
 	@Override
 	protected void setDraggableEvents() {
-		if (embeddingNode != null || frame.isUndecorated())
+		if (doEmbed || frame.isUndecorated())
 			return;
 		@SuppressWarnings("unused")
 		DOMNode fnode = frameNode;		

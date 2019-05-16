@@ -45,6 +45,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
+import javax.swing.text.PlainDocument;
 //import javax.swing.text.PlainDocument;
 import javax.swing.text.TextAction;
 
@@ -372,9 +373,9 @@ public class JTextField extends JTextComponent implements SwingConstants {
      * @return the default model implementation
      */
     protected Document createDefaultModel() {
-    	// SwingJS 
-    	return JSToolkit.getPlainDocument();
-//        return new PlainDocument();
+//    	// SwingJS 
+//    	return JSToolkit.getPlainDocument();
+        return new PlainDocument();
     }
 
     /**

@@ -278,7 +278,7 @@ public class SwingUtilities implements SwingConstants
             return null;
         }
         if (parent instanceof Container) {
-            Component components[] = JSComponent.getChildArray((Container)parent);
+            Component components[] = JSComponent.秘getChildArray((Container)parent);
             for (int i = 0, n = ((Container) parent).getComponentCount() ; i < n ; i++) {
                 Component comp = components[i];
                 if (comp != null && comp.isVisible()) {
@@ -1270,7 +1270,7 @@ public class SwingUtilities implements SwingConstants
             n = ((JMenu) c).getMenuComponentCount();
         }
         else if (c instanceof Container) {
-            children = JSComponent.getChildArray((Container)c);
+            children = JSComponent.秘getChildArray((Container)c);
             n = ((Container) c).getComponentCount();
         }
         for(int i = 0; i < n; i++) {

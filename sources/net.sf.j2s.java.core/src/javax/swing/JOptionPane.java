@@ -1132,7 +1132,7 @@ public class JOptionPane extends JComponent {
 				setValue(UNINITIALIZED_VALUE);
 			}
 		});
-		ensurePropertyChangeListener(this, parentComponent);
+		秘ensurePropertyChangeListener(this, parentComponent);
 
 		addPropertyChangeListener(new PropertyChangeListener() {
 			@Override

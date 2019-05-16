@@ -17,16 +17,16 @@ import javax.swing.SwingUtilities;
  */
 public class JSAppletThread extends JSThread {
 
-	public JSAppletViewer appletViewer;
+	public JSAppletViewer 秘appletViewer;
 
 	public JSAppletThread(JSAppletViewer ap, ThreadGroup group, String name) {
 		super(group, name);
-		appletViewer = ap;
+		秘appletViewer = ap;
 	}
 
 	@Override
 	public void run1(int mode) {
-		mode = appletViewer.run1(mode);
+		mode = 秘appletViewer.run1(mode);
 		if (mode != DONE)
 			dispatchAndReturn(null, mode);
 	}

@@ -1082,6 +1082,16 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 
 	void setJSTextDelayed() {
 		updateDOMNode();
+//		JTextComponent ed = editor;
+//		Document doc = ed.getDocument();
+//		if (isAWT) {
+////			((AbstractDocument) doc).resetAWTScroll();
+//		} else {
+////			int docpt = e.getOffset() + e.getLength();
+////			ed.getCaret().setDot(docpt);
+////			ui.updateJSCursor("insert");
+//		}
+
 	}
 
 	
@@ -1115,6 +1125,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	 */
 	public void updateJSCursor(String why) {	
 		if (editor.getDocument() == null || editor.getText().length() == 0)
+			return;
+		if (isAWT && why != "focus")
 			return;
 		int start = editor.getCaret().getMark();
 		int end = editor.getCaret().getDot();
@@ -1226,6 +1238,10 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		case "keyup":
 			switch (/** @j2sNative jQueryEvent.keyCode || */
 			0) {
+			case KeyEvent.VK_TAB:
+				// TODO: handle tab
+				b = CONSUMED;
+				break;
 			case KeyEvent.VK_UP:
 			case KeyEvent.VK_DOWN:
 			case KeyEvent.VK_LEFT:

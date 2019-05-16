@@ -428,7 +428,7 @@ public class JInternalFrame extends JFrame
 	void updateUIWhenHidden() {
 		setUI((InternalFrameUI) UIManager.getUI(this));
 		invalidate();
-		Component[] children = JSComponent.getChildArray(desktop);
+		Component[] children = JSComponent.秘getChildArray(desktop);
 		int n = desktop.getComponentCount();
 		for (int i = 0; i < n; i++) {
 			SwingUtilities.updateComponentTreeUI(children[i]);
@@ -2013,7 +2013,7 @@ public class JInternalFrame extends JFrame
             setSize(r.width, r.height);
 
             invalidate();
-			Component[] children = JSComponent.getChildArray(this);
+			Component[] children = JSComponent.秘getChildArray(this);
             if (children != null) {
                 for(int i = 0, n = getComponentCount(); i < n; i++) {
                     SwingUtilities.updateComponentTreeUI(children[i]);

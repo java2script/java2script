@@ -32,8 +32,9 @@ public class JSTextAreaUI extends JSTextViewUI {
 			setupViewNode();
 		}
 		JTextArea area = (JTextArea) jc;
-		if (isAWT && !area.isBackgroundSet())
-			area.setBackground(new Color(240,240,240));
+// Q: Why did I have this 240,240,240?
+//		if (isAWT && !area.isBackgroundSet())
+//			area.setBackground(Color.white);
 		DOMNode.setStyles(domNode, "white-space", null, "overflow-wrap", null);
 		if (area.getLineWrap()) {
 			DOMNode.setStyles(domNode, "overflow-wrap", area.getWrapStyleWord() ? null : "anywhere");
@@ -42,7 +43,7 @@ public class JSTextAreaUI extends JSTextViewUI {
 		}
 		textListener.checkDocument();
 		setCssFont(DOMNode.setAttr(domNode, "value", setCurrentText()), c.getFont());
-		updateJSCursor("rewrite");
+		updateJSCursor("areaupdate");
 		return super.updateDOMNode();
 	}
 

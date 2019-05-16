@@ -356,7 +356,7 @@ public class JRootPane extends JComponent {
 	 * @param c 
 	 */
 	public JRootPane(String prefix, boolean isApplet, Container container) {
-		isRootPane = true;
+		秘isRootPane = true;
     	isAWT =  container instanceof A2SContainer;
     	
 		// can come here from JApplet, JWindow, JDialog, or JFrame
@@ -592,7 +592,7 @@ public class JRootPane extends JComponent {
 		if (contentPane != null && contentPane.getParent() == layeredPane)
 			layeredPane.remove(contentPane);
 		contentPane = content;
-		content.isContentPane = true;
+		content.秘isContentPane = true;
 
 		layeredPane.add(contentPane, JLayeredPane.FRAME_CONTENT_LAYER);
 	}

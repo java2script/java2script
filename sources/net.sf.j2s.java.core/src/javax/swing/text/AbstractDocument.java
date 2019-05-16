@@ -34,8 +34,6 @@ import java.util.EventListener;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import swingjs.api.JSMinimalAbstractDocument;
-
 import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -50,8 +48,6 @@ import javax.swing.undo.CompoundEdit;
 import javax.swing.undo.UndoableEdit;
 
 /**
- * 
- * NOT USED IN SwingJS
  * 
  * An implementation of the document interface to serve as a
  * basis for implementing various kinds of documents.  At this
@@ -111,8 +107,7 @@ import javax.swing.undo.UndoableEdit;
  *
  * @author  Timothy Prinzing
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
-public abstract class AbstractDocument implements JSMinimalAbstractDocument {
+public abstract class AbstractDocument implements Document {
 
     /**
      * Constructs a new <code>AbstractDocument</code>, wrapped around some
@@ -350,8 +345,7 @@ public abstract class AbstractDocument implements JSMinimalAbstractDocument {
      * @return the asynchronous loading priority, or <code>-1</code>
      *   if the document should not be loaded asynchronously
      */
-    @Override
-		public int getAsynchronousLoadPriority() {
+	public int getAsynchronousLoadPriority() {
         Integer loadPriority = (Integer)
             getProperty(AbstractDocument.AsyncLoadPriority);
         if (loadPriority != null) {
@@ -381,7 +375,6 @@ public abstract class AbstractDocument implements JSMinimalAbstractDocument {
      * @see #getDocumentFilter
      * @since 1.4
      */
-    @Override
 		public void setDocumentFilter(DocumentFilter filter) {
         documentFilter = filter;
     }
@@ -401,44 +394,45 @@ public abstract class AbstractDocument implements JSMinimalAbstractDocument {
 
 //    // --- Document methods -----------------------------------------
 //
-//    /**
-//     * This allows the model to be safely rendered in the presence
-//     * of currency, if the model supports being updated asynchronously.
-//     * The given runnable will be executed in a way that allows it
-//     * to safely read the model with no changes while the runnable
-//     * is being executed.  The runnable itself may <em>not</em>
-//     * make any mutations.
-//     * <p>
-//     * This is implemented to aquire a read lock for the duration
-//     * of the runnables execution.  There may be multiple runnables
-//     * executing at the same time, and all writers will be blocked
-//     * while there are active rendering runnables.  If the runnable
-//     * throws an exception, its lock will be safely released.
-//     * There is no protection against a runnable that never exits,
-//     * which will effectively leave the document locked for it's
-//     * lifetime.
-//     * <p>
-//     * If the given runnable attempts to make any mutations in
-//     * this implementation, a deadlock will occur.  There is
-//     * no tracking of individual rendering threads to enable
-//     * detecting this situation, but a subclass could incur
-//     * the overhead of tracking them and throwing an error.
-//     * <p>
-//     * This method is thread safe, although most Swing methods
-//     * are not. Please see
-//     * <A HREF="http://java.sun.com/docs/books/tutorial/uiswing/misc/threads.html">How
-//     * to Use Threads</A> for more information.
-//     *
-//     * @param r the renderer to execute
-//     */
-//    public void render(Runnable r) {
+    /**
+     * This allows the model to be safely rendered in the presence
+     * of currency, if the model supports being updated asynchronously.
+     * The given runnable will be executed in a way that allows it
+     * to safely read the model with no changes while the runnable
+     * is being executed.  The runnable itself may <em>not</em>
+     * make any mutations.
+     * <p>
+     * This is implemented to aquire a read lock for the duration
+     * of the runnables execution.  There may be multiple runnables
+     * executing at the same time, and all writers will be blocked
+     * while there are active rendering runnables.  If the runnable
+     * throws an exception, its lock will be safely released.
+     * There is no protection against a runnable that never exits,
+     * which will effectively leave the document locked for it's
+     * lifetime.
+     * <p>
+     * If the given runnable attempts to make any mutations in
+     * this implementation, a deadlock will occur.  There is
+     * no tracking of individual rendering threads to enable
+     * detecting this situation, but a subclass could incur
+     * the overhead of tracking them and throwing an error.
+     * <p>
+     * This method is thread safe, although most Swing methods
+     * are not. Please see
+     * <A HREF="http://java.sun.com/docs/books/tutorial/uiswing/misc/threads.html">How
+     * to Use Threads</A> for more information.
+     *
+     * @param r the renderer to execute
+     */
+    @Override
+	public void render(Runnable r) {
 //        readLock();
-//        try {
-//            r.run();
-//        } finally {
+        try {
+            r.run();
+        } finally {
 //            readUnlock();
-//        }
-//    }
+        }
+    }
 
     /**
      * Returns the length of the data.  This is the number of
@@ -656,52 +650,46 @@ public abstract class AbstractDocument implements JSMinimalAbstractDocument {
         }
     }
 
-    /**
-     * Deletes the region of text from <code>offset</code> to
-     * <code>offset + length</code>, and replaces it with <code>text</code>.
-     * It is up to the implementation as to how this is implemented, some
-     * implementations may treat this as two distinct operations: a remove
-     * followed by an insert, others may treat the replace as one atomic
-     * operation.
-     *
-     * @param offset index of child element
-     * @param length length of text to delete, may be 0 indicating don't
-     *               delete anything
-     * @param text text to insert, <code>null</code> indicates no text to insert
-     * @param attrs AttributeSet indicating attributes of inserted text,
-     *              <code>null</code>
-     *              is legal, and typically treated as an empty attributeset,
-     *              but exact interpretation is left to the subclass
-     * @exception BadLocationException the given position is not a valid
-     *            position within the document
-     * @since 1.4
-     */
-    @Override
-		public void replace(int offset, int length, String text,
-                        AttributeSet attrs) throws BadLocationException {
-        if (length == 0 && (text == null || text.length() == 0)) {
-            return;
-        }
-        DocumentFilter filter = getDocumentFilter();
+	/**
+	 * Deletes the region of text from <code>offset</code> to
+	 * <code>offset + length</code>, and replaces it with <code>text</code>. It is
+	 * up to the implementation as to how this is implemented, some implementations
+	 * may treat this as two distinct operations: a remove followed by an insert,
+	 * others may treat the replace as one atomic operation.
+	 *
+	 * @param offset index of child element
+	 * @param length length of text to delete, may be 0 indicating don't delete
+	 *               anything
+	 * @param text   text to insert, <code>null</code> indicates no text to insert
+	 * @param attrs  AttributeSet indicating attributes of inserted text,
+	 *               <code>null</code> is legal, and typically treated as an empty
+	 *               attributeset, but exact interpretation is left to the subclass
+	 * @exception BadLocationException the given position is not a valid position
+	 *                                 within the document
+	 * @since 1.4
+	 */
+	public void replace(int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+		if (length == 0 && (text == null || text.length() == 0)) {
+			return;
+		}
+		DocumentFilter filter = getDocumentFilter();
 
-        writeLock();
-        try {
-            if (filter != null) {
-                filter.replace(getFilterBypass(), offset, length, text,
-                               attrs);
-            }
-            else {
-                if (length > 0) {
-                    remove(offset, length);
-                }
-                if (text != null && text.length() > 0) {
-                    insertString(offset, text, attrs);
-                }
-            }
-        } finally {
-            writeUnlock();
-        }
-    }
+		writeLock();
+		try {
+			if (filter != null) {
+				filter.replace(getFilterBypass(), offset, length, text, attrs);
+			} else {
+				if (length > 0) {
+					remove(offset, length);
+				}
+				if (text != null && text.length() > 0) {
+					insertString(offset, text, attrs);
+				}
+			}
+		} finally {
+			writeUnlock();
+		}
+	}
 
     /**
      * Inserts some content into the document.
@@ -1553,6 +1541,14 @@ public abstract class AbstractDocument implements JSMinimalAbstractDocument {
      * Used by DocumentFilter to do actual insert/remove.
      */
     private transient DocumentFilter.FilterBypass filterBypass;
+
+	private JTextComponent editor;
+
+	private boolean isAWT;
+
+	private int currentDot;
+
+	private int currentMark;
 
 //    private static final String BAD_LOCK_STATE = "document lock failure";
 
@@ -3224,10 +3220,37 @@ public abstract class AbstractDocument implements JSMinimalAbstractDocument {
             handleInsertString(offset, string, attr);
         }
 
+    	@Override
         public void replace(int offset, int length, String text,
                             AttributeSet attrs) throws BadLocationException {
             handleRemove(offset, length);
             handleInsertString(offset, text, attrs);
         }
+        
     }
+
+	/**
+	 * SwingJS addition
+	 *
+	 */
+	public void replace(int offset, int length, String text, AttributeSet attrs, JTextComponent c)
+			throws BadLocationException {
+		editor = c;
+		isAWT = /** @j2sNative c.isAWT$ || */false;
+		if (isAWT) {
+			currentDot = c.getCaret().getDot();
+			currentMark = c.getCaret().getMark();
+		}
+		replace(offset, length, text, attrs);
+	}
+
+	public void resetAWTScroll() {
+		// called by swingjs.plaf.TextListener
+		if (isAWT) {
+			editor.getCaret().setDot(currentMark);
+			editor.getCaret().moveDot(currentDot);
+		}
+	}
+
+
 }

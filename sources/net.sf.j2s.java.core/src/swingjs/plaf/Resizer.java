@@ -66,7 +66,7 @@ public class Resizer {
 	
 	@SuppressWarnings("unused")
 	private void createAndShowResizer() {
-		String id = rootPane.htmlName + "_resizer";
+		String id = rootPane.秘htmlName + "_resizer";
 		resizer = DOMNode.createElement("div", id);
 		DOMNode.setSize(resizer, 10, 10);
 		DOMNode.setStyles(resizer, "background-color", "red", "opacity", "0", "cursor", "nwse-resize");

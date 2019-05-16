@@ -35,7 +35,7 @@ public class List extends JList implements ItemSelectable, JSComponent.A2SWrappe
     final static int    DEFAULT_VISIBLE_ROWS = 4;
 
 	@Override
-	public Component getWrap$() {
+	public Component 秘getWrap() {
 		return new JScrollPane(this);
 	}
         

@@ -763,6 +763,10 @@ public class JSComponentUI extends ComponentUI
 		DOMNode.setAttr(node, "data-keycomponent", c);
 	}
 
+	protected void setDataFocusComponent(DOMNode node) {
+		DOMNode.setAttr(node, "data-focuscomponent", c);
+	}
+
 	/**
 	 * Indicate to J2S to completely ignore all mouse events for this control. It
 	 * will be handled by the control directly using a jQuery callback that is
@@ -887,7 +891,7 @@ public class JSComponentUI extends ComponentUI
 		return (jc.isFocusable() && setFocusable());
 	}
 
-	private boolean setFocusable() {
+	protected boolean setFocusable() {
 		if (focusNode == null)
 		  addFocusHandler();
 		return (focusNode != null);
@@ -1190,7 +1194,7 @@ public class JSComponentUI extends ComponentUI
 	 * @param value
 	 */
 	private void setAWTFontAndColor(Container value) {
-		Container top = JSComponent.getTopInvokableAncestor(value, false);
+		Container top = JSComponent.秘getTopInvokableAncestor(value, false);
 		 if (top == this.awttop || (this.awttop = top) == null) {
 			 if (top == null) {
 				 awtPeerBG = awtPeerFG = null;
@@ -1703,7 +1707,9 @@ public class JSComponentUI extends ComponentUI
 			}
 			if (n > 0)
 				addChildrenToDOM(children, n);
-			if (isWindow && jc.getUIClassID() != "InternalFrameUI" && jc.getWidth() > 0) {
+			if (isWindow 
+					&& jc.getWidth() > 0
+					&& isFrameIndependent()) {
 				DOMNode.transferTo(outerNode, body);
 			}
 		}
@@ -1712,6 +1718,10 @@ public class JSComponentUI extends ComponentUI
 		if (embeddingNode != null)
 			DOMNode.appendChildSafely(embeddingNode, outerNode);
 		return outerNode;
+	}
+
+	protected boolean isFrameIndependent() {
+		return true;
 	}
 
 	private void setOuterLocationFromComponent() {
@@ -1734,7 +1744,7 @@ public class JSComponentUI extends ComponentUI
 
 	protected Component[] getChildren() {
 		// but see JSMenuUI and JTableUI
-		return JSComponent.getChildArray(jc);
+		return JSComponent.秘getChildArray(jc);
 	}
 
 	protected int getChildCount() {
@@ -1758,7 +1768,7 @@ public class JSComponentUI extends ComponentUI
 			} else {
 				if (ui.domNode != ui.outerNode && DOMNode.getParent(ui.domNode) == null)				
 					ui.outerNode.appendChild(ui.domNode);
-				if (ui.embeddingNode == null)
+				if (ui.embeddingNode == null && (!ui.isWindow || !ui.isFrameIndependent()))
 					DOMNode.appendChildSafely(containerNode, ui.outerNode);
 			}
 		}
@@ -2832,15 +2842,15 @@ public class JSComponentUI extends ComponentUI
 			setTransparent(node);
 		else
 			checkTransparent(node);
-		if (jc._gtemp != null)
-			jc._gtemp.setBackground(color);
+		if (jc.秘gtemp != null)
+			jc.秘gtemp.setBackground(color);
 	}
 
 	public boolean selfOrParentBackgroundPainted() {
 		JSComponent c = jc;
 		JSComponent p = targetParent;
 		while (c != null) {
-			if (c._isBackgroundPainted)
+			if (c.秘isBackgroundPainted)
 				return true;
 			c = (JSComponent) (p == null ? c.getParent() : p);
 			p = null;

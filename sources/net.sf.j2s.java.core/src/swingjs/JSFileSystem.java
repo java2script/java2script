@@ -196,8 +196,8 @@ public class JSFileSystem extends FileSystem {
 
 		@Override
 		public void force(boolean metaData) throws IOException {
-			path._bytes = bc._bytes;
-			JSUtil.cacheFileData(path.name, path._bytes);
+			path.秘bytes = bc.秘bytes;
+			JSUtil.cacheFileData(path.name, path.秘bytes);
 		}
 
 		
@@ -225,7 +225,7 @@ public class JSFileSystem extends FileSystem {
 		@Override
 		public MappedByteBuffer map(MapMode mode, long position, long size) throws IOException {
 			ni();
-			return new JSMappedByteBuffer(bc._bytes, -1, (int) position, (int) size, (int) size, 0, fd);
+			return new JSMappedByteBuffer(bc.秘bytes, -1, (int) position, (int) size, (int) size, 0, fd);
 		}
 
 		@Override
@@ -340,7 +340,7 @@ public class JSFileSystem extends FileSystem {
 
 		long tCreate, tMod, tAccess;
 		private JSPath path;
-		private byte[] _bytes;
+		private byte[] 秘bytes;
 		private BufferedInputStream bis;
 		protected int pos, len;
 		private JSFileAttribute<?>[] attrs;
@@ -371,13 +371,13 @@ public class JSFileSystem extends FileSystem {
 						if (b != null)
 							throw new FileAlreadyExistsException(path.name);
 					}
-					path._bytes = null;
+					path.秘bytes = null;
 					JSUtil.cacheFileData(path.name, null);
 				} else if (truncate) {
-					path._bytes = null;
+					path.秘bytes = null;
 				}
-				if (path._bytes == null) {
-					_bytes = new byte[4096];
+				if (path.秘bytes == null) {
+					秘bytes = new byte[4096];
 				} else {
 					getBytes();
 				}
@@ -394,14 +394,14 @@ public class JSFileSystem extends FileSystem {
 		public void close() throws IOException {
 			open = false;
 			if (delete) {
-				_bytes = null;
+				秘bytes = null;
 				JSUtil.cacheFileData(path.name, null);
 			} else if (write) {
-				if (len < _bytes.length)
-					_bytes = Arrays.copyOf(_bytes, len);
-				path._bytes = _bytes;
-				JSUtil.cacheFileData(path.name, _bytes);
-				JSUtil.saveFile(path.name, _bytes, null, null);
+				if (len < 秘bytes.length)
+					秘bytes = Arrays.copyOf(秘bytes, len);
+				path.秘bytes = 秘bytes;
+				JSUtil.cacheFileData(path.name, 秘bytes);
+				JSUtil.saveFile(path.name, 秘bytes, null, null);
 			}
 		}
 
@@ -414,7 +414,7 @@ public class JSFileSystem extends FileSystem {
 			n = Math.min(dst.remaining(), Math.min(len - pos, n));
 			if (n <= 0)
 				return -1;
-			System.arraycopy(_bytes, pos, dst.array(), dst.arrayOffset() + dst.position(), n);
+			System.arraycopy(秘bytes, pos, dst.array(), dst.arrayOffset() + dst.position(), n);
 			dst.position(dst.position() + n);
 			if (updatePos)
 				this.pos += n;
@@ -432,13 +432,13 @@ public class JSFileSystem extends FileSystem {
 
 		public long transferTo(int fromPos, JSByteChannel bc, int toPos, int n, boolean updatePos) {
 			n = Math.min(len - fromPos, n);
-			return bc._get(_bytes, fromPos, toPos, n, updatePos);
+			return bc._get(秘bytes, fromPos, toPos, n, updatePos);
 		}
 
 		private int _get(byte[] array, int from, int to, int n, boolean updatePos) {
 			if (to + n > getBytes().length)
-				_bytes = AU.ensureLengthByte(_bytes, (to + n) * 2);
-			System.arraycopy(array, from, _bytes, to, n);
+				秘bytes = AU.ensureLengthByte(秘bytes, (to + n) * 2);
+			System.arraycopy(array, from, 秘bytes, to, n);
 			pos += n;
 			if (pos > len)
 				len = pos;
@@ -449,13 +449,13 @@ public class JSFileSystem extends FileSystem {
 
 
 		private byte[] getBytes() {
-			if (_bytes == null)
-				_bytes = path._bytes;
-			if (_bytes == null) {
-				_bytes = JSUtil.getFileAsBytes(path.toString());
-				len = _bytes.length;
+			if (秘bytes == null)
+				秘bytes = path.秘bytes;
+			if (秘bytes == null) {
+				秘bytes = JSUtil.getFileAsBytes(path.toString());
+				len = 秘bytes.length;
 			}
-			return _bytes;
+			return 秘bytes;
 		}
 
 		@Override
@@ -537,7 +537,7 @@ public class JSFileSystem extends FileSystem {
 		private JSFileSystem fileSystem;
 
 		private String[] nameArray;
-		public byte[] _bytes;
+		public byte[] 秘bytes;
 
 		private String[] getNameArray() {
 			if (nameArray == null)
@@ -704,7 +704,7 @@ public class JSFileSystem extends FileSystem {
 		@Override
 		public Path toAbsolutePath() {
 			Path path = getPath(isAbsolute() ? name : "http://./" + name);
-			((JSPath) path)._bytes = _bytes;
+			((JSPath) path).秘bytes = 秘bytes;
 			return path;
 		}
 
@@ -717,7 +717,7 @@ public class JSFileSystem extends FileSystem {
 		@Override
 		public File toFile() {
 			File f = new File(name);
-			f._bytes = _bytes;
+			f.秘bytes = 秘bytes;
 			return f;
 		}
 

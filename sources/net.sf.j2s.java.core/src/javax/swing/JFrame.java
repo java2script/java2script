@@ -153,8 +153,8 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
     @Override
 	public void add(Component comp, Object constraints) {
     	if (comp instanceof JApplet) {
-    		isAppletFrame = true;
-    		((JApplet) comp).getLayeredPane().isFramedApplet = true;
+    		秘isAppletFrame = true;
+    		((JApplet) comp).getLayeredPane().秘isFramedApplet = true;
     	}
     	super.add(comp, constraints);
      }

@@ -41,9 +41,13 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
 import swingjs.JSKeyEvent;
+//import swingjs.api.JSMinimalAbstractDocument;
+import swingjs.api.js.DOMNode;
 
 public class TextListener implements FocusListener, ChangeListener,
 		PropertyChangeListener, DocumentListener, CaretListener {
@@ -115,6 +119,9 @@ public class TextListener implements FocusListener, ChangeListener,
 	 * @return false to indicate "handled and so don't pass on to window"
 	 */
 	boolean handleJSTextEvent(JSTextUI ui, int eventType, Object jqevent) {
+		DOMNode activeElement =  (/** @j2sNative document.activeElement || */null);
+		if (activeElement != ui.domNode) // tabbed out of this object
+			return JSComponentUI.HANDLED;
 		Point markDot = ui.getNewCaretPosition(null);
 		int mark = markDot.x;
 		int dot = markDot.y;
@@ -122,14 +129,16 @@ public class TextListener implements FocusListener, ChangeListener,
 		eventType = JSKeyEvent.fixEventType(jqevent, eventType);
 		switch (eventType) {
 		case KeyEvent.KEY_TYPED:
-			setCaret = false;
+//			setCaret = false;
 			break;
 		case KeyEvent.KEY_PRESSED:
 			int keyCode = /** @j2sNative jqevent.keyCode || */
 					0;
-			if (keyCode == 13 || keyCode == KeyEvent.VK_ENTER)
+			if (keyCode == 13 || keyCode == KeyEvent.VK_ENTER) {
 				ui.handleEnter();
-			setCaret = false;
+			} else if (keyCode != KeyEvent.VK_BACK_SPACE){
+				setCaret = false;
+			}
 			if (lastKeyEvent != KeyEvent.KEY_TYPED)
 			  break;
 			// fall through if this is a continuation press
@@ -151,10 +160,12 @@ public class TextListener implements FocusListener, ChangeListener,
 		return JSComponentUI.HANDLED;
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public void insertUpdate(DocumentEvent e) {
-		if (!working)
+		if (!working) {
 			ui.setJSTextDelayed();
+		}
 	}
 
 	@Override

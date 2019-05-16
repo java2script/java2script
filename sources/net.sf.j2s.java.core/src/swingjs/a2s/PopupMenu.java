@@ -60,7 +60,7 @@ public class PopupMenu extends JPopupMenu implements AWTPopupMenu {
 	@Override
 	public void insertSeparator(int index) {
 		Separator sep = new JPopupMenu.Separator();
-    	sep._j2sInvalidateOnAdd = false;
+    	sep.秘j2sInvalidateOnAdd = false;
 		insert(sep, index);
 	}
 

@@ -99,7 +99,7 @@ public class JSMenuUI extends JSMenuItemUI {
 	 */
 	@Override
 	protected Component[] getChildren() {
-		return (isMenuItem ? new Component[] { jm.getPopupMenu() } : JSComponent.getChildArray(jm));
+		return (isMenuItem ? new Component[] { jm.getPopupMenu() } : JSComponent.秘getChildArray(jm));
 	}
 
 	@Override

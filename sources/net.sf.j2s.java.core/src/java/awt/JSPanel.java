@@ -75,7 +75,7 @@ public class JSPanel extends Container {
     @Override
 		protected boolean canPaint() {
     	//return this.isContentPane || this.rootPane; ??
-			return isContentPane;
+			return 秘isContentPane;
     }
 
     /**

@@ -2,6 +2,7 @@ package swingjs;
 
 import java.util.Hashtable;
 import java.util.Locale;
+import java.util.Map.Entry;
 
 import swingjs.api.js.HTML5Applet;
 
@@ -9,20 +10,25 @@ import swingjs.api.js.HTML5Applet;
 public class JSApp {
 
 	public JSApp() {
-		// Frame only; not applet
+		// Frame entry point
 	}
 
 	public JSApp(Hashtable<String, Object> params) {
+		// JApplet entry point
 		setAppParams(params);
 	}
-	
+
+	/**
+	 * Only called from setAppParams
+	 * @param name
+	 * @return
+	 */
 	public String getParameter(String name) {
-		String s = (String) params.get(name);
-		System.out.println("get parameter: " + name + " = " + s);
+		String s = (String) params.get(name.toLowerCase());
 		return (s == null ? null : "" + s); // because it may not be a string in JavaScript if inherited from Info
 	}
 	
-	protected Hashtable params;
+	protected Hashtable<String, Object> params;
 
 	public String appletCodeBase;
 	public String appletIdiomaBase;
@@ -50,8 +56,15 @@ public class JSApp {
 	/**
 	 * @param params
 	 */
-	protected void setAppParams(Hashtable<String, Object> params) {
-		this.params = params;
+	protected void setAppParams(Hashtable<String, Object> params0) {
+		params = params0;
+		// Although we allow params to hold mixed-case keys, 
+		// we need to ensure that it has the lower-case version
+		// It was an early design flaw, unfortunately.
+		// At least for now, this is the solution.
+		params = new Hashtable<String, Object>();
+		for (Entry<String, Object> e: params0.entrySet())
+			params.put(e.getKey().toLowerCase(), e.getValue());
 		String language = getParameter("language");
 		if (language == null)
 			language = JSUtil.J2S.getDefaultLanguage(false);
@@ -63,18 +76,18 @@ public class JSApp {
 
 		syncId = getParameter("syncId");
 		fullName = htmlName + "__" + syncId + "__";
-		params.put("fullName", fullName);
-		Object o = params.get("codePath");
+		params.put("fullname", fullName);
+		Object o = params.get("codepath");
 		if (o == null)
 			o = "../java/";
 		appletCodeBase = o.toString();
 		appletIdiomaBase = appletCodeBase.substring(0,
 				appletCodeBase.lastIndexOf("/", appletCodeBase.length() - 2) + 1)
 				+ "idioma";
-		o = params.get("documentBase");
+		o = params.get("documentbase");
 		appletDocumentBase = (o == null ? "" : o.toString());
-		if (params.containsKey("maximumSize"))
-			Math.max(((Integer) params.get("maximumSize")).intValue(), 100);
+		if (params.containsKey("maximumsize"))
+			Math.max(((Integer) params.get("maximumsize")).intValue(), 100);
 		async = (testAsync || params.containsKey("async"));
 		HTML5Applet applet = JSUtil.J2S.findApplet(htmlName); 
 		String javaver = JSUtil.J2S.getJavaVersion();
