@@ -11706,11 +11706,14 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		if (dataOut) {
 			if (url.indexOf("http://") != 0 && url.indexOf("https://") != 0)
 				return J2S.saveFile(url, dataOut);
-			var info = {async:false,url:url,type:"POST", processData:false,
-				data:(typeof data == "string" ? dataOut 
-					: ";base64," + Clazz.load("javajs.util.Base64").getBase64$BA(dataOut).toString())
-			};
-			return J2S.$ajax(info).responseText;
+			info.async = false;
+			info.url = url;
+			info.type = "POST";
+			info.processData = false;
+			info.data = (typeof data == "string" ? dataOut 
+					: ";base64," + Clazz.load("javajs.util.Base64").getBase64$BA(dataOut).toString());
+			info.xhr = J2S.$ajax(info);
+			return info.xhr.responseText;
 		}
 		if (postOut)
 			url += "?POST?" + postOut;
@@ -12952,20 +12955,20 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	};
 
 	J2S._setAppletParams = function(availableParams, params, Info, isHashtable) {
-		for ( var i in Info)
+		for (var i in Info) {
+			var lci = i.toLowerCase();
 			if (!availableParams
-					|| availableParams.indexOf(";" + i.toLowerCase() + ";") >= 0) {
-				if (Info[i] == null || i == "language"
+					|| availableParams.indexOf(";" + lci + ";") >= 0) {
+				if (Info[i] == null || lci == "language"
 						&& !J2S.featureDetection.supportsLocalization())
 					continue;
-				// params.put$TK$TV(i, (Info[i] === true ? Boolean.TRUE: Info[i]
-				// === false ? Boolean.FALSE : Info[i]))
 				if (isHashtable)
 					params.put$TK$TV(i, (Info[i] === true ? Boolean.TRUE
 							: Info[i] === false ? Boolean.FALSE : Info[i]))
 				else
 					params[i] = Info[i];
 			}
+		}
 	}
 
 	// The original Jmol "applet" was created as an 
