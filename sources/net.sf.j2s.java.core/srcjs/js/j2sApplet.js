@@ -2287,10 +2287,10 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	};
 
 	J2S._setAppletParams = function(availableParams, params, Info, isHashtable) {
-		for ( var i in Info)
+		for (var i in Info) {
 			if (!availableParams
 					|| availableParams.indexOf(";" + i.toLowerCase() + ";") >= 0) {
-				if (Info[i] == null || i == "language"
+				if (Info[i] == null || lci == "language"
 						&& !J2S.featureDetection.supportsLocalization())
 					continue;
 				// params.put$TK$TV(i, (Info[i] === true ? Boolean.TRUE: Info[i]
@@ -2301,6 +2301,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				else
 					params[i] = Info[i];
 			}
+		}
 	}
 
 	// The original Jmol "applet" was created as an 

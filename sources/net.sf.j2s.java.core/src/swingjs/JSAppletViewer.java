@@ -262,7 +262,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 	@Override
 	public URL getDocumentBase() {
 		try {
-			return new URL((String) params.get("documentBase"));
+			return new URL((String) params.get("documentbase"));
 		} catch (MalformedURLException e) {
 			return null;
 		}
@@ -271,7 +271,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 	@Override
 	public URL getCodeBase() {
 		try {
-			return new URL((String) params.get("codePath"));
+			return new URL((String) params.get("codepath"));
 		} catch (MalformedURLException e) {
 			return null;
 		}
@@ -279,10 +279,9 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 
 	@Override
 	public String getParameter(String name) {
-		String s = (String) params.get(name);
-		System.out.println("get parameter: " + name + " = " + s);
-		return (s == null ? null : "" + s); // because it may not be a string in
-											// JavaScript if inherited from Info
+		String s = super.getParameter(name);
+		System.out.println("JSApp get parameter: " + name + " = " + s);
+		return s;
 	}
 
 	@Override
