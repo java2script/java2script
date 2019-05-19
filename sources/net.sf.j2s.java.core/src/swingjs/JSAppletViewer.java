@@ -506,8 +506,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 				Object args = params.get("args");
 				if (args instanceof String)
 					args = PT.split((String) args, " ");
-				((JSDummyApplet) applet).runMain(main, (String[]) args);
-				JSUtil.readyCallback(appletName, fullName, applet, this);
+				((JSDummyApplet) applet).runMain(this, (String[]) args);
 				break;
 			case APPLET_QUIT:
 				break;
@@ -535,7 +534,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 				throw new InstantiationException("\"code\" or \"main\" must be specified.");
 			}
 			if (code == null)
-				code = "swingjs.JSApplet";
+				code = "swingjs.JSDummyApplet";
 			else if (code.indexOf(".") < 0)
 				code = "_." + code;
 			top = applet = (JApplet) JSUtil.getInstance(code);

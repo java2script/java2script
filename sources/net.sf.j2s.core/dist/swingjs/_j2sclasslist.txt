@@ -172,6 +172,7 @@ javajs/util/JSThread.js
 javajs/util/Lst.js
 javajs/util/PT.js
 javajs/util/SB.js
+javax/net/ssl/HttpsUrlConnection.js
 javax/swing/AbstractAction.js
 javax/swing/AbstractButton.js
 javax/swing/AbstractListModel.js

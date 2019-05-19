@@ -9,7 +9,8 @@ import javax.swing.JApplet;
  */
 public class JSDummyApplet extends JApplet {
 
-	public Class<?> runMain(String className, String[] args) {
+	public Class<?> runMain(JSAppletViewer v, String[] args) {
+		String className = v.main;
 		Class<?> theClass = null;
 		try {
 			theClass = Class.forName(className);
@@ -24,11 +25,16 @@ public class JSDummyApplet extends JApplet {
 	  /**
 	   * @j2sNative
 	   * 
-	   * setTimeout(function(){theClass.$clazz$.main$SA.call(null, args || []);},1);
+	   * setTimeout(function(){
+	   *   theClass.$clazz$.main$SA.call(null, args || []);
+	   */
+	   JSUtil.readyCallback(v.appletName, v.fullName, v.applet, v);
+	   /**
+	   * @j2sNative
+	   *   
+	   *   },1);
 	   * 
 	   */
-		{
-		}
 		return theClass;			
 	}
 }
