@@ -1,9 +1,11 @@
 package swingjs.plaf;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Insets;
+import java.awt.JSComponent;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ComponentEvent;
@@ -185,9 +187,13 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 
 	 @Override
 	  protected boolean isFrameIndependent() {
-		 	if (isInternalFrame && frame.parent != null && frame.parent.getUIClassID() != "DesktopPaneUI")
+		 	JSComponent c = frame.parent;
+		 	if (isInternalFrame && (c == null || c != null 
+		 			&& c.getUIClassID() != "DesktopPaneUI"))
 		 		return false;
-		 	return (!isInternalFrame || embeddingNode == null || !doEmbed); 
+		 	boolean is = (isInternalFrame ? c == null 
+		 			|| c.getWidth() == 0 : !doEmbed);
+		 	return is;
 	  }
 
 
