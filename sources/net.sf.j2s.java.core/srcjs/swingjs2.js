@@ -12512,9 +12512,18 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			ev.preventDefault();
 		}
 
+		var newid = (J2S._mouseOwner && J2S._mouseOwner.isDragging ? 506 : 503);
+		// MouseEvent.MOUSE_DRAGGED : MouseEvent.MOUSE_MOVED
+
 		var isTouch = (ev.type == "touchmove");
-		if (isTouch && J2S._gestureUpdate(who, ev))
-			return false;
+		if (isTouch) {
+			if (J2S._gestureUpdate(who, ev))
+				return false;
+			if (newid == 506) {
+				ev.button = ev.originalEvent.button = 0;
+				ev.buttons = ev.originalEvent.buttons = 1;
+			}
+		}
 		var xym = getXY(who, ev, id);
 		if (!xym)
 			return false;
@@ -12528,9 +12537,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		var ui = ev.target["data-ui"];
 		var target = ev.target["data-component"];
 
-		who.applet._processEvent(J2S._mouseOwner && J2S._mouseOwner.isDragging ? 506 : 503, xym, ev,
-				who._frameViewer); // MouseEvent.MOUSE_DRAGGED :
-									// MouseEvent.MOUSE_MOVED
+		who.applet._processEvent(newid, xym, ev, who._frameViewer);
 		return !!(ui || target);
 	}
 
@@ -13661,6 +13668,52 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		return path;
 	}
 
+	J2S._newGrayScaleImage = function(context, image, width, height, grayBuffer) {
+		var c;
+	  image || (image = Jmol.$(context.canvas.applet, "image")[0]);
+		if (image == null) {
+			var appId = context.canvas.applet._id;
+	    var id = appId + "_imagediv";
+			c = document.createElement("canvas");
+			c.id = id;
+			c.style.width = width + "px";
+			c.style.height = height + "px";
+			c.width = width;
+			c.height = height;
+
+			var layer = document.getElementById(appId + "_contentLayer");
+			image = new Image();
+			image.canvas = c;
+			image.appId = appId;
+			image.id = appId + "_image";
+			image.layer = layer;
+			image.w = width;
+			image.h = height;
+			image.onload = function(e) {
+				try {
+				  URL.revokeObjectURL(image.src);
+				} catch (e) {}
+			};
+			var div = document.createElement("div");
+			image.div = div;
+			div.style.position="absolute";
+			layer.appendChild(div);
+			div.appendChild(image);
+		}
+		c = image.canvas.getContext("2d");
+		var imageData = c.getImageData(0, 0, width, height);
+		var buf = imageData.data;
+		var ng = grayBuffer.length;
+		var pt = 0;
+		for (var i = 0; i < ng; i++) {
+			buf[pt++] = buf[pt++] = buf[pt++] = grayBuffer[i];
+			buf[pt++] = 0xFF;
+		}
+		c.putImageData(imageData, 0, 0);
+		image.canvas.toBlob(function(blob){image.src = URL.createObjectURL(blob)});
+		return image;
+	}
+
 })(J2S);
 // j2sClazz.js 
 // NOTE: updates to this file should be copies to j2sjmol.js
@@ -13673,6 +13726,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // TODO: still a lot of references to window[...]
 
+// BH 2019.05.21 changes Clazz.isClassDefined to Clazz._isClassDefined for compression
 // BH 2019.05.13 fixes for Math.getExponent, Math.IEEERemainder, Array.equals(Object)
 // BH 2019.02.16 fixes typo in Integer.parseInt(s,radix)
 // BH 2019.02.07 fixes radix|10 should be radix||10  
@@ -14602,8 +14656,8 @@ var checkDeclared = function(name, type) {
   _declared[name] = type;
 }
 
-/* not clear that this needs to be public */
-Clazz.isClassDefined = function(clazzName) {
+/* public */
+Clazz._isClassDefined = function(clazzName) {
   if (!clazzName) 
     return false;    /* consider null or empty name as non-defined class */
   if (Clazz.allClasses[clazzName])
@@ -15874,8 +15928,8 @@ _Loader.requireLoaderByBase = function (base) {
 var isClassdefined;
 var definedClasses;
 
-if (self.Clazz && Clazz.isClassDefined) {
-  isClassDefined = Clazz.isClassDefined;
+if (self.Clazz && Clazz._isClassDefined) {
+  isClassDefined = Clazz._isClassDefined;
 } else {
   definedClasses = {};
   isClassDefined = function (clazzName) {
@@ -16168,7 +16222,7 @@ Clazz._4Name = function(clazzName, applet, state, asClazz, initialize, isQuiet) 
 	return getArrayClass(clazzName);
   if (clazzName.indexOf(".") < 0)
     clazzName = "java.lang." + clazzName;  
-  var isok = Clazz.isClassDefined(clazzName);
+  var isok = Clazz._isClassDefined(clazzName);
   if (isok && asClazz) {
     var cl1 = Clazz.allClasses[clazzName];
     cl1.$clinit$ && cl1.$clinit$();
@@ -16180,7 +16234,7 @@ Clazz._4Name = function(clazzName, applet, state, asClazz, initialize, isQuiet) 
       // BH we allow Java's java.swing.JTable.$BooleanRenderer as a stand-in for java.swing.JTable.BooleanRenderer
       // when the static nested class is created using declareType  
       name2 = clazzName.replace(/\$/g,".");
-      if (Clazz.isClassDefined(name2)) {
+      if (Clazz._isClassDefined(name2)) {
         clazzName = name2;
       } else {
         name2 = null;

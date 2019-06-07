@@ -9,6 +9,7 @@
 
 // TODO: still a lot of references to window[...]
 
+// BH 2019.05.21 changes Clazz.isClassDefined to Clazz._isClassDefined for compression
 // BH 2019.05.13 fixes for Math.getExponent, Math.IEEERemainder, Array.equals(Object)
 // BH 2019.02.16 fixes typo in Integer.parseInt(s,radix)
 // BH 2019.02.07 fixes radix|10 should be radix||10  
@@ -938,8 +939,8 @@ var checkDeclared = function(name, type) {
   _declared[name] = type;
 }
 
-/* not clear that this needs to be public */
-Clazz.isClassDefined = function(clazzName) {
+/* public */
+Clazz._isClassDefined = function(clazzName) {
   if (!clazzName) 
     return false;    /* consider null or empty name as non-defined class */
   if (Clazz.allClasses[clazzName])
@@ -2210,8 +2211,8 @@ _Loader.requireLoaderByBase = function (base) {
 var isClassdefined;
 var definedClasses;
 
-if (self.Clazz && Clazz.isClassDefined) {
-  isClassDefined = Clazz.isClassDefined;
+if (self.Clazz && Clazz._isClassDefined) {
+  isClassDefined = Clazz._isClassDefined;
 } else {
   definedClasses = {};
   isClassDefined = function (clazzName) {
@@ -2504,7 +2505,7 @@ Clazz._4Name = function(clazzName, applet, state, asClazz, initialize, isQuiet) 
 	return getArrayClass(clazzName);
   if (clazzName.indexOf(".") < 0)
     clazzName = "java.lang." + clazzName;  
-  var isok = Clazz.isClassDefined(clazzName);
+  var isok = Clazz._isClassDefined(clazzName);
   if (isok && asClazz) {
     var cl1 = Clazz.allClasses[clazzName];
     cl1.$clinit$ && cl1.$clinit$();
@@ -2516,7 +2517,7 @@ Clazz._4Name = function(clazzName, applet, state, asClazz, initialize, isQuiet) 
       // BH we allow Java's java.swing.JTable.$BooleanRenderer as a stand-in for java.swing.JTable.BooleanRenderer
       // when the static nested class is created using declareType  
       name2 = clazzName.replace(/\$/g,".");
-      if (Clazz.isClassDefined(name2)) {
+      if (Clazz._isClassDefined(name2)) {
         clazzName = name2;
       } else {
         name2 = null;

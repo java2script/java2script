@@ -9,6 +9,14 @@ import java.util.Hashtable;
 @SuppressWarnings("rawtypes")
 class Test_Class extends Test_ {
 	
+	private void test(String s) {
+		
+	}
+	
+	private void test(Integer i) {
+		
+	}
+	
 	int test1 = 0;
 	
 	static String s = "test";
