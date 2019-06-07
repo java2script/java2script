@@ -349,12 +349,10 @@ class Java2ScriptCompiler {
 		return val;
 	}
 
-	private void outputJavaScript(Java2ScriptVisitor visitor,
-			// DependencyASTVisitor dvisitor, CompilationUnit fRoot,
-			String j2sPath) {
+	private void outputJavaScript(Java2ScriptVisitor visitor, String j2sPath) {
 
 		// fragments[0] is package]
-		List<String> elements = visitor.getElementList();// dvisitor.getDependencyScript(visitor.getBuffer());
+		List<String> elements = visitor.getElementList();
 
 		// BH all compression is deprecated --- use Google Closure Compiler
 
@@ -376,10 +374,6 @@ class Java2ScriptCompiler {
 					throw new RuntimeException("Failed to create folder " + j2sPath); //$NON-NLS-1$
 				}
 			}
-			// InnerHotspotServer.addCompiledItem(packageName + "." +
-			// elementName);
-		} else {
-			// InnerHotspotServer.addCompiledItem(elementName);
 		}
 		writeToFile(new File(j2sPath, elementName + ".js"), js);
 	}
