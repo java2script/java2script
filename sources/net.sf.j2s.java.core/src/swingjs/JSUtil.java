@@ -281,6 +281,10 @@ public class JSUtil {
 		return s;
 	}
 
+	public static boolean isClassLoaded(String className) {
+		return (/** @j2sNative Clazz._isClassDefined(className) || */false);		
+	}
+	
 	static String processCSS(String css, String path) {
 		if (path != null && css.indexOf("images/") >= 0) {
 			path = path.substring(0, path.lastIndexOf("/") + 1) + "images/";
