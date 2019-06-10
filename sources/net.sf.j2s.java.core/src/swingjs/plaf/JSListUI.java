@@ -644,7 +644,7 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 					false, false);
 			lafDefaults.put(BASELINE_COMPONENT_KEY, baselineComponent);
 		}
-		baselineComponent.setFont(list.getFont());
+		baselineComponent.setFont(getFont());
 		// JList actually has much more complex behavior here.
 		// If rowHeight != -1 the rowHeight is either the max of all cell
 		// heights (layout orientation != VERTICAL), or is variable depending
@@ -951,7 +951,7 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 		boolean b = Boolean.TRUE.equals(list.getClientProperty("List.isFileList"));
 		if (b != isFileList) {
 			isFileList = b;
-			Font oldFont = list.getFont();
+			Font oldFont = getFont();
 			if (oldFont == null || oldFont instanceof UIResource) {
 				Font newFont = UIManager.getFont(b ? "FileChooser.listFont"
 						: "List.font");
@@ -972,7 +972,7 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 	 */
 	protected void uninstallDefaults() {
 		LookAndFeel.uninstallBorder(list);
-		if (list.getFont() instanceof UIResource) {
+		if (getFont() instanceof UIResource) {
 			list.setFont(null);
 		}
 		if (list.getForeground() instanceof UIResource) {
@@ -2997,7 +2997,7 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 			if (o instanceof Component) {
 				w += ((Component) o).getPreferredSize().width;
 			} else if (o != null) {
-				int d = list.getFontMetrics(list.getFont()).stringWidth(o.toString());
+				int d = list.getFontMetrics(getFont()).stringWidth(o.toString());
 				if (d > w)
 					w = d;
 			}
@@ -3014,7 +3014,7 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 		int h = 4;
 		for (int i = 0; i < rows; i++)
 			h += getRowHeight(i);
-		return new Dimension(list.getFont().getSize() * 10, h); 
+		return new Dimension(getFont().getSize() * 10, h); 
 	}
 
 
