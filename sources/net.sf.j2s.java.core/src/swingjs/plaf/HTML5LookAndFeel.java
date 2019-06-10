@@ -572,15 +572,15 @@ public class HTML5LookAndFeel extends LookAndFeel {
 	Object etchedBorder = new BorderUIResource.EtchedBorderUIResource();
 		Object loweredBevelBorder = new SwingLazyValue(
 		"javax.swing.plaf.BorderUIResource",
-		"getLoweredBevelBorderUIResource$");
+		"getLoweredBevelBorderUIResource");
 		//
 		// Object popupMenuBorder = new SwingLazyValue(
 		// "javax.swing.plaf.basic.BasicBorders",
-		// "getInternalFrameBorder$");
+		// "getInternalFrameBorder");
 		//
 		 Object blackLineBorder = new SwingLazyValue(
 		 "javax.swing.plaf.BorderUIResource",
-		 "getBlackLineBorderUIResource$");
+		 "getBlackLineBorderUIResource");
 		// Object focusCellHighlightBorder = new SwingLazyValue(
 		// "javax.swing.plaf.BorderUIResource$LineBorderUIResource",
 		// null,
@@ -605,17 +605,17 @@ public class HTML5LookAndFeel extends LookAndFeel {
 	        Object buttonBorder =
 	                new SwingLazyValue(
 	                                "javax.swing.plaf.basic.BasicBorders",
-	                                "getButtonBorder$");
+	                                "getButtonBorder");
 
 	            Object buttonToggleBorder =
 	                new SwingLazyValue(
 	                                "javax.swing.plaf.basic.BasicBorders",
-	                                "getToggleButtonBorder$");
+	                                "getToggleButtonBorder");
 
 	            Object radioButtonBorder =
 	                new SwingLazyValue(
 	                                "javax.swing.plaf.basic.BasicBorders",
-	                                "getRadioButtonBorder$");
+	                                "getRadioButtonBorder");
 
 		//
 //		Object buttonToggleBorder = buttonBorder;//new SwingLazyValue("javax.swing.plaf.basic.BasicBorders", "getToggleButtonBorder");
