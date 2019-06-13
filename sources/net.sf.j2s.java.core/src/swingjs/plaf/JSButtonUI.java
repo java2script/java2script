@@ -92,6 +92,7 @@ public class JSButtonUI extends JSLightweightUI {
 		if (domNode == null) {
 			setDoPropagate();
 			domNode = enableNode = buttonNode = newDOMObject("button", id + "_dom", "type", "button");
+			//DOMNode.setStyles(domNode,"transform","translateY(0.5px)translateX(0.5px)");
 			isFocusable();
 			setDataFocusComponent(focusNode);
 			DOMNode.setPositionAbsolute(domNode);

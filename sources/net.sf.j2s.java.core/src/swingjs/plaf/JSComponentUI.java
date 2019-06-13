@@ -1311,7 +1311,7 @@ public class JSComponentUI extends ComponentUI
 	 * 
 	 */
 	@SuppressWarnings("unused")
-	private boolean layingOut;
+	protected boolean layingOut;
 
 	/**
 	 * has been disposed; will need to reattach it if it ever becomes visible again.
@@ -1456,12 +1456,12 @@ public class JSComponentUI extends ComponentUI
 		System.out.println(DOMNode.getAttr(d, "outerHTML"));
 	}
 
-	protected static void vCenter(DOMNode obj, int offset, float scale) {
-		DOMNode.setStyles(obj, "top", "50%", "transform", 
-				(scale > 0 ? "scale(" + scale + "," + scale + ")" : "")
-				+"translateY(" + offset + "%)");
-	}
-
+//	protected static void vCenter(DOMNode obj, int offset, float scale) {
+//		DOMNode.setStyles(obj, "top", "50%", "transform", 
+//				(scale > 0 ? "scale(" + scale + "," + scale + ")" : "")
+//				+"translateY(" + offset + "%)");
+//	}
+//
 	/**
 	 * overloaded to allow panel and radiobutton to handle slightly differently
 	 * 
@@ -1724,24 +1724,6 @@ public class JSComponentUI extends ComponentUI
 		return true;
 	}
 
-	private void setOuterLocationFromComponent() {
-		// In SwingJS we just use the "local" lightweight location
-		// for all components, not the native adjusted one, because
-		// we maintain the hierarchy of the divs. I think this is
-		// saying that everything is basically heavyweight. It
-		// "paints" itself.
-
-		if (outerNode != null && !isMenuItem) {
-			// Considering the possibility of the parent being created
-			// before children are formed. So here we can add them later.
-			if (parent == null && jc.getParent() != null && (parent = (JSComponentUI) jc.getParent().getUI()) != null
-					&& parent.outerNode != null)
-				DOMNode.appendChildSafely(parent.outerNode, outerNode);
-			DOMNode.setPositionAbsolute(outerNode);
-			DOMNode.setStyles(outerNode, "left", (x = c.getX()) + "px", "top", (y = c.getY()) + "px");
-		}
-	}
-
 	protected Component[] getChildren() {
 		// but see JSMenuUI and JTableUI
 		return JSComponent.秘getChildArray(jc);
@@ -1804,7 +1786,8 @@ public class JSComponentUI extends ComponentUI
 	 * @return
 	 */
 	public boolean doPaintBackground() {
-		return !backgroundPainted && c.isOpaque() && allowPaintedBackground;
+		return( //NO! 6/10/2019 !backgroundPainted && 
+				c.isOpaque() && allowPaintedBackground);
 	}
 	
 	/**
@@ -2154,6 +2137,24 @@ public class JSComponentUI extends ComponentUI
 		}
 	}
 
+	private void setOuterLocationFromComponent() {
+		// In SwingJS we just use the "local" lightweight location
+		// for all components, not the native adjusted one, because
+		// we maintain the hierarchy of the divs. I think this is
+		// saying that everything is basically heavyweight. It
+		// "paints" itself.
+
+		if (outerNode != null && !isMenuItem) {
+			// Considering the possibility of the parent being created
+			// before children are formed. So here we can add them later.
+			if (parent == null && jc.getParent() != null && (parent = (JSComponentUI) jc.getParent().getUI()) != null
+					&& parent.outerNode != null)
+				DOMNode.appendChildSafely(parent.outerNode, outerNode);
+			DOMNode.setPositionAbsolute(outerNode);
+			DOMNode.setStyles(outerNode, "left", (x = c.getX()) + "px", "top", (y = c.getY()) + "px");
+		}
+	}
+
 	private void setSizeFromComponent(int width, int height, int op) {
 		// allow for special adjustments
 		// currently MenuItem, TextField, and TextArea
@@ -2161,9 +2162,6 @@ public class JSComponentUI extends ComponentUI
 		// if (this.width != width || this.height != height) {
 		this.width = width;
 		this.height = height;
-		if (debugging)
-			System.out.println(id + " setBounds " + x + " " + y + " " + this.width + " " + this.height + " op=" + op
-					+ " createDOM?" + (domNode == null));
 		if (domNode == null)
 			updateDOMNode();
 		setJSDimensions(width + size.width, height + size.height);
@@ -2172,16 +2170,13 @@ public class JSComponentUI extends ComponentUI
 
 	protected void setJSDimensions(int width, int height) {
 		if (jsActualWidth > 0)
-			width = jsActualWidth;
+			width = jsActualWidth; // list only
 		if (jsActualHeight > 0)
-			height = jsActualHeight;
+			height = jsActualHeight; // list only
 		DOMNode.setSize(domNode, width, height);
 		if (outerNode != null) {
 			DOMNode.setSize(outerNode, width, height);
 		}
-//		if (menuAnchorNode != null) {
-//			DOMNode.setSize(menuAnchorNode, width, height);
-//		}
 	}
 
 	protected void setInnerComponentBounds(int width, int height) {
@@ -2514,12 +2509,9 @@ public class JSComponentUI extends ComponentUI
 
 			// simple totally centered label or button
 			// can't have width or height here --- let the browser figure that out
-			DOMNode.setStyles(centeringNode, "width", null, "top", "50%", "left", "50%", "transform",
-					"translateX(-50%)translateY(-50%)", "position", "absolute");
-			DOMNode.setStyles(iconNode, "top", "50%", "left", "50%", "transform", "translateX(-50%)translateY(-50%)",
-					"position", "absolute");
-			DOMNode.setStyles(textNode, "top", "50%", "left", "50%", "transform", "translateX(-50%)translateY(-50%)",
-					"position", "absolute");
+			fullyCenter(centeringNode, true);
+			fullyCenter(iconNode, false);
+			fullyCenter(textNode, false);
 		} else {
 
 			DOMNode.setStyles(iconNode, "position", "absolute", "top", null, "left", null, "transform", null);
@@ -2640,6 +2632,15 @@ public class JSComponentUI extends ComponentUI
 		if (cellComponent != null)
 			updateCellNode();
 	}
+
+	protected void fullyCenter(DOMNode node, boolean isCtr) {
+		if (isLabel)
+			DOMNode.setStyles(node, "width", null, "top", "50%", "left", "50%", "transform",
+				"translateX(-50%)translateY(-50%)translateY(0.5px)translateX(0.5px)", "position", "absolute");
+		else
+			DOMNode.setStyles(node, "width", null, "top", null, "left", null, "transform", null, "position", null, "height", null);
+	}
+
 
 	private void updateCellNode() {
 		// could be editor or cell
@@ -2821,7 +2822,7 @@ public class JSComponentUI extends ComponentUI
 		setBackgroundFor(domNode, c);
 	}
 	
-	private void setForegroundFor(DOMNode node, Color color) {
+	protected void setForegroundFor(DOMNode node, Color color) {
 		if (node != null)
 			DOMNode.setStyles(node, "color",
 					(color == null ? "rgba(0,0,0,0)" : JSToolkit.getCSSColor(color == null ? Color.black : color)));
