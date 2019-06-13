@@ -162,7 +162,7 @@ public class JSGraphics2D implements
 		if (!inPath) {
 			if (x0 == x1 && y0 == y1) {
 				// meaning is to draw a point
-				fillRect(x0, y0, 1, 1);
+				ctx.fillRect(x0, y0, 1, 1);
 				return;
 			}
 			doStroke(true);
