@@ -4347,7 +4347,7 @@ public abstract class JComponent extends Container {
 			return;
 		}
 
-		while (!((JComponent) c).isOpaque()) {
+		while (!((JSComponent)c).canPaintImmediately()) {
 			parent = c.getParent();
 			if (parent != null) {
 				x += c.getX();

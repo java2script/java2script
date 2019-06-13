@@ -330,6 +330,8 @@ public class JLabel extends JComponent implements SwingConstants/*, Accessible*/
     public void setIcon(Icon icon) {
         Icon oldValue = defaultIcon;
         defaultIcon = icon;
+        if (defaultIcon != null)
+        	秘paintOverridden = 1;
 
         /* If the default icon has really changed and we had
          * generated the disabled icon for this component

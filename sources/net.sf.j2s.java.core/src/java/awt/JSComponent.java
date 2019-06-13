@@ -45,6 +45,7 @@ import swingjs.JSAppletThread;
 import swingjs.JSAppletViewer;
 import swingjs.JSFrameViewer;
 import swingjs.JSGraphics2D;
+import swingjs.JSUtil;
 import swingjs.api.js.HTML5Canvas;
 import swingjs.plaf.JSComponentUI;
 
@@ -523,6 +524,38 @@ public abstract class JSComponent extends Component {
     final public boolean 秘isFocusSetAndEnabled() {
         return 秘isFocusableSet && isFocusable();
     }
+
+    /**
+     * will be set to 1 if paint(graphics) is found to be overridden, signally that
+     * we can't depend upon this component to be drawn by itself; JLabel will
+     * also set this to 1 if there there is an icon
+     * 
+     */
+    protected int 秘paintOverridden = 0;
+
+	/**
+	 * A component in SwingJS can paint immediately if it is opaque (as in Java) or
+	 * if its paint(Graphics) method is not overridden. Note that AWT Applet and Panel 
+	 * do override paint(graphics)
+	 * 
+	 * @return
+	 */
+	public boolean canPaintImmediately() {
+		if (isOpaque())
+			return true;
+		if (秘paintOverridden == 0) {
+			if (((Container) this).getComponentCount() != 0) {
+				秘paintOverridden = -1;
+			} else {
+				Object f = JSUtil.getJ2SAlias(this, "paint$java_awt_Graphics");
+				秘paintOverridden = (JSUtil.isOverridden(f, JComponent.class) ? 1 : -1);
+			}
+		}
+		// TODO -- still need to set RepaintManager so that
+		// objects with the same paintable root can be grouped together.
+		
+		return (秘paintOverridden == -1);
+	}
 
 
 
