@@ -40,7 +40,7 @@ public class ScrollPane extends JScrollPane {
 
 	public ScrollPane() {
         this(SCROLLBARS_AS_NEEDED);
-	}
+    }
 
 	public ScrollPane(int scrollbars) {
 		super();
@@ -56,7 +56,8 @@ public class ScrollPane extends JScrollPane {
 		case SCROLLBARS_AS_NEEDED:
 			break;
 		}
-		setBorder(new LineBorder(Color.black));
+        setBackground(Color.LIGHT_GRAY); // fills in around the scrollbars
+        setOpaque(true);
 	}
 
 	@Override
