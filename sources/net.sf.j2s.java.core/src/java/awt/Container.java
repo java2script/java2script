@@ -367,6 +367,13 @@ public class Container extends JSComponent {
     	return  (i == null ? NULL_INSETS : i);
     }
 
+    public Insets 秘getInsetsC() {
+    	// in SwingJS, we do not clone. Everything is a ContainerPeer.
+    	// it is inconsistent with other classes that this would need cloning.
+    	Insets i = (peer == null ? null : ((ContainerPeer) peer).getInsets());
+    	return  (i == null ? NULL_INSETS : i);
+    }
+
     @Deprecated
     public Insets insets() {
     	return getInsets();

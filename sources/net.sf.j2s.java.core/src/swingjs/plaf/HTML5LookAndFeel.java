@@ -778,11 +778,11 @@ public class HTML5LookAndFeel extends LookAndFeel {
 
 		// *** Text value objects
 
-		// Object textFieldBorder =
-		// new SwingLazyValue(
-		// "javax.swing.plaf.basic.BasicBorders",
-		// "getTextFieldBorder");
-		//
+		 Object textFieldBorder = // used for scrollpane
+		 new SwingLazyValue(
+		 "javax.swing.plaf.basic.BasicBorders",
+		 "getTextFieldBorder");
+		
 		Object editorMargin = threeInsets;
 
 		// Object caretBlinkRate = fiveHundred;
@@ -1448,7 +1448,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// "ScrollPane.font", dialogPlain12,
 				"ScrollPane.background", control,
 				"ScrollPane.foreground", controlText,
-				// "ScrollPane.border", textFieldBorder,
+				"ScrollPane.border", textFieldBorder,
 				// "ScrollPane.viewportBorder", null,
 				// "ScrollPane.ancestorInputMap",
 				// new UIDefaults.LazyInputMap(new Object[] {
@@ -1789,10 +1789,10 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				window,
 				"TextField.foreground",
 				textText,
-				// "TextField.shadow", controlShadow,
-				// "TextField.darkShadow", controlDkShadow,
-				// "TextField.light", controlHighlight,
-				// "TextField.highlight", controlLtHighlight,
+				 "TextField.shadow", controlShadow,
+				 "TextField.darkShadow", controlDkShadow,
+				 "TextField.light", controlHighlight,
+				 "TextField.highlight", controlLtHighlight,
 				"TextField.inactiveForeground", disabledTextColor,
 				"TextField.inactiveBackground", control,
 				// "TextField.selectionBackground", textHighlight,

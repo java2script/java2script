@@ -3,6 +3,8 @@ package swingjs.a2s;
 import java.awt.Adjustable;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.Point;
 
 import javax.swing.JScrollPane;
@@ -94,5 +96,20 @@ public class ScrollPane extends JScrollPane {
 					getVerticalScrollBar().getValue());
 		}
 	}
+
+    /**
+     * Returns the current size of the scroll pane's view port.
+     * @return the size of the view port in pixels
+     */
+    public Dimension getViewportSize() {
+        Insets i = getInsets();
+        return new Dimension(width - i.right - i.left,
+                             height - i.top - i.bottom);
+    }
+
+    @Override
+	public Insets getInsets() {
+       return 秘getInsetsC();
+    }
 
 }

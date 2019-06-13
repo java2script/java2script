@@ -58,7 +58,6 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 	@SuppressWarnings("unused")
 	@Override
 	public DOMNode updateDOMNode() {
-		scrollpane = (JScrollPane) jc;
 		isContainer = true;
 		if (domNode == null) {
 			domNode = newDOMObject("div", id);
@@ -271,7 +270,6 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 	@Override
 	public void installUI(JComponent jc) {
 		scrollpane = (JScrollPane) jc;
-
 		installDefaults(scrollpane);
 		installListeners(scrollpane);
 		installKeyboardActions(scrollpane);
@@ -569,6 +567,19 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 		return -1;
 	}
 
+	@Override
+	public Insets getInsets() {
+		// AWT only here. 
+		Insets i = scrollpane.getBorder().getBorderInsets(scrollpane);
+		if (!layingOut) {
+			// AWT includes scrollbars in visibility, but the layout manager does not
+			i.right += scrollpane.getVerticalScrollBar().isVisible() ? 12 : 0;
+			i.bottom += scrollpane.getHorizontalScrollBar().isVisible() ? 12 : 0;
+		}
+		return i;
+	}
+
+
 	/**
 	 * Returns an enum indicating how the baseline of the component changes as the
 	 * size changes.
@@ -833,30 +844,30 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			JScrollPane scrollPane = (JScrollPane) e.getSource();
-			boolean ltr = scrollPane.getComponentOrientation().isLeftToRight();
+			JScrollPane scrollpane = (JScrollPane) e.getSource();
+			boolean ltr = scrollpane.getComponentOrientation().isLeftToRight();
 			String key = getName();
 
 			if (key == SCROLL_UP) {
-				scroll(scrollPane, SwingConstants.VERTICAL, -1, true);
+				scroll(scrollpane, SwingConstants.VERTICAL, -1, true);
 			} else if (key == SCROLL_DOWN) {
-				scroll(scrollPane, SwingConstants.VERTICAL, 1, true);
+				scroll(scrollpane, SwingConstants.VERTICAL, 1, true);
 			} else if (key == SCROLL_HOME) {
-				scrollHome(scrollPane);
+				scrollHome(scrollpane);
 			} else if (key == SCROLL_END) {
-				scrollEnd(scrollPane);
+				scrollEnd(scrollpane);
 			} else if (key == UNIT_SCROLL_UP) {
-				scroll(scrollPane, SwingConstants.VERTICAL, -1, false);
+				scroll(scrollpane, SwingConstants.VERTICAL, -1, false);
 			} else if (key == UNIT_SCROLL_DOWN) {
-				scroll(scrollPane, SwingConstants.VERTICAL, 1, false);
+				scroll(scrollpane, SwingConstants.VERTICAL, 1, false);
 			} else if (key == SCROLL_LEFT) {
-				scroll(scrollPane, SwingConstants.HORIZONTAL, ltr ? -1 : 1, true);
+				scroll(scrollpane, SwingConstants.HORIZONTAL, ltr ? -1 : 1, true);
 			} else if (key == SCROLL_RIGHT) {
-				scroll(scrollPane, SwingConstants.HORIZONTAL, ltr ? 1 : -1, true);
+				scroll(scrollpane, SwingConstants.HORIZONTAL, ltr ? 1 : -1, true);
 			} else if (key == UNIT_SCROLL_LEFT) {
-				scroll(scrollPane, SwingConstants.HORIZONTAL, ltr ? -1 : 1, false);
+				scroll(scrollpane, SwingConstants.HORIZONTAL, ltr ? -1 : 1, false);
 			} else if (key == UNIT_SCROLL_RIGHT) {
-				scroll(scrollPane, SwingConstants.HORIZONTAL, ltr ? 1 : -1, false);
+				scroll(scrollpane, SwingConstants.HORIZONTAL, ltr ? 1 : -1, false);
 			}
 		}
 

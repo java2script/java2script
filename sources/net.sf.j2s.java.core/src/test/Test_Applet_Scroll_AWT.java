@@ -16,6 +16,7 @@ import java.awt.Button;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.Label;
 import java.awt.Panel;
 import java.awt.ScrollPane;
@@ -59,6 +60,7 @@ public class Test_Applet_Scroll_AWT extends Applet {
 	}
 	static DecimalFormat df = new DecimalFormat("0.00");
 	boolean preferred = true;
+	private ScrollPane mysp;
 
 	void setSize(Component c, int x, int y) {
 		if (preferred)
@@ -243,6 +245,11 @@ public class Test_Applet_Scroll_AWT extends Applet {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				Insets i = mysp.getInsets();
+				System.out.println("checking sp " + mysp.getViewportSize());
+				System.out.println("checking sp " + mysp.getInsets() + "\n" + mysp.getHorizontalScrollBar().isVisible()
+				 + mysp.getVerticalScrollBar().isVisible());
+				
 
 				System.out.println("PANEL clicked " + e.getClickCount());
 				
@@ -300,9 +307,11 @@ public class Test_Applet_Scroll_AWT extends Applet {
 		sp.setBackground(Color.yellow);
 
 		sp.setSize(500, 250);
+		
 		Dimension d = sp.getPreferredSize();
 		add(sp);
 
+		mysp = sp;
 		
 		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200);
 
