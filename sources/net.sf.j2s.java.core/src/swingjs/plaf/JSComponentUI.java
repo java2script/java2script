@@ -1116,7 +1116,7 @@ public class JSComponentUI extends ComponentUI
 	 * 
 	 */
 	public void setTainted() {
-		isTainted = true;
+		setTainted(true);
 	}
 
 	/**
@@ -1775,7 +1775,8 @@ public class JSComponentUI extends ComponentUI
 			System.out.println("drawing " + c.getWidth() + " " + c.getHeight());
 		}
 		setHTMLElement();
-		setAlignment();
+		if (allowTextAlignment && centeringNode != null)
+			setAlignments((AbstractButton)jc, false);
 		paint(g, c);
 	}
 
@@ -2342,11 +2343,6 @@ public class JSComponentUI extends ComponentUI
 		iconR.x = iconR.y = textR.x = textR.y = 0;
 	}
 	
-	protected void setAlignment() {
-		if (allowTextAlignment && centeringNode != null)
-			setAlignments((AbstractButton)jc, false);
-	}
-
 	protected void addCentering(DOMNode node) {
 		if (iconNode == null)
 			iconNode = newDOMObject("span", id + "_icon");
@@ -2634,11 +2630,11 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	protected void fullyCenter(DOMNode node, boolean isCtr) {
-		if (isLabel)
+//		if (isLabel)
 			DOMNode.setStyles(node, "width", null, "top", "50%", "left", "50%", "transform",
 				"translateX(-50%)translateY(-50%)translateY(0.5px)translateX(0.5px)", "position", "absolute");
-		else
-			DOMNode.setStyles(node, "width", null, "top", null, "left", null, "transform", null, "position", null, "height", null);
+// no, this causes the label to be offset too much
+	//		DOMNode.setStyles(node, "width", null, "top", null, "left", null, "transform", null, "position", null, "height", null);
 	}
 
 
