@@ -4,7 +4,8 @@ import java.awt.Component;
 import java.awt.GraphicsConfiguration;
 import java.awt.MenuBar;
 import java.awt.MenuComponent;
-//import java.awt.peer.FramePeer;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
@@ -38,6 +39,14 @@ public class Frame extends JFrame implements A2SContainer {
 		listener = new A2SListener();
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		Util.setAWTWindowDefaults(this);
+		addWindowListener(new WindowAdapter() {
+
+		    @Override
+			public void windowOpened(WindowEvent e) {
+		    	repaint();
+		    }
+
+		});
 	}
 
 
@@ -78,5 +87,8 @@ public class Frame extends JFrame implements A2SContainer {
             super.addNotify();
         }
     }
+
+
+
 
 }
