@@ -10663,7 +10663,7 @@ return jQuery;
 	};
 	// note - click is for dragging the resizer
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
-// j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
+﻿// j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
 // J2S._version set to "3.2.4.07" 2019.01.04; 2019.02.06
 
@@ -12987,7 +12987,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	J2S._jsSetPrototype = function(proto) {
 		proto._init = function() {
 			this._setupJS();
-			this._showInfo(true);
+			this._showInfo(!this.__Info.console);
 			if (this._disableInitialConsole)
 				this._showInfo(false);
 		};
