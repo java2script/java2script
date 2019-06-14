@@ -21,6 +21,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.plaf.UIResource;
 
 import sun.swing.DefaultLookup;
+import swingjs.JSGraphics2D;
 import swingjs.JSToolkit;
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
@@ -140,9 +141,14 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			return;
 		foreColor = s;
 		if (paintTicks) { 
+			
+			// but this is not persisting
+			
 			DOMNode.setStyles(jqSlider, "background-color",s);
-			String tickClass = "ui-j2sslider-tick-mark" + (isHoriz ? "-vert" : "-horiz");
-			$(domNode).find("." + tickClass).css("background-color",  s);
+			String tickClass = "ui-j2sslider-tick-mark-" + (isHoriz ? "vert" : "horiz");
+			
+			/**@j2sNative xxt = this; xxs = s; xxc = tickClass;debugger*/
+			$(domNode).find("." + tickClass).css(/** @j2sNative 1?{backgroundColor:s} :*/"","");
 		}
 		if (paintLabels) {
 			$(domNode).find("SPAN").css("color", s);
@@ -151,22 +157,34 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 
 
 	@Override
-	public void setBackground(Color background) {
-		if (awtPeerBG != null 
-				// not for scrollbar && !jc.isDisplayable() 
-				&& !awtPeerBG.equals(background))
+	public void setBackground(Color c) {
+		if (awtPeerBG != null
+				// not for scrollbar && !jc.isDisplayable()
+				&& !awtPeerBG.equals(c))
 			awtPeerBG = null;
-		if (isScrollBar ? background != null : jc.isOpaque()) {
-			DOMNode node = (myScrollPaneUI == null && !paintTicks ? jqSlider : sliderTrack);
-			DOMNode.setStyles(node, "background-color", JSToolkit.getCSSColor(background));
-			if (isScrollBar && Color.WHITE.equals(background))
-				DOMNode.setStyles(sliderHandle, "background", "#ccc");
+		if (isScrollBar ? c != null : jc.isOpaque()) {
+
+			if (paintTicks) {
+				// they are painted with FOREground
+			} else {
+				DOMNode node = (myScrollPaneUI == null && !paintTicks ? jqSlider : sliderTrack);
+				DOMNode.setStyles(node, "background-color", JSToolkit.getCSSColor(c));
+				if (isScrollBar && Color.WHITE.equals(c))
+					DOMNode.setStyles(sliderHandle, "background", "#ccc");
+			}
 
 		}
+		if (!isScrollBar)
+			setBackgroundDOM(outerNode, getBackground());
 	}	
+	
+	@Override
+	public void paintBackground(JSGraphics2D g) {
+		// n/a
+	}
 
 	@Override
-	protected void setBackgroundFor(DOMNode node, Color color) {
+	protected void setBackgroundImpl(Color color) {
 		setBackground(color);
 	}
 
@@ -278,6 +296,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	 * @param isNew
 	 */
 	private void setup(boolean isNew) {
+		
 		sliderTrack = DOMNode.lastChild(domNode);
 		sliderHandle = DOMNode.firstChild(sliderTrack);
 		// mark the handle and track with the "swingjs-ui" class

@@ -14,14 +14,16 @@ public class Canvas extends Panel {
 
 	public Canvas() {
 		super();
-		秘alwaysPaint = true;
+		秘setPaintsSelf();
 	}
 
+	@Override
 	public Dimension getPreferredSize() {
 		// must bypass JComponent here because we subclass Panel
 		return preferredSize();
 	}
 
+	@Override
 	public Dimension preferredSize() {
 		// must bypass JComponent here because we subclass Panel
 		return prefSizeComp();

@@ -2697,7 +2697,9 @@ public abstract class Component implements ImageObserver/*
 
 	/**
 	 * 
-	 * For SwingJS, we have the graphics without needing to get it from a peer.
+	 * Unused in SwingJS. For SwingJS, we have the graphics without needing to get it from a peer.
+	 * @see JSComponent.getGraphics
+	 * 
 	 * Creates a graphics context for this component. This method will return
 	 * <code>null</code> if this component is currently not displayable.
 	 * 
@@ -8307,5 +8309,6 @@ public abstract class Component implements ImageObserver/*
 
 		return doesClassImplement(obj.getClass(), interfaceName);
 	}
+
 
 }

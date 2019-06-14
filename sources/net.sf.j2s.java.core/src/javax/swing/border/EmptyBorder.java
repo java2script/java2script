@@ -75,13 +75,14 @@ public class EmptyBorder extends AbstractBorder
         this.left = borderInsets.left;
     }
 
-    /**
-     * Does no drawing by default.
-     */
-    @Override
-		public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-    }
-
+// SwingJS -- important not to override, as we check that in JSComponent
+//    /**
+//     * Does no drawing by default.
+//     */
+//    @Override
+//		public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+//    }
+//
     /**
      * Returns the insets of the border.
      * @param c the component for which this border insets value applies

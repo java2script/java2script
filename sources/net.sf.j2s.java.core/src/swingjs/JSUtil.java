@@ -610,8 +610,8 @@ public class JSUtil {
 	 * @param name the method's fully qualified name, such as paint$java_awt_Graphics
 	 * @return the JavaScript function backing this method name
 	 */
-	public static Object getJ2SAlias(Component c, String name) {
-		return (/** @j2sNative c[name] || */null);
+	public static Object getJ2SAlias(Object c, String name) {
+		return (/** @j2sNative c && c[name] || */null);
 	}
 
 	/**
@@ -624,8 +624,8 @@ public class JSUtil {
 		return (/** @j2sNative f && f.exClazz != cl.$clazz$ || */false);
 	}
 
-	public static boolean isOverridden(Component c, String name, Class<?> cl) {
-		return isOverridden(getJ2SAlias(c, name), cl);
+	public static boolean isOverridden(Object c, String name, Class<?> cl) {
+		return c != null && isOverridden(getJ2SAlias(c, name), cl);
 	}
 
 }

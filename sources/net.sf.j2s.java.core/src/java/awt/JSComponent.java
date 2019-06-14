@@ -37,6 +37,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.RootPaneContainer;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
+import javax.swing.border.AbstractBorder;
+import javax.swing.border.Border;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.plaf.UIResource;
@@ -93,7 +95,46 @@ public abstract class JSComponent extends Component {
 	   public Component 秘getWrap();
 
 	}
-	/**
+
+	protected boolean 秘isAppletFrame;
+	public boolean 秘isFramedApplet;
+
+	public String 秘htmlName;
+
+	protected int 秘num;
+	private static int 秘incr;
+	private Insets 秘tempInsets;
+	public JSGraphics2D 秘gtemp; // indicates that we are painting, so that g.setBackground() should also be set 
+
+	public boolean 秘isRootPane, 秘isContentPane;
+	public JSAppletViewer 秘appletViewer = ((JSAppletThread) Thread.currentThread()).秘appletViewer;
+	private JSFrameViewer 秘frameViewer, 秘topFrameViewer;
+	public HTML5Canvas 秘canvas;
+	public ComponentUI ui; // from JComponent
+
+	private String 秘uiClassID;
+
+	Boolean 秘peerVis;
+
+	protected Border 秘border; // from private JComponent field
+
+    public final static int PAINTS_SELF_NO = -1;
+    public final static int PAINTS_SELF_YES = 1;
+    public final static int PAINTS_SELF_UNKNOWN = 0;
+
+    /**
+     * will be set to 1 if paint(graphics) is found to be overridden, signally that
+     * we can't depend upon this component to be drawn by itself; JLabel will
+     * also set this to 1 if there there is an icon
+     * 
+     */
+    private int 秘iPaintMyself = PAINTS_SELF_UNKNOWN;
+
+    // trying to replace these two:
+	// public boolean 秘isBackgroundPainted;
+	// protected boolean 秘alwaysPaint; // in AWT canvas
+
+    /**
 	 * overridden in Applet
 	 * 
 	 * SwingJS Applet repurposes resize(width, height) to call
@@ -105,9 +146,7 @@ public abstract class JSComponent extends Component {
 	 * @param width
 	 * @param height
 	 */
-	@SuppressWarnings("deprecation")
 	public void 秘resizeOriginal(int width, int height) {
-		// o
 		resize(width, height);
 	}
 
@@ -144,45 +183,6 @@ public abstract class JSComponent extends Component {
 	 * used by SwingJS
 	 * 
 	 */
-
-	protected boolean 秘isAppletFrame;
-	public boolean 秘isFramedApplet;
-
-	public String 秘htmlName;
-
-	protected int 秘num;
-	private static int 秘incr;
-	public boolean 秘isBackgroundPainted;
-	protected boolean 秘alwaysPaint;
-	private Insets 秘tempInsets;
-	public JSGraphics2D 秘gtemp; // indicates that we are painting, so that g.setBackground() should also be set 
-
-
-	public boolean 秘isRootPane, 秘isContentPane;
-	public JSAppletViewer 秘appletViewer = ((JSAppletThread) Thread.currentThread()).秘appletViewer;
-	private JSFrameViewer 秘frameViewer, 秘topFrameViewer;
-	public HTML5Canvas 秘canvas;
-	public ComponentUI ui; // from JComponent
-
-	private String 秘uiClassID;
-
-	Boolean 秘peerVis;
-
-	/**
-	 * not totally successful; triggered for images, background, and fillBox
-	 * 
-	 */
-
-	public boolean selfOrChildIsPainted() {
-		if (秘alwaysPaint || 秘isBackgroundPainted)
-			return true;
-		Component[] a = JSComponent.秘getChildArray((Container) this);
-		for (int i = ((Container) this).getComponentCount(); --i >= 0;)
-			if (((JSComponent) a[i]).selfOrChildIsPainted())
-				return true;
-		return false;
-	}
-
 
 	public JSComponent() {
 		super();
@@ -222,6 +222,13 @@ public abstract class JSComponent extends Component {
 		// if (g instanceof ConstrainableGraphics) {
 		// ((ConstrainableGraphics) g).constrain(x, y, width, height);
 		// } else {
+		// Check to see if the subclass is getting this graphics
+		// object directly, without using paint(Graphics).
+		if (!JComponent.isComponentObtainingGraphicsFrom(null) && !秘paintsSelf()) {
+			秘setPaintsSelf();
+			((JSComponentUI) ui).clearPaintPath();
+		}
+		
 		g.translate(x, (秘isContentPane ? 0 : y));
 		g.clipRect(0, 0, width, height); // BH changed 2018.12.05 was setClip
 		// }
@@ -325,41 +332,21 @@ public abstract class JSComponent extends Component {
 		return (/** @j2sNative g.mark$ ? g : */ null);
 	}
 
-	/**
-	 * This method is added to ensure that if a jpanel or other object's
-	 * background is painted to, that it becomes transparent -- since the actual
-	 * painting is not to this canvas but instead to the JRootPane canvas.
-	 *
-	 * @param jsg
-	 */
-	public void 秘checkBackgroundPainted(JSGraphics2D jsg, boolean init) {
-		if (jsg == null || init) {
-			秘isBackgroundPainted = false;
-			秘gtemp = jsg;
-			return;
-		}
-		秘gtemp = null;
-		秘isBackgroundPainted = 秘alwaysPaint || jsg.isBackgroundPainted();
-		if (秘isBackgroundPainted) {
-			((JSComponentUI) ui).setPainted(jsg);
-			// It's all one canvas, and it is behind the root pane (bad design?)
-			// so if it is painted, we should make the root pane transparent
-			((JSComponentUI) ((JComponent) this).getRootPane().getUI()).setPainted(jsg);
-		}
-	}
-
+	@SuppressWarnings("unused")
 	@Override
 	public boolean isBackgroundSet() {
 		return (background == null ? false 
 				: /** @j2sNative this.isAWT$ || */false ? !(background instanceof UIResource) : true);
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public boolean isForegroundSet() {
 		return (foreground == null ? false 
 				: /** @j2sNative this.isAWT$ || */false ? !(foreground instanceof UIResource) : true);
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public boolean isFontSet() {
 		return (font == null ? null : /** @j2sNative this.isAWT$ || */false ? !(font instanceof FontUIResource) : true);
@@ -464,6 +451,13 @@ public abstract class JSComponent extends Component {
 		秘checkBackgroundPainted(jcg, false);
 	}
 
+	public void 秘paintContainerBackgroundCheck(Graphics g) {
+		JSGraphics2D jcg = 秘getJSGraphic2D(g);
+		秘checkBackgroundPainted(jcg, true);
+		((Container) this).paintContainer(g);
+		秘checkBackgroundPainted(jcg, false);
+	}
+
 	@Override
 	public void addKeyListener(KeyListener l) {
 		super.addKeyListener(l);
@@ -525,38 +519,82 @@ public abstract class JSComponent extends Component {
         return 秘isFocusableSet && isFocusable();
     }
 
-    /**
-     * will be set to 1 if paint(graphics) is found to be overridden, signally that
-     * we can't depend upon this component to be drawn by itself; JLabel will
-     * also set this to 1 if there there is an icon
-     * 
-     */
-    protected int 秘paintOverridden = 0;
-
 	/**
-	 * A component in SwingJS can paint immediately if it is opaque (as in Java) or
-	 * if its paint(Graphics) method is not overridden. Note that AWT Applet and Panel 
-	 * do override paint(graphics)
+	 * This method is added to ensure that if a jpanel or other object's
+	 * background is painted to, that it becomes transparent -- since the actual
+	 * painting is not to this canvas but instead to the JRootPane canvas.
+	 *
+	 * @param jsg
+	 */
+	public void 秘checkBackgroundPainted(JSGraphics2D jsg, boolean init) {
+		if (jsg == null || init) {
+//			秘isBackgroundPainted = false;
+			秘gtemp = jsg;
+			((JSComponentUI) ui).paintBackground(jsg);
+			return;
+		}
+		秘gtemp = null;
+//		秘isBackgroundPainted = 秘alwaysPaint || jsg.isBackgroundPainted();
+//		if (秘isBackgroundPainted) {
+//			((JSComponentUI) ui).setPainted(jsg);
+//			// It's all one canvas, and it is behind the root pane (bad design?)
+//			// so if it is painted, we should make the root pane transparent
+//			((JSComponentUI) ((JComponent) this).getRootPane().getUI()).setPainted(jsg);
+//		}
+	}
+
+    public int 秘setPaintsSelf() {
+    	return 秘iPaintMyself = PAINTS_SELF_YES;
+    }
+    
+	/**
+	 * Used by:
+	 * 
+	 * JComponent to checked to see if a component in SwingJS can paint immediately
+	 * because it is opaque or DOES NOT paint itself;
+	 * 
+	 * JScrollPane to check if it needs to fire a repaint()
+	 * on the scrolled component; and 
+	 * 
+	 * JSComponentUI to check if it can use a CSS background
 	 * 
 	 * @return
 	 */
-	public boolean canPaintImmediately() {
-		if (isOpaque())
-			return true;
-		if (秘paintOverridden == 0) {
-			if (((Container) this).getComponentCount() != 0) {
-				秘paintOverridden = -1;
-			} else {
-				Object f = JSUtil.getJ2SAlias(this, "paint$java_awt_Graphics");
-				秘paintOverridden = (JSUtil.isOverridden(f, JComponent.class) ? 1 : -1);
-			}
+	public boolean 秘paintsSelf() {
+		if (秘iPaintMyself == PAINTS_SELF_UNKNOWN) {
+			// don't allow if not opaque and has components
+			// don't allow if JComponent.paint(Graphics) has been overridden
+			// don't allow if AbstractBorder.paintBorder(...) has been overridden
+			// unchecked here is if a class calls getGraphics outside of this context
+			秘iPaintMyself = (JSUtil.isOverridden(this, "paint$java_awt_Graphics", JComponent.class)
+					|| JSUtil.isOverridden(this, "paintComponent$java_awt_Graphics", JComponent.class)
+					|| JSUtil.isOverridden(this, "paintContainer$java_awt_Graphics", Container.class)
+					|| JSUtil.isOverridden(秘border, "paintBorder$java_awt_Component$java_awt_Graphics$I$I$I$I",
+							AbstractBorder.class) 
+					? 秘setPaintsSelf() : PAINTS_SELF_NO);
 		}
 		// TODO -- still need to set RepaintManager so that
 		// objects with the same paintable root can be grouped together.
-		
-		return (秘paintOverridden == -1);
+
+		return (秘iPaintMyself == PAINTS_SELF_YES);
 	}
 
+	/**
+	 * JScrollBar needs to know if we need to paint this component when it is scrolled
+	 * 
+	 */
 
+	public boolean 秘selfOrChildIsPainted() {
+		return 秘paintsSelf(); 
+	}
 
+//	private boolean childPaintsItself() {
+//		Component[] a = JSComponent.秘getChildArray((Container) this);
+//		for (int i = ((Container) this).getComponentCount(); --i >= 0;)
+//			if (((JSComponent) a[i]).秘selfOrChildIsPainted())
+//				return true;
+//		return false;
+//	}
+
+	
 }

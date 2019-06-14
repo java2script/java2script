@@ -196,7 +196,8 @@ public class JSComponentUI extends ComponentUI
 	
 	/**
 	 *  TableCellRenderers will not have parents; here we point to the table so that
-	 * we can send the coordinates to the retrieve the row and cell
+	 * we can send the coordinates to retrieve the row and cell and also set the 
+	 * background to transparent if need be.
 	 * 
 	 */
 	private JComponent targetParent;
@@ -1201,7 +1202,7 @@ public class JSComponentUI extends ComponentUI
 			 }
 			 return;
 		 }
-		setBackgroundFor(domNode, awtPeerBG = getBackground());
+		setBackgroundImpl(awtPeerBG = getBackground());
 		setForegroundFor(domNode, awtPeerFG = getForeground());
 		setFont(c.getFont());
 	}
@@ -1358,7 +1359,7 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected boolean allowPaintedBackground = true;
 
-	private boolean backgroundPainted;
+	//private boolean backgroundPainted;
 
 	/**
 	 * Label will render its image, drawing to the canvas; Button will not 
@@ -1658,7 +1659,7 @@ public class JSComponentUI extends ComponentUI
 			return (outerNode = DOMNode.createElement("div", "dummyFrame"));
 		}
 		updateDOMNode();
-		checkTransparent(domNode);
+		checkTransparent();
 		Component[] children = getChildren();
 		int n = getChildCount();
 
@@ -1769,43 +1770,33 @@ public class JSComponentUI extends ComponentUI
 		if (isUIDisabled)
 			return;
 		// called from JComponent.paintComponent
-		if (borderTest) {
-			g.setColor(Color.red);
-			g.drawRect(0, 0, c.getWidth(), c.getHeight());
-			System.out.println("drawing " + c.getWidth() + " " + c.getHeight());
-		}
+//		if (borderTest) {
+//			g.setColor(Color.red);
+//			g.drawRect(0, 0, c.getWidth(), c.getHeight());
+//			System.out.println("drawing " + c.getWidth() + " " + c.getHeight());
+//		}
 		setHTMLElement();
 		if (allowTextAlignment && centeringNode != null)
 			setAlignments((AbstractButton)jc, false);
 		paint(g, c);
 	}
 
-	/**
-	 * Even if opaque, do not paint the background for some components (JButton, 
-	 * JComboBox, JMenuItem, JEditorPanel, JTextArea, JTextField), as they
-	 * will be be given colored backgrounds themselves as HTML5 components. 
-	 * @return
-	 */
-	public boolean doPaintBackground() {
-		return( //NO! 6/10/2019 !backgroundPainted && 
-				c.isOpaque() && allowPaintedBackground);
-	}
 	
-	/**
-	 * This flag is set by border painting and background painting detection to
-	 * indicate that a cell renderer must do that painting.
-	 */
-	public void setPainted(Object g) {
-		if (g == null) {
-			// reset
-			backgroundPainted = false;
-			if (allowPaintedBackground)
-				DOMNode.setStyles(domNode, "background", null);
-		} else {
-			backgroundPainted = true;
-			setTransparent(domNode);
-		}
-	}
+//	/**
+//	 * This flag is set by border painting and background painting detection to
+//	 * indicate that a cell renderer must do that painting.
+//	 */
+//	public void setPainted(Object g) {
+//		if (g == null) {
+//			// reset
+//			backgroundPainted = false;
+//			if (allowPaintedBackground)
+//				DOMNode.setStyles(domNode, "background", null);
+//		} else {
+//			backgroundPainted = true;
+//			setTransparent(domNode);
+//		}
+//	}
 
 	/**
 	 * from ComponentPeer; not implemented in SwingJS
@@ -1821,11 +1812,6 @@ public class JSComponentUI extends ComponentUI
 	@Override
 	public void paint(Graphics g, JComponent c) {
 
-		if (doPaintBackground()) {
-			g.setColor(getBackground());
-			g.fillRect(0, 0, c.getWidth(), c.getHeight());
-			setTransparent(domNode);
-		} 
 		setOverflow();
 		if (imageNode != null && !imagePersists) {
 			// the icon must paint itself; imageNode is just a placeholder
@@ -2073,7 +2059,7 @@ public class JSComponentUI extends ComponentUI
 			getDisabledColors(buttonNode == null ? getPropertyPrefix() : "Button");
 		if (jc.isOpaque()) {
 			Color bg = getBackground();
-			setBackgroundFor(domNode, b || !(bg instanceof UIResource) || inactiveBackground == null ? bg : inactiveBackground);
+			setBackgroundImpl(b || !(bg instanceof UIResource) || inactiveBackground == null ? bg : inactiveBackground);
 		}
 		Color fg = getForeground();
 		setForegroundFor(domNode, b ? fg : getInactiveTextColor(fg));
@@ -2291,7 +2277,7 @@ public class JSComponentUI extends ComponentUI
 			setJSText(obj, prop, text);
 		}
 		if (valueNode != null) {
-			setBackgroundFor(valueNode, c.getBackground());
+			setBackgroundImpl(c.getBackground());
 		}
 		if (debugging)
 			System.out.println("JSComponentUI: setting " + id + " " + prop);
@@ -2806,73 +2792,10 @@ public class JSComponentUI extends ComponentUI
 		setForegroundFor(domNode, c);
 	}
 
-	@Override
-	public void setForeground(Color c) {
-		awtPeerFG = null;
-		setForegroundFor(domNode, c);
-	}
-
-	@Override
-	public void setBackground(Color c) {
-		awtPeerBG = null;
-		setBackgroundFor(domNode, c);
-	}
-	
 	protected void setForegroundFor(DOMNode node, Color color) {
 		if (node != null)
 			DOMNode.setStyles(node, "color",
 					(color == null ? "rgba(0,0,0,0)" : JSToolkit.getCSSColor(color == null ? Color.black : color)));
-	}
-
-	protected void setBackgroundCUI(Color color) {
-		setBackgroundFor(domNode, color);
-	}
-
-	protected void setBackgroundFor(DOMNode node, Color color) {
-		// Don't allow color for Menu and MenuItem. This is taken care of by
-		// jQuery
-		if (node == null || isMenuItem || isUIDisabled)
-			return;
-		// if (color == null) // from paintComponentSafely
-		DOMNode.setStyles(node, "background-color", color == null ? null : JSToolkit.getCSSColor(color == null ? rootPaneColor : color));
-		if (allowPaintedBackground && selfOrParentBackgroundPainted())
-			setTransparent(node);
-		else
-			checkTransparent(node);
-		if (jc.秘gtemp != null)
-			jc.秘gtemp.setBackground(color);
-	}
-
-	public boolean selfOrParentBackgroundPainted() {
-		JSComponent c = jc;
-		JSComponent p = targetParent;
-		while (c != null) {
-			if (c.秘isBackgroundPainted)
-				return true;
-			c = (JSComponent) (p == null ? c.getParent() : p);
-			p = null;
-		}
-		return false;
-	}
-
-	/**
-	 * If a control is transparent, then set that in HTML for its node
-	 * 
-	 * @param node
-	 */
-	private void checkTransparent(DOMNode node) {
-		// Note that c.setOpaque(true/false) on a label DOES work, but you need
-		// to do a repaint to see it in Java.
-		// Here we keep it simple and do the change immediately.
-		//
-
-		if (!c.isOpaque() && node != null)
-			setTransparent(node);
-	}
-
-	private void setTransparent(DOMNode node) {
-		if (allowPaintedBackground)
-			DOMNode.setStyles(node, "background", "transparent");
 	}
 
 	@Override
@@ -3223,7 +3146,7 @@ public class JSComponentUI extends ComponentUI
 			return;
 		}
 		cellComponent = (JComponent) rendererComponent;		
-		backgroundPainted = false;
+		//backgroundPainted = false;
 		if (width == 0)
 			return;
 		cellWidth = width;
@@ -3248,8 +3171,108 @@ public class JSComponentUI extends ComponentUI
         }
 	}
 
-	public void setPaintedOnly() {
-		isPaintedOnly = true;
+//	public void setPaintedOnly() {
+//		isPaintedOnly = true;
+//	}
+
+
+	@Override
+	public void setForeground(Color c) {
+		awtPeerFG = null;
+		setForegroundFor(domNode, c);
+	}
+
+	/**
+	 * Setting the background through the interface also clears the AWT peer background
+	 */
+	@Override
+	public void setBackground(Color c) {
+		awtPeerBG = null;
+		setBackgroundImpl(c);
+	}
+	
+	private Color backgroundColor;
+	
+	protected void setBackgroundImpl(Color color) {
+		// Don't allow color for Menu and MenuItem. This is taken care of by
+		// jQuery
+		
+		if (domNode == null || isMenuItem || isUIDisabled)
+			return;
+		// currently painting - update JSGraphics2D
+		if (jc.秘gtemp != null && color != null)
+			jc.秘gtemp.setBackground(color);
+		backgroundColor = color;
+		paintBackground(jc.秘gtemp);
+	}
+
+//	public boolean selfOrParentPaintsItself(JSComponent c, JSComponent p) {
+//		while (c != null) {
+//			if (c.秘paintsItself())
+//				return true;
+//			if (c.isOpaque())
+//				return false;
+//			c = (JSComponent) (p == null ? c.getParent() : p);
+//			p = null;
+//		}
+//		return false;
+//	}
+
+	/**
+	 * If a control is transparent, then set that in HTML for its node
+	 * 
+	 * @param node
+	 */
+	private void checkTransparent() {
+		// Note that c.setOpaque(true/false) on a label DOES work, but you need
+		// to do a repaint to see it in Java.
+		// Here we keep it simple and do the change immediately.
+		//
+
+		if (domNode != null && !c.isOpaque())
+			setTransparent();
+	}
+
+	private void setTransparent() {
+		if (allowPaintedBackground)
+			DOMNode.setStyles(domNode, "background", "transparent");
+	}
+	
+	public void paintBackground(JSGraphics2D g) {
+		boolean isOpaque = c.isOpaque();
+		Color color = (this.backgroundColor == null ? getBackground() : this.backgroundColor);
+		if (g == null) {
+			setBackgroundDOM(domNode, color);
+			// preliminary -- DOM only, when the background is set
+		} else if (allowPaintedBackground && isOpaque) {
+			// all opaque components must paint their background
+			// just in case they have painted CHILDREN
+			g.setColor(color);
+			g.fillRect(0, 0, c.getWidth(), c.getHeight());
+			isOpaque = !jc.秘paintsSelf();
+		}
+		if (allowPaintedBackground && !isOpaque)
+			setTransparent();
+		else
+			checkTransparent();
+	}
+
+	protected void setBackgroundDOM(DOMNode node, Color color) {
+		DOMNode.setStyles(node, "background-color",
+				color == null ? null : JSToolkit.getCSSColor(color));
+	}
+
+
+	/**
+	 * A call to getGraphics has been made to a component that
+	 * otherwise has not been identified as a painted object
+	 */
+	public void clearPaintPath() {
+		JSComponent c = jc;
+		while (c != null) {
+			((JSComponentUI) c.ui).setTransparent();
+			c = c.getParent();
+		}
 	}
 
 }

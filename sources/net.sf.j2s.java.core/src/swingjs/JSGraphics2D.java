@@ -56,7 +56,7 @@ public class JSGraphics2D implements
 	private static final int DRAW_CLOSE = 1;
 	private static final int FILL = 2;
 
-	private boolean backgroundPainted;
+//	private boolean backgroundPainted;
 
 	public int constrainX;
 	public int constrainY;
@@ -235,7 +235,7 @@ public class JSGraphics2D implements
 	}
 
 	public void clearRect(int x, int y, int width, int height) {
-		backgroundPainted = true;
+//		backgroundPainted = true;
 		clearRectPriv(x, y, width, height);
 	}
 
@@ -308,7 +308,7 @@ public class JSGraphics2D implements
 	public void fillRect(int x, int y, int width, int height) {
 		if (width <= 0 || height <= 0)
 			return;
-		backgroundPainted = true;
+//		backgroundPainted = true;
 		ctx.fillRect(x, y, width, height);
 	}
 
@@ -475,7 +475,7 @@ public class JSGraphics2D implements
 	public boolean drawImage(Image img, int x, int y, int width, int height, ImageObserver observer) {
 		if (width <= 0 || height <= 0)
 			return true;
-		backgroundPainted = true;
+//		backgroundPainted = true;
 		if (img != null) {
 			DOMNode imgNode = getImageNode(img);
 			if (imgNode != null)
@@ -487,7 +487,7 @@ public class JSGraphics2D implements
 	}
 
 	private DOMNode getImageNode(Image img) {
-		backgroundPainted = true;
+//		backgroundPainted = true;
 		DOMNode imgNode = DOMNode.getImageNode(img);
 		return (imgNode == null ? JSGraphicsCompositor.createImageNode(img) : imgNode);
 	}
@@ -497,14 +497,14 @@ public class JSGraphics2D implements
 	}
 
 	public boolean drawImage(Image img, int x, int y, Color bgcolor, ImageObserver observer) {
-		backgroundPainted = true;
+//		backgroundPainted = true;
 		return drawImage(img, x, y, observer);
 	}
 
 	public boolean drawImage(Image img, int x, int y, int width, int height, Color bgcolor, ImageObserver observer) {
 		if (width <= 0 || height <= 0)
 			return false;
-		backgroundPainted = true;
+//		backgroundPainted = true;
 		return drawImage(img, x, y, width, height, observer);
 	}
 
@@ -512,7 +512,7 @@ public class JSGraphics2D implements
 
 	public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2,
 			ImageObserver observer) {
-		backgroundPainted = true;
+//		backgroundPainted = true;
 		if (img != null) {
 			byte[] bytes = null;
 			DOMNode imgNode = getImageNode(img);
@@ -556,7 +556,7 @@ public class JSGraphics2D implements
 
 	@SuppressWarnings("unused")
 	public boolean drawImagePriv(Image img, int x, int y, ImageObserver observer) {
-		backgroundPainted = true;
+//		backgroundPainted = true;
 		if (img != null) {
 			int[] pixels = null;
 			boolean isRGB = false; // usually RGBA
@@ -584,7 +584,7 @@ public class JSGraphics2D implements
 
 	public void drawDirectRGBA(int[] pixels) {
 		// this can go VERY fast - for writing directly to the canvas context
-		backgroundPainted = true;
+//		backgroundPainted = true;
 		drawDirect(pixels, 0, 0, width, height, false);
 	}
 
@@ -1012,14 +1012,14 @@ public class JSGraphics2D implements
 		return canvas;
 	}
 
-	/**
-	 * used to determine if it is likely that the background was painted
-	 * 
-	 * @return background taint count
-	 */
-	public boolean isBackgroundPainted() {
-		return backgroundPainted;
-	}
+//	/**
+//	 * used to determine if it is likely that the background was painted
+//	 * 
+//	 * @return background taint count
+//	 */
+//	public boolean isBackgroundPainted() {
+//		return backgroundPainted;
+//	}
 
 	/////////////// saving of the state ////////////////
 
@@ -1061,8 +1061,8 @@ public class JSGraphics2D implements
 		map[SAVE_TRANSFORM] = transform;
 		map[SAVE_FONT] = font;
 		map[SAVE_CLIP] = currentClip;
-		map[SAVE_BACKGROUND_PAINTED] = (backgroundPainted ? Boolean.TRUE : Boolean.FALSE);
-		backgroundPainted = false;
+//		map[SAVE_BACKGROUND_PAINTED] = (backgroundPainted ? Boolean.TRUE : Boolean.FALSE);
+//		backgroundPainted = false;
 		return HTML5CanvasContext2D.push(ctx, map);
 	}
 
@@ -1084,7 +1084,7 @@ public class JSGraphics2D implements
 			setTransform((AffineTransform) map[SAVE_TRANSFORM]);
 			setFont((Font) map[SAVE_FONT]);
 			currentClip = (Shape) map[SAVE_CLIP];
-			backgroundPainted = ((Boolean) map[SAVE_BACKGROUND_PAINTED]).booleanValue();
+//			backgroundPainted = ((Boolean) map[SAVE_BACKGROUND_PAINTED]).booleanValue();
 			ctx.restore();
 		}
 	}

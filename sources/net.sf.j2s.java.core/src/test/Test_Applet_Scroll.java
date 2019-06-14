@@ -171,22 +171,24 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		sp.getViewport().addChangeListener(this);
 		hsb = sp.getHorizontalScrollBar();
 
-		mkBar(p, tf, Adjustable.VERTICAL, 100, 200);
-		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200);
-		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200).setInverted(true);
-		p.add(label);
-		p.add(tf);
-		p.add(button);
-		p.add(button2);
-		p.add(button3);
-		mkBar(p, tf, Adjustable.HORIZONTAL, 100, 20);
+		sp.getViewport().setBackground(Color.blue);
+		p.setOpaque(false);
+//		mkBar(p, tf, Adjustable.VERTICAL, 20, 200);
+//		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200);
+//		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200).setInverted(true);
+//		p.add(label);
+//		p.add(tf);
+//		p.add(button);
+//		p.add(button2);
+//		p.add(button3);
+//		mkBar(p, tf, Adjustable.HORIZONTAL, 100, 20);
 		JSlider slider = mkSlider(p, tf, Adjustable.HORIZONTAL, 100, 20);
         slider.setPaintTicks(true);
         slider.setPaintLabels(true);
         slider.setPreferredSize(new Dimension(100, 100));
         slider.setMajorTickSpacing(200);
         slider.setBackground(Color.WHITE);
-        //slider.setForeground(Color.BLUE);
+        slider.setForeground(Color.BLUE);
 
 		mkSlider(p, tf, Adjustable.HORIZONTAL, 100, 20).setInverted(true);
 		repaint();
