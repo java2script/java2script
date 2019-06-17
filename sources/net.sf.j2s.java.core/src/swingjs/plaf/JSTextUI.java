@@ -147,7 +147,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	@Override
 	public DOMNode updateDOMNode() {
 		if (editor.isOpaque() && editor.isEnabled())
-			setBackgroundCUI(getBackground());
+			setBackgroundImpl(getBackground());
 		setEditable(editable);
 		return updateDOMNodeCUI();
 	}
@@ -809,7 +809,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
         	default:
         	case View.Y_AXIS:
             	JTextArea area = (JTextArea) editor;
-            	int h = area.getFont().getFontMetrics().getHeight();
+            	int h = getFont().getFontMetrics().getHeight();
             	int r = area.getRows();
             	return  h * (r > 0 ? r : isAWT ? 10 : 6);
         	}
@@ -1039,7 +1039,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		setEditableCSS();
 		if (jc.isOpaque()) {
 			Color bg = getBackground();
-			setBackgroundCUI(editable || !(bg instanceof UIResource) 
+			setBackgroundImpl(editable || !(bg instanceof UIResource) 
 					|| inactiveBackground == colorUNKNOWN ? bg : inactiveBackground);
 		}		
 	}

@@ -249,7 +249,7 @@ public final class JLayer<V extends Component>
         this.view = view;
         firePropertyChange("view", oldView, view);
         revalidate();
-        repaint();
+        秘repaint();
     }
 
     /**
@@ -309,7 +309,7 @@ public final class JLayer<V extends Component>
         this.glassPane = glassPane;
         firePropertyChange("glassPane", oldGlassPane, glassPane);
         revalidate();
-        repaint();
+        秘repaint();
     }
 
     /**

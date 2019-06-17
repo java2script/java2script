@@ -462,7 +462,7 @@ public class JProgressBar extends JComponent implements SwingConstants
         firePropertyChange("stringPainted", oldValue, paintString);
         if (paintString != oldValue) {
             revalidate();
-            repaint();
+            秘repaint();
         }
     }
 
@@ -512,7 +512,7 @@ public class JProgressBar extends JComponent implements SwingConstants
         progressString = s;
         firePropertyChange("string", oldValue, progressString);
         if (progressString == null || oldValue == null || !progressString.equals(oldValue)) {
-            repaint();
+            秘repaint();
         }
     }
 
@@ -562,7 +562,7 @@ public class JProgressBar extends JComponent implements SwingConstants
         paintBorder = b;
         firePropertyChange("borderPainted", oldValue, paintBorder);
         if (paintBorder != oldValue) {
-            repaint();
+            秘repaint();
         }
     }
 
@@ -732,7 +732,7 @@ public class JProgressBar extends JComponent implements SwingConstants
             if (model != null) {
                 model.setExtent(0);
             }
-            repaint();
+            秘repaint();
         }
     }
 

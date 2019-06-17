@@ -3236,7 +3236,7 @@ public abstract class AbstractDocument implements Document {
 	public void replace(int offset, int length, String text, AttributeSet attrs, JTextComponent c)
 			throws BadLocationException {
 		editor = c;
-		isAWT = /** @j2sNative c.isAWT$ || */false;
+		isAWT = c.秘isAWT();
 		if (isAWT) {
 			currentDot = c.getCaret().getDot();
 			currentMark = c.getCaret().getMark();

@@ -833,7 +833,7 @@ public class GroupLayout implements LayoutManager2 {
         } else {
             host.invalidate();
         }
-        host.repaint();
+        host.秘repaint();
     }
 
     //

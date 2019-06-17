@@ -32,6 +32,7 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.JSComponent;
 import java.awt.Rectangle;
 import java.awt.Shape;
 
@@ -569,7 +570,7 @@ public class PlainView extends View implements TabExpander {
                 }
             }
             preferenceChanged(null, true, true);
-            host.repaint();
+            ((JSComponent)host).秘repaint();
         } else {
             Element map = getElement();
             int line = map.getElementIndex(changes.getOffset());
@@ -614,7 +615,7 @@ public class PlainView extends View implements TabExpander {
                 Rectangle damage = area0.union(area1);
                 host.repaint(damage.x, damage.y, damage.width, damage.height);
             } else {
-                host.repaint();
+            	((JSComponent)host).秘repaint();
             }
         }
     }

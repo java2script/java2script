@@ -871,7 +871,7 @@ public class Window extends JComponent {
     	// this is Component's not JComponent's
     	if (b) {
     		show();
-        	repaint(); // BH SwingJS needs this, because there is no system event set to do this.
+        	秘repaint(); // BH SwingJS needs this, because there is no system event set to do this.
     	} else {
     		hide();
     	}
@@ -931,7 +931,7 @@ public class Window extends JComponent {
 
         // If first time shown, generate WindowOpened event
         if ((state & OPENED) == 0) {
-            repaint(); // main frame was not showing for Varna PrintTest.
+            	秘repaint(); // main frame was not showing for Varna PrintTest.
             postWindowEvent(WindowEvent.WINDOW_OPENED);
             state |= OPENED;
         }

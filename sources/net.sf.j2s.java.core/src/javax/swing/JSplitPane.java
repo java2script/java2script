@@ -470,7 +470,7 @@ public class JSplitPane extends JComponent {
 		oneTouchExpandable = newValue;
 		oneTouchExpandableSet = true;
 		firePropertyChange(ONE_TOUCH_EXPANDABLE_PROPERTY, oldValue, newValue);
-		repaint();
+		秘repaint();
 	}
 
 	/**
@@ -765,7 +765,7 @@ public class JSplitPane extends JComponent {
 
 		// Update the JSplitPane on the screen
 		revalidate();
-		repaint();
+		秘repaint();
 	}
 
 	/**
@@ -790,7 +790,7 @@ public class JSplitPane extends JComponent {
 
 		// Update the JSplitPane on the screen
 		revalidate();
-		repaint();
+		秘repaint();
 	}
 
 	/**
@@ -805,7 +805,7 @@ public class JSplitPane extends JComponent {
 
 		// Update the JSplitPane on the screen
 		revalidate();
-		repaint();
+		秘repaint();
 	}
 
 	/**
@@ -903,7 +903,7 @@ public class JSplitPane extends JComponent {
 
 		// Update the JSplitPane on the screen
 		revalidate();
-		repaint();
+		秘repaint();
 	}
 
 	/**

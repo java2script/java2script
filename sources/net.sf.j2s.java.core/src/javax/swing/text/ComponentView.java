@@ -277,7 +277,7 @@ public class ComponentView extends View  {
                         Container host = getContainer();
                         if (host != null) {
                             preferenceChanged(null, true, true);
-                            host.repaint();
+                            host.秘repaint();
                         }
                     } finally {
                         if (doc instanceof AbstractDocument) {

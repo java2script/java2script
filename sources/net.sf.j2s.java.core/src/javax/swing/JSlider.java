@@ -729,7 +729,7 @@ public class JSlider extends JComponent implements SwingConstants {
 		firePropertyChange("labelTable", oldTable, labelTable);
 		if (labels != oldTable) {
 			revalidate();
-			repaint();
+			秘repaint();
 		}
 	}
 
@@ -875,7 +875,7 @@ public class JSlider extends JComponent implements SwingConstants {
 		isInverted = b;
 		firePropertyChange("inverted", oldValue, isInverted);
 		if (b != oldValue) {
-			repaint();
+			秘repaint();
 		}
 	}
 
@@ -929,7 +929,7 @@ public class JSlider extends JComponent implements SwingConstants {
 		}
 		firePropertyChange("majorTickSpacing", oldValue, majorTickSpacing);
 		if (majorTickSpacing != oldValue && getPaintTicks()) {
-			repaint();
+			秘repaint();
 		}
 	}
 
@@ -969,7 +969,7 @@ public class JSlider extends JComponent implements SwingConstants {
 		minorTickSpacing = n;
 		firePropertyChange("minorTickSpacing", oldValue, minorTickSpacing);
 		if (minorTickSpacing != oldValue && getPaintTicks()) {
-			repaint();
+			秘repaint();
 		}
 	}
 
@@ -1058,7 +1058,7 @@ public class JSlider extends JComponent implements SwingConstants {
 		firePropertyChange("paintTicks", oldValue, paintTicks);
 		if (paintTicks != oldValue) {
 			revalidate();
-			repaint();
+			秘repaint();
 		}
 	}
 
@@ -1087,7 +1087,7 @@ public class JSlider extends JComponent implements SwingConstants {
 		paintTrack = b;
 		firePropertyChange("paintTrack", oldValue, paintTrack);
 		if (paintTrack != oldValue) {
-			repaint();
+			秘repaint();
 		}
 	}
 
@@ -1129,7 +1129,7 @@ public class JSlider extends JComponent implements SwingConstants {
 		firePropertyChange("paintLabels", oldValue, paintLabels);
 		if (paintLabels != oldValue) {
 			revalidate();
-			repaint();
+			秘repaint();
 		}
 	}
 

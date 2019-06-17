@@ -37,6 +37,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.HeadlessException;
 import java.awt.LayoutManager;
+import java.awt.peer.LightweightPeer;
 
 /**
  * An extended version of <code>java.applet.Applet</code> that adds support for
@@ -547,32 +548,30 @@ public class JApplet extends JSApplet implements /* Accessible ,*/
         return super.getGraphics();
     }
 
-    /**
-     * Repaints the specified rectangle of this component within
-     * <code>time</code> milliseconds.  Refer to <code>RepaintManager</code>
-     * for details on how the repaint is handled.
-     *
-     * @param     time   maximum time in milliseconds before update
-     * @param     x    the <i>x</i> coordinate
-     * @param     y    the <i>y</i> coordinate
-     * @param     width    the width
-     * @param     height   the height
-     * @see       RepaintManager
-     * @since     1.6
-     */
-    @Override
+	/**
+	 * Repaints the specified rectangle of this component within <code>time</code>
+	 * milliseconds. Refer to <code>RepaintManager</code> for details on how the
+	 * repaint is handled.
+	 *
+	 * @param time   maximum time in milliseconds before update
+	 * @param x      the <i>x</i> coordinate
+	 * @param y      the <i>y</i> coordinate
+	 * @param width  the width
+	 * @param height the height
+	 * @see RepaintManager
+	 * @since 1.6
+	 */
+	@Override
 	public void repaint(long time, int x, int y, int width, int height) {
-      if (RepaintManager.HANDLE_TOP_LEVEL_PAINT) {
-      	//System.out.println("repaintNow " + this);
-          RepaintManager.currentManager(this).addDirtyRegion(
-                            this, x, y, width, height);
-      }
-      else {
-    	  super.repaint(time, x, y, width, height);
-      }
-    }
+		if ((!秘isAWT() || !canPaint()) && RepaintManager.HANDLE_TOP_LEVEL_PAINT) {
+			RepaintManager.currentManager(this).addDirtyRegion(this, x, y, width, height);
+		} else {
+			super.repaint(time, x, y, width, height);
+		}
+	}
+        
 
-    //The call to make for repainting from SwingJS
+    //The call to make for repainting from SwingJS ??
     public void repaintNow() {
     	// SwingJS 
     	repaint(100, 0, 0, getWidth(), getHeight());
@@ -581,7 +580,7 @@ public class JApplet extends JSApplet implements /* Accessible ,*/
 //    @Override
 //	public void validateTree() {
 //    	// was necessary for mpEnigma.Applet.TextAnalyzer2
-////     no, Bob, don't do this! It causes repaint() to fail.
+////     no, Bob, don't do this! It causes 秘repaint() to fail.
 ////    	getContentPane().validateTree();
 //    	//System.out.println("JApplet validateTree");
 //    	super.validateTree();

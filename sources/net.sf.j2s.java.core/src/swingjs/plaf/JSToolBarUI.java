@@ -822,7 +822,7 @@ public class JSToolBarUI extends JSPanelUI {
 			Container dockingSourceParent = dockingSource.getParent();
 			if (dockingSourceParent != null)
 				dockingSourceParent.validate();
-			dockingSource.repaint();
+			dockingSource.秘repaint();
 		}
 	}
 
@@ -1239,7 +1239,7 @@ public class JSToolBarUI extends JSPanelUI {
 				Container dockingSourceParent = dockingSource.getParent();
 				if (dockingSourceParent != null)
 					dockingSourceParent.validate();
-				dockingSource.repaint();
+				dockingSource.秘repaint();
 			}
 		}
 
@@ -1391,7 +1391,7 @@ public class JSToolBarUI extends JSPanelUI {
 						setOffset(new Point(offset.y, size.width - offset.x));
 					}
 				}
-				repaint();
+				秘repaint();
 			}
 		}
 
@@ -1407,7 +1407,7 @@ public class JSToolBarUI extends JSPanelUI {
 			if (this.borderColor == c)
 				return;
 			this.borderColor = c;
-			repaint();
+			秘repaint();
 		}
 
 		public Color getBorderColor() {

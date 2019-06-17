@@ -468,7 +468,7 @@ public class JTabbedPane extends JComponent
         }
 
         firePropertyChange("model", oldModel, model);
-        repaint();
+        秘repaint();
     }
 
     /**
@@ -514,7 +514,7 @@ public class JTabbedPane extends JComponent
             this.tabPlacement = tabPlacement;
             firePropertyChange("tabPlacement", oldValue, tabPlacement);
             revalidate();
-            repaint();
+            秘repaint();
         }
     }
 
@@ -567,7 +567,7 @@ public class JTabbedPane extends JComponent
             this.tabLayoutPolicy = tabLayoutPolicy;
             firePropertyChange("tabLayoutPolicy", oldValue, tabLayoutPolicy);
             revalidate();
-            repaint();
+            秘repaint();
         }
     }
 
@@ -762,7 +762,7 @@ public class JTabbedPane extends JComponent
 //                    null, component);
 //        }
         revalidate();
-        repaint();
+        秘repaint();
     }
 
     /**
@@ -1027,7 +1027,7 @@ public class JTabbedPane extends JComponent
         }
 
         revalidate();
-        repaint();
+        秘repaint();
     }
 
     /**
@@ -1352,7 +1352,7 @@ public class JTabbedPane extends JComponent
         if (title == null || oldTitle == null ||
             !title.equals(oldTitle)) {
             revalidate();
-            repaint();
+            秘repaint();
         }
     }
 
@@ -1400,7 +1400,7 @@ public class JTabbedPane extends JComponent
 //                        oldIcon, icon);
 //            }
             revalidate();
-            repaint();
+            秘repaint();
         }
     }
 
@@ -1425,7 +1425,7 @@ public class JTabbedPane extends JComponent
         pages.get(index).disabledIcon = disabledIcon;
         if (disabledIcon != oldIcon && !isEnabledAt(index)) {
             revalidate();
-            repaint();
+            秘repaint();
         }
     }
 
@@ -1542,7 +1542,7 @@ public class JTabbedPane extends JComponent
         pages.get(index).setEnabled(enabled);
         if (enabled != oldEnabled) {
             revalidate();
-            repaint();
+            秘repaint();
         }
     }
 
@@ -1597,7 +1597,7 @@ public class JTabbedPane extends JComponent
                     SwingUtilities2.tabbedPaneChangeFocusTo(component);
                 }
             } else {
-                repaint();
+                秘repaint();
             }
 
             revalidate();

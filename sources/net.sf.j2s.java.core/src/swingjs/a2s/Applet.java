@@ -1,7 +1,6 @@
 package swingjs.a2s;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.HeadlessException;
 import java.net.MalformedURLException;
@@ -10,10 +9,10 @@ import java.net.URL;
 import javax.swing.JApplet;
 import javax.swing.JComponent;
 
-import swingjs.JSUtil;
-
 public class Applet extends JApplet implements A2SContainer {
 	
+
+	public void isAWT() {}
 
 	// Note: applet.paint(g) needs to include super.paint(g), 
 	// or buttons will not show.
@@ -22,7 +21,7 @@ public class Applet extends JApplet implements A2SContainer {
     	super();
 		// Note: applet.paint(g) needs to include super.paint(g), or buttons will not
 		// show. So we do that in fixAWTPaint().
-		fixAWTPaint(this, Applet.class);
+		A2SContainer.fixAWTPaint(this, Applet.class);
 		listener = new A2SListener();
 		addMouseListener(listener);
 		addMouseMotionListener(listener);
@@ -31,26 +30,6 @@ public class Applet extends JApplet implements A2SContainer {
 		((JComponent) getContentPane()).setOpaque(false);
     }
 
-	/**
-	 * Effectively add "super.paint(g)" the user's method.
-	 * 
-	 */
-	static void fixAWTPaint(Component c, Class<?> cl) {
-		Object f = JSUtil.getJ2SAlias(c, "paint$java_awt_Graphics");
-		if (JSUtil.isOverridden(f, cl)
-				&& f.toString().indexOf("C$.superclazz.prototype.paint$java_awt_Graphics.apply(this") < 0) {
-		/**@j2sNative
-		 * 
-		 *      c.paint$java_awt_Graphics = function(g) {
-		 *        cl.$clazz$.prototype.paint$java_awt_Graphics.apply(c,[g]);
-		 *        f.apply(c,[g]);
-		 *      }
-		 */
-		}
-	}
-
-
-    
 	@Override
 	public void setBackground(Color c) {
 		super.setBackground(c);

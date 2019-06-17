@@ -31,6 +31,7 @@ import java.util.Vector;
 
 import java.awt.Component;
 import java.awt.Graphics;
+import java.awt.JSComponent;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import javax.swing.SizeRequirements;
@@ -222,7 +223,7 @@ public abstract class FlowView extends BoxView {
                 Component host = getContainer();
                 if (host != null) {
                     //nb idk 12/12/2001 host should not be equal to null. We need to add assertion here
-                    host.repaint();
+                	((JSComponent)host).秘repaint();
                 }
             }
         }

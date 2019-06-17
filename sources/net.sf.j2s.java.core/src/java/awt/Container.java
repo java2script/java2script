@@ -367,6 +367,13 @@ public class Container extends JSComponent {
     	return  (i == null ? NULL_INSETS : i);
     }
 
+    public Insets 秘getInsetsC() {
+    	// in SwingJS, we do not clone. Everything is a ContainerPeer.
+    	// it is inconsistent with other classes that this would need cloning.
+    	Insets i = (peer == null ? null : ((ContainerPeer) peer).getInsets());
+    	return  (i == null ? NULL_INSETS : i);
+    }
+
     @Deprecated
     public Insets insets() {
     	return getInsets();
@@ -1277,7 +1284,7 @@ public class Container extends JSComponent {
      * @see #add
      * @see #remove
      */
-    public void removeAll() {
+    public void removeAll() { 
         synchronized (getTreeLock()) {
             adjustListeningChildren(AWTEvent.HIERARCHY_EVENT_MASK,
                                     -listeningChildren);
@@ -1309,20 +1316,12 @@ public class Container extends JSComponent {
                                            HierarchyEvent.PARENT_CHANGED,
                                            Toolkit.enabledOnToolkit(AWTEvent.HIERARCHY_EVENT_MASK));
             }
-            if (peer != null) {
-            	if (layoutMgr == null && isVisible()) {
-                    updateCursorImmediately();
-            	}	
-            	if (isVisible()) {
-            		// this did not work -- see _mpEnigma_Applets_textana_Textanalyzer2_node4.htm
-                	Graphics g = getGraphics();
-                	if (g != null)
-                		g.clearRect(0, 0,  width, height);
-
-            	}
+            if (peer != null && layoutMgr == null && isVisible()) {
+                updateCursorImmediately();
             }
             invalidateIfValid();
         }
+        super.removeAll();
     }
 
     // Should only be called while holding tree lock
@@ -2732,7 +2731,7 @@ public class Container extends JSComponent {
             // on this instance, so we first call addNotifyComp() and
             // possibly create an lightweight event dispatcher before calling
             // addNotify() on the children which may be lightweight.
-            addNotifyComp();
+            super.addNotify();
             if (! (peer instanceof LightweightPeer)) {
             	setDispatcher();
             }

@@ -1593,7 +1593,7 @@ public class JSTableUI extends JSPanelUI {
 			} else if ("Table.isFileList" == changeName) {
 				isFileList = Boolean.TRUE.equals(table.getClientProperty("Table.isFileList"));
 				table.revalidate();
-				table.repaint();
+				table.秘repaint();
 				if (isFileList) {
 					table.getSelectionModel().addListSelectionListener(getHandler());
 				} else {
@@ -2600,7 +2600,7 @@ public class JSTableUI extends JSPanelUI {
 		JSComponentUI ui = getHeaderUI();
 		ui.setTainted();
 		ui.setHTMLElement();
-		table.getTableHeader().repaint();
+		table.getTableHeader().秘repaint();
 	}
 
 

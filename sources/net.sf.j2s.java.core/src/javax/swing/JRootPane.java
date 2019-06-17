@@ -194,6 +194,9 @@ import swingjs.a2s.A2SContainer;
 // / PENDING(klobad) Who should be opaque in this component?
 public class JRootPane extends JComponent {
 
+	public boolean isAWT = false;
+	
+
 	// /**
 	// * Whether or not we should dump the stack when true double buffering
 	// * is disabled. Default is false.
@@ -686,7 +689,7 @@ public class JRootPane extends JComponent {
 		glassPane = (JSComponent) glass;
 		this.add(glassPane, 0);
 		if (visible) {
-			repaint();
+			秘repaint();
 		}
 	}
 
@@ -774,10 +777,10 @@ public class JRootPane extends JComponent {
 			this.defaultButton = defaultButton;
 
 			if (oldDefault != null) {
-				oldDefault.repaint();
+				oldDefault.秘repaint();
 			}
 			if (defaultButton != null) {
-				defaultButton.repaint();
+				defaultButton.秘repaint();
 			}
 		}
 
@@ -1039,8 +1042,6 @@ public class JRootPane extends JComponent {
 		return super.paramString();
 	}
 
-	public boolean isAWT = false;
-	
 	@Override
 	public Insets getInsets() {
 //		if (isAWT) {

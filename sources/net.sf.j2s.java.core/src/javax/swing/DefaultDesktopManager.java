@@ -819,7 +819,7 @@ public class DefaultDesktopManager implements DesktopManager, java.io.Serializab
 ////                                                          f.getWidth(),
 ////                                                          f.getHeight());
 ////
-////                                        //finalFrame.repaint();
+////                                        //finalFrame.秘repaint();
 ////                                        ((JInternalFrame)f).isDragging = true;
 ////                                        // System.out.println("repair complete");
 ////                                       }});

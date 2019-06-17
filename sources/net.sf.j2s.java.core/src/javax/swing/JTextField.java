@@ -362,7 +362,7 @@ public class JTextField extends JTextComponent implements SwingConstants {
         }
         firePropertyChange("horizontalAlignment", oldValue, horizontalAlignment);
         invalidate();
-        repaint();
+        秘repaint();
     }
 
     /**
@@ -889,7 +889,7 @@ public class JTextField extends JTextComponent implements SwingConstants {
 
         @Override
 				public void stateChanged(ChangeEvent e) {
-            repaint();
+            秘repaint();
         }
 
     }

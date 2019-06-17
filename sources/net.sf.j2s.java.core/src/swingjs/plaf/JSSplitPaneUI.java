@@ -768,7 +768,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 		if (splitPane != null) {
 			layoutManager.resetToPreferredSizes();
 			splitPane.revalidate();
-			splitPane.repaint();
+			splitPane.秘repaint();
 		}
 	}
 
@@ -782,7 +782,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 		}
 		dividerLocationIsSet = true;
 		splitPane.revalidate();
-		splitPane.repaint();
+		splitPane.秘repaint();
 		if (keepHidden) {
 			Insets insets = splitPane.getInsets();
 			int orientation = splitPane.getOrientation();
@@ -950,7 +950,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 		splitPane.setLayout(layoutManager);
 		layoutManager.updateComponents();
 		splitPane.revalidate();
-		splitPane.repaint();
+		splitPane.秘repaint();
 	}
 
 	/**
@@ -1805,7 +1805,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 				} else if (changeName == JSplitPane.DIVIDER_SIZE_PROPERTY) {
 					dividerSize = splitPane.getDividerSize();
 					splitPane.revalidate();
-					splitPane.repaint();
+					splitPane.秘repaint();
 				}
 			}
 		}
@@ -1816,13 +1816,13 @@ public class JSSplitPaneUI extends JSPanelUI {
 		@Override
 		public void focusGained(FocusEvent ev) {
 			dividerKeyboardResize = true;
-			splitPane.repaint();
+			splitPane.秘repaint();
 		}
 
 		@Override
 		public void focusLost(FocusEvent ev) {
 			dividerKeyboardResize = false;
-			splitPane.repaint();
+			splitPane.秘repaint();
 		}
 	}
 

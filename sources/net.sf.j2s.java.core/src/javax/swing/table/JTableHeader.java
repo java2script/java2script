@@ -442,7 +442,7 @@ public class JTableHeader extends JComponent implements TableColumnModelListener
     public void setUI(TableHeaderUI ui){
         if (this.ui != ui) {
             super.setUI(ui);
-            repaint();
+            秘repaint();
         }
     }
 
@@ -494,7 +494,7 @@ public class JTableHeader extends JComponent implements TableColumnModelListener
             columnModel.addColumnModelListener(this);
 
             firePropertyChange("columnModel", old, columnModel);
-            resizeAndRepaint();
+            resizeAnd秘repaint();
         }
     }
 
@@ -523,7 +523,7 @@ public class JTableHeader extends JComponent implements TableColumnModelListener
      * @see TableColumnModelListener
      */
     @Override
-		public void columnAdded(TableColumnModelEvent e) { resizeAndRepaint(); }
+		public void columnAdded(TableColumnModelEvent e) { resizeAnd秘repaint(); }
 
 
     /**
@@ -536,7 +536,7 @@ public class JTableHeader extends JComponent implements TableColumnModelListener
      * @see TableColumnModelListener
      */
     @Override
-		public void columnRemoved(TableColumnModelEvent e) { resizeAndRepaint(); }
+		public void columnRemoved(TableColumnModelEvent e) { resizeAnd秘repaint(); }
 
 
     /**
@@ -549,7 +549,7 @@ public class JTableHeader extends JComponent implements TableColumnModelListener
      * @see TableColumnModelListener
      */
     @Override
-		public void columnMoved(TableColumnModelEvent e) { repaint(); }
+		public void columnMoved(TableColumnModelEvent e) { 秘repaint(); }
 
 
     /**
@@ -562,7 +562,7 @@ public class JTableHeader extends JComponent implements TableColumnModelListener
      * @see TableColumnModelListener
      */
     @Override
-		public void columnMarginChanged(ChangeEvent e) { resizeAndRepaint(); }
+		public void columnMarginChanged(ChangeEvent e) { resizeAnd秘repaint(); }
 
 
     // --Redrawing the header is slow in cell selection mode.
@@ -580,7 +580,7 @@ public class JTableHeader extends JComponent implements TableColumnModelListener
      * @see TableColumnModelListener
      */
     @Override
-		public void columnSelectionChanged(ListSelectionEvent e) { } // repaint(); }
+		public void columnSelectionChanged(ListSelectionEvent e) { } // 秘repaint(); }
 
 //
 //  Package Methods
@@ -634,9 +634,9 @@ public class JTableHeader extends JComponent implements TableColumnModelListener
      * Sizes the header and marks it as needing display.  Equivalent
      * to <code>revalidate</code> followed by <code>repaint</code>.
      */
-    public void resizeAndRepaint() {
+    public void resizeAnd秘repaint() {
         revalidate();
-        repaint();
+        秘repaint();
     }
 
     /**

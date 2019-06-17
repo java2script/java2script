@@ -2334,12 +2334,12 @@ public class JList<E> extends JComponent implements Scrollable//, Accessible
                     setSelectedIndex(i);
                     if(shouldScroll)
                         ensureIndexIsVisible(i);
-                    repaint();  /** FIX-ME setSelectedIndex does not redraw all the time with the basic l&f**/
+                    秘repaint();  /** FIX-ME setSelectedIndex does not redraw all the time with the basic l&f**/
                     return;
                 }
             setSelectedIndex(-1);
         }
-        repaint(); /** FIX-ME setSelectedIndex does not redraw all the time with the basic l&f**/
+        秘repaint(); /** FIX-ME setSelectedIndex does not redraw all the time with the basic l&f**/
     }
 
 

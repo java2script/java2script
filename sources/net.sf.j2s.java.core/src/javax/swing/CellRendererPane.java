@@ -37,7 +37,7 @@ import swingjs.plaf.JSComponentUI;
 
 /**
  * This class is inserted in between cell renderers and the components that
- * use them.  It just exists to thwart the repaint() and invalidate() methods
+ * use them.  It just exists to thwart the 秘repaint() and invalidate() methods
  * which would otherwise propagate up the tree when the renderer was configured.
  * It's used by the implementations of JTable, JTree, and JList.  For example,
  * here's how CellRendererPane is used in the code the paints each row

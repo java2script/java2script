@@ -270,7 +270,9 @@ System.exit(0) does not stop all processes
 list cell renderers must be JComponents
 myClass.getField not implemented
 "window" and other reserved JavaScript names
-
+qualified field and method names
+missing Math methods
+component.getGraphics(), graphics.dispose()
 
 MAJOR ISSUES--for Bob and Udo within SwingJS
 ============================================
@@ -488,14 +490,28 @@ qualified field and method names
 
 In order to minimize the chance of added SwingJS field and method names colliding with
 ones developers might use in subclassing Java classes, we have added U+79D8 (Mandarin "secrect") 
-to the characaters already disrecommended by Java documentation ("$" and "_"). The only problem
+to the characters already disrecommended by Java documentation ("$" and "_"). The only problem
 would be if you use that character followed by certain English words in certain classes. For example
 \u79D8canvas for JComponents (in java.awt.JSComponent) and \u79D8byte (in java.io.File).
 
 missing Math methods
 --------------------
 
-A few java.lang.Math 
+A few of the more obscure java.lang.Math methods are missing. This is a
+result of continued Java development. It is easy enough to add these
+methods if you have the source. They go into j2sClazz.js, which is 
+combined with other initial libraries into swingjs2.js.  
+
+
+component.getGraphics(), graphics.dispose()
+-------------------------------------------
+
+Use of component.getGraphics() is discouraged in Java and in SwingJS. 
+Specifically in SwingJS, any call to component.getGraphics() or 
+component.createGraphics() must be matched with graphics.dispose(), 
+particularly when it is called outside the context of a paint(Graphics)
+call from the system. 
+
 
 MAJOR ISSUES--for Bob and Udo within SwingJS
 ============================================
