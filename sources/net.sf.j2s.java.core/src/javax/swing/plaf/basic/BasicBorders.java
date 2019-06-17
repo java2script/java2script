@@ -249,6 +249,7 @@ public class BasicBorders {
         protected Color darkShadow;
         protected Color highlight;
         protected Color lightHighlight;
+        protected void noPaint(){};
 
         public ButtonBorder(Color shadow, Color darkShadow,
                             Color highlight, Color lightHighlight) {

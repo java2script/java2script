@@ -40,6 +40,7 @@ import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.border.AbstractBorder;
 import javax.swing.border.Border;
+import javax.swing.plaf.BorderUIResource;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.plaf.UIResource;
@@ -598,7 +599,7 @@ public abstract class JSComponent extends Component {
 					|| JSUtil.isOverridden(this, "paintComponent$java_awt_Graphics", JComponent.class)
 					|| JSUtil.isOverridden(this, "paintContainer$java_awt_Graphics", Container.class)
 					|| JSUtil.isOverridden(this, "update$java_awt_Graphics", JComponent.class)
-					|| JSUtil.isOverridden(秘border, "paintBorder$java_awt_Component$java_awt_Graphics$I$I$I$I",
+					|| 秘paintsBorder() && JSUtil.isOverridden(秘border, "paintBorder$java_awt_Component$java_awt_Graphics$I$I$I$I",
 							AbstractBorder.class) 
 					? PAINTS_SELF_YES : PAINTS_SELF_NO);
 		}
@@ -606,6 +607,12 @@ public abstract class JSComponent extends Component {
 		// objects with the same paintable root can be grouped together.
 
 		return (秘iPaintMyself != PAINTS_SELF_NO);
+	}
+
+	protected boolean 秘paintsBorder() {
+		// default ButtonBorders are not painted by default; this happens to also include internal frames
+		return (秘border != null
+				&& !(秘border instanceof BorderUIResource.CompoundBorderUIResource));
 	}
 
 	/**

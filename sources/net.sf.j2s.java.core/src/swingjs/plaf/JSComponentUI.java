@@ -2290,6 +2290,11 @@ public class JSComponentUI extends ComponentUI
 
 	protected Dimension preferredDim;
 
+	/**
+	 * particularly for buttons
+	 */
+	private boolean isFullyCentered;
+
 	protected static Insets zeroInsets = new Insets(0, 0, 0, 0);
 	
 	protected void getJSInsets() {
@@ -2358,19 +2363,18 @@ public class JSComponentUI extends ComponentUI
 		int wText = (dimText == null ? 0 : dimText.width);
 		int gap = (wText == 0 || wIcon == 0 ? 0 : b.getIconTextGap());
 		int w0 = cellComponent != null ? cellWidth : $(domNode).width();
-	    int w = w0;
-	    if (w < wIcon + wText) {
-				// jQuery method can fail that may not have worked.
-				w = wIcon + wText;
+		int w = w0;
+		if (w < wIcon + wText) {
+			// jQuery method can fail that may not have worked.
+			w = wIcon + wText;
 		}
 		boolean alignVCenter = (vAlign == SwingConstants.CENTER);
-		Insets margins = (isLabel ? (isAWT ? b.getInsets() : insets) : 
-			getButtonMargins(b, justGetPreferred));
+		Insets margins = (isLabel ? (isAWT ? b.getInsets() : insets) : getButtonMargins(b, justGetPreferred));
 		if (margins == null)
 			margins = zeroInsets;
-		Insets insets = (isLabel || !isSimpleButton || justGetPreferred ? zeroInsets :
-			getButtonOuterInsets(b));
-		//System.out.println("JSCUI margins " + justGetPreferred + " " + b.getText() + " " + margins + " " + insets);
+		Insets insets = (isLabel || !isSimpleButton || justGetPreferred ? zeroInsets : getButtonOuterInsets(b));
+		// System.out.println("JSCUI margins " + justGetPreferred + " " + b.getText() +
+		// " " + margins + " " + insets);
 		int h = (dimText == null ? 0 : dimText.height);
 		int ih = (dimIcon == null ? 0 : dimIcon.height);
 		int hCtr = Math.max(h, ih);
@@ -2469,7 +2473,7 @@ public class JSComponentUI extends ComponentUI
 					w = w0;
 				break;
 			}
-		} 
+		}
 		if (justGetPreferred) {
 			if (preferredDim == null)
 				preferredDim = new Dimension();
@@ -2481,17 +2485,19 @@ public class JSComponentUI extends ComponentUI
 		DOMNode.setStyles(centeringNode, "position", "absolute", "top", null, "left", null, "transform", null);
 		DOMNode.setStyles(centeringNode, "width", wCtr + "px", "height", hCtr + "px");
 
-		if (alignHCenter && alignVCenter && wIcon == 0
-				|| wText == 0 && margins.left == margins.right && margins.top == margins.bottom
-				&& insets.left == insets.right && insets.top == insets.bottom) {
+		if (alignHCenter && alignVCenter && wIcon == 0 || wText == 0 && margins.left == margins.right
+				&& margins.top == margins.bottom && insets.left == insets.right && insets.top == insets.bottom) {
 
-			// simple totally centered label or button
-			// can't have width or height here --- let the browser figure that out
-			fullyCenter(centeringNode, true);
-			fullyCenter(iconNode, false);
-			fullyCenter(textNode, false);
+			isFullyCentered = !isLabel;
+			if (isFullyCentered) {
+				// simple totally centered label or button
+				// can't have width or height here --- let the browser figure that out
+				fullyCenter(centeringNode, true);
+				fullyCenter(iconNode, false);
+				fullyCenter(textNode, false);
+			}
 		} else {
-
+			isFullyCentered = false;
 			DOMNode.setStyles(iconNode, "position", "absolute", "top", null, "left", null, "transform", null);
 			DOMNode.setStyles(textNode, "position", "absolute", "top", null, "left", null, "transform", null);
 
@@ -2595,7 +2601,7 @@ public class JSComponentUI extends ComponentUI
 					yoff = "-50%";
 					break;
 				}
-				DOMNode.setStyles(centeringNode, "overflow","none");
+				DOMNode.setStyles(centeringNode, "overflow", "none");
 				DOMNode.setStyles(textNode, "top", top + "%", "transform",
 						"translateY(" + (yoff == null ? "-" + top + "%" : yoff + ")"));
 				DOMNode.setStyles(iconNode, "top", top + "%", "transform",
