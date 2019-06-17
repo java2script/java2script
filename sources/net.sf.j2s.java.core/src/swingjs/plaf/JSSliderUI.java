@@ -18,7 +18,10 @@ import javax.swing.JSlider;
 import javax.swing.LookAndFeel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.plaf.UIResource;
+
 import sun.swing.DefaultLookup;
+import swingjs.JSGraphics2D;
 import swingjs.JSToolkit;
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
@@ -88,8 +91,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			paintTrack = slider.getPaintTrack();
 			snapToTicks = slider.getSnapToTicks();
 		}
-		orientation = (slider.getOrientation() == SwingConstants.VERTICAL ? "vertical"
-				: "horizontal");
+		orientation = (slider.getOrientation() == SwingConstants.VERTICAL ? "vertical" : "horizontal");
 		model = slider.getModel();
 		boolean isHoriz = (slider.getOrientation() == SwingConstants.HORIZONTAL);
 		boolean isVerticalScrollBar = (isScrollBar && !isHoriz);
@@ -104,44 +106,84 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		}
 		boolean isNew = (domNode == null);
 		if (isNew) {
-			domNode = wrap("div", id + "_wrap",
-					jqSlider = DOMNode.createElement("div", id));
-			$(domNode).addClass("swingjs"); //??
-			$(domNode).addClass("ui-j2sslider-wrap"); //??
+			domNode = wrap("div", id + "_wrap", jqSlider = DOMNode.createElement("div", id));
+			$(domNode).addClass("swingjs"); // ??
+			$(domNode).addClass("ui-j2sslider-wrap"); // ??
 			setJQuerySliderAndEvents();
 			setTainted();
 		} else if (isChanged) {
 			disposeSlider();
 			domNode.appendChild(jqSlider = DOMNode.createElement("div", id + (++incr)));
-			setJQuerySliderAndEvents();	
+			setJQuerySliderAndEvents();
 			setTainted();
-		  setInnerComponentBounds(jc.getWidth(), jc.getHeight());
+			setInnerComponentBounds(jc.getWidth(), jc.getHeight());
 		}
 		setup(isNew || isChanged);
 		setSlider();
 		setBackground(getBackground());
+		setForeground(getForeground());
 		return updateDOMNodeCUI();
+	}
+	
+	private String foreColor = null;
+	@Override
+	public void setForeground(Color c) {
+		if (!paintTicks && !paintLabels)
+			return;
+		if (awtPeerFG != null 
+				// not for scrollbar && !jc.isDisplayable() 
+				&& !awtPeerFG.equals(c))
+		awtPeerFG = null;		
+		if (c == null || c instanceof UIResource)
+			c = Color.black;
+		String s = JSToolkit.getCSSColor(c);
+		if (foreColor == s)
+			return;
+		foreColor = s;
+		if (paintTicks) { 
+			
+			// but this is not persisting
+			
+			DOMNode.setStyles(jqSlider, "background-color",s);
+			String tickClass = "ui-j2sslider-tick-mark-" + (isHoriz ? "vert" : "horiz");
+			
+			$(domNode).find("." + tickClass).css(/** @j2sNative 1?{backgroundColor:s} :*/"","");
+		}
+		if (paintLabels) {
+			$(domNode).find("SPAN").css("color", s);
+		}
+	}
+
+
+	@Override
+	public void setBackground(Color c) {
+		if (awtPeerBG != null
+				// not for scrollbar && !jc.isDisplayable()
+				&& !awtPeerBG.equals(c))
+			awtPeerBG = null;
+		if (isScrollBar ? c != null : jc.isOpaque()) {
+
+			if (paintTicks) {
+				// they are painted with FOREground
+			} else {
+				DOMNode node = (myScrollPaneUI == null && !paintTicks ? jqSlider : sliderTrack);
+				DOMNode.setStyles(node, "background-color", JSToolkit.getCSSColor(c));
+				if (isScrollBar && Color.WHITE.equals(c))
+					DOMNode.setStyles(sliderHandle, "background", "#ccc");
+			}
+
+		}
+		if (!isScrollBar)
+			setBackgroundDOM(outerNode, getBackground());
+	}	
+	
+	@Override
+	public void paintBackground(JSGraphics2D g) {
+		// n/a
 	}
 
 	@Override
-	public void setBackground(Color background) {
-		if (awtPeerBG != null 
-				// not for scrollbar && !jc.isDisplayable() 
-				&& !awtPeerBG.equals(background))
-			awtPeerBG = null;
-		if (isScrollBar ? background != null : jc.isOpaque()) {
-			DOMNode node = (myScrollPaneUI == null && !paintTicks ? jqSlider : sliderTrack);
-			DOMNode.setStyles(node, "background-color", JSToolkit.getCSSColor(background));
-			if (isScrollBar && Color.WHITE.equals(background))
-				DOMNode.setStyles(sliderHandle, "background", "#ccc");
-
-		}
-		if (paintTicks)
-			DOMNode.setStyles(jqSlider, "background-color", "black");
-	}	
-
-	@Override
-	protected void setBackgroundFor(DOMNode node, Color color) {
+	protected void setBackgroundImpl(Color color) {
 		setBackground(color);
 	}
 
@@ -253,6 +295,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	 * @param isNew
 	 */
 	private void setup(boolean isNew) {
+		
 		sliderTrack = DOMNode.lastChild(domNode);
 		sliderHandle = DOMNode.firstChild(sliderTrack);
 		// mark the handle and track with the "swingjs-ui" class
@@ -298,10 +341,9 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		int barPlace = 40; // not for general slider or scrollbar
 		if (isHoriz && slider.getBorder() != null)
 			barPlace += 10;
-
 		String tickClass = "ui-j2sslider-tick-mark" + (isHoriz ? "-vert" : "-horiz");
 		$(domNode).find("." + tickClass).remove();
-		$(domNode).find(".jslider-labels").remove();
+		$(domNode).find(".jslider-label").remove();
 		getHTMLSizePreferred(jqSlider, false);
 		if (majorSpacing == 0 && minorSpacing == 0 || !paintTicks && !paintLabels) {
 			if (myScrollPaneUI != null) {
@@ -373,6 +415,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 					left = 28;
 				}
 				DOMNode.setTopLeftAbsolute(labelNode, top, left);
+				addClass(labelNode, ".jslider-label");
 				domNode.insertBefore(labelNode, sliderTrack);
 			}
 
@@ -590,6 +633,17 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 				DOMNode.setStyles(sliderTrack, "width", (width - margin * 2) + "px");
 			}
 			setScrollBarExtentAndCSS();
+		}
+	}
+
+	@Override
+	protected void setJSDimensions(int width, int height) {
+		super.setJSDimensions(width, height);
+		DOMNode.setPositionAbsolute(domNode);
+		if (isHoriz) {
+			DOMNode.setStyles(domNode, "top", ((height - myHeight) / 2) + "px", "height", myHeight + "px");
+		} else {
+			DOMNode.setStyles(domNode, "left", ((width - myHeight) / 2) + "px", "width", myHeight + "px");
 		}
 	}
 

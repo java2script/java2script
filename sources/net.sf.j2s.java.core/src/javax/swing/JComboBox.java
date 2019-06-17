@@ -305,8 +305,10 @@ implements ItemSelectable,ListDataListener,ActionListener {
         }
         dataModel = aModel;
         dataModel.addListDataListener(this);
+        @SuppressWarnings("unused")
+		boolean isAWT = 秘isAWT();
         /** @j2sNative
-         * aModel.isAWT$ = this.isAWT$
+         * aModel.isAWT$ = isAWT;
          */
 
         // set the current selected item.
@@ -573,10 +575,10 @@ implements ItemSelectable,ListDataListener,ActionListener {
             // Must toggle the state of this flag since this method
             // call may result in ListDataEvents being fired.
             selectingItem = true;
-            if (_trigger || /** @j2sNative !this.isAWT$ &&*/true) {
+            if (_trigger || 秘isAWT()) {
             	dataModel.setSelectedItem(objectToSelect);
             } else {
-            	((DefaultComboBoxModel)dataModel)._setSelectedItemQuiet(objectToSelect);
+            	((DefaultComboBoxModel)dataModel).秘setSelectedItemQuiet(objectToSelect);
             }
             selectingItem = false;
 
@@ -1276,11 +1278,18 @@ implements ItemSelectable,ListDataListener,ActionListener {
      * This protected method is implementation specific. Do not access directly
      * or override.
      */
-    protected void selectedItemChanged() {
-        if (selectedItemReminder != null && /** @j2sNative !this.isAWT$ && */true) {
+    @SuppressWarnings("unused")
+	protected void selectedItemChanged() {
+        if (selectedItemReminder != null) {
+        	
+          if (!秘isAWT()) {
+        
             fireItemStateChanged(new ItemEvent(this,ItemEvent.ITEM_STATE_CHANGED,
                                                selectedItemReminder,
                                                ItemEvent.DESELECTED));
+          } else {
+        	firePropertyChange("updateSwingJS", selectedItemReminder, getSelectedItem());
+          }
         }
 
         // set the new selected item.

@@ -46,7 +46,7 @@ public class JSLabelUI extends JSLightweightUI {
 			setAlignments((AbstractButton) (JComponent) label, false);
 		}
 		if (jc.isEnabled())
-			setBackgroundCUI(jc.isOpaque() ? getBackground() : null);
+			setBackgroundImpl(jc.isOpaque() ? getBackground() : null);
 		return updateDOMNodeCUI();
 	}
 

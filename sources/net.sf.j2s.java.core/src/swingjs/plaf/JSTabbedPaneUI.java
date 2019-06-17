@@ -3616,10 +3616,10 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
             boolean isScrollLayout = scrollableTabLayoutEnabled();
             if (name == "mnemonicAt") {
                 updateMnemonics();
-                pane.repaint();
+                pane.秘repaint();
             }
             else if (name == "displayedMnemonicIndexAt") {
-                pane.repaint();
+                pane.秘repaint();
             }
             else if (name =="indexForTitle") {
                 calculatedBaseline = false;
@@ -3658,7 +3658,7 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
                     }
                 }
                 tabPane.revalidate();
-                tabPane.repaint();
+                tabPane.秘repaint();
                 calculatedBaseline = false;
             } else if (name == "indexForNullComponent") {
                 isRunsDirty = true;
@@ -3693,7 +3693,7 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
 		public void stateChanged(ChangeEvent e) {
             JTabbedPane tabPane = (JTabbedPane)e.getSource();
             tabPane.revalidate();
-            tabPane.repaint();
+            tabPane.秘repaint();
 
             setFocusIndex(tabPane.getSelectedIndex(), false);
 
@@ -3967,7 +3967,7 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
             // and use this method as a hook for repainting tabs
             // to update tabs area e.g. when the size of tabComponent was changed
             if (scrollableTabLayoutEnabled()) {
-                tabScroller.tabPanel.repaint();
+                tabScroller.tabPanel.秘repaint();
                 tabScroller.updateView();
             } else {
                 tabPane.repaint(getBounds());

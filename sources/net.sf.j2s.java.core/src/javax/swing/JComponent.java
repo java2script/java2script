@@ -223,7 +223,6 @@ public abstract class JComponent extends Container {
 	 * Whether or not autoscroll has been enabled.
 	 */
 	private boolean autoscrolls;
-	private Border border;
 	private int flags;
 
 	/* Input verifier for this component */
@@ -341,30 +340,31 @@ public abstract class JComponent extends Container {
 	private static final String defaultLocale = "JComponent.defaultLocale";
 
 	private static Component componentObtainingGraphicsFrom;
-	private static Object componentObtainingGraphicsFromLock = new Object(); // componentObtainingGraphicsFrom
+//	private static Object componentObtainingGraphicsFromLock = new Object(); // componentObtainingGraphicsFrom
 
 	// /**
 	// * AA text hints.
 	// */
 	// transient private Object aaTextInfo;
 
-	/**
-	 * 
-	 * @param c
-	 * @return
-	 * 
-	 */
-	static Graphics safelyGetGraphics(Component c) {
-		return safelyGetGraphics(c, SwingUtilities.getRoot(c));
-	}
-
+//	/**
+//	 * unused - SwingJS
+//	 * 
+//	 * @param c
+//	 * @return
+//	 * 
+//	 */
+//	static Graphics safelyGetGraphics(Component c) {
+//		return safelyGetGraphics(c, SwingUtilities.getRoot(c));
+//	}
+//
 	static Graphics safelyGetGraphics(Component c, Component root) {
-		synchronized (componentObtainingGraphicsFromLock) {
+//Swingjs		synchronized (componentObtainingGraphicsFromLock) {
 			componentObtainingGraphicsFrom = root;
 			Graphics g = c.getGraphics();
 			componentObtainingGraphicsFrom = null;
 			return g;
-		}
+//		}
 	}
 
 	/**
@@ -373,7 +373,7 @@ public abstract class JComponent extends Container {
 	 * @param root
 	 */
 	static void getGraphicsInvoked(Component root) {
-		if (!JComponent.isComponentObtainingGraphicsFrom(root)) {
+		if (!isComponentObtainingGraphicsFrom(root)) {
 			JRootPane rootPane = ((RootPaneContainer) root).getRootPane();
 			if (rootPane != null) {
 				rootPane.disableTrueDoubleBuffering();
@@ -385,10 +385,11 @@ public abstract class JComponent extends Container {
 	 * Returns true if {@code c} is the component the graphics is being requested
 	 * of. This is intended for use when getGraphics is invoked.
 	 */
-	private static boolean isComponentObtainingGraphicsFrom(Component c) {
-		synchronized (componentObtainingGraphicsFromLock) {
-			return (componentObtainingGraphicsFrom == c);
-		}
+	public static boolean isComponentObtainingGraphicsFrom(Component c) {
+//		synchronized (componentObtainingGraphicsFromLock) {
+			return (c == null && componentObtainingGraphicsFrom != null
+					|| componentObtainingGraphicsFrom == c);
+//		}
 	}
 
 	/**
@@ -564,7 +565,7 @@ public abstract class JComponent extends Container {
 		// getManagingFocusBackwardTraversalKeys());
 		// }
 		//
-		super.setLocale(JComponent.getDefaultLocale());
+		super.setLocale(getDefaultLocale());
 	}
 
 	/**
@@ -618,17 +619,16 @@ public abstract class JComponent extends Container {
 	 * @see ComponentUI
 	 */
 	protected void paintComponent(Graphics g) {
-		if (ui != null) {
-			Graphics scratchGraphics = (g == null) ? null : g.create();
+		if (ui != null && g != null) {
+			Graphics scratchGraphics = g.create();
 			try {
 				// note that this update will fill the component's background, but  
 				// that is not what we are worried about. What we are worried about
 				// is if this method is overridden and is written to.
-				秘isBackgroundPainted = false;
+				//秘isBackgroundPainted = false;
 				ui.update(scratchGraphics, this);
-				// BH TODO CHECK THIS 
-				JSGraphics2D jsg = 秘getJSGraphic2D(scratchGraphics);		
-				秘isBackgroundPainted = (jsg != null && jsg.isBackgroundPainted());
+				//JSGraphics2D jsg = 秘getJSGraphic2D(scratchGraphics);		
+				//秘isBackgroundPainted = (jsg != null && jsg.isBackgroundPainted());
 			} finally {
 				scratchGraphics.dispose();
 			}
@@ -1590,9 +1590,9 @@ public abstract class JComponent extends Container {
 	 *           description: The component's border.
 	 */
 	public void setBorder(Border border) {
-		Border oldBorder = this.border;
+		Border oldBorder = this.秘border;
 
-		this.border = border;
+		this.秘border = border;
 		firePropertyChange("border", oldBorder, border);
 		if (border != oldBorder) {
 			if (border == null
@@ -1601,7 +1601,7 @@ public abstract class JComponent extends Container {
 							.getBorderInsets(this)))) {
 				revalidate();
 			}
-			repaint();
+			秘repaint();
 		}
 	}
 
@@ -1613,7 +1613,7 @@ public abstract class JComponent extends Container {
 	 * @see #setBorder
 	 */
 	public Border getBorder() {
-		return border;
+		return 秘border;
 	}
 
 	/**
@@ -1625,8 +1625,8 @@ public abstract class JComponent extends Container {
 	 */
 	@Override
 	public Insets getInsets() {
-		if (border != null) {
-			return border.getBorderInsets(this);
+		if (秘border != null) {
+			return 秘border.getBorderInsets(this);
 		}
 		return super.getInsets();
 	}
@@ -1654,17 +1654,17 @@ public abstract class JComponent extends Container {
 			// because AWT components do not have this method
 			in = getInsets();
 		} else {
-			if (border == null) {
+			if (秘border == null) {
 				// super.getInsets() always returns an Insets object with
 				// all of its value zeroed. No need for a new object here.
 				insets.left = insets.top = insets.right = insets.bottom = 0;
 			} else {
-				if (border instanceof AbstractBorder) {
-					in = ((AbstractBorder) border).getBorderInsets(this, insets);
+				if (秘border instanceof AbstractBorder) {
+					in = ((AbstractBorder) 秘border).getBorderInsets(this, insets);
 				}
 				// Can't reuse border insets because the Border interface
 				// can't be enhanced.
-				in = border.getBorderInsets(this);
+				in = 秘border.getBorderInsets(this);
 			}
 		}
 		if (in != null) {
@@ -2509,7 +2509,7 @@ public abstract class JComponent extends Container {
 		super.setEnabled(enabled);
 		firePropertyChange("enabled", oldEnabled, enabled);
 		if (enabled != oldEnabled) {
-			repaint();
+			秘repaint();
 		}
 	}
 
@@ -2531,7 +2531,7 @@ public abstract class JComponent extends Container {
 		if ((oldFg != null) ? !oldFg.equals(fg) : ((fg != null) && !fg
 				.equals(oldFg))) {
 			// foreground already bound in AWT1.2
-			repaint();
+			秘repaint();
 		}
 	}
 
@@ -2560,7 +2560,7 @@ public abstract class JComponent extends Container {
 		if ((oldBg != null) ? !oldBg.equals(bg) : ((bg != null) && !bg
 				.equals(oldBg))) {
 			// background already bound in AWT1.2
-			repaint();
+			秘repaint();
 		}
 	}
 
@@ -2581,7 +2581,7 @@ public abstract class JComponent extends Container {
 		// font already bound in AWT1.2
 		if (font != oldFont) {
 			revalidate();
-			repaint();
+			秘repaint();
 		}
 	}
 
@@ -2606,7 +2606,7 @@ public abstract class JComponent extends Container {
 			// REMIND(bcb) choosing the default value is more complicated
 			// than this.
 			l = Locale.getDefault();
-			JComponent.setDefaultLocale(l);
+			setDefaultLocale(l);
 		}
 		return l;
 	}
@@ -2774,7 +2774,7 @@ public abstract class JComponent extends Container {
 		 * window.
 		 */
 		if (parent != null) {
-			return JComponent.processKeyBindingsForAllComponents(e, parent, pressed);
+			return processKeyBindingsForAllComponents(e, parent, pressed);
 		}
 		return false;
 	}
@@ -3159,7 +3159,7 @@ public abstract class JComponent extends Container {
 
 	static class KeyboardState {
 		
-		private static final Object keyCodesKey = JComponent.KeyboardState.class;
+		private static final Object keyCodesKey = KeyboardState.class;
 
 		// Get the array of key codes from the AppContext.
 		static IntVector getKeyCodeArray() {
@@ -3461,7 +3461,7 @@ public abstract class JComponent extends Container {
 		// firePropertyChange("UI", oldUI, newUI);
 		if (oldUI != null) {
 			revalidate();
-			repaint();
+			秘repaint();
 		}
 	}
 
@@ -4267,9 +4267,9 @@ public abstract class JComponent extends Container {
 			Runnable callRevalidate = new Runnable() {
 				@Override
 				public void run() {
-					//synchronized (JComponent.this) {
+//					synchronized (JComponent.this) {
 						setFlag(REVALIDATE_RUNNABLE_SCHEDULED, false);
-					//}
+//					}
 					revalidate();
 				}
 			};
@@ -4347,7 +4347,7 @@ public abstract class JComponent extends Container {
 			return;
 		}
 
-		while (!((JComponent) c).isOpaque()) {
+		while (!isOpaque() && ((JSComponent)c).秘paintsSelf()) {
 			parent = c.getParent();
 			if (parent != null) {
 				x += c.getX();
@@ -4399,7 +4399,7 @@ public abstract class JComponent extends Container {
 
 	void _paintImmediately(int x, int y, int w, int h) {
 
-		// this method is called on JPanel if the developer uses jpanel.repaint()
+		// this method is called on JPanel if the developer uses jpanel.秘repaint()
 		
 		Graphics g;
 		Container c;
@@ -4524,6 +4524,13 @@ public abstract class JComponent extends Container {
 			return;
 		}
 
+		if (paintingComponent.秘isContentPane && !paintingComponent.isOpaque()) {
+			// SwingJS 
+			// the root pane may be opaque and need to clear the canvas
+			// we have gotten to the contentPane level. 
+			// SwingJS hiding of panel that is drawn through needs to clear
+			paintingComponent = paintingComponent.getRootPane();
+		}
 		paintingComponent.setFlag(ISREPAINTING, true);
 
 		paintImmediatelyClip.x -= offsetX;
@@ -4565,10 +4572,11 @@ public abstract class JComponent extends Container {
                             paintImmediatelyClip.width, paintImmediatelyClip.height);
 
 					// this sequence assures that if the developer called 
-					// jpanel.repaint() and then draws on the background,
+					// jpanel.秘repaint() and then draws on the background,
 					// the JPanel's background is made transparent
 					// (so that the underlying JRootPane canvas can show).
-					paintingComponent.秘paintWithBackgroundCheck(g);
+					 paintingComponent.秘paintWithBackgroundCheck(g);
+					 //paintingComponent.paint(g);
 				}
 			} finally {
 				g.dispose();
@@ -4758,8 +4766,8 @@ public abstract class JComponent extends Container {
 				.toString() : "");
 		String maximumSizeString = (isMaximumSizeSet() ? getMaximumSize()
 				.toString() : "");
-		String borderString = (border == null ? "" : (border == this ? "this"
-				: border.toString()));
+		String borderString = (秘border == null ? "" : (秘border == this ? "this"
+				: 秘border.toString()));
 
 		return super.paramString() + ",alignmentX=" + 秘alignmentX + ",alignmentY="
 				+ 秘alignmentY + ",border=" + borderString + ",flags=" + flags
@@ -4922,14 +4930,13 @@ public abstract class JComponent extends Container {
 	private void printBorderSafely(Graphics g) {
 		if (getBorder() == null)
 			return;
-		秘isBackgroundPainted=true;
+//		秘isBackgroundPainted=true;
 		JSGraphics2D jsg = 秘getJSGraphic2D(g);		
 		int nSave = (jsg == null ? 0 : jsg.mark());
 		printBorder(g);
 		if (jsg != null)
 			jsg.reset(nSave);
 	}
-
 
 
 }

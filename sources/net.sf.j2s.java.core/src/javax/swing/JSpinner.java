@@ -260,7 +260,7 @@ public class JSpinner extends JComponent
                 setEditor(createEditor(model)); // sets editorExplicitlySet true
                 editorExplicitlySet = false;
             }
-            repaint();
+            秘repaint();
             revalidate();
         }
     }
@@ -486,7 +486,7 @@ public class JSpinner extends JComponent
             editorExplicitlySet = true;
             firePropertyChange("editor", oldEditor, editor);
             revalidate();
-            repaint();
+            秘repaint();
         }
     }
 

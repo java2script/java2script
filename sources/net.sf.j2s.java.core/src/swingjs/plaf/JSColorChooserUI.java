@@ -240,7 +240,7 @@ public class JSColorChooserUI extends JSPanelUI
             ColorSelectionModel model = (ColorSelectionModel)evt.getSource();
             if (previewPanel != null) {
                 previewPanel.setForeground(model.getSelectedColor());
-                previewPanel.repaint();
+                previewPanel.秘repaint();
             }
         }
 

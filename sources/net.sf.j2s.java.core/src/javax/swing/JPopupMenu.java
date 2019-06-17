@@ -475,7 +475,7 @@ public class JPopupMenu extends JComponent implements MenuElement {
 //                oldValue, label);
 //        }
         invalidate();
-        repaint();
+        秘repaint();
     }
 
     /**
@@ -1034,7 +1034,7 @@ public class JPopupMenu extends JComponent implements MenuElement {
      */
     public void setBorderPainted(boolean b) {
         paintBorder = b;
-        repaint();
+        秘repaint();
     }
 
     /**

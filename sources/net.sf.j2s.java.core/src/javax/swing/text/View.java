@@ -1238,7 +1238,7 @@ public abstract class View implements SwingConstants {
             preferenceChanged(null, true, true);
             Container host = getContainer();
             if (host != null) {
-                host.repaint();
+                host.秘repaint();
             }
         }
     }

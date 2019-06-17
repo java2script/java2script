@@ -21,7 +21,7 @@ public class Panel extends JPanel {
 		subclassSetup();
 		setBackground(null);
 		setOpaque(false);
-		Applet.fixAWTPaint(this, Panel.class);
+		A2SContainer.fixAWTPaint(this, Panel.class);
 	}
 
 	protected void subclassSetup() {

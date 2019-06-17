@@ -38,7 +38,7 @@ public class JSTextFieldUI extends JSTextUI {
 		Insets insets = editor.getMargin();
 		setPadding(insets);
 		textListener.checkDocument();
-		setCssFont(setJSText(focusNode, "value", setCurrentText()), c.getFont());
+		setCssFont(setJSText(focusNode, "value", setCurrentText()), getFont());
 		// setTextAlignment();
 		return super.updateDOMNode();
 	}

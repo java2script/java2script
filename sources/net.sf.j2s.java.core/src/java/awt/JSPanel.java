@@ -71,12 +71,12 @@ public class JSPanel extends Container {
 		setAppContext();
 		setLayout(layout);
 	}
-
-    @Override
-		protected boolean canPaint() {
-    	//return this.isContentPane || this.rootPane; ??
-			return 秘isContentPane;
-    }
+// JSPanel is just for JSApplet, which is the superclass of JApplet and, from that, Applet
+//    @Override
+//		protected boolean canPaint() {
+//    	//return this.isContentPane || this.rootPane; ??
+//			return 秘isContentPane;
+//    }
 
     /**
      * Construct a name for this component.  Called by getName() when the

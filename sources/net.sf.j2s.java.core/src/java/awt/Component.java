@@ -1488,7 +1488,7 @@ public abstract class Component implements ImageObserver/*
 		createHierarchyEvents(HierarchyEvent.HIERARCHY_CHANGED, this, parent, HierarchyEvent.SHOWING_CHANGED,
 				Toolkit.enabledOnToolkit(AWTEvent.HIERARCHY_EVENT_MASK));
 		if (peer instanceof LightweightPeer) {
-			repaint();
+			((JSComponent)this).秘repaint();
 		}
 		updateCursorImmediately();
 	}
@@ -2112,7 +2112,7 @@ public abstract class Component implements ImageObserver/*
 			// Have the parent redraw the area this component occupied.
 			parent.repaint(oldX, oldY, oldWidth, oldHeight);
 			// Have the parent redraw the area this component *now* occupies.
-			repaint();
+			((JSComponent)this).秘repaint();
 		}
 	}
 
@@ -2697,7 +2697,9 @@ public abstract class Component implements ImageObserver/*
 
 	/**
 	 * 
-	 * For SwingJS, we have the graphics without needing to get it from a peer.
+	 * Unused in SwingJS. For SwingJS, we have the graphics without needing to get it from a peer.
+	 * @see JSComponent.getGraphics
+	 * 
 	 * Creates a graphics context for this component. This method will return
 	 * <code>null</code> if this component is currently not displayable.
 	 * 
@@ -3832,6 +3834,9 @@ public abstract class Component implements ImageObserver/*
 		// selectively for non-native components on Windows only.
 		// - Fred.Ecks@Eng.sun.com, 5-8-98
 
+		case PaintEvent.UPDATE:
+			((JSComponent)this).秘update();
+			break;
 		case KeyEvent.KEY_PRESSED:
 		case KeyEvent.KEY_RELEASED:
 			Container p = (Container) ((this instanceof Container) ? this : parent);
@@ -5402,7 +5407,7 @@ public abstract class Component implements ImageObserver/*
 	 */
 	protected void processKeyEvent(KeyEvent e) {
 		KeyListener listener = keyListener;
-		if (listener != null && (/** @j2sNative this.isAWT$ || */ 秘isFocusableSet)) {
+		if (listener != null && (((JSComponent)this).秘isAWT()||  秘isFocusableSet)) {
 			int id = e.getID();
 			switch (id) {
 			case KeyEvent.KEY_TYPED:
@@ -5785,10 +5790,6 @@ public abstract class Component implements ImageObserver/*
 	 * @since JDK1.0
 	 */
 	public void addNotify() {
-		addNotifyComp();
-	}
-
-	protected void addNotifyComp() {
 		synchronized (getTreeLock()) {
 			ComponentPeer peer = getOrCreatePeer();
 			// this.peer;
@@ -8307,5 +8308,6 @@ public abstract class Component implements ImageObserver/*
 
 		return doesClassImplement(obj.getClass(), interfaceName);
 	}
+
 
 }

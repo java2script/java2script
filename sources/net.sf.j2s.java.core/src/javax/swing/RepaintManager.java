@@ -35,6 +35,7 @@ import java.awt.JSFrame;
 import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
 import java.awt.Image;
+import java.awt.JSComponent;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
@@ -854,13 +855,14 @@ public class RepaintManager {
 				} else if (dirtyComponent.isShowing()) {
 					// in SwingJS this means we are working with  
 					// a JApplet, JFrame, JWindow, or JDialog
-					Graphics g = dirtyComponent.getGraphics();//JComponent.safelyGetGraphics(dirtyComponent,	dirtyComponent);
+					Graphics g = JComponent.safelyGetGraphics(dirtyComponent,	dirtyComponent);
 					// If the Graphics goes away, it means someone disposed of
 					// the window, don't do anything.
 					if (g != null) {
 						// SwingJS not clipping, for performance g.setClip(rect.x, rect.y, rect.width, rect.height);
 						try {
 							((Container) dirtyComponent).秘paintWithBackgroundCheck(g); // SwingJS was paintContainer, but that bypasses user's paint(g) and does not do the background check?? 9/15/18
+//							((Container) dirtyComponent).paintContainer(g); // SwingJS was paintContainer,
 						} finally {
 							g.dispose();
 						}
@@ -914,6 +916,15 @@ public class RepaintManager {
 			Component dirtyComponent, java.util.List<Component> roots) {
 		int dx, dy, rootDx, rootDy;
 		Component component, rootDirtyComponent, parent;
+		
+		// TODO: SwingJS: we need to make sure that if a set of 
+		// labels are not opaque (as is usually the case) 
+		// and all paint themselves, that we don't try to paint them 
+		// one by one, which will trigger a full paint of the panel 
+		// each time. 
+		
+		
+		
 		// Rectangle cBounds;
 
 		// Find the highest parent which is dirty. When we get out of this
@@ -1563,7 +1574,7 @@ public class RepaintManager {
 	// if (repaintManager.painting) {
 	// repaintManager.repaintRoot = root;
 	// } else {
-	// root.repaint();
+	// root.秘repaint();
 	// }
 	// }
 	//

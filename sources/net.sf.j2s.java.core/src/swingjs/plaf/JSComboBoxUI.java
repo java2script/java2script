@@ -4,6 +4,8 @@ package swingjs.plaf;
 import javajs.util.PT;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.beans.PropertyChangeEvent;
+
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.LookAndFeel;
@@ -45,6 +47,22 @@ public class JSComboBoxUI extends JSLightweightUI implements ItemListener, ListD
 		checkEnabled();
 		return updateDOMNodeCUI();
 	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent e) {
+		switch (e.getPropertyName()) {
+		case "updateSwingJS":
+			updateJSCombo();
+			return;
+		}
+		super.propertyChange(e);
+	}
+
+	private void updateJSCombo() {
+		if (domNode != null)
+			DOMNode.setAttrInt(domNode, "selectedIndex", comboBox.getSelectedIndex());
+	}
+
 
 	private void checkEnabled() {
 		if (comboBox.isEnabled())
@@ -210,7 +228,7 @@ public class JSComboBoxUI extends JSLightweightUI implements ItemListener, ListD
 
 	@Override
 	public void itemStateChanged(ItemEvent e) {
-		//System.out.println("JSComboBoxUI itemStateChanged " + e);
+		updateJSCombo();
 	}
 
 

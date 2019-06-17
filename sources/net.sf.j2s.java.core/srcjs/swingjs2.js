@@ -10663,7 +10663,7 @@ return jQuery;
 	};
 	// note - click is for dragging the resizer
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
-// j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
+﻿// j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
 // J2S._version set to "3.2.4.07" 2019.01.04; 2019.02.06
 
@@ -10702,27 +10702,28 @@ try {
 
 J2S.onClazzLoaded || (J2S.onClazzLoaded = function(i, msg) {console.log([i,msg])});
 
+var getZOrders = function(z) {
+	return {
+		rear : z++,
+		header : z++,
+		main : z++,
+		content : z++,
+		front : z++,
+		fileOpener : z++,
+		coverImage : z++,
+		dialog : z++, // could be several of these, JSV only
+		menu : z + 90000, // way front
+		console : z + 91000, // even more front
+		consoleImage : z + 91001, // bit more front; increments
+		monitorZIndex : z + 99999
+	// way way front
+	}
+};
+
+
 if (!J2S._version)
 	J2S = (function(document) {
 		var z = J2S.z || 9000;
-		var getZOrders = function(z) {
-			return {
-				rear : z++,
-				header : z++,
-				main : z++,
-				content : z++,
-				front : z++,
-				fileOpener : z++,
-				coverImage : z++,
-				dialog : z++, // could be several of these, JSV only
-				menu : z + 90000, // way front
-				console : z + 91000, // even more front
-				consoleImage : z + 91001, // bit more front; increments
-				monitorZIndex : z + 99999
-			// way way front
-			}
-		};
-
 		var j = {
 
 			_version : "3.2.4.07", // svn.keywords:lastUpdated
@@ -11930,11 +11931,11 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		obj._id = id;
 		obj.__Info = {};
 		Info.z && Info.zIndexBase
-				&& (J2S._z = J2S.getZOrders(Info.zIndexBase));
+				&& (J2S._z = getZOrders(Info.zIndexBase));
 		for ( var i in Info)
 			obj.__Info[i] = Info[i];
 		(obj._z = Info.z) || Info.zIndexBase
-				&& (obj._z = obj.__Info.z = J2S.getZOrders(Info.zIndexBase));
+				&& (obj._z = obj.__Info.z = getZOrders(Info.zIndexBase));
 		obj._width = Info.width;
 		obj._height = Info.height;
 		obj._noscript = !obj._isJava && Info.noscript;
@@ -12986,7 +12987,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	J2S._jsSetPrototype = function(proto) {
 		proto._init = function() {
 			this._setupJS();
-			this._showInfo(true);
+			this._showInfo(!this.__Info.console);
 			if (this._disableInitialConsole)
 				this._showInfo(false);
 		};

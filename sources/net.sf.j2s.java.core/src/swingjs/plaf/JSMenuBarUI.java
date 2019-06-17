@@ -95,7 +95,7 @@ public class JSMenuBarUI extends JSPanelUI implements ContainerListener {
 			containerNode = domNode = newDOMObject("div", id);//???, "tabindex", "0");
 			DOMNode.setTopLeftAbsolute(domNode, 0, 0); // after title bar
 		}
-		setBackgroundCUI(jc.isOpaque() ? getBackground() : null);
+		setBackgroundImpl(jc.isOpaque() ? getBackground() : null);
 		return updateDOMNodeCUI();
 	}
 
@@ -119,7 +119,7 @@ public class JSMenuBarUI extends JSPanelUI implements ContainerListener {
 	@Override
 	protected int getContainerHeight() {
 		Insets m = menuBar.getInsets();
-		return height = menuBar.getFont().getFontMetrics().getHeight() + m.top + m.bottom;
+		return height = getFont().getFontMetrics().getHeight() + m.top + m.bottom;
 	}
 
 	@Override

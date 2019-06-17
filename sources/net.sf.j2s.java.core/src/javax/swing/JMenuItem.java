@@ -225,7 +225,7 @@ public class JMenuItem extends AbstractButton implements MenuElement {
 			// the focus information is painted
 			JMenuItem mi = (JMenuItem) event.getSource();
 			if (mi.isFocusPainted()) {
-				mi.repaint();
+				mi.秘repaint();
 			}
 		}
 	}
@@ -312,7 +312,7 @@ public class JMenuItem extends AbstractButton implements MenuElement {
 	public void setAccelerator(KeyStroke keyStroke) {
 		KeyStroke oldAccelerator = accelerator;
 		this.accelerator = keyStroke;
-		repaint();
+		秘repaint();
 		revalidate();
 		firePropertyChange("accelerator", oldAccelerator, accelerator);
 	}

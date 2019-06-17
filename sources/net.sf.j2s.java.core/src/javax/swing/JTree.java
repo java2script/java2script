@@ -2844,7 +2844,7 @@ public class JTree extends JComponent implements Scrollable
      */
     public void treeDidChange() {
         revalidate();
-        repaint();
+        秘repaint();
     }
 
     /**

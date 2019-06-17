@@ -3187,8 +3187,9 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @return
 	 */
 	public static String argumentTypesToString(Class<?>[] parameterTypes) {
+		if (parameterTypes == null)
+			return "$";
 		String s = "";
-		if (parameterTypes != null)
 			for (int i = 0; i < parameterTypes.length; i++)
 				s += "$" + /** @j2sNative Clazz._getParamCode(parameterTypes[i]) || */null;
 		return s;
@@ -3565,7 +3566,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		Object[] a = new Object[args == null ? 0 : args.length];
 		if (args != null && (types != null || isProxy))
 		      for (int i = args.length; --i >= 0;)
-		    	  a[i] = (isProxy ? args[i] : /** @j2sNative (types[i].__PRIMITIVE && args[i].valueOf$ ? args[i].valueOf$() : args[i]) || */ null);
+		    	  a[i] = (isProxy ? args[i] : /** @j2sNative (types[i].__PRIMITIVE && args[i].valueOf ? args[i].valueOf() : args[i]) || */ null);
 		return a;
 	}
 

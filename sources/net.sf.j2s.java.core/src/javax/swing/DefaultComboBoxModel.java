@@ -40,7 +40,7 @@ import java.util.Vector;
 public class DefaultComboBoxModel<E> extends AbstractListModel<E> implements MutableComboBoxModel<E> {
     Vector<E> objects;
     Object selectedObject;
-	private boolean _isQuiet;
+	private boolean 秘isQuiet;
 
     /**
      * Constructs an empty DefaultComboBoxModel object.
@@ -93,8 +93,11 @@ public class DefaultComboBoxModel<E> extends AbstractListModel<E> implements Mut
         if ((selectedObject != null && !selectedObject.equals( anObject )) ||
             selectedObject == null && anObject != null) {
             selectedObject = anObject;
-            if (!_isQuiet)
+            if (秘isQuiet) {
+            	
+            } else {
             	fireContentsChanged(this, -1, -1);
+            }
         }
     }
 
@@ -136,7 +139,7 @@ public class DefaultComboBoxModel<E> extends AbstractListModel<E> implements Mut
         objects.addElement(anObject);
         fireIntervalAdded(this,objects.size()-1, objects.size()-1);
         if ( objects.size() == 1 && selectedObject == null && anObject != null ) {
-        	_setSelectedItemQuiet(anObject);
+        	秘setSelectedItemQuiet(anObject);
         }
     }
 
@@ -152,7 +155,7 @@ public class DefaultComboBoxModel<E> extends AbstractListModel<E> implements Mut
     @Override
 		public void removeElementAt(int index) {
         if ( getElementAt( index ) == selectedObject )
-        	_setSelectedItemQuiet(index > 0 ? getElementAt( index - 1 )
+        	秘setSelectedItemQuiet(index > 0 ? getElementAt( index - 1 )
         			:  getSize() == 1 ? null : getElementAt( index + 1 ) );
 
         objects.removeElementAt(index);
@@ -184,9 +187,9 @@ public class DefaultComboBoxModel<E> extends AbstractListModel<E> implements Mut
         }
     }
 
-	void _setSelectedItemQuiet(Object o) {
-        _isQuiet = (/**@j2sNative !!this.isAWT$ || */false);
+	void 秘setSelectedItemQuiet(Object o) {
+        秘isQuiet = (/**@j2sNative !!this.isAWT$ || */false);
         setSelectedItem( o );
-        _isQuiet = false;
+        秘isQuiet = false;
 	}
 }

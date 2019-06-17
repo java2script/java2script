@@ -147,7 +147,7 @@ public class JSeparator extends JComponent implements SwingConstants
         this.orientation = orientation;
         firePropertyChange("orientation", oldValue, orientation);
         revalidate();
-        repaint();
+        秘repaint();
     }
 
     private void checkOrientation( int orientation )

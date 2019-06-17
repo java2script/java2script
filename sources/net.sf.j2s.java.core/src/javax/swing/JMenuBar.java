@@ -276,7 +276,7 @@ public class JMenuBar extends JComponent implements MenuElement
         firePropertyChange("borderPainted", oldValue, paintBorder);
         if (b != oldValue) {
             revalidate();
-            repaint();
+            秘repaint();
         }
       }
     }
@@ -314,7 +314,7 @@ public class JMenuBar extends JComponent implements MenuElement
         firePropertyChange("margin", old, m);
         if (old == null || !old.equals(m)) {
             revalidate();
-            repaint();
+            秘repaint();
         }
     }
 

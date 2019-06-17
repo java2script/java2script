@@ -770,7 +770,7 @@ public class JInternalFrame extends JFrame
           fireInternalFrameEvent(InternalFrameEvent.INTERNAL_FRAME_ACTIVATED);
         else
           fireInternalFrameEvent(InternalFrameEvent.INTERNAL_FRAME_DEACTIVATED);
-        //repaint();
+        //秘repaint();
     }
 
     /**
@@ -1145,7 +1145,7 @@ public class JInternalFrame extends JFrame
 	public void reshape(int x, int y, int width, int height) {
         super.reshape(x, y, width, height);
 //        validate();
-//        repaint();
+//        秘repaint();
     }
 
 ///////////////////////////

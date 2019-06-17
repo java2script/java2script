@@ -196,7 +196,8 @@ public class JSComponentUI extends ComponentUI
 	
 	/**
 	 *  TableCellRenderers will not have parents; here we point to the table so that
-	 * we can send the coordinates to the retrieve the row and cell
+	 * we can send the coordinates to retrieve the row and cell and also set the 
+	 * background to transparent if need be.
 	 * 
 	 */
 	private JComponent targetParent;
@@ -696,11 +697,7 @@ public class JSComponentUI extends ComponentUI
 		// but it will always be a JSComponent, and
 		// we do not care if it is not a JComponent.
 		setComponent(target);
-		/**
-		 * @j2sNative
-		 *           this.isAWT = this.jc.isAWT$;
-		 */
-
+		isAWT = jc.秘isAWT();
 		applet = JSToolkit.getHTML5Applet(c);
 		newID(false);
 		installUI(target); // need to do this immediately, not later
@@ -1116,7 +1113,7 @@ public class JSComponentUI extends ComponentUI
 	 * 
 	 */
 	public void setTainted() {
-		isTainted = true;
+		setTainted(true);
 	}
 
 	/**
@@ -1201,7 +1198,7 @@ public class JSComponentUI extends ComponentUI
 			 }
 			 return;
 		 }
-		setBackgroundFor(domNode, awtPeerBG = getBackground());
+		setBackgroundImpl(awtPeerBG = getBackground());
 		setForegroundFor(domNode, awtPeerFG = getForeground());
 		setFont(c.getFont());
 	}
@@ -1311,7 +1308,7 @@ public class JSComponentUI extends ComponentUI
 	 * 
 	 */
 	@SuppressWarnings("unused")
-	private boolean layingOut;
+	protected boolean layingOut;
 
 	/**
 	 * has been disposed; will need to reattach it if it ever becomes visible again.
@@ -1358,7 +1355,7 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected boolean allowPaintedBackground = true;
 
-	private boolean backgroundPainted;
+	//private boolean backgroundPainted;
 
 	/**
 	 * Label will render its image, drawing to the canvas; Button will not 
@@ -1456,12 +1453,12 @@ public class JSComponentUI extends ComponentUI
 		System.out.println(DOMNode.getAttr(d, "outerHTML"));
 	}
 
-	protected static void vCenter(DOMNode obj, int offset, float scale) {
-		DOMNode.setStyles(obj, "top", "50%", "transform", 
-				(scale > 0 ? "scale(" + scale + "," + scale + ")" : "")
-				+"translateY(" + offset + "%)");
-	}
-
+//	protected static void vCenter(DOMNode obj, int offset, float scale) {
+//		DOMNode.setStyles(obj, "top", "50%", "transform", 
+//				(scale > 0 ? "scale(" + scale + "," + scale + ")" : "")
+//				+"translateY(" + offset + "%)");
+//	}
+//
 	/**
 	 * overloaded to allow panel and radiobutton to handle slightly differently
 	 * 
@@ -1658,7 +1655,7 @@ public class JSComponentUI extends ComponentUI
 			return (outerNode = DOMNode.createElement("div", "dummyFrame"));
 		}
 		updateDOMNode();
-		checkTransparent(domNode);
+		checkTransparent();
 		Component[] children = getChildren();
 		int n = getChildCount();
 
@@ -1724,24 +1721,6 @@ public class JSComponentUI extends ComponentUI
 		return true;
 	}
 
-	private void setOuterLocationFromComponent() {
-		// In SwingJS we just use the "local" lightweight location
-		// for all components, not the native adjusted one, because
-		// we maintain the hierarchy of the divs. I think this is
-		// saying that everything is basically heavyweight. It
-		// "paints" itself.
-
-		if (outerNode != null && !isMenuItem) {
-			// Considering the possibility of the parent being created
-			// before children are formed. So here we can add them later.
-			if (parent == null && jc.getParent() != null && (parent = (JSComponentUI) jc.getParent().getUI()) != null
-					&& parent.outerNode != null)
-				DOMNode.appendChildSafely(parent.outerNode, outerNode);
-			DOMNode.setPositionAbsolute(outerNode);
-			DOMNode.setStyles(outerNode, "left", (x = c.getX()) + "px", "top", (y = c.getY()) + "px");
-		}
-	}
-
 	protected Component[] getChildren() {
 		// but see JSMenuUI and JTableUI
 		return JSComponent.秘getChildArray(jc);
@@ -1787,41 +1766,33 @@ public class JSComponentUI extends ComponentUI
 		if (isUIDisabled)
 			return;
 		// called from JComponent.paintComponent
-		if (borderTest) {
-			g.setColor(Color.red);
-			g.drawRect(0, 0, c.getWidth(), c.getHeight());
-			System.out.println("drawing " + c.getWidth() + " " + c.getHeight());
-		}
+//		if (borderTest) {
+//			g.setColor(Color.red);
+//			g.drawRect(0, 0, c.getWidth(), c.getHeight());
+//			System.out.println("drawing " + c.getWidth() + " " + c.getHeight());
+//		}
 		setHTMLElement();
-		setAlignment();
+		if (allowTextAlignment && centeringNode != null)
+			setAlignments((AbstractButton)jc, false);
 		paint(g, c);
 	}
 
-	/**
-	 * Even if opaque, do not paint the background for some components (JButton, 
-	 * JComboBox, JMenuItem, JEditorPanel, JTextArea, JTextField), as they
-	 * will be be given colored backgrounds themselves as HTML5 components. 
-	 * @return
-	 */
-	public boolean doPaintBackground() {
-		return !backgroundPainted && c.isOpaque() && allowPaintedBackground;
-	}
 	
-	/**
-	 * This flag is set by border painting and background painting detection to
-	 * indicate that a cell renderer must do that painting.
-	 */
-	public void setPainted(Object g) {
-		if (g == null) {
-			// reset
-			backgroundPainted = false;
-			if (allowPaintedBackground)
-				DOMNode.setStyles(domNode, "background", null);
-		} else {
-			backgroundPainted = true;
-			setTransparent(domNode);
-		}
-	}
+//	/**
+//	 * This flag is set by border painting and background painting detection to
+//	 * indicate that a cell renderer must do that painting.
+//	 */
+//	public void setPainted(Object g) {
+//		if (g == null) {
+//			// reset
+//			backgroundPainted = false;
+//			if (allowPaintedBackground)
+//				DOMNode.setStyles(domNode, "background", null);
+//		} else {
+//			backgroundPainted = true;
+//			setTransparent(domNode);
+//		}
+//	}
 
 	/**
 	 * from ComponentPeer; not implemented in SwingJS
@@ -1837,11 +1808,6 @@ public class JSComponentUI extends ComponentUI
 	@Override
 	public void paint(Graphics g, JComponent c) {
 
-		if (doPaintBackground()) {
-			g.setColor(getBackground());
-			g.fillRect(0, 0, c.getWidth(), c.getHeight());
-			setTransparent(domNode);
-		} 
 		setOverflow();
 		if (imageNode != null && !imagePersists) {
 			// the icon must paint itself; imageNode is just a placeholder
@@ -2089,7 +2055,7 @@ public class JSComponentUI extends ComponentUI
 			getDisabledColors(buttonNode == null ? getPropertyPrefix() : "Button");
 		if (jc.isOpaque()) {
 			Color bg = getBackground();
-			setBackgroundFor(domNode, b || !(bg instanceof UIResource) || inactiveBackground == null ? bg : inactiveBackground);
+			setBackgroundImpl(b || !(bg instanceof UIResource) || inactiveBackground == null ? bg : inactiveBackground);
 		}
 		Color fg = getForeground();
 		setForegroundFor(domNode, b ? fg : getInactiveTextColor(fg));
@@ -2154,6 +2120,24 @@ public class JSComponentUI extends ComponentUI
 		}
 	}
 
+	private void setOuterLocationFromComponent() {
+		// In SwingJS we just use the "local" lightweight location
+		// for all components, not the native adjusted one, because
+		// we maintain the hierarchy of the divs. I think this is
+		// saying that everything is basically heavyweight. It
+		// "paints" itself.
+
+		if (outerNode != null && !isMenuItem) {
+			// Considering the possibility of the parent being created
+			// before children are formed. So here we can add them later.
+			if (parent == null && jc.getParent() != null && (parent = (JSComponentUI) jc.getParent().getUI()) != null
+					&& parent.outerNode != null)
+				DOMNode.appendChildSafely(parent.outerNode, outerNode);
+			DOMNode.setPositionAbsolute(outerNode);
+			DOMNode.setStyles(outerNode, "left", (x = c.getX()) + "px", "top", (y = c.getY()) + "px");
+		}
+	}
+
 	private void setSizeFromComponent(int width, int height, int op) {
 		// allow for special adjustments
 		// currently MenuItem, TextField, and TextArea
@@ -2161,9 +2145,6 @@ public class JSComponentUI extends ComponentUI
 		// if (this.width != width || this.height != height) {
 		this.width = width;
 		this.height = height;
-		if (debugging)
-			System.out.println(id + " setBounds " + x + " " + y + " " + this.width + " " + this.height + " op=" + op
-					+ " createDOM?" + (domNode == null));
 		if (domNode == null)
 			updateDOMNode();
 		setJSDimensions(width + size.width, height + size.height);
@@ -2172,16 +2153,13 @@ public class JSComponentUI extends ComponentUI
 
 	protected void setJSDimensions(int width, int height) {
 		if (jsActualWidth > 0)
-			width = jsActualWidth;
+			width = jsActualWidth; // list only
 		if (jsActualHeight > 0)
-			height = jsActualHeight;
+			height = jsActualHeight; // list only
 		DOMNode.setSize(domNode, width, height);
 		if (outerNode != null) {
 			DOMNode.setSize(outerNode, width, height);
 		}
-//		if (menuAnchorNode != null) {
-//			DOMNode.setSize(menuAnchorNode, width, height);
-//		}
 	}
 
 	protected void setInnerComponentBounds(int width, int height) {
@@ -2295,7 +2273,7 @@ public class JSComponentUI extends ComponentUI
 			setJSText(obj, prop, text);
 		}
 		if (valueNode != null) {
-			setBackgroundFor(valueNode, c.getBackground());
+			setBackgroundImpl(c.getBackground());
 		}
 		if (debugging)
 			System.out.println("JSComponentUI: setting " + id + " " + prop);
@@ -2347,11 +2325,6 @@ public class JSComponentUI extends ComponentUI
 		iconR.x = iconR.y = textR.x = textR.y = 0;
 	}
 	
-	protected void setAlignment() {
-		if (allowTextAlignment && centeringNode != null)
-			setAlignments((AbstractButton)jc, false);
-	}
-
 	protected void addCentering(DOMNode node) {
 		if (iconNode == null)
 			iconNode = newDOMObject("span", id + "_icon");
@@ -2514,12 +2487,9 @@ public class JSComponentUI extends ComponentUI
 
 			// simple totally centered label or button
 			// can't have width or height here --- let the browser figure that out
-			DOMNode.setStyles(centeringNode, "width", null, "top", "50%", "left", "50%", "transform",
-					"translateX(-50%)translateY(-50%)", "position", "absolute");
-			DOMNode.setStyles(iconNode, "top", "50%", "left", "50%", "transform", "translateX(-50%)translateY(-50%)",
-					"position", "absolute");
-			DOMNode.setStyles(textNode, "top", "50%", "left", "50%", "transform", "translateX(-50%)translateY(-50%)",
-					"position", "absolute");
+			fullyCenter(centeringNode, true);
+			fullyCenter(iconNode, false);
+			fullyCenter(textNode, false);
 		} else {
 
 			DOMNode.setStyles(iconNode, "position", "absolute", "top", null, "left", null, "transform", null);
@@ -2641,6 +2611,15 @@ public class JSComponentUI extends ComponentUI
 			updateCellNode();
 	}
 
+	protected void fullyCenter(DOMNode node, boolean isCtr) {
+//		if (isLabel)
+			DOMNode.setStyles(node, "width", null, "top", "50%", "left", "50%", "transform",
+				"translateX(-50%)translateY(-50%)translateY(0.5px)translateX(0.5px)", "position", "absolute");
+// no, this causes the label to be offset too much
+	//		DOMNode.setStyles(node, "width", null, "top", null, "left", null, "transform", null, "position", null, "height", null);
+	}
+
+
 	private void updateCellNode() {
 		// could be editor or cell
 		if (cellWidth == 0 || cellHeight == 0) {
@@ -2730,8 +2709,7 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public void coalescePaintEvent(PaintEvent e) {
-		JSUtil.notImplemented("");
-
+		//JSUtil.notImplemented("");
 	}
 
 	/**
@@ -2809,73 +2787,10 @@ public class JSComponentUI extends ComponentUI
 		setForegroundFor(domNode, c);
 	}
 
-	@Override
-	public void setForeground(Color c) {
-		awtPeerFG = null;
-		setForegroundFor(domNode, c);
-	}
-
-	@Override
-	public void setBackground(Color c) {
-		awtPeerBG = null;
-		setBackgroundFor(domNode, c);
-	}
-	
-	private void setForegroundFor(DOMNode node, Color color) {
+	protected void setForegroundFor(DOMNode node, Color color) {
 		if (node != null)
 			DOMNode.setStyles(node, "color",
 					(color == null ? "rgba(0,0,0,0)" : JSToolkit.getCSSColor(color == null ? Color.black : color)));
-	}
-
-	protected void setBackgroundCUI(Color color) {
-		setBackgroundFor(domNode, color);
-	}
-
-	protected void setBackgroundFor(DOMNode node, Color color) {
-		// Don't allow color for Menu and MenuItem. This is taken care of by
-		// jQuery
-		if (node == null || isMenuItem || isUIDisabled)
-			return;
-		// if (color == null) // from paintComponentSafely
-		DOMNode.setStyles(node, "background-color", color == null ? null : JSToolkit.getCSSColor(color == null ? rootPaneColor : color));
-		if (allowPaintedBackground && selfOrParentBackgroundPainted())
-			setTransparent(node);
-		else
-			checkTransparent(node);
-		if (jc.秘gtemp != null)
-			jc.秘gtemp.setBackground(color);
-	}
-
-	public boolean selfOrParentBackgroundPainted() {
-		JSComponent c = jc;
-		JSComponent p = targetParent;
-		while (c != null) {
-			if (c.秘isBackgroundPainted)
-				return true;
-			c = (JSComponent) (p == null ? c.getParent() : p);
-			p = null;
-		}
-		return false;
-	}
-
-	/**
-	 * If a control is transparent, then set that in HTML for its node
-	 * 
-	 * @param node
-	 */
-	private void checkTransparent(DOMNode node) {
-		// Note that c.setOpaque(true/false) on a label DOES work, but you need
-		// to do a repaint to see it in Java.
-		// Here we keep it simple and do the change immediately.
-		//
-
-		if (!c.isOpaque() && node != null)
-			setTransparent(node);
-	}
-
-	private void setTransparent(DOMNode node) {
-		if (allowPaintedBackground)
-			DOMNode.setStyles(node, "background", "transparent");
 	}
 
 	@Override
@@ -3226,7 +3141,7 @@ public class JSComponentUI extends ComponentUI
 			return;
 		}
 		cellComponent = (JComponent) rendererComponent;		
-		backgroundPainted = false;
+		//backgroundPainted = false;
 		if (width == 0)
 			return;
 		cellWidth = width;
@@ -3251,8 +3166,108 @@ public class JSComponentUI extends ComponentUI
         }
 	}
 
-	public void setPaintedOnly() {
-		isPaintedOnly = true;
+//	public void setPaintedOnly() {
+//		isPaintedOnly = true;
+//	}
+
+
+	@Override
+	public void setForeground(Color c) {
+		awtPeerFG = null;
+		setForegroundFor(domNode, c);
+	}
+
+	/**
+	 * Setting the background through the interface also clears the AWT peer background
+	 */
+	@Override
+	public void setBackground(Color c) {
+		awtPeerBG = null;
+		setBackgroundImpl(c);
+	}
+	
+	private Color backgroundColor;
+	
+	protected void setBackgroundImpl(Color color) {
+		// Don't allow color for Menu and MenuItem. This is taken care of by
+		// jQuery
+		
+		if (domNode == null || isMenuItem || isUIDisabled)
+			return;
+		// currently painting - update JSGraphics2D
+		backgroundColor = color;
+		paintBackground(jc.秘gtemp);
+	}
+
+//	public boolean selfOrParentPaintsItself(JSComponent c, JSComponent p) {
+//		while (c != null) {
+//			if (c.秘paintsItself())
+//				return true;
+//			if (c.isOpaque())
+//				return false;
+//			c = (JSComponent) (p == null ? c.getParent() : p);
+//			p = null;
+//		}
+//		return false;
+//	}
+
+	/**
+	 * If a control is transparent, then set that in HTML for its node
+	 * 
+	 * @param node
+	 */
+	private void checkTransparent() {
+		// Note that c.setOpaque(true/false) on a label DOES work, but you need
+		// to do a repaint to see it in Java.
+		// Here we keep it simple and do the change immediately.
+		//
+
+		if (domNode != null && !c.isOpaque())
+			setTransparent();
+	}
+
+	private void setTransparent() {
+		if (allowPaintedBackground)
+			DOMNode.setStyles(domNode, "background", "transparent");
+	}
+	
+	public void paintBackground(JSGraphics2D g) {
+		boolean isOpaque = c.isOpaque();
+		boolean paintsSelf = jc.秘paintsSelf();
+		Color color = (this.backgroundColor == null ? getBackground() : this.backgroundColor);
+		if (g == null) {
+			if (!paintsSelf)
+				setBackgroundDOM(domNode, color);
+			// preliminary -- DOM only, when the background is set
+		} else if (allowPaintedBackground && isOpaque) {
+			// all opaque components must paint their background
+			// just in case they have painted CHILDREN
+			g.setBackground(color);
+			g.clearRect(0, 0, c.getWidth(), c.getHeight());
+			isOpaque = !jc.秘paintsSelf();
+		}
+		if (allowPaintedBackground && !isOpaque)
+			setTransparent();
+		else
+			checkTransparent();
+	}
+
+	protected void setBackgroundDOM(DOMNode node, Color color) {
+		DOMNode.setStyles(node, "background-color",
+				color == null ? null : JSToolkit.getCSSColor(color));
+	}
+
+
+	/**
+	 * A call to getGraphics has been made to a component that
+	 * otherwise has not been identified as a painted object
+	 */
+	public void clearPaintPath() {
+		JSComponent c = jc;
+		while (c != null) {
+			((JSComponentUI) c.ui).setTransparent();
+			c = c.getParent();
+		}
 	}
 
 }

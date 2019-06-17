@@ -986,7 +986,7 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
         }
 
         revalidate();
-        repaint();
+        秘repaint();
     }
 
 
@@ -1125,7 +1125,7 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
             }
             else {
                 scrollUnderway = true;
-                // This calls setBounds(), and then repaint().
+                // This calls setBounds(), and then 秘repaint().
                 view.setLocation(newX, newY);
                 repaintAll = false;
             }
@@ -1498,7 +1498,7 @@ public class JViewport extends JComponent implements JSComponent.A2SComponentWra
 //                // with the complete clip rect, in which case we don't
 //                // have to cause a repaint.
 //                if (waitingForRepaint) {
-//                    repaint();
+//                    秘repaint();
 //                }
 //            }
 //        });

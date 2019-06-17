@@ -445,7 +445,7 @@ public class JScrollPane extends JComponent implements ScrollPaneConstants
         verticalScrollBarPolicy = policy;
         firePropertyChange("verticalScrollBarPolicy", old, policy);
         revalidate();
-        repaint();
+        秘repaint();
     }
 
 
@@ -493,7 +493,7 @@ public class JScrollPane extends JComponent implements ScrollPaneConstants
         horizontalScrollBarPolicy = policy;
         firePropertyChange("horizontalScrollBarPolicy", old, policy);
         revalidate();
-        repaint();
+        秘repaint();
     }
 
 
@@ -794,7 +794,7 @@ public class JScrollPane extends JComponent implements ScrollPaneConstants
         firePropertyChange("horizontalScrollBar", old, horizontalScrollBar);
 
         revalidate();
-        repaint();
+        秘repaint();
     }
 
 
@@ -847,7 +847,7 @@ public class JScrollPane extends JComponent implements ScrollPaneConstants
         firePropertyChange("verticalScrollBar", old, verticalScrollBar);
 
         revalidate();
-        repaint();
+        秘repaint();
     }
 
 
@@ -918,7 +918,7 @@ public class JScrollPane extends JComponent implements ScrollPaneConstants
 //        }
 //
         revalidate();
-        repaint();
+        秘repaint();
     }
 
 
@@ -989,7 +989,7 @@ public class JScrollPane extends JComponent implements ScrollPaneConstants
         }
         firePropertyChange("rowHeader", old, rowHeader);
         revalidate();
-        repaint();
+        秘repaint();
     }
 
 
@@ -1055,7 +1055,7 @@ public class JScrollPane extends JComponent implements ScrollPaneConstants
         firePropertyChange("columnHeader", old, columnHeader);
 
         revalidate();
-        repaint();
+        秘repaint();
     }
 
 
@@ -1204,7 +1204,7 @@ public class JScrollPane extends JComponent implements ScrollPaneConstants
         }
         firePropertyChange(key, old, corner);
         revalidate();
-        repaint();
+        秘repaint();
     }
 
     /**

@@ -1014,7 +1014,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 			sortManager.modelRowSizes = null;
 		}
 		isRowHeightSet = true;
-		resizeAndRepaint();
+		resizeAnd秘repaint();
 		firePropertyChange("rowHeight", old, rowHeight);
 	}
 
@@ -1059,7 +1059,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		if (sortManager != null) {
 			sortManager.setViewRowHeight(row, rowHeight);
 		}
-		resizeAndRepaint();
+		resizeAnd秘repaint();
 	}
 
 	/**
@@ -1085,7 +1085,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 	public void setRowMargin(int rowMargin) {
 		int old = this.rowMargin;
 		this.rowMargin = rowMargin;
-		resizeAndRepaint();
+		resizeAnd秘repaint();
 		firePropertyChange("rowMargin", old, rowMargin);
 	}
 
@@ -1118,7 +1118,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		setRowMargin(intercellSpacing.height);
 		getColumnModel().setColumnMargin(intercellSpacing.width);
 
-		resizeAndRepaint();
+		resizeAnd秘repaint();
 	}
 
 	/**
@@ -1151,7 +1151,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		this.gridColor = gridColor;
 		firePropertyChange("gridColor", old, gridColor);
 		// Redraw
-		repaint();
+		秘repaint();
 	}
 
 	/**
@@ -1185,7 +1185,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		setShowVerticalLines(showGrid);
 
 		// Redraw
-		repaint();
+		秘repaint();
 	}
 
 //	@Override
@@ -1194,8 +1194,8 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 //	}
 //
 //	@Override
-//	public void repaint() {
-//		super.repaint();
+//	public void 秘repaint() {
+//		super.秘repaint();
 //	}
 //	
 //	@Override
@@ -1222,7 +1222,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		firePropertyChange("showHorizontalLines", old, showHorizontalLines);
 
 		// Redraw
-		repaint();
+		秘repaint();
 	}
 
 	/**
@@ -1243,7 +1243,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		this.showVerticalLines = showVerticalLines;
 		firePropertyChange("showVerticalLines", old, showVerticalLines);
 		// Redraw
-		repaint();
+		秘repaint();
 	}
 
 	/**
@@ -1295,9 +1295,9 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 				|| (mode == AUTO_RESIZE_LAST_COLUMN) || (mode == AUTO_RESIZE_ALL_COLUMNS)) {
 			int old = autoResizeMode;
 			autoResizeMode = mode;
-			resizeAndRepaint();
+			resizeAnd秘repaint();
 			if (tableHeader != null) {
-				tableHeader.resizeAndRepaint();
+				tableHeader.resizeAnd秘repaint();
 			}
 			firePropertyChange("autoResizeMode", old, autoResizeMode);
 		}
@@ -2018,7 +2018,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		if (sorter != null) {
 			sortManager = new SortManager(sorter);
 		}
-		resizeAndRepaint();
+		resizeAnd秘repaint();
 		firePropertyChange("rowSorter", oldRowSorter, sorter);
 		firePropertyChange("sorter", oldRowSorter, sorter);
 	}
@@ -2080,7 +2080,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		boolean old = this.rowSelectionAllowed;
 		this.rowSelectionAllowed = rowSelectionAllowed;
 		if (old != rowSelectionAllowed) {
-			repaint();
+			秘repaint();
 		}
 		firePropertyChange("rowSelectionAllowed", old, rowSelectionAllowed);
 	}
@@ -2108,7 +2108,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		boolean old = columnModel.getColumnSelectionAllowed();
 		columnModel.setColumnSelectionAllowed(columnSelectionAllowed);
 		if (old != columnSelectionAllowed) {
-			repaint();
+			秘repaint();
 		}
 		firePropertyChange("columnSelectionAllowed", old, columnSelectionAllowed);
 	}
@@ -2619,7 +2619,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		this.selectionForeground = selectionForeground;
 		firePropertyChange("selectionForeground", old, selectionForeground);
 		if (!selectionForeground.equals(old)) {
-			repaint();
+			秘repaint();
 		}
 	}
 
@@ -2662,7 +2662,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		this.selectionBackground = selectionBackground;
 		firePropertyChange("selectionBackground", old, selectionBackground);
 		if (!selectionBackground.equals(old)) {
-			repaint();
+			秘repaint();
 		}
 	}
 
@@ -3716,7 +3716,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 			// SwingJS don't invalidate the table itself
 			add(comp);
 			comp.validate();
-			comp.repaint();
+			comp.秘repaint();
 			comp.setVisible(true);
 			// force domNode to be visible as well as outer node
 			((JSComponentUI) comp.getUI()).setVisible(null, true);
@@ -3828,7 +3828,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 	public void setUI(TableUI ui) {
 		if (this.ui != ui) {
 			super.setUI(ui);
-			repaint();
+			秘repaint();
 		}
 	}
 
@@ -3955,7 +3955,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 			}
 
 			firePropertyChange("columnModel", old, columnModel);
-			resizeAndRepaint();
+			resizeAnd秘repaint();
 		}
 	}
 
@@ -3997,7 +3997,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 			newModel.addListSelectionListener(this);
 
 			firePropertyChange("selectionModel", oldModel, newModel);
-			repaint();
+			秘repaint();
 		}
 	}
 
@@ -4032,7 +4032,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		if (e.getType() == RowSorterEvent.Type.SORT_ORDER_CHANGED) {
 			JTableHeader header = getTableHeader();
 			if (header != null) {
-				header.repaint();
+				header.秘repaint();
 			}
 		} else if (e.getType() == RowSorterEvent.Type.SORTED) {
 			sorterChanged = true;
@@ -4328,14 +4328,14 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 
 			// And handle the appropriate repainting.
 			if (e == null || change.type != TableModelEvent.UPDATE) {
-				resizeAndRepaint();
+				resizeAnd秘repaint();
 			}
 		}
 
 		// Check if lead/anchor need to be reset.
 		if (change != null && change.allRowsChanged) {
 			clearSelectionAndLeadAnchor();
-			resizeAndRepaint();
+			resizeAnd秘repaint();
 		}
 	}
 
@@ -4345,7 +4345,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 	private void repaintSortedRows(ModelChange change) {
 		if (change.startModelIndex > change.endModelIndex || change.startModelIndex + 10 < change.endModelIndex) {
 			// Too much has changed, punt
-			repaint();
+			秘repaint();
 			return;
 		}
 		int eventColumn = change.event.getColumn();
@@ -4424,7 +4424,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		} else {
 			// Repositioning handled in BasicTableUI
 			this.editingRow = editingRow;
-			repaint();
+			秘repaint();
 		}
 	}
 
@@ -4562,7 +4562,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 				return;
 			}
 
-			resizeAndRepaint();
+			resizeAnd秘repaint();
 			return;
 		}
 
@@ -4575,7 +4575,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		// there are variable height rows. Repaint the visible region,
 		// but don't return as a revalidate may be necessary as well.
 		if (rowModel != null) {
-			repaint();
+			秘repaint();
 		}
 
 		if (e.getType() == TableModelEvent.INSERT) {
@@ -4617,7 +4617,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		// because the scrollbar may need repainting.
 		else {
 			clearSelectionAndLeadAnchor();
-			resizeAndRepaint();
+			resizeAnd秘repaint();
 			rowModel = null;
 		}
 	}
@@ -4652,7 +4652,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 				(getRowCount() - start) * rh);
 
 		revalidate();
-		// PENDING(milne) revalidate calls repaint() if parent is a ScrollPane
+		// PENDING(milne) revalidate calls 秘repaint() if parent is a ScrollPane
 		// repaint still required in the unusual case where there is no
 		// ScrollPane
 		repaint(drawRect);
@@ -4690,7 +4690,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 				(previousRowCount - start) * rh);
 
 		revalidate();
-		// PENDING(milne) revalidate calls repaint() if parent is a ScrollPane
+		// PENDING(milne) revalidate calls 秘repaint() if parent is a ScrollPane
 		// repaint still required in the unusual case where there is no
 		// ScrollPane
 		repaint(drawRect);
@@ -4714,7 +4714,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		if (isEditing()) {
 			removeEditor();
 		}
-		resizeAndRepaint();
+		resizeAnd秘repaint();
 	}
 
 	/**
@@ -4731,7 +4731,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		if (isEditing()) {
 			removeEditor();
 		}
-		resizeAndRepaint();
+		resizeAnd秘repaint();
 	}
 
 	/**
@@ -4751,7 +4751,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		if (isEditing()) {
 			removeEditor();
 		}
-		repaint();
+		秘repaint();
 	}
 
 	/**
@@ -4776,7 +4776,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		if (resizingColumn != null && autoResizeMode == AUTO_RESIZE_OFF) {
 			resizingColumn.setPreferredWidth(resizingColumn.getWidth());
 		}
-		resizeAndRepaint();
+		resizeAnd秘repaint();
 	}
 
 	private int limit(int i, int a, int b) {
@@ -5383,7 +5383,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 	public void setFillsViewportHeight(boolean fillsViewportHeight) {
 		boolean old = this.fillsViewportHeight;
 		this.fillsViewportHeight = fillsViewportHeight;
-		resizeAndRepaint();
+		resizeAnd秘repaint();
 		firePropertyChange("fillsViewportHeight", old, fillsViewportHeight);
 	}
 
@@ -5770,9 +5770,9 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 	/**
 	 * Equivalent to <code>revalidate</code> followed by <code>repaint</code>.
 	 */
-	protected void resizeAndRepaint() {
+	protected void resizeAnd秘repaint() {
 		revalidate();
-		repaint();
+		秘repaint();
 	}
 
 	/**

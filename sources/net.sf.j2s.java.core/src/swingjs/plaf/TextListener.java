@@ -95,7 +95,7 @@ public class TextListener implements FocusListener, ChangeListener,
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		JTextComponent txtComp = (JTextComponent) e.getSource();
-		txtComp.repaint();
+		txtComp.秘repaint();
 	}
 
 	@Override

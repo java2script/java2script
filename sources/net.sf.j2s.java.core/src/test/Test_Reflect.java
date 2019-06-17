@@ -12,6 +12,7 @@ class Test_Reflect extends Test_ {
 	}
 
 	public void test(int i, String s) {
+		// note -- not testing whether this is Integer or int
 		System.out.println("testint " + i);assert(s.equals("int"));
 	}
 
