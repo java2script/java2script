@@ -43,7 +43,7 @@ public class Frame extends JFrame implements A2SContainer {
 
 		    @Override
 			public void windowOpened(WindowEvent e) {
-		    	repaint();
+		    	秘repaint();
 		    }
 
 		});

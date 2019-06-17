@@ -463,7 +463,7 @@ public class BasicHTML {
         @Override
 		public void preferenceChanged(View child, boolean width, boolean height) {
             host.revalidate();
-            host.repaint();
+            host.秘repaint();
         }
 
         /**

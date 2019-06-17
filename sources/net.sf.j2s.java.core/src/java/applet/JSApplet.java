@@ -263,7 +263,7 @@ public class JSApplet extends JSPanel {
 		public void setVisible(boolean b) {
         super.setVisible(b);
         if (b)
-        	repaint(); // BH SwingJS needs this, because there is no system event set to do this.
+        	秘repaint(); // BH SwingJS needs this, because there is no system event set to do this.
     }
     
     

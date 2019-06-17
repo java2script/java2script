@@ -697,11 +697,7 @@ public class JSComponentUI extends ComponentUI
 		// but it will always be a JSComponent, and
 		// we do not care if it is not a JComponent.
 		setComponent(target);
-		/**
-		 * @j2sNative
-		 *           this.isAWT = this.jc.isAWT$;
-		 */
-
+		isAWT = jc.秘isAWT();
 		applet = JSToolkit.getHTML5Applet(c);
 		newID(false);
 		installUI(target); // need to do this immediately, not later
@@ -2713,8 +2709,7 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public void coalescePaintEvent(PaintEvent e) {
-		JSUtil.notImplemented("");
-
+		//JSUtil.notImplemented("");
 	}
 
 	/**
@@ -3200,8 +3195,6 @@ public class JSComponentUI extends ComponentUI
 		if (domNode == null || isMenuItem || isUIDisabled)
 			return;
 		// currently painting - update JSGraphics2D
-		if (jc.秘gtemp != null && color != null)
-			jc.秘gtemp.setBackground(color);
 		backgroundColor = color;
 		paintBackground(jc.秘gtemp);
 	}
@@ -3240,15 +3233,17 @@ public class JSComponentUI extends ComponentUI
 	
 	public void paintBackground(JSGraphics2D g) {
 		boolean isOpaque = c.isOpaque();
+		boolean paintsSelf = jc.秘paintsSelf();
 		Color color = (this.backgroundColor == null ? getBackground() : this.backgroundColor);
 		if (g == null) {
-			setBackgroundDOM(domNode, color);
+			if (!paintsSelf)
+				setBackgroundDOM(domNode, color);
 			// preliminary -- DOM only, when the background is set
 		} else if (allowPaintedBackground && isOpaque) {
 			// all opaque components must paint their background
 			// just in case they have painted CHILDREN
-			g.setColor(color);
-			g.fillRect(0, 0, c.getWidth(), c.getHeight());
+			g.setBackground(color);
+			g.clearRect(0, 0, c.getWidth(), c.getHeight());
 			isOpaque = !jc.秘paintsSelf();
 		}
 		if (allowPaintedBackground && !isOpaque)

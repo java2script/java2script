@@ -29,6 +29,7 @@ package java.awt;
 
 import java.awt.event.KeyListener;
 import java.awt.peer.ComponentPeer;
+import java.awt.peer.LightweightPeer;
 import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 
@@ -120,6 +121,7 @@ public abstract class JSComponent extends Component {
 
     public final static int PAINTS_SELF_NO = -1;
     public final static int PAINTS_SELF_YES = 1;
+    public final static int PAINTS_SELF_ALWAYS = 2;
     public final static int PAINTS_SELF_UNKNOWN = 0;
 
     /**
@@ -129,6 +131,7 @@ public abstract class JSComponent extends Component {
      * 
      */
     private int 秘iPaintMyself = PAINTS_SELF_UNKNOWN;
+	private boolean 秘repaintAsUpdate = true;
 
     // trying to replace these two:
 	// public boolean 秘isBackgroundPainted;
@@ -225,7 +228,7 @@ public abstract class JSComponent extends Component {
 		// Check to see if the subclass is getting this graphics
 		// object directly, without using paint(Graphics).
 		if (!JComponent.isComponentObtainingGraphicsFrom(null) && !秘paintsSelf()) {
-			秘setPaintsSelf();
+			秘setPaintsSelf(PAINTS_SELF_YES);
 			((JSComponentUI) ui).clearPaintPath();
 		}
 		
@@ -234,6 +237,12 @@ public abstract class JSComponent extends Component {
 		// }
 		g.setFont(getFont());
 		return g;
+	}
+
+	public void addNotify() {
+		if (秘paintsSelf())
+			((JSComponentUI) ui).clearPaintPath();	
+		super.addNotify();
 	}
 
 	public JSFrameViewer setFrameViewer(JSFrameViewer viewer) {
@@ -331,6 +340,25 @@ public abstract class JSComponent extends Component {
 	protected JSGraphics2D 秘getJSGraphic2D(Graphics g) {
 		return (/** @j2sNative g.mark$ ? g : */ null);
 	}
+
+	public boolean 秘isAWT() {
+		return (/** @j2sNative !!this.isAWT$ || */ false);
+	}
+	
+	protected void 秘setIsAWT() {
+        /**
+         * @j2sNative
+         * this.isAWT$ = true;
+         */
+    }
+
+
+	@Override
+	protected boolean canPaint() {
+		// meaning can UPDATE
+		return (秘repaintAsUpdate && 秘isAWT() || !(peer instanceof LightweightPeer));
+	}
+
 
 	@SuppressWarnings("unused")
 	@Override
@@ -543,8 +571,8 @@ public abstract class JSComponent extends Component {
 //		}
 	}
 
-    public int 秘setPaintsSelf() {
-    	return 秘iPaintMyself = PAINTS_SELF_YES;
+    public int 秘setPaintsSelf(int flag) {
+    	return (秘iPaintMyself == PAINTS_SELF_ALWAYS ? PAINTS_SELF_ALWAYS : (秘iPaintMyself = flag));
     }
     
 	/**
@@ -566,17 +594,18 @@ public abstract class JSComponent extends Component {
 			// don't allow if JComponent.paint(Graphics) has been overridden
 			// don't allow if AbstractBorder.paintBorder(...) has been overridden
 			// unchecked here is if a class calls getGraphics outside of this context
-			秘iPaintMyself = (JSUtil.isOverridden(this, "paint$java_awt_Graphics", JComponent.class)
+			秘iPaintMyself = 秘setPaintsSelf(JSUtil.isOverridden(this, "paint$java_awt_Graphics", JComponent.class)
 					|| JSUtil.isOverridden(this, "paintComponent$java_awt_Graphics", JComponent.class)
 					|| JSUtil.isOverridden(this, "paintContainer$java_awt_Graphics", Container.class)
+					|| JSUtil.isOverridden(this, "update$java_awt_Graphics", JComponent.class)
 					|| JSUtil.isOverridden(秘border, "paintBorder$java_awt_Component$java_awt_Graphics$I$I$I$I",
 							AbstractBorder.class) 
-					? 秘setPaintsSelf() : PAINTS_SELF_NO);
+					? PAINTS_SELF_YES : PAINTS_SELF_NO);
 		}
 		// TODO -- still need to set RepaintManager so that
 		// objects with the same paintable root can be grouped together.
 
-		return (秘iPaintMyself == PAINTS_SELF_YES);
+		return (秘iPaintMyself != PAINTS_SELF_NO);
 	}
 
 	/**
@@ -587,6 +616,39 @@ public abstract class JSComponent extends Component {
 	public boolean 秘selfOrChildIsPainted() {
 		return 秘paintsSelf(); 
 	}
+
+	public void removeAll() {
+		秘setPaintsSelf(PAINTS_SELF_UNKNOWN);
+	    ((JComponent) this).paintImmediately(0,  0,  width,  height);
+	}
+
+	public void 秘update() {
+		// from AWT repaint() via a PaintEvent.UPDATE
+		Graphics g = getGraphics();
+		try {
+			update(g);
+		} finally {
+			g.dispose();
+		}
+	}
+
+	/**
+	 * AWT controls will regard repaint() as update() unless called this way (from
+	 * javax.swing, primarily)
+	 */
+	public void 秘repaint() {
+		if (秘isAWT()) {
+			秘repaintAsUpdate = false;
+			try {
+				((JComponent) this).repaint();
+			} finally {
+				秘repaintAsUpdate = true;
+			}
+		} else {
+			repaint();
+		}
+	}
+
 
 //	private boolean childPaintsItself() {
 //		Component[] a = JSComponent.秘getChildArray((Container) this);

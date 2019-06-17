@@ -313,10 +313,10 @@ public class EventQueue {
 	}
 
 	private boolean coalescePaintEvent(PaintEvent e) {
-		ComponentPeer sourcePeer = ((Component) e.getSource()).peer;
-		if (sourcePeer != null) {
-			sourcePeer.coalescePaintEvent(e);
-		}
+//SwingJS		ComponentPeer sourcePeer = ((Component) e.getSource()).peer;
+//		if (sourcePeer != null) {
+//			sourcePeer.coalescePaintEvent(e);
+//		}
 		EventQueueItem[] cache = ((Component) e.getSource()).eventCache;
 		if (cache == null) {
 			return false;

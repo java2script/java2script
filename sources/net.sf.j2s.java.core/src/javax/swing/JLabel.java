@@ -295,7 +295,7 @@ public class JLabel extends JComponent implements SwingConstants/*, Accessible*/
 //        }
         if (text == null || oldValue == null || !text.equals(oldValue)) {
             revalidate();
-            repaint();
+            秘repaint();
         }
     }
 
@@ -331,7 +331,7 @@ public class JLabel extends JComponent implements SwingConstants/*, Accessible*/
         Icon oldValue = defaultIcon;
         defaultIcon = icon;
         if (defaultIcon != null)
-        	秘setPaintsSelf();
+        	秘setPaintsSelf(PAINTS_SELF_ALWAYS);
 
         /* If the default icon has really changed and we had
          * generated the disabled icon for this component
@@ -361,7 +361,7 @@ public class JLabel extends JComponent implements SwingConstants/*, Accessible*/
                 (defaultIcon.getIconHeight() != oldValue.getIconHeight())) {
                 revalidate();
             }
-            repaint();
+            秘repaint();
         }
     }
 
@@ -416,7 +416,7 @@ public class JLabel extends JComponent implements SwingConstants/*, Accessible*/
                 revalidate();
             }
             if (!isEnabled()) {
-                repaint();
+                秘repaint();
             }
         }
     }
@@ -446,7 +446,7 @@ public class JLabel extends JComponent implements SwingConstants/*, Accessible*/
 
         if (key != oldKey) {
             revalidate();
-            repaint();
+            秘repaint();
         }
     }
 
@@ -524,7 +524,7 @@ public class JLabel extends JComponent implements SwingConstants/*, Accessible*/
         firePropertyChange("displayedMnemonicIndex", oldValue, index);
         if (index != oldValue) {
             revalidate();
-            repaint();
+            秘repaint();
         }
     }
 
@@ -618,7 +618,7 @@ public class JLabel extends JComponent implements SwingConstants/*, Accessible*/
         firePropertyChange("iconTextGap", oldValue, iconTextGap);
         if (iconTextGap != oldValue) {
             revalidate();
-            repaint();
+            秘repaint();
         }
     }
 
@@ -667,7 +667,7 @@ public class JLabel extends JComponent implements SwingConstants/*, Accessible*/
         int oldValue = verticalAlignment;
         verticalAlignment = checkVerticalKey(alignment, "verticalAlignment");
         firePropertyChange("verticalAlignment", oldValue, verticalAlignment);
-        repaint();
+        秘repaint();
     }
 
 
@@ -721,7 +721,7 @@ public class JLabel extends JComponent implements SwingConstants/*, Accessible*/
                                                  "horizontalAlignment");
         firePropertyChange("horizontalAlignment",
                            oldValue, horizontalAlignment);
-        repaint();
+        秘repaint();
     }
 
 
@@ -775,7 +775,7 @@ public class JLabel extends JComponent implements SwingConstants/*, Accessible*/
                                                 "verticalTextPosition");
         firePropertyChange("verticalTextPosition", old, verticalTextPosition);
         revalidate();
-        repaint();
+        秘repaint();
     }
 
 
@@ -831,7 +831,7 @@ public class JLabel extends JComponent implements SwingConstants/*, Accessible*/
         firePropertyChange("horizontalTextPosition",
                            old, horizontalTextPosition);
         revalidate();
-        repaint();
+        秘repaint();
     }
 
 

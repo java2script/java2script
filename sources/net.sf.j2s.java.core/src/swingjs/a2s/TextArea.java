@@ -101,25 +101,25 @@ public class TextArea extends JTextArea {
         return verticalScrollBarPolicy;
     }
 
-    private void setVerticalScrollBarPolicy(int policy) {
-        int old = verticalScrollBarPolicy;
-        verticalScrollBarPolicy = policy;
-        firePropertyChange("verticalScrollBarPolicy", old, policy);
-        revalidate();
-        repaint();
-    }
+	private void setVerticalScrollBarPolicy(int policy) {
+		int old = verticalScrollBarPolicy;
+		verticalScrollBarPolicy = policy;
+		firePropertyChange("verticalScrollBarPolicy", old, policy);
+		revalidate();
+		秘repaint();
+	}
 
     public int getHorizontalScrollBarPolicy() {
         return horizontalScrollBarPolicy;
     }
 
-    private void setHorizontalScrollBarPolicy(int policy) {
-        int old = horizontalScrollBarPolicy;
-        horizontalScrollBarPolicy = policy;
-        firePropertyChange("horizontalScrollBarPolicy", old, policy);
-        revalidate();
-        repaint();
-    }
+	private void setHorizontalScrollBarPolicy(int policy) {
+		int old = horizontalScrollBarPolicy;
+		horizontalScrollBarPolicy = policy;
+		firePropertyChange("horizontalScrollBarPolicy", old, policy);
+		revalidate();
+		秘repaint();
+	}
 
     public int getScrollbarVisibility() {
 		boolean v = (getVerticalScrollBarPolicy() != ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);

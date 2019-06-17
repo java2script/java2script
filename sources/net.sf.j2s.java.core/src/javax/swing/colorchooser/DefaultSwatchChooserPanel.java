@@ -372,7 +372,7 @@ class RecentSwatchPanel extends SwatchPanel {
 
         System.arraycopy( colors, 0, colors, 1, colors.length-1);
         colors[0] = c;
-        repaint();
+        秘repaint();
     }
 
 }

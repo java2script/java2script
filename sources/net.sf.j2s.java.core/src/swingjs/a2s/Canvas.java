@@ -3,7 +3,6 @@ package swingjs.a2s;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 
 public class Canvas extends Panel {
@@ -14,7 +13,7 @@ public class Canvas extends Panel {
 
 	public Canvas() {
 		super();
-		秘setPaintsSelf();
+		秘setPaintsSelf(PAINTS_SELF_ALWAYS);
 	}
 
 	@Override
@@ -36,33 +35,44 @@ public class Canvas extends Panel {
 		setOpaque(c != null);
 	}
 
-	@Override
+    @Override
 	public void paint(Graphics g) {
-		((Graphics2D) g).setBackground(getBackground());
-		g.clearRect(0, 0, width, height);
+        g.clearRect(0, 0, width, height);
+    }
 
-		// see http://www.oracle.com/technetwork/java/painting-140037.html#awt_summary
-
-		// BH AWT called canvas.update(g), but Swing will call canvas.paint(g) instead.
-		// BH a2s does allow for that, with paint(g) calling update(g) (Opposite of
-		// standard Swing).
-
-		// BH So in the code, canvas.paint should be renamed something like
-		// canvas.paintMe
-
-		update(g);
-	}
-
-//	private boolean notified;
-	@SuppressWarnings("unused")
-	@Override
+    @Override
 	public void update(Graphics g) {
-//		if (!notified && JSUtil.is)
-//			System.out.println("neither paint(g) nor update(g) is implemented for " + this);
-//		notified = true;
-	       		if (/** @j2sNative this.paintComponent$java_awt_Graphics || */
-		false)
-			paintComponent(g);
-	}
+        g.clearRect(0, 0, width, height);
+        paint(g);
+    }
+    
+//	@Override
+//	public void paint(Graphics g) {
+//		((Graphics2D) g).setBackground(getBackground());
+//		g.clearRect(0, 0, width, height);
+//
+    
+    // on second thought, I think this was a mistaken idea: BH 2019.06
+    
+//		// see http://www.oracle.com/technetwork/java/painting-140037.html#awt_summary
+//
+//		// BH AWT called canvas.update(g), but Swing will call canvas.paint(g) instead.
+//		// BH a2s does allow for that, with paint(g) calling update(g) (Opposite of
+//		// standard Swing).
+//
+//		// BH So in the code, canvas.paint should be renamed something like
+//		// canvas.paintMe
+//
+//		update(g);
+//	}
+//
+////	private boolean notified;
+//	@SuppressWarnings("unused")
+//	@Override
+//	public void update(Graphics g) {
+//	       		if (/** @j2sNative this.paintComponent$java_awt_Graphics || */
+//		false)
+//			paintComponent(g);
+//	}
 
 }

@@ -187,7 +187,7 @@ public class JPasswordField extends JTextField {
     public void setEchoChar(char c) {
         echoChar = c;
         echoCharSet = true;
-        repaint();
+        秘repaint();
         revalidate();
     }
 

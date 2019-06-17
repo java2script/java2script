@@ -61,8 +61,6 @@ import java.awt.LayoutManager;
 public class JPanel extends JComponent
 {
 
-    private boolean isAWT;
-
 	/**
      * Creates a new JPanel with the specified layout manager and buffering
      * strategy.
@@ -118,10 +116,11 @@ public class JPanel extends JComponent
 		this(new FlowLayout(), true, isAWTContainer);
 	}
 
-	public JPanel(LayoutManager layout, boolean isDoubleBuffered, boolean isAWTContainer) {
+	private JPanel(LayoutManager layout, boolean isDoubleBuffered, boolean isAWTContainer) {
         setLayout(layout);
 //      setDoubleBuffered(isDoubleBuffered);
-        this.isAWT = isAWTContainer;
+        if (isAWTContainer)
+        	秘setIsAWT();
         setUIProperty("opaque", Boolean.TRUE);
         updateUI();
 	}

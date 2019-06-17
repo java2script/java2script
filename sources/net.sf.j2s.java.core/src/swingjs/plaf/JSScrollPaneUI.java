@@ -61,7 +61,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 		isContainer = true;
 		if (domNode == null) {
 			domNode = newDOMObject("div", id);
-			if (scrolledComponent != null && (/** @j2sNative this.scrolledComponent.isAWT$ || */false))
+			if (scrolledComponent != null && scrolledComponent.秘isAWT())
 				DOMNode.setStyles(domNode,  "border", "solid black 1px", "box-sizing", "border-box");
 		}
 		// add code here for adjustments when changes in bounds or other properties
@@ -726,7 +726,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 
 	protected void updateScrollBarDisplayPolicy(PropertyChangeEvent e) {
 		scrollpane.revalidate();
-		scrollpane.repaint();
+		scrollpane.秘repaint();
 	}
 
 	protected void updateViewport(PropertyChangeEvent e) {
@@ -1261,7 +1261,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 			syncScrollPaneWithViewport();
 			// painted label, button, or canvas anywhere in the tree will need to be repainted after the shift in origin.
 			if (jc.秘selfOrChildIsPainted())
-				jc.repaint();
+				jc.秘repaint();
 		}
 
 		//
@@ -1306,7 +1306,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 				break;
 			case "componentOrientation":
 				scrollpane.revalidate();
-				scrollpane.repaint();
+				scrollpane.秘repaint();
 				break;
 			}
 		}

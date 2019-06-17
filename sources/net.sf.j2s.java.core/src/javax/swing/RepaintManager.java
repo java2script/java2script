@@ -1574,7 +1574,7 @@ public class RepaintManager {
 	// if (repaintManager.painting) {
 	// repaintManager.repaintRoot = root;
 	// } else {
-	// root.repaint();
+	// root.秘repaint();
 	// }
 	// }
 	//

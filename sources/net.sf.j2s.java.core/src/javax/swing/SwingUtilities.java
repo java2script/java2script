@@ -1251,7 +1251,7 @@ public class SwingUtilities implements SwingConstants
         updateComponentTreeUI0(c);
         c.invalidate();
         c.validate();
-        c.repaint();
+        ((JSComponent)c).秘repaint();
     }
 
     private static void updateComponentTreeUI0(Component c) {

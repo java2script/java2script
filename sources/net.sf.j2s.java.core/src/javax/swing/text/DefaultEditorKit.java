@@ -2354,7 +2354,7 @@ public class DefaultEditorKit extends EditorKit {
                 else
                     next = ComponentOrientation.RIGHT_TO_LEFT;
                 target.setComponentOrientation(next);
-                target.repaint();
+                target.秘repaint();
             }
         }
     }

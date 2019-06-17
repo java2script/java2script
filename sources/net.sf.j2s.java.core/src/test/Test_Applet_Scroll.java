@@ -12,6 +12,7 @@ package test;
 import java.awt.Adjustable;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
@@ -29,6 +30,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JViewport;
@@ -57,6 +59,8 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 
 	private JScrollBar sbar;
 
+	private JPanel panel2;
+
 	void setSize(JComponent c, int x, int y) {
 		if (preferred)
 			c.setPreferredSize(new Dimension(x, y));
@@ -64,6 +68,19 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 			c.setSize(x, y);
 	}
 
+	@Override 
+	public void paint(Graphics g) {
+		System.out.println("appletPaint");
+		super.paint(g);
+	}
+	
+	@Override 
+	public void update(Graphics g) {
+		System.out.println("appletUpdate");
+		super.update(g);
+	}
+	
+	
 	@Override
 	public void init() {
 
@@ -86,7 +103,8 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 			public void actionPerformed(ActionEvent event) {
 				label.setBackground(Color.white);
 				label.setText(tf.getText());
-				// repaint();
+				panel2.removeAll();
+			   repaint();
 			}
 		});
 		tf.addFocusListener(new FocusListener() {
@@ -163,9 +181,17 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 			}
 		});
 
+		
 		JPanel p = new JPanel();
+
 		// p.setLayout(new GridLayout(2, 2, 2, 2));
 		JScrollPane sp = new JScrollPane();
+		
+		panel2 = new JPanel();
+		panel2.add(new JTextArea(10,10));
+		panel2.setSize(100,100);
+		p.add(panel2);
+
 		sp.getViewport().add(p);
 		getContentPane().add(sp);
 		sp.getViewport().addChangeListener(this);
@@ -173,15 +199,15 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 
 		sp.getViewport().setBackground(Color.blue);
 		p.setOpaque(false);
-//		mkBar(p, tf, Adjustable.VERTICAL, 20, 200);
-//		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200);
-//		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200).setInverted(true);
-//		p.add(label);
-//		p.add(tf);
-//		p.add(button);
-//		p.add(button2);
-//		p.add(button3);
-//		mkBar(p, tf, Adjustable.HORIZONTAL, 100, 20);
+		mkBar(p, tf, Adjustable.VERTICAL, 20, 200);
+		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200);
+		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200).setInverted(true);
+		p.add(label);
+		p.add(tf);
+		p.add(button);
+		p.add(button2);
+		p.add(button3);
+		mkBar(p, tf, Adjustable.HORIZONTAL, 100, 20);
 		JSlider slider = mkSlider(p, tf, Adjustable.HORIZONTAL, 100, 20);
         slider.setPaintTicks(true);
         slider.setPaintLabels(true);
@@ -191,7 +217,6 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
         slider.setForeground(Color.BLUE);
 
 		mkSlider(p, tf, Adjustable.HORIZONTAL, 100, 20).setInverted(true);
-		repaint();
 	}
 
 	JScrollBar mkBar(JPanel p, final JTextField tf, int orient, int x, int y) {
@@ -238,6 +263,8 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				tf.setText(df.format(((JSlider) e.getSource()).getValue() / 100.0));
+				doRepaint();
+
 			}
 		});
 		bar.addMouseWheelListener(new MouseWheelListener() {
@@ -254,6 +281,10 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		bar.setOpaque(true);
 		p.add(bar);
 		return bar;
+	}
+
+	protected void doRepaint() {
+		repaint();
 	}
 
 	@Override

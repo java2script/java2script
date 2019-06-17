@@ -195,7 +195,7 @@ public abstract class LookAndFeel
                                          String defaultBgName,
                                          String defaultFgName,
                                          String defaultFontName) {
-    	if (/** @j2sNative c.isAWT || c.isAWT$ || */false)
+    	if (/** @j2sNative c.isAWT ||  */ c.秘isAWT())
     		return;
         Font f = c.getFont();
         if (f == null || f instanceof UIResource) {

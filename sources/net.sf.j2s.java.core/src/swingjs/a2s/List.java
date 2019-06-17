@@ -20,7 +20,7 @@ import javax.swing.border.LineBorder;
 import java.awt.JSComponent;
 public class List extends JList implements ItemSelectable, JSComponent.A2SWrappedComponent  {
 
-	public void isAWT() {} // for SwingJS isAWT$
+	public void isAWT() {} 
 	
     int         visibleIndex = -1;
 

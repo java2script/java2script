@@ -451,7 +451,7 @@ public abstract class JTextComponent extends JComponent implements TextComponent
         }
 
         revalidate();
-        repaint();
+        秘repaint();
 //        if (accessibleContext != null) {
 //            model.addDocumentListener(
 //                ((AccessibleJTextComponent)accessibleContext));
@@ -1790,7 +1790,7 @@ public abstract class JTextComponent extends JComponent implements TextComponent
             editable = b;
 //            enableInputMethods(editable);
             firePropertyChange("editable", Boolean.valueOf(oldVal), Boolean.valueOf(editable));
-            repaint();
+            秘repaint();
         }
     }
 

@@ -304,7 +304,7 @@ public class WrappedPlainView extends BoxView implements TabExpander {
             // should damge a little more intelligently.
             if (a != null) {
                 preferenceChanged(null, true, true);
-                getContainer().repaint();
+                getContainer().秘repaint();
             }
         }
 
@@ -814,7 +814,7 @@ public class WrappedPlainView extends BoxView implements TabExpander {
             if (oldCount != lineCount) {
                 WrappedPlainView.this.preferenceChanged(this, false, true);
                 // have to repaint any views after the receiver.
-                getContainer().repaint();
+                getContainer().秘repaint();
             } else if (a != null) {
                 Component c = getContainer();
                 Rectangle alloc = (Rectangle) a;

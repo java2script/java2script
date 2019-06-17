@@ -147,7 +147,6 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 			DOMNode.setStyles(jqSlider, "background-color",s);
 			String tickClass = "ui-j2sslider-tick-mark-" + (isHoriz ? "vert" : "horiz");
 			
-			/**@j2sNative xxt = this; xxs = s; xxc = tickClass;debugger*/
 			$(domNode).find("." + tickClass).css(/** @j2sNative 1?{backgroundColor:s} :*/"","");
 		}
 		if (paintLabels) {

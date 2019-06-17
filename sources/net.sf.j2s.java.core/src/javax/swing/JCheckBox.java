@@ -195,7 +195,7 @@ public class JCheckBox extends JToggleButton {
         firePropertyChange(BORDER_PAINTED_FLAT_CHANGED_PROPERTY, oldValue, flat);
         if (b != oldValue) {
             revalidate();
-            repaint();
+            秘repaint();
         }
     }
 

@@ -1601,7 +1601,7 @@ public abstract class JComponent extends Container {
 							.getBorderInsets(this)))) {
 				revalidate();
 			}
-			repaint();
+			秘repaint();
 		}
 	}
 
@@ -2509,7 +2509,7 @@ public abstract class JComponent extends Container {
 		super.setEnabled(enabled);
 		firePropertyChange("enabled", oldEnabled, enabled);
 		if (enabled != oldEnabled) {
-			repaint();
+			秘repaint();
 		}
 	}
 
@@ -2531,7 +2531,7 @@ public abstract class JComponent extends Container {
 		if ((oldFg != null) ? !oldFg.equals(fg) : ((fg != null) && !fg
 				.equals(oldFg))) {
 			// foreground already bound in AWT1.2
-			repaint();
+			秘repaint();
 		}
 	}
 
@@ -2560,7 +2560,7 @@ public abstract class JComponent extends Container {
 		if ((oldBg != null) ? !oldBg.equals(bg) : ((bg != null) && !bg
 				.equals(oldBg))) {
 			// background already bound in AWT1.2
-			repaint();
+			秘repaint();
 		}
 	}
 
@@ -2581,7 +2581,7 @@ public abstract class JComponent extends Container {
 		// font already bound in AWT1.2
 		if (font != oldFont) {
 			revalidate();
-			repaint();
+			秘repaint();
 		}
 	}
 
@@ -3461,7 +3461,7 @@ public abstract class JComponent extends Container {
 		// firePropertyChange("UI", oldUI, newUI);
 		if (oldUI != null) {
 			revalidate();
-			repaint();
+			秘repaint();
 		}
 	}
 
@@ -4399,7 +4399,7 @@ public abstract class JComponent extends Container {
 
 	void _paintImmediately(int x, int y, int w, int h) {
 
-		// this method is called on JPanel if the developer uses jpanel.repaint()
+		// this method is called on JPanel if the developer uses jpanel.秘repaint()
 		
 		Graphics g;
 		Container c;
@@ -4524,6 +4524,13 @@ public abstract class JComponent extends Container {
 			return;
 		}
 
+		if (paintingComponent.秘isContentPane && !paintingComponent.isOpaque()) {
+			// SwingJS 
+			// the root pane may be opaque and need to clear the canvas
+			// we have gotten to the contentPane level. 
+			// SwingJS hiding of panel that is drawn through needs to clear
+			paintingComponent = paintingComponent.getRootPane();
+		}
 		paintingComponent.setFlag(ISREPAINTING, true);
 
 		paintImmediatelyClip.x -= offsetX;
@@ -4565,7 +4572,7 @@ public abstract class JComponent extends Container {
                             paintImmediatelyClip.width, paintImmediatelyClip.height);
 
 					// this sequence assures that if the developer called 
-					// jpanel.repaint() and then draws on the background,
+					// jpanel.秘repaint() and then draws on the background,
 					// the JPanel's background is made transparent
 					// (so that the underlying JRootPane canvas can show).
 					 paintingComponent.秘paintWithBackgroundCheck(g);
@@ -4930,7 +4937,6 @@ public abstract class JComponent extends Container {
 		if (jsg != null)
 			jsg.reset(nSave);
 	}
-
 
 
 }

@@ -1775,7 +1775,7 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 	void redrawList() {
 		needFilling = true;
 		list.revalidate();
-		list.repaint();
+		list.秘repaint();
 	}
 
 	/**
@@ -2565,9 +2565,9 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 				updateLayoutStateNeeded |= fixedCellWidthChanged;
 				redrawList();
 			} else if (propertyName == "selectionForeground") {
-				list.repaint();
+				list.秘repaint();
 			} else if (propertyName == "selectionBackground") {
-				list.repaint();
+				list.秘repaint();
 			} else if ("layoutOrientation" == propertyName) {
 				updateLayoutStateNeeded |= layoutOrientationChanged;
 				layoutOrientation = list.getLayoutOrientation();
