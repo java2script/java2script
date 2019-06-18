@@ -32,8 +32,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 
-//import java.awt.AWTEvent;
-import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.LookAndFeel;
 import javax.swing.UIDefaults;

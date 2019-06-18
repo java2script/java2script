@@ -243,7 +243,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	protected void installDefaults() {
 		String prefix = getPropertyPrefix();
 		Font f = editor.getFont();
-		if ((f == null) || (f instanceof UIResource)) {
+		if ((f == null && !editor.秘isAWT()) || (f instanceof UIResource)) {
 			editor.setFont(UIManager.getFont(prefix + ".font"));
 		}
 
@@ -1342,6 +1342,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	}
 
 	public void caretUpdatedByProgram(CaretEvent e) {
+		System.out.println("JSTextUI "+ e);
+		
 		// AWT components need to show the change, but not Swing components.
 		if (false && isAWT && !jc.hasFocus()) { 
 			Component fc = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();

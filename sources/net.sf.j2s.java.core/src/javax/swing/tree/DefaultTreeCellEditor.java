@@ -720,7 +720,7 @@ public class DefaultTreeCellEditor implements ActionListener, TreeCellEditor,
          * icon and use the selection color for the background.
          */
         @Override
-				public void paint(Graphics g) {
+			public void paint(Graphics g) {
             int width = getWidth();
             int height = getHeight();
 

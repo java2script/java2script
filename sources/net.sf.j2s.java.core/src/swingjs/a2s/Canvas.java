@@ -14,6 +14,7 @@ public class Canvas extends Panel {
 	public Canvas() {
 		super();
 		秘setPaintsSelf(PAINTS_SELF_ALWAYS);
+		秘paintClass = 秘updateClass = /**@j2sNative C$ || */null;
 	}
 
 	@Override
@@ -28,32 +29,31 @@ public class Canvas extends Panel {
 		return prefSizeComp();
 	}
 
-
 	@Override
 	public void setBackground(Color c) {
 		super.setBackground(c);
 		setOpaque(c != null);
 	}
 
-    @Override
+	@Override
 	public void paint(Graphics g) {
-        g.clearRect(0, 0, width, height);
-    }
+		g.clearRect(0, 0, width, height);
+	}
 
-    @Override
+	@Override
 	public void update(Graphics g) {
-        g.clearRect(0, 0, width, height);
-        paint(g);
-    }
-    
+		g.clearRect(0, 0, width, height);
+		paint(g);
+	}
+
 //	@Override
 //	public void paint(Graphics g) {
 //		((Graphics2D) g).setBackground(getBackground());
 //		g.clearRect(0, 0, width, height);
 //
-    
-    // on second thought, I think this was a mistaken idea: BH 2019.06
-    
+
+	// on second thought, I think this was a mistaken idea: BH 2019.06
+
 //		// see http://www.oracle.com/technetwork/java/painting-140037.html#awt_summary
 //
 //		// BH AWT called canvas.update(g), but Swing will call canvas.paint(g) instead.

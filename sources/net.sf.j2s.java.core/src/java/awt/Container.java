@@ -288,6 +288,7 @@ public class Container extends JSComponent {
      */
     public Container() {
     	component = new Lst<Component>();
+		 秘paintClass = 秘updateClass = /**@j2sNative C$ || */null;
     }
 
 		@Override
@@ -1284,7 +1285,8 @@ public class Container extends JSComponent {
      * @see #add
      * @see #remove
      */
-    public void removeAll() { 
+    @Override
+	public void removeAll() { 
         synchronized (getTreeLock()) {
             adjustListeningChildren(AWTEvent.HIERARCHY_EVENT_MASK,
                                     -listeningChildren);

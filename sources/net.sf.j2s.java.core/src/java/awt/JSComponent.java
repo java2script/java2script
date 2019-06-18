@@ -39,7 +39,6 @@ import javax.swing.RootPaneContainer;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.border.AbstractBorder;
-import javax.swing.border.Border;
 import javax.swing.plaf.BorderUIResource;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.FontUIResource;
@@ -118,7 +117,7 @@ public abstract class JSComponent extends Component {
 
 	Boolean 秘peerVis;
 
-	protected Border 秘border; // from private JComponent field
+	protected AbstractBorder 秘border; // from private JComponent field; was Border
 
     public final static int PAINTS_SELF_NO = -1;
     public final static int PAINTS_SELF_YES = 1;
@@ -240,8 +239,9 @@ public abstract class JSComponent extends Component {
 		return g;
 	}
 
+	@Override
 	public void addNotify() {
-		if (秘paintsSelf())
+		if (秘paintsSelf() && ui != null) // BoxFiller will not have a ui? 
 			((JSComponentUI) ui).clearPaintPath();	
 		super.addNotify();
 	}
@@ -576,6 +576,11 @@ public abstract class JSComponent extends Component {
     	return (秘iPaintMyself == PAINTS_SELF_ALWAYS ? PAINTS_SELF_ALWAYS : (秘iPaintMyself = flag));
     }
     
+    /**
+     * the lowest subclass that does not actually paint anything other than a background
+     */
+    public Class<?> 秘paintClass,  秘updateClass;
+    
 	/**
 	 * Used by:
 	 * 
@@ -590,17 +595,18 @@ public abstract class JSComponent extends Component {
 	 * @return
 	 */
 	public boolean 秘paintsSelf() {
+		
 		if (秘iPaintMyself == PAINTS_SELF_UNKNOWN) {
 			// don't allow if not opaque and has components
 			// don't allow if JComponent.paint(Graphics) has been overridden
 			// don't allow if AbstractBorder.paintBorder(...) has been overridden
 			// unchecked here is if a class calls getGraphics outside of this context
-			秘iPaintMyself = 秘setPaintsSelf(JSUtil.isOverridden(this, "paint$java_awt_Graphics", JComponent.class)
+			秘iPaintMyself = 秘setPaintsSelf(JSUtil.isOverridden(this, "paint$java_awt_Graphics", 秘paintClass)
 					|| JSUtil.isOverridden(this, "paintComponent$java_awt_Graphics", JComponent.class)
-					|| JSUtil.isOverridden(this, "paintContainer$java_awt_Graphics", Container.class)
-					|| JSUtil.isOverridden(this, "update$java_awt_Graphics", JComponent.class)
+					|| JSUtil.isOverridden(this, "update$java_awt_Graphics", 秘updateClass)
+					|| JSUtil.isOverridden(this, "paintContainer$java_awt_Graphics", Window.class)
 					|| 秘paintsBorder() && JSUtil.isOverridden(秘border, "paintBorder$java_awt_Component$java_awt_Graphics$I$I$I$I",
-							AbstractBorder.class) 
+							秘border.秘paintClass) 
 					? PAINTS_SELF_YES : PAINTS_SELF_NO);
 		}
 		// TODO -- still need to set RepaintManager so that

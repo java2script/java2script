@@ -68,8 +68,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-import javax.swing.JInternalFrame;
-
 import sun.awt.AppContext;
 import sun.awt.CausedFocusEvent;
 import sun.awt.RequestFocusController;

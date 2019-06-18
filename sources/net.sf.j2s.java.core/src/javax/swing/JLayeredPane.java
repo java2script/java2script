@@ -200,7 +200,8 @@ public class JLayeredPane extends JComponent /* implements Accessible */ {
 	public JLayeredPane(boolean isAWTContainer) {
     	super();
         initLayeredPane();
-		this.isAWT = isAWTContainer;
+		isAWT = isAWTContainer;
+    	秘paintClass = /**@j2sNative C$ || */null;
 	}
 
 	protected void initLayeredPane() {

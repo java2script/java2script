@@ -552,6 +552,7 @@ public abstract class JComponent extends Container {
 	 */
 	public JComponent() {
 		super();
+		 秘paintClass = 秘updateClass = /**@j2sNative C$ || */null;
 		// We enable key events on all JComponents so that accessibility
 		// bindings will work everywhere. This is a partial fix to BugID
 		// 4282211.
@@ -1592,7 +1593,7 @@ public abstract class JComponent extends Container {
 	public void setBorder(Border border) {
 		Border oldBorder = this.秘border;
 
-		this.秘border = border;
+		this.秘border = (AbstractBorder) border;
 		firePropertyChange("border", oldBorder, border);
 		if (border != oldBorder) {
 			if (border == null
@@ -4766,7 +4767,7 @@ public abstract class JComponent extends Container {
 				.toString() : "");
 		String maximumSizeString = (isMaximumSizeSet() ? getMaximumSize()
 				.toString() : "");
-		String borderString = (秘border == null ? "" : (秘border == this ? "this"
+		String borderString = (秘border == null ? "" : (秘border == (Object) this ? "this"
 				: 秘border.toString()));
 
 		return super.paramString() + ",alignmentX=" + 秘alignmentX + ",alignmentY="

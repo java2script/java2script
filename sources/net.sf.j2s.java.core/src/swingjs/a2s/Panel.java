@@ -28,11 +28,11 @@ public class Panel extends JPanel {
 		// JApplet startup
 	}
 
-	@Override
-	public void paint(Graphics g) {
-		super.paint(g);
-	}
-	
+//	@Override
+//	public void paint(Graphics g) {
+//		super.paint(g);
+//	}
+//	
 	@Override
 	public void setBackground(Color c) {
 		super.setBackground(c);

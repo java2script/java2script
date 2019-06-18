@@ -133,8 +133,8 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 		JTextArea area = getArea();
 		JScrollPane js2 = new JScrollPane(area);
 		js2.setPreferredSize(new Dimension(300, 300));
-		js2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		js2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		js2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);//_AS_NEEDED);
+		js2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);//NEVER);//VERTICAL_SCROLLBAR_AS_NEEDED);
 
 		JTextField field = getField();
 		JTextField field2 = getField();
@@ -337,6 +337,19 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 				System.out.println("Test_Editor action " + getID(e.getSource()));
 				editor.getCaret().setDot(editor.getCaret().getDot() + 1);
 				editor.requestFocus();
+			}
+
+		});
+		b.addFocusListener(fl);
+		panel.add(b);
+		b = new JButton("caret+1(r)");
+		b.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("Test_Editor action " + getID(e.getSource()));
+				area.getCaret().setDot(area.getCaret().getDot() + 1);
+				area.requestFocus();
 			}
 
 		});

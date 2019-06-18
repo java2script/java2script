@@ -27,7 +27,6 @@
  */
 package java.awt;
 
-import java.applet.JSApplet;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseWheelEvent;
@@ -50,7 +49,6 @@ import javax.swing.JComponent;
 import javax.swing.JLayeredPane;
 import javax.swing.JRootPane;
 import javax.swing.RootPaneContainer;
-import javax.swing.plaf.ComponentUI;
 
 import sun.awt.AppContext;
 import swingjs.JSToolkit;
@@ -345,7 +343,7 @@ public class Window extends JComponent {
      */
     Window() {
         //GraphicsEnvironment.checkHeadless();
-      	initWinGC(null, null);
+      	this(null, null);
     }
 
     /**
@@ -371,7 +369,7 @@ public class Window extends JComponent {
      * 
      */
     Window(GraphicsConfiguration gc) {
-    	initWinGC(null, gc);
+    	this(null, gc);
     }
     
 
@@ -435,7 +433,7 @@ public class Window extends JComponent {
 	 * 
 	 */
 	public Window(Window owner) {
-  	initWinGC(owner, null);
+		this(owner, null);
 	}
 
     /**
@@ -472,6 +470,7 @@ public class Window extends JComponent {
     public Window(Window owner, GraphicsConfiguration gc) {
     	// everything will pass through here, even Window(gc);
     	// We just adjust for the 1-parameter issue here
+		 秘paintClass = 秘updateClass = /**@j2sNative C$ || */null;
     	initWinGC(owner, gc);   	
     }
 
@@ -2299,7 +2298,8 @@ public class Window extends JComponent {
      * @see Container#getFocusTraversalPolicy
      * @since 1.4
      */
-    public void setFocusCycleRoot(boolean focusCycleRoot) {
+    @Override
+	public void setFocusCycleRoot(boolean focusCycleRoot) {
     }
 
     /**
@@ -3136,6 +3136,7 @@ public class Window extends JComponent {
      * Verifies that it is focusable and as container it can container focus owner.
      * @since 1.5
      */
+		@Override
 		protected boolean canContainFocusOwner(Component focusOwnerCandidate) {
         return super.canContainFocusOwner(focusOwnerCandidate) && isFocusableWindow();
     }
@@ -3396,11 +3397,13 @@ public class Window extends JComponent {
 
 	private boolean opaque = true;
 
+	@Override
 	public boolean isOpaque() {
 		// SwingJS
 		return opaque;
 	}
 
+		@Override
 		public void setOpaque(boolean opaque) {
         synchronized (getTreeLock()) {
         	//TODO ?

@@ -621,11 +621,11 @@ public class JSUtil {
 	 * @return
 	 */
 	public static boolean isOverridden(Object f, Class<?> cl) {
-		return (/** @j2sNative f && f.exClazz != cl.$clazz$ || */false);
+		return cl == null || (/** @j2sNative f && f.exClazz != cl.$clazz$ || */false);
 	}
 
 	public static boolean isOverridden(Object c, String name, Class<?> cl) {
-		return c != null && isOverridden(getJ2SAlias(c, name), cl);
+		return cl == null || c != null && isOverridden(getJ2SAlias(c, name), cl);
 	}
 
 }

@@ -37,7 +37,6 @@ import java.awt.Rectangle;
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonModel;
-import javax.swing.JButton;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 import javax.swing.UIDefaults;
@@ -166,7 +165,8 @@ public class BasicBorders {
             super(shadow, darkShadow, highlight, lightHighlight);
         }
 
-        public void paintBorder( Component c, Graphics g, int x, int y, int w, int h ) {
+        @Override
+		public void paintBorder( Component c, Graphics g, int x, int y, int w, int h ) {
             AbstractButton b = (AbstractButton) c;
             ButtonModel model = b.getModel();
 
@@ -217,11 +217,13 @@ public class BasicBorders {
             super(3,3,3,3); // hardcoded margin for JLF requirements.
         }
 
-        public Insets getBorderInsets(Component c) {
+        @Override
+		public Insets getBorderInsets(Component c) {
             return getBorderInsets(c, new Insets(0,0,0,0));
         }
 
-        public Insets getBorderInsets(Component c, Insets insets) {
+        @Override
+		public Insets getBorderInsets(Component c, Insets insets) {
             Insets margin = null;
 
             if (c instanceof AbstractButton) {
@@ -326,27 +328,27 @@ public class BasicBorders {
         }
 
 
-        public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-
-//            if (c instanceof AbstractButton) {
-//                AbstractButton b = (AbstractButton)c;
-//                ButtonModel model = b.getModel();
+//        public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
 //
-//                if (model.isArmed() && model.isPressed() || model.isSelected()) {
-//                    BasicGraphicsUtils.drawLoweredBezel(g, x, y, width, height,
-//                                                        shadow, darkShadow,
-//                                                        highlight, lightHighlight);
-//                } else {
-//                    BasicGraphicsUtils.drawBezel(g, x, y, width, height,
-//                                               false, b.isFocusPainted() && b.hasFocus(),
-//                                                 shadow, darkShadow,
-//                                                 highlight, lightHighlight);
-//                }
-//            } else {
-//                BasicGraphicsUtils.drawBezel(g, x, y, width, height, false, false,
-//                                             shadow, darkShadow, highlight, lightHighlight);
-//            }
-        }
+////            if (c instanceof AbstractButton) {
+////                AbstractButton b = (AbstractButton)c;
+////                ButtonModel model = b.getModel();
+////
+////                if (model.isArmed() && model.isPressed() || model.isSelected()) {
+////                    BasicGraphicsUtils.drawLoweredBezel(g, x, y, width, height,
+////                                                        shadow, darkShadow,
+////                                                        highlight, lightHighlight);
+////                } else {
+////                    BasicGraphicsUtils.drawBezel(g, x, y, width, height,
+////                                               false, b.isFocusPainted() && b.hasFocus(),
+////                                                 shadow, darkShadow,
+////                                                 highlight, lightHighlight);
+////                }
+////            } else {
+////                BasicGraphicsUtils.drawBezel(g, x, y, width, height, false, false,
+////                                             shadow, darkShadow, highlight, lightHighlight);
+////            }
+//        }
 
 //        public Insets getBorderInsets(Component c)       {
 //            return getBorderInsets(c, new Insets(0,0,0,0));
@@ -367,7 +369,8 @@ public class BasicBorders {
             this.highlight = highlight;
         }
 
-        public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+        @Override
+		public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
             Color oldColor = g.getColor();
             g.translate(x, y);
             g.setColor(shadow);
@@ -378,11 +381,13 @@ public class BasicBorders {
             g.setColor(oldColor);
         }
 
-        public Insets getBorderInsets(Component c)       {
+        @Override
+		public Insets getBorderInsets(Component c)       {
             return getBorderInsets(c, new Insets(0,0,0,0));
         }
 
-        public Insets getBorderInsets(Component c, Insets insets)       {
+        @Override
+		public Insets getBorderInsets(Component c, Insets insets)       {
             insets.top = 0;
             insets.left = 0;
             insets.bottom = 2;
@@ -393,11 +398,13 @@ public class BasicBorders {
 
     public static class MarginBorder extends AbstractBorder implements UIResource {
 
-        public Insets getBorderInsets(Component c)       {
+        @Override
+		public Insets getBorderInsets(Component c)       {
             return getBorderInsets(c, new Insets(0,0,0,0));
         }
 
-        public Insets getBorderInsets(Component c, Insets insets)       {
+        @Override
+		public Insets getBorderInsets(Component c, Insets insets)       {
             Insets margin = null;
             //
             // Ideally we'd have an interface defined for classes which
@@ -437,18 +444,21 @@ public class BasicBorders {
             this.lightHighlight = lightHighlight;
         }
 
-        public void paintBorder(Component c, Graphics g, int x, int y,
+        @Override
+		public void paintBorder(Component c, Graphics g, int x, int y,
                             int width, int height) {
             BasicGraphicsUtils.drawEtchedRect(g, x, y, width, height,
                                               shadow, darkShadow,
                                               highlight, lightHighlight);
         }
 
-        public Insets getBorderInsets(Component c) {
+        @Override
+		public Insets getBorderInsets(Component c) {
             return getBorderInsets(c, new Insets(0,0,0,0));
         }
 
-        public Insets getBorderInsets(Component c, Insets insets) {
+        @Override
+		public Insets getBorderInsets(Component c, Insets insets) {
             Insets margin = null;
             if (c instanceof JTextComponent) {
                 margin = ((JTextComponent)c).getMargin();
@@ -556,7 +566,8 @@ public class BasicBorders {
             this.shadow = shadow;
         }
 
-        public void paintBorder(Component c, Graphics g, int x, int y,
+        @Override
+		public void paintBorder(Component c, Graphics g, int x, int y,
                                 int width, int height) {
             // The only tricky part with this border is that the divider is
             // not positioned at the top (for horizontal) or left (for vert),
@@ -635,10 +646,12 @@ public class BasicBorders {
                 }
             }
         }
-        public Insets getBorderInsets(Component c) {
+        @Override
+		public Insets getBorderInsets(Component c) {
             return new Insets(1, 1, 1, 1);
         }
-        public boolean isBorderOpaque() { return true; }
+        @Override
+		public boolean isBorderOpaque() { return true; }
     }
 
 }
