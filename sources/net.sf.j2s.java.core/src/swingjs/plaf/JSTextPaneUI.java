@@ -86,4 +86,5 @@ public class JSTextPaneUI extends JSEditorPaneUI {
 	public void propertyChange(PropertyChangeEvent evt) {
         super.propertyChange(evt);
     }
+    
 }

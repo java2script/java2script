@@ -28,7 +28,6 @@
 
 package sun.awt;
 
-import java.applet.JSApplet;
 import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.Container;
@@ -414,16 +413,18 @@ public abstract class SunToolkit extends Toolkit implements
 	 * MenuComponent, this returns false.
 	 */
 	private static boolean setAppContext(Object target, AppContext context) {
-		if (target instanceof Component) {
-			AWTAccessor.getComponentAccessor().setAppContext((Component) target,
-					context);
-			// } else if (target instanceof MenuComponent) {
-			// AWTAccessor.getMenuComponentAccessor().
-			// setAppContext((MenuComponent)target, context);
-		} else {
-			return false;
-		}
-		return true;
+		// SwingJS -- NOT allowing moving components from one applet to another!
+		return false;
+//		if (target instanceof Component) {
+//			AWTAccessor.getComponentAccessor().setAppContext((Component) target,
+//					context);
+//			// } else if (target instanceof MenuComponent) {
+//			// AWTAccessor.getMenuComponentAccessor().
+//			// setAppContext((MenuComponent)target, context);
+//		} else {
+//			return false;
+//		}
+//		return true;
 	}
 
 	/**
@@ -440,8 +441,9 @@ public abstract class SunToolkit extends Toolkit implements
 			 *            return target.appContext;
 			 */
 			{
-				return AWTAccessor.getComponentAccessor().getAppContext(
-						(Component) target);
+				return null;
+//						AWTAccessor.getComponentAccessor().getAppContext(
+//						(Component) target);
 			}
 			// } else if (target instanceof MenuComponent) {
 			// return AWTAccessor.getMenuComponentAccessor().
@@ -498,7 +500,8 @@ public abstract class SunToolkit extends Toolkit implements
 	 */
 
 	public static void setLWRequestStatus(Window changed, boolean status) {
-		AWTAccessor.getWindowAccessor().setLWRequestStatus(changed, status);
+		changed.setLWRequestStatus(status);
+		//AWTAccessor.getWindowAccessor().setLWRequestStatus(changed, status);
 	}
 
 	public static void checkAndSetPolicy(Container cont, boolean isSwingCont) {
@@ -605,7 +608,8 @@ public abstract class SunToolkit extends Toolkit implements
 		PeerEvent pe = new PeerEvent(Toolkit.getDefaultToolkit(), new Runnable() {
 			@Override
 			public void run() {
-				AWTAccessor.getAWTEventAccessor().setPosted(e);
+				e.setPosted();
+//				AWTAccessor.getAWTEventAccessor().setPosted(e);
 				((Component) e.getSource()).dispatchEvent(e);
 			}
 		}, PeerEvent.ULTIMATE_PRIORITY_EVENT);
@@ -720,15 +724,8 @@ public abstract class SunToolkit extends Toolkit implements
 	public static boolean isDispatchThreadForAppContext(Object target) {
 		AppContext appContext = targetToAppContext(target);
 		EventQueue eq = (EventQueue) appContext.get(AppContext.EVENT_QUEUE_KEY);
-
-		EventQueue next = AWTAccessor.getEventQueueAccessor().getNextQueue(eq);
-		while (next != null) {
-			eq = next;
-			next = AWTAccessor.getEventQueueAccessor().getNextQueue(eq);
-		}
-
-		return (Thread.currentThread() == AWTAccessor.getEventQueueAccessor()
-				.getDispatchThread(eq));
+		// BH SwingJS does this take into account app context? -- Never called in SwingJS
+		return eq.isDispatchThread();
 	}
 
 	@Override
@@ -786,13 +783,13 @@ public abstract class SunToolkit extends Toolkit implements
 	 * this property once the Component becomes displayable.
 	 */
 	public void disableBackgroundErase(Component component) {
-		disableBackgroundEraseImpl(component);
+		component.setBackgroundEraseDisabled(true);
 	}
 
-	private void disableBackgroundEraseImpl(Component component) {
-		AWTAccessor.getComponentAccessor().setBackgroundEraseDisabled(component,
-				true);
-	}
+//	private void disableBackgroundEraseImpl(Component component) {
+//		AWTAccessor.getComponentAccessor().setBackgroundEraseDisabled(component,
+//				true);
+//	}
 
 	/**
 	 * Returns the value of "sun.awt.noerasebackground" property. Default value

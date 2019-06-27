@@ -367,6 +367,7 @@ public class TextArea extends JTextArea {
 	private void toEnd() {
 		super.setCaretPosition(super.getText().length());
 		super.requestFocusInWindow();
+		firePropertyChange("JSToEnd", null, "JSToEnd");
 	}
 
 //	@Override

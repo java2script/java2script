@@ -31,17 +31,14 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Frame;
-import java.awt.JSFrame;
 import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
 import java.awt.HeadlessException;
 import java.awt.IllegalComponentStateException;
+import java.awt.JSFrame;
 import java.awt.LayoutManager;
 import java.awt.Window;
 import java.awt.event.WindowListener;
-
-import swingjs.JSUtil;
-import swingjs.plaf.JSComponentUI;
 
 
 // 
@@ -354,6 +351,7 @@ public class JWindow extends Window implements RootPaneContainer {
 	 * @beaninfo bound: true hidden: true description: Mechanism for transfer of
 	 *           data into the component
 	 */
+	@Override
 	public void setTransferHandler(TransferHandler newHandler) {
 		TransferHandler oldHandler = transferHandler;
 		transferHandler = newHandler;
@@ -370,6 +368,7 @@ public class JWindow extends Window implements RootPaneContainer {
 	 * @see #setTransferHandler
 	 * @since 1.6
 	 */
+	@Override
 	public TransferHandler getTransferHandler() {
 		return transferHandler;
 	}

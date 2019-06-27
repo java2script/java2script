@@ -176,11 +176,11 @@ public class ButtonListener
 	 */
 	InputMap getInputMap(int condition, JComponent c) {
 		if (condition == JComponent.WHEN_FOCUSED) {
-			JSComponentUI ui = (JSComponentUI) c.getUI();
-			if (ui instanceof JSButtonUI) {
+//			JSComponentUI ui = (JSComponentUI) c.getUI();
+//			if (ui instanceof JSButtonUI) {
 				// SwingJS - there was a mistake here -- missing '.' ??
 				return (InputMap) DefaultLookup.get(c, ui, ui.getPropertyPrefix() + ".focusInputMap");
-			}
+//			}
 		}
 		return null;
 	}
@@ -369,6 +369,9 @@ public class ButtonListener
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			AbstractButton b = (AbstractButton) e.getSource();
+			if (((JSComponentUI) (Object) b.getUI()).isModalBlocked())
+				return;
+			
 			ButtonModel model = b.getModel();
 			switch (getName()) {
 			case PRESS:

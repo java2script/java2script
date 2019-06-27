@@ -153,6 +153,84 @@ import swingjs.plaf.JSWindowUI;
 @SuppressWarnings({"unchecked", "deprecation"})
 public class Window extends JComponent {
 
+//    static {
+//        AWTAccessor.setWindowAccessor(new AWTAccessor.WindowAccessor() {
+//            public float getOpacity(Window window) {
+//                return window.opacity;
+//            }
+//            public void setOpacity(Window window, float opacity) {
+//                window.setOpacity(opacity);
+//            }
+//            public Shape getShape(Window window) {
+//                return window.getShape();
+//            }
+//            public void setShape(Window window, Shape shape) {
+//                window.setShape(shape);
+//            }
+            public void setOpaque(Window window, boolean opaque) {
+                Color bg = window.getBackground();
+                if (bg == null) {
+                    bg = new Color(0, 0, 0, 0);
+                }
+                window.setBackground(new Color(bg.getRed(), bg.getGreen(), bg.getBlue(),
+                                               opaque ? 255 : 0));
+            }
+            public void updateWindow() {
+//                window.updateWindow();
+            }
+
+//            public Dimension getSecurityWarningSize() {
+//                return new Dimension(securityWarningWidth,
+//                        window.securityWarningHeight);
+//            }
+//
+//            public void setSecurityWarningSize(Window window, int width, int height)
+//            {
+//                window.securityWarningWidth = width;
+//                window.securityWarningHeight = height;
+//            }
+//
+//            public void setSecurityWarningPosition(Window window,
+//                    Point2D point, float alignmentX, float alignmentY)
+//            {
+//                window.securityWarningPointX = point.getX();
+//                window.securityWarningPointY = point.getY();
+//                window.securityWarningAlignmentX = alignmentX;
+//                window.securityWarningAlignmentY = alignmentY;
+//
+//                synchronized (window.getTreeLock()) {
+//                    WindowPeer peer = (WindowPeer)window.getPeer();
+//                    if (peer != null) {
+//                        peer.repositionSecurityWarning();
+//                    }
+//                }
+//            }
+//
+//            public Point2D calculateSecurityWarningPosition(Window window,
+//                    double x, double y, double w, double h)
+//            {
+//                return window.calculateSecurityWarningPosition(x, y, w, h);
+//            }
+
+            public void setLWRequestStatus(boolean status) {
+                syncLWRequests = status;
+            }
+
+            public boolean isAutoRequestFocus() {
+            	return true;
+//                return autoRequestFocus;
+            }
+
+            public boolean isTrayIconWindow() {
+                return isTrayIconWindow;
+            }
+
+            public void setTrayIconWindow(boolean isTrayIconWindow) {
+                this.isTrayIconWindow = isTrayIconWindow;
+            }
+//        }); // WindowAccessor
+//    } // static
+
     /**
      * This represents the warning message that is
      * to be displayed in a non secure window. ie :
@@ -3289,7 +3367,7 @@ public class Window extends JComponent {
     /**
      * JavaDoc
      */
-    /*public */float getOpacity() {
+    public float getOpacity() {
         synchronized (getTreeLock()) {
             return opacity;
         }
@@ -3298,7 +3376,7 @@ public class Window extends JComponent {
     /**
      * JavaDoc
      */
-    /*public */void setOpacity(float opacity) {
+    public void setOpacity(float opacity) {
         synchronized (getTreeLock()) {
             if (opacity < 0.0f || opacity > 1.0f) {
                 throw new IllegalArgumentException(
@@ -3325,7 +3403,7 @@ public class Window extends JComponent {
     /**
      * JavaDoc
      */
-    /*public */Shape getShape() {
+    public Shape getShape() {
         synchronized (getTreeLock()) {
             return shape;
         }
@@ -3339,7 +3417,7 @@ public class Window extends JComponent {
      * @throws IllegalArgumentException if the window is in full screen mode,
      *                                  and the shape is not null
      */
-    /*public */void setShape(Shape shape) {
+    public void setShape(Shape shape) {
         synchronized (getTreeLock()) {
 //            GraphicsConfiguration gc = getGraphicsConfiguration();
 //            GraphicsDevice gd = gc.getDevice();

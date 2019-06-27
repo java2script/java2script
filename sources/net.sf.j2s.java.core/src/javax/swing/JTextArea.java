@@ -216,14 +216,16 @@ public class JTextArea extends JTextComponent {
         if (columns < 0) {
             throw new IllegalArgumentException("columns: " + columns);
         }
-        LookAndFeel.installProperty(this,
-                                    "focusTraversalKeysForward",
-                                    JComponent.
-                                    getManagingFocusForwardTraversalKeys());
-        LookAndFeel.installProperty(this,
-                                    "focusTraversalKeysBackward",
-                                    JComponent.
-                                    getManagingFocusBackwardTraversalKeys());
+		// unfortunately, we cannot trap CTRL-TAB in a browser
+//
+//        LookAndFeel.installProperty(this,
+//                                    "focusTraversalKeysForward",
+//                                    JComponent.
+//                                    getManagingFocusForwardTraversalKeys());
+//        LookAndFeel.installProperty(this,
+//                                    "focusTraversalKeysBackward",
+//                                    JComponent.
+//                                    getManagingFocusBackwardTraversalKeys());
     }
 
 	@Override

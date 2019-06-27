@@ -1,5 +1,7 @@
 package swingjs.plaf;
 
+import java.beans.PropertyChangeEvent;
+
 import javax.swing.JComponent;
 import javax.swing.LookAndFeel;
 
@@ -22,5 +24,24 @@ public class JSAppletUI extends JSLightweightUI {
         null, null, "Panel.font");
 	}
 
+	public void setVisible(boolean b) {
+		super.setVisible(b);
+		if (b) {
+			setComponentFocus();
+		}
+//		System.out.println("JSAppletUI visible " + b);
+	}
 	
+	@Override
+	public void propertyChange(PropertyChangeEvent e) {
+		Object value = e.getNewValue();
+		String prop = e.getPropertyName();
+//		System.out.println("JSAPpletUI prop val " + prop + " " + value);
+	}
+
+//	@Override
+//	public boolean isFocusable() {
+//		return true;
+//	}
+
 }

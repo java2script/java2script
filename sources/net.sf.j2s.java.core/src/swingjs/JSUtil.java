@@ -615,17 +615,18 @@ public class JSUtil {
 	}
 
 	/**
+	 * Determine whether a method is defined in a given class.
 	 * 
 	 * @param f  the JavaScript function aliasing the Java method
-	 * @param cl
+	 * @param cl can be a Class object or a JavaScript C$ object
 	 * @return
 	 */
-	public static boolean isOverridden(Object f, Class<?> cl) {
-		return cl == null || (/** @j2sNative f && f.exClazz != cl.$clazz$ || */false);
+	public static boolean isForClass(Object f, Class<?> cl) {
+		return cl != null && (/** @j2sNative !f || f.exClazz == (cl.$clazz$ || cl) || */false);
 	}
 
 	public static boolean isOverridden(Object c, String name, Class<?> cl) {
-		return cl == null || c != null && isOverridden(getJ2SAlias(c, name), cl);
+		return cl == null || c != null && !isForClass(getJ2SAlias(c, name), cl);
 	}
 
 }

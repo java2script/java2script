@@ -36,11 +36,13 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.FocusTraversalPolicy;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.JSComponent;
+import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
@@ -317,8 +319,8 @@ public abstract class JComponent extends Container {
 	private static final int INHERITS_POPUP_MENU = 23;
 	private static final int OPAQUE_SET = 24;
 	private static final int AUTOSCROLLS_SET = 25;
-	// private static final int FOCUS_TRAVERSAL_KEYS_FORWARD_SET = 26;
-	// private static final int FOCUS_TRAVERSAL_KEYS_BACKWARD_SET = 27;
+	 private static final int FOCUS_TRAVERSAL_KEYS_FORWARD_SET = 26;
+	 private static final int FOCUS_TRAVERSAL_KEYS_BACKWARD_SET = 27;
 	private static final int REVALIDATE_RUNNABLE_SCHEDULED = 28;
 
 	/**
@@ -543,29 +545,27 @@ public abstract class JComponent extends Container {
 
 	/**
 	 * Default <code>JComponent</code> constructor. This constructor does very
-	 * little initialization beyond calling the <code>Container</code>
-	 * constructor. For example, the initial layout manager is <code>null</code>.
-	 * It does, however, set the component's locale property to the value returned
-	 * by <code>JComponent.getDefaultLocale</code>.
+	 * little initialization beyond calling the <code>Container</code> constructor.
+	 * For example, the initial layout manager is <code>null</code>. It does,
+	 * however, set the component's locale property to the value returned by
+	 * <code>JComponent.getDefaultLocale</code>.
 	 * 
 	 * @see #getDefaultLocale
 	 */
 	public JComponent() {
 		super();
-		 秘paintClass = 秘updateClass = /**@j2sNative C$ || */null;
+		秘paintClass = 秘updateClass = /** @j2sNative C$ || */
+				null;
 		// We enable key events on all JComponents so that accessibility
 		// bindings will work everywhere. This is a partial fix to BugID
 		// 4282211.
 		enableEvents(AWTEvent.KEY_EVENT_MASK);
-		// SwingJS if (isManagingFocus()) {
-		// LookAndFeel.installProperty(this,
-		// "focusTraversalKeysForward",
-		// getManagingFocusForwardTraversalKeys());
-		// LookAndFeel.installProperty(this,
-		// "focusTraversalKeysBackward",
-		// getManagingFocusBackwardTraversalKeys());
-		// }
-		//
+		if (isManagingFocus()) {
+			// SwingJS -- this is a problem, because we cannot trap CTRL-TAB in a browser
+//			LookAndFeel.installProperty(this, "focusTraversalKeysForward", getManagingFocusForwardTraversalKeys());
+//			LookAndFeel.installProperty(this, "focusTraversalKeysBackward", getManagingFocusBackwardTraversalKeys());
+		}
+
 		super.setLocale(getDefaultLocale());
 	}
 
@@ -705,7 +705,9 @@ public abstract class JComponent extends Container {
 							// }
 							// if (!printing) {
 							jc.秘checkBackgroundPainted(jsg, true);
-							jc.paint((Graphics) (Object) jsg);
+							jc.秘setIsRepaint(false);
+							jc.秘paint((Graphics) (Object) jsg);
+							jc.秘setIsRepaint(true);
 							jc.秘checkBackgroundPainted(秘getJSGraphic2D((Graphics) (Object) jsg), false);
 							// } else {
 							// if (!getFlag(IS_PRINTING_ALL)) {
@@ -738,7 +740,7 @@ public abstract class JComponent extends Container {
 			}
 			recycleRectangle(tmpRect2);
 			recycleRectangle(tmpRect);
-		}
+		} 
 	}
 
 	/**
@@ -1143,15 +1145,15 @@ public abstract class JComponent extends Container {
 			return;
 		}
 
-		// Container nearestRoot =
-		// (isFocusCycleRoot()) ? this : getFocusCycleRootAncestor();
-		// FocusTraversalPolicy policy = nearestRoot.getFocusTraversalPolicy();
-		// if (!(policy instanceof LegacyGlueFocusTraversalPolicy)) {
-		// policy = new LegacyGlueFocusTraversalPolicy(policy);
-		// nearestRoot.setFocusTraversalPolicy(policy);
-		// }
-		// ((LegacyGlueFocusTraversalPolicy)policy).
-		// setNextFocusableComponent(this, nextFocusableComponent);
+		 Container nearestRoot =
+		 (isFocusCycleRoot()) ? this : getFocusCycleRootAncestor();
+		 FocusTraversalPolicy policy = nearestRoot.getFocusTraversalPolicy();
+		 if (!(policy instanceof LegacyGlueFocusTraversalPolicy)) {
+		 policy = new LegacyGlueFocusTraversalPolicy(policy);
+		 nearestRoot.setFocusTraversalPolicy(policy);
+		 }
+		 ((LegacyGlueFocusTraversalPolicy)policy).
+		 setNextFocusableComponent(this, nextFocusableComponent);
 	}
 
 	private void deregisterNextFocusableComponent() {
@@ -3241,7 +3243,7 @@ public abstract class JComponent extends Container {
 		
 	}
 
-	static final sun.awt.RequestFocusController focusController = new sun.awt.RequestFocusController() {
+	/*SwingJS was not public, but Component needs this*/public static final sun.awt.RequestFocusController focusController = new sun.awt.RequestFocusController() {
 
 		@Override
 		public boolean acceptRequestFocus(Component from, Component to, boolean temporary,
@@ -3515,17 +3517,17 @@ public abstract class JComponent extends Container {
 				setFlag(AUTOSCROLLS_SET, false);
 			}
 		} else if (propertyName == "focusTraversalKeysForward") {
-			// if (!getFlag(FOCUS_TRAVERSAL_KEYS_FORWARD_SET)) {
-			// super.setFocusTraversalKeys(KeyboardFocusManager.
-			// FORWARD_TRAVERSAL_KEYS,
-			// (Set)value);
-			// }
+			 if (!getFlag(FOCUS_TRAVERSAL_KEYS_FORWARD_SET)) {
+			 super.setFocusTraversalKeys(KeyboardFocusManager.
+			 FORWARD_TRAVERSAL_KEYS,
+			 (Set)value);
+			 }
 		} else if (propertyName == "focusTraversalKeysBackward") {
-			// if (!getFlag(FOCUS_TRAVERSAL_KEYS_BACKWARD_SET)) {
-			// super.setFocusTraversalKeys(KeyboardFocusManager.
-			// BACKWARD_TRAVERSAL_KEYS,
-			// (Set)value);
-			// }
+			 if (!getFlag(FOCUS_TRAVERSAL_KEYS_BACKWARD_SET)) {
+			 super.setFocusTraversalKeys(KeyboardFocusManager.
+			 BACKWARD_TRAVERSAL_KEYS,
+			 (Set)value);
+			 }
 		} else {
 			// SwingJS throw new IllegalArgumentException
 			System.out.println(getClass().getName() + " property \""
@@ -3562,12 +3564,11 @@ public abstract class JComponent extends Container {
 	@Override
 	public void setFocusTraversalKeys(int id,
 			Set<? extends AWTKeyStroke> keystrokes) {
-
-		// if (id == KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS) {
-		// setFlag(FOCUS_TRAVERSAL_KEYS_FORWARD_SET,true);
-		// } else if (id == KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS) {
-		// setFlag(FOCUS_TRAVERSAL_KEYS_BACKWARD_SET,true);
-		// }
+		 if (id == KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS) {
+		 setFlag(FOCUS_TRAVERSAL_KEYS_FORWARD_SET,true);
+		 } else if (id == KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS) {
+		 setFlag(FOCUS_TRAVERSAL_KEYS_BACKWARD_SET,true);
+		 }
 		super.setFocusTraversalKeys(id, keystrokes);
 	}
 
@@ -4195,7 +4196,7 @@ public abstract class JComponent extends Container {
 	@Override
 	public void repaint(long tm, int x, int y, int width, int height) {
 		RepaintManager.currentManager(this).addDirtyRegion(this, x, y, width,
-				height);
+			height);
 	}
 
 	/**
@@ -4348,7 +4349,7 @@ public abstract class JComponent extends Container {
 			return;
 		}
 
-		while (!isOpaque() && ((JSComponent)c).秘paintsSelf()) {
+		while (!isOpaque()) {//see TextAnalyzer2 -- doesn't erase canvas on hide && ((JSComponent)c).秘paintsSelf()) {
 			parent = c.getParent();
 			if (parent != null) {
 				x += c.getX();

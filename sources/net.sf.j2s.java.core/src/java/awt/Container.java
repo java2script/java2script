@@ -1567,16 +1567,18 @@ public class Container extends JSComponent {
 	@Override
 	public void validate() {
 		/* Avoid grabbing lock unless really necessary. */
-		if (!isValid()) {
+		if (!isValid() && peer != null) {
 			synchronized (getTreeLock()) {
 
+				// validation in AWT prior to addNotify will cause NPE for TextArea without font
+				
 				// for SwingJS ALL components must have peers. might as well do that
 				// now.
 				// I think there was a notification threading issue that the root pane
 				// was not
 				// getting its peer in time for validation.
-				if (peer == null)
-					peer = getToolkit().createComponent(this);
+//				if (peer == null)
+//					peer = getToolkit().createComponent(this);
 				int n = component.size();
 				if (!isValid() && peer != null && n > 0) {
 					ContainerPeer p = null;
@@ -3298,23 +3300,22 @@ public class Container extends JSComponent {
 
     @Override
     protected void clearCurrentFocusCycleRootOnHide() {
-//        KeyboardFocusManager kfm =
-//            KeyboardFocusManager.getCurrentKeyboardFocusManager();
-//        Container cont = kfm.getCurrentFocusCycleRoot();
-//
-//        if (cont == this || isParentOf(cont)) {
-//            kfm.setGlobalCurrentFocusCycleRoot(null);
-//        }
+        KeyboardFocusManager kfm =
+            KeyboardFocusManager.getCurrentKeyboardFocusManager();
+        Container cont = kfm.getCurrentFocusCycleRoot();
+
+        if (cont == this || isParentOf(cont)) {
+            kfm.setGlobalCurrentFocusCycleRoot(null);
+        }
     }
 
     @Override
 	final Container getTraversalRoot() {
-//        if (isFocusCycleRoot()) {
-//            return findTraversalRoot();
-//        }
-//
-//        return super.getTraversalRoot();
-    	return null;
+        if (isFocusCycleRoot()) {
+            return findTraversalRoot();
+        }
+
+        return super.getTraversalRoot();
     }
 
     /**
@@ -3374,6 +3375,9 @@ public class Container extends JSComponent {
         Container rootAncestor = getFocusCycleRootAncestor();
         if (rootAncestor != null) {
             return rootAncestor.getFocusTraversalPolicy();
+        } else if (秘isAWT()) {
+            return KeyboardFocusManager.getCurrentKeyboardFocusManager().
+                    getDefaultAWTFocusTraversalPolicy();
         } else {
             return KeyboardFocusManager.getCurrentKeyboardFocusManager().
                 getDefaultFocusTraversalPolicy();

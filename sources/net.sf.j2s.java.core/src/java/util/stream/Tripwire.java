@@ -64,6 +64,7 @@ final class Tripwire {
      * {@link PlatformLogger}
      */
     static void trip(Class<?> trippingClass, String msg) {
+    	System.out.println(trippingClass.getName() + " " +  msg); 
         //PlatformLogger.getLogger(trippingClass.getName()).warning(msg, trippingClass.getName());
     }
 }

@@ -943,7 +943,8 @@ public class SwingUtilities implements SwingConstants
      * horizontalAlignment (they will default to CENTER).
      * Use the other version of layoutCompoundLabel() instead.
      */
-    private static String layoutCompoundLabelImpl(
+    @SuppressWarnings("unused")
+	private static String layoutCompoundLabelImpl(
         JComponent c,
         JSComponentUI ui,
         FontMetrics fm,
@@ -1013,11 +1014,11 @@ public class SwingUtilities implements SwingConstants
             		textR.height = fm.getHeight();
             	} else {
             		String t = text.replace(' ', '\u00A0'); // no-break space
-            		if (t != text)
+            		if (t != text && /** @j2sNative ui.textNode.innerHTML != t || */false)
             			DOMNode.setAttr(ui.textNode, "innerHTML", t);
             		Dimension d = ui.getHTMLSize(ui.textNode);
-            		if (t != text)
-            			DOMNode.setAttr(ui.textNode, "innerHTML", text);            			
+//            		if (t != text)
+//            			DOMNode.setAttr(ui.textNode, "innerHTML", text);            			
             		textR.width = (d.width == 0 ? 1 : d.width);
             		textR.height = (d.height == 0 ? fm.getHeight() : d.height);
             	}

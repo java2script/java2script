@@ -3,10 +3,8 @@ package test;
 import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Dimension;
-import java.awt.Event;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Frame;
@@ -14,14 +12,8 @@ import java.awt.GridLayout;
 import java.awt.Label;
 import java.awt.Panel;
 import java.awt.TextArea;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -35,7 +27,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 import javax.swing.plaf.UIResource;
 
 public class Test_Dialog extends JFrame implements PropertyChangeListener {
@@ -45,7 +36,7 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 	public static Object o = new Object();
 	public static Color c = new Color(1, 2, 3);
 
-	// @Override
+	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		Object val = event.getNewValue();
 		String name = event.getPropertyName();
@@ -97,10 +88,16 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 	public void onDialogReturn(Object value) {
 		if (value == null || value instanceof UIResource)
 			return;
+		if (value instanceof Color) {
+			colorButton.setBackground((Color) value);
+		}
+			
 		status.setText(value.toString());
 	}
 
 	JLabel status;
+
+	private JButton colorButton;
 
 	public Test_Dialog() {
 		super();
@@ -173,7 +170,7 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 		});
 		p.add(b);
 
-		b = new JButton("ColorDialog");
+		b = colorButton = new JButton("ColorDialog");
 		b.addActionListener(new ActionListener() {
 
 			@Override
@@ -253,25 +250,29 @@ class ImportExportDialog extends Dialog
     	add("North", new Label("Export using CTRL + C"));
 
     textArea = new TextArea() {
-    	public Dimension getPreferredSize() {
+    	@Override
+		public Dimension getPreferredSize() {
     		Dimension d = super.getPreferredSize();
     		System.out.println(this.getRows() + " " + this.getColumns());
     		System.out.println("export dialog textarea pref d = " + d);
     		return d;
     	}
-    	public Dimension preferredSize() {
+    	@Override
+		public Dimension preferredSize() {
     		Dimension d = super.preferredSize();
     		System.out.println("export dialog pref textarea pref d = " + d);
     		return d;
     	}
 
-    	public Dimension minimumSize() {
+    	@Override
+		public Dimension minimumSize() {
     		Dimension d = super.minimumSize();
     		System.out.println("export dialog min textarea min d = " + d);
     		return d;
     	}
 
-    	public Dimension getMinimumSize() {
+    	@Override
+		public Dimension getMinimumSize() {
     		Dimension d = super.getMinimumSize();
     		System.out.println("export dialog textarea min d = " + d);
     		return d;
@@ -370,25 +371,29 @@ class ImportExportJDialog extends JDialog
     	add("North", new Label("Export using CTRL + C"));
 
     textArea = new TextArea() {
-    	public Dimension getPreferredSize() {
+    	@Override
+		public Dimension getPreferredSize() {
     		Dimension d = super.getPreferredSize();
     		System.out.println(this.getRows() + " " + this.getColumns());
     		System.out.println("export dialog textarea pref d = " + d);
     		return d;
     	}
-    	public Dimension preferredSize() {
+    	@Override
+		public Dimension preferredSize() {
     		Dimension d = super.preferredSize();
     		System.out.println("export dialog pref textarea pref d = " + d);
     		return d;
     	}
 
-    	public Dimension minimumSize() {
+    	@Override
+		public Dimension minimumSize() {
     		Dimension d = super.minimumSize();
     		System.out.println("export dialog min textarea min d = " + d);
     		return d;
     	}
 
-    	public Dimension getMinimumSize() {
+    	@Override
+		public Dimension getMinimumSize() {
     		Dimension d = super.getMinimumSize();
     		System.out.println("export dialog textarea min d = " + d);
     		return d;

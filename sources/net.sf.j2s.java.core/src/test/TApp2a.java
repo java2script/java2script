@@ -3,6 +3,7 @@ package test;
 import java.applet.Applet;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
@@ -10,8 +11,13 @@ import java.awt.Label;
 import java.awt.List;
 import java.awt.Polygon;
 import java.awt.TextArea;
+import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -21,10 +27,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
-import javax.swing.event.ChangeListener;
-import javax.swing.text.DefaultCaret;
 
 public class TApp2a extends Applet {
+	@Override
 	public void init() {
 		setSize(500,400);
 		List l = new List();
@@ -42,6 +47,87 @@ public class TApp2a extends Applet {
 		label.setBounds(10, 10, 50, 60);
 		panel.add(label);
 		
+		
+		Label SpeedLab = new Label("Speed");
+		  SpeedLab.setFont(new Font("Helvetica",Font.PLAIN,8));
+		  SpeedLab.setBounds(10, 100, 50, 10);
+		  
+		  for (int i = 6; i < 20; i+=2) {
+			  JLabel l1 = new JLabel("XyX"){
+				  @Override
+				public boolean isFocusable() {
+					  System.out.println("is focusable ? " + super.isFocusable() + " " + this.getPeer().isFocusable());
+					  return super.isFocusable();
+				  }
+					@Override
+					public boolean getFocusTraversalKeysEnabled() {
+						System.out.println("getftke " + getText() + " " + super.getFocusTraversalKeysEnabled());
+						return super.getFocusTraversalKeysEnabled();
+					}
+
+			  };
+//			  l1.setFocusable(true);
+
+			  l1.setFont(new Font("Helvetica", Font.PLAIN, i));
+//			  l1.setLocation(10,  100 + i * 15);
+			  l1.setBounds(10, 100 + i * 15, 50, 15);
+			  l1.setBackground(Color.yellow);
+			  add(l1);
+			  TextField t1 = new TextField("tf" + i) {
+					@Override
+					public boolean getFocusTraversalKeysEnabled() {
+						System.out.println("getftke " + getText());
+						return super.getFocusTraversalKeysEnabled();
+					}
+
+			  };
+			  t1.setBounds(70, 100 + i * 15, 30, 15);
+			  t1.addKeyListener(new KeyListener() {
+
+				@Override
+				public void keyTyped(KeyEvent e) {
+					TextField t = ((TextField) e.getSource());
+					System.out.println(t.getText() + " " + e);
+				}
+
+				@Override
+				public void keyPressed(KeyEvent e) {
+					TextField t = ((TextField) e.getSource());
+					System.out.println(t.getText() + " " + e);
+				}
+
+				@Override
+				public void keyReleased(KeyEvent e) {
+					TextField t = ((TextField) e.getSource());
+					System.out.println(t.getText() + " " + e);
+				}
+				  
+			  });
+			  t1.addFocusListener(new FocusListener() {
+
+				@Override
+				public void focusGained(FocusEvent e) {
+					TextField t = ((TextField) e.getSource());
+					System.out.println("focus gained " + t.getText());
+					t.setBackground(Color.yellow);
+				}
+
+				@Override
+				public void focusLost(FocusEvent e) {
+					TextField t = ((TextField) e.getSource());
+					System.out.println("focus lost " + t.getText());
+					t.setBackground(Color.white);
+				}
+				  
+			  });
+			  add(t1);
+			  
+		  }
+
+		  SpeedLab.setBackground(Color.yellow);
+
+		  panel.add(SpeedLab);
+		
 		JPanel panel2 = new JPanel();
 		panel2.setLayout(new GridLayout(2, 1));
 		Label label2 = new Label("1");
@@ -50,7 +136,6 @@ public class TApp2a extends Applet {
 		panel2.add(new JLabel("2"));
 		panel2.setBounds(200, 150, 100, 150);
 //		add(panel2);
-		
 		
 		
 		
@@ -86,11 +171,27 @@ public class TApp2a extends Applet {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				System.out.println("moving caret");
 				ta1.setCaretPosition(ta1.getCaretPosition() == 0 ? ta1.getText().length() : 0);
-				//	tb.requestFocus();
+				ta1.requestFocus();
 			}
 			
 		});
+		
+		  bb.addFocusListener(new FocusListener() {
+
+			@Override
+			public void focusGained(FocusEvent e) {
+				System.out.println("focus gained " + e.getSource());
+			}
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				System.out.println("focus lost " + e.getSource());
+			}
+			  
+		  });
+
 		add(bb);
 		
 		
@@ -165,7 +266,8 @@ public class TApp2a extends Applet {
 				
 			}
 			
-		});
+		});		
+		
 	}
 	
     static String hexValueOf(String hex)  {   // converts hex format into BitSeq
@@ -182,8 +284,16 @@ public class TApp2a extends Applet {
         return s;
     }
 
-    public void paint(Graphics g) {
+    @Override
+	public void paint(Graphics g) {
 		super.paint(g);
+		
+//		  Graphics g = getGraphics();
+//		  FontMetrics fm = g.getFontMetrics(new Font("Helvetica",Font.PLAIN,8));
+//		  int width = fm.stringWidth("Speed");
+//		  g.dispose();
+//		  
+
 		((Graphics2D) g).setStroke((new BasicStroke(0)));
 		g.drawRect(130, 150, 40, 60);
 		g.fillRect(140, 5, 1, 200);

@@ -419,7 +419,7 @@ public class Attributes implements Map<Object,Object>, Cloneable {
             }
             try {
                 if ((putValue(name, value) != null) && (!lineContinued)) {
-                    PlatformLogger.getLogger("java.util.jar").warning(
+                	System.out.println("java.util.jar" +
                                      "Duplicate name in Manifest: " + name
                                      + ".\n"
                                      + "Ensure that the manifest does not "

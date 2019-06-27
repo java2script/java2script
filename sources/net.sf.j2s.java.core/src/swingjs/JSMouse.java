@@ -35,6 +35,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 
+import javax.swing.JComponent;
+
 /**
  * JavaScript interface from JmolJSmol.js via handleOldJvm10Event (for now)
  * 
@@ -449,8 +451,10 @@ public class JSMouse {
 		}
 	}
 
-	private boolean keyAction(int id, int modifiers, Object jqevent2, long time) {
-		return JSKeyEvent.dispatchKeyEvent(id, modifiers, jqevent, time);
+	private boolean keyAction(int id, int modifiers, Object jqevent, long time) {
+		JComponent c = 	/** @j2sNative jqevent.target["data-keycomponent"] ||
+				 */null;
+		return JSKeyEvent.dispatchKeyEvent(c, id, modifiers, jqevent, time);
 	}
 
 

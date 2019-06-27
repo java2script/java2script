@@ -642,8 +642,8 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 
 	public static boolean requestFocus(Component c) {
 		final JSComponentUI ui = getUI(c, false);
-		if (ui == null || ui.isNull || !ui.isFocusable())
-			return  false;
+		if (ui == null || ui.isNull || !ui.jc.isFocusable())
+			return false;
 		Runnable r = new Runnable() {
 
 			@Override

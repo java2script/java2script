@@ -166,7 +166,13 @@ public class JSFocusPeer implements KeyboardFocusManagerPeer {
 	}
 
 	public static void focus(DOMNode focusNode) {
-		/** @j2sNative focusNode.focus(); */
+		/** @j2sNative 
+		 * 
+		 * focusNode.focus();
+		 * 
+		 *
+		 *  
+		 *  */
 	}
 
 	public static void setFocusLast(JSApplet applet) {

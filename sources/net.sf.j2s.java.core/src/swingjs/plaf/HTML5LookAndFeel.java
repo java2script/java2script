@@ -856,12 +856,12 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				new InsetsUIResource(2, 14, 2, 14),
 				"Button.textIconGap", four,
 				// "Button.textShiftOffset", zero,
-				// "Button.focusInputMap", new UIDefaults.LazyInputMap(new Object[] {
-				// "SPACE", "pressed",
-				// "released SPACE", "released",
-				// "ENTER", "pressed",
-				// "released ENTER", "released"
-				// }),
+				 "Button.focusInputMap", new UIDefaults.LazyInputMap(new Object[] {
+				 "SPACE", "pressed",
+				 "released SPACE", "released",
+				 "ENTER", "pressed",
+				 "released ENTER", "released"
+				 }),
 				//
 				// "ToggleButton.font", dialogPlain12,
 				"ToggleButton.background", control,
@@ -877,12 +877,12 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				four,
 				"ToggleButton.textShiftOffset",
 				zero,
-				// "ToggleButton.focusInputMap",
-				// new UIDefaults.LazyInputMap(new Object[] {
-				// "SPACE", "pressed",
-				// "released SPACE", "released"
-				// }),
-				//
+				 "ToggleButton.focusInputMap",
+				 new UIDefaults.LazyInputMap(new Object[] {
+				 "SPACE", "pressed",
+				 "released SPACE", "released"
+				 }),
+				
 				// "RadioButton.font", dialogPlain12,
 				"RadioButton.background", control,
 				"RadioButton.foreground", controlText,
@@ -897,13 +897,13 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				four,
 				"RadioButton.textShiftOffset",
 				zero,
-				// "RadioButton.icon", radioButtonIcon,
-				// "RadioButton.focusInputMap",
-				// new UIDefaults.LazyInputMap(new Object[] {
-				// "SPACE", "pressed",
-				// "released SPACE", "released",
-				// "RETURN", "pressed"
-				// }),
+//				 "RadioButton.icon", radioButtonIcon,
+				 "RadioButton.focusInputMap",
+				 new UIDefaults.LazyInputMap(new Object[] {
+				 "SPACE", "pressed",
+				 "released SPACE", "released",
+				 "RETURN", "pressed"
+				 }),
 				//
 				// "CheckBox.font", dialogPlain12,
 				"CheckBox.background", control,
@@ -916,11 +916,11 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				"CheckBox.textShiftOffset",
 				zero,
 				// "CheckBox.icon", checkBoxIcon,
-				// "CheckBox.focusInputMap",
-				// new UIDefaults.LazyInputMap(new Object[] {
-				// "SPACE", "pressed",
-				// "released SPACE", "released"
-				// }),
+				 "CheckBox.focusInputMap",
+				 new UIDefaults.LazyInputMap(new Object[] {
+				 "SPACE", "pressed",
+				 "released SPACE", "released"
+				 }),
 				// "FileChooser.useSystemExtensionHiding", Boolean.FALSE,
 
 				// *** ColorChooser
@@ -1494,28 +1494,28 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				"Slider.minimumVerticalSize",
 				new Dimension(21, 36),
 				// "Slider.focusInsets", sliderFocusInsets,
-				// "Slider.focusInputMap",
-				// new UIDefaults.LazyInputMap(new Object[] {
-				// "RIGHT", "positiveUnitIncrement",
-				// "KP_RIGHT", "positiveUnitIncrement",
-				// "DOWN", "negativeUnitIncrement",
-				// "KP_DOWN", "negativeUnitIncrement",
-				// "PAGE_DOWN", "negativeBlockIncrement",
-				// "LEFT", "negativeUnitIncrement",
-				// "KP_LEFT", "negativeUnitIncrement",
-				// "UP", "positiveUnitIncrement",
-				// "KP_UP", "positiveUnitIncrement",
-				// "PAGE_UP", "positiveBlockIncrement",
-				// "HOME", "minScroll",
-				// "END", "maxScroll"
-				// }),
-				// "Slider.focusInputMap.RightToLeft",
-				// new UIDefaults.LazyInputMap(new Object[] {
-				// "RIGHT", "negativeUnitIncrement",
-				// "KP_RIGHT", "negativeUnitIncrement",
-				// "LEFT", "positiveUnitIncrement",
-				// "KP_LEFT", "positiveUnitIncrement",
-				// }),
+				 "Slider.focusInputMap",
+				 new UIDefaults.LazyInputMap(new Object[] {
+				 "RIGHT", "positiveUnitIncrement",
+				 "KP_RIGHT", "positiveUnitIncrement",
+				 "DOWN", "negativeUnitIncrement",
+				 "KP_DOWN", "negativeUnitIncrement",
+				 "PAGE_DOWN", "negativeBlockIncrement",
+				 "LEFT", "negativeUnitIncrement",
+				 "KP_LEFT", "negativeUnitIncrement",
+				 "UP", "positiveUnitIncrement",
+				 "KP_UP", "positiveUnitIncrement",
+				 "PAGE_UP", "positiveBlockIncrement",
+				 "HOME", "minScroll",
+				 "END", "maxScroll"
+				 }),
+				 "Slider.focusInputMap.RightToLeft",
+				 new UIDefaults.LazyInputMap(new Object[] {
+				 "RIGHT", "negativeUnitIncrement",
+				 "KP_RIGHT", "negativeUnitIncrement",
+				 "LEFT", "positiveUnitIncrement",
+				 "KP_LEFT", "positiveUnitIncrement",
+				 }),
 				//
 				// *** Spinner
 				"Spinner.font",
@@ -1605,19 +1605,19 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				new Integer(2),
 				// "TabbedPane.tabsOpaque", Boolean.TRUE,
 				// "TabbedPane.contentOpaque", Boolean.TRUE,
-				// "TabbedPane.focusInputMap",
-				// new UIDefaults.LazyInputMap(new Object[] {
-				// "RIGHT", "navigateRight",
-				// "KP_RIGHT", "navigateRight",
-				// "LEFT", "navigateLeft",
-				// "KP_LEFT", "navigateLeft",
-				// "UP", "navigateUp",
-				// "KP_UP", "navigateUp",
-				// "DOWN", "navigateDown",
-				// "KP_DOWN", "navigateDown",
-				// "ctrl DOWN", "requestFocusForVisibleComponent",
-				// "ctrl KP_DOWN", "requestFocusForVisibleComponent",
-				// }),
+				 "TabbedPane.focusInputMap",
+				 new UIDefaults.LazyInputMap(new Object[] {
+				 "RIGHT", "navigateRight",
+				 "KP_RIGHT", "navigateRight",
+				 "LEFT", "navigateLeft",
+				 "KP_LEFT", "navigateLeft",
+				 "UP", "navigateUp",
+				 "KP_UP", "navigateUp",
+				 "DOWN", "navigateDown",
+				 "KP_DOWN", "navigateDown",
+				 "ctrl DOWN", "requestFocusForVisibleComponent",
+				 "ctrl KP_DOWN", "requestFocusForVisibleComponent",
+				 }),
 				// "TabbedPane.ancestorInputMap",
 				// new UIDefaults.LazyInputMap(new Object[] {
 				// "ctrl PAGE_DOWN", "navigatePageDown",
@@ -2082,17 +2082,17 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		// "shift SPACE", "extendTo",
 		// "ctrl shift SPACE", "moveSelectionTo"
 		// }),
-		// "Tree.focusInputMap.RightToLeft",
-		// new UIDefaults.LazyInputMap(new Object[] {
-		// "RIGHT", "selectParent",
-		// "KP_RIGHT", "selectParent",
-		// "LEFT", "selectChild",
-		// "KP_LEFT", "selectChild",
-		// }),
-		// "Tree.ancestorInputMap",
-		// new UIDefaults.LazyInputMap(new Object[] {
-		// "ESCAPE", "cancel"
-		// }),
+		 "Tree.focusInputMap.RightToLeft",
+		 new UIDefaults.LazyInputMap(new Object[] {
+		 "RIGHT", "selectParent",
+		 "KP_RIGHT", "selectParent",
+		 "LEFT", "selectChild",
+		 "KP_LEFT", "selectChild",
+		 }),
+		 "Tree.ancestorInputMap",
+		 new UIDefaults.LazyInputMap(new Object[] {
+		 "ESCAPE", "cancel"
+		 }),
 		// // Bind specific keys that can invoke popup on currently
 		// // focused JComponent
 		// "RootPane.ancestorInputMap",

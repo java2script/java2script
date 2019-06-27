@@ -35,6 +35,7 @@ import java.util.Arrays;
 
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
+import javax.swing.JRootPane;
 import javax.swing.RootPaneContainer;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
@@ -132,7 +133,22 @@ public abstract class JSComponent extends Component {
      */
     private int 秘iPaintMyself = PAINTS_SELF_UNKNOWN;
 	private boolean 秘repaintAsUpdate = true;
+	private static boolean 秘isRepaint = true;
 
+	protected static void 秘setIsRepaint(boolean b) {
+		秘isRepaint = b;
+	}
+	
+	@Override
+	public void repaint() {
+		if (秘isAWT()) {
+			秘repaintCmp(0, 0, 0, width, height);
+		} else {
+			repaint(0, 0, 0, width, height);
+		}
+	}
+
+	
     // trying to replace these two:
 	// public boolean 秘isBackgroundPainted;
 	// protected boolean 秘alwaysPaint; // in AWT canvas
@@ -353,14 +369,6 @@ public abstract class JSComponent extends Component {
          */
     }
 
-
-	@Override
-	protected boolean canPaint() {
-		// meaning can UPDATE
-		return (秘repaintAsUpdate && 秘isAWT() || !(peer instanceof LightweightPeer));
-	}
-
-
 	@SuppressWarnings("unused")
 	@Override
 	public boolean isBackgroundSet() {
@@ -573,7 +581,12 @@ public abstract class JSComponent extends Component {
 	}
 
     public int 秘setPaintsSelf(int flag) {
-    	return (秘iPaintMyself == PAINTS_SELF_ALWAYS ? PAINTS_SELF_ALWAYS : (秘iPaintMyself = flag));
+    	flag = (秘iPaintMyself == PAINTS_SELF_ALWAYS ? PAINTS_SELF_ALWAYS : (秘iPaintMyself = flag));
+    	JRootPane r;
+    	return (flag == PAINTS_SELF_NO 
+    			|| (r = ((JComponent) this).getRootPane()) == null
+    			|| r.秘paintsSelf() ? flag : r.秘setPaintsSelf(PAINTS_SELF_YES)
+    					);		
     }
     
     /**
@@ -602,9 +615,9 @@ public abstract class JSComponent extends Component {
 			// don't allow if AbstractBorder.paintBorder(...) has been overridden
 			// unchecked here is if a class calls getGraphics outside of this context
 			秘iPaintMyself = 秘setPaintsSelf(JSUtil.isOverridden(this, "paint$java_awt_Graphics", 秘paintClass)
-					|| JSUtil.isOverridden(this, "paintComponent$java_awt_Graphics", JComponent.class)
+					|| JSUtil.isOverridden(this, "paintComponent$java_awt_Graphics", /** @j2sNative javax.swing.JComponent || */null)
 					|| JSUtil.isOverridden(this, "update$java_awt_Graphics", 秘updateClass)
-					|| JSUtil.isOverridden(this, "paintContainer$java_awt_Graphics", Window.class)
+					|| JSUtil.isOverridden(this, "paintContainer$java_awt_Graphics", /** @j2sNative java.awt.Container || */null)
 					|| 秘paintsBorder() && JSUtil.isOverridden(秘border, "paintBorder$java_awt_Component$java_awt_Graphics$I$I$I$I",
 							秘border.秘paintClass) 
 					? PAINTS_SELF_YES : PAINTS_SELF_NO);
@@ -635,6 +648,12 @@ public abstract class JSComponent extends Component {
 	    ((JComponent) this).paintImmediately(0,  0,  width,  height);
 	}
 
+	@Override
+	protected boolean canPaint() {
+		// meaning can UPDATE
+		return (秘isRepaint && 秘repaintAsUpdate && 秘isAWT() || !(peer instanceof LightweightPeer));
+	}
+
 	public void 秘update() {
 		// from AWT repaint() via a PaintEvent.UPDATE
 		Graphics g = getGraphics();
@@ -645,15 +664,25 @@ public abstract class JSComponent extends Component {
 		}
 	}
 
+	protected void 秘paint(Graphics g) {
+		if (秘isRepaint && 秘isAWT() && 秘repaintAsUpdate) {
+			update(g);
+		} else {
+			paint(g);
+		}
+	}
+
+
 	/**
-	 * AWT controls will regard repaint() as update() unless called this way (from
+	 * AWT controls will direct repaint() to update(Graphics) unless called this way (from
 	 * javax.swing, primarily)
 	 */
 	public void 秘repaint() {
 		if (秘isAWT()) {
+			// this is an internal Swing repaint call - do not use update(Graphics)
 			秘repaintAsUpdate = false;
 			try {
-				((JComponent) this).repaint();
+				super.repaint();
 			} finally {
 				秘repaintAsUpdate = true;
 			}

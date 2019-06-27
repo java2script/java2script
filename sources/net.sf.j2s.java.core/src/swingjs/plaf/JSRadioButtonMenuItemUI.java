@@ -24,5 +24,11 @@ public class JSRadioButtonMenuItemUI extends JSRadioButtonUI {
 		menuItem = (JMenuItem) jc;
 		super.installUI(jc);
 	}
-	
+
+	@Override
+	public boolean isFocusable() {
+		return false;
+	}
+
+
 }

@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.LayoutManager;
 
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 public class Panel extends JPanel {
@@ -21,18 +22,13 @@ public class Panel extends JPanel {
 		subclassSetup();
 		setBackground(null);
 		setOpaque(false);
-		A2SContainer.fixAWTPaint(this, Panel.class);
+		A2SContainer.fixAWTPaint(this, JComponent.class);
 	}
 
 	protected void subclassSetup() {
 		// JApplet startup
 	}
 
-//	@Override
-//	public void paint(Graphics g) {
-//		super.paint(g);
-//	}
-//	
 	@Override
 	public void setBackground(Color c) {
 		super.setBackground(c);

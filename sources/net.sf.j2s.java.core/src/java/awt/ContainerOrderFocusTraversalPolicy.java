@@ -24,9 +24,8 @@
  */
 package java.awt;
 
-import java.util.List;
 import java.util.ArrayList;
-import sun.util.logging.PlatformLogger;
+import java.util.List;
 
 /**
  * A FocusTraversalPolicy that determines traversal order based on the order
@@ -102,12 +101,14 @@ public class ContainerOrderFocusTraversalPolicy extends FocusTraversalPolicy
      * the 2nd point but just override the implementation of the 1st one.
      * A striking example of such a descendant is the javax.swing.SortingFocusTraversalPolicy.
      */
-    /*protected*/ private List<Component> getFocusTraversalCycle(Container aContainer) {
+    /* protected*/ private List<Component> getFocusTraversalCycle(Container aContainer) {
+    	// change from protected was Java, not SwingJS
         List<Component> cycle = new ArrayList<Component>();
         enumerateCycle(aContainer, cycle);
         return cycle;
     }
     /*protected*/ private int getComponentIndex(List<Component> cycle, Component aComponent) {
+    	// change from protected was Java, not SwingJS
         return cycle.indexOf(aComponent);
     }
 
@@ -120,7 +121,10 @@ public class ContainerOrderFocusTraversalPolicy extends FocusTraversalPolicy
 
         Component[] components = container.getChildArray();
         for (int i = 0, n = container.getComponentCount(); i < n; i++) {
-            Component comp = components[i];
+        	// SwingJS adding check for JTextArea and JEditorPane, which 
+        	// cannot accept tab focus in HTML5 because they cannot 
+        	// break out of it.
+            JSComponent comp = (JSComponent) components[i];
             if (comp instanceof Container) {
                 Container cont = (Container)comp;
 
@@ -207,7 +211,8 @@ public class ContainerOrderFocusTraversalPolicy extends FocusTraversalPolicy
      *         root of aComponent or focus traversal policy provider, or if either aContainer or
      *         aComponent is null
      */
-    public Component getComponentAfter(Container aContainer, Component aComponent) {
+    @Override
+	public Component getComponentAfter(Container aContainer, Component aComponent) {
 //        if (log.isLoggable(PlatformLogger.Level.FINE)) {
 //            log.fine("### Searching in " + aContainer + " for component after " + aComponent);
 //        }
@@ -222,7 +227,7 @@ public class ContainerOrderFocusTraversalPolicy extends FocusTraversalPolicy
             throw new IllegalArgumentException("aContainer is not a focus cycle root of aComponent");
         }
 
-        synchronized(aContainer.getTreeLock()) {
+//        synchronized(aContainer.getTreeLock()) {
 
             if (!(aContainer.isVisible() && aContainer.isDisplayable())) {
                 return null;
@@ -292,7 +297,7 @@ public class ContainerOrderFocusTraversalPolicy extends FocusTraversalPolicy
 
                 return comp;
             }
-        }
+ //       }
         return null;
     }
 
@@ -311,7 +316,8 @@ public class ContainerOrderFocusTraversalPolicy extends FocusTraversalPolicy
      *         root of aComponent or focus traversal policy provider, or if either aContainer or
      *         aComponent is null
      */
-    public Component getComponentBefore(Container aContainer, Component aComponent) {
+    @Override
+	public Component getComponentBefore(Container aContainer, Component aComponent) {
         if (aContainer == null || aComponent == null) {
             throw new IllegalArgumentException("aContainer and aComponent cannot be null");
         }
@@ -408,7 +414,8 @@ public class ContainerOrderFocusTraversalPolicy extends FocusTraversalPolicy
      *         or null if no suitable Component can be found
      * @throws IllegalArgumentException if aContainer is null
      */
-    public Component getFirstComponent(Container aContainer) {
+    @Override
+	public Component getFirstComponent(Container aContainer) {
         List<Component> cycle;
 
 //        if (log.isLoggable(PlatformLogger.Level.FINE)) {
@@ -419,7 +426,7 @@ public class ContainerOrderFocusTraversalPolicy extends FocusTraversalPolicy
 
         }
 
-        synchronized(aContainer.getTreeLock()) {
+//        synchronized(aContainer.getTreeLock()) {
 
             if (!(aContainer.isVisible() && aContainer.isDisplayable())) {
                 return null;
@@ -442,6 +449,10 @@ public class ContainerOrderFocusTraversalPolicy extends FocusTraversalPolicy
 //            }
 
             for (Component comp : cycle) {
+            	
+            	if (comp == aContainer)
+            		continue; // BH -- SwingJS HACK -- presuming that comp itself should somehow define first component implicitly?
+            	
                 if (accept(comp)) {
                     return comp;
                 } else if (comp != aContainer &&
@@ -450,7 +461,7 @@ public class ContainerOrderFocusTraversalPolicy extends FocusTraversalPolicy
                     return comp;
                 }
             }
-        }
+ //       }
         return null;
     }
 
@@ -465,7 +476,8 @@ public class ContainerOrderFocusTraversalPolicy extends FocusTraversalPolicy
      *         or null if no suitable Component can be found
      * @throws IllegalArgumentException if aContainer is null
      */
-    public Component getLastComponent(Container aContainer) {
+    @Override
+	public Component getLastComponent(Container aContainer) {
         List<Component> cycle;
 //        if (log.isLoggable(PlatformLogger.Level.FINE)) {
 //            log.fine("### Getting last component in " + aContainer);
@@ -525,7 +537,8 @@ public class ContainerOrderFocusTraversalPolicy extends FocusTraversalPolicy
      * @see #getFirstComponent
      * @throws IllegalArgumentException if aContainer is null
      */
-    public Component getDefaultComponent(Container aContainer) {
+    @Override
+	public Component getDefaultComponent(Container aContainer) {
         return getFirstComponent(aContainer);
     }
 

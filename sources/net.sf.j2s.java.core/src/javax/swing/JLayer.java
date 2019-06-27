@@ -303,8 +303,8 @@ public final class JLayer<V extends Component>
             super.remove(oldGlassPane);
         }
         if (glassPane != null) {
-            AWTAccessor.getComponentAccessor().setMixingCutoutShape(glassPane,
-                    new Rectangle());
+//            AWTAccessor.getComponentAccessor().setMixingCutoutShape(glassPane,
+//                    new Rectangle());
             glassPane.setVisible(isGlassPaneVisible);
             super.addImpl(glassPane, null, 0);
         }
