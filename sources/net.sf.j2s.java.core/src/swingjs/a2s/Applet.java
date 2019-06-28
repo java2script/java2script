@@ -21,7 +21,7 @@ public class Applet extends JApplet implements A2SContainer {
     	super();
 		// Note: applet.paint(g) needs to include super.paint(g), or buttons will not
 		// show. So we do that in fixAWTPaint().
-		A2SContainer.fixAWTPaint(this, Applet.class);
+		A2SContainer.fixAWTPaint(this, JApplet.class);
 		listener = new A2SListener();
 		addMouseListener(listener);
 		addMouseMotionListener(listener);
@@ -33,6 +33,7 @@ public class Applet extends JApplet implements A2SContainer {
 	@Override
 	public void setBackground(Color c) {
 		super.setBackground(c);
+		getRootPane().setBackground(c);
 		getContentPane().setBackground(c);
 	}
 	

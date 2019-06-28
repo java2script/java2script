@@ -82,4 +82,10 @@ public class JSMenuItemUI extends JSButtonUI {
 		JSPopupMenuUI.processJ2SMenuCmd(data);
 	}
 
+	@Override
+	public boolean isFocusable() {
+		return false;
+	}
+
+
 }

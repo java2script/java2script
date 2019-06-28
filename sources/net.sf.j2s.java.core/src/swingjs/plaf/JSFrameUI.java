@@ -142,7 +142,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 				);
 
 				titleNode = newDOMObject("label", id + "_title");
-				DOMNode.setTopLeftAbsolute(titleNode, 2, 4);
+				DOMNode.setTopLeftAbsolute(titleNode, 0, 0);
 				DOMNode.setStyles(titleNode, "background-color", "#E0E0E0", "height", "20px", "overflow", "hidden");
 
 				closerWrap = newDOMObject("div", id + "_closerwrap");
@@ -375,6 +375,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	}
 
 	private Rectangle bounds;
+
 	@Override
 	public void setBoundsPrivate(int x, int y, int width, int height) {
 	// only for embedded frames -- not supported in SwingJS
@@ -417,6 +418,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			b = false;
 		super.setVisible(b);
 		if (isModal) {
+			modalBlocked = b;
 			if (b) {
 				$(body).after(modalNode);
 				addClass(modalNode, "swingjs-window"); // so as to slip into z-index ranking
@@ -430,5 +432,5 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		}
 		DOMNode.setVisible(domNode, b);
 	}
-
+	
 }

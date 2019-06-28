@@ -180,7 +180,7 @@ public class JColorChooser extends JComponent {
 
 		final JColorChooser pane = new JColorChooser(initialColor != null ? initialColor : Color.white);
 
-		ColorTracker ok = new ColorTracker(pane);
+		ColorTracker ok = null;// SwingJS new ColorTracker(pane);
 		JDialog dialog = createDialog(component, title, true, pane, ok, null, true);
 
 		//dialog.addComponentListener(pane);
@@ -787,7 +787,7 @@ class ColorChooserDialog extends JDialog {
 				w.dispose();
 			else
 				w.hide();
-		}
+		} 	
 	}
 
 

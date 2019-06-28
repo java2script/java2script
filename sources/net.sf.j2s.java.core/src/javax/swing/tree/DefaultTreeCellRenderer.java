@@ -35,12 +35,14 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Rectangle;
+
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JTree;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.FontUIResource;
+
 import sun.swing.DefaultLookup;
 
 /**
@@ -589,7 +591,8 @@ public class DefaultTreeCellRenderer extends JLabel implements TreeCellRenderer
     * See the <a href="#override">Implementation Note</a>
     * for more information.
     */
-    public void firePropertyChange(String propertyName, byte oldValue, byte newValue) {}
+    @Override
+	public void firePropertyChange(String propertyName, byte oldValue, byte newValue) {}
 
    /**
     * Overridden for performance reasons.
@@ -604,7 +607,8 @@ public class DefaultTreeCellRenderer extends JLabel implements TreeCellRenderer
     * See the <a href="#override">Implementation Note</a>
     * for more information.
     */
-    public void firePropertyChange(String propertyName, short oldValue, short newValue) {}
+    @Override
+	public void firePropertyChange(String propertyName, short oldValue, short newValue) {}
 
    /**
     * Overridden for performance reasons.
@@ -619,21 +623,24 @@ public class DefaultTreeCellRenderer extends JLabel implements TreeCellRenderer
     * See the <a href="#override">Implementation Note</a>
     * for more information.
     */
-    public void firePropertyChange(String propertyName, long oldValue, long newValue) {}
+    @Override
+	public void firePropertyChange(String propertyName, long oldValue, long newValue) {}
 
    /**
     * Overridden for performance reasons.
     * See the <a href="#override">Implementation Note</a>
     * for more information.
     */
-    public void firePropertyChange(String propertyName, float oldValue, float newValue) {}
+    @Override
+	public void firePropertyChange(String propertyName, float oldValue, float newValue) {}
 
    /**
     * Overridden for performance reasons.
     * See the <a href="#override">Implementation Note</a>
     * for more information.
     */
-    public void firePropertyChange(String propertyName, double oldValue, double newValue) {}
+    @Override
+	public void firePropertyChange(String propertyName, double oldValue, double newValue) {}
 
    /**
     * Overridden for performance reasons.

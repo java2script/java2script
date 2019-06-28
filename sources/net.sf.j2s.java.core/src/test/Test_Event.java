@@ -92,6 +92,8 @@ public class Test_Event extends JFrame {
 							"FocusMan dispatching activeElement=" + (/** @j2sNative document.activeElement.id || */
 					getFocusOwner()));
 					System.out.println("FocusMan dispatching event Source " + e.getSource());
+					if (e.toString().indexOf("WINDOW_OPENED")>=0)
+						System.out.println("???");
 //					if (e.toString().indexOf("GAINED") >= 0)
 						System.out.println("FocusMan dispatching event " + e);
 				}

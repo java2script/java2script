@@ -37,7 +37,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.PaintEvent;
 import java.awt.event.WindowEvent;
-import java.awt.peer.ComponentPeer;
 //import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.util.EmptyStackException;
@@ -155,40 +154,46 @@ public class EventQueue {
 
 	private final String name = "AWT-EventQueue-" + nextThreadNum();
 
-	// private static final Logger eventLog =
-	// Logger.getLogger("java.awt.event.EventQueue");
-	//
-	// static {
-	// AWTAccessor.setEventQueueAccessor(
-	// new AWTAccessor.EventQueueAccessor() {
-	public static boolean noEvents(EventQueue eventQueue) {
-		return eventQueue.noEvents();
-	}
-
-	// public Thread getDispatchThread(EventQueue eventQueue) {
-	// return eventQueue.dispatchThread;
-	// }
-	public static EventQueue getNextQueue(EventQueue eventQueue) {
-		return eventQueue.nextQueue;
-	}
-
-	public static void removeSourceEvents(EventQueue eventQueue, Object source,
-			boolean removeAllEvents) {
-		eventQueue.removeSourceEvents(source, removeAllEvents);
-	}
-
-	// public static void invokeAndWait(Object source, Runnable r)
-	// throws InterruptedException, InvocationTargetException
-	// {
-	// EventQueue.invokeAndWait(source, r);
-	// }
-	//
-	// @Override
-	// public static long getMostRecentEventTime(EventQueue eventQueue) {
-	// return eventQueue.getMostRecentEventTimeImpl();
-	// }
-	// });
-	// }
+//	// private static final Logger eventLog =
+//	// Logger.getLogger("java.awt.event.EventQueue");
+//	//
+//    static {
+//        AWTAccessor.setEventQueueAccessor(
+//            new AWTAccessor.EventQueueAccessor() {
+//                public Thread getDispatchThread(EventQueue eventQueue) {
+//                    return eventQueue.getDispatchThread();
+//                }
+//                public boolean isDispatchThreadImpl(EventQueue eventQueue) {
+//                    return eventQueue.isDispatchThreadImpl();
+//                }
+//                public void removeSourceEvents(EventQueue eventQueue,
+//                                               Object source,
+//                                               boolean removeAllEvents)
+//                {
+//                    eventQueue.removeSourceEvents(source, removeAllEvents);
+//                }
+//                public boolean noEvents(EventQueue eventQueue) {
+//                    return eventQueue.noEvents();
+//                }
+//                public void wakeup(EventQueue eventQueue, boolean isShutdown) {
+//                    eventQueue.wakeup(isShutdown);
+//                }
+//                public void invokeAndWait(Object source, Runnable r)
+//                    throws InterruptedException, InvocationTargetException
+//                {
+//                    EventQueue.invokeAndWait(source, r);
+//                }
+//                public void setFwDispatcher(EventQueue eventQueue,
+//                                            FwDispatcher dispatcher) {
+//                    eventQueue.setFwDispatcher(dispatcher);
+//                }
+//
+//                @Override
+//                public long getMostRecentEventTime(EventQueue eventQueue) {
+//                    return eventQueue.getMostRecentEventTimeImpl();
+//                }
+//            });
+//    }
 
 	public EventQueue() {
 		for (int i = 0; i < NUM_PRIORITIES; i++) {

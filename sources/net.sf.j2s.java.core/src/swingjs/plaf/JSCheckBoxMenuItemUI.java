@@ -23,5 +23,11 @@ public class JSCheckBoxMenuItemUI extends JSCheckBoxUI {
 		menuItem = (JMenuItem) jc;
 		super.installUI(jc);
 	}
-	
+
+	@Override
+	public boolean isFocusable() {
+		return false;
+	}
+
+
 }

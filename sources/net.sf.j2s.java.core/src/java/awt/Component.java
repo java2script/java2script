@@ -68,7 +68,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-import javax.swing.JInternalFrame;
+import javax.swing.JComponent;
 
 import sun.awt.AppContext;
 import sun.awt.CausedFocusEvent;
@@ -390,7 +390,7 @@ public abstract class Component implements ImageObserver/*
 	 * @see #getFocusTraversalKeysEnabled
 	 * @since 1.4
 	 */
-	private boolean focusTraversalKeysEnabled = false;// true;
+	private boolean focusTraversalKeysEnabled = true;
 
 	/**
 	 * The locking object for AWT component-tree and layout operations.
@@ -740,6 +740,8 @@ public abstract class Component implements ImageObserver/*
 	// return comp.getAccessControlContext();
 	// }
 	//
+	
+	
 	// public void setBackgroundEraseDisabled(Component comp, boolean disabled)
 	// {
 	// comp.backgroundEraseDisabled = disabled;
@@ -749,10 +751,16 @@ public abstract class Component implements ImageObserver/*
 	// return comp.backgroundEraseDisabled;
 	// }
 	//
-	public Rectangle getBounds(Component comp) {
-		return new Rectangle(comp.x, comp.y, comp.width, comp.height);
+
+	public void setBackgroundEraseDisabled(boolean disabled) {
+		backgroundEraseDisabled = disabled;
 	}
 	
+	public boolean getBackgroundEraseDisabled() {
+		return backgroundEraseDisabled;
+	}
+	
+
 	public boolean requestFocusInWindow(Component comp, CausedFocusEvent.Cause cause) {
 		return comp.requestFocusInWindow(cause);
 	}
@@ -1123,7 +1131,7 @@ public abstract class Component implements ImageObserver/*
 		return isVisible_NoClientCode();
 	}
 
-	protected final boolean isVisible_NoClientCode() {
+	public final boolean isVisible_NoClientCode() {
 		return visible;
 	}
 
@@ -3050,6 +3058,10 @@ public abstract class Component implements ImageObserver/*
 	 * @since JDK1.0
 	 */
 	public void repaint(long tm, int x, int y, int width, int height) {
+		秘repaintCmp(tm, x, y, width, height);
+	}
+	
+	protected void 秘repaintCmp(long tm, int x, int y, int width, int height) {
 		// System.out.println("C repaint " + this.name);
 		if (canPaint()) {
 			// System.out.println("C firing Paint event on " + this.name);
@@ -6347,7 +6359,7 @@ public abstract class Component implements ImageObserver/*
 		requestFocusHelper(false, true);
 	}
 
-	void requestFocus(CausedFocusEvent.Cause cause) {
+	public void requestFocus(CausedFocusEvent.Cause cause) {
 		requestFocusHelper(false, true, cause);
 	}
 
@@ -6625,17 +6637,20 @@ public abstract class Component implements ImageObserver/*
 			return true;
 		}
 
+		if (requestFocusController == null)
+			requestFocusController = JComponent.focusController;
 		boolean ret = requestFocusController.acceptRequestFocus(focusOwner, this, temporary, focusedWindowChangeAllowed,
 				cause);
 		return ret;
 	}
 
-	private static RequestFocusController requestFocusController = new DummyRequestFocusController();
+	private static RequestFocusController requestFocusController;// = new DummyRequestFocusController();
 
 	// Swing access this method through reflection to implement
 	// InputVerifier's functionality.
 	// Perhaps, we should make this method public (later ;)
 	private static class DummyRequestFocusController implements RequestFocusController {
+		@Override
 		public boolean acceptRequestFocus(Component from, Component to, boolean temporary,
 				boolean focusedWindowChangeAllowed, CausedFocusEvent.Cause cause) {
 			return true;

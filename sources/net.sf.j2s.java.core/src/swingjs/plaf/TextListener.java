@@ -132,8 +132,13 @@ public class TextListener implements FocusListener, ChangeListener,
 //			setCaret = false;
 			break;
 		case KeyEvent.KEY_PRESSED:
+			
 			int keyCode = /** @j2sNative jqevent.keyCode || */
 					0;
+			System.out.println("TextListener key pressed " + keyCode);
+			if (keyCode == KeyEvent.VK_TAB) {
+				System.out.println("tab pressed");
+			}
 			if (keyCode == 13 || keyCode == KeyEvent.VK_ENTER) {
 				ui.handleEnter();
 			} else if (keyCode != KeyEvent.VK_BACK_SPACE){

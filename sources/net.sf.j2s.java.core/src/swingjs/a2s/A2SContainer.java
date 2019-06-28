@@ -15,7 +15,7 @@ public interface A2SContainer {
  */
 static void fixAWTPaint(Component c, Class<?> cl) {
 	Object f = JSUtil.getJ2SAlias(c, "paint$java_awt_Graphics");
-	if (JSUtil.isOverridden(f, cl)
+	if (!JSUtil.isForClass(f, cl)
 			&& f.toString().indexOf("C$.superclazz.prototype.paint$java_awt_Graphics.apply(this") < 0) {
 	/**@j2sNative
 	 * 

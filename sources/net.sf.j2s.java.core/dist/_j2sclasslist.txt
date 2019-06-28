@@ -15,9 +15,7 @@ java/awt/color/ColorSpace.js
 java/awt/Component.js
 java/awt/ComponentOrientation.js
 java/awt/Container.js
-java/awt/ContainerOrderFocusTraversalPolicy.js
 java/awt/Cursor.js
-java/awt/DefaultFocusTraversalPolicy.js
 java/awt/DefaultKeyboardFocusManager.js
 java/awt/Dialog.js
 java/awt/Dimension.js
@@ -212,6 +210,13 @@ javax/swing/event/ListDataEvent.js
 javax/swing/event/ListDataListener.js
 javax/swing/event/UndoableEditEvent.js
 javax/swing/event/UndoableEditListener.js
+javax/swing/FocusManager.js
+javax/swing/InternalFrameFocusTraversalPolicy.js
+javax/swing/LayoutComparator.js
+javax/swing/LayoutFocusTraversalPolicy.js
+javax/swing/SortingFocusTraversalPolicy.js
+javax/swing/SwingContainerOrderFocusTraversalPolicy.js
+javax/swing/SwingDefaultFocusTraversalPolicy.js
 javax/swing/InputMap.js
 javax/swing/JApplet.js
 javax/swing/JButton.js

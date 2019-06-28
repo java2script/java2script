@@ -779,7 +779,7 @@ public class RepaintManager {
 			Window window = dirty.isWindowOrJSApplet() ? (Window) dirty : SwingUtilities
 					.getWindowAncestor(dirty);
 
-			if (window != null && !AWTAccessor.getWindowAccessor().isOpaque(window)) {
+			if (window != null && !window.isOpaque()) {//.isOpaque(window)) {
 				// if this component's toplevel is perpixel translucent, it will
 				// be repainted below
 				it.remove();
@@ -790,11 +790,11 @@ public class RepaintManager {
 			}
 		}
 
-		for (Window window : windows) {
-			//
-			AWTAccessor.getWindowAccessor().updateWindow(window, null);
-		}
-
+//		for (Window window : windows) {
+//			//
+//			AWTAccessor.getWindowAccessor().updateWindow(window, null);
+//		}
+//
 		return dirtyComponents;
 	}
 

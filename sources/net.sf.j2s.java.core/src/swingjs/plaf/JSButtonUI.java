@@ -93,8 +93,8 @@ public class JSButtonUI extends JSLightweightUI {
 			setDoPropagate();
 			domNode = enableNode = buttonNode = newDOMObject("button", id + "_dom", "type", "button");
 			//DOMNode.setStyles(domNode,"transform","translateY(0.5px)translateX(0.5px)");
-			isFocusable();
-			setDataFocusComponent(focusNode);
+			addClass(domNode, "j2sbutton");
+			setFocusable();
 			DOMNode.setPositionAbsolute(domNode);
 			iconNode = null;
 			createButton();
@@ -202,6 +202,9 @@ public class JSButtonUI extends JSLightweightUI {
 		// from menus only - action is on mouse-up
 		// other controls use a ButtonListener
 		// checkbox or radio menuitem handle themselves
+		if (eventType == KeyEvent.KEY_PRESSED) {
+			
+		}
 		if (actionNode == null)
 			if (menuItem == null) {
 				switch (eventType) {
@@ -783,5 +786,11 @@ public class JSButtonUI extends JSLightweightUI {
 		imagePersists = true; // at least for now.
 		super.paint(g, c);
 	}
+
+	@Override
+	public boolean isFocusable() {
+		return true;
+	}
+
 
 }

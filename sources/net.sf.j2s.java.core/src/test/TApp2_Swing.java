@@ -11,6 +11,8 @@ import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Label;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.FocusEvent;
@@ -19,6 +21,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Line2D;
 
+import javax.swing.InputMap;
 import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -33,10 +36,34 @@ public class TApp2_Swing extends JApplet {
 
 	JTextArea ta;
 
+	JButton b;
 	private void addButtonTest() {
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < 4; j++) {
-				JButton b = new JButton("XyX");
+				b = new JButton("XyX");
+				b.addFocusListener(new FocusListener() {
+
+					@Override
+					public void focusGained(FocusEvent e) {
+						System.out.println("b " + e.paramString());
+					}
+
+					@Override
+					public void focusLost(FocusEvent e) {
+						System.out.println("b " + e.paramString());
+					}
+
+				});
+				b.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						System.out.println("action performed " + e.getSource());
+					}
+					
+				});
+
+
 				JLabel l = new JLabel("XyX", JLabel.CENTER);
 				setLBBounds((Component) b, (Component) l, i, j);
 			}
@@ -120,7 +147,8 @@ public class TApp2_Swing extends JApplet {
 		// and then only if the append is AFTER the add
 		ta = new JTextArea("Averyveryveryveryveryveryveryverylongword\n" + "Averyveryveryveryveryveryveryverylongword\n"
 				+ "Averyveryveryveryveryveryveryverylongword\n" + "Averyveryveryveryveryveryveryverylongword\n"
-				+ "A text\nwith some\nlines and\n no content.");
+				+ "A text\nwith some\nlines and\n no content.") {
+		};
 		JScrollPane jsp = new JScrollPane(ta);
 		add(jsp);
 		jsp.setBounds(200, 70, 200, 200);
@@ -165,6 +193,7 @@ public class TApp2_Swing extends JApplet {
 
 		});
 
+		TApp2_Swing me = this;
 		addMouseListener(new MouseListener() {
 
 			@Override
@@ -192,10 +221,61 @@ public class TApp2_Swing extends JApplet {
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				System.out.println(">>>>mouseReleased: " + e.getModifiers() + " " + e.getModifiersEx() + " " + e);
+				
+				
+				System.out.println(me.getFocusTraversalPolicy()); // javax.swing.LayoutFocusTraversalPolicy
+
+				
+				class f extends javax.swing.LayoutFocusTraversalPolicy {
+					public boolean accept(Component c) {
+						return super.accept(c);
+					}
+				};
+			
+				class fd extends java.awt.DefaultFocusTraversalPolicy {
+					public boolean accept(Component c) {
+						return super.accept(c);
+					}
+				};
+			
+				
+				Component cc = ta;
+				System.out.println(cc.isEnabled());
+				System.out.println(cc.isVisible());
+				System.out.println(cc.isDisplayable());
+				System.out.println(cc.isFocusTraversable());
+				System.out.println(cc.getPeer().isFocusable());
+
+//	            JComponent jComponent = (JComponent)cc;
+//	            InputMap inputMap = jComponent.getInp utMap(JComponent.WHEN_FOCUSED,
+//	                                                       false);
+//	            while (inputMap != null && inputMap.size() == 0) {
+//	                inputMap = inputMap.getParent();
+//	            }
+//	            if (inputMap != null) {
+//	                return true;
+//	            }
+//
+//				
+				
+				System.out.println(me.getFocusTraversalPolicy());
+		System.out.println("I am a focusRoot " + me.isFocusCycleRoot());
+				System.out.println("acceptb " + new f().accept(b));
+				System.out.println("acceptf " + new f().accept(getRootPane()));
+				System.out.println("acceptfd " + new fd().accept(getRootPane()));
+				Component c = me.getFocusTraversalPolicy().getFirstComponent(me);
+				Component c0 = c;
+				while (c != null) {
+					System.out.println(c);
+					c = me.getFocusTraversalPolicy().getComponentAfter(me, c);
+					if (c == c0)
+						break;
+				}
+				System.out.println("testing");
+				
 			}
 			
 		});
-
 
 		new TestGraphic2(this).testGraphic();
 	}
@@ -217,7 +297,27 @@ public class TApp2_Swing extends JApplet {
 			// images are created only when a button is displayable
 			Image i1 = b.createImage(100, 100);
 			System.out.println("b.isDisplayable " + b.isDisplayable() + " " + i1);
+			b.addActionListener(new ActionListener() {
 
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					System.out.println("action performed " + e.getSource());
+				}
+				
+			});
+			b.addFocusListener(new FocusListener() {
+
+				@Override
+				public void focusGained(FocusEvent e) {
+					System.out.println("b1 " + e.paramString());
+				}
+
+				@Override
+				public void focusLost(FocusEvent e) {
+					System.out.println("b1 " + e.paramString());
+				}
+
+			});
 			tApp2.add(b);
 			i1 = b.createImage(100, 100);
 			System.out.println("b.isDisplayable " + b.isDisplayable() + " " + i1);

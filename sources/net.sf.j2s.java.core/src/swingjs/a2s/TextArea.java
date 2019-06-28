@@ -83,6 +83,7 @@ public class TextArea extends JTextArea {
 			break;
 		case SCROLLBARS_VERTICAL_ONLY:
 			setLineWrap(true);
+			setWrapStyleWord(true);
 			setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 			setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 			break;
@@ -91,6 +92,8 @@ public class TextArea extends JTextArea {
 			setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 			break;
 		case SCROLLBARS_NONE:
+			setLineWrap(true);
+			setWrapStyleWord(true);
 			setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
 			setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 			break;
@@ -364,6 +367,7 @@ public class TextArea extends JTextArea {
 	private void toEnd() {
 		super.setCaretPosition(super.getText().length());
 		super.requestFocusInWindow();
+		firePropertyChange("JSToEnd", null, "JSToEnd");
 	}
 
 //	@Override

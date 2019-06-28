@@ -39,8 +39,13 @@ public class Label extends JLabel {
 		setOpaque(c != null);
 	}
 	
-	private static Insets awtInsets = new Insets(3, 6, 2, 6);
-	// awt.Label has an unadjustable horizontal inset of what appears to be about 6 pixels
+	
+	//private static Insets awtInsets = new Insets(3, 6, 2, 6);
+	// BH 2019.02.05: awt.Label has an unadjustable horizontal inset of what appears to be about 6 pixels
+	
+	private static Insets awtInsets = new Insets(2, 2, 2, 2);
+	// ??? BH 2019.07.21: on the other hand, 2,2,2,2 actually looks correct for all fonts 6-20 - See Tapp2a.java
+	
 	@Override
 	public Insets getInsets() {
 		return awtInsets;

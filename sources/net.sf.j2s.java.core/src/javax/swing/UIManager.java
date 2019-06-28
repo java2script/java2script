@@ -31,6 +31,7 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.Color;
 import java.awt.Insets;
+import java.awt.KeyboardFocusManager;
 import java.awt.Dimension;
 
 
@@ -166,7 +167,7 @@ import java.util.Locale;
 public class UIManager
 {
 
-
+	
 //    /**
 //     * This class defines the state managed by the <code>UIManager</code>.  For
 //     * Swing applications the fields in this class could just as well
@@ -981,6 +982,7 @@ public class UIManager
 	 */
 	public static ComponentUI getUI(Component target) {
 		maybeInitialize();
+        maybeInitializeFocusPolicy((JComponent)target);
 		// note that we use Component here instead of JComponent, because JWindow, JFrame,
 		// and JDialog UI are all returned in JavaScript with this method despite the fact 
 		// that the method would not work in Java.
@@ -991,7 +993,6 @@ public class UIManager
 					+ target.getClass().getName());
 		return ui;
 	}
-
 
 //    /**
 //     * Returns the {@code UIDefaults} from the current look and feel,
@@ -1375,6 +1376,7 @@ public class UIManager
 
     
 private static UIDefaults uid;
+private static boolean focusInitialized;
 
     /*
      * This method is called before any code that depends on the
@@ -1395,6 +1397,33 @@ private static UIDefaults uid;
 //            }
 //        }
     }
+
+    /*
+     * Sets default swing focus traversal policy.
+     */
+    /*
+     * Sets default swing focus traversal policy.
+     */
+    private static void maybeInitializeFocusPolicy(JComponent comp) {
+        // Check for JRootPane which indicates that a swing toplevel
+        // is coming, in which case a swing default focus policy
+        // should be instatiated. See 7125044.
+        if (comp instanceof JRootPane) {
+        	if (!focusInitialized) {
+//            synchronized (classLock) {
+//                if (!getLAFState().focusPolicyInitialized) {
+//                    getLAFState().focusPolicyInitialized = true;
+        			focusInitialized = true;
+                    if (FocusManager.isFocusManagerEnabled()) {
+                        KeyboardFocusManager.getCurrentKeyboardFocusManager().
+                            setDefaultFocusTraversalPolicy(
+                                new LayoutFocusTraversalPolicy());
+                    }
+                }
+//            }
+        }
+    }
+
 
 
     /*
@@ -1424,6 +1453,7 @@ private static UIDefaults uid;
             sun.awt.PaintEventDispatcher.setPaintEventDispatcher(
                                         new SwingPaintEventDispatcher());
         }
+//        setRequestFocusController(JComponent.focusController);
         // Install a hook that will be invoked if no one consumes the
         // KeyEvent.  If the source isn't a JComponent this will process
         // key bindings, if the source is a JComponent it implies that

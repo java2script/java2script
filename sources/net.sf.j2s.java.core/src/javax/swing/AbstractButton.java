@@ -1380,7 +1380,7 @@ public abstract class AbstractButton extends JComponent implements ItemSelectabl
      * @see #setBorderPainted
      */
     public boolean isBorderPainted() {
-        return paintBorder;
+        return paintBorder && 秘paintsBorder();
     }
 
     /**

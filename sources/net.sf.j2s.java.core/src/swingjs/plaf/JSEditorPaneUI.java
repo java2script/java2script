@@ -230,12 +230,13 @@ public class JSEditorPaneUI extends JSTextViewUI {
 			String t = text.substring(start, isDiv ? end - 1 : end);
 			//if (start == 0) {
 			if (t.indexOf(' ') >= 0)
-				for (int i = 0; i < t.length(); i++) {
-					if (t.charAt(i) != ' ')
-						break;
-				    t = t.substring(0, i) + "&nbsp;" + t.substring(i + 1);
-					i += 5;
-				}
+				t = t.replace(' ', '\u00A0');
+//				for (int i = 0; i < t.length(); i++) {
+//					if (t.charAt(i) != ' ')
+//						break;
+//				    t = t.substring(0, i) + "&nbsp;" + t.substring(i + 1);
+//					i += 5;
+//				}
 			//System.out.println("text:'" + t + "'");
 			//}				
 			sb.append(t);
@@ -561,6 +562,13 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		editor.getCaret().setDot(dot);
 		updateDataUI();
 	}
+
+	@Override
+	protected boolean handleTab(Object jqEvent) {
+		// TODO check. OK? Problem is that we can't CTRL-tab out of a JEditorPane
+		return NOT_CONSUMED;
+	}
+
 
 
 }

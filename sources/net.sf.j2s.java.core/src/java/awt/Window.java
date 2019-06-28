@@ -27,7 +27,6 @@
  */
 package java.awt;
 
-import java.applet.JSApplet;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseWheelEvent;
@@ -50,7 +49,6 @@ import javax.swing.JComponent;
 import javax.swing.JLayeredPane;
 import javax.swing.JRootPane;
 import javax.swing.RootPaneContainer;
-import javax.swing.plaf.ComponentUI;
 
 import sun.awt.AppContext;
 import swingjs.JSToolkit;
@@ -154,6 +152,84 @@ import swingjs.plaf.JSWindowUI;
  */
 @SuppressWarnings({"unchecked", "deprecation"})
 public class Window extends JComponent {
+
+//    static {
+//        AWTAccessor.setWindowAccessor(new AWTAccessor.WindowAccessor() {
+//            public float getOpacity(Window window) {
+//                return window.opacity;
+//            }
+//            public void setOpacity(Window window, float opacity) {
+//                window.setOpacity(opacity);
+//            }
+//            public Shape getShape(Window window) {
+//                return window.getShape();
+//            }
+//            public void setShape(Window window, Shape shape) {
+//                window.setShape(shape);
+//            }
+            public void setOpaque(Window window, boolean opaque) {
+                Color bg = window.getBackground();
+                if (bg == null) {
+                    bg = new Color(0, 0, 0, 0);
+                }
+                window.setBackground(new Color(bg.getRed(), bg.getGreen(), bg.getBlue(),
+                                               opaque ? 255 : 0));
+            }
+            public void updateWindow() {
+//                window.updateWindow();
+            }
+
+//            public Dimension getSecurityWarningSize() {
+//                return new Dimension(securityWarningWidth,
+//                        window.securityWarningHeight);
+//            }
+//
+//            public void setSecurityWarningSize(Window window, int width, int height)
+//            {
+//                window.securityWarningWidth = width;
+//                window.securityWarningHeight = height;
+//            }
+//
+//            public void setSecurityWarningPosition(Window window,
+//                    Point2D point, float alignmentX, float alignmentY)
+//            {
+//                window.securityWarningPointX = point.getX();
+//                window.securityWarningPointY = point.getY();
+//                window.securityWarningAlignmentX = alignmentX;
+//                window.securityWarningAlignmentY = alignmentY;
+//
+//                synchronized (window.getTreeLock()) {
+//                    WindowPeer peer = (WindowPeer)window.getPeer();
+//                    if (peer != null) {
+//                        peer.repositionSecurityWarning();
+//                    }
+//                }
+//            }
+//
+//            public Point2D calculateSecurityWarningPosition(Window window,
+//                    double x, double y, double w, double h)
+//            {
+//                return window.calculateSecurityWarningPosition(x, y, w, h);
+//            }
+
+            public void setLWRequestStatus(boolean status) {
+                syncLWRequests = status;
+            }
+
+            public boolean isAutoRequestFocus() {
+            	return true;
+//                return autoRequestFocus;
+            }
+
+            public boolean isTrayIconWindow() {
+                return isTrayIconWindow;
+            }
+
+            public void setTrayIconWindow(boolean isTrayIconWindow) {
+                this.isTrayIconWindow = isTrayIconWindow;
+            }
+//        }); // WindowAccessor
+//    } // static
 
     /**
      * This represents the warning message that is
@@ -345,7 +421,7 @@ public class Window extends JComponent {
      */
     Window() {
         //GraphicsEnvironment.checkHeadless();
-      	initWinGC(null, null);
+      	this(null, null);
     }
 
     /**
@@ -371,7 +447,7 @@ public class Window extends JComponent {
      * 
      */
     Window(GraphicsConfiguration gc) {
-    	initWinGC(null, gc);
+    	this(null, gc);
     }
     
 
@@ -435,7 +511,7 @@ public class Window extends JComponent {
 	 * 
 	 */
 	public Window(Window owner) {
-  	initWinGC(owner, null);
+		this(owner, null);
 	}
 
     /**
@@ -472,6 +548,7 @@ public class Window extends JComponent {
     public Window(Window owner, GraphicsConfiguration gc) {
     	// everything will pass through here, even Window(gc);
     	// We just adjust for the 1-parameter issue here
+		 秘paintClass = 秘updateClass = /**@j2sNative C$ || */null;
     	initWinGC(owner, gc);   	
     }
 
@@ -2299,7 +2376,8 @@ public class Window extends JComponent {
      * @see Container#getFocusTraversalPolicy
      * @since 1.4
      */
-    public void setFocusCycleRoot(boolean focusCycleRoot) {
+    @Override
+	public void setFocusCycleRoot(boolean focusCycleRoot) {
     }
 
     /**
@@ -3136,6 +3214,7 @@ public class Window extends JComponent {
      * Verifies that it is focusable and as container it can container focus owner.
      * @since 1.5
      */
+		@Override
 		protected boolean canContainFocusOwner(Component focusOwnerCandidate) {
         return super.canContainFocusOwner(focusOwnerCandidate) && isFocusableWindow();
     }
@@ -3288,7 +3367,7 @@ public class Window extends JComponent {
     /**
      * JavaDoc
      */
-    /*public */float getOpacity() {
+    public float getOpacity() {
         synchronized (getTreeLock()) {
             return opacity;
         }
@@ -3297,7 +3376,7 @@ public class Window extends JComponent {
     /**
      * JavaDoc
      */
-    /*public */void setOpacity(float opacity) {
+    public void setOpacity(float opacity) {
         synchronized (getTreeLock()) {
             if (opacity < 0.0f || opacity > 1.0f) {
                 throw new IllegalArgumentException(
@@ -3324,7 +3403,7 @@ public class Window extends JComponent {
     /**
      * JavaDoc
      */
-    /*public */Shape getShape() {
+    public Shape getShape() {
         synchronized (getTreeLock()) {
             return shape;
         }
@@ -3338,7 +3417,7 @@ public class Window extends JComponent {
      * @throws IllegalArgumentException if the window is in full screen mode,
      *                                  and the shape is not null
      */
-    /*public */void setShape(Shape shape) {
+    public void setShape(Shape shape) {
         synchronized (getTreeLock()) {
 //            GraphicsConfiguration gc = getGraphicsConfiguration();
 //            GraphicsDevice gd = gc.getDevice();
@@ -3396,11 +3475,13 @@ public class Window extends JComponent {
 
 	private boolean opaque = true;
 
+	@Override
 	public boolean isOpaque() {
 		// SwingJS
 		return opaque;
 	}
 
+		@Override
 		public void setOpaque(boolean opaque) {
         synchronized (getTreeLock()) {
         	//TODO ?

@@ -51,8 +51,6 @@ import java.util.StringTokenizer;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 
-import sun.awt.AWTAccessor;
-
 //import sun.util.logging.PlatformLogger;
 
 import sun.awt.AppContext;
@@ -106,42 +104,44 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 	// Shared focus engine logger
 //    private static final PlatformLogger focusLog = PlatformLogger.getLogger("java.awt.focus.KeyboardFocusManager");
 
-	static {
-		/* ensure that the necessary native libraries are loaded */
-//        Toolkit.loadLibraries();
-//        if (!GraphicsEnvironment.isHeadless()) {
-//            initIDs();
-//        }
-		AWTAccessor.setKeyboardFocusManagerAccessor(new AWTAccessor.KeyboardFocusManagerAccessor() {
-			public int shouldNativelyFocusHeavyweight(Component heavyweight, Component descendant, boolean temporary,
-					boolean focusedWindowChangeAllowed, long time, CausedFocusEvent.Cause cause) {
-				return KeyboardFocusManager.shouldNativelyFocusHeavyweight(heavyweight, descendant, temporary,
-						focusedWindowChangeAllowed, time, cause);
-			}
-
-			public boolean processSynchronousLightweightTransfer(Component heavyweight, Component descendant,
-					boolean temporary, boolean focusedWindowChangeAllowed, long time) {
-				return KeyboardFocusManager.processSynchronousLightweightTransfer(heavyweight, descendant, temporary,
-						focusedWindowChangeAllowed, time);
-			}
-
-			public void removeLastFocusRequest(Component heavyweight) {
-				KeyboardFocusManager.removeLastFocusRequest(heavyweight);
-			}
-
-			public void setMostRecentFocusOwner(Window window, Component component) {
-				KeyboardFocusManager.setMostRecentFocusOwner(window, component);
-			}
-
-			public KeyboardFocusManager getCurrentKeyboardFocusManager(AppContext ctx) {
-				return KeyboardFocusManager.getCurrentKeyboardFocusManager(ctx);
-			}
-
-			public Container getCurrentFocusCycleRoot() {
-				return KeyboardFocusManager.currentFocusCycleRoot;
-			}
-		});
-	}
+//	static {
+//		/* ensure that the necessary native libraries are loaded */
+////        Toolkit.loadLibraries();
+////        if (!GraphicsEnvironment.isHeadless()) {
+////            initIDs();
+////        }
+//		AWTAccessor.setKeyboardFocusManagerAccessor(new AWTAccessor.KeyboardFocusManagerAccessor() {
+//			@Override
+//			public int shouldNativelyFocusHeavyweight(Component heavyweight, Component descendant, boolean temporary,
+//					boolean focusedWindowChangeAllowed, long time, CausedFocusEvent.Cause cause) {
+//				return KeyboardFocusManager.shouldNativelyFocusHeavyweight(heavyweight, descendant, temporary,
+//						focusedWindowChangeAllowed, time, cause);
+//			}
+//
+//			public boolean processSynchronousLightweightTransfer(Component heavyweight, Component descendant,
+//					boolean temporary, boolean focusedWindowChangeAllowed, long time) {
+//				return KeyboardFocusManager.processSynchronousLightweightTransfer(heavyweight, descendant, temporary,
+//						focusedWindowChangeAllowed, time);
+//			}
+//
+//			@Override
+//			public void removeLastFocusRequest(Component heavyweight) {
+//				KeyboardFocusManager.removeLastFocusRequest(heavyweight);
+//			}
+//
+//			public void setMostRecentFocusOwner(Window window, Component component) {
+//				KeyboardFocusManager.setMostRecentFocusOwner(window, component);
+//			}
+//
+//			public KeyboardFocusManager getCurrentKeyboardFocusManager(AppContext ctx) {
+//				return KeyboardFocusManager.getCurrentKeyboardFocusManager(ctx);
+//			}
+//
+//			public Container getCurrentFocusCycleRoot() {
+//				return KeyboardFocusManager.currentFocusCycleRoot;
+//			}
+//		});
+//	}
 
 	transient KeyboardFocusManagerPeer peer;
 
@@ -289,7 +289,8 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 	 * keyboard-traversal policy of their own, then those children will also inherit
 	 * this policy (as will, recursively, their focus-cycle-root children).
 	 */
-	private FocusTraversalPolicy defaultPolicy = new DefaultFocusTraversalPolicy();
+	private FocusTraversalPolicy defaultPolicy;// = new DefaultFocusTraversalPolicy();
+	private FocusTraversalPolicy defaultPolicyAWT = new DefaultFocusTraversalPolicy();
 
 	/**
 	 * The bound property names of each focus traversal key.
@@ -362,7 +363,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 	 * We cache the permission used to verify that the calling thread is permitted
 	 * to access the global focus state.
 	 */
-	private static AWTPermission replaceKeyboardFocusManagerPermission;
+//	private static AWTPermission replaceKeyboardFocusManagerPermission;
 
 	/*
 	 * SequencedEvent which is currently dispatched in AppContext.
@@ -917,6 +918,10 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 	 */
 	public synchronized FocusTraversalPolicy getDefaultFocusTraversalPolicy() {
 		return defaultPolicy;
+	}
+
+	public synchronized FocusTraversalPolicy getDefaultAWTFocusTraversalPolicy() {
+		return (defaultPolicyAWT == null ? defaultPolicyAWT = new DefaultFocusTraversalPolicy() : defaultPolicy);
 	}
 
 	/**
@@ -1824,6 +1829,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 	 *         otherwise
 	 * @see #dispatchEvent
 	 */
+	@Override
 	public abstract boolean dispatchKeyEvent(KeyEvent e);
 
 	/**
@@ -1837,6 +1843,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 	 * @see #dispatchKeyEvent
 	 * @see MenuShortcut
 	 */
+	@Override
 	public abstract boolean postProcessKeyEvent(KeyEvent e);
 
 	/**
@@ -2023,6 +2030,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 			this.cause = cause;
 		}
 
+		@Override
 		public String toString() {
 			return "LightweightFocusRequest[component=" + component + ",temporary=" + temporary + ", cause=" + cause
 					+ "]";
@@ -2082,6 +2090,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 			return lightweightRequests.getFirst();
 		}
 
+		@Override
 		public String toString() {
 			boolean first = true;
 			String str = "HeavyweightFocusRequest[heavweight=" + heavyweight + ",lightweightRequests=";
@@ -2587,6 +2596,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 				if (hwFocusRequest.lightweightRequests.size() > 0) {
 					currentLightweightRequests = hwFocusRequest.lightweightRequests;
 					EventQueue.invokeLater(new Runnable() {
+						@Override
 						public void run() {
 							processCurrentLightweightRequests();
 						}

@@ -797,7 +797,7 @@ public class JSDialog extends Window {
             return;
         }
 
-        checkModalityPermission(type);
+//        checkModalityPermission(type);
 
         modalityType = type;
         modal = (modalityType != Dialog.ModalityType.MODELESS);
@@ -857,7 +857,6 @@ public class JSDialog extends Window {
 		} else {
 			//visible = 
 		  retval = true;
-		  // TODO this was Component.showSAEM,  but now is Window.setVisible
 			super.show();
 
 //			// check if this dialog should be modal blocked BEFORE calling
@@ -1135,22 +1134,22 @@ public class JSDialog extends Window {
         }
     }
 
-    final void modalityPushed() {
-//        Toolkit tk = Toolkit.getDefaultToolkit();
-//        if (tk instanceof SunToolkit) {
-//            SunToolkit stk = (SunToolkit)tk;
-//            stk.notifyModalityPushed(this);
-//        }
-    }
-
-    final void modalityPopped() {
-//        Toolkit tk = Toolkit.getDefaultToolkit();
-//        if (tk instanceof SunToolkit) {
-//            SunToolkit stk = (SunToolkit)tk;
-//            stk.notifyModalityPopped(this);
-//        }
-    }
-
+//    final void modalityPushed() {
+////        Toolkit tk = Toolkit.getDefaultToolkit();
+////        if (tk instanceof SunToolkit) {
+////            SunToolkit stk = (SunToolkit)tk;
+////            stk.notifyModalityPushed(this);
+////        }
+//    }
+//
+//    final void modalityPopped() {
+////        Toolkit tk = Toolkit.getDefaultToolkit();
+////        if (tk instanceof SunToolkit) {
+////            SunToolkit stk = (SunToolkit)tk;
+////            stk.notifyModalityPopped(this);
+////        }
+//    }
+//
     void interruptBlocking() {
         if (isModal()) {
             disposeImpl();
@@ -1168,94 +1167,94 @@ public class JSDialog extends Window {
 //            }
 //        }
 //    }
-    private void hideAndDisposePreHandler() {
-        isInHide = true;
-//        synchronized (getTreeLock()) {
-//            if (keepBlockingEDT) {
-                modalHide();
-                // dialog can be shown and then disposed before its
-                // modal filter is created
-                if (modalFilter != null) {
-                    modalFilter.disable();
-                }
-                modalDialogs.remove(this);
-//            }
-//        }
-    }
-    private void hideAndDisposeHandler() {
-//        synchronized (getTreeLock()) {
-//            if (keepBlockingEDT) {
-//                keepBlockingEDT = false;
-//                PeerEvent wakingEvent = new PeerEvent(this, new WakingRunnable(), PeerEvent.PRIORITY_EVENT);
-//                AppContext curAppContext = AppContext.getAppContext();
-//                if (showAppContext != curAppContext) {
-//                    // Wake up event dispatch thread on which the dialog was
-//                    // initially shown
-//                    SunToolkit.postEvent(showAppContext, wakingEvent);
-//                    showAppContext = null;
-//                } else {
-//                    Toolkit.getEventQueue().postEvent(wakingEvent);
+//    private void hideAndDisposePreHandler() {
+//        isInHide = true;
+////        synchronized (getTreeLock()) {
+////            if (keepBlockingEDT) {
+//                modalHide();
+//                // dialog can be shown and then disposed before its
+//                // modal filter is created
+//                if (modalFilter != null) {
+//                    modalFilter.disable();
 //                }
-//            }
+//                modalDialogs.remove(this);
+////            }
+////        }
+//    }
+//    private void hideAndDisposeHandler() {
+////        synchronized (getTreeLock()) {
+////            if (keepBlockingEDT) {
+////                keepBlockingEDT = false;
+////                PeerEvent wakingEvent = new PeerEvent(this, new WakingRunnable(), PeerEvent.PRIORITY_EVENT);
+////                AppContext curAppContext = AppContext.getAppContext();
+////                if (showAppContext != curAppContext) {
+////                    // Wake up event dispatch thread on which the dialog was
+////                    // initially shown
+////                    SunToolkit.postEvent(showAppContext, wakingEvent);
+////                    showAppContext = null;
+////                } else {
+////                    Toolkit.getEventQueue().postEvent(wakingEvent);
+////                }
+////            }
+////        }
+//        isInHide = false;
+//    }
+//
+//    /**
+//     * Hides the Dialog and then causes {@code show} to return if it is currently
+//     * blocked.
+//     * @see Window#show
+//     * @see Window#dispose
+//     * @see Window#setVisible(boolean)
+//     * @deprecated As of JDK version 1.5, replaced by
+//     * {@link #setVisible(boolean) setVisible(boolean)}.
+//     */
+//    @Override
+//		@Deprecated
+//    public void hide() {
+//        hideAndDisposePreHandler();
+//        super.hide();
+//        // fix for 5048370: if hide() is called from super.doDispose(), then
+//        // hideAndDisposeHandler() should not be called here as it will be called
+//        // at the end of doDispose()
+//        if (!isInDispose) {
+//            hideAndDisposeHandler();
 //        }
-        isInHide = false;
-    }
-
-    /**
-     * Hides the Dialog and then causes {@code show} to return if it is currently
-     * blocked.
-     * @see Window#show
-     * @see Window#dispose
-     * @see Window#setVisible(boolean)
-     * @deprecated As of JDK version 1.5, replaced by
-     * {@link #setVisible(boolean) setVisible(boolean)}.
-     */
-    @Override
-		@Deprecated
-    public void hide() {
-        hideAndDisposePreHandler();
-        super.hide();
-        // fix for 5048370: if hide() is called from super.doDispose(), then
-        // hideAndDisposeHandler() should not be called here as it will be called
-        // at the end of doDispose()
-        if (!isInDispose) {
-            hideAndDisposeHandler();
-        }
-    }
-
-    /**
-     * Disposes the Dialog and then causes show() to return if it is currently
-     * blocked.
-     */
-    @Override
-		void doDispose() {
-        // fix for 5048370: set isInDispose flag to true to prevent calling
-        // to hideAndDisposeHandler() from hide()
-        isInDispose = true;
-        super.doDispose();
-        hideAndDisposeHandler();
-        isInDispose = false;
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * If this dialog is modal and blocks some windows, then all of them are
-     * also sent to the back to keep them below the blocking dialog.
-     *
-     * @see java.awt.Window#toBack
-     */
-    @Override
-		public void toBack() {
-        super.toBack();
-//        if (visible) {
-//            synchronized (getTreeLock()) {
-//                for (Window w : blockedWindows) {
-//                    w.toBack_NoClientCode();
-//                }
-//            }
-//        }
-    }
+//    }
+//
+//    /**
+//     * Disposes the Dialog and then causes show() to return if it is currently
+//     * blocked.
+//     */
+//    @Override
+//		void doDispose() {
+//        // fix for 5048370: set isInDispose flag to true to prevent calling
+//        // to hideAndDisposeHandler() from hide()
+//        isInDispose = true;
+//        super.doDispose();
+//        hideAndDisposeHandler();
+//        isInDispose = false;
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     * <p>
+//     * If this dialog is modal and blocks some windows, then all of them are
+//     * also sent to the back to keep them below the blocking dialog.
+//     *
+//     * @see java.awt.Window#toBack
+//     */
+//    @Override
+//		public void toBack() {
+//        super.toBack();
+////        if (visible) {
+////            synchronized (getTreeLock()) {
+////                for (Window w : blockedWindows) {
+////                    w.toBack_NoClientCode();
+////                }
+////            }
+////        }
+//    }
 
     /**
      * Indicates whether this dialog is resizable by the user.
@@ -1358,240 +1357,240 @@ public class JSDialog extends Window {
      *
      */
 
-    /*
-     * This method is called only for modal dialogs.
-     *
-     * Goes through the list of all visible top-level windows and
-     * divide them into three distinct groups: blockers of this dialog,
-     * blocked by this dialog and all others. Then blocks this dialog
-     * by first met dialog from the first group (if any) and blocks all
-     * the windows from the second group.
-     */	
-    void modalShow() {
-//        // find all the dialogs that block this one
-//        // IdentityArrayList is used in exactly two places:
-//    	  // Window and Dialog. It allows a check for null and also
-//    	  // uses object == item instead of object.equals(item)
-//    	  // IdentityArrayList<Dialog> blockers = new IdentityArrayList<Dialog>();
-//    	ArrayList<Dialog> blockers = new ArrayList<Dialog>();
-//        for (Dialog d : modalDialogs) {
-//            if (d.shouldBlock(this)) {
-//                Window w = d;
-//                while ((w != null) && (w != this)) {
-//                    w = (Window)(w.getOwner_NoClientCode());
-//                }
-//                if ((w == this) || !shouldBlock(d) || (modalityType.compareTo(d.getModalityType()) < 0)) {
-//                    blockers.add(d);
-//                }
+//    /*
+//     * This method is called only for modal dialogs.
+//     *
+//     * Goes through the list of all visible top-level windows and
+//     * divide them into three distinct groups: blockers of this dialog,
+//     * blocked by this dialog and all others. Then blocks this dialog
+//     * by first met dialog from the first group (if any) and blocks all
+//     * the windows from the second group.
+//     */	
+//    void modalShow() {
+////        // find all the dialogs that block this one
+////        // IdentityArrayList is used in exactly two places:
+////    	  // Window and Dialog. It allows a check for null and also
+////    	  // uses object == item instead of object.equals(item)
+////    	  // IdentityArrayList<Dialog> blockers = new IdentityArrayList<Dialog>();
+////    	ArrayList<Dialog> blockers = new ArrayList<Dialog>();
+////        for (Dialog d : modalDialogs) {
+////            if (d.shouldBlock(this)) {
+////                Window w = d;
+////                while ((w != null) && (w != this)) {
+////                    w = (Window)(w.getOwner_NoClientCode());
+////                }
+////                if ((w == this) || !shouldBlock(d) || (modalityType.compareTo(d.getModalityType()) < 0)) {
+////                    blockers.add(d);
+////                }
+////            }
+////        }
+////
+////        // add all blockers' blockers to blockers :)
+////        for (int i = 0; i < blockers.size(); i++) {
+////            Dialog blocker = blockers.get(i);
+////            if (blocker.isModalBlocked()) {
+////                Dialog blockerBlocker = blocker.getModalBlocker();
+////                if (!blockers.contains(blockerBlocker)) {
+////                    blockers.add(i + 1, blockerBlocker);
+////                }
+////            }
+////        }
+////
+////        if (blockers.size() > 0) {
+////            blockers.get(0).blockWindow(this);
+////        }
+////
+////        // find all windows from blockers' hierarchies
+////        ArrayList<Window> blockersHierarchies = new ArrayList<Window>(blockers);
+////        int k = 0;
+////        while (k < blockersHierarchies.size()) {
+////            Window w = blockersHierarchies.get(k);
+////            Window[] ownedWindows = w.getOwnedWindows_NoClientCode();
+////            for (Window win : ownedWindows) {
+////                blockersHierarchies.add(win);
+////            }
+////            k++;
+////        }
+////
+////        java.util.List<Window> toBlock = new LinkedList<Window>();
+////        // block all windows from scope of blocking except from blockers' hierarchies
+////        ArrayList<Window> unblockedWindows = Window.getAllUnblockedWindows();
+////        for (Window w : unblockedWindows) {
+////            if (shouldBlock(w) && !blockersHierarchies.contains(w)) {
+////                if ((w instanceof Dialog) && ((Dialog)w).isModal_NoClientCode()) {
+////                    Dialog wd = (Dialog)w;
+////                    if (wd.shouldBlock(this) && (modalDialogs.indexOf(wd) > modalDialogs.indexOf(this))) {
+////                        continue;
+////                    }
+////                }
+////                toBlock.add(w);
+////            }
+////        }
+////        blockWindows(toBlock);
+////
+////        if (!isModalBlocked()) {
+////            updateChildrenBlocking();
+////        }
+//    }
+//
+//    /*
+//     * This method is called only for modal dialogs.
+//     *
+//     * Unblocks all the windows blocked by this modal dialog. After
+//     * each of them has been unblocked, it is checked to be blocked by
+//     * any other modal dialogs.
+//     */
+//    void modalHide() {
+//        // we should unblock all the windows first...
+//        ArrayList<Window> save = new ArrayList<Window>();
+//        int blockedWindowsCount = blockedWindows.size();
+//        for (int i = 0; i < blockedWindowsCount; i++) {
+//            Window w = blockedWindows.get(0);
+//            save.add(w);
+//            unblockWindow(w); // also removes w from blockedWindows
+//        }
+//        // ... and only after that check if they should be blocked
+//        // by another dialogs
+//        for (int i = 0; i < blockedWindowsCount; i++) {
+//            Window w = save.get(i);
+//            if ((w instanceof JSDialog) && ((JSDialog)w).isModal_NoClientCode()) {
+//                JSDialog d = (JSDialog)w;
+//                d.modalShow();
+//            } else {
+//                checkShouldBeBlocked(w);
 //            }
 //        }
+//    }
 //
-//        // add all blockers' blockers to blockers :)
-//        for (int i = 0; i < blockers.size(); i++) {
-//            Dialog blocker = blockers.get(i);
-//            if (blocker.isModalBlocked()) {
-//                Dialog blockerBlocker = blocker.getModalBlocker();
-//                if (!blockers.contains(blockerBlocker)) {
-//                    blockers.add(i + 1, blockerBlocker);
-//                }
+//    /*
+//     * Returns whether the given top-level window should be blocked by
+//     * this dialog. Note, that the given window can be also a modal dialog
+//     * and it should block this dialog, but this method do not take such
+//     * situations into consideration (such checks are performed in the
+//     * modalShow() and modalHide() methods).
+//     *
+//     * This method should be called on the getTreeLock() lock.
+//     */
+//    boolean shouldBlock(Window w) {
+//        if (!isVisible_NoClientCode() ||
+//            (!w.isVisible_NoClientCode() && !w.isInShow) ||
+//            isInHide ||
+//            (w == this) ||
+//            !isModal_NoClientCode())
+//        {
+//            return false;
+//        }
+//        if ((w instanceof JSDialog) && ((JSDialog)w).isInHide) {
+//            return false;
+//        }
+//        // check if w is from children hierarchy
+//        // fix for 6271546: we should also take into consideration child hierarchies
+//        // of this dialog's blockers
+//        Window blockerToCheck = this;
+//        while (blockerToCheck != null) {
+//            Component c = w;
+//            while ((c != null) && (c != blockerToCheck)) {
+//                c = c.getParent_NoClientCode();
 //            }
-//        }
-//
-//        if (blockers.size() > 0) {
-//            blockers.get(0).blockWindow(this);
-//        }
-//
-//        // find all windows from blockers' hierarchies
-//        ArrayList<Window> blockersHierarchies = new ArrayList<Window>(blockers);
-//        int k = 0;
-//        while (k < blockersHierarchies.size()) {
-//            Window w = blockersHierarchies.get(k);
-//            Window[] ownedWindows = w.getOwnedWindows_NoClientCode();
-//            for (Window win : ownedWindows) {
-//                blockersHierarchies.add(win);
+//            if (c == blockerToCheck) {
+//                return false;
 //            }
-//            k++;
+//            blockerToCheck = blockerToCheck.getModalBlocker();
 //        }
-//
-//        java.util.List<Window> toBlock = new LinkedList<Window>();
-//        // block all windows from scope of blocking except from blockers' hierarchies
-//        ArrayList<Window> unblockedWindows = Window.getAllUnblockedWindows();
-//        for (Window w : unblockedWindows) {
-//            if (shouldBlock(w) && !blockersHierarchies.contains(w)) {
-//                if ((w instanceof Dialog) && ((Dialog)w).isModal_NoClientCode()) {
-//                    Dialog wd = (Dialog)w;
-//                    if (wd.shouldBlock(this) && (modalDialogs.indexOf(wd) > modalDialogs.indexOf(this))) {
-//                        continue;
+//        switch (modalityType) {
+//            case MODELESS:
+//                return false;
+//            case DOCUMENT_MODAL:
+//                if (w.isModalExcluded(Dialog.ModalExclusionType.APPLICATION_EXCLUDE)) {
+//                    // application- and toolkit-excluded windows are not blocked by
+//                    // document-modal dialogs from outside their children hierarchy
+//                    Component c = this;
+//                    while ((c != null) && (c != w)) {
+//                        c = c.getParent_NoClientCode();
 //                    }
+//                    return c == w;
+//                } else {
+//                    return getDocumentRoot() == w.getDocumentRoot();
 //                }
-//                toBlock.add(w);
-//            }
+//            case APPLICATION_MODAL:
+//                return !w.isModalExcluded(Dialog.ModalExclusionType.APPLICATION_EXCLUDE) &&
+//                    (appContext == w.appContext);
+//            case TOOLKIT_MODAL:
+//                return !w.isModalExcluded(Dialog.ModalExclusionType.TOOLKIT_EXCLUDE);
 //        }
-//        blockWindows(toBlock);
 //
-//        if (!isModalBlocked()) {
-//            updateChildrenBlocking();
+//        return false;
+//    }
+//
+//    /*
+//     * Adds the given top-level window to the list of blocked
+//     * windows for this dialog and marks it as modal blocked.
+//     * If the window is already blocked by some modal dialog,
+//     * does nothing.
+//     */
+//    void blockWindow(Window w) {
+//        if (!w.isModalBlocked()) {
+//            w.setModalBlocked(this, true, true);
+//            blockedWindows.add(w);
 //        }
-    }
-
-    /*
-     * This method is called only for modal dialogs.
-     *
-     * Unblocks all the windows blocked by this modal dialog. After
-     * each of them has been unblocked, it is checked to be blocked by
-     * any other modal dialogs.
-     */
-    void modalHide() {
-        // we should unblock all the windows first...
-        ArrayList<Window> save = new ArrayList<Window>();
-        int blockedWindowsCount = blockedWindows.size();
-        for (int i = 0; i < blockedWindowsCount; i++) {
-            Window w = blockedWindows.get(0);
-            save.add(w);
-            unblockWindow(w); // also removes w from blockedWindows
-        }
-        // ... and only after that check if they should be blocked
-        // by another dialogs
-        for (int i = 0; i < blockedWindowsCount; i++) {
-            Window w = save.get(i);
-            if ((w instanceof JSDialog) && ((JSDialog)w).isModal_NoClientCode()) {
-                JSDialog d = (JSDialog)w;
-                d.modalShow();
-            } else {
-                checkShouldBeBlocked(w);
-            }
-        }
-    }
-
-    /*
-     * Returns whether the given top-level window should be blocked by
-     * this dialog. Note, that the given window can be also a modal dialog
-     * and it should block this dialog, but this method do not take such
-     * situations into consideration (such checks are performed in the
-     * modalShow() and modalHide() methods).
-     *
-     * This method should be called on the getTreeLock() lock.
-     */
-    boolean shouldBlock(Window w) {
-        if (!isVisible_NoClientCode() ||
-            (!w.isVisible_NoClientCode() && !w.isInShow) ||
-            isInHide ||
-            (w == this) ||
-            !isModal_NoClientCode())
-        {
-            return false;
-        }
-        if ((w instanceof JSDialog) && ((JSDialog)w).isInHide) {
-            return false;
-        }
-        // check if w is from children hierarchy
-        // fix for 6271546: we should also take into consideration child hierarchies
-        // of this dialog's blockers
-        Window blockerToCheck = this;
-        while (blockerToCheck != null) {
-            Component c = w;
-            while ((c != null) && (c != blockerToCheck)) {
-                c = c.getParent_NoClientCode();
-            }
-            if (c == blockerToCheck) {
-                return false;
-            }
-            blockerToCheck = blockerToCheck.getModalBlocker();
-        }
-        switch (modalityType) {
-            case MODELESS:
-                return false;
-            case DOCUMENT_MODAL:
-                if (w.isModalExcluded(Dialog.ModalExclusionType.APPLICATION_EXCLUDE)) {
-                    // application- and toolkit-excluded windows are not blocked by
-                    // document-modal dialogs from outside their children hierarchy
-                    Component c = this;
-                    while ((c != null) && (c != w)) {
-                        c = c.getParent_NoClientCode();
-                    }
-                    return c == w;
-                } else {
-                    return getDocumentRoot() == w.getDocumentRoot();
-                }
-            case APPLICATION_MODAL:
-                return !w.isModalExcluded(Dialog.ModalExclusionType.APPLICATION_EXCLUDE) &&
-                    (appContext == w.appContext);
-            case TOOLKIT_MODAL:
-                return !w.isModalExcluded(Dialog.ModalExclusionType.TOOLKIT_EXCLUDE);
-        }
-
-        return false;
-    }
-
-    /*
-     * Adds the given top-level window to the list of blocked
-     * windows for this dialog and marks it as modal blocked.
-     * If the window is already blocked by some modal dialog,
-     * does nothing.
-     */
-    void blockWindow(Window w) {
-        if (!w.isModalBlocked()) {
-            w.setModalBlocked(this, true, true);
-            blockedWindows.add(w);
-        }
-    }
-
-    void blockWindows(java.util.List<Window> toBlock) {
-        DialogPeer dpeer = (DialogPeer)peer;
-        if (dpeer == null) {
-            return;
-        }
-        Iterator<Window> it = toBlock.iterator();
-        while (it.hasNext()) {
-            Window w = it.next();
-            if (!w.isModalBlocked()) {
-                w.setModalBlocked(this, true, false);
-            } else {
-                it.remove();
-            }
-        }
-        dpeer.blockWindows(toBlock);
-        blockedWindows.addAll(toBlock);
-    }
-
-    /*
-     * Removes the given top-level window from the list of blocked
-     * windows for this dialog and marks it as unblocked. If the
-     * window is not modal blocked, does nothing.
-     */
-    void unblockWindow(Window w) {
-        if (w.isModalBlocked() && blockedWindows.contains(w)) {
-            blockedWindows.remove(w);
-            w.setModalBlocked(this, false, true);
-        }
-    }
-
-    /*
-     * Checks if any other modal dialog D blocks the given window.
-     * If such D exists, mark the window as blocked by D.
-     */
-    static void checkShouldBeBlocked(Window w) {
-        synchronized (w.getTreeLock()) {
-            for (int i = 0; i < modalDialogs.size(); i++) {
-                JSDialog modalDialog = modalDialogs.get(i);
-                if (modalDialog.shouldBlock(w)) {
-                    modalDialog.blockWindow(w);
-                    break;
-                }
-            }
-        }
-    }
-
-    private void checkModalityPermission(Dialog.ModalityType mt) {
-//        if (mt == ModalityType.TOOLKIT_MODAL) {
-//            SecurityManager sm = System.getSecurityManager();
-//            if (sm != null) {
-//                sm.checkPermission(
-//                    SecurityConstants.TOOLKIT_MODALITY_PERMISSION
-//                );
+//    }
+//
+//    void blockWindows(java.util.List<Window> toBlock) {
+//        DialogPeer dpeer = (DialogPeer)peer;
+//        if (dpeer == null) {
+//            return;
+//        }
+//        Iterator<Window> it = toBlock.iterator();
+//        while (it.hasNext()) {
+//            Window w = it.next();
+//            if (!w.isModalBlocked()) {
+//                w.setModalBlocked(this, true, false);
+//            } else {
+//                it.remove();
 //            }
 //        }
-    }
+//        dpeer.blockWindows(toBlock);
+//        blockedWindows.addAll(toBlock);
+//    }
+//
+//    /*
+//     * Removes the given top-level window from the list of blocked
+//     * windows for this dialog and marks it as unblocked. If the
+//     * window is not modal blocked, does nothing.
+//     */
+//    void unblockWindow(Window w) {
+//        if (w.isModalBlocked() && blockedWindows.contains(w)) {
+//            blockedWindows.remove(w);
+//            w.setModalBlocked(this, false, true);
+//        }
+//    }
+//
+//    /*
+//     * Checks if any other modal dialog D blocks the given window.
+//     * If such D exists, mark the window as blocked by D.
+//     */
+//    static void checkShouldBeBlocked(Window w) {
+//        synchronized (w.getTreeLock()) {
+//            for (int i = 0; i < modalDialogs.size(); i++) {
+//                JSDialog modalDialog = modalDialogs.get(i);
+//                if (modalDialog.shouldBlock(w)) {
+//                    modalDialog.blockWindow(w);
+//                    break;
+//                }
+//            }
+//        }
+//    }
+//
+//    private void checkModalityPermission(Dialog.ModalityType mt) {
+////        if (mt == ModalityType.TOOLKIT_MODAL) {
+////            SecurityManager sm = System.getSecurityManager();
+////            if (sm != null) {
+////                sm.checkPermission(
+////                    SecurityConstants.TOOLKIT_MODALITY_PERMISSION
+////                );
+////            }
+////        }
+//    }
 
 //    private void readObject(ObjectInputStream s)
 //        throws ClassNotFoundException, IOException,

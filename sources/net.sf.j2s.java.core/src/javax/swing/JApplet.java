@@ -37,7 +37,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.HeadlessException;
 import java.awt.LayoutManager;
-import java.awt.peer.LightweightPeer;
 
 /**
  * An extended version of <code>java.applet.Applet</code> that adds support for
@@ -134,6 +133,7 @@ public class JApplet extends JSApplet implements /* Accessible ,*/
      */
     public JApplet() {
     	super();
+    	秘paintClass = 秘updateClass = /**@j2sNative C$ || */null;
     	setFrameViewer(秘appletViewer);
     	setJApplet();
         updateUI();
@@ -143,8 +143,6 @@ public class JApplet extends JSApplet implements /* Accessible ,*/
 	public String getUIClassID() {
 		return "AppletUI";
 	}
-
-
     
     protected void setPanelUIClassID() {
     	// bypass JPanel UI call

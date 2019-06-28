@@ -188,10 +188,10 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				
-				frame.dispose();
-				System.out.println("frame after dispose " + frame.isValid());
-				frame.show();
-				
+//				frame.dispose();
+//				System.out.println("frame after dispose " + frame.isValid());
+//				frame.show();
+//				
 			}
 
 			@Override
