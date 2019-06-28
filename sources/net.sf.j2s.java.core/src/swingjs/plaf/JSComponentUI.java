@@ -958,7 +958,9 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected void setComponentFocus() {
 		jc.requestFocus();
-		jc.getFocusTraversalPolicy().getDefaultComponent(jc).requestFocus();
+		Component c = jc.getFocusTraversalPolicy().getDefaultComponent(jc);
+		if (c != null)
+			c.requestFocus();
 	}
 
 	/**
