@@ -15,6 +15,7 @@ import java.awt.JSComponent;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.peer.DropTargetPeer;
 import java.awt.event.KeyEvent;
@@ -53,6 +54,7 @@ import javajs.util.PT;
 import sun.awt.CausedFocusEvent.Cause;
 import swingjs.JSFocusPeer;
 import swingjs.JSGraphics2D;
+import swingjs.JSKeyEvent;
 import swingjs.JSToolkit;
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
@@ -145,8 +147,6 @@ import swingjs.api.js.JQueryObject;
 public class JSComponentUI extends ComponentUI
 		implements ContainerPeer, JSEventHandler, PropertyChangeListener, ChangeListener, DropTargetPeer {
 
-	private static final Color rootPaneColor = new Color(238, 238, 238);
-
 	private static final int MENUITEM_OFFSET = 11;
 
 	final J2SInterface J2S = JSUtil.J2S;
@@ -158,11 +158,11 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected static int incr;
 
-	/**
-	 * Set this during run time using swingjs.plaf.JSComponentUI.borderTest = true
-	 * to debug alignments
-	 */
-	private static boolean borderTest;
+//	/**
+//	 * Set this during run time using swingjs.plaf.JSComponentUI.borderTest = true
+//	 * to debug alignments
+//	 */
+//	private static boolean borderTest;
 
 	/**
 	 * Derived from swingjs.JSToolkit.debugger. Set this during run time using
@@ -756,6 +756,10 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	
+	/**
+	 * 
+	 * @param node
+	 */
 	protected void setDataKeyComponent(DOMNode node) {
 		DOMNode.setAttr(node, "data-keycomponent", c);
 	}
@@ -838,6 +842,12 @@ public class JSComponentUI extends ComponentUI
 		J2S.setMouse(domNode, true);
 	}
 
+	protected boolean handleTab(Object jqevent) {
+		JSKeyEvent.dispatchKeyEvent(jc, KeyEvent.KEY_PRESSED, 0, jqevent, System.currentTimeMillis());
+		return CONSUMED;
+	}
+
+
 	/**
 	 * fired by JSComponent when key listeners are registered
 	 * 
@@ -885,12 +895,32 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public boolean isFocusable() {
-		return (jc.isFocusable() && setFocusable());
+		// meaning "can use TAB to set their focus" within a focus cycle
+		return false;
+		// from ComponentPeer
+		// file:///C:/Users/hansonr/git/jdk8u-jdk/src/share/classes/java/awt/doc-files/FocusSpec.html
+		//
+		// The recommendations for Windows and Unix are that Canvases, Labels, Panels,
+		// Scrollbars, ScrollPanes, Windows, and lightweight Components have
+		// non-focusable peers, and all other Components have focusable peers.
+		
+		// Q: What is left? Maybe SUBCLASSES of Window. This makes little sense. 
+		// I have implemented this in SwingJS as:
+		
+		// by default peers are not focusable
+		// AbstractButton, other than menu item buttons, are focusable
+		// TextFields are focusable.
+		
+		
+		
+//		return (jc.isFocusable() && setFocusable());
 	}
 
 	protected boolean setFocusable() {
-		if (focusNode == null)
+		if (focusNode == null) 
 		  addFocusHandler();
+		if (focusNode != null)
+			addJQueryFocusCallbacks();
 		return (focusNode != null);
 	}
 
@@ -905,6 +935,9 @@ public class JSComponentUI extends ComponentUI
 			long time, Cause cause) {
 		if (lightweightChild == null)
 			return focus();
+		if (!jc.isFocusable())
+			return false;
+		setFocusable();
 		return JSToolkit.requestFocus(lightweightChild);
 	}
 
@@ -918,6 +951,16 @@ public class JSComponentUI extends ComponentUI
 			return false;
 		JSFocusPeer.focus(focusNode);
 		return true;
+	}
+
+	/**
+	 * for Window and JApplet
+	 */
+	protected void setComponentFocus() {
+		jc.requestFocus();
+		Component c = jc.getFocusTraversalPolicy().getDefaultComponent(jc);
+		if (c != null)
+			c.requestFocus();
 	}
 
 	/**
@@ -936,13 +979,6 @@ public class JSComponentUI extends ComponentUI
 		JQueryObject node = $(focusNode);
 		node.unbind("focus blur");
 		JSComponentUI me = this;
-
-		// initial idea involved
-		// 
-		//    node.mousedown(function(e) { e.target.focus() });
-		//
-		// but that is not quite right. We need to let KeyboardFocusManager handle all of this.
-		
 
 		/**
 		 * @j2sNative
@@ -1367,6 +1403,10 @@ public class JSComponentUI extends ComponentUI
 
 	protected boolean allowDivOverflow;
 
+	@SuppressWarnings("unused")
+	/**
+	 * used in j2sNative focus callback
+	 */
 	private boolean ignoreFocus;
 
 	protected DOMNode embeddingNode;
@@ -2262,7 +2302,7 @@ public class JSComponentUI extends ComponentUI
 			obj = textNode;
 			setCssFont(textNode, getFont());
 			if (!isHTML)
-				text = PT.rep(text, "<", "&lt;");
+				text = PT.rep(text, "<", "&lt;").replace(' ', '\u00A0');
 		} else if (valueNode != null) {
 			prop = "value";
 			obj = valueNode;
@@ -2289,6 +2329,11 @@ public class JSComponentUI extends ComponentUI
 	protected Rectangle viewR, iconR, textR;
 
 	protected Dimension preferredDim;
+
+	/**
+	 * particularly for buttons
+	 */
+	private boolean isFullyCentered;
 
 	protected static Insets zeroInsets = new Insets(0, 0, 0, 0);
 	
@@ -2358,19 +2403,18 @@ public class JSComponentUI extends ComponentUI
 		int wText = (dimText == null ? 0 : dimText.width);
 		int gap = (wText == 0 || wIcon == 0 ? 0 : b.getIconTextGap());
 		int w0 = cellComponent != null ? cellWidth : $(domNode).width();
-	    int w = w0;
-	    if (w < wIcon + wText) {
-				// jQuery method can fail that may not have worked.
-				w = wIcon + wText;
+		int w = w0;
+		if (w < wIcon + wText) {
+			// jQuery method can fail that may not have worked.
+			w = wIcon + wText;
 		}
 		boolean alignVCenter = (vAlign == SwingConstants.CENTER);
-		Insets margins = (isLabel ? (isAWT ? b.getInsets() : insets) : 
-			getButtonMargins(b, justGetPreferred));
+		Insets margins = (isLabel ? (isAWT ? b.getInsets() : insets) : getButtonMargins(b, justGetPreferred));
 		if (margins == null)
 			margins = zeroInsets;
-		Insets insets = (isLabel || !isSimpleButton || justGetPreferred ? zeroInsets :
-			getButtonOuterInsets(b));
-		//System.out.println("JSCUI margins " + justGetPreferred + " " + b.getText() + " " + margins + " " + insets);
+		Insets insets = (isLabel || !isSimpleButton || justGetPreferred ? zeroInsets : getButtonOuterInsets(b));
+		// System.out.println("JSCUI margins " + justGetPreferred + " " + b.getText() +
+		// " " + margins + " " + insets);
 		int h = (dimText == null ? 0 : dimText.height);
 		int ih = (dimIcon == null ? 0 : dimIcon.height);
 		int hCtr = Math.max(h, ih);
@@ -2469,7 +2513,7 @@ public class JSComponentUI extends ComponentUI
 					w = w0;
 				break;
 			}
-		} 
+		}
 		if (justGetPreferred) {
 			if (preferredDim == null)
 				preferredDim = new Dimension();
@@ -2478,22 +2522,27 @@ public class JSComponentUI extends ComponentUI
 			return;
 		}
 		preferredDim = null;
+		Object cssCtr = getJSObject();
+		Object cssTxt = getJSObject();
+		Object cssIcon = getJSObject();
+		
+		
 		DOMNode.setStyles(centeringNode, "position", "absolute", "top", null, "left", null, "transform", null);
 		DOMNode.setStyles(centeringNode, "width", wCtr + "px", "height", hCtr + "px");
 
-		if (alignHCenter && alignVCenter && wIcon == 0
-				|| wText == 0 && margins.left == margins.right && margins.top == margins.bottom
-				&& insets.left == insets.right && insets.top == insets.bottom) {
-
+		isFullyCentered = false;
+		if (alignHCenter && alignVCenter && wIcon == 0 || wText == 0 && margins.left == margins.right
+				&& margins.top == margins.bottom && insets.left == insets.right && insets.top == insets.bottom)
+			isFullyCentered = true;//!isLabel;
+		if (isFullyCentered) {
 			// simple totally centered label or button
 			// can't have width or height here --- let the browser figure that out
-			fullyCenter(centeringNode, true);
-			fullyCenter(iconNode, false);
-			fullyCenter(textNode, false);
+			fullyCenter(cssCtr, true);
+			fullyCenter(cssIcon, false);
+			fullyCenter(cssTxt, false);
 		} else {
-
-			DOMNode.setStyles(iconNode, "position", "absolute", "top", null, "left", null, "transform", null);
-			DOMNode.setStyles(textNode, "position", "absolute", "top", null, "left", null, "transform", null);
+			addCSS(cssIcon, "position", "absolute", "top", null, "left", null, "transform", null);
+			addCSS(cssTxt, "position", "absolute", "top", null, "left", null, "transform", null);
 
 			int left = -1;
 
@@ -2503,17 +2552,17 @@ public class JSComponentUI extends ComponentUI
 					case SwingConstants.TOP:
 					case SwingConstants.BOTTOM:
 					case SwingConstants.CENTER:
-						DOMNode.setStyles(textNode, "left", ((wCtr - wText) / 2) + "px");
-						DOMNode.setStyles(iconNode, "left", ((wCtr - wIcon) / 2) + "px");
+						addCSS(cssTxt, "left", ((wCtr - wText) / 2) + "px");
+						addCSS(cssIcon, "left", ((wCtr - wIcon) / 2) + "px");
 						break;
 					default:
 						int off = wCtr / 2;
 						if (textRight) {
-							DOMNode.setStyles(iconNode, "left", "0px");
-							DOMNode.setStyles(textNode, "left", (gap + wIcon) + "px");
+							addCSS(cssIcon, "left", "0px");
+							addCSS(cssTxt, "left", (gap + wIcon) + "px");
 						} else {
-							DOMNode.setStyles(textNode, "left", off + "px");
-							DOMNode.setStyles(iconNode, "left", (gap + wText) + "px");
+							addCSS(cssTxt, "left", off + "px");
+							addCSS(cssIcon, "left", (gap + wText) + "px");
 						}
 						break;
 					}
@@ -2521,35 +2570,35 @@ public class JSComponentUI extends ComponentUI
 				} else if (alignRight) {
 					left = w - wCtr - margins.right - insets.right - (cellComponent == null ? 0 : 2);// table fudge
 					if (textRight) {
-						DOMNode.setStyles(textNode, "left", (wCtr - wText) + "px");
-						DOMNode.setStyles(iconNode, "left", "0px");
+						addCSS(cssTxt, "left", (wCtr - wText) + "px");
+						addCSS(cssIcon, "left", "0px");
 					} else {
-						DOMNode.setStyles(textNode, "left", "0px");
-						DOMNode.setStyles(iconNode, "left", (wCtr - wIcon) + "px");
+						addCSS(cssTxt, "left", "0px");
+						addCSS(cssIcon, "left", (wCtr - wIcon) + "px");
 					}
 				} else {
 					left = margins.left + insets.left - (cellComponent == null ? 0 : 1);
 					if (textRight) {
 						int off = (!isMenuItem || ltr || actionNode != null ? 0 : actionItemOffset);
-						DOMNode.setStyles(iconNode, "left", off + "px");
-						DOMNode.setStyles(textNode, "left", (wIcon + gap) + "px");
+						addCSS(cssIcon, "left", off + "px");
+						addCSS(cssTxt, "left", (wIcon + gap) + "px");
 					} else {
-						DOMNode.setStyles(textNode, "left", (!isMenuItem ? 0 : ltr ? actionItemOffset : -3) + "px");
-						DOMNode.setStyles(iconNode, "left", (wText + gap) + "px");
+						addCSS(cssTxt, "left", (!isMenuItem ? 0 : ltr ? actionItemOffset : -3) + "px");
+						addCSS(cssIcon, "left", (wText + gap) + "px");
 					}
 				}
-				DOMNode.setStyles(centeringNode, "left", left + "px");
+				addCSS(cssCtr, "left", left + "px");
 			} else {
 				if (alignRight) {
 					DOMNode.setStyles(itemNode, "text-align", "right");
-					DOMNode.setStyles(centeringNode, "right", "0px");
-					DOMNode.setStyles(textNode, "right", "23px");
-					DOMNode.setStyles(iconNode, "right", "0px"); // was 3
+					addCSS(cssCtr, "right", "0px");
+					addCSS(cssTxt, "right", "23px");
+					addCSS(cssIcon, "right", "0px"); // was 3
 				} else {
 					DOMNode.setStyles(itemNode, "text-align", "left");
-					DOMNode.setStyles(centeringNode, "left", "0px");
-					DOMNode.setStyles(iconNode, "left", "0px"); // was 3
-					DOMNode.setStyles(textNode, "left", "23px");
+					addCSS(cssCtr, "left", "0px");
+					addCSS(cssIcon, "left", "0px"); // was 3
+					addCSS(cssTxt, "left", "23px");
 				}
 			}
 
@@ -2574,7 +2623,7 @@ public class JSComponentUI extends ComponentUI
 					break;
 				}
 
-				DOMNode.setStyles(centeringNode, "top", top + "px");
+				addCSS(cssCtr, "top", top + "px");
 				int itop;
 				String yoff = null;
 				String iscale = null;
@@ -2595,28 +2644,59 @@ public class JSComponentUI extends ComponentUI
 					yoff = "-50%";
 					break;
 				}
-				DOMNode.setStyles(centeringNode, "overflow","none");
-				DOMNode.setStyles(textNode, "top", top + "%", "transform",
+				addCSS(cssCtr, "overflow", "none");
+				addCSS(cssTxt, "top", top + "%", "transform",
 						"translateY(" + (yoff == null ? "-" + top + "%" : yoff + ")"));
-				DOMNode.setStyles(iconNode, "top", top + "%", "transform",
+				addCSS(cssIcon, "top", top + "%", "transform",
 						"translateY(-" + itop + "%)" + (iscale == null ? "" : iscale));
 			} else {
 				DOMNode.setStyles(menuAnchorNode, "height", h + "px");
-				DOMNode.setStyles(textNode, "top", "50%", "transform", "translateY(-50%)");
-				DOMNode.setStyles(iconNode, "top", "50%", "transform", "translateY(-65%) scale(0.6,0.6)");
+				addCSS(cssTxt, "top", "50%", "transform", "translateY(-50%)");
+				addCSS(cssIcon, "top", "50%", "transform", "translateY(-65%) scale(0.6,0.6)");
 			}
 
 		}
+		setCSS(cssCtr, centeringNode);
+		setCSS(cssIcon, iconNode);
+		setCSS(cssTxt, textNode); 
+		
 		if (cellComponent != null)
 			updateCellNode();
 	}
 
-	protected void fullyCenter(DOMNode node, boolean isCtr) {
+	private void addCSS(Object css, String... kv) {
+		for (int i = 0, n = kv.length; i < n; i++) {
+		/** @j2sNative 
+		 * 
+		 * css[kv[i++]] = kv[i]; 
+		 * 
+		 */
+		}
+	}
+
+	private void setCSS(Object css, DOMNode node) {
+		if (node == null)
+			return;
+		/**
+		 * @j2sNative
+		 *  
+		 * for (var a in css)node.style[a] = css[a];
+		 * 
+		 */
+	}
+
+
+	private Object getJSObject() {
+		return /** @j2sNative {} || */ null;
+	}
+
+
+	protected void fullyCenter(Object css, boolean isCtr) {
 //		if (isLabel)
-			DOMNode.setStyles(node, "width", null, "top", "50%", "left", "50%", "transform",
+			addCSS(css, "width", null, "top", "50%", "left", "50%", "transform",
 				"translateX(-50%)translateY(-50%)translateY(0.5px)translateX(0.5px)", "position", "absolute");
 // no, this causes the label to be offset too much
-	//		DOMNode.setStyles(node, "width", null, "top", null, "left", null, "transform", null, "position", null, "height", null);
+	//		addCSS(node, "width", null, "top", null, "left", null, "transform", null, "position", null, "height", null);
 	}
 
 
@@ -3199,18 +3279,6 @@ public class JSComponentUI extends ComponentUI
 		paintBackground(jc.秘gtemp);
 	}
 
-//	public boolean selfOrParentPaintsItself(JSComponent c, JSComponent p) {
-//		while (c != null) {
-//			if (c.秘paintsItself())
-//				return true;
-//			if (c.isOpaque())
-//				return false;
-//			c = (JSComponent) (p == null ? c.getParent() : p);
-//			p = null;
-//		}
-//		return false;
-//	}
-
 	/**
 	 * If a control is transparent, then set that in HTML for its node
 	 * 
@@ -3245,6 +3313,11 @@ public class JSComponentUI extends ComponentUI
 			g.setBackground(color);
 			g.clearRect(0, 0, c.getWidth(), c.getHeight());
 			isOpaque = !jc.秘paintsSelf();
+			if (!isOpaque && isWindow) {
+				JComponent c = (JComponent) jc.getRootPane().getContentPane();
+				c.秘setPaintsSelf(JSComponent.PAINTS_SELF_YES);
+				((JSComponentUI)c.ui).setTransparent();
+			}
 		}
 		if (allowPaintedBackground && !isOpaque)
 			setTransparent();
@@ -3268,6 +3341,18 @@ public class JSComponentUI extends ComponentUI
 			((JSComponentUI) c.ui).setTransparent();
 			c = c.getParent();
 		}
+	}
+
+	/**
+	 * if this window is blocked
+	 * 
+	 */
+	protected boolean modalBlocked;
+
+
+
+	public boolean isModalBlocked() {
+		return ((JSComponentUI)JSComponent.秘getTopInvokableAncestor(jc, false).getUI()).modalBlocked;
 	}
 
 }

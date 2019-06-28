@@ -74,6 +74,8 @@ public class CellRendererPane extends JPanel
      */
     public CellRendererPane() {
         super();
+    	秘paintClass = 秘updateClass = /**@j2sNative C$ || */null;
+
         setLayout(null);
         setVisible(false);
     }

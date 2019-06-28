@@ -356,6 +356,7 @@ public class JInternalFrame extends JFrame
     public JInternalFrame(String title, boolean resizable, boolean closable,
                                 boolean maximizable, boolean iconifiable) {
     	super(title, null);
+    	秘paintClass = /**@j2sNative C$ || */null;
     	defaultCloseOperation = DISPOSE_ON_CLOSE;
     	this.resizable = resizable;
         this.closable = closable;
@@ -1720,25 +1721,25 @@ public class JInternalFrame extends JFrame
 //
     // ======= begin optimized frame dragging defence code ==============
 
-    /**
-     * Overridden to allow optimized painting when the
-     * internal frame is being dragged.
-     */
-    @Override
-	protected void paintComponent(Graphics g) {
-
-     // this is not called, I think.
-    	
-      paintContainer(g);
-      
-      //super.paint(g); 
-   }
+//    /**
+//     * Overridden to allow optimized painting when the
+//     * internal frame is being dragged.
+//     */
+//    @Override
+//	protected void paintComponent(Graphics g) {
+//
+//     // this is not called, I think.
+//    	
+//      paintContainer(g);
+//      
+//      //super.paint(g); 
+//   }
     
 	@Override
 	public void paint(Graphics g) {
 		
 		// The problem is that painting is from a dirty region request on the desktop
-		// we need to swith to the correct graphics. 
+		// we need to switch to the correct graphics. 
 		// Could this be a problem with printing? 
 		
 		super.paint(getRootPane().getGraphics());

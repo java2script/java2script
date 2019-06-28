@@ -87,7 +87,7 @@ public class JSComboBoxUI extends JSLightweightUI implements ItemListener, ListD
 			comboBox._setTrigger(false);
 			break;
 		}
-		return HANDLED;
+		return CONSUMED;
 	}
 
 	

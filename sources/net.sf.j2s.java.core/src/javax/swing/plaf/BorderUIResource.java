@@ -133,6 +133,7 @@ public class BorderUIResource implements Border, UIResource
     public static class CompoundBorderUIResource extends CompoundBorder implements UIResource {
         public CompoundBorderUIResource(Border outsideBorder, Border insideBorder) {
             super(outsideBorder, insideBorder);
+      		 秘paintClass = CompoundBorder.class; // because there is no paint, actually
         }
 
     }

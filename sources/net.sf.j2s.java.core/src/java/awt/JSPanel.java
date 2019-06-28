@@ -107,6 +107,14 @@ public class JSPanel extends Container {
   		return (ui == null ? null : peer == null ? (peer = getToolkit().createPanel((Panel) (Object) this)) : peer);
   	}
 
+  	/**
+  	 * SwingJS added for focus management
+  	 */
+    @Override
+		public boolean isFocusCycleRoot() {
+        return true;
+    }
+
 
 /////////////////
 // Accessibility support

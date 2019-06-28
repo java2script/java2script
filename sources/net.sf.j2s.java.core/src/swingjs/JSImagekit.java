@@ -166,7 +166,7 @@ public class JSImagekit implements ImageConsumer {
 			// b = Arrays.copyOfRange(data, imageoffset, imagelength);
 			int n = imagelength - imageoffset;
       System.arraycopy(data, imageoffset, b = new byte[n], 0, n);
-			if (b.length < 54)
+			if (b.length < 10)//was 54??? I have no recollection of why that might be.
 				return null;
 			switch (getSourceType(b)) {
 			case BMP:

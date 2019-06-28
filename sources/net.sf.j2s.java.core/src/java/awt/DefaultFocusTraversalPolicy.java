@@ -93,7 +93,8 @@ public class DefaultFocusTraversalPolicy
      * @return <code>true</code> if aComponent meets the above requirements;
      *         <code>false</code> otherwise
      */
-    protected boolean accept(Component aComponent) {
+    @Override
+	protected boolean accept(Component aComponent) {
         if (!(aComponent.isVisible() && aComponent.isDisplayable() &&
               aComponent.isEnabled()))
         {
@@ -117,6 +118,9 @@ public class DefaultFocusTraversalPolicy
             }
         }
 
+//        if (((JSComponent) aComponent).秘isNotTabFocusable())
+//			return false; // SwingJS JLabel, JTextArea, JEditorPane
+//        
         boolean focusable = aComponent.isFocusable();
         if (aComponent.isFocusTraversableOverridden()) {
             return focusable;

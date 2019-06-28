@@ -263,6 +263,7 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 	 * 
 	 */
 	public JFrame(String title, GraphicsConfiguration gc) {
+    	秘paintClass = 秘updateClass = /**@j2sNative C$ || */null;
 		initTitleGC(title, gc);
 		enableEvents(AWTEvent.KEY_EVENT_MASK | AWTEvent.WINDOW_EVENT_MASK);
 		setLocale(JComponent.getDefaultLocale());
@@ -497,8 +498,7 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 	public void update(Graphics g) {
 		paint(g);
 	}
-	
-	
+		
 	@Override
 	public void paint(Graphics g) {
 		((Graphics2D) g).setBackground(getBackground());

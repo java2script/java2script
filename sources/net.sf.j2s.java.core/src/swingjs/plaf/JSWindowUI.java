@@ -41,17 +41,13 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 	protected Window window;
 	protected Font font;
 
-	/**
-	 * a translucent screen that prevents events to pass - for JDialog
-	 */
-	protected DOMNode modalNode;
-
-
 	private Graphics2D graphics;
 
 //	private Object dialogBlocker;
 
 	protected boolean isPopup;
+
+	protected DOMNode modalNode;
 
 	/*
 	 * Not Lightweight; an independent space with RootPane, LayeredPane,
@@ -142,8 +138,7 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 
 	@Override
 	public void updateFocusableWindowState() {
-		// TODO Auto-generated method stub
-		
+		System.out.println("JSWindow updateFocusable");
 	}
 
 	@Override
@@ -152,15 +147,15 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 		return false;
 	}
 
+	
 	@Override
 	public void setModalBlocked(Dialog blocker, boolean blocked) {
-//		JSDialog b = ((JSDialog) (Object) blocker);
-//		dialogBlocker = (blocked ? b : null);
+		modalBlocked = blocked;
 	}
 
 	@Override
 	public void setModalBlocked(JSDialog blocker, boolean blocked) {
-//		dialogBlocker = (blocked ? blocker : null);
+		modalBlocked = blocked;
 	}
 
 	@Override
@@ -267,8 +262,7 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 
 	@Override
 	public void windowOpened(WindowEvent e) {
-		System.out.println("JSWindowUI windowOpened " + c.isVisible() + " " + id);
-//		c.requestFocus();
+		setComponentFocus();
 	}
 
 

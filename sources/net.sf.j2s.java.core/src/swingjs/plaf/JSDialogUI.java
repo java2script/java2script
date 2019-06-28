@@ -46,5 +46,14 @@ public class JSDialogUI extends JSFrameUI implements DialogPeer {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	@Override
+	public void setVisible(boolean b) {
+		super.setVisible(b);
+		if (b) {
+			setComponentFocus();
+		}
+		
+	}
 
 }

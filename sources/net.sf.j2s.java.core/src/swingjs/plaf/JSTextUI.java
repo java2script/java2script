@@ -243,7 +243,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	protected void installDefaults() {
 		String prefix = getPropertyPrefix();
 		Font f = editor.getFont();
-		if ((f == null) || (f instanceof UIResource)) {
+		if ((f == null && !editor.秘isAWT()) || (f instanceof UIResource)) {
 			editor.setFont(UIManager.getFont(prefix + ".font"));
 		}
 
@@ -1222,8 +1222,9 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	protected Boolean checkAllowKey(Object jQueryEvent) {
 		boolean b = HANDLED;
 		boolean checkEditable = false;
+		String type = /** @j2sNative jQueryEvent.type || */"";
 		// note: all options are set in JSComponentUI.bindJSKeyEvents
-		switch (/** @j2sNative jQueryEvent.type || */"") {
+		switch (type) {
 		case "drop":
 			// accept if editable
 			checkEditable = true;
@@ -1239,8 +1240,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 			switch (/** @j2sNative jQueryEvent.keyCode || */
 			0) {
 			case KeyEvent.VK_TAB:
-				// TODO: handle tab
-				b = CONSUMED;
+				b = (type == "keydown" ? handleTab(jQueryEvent) : CONSUMED);
 				break;
 			case KeyEvent.VK_UP:
 			case KeyEvent.VK_DOWN:
@@ -1272,7 +1272,6 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		}
 		return Boolean.valueOf(b);
 	}
-
 
 	/**
 	 * Get the current selection point for the Java model.
@@ -1342,6 +1341,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	}
 
 	public void caretUpdatedByProgram(CaretEvent e) {
+		//System.out.println("JSTextUI "+ e);
+		
 		// AWT components need to show the change, but not Swing components.
 		if (false && isAWT && !jc.hasFocus()) { 
 			Component fc = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
@@ -3530,5 +3531,10 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	// return componentMap;
 	// }
 	//
+
+	@Override
+	public boolean isFocusable() {
+		return true;
+	}
 
 }

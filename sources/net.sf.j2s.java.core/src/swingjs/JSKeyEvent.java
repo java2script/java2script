@@ -5,6 +5,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.JComponent;
+import javax.swing.text.JTextComponent;
 
 import swingjs.plaf.JSComponentUI;
 
@@ -25,6 +26,7 @@ public class JSKeyEvent extends KeyEvent {
 
 	/**
 	 * From j2sApplet vis JSMouse
+	 * @param c 
 	 * 
 	 * @param id
 	 * @param modifiers
@@ -32,20 +34,14 @@ public class JSKeyEvent extends KeyEvent {
 	 * @param time
 	 * @return
 	 */
-	public static boolean dispatchKeyEvent(int id, int modifiers, Object jqevent, long time) {
+	public static boolean dispatchKeyEvent(JComponent c, int id, int modifiers, Object jqevent, long time) {
 		if (id == KeyEvent.KEY_TYPED) {
 			// HTML5 keypress is no longer reliable
 			JSToolkit.consumeEvent(jqevent);
 			return false;
 		}
-		JComponent c = null;
-		JSComponentUI ui = null;
-		/**
-		 * @j2sNative
-		 * 
-		 * 			c = jqevent.target["data-keycomponent"]; ui = c && c.ui;
-		 */
 		if (c != null) {
+			JSComponentUI ui = (JSComponentUI) c.getUI();
 			KeyEvent e = newJSKeyEvent(c, jqevent, 0, false);
 			// create our own KEY_PRESSED event
 			c.dispatchEvent(e);

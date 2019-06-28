@@ -123,29 +123,25 @@ public class JLabel extends JComponent implements SwingConstants/*, Accessible*/
      */
     static final String LABELED_BY_PROPERTY = "labeledBy";
 
-    /**
-     * Creates a <code>JLabel</code> instance with the specified
-     * text, image, and horizontal alignment.
-     * The label is centered vertically in its display area.
-     * The text is on the trailing edge of the image.
-     *
-     * @param text  The text to be displayed by the label.
-     * @param icon  The image to be displayed by the label.
-     * @param horizontalAlignment  One of the following constants
-     *           defined in <code>SwingConstants</code>:
-     *           <code>LEFT</code>,
-     *           <code>CENTER</code>,
-     *           <code>RIGHT</code>,
-     *           <code>LEADING</code> or
-     *           <code>TRAILING</code>.
-     */
-    public JLabel(String text, Icon icon, int horizontalAlignment) {
-        setText(text);
-        setIcon(icon);
-        setHorizontalAlignment(horizontalAlignment);
-        updateUI();
-        setAlignmentX(LEFT_ALIGNMENT);
-    }
+	/**
+	 * Creates a <code>JLabel</code> instance with the specified text, image, and
+	 * horizontal alignment. The label is centered vertically in its display area.
+	 * The text is on the trailing edge of the image.
+	 *
+	 * @param text                The text to be displayed by the label.
+	 * @param icon                The image to be displayed by the label.
+	 * @param horizontalAlignment One of the following constants defined in
+	 *                            <code>SwingConstants</code>: <code>LEFT</code>,
+	 *                            <code>CENTER</code>, <code>RIGHT</code>,
+	 *                            <code>LEADING</code> or <code>TRAILING</code>.
+	 */
+	public JLabel(String text, Icon icon, int horizontalAlignment) {
+		setText(text);
+		setIcon(icon);
+		setHorizontalAlignment(horizontalAlignment);
+		updateUI();
+		setAlignmentX(LEFT_ALIGNMENT);
+	}
 
 	@Override
 	public String getUIClassID() {

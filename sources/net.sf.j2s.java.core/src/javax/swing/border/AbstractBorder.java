@@ -51,6 +51,8 @@ import java.awt.Component;
 public abstract class AbstractBorder implements Border
 {
 
+	public Class<?> 秘paintClass = /**@j2sNative C$ || */null;
+	
     /**
      * This default implementation does no painting.
      * @param c the component for which this border is being painted

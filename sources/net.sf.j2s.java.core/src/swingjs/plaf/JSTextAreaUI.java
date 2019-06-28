@@ -54,10 +54,20 @@ public class JSTextAreaUI extends JSTextViewUI {
 		case "ancestor":
 			setJ2sMouseHandler();
 			break;
+		case "JSToEnd":
+			toEnd();
+			break;
 		} 
 		super.propertyChange(e);
 	}
 
+	private void toEnd() {
+		/**
+		 * @j2sNative this.domNode.scrollTop = this.domNode.scrollHeight;
+		 */		
+	}
+
+	@Override
 	protected void updateRootView() {
 		useRootView = true;
         rootView.setView(create(editor.getDocument().getDefaultRootElement()));// does not take into account nested documents like HTML (I guess)		
@@ -137,5 +147,16 @@ public class JSTextAreaUI extends JSTextViewUI {
 		}
 		return v;
 	}
+
+	@Override
+	public boolean isFocusable() {
+		return false;
+	}
+
+	@Override
+	protected boolean handleTab(Object jqEvent) {
+		return CONSUMED;
+	}
+
 
 }

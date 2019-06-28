@@ -9,6 +9,7 @@ import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JTextField;
 
+import swingjs.JSKeyEvent;
 import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
 

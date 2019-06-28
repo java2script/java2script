@@ -27,8 +27,6 @@ package java.awt;
 
 import java.awt.image.ImageObserver;
 
-import swingjs.JSImagekit;
-
 /**
  * The <code>MediaTracker</code> class is a utility class to track the status of
  * a number of media objects. Media objects could include audio clips as well as
@@ -924,10 +922,12 @@ class ImageMediaEntry extends MediaEntry implements ImageObserver, java.io.Seria
 		return (image == img && width == w && height == h);
 	}
 
+	@Override
 	Object getMedia() {
 		return image;
 	}
 
+	@Override
 	synchronized int getStatus(boolean doLoad, boolean doVerify) {
 		if (doVerify) {
 			int flags = tracker.target.checkImage(image, width, height, null);
@@ -943,6 +943,7 @@ class ImageMediaEntry extends MediaEntry implements ImageObserver, java.io.Seria
 		return super.getStatus(doLoad, doVerify);
 	}
 
+	@Override
 	void startLoad() {
 		// if (tracker.target.prepareImage(image, width, height, this)) {
 		setStatus(COMPLETE);
@@ -960,6 +961,7 @@ class ImageMediaEntry extends MediaEntry implements ImageObserver, java.io.Seria
 		return 0;
 	}
 
+	@Override
 	public boolean imageUpdate(Image img, int infoflags, int x, int y, int w, int h) {
 		if (cancelled) {
 			return false;
