@@ -3,6 +3,7 @@ package swingjs;
 import java.applet.AppletContext;
 import java.applet.AppletStub;
 import java.applet.AudioClip;
+import java.applet.JSApplet;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -18,6 +19,7 @@ import java.net.URLStreamHandlerFactory;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.NoSuchElementException;
 
 import javax.imageio.ImageIO;
 import javax.swing.JApplet;
@@ -318,22 +320,56 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 	@Override
 	public java.applet.JSApplet getApplet(String name) {
 		JApplet applet = null;
+		@SuppressWarnings("unused")
+		String nameLC = name.toLowerCase();
 		/**
 		 * @j2sNative
 		 * 
-		 * 			applet = SwingJS._applets[name]; applet && (applet =
-		 *            applet._applet);
+		 * 			var applets = J2S._applets;
+		 *         	for (var a in applets) {
+		 *         		if (("" + applets[a].getParameter$S("name")).toLowerCase() == nameLC) {
+		 *         			applet = applets[a];
+		 *        		}
+		 *        	}
+		 *          if (!applet) {
+		 * 				applet = applets[name];
+		 *          }
+		 *          applet && (applet = applet._applet);
 		 */
-		{
-
-		}
 		return applet;
 	}
 
+	@SuppressWarnings("unused")
 	@Override
-	public Enumeration<java.applet.JSApplet> getApplets() {
-		// not supported for now
-		return null;
+	public Enumeration<JSApplet> getApplets() {
+		ArrayList<JSApplet> appletList = new ArrayList<>();
+		/**
+		 * @j2sNative
+		 * 
+		 * 			var applets = J2S._applets;
+		 *         	for (var a in applets) {
+		 *         		var app = applets[a]._applet;
+		 *         		if (app && !appletList.contains$O(app))
+		 *         			appletList.add$O(app);
+		 *         }
+		 */
+		return new Enumeration() {
+			
+			private int i = 0;
+
+			@Override
+			public boolean hasMoreElements() {
+				return i < appletList.size();
+			}
+
+			@Override
+			public Object nextElement() {
+				if (i >= appletList.size())
+					throw new NoSuchElementException();
+				return appletList.get(i++);
+			}
+			
+		};
 	}
 
 	@Override
@@ -356,9 +392,6 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 		 * 
 		 * 			Clazz._LoaderProgressMonitor.showStatus(status, true);
 		 */
-		{
-			System.out.println(status);
-		}
 	}
 
 	private void showAppletStatus(String status) {
@@ -374,9 +407,6 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 		 *            if (t.printStackTrace$) t.printStackTrace$();
 		 *            else System.out.println(t.stack);
 		 */
-		{
-		}
-		// repaint();
 	}
 
 	/**
