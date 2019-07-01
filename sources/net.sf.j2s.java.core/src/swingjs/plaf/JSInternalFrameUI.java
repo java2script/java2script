@@ -32,6 +32,7 @@ public class JSInternalFrameUI extends JSFrameUI {
 	public JSInternalFrameUI() {
 		super();
 		isInternalFrame = true;
+		allowPaintedBackground = false;
 	}
 
 	@Override
