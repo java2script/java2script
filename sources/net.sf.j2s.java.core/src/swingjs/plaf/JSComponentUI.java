@@ -842,11 +842,11 @@ public class JSComponentUI extends ComponentUI
 		J2S.setMouse(domNode, true);
 	}
 
-	protected boolean handleTab(Object jqevent) {
-		JSKeyEvent.dispatchKeyEvent(jc, KeyEvent.KEY_PRESSED, 0, jqevent, System.currentTimeMillis());
-		return CONSUMED;
-	}
-
+//	protected boolean handleTab(Object jqevent) {
+//		JSKeyEvent.dispatchKeyEvent(jc, KeyEvent.KEY_PRESSED, 0, jqevent, System.currentTimeMillis());
+//		return CONSUMED;
+//	}
+//
 
 	/**
 	 * fired by JSComponent when key listeners are registered

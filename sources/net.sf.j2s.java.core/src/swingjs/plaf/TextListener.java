@@ -41,8 +41,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.text.AbstractDocument;
-import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
 import swingjs.JSKeyEvent;
@@ -122,23 +120,22 @@ public class TextListener implements FocusListener, ChangeListener,
 		DOMNode activeElement =  (/** @j2sNative document.activeElement || */null);
 		if (activeElement != ui.domNode) // tabbed out of this object
 			return JSComponentUI.HANDLED;
-		Point markDot = ui.getNewCaretPosition(null);
+		eventType = JSKeyEvent.fixEventType(jqevent, eventType);
+		int keyCode = /** @j2sNative jqevent.keyCode || */0;
+		Point markDot = ui.getNewCaretPosition(eventType, keyCode);
 		int mark = markDot.x;
 		int dot = markDot.y;
 		boolean setCaret = (mark != Integer.MIN_VALUE);
-		eventType = JSKeyEvent.fixEventType(jqevent, eventType);
 		switch (eventType) {
 		case KeyEvent.KEY_TYPED:
 //			setCaret = false;
 			break;
 		case KeyEvent.KEY_PRESSED:
 			
-			int keyCode = /** @j2sNative jqevent.keyCode || */
-					0;
-			System.out.println("TextListener key pressed " + keyCode);
-			if (keyCode == KeyEvent.VK_TAB) {
-				System.out.println("tab pressed");
-			}
+			//System.out.println("TextListener key pressed " + keyCode);
+//			if (keyCode == KeyEvent.VK_TAB) {
+//				System.out.println("tab pressed");
+//			}
 			if (keyCode == 13 || keyCode == KeyEvent.VK_ENTER) {
 				ui.handleEnter();
 			} else if (keyCode != KeyEvent.VK_BACK_SPACE){
