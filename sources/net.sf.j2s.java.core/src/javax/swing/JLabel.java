@@ -289,8 +289,9 @@ public class JLabel extends JComponent implements SwingConstants/*, Accessible*/
 //                        oldAccessibleName,
 //                        accessibleContext.getAccessibleName());
 //        }
-        if (text == null || oldValue == null || !text.equals(oldValue)) {
-            revalidate();
+        if (秘paintsSelf())
+        	if (text == null || oldValue == null || !text.equals(oldValue)) {
+        		revalidate();
             秘repaint();
         }
     }
