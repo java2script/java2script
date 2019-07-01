@@ -36,6 +36,7 @@ import javax.swing.JTable;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.UIResource;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
@@ -117,14 +118,16 @@ public class DefaultTableCellHeaderRenderer extends DefaultTableCellRenderer
         setIcon(sortIcon);
 //        sortArrow = sortIcon;
 
-        Border border = null;
-        if (hasFocus) {
-            border = DefaultLookup.getBorder(this, ui, "TableHeader.focusCellBorder");
-        }
-        if (border == null) {
-            border = DefaultLookup.getBorder(this, ui, "TableHeader.cellBorder");
-        }
-        setBorder(border);
+//        Border border = null;
+//        if (hasFocus) {
+//            border = DefaultLookup.getBorder(this, ui, "TableHeader.focusCellBorder");
+//        }
+//        if (border == null) {
+//            border = DefaultLookup.getBorder(this, ui, "TableHeader.cellBorder");
+//        }
+//        setBorder(border);
+
+        setBorder(new EmptyBorder(8, 5, 7, 5)); // BH SwingJS from com.sun.java.swing.plaf.windows.WindowsTableHeaderUI$XPDefaultRenderer
 
         return this;
     }
