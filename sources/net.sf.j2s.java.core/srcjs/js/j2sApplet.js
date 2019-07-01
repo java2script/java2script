@@ -127,6 +127,7 @@ if (!J2S._version)
 		var ref = document.location.href.toLowerCase();
 		j._debugCode = (ref.indexOf("j2sdebugcode") >= 0);
 		j._debugCore = (ref.indexOf("j2sdebugcore") >= 0);
+		j._debugPaint = (ref.indexOf("j2sdebugpaint") >= 0);
 		j._debugName = J2S.getURIField("j2sdebugname", null);
 		j._lang = J2S.getURIField("j2slang", null);
 		j._httpProto = (ref.indexOf("https") == 0 ? "https://" : "http://");
