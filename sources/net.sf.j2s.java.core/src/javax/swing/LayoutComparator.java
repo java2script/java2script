@@ -32,6 +32,7 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import java.awt.Component;
 import java.awt.ComponentOrientation;
+import java.awt.Container;
 import java.awt.Window;
 import java.io.Serializable;
 
@@ -120,7 +121,10 @@ final class LayoutComparator implements Comparator, Serializable {
 
         int ax = a.getX(), ay = a.getY(), bx = b.getX(), by = b.getY();
 
-        int zOrder = a.getParent().getComponentZOrder(a) - b.getParent().getComponentZOrder(b);
+        Container ap = a.getParent();
+        Container bp = b.getParent();
+        // desktop will have no parent
+        int zOrder = (ap == null ? 1 : bp == null ? -1 : ap.getComponentZOrder(a) - bp.getComponentZOrder(b));
         if (horizontal) {
             if (leftToRight) {
 
