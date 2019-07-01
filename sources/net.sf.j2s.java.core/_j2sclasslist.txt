@@ -139,6 +139,7 @@ java/util/ArrayList.js
 java/util/Arrays.js
 java/util/Collection.js
 java/util/Collections.js
+java/util/Comparator.js
 java/util/Deque.js
 java/util/Dictionary.js
 java/util/Enumeration.js
@@ -161,6 +162,7 @@ java/util/Random.js
 java/util/RandomAccess.js
 java/util/ResourceBundle.js
 java/util/Set.js
+java/util/TimSort.js
 java/util/Vector.js
 javajs/api/JSFunction.js
 javajs/util/AjaxURLConnection.js
