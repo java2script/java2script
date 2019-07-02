@@ -14,8 +14,10 @@ java/awt/Color.js
 java/awt/color/ColorSpace.js
 java/awt/Component.js
 java/awt/ComponentOrientation.js
+java/awt/ContainerOrderFocusTraversalPolicy.js
 java/awt/Container.js
 java/awt/Cursor.js
+java/awt/DefaultFocusTraversalPolicy.js
 java/awt/DefaultKeyboardFocusManager.js
 java/awt/Dialog.js
 java/awt/Dimension.js

@@ -19,6 +19,7 @@ import java.awt.event.AdjustmentListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
@@ -42,7 +43,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.plaf.ViewportUI;
 
 @SuppressWarnings("serial")
-public class Test_Applet_Scroll extends JApplet implements ChangeListener, MouseMotionListener {
+public class Test_Applet_Scroll extends JApplet implements ChangeListener, MouseListener, MouseMotionListener {
 
 	static {
 		/**
@@ -190,6 +191,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 		JScrollPane sp = new JScrollPane();
 		
 		sp.addMouseMotionListener(this);
+		sp.addMouseListener(this);
 
 
 		panel2 = new JPanel();
@@ -312,6 +314,36 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 	@Override
 	public void mouseMoved(MouseEvent e) {
 		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		System.out.println("Test_Applet_Scroll mouseEntered " + e);
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		System.out.println("Test_Applet_Scroll mouseExited " + e);
 		
 	}
 
