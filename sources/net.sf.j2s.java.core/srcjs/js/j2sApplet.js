@@ -1550,11 +1550,11 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 		J2S.traceMouse = function(what,ev) {
 			System.out.println(["tracemouse:" + what 
-				,"type:",ev.type
+				,"type:",ev.type,ev.pageX,ev.pageY
 				,"target.id:",ev.target.id
-				,"\n  relatedtarget.id:",ev.originalEvent.relatedTarget && ev.originalEvent.relatedTarget.id
+				,"\n  relatedtarget.id:",(ev.originalEvent.relatedTarget && ev.originalEvent.relatedTarget.id)
 				,"\n  who:", who.id
-				,"\n  dragging:", J2S._mouseOwner && J2S._mouseOwner.isDragging
+				,"\n  dragging:", (J2S._mouseOwner && J2S._mouseOwner.isDragging)
 				,"doignore:",doIgnore(ev,1)
 				,"role:",ev.target.getAttribute && ev.target.getAttribute("role")
 				,"data-ui:",ev.target["data-ui"]
@@ -1778,30 +1778,23 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 		J2S.$bind(who, 'mousemoveoutjsmol', function(evspecial, target, ev) {
 
-			if (who.isDragging)
+			if (!who.isDragging || who != J2S._mouseOwner)
+				return;
+
 			if (J2S._traceMouse)
 				J2S.traceMouse("OUTJSMOL", ev);
 
-			if (doIgnore(ev))
-				return true;
-		
-			if (who == J2S._mouseOwner && who.isDragging)
-				return J2S._drag(who, ev, 503);
-			return true;
+			return J2S._drag(who, ev, 503);
 		});
 
 		J2S.$bind(who, 'mouseupoutjsmol', function(evspecial, target, ev) {
 
-			if (who.isDragging)
+			if (!who.isDragging || who != J2S._mouseOwner)
+				return true;
 			if (J2S._traceMouse)
 				J2S.traceMouse("UPJSMOL", ev);
 
-			if (doIgnore(ev))
-				return true;
-		
-			if (who == J2S._mouseOwner && who.isDragging)
-				return J2S._drag(who, ev, 502);
-			return true;
+			return J2S._drag(who, ev, 502);
 		});
 
 		if (who.applet._is2D && !who.applet._isApp) {
