@@ -43,7 +43,6 @@ import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
-import javax.swing.border.CompoundBorder;
 import javax.swing.plaf.UIResource;
 
 import swingjs.api.js.DOMNode;
@@ -189,7 +188,9 @@ public class JSButtonUI extends JSLightweightUI {
 		if (!isMenuSep) {
 			setMnemonic(-1);
 			setAlignments(button, false);
+			updateCenteringNode();
 		}
+		
 	}
 
 	/**
@@ -784,6 +785,8 @@ public class JSButtonUI extends JSLightweightUI {
 	@Override
 	public void paint(Graphics g, JComponent c) {
 		imagePersists = true; // at least for now.
+		if (jc.秘paintsSelf())
+			DOMNode.setStyles(centeringNode, "visibility", "visible");
 		super.paint(g, c);
 	}
 

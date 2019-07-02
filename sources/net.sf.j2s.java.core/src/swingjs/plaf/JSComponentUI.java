@@ -2403,13 +2403,14 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	protected void updateCenteringNode() {
-//		// old code -- label only -- is this advisable? 
-//		if (actualHeight > 0)
-//			DOMNode.setStyles(centeringNode, "position", "absolute", "height",
-//					actualHeight + "px");
-//		if (actualWidth > 0)
-//			DOMNode.setStyles(centeringNode, "position", "absolute", "width",
-//					actualWidth + "px");
+		boolean paintsSelf = jc.秘paintsSelf();
+		if (paintsSelf) {
+			// component will be responsible for border, background, and text
+			DOMNode.setStyles(centeringNode, "visibility", "hidden");
+			DOMNode.setStyles(domNode, "border", "none");
+			DOMNode.setStyles(domNode, "background", "none");
+		}
+
 	}
 
 	protected void setAlignments(AbstractButton b, boolean justGetPreferred) {
