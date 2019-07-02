@@ -4,15 +4,18 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Point;
+import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 
 import javax.swing.text.AbstractDocument.BranchElement;
 import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.StyleConstants;
 
+import javajs.util.PT;
 import javajs.util.SB;
 import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
@@ -65,6 +68,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 			DOMNode.setStyles(domNode); // default for pre is font-height
 			$(domNode).addClass("swingjs-doc");
 			setupViewNode();
+			System.out.println("JSEditorPaneUI todo -- tab; adding after a tab; backspace through tab");
 		}
 		textListener.checkDocument();
 		setCssFont(domNode, c.getFont());
@@ -87,6 +91,8 @@ public class JSEditorPaneUI extends JSTextViewUI {
 	@SuppressWarnings("unused")
 	private int epTimer;
 	private String currentHTML;
+	private static String JSTAB = "<span class='j2stab'>&nbsp;&nbsp;&nbsp;&nbsp;</span>";
+	private int tabCount = 4;
 		
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
@@ -138,6 +144,10 @@ public class JSEditorPaneUI extends JSTextViewUI {
 			return 1;
 		case "DIV":
 			n = 1;
+			break;
+		case "SPAN":
+			if (isJSTAB(sib))
+				return 1;
 			break;
 		}
 		
@@ -228,17 +238,11 @@ public class JSEditorPaneUI extends JSTextViewUI {
 			if (haveStyle)
 				sb.append("<span" + style + ">");
 			String t = text.substring(start, isDiv ? end - 1 : end);
-			//if (start == 0) {
 			if (t.indexOf(' ') >= 0)
 				t = t.replace(' ', '\u00A0');
-//				for (int i = 0; i < t.length(); i++) {
-//					if (t.charAt(i) != ' ')
-//						break;
-//				    t = t.substring(0, i) + "&nbsp;" + t.substring(i + 1);
-//					i += 5;
-//				}
-			//System.out.println("text:'" + t + "'");
-			//}				
+			if (t.indexOf('\t') >= 0) {
+				t = PT.rep(t,  "\t", JSTAB);
+			}
 			sb.append(t);
 			if (haveStyle)
 				sb.append("</span>");
@@ -366,13 +370,16 @@ public class JSEditorPaneUI extends JSTextViewUI {
 	 * @param pt   target caret position
 	 * @return range information or length: [textNode,charOffset] or [nontextNode,charNodesOffset] or [null, nlen] 
 	 */
+	@SuppressWarnings("unused")
 	@Override
 	protected Object[] getJSNodePt(DOMNode node, int off, int pt) {
+		// JavaScript 
 		boolean isRoot = (off < 0);
 		if (isRoot) {
 			lastTextNode = null;
 			off = 0;
-		}
+		} 
+		boolean isTAB = isJSTAB(node);
 		// Must consider several cases for BR and DIV:
 		// <br>
 		// <div><br><div> where br counts as 1 character --> [div, 0] or [null, 1]
@@ -383,7 +390,9 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		// also note that range can point to a character position only if the node is #text
 		// otherwise, it must point to a childNodes index in the parent node. So <br> must
 		// be indicated this second way.
-		
+		//
+		// TAB will be indicated as a JSTAB string (see above).
+
 		/**
 		 * @j2sNative
 			var nodes = node.childNodes;
@@ -395,24 +404,32 @@ public class JSEditorPaneUI extends JSTextViewUI {
 			var ipt = off;
 			var nlen = 0;
 			var i1 = (tag == "DIV" || tag == "P" ? 1 : 0);
+			var ptIncr = 0;
 			for (var i = 0; i < n; i++) {
 				node = nodes[i];
 				if (node.innerText) {
-				  ret = this.getJSNodePt$swingjs_api_js_DOMNode$I$I(node, ipt, pt, false);
+				  ret = this.getJSNodePt$swingjs_api_js_DOMNode$I$I(node, ipt, pt); 
 				  if (ret[0] != null) {
 				  	return ret;
-				  	}
+				  }
 				  nlen = ret[1];
+				  pt += ret[4];
 				} else if (node.tagName == "BR") {
 					if (ipt == pt)
 					  return [node.parentNode, i];
 					nlen = (isRoot ? 1 : 0);
-				} else if (ipt + (nlen = (this.lastTextNode = node).length) >= pt) {
-					return [node, Math.max(0, pt - ipt)];	
+				} else {
+					this.lastTextNode = node;
+					nlen = node.length;
+					var p = ipt + (isTAB ? 1 : nlen);
+					if (p >= pt)
+						return [node, Math.max(0, !isTAB ? pt - ipt : p == pt ? nlen : 0)];
+					if (isTAB)
+						ptIncr = nlen - 1;
 				}
 				ipt += nlen;
 			}
-			return (isRoot ? [this.lastTextNode, Math.max(0, ret[3] - 1)] : [null, ipt + i1 - off, node, nlen]);
+			return (isRoot ? [this.lastTextNode, Math.max(0, ret[3] - 1)] : [null, ipt + i1 - off, node, nlen, ptIncr]);
 		 */
 		{
 			return null;
@@ -438,6 +455,8 @@ public class JSEditorPaneUI extends JSTextViewUI {
 			DOMNode[] nodes = (DOMNode[]) DOMNode.getAttr(node, "childNodes");
 			if (tagName == "BR" || nodes.length == 1 && DOMNode.getAttr(nodes[0], "tagName") == "BR") {
 				sb.append("\n");
+			} else if (tagName == "SPAN" && isJSTAB(node)) {
+					sb.append("\t");
 			} else {
 				for (int i = 0, n = nodes.length; i < n; i++)
 					ret = (Boolean) getInnerTextSafely(nodes[i], i == n - 1, sb);
@@ -453,6 +472,12 @@ public class JSEditorPaneUI extends JSTextViewUI {
 			}
 		}
 		return (isRoot ? sb.toString() : ret);
+	}
+
+	private static boolean isJSTAB(Object node) {
+		return node != null 
+				&& (/** @j2sNative node.nodeType != 3 &&*/true) 
+				&& (((DOMNode) node).getAttribute("class").indexOf("j2stab") >= 0);
 	}
 
 	int timeoutID;
@@ -476,6 +501,10 @@ public class JSEditorPaneUI extends JSTextViewUI {
 	@SuppressWarnings("unused")
 	@Override
 	protected void jsSelect(Object[] r1, Object[] r2, boolean andScroll) {
+		fixTabRange(r1);
+		if (r1 != r2)
+			fixTabRange(r2);
+		
 		//System.out.println("jsSelect " + r1 + r2);
 		// range index may be NaN
 		/**
@@ -506,53 +535,75 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		}
 	}
 
+	/**
+	 * @param r
+	 */
+	private void fixTabRange(Object[] r) {
+		DOMNode node = (DOMNode)r[0];
+		boolean isStart = (/** @j2sNative r[1] || */0) == 0;
+		if (isJSTAB(node)) {
+			if (isStart) {
+				
+			} else {
+				
+			}
+			
+		}
+		System.out.println("jsep fixTabRange " + r + " " + isJSTAB(node) + " " + node);
+	}
+
 	@Override
 	public void updateJSCursorFromCaret() {
 		updateJSCursor("editordefault");
 	}
 
-    @SuppressWarnings("unused")
+	@SuppressWarnings("unused")
 	@Override
-	boolean getJSMarkAndDot(Point pt) {
+	boolean getJSMarkAndDot(Point pt, int keycode) {
 		int dot = 0, mark = 0, apt = 0, fpt = 0;
-		DOMNode anode = null, fnode = null;
+		DOMNode anode = null, fnode = null, apar = null, fpar = null;
 		String atag = null, ftag = null;
-		
+		int alen = 0, flen = 0;
+
+		boolean toEnd = (keycode == KeyEvent.VK_RIGHT || keycode == KeyEvent.VK_KP_RIGHT);
+		boolean toStart = (keycode == KeyEvent.VK_LEFT || keycode == KeyEvent.VK_KP_LEFT);
 		/**
-		 * @j2sNative 
+		 * @j2sNative
 		 * 
 		 * 
-		 * var s = window.getSelection(); 
-		 * anode = s.anchorNode; 
-		 * apt = s.anchorOffset;
-		 * if (anode.tagName) {
-		 *   anode = anode.childNodes[apt];
-		 *   apt = 0;
-		 * }
-		 * fnode = s.focusNode; 
-		 * fpt = s.focusOffset;
-		 * if (fnode.tagName) {
-		 *   fnode = fnode.childNodes[fpt];
-		 *   fpt = 0;
-		 * }
+		 * 			var s = window.getSelection(); anode = s.anchorNode; apt =
+		 *            s.anchorOffset; if (anode.tagName) { anode =
+		 *            anode.childNodes[apt]; apt = 0; } else { alen = anode.length; apar
+		 *            = anode.parentElement; } fnode = s.focusNode; fpt = s.focusOffset;
+		 *            if (fnode.tagName) { fnode = fnode.childNodes[fpt]; fpt = 0; }
+		 *            else { flen = fnode.length; fpar = fnode.parentElement; }
 		 */
 
 		if (anode == null || fnode == null) {
 			System.out.println("JSEditorPaneUI anode or fnode is null ");
 			return false;
 		}
+		boolean isAInTab = (alen == tabCount && apt != 0 && isJSTAB(apar));
+		boolean isFInTab = (flen == tabCount && fpt != 0 && isJSTAB(fpar));
+		boolean updateJS = false;
+		if (isAInTab)
+			apt = (apt == tabCount || (updateJS = toEnd) ? 1 : 0);
+		if (isFInTab)
+			fpt = (fpt == tabCount || (updateJS = toEnd) ? 1 : 0);
+		if (toStart && (isAInTab && apt == 0 || isFInTab && fpt == 0))
+			updateJS = true;
 		mark = getJSDocOffset(anode);
 		dot = (anode == fnode ? mark : getJSDocOffset(fnode)) + fpt;
 		mark += apt;
-		
-		//System.out.println("==windows at " + mark + "-" + dot + "/" + apt + " " + fpt);
 
+		System.out.println("==windows at " + mark + "-" + dot + "/" + apt + " " + fpt + " " + isAInTab + " " + isFInTab);
 		pt.x = mark;
 		pt.y = dot;
 
+		if (updateJS)
+			setJSSelection(mark, dot, false);
 		return true;
 	}
-
 
 	@Override
 	void setJSMarkAndDot(int mark, int dot, boolean andScroll) {
@@ -562,13 +613,29 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		editor.getCaret().setDot(dot);
 		updateDataUI();
 	}
-
+	
 	@Override
-	protected boolean handleTab(Object jqEvent) {
-		// TODO check. OK? Problem is that we can't CTRL-tab out of a JEditorPane
-		return NOT_CONSUMED;
+	public boolean isFocusable() {
+		return false;
 	}
 
-
+	
+	@Override
+	protected boolean handleTab(Object jqEvent) {
+		int x0 = editor.getCaret().getMark();
+		int y = editor.getCaret().getDot();
+		int x = Math.min(x0, y);
+		/** @j2sNative xxt = this.focusNode */
+		y = Math.max(x0, y);
+		try {
+			if (x < y)
+				editor.getDocument().remove(x, y - x);
+			editor.getDocument().insertString(x, "\t", null);
+			setJavaMarkAndDot(new Point(x + 1, x + 1));
+		} catch (BadLocationException e) {
+		}
+		System.out.println("jsep handleTab " + x + " " + y + " " + 	editor.getText().replace('\t','_'));
+		return CONSUMED;
+	}
 
 }

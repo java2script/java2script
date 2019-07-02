@@ -18,6 +18,9 @@ import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.text.DecimalFormat;
@@ -40,7 +43,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.plaf.ViewportUI;
 
 @SuppressWarnings("serial")
-public class Test_Applet_Scroll extends JApplet implements ChangeListener {
+public class Test_Applet_Scroll extends JApplet implements ChangeListener, MouseListener, MouseMotionListener {
 
 	static {
 		/**
@@ -83,7 +86,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 	
 	@Override
 	public void init() {
-
+		
 		final JLabel label = new JLabel("hello");
 		// label.setBounds(0, 60, 200, 60);
 		setSize(label, 80, 50);
@@ -187,6 +190,10 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 		// p.setLayout(new GridLayout(2, 2, 2, 2));
 		JScrollPane sp = new JScrollPane();
 		
+		sp.addMouseMotionListener(this);
+		sp.addMouseListener(this);
+
+
 		panel2 = new JPanel();
 		panel2.add(new JTextArea(10,10));
 		panel2.setSize(100,100);
@@ -297,6 +304,47 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener {
 //		System.out.println(v.getWidth() + " " + v.getHeight() + " " + v.getView().getBounds());
 //		System.out.println(sbar.getValue() + "  "+ sbar.getVisibleAmount() + " " + sbar.getMaximum());
 
+	}
+
+	@Override
+	public void mouseDragged(MouseEvent e) {
+		System.out.println("Test_Applet_Scroll mouseDragged " + e);
+	}
+
+	@Override
+	public void mouseMoved(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		System.out.println("Test_Applet_Scroll mouseEntered " + e);
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		System.out.println("Test_Applet_Scroll mouseExited " + e);
+		
 	}
 
 }

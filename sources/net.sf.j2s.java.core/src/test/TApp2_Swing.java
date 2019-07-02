@@ -145,7 +145,7 @@ public class TApp2_Swing extends JApplet {
 //
 //		// the scrolling to the bottom is only with TextArea, not JTextArea
 		// and then only if the append is AFTER the add
-		ta = new JTextArea("Averyveryveryveryveryveryveryverylongword\n" + "Averyveryveryveryveryveryveryverylongword\n"
+		ta = new JTextArea("Averyvery\tvery\tveryveryveryveryverylongword\n" + "Averyveryveryveryveryveryveryverylongword\n"
 				+ "Averyveryveryveryveryveryveryverylongword\n" + "Averyveryveryveryveryveryveryverylongword\n"
 				+ "A text\nwith some\nlines and\n no content.") {
 		};

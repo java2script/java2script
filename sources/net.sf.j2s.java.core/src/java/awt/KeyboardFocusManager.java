@@ -921,7 +921,7 @@ public abstract class KeyboardFocusManager implements KeyEventDispatcher, KeyEve
 	}
 
 	public synchronized FocusTraversalPolicy getDefaultAWTFocusTraversalPolicy() {
-		return (defaultPolicyAWT == null ? defaultPolicyAWT = new DefaultFocusTraversalPolicy() : defaultPolicy);
+		return (defaultPolicyAWT == null ? defaultPolicyAWT = new DefaultFocusTraversalPolicy() : defaultPolicyAWT);
 	}
 
 	/**

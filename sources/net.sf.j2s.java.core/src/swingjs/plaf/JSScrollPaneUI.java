@@ -15,6 +15,7 @@ import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JViewport;
 import javax.swing.LookAndFeel;
 import javax.swing.Scrollable;
@@ -570,7 +571,10 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 	@Override
 	public Insets getInsets() {
 		// AWT only here. 
-		Insets i = scrollpane.getBorder().getBorderInsets(scrollpane);
+		Border b = scrollpane.getBorder();
+		if (b == null)
+			return null;
+		Insets i = b.getBorderInsets(scrollpane);
 		if (!layingOut) {
 			// AWT includes scrollbars in visibility, but the layout manager does not
 			i.right += scrollpane.getVerticalScrollBar().isVisible() ? 12 : 0;
@@ -1259,8 +1263,10 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 
 		private void viewportStateChanged(ChangeEvent e) {
 			syncScrollPaneWithViewport();
-			// painted label, button, or canvas anywhere in the tree will need to be repainted after the shift in origin.
-			if (jc.秘selfOrChildIsPainted())
+			// painted label, button, or canvas anywhere in the tree will need to be
+			// repainted after the shift in origin.
+			if (!(scrollpane.getViewport().getView() instanceof JTable) 
+					&& jc.秘selfOrChildIsPainted())
 				jc.秘repaint();
 		}
 

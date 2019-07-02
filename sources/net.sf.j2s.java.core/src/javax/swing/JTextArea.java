@@ -200,6 +200,8 @@ public class JTextArea extends JTextComponent {
      *  arguments are negative.
      */
     public JTextArea(Document doc, String text, int rows, int columns) {
+    	
+    	setFocusTraversalKeysEnabled(false); // can't handle CTRL-ENTER in JavaScript
         this.rows = rows;
         this.columns = columns;
         if (doc == null) {

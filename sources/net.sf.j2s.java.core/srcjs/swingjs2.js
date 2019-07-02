@@ -10792,6 +10792,7 @@ if (!J2S._version)
 		var ref = document.location.href.toLowerCase();
 		j._debugCode = (ref.indexOf("j2sdebugcode") >= 0);
 		j._debugCore = (ref.indexOf("j2sdebugcore") >= 0);
+		j._debugPaint = (ref.indexOf("j2sdebugpaint") >= 0);
 		j._debugName = J2S.getURIField("j2sdebugname", null);
 		j._lang = J2S.getURIField("j2slang", null);
 		j._httpProto = (ref.indexOf("https") == 0 ? "https://" : "http://");
@@ -12214,13 +12215,13 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 		J2S.traceMouse = function(what,ev) {
 			System.out.println(["tracemouse:" + what 
-				,"type:",ev.type
+				,"type:",ev.type,ev.pageX,ev.pageY
 				,"target.id:",ev.target.id
-				,"\n  relatedtarget.id:",ev.originalEvent.relatedTarget && ev.originalEvent.relatedTarget.id
+				,"\n  relatedtarget.id:",(ev.originalEvent.relatedTarget && ev.originalEvent.relatedTarget.id)
 				,"\n  who:", who.id
-				,"\n  dragging:", J2S._mouseOwner && J2S._mouseOwner.isDragging
+				,"\n  dragging:", (J2S._mouseOwner && J2S._mouseOwner.isDragging)
 				,"doignore:",doIgnore(ev,1)
-				,"role:",ev.target.getAttribute("role")
+				,"role:",ev.target.getAttribute && ev.target.getAttribute("role")
 				,"data-ui:",ev.target["data-ui"]
 				,"data-component:",ev.target["data-component"]
 				,"mouseOwner:",J2S._mouseOwner && J2S._mouseOwner.id
@@ -12442,30 +12443,23 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 		J2S.$bind(who, 'mousemoveoutjsmol', function(evspecial, target, ev) {
 
-			if (who.isDragging)
+			if (!who.isDragging || who != J2S._mouseOwner)
+				return;
+
 			if (J2S._traceMouse)
 				J2S.traceMouse("OUTJSMOL", ev);
 
-			if (doIgnore(ev))
-				return true;
-		
-			if (who == J2S._mouseOwner && who.isDragging)
-				return J2S._drag(who, ev, 506);
-			return true;
+			return J2S._drag(who, ev, 503);
 		});
 
 		J2S.$bind(who, 'mouseupoutjsmol', function(evspecial, target, ev) {
 
-			if (who.isDragging)
+			if (!who.isDragging || who != J2S._mouseOwner)
+				return true;
 			if (J2S._traceMouse)
 				J2S.traceMouse("UPJSMOL", ev);
 
-			if (doIgnore(ev))
-				return true;
-		
-			if (who == J2S._mouseOwner && who.isDragging)
-				return J2S._drag(who, ev, 502);
-			return true;
+			return J2S._drag(who, ev, 502);
 		});
 
 		if (who.applet._is2D && !who.applet._isApp) {

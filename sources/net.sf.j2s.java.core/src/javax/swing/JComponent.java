@@ -4253,7 +4253,9 @@ public abstract class JComponent extends Container {
 		}
 		if (SwingUtilities.isEventDispatchThread()) {
 			invalidate();
-			RepaintManager.currentManager(this).addInvalidComponent(this);
+			// problem here was that AWT labels were automatically resizing when painted
+			if (!秘isAWT())
+				RepaintManager.currentManager(this).addInvalidComponent(this);
 		} else {
 			// getFlag(REVALIDATE_RUNNABLE_SCHEDULED) + " " + this);
 			// To avoid a flood of Runnables when constructing GUIs off
