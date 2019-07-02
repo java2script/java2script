@@ -179,14 +179,13 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 		String s = "" + params.get("isResizable");
 		isResizable = "true".equalsIgnoreCase(s);
 		haveResizable = (isResizable || "false".equalsIgnoreCase(s));
-		
+
 		addFrame = "true".equalsIgnoreCase("" + params.get("addFrame"));
 
 		insets = new Insets(0, 0, 0, 0);
 
 		threadGroup = new JSThreadGroup(appletName);
 		myThread = new JSAppletThread(this, threadGroup, appletName);
-//		JSToolkit.J2S.setAppletThread(appletName, myThread);
 		java.lang.Thread.thisThread = (java.lang.Thread) ((Object) myThread);
 		
 		appContext = JSToolkit.createNewAppContext();
@@ -320,23 +319,18 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 	@Override
 	public java.applet.JSApplet getApplet(String name) {
 		JApplet applet = null;
-		@SuppressWarnings("unused")
-		String nameLC = name.toLowerCase();
+		name = name.toLowerCase();
 		/**
 		 * @j2sNative
 		 * 
 		 * 			var applets = J2S._applets;
 		 *         	for (var a in applets) {
-		 *         		if (("" + applets[a].getParameter$S("name")).toLowerCase() == nameLC) {
-		 *         			applet = applets[a];
+		 *         		if (a.toLowerCase() == "." + name) {
+		 *         			return applets[a]._applet;
 		 *        		}
 		 *        	}
-		 *          if (!applet) {
-		 * 				applet = applets[name];
-		 *          }
-		 *          applet && (applet = applet._applet);
 		 */
-		return applet;
+		return null;
 	}
 
 	@SuppressWarnings("unused")
@@ -402,7 +396,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 		/**
 		 * @j2sNative
 		 * 
-		 * 			this.showAppletStatus$S("error " + (t.getMessage ?
+		 * 			p$1.showAppletStatus$S("error " + (t.getMessage ?
 		 *            t.getMessage$() : t)); 
 		 *            if (t.printStackTrace$) t.printStackTrace$();
 		 *            else System.out.println(t.stack);
@@ -575,6 +569,12 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 				JSUtil.alert(code + " is not a JApplet!?");
 				status = APPLET_ERROR;
 			}
+			String name = htmlName;
+			/**
+			 * @j2sNative
+			 * 
+			 * J2S._applets["." + name] = {_applet:this.applet};
+			 */
 		} catch (InstantiationException e) {
 			status = APPLET_ERROR;
 			showAppletException(e);
