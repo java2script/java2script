@@ -996,4 +996,8 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	    return s.indexOf("java") != 0 && s.indexOf("swingjs") != 0;
 	}
 
+	public static boolean checkJ2SFlag(String flag) {
+	    return (/** @j2sNative J2S[flag] || */ false);
+	}
+
 }

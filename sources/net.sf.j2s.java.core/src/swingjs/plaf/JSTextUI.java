@@ -28,13 +28,11 @@
 package swingjs.plaf;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Insets;
-import java.awt.KeyboardFocusManager;
 import java.awt.LayoutManager;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -56,7 +54,6 @@ import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.InputMapUIResource;
 import javax.swing.plaf.TextUI;
 import javax.swing.plaf.UIResource;
-import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Caret;
@@ -162,7 +159,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	 */
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
-		String type = /** @j2sNative jQueryEvent.type || */null;
+		//String type = /** @j2sNative jQueryEvent.type || */null;
 		//System.out.println("JSTextUI handlejs "+type + " " + eventType);
 		if (JSToolkit.isMouseEvent(eventType)) {
 			return NOT_HANDLED;
@@ -706,7 +703,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
          *
          * @return the model
          */
-        public Document getDocument() {
+        @Override
+		public Document getDocument() {
             return editor.getDocument();
         }
 
@@ -715,7 +713,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
          *
          * @return the starting offset
          */
-        public int getStartOffset() {
+        @Override
+		public int getStartOffset() {
             if (view != null) {
                 return view.getStartOffset();
             }
@@ -727,7 +726,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
          *
          * @return the ending offset
          */
-        public int getEndOffset() {
+        @Override
+		public int getEndOffset() {
             if (view != null) {
                 return view.getEndOffset();
             }
@@ -739,7 +739,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
          *
          * @return the view
          */
-        public Element getElement() {
+        @Override
+		public Element getElement() {
             if (view != null) {
                 return view.getElement();
             }
@@ -752,7 +753,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
          * @param width the width
          * @param height the height
          */
-        public void setSize(float width, float height) {
+        @Override
+		public void setSize(float width, float height) {
             if (view != null) {
                 view.setSize(width, height);
             }
@@ -766,7 +768,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
          *
          * @return the container
          */
-        public Container getContainer() { 
+        @Override
+		public Container getContainer() { 
             return editor;
         }
 
@@ -789,7 +792,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
          * level there are no attributes.  If an attribute is resolved
          * up the view hierarchy this is the end of the line.
          */
-        public AttributeSet getAttributes() {
+        @Override
+		public AttributeSet getAttributes() {
             return null;
         }
 
@@ -802,7 +806,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
          *         that is returned, although there is no guarantee.
          *         The parent may choose to resize or break the view.
          */
-        public float getPreferredSpan(int axis) {
+        @Override
+		public float getPreferredSpan(int axis) {
         	switch (axis) {
         	case View.X_AXIS:
         		return (view == null ? 10 : view.getPreferredSpan(axis));
@@ -824,7 +829,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
          *         that is returned, although there is no guarantee.
          *         The parent may choose to resize or break the view.
          */
-        public float getMinimumSpan(int axis) {
+        @Override
+		public float getMinimumSpan(int axis) {
             if (view != null) {
                 return view.getMinimumSpan(axis);
             }
@@ -840,7 +846,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
          *         that is returned, although there is no guarantee.
          *         The parent may choose to resize or break the view.
          */
-        public float getMaximumSpan(int axis) {
+        @Override
+		public float getMaximumSpan(int axis) {
             return Integer.MAX_VALUE;
         }
 
@@ -862,7 +869,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
          * @param width true if the width preference has changed
          * @param height true if the height preference has changed
          */
-        public void preferenceChanged(View child, boolean width, boolean height) {
+        @Override
+		public void preferenceChanged(View child, boolean width, boolean height) {
             editor.revalidate();
         }
 
@@ -873,7 +881,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
          * @return the desired alignment, where 0.0 indicates the origin
          *     and 1.0 the full span away from the origin
          */
-        public float getAlignment(int axis) {
+        @Override
+		public float getAlignment(int axis) {
             if (view != null) {
                 return view.getAlignment(axis);
             }
@@ -886,7 +895,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
          * @param g the graphics context
          * @param allocation the region to render into
          */
-        public void paint(Graphics g, Shape allocation) {
+        @Override
+		public void paint(Graphics g, Shape allocation) {
             if (view != null) {
                 Rectangle alloc = (allocation instanceof Rectangle) ?
                           (Rectangle)allocation : allocation.getBounds();
@@ -900,7 +910,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
          *
          * @param parent the parent view
          */
-        public void setParent(View parent) {
+        @Override
+		public void setParent(View parent) {
             throw new Error("Can't set parent on root view");
         }
 
@@ -912,7 +923,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
          * @return the number of views
          * @see #getView
          */
-        public int getViewCount() {
+        @Override
+		public int getViewCount() {
             return 1;
         }
 
@@ -922,7 +934,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
          * @param n the number of the view to get
          * @return the view
          */
-        public View getView(int n) {
+        @Override
+		public View getView(int n) {
             return view;
         }
 
@@ -936,7 +949,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
          *   -1 if no view represents that position
          * @since 1.3
          */
-        public int getViewIndex(int pos, Position.Bias b) {
+        @Override
+		public int getViewIndex(int pos, Position.Bias b) {
             return 0;
         }
 
@@ -952,7 +966,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
          * @param a  the allocation to this view.
          * @return the allocation to the child
          */
-        public Shape getChildAllocation(int index, Shape a) {
+        @Override
+		public Shape getChildAllocation(int index, Shape a) {
             return a;
         }
 
@@ -1130,19 +1145,17 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 			return;
 		int start = editor.getCaret().getMark();
 		int end = editor.getCaret().getDot();
-		//System.out.println(id + " updateJSCursor " + why + "  " + start + " " + end);
-//		if (start > end) {
-//			int t = end;
-//			end = start;
-//			start = t;
-//		}
-		Object[] r1 = getJSNodePt(focusNode, -1, start);
-		Object[] r2 = (end == start ? r1 : getJSNodePt(focusNode, -1, end));
-		if (r1 == null || r2 == null)
-			return;
-		
-		jsSelect(r1, r2, start == end && why == "default");
+		setJSSelection(start, end, start == end && why == "default");
 	}
+
+	protected void setJSSelection(int mark, int dot, boolean andScroll) {
+		//	System.out.println(id + " updateJSCursor " + why + "  " + start + " " + end);
+		Object[] r1 = getJSNodePt(focusNode, -1, mark);
+		Object[] r2 = (r1 == null || dot == mark ? r1 : getJSNodePt(focusNode, -1, dot));
+		if (r1 != null && r2 != null)
+			jsSelect(r1, r2, andScroll);
+	}
+
 
 	/**
 	 * create a range array [node, pt]
@@ -1199,12 +1212,11 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
      * @return
      */
     @SuppressWarnings("unused")
-	boolean getJSMarkAndDot(Point pt) {
+	boolean getJSMarkAndDot(Point pt, int keyCode) {
     	DOMNode node = focusNode;
     	int start = /** @j2sNative node.selectionStart || */ 0;
     	int end = /** @j2sNative node.selectionEnd || */ 1;
-    	boolean reversed = /** @j2sNative node.selectionDirection == "backward" || */false;
-    	//System.out.println("getJSMarkAndDot " + start + "  " + end + " " + reversed);
+//    	boolean reversed = /** @j2sNative node.selectionDirection == "backward" || */false;
     	pt.x = start;
     	pt.y = end;
     	return true;
@@ -1248,6 +1260,10 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 			case KeyEvent.VK_RIGHT:
 			case KeyEvent.VK_PAGE_UP:
 			case KeyEvent.VK_PAGE_DOWN:
+			case KeyEvent.VK_KP_UP:
+			case KeyEvent.VK_KP_DOWN:
+			case KeyEvent.VK_KP_LEFT:
+			case KeyEvent.VK_KP_RIGHT:
 				// accept only if neither ALT nor CTRL is down
 				if (/** @j2sNative !jQueryEvent.altKey && !jQueryEvent.ctrlKey || */
 				false)
@@ -1273,6 +1289,11 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		return Boolean.valueOf(b);
 	}
 
+	protected boolean handleTab(Object jQueryEvent) {
+		return CONSUMED;
+	}
+
+
 	/**
 	 * Get the current selection point for the Java model.
 	 * 
@@ -1291,7 +1312,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 //    	 */
     	// from DefaultCursor mouse event
     	pt.x = Integer.MAX_VALUE;
-    	getJSMarkAndDot(pt);
+    	getJSMarkAndDot(pt, 0);
     	return pt.y;    	
     }
     
@@ -1312,14 +1333,13 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	 * get the new Java cursor position after a key event
 	 * 
 	 * @param pt
-	 * @return a new dot (y) and, if they are changed, a new mark (x), or if not
+	 * @return a new dot (y) anfd, if they are changed, a new mark (x), or if not
 	 *         changed, x will be Integer.MIN_VALUE
 	 */
-	Point getNewCaretPosition(Point pt) {
-		if (pt == null)
-			pt = JSTextUI.markDot;
+	Point getNewCaretPosition(int eventType, int keyCode) {
+		Point pt = JSTextUI.markDot;
 		pt.x = 0;
-		getJSMarkAndDot(pt);
+		getJSMarkAndDot(pt, keyCode);
 		
 		int mark = pt.x, dot = pt.y; 
 
@@ -1342,14 +1362,14 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 
 	public void caretUpdatedByProgram(CaretEvent e) {
 		//System.out.println("JSTextUI "+ e);
-		
-		// AWT components need to show the change, but not Swing components.
-		if (false && isAWT && !jc.hasFocus()) { 
-			Component fc = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
-			jc.requestFocus();
-			if (fc != null)
-				fc.requestFocus();
-		}
+//		
+//		// AWT components need to show the change, but not Swing components.
+//		if (false && isAWT && !jc.hasFocus()) { 
+//			Component fc = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+//			jc.requestFocus();
+//			if (fc != null)
+//				fc.requestFocus();
+//		}
 	}
 	
 

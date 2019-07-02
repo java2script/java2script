@@ -3,6 +3,7 @@ package swingjs;
 import java.applet.AppletContext;
 import java.applet.AppletStub;
 import java.applet.AudioClip;
+import java.applet.JSApplet;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -18,6 +19,7 @@ import java.net.URLStreamHandlerFactory;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.NoSuchElementException;
 
 import javax.imageio.ImageIO;
 import javax.swing.JApplet;
@@ -177,14 +179,13 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 		String s = "" + params.get("isResizable");
 		isResizable = "true".equalsIgnoreCase(s);
 		haveResizable = (isResizable || "false".equalsIgnoreCase(s));
-		
+
 		addFrame = "true".equalsIgnoreCase("" + params.get("addFrame"));
 
 		insets = new Insets(0, 0, 0, 0);
 
 		threadGroup = new JSThreadGroup(appletName);
 		myThread = new JSAppletThread(this, threadGroup, appletName);
-//		JSToolkit.J2S.setAppletThread(appletName, myThread);
 		java.lang.Thread.thisThread = (java.lang.Thread) ((Object) myThread);
 		
 		appContext = JSToolkit.createNewAppContext();
@@ -318,22 +319,51 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 	@Override
 	public java.applet.JSApplet getApplet(String name) {
 		JApplet applet = null;
+		name = name.toLowerCase();
 		/**
 		 * @j2sNative
 		 * 
-		 * 			applet = SwingJS._applets[name]; applet && (applet =
-		 *            applet._applet);
+		 * 			var applets = J2S._applets;
+		 *         	for (var a in applets) {
+		 *         		if (a.toLowerCase() == "." + name) {
+		 *         			return applets[a]._applet;
+		 *        		}
+		 *        	}
 		 */
-		{
-
-		}
-		return applet;
+		return null;
 	}
 
+	@SuppressWarnings("unused")
 	@Override
-	public Enumeration<java.applet.JSApplet> getApplets() {
-		// not supported for now
-		return null;
+	public Enumeration<JSApplet> getApplets() {
+		ArrayList<JSApplet> appletList = new ArrayList<>();
+		/**
+		 * @j2sNative
+		 * 
+		 * 			var applets = J2S._applets;
+		 *         	for (var a in applets) {
+		 *         		var app = applets[a]._applet;
+		 *         		if (app && !appletList.contains$O(app))
+		 *         			appletList.add$O(app);
+		 *         }
+		 */
+		return new Enumeration() {
+			
+			private int i = 0;
+
+			@Override
+			public boolean hasMoreElements() {
+				return i < appletList.size();
+			}
+
+			@Override
+			public Object nextElement() {
+				if (i >= appletList.size())
+					throw new NoSuchElementException();
+				return appletList.get(i++);
+			}
+			
+		};
 	}
 
 	@Override
@@ -356,9 +386,6 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 		 * 
 		 * 			Clazz._LoaderProgressMonitor.showStatus(status, true);
 		 */
-		{
-			System.out.println(status);
-		}
 	}
 
 	private void showAppletStatus(String status) {
@@ -369,14 +396,11 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 		/**
 		 * @j2sNative
 		 * 
-		 * 			this.showAppletStatus$S("error " + (t.getMessage ?
+		 * 			p$1.showAppletStatus$S("error " + (t.getMessage ?
 		 *            t.getMessage$() : t)); 
 		 *            if (t.printStackTrace$) t.printStackTrace$();
 		 *            else System.out.println(t.stack);
 		 */
-		{
-		}
-		// repaint();
 	}
 
 	/**
@@ -545,6 +569,12 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 				JSUtil.alert(code + " is not a JApplet!?");
 				status = APPLET_ERROR;
 			}
+			String name = htmlName;
+			/**
+			 * @j2sNative
+			 * 
+			 * J2S._applets["." + name] = {_applet:this.applet};
+			 */
 		} catch (InstantiationException e) {
 			status = APPLET_ERROR;
 			showAppletException(e);

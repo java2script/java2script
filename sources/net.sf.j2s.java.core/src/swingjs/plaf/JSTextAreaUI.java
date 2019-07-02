@@ -1,19 +1,16 @@
 package swingjs.plaf;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Insets;
+import java.awt.Point;
 import java.beans.PropertyChangeEvent;
 
 import javax.swing.JTextArea;
-import javax.swing.text.Document;
 import javax.swing.text.Element;
-import javax.swing.text.JTextComponent;
 import javax.swing.text.PlainView;
 import javax.swing.text.View;
 import javax.swing.text.WrappedPlainView;
 
-import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
 
 /**
@@ -155,6 +152,18 @@ public class JSTextAreaUI extends JSTextViewUI {
 
 	@Override
 	protected boolean handleTab(Object jqEvent) {
+		String val = getJSTextValue();
+		Point pt = new Point();
+		getJSMarkAndDot(pt, 0);
+		int x = Math.min(pt.x,  pt.y);
+		int y = Math.max(pt.x,  pt.y);
+		val = val.substring(0, x) + "\t" + val.substring(y);
+		editor.setTextFromUI(val);
+		pt.x = pt.y = ++x;		
+		setJSMarkAndDot(x, x, false);
+		checkNewEditorTextValue();
+		setJavaMarkAndDot(pt);
+		//System.out.println("JSTextAreaUI " + editor.getCaretPosition() + " "  + pt);
 		return CONSUMED;
 	}
 

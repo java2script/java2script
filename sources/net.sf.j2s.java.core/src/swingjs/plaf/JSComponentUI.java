@@ -4,6 +4,7 @@ import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -842,11 +843,11 @@ public class JSComponentUI extends ComponentUI
 		J2S.setMouse(domNode, true);
 	}
 
-	protected boolean handleTab(Object jqevent) {
-		JSKeyEvent.dispatchKeyEvent(jc, KeyEvent.KEY_PRESSED, 0, jqevent, System.currentTimeMillis());
-		return CONSUMED;
-	}
-
+//	protected boolean handleTab(Object jqevent) {
+//		JSKeyEvent.dispatchKeyEvent(jc, KeyEvent.KEY_PRESSED, 0, jqevent, System.currentTimeMillis());
+//		return CONSUMED;
+//	}
+//
 
 	/**
 	 * fired by JSComponent when key listeners are registered
@@ -1387,11 +1388,9 @@ public class JSComponentUI extends ComponentUI
 	 * can be set false to never draw a background, primarily because Mac OS will
 	 * paint a non-rectangular object.
 	 * 
-	 * (textfield, textarea, button, combobox, menuitem, scrollbar)
+	 * (InternalFrame, Button, ComboBox, MenuBar, MenuItem, ScrollBar, TextField, TextArea, EditorPane)
 	 */
 	protected boolean allowPaintedBackground = true;
-
-	//private boolean backgroundPainted;
 
 	/**
 	 * Label will render its image, drawing to the canvas; Button will not 
@@ -1456,9 +1455,47 @@ public class JSComponentUI extends ComponentUI
 	protected DOMNode updateDOMNodeCUI() {
 		if (cellComponent != null)
 			updateCellNode();
+		if (myCursor != getCursor())
+			setCursor();
 		return domNode;
 	}
 
+
+	@Override
+	public void updateCursorImmediately() {
+		if (isUIDisabled)
+			return;
+		setHTMLElement(); // for a frame, this is the call that connects it to BODY
+		setCursor();
+	}
+
+	private void setCursor() {
+		myCursor = getCursor();
+		String curs = JSToolkit.getCursorName(myCursor);
+		DOMNode.setStyles(outerNode, "cursor", curs);
+		DOMNode.setStyles(domNode, "cursor", curs);
+		setWaitImage(curs == "wait");
+	}
+
+
+	private Cursor getCursor() {
+		Cursor cur = c.getCursor();
+		return (cur == Cursor.getDefaultCursor() ? null : cur);		
+	}
+
+
+	protected void setWaitImage(boolean doShow) {
+		if (waitImage == null) {
+			if (!doShow)
+				return;
+			String path = (/** @j2sNative this.applet._j2sPath || */null) + "/img/cursor_wait.gif";
+			waitImage = newDOMObject("image", id + "_waitImage", "src", path);
+		}
+		if (doShow)
+			$(waitImage).show();
+		else
+			$(waitImage).hide();
+	}
 	protected DOMNode setCssFont(DOMNode obj, Font font) {
 		if (font != null) {
 			int istyle = font.getStyle();
@@ -1816,23 +1853,6 @@ public class JSComponentUI extends ComponentUI
 			setAlignments((AbstractButton)jc, false);
 		paint(g, c);
 	}
-
-	
-//	/**
-//	 * This flag is set by border painting and background painting detection to
-//	 * indicate that a cell renderer must do that painting.
-//	 */
-//	public void setPainted(Object g) {
-//		if (g == null) {
-//			// reset
-//			backgroundPainted = false;
-//			if (allowPaintedBackground)
-//				DOMNode.setStyles(domNode, "background", null);
-//		} else {
-//			backgroundPainted = true;
-//			setTransparent(domNode);
-//		}
-//	}
 
 	/**
 	 * from ComponentPeer; not implemented in SwingJS
@@ -2335,6 +2355,8 @@ public class JSComponentUI extends ComponentUI
 	 */
 	private boolean isFullyCentered;
 
+	private Cursor myCursor;
+
 	protected static Insets zeroInsets = new Insets(0, 0, 0, 0);
 	
 	protected void getJSInsets() {
@@ -2381,13 +2403,14 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	protected void updateCenteringNode() {
-//		// old code -- label only -- is this advisable? 
-//		if (actualHeight > 0)
-//			DOMNode.setStyles(centeringNode, "position", "absolute", "height",
-//					actualHeight + "px");
-//		if (actualWidth > 0)
-//			DOMNode.setStyles(centeringNode, "position", "absolute", "width",
-//					actualWidth + "px");
+		boolean paintsSelf = jc.秘paintsSelf();
+		if (paintsSelf) {
+			// component will be responsible for border, background, and text
+			DOMNode.setStyles(centeringNode, "visibility", "hidden");
+			DOMNode.setStyles(domNode, "border", "none");
+			DOMNode.setStyles(domNode, "background", "none");
+		}
+
 	}
 
 	protected void setAlignments(AbstractButton b, boolean justGetPreferred) {
@@ -2880,41 +2903,6 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	@Override
-	public void updateCursorImmediately() {
-		if (isUIDisabled)
-			return;
-		setHTMLElement();
-		String curs = JSToolkit.getCursorName(c.getCursor());
-		DOMNode.setStyles(outerNode, "cursor", curs);
-		DOMNode.setStyles(domNode, "cursor", curs);
-		setWaitImage(curs == "wait");
-	}
-
-	protected void setWaitImage(boolean doShow) {
-		if (waitImage != null) {
-			if (!doShow)
-				return;
-			String path = "";
-			/**
-			 * @j2sNative
-			 * 
-			 * 			path = this.applet._j2sPath;
-			 * 
-			 */
-			{
-			}
-			path += "/img/cursor_wait.gif";
-			if (debugging)
-				System.out.println("loading wait cursor " + path);
-			waitImage = newDOMObject("image", id + "_waitImage", "src", path);
-		}
-		if (doShow)
-			$(waitImage).show();
-		else
-			$(waitImage).hide();
-	}
-
-	@Override
 	public Image createImage(ImageProducer producer) {
 		JSUtil.notImplemented("");
 		return null;
@@ -3221,7 +3209,6 @@ public class JSComponentUI extends ComponentUI
 			return;
 		}
 		cellComponent = (JComponent) rendererComponent;		
-		//backgroundPainted = false;
 		if (width == 0)
 			return;
 		cellWidth = width;

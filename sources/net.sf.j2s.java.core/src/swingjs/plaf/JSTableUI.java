@@ -80,7 +80,6 @@ import javax.swing.table.TableColumnModel;
 import sun.swing.DefaultLookup;
 import sun.swing.SwingUtilities2;
 import sun.swing.UIAction;
-import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 
 /**
@@ -212,6 +211,7 @@ public class JSTableUI extends JSPanelUI {
 
 		if (domNode == null) {
 			domNode = newDOMObject("div", id);
+			bindJSKeyEvents(domNode, true);
 		}
 		if (rebuild) {
 			currentRowMin = currentRowMax = -1;
@@ -1126,7 +1126,7 @@ public class JSTableUI extends JSPanelUI {
 	}
 
 	private class Handler
-			implements FocusListener, MouseInputListener, PropertyChangeListener, ListSelectionListener, ActionListener
+			implements KeyListener, FocusListener, MouseInputListener, PropertyChangeListener, ListSelectionListener, ActionListener
 	// ,
 	// BeforeDrag
 	{
@@ -1519,17 +1519,6 @@ public class JSTableUI extends JSPanelUI {
 		public void mouseMoved(MouseEvent e) {
 		}
 
-		public void dragStarting(MouseEvent me) {
-			dragStarted = true;
-
-			if (me.isControlDown() && isFileList) {
-				table.getSelectionModel().addSelectionInterval(pressedRow, pressedRow);
-				table.getColumnModel().getSelectionModel().addSelectionInterval(pressedCol, pressedCol);
-			}
-
-			pressedEvent = null;
-		}
-
 		@Override
 		public void mouseDragged(MouseEvent e) {
 			if (SwingUtilities2.shouldIgnore(e, table)) {
@@ -1672,7 +1661,7 @@ public class JSTableUI extends JSPanelUI {
 	 * Creates the key listener for handling keyboard navigation in the JTable.
 	 */
 	protected KeyListener createKeyListener() {
-		return null;
+		return getHandler();
 	}
 
 	/**
@@ -1779,7 +1768,6 @@ public class JSTableUI extends JSPanelUI {
 		focusListener = createFocusListener();
 		keyListener = createKeyListener();
 		mouseInputListener = createMouseInputListener();
-
 		table.addFocusListener(focusListener);
 		table.addKeyListener(keyListener);
 		table.addMouseListener(mouseInputListener);
@@ -2435,61 +2423,6 @@ public class JSTableUI extends JSPanelUI {
 //
 //        return rect;
 //    }
-
-	private void paintDraggedArea(Graphics g, int rMin, int rMax, TableColumn draggedColumn, int distance) {
-		rebuildTable();
-//	        int draggedColumnIndex = viewIndexForColumn(draggedColumn);
-//
-//	        Rectangle minCell = table.getCellRect(rMin, draggedColumnIndex, true);
-//	        Rectangle maxCell = table.getCellRect(rMax, draggedColumnIndex, true);
-//
-//	        Rectangle vacatedColumnRect = minCell.union(maxCell);
-//
-//	        // Paint a gray well in place of the moving column.
-//	        g.setColor(table.getParent().getBackground());
-//	        g.fillRect(vacatedColumnRect.x, vacatedColumnRect.y,
-//	                   vacatedColumnRect.width, vacatedColumnRect.height);
-//
-//	        // Move to the where the cell has been dragged.
-//	        vacatedColumnRect.x += distance;
-//
-//	        // Fill the background.
-//	        g.setColor(table.getBackground());
-//	        g.fillRect(vacatedColumnRect.x, vacatedColumnRect.y,
-//	                   vacatedColumnRect.width, vacatedColumnRect.height);
-//
-//	        // Paint the vertical grid lines if necessary.
-//	        if (table.getShowVerticalLines()) {
-//	            g.setColor(table.getGridColor());
-//	            int x1 = vacatedColumnRect.x;
-//	            int y1 = vacatedColumnRect.y;
-//	            int x2 = x1 + vacatedColumnRect.width - 1;
-//	            int y2 = y1 + vacatedColumnRect.height - 1;
-//	            // Left
-//	            g.drawLine(x1-1, y1, x1-1, y2);
-//	            // Right
-//	            g.drawLine(x2, y1, x2, y2);
-//	        }
-//
-//	        for(int row = rMin; row <= rMax; row++) {
-//	            // Render the cell value
-//	            Rectangle r = table.getCellRect(row, draggedColumnIndex, false);
-//	            r.x += distance;
-//	            paintCell(g, r, row, draggedColumnIndex);
-//
-//	            // Paint the (lower) horizontal grid line if necessary.
-//	            if (table.getShowHorizontalLines()) {
-//	                g.setColor(table.getGridColor());
-//	                Rectangle rcr = table.getCellRect(row, draggedColumnIndex, true);
-//	                rcr.x += distance;
-//	                int x1 = rcr.x;
-//	                int y1 = rcr.y;
-//	                int x2 = x1 + rcr.width - 1;
-//	                int y2 = y1 + rcr.height - 1;
-//	                g.drawLine(x1, y2, x2, y2);
-//	            }
-//	        }
-	}
 
 	private static int getAdjustedLead(JTable table, boolean row, ListSelectionModel model) {
 

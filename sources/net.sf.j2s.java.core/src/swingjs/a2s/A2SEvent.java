@@ -65,6 +65,16 @@ public class A2SEvent implements Runnable {
 	  Component target = (Component) this.target;
 	  if (target instanceof A2SContainer) {
 		  Component parent = ((Container)target).getMouseEventTarget(e.x, e.y, true, null, false);
+		  switch (e.id) {
+		  case Event.MOUSE_DRAG:
+		  case Event.MOUSE_UP:
+			  parent = ((A2SContainer) target).getA2SListener().lastTarget;
+			  break;
+		  case Event.MOUSE_DOWN:
+			  ((A2SContainer) target).getA2SListener().lastTarget = parent;
+			  break;
+		  }		  
+//		  System.out.println("A2sevent " + e.id + " " +parent);
 		  // on a focus-out event, e.x or e.y may be negative
 		  if (parent != null)
 			  target = parent;

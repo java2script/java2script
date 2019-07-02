@@ -67,7 +67,7 @@ import javax.swing.text.StyleConstants;
 
 public class Test_Editor extends JFrame implements DropTargetListener {
 
-	String test = "  34567890\n1234567890\n  345\n     ";
+	String test = "  345\t67890\n1234567890\n  345\n     ";
 
 //	private static void logClass(String name) {
 //		ConsoleHandler consoleHandler = new ConsoleHandler();

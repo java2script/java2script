@@ -52,6 +52,7 @@ import javajs.util.Lst;
 import sun.awt.AWTAccessor;
 import sun.awt.AppContext;
 import sun.awt.SunToolkit;
+import swingjs.JSToolkit;
 
 /**
  * This class manages repaint requests, allowing the number of repaints to be
@@ -1419,6 +1420,14 @@ public class RepaintManager {
 
 	private void scheduleProcessingRunnable(AppContext context) {
 		if (processingRunnable.markPending()) {
+			if (JSToolkit.checkJ2SFlag("_debugPaint"))
+				System.out.println("RepaintManager"
+						+ "\n invalid:" + invalidComponents 
+						+ "\n dirty:" + dirtyComponents);
+				
+			/**
+			 * @j2sNative
+			 */
 			SunToolkit.getSystemEventQueueImplPP(context).postEvent(
 					new InvocationEvent(Toolkit.getDefaultToolkit(), InvocationEvent.INVOCATION_DEFAULT, processingRunnable, null, false));
 		}

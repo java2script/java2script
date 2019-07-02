@@ -236,7 +236,7 @@ public class LayoutFocusTraversalPolicy extends SortingFocusTraversalPolicy
         } else if (aComponent instanceof javax.swing.JTable) {
             // JTable only has ancestor focus bindings, we thus force it
             // to be focusable by returning true here.
-            return true;
+            return false;// SwingJS NOT true, at least for now;
         } else if (aComponent instanceof javax.swing.JComboBox) {
             JComboBox box = (JComboBox)aComponent;
             return ((ComboBoxUI) box.getUI()).isFocusTraversable(box);
