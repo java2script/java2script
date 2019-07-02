@@ -12221,7 +12221,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				,"\n  who:", who.id
 				,"\n  dragging:", J2S._mouseOwner && J2S._mouseOwner.isDragging
 				,"doignore:",doIgnore(ev,1)
-				,"role:",ev.target.getAttribute("role")
+				,"role:",ev.target.getAttribute && ev.target.getAttribute("role")
 				,"data-ui:",ev.target["data-ui"]
 				,"data-component:",ev.target["data-component"]
 				,"mouseOwner:",J2S._mouseOwner && J2S._mouseOwner.id
@@ -12451,7 +12451,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				return true;
 		
 			if (who == J2S._mouseOwner && who.isDragging)
-				return J2S._drag(who, ev, 506);
+				return J2S._drag(who, ev, 503);
 			return true;
 		});
 
