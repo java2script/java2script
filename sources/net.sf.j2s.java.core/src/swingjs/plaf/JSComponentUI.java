@@ -1506,6 +1506,7 @@ public class JSComponentUI extends ComponentUI
 					"font-weight", ((istyle & Font.BOLD) == 0 ? "normal" : "bold"));
 		}
 
+		// force the issue
 		enabled = !c.isEnabled();
 		setEnabled(c.isEnabled());
 		return obj;
@@ -2110,7 +2111,7 @@ public class JSComponentUI extends ComponentUI
 		if (node == null)
 			return;
 		
-		DOMNode.setAttr(node, "disabled", (b ? null : TRUE));
+		DOMNode.setAttr(node, "disabled", (b ? FALSE : TRUE));
 		if (!b && inactiveForeground == colorUNKNOWN)
 			getDisabledColors(buttonNode == null ? getPropertyPrefix() : "Button");
 		if (jc.isOpaque()) {

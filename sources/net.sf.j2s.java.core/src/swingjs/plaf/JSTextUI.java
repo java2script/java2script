@@ -130,7 +130,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	protected static final EditorKit defaultKit = new DefaultEditorKit();
 	
 	static final Point markDot = new Point();
-		
+
 	transient JTextComponent editor;
 	protected boolean editable = true;
     protected RootView rootView = new RootView();
@@ -293,7 +293,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		if ((dfg == null) || (dfg instanceof UIResource)) {
 			editor.setDisabledTextColor(UIManager.getColor(prefix + ".inactiveForeground"));
 		}
-		dfg = UIManager.getColor(prefix + ".inactiveBackground");
+		dfg =  UIManager.getColor(editor.秘isAWT() ? "control" : prefix + ".inactiveBackground");
 		if (dfg != null)
 			inactiveBackground = dfg;
 

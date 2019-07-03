@@ -329,8 +329,9 @@ public class ButtonListener
 	}
 
 	/**
-	 * Just ensure the button is in sync by forcing the HTML5 DOM button to the same
-	 * setting as Java.
+	 * It is necessary that this method be called any time the "CHECKED" attribute
+	 * of a toggle button is changed. Otherwise it may fire for a previous state
+	 * after the state is changed in code directly.
 	 * 
 	 * @param m
 	 * 
@@ -339,12 +340,13 @@ public class ButtonListener
 	boolean verifyButtonClick(AbstractButton b) {
 		ButtonModel m = b.getModel();
 		DOMNode btn = ui.actionNode;
-		// BH: I don't know that this is necessary anymore
-		boolean state = m.isSelected();// && !ui.isRadio;
+		boolean state = m.isSelected();
 		/**
 		 * @j2sNative
 		 * 
-		 * 			setTimeout(function(){btn && (btn.checked = state)}, 0);
+		 * 			setTimeout(function(){
+		 * btn && btn.checked != state && (btn.checked = state);
+		 *  }, 0);
 		 */
 		{
 			System.out.println("" + btn + state);
