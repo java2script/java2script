@@ -31,6 +31,13 @@
 
 package test.components;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+
 /*
  * TableDemo.java requires no other files.
  */
@@ -44,15 +51,6 @@ import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
-
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.GridLayout;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 /**
  * TableDemo is just like SimpleTableDemo, except that it uses a custom
@@ -90,37 +88,6 @@ public class TableDemo extends JPanel {
 
 
 		JTable table = new JTable(new MyTableModel());
-		table.addMouseListener(new MouseListener() {
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				System.out.println("Table mouse entered " + e.getSource().getClass().getName());
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				System.out.println("Table mouse exited " + e.getSource().getClass().getName());
-			}
-			
-		});
 		table.setRowHeight(40);
 		table.setPreferredScrollableViewportSize(new Dimension(500, 70));
 		table.setFillsViewportHeight(true);
@@ -162,18 +129,22 @@ public class TableDemo extends JPanel {
 				{ ++i,  color, "Joe", "Brown", "Pool", new Integer(10), new Boolean(false) } 
 				};
 
+		@Override
 		public int getColumnCount() {
 			return columnNames.length;
 		}
 
+		@Override
 		public int getRowCount() {
 			return data.length;
 		}
 
+		@Override
 		public String getColumnName(int col) {
 			return columnNames[col];
 		}
 
+		@Override
 		public Object getValueAt(int row, int col) {
 			return data[row][col];
 		}
@@ -183,6 +154,7 @@ public class TableDemo extends JPanel {
 		 * cell. If we didn't implement this method, then the last column would contain
 		 * text ("true"/"false"), rather than a check box.
 		 */
+		@Override
 		public Class getColumnClass(int c) {
 			return getValueAt(0, c).getClass();
 		}
@@ -190,6 +162,7 @@ public class TableDemo extends JPanel {
 		/*
 		 * Don't need to implement this method unless your table's editable.
 		 */
+		@Override
 		public boolean isCellEditable(int row, int col) {
 			// Note that the data/cell address is constant,
 			// no matter where the cell appears onscreen.
@@ -203,6 +176,7 @@ public class TableDemo extends JPanel {
 		/*
 		 * Don't need to implement this method unless your table's data can change.
 		 */
+		@Override
 		public void setValueAt(Object value, int row, int col) {
 			if (DEBUG) {
 				System.out.println("Setting value at " + row + "," + col + " to " + value + " (an instance of "
@@ -256,6 +230,7 @@ public class TableDemo extends JPanel {
 		// Schedule a job for the event-dispatching thread:
 		// creating and showing this application's GUI.
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				createAndShowGUI();
 			}

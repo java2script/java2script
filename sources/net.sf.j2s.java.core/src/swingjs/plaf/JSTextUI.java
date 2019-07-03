@@ -240,7 +240,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	protected void installDefaults() {
 		String prefix = getPropertyPrefix();
 		Font f = editor.getFont();
-		if ((f == null && !editor.秘isAWT()) || (f instanceof UIResource)) {
+		if ((f == null && !isAWT) || (f instanceof UIResource)) {
 			editor.setFont(UIManager.getFont(prefix + ".font"));
 		}
 
@@ -293,7 +293,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		if ((dfg == null) || (dfg instanceof UIResource)) {
 			editor.setDisabledTextColor(UIManager.getColor(prefix + ".inactiveForeground"));
 		}
-		dfg =  UIManager.getColor(editor.秘isAWT() ? "control" : prefix + ".inactiveBackground");
+		dfg =  UIManager.getColor(isAWT ? "control" : prefix + ".inactiveBackground");
 		if (dfg != null)
 			inactiveBackground = dfg;
 
