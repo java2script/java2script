@@ -243,7 +243,7 @@ public class ButtonListener
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		AbstractButton b = (AbstractButton) e.getSource();
-		verifyButtonClick(b);
+		verifyButtonClick(b, false);
 	}
 
 	@Override
@@ -290,7 +290,7 @@ public class ButtonListener
 			if (checkHideMenus(b))
 				return;
 			b.doClick(0);
-			verifyButtonClick(b);
+			verifyButtonClick(b, true);
 		}
 	}
 
@@ -337,16 +337,18 @@ public class ButtonListener
 	 * 
 	 * @return true
 	 */
-	boolean verifyButtonClick(AbstractButton b) {
+	boolean verifyButtonClick(AbstractButton b, boolean delayed) {
 		ButtonModel m = b.getModel();
 		DOMNode btn = ui.actionNode;
+		if (btn == null)
+			return true;
 		boolean state = m.isSelected();
 		/**
 		 * @j2sNative
 		 * 
-		 * 			setTimeout(function(){
-		 * btn && btn.checked != state && (btn.checked = state);
-		 *  }, 0);
+		 * 			if (delayed) { setTimeout(function(){ btn && btn.checked != state
+		 *            && (btn.checked = state); }, 0); } else { btn.checked = state; }
+		 * 
 		 */
 		{
 			System.out.println("" + btn + state);
