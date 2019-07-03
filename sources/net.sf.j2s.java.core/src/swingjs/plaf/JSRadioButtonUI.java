@@ -77,9 +77,8 @@ public class JSRadioButtonUI extends JSButtonUI {
 
 	protected void setupButton(JToggleButton b, boolean doAll) {
 		// actionNode, iconNode, textNode, centeringNode, buttonNode
-				
-		DOMNode.setAttr(actionNode, "checked", b.isSelected() ? TRUE : null);
-		
+		DOMNode.setAttr(actionNode, "checked", b.isSelected() ? TRUE : FALSE);
+		buttonListener.verifyButtonClick(b); // necessary!
 		setCssFont(textNode, c.getFont());
 		// TODO: not allowing radio/checkbox icons (custom buttons)
 		setIconAndText("radio", (ImageIcon) null/* button.getIcon() */, button.getIconTextGap(), button.getText());
