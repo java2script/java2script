@@ -8,12 +8,12 @@ import swingjs.api.js.DOMNode;
 
 /**
  * 
- * JTable and JTableHeader
+ * An uninstantiable abstact class for JTable and JTableHeader that sets up the parameters for rendering using a small set of static methods. 
  * 
  * @author Bob Hanson
  *
  */
-public abstract class CellHolder extends JSLightweightUI {
+public abstract class CellHolder {
 	
 	static String getRowColumnID(JSComponentUI holder, int row, int col) {
     	return holder.id + "_tab" + (row >= 0 ? "_row" + row : "") + "_col" + col;
@@ -42,24 +42,14 @@ public abstract class CellHolder extends JSLightweightUI {
 		JSComponentUI ui;
 		if (c == null || (ui = (JSComponentUI) c.getUI()).isNull)
 			return;
-		if (width > 0) {
-			// for table header, to center
-			c.setSize(width, height);
-		} else {
+		boolean isHeader = (width >= 0);
+		if (!isHeader) {
 			width = DOMNode.getWidth(td);
 			height = DOMNode.getHeight(td);
 		}
-		ui.tableID = (String) DOMNode.getAttr(td, "id");
-		//System.out.println("CellHolder.updateCell " + ui.tableID);
+		c.setSize(width, height);
 		ui.setRenderer(c, width, height, null);
-		ui.outerNode = null;
-		ui.reInit();
-		ui.updateDOMNode();
-		ui.saveCellNodes(td);
-	}
-
-	public static void restoreUI(JSComponentUI ui, DOMNode td, int row, int col, int w, int h) {
-			ui.restoreCellNodes(td);
+		ui.saveCellNodes(td, isHeader);
 	}
 
 	public static void setJ2SRendererComponent(JComponent comp) {

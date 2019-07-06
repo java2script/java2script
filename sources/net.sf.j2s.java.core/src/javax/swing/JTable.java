@@ -243,7 +243,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		ListSelectionListener, CellEditorListener, /* Accessible, */ RowSorterListener {
 
 	
-	private final static Rectangle r = new Rectangle();
+	//private final static Rectangle r = new Rectangle();
 	//
 	// Static Constants
 	//
@@ -5797,7 +5797,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 	 * @beaninfo bound: true description: The table's active cell editor.
 	 */
 	public void setCellEditor(TableCellEditor anEditor) {
-		System.out.println("JTable setting Cell Editor " + anEditor);
+		//System.out.println("JTable setting Cell Editor " + anEditor);
 		TableCellEditor oldEditor = cellEditor;
 		cellEditor = anEditor;
 		boolean a = _addingEditor;

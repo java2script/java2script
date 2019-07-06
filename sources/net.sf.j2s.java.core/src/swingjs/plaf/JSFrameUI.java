@@ -1,8 +1,6 @@
 package swingjs.plaf;
 
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.JSComponent;
@@ -33,14 +31,14 @@ import swingjs.api.js.DOMNode;
  * this.setName("myframe");
  * 
  * 
- * 3) On the web page somewhere, create a div with id (name + "-div")
- * and styles position:absolute, left, and right. If you wish, you can
- * set the width and height, but that is optional. All four of these
- * values override whatever is given in the constructor.
+ * 3) On the web page somewhere, create a div with id (name + "-div") and styles
+ * position:absolute, left, and right. If you wish, you can set the width and
+ * height, but that is optional. All four of these values override whatever is
+ * given in the constructor.
  * 
- * &lt;div id="myframe-div" 
-style="position:absolute;left:100px;top:200px;width:400px;height:300px"
-&gt;&lt;/div&gt;
+ * &lt;div id="myframe-div"
+ * style="position:absolute;left:100px;top:200px;width:400px;height:300px"
+ * &gt;&lt;/div&gt;
  * 
  * That's all there is to it! The frame will not be sizable.
  * 
@@ -48,25 +46,27 @@ style="position:absolute;left:100px;top:200px;width:400px;height:300px"
  *
  */
 public class JSFrameUI extends JSWindowUI implements FramePeer {
-	
-	private static final Insets ZERO_INSETS = new Insets(0, 0, 0, 0);
-	
-	// a window with a border and optional menubar and (though not here) min and max buttons
 
-	// Adds a root pane to the JPanel content pane to connect the menubar with the content plane
+	private static final Insets ZERO_INSETS = new Insets(0, 0, 0, 0);
+
+	// a window with a border and optional menubar and (though not here) min and max
+	// buttons
+
+	// Adds a root pane to the JPanel content pane to connect the menubar with the
+	// content plane
 	// manages the menu bar; would provide min/max buttons to a dialog.
 	//
-	// for our purposes, a frame will be synonymous with a non-imbedded applet or a dialog. 
-	
-	// Applet:                        xxx_appletinfotablediv   (fixed w&h)
-	//                                  /                              \
-	//        z 200000           xxx_swingdiv (rootpane, fixed w&h)      \
-	//        z 200001           xxx_appletdiv (w,h 100%)           xxx_infotablediv (System.out)
-	//        z 200002              xxx_canvas2d   (w,h 100%)
-	//        z 200003              xxx_contentLayer  (fixed w&h)  
-	//                           xxx_2dappletdiv (w,h 100%; could be used for the glassPane)
-	//           
-	
+	// for our purposes, a frame will be synonymous with a non-imbedded applet or a
+	// dialog.
+
+	// Applet: xxx_appletinfotablediv (fixed w&h)
+	// / \
+	// z 200000 xxx_swingdiv (rootpane, fixed w&h) \
+	// z 200001 xxx_appletdiv (w,h 100%) xxx_infotablediv (System.out)
+	// z 200002 xxx_canvas2d (w,h 100%)
+	// z 200003 xxx_contentLayer (fixed w&h)
+	// xxx_2dappletdiv (w,h 100%; could be used for the glassPane)
+	//
 
 	protected JFrame frame;
 //	private String title;
@@ -74,12 +74,11 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	private DOMNode closerWrap;
 	protected boolean isModal;
 	protected int zModal;
-	private boolean isDesktop;
 
 	protected boolean isInternalFrame;
 
-  boolean doEmbed;
-  
+	boolean doEmbed;
+
 	public JSFrameUI() {
 		frameZ += 1000;
 		z = frameZ;
@@ -89,7 +88,6 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		setDoc();
 	}
 
-	
 	// public void notifyFrameMoved() {
 	// Toolkit.getEventQueue().postEvent(new ComponentEvent(frame,
 	// ComponentEvent.COMPONENT_MOVED));
@@ -118,13 +116,13 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			DOMNode node = DOMNode.getElement(fname + "-div");
 			if (node != null) {
 				embeddingNode = node;
-			  doEmbed = (DOMNode.getWidth(embeddingNode) > 0);
-			  if (doEmbed) {
-		       frame.setUndecorated(true);
-		       frame.setLocation(0, 0);
-			  }
+				doEmbed = (DOMNode.getWidth(embeddingNode) > 0);
+				if (doEmbed) {
+					frame.setUndecorated(true);
+					frame.setLocation(0, 0);
+				}
 
-			  int ew = DOMNode.getWidth(node);
+				int ew = DOMNode.getWidth(node);
 				int eh = DOMNode.getHeight(node);
 				if (ew > 0 && eh > 0) {
 					frame._freezeBounds(ew, eh);
@@ -185,18 +183,14 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		return domNode;
 	}
 
-	 @Override
-	  protected boolean isFrameIndependent() {
-		 	JSComponent c = frame.parent;
-		 	if (isInternalFrame && (c == null || c != null 
-		 			&& c.getUIClassID() != "DesktopPaneUI"))
-		 		return false;
-		 	boolean is = (isInternalFrame ? c == null 
-		 			|| c.getWidth() == 0 : !doEmbed);
-		 	return is;
-	  }
-
-
+	@Override
+	protected boolean isFrameIndependent() {
+		JSComponent c = frame.parent;
+		if (isInternalFrame && (c == null || c != null && c.getUIClassID() != "DesktopPaneUI"))
+			return false;
+		boolean is = (isInternalFrame ? c == null || c.getWidth() == 0 : !doEmbed);
+		return is;
+	}
 
 	@Override
 	public void setZOrder(int z) {
@@ -210,93 +204,77 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		if (doEmbed || frame.isUndecorated())
 			return;
 		@SuppressWarnings("unused")
-		DOMNode fnode = frameNode;		
-		JSFunction fGetFrameParent = null; 
+		DOMNode fnode = frameNode;
+		JSFunction fGetFrameParent = null;
 		/**
-		 * @j2sNative var me = this; 
-		 * fGetFrameParent = function(mode, x, y) {
-		 * 		switch(arguments.length) {
-		 * 		case 1:
-		 *  	         if (mode == 501)
-		 *      	        me.selected$();  
-		 *     me.hideMenu$();
-		 *          	 return $(fnode).parent();
-		 *      case 3:
-		 *      		 if (mode == 506) {
-		 *      			me.moveFrame$I$I(x, y);
-		 *      			return null;
-		 *               }
-		 *     }
-		 *     
-		 *     return null;
-		 * }
-		 */ 
+		 * @j2sNative var me = this; fGetFrameParent = function(mode, x, y) {
+		 *            switch(arguments.length) { case 1: if (mode == 501)
+		 *            me.selected$(); me.hideMenu$(); return $(fnode).parent(); case 3:
+		 *            if (mode == 506) { me.moveFrame$I$I(x, y); return null; } }
+		 * 
+		 *            return null; }
+		 */
 		{
-			 selected();
- 			 moveFrame(0,0);
-			 hideMenu();
+			selected();
+			moveFrame(0, 0);
+			hideMenu();
 		}
-		 
+
 		J2S.setDraggable(titleBarNode, fGetFrameParent);
 	}
 
-
 	/**
-	 * Do not change this method name
-	 * referenced by j2sNative, above
+	 * Do not change this method name referenced by j2sNative, above
 	 */
 	protected void selected() {
 		// subclassed by JSInternalFrameUI
 		((JFrame) jc).toFront();
 	}
-	
+
 	/**
-	 * Do not change this method name
-	 * referenced by j2sNative, above
+	 * Do not change this method name referenced by j2sNative, above
 	 */
-	/*not private*/ void hideMenu() {
+	/* not private */ void hideMenu() {
 		hideMenusAndToolTip();
 	}
 
-
-	
 	/**
-	 * Do not change this method name
-	 * referenced by j2sNative, above
+	 * Do not change this method name referenced by j2sNative, above
+	 * 
 	 * @param x
 	 * @param y
 	 */
-	/*not private*/ void moveFrame(int x, int y) {
+	/* not private */ void moveFrame(int x, int y) {
 		if (!isInternalFrame) {
 			x = Math.max(30 - frame.getWidth(), x);
 			y = Math.max(0, y);
 		}
 		frame.setLocation(x, y);
 	}
-	
+
 	public int[] getMoveCoords(int x, int y) {
-		return new int[] {x, y};
+		return new int[] { x, y };
 	}
 
 	public void notifyFrameMoved() {
 		// from JavaScript
 		this.toFront();
-		Toolkit.getEventQueue().postEvent(
-				new ComponentEvent(frame, ComponentEvent.COMPONENT_MOVED));
+		Toolkit.getEventQueue().postEvent(new ComponentEvent(frame, ComponentEvent.COMPONENT_MOVED));
 	}
 
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
 		// we use == here because this will be JavaScript
 		if (target == closerNode && eventType == -1) {
-			switch (/** @j2sNative jQueryEvent.type || */"") {
+			switch (/** @j2sNative jQueryEvent.type || */
+			"") {
 			case "click":
 				DOMNode tbar = titleBarNode;
 				J2S.setDraggable(tbar, false);
 				frameCloserAction();
 				return HANDLED;
 			case "mouseout":
-				DOMNode.setStyles(closerNode, "background-color", "#DDD");//toCSSString(c.getBackground()));
+				DOMNode.setStyles(closerNode, "background-color", "#DDD");// toCSSString(c.getBackground()));
 				return HANDLED;
 			case "mouseenter":
 				DOMNode.setStyles(closerNode, "background-color", "red");
@@ -306,9 +284,8 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		return NOT_HANDLED;
 	}
 
-	
 	protected void frameCloserAction() {
-  		frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+		frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
 	}
 
 	protected void closeFrame() {
@@ -320,20 +297,23 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	@Override
 	protected void setInnerComponentBounds(int width, int height) {
 		DOMNode.setStyles(closerWrap, "text-align", "right", "width", width + "px");
-		DOMNode.setStyles(titleNode, "width", (width-4) + "px", "height", "20px");
+		DOMNode.setStyles(titleNode, "width", (width - 4) + "px", "height", "20px");
 	}
-	
+
 	@Override
 	public void installUI(JComponent jc) {
-		super.installUI(jc); 
+		super.installUI(jc);
 		// jc is really JFrame, even though JFrame is not a JComponent
-		frame = (JFrame) c;	
-		isDummyFrame = /** @j2sNative jc.__CLASS_NAME__ == "javax.swing.SwingUtilities.SharedOwnerFrame" || */false;
-		
+		frame = (JFrame) c;
+		isDummyFrame = /**
+						 * @j2sNative jc.__CLASS_NAME__ == "javax.swing.SwingUtilities.SharedOwnerFrame"
+						 *            ||
+						 */
+				false;
+
 		frame.addWindowListener(this);
 		frame.addComponentListener(this);
-		 LookAndFeel.installColorsAndFont(jc, "Frame.background",
-		 "Frame.foreground", "Frame.font");
+		LookAndFeel.installColorsAndFont(jc, "Frame.background", "Frame.foreground", "Frame.font");
 	}
 
 	@Override
@@ -342,7 +322,6 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		closeFrame();
 		frame.removeWindowListener(this);
 	}
-
 
 	@Override
 	public void setTitle(String title) {
@@ -371,14 +350,14 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	@Override
 	public void setMaximizedBounds(Rectangle bounds) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	private Rectangle bounds;
 
 	@Override
 	public void setBoundsPrivate(int x, int y, int width, int height) {
-	// only for embedded frames -- not supported in SwingJS
+		// only for embedded frames -- not supported in SwingJS
 //		// includes frame insets or not?
 //		// do we need to subtract them? Add them?
 //		// is the width and height of a frame a measure of the internal contents pane?
@@ -411,7 +390,6 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		super.propertyChange(e);
 	}
 
-
 	@Override
 	public void setVisible(boolean b) {
 		if (isDummyFrame)
@@ -432,5 +410,5 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 		}
 		DOMNode.setVisible(domNode, b);
 	}
-	
+
 }

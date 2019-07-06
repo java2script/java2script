@@ -5419,7 +5419,7 @@ public abstract class Component implements ImageObserver/*
 	 */
 	protected void processKeyEvent(KeyEvent e) {
 		KeyListener listener = keyListener;
-		if (listener != null && (((JSComponent)this).秘isAWT()||  秘isFocusableSet)) {
+		if (listener != null && (((JSComponent)this).秘isAWT()||  秘isFocusableSet || keyListener != null)) {
 			int id = e.getID();
 			switch (id) {
 			case KeyEvent.KEY_TYPED:

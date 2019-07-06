@@ -1637,7 +1637,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				"Table.dropLineShortColor",
 				black,
 				"Table.gridColor",
-				gray, // grid line color
+				controlShadow,//gray, // grid line color
 				"Table.focusCellBackground",
 				window,
 				"Table.focusCellForeground",

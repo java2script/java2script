@@ -687,7 +687,9 @@ public abstract class JComponent extends Container {
 				if (jc != null && jc.isVisible()) {
 					jc.getBounds(tmpRect);
 					boolean isContentPane = jc.getRootPane().getContentPane() == jc;
-					Rectangle vr = (jc instanceof JTable ? jc.getVisibleRect() : tmpRect);
+					Rectangle vr = (
+							//jc instanceof JTable ? jc.getVisibleRect() : 
+								tmpRect);
 					JSGraphics2D jsg = (JSGraphics2D) (Object) g.create(tmpRect.x, 
 							(isContentPane ? 0 : tmpRect.y), vr.width, vr.height); 
 					jsg.setColor(jc.getForeground());

@@ -3,7 +3,6 @@ package swingjs.plaf;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Rectangle;
-import java.beans.PropertyChangeEvent;
 
 import javax.swing.AbstractButton;
 import javax.swing.JComponent;
@@ -39,7 +38,7 @@ public class JSLabelUI extends JSLightweightUI {
 		getIconAndText(); // could be ToolTip
 		setIconAndText("label", icon, gap, text);
 		DOMNode.setStyles(domNode, "position", "absolute", "width", c.getWidth()
-				+ "px", "height", c.getHeight() + "px");
+   				+ "px", "height", c.getHeight() + "px");
 		updateCenteringNode();
 		if (allowTextAlignment) {
 			// not for JToolTip

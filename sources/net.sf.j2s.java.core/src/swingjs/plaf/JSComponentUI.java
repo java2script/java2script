@@ -16,7 +16,6 @@ import java.awt.JSComponent;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
-import java.awt.Window;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.peer.DropTargetPeer;
 import java.awt.event.KeyEvent;
@@ -40,11 +39,11 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JRootPane;
 import javax.swing.JTable.BooleanRenderer;
-import javax.swing.border.CompoundBorder;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
+import javax.swing.border.CompoundBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.ComponentUI;
@@ -55,7 +54,6 @@ import javajs.util.PT;
 import sun.awt.CausedFocusEvent.Cause;
 import swingjs.JSFocusPeer;
 import swingjs.JSGraphics2D;
-import swingjs.JSKeyEvent;
 import swingjs.JSToolkit;
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
@@ -237,7 +235,11 @@ public class JSComponentUI extends ComponentUI
 	 * 
 	 * @param td
 	 */
-	protected void saveCellNodes(DOMNode td) {
+	protected void saveCellNodes(DOMNode td, boolean isHeader) {
+		outerNode = null;
+		reInit();
+		//if (isHeader) // or headers will be blank
+			updateDOMNode();
 		DOMNode[] nodes = new DOMNode[] {
 				domNode,
 				innerNode,
@@ -261,25 +263,29 @@ public class JSComponentUI extends ComponentUI
 		
 		//System.err.println("JSCUI td saved " + tableID);
 		
-		updateTableCell(td);
+		updateTableCell(td, isHeader);
 	}
 
 	/**
-	 * We must make sure that the table cell actually holds this dom node
+	 * We must make sure that the table cell actually holds this DOMNode
 	 * @param td
 	 */
-	private void updateTableCell(DOMNode td) {
+	private void updateTableCell(DOMNode td, boolean andAdd) {
 		DOMNode node = DOMNode.firstChild(td);
 		if (node != domNode) {
 			$(td).empty();
-			td.appendChild(domNode);
+			node = null;
+			//if (andAdd) 
+				td.appendChild(domNode);
+			//else
+				node = domNode;
+			DOMNode.setAttr(td, "domNode", node);
 		}
 		domNode = outerNode = null;		
 	}
 
 
 	protected void restoreCellNodes(DOMNode td) {
-		//System.out.println("JSCUI restore "+ id + " " + hashCode() + " " + DOMNode.getAttrInt(td,  "id") + " " + tableID);
 		DOMNode[] nodes = (DOMNode[]) DOMNode.getAttr(td, "data-nodes");
 		if (nodes == null)
 			return;
@@ -292,9 +298,7 @@ public class JSComponentUI extends ComponentUI
 		accelNode       = nodes[5];
 		buttonNode 		= nodes[6];
 		enableNode 		= nodes[7];
-		
-//		System.out.println("JCSUInode " + DOMNode.getAttr(domNode,  "outerHTML"));
-		
+
 		if (nodes[8] != null) {
 			enableNodes[0] = nodes[8];
 			enableNodes[1] = nodes[9];
@@ -618,15 +622,8 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	protected void setDoc() {
-		  			//this.document = document; 
-		/**
-		 * @j2sNative
-		 * 
-		 *          this.body = document.body;
-		 * 
-		 */
-		{
-		}
+		body = /** @j2sNative document.body ||*/ null;
+
 		debugging = swingjs.JSUtil.debugging;
 	}
 
@@ -691,6 +688,11 @@ public class JSComponentUI extends ComponentUI
 		setUIDisabled(comp == null);
 	}
 
+	/**
+	 * required call to fully set up the UI
+	 * @param target
+	 * @return
+	 */
 	public JSComponentUI set(JComponent target) {
 		// note that in JavaScript, in certain cases
 		// (JFrame, JWindow, JDialog)
@@ -701,6 +703,7 @@ public class JSComponentUI extends ComponentUI
 		isAWT = jc.秘isAWT();
 		applet = JSToolkit.getHTML5Applet(c);
 		newID(false);
+		// don't do this -- will break JSTableUI.installListeners:    target.ui = this;
 		installUI(target); // need to do this immediately, not later
 		installJS();
 		if (needPreferred) // only slider needs this
@@ -758,10 +761,11 @@ public class JSComponentUI extends ComponentUI
 
 	
 	/**
+	 * Sends key events through JSMouse
 	 * 
 	 * @param node
 	 */
-	protected void setDataKeyComponent(DOMNode node) {
+	private void setDataKeyComponent(DOMNode node) {
 		DOMNode.setAttr(node, "data-keycomponent", c);
 	}
 
@@ -850,13 +854,15 @@ public class JSComponentUI extends ComponentUI
 //
 
 	/**
-	 * fired by JSComponent when key listeners are registered
+	 * Fired by JSComponent when key listeners are registered.
+	 * Will NOT be created from ui.installUI() since component.ui 
+	 * will not have been created yet. 
 	 * 
 	 * @param on
 	 */
 	public void enableJSKeys(boolean on) {
-		if (getDOMNode() == null)
-			return; // too early
+		if (isUIDisabled)
+			return;
 		if (!on) {
 			setTabIndex(Integer.MIN_VALUE);
 		} else if (keysEnabled) {
@@ -869,7 +875,6 @@ public class JSComponentUI extends ComponentUI
 	protected void addFocusHandler() {
 		if (focusNode == null && (focusNode = domNode) == null)
 			return;
-		//System.out.println("JSCUI.adding FocusHandler " + id);
 		keysEnabled = true;
 		DOMNode.setAttrs(focusNode, "applet", applet, "_frameViewer", jc.getFrameViewer());
 		setDataKeyComponent(focusNode);
@@ -1067,7 +1072,7 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected void bindJSKeyEvents(DOMNode node, boolean addFocus) {
 		setDataUI(node);
-		addClass(node, "ui-key");
+//		addClass(node, "ui-key"); ??
 		keysEnabled = true;
 		bindJQueryEvents(node, "keydown keypress keyup" + (addFocus ? " focusout"// dragover drop"
 				: ""), SOME_KEY_EVENT);
@@ -1165,12 +1170,8 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		if (debugging)
-			System.out.println(id + " stateChange " + dumpEvent(e));
 	}
 
-
-	
 	private void updatePropertyAncestor(boolean fromButtonListener) {
 		if (fromButtonListener) {
 			setTainted();
@@ -1197,7 +1198,8 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
-		if (isUIDisabled)
+		// domNode null could be a new table component
+		if (isUIDisabled || domNode == null)
 			return;
 		Object value = e.getNewValue();
 		String prop = e.getPropertyName();
@@ -1262,7 +1264,7 @@ public class JSComponentUI extends ComponentUI
 	protected void propertyChangedCUI(PropertyChangeEvent e, String prop) {
 		// don't want to update a menu until we have to, after its place is set
 		// and we know it is not a JMenuBar menu
-		if (!isMenu)
+		if (!isMenu && cellComponent == null)
 			getDOMNode();
 		switch (prop) {
 		case "preferredSize":
@@ -1364,8 +1366,6 @@ public class JSComponentUI extends ComponentUI
 	 */
 	private int cellWidth, cellHeight;
 	
-	String tableID;
-
 	/**
 	 * this ui has been disabled from receiving any events; see JTableUI
 	 */
@@ -1453,8 +1453,6 @@ public class JSComponentUI extends ComponentUI
 	}
 				
 	protected DOMNode updateDOMNodeCUI() {
-		if (cellComponent != null)
-			updateCellNode();
 		if (myCursor != getCursor())
 			setCursor();
 		return domNode;
@@ -1468,8 +1466,8 @@ public class JSComponentUI extends ComponentUI
 		setHTMLElement(); // for a frame, this is the call that connects it to BODY
 		setCursor();
 	}
-
-	private void setCursor() {
+  
+	protected void setCursor() {
 		myCursor = getCursor();
 		String curs = JSToolkit.getCursorName(myCursor);
 		DOMNode.setStyles(outerNode, "cursor", curs);
@@ -1531,6 +1529,7 @@ public class JSComponentUI extends ComponentUI
 		System.out.println(DOMNode.getAttr(d, "outerHTML"));
 	}
 
+// save for posterity -- a good idea in general	
 //	protected static void vCenter(DOMNode obj, int offset, float scale) {
 //		DOMNode.setStyles(obj, "top", "50%", "transform", 
 //				(scale > 0 ? "scale(" + scale + "," + scale + ")" : "")
@@ -1762,8 +1761,6 @@ public class JSComponentUI extends ComponentUI
 		if (isContainer || n > 0) {
 			// set width from component
 			if (isContainer && !isMenuItem && !isTable) {
-				// System.out.println("JSComponentUI container " + id + " "
-				// + c.getBounds());
 				int w = getContainerWidth();
 				int h = getContainerHeight();
 				DOMNode.setSize(outerNode, w, h);				
@@ -1799,14 +1796,26 @@ public class JSComponentUI extends ComponentUI
 		return true;
 	}
 
+	/**
+	 * The (effective) children of this component. 
+	 * For performance, we allow the raw component[] array to be delivered directly,
+	 * which may be null-terminating.
+	 * 
+	 * @return null-terminated array
+	 */
 	protected Component[] getChildren() {
-		// but see JSMenuUI and JTableUI
+		// but see JSMenuUI and JSTableUI and JComboBox
 		return JSComponent.秘getChildArray(jc);
 	}
 
 	protected int getChildCount() {
-		// but see JSMenuUI and JTableUI
+		// but see JSMenuUI and JSTableUI and JSComboBoxUI
 		return jc.getComponentCount();
+	}
+
+
+	protected DOMNode getContainerNode(int i) {
+		return containerNode;
 	}
 
 	protected void addChildrenToDOM(Component[] children, int n) {
@@ -1826,7 +1835,7 @@ public class JSComponentUI extends ComponentUI
 				if (ui.domNode != ui.outerNode && DOMNode.getParent(ui.domNode) == null)				
 					ui.outerNode.appendChild(ui.domNode);
 				if (ui.embeddingNode == null && (!ui.isWindow || !ui.isFrameIndependent()))
-					DOMNode.appendChildSafely(containerNode, ui.outerNode);
+					DOMNode.appendChildSafely(getContainerNode(i), ui.outerNode);
 			}
 		}
 	}
@@ -1844,14 +1853,11 @@ public class JSComponentUI extends ComponentUI
 		if (isUIDisabled)
 			return;
 		// called from JComponent.paintComponent
-//		if (borderTest) {
-//			g.setColor(Color.red);
-//			g.drawRect(0, 0, c.getWidth(), c.getHeight());
-//			System.out.println("drawing " + c.getWidth() + " " + c.getHeight());
-//		}
-		setHTMLElement();
-		if (allowTextAlignment && centeringNode != null)
-			setAlignments((AbstractButton)jc, false);
+		if (cellComponent == null) {
+			setHTMLElement();
+			if (allowTextAlignment && centeringNode != null)
+				setAlignments((AbstractButton) jc, false);
+		}
 		paint(g, c);
 	}
 
@@ -2148,13 +2154,10 @@ public class JSComponentUI extends ComponentUI
 		if (isBounded && !boundsSet) {
 			// now we can set it to be visible, because its bounds have
 			// been explicitly set.
-			if (c.visible)
+			if (c.visible && cellComponent == null)
 				setVisible(true);
 			boundsSet = true;
 		}
-		if (debugging)
-			System.out.println("CUI << SetBounds >> [" + x + " " + y + " " + width + " " + height + "] op=" + op
-					+ " for " + this.id);
 		// Note that this.x and this.y are never used. Tney are frame-referenced
 		switch (op) {
 		case SET_BOUNDS:
@@ -2206,8 +2209,11 @@ public class JSComponentUI extends ComponentUI
 		// if (this.width != width || this.height != height) {
 		this.width = width;
 		this.height = height;
-		if (domNode == null)
+		if (domNode == null) {
+			alignmentDisabled = true;
 			updateDOMNode();
+			alignmentDisabled = false;
+		}
 		setJSDimensions(width + size.width, height + size.height);
 		setInnerComponentBounds(width, height);
 	}
@@ -2224,9 +2230,6 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	protected void setInnerComponentBounds(int width, int height) {
-		if (debugging)
-			System.out.println("CUI reshapeMe: need to reshape " + id + " w:" + this.width + "->" + width + " h:"
-					+ this.height + "->" + height);
 	}
 
 	private ImageIcon getIcon(JSComponent c, Icon icon) {
@@ -2336,8 +2339,6 @@ public class JSComponentUI extends ComponentUI
 		if (valueNode != null) {
 			setBackgroundImpl(c.getBackground());
 		}
-		if (debugging)
-			System.out.println("JSComponentUI: setting " + id + " " + prop);
 	}
 
 	protected int getDefaultIconTextGap() {
@@ -2357,6 +2358,8 @@ public class JSComponentUI extends ComponentUI
 	private boolean isFullyCentered;
 
 	private Cursor myCursor;
+
+	private boolean alignmentDisabled;
 
 	protected static Insets zeroInsets = new Insets(0, 0, 0, 0);
 	
@@ -2415,6 +2418,8 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	protected void setAlignments(AbstractButton b, boolean justGetPreferred) {
+		if (alignmentDisabled)
+			return;
 		int hTextPos = b.getHorizontalTextPosition();
 		int hAlign = b.getHorizontalAlignment();
 		int vAlign = b.getVerticalAlignment();
@@ -2437,16 +2442,12 @@ public class JSComponentUI extends ComponentUI
 		if (margins == null)
 			margins = zeroInsets;
 		Insets insets = (isLabel || !isSimpleButton || justGetPreferred ? zeroInsets : getButtonOuterInsets(b));
-		// System.out.println("JSCUI margins " + justGetPreferred + " " + b.getText() +
-		// " " + margins + " " + insets);
 		int h = (dimText == null ? 0 : dimText.height);
 		int ih = (dimIcon == null ? 0 : dimIcon.height);
 		int hCtr = Math.max(h, ih);
 		int wCtr = wIcon + gap + wText;
 		int wAccel = 0;
 		String accel = null;
-		// setHTMLSize1((buttonNode == null ? domNode : centeringNode), false,
-		// false).width;
 		// But we need to slightly underestimate it so that the
 		// width of label + button does not go over the total calculated width
 
@@ -2724,19 +2725,18 @@ public class JSComponentUI extends ComponentUI
 	}
 
 
-	private void updateCellNode() {
+	protected void updateCellNode() {
 		// could be editor or cell
 		if (cellWidth == 0 || cellHeight == 0) {
-			// this does not work
-			//DOMNode.setVisible(domNode,  false);
 			return;
 		}
-//		DOMNode.setStyles(domNode, "width", "100%", "height", "100%");
+		
+		//System.out.println("jscui.updateCellNode " + id + " " + DOMNode.getAttr(actionNode, "outerHTML"));
+
 		if (allowPaintedBackground)
 			DOMNode.setStyles(domNode, "background", "transparent");
 		if (cellComponent instanceof BooleanRenderer || cellComponent.getClientProperty("_jsBooleanEditor") != null) {
-			//System.out.println("boolean");
-			//System.out.println("JSCUI updateCell " + (jc == null ? null : jc.isVisible()) + " " + tableID + " " + cellComponent);
+
 			DOMNode.setStyles(centeringNode, "width", "100%", "height", "100%");
 			DOMNode.setStyles(buttonNode, "width", "100%", "height", "100%");
 			DOMNode.setStyles(actionNode, "position", "absolute", "width", "14px", "height", "14px", "top",
@@ -2755,10 +2755,12 @@ public class JSComponentUI extends ComponentUI
 				break;
 			case SwingConstants.CENTER:
 				DOMNode.setStyles(actionNode, "left", (width / 2) + "px", "transform",
-						"scale(0.75,0.75) translate(-15px,-20px)");
+						"scale(0.75,0.75) translate(-15px,-15px)"); // admittedly, a hack
 				break;
 			}
-			//System.out.println(DOMNode.getAttr(actionNode, "outerHTML"));
+
+			//System.out.println(JSUtil.getStackTrace(6));
+			
 		}
 
 	}
@@ -3012,13 +3014,10 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public void beginValidate() {
-		//System.out.println("JSCUI beginValidate " + id);
 	}
 
 	@Override
 	public void endValidate() {
-//		if (!isUIDisabled && jc.getUIClassID() != "AppletUI")
-//			setHTMLElement();
 	}
 
 	@Override
@@ -3203,10 +3202,9 @@ public class JSComponentUI extends ComponentUI
 		// We must disable the UI after painting so that when 
 		// the next cell is chosen we do not act on the previous cell
 		// in table.prepareRenderer(...) prior to assigning the desired table cell.
-		//System.out.println(this.id + " " + rendererComponent + " " + width + " " + height);
 		setComponent((JComponent) rendererComponent);
 		if (isUIDisabled) {
-			updateTableCell(td);
+			updateTableCell(td, true);
 			return;
 		}
 		cellComponent = (JComponent) rendererComponent;		
@@ -3278,7 +3276,7 @@ public class JSComponentUI extends ComponentUI
 		// Here we keep it simple and do the change immediately.
 		//
 
-		if (domNode != null && !c.isOpaque())
+		if (domNode != null && (cellComponent != null || !c.isOpaque()))
 			setTransparent();
 	}
 
@@ -3300,7 +3298,7 @@ public class JSComponentUI extends ComponentUI
 			// just in case they have painted CHILDREN
 			g.setBackground(color);
 			g.clearRect(0, 0, c.getWidth(), c.getHeight());
-			isOpaque = !jc.秘paintsSelf();
+			isOpaque = cellComponent == null && !jc.秘paintsSelf();
 			if (!isOpaque && isWindow) {
 				JComponent c = (JComponent) jc.getRootPane().getContentPane();
 				c.秘setPaintsSelf(JSComponent.PAINTS_SELF_YES);

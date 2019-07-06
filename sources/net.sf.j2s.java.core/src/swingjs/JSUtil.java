@@ -1,6 +1,5 @@
 package swingjs;
 
-import java.awt.Component;
 import java.awt.JSComponent;
 import java.awt.Toolkit;
 import java.io.BufferedInputStream;
