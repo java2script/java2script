@@ -40,7 +40,7 @@ public abstract class CellHolder {
 
 	static void updateCellNode(DOMNode td, JSComponent c, int width, int height) {
 		JSComponentUI ui;
-		if (c == null || (ui = (JSComponentUI) c.getUI()).isNull)
+		if (c == null || (ui = c.秘getUI()).isNull)
 			return;
 		boolean isHeader = (width >= 0);
 		if (!isHeader) {
@@ -53,7 +53,7 @@ public abstract class CellHolder {
 	}
 
 	public static void setJ2SRendererComponent(JComponent comp) {
-		((JSComponentUI) comp.getUI()).setRenderer(comp, 0, 0, null);
+		comp.秘getUI().setRenderer(comp, 0, 0, null);
 	}
 
 

@@ -1,3 +1,6 @@
+2019.07.07 Why do we have to run rootPane.addNotify after init()? 
+           This is causing two full creations of components.
+           
 2019.07.01 working on JSEditorPaneUI tab business
 2019.07.01 AppContext.getApplet(name) initial work
 2019.07.01 working on JTable key navigation events

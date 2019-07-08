@@ -77,7 +77,7 @@ public class JSLabelUI extends JSLightweightUI {
 
 	@Override
 	public void paint(Graphics g, JComponent c) {
-		if (jc.秘paintsSelf())
+		if (jc.秘paintsSelfEntirely())
 			DOMNode.setStyles(centeringNode, "visibility", "visible");
 		super.paint(g, c);
 		// TODO: implement this for buttons?

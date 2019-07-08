@@ -29,6 +29,7 @@
 package javax.swing;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Rectangle;
 
 import javax.swing.border.Border;
@@ -114,7 +115,7 @@ public class DefaultListCellRenderer extends JLabel
     }
 
     @Override
-		public JComponent getListCellRendererComponent(
+		public Component getListCellRendererComponent(
         JList list,
         Object value,
         int index,
@@ -150,7 +151,13 @@ public class DefaultListCellRenderer extends JLabel
             setIcon((Icon)value);
             setText("");
         }
-        else {
+        else if (value instanceof JLabel) {
+            setIcon(null);
+            setText(((JLabel) value).getText());
+        } else if (value instanceof AbstractButton) {
+            setIcon(null);
+            setText(((AbstractButton) value).getText());
+        } else {
             setIcon(null);
             setText((value == null) ? "" : value.toString());
         }

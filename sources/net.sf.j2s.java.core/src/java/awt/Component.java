@@ -5068,7 +5068,10 @@ public abstract class Component implements ImageObserver/*
 	 */
 	transient private boolean coalescingEnabled = checkCoalescing(); 
 
-	public boolean 秘j2sInvalidateOnAdd = true; // not for menu items?
+	/**
+	 * false only for menu items and menu separators
+	 */
+	public boolean 秘j2sInvalidateOnAdd = true;
 
 	/**
 	 * Weak map of known coalesceEvent overriders. Value indicates whether
@@ -5865,6 +5868,7 @@ public abstract class Component implements ImageObserver/*
 
 			// Update stacking order
 			if (parent != null && parent.peer != null) {
+				@SuppressWarnings("unused")
 				ContainerPeer parentContPeer = (ContainerPeer) parent.peer;
 				// if our parent is lightweight and we are not
 				// we should call restack on nearest heavyweight

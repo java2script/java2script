@@ -12,6 +12,9 @@ public class JSToolTipUI extends JSLabelUI {
 	// TODO: allow generic tool tip, not just text
 	
 	// note that, however, JSToolTip is not a label. 
+
+	
+	// TODO: z-index?
 	
 	public JSToolTipUI() {
 		super();
@@ -41,6 +44,7 @@ public class JSToolTipUI extends JSLabelUI {
 
 	@Override
 	public Insets getInsets() {
+		// a ComponentPeer method
 		return new Insets(2,2,2,2);
 	}
 
@@ -55,8 +59,6 @@ public class JSToolTipUI extends JSLabelUI {
 	@Override
 	public void uninstallUI(JComponent jc) {
 		System.out.println("Uninstalling ToolTipUI");
-		// should remove dom node?
-		// TODO Auto-generated method stub
 	}
 
 }

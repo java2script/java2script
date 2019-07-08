@@ -146,7 +146,7 @@ public class CellRendererPane extends JPanel
       if(shouldValidate) {
           c.validate();
       } 
-	  JSComponentUI ui = (JSComponentUI) ((JComponent) c).getUI();
+	  JSComponentUI ui = ((JComponent) c).秘getUI();
 	  ui.updateDOMNode();
 //          if (!ui.doPaintBackground())
 //        	  return;

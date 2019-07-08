@@ -68,14 +68,6 @@ import swingjs.api.js.DOMNode;
  */
 public class JSMenuBarUI extends JSPanelUI implements ContainerListener {
 
-//	static {
-//		
-//		// this mechanism allows on-demand loading of the CSS used for the menu bar 
-//		
-//		JSToolkit.getJavaResource("swingjs/jquery/swingjs-menu.css", true);
-//	}
-//
-
 	private JMenuBar menuBar;
 	private ChangeListener changeListener;
 	private ContainerListener containerListener;

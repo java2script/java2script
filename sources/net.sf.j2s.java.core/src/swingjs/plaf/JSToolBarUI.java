@@ -87,14 +87,6 @@ import swingjs.api.js.DOMNode;
 @SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
 public class JSToolBarUI extends JSPanelUI {
 
-//	static {
-//		
-//		// this mechanism allows on-demand loading of the CSS used for the menu bar 
-//		
-//		JSToolkit.getJavaResource("swingjs/jquery/swingjs-menu.css", true);
-//	}
-//
-
 	static int toolbarCount;
 
 	private JToolBar toolBar;

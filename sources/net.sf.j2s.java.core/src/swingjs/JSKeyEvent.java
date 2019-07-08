@@ -41,7 +41,7 @@ public class JSKeyEvent extends KeyEvent {
 			return false;
 		}
 		if (c != null) {
-			JSComponentUI ui = (JSComponentUI) c.getUI();
+			JSComponentUI ui = c.秘getUI();
 			KeyEvent e = newJSKeyEvent(c, jqevent, 0, false);
 			// create our own KEY_PRESSED event
 			c.dispatchEvent(e);

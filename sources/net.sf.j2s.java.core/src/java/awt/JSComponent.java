@@ -114,6 +114,10 @@ public abstract class JSComponent extends Component {
 	public HTML5Canvas 秘canvas;
 	public ComponentUI ui; // from JComponent
 
+	public JSComponentUI 秘getUI() {
+		return (JSComponentUI) ui;
+	}
+
 	private String 秘uiClassID;
 
 	Boolean 秘peerVis;
@@ -132,8 +136,13 @@ public abstract class JSComponent extends Component {
      * 
      */
     private int 秘iPaintMyself = PAINTS_SELF_UNKNOWN;
+    private boolean 秘iPaintMyselfEntirely;
 	private boolean 秘repaintAsUpdate = true;
 	private static boolean 秘isRepaint = true;
+	
+	public boolean 秘paintsSelfEntirely() {
+		return 秘iPaintMyselfEntirely;
+	}
 
 	protected static void 秘setIsRepaint(boolean b) {
 		秘isRepaint = b;
@@ -451,10 +460,10 @@ public abstract class JSComponent extends Component {
     	JSComponent[] components = (JSComponent[]) 秘getChildArray((Container) this);
     	int[] zorders = new int[n];
         for (int i = 0; i < n; i++)
-            zorders[i] = ((JSComponentUI) components[i].getUI()).getZIndex(null);
+            zorders[i] = components[i].秘getUI().getZIndex(null);
         Arrays.sort(zorders);
         for (int i = 0; i < n; i++)
-        	((JSComponentUI) components[i].getUI()).setZOrder(zorders[n - 1 - i]);
+        	components[i].秘getUI().setZOrder(zorders[n - 1 - i]);
 	}
 
 	
@@ -614,10 +623,13 @@ public abstract class JSComponent extends Component {
 			// don't allow if JComponent.paint(Graphics) has been overridden
 			// don't allow if AbstractBorder.paintBorder(...) has been overridden
 			// unchecked here is if a class calls getGraphics outside of this context
-			秘iPaintMyself = 秘setPaintsSelf(JSUtil.isOverridden(this, "paint$java_awt_Graphics", 秘paintClass)
-					|| JSUtil.isOverridden(this, "paintComponent$java_awt_Graphics", /** @j2sNative javax.swing.JComponent || */null)
-					|| JSUtil.isOverridden(this, "update$java_awt_Graphics", 秘updateClass)
-					|| JSUtil.isOverridden(this, "paintContainer$java_awt_Graphics", /** @j2sNative java.awt.Container || */null)
+			秘iPaintMyself = 秘setPaintsSelf(
+					(秘iPaintMyselfEntirely = (
+							JSUtil.isOverridden(this, "paint$java_awt_Graphics", 秘paintClass)
+							|| JSUtil.isOverridden(this, "paintComponent$java_awt_Graphics", /** @j2sNative javax.swing.JComponent || */null)
+							|| JSUtil.isOverridden(this, "update$java_awt_Graphics", 秘updateClass)
+							|| JSUtil.isOverridden(this, "paintContainer$java_awt_Graphics", /** @j2sNative java.awt.Container || */null)
+							))
 					|| 秘paintsBorder() && JSUtil.isOverridden(秘border, "paintBorder$java_awt_Component$java_awt_Graphics$I$I$I$I",
 							秘border.秘paintClass) 
 					? PAINTS_SELF_YES : PAINTS_SELF_NO);

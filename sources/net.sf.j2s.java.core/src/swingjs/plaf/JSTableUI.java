@@ -262,7 +262,7 @@ public class JSTableUI extends JSPanelUI {
 		JSComponent cNoPrep = /** @j2sNative renderer.getComponent$ && renderer.getComponent$() || */null;
 		JSComponent c = (cNoPrep == null ? (JSComponent) table.prepareRenderer(renderer, row, col) : cNoPrep);
 		if (c != null) {
-			JSComponentUI ui = ((JSComponentUI) c.getUI());
+			JSComponentUI ui = c.秘getUI();
 			boolean wasDisabled = ui.isUIDisabled;
 			ui.setRenderer(c, w, h, null);
 			ui.setTargetParent(table);
@@ -2270,7 +2270,7 @@ public class JSTableUI extends JSPanelUI {
 			if (comp == null)
 				return;
 			rendererPane.paintComponent(g, comp, table, cellRect.x, cellRect.y, cellRect.width, cellRect.height, fullPaint && !isScrolling);
-			((JSComponentUI) comp.getUI()).setRenderer(null, 0, 0, td);
+			comp.秘getUI().setRenderer(null, 0, 0, td);
 		}
 	}
 	

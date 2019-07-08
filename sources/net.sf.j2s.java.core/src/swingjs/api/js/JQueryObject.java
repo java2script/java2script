@@ -72,5 +72,20 @@ public interface JQueryObject {
 	 */
 	public abstract void empty();
 
+	public abstract DOMNode getElement();
 	
+	public interface J2SCB extends JQueryObject {
+
+		public abstract J2SCB j2sCB(Object options);
+
+		public abstract Object[] j2sCB(String method);
+		
+		public abstract Object[] j2sCB(String method, Object o);
+
+		public abstract Object[] j2sCB(String method, int i);
+
+		
+	}
+	
+
 }

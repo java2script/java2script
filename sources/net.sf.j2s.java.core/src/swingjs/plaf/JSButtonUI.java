@@ -785,7 +785,7 @@ public class JSButtonUI extends JSLightweightUI {
 	@Override
 	public void paint(Graphics g, JComponent c) {
 		imagePersists = true; // at least for now.
-		if (jc.秘paintsSelf())
+		if (jc.秘paintsSelfEntirely())
 			DOMNode.setStyles(centeringNode, "visibility", "visible");
 		super.paint(g, c);
 	}

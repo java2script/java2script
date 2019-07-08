@@ -43,17 +43,16 @@ import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
-import java.awt.peer.ListPeer;
 //import java.awt.geom.Point2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+
 import javax.swing.CellRendererPane;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JList;
-import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
@@ -69,10 +68,10 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.MouseInputListener;
 import javax.swing.plaf.UIResource;
 import javax.swing.text.Position;
+
 import sun.swing.DefaultLookup;
 import sun.swing.SwingUtilities2;
 import sun.swing.UIAction;
-import swingjs.JSKeyEvent;
 import swingjs.JSUtil;
 //import java.awt.datatransfer.Transferable;
 //import javax.swing.BorderFactory;
@@ -123,15 +122,15 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 		list = (JList) jc;
 		if (domNode == null) {
 			
-			focusNode = enableNode = newDOMObject("div", id);
+			domNode = focusNode = enableNode = newDOMObject("div", id);
 			// maybe DOMNode.setAttrInt(domNode, "tabIndex", 1);
 			innerNode = newDOMObject("div", id + "_inner");
-			domNode = focusNode;
+			addFocusHandler();
 
-			focusNode.appendChild(innerNode);
+			domNode.appendChild(innerNode);
 			// tell j2sApplet.js that we will handle all the mouse clicks here
-			setDataComponent(focusNode);
-			bindJSKeyEvents(focusNode, false);
+//			setDataComponent(focusNode);
+//			bindJSKeyEvents(focusNode, false);
 		}
 		if (needFilling) {
 			fillDOM();
@@ -147,18 +146,18 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 	}
 
 
-	@Override
-	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
-		switch (eventType) {
-		case SOME_KEY_EVENT:
-			JSKeyEvent keyEvent = JSKeyEvent.newJSKeyEvent(jc, jQueryEvent, 0, true);
-			if (keyEvent != null)
-				jc.dispatchEvent(keyEvent);
-			break;
-		}
-		return true;
-	}
-
+//	@Override
+//	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
+//		switch (eventType) {
+//		case SOME_KEY_EVENT:
+//			JSKeyEvent keyEvent = JSKeyEvent.newJSKeyEvent(jc, jQueryEvent, 0, true);
+//			if (keyEvent != null)
+//				jc.dispatchEvent(keyEvent);
+//			break;
+//		}
+//		return true;
+//	}
+//
 	/**
 	 * Each time there is a change in components - a scroll, for example, we will
 	 * need to fill domNode with a new set of children
@@ -315,9 +314,6 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 		Object value = dataModel.getElementAt(index);
 		boolean cellHasFocus = list.hasFocus() && (index == leadIndex);
 		boolean isSelected = selModel.isSelectedIndex(index);
-
-		//System.out.println("jslistui paint " + index + " " + rowBounds + " " + leadIndex + " " + value);
-
 		Component rendererComponent = cellRenderer
 				.getListCellRendererComponent(list, value, index, isSelected,
 						cellHasFocus);
@@ -362,7 +358,6 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 
 	private void updateItemHTML(Component c, int index, int left, int top, int width, int height) {
 		DOMNode node = (c == null ? null : ((JSComponentUI) ((JComponent) c).ui).getDOMNode());
-	    //System.out.println("updateitemhtml " + index + " " + getRowHeight(index));
 		String myid = id + "_" + index;
 		JQueryObject jnode = $((DOMNode) (Object) ("#" + myid));
 		if (((DOMNode[]) (Object) jnode)[0] == null) {
@@ -377,15 +372,13 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 			if (node != null)
 				jnode.append(node);
 		}
-		//System.out.println("updateItem " + index + " " + height);
-		Rectangle r = getCellBounds1(list, index);
+		//Rectangle r = getCellBounds1(list, index);
 		DOMNode.setSize(node, width, height);
 //		DOMNode.setTopLeftAbsolute(node, r.y, r.x);
 	}
 
 	protected void removeItemHTML(int i0, int i1) {
 		int n = list.getModel().getSize();
-		//System.out.println("listui remove " + " " + i0 + " " + i1 + " " + n);
 		for (int i = i0; i <= i1; i++)
 			updateItemHTML(null, n++, 0, 0, 0, 0);
 	}
@@ -1480,12 +1473,9 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 					Component c = renderer.getListCellRendererComponent(list, value,
 							index, false, false);
 					rendererPane.add(c);
-					((JSComponentUI) ((JComponent) c).getUI()).updateDOMNode();
+					((JComponent) c).秘getUI().updateDOMNode();
 					((JComponent) c).getInsets();
 					Dimension cellSize = c.getPreferredSize();
-					
-					//System.out.println("udpatelayout " + cellSize + " " + value);
-					
 					if (fixedCellWidth == -1) {
 						cellWidth = Math.max(cellSize.width, cellWidth);
 					}
@@ -1535,7 +1525,6 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 		Dimension d = getListDimensions();
 		jsActualWidth = d.width;
 		jsActualHeight = d.height;
-//		System.out.println("ListUI Actual size is " + d);
 	}
 
 	private void getWrappedListDimensions(int visRows, int fixedCellWidth,
@@ -1964,67 +1953,88 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 			// JSListUI ui = (JSListUI) BasicLookAndFeel.getUIOfType(list.getUI(),
 			// JSListUI.class);
 
-			if (name == SELECT_PREVIOUS_COLUMN) {
-				changeSelection(list, CHANGE_SELECTION,
-						getNextColumnIndex(list, ui, -1), -1);
-			} else if (name == SELECT_PREVIOUS_COLUMN_EXTEND) {
-				changeSelection(list, EXTEND_SELECTION,
-						getNextColumnIndex(list, ui, -1), -1);
-			} else if (name == SELECT_PREVIOUS_COLUMN_CHANGE_LEAD) {
+			int index;
+			switch (name) {
+			case SELECT_PREVIOUS_COLUMN:
+				changeSelection(list, CHANGE_SELECTION, getNextColumnIndex(list, ui, -1), -1);
+				break;
+			case SELECT_PREVIOUS_COLUMN_EXTEND:
+				changeSelection(list, EXTEND_SELECTION, getNextColumnIndex(list, ui, -1), -1);
+				break;
+			case SELECT_PREVIOUS_COLUMN_CHANGE_LEAD:
 				changeSelection(list, CHANGE_LEAD, getNextColumnIndex(list, ui, -1), -1);
-			} else if (name == SELECT_NEXT_COLUMN) {
-				changeSelection(list, CHANGE_SELECTION,
-						getNextColumnIndex(list, ui, 1), 1);
-			} else if (name == SELECT_NEXT_COLUMN_EXTEND) {
-				changeSelection(list, EXTEND_SELECTION,
-						getNextColumnIndex(list, ui, 1), 1);
-			} else if (name == SELECT_NEXT_COLUMN_CHANGE_LEAD) {
+				break;
+			case SELECT_NEXT_COLUMN:
+				changeSelection(list, CHANGE_SELECTION, getNextColumnIndex(list, ui, 1), 1);
+				break;
+			case SELECT_NEXT_COLUMN_EXTEND:
+				changeSelection(list, EXTEND_SELECTION, getNextColumnIndex(list, ui, 1), 1);
+				break;
+			case SELECT_NEXT_COLUMN_CHANGE_LEAD:
 				changeSelection(list, CHANGE_LEAD, getNextColumnIndex(list, ui, 1), 1);
-			} else if (name == SELECT_PREVIOUS_ROW) {
+				break;
+			case SELECT_PREVIOUS_ROW:
 				changeSelection(list, CHANGE_SELECTION, getNextIndex(list, ui, -1), -1);
-			} else if (name == SELECT_PREVIOUS_ROW_EXTEND) {
+				break;
+			case SELECT_PREVIOUS_ROW_EXTEND:
 				changeSelection(list, EXTEND_SELECTION, getNextIndex(list, ui, -1), -1);
-			} else if (name == SELECT_PREVIOUS_ROW_CHANGE_LEAD) {
+				break;
+			case SELECT_PREVIOUS_ROW_CHANGE_LEAD:
 				changeSelection(list, CHANGE_LEAD, getNextIndex(list, ui, -1), -1);
-			} else if (name == SELECT_NEXT_ROW) {
+				break;
+			case SELECT_NEXT_ROW:
 				changeSelection(list, CHANGE_SELECTION, getNextIndex(list, ui, 1), 1);
-			} else if (name == SELECT_NEXT_ROW_EXTEND) {
+				break;
+			case SELECT_NEXT_ROW_EXTEND:
 				changeSelection(list, EXTEND_SELECTION, getNextIndex(list, ui, 1), 1);
-			} else if (name == SELECT_NEXT_ROW_CHANGE_LEAD) {
+				break;
+			case SELECT_NEXT_ROW_CHANGE_LEAD:
 				changeSelection(list, CHANGE_LEAD, getNextIndex(list, ui, 1), 1);
-			} else if (name == SELECT_FIRST_ROW) {
+				break;
+			case SELECT_FIRST_ROW:
 				changeSelection(list, CHANGE_SELECTION, 0, -1);
-			} else if (name == SELECT_FIRST_ROW_EXTEND) {
+				break;
+			case SELECT_FIRST_ROW_EXTEND:
 				changeSelection(list, EXTEND_SELECTION, 0, -1);
-			} else if (name == SELECT_FIRST_ROW_CHANGE_LEAD) {
+				break;
+			case SELECT_FIRST_ROW_CHANGE_LEAD:
 				changeSelection(list, CHANGE_LEAD, 0, -1);
-			} else if (name == SELECT_LAST_ROW) {
-				changeSelection(list, CHANGE_SELECTION, list.getModel().getSize() - 1,
-						1);
-			} else if (name == SELECT_LAST_ROW_EXTEND) {
-				changeSelection(list, EXTEND_SELECTION, list.getModel().getSize() - 1,
-						1);
-			} else if (name == SELECT_LAST_ROW_CHANGE_LEAD) {
+				break;
+			case SELECT_LAST_ROW:
+				changeSelection(list, CHANGE_SELECTION, list.getModel().getSize() - 1, 1);
+				break;
+			case SELECT_LAST_ROW_EXTEND:
+				changeSelection(list, EXTEND_SELECTION, list.getModel().getSize() - 1, 1);
+				break;
+			case SELECT_LAST_ROW_CHANGE_LEAD:
 				changeSelection(list, CHANGE_LEAD, list.getModel().getSize() - 1, 1);
-			} else if (name == SCROLL_UP) {
+				break;
+			case SCROLL_UP:
 				changeSelection(list, CHANGE_SELECTION, getNextPageIndex(list, -1), -1);
-			} else if (name == SCROLL_UP_EXTEND) {
+				break;
+			case SCROLL_UP_EXTEND:
 				changeSelection(list, EXTEND_SELECTION, getNextPageIndex(list, -1), -1);
-			} else if (name == SCROLL_UP_CHANGE_LEAD) {
+				break;
+			case SCROLL_UP_CHANGE_LEAD:
 				changeSelection(list, CHANGE_LEAD, getNextPageIndex(list, -1), -1);
-			} else if (name == SCROLL_DOWN) {
+				break;
+			case SCROLL_DOWN:
 				changeSelection(list, CHANGE_SELECTION, getNextPageIndex(list, 1), 1);
-			} else if (name == SCROLL_DOWN_EXTEND) {
+				break;
+			case SCROLL_DOWN_EXTEND:
 				changeSelection(list, EXTEND_SELECTION, getNextPageIndex(list, 1), 1);
-			} else if (name == SCROLL_DOWN_CHANGE_LEAD) {
+				break;
+			case SCROLL_DOWN_CHANGE_LEAD:
 				changeSelection(list, CHANGE_LEAD, getNextPageIndex(list, 1), 1);
-			} else if (name == SELECT_ALL) {
+				break;
+			case SELECT_ALL:
 				selectAll(list);
-			} else if (name == CLEAR_SELECTION) {
+				break;
+			case CLEAR_SELECTION:
 				clearSelection(list);
-			} else if (name == ADD_TO_SELECTION) {
-				int index = adjustIndex(list.getSelectionModel()
-						.getLeadSelectionIndex(), list);
+				break;
+			case ADD_TO_SELECTION:
+				index = adjustIndex(list.getSelectionModel().getLeadSelectionIndex(), list);
 
 				if (!list.isSelectedIndex(index)) {
 					int oldAnchor = list.getSelectionModel().getAnchorSelectionIndex();
@@ -2033,27 +2043,23 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 					list.getSelectionModel().setAnchorSelectionIndex(oldAnchor);
 					list.setValueIsAdjusting(false);
 				}
-			} else if (name == TOGGLE_AND_ANCHOR) {
-				int index = adjustIndex(list.getSelectionModel()
-						.getLeadSelectionIndex(), list);
+				break;
+			case TOGGLE_AND_ANCHOR:
+				index = adjustIndex(list.getSelectionModel().getLeadSelectionIndex(), list);
 
 				if (list.isSelectedIndex(index)) {
 					list.removeSelectionInterval(index, index);
 				} else {
 					list.addSelectionInterval(index, index);
 				}
-			} else if (name == EXTEND_TO) {
-				changeSelection(
-						list,
-						EXTEND_SELECTION,
-						adjustIndex(list.getSelectionModel().getLeadSelectionIndex(), list),
-						0);
-			} else if (name == MOVE_SELECTION_TO) {
-				changeSelection(
-						list,
-						CHANGE_SELECTION,
-						adjustIndex(list.getSelectionModel().getLeadSelectionIndex(), list),
-						0);
+				break;
+			case EXTEND_TO:
+				changeSelection(list, EXTEND_SELECTION,
+						adjustIndex(list.getSelectionModel().getLeadSelectionIndex(), list), 0);
+				break;
+			case MOVE_SELECTION_TO:
+				changeSelection(list, CHANGE_SELECTION,
+						adjustIndex(list.getSelectionModel().getLeadSelectionIndex(), list), 0);
 			}
 		}
 
@@ -2477,7 +2483,7 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 		 */
 		@Override
 		public void keyPressed(KeyEvent e) {
-			System.out.println("pressed " + isNavigationKey(e) + " " + e);
+			//System.out.println("pressed " + isNavigationKey(e) + " " + e);
 			if (isNavigationKey(e)) {
 				prefix = "";
 				typedString = "";
@@ -2491,7 +2497,7 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 		 */
 		@Override
 		public void keyReleased(KeyEvent e) {
-			System.out.println("released " + e);
+			//System.out.println("released " + e);
 		}
 
 		/**
@@ -2517,10 +2523,11 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 		public void propertyChange(PropertyChangeEvent e) {
 			String propertyName = e.getPropertyName();
 			/*
-			 * If the JList.model property changes, remove our listener,
-			 * listDataListener from the old model and add it to the new one.
+			 * If the JList.model property changes, remove our listener, listDataListener
+			 * from the old model and add it to the new one.
 			 */
-			if (propertyName == "model") {
+			switch (propertyName) {
+			case "model":
 				ListModel oldModel = (ListModel) e.getOldValue();
 				ListModel newModel = (ListModel) e.getNewValue();
 				if (oldModel != null) {
@@ -2531,68 +2538,78 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 				}
 				updateLayoutStateNeeded |= modelChanged;
 				redrawList();
-			}
 
-			/*
-			 * If the JList.selectionModel property changes, remove our listener,
-			 * listSelectionListener from the old selectionModel and add it to the new
-			 * one.
-			 */
-			else if (propertyName == "selectionModel") {
-				ListSelectionModel oldModel = (ListSelectionModel) e.getOldValue();
-				ListSelectionModel newModel = (ListSelectionModel) e.getNewValue();
-				if (oldModel != null) {
-					oldModel.removeListSelectionListener(listSelectionListener);
+				/*
+				 * If the JList.selectionModel property changes, remove our listener,
+				 * listSelectionListener from the old selectionModel and add it to the new one.
+				 */
+				break;
+			case "selectionModel":
+				ListSelectionModel oldModel2 = (ListSelectionModel) e.getOldValue();
+				ListSelectionModel newModel2 = (ListSelectionModel) e.getNewValue();
+				if (oldModel2 != null) {
+					oldModel2.removeListSelectionListener(listSelectionListener);
 				}
-				if (newModel != null) {
-					newModel.addListSelectionListener(listSelectionListener);
+				if (newModel2 != null) {
+					newModel2.addListSelectionListener(listSelectionListener);
 				}
 				updateLayoutStateNeeded |= modelChanged;
 				redrawList();
-			} else if (propertyName == "cellRenderer") {
+				break;
+			case "cellRenderer":
 				updateLayoutStateNeeded |= cellRendererChanged;
 				redrawList();
-			} else if (propertyName == "font") {
+				break;
+			case "font":
 				updateLayoutStateNeeded |= fontChanged;
 				redrawList();
-			} else if (propertyName == "prototypeCellValue") {
+				break;
+			case "prototypeCellValue":
 				updateLayoutStateNeeded |= prototypeCellValueChanged;
 				redrawList();
-			} else if (propertyName == "fixedCellHeight") {
+				break;
+			case "fixedCellHeight":
 				updateLayoutStateNeeded |= fixedCellHeightChanged;
 				redrawList();
-			} else if (propertyName == "fixedCellWidth") {
+				break;
+			case "fixedCellWidth":
 				updateLayoutStateNeeded |= fixedCellWidthChanged;
 				redrawList();
-			} else if (propertyName == "selectionForeground") {
+				break;
+			case "selectionForeground":
 				list.秘repaint();
-			} else if (propertyName == "selectionBackground") {
+				break;
+			case "selectionBackground":
 				list.秘repaint();
-			} else if ("layoutOrientation" == propertyName) {
+				break;
+			case "layoutOrientation":
 				updateLayoutStateNeeded |= layoutOrientationChanged;
 				layoutOrientation = list.getLayoutOrientation();
 				redrawList();
-			} else if ("visibleRowCount" == propertyName) {
+				break;
+			case "visibleRowCount":
 				if (layoutOrientation != JList.VERTICAL) {
 					updateLayoutStateNeeded |= layoutOrientationChanged;
 					redrawList();
 				}
-			} else if ("componentOrientation" == propertyName) {
+				break;
+			case "componentOrientation":
 				isLeftToRight = list.getComponentOrientation().isLeftToRight();
 				updateLayoutStateNeeded |= componentOrientationChanged;
 				redrawList();
-
 				InputMap inputMap = getInputMap(JComponent.WHEN_FOCUSED);
-				SwingUtilities.replaceUIInputMap(list, JComponent.WHEN_FOCUSED,
-						inputMap);
-			} else if ("List.isFileList" == propertyName) {
+				SwingUtilities.replaceUIInputMap(list, JComponent.WHEN_FOCUSED, inputMap);
+				break;
+			case "List.isFileList":
 				updateIsFileList();
 				redrawList();
-			} else if ("dropLocation" == propertyName) {
+				break;
+			case "dropLocation":
 				JSUtil.notImplemented("dropLocation");
 				// JList.DropLocation oldValue = (JList.DropLocation) e.getOldValue();
 				// repaintDropLocation(oldValue);
 				// repaintDropLocation(list.getDropLocation());
+				break;
 			}
 		}
 

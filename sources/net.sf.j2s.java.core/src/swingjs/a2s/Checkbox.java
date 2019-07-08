@@ -76,7 +76,7 @@ public class Checkbox extends JCheckBox {
 
 	public void setState(boolean b) {
 		if (((DefaultButtonModel) model).setStateNoFire(b))
-			((JSCheckBoxUI) (Object) getUI()).updateDOMNode();
+			秘getUI().updateDOMNode();
 	}   
 	
 	public void setCheckboxGroup(java.awt.CheckboxGroup group) throws HeadlessException {

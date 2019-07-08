@@ -2,7 +2,6 @@ package swingjs.plaf;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
@@ -339,13 +338,6 @@ public class JSEditorPaneUI extends JSTextViewUI {
 			return b != Color.none && (currAttr == null || !b.equals(getBackground(currAttr))); 
 		}
 		return false;
-	}
-
-	private Insets myInsets = new Insets(0, 0, 0, 0);
-
-	@Override
-	public Insets getInsets() {
-		return myInsets;
 	}
 
 	@Override

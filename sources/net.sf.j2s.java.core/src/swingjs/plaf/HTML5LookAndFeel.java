@@ -954,15 +954,15 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				oneThousand,
 				"ComboBox.isEnterSelectablePopup",
 				Boolean.FALSE,
-				// "ComboBox.ancestorInputMap",
-				// new UIDefaults.LazyInputMap(new Object[] {
-				// "ESCAPE", "hidePopup",
-				// "PAGE_UP", "pageUpPassThrough",
-				// "PAGE_DOWN", "pageDownPassThrough",
-				// "HOME", "homePassThrough",
-				// "END", "endPassThrough",
-				// "ENTER", "enterPressed"
-				// }),
+				 "ComboBox.ancestorInputMap",
+				 new UIDefaults.LazyInputMap(new Object[] {
+				 "ESCAPE", "hidePopup",
+				 "PAGE_UP", "pageUpPassThrough",
+				 "PAGE_DOWN", "pageDownPassThrough",
+				 "HOME", "homePassThrough",
+				 "END", "endPassThrough",
+				 "ENTER", "enterPressed"
+				 }),
 				//
 				// *** FileChooser
 

@@ -7,6 +7,7 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dialog;
 import java.awt.Dimension;
+import java.awt.Event;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -537,10 +538,10 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	}
 
 	public static JSComponentUI getUI(Component c, boolean isQuiet) {
-		JSComponentUI ui = /** @2sNative !!c.getUI$ &&*/(JSComponentUI)((JComponent) c).getUI();
+		JSComponentUI ui = ((JComponent) c).秘getUI();
 		if (ui == null) {
 			((JComponent) c).updateUI();
-			ui = (JSComponentUI) ((JComponent) c).getUI();
+			ui = ((JComponent) c).秘getUI();
 		}
 		if (ui == null) {
 			String s = c.getClass().getName();
@@ -999,5 +1000,10 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	public static boolean checkJ2SFlag(String flag) {
 	    return (/** @j2sNative J2S[flag] || */ false);
 	}
+
+    @Override
+	public int getMenuShortcutKeyMask()  {
+        return (isMac ? Event.META_MASK : Event.CTRL_MASK);
+    }
 
 }

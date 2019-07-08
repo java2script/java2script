@@ -362,10 +362,8 @@ public class Container extends JSComponent {
      * @since     JDK1.1
      */
     public Insets getInsets() {
-    	// in SwingJS, we do not clone. Everything is a ContainerPeer.
-    	// it is inconsistent with other classes that this would need cloning.
-    	Insets i = (peer == null ? null : ((ContainerPeer) peer).getInsets());
-    	return  (i == null ? NULL_INSETS : i);
+    	// Panel, ScrollPane, and Window only
+    	return (peer instanceof ContainerPeer ? this.秘getInsetsC() : NULL_INSETS);
     }
 
     public Insets 秘getInsetsC() {
@@ -4678,7 +4676,7 @@ class LightweightDispatcher implements AWTEventListener {
 
 		int x = e.getX(), y = e.getY();
 		Component component = target;
-		Component p = ((JSComponentUI) ((JSComponent) target).getUI()).getTargetParent();
+		Component p = ((JSComponent) target).秘getUI().getTargetParent();
 		if (p != null) {
 			target = component = p;
 		}

@@ -352,9 +352,10 @@ public abstract class InputEvent extends ComponentEvent {
 	 * Consumes this event so that it will not be processed in the default manner by
 	 * the source which originated it.
 	 */
+	@SuppressWarnings("unused")
 	@Override
 	public void consume() {
-		JSComponentUI ui = (JSComponentUI) ((JComponent) source).getUI();
+		JSComponentUI ui = ((JComponent) source).秘getUI();
 		if (bdata != null && ui != null && ui.buttonListener == null 
 				&& ((/** @j2sNative !this.bdata.doPropagate || */false))) {
 			JSToolkit.consumeEvent(this);

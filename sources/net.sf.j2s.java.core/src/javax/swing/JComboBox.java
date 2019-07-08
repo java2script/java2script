@@ -575,7 +575,7 @@ implements ItemSelectable,ListDataListener,ActionListener {
             // Must toggle the state of this flag since this method
             // call may result in ListDataEvents being fired.
             selectingItem = true;
-            if (_trigger || 秘isAWT()) {
+            if (秘trigger || 秘isAWT()) {
             	dataModel.setSelectedItem(objectToSelect);
             } else {
             	((DefaultComboBoxModel)dataModel).秘setSelectedItemQuiet(objectToSelect);
@@ -1035,7 +1035,7 @@ implements ItemSelectable,ListDataListener,ActionListener {
 
     private Action action;
     private PropertyChangeListener actionPropertyChangeListener;
-	protected boolean _trigger;
+	protected boolean 秘trigger;
 
     /**
      * Sets the <code>Action</code> for the <code>ActionEvent</code> source.
@@ -1440,7 +1440,7 @@ implements ItemSelectable,ListDataListener,ActionListener {
         }
         super.processKeyEvent(e);
     }
-
+	
     /**
      * Sets the object that translates a keyboard character into a list
      * selection. Typically, the first selection with a matching first
@@ -1605,8 +1605,8 @@ implements ItemSelectable,ListDataListener,ActionListener {
         ",selectedItemReminder=" + selectedItemReminderString;
     }
 
-	public void _setTrigger(boolean b) {
-		_trigger = b;
+	public void 秘setTrigger(boolean b) {
+		秘trigger = b; 
 	}
 
 

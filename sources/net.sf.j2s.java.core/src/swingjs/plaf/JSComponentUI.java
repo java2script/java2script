@@ -144,7 +144,7 @@ import swingjs.api.js.JQueryObject;
  * 
  */
 public class JSComponentUI extends ComponentUI
-		implements ContainerPeer, JSEventHandler, PropertyChangeListener, ChangeListener, DropTargetPeer {
+		implements JSEventHandler, PropertyChangeListener, ChangeListener, DropTargetPeer {
 
 	private static final int MENUITEM_OFFSET = 11;
 
@@ -765,10 +765,25 @@ public class JSComponentUI extends ComponentUI
 	 * 
 	 * @param node
 	 */
-	private void setDataKeyComponent(DOMNode node) {
+	protected void setDataKeyComponent(DOMNode node) {
 		DOMNode.setAttr(node, "data-keycomponent", c);
 	}
 
+	/**
+	 * Sends key events through JSMouse to a DIFFERENT component;
+	 * used for JComboBox to pass events to JList even though JList
+	 * is not actually there.
+	 * 
+	 * @param node
+	 */
+	protected void setDataShadowKeyComponent(DOMNode node, Component c) {
+		DOMNode.setAttr(node, "data-shadowkeycomponent", c);
+	}
+
+	/**
+	 * 
+	 * @param node
+	 */
 	protected void setDataFocusComponent(DOMNode node) {
 		DOMNode.setAttr(node, "data-focuscomponent", c);
 	}
@@ -1173,13 +1188,14 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	private void updatePropertyAncestor(boolean fromButtonListener) {
+		// Q: Why is setTainted() within fromButtonListener -- here only, not below?
 		if (fromButtonListener) {
 			setTainted();
 			setHTMLElement();
 		}
 		JComponent p = (JComponent) jc.getParent();
 		while (p != null) {
-			JSComponentUI parentui = (JSComponentUI) (p == null ? null : p.getUI());
+			JSComponentUI parentui = (p == null ? null : p.秘getUI());
 			if (parentui != null) {
 				parentui.setTainted();
 				if (fromButtonListener) {
@@ -2194,7 +2210,7 @@ public class JSComponentUI extends ComponentUI
 		if (outerNode != null && !isMenuItem) {
 			// Considering the possibility of the parent being created
 			// before children are formed. So here we can add them later.
-			if (parent == null && jc.getParent() != null && (parent = (JSComponentUI) jc.getParent().getUI()) != null
+			if (parent == null && jc.getParent() != null && (parent = jc.getParent().秘getUI()) != null
 					&& parent.outerNode != null)
 				DOMNode.appendChildSafely(parent.outerNode, outerNode);
 			DOMNode.setPositionAbsolute(outerNode);
@@ -2365,7 +2381,7 @@ public class JSComponentUI extends ComponentUI
 	
 	protected void getJSInsets() {
 		if (insets == null)
-			insets = new Insets(0, 0, 0, 0);
+			insets = zeroInsets;
 		insets = jc.getInsets(insets);
 	}
 
@@ -2407,8 +2423,7 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	protected void updateCenteringNode() {
-		boolean paintsSelf = jc.秘paintsSelf();
-		if (paintsSelf) {
+		if (jc.秘paintsSelfEntirely()) {
 			// component will be responsible for border, background, and text
 			DOMNode.setStyles(centeringNode, "visibility", "hidden");
 			DOMNode.setStyles(domNode, "border", "none");
@@ -2877,7 +2892,7 @@ public class JSComponentUI extends ComponentUI
 		Container parent = c.getParent();
 		// node will be null for Window, including Dialog
 		if (node != null && parent != null) {
-			JSComponentUI ui = (JSComponentUI) c.getParent().getUI();
+			JSComponentUI ui = c.getParent().秘getUI();
 			if (ui.containerNode != null)
 				ui.containerNode.appendChild(node);
 		}
@@ -2993,7 +3008,7 @@ public class JSComponentUI extends ComponentUI
 		 * 			if (what) return this.applet._z[what];
 		 * 
 		 *            while (node && !node.style["z-index"]) node = node.parentElement;
-		 *            z = parseInt(node.style["z-index"]); return(!z || isNaN(z) ?
+		 *            z = parseInt(node && node.style["z-index"]); return(!z || isNaN(z) ?
 		 *            100000 : z);
 		 */
 		{
@@ -3003,24 +3018,18 @@ public class JSComponentUI extends ComponentUI
 
 	// /////////////////////////// ContainerPeer ///////////////////////////
 
-	// all Swing components are containers
-
-	@Override
 	public Insets getInsets() {
 		// In lieu of a JComponent border, the UI is responsible for setting 
 		// the inset that is calculated into the position of the component
 		return null;
 	}
 
-	@Override
 	public void beginValidate() {
 	}
 
-	@Override
 	public void endValidate() {
 	}
 
-	@Override
 	public void beginLayout() {
 		// hide if not a panel and bounds have not been set.
 		if (!boundsSet && !isContainer)
@@ -3031,12 +3040,15 @@ public class JSComponentUI extends ComponentUI
 
 	boolean isLaidOut;
 
-	@Override
 	public void endLayout() {
 		layingOut = false;
 		isLaidOut = true;
 	}
 
+	
+	//////////////////////////////////
+	
+	
 	public String getId() {
 		return id;
 	}
@@ -3338,7 +3350,7 @@ public class JSComponentUI extends ComponentUI
 
 
 	public boolean isModalBlocked() {
-		return ((JSComponentUI)JSComponent.秘getTopInvokableAncestor(jc, false).getUI()).modalBlocked;
+		return JSComponent.秘getTopInvokableAncestor(jc, false).秘getUI().modalBlocked;
 	}
 
 }

@@ -196,7 +196,7 @@ public abstract class DOMNode {
 	}
 
 	public static void setCursor(String c, Component comp) {
-		JSComponentUI ui = (comp == null ? null : (JSComponentUI)((JSComponent) comp).getUI());
+		JSComponentUI ui = (comp == null ? null : ((JSComponent) comp).秘getUI());
 		@SuppressWarnings("unused")
 		DOMNode node = (ui == null ? null : ui.getDOMNode());
 		/**

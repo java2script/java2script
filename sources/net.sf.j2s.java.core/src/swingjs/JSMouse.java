@@ -452,7 +452,8 @@ public class JSMouse {
 	}
 
 	private boolean keyAction(int id, int modifiers, Object jqevent, long time) {
-		JComponent c = 	/** @j2sNative jqevent.target["data-keycomponent"] ||
+		JComponent c = 	/** @j2sNative 
+		jqevent.target["data-shadowkeycomponent"] || jqevent.target["data-keycomponent"]
 				 */null;
 		return JSKeyEvent.dispatchKeyEvent(c, id, modifiers, jqevent, time);
 	}

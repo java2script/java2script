@@ -456,6 +456,8 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 					status = APPLET_ERROR;
 					break;
 				}
+				// BH: This should not be necessary, and it 
+				// is causing validation to happen twice
 				applet.getRootPane().addNotify();
 				// force peer creation now
 				System.out.println("JSAppletViewer start" + currentAppletSize);

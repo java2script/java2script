@@ -70,7 +70,7 @@ public class Choice extends JComboBox {
     
     @Override
     protected void fireItemStateChanged(ItemEvent event) {
-    	if (!_trigger) 
+    	if (!秘trigger)
     		return;
     	A2SEvent.addListener(this);
     	super.fireItemStateChanged(event);

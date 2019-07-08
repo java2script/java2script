@@ -66,7 +66,7 @@ public class JSMenuItemUI extends JSButtonUI {
 		if (jc.isVisible()) {
 			if (prop == "ancestor") {
 				if (jc.getParent() != null) {
- 					((JSComponentUI) jc.getParent().getUI()).setHTMLElement();
+ 					jc.getParent().秘getUI().setHTMLElement();
 				}
 			}
 		}
