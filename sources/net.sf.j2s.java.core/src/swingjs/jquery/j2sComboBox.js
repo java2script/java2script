@@ -1,5 +1,5 @@
 /**
- * @authore Bob Hanson 2019.07.06
+ * @author Bob Hanson 2019.07.06
  * 
  * A relatively simple ComboBox that supports actual objects, not just strings
  * 
@@ -11,7 +11,7 @@ $( function() {
     		+'\n.j2scbcont {position:absolute; left:0px;top:0px;border:black solid 1px;}'
     		+'\n.j2scbhead {position:absolute; left:0px;top:0px;padding:.1em .2em 0em .2em;text-align:left;overflow:hidden;}'
     		+'\n.j2scbbtn {position:absolute; left:100px;top:0px; width:20px;text-align:center;cursor:pointer;background-color:lightblue;padding:0px}'
-    		+'\n.j2scbpopup {position:absolute;}'
+    		+'\n.j2scbpopup {position:absolute; list-style:none}'
     		+'\n.j2scblist {position:absolute; left:0px;top:0px;margin:0;border:black solid 1px;cursor:pointer;text-align:left;padding:0em;scrollbar-width:thin;cursor:pointer;}</style>'
     );
     
@@ -37,150 +37,37 @@ $( function() {
         // Callbacks
         change: null
       },
-      setZIndex: function(z) {
-    	this.options.zIndex = z;
-      },
-      updateList: function(items) {
-    	  this.list.children().detach();
-    	  this.add(items);
-	  },
-	  setHeight: function(h) {
-		  this.options.height = h;
-	  },
-      updateCSS: function() {
-          var w = this.element.width();
-          var h = this.element.height() + 'px';
-          this.cont.css({
-          	width: w + 'px',
-          	height: h,
-          	backgroundColor: this.options.backgroundColor
-          });
-          this.head.css({
-          	width: (w - 20) + 'px',
-          	height: h
-          });
-          this.btn.css({
-          	left: (w - 20) + 'px',
-          	height: h
-          });
-          h = (this.options.height ? this.options.height + 'px' : null);
-          this.popup.css({
-            width: w + 'px',
-        	height: h
-          });  
-          this.list.css({
-            width: w + 'px',
-          	height: h,
-          	overflowY: (h ? null : 'auto')
-          });  
-      },
-      getSelectedItem: function() { return this._selected() },
-      getSelectedIndex: function() { return this._selected()[0] ? this._selected()[0].j2scbIndex : -1 },
-      setSelectedIndex: function(n) { return this._clickOpt({target: $('#' + this.id() + '_opt' + n)}, false) },
-      setText: function(s) { this.head.text(s) },
-      _selected: function() { return this.list && this.list.find('.j2scb-sel')},
-      
-      _leave: function() {
-          if (t)return;
-          var me = this;
-      	  t = setTimeout(function() {  
-      		  me.hidePopup();
-      	  	  stopT();
-      	  },CLOSE_DELAY);
-      },
-  	  hidePopup: function() {
-  		 this.options.popupVisible = false;
-  		 this.popup.hide();
-  	  },
-  	  popupVisible: function() { return this.options.popupVisible; }, 
-  	  showPopup: function() {
-  		this.cont.focus();
-  		if (this.options.disabled)
-  			return;
-		stopT();
-		var loc = this.element.offset();
-		this.options.popupVisible = true;
-	 	this.popup.css({
-	 		'display':'block',
-	 		left: loc.left + 'px',
-        	top: (loc.top + this.element.height() + 1) + 'px',
-        	width:this.element.css('width'),
-	 		'z-index': this.options.zIndex
-	 	});
-	  	this.list.scrollTop(0);
-	  	this.element.focus();
-	  },
-      update: function(andTrigger) {
-  		 var sel = this._selected();
-  		 var all;
-  		 this.options.selectedIndex = this.getSelectedIndex();
-  		 this.head.text(sel.length ==0 ? '' : 
-  			this.options.mode == 's' ? sel.text() : sel.length + ' of ' 
-  					+ (all = this.list.find('.j2scbopt').length) + ' selected option' + (all > 1 ? 's' :''));
-  		 if (andTrigger)
-	      	this._trigger( 'change' , null, [this, "selected", sel[0].j2scbIndex]);
-	     else
-	    	 stopT();
-      },  
       itemCount: 0,
+      
       id: function() {return this.element[0].id},
       find: function(x) {return this.element.find(x)},
       on: function(a, x) {for(var i = a.length; --i >= 0;)this._on(a[i],x)},
-      add: function(items) {
-    	  if (Array.isArray(items)) {
-        	this.itemCount = 0;    		
-    	  } else {
-    		items = [items];  
-    	  }
-    	  for (var i = 0; i < items.length; i++) {
-    		var item = items[i];
-    		if (!item)continue;
-    		var opt = $('<li>', {'class':'j2scbopt j2scb-unsel', 'id': this.id() + '_opt' + this.itemCount});
-    		opt[0].j2scbIndex = this.itemCount++;    		
-    		this.list.append(opt);
-			if (typeof item == 'string') {
-				opt.text(item);
-    		} else {
-    			opt.append(item);
-    		}
-	        this._on(opt, {mouseleave: '_leave', mouseover: '_overOpt', click : '_clickOpt'});
-    	  }
+      on2: function(obj, evts, handle) {var a = {};for(var i = evts.length; --i >= 0;)a[evts[i]]=handle;this._on(obj, a)},
+
+  	  popupVisible: function() { return this.options.popupVisible; }, 
+
+  	  setHeight: function(h) {
+		  this.options.height = h;
+	  },
+      setZIndex: function(z) {
+    	this.options.zIndex = z;
       },
-      hoverIndex: function(i) {
-    	this._overOpt(this.list[0].children[i]);  
+      
+      _mouse: function(e) { 
+    	  var opt = $(e.target).closest('.j2scbopt');
+    	  this._trigger('change', e, [this, 'mouse', (opt[0] ? opt[0].j2scbIndex : -1)])
       },
-      _overOpt: function(e) {
-    	  stopT();
-    	  this.list.find('.j2scbopt').removeClass('j2scb-hov j2scb-sel');
-    	  var opt = $(e.target || e).closest('.j2scbopt');
-    	  opt.addClass('j2scb-hov');
-    	  this._trigger("change", e, [this, "mouseover", opt[0].j2scbIndex])
-    	  return opt;
+      _keyEvent: function(e) {
+    	  this._trigger('change', e, [this, 'keyevent']);
       },
-      _clickOpt: function(e, andTrigger) {
-    	    andTrigger |= (arguments.length == 1);
-    	    var opt = $(e.target || e).closest('.j2scbopt');
-    	  	var opts = this.list.find('.j2scbopt');
-    	  	opts.removeClass('j2scb-hov');
-	    	if (this.options.mode=='s') {
-	    		opts.removeClass('j2scb-sel');
-	    	    opts.addClass('j2scb-unsel');
-	    	    opt.removeClass('j2scb-unsel');
-	    	    opt.addClass('j2scb-sel');
-	    	    if (andTrigger)
-	    	    	this._leave();
-	    	} else if (mode == 'm') {  
-	    		  if (opt.is('.j2scb-sel')) {
-	    			opt.addClass('j2scb-unsel');
-	    			opt.removeClass('j2scb-sel');
-	    	      } else {
-	    			opt.addClass('j2scb-sel');
-	    			opt.removeClass('j2scb-unsel');
-	    	      }  
-	    	}  
-	    	this.update(andTrigger);
-	    	return opt;
+ 
+      // Called when created, and later when changing options
+      _refresh: function() {
+ 
+        // Trigger a callback/event
+        this._trigger( 'change' , null, [this, "refreshed"] );
       },
+ 
       // The constructor
       _create: function() {
     	var id = this.id();
@@ -193,15 +80,16 @@ $( function() {
         	display:'none',
         });
         this.list = $( '<ul>', {'class': 'j2scblist', 'id':id+'_list' });
+        this.on2(this.list, 'click mousedown touchstart mousemove touchmove mouseup touchend mousewheel mouseover mouseout mouseenter mouseexit'.split(' '), '_mouse');
         this.popup.append(this.list);        
         this.element.append(this.cont);
         // important to add popup to body, because it is 
         $('body').append(this.popup);
         this.updateCSS();    	
-        this.on( [this.head, this.btn, this.cont], { click: 'showPopup' });
+        this.on( [this.head, this.btn, this.cont], { click: '_open' });
         this.on( [this.popup, this.list], {mouseover: stopT });
         this.on( [this.cont, this.head, this.btn, this.popup, this.list], {
-        	mouseleave: '_leave'//,
+        	mouseleave: '_close'//,
         	//keydown: '_keyEvent'
         		});
         
@@ -211,17 +99,6 @@ $( function() {
         this.setSelectedIndex(this.options.selectedIndex)
         this._refresh();
       },
-      _keyEvent: function(e) {
-    	  this._trigger('change', e, [this, 'keyevent', e]);
-      },
- 
-      // Called when created, and later when changing options
-      _refresh: function() {
- 
-        // Trigger a callback/event
-        this._trigger( 'change' , null, [this, "refreshed"] );
-      },
- 
       // Events bound via _on are removed automatically
       // revert other modifications here
       _destroy: function() {
@@ -247,9 +124,152 @@ $( function() {
     	  if (key == "disabled") {
     		  this.options.disabled = true;
     	  }
-    	//  if (false)return;
         //[prevent invalid value here with test and return]
         this._super( key, value );
+      },
+
+      update: function(andTrigger) {
+   		 var sel = this._selectedItem();
+   		 var all;
+   		 this.options.selectedIndex = (sel[0] ? sel[0].j2scbIndex : -1);
+   		 this.head.text(sel.length ==0 ? '' : 
+   			this.options.mode == 's' ? sel.text() : sel.length + ' of ' 
+   					+ (all = this.list.find('.j2scbopt').length) + ' selected option' + (all > 1 ? 's' :''));
+   		 if (andTrigger)
+ 	      	this._trigger( 'change' , null, [this, "selected", sel[0].j2scbIndex]);
+ 	     else
+ 	    	 stopT();
+       },  
+      updateList: function(items) {
+    	  this.list.children().detach();
+    	  this.add(items);
+	  },
+      add: function(items) {
+      	  var y = 0;
+    	  if (Array.isArray(items)) {
+        	this.itemCount = 0;    		
+    	  } else {
+    	  	this.list.children().each(function(a) {y += a.height()});
+    		items = [items];  
+    	  }
+    	  for (var i = 0; i < items.length; i++) {
+    		var item = items[i];
+    		if (!item)continue;
+    		var opt = $('<li>', {'class':'j2scbopt j2scb-unsel', 'id': this.id() + '_opt' + this.itemCount});
+    		opt[0].j2scbIndex = this.itemCount++;    		
+    		this.list.append(opt);
+			if (typeof item == 'string') {
+				opt.text(item);
+    		} else {
+    			var ji = $(item);
+    			ji.css("background-color", "transparent");
+    			opt.append(item);
+    			opt.css({height:ji.css("height")});
+	    		y += opt.height();
+    		}
+    		this.list.css({height: (y + 2) + "px"});
+	        this._on(opt, {mouseleave: '_close', mouseover: '_overOpt', click : '_clickOpt'});
+    	  }
+      },
+      updateCSS: function() {
+          var w = this.element.width();
+          if (w == 0)
+        	  return;
+          var h = this.element.height() + 'px';
+          this.cont.css({
+          	width: w + 'px',
+          	height: h,
+          	backgroundColor: this.options.backgroundColor
+          });
+          this.head.css({
+          	width: (w - 20) + 'px',
+          	height: h
+          });
+          this.btn.css({
+          	left: (w - 20) + 'px',
+          	height: h
+          });
+          h = (this.options.height ? this.options.height + 'px' : null);
+          this.popup.css({
+            width: w + 'px',
+        	height: h
+          });  
+          this.list.css({
+            width: w + 'px',
+          	height: h,
+          	overflowY: (h ? null : 'auto')
+          });  
+      },
+      
+      setSelectedIndex: function(n) { return this._clickOpt({target: $('#' + this.id() + '_opt' + n)}, false) },
+      _selectedItem: function() { return this.list && this.list.find('.j2scb-sel') },
+            
+      setText: function(s) { this.head.text(s) },
+      hoverOver: function(i) {
+      	this._overOpt(i >= 0 ? this.list[0].children[i] : null);  
+        },
+      showPopup: function() { this._open(null);},
+  	  _open: function(e) {
+  		this.cont.focus();
+  		if (this.options.disabled)
+  			return;
+		stopT();
+		var loc = this.element.offset();
+		if (e)
+			this._trigger('change', null, [this, 'opening']);
+		this.options.popupVisible = true;
+	 	this.popup.css({
+	 		'display':'block',
+	 		left: loc.left + 'px',
+        	top: (loc.top + this.element.height() + 1) + 'px',
+        	width:this.element.css('width'),
+	 		'z-index': this.options.zIndex
+	 	});
+	  	this.list.scrollTop(0);
+	  	this.element.focus();
+	  },
+  	  hidePopup: function() {
+   		 this.options.popupVisible = false;
+   		 this.popup.hide();
+   	  },
+      _overOpt: function(e) {
+    	  stopT();
+    	  this.list.find('.j2scbopt').removeClass('j2scb-hov j2scb-sel');
+    	  var opt = $(e && e.target || e).closest('.j2scbopt');
+    	  opt.addClass('j2scb-hov');
+    	  this.options.hoveredIndex = (opt[0] ? opt[0].j2scbIndex : -1);
+      },
+      _clickOpt: function(e, andTrigger) {
+    	    andTrigger |= (arguments.length == 1);
+    	    var opt = $(e.target || e).closest('.j2scbopt');
+    	  	var opts = this.list.find('.j2scbopt');
+    	  	opts.removeClass('j2scb-hov');
+	    	if (this.options.mode=='s') {
+	    		opts.removeClass('j2scb-sel');
+	    	    opts.addClass('j2scb-unsel');
+	    	    opt.removeClass('j2scb-unsel');
+	    	    opt.addClass('j2scb-sel');
+	    	    if (andTrigger)
+	    	    	this._close();
+	    	} else if (mode == 'm') {  
+	    		  if (opt.is('.j2scb-sel')) {
+	    			opt.addClass('j2scb-unsel');
+	    			opt.removeClass('j2scb-sel');
+	    	      } else {
+	    			opt.addClass('j2scb-sel');
+	    			opt.removeClass('j2scb-unsel');
+	    	      }  
+	    	}  
+	    	this.update(andTrigger);
+	    	return opt;
+      },
+      _close: function() {
+          if (t)return;
+          var me = this;
+      	  t = setTimeout(function() {  
+      		  me.hidePopup();
+      	  	  stopT();
+      	  },CLOSE_DELAY);
       }
     });
  

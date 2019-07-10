@@ -106,6 +106,7 @@ public class JSLabelUI extends JSLightweightUI {
 
 	@Override
 	public Dimension getPreferredSize(JComponent jc) {
+		updateDOMNode();
 		return (label == null ? super.getPreferredSize(jc) : JSGraphicsUtils.getPreferredButtonSize(((AbstractButton) jc), ((AbstractButton) jc).getIconTextGap()));
 	}
 

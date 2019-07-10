@@ -43,7 +43,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 
-import swingjs.JSKeyEvent;
+import swingjs.JSMouse;
 //import swingjs.api.JSMinimalAbstractDocument;
 import swingjs.api.js.DOMNode;
 
@@ -120,7 +120,7 @@ public class TextListener implements FocusListener, ChangeListener,
 		DOMNode activeElement =  (/** @j2sNative document.activeElement || */null);
 		if (activeElement != ui.domNode) // tabbed out of this object
 			return JSComponentUI.HANDLED;
-		eventType = JSKeyEvent.fixEventType(jqevent, eventType);
+		eventType = JSMouse.fixEventType(jqevent, eventType);
 		int keyCode = /** @j2sNative jqevent.keyCode || */0;
 		Point markDot = ui.getNewCaretPosition(eventType, keyCode);
 		int mark = markDot.x;

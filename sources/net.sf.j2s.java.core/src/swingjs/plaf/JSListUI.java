@@ -346,17 +346,14 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 				true);
 		updateItemHTML(rendererComponent, index, cx, cy, cw, getRowHeight(index));
 
-		
-		/**
-		 * @j2sNative
-		 *            rendererComponent.ui.domNode = null;
-		 *            rendererComponent.ui.reInit$();
-		 */
-		{}
+		((JComponent) rendererComponent).秘getUI().reInit(false);
 
 	}
 
 	private void updateItemHTML(Component c, int index, int left, int top, int width, int height) {
+		if (c != null) {
+			c.setSize(width, height);
+		}
 		DOMNode node = (c == null ? null : ((JSComponentUI) ((JComponent) c).ui).getDOMNode());
 		String myid = id + "_" + index;
 		JQueryObject jnode = $((DOMNode) (Object) ("#" + myid));
@@ -1473,6 +1470,7 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 					Component c = renderer.getListCellRendererComponent(list, value,
 							index, false, false);
 					rendererPane.add(c);
+					c.setSize(c.getPreferredSize());
 					((JComponent) c).秘getUI().updateDOMNode();
 					((JComponent) c).getInsets();
 					Dimension cellSize = c.getPreferredSize();
@@ -2483,7 +2481,6 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 		 */
 		@Override
 		public void keyPressed(KeyEvent e) {
-			//System.out.println("pressed " + isNavigationKey(e) + " " + e);
 			if (isNavigationKey(e)) {
 				prefix = "";
 				typedString = "";
@@ -2497,7 +2494,6 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 		 */
 		@Override
 		public void keyReleased(KeyEvent e) {
-			//System.out.println("released " + e);
 		}
 
 		/**
@@ -2710,14 +2706,17 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 		//
 		@Override
 		public void mouseClicked(MouseEvent e) {
+			list.秘processUIEvent(e);
 		}
 
 		@Override
 		public void mouseEntered(MouseEvent e) {
+			list.秘processUIEvent(e);
 		}
 
 		@Override
 		public void mouseExited(MouseEvent e) {
+			list.秘processUIEvent(e);
 		}
 
 		// Whether or not the mouse press (which is being considered as part
@@ -2728,7 +2727,7 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 
 		@Override
 		public void mousePressed(MouseEvent e) {
-			if (SwingUtilities2.shouldIgnore(e, list)) {
+			if (list.秘processUIEvent(e)) {
 				return;
 			}
 
@@ -2825,7 +2824,7 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 
 		@Override
 		public void mouseDragged(MouseEvent e) {
-			if (SwingUtilities2.shouldIgnore(e, list)) {
+			if (list.秘processUIEvent(e)) {
 				return;
 			}
 
@@ -2854,11 +2853,12 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 
 		@Override
 		public void mouseMoved(MouseEvent e) {
+			list.秘processUIEvent(e);
 		}
 
 		@Override
 		public void mouseReleased(MouseEvent e) {
-			if (SwingUtilities2.shouldIgnore(e, list)) {
+			if (list.秘processUIEvent(e)) {
 				return;
 			}
 
@@ -2965,36 +2965,28 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 	// ListPeer 
 	
     public void makeVisible(int index) {
-//		System.out.println("JSListUI makeVisible "+ index);
     }
 
 	public int[] getSelectedIndexes() {
-//		System.out.println("JSListUI getselected");
 		return new int[] {};
 	}
 
 	public void add(String item, int index) {
-//		System.out.println("JSListUI add item " + item + " at "+ index);
 	}
 
 	public void delItems(int start, int end) {
-//		System.out.println("JSListUI delItems " + start + " " + end);
 	}
 
 	public void removeAll() {
-//		System.out.println("JSListUI removeAll");
 	}
 
 	public void select(int index) {
-//		System.out.println("JSListUI select " + index);
 	}
 
 	public void deselect(int index) {
-//		System.out.println("JSListUI deselect " + index);
 	}
 
 	public void setMultipleMode(boolean m) {
-//		System.out.println("JSListUI setMultipleMode " + m);
 	}
 
 	/**
@@ -3011,13 +3003,14 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 		ListModel m = list.getModel();
 		for (int i = m.getSize(); --i >= 0; ) {
 			Object o = m.getElementAt(i);
+			int d = 0;
 			if (o instanceof Component) {
-				w += ((Component) o).getPreferredSize().width;
+				d = ((Component) o).getPreferredSize().width;
 			} else if (o != null) {
-				int d = list.getFontMetrics(getFont()).stringWidth(o.toString());
-				if (d > w)
-					w = d;
+				d = list.getFontMetrics(getFont()).stringWidth(o.toString());
 			}
+			if (d > w)
+				w = d;
 		}
 		return new Dimension(w + 24, h); 
 	}

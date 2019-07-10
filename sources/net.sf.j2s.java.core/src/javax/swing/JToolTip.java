@@ -29,10 +29,6 @@
 
 package javax.swing;
 
-import java.awt.Insets;
-import java.awt.peer.ComponentPeer;
-import java.awt.peer.ContainerPeer;
-
 /**
  * Used to display a "Tip" for a Component. Typically components provide api
  * to automate the process of using <code>ToolTip</code>s.
@@ -172,13 +168,4 @@ public class JToolTip extends JComponent {
     }
 
     
-    @Override
-	public Insets getInsets() {
-        ComponentPeer peer = this.peer;
-        Insets i = ((ContainerPeer)peer).getInsets();
-        return (i == null ? NULL_INSETS : i);
-    }
-
-
-
 }

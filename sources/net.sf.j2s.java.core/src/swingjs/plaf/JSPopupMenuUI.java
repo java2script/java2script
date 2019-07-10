@@ -200,6 +200,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 			//have to cheat here; these values are private to JMenu.
 			int x = /** @j2sNative this.menu.desiredLocationX || */0;
 			int y = /** @j2sNative this.menu.desiredLocationY || */0;
+			setZ(getInheritedZ((JComponent) menu.getInvoker()) + 2);
 			j2sSwingMenu.showMenu(menu, x, y);
 //		} else {
 //			hideMenu();

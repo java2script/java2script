@@ -460,10 +460,10 @@ public abstract class JSComponent extends Component {
     	JSComponent[] components = (JSComponent[]) 秘getChildArray((Container) this);
     	int[] zorders = new int[n];
         for (int i = 0; i < n; i++)
-            zorders[i] = components[i].秘getUI().getZIndex(null);
+            zorders[i] = JSComponentUI.getInheritedZ((JComponent)components[i]);
         Arrays.sort(zorders);
         for (int i = 0; i < n; i++)
-        	components[i].秘getUI().setZOrder(zorders[n - 1 - i]);
+        	components[i].秘getUI().setZ(zorders[n - 1 - i]);
 	}
 
 	
@@ -712,5 +712,14 @@ public abstract class JSComponent extends Component {
 //		return false;
 //	}
 
-	
+	private boolean 秘isDesktop;
+
+	public void 秘setIsDesktop() {
+		秘isDesktop = true;
+	}
+
+	public boolean 秘isDesktop() {
+		return 秘isDesktop;
+	}
+
 }

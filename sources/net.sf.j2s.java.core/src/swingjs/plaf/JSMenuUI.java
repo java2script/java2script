@@ -6,9 +6,7 @@ import java.beans.PropertyChangeEvent;
 
 import javax.swing.JComponent;
 import javax.swing.JMenu;
-import javax.swing.UIManager;
 
-import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 
 public class JSMenuUI extends JSMenuItemUI {
@@ -73,9 +71,8 @@ public class JSMenuUI extends JSMenuItemUI {
 	private void rebuild() {
 		if (jc.getParent() != null) {
 			if (domNode != null && isMenuItem == jm.isTopLevelMenu()) {
-				reInit();
-				outerNode = null;
-				updateDOMNode();
+        outerNode = null;
+				reInit(true);
 				return;
 			}
 		}

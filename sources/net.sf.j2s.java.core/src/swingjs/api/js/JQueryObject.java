@@ -84,6 +84,15 @@ public interface JQueryObject {
 
 		public abstract Object[] j2sCB(String method, int i);
 
+		/**
+		 *
+		 * @param method
+		 * @param i
+		 * @param i2 ignored -- just to set the signature
+		 * @return
+		 */
+		public abstract int j2sCB(String OPTION, String name);
+
 		
 	}
 	

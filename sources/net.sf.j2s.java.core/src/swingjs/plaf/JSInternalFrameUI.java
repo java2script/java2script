@@ -302,6 +302,16 @@ public class JSInternalFrameUI extends JSFrameUI {
 		// delegate to desktop manager
 		getDesktopManager().closeFrame(f);
 	}
+	
+	@Override
+	public void toFront() {
+		// not a JInternalFrame operation
+	}
+
+	@Override
+	public void toBack() {
+		// not a JInternalFrame operation
+	}
 
 	/**
 	 * This method is called when the frame becomes selected. This action is

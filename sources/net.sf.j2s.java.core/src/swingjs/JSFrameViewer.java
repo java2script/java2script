@@ -8,6 +8,7 @@ import java.awt.JSComponent;
 import java.util.Hashtable;
 
 import javax.swing.JApplet;
+import javax.swing.JComponent;
 import javax.swing.JRootPane;
 import javax.swing.RootPaneContainer;
 

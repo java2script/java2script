@@ -91,7 +91,7 @@ public class JSKeyEvent extends KeyEvent {
 		 */
 
 		if (id == 0)
-			id = fixEventType(jqevent, 0);
+			id = JSMouse.fixEventType(jqevent, 0);
 		if (id == 0)
 			return null;
 		int keyCode = getJavaKeyCode(jskeyCode, jskey);
@@ -115,7 +115,7 @@ public class JSKeyEvent extends KeyEvent {
 		 * 
 		 */
 		setBData(bdata);
-		modifiers = getModifiers(ev);
+		modifiers = JSMouse.getModifiers(ev);
 	}
 
 	private static int getJavaKeyCode(int jskeyCode, String jskey) {
@@ -186,43 +186,6 @@ public class JSKeyEvent extends KeyEvent {
 			return (jskey.length() == 1);
 		}
 		
-	}
-
-	public static int getModifiers(Object ev) {
-		boolean shift = false, ctrl = false, meta = false, alt = false, altGraph = false;
-		/**
-		 * @j2sNative
-		 * 
-		 *            shift = ev.shiftKey;
-		 *            ctrl = ev.ctrlKey;
-		 *            alt = ev.altKey;
-		 *            meta = ev.metaKey;
-		 *            altGraph = ev.altGraphKey;
-		 */
-		return getModifiers(shift, ctrl, alt, meta, altGraph);
-
-	}
-	private static int getModifiers(boolean shift, boolean ctrl, boolean alt, boolean meta, boolean altGraph) {
-		 int modifiers = 0; 
-		if (shift)
-			modifiers |= InputEvent.SHIFT_MASK + InputEvent.SHIFT_DOWN_MASK;
-		if (ctrl)
-			modifiers |= InputEvent.CTRL_MASK + InputEvent.CTRL_DOWN_MASK;
-		if (alt)
-			modifiers |= InputEvent.ALT_MASK + InputEvent.ALT_DOWN_MASK;
-		if (meta)
-			modifiers |= InputEvent.META_MASK + InputEvent.META_DOWN_MASK;
-		if (altGraph)
-			modifiers |= InputEvent.ALT_GRAPH_MASK + InputEvent.ALT_GRAPH_DOWN_MASK;
-		return modifiers;
-	}
-
-	public static int fixEventType(Object jqevent, int eventType) {
-		String evType = /**@j2sNative jqevent.type ||*/"";
-		return (evType == "keydown" ? KEY_PRESSED
-				: evType == "keypress" ? KEY_TYPED 
-				: evType == "keyup" ? KEY_RELEASED 
-				: eventType);
 	}
 
 }

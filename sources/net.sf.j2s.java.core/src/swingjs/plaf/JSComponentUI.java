@@ -16,6 +16,7 @@ import java.awt.JSComponent;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.peer.DropTargetPeer;
 import java.awt.event.KeyEvent;
@@ -237,9 +238,7 @@ public class JSComponentUI extends ComponentUI
 	 */
 	protected void saveCellNodes(DOMNode td, boolean isHeader) {
 		outerNode = null;
-		reInit();
-		//if (isHeader) // or headers will be blank
-			updateDOMNode();
+		reInit(true);
 		DOMNode[] nodes = new DOMNode[] {
 				domNode,
 				innerNode,
@@ -723,13 +722,14 @@ public class JSComponentUI extends ComponentUI
 	/**
 	 * This must remain the only place that domNode is set to null;
 	 */
-	public void reInit() {
+	public DOMNode reInit(boolean getNew) {
 		setTainted();
 		if (domNode != null)
 			DOMNode.dispose(domNode);
 		domNode = null;
 		keysEnabled = false;
 		newID(true);
+		return (getNew ? getDOMNode() : null);
 	}
 
 	// ////////////// user event handling ///////////////////
@@ -1426,6 +1426,8 @@ public class JSComponentUI extends ComponentUI
 
 	protected DOMNode embeddingNode;
 
+	private static DOMNode tempDiv;
+
 	/**
 	 * we can allow frames -- particularly JInternalFrames in a JDesktopFrame -- to overflow.
 	 * 
@@ -1459,9 +1461,10 @@ public class JSComponentUI extends ComponentUI
 	public DOMNode updateDOMNode() {
 		if (domNode == null) {
 			if (notImplemented) {
-				String msg = "Swingjs WARNING: default JSComponentUI.updateDOMNode() is being used for "
-						+ getClass().getName();
-				System.out.println(msg);
+				notImplemented = false;
+				String s = jc.getClass().getName();
+				if (!s.equals("javax.swing.Box$Filler"))
+					System.out.println("Swingjs WARNING: default JSComponentUI.updateDOMNode() is being used for " + s);
 			}
 			domNode = DOMNode.createElement("div", id);
 		}
@@ -1600,72 +1603,80 @@ public class JSComponentUI extends ComponentUI
 		boolean hasFocus = false;
 		if (scrollPaneUI != null) {
 			w = scrollPaneUI.c.getWidth();
-			h = scrollPaneUI.c.getHeight(); 
+			h = scrollPaneUI.c.getHeight();
 		} else if (usePreferred && preferredSize != null) {
 			// preferred size has been set by JComponent layout
 			// and delivered via a property change "preferredSize"
 			w = preferredSize.width;
 			h = preferredSize.height;
 			// frame resizeing will be here
-			position = /** @j2sNative node.style.position || */null;
+			position = /** @j2sNative node.style.position || */
+					null;
 		} else if (usePreferred && preferredDim != null) {
 			// has been set by setAlignments
 			w = preferredDim.width;
 			h = preferredDim.height;
-			position = /** @j2sNative node.style.position || */null;
+			position = /** @j2sNative node.style.position || */
+					null;
 		} else {
 			// determine the natural size of this object
 			// save the parent node -- we will need to reset that.
 			hasFocus = hasFocus();
-			parentNode = DOMNode.transferTo(node, null);
 
 			// remove position, width, and height, because those are what we are
 			// setting here
 
-			boolean simpleButton = isSimpleButton;
-			DOMNode centerNode = centeringNode;
-			DOMNode dnode = domNode;
-			
-			if (!isMenuItem)
-			/**
-			 * @j2sNative
-			 * 
-			 * 			w0 = node.style.width; h0 = node.style.height; position =
-			 *            node.style.position;
-			 * 
-			 *            if (node == centerNode && simpleButton) { w0i =
-			 *            dNode.style.width; h0i = dNode.style.height; }
-			 */
-			{
-				w0 = w0i = "";
+			if (!isMenuItem) {
+				@SuppressWarnings("unused")
+				boolean simpleButton = isSimpleButton;
+				@SuppressWarnings("unused")
+				DOMNode centerNode = centeringNode;
+				@SuppressWarnings("unused")
+				DOMNode dnode = domNode;
+				/**
+				 * @j2sNative
+				 * 
+				 * 			w0 = node.style.width; h0 = node.style.height; position =
+				 *            node.style.position;
+				 * 
+				 *            if (node == centerNode && simpleButton) { w0i = dNode.style.width;
+				 *            h0i = dNode.style.height; }
+				 */
+				{
+					w0 = w0i = "";
+				}
 			}
 			DOMNode.setStyles(node, "position", null, "width", null, "height", null);
 			if (innerNode != null) // JSListUI only
 				DOMNode.setStyles(innerNode, "width", null, "height", null);
-			DOMNode div;
-			String s = (String) DOMNode.getAttr(node, "tagName");
-			if (s == "DIV" || s == "SPAN")
-				div = node;
-			else
-				div = wrap("div", id + "_temp", node);
-			DOMNode.setPositionAbsolute(div);
-
 			// process of discovering width and height is facilitated using
 			// jQuery
 			// and appending to document.body.
 			// By using .after() we avoid CSS changes in the BODY element.
 			// but this almost certainly has issues with zooming
 
-			if (node == this.centeringNode) {
-				// can't have these for getBoundingClientRect to work
-				DOMNode.setStyles(node, "position", null);
-				DOMNode.setStyles(this.textNode, "position", null);
-				DOMNode.setStyles(this.iconNode, "position", null);
+			if (node == centeringNode) {
+//				if (isHTML && (/** @j2sNative this.textNode.firstElementChild.tagName || */null) == "DIV") {
+//					node = (DOMNode) DOMNode.getAttr(textNode, "firstChild");
+				if (!isHTML) {
+
+					// can't have these for getBoundingClientRect to work
+					DOMNode.setStyles(node, "position", null);
+					DOMNode.setStyles(this.textNode, "position", null);
+					DOMNode.setStyles(this.iconNode, "position", null);
+				}
 			}
 
-			$(body).after(div);
-			Rectangle r = div.getBoundingClientRect();
-			
+			if (tempDiv == null) {
+				tempDiv = DOMNode.createElement("div", "_temp");
+				DOMNode.setTopLeftAbsolute(tempDiv, 0, -100000);
+				$(body).after(tempDiv);
+			}
+			parentNode = DOMNode.transferTo(node, null);
+			tempDiv.appendChild(node);
+			Rectangle r = tempDiv.getBoundingClientRect();
+			tempDiv.removeChild(node);
+
 			// From the DOM; Will be Rectangle2D.double, actually.
 			// This is preferable to $(text).width() because that is rounded
 			// DOWN.
@@ -1678,7 +1689,6 @@ public class JSComponentUI extends ComponentUI
 				actualWidth = w;
 				actualHeight = h;
 			}
-			$(div).detach();
 		}
 		// allow a UI to slightly adjust its dimension
 		Dimension dim = getCSSAdjustment(addCSS);
@@ -2109,12 +2119,7 @@ public class JSComponentUI extends ComponentUI
 		if (b) {
 			if (isDisposed)
 				undisposeUI(node);
-			toFront();
 		}
-	}
-
-	public void toFront() {
-		// windows only
 	}
 
 	@Override
@@ -2567,8 +2572,7 @@ public class JSComponentUI extends ComponentUI
 		Object cssIcon = getJSObject();
 		
 		
-		DOMNode.setStyles(centeringNode, "position", "absolute", "top", null, "left", null, "transform", null);
-		DOMNode.setStyles(centeringNode, "width", wCtr + "px", "height", hCtr + "px");
+		DOMNode.setStyles(centeringNode, "position", "absolute", "top", null, "left", null, "transform", null, "width", wCtr + "px", "height", hCtr + "px");
 
 		isFullyCentered = false;
 		if (alignHCenter && alignVCenter && wIcon == 0 || wText == 0 && margins.left == margins.right
@@ -2650,6 +2654,7 @@ public class JSComponentUI extends ComponentUI
 
 			if (menuAnchorNode == null) {
 				int top;
+				
 				switch (vAlign) {
 				case SwingConstants.TOP:
 					top = margins.top + insets.top;
@@ -2662,6 +2667,8 @@ public class JSComponentUI extends ComponentUI
 					top = (h - hCtr + margins.top - margins.bottom - insets.top - insets.bottom) / 2;
 					break;
 				}
+
+				//System.out.println("jscui.setAlignments " + b.getText() + " " + vAlign + " " + top + " " + h + " " + hCtr + " " + jc.getClass().getName() + " " + b.getFont() + " " + margins + " " + insets + " " + top);
 
 				addCSS(cssCtr, "top", top + "px");
 				int itop;
@@ -2839,7 +2846,7 @@ public class JSComponentUI extends ComponentUI
 	 */
 	@Override
 	public Point getLocationOnScreen() {
-		Insets offset = (Insets) $(outerNode).offset();
+		Insets offset = (Insets) $(outerNode == null ? jc.getParent().秘getUI().outerNode : outerNode).offset();
 		return new Point(offset.left, offset.top);
 	}
 
@@ -2996,25 +3003,57 @@ public class JSComponentUI extends ComponentUI
 		return null;
 	}
 
-	public int getZIndex(String what) {
-		@SuppressWarnings("unused")
+	/**
+	 * Efficiently find the closest object in the DOM hierarchy to this component's
+	 * domNode that has a non-zero and non-blank z-index.
+	 * 
+	 * @return z-index of self or higher element; 9000 as default
+	 */
+	
+	public static int getInheritedZ(JComponent c) {
+		return c.秘getUI().getInheritedZ();
+	}
+
+	/**
+	 * Efficiently find the closest object in the DOM hierarchy to this component's
+	 * domNode that has a non-zero and non-blank z-index.
+	 * 
+	 * @return z-index of self or higher element; 9000 as default
+	 */
+	@SuppressWarnings("unused")
+	protected int getInheritedZ() {
 		DOMNode node = domNode;
+		int base = 9000;
 		int z = 0;
 		/**
-		 * looking for high-level content pane or frame
-		 * 
 		 * @j2sNative
 		 * 
-		 * 			if (what) return this.applet._z[what];
-		 * 
 		 *            while (node && !node.style["z-index"]) node = node.parentElement;
-		 *            z = parseInt(node && node.style["z-index"]); return(!z || isNaN(z) ?
-		 *            100000 : z);
+		 *            !(z = +(node && node.style["z-index"])) && (z = base);
 		 */
-		{
-			return z;
-		}
+		return z;
 	}
+
+	/**
+	 * Set the z-index of this component's domNode and outerNode
+	 * @param z
+	 */
+	public void setZ(int z) {
+		DOMNode.setPositionAbsolute(domNode);
+		DOMNode.setZ(domNode, z);
+		DOMNode.setZ(outerNode, z);// saves it
+	}
+
+	/**
+	 * Bring the container of this component to the front
+	 * @param c
+	 */
+	public static void containerToFront(JComponent c) {
+		Component w = c.getRootPane().getParent();
+		if (w instanceof Window)
+			((Window) w).toFront();
+	}
+
 
 	// /////////////////////////// ContainerPeer ///////////////////////////
 
@@ -3156,12 +3195,6 @@ public class JSComponentUI extends ComponentUI
 		if (dropTarget == this)
 			return;
 		J2S.setDragDropTarget(c, getDOMNode(), dropTarget != null);
-	}
-
-	public void setZOrder(int z) {
-		DOMNode.setPositionAbsolute(domNode);
-		DOMNode.setZ(domNode, z);
-		DOMNode.setZ(outerNode, z);// saves it
 	}
 
 	public void invalidate() {
@@ -3352,5 +3385,6 @@ public class JSComponentUI extends ComponentUI
 	public boolean isModalBlocked() {
 		return JSComponent.秘getTopInvokableAncestor(jc, false).秘getUI().modalBlocked;
 	}
+
 
 }

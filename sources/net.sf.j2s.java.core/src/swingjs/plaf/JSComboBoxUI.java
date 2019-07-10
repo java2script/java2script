@@ -18,12 +18,10 @@ import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.EventObject;
 
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -32,7 +30,6 @@ import javax.swing.ComboBoxEditor;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.InputMap;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -56,9 +53,9 @@ import sun.awt.AppContext;
 import sun.swing.DefaultLookup;
 import sun.swing.UIAction;
 import swingjs.JSKeyEvent;
+import swingjs.JSMouse;
 import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
-import swingjs.api.js.JQueryObject.J2SCB;
 import swingjs.jquery.JQueryUI;
 
 /**
@@ -72,207 +69,26 @@ import swingjs.jquery.JQueryUI;
  * 
  */
 
-public class JSComboBoxUI extends JSLightweightUI implements ListDataListener {
+public class JSComboBoxUI extends JSLightweightUI {
 
-	public static final int MAX_HEIGHT = 300;
+	/**
+	 * maximum height before scrollbar is implemented in j2sCB
+	 */
+	public static final int MAX_HEIGHT = 300; // SwingJS
+	
+	/**
+	 * button width in j2sCB
+	 * 
+	 */
+	public static final int BUTTON_WIDTH = 20;// SwingjS
+
 	private boolean hasCustomRenderer;
 	private ListCellRenderer renderer;
-	private JSFunction fChange;
-	private int iLastOver;
 
 	public JSComboBoxUI() {
 		isContainer = true;
 		allowPaintedBackground = false;
-		@SuppressWarnings("unused")
-		Object me = this;
-		fChange = /** @j2sNative function(){p$1.fChange$O$O$S$O.apply(me,arguments)} || */
-				null;
 		setDoc();
-	}
-
-	private class JSComboPopup implements ComboPopup, MouseMotionListener, MouseListener {
-
-		private J2SCB j2scb;
-
-		@SuppressWarnings("unused")
-		void createJ2SCB() {
-			if (j2scb != null)
-				j2scb.j2sCB("destroy");
-			j2scb = (J2SCB) $(domNode);
-			JSFunction f = fChange;
-			j2scb.j2sCB(/** @j2sNative {change:f} || */
-					"");
-			updateCSS();
-			updateList();
-			updateSelectedIndex();
-
-		}
-
-		void setComboVisible() {
-			if (j2scb == null)
-				createJ2SCB();
-		}
-
-		void updateText() {
-			// TODO -- this might be much more than a string
-		}
-
-		void updateCSS() {
-			DOMNode.setSize(domNode, width, height);
-			if (j2scb != null)
-				j2scb.j2sCB("updateCSS");
-		}
-
-		void updateList() {
-			if (j2scb == null)
-				return;
-			int n = comboBox.getItemCount();
-			DOMNode[] opts = new DOMNode[n];
-			JList l = listBox;
-			Dimension d = l.getPreferredSize();
-			int h = d.height;
-			int w = d.width;
-			JSListUI ui = (JSListUI) l.getUI();
-			for (int i = 0; i < n; i++) {
-				JComponent j = (JComponent) comboBox.getRenderer().getListCellRendererComponent(listBox,
-						listBox.getModel().getElementAt(i), i, true, false);
-				int rh = ui.getRowHeight(i);
-				opts[i] = j.秘getUI().getDOMNode();
-				DOMNode.setSize(opts[i], w, rh);
-				j.秘getUI().reInit();
-			}
-			j2scb.j2sCB("updateList", opts);
-			j2scb.j2sCB("setHeight", (h > MAX_HEIGHT ? MAX_HEIGHT : 0));
-		}
-
-		void updateSelectedIndex() {
-			if (j2scb != null)
-				j2scb.j2sCB("setSelectedIndex", comboBox.getSelectedIndex());
-		}
-
-		void updateHoverIndex() {
-			if (j2scb == null)
-				return;
-			if (!isPopupVisible(comboBox))
-				show();
-			int index = listBox.getSelectedIndex();
-			j2scb.j2sCB("hoverIndex", index);
-			comboBox.setSelectedIndex(index);
-//			updateSelectedIndex();
-		}
-
-		void updateEnabled() {
-			if (j2scb != null)
-				j2scb.j2sCB(comboBox.isEnabled() ? "enable" : "disable");
-		}
-
-		public void updateState(EventObject e, String name) {
-			if (j2scb == null)
-				return;
-			//System.out.println("JSComboBoxUI.popup.updateState " + e);
-			if (name == null) {
-				// ItemEvent
-				updateSelectedIndex();
-			}
-		}
-
-		@Override
-		public void show() {
-			if (j2scb == null)
-				createJ2SCB();
-			if (isTainted)
-				updateList();
-			j2scb.j2sCB("setZIndex", comboBox.getTopLevelAncestor().秘getUI().getZIndex(null) + 1);
-			updateCSS();
-			j2scb.j2sCB("showPopup");
-			updateSelectedIndex();
-		}
-
-		@Override
-		public void hide() {
-			if (j2scb != null)
-				j2scb.j2sCB("hidePopup");
-		}
-
-		@SuppressWarnings("unused")
-		@Override
-		public boolean isVisible() {
-			if (j2scb == null)
-				return false;
-			Object ret = j2scb.j2sCB("popupVisible");
-			return /** @j2sNative !!ret || */
-			false;
-		}
-
-		@Override
-		public JList getList() {
-			return listBox;
-		}
-
-		@Override
-		public MouseListener getMouseListener() {
-			return null;
-		}
-
-		@Override
-		public MouseMotionListener getMouseMotionListener() {
-			return null;
-		}
-
-		@Override
-		public KeyListener getKeyListener() {
-			return null;
-		}
-
-		@Override
-		public void uninstallingUI() {
-			if (j2scb != null)
-				j2scb.j2sCB("destroy");
-			j2scb = null;
-		}
-
-		@Override
-		public void mouseClicked(MouseEvent e) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void mousePressed(MouseEvent e) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void mouseReleased(MouseEvent e) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void mouseEntered(MouseEvent e) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void mouseExited(MouseEvent e) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void mouseDragged(MouseEvent e) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void mouseMoved(MouseEvent e) {
-			// TODO Auto-generated method stub
-
-		}
-
 	}
 
 	static {
@@ -300,7 +116,7 @@ public class JSComboBoxUI extends JSLightweightUI implements ListDataListener {
 			setHTMLElement();
 		super.setVisible(b);
 		if (b)
-			popup.setComboVisible();
+			popup.setComboVisible(true);
 	}
 
 	@Override
@@ -316,6 +132,7 @@ public class JSComboBoxUI extends JSLightweightUI implements ListDataListener {
 			return;
 		case "renderer":
 			renderer = (ListCellRenderer) e.getNewValue();
+			listBox.setCellRenderer(renderer);
 			hasCustomRenderer = true;
 			return;
 		}
@@ -326,35 +143,6 @@ public class JSComboBoxUI extends JSLightweightUI implements ListDataListener {
 //		popup.uninstallingUI();
 //	}
 //
-	@SuppressWarnings("unused")
-	private void fChange(Object event, Object cb, String type, Object data) {
-		int i = /** @j2sNative data || */
-				0;
-		//System.out.println(type + " " + data + " " + iLastOver);
-		switch (type) {
-		case "refreshed":
-			iLastOver = -1;
-			return;
-		case "keyevent":
-			comboBox.dispatchEvent(JSKeyEvent.newJSKeyEvent(comboBox, data, 0, true));
-			return;
-		case "selected":
-			comboBox.秘setTrigger(true);
-			comboBox.setSelectedIndex(i);
-			comboBox.秘setTrigger(false);
-			iLastOver = -1;
-			return;
-		case "mouseover":
-			if (i >= 0 && renderer != null)
-				comboBox.getRenderer().getListCellRendererComponent(listBox, listBox.getModel().getElementAt(i), i,
-						true, false);
-//			if (iLastOver >= 0 && renderer != null)
-//				comboBox.getRenderer().getListCellRendererComponent(listBox, listBox.getModel().getElementAt(i), iLastOver, false, false);
-//			iLastOver = i;
-			return;
-		}
-	}
-
 //	@Override
 //	public Dimension getPreferredSize(JComponent jc) {
 //		return getHTMLSizePreferred(updateDOMNode(), false);
@@ -385,8 +173,7 @@ public class JSComboBoxUI extends JSLightweightUI implements ListDataListener {
 		isMinimumSizeDirty = true;
 		comboBox = (JComboBox) c;
 		installDefaults();
-		popup = (JSComboPopup) createPopup();
-		listBox = new JList(comboBox.getModel());
+		listBox = popup = (JSComboPopupList) createPopup();
 		listBox.setSelectionBackground(null);
 		listBox.addListSelectionListener(getHandler());
 		comboBox.add(listBox);
@@ -581,21 +368,6 @@ public class JSComboBoxUI extends JSLightweightUI implements ListDataListener {
 		inactiveForeground = UIManager.getColor(pp + "disabledForeground");
 	}
 
-	@Override
-	public void intervalAdded(ListDataEvent e) {
-		revalidate();
-	}
-
-	@Override
-	public void intervalRemoved(ListDataEvent e) {
-		revalidate();
-	}
-
-	@Override
-	public void contentsChanged(ListDataEvent e) {
-		revalidate();
-	}
-
 	protected JComboBox comboBox;
 	/**
 	 * This protected field is implementation specific. Do not access directly or
@@ -616,13 +388,13 @@ public class JSComboBoxUI extends JSLightweightUI implements ListDataListener {
 	protected CellRendererPane currentValuePane = new CellRendererPane();
 
 	// The implementation of ComboPopup that is used to show the popup.
-	protected JSComboPopup popup;
+	protected JSComboPopupList popup;
 
 	// The Component that the ComboBoxEditor uses for editing
 	protected Component editor;
 
-	// The arrow button that invokes the popup.
-	protected JButton arrowButton;
+//	// The arrow button that invokes the popup.
+//	protected JButton arrowButton;
 
 	// Listeners that are attached to the JComboBox
 	/**
@@ -740,8 +512,8 @@ public class JSComboBoxUI extends JSLightweightUI implements ListDataListener {
 		ListCellRenderer renderer = (ListCellRenderer) AppContext.getAppContext().get(COMBO_UI_LIST_CELL_RENDERER_KEY);
 
 		if (renderer == null) {
-			renderer = new DefaultListCellRenderer();
-			AppContext.getAppContext().put(COMBO_UI_LIST_CELL_RENDERER_KEY, new DefaultListCellRenderer());
+//BH??			renderer = new DefaultListCellRenderer();
+			AppContext.getAppContext().put(COMBO_UI_LIST_CELL_RENDERER_KEY, renderer = new DefaultListCellRenderer());
 		}
 		return renderer;
 	}
@@ -773,8 +545,8 @@ public class JSComboBoxUI extends JSLightweightUI implements ListDataListener {
 	 * @return an instance of <code>ComboPopup</code>
 	 * @see ComboPopup
 	 */
-	protected ComboPopup createPopup() {
-		return new JSComboPopup();
+	protected JSComboPopupList createPopup() {
+		return new JSComboPopupList(this);
 	}
 
 	/**
@@ -1036,13 +808,13 @@ public class JSComboBoxUI extends JSLightweightUI implements ListDataListener {
 	 * This method is called as part of the UI installation process.
 	 */
 	protected void installComponents() {
-		arrowButton = createArrowButton();
-
-		if (arrowButton != null) {
-			comboBox.add(arrowButton);
-			configureArrowButton();
-		}
-
+//		arrowButton = createArrowButton();
+//
+//		if (arrowButton != null) {
+//			comboBox.add(arrowButton);
+//			configureArrowButton();
+//		}
+//
 		if (comboBox.isEditable()) {
 			addEditor();
 		}
@@ -1056,14 +828,14 @@ public class JSComboBoxUI extends JSLightweightUI implements ListDataListener {
 	 * process.
 	 */
 	protected void uninstallComponents() {
-		if (arrowButton != null) {
-			unconfigureArrowButton();
-		}
+//		if (arrowButton != null) {
+//			unconfigureArrowButton();
+//		}
 		if (editor != null) {
 			unconfigureEditor();
 		}
 		comboBox.removeAll(); // Just to be safe.
-		arrowButton = null;
+//		arrowButton = null;
 	}
 
 	/**
@@ -1150,55 +922,55 @@ public class JSComboBoxUI extends JSLightweightUI implements ListDataListener {
 		comboBox.getEditor().removeActionListener(getHandler());
 	}
 
-	/**
-	 * This public method is implementation specific and should be private. Do not
-	 * call or override.
-	 *
-	 * @see #createArrowButton
-	 */
-	public void configureArrowButton() {
-		if (arrowButton != null) {
-			arrowButton.setEnabled(comboBox.isEnabled());
-			arrowButton.setFocusable(comboBox.isFocusable());
-			arrowButton.setRequestFocusEnabled(false);
-			arrowButton.addMouseListener(popup.getMouseListener());
-			arrowButton.addMouseMotionListener(popup.getMouseMotionListener());
-			arrowButton.resetKeyboardActions();
-			arrowButton.putClientProperty("doNotCancelPopup", HIDE_POPUP_KEY);
-			arrowButton.setInheritsPopupMenu(true);
-		}
-	}
+//	/**
+//	 * This public method is implementation specific and should be private. Do not
+//	 * call or override.
+//	 *
+//	 * @see #createArrowButton
+//	 */
+//	public void configureArrowButton() {
+//		if (arrowButton != null) {
+//			arrowButton.setEnabled(comboBox.isEnabled());
+//			arrowButton.setFocusable(comboBox.isFocusable());
+//			arrowButton.setRequestFocusEnabled(false);
+//			arrowButton.addMouseListener(popup.getMouseListener());
+//			arrowButton.addMouseMotionListener(popup.getMouseMotionListener());
+//			arrowButton.resetKeyboardActions();
+//			arrowButton.putClientProperty("doNotCancelPopup", HIDE_POPUP_KEY);
+//			arrowButton.setInheritsPopupMenu(true);
+//		}
+//	}
+//
+//	/**
+//	 * This public method is implementation specific and should be private. Do not
+//	 * call or override.
+//	 *
+//	 * @see #createArrowButton
+//	 */
+//	public void unconfigureArrowButton() {
+//		if (arrowButton != null) {
+//			arrowButton.removeMouseListener(popup.getMouseListener());
+//			arrowButton.removeMouseMotionListener(popup.getMouseMotionListener());
+//		}
+//	}
 
-	/**
-	 * This public method is implementation specific and should be private. Do not
-	 * call or override.
-	 *
-	 * @see #createArrowButton
-	 */
-	public void unconfigureArrowButton() {
-		if (arrowButton != null) {
-			arrowButton.removeMouseListener(popup.getMouseListener());
-			arrowButton.removeMouseMotionListener(popup.getMouseMotionListener());
-		}
-	}
-
-	/**
-	 * Creates a button which will be used as the control to show or hide the popup
-	 * portion of the combo box.
-	 *
-	 * @return a button which represents the popup control
-	 */
-	protected JButton createArrowButton() {
-		JButton button = new JButton();
-		button.秘getUI().setUIDisabled(true);
-//        BasicArrowButton(BasicArrowButton.SOUTH,
-//                                    UIManager.getColor("ComboBox.buttonBackground"),
-//                                    UIManager.getColor("ComboBox.buttonShadow"),
-//                                    UIManager.getColor("ComboBox.buttonDarkShadow"),
-//                                    UIManager.getColor("ComboBox.buttonHighlight"));
-//        button.setName("ComboBox.arrowButton");
-		return button;
-	}
+//	/**
+//	 * Creates a button which will be used as the control to show or hide the popup
+//	 * portion of the combo box.
+//	 *
+//	 * @return a button which represents the popup control
+//	 */
+//	protected JButton createArrowButton() {
+//		JButton button = new JButton();
+//		button.秘getUI().setUIDisabled(true);
+////        BasicArrowButton(BasicArrowButton.SOUTH,
+////                                    UIManager.getColor("ComboBox.buttonBackground"),
+////                                    UIManager.getColor("ComboBox.buttonShadow"),
+////                                    UIManager.getColor("ComboBox.buttonDarkShadow"),
+////                                    UIManager.getColor("ComboBox.buttonHighlight"));
+////        button.setName("ComboBox.arrowButton");
+//		return button;
+//	}
 
 	//
 	// end Sub-Component Management
@@ -1219,11 +991,7 @@ public class JSComboBoxUI extends JSLightweightUI implements ListDataListener {
 	 * Hides the popup.
 	 */
 	public void setPopupVisible(JComboBox c, boolean v) {
-		if (v) {
-			popup.show();
-		} else {
-			popup.hide();
-		}
+		popup.setPopupVisible(v);
 	}
 
 	/**
@@ -1242,6 +1010,7 @@ public class JSComboBoxUI extends JSLightweightUI implements ListDataListener {
 	// begin ComponentUI Implementation
 	@Override
 	public void paint(Graphics g, JComponent c) {
+		popup.updateCSS();
 		// SwingJS -- not doing this for now.
 //        hasFocus = comboBox.hasFocus();
 //        if ( !comboBox.isEditable() ) {
@@ -1264,14 +1033,15 @@ public class JSComboBoxUI extends JSLightweightUI implements ListDataListener {
 		if (!isMinimumSizeDirty) {
 			return new Dimension(cachedMinimumSize);
 		}
+		
 		Dimension size = getDisplaySize();
 		Insets insets = c.getInsets();
 		// calculate the width and height of the button
-		int buttonHeight = size.height;
-		int buttonWidth = squareButton ? buttonHeight : arrowButton.getPreferredSize().width;
+		//int buttonHeight = size.height;
+		int buttonWidth = BUTTON_WIDTH;//squareButton ? buttonHeight : arrowButton.getPreferredSize().width;
 		// adjust the size based on the button width
 		size.height += insets.top + insets.bottom;
-		size.width += insets.left + insets.right + buttonWidth;
+		size.width += insets.left + insets.right + buttonWidth + 10;//SwingJS;
 
 		cachedMinimumSize.setSize(size.width, size.height);
 		isMinimumSizeDirty = false;
@@ -1504,9 +1274,9 @@ public class JSComboBoxUI extends JSLightweightUI implements ListDataListener {
 		int height = comboBox.getHeight();
 		Insets insets = comboBox.getInsets();
 		int buttonSize = height - (insets.top + insets.bottom);
-		if (arrowButton != null) {
-			buttonSize = arrowButton.getWidth();
-		}
+//		if (arrowButton != null) {
+//			buttonSize = arrowButton.getWidth();
+//		}
 		if (BasicGraphicsUtils.isLeftToRight(comboBox)) {
 			return new Rectangle(insets.left, insets.top, width - (insets.left + insets.right + buttonSize),
 					height - (insets.top + insets.bottom));
@@ -1719,7 +1489,10 @@ public class JSComboBoxUI extends JSLightweightUI implements ListDataListener {
 		// redundant operations.
 		currentValuePane.add(comp);
 		comp.setFont(comboBox.getFont());
+		JSComponentUI ui = ((JComponent)comp).秘getUI();
+		ui.reInit(true);
 		Dimension d = comp.getPreferredSize();
+		comp.setSize(d);
 		currentValuePane.remove(comp);
 		return d;
 	}
@@ -1967,6 +1740,7 @@ public class JSComboBoxUI extends JSLightweightUI implements ListDataListener {
 		@Override
 		public void propertyChange(PropertyChangeEvent e) {
 			String propertyName = e.getPropertyName();
+			//System.out.println("handler prop " + propertyName);
 			if (e.getSource() == editor) {
 				// If the border of the editor changes then this can effect
 				// the size of the editor which can cause the combo's size to
@@ -1996,6 +1770,12 @@ public class JSComboBoxUI extends JSLightweightUI implements ListDataListener {
 					isMinimumSizeDirty = true;
 					isDisplaySizeDirty = true;
 					comboBox.revalidate();
+					listBox.setModel(newModel);
+					setTainted(true);
+					updateDOMNode();
+					popup.updateList();
+					popup.updateSelectedIndex();
+					popup.updateCSS();
 					repaint();
 				} else if (propertyName == "editor" && comboBox.isEditable()) {
 					addEditor();
@@ -2014,15 +1794,15 @@ public class JSComboBoxUI extends JSLightweightUI implements ListDataListener {
 					boolean enabled = comboBox.isEnabled();
 					if (editor != null)
 						editor.setEnabled(enabled);
-					if (arrowButton != null)
-						arrowButton.setEnabled(enabled);
+//					if (arrowButton != null)
+//						arrowButton.setEnabled(enabled);
 					repaint();
 				} else if (propertyName == "focusable") {
 					boolean focusable = comboBox.isFocusable();
 					if (editor != null)
 						editor.setFocusable(focusable);
-					if (arrowButton != null)
-						arrowButton.setFocusable(focusable);
+//					if (arrowButton != null)
+//						arrowButton.setFocusable(focusable);
 					repaint();
 				} else if (propertyName == "maximumRowCount") {
 					if (isPopupVisible(comboBox)) {
@@ -2049,6 +1829,7 @@ public class JSComboBoxUI extends JSLightweightUI implements ListDataListener {
 				} else if (propertyName == "renderer") {
 					isMinimumSizeDirty = true;
 					isDisplaySizeDirty = true;
+					popup.updateList();
 					comboBox.revalidate();
 				}
 			}
@@ -2187,30 +1968,27 @@ public class JSComboBoxUI extends JSLightweightUI implements ListDataListener {
 
 		@Override
 		public void layoutContainer(Container parent) {
-			JComboBox cb = (JComboBox) parent;
-			int width = cb.getWidth();
-			int height = cb.getHeight();
-
-			Insets insets = cb.getInsets();
-			int buttonHeight = height - (insets.top + insets.bottom);
-			int buttonWidth = buttonHeight;
-			if (arrowButton != null) {
-				Insets arrowInsets = arrowButton.getInsets();
-				buttonWidth = squareButton ? buttonHeight
-						: arrowButton.getPreferredSize().width + arrowInsets.left + arrowInsets.right;
-			}
-			Rectangle cvb;
-
-			if (arrowButton != null) {
-				if (BasicGraphicsUtils.isLeftToRight(cb)) {
-					arrowButton.setBounds(width - (insets.right + buttonWidth), insets.top, buttonWidth, buttonHeight);
-				} else {
-					arrowButton.setBounds(insets.left, insets.top, buttonWidth, buttonHeight);
-				}
-			}
+//			JComboBox cb = (JComboBox) parent;
+//			int width = cb.getWidth();
+//			int height = cb.getHeight();
+//
+//			Insets insets = cb.getInsets();
+//			int buttonHeight = height - (insets.top + insets.bottom);
+//			int buttonWidth = BUTTON_WIDTH;//buttonHeight;
+//			if (arrowButton != null) {
+//				Insets arrowInsets = arrowButton.getInsets();
+//				buttonWidth = squareButton ? buttonHeight
+//						: arrowButton.getPreferredSize().width + arrowInsets.left + arrowInsets.right;
+//			}
+//			if (arrowButton != null) {
+//				if (BasicGraphicsUtils.isLeftToRight(cb)) {
+//					arrowButton.setBounds(width - (insets.right + buttonWidth), insets.top, buttonWidth, buttonHeight);
+//				} else {
+//					arrowButton.setBounds(insets.left, insets.top, buttonWidth, buttonHeight);
+//				}
+//			}
 			if (editor != null) {
-				cvb = rectangleForCurrentValue();
-				editor.setBounds(cvb);
+				editor.setBounds(rectangleForCurrentValue());
 			}
 		}
 
@@ -2295,4 +2073,6 @@ public class JSComboBoxUI extends JSLightweightUI implements ListDataListener {
 		// comboBox.repaint();
 	}
 
+		
+	
 }

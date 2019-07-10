@@ -28,6 +28,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.io.Serializable;
 
+import javax.swing.AbstractButton;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -50,6 +51,7 @@ import javax.swing.border.EmptyBorder;
  *
  * @author Arnaud Weber
  */
+@SuppressWarnings("serial")
 public class BasicComboBoxRenderer extends JLabel
 implements ListCellRenderer, Serializable {
 
@@ -75,7 +77,8 @@ implements ListCellRenderer, Serializable {
         }
     }
 
-    public Dimension getPreferredSize() {
+    @Override
+	public Dimension getPreferredSize() {
         Dimension size;
 
         if ((this.getText() == null) || (this.getText().equals( "" ))) {
@@ -90,7 +93,8 @@ implements ListCellRenderer, Serializable {
         return size;
     }
 
-    public Component getListCellRendererComponent(
+    @Override
+	public Component getListCellRendererComponent(
                                                  JList list,
                                                  Object value,
                                                  int index,
@@ -120,7 +124,14 @@ implements ListCellRenderer, Serializable {
         if (value instanceof Icon) {
             setIcon((Icon)value);
         }
-        else {
+        else if (value instanceof JLabel) {
+            setIcon(null);
+            setText(((JLabel) value).getText());
+        } else if (value instanceof AbstractButton) {
+            setIcon(null);
+            setText(((AbstractButton) value).getText());
+        } else {
+            setIcon(null);
             setText((value == null) ? "" : value.toString());
         }
         return this;

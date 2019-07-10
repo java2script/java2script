@@ -400,8 +400,8 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		"controlShadow", "#808080", /* Shadow color for controls */
 		"controlDkShadow", "#000000", /* Dark shadow color for controls */
 		"scrollbar", "#E0E0E0", /* Scrollbar background (usually the "track") */
-		"info", "#FFFFE1", /* ??? */
-		"infoText", "#000000" /* ??? */
+		"info", "#FFFFE1", /* ToolTip -- light yellow */
+		"infoText", "#000000" /* ToolTip */
 		};
 
 		loadSystemColors(table, defaultSystemColors, isNativeLookAndFeel());
@@ -530,12 +530,11 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		Object sansSerifPlain12 = new FontUIResource(Font.SANS_SERIF, Font.PLAIN,
 				12);
 		Object monospacedPlain12 = new FontUIResource(Font.MONOSPACED, Font.PLAIN, 12);
-		// Object dialogBold12 = new SwingLazyValue(
-		// "javax.swing.plaf.FontUIResource",
-		// null,
-		// new Object[] {Font.DIALOG, fontBold, twelve});
-		//
-
+		Object sansSerifPlain18 = new SwingLazyValue(
+		 "javax.swing.plaf.FontUIResource",
+		 null,
+		 new Object[] {Font.SANS_SERIF, Font.PLAIN, Integer.valueOf(18)});
+	
 		// *** Shared Colors
 		ColorUIResource red = new ColorUIResource(Color.red);
 		ColorUIResource black = new ColorUIResource(Color.black);
@@ -1967,7 +1966,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// }),
 
 				// *** ToolTips
-				 "ToolTip.font", sansSerifPlain12,
+				 "ToolTip.font", sansSerifPlain18,
 				 "ToolTip.background", table.get("info"),
 				 "ToolTip.foreground", table.get("infoText"),
 				 "ToolTip.border", blackLineBorder,

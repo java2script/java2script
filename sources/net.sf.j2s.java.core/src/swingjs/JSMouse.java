@@ -37,6 +37,8 @@ import java.awt.event.MouseWheelEvent;
 
 import javax.swing.JComponent;
 
+import swingjs.plaf.JSComponentUI;
+
 /**
  * JavaScript interface from JmolJSmol.js via handleOldJvm10Event (for now)
  * 
@@ -410,7 +412,7 @@ public class JSMouse {
 		 * @j2sNative
 		 * 
 		 * 			bdata.jqevent = jqevent; bdata.source = c =
-		 *            jqevent.target["data-component"]; bdata.doPropagate = c &&
+		 *            jqevent.j2sretarget || jqevent.target["data-component"]; bdata.doPropagate = c &&
 		 *            c.ui.j2sDoPropagate;
 		 */
 
@@ -428,6 +430,29 @@ public class JSMouse {
 		}
 	}
 	
+	public static void setPropagation(Component target, MouseEvent e) {
+		/**
+		 * @j2sNative
+		 * 
+		 * if (e.bdata && e.bdata.jqevent && target.ui.j2sDoPropagate)
+		 *   e.bdata.jqevent.doPropagate = true;
+		 */
+	}
+
+	@SuppressWarnings("unused")
+	public static void checkConsume(InputEvent e) {
+		JSComponentUI ui = ((JComponent) e.getSource()).秘getUI();
+		if (e.bdata != null && ui != null && ui.buttonListener == null 
+				&& ((/** @j2sNative !e.bdata.doPropagate || */false))) {
+			JSToolkit.consumeEvent(e);
+		}
+	}
+
+	
+	public static JComponent getJ2SEventTarget(MouseEvent e) {
+		return /** @j2sNative e.bdata.source || */null;
+	}
+
 	private static boolean isPopupTrigger(int id, int mods, boolean isWin) {
 		boolean rt = ((mods & InputEvent.BUTTON3_MASK) != 0);
 		if (isWin) {
@@ -456,6 +481,75 @@ public class JSMouse {
 		jqevent.target["data-shadowkeycomponent"] || jqevent.target["data-keycomponent"]
 				 */null;
 		return JSKeyEvent.dispatchKeyEvent(c, id, modifiers, jqevent, time);
+	}
+	
+	public static int getScroll(Object ev) {
+		/**
+		 * @j2sNative
+		 * 
+		 * 			var oe = ev.originalEvent; return (oe.detail ? oe.detail :
+		 *            (J2S.featureDetection.os == "mac" ? 1 : -1) * oe.wheelDelta);
+		 */
+		{
+			return 0;
+		}
+	}
+
+	public static int getModifiers(Object ev) {
+		boolean shift = false, ctrl = false, meta = false, alt = false, altGraph = false;
+		/**
+		 * @j2sNative
+		 * 
+		 *            shift = ev.shiftKey;
+		 *            ctrl = ev.ctrlKey;
+		 *            alt = ev.altKey;
+		 *            meta = ev.metaKey;
+		 *            altGraph = ev.altGraphKey;
+		 */
+		int modifiers = 0; 
+		if (shift)
+			modifiers |= InputEvent.SHIFT_MASK + InputEvent.SHIFT_DOWN_MASK;
+		if (ctrl)
+			modifiers |= InputEvent.CTRL_MASK + InputEvent.CTRL_DOWN_MASK;
+		if (alt)
+			modifiers |= InputEvent.ALT_MASK + InputEvent.ALT_DOWN_MASK;
+		if (meta)
+			modifiers |= InputEvent.META_MASK + InputEvent.META_DOWN_MASK;
+		if (altGraph)
+			modifiers |= InputEvent.ALT_GRAPH_MASK + InputEvent.ALT_GRAPH_DOWN_MASK;
+		return modifiers;
+	}
+
+	public static int fixEventType(Object jqevent, int def) {
+		switch (/**@j2sNative jqevent.type ||*/""){
+		case "keydown":
+			return KeyEvent.KEY_PRESSED;
+		case "keyup":
+			return KeyEvent.KEY_RELEASED;
+		case "keypress":
+			return KeyEvent.KEY_TYPED;
+		case "click":
+			return MouseEvent.MOUSE_CLICKED;
+		case "mousedown":
+		case "touchstart":
+			return MouseEvent.MOUSE_PRESSED;
+		case "mouseup":
+		case "touchend":
+			return MouseEvent.MOUSE_RELEASED;
+		case "mousemove":
+			return MouseEvent.MOUSE_MOVED;
+		case "mousedrag":
+			return MouseEvent.MOUSE_DRAGGED;
+		case "mousewheel":
+			return MouseEvent.MOUSE_WHEEL;
+		case "mouseover":
+		case "mouseenter":
+			return MouseEvent.MOUSE_ENTERED;
+		case "mouseout":
+		case "mouseleave":
+			return MouseEvent.MOUSE_EXITED;
+		}
+		return def;			
 	}
 
 

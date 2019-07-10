@@ -33,6 +33,7 @@ package test.components;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -78,6 +79,7 @@ public class ListDemo extends JPanel implements ListSelectionListener {
 		listModel.addElement("Pearly White");
 		// Create the list and put it in a scroll pane.
 		list = new JList(listModel);
+		list.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 24));
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		list.setSelectedIndex(0);
 		list.addListSelectionListener(this);

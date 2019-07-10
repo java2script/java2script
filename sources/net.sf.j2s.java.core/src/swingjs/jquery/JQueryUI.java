@@ -8,12 +8,12 @@ package swingjs.jquery;
  * the transpiler will not transfer it to the site directory unless you touch this java file.
  * Just add and remove a space before the package command.
  * 
- * @author Bob Hanson 
+ * @author Bob Hanson
  *  
  *
  */  
 public class JQueryUI {
-	static {  
+	static {
 	  
 		/**      
 		 * 

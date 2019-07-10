@@ -2824,6 +2824,10 @@ public class JList<E> extends JComponent implements Scrollable//, Accessible
         ",layoutOrientation=" + layoutOrientation;
     }
 
+	public boolean 秘processUIEvent(MouseEvent e) {
+		return SwingUtilities2.shouldIgnore(e, this);
+	}
+
 
 //
 //    /**

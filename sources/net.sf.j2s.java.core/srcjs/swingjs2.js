@@ -12585,6 +12585,10 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			J2S.unsetMouse(who);
 			return;
 		}
+		return J2S._getEventXY(ev, offsets, getMouseModifiers(ev, id));
+	}
+
+	J2S._getEventXY = function(ev, offsets, mods) {
 		var x, y;
 		var oe = ev.originalEvent;
 		// drag-drop jQuery event is missing pageX
@@ -12602,10 +12606,9 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			x = ev.pageX - offsets.left;
 			y = ev.pageY - offsets.top;
 		}
-		return (x == undefined ? null : [ Math.round(x), Math.round(y),
-				getMouseModifiers(ev, id) ]);
+		return (x == undefined ? null : [ Math.round(x), Math.round(y), mods]);
 	}
-
+	
 	J2S._gestureUpdate = function(who, ev) {
 		ev.stopPropagation();
 		ev.preventDefault();
@@ -13592,31 +13595,31 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	J2S.setWindowZIndex = function(node, z) {
 		// on frame show or mouse-down, create a stack of frames and sort by
 		// z-order
-		if (!node)
+		if (!node || node.ui && node.ui.embeddedNode)
 			return 
 
-		var zbase = J2S._z.rear + 2000;
 		var a = [];
 		var zmin = 1e10
 		var zmax = -1e10
-		var $windows = $(".swingjs-window");
+		var $windows = $("body > div > .swingjs-window").not("body > .swingjs-tooltip :first-child");
 		$windows.each(function(c, b) {
-			if (b != node)
-				a.push([ +b.style.zIndex, b ]);
+				a.push([ (b == node ? z : +b.style.zIndex), b ]);
 		});
 		a.sort(function(a, b) {
 			return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0
 		})
-		var z0 = zbase;
-		var z0 = zbase;
-		for (var i = 0; i < a.length; i++) {
-			if (!a[i][1].ui || !a[i][1].ui.embeddingNode)
-			  a[i][1].style.zIndex = zbase;
+		var zbase = z = J2S._z.rear + 2000;
+		for (var i = 0, i1 = a.length; i < i1; i++) {
+			var n = a[i][1];
+			if (n == node)
+				z = zbase;
+			if (!n.ui || !n.ui.embeddingNode) {
+			  n.style.zIndex = zbase;
+			  if (n.ui && n.ui.outerNode && !n.ui.embeddingNode)
+				  n.ui.outerNode.style.zIndex = zbase;
+			}
 			zbase += 1000;
 		}
-		z = (z > 0 ? zbase : z0);
-		if (!node.ui || !node.ui.embeddingNode) // could be popupMenu, with no ui
-			node.style.zIndex = z;
 		node.style.position = "absolute";
 		if (J2S._checkLoading) 
 			System.out.println("setting z-index to " + z + " for " + node.id);
@@ -13721,6 +13724,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // TODO: still a lot of references to window[...]
 
+// BH 2019.07.09 adds Java String.trim()
 // BH 2019.05.21 changes Clazz.isClassDefined to Clazz._isClassDefined for compression
 // BH 2019.05.13 fixes for Math.getExponent, Math.IEEERemainder, Array.equals(Object)
 // BH 2019.02.16 fixes typo in Integer.parseInt(s,radix)
@@ -18240,10 +18244,19 @@ sp.substring$I = sp.substring$I$I = sp.subSequence$I$I = sp.substring;
 sp.replace$C$C = sp.replace$CharSequence$CharSequence = sp.replace$;
 sp.toUpperCase$ = sp.toUpperCase;
 sp.toLowerCase$ = sp.toLowerCase;
-sp.trim$ = sp.trim;
 sp.toLowerCase$java_util_Locale = sp.toLocaleLowerCase ? function(loc) {loc = loc.toString(); var s = this.valueOf(); return (loc ? s.toLocaleLowerCase(loc.replace(/_/g,'-')) : s.toLocaleLowerCase()) } : sp.toLowerCase;
 sp.toUpperCase$java_util_Locale = sp.toLocaleUpperCase ? function(loc) {loc = loc.toString(); var s = this.valueOf(); return (loc ? s.toLocaleUpperCase(loc.replace(/_/g,'-')) : s.toLocaleUpperCase()) } : sp.toUpperCase;
 sp.length$ = function() {return this.length};
+sp.trim$ = function() {
+  var s = this.trim();
+  var j;
+  if (s == "" || s.charCodeAt(j = s.length - 1) > 32 && s.charCodeAt(0) > 32) return s;
+  var i = 0;
+  while (i <= j && s.charCodeAt(i) <= 32)i++;
+  while (j > i && s.charCodeAt(j) <= 32)j--;
+  return s.substring(i, ++j);
+};
+
 
 //sp.chars$ = CharSequence.prototype.chars$;
 //sp.codePoints$ = CharSequence.prototype.codePoints$;

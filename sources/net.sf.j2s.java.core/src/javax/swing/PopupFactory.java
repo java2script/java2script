@@ -339,8 +339,10 @@ public class PopupFactory {
                               getWindowAncestor(owner) : null;
             HeavyWeightPopup popup = null;
 
+            String name = (contents instanceof JPopupMenu ? "MenuPopup" : "ToolTip") + ++popupCount;
             if (window != null) {
                 popup = getRecycledHeavyWeightPopup(window);
+                window.setName(name + "(recycled)");
             }
 
             boolean focusPopup = false;
@@ -374,6 +376,7 @@ public class PopupFactory {
 //                }
 
                 popup = new HeavyWeightPopup();
+                popup.name = "popup" + (++popupCount);
             }
 
             popup.reset(owner, contents, ownerX, ownerY);

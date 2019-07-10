@@ -134,10 +134,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 				titleBarNode = newDOMObject("div", id + "_titlebar");
 				DOMNode.setTopLeftAbsolute(titleBarNode, 0, 0);
 				DOMNode.setStyles(titleBarNode, "background-color", "#E0E0E0", "height", "20px", "font-size", "14px",
-						"font-family", "sans-serif", "font-weight", "bold"// ,
-				// "border-style", "solid",
-				// "border-width", "1px"
-				);
+						"font-family", "sans-serif", "font-weight", "bold");
 
 				titleNode = newDOMObject("label", id + "_title");
 				DOMNode.setTopLeftAbsolute(titleNode, 0, 0);
@@ -193,10 +190,10 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	}
 
 	@Override
-	public void setZOrder(int z) {
+	public void setZ(int z) {
 		if (doEmbed)
 			z = 999;
-		super.setZOrder(z);
+		super.setZ(z);
 	}
 
 	@Override
@@ -402,8 +399,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 				addClass(modalNode, "swingjs-window"); // so as to slip into z-index ranking
 				@SuppressWarnings("unused")
 				String sz = DOMNode.getStyle(domNode, "z-index");
-				int z = (( /** @j2sNative +sz || */
-				getZIndex(null))) - 1;
+				int z = ( /** @j2sNative +sz || */getInheritedZ()) - 1;
 				DOMNode.setZ(modalNode, z);
 			}
 			DOMNode.setVisible(modalNode, b);
