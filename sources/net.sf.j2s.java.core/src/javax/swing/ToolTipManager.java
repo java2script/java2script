@@ -272,7 +272,8 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 		if (insideComponent == null || !insideComponent.isShowing())
 			return;
 		Component win = insideComponent.getTopLevelAncestor();
-		if (win.isWindowOrJSApplet()) {
+		// will be null for some menu items
+		if (win != null  && win.isWindowOrJSApplet()) {
 			if (((Window) win).getModalBlocker() != null)
 				return;
 		}
