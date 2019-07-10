@@ -51,7 +51,9 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 
 	/*
 	 * Not Lightweight; an independent space with RootPane, LayeredPane,
-	 * ContentPane, (optional) MenuBar, and GlassPane
+	 * ContentPane, (optional) MenuBar, and GlassPane.
+	 * 
+	 * Part of the required initializations of all Dialog, Frame, and Window
 	 * 
 	 * 
 	 * Used by JWindow, JFrame, JDialog, and JPopupMenu
@@ -106,7 +108,7 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 	@Override
 	public FontMetrics getFontMetrics(Font font) {
 		if (!font.equals(this.font))
-			this.window.setFont(this.font = font);
+			window.setFont(this.font = font);
 		return graphics.getFontMetrics(font);
 	}
 
