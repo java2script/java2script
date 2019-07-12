@@ -215,7 +215,7 @@ public class JSUtil {
 		Object data = getCachedFileData(path);
 		if (data == null) {
 			stream = getResourceAsStream(name);
-			data = /** @j2sNative stream.$in.buf ||*/null;
+			data = /** @j2sNative stream && stream.$in.buf ||*/null;
 		} else {
 			stream = new BufferedInputStream(new ByteArrayInputStream((byte[]) data));
 		}
