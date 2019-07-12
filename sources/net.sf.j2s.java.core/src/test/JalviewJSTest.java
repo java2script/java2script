@@ -26,9 +26,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -127,7 +125,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		}
 		
 	};
-	private Label status;
+	private JLabel status;
 	private JMenu menu, menu1, menu2;
 	private JCheckBoxMenuItem cb4m;
 	/**
@@ -169,6 +167,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		mb.add(menu2);
 		frame.setContentPane(getVisualPaneContent(menu, menu1, menu2));
 		frame.pack();
+		System.out.println(frame.getContentPane());
 		//frame.setBackground(Color.blue);
 		// note -- this blue color is never seen
 		JPopupMenu pmenu = new JPopupMenu();
@@ -198,7 +197,14 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 			public void mousePressed(MouseEvent e) {
 				System.out.println(frame.getContentPane().getSize());
 				frame.getContentPane().setBackground(Color.yellow);
+				System.out.println(frame.getContentPane());
+				System.out.println(frame.getContentPane().getComponent(0));
+				System.out.println(frame.getContentPane().getComponent(0).getBackground());
+				
 				((JPanel)frame.getContentPane()).setOpaque(true);
+				
+				invalidate();
+				repaint();
 				//System.out.println(e.getButton());
 				if (e.getButton() != MouseEvent.BUTTON3)
 					return;
@@ -265,11 +271,14 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		Font font = new Font("Verdana", Font.PLAIN, 12);
 
 		JPanel panel = new JPanel();
+		panel.setName("top-blue");
 		panel.setPreferredSize(new Dimension(600, 600));
 		panel.setMaximumSize(new Dimension(600, 600));
 		panel.setOpaque(true);
+		panel.setBackground(Color.blue);
+
 		panel.setLayout(new BorderLayout());
-		panel.add(status = new Label("ok"), BorderLayout.SOUTH);
+		panel.add(status = new JLabel("ok"), BorderLayout.SOUTH);
 
 		JPanel firstColumn = new JPanel();
 		firstColumn.setLayout(new GridLayout(13, 1));
@@ -296,6 +305,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		JLabel l2 = new JLabel(getImage("test2.png"));
 		l2.setText("leading left");
 		l2.setFont(font);
+		l2.setVerticalAlignment(SwingConstants.CENTER);
 		l2.setHorizontalTextPosition(SwingConstants.LEADING);
 		l2.setHorizontalAlignment(SwingConstants.LEFT);
 		l2.setBorder(new LineBorder(Color.red, 7));
@@ -589,7 +599,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 			}
 		});
 		theTab.setLayout(null);
-		theTab.setBackground(Color.white);
+		theTab.setBackground(Color.GREEN);
 		theTab.add(firstColumn);
 		panel.add(theTab);
 

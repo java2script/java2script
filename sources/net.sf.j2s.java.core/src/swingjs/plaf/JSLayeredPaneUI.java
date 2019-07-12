@@ -8,7 +8,7 @@ import swingjs.api.js.DOMNode;
 public class JSLayeredPaneUI extends JSLightweightUI {
 
 	public JSLayeredPaneUI() {
-		isContainer = true;
+		isContainer = isLayeredPane = true;
 	}
 	
 	@Override

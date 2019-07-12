@@ -528,7 +528,7 @@ public class JSComponentUI extends ComponentUI
 	 * 
 	 */
 	protected boolean isContainer, isWindow, isRootPane, isPopupMenu,
-					  isContentPane, isPanel, isDesktop, isTable;
+					  isContentPane, isLayeredPane, isPanel, isDesktop, isTable;
 
 	/**
 	 * linked nodes of this class
@@ -1299,6 +1299,7 @@ public class JSComponentUI extends ComponentUI
 			return;
 		case "opaque":
 			setBackground(c.getBackground());// BH was CUI??
+			System.err.println("prop opaque " + c.isOpaque() + " " + this.id);
 			return;
 		case "inverted":
 			updateDOMNode();
@@ -1790,6 +1791,7 @@ public class JSComponentUI extends ComponentUI
 				int w = getContainerWidth();
 				int h = getContainerHeight();
 				DOMNode.setSize(outerNode, w, h);				
+
 				if (isPanel || isContentPane || isRootPane) {
 					DOMNode.setStyles(outerNode, "overflow",
 							 allowDivOverflow ? "visible" : "hidden");
@@ -1810,6 +1812,8 @@ public class JSComponentUI extends ComponentUI
 					&& isFrameIndependent()) {
 				DOMNode.transferTo(outerNode, body);
 			}
+		} else {
+			DOMNode.setStyles(outerNode, "overflow", "hidden");
 		}
 		isTainted = false;
 		
@@ -2661,14 +2665,14 @@ public class JSComponentUI extends ComponentUI
 				
 				switch (vAlign) {
 				case SwingConstants.TOP:
-					top = margins.top + insets.top;
+					top = margins.top;
 					break;
 				case SwingConstants.BOTTOM:
-					top = h - margins.bottom - insets.bottom - hCtr;
+					top = h - margins.bottom - hCtr;
 					break;
 				default:
 				case SwingConstants.CENTER:
-					top = (h - hCtr + margins.top - margins.bottom - insets.top - insets.bottom) / 2;
+					top = (h - hCtr + margins.top - margins.bottom) / 2;
 					break;
 				}
 
@@ -2695,7 +2699,6 @@ public class JSComponentUI extends ComponentUI
 					yoff = "-50%";
 					break;
 				}
-				addCSS(cssCtr, "overflow", "none");
 				addCSS(cssTxt, "top", top + "%", "transform",
 						"translateY(" + (yoff == null ? "-" + top + "%" : yoff + ")"));
 				addCSS(cssIcon, "top", top + "%", "transform",
@@ -3298,6 +3301,7 @@ public class JSComponentUI extends ComponentUI
 	@Override
 	public void setBackground(Color c) {
 		awtPeerBG = null;
+		
 		setBackgroundImpl(c);
 	}
 	
@@ -3306,11 +3310,15 @@ public class JSComponentUI extends ComponentUI
 	protected void setBackgroundImpl(Color color) {
 		// Don't allow color for Menu and MenuItem. This is taken care of by
 		// jQuery
-		
+
 		if (domNode == null || isMenuItem || isUIDisabled)
 			return;
 		// currently painting - update JSGraphics2D
 		backgroundColor = color;
+		if ((jc.秘paintsSelf() || (isContentPane || isLayeredPane)
+				&& jc.秘setPaintsSelf(JSComponent.PAINTS_SELF_YES) == JSComponent.PAINTS_SELF_YES) && jc.isOpaque()) {
+			clearPaintPath();
+		}
 		paintBackground(jc.秘gtemp);
 	}
 
@@ -3337,6 +3345,7 @@ public class JSComponentUI extends ComponentUI
 	public void paintBackground(JSGraphics2D g) {
 		boolean isOpaque = c.isOpaque();
 		boolean paintsSelf = jc.秘paintsSelf();
+		System.out.println("paintback " + this.id  + " " + (/** @j2sNative this.jc.text||*/"")+ " " + isOpaque + " " + paintsSelf + " " + g);
 		Color color = (this.backgroundColor == null ? getBackground() : this.backgroundColor);
 		if (g == null) {
 			if (!paintsSelf)
