@@ -196,6 +196,9 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 
 			@Override
 			public void mousePressed(MouseEvent e) {
+				System.out.println(frame.getContentPane().getSize());
+				frame.getContentPane().setBackground(Color.yellow);
+				((JPanel)frame.getContentPane()).setOpaque(true);
 				//System.out.println(e.getButton());
 				if (e.getButton() != MouseEvent.BUTTON3)
 					return;
@@ -262,7 +265,8 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		Font font = new Font("Verdana", Font.PLAIN, 12);
 
 		JPanel panel = new JPanel();
-		panel.setPreferredSize(new Dimension(400, 600));
+		panel.setPreferredSize(new Dimension(600, 600));
+		panel.setMaximumSize(new Dimension(600, 600));
 		panel.setOpaque(true);
 		panel.setLayout(new BorderLayout());
 		panel.add(status = new Label("ok"), BorderLayout.SOUTH);
