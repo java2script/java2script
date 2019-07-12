@@ -47,6 +47,10 @@ public class JSMenuUI extends JSMenuItemUI {
 		setCssFont(domNode, c.getFont());
 		DOMNode.setVisible(domNode, jc.isVisible());
 		setIconAndText("menu", currentIcon, currentGap, currentText);
+		setAlignments(jm, false);
+		updateCenteringNode();
+		if (isMenuBarMenu)
+			DOMNode.setStyles(textNode, "left", "0px");
 		return domNode;
 	}
 
