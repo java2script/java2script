@@ -148,7 +148,7 @@ public class Resizer {
 			((JApplet) rootPane.getParent()).resizeHTML(r.width, r.height);
 		} else {
 			jframe.setPreferredSize(new Dimension(r.width, r.height));
-			jframe.invalidate();
+			jframe.invalidateTree();
 			jframe.repackContainer();
 			if (jframe instanceof JInternalFrame) {
 				try {
