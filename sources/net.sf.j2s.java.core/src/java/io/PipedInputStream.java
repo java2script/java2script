@@ -201,8 +201,8 @@ public class PipedInputStream extends InputStream {
     protected synchronized void receive(int b) throws IOException {
         checkStateForReceive();
         writeSide = Thread.currentThread();
-        if (in == out)
-            awaitSpace();
+//        if (in == out)
+//            awaitSpace();
         if (in < 0) {
             in = 0;
             out = 0;
@@ -228,8 +228,8 @@ public class PipedInputStream extends InputStream {
         writeSide = Thread.currentThread();
         int bytesToTransfer = len;
         while (bytesToTransfer > 0) {
-            if (in == out)
-                awaitSpace();
+//            if (in == out)
+//                awaitSpace();
             int nextTransferAmount = 0;
             if (out < in) {
                 nextTransferAmount = buffer.length - in;
@@ -264,19 +264,19 @@ public class PipedInputStream extends InputStream {
         }
     }
 
-    private void awaitSpace() throws IOException {
-        while (in == out) {
-            checkStateForReceive();
-
-            /* full: kick any waiting readers */
-            notifyAll();
-            try {
-                wait(1000);
-            } catch (InterruptedException ex) {
-                throw new java.io.InterruptedIOException();
-            }
-        }
-    }
+//    private void awaitSpace() throws IOException {
+//        while (in == out) {
+//            checkStateForReceive();
+//
+//            /* full: kick any waiting readers */
+//            notifyAll();
+//            try {
+//                wait(1000);
+//            } catch (InterruptedException ex) {
+//                throw new java.io.InterruptedIOException();
+//            }
+//        }
+//    }
 
     /**
      * Notifies all waiting threads that the last byte of data has been
@@ -313,22 +313,24 @@ public class PipedInputStream extends InputStream {
 
         readSide = Thread.currentThread();
         int trials = 2;
-        while (in < 0) {
-            if (closedByWriter) {
-                /* closed by writer, return EOF */
-                return -1;
-            }
-            if ((writeSide != null) && (!writeSide.isAlive()) && (--trials < 0)) {
-                throw new IOException("Pipe broken");
-            }
-            /* might be a writer waiting */
-            notifyAll();
-            try {
-                wait(1000);
-            } catch (InterruptedException ex) {
-                throw new java.io.InterruptedIOException();
-            }
-        }
+        if (in < 0)
+        	return -1;   // SwingJS
+//        while (in < 0) {
+//            if (closedByWriter) {
+//                /* closed by writer, return EOF */
+//                return -1;
+//            }
+//            if ((writeSide != null) && (!writeSide.isAlive()) && (--trials < 0)) {
+//                throw new IOException("Pipe broken");
+//            }
+//            /* might be a writer waiting */
+//            notifyAll();
+//            try {
+//                wait(1000);
+//            } catch (InterruptedException ex) {
+//                throw new java.io.InterruptedIOException();
+//            }
+//        }
         int ret = buffer[out++] & 0xFF;
         if (out >= buffer.length) {
             out = 0;
