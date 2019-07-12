@@ -3127,8 +3127,17 @@ Sys.exit$I = Sys.exit$;
 Sys.out = new Clazz._O ();
 Sys.out.__CLASS_NAME__ = "java.io.PrintStream";
 
+Sys.setOut$java_io_PrintStream = function(ps) {
+  Sys.out = ps;
+};
+
+Sys.setErr$java_io_PrintStream = function(ps) {
+  Sys.err = ps;
+};
+
 
 Sys.out.print = Sys.out.print$O = Sys.out.print$Z = Sys.out.print$I = Sys.out.println$J = Sys.out.print$S = Sys.out.print$C = Sys.out.print = function (s) { 
+
   Con.consoleOutput (s);
 };
 
