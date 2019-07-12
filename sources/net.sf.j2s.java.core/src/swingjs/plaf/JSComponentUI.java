@@ -2574,6 +2574,8 @@ public class JSComponentUI extends ComponentUI
 		
 		DOMNode.setStyles(centeringNode, "position", "absolute", "top", null, "left", null, "transform", null, "width", wCtr + "px", "height", hCtr + "px");
 
+		// horizontal
+		
 		isFullyCentered = false;
 		if (alignHCenter && alignVCenter && wIcon == 0 || wText == 0 && margins.left == margins.right
 				&& margins.top == margins.bottom && insets.left == insets.right && insets.top == insets.bottom)
@@ -2646,10 +2648,12 @@ public class JSComponentUI extends ComponentUI
 				}
 			}
 
+			// vertical
+			
 			h = c.getHeight();
 
 			if (h == 0) {
-				h = 16;
+				h = 16; // fallback -- actually, this is a real problem.
 			}
 
 			if (menuAnchorNode == null) {
@@ -2698,7 +2702,7 @@ public class JSComponentUI extends ComponentUI
 						"translateY(-" + itop + "%)" + (iscale == null ? "" : iscale));
 			} else {
 				DOMNode.setStyles(menuAnchorNode, "height", h + "px");
-				addCSS(cssTxt, "top", "50%", "transform", "translateY(-50%)");
+				//addCSS(cssTxt, "top", "50%", "transform", "translateY(-50%)");
 				addCSS(cssIcon, "top", "50%", "transform", "translateY(-65%) scale(0.6,0.6)");
 			}
 
