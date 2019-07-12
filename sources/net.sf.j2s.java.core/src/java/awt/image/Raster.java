@@ -978,6 +978,12 @@ public class Raster {
         }
 
         int dataType = sm.getDataType();
+
+        if (dataType == DataBuffer.TYPE_INT) { // SwingJS
+            SunWritableRaster r = new SunWritableRaster(sm,db,location);
+            r.秘pix = SunWritableRaster.stealData((DataBufferInt) db, 0);
+            return r;
+        }
 //
 //        if (sm instanceof PixelInterleavedSampleModel) {
 //            switch(dataType) {
@@ -1007,7 +1013,7 @@ public class Raster {
 
         // we couldn't do anything special - do the generic thing
 
-        return new SunWritableRaster(sm,db,location);
+        return new BytePackedRaster(sm, db, location);
     }
 
     /**
