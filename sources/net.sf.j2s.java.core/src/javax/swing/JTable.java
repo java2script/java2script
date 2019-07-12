@@ -84,6 +84,9 @@ import swingjs.plaf.CellHolder;
 import swingjs.plaf.JSComponentUI;
 
 /**
+ * SwingJS TODO: print/printable all not implemented
+ * 
+ * 
  * The <code>JTable</code> is used to display and edit regular two-dimensional
  * tables of cells. See <a href=
  * "http://java.sun.com/docs/books/tutorial/uiswing/components/table.html">How
@@ -5775,7 +5778,15 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		秘repaint();
 	}
 
-	/**
+    /**
+     * Equivalent to <code>revalidate</code> followed by <code>repaint</code>.
+     */
+    protected void resizeAndRepaint() {
+        revalidate();
+        repaint();
+    }
+
+    /**
 	 * Returns the active cell editor, which is {@code null} if the table is not
 	 * currently editing.
 	 *
