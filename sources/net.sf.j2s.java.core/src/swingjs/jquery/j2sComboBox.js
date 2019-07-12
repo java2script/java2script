@@ -83,8 +83,8 @@ $( function() {
         this.on2(this.list, 'click mousedown touchstart mousemove touchmove mouseup touchend mousewheel mouseover mouseout mouseenter mouseexit'.split(' '), '_mouse');
         this.popup.append(this.list);        
         this.element.append(this.cont);
-        // important to add popup to body, because it is 
-        $('body').append(this.popup);
+        // important to add popup after body so that it does not take on any body attributes 
+        $('body').after(this.popup);
         this.updateCSS();    	
         this.on( [this.head, this.btn, this.cont], { click: '_open' });
         this.on( [this.popup, this.list], {mouseover: stopT });

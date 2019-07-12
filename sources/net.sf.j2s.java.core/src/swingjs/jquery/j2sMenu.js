@@ -3,8 +3,6 @@
 // author: Bob Hanson, hansonr@stolaf.edu
 // last edited 1/23/2019 -- fixes for mouse-down effector (mac) operation
 
-// TODO: test for dynamic update of menu items, as in Jmol
-
 /*! jQuery UI - v1.9.2 - 2012-12-17
 * http://jqueryui.com
 * Includes: jquery.ui.core.js, jquery.ui.widget.js, jquery.ui.mouse.js, jquery.ui.position.js, jquery.ui.menu.js
