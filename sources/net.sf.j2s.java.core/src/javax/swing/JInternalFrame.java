@@ -2095,4 +2095,10 @@ public class JInternalFrame extends JFrame implements
 		((JComponent) parent).getTopLevelAncestor().秘setIsDesktop();
 	}
 
+	@Override
+	protected void 秘frameAddNodify(JRootPane rootPane) {
+		// actual JFrame only
+	}
+
+
 }

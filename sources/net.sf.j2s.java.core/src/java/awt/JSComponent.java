@@ -722,4 +722,9 @@ public abstract class JSComponent extends Component {
 		return 秘isDesktop;
 	}
 
+	protected void 秘frameAddNodify(JRootPane rootPane) {
+		addNotify(); // BH added; applet will not do this automatically
+		rootPane.addNotify(); // builds a peer for the root pane
+	} 
+
 }
