@@ -294,7 +294,7 @@ public class JSApplet extends JSPanel {
 		}
     }
 
-    @SuppressWarnings("deprecation")
+    @Override
     public void 秘resizeOriginal(int width, int height) {
         Dimension d = size();
         if ((d.width != width) || (d.height != height)) {
