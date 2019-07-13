@@ -4359,6 +4359,8 @@ class LightweightDispatcher implements AWTEventListener {
 		}
 		// SwingJS note: This was moved here 7/8/2019 from above. 
 		targetLastKnown = (actualTarget == null ? mouseOver : actualTarget);
+		if (id == MouseEvent.MOUSE_PRESSED)
+			targetLastDown = targetLastKnown;
 
 		// 4508327 : MOUSE_CLICKED should only go to the recipient of
 		// the accompanying MOUSE_PRESSED, so don't reset mouseEventTarget on a
@@ -4379,7 +4381,6 @@ class LightweightDispatcher implements AWTEventListener {
 				break;
 			case MouseEvent.MOUSE_PRESSED:
 				checkInternalFrameMouseDown((JSComponent) e.getSource());
-				targetLastDown = mouseEventTarget;
 				retargetMouseEvent(mouseEventTarget, id, e);
 				break;
 			case MouseEvent.MOUSE_RELEASED:

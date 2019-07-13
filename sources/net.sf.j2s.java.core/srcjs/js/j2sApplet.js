@@ -1,4 +1,4 @@
-﻿// j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
+// j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
 // J2S._version set to "3.2.4.07" 2019.01.04; 2019.02.06
 
@@ -975,7 +975,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 					case "java.io.File":
 						var f = Clazz.new_(Clazz.load("java.io.File").c$$S,
 								[ file.name ]);
-						f.秘bytes = J2S._toBytes(data);
+						f.?bytes = J2S._toBytes(data);
 						return fDone(f);
 					case "ArrayBuffer":
 						break;
@@ -2908,6 +2908,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				}, 502);
 				return false;
 			} else {
+				setTimeout(function(){document.body.dispatchEvent(ev.ev0.originalEvent)},50)
 			}
 		};
 
