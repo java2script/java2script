@@ -62,7 +62,6 @@ import swingjs.api.js.HTML5Applet;
 import swingjs.api.js.J2SInterface;
 import swingjs.api.js.JQuery;
 import swingjs.api.js.JQueryObject;
-import swingjs.api.js.JSInterface;
 
 /**
  * The JSComponentUI subclasses are where all the detailed HTML5 implementation
@@ -1292,8 +1291,8 @@ public class JSComponentUI extends ComponentUI
 		switch (prop) {
 		case "preferredSize":
 			// size has been set by JComponent layout
-			preferredSize = c.getPreferredSize(); // may be null
-			getPreferredSize(jc);
+			preferredSize = (Dimension) e.getNewValue(); 
+//			getPreferredSize(jc);
 			return;
 		case "background":
 			setBackground(c.getBackground());
