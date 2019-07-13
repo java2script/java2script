@@ -1289,8 +1289,6 @@ public class JSComponentUI extends ComponentUI
 			getDOMNode();
 		
 		
-		if (id.indexOf("66_")>=0)System.err.println(this.id + " prop " + prop);
-
 		switch (prop) {
 		case "preferredSize":
 			// size has been set by JComponent layout
@@ -1434,8 +1432,6 @@ public class JSComponentUI extends ComponentUI
 	private boolean ignoreFocus;
 
 	protected DOMNode embeddingNode;
-
-	private DOMNode fontNode;
 
 	private static DOMNode tempDiv;
 
@@ -1609,7 +1605,6 @@ public class JSComponentUI extends ComponentUI
 	protected Dimension setHTMLSize1(DOMNode node, boolean addCSS, boolean usePreferred) {
 		if (node == null)
 			return null;
-		if (id.indexOf("66_")>=0)System.err.println(this.id + " sethtmlsize1 " + (this.jc.getParent() != null));
 		addCSS &= !isMenuItem;
 		int h, w;
 		String w0 = null, h0 = null, w0i = null, h0i = null, position = null;
@@ -1772,8 +1767,6 @@ public class JSComponentUI extends ComponentUI
 			return (outerNode = DOMNode.createElement("div", "dummyFrame"));
 		}
 		
-		if (id.indexOf("66_")>=0)System.err.println(this.id + " sethtmlelement ");
-
 		updateDOMNode();
 		checkTransparent();
 		Component[] children = getChildren();
