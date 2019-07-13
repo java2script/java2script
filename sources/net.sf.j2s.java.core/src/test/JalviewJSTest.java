@@ -281,7 +281,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		panel.add(status = new JLabel("ok"), BorderLayout.SOUTH);
 
 		JPanel firstColumn = new JPanel();
-		firstColumn.setLayout(new GridLayout(13, 1));
+		firstColumn.setLayout(new GridLayout(14, 1));
 		firstColumn.setBorder(new TitledBorder("column 1"));
 
 		JTextField t1 = new JTextField("testing");
@@ -309,6 +309,13 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		l2.setHorizontalTextPosition(SwingConstants.LEADING);
 		l2.setHorizontalAlignment(SwingConstants.LEFT);
 		l2.setBorder(new LineBorder(Color.red, 7));
+		
+		Label awtlabel = new Label("AWT");
+		awtlabel.setFont(font);
+		awtlabel.setAlignment(Label.LEFT);
+		firstColumn.add(awtlabel);
+		awtlabel.setBackground(Color.white);
+		
 		
 		JButton b1 = new JButton("right left");
 		b1.setIcon(getImage("test2.png"));
@@ -566,7 +573,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 				});
 			}
 		};
-		bh.setBorder(new LineBorder(Color.red, 14));
+		bh.setBorder(new LineBorder(Color.red, 10));
 		firstColumn.add(bh);
 		firstColumn.add(new JButton("add 'testbtn'") {
 			{

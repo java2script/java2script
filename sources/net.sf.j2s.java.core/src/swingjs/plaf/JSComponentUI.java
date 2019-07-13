@@ -62,6 +62,7 @@ import swingjs.api.js.HTML5Applet;
 import swingjs.api.js.J2SInterface;
 import swingjs.api.js.JQuery;
 import swingjs.api.js.JQueryObject;
+import swingjs.api.js.JSInterface;
 
 /**
  * The JSComponentUI subclasses are where all the detailed HTML5 implementation
@@ -858,6 +859,8 @@ public class JSComponentUI extends ComponentUI
 		// The DOM attributes applet and _frameViewer are necessary for proper 
 		// direction to the target
 		J2S.unsetMouse(domNode);
+		if (domNode == null);
+			updateDOMNode();
 		DOMNode.setAttrs(domNode, "applet", applet, "_frameViewer", jc.getFrameViewer());
 		J2S.setMouse(domNode, true);
 	}
@@ -1217,8 +1220,10 @@ public class JSComponentUI extends ComponentUI
 		// domNode null could be a new table component
 		if (isUIDisabled || domNode == null)
 			return;
-		Object value = e.getNewValue();
 		String prop = e.getPropertyName();
+		Object value = e.getNewValue();
+		
+		
 		if (prop == "ancestor") {
 			if (isAWT) 
 				setAWTFontAndColor((Container) value);
@@ -1282,6 +1287,10 @@ public class JSComponentUI extends ComponentUI
 		// and we know it is not a JMenuBar menu
 		if (!isMenu && cellComponent == null)
 			getDOMNode();
+		
+		
+		if (id.indexOf("66_")>=0)System.err.println(this.id + " prop " + prop);
+
 		switch (prop) {
 		case "preferredSize":
 			// size has been set by JComponent layout
@@ -1299,7 +1308,6 @@ public class JSComponentUI extends ComponentUI
 			return;
 		case "opaque":
 			setBackground(c.getBackground());// BH was CUI??
-			System.err.println("prop opaque " + c.isOpaque() + " " + this.id);
 			return;
 		case "inverted":
 			updateDOMNode();
@@ -1427,6 +1435,8 @@ public class JSComponentUI extends ComponentUI
 
 	protected DOMNode embeddingNode;
 
+	private DOMNode fontNode;
+
 	private static DOMNode tempDiv;
 
 	/**
@@ -1514,6 +1524,7 @@ public class JSComponentUI extends ComponentUI
 		else
 			$(waitImage).hide();
 	}
+	
 	protected DOMNode setCssFont(DOMNode obj, Font font) {
 		if (font != null) {
 			int istyle = font.getStyle();
@@ -1579,6 +1590,7 @@ public class JSComponentUI extends ComponentUI
 	private Dimension getTextSize(AbstractButton b) {
 		if (textNode == null)
 			return null;
+		DOMNode.setStyles(textNode,  "padding", "0");
 		String t = b.getText();
 		if (isAWT && t == "")
 			t = "\u00A0"; // AWT labels do not hide if ""
@@ -1597,6 +1609,7 @@ public class JSComponentUI extends ComponentUI
 	protected Dimension setHTMLSize1(DOMNode node, boolean addCSS, boolean usePreferred) {
 		if (node == null)
 			return null;
+		if (id.indexOf("66_")>=0)System.err.println(this.id + " sethtmlsize1 " + (this.jc.getParent() != null));
 		addCSS &= !isMenuItem;
 		int h, w;
 		String w0 = null, h0 = null, w0i = null, h0i = null, position = null;
@@ -1758,6 +1771,9 @@ public class JSComponentUI extends ComponentUI
 			isTainted = false;
 			return (outerNode = DOMNode.createElement("div", "dummyFrame"));
 		}
+		
+		if (id.indexOf("66_")>=0)System.err.println(this.id + " sethtmlelement ");
+
 		updateDOMNode();
 		checkTransparent();
 		Component[] children = getChildren();
@@ -2349,6 +2365,11 @@ public class JSComponentUI extends ComponentUI
 		if (textNode != null) {
 			prop = "innerHTML";
 			obj = textNode;
+			// IT TURNS OUT...
+			// that for a <button> element to properly align vertically, 
+			// the font must be set for the button element, not in a child element. 
+			
+			setCssFont(domNode, getFont()); // for vertical centering
 			setCssFont(textNode, getFont());
 			if (!isHTML)
 				text = PT.rep(text, "<", "&lt;").replace(' ', '\u00A0');
@@ -2390,7 +2411,7 @@ public class JSComponentUI extends ComponentUI
 	
 	protected void getJSInsets() {
 		if (insets == null)
-			insets = zeroInsets;
+			insets = new Insets(0, 0, 0, 0);
 		insets = jc.getInsets(insets);
 	}
 
@@ -2465,7 +2486,7 @@ public class JSComponentUI extends ComponentUI
 		Insets margins = (isLabel ? (isAWT ? b.getInsets() : insets) : getButtonMargins(b, justGetPreferred));
 		if (margins == null)
 			margins = zeroInsets;
-		Insets insets = (isLabel || !isSimpleButton || justGetPreferred ? zeroInsets : getButtonOuterInsets(b));
+		Insets myInsets = (isLabel || !isSimpleButton || justGetPreferred ? zeroInsets : getButtonOuterInsets(b));
 		int h = (dimText == null ? 0 : dimText.height);
 		int ih = (dimIcon == null ? 0 : dimIcon.height);
 		int hCtr = Math.max(h, ih);
@@ -2571,29 +2592,26 @@ public class JSComponentUI extends ComponentUI
 			return;
 		}
 		preferredDim = null;
-		Object cssCtr = getJSObject();
+		Object cssCtr = getJSObject(); // {...}
 		Object cssTxt = getJSObject();
 		Object cssIcon = getJSObject();
 		
-		
-		DOMNode.setStyles(centeringNode, "position", "absolute", "top", null, "left", null, "transform", null, "width", wCtr + "px", "height", hCtr + "px");
+		addJSKeyVal(cssCtr, "position", "absolute", "top", null, "left", null, "transform", null, "width", wCtr + "px", "height", hCtr + "px");
+		addJSKeyVal(cssIcon, "position", "absolute", "top", null, "left", null, "transform", null);
+		addJSKeyVal(cssTxt, "position", "absolute", "top", null, "left", null, "transform", null);
 
-		// horizontal
-		
-		isFullyCentered = false;
-		if (alignHCenter && alignVCenter && wIcon == 0 || wText == 0 && margins.left == margins.right
-				&& margins.top == margins.bottom && insets.left == insets.right && insets.top == insets.bottom)
-			isFullyCentered = true;//!isLabel;
+		isFullyCentered = (alignHCenter && alignVCenter && wIcon == 0 || wText == 0 && margins.left == margins.right
+				&& margins.top == margins.bottom && myInsets.left == myInsets.right && myInsets.top == myInsets.bottom);
 		if (isFullyCentered) {
 			// simple totally centered label or button
 			// can't have width or height here --- let the browser figure that out
-			fullyCenter(cssCtr, true);
-			fullyCenter(cssIcon, false);
-			fullyCenter(cssTxt, false);
+			fullyCenter(cssCtr);
+			fullyCenter(cssIcon);
+			fullyCenter(cssTxt);
 		} else {
-			addCSS(cssIcon, "position", "absolute", "top", null, "left", null, "transform", null);
-			addCSS(cssTxt, "position", "absolute", "top", null, "left", null, "transform", null);
-
+			
+			// horizontal
+			
 			int left = -1;
 
 			if (menuAnchorNode == null) {
@@ -2602,53 +2620,53 @@ public class JSComponentUI extends ComponentUI
 					case SwingConstants.TOP:
 					case SwingConstants.BOTTOM:
 					case SwingConstants.CENTER:
-						addCSS(cssTxt, "left", ((wCtr - wText) / 2) + "px");
-						addCSS(cssIcon, "left", ((wCtr - wIcon) / 2) + "px");
+						addJSKeyVal(cssTxt, "left", ((wCtr - wText) / 2) + "px");
+						addJSKeyVal(cssIcon, "left", ((wCtr - wIcon) / 2) + "px");
 						break;
 					default:
 						int off = wCtr / 2;
 						if (textRight) {
-							addCSS(cssIcon, "left", "0px");
-							addCSS(cssTxt, "left", (gap + wIcon) + "px");
+							addJSKeyVal(cssIcon, "left", "0px");
+							addJSKeyVal(cssTxt, "left", (gap + wIcon) + "px");
 						} else {
-							addCSS(cssTxt, "left", off + "px");
-							addCSS(cssIcon, "left", (gap + wText) + "px");
+							addJSKeyVal(cssTxt, "left", off + "px");
+							addJSKeyVal(cssIcon, "left", (gap + wText) + "px");
 						}
 						break;
 					}
-					left = (w - wCtr + margins.left - margins.right - insets.left - insets.right) / 2;
+					left = (w - wCtr + margins.left - margins.right + myInsets.left - myInsets.right) / 2;
 				} else if (alignRight) {
-					left = w - wCtr - margins.right - insets.right - (cellComponent == null ? 0 : 2);// table fudge
+					left = w - wCtr - margins.right - myInsets.right - (cellComponent == null ? 0 : 2);// table fudge
 					if (textRight) {
-						addCSS(cssTxt, "left", (wCtr - wText) + "px");
-						addCSS(cssIcon, "left", "0px");
+						addJSKeyVal(cssTxt, "left", (wCtr - wText) + "px");
+						addJSKeyVal(cssIcon, "left", "0px");
 					} else {
-						addCSS(cssTxt, "left", "0px");
-						addCSS(cssIcon, "left", (wCtr - wIcon) + "px");
+						addJSKeyVal(cssTxt, "left", "0px");
+						addJSKeyVal(cssIcon, "left", (wCtr - wIcon) + "px");
 					}
 				} else {
-					left = margins.left + insets.left - (cellComponent == null ? 0 : 1);
+					left = margins.left + myInsets.left - (cellComponent == null ? 0 : 1);
 					if (textRight) {
 						int off = (!isMenuItem || ltr || actionNode != null ? 0 : actionItemOffset);
-						addCSS(cssIcon, "left", off + "px");
-						addCSS(cssTxt, "left", (wIcon + gap) + "px");
+						addJSKeyVal(cssIcon, "left", off + "px");
+						addJSKeyVal(cssTxt, "left", (wIcon + gap) + "px");
 					} else {
-						addCSS(cssTxt, "left", (!isMenuItem ? 0 : ltr ? actionItemOffset : -3) + "px");
-						addCSS(cssIcon, "left", (wText + gap) + "px");
+						addJSKeyVal(cssTxt, "left", (!isMenuItem ? 0 : ltr ? actionItemOffset : -3) + "px");
+						addJSKeyVal(cssIcon, "left", (wText + gap) + "px");
 					}
 				}
-				addCSS(cssCtr, "left", left + "px");
+				addJSKeyVal(cssCtr, "left", left + "px");
 			} else {
 				if (alignRight) {
 					DOMNode.setStyles(itemNode, "text-align", "right");
-					addCSS(cssCtr, "right", "0px");
-					addCSS(cssTxt, "right", "23px");
-					addCSS(cssIcon, "right", "0px"); // was 3
+					addJSKeyVal(cssCtr, "right", "0px");
+					addJSKeyVal(cssTxt, "right", "23px");
+					addJSKeyVal(cssIcon, "right", "0px"); // was 3
 				} else {
 					DOMNode.setStyles(itemNode, "text-align", "left");
-					addCSS(cssCtr, "left", "0px");
-					addCSS(cssIcon, "left", "0px"); // was 3
-					addCSS(cssTxt, "left", "23px");
+					addJSKeyVal(cssCtr, "left", "0px");
+					addJSKeyVal(cssIcon, "left", "0px"); // was 3
+					addJSKeyVal(cssTxt, "left", "23px");
 				}
 			}
 
@@ -2665,20 +2683,20 @@ public class JSComponentUI extends ComponentUI
 				
 				switch (vAlign) {
 				case SwingConstants.TOP:
-					top = margins.top;
+					top = margins.top + myInsets.top;
 					break;
 				case SwingConstants.BOTTOM:
-					top = h - margins.bottom - hCtr;
+					top = h - margins.bottom - myInsets.bottom - hCtr;
 					break;
 				default:
 				case SwingConstants.CENTER:
-					top = (h - hCtr + margins.top - margins.bottom) / 2;
+					top = (h - hCtr + margins.top - margins.bottom + myInsets.top - myInsets.bottom) / 2;
 					break;
 				}
 
 				//System.out.println("jscui.setAlignments " + b.getText() + " " + vAlign + " " + top + " " + h + " " + hCtr + " " + jc.getClass().getName() + " " + b.getFont() + " " + margins + " " + insets + " " + top);
 
-				addCSS(cssCtr, "top", top + "px");
+				addJSKeyVal(cssCtr, "top", top + "px");
 				int itop;
 				String yoff = null;
 				String iscale = null;
@@ -2699,14 +2717,14 @@ public class JSComponentUI extends ComponentUI
 					yoff = "-50%";
 					break;
 				}
-				addCSS(cssTxt, "top", top + "%", "transform",
+				addJSKeyVal(cssTxt, "top", top + "%", "transform",
 						"translateY(" + (yoff == null ? "-" + top + "%" : yoff + ")"));
-				addCSS(cssIcon, "top", top + "%", "transform",
+				addJSKeyVal(cssIcon, "top", top + "%", "transform",
 						"translateY(-" + itop + "%)" + (iscale == null ? "" : iscale));
 			} else {
 				DOMNode.setStyles(menuAnchorNode, "height", h + "px");
 				//addCSS(cssTxt, "top", "50%", "transform", "translateY(-50%)");
-				addCSS(cssIcon, "top", "50%", "transform", "translateY(-65%) scale(0.6,0.6)");
+				addJSKeyVal(cssIcon, "top", "50%", "transform", "translateY(-65%) scale(0.6,0.6)");
 			}
 
 		}
@@ -2718,11 +2736,23 @@ public class JSComponentUI extends ComponentUI
 			updateCellNode();
 	}
 
-	private void addCSS(Object css, String... kv) {
+	private void fullyCenter(Object css) {
+		if (isSimpleButton)
+			addJSKeyVal(css, "width", null, "position", null, "padding", "0", "margin", "0 auto");
+		else
+			addJSKeyVal(css, "width", null, "top", "50%", "left", "50%", "transform",
+				"translateX(-50%)translateY(-50%)translateY(0.5px)translateX(0.5px)", "position", "absolute");
+	}
+
+	public static Object getJSObject() {
+		return /** @j2sNative {} || */ null;
+	}
+
+	public static void addJSKeyVal(Object o, String... kv) {
 		for (int i = 0, n = kv.length; i < n; i++) {
 		/** @j2sNative 
 		 * 
-		 * css[kv[i++]] = kv[i]; 
+		 * o[kv[i++]] = kv[i]; 
 		 * 
 		 */
 		}
@@ -2738,21 +2768,6 @@ public class JSComponentUI extends ComponentUI
 		 * 
 		 */
 	}
-
-
-	private Object getJSObject() {
-		return /** @j2sNative {} || */ null;
-	}
-
-
-	protected void fullyCenter(Object css, boolean isCtr) {
-//		if (isLabel)
-			addCSS(css, "width", null, "top", "50%", "left", "50%", "transform",
-				"translateX(-50%)translateY(-50%)translateY(0.5px)translateX(0.5px)", "position", "absolute");
-// no, this causes the label to be offset too much
-	//		addCSS(node, "width", null, "top", null, "left", null, "transform", null, "position", null, "height", null);
-	}
-
 
 	protected void updateCellNode() {
 		// could be editor or cell
@@ -2794,7 +2809,12 @@ public class JSComponentUI extends ComponentUI
 
 	}
 
-
+    /**
+     * 
+     * @param b
+     * @param includeOuter only if getting preferred settings only
+     * @return
+     */
 	private Insets getButtonMargins(AbstractButton b, boolean includeOuter) {
 		return (includeOuter ? b.getInsets() // will include margins
 				: b.getBorder() instanceof CompoundBorder
@@ -2930,8 +2950,11 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public void setFont(Font f) {
-		if (domNode != null && !isUIDisabled)
-			setCssFont((textNode == null ? domNode : textNode), f);
+//		if (domNode != null && !isUIDisabled) {
+//		if (textNode != null)
+//			setCssFont(textNode, f);
+//			setCssFont(domNode, f);
+//		}
 	}
 
 	@Override
@@ -3345,7 +3368,7 @@ public class JSComponentUI extends ComponentUI
 	public void paintBackground(JSGraphics2D g) {
 		boolean isOpaque = c.isOpaque();
 		boolean paintsSelf = jc.秘paintsSelf();
-		System.out.println("paintback " + this.id  + " " + (/** @j2sNative this.jc.text||*/"")+ " " + isOpaque + " " + paintsSelf + " " + g);
+		//System.out.println("paintback " + this.id  + " " + (/** @j2sNative this.jc.text||*/"")+ " " + isOpaque + " " + paintsSelf + " " + g);
 		Color color = (this.backgroundColor == null ? getBackground() : this.backgroundColor);
 		if (g == null) {
 			if (!paintsSelf)
