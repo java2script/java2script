@@ -975,7 +975,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 					case "java.io.File":
 						var f = Clazz.new_(Clazz.load("java.io.File").c$$S,
 								[ file.name ]);
-						f.?bytes = J2S._toBytes(data);
+						f.秘bytes = J2S._toBytes(data);
 						return fDone(f);
 					case "ArrayBuffer":
 						break;
@@ -2908,7 +2908,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				}, 502);
 				return false;
 			} else {
-				setTimeout(function(){document.body.dispatchEvent(ev.ev0.originalEvent)},50)
+// if (ev.ev0)
+//				setTimeout(function(){document.body.dispatchEvent(ev.ev0.originalEvent)},50)
 			}
 		};
 

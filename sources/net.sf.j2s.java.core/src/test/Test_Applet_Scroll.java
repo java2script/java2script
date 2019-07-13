@@ -36,13 +36,10 @@ import javax.swing.JSlider;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
-import javax.swing.JViewport;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.plaf.ViewportUI;
 
-@SuppressWarnings("serial")
 public class Test_Applet_Scroll extends JApplet implements ChangeListener, MouseListener, MouseMotionListener {
 
 	static {
@@ -58,9 +55,9 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 
 	boolean preferred = true;
 
-	private JScrollBar hsb;
-
-	private JScrollBar sbar;
+//	private JScrollBar hsb;
+//
+//	private JScrollBar sbar;
 
 	private JPanel panel2;
 
@@ -202,7 +199,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 		sp.getViewport().add(p);
 		getContentPane().add(sp);
 		sp.getViewport().addChangeListener(this);
-		hsb = sp.getHorizontalScrollBar();
+//		hsb = sp.getHorizontalScrollBar();
 
 		sp.getViewport().setBackground(Color.blue);
 		p.setOpaque(false);
@@ -249,7 +246,7 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 		bar.setForeground(Color.green);
 		bar.setOpaque(true);
 		p.add(bar);
-		sbar = bar;
+//		sbar = bar;
 		bar.setVisibleAmount(80);
 		return bar;
 	}

@@ -575,7 +575,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 		if (b == null)
 			return null;
 		Insets i = b.getBorderInsets(scrollpane);
-		if (!layingOut) {
+		if (false && !layingOut) {
 			// AWT includes scrollbars in visibility, but the layout manager does not
 			i.right += scrollpane.getVerticalScrollBar().isVisible() ? 12 : 0;
 			i.bottom += scrollpane.getHorizontalScrollBar().isVisible() ? 12 : 0;

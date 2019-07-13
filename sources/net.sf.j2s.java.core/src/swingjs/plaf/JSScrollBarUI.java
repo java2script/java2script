@@ -93,6 +93,7 @@ public class JSScrollBarUI extends JSSliderUI {
 		// thin because we are implementing jquery slider here
 		int wh = (myScrollPaneUI == null ? 15 : myScrollPaneUI.scrollBarUIDisabled ? 0 : 13);
 		// just used for width or height, but not both. I think.... 
+		System.out.println("JSSCrollbarUI dim " + wh + " " + myScrollPaneUI);
 		return new Dimension(wh, wh);
 	}
 	
