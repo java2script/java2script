@@ -2,6 +2,11 @@ package swingjs.api.js;
 
 import javax.swing.JPopupMenu;
 
+/**
+ * An abstract class to cover the JavaScript calls made to j2sMenu
+ * @author hansonr
+ *
+ */
 public abstract class JSSwingMenu {
 
 	public class Options {
