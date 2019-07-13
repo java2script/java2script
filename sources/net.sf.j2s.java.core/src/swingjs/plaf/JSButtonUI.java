@@ -84,11 +84,11 @@ public class JSButtonUI extends JSLightweightUI {
 
 	@Override
 	public DOMNode updateDOMNode() {
-		isSimpleButton = true;
-		allowPaintedBackground = false;
-		// all subclasses will have their own version of this.
+		// all subclasses will have their own version of this. They do not call super.updateDOMNode()
 		// this one is only for a simple button
 		if (domNode == null) {
+			isSimpleButton = true;
+			allowPaintedBackground = false;
 			setDoPropagate();
 			domNode = enableNode = buttonNode = newDOMObject("button", id + "_dom", "type", "button");
 			//DOMNode.setStyles(domNode,"transform","translateY(0.5px)translateX(0.5px)");
