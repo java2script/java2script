@@ -30,7 +30,9 @@ public class JSLabelUI extends JSLightweightUI {
 
 	@Override
 	public DOMNode updateDOMNode() {
-		if (domNode == null) {
+//		if (jc.getTopLevelAncestor() == null)
+//			return domNode;
+	if (domNode == null) {
 			enableNode = domNode = newDOMObject("label", id);
 			textNode = iconNode = null;
 			addCentering(domNode);
