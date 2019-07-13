@@ -50,6 +50,8 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.plaf.ComboBoxUI;
 
+import swingjs.plaf.JSComboBoxUI;
+
 //
 
 /**
@@ -186,6 +188,13 @@ implements ItemSelectable,ListDataListener,ActionListener {
 
     // Flag to ensure the we don't get multiple ActionEvents on item selection.
     private boolean selectingItem = false;
+    
+	/**
+	 * SwingJS tweak: Lazy creation of editor, so we need to know if the editor has
+	 * been explicitly set null using setEditor(null) or not.
+	 * 
+	 */
+	private boolean 秘isEditorCleared;
 
     /**
      * Creates a <code>JComboBox</code> that takes its items from an
@@ -496,7 +505,7 @@ implements ItemSelectable,ListDataListener,ActionListener {
      */
     public void setEditor(ComboBoxEditor anEditor) {
         ComboBoxEditor oldEditor = editor;
-
+        秘isEditorCleared = (editor == null);
         if ( editor != null ) {
             editor.removeActionListener(this);
         }
@@ -514,6 +523,8 @@ implements ItemSelectable,ListDataListener,ActionListener {
      * @return the <code>ComboBoxEditor</code> that displays the selected item
      */
     public ComboBoxEditor getEditor() {
+    	if (editor == null && !this.秘isEditorCleared)
+    		setEditor(((JSComboBoxUI) ui).createEditor());
         return editor;
     }
 

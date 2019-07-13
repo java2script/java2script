@@ -187,10 +187,11 @@ public class JSComboBoxUI extends JSLightweightUI {
 			comboBox.setRenderer(createRenderer());
 		}
 
-		if (comboBox.getEditor() == null || comboBox.getEditor() instanceof UIResource) {
-			comboBox.setEditor(createEditor());
-		}
-
+// deferred -- no reason to do this now.
+//		if (comboBox.getEditor() == null || comboBox.getEditor() instanceof UIResource) {
+//			comboBox.setEditor(createEditor());
+//		}
+//
 		installListeners();
 		installComponents();
 
@@ -225,7 +226,7 @@ public class JSComboBoxUI extends JSLightweightUI {
 			comboBox.setRenderer(null);
 		}
 
-		ComboBoxEditor comboBoxEditor = comboBox.getEditor();
+		ComboBoxEditor comboBoxEditor = /** @j2sNative this.comboBox.editor && */comboBox.getEditor();
 		if (comboBoxEditor instanceof UIResource) {
 			if (comboBoxEditor.getEditorComponent().hasFocus()) {
 				// Leave focus in JComboBox.
@@ -634,7 +635,7 @@ public class JSComboBoxUI extends JSLightweightUI {
 	 * @return a <code>ComboBoxEditor</code> used for the combo box
 	 * @see javax.swing.JComboBox#setEditor
 	 */
-	protected ComboBoxEditor createEditor() {
+	public ComboBoxEditor createEditor() {
 		return new BasicComboBoxEditor.UIResource();
 	}
 
