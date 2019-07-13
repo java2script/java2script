@@ -901,7 +901,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				 new UIDefaults.LazyInputMap(new Object[] {
 				 "SPACE", "pressed",
 				 "released SPACE", "released",
-				 "RETURN", "pressed"
+				 "ENTER", "pressed" // Was mistakenly "RETURN" in Java
 				 }),
 				//
 				// "CheckBox.font", dialogPlain12,
