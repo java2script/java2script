@@ -1684,6 +1684,7 @@ public class JSComponentUI extends ComponentUI
 			tempDiv.appendChild(node);
 			Rectangle r = tempDiv.getBoundingClientRect();
 			tempDiv.removeChild(node);
+			
 
 			// From the DOM; Will be Rectangle2D.double, actually.
 			// This is preferable to $(text).width() because that is rounded
@@ -2484,7 +2485,6 @@ public class JSComponentUI extends ComponentUI
 		int hCtr = Math.max(h, ih);
 		int wCtr = wIcon + gap + wText;
 		int wAccel = 0;
-		String accel = null;
 		// But we need to slightly underestimate it so that the
 		// width of label + button does not go over the total calculated width
 
@@ -2537,27 +2537,28 @@ public class JSComponentUI extends ComponentUI
 			alignRight = !ltr;
 			alignHCenter = false;
 			textRight = ltr;
-			accel = (b instanceof JMenuItem ? getAccelStr((JMenuItem) b) : null);
-			DOMNode accelNode = menuAnchorNode;
-			accelNode = /** @j2sNative accelNode.children[1] || */
-					null;
-			if ((accelNode == null) != (accel == null)) {
-				if (accel == null) {
-					DOMNode.remove(accelNode);
-				} else {
-					menuAnchorNode.appendChild(accelNode = DOMNode.createElement("span", id + "_acc"));
-					addClass(accelNode, "ui-j2smenu-accel");
-					DOMNode.setAttr(accelNode, "role", "menuitem");
-					DOMNode.setStyles(accelNode, "font-size", "10px");
-					setMenuItem(accelNode);
+			if (!isMenu) {
+				String accel = getAccelStr((JMenuItem) b);
+				DOMNode accelNode = menuAnchorNode;
+				accelNode = /** @j2sNative accelNode.children[1] || */null;
+				if ((accelNode == null) != (accel == null)) {
+					if (accel == null) {
+						DOMNode.remove(accelNode);
+					} else {
+						menuAnchorNode.appendChild(accelNode = DOMNode.createElement("span", id + "_acc"));
+						addClass(accelNode, "ui-j2smenu-accel");
+						DOMNode.setAttr(accelNode, "role", "menuitem");
+						DOMNode.setStyles(accelNode, "font-size", "10px");
+						setMenuItem(accelNode);
+					}
 				}
-			}
-			if (accel != null) {
-				DOMNode.setStyles(accelNode, "float", null);
-				DOMNode.setAttr(accelNode, "innerHTML", accel);// = accel + "\u00A0\u00A0");
-				wAccel = getHTMLSize(accelNode).width;
-				DOMNode.setStyles(accelNode, "float", ltr ? "right" : "left", "text-align", ltr ? "right" : "left",
-						"margin", "0px 5px", "transform", "translateY(15%)");
+				if (accel != null) {
+					DOMNode.setStyles(accelNode, "float", null);
+					DOMNode.setAttr(accelNode, "innerHTML", accel);// = accel + "\u00A0\u00A0");
+					wAccel = getHTMLSize(accelNode).width;
+					DOMNode.setStyles(accelNode, "float", ltr ? "right" : "left", "text-align", ltr ? "right" : "left",
+							"margin", "0px 5px", "transform", "translateY(15%)");
+				}
 			}
 			DOMNode.setStyles(menuAnchorNode, "width", "90%", "min-width",
 					Math.max(75, (wCtr + wAccel + margins.left + margins.right) * 1.1) + "px");
@@ -2587,8 +2588,9 @@ public class JSComponentUI extends ComponentUI
 		Object cssCtr = getJSObject(); // {...}
 		Object cssTxt = getJSObject();
 		Object cssIcon = getJSObject();
-		
-		addJSKeyVal(cssCtr, "position", "absolute", "top", null, "left", null, "transform", null, "width", wCtr + "px", "height", hCtr + "px");
+
+		addJSKeyVal(cssCtr, "position", "absolute", "top", null, "left", null, "transform", null, "width", wCtr + "px",
+				"height", hCtr + "px");
 		addJSKeyVal(cssIcon, "position", "absolute", "top", null, "left", null, "transform", null);
 		addJSKeyVal(cssTxt, "position", "absolute", "top", null, "left", null, "transform", null);
 
@@ -2601,9 +2603,9 @@ public class JSComponentUI extends ComponentUI
 			fullyCenter(cssIcon);
 			fullyCenter(cssTxt);
 		} else {
-			
+
 			// horizontal
-			
+
 			int left = -1;
 
 			if (menuAnchorNode == null) {
@@ -2663,7 +2665,7 @@ public class JSComponentUI extends ComponentUI
 			}
 
 			// vertical
-			
+
 			h = c.getHeight();
 
 			if (h == 0) {
@@ -2672,7 +2674,7 @@ public class JSComponentUI extends ComponentUI
 
 			if (menuAnchorNode == null) {
 				int top;
-				
+
 				switch (vAlign) {
 				case SwingConstants.TOP:
 					top = margins.top + myInsets.top;
@@ -2686,7 +2688,9 @@ public class JSComponentUI extends ComponentUI
 					break;
 				}
 
-				//System.out.println("jscui.setAlignments " + b.getText() + " " + vAlign + " " + top + " " + h + " " + hCtr + " " + jc.getClass().getName() + " " + b.getFont() + " " + margins + " " + insets + " " + top);
+				// System.out.println("jscui.setAlignments " + b.getText() + " " + vAlign + " "
+				// + top + " " + h + " " + hCtr + " " + jc.getClass().getName() + " " +
+				// b.getFont() + " " + margins + " " + insets + " " + top);
 
 				addJSKeyVal(cssCtr, "top", top + "px");
 				int itop;
@@ -2715,15 +2719,15 @@ public class JSComponentUI extends ComponentUI
 						"translateY(-" + itop + "%)" + (iscale == null ? "" : iscale));
 			} else {
 				DOMNode.setStyles(menuAnchorNode, "height", h + "px");
-				//addCSS(cssTxt, "top", "50%", "transform", "translateY(-50%)");
+				// addCSS(cssTxt, "top", "50%", "transform", "translateY(-50%)");
 				addJSKeyVal(cssIcon, "top", "50%", "transform", "translateY(-65%) scale(0.6,0.6)");
 			}
 
 		}
 		setCSS(cssCtr, centeringNode);
 		setCSS(cssIcon, iconNode);
-		setCSS(cssTxt, textNode); 
-		
+		setCSS(cssTxt, textNode);
+
 		if (cellComponent != null)
 			updateCellNode();
 	}
