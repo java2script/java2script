@@ -270,11 +270,11 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      */
     private transient long intCompact;
 
-	private static StringBuilderHelper myStringBuilder;
+//	private static StringBuilderHelper myStringBuilder;
 
     // All 18-digit base ten strings fit into a long; not all 19-digit
     // strings will
-    private static final int MAX_COMPACT_DIGITS = 18;
+    private static final int MAX_COMPACT_DIGITS = 9; 
 
     /* Appease the serialization gods */
     private static final long serialVersionUID = 6108874887143696463L;
@@ -1010,14 +1010,14 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
 
     private final static double[] bufd;    
     private final static int[] bufi2;
-    private final static byte[] bufb8;
+//    private final static byte[] bufb8;
     
     static {
         @SuppressWarnings("unused")
 		Object buf8 = /** @j2sNative new ArrayBuffer(8) || */null;
     	bufd = /** @j2sNative new Float64Array(buf8) || */null;
     	bufi2 = /** @j2sNative new Uint32Array(buf8) || */null;
-    	bufb8 = /** @j2sNative new Uint8Array(buf8) || */null;
+//    	bufb8 = /** @j2sNative new Uint8Array(buf8) || */null;
     }
 
     private static int[] doubleToInt2(double val) {
@@ -1025,11 +1025,11 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
     	return bufi2; 
     }
 
-    private static byte[] int2ToByte8(int high, int low) {
-    	bufi2[0] = low;
-    	bufi2[1] = high;
-    	return bufb8; 
-    }
+//    private static byte[] int2ToByte8(int high, int low) {
+//    	bufi2[0] = low;
+//    	bufi2[1] = high;
+//    	return bufb8; 
+//    }
 
 	/**
      * Translates a {@code BigInteger} into a {@code BigDecimal}.
@@ -1622,19 +1622,22 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
     public BigDecimal divide(BigDecimal divisor, int scale, int roundingMode) {
         if (roundingMode < ROUND_UP || roundingMode > ROUND_UNNECESSARY)
             throw new IllegalArgumentException("Invalid rounding mode");
-        if (this.intCompact != INFLATED) {
-            if ((divisor.intCompact != INFLATED)) {
-                return divide(this.intCompact, this.scale, divisor.intCompact, divisor.scale, scale, roundingMode);
-            } else {
-                return divide(this.intCompact, this.scale, divisor.intVal, divisor.scale, scale, roundingMode);
-            }
-        } else {
-            if ((divisor.intCompact != INFLATED)) {
-                return divide(this.intVal, this.scale, divisor.intCompact, divisor.scale, scale, roundingMode);
-            } else {
-                return divide(this.intVal, this.scale, divisor.intVal, divisor.scale, scale, roundingMode);
-            }
-        }
+//        if (this.intCompact != INFLATED) {
+//            if ((divisor.intCompact != INFLATED)) {
+//                return divide(this.intCompact, this.scale, divisor.intCompact, divisor.scale, scale, roundingMode);
+//            } else {
+//                return divide(this.intCompact, this.scale, divisor.intVal, divisor.scale, scale, roundingMode);
+//            }
+//        } else {
+//            if ((divisor.intCompact != INFLATED)) {
+//                return divide(this.intVal, this.scale, divisor.intCompact, divisor.scale, scale, roundingMode);
+//            } else {
+                return divide(this.intVal == null ? BigInteger.valueOf(this.intCompact) : this.intVal, 
+                		this.scale, 
+                		divisor.intVal == null ? BigInteger.valueOf(divisor.intCompact) : divisor.intVal , 
+                				divisor.scale, scale, roundingMode);
+//            }
+//       }
     }
 
     /**
@@ -2686,7 +2689,8 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      * @return -1, 0, or 1 as this {@code BigDecimal} is numerically
      *          less than, equal to, or greater than {@code val}.
      */
-    public int compareTo(BigDecimal val) {
+    @Override
+	public int compareTo(BigDecimal val) {
         // Quick path for equal scale and non-inflated case.
         if (scale == val.scale) {
             long xs = intCompact;
@@ -3122,7 +3126,8 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      *
      * @return this {@code BigDecimal} converted to a {@code long}.
      */
-    public long longValue(){
+    @Override
+	public long longValue(){
         return (intCompact != INFLATED && scale == 0) ?
             intCompact:
             toBigInteger().longValue();
@@ -3190,7 +3195,8 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      *
      * @return this {@code BigDecimal} converted to an {@code int}.
      */
-    public int intValue() {
+    @Override
+	public int intValue() {
         return  (intCompact != INFLATED && scale == 0) ?
             (int)intCompact :
             toBigInteger().intValue();
@@ -3272,7 +3278,8 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      *
      * @return this {@code BigDecimal} converted to a {@code float}.
      */
-    public float floatValue(){
+    @Override
+	public float floatValue(){
         if(intCompact != INFLATED) {
             if (scale == 0) {
                 return (float)intCompact;
@@ -3315,7 +3322,8 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      *
      * @return this {@code BigDecimal} converted to a {@code double}.
      */
-    public double doubleValue(){
+    @Override
+	public double doubleValue(){
         if(intCompact != INFLATED) {
             if (scale == 0) {
                 return (double)intCompact;
@@ -3952,6 +3960,9 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      * {@code BigInteger}.
      */
     private static long compactValFor(BigInteger b) {
+    	if (true)
+    		return INFLATED;
+    	// SwingJS -- for now we do not allow compact BigInt values
     	if (b.isOneInt())
     		return b.intValue();
         int[] m = b.mag;
@@ -5282,52 +5293,46 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
         }
     }
 
-    private static BigDecimal divide(BigInteger dividend, int dividendScale, long divisor, int divisorScale, int scale, int roundingMode) {
-        if (checkScale(dividend,(long)scale + divisorScale) > dividendScale) {
-            int newScale = scale + divisorScale;
-            int raise = newScale - dividendScale;
-            BigInteger scaledDividend = bigMultiplyPowerTen(dividend, raise);
-            return divideAndRound(scaledDividend, divisor, scale, roundingMode, scale);
-        } else {
-            int newScale = checkScale(divisor,(long)dividendScale - scale);
-            int raise = newScale - divisorScale;
-            if(raise<LONG_TEN_POWERS_TABLE.length) {
-                long ys = divisor;
-                if ((ys = longMultiplyPowerTen(ys, raise)) != INFLATED) {
-                    return divideAndRound(dividend, ys, scale, roundingMode, scale);
-                }
-            }
-            BigInteger scaledDivisor = bigMultiplyPowerTen(divisor, raise);
-            return divideAndRound(dividend, scaledDivisor, scale, roundingMode, scale);
-        }
-    }
-
-    private static BigDecimal divide(long dividend, int dividendScale, BigInteger divisor, int divisorScale, int scale, int roundingMode) {
-        if (checkScale(dividend,(long)scale + divisorScale) > dividendScale) {
-            int newScale = scale + divisorScale;
-            int raise = newScale - dividendScale;
-            BigInteger scaledDividend = bigMultiplyPowerTen(dividend, raise);
-            return divideAndRound(scaledDividend, divisor, scale, roundingMode, scale);
-        } else {
-            int newScale = checkScale(divisor,(long)dividendScale - scale);
-            int raise = newScale - divisorScale;
-            BigInteger scaledDivisor = bigMultiplyPowerTen(divisor, raise);
-            return divideAndRound(BigInteger.valueOf(dividend), scaledDivisor, scale, roundingMode, scale);
-        }
-    }
+//    private static BigDecimal divide(BigInteger dividend, int dividendScale, long divisor, int divisorScale, int scale, int roundingMode) {
+//        if (checkScale(dividend,(long)scale + divisorScale) > dividendScale) {
+//            int newScale = scale + divisorScale;
+//            int raise = newScale - dividendScale;
+//            BigInteger scaledDividend = bigMultiplyPowerTen(dividend, raise);
+//            return divideAndRound(scaledDividend, divisor, scale, roundingMode, scale);
+//        } else {
+//            int newScale = checkScale(divisor,(long)dividendScale - scale);
+//            int raise = newScale - divisorScale;
+//            if(raise<LONG_TEN_POWERS_TABLE.length) {
+//                long ys = divisor;
+//                if ((ys = longMultiplyPowerTen(ys, raise)) != INFLATED) {
+//                    return divideAndRound(dividend, ys, scale, roundingMode, scale);
+//                }
+//            }
+//            BigInteger scaledDivisor = bigMultiplyPowerTen(divisor, raise);
+//            return divideAndRound(dividend, scaledDivisor, scale, roundingMode, scale);
+//        }
+//    }
+//
+//    private static BigDecimal divide(long dividend, int dividendScale, BigInteger divisor, int divisorScale, int scale, int roundingMode) {
+//        if (checkScale(dividend,(long)scale + divisorScale) > dividendScale) {
+//            int newScale = scale + divisorScale;
+//            int raise = newScale - dividendScale;
+//            BigInteger scaledDividend = bigMultiplyPowerTen(dividend, raise);
+//            return divideAndRound(scaledDividend, divisor, scale, roundingMode, scale);
+//        } else {
+//            int newScale = checkScale(divisor,(long)dividendScale - scale);
+//            int raise = newScale - divisorScale;
+//            BigInteger scaledDivisor = bigMultiplyPowerTen(divisor, raise);
+//            return divideAndRound(BigInteger.valueOf(dividend), scaledDivisor, scale, roundingMode, scale);
+//        }
+//    }
 
     private static BigDecimal divide(BigInteger dividend, int dividendScale, BigInteger divisor, int divisorScale, int scale, int roundingMode) {
-        if (checkScale(dividend,(long)scale + divisorScale) > dividendScale) {
-            int newScale = scale + divisorScale;
-            int raise = newScale - dividendScale;
-            BigInteger scaledDividend = bigMultiplyPowerTen(dividend, raise);
-            return divideAndRound(scaledDividend, divisor, scale, roundingMode, scale);
-        } else {
-            int newScale = checkScale(divisor,(long)dividendScale - scale);
-            int raise = newScale - divisorScale;
-            BigInteger scaledDivisor = bigMultiplyPowerTen(divisor, raise);
-            return divideAndRound(dividend, scaledDivisor, scale, roundingMode, scale);
-        }
+    	int newScale = (checkScale(dividend,(long)scale + divisorScale) > dividendScale ?
+    			scale + divisorScale : checkScale(divisor,(long)dividendScale - scale));
+        int raise = newScale - divisorScale;
+        BigInteger scaledDividend = bigMultiplyPowerTen(dividend, raise);
+        return divideAndRound(scaledDividend, divisor, scale, roundingMode, scale);
     }
 
 }
