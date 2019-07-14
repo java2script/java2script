@@ -1,6 +1,8 @@
 package swingjs.plaf;
 
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 
@@ -109,7 +111,20 @@ public class JSLabelUI extends JSLightweightUI {
 	@Override
 	public Dimension getPreferredSize(JComponent jc) {
 		updateDOMNode();
-		return (label == null ? super.getPreferredSize(jc) : JSGraphicsUtils.getPreferredButtonSize(((AbstractButton) jc), ((AbstractButton) jc).getIconTextGap()));
+		return (isAWT ? getMinimumSizePeer(jc, label) : label == null ? super.getPreferredSize(jc) : JSGraphicsUtils.getPreferredButtonSize(((AbstractButton) jc), ((AbstractButton) jc).getIconTextGap()));
 	}
+
+	static Dimension getMinimumSizePeer(JComponent jc, Object label) {
+		Font f = jc.getFont();
+		String s = null;
+		if (f == null)
+			return new Dimension(14, 8);
+		FontMetrics fm = f.getFontMetrics();
+		s = ((JLabel) label).getText();
+		if (s == null)
+			s = "";
+		return new Dimension(fm.stringWidth(s) + 14, fm.getHeight() + 8);
+	}
+	
 
 }

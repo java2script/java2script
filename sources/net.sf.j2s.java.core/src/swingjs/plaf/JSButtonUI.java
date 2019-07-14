@@ -28,8 +28,11 @@
 
 package swingjs.plaf;
 
+import java.awt.Button;
 //import java.awt.FontMetrics;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.event.KeyEvent;
@@ -90,7 +93,7 @@ public class JSButtonUI extends JSLightweightUI {
 			isSimpleButton = true;
 			allowPaintedBackground = false;
 			setDoPropagate();
-			domNode = enableNode = buttonNode = newDOMObject("button", id + "_dom", "type", "button");
+			domNode = enableNode = buttonNode = newDOMObject("button", id + "_dom", "type", "button", "style", "padding:0");
 			//DOMNode.setStyles(domNode,"transform","translateY(0.5px)translateX(0.5px)");
 			addClass(domNode, "j2sbutton");
 			setFocusable();
@@ -795,5 +798,12 @@ public class JSButtonUI extends JSLightweightUI {
 		return true;
 	}
 
-
+	@Override 
+	public Dimension getPreferredSize(JComponent jc) {
+		if (isAWT && isSimpleButton)
+			return JSLabelUI.getMinimumSizePeer(jc, button);
+		return super.getPreferredSize(jc);
+		
+	}
+	
 }

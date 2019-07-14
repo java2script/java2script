@@ -1937,7 +1937,7 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	@Override
-	public final Dimension getMinimumSize() {
+	public Dimension getMinimumSize() {
 		// from ComponentPeer; convenience only
 		return getMinimumSize(jc);
 	}
