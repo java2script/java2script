@@ -4,20 +4,22 @@
  * A relatively simple ComboBox that supports actual objects, not just strings
  * 
  */
+
+// NOTE: If you change this file, then you need to touch and save JQueryUI.java, as only then
+//       will the transpiler copy this file to site/swingjs/j2s/swingjs/jquery/
+
 $( function() {
     $('head').append('<style>.j2scb-sel {background-color:#B8CFE5;}'
     		+'\n.j2scb-unsel {background-color:white;}'
     		+'\n.j2scb-hov {background-color:lightblue;}'
     		+'\n.j2scbcont {position:absolute; left:0px;top:0px;border:black solid 1px;}'
     		+'\n.j2scbhead {position:absolute; left:0px;top:0px;padding:.1em .2em 0em .2em;text-align:left;overflow:hidden;}'
-    		+'\n.j2scbbtn {position:absolute; left:100px;top:0px; width:20px;text-align:center;cursor:pointer;background-color:lightblue;padding:0px}'
+    		+'\n.j2scbbtn {position:absolute; leftbackground-color:white;:100px;top:0px; width:20px;text-align:center;cursor:pointer;background-color:lightblue;padding:0px}'
     		+'\n.j2scbpopup {position:absolute; list-style:none}'
-    		+'\n.j2scblist {position:absolute; left:0px;top:0px;margin:0;border:black solid 1px;cursor:pointer;text-align:left;padding:0em;scrollbar-width:thin;cursor:pointer;}</style>'
+    		+'\n.j2scblist {background-color:white;position:absolute; left:0px;top:0px;margin:0;border:black solid 1px;cursor:pointer;text-align:left;padding:0em;scrollbar-width:thin;cursor:pointer;}</style>'
     );
     
-    var t;
     var CLOSE_DELAY = 50;
-    var stopT = function() {clearTimeout(t); t = 0;}
         
     // the widget definition, where 'custom' is the namespace,
     // 'j2sCB' the widget name
@@ -87,7 +89,7 @@ $( function() {
         $('body').after(this.popup);
         this.updateCSS();    	
         this.on( [this.head, this.btn, this.cont], { click: '_open' });
-        this.on( [this.popup, this.list], {mouseover: stopT });
+        this.on( [this.popup, this.list], {mouseover: '_stopT' });
         this.on( [this.cont, this.head, this.btn, this.popup, this.list], {
         	mouseleave: '_close'//,
         	//keydown: '_keyEvent'
@@ -137,8 +139,8 @@ $( function() {
    					+ (all = this.list.find('.j2scbopt').length) + ' selected option' + (all > 1 ? 's' :''));
    		 if (andTrigger)
  	      	this._trigger( 'change' , null, [this, "selected", sel[0].j2scbIndex]);
- 	     else
- 	    	 stopT();
+// 	     else
+// 	    	 this._stopT("update");
        },  
       updateList: function(items) {
     	  this.list.children().detach();
@@ -213,7 +215,7 @@ $( function() {
   		this.cont.focus();
   		if (this.options.disabled)
   			return;
-		stopT();
+		this._stopT("_open");
 		var loc = this.element.offset();
 		if (e)
 			this._trigger('change', null, [this, 'opening']);
@@ -229,11 +231,13 @@ $( function() {
 	  	this.element.focus();
 	  },
   	  hidePopup: function() {
-   		 this.options.popupVisible = false;
-   		 this.popup.hide();
+   		 if (this.options.popupVisible) {
+   			this.options.popupVisible = false;
+   			this.popup.hide();
+   		 }
    	  },
       _overOpt: function(e) {
-    	  stopT();
+    	  this._stopT("_overOpt");
     	  this.list.find('.j2scbopt').removeClass('j2scb-hov j2scb-sel');
     	  var opt = $(e && e.target || e).closest('.j2scbopt');
     	  opt.addClass('j2scb-hov');
@@ -263,14 +267,19 @@ $( function() {
 	    	this.update(andTrigger);
 	    	return opt;
       },
+      _stopT: function(why) {
+    	  clearTimeout(this.t);
+    	  this.t = 0;
+      },
       _close: function() {
-          if (t)return;
+          if (this.t)return;
           var me = this;
-      	  t = setTimeout(function() {  
+          this.t = setTimeout(function() {  
       		  me.hidePopup();
-      	  	  stopT();
+      		  me.t = 0;
       	  },CLOSE_DELAY);
       }
+      
     });
  
 } );

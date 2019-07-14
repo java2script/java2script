@@ -3,6 +3,9 @@
 // author: Bob Hanson, hansonr@stolaf.edu
 // last edited 1/23/2019 -- fixes for mouse-down effector (mac) operation
 
+// NOTE: If you change this file, then you need to touch and save JQueryUI.java, as only then
+//       will the transpiler copy this file to site/swingjs/j2s/swingjs/jquery/
+
 /*! jQuery UI - v1.9.2 - 2012-12-17
 * http://jqueryui.com
 * Includes: jquery.ui.core.js, jquery.ui.widget.js, jquery.ui.mouse.js, jquery.ui.position.js, jquery.ui.menu.js
@@ -44,11 +47,19 @@ try{
 	 }
  }
  
+ var closeOnLeave = function(e, me, t) {
+	 debugger
+	 
+	 	e.contains(me.element[0],me.document[0].activeElement)
+	 	  ||me.collapseAll(t)
+ }
+ 
  var cleanText = function(n) {
 	 return n && n.innerText.replace(/\n/g,"|");
  }
  
  var CLICK_OUT_DELAY = 200;// ms; 100 was too fast
+ var CLOSE_DELAY = 700;
  
  var outActive;
  
@@ -131,7 +142,7 @@ try{
 		 n||me.focus(t,me.active||me.element.children(".ui-j2smenu-item").eq(0));
 		 return;
 	 case "onblur":
-		 me.timer = delayMe(me, function(){e.contains(me.element[0],me.document[0].activeElement)||me.collapseAll(t)});
+		 me.timer = delayMe(me, function(){closeOnLeave(e, me, t)});
 		 break;
 	 case "_activate":
 		 me.active.is(".ui-state-disabled")||(me.active.children(".a[aria-haspopup='true']").length?me.expand(t):me.select(t));
@@ -140,6 +151,7 @@ try{
 		 if(t.attr("aria-hidden")!=="true") {
 			 return;
 		 }
+		 me._stopT("opening");
 		 me.timer=delayMe(me, function(){me._closeSubmenus(),me._openSubmenu(t);},me.delay);
 		 return;
 	 case "_hideAllMenus":
@@ -155,6 +167,7 @@ try{
 		 n = e.extend({of:n},me.options.position);
 		 var ui = me.activeMenu && me.activeMenu[0] && me.activeMenu[0]["data-ui"];
 	 	 ui && ui.processJ2SMenuCmd$OA([trigger,me,e,t.parent(),n,why]);
+		 me._stopT("opening");
 		 clearMe(me.timer, trigger);
 		 me.refresh("_openSubmenu",n);
 		 var v = me.element.find(".ui-j2smenu").not(t.parents(".ui-j2smenu"));
@@ -224,6 +237,8 @@ try{
 		 }
 		 break;
 	 case "collapseAll":
+		 // e jQuery
+		 // t event
 		 var u;
 		 if ( me.closed || !n && (!someMenuOpen(e) ||
 			  ((u=e(t&&t.target)).hasClass("ui-j2smenu-node") || u.hasClass("ui-j2smenu"))
@@ -246,7 +261,6 @@ try{
 		   }, me.delay); 
 		 break;
 	 case "focus":
-		 //System.out.println("j2smenu " + document.activeElement.id);
 		 me.blur(t,t&&t.type==="focus");
 		 me._scrollIntoView(n);
 		 me.active=n.first();
@@ -261,10 +275,8 @@ try{
 		 me.activeMenu=n.parent();
 		 me._trigger("focus",t,{item:n});
 		 t = n;
-		 //System.out.println("j2smenu " + document.activeElement.id);
 		 break;
 	 case "blur":
-		 //System.out.println("j2smenu " + document.activeElement.id);
 		 if (me.active && t && typeof n == "undefined" && t.relatedTarget && t.relatedTarget.getAttribute("role") != "presentation")	 {
 			 doCmd("_hide", me, t, me.element);
 		 }
@@ -276,7 +288,6 @@ try{
 		 me.active=null;
 		 me._trigger("blur",t,{item:a});
 		 t = a;
-		 //System.out.println("j2smenu " + document.activeElement.id);
 		 break;
 	 case "select":
 		 me.active=me.active||e(t.target).closest(".ui-j2smenu-item");
@@ -353,6 +364,10 @@ try{
  
  _create:function(){
 
+	 
+	 xxm = this;
+	 
+	 xxe = e;
 	 this.closed = false;
 	 
 	 if (typeof this.options.delay == "number")
@@ -378,6 +393,10 @@ try{
 		 blur:                                  function(t){doCmd("onblur",this,e,t)},
 		 keydown:"_keydown"
 	 }), 
+	 this.on($(".ui-j2smenu-node"), {
+		 "mouseout":function() {this._closeMe()},
+		 "mouseover":function() {this._stopT("over")}
+	 }),
 	 this.refresh("create");
  	},
  _destroy:function(){this.element.removeAttr("aria-activedescendant").find(".ui-j2smenu").andSelf()
@@ -459,6 +478,24 @@ try{
 		break;
 	}
  },
+
+ on: function(a, x) {for(var i = a.length; --i >= 0;)this._on(a[i],x)},
+ on2: function(obj, evts, handle) {var a = {};for(var i = evts.length; --i >= 0;)a[evts[i]]=handle;this._on(obj, a)},
+ _stopT: function(why) {
+	  clearTimeout(this.t);
+	  this.t = 0;
+ },
+ _closeMe: function() {
+     if (this.t)return;
+     var me = this;
+     this.t = setTimeout(function() {  
+ 		  me.collapseAll();
+ 		  me.t = 0;
+ 	  },CLOSE_DELAY);
+ },
+
+ 
+ 
  _activate:function(t){     doCmd("_activate", this, e, t); },
  _startOpening: function(t){ doCmd("_startOpening", this, e, t); },
  focus:function(t,n){       doCmd("focus", this, e, t, n) },
@@ -499,7 +536,7 @@ Swing.__getMenuStyle = function(applet) { return '\
 	.swingjsPopupMenu,.swingjsPopupMenu .ui-j2smenu{list-style:none;padding:2px;margin:0;display:block;outline:none;box-shadow:1px 1px 5px rgba(50,50,50,0.75)}\
 	.swingjsPopupMenu .ui-j2smenu{margin-top:-3px;position:absolute}\
 	.swingjsPopupMenu .ui-j2smenu-item{cursor:pointer;margin:0 0 0 0;padding:0;width:100%}\
-	.swingjsPopupMenu .a:focus{cursor:pointer;margin:0 0 0 0;padding:0;width:100%}\
+	.swingjsPopupMenu .a:focus{outline:none;cursor:pointer;margin:0 0 0 0;padding:0;width:100%}\
 	.swingjsPopupMenu .ui-j2smenu-divider{margin:3px 1px;height:0;transform:translateY(-4px);position:absolute;font-size:0;line-height:0px;border-width:2px 0 0 0;width:93%;}\
 	.swingjsPopupMenu .ui-j2smenu-item .a{display:block;padding:0.05em 0.4em;white-space:nowrap;border:1px solid transparent}\
 	.swingjsPopupMenu .ui-j2smenu-icons{position:relative}\
