@@ -1,6 +1,7 @@
 package swingjs.a2s;
 
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.GraphicsConfiguration;
 import java.awt.MenuBar;
 import java.awt.MenuComponent;
@@ -48,10 +49,14 @@ public class Frame extends JFrame implements A2SContainer {
 
 		});
 	}
-	
-	
 
-
+	@Override
+	public Font getFont() {
+		if (font == null && parent == null)
+	    	font = new Font(Font.DIALOG, Font.PLAIN, 12);
+		return super.getFont();
+	}
+	
 	@Override
 	public void remove(int i) {
 		super.remove(i);

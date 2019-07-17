@@ -2,6 +2,7 @@ package swingjs.a2s;
 
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.HeadlessException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -30,6 +31,13 @@ public class Applet extends JApplet implements A2SContainer {
 		((JComponent) getContentPane()).setOpaque(false);
     }
 
+	@Override
+	public Font getFont() {
+		if (font == null && parent == null)
+	    	font = new Font(Font.DIALOG, Font.PLAIN, 12);
+		return super.getFont();
+	}
+	
 	@Override
 	public void setBackground(Color c) {
 		super.setBackground(c);
