@@ -20,6 +20,10 @@ import swingjs.api.js.DOMNode;
  */
 public class JSTextAreaUI extends JSTextViewUI {
 
+	public JSTextAreaUI() {
+		// make sure standard HTML5 event is passed even if the Java event is consumed.
+		setDoPropagate();
+	}
 	@Override
 	public DOMNode updateDOMNode() {
 

@@ -252,7 +252,7 @@ public abstract class Component implements ImageObserver/*
 	 * @see #getFont
 	 * @see #setFont
 	 */
-	Font font;
+	public Font font; // was package-private; need to set it here from a2s directory
 
 	/**
 	 * The font which the peer is currently using. (<code>null</code> if no peer

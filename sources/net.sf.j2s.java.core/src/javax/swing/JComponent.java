@@ -68,6 +68,7 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.event.EventListenerList;
 import javax.swing.plaf.ComponentUI;
+import javax.swing.text.DefaultEditorKit;
 
 import javajs.util.Lst;
 import sun.font.FontDesignMetrics;
@@ -2665,12 +2666,9 @@ public abstract class JComponent extends Container {
 
 		shouldProcessKey = KeyboardState.shouldProcess(e);
 
-		if (e.isConsumed()) {
-			return;
-		}
-
-		if (shouldProcessKey
-				&& processKeyBindings(e, e.getID() == KeyEvent.KEY_PRESSED)) {
+		if (!e.isConsumed() && (shouldProcessKey
+				&& processKeyBindings(e, e.getID() == KeyEvent.KEY_PRESSED)
+				|| 秘getUI().processKeyEvent(e))) {
 			e.consume();
 		}
 	}
@@ -2709,8 +2707,12 @@ public abstract class JComponent extends Container {
 			Object binding = map.get(ks);
 			Action action = (binding == null) ? null : am.get(binding);
 			if (action != null) {
-				return SwingUtilities.notifyAction(action, ks, e, this,
+				//System.out.println("JComponent action: " + action.getValue(Action.NAME));
+				this.秘keyAction = action; 
+				boolean ret = SwingUtilities.notifyAction(action, ks, e, this,
 						e.getModifiers());
+				this.秘keyAction = null;
+				return ret;
 			}
 		}
 		return false;

@@ -3,19 +3,29 @@ package swingjs.plaf;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 
+import javax.swing.InputMap;
+import javax.swing.JComponent;
+import javax.swing.JEditorPane;
+import javax.swing.event.CaretEvent;
+import javax.swing.plaf.InputMapUIResource;
 import javax.swing.text.AbstractDocument.BranchElement;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.Caret;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
+import javax.swing.text.Keymap;
 import javax.swing.text.StyleConstants;
 
 import javajs.util.PT;
 import javajs.util.SB;
+import sun.swing.DefaultLookup;
+import swingjs.JSKeyEvent;
 import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
 
@@ -39,7 +49,109 @@ import swingjs.api.js.DOMNode;
  */
 public class JSEditorPaneUI extends JSTextViewUI {
 
+	private static final String JSTAB = "<span class='j2stab'>&nbsp;&nbsp;&nbsp;&nbsp;</span>";
+	private static final int SPACES_PER_TAB = 4;
 
+	public JSEditorPaneUI() {
+		isEditorPane = true;
+		// turning this off: setDoPropagate();
+	}
+	
+	
+//	@Override
+//	protected InputMap getSharedMap() { 
+//		return 	(InputMap) DefaultLookup.get(editor, this, getPropertyPrefix() + ".focusInputMap");
+//	}
+
+	@Override
+	protected void installKeyboardActions() {
+		editor.setKeymap(createKeymap());
+		super.installKeyboardActions();
+	}
+
+	/**
+	 * Creates the keymap to use for the text component, and installs any necessary
+	 * bindings into it. By default, the keymap is shared between all instances of
+	 * this type of TextUI. The keymap has the name defined by the getKeymapName
+	 * method. If the keymap is not found, then DEFAULT_KEYMAP from JTextComponent
+	 * is used.
+	 * <p>
+	 * The set of bindings used to create the keymap is fetched from the UIManager
+	 * using a key formed by combining the {@link #getPropertyPrefix} method and the
+	 * string <code>.keyBindings</code>. The type is expected to be
+	 * <code>JTextComponent.KeyBinding[]</code>.
+	 *
+	 * @return the keymap
+	 * @see #getKeymapName
+	 * @see javax.swing.text.JTextComponent
+	 */
+	protected Keymap createKeymap() {
+		String nm = getKeymapName();
+		Keymap map = JTextComponent.getKeymap(nm);
+		if (map == null) {
+			Keymap parent = JTextComponent.getKeymap(JTextComponent.DEFAULT_KEYMAP);
+			map = JTextComponent.addKeymap(nm, parent);
+			String prefix = getPropertyPrefix();
+			Object o = DefaultLookup.get(editor, this, prefix + ".keyBindings");
+			if ((o != null) && (o instanceof JTextComponent.KeyBinding[])) {
+				JTextComponent.KeyBinding[] bindings = (JTextComponent.KeyBinding[]) o;
+				JTextComponent.loadKeymap(map, bindings, getComponent().getActions());
+			}
+		}
+		return map;
+	}
+
+	/**
+	 * Fetches the name of the keymap that will be installed/used by default for
+	 * this UI. This is implemented to create a name based upon the classname. The
+	 * name is the the name of the class with the package prefix removed.
+	 *
+	 * @return the name
+	 */
+	protected String getKeymapName() {
+		String nm = getClass().getName();
+		int index = nm.lastIndexOf('.');
+		if (index >= 0) {
+			nm = nm.substring(index + 1, nm.length());
+		}
+		return nm;
+	}
+
+	@Override
+	InputMap getInputMap() {
+		InputMap map = new InputMapUIResource();
+        InputMap shared =
+            (InputMap)DefaultLookup.get(editor, this,
+            getPropertyPrefix() + ".focusInputMap");
+        if (shared != null) {
+        	//System.out.println("JSEditorPaneUI inputmap " + shared.keys());
+            map.setParent(shared);
+        }
+		return map;
+	}
+
+
+//	@Override
+//	ActionMap createActionMap() {
+//		ActionMap map = new ActionMapUIResource();
+//		Action[] actions = getEditorKit(editor).getActions();
+//		// System.out.println("building map for UI: " + getPropertyPrefix());
+//		int n = (actions == null ? 0 : actions.length);
+//		for (int i = 0; i < n; i++) {
+//			Action a = actions[i];
+//			map.put(a.getValue(Action.NAME), a);
+//			//System.out.println("  " + a.getValue(Action.NAME));
+//		}
+//		// map.put(TransferHandler.getCutAction().getValue(Action.NAME),
+//		// TransferHandler.getCutAction());
+//		// map.put(TransferHandler.getCopyAction().getValue(Action.NAME),
+//		// TransferHandler.getCopyAction());
+//		// map.put(TransferHandler.getPasteAction().getValue(Action.NAME),
+//		// TransferHandler.getPasteAction());
+//		return map;
+//	}
+	
+	
 	// https://stackoverflow.com/questions/2237497/how-to-make-the-tab-key-insert-a-tab-character-in-a-contenteditable-div	
 //		$(document).on('keyup', '.editor', function(e){
 //			  //detect 'tab' key
@@ -67,7 +179,6 @@ public class JSEditorPaneUI extends JSTextViewUI {
 			DOMNode.setStyles(domNode); // default for pre is font-height
 			$(domNode).addClass("swingjs-doc");
 			setupViewNode();
-			System.out.println("JSEditorPaneUI todo -- tab; adding after a tab; backspace through tab");
 		}
 		textListener.checkDocument();
 		setCssFont(domNode, c.getFont());
@@ -79,6 +190,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
+		//System.out.println("JSEPUI prop " + prop);
 		switch(prop) {
 		case "text":
 			setCurrentText();
@@ -88,40 +200,63 @@ public class JSEditorPaneUI extends JSTextViewUI {
 	}
 
 	@SuppressWarnings("unused")
-	private int epTimer;
 	private String currentHTML;
-	private static String JSTAB = "<span class='j2stab'>&nbsp;&nbsp;&nbsp;&nbsp;</span>";
-	private int tabCount = 4;
-		
-	@Override
-	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
+	
 
-		if (JSToolkit.isMouseEvent(eventType)) {
-			return NOT_HANDLED;
-		}
-		if (target != null) {
-			Boolean b = checkAllowKey(jQueryEvent);
-			if (b != null)
-				return b.booleanValue();
 
-			// A first touch down may trigger on the wrong event target
-			// and not have set up window.getSelection() yet.
-			// 50-ms delay allows for multiple clicks, effecting word and line selection.
-			/**
-			 *
-			 * @j2sNative
-			 * 
-			 * 			var me = this; clearTimeout(this.epTimer);this.epTimer =
-			 *            setTimeout(function(){me.handleJSEvent$O$I$O(null, eventType,
-			 *            jQueryEvent)},50);
-			 * 
-			 */
-			return HANDLED;
-		}
+	
+//	private int epTimer;
+//	@Override
+//	protected void handleJSTextEvent(int eventType, Object jQueryEvent, int keyCode, boolean trigger) {
+//		if (!trigger && isNavigationKey(keyCode)) {
+//
+//			// A first touch down may trigger on the wrong event target
+//			// and not have set up window.getSelection() yet.
+//			// 50-ms delay allows for multiple clicks, effecting word and line selection.
+//			/**
+//			 *
+//			 * @j2sNative
+//			 * 
+//			 * 			var me = this; clearTimeout(this.epTimer);this.epTimer =
+//			 *            setTimeout(function(){me.handleJSTextEvent$I$O$Z(eventType,
+//			 *            jQueryEvent, true)},50);
+//			 * 
+//			 */
+//			return;
+//		} 
+//		super.handleJSTextEvent(eventType, jQueryEvent, keyCode, true);
+//	}
 
-		return super.handleJSEvent(null, eventType, jQueryEvent);
-	}
 
+//	@Override
+//	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
+//
+//		if (JSToolkit.isMouseEvent(eventType)) {
+//			return NOT_HANDLED;
+//		}
+//		if (target != null) {
+//			Boolean b = checkAllowKey(jQueryEvent);
+//			if (b != null)
+//				return b.booleanValue();
+//
+//			// A first touch down may trigger on the wrong event target
+//			// and not have set up window.getSelection() yet.
+//			// 50-ms delay allows for multiple clicks, effecting word and line selection.
+//			/**
+//			 *
+//			 * @j2sNative
+//			 * 
+//			 * 			var me = this; clearTimeout(this.epTimer);this.epTimer =
+//			 *            setTimeout(function(){me.handleJSEvent$O$I$O(null, eventType,
+//			 *            jQueryEvent)},50);
+//			 * 
+//			 */
+//			return HANDLED;
+//		}
+//
+//		return super.handleJSEvent(null, eventType, jQueryEvent);
+//	}
+//
 	private int getJSDocOffset(DOMNode node) {
 		int pt = 0;
 		while (node != domNode) {
@@ -352,7 +487,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 	
 	
 	@SuppressWarnings("unused")
-	private DOMNode lastTextNode;
+	private Object[] lastRange;
 
 	/**
 	 * Find the HTML node and offset for this Java caret position.
@@ -368,9 +503,12 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		// JavaScript 
 		boolean isRoot = (off < 0);
 		if (isRoot) {
-			lastTextNode = null;
+			lastRange = null;
 			off = 0;
 		} 
+		
+		//System.out.println("getting JSNodePt for " + off + "." + pt + " " + (/**node.data||node.outerHTML ||*/""));
+		
 		boolean isTAB = isJSTAB(node);
 		// Must consider several cases for BR and DIV:
 		// <br>
@@ -387,11 +525,13 @@ public class JSEditorPaneUI extends JSTextViewUI {
 
 		/**
 		 * @j2sNative
+		 * 
+		    this.lastRange = [node, 0];
 			var nodes = node.childNodes;
 			var tag = node.tagName;
 			var n = nodes.length;
 			if (tag == "BR" || n == 1 && nodes[0].tagName == "BR") {
-				return (pt == off ? [node, 0] : [null, 1]);
+				return (pt == off ? [node, 0] : [null, 1, null, 0, 0]);
 			} 
 			var ipt = off;
 			var nlen = 0;
@@ -411,17 +551,21 @@ public class JSEditorPaneUI extends JSTextViewUI {
 					  return [node.parentNode, i];
 					nlen = (isRoot ? 1 : 0);
 				} else {
-					this.lastTextNode = node;
 					nlen = node.length;
 					var p = ipt + (isTAB ? 1 : nlen);
 					if (p >= pt)
-						return [node, Math.max(0, !isTAB ? pt - ipt : p == pt ? nlen : 0)];
+						return this.lastRange = [node, Math.max(0, !isTAB ? pt - ipt : p == pt ? nlen : 0)];
+					this.lastRange = [node, node.length];
 					if (isTAB)
 						ptIncr = nlen - 1;
 				}
 				ipt += nlen;
 			}
-			return (isRoot ? [this.lastTextNode, Math.max(0, ret[3] - 1)] : [null, ipt + i1 - off, node, nlen, ptIncr]);
+			if (!isRoot)
+			  return [null, ipt + i1 - off, node, nlen, ptIncr];
+			var r = this.lastRange;
+			this.lastRange = null;
+			return r;
 		 */
 		{
 			return null;
@@ -468,26 +612,16 @@ public class JSEditorPaneUI extends JSTextViewUI {
 
 	private static boolean isJSTAB(Object node) {
 		return node != null 
-				&& (/** @j2sNative node.nodeType != 3 &&*/true) 
-				&& (((DOMNode) node).getAttribute("class").indexOf("j2stab") >= 0);
+				&& (/** @j2sNative node.nodeType != 3 && ("" + node.class).indexOf("j2stab") >= 0 && */true);
 	}
 
-	int timeoutID;
 	
-	@SuppressWarnings("unused")
+	/**
+	 * no backward selections in a div with contentEditable TRUE
+	 */
 	@Override
-	void setJSTextDelayed() {
-		// this timeout is critical and did not work with invokeLater
-		JSTextUI u = this;
-		JTextComponent t = editor;
-		/** 
-		 * @j2sNative
-		 * 
-		 *  if (this.timeoutID) {
-		 *  clearTimeout(this.timeoutID);
-		 *  }
-		 *  this.timeoutID = setTimeout(function(){u.timeoutID = 0;u.updateDOMNode$()},50);
-		 */
+	protected void setJSSelection(int mark, int dot, boolean andScroll) {
+		super.setJSSelection(Math.min(mark,  dot), Math.max(mark,  dot), andScroll);
 	}
 
 	@SuppressWarnings("unused")
@@ -496,6 +630,10 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		fixTabRange(r1);
 		if (r1 != r2)
 			fixTabRange(r2);
+		
+		andScroll |= (jc.秘keyAction != null);
+			
+			
 		
 		//System.out.println("jsSelect " + r1 + r2);
 		// range index may be NaN
@@ -506,25 +644,69 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		 *  var range = document.createRange(); 
 		 * 			  range.setStart(r1[0], r1[1] || 0);
 		 *            range.setEnd(r2[0], r2[1] || 0); 
+		 *            
+		 *            
 		 *            var sel = window.getSelection();
 		 *            sel.removeAllRanges(); 
 		 *            sel.addRange(range);
 		 */
 		
-		if (andScroll) {
-			//System.out.println("JSEditorPane scrolling to " + r2);
-			DOMNode node = (DOMNode) r2[0];
-			/**
-			 * @j2sNative
-			 * 
-			 * if (node.scrollIntoView) {
-			 *   node.scrollIntoView();
-			 * } else {
-			 *   node.parentElement.scrollIntoView();
-			 * }
-			 * 
-			 */
-		}
+		if (andScroll) {	
+			scrollAsNeeded(r2[0]);
+		} 
+	}
+
+	@SuppressWarnings("unused")
+	private void scrollAsNeeded(Object node) {
+		// System.out.println("JSEditorPane scrolling to " + r2);
+		/**
+		 * @j2sNative
+		 * 
+		 * 
+		 * 			var h = 0; node.getBoundingClientRect || 
+		 * 
+		 * (node =  node.parentElement);
+		 *            //
+		 *            var od = $(this.domNode).offset();
+		 *            var on = $(node).offset();
+		 *            var hn = $(node).height();
+		 *            var hd = $(this.domNode).height();
+		 *             
+		 *            //
+		 *            var top =       this.domNode.scrollTop; 
+		 *            
+		 *            var off = on.top + top -od.top;
+		 *            
+		 *            //xxe = this.domNode;
+		 *            
+		 *            
+	
+		 *            ///System.out.println([node.innerText,"top",top, "[",off |0, (off+hn)|0, "]bottom",(top+hd)|0]);
+		 *            
+		 *            
+		 *            if (off < top) {
+		 *            //
+		 *            this.domNode.scrollTop = off; 
+		 *            //
+		 *            } else if (off+ hn + 20 > top + hd) {
+		 *            //
+		 *            		this.domNode.scrollTop = off + hn - hd +20; 
+		 *            //
+		 *            }
+		 *            
+		 *            
+		 *                 var top =       this.domNode.scrollTop; 
+		 *            
+	
+		 *            //System.out.println([node.innerText,"top",top, "[",off |0, (off+hn)|0, "]bottom",(top+hd)|0]);
+	
+		 */
+		
+	}
+
+
+	private void scrollIntoView() {
+		this.setJSSelection(editor.getCaret().getMark(), editor.getCaret().getDot(), true);
 	}
 
 	/**
@@ -541,13 +723,14 @@ public class JSEditorPaneUI extends JSTextViewUI {
 			}
 			
 		}
-		System.out.println("jsep fixTabRange " + r + " " + isJSTAB(node) + " " + node);
 	}
 
 	@Override
-	public void updateJSCursorFromCaret() {
-		updateJSCursor("editordefault");
+	public void caretUpdatedByProgram(CaretEvent e) {
+		//System.out.println("caret update" + editor.getCaretPosition());
+		updateJSCursor("noscroll");
 	}
+
 
 	@SuppressWarnings("unused")
 	@Override
@@ -575,20 +758,19 @@ public class JSEditorPaneUI extends JSTextViewUI {
 			System.out.println("JSEditorPaneUI anode or fnode is null ");
 			return false;
 		}
-		boolean isAInTab = (alen == tabCount && apt != 0 && isJSTAB(apar));
-		boolean isFInTab = (flen == tabCount && fpt != 0 && isJSTAB(fpar));
+		boolean isAInTab = (alen == SPACES_PER_TAB && apt != 0 && isJSTAB(apar));
+		boolean isFInTab = (flen == SPACES_PER_TAB && fpt != 0 && isJSTAB(fpar));
 		boolean updateJS = false;
 		if (isAInTab)
-			apt = (apt == tabCount || (updateJS = toEnd) ? 1 : 0);
+			apt = (apt == SPACES_PER_TAB || (updateJS = toEnd) ? 1 : 0);
 		if (isFInTab)
-			fpt = (fpt == tabCount || (updateJS = toEnd) ? 1 : 0);
+			fpt = (fpt == SPACES_PER_TAB || (updateJS = toEnd) ? 1 : 0);
 		if (toStart && (isAInTab && apt == 0 || isFInTab && fpt == 0))
 			updateJS = true;
 		mark = getJSDocOffset(anode);
 		dot = (anode == fnode ? mark : getJSDocOffset(fnode)) + fpt;
 		mark += apt;
-
-		System.out.println("==windows at " + mark + "-" + dot + "/" + apt + " " + fpt + " " + isAInTab + " " + isFInTab);
+//		System.out.println("==windows at " + mark + "-" + dot + "/" + apt + " " + fpt + " " + isAInTab + " " + isFInTab);
 		pt.x = mark;
 		pt.y = dot;
 
@@ -613,21 +795,162 @@ public class JSEditorPaneUI extends JSTextViewUI {
 
 	
 	@Override
+	public void action(String what, int data) {
+		int p = -1;
+		switch (what) {
+		case "paste":
+			setText(null);
+			break;
+		case "delete":
+			// data -1 for prev, +1 for next, 0 for just cut
+			try {
+				Document doc = editor.getDocument();
+				Caret caret = editor.getCaret();
+				int dot = caret.getDot();
+				int mark = caret.getMark();
+				p = Math.min(dot, mark);
+				if (dot != mark) {
+					doc.remove(p, Math.abs(dot - mark));
+				} else {
+					int len = doc.getLength();
+					if (data < 0 && dot == 0 || data > 0 && dot == len || data == 0)
+						return;
+					int delChars = 1;
+					if (data < 0)
+						dot -= 2;					
+					if (dot > 1 && dot < len - 1) {
+						String dotChars = doc.getText(dot, 2);
+						char c0 = dotChars.charAt(0);
+						char c1 = dotChars.charAt(1);
+
+						if (c0 >= '\uD800' && c0 <= '\uDBFF' && c1 >= '\uDC00' && c1 <= '\uDFFF') {
+							delChars = 2;
+						}
+					}
+					if (data < 0) {
+						if (delChars == 1)
+							dot++;
+						p = dot;
+					}
+					//System.out.println("removing char at " + dot);
+					doc.remove(dot, delChars);
+				}
+			} catch (BadLocationException bl) {
+			}
+			break;
+		}
+		if (p >= 0) {
+			setText(null);
+			setJSMarkAndDot(p, p, false);
+		}
+	}
+
+	@Override
 	protected boolean handleTab(Object jqEvent) {
-		int x0 = editor.getCaret().getMark();
-		int y = editor.getCaret().getDot();
-		int x = Math.min(x0, y);
-		/** @j2sNative xxt = this.focusNode */
-		y = Math.max(x0, y);
+		replaceText("\t", -1);
+		return CONSUMED;
+	}
+
+	private void replaceText(String s, int x) {
 		try {
-			if (x < y)
-				editor.getDocument().remove(x, y - x);
-			editor.getDocument().insertString(x, "\t", null);
-			setJavaMarkAndDot(new Point(x + 1, x + 1));
+			if (x < 0) {
+				int[] xy = getJavaMarkAndDot();
+				x = xy[0];
+				editor.getDocument().remove(x, xy[1] - x);
+			}
+			if (s != null)
+				editor.getDocument().insertString(x, s, null);
 		} catch (BadLocationException e) {
 		}
-		System.out.println("jsep handleTab " + x + " " + y + " " + 	editor.getText().replace('\t','_'));
-		return CONSUMED;
+	}
+
+	private int[] getJavaMarkAndDot() {
+		int x = editor.getCaret().getMark();
+		int y = editor.getCaret().getDot();
+		return new int[] { Math.min(x,  y), Math.max(x,  y) };
+	}
+
+	private int len0;
+	
+	/**
+	 * CTRL-V insertion requires knowledge of the text length at the time of keypress and 
+	 * then comparing that to the value at the time of keyup. Hopefully no repeating!
+	 * 
+	 */
+	@Override
+	protected void handleFutureInsert(boolean trigger) {
+		if (!trigger) {
+			len0 = ((String) DOMNode.getAttr(domNode, "innerText")).length();
+			return;
+		}
+		String newText = (String) DOMNode.getAttr(domNode, "innerText");
+		int[] xy = getJavaMarkAndDot();
+		int x = xy[0];
+		int n = (newText.length() - len0) + (xy[1] - x);
+		if (n <= 0)
+			return;
+		try {
+			x += (SPACES_PER_TAB - 1) * tabCount(editor.getDocument().getText(0, x));
+			if (x < 0)
+				return;
+			String s = newText.substring(x, x + n);
+			getJSMarkAndDot(markDot, 0);
+			replaceText(s, -1);
+			setJSMarkAndDot(markDot.x, markDot.x, false);
+		} catch (BadLocationException bl) {
+		}
+	}
+	
+	private int tabCount(String s) {
+		int n = 0;
+		for (int i = s.length(); --i >= 0;)
+			if (s.charAt(i) == '\t')
+				n++;
+		return n;
+	}
+
+//	protected boolean handleEnter() {
+//		editor.replaceSelection("\n");
+//		return true;
+//	}
+	
+	@Override
+	void setJSText() {
+		updateDOMNode();
+//		System.out.println("JSEPUI iskeyaction " + (jc.秘keyAction != null) + "dot=" + dot + " len=" + editor.getDocument().getLength() 
+//				+ "\nEDITOR: >>" + PT.esc(editor.getText()) + "<<" 
+//				+ "\nJAVASC: >>" + PT.esc((String)DOMNode.getAttr(domNode, "innerText")) + "<<"
+//		        + "\nJSHTML: >>" + PT.esc((String)DOMNode.getAttr(domNode, "innerHTML")) + "<<\n");
+//		for (int i = 0, len = editor.getCaretPosition(); i < len; i++)
+//			try {
+//				System.out.println("Ed[" + i + "]=" + editor.getDocument().getText(i, 1).codePointAt(0));
+//			} catch (BadLocationException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+	}
+
+	
+	boolean isPressConsumed;
+	
+	@Override
+	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
+		Boolean b = checkAllowEvent(jQueryEvent);
+		if (b != null)
+			return b;
+		switch (eventType) {
+		default:
+			return NOT_HANDLED;
+		case SOME_KEY_EVENT:
+			JSKeyEvent.dispatchKeyEvent(jc, 0, jQueryEvent, System.currentTimeMillis());
+			/**
+			 * @j2sNative
+			 * 
+			 * 			jQueryEvent.preventDefault(); 
+			 * 			jQueryEvent.stopPropagation();
+			 */
+			return HANDLED;
+		}
 	}
 
 }

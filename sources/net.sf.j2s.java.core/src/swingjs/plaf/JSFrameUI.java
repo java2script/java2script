@@ -299,7 +299,6 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 
 	@Override
 	public void installUI(JComponent jc) {
-		super.installUI(jc);
 		// jc is really JFrame, even though JFrame is not a JComponent
 		frame = (JFrame) c;
 		isDummyFrame = /**

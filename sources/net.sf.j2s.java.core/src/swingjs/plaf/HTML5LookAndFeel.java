@@ -40,6 +40,7 @@ import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.DimensionUIResource;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.plaf.InsetsUIResource;
+import javax.swing.text.DefaultEditorKit;
 
 //import java.awt.Component;
 //import java.awt.Dimension;
@@ -670,6 +671,61 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				return new DefaultListCellRenderer.UIResource();
 			}
 		};
+
+		
+        Object multilineInputMap = new UIDefaults.LazyInputMap(new Object[] {
+//                "control C", DefaultEditorKit.copyAction,
+                "control V", DefaultEditorKit.pasteAction,
+                "control X", DefaultEditorKit.cutAction,
+//                     "COPY", DefaultEditorKit.copyAction,
+                    "PASTE", DefaultEditorKit.pasteAction,
+                      "CUT", DefaultEditorKit.cutAction,
+//           "control INSERT", DefaultEditorKit.copyAction,
+             "shift INSERT", DefaultEditorKit.pasteAction,
+             "shift DELETE", DefaultEditorKit.cutAction,
+               "shift LEFT", DefaultEditorKit.selectionBackwardAction,
+              "shift RIGHT", DefaultEditorKit.selectionForwardAction,
+             "control LEFT", DefaultEditorKit.previousWordAction,
+            "control RIGHT", DefaultEditorKit.nextWordAction,
+       "control shift LEFT", DefaultEditorKit.selectionPreviousWordAction,
+      "control shift RIGHT", DefaultEditorKit.selectionNextWordAction,
+                "control A", DefaultEditorKit.selectAllAction,
+//       "control BACK_SLASH", "unselect"/*DefaultEditorKit.unselectAction*/,
+                     "HOME", DefaultEditorKit.beginLineAction,
+                      "END", DefaultEditorKit.endLineAction,
+               "shift HOME", DefaultEditorKit.selectionBeginLineAction,
+                "shift END", DefaultEditorKit.selectionEndLineAction,
+             "control HOME", DefaultEditorKit.beginAction,
+              "control END", DefaultEditorKit.endAction,
+       "control shift HOME", DefaultEditorKit.selectionBeginAction,
+        "control shift END", DefaultEditorKit.selectionEndAction,
+                       "UP", DefaultEditorKit.upAction,
+                     "DOWN", DefaultEditorKit.downAction,
+               "BACK_SPACE", DefaultEditorKit.deletePrevCharAction,
+         "shift BACK_SPACE", DefaultEditorKit.deletePrevCharAction,
+                   "ctrl H", DefaultEditorKit.deletePrevCharAction,
+                   "DELETE", DefaultEditorKit.deleteNextCharAction,
+              "ctrl DELETE", DefaultEditorKit.deleteNextWordAction,
+          "ctrl BACK_SPACE", DefaultEditorKit.deletePrevWordAction,
+                    "RIGHT", DefaultEditorKit.forwardAction,
+                     "LEFT", DefaultEditorKit.backwardAction,
+                 "KP_RIGHT", DefaultEditorKit.forwardAction,
+                  "KP_LEFT", DefaultEditorKit.backwardAction,
+                  "PAGE_UP", DefaultEditorKit.pageUpAction,
+                "PAGE_DOWN", DefaultEditorKit.pageDownAction,
+//            "shift PAGE_UP", "selection-page-up",
+//          "shift PAGE_DOWN", "selection-page-down",
+//       "ctrl shift PAGE_UP", "selection-page-left",
+//     "ctrl shift PAGE_DOWN", "selection-page-right",
+                 "shift UP", DefaultEditorKit.selectionUpAction,
+               "shift DOWN", DefaultEditorKit.selectionDownAction,
+                    "ENTER", DefaultEditorKit.insertBreakAction,
+                      "TAB", DefaultEditorKit.insertTabAction,
+//                "control T", "next-link-action",
+//          "control shift T", "previous-link-action",
+//            "control SPACE", "activate-link-action",
+//          "control shift O", "toggle-componentOrientation"/*DefaultEditorKit.toggleComponentOrientation*/
+  });
 
 		//
 		// // *** Menus value objects
@@ -1911,6 +1967,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// "TextPane.border", marginBorder,
 				"TextPane.margin",
 				editorMargin,
+	            "TextPane.focusInputMap", multilineInputMap,
 
 				"EditorPane.font",
 				serifPlain12,
@@ -1926,6 +1983,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// "EditorPane.border", marginBorder,
 				"EditorPane.margin",
 				editorMargin,
+	            "EditorPane.focusInputMap", multilineInputMap,
 				//
 				// "html.pendingImage", SwingUtilities2.makeIcon(getClass(),
 				// HTML5LookAndFeel.class,
@@ -1966,7 +2024,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// }),
 
 				// *** ToolTips
-				 "ToolTip.font", sansSerifPlain18,
+				 "ToolTip.font", sansSerifPlain12,
 				 "ToolTip.background", table.get("info"),
 				 "ToolTip.foreground", table.get("infoText"),
 				 "ToolTip.border", blackLineBorder,

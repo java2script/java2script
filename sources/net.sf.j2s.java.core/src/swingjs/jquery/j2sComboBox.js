@@ -111,6 +111,7 @@ $( function() {
           .removeClass( 'custom-j2sCB' )
           .enableSelection()
           .css( 'background-color', 'transparent' );
+		this._trigger('change', null, [this, 'destroyed']);
       },
  
       // _setOptions is called with a hash of all options that are changing

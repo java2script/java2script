@@ -222,6 +222,9 @@ class JSComboPopupList extends JList {
 		switch (type) {
 		case "refreshed":
 			return;
+		case "destroyed":
+			j2scb = null;
+			return;
 		case "opening":
 			updateZIndex();
 			return;

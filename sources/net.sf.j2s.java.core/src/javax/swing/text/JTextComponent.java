@@ -82,6 +82,7 @@ import swingjs.JSUtil;
 //import java.security.AccessController;
 //import java.security.PrivilegedAction;
 //import swingjs.api.JSMinimalAbstractDocument;
+import swingjs.plaf.JSTextUI;
 
 /**
  * <code>JTextComponent</code> is the base class for swing text
@@ -1438,6 +1439,7 @@ public abstract class JTextComponent extends JComponent implements TextComponent
      * @see java.awt.datatransfer.Clipboard
      */
     public void cut() {
+    	((JSTextUI)this.ui).action("delete", 0);
 //        if (isEditable() && isEnabled()) {
 //            invokeAction("cut", TransferHandler.getCutAction());
 //        }
@@ -1469,6 +1471,7 @@ public abstract class JTextComponent extends JComponent implements TextComponent
      * @see java.awt.datatransfer.Clipboard
      */
     public void paste() {
+    	((JSTextUI)this.ui).action("paste", 0);
 //        if (isEditable() && isEnabled()) {
 //            invokeAction("paste", TransferHandler.getPasteAction());
 //        }
@@ -4048,8 +4051,7 @@ public abstract class JTextComponent extends JComponent implements TextComponent
 //        return modifiers;
 //    }
 //
-    private static final Object KEYMAP_TABLE = new Object(); // JTextComponent_KeymapTable
-//    private JTextComponent editor;
+    private static final String KEYMAP_TABLE = "JTextComponent_KeymapTable";//new Object(); //  new StringBuilder("JTextComponent_KeymapTable"
     //
     // member variables used for on-the-spot input method
     // editing style support

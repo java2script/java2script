@@ -34,7 +34,9 @@ public class JSKeyEvent extends KeyEvent {
 	 * @param time
 	 * @return
 	 */
-	public static boolean dispatchKeyEvent(JComponent c, int id, int modifiers, Object jqevent, long time) {
+	public static boolean dispatchKeyEvent(JComponent c, int id, Object jqevent, long time) {
+		if (id == 0)
+			id = JSMouse.fixEventType(jqevent, 0);
 		if (id == KeyEvent.KEY_TYPED) {
 			// HTML5 keypress is no longer reliable
 			JSToolkit.consumeEvent(jqevent);
@@ -42,7 +44,7 @@ public class JSKeyEvent extends KeyEvent {
 		}
 		if (c != null) {
 			JSComponentUI ui = c.秘getUI();
-			KeyEvent e = newJSKeyEvent(c, jqevent, 0, false);
+			KeyEvent e = newJSKeyEvent(c, jqevent, id, false);
 			// create our own KEY_PRESSED event
 			c.dispatchEvent(e);
 			if (!ui.j2sDoPropagate)
@@ -128,8 +130,7 @@ public class JSKeyEvent extends KeyEvent {
 			return jskeyCode;
 		}
 		if (jskey.length() == 1) {
-			// same if 1-character, except numeric keypad 0-9
-			return (jskeyCode >= 96 && jskeyCode <= 105 ? jskeyCode :  0 + jskey.toUpperCase().charAt(0));
+			return jskeyCode;
 		}
 		switch (jskeyCode) {
 		case 91: // META

@@ -12,6 +12,7 @@ package test;
 import java.awt.Adjustable;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.AdjustmentEvent;
@@ -83,7 +84,6 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 	
 	@Override
 	public void init() {
-		
 		final JLabel label = new JLabel("hello");
 		// label.setBounds(0, 60, 200, 60);
 		setSize(label, 80, 50);

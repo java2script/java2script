@@ -3419,4 +3419,9 @@ public class JSComponentUI extends ComponentUI
 	}
 
 
+	public boolean processKeyEvent(KeyEvent e) {
+		return NOT_HANDLED;
+	}
+
+
 }

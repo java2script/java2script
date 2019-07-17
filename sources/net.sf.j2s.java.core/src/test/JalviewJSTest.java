@@ -531,6 +531,18 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 			}
 			
 		});
+
+	    addMenuActionAndAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false), testbtn,
+	    		new ActionListener()
+	    {
+	      @Override
+	      public void actionPerformed(ActionEvent e)
+	      {
+	    	  System.out.println("testbtn via ESC");
+	        frame.setBackground(Color.yellow);
+	      }
+	    });
+
 		menu.add(testbtn);
 
 		menu.add(mRight);
@@ -612,6 +624,13 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 
 		return panel;
 	}
+
+	  protected void addMenuActionAndAccelerator(KeyStroke keyStroke,
+	          JMenuItem menuItem, ActionListener actionListener)
+	  {
+	    menuItem.setAccelerator(keyStroke);
+	    menuItem.addActionListener(actionListener);
+	  }
 
 	private void addListeners(AbstractButton c) {
 		c.addActionListener(listener);

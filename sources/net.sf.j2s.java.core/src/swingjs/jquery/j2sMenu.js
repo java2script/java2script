@@ -364,10 +364,6 @@ try{
  
  _create:function(){
 
-	 
-	 xxm = this;
-	 
-	 xxe = e;
 	 this.closed = false;
 	 
 	 if (typeof this.options.delay == "number")

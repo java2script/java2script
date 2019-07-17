@@ -33,6 +33,7 @@ import java.awt.peer.LightweightPeer;
 import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 
+import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JRootPane;
@@ -97,6 +98,11 @@ public abstract class JSComponent extends Component {
 	   public Component 秘getWrap();
 
 	}
+
+	/**
+	 * indicates an key action is being processed
+	 */
+	public Action 秘keyAction;
 
 	protected boolean 秘isAppletFrame;
 	public boolean 秘isFramedApplet;

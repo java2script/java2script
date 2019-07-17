@@ -59,7 +59,7 @@ public class JSMouse {
 		case KeyEvent.KEY_PRESSED:
 		case KeyEvent.KEY_TYPED:
 		case KeyEvent.KEY_RELEASED:
-			return keyAction(id, modifiers, jqevent, time);
+			return keyAction(id, jqevent, time);
 		}	
 		if (id != MouseEvent.MOUSE_WHEEL && id != MouseEvent.MOUSE_MOVED)
 			modifiers = applyLeftMouse(modifiers);
@@ -476,11 +476,11 @@ public class JSMouse {
 		}
 	}
 
-	private boolean keyAction(int id, int modifiers, Object jqevent, long time) {
+	private boolean keyAction(int id, Object jqevent, long time) {
 		JComponent c = 	/** @j2sNative 
 		jqevent.target["data-shadowkeycomponent"] || jqevent.target["data-keycomponent"]
 				 */null;
-		return JSKeyEvent.dispatchKeyEvent(c, id, modifiers, jqevent, time);
+		return JSKeyEvent.dispatchKeyEvent(c, id, jqevent, time);
 	}
 	
 	public static int getScroll(Object ev) {

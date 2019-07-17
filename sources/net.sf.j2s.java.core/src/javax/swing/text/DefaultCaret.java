@@ -1336,8 +1336,8 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
         dotLTR = isPositionLTR(dot, dotBias);
         fireStateChanged();
 
-        if (false && !working)
-        	updateSystemSelection();
+        if (!working)
+        	updateSystemSelection(); 
 
         setMagicCaretPosition(null);
 
@@ -1389,7 +1389,7 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
     }
 
     private void updateSystemSelection() {
-    	((JSTextUI) component.ui).updateJSCursorFromCaret();
+    	// will be taken care of by fireStateChanged ((JSTextUI) component.ui).updateJSCursorFromCaret();
     	
     	
     	
@@ -1624,7 +1624,7 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
     // access bug
     JTextComponent component;
 
-    int updatePolicy = UPDATE_WHEN_ON_EDT;
+    int updatePolicy = ALWAYS_UPDATE;//UPDATE_WHEN_ON_EDT;
     boolean visible;
     boolean active;
     protected int dot;
