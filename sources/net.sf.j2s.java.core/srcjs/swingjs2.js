@@ -12170,9 +12170,10 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 				return true;
 			}
 			var target = ev.target["data-keycomponent"];
-if (!target) {
-	  return;
-}
+// BH 2019 - need this for the focus manager to pick up accelerators and other mapped items
+//if (!target) {
+//	  return;
+//}
 if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	ev.stopPropagation();
 	ev.preventDefault();
