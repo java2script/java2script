@@ -1,9 +1,10 @@
 package swingjs.plaf;
 
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Rectangle;
-import java.beans.PropertyChangeEvent;
 
 import javax.swing.AbstractButton;
 import javax.swing.JComponent;
@@ -31,7 +32,9 @@ public class JSLabelUI extends JSLightweightUI {
 
 	@Override
 	public DOMNode updateDOMNode() {
-		if (domNode == null) {
+//		if (jc.getTopLevelAncestor() == null)
+//			return domNode;
+	if (domNode == null) {
 			enableNode = domNode = newDOMObject("label", id);
 			textNode = iconNode = null;
 			addCentering(domNode);
@@ -39,7 +42,7 @@ public class JSLabelUI extends JSLightweightUI {
 		getIconAndText(); // could be ToolTip
 		setIconAndText("label", icon, gap, text);
 		DOMNode.setStyles(domNode, "position", "absolute", "width", c.getWidth()
-				+ "px", "height", c.getHeight() + "px");
+   				+ "px", "height", c.getHeight() + "px");
 		updateCenteringNode();
 		if (allowTextAlignment) {
 			// not for JToolTip
@@ -78,7 +81,7 @@ public class JSLabelUI extends JSLightweightUI {
 
 	@Override
 	public void paint(Graphics g, JComponent c) {
-		if (jc.秘paintsSelf())
+		if (jc.秘paintsSelfEntirely())
 			DOMNode.setStyles(centeringNode, "visibility", "visible");
 		super.paint(g, c);
 		// TODO: implement this for buttons?
@@ -107,7 +110,21 @@ public class JSLabelUI extends JSLightweightUI {
 
 	@Override
 	public Dimension getPreferredSize(JComponent jc) {
-		return (label == null ? super.getPreferredSize(jc) : JSGraphicsUtils.getPreferredButtonSize(((AbstractButton) jc), ((AbstractButton) jc).getIconTextGap()));
+		updateDOMNode();
+		return (isAWT ? getMinimumSizePeer(jc, label) : label == null ? super.getPreferredSize(jc) : JSGraphicsUtils.getPreferredButtonSize(((AbstractButton) jc), ((AbstractButton) jc).getIconTextGap()));
 	}
+
+	static Dimension getMinimumSizePeer(JComponent jc, Object label) {
+		Font f = jc.getFont();
+		String s = null;
+		if (f == null)
+			return new Dimension(14, 8);
+		FontMetrics fm = f.getFontMetrics();
+		s = ((JLabel) label).getText();
+		if (s == null)
+			s = "";
+		return new Dimension(fm.stringWidth(s) + 14, fm.getHeight() + 8);
+	}
+	
 
 }

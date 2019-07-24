@@ -56,6 +56,7 @@ import javax.swing.MenuSelectionManager;
 import javax.swing.Timer;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
@@ -67,7 +68,7 @@ import javax.swing.text.StyleConstants;
 
 public class Test_Editor extends JFrame implements DropTargetListener {
 
-	String test = "  345\t67890\n1234567890\n  345\n     ";
+	String test = "  345\n67890\n1234567890\n  345\n     ";
 
 //	private static void logClass(String name) {
 //		ConsoleHandler consoleHandler = new ConsoleHandler();
@@ -136,8 +137,8 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 		js2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);//_AS_NEEDED);
 		js2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);//NEVER);//VERTICAL_SCROLLBAR_AS_NEEDED);
 
-		JTextField field = getField();
-		JTextField field2 = getField();
+		JTextField field = getField("field1");
+		JTextField field2 = getField("field2");
 
 		JMenuBar mb = getMenuBar(ptop);
 
@@ -218,12 +219,12 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 			
 			KeyStroke[] a = ((JComponent) mb.getComponent(0)).getRegisteredKeyStrokes();
-			System.out.println("menubar menu registration: " + a.length);
+			////System.out.println("menubar menu registration: " + a.length);
 
 			main.setJMenuBar(mb);
 
 			a = ((JComponent) mb.getComponent(0)).getRegisteredKeyStrokes();
-			System.out.println("menubar menu registration: " + a.length);
+			////System.out.println("menubar menu registration: " + a.length);
 
 			main.add(full);
 			main.addFocusListener(fl);
@@ -302,7 +303,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Test_Editor action " + getID(e.getSource()));
+				////System.out.println("Test_Editor action " + getID(e.getSource()));
 				editor.setCaretPosition(0);
 				area.setCaretPosition(0);
 				area.requestFocus();
@@ -320,7 +321,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Test_Editor action " + getID(e.getSource()));
+				////System.out.println("Test_Editor action " + getID(e.getSource()));
 				editor.setText("");
 //				btop.setEnabled(!btop.isEnabled());
 			}
@@ -334,7 +335,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Test_Editor action " + getID(e.getSource()));
+				////System.out.println("Test_Editor action " + getID(e.getSource()));
 				editor.getCaret().setDot(editor.getCaret().getDot() + 1);
 				editor.requestFocus();
 			}
@@ -347,7 +348,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Test_Editor action " + getID(e.getSource()));
+				////System.out.println("Test_Editor action " + getID(e.getSource()));
 				area.getCaret().setDot(area.getCaret().getDot() + 1);
 				area.requestFocus();
 			}
@@ -361,7 +362,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Test_Editor action " + getID(e.getSource()));
+				////System.out.println("Test_Editor action " + getID(e.getSource()));
 				editor.getCaret().setDot(7);
 				editor.getCaret().moveDot(10);
 				editor.getCaret().setSelectionVisible(true);
@@ -381,7 +382,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Test_Editor action " + getID(e.getSource()));
+				////System.out.println("Test_Editor action " + getID(e.getSource()));
 //				editor.setCaretPosition(editor.getDocument().getLength());
 				area.setCaretPosition(area.getDocument().getLength());
 				area.requestFocus();
@@ -397,7 +398,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Test_Editor action " + getID(e.getSource()));
+				////System.out.println("Test_Editor action " + getID(e.getSource()));
 				area1.setCaretPosition(area1.getText().length());
 				area1.requestFocus();
 			}
@@ -411,7 +412,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Test_Editor action " + getID(e.getSource()));
+				////System.out.println("Test_Editor action " + getID(e.getSource()));
 				area.getCaret().setDot(7);
 				area.getCaret().moveDot(10);
 				area.getCaret().setSelectionVisible(true);
@@ -428,7 +429,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Test_Editor action " + getID(e.getSource()));
+				////System.out.println("Test_Editor action " + getID(e.getSource()));
 				area.append("\ntesting" + ++n); 
 //				area.requestFocus();
 			}
@@ -442,7 +443,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Test_Editor action " + getID(e.getSource()));
+				////System.out.println("Test_Editor action " + getID(e.getSource()));
 				area1.requestFocus();
 				area1.append("\ntesting" + ++n); 
 			}
@@ -459,7 +460,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Test_Editor action " + getID(e.getSource()));
+				////System.out.println("Test_Editor action " + getID(e.getSource()));
 				field.setCaretPosition(3);
 				field.getCaret().moveDot(5);
 				field.getCaret().setSelectionVisible(true);
@@ -478,13 +479,15 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Test_Editor action " + getID(e.getSource()));
 				int start = editor.getSelectionStart();
 				int end = editor.getSelectionEnd();
 				if (end == start)
 					return;
+				////System.out.println("Test_Editor BOLD action " + start + " " + end + " " + getID(e.getSource()));
 				Element ch = editor.getStyledDocument().getCharacterElement(start);
+
 				boolean isBold = !StyleConstants.isBold(ch.getAttributes());
+				////System.out.println("Test_Editor BOLD action " + isBold + " " + ch);
 				MutableAttributeSet attrs = new SimpleAttributeSet();
 				StyleConstants.setForeground(attrs, isBold ? Color.red : Color.black);
 				StyleConstants.setBold(attrs, isBold);
@@ -504,7 +507,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Test_Editor action " + getID(e.getSource()));
+				////System.out.println("Test_Editor action " + getID(e.getSource()));
 				int start = editor.getSelectionStart();
 				int end = editor.getSelectionEnd();
 				if (end == start)
@@ -522,14 +525,20 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 		return panel;
 	}
 
-	private JTextField getField() {
+	private JTextField getField(String name) {
 
-		JTextField field = new JTextField("testing");
+		JTextField field = new JTextField("testing" + name);
 		field.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Test_Editor action " + getID(e.getSource()));
+				////System.out.println("Test_Editor field insert action " + getID(e.getSource()));
+				try {
+					editor.getDocument().insertString(3, field.getText(), null);
+				} catch (BadLocationException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 
 		});
@@ -538,7 +547,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 			@Override
 			public void caretUpdate(CaretEvent e) {
-				System.out.println("Test_Editor JTextField  caret:" + e);
+				////System.out.println("Test_Editor JTextField  caret:" + e);
 			}
 
 		});
@@ -548,7 +557,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 	private JTextArea getArea() {
 		JTextArea area = new JTextArea() {
 public void setCarentPosition(int i) {
-	System.out.println("Test_Editor JTextArea setCP " + i);
+	////System.out.println("Test_Editor JTextArea setCP " + i);
 	super.setCaretPosition(i);
 }
 		};
@@ -557,7 +566,7 @@ public void setCarentPosition(int i) {
 		DefaultCaret c = new DefaultCaret() {
 			@Override
 			protected void fireStateChanged() {
-				System.out.println("Test_Editor area caret firestatechanged " + area.getCaretPosition());
+				////System.out.println("Test_Editor area caret firestatechanged " + area.getCaretPosition());
 				super.fireStateChanged();
 			}
 
@@ -573,7 +582,7 @@ public void setCarentPosition(int i) {
 
 			@Override
 			public void caretUpdate(CaretEvent e) {
-				System.out.println("Test_Editor JTextArea  caret:" + e);
+				////System.out.println("Test_Editor JTextArea  caret:" + e);
 			}
 
 		});
@@ -583,11 +592,19 @@ public void setCarentPosition(int i) {
 		return area;
 	}
 
+	JTextPane editor;
+	
 	private JTextPane getEditor() {
-		JTextPane editor = new JTextPane();
+		editor = new JTextPane() {
+		};
+		
+		ActionListener xxxx = editor.getActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0, false));
+		////System.out.println(xxxx);
+		
+		editor.addKeyListener(ka);
 		editor.setPreferredSize(new Dimension(400, 300));
-		System.out.println("Test_Editor " + editor.getDocument());
-		System.out.println("Test_Editor " + editor.getEditorKit());
+		////System.out.println("Test_Editor " + editor.getDocument());
+		////System.out.println("Test_Editor " + editor.getEditorKit());
 		editor.setText(test);
 		// editor.setEditable(false);
 
@@ -595,7 +612,7 @@ public void setCarentPosition(int i) {
 				.println("Test_Editor Element count = " + editor.getDocument().getRootElements()[0].getElementCount());
 		editor.setBackground(new Color(200, 200, 200));
 		editor.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 16));
-		System.out.println("Test_Editor editor pref size " + editor.getPreferredSize());
+		////System.out.println("Test_Editor editor pref size " + editor.getPreferredSize());
 
 		Style style = editor.addStyle("Red", null);
 		StyleConstants.setForeground(style, Color.red);
@@ -604,7 +621,7 @@ public void setCarentPosition(int i) {
 
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
-				System.out.println("Test_Editor prop change " + evt.getPropertyName() + " " + evt);
+				////System.out.println("Test_Editor prop change " + evt.getPropertyName() + " " + evt);
 			}
 
 		});
@@ -613,7 +630,7 @@ public void setCarentPosition(int i) {
 
 			@Override
 			public void caretUpdate(CaretEvent e) {
-				System.out.println("Test_Editor JTextPane caret:" + e);
+				////System.out.println("Test_Editor JTextPane caret:" + e + " len="+ editor.getDocument().getLength() +  "\n");// + editor.getText());
 				// dumpRoot(editor.getDocument());
 			}
 
@@ -659,14 +676,14 @@ public void setCarentPosition(int i) {
 
 			Component c = DefaultKeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
 
-			System.out.println("Test_Editor " + e.getSource() + " mouse pressed " + e.getX() + " " + e.getY()
-					+ " focus owner is " + (c == null ? null : c.getClass().getName()));
+//			System.out.println("Test_Editor " + e.getSource() + " mouse pressed " + e.getX() + " " + e.getY()
+//					+ " focus owner is " + (c == null ? null : c.getClass().getName()));
 		}
 
 		@Override
 		public void mouseReleased(MouseEvent e) {
 			// TODO Auto-generated method stub
-			System.out.println("Test_Editor  mouse released" + e.getX() + " " + e.getY());
+			////System.out.println("Test_Editor  mouse released" + e.getX() + " " + e.getY());
 
 		}
 
@@ -688,15 +705,15 @@ public void setCarentPosition(int i) {
 
 		@Override
 		public void focusGained(FocusEvent e) {
-			System.out.println(
-					"Test_Editor focus GAINED " + getID(e.getSource()) + " opp:" + getID(e.getOppositeComponent()));
+//			System.out.println(
+//					"Test_Editor focus GAINED " + getID(e.getSource()) + " opp:" + getID(e.getOppositeComponent()));
 			// ptop.setBackground(Color.LIGHT_GRAY);
 		}
 
 		@Override
 		public void focusLost(FocusEvent e) {
-			System.out.println(
-					"Test_Editor focus LOST " + getID(e.getSource()) + " opp:" + getID(e.getOppositeComponent()));
+//			System.out.println(
+//					"Test_Editor focus LOST " + getID(e.getSource()) + " opp:" + getID(e.getOppositeComponent()));
 			// ptop.setBackground(Color.MAGENTA);
 		}
 
@@ -706,20 +723,20 @@ public void setCarentPosition(int i) {
 		JMenuBar mb = new JMenuBar() {
 			@Override
 			public void processKeyEvent(KeyEvent e, MenuElement[] path, MenuSelectionManager m) {
-				System.out.println("Test_Editor path length=" + path.length);
+				////System.out.println("Test_Editor path length=" + path.length);
 				super.processKeyEvent(e, path, m);
 			}
 		};
 		JMenu mb1 = new JMenu("Test") {
 			@Override
 			public void processKeyEvent(KeyEvent e, MenuElement[] path, MenuSelectionManager m) {
-				System.out.println("Test_Editor JMenu path length=" + path.length);
+				////System.out.println("Test_Editor JMenu path length=" + path.length);
 				super.processKeyEvent(e, path, m);
 			}
 
 			@Override
 			public void addNotify() {
-				System.out.println("Test_Editor JMenu addNotify");
+				////System.out.println("Test_Editor JMenu addNotify");
 				super.addNotify();
 			}
 
@@ -747,20 +764,20 @@ public void setCarentPosition(int i) {
 		mb1.add(mb1e);
 
 		KeyStroke[] a = mb1.getRegisteredKeyStrokes();
-		System.out.println("menubar menu registration: " + a.length);
-		for (int i = 0; i < a.length; i++)
-			System.out.println(a[i]);
+		////System.out.println("menubar menu registration: " + a.length);
+//		for (int i = 0; i < a.length; i++)
+//			System.out.println(a[i]);
 
 		mb.add(mb1);
 
 		a = mb1.getRegisteredKeyStrokes();
-		System.out.println("menubar menu registration: " + a.length);
+		//System.out.println("menubar menu registration: " + a.length);
 
 		ActionListener al = new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Test_Editor action " + getID(e.getSource()));
+				////System.out.println("Test_Editor action " + getID(e.getSource()));
 				ptop.setBackground(Color.cyan);
 			}
 
@@ -772,7 +789,7 @@ public void setCarentPosition(int i) {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Test_Editor action " + getID(e.getSource()));
+				////System.out.println("Test_Editor action " + getID(e.getSource()));
 				ptop.setBackground(Color.YELLOW);
 			}
 
@@ -782,7 +799,7 @@ public void setCarentPosition(int i) {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Test_Editor action " + getID(e.getSource()));
+				////System.out.println("Test_Editor action " + getID(e.getSource()));
 				ptop.setBackground(Color.white);
 			}
 
@@ -823,18 +840,18 @@ public void setCarentPosition(int i) {
 	protected void updateTitle() {
 		Component c = DefaultKeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
 
-		System.out.println("Test_Editor focus owner is " + (c == null ? null : c.getClass().getName()));
+		////System.out.println("Test_Editor focus owner is " + (c == null ? null : c.getClass().getName()));
 		setTitle((++n) + "  " + (c == null ? null : c.getClass().getName()));
 	}
 
 	protected void showKeyEvent(KeyEvent e) {
 		String source = /** @j2sNative (xxx = e).bdata.jqevent.originalEvent.target.id || */
 				"";
-		System.out.println(
-				"Test_Editor keyEvent id=" + e.getID() + " " + ((JComponent) e.getSource()).getClass().getName() + " "
-						+ source + " char=" + e.getKeyChar() + " code=" + e.getKeyCode() + " loc=" + e.getKeyLocation()
-						+ "\n mod=" + e.getModifiers() + " " + KeyEvent.getKeyModifiersText(e.getModifiers()) + " modx="
-						+ e.getModifiersEx() + " " + KeyEvent.getKeyModifiersText(e.getModifiersEx()));
+//		System.out.println(
+//				"Test_Editor keyEvent id=" + e.getID() + " " + ((JComponent) e.getSource()).getClass().getName() + " "
+//						+ source + " char=" + e.getKeyChar() + " code=" + e.getKeyCode() + " loc=" + e.getKeyLocation()
+//						+ "\n mod=" + e.getModifiers() + " " + KeyEvent.getKeyModifiersText(e.getModifiers()) + " modx="
+//						+ e.getModifiersEx() + " " + KeyEvent.getKeyModifiersText(e.getModifiersEx()));
 	}
 
 	protected void dumpRoot(Document document) {
@@ -842,7 +859,7 @@ public void setCarentPosition(int i) {
 	}
 
 	private void dumpElement(int index, Element element) {
-		System.out.println("Test_Editor i=" + index + " e=" + element.toString());
+		////System.out.println("Test_Editor i=" + index + " e=" + element.toString());
 		for (int i = 0, n = element.getElementCount(); i < n; i++)
 			dumpElement((index + 1) * 100, element.getElement(i));
 

@@ -9,6 +9,7 @@
 
 // TODO: still a lot of references to window[...]
 
+// BH 2019.07.09 adds Java String.trim()
 // BH 2019.05.21 changes Clazz.isClassDefined to Clazz._isClassDefined for compression
 // BH 2019.05.13 fixes for Math.getExponent, Math.IEEERemainder, Array.equals(Object)
 // BH 2019.02.16 fixes typo in Integer.parseInt(s,radix)
@@ -3126,8 +3127,17 @@ Sys.exit$I = Sys.exit$;
 Sys.out = new Clazz._O ();
 Sys.out.__CLASS_NAME__ = "java.io.PrintStream";
 
+Sys.setOut$java_io_PrintStream = function(ps) {
+  Sys.out = ps;
+};
+
+Sys.setErr$java_io_PrintStream = function(ps) {
+  Sys.err = ps;
+};
+
 
 Sys.out.print = Sys.out.print$O = Sys.out.print$Z = Sys.out.print$I = Sys.out.println$J = Sys.out.print$S = Sys.out.print$C = Sys.out.print = function (s) { 
+
   Con.consoleOutput (s);
 };
 
@@ -4528,10 +4538,19 @@ sp.substring$I = sp.substring$I$I = sp.subSequence$I$I = sp.substring;
 sp.replace$C$C = sp.replace$CharSequence$CharSequence = sp.replace$;
 sp.toUpperCase$ = sp.toUpperCase;
 sp.toLowerCase$ = sp.toLowerCase;
-sp.trim$ = sp.trim;
 sp.toLowerCase$java_util_Locale = sp.toLocaleLowerCase ? function(loc) {loc = loc.toString(); var s = this.valueOf(); return (loc ? s.toLocaleLowerCase(loc.replace(/_/g,'-')) : s.toLocaleLowerCase()) } : sp.toLowerCase;
 sp.toUpperCase$java_util_Locale = sp.toLocaleUpperCase ? function(loc) {loc = loc.toString(); var s = this.valueOf(); return (loc ? s.toLocaleUpperCase(loc.replace(/_/g,'-')) : s.toLocaleUpperCase()) } : sp.toUpperCase;
 sp.length$ = function() {return this.length};
+sp.trim$ = function() {
+  var s = this.trim();
+  var j;
+  if (s == "" || s.charCodeAt(j = s.length - 1) > 32 && s.charCodeAt(0) > 32) return s;
+  var i = 0;
+  while (i <= j && s.charCodeAt(i) <= 32)i++;
+  while (j > i && s.charCodeAt(j) <= 32)j--;
+  return s.substring(i, ++j);
+};
+
 
 //sp.chars$ = CharSequence.prototype.chars$;
 //sp.codePoints$ = CharSequence.prototype.codePoints$;

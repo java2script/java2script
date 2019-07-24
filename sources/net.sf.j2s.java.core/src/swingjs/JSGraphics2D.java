@@ -99,6 +99,9 @@ public class JSGraphics2D implements
 										 *            ctx.backingStorePixelRatio || 1; return dpr / bsr; })() ||
 										 */
 			1;
+	static {
+		System.out.println("JSGraphics2D pixelRatio is " + pixelRatio);
+	}
 // this is 1.5 for Windows
 // nice, but now how would be do raw pixel setting, say, from images?
 //    can.width = w * pixelRatio;
@@ -468,6 +471,14 @@ public class JSGraphics2D implements
 			draw(rrect);
 	}
 
+	/**
+	 * Allows for direct image transfer by buffer
+	 * @param img
+	 * @param x
+	 * @param y
+	 * @param observer
+	 * @return
+	 */
 	public boolean drawImage(Image img, int x, int y, ImageObserver observer) {
 		return drawImagePriv(img, x, y, observer);
 	}
@@ -496,10 +507,10 @@ public class JSGraphics2D implements
 		observer.imageUpdate(img, (isOK ? 0 : ImageObserver.ABORT | ImageObserver.ERROR), -1, -1, -1, -1);
 	}
 
-	public boolean drawImage(Image img, int x, int y, Color bgcolor, ImageObserver observer) {
-//		backgroundPainted = true;
-		return drawImage(img, x, y, observer);
-	}
+//	public boolean drawImage(Image img, int x, int y, Color bgcolor, ImageObserver observer) {
+////		backgroundPainted = true;
+//		return drawImage(img, x, y, observer);
+//	}
 
 	public boolean drawImage(Image img, int x, int y, int width, int height, Color bgcolor, ImageObserver observer) {
 		if (width <= 0 || height <= 0)
@@ -563,7 +574,7 @@ public class JSGraphics2D implements
 			/**
 			 * @j2sNative
 			 * 
-			 * 			pixels = img.秘pix; isRGB = (img.imageType == 1);
+			 * 			pixels = img.raster.秘pix ||img.秘pix; isRGB = (img.imageType == 1);
 			 *
 			 */
 			DOMNode imgNode = null;
@@ -582,13 +593,7 @@ public class JSGraphics2D implements
 		return true;
 	}
 
-	public void drawDirectRGBA(int[] pixels) {
-		// this can go VERY fast - for writing directly to the canvas context
-//		backgroundPainted = true;
-		drawDirect(pixels, 0, 0, width, height, false);
-	}
-
-	private void drawDirect(int[] pixels, int x, int y, int width, int height, boolean isRGB) {
+	public void drawDirect(int[] pixels, int x, int y, int width, int height, boolean isRGB) {
 		if (buf8 == null || x != lastx || y != lasty || nx != width || ny != height) {
 			imageData = ctx.getImageData(x, y, width, height);
 			buf8 = imageData.data;

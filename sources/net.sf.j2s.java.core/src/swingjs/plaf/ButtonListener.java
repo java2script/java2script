@@ -373,7 +373,7 @@ public class ButtonListener
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			AbstractButton b = (AbstractButton) e.getSource();
-			if (((JSComponentUI) (Object) b.getUI()).isModalBlocked())
+			if (b.秘getUI().isModalBlocked())
 				return;
 			
 			ButtonModel model = b.getModel();

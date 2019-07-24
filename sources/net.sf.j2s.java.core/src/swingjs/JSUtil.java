@@ -1,6 +1,6 @@
 package swingjs;
 
-import java.awt.Component;
+import java.awt.Color;
 import java.awt.JSComponent;
 import java.awt.Toolkit;
 import java.io.BufferedInputStream;
@@ -216,7 +216,7 @@ public class JSUtil {
 		Object data = getCachedFileData(path);
 		if (data == null) {
 			stream = getResourceAsStream(name);
-			data = /** @j2sNative stream.$in.buf ||*/null;
+			data = /** @j2sNative stream && stream.$in.buf ||*/null;
 		} else {
 			stream = new BufferedInputStream(new ByteArrayInputStream((byte[]) data));
 		}
@@ -629,5 +629,31 @@ public class JSUtil {
 		return cl == null || c != null && !isForClass(getJ2SAlias(c, name), cl);
 	}
 
+	static Object ctxTemp;
+
+	/**
+	 * A great trick to get a Java Color from a name using JavaScript.
+	 * https://stackoverflow.com/questions/1573053/javascript-function-to-convert-color-names-to-hex-codes
+	 *  
+	 * @param c
+	 * @return
+	 */
+	@SuppressWarnings({ "null" })
+	public static Color getColorFromName(String c) {
+		int[] rgb = null;
+		/**
+		 * @j2sNative
+		 * 
+		 * 	if (C$.ctxTemp == null) { 
+		 *    var d = document.createElement("canvas"); 
+		 *    d.height = d.width = 1;
+		 *    C$.ctxTemp = d.getContext("2d"); 
+		 *  } 
+		 *  C$.ctxTemp.fillStyle = c;
+		 *  C$.ctxTemp.fillRect(0, 0, 1, 1); 
+		 *  rgb = C$.ctxTemp.getImageData(0, 0, 1, 1).data;
+		 */		
+		return new Color(rgb[0], rgb[1], rgb[2]);
+	}
 }
 

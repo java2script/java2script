@@ -30,7 +30,7 @@ public class JSRadioButtonUI extends JSButtonUI {
 			}
 			iconNode = null;
 			if (b.getIcon() == null) {
-				iconNode = actionNode = newDOMObject("input", id, "type", (getPropertyPrefix() == "RadioButton" ? "radio" : "checkbox"), "name", id);
+				iconNode = actionNode = newDOMObject("input", id + "_inp", "type", (getPropertyPrefix() == "RadioButton" ? "radio" : "checkbox"), "name", id);
 				DOMNode.setAttr(buttonNode, "htmlFor", id);
 			} else {
 				// don't we need an icon node here??

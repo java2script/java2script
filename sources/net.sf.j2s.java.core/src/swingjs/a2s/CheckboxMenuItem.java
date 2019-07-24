@@ -29,7 +29,7 @@ public class CheckboxMenuItem extends JCheckBoxMenuItem {
 	@Override
 	public void setState(boolean b) {
 		if (((DefaultButtonModel) model).setStateNoFire(b))
-			((JSCheckBoxUI) (Object) getUI()).updateDOMNode();
+			秘getUI().updateDOMNode();
 	}   
 	
 

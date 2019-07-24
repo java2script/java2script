@@ -34,15 +34,17 @@ public class JSKeyEvent extends KeyEvent {
 	 * @param time
 	 * @return
 	 */
-	public static boolean dispatchKeyEvent(JComponent c, int id, int modifiers, Object jqevent, long time) {
+	public static boolean dispatchKeyEvent(JComponent c, int id, Object jqevent, long time) {
+		if (id == 0)
+			id = JSMouse.fixEventType(jqevent, 0);
 		if (id == KeyEvent.KEY_TYPED) {
 			// HTML5 keypress is no longer reliable
 			JSToolkit.consumeEvent(jqevent);
 			return false;
 		}
 		if (c != null) {
-			JSComponentUI ui = (JSComponentUI) c.getUI();
-			KeyEvent e = newJSKeyEvent(c, jqevent, 0, false);
+			JSComponentUI ui = c.秘getUI();
+			KeyEvent e = newJSKeyEvent(c, jqevent, id, false);
 			// create our own KEY_PRESSED event
 			c.dispatchEvent(e);
 			if (!ui.j2sDoPropagate)
@@ -91,7 +93,7 @@ public class JSKeyEvent extends KeyEvent {
 		 */
 
 		if (id == 0)
-			id = fixEventType(jqevent, 0);
+			id = JSMouse.fixEventType(jqevent, 0);
 		if (id == 0)
 			return null;
 		int keyCode = getJavaKeyCode(jskeyCode, jskey);
@@ -115,7 +117,7 @@ public class JSKeyEvent extends KeyEvent {
 		 * 
 		 */
 		setBData(bdata);
-		modifiers = getModifiers(ev);
+		modifiers = JSMouse.getModifiers(ev);
 	}
 
 	private static int getJavaKeyCode(int jskeyCode, String jskey) {
@@ -128,8 +130,7 @@ public class JSKeyEvent extends KeyEvent {
 			return jskeyCode;
 		}
 		if (jskey.length() == 1) {
-			// same if 1-character, except numeric keypad 0-9
-			return (jskeyCode >= 96 && jskeyCode <= 105 ? jskeyCode :  0 + jskey.toUpperCase().charAt(0));
+			return jskeyCode;
 		}
 		switch (jskeyCode) {
 		case 91: // META
@@ -186,43 +187,6 @@ public class JSKeyEvent extends KeyEvent {
 			return (jskey.length() == 1);
 		}
 		
-	}
-
-	public static int getModifiers(Object ev) {
-		boolean shift = false, ctrl = false, meta = false, alt = false, altGraph = false;
-		/**
-		 * @j2sNative
-		 * 
-		 *            shift = ev.shiftKey;
-		 *            ctrl = ev.ctrlKey;
-		 *            alt = ev.altKey;
-		 *            meta = ev.metaKey;
-		 *            altGraph = ev.altGraphKey;
-		 */
-		return getModifiers(shift, ctrl, alt, meta, altGraph);
-
-	}
-	private static int getModifiers(boolean shift, boolean ctrl, boolean alt, boolean meta, boolean altGraph) {
-		 int modifiers = 0; 
-		if (shift)
-			modifiers |= InputEvent.SHIFT_MASK + InputEvent.SHIFT_DOWN_MASK;
-		if (ctrl)
-			modifiers |= InputEvent.CTRL_MASK + InputEvent.CTRL_DOWN_MASK;
-		if (alt)
-			modifiers |= InputEvent.ALT_MASK + InputEvent.ALT_DOWN_MASK;
-		if (meta)
-			modifiers |= InputEvent.META_MASK + InputEvent.META_DOWN_MASK;
-		if (altGraph)
-			modifiers |= InputEvent.ALT_GRAPH_MASK + InputEvent.ALT_GRAPH_DOWN_MASK;
-		return modifiers;
-	}
-
-	public static int fixEventType(Object jqevent, int eventType) {
-		String evType = /**@j2sNative jqevent.type ||*/"";
-		return (evType == "keydown" ? KEY_PRESSED
-				: evType == "keypress" ? KEY_TYPED 
-				: evType == "keyup" ? KEY_RELEASED 
-				: eventType);
 	}
 
 }

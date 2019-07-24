@@ -86,7 +86,7 @@ public class Test_Event extends JFrame {
 			public boolean dispatchEvent(AWTEvent e) {
 				if (allowEventInfo && e.getID() != MouseEvent.MOUSE_MOVED) {
 					if (e.getID() == MouseEvent.MOUSE_PRESSED) { //
-						System.out.println("FocusMan mousepreseed event");
+						System.out.println("FocusMan mousepressed event");
 					}
 					System.out.println(
 							"FocusMan dispatching activeElement=" + (/** @j2sNative document.activeElement.id || */

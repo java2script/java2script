@@ -13,6 +13,10 @@
 // added j2sslider("getState")
 ;
 
+//NOTE: If you change this file, then you need to touch and save JQueryUI.java, as only then
+//will the transpiler copy this file to site/swingjs/j2s/swingjs/jquery/
+
+
 (function() {
 
 	if (J2S.isResourceLoaded("swingjs/jquery/jquery-ui-j2sslider.js", true))

@@ -103,9 +103,9 @@ public class JSTableHeaderUI extends JSLightweightUI {
 
 	private JTable table;
 
-	private int oldrc;
-
-	private int oldrh;
+//	private int oldrc;
+//
+//	private int oldrh;
 
 	private DOMNode headdiv;
 
@@ -126,13 +126,13 @@ public class JSTableHeaderUI extends JSLightweightUI {
 	public DOMNode updateDOMNode() {
 
 		table = tableHeader.getTable();
-		int rc = table.getRowCount();
-		int rh = table.getRowHeight();
+//		int rc = table.getRowCount();
+//		int rh = table.getRowHeight();
 
-		boolean rebuild = (rc != oldrc || rh != oldrh);
+		//boolean rebuild = (rc != oldrc || rh != oldrh);
 
-		oldrh = rh;
-		oldrc = rc;
+//		oldrh = rh;
+//		oldrc = rc;
 
 		int thh = tableHeader.getHeight();
 
@@ -788,10 +788,43 @@ public class JSTableHeaderUI extends JSLightweightUI {
 			paintCell(g, draggedCellRect, draggedColumnIndex);
 		}
 
+		paintGrid(g, cMin, cMax);
+
 		// Remove all components in the rendererPane.
 		rendererPane.removeAll();
 
 		working = false;
+	}
+
+	private void paintGrid(Graphics g, int cMin, int cMax) {
+		g.setColor(table.getGridColor());
+
+		table._getCellRect(0, cMin, true, JSTableUI.minCell);
+		table._getCellRect(0, cMax, true, JSTableUI.maxCell);
+		Rectangle damagedArea = JSTableUI.minCell.union(JSTableUI.maxCell);
+		int tableHeight = getHeaderHeight();
+		if (table.getShowHorizontalLines()) {
+			g.drawLine(0, tableHeight - 1, damagedArea.width, tableHeight - 1);			
+		}
+		if (table.getShowVerticalLines()) {
+			TableColumnModel cm = table.getColumnModel();
+			int x;
+			if (table.getComponentOrientation().isLeftToRight()) {
+				x = damagedArea.x;
+				for (int column = cMin; column <= cMax; column++) {
+					int w = cm.getColumn(column).getWidth();
+					x += w;
+					g.drawLine(x - 1, 0, x - 1, tableHeight - 1);
+				}
+			} else {
+				x = damagedArea.x;
+				for (int column = cMax; column >= cMin; column--) {
+					int w = cm.getColumn(column).getWidth();
+					x += w;
+					g.drawLine(x - 1, 0, x - 1, tableHeight - 1);
+				}
+			}
+		}
 	}
 
 	//
@@ -815,9 +848,9 @@ public class JSTableHeaderUI extends JSLightweightUI {
 
 	private void paintCell(Graphics g, Rectangle cellRect, int columnIndex) {
 		// System.out.println("paintCell header" + columnIndex);
-		JComponent component = (JComponent) getHeaderComponent(columnIndex);
-		((JSComponentUI) component.getUI()).setRenderer(component, cellRect.width, cellRect.height, null);
-		rendererPane.paintComponent(g, component, tableHeader, cellRect.x, cellRect.y, cellRect.width, cellRect.height,
+		JComponent c = (JComponent) getHeaderComponent(columnIndex);
+		c.秘getUI().setRenderer(c, cellRect.width, cellRect.height, null);
+		rendererPane.paintComponent(g, c, tableHeader, cellRect.x, cellRect.y, cellRect.width, cellRect.height,
 				true);
 	}
 
@@ -868,7 +901,7 @@ public class JSTableHeaderUI extends JSLightweightUI {
 	}
 
 	private Dimension createHeaderSize(long width) {
-		TableColumnModel columnModel = tableHeader.getColumnModel();
+		//TableColumnModel columnModel = tableHeader.getColumnModel();
 		// None of the callers include the intercell spacing, do it here.
 		if (width > Integer.MAX_VALUE) {
 			width = Integer.MAX_VALUE;

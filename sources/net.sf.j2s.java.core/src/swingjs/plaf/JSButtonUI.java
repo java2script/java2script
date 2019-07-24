@@ -84,13 +84,13 @@ public class JSButtonUI extends JSLightweightUI {
 
 	@Override
 	public DOMNode updateDOMNode() {
-		isSimpleButton = true;
-		allowPaintedBackground = false;
-		// all subclasses will have their own version of this.
+		// all subclasses will have their own version of this. They do not call super.updateDOMNode()
 		// this one is only for a simple button
 		if (domNode == null) {
+			isSimpleButton = true;
+			allowPaintedBackground = false;
 			setDoPropagate();
-			domNode = enableNode = buttonNode = newDOMObject("button", id + "_dom", "type", "button");
+			domNode = enableNode = buttonNode = newDOMObject("button", id + "_dom", "type", "button", "style", "padding:0");
 			//DOMNode.setStyles(domNode,"transform","translateY(0.5px)translateX(0.5px)");
 			addClass(domNode, "j2sbutton");
 			setFocusable();
@@ -785,7 +785,7 @@ public class JSButtonUI extends JSLightweightUI {
 	@Override
 	public void paint(Graphics g, JComponent c) {
 		imagePersists = true; // at least for now.
-		if (jc.秘paintsSelf())
+		if (jc.秘paintsSelfEntirely())
 			DOMNode.setStyles(centeringNode, "visibility", "visible");
 		super.paint(g, c);
 	}
@@ -795,5 +795,12 @@ public class JSButtonUI extends JSLightweightUI {
 		return true;
 	}
 
-
+	@Override 
+	public Dimension getPreferredSize(JComponent jc) {
+		if (isAWT && isSimpleButton)
+			return JSLabelUI.getMinimumSizePeer(jc, button);
+		return super.getPreferredSize(jc);
+		
+	}
+	
 }

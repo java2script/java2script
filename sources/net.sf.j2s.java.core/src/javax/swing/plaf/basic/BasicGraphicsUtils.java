@@ -31,6 +31,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Insets;
+import java.awt.Toolkit;
+import java.awt.event.InputEvent;
 
 
 
@@ -300,4 +302,10 @@ public class BasicGraphicsUtils
     public static boolean isLeftToRight( Component c ) {
         return c.getComponentOrientation().isLeftToRight();
     }
+    
+    static public boolean isMenuShortcutKeyDown(InputEvent event) {
+        return (event.getModifiers() &
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()) != 0;
+    }
+
 }

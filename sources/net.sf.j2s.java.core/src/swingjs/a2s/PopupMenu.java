@@ -20,13 +20,22 @@ import javax.swing.JPopupMenu;
 public class PopupMenu extends JPopupMenu implements AWTPopupMenu {
 
 	public PopupMenu() {
-		super();
+		this(null);
 	}
 
 	public PopupMenu(String string) {
 		super(string);
 	}
 
+	@Override
+	public Font getFont() {
+		// AWT default fonts are set by the peer (native OS)
+		Font f = super.getFont();
+		if (f == null) {
+	    	setFont(f = new Font(Font.DIALOG, Font.PLAIN, 12));	    	
+		}
+		return f;
+	}
 	@Override
 	public int countItems() {
 		return getComponentCount();

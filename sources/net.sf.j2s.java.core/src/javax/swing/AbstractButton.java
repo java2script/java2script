@@ -295,32 +295,34 @@ public abstract class AbstractButton extends JComponent implements ItemSelectabl
         return text;
     }
 
-    /**
-     * Sets the button's text.
-     * @param text the string used to set the text
-     * @see #getText
-     * @beaninfo
-     *        bound: true
-     *    preferred: true
-     *    attribute: visualUpdate true
-     *  description: The button's text.
-     */
-    public void setText(String text) {
-        String oldValue = this.text;
-        this.text = text;
-        firePropertyChange(TEXT_CHANGED_PROPERTY, oldValue, text);
-        updateDisplayedMnemonicIndex(text, getMnemonic());
+	/**
+	 * Sets the button's text.
+	 * 
+	 * @param text the string used to set the text
+	 * @see #getText
+	 * @beaninfo bound: true preferred: true attribute: visualUpdate true
+	 *           description: The button's text.
+	 */
+	public void setText(String text) {
+		String oldValue = this.text;
+		this.text = text;
+		firePropertyChange(TEXT_CHANGED_PROPERTY, oldValue, text);
+		updateDisplayedMnemonicIndex(text, getMnemonic());
 
 //        if (accessibleContext != null) {
 //            accessibleContext.firePropertyChange(
 //                AccessibleContext.ACCESSIBLE_VISIBLE_DATA_PROPERTY,
 //                oldValue, text);
 //        }
-        if (text == null || oldValue == null || !text.equals(oldValue)) {
-            revalidate();
-            秘repaint();
-        }
-    }
+		if (text == null || oldValue == null || !text.equals(oldValue)) {
+	        if (秘isAWT()) {
+	        	invalidateIfValid();
+	        } else {
+	        	revalidate();
+	        	秘repaint();
+	        }
+		}
+	}
 
 
     /**

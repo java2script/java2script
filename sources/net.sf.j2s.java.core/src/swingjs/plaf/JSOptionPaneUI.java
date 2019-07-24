@@ -800,16 +800,9 @@ public class JSOptionPaneUI extends JSPanelUI {
     }
 
     private int getMnemonic(String key, Locale l) {
-        String value = (String)UIManager.get(key, l);
-
-        if (value == null) {
-            return 0;
-        }
-        try {
-            return Integer.parseInt(value);
-        }
-        catch (NumberFormatException nfe) { }
-        return 0;
+        @SuppressWarnings("unused")
+		String value = (String)UIManager.get(key, l);
+        return (/** @j2sNative +value || */0);
     }
 
     /**

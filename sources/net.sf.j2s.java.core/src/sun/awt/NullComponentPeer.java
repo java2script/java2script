@@ -232,19 +232,6 @@ public class NullComponentPeer implements LightweightPeer,
         return new Point(0,0);
     }
 
-    @Override
-		public Insets getInsets() {
-        return insets();
-    }
-
-    @Override
-		public void beginValidate() {
-    }
-
-    @Override
-		public void endValidate() {
-    }
-
     public Insets insets() {
         return new Insets(0, 0, 0, 0);
     }
@@ -261,14 +248,6 @@ public class NullComponentPeer implements LightweightPeer,
     @Override
 		public VolatileImage createVolatileImage(int width, int height) {
         return null;
-    }
-
-    @Override
-		public void beginLayout() {
-    }
-
-    @Override
-		public void endLayout() {
     }
 
 //    public void createBuffers(int numBuffers, BufferCapabilities caps)

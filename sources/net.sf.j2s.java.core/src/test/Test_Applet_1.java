@@ -52,7 +52,7 @@ public class Test_Applet_1 extends JApplet implements AdjustmentListener, Proper
 		button.addFocusListener(this);
 		button.setBorder(new LineBorder(Color.yellow, 4));
 		button.setSize(80, 40);
-		button.setBackground(Color.orange);
+		button.setBackground(Color.red);
 		/* final$ */Test_Applet_1 me = this;
 		button.addActionListener(new ActionListener() {
 			@Override

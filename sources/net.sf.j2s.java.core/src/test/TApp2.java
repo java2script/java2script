@@ -206,7 +206,7 @@ public class TApp2 extends Applet {
 		}
 
 		void testGraphic() {
-			Button b = new Button("g");
+			Button b = new Button("MyM");
 			b.setBounds(300, 300, 40, 20);
 			// images are created only when a button is displayable
 			Image i1 = b.createImage(100, 100);
@@ -220,6 +220,7 @@ public class TApp2 extends Applet {
 			Font f = g.getFont();
 			System.out.println(f);
 
+			
 			// font/background/foreground are set when the graphic is created
 			Font f0 = new Font(Font.DIALOG, Font.PLAIN, 30);
 			b.setFont(f0);
@@ -235,6 +236,13 @@ public class TApp2 extends Applet {
 			assert (g.getFont().equals(f0));
 			assert (g.getColor() == Color.green);
 			assert (((Graphics2D) g).getBackground() == Color.red);
+			
+			
+			b = new Button("XXX");
+			b.setBounds(500, 100, 100, 100);
+			tApp2.add(b);
+			
+
 			System.out.println("Tapp2 OK");
 		}
 	}

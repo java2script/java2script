@@ -853,7 +853,7 @@ public class SwingUtilities implements SwingConstants
                                              int textIconGap)
     {
     	
-    	JSComponentUI ui = (JSComponentUI) c.getUI();
+    	JSComponentUI ui = c.秘getUI();
 
         boolean ltr = (c == null || c.getComponentOrientation().isLeftToRight());
         int hAlign, hTextPos;

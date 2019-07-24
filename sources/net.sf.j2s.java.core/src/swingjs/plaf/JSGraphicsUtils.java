@@ -268,7 +268,7 @@ public class JSGraphicsUtils
             return null;
         }
 
-        JSComponentUI ui = (JSComponentUI) ((JComponent) b).getUI();
+        JSComponentUI ui = b.秘getUI();
         ui.setTainted();
         Icon icon = b.getIcon();
         String text = b.getText();

@@ -35,8 +35,6 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.text.DecimalFormat;
 
-import javax.swing.JTextArea;
-
 /**
  * Creates a ScrollPane with a mix of SwingJS and AWT components. 
  * 
@@ -304,13 +302,13 @@ public class Test_Applet_Scroll_AWT extends Applet {
 		// p.setLayout(new GridLayout(2, 2, 2, 2));
 		ScrollPane sp = new ScrollPane(ScrollPane.SCROLLBARS_ALWAYS);
 		sp.add(p);
-		sp.setBackground(Color.yellow);
+		
 
 		sp.setSize(500, 250);
 		
-		Dimension d = sp.getPreferredSize();
 		add(sp);
 
+		setBackground(Color.yellow);
 		mysp = sp;
 		
 		mkSlider(p, tf, Adjustable.VERTICAL, 20, 200);

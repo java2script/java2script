@@ -19,11 +19,6 @@ public abstract class JSTextViewUI extends JSTextUI {
 	 * set true for JEditorPane
 	 */
 	protected boolean mustWrap = false;
-
-	public JSTextViewUI() {
-		// make sure standard HTML5 event is passed even if the Java event is consumed.
-		setDoPropagate();
-	}
 	
 	protected void setupViewNode() {
 		allowPaintedBackground = false;

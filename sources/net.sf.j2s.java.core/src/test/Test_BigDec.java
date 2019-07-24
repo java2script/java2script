@@ -17,10 +17,11 @@ public class Test_BigDec extends Test_ {
     	testBDMul();
     	testBDDiv();
     	
+		System.out.println("testBD OK");
 
 	}
 
-	// failing		testBDMul();
+	// failing		testBDDiv();
 	
 	
 
@@ -67,10 +68,23 @@ public class Test_BigDec extends Test_ {
 	}
 
 	private static void testBDDiv() {
-		BigDecimal g;
-		g = BigDecimal.valueOf(5).divide(BigDecimal.valueOf(2));
+		BigDecimal g, a, b;
+		a = new BigDecimal(0);
+		b = new BigDecimal(2.01);
+		g = a.divide(b,10,BigDecimal.ROUND_DOWN);
 		System.out.println(g);
-		assert(g.toString().equals("2.5"));
+		a = new BigDecimal(5.1);
+		b = new BigDecimal(2.01);
+		g = a.divide(b,10,BigDecimal.ROUND_DOWN);
+		System.out.println(g);
+		assert(g.toString().equals("2.5373134328"));
+		String zeros = "";
+		for (int i = 0; i < 10; i ++) {
+			g = new BigDecimal("50" + zeros).divide(BigDecimal.valueOf(2), 10, BigDecimal.ROUND_DOWN);
+			System.out.println(g);
+			assert(g.toString().equals("25" + zeros + ".0000000000"));
+			zeros += "0";
+		}
 		System.out.println("testBDDiv OK");
 	}
 	
