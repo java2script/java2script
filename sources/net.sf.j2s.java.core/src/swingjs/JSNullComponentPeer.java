@@ -9,7 +9,6 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
 import java.awt.Image;
-import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -265,34 +264,5 @@ public class JSNullComponentPeer implements LightweightPeer {
 		return null;
 	}
 
-	
-	@Override
-	public Insets getInsets() {
-		return null;
-	}
-
-	@Override
-	public void beginValidate() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void endValidate() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void beginLayout() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void endLayout() {
-		// TODO Auto-generated method stub
-		
-	}
 
 }

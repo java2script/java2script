@@ -84,6 +84,9 @@ import swingjs.plaf.CellHolder;
 import swingjs.plaf.JSComponentUI;
 
 /**
+ * SwingJS TODO: print/printable all not implemented
+ * 
+ * 
  * The <code>JTable</code> is used to display and edit regular two-dimensional
  * tables of cells. See <a href=
  * "http://java.sun.com/docs/books/tutorial/uiswing/components/table.html">How
@@ -243,7 +246,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		ListSelectionListener, CellEditorListener, /* Accessible, */ RowSorterListener {
 
 	
-	private final static Rectangle r = new Rectangle();
+	//private final static Rectangle r = new Rectangle();
 	//
 	// Static Constants
 	//
@@ -3719,7 +3722,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 			comp.秘repaint();
 			comp.setVisible(true);
 			// force domNode to be visible as well as outer node
-			((JSComponentUI) comp.getUI()).setVisible(null, true);
+			comp.秘getUI().setVisible(null, true);
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
@@ -5775,7 +5778,15 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 		秘repaint();
 	}
 
-	/**
+    /**
+     * Equivalent to <code>revalidate</code> followed by <code>repaint</code>.
+     */
+    protected void resizeAndRepaint() {
+        revalidate();
+        repaint();
+    }
+
+    /**
 	 * Returns the active cell editor, which is {@code null} if the table is not
 	 * currently editing.
 	 *
@@ -5797,7 +5808,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
 	 * @beaninfo bound: true description: The table's active cell editor.
 	 */
 	public void setCellEditor(TableCellEditor anEditor) {
-		System.out.println("JTable setting Cell Editor " + anEditor);
+		//System.out.println("JTable setting Cell Editor " + anEditor);
 		TableCellEditor oldEditor = cellEditor;
 		cellEditor = anEditor;
 		boolean a = _addingEditor;

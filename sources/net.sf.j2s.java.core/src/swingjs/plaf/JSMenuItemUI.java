@@ -36,6 +36,7 @@ public class JSMenuItemUI extends JSButtonUI {
 		return domNode;
 	}
 	
+	
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
 		// we use == here because this will be JavaScript
@@ -59,19 +60,27 @@ public class JSMenuItemUI extends JSButtonUI {
 		super.installUI(jc);
 	}	
 
+	
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
-		super.propertyChange(e);
 		String prop = e.getPropertyName();
-		if (jc.isVisible()) {
-			if (prop == "ancestor") {
-				if (jc.getParent() != null) {
- 					((JSComponentUI) jc.getParent().getUI()).setHTMLElement();
-				}
+		if (!jc.isVisible() && prop != "ancestor" && jc.getParent() == null)
+			return;
+		switch (prop) {
+		case "focusPainted":
+		case "focusable":
+		case "borderPainted":
+		case "opaque":
+			return;
+		}
+		super.propertyChange(e);
+		if (prop == "ancestor") {
+			if (jc.getParent() != null) {
+				jc.getParent().秘getUI().setHTMLElement();
 			}
 		}
 	}
-
+	
 	@Override
 	protected String getPropertyPrefix() {
 		return "MenuItem";

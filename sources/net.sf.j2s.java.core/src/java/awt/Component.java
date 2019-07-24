@@ -252,7 +252,7 @@ public abstract class Component implements ImageObserver/*
 	 * @see #getFont
 	 * @see #setFont
 	 */
-	Font font;
+	public Font font; // was package-private; need to set it here from a2s directory
 
 	/**
 	 * The font which the peer is currently using. (<code>null</code> if no peer
@@ -694,10 +694,10 @@ public abstract class Component implements ImageObserver/*
 	// */
 	// private transient Region mixingCutoutRegion = null;
 
-	/*
-	 * Indicates whether addNotify() is complete (i.e. the peer is created).
-	 */
-	private transient boolean isAddNotifyComplete = false;
+//	/*
+//	 * Indicates whether addNotify() is complete (i.e. the peer is created).
+//	 */
+//	private transient boolean isAddNotifyComplete = false;
 
 	/**
 	 * Should only be used in subclass getBounds to check that part of bounds is
@@ -5068,7 +5068,10 @@ public abstract class Component implements ImageObserver/*
 	 */
 	transient private boolean coalescingEnabled = checkCoalescing(); 
 
-	public boolean 秘j2sInvalidateOnAdd = true; // not for menu items?
+	/**
+	 * false only for menu items and menu separators
+	 */
+	public boolean 秘j2sInvalidateOnAdd = true;
 
 	/**
 	 * Weak map of known coalesceEvent overriders. Value indicates whether
@@ -5419,7 +5422,7 @@ public abstract class Component implements ImageObserver/*
 	 */
 	protected void processKeyEvent(KeyEvent e) {
 		KeyListener listener = keyListener;
-		if (listener != null && (((JSComponent)this).秘isAWT()||  秘isFocusableSet)) {
+		if (listener != null && (((JSComponent)this).秘isAWT()||  秘isFocusableSet || keyListener != null)) {
 			int id = e.getID();
 			switch (id) {
 			case KeyEvent.KEY_TYPED:
@@ -5865,6 +5868,7 @@ public abstract class Component implements ImageObserver/*
 
 			// Update stacking order
 			if (parent != null && parent.peer != null) {
+				@SuppressWarnings("unused")
 				ContainerPeer parentContPeer = (ContainerPeer) parent.peer;
 				// if our parent is lightweight and we are not
 				// we should call restack on nearest heavyweight
@@ -5884,7 +5888,7 @@ public abstract class Component implements ImageObserver/*
 			// mixOnShowing();
 			// }
 
-			isAddNotifyComplete = true;
+//			isAddNotifyComplete = true;
 			if (visible && peer != null) {// BH added for SwingJS menu in Varna
 				if (/** @j2sNative peer.isDisposed && */
 				true)
@@ -5986,7 +5990,7 @@ public abstract class Component implements ImageObserver/*
 
 				// mixOnHiding(isLightweight);
 
-				isAddNotifyComplete = false;
+//				isAddNotifyComplete = false;
 				// Nullifying compoundShape means that the component has normal
 				// shape
 				// (or has no shape at all).

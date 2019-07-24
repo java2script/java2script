@@ -7,6 +7,7 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dialog;
 import java.awt.Dimension;
+import java.awt.Event;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -491,8 +492,6 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	@Override
   protected LightweightPeer createComponent(Component target) {
   	LightweightPeer peer = (LightweightPeer) getUI(target, true);
-  	if (JSUtil.debugging)
-  		System.out.println("JSToolkit creating UI-Peer for " +  target.getClass().getName() + ": " + peer.getClass().getName());
   	return peer;
   }
 
@@ -501,8 +500,6 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		ComponentUI ui = target.getUI();
 		if (ui == null)
 			return null;
-  	if (JSUtil.debugging)
-  		System.out.println("JSToolkit creating Dialog Peer for " +  target.getClass().getName() + ": " + target.getClass().getName());
 		return (DialogPeer) ((WindowPeer) ui).setFrame(target, true);
 	}
 
@@ -511,8 +508,6 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		ComponentUI ui = target.getUI();
 		if (ui == null)
 			return null;
-  	if (JSUtil.debugging)
-  		System.out.println("JSToolkit creating Frame Peer for " +  target.getClass().getName() + ": " + target.getClass().getName());
 		return (FramePeer) ((WindowPeer) ui).setFrame(target, true);
 	}
 
@@ -521,8 +516,6 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		ComponentUI ui = target.getUI();
 		if (ui == null)
 			return null;
-  	if (JSUtil.debugging)
-  		System.out.println("JSToolkit creating Frame Peer for " +  target.getClass().getName() + ": " + target.getClass().getName());
 		return (FramePeer) ((WindowPeer) ui).setFrame(target, true);
 	}
 
@@ -531,16 +524,14 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		ComponentUI ui = target.getUI();
 		if (ui == null)
 			return null;
-  	if (JSUtil.debugging)
-  		System.out.println("JSToolkit creating Window Peer for " +  target.getClass().getName() + ": " + target.getClass().getName());
 		return ((WindowPeer) ui).setFrame(target, false);
 	}
 
 	public static JSComponentUI getUI(Component c, boolean isQuiet) {
-		JSComponentUI ui = /** @2sNative !!c.getUI$ &&*/(JSComponentUI)((JComponent) c).getUI();
+		JSComponentUI ui = ((JComponent) c).秘getUI();
 		if (ui == null) {
 			((JComponent) c).updateUI();
-			ui = (JSComponentUI) ((JComponent) c).getUI();
+			ui = ((JComponent) c).秘getUI();
 		}
 		if (ui == null) {
 			String s = c.getClass().getName();
@@ -999,5 +990,10 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	public static boolean checkJ2SFlag(String flag) {
 	    return (/** @j2sNative J2S[flag] || */ false);
 	}
+
+    @Override
+	public int getMenuShortcutKeyMask()  {
+        return (isMac ? Event.META_MASK : Event.CTRL_MASK);
+    }
 
 }

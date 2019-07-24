@@ -1,4 +1,5 @@
-// j2sQueryExt.js
+// j2sQueryExt.js]
+// BH 7/13/2019 removing hook for J2S.unsetMouse
 // BH 7/21/2016 9:25:38 PM passing .pageX and  .pageY to jQuery event
 // BH 7/24/2015 7:24:30 AM renamed from JSmoljQueryExt.js
 // BH 3/11/2014 6:31:01 AM BH fix for MSIE not working locally
@@ -284,7 +285,6 @@
 		};
 		function handle_event( event) {
 			$(elems).each(function(){
-				self.J2S && (outside_event_name.indexOf("mouseup") >= 0 || outside_event_name.indexOf("touchend") >= 0) && J2S.setMouseOwner(null);
 				var elem = $(this);
 				if ( this !== event.target && !elem.has(event.target).length ) {
 					//BH: adds event to pass that along to our handler as well.

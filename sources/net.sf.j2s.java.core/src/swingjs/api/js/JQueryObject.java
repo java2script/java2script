@@ -4,6 +4,10 @@ import javajs.api.JSFunction;
 
 public interface JQueryObject {
 
+	public interface JQEvent {
+
+	}
+
 	public abstract void appendTo(Object obj);
 	public abstract JQueryObject append(Object span);
 
@@ -24,6 +28,7 @@ public interface JQueryObject {
 
 	public abstract DOMNode get(int i);
 
+	public abstract String attr(String key);
 	public abstract JQueryObject attr(String key, String value);
 	public abstract JQueryObject css(String key, String value);
 
@@ -52,7 +57,7 @@ public interface JQueryObject {
 	 */
 	public abstract JQueryObject find(String selector);
 
-	public abstract DOMNode parent();
+	public abstract JQueryObject parent();
 	public abstract void before(Object obj);
 	public abstract void after(Object div);
 
@@ -72,5 +77,29 @@ public interface JQueryObject {
 	 */
 	public abstract void empty();
 
+	public abstract DOMNode getElement();
 	
+	public interface J2SCB extends JQueryObject {
+
+		public abstract J2SCB j2sCB(Object options);
+
+		public abstract Object[] j2sCB(String method);
+		
+		public abstract Object[] j2sCB(String method, Object o);
+
+		public abstract Object[] j2sCB(String method, int i);
+
+		/**
+		 *
+		 * @param method
+		 * @param i
+		 * @param i2 ignored -- just to set the signature
+		 * @return
+		 */
+		public abstract int j2sCB(String OPTION, String name);
+		
+		
+	}
+	
+
 }

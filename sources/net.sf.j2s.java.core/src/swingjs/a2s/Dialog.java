@@ -1,5 +1,6 @@
 package swingjs.a2s;
 
+import java.awt.Font;
 import java.awt.GraphicsConfiguration;
 import java.awt.Window;
 
@@ -19,9 +20,15 @@ public class Dialog extends JDialog implements A2SContainer {
 		Util.setAWTWindowDefaults(this);
 	}
 
+	@Override
+	public Font getFont() {
+		if (font == null && parent == null)
+	    	font = new Font(Font.DIALOG, Font.PLAIN, 12);
+		return super.getFont();
+	}
+	
 	public Dialog(Frame owner) {
-		super(owner);
-		setListener();
+		this(owner, false);
 	}
 
 	public Dialog(java.awt.Frame owner, boolean modal) {

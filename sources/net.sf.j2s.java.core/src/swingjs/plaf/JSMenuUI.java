@@ -6,9 +6,7 @@ import java.beans.PropertyChangeEvent;
 
 import javax.swing.JComponent;
 import javax.swing.JMenu;
-import javax.swing.UIManager;
 
-import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 
 public class JSMenuUI extends JSMenuItemUI {
@@ -49,6 +47,10 @@ public class JSMenuUI extends JSMenuItemUI {
 		setCssFont(domNode, c.getFont());
 		DOMNode.setVisible(domNode, jc.isVisible());
 		setIconAndText("menu", currentIcon, currentGap, currentText);
+		setAlignments(jm, false);
+		updateCenteringNode();
+		if (isMenuBarMenu)
+			DOMNode.setStyles(textNode, "left", "0px");
 		return domNode;
 	}
 
@@ -73,9 +75,8 @@ public class JSMenuUI extends JSMenuItemUI {
 	private void rebuild() {
 		if (jc.getParent() != null) {
 			if (domNode != null && isMenuItem == jm.isTopLevelMenu()) {
-				reInit();
-				outerNode = null;
-				updateDOMNode();
+        outerNode = null;
+				reInit(true);
 				return;
 			}
 		}

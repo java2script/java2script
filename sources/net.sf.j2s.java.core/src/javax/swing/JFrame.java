@@ -245,25 +245,24 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 	 * This constructor sets the component's locale property to the value returned
 	 * by <code>JComponent.getDefaultLocale</code>.
 	 * 
-	 * @param title
-	 *          the title to be displayed in the frame's border. A
-	 *          <code>null</code> value is treated as an empty string, "".
-	 * @param gc
-	 *          the <code>GraphicsConfiguration</code> that is used to construct
-	 *          the new <code>JFrame</code> with; if <code>gc</code> is
-	 *          <code>null</code>, the system default
-	 *          <code>GraphicsConfiguration</code> is assumed
-	 * @exception IllegalArgumentException
-	 *              if <code>gc</code> is not from a screen device. This exception
-	 *              is always thrown when GraphicsEnvironment.isHeadless() returns
-	 *              true.
+	 * @param title the title to be displayed in the frame's border. A
+	 *              <code>null</code> value is treated as an empty string, "".
+	 * @param gc    the <code>GraphicsConfiguration</code> that is used to construct
+	 *              the new <code>JFrame</code> with; if <code>gc</code> is
+	 *              <code>null</code>, the system default
+	 *              <code>GraphicsConfiguration</code> is assumed
+	 * @exception IllegalArgumentException if <code>gc</code> is not from a screen
+	 *                                     device. This exception is always thrown
+	 *                                     when GraphicsEnvironment.isHeadless()
+	 *                                     returns true.
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 * @see JComponent#getDefaultLocale
 	 * @since 1.3
 	 * 
 	 */
 	public JFrame(String title, GraphicsConfiguration gc) {
-    	秘paintClass = 秘updateClass = /**@j2sNative C$ || */null;
+		秘paintClass = 秘updateClass = /** @j2sNative C$ || */
+				null;
 		initTitleGC(title, gc);
 		enableEvents(AWTEvent.KEY_EVENT_MASK | AWTEvent.WINDOW_EVENT_MASK);
 		setLocale(JComponent.getDefaultLocale());
@@ -272,17 +271,15 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 		setBackground(UIManager.getColor("control"));
 		setRootPaneCheckingEnabled(true);
 		if (JFrame.isDefaultLookAndFeelDecorated()) {
-			boolean supportsWindowDecorations = UIManager.getLookAndFeel()
-					.getSupportsWindowDecorations();
+			boolean supportsWindowDecorations = UIManager.getLookAndFeel().getSupportsWindowDecorations();
 			if (supportsWindowDecorations) {
 				setUndecorated(true);
 				getRootPane().setWindowDecorationStyle(JRootPane.FRAME);
 			}
 		}
-    updateUI();
-    addNotify(); // BH added; applet will not do this automatically
-		rootPane.addNotify(); // builds a peer for the root pane
-	}
+		updateUI();
+		秘frameAddNodify(rootPane);
+	}	
 
 	public JFrame(Object object, Object object2, Object object3, Object object4) {
 		// For SwingJS JInternalFrame constructor

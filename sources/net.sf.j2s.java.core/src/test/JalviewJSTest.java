@@ -26,9 +26,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -127,7 +125,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		}
 		
 	};
-	private Label status;
+	private JLabel status;
 	private JMenu menu, menu1, menu2;
 	private JCheckBoxMenuItem cb4m;
 	/**
@@ -169,6 +167,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		mb.add(menu2);
 		frame.setContentPane(getVisualPaneContent(menu, menu1, menu2));
 		frame.pack();
+		System.out.println(frame.getContentPane());
 		//frame.setBackground(Color.blue);
 		// note -- this blue color is never seen
 		JPopupMenu pmenu = new JPopupMenu();
@@ -196,6 +195,16 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 
 			@Override
 			public void mousePressed(MouseEvent e) {
+				System.out.println(frame.getContentPane().getSize());
+				frame.getContentPane().setBackground(Color.yellow);
+				System.out.println(frame.getContentPane());
+				System.out.println(frame.getContentPane().getComponent(0));
+				System.out.println(frame.getContentPane().getComponent(0).getBackground());
+				
+				((JPanel)frame.getContentPane()).setOpaque(true);
+				
+				invalidate();
+				repaint();
 				//System.out.println(e.getButton());
 				if (e.getButton() != MouseEvent.BUTTON3)
 					return;
@@ -262,13 +271,17 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		Font font = new Font("Verdana", Font.PLAIN, 12);
 
 		JPanel panel = new JPanel();
-		panel.setPreferredSize(new Dimension(400, 600));
+		panel.setName("top-blue");
+		panel.setPreferredSize(new Dimension(600, 600));
+		panel.setMaximumSize(new Dimension(600, 600));
 		panel.setOpaque(true);
+		panel.setBackground(Color.blue);
+
 		panel.setLayout(new BorderLayout());
-		panel.add(status = new Label("ok"), BorderLayout.SOUTH);
+		panel.add(status = new JLabel("ok"), BorderLayout.SOUTH);
 
 		JPanel firstColumn = new JPanel();
-		firstColumn.setLayout(new GridLayout(13, 1));
+		firstColumn.setLayout(new GridLayout(14, 1));
 		firstColumn.setBorder(new TitledBorder("column 1"));
 
 		JTextField t1 = new JTextField("testing");
@@ -292,9 +305,17 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		JLabel l2 = new JLabel(getImage("test2.png"));
 		l2.setText("leading left");
 		l2.setFont(font);
+		l2.setVerticalAlignment(SwingConstants.CENTER);
 		l2.setHorizontalTextPosition(SwingConstants.LEADING);
 		l2.setHorizontalAlignment(SwingConstants.LEFT);
 		l2.setBorder(new LineBorder(Color.red, 7));
+		
+		Label awtlabel = new Label("AWT");
+		awtlabel.setFont(font);
+		awtlabel.setAlignment(Label.LEFT);
+		firstColumn.add(awtlabel);
+		awtlabel.setBackground(Color.white);
+		
 		
 		JButton b1 = new JButton("right left");
 		b1.setIcon(getImage("test2.png"));
@@ -360,7 +381,8 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		firstColumn.add(rb3);
 		firstColumn.setBounds(100, 40, 200, 500);
 
-		JMenuItem cb3m = new JMenuItem("XXleading,left-to-rightXX");
+		JMenuItem cb3m = new JMenuItem("tooltiptest");//XXleading,left-to-rightXX");
+		cb3m.setToolTipText("testing");
 		cb3m.setFont(font);
 		cb3m.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 		cb3m.setHorizontalTextPosition(SwingConstants.LEADING);
@@ -464,12 +486,14 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 			@Override
 			public void menuSelected(MenuEvent e) {
 				JMenu m = (JMenu) e.getSource();
+				System.out.println("JalviewJSText remove/add failure!");
 				if (haveCb4m) {
 					m.remove(cb4m);
 				} else {
 					m.add(cb4m);
 					m.add(cb4m);
-					cb4m2 = new JMenuItem("testing");
+					if (cb4m2 == null)
+						cb4m2 = new JMenuItem("testing");
 					m.add(cb4m2);
 				}
 				haveCb4m = !haveCb4m;
@@ -510,6 +534,18 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 			}
 			
 		});
+
+	    addMenuActionAndAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false), testbtn,
+	    		new ActionListener()
+	    {
+	      @Override
+	      public void actionPerformed(ActionEvent e)
+	      {
+	    	  System.out.println("testbtn via ESC");
+	        frame.setBackground(Color.yellow);
+	      }
+	    });
+
 		menu.add(testbtn);
 
 		menu.add(mRight);
@@ -552,7 +588,7 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 				});
 			}
 		};
-		bh.setBorder(new LineBorder(Color.red, 14));
+		bh.setBorder(new LineBorder(Color.red, 10));
 		firstColumn.add(bh);
 		firstColumn.add(new JButton("add 'testbtn'") {
 			{
@@ -585,12 +621,19 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 			}
 		});
 		theTab.setLayout(null);
-		theTab.setBackground(Color.white);
+		theTab.setBackground(Color.GREEN);
 		theTab.add(firstColumn);
 		panel.add(theTab);
 
 		return panel;
 	}
+
+	  protected void addMenuActionAndAccelerator(KeyStroke keyStroke,
+	          JMenuItem menuItem, ActionListener actionListener)
+	  {
+	    menuItem.setAccelerator(keyStroke);
+	    menuItem.addActionListener(actionListener);
+	  }
 
 	private void addListeners(AbstractButton c) {
 		c.addActionListener(listener);

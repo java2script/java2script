@@ -146,8 +146,8 @@ public class DefaultTableCellHeaderRenderer extends DefaultTableCellRenderer
         return rv;
     }
 
-    @Override
-    public void paintComponent(Graphics g) {
+//    @Override
+//    public void paintComponent(Graphics g) {
 //        boolean b = DefaultLookup.getBoolean(this, ui,
 //                "TableHeader.rightAlignSortArrow", false);
 //        if (b && sortArrow != null) {
@@ -164,7 +164,7 @@ public class DefaultTableCellHeaderRenderer extends DefaultTableCellRenderer
 //        } else {
 //            super.paintComponent(g);
 //        }
-    }
+//    }
 
 //    private Point computeIconPosition(Graphics g) {
 //        FontMetrics fontMetrics = g.getFontMetrics();

@@ -34,6 +34,8 @@ import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.peer.ComponentPeer;
+import java.awt.peer.ContainerPeer;
 
 import javax.swing.border.Border;
 import javax.swing.plaf.UIResource;
@@ -1490,4 +1492,12 @@ public class JScrollPane extends JComponent implements ScrollPaneConstants
 //            getAccessibleRelationSet().add(controlledBy);
 //        }
 //    }
+    
+    @Override
+	public Insets getInsets() {
+        ComponentPeer peer = this.peer;
+        Insets i = ((ContainerPeer)peer).getInsets();
+        return (i == null ? NULL_INSETS : i);
+    }
+
 }

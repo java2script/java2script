@@ -1,4 +1,4 @@
-﻿// j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
+// j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
 // J2S._version set to "3.2.4.07" 2019.01.04; 2019.02.06
 
@@ -1505,9 +1505,10 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 				return true;
 			}
 			var target = ev.target["data-keycomponent"];
-if (!target) {
-	  return;
-}
+// BH 2019 - need this for the focus manager to pick up accelerators and other mapped items
+//if (!target) {
+//	  return;
+//}
 if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	ev.stopPropagation();
 	ev.preventDefault();
@@ -1920,6 +1921,10 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			J2S.unsetMouse(who);
 			return;
 		}
+		return J2S._getEventXY(ev, offsets, getMouseModifiers(ev, id));
+	}
+
+	J2S._getEventXY = function(ev, offsets, mods) {
 		var x, y;
 		var oe = ev.originalEvent;
 		// drag-drop jQuery event is missing pageX
@@ -1937,10 +1942,9 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			x = ev.pageX - offsets.left;
 			y = ev.pageY - offsets.top;
 		}
-		return (x == undefined ? null : [ Math.round(x), Math.round(y),
-				getMouseModifiers(ev, id) ]);
+		return (x == undefined ? null : [ Math.round(x), Math.round(y), mods]);
 	}
-
+	
 	J2S._gestureUpdate = function(who, ev) {
 		ev.stopPropagation();
 		ev.preventDefault();
@@ -2905,6 +2909,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				}, 502);
 				return false;
 			} else {
+// if (ev.ev0)
+//				setTimeout(function(){document.body.dispatchEvent(ev.ev0.originalEvent)},50)
 			}
 		};
 
@@ -2927,31 +2933,31 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	J2S.setWindowZIndex = function(node, z) {
 		// on frame show or mouse-down, create a stack of frames and sort by
 		// z-order
-		if (!node)
+		if (!node || node.ui && node.ui.embeddedNode)
 			return 
 
-		var zbase = J2S._z.rear + 2000;
 		var a = [];
 		var zmin = 1e10
 		var zmax = -1e10
-		var $windows = $(".swingjs-window");
+		var $windows = $("body > div > .swingjs-window").not("body > .swingjs-tooltip :first-child");
 		$windows.each(function(c, b) {
-			if (b != node)
-				a.push([ +b.style.zIndex, b ]);
+				a.push([ (b == node ? z : +b.style.zIndex), b ]);
 		});
 		a.sort(function(a, b) {
 			return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0
 		})
-		var z0 = zbase;
-		var z0 = zbase;
-		for (var i = 0; i < a.length; i++) {
-			if (!a[i][1].ui || !a[i][1].ui.embeddingNode)
-			  a[i][1].style.zIndex = zbase;
+		var zbase = z = J2S._z.rear + 2000;
+		for (var i = 0, i1 = a.length; i < i1; i++) {
+			var n = a[i][1];
+			if (n == node)
+				z = zbase;
+			if (!n.ui || !n.ui.embeddingNode) {
+			  n.style.zIndex = zbase;
+			  if (n.ui && n.ui.outerNode && !n.ui.embeddingNode)
+				  n.ui.outerNode.style.zIndex = zbase;
+			}
 			zbase += 1000;
 		}
-		z = (z > 0 ? zbase : z0);
-		if (!node.ui || !node.ui.embeddingNode) // could be popupMenu, with no ui
-			node.style.zIndex = z;
 		node.style.position = "absolute";
 		if (J2S._checkLoading) 
 			System.out.println("setting z-index to " + z + " for " + node.id);

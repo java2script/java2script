@@ -40,6 +40,7 @@ import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.DimensionUIResource;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.plaf.InsetsUIResource;
+import javax.swing.text.DefaultEditorKit;
 
 //import java.awt.Component;
 //import java.awt.Dimension;
@@ -400,8 +401,8 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		"controlShadow", "#808080", /* Shadow color for controls */
 		"controlDkShadow", "#000000", /* Dark shadow color for controls */
 		"scrollbar", "#E0E0E0", /* Scrollbar background (usually the "track") */
-		"info", "#FFFFE1", /* ??? */
-		"infoText", "#000000" /* ??? */
+		"info", "#FFFFE1", /* ToolTip -- light yellow */
+		"infoText", "#000000" /* ToolTip */
 		};
 
 		loadSystemColors(table, defaultSystemColors, isNativeLookAndFeel());
@@ -530,12 +531,11 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		Object sansSerifPlain12 = new FontUIResource(Font.SANS_SERIF, Font.PLAIN,
 				12);
 		Object monospacedPlain12 = new FontUIResource(Font.MONOSPACED, Font.PLAIN, 12);
-		// Object dialogBold12 = new SwingLazyValue(
-		// "javax.swing.plaf.FontUIResource",
-		// null,
-		// new Object[] {Font.DIALOG, fontBold, twelve});
-		//
-
+		Object sansSerifPlain18 = new SwingLazyValue(
+		 "javax.swing.plaf.FontUIResource",
+		 null,
+		 new Object[] {Font.SANS_SERIF, Font.PLAIN, Integer.valueOf(18)});
+	
 		// *** Shared Colors
 		ColorUIResource red = new ColorUIResource(Color.red);
 		ColorUIResource black = new ColorUIResource(Color.black);
@@ -671,6 +671,61 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				return new DefaultListCellRenderer.UIResource();
 			}
 		};
+
+		
+        Object multilineInputMap = new UIDefaults.LazyInputMap(new Object[] {
+//                "control C", DefaultEditorKit.copyAction,
+                "control V", DefaultEditorKit.pasteAction,
+                "control X", DefaultEditorKit.cutAction,
+//                     "COPY", DefaultEditorKit.copyAction,
+                    "PASTE", DefaultEditorKit.pasteAction,
+                      "CUT", DefaultEditorKit.cutAction,
+//           "control INSERT", DefaultEditorKit.copyAction,
+             "shift INSERT", DefaultEditorKit.pasteAction,
+             "shift DELETE", DefaultEditorKit.cutAction,
+               "shift LEFT", DefaultEditorKit.selectionBackwardAction,
+              "shift RIGHT", DefaultEditorKit.selectionForwardAction,
+             "control LEFT", DefaultEditorKit.previousWordAction,
+            "control RIGHT", DefaultEditorKit.nextWordAction,
+       "control shift LEFT", DefaultEditorKit.selectionPreviousWordAction,
+      "control shift RIGHT", DefaultEditorKit.selectionNextWordAction,
+                "control A", DefaultEditorKit.selectAllAction,
+//       "control BACK_SLASH", "unselect"/*DefaultEditorKit.unselectAction*/,
+                     "HOME", DefaultEditorKit.beginLineAction,
+                      "END", DefaultEditorKit.endLineAction,
+               "shift HOME", DefaultEditorKit.selectionBeginLineAction,
+                "shift END", DefaultEditorKit.selectionEndLineAction,
+             "control HOME", DefaultEditorKit.beginAction,
+              "control END", DefaultEditorKit.endAction,
+       "control shift HOME", DefaultEditorKit.selectionBeginAction,
+        "control shift END", DefaultEditorKit.selectionEndAction,
+                       "UP", DefaultEditorKit.upAction,
+                     "DOWN", DefaultEditorKit.downAction,
+               "BACK_SPACE", DefaultEditorKit.deletePrevCharAction,
+         "shift BACK_SPACE", DefaultEditorKit.deletePrevCharAction,
+                   "ctrl H", DefaultEditorKit.deletePrevCharAction,
+                   "DELETE", DefaultEditorKit.deleteNextCharAction,
+              "ctrl DELETE", DefaultEditorKit.deleteNextWordAction,
+          "ctrl BACK_SPACE", DefaultEditorKit.deletePrevWordAction,
+                    "RIGHT", DefaultEditorKit.forwardAction,
+                     "LEFT", DefaultEditorKit.backwardAction,
+                 "KP_RIGHT", DefaultEditorKit.forwardAction,
+                  "KP_LEFT", DefaultEditorKit.backwardAction,
+                  "PAGE_UP", DefaultEditorKit.pageUpAction,
+                "PAGE_DOWN", DefaultEditorKit.pageDownAction,
+//            "shift PAGE_UP", "selection-page-up",
+//          "shift PAGE_DOWN", "selection-page-down",
+//       "ctrl shift PAGE_UP", "selection-page-left",
+//     "ctrl shift PAGE_DOWN", "selection-page-right",
+                 "shift UP", DefaultEditorKit.selectionUpAction,
+               "shift DOWN", DefaultEditorKit.selectionDownAction,
+                    "ENTER", DefaultEditorKit.insertBreakAction,
+                      "TAB", DefaultEditorKit.insertTabAction,
+//                "control T", "next-link-action",
+//          "control shift T", "previous-link-action",
+//            "control SPACE", "activate-link-action",
+//          "control shift O", "toggle-componentOrientation"/*DefaultEditorKit.toggleComponentOrientation*/
+  });
 
 		//
 		// // *** Menus value objects
@@ -902,7 +957,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				 new UIDefaults.LazyInputMap(new Object[] {
 				 "SPACE", "pressed",
 				 "released SPACE", "released",
-				 "RETURN", "pressed"
+				 "ENTER", "pressed" // Was mistakenly "RETURN" in Java
 				 }),
 				//
 				// "CheckBox.font", dialogPlain12,
@@ -954,15 +1009,15 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				oneThousand,
 				"ComboBox.isEnterSelectablePopup",
 				Boolean.FALSE,
-				// "ComboBox.ancestorInputMap",
-				// new UIDefaults.LazyInputMap(new Object[] {
-				// "ESCAPE", "hidePopup",
-				// "PAGE_UP", "pageUpPassThrough",
-				// "PAGE_DOWN", "pageDownPassThrough",
-				// "HOME", "homePassThrough",
-				// "END", "endPassThrough",
-				// "ENTER", "enterPressed"
-				// }),
+				 "ComboBox.ancestorInputMap",
+				 new UIDefaults.LazyInputMap(new Object[] {
+				 "ESCAPE", "hidePopup",
+				 "PAGE_UP", "pageUpPassThrough",
+				 "PAGE_DOWN", "pageDownPassThrough",
+				 "HOME", "homePassThrough",
+				 "END", "endPassThrough",
+				 "ENTER", "enterPressed"
+				 }),
 				//
 				// *** FileChooser
 
@@ -1637,7 +1692,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				"Table.dropLineShortColor",
 				black,
 				"Table.gridColor",
-				gray, // grid line color
+				controlShadow,//gray, // grid line color
 				"Table.focusCellBackground",
 				window,
 				"Table.focusCellForeground",
@@ -1912,6 +1967,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// "TextPane.border", marginBorder,
 				"TextPane.margin",
 				editorMargin,
+	            "TextPane.focusInputMap", multilineInputMap,
 
 				"EditorPane.font",
 				serifPlain12,
@@ -1927,6 +1983,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 				// "EditorPane.border", marginBorder,
 				"EditorPane.margin",
 				editorMargin,
+	            "EditorPane.focusInputMap", multilineInputMap,
 				//
 				// "html.pendingImage", SwingUtilities2.makeIcon(getClass(),
 				// HTML5LookAndFeel.class,

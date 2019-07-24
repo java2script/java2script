@@ -687,7 +687,9 @@ public abstract class JComponent extends Container {
 				if (jc != null && jc.isVisible()) {
 					jc.getBounds(tmpRect);
 					boolean isContentPane = jc.getRootPane().getContentPane() == jc;
-					Rectangle vr = (jc instanceof JTable ? jc.getVisibleRect() : tmpRect);
+					Rectangle vr = (
+							//jc instanceof JTable ? jc.getVisibleRect() : 
+								tmpRect);
 					JSGraphics2D jsg = (JSGraphics2D) (Object) g.create(tmpRect.x, 
 							(isContentPane ? 0 : tmpRect.y), vr.width, vr.height); 
 					jsg.setColor(jc.getForeground());
@@ -705,9 +707,9 @@ public abstract class JComponent extends Container {
 							// }
 							// if (!printing) {
 							jc.秘checkBackgroundPainted(jsg, true);
-							jc.秘setIsRepaint(false);
+							秘setIsRepaint(false);
 							jc.秘paint((Graphics) (Object) jsg);
-							jc.秘setIsRepaint(true);
+							秘setIsRepaint(true);
 							jc.秘checkBackgroundPainted(秘getJSGraphic2D((Graphics) (Object) jsg), false);
 							// } else {
 							// if (!getFlag(IS_PRINTING_ALL)) {
@@ -2663,12 +2665,9 @@ public abstract class JComponent extends Container {
 
 		shouldProcessKey = KeyboardState.shouldProcess(e);
 
-		if (e.isConsumed()) {
-			return;
-		}
-
-		if (shouldProcessKey
-				&& processKeyBindings(e, e.getID() == KeyEvent.KEY_PRESSED)) {
+		if (!e.isConsumed() && (shouldProcessKey
+				&& processKeyBindings(e, e.getID() == KeyEvent.KEY_PRESSED)
+				|| 秘getUI().processKeyEvent(e))) {
 			e.consume();
 		}
 	}
@@ -2707,8 +2706,12 @@ public abstract class JComponent extends Container {
 			Object binding = map.get(ks);
 			Action action = (binding == null) ? null : am.get(binding);
 			if (action != null) {
-				return SwingUtilities.notifyAction(action, ks, e, this,
+				//System.out.println("JComponent action: " + action.getValue(Action.NAME));
+				this.秘keyAction = action; 
+				boolean ret = SwingUtilities.notifyAction(action, ks, e, this,
 						e.getModifiers());
+				this.秘keyAction = null;
+				return ret;
 			}
 		}
 		return false;

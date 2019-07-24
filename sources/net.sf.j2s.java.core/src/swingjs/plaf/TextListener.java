@@ -32,6 +32,7 @@ import java.awt.Point;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -43,11 +44,11 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 
-import swingjs.JSKeyEvent;
+import swingjs.JSMouse;
 //import swingjs.api.JSMinimalAbstractDocument;
 import swingjs.api.js.DOMNode;
 
-public class TextListener implements FocusListener, ChangeListener,
+public class TextListener implements KeyListener, FocusListener, ChangeListener,
 		PropertyChangeListener, DocumentListener, CaretListener {
 
 	private JTextComponent txtComp;
@@ -116,11 +117,11 @@ public class TextListener implements FocusListener, ChangeListener,
 	 * @param jQueryEvent
 	 * @return false to indicate "handled and so don't pass on to window"
 	 */
-	boolean handleJSTextEvent(JSTextUI ui, int eventType, Object jqevent) {
+	void handleJSTextEvent(JSTextUI ui, int eventType, Object jqevent) {
 		DOMNode activeElement =  (/** @j2sNative document.activeElement || */null);
 		if (activeElement != ui.domNode) // tabbed out of this object
-			return JSComponentUI.HANDLED;
-		eventType = JSKeyEvent.fixEventType(jqevent, eventType);
+			return;
+		eventType = JSMouse.fixEventType(jqevent, eventType);
 		int keyCode = /** @j2sNative jqevent.keyCode || */0;
 		Point markDot = ui.getNewCaretPosition(eventType, keyCode);
 		int mark = markDot.x;
@@ -159,32 +160,48 @@ public class TextListener implements FocusListener, ChangeListener,
 		lastKeyEvent = eventType;
 		if (setCaret)
 			ui.setJavaMarkAndDot(markDot);
-		return JSComponentUI.HANDLED;
 	}
 
 	@SuppressWarnings("unused")
 	@Override
 	public void insertUpdate(DocumentEvent e) {
-		if (!working) {
-			ui.setJSTextDelayed();
-		}
+		if (!working)
+			ui.setJSText();
 	}
 
 	@Override
 	public void removeUpdate(DocumentEvent e) {
 		if (!working)
-			ui.setJSTextDelayed();
+			ui.setJSText();
 	}
 
 	@Override
 	public void changedUpdate(DocumentEvent e) {
 		if (!working)
-			ui.setJSTextDelayed();
+			ui.setJSText();
 	}
 
 	@Override
 	public void caretUpdate(CaretEvent e) {
 		ui.caretUpdatedByProgram(e);
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		// NOTE: Any System.out here will cause problems with the cursor
+		//System.out.println("TextListener " + e);  
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		// NOTE: Any System.out here will cause problems with the cursor
+		//System.out.println("TextListener " + e);
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		// NOTE: Any System.out here will cause problems with the cursor
+//		System.out.println("TextListener " + e);
 	}
 
 }

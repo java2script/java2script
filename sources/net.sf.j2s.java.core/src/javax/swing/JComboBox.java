@@ -50,6 +50,8 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.plaf.ComboBoxUI;
 
+import swingjs.plaf.JSComboBoxUI;
+
 //
 
 /**
@@ -186,6 +188,13 @@ implements ItemSelectable,ListDataListener,ActionListener {
 
     // Flag to ensure the we don't get multiple ActionEvents on item selection.
     private boolean selectingItem = false;
+    
+	/**
+	 * SwingJS tweak: Lazy creation of editor, so we need to know if the editor has
+	 * been explicitly set null using setEditor(null) or not.
+	 * 
+	 */
+	private boolean 秘isEditorCleared;
 
     /**
      * Creates a <code>JComboBox</code> that takes its items from an
@@ -496,7 +505,7 @@ implements ItemSelectable,ListDataListener,ActionListener {
      */
     public void setEditor(ComboBoxEditor anEditor) {
         ComboBoxEditor oldEditor = editor;
-
+        秘isEditorCleared = (editor == null);
         if ( editor != null ) {
             editor.removeActionListener(this);
         }
@@ -514,6 +523,8 @@ implements ItemSelectable,ListDataListener,ActionListener {
      * @return the <code>ComboBoxEditor</code> that displays the selected item
      */
     public ComboBoxEditor getEditor() {
+    	if (editor == null && !this.秘isEditorCleared)
+    		setEditor(((JSComboBoxUI) ui).createEditor());
         return editor;
     }
 
@@ -575,7 +586,7 @@ implements ItemSelectable,ListDataListener,ActionListener {
             // Must toggle the state of this flag since this method
             // call may result in ListDataEvents being fired.
             selectingItem = true;
-            if (_trigger || 秘isAWT()) {
+            if (秘trigger || 秘isAWT()) {
             	dataModel.setSelectedItem(objectToSelect);
             } else {
             	((DefaultComboBoxModel)dataModel).秘setSelectedItemQuiet(objectToSelect);
@@ -1035,7 +1046,7 @@ implements ItemSelectable,ListDataListener,ActionListener {
 
     private Action action;
     private PropertyChangeListener actionPropertyChangeListener;
-	protected boolean _trigger;
+	protected boolean 秘trigger;
 
     /**
      * Sets the <code>Action</code> for the <code>ActionEvent</code> source.
@@ -1440,7 +1451,7 @@ implements ItemSelectable,ListDataListener,ActionListener {
         }
         super.processKeyEvent(e);
     }
-
+	
     /**
      * Sets the object that translates a keyboard character into a list
      * selection. Typically, the first selection with a matching first
@@ -1605,8 +1616,8 @@ implements ItemSelectable,ListDataListener,ActionListener {
         ",selectedItemReminder=" + selectedItemReminderString;
     }
 
-	public void _setTrigger(boolean b) {
-		_trigger = b;
+	public void 秘setTrigger(boolean b) {
+		秘trigger = b; 
 	}
 
 

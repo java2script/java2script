@@ -28,20 +28,19 @@
 
 package javax.swing;
 
-import java.util.EventObject;
-
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
+import java.util.EventObject;
+
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.TreeCellEditor;
 
 import swingjs.plaf.CellHolder;
-import swingjs.plaf.JSComponentUI;
 
 /**
  * The default editor for table and tree cells.
@@ -381,7 +380,7 @@ public class DefaultCellEditor extends AbstractCellEditor implements TableCellEd
 		 * @return true
 		 */
 		public boolean stopCellEditing() {
-			System.out.println("DefaultCellEditor stop");
+			//System.out.println("DefaultCellEditor stop");
 			fireEditingStopped();
 			return true;
 		}
@@ -390,7 +389,7 @@ public class DefaultCellEditor extends AbstractCellEditor implements TableCellEd
 		 * Cancels editing. This method calls <code>fireEditingCanceled</code>.
 		 */
 		public void cancelCellEditing() {
-			System.out.println("DefaultCellEditor cancel");
+			//System.out.println("DefaultCellEditor cancel");
 			fireEditingCanceled();
 		}
 
@@ -402,7 +401,7 @@ public class DefaultCellEditor extends AbstractCellEditor implements TableCellEd
 		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			System.out.println("DefaultCellEditor action Performed");
+			//System.out.println("DefaultCellEditor action Performed");
 			DefaultCellEditor.this.stopCellEditing();
 		}
 

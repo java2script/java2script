@@ -34,7 +34,7 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 	protected int z;
 
   protected int defaultWidth = 400;
-  protected int defaultHeight = 400;
+  protected int defaultHeight = 400; 
 	
 
 	protected boolean isFrame, isDialog;
@@ -46,12 +46,14 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 //	private Object dialogBlocker;
 
 	protected boolean isPopup;
-
+	
 	protected DOMNode modalNode;
 
 	/*
 	 * Not Lightweight; an independent space with RootPane, LayeredPane,
-	 * ContentPane, (optional) MenuBar, and GlassPane
+	 * ContentPane, (optional) MenuBar, and GlassPane.
+	 * 
+	 * Part of the required initializations of all Dialog, Frame, and Window
 	 * 
 	 * 
 	 * Used by JWindow, JFrame, JDialog, and JPopupMenu
@@ -100,32 +102,31 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 	
 	protected void setWindowClass() { 
 		addClass(domNode, "swingjs-window");
-		setZOrder(z);
+		setZ(z);
 	}
 
 	@Override
 	public FontMetrics getFontMetrics(Font font) {
 		if (!font.equals(this.font))
-			this.window.setFont(this.font = font);
+			window.setFont(this.font = font);
 		return graphics.getFontMetrics(font);
 	}
 
 
 	@Override
 	public void toFront() {
-		if (debugging)
-			System.out.println("window to front for " + id);
+		if (jc.秘isDesktop())
+			return;
 		z = J2S.setWindowZIndex(domNode, Integer.MAX_VALUE);
-		DOMNode.setPositionAbsolute(domNode);
+		setZ(z);
 		if (modalNode != null)
 			DOMNode.setZ(modalNode, z - 1);
 	}
 
 	@Override
 	public void toBack() {
-		if (debugging)
-			System.out.println("window to back for " + id);
 		z = J2S.setWindowZIndex(domNode, Integer.MIN_VALUE);
+		setZ(z);
 		if (modalNode != null)
 			DOMNode.setZ(modalNode, z - 1);		
 	}
@@ -196,7 +197,7 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 
 	@Override
 	public void dispose() {
-		System.out.println("window disposed");
+		//accelNode.System.out.println("window disposed");
 		J2S.unsetMouse(domNode);
 		if (modalNode != null)
 			DOMNode.dispose(modalNode);
@@ -239,9 +240,6 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 			setChildVisibilities(c);
 		}
 		JSComponentUI ui = (JSComponentUI) jc.ui;
-//		ui.isTainted = true;
-//		ui.domNode = null;
-//		ui.updateDOMNode();
 		if (jc.isVisible())
 			ui.setVisible(true);
 	}
@@ -251,13 +249,15 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 		return zeroInsets; 
 	}
 
+	
 	@Override
 	public void setVisible(boolean b) {
-		if (!isPopup)
+		if (!isPopup) {
 			hideMenusAndToolTip();
+		}
 		super.setVisible(b);
+		toFront();
 	}
-
 
 
 	@Override

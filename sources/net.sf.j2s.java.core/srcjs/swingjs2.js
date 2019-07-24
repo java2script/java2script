@@ -773,7 +773,7 @@ try {
 	};
 }
 
-var invalidSelectors = "";
+var j2sInvalidSelectors = "";
 
 function Sizzle( selector, context, results, seed ) {
 	var match, elem, m, nodeType,
@@ -867,14 +867,18 @@ function Sizzle( selector, context, results, seed ) {
 			if ( newSelector ) {
 				try {
 					 // SwingJS addition
-					 if (invalidSelectors.indexOf(";" + newSelector + ";") < 0) {					
+					var mode = (newSelector.indexOf(":") >= 0 ? ":" 
+							: newSelector.indexOf(".not(") >= 0 ? ".not" 
+							: newSelector.indexOf("!=") >= 0 ? "!=" : 0);
+					 if (mode && j2sInvalidSelectors.indexOf(mode) < 0) {			
 						push.apply( results,
 							newContext.querySelectorAll( newSelector )
 						);
 						return results;
 					 }
 				} catch(qsaError) {
-					invalidSelectors += ";" + newSelector + ";";
+					if (mode)
+						j2sInvalidSelectors += mode;
 				} finally {
 					if ( !old ) {
 						context.removeAttribute("id");
@@ -10366,7 +10370,8 @@ if ( typeof noGlobal === strundefined ) {
 return jQuery;
 
 }));
-// j2sQueryExt.js
+// j2sQueryExt.js]
+// BH 7/13/2019 removing hook for J2S.unsetMouse
 // BH 7/21/2016 9:25:38 PM passing .pageX and  .pageY to jQuery event
 // BH 7/24/2015 7:24:30 AM renamed from JSmoljQueryExt.js
 // BH 3/11/2014 6:31:01 AM BH fix for MSIE not working locally
@@ -10652,7 +10657,6 @@ return jQuery;
 		};
 		function handle_event( event) {
 			$(elems).each(function(){
-				self.J2S && (outside_event_name.indexOf("mouseup") >= 0 || outside_event_name.indexOf("touchend") >= 0) && J2S.setMouseOwner(null);
 				var elem = $(this);
 				if ( this !== event.target && !elem.has(event.target).length ) {
 					//BH: adds event to pass that along to our handler as well.
@@ -10663,7 +10667,7 @@ return jQuery;
 	};
 	// note - click is for dragging the resizer
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
-﻿// j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
+// j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
 // J2S._version set to "3.2.4.07" 2019.01.04; 2019.02.06
 
@@ -12170,9 +12174,10 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 				return true;
 			}
 			var target = ev.target["data-keycomponent"];
-if (!target) {
-	  return;
-}
+// BH 2019 - need this for the focus manager to pick up accelerators and other mapped items
+//if (!target) {
+//	  return;
+//}
 if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	ev.stopPropagation();
 	ev.preventDefault();
@@ -12585,6 +12590,10 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			J2S.unsetMouse(who);
 			return;
 		}
+		return J2S._getEventXY(ev, offsets, getMouseModifiers(ev, id));
+	}
+
+	J2S._getEventXY = function(ev, offsets, mods) {
 		var x, y;
 		var oe = ev.originalEvent;
 		// drag-drop jQuery event is missing pageX
@@ -12602,10 +12611,9 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			x = ev.pageX - offsets.left;
 			y = ev.pageY - offsets.top;
 		}
-		return (x == undefined ? null : [ Math.round(x), Math.round(y),
-				getMouseModifiers(ev, id) ]);
+		return (x == undefined ? null : [ Math.round(x), Math.round(y), mods]);
 	}
-
+	
 	J2S._gestureUpdate = function(who, ev) {
 		ev.stopPropagation();
 		ev.preventDefault();
@@ -13570,6 +13578,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				}, 502);
 				return false;
 			} else {
+// if (ev.ev0)
+//				setTimeout(function(){document.body.dispatchEvent(ev.ev0.originalEvent)},50)
 			}
 		};
 
@@ -13592,31 +13602,31 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	J2S.setWindowZIndex = function(node, z) {
 		// on frame show or mouse-down, create a stack of frames and sort by
 		// z-order
-		if (!node)
+		if (!node || node.ui && node.ui.embeddedNode)
 			return 
 
-		var zbase = J2S._z.rear + 2000;
 		var a = [];
 		var zmin = 1e10
 		var zmax = -1e10
-		var $windows = $(".swingjs-window");
+		var $windows = $("body > div > .swingjs-window").not("body > .swingjs-tooltip :first-child");
 		$windows.each(function(c, b) {
-			if (b != node)
-				a.push([ +b.style.zIndex, b ]);
+				a.push([ (b == node ? z : +b.style.zIndex), b ]);
 		});
 		a.sort(function(a, b) {
 			return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0
 		})
-		var z0 = zbase;
-		var z0 = zbase;
-		for (var i = 0; i < a.length; i++) {
-			if (!a[i][1].ui || !a[i][1].ui.embeddingNode)
-			  a[i][1].style.zIndex = zbase;
+		var zbase = z = J2S._z.rear + 2000;
+		for (var i = 0, i1 = a.length; i < i1; i++) {
+			var n = a[i][1];
+			if (n == node)
+				z = zbase;
+			if (!n.ui || !n.ui.embeddingNode) {
+			  n.style.zIndex = zbase;
+			  if (n.ui && n.ui.outerNode && !n.ui.embeddingNode)
+				  n.ui.outerNode.style.zIndex = zbase;
+			}
 			zbase += 1000;
 		}
-		z = (z > 0 ? zbase : z0);
-		if (!node.ui || !node.ui.embeddingNode) // could be popupMenu, with no ui
-			node.style.zIndex = z;
 		node.style.position = "absolute";
 		if (J2S._checkLoading) 
 			System.out.println("setting z-index to " + z + " for " + node.id);
@@ -13721,6 +13731,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // TODO: still a lot of references to window[...]
 
+// BH 2019.07.09 adds Java String.trim()
 // BH 2019.05.21 changes Clazz.isClassDefined to Clazz._isClassDefined for compression
 // BH 2019.05.13 fixes for Math.getExponent, Math.IEEERemainder, Array.equals(Object)
 // BH 2019.02.16 fixes typo in Integer.parseInt(s,radix)
@@ -16838,8 +16849,17 @@ Sys.exit$I = Sys.exit$;
 Sys.out = new Clazz._O ();
 Sys.out.__CLASS_NAME__ = "java.io.PrintStream";
 
+Sys.setOut$java_io_PrintStream = function(ps) {
+  Sys.out = ps;
+};
+
+Sys.setErr$java_io_PrintStream = function(ps) {
+  Sys.err = ps;
+};
+
 
 Sys.out.print = Sys.out.print$O = Sys.out.print$Z = Sys.out.print$I = Sys.out.println$J = Sys.out.print$S = Sys.out.print$C = Sys.out.print = function (s) { 
+
   Con.consoleOutput (s);
 };
 
@@ -18240,10 +18260,19 @@ sp.substring$I = sp.substring$I$I = sp.subSequence$I$I = sp.substring;
 sp.replace$C$C = sp.replace$CharSequence$CharSequence = sp.replace$;
 sp.toUpperCase$ = sp.toUpperCase;
 sp.toLowerCase$ = sp.toLowerCase;
-sp.trim$ = sp.trim;
 sp.toLowerCase$java_util_Locale = sp.toLocaleLowerCase ? function(loc) {loc = loc.toString(); var s = this.valueOf(); return (loc ? s.toLocaleLowerCase(loc.replace(/_/g,'-')) : s.toLocaleLowerCase()) } : sp.toLowerCase;
 sp.toUpperCase$java_util_Locale = sp.toLocaleUpperCase ? function(loc) {loc = loc.toString(); var s = this.valueOf(); return (loc ? s.toLocaleUpperCase(loc.replace(/_/g,'-')) : s.toLocaleUpperCase()) } : sp.toUpperCase;
 sp.length$ = function() {return this.length};
+sp.trim$ = function() {
+  var s = this.trim();
+  var j;
+  if (s == "" || s.charCodeAt(j = s.length - 1) > 32 && s.charCodeAt(0) > 32) return s;
+  var i = 0;
+  while (i <= j && s.charCodeAt(i) <= 32)i++;
+  while (j > i && s.charCodeAt(j) <= 32)j--;
+  return s.substring(i, ++j);
+};
+
 
 //sp.chars$ = CharSequence.prototype.chars$;
 //sp.codePoints$ = CharSequence.prototype.codePoints$;

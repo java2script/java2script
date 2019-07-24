@@ -1,7 +1,6 @@
 package swingjs.plaf;
 
 import java.awt.Dimension;
-import java.awt.Insets;
 import java.awt.Point;
 import java.beans.PropertyChangeEvent;
 
@@ -21,6 +20,10 @@ import swingjs.api.js.DOMNode;
  */
 public class JSTextAreaUI extends JSTextViewUI {
 
+	public JSTextAreaUI() {
+		// make sure standard HTML5 event is passed even if the Java event is consumed.
+		setDoPropagate();
+	}
 	@Override
 	public DOMNode updateDOMNode() {
 
@@ -100,12 +103,6 @@ public class JSTextAreaUI extends JSTextViewUI {
 			d.height = sh;
 	}
 
-	private Insets myInsets = new Insets(0, 0, 0, 0); 
-	@Override
-	public Insets getInsets() {
-		return myInsets;
-	}
-	
 //	@Override
 //	protected Dimension getCSSAdjustment(boolean addingCSS) {
 //		return (

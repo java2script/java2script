@@ -167,5 +167,5 @@ public class JToolTip extends JComponent {
         ",tipText=" + tipTextString;
     }
 
-
+    
 }

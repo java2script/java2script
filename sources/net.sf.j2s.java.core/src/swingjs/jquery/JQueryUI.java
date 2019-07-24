@@ -2,18 +2,18 @@ package swingjs.jquery;
 
 /**
  * This "class" simply checks for jQuery.ui having been loaded and loads it if it has not been loaded.
- * Used by swingjs.plaf.JSSliderUI and swingjs.plaf.JSPopupMenuUI
+ * Used by swingjs.plaf.JSSliderUI JSPopupMenuUI JSComboBoxUI
  * 
  * Note that if you change one of the JavaScript files in this directory, 
  * the transpiler will not transfer it to the site directory unless you touch this java file.
  * Just add and remove a space before the package command.
  * 
- * @author Bob Hanson  
+ * @author Bob Hanson
  *  
  *
  */  
 public class JQueryUI {
-	static { 
+	static {
 	  
 		/**      
 		 * 

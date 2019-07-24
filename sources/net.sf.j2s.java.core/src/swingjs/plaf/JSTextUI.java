@@ -46,6 +46,7 @@ import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.CaretEvent;
@@ -125,21 +126,24 @@ import swingjs.api.js.DOMNode;
  * @author Timothy Prinzing
  * @author Shannon Hickey (drag and drop)
  */
-public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFactory
-																											// {
-	protected static final EditorKit defaultKit = new DefaultEditorKit();
+public abstract class JSTextUI extends JSLightweightUI {
+	
+	protected static EditorKit defaultKit = new DefaultEditorKit();
+	
 	
 	static final Point markDot = new Point();
 
 	transient JTextComponent editor;
+
 	protected boolean editable = true;
+	protected boolean isEditorPane;
+
+
     protected RootView rootView = new RootView();
 
     TextListener textListener; // referred to in j2sApplet.js
 
 	protected boolean useRootView = false; // TextArea only?
-
-
 	
 	@Override
 	public DOMNode updateDOMNode() {
@@ -157,14 +161,15 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	 * 
 	 * 
 	 */
-	@Override
+	@Override  
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
+		
 		//String type = /** @j2sNative jQueryEvent.type || */null;
 		//System.out.println("JSTextUI handlejs "+type + " " + eventType);
 		if (JSToolkit.isMouseEvent(eventType)) {
 			return NOT_HANDLED;
 		}
-		Boolean b = checkAllowKey(jQueryEvent);
+		Boolean b = checkAllowEvent(jQueryEvent);
 		if (b != null)
 			return b.booleanValue();
 		int keyCode = /** @j2sNative jQueryEvent.keyCode || */
@@ -189,13 +194,11 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 			case KeyEvent.VK_SHIFT:
 			case KeyEvent.VK_CONTROL:
 				ret = HANDLED;
+				break;
 			}
 			eventType = keyEvent.getID();
 			break;
 		}
-
-		if (ret != HANDLED)
-			ret = textListener.handleJSTextEvent(this, eventType, jQueryEvent);
 		if (keyEvent != null) {
 			editor.dispatchEvent(keyEvent);
 			if (keyEvent.isConsumed()) {
@@ -204,13 +207,19 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 				 * 
 				 * 			jQueryEvent.preventDefault(); jQueryEvent.stopPropagation();
 				 */
-				ret = HANDLED;
+				return HANDLED;
 			}
 		}
-		return ret;
+		if (ret != HANDLED)
+			handleJSTextEvent(eventType, jQueryEvent, keyCode, false);
+		return HANDLED;
 	}
 
-	
+	protected void handleJSTextEvent(int eventType, Object jQueryEvent, int keyCode, boolean trigger) {
+		textListener.handleJSTextEvent(this, eventType, jQueryEvent);
+	}
+
+
 	/**
 	 * Handle stopPropagation and preventDefault here.
 	 * 
@@ -240,7 +249,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	protected void installDefaults() {
 		String prefix = getPropertyPrefix();
 		Font f = editor.getFont();
-		if ((f == null && !editor.秘isAWT()) || (f instanceof UIResource)) {
+		if ((f == null && !isAWT) || (f instanceof UIResource)) {
 			editor.setFont(UIManager.getFont(prefix + ".font"));
 		}
 
@@ -293,7 +302,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		if ((dfg == null) || (dfg instanceof UIResource)) {
 			editor.setDisabledTextColor(UIManager.getColor(prefix + ".inactiveForeground"));
 		}
-		dfg =  UIManager.getColor(editor.秘isAWT() ? "control" : prefix + ".inactiveBackground");
+		dfg =  UIManager.getColor(isAWT ? "control" : prefix + ".inactiveBackground");
 		if (dfg != null)
 			inactiveBackground = dfg;
 
@@ -417,8 +426,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	protected void installKeyboardActions() {
 		// backward compatibility support... keymaps for the UI
 		// are now installed in the more friendly input map.
-		// editor.setKeymap(createKeymap());
-
+		
+		
 		InputMap km = getInputMap();
 		if (km != null) {
 			SwingUtilities.replaceUIInputMap(editor, JComponent.WHEN_FOCUSED, km);
@@ -437,16 +446,20 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	 */
 	InputMap getInputMap() {
 		InputMap map = new InputMapUIResource();
-
-		// InputMap shared =
-		// (InputMap)DefaultLookup.get(editor, this,
-		// getPropertyPrefix() + ".focusInputMap");
-		// if (shared != null) {
-		// map.setParent(shared);
-		// }
+//
+//        InputMap shared =
+//            (InputMap)DefaultLookup.get(editor, this,
+//            getPropertyPrefix() + ".focusInputMap");
+//        if (shared != null) {
+//            map.setParent(shared);
+//        }
 		return map;
 	}
 
+//	protected InputMap getSharedMap() {
+//		return null;
+//	}
+//
 	/**
 	 * Fetch an action map to use.
 	 */
@@ -470,13 +483,16 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	 */
 	ActionMap createActionMap() {
 		ActionMap map = new ActionMapUIResource();
-		Action[] actions = editor.getActions();//defaultKit.getActions(); // SwingJS was editor.getEditorKit().getActions()
-		// System.out.println("building map for UI: " + getPropertyPrefix());
+		Action[] actions = this.editor.getActions();
+		// BH: The problem with the above is that for generic JTextComponent,
+		// that method just returns us here, but UI has not been created yet, so it bails.
+		if (actions == null)
+			actions = getEditorKit(editor).getActions();
 		int n = (actions == null ? 0 : actions.length);
 		for (int i = 0; i < n; i++) {
 			Action a = actions[i];
 			map.put(a.getValue(Action.NAME), a);
-			// System.out.println("  " + a.getValue(Action.NAME));
+			//System.out.println("JSTextUI " + jc.getUIClassID() + ".createAction: " + a.getValue(Action.NAME));
 		}
 		// map.put(TransferHandler.getCutAction().getValue(Action.NAME),
 		// TransferHandler.getCutAction());
@@ -607,6 +623,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		TextListener listener = textListener;
 //		b.addMouseListener(listener);
 //		b.addMouseMotionListener(listener);
+		b.addKeyListener(textListener);
 		b.addFocusListener(listener);
 		b.addPropertyChangeListener(listener);
 		b.addCaretListener(listener);
@@ -616,6 +633,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 
 	protected void uninstallListeners(JTextComponent b) {
 		TextListener listener = textListener;
+		b.removeKeyListener(textListener);
 //		b.removeMouseListener(listener);
 //		b.removeMouseMotionListener(listener);
 		b.removeFocusListener(listener);
@@ -1083,30 +1101,16 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		String val = getJSTextValue();
 		if (val.equals(fixText(currentText)))
 			return false;
-//		String oldval = currentText;
-//			currentText = val;
-		// System.out.println("from HTML: " + DOMNode.getAttr(domNode, "innerHTML"));
-		// System.out.println("to editor: " + val.replace('\n', '.'));
+//		 System.out.println("editor: " + editor.getText().replace('\n', '.'));
+//		 System.out.println(("from HTML: " + DOMNode.getAttr(domNode, "innerHTML")).replace('\n', '.'));
+//		 System.out.println("to editor: " + val.replace('\n', '.'));
 		editor.setTextFromUI(val);
 		setCurrentText();
-//			getComponentText();
-		// TODO: why this?
-		// editor.firePropertyChange("text", oldval, val);
 		return true;
 	}
 
-	void setJSTextDelayed() {
+	void setJSText() {
 		updateDOMNode();
-//		JTextComponent ed = editor;
-//		Document doc = ed.getDocument();
-//		if (isAWT) {
-////			((AbstractDocument) doc).resetAWTScroll();
-//		} else {
-////			int docpt = e.getOffset() + e.getLength();
-////			ed.getCaret().setDot(docpt);
-////			ui.updateJSCursor("insert");
-//		}
-
 	}
 
 	
@@ -1139,7 +1143,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	 * @param why
 	 */
 	public void updateJSCursor(String why) {	
-		if (editor.getDocument() == null || editor.getText().length() == 0)
+		if (domNode == null || editor.getDocument() == null || editor.getText().length() == 0)
 			return;
 		if (isAWT && why != "focus")
 			return;
@@ -1228,14 +1232,17 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	 * editable.
 	 * 
 	 * @param jQueryEvent
-	 * @return null to continue processing, CONSUMED(false) to stop propagation, UNHANLDED(true) to ignore
+	 * @return null to continue processing, CONSUMED(false) to stop propagation,
+	 *         UNHANLDED(true) to ignore
 	 */
 	@SuppressWarnings("unused")
-	protected Boolean checkAllowKey(Object jQueryEvent) {
-		boolean b = HANDLED;
+	protected Boolean checkAllowEvent(Object jQueryEvent) {
+		boolean b = NOT_CONSUMED; // jQuery event will propagate
 		boolean checkEditable = false;
-		String type = /** @j2sNative jQueryEvent.type || */"";
+		String type = /** @j2sNative jQueryEvent.type || */
+				"";
 		// note: all options are set in JSComponentUI.bindJSKeyEvents
+
 		switch (type) {
 		case "drop":
 			// accept if editable
@@ -1243,14 +1250,26 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 			break;
 		case "focusout":
 		case "dragover":
-			b = NOT_CONSUMED;
-			//System.out.println("jstextvui " + (/** @j2sNative jQueryEvent.type || */"") + editable);
+			// System.out.println("jstextvui " + (/** @j2sNative jQueryEvent.type || */"") +
+			// editable);
 			break;
 		case "keydown":
 		case "keypress":
 		case "keyup":
+			boolean isCTRL = /** @j2sNative jQueryEvent.ctrlKey || */
+					false;
 			switch (/** @j2sNative jQueryEvent.keyCode || */
 			0) {
+			case KeyEvent.VK_V: // paste
+				if (!isCTRL)
+					return null;
+				if (type == "keydown")
+					handleFutureInsert(false);
+				else if (type == "keyup")
+					handleFutureInsert(true);
+				return NOT_CONSUMED;
+			case KeyEvent.VK_C: // copy
+				return (isCTRL ? NOT_CONSUMED : null); // allow standard browser CTRL-C, with no Java-Event processing
 			case KeyEvent.VK_TAB:
 				b = (type == "keydown" ? handleTab(jQueryEvent) : CONSUMED);
 				break;
@@ -1265,11 +1284,8 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 			case KeyEvent.VK_KP_LEFT:
 			case KeyEvent.VK_KP_RIGHT:
 				// accept only if neither ALT nor CTRL is down
-				if (/** @j2sNative !jQueryEvent.altKey && !jQueryEvent.ctrlKey || */
-				false)
-					return null;
-				b = CONSUMED;
-				break;
+				return (/** @j2sNative jQueryEvent.altKey || */
+				isCTRL ? CONSUMED : null);
 			default:
 				// accept all others only if editable
 				checkEditable = true;
@@ -1281,12 +1297,14 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 		}
 		if (checkEditable) {
 			// NEVER allowing editing of HTMLDocument
-			if (editor.isEditable() 
-					&& !(editor.getDocument() instanceof HTMLDocument))
+			if (editor.isEditable() && !(editor.getDocument() instanceof HTMLDocument))
 				return null;
 			b = CONSUMED; // this will cancel the jQuery event
 		}
-		return Boolean.valueOf(b);
+		return b;
+	}
+
+	protected void handleFutureInsert(boolean trigger) {
 	}
 
 	protected boolean handleTab(Object jQueryEvent) {
@@ -1305,11 +1323,6 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
     public int viewToModel(JTextComponent t, Point pt,
             Position.Bias[] biasReturn) {
     	
-//    	/**
-//    	 * @j2sNative console.log("-----");
-//    	 * console.log(document.getSelection());
-//    	 * 
-//    	 */
     	// from DefaultCursor mouse event
     	pt.x = Integer.MAX_VALUE;
     	getJSMarkAndDot(pt, 0);
@@ -1326,20 +1339,19 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 			c.setDot(mark);
 		if (c.getDot() != dot)
 			c.moveDot(dot);
-		//editor.caretEvent.fire();
 	}
 
 	/**
 	 * get the new Java cursor position after a key event
 	 * 
 	 * @param pt
-	 * @return a new dot (y) anfd, if they are changed, a new mark (x), or if not
+	 * @return a new dot (y) and, if they are changed, a new mark (x), or if not
 	 *         changed, x will be Integer.MIN_VALUE
 	 */
 	Point getNewCaretPosition(int eventType, int keyCode) {
-		Point pt = JSTextUI.markDot;
+		Point pt = markDot;
 		pt.x = 0;
-		getJSMarkAndDot(pt, keyCode);
+		getJSMarkAndDot(pt, keyCode); 
 		
 		int mark = pt.x, dot = pt.y; 
 
@@ -1497,162 +1509,121 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	// }
 	// }
 
-	//
-	// /**
-	// * Gets the allocation to give the root View. Due
-	// * to an unfortunate set of historical events this
-	// * method is inappropriately named. The Rectangle
-	// * returned has nothing to do with visibility.
-	// * The component must have a non-zero positive size for
-	// * this translation to be computed.
-	// *
-	// * @return the bounding box for the root view
-	// */
-	// protected Rectangle getVisibleEditorRect() {
-	// Rectangle alloc = editor.getBounds();
-	// if ((alloc.width > 0) && (alloc.height > 0)) {
-	// alloc.x = alloc.y = 0;
-	// Insets insets = editor.getInsets();
-	// alloc.x += insets.left;
-	// alloc.y += insets.top;
-	// alloc.width -= insets.left + insets.right;
-	// alloc.height -= insets.top + insets.bottom;
-	// return alloc;
-	// }
-	// return null;
-	// }
-	//
-	// /**
-	// * Converts the given location in the model to a place in
-	// * the view coordinate system.
-	// * The component must have a non-zero positive size for
-	// * this translation to be computed.
-	// *
-	// * @param tc the text component for which this UI is installed
-	// * @param pos the local location in the model to translate >= 0
-	// * @return the coordinates as a rectangle, null if the model is not painted
-	// * @exception BadLocationException if the given position does not
-	// * represent a valid location in the associated document
-	// * @see TextUI#modelToView
-	// */
-	// public Rectangle modelToView(JTextComponent tc, int pos) throws
-	// BadLocationException {
-	// return modelToView(tc, pos, Position.Bias.Forward);
-	// }
-	//
-	// /**
-	// * Converts the given location in the model to a place in
-	// * the view coordinate system.
-	// * The component must have a non-zero positive size for
-	// * this translation to be computed.
-	// *
-	// * @param tc the text component for which this UI is installed
-	// * @param pos the local location in the model to translate >= 0
-	// * @return the coordinates as a rectangle, null if the model is not painted
-	// * @exception BadLocationException if the given position does not
-	// * represent a valid location in the associated document
-	// * @see TextUI#modelToView
-	// */
-	// public Rectangle modelToView(JTextComponent tc, int pos, Position.Bias
-	// bias) throws BadLocationException {
-	// Document doc = editor.getDocument();
-	// if (doc instanceof AbstractDocument) {
-	// ((AbstractDocument)doc).readLock();
-	// }
-	// try {
-	// Rectangle alloc = getVisibleEditorRect();
-	// if (alloc != null) {
-	// rootView.setSize(alloc.width, alloc.height);
-	// Shape s = rootView.modelToView(pos, alloc, bias);
-	// if (s != null) {
-	// return s.getBounds();
-	// }
-	// }
-	// } finally {
-	// if (doc instanceof AbstractDocument) {
-	// ((AbstractDocument)doc).readUnlock();
-	// }
-	// }
-	// return null;
-	// }
-	//
-	// /**
-	// * Converts the given place in the view coordinate system
-	// * to the nearest representative location in the model.
-	// * The component must have a non-zero positive size for
-	// * this translation to be computed.
-	// *
-	// * @param tc the text component for which this UI is installed
-	// * @param pt the location in the view to translate. This
-	// * should be in the same coordinate system as the mouse events.
-	// * @return the offset from the start of the document >= 0,
-	// * -1 if not painted
-	// * @see TextUI#viewToModel
-	// */
-	// public int viewToModel(JTextComponent tc, Point pt) {
-	// return viewToModel(tc, pt, discardBias);
-	// }
-	//
-	// /**
-	// * Converts the given place in the view coordinate system
-	// * to the nearest representative location in the model.
-	// * The component must have a non-zero positive size for
-	// * this translation to be computed.
-	// *
-	// * @param tc the text component for which this UI is installed
-	// * @param pt the location in the view to translate. This
-	// * should be in the same coordinate system as the mouse events.
-	// * @return the offset from the start of the document >= 0,
-	// * -1 if the component doesn't yet have a positive size.
-	// * @see TextUI#viewToModel
-	// */
-	// public int viewToModel(JTextComponent tc, Point pt,
-	// Position.Bias[] biasReturn) {
-	// int offs = -1;
-	// Document doc = editor.getDocument();
-	// if (doc instanceof AbstractDocument) {
-	// ((AbstractDocument)doc).readLock();
-	// }
-	// try {
-	// Rectangle alloc = getVisibleEditorRect();
-	// if (alloc != null) {
-	// rootView.setSize(alloc.width, alloc.height);
-	// offs = rootView.viewToModel(pt.x, pt.y, alloc, biasReturn);
-	// }
-	// } finally {
-	// if (doc instanceof AbstractDocument) {
-	// ((AbstractDocument)doc).readUnlock();
-	// }
-	// }
-	// return offs;
-	// }
-
-	// /**
-	// * {@inheritDoc}
-	// */
-	// public int getNextVisualPositionFrom(JTextComponent t, int pos,
-	// Position.Bias b, int direction, Position.Bias[] biasRet)
-	// throws BadLocationException{
-	// Document doc = editor.getDocument();
-	// if (doc instanceof AbstractDocument) {
-	// ((AbstractDocument)doc).readLock();
-	// }
-	// try {
-	// if (painted) {
-	// Rectangle alloc = getVisibleEditorRect();
-	// if (alloc != null) {
-	// rootView.setSize(alloc.width, alloc.height);
-	// }
-	// return rootView.getNextVisualPositionFrom(pos, b, alloc, direction,
-	// biasRet);
-	// }
-	// } finally {
-	// if (doc instanceof AbstractDocument) {
-	// ((AbstractDocument)doc).readUnlock();
-	// }
-	// }
-	// return -1;
-	// }
+	/**
+	 * Gets the allocation to give the root View. Due to an unfortunate set of
+	 * historical events this method is inappropriately named. The Rectangle
+	 * returned has nothing to do with visibility. The component must have a
+	 * non-zero positive size for this translation to be computed.
+	 *
+	 * @return the bounding box for the root view
+	 */
+	protected Rectangle getVisibleEditorRect() {
+		Rectangle alloc = editor.getBounds();
+		if ((alloc.width > 0) && (alloc.height > 0)) {
+			alloc.x = alloc.y = 0;
+			Insets insets = editor.getInsets();
+			alloc.x += insets.left;
+			alloc.y += insets.top;
+			alloc.width -= insets.left + insets.right;
+			alloc.height -= insets.top + insets.bottom;
+			return alloc;
+		}
+		return null;
+	}
+	
+	 /**
+	 * Converts the given location in the model to a place in
+	 * the view coordinate system.
+	 * The component must have a non-zero positive size for
+	 * this translation to be computed.
+	 *
+	 * @param tc the text component for which this UI is installed
+	 * @param pos the local location in the model to translate >= 0
+	 * @return the coordinates as a rectangle, null if the model is not painted
+	 * @exception BadLocationException if the given position does not
+	 * represent a valid location in the associated document
+	 * @see TextUI#modelToView
+	 */
+	 public Rectangle modelToView(JTextComponent tc, int pos) throws
+	 BadLocationException {
+	 return modelToView(tc, pos, Position.Bias.Forward);
+	 }
+	
+	 /**
+	 * Converts the given location in the model to a place in
+	 * the view coordinate system.
+	 * The component must have a non-zero positive size for
+	 * this translation to be computed.
+	 *
+	 * @param tc the text component for which this UI is installed
+	 * @param pos the local location in the model to translate >= 0
+	 * @return the coordinates as a rectangle, null if the model is not painted
+	 * @exception BadLocationException if the given position does not
+	 * represent a valid location in the associated document
+	 * @see TextUI#modelToView
+	 */
+	 public Rectangle modelToView(JTextComponent tc, int pos, Position.Bias
+	 bias) throws BadLocationException {
+//	 Document doc = editor.getDocument();
+//	 if (doc instanceof AbstractDocument) {
+//	 ((AbstractDocument)doc).readLock();
+//	 }
+//	 try {
+	 Rectangle alloc = getVisibleEditorRect();
+	 return alloc;
+//	 if (alloc != null) {
+//	 rootView.setSize(alloc.width, alloc.height);
+//	 Shape s = rootView.modelToView(pos, alloc, bias);
+//	 if (s != null) {
+//	 return s.getBounds();
+//	 }
+//	 }
+//	 } finally {
+//	 if (doc instanceof AbstractDocument) {
+//	 ((AbstractDocument)doc).readUnlock();
+//	 }
+//	 }
+//	 return null;
+	 }
+	
+	 /**
+	 * Converts the given place in the view coordinate system
+	 * to the nearest representative location in the model.
+	 * The component must have a non-zero positive size for
+	 * this translation to be computed.
+	 *
+	 * @param tc the text component for which this UI is installed
+	 * @param pt the location in the view to translate. This
+	 * should be in the same coordinate system as the mouse events.
+	 * @return the offset from the start of the document >= 0,
+	 * -1 if not painted
+	 * @see TextUI#viewToModel
+	 */
+	 public int viewToModel(JTextComponent tc, Point pt) {
+	 return viewToModel(tc, pt, discardBias);
+	 }
+	
+	 /**
+	 * {@inheritDoc}
+	 */
+	 public int getNextVisualPositionFrom(JTextComponent t, int pos,
+	 Position.Bias b, int direction, Position.Bias[] biasRet)
+	 throws BadLocationException{
+		 
+		 int dot = editor.getCaretPosition();
+		 
+//		 System.out.println("next " + dot + " " + direction);
+		 switch (direction) {
+		 case SwingConstants.SOUTH:
+		 case SwingConstants.EAST:
+			 int len = editor.getDocument().getLength() - 1;
+			 return (dot >= len ? len : ++dot);
+		 case SwingConstants.NORTH:
+		 case SwingConstants.WEST:
+			 return (dot == 0 ? 0 : --dot);
+		 }
+	 return -1;
+	 }
 	//
 	// /**
 	// * Causes the portion of the view responsible for the
@@ -1812,7 +1783,7 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	// protected static final TransferHandler defaultTransferHandler = new
 	// TextTransferHandler();
 	// protected final DragListener dragListener = getDragListener();
-	// protected static final Position.Bias[] discardBias = new Position.Bias[1];
+	protected static final Position.Bias[] discardBias = new Position.Bias[1];
 	// protected DefaultCaret dropCaret;
 
 	// /**
@@ -3167,56 +3138,59 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	// return new BasicHighlighter();
 	// }
 	//
-	// /**
-	// * Fetches the name of the keymap that will be installed/used
-	// * by default for this UI. This is implemented to create a
-	// * name based upon the classname. The name is the the name
-	// * of the class with the package prefix removed.
-	// *
-	// * @return the name
-	// */
-	// protected String getKeymapName() {
-	// String nm = getClass().getName();
-	// int index = nm.lastIndexOf('.');
-	// if (index >= 0) {
-	// nm = nm.substring(index+1, nm.length());
-	// }
-	// return nm;
-	// }
-	//
-	// /**
-	// * Creates the keymap to use for the text component, and installs
-	// * any necessary bindings into it. By default, the keymap is
-	// * shared between all instances of this type of TextUI. The
-	// * keymap has the name defined by the getKeymapName method. If the
-	// * keymap is not found, then DEFAULT_KEYMAP from JTextComponent is used.
-	// * <p>
-	// * The set of bindings used to create the keymap is fetched
-	// * from the UIManager using a key formed by combining the
-	// * {@link #getPropertyPrefix} method
-	// * and the string <code>.keyBindings</code>. The type is expected
-	// * to be <code>JTextComponent.KeyBinding[]</code>.
-	// *
-	// * @return the keymap
-	// * @see #getKeymapName
-	// * @see javax.swing.text.JTextComponent
-	// */
-	// protected Keymap createKeymap() {
-	// String nm = getKeymapName();
-	// Keymap map = JTextComponent.getKeymap(nm);
-	// if (map == null) {
-	// Keymap parent = JTextComponent.getKeymap(JTextComponent.DEFAULT_KEYMAP);
-	// map = JTextComponent.addKeymap(nm, parent);
-	// String prefix = getPropertyPrefix();
-	// Object o = DefaultLookup.get(editor, this,
-	// prefix + ".keyBindings");
-	// if ((o != null) && (o instanceof JTextComponent.KeyBinding[])) {
-	// JTextComponent.KeyBinding[] bindings = (JTextComponent.KeyBinding[]) o;
-	// JTextComponent.loadKeymap(map, bindings, getComponent().getActions());
-	// }
-	// }
-	// return map;
-	// }
+	
+	
+	
+//	 /**
+//	 * Fetches the name of the keymap that will be installed/used
+//	 * by default for this UI. This is implemented to create a
+//	 * name based upon the classname. The name is the the name
+//	 * of the class with the package prefix removed.
+//	 *
+//	 * @return the name
+//	 */
+//	 protected String getKeymapName() {
+//	 String nm = getClass().getName(); 
+//	 int index = nm.lastIndexOf('.');
+//	 if (index >= 0) {
+//	 nm = nm.substring(index+1, nm.length());
+//	 }
+//	 return nm;
+//	 }
+//	
+//	 /**
+//	 * Creates the keymap to use for the text component, and installs
+//	 * any necessary bindings into it. By default, the keymap is
+//	 * shared between all instances of this type of TextUI. The
+//	 * keymap has the name defined by the getKeymapName method. If the
+//	 * keymap is not found, then DEFAULT_KEYMAP from JTextComponent is used.
+//	 * <p>
+//	 * The set of bindings used to create the keymap is fetched
+//	 * from the UIManager using a key formed by combining the
+//	 * {@link #getPropertyPrefix} method
+//	 * and the string <code>.keyBindings</code>. The type is expected
+//	 * to be <code>JTextComponent.KeyBinding[]</code>.
+//	 *
+//	 * @return the keymap
+//	 * @see #getKeymapName
+//	 * @see javax.swing.text.JTextComponent
+//	 */
+//	 protected Keymap createKeymap() {
+//	 String nm = getKeymapName();
+//	 Keymap map = JTextComponent.getKeymap(nm);
+//	 if (map == null) {
+//	 Keymap parent = JTextComponent.getKeymap(JTextComponent.DEFAULT_KEYMAP);
+//	 map = JTextComponent.addKeymap(nm, parent);
+//	 String prefix = getPropertyPrefix();
+//	 Object o = DefaultLookup.get(editor, this,
+//	 prefix + ".keyBindings");
+//	 if ((o != null) && (o instanceof JTextComponent.KeyBinding[])) {
+//	 JTextComponent.KeyBinding[] bindings = (JTextComponent.KeyBinding[]) o;
+//	 JTextComponent.loadKeymap(map, bindings, getComponent().getActions());
+//	 }
+//	 }
+//	 return map;
+//	 }
 	//
 	// /**
 	// * This method gets called when a bound property is changed
@@ -3555,6 +3529,17 @@ public abstract class JSTextUI extends JSLightweightUI {// implements {ViewFacto
 	@Override
 	public boolean isFocusable() {
 		return true;
+	}
+
+
+	public void action(String what, int data) {
+	}
+
+
+	public void setCaretFromJS() {
+		Point pt = new Point();
+		getJSMarkAndDot(pt, 0);
+		setJavaMarkAndDot(pt);
 	}
 
 }

@@ -28,17 +28,11 @@
 
 package java.awt.event;
 
-import java.awt.Event;
 import java.awt.Component;
-//import java.awt.GraphicsEnvironment;
+import java.awt.Event;
 import java.awt.Toolkit;
-//import java.util.logging.Logger;
-//import java.util.logging.Level;
 
-import javax.swing.JComponent;
-
-import swingjs.JSToolkit;
-import swingjs.plaf.JSComponentUI;
+import swingjs.JSMouse;
 
 /**
  * The root event class for all component-level input events.
@@ -354,11 +348,7 @@ public abstract class InputEvent extends ComponentEvent {
 	 */
 	@Override
 	public void consume() {
-		JSComponentUI ui = (JSComponentUI) ((JComponent) source).getUI();
-		if (bdata != null && ui != null && ui.buttonListener == null 
-				&& ((/** @j2sNative !this.bdata.doPropagate || */false))) {
-			JSToolkit.consumeEvent(this);
-		}
+		JSMouse.checkConsume(this);
 		consumed = true;
 	}
 

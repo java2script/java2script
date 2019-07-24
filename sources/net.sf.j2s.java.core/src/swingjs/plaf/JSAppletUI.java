@@ -24,18 +24,22 @@ public class JSAppletUI extends JSLightweightUI {
         null, null, "Panel.font");
 	}
 
+	@Override
 	public void setVisible(boolean b) {
 		super.setVisible(b);
-		if (b) {
-			setComponentFocus();
-		}
+// No - frames accept focus when made visible, but applets do not, 
+		// since they are visible from the beginning.
+//		if (b) {
+//			setComponentFocus();
+//		}
 //		System.out.println("JSAppletUI visible " + b);
 	}
 	
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
-		Object value = e.getNewValue();
-		String prop = e.getPropertyName();
+// nothing to do here?
+//		Object value = e.getNewValue();
+//		String prop = e.getPropertyName();
 //		System.out.println("JSAPpletUI prop val " + prop + " " + value);
 	}
 

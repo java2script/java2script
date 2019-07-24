@@ -12,7 +12,10 @@ public interface Test_Interface {
 		}
 	}
 	
-	
+	public static int doTest(int i) {
+		return i + 1;
+	}
+		
 	public interface Test_Interface_inner {
 		// This mus be wrapped, or C$ changes definitions
 	}

@@ -48,6 +48,8 @@ import sun.java2d.StateTrackableDelegate;
 
 public class SunWritableRaster extends WritableRaster {
 	private static DataStealer stealer;
+	
+	public int[] 秘pix;
 
 	private static DataStealer getStealer() {
 		return (stealer == null ? stealer = new DataStealer() {

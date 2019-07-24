@@ -1,5 +1,6 @@
 Notes
 =====
+updated 7/19/19 -- clarification that AWT and Swing classes are supported directly
 updated 5/13/19 -- Mandarin U+79D8 reserved character; Missing Math methods; int and long
 updated 5/10/19 -- adds a section on static issues in multi-(duplicate)-applet pages
 updated 1/4/19 -- nio
@@ -11,12 +12,15 @@ updated 3/7/17 -- overloading of JSplitPane.setDividerLocation
 updated 3/2/17 -- more indication of classes not implemented (KeyListener)
 
 =============================================================================
-SwingJS and JDK 1.6+
+SwingJS and OpenJDK 8+
 =============================================================================
 
 SwingJS implements a wide range of the Java language in JavaScript. The base
-version for this implementation is Java 1.6. However, some classes were
-implemented using older source code, and there are some missing methods.  
+version for this implementation is OpenJDK8. some classes are implemented using 
+older source code, and there are some missing methods. For the most part, this is 
+no real problem. You can add or modify any java class just be adding it as source
+in your project. Or (preferably) you can contact me, and I can get it into the 
+distribution. Or (even more preferably) you can do that via a patch submission. 
 
 =================
 DESIGN PHILOSOPHY
@@ -222,14 +226,11 @@ that we also wanted it to be possible to quickly adapt these applets to JavaScri
  
 The solution turned out to be simple: Write a package (a2s) that recreates the interface for 
 non-Swing components as subclasses of Swing components. Thus, a2s.Button subclasses javax.swing.JButton
-but also accepts all of the methods of java.awt.Button. It's not perfect, and the ultimate 
-solution is probably to just change java.awt.Xxxx itself to subclass javax.swing.JXxxx.
-In any case, it works -- mostly. By adding the a2s package to a project and changing the include
-statements to target a2s instead of java.awt, non-Swing applets can be easily converted to JavaScript.
-Certainly there will be issues such as missing methods. It is all a work in progress.
-
-All AWT components now subclass a2s components, which in turn subclass JComponet.
-
+but also accepts all of the methods of java.awt.Button. This works amazingly well, with a few
+special adaptations to the core javax.swing to be "AWT-aware." All AWT components now subclass 
+a2s components, which in turn subclass JComponents. So no changes in code are necessary. We have
+successfully transpiled over 500 applets using this strategy. (Kind of surprising, actually, that
+the original Java developers did not see that option. But we have a hindsight advantage here.)
 
 
 UNIMPLEMENTED CLASSES BY DESIGN
@@ -243,11 +244,11 @@ serialization
 TODO LIST FOR UNIMPLEMENTED CLASSES
 ===================================
 
-JEditorPane (minimal implementation) - DONE 12/2018
+JEditorPane (minimal implementation) - DONE 12/2018; some issues still
 JSplitPane - DONE 8/2018
 JTabbedPane - DONE 10/2018
 
-JTree 
+JTree - not done; no particular issues expected, just have had other things to do first.
 
 
 MINOR ISSUES--required some rewriting/refactoring by Bob and Udo  
@@ -265,7 +266,7 @@ java.awt.Color
 native methods
 javax.swing.JFileDialog
 key focus
-LookAndFeel
+LookAndFeel and UI Classes
 System.exit(0) does not stop all processes
 list cell renderers must be JComponents
 myClass.getField not implemented
@@ -286,7 +287,6 @@ MAJOR ISSUES--to be resolved by implementers
 ============================================
 
 fonts
-specific AWT components not implemented
 threads
 modal dialogs
 image loading
@@ -306,11 +306,7 @@ Table row/col sorter needs checking after removal of java.text.Collator referenc
 
 I had to move all of SunHints class to RenderingHints, or the 
 two classes could not be loaded. Shouldn't be a problem, I think. The sun classes are
-not accessible anyway.
-
-We now have jsjava.lang.Thread and jsjava.lang.ThreadGroup. These should be useful in
-figuring out what we want to do with those. ThreadGroup in particular is interesting,
-as it is used to key for AppContexts. We will see if that use useful or not.
+not accessible to developers in Java anyway, since they are generally package private.
 
 ========================================================================== 
 
@@ -323,7 +319,8 @@ accessibility
 -------------
 
 All Accessibility handling has been commented out to save the download footprint.
-This removes the need for sun.misc.SharedSecrets
+This removes the need for sun.misc.SharedSecrets as well. 
+Nothing says we could not implement accessibility. We just didn't.
 
 
 security
@@ -334,6 +331,8 @@ Thus, Java security checking is no longer necessary, and
 java.security.AccessController has been simplified to work without
 native security checking.
 
+Note that private methods in a class are REALLY private. 
+
 
 serialization
 -------------
@@ -342,11 +341,11 @@ All serialization has been removed. It was never very useful for Swing anyway,
 because one needs exactly the same Java version to save and restore serialized objects.
 
 
-keyboard accelerators
----------------------
+keyboard accelerators and mnemonics
+-----------------------------------
 
-JMenu.setAccelerator() and JMenuItem.setAccelerator() hae not been implemented in SwingJS. 
-Thus, menus cannot be opened just be typing CTRL-C or similar shortcuts.
+This work was completed in the spring of 2019. Note that in a browser, some 
+key strokes, particularly CTRL-keys, are not available. Bummer.
 
 
 MINOR ISSUES--required some rewriting/refactoring by Bob and Udo  
@@ -380,7 +379,8 @@ just get bigger.
 						}
 
 
-Because "-1" in JavaScript is not 0xFFFFFFFF one must take care to not compare a negative number with a 32-bit mask;
+Because "-1" in JavaScript is not 0xFFFFFFFF one must take care to not compare a negative 
+number with a 32-bit mask. So
 
 (b & 0xFF000000) == 0xFF000000
 
@@ -391,7 +391,7 @@ while (-1 & 0xFF000000) is, strangely enough, -16777216, and, in fact,
 
 because -16777216 is not 4278190080.
 
-One must compare similar operations:
+The fix is that one must compare similar operations:
 
 if ((b & 0xFF000000) == (0xFF000000 & 0xFF000000)) .....
 
@@ -400,28 +400,64 @@ if ((b & 0xFF000000) == (0xFF000000 & 0xFF000000)) .....
 ArrayIndexOutOfBounds
 ---------------------
 
-You cannot intentionally throw an ArrayIndexOutOfBoundsException in JavaScript.
-JavaScript will simply return "undefined", not throw an Exception.
+You cannot implicitly throw an ArrayIndexOutOfBoundsException in JavaScript.
+JavaScript will simply return "undefined", not throw an Exception. So:
 
-ArrayIndexOutOutBoundsException cannot be trapped in JavaScript because 
-it is a JavaScript Error, not a Java Exception. 
+boolean notAGoodIdeaIsOutOfBounds(String[] sa, int i) {
+  try {
+     return (sa[i] == sa[i]);
+  } catch (ArrayIndexOutOfBoundsException e) {
+  	return false;
+  }
+}
 
-Solution is to change that catch to catch(Throwable e), 
-which includes all JavaScript errors and is transpiled as "catch(e)"
- 
+will work in Java but not in JavaScript. Code should not depend upon this sort 
+of trap anyway, if you ask me. 
 
-java.awt.Color
+Throwable vs Error vs Exception
+-------------------------------
+
+True JavaScript errors are trapped as Throwable, whereas you can still trap
+Error and Exception as well. So if you want to be sure to catch any JavaScript
+error, use try{}catch (Throwable t){}, not try{}catch (Exception e){}. 
+
+j
+ava.awt.Color
 --------------
 
-ColorSpace: only "support" CS_sRGB
+ColorSpace: only "support" CS_sRGB.
 
- -BH: This is a temporary edit just to get us started.
-
+ TODO -- any volunteers??
+ 
 
 javax.swing.JFileDialog
 -----------------------
 
-Not implemented. HTML5 cannot expose a file directory structure
+HTML5 cannot expose a file reading directory structure. But you certainly 
+can still do file reading and writing. It just works a little differently.
+It's a simple modification:
+
+		b = new JButton("FileOpenDialog");
+		b.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser fc = new JFileChooser();
+				Test_Dialog.this.onDialogReturn(fc.showOpenDialog(Test_Dialog.this));
+				// Java will wait until the dialog is closed, then enter the onDialogReturn method.
+				// JavaScript will exit with NaN immediately, and then call back with its actual value
+				// asynchronously.
+			}
+
+		});
+	
+		public void onDialogReturn(int value) {
+			if (value != Math.floor(value))
+				return; // in JavaScript, this will be NaN, indicating the dialog has been opened
+			// If we are here, the dialog has closed, in both Java and JavaScript.
+			System.out.println("int value is " + value);
+		}
+
 
 
 native methods
@@ -434,49 +470,60 @@ using j2sNative blocks:
 /**
  * @j2sNative
  *
+ *    var putYourJavaScriptCodeHere
+ *
  */
- {
-   // it is critical to remember to insert this { } phrasing, 
-   // or the block will be ignored!
- }
  
-
+ Note that if you follow that directly with a {...} block, then 
+ the javadoc code will run in JavaScript, and the {...} code will run in Java.
+ 
+ 
 key Focus
 ---------
-- Less explicit key focus 
-- handling (mostly done by Browser/HTML)
-- no SwingUtilities.findFocusOwner
-- focus traversal not implemented
+
+As of June, 2019, the keyboard focus manager is fully implemented. 
+The one catch is that JTextPane and JTextArea, which already consume
+VK_TAB in Java, cannot use CTRL-TAB to continue a tabbing cycle around
+the components in a window. Instead, CTRL-TAB is absorbed by the browser. 
 
 
-LookAndFeel
------------
+LookAndFeel and UI Classes
+--------------------------
 
-SwingJS implements the native browser LookAndFeel. Token UIManager methods are
-present but unimplemented; methods returning key bindings or other arrays return null.
+SwingJS implements the native browser look and feel as swingjs.plaf.HTML5LookAndFeel. 
+There are small differences between all look and feels -- MacOS, Windows, SwingJS.
 
-Note that LookAndFeel determines canvas size in a Frame because diffent operating
-systems (Mac OS vs Windows vs HTML5) will have different edge sizes on their frames. 
+Expert developers know how to coerce changes in the UI by subclassing the UI for a 
+component. This probably will not work in SwingJS. 
+
+Note that LookAndFeel in Java usually determines canvas size in a Frame because 
+different operating systems (Mac OS vs Windows vs HTML5) will have 
+different edge sizes on their frames. If you want to ensure a component size, 
+use getContentPane().setPreferredSize().
 
 
 System.exit(0) does not stop all processes
 ------------------------------------------
 
-Although System.ext(int) has been implemented in JavaScript, it may not stop all "threads."
-Applications are responsible for shutting down prior to executing it. 
+Although System.ext(int) has been implemented in JavaScript, it just closes the 
+frames. It may not stop all "threads." So don't rely on that.
+Applications are responsible for shutting down prior to executing System.exit(0). 
 
 
 myClass.getField not implemented
 --------------------------------
 
-java.lang.reflect.Field is not implemented. You can get a field value very simply
-using:
+java.lang.reflect.Field is implemented minimally. It is not
+certain that Field.getDeclaringClass() will work. If you just want a 
+value of a field, you can do this:
 
 /**
  *@j2sNative
  *
  * return myClass[name]
  */   
+
+But that is not a java.lang.reflection.Field object.
 
 
 "window" and other reserved JavaScript names
@@ -488,19 +535,20 @@ one must rename packages such as "window" or "document" to names such as "win" o
 qualified field and method names
 --------------------------------
 
-In order to minimize the chance of added SwingJS field and method names colliding with
-ones developers might use in subclassing Java classes, we have added U+79D8 (Mandarin "secrect") 
-to the characters already disrecommended by Java documentation ("$" and "_"). The only problem
+In order to minimize the chance of added SwingJS field and method names colliding with ones 
+developers might use in subclassing Java classes, we have added U+79D8 (first character of Mandarin 
+"secrect") to the characters already disrecommended by Java documentation ("$" and "_"). The only problem
 would be if you use that character followed by certain English words in certain classes. For example
 \u79D8canvas for JComponents (in java.awt.JSComponent) and \u79D8byte (in java.io.File).
 
 missing Math methods
 --------------------
 
-A few of the more obscure java.lang.Math methods are missing. This is a
-result of continued Java development. It is easy enough to add these
-methods if you have the source. They go into j2sClazz.js, which is 
-combined with other initial libraries into swingjs2.js.  
+java.lang.Math is worked out, but some methods are missing, eithr because they
+involve long integer value that are inaccessible in JavaScript, or because I just
+didn't implement them. This is a result of continued Java development. 
+It is easy enough to add these methods if you have the source. They go into j2sClazz.js, 
+which is combined with other initial libraries into swingjs2.js by build_site.xml
 
 
 component.getGraphics(), graphics.dispose()
@@ -508,9 +556,23 @@ component.getGraphics(), graphics.dispose()
 
 Use of component.getGraphics() is discouraged in Java and in SwingJS. 
 Specifically in SwingJS, any call to component.getGraphics() or 
-component.createGraphics() must be matched with graphics.dispose(), 
+component.createGraphics() should be matched with graphics.dispose(), 
 particularly when it is called outside the context of a paint(Graphics)
 call from the system. 
+
+If you see your graphics scrolling down the page with each repaint, 
+look for where you have used Component.getGraphics() and not Graphics.dispose().
+For example, this will definitely NOT work in SwingJS:
+
+  this.paint(getGraphics())
+  
+and really should not in Java, either, as it is technically a resource memory leak.
+
+Instead, if you really do not want to use repaint(), use this:
+
+  Graphics g = getGraphics();
+  paint(g);
+  g.dispose();
 
 
 MAJOR ISSUES--for Bob and Udo within SwingJS
@@ -522,9 +584,10 @@ fonts
 Fonts and FontMetrics will all be handled in JavaScript. Font matching will 
 not be exact, and composite (drawn) fonts will not be supported. 
 
-Jmol handles calls such as font.getFontMetrics(g).stringWidth("xxx") by 
-creating an off-page DOM image and querying its context. 
-This will be done here as well.
+SwingJS handles calls such as font.getFontMetrics(g).stringWidth("xxx") by 
+creating a <div> containing that text, placing it in an obscure location on 
+the page, and reading div.getBoundingClientRect(). This is a VERY precise
+value, but can be a pixel or two off from what Java reports for the same font.
  
  
 OS-dependent classes
@@ -536,8 +599,7 @@ Static classes such as:
    java.awt.GraphicsEnvironment
    
    
-which are created using Class.forName
-will be implemented as JavaScript classes in the swingjs package
+which are created using Class.forName are implemented using classes in the swingjs package.
 
 AWTAccessor and  AwtContext need to be customized 
 
@@ -561,13 +623,8 @@ MAJOR ISSUES--to be resolved by implementers
 fonts
 -----
 
-Glyph/composite/outline fonts are not supported
+Glyph/composite/outline fonts are not supported.
    
-
-specific AWT components not implemented
----------------------------------------
-
-all AWT components are now implemented as subclasses of Swing counterparts. 2019.02.13 BH
 
 
 threads
@@ -658,18 +715,38 @@ image loading
 - All image loading in SwingJS is synchronous. A MediaTracker call will immediately return "complete".
   However, it still may take one system clock tick to fully load images. Thus, it is recommended that
   images be preloaded in the static block of the applet if it is necessary that they be available in init().
-
+  This is only an issue if you are trying to access the pixel buffer of the image in JavaScript. 
+  
 - Applet.getImage(path, name) will return null if the image does not exist. 
 
 - BufferedImage: only "support" imageType RGB and ARGB
+
   -BH: This is a temporary edit, just to get us started. Certainly GRAY will be needed
 
 
-no BigInteger; no BigDecimal
-----------------------------
+BigInteger and BigDecimal
+-------------------------
 
-BigInteger if fully supported; BigDecimal is roughed in and not fully supported
+java.math.BigInteger is fully supported; java.math.BigDecimal is roughed 
+in and not fully tested (07/2019). 
 
+Both classes present significant issues for JavaScript, as they are based in 
+Java's 64-bit long for all their operations. Here is the JavaDoc note I added
+to BigInteger:
+
+ * SwingJS note: Because of the limitations of JavaScript with regard
+ * to long-integer bit storage as a double, this implementation drops
+ * the integer storage bit length to 24, giving 48 for long and leaving
+ * the last 16 bits clear for the exponent of the double number. This should
+ * not affect performance significantly. It does increase the storage 
+ * size by about 33%. By bring an "int" to 3 bytes, we can easily construct
+ * and use byte[] data intended for the original BitSet.  
+
+"Easily" may be a bit strong there. This was a serious challenge.
+
+BigDecimal seems to run normally, but in order to do that, my hack involves
+reducing the size of an integer that is allowed to be stored as such and not
+in byte[] as a BigInteger. I'm sure there is a performance hit, but it does work.
 
 no format internationalization
 ------------------------------
@@ -689,9 +766,9 @@ text-related field implementation
 Text fields are:
 
 JTextField   (JavaScript <input type="text">)
-JTextArea    (JavaScript <textarea>;)
-JTextPane    (JavaScript <div>; non-editing; TODO)
-JEditorPane  NOT IMPLEMENTED
+JTextArea    (JavaScript <textarea>)
+JTextPane    (JavaScript <div>)
+JEditorPane  (JavaScript <div>)
 
 For the initial implementation, we don't implement infinite undo/redo, and the abstract 
 document model is much less elaborate. Only PlainDocument (in the form of JSPlainDocument)

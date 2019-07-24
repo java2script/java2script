@@ -2,6 +2,7 @@ package swingjs.plaf;
 
 
 import java.awt.Dimension;
+import java.awt.peer.ContainerPeer;
 
 import javax.swing.JComponent;
 import javax.swing.JRootPane;
@@ -9,7 +10,7 @@ import javax.swing.LookAndFeel;
 
 import swingjs.api.js.DOMNode;
 
-public class JSPanelUI extends JSLightweightUI {
+public class JSPanelUI extends JSLightweightUI implements ContainerPeer {
 
 	int frameZ = 10000;
 	public JSPanelUI() {

@@ -50,6 +50,7 @@ import javajs.util.Lst;
 import sun.awt.AppContext;
 import sun.awt.SunGraphicsCallback;
 import swingjs.JSFrameViewer;
+import swingjs.JSMouse;
 import swingjs.plaf.JSComponentUI;
 
 
@@ -362,10 +363,8 @@ public class Container extends JSComponent {
      * @since     JDK1.1
      */
     public Insets getInsets() {
-    	// in SwingJS, we do not clone. Everything is a ContainerPeer.
-    	// it is inconsistent with other classes that this would need cloning.
-    	Insets i = (peer == null ? null : ((ContainerPeer) peer).getInsets());
-    	return  (i == null ? NULL_INSETS : i);
+    	// Panel, ScrollPane, and Window only
+    	return (peer instanceof ContainerPeer ? this.秘getInsetsC() : NULL_INSETS);
     }
 
     public Insets 秘getInsetsC() {
@@ -3644,6 +3643,7 @@ public class Container extends JSComponent {
         super.addPropertyChangeListener(propertyName, listener);
     }
 
+
 //     * --- Accessibility Support ---
 //     */
 //
@@ -4339,7 +4339,7 @@ class LightweightDispatcher implements AWTEventListener {
 
 		// sensitive to mouse events
 
-		Component mouseOver = targetLastKnown = nativeContainer.getMouseEventTarget(e.getX(), e.getY(), Container.INCLUDE_SELF);
+		Component mouseOver = nativeContainer.getMouseEventTarget(e.getX(), e.getY(), Container.INCLUDE_SELF);
 
 		trackMouseEnterExit(mouseOver, e);
 
@@ -4354,11 +4354,13 @@ class LightweightDispatcher implements AWTEventListener {
 			actualTarget = targetLastKnown;
 			break;
 	    default:
-			// see swingjs.plaf.JSButtionUI
-	    	actualTarget = (/** @j2sNative e.bdata.jqevent && e.bdata.jqevent.target["data-component"] || */
-	    			null);
+	    	actualTarget = JSMouse.getJ2SEventTarget(e);
 	    	break;
 		}
+		// SwingJS note: This was moved here 7/8/2019 from above. 
+		targetLastKnown = (actualTarget == null ? mouseOver : actualTarget);
+		if (id == MouseEvent.MOUSE_PRESSED)
+			targetLastDown = targetLastKnown;
 
 		// 4508327 : MOUSE_CLICKED should only go to the recipient of
 		// the accompanying MOUSE_PRESSED, so don't reset mouseEventTarget on a
@@ -4374,10 +4376,11 @@ class LightweightDispatcher implements AWTEventListener {
 			switch (id) {
 			case MouseEvent.MOUSE_ENTERED:
 			case MouseEvent.MOUSE_EXITED:
+				if (JSMouse.getJ2SEventTarget(e) == mouseEventTarget)
+					retargetMouseEvent(mouseEventTarget, id, e);
 				break;
 			case MouseEvent.MOUSE_PRESSED:
 				checkInternalFrameMouseDown((JSComponent) e.getSource());
-				targetLastDown = mouseEventTarget;
 				retargetMouseEvent(mouseEventTarget, id, e);
 				break;
 			case MouseEvent.MOUSE_RELEASED:
@@ -4678,7 +4681,7 @@ class LightweightDispatcher implements AWTEventListener {
 
 		int x = e.getX(), y = e.getY();
 		Component component = target;
-		Component p = ((JSComponentUI) ((JSComponent) target).getUI()).getTargetParent();
+		Component p = ((JSComponent) target).秘getUI().getTargetParent();
 		if (p != null) {
 			target = component = p;
 		}
@@ -4744,12 +4747,7 @@ class LightweightDispatcher implements AWTEventListener {
 					}
 				} else {
 					target.dispatchEvent(retargeted);
-					/**
-					 * @j2sNative
-					 * 
-					 * if (e.bdata && e.bdata.jqevent && target.ui.j2sDoPropagate)
-					 *   e.bdata.jqevent.doPropagate = true;
-					 */
+					JSMouse.setPropagation(target, e);
 				}
 			}
 		}

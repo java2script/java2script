@@ -243,7 +243,7 @@ public class JSFrameViewer extends JSApp implements JSInterface {
 		if (width > 0) {
 			//System.out.println("JSFrameViewer creating new canvas " + canvasId + ": " + width + "  " + height);
 			// ensures one last update for a frame
-			JSComponentUI ui = (JSComponentUI) root.getParent().getUI();
+			JSComponentUI ui = root.getParent().秘getUI();
 			if (ui != null)
 				ui.updateDOMNode();
 			if (resizer != null)
