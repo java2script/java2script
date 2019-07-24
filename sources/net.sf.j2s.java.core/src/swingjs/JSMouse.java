@@ -29,6 +29,7 @@ package swingjs;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Event;
+import java.awt.JSComponent;
 import java.awt.Toolkit;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -37,6 +38,9 @@ import java.awt.event.MouseWheelEvent;
 
 import javax.swing.JComponent;
 
+import swingjs.api.js.DOMNode;
+import swingjs.api.js.JQueryObject;
+import swingjs.api.js.JQueryObject.JQEvent;
 import swingjs.plaf.JSComponentUI;
 
 /**
@@ -55,6 +59,8 @@ public class JSMouse {
 
 	public boolean processEvent(int id, int x, int y, int modifiers, long time, Object jqevent, int scroll) {
 		this.jqevent = jqevent;
+		// Note that we do not derive the Java event id from the jQuery event. 
+		// This is because we may be creating a different type of Java event.
 		switch (id) {
 		case KeyEvent.KEY_PRESSED:
 		case KeyEvent.KEY_TYPED:
@@ -88,7 +94,7 @@ public class JSMouse {
 			// simulate a mouseClicked event for us
 			if (x == xWhenPressed && y == yWhenPressed
 					&& (modifiers & ~EXTENDED_MASK) == modifiersWhenPressed10 
-					&& getButton(id) != MouseEvent.BUTTON1) {
+					&& getButton(id, jqevent) != MouseEvent.BUTTON1) {
 				// the underlying code will turn this into dbl clicks for us
 				// note that double-right-click is not supported.
 				// note that original event type field is read-only
@@ -266,7 +272,7 @@ public class JSMouse {
 
 	private int xWhenPressed, yWhenPressed, modifiersWhenPressed10;
 
-	private int getButton(int id) {
+	private static int getButton(int id, Object jqevent) {
 //
 // Firefox MDN notes:
 //
@@ -386,34 +392,32 @@ public class JSMouse {
 	 */
 	@SuppressWarnings("unused")
 	private void mouseAction(int id, long time, int x, int y, int xcount, int modifiers, int dy) {
-
-		int button = getButton(id);
-		int count = (xcount > 1 && id == MouseEvent.MOUSE_CLICKED ? xcount : updateClickCount(id, time, x, y));
-		boolean popupTrigger = isPopupTrigger(id, modifiers, JSToolkit.isWin);
-
 		Component source = viewer.getTopComponent(); // may be a JFrame
+		int count = (xcount > 1 && id == MouseEvent.MOUSE_CLICKED ? xcount : updateClickCount(id, time, x, y));
+		processMouseEvent(jqevent, source, id, time, x, y, count,  modifiers, dy);
+	}
+	
+	@SuppressWarnings("unused")
+	private static void processMouseEvent(Object jqevent, Component source, int id, long time, int x, int y, int count, int modifiers,
+			int dy) {
+		int button = getButton(id, jqevent);
+		boolean popupTrigger = isPopupTrigger(id, modifiers, JSToolkit.isWin);
 		MouseEvent e;
 		if (id == MouseEvent.MOUSE_WHEEL) {
 			e = new MouseWheelEvent(source, id, time, modifiers, x, y, x, y, count, popupTrigger,
 					MouseWheelEvent.WHEEL_UNIT_SCROLL, 1, dy);
 		} else {
-			// Component source, int id, long when, int modifiers,
-			// int x, int y, int xAbs, int yAbs, int clickCount, boolean popupTrigger,
-			// int scrollType, int scrollAmount, int wheelRotation
-
 			e = new MouseEvent(source, id, time, modifiers, x, y, x, y, count, popupTrigger, button);
-
 		}
 		byte[] bdata = new byte[0];
 		e.setBData(bdata);
-		Object jqevent = this.jqevent;
 		Component c = null;
 		/**
 		 * @j2sNative
 		 * 
 		 * 			bdata.jqevent = jqevent; bdata.source = c =
-		 *            jqevent.j2sretarget || jqevent.target["data-component"]; bdata.doPropagate = c &&
-		 *            c.ui.j2sDoPropagate;
+		 *            jqevent.j2sretarget || jqevent.target["data-component"]; 
+		 *            bdata.doPropagate = c && c.ui.j2sDoPropagate;
 		 */
 
 		// bdata.doPropagate will be tested in InputEvent.doConsume.
@@ -429,14 +433,27 @@ public class JSMouse {
 			((Container) e.getSource()).dispatchEvent(e);
 		}
 	}
-	
+
 	public static void setPropagation(Component target, MouseEvent e) {
+		@SuppressWarnings("unused")
+		JQueryObject.JQEvent je = getJQEvent(e);
 		/**
 		 * @j2sNative
 		 * 
-		 * if (e.bdata && e.bdata.jqevent && target.ui.j2sDoPropagate)
-		 *   e.bdata.jqevent.doPropagate = true;
+		 * if (je && target.ui.j2sDoPropagate)
+		 *   je.doPropagate = true;
 		 */
+	}
+
+	private static JQEvent getJQEvent(MouseEvent e) {
+		/**
+		 * @j2sNative
+		 * 
+		 * 			return (e.bdata && e.bdata.jqevent || null)
+		 */
+		{
+			return null;
+		}
 	}
 
 	@SuppressWarnings("unused")
@@ -551,6 +568,41 @@ public class JSMouse {
 		}
 		return def;			
 	}
+	
+	@SuppressWarnings({ "unused", "null" })
+	public static void retargetMouseEvent(Object jqevent, DOMNode base, JComponent from, JComponent to, int id) {
+		if (id == 0)
+			id = fixEventType(jqevent, 0);
+		boolean isDirect = (base != null);
+		JSComponent c;
+		if (base == null) {
+			c = JSComponent.秘getTopInvokableAncestor(from, false);
+			base = c.秘getUI().getDOMNode();
+		} else {
+			c = from;
+		}
+		int[] xym = null;
+		/**
+		 * @j2sNative jqevent.j2sretarget = to; xym = J2S._getEventXY(jqevent,
+		 *            J2S.$(base).offset());
+		 */
+		int modifiers = getModifiers(jqevent);
+		long time = System.currentTimeMillis();
+		if (isDirect) {
+			processMouseEvent(jqevent, from, id, time, xym[0], xym[1], 0, modifiers, 0);
+		} else {
+			c.getFrameViewer().processMouseEvent(id, xym[0], xym[1], modifiers, time, jqevent,
+					getScroll(jqevent));
+		}
+	}
+
+	public static DOMNode getTarget(MouseEvent e) {
+		@SuppressWarnings("unused")
+		JQEvent je = getJQEvent(e);
+		return /** @j2sNative je ? je.target :*/null;
+	}
+
+
 
 
 }

@@ -36,6 +36,22 @@ public class JSInternalFrameUI extends JSFrameUI {
 	}
 
 	@Override
+	protected boolean isFrameIndependent() {
+		JComponent c = (JComponent) frame.parent;
+		// 1. it has an embeddding node
+		// 2. it has a parent
+		// 3. that parent is a JDeskTopPane
+		// 4. that desktop is not 
+		if (embeddingNode != null || c == null || !c.秘getUI().isDesktop
+				|| !((JSFrameUI) (c = (JComponent) c.getTopLevelAncestor()).getUI()).isHidden)
+			return false;
+		isSticky = true;
+		body.insertBefore(outerNode, DOMNode.firstChild(body));
+		DOMNode.setStyles(outerNode, "position", "sticky");
+		return true;
+	}
+
+	@Override
 	protected void frameCloserAction() {
 		JInternalFrame jif = (JInternalFrame) iframe;
 		if (jif.isClosable())
@@ -63,7 +79,6 @@ public class JSInternalFrameUI extends JSFrameUI {
 	private Handler handler;
 	private Handler internalFrameListener;
 	private PropertyChangeListener propertyChangeListener;
-	private boolean titleBarHidden;
 	private static DesktopManager sharedDesktopManager;
 
 	@Override

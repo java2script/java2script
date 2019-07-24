@@ -6,8 +6,6 @@ import java.awt.Image;
 import java.awt.JSComponent;
 import java.awt.Rectangle;
 
-import javax.swing.plaf.ComponentUI;
-
 import swingjs.JSUtil;
 import swingjs.plaf.JSComponentUI;
 
@@ -88,7 +86,7 @@ public abstract class DOMNode {
 		return setStyles(node, "z-index", "" + z);
 	}
 
-	public static Object getAttr(DOMNode node, String attr) {
+	public static Object getAttr(Object node, String attr) {
 		/**
 		 * @j2sNative
 		 * 
@@ -334,6 +332,5 @@ public abstract class DOMNode {
 		JSComponentUI ui = (JSComponentUI) (/** @j2sNative node.ui || node["data-ui"] || node["data-component"] || node["data-textcomponent"] || */  null);
 		return (ui == null ? null : ui.jc);
 	}
-
 
 }

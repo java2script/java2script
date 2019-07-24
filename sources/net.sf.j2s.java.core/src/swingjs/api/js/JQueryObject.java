@@ -4,6 +4,10 @@ import javajs.api.JSFunction;
 
 public interface JQueryObject {
 
+	public interface JQEvent {
+
+	}
+
 	public abstract void appendTo(Object obj);
 	public abstract JQueryObject append(Object span);
 
@@ -24,6 +28,7 @@ public interface JQueryObject {
 
 	public abstract DOMNode get(int i);
 
+	public abstract String attr(String key);
 	public abstract JQueryObject attr(String key, String value);
 	public abstract JQueryObject css(String key, String value);
 
@@ -52,7 +57,7 @@ public interface JQueryObject {
 	 */
 	public abstract JQueryObject find(String selector);
 
-	public abstract DOMNode parent();
+	public abstract JQueryObject parent();
 	public abstract void before(Object obj);
 	public abstract void after(Object div);
 
@@ -92,7 +97,7 @@ public interface JQueryObject {
 		 * @return
 		 */
 		public abstract int j2sCB(String OPTION, String name);
-
+		
 		
 	}
 	

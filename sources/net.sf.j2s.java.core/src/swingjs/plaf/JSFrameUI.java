@@ -3,7 +3,6 @@ package swingjs.plaf;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Insets;
-import java.awt.JSComponent;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ComponentEvent;
@@ -77,7 +76,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 
 	protected boolean isInternalFrame;
 
-	boolean doEmbed;
+	boolean doEmbed, isHidden;
 
 	public JSFrameUI() {
 		frameZ += 1000;
@@ -117,9 +116,12 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			if (node != null) {
 				embeddingNode = node;
 				doEmbed = (DOMNode.getWidth(embeddingNode) > 0);
+				isHidden = !doEmbed;
 				if (doEmbed) {
 					frame.setUndecorated(true);
 					frame.setLocation(0, 0);
+				} else {
+					DOMNode.setStyles(embeddingNode,  "position", "relative", "overflow", "hidden");
 				}
 
 				int ew = DOMNode.getWidth(node);
@@ -157,8 +159,8 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			if (isModal) {
 				modalNode = DOMNode.createElement("div", id + "_modaldiv");
 				Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-				DOMNode.setStyles(modalNode, "background", toCSSString(new Color(100, 100, 100, 100)));
-				DOMNode.setTopLeftAbsolute(modalNode, 0, 0);
+				DOMNode.setStyles(modalNode, "position", "sticky", "left","0px", "top", "0px", 
+						"background", toCSSString(new Color(100, 100, 100, 100)));
 				DOMNode.setSize(modalNode, screen.width, screen.height);
 			}
 			Insets s = getInsets();
@@ -182,11 +184,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 
 	@Override
 	protected boolean isFrameIndependent() {
-		JSComponent c = frame.parent;
-		if (isInternalFrame && (c == null || c != null && c.getUIClassID() != "DesktopPaneUI"))
-			return false;
-		boolean is = (isInternalFrame ? c == null || c.getWidth() == 0 : !doEmbed);
-		return is;
+		return !doEmbed;
 	}
 
 	@Override

@@ -746,6 +746,11 @@ public class JPopupMenu extends JComponent implements MenuElement {
 //
 	}
 
+	@Override
+	public boolean isShowing() {
+		return isVisible() && invoker.isShowing();
+	}
+	
     /**
      * Returns a <code>Popup</code> instance from the
      * <code>PopupMenuUI</code> that has had <code>show</code> invoked on

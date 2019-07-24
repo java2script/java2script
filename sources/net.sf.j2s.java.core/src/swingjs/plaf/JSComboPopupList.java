@@ -241,25 +241,9 @@ class JSComboPopupList extends JList {
 		case "mouse":
 			Object jqEvent = /** @j2sNative event.originalEvent || */
 					null;
-			String jqtype = /** @j2sNative jqEvent.type || */
-					null;
-			retargetMouseEvent(jqEvent, cbui.comboBox, this);
+			JSMouse.retargetMouseEvent(jqEvent, null, cbui.comboBox, this, 0);
 			return;
 		}
-	}
-
-	@SuppressWarnings({ "unused", "null" })
-	public static void retargetMouseEvent(Object jqevent, JComponent from, JComponent to) {
-		DOMNode base = from.getTopLevelAncestor().秘getUI().getDOMNode();
-		int id = JSMouse.fixEventType(jqevent, 0);
-		int modifiers = JSMouse.getModifiers(jqevent);
-		int[] xym = null;
-		/**
-		 * @j2sNative jqevent.j2sretarget = to; xym = J2S._getEventXY(jqevent,
-		 *            J2S.$(base).offset());
-		 */
-		from.getFrameViewer().processMouseEvent(id, xym[0], xym[1], modifiers, System.currentTimeMillis(), jqevent,
-				JSMouse.getScroll(jqevent));
 	}
 
 }

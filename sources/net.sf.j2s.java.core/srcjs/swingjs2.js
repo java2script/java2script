@@ -773,7 +773,7 @@ try {
 	};
 }
 
-var invalidSelectors = "";
+var j2sInvalidSelectors = "";
 
 function Sizzle( selector, context, results, seed ) {
 	var match, elem, m, nodeType,
@@ -867,14 +867,18 @@ function Sizzle( selector, context, results, seed ) {
 			if ( newSelector ) {
 				try {
 					 // SwingJS addition
-					 if (invalidSelectors.indexOf(";" + newSelector + ";") < 0) {					
+					var mode = (newSelector.indexOf(":") >= 0 ? ":" 
+							: newSelector.indexOf(".not(") >= 0 ? ".not" 
+							: newSelector.indexOf("!=") >= 0 ? "!=" : 0);
+					 if (mode && j2sInvalidSelectors.indexOf(mode) < 0) {			
 						push.apply( results,
 							newContext.querySelectorAll( newSelector )
 						);
 						return results;
 					 }
 				} catch(qsaError) {
-					invalidSelectors += ";" + newSelector + ";";
+					if (mode)
+						j2sInvalidSelectors += mode;
 				} finally {
 					if ( !old ) {
 						context.removeAttribute("id");

@@ -40,7 +40,6 @@ import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -48,6 +47,7 @@ import java.awt.event.MouseMotionListener;
 
 import swingjs.JSMouse;
 import swingjs.JSToolkit;
+import swingjs.api.js.DOMNode;
 
 /**
  * Manages all the <code>ToolTips</code> in the system.
@@ -87,21 +87,22 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 	JToolTip tip;
 
 	private Rectangle popupRect = null;
-	private Rectangle popupFrameRect = null;
+//	private Rectangle popupFrameRect = null;
 
 	boolean enabled = true;
 	private boolean tipShowing = false;
 
-	private FocusListener focusChangeListener = null;
 	private MouseMotionListener moveBeforeEnterListener = null;
-//	private KeyListener accessibilityKeyListener = null;
+
+	//	private KeyListener accessibilityKeyListener = null;
+//	private FocusListener focusChangeListener = null;
 
 	// PENDING(ges)
 	protected boolean lightWeightPopupEnabled = false; // BH 2018 true;
 	protected boolean heavyWeightPopupEnabled = false;
 	
 	protected boolean hasFired = false;
-	private boolean useCurrentMenu;
+//	private boolean useCurrentMenu;
 
 	ToolTipManager() {
 		enterTimer = new Timer(750, new ActionListener() {
@@ -318,13 +319,14 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 				}
 			} else {
 				location.x = screenLocation.x + mouseEvent.getX();
-				location.y = screenLocation.y + mouseEvent.getY() + 20;
+				location.y = screenLocation.y + mouseEvent.getY() + 
+						(DOMNode.getStyle(JSMouse.getTarget(mouseEvent), "cursor") == "default" ? 20 : 30);				
+				
 				if (!leftToRight) {
 					if (location.x - size.width >= 0) {
 						location.x -= size.width;
 					}
 				}
-
 			}
 
 			// we do not adjust x/y when using awt.Window tips
@@ -503,7 +505,7 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 					showTipWindow();
 				}
 			} else {
-				useCurrentMenu = true;
+//				useCurrentMenu = true;
 				enterTimer.start();
 			}
 		}
@@ -616,7 +618,6 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 	 */
 	@Override
 	public void mouseMoved(MouseEvent event) {
-		
 		if (tipShowing) {
 			checkForTipChange(event);
 		} else if (showImmediately) {
@@ -712,7 +713,7 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 	}
 
 //	private FocusListener createFocusChangeListener() {
-//		return new FocusAdapter() {
+//		return new FocusListener() {
 //			@Override
 //			public void focusLost(FocusEvent evt) {
 //				hideTipWindow();
@@ -720,6 +721,11 @@ public class ToolTipManager extends MouseAdapter implements MouseMotionListener 
 //				JComponent c = (JComponent) evt.getSource();
 //				c.removeFocusListener(focusChangeListener);
 //			}
+//
+//			@Override
+//			public void focusGained(FocusEvent e) {
+//			}
+//
 //		};
 //	}
 //

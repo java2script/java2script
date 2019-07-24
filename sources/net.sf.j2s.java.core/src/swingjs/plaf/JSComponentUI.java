@@ -1430,7 +1430,26 @@ public class JSComponentUI extends ComponentUI
 	 */
 	private boolean ignoreFocus;
 
+	/**
+	 * a div that the user has created that has a frame-specific name, indicating
+	 * that the frame should be embedding in the page within that div. 
+	 * 
+	 * If this div has style width:0px, then the embedding is not done, and the 
+	 * component is completely hidden from view. 
+	 * 
+	 * If this div is the top-level ancestor of a JDesktopPane, then setting
+	 * width:0px both hides this div and causes its internal frames that are not
+	 * themselves hidden to be "sticky" -- to float above the page without moving
+	 * when the page (body) is scrolled.
+	 * 
+	 */
 	protected DOMNode embeddingNode;
+
+	/**
+	 * A sticky frame (specifically for now a JInternalFrame) will take this
+	 * attribute, preventing it being added to its desktop parent.
+	 */
+	protected boolean isSticky;
 
 	private static DOMNode tempDiv;
 
@@ -1818,16 +1837,26 @@ public class JSComponentUI extends ComponentUI
 				addChildrenToDOM(children, n);
 			if (isWindow 
 					&& jc.getWidth() > 0
-					&& isFrameIndependent()) {
+					&& isFrameIndependent() && !isSticky) {
+			  // that isSticky must come after isFrameIndependent, because
+			  // that is where it is set. (All independent JInternalFrames are sticky when they are independent, 
+			  // because in that case, their parent JDesktopPane is hidden.)
 				DOMNode.transferTo(outerNode, body);
+				DOMNode.setStyles(outerNode,  "position", "absolute");
 			}
 		} else {
 			DOMNode.setStyles(outerNode, "overflow", "hidden");
 		}
 		isTainted = false;
 		
-		if (embeddingNode != null)
+		if (embeddingNode != null) {
+			// Note that detachAll leaves any previously attached nodes in limbo. 
+			// It should probably close them. We could add a data-j2sembedded
+			// attribute to indicate that we need to close any frame that is being 
+			// removed. But I am not sure we really want to destroy them like that. Maybe.
+			DOMNode.detachAll(embeddingNode);
 			DOMNode.appendChildSafely(embeddingNode, outerNode);
+		}
 		return outerNode;
 	}
 
@@ -2560,7 +2589,7 @@ public class JSComponentUI extends ComponentUI
 							"margin", "0px 5px", "transform", "translateY(15%)");
 				}
 			}
-			DOMNode.setStyles(menuAnchorNode, "width", "90%", "min-width",
+			DOMNode.setStyles(menuAnchorNode, "width", "95%", "min-width",
 					Math.max(75, (wCtr + wAccel + margins.left + margins.right) * 1.1) + "px");
 		}
 
@@ -2719,8 +2748,9 @@ public class JSComponentUI extends ComponentUI
 						"translateY(-" + itop + "%)" + (iscale == null ? "" : iscale));
 			} else {
 				DOMNode.setStyles(menuAnchorNode, "height", h + "px");
-				// addCSS(cssTxt, "top", "50%", "transform", "translateY(-50%)");
-				addJSKeyVal(cssIcon, "top", "50%", "transform", "translateY(-65%) scale(0.6,0.6)");
+//				if (wIcon > 0)
+	//				addJSKeyVal(cssTxt, "top", "50%", "transform", "translateY(-50%)");
+				addJSKeyVal(cssIcon, "top", "50%", "transform", "translateY(-80%) scale(0.6,0.6)");
 			}
 
 		}

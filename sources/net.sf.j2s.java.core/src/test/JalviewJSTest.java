@@ -381,7 +381,8 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 		firstColumn.add(rb3);
 		firstColumn.setBounds(100, 40, 200, 500);
 
-		JMenuItem cb3m = new JMenuItem("XXleading,left-to-rightXX");
+		JMenuItem cb3m = new JMenuItem("tooltiptest");//XXleading,left-to-rightXX");
+		cb3m.setToolTipText("testing");
 		cb3m.setFont(font);
 		cb3m.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 		cb3m.setHorizontalTextPosition(SwingConstants.LEADING);
@@ -485,12 +486,14 @@ public class JalviewJSTest extends JPanel implements MenuListener, ItemListener 
 			@Override
 			public void menuSelected(MenuEvent e) {
 				JMenu m = (JMenu) e.getSource();
+				System.out.println("JalviewJSText remove/add failure!");
 				if (haveCb4m) {
 					m.remove(cb4m);
 				} else {
 					m.add(cb4m);
 					m.add(cb4m);
-					cb4m2 = new JMenuItem("testing");
+					if (cb4m2 == null)
+						cb4m2 = new JMenuItem("testing");
 					m.add(cb4m2);
 				}
 				haveCb4m = !haveCb4m;

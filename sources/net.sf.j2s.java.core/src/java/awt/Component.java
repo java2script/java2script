@@ -694,10 +694,10 @@ public abstract class Component implements ImageObserver/*
 	// */
 	// private transient Region mixingCutoutRegion = null;
 
-	/*
-	 * Indicates whether addNotify() is complete (i.e. the peer is created).
-	 */
-	private transient boolean isAddNotifyComplete = false;
+//	/*
+//	 * Indicates whether addNotify() is complete (i.e. the peer is created).
+//	 */
+//	private transient boolean isAddNotifyComplete = false;
 
 	/**
 	 * Should only be used in subclass getBounds to check that part of bounds is
@@ -5888,7 +5888,7 @@ public abstract class Component implements ImageObserver/*
 			// mixOnShowing();
 			// }
 
-			isAddNotifyComplete = true;
+//			isAddNotifyComplete = true;
 			if (visible && peer != null) {// BH added for SwingJS menu in Varna
 				if (/** @j2sNative peer.isDisposed && */
 				true)
@@ -5990,7 +5990,7 @@ public abstract class Component implements ImageObserver/*
 
 				// mixOnHiding(isLightweight);
 
-				isAddNotifyComplete = false;
+//				isAddNotifyComplete = false;
 				// Nullifying compoundShape means that the component has normal
 				// shape
 				// (or has no shape at all).

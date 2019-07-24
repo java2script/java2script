@@ -68,7 +68,6 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.event.EventListenerList;
 import javax.swing.plaf.ComponentUI;
-import javax.swing.text.DefaultEditorKit;
 
 import javajs.util.Lst;
 import sun.font.FontDesignMetrics;
@@ -708,9 +707,9 @@ public abstract class JComponent extends Container {
 							// }
 							// if (!printing) {
 							jc.秘checkBackgroundPainted(jsg, true);
-							jc.秘setIsRepaint(false);
+							秘setIsRepaint(false);
 							jc.秘paint((Graphics) (Object) jsg);
-							jc.秘setIsRepaint(true);
+							秘setIsRepaint(true);
 							jc.秘checkBackgroundPainted(秘getJSGraphic2D((Graphics) (Object) jsg), false);
 							// } else {
 							// if (!getFlag(IS_PRINTING_ALL)) {
