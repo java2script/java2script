@@ -147,6 +147,10 @@ import swingjs.api.js.JQueryObject;
 public class JSComponentUI extends ComponentUI
 		implements JSEventHandler, PropertyChangeListener, ChangeListener, DropTargetPeer {
 
+	public interface Embeddable {
+		Object getEmbedded(String type);
+	}
+
 	private static final int MENUITEM_OFFSET = 11;
 
 	final J2SInterface J2S = JSUtil.J2S;
