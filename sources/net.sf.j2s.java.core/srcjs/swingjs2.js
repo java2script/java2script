@@ -13731,6 +13731,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // TODO: still a lot of references to window[...]
 
+// BH 2019.07.27 fixes array(intArray).clone
 // BH 2019.07.09 adds Java String.trim()
 // BH 2019.05.21 changes Clazz.isClassDefined to Clazz._isClassDefined for compression
 // BH 2019.05.13 fixes for Math.getExponent, Math.IEEERemainder, Array.equals(Object)
@@ -13936,7 +13937,7 @@ var _array = function(baseClass, paramType, ndims, params, isClone) {
   }
   params.push(paramType);
   var nbits = 0;
-  if (ndims != 0) {
+  if (ndims != 0 && !(isClone && Array.isArray(params[1]))) {
     switch (prim) {
     case "B":
       nbits = 8;
@@ -18145,11 +18146,8 @@ sp.contains$S = function(a) {return this.indexOf(a) >= 0}  // bh added
 sp.compareTo$ = sp.compareTo$S = sp.compareTo$TT = function(a){return this > a ? 1 : this < a ? -1 : 0} // bh added
 
 sp.toCharArray$=function(){
-var result=new Array(this.length);
-for(var i=0;i<this.length;i++){
-result[i]=this.charAt(i);
-}
-return Clazz.array(Character.TYPE, -1, result);
+	var result = this.split("");	
+	return setArray(result, Character.TYPE, "CA", -1);
 };
 
 String.valueOf$ = String.valueOf$Z = String.valueOf$C = String.valueOf$CA 

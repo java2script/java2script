@@ -170,7 +170,7 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 	 */
 	protected boolean rootPaneCheckingEnabled = false;
 
-	private boolean _boundsFrozen;
+	private boolean 秘boundsFrozen;
 
 	/**
 	 * Constructs a new frame that is initially invisible.
@@ -915,15 +915,15 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 				+ ",rootPaneCheckingEnabled=" + rootPaneCheckingEnabledString;
 	}
 
-	public void _freezeBounds(int w, int h) {
+	public void 秘freezeBounds(int w, int h) {
 		setSize(w, h);
-		_boundsFrozen = true;
+		秘boundsFrozen = true;
 		resizable = false;
 	}
 	
 	@Override
 	public void reshape(int x, int y, int width, int height) {
-		if (!_boundsFrozen)
+		if (!秘boundsFrozen)
 			super.reshape(x, y, width, height);
 	}
 

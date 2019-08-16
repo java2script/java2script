@@ -11,6 +11,12 @@ class Test_Array extends Test_ {
 	
 	static int y;
 	static {
+		
+		
+		int[][] ia = (int[][])c33def2b;
+		int[][] ib = ia.clone();
+		assert("[[I".equals(ib.getClass().getName()));
+		
 		int x = 3;
 		y = x;
 		Test_Array[] a = new Test_Array[3];
@@ -82,8 +88,10 @@ class Test_Array extends Test_ {
 		double[] da = new double[3];
 		System.out.println(da[iI]);
 		assert (ii3[2] == 1 && j == 1);
+		
 
 		System.out.println("Test_Array OK");
 	}
+
 
 }

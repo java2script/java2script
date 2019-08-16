@@ -16,6 +16,8 @@ public abstract class HTML5CanvasContext2D {
 
 	public String font, fillStyle, strokeStyle;
 
+	public float globalAlpha;
+
 	public abstract void drawImage(DOMNode img, int sx,
 			int sy, int swidth, int sheight, int dx, int dy, int dwidth, int dheight);
 
