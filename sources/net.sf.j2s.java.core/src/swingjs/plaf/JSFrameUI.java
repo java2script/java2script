@@ -44,7 +44,7 @@ import swingjs.api.js.DOMNode;
  * @author hansonr
  *
  */
-public class JSFrameUI extends JSWindowUI implements FramePeer {
+public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Embeddable {
 
 	private static final Insets ZERO_INSETS = new Insets(0, 0, 0, 0);
 
@@ -111,24 +111,11 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 				h = defaultHeight;
 			DOMNode.setSize(frameNode, w, h);
 			DOMNode.setTopLeftAbsolute(frameNode, 0, 0);
-			String fname = frame.getName();
-			DOMNode node = DOMNode.getElement(fname + "-div");
+			DOMNode node = (DOMNode) getEmbedded("init");
 			if (node != null) {
 				embeddingNode = node;
-				doEmbed = (DOMNode.getWidth(embeddingNode) > 0);
+				doEmbed = (DOMNode.getWidth(node) > 0);
 				isHidden = !doEmbed;
-				if (doEmbed) {
-					frame.setUndecorated(true);
-					frame.setLocation(0, 0);
-				} else {
-					DOMNode.setStyles(embeddingNode,  "position", "relative", "overflow", "hidden");
-				}
-
-				int ew = DOMNode.getWidth(node);
-				int eh = DOMNode.getHeight(node);
-				if (ew > 0 && eh > 0) {
-					frame._freezeBounds(ew, eh);
-				}
 			}
 			setWindowClass();
 			if (!frame.isUndecorated()) {
@@ -180,6 +167,46 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			DOMNode.setVisible(domNode, jc.isVisible());
 		}
 		return domNode;
+	}
+
+	/**
+	 * Note: DO NOT CHANGE THE NAME OF THIS METHOD
+	 * 
+	 * @param frame
+	 * @param type
+	 *  one of: "name", "node", "init", "dim"
+	 * @return
+	 */
+	@Override
+	@SuppressWarnings("unused")
+	public Object getEmbedded(String type) {
+		String name = frame.getName();
+		DOMNode node = DOMNode.getElement(name + "-div");
+		if (node == null)
+			return null;
+		switch (type) {
+		case "name":
+			return name;
+		case "node":
+			return node;
+		case "dim":
+			return new Dimension(DOMNode.getWidth(node), DOMNode.getHeight(node));
+		case "init":
+			if (node == null)
+				return null;
+			Dimension dim = (Dimension) getEmbedded("dim");
+			if (dim.width > 0) {
+				frame.setUndecorated(true);
+				frame.setLocation(0, 0);
+				String resize = DOMNode.getStyle(node, "resize");
+				if (resize == "none")
+					frame.秘freezeBounds(dim.width, dim.height);
+			} else {
+				DOMNode.setStyles(node, "position", "relative", "overflow", "hidden");
+			}
+			return node;
+		}
+		return null;
 	}
 
 	@Override

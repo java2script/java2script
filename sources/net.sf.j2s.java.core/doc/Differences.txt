@@ -1,10 +1,11 @@
 Notes
 =====
+updated 8/16/19 -- minor typos and added summary paragraph
 updated 7/19/19 -- clarification that AWT and Swing classes are supported directly
 updated 5/13/19 -- Mandarin U+79D8 reserved character; Missing Math methods; int and long
 updated 5/10/19 -- adds a section on static issues in multi-(duplicate)-applet pages
 updated 1/4/19 -- nio
-updated 9/15/18 -- adds integer 1/0 == 0
+updated 9/15/18 -- adds integer 1/0 == Infinity
 updated 7/24/18 -- most classes replaced with https://github.com/frohoff/jdk8u-jdk
 updated 6/5/17 -- reserved package name "window"
 updated 3/11/17 -- myClass.getField
@@ -537,14 +538,14 @@ qualified field and method names
 
 In order to minimize the chance of added SwingJS field and method names colliding with ones 
 developers might use in subclassing Java classes, we have added U+79D8 (first character of Mandarin 
-"secrect") to the characters already disrecommended by Java documentation ("$" and "_"). The only problem
+"secret") to the characters already disrecommended by Java documentation ("$" and "_"). The only problem
 would be if you use that character followed by certain English words in certain classes. For example
 \u79D8canvas for JComponents (in java.awt.JSComponent) and \u79D8byte (in java.io.File).
 
 missing Math methods
 --------------------
 
-java.lang.Math is worked out, but some methods are missing, eithr because they
+java.lang.Math is worked out, but some methods are missing, either because they
 involve long integer value that are inaccessible in JavaScript, or because I just
 didn't implement them. This is a result of continued Java development. 
 It is easy enough to add these methods if you have the source. They go into j2sClazz.js, 
@@ -566,7 +567,7 @@ For example, this will definitely NOT work in SwingJS:
 
   this.paint(getGraphics())
   
-and really should not in Java, either, as it is technically a resource memory leak.
+and really should not work in Java, either, as it is technically a resource memory leak.
 
 Instead, if you really do not want to use repaint(), use this:
 
@@ -601,7 +602,7 @@ Static classes such as:
    
 which are created using Class.forName are implemented using classes in the swingjs package.
 
-AWTAccessor and  AwtContext need to be customized 
+AWTAccessor is not implemented. 
 
    
 AWT component peers and component "ui" user interfaces
@@ -739,7 +740,7 @@ to BigInteger:
  * the integer storage bit length to 24, giving 48 for long and leaving
  * the last 16 bits clear for the exponent of the double number. This should
  * not affect performance significantly. It does increase the storage 
- * size by about 33%. By bring an "int" to 3 bytes, we can easily construct
+ * size by about 33%. By bringing an "int" to 3 bytes, we can easily construct
  * and use byte[] data intended for the original BitSet.  
 
 "Easily" may be a bit strong there. This was a serious challenge.
@@ -772,13 +773,11 @@ JEditorPane  (JavaScript <div>)
 
 For the initial implementation, we don't implement infinite undo/redo, and the abstract 
 document model is much less elaborate. Only PlainDocument (in the form of JSPlainDocument)
-is implemented. 
-The Document returned by JTextField.getDocument() is a javax.swing.text.Document.
+is implemented. The Document returned by JTextField.getDocument() is a javax.swing.text.Document.
 
-all scrolling is handled by HTML5
-javax.swing.AutoScroller is not implemented
+All scrolling is handled by HTML5. javax.swing.AutoScroller is not implemented.
 public static methods .stop, .isRunning, .processMouseDragged require true Java threading
-javax.swing.text.View and its subclasses are not implemented. 
+and so are not implmented. javax.swing.text.View and its subclasses are not implemented. 
 
 The JS document model does not allow two text fields to address the same underlying document. 
 
@@ -792,9 +791,23 @@ Matcher.start(groupID) is not supported.
 
 java.util.Formatter will function correctly for all standard %... patterns.
 
-integer 1/0 == 0
-----------------
+integer 1/0 == Infinity
+-----------------------
 
 1/0 in Java throws "java.lang.ArithmeticException: / by zero", but in JavaScript is just Infinity. 
  
- 
+
+
+Summary
+-------
+
+These are all the known limitations of SwingJS. We have not found any of these limitations
+to be show-stoppers. The primary issue for newcomers to SwingJS is having the source code.
+You must check that source code for all your library jar files is available or, if you
+choose, you will need to decompile those classes. We have used decompilation on some projects,
+and it works just fine. So, technically, all we really need are JAR/class files. But the 
+source is by far superior. It's generally prettier, and it has the license information that
+may or may not be present with the JAR or class files. Use class files at your own risk.
+
+Bob Hanson
+2019.08.16

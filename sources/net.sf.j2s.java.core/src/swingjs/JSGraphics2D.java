@@ -790,9 +790,13 @@ public class JSGraphics2D implements
 		return clipRect.intersects(x, y, width, height);
 	}
 
+	private int alpha;
 	private void setGraphicsColor(Color c) {
 		if (c == null)
 			return; // this was the case with a JRootPanel graphic call
+		int a = c.getAlpha();
+		if (a != alpha)
+			ctx.globalAlpha = (alpha = a) / 256F;
 		ctx.fillStyle = ctx.strokeStyle = JSToolkit.getCSSColor(c);
 	}
 
@@ -1010,13 +1014,8 @@ public class JSGraphics2D implements
 	}
 
 	public void setAlpha(float f) {
-		/**
-		 * @j2sNative
-		 *
-		 * 			this.ctx.globalAlpha = f;
-		 */
-		{
-		}
+		ctx.globalAlpha = f;
+		alpha = (int) Math.floor(f * 256 + 0.0039);
 	}
 
 	public HTML5Canvas getCanvas() {
@@ -1056,17 +1055,7 @@ public class JSGraphics2D implements
 		// note: This method is referred to in JComponent.java j2snative block as mark$
 		ctx.save();
 		Object[] map = new Object[SAVE_MAX];
-
-		float alpha = 0;
-		/**
-		 * @j2sNative
-		 * 
-		 * 			alpha = this.ctx.globalAlpha;
-		 * 
-		 */
-		{
-		}
-		map[SAVE_ALPHA] = Float.valueOf(alpha);
+		map[SAVE_ALPHA] = Float.valueOf(ctx.globalAlpha);
 		map[SAVE_COMPOSITE] = alphaComposite;
 		map[SAVE_STROKE] = currentStroke;
 		map[SAVE_TRANSFORM] = transform;
@@ -1089,8 +1078,9 @@ public class JSGraphics2D implements
 			Object[] map = HTML5CanvasContext2D.pop(ctx);
 			setComposite((Composite) map[SAVE_COMPOSITE]);
 			Float alpha = (Float) map[SAVE_ALPHA];
-			if (alpha != null)
+			if (alpha != null) {
 				setAlpha(alpha.floatValue());
+			}
 			setStroke((Stroke) map[SAVE_STROKE]);
 			setTransform((AffineTransform) map[SAVE_TRANSFORM]);
 			setFont((Font) map[SAVE_FONT]);
