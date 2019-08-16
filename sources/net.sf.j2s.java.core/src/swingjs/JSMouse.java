@@ -467,7 +467,7 @@ public class JSMouse {
 
 	
 	public static JComponent getJ2SEventTarget(MouseEvent e) {
-		return /** @j2sNative e.bdata.source || */null;
+		return /** @j2sNative e.bdata && e.bdata.source || */null;
 	}
 
 	private static boolean isPopupTrigger(int id, int mods, boolean isWin) {
