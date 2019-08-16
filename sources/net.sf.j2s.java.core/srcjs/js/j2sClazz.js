@@ -4424,11 +4424,8 @@ sp.contains$S = function(a) {return this.indexOf(a) >= 0}  // bh added
 sp.compareTo$ = sp.compareTo$S = sp.compareTo$TT = function(a){return this > a ? 1 : this < a ? -1 : 0} // bh added
 
 sp.toCharArray$=function(){
-var result=new Array(this.length);
-for(var i=0;i<this.length;i++){
-result[i]=this.charAt(i);
-}
-return Clazz.array(Character.TYPE, -1, result);
+	var result = this.split("");	
+	return setArray(result, Character.TYPE, "CA", -1);
 };
 
 String.valueOf$ = String.valueOf$Z = String.valueOf$C = String.valueOf$CA 

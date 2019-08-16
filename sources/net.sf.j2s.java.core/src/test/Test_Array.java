@@ -88,8 +88,10 @@ class Test_Array extends Test_ {
 		double[] da = new double[3];
 		System.out.println(da[iI]);
 		assert (ii3[2] == 1 && j == 1);
+		
 
 		System.out.println("Test_Array OK");
 	}
+
 
 }
