@@ -115,7 +115,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		public String __CLASS_NAME__;
 	}
 	private JSClass $clazz$; //  BH SwingJS
-	private String[] $methodList$; // BH SwingJS for proxy interfaces
+	public String[] $methodList$; // BH see j2sClazz.js Clazz.getClass, from interface parameters
 	
 //	private static native void registerNatives();
 //
@@ -139,6 +139,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 *
 	 * @return a string representation of this class object.
 	 */
+	@Override
 	public String toString() {
 		return (isInterface() ? "interface " : (isPrimitive() ? "" : "class ")) + getName();
 	}
@@ -769,7 +770,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 *             Specification, 3rd edition
 	 * @since 1.5
 	 */
-	@SuppressWarnings("unchecked")
+	@Override
 	public TypeVariable<Class<T>>[] getTypeParameters() {
 //		if (getGenericSignature() != null)
 //			return (TypeVariable<Class<T>>[]) getGenericInfo().getTypeParameters();
@@ -1811,7 +1812,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 *
 	 * @param name
 	 *            the name of the method
-	 * @param parameterTypes
+	 * @param paramTypes
 	 *            the list of parameters
 	 * @return the {@code Method} object that matches the specified {@code name}
 	 *         and {@code parameterTypes}
@@ -1852,7 +1853,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		Method m = new Method(this, name, paramTypes, null, null, 0);
 		if (!isInterface()) {
 			Object o = null;
-			String qname = name + argumentTypesToString(paramTypes);
+			String qname = m.getSignature();
 			/**
 			 * @j2sNative
 			 * 
@@ -1925,15 +1926,11 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 *
 	 * @since JDK1.1
 	 */
-	@SuppressWarnings("unchecked")
 	public Constructor<T> getConstructor(Class<?>... parameterTypes) throws NoSuchMethodException, SecurityException {
 		// be very careful not to change the stack depth of this
 		// checkMemberAccess call for security reasons
 		// see java.lang.SecurityManager.checkMemberAccess
 //		checkMemberAccess(Member.PUBLIC, ClassLoader.getCallerClassLoader());
-		Class<?>[] x = parameterTypes;
-		if (parameterTypes == null)
-			parameterTypes = new Class<?>[0];
 		return new Constructor(this, parameterTypes, new Class<?>[0], Member.PUBLIC);
 //	return getConstructor0(parameterTypes, Member.PUBLIC);
 	}
@@ -3218,6 +3215,8 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 //	 */
 //	private static final ObjectStreamField[] serialPersistentFields = new ObjectStreamField[0];
 
+	public static final Class<?>[] NO_PARAMETERS = new Class<?>[0];
+
 //	/**
 //	 * Returns the assertion status that would be assigned to this class if it
 //	 * were to be initialized at the time this method is invoked. If this class
@@ -3295,7 +3294,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 //	private static ReflectionFactory reflectionFactory;
 //
 	// To be able to query system properties as soon as they're available
-	private static boolean initted = false;
+//	private static boolean initted = false;
 
 //	private static void checkInitted() {
 //		if (initted)
@@ -3558,8 +3557,9 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	/**
 	 * A SwingJS method for Constructor and Method
 	 * 
-	 * @param parameterTypes
+	 * @param types
 	 * @param args
+	 * @param isProxy
 	 * @return
 	 */
 	public static Object[] getArgumentArray(Class<?>[] types, Object[] args, boolean isProxy) {

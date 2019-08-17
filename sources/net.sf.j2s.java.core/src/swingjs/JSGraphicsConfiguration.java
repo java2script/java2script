@@ -56,9 +56,9 @@ public class JSGraphicsConfiguration extends GraphicsConfiguration {
 			boolean alphaPremultiplied, Hashtable<?, ?> properties) {
 		return (BufferedImage) Interface.getInstanceWithParams(
 				"java.awt.image.BufferedImage", new Class<?>[] { ColorModel.class,
-						WritableRaster.class, Boolean.class, Hashtable.class },
+						WritableRaster.class, boolean.class, Hashtable.class },
 				new Object[] { cm, wr,
-						alphaPremultiplied ? Boolean.TRUE : Boolean.FALSE, properties });
+						alphaPremultiplied, properties });
 	}
 
 	@Override

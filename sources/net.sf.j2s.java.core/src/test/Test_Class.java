@@ -63,11 +63,11 @@ class Test_Class extends Test_ {
 			
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				System.out.println("!!!");
+				System.out.println("mouseClicked1");
 				Test_Class.this.showt(); 
 				showt();				
 				assert(Test_Class.this == me);
-				System.out.println("!!!");
+				System.out.println("mouseClicked2");
 			}
 
 			@Override

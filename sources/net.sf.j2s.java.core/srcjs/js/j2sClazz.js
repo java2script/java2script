@@ -9,6 +9,7 @@
 
 // TODO: still a lot of references to window[...]
 
+// BH 2019.08.16 adds cache for instanceof
 // BH 2019.07.27 fixes array(intArray).clone
 // BH 2019.07.09 adds Java String.trim()
 // BH 2019.05.21 changes Clazz.isClassDefined to Clazz._isClassDefined for compression
@@ -351,11 +352,14 @@ Clazz.instanceOf = function (obj, clazz) {
   if (typeof clazz == "string") {
     clazz = window[clazz];
   }
+  
   if (obj == null || !clazz)
     return false;
     // check for object being a java.lang.Class and the other not 
   if (obj.$clazz$ && !clazz.$clazz$) return false;
   obj.$clazz$ && (obj = obj.$clazz$);
+ if (clazz == String)
+	return typeof obj == "string";
   clazz.$clazz$ && (clazz = clazz.$clazz$);
   if (obj == clazz)
     return true;
@@ -1396,11 +1400,7 @@ var extendPrototype = function(clazz, isPrimitive, addAll) {
 }
 
 
-Clazz.saemCount0 = 0 // methods defined        5400 (Ripple.js)
-Clazz.saemCount1 = 0 // delegates created       937
-Clazz.saemCount2 = 0 // delegates bound         397
-Clazz.saemCount3 = 0 // isInstanceOfs started      
-Clazz.saemCount4 = 0 // isInstanceOfs checked
+Clazz.saemCount0 = 0 // methods defined 
 
 var NullObject = function () {};
 
@@ -1457,14 +1457,16 @@ var equalsOrExtendsLevel = function (clazzThis, clazzAncestor) {
   return false;
 };
 
+var knownInst = {};
+
 var isInstanceOf = function (clazzTarget, clazzBase, isTgtStr, isBaseStr) {
   if (clazzTarget === clazzBase)
     return true;
-  clazzBase.$clinit$ && clazzBase.$clinit$(); 
   if (isTgtStr && ("void" == clazzTarget || "unknown" == clazzTarget))
     return false;
   if (isBaseStr && ("void" == clazzBase || "unknown" == clazzBase))
     return false;
+  clazzBase.$clinit$ && clazzBase.$clinit$(); 
   if (clazzTarget === (isTgtStr ? "NullObject" : NullObject)) {
     switch (clazzBase) {
     case "n":
@@ -1477,15 +1479,27 @@ var isInstanceOf = function (clazzTarget, clazzBase, isTgtStr, isBaseStr) {
     default:
       return true;
     }
-  }  
-  isTgtStr && (clazzTarget = evalType(clazzTarget));
-  isBaseStr && (clazzBase = evalType(clazzBase));
-  return (clazzBase && clazzTarget && (
+  } 
+  var t = (isTgtStr ? clazzTarget : clazzTarget.__CLASS_NAME__ || clazzTarget.type);
+  var b = (isBaseStr ? clazzBase : clazzBase.__CLASS_NAME__ || clazzBase.type);
+  if (t && t == b)
+	return true;
+  var key = t + "|" + b;
+  var val = knownInst[key];
+  if (val)
+	return (val == 1 ? true : false); 
+  
+  isTgtStr && (clazzTarget = window[clazzTarget]);
+  isBaseStr && (clazzBase = window[clazzBase]);
+  var ret = (clazzBase && clazzTarget && (
     clazzTarget == clazzBase 
       || clazzBase === Object 
       || clazzBase === Clazz._O
       || equalsOrExtendsLevel(clazzTarget, clazzBase)
     ));
+if (t && b)
+  knownInst[key] = (ret ? 1 : -1);
+  return ret;
 };
 
 

@@ -46,11 +46,14 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 			Class<?>[] checkedExceptions, int modifiers) {
 		this.Class_ = declaringClass;
 		this.name = name;
-		this.parameterTypes = parameterTypes;
+		this.parameterTypes = (parameterTypes == null ? Class.NO_PARAMETERS : parameterTypes);
 		this.returnType = returnType;
 		this.exceptionTypes = checkedExceptions;
 		this.modifiers = modifiers;
-		this.signature = name + Class.argumentTypesToString(parameterTypes);
+		// modifier PUBLIC means this is from Class.java getMethods
+		if (parameterTypes != null && parameterTypes.length == 0)
+			parameterTypes = null;
+		this.signature = (declaringClass.$methodList$ == null ? name + Class.argumentTypesToString(parameterTypes) : name);
 	}
 
 	/**
