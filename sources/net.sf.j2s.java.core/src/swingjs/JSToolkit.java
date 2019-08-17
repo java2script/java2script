@@ -964,12 +964,13 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		// SwingJS stop any further processing at all within the browser
 		Object jqevent = null;
 		if (e instanceof InputEvent) {
-			jqevent = /** @j2sNative e.bdata.jqevent || */null; 
+			jqevent = /** @j2sNative e.bdata && e.bdata.jqevent || */null; 
 		} else {
 			jqevent = e;
 		}
 		if (jqevent == null)
 			return;
+		
 		/**
 		 * @j2sNative 
 		 * 		jqevent.stopPropagation();

@@ -467,7 +467,7 @@ public class JSMouse {
 
 	
 	public static JComponent getJ2SEventTarget(MouseEvent e) {
-		return /** @j2sNative e.bdata.source || */null;
+		return /** @j2sNative e.bdata && e.bdata.source || */null;
 	}
 
 	private static boolean isPopupTrigger(int id, int mods, boolean isWin) {
@@ -495,8 +495,8 @@ public class JSMouse {
 
 	private boolean keyAction(int id, Object jqevent, long time) {
 		JComponent c = 	/** @j2sNative 
-		jqevent.target["data-shadowkeycomponent"] || jqevent.target["data-keycomponent"]
-				 */null;
+		jqevent.target["data-shadowkeycomponent"] || jqevent.target["data-keycomponent"] ||
+				 */null; 
 		return JSKeyEvent.dispatchKeyEvent(c, id, jqevent, time);
 	}
 	

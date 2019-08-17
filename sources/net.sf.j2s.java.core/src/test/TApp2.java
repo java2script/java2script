@@ -29,6 +29,8 @@ import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
@@ -120,6 +122,25 @@ public class TApp2 extends Applet {
 		ta.setBounds(200, 70, 200, 200);
 		ta.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
 		ta.appendText("A text\nwith some\nlines and\n no content.");
+		ta.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+				System.out.println("keyTyped");
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				System.out.println("keypressed");
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				System.out.println("keyReleased");
+				
+			}
+			
+		});
 		ta.addFocusListener(new FocusListener() {
 
 			@Override

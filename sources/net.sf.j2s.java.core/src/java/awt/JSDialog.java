@@ -690,10 +690,9 @@ public class JSDialog extends Window {
 		public void addNotify() {
         synchronized (getTreeLock()) {
           getOrCreatePeer();
-            if (parent != null) {
-                parent.addNotify();
-            }
-            super.addNotify();
+  		if (parent != null && parent.getPeer() == null)
+			parent.addNotify();
+           super.addNotify();
         }
     }
 

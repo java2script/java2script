@@ -1103,6 +1103,18 @@ public class JSComponentUI extends ComponentUI
 		}
 	}
 
+
+
+	/**
+	 * Signal to swingjs2 to ignore the event, as it has been handled already.
+	 * 
+	 * @param jqevent
+	 */
+	void setIgnoreEvent(Object jqevent) {
+		/**
+		 * @j2sNative jqevent.originalEvent.xhandled = true;
+		 */
+	}
 	/**
 	 * Allows mouse and keyboard handling via an overridden method
 	 * 

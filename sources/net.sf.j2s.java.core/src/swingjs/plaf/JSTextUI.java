@@ -3542,4 +3542,5 @@ public abstract class JSTextUI extends JSLightweightUI {
 		setJavaMarkAndDot(pt);
 	}
 
+
 }
