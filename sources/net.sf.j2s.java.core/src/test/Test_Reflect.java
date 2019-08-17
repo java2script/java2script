@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 
 class Test_Reflect extends Test_ {
 
+	static long ltime = System.currentTimeMillis();
 	public String s = "field s";
 	
 	public void test(char i, String s) {
@@ -71,6 +72,8 @@ test.Test_Reflect.getMethod$S$ClassA ("test", [String, Clazz.arrayType('float[][
 
 	public static void main(String[] args) {
 		
+		
+		new Test_Reflect().test("int[]", new int[] {1,2,3});
 		String name = "";
 		try {
 			Test_Path tp = (Test_Path) Class.forName(name = "Test_Path", true, Test_Reflect.class.getClassLoader()).newInstance();
@@ -87,6 +90,20 @@ test.Test_Reflect.getMethod$S$ClassA ("test", [String, Clazz.arrayType('float[][
 		}
 		
 		Test_Reflect tr = new Test_Reflect();
+		
+		new Test_Char();
+		assert(tr instanceof Test_);
+		assert(tr instanceof Test_);
+		assert(!(((Test_)tr) instanceof Test_Char));
+
+		long l = System.currentTimeMillis();
+		System.out.println(l - ltime);
+		for (int i = 0; i < 10000; i++) {
+		assert(!(((Test_)tr) instanceof Test_Char));
+		}
+		System.out.println(l - System.currentTimeMillis());
+		
+		
   		  // Field is not implemented
 //			Field f = Test_Reflect.class.getDeclaredField("s");
 //			System.out.println(f.getDeclaringClass());
