@@ -949,6 +949,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 			 * 			jQueryEvent.preventDefault(); 
 			 * 			jQueryEvent.stopPropagation();
 			 */
+			setIgnoreEvent(jQueryEvent);
 			return HANDLED;
 		}
 	}
