@@ -23,7 +23,7 @@ import swingjs.api.js.DOMNode;
 public class JSTextFieldUI extends JSTextUI {
 
 	protected String inputType = "text";
-	private JTextField textField;
+	protected JTextField textField;
 
 	@Override
 	public DOMNode updateDOMNode() {
@@ -42,12 +42,6 @@ public class JSTextFieldUI extends JSTextUI {
 		setCssFont(setJSText(focusNode, "value", setCurrentText()), getFont());
 		// setTextAlignment();
 		return super.updateDOMNode();
-	}
-
-	@Override
-	protected void undisposeUI(DOMNode node) {
-		super.undisposeUI(node);
-		bindJSKeyEvents(focusNode, true);		
 	}
 
 	@Override

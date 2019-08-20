@@ -6,6 +6,8 @@ import java.awt.Component;
 import java.awt.DefaultKeyboardFocusManager;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Frame;
+import java.awt.TextArea;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -20,7 +22,6 @@ import javax.swing.JApplet;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
-import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
@@ -28,30 +29,22 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.text.Document;
 import javax.swing.text.EditorKit;
-import javax.swing.text.StyledEditorKit;
 
-public class Test_Editor0 extends JApplet {
+public class Test_Editor3 extends JApplet {
 
-	static String test = "123\n\n678\n\n123\n";
+	static String test = "1234567890";
 
 	public static void main(String[] args) {
 		new Test_EditorFrame();
 	}
 
-	static class Test_EditorFrame  extends JFrame {
+	static class Test_EditorFrame  extends Frame {
 
 		Test_EditorFrame() {
 		//JTextField field = getField();
-		JEditorPane area = getEditor();
-		System.out.println(area.getDocument());
+		TextArea area = getArea();
 		area.setPreferredSize(new Dimension(300,300));
-		//area.addKeyListener(ka);
-		JScrollPane js2 = new JScrollPane(area);
-		js2.setPreferredSize(new Dimension(300, 300));
-		js2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		js2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-
-		add(js2);
+		add(area);
 		pack();
 		setVisible(true);
 		//field.addKeyListener(ka);
@@ -61,12 +54,12 @@ public class Test_Editor0 extends JApplet {
 	
 	
 	
-	public Test_Editor0() {
+	public Test_Editor3() {
 
 	//	setTitle("testing editor");
 		setLocation(100, 100);
 		//JTextArea area = getArea();
-//		
+		
 //		JScrollPane js2 = new JScrollPane(area);
 //		js2.setPreferredSize(new Dimension(300, 300));
 //		js2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -105,8 +98,8 @@ public class Test_Editor0 extends JApplet {
 		return field;
 	}
 
-	private static JTextArea getArea() {
-		JTextArea area = new JTextArea() {
+	private static TextArea getArea() {
+		TextArea area = new TextArea() {
 		};
 
 //		DefaultCaret c = new DefaultCaret() {
@@ -139,10 +132,8 @@ public class Test_Editor0 extends JApplet {
 		return area;
 	}
 
-	private static JEditorPane area;
-	
 	private static JEditorPane getEditor() {
-		area = new JEditorPane() {
+		JEditorPane area = new JTextPane() {
 			@Override
 			public EditorKit getEditorKit() {
 				return super.getEditorKit();
@@ -152,7 +143,7 @@ public class Test_Editor0 extends JApplet {
 		    	super.setDocument(doc);
 		    }
 		};
-		area.setEditorKit(new StyledEditorKit());
+
 		area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
 		area.setText(test);
 		area.setBackground(new Color(200, 200, 180));
@@ -164,9 +155,6 @@ public class Test_Editor0 extends JApplet {
 		public void keyPressed(KeyEvent e) {
 			//e.consume();
 			showKeyEvent(e);
-//			System.out.println(area.getFont());
-//			if (e.getKeyChar() == 'X')
-//				setFontTo(new Font(Font.MONOSPACED, Font.PLAIN, area.getFont().getSize() * 2));
 		}
 
 		@Override
@@ -241,40 +229,6 @@ public class Test_Editor0 extends JApplet {
 	static protected String getID(Object jc) {
 		return (jc == null ? null : jc instanceof JComponent ? /** @j2sNative jc.ui.id || */
 				((JComponent) jc).getUIClassID() : jc.getClass().getName());
-	}
-
-	protected static void setFontTo(Font font) {
-		
-		area.setFont(font);
-//	    JEditorPane jtp;
-//	    
-//	        // Start with the current input attributes for the JTextPane. This
-//	        // should ensure that we do not wipe out any existing attributes
-//	        // (such as alignment or other paragraph attributes) currently
-//	        // set on the text area.
-//	        MutableAttributeSet attrs = jtp.getInputAttributes();
-//
-//	        // Set the font family, size, and style, based on properties of
-//	        // the Font object. Note that JTextPane supports a number of
-//	        // character attributes beyond those supported by the Font class.
-//	        // For example, underline, strike-through, super- and sub-script.
-//	        StyleConstants.setFontFamily(attrs, font.getFamily());
-//	        StyleConstants.setFontSize(attrs, font.getSize());
-//	        StyleConstants.setItalic(attrs, (font.getStyle() & Font.ITALIC) != 0);
-//	        StyleConstants.setBold(attrs, (font.getStyle() & Font.BOLD) != 0);
-//
-//	        // Set the font color
-//	        StyleConstants.setForeground(attrs, c);
-//
-//	        // Retrieve the pane's document object
-//	        StyledDocument doc = jtp.getStyledDocument();
-//
-//	        // Replace the style for the entire document. We exceed the length
-//	        // of the document by 1 so that text entered at the end of the
-//	        // document uses the attributes.
-//	        doc.setCharacterAttributes(0, doc.getLength() + 1, attrs, false);
-//		// TODO Auto-generated method stub
-//		
 	}
 
 	protected static void showKeyEvent(KeyEvent e) {

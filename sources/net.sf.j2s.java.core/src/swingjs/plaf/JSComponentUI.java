@@ -2940,6 +2940,9 @@ public class JSComponentUI extends ComponentUI
 		return c.getFontMetrics(font);
 	}
 
+	/**
+	 * Window has been disposed, or component has been removed.
+	 */
 	@Override
 	public void dispose() {
 		if (isUIDisabled)
@@ -3457,6 +3460,11 @@ public class JSComponentUI extends ComponentUI
 	 * 
 	 */
 	protected boolean modalBlocked;
+
+	/**
+	 * JTextArea, JTextPane, and JEditorPane
+	 */
+	public boolean isTextView;
 
 
 

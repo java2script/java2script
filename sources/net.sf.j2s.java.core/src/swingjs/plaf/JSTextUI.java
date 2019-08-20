@@ -45,7 +45,9 @@ import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JViewport;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -130,10 +132,12 @@ public abstract class JSTextUI extends JSLightweightUI {
 	
 	protected static EditorKit defaultKit = new DefaultEditorKit();
 	
+	private final static String[] overflows = new String[] { "auto", "hidden", "scroll" };
+
 	
 	static final Point markDot = new Point();
 
-	transient JTextComponent editor;
+	protected JTextComponent editor;
 
 	protected boolean editable = true;
 	protected boolean isEditorPane;
@@ -236,6 +240,12 @@ public abstract class JSTextUI extends JSLightweightUI {
 		return false;
 	}
 
+	@Override
+	protected void undisposeUI(DOMNode node) {
+		super.undisposeUI(node);
+		bindJSKeyEvents(focusNode, true);		
+	}
+	
 	/**
 	 * Initializes component properties, e.g. font, foreground, background, caret
 	 * color, selection color, selected text color, disabled text color, and
@@ -675,6 +685,12 @@ public abstract class JSTextUI extends JSLightweightUI {
 	}
 
 	
+	/**
+	 * original TextUI call; only for JTextArea here
+	 * 
+	 * @param tc
+	 * @return
+	 */
     public View getRootView(JTextComponent tc) {
         return rootView;
     }
@@ -1145,7 +1161,7 @@ public abstract class JSTextUI extends JSLightweightUI {
 	public void updateJSCursor(String why) {	
 		if (domNode == null || editor.getDocument() == null || editor.getText().length() == 0)
 			return;
-		if (isAWT && why != "focus")
+		if (isAWT && why != "focus" && why != "default")
 			return;
 		int start = editor.getCaret().getMark();
 		int end = editor.getCaret().getDot();
@@ -1153,9 +1169,13 @@ public abstract class JSTextUI extends JSLightweightUI {
 	}
 
 	protected void setJSSelection(int mark, int dot, boolean andScroll) {
-		//	System.out.println(id + " updateJSCursor " + why + "  " + start + " " + end);
-		Object[] r1 = getJSNodePt(focusNode, -1, mark);
-		Object[] r2 = (r1 == null || dot == mark ? r1 : getJSNodePt(focusNode, -1, dot));
+		// overridden by JSEditorPaneUI
+	  //System.out.println(id + " seJSSelection  " + mark + " " + dot + " " +andScroll);
+		Object[] r1 = getJSNodePt(focusNode, mark, true);
+		Object[] r2 = (r1 == null || dot == mark ? r1 : getJSNodePt(focusNode, dot, true));
+		
+		//System.out.println(id + " setJSSelection " + r1 + " " + r2);
+		
 		if (r1 != null && r2 != null)
 			jsSelect(r1, r2, andScroll);
 	}
@@ -1171,7 +1191,7 @@ public abstract class JSTextUI extends JSLightweightUI {
 	 * @param pt
 	 * @return
 	 */
-	protected Object[] getJSNodePt(DOMNode node, int offset, int pt) {
+	protected Object[] getJSNodePt(DOMNode node, int pt, boolean isRoot) {
 		/**
 		 * @j2sNative return [null, pt];
 		 */
@@ -1189,6 +1209,7 @@ public abstract class JSTextUI extends JSLightweightUI {
 	 */
 
 	protected void jsSelect(Object[] r1, Object[] r2, boolean andScroll) {
+		// overridden in JSEditorPaneUI
 //		System.out.println("scrolling to " + r1 + " " + r2 + " " + editor.getText());
 		setJSMarkAndDot(/** @j2sNative r1[1] || */0, /** @j2sNative r2[1] || */0, andScroll);
 	}
@@ -1263,13 +1284,18 @@ public abstract class JSTextUI extends JSLightweightUI {
 			case KeyEvent.VK_V: // paste
 				if (!isCTRL)
 					return null;
+				//TODO -- JEditorPane needs this -- right now we cannot do this correctly with multiple new lines 
+				//allowKeyEvent(jQueryEvent);
 				if (type == "keydown")
 					handleFutureInsert(false);
 				else if (type == "keyup")
 					handleFutureInsert(true);
 				return NOT_CONSUMED;
 			case KeyEvent.VK_C: // copy
-				return (isCTRL ? NOT_CONSUMED : null); // allow standard browser CTRL-C, with no Java-Event processing
+				if (!isCTRL)
+					return null;
+				allowKeyEvent(jQueryEvent);
+				return (NOT_CONSUMED); // allow standard browser CTRL-C, with no Java-Event processing
 			case KeyEvent.VK_TAB:
 				b = (type == "keydown" ? handleTab(jQueryEvent) : CONSUMED);
 				break;
@@ -1303,6 +1329,15 @@ public abstract class JSTextUI extends JSLightweightUI {
 		}
 		return b;
 	}
+
+	private void allowKeyEvent(Object jQueryEvent) {
+		/**
+		 * @j2sNative
+		 * 
+		 * jQueryEvent.originalEvent.xallowKeyEvent = true;
+		 */		
+	}
+
 
 	protected void handleFutureInsert(boolean trigger) {
 	}
@@ -1604,7 +1639,7 @@ public abstract class JSTextUI extends JSLightweightUI {
 	 }
 	
 	 /**
-	 * {@inheritDoc}
+	 * Called from javax.swing.text classes, particularly DefaultEditorKit
 	 */
 	 public int getNextVisualPositionFrom(JTextComponent t, int pos,
 	 Position.Bias b, int direction, Position.Bias[] biasRet)
@@ -1615,12 +1650,23 @@ public abstract class JSTextUI extends JSLightweightUI {
 //		 System.out.println("next " + dot + " " + direction);
 		 switch (direction) {
 		 case SwingConstants.SOUTH:
+			 dot = editor.getText().indexOf('\n', dot + 1);
+			 if (dot >= 0)
+				 return dot;
+			 dot = Integer.MAX_VALUE;
+			 // fall through
 		 case SwingConstants.EAST:
-			 int len = editor.getDocument().getLength() - 1;
-			 return (dot >= len ? len : ++dot);
+			 int len = editor.getDocument().getLength() - (isEditorPane ? 0 : 1);
+			 dot = (dot >= len ? len : ++dot);
+			 return dot;
 		 case SwingConstants.NORTH:
+			 dot = editor.getText().lastIndexOf('\n', dot - 1);
+			 if (dot >= 0)
+				 return dot;
+			 dot = -1;
+			 // fall through
 		 case SwingConstants.WEST:
-			 return (dot == 0 ? 0 : --dot);
+			 return (dot <= 0 ? 0 : --dot);
 		 }
 	 return -1;
 	 }
@@ -3542,5 +3588,22 @@ public abstract class JSTextUI extends JSLightweightUI {
 		setJavaMarkAndDot(pt);
 	}
 
+	@Override
+	protected void setOverflow() {
+		if (textNode == null) // JTextField
+			return;
+		Container scroller = jc.getParent();
+		if (isAWT) {
+			scroller = jc;
+		} else if (!(scroller instanceof JViewport) || !((scroller = scroller.getParent()) instanceof JScrollPane)) {
+			DOMNode.setStyles(domNode, "overflow", "hidden", "overflow-x", null, "overflow-y", null);
+			return;
+		} 
+		JScrollPane sp = (JScrollPane) scroller;
+		DOMNode.setStyles(domNode, "overflow", null);
+		DOMNode.setStyles(domNode, "overflow-x", overflows[sp.getHorizontalScrollBarPolicy() % 10]);
+		DOMNode.setStyles(domNode, "overflow-y", overflows[sp.getVerticalScrollBarPolicy() % 10]);
+	}
+	
 
 }

@@ -18,9 +18,10 @@ import swingjs.api.js.DOMNode;
  * @author Bob Hanson
  *
  */
-public class JSTextAreaUI extends JSTextViewUI {
+public class JSTextAreaUI extends JSTextUI {
 
 	public JSTextAreaUI() {
+		isTextView = true;
 		// make sure standard HTML5 event is passed even if the Java event is consumed.
 		setDoPropagate();
 	}
@@ -29,7 +30,11 @@ public class JSTextAreaUI extends JSTextViewUI {
 
 		if (domNode == null) {
 			valueNode = domNode = newDOMObject("textarea", id, "spellcheck", FALSE, "autocomplete", "off");
-			setupViewNode();
+			allowPaintedBackground = false;
+			focusNode = enableNode = textNode = domNode;
+			DOMNode.setStyles(domNode, "resize", "none", "margin", "0px", "padding", "0px","scrollbar-width", "thin"); // otherwise it overflows
+			DOMNode.setStyles(domNode, "box-sizing", "border-box");
+			bindJSKeyEvents(focusNode, true);
 		}
 		JTextArea area = (JTextArea) jc;
 // Q: Why did I have this 240,240,240?
