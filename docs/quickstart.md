@@ -4,6 +4,10 @@
 
 ## Installation
 
+see https://github.com/BobHanson/java2script/tree/master/sources/net.sf.j2s.core/dist  for installation instructions. 
+
+The instructions given here are for a much earlier version.
+
 ### Prerequisites
 
 - Eclipse Neon (4.6) or higher.
