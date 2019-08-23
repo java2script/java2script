@@ -122,7 +122,7 @@ public abstract class DocumentBuilderFactory {
                 /* The default property name according to the JAXP spec */
                 "javax.xml.parsers.DocumentBuilderFactory",
                 /* The fallback implementation class name */
-                "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl");
+                "swingjs.xml.JSDocumentBuilderFactory"); // BH SwingJS
         } catch (FactoryFinder.ConfigurationError e) {
             throw new FactoryConfigurationError(e.getException(),
                                                 e.getMessage());
