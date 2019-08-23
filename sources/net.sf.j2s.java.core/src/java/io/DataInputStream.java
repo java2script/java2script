@@ -565,7 +565,7 @@ public class DataInputStream extends FilterInputStream implements DataInput {
 					if (!(in instanceof PushbackInputStream)) {
 						this.in = new PushbackInputStream(in, 1);
 					}
-					((PushbackInputStream) in).unreadByte(c2);
+					((PushbackInputStream) in).unread(c2);
 				}
 				break loop;
 

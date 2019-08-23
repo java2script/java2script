@@ -102,10 +102,13 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 	 */
 	public void buildFinished(IJavaProject project) {
 		if (javaFiles != null) {
-			System.out.println("building JavaScript " + project.getProject().getLocation());
 			Java2ScriptCompiler j2sCompiler = new Java2ScriptCompiler();
 			j2sCompiler.startBuild(isCleanBuild);
-			j2sCompiler.initializeProject(project, true);
+			if (!j2sCompiler.initializeProject(project, true)) {
+				System.out.println(".j2s disabled");
+				return;
+			}
+			System.out.println("building JavaScript " + project.getProject().getLocation());
 			for (int i = 0; i < javaFiles.length; i++) {
 				System.out.println("transpiling " + javaFiles[i]);
 // trying to keep the progess monitor running - didn't work

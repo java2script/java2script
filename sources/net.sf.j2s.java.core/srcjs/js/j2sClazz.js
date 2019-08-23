@@ -5342,21 +5342,22 @@ newEx(java.lang,"ArrayStoreException",RuntimeException);
 newEx(java.lang,"ClassCircularityError",LinkageError);
 newEx(java.lang,"ClassFormatError",LinkageError);
 newEx(java.lang,"CloneNotSupportedException",Exception);
+newEx(java.lang,"ReflectiveOperationException",Exception);
 newEx(java.lang,"IllegalAccessError",IncompatibleClassChangeError);
-newEx(java.lang,"IllegalAccessException",Exception);
+newEx(java.lang,"IllegalAccessException",ReflectiveOperationException);
 newEx(java.lang,"IllegalMonitorStateException",RuntimeException);
 newEx(java.lang,"IllegalStateException",RuntimeException);
 newEx(java.lang,"IllegalThreadStateException",IllegalArgumentException);
 newEx(java.lang,"IndexOutOfBoundsException",RuntimeException);
 newEx(java.lang,"InstantiationError",IncompatibleClassChangeError);
-newEx(java.lang,"InstantiationException",Exception);
+newEx(java.lang,"InstantiationException",ReflectiveOperationException);
 newEx(java.lang,"InternalError",VirtualMachineError);
 newEx(java.lang,"InterruptedException",Exception);
 newEx(java.lang,"NegativeArraySizeException",RuntimeException);
 newEx(java.lang,"NoClassDefFoundError",LinkageError);
 newEx(java.lang,"NoSuchFieldError",IncompatibleClassChangeError);
-newEx(java.lang,"NoSuchFieldException",Exception);
-newEx(java.lang,"NoSuchMethodException",Exception);
+newEx(java.lang,"NoSuchFieldException",ReflectiveOperationException);
+newEx(java.lang,"NoSuchMethodException",ReflectiveOperationException);
 newEx(java.lang,"NoSuchMethodError",IncompatibleClassChangeError);
 newEx(java.lang,"NullPointerException",RuntimeException);
 newEx(java.lang,"NumberFormatException",IllegalArgumentException);
@@ -5391,7 +5392,7 @@ m$(C$, "c$$I", function(index){
 C$.superclazz.c$$S.apply(this,["String index out of range: "+index]);
 }, 1);
 
-C$=Clazz.newClass(java.lang.reflect,"InvocationTargetException",function(){this.target=null;},Exception);
+C$=Clazz.newClass(java.lang.reflect,"InvocationTargetException",function(){this.target=null;},ReflectiveOperationException);
 m$(C$, "c$$Throwable", function(exception){
 C$.superclazz.c$$Throwable.apply(this, arguments);
 this.target=exception;

@@ -2003,4 +2003,8 @@ public class File
         return result;
     }
 
+	public long lastModified() {
+		return this.lastModified;
+	}
+
 }

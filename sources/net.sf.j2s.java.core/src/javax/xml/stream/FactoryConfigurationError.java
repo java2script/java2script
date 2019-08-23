@@ -1,85 +1,125 @@
-/* FactoryConfigurationError.java --
-   Copyright (C) 2005  Free Software Foundation, Inc.
+/*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
+ */
 
-This file is part of GNU Classpath.
-
-GNU Classpath is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
-
-GNU Classpath is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with GNU Classpath; see the file COPYING.  If not, write to the
-Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-02110-1301 USA.
-
-Linking this library statically or dynamically with other modules is
-making a combined work based on this library.  Thus, the terms and
-conditions of the GNU General Public License cover the whole
-combination.
-
-As a special exception, the copyright holders of this library give you
-permission to link this library with independent modules to produce an
-executable, regardless of the license terms of these independent
-modules, and to copy and distribute the resulting executable under
-terms of your choice, provided that you also meet, for each linked
-independent module, the terms and conditions of the license of that
-module.  An independent module is a module which is not derived from
-or based on this library.  If you modify this library, you may extend
-this exception to your version of the library, but you are not
-obligated to do so.  If you do not wish to do so, delete this
-exception statement from your version. */
+/*
+ * Copyright (c) 2009 by Oracle Corporation. All Rights Reserved.
+ */
 
 package javax.xml.stream;
 
 /**
- * Error indicating that a factory could not be configured.
+ * An error class for reporting factory configuration errors.
+ *
+ * @version 1.0
+ * @author Copyright (c) 2009 by Oracle Corporation. All Rights Reserved.
+ * @since 1.6
  */
-public class FactoryConfigurationError
-  extends Error
-{
+public class FactoryConfigurationError extends Error {
+    private static final long serialVersionUID = -2994412584589975744L;
 
-  private final Exception exception;
+  Exception nested;
 
-  public FactoryConfigurationError()
-  {
-    this((String) null, (Exception) null);
+  /**
+   * Default constructor
+   */
+  public FactoryConfigurationError(){}
+
+  /**
+   * Construct an exception with a nested inner exception
+   *
+   * @param e the exception to nest
+   */
+  public FactoryConfigurationError(java.lang.Exception e){
+    nested = e;
   }
 
-  public FactoryConfigurationError(Exception e)
-  {
-    this(e, null);
-  }
-
-  public FactoryConfigurationError(Exception e, String msg)
-  {
+  /**
+   * Construct an exception with a nested inner exception
+   * and a message
+   *
+   * @param e the exception to nest
+   * @param msg the message to report
+   */
+  public FactoryConfigurationError(java.lang.Exception e, java.lang.String msg){
     super(msg);
-    exception = e;
+    nested = e;
   }
 
-  public FactoryConfigurationError(String msg, Exception e)
-  {
-    this(e, msg);
+  /**
+   * Construct an exception with a nested inner exception
+   * and a message
+   *
+   * @param msg the message to report
+   * @param e the exception to nest
+   */
+  public FactoryConfigurationError(java.lang.String msg, java.lang.Exception e){
+    super(msg);
+    nested = e;
   }
 
-  public FactoryConfigurationError(String msg)
-  {
-    this(null, msg);
+  /**
+   * Construct an exception with associated message
+   *
+   * @param msg the message to report
+   */
+  public FactoryConfigurationError(java.lang.String msg) {
+    super(msg);
   }
 
-  public Exception getException()
-  {
-    return exception;
+  /**
+   * Return the nested exception (if any)
+   *
+   * @return the nested exception or null
+   */
+  public Exception getException() {
+    return nested;
+  }
+    /**
+     * use the exception chaining mechanism of JDK1.4
+    */
+    @Override
+    public Throwable getCause() {
+        return nested;
+    }
+
+  /**
+   * Report the message associated with this error
+   *
+   * @return the string value of the message
+   */
+  public String getMessage() {
+    String msg = super.getMessage();
+    if(msg != null)
+      return msg;
+    if(nested != null){
+      msg = nested.getMessage();
+      if(msg == null)
+        msg = nested.getClass().toString();
+    }
+    return msg;
   }
 
-  public String getMessage()
-  {
-    return super.getMessage();
-  }
+
 
 }

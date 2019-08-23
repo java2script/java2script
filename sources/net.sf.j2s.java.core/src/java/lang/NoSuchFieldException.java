@@ -20,7 +20,7 @@ package java.lang;
  * This exception is thrown when a program attempts to access a field which does
  * not exist in a class
  */
-public class NoSuchFieldException extends java.lang.Exception {
+public class NoSuchFieldException extends ReflectiveOperationException {
 
     private static final long serialVersionUID = -6143714805279938260L;
 
