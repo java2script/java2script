@@ -392,7 +392,7 @@ public static final short DOCUMENT_POSITION_CONTAINS 	 = 8;
 public static final short DOCUMENT_POSITION_CONTAINED_BY = 16;	
 public static final short DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 32;
 
-public int compareDocumentPosition(Node other) throws DOMException;
+public short compareDocumentPosition(Node other) throws DOMException;
 
     /**
      * Compares a node with this node with regard to their position in the 
@@ -510,6 +510,10 @@ public int compareDocumentPosition(Node other) throws DOMException;
      * (Node, Document, ...)?
      */
     public Object getKey();
+
+	public boolean isEqualNode(Node child2);
+
+	public boolean hasAttributes();
 
 }
 

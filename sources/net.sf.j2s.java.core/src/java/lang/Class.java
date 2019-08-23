@@ -2879,7 +2879,9 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		void removeByNameAndSignature(Method toRemove) {
 			for (int i = 0; i < length; i++) {
 				Method m = methods[i];
-				if (m != null && m.getReturnType() == toRemove.getReturnType() && m.getName() == toRemove.getName()
+				if (m != null 
+						//&& m.getReturnType() == toRemove.getReturnType() 
+						&& m.getName() == toRemove.getName()
 						&& arrayContentsEq(m.getParameterTypes(), toRemove.getParameterTypes())) {
 					methods[i] = null;
 				}

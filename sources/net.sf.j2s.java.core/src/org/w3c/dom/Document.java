@@ -490,6 +490,8 @@ public interface Document extends Node {
                                                 String localName, 
                                                 String value);
 
+	public String getDocumentURI();
+
 
 
 }

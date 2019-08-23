@@ -300,5 +300,11 @@ public interface Element extends Node {
     public boolean hasAttributeNS(String namespaceURI, 
                                   String localName);
 
+	public boolean hasAttributes();
+
+	public boolean isDefaultNamespace(String namespaceURI);
+
+	public String lookupPrefix(String namespaceURI);
+
 }
 

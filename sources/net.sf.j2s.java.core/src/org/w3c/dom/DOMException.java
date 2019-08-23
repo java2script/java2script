@@ -66,6 +66,9 @@ public class DOMException extends RuntimeException {
      * @since DOM Level 2
      */ 
     public static final short INVALID_ACCESS_ERR        = 15;
+    
+    public static final short 	TYPE_MISMATCH_ERR 	=  17;
+    public static final short 	VALIDATION_ERR 	 = 16;
 
 }
 

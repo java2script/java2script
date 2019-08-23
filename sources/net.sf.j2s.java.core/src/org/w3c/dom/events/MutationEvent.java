@@ -21,6 +21,11 @@ import org.w3c.dom.Node;
  * @since DOM Level 2
  */
 public interface MutationEvent extends Event {
+	
+	public static final short 	ADDITION      =	2;
+	public static final short 	MODIFICATION  = 1;
+	public static final short 	REMOVAL 	  = 3;
+	
     /**
      *  <code>relatedNode</code> is used to identify a secondary node related 
      * to a mutation event. For example, if a mutation event is dispatched to 
@@ -78,6 +83,15 @@ public interface MutationEvent extends Event {
                                   String prevValueArg, 
                                   String newValueArg, 
                                   String attrNameArg);
+
+    public void initMutationEvent(String typeArg, 
+            boolean canBubbleArg, 
+            boolean cancelableArg, 
+            Node relatedNodeArg, 
+            String prevValueArg, 
+            String newValueArg, 
+            String attrNameArg, 
+            short unkonwnParam);
 
 }
 
