@@ -13,6 +13,7 @@
 package org.w3c.dom;
 
 
+
 /**
  * This interface extends the <code>Text</code> interface with a new attribute 
  * that allows one to find out whether a <code>Text</code> node only 
@@ -20,12 +21,12 @@ package org.w3c.dom;
  * <p>See also the <a href='http://www.w3.org/TR/2000/WD-DOM-Level-3-Core-20000901'>Document Object Model (DOM) Level 3 Core Specification</a>.
  */
 public interface Text3 extends Text {
-    /**
-     * Returns whether this text node contains whitespace in element content, 
-     * often abusively called "ignorable whitespace".An implementation can 
-     * only return <code>true</code> if, one way or another, it has access 
-     * to the relevant information (e.g., the DTD or schema).
-     */
-    public boolean getIsWhitespaceInElementContent();
+//    /**
+//     * Returns whether this text node contains whitespace in element content, 
+//     * often abusively called "ignorable whitespace".An implementation can 
+//     * only return <code>true</code> if, one way or another, it has access 
+//     * to the relevant information (e.g., the DTD or schema).
+//     */
+//    public boolean getIsWhitespaceInElementContent();
 
 }
