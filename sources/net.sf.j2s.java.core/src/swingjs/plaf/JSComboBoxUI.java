@@ -9,6 +9,7 @@ import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -84,6 +85,7 @@ public class JSComboBoxUI extends JSLightweightUI {
 
 	private boolean hasCustomRenderer;
 	private ListCellRenderer renderer;
+	protected boolean contentsTainted;
 
 	public JSComboBoxUI() {
 		isContainer = true;
@@ -1011,7 +1013,14 @@ public class JSComboBoxUI extends JSLightweightUI {
 	// begin ComponentUI Implementation
 	@Override
 	public void paint(Graphics g, JComponent c) {
-		popup.updateCSS();
+		if (contentsTainted) {
+			popup.updateList();
+			contentsTainted = false;
+		} else {
+			popup.updateCSS();
+		}
+		popup.updateSelectedIndex();
+		popup.setPopupVisible(false);
 		// SwingJS -- not doing this for now.
 //        hasFocus = comboBox.hasFocus();
 //        if ( !comboBox.isEditable() ) {
@@ -1729,7 +1738,7 @@ public class JSComboBoxUI extends JSLightweightUI {
 	//
 	private class Handler implements ActionListener, FocusListener, KeyListener, LayoutManager, ListDataListener,
 			PropertyChangeListener, ListSelectionListener, ItemListener {
-		
+
 		@Override
 		public void itemStateChanged(ItemEvent e) {
 			popup.updateState(e, null);
@@ -1927,7 +1936,7 @@ public class JSComboBoxUI extends JSLightweightUI {
 			if (comboBox.isEditable() && editor != null) {
 				comboBox.configureEditor(comboBox.getEditor(), comboBox.getSelectedItem());
 			}
-
+			contentsTainted = true;
 			isDisplaySizeDirty = true;
 			repaint();
 		}
@@ -2071,9 +2080,8 @@ public class JSComboBoxUI extends JSLightweightUI {
 	}
 
 	public void repaint() {
-		// comboBox.repaint();
+		comboBox.repaint();
 	}
 
-		
 	
 }

@@ -724,6 +724,18 @@ public class JSComponentUI extends ComponentUI
 	}
 
 	/**
+	 * Retrieve the node for a list or table, and then clear this renderer
+	 * so that it can rebuild a new domNode for the next cell.
+	 * @return
+	 */
+	public DOMNode getListNode() {
+		DOMNode node = reInit(true);
+	    reInit(false);
+		return node;
+	}
+
+
+	/**
 	 * This must remain the only place that domNode is set to null;
 	 */
 	public DOMNode reInit(boolean getNew) {
@@ -3476,6 +3488,7 @@ public class JSComponentUI extends ComponentUI
 	public boolean processKeyEvent(KeyEvent e) {
 		return NOT_HANDLED;
 	}
+
 
 
 }

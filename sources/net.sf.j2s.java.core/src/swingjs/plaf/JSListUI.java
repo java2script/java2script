@@ -132,6 +132,7 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 //			setDataComponent(focusNode);
 //			bindJSKeyEvents(focusNode, false);
 		}
+	    setBackgroundImpl(jc.getBackground());
 		if (needFilling) {
 			fillDOM();
 		}
@@ -342,19 +343,18 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 			cw = w;
 		}
 
-		rendererPane.paintComponent(g, rendererComponent, list, cx, cy, cw, ch,
+		JComponent r = (JComponent) rendererComponent;
+		rendererPane.paintComponent(g, r, list, cx, cy, cw, ch,
 				true);
-		updateItemHTML(rendererComponent, index, cx, cy, cw, getRowHeight(index));
-
-		((JComponent) rendererComponent).秘getUI().reInit(false);
-
+		updateItemHTML((JComponent) r, index, cx, cy, cw, getRowHeight(index));
 	}
 
-	private void updateItemHTML(Component c, int index, int left, int top, int width, int height) {
+	private void updateItemHTML(JComponent c, int index, int left, int top, int width, int height) {
+	  DOMNode node = null;
 		if (c != null) {
 			c.setSize(width, height);
-		}
-		DOMNode node = (c == null ? null : ((JSComponentUI) ((JComponent) c).ui).getDOMNode());
+	    node = c.秘getUI().getListNode();
+	  }
 		String myid = id + "_" + index;
 		JQueryObject jnode = $((DOMNode) (Object) ("#" + myid));
 		if (((DOMNode[]) (Object) jnode)[0] == null) {
@@ -389,6 +389,8 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 	 */
 	@Override
 	public void paint(Graphics g, JComponent c) {
+	  if (isTainted)
+	    updateDOMNode();
 		super.paint(g, c);
 		Shape clip = g.getClip();
 		paintImpl(g, c);
@@ -401,7 +403,7 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 		// It is the responsibility of the JScrollPane scrollbar will move the JList
 		// to new x,y coordinates.
 
-		needFilling = true;
+		needFilling = false;
 		itemHTML = "";
 		switch (layoutOrientation) {
 		case JList.VERTICAL_WRAP:
@@ -1761,6 +1763,7 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 
 	void redrawList() {
 		needFilling = true;
+		setTainted(true);
 		list.revalidate();
 		list.秘repaint();
 	}
@@ -3005,10 +3008,13 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 			Object o = m.getElementAt(i);
 			int d = 0;
 			if (o instanceof Component) {
+				// was w +=... so these would be for left to right
 				d = ((Component) o).getPreferredSize().width;
 			} else if (o != null) {
+				// and this would not?
 				d = list.getFontMetrics(getFont()).stringWidth(o.toString());
 			}
+			// was included in o != null
 			if (d > w)
 				w = d;
 		}
