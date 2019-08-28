@@ -934,6 +934,7 @@ public class JSTabbedPaneUI extends JSPanelUI implements SwingConstants {
                     tabRect.width, tabRect.height, isSelected);
         }
 
+        
         paintTabBorder(g, tabPlacement, tabIndex, tabRect.x, tabRect.y,
                        tabRect.width, tabRect.height, isSelected);
 

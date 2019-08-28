@@ -156,14 +156,14 @@ class FileSystemPreferences extends AbstractPreferences {
 //
 //    private static int systemRootLockHandle = 0;
 //
-//    /**
-//     * The directory representing this preference node.  There is no guarantee
-//     * that this directory exits, as another VM can delete it at any time
-//     * that it (the other VM) holds the file-lock.  While the root node cannot
-//     * be deleted, it may not yet have been created, or the underlying
-//     * directory could have been deleted accidentally.
-//     */
-//    private File dir;
+    /**
+     * The directory representing this preference node.  There is no guarantee
+     * that this directory exits, as another VM can delete it at any time
+     * that it (the other VM) holds the file-lock.  While the root node cannot
+     * be deleted, it may not yet have been created, or the underlying
+     * directory could have been deleted accidentally.
+     */
+    private File dir;
 //
 //    /**
 //     * The file representing this preference node's preferences.
@@ -216,14 +216,14 @@ class FileSystemPreferences extends AbstractPreferences {
 //     */
 //    private static long systemRootModTime;
 //
-//    /**
-//     * Locally cached preferences for this node (includes uncommitted
-//     * changes).  This map is initialized with from disk when the first get or
-//     * put operation occurs on this node.  It is synchronized with the
-//     * corresponding disk file (prefsFile) by the sync operation.  The initial
-//     * value is read *without* acquiring the file-lock.
-//     */
-//    private Map<String, String> prefsCache = null;
+    /**
+     * Locally cached preferences for this node (includes uncommitted
+     * changes).  This map is initialized with from disk when the first get or
+     * put operation occurs on this node.  It is synchronized with the
+     * corresponding disk file (prefsFile) by the sync operation.  The initial
+     * value is read *without* acquiring the file-lock.
+     */
+    private Map<String, String> prefsCache = null;
 //
 //    /**
 //     * The last modification time of the file backing this node at the time
@@ -388,7 +388,7 @@ class FileSystemPreferences extends AbstractPreferences {
     private FileSystemPreferences(boolean user) {
         super(null, "");
         isUserNode = user;
-//        dir = (user ? userRootDir: systemRootDir);
+        dir = (user ? userRootDir: systemRootDir);
 //        prefsFile = new File(dir, "prefs.xml");
 //        tmpFile   = new File(dir, "prefs.tmp");
    }
@@ -401,64 +401,71 @@ class FileSystemPreferences extends AbstractPreferences {
     private FileSystemPreferences(FileSystemPreferences parent, String name) {
         super(parent, name);
         isUserNode = parent.isUserNode;
-//        dir  = new File(parent.dir, dirName(name));
+        dir  = new File(parent.dir, dirName(name));
+        newNode = !dir.exists();
+        
 //        prefsFile = new File(dir, "prefs.xml");
 //        tmpFile  = new File(dir, "prefs.tmp");
-//        AccessController.doPrivileged(new PrivilegedAction<Void>() {
-//            public Void run() {
-//                newNode = !dir.exists();
-//                return null;
-//            }
-//        });
-//        if (newNode) {
-//            // These 2 things guarantee node will get wrtten at next flush/sync
-//            prefsCache = new TreeMap<>();
+        AccessController.doPrivileged(new PrivilegedAction<Void>() {
+            @Override
+			public Void run() {
+                newNode = !dir.exists();
+                return null;
+            }
+        });
+        if (newNode) {
+            // These 2 things guarantee node will get wrtten at next flush/sync
+            prefsCache = new TreeMap<>();
 //            nodeCreate = new NodeCreate();
 //            changeLog.add(nodeCreate);
-//        }
+        }
     }
 
-    public boolean isUserNode() {
+    @Override
+	public boolean isUserNode() {
         return isUserNode;
     }
 
-    protected void putSpi(String key, String value) {
-//        initCacheIfNecessary();
+    @Override
+	protected void putSpi(String key, String value) {
+        initCacheIfNecessary();
 //        changeLog.add(new Put(key, value));
-//        prefsCache.put(key, value);
+        prefsCache.put(key, value);
     }
 
-    protected String getSpi(String key) {
-    	return null;
-//        initCacheIfNecessary();
-//        return prefsCache.get(key);
+    @Override
+	protected String getSpi(String key) {
+        initCacheIfNecessary();
+        return prefsCache.get(key);
     }
 
-    protected void removeSpi(String key) {
-//        initCacheIfNecessary();
+    @Override
+	protected void removeSpi(String key) {
+        initCacheIfNecessary();
 //        changeLog.add(new Remove(key));
-//        prefsCache.remove(key);
+        prefsCache.remove(key);
     }
 
-//    /**
-//     * Initialize prefsCache if it has yet to be initialized.  When this method
-//     * returns, prefsCache will be non-null.  If the data was successfully
-//     * read from the file, lastSyncTime will be updated.  If prefsCache was
-//     * null, but it was impossible to read the file (because it didn't
-//     * exist or for any other reason) prefsCache will be initialized to an
-//     * empty, modifiable Map, and lastSyncTime remain zero.
-//     */
-//    private void initCacheIfNecessary() {
-//        if (prefsCache != null)
-//            return;
-//
+    /**
+     * Initialize prefsCache if it has yet to be initialized.  When this method
+     * returns, prefsCache will be non-null.  If the data was successfully
+     * read from the file, lastSyncTime will be updated.  If prefsCache was
+     * null, but it was impossible to read the file (because it didn't
+     * exist or for any other reason) prefsCache will be initialized to an
+     * empty, modifiable Map, and lastSyncTime remain zero.
+     */
+    private void initCacheIfNecessary() {
+        if (prefsCache != null)
+            return;
+
+// SwingJS - this where we might load a cache from some sort of cookie?
 //        try {
 //            loadCache();
 //        } catch(Exception e) {
-//            // assert lastSyncTime == 0;
-//            prefsCache = new TreeMap<>();
+            // assert lastSyncTime == 0;
+            prefsCache = new TreeMap<>();
 //        }
-//    }
+    }
 
 //    /**
 //     * Attempt to load prefsCache from the backing store.  If the attempt
@@ -543,36 +550,38 @@ class FileSystemPreferences extends AbstractPreferences {
 //        }
 //    }
 //
-    protected String[] keysSpi() {
-    	return EMPTY_STRING_ARRAY;
-//        initCacheIfNecessary();
-//        return prefsCache.keySet().toArray(new String[prefsCache.size()]);
+    @Override
+	protected String[] keysSpi() {
+        initCacheIfNecessary();
+        return prefsCache.keySet().toArray(new String[prefsCache.size()]);
     }
 
-    protected String[] childrenNamesSpi() {
-    	return EMPTY_STRING_ARRAY;
+    @Override
+	protected String[] childrenNamesSpi() {
 //        return AccessController.doPrivileged(
 //            new PrivilegedAction<String[]>() {
 //                public String[] run() {
-//                    List<String> result = new ArrayList<>();
-//                    File[] dirContents = dir.listFiles();
-//                    if (dirContents != null) {
-//                        for (int i = 0; i < dirContents.length; i++)
-//                            if (dirContents[i].isDirectory())
-//                                result.add(nodeName(dirContents[i].getName()));
-//                    }
-//                    return result.toArray(EMPTY_STRING_ARRAY);
+                    List<String> result = new ArrayList<>();
+                    File[] dirContents = dir.listFiles();
+                    if (dirContents != null) {
+                        for (int i = 0; i < dirContents.length; i++)
+                            if (dirContents[i].isDirectory())
+                                result.add(nodeName(dirContents[i].getName()));
+                    }
+                    return result.toArray(EMPTY_STRING_ARRAY);
 //               }
 //            });
     }
 
     private static String[] EMPTY_STRING_ARRAY = new String[0];
 
-    protected AbstractPreferences childSpi(String name) {
+    @Override
+	protected AbstractPreferences childSpi(String name) {
         return new FileSystemPreferences(this, name);
     }
 
-    public void removeNode() throws BackingStoreException {
+    @Override
+	public void removeNode() throws BackingStoreException {
 //        synchronized (isUserNode()? userLockFile: systemLockFile) {
 //            // to remove a node we need an exclusive lock
 //            if (!lockFile(false))
@@ -588,7 +597,8 @@ class FileSystemPreferences extends AbstractPreferences {
     /**
      * Called with file lock held (in addition to node locks).
      */
-    protected void removeNodeSpi() throws BackingStoreException {
+    @Override
+	protected void removeNodeSpi() throws BackingStoreException {
 //        try {
 //            AccessController.doPrivileged(
 //                new PrivilegedExceptionAction<Void>() {
@@ -622,7 +632,8 @@ class FileSystemPreferences extends AbstractPreferences {
 //        }
     }
 
-    public synchronized void sync() throws BackingStoreException {
+    @Override
+	public synchronized void sync() throws BackingStoreException {
 //        boolean userNode = isUserNode();
 //        boolean shared;
 //
@@ -671,7 +682,8 @@ class FileSystemPreferences extends AbstractPreferences {
 //        }
     }
 
-    protected void syncSpi() throws BackingStoreException {
+    @Override
+	protected void syncSpi() throws BackingStoreException {
 //        try {
 //            AccessController.doPrivileged(
 //                new PrivilegedExceptionAction<Void>() {
@@ -726,38 +738,40 @@ class FileSystemPreferences extends AbstractPreferences {
 //        }
 //    }
 
-    public void flush() throws BackingStoreException {
+    @Override
+	public void flush() throws BackingStoreException {
 //        if (isRemoved())
 //            return;
 //        sync();
     }
 
-    protected void flushSpi() throws BackingStoreException {
+    @Override
+	protected void flushSpi() throws BackingStoreException {
         // assert false;
     }
 
-//    /**
-//     * Returns true if the specified character is appropriate for use in
-//     * Unix directory names.  A character is appropriate if it's a printable
-//     * ASCII character (> 0x1f && < 0x7f) and unequal to slash ('/', 0x2f),
-//     * dot ('.', 0x2e), or underscore ('_', 0x5f).
-//     */
-//    private static boolean isDirChar(char ch) {
-//        return ch > 0x1f && ch < 0x7f && ch != '/' && ch != '.' && ch != '_';
-//    }
-//
-//    /**
-//     * Returns the directory name corresponding to the specified node name.
-//     * Generally, this is just the node name.  If the node name includes
-//     * inappropriate characters (as per isDirChar) it is translated to Base64.
-//     * with the underscore  character ('_', 0x5f) prepended.
-//     */
-//    private static String dirName(String nodeName) {
+    /**
+     * Returns true if the specified character is appropriate for use in
+     * Unix directory names.  A character is appropriate if it's a printable
+     * ASCII character (> 0x1f && < 0x7f) and unequal to slash ('/', 0x2f),
+     * dot ('.', 0x2e), or underscore ('_', 0x5f).
+     */
+    private static boolean isDirChar(char ch) {
+        return ch > 0x1f && ch < 0x7f && ch != '/' && ch != '.' && ch != '_';
+    }
+
+    /**
+     * Returns the directory name corresponding to the specified node name.
+     * Generally, this is just the node name.  If the node name includes
+     * inappropriate characters (as per isDirChar) it is translated to Base64.
+     * with the underscore  character ('_', 0x5f) prepended.
+     */
+    private static String dirName(String nodeName) {
 //        for (int i=0, n=nodeName.length(); i < n; i++)
 //            if (!isDirChar(nodeName.charAt(i)))
 //                return "_" + Base64.byteArrayToAltBase64(byteArray(nodeName));
-//        return nodeName;
-//    }
+        return nodeName;
+    }
 //
 //    /**
 //     * Translate a string into a byte array by translating each character
@@ -774,13 +788,13 @@ class FileSystemPreferences extends AbstractPreferences {
 //        return result;
 //    }
 //
-//    /**
-//     * Returns the node name corresponding to the specified directory name.
-// * (Inverts the transformation of dirName(String).
-//     */
-//    private static String nodeName(String dirName) {
+    /**
+     * Returns the node name corresponding to the specified directory name.
+     * (Inverts the transformation of dirName(String).
+     */
+    private static String nodeName(String dirName) {
 //        if (dirName.charAt(0) != '_')
-//            return dirName;
+            return dirName;
 //        byte a[] = Base64.altBase64ToByteArray(dirName.substring(1));
 //        StringBuffer result = new StringBuffer(a.length/2);
 //        for (int i = 0; i < a.length; ) {
@@ -789,7 +803,7 @@ class FileSystemPreferences extends AbstractPreferences {
 //            result.append((char) ((highByte << 8) | lowByte));
 //        }
 //        return result.toString();
-//    }
+    }
 //
 //    /**
 //     * Try to acquire the appropriate file lock (user or system).  If

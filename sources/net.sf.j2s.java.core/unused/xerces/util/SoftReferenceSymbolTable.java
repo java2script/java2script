@@ -17,8 +17,8 @@
 
 package org.apache.xerces.util;
 
-import java.lang.ref.ReferenceQueue;
-import java.lang.ref.SoftReference;
+//import java.lang.ref.ReferenceQueue;
+//import java.lang.ref.SoftReference;
 
 /**
  * This symbol table uses SoftReferences to its String entries, which means that table entries
@@ -48,7 +48,7 @@ public class SoftReferenceSymbolTable extends SymbolTable {
      */
     protected SREntry[] fBuckets = null;
 
-    private final ReferenceQueue fReferenceQueue;
+    //private final ReferenceQueue fReferenceQueue;
     
     //
     // Constructors
@@ -89,7 +89,7 @@ public class SoftReferenceSymbolTable extends SymbolTable {
         fThreshold = (int)(fTableSize * loadFactor);
         fCount = 0;
 
-        fReferenceQueue = new ReferenceQueue();
+        //fReferenceQueue = new ReferenceQueue();
     }
 
     /**
@@ -157,7 +157,7 @@ public class SoftReferenceSymbolTable extends SymbolTable {
         
         // add new entry
         symbol = symbol.intern();
-        SREntry entry = new SREntry(symbol, fBuckets[bucket], bucket, fReferenceQueue);
+        SREntry entry = new SREntry(symbol, fBuckets[bucket], bucket);
         fBuckets[bucket] = entry;
         ++fCount;
         return symbol;
@@ -212,7 +212,7 @@ public class SoftReferenceSymbolTable extends SymbolTable {
         
         // add new entry
         String symbol = new String(buffer, offset, length).intern();
-        SREntry entry = new SREntry(symbol, buffer, offset, length, fBuckets[bucket], bucket, fReferenceQueue);
+        SREntry entry = new SREntry(symbol, buffer, offset, length, fBuckets[bucket], bucket);
         fBuckets[bucket] = entry;
         ++fCount;
         return symbol;
@@ -371,19 +371,19 @@ public class SoftReferenceSymbolTable extends SymbolTable {
      * Removes stale symbols from the table.
      */
     private void clean() {
-        SREntry entry = (SREntry)fReferenceQueue.poll();
-        if (entry != null) {
-            do {
-                removeEntry(entry);
-                entry = (SREntry)fReferenceQueue.poll();
-            }
-            while (entry != null);
-            // Reduce the number of buckets if the number of items
-            // in the table has dropped below 25% of the threshold.
-            if (fCount < (fThreshold >> 2)) {
-                compact();
-            }
-        }
+//        SREntry entry = (SREntry)fReferenceQueue.poll();
+//        if (entry != null) {
+//            do {
+//                removeEntry(entry);
+//                entry = (SREntry)fReferenceQueue.poll();
+//            }
+//            while (entry != null);
+//            // Reduce the number of buckets if the number of items
+//            // in the table has dropped below 25% of the threshold.
+//            if (fCount < (fThreshold >> 2)) {
+//                compact();
+//            }
+//        }
     }
         
     //
@@ -396,7 +396,7 @@ public class SoftReferenceSymbolTable extends SymbolTable {
      * 
      * The "SR" stands for SoftReference.
      */
-    protected static final class SREntry extends SoftReference {
+    protected static final class SREntry {
 
         /** The next entry. */
         public SREntry next;
@@ -406,7 +406,12 @@ public class SoftReferenceSymbolTable extends SymbolTable {
 
         /** The bucket this entry is contained in; -1 if it has been removed from the table. */
         public int bucket;
-        
+
+		private SREntryData data;
+
+		SREntryData get() {
+			return data;
+		}
         //
         // Constructors
         //
@@ -415,8 +420,8 @@ public class SoftReferenceSymbolTable extends SymbolTable {
          * Constructs a new entry from the specified symbol and next entry
          * reference.
          */
-        public SREntry(String internedSymbol, SREntry next, int bucket, ReferenceQueue q) {
-            super(new SREntryData(internedSymbol), q);
+        public SREntry(String internedSymbol, SREntry next, int bucket) {
+            data = new SREntryData(internedSymbol);
             initialize(next, bucket);
         }
 
@@ -424,8 +429,8 @@ public class SoftReferenceSymbolTable extends SymbolTable {
          * Constructs a new entry from the specified symbol information and
          * next entry reference.
          */
-        public SREntry(String internedSymbol, char[] ch, int offset, int length, SREntry next, int bucket, ReferenceQueue q) {
-            super(new SREntryData(internedSymbol, ch, offset, length), q);
+        public SREntry(String internedSymbol, char[] ch, int offset, int length, SREntry next, int bucket) {
+            data = new SREntryData(internedSymbol, ch, offset, length);
             initialize(next, bucket);
         }
         

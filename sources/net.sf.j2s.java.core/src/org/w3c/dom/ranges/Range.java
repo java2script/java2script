@@ -10,7 +10,7 @@
  * details.
  */
 
-package org.w3c.dom.range;
+package org.w3c.dom.ranges;
 
 import org.w3c.dom.DOMException;
 import org.w3c.dom.DocumentFragment;

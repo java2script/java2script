@@ -164,7 +164,7 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fc = new JFileChooser();
-				Test_Dialog.this.onDialogReturn(fc.showOpenDialog(Test_Dialog.this));
+				onDialogReturn(fc.showOpenDialog(Test_Dialog.this));
 			}
 
 		});

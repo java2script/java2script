@@ -48,144 +48,144 @@ import java.security.AccessController;
  *
  */
 public class PerfCounter {
-    private static final Perf perf =
-        AccessController.doPrivileged(new Perf.GetPerfAction());
-
-    // Must match values defined in hotspot/src/share/vm/runtime/perfdata.hpp
-    private final static int V_Constant  = 1;
-    private final static int V_Monotonic = 2;
-    private final static int V_Variable  = 3;
-    private final static int U_None      = 1;
-
-    private final String name;
-    private long lb;
-
-    private PerfCounter(String name, int type) {
-        this.name = name;
-        ByteBuffer bb = perf.createLong(name, type, U_None, 0L);
-        bb.order(ByteOrder.nativeOrder());
-        this.lb = System.currentTimeMillis();//bb.asLongBuffer();
-    }
-
-    static PerfCounter newPerfCounter(String name) {
-        return new PerfCounter(name, V_Variable);
-    }
-
-    static PerfCounter newConstantPerfCounter(String name) {
-        PerfCounter c = new PerfCounter(name, V_Constant);
-        return c;
-    }
-
-    /**
-     * Returns the current value of the perf counter.
-     */
-    public synchronized long get() {
-        return lb;//;
-    }
-
-    /**
-     * Sets the value of the perf counter to the given newValue.
-     */
-    public synchronized void set(long newValue) {
-        lb = newValue;//.put(0, newValue);
-    }
-
-    /**
-     * Adds the given value to the perf counter.
-     */
-    public synchronized void add(long value) {
-        long res = get() + value;
-        lb = res;//.put(0, res);
-    }
-
-    /**
-     * Increments the perf counter with 1.
-     */
-    public void increment() {
-        add(1);
-    }
-
-    /**
-     * Adds the given interval to the perf counter.
-     */
-    public void addTime(long interval) {
-        add(interval);
-    }
-
-    /**
-     * Adds the elapsed time from the given start time (ns) to the perf counter.
-     */
-    public void addElapsedTimeFrom(long startTime) {
-        add(System.nanoTime() - startTime);
-    }
-
-    @Override
-    public String toString() {
-        return name + " = " + get();
-    }
-
-    static class CoreCounters {
-        static final PerfCounter pdt   = newPerfCounter("sun.classloader.parentDelegationTime");
-        static final PerfCounter lc    = newPerfCounter("sun.classloader.findClasses");
-        static final PerfCounter lct   = newPerfCounter("sun.classloader.findClassTime");
-        static final PerfCounter rcbt  = newPerfCounter("sun.urlClassLoader.readClassBytesTime");
-        static final PerfCounter zfc   = newPerfCounter("sun.zip.zipFiles");
-        static final PerfCounter zfot  = newPerfCounter("sun.zip.zipFile.openTime");
-    }
-
-    static class WindowsClientCounters {
-        static final PerfCounter d3dAvailable = newConstantPerfCounter("sun.java2d.d3d.available");
-    }
-
-    /**
-     * Number of findClass calls
-     */
-    public static PerfCounter getFindClasses() {
-        return CoreCounters.lc;
-    }
-
-    /**
-     * Time (ns) spent in finding classes that includes
-     * lookup and read class bytes and defineClass
-     */
-    public static PerfCounter getFindClassTime() {
-        return CoreCounters.lct;
-    }
-
-    /**
-     * Time (ns) spent in finding classes
-     */
-    public static PerfCounter getReadClassBytesTime() {
-        return CoreCounters.rcbt;
-    }
-
-    /**
-     * Time (ns) spent in the parent delegation to
-     * the parent of the defining class loader
-     */
-    public static PerfCounter getParentDelegationTime() {
-        return CoreCounters.pdt;
-    }
-
-    /**
-     * Number of zip files opened.
-     */
-    public static PerfCounter getZipFileCount() {
-        return CoreCounters.zfc;
-    }
-
-    /**
-     * Time (ns) spent in opening the zip files that
-     * includes building the entries hash table
-     */
-    public static PerfCounter getZipFileOpenTime() {
-        return CoreCounters.zfot;
-    }
-
-    /**
-     * D3D graphic pipeline available
-     */
-    public static PerfCounter getD3DAvailable() {
-        return WindowsClientCounters.d3dAvailable;
-    }
+//    private static final Perf perf =
+//        AccessController.doPrivileged(new Perf.GetPerfAction());
+//
+//    // Must match values defined in hotspot/src/share/vm/runtime/perfdata.hpp
+//    private final static int V_Constant  = 1;
+//    private final static int V_Monotonic = 2;
+//    private final static int V_Variable  = 3;
+//    private final static int U_None      = 1;
+//
+//    private final String name;
+//    private long lb;
+//
+//    private PerfCounter(String name, int type) {
+//        this.name = name;
+//        ByteBuffer bb = perf.createLong(name, type, U_None, 0L);
+//        bb.order(ByteOrder.nativeOrder());
+//        this.lb = System.currentTimeMillis();//bb.asLongBuffer();
+//    }
+//
+//    static PerfCounter newPerfCounter(String name) {
+//        return new PerfCounter(name, V_Variable);
+//    }
+//
+//    static PerfCounter newConstantPerfCounter(String name) {
+//        PerfCounter c = new PerfCounter(name, V_Constant);
+//        return c;
+//    }
+//
+//    /**
+//     * Returns the current value of the perf counter.
+//     */
+//    public synchronized long get() {
+//        return lb;//;
+//    }
+//
+//    /**
+//     * Sets the value of the perf counter to the given newValue.
+//     */
+//    public synchronized void set(long newValue) {
+//        lb = newValue;//.put(0, newValue);
+//    }
+//
+//    /**
+//     * Adds the given value to the perf counter.
+//     */
+//    public synchronized void add(long value) {
+//        long res = get() + value;
+//        lb = res;//.put(0, res);
+//    }
+//
+//    /**
+//     * Increments the perf counter with 1.
+//     */
+//    public void increment() {
+//        add(1);
+//    }
+//
+//    /**
+//     * Adds the given interval to the perf counter.
+//     */
+//    public void addTime(long interval) {
+//        add(interval);
+//    }
+//
+//    /**
+//     * Adds the elapsed time from the given start time (ns) to the perf counter.
+//     */
+//    public void addElapsedTimeFrom(long startTime) {
+//        add(System.nanoTime() - startTime);
+//    }
+//
+//    @Override
+//    public String toString() {
+//        return name + " = " + get();
+//    }
+//
+//    static class CoreCounters {
+//        static final PerfCounter pdt   = newPerfCounter("sun.classloader.parentDelegationTime");
+//        static final PerfCounter lc    = newPerfCounter("sun.classloader.findClasses");
+//        static final PerfCounter lct   = newPerfCounter("sun.classloader.findClassTime");
+//        static final PerfCounter rcbt  = newPerfCounter("sun.urlClassLoader.readClassBytesTime");
+//        static final PerfCounter zfc   = newPerfCounter("sun.zip.zipFiles");
+//        static final PerfCounter zfot  = newPerfCounter("sun.zip.zipFile.openTime");
+//    }
+//
+//    static class WindowsClientCounters {
+//        static final PerfCounter d3dAvailable = newConstantPerfCounter("sun.java2d.d3d.available");
+//    }
+//
+//    /**
+//     * Number of findClass calls
+//     */
+//    public static PerfCounter getFindClasses() {
+//        return CoreCounters.lc;
+//    }
+//
+//    /**
+//     * Time (ns) spent in finding classes that includes
+//     * lookup and read class bytes and defineClass
+//     */
+//    public static PerfCounter getFindClassTime() {
+//        return CoreCounters.lct;
+//    }
+//
+//    /**
+//     * Time (ns) spent in finding classes
+//     */
+//    public static PerfCounter getReadClassBytesTime() {
+//        return CoreCounters.rcbt;
+//    }
+//
+//    /**
+//     * Time (ns) spent in the parent delegation to
+//     * the parent of the defining class loader
+//     */
+//    public static PerfCounter getParentDelegationTime() {
+//        return CoreCounters.pdt;
+//    }
+//
+//    /**
+//     * Number of zip files opened.
+//     */
+//    public static PerfCounter getZipFileCount() {
+//        return CoreCounters.zfc;
+//    }
+//
+//    /**
+//     * Time (ns) spent in opening the zip files that
+//     * includes building the entries hash table
+//     */
+//    public static PerfCounter getZipFileOpenTime() {
+//        return CoreCounters.zfot;
+//    }
+//
+//    /**
+//     * D3D graphic pipeline available
+//     */
+//    public static PerfCounter getD3DAvailable() {
+//        return WindowsClientCounters.d3dAvailable;
+//    }
 }

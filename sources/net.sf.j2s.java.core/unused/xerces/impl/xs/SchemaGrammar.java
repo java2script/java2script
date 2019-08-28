@@ -17,7 +17,7 @@
 
 package org.apache.xerces.impl.xs;
 
-import java.lang.ref.SoftReference;
+//import java.lang.ref.SoftReference;
 import java.util.Vector;
 
 import org.apache.xerces.impl.Constants;
@@ -116,8 +116,8 @@ public class SchemaGrammar implements XSGrammar, XSNamespaceItem {
     // symbol table for constructing parsers (annotation support)
     private SymbolTable fSymbolTable = null;
     // parsers for annotation support
-    private SoftReference fSAXParser = null;
-    private SoftReference fDOMParser = null;
+    private Object fSAXParser = null;
+    private Object fDOMParser = null;
     
     // is this grammar immutable?  (fully constructed and not changeable)
     private boolean fIsImmutable = false;
@@ -1387,7 +1387,7 @@ public class SchemaGrammar implements XSGrammar, XSNamespaceItem {
     // annotation support
     synchronized DOMParser getDOMParser() {
         if (fDOMParser != null) {
-            DOMParser parser = (DOMParser) fDOMParser.get();
+            DOMParser parser = (DOMParser) fDOMParser;
             if (parser != null) {
                 return parser;
             }
@@ -1406,13 +1406,13 @@ public class SchemaGrammar implements XSGrammar, XSNamespaceItem {
             parser.setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.DEFER_NODE_EXPANSION_FEATURE, false);
         }
         catch (SAXException exc) {}
-        fDOMParser = new SoftReference(parser);
+        fDOMParser = parser;
         return parser;
     }
 
     synchronized SAXParser getSAXParser() {
         if (fSAXParser != null) {
-            SAXParser parser = (SAXParser) fSAXParser.get();
+            SAXParser parser = (SAXParser) fSAXParser;
             if (parser != null) {
                 return parser;
             }
@@ -1426,7 +1426,7 @@ public class SchemaGrammar implements XSGrammar, XSNamespaceItem {
         config.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.NAMESPACES_FEATURE, true);
         config.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.VALIDATION_FEATURE, false);
         SAXParser parser = new SAXParser(config);
-        fSAXParser = new SoftReference(parser);
+        fSAXParser = (parser);
         return parser;
     }
 

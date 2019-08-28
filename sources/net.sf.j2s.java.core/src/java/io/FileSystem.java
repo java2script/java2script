@@ -178,12 +178,14 @@ class FileSystem {
 //     */
 //    public abstract boolean delete(File f);
 //
-//    /**
-//     * List the elements of the directory denoted by the given abstract
-//     * pathname.  Return an array of strings naming the elements of the
-//     * directory if successful; otherwise, return <code>null</code>.
-//     */
-//    public abstract String[] list(File f);
+    /**
+     * List the elements of the directory denoted by the given abstract
+     * pathname.  Return an array of strings naming the elements of the
+     * directory if successful; otherwise, return <code>null</code>.
+     */
+    public String[] list(File f) {
+    	return null;
+    }
 //
 //    /**
 //     * Create a new directory denoted by the given abstract pathname,

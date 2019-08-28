@@ -67,18 +67,18 @@ class FactoryFinder {
     static SecuritySupport ss = new SecuritySupport();
 
     // Define system property "jaxp.debug" to get output
-    static {
-        // Use try/catch block to support applets, which throws
-        // SecurityException out of this code.
-        try {
-            String val = ss.getSystemProperty("jaxp.debug");
-            // Allow simply setting the prop to turn on debug
-            debug = val != null && !"false".equals(val);
-        }
-        catch (SecurityException se) {
-            debug = false;
-        }
-    }
+//    static {
+//        // Use try/catch block to support applets, which throws
+//        // SecurityException out of this code.
+//        try {
+//            String val = ss.getSystemProperty("jaxp.debug");
+//            // Allow simply setting the prop to turn on debug
+//            debug = val != null && !"false".equals(val);
+//        }
+//        catch (SecurityException se) {
+//            debug = false;
+//        }
+//    }
 
     private static void dPrint(String msg) {
         if (debug) {
@@ -274,11 +274,11 @@ class FactoryFinder {
         }
 
         // Try Jar Service Provider Mechanism
-        Object provider = findJarServiceProvider(factoryId);
-        if (provider != null) {
-            return provider;
-        }
-        if (fallbackClassName == null) {
+//        Object provider = findJarServiceProvider(factoryId);
+//        if (provider != null) {
+//            return provider;
+//        }
+       if (fallbackClassName == null) {
             throw new ConfigurationError(
                 "Provider for " + factoryId + " cannot be found", null);
         }
@@ -287,78 +287,78 @@ class FactoryFinder {
         return newInstance(fallbackClassName, null, true, false, true);
     }
 
-    /*
-     * Try to find provider using Jar Service Provider Mechanism
-     *
-     * @return instance of provider class if found or null
-     */
-    private static Object findJarServiceProvider(String factoryId)
-        throws ConfigurationError
-    {
-        String serviceId = "META-INF/services/" + factoryId;
-        InputStream is = null;
-
-        // First try the Context ClassLoader
-        ClassLoader cl = ss.getContextClassLoader();
-        boolean useBSClsLoader = false;
-        if (cl != null) {
-            is = ss.getResourceAsStream(cl, serviceId);
-
-            // If no provider found then try the current ClassLoader
-            if (is == null) {
-                cl = FactoryFinder.class.getClassLoader();
-                is = ss.getResourceAsStream(cl, serviceId);
-                useBSClsLoader = true;
-           }
-        } else {
-            // No Context ClassLoader, try the current ClassLoader
-            cl = FactoryFinder.class.getClassLoader();
-            is = ss.getResourceAsStream(cl, serviceId);
-            useBSClsLoader = true;
-        }
-
-        if (is == null) {
-            // No provider found
-            return null;
-        }
-
-        if (debug) {    // Extra check to avoid computing cl strings
-            dPrint("found jar resource=" + serviceId + " using ClassLoader: " + cl);
-        }
-
-        BufferedReader rd;
-        try {
-            rd = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-        }
-        catch (java.io.UnsupportedEncodingException e) {
-            rd = new BufferedReader(new InputStreamReader(is));
-        }
-
-        String factoryClassName = null;
-        try {
-            // XXX Does not handle all possible input as specified by the
-            // Jar Service Provider specification
-            factoryClassName = rd.readLine();
-            rd.close();
-        } catch (IOException x) {
-            // No provider found
-            return null;
-        }
-
-        if (factoryClassName != null && !"".equals(factoryClassName)) {
-            dPrint("found in resource, value=" + factoryClassName);
-
-            // Note: here we do not want to fall back to the current
-            // ClassLoader because we want to avoid the case where the
-            // resource file was found using one ClassLoader and the
-            // provider class was instantiated using a different one.
-            return newInstance(factoryClassName, cl, false, useBSClsLoader, true);
-        }
-
-        // No provider found
-        return null;
-    }
-
+//    /*
+//     * Try to find provider using Jar Service Provider Mechanism
+//     *
+//     * @return instance of provider class if found or null
+//     */
+//    private static Object findJarServiceProvider(String factoryId)
+//        throws ConfigurationError
+//    {
+//        String serviceId = "META-INF/services/" + factoryId;
+//        InputStream is = null;
+//
+//        // First try the Context ClassLoader
+//        ClassLoader cl = ss.getContextClassLoader();
+//        boolean useBSClsLoader = false;
+//        if (cl != null) {
+//            is = ss.getResourceAsStream(cl, serviceId);
+//
+//            // If no provider found then try the current ClassLoader
+//            if (is == null) {
+//                cl = FactoryFinder.class.getClassLoader();
+//                is = ss.getResourceAsStream(cl, serviceId);
+//                useBSClsLoader = true;
+//           }
+//        } else {
+//            // No Context ClassLoader, try the current ClassLoader
+//            cl = FactoryFinder.class.getClassLoader();
+//            is = ss.getResourceAsStream(cl, serviceId);
+//            useBSClsLoader = true;
+//        }
+//
+//        if (is == null) {
+//            // No provider found
+//            return null;
+//        }
+//
+//        if (debug) {    // Extra check to avoid computing cl strings
+//            dPrint("found jar resource=" + serviceId + " using ClassLoader: " + cl);
+//        }
+//
+//        BufferedReader rd;
+//        try {
+//            rd = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+//        }
+//        catch (java.io.UnsupportedEncodingException e) {
+//            rd = new BufferedReader(new InputStreamReader(is));
+//        }
+//
+//        String factoryClassName = null;
+//        try {
+//            // XXX Does not handle all possible input as specified by the
+//            // Jar Service Provider specification
+//            factoryClassName = rd.readLine();
+//            rd.close();
+//        } catch (IOException x) {
+//            // No provider found
+//            return null;
+//        }
+//
+//        if (factoryClassName != null && !"".equals(factoryClassName)) {
+//            dPrint("found in resource, value=" + factoryClassName);
+//
+//            // Note: here we do not want to fall back to the current
+//            // ClassLoader because we want to avoid the case where the
+//            // resource file was found using one ClassLoader and the
+//            // provider class was instantiated using a different one.
+//            return newInstance(factoryClassName, cl, false, useBSClsLoader, true);
+//        }
+//
+//        // No provider found
+//        return null;
+//    }
+//
     static class ConfigurationError extends Error {
         private Exception exception;
 

@@ -86,7 +86,7 @@ public abstract class DatatypeFactory {
          * document a factory implementation detail.
          * </p>
          */
-        public static final String DATATYPEFACTORY_IMPLEMENTATION_CLASS = new String("com.sun.org.apache.xerces.internal.jaxp.datatype.DatatypeFactoryImpl");
+        public static final String DATATYPEFACTORY_IMPLEMENTATION_CLASS = new String("org.apache.xerces.jaxp.datatype.DatatypeFactoryImpl");
 
     /**
      * http://www.w3.org/TR/xpath-datamodel/#xdtschema defines two regexps

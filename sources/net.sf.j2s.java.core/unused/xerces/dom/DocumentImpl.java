@@ -18,9 +18,9 @@
 package org.apache.xerces.dom;
 
 import java.io.Serializable;
-import java.lang.ref.Reference;
-import java.lang.ref.ReferenceQueue;
-import java.lang.ref.WeakReference;
+//import java.lang.ref.Reference;
+//import java.lang.ref.ReferenceQueue;
+//import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -104,13 +104,13 @@ public class DocumentImpl
     protected transient List iterators;
     
     /** Reference queue for cleared Node Iterator references */
-    protected transient ReferenceQueue iteratorReferenceQueue;
+  //  protected transient ReferenceQueue iteratorReferenceQueue;
 
     /** Ranges */
     protected transient List ranges;
     
     /** Reference queue for cleared Range references */
-    protected transient ReferenceQueue rangeReferenceQueue;
+  //  protected transient ReferenceQueue rangeReferenceQueue;
 
     /** Table for event listeners registered to this document nodes. */
     protected Hashtable eventListeners;
@@ -238,11 +238,11 @@ public class DocumentImpl
                                                      entityReferenceExpansion);
         if (iterators == null) {
             iterators = new LinkedList();
-            iteratorReferenceQueue = new ReferenceQueue();
+            //iteratorReferenceQueue = new ReferenceQueue();
         }
 
         removeStaleIteratorReferences();
-        iterators.add(new WeakReference(iterator, iteratorReferenceQueue));
+        iterators.add(iterator);
 
         return iterator;
     }
@@ -303,7 +303,7 @@ public class DocumentImpl
         removeStaleIteratorReferences();
         Iterator i = iterators.iterator();
         while (i.hasNext()) {
-            Object iterator = ((Reference) i.next()).get();
+            Object iterator = i.next();
             if (iterator == nodeIterator) {
                 i.remove();
                 return;
@@ -319,33 +319,33 @@ public class DocumentImpl
      * Remove stale iterator references from the iterator list.
      */
     private void removeStaleIteratorReferences() {
-        removeStaleReferences(iteratorReferenceQueue, iterators);
+    //    removeStaleReferences(iteratorReferenceQueue, iterators);
     }
     
-    /**
-     * Remove stale references from the given list.
-     */
-    private void removeStaleReferences(ReferenceQueue queue, List list) {
-        Reference ref = queue.poll();
-        int count = 0;
-        while (ref != null) {
-            ++count;
-            ref = queue.poll();
-        }
-        if (count > 0) {
-            final Iterator i = list.iterator();
-            while (i.hasNext()) {
-                Object o = ((Reference) i.next()).get();
-                if (o == null) {
-                    i.remove();
-                    if (--count <= 0) {
-                        return;
-                    }
-                }
-            }
-        }
-    }
-
+//    /**
+//     * Remove stale references from the given list.
+//     */
+//    private void removeStaleReferences(ReferenceQueue queue, List list) {
+//        Reference ref = queue.poll();
+//        int count = 0;
+//        while (ref != null) {
+//            ++count;
+//            ref = queue.poll();
+//        }
+//        if (count > 0) {
+//            final Iterator i = list.iterator();
+//            while (i.hasNext()) {
+//                Object o = ((Reference) i.next()).get();
+//                if (o == null) {
+//                    i.remove();
+//                    if (--count <= 0) {
+//                        return;
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
     //
     // DocumentRange methods
     //
@@ -355,13 +355,13 @@ public class DocumentImpl
 
         if (ranges == null) {
             ranges = new LinkedList();
-            rangeReferenceQueue = new ReferenceQueue();
+            //rangeReferenceQueue = new ReferenceQueue();
         }
 
         Range range = new RangeImpl(this);
 
         removeStaleRangeReferences();
-        ranges.add(new WeakReference(range, rangeReferenceQueue));
+        ranges.add(range);
 
         return range;
 
@@ -379,7 +379,7 @@ public class DocumentImpl
         removeStaleRangeReferences();
         Iterator i = ranges.iterator();
         while (i.hasNext()) {
-            Object otherRange = ((Reference) i.next()).get();
+            Object otherRange = i.next();
             if (otherRange == range) {
                 i.remove();
                 return;
@@ -406,7 +406,7 @@ public class DocumentImpl
         removeStaleRangeReferences();
         final Iterator i = ranges.iterator();
         while (i.hasNext()) {
-            RangeImpl range = (RangeImpl) ((Reference) i.next()).get();
+            RangeImpl range = (RangeImpl) i.next();
             if (range != null) {
                 range.receiveReplacedText(node);
             }
@@ -432,7 +432,7 @@ public class DocumentImpl
         removeStaleRangeReferences();
         final Iterator i = ranges.iterator();
         while (i.hasNext()) {
-            RangeImpl range = (RangeImpl) ((Reference) i.next()).get();
+            RangeImpl range = (RangeImpl) i.next();
             if (range != null) {
                 range.receiveDeletedText(node, offset, count);
             }
@@ -458,7 +458,7 @@ public class DocumentImpl
         removeStaleRangeReferences();
         final Iterator i = ranges.iterator();
         while (i.hasNext()) {
-            RangeImpl range = (RangeImpl) ((Reference) i.next()).get();
+            RangeImpl range = (RangeImpl) i.next();
             if (range != null) {
                 range.receiveInsertedText(node, offset, count);
             }
@@ -484,7 +484,7 @@ public class DocumentImpl
         removeStaleRangeReferences();
         final Iterator i = ranges.iterator();
         while (i.hasNext()) {
-            RangeImpl range = (RangeImpl) ((Reference) i.next()).get();
+            RangeImpl range = (RangeImpl) i.next();
             if (range != null) {
                 range.receiveSplitData(node, newNode, offset);
             }
@@ -499,7 +499,7 @@ public class DocumentImpl
      * Remove stale range references from the range list.
      */
     private void removeStaleRangeReferences() {
-        removeStaleReferences(rangeReferenceQueue, ranges);
+     //   removeStaleReferences(rangeReferenceQueue, ranges);
     }
 
     //
@@ -1261,7 +1261,7 @@ public class DocumentImpl
         removeStaleRangeReferences();
         final Iterator i = ranges.iterator();
         while (i.hasNext()) {
-            RangeImpl range = (RangeImpl) ((Reference) i.next()).get();
+            RangeImpl range = (RangeImpl) i.next();
             if (range != null) {
                 range.insertedNodeFromDOM(newInternal);
             }
@@ -1297,7 +1297,7 @@ public class DocumentImpl
         removeStaleIteratorReferences();
         final Iterator i = iterators.iterator();
         while (i.hasNext()) {
-            NodeIteratorImpl iterator = (NodeIteratorImpl) ((Reference) i.next()).get();
+            NodeIteratorImpl iterator = (NodeIteratorImpl)i.next();
             if (iterator != null) {
                 iterator.removeNode(oldChild);
             }
@@ -1312,7 +1312,7 @@ public class DocumentImpl
         removeStaleRangeReferences();
         final Iterator i = ranges.iterator();
         while (i.hasNext()) {
-            RangeImpl range = (RangeImpl) ((Reference) i.next()).get();
+            RangeImpl range = (RangeImpl) i.next();
             if (range != null) {
                 range.removeNode(oldChild);
             }

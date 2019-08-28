@@ -24,9 +24,9 @@
  */
 
 package sun.misc;
-
-import java.lang.ref.SoftReference;
-import java.lang.ref.ReferenceQueue;
+//
+//import java.lang.ref.SoftReference;
+//import java.lang.ref.ReferenceQueue;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -38,6 +38,9 @@ import java.util.NoSuchElementException;
 
 
 /**
+ * 
+ * BH unfortunately not usable in JavaScript
+ * 
  * A memory-sensitive implementation of the <code>Map</code> interface.
  *
  * <p> A <code>SoftCache</code> object uses {@link java.lang.ref.SoftReference
@@ -115,27 +118,27 @@ public class SoftCache extends AbstractMap implements Map {
      */
 
 
-    static private class ValueCell extends SoftReference {
+    static private class ValueCell {//extends SoftReference {
         static private Object INVALID_KEY = new Object();
         static private int dropped = 0;
         private Object key;
+		private Object value;
 
-        private ValueCell(Object key, Object value, ReferenceQueue queue) {
-            super(value, queue);
+        private ValueCell(Object key, Object value) {
+            this.value = value;
             this.key = key;
         }
 
-        private static ValueCell create(Object key, Object value,
-                                        ReferenceQueue queue)
+        private static ValueCell create(Object key, Object value)
         {
             if (value == null) return null;
-            return new ValueCell(key, value, queue);
+            return new ValueCell(key, value);
         }
 
         private static Object strip(Object val, boolean drop) {
             if (val == null) return null;
             ValueCell vc = (ValueCell)val;
-            Object o = vc.get();
+            Object o = vc.value;
             if (drop) vc.drop();
             return o;
         }
@@ -145,7 +148,7 @@ public class SoftCache extends AbstractMap implements Map {
         }
 
         private void drop() {
-            super.clear();
+        //    super.clear();
             key = INVALID_KEY;
             dropped++;
         }
@@ -157,7 +160,7 @@ public class SoftCache extends AbstractMap implements Map {
     private Map hash;
 
     /* Reference queue for cleared ValueCells */
-    private ReferenceQueue queue = new ReferenceQueue();
+ //   private ReferenceQueue queue = new ReferenceQueue();
 
 
     /* Process any ValueCells that have been cleared and enqueued by the
@@ -166,11 +169,11 @@ public class SoftCache extends AbstractMap implements Map {
        because that can lead to surprising ConcurrentModificationExceptions.
      */
     private void processQueue() {
-        ValueCell vc;
-        while ((vc = (ValueCell)queue.poll()) != null) {
-            if (vc.isValid()) hash.remove(vc.key);
-            else ValueCell.dropped--;
-        }
+//        ValueCell vc;
+//        while ((vc = (ValueCell)queue.poll()) != null) {
+//            if (vc.isValid()) hash.remove(vc.key);
+//            else ValueCell.dropped--;
+//        }
     }
 
 
@@ -288,7 +291,7 @@ public class SoftCache extends AbstractMap implements Map {
         if (v == null) {
             v = fill(key);
             if (v != null) {
-                hash.put(key, ValueCell.create(key, v, queue));
+                hash.put(key, ValueCell.create(key, v));
                 return v;
             }
         }
@@ -311,7 +314,7 @@ public class SoftCache extends AbstractMap implements Map {
      */
     public Object put(Object key, Object value) {
         processQueue();
-        ValueCell vc = ValueCell.create(key, value, queue);
+        ValueCell vc = ValueCell.create(key, value);
         return ValueCell.strip(hash.put(key, vc), true);
     }
 
@@ -368,7 +371,7 @@ public class SoftCache extends AbstractMap implements Map {
         }
 
         public Object setValue(Object value) {
-            return ent.setValue(ValueCell.create(ent.getKey(), value, queue));
+            return ent.setValue(ValueCell.create(ent.getKey(), value));
         }
 
         public boolean equals(Object o) {
@@ -402,7 +405,7 @@ public class SoftCache extends AbstractMap implements Map {
                         Map.Entry ent = (Map.Entry)hashIterator.next();
                         ValueCell vc = (ValueCell)ent.getValue();
                         Object v = null;
-                        if ((vc != null) && ((v = vc.get()) == null)) {
+                        if ((vc != null) && ((v = vc.value) == null)) {
                             /* Value has been flushed by GC */
                             continue;
                         }

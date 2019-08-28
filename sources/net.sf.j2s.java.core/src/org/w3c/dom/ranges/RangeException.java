@@ -10,7 +10,7 @@
  * details.
  */
 
-package org.w3c.dom.range;
+package org.w3c.dom.ranges;
 
 /**
  *  Range operations may throw a <code>RangeException</code> as specified in 

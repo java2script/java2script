@@ -1498,7 +1498,6 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 
 	J2S.setKeyListener = function(who) {
 		J2S.$bind(who, 'keydown keypress keyup', function(ev) {
-return;
 			if (doIgnore(ev))
 				return true;
 			if (ev.target.getAttribute("role")) {
@@ -2510,6 +2509,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					return;
 				}
 				if (isApp && applet.__Info.headless) {
+					Clazz.loadClass("java.lang.Thread").currentThread$().group.html5Applet = applet;
 					cl.main$SA(applet.__Info.args || []);
 				} else {
 					

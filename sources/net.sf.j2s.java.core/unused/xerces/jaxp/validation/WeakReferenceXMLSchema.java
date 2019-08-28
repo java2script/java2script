@@ -17,7 +17,7 @@
 
 package org.apache.xerces.jaxp.validation;
 
-import java.lang.ref.WeakReference;
+//import java.lang.ref.WeakReference;
 
 import org.apache.xerces.xni.grammars.XMLGrammarPool;
 
@@ -34,7 +34,7 @@ import org.apache.xerces.xni.grammars.XMLGrammarPool;
 final class WeakReferenceXMLSchema extends AbstractXMLSchema {
     
     /** Weak reference to grammar pool. */
-    private WeakReference fGrammarPool = new WeakReference(null);
+    private Object fGrammarPool = null;//new WeakReference(null);
 
     public WeakReferenceXMLSchema() {}
     
@@ -43,12 +43,12 @@ final class WeakReferenceXMLSchema extends AbstractXMLSchema {
      */
 
     public synchronized XMLGrammarPool getGrammarPool() {
-        XMLGrammarPool grammarPool = (XMLGrammarPool) fGrammarPool.get();
+        XMLGrammarPool grammarPool = (XMLGrammarPool) fGrammarPool;
         // If there's no grammar pool then either we haven't created one
         // yet or the garbage collector has already cleaned out the previous one. 
         if (grammarPool == null) {
             grammarPool = new SoftReferenceGrammarPool();
-            fGrammarPool = new WeakReference(grammarPool);
+            fGrammarPool = grammarPool;
         }
         return grammarPool;
     }

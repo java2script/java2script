@@ -29,7 +29,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.ref.SoftReference;
+//import java.lang.ref.SoftReference;
 import java.net.URL;
 import java.security.CodeSource;
 //import java.security.AccessController;
@@ -83,7 +83,7 @@ import sun.security.util.SignatureFileVerifier;
  */
 public
 class JarFile extends ZipFile {
-    private SoftReference<Manifest> manRef;
+    private Manifest manRef;
     private JarEntry manEntry;
 //    private JarVerifier jv;
     private boolean jvInitialized;
@@ -196,7 +196,7 @@ class JarFile extends ZipFile {
     }
 
     private Manifest getManifestFromReference() throws IOException {
-        Manifest man = manRef != null ? manRef.get() : null;
+        Manifest man = manRef;
 
         if (man == null) {
 
@@ -213,7 +213,7 @@ class JarFile extends ZipFile {
                 } else {
                     man = new Manifest(super.getInputStream(manEntry));
                 }
-                manRef = new SoftReference<>(man);
+                manRef = man;
             }
         }
         return man;

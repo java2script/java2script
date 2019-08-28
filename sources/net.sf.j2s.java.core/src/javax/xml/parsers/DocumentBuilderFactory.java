@@ -43,6 +43,8 @@ public abstract class DocumentBuilderFactory {
     /** The default property name according to the JAXP spec */
     private static final String DEFAULT_PROPERTY_NAME = "javax.xml.parsers.DocumentBuilderFactory";
 
+	public static boolean useXerces;
+
     private boolean validating = false;
     private boolean namespaceAware = false;
     private boolean whitespace = false;
@@ -116,13 +118,14 @@ public abstract class DocumentBuilderFactory {
      * @throws FactoryConfigurationError if the implementation is not
      *   available or cannot be instantiated.
      */
-    public static DocumentBuilderFactory newInstance() {
+    public static DocumentBuilderFactory newInstance() { 
         try {
             return (DocumentBuilderFactory) FactoryFinder.find(
                 /* The default property name according to the JAXP spec */
                 "javax.xml.parsers.DocumentBuilderFactory",
                 /* The fallback implementation class name */
-                "swingjs.xml.JSDocumentBuilderFactory"); // BH SwingJS
+                useXerces ? "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl" 
+                		: "swingjs.xml.JSXMLDocumentBuilderFactory"); // BH SwingJS
         } catch (FactoryFinder.ConfigurationError e) {
             throw new FactoryConfigurationError(e.getException(),
                                                 e.getMessage());

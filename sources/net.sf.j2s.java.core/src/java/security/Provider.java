@@ -25,11 +25,28 @@
 
 package java.security;
 
-import java.io.*;
-import java.util.*;
 import static java.util.Locale.ENGLISH;
-import java.lang.ref.*;
-import java.lang.reflect.*;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+//import java.lang.ref.Reference;
+//import java.lang.ref.WeakReference;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -1393,7 +1410,7 @@ public abstract class Provider extends Properties {
         private Map<UString,String> attributes;
 
         // Reference to the cached implementation Class object
-        private volatile Reference<Class<?>> classRef;
+        private volatile Class<?> classRef;
 
         // flag indicating whether this service has its attributes for
         // supportedKeyFormats or supportedKeyClasses set
@@ -1626,8 +1643,8 @@ public abstract class Provider extends Properties {
         // return the implementation Class object for this service
         private Class<?> getImplClass() throws NoSuchAlgorithmException {
             try {
-                Reference<Class<?>> ref = classRef;
-                Class<?> clazz = (ref == null) ? null : ref.get();
+               // Class<?> ref = classRef;
+                Class<?> clazz = classRef;
                 if (clazz == null) {
                     ClassLoader cl = provider.getClass().getClassLoader();
                     if (cl == null) {
@@ -1640,7 +1657,7 @@ public abstract class Provider extends Properties {
                             ("class configured for " + type + " (provider: " +
                             provider.getName() + ") is not public.");
                     }
-                    classRef = new WeakReference<Class<?>>(clazz);
+                    classRef = clazz;
                 }
                 return clazz;
             } catch (ClassNotFoundException e) {

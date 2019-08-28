@@ -9,6 +9,7 @@
 
 // TODO: still a lot of references to window[...]
 
+// BH 2019.09.26 superfast byte[] -> String using TextDecoder
 // BH 2019.08.16 adds cache for instanceof
 // BH 2019.07.27 fixes array(intArray).clone
 // BH 2019.07.09 adds Java String.trim()
@@ -4612,10 +4613,10 @@ case 2:
   // String(byte[] bytes, Charset charset)
   // String(byte[] bytes, String charsetName)
 
-  var x=arguments[0];
   var hibyte=arguments[1];
-  return (typeof hibyte=="number" ? String.instantialize(x,hibyte,0,x.length) 
-    : String.instantialize(x,0,x.length,hibyte));
+  return (typeof hibyte=="number" ? String.instantialize(arguments[0],hibyte,0,arguments[0].length) 
+	: self.TextDecoder && arguments[1].toString().toUpperCase() == "UTF-8" ? new TextDecoder().decode(arguments[0])
+	: String.instantialize(x,0,x.length,hibyte));
 case 3:
   // String(byte[] bytes, int offset, int length)
   // String(char[] value, int offset, int count)

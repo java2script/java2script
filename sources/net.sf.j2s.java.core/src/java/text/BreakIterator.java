@@ -40,7 +40,7 @@
 
 package java.text;
 
-import java.lang.ref.SoftReference;
+//import java.lang.ref.SoftReference;
 import java.text.spi.BreakIteratorProvider;
 import java.util.Locale;
 import sun.util.locale.provider.LocaleProviderAdapter;
@@ -433,7 +433,7 @@ public abstract class BreakIterator implements Cloneable
     private static final int SENTENCE_INDEX = 3;
 
     @SuppressWarnings("unchecked")
-    private static final SoftReference<BreakIteratorCache>[] iterCache = (SoftReference<BreakIteratorCache>[]) new SoftReference<?>[4];
+    private static final BreakIteratorCache[] iterCache = new BreakIteratorCache[4];
 
     /**
      * Returns a new <code>BreakIterator</code> instance
@@ -533,7 +533,7 @@ public abstract class BreakIterator implements Cloneable
 
     private static BreakIterator getBreakInstance(Locale locale, int type) {
         if (iterCache[type] != null) {
-            BreakIteratorCache cache = iterCache[type].get();
+            BreakIteratorCache cache = iterCache[type];
             if (cache != null) {
                 if (cache.getLocale().equals(locale)) {
                     return cache.createBreakInstance();
@@ -543,7 +543,7 @@ public abstract class BreakIterator implements Cloneable
 
         BreakIterator result = createBreakInstance(locale, type);
         BreakIteratorCache cache = new BreakIteratorCache(locale, result);
-        iterCache[type] = new SoftReference<>(cache);
+        iterCache[type] = cache;
         return result;
     }
 

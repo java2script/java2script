@@ -25,20 +25,6 @@
 
 package java.security;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
-import sun.misc.JavaSecurityProtectionDomainAccess;
-import static sun.misc.JavaSecurityProtectionDomainAccess.ProtectionDomainCache;
-import sun.security.util.Debug;
-import sun.security.util.SecurityConstants;
-import sun.misc.JavaSecurityAccess;
-import sun.misc.SharedSecrets;
-
 /**
  *
  *<p>

@@ -16,7 +16,7 @@
  */
 package org.apache.xerces.dom;
 
-import java.lang.ref.SoftReference;
+//import java.lang.ref.SoftReference;
 
 import org.apache.xerces.impl.RevalidationHandler;
 import org.apache.xerces.impl.dtd.XMLDTDLoader;
@@ -63,9 +63,9 @@ public class CoreDOMImplementationImpl
     // validator pools
     private static final int SIZE = 2;
     
-    private SoftReference schemaValidators[] = new SoftReference[SIZE];
-    private SoftReference xml10DTDValidators[] = new SoftReference[SIZE];
-    private SoftReference xml11DTDValidators[] = new SoftReference[SIZE];
+    private Object[] schemaValidators = new Object[SIZE];
+    private Object[] xml10DTDValidators = new Object[SIZE];
+    private Object[] xml11DTDValidators = new Object[SIZE];
     
     private int freeSchemaValidatorIndex = -1;
     private int freeXML10DTDValidatorIndex = -1;
@@ -75,8 +75,8 @@ public class CoreDOMImplementationImpl
     private int xml10DTDValidatorsCurrentSize = SIZE;
     private int xml11DTDValidatorsCurrentSize = SIZE;
     
-    private SoftReference xml10DTDLoaders[] = new SoftReference[SIZE];
-    private SoftReference xml11DTDLoaders[] = new SoftReference[SIZE];
+    private Object[] xml10DTDLoaders = new Object[SIZE];
+    private Object[] xml11DTDLoaders = new Object[SIZE];
     
     private int freeXML10DTDLoaderIndex = -1;
     private int freeXML11DTDLoaderIndex = -1;
@@ -452,8 +452,8 @@ public class CoreDOMImplementationImpl
             // requested
             while (freeSchemaValidatorIndex >= 0) {
                 // return first available validator
-                SoftReference ref = schemaValidators[freeSchemaValidatorIndex];
-                RevalidationHandlerHolder holder = (RevalidationHandlerHolder) ref.get();
+//                SoftReference ref = schemaValidators[freeSchemaValidatorIndex];
+                RevalidationHandlerHolder holder = (RevalidationHandlerHolder) schemaValidators[freeSchemaValidatorIndex];
                 if (holder != null && holder.handler != null) {
                     RevalidationHandler val = holder.handler;
                     holder.handler = null;
@@ -473,8 +473,8 @@ public class CoreDOMImplementationImpl
             if ("1.1".equals(xmlVersion)) {
                 while (freeXML11DTDValidatorIndex >= 0) {
                     // return first available validator
-                    SoftReference ref = xml11DTDValidators[freeXML11DTDValidatorIndex];
-                    RevalidationHandlerHolder holder = (RevalidationHandlerHolder) ref.get();
+                    //SoftReference ref = xml11DTDValidators[freeXML11DTDValidatorIndex];
+                    RevalidationHandlerHolder holder = (RevalidationHandlerHolder) xml11DTDValidators[freeXML11DTDValidatorIndex];
                     if (holder != null && holder.handler != null) {
                         RevalidationHandler val = holder.handler;
                         holder.handler = null;
@@ -493,8 +493,8 @@ public class CoreDOMImplementationImpl
             else {
                 while (freeXML10DTDValidatorIndex >= 0) {
                     // return first available validator
-                    SoftReference ref = xml10DTDValidators[freeXML10DTDValidatorIndex];
-                    RevalidationHandlerHolder holder = (RevalidationHandlerHolder) ref.get();
+                   // SoftReference ref = xml10DTDValidators[freeXML10DTDValidatorIndex];
+                    RevalidationHandlerHolder holder = (RevalidationHandlerHolder) xml10DTDValidators[freeXML10DTDValidatorIndex];
                     if (holder != null && holder.handler != null) {
                         RevalidationHandler val = holder.handler;
                         holder.handler = null;
@@ -521,19 +521,19 @@ public class CoreDOMImplementationImpl
 	        if (schemaValidators.length == freeSchemaValidatorIndex) {
 	            // resize size of the validators
 	            schemaValidatorsCurrentSize += SIZE;
-	            SoftReference newarray[] =  new SoftReference[schemaValidatorsCurrentSize];
+	            Object[] newarray =  new Object[schemaValidatorsCurrentSize];
 	            System.arraycopy(schemaValidators, 0, newarray, 0, schemaValidators.length);
 	            schemaValidators = newarray;
 	        }
-	        SoftReference ref = schemaValidators[freeSchemaValidatorIndex];
-	        if (ref != null) {
-	            RevalidationHandlerHolder holder = (RevalidationHandlerHolder) ref.get();
+	        //SoftReference ref = schemaValidators[freeSchemaValidatorIndex];
+	      //  if (ref != null) {
+	            RevalidationHandlerHolder holder = (RevalidationHandlerHolder) schemaValidators[freeSchemaValidatorIndex];
 	            if (holder != null) {
 	                holder.handler = validator;
 	                return;
 	            }
-	        }
-	        schemaValidators[freeSchemaValidatorIndex] = new SoftReference(new RevalidationHandlerHolder(validator));
+	      //  }
+	        schemaValidators[freeSchemaValidatorIndex] = (new RevalidationHandlerHolder(validator));
 	    }
 	    else if (schemaType == XMLGrammarDescription.XML_DTD) {
 	        // release an instance of XML11DTDValidator
@@ -542,19 +542,19 @@ public class CoreDOMImplementationImpl
 	            if (xml11DTDValidators.length == freeXML11DTDValidatorIndex) {
 	                // resize size of the validators
 	                xml11DTDValidatorsCurrentSize += SIZE;
-	                SoftReference [] newarray = new SoftReference[xml11DTDValidatorsCurrentSize];
+	                Object[] newarray = new Object[xml11DTDValidatorsCurrentSize];
 	                System.arraycopy(xml11DTDValidators, 0, newarray, 0, xml11DTDValidators.length);
 	                xml11DTDValidators = newarray;
 	            }
-	            SoftReference ref = xml11DTDValidators[freeXML11DTDValidatorIndex];
-	            if (ref != null) {
-	                RevalidationHandlerHolder holder = (RevalidationHandlerHolder) ref.get();
+	            //SoftReference ref = xml11DTDValidators[freeXML11DTDValidatorIndex];
+	            //if (ref != null) {
+	                RevalidationHandlerHolder holder = (RevalidationHandlerHolder) xml11DTDValidators[freeXML11DTDValidatorIndex];
 	                if (holder != null) {
 	                    holder.handler = validator;
 	                    return;
 	                }
-	            }
-	            xml11DTDValidators[freeXML11DTDValidatorIndex] = new SoftReference(new RevalidationHandlerHolder(validator));
+	           // }
+	            xml11DTDValidators[freeXML11DTDValidatorIndex] = new RevalidationHandlerHolder(validator);
 	        }
 	        // release an instance of XMLDTDValidator
 	        else {
@@ -562,19 +562,19 @@ public class CoreDOMImplementationImpl
 	            if (xml10DTDValidators.length == freeXML10DTDValidatorIndex) {
 	                // resize size of the validators
 	                xml10DTDValidatorsCurrentSize += SIZE;
-	                SoftReference [] newarray = new SoftReference[xml10DTDValidatorsCurrentSize];
+	                Object[] newarray = new Object[xml10DTDValidatorsCurrentSize];
 	                System.arraycopy(xml10DTDValidators, 0, newarray, 0, xml10DTDValidators.length);
 	                xml10DTDValidators = newarray;
 	            }
-	            SoftReference ref = xml10DTDValidators[freeXML10DTDValidatorIndex];
-	            if (ref != null) {
-	                RevalidationHandlerHolder holder = (RevalidationHandlerHolder) ref.get();
+	        //    SoftReference ref = xml10DTDValidators[freeXML10DTDValidatorIndex];
+	        //    if (ref != null) {
+	                RevalidationHandlerHolder holder = (RevalidationHandlerHolder) xml10DTDValidators[freeXML10DTDValidatorIndex];
 	                if (holder != null) {
 	                    holder.handler = validator;
 	                    return;
 	                }
-	            }
-	            xml10DTDValidators[freeXML10DTDValidatorIndex] = new SoftReference(new RevalidationHandlerHolder(validator));
+	        //    }
+	            xml10DTDValidators[freeXML10DTDValidatorIndex] = (new RevalidationHandlerHolder(validator));
 	        }
 	    }
 	}
@@ -585,8 +585,8 @@ public class CoreDOMImplementationImpl
         if ("1.1".equals(xmlVersion)) {
             while (freeXML11DTDLoaderIndex >= 0) {
                 // return first available DTD loader
-                SoftReference ref = xml11DTDLoaders[freeXML11DTDLoaderIndex];
-                XMLDTDLoaderHolder holder = (XMLDTDLoaderHolder) ref.get();
+               // SoftReference ref = xml11DTDLoaders[freeXML11DTDLoaderIndex];
+                XMLDTDLoaderHolder holder = (XMLDTDLoaderHolder) xml11DTDLoaders[freeXML11DTDLoaderIndex];
                 if (holder != null && holder.loader != null) {
                     XMLDTDLoader val = holder.loader;
                     holder.loader = null;
@@ -605,8 +605,8 @@ public class CoreDOMImplementationImpl
         else {
             while (freeXML10DTDLoaderIndex >= 0) {
                 // return first available DTD loader
-                SoftReference ref = xml10DTDLoaders[freeXML10DTDLoaderIndex];
-                XMLDTDLoaderHolder holder = (XMLDTDLoaderHolder) ref.get();
+               // SoftReference ref = xml10DTDLoaders[freeXML10DTDLoaderIndex];
+                XMLDTDLoaderHolder holder = (XMLDTDLoaderHolder)xml10DTDLoaders[freeXML10DTDLoaderIndex];
                 if (holder != null && holder.loader != null) {
                     XMLDTDLoader val = holder.loader;
                     holder.loader = null;
@@ -627,19 +627,19 @@ public class CoreDOMImplementationImpl
             if (xml11DTDLoaders.length == freeXML11DTDLoaderIndex) {
                 // resize size of the DTD loaders
                 xml11DTDLoaderCurrentSize += SIZE;
-                SoftReference [] newarray = new SoftReference[xml11DTDLoaderCurrentSize];
+                Object[] newarray = new Object[xml11DTDLoaderCurrentSize];
                 System.arraycopy(xml11DTDLoaders, 0, newarray, 0, xml11DTDLoaders.length);
                 xml11DTDLoaders = newarray;
             }
-            SoftReference ref = xml11DTDLoaders[freeXML11DTDLoaderIndex];
-            if (ref != null) {
-                XMLDTDLoaderHolder holder = (XMLDTDLoaderHolder) ref.get();
+//            SoftReference ref = xml11DTDLoaders[freeXML11DTDLoaderIndex];
+//            if (ref != null) {
+                XMLDTDLoaderHolder holder = (XMLDTDLoaderHolder)xml11DTDLoaders[freeXML11DTDLoaderIndex];
                 if (holder != null) {
                     holder.loader = loader;
                     return;
                 }
-            }
-            xml11DTDLoaders[freeXML11DTDLoaderIndex] = new SoftReference(new XMLDTDLoaderHolder(loader));
+//            }
+            xml11DTDLoaders[freeXML11DTDLoaderIndex] = (new XMLDTDLoaderHolder(loader));
         }
         // release an instance of XMLDTDLoader
         else {
@@ -647,19 +647,19 @@ public class CoreDOMImplementationImpl
             if (xml10DTDLoaders.length == freeXML10DTDLoaderIndex) {
                 // resize size of the DTD loaders
                 xml10DTDLoaderCurrentSize += SIZE;
-                SoftReference [] newarray = new SoftReference[xml10DTDLoaderCurrentSize];
+                Object[] newarray = new Object[xml10DTDLoaderCurrentSize];
                 System.arraycopy(xml10DTDLoaders, 0, newarray, 0, xml10DTDLoaders.length);
                 xml10DTDLoaders = newarray;
             }
-            SoftReference ref = xml10DTDLoaders[freeXML10DTDLoaderIndex];
-            if (ref != null) {
-                XMLDTDLoaderHolder holder = (XMLDTDLoaderHolder) ref.get();
+            //SoftReference ref = xml10DTDLoaders[freeXML10DTDLoaderIndex];
+            //if (ref != null) {
+                XMLDTDLoaderHolder holder = (XMLDTDLoaderHolder) xml10DTDLoaders[freeXML10DTDLoaderIndex];
                 if (holder != null) {
                     holder.loader = loader;
                     return;
                 }
-            }
-            xml10DTDLoaders[freeXML10DTDLoaderIndex] = new SoftReference(new XMLDTDLoaderHolder(loader));
+            //}
+            xml10DTDLoaders[freeXML10DTDLoaderIndex] = (new XMLDTDLoaderHolder(loader));
         }
     }
     
