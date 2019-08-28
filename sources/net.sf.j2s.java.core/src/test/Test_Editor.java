@@ -56,6 +56,7 @@ import javax.swing.MenuSelectionManager;
 import javax.swing.Timer;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
@@ -308,8 +309,8 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 				area.setCaretPosition(0);
 				area.requestFocus();
 				editor.requestFocus();
-				area1.setCaretPosition(0);
-				area1.requestFocus();
+				//area1.setCaretPosition(0);
+				//area1.requestFocus();
 			}
 
 		});
@@ -383,10 +384,10 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Test_Editor action " + getID(e.getSource()));
-//				editor.setCaretPosition(editor.getDocument().getLength());
-				area.setCaretPosition(area.getDocument().getLength());
-				area.requestFocus();
-//				editor.requestFocus();
+				editor.setCaretPosition(editor.getDocument().getLength());
+				//area.setCaretPosition(area.getDocument().getLength());
+				//area.requestFocus();
+				editor.requestFocus();
 			}
 
 		});
@@ -399,8 +400,8 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Test_Editor action " + getID(e.getSource()));
-				area1.setCaretPosition(area1.getText().length());
-				area1.requestFocus();
+				area.setCaretPosition(area1.getText().length());
+				area.requestFocus();
 			}
 
 		});
@@ -430,8 +431,13 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Test_Editor action " + getID(e.getSource()));
-				area.append("\ntesting" + ++n); 
-//				area.requestFocus();
+				try {
+					editor.getDocument().insertString(editor.getDocument().getLength(),"\ntesting" + ++n, null);
+				} catch (BadLocationException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} 
+				editor.requestFocus();
 			}
 
 		});
@@ -444,8 +450,8 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Test_Editor action " + getID(e.getSource()));
-				area1.requestFocus();
-				area1.append("\ntesting" + ++n); 
+				area.requestFocus();
+				area.append("\ntesting" + ++n); 
 			}
 
 		});

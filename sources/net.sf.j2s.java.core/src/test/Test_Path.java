@@ -2,26 +2,19 @@ package test;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
 
-import com.sun.xml.internal.fastinfoset.stax.events.CharactersEvent;
 
 class Test_Path extends Test_ {
 
 	public static void main(String[] args) {
+		
+		
+	//	assert(checkDBName("none", "https://4virology.net/ca.virology/xml/DBPrefs.xml", null));
+		
 		File f;
 		Path p,p2;
 
@@ -60,8 +53,20 @@ class Test_Path extends Test_ {
 			assert(false);
 		}
 		
+
+		
+		
 		
 	  System.out.println("Test_Path OK");
   }
+	
+	  private static boolean checkDBName (String dbname, String dbprefs, String dbprefs_prefix) {
+		    test.bsml.DBPrefs dbp = new test.bsml.DBPrefs(dbprefs, dbprefs_prefix);
+		    if (dbp.checkDBExists(dbname)) //dbname exists in xml file
+		      return true;
+		    else
+		      return false;
+		  }
+		 
 	
 }

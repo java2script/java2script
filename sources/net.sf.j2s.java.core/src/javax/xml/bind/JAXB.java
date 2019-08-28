@@ -53,7 +53,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
-import java.lang.ref.WeakReference;
+//import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -132,7 +132,7 @@ public final class JAXB {
      * Cache. We don't want to prevent the {@link Cache#type} from GC-ed,
      * hence {@link WeakReference}.
      */
-    private static volatile WeakReference<Cache> cache;
+    private static volatile Cache cache;
 
     /**
      * Obtains the {@link JAXBContext} from the given type,
@@ -143,16 +143,15 @@ public final class JAXB {
      * should be thread-safe thanks to the immutable {@link Cache} and {@code volatile}.
      */
     private static <T> JAXBContext getContext(Class<T> type) throws JAXBException {
-        WeakReference<Cache> c = cache;
-        if(c!=null) {
-            Cache d = c.get();
+
+            Cache d = cache;
             if(d!=null && d.type==type)
                 return d.context;
-        }
+
 
         // overwrite the cache
-        Cache d = new Cache(type);
-        cache = new WeakReference<Cache>(d);
+        d = new Cache(type);
+        cache = d;
 
         return d.context;
     }

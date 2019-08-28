@@ -20,7 +20,7 @@ package java.lang;
  * This exception is thrown when a program attempts to access a method which
  * does not exist in a class.
  */
-public class NoSuchMethodException extends java.lang.Exception {
+public class NoSuchMethodException extends ReflectiveOperationException {
 
     private static final long serialVersionUID = 5034388446362600923L;
 

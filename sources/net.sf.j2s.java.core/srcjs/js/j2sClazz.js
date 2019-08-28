@@ -9,6 +9,7 @@
 
 // TODO: still a lot of references to window[...]
 
+// BH 2019.09.26 superfast byte[] -> String using TextDecoder
 // BH 2019.08.16 adds cache for instanceof
 // BH 2019.07.27 fixes array(intArray).clone
 // BH 2019.07.09 adds Java String.trim()
@@ -4612,10 +4613,10 @@ case 2:
   // String(byte[] bytes, Charset charset)
   // String(byte[] bytes, String charsetName)
 
-  var x=arguments[0];
   var hibyte=arguments[1];
-  return (typeof hibyte=="number" ? String.instantialize(x,hibyte,0,x.length) 
-    : String.instantialize(x,0,x.length,hibyte));
+  return (typeof hibyte=="number" ? String.instantialize(arguments[0],hibyte,0,arguments[0].length) 
+	: self.TextDecoder && arguments[1].toString().toUpperCase() == "UTF-8" ? new TextDecoder().decode(arguments[0])
+	: String.instantialize(x,0,x.length,hibyte));
 case 3:
   // String(byte[] bytes, int offset, int length)
   // String(char[] value, int offset, int count)
@@ -5342,21 +5343,22 @@ newEx(java.lang,"ArrayStoreException",RuntimeException);
 newEx(java.lang,"ClassCircularityError",LinkageError);
 newEx(java.lang,"ClassFormatError",LinkageError);
 newEx(java.lang,"CloneNotSupportedException",Exception);
+newEx(java.lang,"ReflectiveOperationException",Exception);
 newEx(java.lang,"IllegalAccessError",IncompatibleClassChangeError);
-newEx(java.lang,"IllegalAccessException",Exception);
+newEx(java.lang,"IllegalAccessException",ReflectiveOperationException);
 newEx(java.lang,"IllegalMonitorStateException",RuntimeException);
 newEx(java.lang,"IllegalStateException",RuntimeException);
 newEx(java.lang,"IllegalThreadStateException",IllegalArgumentException);
 newEx(java.lang,"IndexOutOfBoundsException",RuntimeException);
 newEx(java.lang,"InstantiationError",IncompatibleClassChangeError);
-newEx(java.lang,"InstantiationException",Exception);
+newEx(java.lang,"InstantiationException",ReflectiveOperationException);
 newEx(java.lang,"InternalError",VirtualMachineError);
 newEx(java.lang,"InterruptedException",Exception);
 newEx(java.lang,"NegativeArraySizeException",RuntimeException);
 newEx(java.lang,"NoClassDefFoundError",LinkageError);
 newEx(java.lang,"NoSuchFieldError",IncompatibleClassChangeError);
-newEx(java.lang,"NoSuchFieldException",Exception);
-newEx(java.lang,"NoSuchMethodException",Exception);
+newEx(java.lang,"NoSuchFieldException",ReflectiveOperationException);
+newEx(java.lang,"NoSuchMethodException",ReflectiveOperationException);
 newEx(java.lang,"NoSuchMethodError",IncompatibleClassChangeError);
 newEx(java.lang,"NullPointerException",RuntimeException);
 newEx(java.lang,"NumberFormatException",IllegalArgumentException);
@@ -5391,7 +5393,7 @@ m$(C$, "c$$I", function(index){
 C$.superclazz.c$$S.apply(this,["String index out of range: "+index]);
 }, 1);
 
-C$=Clazz.newClass(java.lang.reflect,"InvocationTargetException",function(){this.target=null;},Exception);
+C$=Clazz.newClass(java.lang.reflect,"InvocationTargetException",function(){this.target=null;},ReflectiveOperationException);
 m$(C$, "c$$Throwable", function(exception){
 C$.superclazz.c$$Throwable.apply(this, arguments);
 this.target=exception;

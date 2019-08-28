@@ -28,7 +28,6 @@
 
 package sun.awt.image;
 
-import java.lang.ref.WeakReference;
 import java.awt.Image;
 import java.awt.image.ImageObserver;
 

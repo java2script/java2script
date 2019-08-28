@@ -30,7 +30,7 @@ package java.awt.datatransfer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.lang.ref.SoftReference;
+//import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -631,15 +631,15 @@ public final class SystemFlavorMap implements FlavorMap, FlavorTable {
         List retval = null;
 
         // Check cache, even for null flav
-        SoftReference ref = (SoftReference)getNativesForFlavorCache.get(flav);
-        if (ref != null) {
-            retval = (List)ref.get();
+        Object refval = getNativesForFlavorCache.get(flav);
+//        if (ref != null) {
+//            retval = (List)ref.get();
             if (retval != null) {
                 // Create a copy, because client code can modify the returned
                 // list.
                 return new ArrayList(retval);
             }
-        }
+ //       }
 
         if (flav == null) {
             retval = new ArrayList(nativeToFlavor.keySet());
@@ -723,7 +723,7 @@ public final class SystemFlavorMap implements FlavorMap, FlavorTable {
             retval = flavorToNativeLookup(flav, SYNTHESIZE_IF_NOT_FOUND);
         }
 
-        getNativesForFlavorCache.put(flav, new SoftReference(retval));
+        getNativesForFlavorCache.put(flav, retval);
         // Create a copy, because client code can modify the returned list.
         return new ArrayList(retval);
     }
@@ -763,13 +763,13 @@ public final class SystemFlavorMap implements FlavorMap, FlavorTable {
 	public synchronized List<DataFlavor> getFlavorsForNative(String nat) {
 
         // Check cache, even for null nat
-        SoftReference ref = (SoftReference)getFlavorsForNativeCache.get(nat);
-        if (ref != null) {
-            ArrayList retval = (ArrayList)ref.get();
-            if (retval != null) {
-                return (List)retval.clone();
+//        SoftReference ref = (SoftReference)getFlavorsForNativeCache.get(nat);
+//        if (ref != null) {
+            ArrayList rval = (ArrayList) getFlavorsForNativeCache.get(nat);
+            if (rval != null) {
+                return (List)rval.clone();
             }
-        }
+//        }
 
         LinkedList retval = new LinkedList();
 
@@ -903,7 +903,7 @@ public final class SystemFlavorMap implements FlavorMap, FlavorTable {
         }
 
         ArrayList arrayList = new ArrayList(retval);
-        getFlavorsForNativeCache.put(nat, new SoftReference(arrayList));
+        getFlavorsForNativeCache.put(nat, arrayList);
         return (List)arrayList.clone();
     }
 

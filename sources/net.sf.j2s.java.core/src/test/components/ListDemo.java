@@ -97,14 +97,14 @@ public class ListDemo extends JPanel implements ListSelectionListener {
 		hireButton.addActionListener(hireListener);
 		hireButton.setEnabled(false);
 
-		JButton gotoButton = new JButton("Blanco White");
+		JButton gotoButton = new JButton("Pearly White");
 		gotoButton.setPreferredSize(new Dimension(130, 20));
 		gotoButton.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				list.setSelectedValue(gotoButton.getText(), true);
-				gotoButton.setText(gotoButton.getText() == "Blanco White" ? "Jane Doe" : "Blanco White");
+				gotoButton.setText(gotoButton.getText() == "Pearly White" ? "Jane Doe" : "Pearly White");
 			}
 			
 		});

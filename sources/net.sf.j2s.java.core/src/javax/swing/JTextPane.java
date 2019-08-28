@@ -88,10 +88,6 @@ import javax.swing.text.StyledEditorKit;
  */
 public class JTextPane extends JEditorPane {
 		
-	
-	// TODO SwingJS -- JSTextPaneUI has not been implemented
-	
-		
     /**
      * Creates a new <code>JTextPane</code>.  A new instance of
      * <code>StyledEditorKit</code> is

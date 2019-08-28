@@ -38,8 +38,6 @@ import java.util.Set;
 
 import javax.swing.JApplet;
 
-import sun.awt.AWTAccessor;
-
 //import sun.util.logging.PlatformLogger;
 
 import sun.awt.AppContext;

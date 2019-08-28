@@ -85,6 +85,11 @@ public class JSSAXParser implements Parser, XMLReader {
 			error(e);
 		}
 	}
+	
+
+	public DOMNode parseToDOM(InputSource is) throws SAXException, IOException {	
+		return parseXML(getString(is));
+	}
 
 	public void parse(InputSource source, DefaultHandler handler) throws SAXException, IOException {
 		setContentHandler(handler);
@@ -92,6 +97,10 @@ public class JSSAXParser implements Parser, XMLReader {
 	}
 
 	public void parse(InputSource source, int mode) throws  SAXException, IOException  {
+		parseXMLString(getString(source));
+	}
+
+	private String getString(InputSource source) throws IOException {
 		Reader rdr = source.getCharacterStream();
 		String[] data = new String[1];
 		if (rdr == null) {
@@ -104,11 +113,7 @@ public class JSSAXParser implements Parser, XMLReader {
 				rdr = new BufferedReader(rdr);
 			Rdr.readAllAsString((BufferedReader) rdr, -1, false, data, 0);
 		}
-		try {
-			parseDocument(parseXML(data[0]), mode);
-		} catch (Exception e) {
-			error(e);
-		}
+		return data[0];
 	}
 
 	public DOMNode parseXML(String data) {
@@ -399,6 +404,7 @@ public class JSSAXParser implements Parser, XMLReader {
 	public ErrorHandler getErrorHandler() {
 		return errorHandler;
 	}
+
 
 
 }

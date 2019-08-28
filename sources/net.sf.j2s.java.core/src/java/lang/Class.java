@@ -25,6 +25,7 @@
 
 package java.lang;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -34,12 +35,15 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 //import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.net.URL;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import sun.misc.CompoundEnumeration;
 import swingjs.JSUtil;
 
 //import sun.misc.Unsafe;
@@ -748,13 +752,17 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		 * var me = this;
 		 * loader.getResourceAsStream$S = function(s) { return me.getResourceAsStream$S(s.indexOf("/") == 0 ? s : "/" + s) };
 		 * loader.getResource$S = function(s) { return me.getResource$S(s.indexOf("/") == 0 ? s : "/" + s) }; 
-		 * 
+		 * loader.getResources$S = function(s) { return me.getResources$S(s) };
 		 */
 	    { }
 	    return loader;
 
 	}
-
+	
+	protected CompoundEnumeration<Enumeration<URL>> getResources(String name) throws IOException {
+    	// sorry, just not implemented.
+        return new CompoundEnumeration((Enumeration<URL>[]) new Enumeration<?>[] { null, java.util.Collections.emptyEnumeration() });
+    } 
 	/**
 	 * Returns an array of {@code TypeVariable} objects that represent the type
 	 * variables declared by the generic declaration represented by this
@@ -2871,7 +2879,9 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		void removeByNameAndSignature(Method toRemove) {
 			for (int i = 0; i < length; i++) {
 				Method m = methods[i];
-				if (m != null && m.getReturnType() == toRemove.getReturnType() && m.getName() == toRemove.getName()
+				if (m != null 
+						//&& m.getReturnType() == toRemove.getReturnType() 
+						&& m.getName() == toRemove.getName()
 						&& arrayContentsEq(m.getParameterTypes(), toRemove.getParameterTypes())) {
 					methods[i] = null;
 				}

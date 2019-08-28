@@ -305,7 +305,6 @@ javax/swing/undo/UndoableEdit.js
 javax/swing/ViewportLayout.js
 javax/swing/WindowConstants.js
 sun/awt/AppContext.js
-sun/awt/AWTAccessor.js
 sun/awt/AWTAutoShutdown.js
 sun/awt/CausedFocusEvent.js
 sun/awt/ComponentFactory.js
@@ -339,10 +338,8 @@ swingjs/api/Interface.js
 swingjs/api/js/DOMNode.js
 swingjs/api/js/HTML5CanvasContext2D.js
 swingjs/api/js/JSInterface.js
-swingjs/api/JSMinimalAbstractDocument.js
 swingjs/jquery/JQueryUI.js
 swingjs/JSApp.js
-swingjs/JSApplet.js
 swingjs/JSAppletThread.js
 swingjs/JSAppletViewer.js
 swingjs/JSFocusPeer.js

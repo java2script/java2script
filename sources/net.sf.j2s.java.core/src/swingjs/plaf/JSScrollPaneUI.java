@@ -115,7 +115,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 		if (sc != scrolledComponent) {
 			scrolledComponent = sc;
 			scrolledUI = (JSComponentUI) sc.ui;
-			scrollBarUIDisabled = (scrolledUI instanceof JSTextViewUI);
+			scrollBarUIDisabled = scrolledUI.isTextView;
 			scrolledUI.scrollPaneUI = this;
 			if (setSize)
 				DOMNode.setSize(scrolledUI.domNode, c.getWidth(), c.getHeight());
@@ -1006,6 +1006,10 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 		super.paint(g, c);
 //		checkTextAreaHeight();
 		updateScrollBarExtents();
+		if (scrollBarUIDisabled) {
+			scrollpane.getVerticalScrollBar().setVisible(false);
+			scrollpane.getHorizontalScrollBar().setVisible(false);
+		}
 //		Border vpBorder = scrollpane.getViewportBorder();
 //		if (vpBorder != null) {
 //			Rectangle r = scrollpane.getViewportBorderBounds();
