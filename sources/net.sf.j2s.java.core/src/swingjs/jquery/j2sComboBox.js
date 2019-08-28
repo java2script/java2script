@@ -1,9 +1,12 @@
 /**
+ * 
  * @author Bob Hanson 2019.07.06
+ * 
  * 
  * A relatively simple ComboBox that supports actual objects, not just strings
  * 
  */
+// BH 2019.08.26 text area set to <button> to manage vertical centering. 
 
 // NOTE: If you change this file, then you need to touch and save JQueryUI.java, as only then
 //       will the transpiler copy this file to site/swingjs/j2s/swingjs/jquery/
@@ -12,8 +15,8 @@ $( function() {
     $('head').append('<style>.j2scb-sel {background-color:#B8CFE5;}'
     		+'\n.j2scb-unsel {background-color:white;}'
     		+'\n.j2scb-hov {background-color:lightblue;}'
-    		+'\n.j2scbcont {position:absolute; left:0px;top:0px;border:black solid 1px;}'
-    		+'\n.j2scbhead {position:absolute; left:0px;top:0px;padding:.1em .2em 0em .2em;text-align:left;overflow:hidden;}'
+    		+'\n.j2scbcont {position:absolute; left:0px;top:0px;}'
+    		+'\n.j2scbhead {position:absolute; left:0px;top:0px;text-align:left;overflow:hidden;}'
     		+'\n.j2scbbtn {position:absolute; leftbackground-color:white;:100px;top:0px; width:20px;text-align:center;cursor:pointer;background-color:lightblue;padding:0px}'
     		+'\n.j2scbpopup {position:absolute; list-style:none}'
     		+'\n.j2scblist {background-color:white;position:absolute; left:0px;top:0px;margin:0;border:black solid 1px;cursor:pointer;text-align:left;padding:0em;scrollbar-width:thin;cursor:pointer;}</style>'
@@ -75,7 +78,7 @@ $( function() {
     	var id = this.id();
         this.element.addClass( 'custom-j2sCB' );
         this.cont = $( '<div>', {'class': 'j2scbcont', 'id':id+'_cont' });
-        this.cont.append(this.head = $( '<div>', {'class': 'j2scbhead', 'id':id+'_head' }));
+        this.cont.append(this.head = $( '<button>', {'class': 'j2scbhead', 'id':id+'_head' }));
         this.cont.append(this.btn = $( '<button>', {'class': 'j2scbbtn', 'id':id+'_btn' , text:'\u25bc'}));
         this.popup = $( '<div>', {'class': 'j2scbpopup', 'id':id+'_popup' });
         this.popup.css({
@@ -175,33 +178,44 @@ $( function() {
     	  }
       },
       updateCSS: function() {
+    	  var cbox = this.cont.parent();
+    	  var font = {"font-family": cbox.css("font-family")
+    			  , "font-size": cbox.css("font-size")
+    			  , "font-weight": cbox.css("font-weight")
+    			  , "font-style": cbox.css("font-style")
+    			  }; 	  
           var w = this.element.width();
           if (w == 0)
         	  return;
           var h = this.element.height() + 'px';
           this.cont.css({
-          	width: w + 'px',
+          	width: (w - 2) + 'px',
           	height: h,
           	backgroundColor: this.options.backgroundColor
           });
           this.head.css({
           	width: (w - 20) + 'px',
-          	height: h
+          	height: h,
+          	backgroundColor: this.options.backgroundColor
           });
+          this.head.css(font);
           this.btn.css({
           	left: (w - 20) + 'px',
           	height: h
           });
+          this.btn.css(font);
           h = (this.options.height ? this.options.height + 'px' : null);
           this.popup.css({
             width: w + 'px',
         	height: h
           });  
+          this.popup.css(font);
           this.list.css({
             width: w + 'px',
           	height: h,
           	overflowY: (h ? null : 'auto')
-          });  
+          }); 
+          this.list.css(font);
       },
       
       setSelectedIndex: function(n) { return this._clickOpt({target: $('#' + this.id() + '_opt' + n)}, false) },
@@ -224,8 +238,8 @@ $( function() {
 	 	this.popup.css({
 	 		'display':'block',
 	 		left: loc.left + 'px',
-        	top: (loc.top + this.element.height() + 1) + 'px',
-        	width:this.element.css('width'),
+        	top: (loc.top + this.element.height()) + 'px',
+        	width:this.element.css('width') - 2,
 	 		'z-index': this.options.zIndex
 	 	});
 	  	this.list.scrollTop(0);

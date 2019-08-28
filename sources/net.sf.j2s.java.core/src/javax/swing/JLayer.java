@@ -54,8 +54,6 @@ import java.util.ArrayList;
 import javax.swing.border.Border;
 import javax.swing.plaf.LayerUI;
 
-import sun.awt.AWTAccessor;
-
 /**
  * {@code JLayer} is a universal decorator for Swing components
  * which enables you to implement various advanced painting effects as well as

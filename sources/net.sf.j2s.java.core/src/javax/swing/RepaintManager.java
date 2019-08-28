@@ -49,7 +49,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javajs.util.Lst;
-import sun.awt.AWTAccessor;
+//import sun.awt.AWTAccessor;
 import sun.awt.AppContext;
 import sun.awt.SunToolkit;
 import swingjs.JSToolkit;

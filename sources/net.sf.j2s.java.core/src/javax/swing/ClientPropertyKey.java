@@ -25,8 +25,6 @@
 
 package javax.swing;
 
-import sun.awt.AWTAccessor;
-
 /**
  * An enumeration for keys used as client properties within the Swing
  * implementation.

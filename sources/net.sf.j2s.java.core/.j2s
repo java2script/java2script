@@ -1,5 +1,7 @@
 j2s.compiler.status=enable
 
+#j2s.compiler.nonqualified.packages=org.w3c.dom
+
 #output file name for logging methods declared - delete the file to regenerate a listing 
 #j2s.log.methods.declared=methodsDeclared.csv
 

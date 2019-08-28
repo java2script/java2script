@@ -125,9 +125,7 @@ class JSComboPopupList extends JList {
 			JComponent j = (JComponent) cbui.comboBox.getRenderer().getListCellRendererComponent(this,
 					getModel().getElementAt(i), i, true, false);
 			j.setSize(w, ui.getRowHeight(i));
-			opts[i] = j.秘getUI().reInit(true);
-			// this next is critical to clear the renderer.
-			j.秘getUI().reInit(false);
+			opts[i] = j.秘getUI().getListNode();
 		}
 		j2scb.j2sCB("updateList", opts);
 		j2scb.j2sCB("setHeight", (h > JSComboBoxUI.MAX_HEIGHT ? JSComboBoxUI.MAX_HEIGHT : 0));

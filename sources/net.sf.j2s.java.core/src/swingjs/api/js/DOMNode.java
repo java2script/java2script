@@ -124,7 +124,7 @@ public abstract class DOMNode {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			node[attr] = (val == "TRUE" ? true : val == "FALSE" ? false : val);
+		 * 			attr && (node[attr] = (val == "TRUE" ? true : val == "FALSE" ? false : val));
 		 * 
 		 */
 		return node;
@@ -153,9 +153,7 @@ public abstract class DOMNode {
 		 * @j2sNative
 		 * 
 		 *            for (var i = 0; i < attr.length;) { 
-		 *            	var key = attr[i++];
-		 *            	var val = attr[i++];
-		 *            	key && (node[key] = val); 
+		 *              C$.setAttr(node, attr[i++],attr[i++]);
 		 *            }
 		 */
 		return node;
@@ -166,9 +164,7 @@ public abstract class DOMNode {
 		 * @j2sNative
 		 * 
 		 *            if (node) for (var i = 0; i < attr.length;) {
-		 *             //
-		 *             node.style[attr[i++]] = attr[i++]; 
-		 *             //
+		 *             node.style[attr[i++]] = attr[i++];
 		 *             }
 		 * 
 		 */

@@ -1,12 +1,12 @@
 /*
- * Copyright 1997-2003 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 1997, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.security;
@@ -40,16 +40,15 @@ package java.security;
  * @author Roland Schemers
  */
 
-@SuppressWarnings("serial")
 public class AccessControlException extends SecurityException {
 
-//    private static final long serialVersionUID = 5138225684096988535L;
+    private static final long serialVersionUID = 5138225684096988535L;
 
-    // the permission that caused the exeception to be thrown.
-//    private Permission perm;
+    // the permission that caused the exception to be thrown.
+    private Permission perm;
 
     /**
-     * Constructs an <code>AccessControlException</code> with the
+     * Constructs an {@code AccessControlException} with the
      * specified, detailed message.
      *
      * @param   s   the detail message.
@@ -57,27 +56,27 @@ public class AccessControlException extends SecurityException {
     public AccessControlException(String s) {
         super(s);
     }
-//
-//    /**
-//     * Constructs an <code>AccessControlException</code> with the
-//     * specified, detailed message, and the requested permission that caused
-//     * the exception.
-//     *
-//     * @param   s   the detail message.
-//     * @param   p   the permission that caused the exception.
-//     */
-//    public AccessControlException(String s, Permission p) {
-//        super(s);
-//        perm = p;
-//    }
-//
-//    /**
-//     * Gets the Permission object associated with this exeception, or
-//     * null if there was no corresponding Permission object.
-//     *
-//     * @return the Permission object.
-//     */
-//    public Permission getPermission() {
-//        return perm;
-//    }
+
+    /**
+     * Constructs an {@code AccessControlException} with the
+     * specified, detailed message, and the requested permission that caused
+     * the exception.
+     *
+     * @param   s   the detail message.
+     * @param   p   the permission that caused the exception.
+     */
+    public AccessControlException(String s, Permission p) {
+        super(s);
+        perm = p;
+    }
+
+    /**
+     * Gets the Permission object associated with this exception, or
+     * null if there was no corresponding Permission object.
+     *
+     * @return the Permission object.
+     */
+    public Permission getPermission() {
+        return perm;
+    }
 }

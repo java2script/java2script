@@ -24,19 +24,19 @@
  */
 
 package sun.java2d.loops;
-
-import java.awt.Composite;
-import java.awt.CompositeContext;
-import java.awt.RenderingHints;
-import java.awt.image.ColorModel;
-import java.awt.image.Raster;
-import java.awt.image.WritableRaster;
-import java.lang.ref.WeakReference;
-import sun.java2d.loops.GraphicsPrimitive;
-import sun.java2d.SurfaceData;
-import sun.java2d.pipe.Region;
-import sun.java2d.pipe.SpanIterator;
-
+//
+//import java.awt.Composite;
+//import java.awt.CompositeContext;
+//import java.awt.RenderingHints;
+//import java.awt.image.ColorModel;
+//import java.awt.image.Raster;
+//import java.awt.image.WritableRaster;
+//import java.lang.ref.WeakReference;
+//import sun.java2d.loops.GraphicsPrimitive;
+//import sun.java2d.SurfaceData;
+//import sun.java2d.pipe.Region;
+//import sun.java2d.pipe.SpanIterator;
+//
 /**
  * Blit
  * 1) copies rectangle of pixels from one surface to another

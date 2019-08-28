@@ -231,14 +231,13 @@ public class JSTableUI extends JSPanelUI {
 		case "rowSorter":
 		case "sorter":
 		case "autoResizeMode":
-//		case "ancestor":
-//			if (havePainted) {
-//				setTainted();
-////					rebuildTable();
-//				table.repaint();
-//			}
-			return;
 		case "tableCellEditor":
+		case "gridColor":
+		case "preferredSize":
+		case "background":
+		case "ancestor":
+		case "tableData":
+			// TODO ? 
 			return;
 		}
 		System.out.println("JTableUI property not handled: " + prop);

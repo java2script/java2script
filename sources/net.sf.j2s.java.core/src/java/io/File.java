@@ -1022,13 +1022,14 @@ public class File
      *          the directory
      */
     public String[] list() {
+    	if (fs == null)
       throw new AccessControlException("access denied");
 //
 //        SecurityManager security = System.getSecurityManager();
 //        if (security != null) {
 //            security.checkRead(path);
 //        }
-//        return fs.list(this);
+    	return fs.list(this);
     }
 
     /**
@@ -2002,5 +2003,9 @@ public class File
         }
         return result;
     }
+
+	public long lastModified() {
+		return this.lastModified;
+	}
 
 }

@@ -1,97 +1,129 @@
-/* XMLStreamException.java --
-   Copyright (C) 2005  Free Software Foundation, Inc.
+/*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
+ */
 
-This file is part of GNU Classpath.
-
-GNU Classpath is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
-
-GNU Classpath is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with GNU Classpath; see the file COPYING.  If not, write to the
-Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-02110-1301 USA.
-
-Linking this library statically or dynamically with other modules is
-making a combined work based on this library.  Thus, the terms and
-conditions of the GNU General Public License cover the whole
-combination.
-
-As a special exception, the copyright holders of this library give you
-permission to link this library with independent modules to produce an
-executable, regardless of the license terms of these independent
-modules, and to copy and distribute the resulting executable under
-terms of your choice, provided that you also meet, for each linked
-independent module, the terms and conditions of the license of that
-module.  An independent module is a module which is not derived from
-or based on this library.  If you modify this library, you may extend
-this exception to your version of the library, but you are not
-obligated to do so.  If you do not wish to do so, delete this
-exception statement from your version. */
+/*
+ * Copyright (c) 2009 by Oracle Corporation. All Rights Reserved.
+ */
 
 package javax.xml.stream;
 
 /**
- * Exception indicating an XML stream processing error.
+ * The base exception for unexpected processing errors.  This Exception
+ * class is used to report well-formedness errors as well as unexpected
+ * processing conditions.
+ * @version 1.0
+ * @author Copyright (c) 2009 by Oracle Corporation. All Rights Reserved.
+ * @since 1.6
  */
-public class XMLStreamException
-  extends Exception
-{
 
-  protected Location location;
+public class XMLStreamException extends Exception {
+
   protected Throwable nested;
+  protected Location location;
 
-  public XMLStreamException()
-  {
-    this(null, null, null);
-  }
-
-  public XMLStreamException(String msg)
-  {
-    this(msg, null, null);
-  }
-
-  public XMLStreamException(Throwable th)
-  {
-    this(null, null, th);
-  }
-
-  public XMLStreamException(String msg, Throwable th)
-  {
-    this(msg, null, th);
-  }
-
-  public XMLStreamException(String msg, Location location, Throwable th)
-  {
-    super(msg);
-    this.location = location;
-    nested = th;
-  }
-
-  public XMLStreamException(String msg, Location location)
-  {
-    this(msg, location, null);
+  /**
+   * Default constructor
+   */
+  public XMLStreamException(){
+    super();
   }
 
   /**
-   * Returns the nested exception.
+   * Construct an exception with the assocated message.
+   *
+   * @param msg the message to report
    */
-  public Throwable getNestedException()
-  {
+  public XMLStreamException(String msg) {
+    super(msg);
+  }
+
+  /**
+   * Construct an exception with the assocated exception
+   *
+   * @param th a nested exception
+   */
+  public XMLStreamException(Throwable th) {
+      super(th);
+    nested = th;
+  }
+
+  /**
+   * Construct an exception with the assocated message and exception
+   *
+   * @param th a nested exception
+   * @param msg the message to report
+   */
+  public XMLStreamException(String msg, Throwable th) {
+    super(msg, th);
+    nested = th;
+  }
+
+  /**
+   * Construct an exception with the assocated message, exception and location.
+   *
+   * @param th a nested exception
+   * @param msg the message to report
+   * @param location the location of the error
+   */
+  public XMLStreamException(String msg, Location location, Throwable th) {
+    super("ParseError at [row,col]:["+location.getLineNumber()+","+
+          location.getColumnNumber()+"]\n"+
+          "Message: "+msg);
+    nested = th;
+    this.location = location;
+  }
+
+  /**
+   * Construct an exception with the assocated message, exception and location.
+   *
+   * @param msg the message to report
+   * @param location the location of the error
+   */
+  public XMLStreamException(String msg,
+                            Location location) {
+    super("ParseError at [row,col]:["+location.getLineNumber()+","+
+          location.getColumnNumber()+"]\n"+
+          "Message: "+msg);
+    this.location = location;
+  }
+
+
+  /**
+   * Gets the nested exception.
+   *
+   * @return Nested exception
+   */
+  public Throwable getNestedException() {
     return nested;
   }
 
   /**
-   * Returns the location of the exception.
+   * Gets the location of the exception
+   *
+   * @return the location of the exception, may be null if none is available
    */
-  public Location getLocation()
-  {
+  public Location getLocation() {
     return location;
   }
 

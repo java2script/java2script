@@ -1,45 +1,62 @@
-/* Copyright 1998, 2002 The Apache Software Foundation or its licensors, as applicable
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *     http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*
+ * Copyright (c) 1995, 2008, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.lang;
 
-
 /**
- * This runtime exception is thrown when a monitor operation is attempted when
- * the monitor is not in the correct state, for example when a thread attempts
- * to exit a monitor which it did not own.
+ * Thrown to indicate that a thread has attempted to wait on an
+ * object's monitor or to notify other threads waiting on an object's
+ * monitor without owning the specified monitor.
+ *
+ * @author  unascribed
+ * @see     java.lang.Object#notify()
+ * @see     java.lang.Object#notifyAll()
+ * @see     java.lang.Object#wait()
+ * @see     java.lang.Object#wait(long)
+ * @see     java.lang.Object#wait(long, int)
+ * @since   JDK1.0
  */
-public class IllegalMonitorStateException extends RuntimeException {
-
+public
+class IllegalMonitorStateException extends RuntimeException {
     private static final long serialVersionUID = 3713306369498869069L;
 
     /**
-	 * Constructs a new instance of this class with its walkback filled in.
-	 */
-	public IllegalMonitorStateException() {
-		super();
-	}
+     * Constructs an <code>IllegalMonitorStateException</code> with no
+     * detail message.
+     */
+    public IllegalMonitorStateException() {
+        super();
+    }
 
-	/**
-	 * Constructs a new instance of this class with its walkback and message
-	 * filled in.
-	 * 
-	 * @param detailMessage
-	 *            String The detail message for the exception.
-	 */
-	public IllegalMonitorStateException(String detailMessage) {
-		super(detailMessage);
-	}
+    /**
+     * Constructs an <code>IllegalMonitorStateException</code> with the
+     * specified detail message.
+     *
+     * @param   s   the detail message.
+     */
+    public IllegalMonitorStateException(String s) {
+        super(s);
+    }
 }

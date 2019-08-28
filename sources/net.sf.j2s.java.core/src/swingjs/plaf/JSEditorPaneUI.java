@@ -3,7 +3,6 @@ package swingjs.plaf;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 
@@ -21,6 +20,7 @@ import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.Keymap;
 import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledEditorKit;
 
 import javajs.util.PT;
 import javajs.util.SB;
@@ -47,14 +47,44 @@ import swingjs.api.js.DOMNode;
  * @author hansonr
  *
  */
-public class JSEditorPaneUI extends JSTextViewUI {
+public class JSEditorPaneUI extends JSTextUI {
 
+	
+	// For the most part, this is working fine.  CTRL-C works, but CTRL-V does not.
+	// (See TextUI where I have disabled that)
+	// TODO -- should try this all without <div> and just use <span> and <br>. 
+	// DIV is adding \n before and after itself. 
+	// differences with StyledDocument and PlainDocument. 
+	//Shouldn't be this hard!
+	// unfortunately, different browsers handle contentEditable differently.
+	
+	
 	private static final String JSTAB = "<span class='j2stab'>&nbsp;&nbsp;&nbsp;&nbsp;</span>";
 	private static final int SPACES_PER_TAB = 4;
 
 	public JSEditorPaneUI() {
-		isEditorPane = true;
-		// turning this off: setDoPropagate();
+		isEditorPane = isTextView = true;
+//		/**
+//		 * @j2xxu=this;
+//		 */
+//		// turning this off: setDoPropagate();
+	}
+	
+	@Override
+	public void installUI(JComponent jc) {
+		super.installUI(jc);
+		if (getPropertyPrefix() == "TextPane")
+			return;
+        Document doc = editor.getDocument();
+        if (doc == null) {
+            // no model, create a default one.  This will
+            // fire a notification to the updateHandler
+            // which takes care of the rest.
+            editor.setDocument(getEditorKit(editor).createDefaultDocument());
+        } else {
+//            doc.addDocumentListener(updateHandler);
+//            modelChanged();
+        }
 	}
 	
 	
@@ -174,16 +204,27 @@ public class JSEditorPaneUI extends JSTextViewUI {
 //
 //		 */
 		if (domNode == null) {
-			mustWrap = true;
 			domNode = newDOMObject("div", id);
 			DOMNode.setStyles(domNode); // default for pre is font-height
 			$(domNode).addClass("swingjs-doc");
-			setupViewNode();
+			allowPaintedBackground = false;
+			focusNode = enableNode = textNode = domNode;
+			DOMNode.setStyles(domNode, "resize", "none", "margin", "0px", "padding", "1px");//,"scrollbar-width", "thin"); // otherwise it overflows
+			DOMNode.setStyles(domNode, "box-sizing", "border-box");
+			bindJSKeyEvents(focusNode, true);
 		}
 		textListener.checkDocument();
 		setCssFont(domNode, c.getFont());
-		DOMNode.setAttr(domNode, "contentEditable", TRUE);
-		setText(null);
+		DOMNode.setAttrs(domNode, "contentEditable", TRUE, "spellcheck", FALSE);
+		if (jc.getTopLevelAncestor() != null) {
+			if (editor.getText() != mytext) {
+				setText(null);
+				// should be OK here
+//			} else {
+//			    System.out.println(JSUtil.getStackTrace(10));
+//				System.out.println("updateDomnode");
+			}
+		}
 		return updateDOMNodeCUI();
 	} 
 
@@ -201,6 +242,8 @@ public class JSEditorPaneUI extends JSTextViewUI {
 
 	@SuppressWarnings("unused")
 	private String currentHTML;
+	private boolean isStyled;
+	private String mytext;
 	
 
 
@@ -296,10 +339,14 @@ public class JSEditorPaneUI extends JSTextViewUI {
 			return;
 		if (text == null)
 			text = editor.getText();
+		mytext = text;
+		isStyled = ((JEditorPane)editor).getEditorKit() instanceof StyledEditorKit;
 		fromJava(text, sb, d.getRootElements()[0], true, null);
-		//System.out.println("fromJava " + text.replace('\n', '.'));
-		//System.out.println("toHTML" + sb);
-		String html = sb.toString();
+		//System.out.println("JSEPUI setText " + text.replace('\n', '.').replace('\t', '^'));
+		// This added 5 px is necessary for the last line when scrolled to appear in full. 
+		// Don't know why. Maybe the scrollbar just needs one last div?
+		String html = sb.toString() + "<div style='height:5px'><br></div>";
+		//System.out.println(html);
 		if (html == currentHTML)
 			return;
 		text = fixText(currentText = text);
@@ -337,25 +384,37 @@ public class JSEditorPaneUI extends JSTextViewUI {
 	private final static int BACKGROUND = 128;
 	
 	private void fromJava(String text, SB sb, Element node, boolean allowBR, AttributeSet currAttr) {
+		
 		setEditorAttrs();
 		int start = node.getStartOffset();
 		int end = node.getEndOffset();
+		
+		//String subtext = text.substring(start, end);
+		//System.out.println("fromJava " + node.getName() + " " + node + " " + subtext.replace("\n", "."));
+		//System.out.println(node + " " + start + " " + end + " " + allowBR);
 		if (end == start)
 			return;
-		boolean isDiv = text.charAt(end - 1) == '\n';
-		//System.out.println("appendHTML " + node);
+		boolean isDiv = (start >= text.length() || text.charAt(end - 1) == '\n');
 		if (isDiv && start + 1 == end) {
-			if (allowBR)
-				sb.append("<div><br></div>");
+			if (allowBR) {
+				sb.append("<br>");//<div><br></div>");
+			}
 			return;
 		}
+		//int nlen = sb.length();
 		boolean isBranch = (node instanceof BranchElement);
+		// StyledDocument starts with SECTION, then lots of PARAGRAPHS with CONTENT
+		// PlainDocument starts with PARAGRAPH followed by CONTENT
+		// System.out.println("node text: " + node.getName() + " " + isBranch + " " + start + " " + end + " " + text.substring(start, end).replace('\n', '.'));
+		boolean isPara = (isStyled && node.getName() == "paragraph");
+		//System.out.println("isPara " + isPara);
 		AttributeSet a = node.getAttributes();
 		String style = getCSSStyle(a, currAttr);
 		boolean haveStyle = (style.length() > 0);
 		if (haveStyle)
 			style = " style=\"" + style + "\"";
 		//haveStyle = true; // for now
+		sb.append(allowBR && (isDiv || isPara)? "<div" + style + ">": haveStyle ? "<span" + style + ">" : "");
 		boolean isSub = checkAttr(SUB, a, null);
 		boolean isSup = !isSub && checkAttr(SUP, a, null);
 		if (isSub)
@@ -363,14 +422,10 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		else if (isSup)
 			sb.append("<sup>");
 		if (isBranch) {
-			sb.append(isDiv ? "<div" + style + ">": haveStyle ? "<span" + style + ">" : "");
 			for (int i = 0, n = node.getElementCount(); i < n; i++) {
-				fromJava(text, sb, node.getElement(i), !isDiv, a);
+				fromJava(text, sb, node.getElement(i), !isDiv && !isPara, a);
 			}
-			sb.append(isDiv ? "</div>" : haveStyle ? "</span>" : "");
 		} else {
-			if (haveStyle)
-				sb.append("<span" + style + ">");
 			String t = text.substring(start, isDiv ? end - 1 : end);
 			if (t.indexOf(' ') >= 0)
 				t = t.replace(' ', '\u00A0');
@@ -378,13 +433,13 @@ public class JSEditorPaneUI extends JSTextViewUI {
 				t = PT.rep(t,  "\t", JSTAB);
 			}
 			sb.append(t);
-			if (haveStyle)
-				sb.append("</span>");
 		}
 		if (isSup)
 			sb.append("</sup>");
 		else if (isSub)
 			sb.append("</sub>");
+		sb.append(allowBR && (isDiv || isPara) ? "</div>" : haveStyle ? "</span>" : "");
+		//System.out.println("added " + sb.substring(nlen));
 	}
 
 	private String getCSSStyle(AttributeSet a, AttributeSet currAttr) {
@@ -487,6 +542,9 @@ public class JSEditorPaneUI extends JSTextViewUI {
 	
 	
 	@SuppressWarnings("unused")
+	/**
+	 * used internally in JavaScript of getJSNodePt
+	 */
 	private Object[] lastRange;
 
 	/**
@@ -499,17 +557,18 @@ public class JSEditorPaneUI extends JSTextViewUI {
 	 */
 	@SuppressWarnings("unused")
 	@Override
-	protected Object[] getJSNodePt(DOMNode node, int off, int pt) {
-		// JavaScript 
-		boolean isRoot = (off < 0);
+	protected Object[] getJSNodePt(DOMNode node, int pt, boolean isRoot) {
+		// JavaScript below will call this method iteratively with off >= 0.
+		pt = Math.max(0, pt);
 		if (isRoot) {
+			//System.out.println("JSEPUI getJSNodePt " + editor.getText().replace('\n', '.').replace('\t', '^'));
 			lastRange = null;
-			off = 0;
 		} 
 		
-		//System.out.println("getting JSNodePt for " + off + "." + pt + " " + (/**node.data||node.outerHTML ||*/""));
-		
 		boolean isTAB = isJSTAB(node);
+	
+		//System.out.println("getting JSNodePt for " + isTAB + " " + pt + " " + (/** @j2sNative node.data||node.outerHTML ||*/""));
+		
 		// Must consider several cases for BR and DIV:
 		// <br>
 		// <div><br><div> where br counts as 1 character --> [div, 0] or [null, 1]
@@ -526,43 +585,41 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		/**
 		 * @j2sNative
 		 * 
+			
+		
 		    this.lastRange = [node, 0];
+		    if (isTAB) {
+		 	  return (pt == 0 ? this.lastRange : [null, pt - 1]);
+		 	}
 			var nodes = node.childNodes;
 			var tag = node.tagName;
 			var n = nodes.length;
 			if (tag == "BR" || n == 1 && nodes[0].tagName == "BR") {
-				return (pt == off ? [node, 0] : [null, 1, null, 0, 0]);
+				return (pt == 0 ? [node, 0] : [null, pt - 1]);
 			} 
-			var ipt = off;
 			var nlen = 0;
 			var i1 = (tag == "DIV" || tag == "P" ? 1 : 0);
-			var ptIncr = 0;
 			for (var i = 0; i < n; i++) {
 				node = nodes[i];
 				if (node.innerText) {
-				  ret = this.getJSNodePt$swingjs_api_js_DOMNode$I$I(node, ipt, pt); 
-				  if (ret[0] != null) {
-				  	return ret;
-				  }
-				  nlen = ret[1];
-				  pt += ret[4];
+				  var ret=this.getJSNodePt$swingjs_api_js_DOMNode$I$Z(node, pt, false);
+				  if (ret[0] != null)
+				    return ret;
+				  pt = ret[1];
 				} else if (node.tagName == "BR") {
-					if (ipt == pt)
+					if (pt == 0)
 					  return [node.parentNode, i];
-					nlen = (isRoot ? 1 : 0);
+					pt -= (isRoot ? 1 : 0);
 				} else {
 					nlen = node.length;
-					var p = ipt + (isTAB ? 1 : nlen);
-					if (p >= pt)
-						return this.lastRange = [node, Math.max(0, !isTAB ? pt - ipt : p == pt ? nlen : 0)];
-					this.lastRange = [node, node.length];
-					if (isTAB)
-						ptIncr = nlen - 1;
+					if (nlen >= pt)
+						return this.lastRange = [node, pt];
+					this.lastRange = [node, nlen];
+					pt -= nlen;
 				}
-				ipt += nlen;
 			}
 			if (!isRoot)
-			  return [null, ipt + i1 - off, node, nlen, ptIncr];
+			  return [null, Math.max(0, pt - i1)];
 			var r = this.lastRange;
 			this.lastRange = null;
 			return r;
@@ -574,7 +631,9 @@ public class JSEditorPaneUI extends JSTextViewUI {
 	
 	@Override
 	public String getJSTextValue() {
-		return getInnerTextSafely(domNode, false, null).toString().replace('\u00A0',' '); // &nbsp;
+		String s = getInnerTextSafely(domNode, false, null).toString().replace('\u00A0',' '); // &nbsp;
+//		System.out.println("getjSTextValue " + s);
+		return s;
 	}
 
 	private static Object getInnerTextSafely(DOMNode node, boolean isLast, SB sb) {
@@ -612,7 +671,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 
 	private static boolean isJSTAB(Object node) {
 		return node != null 
-				&& (/** @j2sNative node.nodeType != 3 && ("" + node.class).indexOf("j2stab") >= 0 && */true);
+				&& (/** @j2sNative node.nodeType != 3 && ("" + node.getAttribute("class")).indexOf("j2stab") >= 0 && */true);
 	}
 
 	
@@ -624,7 +683,6 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		super.setJSSelection(Math.min(mark,  dot), Math.max(mark,  dot), andScroll);
 	}
 
-	@SuppressWarnings("unused")
 	@Override
 	protected void jsSelect(Object[] r1, Object[] r2, boolean andScroll) {
 		fixTabRange(r1);
@@ -635,7 +693,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 			
 			
 		
-		//System.out.println("jsSelect " + r1 + r2);
+//		System.out.println("jsSelect " + r1 + r2 + " " + andScroll);
 		// range index may be NaN
 		/**
 		 * @j2sNative
@@ -656,12 +714,17 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		} 
 	}
 
-	@SuppressWarnings("unused")
 	private void scrollAsNeeded(Object node) {
-		// System.out.println("JSEditorPane scrolling to " + r2);
+		@SuppressWarnings("unused")
+		boolean isAtEnd = (editor.getCaret().getDot() >= editor.getText().lastIndexOf('\n'));
+		
 		/**
 		 * @j2sNative
 		 * 
+		 * if (isAtEnd) {
+		 *   this.domNode.scrollTop = this.domNode.scrollHeight;
+		 *   return;
+		 * }
 		 * 
 		 * 			var h = 0; node.getBoundingClientRect || 
 		 * 
@@ -680,8 +743,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		 *            //xxe = this.domNode;
 		 *            
 		 *            
-	
-		 *            ///System.out.println([node.innerText,"top",top, "[",off |0, (off+hn)|0, "]bottom",(top+hd)|0]);
+		 *            //System.out.println([node.innerText,"top",top, "[",off |0, (off+hn)|0, "]bottom",(top+hd)|0]);
 		 *            
 		 *            
 		 *            if (off < top) {
@@ -697,25 +759,24 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		 *            
 		 *                 var top =       this.domNode.scrollTop; 
 		 *            
-	
 		 *            //System.out.println([node.innerText,"top",top, "[",off |0, (off+hn)|0, "]bottom",(top+hd)|0]);
-	
 		 */
 		
 	}
 
-
-	private void scrollIntoView() {
-		this.setJSSelection(editor.getCaret().getMark(), editor.getCaret().getDot(), true);
-	}
+//
+//	private void scrollIntoView() {
+//		this.setJSSelection(editor.getCaret().getMark(), editor.getCaret().getDot(), true);
+//	}
 
 	/**
 	 * @param r
 	 */
 	private void fixTabRange(Object[] r) {
 		DOMNode node = (DOMNode)r[0];
-		boolean isStart = (/** @j2sNative r[1] || */0) == 0;
+		boolean isStart = /** @j2sNative r[1] == 0|| */false;
 		if (isJSTAB(node)) {
+			System.out.println("fixtab");
 			if (isStart) {
 				
 			} else {
@@ -742,9 +803,13 @@ public class JSEditorPaneUI extends JSTextViewUI {
 
 		boolean toEnd = (keycode == KeyEvent.VK_RIGHT || keycode == KeyEvent.VK_KP_RIGHT);
 		boolean toStart = (keycode == KeyEvent.VK_LEFT || keycode == KeyEvent.VK_KP_LEFT);
+		
+		
 		/**
 		 * @j2sNative
 		 * 
+		 * 
+		//System.out.println("getJSMandD " + [toEnd,toStart]);
 		 * 
 		 * 			var s = window.getSelection(); anode = s.anchorNode; apt =
 		 *            s.anchorOffset; if (anode.tagName) { anode =
@@ -781,6 +846,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 
 	@Override
 	void setJSMarkAndDot(int mark, int dot, boolean andScroll) {
+		//System.out.println("setJSMarkAndDot " + mark + " " + dot + " " + andScroll);
 		// key up with text change -- need to refresh data-ui attributes
 		// for all childNodes and also set the java caret, which will then
 		// update that in JavaScript. Mark is not used here.
@@ -856,7 +922,8 @@ public class JSEditorPaneUI extends JSTextViewUI {
 			if (x < 0) {
 				int[] xy = getJavaMarkAndDot();
 				x = xy[0];
-				editor.getDocument().remove(x, xy[1] - x);
+				if (xy[1] > x)
+					editor.getDocument().remove(x, xy[1] - x);
 			}
 			if (s != null)
 				editor.getDocument().insertString(x, s, null);
@@ -871,6 +938,8 @@ public class JSEditorPaneUI extends JSTextViewUI {
 	}
 
 	private int len0;
+	private String stemp;
+	private int[] xyTemp;
 	
 	/**
 	 * CTRL-V insertion requires knowledge of the text length at the time of keypress and 
@@ -879,24 +948,41 @@ public class JSEditorPaneUI extends JSTextViewUI {
 	 */
 	@Override
 	protected void handleFutureInsert(boolean trigger) {
+		//System.out.println(getJavaMarkAndDot());
+		
+		getJSMarkAndDot(markDot, 0);
+		//System.out.println(markDot);
+		String s = (String) DOMNode.getAttr(domNode, "innerText");
 		if (!trigger) {
-			len0 = ((String) DOMNode.getAttr(domNode, "innerText")).length();
+			stemp = s;
+			xyTemp = getJavaMarkAndDot();
 			return;
 		}
-		String newText = (String) DOMNode.getAttr(domNode, "innerText");
-		int[] xy = getJavaMarkAndDot();
-		int x = xy[0];
-		int n = (newText.length() - len0) + (xy[1] - x);
+	
+		// problem here is that JavaScript raw text has extra \n in it that the Java does not.
+
+		int x = xyTemp[0];
+		int n = s.length() - stemp.length() + xyTemp[1] - x;
+		
+		//System.out.println("n=" + n + " x=" + x + " newlen=" + s.length() + " len0=" + len0);
 		if (n <= 0)
 			return;
 		try {
+			
 			x += (SPACES_PER_TAB - 1) * tabCount(editor.getDocument().getText(0, x));
 			if (x < 0)
 				return;
-			String s = newText.substring(x, x + n);
-			getJSMarkAndDot(markDot, 0);
-			replaceText(s, -1);
-			setJSMarkAndDot(markDot.x, markDot.x, false);
+			s = s.substring(x, x + n);
+			
+			//System.out.println("x=" + x + " n=" + n + " s=" +s);
+
+			if (xyTemp[0] != xyTemp[1])
+				editor.getDocument().remove(xyTemp[0], xyTemp[1] - xyTemp[0]);
+
+			editor.getDocument().insertString(xyTemp[0], s, null);
+		
+			//replaceText(s, -1);
+			//setJSMarkAndDot(markDot.x, markDot.x, false);
 		} catch (BadLocationException bl) {
 		}
 	}
@@ -916,6 +1002,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 	
 	@Override
 	void setJSText() {
+		mytext = null;
 		updateDOMNode();
 //		System.out.println("JSEPUI iskeyaction " + (jc.秘keyAction != null) + "dot=" + dot + " len=" + editor.getDocument().getLength() 
 //				+ "\nEDITOR: >>" + PT.esc(editor.getText()) + "<<" 
@@ -942,6 +1029,7 @@ public class JSEditorPaneUI extends JSTextViewUI {
 		default:
 			return NOT_HANDLED;
 		case SOME_KEY_EVENT:
+			//System.out.println("JSEPUI dispatching " + jQueryEvent);
 			JSKeyEvent.dispatchKeyEvent(jc, 0, jQueryEvent, System.currentTimeMillis());
 			/**
 			 * @j2sNative
@@ -953,5 +1041,6 @@ public class JSEditorPaneUI extends JSTextViewUI {
 			return HANDLED;
 		}
 	}
+
 
 }

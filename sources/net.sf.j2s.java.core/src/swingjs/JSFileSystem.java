@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.FileChannel;
@@ -48,7 +47,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javajs.util.AU;
-import swingjs.JSFileSystem.JSMappedByteBuffer;
 
 /**
  * very rough - not fleshed out.
@@ -530,6 +528,10 @@ public class JSFileSystem extends FileSystem {
 		}
 
 	}
+	
+    public String[] list(File f) {
+    	return new String[0];
+    }
 
 	public class JSPath implements Path {
 

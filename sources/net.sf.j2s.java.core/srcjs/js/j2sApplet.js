@@ -1527,7 +1527,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				break;
 			}
 			who.applet._processEvent(id, [0,0,getKeyModifiers(ev)], ev, who._frameViewer);
-			return !!(target);
+			return ev.originalEvent.xallowKeyEvent || !!(target);
 		});
 	}
 	
@@ -2509,6 +2509,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					return;
 				}
 				if (isApp && applet.__Info.headless) {
+					Clazz.loadClass("java.lang.Thread").currentThread$().group.html5Applet = applet;
 					cl.main$SA(applet.__Info.args || []);
 				} else {
 					

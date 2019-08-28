@@ -17,6 +17,8 @@ import javax.xml.sax.XMLReader;
 import javax.xml.validation.Schema;
 
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
 
 /**
  * 
@@ -177,8 +179,11 @@ public class SAXParserFactory {
 	 * 
 	 * @param name
 	 * @return
+	 * @throws SAXNotSupportedException 
+	 * @throws SAXNotRecognizedException 
+	 * @throws ParserConfigurationException 
 	 */
-	public boolean getFeature(String name) {
+	public boolean getFeature(String name) throws ParserConfigurationException, SAXNotRecognizedException, SAXNotSupportedException {
 		return props.getProperty(name, "false").equals("true");
 	}
 
@@ -221,7 +226,7 @@ public class SAXParserFactory {
 		return xIncludeAware;
 	}
 
-	public void setFeature(String name, boolean value) {
+	public void setFeature(String name, boolean value) throws ParserConfigurationException, SAXNotRecognizedException, SAXNotSupportedException {
 		props.setProperty(name, "" + value);
 	}
 
