@@ -70,6 +70,8 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 	String test = "  345567890112345678903  345\n     ";
 
+	private JTextArea area;
+
 //	private static void logClass(String name) {
 //		ConsoleHandler consoleHandler = new ConsoleHandler();
 //		consoleHandler.setLevel(Level.ALL);
@@ -131,7 +133,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 		JScrollPane js = new JScrollPane(editor);
 		// js.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
-		JTextArea area = getArea();
+		area = getArea();
 		area.addKeyListener(ka);
 		JScrollPane js2 = new JScrollPane(area);
 		js2.setPreferredSize(new Dimension(300, 300));
@@ -156,6 +158,7 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 
 		JPanel panel = getButtonPanel(editor, area, area1, field);
 		panel.add(field2);
+		field2.addKeyListener(ka);
 
 		new DropTarget(editor, this);
 		new DropTarget(area, this);
@@ -664,6 +667,7 @@ public void setCarentPosition(int i) {
 			System.out.println("ok5");
 			showKeyEvent(e);
 			System.out.println("ok6");
+			System.out.println(area.getText());
 		}
 	};
 
@@ -852,7 +856,7 @@ public void setCarentPosition(int i) {
 		String source = /** @j2sNative (xxx = e).bdata.jqevent.originalEvent.target.id || */
 				"";
 		System.out.println(
-				"Test_Editor keyEvent id=" + e.getID() + " " + ((JComponent) e.getSource()).getClass().getName() + " "
+				"Test_Editor keyEvent id=" + e.getID() + "\n'" + ((JTextComponent) e.getSource()).getText() + "'\n "
 						+ source + " char=" + e.getKeyChar() + " code=" + e.getKeyCode() + " loc=" + e.getKeyLocation()
 						+ "\n mod=" + e.getModifiers() + " " + KeyEvent.getKeyModifiersText(e.getModifiers()) + " modx="
 						+ e.getModifiersEx() + " " + KeyEvent.getKeyModifiersText(e.getModifiersEx()));
