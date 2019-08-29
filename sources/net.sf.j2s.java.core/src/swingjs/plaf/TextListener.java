@@ -45,7 +45,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 
 import swingjs.JSMouse;
-//import swingjs.api.JSMinimalAbstractDocument;
+
 import swingjs.api.js.DOMNode;
 
 public class TextListener implements KeyListener, FocusListener, ChangeListener,

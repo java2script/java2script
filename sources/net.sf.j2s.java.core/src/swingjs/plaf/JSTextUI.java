@@ -1256,7 +1256,6 @@ public abstract class JSTextUI extends JSLightweightUI {
 	 * @return null to continue processing, CONSUMED(false) to stop propagation,
 	 *         UNHANLDED(true) to ignore
 	 */
-	@SuppressWarnings("unused")
 	protected Boolean checkAllowEvent(Object jQueryEvent) {
 		boolean b = NOT_CONSUMED; // jQuery event will propagate
 		boolean checkEditable = false;
@@ -1284,21 +1283,23 @@ public abstract class JSTextUI extends JSLightweightUI {
 			case KeyEvent.VK_V: // paste
 				if (!isCTRL)
 					return null;
-				//TODO -- JEditorPane needs this -- right now we cannot do this correctly with multiple new lines 
-				//allowKeyEvent(jQueryEvent);
+				// TODO -- JEditorPane needs this -- right now we cannot do this correctly with
+				// multiple new lines
+
+				if (!isEditorPane)
+					allowKeyEvent(jQueryEvent);
 				if (type == "keydown")
-					handleFutureInsert(false);
+					handleCtrlV(KeyEvent.KEY_PRESSED);
 				else if (type == "keyup")
-					handleFutureInsert(true);
+					handleCtrlV(KeyEvent.KEY_RELEASED);
 				return NOT_CONSUMED;
 			case KeyEvent.VK_C: // copy
 				if (!isCTRL)
 					return null;
 				allowKeyEvent(jQueryEvent);
-				return (NOT_CONSUMED); // allow standard browser CTRL-C, with no Java-Event processing
+				return NOT_CONSUMED; // allow standard browser CTRL-C, with no Java-Event processing
 			case KeyEvent.VK_TAB:
-				b = (type == "keydown" ? handleTab(jQueryEvent) : CONSUMED);
-				break;
+				return (type == "keydown" && handleTab(jQueryEvent) == NOT_CONSUMED ? null : Boolean.valueOf(CONSUMED));
 			case KeyEvent.VK_UP:
 			case KeyEvent.VK_DOWN:
 			case KeyEvent.VK_LEFT:
@@ -1338,12 +1339,24 @@ public abstract class JSTextUI extends JSLightweightUI {
 		 */		
 	}
 
-
-	protected void handleFutureInsert(boolean trigger) {
+	protected boolean handleCtrlV(int mode) {
+		switch (mode) {
+		case KeyEvent.KEY_PRESSED:
+			break;
+		case KeyEvent.KEY_RELEASED:
+			String val = getJSTextValue();
+			Point pt = new Point();
+			getJSMarkAndDot(pt, 0);
+			editor.setTextFromUI(val);		
+			setJSMarkAndDot(pt.x, pt.x, false);
+			setJavaMarkAndDot(pt);
+			break;
+		}
+		return true;
 	}
 
 	protected boolean handleTab(Object jQueryEvent) {
-		return CONSUMED;
+		return NOT_CONSUMED;
 	}
 
 

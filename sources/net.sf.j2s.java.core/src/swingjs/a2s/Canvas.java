@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
+import java.awt.JSComponent;
 
 public class Canvas extends Panel {
 
@@ -13,10 +14,12 @@ public class Canvas extends Panel {
 
 	public Canvas() {
 		super();
+		//no: AWT canvases are not opaque xxxsetBackground(Color.white);
 		秘setPaintsSelf(PAINTS_SELF_ALWAYS);
 		秘paintClass = 秘updateClass = /**@j2sNative C$ || */null;
 	}
 
+	
 	@Override
 	public Dimension getPreferredSize() {
 		// must bypass JComponent here because we subclass Panel

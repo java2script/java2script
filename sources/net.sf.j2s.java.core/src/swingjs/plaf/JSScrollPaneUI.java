@@ -7,6 +7,7 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
+import java.awt.peer.ContainerPeer;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -32,7 +33,7 @@ import sun.swing.UIAction;
 import swingjs.api.js.DOMNode;
 
 public class JSScrollPaneUI extends JSLightweightUI implements
-		PropertyChangeListener, ChangeListener {
+		ContainerPeer, PropertyChangeListener, ChangeListener {
 
 	/*
 	 * This first implementation is an attempt to reproduce Java's JScrollPane
@@ -575,7 +576,7 @@ public class JSScrollPaneUI extends JSLightweightUI implements
 		if (b == null)
 			return null;
 		Insets i = b.getBorderInsets(scrollpane);
-		if (false && !layingOut) {
+		if (isAWT && !layingOut) {
 			// AWT includes scrollbars in visibility, but the layout manager does not
 			i.right += scrollpane.getVerticalScrollBar().isVisible() ? 12 : 0;
 			i.bottom += scrollpane.getHorizontalScrollBar().isVisible() ? 12 : 0;

@@ -273,7 +273,7 @@ public abstract class JSComponent extends Component {
 	@Override
 	public void addNotify() {
 		if (秘paintsSelf() && ui != null) // BoxFiller will not have a ui? 
-			((JSComponentUI) ui).clearPaintPath();	
+			((JSComponentUI) ui).clearPaintPath();
 		super.addNotify();
 	}
 

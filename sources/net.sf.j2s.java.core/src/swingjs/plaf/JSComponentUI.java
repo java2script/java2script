@@ -472,6 +472,11 @@ public class JSComponentUI extends ComponentUI
 	 * indicates not to add it to the DOM
 	 */
 	private boolean isPaintedOnly;
+
+	/**
+	 * container is between the HTML5 canvas and a component that paints itself
+	 */
+	private boolean inPaintPath;
 	
 
 	/**
@@ -3386,7 +3391,7 @@ public class JSComponentUI extends ComponentUI
 	}
 	
 	private Color backgroundColor;
-	
+
 	protected void setBackgroundImpl(Color color) {
 		// Don't allow color for Menu and MenuItem. This is taken care of by
 		// jQuery
@@ -3413,7 +3418,7 @@ public class JSComponentUI extends ComponentUI
 		// Here we keep it simple and do the change immediately.
 		//
 
-		if (domNode != null && (cellComponent != null || !c.isOpaque()))
+		if (inPaintPath || domNode != null && (cellComponent != null || !c.isOpaque()))
 			setTransparent();
 	}
 
@@ -3462,6 +3467,9 @@ public class JSComponentUI extends ComponentUI
 	public void clearPaintPath() {
 		JSComponent c = jc;
 		while (c != null) {
+			((JSComponentUI) c.ui).inPaintPath = true;
+
+			c.秘setPaintsSelf(JSComponent.PAINTS_SELF_ALWAYS);
 			((JSComponentUI) c.ui).setTransparent();
 			c = c.getParent();
 		}

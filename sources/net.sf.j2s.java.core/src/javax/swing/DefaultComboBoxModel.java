@@ -134,21 +134,27 @@ public class DefaultComboBoxModel<E> extends AbstractListModel<E> implements Mut
     }
 
     // implements javax.swing.MutableComboBoxModel
-    @Override
+	@Override
 		public void addElement(E anObject) {
         objects.addElement(anObject);
         fireIntervalAdded(this,objects.size()-1, objects.size()-1);
-        if ( objects.size() == 1 && selectedObject == null && anObject != null ) {
+        if (objects.size() == 1 && selectedObject == null && anObject != null ) {
         	秘setSelectedItemQuiet(anObject);
         }
     }
 
     
     // implements javax.swing.MutableComboBoxModel
-    @Override
+    @SuppressWarnings("unused")
+	@Override
 		public void insertElementAt(E anObject,int index) {
         objects.insertElementAt(anObject,index);
         fireIntervalAdded(this, index, index);
+        boolean select = (/**@j2sNative  1 ? !!this.isAWT$ : */false) ;
+        if ( select
+        		
+        		&& index == 0 && objects.size() == 1 && selectedObject == null && anObject != null )
+        	秘setSelectedItemQuiet(anObject);
     }
 
     // implements javax.swing.MutableComboBoxModel

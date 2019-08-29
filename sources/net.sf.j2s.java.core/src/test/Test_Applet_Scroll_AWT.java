@@ -13,6 +13,7 @@ import java.applet.Applet;
 
 import java.awt.Adjustable;
 import java.awt.Button;
+import java.awt.Choice;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -323,6 +324,10 @@ public class Test_Applet_Scroll_AWT extends Applet {
 		p.add(button);
 		p.add(button2);
 		p.add(button3);
+	    Choice formatChoice = new Choice();
+	    formatChoice.insert("bin\u00e4r",0);
+	    formatChoice.insert("hex",1);
+	    p.add(formatChoice);
 		p.setBackground(Color.CYAN);
 		mkBar(p, tf, Adjustable.HORIZONTAL, 100, 40);
 //		Scrollbar framesPerSecond = mkSlider(p, tf, Adjustable.HORIZONTAL, 300, 40);

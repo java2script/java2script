@@ -19,6 +19,8 @@ import javax.swing.JPopupMenu;
  */
 public class PopupMenu extends JPopupMenu implements AWTPopupMenu {
 
+	public void isAWT() {}
+	
 	public PopupMenu() {
 		this(null);
 	}
@@ -30,11 +32,10 @@ public class PopupMenu extends JPopupMenu implements AWTPopupMenu {
 	@Override
 	public Font getFont() {
 		// AWT default fonts are set by the peer (native OS)
-		Font f = super.getFont();
-		if (f == null) {
-	    	setFont(f = new Font(Font.DIALOG, Font.PLAIN, 12));	    	
-		}
-		return f;
+		if (font == null && parent == null)
+	    	font = new Font(Font.DIALOG, Font.PLAIN, 12);
+		return super.getFont();
+
 	}
 	@Override
 	public int countItems() {
