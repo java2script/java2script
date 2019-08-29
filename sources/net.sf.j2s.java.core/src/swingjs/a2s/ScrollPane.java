@@ -56,13 +56,15 @@ public class ScrollPane extends JScrollPane {
 		case SCROLLBARS_AS_NEEDED:
 			break;
 		}
-        setBackground(Color.LIGHT_GRAY); // fills in around the scrollbars
+//        setBackground(Color.LIGHT_GRAY); // fills in around the scrollbars
         setOpaque(true);
 	}
 
 	@Override
 	public Component add(Component c) {
 		getViewport().add(c);
+		if (!isBackgroundSet() && c.isBackgroundSet())
+			setBackground(c.getBackground());
 		return c;
 	}
 

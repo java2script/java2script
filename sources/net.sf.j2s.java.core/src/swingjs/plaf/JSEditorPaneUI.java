@@ -64,10 +64,6 @@ public class JSEditorPaneUI extends JSTextUI {
 
 	public JSEditorPaneUI() {
 		isEditorPane = isTextView = true;
-//		/**
-//		 * @j2xxu=this;
-//		 */
-//		// turning this off: setDoPropagate();
 	}
 	
 	@Override
@@ -195,14 +191,6 @@ public class JSEditorPaneUI extends JSTextUI {
 
 	@Override
 	public DOMNode updateDOMNode() {
-//		System.out.println("update xxu dom");
-//		/**
-//		 * @j2sNative
-//		 * 
-//		 * xxu = this;
-//		 * 
-//
-//		 */
 		if (domNode == null) {
 			domNode = newDOMObject("div", id);
 			DOMNode.setStyles(domNode); // default for pre is font-height
@@ -937,7 +925,6 @@ public class JSEditorPaneUI extends JSTextUI {
 		return new int[] { Math.min(x,  y), Math.max(x,  y) };
 	}
 
-	private int len0;
 	private String stemp;
 	private int[] xyTemp;
 	
@@ -947,16 +934,16 @@ public class JSEditorPaneUI extends JSTextUI {
 	 * 
 	 */
 	@Override
-	protected void handleFutureInsert(boolean trigger) {
+	protected boolean handleCtrlV(int mode) {
 		//System.out.println(getJavaMarkAndDot());
 		
 		getJSMarkAndDot(markDot, 0);
 		//System.out.println(markDot);
 		String s = (String) DOMNode.getAttr(domNode, "innerText");
-		if (!trigger) {
+		if (mode == KeyEvent.KEY_PRESSED) {
 			stemp = s;
 			xyTemp = getJavaMarkAndDot();
-			return;
+			return false;
 		}
 	
 		// problem here is that JavaScript raw text has extra \n in it that the Java does not.
@@ -966,12 +953,12 @@ public class JSEditorPaneUI extends JSTextUI {
 		
 		//System.out.println("n=" + n + " x=" + x + " newlen=" + s.length() + " len0=" + len0);
 		if (n <= 0)
-			return;
+			return false;
 		try {
 			
 			x += (SPACES_PER_TAB - 1) * tabCount(editor.getDocument().getText(0, x));
 			if (x < 0)
-				return;
+				return false;
 			s = s.substring(x, x + n);
 			
 			//System.out.println("x=" + x + " n=" + n + " s=" +s);
@@ -985,6 +972,7 @@ public class JSEditorPaneUI extends JSTextUI {
 			//setJSMarkAndDot(markDot.x, markDot.x, false);
 		} catch (BadLocationException bl) {
 		}
+		return true;
 	}
 	
 	private int tabCount(String s) {
@@ -994,11 +982,6 @@ public class JSEditorPaneUI extends JSTextUI {
 				n++;
 		return n;
 	}
-
-//	protected boolean handleEnter() {
-//		editor.replaceSelection("\n");
-//		return true;
-//	}
 	
 	@Override
 	void setJSText() {

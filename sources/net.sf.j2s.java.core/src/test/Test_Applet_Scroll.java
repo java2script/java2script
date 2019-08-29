@@ -10,6 +10,7 @@ package test;
 //web_Features= graphics, AWT-to-Swing
 
 import java.awt.Adjustable;
+import java.awt.Choice;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
@@ -28,6 +29,7 @@ import java.text.DecimalFormat;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JApplet;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -211,6 +213,10 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 		p.add(button);
 		p.add(button2);
 		p.add(button3);
+	    JComboBox formatChoice = new JComboBox();
+	    formatChoice.insertItemAt("bin\u00e4r", 0);
+	    formatChoice.insertItemAt("hex", 1);
+	    p.add(formatChoice);
 		mkBar(p, tf, Adjustable.HORIZONTAL, 100, 20);
 		JSlider slider = mkSlider(p, tf, Adjustable.HORIZONTAL, 100, 20);
         slider.setPaintTicks(true);

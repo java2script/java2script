@@ -2,6 +2,7 @@
 
 // J2S._version set to "3.2.4.07" 2019.01.04; 2019.02.06
 
+// BH 2019.08.29 fixes mouseupoutjsmol not firing MouseEvent.MOUSE_UP
 // BH 5/16/2019 fixes POST method for OuputStream
 // BH 2/6/2019 adds check for non-DOM event handler in getXY
 // BH 1/4/2019 moves window.thisApplet to J2S.thisApplet; 
@@ -1843,7 +1844,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			ev.preventDefault();
 		}
 
-		var newid = (J2S._mouseOwner && J2S._mouseOwner.isDragging ? 506 : 503);
+		var newid = (id == 502 ? 502 : J2S._mouseOwner && J2S._mouseOwner.isDragging ? 506 : 503);
 		// MouseEvent.MOUSE_DRAGGED : MouseEvent.MOUSE_MOVED
 
 		var isTouch = (ev.type == "touchmove");
@@ -1859,7 +1860,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		if (!xym)
 			return false;
 
-		if (lastDragx == xym[0] && lastDragy == xym[1])
+		if (id != 502 && lastDragx == xym[0] && lastDragy == xym[1])
 			return false;
 		lastDragx = xym[0];
 		lastDragy = xym[1];
