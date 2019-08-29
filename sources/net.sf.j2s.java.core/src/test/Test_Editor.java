@@ -137,7 +137,15 @@ public class Test_Editor extends JFrame implements DropTargetListener {
 		js2.setPreferredSize(new Dimension(300, 300));
 		js2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);//_AS_NEEDED);
 		js2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);//NEVER);//VERTICAL_SCROLLBAR_AS_NEEDED);
+		area.addPropertyChangeListener(new PropertyChangeListener() {
 
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				System.out.println("TA property " + evt.getPropertyName());
+				
+			}
+			
+		});
 		JTextField field = getField();
 		JTextField field2 = getField();
 

@@ -16,7 +16,7 @@ $( function() {
     		+'\n.j2scb-unsel {background-color:white;}'
     		+'\n.j2scb-hov {background-color:lightblue;}'
     		+'\n.j2scbcont {position:absolute; left:0px;top:0px;}'
-    		+'\n.j2scbhead {position:absolute; left:0px;top:0px;text-align:left;overflow:hidden;}'
+    		+'\n.j2scbhead {position:absolute; left:0px;top:0px;text-align:left;overflow:hidden;padding:1px}'
     		+'\n.j2scbbtn {position:absolute; leftbackground-color:white;:100px;top:0px; width:20px;text-align:center;cursor:pointer;background-color:lightblue;padding:0px}'
     		+'\n.j2scbpopup {position:absolute; list-style:none}'
     		+'\n.j2scblist {background-color:white;position:absolute; left:0px;top:0px;margin:0;border:black solid 1px;cursor:pointer;text-align:left;padding:0em;scrollbar-width:thin;cursor:pointer;}</style>'

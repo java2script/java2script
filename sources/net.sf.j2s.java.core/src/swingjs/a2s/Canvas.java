@@ -13,6 +13,7 @@ public class Canvas extends Panel {
 
 	public Canvas() {
 		super();
+		//no: AWT canvases are not opaque xxxsetBackground(Color.white);
 		秘setPaintsSelf(PAINTS_SELF_ALWAYS);
 		秘paintClass = 秘updateClass = /**@j2sNative C$ || */null;
 	}
