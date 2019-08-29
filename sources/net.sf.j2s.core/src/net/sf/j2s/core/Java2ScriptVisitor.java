@@ -134,6 +134,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// BH 2019.08.29 fix for boxing of binary representation 0b01... (Google Closure Compiler bug)
 // BH 2019.05.13 fix for Math.getExponent, ulp, nextDown, nextUp, nextAfter needing qualification
 // BH 2019.05.13 fix for Function reference in   new Foo()::test(...)
 // BH 2019.04.03 fix for @j2sIgnore not including {}
@@ -3208,18 +3209,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	public boolean visit(NumberLiteral node) {
-		String token = node.getToken();
-		if (token.endsWith("L") || token.endsWith("l")) {
-			buffer.append(token.substring(0, token.length() - 1));
-		} else if (!token.startsWith("0x") && !token.startsWith("0X")) {
-			if (token.endsWith("F") || token.endsWith("f") || token.endsWith("D") || token.endsWith("d")) {
-				buffer.append(token.substring(0, token.length() - 1));
-			} else {
-				buffer.append(token);
-			}
-		} else {
-			buffer.append(token);
-		}
+		buffer.append(node.resolveConstantExpressionValue());
 		return false;
 	}
 
