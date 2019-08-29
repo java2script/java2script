@@ -1285,7 +1285,9 @@ public abstract class JSTextUI extends JSLightweightUI {
 				if (!isCTRL)
 					return null;
 				//TODO -- JEditorPane needs this -- right now we cannot do this correctly with multiple new lines 
-				//allowKeyEvent(jQueryEvent);
+				
+				if (!isEditorPane)
+					allowKeyEvent(jQueryEvent);
 				if (type == "keydown")
 					handleFutureInsert(false);
 				else if (type == "keyup")
