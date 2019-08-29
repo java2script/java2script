@@ -1,5 +1,7 @@
 package test;
 
+import java.util.Map;
+
 public class Test_Ints extends Test_ {
 
 	public Test_Ints(float... floats){
@@ -12,10 +14,28 @@ public class Test_Ints extends Test_ {
 		assert(ints.length == 0 || ints[0] == 3);
 	};
 
+	private static void test(int i, Integer j, Character c, Integer k, Double d, Float f, Long l, Short s) {
+		
+	}
+	
+	private static int CLEAR_BITS = 0b10;
+	
+	 Map<String, Integer> map;
+	
+    Map<String, Integer> build() {
+    	map.putIfAbsent("test", 0x00);
+        return map;
+    }
+    
 	private final static int USER = -13;
 	private final static int ALT = 16;
 	
 	public static void main(String[] args) {
+		int i0b = new Integer(0b010101).intValue();
+		assert(i0b == 21);
+		new Test_Ints(0b00,0b01);
+		test(0b01, 0b0101, 'c', 0x0f,0.5D, 0.2F, 33L, (short) 33);
+		test(0b01, new Integer(0b0101), 'b', 0x0f,0.5D, 0.2F, 33L, (short) 33);
 		int i3 = new Integer("3");
 		int it = +USER;
 		new Test_Ints();
