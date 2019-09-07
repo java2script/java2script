@@ -317,7 +317,8 @@ Clazz.forName = function(name, initialize, loader, isQuiet) {
 		isQuiet = true;
 		var className = loader.baseClass.getName$(); // set in java.lang.Class.getClassLoader$()
 		var i = className.lastIndexOf(".");
-		var name1 = className.substring(0, i + 1) + name;
+		var name1 = className.substring(0, i + 1);
+		name1 = (name.indexOf(name1) == 0 ? name : name1 + name);
 		cl = Clazz._4Name(name1, null, null, false, initialize, true);
 	} catch (e) {}
  }

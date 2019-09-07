@@ -14,7 +14,13 @@ class Test_ {
 	private int t = 0;
 
 	public int showt() {
+		if (true && (/**@j2sNative 1? test : */false)) {
+			
+		}
 		System.out.println(t);
+		if (false || (/**@j2sNative test || */false)) {
+			
+		}
 		return t;
 	}
 
