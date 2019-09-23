@@ -10667,10 +10667,11 @@ return jQuery;
 	};
 	// note - click is for dragging the resizer
 })(jQuery,document,"click mousemove mouseup touchmove touchend", "outjsmol");
-// j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
+﻿// j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
 // J2S._version set to "3.2.4.07" 2019.01.04; 2019.02.06
 
+// BH 2019.09.13 fixes touchend canceling click
 // BH 2019.08.29 fixes mouseupoutjsmol not firing MouseEvent.MOUSE_UP
 // BH 5/16/2019 fixes POST method for OuputStream
 // BH 2/6/2019 adds check for non-DOM event handler in getXY
@@ -12201,41 +12202,111 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		});
 	}
 	
+	// set to ignore touches if a mouse is found. Will break gestures on touch-screen laptops, but 
+	// it enables click in touch-only devices. What a pain!
+	
+	J2S._haveMouse;
+	J2S._firstTouch; // three-position switch: undefined, true, false
+
+	J2S.$bind('body', 'mousedown mousemove mouseup', function(ev) {
+		J2S._haveMouse = true;
+	});
+	
+	J2S.$bind('body', 'mouseup touchend', function(ev) {
+		mouseup(null, ev);
+		return true;
+	});
+
+	var checkStopPropagation = function(ev, ui, handled, target) {
+		if (ui && ui.checkStopPropagation$O$Z) {
+			handled = ui.checkStopPropagation$O$Z(ev, handled);
+		} else if (!ui || !handled || !ev.target.getAttribute("role")) {
+			if (!target || !target.ui.buttonListener) {					
+				ev.preventDefault();
+				ev.stopPropagation();
+			}
+		}
+		// handled -- we are done here
+		return handled;
+	};
+
+	var mouseup = function(who, ev) {
+		if (J2S._traceMouse)
+			J2S.traceMouse(who,"UP", ev);
+
+		// If we have a touchend, ignore it if we have found a mouse or it is a first touch, 
+		// and set J2S.firstTouch false:
+			
+		if (ev.type == "touchend") {
+		    if (J2S._haveMouse) return;
+		    if (J2S._firstTouch) {
+		    	J2S._firstTouch = false;
+		        return;
+		    }
+		}
+
+		if (doIgnore(ev))
+			return true;
+
+		if (J2S._mouseOwner)
+			who = J2S._mouseOwner;
+
+//		if (ev.target.getAttribute("role")) { // JSButtonUI adds
+//												// role=menucloser to icon
+//												// and text
+//			var m = (ev.target._menu || ev.target.parentElement._menu);
+//			m && m._hideJSMenu();
+//		}
+
+		J2S.setMouseOwner(null);
+
+		if (!who)
+			return true;
+		
+		var ui = ev.target["data-ui"]; // e.g., a textbox
+		var target = ev.target["data-component"]; // e.g., a button
+		var handled = (ui && ui.handleJSEvent$O$I$O(who, 502, ev));
+		if (checkStopPropagation(ev, ui, handled))
+			return true;
+		
+		who.isDragging = false;
+		
+		if (ev.type != "touchend" || !J2S._gestureUpdate(who, ev)) {
+			var xym = getXY(who, ev, 502);
+			if (xym)
+				who.applet._processEvent(502, xym, ev, who._frameViewer);// MouseEvent.MOUSE_RELEASED
+		}
+					
+		return !!(ui || target);
+	}
+	
+	J2S.traceMouse = function(who,what,ev) {
+		System.out.println(["tracemouse:" + what 
+			,"type:",ev.type,ev.pageX,ev.pageY
+			,"target.id:",ev.target.id
+			,"\n  relatedtarget.id:",(ev.originalEvent.relatedTarget && ev.originalEvent.relatedTarget.id)
+			,"\n  who:", who.id
+			,"\n  dragging:", (J2S._mouseOwner && J2S._mouseOwner.isDragging)
+			,"doignore:",doIgnore(ev,1)
+			,"role:",ev.target.getAttribute && ev.target.getAttribute("role")
+			,"data-ui:",ev.target["data-ui"]
+			,"data-component:",ev.target["data-component"]
+			,"mouseOwner:",J2S._mouseOwner && J2S._mouseOwner.id
+		].join().replace(":,",":"));
+	}
+
 	J2S.setMouse = function(who, isSwingJS) {
 		// swingjs.api.J2SInterface
 
 
-		var checkStopPropagation = function(ev, ui, handled, target) {
-			if (ui && ui.checkStopPropagation$O$Z) {
-				handled = ui.checkStopPropagation$O$Z(ev, handled);
-			} else if (!ui || !handled || !ev.target.getAttribute("role")) {
-				if (!target || !target.ui.buttonListener) {					
-					ev.preventDefault();
-					ev.stopPropagation();
-				}
-			}
-			// handled -- we are done here
-			return handled;
-		};
+		J2S.$bind(who, (J2S._haveMouse ? 'mousemove' : 'mousemove touchmove'), function(ev) { 
 
-
-		J2S.traceMouse = function(what,ev) {
-			System.out.println(["tracemouse:" + what 
-				,"type:",ev.type,ev.pageX,ev.pageY
-				,"target.id:",ev.target.id
-				,"\n  relatedtarget.id:",(ev.originalEvent.relatedTarget && ev.originalEvent.relatedTarget.id)
-				,"\n  who:", who.id
-				,"\n  dragging:", (J2S._mouseOwner && J2S._mouseOwner.isDragging)
-				,"doignore:",doIgnore(ev,1)
-				,"role:",ev.target.getAttribute && ev.target.getAttribute("role")
-				,"data-ui:",ev.target["data-ui"]
-				,"data-component:",ev.target["data-component"]
-				,"mouseOwner:",J2S._mouseOwner && J2S._mouseOwner.id
-			].join().replace(":,",":"));
-		}
-
-		J2S.$bind(who, 'mousemove touchmove', function(ev) { // touchmove
+			// ignore touchmove if J2S._haveMouse
 			
+			if (ev.type == "touchmove" && 
+					(J2S._firstTouch || J2S._haveMouse)) {
+				return;
+			}
 			
 			if (J2S._dmouseOwner) {
 				if (J2S._dmouseDrag)
@@ -12245,7 +12316,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			}
 			
 			if (J2S._traceMouseMove)
-				J2S.traceMouse("MOVE", ev);
+				J2S.traceMouse(who, "MOVE", ev);
 
 			if (doIgnore(ev))
 				return true;
@@ -12268,7 +12339,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 		J2S.$bind(who, 'click', function(ev) {
 			if (J2S._traceMouse)
-				J2S.traceMouse("CLICK", ev);
+				J2S.traceMouse(who,"CLICK", ev);
 
 			if (doIgnore(ev))
 				return true;
@@ -12291,7 +12362,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			// return true;
 
 			if (J2S._traceMouse)
-				J2S.traceMouse("SCROLL", ev);
+				J2S.traceMouse(who,"SCROLL", ev);
 
 			if (ev.target.getAttribute("role")) {
 				return true;
@@ -12316,10 +12387,23 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			return !!(ui || target);
 		});
 
-		J2S.$bind(who, 'mousedown touchstart', function(ev) {
-
+		J2S.$bind(who, (J2S._haveMouse ? 'mousedown' : 'mousedown touchstart'), function(ev) {
 			if (J2S._traceMouse)
-				J2S.traceMouse("DOWN", ev);
+				J2S.traceMouse(who,"DOWN", ev);
+
+			// If we have a mousedown on the applet, then disable touch; 
+			// otherwise, if J2S._firstTouch is undefined (!!x != x), set J2S._firstTouch
+			// and ignore future touch events (through the first touchend):
+			
+			if (ev.type == "mousedown") {
+			    J2S._haveMouse = true;
+			} else { 
+			    if (J2S._haveMouse) return;
+			    if (!!J2S._firstTouch != J2S._firstTouch) {
+				J2S._firstTouch = true;
+			        return;
+			    }
+			}
 
 			lastDragx = lastDragy = 99999;
 
@@ -12350,57 +12434,13 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 //			return !!target || ui && ui.j2sDoPropagate;
 		});
 
-		J2S.$bind(who, 'mouseup touchend', function(ev) {
+		J2S.$bind(who, (J2S._haveMouse ? 'mouseup' : 'mouseup touchend'), function(ev) {
 			return mouseup(who, ev);
 		});
 
-		J2S.$bind('body', 'mouseup touchend', function(ev) {
-			mouseup(null, ev);
-			return true;
-		});
-
-		var mouseup = function(who, ev) {
-			if (J2S._traceMouse)
-				J2S.traceMouse("UP", ev);
-
-			if (doIgnore(ev))
-				return true;
-
-			if (J2S._mouseOwner)
-				who = J2S._mouseOwner;
-
-//			if (ev.target.getAttribute("role")) { // JSButtonUI adds
-//													// role=menucloser to icon
-//													// and text
-//				var m = (ev.target._menu || ev.target.parentElement._menu);
-//				m && m._hideJSMenu();
-//			}
-
-			J2S.setMouseOwner(null);
-
-			if (!who)
-				return true;
-			
-			var ui = ev.target["data-ui"]; // e.g., a textbox
-			var target = ev.target["data-component"]; // e.g., a button
-			var handled = (ui && ui.handleJSEvent$O$I$O(who, 502, ev));
-			if (checkStopPropagation(ev, ui, handled))
-				return true;
-			
-			who.isDragging = false;
-			
-			if (ev.type != "touchend" || !J2S._gestureUpdate(who, ev)) {
-				var xym = getXY(who, ev, 502);
-				if (xym)
-					who.applet._processEvent(502, xym, ev, who._frameViewer);// MouseEvent.MOUSE_RELEASED
-			}
-						
-			return !!(ui || target);
-		}
-		
 		J2S.$bind(who, 'mouseenter', function(ev) {
 			if (J2S._traceMouse)
-				J2S.traceMouse("ENTER", ev);
+				J2S.traceMouse(who,"ENTER", ev);
 
 			if (doIgnore(ev))
 				return true;
@@ -12421,7 +12461,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 		J2S.$bind(who, 'mouseleave', function(ev) {
 			if (J2S._traceMouse)
-				J2S.traceMouse("OUT", ev);
+				J2S.traceMouse(who,"OUT", ev);
 
 			if (doIgnore(ev))
 				return true;
@@ -12453,7 +12493,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				return;
 
 			if (J2S._traceMouse)
-				J2S.traceMouse("OUTJSMOL", ev);
+				J2S.traceMouse(who,"OUTJSMOL", ev);
 
 			return J2S._drag(who, ev, 503);
 		});
@@ -12463,7 +12503,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			if (!who.isDragging || who != J2S._mouseOwner)
 				return true;
 			if (J2S._traceMouse)
-				J2S.traceMouse("UPJSMOL", ev);
+				J2S.traceMouse(who,"UPJSMOL", ev);
 
 			return J2S._drag(who, ev, 502);
 		});
@@ -12616,8 +12656,6 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	}
 	
 	J2S._gestureUpdate = function(who, ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
 		var oe = ev.originalEvent;
 		switch (ev.type) {
 		case "touchstart":
@@ -12650,6 +12688,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				who.applet._processGesture(who._touches, who._frameViewer);
 			break;
 		}
+		ev.stopPropagation();
+		ev.preventDefault();
 		return true;
 	}
 
@@ -14041,7 +14081,8 @@ Clazz.forName = function(name, initialize, loader, isQuiet) {
 		isQuiet = true;
 		var className = loader.baseClass.getName$(); // set in java.lang.Class.getClassLoader$()
 		var i = className.lastIndexOf(".");
-		var name1 = className.substring(0, i + 1) + name;
+		var name1 = className.substring(0, i + 1);
+		name1 = (name.indexOf(name1) == 0 ? name : name1 + name);
 		cl = Clazz._4Name(name1, null, null, false, initialize, true);
 	} catch (e) {}
  }

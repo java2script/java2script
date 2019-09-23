@@ -141,8 +141,12 @@ import java.util.prefs.Preferences;
     else vocsNodes = Preferences.userRoot().node("/" + PREFIX + "/" + VOCS_DB);
     try {
       String children[] = vocsNodes.childrenNames();
+      System.out.println(vocsNodes.toString());
+      
       for (int i = 0; i < children.length; i++) {
         Preferences prefs = vocsNodes.node(children[i]);
+        String s = prefs.get("host", "?");
+        assert(s.equals("52.35.121.80"));
         if (prefs.get("database", "").equals(dbname) ) {
           return true;
         }

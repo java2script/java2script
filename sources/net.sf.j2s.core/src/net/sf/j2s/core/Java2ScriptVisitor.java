@@ -134,6 +134,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// BH 2019.09.07 adds optimization for lambda methods that do not have finals
 // BH 2019.08.29 fix for boxing of binary representation 0b01... (Google Closure Compiler bug)
 // BH 2019.05.13 fix for Math.getExponent, ulp, nextDown, nextUp, nextAfter needing qualification
 // BH 2019.05.13 fix for Function reference in   new Foo()::test(...)
@@ -162,6 +163,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * 
 	 */
 	private static final boolean ALLOW_NEW_LAMBDA = false;
+
+	/**
+	 * If there are no finals for a lambda method, then we can reuse the object. 
+	 * This can be huge for preventing repetitive object creation
+	 */
+	private static final boolean ALLOW_LAMBDA_OBJECT_REUSE = true;
 
 	private static final int NOT_LAMBDA = 0;
 	private static final int LAMBDA_METHOD = 1;
@@ -657,8 +664,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 *                                  anonymous class names
 	 * @param isLambda
 	 * @param isClassTrulyLocal
+	 * 
+	 * @return anonymous name only if there are no finals
 	 */
-	private void processLocalInstance(ASTNode node, ASTNode anonymousClassDeclaration, ITypeBinding binding,
+	private String processLocalInstance(ASTNode node, ASTNode anonymousClassDeclaration, ITypeBinding binding,
 			ITypeBinding innerClass, String javaInnerClassName, int lambdaType, boolean isClassTrulyLocal) {
 
 		// In the case of local classes, the declaration is dissociated from the
@@ -701,6 +710,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				anonymousSuperclassName, anonName);
 		if (lambdaType != LAMBDA_METHOD && !isClassTrulyLocal)
 			buffer.append(")"); // end of line (..., ...)
+		return finals == null ? anonName : null;
 	}
 
 	/**
@@ -6808,15 +6818,19 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 */
 	private boolean addLambda$class$Method(MethodReference node, ITypeBinding binding, Expression exp,
 			ITypeBinding declaringClass, boolean checkFinals) {
+		
+		
 		allowClazzNewLambda = (ALLOW_NEW_LAMBDA && getLastCharInBuffer() != '=');
 		int pt = buffer.length();
 		buffer.append("(function($class$){");
-		processLocalInstance(node, null, binding, null, null, LAMBDA_METHOD, false);
+		String anonName = processLocalInstance(node, null, binding, null, null, LAMBDA_METHOD, false);
 		buffer.append("})(");
 		appendFinalMethodQualifier(exp, declaringClass, null, FINAL_ESCAPECACHE | FINAL_LAMBDA);
 		buffer.append(")");
 		if (checkFinals && allowClazzNewLambda)
 			buffer.setLength(pt);
+		if (anonName != null && ALLOW_LAMBDA_OBJECT_REUSE)
+			addLambdaReuse(pt, anonName);		
 		return !allowClazzNewLambda;
 
 	}
@@ -6871,10 +6885,26 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private boolean addLambda$class$Expr(LambdaExpression node, ITypeBinding binding, boolean checkFinals) {
 		allowClazzNewLambda = (ALLOW_NEW_LAMBDA && getLastCharInBuffer() != '=');
 		int pt = buffer.length();
-		processLocalInstance(node, null, binding, null, null, LAMBDA_EXPRESSION, false);
+		String anonName = processLocalInstance(node, null, binding, null, null, LAMBDA_EXPRESSION, false);
 		if (checkFinals && allowClazzNewLambda)
 			buffer.setLength(pt);
+		if (anonName != null && ALLOW_LAMBDA_OBJECT_REUSE)
+			addLambdaReuse(pt, anonName);		
 		return !allowClazzNewLambda;
+	}
+
+	/**
+	 * allow reuse of Lambda method and expression objects when they involve no finals
+	 *  
+	 * @param pt
+	 * @param anonName
+	 */
+	private void addLambdaReuse(int pt, String anonName) {
+		String tmp = buffer.substring(pt);
+		buffer.setLength(pt);
+		anonName = getFinalJ2SClassName(anonName, FINAL_P);
+		buffer.append("(" + anonName + "$||(" + anonName + "$=(")
+			.append(tmp).append(")))");
 	}
 
 	private char getLambdaType(ITypeBinding binding) {

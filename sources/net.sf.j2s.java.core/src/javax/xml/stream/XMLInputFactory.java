@@ -150,9 +150,10 @@ public abstract class XMLInputFactory {
   public static XMLInputFactory newInstance()
     throws FactoryConfigurationError
   {
-    return (XMLInputFactory) FactoryFinder.find(
-      "javax.xml.stream.XMLInputFactory",
-      DEFAULIMPL);
+		return new swingjs.xml.JSXMLInputFactory();
+//    return (XMLInputFactory) FactoryFinder.find(
+//      "javax.xml.stream.XMLInputFactory",
+//      DEFAULIMPL);
   }
 
   /**
