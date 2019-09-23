@@ -13,7 +13,7 @@ class Test_Path extends Test_ {
 	public static void main(String[] args) {
 		
 		
-	//	assert(checkDBName("none", "https://4virology.net/ca.virology/xml/DBPrefs.xml", null));
+		assert(checkDBName("none", "https://4virology.net/ca.virology/xml/DBPrefs.xml", null));
 		
 		File f;
 		Path p,p2;
@@ -62,7 +62,7 @@ class Test_Path extends Test_ {
 	
 	  private static boolean checkDBName (String dbname, String dbprefs, String dbprefs_prefix) {
 		    test.bsml.DBPrefs dbp = new test.bsml.DBPrefs(dbprefs, dbprefs_prefix);
-		    if (dbp.checkDBExists(dbname)) //dbname exists in xml file
+		    if (dbp.checkDBExists(dbname)) //bdname exists in xml file
 		      return true;
 		    else
 		      return false;
