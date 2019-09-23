@@ -79,6 +79,8 @@ class Java2ScriptCompiler {
 
 	private IJavaProject project;
 
+	private boolean isDebugging;
+
 	static boolean isActive(IJavaProject project) {
 		try {
 			return new File(project.getProject().getLocation().toOSString(), J2S_OPTIONS_FILE_NAME).exists();
@@ -152,6 +154,8 @@ class Java2ScriptCompiler {
 		siteFolder = projectFolder + "/" + siteFolder;
 		j2sPath = siteFolder + "/swingjs/j2s";
 
+		if (isDebugging)
+			System.out.println("Java2ScriptCompiler writing to " + j2sPath);
 		// method declarations and invocations are only logged
 		// when the designated files are deleted prior to building
 
@@ -199,7 +203,7 @@ class Java2ScriptCompiler {
 	    if (nonqualifiedPackages.length() == 0)
 	    	nonqualifiedPackages = null;
 		// includes @j2sDebug blocks
-		boolean isDebugging = "debug".equals(getProperty("j2s.compiler.mode"));
+		isDebugging = "debug".equals(getProperty("j2s.compiler.mode"));
 
 		String classReplacements = getProperty("j2s.class.replacements");
 
@@ -375,7 +379,10 @@ class Java2ScriptCompiler {
 				}
 			}
 		}
-		writeToFile(new File(j2sPath, elementName + ".js"), js);
+		File f = new File(j2sPath, elementName + ".js");
+		if (isDebugging)
+			System.out.println("Java2ScriptCompiler creating " + f);
+		writeToFile(f, js);
 	}
 
 	private String getFileContents(File file) {
