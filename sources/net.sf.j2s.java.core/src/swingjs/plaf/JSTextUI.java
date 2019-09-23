@@ -184,6 +184,7 @@ public abstract class JSTextUI extends JSLightweightUI {
 		case SOME_KEY_EVENT:
 			// note that events are bundled here into one eventType
 			// 0 param here says "get the real event type from jQueryEvent
+			// Android will not fire keypressed (KEY_TYPED)
 			keyEvent = JSKeyEvent.newJSKeyEvent(editor, jQueryEvent, 0, false);
 			if (keyEvent == null)
 				return HANDLED;

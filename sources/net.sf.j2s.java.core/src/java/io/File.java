@@ -803,7 +803,8 @@ public class File
 //        return ((fs.getBooleanAttributes(this) & FileSystem.BA_DIRECTORY)
 //                != 0);
 //    
-    	return true;
+    	// BH 2019.09.23 return true;
+    	return false;
     	}
 
     /**
