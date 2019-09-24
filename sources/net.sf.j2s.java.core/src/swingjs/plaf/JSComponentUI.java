@@ -3141,7 +3141,8 @@ public class JSComponentUI extends ComponentUI
 	 * @param c
 	 */
 	public static void containerToFront(JComponent c) {
-		Component w = c.getRootPane().getParent();
+		Component root = c.getRootPane();
+		Component w = (root == null ? null : root.getParent());
 		if (w instanceof Window)
 			((Window) w).toFront();
 	}
