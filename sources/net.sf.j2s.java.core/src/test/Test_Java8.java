@@ -155,6 +155,8 @@ public class Test_Java8 extends Test_ implements PropertyChangeListener {
 
 	public static void main(String[] args) {
 
+		// TODO:  Nodes.flatten issue?
+		
 		Function<String, Test_Java8> iaCreator2 = Test_Java8::new;
 		iaCreator2.apply("testNew");
 
