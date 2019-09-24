@@ -10,6 +10,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.Insets;
 import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -150,6 +151,8 @@ public class TApp2_Swing extends JApplet {
 				+ "A text\nwith some\nlines and\n no content.") {
 		};
 		JScrollPane jsp = new JScrollPane(ta);
+		Insets insets = jsp.getInsets();
+		System.out.println("jsp offsets " + insets + jsp.getPeer());
 		add(jsp);
 		jsp.setBounds(200, 70, 200, 200);
 		ta.setWrapStyleWord(true);

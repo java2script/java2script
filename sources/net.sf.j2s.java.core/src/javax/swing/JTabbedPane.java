@@ -282,7 +282,8 @@ public class JTabbedPane extends JComponent
      * the tabbedpane (instead of the model itself) as the event source.
      */
     protected class ModelListener implements ChangeListener, Serializable {
-        public void stateChanged(ChangeEvent e) {
+        @Override
+		public void stateChanged(ChangeEvent e) {
             fireStateChanged();
         }
     }
@@ -826,7 +827,8 @@ public class JTabbedPane extends JComponent
      * @see #insertTab
      * @see #removeTabAt
      */
-    public Component add(Component component) {
+    @Override
+	public Component add(Component component) {
         if (!(component instanceof UIResource)) {
             addTab(component.getName(), component);
         } else {
@@ -846,7 +848,8 @@ public class JTabbedPane extends JComponent
      * @see #insertTab
      * @see #removeTabAt
      */
-    public Component add(String title, Component component) {
+    @Override
+	public Component add(String title, Component component) {
         if (!(component instanceof UIResource)) {
             addTab(title, component);
         } else {
@@ -867,7 +870,8 @@ public class JTabbedPane extends JComponent
      * @see #insertTab
      * @see #removeTabAt
      */
-    public Component add(Component component, int index) {
+    @Override
+	public Component add(Component component, int index) {
         if (!(component instanceof UIResource)) {
             // Container.add() interprets -1 as "append", so convert
             // the index appropriately to be handled by the vector
@@ -892,7 +896,8 @@ public class JTabbedPane extends JComponent
      * @see #insertTab
      * @see #removeTabAt
      */
-    public void add(Component component, Object constraints) {
+    @Override
+	public void add(Component component, Object constraints) {
         if (!(component instanceof UIResource)) {
             if (constraints instanceof String) {
                 addTab((String)constraints, component);
@@ -920,7 +925,8 @@ public class JTabbedPane extends JComponent
      * @see #insertTab
      * @see #removeTabAt
      */
-    public Component add(Component component, Object constraints, int index) {
+    @Override
+	public Component add(Component component, Object constraints, int index) {
         if (!(component instanceof UIResource)) {
 
             Icon icon = constraints instanceof Icon? (Icon)constraints : null;
@@ -1853,7 +1859,8 @@ public class JTabbedPane extends JComponent
      *
      * @return  a string representation of this JTabbedPane.
      */
-    protected String paramString() {
+    @Override
+	protected String paramString() {
         String tabPlacementString;
         if (tabPlacement == TOP) {
             tabPlacementString = "TOP";
@@ -2440,4 +2447,16 @@ public class JTabbedPane extends JComponent
         }
         return -1;
     }
+     
+     /**
+      * SwingJS added - needs this??
+      * 
+      */
+     @Override
+	public void addNotify() {
+         for(int i = 0; i < getTabCount(); i++) {
+             Component c = getTabComponentAt(i);
+             c.addNotify();
+         }
+     }
 }

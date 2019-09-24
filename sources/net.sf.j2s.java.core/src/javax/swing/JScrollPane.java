@@ -1495,9 +1495,10 @@ public class JScrollPane extends JComponent implements ScrollPaneConstants
     
     @Override
 	public Insets getInsets() {
-        ComponentPeer peer = this.peer;
-        Insets i = ((ContainerPeer)peer).getInsets();
-        return (i == null ? NULL_INSETS : i);
+    	return super.getInsets();
+//        ComponentPeer peer = this.peer;
+//        Insets i = ((ContainerPeer)peer).getInsets();
+//        return (i == null ? NULL_INSETS : i);
     }
 
 }
