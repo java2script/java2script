@@ -390,12 +390,11 @@ public class JSUtil {
 		 */
 		{
 		}
-		if (mapNotImpl.containsKey(s))
+		if (mapNotImpl.containsKey(s + msg))
 			return;
-		mapNotImpl.put(s, Boolean.TRUE);
+		mapNotImpl.put(s + msg, Boolean.TRUE);
 		System.out.println(s + " has not been implemented in SwingJS. "
-				+ (msg == "" ? "" : (msg == null ? "" : msg) + getStackTrace(-5)));
-	
+				+ (msg == "" ? "" : (msg == null ? "" : msg) + getStackTrace(-5)));	
 	}
 
 	static Map<String, Boolean> mapNotImpl;
