@@ -13773,6 +13773,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // TODO: still a lot of references to window[...]
 
+// BH 2019.09.24 missing isArray$() in Integer.class
 // BH 2019.09.26 superfast byte[] -> String using TextDecoder
 // BH 2019.08.16 adds cache for instanceof
 // BH 2019.07.27 fixes array(intArray).clone
@@ -16872,11 +16873,11 @@ java.lang.System = System = {
         v = navigator.userAgent;
         break;
       case "javax.xml.datatype.DatatypeFactory":
-	v = "org.apache.xerces.jaxp.datatype";
-	break;
-      case "javax.xml.bind.JAXBContextFactory":
-	v = "swingjs.xml.JSJAXBContextFactory";
-	break;
+		v = "swingjs.xml.JSJAXBDatatypeFactory";
+		break;
+	  case "javax.xml.bind.JAXBContextFactory":
+		v = "swingjs.xml.JSJAXBContextFactory";
+		break;
       }
       if (v)
         return System.$props[key] = v;
@@ -17192,7 +17193,8 @@ var setJ2STypeclass = function(cl, type, paramCode) {
 // TODO -- should be a proper Java.lang.Class
   primTypes[paramCode] = cl;
   cl.TYPE = {
-    isPrimitive: function() { return true },
+    isArray$: function() { return false },
+    isPrimitive$: function() { return true },
     type:type, 
     __PARAMCODE:paramCode, 
     __PRIMITIVE:1  // referenced in java.lang.Class
@@ -19467,7 +19469,6 @@ if (!Clazz._loadcore || J2S._coreFiles.length == 0) {
 
 })(Clazz, J2S); 
 }; // called by external application 
-
 // SwingJSApplet.js
 
 // BH 8/1/2018 $-qualified Java methods

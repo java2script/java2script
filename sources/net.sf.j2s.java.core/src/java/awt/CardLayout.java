@@ -109,21 +109,21 @@ public class CardLayout implements LayoutManager2,
     */
     int vgap;
 
-    /**
-     * @serialField tab         Hashtable
-     *      deprectated, for forward compatibility only
-     * @serialField hgap        int
-     * @serialField vgap        int
-     * @serialField vector      Vector
-     * @serialField currentCard int
-     */
-    private static final ObjectStreamField[] serialPersistentFields = {
-        new ObjectStreamField("tab", Hashtable.class),
-        new ObjectStreamField("hgap", Integer.TYPE),
-        new ObjectStreamField("vgap", Integer.TYPE),
-        new ObjectStreamField("vector", Vector.class),
-        new ObjectStreamField("currentCard", Integer.TYPE)
-    };
+//    /**
+//     * @serialField tab         Hashtable
+//     *      deprectated, for forward compatibility only
+//     * @serialField hgap        int
+//     * @serialField vgap        int
+//     * @serialField vector      Vector
+//     * @serialField currentCard int
+//     */
+//    private static final ObjectStreamField[] serialPersistentFields = {
+//        new ObjectStreamField("tab", Hashtable.class),
+//        new ObjectStreamField("hgap", Integer.TYPE),
+//        new ObjectStreamField("vgap", Integer.TYPE),
+//        new ObjectStreamField("vector", Vector.class),
+//        new ObjectStreamField("currentCard", Integer.TYPE)
+//    };
 
     /**
      * Creates a new card layout with gaps of size zero.

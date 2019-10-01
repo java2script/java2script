@@ -67,13 +67,11 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 
 	@Override
 	public Object unmarshal(Node node) throws JAXBException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public UnmarshallerHandler getUnmarshallerHandler() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -81,7 +79,6 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 	public <T> JAXBElement<T> unmarshal(XMLStreamReader reader, Class<T> expectedType) throws JAXBException {
 		parser = new JSSAXParser();
 		xmlSource = ((JSXMLStreamReader) reader).getSource();
-		@SuppressWarnings("unchecked")
 		JAXBElement<T> o = (JAXBElement<T>) doUnmarshal(null, expectedType, MODE_RETURN_ELEMENT);
 		clearStatics();
 		return o;
@@ -133,7 +130,6 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 			if (nodeName.equals(name))
 				return classes[i];
 		}
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -154,7 +150,6 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 	 * @param javaClass
 	 * @return an instance of this class
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Object doUnmarshal(DOMNode node, Class<?> javaClass, int mode) {
 		if (jaxbClass != null)
 			addSeeAlso(javaClass);
@@ -175,6 +170,8 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		this.javaObject = javaObject;
 		jaxbClass = newUnmarshalledInstance(javaClass, javaObject);
 		try {
+			// Note that we only ever parse the top level. 
+			// This method iterates to generate subsequent levels.
 			parser.setContentHandler(this);
 			switch (mode) {
 			case MODE_RESTARTING:
@@ -232,13 +229,12 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 //				System.out.println("Filling List " + field.javaName);
 				String type = (field.isArray ? field.javaClassName.replace("[]", "") : field.listClassName);
 				boolean holdsObject = (field.holdsObjects != JSJAXBField.NO_OBJECT);
-				field.setValue(fillArrayData(field, null, null, (holdsObject ? null : type), !field.isArray), this.javaObject);
+				field.setValue(fillArrayData(field, null, null, (holdsObject ? null : type)), this.javaObject);
 			}
 			field.boundListNodes = null;
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private void processMaps() {
 		for (int j = jaxbClass.fields.size(); --j >= 0;) {
 			JSJAXBField field = jaxbClass.fields.get(j);
@@ -265,8 +261,8 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 					valueType = className;
 				JSJAXBField valueFieldToUnmarshal = (className == null ? null : field);
 				for (int i = 1, n = nodes.size(); i < n;) {
-					Object key = getNodeObject(keyFieldToUnmarshal, (DOMNode) nodes.get(i++), keyType, null, true);
-					Object value = getNodeObject(valueFieldToUnmarshal, (DOMNode) nodes.get(i++), valueType, null, true);
+					Object key = getNodeObject(keyFieldToUnmarshal, (DOMNode) nodes.get(i++), keyType, null);
+					Object value = getNodeObject(valueFieldToUnmarshal, (DOMNode) nodes.get(i++), valueType, null);
 //					System.out.println("map.put " + key + " = " + value);
 					map.put(key, value);
 				}
@@ -303,7 +299,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		return new Object[len];
 	}
 
-	private Object[] fillArrayData(JSJAXBField field, DOMNode node, Object[] data, String arrayType, boolean asObject) {
+	private Object[] fillArrayData(JSJAXBField field, DOMNode node, Object[] data, String arrayType) {
 		boolean haveData = (data != null);
 		int n = (haveData ? data.length : field.boundListNodes != null ? field.boundListNodes.size() : field.listValues.size());
 		Object[] a = getArrayOfType(field, arrayType, n);
@@ -315,12 +311,11 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		if (className != null)
 			arrayType = className;
 		for (int i = 0; i < n; i++)
-			a[i] = (field.listValues != null ? field.listValues.get(i) : getNodeObject(fieldToUnmarshal, (node == null ? (DOMNode) field.boundListNodes.get(i) : node), arrayType, data[i],
-					asObject));
+			a[i] = (field.listValues != null ? field.listValues.get(i) : getNodeObject(fieldToUnmarshal, (node == null ? (DOMNode) field.boundListNodes.get(i) : node), arrayType, data[i]));
 		return a;
 	}
 
-	private Object getNodeObject(JSJAXBField fieldToUnmarshal, DOMNode node, String type, Object data, boolean asObject) {
+	private Object getNodeObject(JSJAXBField fieldToUnmarshal, DOMNode node, String type, Object data) {
 		if (fieldToUnmarshal != null) {
 			return unmarshalField(fieldToUnmarshal, node, type);
 		}
@@ -339,7 +334,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 				return unmarshalField(field, node, null);
 			}
 		}
-		return convertFromType(null, data, type, asObject);
+		return convertFromType(null, data, type);
 	}
 
 	private void start(DOMNode node, QName qName, Attributes atts) {
@@ -510,14 +505,9 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 	JSJAXBField getFieldFromQName(QName qName) {
 		String key = qName.getNamespaceURI() + ":" + qName.getLocalPart();
 		JSJAXBField f = jaxbClass.unmarshallerFieldMap.get(key);
-//		if (f == null)
-//			f = jaxbClass.unmarshallerFieldMap.get(qName.getLocalPart());
 		if (f == null)
 			f = seeAlsoMap.get(key);
-//		if (f == null)
-//			f = seeAlsoMap.get(qName.getLocalPart());
-
-		// desparately doing this because I cannot find the capitalization algorithm in JAXB!
+		// desperately doing this because I cannot find the capitalization algorithm in JAXB!
 		if (f == null)
 			f = jaxbClass.unmarshallerFieldMap.get("/lc/" + key.toLowerCase());		
 		if (f == null)
@@ -541,7 +531,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		// char data for field
 		if (field.asList) {
 			field.setValue(fillArrayData(field, field.boundNode, data.split(" "),
-					getArrayType(field), false), javaObject);
+					getArrayType(field)), javaObject);
 			return;
 		}
 
@@ -581,7 +571,7 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		}
 
 		String dataType = (field.xmlType == null ? field.javaClassName : field.xmlType);
-		field.setValue(convertFromType(field, data, dataType, field.xmlType != null), javaObject);
+		field.setValue(convertFromType(field, data, dataType), javaObject);
 	}
 
 	private DOMNode addXmlns(DOMNode node) {
@@ -606,11 +596,9 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 	 * @param field
 	 * @param objVal
 	 * @param type
-	 * @param asObject TODO
 	 * @return
 	 */
-	@SuppressWarnings({ "unchecked", "deprecation" })
-	private Object convertFromType(JSJAXBField field, Object objVal, String type, boolean asObject) {
+	private Object convertFromType(JSJAXBField field, Object objVal, String type) {
 		@SuppressWarnings("unused")
 		Object newVal = null;
 		try {
@@ -622,7 +610,6 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 
 			if (field != null) {
 				if (field.typeAdapter != null) {
-					@SuppressWarnings("rawtypes")
 					XmlAdapter adapter = field.getAdapter();
 					try {
 						return newVal = adapter.unmarshal(val);
@@ -788,23 +775,17 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 		return null;
 	}
 
-	/////////// JSSAXParser callbacks ////////
+	/////////// ContentHandler (JSSAXParser callback) ////////
 
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
 		start(parser.getNode(), new QName(uri, localName, ""), atts);
 	}
 
-	/////////// unused XMLReader /////////
-
-	@Override
-	public void startDocument() throws SAXException {
-	}
+	/////////// unused ContentHandler /////////
 
 	@Override
 	public void characters(char[] ch, int start, int length) throws SAXException {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -816,39 +797,31 @@ public class JSJAXBUnmarshaller extends AbstractUnmarshallerImpl implements Cont
 	}
 
 	@Override
-	public void setDocumentLocator(Locator locator) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void startPrefixMapping(String prefix, String uri) throws SAXException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public void endPrefixMapping(String prefix) throws SAXException {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void processingInstruction(String target, String data) throws SAXException {
-		// TODO Auto-generated method stub
+	}
 
+	@Override
+	public void setDocumentLocator(Locator locator) {
 	}
 
 	@Override
 	public void skippedEntity(String name) throws SAXException {
-		// TODO Auto-generated method stub
+	}
 
+	@Override
+	public void startDocument() throws SAXException {
+	}
+
+	@Override
+	public void startPrefixMapping(String prefix, String uri) throws SAXException {
 	}
 
 }

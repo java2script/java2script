@@ -30,6 +30,8 @@ package java.io;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 
 /**
  * An InputStreamReader is a bridge from byte streams to character streams: It
@@ -103,37 +105,38 @@ public class InputStreamReader extends Reader {
         //sd = StreamDecoder.forInputStreamReader(in, this, charsetName);
     }
 
-//    /**
-//     * Creates an InputStreamReader that uses the given charset. </p>
-//     *
-//     * @param  in       An InputStream
-//     * @param  cs       A charset
-//     *
-//     * @since 1.4
-//     * @spec JSR-51
-//     */
-//    public InputStreamReader(InputStream in, Charset cs) {
-//        super(in);
-//        if (cs == null)
-//            throw new NullPointerException("charset");
+    /**
+     * Creates an InputStreamReader that uses the given charset. </p>
+     *
+     * @param  in       An InputStream
+     * @param  cs       A charset
+     *
+     * @since 1.4
+     * @spec JSR-51
+     */
+    public InputStreamReader(InputStream in, Charset cs) {
+        super(in);
+        if (cs == null)
+            throw new NullPointerException("charset");
 //        sd = StreamDecoder.forInputStreamReader(in, this, cs);
-//    }
+    }
 
-//    /**
-//     * Creates an InputStreamReader that uses the given charset decoder.  </p>
-//     *
-//     * @param  in       An InputStream
-//     * @param  dec      A charset decoder
-//     *
-//     * @since 1.4
-//     * @spec JSR-51
-//     */
-//    public InputStreamReader(InputStream in, CharsetDecoder dec) {
-//        super(in);
-//        if (dec == null)
-//            throw new NullPointerException("charset decoder");
+    /**
+     * Creates an InputStreamReader that uses the given charset decoder.  </p>
+     *
+     * @param  in       An InputStream
+     * @param  dec      A charset decoder
+     *
+     * @since 1.4
+     * @spec JSR-51
+     */
+    public InputStreamReader(InputStream in, CharsetDecoder dec) {
+        super(in);
+        System.err.println("SwingJS java.io.InputStreamReader(InputStream, CharsetDecoder) is not implemented");
+        if (dec == null)
+            throw new NullPointerException("charset decoder");
 //        sd = StreamDecoder.forInputStreamReader(in, this, dec);
-//    }
+    }
 
     /**
      * Returns the name of the character encoding being used by this stream.

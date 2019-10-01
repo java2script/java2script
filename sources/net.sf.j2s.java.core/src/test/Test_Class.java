@@ -191,6 +191,10 @@ class Test_Class extends Test_ {
 
 	public static void main(String[] args) {
 
+	   System.out.println(Integer.TYPE.isPrimitive());
+	   System.out.println(Integer.TYPE.isArray());
+		
+		
 		class LocalClass {
 
 			String hello() {

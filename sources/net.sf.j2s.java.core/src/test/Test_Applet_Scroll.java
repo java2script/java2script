@@ -31,6 +31,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.JApplet;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
@@ -149,13 +150,20 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 		// BasicToggleButtonUI
 		setSize(button2, 80, 20);
 		button2.setBackground(Color.orange);
+		Test_Applet_Scroll me = this;
 		button2.addActionListener(new java.awt.event.ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				label.setBackground(button2.isSelected() ? Color.green : Color.yellow);
 				tf.setBackground(Color.green);
 				label.setText("btn2");
-				// repaint();
+				JFrame frame1 = new JFrame();
+				frame1.setLocationRelativeTo(button2);
+				JPanel jp = new JPanel();
+				jp.setPreferredSize(new Dimension(150,150));
+				frame1.add(jp);
+				frame1.pack();
+				frame1.setVisible(true);
 			}
 		});
 
