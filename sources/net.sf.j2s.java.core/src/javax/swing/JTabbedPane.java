@@ -2456,7 +2456,8 @@ public class JTabbedPane extends JComponent
 	public void addNotify() {
          for(int i = 0; i < getTabCount(); i++) {
              Component c = getTabComponentAt(i);
-             c.addNotify();
+             if (c != null)
+            	 c.addNotify();
          }
      }
 }

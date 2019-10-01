@@ -3109,11 +3109,11 @@ java.lang.System = System = {
         v = navigator.userAgent;
         break;
       case "javax.xml.datatype.DatatypeFactory":
-	v = "org.apache.xerces.jaxp.datatype";
-	break;
-      case "javax.xml.bind.JAXBContextFactory":
-	v = "swingjs.xml.JSJAXBContextFactory";
-	break;
+		v = "swingjs.xml.JSJAXBDatatypeFactory";
+		break;
+	  case "javax.xml.bind.JAXBContextFactory":
+		v = "swingjs.xml.JSJAXBContextFactory";
+		break;
       }
       if (v)
         return System.$props[key] = v;
