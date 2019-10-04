@@ -22,7 +22,7 @@ $( function() {
     		+'\n.j2scblist {background-color:white;position:absolute; left:0px;top:0px;margin:0;border:black solid 1px;cursor:pointer;text-align:left;padding:0em;scrollbar-width:thin;cursor:pointer;}</style>'
     );
     
-    var CLOSE_DELAY = 50;
+    var CLOSE_DELAY = 100; // BH 2019.10.04 50 was just a bit too fast; could close early
         
     // the widget definition, where 'custom' is the namespace,
     // 'j2sCB' the widget name
@@ -80,6 +80,7 @@ $( function() {
         this.cont = $( '<div>', {'class': 'j2scbcont', 'id':id+'_cont' });
         this.cont.append(this.head = $( '<button>', {'class': 'j2scbhead', 'id':id+'_head' }));
         this.cont.append(this.btn = $( '<button>', {'class': 'j2scbbtn', 'id':id+'_btn' , text:'\u25bc'}));
+        this.btn.addClass("swingjs-ui");
         this.popup = $( '<div>', {'class': 'j2scbpopup', 'id':id+'_popup' });
         this.popup.css({
         	display:'none',
