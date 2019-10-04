@@ -33,6 +33,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.TextEvent;
+import java.awt.event.TextListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -119,6 +121,14 @@ public class TApp2 extends Applet {
 				+ "Averyveryveryveryveryveryveryverylongword\n" + "Averyveryveryveryveryveryveryverylongword\n"
 				+ "A text\nwith some\nlines and\n no content.", 40, 40, TextArea.SCROLLBARS_VERTICAL_ONLY);
 		add(ta);
+		ta.addTextListener(new TextListener(){
+
+			@Override
+			public void textValueChanged(TextEvent e) {
+				System.out.println("value changed" + e);
+			}
+			
+		});
 		ta.setBounds(200, 70, 200, 200);
 		ta.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
 		ta.appendText("A text\nwith some\nlines and\n no content.");
