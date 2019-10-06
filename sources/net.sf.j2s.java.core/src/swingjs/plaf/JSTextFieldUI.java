@@ -8,6 +8,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JTextField;
+import javax.swing.text.View;
 
 import swingjs.JSKeyEvent;
 import swingjs.JSToolkit;
@@ -70,6 +71,18 @@ public class JSTextFieldUI extends JSTextUI {
 	@Override
 	protected String getPropertyPrefix() {
 		return "TextField";
+	}
+
+	@Override
+	public Dimension getPreferredSize(JComponent c) {
+		return (isAWT ? getMinimumSize(c) : super.getPreferredSize(c));
+    }
+
+    
+
+	@Override
+	public Dimension getMinimumSize(JComponent jc) {
+		return (isAWT ? JSLabelUI.getMinimumSizePeer(jc, editor) : super.getMinimumSize(jc));
 	}
 
 }

@@ -16,7 +16,7 @@ import swingjs.api.js.DOMNode;
 /**
  * A JavaScript equivalent for a label.
  * 
- *   Also used for ToolTip
+ * Also used for ToolTip
  * 
  * @author Bob Hanson
  *
@@ -34,15 +34,15 @@ public class JSLabelUI extends JSLightweightUI {
 	public DOMNode updateDOMNode() {
 //		if (jc.getTopLevelAncestor() == null)
 //			return domNode;
-	if (domNode == null) {
+		if (domNode == null) {
 			enableNode = domNode = newDOMObject("label", id);
 			textNode = iconNode = null;
 			addCentering(domNode);
 		}
 		getIconAndText(); // could be ToolTip
 		setIconAndText("label", icon, gap, text);
-		DOMNode.setStyles(domNode, "position", "absolute", "width", c.getWidth()
-   				+ "px", "height", c.getHeight() + "px");
+		DOMNode.setStyles(domNode, "position", "absolute", "width", c.getWidth() + "px", "height",
+				c.getHeight() + "px");
 		updateCenteringNode();
 		if (allowTextAlignment) {
 			// not for JToolTip
@@ -53,7 +53,7 @@ public class JSLabelUI extends JSLightweightUI {
 		return updateDOMNodeCUI();
 	}
 
-	protected void getIconAndText() {	
+	protected void getIconAndText() {
 		// overridden in JSToolTipUI
 		label = (JLabel) jc;
 		icon = label.getIcon();
@@ -64,14 +64,13 @@ public class JSLabelUI extends JSLightweightUI {
 	@Override
 	public void installUI(JComponent jc) {
 		label = (JLabel) jc;
-    LookAndFeel.installColorsAndFont(jc, "Label.background", "Label.foreground",
-        "Label.font");
+		LookAndFeel.installColorsAndFont(jc, "Label.background", "Label.foreground", "Label.font");
 	}
 
 	@Override
 	public void uninstallUI(JComponent jc) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -87,7 +86,7 @@ public class JSLabelUI extends JSLightweightUI {
 		// TODO: implement this for buttons?
 		DOMNode.setStyles(textNode, "overflow", "hidden", "white-space", "nowrap");
 		if (icon != null) {
-			// The graphics object is translated to the label, 
+			// The graphics object is translated to the label,
 			// not the image, at this point. In order to get
 			// a clientRectangle, the node must be visible, even for just
 			// an instant.
@@ -102,7 +101,7 @@ public class JSLabelUI extends JSLightweightUI {
 			}
 			Rectangle r0 = domNode.getBoundingClientRect();
 			if (isHidden)
-				DOMNode.transferTo(domNode,  parent);				
+				DOMNode.transferTo(domNode, parent);
 			DOMNode.setStyles(imageNode, "visibility", "hidden");
 			icon.paintIcon(c, g, (int) (r.x - r0.x), (int) (r.y - r0.y));
 		}
@@ -111,8 +110,14 @@ public class JSLabelUI extends JSLightweightUI {
 	@Override
 	public Dimension getPreferredSize(JComponent jc) {
 		updateDOMNode();
-		return (isAWT ? getMinimumSizePeer(jc, label) : label == null ? super.getPreferredSize(jc) : JSGraphicsUtils.getPreferredButtonSize(((AbstractButton) jc), ((AbstractButton) jc).getIconTextGap()));
+		return (isAWT ? getMinimumSizePeer(jc, label)
+				: label == null ? super.getPreferredSize(jc)
+						: JSGraphicsUtils.getPreferredButtonSize(((AbstractButton) jc),
+								((AbstractButton) jc).getIconTextGap()));
 	}
+
+	final static int[] htAdj = { 0, 7, 6, 7, 6, 6, 5, 5, 6, 7, 7, 7, 6, 6, 5, 5, 5, 5, 6, 6, 4, 4, 4, 4, 3, 3, 5, 5,
+			3, 3, 4, 3, 2, 3, 3, 3, 2, 2, 2, 2, 0, };
 
 	static Dimension getMinimumSizePeer(JComponent jc, Object label) {
 		Font f = jc.getFont();
@@ -123,8 +128,9 @@ public class JSLabelUI extends JSLightweightUI {
 		s = ((JLabel) label).getText();
 		if (s == null)
 			s = "";
-		return new Dimension(fm.stringWidth(s) + 14, fm.getHeight() + 8);
+		int sz = f.getSize();
+		int adj = (sz <= 40 ? htAdj[sz] : 0);
+		return new Dimension(fm.stringWidth(s) + 14, fm.getHeight() + adj);
 	}
-	
 
 }
