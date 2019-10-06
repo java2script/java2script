@@ -483,6 +483,11 @@ public class JSGraphics2D implements
 		return drawImagePriv(img, x, y, observer);
 	}
 
+	public boolean drawImage(Image img, int x, int y, Color background, ImageObserver observer) {
+		JSUtil.notImplemented("transparent image pixel background fill is not supported in SwingJS");
+		return drawImagePriv(img, x, y, observer);
+	}
+
 	public boolean drawImage(Image img, int x, int y, int width, int height, ImageObserver observer) {
 		if (width <= 0 || height <= 0)
 			return true;
