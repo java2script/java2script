@@ -66,8 +66,8 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
-//		String prop = e.getPropertyName();
-//		System.out.println("jspopiupmenuui prop " + prop);
+		String prop = e.getPropertyName();
+		System.out.println("jspopiupmenuui prop " + prop);
 		super.propertyChange(e);
 	}
 
@@ -124,6 +124,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 	public void componentAdded(ContainerEvent e) {
 		// OK, the idea here is that we detach all child nodes
 		// and then reattach them. 
+		System.out.println("jspopupmenu componentadded " + e);
 		DOMNode.detachAll(outerNode);
 		setTainted();
 		setHTMLElement();
@@ -134,6 +135,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 
 	@Override
 	public void componentRemoved(ContainerEvent e) {
+		System.out.println("jspopupmenu componentremoved " + e);
 		DOMNode.detachAll(outerNode);
 		setTainted();
 		setHTMLElement();
@@ -145,6 +147,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 	@Override
 	public boolean handleJSEvent(Object target, int eventType, Object jQueryEvent) {
 		// we use == here because this will be JavaScript
+		System.out.println("jspopupmenu JSEVent " + eventType);
 		checkStopPopupMenuTimer(target, eventType, jQueryEvent);
 		return super.handleJSEvent(target, eventType, jQueryEvent);
 	}
@@ -181,6 +184,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 
 	@Override
 	public void setVisible(boolean b) {
+		System.out.println("jspopupmenu setvis " + b);
 		// TODO: We are not setting vis false when closing
 		//if (b && menu != null && menu.isVisible())
 			//b = false;
@@ -229,6 +233,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 	}
 
 	public void updateMenu(boolean andShow) {
+		System.out.println("jspopupmenu updateMenu andshow=" + andShow);
 		setTainted();
 		setHTMLElement();
 		JSPopupMenuUI.j2sSwingMenu.updateMenu(menu, andShow);
@@ -1217,7 +1222,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 			System.err.println("JSPopupMenu not processing " + trigger);
 			break;
 		}
-		if (eventID != 0 && c != null) {
+		if (e != null && eventID != 0 && c != null) {
 				JSMouse.retargetMouseEvent(e, base, c, c, eventID);
 		}
 	}
