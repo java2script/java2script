@@ -2,6 +2,7 @@
 
 These notes are for developers of SwingJS, not for users of SwingJS.
 
+see also https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/doc/howItWorks.md
 ```
 cd workspace (where workspace is your Eclipse Neon Workspace)
 git clone https://github.com/BobHanson/java2script.git
