@@ -178,20 +178,13 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 	 * @return
 	 */
 	@Override
-	@SuppressWarnings("unused")
 	public Object getEmbedded(String type) {
 		String name = frame.getName();
-		DOMNode node = DOMNode.getElement(name + "-div");
-		if (node == null)
-			return null;
 		switch (type) {
 		case "name":
 			return name;
-		case "node":
-			return node;
-		case "dim":
-			return new Dimension(DOMNode.getWidth(node), DOMNode.getHeight(node));
 		case "init":
+			DOMNode node = (DOMNode) getEmbedded("node");
 			if (node == null)
 				return null;
 			Dimension dim = (Dimension) getEmbedded("dim");
@@ -205,8 +198,9 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 				DOMNode.setStyles(node, "position", "relative", "overflow", "hidden");
 			}
 			return node;
+		default:
+			return DOMNode.getEmbedded(name, type);
 		}
-		return null;
 	}
 
 	@Override

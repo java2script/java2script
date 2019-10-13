@@ -483,6 +483,11 @@ public class JSGraphics2D implements
 		return drawImagePriv(img, x, y, observer);
 	}
 
+	public boolean drawImage(Image img, int x, int y, Color background, ImageObserver observer) {
+		JSUtil.notImplemented("transparent image pixel background fill is not supported in SwingJS");
+		return drawImagePriv(img, x, y, observer);
+	}
+
 	public boolean drawImage(Image img, int x, int y, int width, int height, ImageObserver observer) {
 		if (width <= 0 || height <= 0)
 			return true;
@@ -795,7 +800,8 @@ public class JSGraphics2D implements
 		if (c == null)
 			return; // this was the case with a JRootPanel graphic call
 		int a = c.getAlpha();
-		if (a != alpha)
+		// set alpha only if it is new and if this color has an alpha not 0xFF
+		if (a != alpha && a != 255)
 			ctx.globalAlpha = (alpha = a) / 256F;
 		ctx.fillStyle = ctx.strokeStyle = JSToolkit.getCSSColor(c);
 	}

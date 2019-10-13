@@ -67,8 +67,11 @@ public class JSTextAreaUI extends JSTextUI {
 	}
 
 	private void toEnd() {
+		DOMNode node = domNode;
+		if (node == null)
+			return;
 		/**
-		 * @j2sNative this.domNode.scrollTop = this.domNode.scrollHeight;
+		 * @j2sNative node.scrollTop = node.scrollHeight;
 		 */		
 	}
 

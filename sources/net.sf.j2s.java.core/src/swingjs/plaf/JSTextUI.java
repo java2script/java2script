@@ -205,6 +205,10 @@ public abstract class JSTextUI extends JSLightweightUI {
 			break;
 		}
 		if (keyEvent != null) {
+			if (eventType == KeyEvent.KEY_RELEASED) {
+				handleJSTextEvent(eventType, jQueryEvent, keyCode, false);
+				ret = HANDLED;
+			}
 			editor.dispatchEvent(keyEvent);
 			if (keyEvent.isConsumed()) {
 				/**

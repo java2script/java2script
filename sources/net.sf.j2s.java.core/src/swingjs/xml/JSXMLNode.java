@@ -1,11 +1,15 @@
 package swingjs.xml;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 
 public class JSXMLNode implements Node {
@@ -229,20 +233,16 @@ public class JSXMLNode implements Node {
 
 	@Override
 	public String getTextContent() {
-		// TODO Auto-generated method stub
-		return null;
+		return /** @j2sNative 1 ? this.node.textContent : */ null; 
 	}
 
 	@Override
 	public void setTextContent(String textContent) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public boolean isSameNode(Node other) {
-		// TODO Auto-generated method stub
-		return false;
+		return node == ((JSXMLNode) other).node;
 	}
 
 	@Override
@@ -263,38 +263,42 @@ public class JSXMLNode implements Node {
 		
 	}
 
+	private Map<String, Object> htData; 
 	@Override
+	@Deprecated
 	public Object setUserData(Object data, String key) {
-		// TODO Auto-generated method stub
-		return null;
+		if (key == null)
+			return null;
+		if (htData == null)
+			htData = new HashMap<>();
+		htData.put(key, data);
+		return data;
 	}
 
 	@Override
+	@Deprecated
 	public Object getUserData(String key) {
-		// TODO Auto-generated method stub
-		return null;
+		return (htData == null || key == null ? null : htData.get(key));
 	}
 
 	@Override
+	@Deprecated
 	public Object getKey() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public boolean isEqualNode(Node child2) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean isEqualNode(Node node) {
+		return (/** @j2sNative this.node.outerHTML == node.outerHTML ||*/false);
 	}
 
 	@Override
 	public boolean hasAttributes() {
-		// TODO Auto-generated method stub
-		return false;
+		return /** @j2sNative this.node.hasAttributes || */false; 
 	}
 
 	public NodeList getElementsByAttributeValue(String namespaceURI, String localName, String value) {
-		// TODO Auto-generated method stub
+		// Document3
 		return null;
 	}
 

@@ -14,6 +14,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.EntityReference;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.w3c.dom.ProcessingInstruction;
 import org.w3c.dom.Text;
 import org.xml.sax.InputSource;
@@ -209,6 +210,13 @@ public class JSXMLDocument extends JSXMLNode implements Document {
 		return null;
 	}
 	
+	@Override
+	public NodeList getElementsByAttributeValue(String namespaceURI, String localName, String value) {
+		JSUtil.notImplemented(null);
+		return null;
+	}
+
+
 	private class ImplementationImpl implements DOMImplementation {
 		
 		DOMNode domImpl;
@@ -294,4 +302,5 @@ public class JSXMLDocument extends JSXMLNode implements Document {
 		}
 
 	}
+	
 }

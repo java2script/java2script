@@ -2,6 +2,7 @@ package swingjs.api.js;
 
 import java.applet.AudioClip;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.JSComponent;
 import java.awt.Rectangle;
@@ -327,6 +328,20 @@ public abstract class DOMNode {
 			return null;
 		JSComponentUI ui = (JSComponentUI) (/** @j2sNative node.ui || node["data-ui"] || node["data-component"] || node["data-textcomponent"] || */  null);
 		return (ui == null ? null : ui.jc);
+	}
+
+	public static Object getEmbedded(String name, String type) {
+		DOMNode node = DOMNode.getElement(name + "-div");
+		if (node == null)
+			return null;
+		switch (type) {
+		case "node":
+			return node;
+		case "dim":
+			return new Dimension(DOMNode.getWidth(node), DOMNode.getHeight(node));
+		default:
+			return DOMNode.getAttr(node, type);
+		}
 	}
 
 }

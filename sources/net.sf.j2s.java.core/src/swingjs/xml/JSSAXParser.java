@@ -9,12 +9,6 @@ import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map;
 
-import javajs.util.AU;
-import javajs.util.PT;
-import javajs.util.Rdr;
-import swingjs.JSUtil;
-import swingjs.api.js.DOMNode;
-
 import org.xml.sax.ContentHandler;
 import org.xml.sax.DTDHandler;
 import org.xml.sax.DocumentHandler;
@@ -29,7 +23,11 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
-@SuppressWarnings({"deprecation"})
+import javajs.util.AU;
+import javajs.util.Rdr;
+import swingjs.JSUtil;
+import swingjs.api.js.DOMNode;
+
 public class JSSAXParser implements Parser, XMLReader {
 
 	private EntityResolver resolver;
@@ -78,26 +76,29 @@ public class JSSAXParser implements Parser, XMLReader {
 		parse(source, PARSE_ALL);
 	}
 
+	public DOMNode parseToDOM(InputSource is) throws SAXException, IOException {	
+		return parseXML(getString(is));
+	}
+
+	public void parse(InputSource source, int mode) throws  SAXException, IOException  {
+		parseXMLString(getString(source), mode);
+	}
+
 	public void parseXMLString(String data) throws SAXException, IOException {	
+		parseXMLString(data, PARSE_ALL);
+	}
+
+	public void parseXMLString(String data, int mode) throws SAXException, IOException {	
 		try {
-			parseDocument(parseXML(data), PARSE_ALL);
+			parseDocument(parseXML(data), mode);
 		} catch (Exception e) {
 			error(e);
 		}
 	}
 	
-
-	public DOMNode parseToDOM(InputSource is) throws SAXException, IOException {	
-		return parseXML(getString(is));
-	}
-
 	public void parse(InputSource source, DefaultHandler handler) throws SAXException, IOException {
 		setContentHandler(handler);
 		parse(source, PARSE_ALL);
-	}
-
-	public void parse(InputSource source, int mode) throws  SAXException, IOException  {
-		parseXMLString(getString(source));
 	}
 
 	private String getString(InputSource source) throws IOException {
@@ -129,25 +130,25 @@ public class JSSAXParser implements Parser, XMLReader {
 	 * @return reconfigured data
 	 */
 	private String removeProcessing(String data) {
-		if (false && data.indexOf("<?") >= 0) { // doesn't seem to be necessary?
-			getUniqueSequence(data);
-			data = PT.rep(PT.rep(data,  "<?", "<![CDATA[" + uniqueSeq), "?>", "]]>");
-			if (data.startsWith("<!")) {
-			data = "<pre>" + data + "</pre>";
-			havePre = true;
-			}
-		}
+//		if (data.indexOf("<?") >= 0) { // doesn't seem to be necessary?
+//			getUniqueSequence(data);
+//			data = PT.rep(PT.rep(data,  "<?", "<![CDATA[" + uniqueSeq), "?>", "]]>");
+//			if (data.startsWith("<!")) {
+//			data = "<pre>" + data + "</pre>";
+//			havePre = true;
+//			}
+//		}
 	  return data;
 	}
 
-	private String uniqueSeq;
-
-	private void getUniqueSequence(String data) {
-		String s = "~";
-		while (data.indexOf("<![CDATA["+s) >= 0)
-			s += "~";
-		uniqueSeq = s;
-	}
+//	private String uniqueSeq;
+//
+//	private void getUniqueSequence(String data) {
+//		String s = "~";
+//		while (data.indexOf("<![CDATA["+s) >= 0)
+//			s += "~";
+//		uniqueSeq = s;
+//	}
 
 	private void error(Exception e) throws SAXException {
 		SAXParseException ee = new SAXParseException("Invalid Document", null);
@@ -159,7 +160,6 @@ public class JSSAXParser implements Parser, XMLReader {
 
   private boolean ver2;
 
-	private static final int ELEMENT_TYPE = 1;
 	public static final int PARSE_ALL = 0;
 	public static final int PARSE_TOP_LEVEL_ONLY = 1;
 	public static final int PARSE_GET_DOC_ONLY = 2;
@@ -312,7 +312,7 @@ public class JSSAXParser implements Parser, XMLReader {
 			String data = (String) DOMNode.getAttr(node, "textContent");
 			if (!doProcess)
 				return data;
-			if (isText || uniqueSeq == null || !data.startsWith(uniqueSeq)) {
+//			if (isText || uniqueSeq == null || !data.startsWith(uniqueSeq)) {
 				int len = data.length();
 				char[] ch = tempChars;
 				if (len > ch.length)
@@ -325,15 +325,15 @@ public class JSSAXParser implements Parser, XMLReader {
 				else
 					docHandler.characters(ch, 0, len);
 				return null;
-			}
-			data = data.substring(uniqueSeq.length());
-			String target = data + " ";
-			target = target.substring(0, target.indexOf(" "));
-			data = data.substring(target.length()).trim();
-			if (ver2)
-				contentHandler.processingInstruction(target, data);
-			else
-				docHandler.processingInstruction(target, data);
+//			}
+//			data = data.substring(uniqueSeq.length());
+//			String target = data + " ";
+//			target = target.substring(0, target.indexOf(" "));
+//			data = data.substring(target.length()).trim();
+//			if (ver2)
+//				contentHandler.processingInstruction(target, data);
+//			else
+//				docHandler.processingInstruction(target, data);
 		}
 		return null;
 	}

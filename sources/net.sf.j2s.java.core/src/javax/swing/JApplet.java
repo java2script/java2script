@@ -37,6 +37,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.HeadlessException;
 import java.awt.LayoutManager;
+import java.awt.Point;
 
 /**
  * An extended version of <code>java.applet.Applet</code> that adds support for
@@ -641,4 +642,14 @@ public class JApplet extends JSApplet implements /* Accessible ,*/
 //    protected class AccessibleJApplet extends AccessibleApplet {
 //        // everything moved to new parent, AccessibleApplet
 //    }
+    
+    /**
+     * SwingJS needs this for the applet 
+     * because the jQuery.offset() call does not work for it directly.
+     */
+    @Override
+	public Point getLocationOnScreen() {
+            return (isShowing() ? getRootPane().getLocationOnScreen() : null);
+    }
+
 }

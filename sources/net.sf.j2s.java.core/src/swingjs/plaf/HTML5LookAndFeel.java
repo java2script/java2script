@@ -821,7 +821,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 		//
 		// ** TabbedBane value objects
 
-		Object tabbedPaneTabInsets = new InsetsUIResource(4, 4, 8, 4);
+		Object tabbedPaneTabInsets = new InsetsUIResource(2, 4, 2, 4);
 
 		Object tabbedPaneTabPadInsets = new InsetsUIResource(2, 2, 2, 1);// selected tab size
 

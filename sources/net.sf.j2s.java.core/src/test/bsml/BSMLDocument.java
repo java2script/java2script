@@ -92,6 +92,7 @@ public class BSMLDocument {
 	 */
 	public static boolean test() {
 		
+		testXMLToDoc("<bsml>\n     <defn />\n<Sequence>\n\ntesting<sequence>\ntesting\n</sequence></Sequence></bsml>");
 		testXMLToDoc("<bsml>\n     <defn />\n    </bsml>");
 		String s = testDocToXML();
 		System.out.println(s);
@@ -162,7 +163,7 @@ public class BSMLDocument {
 	}
 
 	private static void testNode(Node node) {
-		System.out.println(node.getNodeName() + " [" + node.getNodeValue() + "]");
+		System.out.println(node.getNodeName() + " [" + node.getNodeValue() + ("," + node.getTextContent()).replace("\n", "\\n") + "]");
 		if (node.hasChildNodes()) {
 			NodeList list = node.getChildNodes();
 			for (int i = 0; i < list.getLength(); i++) {

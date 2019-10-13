@@ -3045,81 +3045,76 @@ public class Window extends JComponent {
 //        }
     }
 
-    /**
-     * Sets the location of the window relative to the specified
-     * component.
-     * <p>
-     * If the component is not currently showing, or <code>c</code>
-     * is <code>null</code>, the window is placed at the center of
-     * the screen. The center point can be determined with {@link
-     * GraphicsEnvironment#getCenterPoint GraphicsEnvironment.getCenterPoint}
-     * <p>
-     * If the bottom of the component is offscreen, the window is
-     * placed to the side of the <code>Component</code> that is
-     * closest to the center of the screen.  So if the <code>Component</code>
-     * is on the right part of the screen, the <code>Window</code>
-     * is placed to its left, and vice versa.
-     *
-     * @param c  the component in relation to which the window's location
-     *           is determined
-     * @see java.awt.GraphicsEnvironment#getCenterPoint
-     * @since 1.4
-     */
-    public void setLocationRelativeTo(Component c) {
-        Container root=null;
+	/**
+	 * Sets the location of the window relative to the specified component.
+	 * <p>
+	 * If the component is not currently showing, or <code>c</code> is
+	 * <code>null</code>, the window is placed at the center of the screen. The
+	 * center point can be determined with {@link GraphicsEnvironment#getCenterPoint
+	 * GraphicsEnvironment.getCenterPoint}
+	 * <p>
+	 * If the bottom of the component is offscreen, the window is placed to the side
+	 * of the <code>Component</code> that is closest to the center of the screen. So
+	 * if the <code>Component</code> is on the right part of the screen, the
+	 * <code>Window</code> is placed to its left, and vice versa.
+	 *
+	 * @param c the component in relation to which the window's location is
+	 *          determined
+	 * @see java.awt.GraphicsEnvironment#getCenterPoint
+	 * @since 1.4
+	 */
+	public void setLocationRelativeTo(Component c) {
+		Container root = null;
 
-        if (c != null) {
-            if (c.isWindowOrJSApplet()) {
-                root = (Container)c;
-            } else {
-                Container parent;
-                for(parent = c.getParent() ; parent != null ; parent = parent.getParent()) {
-                    if (parent.isWindowOrJSApplet()) {
-                        root = parent;
-                        break;
-                    }
-                }
-            }
-        }
+		if (c != null) {
+			if (c.isWindowOrJSApplet()) {
+				root = (Container) c;
+			} else {
+				Container parent;
+				for (parent = c.getParent(); parent != null; parent = parent.getParent()) {
+					if (parent.isWindowOrJSApplet()) {
+						root = parent;
+						break;
+					}
+				}
+			}
+		}
 
-        if((c != null && !c.isShowing()) || root == null ||
-           !root.isShowing()) {
-            Dimension         paneSize = getSize();
+		if ((c != null && !c.isShowing()) || root == null || !root.isShowing()) {
+			Dimension paneSize = getSize();
+			Point centerPoint = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
+			setLocation(centerPoint.x - paneSize.width / 2, centerPoint.y - paneSize.height / 2);
+		} else {
+			Dimension invokerSize = c.getSize();
+			Point invokerScreenLocation = c.getLocationOnScreen();
 
-            Point centerPoint = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
-            setLocation(centerPoint.x - paneSize.width / 2,
-                        centerPoint.y - paneSize.height / 2);
-        } else {
-            Dimension invokerSize = c.getSize();
-            Point invokerScreenLocation = c.getLocationOnScreen();
+			Rectangle windowBounds = getBounds();
+			int dx = invokerScreenLocation.x + ((invokerSize.width - windowBounds.width) >> 1);
+			int dy = invokerScreenLocation.y + ((invokerSize.height - windowBounds.height) >> 1);
+			Rectangle ss = root.getGraphicsConfiguration().getBounds();
 
-            Rectangle  windowBounds = getBounds();
-            int        dx = invokerScreenLocation.x+((invokerSize.width-windowBounds.width)>>1);
-            int        dy = invokerScreenLocation.y+((invokerSize.height - windowBounds.height)>>1);
-            Rectangle ss = root.getGraphicsConfiguration().getBounds();
+			// Adjust for bottom edge being offscreen
+			if (dy + windowBounds.height > ss.y + ss.height) {
+				dy = ss.y + ss.height - windowBounds.height;
+				if (invokerScreenLocation.x - ss.x + invokerSize.width / 2 < ss.width / 2) {
+					dx = invokerScreenLocation.x + invokerSize.width;
+				} else {
+					dx = invokerScreenLocation.x - windowBounds.width;
+				}
+			}
 
-            // Adjust for bottom edge being offscreen
-            if (dy+windowBounds.height>ss.y+ss.height) {
-                dy = ss.y + ss.height-windowBounds.height;
-                if (invokerScreenLocation.x - ss.x + invokerSize.width / 2 <
-                    ss.width / 2) {
-                    dx = invokerScreenLocation.x+invokerSize.width;
-                }
-                else {
-                    dx = invokerScreenLocation.x-windowBounds.width;
-                }
-            }
+			// Avoid being placed off the edge of the screen
+			if (dx + windowBounds.width > ss.x + ss.width) {
+				dx = ss.x + ss.width - windowBounds.width;
+			}
+			if (dx < ss.x)
+				dx = ss.x;
+			if (dy < ss.y)
+				dy = ss.y;
 
-            // Avoid being placed off the edge of the screen
-            if (dx+windowBounds.width > ss.x + ss.width) {
-                dx = ss.x + ss.width - windowBounds.width;
-            }
-            if (dx < ss.x) dx = ss.x;
-            if (dy < ss.y) dy = ss.y;
-
-            setLocation(dx, dy);
-        }
-    }
+			setLocation(dx, dy);
+		}
+	}
 
     /**
      * Overridden from Component.  Top-level Windows should not propagate a

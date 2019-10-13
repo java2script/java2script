@@ -33,6 +33,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.TextEvent;
+import java.awt.event.TextListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -49,23 +51,33 @@ public class TApp2 extends Applet {
 			for (int j = 0; j < 4; j++) {
 				Button b = new Button("XyX");
 				Label l = new Label("XyX", Label.CENTER);
-				setLBBounds((Component) b, (Component) l, i, j);
+				TextField tf = new TextField("XyX");
+				setLBBounds(b, l, tf, i, j);
 			}
 		}
 	}
 
-	private void setLBBounds(Component b, Component l, int i, int j) {
-		int x = 40 + i * 170;
+	private void setLBBounds(Component b, Component l, Component tf, int i, int j) {
+		int x = 40 + i * 260;
 		int y = 350 + j * 40;
 		int w = 70 + i * 10;
 		int h = 25 + j * 4;
-		b.setBounds(x, y, w, h);
-		l.setBounds(x + 105, y, w - 30, h);
 		b.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10 + i * 3));
 		l.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10 + i * 3));
-		l.setBackground(Color.cyan);
+		tf.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10 + i * 3));
 		add(b);
 		add(l);
+		add(tf);
+		w = b.getPeer().getMinimumSize().width;
+		h = b.getPeer().getMinimumSize().height;
+		b.setBounds(x, y,w , h);
+		w = l.getPeer().getMinimumSize().width;
+		h = l.getPeer().getMinimumSize().height;
+		l.setBounds(x + 105, y, w, h);
+		w = tf.getMinimumSize().width;
+		h = tf.getMinimumSize().height;
+		tf.setBounds(x + 200, y, w, h);
+		l.setBackground(Color.cyan);
 	}
 
 	long t;
@@ -119,6 +131,14 @@ public class TApp2 extends Applet {
 				+ "Averyveryveryveryveryveryveryverylongword\n" + "Averyveryveryveryveryveryveryverylongword\n"
 				+ "A text\nwith some\nlines and\n no content.", 40, 40, TextArea.SCROLLBARS_VERTICAL_ONLY);
 		add(ta);
+		ta.addTextListener(new TextListener(){
+
+			@Override
+			public void textValueChanged(TextEvent e) {
+				System.out.println("value changed" + e);
+			}
+			
+		});
 		ta.setBounds(200, 70, 200, 200);
 		ta.setFont(new Font(Font.DIALOG, Font.BOLD, 20));
 		ta.appendText("A text\nwith some\nlines and\n no content.");

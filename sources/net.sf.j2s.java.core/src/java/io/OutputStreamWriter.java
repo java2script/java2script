@@ -32,6 +32,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 //import java.nio.charset.Charset;
 //import java.nio.charset.CharsetEncoder;
 //import sun.nio.cs.StreamEncoder;
@@ -138,24 +139,24 @@ public class OutputStreamWriter extends Writer {
 				}
     }
 
-//    /**
-//     * Creates an OutputStreamWriter that uses the given charset. </p>
-//     *
-//     * @param  out
-//     *         An OutputStream
-//     *
-//     * @param  cs
-//     *         A charset
-//     *
-//     * @since 1.4
-//     * @spec JSR-51
-//     */
-//    public OutputStreamWriter(OutputStream out, Charset cs) {
-//        super(out);
-//        if (cs == null)
-//            throw new NullPointerException("charset");
+    /**
+     * Creates an OutputStreamWriter that uses the given charset. </p>
+     *
+     * @param  out
+     *         An OutputStream
+     *
+     * @param  cs
+     *         A charset
+     *
+     * @since 1.4
+     * @spec JSR-51
+     */
+    public OutputStreamWriter(OutputStream out, Charset cs) {
+        super(out);
+        if (cs == null)
+            throw new NullPointerException("charset");
 //        se = StreamEncoder.forOutputStreamWriter(out, this, cs);
-//    }
+    }
 
     /**
      * Creates an OutputStreamWriter that uses the given charset encoder.  </p>
