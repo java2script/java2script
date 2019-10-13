@@ -49,86 +49,78 @@ import javax.swing.undo.UndoableEdit;
 
 /**
  * 
- * An implementation of the document interface to serve as a
- * basis for implementing various kinds of documents.  At this
- * level there is very little policy, so there is a corresponding
- * increase in difficulty of use.
+ * An implementation of the document interface to serve as a basis for
+ * implementing various kinds of documents. At this level there is very little
+ * policy, so there is a corresponding increase in difficulty of use.
  * <p>
- * This class implements a locking mechanism for the document.  It
- * allows multiple readers or one writer, and writers must wait until
- * all observers of the document have been notified of a previous
- * change before beginning another mutation to the document.  The
- * read lock is acquired and released using the <code>render</code>
- * method.  A write lock is aquired by the methods that mutate the
- * document, and are held for the duration of the method call.
- * Notification is done on the thread that produced the mutation,
- * and the thread has full read access to the document for the
- * duration of the notification, but other readers are kept out
- * until the notification has finished.  The notification is a
- * beans event notification which does not allow any further
+ * This class implements a locking mechanism for the document. It allows
+ * multiple readers or one writer, and writers must wait until all observers of
+ * the document have been notified of a previous change before beginning another
+ * mutation to the document. The read lock is acquired and released using the
+ * <code>render</code> method. A write lock is aquired by the methods that
+ * mutate the document, and are held for the duration of the method call.
+ * Notification is done on the thread that produced the mutation, and the thread
+ * has full read access to the document for the duration of the notification,
+ * but other readers are kept out until the notification has finished. The
+ * notification is a beans event notification which does not allow any further
  * mutations until all listeners have been notified.
  * <p>
- * Any models subclassed from this class and used in conjunction
- * with a text component that has a look and feel implementation
- * that is derived from BasicTextUI may be safely updated
- * asynchronously, because all access to the View hierarchy
- * is serialized by BasicTextUI if the document is of type
- * <code>AbstractDocument</code>.  The locking assumes that an
- * independent thread will access the View hierarchy only from
- * the DocumentListener methods, and that there will be only
- * one event thread active at a time.
+ * Any models subclassed from this class and used in conjunction with a text
+ * component that has a look and feel implementation that is derived from
+ * BasicTextUI may be safely updated asynchronously, because all access to the
+ * View hierarchy is serialized by BasicTextUI if the document is of type
+ * <code>AbstractDocument</code>. The locking assumes that an independent thread
+ * will access the View hierarchy only from the DocumentListener methods, and
+ * that there will be only one event thread active at a time.
  * <p>
- * If concurrency support is desired, there are the following
- * additional implications.  The code path for any DocumentListener
- * implementation and any UndoListener implementation must be threadsafe,
- * and not access the component lock if trying to be safe from deadlocks.
- * The <code>repaint</code> and <code>revalidate</code> methods
- * on JComponent are safe.
+ * If concurrency support is desired, there are the following additional
+ * implications. The code path for any DocumentListener implementation and any
+ * UndoListener implementation must be threadsafe, and not access the component
+ * lock if trying to be safe from deadlocks. The <code>repaint</code> and
+ * <code>revalidate</code> methods on JComponent are safe.
  * <p>
- * AbstractDocument models an implied break at the end of the document.
- * Among other things this allows you to position the caret after the last
- * character. As a result of this, <code>getLength</code> returns one less
- * than the length of the Content. If you create your own Content, be
- * sure and initialize it to have an additional character. Refer to
- * StringContent and GapContent for examples of this. Another implication
- * of this is that Elements that model the implied end character will have
- * an endOffset == (getLength() + 1). For example, in DefaultStyledDocument
+ * AbstractDocument models an implied break at the end of the document. Among
+ * other things this allows you to position the caret after the last character.
+ * As a result of this, <code>getLength</code> returns one less than the length
+ * of the Content. If you create your own Content, be sure and initialize it to
+ * have an additional character. Refer to StringContent and GapContent for
+ * examples of this. Another implication of this is that Elements that model the
+ * implied end character will have an endOffset == (getLength() + 1). For
+ * example, in DefaultStyledDocument
  * <code>getParagraphElement(getLength()).getEndOffset() == getLength() + 1
  * </code>.
  * <p>
- * <strong>Warning:</strong>
- * Serialized objects of this class will not be compatible with
- * future Swing releases. The current serialization support is
- * appropriate for short term storage or RMI between applications running
- * the same version of Swing.  As of 1.4, support for long term storage
- * of all JavaBeans<sup><font size="-2">TM</font></sup>
- * has been added to the <code>java.beans</code> package.
- * Please see {@link java.beans.XMLEncoder}.
+ * <strong>Warning:</strong> Serialized objects of this class will not be
+ * compatible with future Swing releases. The current serialization support is
+ * appropriate for short term storage or RMI between applications running the
+ * same version of Swing. As of 1.4, support for long term storage of all
+ * JavaBeans<sup><font size="-2">TM</font></sup> has been added to the
+ * <code>java.beans</code> package. Please see {@link java.beans.XMLEncoder}.
  *
- * @author  Timothy Prinzing
+ * @author Timothy Prinzing
  */
 public abstract class AbstractDocument implements Document {
 
-    /**
-     * Constructs a new <code>AbstractDocument</code>, wrapped around some
-     * specified content storage mechanism.
-     *
-     * @param data the content
-     */
-    protected AbstractDocument(Content data) {
-        this(data, StyleContext.getDefaultStyleContext());
-    }
+	/**
+	 * Constructs a new <code>AbstractDocument</code>, wrapped around some specified
+	 * content storage mechanism.
+	 *
+	 * @param data the content
+	 */
+	protected AbstractDocument(Content data) {
+		this(data, StyleContext.getDefaultStyleContext());
+	}
 
-    /**
-     * Constructs a new <code>AbstractDocument</code>, wrapped around some
-     * specified content storage mechanism.
-     *
-     * @param data the content
-     * @param context the attribute context
-     */
-    protected AbstractDocument(Content data, AttributeContext context) {
-        this.data = data;
-        this.context = context;
+	/**
+	 * Constructs a new <code>AbstractDocument</code>, wrapped around some specified
+	 * content storage mechanism.
+	 *
+	 * @param data    the content
+	 * @param context the attribute context
+	 */
+	protected AbstractDocument(Content data, AttributeContext context) {
+		this.data = data;
+		this.context = context;
 //        bidiRoot = new BidiRootElement();
 
 //        if (defaultI18NProperty == null) {
@@ -161,410 +153,392 @@ public abstract class AbstractDocument implements Document {
 //        } finally {
 //            writeUnlock();
 //        }
-    }
+	}
 
-    /**
-     * Supports managing a set of properties. Callers
-     * can use the <code>documentProperties</code> dictionary
-     * to annotate the document with document-wide properties.
-     *
-     * @return a non-<code>null</code> <code>Dictionary</code>
-     * @see #setDocumentProperties
-     */
-    public Dictionary<Object,Object> getDocumentProperties() {
-        if (documentProperties == null) {
-            documentProperties = new Hashtable(2);
-        }
-        return documentProperties;
-    }
+	/**
+	 * Supports managing a set of properties. Callers can use the
+	 * <code>documentProperties</code> dictionary to annotate the document with
+	 * document-wide properties.
+	 *
+	 * @return a non-<code>null</code> <code>Dictionary</code>
+	 * @see #setDocumentProperties
+	 */
+	public Dictionary<Object, Object> getDocumentProperties() {
+		if (documentProperties == null) {
+			documentProperties = new Hashtable(2);
+		}
+		return documentProperties;
+	}
 
-    /**
-     * Replaces the document properties dictionary for this document.
-     *
-     * @param x the new dictionary
-     * @see #getDocumentProperties
-     */
-    public void setDocumentProperties(Dictionary<Object,Object> x) {
-        documentProperties = x;
-    }
+	/**
+	 * Replaces the document properties dictionary for this document.
+	 *
+	 * @param x the new dictionary
+	 * @see #getDocumentProperties
+	 */
+	public void setDocumentProperties(Dictionary<Object, Object> x) {
+		documentProperties = x;
+	}
 
-    /**
-     * Notifies all listeners that have registered interest for
-     * notification on this event type.  The event instance
-     * is lazily created using the parameters passed into
-     * the fire method.
-     *
-     * @param e the event
-     * @see EventListenerList
-     */
-    protected void fireInsertUpdate(DocumentEvent e) {
+	/**
+	 * Notifies all listeners that have registered interest for notification on this
+	 * event type. The event instance is lazily created using the parameters passed
+	 * into the fire method.
+	 *
+	 * @param e the event
+	 * @see EventListenerList
+	 */
+	protected void fireInsertUpdate(DocumentEvent e) {
 //        notifyingListeners = true;
-        try {
-            // Guaranteed to return a non-null array
-            Object[] listeners = listenerList.getListenerList();
-            // Process the listeners last to first, notifying
-            // those that are interested in this event
-            for (int i = listeners.length-2; i>=0; i-=2) {
-                if (listeners[i]==DocumentListener.class) {
-                    // Lazily create the event:
-                    // if (e == null)
-                    // e = new ListSelectionEvent(this, firstIndex, lastIndex);
-                    ((DocumentListener)listeners[i+1]).insertUpdate(e);
-                }
-            }
-        } finally {
+		try {
+			// Guaranteed to return a non-null array
+			Object[] listeners = listenerList.getListenerList();
+			// Process the listeners last to first, notifying
+			// those that are interested in this event
+			for (int i = listeners.length - 2; i >= 0; i -= 2) {
+				if (listeners[i] == DocumentListener.class) {
+					// Lazily create the event:
+					// if (e == null)
+					// e = new ListSelectionEvent(this, firstIndex, lastIndex);
+					((DocumentListener) listeners[i + 1]).insertUpdate(e);
+				}
+			}
+		} finally {
 //            notifyingListeners = false;
-        }
-    }
+		}
+	}
 
-    /**
-     * Notifies all listeners that have registered interest for
-     * notification on this event type.  The event instance
-     * is lazily created using the parameters passed into
-     * the fire method.
-     *
-     * @param e the event
-     * @see EventListenerList
-     */
-    protected void fireChangedUpdate(DocumentEvent e) {
+	/**
+	 * Notifies all listeners that have registered interest for notification on this
+	 * event type. The event instance is lazily created using the parameters passed
+	 * into the fire method.
+	 *
+	 * @param e the event
+	 * @see EventListenerList
+	 */
+	protected void fireChangedUpdate(DocumentEvent e) {
 //        notifyingListeners = true;
-        try {
-            // Guaranteed to return a non-null array
-            Object[] listeners = listenerList.getListenerList();
-            // Process the listeners last to first, notifying
-            // those that are interested in this event
-            for (int i = listeners.length-2; i>=0; i-=2) {
-                if (listeners[i]==DocumentListener.class) {
-                    // Lazily create the event:
-                    // if (e == null)
-                    // e = new ListSelectionEvent(this, firstIndex, lastIndex);
-                    ((DocumentListener)listeners[i+1]).changedUpdate(e);
-                }
-            }
-        } finally {
+		try {
+			// Guaranteed to return a non-null array
+			Object[] listeners = listenerList.getListenerList();
+			// Process the listeners last to first, notifying
+			// those that are interested in this event
+			for (int i = listeners.length - 2; i >= 0; i -= 2) {
+				if (listeners[i] == DocumentListener.class) {
+					// Lazily create the event:
+					// if (e == null)
+					// e = new ListSelectionEvent(this, firstIndex, lastIndex);
+					((DocumentListener) listeners[i + 1]).changedUpdate(e);
+				}
+			}
+		} finally {
 //            notifyingListeners = false;
-        }
-    }
+		}
+	}
 
-    /**
-     * Notifies all listeners that have registered interest for
-     * notification on this event type.  The event instance
-     * is lazily created using the parameters passed into
-     * the fire method.
-     *
-     * @param e the event
-     * @see EventListenerList
-     */
-    protected void fireRemoveUpdate(DocumentEvent e) {
+	/**
+	 * Notifies all listeners that have registered interest for notification on this
+	 * event type. The event instance is lazily created using the parameters passed
+	 * into the fire method.
+	 *
+	 * @param e the event
+	 * @see EventListenerList
+	 */
+	protected void fireRemoveUpdate(DocumentEvent e) {
 //        notifyingListeners = true;
-        try {
-            // Guaranteed to return a non-null array
-            Object[] listeners = listenerList.getListenerList();
-            // Process the listeners last to first, notifying
-            // those that are interested in this event
-            for (int i = listeners.length-2; i>=0; i-=2) {
-                if (listeners[i]==DocumentListener.class) {
-                    // Lazily create the event:
-                    // if (e == null)
-                    // e = new ListSelectionEvent(this, firstIndex, lastIndex);
-                    ((DocumentListener)listeners[i+1]).removeUpdate(e);
-                }
-            }
-        } finally {
+		try {
+			// Guaranteed to return a non-null array
+			Object[] listeners = listenerList.getListenerList();
+			// Process the listeners last to first, notifying
+			// those that are interested in this event
+			for (int i = listeners.length - 2; i >= 0; i -= 2) {
+				if (listeners[i] == DocumentListener.class) {
+					// Lazily create the event:
+					// if (e == null)
+					// e = new ListSelectionEvent(this, firstIndex, lastIndex);
+					((DocumentListener) listeners[i + 1]).removeUpdate(e);
+				}
+			}
+		} finally {
 //            notifyingListeners = false;
-        }
-    }
+		}
+	}
 
-    /**
-     * Notifies all listeners that have registered interest for
-     * notification on this event type.  The event instance
-     * is lazily created using the parameters passed into
-     * the fire method.
-     *
-     * @param e the event
-     * @see EventListenerList
-     */
-    protected void fireUndoableEditUpdate(UndoableEditEvent e) {
-        // Guaranteed to return a non-null array
-        Object[] listeners = listenerList.getListenerList();
-        // Process the listeners last to first, notifying
-        // those that are interested in this event
-        for (int i = listeners.length-2; i>=0; i-=2) {
-            if (listeners[i]==UndoableEditListener.class) {
-                // Lazily create the event:
-                // if (e == null)
-                // e = new ListSelectionEvent(this, firstIndex, lastIndex);
-                ((UndoableEditListener)listeners[i+1]).undoableEditHappened(e);
-            }
-        }
-    }
+	/**
+	 * Notifies all listeners that have registered interest for notification on this
+	 * event type. The event instance is lazily created using the parameters passed
+	 * into the fire method.
+	 *
+	 * @param e the event
+	 * @see EventListenerList
+	 */
+	protected void fireUndoableEditUpdate(UndoableEditEvent e) {
+		// Guaranteed to return a non-null array
+		Object[] listeners = listenerList.getListenerList();
+		// Process the listeners last to first, notifying
+		// those that are interested in this event
+		for (int i = listeners.length - 2; i >= 0; i -= 2) {
+			if (listeners[i] == UndoableEditListener.class) {
+				// Lazily create the event:
+				// if (e == null)
+				// e = new ListSelectionEvent(this, firstIndex, lastIndex);
+				((UndoableEditListener) listeners[i + 1]).undoableEditHappened(e);
+			}
+		}
+	}
 
-    /**
-     * Returns an array of all the objects currently registered
-     * as <code><em>Foo</em>Listener</code>s
-     * upon this document.
-     * <code><em>Foo</em>Listener</code>s are registered using the
-     * <code>add<em>Foo</em>Listener</code> method.
-     *
-     * <p>
-     * You can specify the <code>listenerType</code> argument
-     * with a class literal, such as
-     * <code><em>Foo</em>Listener.class</code>.
-     * For example, you can query a
-     * document <code>d</code>
-     * for its document listeners with the following code:
-     *
-     * <pre>DocumentListener[] mls = (DocumentListener[])(d.getListeners(DocumentListener.class));</pre>
-     *
-     * If no such listeners exist, this method returns an empty array.
-     *
-     * @param listenerType the type of listeners requested; this parameter
-     *          should specify an interface that descends from
-     *          <code>java.util.EventListener</code>
-     * @return an array of all objects registered as
-     *          <code><em>Foo</em>Listener</code>s on this component,
-     *          or an empty array if no such
-     *          listeners have been added
-     * @exception ClassCastException if <code>listenerType</code>
-     *          doesn't specify a class or interface that implements
-     *          <code>java.util.EventListener</code>
-     *
-     * @see #getDocumentListeners
-     * @see #getUndoableEditListeners
-     *
-     * @since 1.3
-     */
-    public <T extends EventListener> T[] getListeners(Class<T> listenerType) {
-        return listenerList.getListeners(listenerType);
-    }
+	/**
+	 * Returns an array of all the objects currently registered as
+	 * <code><em>Foo</em>Listener</code>s upon this document.
+	 * <code><em>Foo</em>Listener</code>s are registered using the
+	 * <code>add<em>Foo</em>Listener</code> method.
+	 *
+	 * <p>
+	 * You can specify the <code>listenerType</code> argument with a class literal,
+	 * such as <code><em>Foo</em>Listener.class</code>. For example, you can query a
+	 * document <code>d</code> for its document listeners with the following code:
+	 *
+	 * <pre>
+	 * DocumentListener[] mls = (DocumentListener[]) (d.getListeners(DocumentListener.class));
+	 * </pre>
+	 *
+	 * If no such listeners exist, this method returns an empty array.
+	 *
+	 * @param listenerType the type of listeners requested; this parameter should
+	 *                     specify an interface that descends from
+	 *                     <code>java.util.EventListener</code>
+	 * @return an array of all objects registered as
+	 *         <code><em>Foo</em>Listener</code>s on this component, or an empty
+	 *         array if no such listeners have been added
+	 * @exception ClassCastException if <code>listenerType</code> doesn't specify a
+	 *                               class or interface that implements
+	 *                               <code>java.util.EventListener</code>
+	 *
+	 * @see #getDocumentListeners
+	 * @see #getUndoableEditListeners
+	 *
+	 * @since 1.3
+	 */
+	public <T extends EventListener> T[] getListeners(Class<T> listenerType) {
+		return listenerList.getListeners(listenerType);
+	}
 
-    /**
-     * Gets the asynchronous loading priority.  If less than zero,
-     * the document should not be loaded asynchronously.
-     *
-     * @return the asynchronous loading priority, or <code>-1</code>
-     *   if the document should not be loaded asynchronously
-     */
+	/**
+	 * Gets the asynchronous loading priority. If less than zero, the document
+	 * should not be loaded asynchronously.
+	 *
+	 * @return the asynchronous loading priority, or <code>-1</code> if the document
+	 *         should not be loaded asynchronously
+	 */
 	public int getAsynchronousLoadPriority() {
-        Integer loadPriority = (Integer)
-            getProperty(AbstractDocument.AsyncLoadPriority);
-        if (loadPriority != null) {
-            return loadPriority.intValue();
-        }
-        return -1;
-    }
+		Integer loadPriority = (Integer) getProperty(AbstractDocument.AsyncLoadPriority);
+		if (loadPriority != null) {
+			return loadPriority.intValue();
+		}
+		return -1;
+	}
 
-    /**
-     * Sets the asynchronous loading priority.
-     * @param p the new asynchronous loading priority; a value
-     *   less than zero indicates that the document should not be
-     *   loaded asynchronously
-     */
-    public void setAsynchronousLoadPriority(int p) {
-        Integer loadPriority = (p >= 0) ? new Integer(p) : null;
-        putProperty(AbstractDocument.AsyncLoadPriority, loadPriority);
-    }
+	/**
+	 * Sets the asynchronous loading priority.
+	 * 
+	 * @param p the new asynchronous loading priority; a value less than zero
+	 *          indicates that the document should not be loaded asynchronously
+	 */
+	public void setAsynchronousLoadPriority(int p) {
+		Integer loadPriority = (p >= 0) ? new Integer(p) : null;
+		putProperty(AbstractDocument.AsyncLoadPriority, loadPriority);
+	}
 
-    /**
-     * Sets the <code>DocumentFilter</code>. The <code>DocumentFilter</code>
-     * is passed <code>insert</code> and <code>remove</code> to conditionally
-     * allow inserting/deleting of the text.  A <code>null</code> value
-     * indicates that no filtering will occur.
-     *
-     * @param filter the <code>DocumentFilter</code> used to constrain text
-     * @see #getDocumentFilter
-     * @since 1.4
-     */
-		public void setDocumentFilter(DocumentFilter filter) {
-        documentFilter = filter;
-    }
+	/**
+	 * Sets the <code>DocumentFilter</code>. The <code>DocumentFilter</code> is
+	 * passed <code>insert</code> and <code>remove</code> to conditionally allow
+	 * inserting/deleting of the text. A <code>null</code> value indicates that no
+	 * filtering will occur.
+	 *
+	 * @param filter the <code>DocumentFilter</code> used to constrain text
+	 * @see #getDocumentFilter
+	 * @since 1.4
+	 */
+	public void setDocumentFilter(DocumentFilter filter) {
+		documentFilter = filter;
+	}
 
-    /**
-     * Returns the <code>DocumentFilter</code> that is responsible for
-     * filtering of insertion/removal. A <code>null</code> return value
-     * implies no filtering is to occur.
-     *
-     * @since 1.4
-     * @see #setDocumentFilter
-     * @return the DocumentFilter
-     */
-    public DocumentFilter getDocumentFilter() {
-        return documentFilter;
-    }
+	/**
+	 * Returns the <code>DocumentFilter</code> that is responsible for filtering of
+	 * insertion/removal. A <code>null</code> return value implies no filtering is
+	 * to occur.
+	 *
+	 * @since 1.4
+	 * @see #setDocumentFilter
+	 * @return the DocumentFilter
+	 */
+	public DocumentFilter getDocumentFilter() {
+		return documentFilter;
+	}
 
 //    // --- Document methods -----------------------------------------
 //
-    /**
-     * This allows the model to be safely rendered in the presence
-     * of currency, if the model supports being updated asynchronously.
-     * The given runnable will be executed in a way that allows it
-     * to safely read the model with no changes while the runnable
-     * is being executed.  The runnable itself may <em>not</em>
-     * make any mutations.
-     * <p>
-     * This is implemented to aquire a read lock for the duration
-     * of the runnables execution.  There may be multiple runnables
-     * executing at the same time, and all writers will be blocked
-     * while there are active rendering runnables.  If the runnable
-     * throws an exception, its lock will be safely released.
-     * There is no protection against a runnable that never exits,
-     * which will effectively leave the document locked for it's
-     * lifetime.
-     * <p>
-     * If the given runnable attempts to make any mutations in
-     * this implementation, a deadlock will occur.  There is
-     * no tracking of individual rendering threads to enable
-     * detecting this situation, but a subclass could incur
-     * the overhead of tracking them and throwing an error.
-     * <p>
-     * This method is thread safe, although most Swing methods
-     * are not. Please see
-     * <A HREF="http://java.sun.com/docs/books/tutorial/uiswing/misc/threads.html">How
-     * to Use Threads</A> for more information.
-     *
-     * @param r the renderer to execute
-     */
-    @Override
+	/**
+	 * This allows the model to be safely rendered in the presence of currency, if
+	 * the model supports being updated asynchronously. The given runnable will be
+	 * executed in a way that allows it to safely read the model with no changes
+	 * while the runnable is being executed. The runnable itself may <em>not</em>
+	 * make any mutations.
+	 * <p>
+	 * This is implemented to aquire a read lock for the duration of the runnables
+	 * execution. There may be multiple runnables executing at the same time, and
+	 * all writers will be blocked while there are active rendering runnables. If
+	 * the runnable throws an exception, its lock will be safely released. There is
+	 * no protection against a runnable that never exits, which will effectively
+	 * leave the document locked for it's lifetime.
+	 * <p>
+	 * If the given runnable attempts to make any mutations in this implementation,
+	 * a deadlock will occur. There is no tracking of individual rendering threads
+	 * to enable detecting this situation, but a subclass could incur the overhead
+	 * of tracking them and throwing an error.
+	 * <p>
+	 * This method is thread safe, although most Swing methods are not. Please see
+	 * <A HREF=
+	 * "http://java.sun.com/docs/books/tutorial/uiswing/misc/threads.html">How to
+	 * Use Threads</A> for more information.
+	 *
+	 * @param r the renderer to execute
+	 */
+	@Override
 	public void render(Runnable r) {
 //        readLock();
-        try {
-            r.run();
-        } finally {
+		try {
+			r.run();
+		} finally {
 //            readUnlock();
-        }
-    }
+		}
+	}
 
-    /**
-     * Returns the length of the data.  This is the number of
-     * characters of content that represents the users data.
-     *
-     * @return the length >= 0
-     * @see Document#getLength
-     */
-    @Override
-		public int getLength() {
-        return data.length() - 1;
-    }
+	/**
+	 * Returns the length of the data. This is the number of characters of content
+	 * that represents the users data.
+	 *
+	 * @return the length >= 0
+	 * @see Document#getLength
+	 */
+	@Override
+	public int getLength() {
+		return data.length() - 1;
+	}
 
-    /**
-     * Adds a document listener for notification of any changes.
-     *
-     * @param listener the <code>DocumentListener</code> to add
-     * @see Document#addDocumentListener
-     */
-    @Override
-		public void addDocumentListener(DocumentListener listener) {
-        listenerList.add(DocumentListener.class, listener);
-    }
+	/**
+	 * Adds a document listener for notification of any changes.
+	 *
+	 * @param listener the <code>DocumentListener</code> to add
+	 * @see Document#addDocumentListener
+	 */
+	@Override
+	public void addDocumentListener(DocumentListener listener) {
+		listenerList.add(DocumentListener.class, listener);
+	}
 
-    /**
-     * Removes a document listener.
-     *
-     * @param listener the <code>DocumentListener</code> to remove
-     * @see Document#removeDocumentListener
-     */
-    @Override
-		public void removeDocumentListener(DocumentListener listener) {
-        listenerList.remove(DocumentListener.class, listener);
-    }
+	/**
+	 * Removes a document listener.
+	 *
+	 * @param listener the <code>DocumentListener</code> to remove
+	 * @see Document#removeDocumentListener
+	 */
+	@Override
+	public void removeDocumentListener(DocumentListener listener) {
+		listenerList.remove(DocumentListener.class, listener);
+	}
 
-    /**
-     * Returns an array of all the document listeners
-     * registered on this document.
-     *
-     * @return all of this document's <code>DocumentListener</code>s
-     *         or an empty array if no document listeners are
-     *         currently registered
-     *
-     * @see #addDocumentListener
-     * @see #removeDocumentListener
-     * @since 1.4
-     */
-    public DocumentListener[] getDocumentListeners() {
-        return (DocumentListener[])listenerList.getListeners(
-                DocumentListener.class);
-    }
+	/**
+	 * Returns an array of all the document listeners registered on this document.
+	 *
+	 * @return all of this document's <code>DocumentListener</code>s or an empty
+	 *         array if no document listeners are currently registered
+	 *
+	 * @see #addDocumentListener
+	 * @see #removeDocumentListener
+	 * @since 1.4
+	 */
+	public DocumentListener[] getDocumentListeners() {
+		return (DocumentListener[]) listenerList.getListeners(DocumentListener.class);
+	}
 
-    /**
-     * Adds an undo listener for notification of any changes.
-     * Undo/Redo operations performed on the <code>UndoableEdit</code>
-     * will cause the appropriate DocumentEvent to be fired to keep
-     * the view(s) in sync with the model.
-     *
-     * @param listener the <code>UndoableEditListener</code> to add
-     * @see Document#addUndoableEditListener
-     */
-    @Override
-		public void addUndoableEditListener(UndoableEditListener listener) {
-        listenerList.add(UndoableEditListener.class, listener);
-    }
+	/**
+	 * Adds an undo listener for notification of any changes. Undo/Redo operations
+	 * performed on the <code>UndoableEdit</code> will cause the appropriate
+	 * DocumentEvent to be fired to keep the view(s) in sync with the model.
+	 *
+	 * @param listener the <code>UndoableEditListener</code> to add
+	 * @see Document#addUndoableEditListener
+	 */
+	@Override
+	public void addUndoableEditListener(UndoableEditListener listener) {
+		listenerList.add(UndoableEditListener.class, listener);
+	}
 
-    /**
-     * Removes an undo listener.
-     *
-     * @param listener the <code>UndoableEditListener</code> to remove
-     * @see Document#removeDocumentListener
-     */
-    @Override
-		public void removeUndoableEditListener(UndoableEditListener listener) {
-        listenerList.remove(UndoableEditListener.class, listener);
-    }
+	/**
+	 * Removes an undo listener.
+	 *
+	 * @param listener the <code>UndoableEditListener</code> to remove
+	 * @see Document#removeDocumentListener
+	 */
+	@Override
+	public void removeUndoableEditListener(UndoableEditListener listener) {
+		listenerList.remove(UndoableEditListener.class, listener);
+	}
 
-    /**
-     * Returns an array of all the undoable edit listeners
-     * registered on this document.
-     *
-     * @return all of this document's <code>UndoableEditListener</code>s
-     *         or an empty array if no undoable edit listeners are
-     *         currently registered
-     *
-     * @see #addUndoableEditListener
-     * @see #removeUndoableEditListener
-     *
-     * @since 1.4
-     */
-    public UndoableEditListener[] getUndoableEditListeners() {
-        return (UndoableEditListener[])listenerList.getListeners(
-                UndoableEditListener.class);
-    }
+	/**
+	 * Returns an array of all the undoable edit listeners registered on this
+	 * document.
+	 *
+	 * @return all of this document's <code>UndoableEditListener</code>s or an empty
+	 *         array if no undoable edit listeners are currently registered
+	 *
+	 * @see #addUndoableEditListener
+	 * @see #removeUndoableEditListener
+	 *
+	 * @since 1.4
+	 */
+	public UndoableEditListener[] getUndoableEditListeners() {
+		return (UndoableEditListener[]) listenerList.getListeners(UndoableEditListener.class);
+	}
 
-    /**
-     * A convenience method for looking up a property value. It is
-     * equivalent to:
-     * <pre>
-     * getDocumentProperties().get(key);
-     * </pre>
-     *
-     * @param key the non-<code>null</code> property key
-     * @return the value of this property or <code>null</code>
-     * @see #getDocumentProperties
-     */
-    @Override
-		public final Object getProperty(Object key) {
-        return getDocumentProperties().get(key);
-    }
+	/**
+	 * A convenience method for looking up a property value. It is equivalent to:
+	 * 
+	 * <pre>
+	 * getDocumentProperties().get(key);
+	 * </pre>
+	 *
+	 * @param key the non-<code>null</code> property key
+	 * @return the value of this property or <code>null</code>
+	 * @see #getDocumentProperties
+	 */
+	@Override
+	public final Object getProperty(Object key) {
+		return getDocumentProperties().get(key);
+	}
 
-
-    /**
-     * A convenience method for storing up a property value.  It is
-     * equivalent to:
-     * <pre>
-     * getDocumentProperties().put(key, value);
-     * </pre>
-     * If <code>value</code> is <code>null</code> this method will
-     * remove the property.
-     *
-     * @param key the non-<code>null</code> key
-     * @param value the property value
-     * @see #getDocumentProperties
-     */
-    @Override
-		public final void putProperty(Object key, Object value) {
-        if (value != null) {
-            getDocumentProperties().put(key, value);
-        } else {
-            getDocumentProperties().remove(key);
-        }
+	/**
+	 * A convenience method for storing up a property value. It is equivalent to:
+	 * 
+	 * <pre>
+	 * getDocumentProperties().put(key, value);
+	 * </pre>
+	 * 
+	 * If <code>value</code> is <code>null</code> this method will remove the
+	 * property.
+	 *
+	 * @param key   the non-<code>null</code> key
+	 * @param value the property value
+	 * @see #getDocumentProperties
+	 */
+	@Override
+	public final void putProperty(Object key, Object value) {
+		if (value != null) {
+			getDocumentProperties().put(key, value);
+		} else {
+			getDocumentProperties().remove(key);
+		}
 //        if( key == TextAttribute.RUN_DIRECTION
 //            && Boolean.TRUE.equals(getProperty(I18NProperty)) )
 //        {
@@ -580,75 +554,71 @@ public abstract class AbstractDocument implements Document {
 //                writeUnlock();
 //            }
 //        }
-    }
+	}
 
-    /**
-     * Removes some content from the document.
-     * Removing content causes a write lock to be held while the
-     * actual changes are taking place.  Observers are notified
-     * of the change on the thread that called this method.
-     * <p>
-     * This method is thread safe, although most Swing methods
-     * are not. Please see
-     * <A HREF="http://java.sun.com/docs/books/tutorial/uiswing/misc/threads.html">How
-     * to Use Threads</A> for more information.
-     *
-     * @param offs the starting offset >= 0
-     * @param len the number of characters to remove >= 0
-     * @exception BadLocationException  the given remove position is not a valid
-     *   position within the document
-     * @see Document#remove
-     */
-    @Override
-		public void remove(int offs, int len) throws BadLocationException {
-        DocumentFilter filter = getDocumentFilter();
+	/**
+	 * Removes some content from the document. Removing content causes a write lock
+	 * to be held while the actual changes are taking place. Observers are notified
+	 * of the change on the thread that called this method.
+	 * <p>
+	 * This method is thread safe, although most Swing methods are not. Please see
+	 * <A HREF=
+	 * "http://java.sun.com/docs/books/tutorial/uiswing/misc/threads.html">How to
+	 * Use Threads</A> for more information.
+	 *
+	 * @param offs the starting offset >= 0
+	 * @param len  the number of characters to remove >= 0
+	 * @exception BadLocationException the given remove position is not a valid
+	 *                                 position within the document
+	 * @see Document#remove
+	 */
+	@Override
+	public void remove(int offs, int len) throws BadLocationException {
+		DocumentFilter filter = getDocumentFilter();
 
-        writeLock();
-        try {
-            if (filter != null) {
-                filter.remove(getFilterBypass(), offs, len);
-            }
-            else {
-                handleRemove(offs, len);
-            }
-        } finally {
-            writeUnlock();
-        }
-    }
+		writeLock();
+		try {
+			if (filter != null) {
+				filter.remove(getFilterBypass(), offs, len);
+			} else {
+				handleRemove(offs, len);
+			}
+		} finally {
+			writeUnlock();
+		}
+	}
 
-    /**
-     * Performs the actual work of the remove. It is assumed the caller
-     * will have obtained a <code>writeLock</code> before invoking this.
-     */
-    void handleRemove(int offs, int len) throws BadLocationException {
-        if (len > 0) {
-            if (offs < 0 || (offs + len) > getLength()) {
-                throw new BadLocationException("Invalid remove",
-                                               getLength() + 1);
-            }
-            DefaultDocumentEvent chng =
-                    new DefaultDocumentEvent(offs, len, DocumentEvent.EventType.REMOVE);
+	/**
+	 * Performs the actual work of the remove. It is assumed the caller will have
+	 * obtained a <code>writeLock</code> before invoking this.
+	 */
+	void handleRemove(int offs, int len) throws BadLocationException {
+		if (len > 0) {
+			if (offs < 0 || (offs + len) > getLength()) {
+				throw new BadLocationException("Invalid remove", getLength() + 1);
+			}
+			DefaultDocumentEvent chng = new DefaultDocumentEvent(offs, len, DocumentEvent.EventType.REMOVE);
 
-            boolean isComposedTextElement = false;
-            // Check whether the position of interest is the composed text
-            isComposedTextElement = Utilities.isComposedTextElement(this, offs);
+			boolean isComposedTextElement = false;
+			// Check whether the position of interest is the composed text
+			isComposedTextElement = Utilities.isComposedTextElement(this, offs);
 
-            removeUpdate(chng);
-            UndoableEdit u = data.remove(offs, len);
-            if (u != null) {
-                chng.addEdit(u);
-            }
-            postRemoveUpdate(chng);
-            // Mark the edit as done.
-            chng.end();
-            fireRemoveUpdate(chng);
-            // only fire undo if Content implementation supports it
-            // undo for the composed text is not supported for now
-            if ((u != null) && !isComposedTextElement) {
-                fireUndoableEditUpdate(new UndoableEditEvent(this, chng));
-            }
-        }
-    }
+			removeUpdate(chng);
+			UndoableEdit u = data.remove(offs, len);
+			if (u != null) {
+				chng.addEdit(u);
+			}
+			postRemoveUpdate(chng);
+			// Mark the edit as done.
+			chng.end();
+			fireRemoveUpdate(chng);
+			// only fire undo if Content implementation supports it
+			// undo for the composed text is not supported for now
+			if ((u != null) && !isComposedTextElement) {
+				fireUndoableEditUpdate(new UndoableEditEvent(this, chng));
+			}
+		}
+	}
 
 	/**
 	 * Deletes the region of text from <code>offset</code> to
@@ -681,71 +651,71 @@ public abstract class AbstractDocument implements Document {
 			} else {
 				if (length > 0) {
 					remove(offset, length);
+					秘replacing = true;
+				} else {
+					秘replacing = false;
 				}
 				if (text != null && text.length() > 0) {
 					insertString(offset, text, attrs);
 				}
+				秘replacing = false;
 			}
 		} finally {
 			writeUnlock();
 		}
 	}
 
-    /**
-     * Inserts some content into the document.
-     * Inserting content causes a write lock to be held while the
-     * actual changes are taking place, followed by notification
-     * to the observers on the thread that grabbed the write lock.
-     * <p>
-     * This method is thread safe, although most Swing methods
-     * are not. Please see
-     * <A HREF="http://java.sun.com/docs/books/tutorial/uiswing/misc/threads.html">How
-     * to Use Threads</A> for more information.
-     *
-     * @param offs the starting offset >= 0
-     * @param str the string to insert; does nothing with null/empty strings
-     * @param a the attributes for the inserted content
-     * @exception BadLocationException  the given insert position is not a valid
-     *   position within the document
-     * @see Document#insertString
-     */
-    @Override
-		public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
-        if ((str == null) || (str.length() == 0)) {
-            return;
-        }
-        DocumentFilter filter = getDocumentFilter();
+	/**
+	 * Inserts some content into the document. Inserting content causes a write lock
+	 * to be held while the actual changes are taking place, followed by
+	 * notification to the observers on the thread that grabbed the write lock.
+	 * <p>
+	 * This method is thread safe, although most Swing methods are not. Please see
+	 * <A HREF=
+	 * "http://java.sun.com/docs/books/tutorial/uiswing/misc/threads.html">How to
+	 * Use Threads</A> for more information.
+	 *
+	 * @param offs the starting offset >= 0
+	 * @param str  the string to insert; does nothing with null/empty strings
+	 * @param a    the attributes for the inserted content
+	 * @exception BadLocationException the given insert position is not a valid
+	 *                                 position within the document
+	 * @see Document#insertString
+	 */
+	@Override
+	public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
+		if ((str == null) || (str.length() == 0)) {
+			return;
+		}
+		DocumentFilter filter = getDocumentFilter();
 
-        writeLock();
-        try {
-            if (filter != null) {
-                filter.insertString(getFilterBypass(), offs, str, a);
-            }
-            else {
-                handleInsertString(offs, str, a);
-            }
-        } finally {
-            writeUnlock();
-        }
-    }
+		writeLock();
+		try {
+			if (filter != null) {
+				filter.insertString(getFilterBypass(), offs, str, a);
+			} else {
+				handleInsertString(offs, str, a);
+			}
+		} finally {
+			writeUnlock();
+		}
+	}
 
-    /**
-     * Performs the actual work of inserting the text; it is assumed the
-     * caller has obtained a write lock before invoking this.
-     */
-    void handleInsertString(int offs, String str, AttributeSet a)
-                         throws BadLocationException {
-        if ((str == null) || (str.length() == 0)) {
-            return;
-        }
-        UndoableEdit u = data.insertString(offs, str);
-        DefaultDocumentEvent e =
-            new DefaultDocumentEvent(offs, str.length(), DocumentEvent.EventType.INSERT);
-        if (u != null) {
-            e.addEdit(u);
-        }
+	/**
+	 * Performs the actual work of inserting the text; it is assumed the caller has
+	 * obtained a write lock before invoking this.
+	 */
+	void handleInsertString(int offs, String str, AttributeSet a) throws BadLocationException {
+		if ((str == null) || (str.length() == 0)) {
+			return;
+		}
+		UndoableEdit u = data.insertString(offs, str);
+		DefaultDocumentEvent e = new DefaultDocumentEvent(offs, str.length(), DocumentEvent.EventType.INSERT);
+		if (u != null) {
+			e.addEdit(u);
+		}
 
-        // see if complex glyph layout support is needed
+		// see if complex glyph layout support is needed
 //        if( getProperty(I18NProperty).equals( Boolean.FALSE ) ) {
 //            // if a default direction of right-to-left has been specified,
 //            // we want complex layout even if the text is all left to right.
@@ -760,186 +730,181 @@ public abstract class AbstractDocument implements Document {
 //            }
 //        }
 
-        insertUpdate(e, a);
-        // Mark the edit as done.
-        e.end();
-        fireInsertUpdate(e);
-        // only fire undo if Content implementation supports it
-        // undo for the composed text is not supported for now
-        if (u != null &&
-            (a == null || !a.isDefined(StyleConstants.ComposedTextAttribute))) {
-            fireUndoableEditUpdate(new UndoableEditEvent(this, e));
-        }
-    }
+		insertUpdate(e, a);
+		// Mark the edit as done.
+		e.end();
+		fireInsertUpdate(e);
+		// only fire undo if Content implementation supports it
+		// undo for the composed text is not supported for now
+		if (u != null && (a == null || !a.isDefined(StyleConstants.ComposedTextAttribute))) {
+			fireUndoableEditUpdate(new UndoableEditEvent(this, e));
+		}
+	}
 
-    /**
-     * Gets a sequence of text from the document.
-     *
-     * @param offset the starting offset >= 0
-     * @param length the number of characters to retrieve >= 0
-     * @return the text
-     * @exception BadLocationException  the range given includes a position
-     *   that is not a valid position within the document
-     * @see Document#getText
-     */
-    @Override
-		public String getText(int offset, int length) throws BadLocationException {
-        if (length < 0) {
-            throw new BadLocationException("Length must be positive", length);
-        }
-        String str = data.getString(offset, length);
-        return str;
-    }
+	/**
+	 * Gets a sequence of text from the document.
+	 *
+	 * @param offset the starting offset >= 0
+	 * @param length the number of characters to retrieve >= 0
+	 * @return the text
+	 * @exception BadLocationException the range given includes a position that is
+	 *                                 not a valid position within the document
+	 * @see Document#getText
+	 */
+	@Override
+	public String getText(int offset, int length) throws BadLocationException {
+		if (length < 0) {
+			throw new BadLocationException("Length must be positive", length);
+		}
+		String str = data.getString(offset, length);
+		return str;
+	}
 
-    /**
-     * Fetches the text contained within the given portion
-     * of the document.
-     * <p>
-     * If the partialReturn property on the txt parameter is false, the
-     * data returned in the Segment will be the entire length requested and
-     * may or may not be a copy depending upon how the data was stored.
-     * If the partialReturn property is true, only the amount of text that
-     * can be returned without creating a copy is returned.  Using partial
-     * returns will give better performance for situations where large
-     * parts of the document are being scanned.  The following is an example
-     * of using the partial return to access the entire document:
-     * <p>
-     * <pre>
-     * &nbsp; int nleft = doc.getDocumentLength();
-     * &nbsp; Segment text = new Segment();
-     * &nbsp; int offs = 0;
-     * &nbsp; text.setPartialReturn(true);
-     * &nbsp; while (nleft > 0) {
-     * &nbsp;     doc.getText(offs, nleft, text);
-     * &nbsp;     // do something with text
-     * &nbsp;     nleft -= text.count;
-     * &nbsp;     offs += text.count;
-     * &nbsp; }
-     * </pre>
-     *
-     * @param offset the starting offset >= 0
-     * @param length the number of characters to retrieve >= 0
-     * @param txt the Segment object to retrieve the text into
-     * @exception BadLocationException  the range given includes a position
-     *   that is not a valid position within the document
-     */
-    @Override
-		public void getText(int offset, int length, Segment txt) throws BadLocationException {
-        if (length < 0) {
-            throw new BadLocationException("Length must be positive", length);
-        }
-        data.getChars(offset, length, txt);
-    }
+	/**
+	 * Fetches the text contained within the given portion of the document.
+	 * <p>
+	 * If the partialReturn property on the txt parameter is false, the data
+	 * returned in the Segment will be the entire length requested and may or may
+	 * not be a copy depending upon how the data was stored. If the partialReturn
+	 * property is true, only the amount of text that can be returned without
+	 * creating a copy is returned. Using partial returns will give better
+	 * performance for situations where large parts of the document are being
+	 * scanned. The following is an example of using the partial return to access
+	 * the entire document:
+	 * <p>
+	 * 
+	 * <pre>
+	 * int nleft = doc.getDocumentLength();
+	 * Segment text = new Segment();
+	 * int offs = 0;
+	 * text.setPartialReturn(true);
+	 * while (nleft > 0) {
+	 * 	doc.getText(offs, nleft, text);
+	 * 	// do something with text
+	 * 	nleft -= text.count;
+	 * 	offs += text.count;
+	 * }
+	 * </pre>
+	 *
+	 * @param offset the starting offset >= 0
+	 * @param length the number of characters to retrieve >= 0
+	 * @param txt    the Segment object to retrieve the text into
+	 * @exception BadLocationException the range given includes a position that is
+	 *                                 not a valid position within the document
+	 */
+	@Override
+	public void getText(int offset, int length, Segment txt) throws BadLocationException {
+		if (length < 0) {
+			throw new BadLocationException("Length must be positive", length);
+		}
+		data.getChars(offset, length, txt);
+	}
 
-    /**
-     * Returns a position that will track change as the document
-     * is altered.
-     * <p>
-     * This method is thread safe, although most Swing methods
-     * are not. Please see
-     * <A HREF="http://java.sun.com/docs/books/tutorial/uiswing/misc/threads.html">How
-     * to Use Threads</A> for more information.
-     *
-     * @param offs the position in the model >= 0
-     * @return the position
-     * @exception BadLocationException  if the given position does not
-     *   represent a valid location in the associated document
-     * @see Document#createPosition
-     */
-    @Override
-		public synchronized Position createPosition(int offs) throws BadLocationException {
-        return data.createPosition(offs);
-    }
+	/**
+	 * Returns a position that will track change as the document is altered.
+	 * <p>
+	 * This method is thread safe, although most Swing methods are not. Please see
+	 * <A HREF=
+	 * "http://java.sun.com/docs/books/tutorial/uiswing/misc/threads.html">How to
+	 * Use Threads</A> for more information.
+	 *
+	 * @param offs the position in the model >= 0
+	 * @return the position
+	 * @exception BadLocationException if the given position does not represent a
+	 *                                 valid location in the associated document
+	 * @see Document#createPosition
+	 */
+	@Override
+	public synchronized Position createPosition(int offs) throws BadLocationException {
+		return data.createPosition(offs);
+	}
 
-    /**
-     * Returns a position that represents the start of the document.  The
-     * position returned can be counted on to track change and stay
-     * located at the beginning of the document.
-     *
-     * @return the position
-     */
-    @Override
-		public final Position getStartPosition() {
-        Position p;
-        try {
-            p = createPosition(0);
-        } catch (BadLocationException bl) {
-            p = null;
-        }
-        return p;
-    }
+	/**
+	 * Returns a position that represents the start of the document. The position
+	 * returned can be counted on to track change and stay located at the beginning
+	 * of the document.
+	 *
+	 * @return the position
+	 */
+	@Override
+	public final Position getStartPosition() {
+		Position p;
+		try {
+			p = createPosition(0);
+		} catch (BadLocationException bl) {
+			p = null;
+		}
+		return p;
+	}
 
-    /**
-     * Returns a position that represents the end of the document.  The
-     * position returned can be counted on to track change and stay
-     * located at the end of the document.
-     *
-     * @return the position
-     */
-    @Override
-		public final Position getEndPosition() {
-        Position p;
-        try {
-            p = createPosition(data.length());
-        } catch (BadLocationException bl) {
-            p = null;
-        }
-        return p;
-    }
+	/**
+	 * Returns a position that represents the end of the document. The position
+	 * returned can be counted on to track change and stay located at the end of the
+	 * document.
+	 *
+	 * @return the position
+	 */
+	@Override
+	public final Position getEndPosition() {
+		Position p;
+		try {
+			p = createPosition(data.length());
+		} catch (BadLocationException bl) {
+			p = null;
+		}
+		return p;
+	}
 
-    /**
-     * Gets all root elements defined.  Typically, there
-     * will only be one so the default implementation
-     * is to return the default root element.
-     *
-     * @return the root element
-     */
-    @Override
-		public Element[] getRootElements() {
-        Element[] elems = new Element[2];
-        elems[0] = getDefaultRootElement();
-        elems[1] = getBidiRootElement();
-        return elems;
-    }
+	/**
+	 * Gets all root elements defined. Typically, there will only be one so the
+	 * default implementation is to return the default root element.
+	 *
+	 * @return the root element
+	 */
+	@Override
+	public Element[] getRootElements() {
+		Element[] elems = new Element[2];
+		elems[0] = getDefaultRootElement();
+		elems[1] = getBidiRootElement();
+		return elems;
+	}
 
-    /**
-     * Returns the root element that views should be based upon
-     * unless some other mechanism for assigning views to element
-     * structures is provided.
-     *
-     * @return the root element
-     * @see Document#getDefaultRootElement
-     */
-    @Override
-		public abstract Element getDefaultRootElement();
+	/**
+	 * Returns the root element that views should be based upon unless some other
+	 * mechanism for assigning views to element structures is provided.
+	 *
+	 * @return the root element
+	 * @see Document#getDefaultRootElement
+	 */
+	@Override
+	public abstract Element getDefaultRootElement();
 
-    // ---- local methods -----------------------------------------
+	// ---- local methods -----------------------------------------
 
-    /**
-     * Returns the <code>FilterBypass</code>. This will create one if one
-     * does not yet exist.
-     */
-    private DocumentFilter.FilterBypass getFilterBypass() {
-        if (filterBypass == null) {
-            filterBypass = new DefaultFilterBypass();
-        }
-        return filterBypass;
-    }
+	/**
+	 * Returns the <code>FilterBypass</code>. This will create one if one does not
+	 * yet exist.
+	 */
+	private DocumentFilter.FilterBypass getFilterBypass() {
+		if (filterBypass == null) {
+			filterBypass = new DefaultFilterBypass();
+		}
+		return filterBypass;
+	}
 
-    /**
-     * Returns the root element of the bidirectional structure for this
-     * document.  Its children represent character runs with a given
-     * Unicode bidi level.
-     */
-    public Element getBidiRootElement() {
-        return bidiRoot;
-    }
+	/**
+	 * Returns the root element of the bidirectional structure for this document.
+	 * Its children represent character runs with a given Unicode bidi level.
+	 */
+	public Element getBidiRootElement() {
+		return bidiRoot;
+	}
 
-    /**
-     * Returns true if the text in the range <code>p0</code> to
-     * <code>p1</code> is left to right.
-     */
-    boolean isLeftToRight(int p0, int p1) {
+	/**
+	 * Returns true if the text in the range <code>p0</code> to <code>p1</code> is
+	 * left to right.
+	 */
+	boolean isLeftToRight(int p0, int p1) {
 //        if(!getProperty(I18NProperty).equals(Boolean.TRUE)) {
 //            return true;
 //        }
@@ -950,91 +915,85 @@ public abstract class AbstractDocument implements Document {
 //            AttributeSet bidiAttrs = bidiElem.getAttributes();
 //            return ((StyleConstants.getBidiLevel(bidiAttrs) % 2) == 0);
 //        }
-        return true;
-    }
+		return true;
+	}
 
-    /**
-     * Get the paragraph element containing the given position.  Sub-classes
-     * must define for themselves what exactly constitutes a paragraph.  They
-     * should keep in mind however that a paragraph should at least be the
-     * unit of text over which to run the Unicode bidirectional algorithm.
-     *
-     * @param pos the starting offset >= 0
-     * @return the element */
-    public abstract Element getParagraphElement(int pos);
+	/**
+	 * Get the paragraph element containing the given position. Sub-classes must
+	 * define for themselves what exactly constitutes a paragraph. They should keep
+	 * in mind however that a paragraph should at least be the unit of text over
+	 * which to run the Unicode bidirectional algorithm.
+	 *
+	 * @param pos the starting offset >= 0
+	 * @return the element
+	 */
+	public abstract Element getParagraphElement(int pos);
 
+	/**
+	 * Fetches the context for managing attributes. This method effectively
+	 * establishes the strategy used for compressing AttributeSet information.
+	 *
+	 * @return the context
+	 */
+	protected final AttributeContext getAttributeContext() {
+		return context;
+	}
 
-    /**
-     * Fetches the context for managing attributes.  This
-     * method effectively establishes the strategy used
-     * for compressing AttributeSet information.
-     *
-     * @return the context
-     */
-    protected final AttributeContext getAttributeContext() {
-        return context;
-    }
-
-    /**
-     * Updates document structure as a result of text insertion.  This
-     * will happen within a write lock.  If a subclass of
-     * this class reimplements this method, it should delegate to the
-     * superclass as well.
-     *
-     * @param chng a description of the change
-     * @param attr the attributes for the change
-     */
-    protected void insertUpdate(DefaultDocumentEvent chng, AttributeSet attr) {
+	/**
+	 * Updates document structure as a result of text insertion. This will happen
+	 * within a write lock. If a subclass of this class reimplements this method, it
+	 * should delegate to the superclass as well.
+	 *
+	 * @param chng a description of the change
+	 * @param attr the attributes for the change
+	 */
+	protected void insertUpdate(DefaultDocumentEvent chng, AttributeSet attr) {
 //        if( getProperty(I18NProperty).equals( Boolean.TRUE ) )
 //            updateBidi( chng );
 //
-        // Check if a multi byte is encountered in the inserted text.
-        if (chng.type == DocumentEvent.EventType.INSERT &&
-                        chng.getLength() > 0 &&
-                        !Boolean.TRUE.equals(getProperty(MultiByteProperty))) {
-            Segment segment = SegmentCache.getSharedSegment();
-            try {
-                getText(chng.getOffset(), chng.getLength(), segment);
-                segment.first();
-                do {
-                    if ((int)segment.current() > 255) {
-                        putProperty(MultiByteProperty, Boolean.TRUE);
-                        break;
-                    }
-                } while (segment.next() != Segment.DONE);
-            } catch (BadLocationException ble) {
-                // Should never happen
-            }
-            SegmentCache.releaseSharedSegment(segment);
-        }
-    }
+		// Check if a multi byte is encountered in the inserted text.
+		if (chng.type == DocumentEvent.EventType.INSERT && chng.getLength() > 0
+				&& !Boolean.TRUE.equals(getProperty(MultiByteProperty))) {
+			Segment segment = SegmentCache.getSharedSegment();
+			try {
+				getText(chng.getOffset(), chng.getLength(), segment);
+				segment.first();
+				do {
+					if ((int) segment.current() > 255) {
+						putProperty(MultiByteProperty, Boolean.TRUE);
+						break;
+					}
+				} while (segment.next() != Segment.DONE);
+			} catch (BadLocationException ble) {
+				// Should never happen
+			}
+			SegmentCache.releaseSharedSegment(segment);
+		}
+	}
 
-    /**
-     * Updates any document structure as a result of text removal.  This
-     * method is called before the text is actually removed from the Content.
-     * This will happen within a write lock. If a subclass
-     * of this class reimplements this method, it should delegate to the
-     * superclass as well.
-     *
-     * @param chng a description of the change
-     */
-    protected void removeUpdate(DefaultDocumentEvent chng) {
-    }
+	/**
+	 * Updates any document structure as a result of text removal. This method is
+	 * called before the text is actually removed from the Content. This will happen
+	 * within a write lock. If a subclass of this class reimplements this method, it
+	 * should delegate to the superclass as well.
+	 *
+	 * @param chng a description of the change
+	 */
+	protected void removeUpdate(DefaultDocumentEvent chng) {
+	}
 
-    /**
-     * Updates any document structure as a result of text removal.  This
-     * method is called after the text has been removed from the Content.
-     * This will happen within a write lock. If a subclass
-     * of this class reimplements this method, it should delegate to the
-     * superclass as well.
-     *
-     * @param chng a description of the change
-     */
-    protected void postRemoveUpdate(DefaultDocumentEvent chng) {
+	/**
+	 * Updates any document structure as a result of text removal. This method is
+	 * called after the text has been removed from the Content. This will happen
+	 * within a write lock. If a subclass of this class reimplements this method, it
+	 * should delegate to the superclass as well.
+	 *
+	 * @param chng a description of the change
+	 */
+	protected void postRemoveUpdate(DefaultDocumentEvent chng) {
 //        if( getProperty(I18NProperty).equals( Boolean.TRUE ) )
 //            updateBidi( chng );
-    }
-
+	}
 
 //    /**
 //     * Update the bidi element structure as a result of the given change
@@ -1192,7 +1151,6 @@ public abstract class AbstractDocument implements Document {
 //        bidiRoot.replace( removeFromIndex, removedElems.length, addedElems );
 //    }
 
-
 //    /**
 //     * Calculate the levels array for a range of paragraphs.
 //     */
@@ -1271,46 +1229,44 @@ public abstract class AbstractDocument implements Document {
 //        bidiRoot.dump(out,0);
 //    }
 
-    /**
-     * Gets the content for the document.
-     *
-     * @return the content
-     */
-    public final Content getContent() {
-        return data;
-    }
+	/**
+	 * Gets the content for the document.
+	 *
+	 * @return the content
+	 */
+	public final Content getContent() {
+		return data;
+	}
 
-    /**
-     * Creates a document leaf element.
-     * Hook through which elements are created to represent the
-     * document structure.  Because this implementation keeps
-     * structure and content separate, elements grow automatically
-     * when content is extended so splits of existing elements
-     * follow.  The document itself gets to decide how to generate
-     * elements to give flexibility in the type of elements used.
-     *
-     * @param parent the parent element
-     * @param a the attributes for the element
-     * @param p0 the beginning of the range >= 0
-     * @param p1 the end of the range >= p0
-     * @return the new element
-     */
-    protected Element createLeafElement(Element parent, AttributeSet a, int p0, int p1) {
-        return new LeafElement(parent, a, p0, p1);
-    }
+	/**
+	 * Creates a document leaf element. Hook through which elements are created to
+	 * represent the document structure. Because this implementation keeps structure
+	 * and content separate, elements grow automatically when content is extended so
+	 * splits of existing elements follow. The document itself gets to decide how to
+	 * generate elements to give flexibility in the type of elements used.
+	 *
+	 * @param parent the parent element
+	 * @param a      the attributes for the element
+	 * @param p0     the beginning of the range >= 0
+	 * @param p1     the end of the range >= p0
+	 * @return the new element
+	 */
+	protected Element createLeafElement(Element parent, AttributeSet a, int p0, int p1) {
+		return new LeafElement(parent, a, p0, p1);
+	}
 
-    /**
-     * Creates a document branch element, that can contain other elements.
-     *
-     * @param parent the parent element
-     * @param a the attributes
-     * @return the element
-     */
-    protected Element createBranchElement(Element parent, AttributeSet a) {
-        return new BranchElement(parent, a);
-    }
+	/**
+	 * Creates a document branch element, that can contain other elements.
+	 *
+	 * @param parent the parent element
+	 * @param a      the attributes
+	 * @return the element
+	 */
+	protected Element createBranchElement(Element parent, AttributeSet a) {
+		return new BranchElement(parent, a);
+	}
 
-    // --- Document locking ----------------------------------
+	// --- Document locking ----------------------------------
 
 //    /**
 //     * Fetches the current writing thread if there is one.
@@ -1326,32 +1282,31 @@ public abstract class AbstractDocument implements Document {
 //        return currWriter;
 //    }
 
-    /**
-     * Acquires a lock to begin mutating the document this lock
-     * protects.  There can be no writing, notification of changes, or
-     * reading going on in order to gain the lock.  Additionally a thread is
-     * allowed to gain more than one <code>writeLock</code>,
-     * as long as it doesn't attempt to gain additional <code>writeLock</code>s
-     * from within document notification.  Attempting to gain a
-     * <code>writeLock</code> from within a DocumentListener notification will
-     * result in an <code>IllegalStateException</code>.  The ability
-     * to obtain more than one <code>writeLock</code> per thread allows
-     * subclasses to gain a writeLock, perform a number of operations, then
-     * release the lock.
-     * <p>
-     * Calls to <code>writeLock</code>
-     * must be balanced with calls to <code>writeUnlock</code>, else the
-     * <code>Document</code> will be left in a locked state so that no
-     * reading or writing can be done.
-     *
-     * @exception IllegalStateException thrown on illegal lock
-     *  attempt.  If the document is implemented properly, this can
-     *  only happen if a document listener attempts to mutate the
-     *  document.  This situation violates the bean event model
-     *  where order of delivery is not guaranteed and all listeners
-     *  should be notified before further mutations are allowed.
-     */
-    protected synchronized final void writeLock() {
+	/**
+	 * Acquires a lock to begin mutating the document this lock protects. There can
+	 * be no writing, notification of changes, or reading going on in order to gain
+	 * the lock. Additionally a thread is allowed to gain more than one
+	 * <code>writeLock</code>, as long as it doesn't attempt to gain additional
+	 * <code>writeLock</code>s from within document notification. Attempting to gain
+	 * a <code>writeLock</code> from within a DocumentListener notification will
+	 * result in an <code>IllegalStateException</code>. The ability to obtain more
+	 * than one <code>writeLock</code> per thread allows subclasses to gain a
+	 * writeLock, perform a number of operations, then release the lock.
+	 * <p>
+	 * Calls to <code>writeLock</code> must be balanced with calls to
+	 * <code>writeUnlock</code>, else the <code>Document</code> will be left in a
+	 * locked state so that no reading or writing can be done.
+	 *
+	 * @exception IllegalStateException thrown on illegal lock attempt. If the
+	 *                                  document is implemented properly, this can
+	 *                                  only happen if a document listener attempts
+	 *                                  to mutate the document. This situation
+	 *                                  violates the bean event model where order of
+	 *                                  delivery is not guaranteed and all listeners
+	 *                                  should be notified before further mutations
+	 *                                  are allowed.
+	 */
+	protected synchronized final void writeLock() {
 //        try {
 //            while ((numReaders > 0) || (currWriter != null)) {
 //                if (Thread.currentThread() == currWriter) {
@@ -1372,35 +1327,33 @@ public abstract class AbstractDocument implements Document {
 //        } catch (InterruptedException e) {
 //            throw new Error("Interrupted attempt to aquire write lock");
 //        }
-    }
+	}
 
-    /**
-     * Releases a write lock previously obtained via <code>writeLock</code>.
-     * After decrementing the lock count if there are no oustanding locks
-     * this will allow a new writer, or readers.
-     *
-     * @see #writeLock
-     */
-    protected synchronized final void writeUnlock() {
+	/**
+	 * Releases a write lock previously obtained via <code>writeLock</code>. After
+	 * decrementing the lock count if there are no oustanding locks this will allow
+	 * a new writer, or readers.
+	 *
+	 * @see #writeLock
+	 */
+	protected synchronized final void writeUnlock() {
 //        if (--numWriters <= 0) {
 //            numWriters = 0;
 //            currWriter = null;
 //          // SwingJS  CANNOT DO THIS                notifyAll();
 //        }
-    }
+	}
 
-    /**
-     * Acquires a lock to begin reading some state from the
-     * document.  There can be multiple readers at the same time.
-     * Writing blocks the readers until notification of the change
-     * to the listeners has been completed.  This method should
-     * be used very carefully to avoid unintended compromise
-     * of the document.  It should always be balanced with a
-     * <code>readUnlock</code>.
-     *
-     * @see #readUnlock
-     */
-    public synchronized final void readLock() {
+	/**
+	 * Acquires a lock to begin reading some state from the document. There can be
+	 * multiple readers at the same time. Writing blocks the readers until
+	 * notification of the change to the listeners has been completed. This method
+	 * should be used very carefully to avoid unintended compromise of the document.
+	 * It should always be balanced with a <code>readUnlock</code>.
+	 *
+	 * @see #readUnlock
+	 */
+	public synchronized final void readLock() {
 //        try {
 //            while (currWriter != null) {
 //                if (currWriter == Thread.currentThread()) {
@@ -1414,27 +1367,28 @@ public abstract class AbstractDocument implements Document {
 //        } catch (InterruptedException e) {
 //            throw new Error("Interrupted attempt to aquire read lock");
 //        }
-    }
+	}
 
-    /**
-     * Does a read unlock.  This signals that one
-     * of the readers is done.  If there are no more readers
-     * then writing can begin again.  This should be balanced
-     * with a readLock, and should occur in a finally statement
-     * so that the balance is guaranteed.  The following is an
-     * example.
-     * <pre><code>
-     * &nbsp;   readLock();
-     * &nbsp;   try {
-     * &nbsp;       // do something
-     * &nbsp;   } finally {
-     * &nbsp;       readUnlock();
-     * &nbsp;   }
-     * </code></pre>
-     *
-     * @see #readLock
-     */
-    public synchronized final void readUnlock() {
+	/**
+	 * Does a read unlock. This signals that one of the readers is done. If there
+	 * are no more readers then writing can begin again. This should be balanced
+	 * with a readLock, and should occur in a finally statement so that the balance
+	 * is guaranteed. The following is an example.
+	 * 
+	 * <pre>
+	 * <code>
+	 * &nbsp;   readLock();
+	 * &nbsp;   try {
+	 * &nbsp;       // do something
+	 * &nbsp;   } finally {
+	 * &nbsp;       readUnlock();
+	 * &nbsp;   }
+	 * </code>
+	 * </pre>
+	 *
+	 * @see #readLock
+	 */
+	public synchronized final void readUnlock() {
 //        if (currWriter == Thread.currentThread()) {
 //            // writer has full read access.... may try to acquire
 //            // lock in notification
@@ -1445,7 +1399,7 @@ public abstract class AbstractDocument implements Document {
 //        }
 //        numReaders -= 1;
 //        notify();
-    }
+	}
 
 //    // --- serialization ---------------------------------------------
 //
@@ -1487,7 +1441,7 @@ public abstract class AbstractDocument implements Document {
 //        }, 0);
 //    }
 
-    // ----- member variables ------------------------------------------
+	// ----- member variables ------------------------------------------
 
 //    private transient int numReaders;
 //    private transient Thread currWriter;
@@ -1502,45 +1456,44 @@ public abstract class AbstractDocument implements Document {
 //
 //    private static Boolean defaultI18NProperty;
 
-    /**
-     * Storage for document-wide properties.
-     */
-    private Dictionary<Object,Object> documentProperties = null;
+	/**
+	 * Storage for document-wide properties.
+	 */
+	private Dictionary<Object, Object> documentProperties = null;
 
-    /**
-     * The event listener list for the document.
-     */
-    protected EventListenerList listenerList = new EventListenerList();
+	/**
+	 * The event listener list for the document.
+	 */
+	protected EventListenerList listenerList = new EventListenerList();
 
-    /**
-     * Where the text is actually stored, and a set of marks
-     * that track change as the document is edited are managed.
-     */
-    private Content data;
+	/**
+	 * Where the text is actually stored, and a set of marks that track change as
+	 * the document is edited are managed.
+	 */
+	private Content data;
 
-    /**
-     * Factory for the attributes.  This is the strategy for
-     * attribute compression and control of the lifetime of
-     * a set of attributes as a collection.  This may be shared
-     * with other documents.
-     */
-    private AttributeContext context;
+	/**
+	 * Factory for the attributes. This is the strategy for attribute compression
+	 * and control of the lifetime of a set of attributes as a collection. This may
+	 * be shared with other documents.
+	 */
+	private AttributeContext context;
 
-    /**
-     * The root of the bidirectional structure for this document.  Its children
-     * represent character runs with the same Unicode bidi level.
-     */
-    private transient BranchElement bidiRoot;
+	/**
+	 * The root of the bidirectional structure for this document. Its children
+	 * represent character runs with the same Unicode bidi level.
+	 */
+	private transient BranchElement bidiRoot;
 
-    /**
-     * Filter for inserting/removing of text.
-     */
-    private DocumentFilter documentFilter;
+	/**
+	 * Filter for inserting/removing of text.
+	 */
+	private DocumentFilter documentFilter;
 
-    /**
-     * Used by DocumentFilter to do actual insert/remove.
-     */
-    private transient DocumentFilter.FilterBypass filterBypass;
+	/**
+	 * Used by DocumentFilter to do actual insert/remove.
+	 */
+	private transient DocumentFilter.FilterBypass filterBypass;
 
 	private JTextComponent editor;
 
@@ -1552,263 +1505,250 @@ public abstract class AbstractDocument implements Document {
 
 //    private static final String BAD_LOCK_STATE = "document lock failure";
 
-    /**
-     * Error message to indicate a bad location.
-     */
-    protected static final String BAD_LOCATION = "document location failure";
+	/**
+	 * Error message to indicate a bad location.
+	 */
+	protected static final String BAD_LOCATION = "document location failure";
 
-    /**
-     * Name of elements used to represent paragraphs
-     */
-    public static final String ParagraphElementName = "paragraph";
+	/**
+	 * Name of elements used to represent paragraphs
+	 */
+	public static final String ParagraphElementName = "paragraph";
 
-    /**
-     * Name of elements used to represent content
-     */
-    public static final String ContentElementName = "content";
+	/**
+	 * Name of elements used to represent content
+	 */
+	public static final String ContentElementName = "content";
 
-    /**
-     * Name of elements used to hold sections (lines/paragraphs).
-     */
-    public static final String SectionElementName = "section";
+	/**
+	 * Name of elements used to hold sections (lines/paragraphs).
+	 */
+	public static final String SectionElementName = "section";
 
-    /**
-     * Name of elements used to hold a unidirectional run
-     */
-    public static final String BidiElementName = "bidi level";
+	/**
+	 * Name of elements used to hold a unidirectional run
+	 */
+	public static final String BidiElementName = "bidi level";
 
-    /**
-     * Name of the attribute used to specify element
-     * names.
-     */
-    public static final String ElementNameAttribute = "$ename";
+	/**
+	 * Name of the attribute used to specify element names.
+	 */
+	public static final String ElementNameAttribute = "$ename";
 
-    /**
-     * Document property that indicates whether internationalization
-     * functions such as text reordering or reshaping should be
-     * performed. This property should not be publicly exposed,
-     * since it is used for implementation convenience only.  As a
-     * side effect, copies of this property may be in its subclasses
-     * that live in different packages (e.g. HTMLDocument as of now),
-     * so those copies should also be taken care of when this property
-     * needs to be modified.
-     */
-    static final String I18NProperty = "i18n";
+	/**
+	 * Document property that indicates whether internationalization functions such
+	 * as text reordering or reshaping should be performed. This property should not
+	 * be publicly exposed, since it is used for implementation convenience only. As
+	 * a side effect, copies of this property may be in its subclasses that live in
+	 * different packages (e.g. HTMLDocument as of now), so those copies should also
+	 * be taken care of when this property needs to be modified.
+	 */
+	static final String I18NProperty = "i18n";
 
-    /**
-     * Document property that indicates if a character has been inserted
-     * into the document that is more than one byte long.  GlyphView uses
-     * this to determine if it should use BreakIterator.
-     */
-    static final Object MultiByteProperty = "multiByte";
+	/**
+	 * Document property that indicates if a character has been inserted into the
+	 * document that is more than one byte long. GlyphView uses this to determine if
+	 * it should use BreakIterator.
+	 */
+	static final Object MultiByteProperty = "multiByte";
 
-    /**
-     * Document property that indicates asynchronous loading is
-     * desired, with the thread priority given as the value.
-     */
-    static final String AsyncLoadPriority = "load priority";
+	/**
+	 * Document property that indicates asynchronous loading is desired, with the
+	 * thread priority given as the value.
+	 */
+	static final String AsyncLoadPriority = "load priority";
 
-    /**
-     * Interface to describe a sequence of character content that
-     * can be edited.  Implementations may or may not support a
-     * history mechanism which will be reflected by whether or not
-     * mutations return an UndoableEdit implementation.
-     * @see AbstractDocument
-     */
-    public interface Content {
+	/**
+	 * Interface to describe a sequence of character content that can be edited.
+	 * Implementations may or may not support a history mechanism which will be
+	 * reflected by whether or not mutations return an UndoableEdit implementation.
+	 * 
+	 * @see AbstractDocument
+	 */
+	public interface Content {
 
-        /**
-         * Creates a position within the content that will
-         * track change as the content is mutated.
-         *
-         * @param offset the offset in the content >= 0
-         * @return a Position
-         * @exception BadLocationException for an invalid offset
-         */
-        public Position createPosition(int offset) throws BadLocationException;
+		/**
+		 * Creates a position within the content that will track change as the content
+		 * is mutated.
+		 *
+		 * @param offset the offset in the content >= 0
+		 * @return a Position
+		 * @exception BadLocationException for an invalid offset
+		 */
+		public Position createPosition(int offset) throws BadLocationException;
 
-        /**
-         * Current length of the sequence of character content.
-         *
-         * @return the length >= 0
-         */
-        public int length();
+		/**
+		 * Current length of the sequence of character content.
+		 *
+		 * @return the length >= 0
+		 */
+		public int length();
 
-        /**
-         * Inserts a string of characters into the sequence.
-         *
-         * @param where   offset into the sequence to make the insertion >= 0
-         * @param str     string to insert
-         * @return  if the implementation supports a history mechanism,
-         *    a reference to an <code>Edit</code> implementation will be returned,
-         *    otherwise returns <code>null</code>
-         * @exception BadLocationException  thrown if the area covered by
-         *   the arguments is not contained in the character sequence
-         */
-        public UndoableEdit insertString(int where, String str) throws BadLocationException;
+		/**
+		 * Inserts a string of characters into the sequence.
+		 *
+		 * @param where offset into the sequence to make the insertion >= 0
+		 * @param str   string to insert
+		 * @return if the implementation supports a history mechanism, a reference to an
+		 *         <code>Edit</code> implementation will be returned, otherwise returns
+		 *         <code>null</code>
+		 * @exception BadLocationException thrown if the area covered by the arguments
+		 *                                 is not contained in the character sequence
+		 */
+		public UndoableEdit insertString(int where, String str) throws BadLocationException;
 
-        /**
-         * Removes some portion of the sequence.
-         *
-         * @param where   The offset into the sequence to make the
-         *   insertion >= 0.
-         * @param nitems  The number of items in the sequence to remove >= 0.
-         * @return  If the implementation supports a history mechansim,
-         *    a reference to an Edit implementation will be returned,
-         *    otherwise null.
-         * @exception BadLocationException  Thrown if the area covered by
-         *   the arguments is not contained in the character sequence.
-         */
-        public UndoableEdit remove(int where, int nitems) throws BadLocationException;
+		/**
+		 * Removes some portion of the sequence.
+		 *
+		 * @param where  The offset into the sequence to make the insertion >= 0.
+		 * @param nitems The number of items in the sequence to remove >= 0.
+		 * @return If the implementation supports a history mechansim, a reference to an
+		 *         Edit implementation will be returned, otherwise null.
+		 * @exception BadLocationException Thrown if the area covered by the arguments
+		 *                                 is not contained in the character sequence.
+		 */
+		public UndoableEdit remove(int where, int nitems) throws BadLocationException;
 
-        /**
-         * Fetches a string of characters contained in the sequence.
-         *
-         * @param where   Offset into the sequence to fetch >= 0.
-         * @param len     number of characters to copy >= 0.
-         * @return the string
-         * @exception BadLocationException  Thrown if the area covered by
-         *   the arguments is not contained in the character sequence.
-         */
-        public String getString(int where, int len) throws BadLocationException;
+		/**
+		 * Fetches a string of characters contained in the sequence.
+		 *
+		 * @param where Offset into the sequence to fetch >= 0.
+		 * @param len   number of characters to copy >= 0.
+		 * @return the string
+		 * @exception BadLocationException Thrown if the area covered by the arguments
+		 *                                 is not contained in the character sequence.
+		 */
+		public String getString(int where, int len) throws BadLocationException;
 
-        /**
-         * Gets a sequence of characters and copies them into a Segment.
-         *
-         * @param where the starting offset >= 0
-         * @param len the number of characters >= 0
-         * @param txt the target location to copy into
-         * @exception BadLocationException  Thrown if the area covered by
-         *   the arguments is not contained in the character sequence.
-         */
-        public void getChars(int where, int len, Segment txt) throws BadLocationException;
-    }
+		/**
+		 * Gets a sequence of characters and copies them into a Segment.
+		 *
+		 * @param where the starting offset >= 0
+		 * @param len   the number of characters >= 0
+		 * @param txt   the target location to copy into
+		 * @exception BadLocationException Thrown if the area covered by the arguments
+		 *                                 is not contained in the character sequence.
+		 */
+		public void getChars(int where, int len, Segment txt) throws BadLocationException;
+	}
 
-    /**
-     * An interface that can be used to allow MutableAttributeSet
-     * implementations to use pluggable attribute compression
-     * techniques.  Each mutation of the attribute set can be
-     * used to exchange a previous AttributeSet instance with
-     * another, preserving the possibility of the AttributeSet
-     * remaining immutable.  An implementation is provided by
-     * the StyleContext class.
-     *
-     * The Element implementations provided by this class use
-     * this interface to provide their MutableAttributeSet
-     * implementations, so that different AttributeSet compression
-     * techniques can be employed.  The method
-     * <code>getAttributeContext</code> should be implemented to
-     * return the object responsible for implementing the desired
-     * compression technique.
-     *
-     * @see StyleContext
-     */
-    public interface AttributeContext {
+	/**
+	 * An interface that can be used to allow MutableAttributeSet implementations to
+	 * use pluggable attribute compression techniques. Each mutation of the
+	 * attribute set can be used to exchange a previous AttributeSet instance with
+	 * another, preserving the possibility of the AttributeSet remaining immutable.
+	 * An implementation is provided by the StyleContext class.
+	 *
+	 * The Element implementations provided by this class use this interface to
+	 * provide their MutableAttributeSet implementations, so that different
+	 * AttributeSet compression techniques can be employed. The method
+	 * <code>getAttributeContext</code> should be implemented to return the object
+	 * responsible for implementing the desired compression technique.
+	 *
+	 * @see StyleContext
+	 */
+	public interface AttributeContext {
 
-        /**
-         * Adds an attribute to the given set, and returns
-         * the new representative set.
-         *
-         * @param old the old attribute set
-         * @param name the non-null attribute name
-         * @param value the attribute value
-         * @return the updated attribute set
-         * @see MutableAttributeSet#addAttribute
-         */
-        public AttributeSet addAttribute(AttributeSet old, Object name, Object value);
+		/**
+		 * Adds an attribute to the given set, and returns the new representative set.
+		 *
+		 * @param old   the old attribute set
+		 * @param name  the non-null attribute name
+		 * @param value the attribute value
+		 * @return the updated attribute set
+		 * @see MutableAttributeSet#addAttribute
+		 */
+		public AttributeSet addAttribute(AttributeSet old, Object name, Object value);
 
-        /**
-         * Adds a set of attributes to the element.
-         *
-         * @param old the old attribute set
-         * @param attr the attributes to add
-         * @return the updated attribute set
-         * @see MutableAttributeSet#addAttribute
-         */
-        public AttributeSet addAttributes(AttributeSet old, AttributeSet attr);
+		/**
+		 * Adds a set of attributes to the element.
+		 *
+		 * @param old  the old attribute set
+		 * @param attr the attributes to add
+		 * @return the updated attribute set
+		 * @see MutableAttributeSet#addAttribute
+		 */
+		public AttributeSet addAttributes(AttributeSet old, AttributeSet attr);
 
-        /**
-         * Removes an attribute from the set.
-         *
-         * @param old the old attribute set
-         * @param name the non-null attribute name
-         * @return the updated attribute set
-         * @see MutableAttributeSet#removeAttribute
-         */
-        public AttributeSet removeAttribute(AttributeSet old, Object name);
+		/**
+		 * Removes an attribute from the set.
+		 *
+		 * @param old  the old attribute set
+		 * @param name the non-null attribute name
+		 * @return the updated attribute set
+		 * @see MutableAttributeSet#removeAttribute
+		 */
+		public AttributeSet removeAttribute(AttributeSet old, Object name);
 
-        /**
-         * Removes a set of attributes for the element.
-         *
-         * @param old the old attribute set
-         * @param names the attribute names
-         * @return the updated attribute set
-         * @see MutableAttributeSet#removeAttributes
-         */
-        public AttributeSet removeAttributes(AttributeSet old, Enumeration<?> names);
+		/**
+		 * Removes a set of attributes for the element.
+		 *
+		 * @param old   the old attribute set
+		 * @param names the attribute names
+		 * @return the updated attribute set
+		 * @see MutableAttributeSet#removeAttributes
+		 */
+		public AttributeSet removeAttributes(AttributeSet old, Enumeration<?> names);
 
-        /**
-         * Removes a set of attributes for the element.
-         *
-         * @param old the old attribute set
-         * @param attrs the attributes
-         * @return the updated attribute set
-         * @see MutableAttributeSet#removeAttributes
-         */
-        public AttributeSet removeAttributes(AttributeSet old, AttributeSet attrs);
+		/**
+		 * Removes a set of attributes for the element.
+		 *
+		 * @param old   the old attribute set
+		 * @param attrs the attributes
+		 * @return the updated attribute set
+		 * @see MutableAttributeSet#removeAttributes
+		 */
+		public AttributeSet removeAttributes(AttributeSet old, AttributeSet attrs);
 
-        /**
-         * Fetches an empty AttributeSet.
-         *
-         * @return the attribute set
-         */
-        public AttributeSet getEmptySet();
+		/**
+		 * Fetches an empty AttributeSet.
+		 *
+		 * @return the attribute set
+		 */
+		public AttributeSet getEmptySet();
 
-        /**
-         * Reclaims an attribute set.
-         * This is a way for a MutableAttributeSet to mark that it no
-         * longer need a particular immutable set.  This is only necessary
-         * in 1.1 where there are no weak references.  A 1.1 implementation
-         * would call this in its finalize method.
-         *
-         * @param a the attribute set to reclaim
-         */
-        public void reclaim(AttributeSet a);
-    }
+		/**
+		 * Reclaims an attribute set. This is a way for a MutableAttributeSet to mark
+		 * that it no longer need a particular immutable set. This is only necessary in
+		 * 1.1 where there are no weak references. A 1.1 implementation would call this
+		 * in its finalize method.
+		 *
+		 * @param a the attribute set to reclaim
+		 */
+		public void reclaim(AttributeSet a);
+	}
 
-    /**
-     * Implements the abstract part of an element.  By default elements
-     * support attributes by having a field that represents the immutable
-     * part of the current attribute set for the element.  The element itself
-     * implements MutableAttributeSet which can be used to modify the set
-     * by fetching a new immutable set.  The immutable sets are provided
-     * by the AttributeContext associated with the document.
-     * <p>
-     * <strong>Warning:</strong>
-     * Serialized objects of this class will not be compatible with
-     * future Swing releases. The current serialization support is
-     * appropriate for short term storage or RMI between applications running
-     * the same version of Swing.  As of 1.4, support for long term storage
-     * of all JavaBeans<sup><font size="-2">TM</font></sup>
-     * has been added to the <code>java.beans</code> package.
-     * Please see {@link java.beans.XMLEncoder}.
-     */
-    public abstract class AbstractElement implements Element, MutableAttributeSet, TreeNode {
+	/**
+	 * Implements the abstract part of an element. By default elements support
+	 * attributes by having a field that represents the immutable part of the
+	 * current attribute set for the element. The element itself implements
+	 * MutableAttributeSet which can be used to modify the set by fetching a new
+	 * immutable set. The immutable sets are provided by the AttributeContext
+	 * associated with the document.
+	 * <p>
+	 * <strong>Warning:</strong> Serialized objects of this class will not be
+	 * compatible with future Swing releases. The current serialization support is
+	 * appropriate for short term storage or RMI between applications running the
+	 * same version of Swing. As of 1.4, support for long term storage of all
+	 * JavaBeans<sup><font size="-2">TM</font></sup> has been added to the
+	 * <code>java.beans</code> package. Please see {@link java.beans.XMLEncoder}.
+	 */
+	public abstract class AbstractElement implements Element, MutableAttributeSet, TreeNode {
 
-        /**
-         * Creates a new AbstractElement.
-         *
-         * @param parent the parent element
-         * @param a the attributes for the element
-         * @since 1.4
-         */
-        public AbstractElement(Element parent, AttributeSet a) {
-            this.parent = parent;
-            attributes = getAttributeContext().getEmptySet();
-            if (a != null) {
-                addAttributes(a);
-            }
-        }
+		/**
+		 * Creates a new AbstractElement.
+		 *
+		 * @param parent the parent element
+		 * @param a      the attributes for the element
+		 * @since 1.4
+		 */
+		public AbstractElement(Element parent, AttributeSet a) {
+			this.parent = parent;
+			attributes = getAttributeContext().getEmptySet();
+			if (a != null) {
+				addAttributes(a);
+			}
+		}
 
 //        private final void indent(PrintWriter out, int n) {
 //            for (int i = 0; i < n; i++) {
@@ -1873,389 +1813,383 @@ public abstract class AbstractDocument implements Document {
 //            }
 //        }
 
-        // --- AttributeSet ----------------------------
-        // delegated to the immutable field "attributes"
+		// --- AttributeSet ----------------------------
+		// delegated to the immutable field "attributes"
 
-        /**
-         * Gets the number of attributes that are defined.
-         *
-         * @return the number of attributes >= 0
-         * @see AttributeSet#getAttributeCount
-         */
-        @Override
-				public int getAttributeCount() {
-            return attributes.getAttributeCount();
-        }
+		/**
+		 * Gets the number of attributes that are defined.
+		 *
+		 * @return the number of attributes >= 0
+		 * @see AttributeSet#getAttributeCount
+		 */
+		@Override
+		public int getAttributeCount() {
+			return attributes.getAttributeCount();
+		}
 
-        /**
-         * Checks whether a given attribute is defined.
-         *
-         * @param attrName the non-null attribute name
-         * @return true if the attribute is defined
-         * @see AttributeSet#isDefined
-         */
-        @Override
-				public boolean isDefined(Object attrName) {
-            return attributes.isDefined(attrName);
-        }
+		/**
+		 * Checks whether a given attribute is defined.
+		 *
+		 * @param attrName the non-null attribute name
+		 * @return true if the attribute is defined
+		 * @see AttributeSet#isDefined
+		 */
+		@Override
+		public boolean isDefined(Object attrName) {
+			return attributes.isDefined(attrName);
+		}
 
-        /**
-         * Checks whether two attribute sets are equal.
-         *
-         * @param attr the attribute set to check against
-         * @return true if the same
-         * @see AttributeSet#isEqual
-         */
-        @Override
-				public boolean isEqual(AttributeSet attr) {
-            return attributes.isEqual(attr);
-        }
+		/**
+		 * Checks whether two attribute sets are equal.
+		 *
+		 * @param attr the attribute set to check against
+		 * @return true if the same
+		 * @see AttributeSet#isEqual
+		 */
+		@Override
+		public boolean isEqual(AttributeSet attr) {
+			return attributes.isEqual(attr);
+		}
 
-        /**
-         * Copies a set of attributes.
-         *
-         * @return the copy
-         * @see AttributeSet#copyAttributes
-         */
-        @Override
-				public AttributeSet copyAttributes() {
-            return attributes.copyAttributes();
-        }
+		/**
+		 * Copies a set of attributes.
+		 *
+		 * @return the copy
+		 * @see AttributeSet#copyAttributes
+		 */
+		@Override
+		public AttributeSet copyAttributes() {
+			return attributes.copyAttributes();
+		}
 
-        /**
-         * Gets the value of an attribute.
-         *
-         * @param attrName the non-null attribute name
-         * @return the attribute value
-         * @see AttributeSet#getAttribute
-         */
-        @Override
-				public Object getAttribute(Object attrName) {
-            Object value = attributes.getAttribute(attrName);
-            if (value == null) {
-                // The delegate nor it's resolvers had a match,
-                // so we'll try to resolve through the parent
-                // element.
-                AttributeSet a = (parent != null) ? parent.getAttributes() : null;
-                if (a != null) {
-                    value = a.getAttribute(attrName);
-                }
-            }
-            return value;
-        }
+		/**
+		 * Gets the value of an attribute.
+		 *
+		 * @param attrName the non-null attribute name
+		 * @return the attribute value
+		 * @see AttributeSet#getAttribute
+		 */
+		@Override
+		public Object getAttribute(Object attrName) {
+			Object value = attributes.getAttribute(attrName);
+			if (value == null) {
+				// The delegate nor it's resolvers had a match,
+				// so we'll try to resolve through the parent
+				// element.
+				AttributeSet a = (parent != null) ? parent.getAttributes() : null;
+				if (a != null) {
+					value = a.getAttribute(attrName);
+				}
+			}
+			return value;
+		}
 
-        /**
-         * Gets the names of all attributes.
-         *
-         * @return the attribute names as an enumeration
-         * @see AttributeSet#getAttributeNames
-         */
-        @Override
-				public Enumeration<?> getAttributeNames() {
-            return attributes.getAttributeNames();
-        }
+		/**
+		 * Gets the names of all attributes.
+		 *
+		 * @return the attribute names as an enumeration
+		 * @see AttributeSet#getAttributeNames
+		 */
+		@Override
+		public Enumeration<?> getAttributeNames() {
+			return attributes.getAttributeNames();
+		}
 
-        /**
-         * Checks whether a given attribute name/value is defined.
-         *
-         * @param name the non-null attribute name
-         * @param value the attribute value
-         * @return true if the name/value is defined
-         * @see AttributeSet#containsAttribute
-         */
-        @Override
-				public boolean containsAttribute(Object name, Object value) {
-            return attributes.containsAttribute(name, value);
-        }
+		/**
+		 * Checks whether a given attribute name/value is defined.
+		 *
+		 * @param name  the non-null attribute name
+		 * @param value the attribute value
+		 * @return true if the name/value is defined
+		 * @see AttributeSet#containsAttribute
+		 */
+		@Override
+		public boolean containsAttribute(Object name, Object value) {
+			return attributes.containsAttribute(name, value);
+		}
 
+		/**
+		 * Checks whether the element contains all the attributes.
+		 *
+		 * @param attrs the attributes to check
+		 * @return true if the element contains all the attributes
+		 * @see AttributeSet#containsAttributes
+		 */
+		@Override
+		public boolean containsAttributes(AttributeSet attrs) {
+			return attributes.containsAttributes(attrs);
+		}
 
-        /**
-         * Checks whether the element contains all the attributes.
-         *
-         * @param attrs the attributes to check
-         * @return true if the element contains all the attributes
-         * @see AttributeSet#containsAttributes
-         */
-        @Override
-				public boolean containsAttributes(AttributeSet attrs) {
-            return attributes.containsAttributes(attrs);
-        }
+		/**
+		 * Gets the resolving parent. If not overridden, the resolving parent defaults
+		 * to the parent element.
+		 *
+		 * @return the attributes from the parent, <code>null</code> if none
+		 * @see AttributeSet#getResolveParent
+		 */
+		@Override
+		public AttributeSet getResolveParent() {
+			AttributeSet a = attributes.getResolveParent();
+			if ((a == null) && (parent != null)) {
+				a = parent.getAttributes();
+			}
+			return a;
+		}
 
-        /**
-         * Gets the resolving parent.
-         * If not overridden, the resolving parent defaults to
-         * the parent element.
-         *
-         * @return the attributes from the parent, <code>null</code> if none
-         * @see AttributeSet#getResolveParent
-         */
-        @Override
-				public AttributeSet getResolveParent() {
-            AttributeSet a = attributes.getResolveParent();
-            if ((a == null) && (parent != null)) {
-                a = parent.getAttributes();
-            }
-            return a;
-        }
+		// --- MutableAttributeSet ----------------------------------
+		// should fetch a new immutable record for the field
+		// "attributes".
 
-        // --- MutableAttributeSet ----------------------------------
-        // should fetch a new immutable record for the field
-        // "attributes".
+		/**
+		 * Adds an attribute to the element.
+		 *
+		 * @param name  the non-null attribute name
+		 * @param value the attribute value
+		 * @see MutableAttributeSet#addAttribute
+		 */
+		@Override
+		public void addAttribute(Object name, Object value) {
+			checkForIllegalCast();
+			AttributeContext context = getAttributeContext();
+			attributes = context.addAttribute(attributes, name, value);
+		}
 
-        /**
-         * Adds an attribute to the element.
-         *
-         * @param name the non-null attribute name
-         * @param value the attribute value
-         * @see MutableAttributeSet#addAttribute
-         */
-        @Override
-				public void addAttribute(Object name, Object value) {
-            checkForIllegalCast();
-            AttributeContext context = getAttributeContext();
-            attributes = context.addAttribute(attributes, name, value);
-        }
+		/**
+		 * Adds a set of attributes to the element.
+		 *
+		 * @param attr the attributes to add
+		 * @see MutableAttributeSet#addAttribute
+		 */
+		@Override
+		public void addAttributes(AttributeSet attr) {
+			checkForIllegalCast();
+			AttributeContext context = getAttributeContext();
+			attributes = context.addAttributes(attributes, attr);
+		}
 
-        /**
-         * Adds a set of attributes to the element.
-         *
-         * @param attr the attributes to add
-         * @see MutableAttributeSet#addAttribute
-         */
-        @Override
-				public void addAttributes(AttributeSet attr) {
-            checkForIllegalCast();
-            AttributeContext context = getAttributeContext();
-            attributes = context.addAttributes(attributes, attr);
-        }
+		/**
+		 * Removes an attribute from the set.
+		 *
+		 * @param name the non-null attribute name
+		 * @see MutableAttributeSet#removeAttribute
+		 */
+		@Override
+		public void removeAttribute(Object name) {
+			checkForIllegalCast();
+			AttributeContext context = getAttributeContext();
+			attributes = context.removeAttribute(attributes, name);
+		}
 
-        /**
-         * Removes an attribute from the set.
-         *
-         * @param name the non-null attribute name
-         * @see MutableAttributeSet#removeAttribute
-         */
-        @Override
-				public void removeAttribute(Object name) {
-            checkForIllegalCast();
-            AttributeContext context = getAttributeContext();
-            attributes = context.removeAttribute(attributes, name);
-        }
+		/**
+		 * Removes a set of attributes for the element.
+		 *
+		 * @param names the attribute names
+		 * @see MutableAttributeSet#removeAttributes
+		 */
+		@Override
+		public void removeAttributes(Enumeration<?> names) {
+			checkForIllegalCast();
+			AttributeContext context = getAttributeContext();
+			attributes = context.removeAttributes(attributes, names);
+		}
 
-        /**
-         * Removes a set of attributes for the element.
-         *
-         * @param names the attribute names
-         * @see MutableAttributeSet#removeAttributes
-         */
-        @Override
-				public void removeAttributes(Enumeration<?> names) {
-            checkForIllegalCast();
-            AttributeContext context = getAttributeContext();
-            attributes = context.removeAttributes(attributes, names);
-        }
+		/**
+		 * Removes a set of attributes for the element.
+		 *
+		 * @param attrs the attributes
+		 * @see MutableAttributeSet#removeAttributes
+		 */
+		@Override
+		public void removeAttributes(AttributeSet attrs) {
+			checkForIllegalCast();
+			AttributeContext context = getAttributeContext();
+			if (attrs == this) {
+				attributes = context.getEmptySet();
+			} else {
+				attributes = context.removeAttributes(attributes, attrs);
+			}
+		}
 
-        /**
-         * Removes a set of attributes for the element.
-         *
-         * @param attrs the attributes
-         * @see MutableAttributeSet#removeAttributes
-         */
-        @Override
-				public void removeAttributes(AttributeSet attrs) {
-            checkForIllegalCast();
-            AttributeContext context = getAttributeContext();
-            if (attrs == this) {
-                attributes = context.getEmptySet();
-            } else {
-                attributes = context.removeAttributes(attributes, attrs);
-            }
-        }
+		/**
+		 * Sets the resolving parent.
+		 *
+		 * @param parent the parent, null if none
+		 * @see MutableAttributeSet#setResolveParent
+		 */
+		@Override
+		public void setResolveParent(AttributeSet parent) {
+			checkForIllegalCast();
+			AttributeContext context = getAttributeContext();
+			if (parent != null) {
+				attributes = context.addAttribute(attributes, StyleConstants.ResolveAttribute, parent);
+			} else {
+				attributes = context.removeAttribute(attributes, StyleConstants.ResolveAttribute);
+			}
+		}
 
-        /**
-         * Sets the resolving parent.
-         *
-         * @param parent the parent, null if none
-         * @see MutableAttributeSet#setResolveParent
-         */
-        @Override
-				public void setResolveParent(AttributeSet parent) {
-            checkForIllegalCast();
-            AttributeContext context = getAttributeContext();
-            if (parent != null) {
-                attributes =
-                    context.addAttribute(attributes, StyleConstants.ResolveAttribute,
-                                         parent);
-            } else {
-                attributes =
-                    context.removeAttribute(attributes, StyleConstants.ResolveAttribute);
-            }
-        }
-
-        private final void checkForIllegalCast() {
+		private final void checkForIllegalCast() {
 //            Thread t = getCurrentWriter();
 //            if ((t == null) || (t != Thread.currentThread())) {
 //                throw new StateInvariantError("Illegal cast to MutableAttributeSet");
 //            }
-        }
+		}
 
-        // --- Element methods -------------------------------------
+		// --- Element methods -------------------------------------
 
-        /**
-         * Retrieves the underlying model.
-         *
-         * @return the model
-         */
-        @Override
-				public Document getDocument() {
-            return AbstractDocument.this;
-        }
+		/**
+		 * Retrieves the underlying model.
+		 *
+		 * @return the model
+		 */
+		@Override
+		public Document getDocument() {
+			return AbstractDocument.this;
+		}
 
-        /**
-         * Gets the parent of the element.
-         *
-         * @return the parent
-         */
-        @Override
-				public Element getParentElement() {
-            return parent;
-        }
+		/**
+		 * Gets the parent of the element.
+		 *
+		 * @return the parent
+		 */
+		@Override
+		public Element getParentElement() {
+			return parent;
+		}
 
-        /**
-         * Gets the attributes for the element.
-         *
-         * @return the attribute set
-         */
-        @Override
-				public AttributeSet getAttributes() {
-            return this;
-        }
+		/**
+		 * Gets the attributes for the element.
+		 *
+		 * @return the attribute set
+		 */
+		@Override
+		public AttributeSet getAttributes() {
+			return this;
+		}
 
-        /**
-         * Gets the name of the element.
-         *
-         * @return the name, null if none
-         */
-        @Override
-				public String getName() {
-            if (attributes.isDefined(ElementNameAttribute)) {
-                return (String) attributes.getAttribute(ElementNameAttribute);
-            }
-            return null;
-        }
+		/**
+		 * Gets the name of the element.
+		 *
+		 * @return the name, null if none
+		 */
+		@Override
+		public String getName() {
+			if (attributes.isDefined(ElementNameAttribute)) {
+				return (String) attributes.getAttribute(ElementNameAttribute);
+			}
+			return null;
+		}
 
-        /**
-         * Gets the starting offset in the model for the element.
-         *
-         * @return the offset >= 0
-         */
-        @Override
-				public abstract int getStartOffset();
+		/**
+		 * Gets the starting offset in the model for the element.
+		 *
+		 * @return the offset >= 0
+		 */
+		@Override
+		public abstract int getStartOffset();
 
-        /**
-         * Gets the ending offset in the model for the element.
-         *
-         * @return the offset >= 0
-         */
-        @Override
-				public abstract int getEndOffset();
+		/**
+		 * Gets the ending offset in the model for the element.
+		 *
+		 * @return the offset >= 0
+		 */
+		@Override
+		public abstract int getEndOffset();
 
-        /**
-         * Gets a child element.
-         *
-         * @param index the child index, >= 0 && < getElementCount()
-         * @return the child element
-         */
-        @Override
-				public abstract Element getElement(int index);
+		/**
+		 * Gets a child element.
+		 *
+		 * @param index the child index, >= 0 && < getElementCount()
+		 * @return the child element
+		 */
+		@Override
+		public abstract Element getElement(int index);
 
-        /**
-         * Gets the number of children for the element.
-         *
-         * @return the number of children >= 0
-         */
-        @Override
-				public abstract int getElementCount();
+		/**
+		 * Gets the number of children for the element.
+		 *
+		 * @return the number of children >= 0
+		 */
+		@Override
+		public abstract int getElementCount();
 
-        /**
-         * Gets the child element index closest to the given model offset.
-         *
-         * @param offset the offset >= 0
-         * @return the element index >= 0
-         */
-        @Override
-				public abstract int getElementIndex(int offset);
+		/**
+		 * Gets the child element index closest to the given model offset.
+		 *
+		 * @param offset the offset >= 0
+		 * @return the element index >= 0
+		 */
+		@Override
+		public abstract int getElementIndex(int offset);
 
-        /**
-         * Checks whether the element is a leaf.
-         *
-         * @return true if a leaf
-         */
-        @Override
-				public abstract boolean isLeaf();
+		/**
+		 * Checks whether the element is a leaf.
+		 *
+		 * @return true if a leaf
+		 */
+		@Override
+		public abstract boolean isLeaf();
 
-        // --- TreeNode methods -------------------------------------
+		// --- TreeNode methods -------------------------------------
 
-        /**
-         * Returns the child <code>TreeNode</code> at index
-         * <code>childIndex</code>.
-         */
-        @Override
-				public TreeNode getChildAt(int childIndex) {
-            return (TreeNode)getElement(childIndex);
-        }
+		/**
+		 * Returns the child <code>TreeNode</code> at index <code>childIndex</code>.
+		 */
+		@Override
+		public TreeNode getChildAt(int childIndex) {
+			return (TreeNode) getElement(childIndex);
+		}
 
-        /**
-         * Returns the number of children <code>TreeNode</code>'s
-         * receiver contains.
-         * @return the number of children <code>TreeNodews</code>'s
-         * receiver contains
-         */
-        @Override
-				public int getChildCount() {
-            return getElementCount();
-        }
+		/**
+		 * Returns the number of children <code>TreeNode</code>'s receiver contains.
+		 * 
+		 * @return the number of children <code>TreeNodews</code>'s receiver contains
+		 */
+		@Override
+		public int getChildCount() {
+			return getElementCount();
+		}
 
-        /**
-         * Returns the parent <code>TreeNode</code> of the receiver.
-         * @return the parent <code>TreeNode</code> of the receiver
-         */
-        @Override
-				public TreeNode getParent() {
-            return (TreeNode)getParentElement();
-        }
+		/**
+		 * Returns the parent <code>TreeNode</code> of the receiver.
+		 * 
+		 * @return the parent <code>TreeNode</code> of the receiver
+		 */
+		@Override
+		public TreeNode getParent() {
+			return (TreeNode) getParentElement();
+		}
 
-        /**
-         * Returns the index of <code>node</code> in the receivers children.
-         * If the receiver does not contain <code>node</code>, -1 will be
-         * returned.
-         * @param node the location of interest
-         * @return the index of <code>node</code> in the receiver's
-         * children, or -1 if absent
-         */
-        @Override
-				public int getIndex(TreeNode node) {
-            for(int counter = getChildCount() - 1; counter >= 0; counter--)
-                if(getChildAt(counter) == node)
-                    return counter;
-            return -1;
-        }
+		/**
+		 * Returns the index of <code>node</code> in the receivers children. If the
+		 * receiver does not contain <code>node</code>, -1 will be returned.
+		 * 
+		 * @param node the location of interest
+		 * @return the index of <code>node</code> in the receiver's children, or -1 if
+		 *         absent
+		 */
+		@Override
+		public int getIndex(TreeNode node) {
+			for (int counter = getChildCount() - 1; counter >= 0; counter--)
+				if (getChildAt(counter) == node)
+					return counter;
+			return -1;
+		}
 
-        /**
-         * Returns true if the receiver allows children.
-         * @return true if the receiver allows children, otherwise false
-         */
-        @Override
-				public abstract boolean getAllowsChildren();
+		/**
+		 * Returns true if the receiver allows children.
+		 * 
+		 * @return true if the receiver allows children, otherwise false
+		 */
+		@Override
+		public abstract boolean getAllowsChildren();
 
-
-        /**
-         * Returns the children of the receiver as an
-         * <code>Enumeration</code>.
-         * @return the children of the receiver as an <code>Enumeration</code>
-         */
-        @Override
-				public abstract Enumeration children();
+		/**
+		 * Returns the children of the receiver as an <code>Enumeration</code>.
+		 * 
+		 * @return the children of the receiver as an <code>Enumeration</code>
+		 */
+		@Override
+		public abstract Enumeration children();
 
 //
 //        // --- serialization ---------------------------------------------
@@ -2275,426 +2209,417 @@ public abstract class AbstractDocument implements Document {
 //            attributes = context.addAttributes(SimpleAttributeSet.EMPTY, attr);
 //        }
 
-        // ---- variables -----------------------------------------------------
+		// ---- variables -----------------------------------------------------
 
-        private Element parent;
-        private transient AttributeSet attributes;
+		private Element parent;
+		private transient AttributeSet attributes;
 
-    }
+	}
 
-    /**
-     * Implements a composite element that contains other elements.
-     * <p>
-     * <strong>Warning:</strong>
-     * Serialized objects of this class will not be compatible with
-     * future Swing releases. The current serialization support is
-     * appropriate for short term storage or RMI between applications running
-     * the same version of Swing.  As of 1.4, support for long term storage
-     * of all JavaBeans<sup><font size="-2">TM</font></sup>
-     * has been added to the <code>java.beans</code> package.
-     * Please see {@link java.beans.XMLEncoder}.
-     */
-    public class BranchElement extends AbstractElement {
+	/**
+	 * Implements a composite element that contains other elements.
+	 * <p>
+	 * <strong>Warning:</strong> Serialized objects of this class will not be
+	 * compatible with future Swing releases. The current serialization support is
+	 * appropriate for short term storage or RMI between applications running the
+	 * same version of Swing. As of 1.4, support for long term storage of all
+	 * JavaBeans<sup><font size="-2">TM</font></sup> has been added to the
+	 * <code>java.beans</code> package. Please see {@link java.beans.XMLEncoder}.
+	 */
+	public class BranchElement extends AbstractElement {
 
-        /**
-         * Constructs a composite element that initially contains
-         * no children.
-         *
-         * @param parent  The parent element
-         * @param a the attributes for the element
-         * @since 1.4
-         */
-        public BranchElement(Element parent, AttributeSet a) {
-            super(parent, a);
-            children = new AbstractElement[1];
-            nchildren = 0;
-            lastIndex = -1;
-        }
+		/**
+		 * Constructs a composite element that initially contains no children.
+		 *
+		 * @param parent The parent element
+		 * @param a      the attributes for the element
+		 * @since 1.4
+		 */
+		public BranchElement(Element parent, AttributeSet a) {
+			super(parent, a);
+			children = new AbstractElement[1];
+			nchildren = 0;
+			lastIndex = -1;
+		}
 
-        /**
-         * Gets the child element that contains
-         * the given model position.
-         *
-         * @param pos the position >= 0
-         * @return the element, null if none
-         */
-        public Element positionToElement(int pos) {
-            int index = getElementIndex(pos);
-            Element child = children[index];
-            int p0 = child.getStartOffset();
-            int p1 = child.getEndOffset();
-            if ((pos >= p0) && (pos < p1)) {
-                return child;
-            }
-            return null;
-        }
+		/**
+		 * Gets the child element that contains the given model position.
+		 *
+		 * @param pos the position >= 0
+		 * @return the element, null if none
+		 */
+		public Element positionToElement(int pos) {
+			int index = getElementIndex(pos);
+			Element child = children[index];
+			int p0 = child.getStartOffset();
+			int p1 = child.getEndOffset();
+			if ((pos >= p0) && (pos < p1)) {
+				return child;
+			}
+			return null;
+		}
 
-        /**
-         * Replaces content with a new set of elements.
-         *
-         * @param offset the starting offset >= 0
-         * @param length the length to replace >= 0
-         * @param elems the new elements
-         */
-        public void replace(int offset, int length, Element[] elems) {
-            int delta = elems.length - length;
-            int src = offset + length;
-            int nmove = nchildren - src;
-            int dest = src + delta;
-            if ((nchildren + delta) >= children.length) {
-                // need to grow the array
-                int newLength = Math.max(2*children.length, nchildren + delta);
-                AbstractElement[] newChildren = new AbstractElement[newLength];
-                System.arraycopy(children, 0, newChildren, 0, offset);
-                System.arraycopy(elems, 0, newChildren, offset, elems.length);
-                System.arraycopy(children, src, newChildren, dest, nmove);
-                children = newChildren;
-            } else {
-                // patch the existing array
-                System.arraycopy(children, src, children, dest, nmove);
-                System.arraycopy(elems, 0, children, offset, elems.length);
-            }
-            nchildren = nchildren + delta;
-        }
+		/**
+		 * Replaces content with a new set of elements.
+		 *
+		 * @param offset the starting offset >= 0
+		 * @param length the length to replace >= 0
+		 * @param elems  the new elements
+		 */
+		public void replace(int offset, int length, Element[] elems) {
+			int delta = elems.length - length;
+			int src = offset + length;
+			int nmove = nchildren - src;
+			int dest = src + delta;
+			if ((nchildren + delta) >= children.length) {
+				// need to grow the array
+				int newLength = Math.max(2 * children.length, nchildren + delta);
+				AbstractElement[] newChildren = new AbstractElement[newLength];
+				System.arraycopy(children, 0, newChildren, 0, offset);
+				System.arraycopy(elems, 0, newChildren, offset, elems.length);
+				System.arraycopy(children, src, newChildren, dest, nmove);
+				children = newChildren;
+			} else {
+				// patch the existing array
+				System.arraycopy(children, src, children, dest, nmove);
+				System.arraycopy(elems, 0, children, offset, elems.length);
+			}
+			nchildren = nchildren + delta;
+		}
 
-        /**
-         * Converts the element to a string.
-         *
-         * @return the string
-         */
-        @Override
-				public String toString() {
-            return "BranchElement(" + getName() + ") " + getStartOffset() + "," +
-                getEndOffset() + "\n";
-        }
+		/**
+		 * Converts the element to a string.
+		 *
+		 * @return the string
+		 */
+		@Override
+		public String toString() {
+			return "BranchElement(" + getName() + ") " + getStartOffset() + "," + getEndOffset() + "\n";
+		}
 
-        // --- Element methods -----------------------------------
+		// --- Element methods -----------------------------------
 
-        /**
-         * Gets the element name.
-         *
-         * @return the element name
-         */
-        @Override
-				public String getName() {
-            String nm = super.getName();
-            if (nm == null) {
-                nm = ParagraphElementName;
-            }
-            return nm;
-        }
+		/**
+		 * Gets the element name.
+		 *
+		 * @return the element name
+		 */
+		@Override
+		public String getName() {
+			String nm = super.getName();
+			if (nm == null) {
+				nm = ParagraphElementName;
+			}
+			return nm;
+		}
 
-        /**
-         * Gets the starting offset in the model for the element.
-         *
-         * @return the offset >= 0
-         */
-        @Override
-				public int getStartOffset() {
-            return children[0].getStartOffset();
-        }
+		/**
+		 * Gets the starting offset in the model for the element.
+		 *
+		 * @return the offset >= 0
+		 */
+		@Override
+		public int getStartOffset() {
+			return children[0].getStartOffset();
+		}
 
-        /**
-         * Gets the ending offset in the model for the element.
-         * @throws NullPointerException if this element has no children
-         *
-         * @return the offset >= 0
-         */
-        @Override
-				public int getEndOffset() {
-            Element child =
-                (nchildren > 0) ? children[nchildren - 1] : children[0];
-            return child.getEndOffset();
-        }
+		/**
+		 * Gets the ending offset in the model for the element.
+		 * 
+		 * @throws NullPointerException if this element has no children
+		 *
+		 * @return the offset >= 0
+		 */
+		@Override
+		public int getEndOffset() {
+			Element child = (nchildren > 0) ? children[nchildren - 1] : children[0];
+			return child.getEndOffset();
+		}
 
-        /**
-         * Gets a child element.
-         *
-         * @param index the child index, >= 0 && < getElementCount()
-         * @return the child element, null if none
-         */
-        @Override
-				public Element getElement(int index) {
-            if (index < nchildren) {
-                return children[index];
-            }
-            return null;
-        }
+		/**
+		 * Gets a child element.
+		 *
+		 * @param index the child index, >= 0 && < getElementCount()
+		 * @return the child element, null if none
+		 */
+		@Override
+		public Element getElement(int index) {
+			if (index < nchildren) {
+				return children[index];
+			}
+			return null;
+		}
 
-        /**
-         * Gets the number of children for the element.
-         *
-         * @return the number of children >= 0
-         */
-        @Override
-				public int getElementCount()  {
-            return nchildren;
-        }
+		/**
+		 * Gets the number of children for the element.
+		 *
+		 * @return the number of children >= 0
+		 */
+		@Override
+		public int getElementCount() {
+			return nchildren;
+		}
 
-        /**
-         * Gets the child element index closest to the given model offset.
-         *
-         * @param offset the offset >= 0
-         * @return the element index >= 0
-         */
-        @Override
-				public int getElementIndex(int offset) {
-            int index;
-            int lower = 0;
-            int upper = nchildren - 1;
-            int mid = 0;
-            int p0 = getStartOffset();
-            int p1;
+		/**
+		 * Gets the child element index closest to the given model offset.
+		 *
+		 * @param offset the offset >= 0
+		 * @return the element index >= 0
+		 */
+		@Override
+		public int getElementIndex(int offset) {
+			int index;
+			int lower = 0;
+			int upper = nchildren - 1;
+			int mid = 0;
+			int p0 = getStartOffset();
+			int p1;
 
-            if (nchildren == 0) {
-                return 0;
-            }
-            if (offset >= getEndOffset()) {
-                return nchildren - 1;
-            }
+			if (nchildren == 0) {
+				return 0;
+			}
+			if (offset >= getEndOffset()) {
+				return nchildren - 1;
+			}
 
-            // see if the last index can be used.
-            if ((lastIndex >= lower) && (lastIndex <= upper)) {
-                Element lastHit = children[lastIndex];
-                p0 = lastHit.getStartOffset();
-                p1 = lastHit.getEndOffset();
-                if ((offset >= p0) && (offset < p1)) {
-                    return lastIndex;
-                }
+			// see if the last index can be used.
+			if ((lastIndex >= lower) && (lastIndex <= upper)) {
+				Element lastHit = children[lastIndex];
+				p0 = lastHit.getStartOffset();
+				p1 = lastHit.getEndOffset();
+				if ((offset >= p0) && (offset < p1)) {
+					return lastIndex;
+				}
 
-                // last index wasn't a hit, but it does give useful info about
-                // where a hit (if any) would be.
-                if (offset < p0) {
-                    upper = lastIndex;
-                } else  {
-                    lower = lastIndex;
-                }
-            }
+				// last index wasn't a hit, but it does give useful info about
+				// where a hit (if any) would be.
+				if (offset < p0) {
+					upper = lastIndex;
+				} else {
+					lower = lastIndex;
+				}
+			}
 
-            while (lower <= upper) {
-                mid = lower + ((upper - lower) / 2);
-                Element elem = children[mid];
-                p0 = elem.getStartOffset();
-                p1 = elem.getEndOffset();
-                if ((offset >= p0) && (offset < p1)) {
-                    // found the location
-                    index = mid;
-                    lastIndex = index;
-                    return index;
-                } else if (offset < p0) {
-                    upper = mid - 1;
-                } else {
-                    lower = mid + 1;
-                }
-            }
+			while (lower <= upper) {
+				mid = lower + ((upper - lower) / 2);
+				Element elem = children[mid];
+				p0 = elem.getStartOffset();
+				p1 = elem.getEndOffset();
+				if ((offset >= p0) && (offset < p1)) {
+					// found the location
+					index = mid;
+					lastIndex = index;
+					return index;
+				} else if (offset < p0) {
+					upper = mid - 1;
+				} else {
+					lower = mid + 1;
+				}
+			}
 
-            // didn't find it, but we indicate the index of where it would belong
-            if (offset < p0) {
-                index = mid;
-            } else {
-                index = mid + 1;
-            }
-            lastIndex = index;
-            return index;
-        }
+			// didn't find it, but we indicate the index of where it would belong
+			if (offset < p0) {
+				index = mid;
+			} else {
+				index = mid + 1;
+			}
+			lastIndex = index;
+			return index;
+		}
 
-        /**
-         * Checks whether the element is a leaf.
-         *
-         * @return true if a leaf
-         */
-        @Override
-				public boolean isLeaf() {
-            return false;
-        }
+		/**
+		 * Checks whether the element is a leaf.
+		 *
+		 * @return true if a leaf
+		 */
+		@Override
+		public boolean isLeaf() {
+			return false;
+		}
 
+		// ------ TreeNode ----------------------------------------------
 
-        // ------ TreeNode ----------------------------------------------
+		/**
+		 * Returns true if the receiver allows children.
+		 * 
+		 * @return true if the receiver allows children, otherwise false
+		 */
+		@Override
+		public boolean getAllowsChildren() {
+			return true;
+		}
 
-        /**
-         * Returns true if the receiver allows children.
-         * @return true if the receiver allows children, otherwise false
-         */
-        @Override
-				public boolean getAllowsChildren() {
-            return true;
-        }
+		/**
+		 * Returns the children of the receiver as an <code>Enumeration</code>.
+		 * 
+		 * @return the children of the receiver
+		 */
+		@Override
+		public Enumeration children() {
+			if (nchildren == 0)
+				return null;
 
+			Vector tempVector = new Vector(nchildren);
 
-        /**
-         * Returns the children of the receiver as an
-         * <code>Enumeration</code>.
-         * @return the children of the receiver
-         */
-        @Override
-				public Enumeration children() {
-            if(nchildren == 0)
-                return null;
+			for (int counter = 0; counter < nchildren; counter++)
+				tempVector.addElement(children[counter]);
+			return tempVector.elements();
+		}
 
-            Vector tempVector = new Vector(nchildren);
+		// ------ members ----------------------------------------------
 
-            for(int counter = 0; counter < nchildren; counter++)
-                tempVector.addElement(children[counter]);
-            return tempVector.elements();
-        }
+		private AbstractElement[] children;
+		private int nchildren;
+		private int lastIndex;
+	}
 
-        // ------ members ----------------------------------------------
+	/**
+	 * Implements an element that directly represents content of some kind.
+	 * <p>
+	 * <strong>Warning:</strong> Serialized objects of this class will not be
+	 * compatible with future Swing releases. The current serialization support is
+	 * appropriate for short term storage or RMI between applications running the
+	 * same version of Swing. As of 1.4, support for long term storage of all
+	 * JavaBeans<sup><font size="-2">TM</font></sup> has been added to the
+	 * <code>java.beans</code> package. Please see {@link java.beans.XMLEncoder}.
+	 *
+	 * @see Element
+	 */
+	public class LeafElement extends AbstractElement {
 
-        private AbstractElement[] children;
-        private int nchildren;
-        private int lastIndex;
-    }
+		/**
+		 * Constructs an element that represents content within the document (has no
+		 * children).
+		 *
+		 * @param parent The parent element
+		 * @param a      The element attributes
+		 * @param offs0  The start offset >= 0
+		 * @param offs1  The end offset >= offs0
+		 * @since 1.4
+		 */
+		public LeafElement(Element parent, AttributeSet a, int offs0, int offs1) {
+			super(parent, a);
+			try {
+				p0 = createPosition(offs0);
+				p1 = createPosition(offs1);
+			} catch (BadLocationException e) {
+				p0 = null;
+				p1 = null;
+				throw new StateInvariantError("Can't create Position references");
+			}
+		}
 
-    /**
-     * Implements an element that directly represents content of
-     * some kind.
-     * <p>
-     * <strong>Warning:</strong>
-     * Serialized objects of this class will not be compatible with
-     * future Swing releases. The current serialization support is
-     * appropriate for short term storage or RMI between applications running
-     * the same version of Swing.  As of 1.4, support for long term storage
-     * of all JavaBeans<sup><font size="-2">TM</font></sup>
-     * has been added to the <code>java.beans</code> package.
-     * Please see {@link java.beans.XMLEncoder}.
-     *
-     * @see     Element
-     */
-    public class LeafElement extends AbstractElement {
+		/**
+		 * Converts the element to a string.
+		 *
+		 * @return the string
+		 */
+		@Override
+		public String toString() {
+			return "LeafElement(" + getName() + ") " + p0 + "," + p1 + "\n";
+		}
 
-        /**
-         * Constructs an element that represents content within the
-         * document (has no children).
-         *
-         * @param parent  The parent element
-         * @param a       The element attributes
-         * @param offs0   The start offset >= 0
-         * @param offs1   The end offset >= offs0
-         * @since 1.4
-         */
-        public LeafElement(Element parent, AttributeSet a, int offs0, int offs1) {
-            super(parent, a);
-            try {
-                p0 = createPosition(offs0);
-                p1 = createPosition(offs1);
-            } catch (BadLocationException e) {
-                p0 = null;
-                p1 = null;
-                throw new StateInvariantError("Can't create Position references");
-            }
-        }
+		// --- Element methods ---------------------------------------------
 
-        /**
-         * Converts the element to a string.
-         *
-         * @return the string
-         */
-        @Override
-				public String toString() {
-            return "LeafElement(" + getName() + ") " + p0 + "," + p1 + "\n";
-        }
+		/**
+		 * Gets the starting offset in the model for the element.
+		 *
+		 * @return the offset >= 0
+		 */
+		@Override
+		public int getStartOffset() {
+			return p0.getOffset();
+		}
 
-        // --- Element methods ---------------------------------------------
+		/**
+		 * Gets the ending offset in the model for the element.
+		 *
+		 * @return the offset >= 0
+		 */
+		@Override
+		public int getEndOffset() {
+			return p1.getOffset();
+		}
 
-        /**
-         * Gets the starting offset in the model for the element.
-         *
-         * @return the offset >= 0
-         */
-        @Override
-				public int getStartOffset() {
-            return p0.getOffset();
-        }
+		/**
+		 * Gets the element name.
+		 *
+		 * @return the name
+		 */
+		@Override
+		public String getName() {
+			String nm = super.getName();
+			if (nm == null) {
+				nm = ContentElementName;
+			}
+			return nm;
+		}
 
-        /**
-         * Gets the ending offset in the model for the element.
-         *
-         * @return the offset >= 0
-         */
-        @Override
-				public int getEndOffset() {
-            return p1.getOffset();
-        }
+		/**
+		 * Gets the child element index closest to the given model offset.
+		 *
+		 * @param pos the offset >= 0
+		 * @return the element index >= 0
+		 */
+		@Override
+		public int getElementIndex(int pos) {
+			return -1;
+		}
 
-        /**
-         * Gets the element name.
-         *
-         * @return the name
-         */
-        @Override
-				public String getName() {
-            String nm = super.getName();
-            if (nm == null) {
-                nm = ContentElementName;
-            }
-            return nm;
-        }
+		/**
+		 * Gets a child element.
+		 *
+		 * @param index the child index, >= 0 && < getElementCount()
+		 * @return the child element
+		 */
+		@Override
+		public Element getElement(int index) {
+			return null;
+		}
 
-        /**
-         * Gets the child element index closest to the given model offset.
-         *
-         * @param pos the offset >= 0
-         * @return the element index >= 0
-         */
-        @Override
-				public int getElementIndex(int pos) {
-            return -1;
-        }
+		/**
+		 * Returns the number of child elements.
+		 *
+		 * @return the number of children >= 0
+		 */
+		@Override
+		public int getElementCount() {
+			return 0;
+		}
 
-        /**
-         * Gets a child element.
-         *
-         * @param index the child index, >= 0 && < getElementCount()
-         * @return the child element
-         */
-        @Override
-				public Element getElement(int index) {
-            return null;
-        }
+		/**
+		 * Checks whether the element is a leaf.
+		 *
+		 * @return true if a leaf
+		 */
+		@Override
+		public boolean isLeaf() {
+			return true;
+		}
 
-        /**
-         * Returns the number of child elements.
-         *
-         * @return the number of children >= 0
-         */
-        @Override
-				public int getElementCount()  {
-            return 0;
-        }
+		// ------ TreeNode ----------------------------------------------
 
-        /**
-         * Checks whether the element is a leaf.
-         *
-         * @return true if a leaf
-         */
-        @Override
-				public boolean isLeaf() {
-            return true;
-        }
+		/**
+		 * Returns true if the receiver allows children.
+		 * 
+		 * @return true if the receiver allows children, otherwise false
+		 */
+		@Override
+		public boolean getAllowsChildren() {
+			return false;
+		}
 
-        // ------ TreeNode ----------------------------------------------
+		/**
+		 * Returns the children of the receiver as an <code>Enumeration</code>.
+		 * 
+		 * @return the children of the receiver
+		 */
+		@Override
+		public Enumeration children() {
+			return null;
+		}
 
-        /**
-         * Returns true if the receiver allows children.
-         * @return true if the receiver allows children, otherwise false
-         */
-        @Override
-				public boolean getAllowsChildren() {
-            return false;
-        }
-
-
-        /**
-         * Returns the children of the receiver as an
-         * <code>Enumeration</code>.
-         * @return the children of the receiver
-         */
-        @Override
-				public Enumeration children() {
-            return null;
-        }
-
-        // --- serialization ---------------------------------------------
+		// --- serialization ---------------------------------------------
 
 //        private void writeObject(ObjectOutputStream s) throws IOException {
 //            s.defaultWriteObject();
@@ -2720,11 +2645,11 @@ public abstract class AbstractDocument implements Document {
 //            }
 //        }
 //
-        // ---- members -----------------------------------------------------
+		// ---- members -----------------------------------------------------
 
-        private transient Position p0;
-        private transient Position p1;
-    }
+		private transient Position p0;
+		private transient Position p1;
+	}
 
 //    /**
 //     * Represents the root element of the bidirectional element structure.
@@ -2782,452 +2707,445 @@ public abstract class AbstractDocument implements Document {
 //        }
 //    }
 
-    /**
-     * Stores document changes as the document is being
-     * modified.  Can subsequently be used for change notification
-     * when done with the document modification transaction.
-     * This is used by the AbstractDocument class and its extensions
-     * for broadcasting change information to the document listeners.
-     */
-    public class DefaultDocumentEvent extends CompoundEdit implements DocumentEvent {
+	/**
+	 * Stores document changes as the document is being modified. Can subsequently
+	 * be used for change notification when done with the document modification
+	 * transaction. This is used by the AbstractDocument class and its extensions
+	 * for broadcasting change information to the document listeners.
+	 */
+	public class DefaultDocumentEvent extends CompoundEdit implements DocumentEvent {
 
-        /**
-         * Constructs a change record.
-         *
-         * @param offs the offset into the document of the change >= 0
-         * @param len  the length of the change >= 0
-         * @param type the type of event (DocumentEvent.EventType)
-         * @since 1.4
-         */
-        public DefaultDocumentEvent(int offs, int len, DocumentEvent.EventType type) {
-            super();
-            offset = offs;
-            length = len;
-            this.type = type;
-        }
+		/**
+		 * Constructs a change record.
+		 *
+		 * @param offs the offset into the document of the change >= 0
+		 * @param len  the length of the change >= 0
+		 * @param type the type of event (DocumentEvent.EventType)
+		 * @since 1.4
+		 */
+		public DefaultDocumentEvent(int offs, int len, DocumentEvent.EventType type) {
+			super();
+			offset = offs;
+			length = len;
+			this.type = type;
+		}
 
-        /**
-         * Returns a string description of the change event.
-         *
-         * @return a string
-         */
-        @Override
-				public String toString() {
-            return edits.toString();
-        }
+		/**
+		 * Returns a string description of the change event.
+		 *
+		 * @return a string
+		 */
+		@Override
+		public String toString() {
+			return edits.toString();
+		}
 
-        // --- CompoundEdit methods --------------------------
+		// --- CompoundEdit methods --------------------------
 
-        /**
-         * Adds a document edit.  If the number of edits crosses
-         * a threshold, this switches on a hashtable lookup for
-         * ElementChange implementations since access of these
-         * needs to be relatively quick.
-         *
-         * @param anEdit a document edit record
-         * @return true if the edit was added
-         */
-        @Override
-				public boolean addEdit(UndoableEdit anEdit) {
-            // if the number of changes gets too great, start using
-            // a hashtable for to locate the change for a given element.
-            if ((changeLookup == null) && (edits.size() > 10)) {
-                changeLookup = new Hashtable();
-                int n = edits.size();
-                for (int i = 0; i < n; i++) {
-                    Object o = edits.elementAt(i);
-                    if (o instanceof DocumentEvent.ElementChange) {
-                        DocumentEvent.ElementChange ec = (DocumentEvent.ElementChange) o;
-                        changeLookup.put(ec.getElement(), ec);
-                    }
-                }
-            }
+		/**
+		 * Adds a document edit. If the number of edits crosses a threshold, this
+		 * switches on a hashtable lookup for ElementChange implementations since access
+		 * of these needs to be relatively quick.
+		 *
+		 * @param anEdit a document edit record
+		 * @return true if the edit was added
+		 */
+		@Override
+		public boolean addEdit(UndoableEdit anEdit) {
+			// if the number of changes gets too great, start using
+			// a hashtable for to locate the change for a given element.
+			if ((changeLookup == null) && (edits.size() > 10)) {
+				changeLookup = new Hashtable();
+				int n = edits.size();
+				for (int i = 0; i < n; i++) {
+					Object o = edits.elementAt(i);
+					if (o instanceof DocumentEvent.ElementChange) {
+						DocumentEvent.ElementChange ec = (DocumentEvent.ElementChange) o;
+						changeLookup.put(ec.getElement(), ec);
+					}
+				}
+			}
 
-            // if we have a hashtable... add the entry if it's
-            // an ElementChange.
-            if ((changeLookup != null) && (anEdit instanceof DocumentEvent.ElementChange)) {
-                DocumentEvent.ElementChange ec = (DocumentEvent.ElementChange) anEdit;
-                changeLookup.put(ec.getElement(), ec);
-            }
-            return super.addEdit(anEdit);
-        }
+			// if we have a hashtable... add the entry if it's
+			// an ElementChange.
+			if ((changeLookup != null) && (anEdit instanceof DocumentEvent.ElementChange)) {
+				DocumentEvent.ElementChange ec = (DocumentEvent.ElementChange) anEdit;
+				changeLookup.put(ec.getElement(), ec);
+			}
+			return super.addEdit(anEdit);
+		}
 
-        /**
-         * Redoes a change.
-         *
-         * @exception CannotRedoException if the change cannot be redone
-         */
-        @Override
-				public void redo() throws CannotRedoException {
-            writeLock();
-            try {
-                // change the state
-                super.redo();
-                // fire a DocumentEvent to notify the view(s)
-                UndoRedoDocumentEvent ev = new UndoRedoDocumentEvent(this, false);
-                if (type == DocumentEvent.EventType.INSERT) {
-                    fireInsertUpdate(ev);
-                } else if (type == DocumentEvent.EventType.REMOVE) {
-                    fireRemoveUpdate(ev);
-                } else {
-                    fireChangedUpdate(ev);
-                }
-            } finally {
-                writeUnlock();
-            }
-        }
+		/**
+		 * Redoes a change.
+		 *
+		 * @exception CannotRedoException if the change cannot be redone
+		 */
+		@Override
+		public void redo() throws CannotRedoException {
+			writeLock();
+			try {
+				// change the state
+				super.redo();
+				// fire a DocumentEvent to notify the view(s)
+				UndoRedoDocumentEvent ev = new UndoRedoDocumentEvent(this, false);
+				if (type == DocumentEvent.EventType.INSERT) {
+					fireInsertUpdate(ev);
+				} else if (type == DocumentEvent.EventType.REMOVE) {
+					fireRemoveUpdate(ev);
+				} else {
+					fireChangedUpdate(ev);
+				}
+			} finally {
+				writeUnlock();
+			}
+		}
 
-        /**
-         * Undoes a change.
-         *
-         * @exception CannotUndoException if the change cannot be undone
-         */
-        @Override
-				public void undo() throws CannotUndoException {
-            writeLock();
-            try {
-                // change the state
-                super.undo();
-                // fire a DocumentEvent to notify the view(s)
-                UndoRedoDocumentEvent ev = new UndoRedoDocumentEvent(this, true);
-                if (type == DocumentEvent.EventType.REMOVE) {
-                    fireInsertUpdate(ev);
-                } else if (type == DocumentEvent.EventType.INSERT) {
-                    fireRemoveUpdate(ev);
-                } else {
-                    fireChangedUpdate(ev);
-                }
-            } finally {
-                writeUnlock();
-            }
-        }
+		/**
+		 * Undoes a change.
+		 *
+		 * @exception CannotUndoException if the change cannot be undone
+		 */
+		@Override
+		public void undo() throws CannotUndoException {
+			writeLock();
+			try {
+				// change the state
+				super.undo();
+				// fire a DocumentEvent to notify the view(s)
+				UndoRedoDocumentEvent ev = new UndoRedoDocumentEvent(this, true);
+				if (type == DocumentEvent.EventType.REMOVE) {
+					fireInsertUpdate(ev);
+				} else if (type == DocumentEvent.EventType.INSERT) {
+					fireRemoveUpdate(ev);
+				} else {
+					fireChangedUpdate(ev);
+				}
+			} finally {
+				writeUnlock();
+			}
+		}
 
-        /**
-         * DefaultDocument events are significant.  If you wish to aggregate
-         * DefaultDocumentEvents to present them as a single edit to the user
-         * place them into a CompoundEdit.
-         *
-         * @return whether the event is significant for edit undo purposes
-         */
-        @Override
-				public boolean isSignificant() {
-            return true;
-        }
+		/**
+		 * DefaultDocument events are significant. If you wish to aggregate
+		 * DefaultDocumentEvents to present them as a single edit to the user place them
+		 * into a CompoundEdit.
+		 *
+		 * @return whether the event is significant for edit undo purposes
+		 */
+		@Override
+		public boolean isSignificant() {
+			return true;
+		}
 
+		/**
+		 * Provides a localized, human readable description of this edit suitable for
+		 * use in, say, a change log.
+		 *
+		 * @return the description
+		 */
+		@Override
+		public String getPresentationName() {
+			DocumentEvent.EventType type = getType();
+			if (type == DocumentEvent.EventType.INSERT)
+				return UIManager.getString("AbstractDocument.additionText");
+			if (type == DocumentEvent.EventType.REMOVE)
+				return UIManager.getString("AbstractDocument.deletionText");
+			return UIManager.getString("AbstractDocument.styleChangeText");
+		}
 
-        /**
-         * Provides a localized, human readable description of this edit
-         * suitable for use in, say, a change log.
-         *
-         * @return the description
-         */
-        @Override
-				public String getPresentationName() {
-            DocumentEvent.EventType type = getType();
-            if(type == DocumentEvent.EventType.INSERT)
-                return UIManager.getString("AbstractDocument.additionText");
-            if(type == DocumentEvent.EventType.REMOVE)
-                return UIManager.getString("AbstractDocument.deletionText");
-            return UIManager.getString("AbstractDocument.styleChangeText");
-        }
+		/**
+		 * Provides a localized, human readable description of the undoable form of this
+		 * edit, e.g. for use as an Undo menu item. Typically derived from
+		 * getDescription();
+		 *
+		 * @return the description
+		 */
+		@Override
+		public String getUndoPresentationName() {
+			return UIManager.getString("AbstractDocument.undoText") + " " + getPresentationName();
+		}
 
-        /**
-         * Provides a localized, human readable description of the undoable
-         * form of this edit, e.g. for use as an Undo menu item. Typically
-         * derived from getDescription();
-         *
-         * @return the description
-         */
-        @Override
-				public String getUndoPresentationName() {
-            return UIManager.getString("AbstractDocument.undoText") + " " +
-                getPresentationName();
-        }
+		/**
+		 * Provides a localized, human readable description of the redoable form of this
+		 * edit, e.g. for use as a Redo menu item. Typically derived from
+		 * getPresentationName();
+		 *
+		 * @return the description
+		 */
+		@Override
+		public String getRedoPresentationName() {
+			return UIManager.getString("AbstractDocument.redoText") + " " + getPresentationName();
+		}
 
-        /**
-         * Provides a localized, human readable description of the redoable
-         * form of this edit, e.g. for use as a Redo menu item. Typically
-         * derived from getPresentationName();
-         *
-         * @return the description
-         */
-        @Override
-				public String getRedoPresentationName() {
-            return UIManager.getString("AbstractDocument.redoText") + " " +
-                getPresentationName();
-        }
+		// --- DocumentEvent methods --------------------------
 
-        // --- DocumentEvent methods --------------------------
+		/**
+		 * Returns the type of event.
+		 *
+		 * @return the event type as a DocumentEvent.EventType
+		 * @see DocumentEvent#getType
+		 */
+		@Override
+		public DocumentEvent.EventType getType() {
+			return type;
+		}
 
-        /**
-         * Returns the type of event.
-         *
-         * @return the event type as a DocumentEvent.EventType
-         * @see DocumentEvent#getType
-         */
-        @Override
-				public DocumentEvent.EventType getType() {
-            return type;
-        }
+		/**
+		 * Returns the offset within the document of the start of the change.
+		 *
+		 * @return the offset >= 0
+		 * @see DocumentEvent#getOffset
+		 */
+		@Override
+		public int getOffset() {
+			return offset;
+		}
 
-        /**
-         * Returns the offset within the document of the start of the change.
-         *
-         * @return the offset >= 0
-         * @see DocumentEvent#getOffset
-         */
-        @Override
-				public int getOffset() {
-            return offset;
-        }
+		/**
+		 * Returns the length of the change.
+		 *
+		 * @return the length >= 0
+		 * @see DocumentEvent#getLength
+		 */
+		@Override
+		public int getLength() {
+			return length;
+		}
 
-        /**
-         * Returns the length of the change.
-         *
-         * @return the length >= 0
-         * @see DocumentEvent#getLength
-         */
-        @Override
-				public int getLength() {
-            return length;
-        }
+		/**
+		 * Gets the document that sourced the change event.
+		 *
+		 * @return the document
+		 * @see DocumentEvent#getDocument
+		 */
+		@Override
+		public Document getDocument() {
+			return AbstractDocument.this;
+		}
 
-        /**
-         * Gets the document that sourced the change event.
-         *
-         * @return the document
-         * @see DocumentEvent#getDocument
-         */
-        @Override
-				public Document getDocument() {
-            return AbstractDocument.this;
-        }
+		/**
+		 * Gets the changes for an element.
+		 *
+		 * @param elem the element
+		 * @return the changes
+		 */
+		@Override
+		public DocumentEvent.ElementChange getChange(Element elem) {
+			if (changeLookup != null) {
+				return (DocumentEvent.ElementChange) changeLookup.get(elem);
+			}
+			int n = edits.size();
+			for (int i = 0; i < n; i++) {
+				Object o = edits.elementAt(i);
+				if (o instanceof DocumentEvent.ElementChange) {
+					DocumentEvent.ElementChange c = (DocumentEvent.ElementChange) o;
+					if (elem.equals(c.getElement())) {
+						return c;
+					}
+				}
+			}
+			return null;
+		}
 
-        /**
-         * Gets the changes for an element.
-         *
-         * @param elem the element
-         * @return the changes
-         */
-        @Override
-				public DocumentEvent.ElementChange getChange(Element elem) {
-            if (changeLookup != null) {
-                return (DocumentEvent.ElementChange) changeLookup.get(elem);
-            }
-            int n = edits.size();
-            for (int i = 0; i < n; i++) {
-                Object o = edits.elementAt(i);
-                if (o instanceof DocumentEvent.ElementChange) {
-                    DocumentEvent.ElementChange c = (DocumentEvent.ElementChange) o;
-                    if (elem.equals(c.getElement())) {
-                        return c;
-                    }
-                }
-            }
-            return null;
-        }
+		// --- member variables ------------------------------------
 
-        // --- member variables ------------------------------------
+		private int offset;
+		private int length;
+		private Hashtable changeLookup;
+		private DocumentEvent.EventType type;
 
-        private int offset;
-        private int length;
-        private Hashtable changeLookup;
-        private DocumentEvent.EventType type;
+	}
 
-    }
-
-    /**
-     * This event used when firing document changes while Undo/Redo
-     * operations. It just wraps DefaultDocumentEvent and delegates
-     * all calls to it except getType() which depends on operation
-     * (Undo or Redo).
-     */
-    class UndoRedoDocumentEvent implements DocumentEvent {
-        private DefaultDocumentEvent src = null;
+	/**
+	 * This event used when firing document changes while Undo/Redo operations. It
+	 * just wraps DefaultDocumentEvent and delegates all calls to it except
+	 * getType() which depends on operation (Undo or Redo).
+	 */
+	class UndoRedoDocumentEvent implements DocumentEvent {
+		private DefaultDocumentEvent src = null;
 //        private boolean isUndo;
-        private EventType type = null;
+		private EventType type = null;
 
-        public UndoRedoDocumentEvent(DefaultDocumentEvent src, boolean isUndo) {
-            this.src = src;
+		public UndoRedoDocumentEvent(DefaultDocumentEvent src, boolean isUndo) {
+			this.src = src;
 //            this.isUndo = isUndo;
-            if(isUndo) {
-                if(src.getType().equals(EventType.INSERT)) {
-                    type = EventType.REMOVE;
-                } else if(src.getType().equals(EventType.REMOVE)) {
-                    type = EventType.INSERT;
-                } else {
-                    type = src.getType();
-                }
-            } else {
-                type = src.getType();
-            }
-        }
+			if (isUndo) {
+				if (src.getType().equals(EventType.INSERT)) {
+					type = EventType.REMOVE;
+				} else if (src.getType().equals(EventType.REMOVE)) {
+					type = EventType.INSERT;
+				} else {
+					type = src.getType();
+				}
+			} else {
+				type = src.getType();
+			}
+		}
 
-        public DefaultDocumentEvent getSource() {
-            return src;
-        }
+		public DefaultDocumentEvent getSource() {
+			return src;
+		}
 
-        // DocumentEvent methods delegated to DefaultDocumentEvent source
-        // except getType() which depends on operation (Undo or Redo).
-        @Override
-				public int getOffset() {
-            return src.getOffset();
-        }
+		// DocumentEvent methods delegated to DefaultDocumentEvent source
+		// except getType() which depends on operation (Undo or Redo).
+		@Override
+		public int getOffset() {
+			return src.getOffset();
+		}
 
-        @Override
-				public int getLength() {
-            return src.getLength();
-        }
+		@Override
+		public int getLength() {
+			return src.getLength();
+		}
 
-        @Override
-				public Document getDocument() {
-            return src.getDocument();
-        }
+		@Override
+		public Document getDocument() {
+			return src.getDocument();
+		}
 
-        @Override
-				public DocumentEvent.EventType getType() {
-            return type;
-        }
+		@Override
+		public DocumentEvent.EventType getType() {
+			return type;
+		}
 
-        @Override
-				public DocumentEvent.ElementChange getChange(Element elem) {
-            return src.getChange(elem);
-        }
-    }
+		@Override
+		public DocumentEvent.ElementChange getChange(Element elem) {
+			return src.getChange(elem);
+		}
+	}
 
-    /**
-     * An implementation of ElementChange that can be added to the document
-     * event.
-     */
-    public static class ElementEdit extends AbstractUndoableEdit implements DocumentEvent.ElementChange {
+	/**
+	 * An implementation of ElementChange that can be added to the document event.
+	 */
+	public static class ElementEdit extends AbstractUndoableEdit implements DocumentEvent.ElementChange {
 
-        /**
-         * Constructs an edit record.  This does not modify the element
-         * so it can safely be used to <em>catch up</em> a view to the
-         * current model state for views that just attached to a model.
-         *
-         * @param e the element
-         * @param index the index into the model >= 0
-         * @param removed a set of elements that were removed
-         * @param added a set of elements that were added
-         */
-        public ElementEdit(Element e, int index, Element[] removed, Element[] added) {
-            super();
-            this.e = e;
-            this.index = index;
-            this.removed = removed;
-            this.added = added;
-        }
+		/**
+		 * Constructs an edit record. This does not modify the element so it can safely
+		 * be used to <em>catch up</em> a view to the current model state for views that
+		 * just attached to a model.
+		 *
+		 * @param e       the element
+		 * @param index   the index into the model >= 0
+		 * @param removed a set of elements that were removed
+		 * @param added   a set of elements that were added
+		 */
+		public ElementEdit(Element e, int index, Element[] removed, Element[] added) {
+			super();
+			this.e = e;
+			this.index = index;
+			this.removed = removed;
+			this.added = added;
+		}
 
-        /**
-         * Returns the underlying element.
-         *
-         * @return the element
-         */
-        @Override
-				public Element getElement() {
-            return e;
-        }
+		/**
+		 * Returns the underlying element.
+		 *
+		 * @return the element
+		 */
+		@Override
+		public Element getElement() {
+			return e;
+		}
 
-        /**
-         * Returns the index into the list of elements.
-         *
-         * @return the index >= 0
-         */
-        @Override
-				public int getIndex() {
-            return index;
-        }
+		/**
+		 * Returns the index into the list of elements.
+		 *
+		 * @return the index >= 0
+		 */
+		@Override
+		public int getIndex() {
+			return index;
+		}
 
-        /**
-         * Gets a list of children that were removed.
-         *
-         * @return the list
-         */
-        @Override
-				public Element[] getChildrenRemoved() {
-            return removed;
-        }
+		/**
+		 * Gets a list of children that were removed.
+		 *
+		 * @return the list
+		 */
+		@Override
+		public Element[] getChildrenRemoved() {
+			return removed;
+		}
 
-        /**
-         * Gets a list of children that were added.
-         *
-         * @return the list
-         */
-        @Override
-				public Element[] getChildrenAdded() {
-            return added;
-        }
+		/**
+		 * Gets a list of children that were added.
+		 *
+		 * @return the list
+		 */
+		@Override
+		public Element[] getChildrenAdded() {
+			return added;
+		}
 
-        /**
-         * Redoes a change.
-         *
-         * @exception CannotRedoException if the change cannot be redone
-         */
-        @Override
-				public void redo() throws CannotRedoException {
-            super.redo();
+		/**
+		 * Redoes a change.
+		 *
+		 * @exception CannotRedoException if the change cannot be redone
+		 */
+		@Override
+		public void redo() throws CannotRedoException {
+			super.redo();
 
-            // Since this event will be reused, switch around added/removed.
-            Element[] tmp = removed;
-            removed = added;
-            added = tmp;
+			// Since this event will be reused, switch around added/removed.
+			Element[] tmp = removed;
+			removed = added;
+			added = tmp;
 
-            // PENDING(prinz) need MutableElement interface, canRedo() should check
-            ((AbstractDocument.BranchElement)e).replace(index, removed.length, added);
-        }
+			// PENDING(prinz) need MutableElement interface, canRedo() should check
+			((AbstractDocument.BranchElement) e).replace(index, removed.length, added);
+		}
 
-        /**
-         * Undoes a change.
-         *
-         * @exception CannotUndoException if the change cannot be undone
-         */
-        @Override
-				public void undo() throws CannotUndoException {
-            super.undo();
-            // PENDING(prinz) need MutableElement interface, canUndo() should check
-            ((AbstractDocument.BranchElement)e).replace(index, added.length, removed);
+		/**
+		 * Undoes a change.
+		 *
+		 * @exception CannotUndoException if the change cannot be undone
+		 */
+		@Override
+		public void undo() throws CannotUndoException {
+			super.undo();
+			// PENDING(prinz) need MutableElement interface, canUndo() should check
+			((AbstractDocument.BranchElement) e).replace(index, added.length, removed);
 
-            // Since this event will be reused, switch around added/removed.
-            Element[] tmp = removed;
-            removed = added;
-            added = tmp;
-        }
+			// Since this event will be reused, switch around added/removed.
+			Element[] tmp = removed;
+			removed = added;
+			added = tmp;
+		}
 
-        private Element e;
-        private int index;
-        private Element[] removed;
-        private Element[] added;
-    }
+		private Element e;
+		private int index;
+		private Element[] removed;
+		private Element[] added;
+	}
 
+	public boolean 秘replacing;
 
-    private class DefaultFilterBypass extends DocumentFilter.FilterBypass {
-        @Override
-				public Document getDocument() {
-            return AbstractDocument.this;
-        }
+	private class DefaultFilterBypass extends DocumentFilter.FilterBypass {
 
-        @Override
-				public void remove(int offset, int length) throws
-            BadLocationException {
-            handleRemove(offset, length);
-        }
+		@Override
+		public Document getDocument() {
+			return AbstractDocument.this;
+		}
 
-        @Override
-				public void insertString(int offset, String string,
-                                 AttributeSet attr) throws
-                                        BadLocationException {
-            handleInsertString(offset, string, attr);
-        }
+		@Override
+		public void remove(int offset, int length) throws BadLocationException {
+			handleRemove(offset, length);
+		}
 
-    	@Override
-        public void replace(int offset, int length, String text,
-                            AttributeSet attrs) throws BadLocationException {
-            handleRemove(offset, length);
-            handleInsertString(offset, text, attrs);
-        }
-        
-    }
+		@Override
+		public void insertString(int offset, String string, AttributeSet attr) throws BadLocationException {
+			handleInsertString(offset, string, attr);
+		}
+
+		@Override
+		public void replace(int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+			秘replacing = true;
+			handleRemove(offset, length);
+			handleInsertString(offset, text, attrs);
+			秘replacing = false;
+		}
+
+	}
 
 	/**
 	 * SwingJS addition
@@ -3251,6 +3169,5 @@ public abstract class AbstractDocument implements Document {
 			editor.getCaret().moveDot(currentDot);
 		}
 	}
-
 
 }

@@ -9,6 +9,8 @@ import java.awt.event.TextListener;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.Document;
 
 public class TextField extends JTextField {
 
@@ -39,20 +41,23 @@ public class TextField extends JTextField {
 	public void addTextListener(final TextListener textListener) {
 		getDocument().addDocumentListener(new DocumentListener() {
 
+			
 			@Override
 			public void insertUpdate(DocumentEvent e) {
-				textListener.textValueChanged(new TextEvent(this, 0));
+				boolean isReplacing = ((AbstractDocument) e.getDocument()).秘replacing;
+				if (!isReplacing)
+					textListener.textValueChanged(new TextEvent(this, TextEvent.TEXT_VALUE_CHANGED));
 			}
 
 			@Override
 			public void removeUpdate(DocumentEvent e) {
-				textListener.textValueChanged(new TextEvent(this, 0));
+				textListener.textValueChanged(new TextEvent(this, TextEvent.TEXT_VALUE_CHANGED));
 			}
 
 			@Override
 			public void changedUpdate(DocumentEvent e) {
 				// not what you think. -- only when the style changes
-				textListener.textValueChanged(new TextEvent(this, 0));
+				//textListener.textValueChanged(new TextEvent(this, 0));
 			}
 		});
 	}

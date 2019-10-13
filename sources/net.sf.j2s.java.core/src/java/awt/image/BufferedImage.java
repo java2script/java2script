@@ -1420,6 +1420,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @exception <code>ArrayIndexOutOfBoundsException</code> if both
 	 *            <code>tileX</code> and <code>tileY</code> are not equal to 0
 	 */
+	@Override
 	public Raster getTile(int tileX, int tileY) {
 		// SwingJS not implemented
 		// if (tileX == 0 && tileY == 0) {
@@ -1436,6 +1437,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 * @return a <code>Raster</code> that is a copy of the image data.
 	 * @see #setData(Raster)
 	 */
+	@Override
 	public Raster getData() {
 
 		// REMIND : this allocates a whole new tile if raster is a
@@ -1470,6 +1472,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 *         specified region of the <code>BufferedImage</code>
 	 * @see #setData(Raster)
 	 */
+	@Override
 	public Raster getData(Rectangle rect) {
 		SampleModel sm = raster.getSampleModel();
 		SampleModel nsm = sm.createCompatibleSampleModel(rect.width, rect.height);
@@ -1502,6 +1505,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 *          image, or <code>null</code>
 	 * @return a reference to the supplied or created <code>WritableRaster</code>.
 	 */
+	@Override
 	public WritableRaster copyData(WritableRaster outRaster) {
 		if (outRaster == null) {
 			return (WritableRaster) getData();
@@ -1717,6 +1721,15 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		秘havePix = true;
 	}
 
+	
+	@Override
+	public void flush() {
+		// call this method after drawing to ensure that
+		// pixels are recreated from the HTML5 canvas
+	    秘pix = null;
+		秘havePix = false;
+		// was for surfaceManager only super.flush();
+	}
 	/**
 	 * convert [r g b a  r g b a ...] into [argb argb argb ...]
 	 * 
@@ -1778,9 +1791,10 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 			 *   pix.img = this;
 			 * 
 			 */
-			{
-			}
-			秘pix = null;
+			
+			// 秘pix = null;
+			flush(); // also setting 秘havePix false
+			
 		}
 		Graphics2D g2d = (Graphics2D) (Object)秘g;
 		if (秘component != null) {
