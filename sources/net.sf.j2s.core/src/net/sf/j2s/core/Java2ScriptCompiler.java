@@ -50,6 +50,45 @@ class Java2ScriptCompiler {
 	private Map<String, String> htMethodsCalled;
 	private List<String> lstMethodsDeclared;
 
+	private final static String J2S_COMPILER_STATUS = "j2s.compiler.status";
+	private final static String J2S_COMPILER_STATUS_ENABLE = "enable";
+	private final static String J2S_COMPILER_STATUS_ENABLED = "enabled";
+
+	private static final String J2S_SITE_DIRECTORY = "j2s.site.directory";
+
+	/**
+	 * log file name for methods declared
+	 */
+	private static final String J2S_LOG_METHODS_DECLARED = "j2s.log.methods.declared";
+
+	/**
+	 * log file name for methods called
+	 */
+	private static final String J2S_LOG_METHODS_CALLED = "j2s.log.methods.called";
+
+	private static final String J2S_LOG_ALL_CALLS = "j2s.log.all.calls";
+
+	private static final String J2S_LOG_ALL_CALLS_TRUE = "true";
+
+	private static final String J2S_EXCLUDED_PATHS = "j2s.excluded.paths";
+
+	private static final String J2S_TESTING = "j2s.testing";
+
+	private static final String J2S_TESTING_TRUE = "true";
+
+	private static final String J2S_COMPILER_NONQUALIFIED_PACKAGES = "j2s.compiler.nonqualified.packages";
+
+	private static final String J2S_COMPILER_NONQUALIFIED_CLASSES = "j2s.compiler.nonqualified.classes";
+
+	private static final String J2S_COMPILER_MODE = "j2s.compiler.mode";
+
+	private static final String J2S_COMPILER_MODE_DEBUG = "debug";
+
+	private static final String J2S_CLASS_REPLACEMENTS = "j2s.class.replacements";
+
+	private static final String J2S_TEMPLATE_HTML = "j2s.template.html";
+	
+	
 	private Properties props;
 	private String htmlTemplate = null;
 
@@ -132,8 +171,8 @@ class Java2ScriptCompiler {
 		try {
 			File j2sFile = new File(projectFolder, J2S_OPTIONS_FILE_NAME);
 			props.load(new FileInputStream(j2sFile));
-			String status = getProperty("j2s.compiler.status");
-			if (!"enable".equals(status) && !"enabled".equals(status)) {
+			String status = getProperty(J2S_COMPILER_STATUS);
+			if (!J2S_COMPILER_STATUS_ENABLE.equalsIgnoreCase(status) && !J2S_COMPILER_STATUS_ENABLED.equalsIgnoreCase(status)) {
 				if (getFileContents(j2sFile).trim().length() == 0) {
 				  writeToFile(j2sFile, getDefaultJ2SFile());
 				} else {
@@ -148,7 +187,7 @@ class Java2ScriptCompiler {
 		}
 
 		File file;
-		siteFolder = getProperty("j2s.site.directory");
+		siteFolder = getProperty(J2S_SITE_DIRECTORY);
 		if (siteFolder == null)
 			siteFolder = "site";
 		siteFolder = projectFolder + "/" + siteFolder;
@@ -159,7 +198,7 @@ class Java2ScriptCompiler {
 		// method declarations and invocations are only logged
 		// when the designated files are deleted prior to building
 
-		logDeclared = (isCompilationParticipant && !isCleanBuild ? null : getProperty("j2s.log.methods.declared"));
+		logDeclared = (isCompilationParticipant && !isCleanBuild ? null : getProperty(J2S_LOG_METHODS_DECLARED));
 		if (logDeclared != null) {
 			if (!(file = new File(projectFolder, logDeclared)).exists()) {
 				lstMethodsDeclared = new ArrayList<String>();
@@ -169,17 +208,17 @@ class Java2ScriptCompiler {
 		}
 		logAllCalls = false;
 
-		logCalled = (isCompilationParticipant && !isCleanBuild ? null : getProperty("j2s.log.methods.called"));
+		logCalled = (isCompilationParticipant && !isCleanBuild ? null : getProperty(J2S_LOG_METHODS_CALLED));
 		if (logCalled != null) {
 			if (!(file = new File(projectFolder, logCalled)).exists()) {
 				htMethodsCalled = new Hashtable<String, String>();
 				System.err.println("logging methods called to " + file);
 			}
 			logCalled = projectFolder + "/" + logCalled;
-			logAllCalls = "true".equals(getProperty("j2s.log.all.calls"));
+			logAllCalls = J2S_LOG_ALL_CALLS_TRUE.equalsIgnoreCase(getProperty(J2S_LOG_ALL_CALLS));
 		}
 
-		excludedPaths = getProperty("j2s.excluded.paths");
+		excludedPaths = getProperty(J2S_EXCLUDED_PATHS);
 
 		lstExcludedPaths = null;
 
@@ -193,21 +232,21 @@ class Java2ScriptCompiler {
 				lstExcludedPaths = null;
 		}
 
-		testing = "true".equals(getProperty("j2s.testing"));
+		testing = J2S_TESTING_TRUE.equalsIgnoreCase(getProperty(J2S_TESTING));
 
-		String prop = getProperty("j2s.compiler.nonqualified.packages");
+		String prop = getProperty(J2S_COMPILER_NONQUALIFIED_PACKAGES);
 		// older version of the name
-		String nonqualifiedPackages = getProperty("j2s.compiler.nonqualified.classes");
+		String nonqualifiedPackages = getProperty(J2S_COMPILER_NONQUALIFIED_CLASSES);
 		nonqualifiedPackages = (prop == null ? "" : prop)
 			+ (nonqualifiedPackages == null ? "" : (prop == null ? "" : ";") + nonqualifiedPackages);
 	    if (nonqualifiedPackages.length() == 0)
 	    	nonqualifiedPackages = null;
 		// includes @j2sDebug blocks
-		isDebugging = "debug".equals(getProperty("j2s.compiler.mode"));
+		isDebugging = J2S_COMPILER_MODE_DEBUG.equalsIgnoreCase(getProperty(J2S_COMPILER_MODE));
 
-		String classReplacements = getProperty("j2s.class.replacements");
+		String classReplacements = getProperty(J2S_CLASS_REPLACEMENTS);
 
-		String htmlTemplateFile = getProperty("j2s.template.html");
+		String htmlTemplateFile = getProperty(J2S_TEMPLATE_HTML);
 		if (htmlTemplateFile == null)
 			htmlTemplateFile = "template.html";
 
