@@ -67,7 +67,7 @@ public class JSPopupMenuUI extends JSPanelUI implements ContainerListener {
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String prop = e.getPropertyName();
-		//System.out.println("jspopiupmenuui prop " + prop);
+//		System.out.println("jspopiupmenuui prop " + prop);
 		super.propertyChange(e);
 	}
 
