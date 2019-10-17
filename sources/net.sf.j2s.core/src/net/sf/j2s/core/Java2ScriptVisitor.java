@@ -134,6 +134,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// BH 2019.10.18 fix for "P$.licationShutdownHooks"
 // BH 2019.09.07 adds optimization for lambda methods that do not have finals
 // BH 2019.08.29 fix for boxing of binary representation 0b01... (Google Closure Compiler bug)
 // BH 2019.05.13 fix for Math.getExponent, ulp, nextDown, nextUp, nextAfter needing qualification
@@ -1713,8 +1714,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			this$0Name0 = this$0Name;
 			this$0Name = null;
 			finalShortClassName = getFinalJ2SClassName(
-					(isLambda ? getMyJavaClassNameLambda(true) : getJavaClassNameQualified(binding)), FINAL_P)
-							.substring(3);
+					(isLambda ? getMyJavaClassNameLambda(true) : getJavaClassNameQualified(binding)), FINAL_P);
+			if (finalShortClassName.startsWith("P$."))
+				finalShortClassName = finalShortClassName.substring(3);
 			setClassAndBinding(finalShortClassName, binding);
 			if (isLambda)
 				buffer.append("(");
@@ -4391,8 +4393,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	static String stripJavaLang(String name) {
 		// shorten java.lang.XXX.YYY but not java.lang.xxx.YYY
-		return (!name.startsWith("java.lang.") || name.equals("java.lang.Object")
+		String s = (!name.startsWith("java.lang.") || name.equals("java.lang.Object")
 				|| name.length() > 10 && !Character.isUpperCase(name.charAt(10)) ? name : name.substring(10));
+		System.out.println("s is " + s + " for  " + name);
+		return s;
 	}
 
 	/**
