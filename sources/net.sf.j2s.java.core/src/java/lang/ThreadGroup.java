@@ -60,7 +60,7 @@ import swingjs.api.js.HTML5Applet;
  */
 public
 class ThreadGroup implements Thread.UncaughtExceptionHandler {
-    private final ThreadGroup parent;
+	private final ThreadGroup parent;
     String name;
     int maxPriority = Thread.MAX_PRIORITY;  // BH
     boolean destroyed;
@@ -74,6 +74,7 @@ class ThreadGroup implements Thread.UncaughtExceptionHandler {
     int ngroups;
     ThreadGroup groups[];
     protected HTML5Applet 秘html5Applet;
+    public boolean 秘systemExited;
 
 //    /**
 //     * Creates an empty Thread group that is not in any Thread group.

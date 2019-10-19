@@ -100,10 +100,10 @@ public class Runtime {
      * @see #halt(int)
      */
     public void exit(int status) {
-        SecurityManager security = System.getSecurityManager();
-        if (security != null) {
-            security.checkExit(status);
-        }
+//        SecurityManager security = System.getSecurityManager();
+//        if (security != null) {
+//            security.checkExit(status);
+//        }
         Shutdown.exit(status);
     }
 
@@ -202,10 +202,10 @@ public class Runtime {
      * @since 1.3
      */
     public void addShutdownHook(Thread hook) {
-        SecurityManager sm = System.getSecurityManager();
-        if (sm != null) {
-            sm.checkPermission(new RuntimePermission("shutdownHooks"));
-        }
+//        SecurityManager sm = System.getSecurityManager();
+//        if (sm != null) {
+//            sm.checkPermission(new RuntimePermission("shutdownHooks"));
+//        }
         ApplicationShutdownHooks.add(hook);
     }
 
@@ -230,10 +230,10 @@ public class Runtime {
      * @since 1.3
      */
     public boolean removeShutdownHook(Thread hook) {
-        SecurityManager sm = System.getSecurityManager();
-        if (sm != null) {
-            sm.checkPermission(new RuntimePermission("shutdownHooks"));
-        }
+//        SecurityManager sm = System.getSecurityManager();
+//        if (sm != null) {
+//            sm.checkPermission(new RuntimePermission("shutdownHooks"));
+//        }
         return ApplicationShutdownHooks.remove(hook);
     }
 

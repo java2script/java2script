@@ -117,13 +117,10 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	/**
 	 * From System.exit()
 	 */
-	public static void exit() {
-		/**
-		 * @j2sNative
-		 * 
-		 * Thread.thisThread.group.systemExited = true;
-		 */
+	public static void exit(int status) {
+		Thread.currentThread().getThreadGroup().秘systemExited = true;
 		JSUtil.getAppletViewer().exit();
+		Runtime.getRuntime().exit(status);
 	}
 
 	// ////// java.awt.Toolkit /////////
