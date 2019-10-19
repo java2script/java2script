@@ -92,19 +92,19 @@ class ContextFinder {
     static {
         //logger = Logger.getLogger("javax.xml.bind");
         try {
-            if (AccessController.doPrivileged(new GetPropertyAction("jaxb.debug")) != null) {
+//            if (AccessController.doPrivileged(new GetPropertyAction("jaxb.debug")) != null) {
                 // disconnect the logger from a bigger framework (if any)
                 // and take the matters into our own hands
                 //Logger.setUseParentHandlers(false);
                 //Logger.setLevel(Level.ALL);
-                ConsoleHandler handler = new ConsoleHandler();
-                handler.setLevel(Level.ALL);
+//                ConsoleHandler handler = new ConsoleHandler();
+//                handler.setLevel(Level.ALL);
                 //Logger.addHandler(handler);
-            } else {
-                // don't change the setting of this logger
-                // to honor what other frameworks
-                // have done on configurations.
-            }
+//            } else {
+//                // don't change the setting of this logger
+//                // to honor what other frameworks
+//                // have done on configurations.
+//            }
         } catch (Throwable t) {
             // just to be extra safe. in particular System.getProperty may throw
             // SecurityException.
