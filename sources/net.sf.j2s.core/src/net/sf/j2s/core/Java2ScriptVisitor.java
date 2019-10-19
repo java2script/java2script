@@ -1715,8 +1715,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			this$0Name = null;
 			finalShortClassName = getFinalJ2SClassName(
 					(isLambda ? getMyJavaClassNameLambda(true) : getJavaClassNameQualified(binding)), FINAL_P);
-			if (finalShortClassName.startsWith("P$."))
+			if (finalShortClassName.startsWith("P$.")) {
+				// java.lang.x will return x, not P$.x
 				finalShortClassName = finalShortClassName.substring(3);
+			}
 			setClassAndBinding(finalShortClassName, binding);
 			if (isLambda)
 				buffer.append("(");
