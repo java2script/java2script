@@ -1565,11 +1565,10 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		if (fields != null)
 			return fields;
 	    fields = new Field[0];
-		int _static = Modifier.STATIC;
-		Object cl = /** @j2sNative this.$clazz$ || */null;
+	    Object cl = /** @j2sNative this.$clazz$ || */null;
 		Object proto = /** @j2sNative cl.prototype || */null;
 		addFields(proto, this.fields, 0);
-		addFields(cl, this.fields, _static);
+		addFields(cl, this.fields, Modifier.STATIC);
 		return fields;
 	}
 
@@ -1741,12 +1740,12 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		 * @j2sNative
 		 * 
 		 * 			for (m in c) { 
-		 *            if (!modifiers && this.$clazz$[m])
+		 *            if (!!modifiers != !!this.$clazz$[m])
 		 *              continue; 
 		 *            if (this.excludeField$S(m)) continue; 
 		 *            var o = c[m]; 
 		 *            switch (typeof o) {
-		 *             case "object": if (o && o.__CLASS_NAME__) continue; 
+		 *             case "object": if (o && !o.__CLASS_NAME__) continue; 
 		 *             case "number": case "boolean": case "string":
 		 */
 		 
@@ -1762,7 +1761,13 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	}
 
 	boolean excludeField(String name) { 
-		return (name == "prototype" || name.startsWith("__"));
+		return (name == "prototype" 
+				|| name.startsWith("__") 
+				|| name == "$isInterface" 
+				|| name == "$isEnum" 
+				|| name == "implementz"
+				|| name == "$init$"
+				|| name == "$init0$");
 	} 
 
 	private void addField(Field[] fields, String m, int modifiers) {
