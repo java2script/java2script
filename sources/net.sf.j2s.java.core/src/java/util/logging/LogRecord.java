@@ -531,19 +531,21 @@ public class LogRecord implements java.io.Serializable {
     }
 
     // Private method to infer the caller's class and method names
-    private void inferCaller() {
+    @SuppressWarnings("unused")
+	private void inferCaller() {
         needToInferCaller = false;
-        JavaLangAccess access = SharedSecrets.getJavaLangAccess();
-        Throwable throwable = new Throwable();
-        int depth = access.getStackTraceDepth(throwable);
+//        JavaLangAccess access = SharedSecrets.getJavaLangAccess();
+//        Throwable throwable = new Throwable();
+//        int depth = access.getStackTraceDepth(throwable);
 
+        int depth = 20; // SwingJS arbitrary limit
         boolean lookingForLogger = true;
-        for (int ix = 0; ix < depth; ix++) {
-            // Calling getStackTraceElement directly prevents the VM
-            // from paying the cost of building the entire stack frame.
-            StackTraceElement frame =
-                access.getStackTraceElement(throwable, ix);
-            String cname = frame.getClassName();
+        Object c = /** @j2sNative arguments.callee.caller || */ null;
+        for (int ix = 0; ix < depth && c != null; ix++) {
+        	Object clazz = (/** @j2sNative c.exClazz || */ null);
+        	if (clazz == null)
+        		return;
+            String cname = /** @j2sNative clazz.__CLASS_NAME__ || */ "?";
             boolean isLoggerImpl = isLoggerImplFrame(cname);
             if (lookingForLogger) {
                 // Skip all frames until we have found the first logger frame.
@@ -556,11 +558,20 @@ public class LogRecord implements java.io.Serializable {
                     if (!cname.startsWith("java.lang.reflect.") && !cname.startsWith("sun.reflect.")) {
                        // We've found the relevant frame.
                        setSourceClassName(cname);
-                       setSourceMethodName(frame.getMethodName());
+                   	   String mname = /** @j2sNative c.exName || */ null;
+                       setSourceMethodName(mname);
                        return;
                     }
                 }
             }
+        	/**
+        	 * 
+        	 *  @j2sNative
+        	 * 
+        	 * c = c.caller;
+        	 * 
+        	 */
+        	
         }
         // We haven't found a suitable frame, so just punt.  This is
         // OK as we are only committed to making a "best effort" here.

@@ -276,7 +276,8 @@ public class Logger {
     private ArrayList<LogManager.LoggerWeakRef> kids;   // WeakReferences to loggers that have us as parent
     private volatile Level levelObject;
     private volatile int levelValue;  // current effective level value
-    private WeakReference<ClassLoader> callersClassLoaderRef;
+    private //WeakReference<
+    ClassLoader callersClassLoaderRef;
     private final boolean isSystemLogger;
 
     /**
@@ -387,13 +388,14 @@ public class Logger {
                                          ? caller.getClassLoader()
                                          : null);
         if (callersClassLoader != null) {
-            this.callersClassLoaderRef = new WeakReference<>(callersClassLoader);
+            this.callersClassLoaderRef = //new WeakReference<>(
+            		callersClassLoader;
         }
     }
 
     private ClassLoader getCallersClassLoader() {
         return (callersClassLoaderRef != null)
-                ? callersClassLoaderRef.get()
+                ? callersClassLoaderRef//.get()
                 : null;
     }
 
@@ -446,12 +448,12 @@ public class Logger {
 
     private static Logger demandLogger(String name, String resourceBundleName, Class<?> caller) {
         LogManager manager = LogManager.getLogManager();
-        SecurityManager sm = System.getSecurityManager();
-        if (sm != null && !SystemLoggerHelper.disableCallerCheck) {
-            if (caller.getClassLoader() == null) {
-                return manager.demandSystemLogger(name, resourceBundleName);
-            }
-        }
+//        SecurityManager sm = System.getSecurityManager();
+//        if (sm != null && !SystemLoggerHelper.disableCallerCheck) {
+//            if (caller.getClassLoader() == null) {
+//                return manager.demandSystemLogger(name, resourceBundleName);
+//            }
+//        }
         return manager.demandLogger(name, resourceBundleName, caller);
         // ends up calling new Logger(name, resourceBundleName, caller)
         // iff the logger doesn't exist already
@@ -636,7 +638,7 @@ public class Logger {
     public static Logger getAnonymousLogger(String resourceBundleName) {
         LogManager manager = LogManager.getLogManager();
         // cleanup some Loggers that have been GC'ed
-        manager.drainLoggerRefQueueBounded();
+//        manager.drainLoggerRefQueueBounded();
         Logger result = new Logger(null, resourceBundleName,
                                    Reflection.getCallerClass(), manager, false);
         result.anonymous = true;
@@ -2073,7 +2075,7 @@ public class Logger {
                 // we didn't have a previous parent
                 ref = manager.new LoggerWeakRef(this);
             }
-            ref.setParentRef(new WeakReference<>(parent));
+            ref.setParentRef(parent);
             parent.kids.add(ref);
 
             // As a result of the reparenting, the effective level
