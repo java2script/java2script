@@ -424,7 +424,7 @@ public class JSUtil {
 	}
 
 	public static JSAppletViewer getAppletViewer() {
-		return ((JSAppletThread) Thread.currentThread()).秘appletViewer;
+		return Thread.currentThread().getThreadGroup().秘appletViewer;
 	}
 
 	public static void readyCallback(String aname, String fname, JSComponent applet,

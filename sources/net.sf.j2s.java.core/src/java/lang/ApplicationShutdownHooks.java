@@ -101,7 +101,7 @@ class ApplicationShutdownHooks {
 
         for (Thread hook : threads) {
         	try {
-            hook.start();
+            hook.run(); // SwingJS was start(), but then this comes too late
         	} catch (Throwable t) {
         		// SwingJS
         		System.err.println("ApplicationShutdownHooks exception:\n" + t);

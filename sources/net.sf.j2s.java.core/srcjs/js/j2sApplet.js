@@ -2552,6 +2552,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				if (isApp && applet.__Info.headless) {
 					Clazz.loadClass("java.lang.Thread").currentThread$().group.html5Applet = applet;
 					cl.main$SA(applet.__Info.args || []);
+					System.exit$(0);
 				} else {
 					
 					applet.__Info.main

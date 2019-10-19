@@ -118,8 +118,11 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	 * From System.exit()
 	 */
 	public static void exit(int status) {
-		Thread.currentThread().getThreadGroup().秘systemExited = true;
-		JSUtil.getAppletViewer().exit();
+		
+		Thread.currentThread().getThreadGroup().秘exit();
+		JSAppletViewer v = JSUtil.getAppletViewer();
+		if (v != null)
+			v.exit();
 		Runtime.getRuntime().exit(status);
 	}
 
@@ -222,7 +225,7 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	 */
 	public static GraphicsConfiguration getGraphicsConfiguration() {
 		JSAppletViewer ap = JSUtil.getAppletViewer();
-		GraphicsConfiguration gc = ap.graphicsConfig;
+		GraphicsConfiguration gc = (ap == null ? null : ap.graphicsConfig);
 		return (gc == null ? (gc = ap.graphicsConfig = (GraphicsConfiguration) JSUtil.getInstance("swingjs.JSGraphicsConfiguration")) : gc);
 	}
 
@@ -688,7 +691,7 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	}
 
 	public static ArrayList<Object> getTimerQueue() {
-		return JSUtil.getAppletViewer().getTimerQueue();
+		return Thread.currentThread().getThreadGroup().秘getTimerQueue();
 	}
 
 	/**

@@ -28,10 +28,14 @@
 
 package java.lang;
 
+import java.util.ArrayList;
 //import java.io.PrintStream;
 import java.util.Arrays;
 //import sun.misc.VM;
 
+import javax.swing.Timer;
+
+import swingjs.JSAppletViewer;
 import swingjs.api.js.HTML5Applet;
 
 /**
@@ -61,20 +65,23 @@ import swingjs.api.js.HTML5Applet;
 public
 class ThreadGroup implements Thread.UncaughtExceptionHandler {
 	private final ThreadGroup parent;
-    String name;
-    int maxPriority = Thread.MAX_PRIORITY;  // BH
-    boolean destroyed;
-    boolean daemon;
-    boolean vmAllowSuspension;
+	private String name;
+    private int maxPriority = Thread.MAX_PRIORITY;  // BH
+    private boolean destroyed;
+    private boolean daemon;
+    private boolean vmAllowSuspension;
 
-    int nUnstartedThreads = 0;
-    int nthreads;
-    Thread threads[];
+    private int nUnstartedThreads = 0;
+    private int nthreads;
+    private Thread threads[];
 
-    int ngroups;
-    ThreadGroup groups[];
+    private int ngroups;
+    private ThreadGroup groups[];
     protected HTML5Applet 秘html5Applet;
     public boolean 秘systemExited;
+	public JSAppletViewer 秘appletViewer;
+
+	private ArrayList<Object> 秘timerQueue;
 
 //    /**
 //     * Creates an empty Thread group that is not in any Thread group.
@@ -1043,5 +1050,20 @@ class ThreadGroup implements Thread.UncaughtExceptionHandler {
         return getClass().getName() + "[name=" + getName() + ",maxpri=" + maxPriority + ",html5Applet=" + 秘html5Applet + "]";
     }
 
+	public ArrayList<Object> 秘getTimerQueue() {
+		return (秘systemExited ? null : 秘timerQueue == null ? (秘timerQueue = new ArrayList<Object>()) : 秘timerQueue);
+	}
 
+	public void 秘exit() {
+		ArrayList<Object> q = 秘getTimerQueue();
+		for (int i = q.size(); --i >= 0;) {
+			Timer t = (Timer) q.get(i);
+			try {
+				t.stop();
+			} catch (Throwable e) {
+				// ignore
+			}
+		}
+		秘systemExited = true;
+	}
 }

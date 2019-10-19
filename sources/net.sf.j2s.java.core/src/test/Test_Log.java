@@ -38,7 +38,7 @@ public class Test_Log extends Test_ {
 		setLogging();
 		logger.setLevel(Level.SEVERE);
 
-		logger.info("info Test_Log");		
+		logger.info("info Test_Log");	
 		
 		System.out.println("logger.parent.parent " + logger.getParent().getHandlers()[0].getClass().getName());
 		logger.getParent().log(Level.SEVERE, "parent test");

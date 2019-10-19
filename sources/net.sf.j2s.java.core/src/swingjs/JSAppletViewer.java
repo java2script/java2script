@@ -619,10 +619,6 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 		return (haveFrames || forceNew ? new JSFrameViewer() : null);
 	}
 
-	public ArrayList<Object> getTimerQueue() {
-		return (timerQueue == null ? (timerQueue = new ArrayList<Object>()) : timerQueue);
-	}
-
 	public void exit() {
 		for (int i = allWindows.size(); --i >= 0;)
 			try {

@@ -164,14 +164,15 @@ class Shutdown {
      */
     static void halt(int status) {
         synchronized (haltLock) {
-            halt0(status);
+        	System.out.println("Shutdown(" + status + ") on " + Thread.currentThread().getThreadGroup().getName());
+//            halt0(status);
         }
     }
 
-    static native void halt0(int status);
+//    static native void halt0(int status);
 
     /* Wormhole for invoking java.lang.ref.Finalizer.runAllFinalizers */
-    private static native void runAllFinalizers();
+//    private static native void runAllFinalizers();
 
 
     /* The actual shutdown sequence is defined here.
@@ -193,12 +194,12 @@ class Shutdown {
             if (state != HOOKS) return;
         }
         runHooks();
-        boolean rfoe;
+//        boolean rfoe;
         synchronized (lock) {
             state = FINALIZERS;
-            rfoe = runFinalizersOnExit;
+//            rfoe = runFinalizersOnExit;
         }
-        if (rfoe) runAllFinalizers();
+//        if (rfoe) runAllFinalizers();
     }
 
 
@@ -230,7 +231,7 @@ class Shutdown {
             }
         }
         if (runMoreFinalizers) {
-            runAllFinalizers();
+            //runAllFinalizers();
             halt(status);
         }
         synchronized (Shutdown.class) {
