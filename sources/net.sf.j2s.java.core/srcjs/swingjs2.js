@@ -13221,6 +13221,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				if (isApp && applet.__Info.headless) {
 					Clazz.loadClass("java.lang.Thread").currentThread$().group.html5Applet = applet;
 					cl.main$SA(applet.__Info.args || []);
+					System.exit$(0);
 				} else {
 					
 					applet.__Info.main
@@ -16830,8 +16831,9 @@ java.lang.System = System = {
   currentTimeMillis$ : function () {
     return new Date ().getTime ();
   },
-  exit$ : function() { 
- 	 swingjs.JSToolkit && swingjs.JSToolkit.exit$() 
+  exit$ : function(status) { 
+	 swingjs.JSToolkit || Clazz.loadClass("swingjs.JSToolkit");
+ 	 swingjs.JSToolkit.exit$I(status || 0) 
   },
   gc$ : function() {}, // bh
   getProperties$ : function () {
@@ -18361,6 +18363,7 @@ String(byte[] ascii, int hibyte, int offset, int count)
 */
 
 String.instantialize=function(){
+var x=arguments[0];
 switch (arguments.length) {
 case 0:
   return new String();
@@ -18370,7 +18373,6 @@ case 1:
   // String(StringBuffer buffer)
   // String(StringBuilder builder)
   // String(String original)
-  var x=arguments[0];
   if (x.__BYTESIZE || x instanceof Array){
     return (x.length == 0 ? "" : typeof x[0]=="number" ? Encoding.readUTF8Array(x) : x.join(''));
   }
@@ -18381,7 +18383,7 @@ case 2:
   // String(byte[] bytes, String charsetName)
 
   var hibyte=arguments[1];
-  return (typeof hibyte=="number" ? String.instantialize(arguments[0],hibyte,0,arguments[0].length) 
+  return (typeof hibyte=="number" ? String.instantialize(x,hibyte,0,x.length) 
 	: self.TextDecoder && arguments[1].toString().toUpperCase() == "UTF-8" ? new TextDecoder().decode(arguments[0])
 	: String.instantialize(x,0,x.length,hibyte));
 case 3:
@@ -18389,13 +18391,13 @@ case 3:
   // String(char[] value, int offset, int count)
   // String(int[] codePoints, int offset, int count)
 
-  var bytes=arguments[0];
+  var bytes=x;
   var offset=arguments[1];
   var length=arguments[2];
   if(arguments[2]instanceof Array){
     // ???
     bytes=arguments[2];
-    offset=arguments[0];
+    offset=x;
     length=arguments[1];
   }
   var arr=new Array(length);
@@ -18420,7 +18422,7 @@ case 4:
   // String(byte[] bytes, int offset, int length, String charsetName)
   // String(byte[] ascii, int hibyte, int offset, int count)
 
-  var bytes=arguments[0];
+  var bytes=x;
   var cs=arguments[3];
   if(typeof cs != "number"){
     var offset=arguments[1];
