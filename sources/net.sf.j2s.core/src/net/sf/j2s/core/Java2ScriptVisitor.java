@@ -4397,7 +4397,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// shorten java.lang.XXX.YYY but not java.lang.xxx.YYY
 		String s = (!name.startsWith("java.lang.") || name.equals("java.lang.Object")
 				|| name.length() > 10 && !Character.isUpperCase(name.charAt(10)) ? name : name.substring(10));
-		System.out.println("s is " + s + " for  " + name);
 		return s;
 	}
 
