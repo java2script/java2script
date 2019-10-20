@@ -115,15 +115,14 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 				AppContext.EVENT_QUEUE_KEY));
 	}
 
+	public static JSAppletViewer getAppletViewer() {
+		return Thread.currentThread().getThreadGroup().秘appletViewer;
+	}
+
 	/**
 	 * From System.exit() in j2sClazz.js
 	 */
 	public static void exit(int status) {
-		
-		Thread.currentThread().getThreadGroup().秘exit();
-		JSAppletViewer v = JSToolkit.getAppletViewer();
-		if (v != null)
-			v.exit();
 		Runtime.getRuntime().exit(status);
 	}
 
@@ -341,7 +340,7 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		 */		
 	}
 
-	private static JSThread getCurrentThread(JSThread t) {
+	public static JSThread getCurrentThread(JSThread t) {
 		boolean setCurrent = (t != null);
 		if (t == null)
 			t = Thread.秘thisThread;
@@ -1003,9 +1002,5 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	public int getMenuShortcutKeyMask()  {
         return (isMac ? Event.META_MASK : Event.CTRL_MASK);
     }
-
-	public static JSAppletViewer getAppletViewer() {
-		return Thread.currentThread().getThreadGroup().秘appletViewer;
-	}
 
 }

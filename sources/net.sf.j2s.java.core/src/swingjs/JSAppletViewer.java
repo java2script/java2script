@@ -625,6 +625,10 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 				allWindows.get(i).dispose();
 			} catch (Throwable e) {
 			}
+		if (isApplet && applet != null) {
+			applet.setVisible(false);
+			html5Applet._show(false);
+		}
 	}
 
 	@Override

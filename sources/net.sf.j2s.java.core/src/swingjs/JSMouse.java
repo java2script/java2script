@@ -38,6 +38,7 @@ import java.awt.event.MouseWheelEvent;
 
 import javax.swing.JComponent;
 
+import javajs.util.JSThread;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.JQueryObject;
 import swingjs.api.js.JQueryObject.JQEvent;
@@ -58,6 +59,10 @@ public class JSMouse {
 	}
 
 	public boolean processEvent(int id, int x, int y, int modifiers, long time, Object jqevent, int scroll) {
+		if (viewer != null && viewer.appletViewer != null && viewer.appletViewer != Thread.currentThread().getThreadGroup().秘appletViewer) {
+			JSThread t = viewer.appletViewer.myThread;
+			JSToolkit.getCurrentThread(t);
+		}
 		this.jqevent = jqevent;
 		// Note that we do not derive the Java event id from the jQuery event. 
 		// This is because we may be creating a different type of Java event.

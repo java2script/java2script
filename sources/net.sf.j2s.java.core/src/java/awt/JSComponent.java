@@ -114,6 +114,7 @@ public abstract class JSComponent extends Component {
 	public JSGraphics2D 秘gtemp; // indicates that we are painting, so that g.setBackground() should also be set 
 
 	public boolean 秘isRootPane, 秘isContentPane;
+	// initially, we go with the current thread, but later we will pick up the actual JSAppletViewer
 	public JSAppletViewer 秘appletViewer = Thread.currentThread().getThreadGroup().秘appletViewer;
 	private JSFrameViewer 秘frameViewer, 秘topFrameViewer;
 	public HTML5Canvas 秘canvas;
@@ -273,6 +274,8 @@ public abstract class JSComponent extends Component {
 	public void addNotify() {
 		if (秘paintsSelf() && ui != null) // BoxFiller will not have a ui? 
 			((JSComponentUI) ui).clearPaintPath();
+		if (parent != null)
+			秘appletViewer = parent.秘appletViewer;
 		super.addNotify();
 	}
 

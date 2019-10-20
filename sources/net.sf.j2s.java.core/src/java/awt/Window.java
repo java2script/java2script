@@ -747,7 +747,9 @@ public class Window extends JComponent {
 		if (parent != null && parent.getPeer() == null)
 			parent.addNotify();
 		getOrCreatePeer();
-		JSToolkit.getAppletViewer().addWindow(this);
+		if (parent != null)
+			秘appletViewer = parent.秘appletViewer;
+		秘appletViewer.addWindow(this);
 		// to JComponent now
 		super.addNotify();
 	}
@@ -762,7 +764,7 @@ public class Window extends JComponent {
 	 */
 	@Override
 	public void removeNotify() {
-		JSToolkit.getAppletViewer().allWindows.removeObj(this);
+	    秘appletViewer.allWindows.removeObj(this);
 		super.removeNotify();
 	}
 
@@ -2679,6 +2681,7 @@ public class Window extends JComponent {
     */
     void addOwnedWindow(Window weakWindow) {
         if (weakWindow != null) {
+        	weakWindow.秘appletViewer = 秘appletViewer;
             synchronized(ownedWindowList) {
                 if (!ownedWindowList.contains(weakWindow)) {
                     ownedWindowList.addElement(weakWindow);
