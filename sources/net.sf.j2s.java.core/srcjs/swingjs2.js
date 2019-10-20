@@ -10671,6 +10671,7 @@ return jQuery;
 
 // J2S._version set to "3.2.4.07" 2019.01.04; 2019.02.06
 
+// BH 2019.10.20 fixes modal for popup dialog; still needs work for two applets?
 // BH 2019.09.13 fixes touchend canceling click
 // BH 2019.08.29 fixes mouseupoutjsmol not firing MouseEvent.MOUSE_UP
 // BH 5/16/2019 fixes POST method for OuputStream
@@ -13647,13 +13648,17 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		// z-order
 		if (!node || node.ui && node.ui.embeddedNode)
 			return 
-
+		var app = node.ui.jc.appContext.threadGroup.name + "_";
 		var a = [];
 		var zmin = 1e10
 		var zmax = -1e10
 		var $windows = $("body > div > .swingjs-window").not("body > .swingjs-tooltip :first-child");
+		var found = false;
 		$windows.each(function(c, b) {
-				a.push([ (b == node ? z : +b.style.zIndex), b ]);
+			  if (b == node)
+				  found = true;
+			  if (b.id.indexOf(app) == 0)
+			    	a.push([ (b == node ? z : +b.style.zIndex), b ]);
 		});
 		a.sort(function(a, b) {
 			return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0
@@ -13670,6 +13675,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			}
 			zbase += 1000;
 		}
+		if (!found)
+			z += 1000;
 		node.style.position = "absolute";
 		if (J2S._checkLoading) 
 			System.out.println("setting z-index to " + z + " for " + node.id);
@@ -19487,7 +19494,7 @@ if(typeof(jQuery)=="undefined") alert ("Note -- jQuery is required for SwingJS, 
 
 if (typeof(SwingJS) == "undefined") {
 
-  SwingJS = {};
+  SwingJS = {eventID:0};
 
 (function (SwingJS, $, J2S) {
 
