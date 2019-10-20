@@ -22,8 +22,9 @@
   	<!-- location of ant-contrib.jar -->
   	<property name="tools.dir" value = "tools" />
 
- 	<!-- SwingjS_site zip file (could be varied if versioning is needed) -->
-  	<property name="swingjs.zip" value="swingjs/SwingJS-site.zip" />
+ 	<!-- SwingjS_site zip file (could be varied if versioning is needed)   	
+ 	<property name="swingjs.zip" value="swingjs/SwingJS-site.zip" />
+-->
 
   	<!-- location of third-party jar contents as precompiled zipped .js files to copy to site/ -->
   	<property name="libjs.dir" value="libjs" />
@@ -54,7 +55,7 @@
 
   	<for param="file.zip">
   	  <path>
-  	    <fileset dir="${libjs.dir}" includes="*.zip" erroronmissingdir="false" />
+  	    <fileset dir="${libjs.dir}" erroronmissingdir="false" includes="*.zip"/>
   	  </path>
   	  <sequential>
   	  	 	<unzip src="@{file.zip}" dest="${site.dir}" overwrite="true"/>  	
@@ -63,11 +64,11 @@
 
   	<!-- unzip SwingJS-site.zip 
   	
-  	  we do this separately, as we want it done last 
-  	
+  	  not in net.sf.j2s
+  	  
+  	<unzip src="${swingjs.zip}" dest="${site.dir}/" overwrite="true"/>  	
   	-->
 
-  	<unzip src="${swingjs.zip}" dest="${site.dir}/" overwrite="true"/>  	
 
  	<!-- transfer resources -->
 
