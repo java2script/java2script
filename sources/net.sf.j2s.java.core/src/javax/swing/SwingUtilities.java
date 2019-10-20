@@ -63,7 +63,7 @@ import sun.awt.AppContext;
 import sun.swing.SwingUtilities2;
 import sun.swing.UIAction;
 import swingjs.JSAppletViewer;
-import swingjs.JSUtil;
+import swingjs.JSToolkit;
 import swingjs.api.Interface;
 import swingjs.api.js.DOMNode;
 import swingjs.plaf.JSComponentUI;
@@ -1887,7 +1887,7 @@ public class SwingUtilities implements SwingConstants
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
 	public static JSFrame getSharedOwnerFrame() {
-		JSAppletViewer p = JSUtil.getAppletViewer();
+		JSAppletViewer p = JSToolkit.getAppletViewer();
 		JSFrame f = p.sharedOwnerFrame;
 		return (f == null ? (p.sharedOwnerFrame = new SharedOwnerFrame()) : f);
 	}

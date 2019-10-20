@@ -52,9 +52,6 @@ import javax.swing.RootPaneContainer;
 
 import sun.awt.AppContext;
 import swingjs.JSToolkit;
-//import java.util.concurrent.atomic.AtomicBoolean;
-//import java.util.logging.Logger;
-import swingjs.JSUtil;
 import swingjs.plaf.JSComponentUI;
 import swingjs.plaf.JSWindowUI;
 
@@ -750,7 +747,7 @@ public class Window extends JComponent {
 		if (parent != null && parent.getPeer() == null)
 			parent.addNotify();
 		getOrCreatePeer();
-		JSUtil.getAppletViewer().addWindow(this);
+		JSToolkit.getAppletViewer().addWindow(this);
 		// to JComponent now
 		super.addNotify();
 	}
@@ -765,7 +762,7 @@ public class Window extends JComponent {
 	 */
 	@Override
 	public void removeNotify() {
-		JSUtil.getAppletViewer().allWindows.removeObj(this);
+		JSToolkit.getAppletViewer().allWindows.removeObj(this);
 		super.removeNotify();
 	}
 
@@ -1484,14 +1481,14 @@ public class Window extends JComponent {
     static ArrayList<Window> getAllWindows() {
 //        synchronized (allWindows) {
             ArrayList<Window> v = new ArrayList<Window>();
-            v.addAll(JSUtil.getAppletViewer().allWindows);
+            v.addAll(JSToolkit.getAppletViewer().allWindows);
             return v;
  //       }
     }
 
 	static ArrayList<Window> getAllUnblockedWindows() {
 		// synchronized (allWindows) {
-		ArrayList<Window> allWindows = JSUtil.getAppletViewer().allWindows;
+		ArrayList<Window> allWindows = JSToolkit.getAppletViewer().allWindows;
 		ArrayList<Window> unblocked = new ArrayList<Window>();
 		for (int i = 0; i < allWindows.size(); i++) {
 			Window w = allWindows.get(i);

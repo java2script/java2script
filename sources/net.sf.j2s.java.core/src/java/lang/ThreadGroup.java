@@ -78,7 +78,7 @@ class ThreadGroup implements Thread.UncaughtExceptionHandler {
     private int ngroups;
     private ThreadGroup groups[];
     protected HTML5Applet 秘html5Applet;
-    public boolean 秘systemExited;
+    public boolean 秘systemExited; 
 	public JSAppletViewer 秘appletViewer;
 
 	private ArrayList<Object> 秘timerQueue;
@@ -1065,5 +1065,11 @@ class ThreadGroup implements Thread.UncaughtExceptionHandler {
 			}
 		}
 		秘systemExited = true;
+	}
+
+	public void 秘transferJ2SInfo(ThreadGroup g) {
+		g.秘appletViewer = 秘appletViewer;
+		g.秘html5Applet = 秘html5Applet;
+		g.秘timerQueue = 秘timerQueue;
 	}
 }

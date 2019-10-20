@@ -19,7 +19,7 @@ import javax.swing.JComponent;
 import javax.swing.JWindow;
 
 import swingjs.JSAppletViewer;
-import swingjs.JSUtil;
+import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
 
 public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListener, ComponentListener  {
@@ -71,7 +71,7 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 		this.isFrame = isFrame;
 		isContainer = isWindow = true;
 		JSComponent jc = (JSComponent) (Object) this;
-		JSAppletViewer viewer = JSUtil.getAppletViewer();
+		JSAppletViewer viewer = JSToolkit.getAppletViewer();
 		applet = viewer.html5Applet;
 		graphics = (Graphics2D) jc.getGraphics();
 		return this;

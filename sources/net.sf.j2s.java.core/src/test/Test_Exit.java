@@ -2,13 +2,10 @@ package test;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
+import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 public class Test_Exit extends Test_ {
@@ -19,17 +16,34 @@ public class Test_Exit extends Test_ {
 
 	public Test_Exit() {
 		
+		try {
+			SwingUtilities.invokeAndWait(new Runnable() {
+
+				@Override
+				public void run() {
+					System.out.println("OK invokeAndWait");
+				}
+				
+			});
+		} catch (InvocationTargetException | InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		ThreadGroup g0 = Thread.currentThread().getThreadGroup();
+
 		// oddly enough, Java runs these hooks in unpredictable order, 
 		// but SwingJS will run them sequentially
-		
-		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+				
+		Thread th = new Thread(new Runnable() {
 
 			@Override
 			public void run() {
 				System.out.println("OK Test_Exit 1");
 			}
 			
-		}));
+		});
+		
+		Runtime.getRuntime().addShutdownHook(th);
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 
 			@Override
@@ -52,14 +66,25 @@ public class Test_Exit extends Test_ {
 		});
 		t.setRepeats(false);
 		t.start();
+		
 		JFrame j = new JFrame("test");
 		j.setSize(300,300);
 		j.setVisible(true);
 		System.exit(0);
+		System.out.println("docs mention that System.exit(0) does not really exit.");
 	}
 	
 	static {
-		// to allow the frame to pop up briefly
-		j2sHeadless = false;
+		/**
+		 * To allow the frame to pop up briefly.
+		 *
+		 * We must do this using j2sNative, because j2sApplet.js
+		 * accesses Test_Exit.j2sHeadless directly, not Test_.j2sHeadless.
+		 * 
+		 * @j2sNative C$.j2sHeadless = false;
+		 */
+		{
+			j2sHeadless = false;
+		}
 	}
 }
