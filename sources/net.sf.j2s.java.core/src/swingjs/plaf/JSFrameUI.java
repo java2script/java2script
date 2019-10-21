@@ -58,15 +58,6 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 	// for our purposes, a frame will be synonymous with a non-imbedded applet or a
 	// dialog.
 
-	// Applet: xxx_appletinfotablediv (fixed w&h)
-	// / \
-	// z 200000 xxx_swingdiv (rootpane, fixed w&h) \
-	// z 200001 xxx_appletdiv (w,h 100%) xxx_infotablediv (System.out)
-	// z 200002 xxx_canvas2d (w,h 100%)
-	// z 200003 xxx_contentLayer (fixed w&h)
-	// xxx_2dappletdiv (w,h 100%; could be used for the glassPane)
-	//
-
 	protected JFrame frame;
 //	private String title;
 	private int state;
