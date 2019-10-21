@@ -423,10 +423,6 @@ public class JSUtil {
 		return swingjs.api.Interface.getInstance(className, false);
 	}
 
-	public static JSAppletViewer getAppletViewer() {
-		return ((JSAppletThread) Thread.currentThread()).秘appletViewer;
-	}
-
 	public static void readyCallback(String aname, String fname, JSComponent applet,
 			JSAppletViewer appletPanel) {
 		try {

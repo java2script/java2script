@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SwingJS test Test_Dialog</title>
+<meta charset="utf-8" />
+<script src="swingjs/swingjs2.js"></script>
+<script>
+if (!self.SwingJS)alert('swingjs2.js was not found. It needs to be in swingjs folder in the same directory as ' + document.location.href)
+Info = {
+  code: null,
+  main: "test.Test_Dialog",
+  core: "NONE",
+	width: 850,
+	height: 550,
+	serverURL: 'http://chemapps.stolaf.edu/jmol/jsmol/php/jsmol.php',
+	j2sPath: 'swingjs/j2s',
+	console:'sysoutdiv',
+	allowjavascript: true
+}
+</script>
+</head>
+<body>
+<table><tr><td>
+<script>
+SwingJS.getApplet('testApplet1', Info)
+</script>
+</td></tr><tr><td>
+<script>
+SwingJS.getApplet('testApplet2', Info)
+</script>
+</td></tr></table>
+<div style="position:absolute;left:900px;top:30px;width:600px;height:700px;">
+<div id=sysoutdiv style="border:1px solid green;width:100%;height:95%;overflow:auto"></div>
+This is System.out. <a href="javascript:testApplet1._clearConsole()">clear it</a> 
+</div>
+</body>
+</html>

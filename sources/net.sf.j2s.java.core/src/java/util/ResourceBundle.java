@@ -343,12 +343,30 @@ public abstract class ResourceBundle {
 	 */
 	private Locale locale = null;
 
-//    /**
-//     * The base bundle name for this bundle.
-//     */
-//    private String name;
+    /**
+     * The base bundle name for this bundle.
+     */
+    private String name;
 
-	/**
+    /**
+     * Returns the base name of this bundle, if known, or {@code null} if unknown.
+     *
+     * If not null, then this is the value of the {@code baseName} parameter
+     * that was passed to the {@code ResourceBundle.getBundle(...)} method
+     * when the resource bundle was loaded.
+     *
+     * @return The base name of the resource bundle, as provided to and expected
+     * by the {@code ResourceBundle.getBundle(...)} methods.
+     *
+     * @see #getBundle(java.lang.String, java.util.Locale, java.lang.ClassLoader)
+     *
+     * @since 1.8
+     */
+    public String getBaseBundleName() {
+        return name;
+    }
+
+    /**
 	 * The flag indicating this bundle has expired in the cache.
 	 */
 	private volatile boolean expired;
@@ -1475,7 +1493,7 @@ public abstract class ResourceBundle {
 				// Set the format in the cache key so that it can be
 				// used when calling needsReload later.
 				cacheKey.setFormat(format);
-				// bundle.name = cacheKey.getName();
+				bundle.name = cacheKey.getName();
 				bundle.locale = targetLocale;
 				// Bundle provider might reuse instances. So we should make
 				// sure to clear the expired flag here.

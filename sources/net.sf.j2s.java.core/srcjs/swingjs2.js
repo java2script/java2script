@@ -10671,6 +10671,7 @@ return jQuery;
 
 // J2S._version set to "3.2.4.07" 2019.01.04; 2019.02.06
 
+// BH 2019.10.20 fixes modal for popup dialog; still needs work for two applets?
 // BH 2019.09.13 fixes touchend canceling click
 // BH 2019.08.29 fixes mouseupoutjsmol not firing MouseEvent.MOUSE_UP
 // BH 5/16/2019 fixes POST method for OuputStream
@@ -13221,6 +13222,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				if (isApp && applet.__Info.headless) {
 					Clazz.loadClass("java.lang.Thread").currentThread$().group.html5Applet = applet;
 					cl.main$SA(applet.__Info.args || []);
+					System.exit$(0);
 				} else {
 					
 					applet.__Info.main
@@ -13646,13 +13648,17 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		// z-order
 		if (!node || node.ui && node.ui.embeddedNode)
 			return 
-
+		var app = node.ui.jc.appContext.threadGroup.name + "_";
 		var a = [];
 		var zmin = 1e10
 		var zmax = -1e10
 		var $windows = $("body > div > .swingjs-window").not("body > .swingjs-tooltip :first-child");
+		var found = false;
 		$windows.each(function(c, b) {
-				a.push([ (b == node ? z : +b.style.zIndex), b ]);
+			  if (b == node)
+				  found = true;
+			  if (b.id.indexOf(app) == 0)
+			    	a.push([ (b == node ? z : +b.style.zIndex), b ]);
 		});
 		a.sort(function(a, b) {
 			return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0
@@ -13669,6 +13675,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			}
 			zbase += 1000;
 		}
+		if (!found)
+			z += 1000;
 		node.style.position = "absolute";
 		if (J2S._checkLoading) 
 			System.out.println("setting z-index to " + z + " for " + node.id);
@@ -16830,8 +16838,9 @@ java.lang.System = System = {
   currentTimeMillis$ : function () {
     return new Date ().getTime ();
   },
-  exit$ : function() { 
- 	 swingjs.JSToolkit && swingjs.JSToolkit.exit$() 
+  exit$ : function(status) { 
+	 swingjs.JSToolkit || Clazz.loadClass("swingjs.JSToolkit");
+ 	 swingjs.JSToolkit.exit$I(status || 0) 
   },
   gc$ : function() {}, // bh
   getProperties$ : function () {
@@ -18361,6 +18370,7 @@ String(byte[] ascii, int hibyte, int offset, int count)
 */
 
 String.instantialize=function(){
+var x=arguments[0];
 switch (arguments.length) {
 case 0:
   return new String();
@@ -18370,7 +18380,6 @@ case 1:
   // String(StringBuffer buffer)
   // String(StringBuilder builder)
   // String(String original)
-  var x=arguments[0];
   if (x.__BYTESIZE || x instanceof Array){
     return (x.length == 0 ? "" : typeof x[0]=="number" ? Encoding.readUTF8Array(x) : x.join(''));
   }
@@ -18381,7 +18390,7 @@ case 2:
   // String(byte[] bytes, String charsetName)
 
   var hibyte=arguments[1];
-  return (typeof hibyte=="number" ? String.instantialize(arguments[0],hibyte,0,arguments[0].length) 
+  return (typeof hibyte=="number" ? String.instantialize(x,hibyte,0,x.length) 
 	: self.TextDecoder && arguments[1].toString().toUpperCase() == "UTF-8" ? new TextDecoder().decode(arguments[0])
 	: String.instantialize(x,0,x.length,hibyte));
 case 3:
@@ -18389,13 +18398,13 @@ case 3:
   // String(char[] value, int offset, int count)
   // String(int[] codePoints, int offset, int count)
 
-  var bytes=arguments[0];
+  var bytes=x;
   var offset=arguments[1];
   var length=arguments[2];
   if(arguments[2]instanceof Array){
     // ???
     bytes=arguments[2];
-    offset=arguments[0];
+    offset=x;
     length=arguments[1];
   }
   var arr=new Array(length);
@@ -18420,7 +18429,7 @@ case 4:
   // String(byte[] bytes, int offset, int length, String charsetName)
   // String(byte[] ascii, int hibyte, int offset, int count)
 
-  var bytes=arguments[0];
+  var bytes=x;
   var cs=arguments[3];
   if(typeof cs != "number"){
     var offset=arguments[1];
@@ -19485,7 +19494,7 @@ if(typeof(jQuery)=="undefined") alert ("Note -- jQuery is required for SwingJS, 
 
 if (typeof(SwingJS) == "undefined") {
 
-  SwingJS = {};
+  SwingJS = {eventID:0};
 
 (function (SwingJS, $, J2S) {
 

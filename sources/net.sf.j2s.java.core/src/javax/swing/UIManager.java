@@ -1376,7 +1376,7 @@ public class UIManager
 
     
 private static UIDefaults uid;
-private static boolean focusInitialized;
+//private static boolean focusInitialized; // Fails for multiple applets!
 
     /*
      * This method is called before any code that depends on the
@@ -1398,30 +1398,24 @@ private static boolean focusInitialized;
 //        }
     }
 
-    /*
-     * Sets default swing focus traversal policy.
-     */
-    /*
-     * Sets default swing focus traversal policy.
-     */
-    private static void maybeInitializeFocusPolicy(JComponent comp) {
-        // Check for JRootPane which indicates that a swing toplevel
-        // is coming, in which case a swing default focus policy
-        // should be instatiated. See 7125044.
-        if (comp instanceof JRootPane) {
-        	if (!focusInitialized) {
-//            synchronized (classLock) {
-//                if (!getLAFState().focusPolicyInitialized) {
-//                    getLAFState().focusPolicyInitialized = true;
-        			focusInitialized = true;
-                    if (FocusManager.isFocusManagerEnabled()) {
-                        KeyboardFocusManager.getCurrentKeyboardFocusManager().
-                            setDefaultFocusTraversalPolicy(
-                                new LayoutFocusTraversalPolicy());
-                    }
-                }
-//            }
-        }
+	/*
+	 * Sets default swing focus traversal policy.
+	 */
+	/*
+	 * Sets default swing focus traversal policy.
+	 */
+	private static void maybeInitializeFocusPolicy(JComponent comp) {
+		// Check for JRootPane which indicates that a swing toplevel
+		// is coming, in which case a swing default focus policy
+		// should be instatiated. See 7125044.
+		// SwingJS can't use static ref here
+		if (comp instanceof JRootPane) {
+			if (FocusManager.isFocusManagerEnabled()) {
+				KeyboardFocusManager fm = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+				if (fm.getDefaultFocusTraversalPolicy() == null)
+					fm.setDefaultFocusTraversalPolicy(new LayoutFocusTraversalPolicy());
+			}
+		}
     }
 
 

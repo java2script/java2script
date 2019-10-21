@@ -186,7 +186,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 
 		threadGroup = new JSThreadGroup(appletName);
 		myThread = new JSAppletThread(this, threadGroup, appletName);
-		java.lang.Thread.thisThread = (java.lang.Thread) ((Object) myThread);
+		java.lang.Thread.秘thisThread = myThread;
 		
 		appContext = JSToolkit.createNewAppContext();
 		// initialize toolkit and graphics configuration
@@ -619,16 +619,16 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 		return (haveFrames || forceNew ? new JSFrameViewer() : null);
 	}
 
-	public ArrayList<Object> getTimerQueue() {
-		return (timerQueue == null ? (timerQueue = new ArrayList<Object>()) : timerQueue);
-	}
-
 	public void exit() {
 		for (int i = allWindows.size(); --i >= 0;)
 			try {
 				allWindows.get(i).dispose();
 			} catch (Throwable e) {
 			}
+		if (isApplet && applet != null) {
+			applet.setVisible(false);
+			html5Applet._show(false);
+		}
 	}
 
 	@Override

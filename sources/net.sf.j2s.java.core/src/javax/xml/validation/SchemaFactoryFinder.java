@@ -68,7 +68,7 @@ class SchemaFactoryFinder  {
         // Use try/catch block to support applets
         try {
             debug = ss.getSystemProperty("jaxp.debug") != null;
-        } catch (Exception _) {
+        } catch (Exception e) {
             debug = false;
         }
     }
@@ -113,7 +113,7 @@ class SchemaFactoryFinder  {
                 debugPrintln("using thread context class loader ("+classLoader+") for search");
                 return;
             }
-        } catch( Throwable _ ) {
+        } catch( Throwable e ) {
             ; // getContextClassLoader() undefined in JDK1.1
         }
 

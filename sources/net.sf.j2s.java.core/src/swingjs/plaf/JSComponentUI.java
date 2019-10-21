@@ -2954,7 +2954,8 @@ public class JSComponentUI extends ComponentUI
 
 	@Override
 	public FontMetrics getFontMetrics(Font font) {
-		return c.getFontMetrics(font);
+		// n/a -- called from java.awt.Component when NOT a LightweightPeer.
+		return null;
 	}
 
 	/**

@@ -46,7 +46,6 @@ import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.plaf.UIResource;
 
-import swingjs.JSAppletThread;
 import swingjs.JSAppletViewer;
 import swingjs.JSFrameViewer;
 import swingjs.JSGraphics2D;
@@ -115,7 +114,8 @@ public abstract class JSComponent extends Component {
 	public JSGraphics2D 秘gtemp; // indicates that we are painting, so that g.setBackground() should also be set 
 
 	public boolean 秘isRootPane, 秘isContentPane;
-	public JSAppletViewer 秘appletViewer = ((JSAppletThread) Thread.currentThread()).秘appletViewer;
+	// initially, we go with the current thread, but later we will pick up the actual JSAppletViewer
+	public JSAppletViewer 秘appletViewer = Thread.currentThread().getThreadGroup().秘appletViewer;
 	private JSFrameViewer 秘frameViewer, 秘topFrameViewer;
 	public HTML5Canvas 秘canvas;
 	public ComponentUI ui; // from JComponent
@@ -274,6 +274,8 @@ public abstract class JSComponent extends Component {
 	public void addNotify() {
 		if (秘paintsSelf() && ui != null) // BoxFiller will not have a ui? 
 			((JSComponentUI) ui).clearPaintPath();
+		if (parent != null)
+			秘appletViewer = parent.秘appletViewer;
 		super.addNotify();
 	}
 
