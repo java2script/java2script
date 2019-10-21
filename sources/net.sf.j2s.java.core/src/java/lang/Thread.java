@@ -42,7 +42,7 @@ import javajs.util.JSThread;
 //import sun.reflect.CallerSensitive;
 //import sun.reflect.Reflection;
 //import sun.security.util.SecurityConstants;
-
+import swingjs.JSThreadGroup;
 import swingjs.JSToolkit;
 import swingjs.JSUtil;
 
@@ -207,7 +207,8 @@ class Thread implements Runnable {
     
     /* For generating thread ID */
     private static long threadSeqNumber;
-		public static Thread thisThread;
+    
+		public static JSThread 秘thisThread;
 
     /* Java thread status for tools,
      * initialized to indicate thread 'not yet started'
@@ -275,43 +276,26 @@ class Thread implements Runnable {
      * @return  the currently executing thread.
      */
 		public static Thread currentThread() {
-    	/**
-    	 * @j2sNative
-    	 *if (java.lang.Thread.thisThread === "working")
-    	 *  return null;
-    	 * 
-    	 * 
-    	 */
-    	{}
-    	if (thisThread == null) {
-			/**
-			 * 
-			 * technically, JSThread is an abstract class, but we go ahead and
-			 * instantialize it anyway in JavaScript. The reason it is abstract
-			 * is to force generation of necessary methods when using it.
-			 * 
-			 * @j2sNative
-			 *
-			 *
-			 * 			java.lang.Thread.thisThread = "working";
-			 *            java.lang.Thread.thisThread =
-			 *            Clazz.new_(java.lang.Thread.c$$S, ["master"]);
-			 *            var name = J2S._applets["master"]._id; var g =
-			 *            Clazz.new_(Clazz.load('swingjs.JSThreadGroup').c$$ThreadGroup$S,
-			 *            [null, name]); java.lang.Thread.thisThread =
-			 *            Clazz.new_(Clazz.load("javajs.util.JSThread").c$$ThreadGroup$S,
-			 *            [g, name]);
-			 * 
-			 */
-    		{
-    			// these are for reference only -- not used in JavaScript
-    			JSThread.interrupted();
-    			new swingjs.JSThreadGroup(null, null);
-    			thisThread = new Thread("master");
-    		}
-    		thisThread.setPriority(NORM_PRIORITY);
+			Thread t = 秘thisThread;
+			if ((Object) t == "working")
+				return null;
+    	if (t == null) {
+			 秘thisThread = (JSThread) (Object) "working";
+			 秘thisThread = (JSThread) new Thread("master");
+    		 String name = /** @j2sNative J2S._applets["master"]._id || */null;
+    		 @SuppressWarnings("unused")
+			JSThreadGroup g = new JSThreadGroup(null, name);
+    		 秘thisThread = /** @j2sNative 
+    		 Clazz.new_(Clazz.load("javajs.util.JSThread").c$$ThreadGroup$S,
+            [g, name]) ||  */ null;
+    				 
+    		 // new JSThread(g, name);
+			// technically, JSThread is an abstract class, but we go ahead and
+			// instantialize it anyway in JavaScript. The reason it is abstract
+			//  is to force generation of necessary methods when using it.
+    		 秘thisThread.setPriority(NORM_PRIORITY);
     	}
-    	return thisThread;
+    	return 秘thisThread;
     }
 
     /**
@@ -319,7 +303,7 @@ class Thread implements Runnable {
      * and allow other threads to execute.
      */
     public static void yield() {
-    	// SwingJS ;
+    	JSUtil.notImplemented(null);
     }
 
     /**
@@ -335,7 +319,8 @@ class Thread implements Runnable {
      * @see        Object#notify()
      */
     public static void sleep(long millis) throws InterruptedException {
-    	// SwingJS ;
+    	JSUtil.notImplemented(null);
+    	JSUtil.warn("SwingJS does not implement Thread.sleep(long)");
     }
     /**
      * Causes the currently executing thread to sleep (cease execution)
@@ -368,8 +353,9 @@ class Thread implements Runnable {
         if (nanos >= 500000 || (nanos != 0 && millis == 0)) {
             millis++;
         }
-
-        sleep(millis);
+    	JSUtil.notImplemented(null);
+    	JSUtil.warn("SwingJS does not implement Thread.sleep(long,int)");
+//        sleep(millis);
     }
 
     /**
@@ -394,7 +380,7 @@ class Thread implements Runnable {
      */
     private void init(ThreadGroup g, Runnable target, String name,
                       long stackSize, Object acc) { // was access controller
-        Thread parent = (thisThread == null ? null : thisThread);
+        Thread parent = (秘thisThread == null ? null : 秘thisThread);
 //        SecurityManager security = System.getSecurityManager();
         if (g == null) {
             /* Determine if it's an applet or not */
@@ -418,13 +404,13 @@ class Thread implements Runnable {
         	g = newThreadGroup(null, name);
         	parent = this; // ?? 
         }
-        /* checkAccess regardless of whether or not threadgroup is
-           explicitly passed in. */
-        g.checkAccess();
-
-        /*
-         * Do we have the required permissions?
-         */
+//        /* checkAccess regardless of whether or not threadgroup is
+//           explicitly passed in. */
+//        g.checkAccess();
+//
+//        /*
+//         * Do we have the required permissions?
+//         */
 //        if (security != null) {
 //            if (isCCLOverridden(getClass())) {
 //                security.checkPermission(SUBCLASS_IMPLEMENTATION_PERMISSION);
@@ -744,8 +730,9 @@ class Thread implements Runnable {
     }
 
     private void start0(){
-    	started = true;    	
-    	JSToolkit.dispatch(this, 0, 0); // run the run() method asynchronously
+    	started = true;	
+        currentThread().getThreadGroup().秘transferJ2SInfo(getThreadGroup());
+    	JSToolkit.startThread(this); // run the run() method asynchronously
     }
 
     /**
@@ -1293,28 +1280,27 @@ class Thread implements Runnable {
      */
     public final synchronized void join(long millis)
     throws InterruptedException {
-        long base = System.currentTimeMillis();
-        long now = 0;
+//        long base = System.currentTimeMillis();
+//        long now = 0;
 
         if (millis < 0) {
             throw new IllegalArgumentException("timeout value is negative");
         }
-
-        JSUtil.warn("Cannot wait in Thread");
-        if (millis == 0) {
-            while (isAlive()) {
-                wait(0);
-            }
-        } else {
-            while (isAlive()) {
-                long delay = millis - now;
-                if (delay <= 0) {
-                    break;
-                }
-                wait(delay);
-                now = System.currentTimeMillis() - base;
-            }
-        }
+    	JSUtil.notImplemented(null);
+//        if (millis == 0) {
+//            while (isAlive()) {
+//                wait(0);
+//            }
+//        } else {
+//            while (isAlive()) {
+//                long delay = millis - now;
+//                if (delay <= 0) {
+//                    break;
+//                }
+//                wait(delay);
+//                now = System.currentTimeMillis() - base;
+//            }
+//        }
     }
 
     /**

@@ -27,5 +27,7 @@ public interface HTML5Applet {
 	 */
 	void _resizeApplet(int[] widthHeight);
 
+	void _show(boolean b);
+
 
 }

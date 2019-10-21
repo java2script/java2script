@@ -33,7 +33,7 @@ public class Test_Ints extends Test_ {
 	public static void main(String[] args) {
 		int i0b = new Integer(0b010101).intValue();
 		assert(i0b == 21);
-		new Test_Ints(0b00,0b01);
+		new Test_Ints(0b11,0b01);
 		test(0b01, 0b0101, 'c', 0x0f,0.5D, 0.2F, 33L, (short) 33);
 		test(0b01, new Integer(0b0101), 'b', 0x0f,0.5D, 0.2F, 33L, (short) 33);
 		int i3 = new Integer("3");

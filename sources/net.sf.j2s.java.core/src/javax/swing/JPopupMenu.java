@@ -688,9 +688,14 @@ public class JPopupMenu extends JComponent implements MenuElement {
 	 */
 	@Override
 	public void setVisible(boolean b) {
-		if (b == isVisible())
+		if (b == isVisible()) {
+			if (b) {
+				// need this for SwingJS to ensure a changed visible menu is updated
+				getUI().setVisible(true);
+			}
 			return;
-		this.getUI().setVisible(true);
+		}
+		getUI().setVisible(b);
 		if (!b)
 			popup = null;
 //		/**

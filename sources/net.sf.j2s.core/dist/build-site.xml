@@ -54,7 +54,7 @@
 
   	<for param="file.zip">
   	  <path>
-  	    <fileset dir="${libjs.dir}" includes="*.zip"/>
+  	    <fileset dir="${libjs.dir}" includes="*.zip" erroronmissingdir="false" />
   	  </path>
   	  <sequential>
   	  	 	<unzip src="@{file.zip}" dest="${site.dir}" overwrite="true"/>  	
@@ -73,14 +73,14 @@
 
   	<echo> Copying ${resource.dir} files into ${j2s.dir} </echo>
   	<copy todir="${j2s.dir}">
-      <fileset dir="${resource.dir}">
+      <fileset dir="${resource.dir}" erroronmissingdir="false" >
       	<include name="**"/>
   	</fileset>
     </copy>
       		
   	<echo> Copying ${site-resource.dir} files into ${site.dir} </echo>
   	<copy todir="${site.dir}">
-      <fileset dir="${site-resource.dir}">
+      <fileset dir="${site-resource.dir}" erroronmissingdir="false" >
       	<include name="**"/>
   	</fileset>
     </copy>

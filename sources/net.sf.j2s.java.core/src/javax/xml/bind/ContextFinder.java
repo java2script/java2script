@@ -87,24 +87,24 @@ class ContextFinder {
     // previous value of JAXBContext.JAXB_CONTEXT_FACTORY, using also this to ensure backwards compatibility
     private static final String JAXB_CONTEXT_FACTORY_DEPRECATED = "javax.xml.bind.context.factory";
 
-    private static final Logger logger;
+    private static Logger logger;
 
     static {
-        logger = Logger.getLogger("javax.xml.bind");
+        //logger = Logger.getLogger("javax.xml.bind");
         try {
-            if (AccessController.doPrivileged(new GetPropertyAction("jaxb.debug")) != null) {
+//            if (AccessController.doPrivileged(new GetPropertyAction("jaxb.debug")) != null) {
                 // disconnect the logger from a bigger framework (if any)
                 // and take the matters into our own hands
-                logger.setUseParentHandlers(false);
-                logger.setLevel(Level.ALL);
-                ConsoleHandler handler = new ConsoleHandler();
-                handler.setLevel(Level.ALL);
-                logger.addHandler(handler);
-            } else {
-                // don't change the setting of this logger
-                // to honor what other frameworks
-                // have done on configurations.
-            }
+                //Logger.setUseParentHandlers(false);
+                //Logger.setLevel(Level.ALL);
+//                ConsoleHandler handler = new ConsoleHandler();
+//                handler.setLevel(Level.ALL);
+                //Logger.addHandler(handler);
+//            } else {
+//                // don't change the setting of this logger
+//                // to honor what other frameworks
+//                // have done on configurations.
+//            }
         } catch (Throwable t) {
             // just to be extra safe. in particular System.getProperty may throw
             // SecurityException.
@@ -278,10 +278,10 @@ class ContextFinder {
             throw new JAXBException(Messages.format(Messages.DEFAULT_PROVIDER_NOT_FOUND), e);
         }
 
-        if (logger.isLoggable(Level.FINE)) {
+        //if (Logger.isLoggable(Level.FINE)) {
             // extra check to avoid costly which operation if not logged
-            logger.log(Level.FINE, "loaded {0} from {1}", new Object[]{className, which(spi)});
-        }
+            //Logger.log(Level.FINE, "loaded {0} from {1}", new Object[]{className, which(spi)});
+        //}
 
         return newInstance(classes, properties, spi);
     }
@@ -360,14 +360,14 @@ class ContextFinder {
         }
 
         // else no provider found
-        logger.fine("Trying to create the platform default provider");
+        //Logger.fine("Trying to create the platform default provider");
         return newInstance(contextPath, contextPathClasses, PLATFORM_DEFAULT_FACTORY_CLASS, classLoader, properties);
     }
 
     static JAXBContext find(Class<?>[] classes, Map<String, ?> properties) throws JAXBException {
 
         // search for jaxb.properties in the class loader of each class first
-        logger.fine("Searching jaxb.properties");
+        //Logger.fine("Searching jaxb.properties");
         for (final Class c : classes) {
             // this classloader is used only to load jaxb.properties, so doing this should be safe.
             // this is possible for primitives, arrays, and classes that are
@@ -408,7 +408,7 @@ class ContextFinder {
         String className = firstByServiceLoaderDeprecated(JAXBContext.class, getContextClassLoader());
         if (className != null) return newInstance(classes, properties, className);
 
-        logger.fine("Trying to create the platform default provider");
+        //Logger.fine("Trying to create the platform default provider");
         Class ctxFactoryClass =
                 (Class) ServiceLoaderUtil.lookupUsingOSGiServiceLoader("javax.xml.bind.JAXBContext", logger);
 
@@ -417,7 +417,7 @@ class ContextFinder {
         }
 
         // else no provider found
-        logger.fine("Trying to create the platform default provider");
+        //Logger.fine("Trying to create the platform default provider");
         return newInstance(classes, properties, PLATFORM_DEFAULT_FACTORY_CLASS);
     }
 
@@ -429,7 +429,7 @@ class ContextFinder {
     private static String classNameFromPackageProperties(URL packagePropertiesUrl,
                                                          String ... factoryIds) throws JAXBException {
 
-        logger.log(Level.FINE, "Trying to locate {0}", packagePropertiesUrl.toString());
+        //Logger.log(Level.FINE, "Trying to locate {0}", packagePropertiesUrl.toString());
         Properties props = loadJAXBProperties(packagePropertiesUrl);
         for(String factoryId : factoryIds) {
             if (props.containsKey(factoryId)) {
@@ -464,19 +464,19 @@ class ContextFinder {
     private static String getDeprecatedSystemProperty(String property) {
         String value = getSystemProperty(property);
         if (value != null) {
-            logger.log(Level.WARNING, "Using non-standard property: {0}. Property {1} should be used instead.",
-                    new Object[] {property, JAXBContext.JAXB_CONTEXT_FACTORY});
+            //Logger.log(Level.WARNING, "Using non-standard property: {0}. Property {1} should be used instead.",
+//                    new Object[] {property, JAXBContext.JAXB_CONTEXT_FACTORY});
         }
         return value;
     }
 
     private static String getSystemProperty(String property) {
-        logger.log(Level.FINE, "Checking system property {0}", property);
+        //Logger.log(Level.FINE, "Checking system property {0}", property);
         String value = AccessController.doPrivileged(new GetPropertyAction(property));
         if (value != null) {
-            logger.log(Level.FINE, "  found {0}", value);
+            //Logger.log(Level.FINE, "  found {0}", value);
         } else {
-            logger.log(Level.FINE, "  not found");
+            //Logger.log(Level.FINE, "  not found");
         }
         return value;
     }
@@ -485,14 +485,14 @@ class ContextFinder {
 
         try {
             Properties props;
-            logger.log(Level.FINE, "loading props from {0}", url);
+            //Logger.log(Level.FINE, "loading props from {0}", url);
             props = new Properties();
             InputStream is = url.openStream();
             props.load(is);
             is.close();
             return props;
         } catch (IOException ioe) {
-            logger.log(Level.FINE, "Unable to load " + url.toString(), ioe);
+            //Logger.log(Level.FINE, "Unable to load " + url.toString(), ioe);
             throw new JAXBException(ioe.toString(), ioe);
         }
     }
@@ -608,7 +608,7 @@ class ContextFinder {
 
         final String jaxbContextFQCN = spiClass.getName();
 
-        logger.fine("Searching META-INF/services");
+        //Logger.fine("Searching META-INF/services");
 
         // search META-INF services next
         BufferedReader r = null;
@@ -626,10 +626,10 @@ class ContextFinder {
                     factoryClassName = factoryClassName.trim();
                 }
                 r.close();
-                logger.log(Level.FINE, "Configured factorty class:{0}", factoryClassName);
+                //Logger.log(Level.FINE, "Configured factorty class:{0}", factoryClassName);
                 return factoryClassName;
             } else {
-                logger.log(Level.FINE, "Unable to load:{0}", resource);
+                //Logger.log(Level.FINE, "Unable to load:{0}", resource);
                 return null;
             }
         } catch (IOException e) {
@@ -640,7 +640,7 @@ class ContextFinder {
                     r.close();
                 }
             } catch (IOException ex) {
-                logger.log(Level.SEVERE, "Unable to close resource: " + resource, ex);
+                //Logger.log(Level.SEVERE, "Unable to close resource: " + resource, ex);
             }
         }
     }

@@ -227,15 +227,15 @@ public class ObjectInputStream
         primClasses.put("void", void.class);
     }
 
-    private static class Caches {
-        /** cache of subclass security audit results */
-        static final ConcurrentMap<WeakClassKey,Boolean> subclassAudits =
-            new ConcurrentHashMap<>();
-
-        /** queue for WeakReferences to audited subclasses */
-        static final ReferenceQueue<Class<?>> subclassAuditsQueue =
-            new ReferenceQueue<>();
-    }
+//    private static class Caches {
+//        /** cache of subclass security audit results */
+//        static final ConcurrentMap<WeakClassKey,Boolean> subclassAudits =
+//            new ConcurrentHashMap<>();
+//
+//        /** queue for WeakReferences to audited subclasses */
+//        static final ReferenceQueue<Class<?>> subclassAuditsQueue =
+//            new ReferenceQueue<>();
+//    }
 
     /** filter stream for handling block data conversion */
     private final BlockDataInputStream bin;

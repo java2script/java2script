@@ -56,9 +56,9 @@ import javax.swing.JComponent;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
-import javax.swing.text.Document;
 
 import javajs.api.JSFunction;
+import javajs.util.JSThread;
 import javajs.util.PT;
 import sun.awt.AppContext;
 import sun.awt.KeyboardFocusManagerPeerProvider;
@@ -92,7 +92,8 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		}
 	}
 	
-
+    private static SwingJS SwingJS = /**@j2sNative SwingJS || */null;
+	
 	/*
 	 * NOTE: This class is constructed from java.awt.Toolkit.getDefaultToolkit$()
 	 * 
@@ -114,16 +115,15 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 				AppContext.EVENT_QUEUE_KEY));
 	}
 
+	public static JSAppletViewer getAppletViewer() {
+		return Thread.currentThread().getThreadGroup().秘appletViewer;
+	}
+
 	/**
-	 * From System.exit()
+	 * From System.exit() in j2sClazz.js
 	 */
-	public static void exit() {
-		/**
-		 * @j2sNative
-		 * 
-		 * Thread.thisThread.group.systemExited = true;
-		 */
-		JSUtil.getAppletViewer().exit();
+	public static void exit(int status) {
+		Runtime.getRuntime().exit(status);
 	}
 
 	// ////// java.awt.Toolkit /////////
@@ -224,8 +224,8 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	 * @return
 	 */
 	public static GraphicsConfiguration getGraphicsConfiguration() {
-		JSAppletViewer ap = JSUtil.getAppletViewer();
-		GraphicsConfiguration gc = ap.graphicsConfig;
+		JSAppletViewer ap = JSToolkit.getAppletViewer();
+		GraphicsConfiguration gc = (ap == null ? null : ap.graphicsConfig);
 		return (gc == null ? (gc = ap.graphicsConfig = (GraphicsConfiguration) JSUtil.getInstance("swingjs.JSGraphicsConfiguration")) : gc);
 	}
 
@@ -301,45 +301,24 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 
 	private static int dispatchID = 0;
 
-	public static void dispatchSystemEvent(Runnable runnable) {
-		JSFunction f = null;
-		/**
-		 * @param eventQueue
-		 * @j2sNative
-		 * 
-		 *            System.out.println("JST dispatchSystemEvent " +
-		 *            runnable.run$.toString()); f =
-		 *            function(_JSToolkit_dispatchSystemEvent) {
-		 *            System.out.println("JST running " +
-		 *            runnable.run$.toString());runnable.run$()};
-		 */
-		{
-		}
-		dispatch(f, 0, 0);
-	}
-
 	/**
-	 * dispatch an event "on the event thread". ActiveEvent has no src but instead
-	 * a dispatch() method.
+	 * dispatch an event "on the event thread". ActiveEvent has no src but instead a
+	 * dispatch() method.
+	 * 
 	 * @param event
 	 * @param src
 	 * @param andWait
 	 */
 	public static void dispatchEvent(AWTEvent event, Object src, boolean andWait) {
-		JSFunction f = null;
 		int id = ++dispatchID;
-		
-		/**
-		 * @j2sNative
-		 * 
-		 * 
-		 *            f = function()
-		 *            {
-		 *            if
-		 *            (src == null) event.dispatch$(); else src.dispatchEvent$java_awt_AWTEvent(event);
-		 *            };
-		 * 
-		 */
+
+		JSFunction f = /**
+						 * @j2sNative
+						 * 
+						 * 			function() { if (src == null) event.dispatch$(); else
+						 *            src.dispatchEvent$java_awt_AWTEvent(event); } ||
+						 */
+				null;
 		if (andWait) {
 			invokeAndWait(f, id);
 		} else {
@@ -352,96 +331,138 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		return (id >= MouseEvent.MOUSE_FIRST && id <= MouseEvent.MOUSE_LAST);
 	}
 	
-	/**
-	 * encapsulate timeout with an anonymous function that re-instates the
-	 * "current thread" prior to execution. This is in case of multiple applets.
-	 * 
-	 * @param f a function or Runnable
-	 * @param msDelay a time to wait for, in milliseconds. If this is < 0, just run without the dispatch (debugging)
-	 * @param id an event id or 0 if not via EventQueue 
-	 */
-	public static int dispatch(Object f, int msDelay, int id) {
-
+	public static void killDispatched(int html5Id) {
 		/**
 		 * @j2sNative
 		 * 
-		 *            var thread = Thread.thisThread;
-		 *            if (thread.group.systemExited)
-		 *            	return;
-		 *            var thread0 = thread;
-		 *            var id0 = SwingJS.eventID || 0;
-		 *            var ff = function(_JSToolkit_setTimeout) {
-		 *            SwingJS.eventID = id;
-		 *            java.lang.Thread.thisThread = thread; 
-		 *            try {
-		 *            if (f.run$)
-		 *             f.run$();
-		 *            else
-		 *             f();
-		 *             } catch (e) {
-		 *             var s = "JSToolkit.dispatch$I(" + id +"): " 
-		 *               + e + "\n" + (e.getStackTrace$ ? e.getStackTrace$() + "\n" : "") + (!!e.stack ? e.stack : "");
-		 *             System.out.println(s);
-		 *             alert(s);
-		 *             }
-		 *            SwingJS.eventID = id0; 
-		 *            Thread.thisThread = thread0; 
-		 *            };
-		 *            return (msDelay == -1 ? ff() : setTimeout(ff, msDelay));
+		 * clearTimeout(html5Id);
 		 * 
-		 * 
-		 * 
-		 */
-		{
-			return  0;
+		 */		
+	}
+
+	public static JSThread getCurrentThread(JSThread t) {
+		boolean setCurrent = (t != null);
+		if (t == null)
+			t = Thread.秘thisThread;
+		t = (/** @j2sNative !self.java || */
+		t.getThreadGroup().秘systemExited ? null : t);
+		if (setCurrent && t != null)
+			Thread.秘thisThread = t;
+		return t;
+	}
+
+	public static void startThread(Thread t) {
+		JSThread thread = (JSThread) t;
+		JSThread thread0 = getCurrentThread(null);
+		if (thread0 == null)
+			return;
+		int id0 = SwingJS.eventID;
+		/**
+		 * @j2sNative var ff = function() {
+		 */		
+		SwingJS.eventID = 0;
+		thread = getCurrentThread(thread);
+		if (thread == null)
+			return;
+		try {
+			/**
+			 * @j2sNative thread.run$();
+			 */
+		} catch (Throwable e) {
+			String s = "JSToolkit.dispatch$I(thread): " + thread.getName() + ": " + e + "\n"
+					+ /**
+						 * @j2sNative (e.getStackTrace$ ? e.getStackTrace$() + "\n" : "") + (!!e.stack ?
+						 *            e.stack : "") +
+						 */
+					"";
+			System.out.println(s);
 		}
+		getCurrentThread(thread0);
+		SwingJS.eventID = id0;
+		/**
+		 * @j2sNative }; setTimeout(ff, 0);
+		 */
 	}
 
 	/**
-	 * encapsulate timeout with an anonymous function that re-instates the
-	 * "current thread" prior to execution. This is in case of multiple applets.
+	 * encapsulate timeout with an anonymous function that re-instates the "current
+	 * thread" prior to execution. This is in case of multiple applets.
+	 * 
+	 * @param f       a function or Runnable
+	 * @param msDelay a time to wait for, in milliseconds. If this is < 0, just run
+	 *                without the dispatch (debugging)
+	 * @param id      an event id or 0 if not via EventQueue
+	 */
+	public static int dispatch(Object f, int msDelay, int id) {
+		JSThread thread0 = getCurrentThread(null);
+		if (thread0 == null)
+			return 0;
+		int ret = 0;
+		int id0 = SwingJS.eventID;
+		/**
+		 * @j2sNative var ff = function() {
+		 */		
+		SwingJS.eventID = id;
+		thread0 = getCurrentThread(thread0);
+		if (thread0 == null)
+			return 0;
+		try {
+			/**
+			 * @j2sNative if (f.run$) f.run$(); else f();
+			 */
+		} catch (Throwable e) {
+			String s = "JSToolkit.dispatch$I(" + id + "): " + e + "\n"
+					+ /**
+						 * @j2sNative (e.getStackTrace$ ? e.getStackTrace$() + "\n" : "") + (!!e.stack ?
+						 *            e.stack : "") +
+						 */
+					"";
+			System.out.println(s);
+			JSUtil.warn(s);
+		}
+		getCurrentThread(thread0);
+		SwingJS.eventID = id0;
+		/**
+		 * @j2sNative }; ret = (msDelay == -1 ? ff() :
+		 *            setTimeout(ff, msDelay));
+		 */
+		return ret;
+	}
+
+	/**
+	 * encapsulate timeout with an anonymous function that re-instates the "current
+	 * thread" prior to execution. This is in case of multiple applets.
 	 * 
 	 * 
-	 * @param f a function or Runnable
-	 * @param id an event id or 0 if not via EventQueue 
+	 * @param f  a function or Runnable
+	 * @param id an event id or 0 if not via EventQueue
 	 */
 	private static void invokeAndWait(JSFunction f, int id) {
+		JSThread thread0 = getCurrentThread(null);
+		if (thread0 == null)
+			return;
 		/**
-		 * @j2sNative
-		 * 
-		 *            var thread = Thread.thisThread;
-		 *            if (thread.group.systemExited)
-		 *            	return;
-		 *            var thread0 = thread;
-		 *            (function(_JSToolkit_setTimeout) {
-		 *              var id0 = SwingJS.eventID || 0;
-		 *              SwingJS.eventID = id;
-		 *              java.lang.Thread.thisThread = thread; 
-		 *              if (f.run$)
-		 *                f.run$();
-		 *              else
-		 *                f();
-		 *              SwingJS.eventID = id0;
-		 *              Thread.thisThread = thread0; 
-		 *            })();
-		 * 
-		 * 
-		 * 
+		 * @j2sNative (function() { */
+		
+		int id0 = SwingJS.eventID;
+		SwingJS.eventID = id;
+		thread0 = getCurrentThread(thread0);
+		if (thread0 == null)
+			return;
+		/**
+		 * @j2sNative if (f.run$) f.run$(); else f();
 		 */
-		{
-		}
+		thread0 = getCurrentThread(thread0);
+		if (thread0 == null)
+			return;
+		SwingJS.eventID = id0;
+		/**
+		 * @j2sNative })();
+		 */
 	}
 
 	public static boolean isDispatchThread() {
-		/**
-		 * @j2sNative
-		 * 
-		 *            return (!!SwingJS.eventID);
-		 * 
-		 */
-		{
-			return false;
-		}
+		return (SwingJS.eventID != 0);
 	}
 
 	/**
@@ -450,12 +471,7 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	 * @param b
 	 */
 	public static void setIsDispatchThread(boolean b) {
-		/**
-		 * @j2sNative
-		 * 
-		 *            SwingJS.eventID = (b ? 1 : 0);
-		 * 
-		 */
+		SwingJS.eventID = (b ? 1 : 0);
 	}
 
 //	public static void forceRepaint(Component c) {
@@ -691,7 +707,7 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	}
 
 	public static ArrayList<Object> getTimerQueue() {
-		return JSUtil.getAppletViewer().getTimerQueue();
+		return Thread.currentThread().getThreadGroup().秘getTimerQueue();
 	}
 
 	/**
@@ -710,16 +726,6 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	   */
 		{}
 		JSUtil.J2S.getFileFromDialog(f, type);
-	}
-
-	public static void killDispatched(int html5Id) {
-		/**
-		 * @j2sNative
-		 * 
-		 * clearTimeout(html5Id);
-		 * 
-		 */		
-		{}
 	}
 
 	static Clipboard systemClipboard;

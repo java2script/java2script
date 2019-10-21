@@ -19,7 +19,7 @@ import javax.swing.JComponent;
 import javax.swing.JWindow;
 
 import swingjs.JSAppletViewer;
-import swingjs.JSUtil;
+import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
 
 public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListener, ComponentListener  {
@@ -40,8 +40,6 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 	protected boolean isFrame, isDialog;
 	protected Window window;
 	protected Font font;
-
-	private Graphics2D graphics;
 
 //	private Object dialogBlocker;
 
@@ -70,10 +68,8 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 		w = (JWindow) window;
 		this.isFrame = isFrame;
 		isContainer = isWindow = true;
-		JSComponent jc = (JSComponent) (Object) this;
-		JSAppletViewer viewer = JSUtil.getAppletViewer();
+		JSAppletViewer viewer = jc.秘appletViewer;
 		applet = viewer.html5Applet;
-		graphics = (Graphics2D) jc.getGraphics();
 		return this;
 	}
 
@@ -105,14 +101,15 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer, WindowListe
 		setZ(z);
 	}
 
-	@Override
-	public FontMetrics getFontMetrics(Font font) {
-		if (!font.equals(this.font))
-			window.setFont(this.font = font);
-		return graphics.getFontMetrics(font);
-	}
-
-
+//	@Override
+//	public FontMetrics getFontMetrics(Font font) {
+//		return null;
+////		if (!font.equals(this.font))
+////			window.setFont(this.font = font);
+////		return jc.getFontMetrics(font);
+//	}
+//
+//
 	@Override
 	public void toFront() {
 		if (jc.秘isDesktop())

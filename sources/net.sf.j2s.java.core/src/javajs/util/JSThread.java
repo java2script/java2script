@@ -3,9 +3,6 @@ package javajs.util;
 import java.awt.Toolkit;
 import java.awt.event.InvocationEvent;
 
-//import javajs.J2SRequireImport;
-import javajs.api.JSFunction;
-
 
 /**
  * An abstract class that takes care of simple threading in Java or JavaScript.

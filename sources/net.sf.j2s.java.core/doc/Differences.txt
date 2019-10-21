@@ -507,7 +507,9 @@ System.exit(0) does not stop all processes
 ------------------------------------------
 
 Although System.ext(int) has been implemented in JavaScript, it just closes the 
-frames. It may not stop all "threads." So don't rely on that.
+frames, stops all pending javax.swing.Timer objects in the queue, and runs any 
+threads added using Runtime.getRuntime().addShutdownHook(Thread).
+It may not stop all "threads." So don't rely on that.
 Applications are responsible for shutting down prior to executing System.exit(0). 
 
 

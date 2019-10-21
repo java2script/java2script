@@ -28,6 +28,9 @@ package java.lang;
 import java.io.*;
 import java.util.StringTokenizer;
 
+import swingjs.JSAppletViewer;
+import swingjs.JSToolkit;
+
 /**
  * Every Java application has a single instance of class
  * <code>Runtime</code> that allows the application to interface with
@@ -100,10 +103,15 @@ public class Runtime {
      * @see #halt(int)
      */
     public void exit(int status) {
-        SecurityManager security = System.getSecurityManager();
-        if (security != null) {
-            security.checkExit(status);
-        }
+		Thread.currentThread().getThreadGroup().秘exit();
+		JSAppletViewer v = JSToolkit.getAppletViewer();
+		if (v != null)
+			v.exit();
+
+//        SecurityManager security = System.getSecurityManager();
+//        if (security != null) {
+//            security.checkExit(status);
+//        }
         Shutdown.exit(status);
     }
 
@@ -202,10 +210,10 @@ public class Runtime {
      * @since 1.3
      */
     public void addShutdownHook(Thread hook) {
-        SecurityManager sm = System.getSecurityManager();
-        if (sm != null) {
-            sm.checkPermission(new RuntimePermission("shutdownHooks"));
-        }
+//        SecurityManager sm = System.getSecurityManager();
+//        if (sm != null) {
+//            sm.checkPermission(new RuntimePermission("shutdownHooks"));
+//        }
         ApplicationShutdownHooks.add(hook);
     }
 
@@ -230,10 +238,10 @@ public class Runtime {
      * @since 1.3
      */
     public boolean removeShutdownHook(Thread hook) {
-        SecurityManager sm = System.getSecurityManager();
-        if (sm != null) {
-            sm.checkPermission(new RuntimePermission("shutdownHooks"));
-        }
+//        SecurityManager sm = System.getSecurityManager();
+//        if (sm != null) {
+//            sm.checkPermission(new RuntimePermission("shutdownHooks"));
+//        }
         return ApplicationShutdownHooks.remove(hook);
     }
 

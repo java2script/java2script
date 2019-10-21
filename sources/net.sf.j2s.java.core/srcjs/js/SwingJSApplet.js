@@ -14,7 +14,7 @@ if(typeof(jQuery)=="undefined") alert ("Note -- jQuery is required for SwingJS, 
 
 if (typeof(SwingJS) == "undefined") {
 
-  SwingJS = {};
+  SwingJS = {eventID:0};
 
 (function (SwingJS, $, J2S) {
 
