@@ -320,7 +320,7 @@ class Thread implements Runnable {
      */
     public static void sleep(long millis) throws InterruptedException {
     	JSUtil.notImplemented(null);
-    	JSUtil.warn("SwingJS does not implement Thread.sleep(long)");
+    	throw new InterruptedException("SwingJS does not implement Thread.sleep(long)");
     }
     /**
      * Causes the currently executing thread to sleep (cease execution)
@@ -354,7 +354,7 @@ class Thread implements Runnable {
             millis++;
         }
     	JSUtil.notImplemented(null);
-    	JSUtil.warn("SwingJS does not implement Thread.sleep(long,int)");
+    	throw new InterruptedException("SwingJS does not implement Thread.sleep(long,int)");
 //        sleep(millis);
     }
 
