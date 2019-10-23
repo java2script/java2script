@@ -458,7 +458,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 				}
 				// BH: This should not be necessary.
 				// It is causing validation to happen twice,
-				// But actually that is a good thing, because we don't 
+				// But actually that is a good thing, because we don't
 				// see the flash of incomplete to complete layout.
 				applet.getRootPane().addNotify();
 				// force peer creation now
@@ -472,18 +472,10 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 				ok = true;
 				break;
 			case APPLET_READY:
-				applet.getContentPane().setBounds(applet.getBounds()); // added
-																			// 7/13/17;
-																			// applet
-																			// background
-																			// was
-																			// not
-																			// painting
-																			// if
-																			// setContentPane()
-																			// was
-																			// used
-				applet.setVisible(true); 
+				applet.getContentPane().setBounds(applet.getBounds());
+				// added 7/13/17; applet background was not painting
+				// if setContentPane() was used
+				applet.setVisible(true);
 				applet.validate(); // one last validation necessary for PolyhedronApplet
 				showAppletStatus("ready");
 				JSUtil.readyCallback(appletName, fullName, applet, this);
@@ -492,7 +484,10 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 					if (resizer != null)
 						resizer.show();
 				}
-				JSFocusPeer.setFocusLast(applet);
+				// NO! JSFocusPeer.setFocusLast(applet);
+				// 2019.10.21 Problem here is that the page will scroll to the
+				// applet even if it is down on the page.
+				
 				applet.秘repaint();
 				break;
 			case APPLET_STOP:

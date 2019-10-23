@@ -3046,8 +3046,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	J2S.getResourcePath = function(path, isJavaPath) {
 		if (!path || path.indexOf("https:/") != 0
 				&& path.indexOf("https:/") != 0 && path.indexOf("file:/") != 0) {
-			var applet = J2S._applets[Clazz.loadClass("java.lang.Thread").currentThread$()
-					.getName$()];
+			var applet = Thread.currentThread$().getThreadGroup$().秘html5Applet;
 			path = (!isJavaPath && applet.__Info.resourcePath || applet.__Info.j2sPath)
 					+ "/" + (path || "");
 		}
