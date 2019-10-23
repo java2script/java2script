@@ -1137,7 +1137,7 @@ public abstract class JSTextUI extends JSLightweightUI {
 	
 	@Override
 	public boolean focus() {
-		if (!super.focus())
+		if (!editor.isEditable() || !super.focus())
 			return false;
 		if (haveFocus()) {
 			

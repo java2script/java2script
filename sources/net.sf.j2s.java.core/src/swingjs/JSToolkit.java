@@ -295,10 +295,6 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 		return ui;
 	}
 
-	public static String getSwingDivId() {
-		return Thread.currentThread().getName() + "_swingdiv";
-	}
-
 	private static int dispatchID = 0;
 
 	/**
