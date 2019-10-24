@@ -66,14 +66,19 @@ class Java2ScriptCompiler {
 	 */
 	private static final String J2S_LOG_METHODS_CALLED = "j2s.log.methods.called";
 
-	private static final String J2S_LOG_ALL_CALLS = "j2s.log.all.calls";
+	/**
+	 * stop processing files if any file has an exception; default is TRUE
+	 * 
+	 */
+	private static final String J2S_BREAK_ON_ERROR = "j2s.break.on.error";
+	private static final String J2S_BREAK_ON_ERROR_FALSE = "false";
 
+	private static final String J2S_LOG_ALL_CALLS = "j2s.log.all.calls";
 	private static final String J2S_LOG_ALL_CALLS_TRUE = "true";
 
 	private static final String J2S_EXCLUDED_PATHS = "j2s.excluded.paths";
 
 	private static final String J2S_TESTING = "j2s.testing";
-
 	private static final String J2S_TESTING_TRUE = "true";
 
 	private static final String J2S_COMPILER_NONQUALIFIED_PACKAGES = "j2s.compiler.nonqualified.packages";
@@ -81,7 +86,6 @@ class Java2ScriptCompiler {
 	private static final String J2S_COMPILER_NONQUALIFIED_CLASSES = "j2s.compiler.nonqualified.classes";
 
 	private static final String J2S_COMPILER_MODE = "j2s.compiler.mode";
-
 	private static final String J2S_COMPILER_MODE_DEBUG = "debug";
 
 	private static final String J2S_CLASS_REPLACEMENTS = "j2s.class.replacements";
@@ -93,6 +97,8 @@ class Java2ScriptCompiler {
 	private String htmlTemplate = null;
 
 	private String projectFolder;
+	
+	private String projectPath;
 
 	private String j2sPath;
 
@@ -119,6 +125,12 @@ class Java2ScriptCompiler {
 	private IJavaProject project;
 
 	private boolean isDebugging;
+
+	private boolean breakOnError;
+
+	public boolean doBreakOnError() {
+		return breakOnError;
+	}
 
 	static boolean isActive(IJavaProject project) {
 		try {
@@ -166,6 +178,7 @@ class Java2ScriptCompiler {
 			// the file .j2s does not exist in the project directory -- skip this project
 			return false;
 		}
+		projectPath  = "/" + project.getProject().getName() + "/";
 		projectFolder = project.getProject().getLocation().toOSString();
 		props = new Properties();
 		try {
@@ -218,6 +231,8 @@ class Java2ScriptCompiler {
 			logAllCalls = J2S_LOG_ALL_CALLS_TRUE.equalsIgnoreCase(getProperty(J2S_LOG_ALL_CALLS));
 		}
 
+		breakOnError = !J2S_BREAK_ON_ERROR_FALSE.equalsIgnoreCase(getProperty(J2S_BREAK_ON_ERROR));
+		
 		excludedPaths = getProperty(J2S_EXCLUDED_PATHS);
 
 		lstExcludedPaths = null;
@@ -227,7 +242,7 @@ class Java2ScriptCompiler {
 			String[] paths = excludedPaths.split(";");
 			for (int i = 0; i < paths.length; i++)
 				if (paths[i].trim().length() > 0)
-					lstExcludedPaths.add(paths[i].trim() + "/");
+					lstExcludedPaths.add(projectPath + paths[i].trim() + "/");
 			if (lstExcludedPaths.size() == 0)
 				lstExcludedPaths = null;
 		}
@@ -273,6 +288,16 @@ class Java2ScriptCompiler {
 		return true;
 	}
 
+	boolean excludeFile(IFile javaSource) {
+		String filePath = javaSource.getFullPath().toString();
+		if (lstExcludedPaths != null) {
+			for (int i = lstExcludedPaths.size(); --i >= 0;)
+				if (filePath.startsWith(lstExcludedPaths.get(i))) {
+					return true;
+				}
+		}
+		return false;
+	}
 	/**
 	 * from Java2ScriptCompilationParticipant.java
 	 * 
@@ -282,13 +307,6 @@ class Java2ScriptCompiler {
 	 * @param javaSource
 	 */
 	boolean compileToJavaScript(IFile javaSource) {
-
-		String fileName = new String(javaSource.getName());
-		if (lstExcludedPaths != null) {
-			for (int i = lstExcludedPaths.size(); --i >= 0;)
-				if (fileName.startsWith(lstExcludedPaths.get(i)))
-					return true;
-		}
 		org.eclipse.jdt.core.ICompilationUnit createdUnit = JavaCore.createCompilationUnitFrom(javaSource);
 		astParser.setSource(createdUnit);
 		// note: next call must come before each createAST call
@@ -318,14 +336,14 @@ class Java2ScriptCompiler {
 			e.printStackTrace();
 			e.printStackTrace(System.out);
 			// find the file and delete it.
-			String filePath = j2sPath;
+			String outPath = j2sPath;
 			String rootName = root.getJavaElement().getElementName();
 			rootName = rootName.substring(0, rootName.lastIndexOf('.'));
 			String packageName = visitor.getMyPackageName();
 			if (packageName != null) {
-				File folder = new File(filePath, packageName.replace('.', File.separatorChar));
-				filePath = folder.getAbsolutePath();
-				File jsFile = new File(filePath, rootName + ".js"); //$NON-NLS-1$
+				File folder = new File(outPath, packageName.replace('.', File.separatorChar));
+				outPath = folder.getAbsolutePath();
+				File jsFile = new File(outPath, rootName + ".js"); //$NON-NLS-1$
 				if (jsFile.exists()) {
 					System.out.println("Java2ScriptCompiler deleting " + jsFile);
 					jsFile.delete();
@@ -388,7 +406,7 @@ class Java2ScriptCompiler {
 	private String getProperty(String key) {
 		String val = props.getProperty(key);
 		if (showJ2SSettings)
-			System.err.println(key + " = " + val);
+			System.out.println(key + " = " + val);
 		return val;
 	}
 

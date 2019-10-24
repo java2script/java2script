@@ -1,5 +1,8 @@
 package net.sf.j2s.core;
 
+import java.util.ArrayList;
+
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.compiler.BuildContext;
 import org.eclipse.jdt.core.compiler.ReconcileContext;
@@ -13,8 +16,9 @@ import org.eclipse.jdt.core.compiler.ReconcileContext;
  *
  */
 public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.compiler.CompilationParticipant {
-	private BuildContext[] javaFiles;
+	private ArrayList<BuildContext[]>contexts;
 	private boolean isCleanBuild;
+	private static String isActiveNotified = ""; 
 
 	public Java2ScriptCompilationParticipant() {
 		System.out.println("CompilationParticipant started");
@@ -34,9 +38,14 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 	 *            the project to participate in
 	 * @return whether this participant is active for a given project
 	 */
+	@Override
 	public boolean isActive(IJavaProject project) {
  		boolean isj2s = Java2ScriptCompiler.isActive(project);
-		System.out.println("isActive " + isj2s + " " + project.getProject().getLocation());
+ 		String loc = " " + project.getProject().getLocation().toString() + " ";
+ 		if (isActiveNotified.indexOf(loc) < 0) {
+ 			System.out.println("j2s isActive " + isj2s + loc);
+ 			isActiveNotified += loc;
+ 		}
 		return isj2s;
 	}
 
@@ -55,8 +64,11 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 	 *            the project about to build
 	 * @return READY_FOR_BUILD or NEEDS_FULL_BUILD
 	 */
+	@Override
 	public int aboutToBuild(IJavaProject project) {
-		System.out.println("aboutToBuild " + project.getProject().getLocation());
+		System.out.println("j2s aboutToBuild " + project.getProject().getName() + " " + project.getProject().getLocation());
+		if (contexts == null)
+			contexts = new ArrayList<>();
 		return READY_FOR_BUILD;
 	}
 
@@ -68,8 +80,9 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 	 * @param project
 	 *            the project about to be cleaned
 	 */
+	@Override
 	public void cleanStarting(IJavaProject project) {
-		System.out.println("cleanStarting " + project.getProject().getLocation());
+		System.out.println("j2s cleanStarting " + project.getProject().getLocation());
 		isCleanBuild = true;
 	}
 
@@ -85,9 +98,12 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 	 * @param isBatch
 	 *            identifies when the build is a batch build
 	 */
+	@Override
 	public void buildStarting(BuildContext[] files, boolean isBatch) {
-		javaFiles = files;
-		System.out.println("buildStarting " + files.length + " files, isBatch=" + isBatch);
+		if (files.length == 0)
+			return;
+		contexts.add(files);
+		System.out.println("j2s buildStarting " + files.length + " files, contexts.size() = " + contexts.size() + ", isBatch=" + isBatch);
 	}
 
 	/**
@@ -96,36 +112,65 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 	 * needed to be compiled or the build failed. Only sent to participants
 	 * interested in the project.
 	 * 
-	 * @param project
-	 *            the project about to build
+	 * @param project the project about to build
 	 * @since 3.4
 	 */
+	@Override
 	public void buildFinished(IJavaProject project) {
-		if (javaFiles != null) {
+		if (contexts != null) {
 			Java2ScriptCompiler j2sCompiler = new Java2ScriptCompiler();
+			boolean breakOnError = j2sCompiler.doBreakOnError();
 			j2sCompiler.startBuild(isCleanBuild);
 			if (!j2sCompiler.initializeProject(project, true)) {
 				System.out.println(".j2s disabled");
 				return;
 			}
-			System.out.println("building JavaScript " + project.getProject().getLocation());
-			for (int i = 0; i < javaFiles.length; i++) {
-				System.out.println("transpiling " + javaFiles[i]);
+			System.out.println("j2s building JavaScript " + project.getProject().getName() + " "
+					+ project.getProject().getLocation());
+			int ntotal = 0, nerror = 0;
+			for (int j = 0; j < contexts.size(); j++) {
+				BuildContext[] files = contexts.get(j);
+				System.out.println("j2s building JavaScript for " + files.length + " file"+plural(files.length));
+
+				for (int i = 0, n = files.length; i < n; i++) {
 // trying to keep the progess monitor running - didn't work
 //				try {
 //					Thread.currentThread().sleep(1);
 //				} catch (InterruptedException e) {
 //					// ignore
 //				}
-				if (!j2sCompiler.compileToJavaScript(javaFiles[i].getFile())) {
-					System.out.println("Error processing " + javaFiles[i].getFile());
-					break;
+//					System.out.println("j2s file"
+//							+ " name=" + files[i].getFile().getName() 
+//							+ " fullpath=" + files[i].getFile().getFullPath() 
+//							+ " location=" + files[i].getFile().getLocation());
+//					
+					IFile f = files[i].getFile();
+					String filePath = f.getLocation().toString();
+					if (j2sCompiler.excludeFile(f)) {
+						System.out.println("j2s excluded " + filePath);
+					} else {
+						System.out.println("j2s transpiling (" + (i + 1) + "/" + n + ") " + filePath);
+						if (j2sCompiler.compileToJavaScript(f)) {
+							ntotal++;
+						} else {
+							nerror++;
+							System.out.println("j2s Error processing " + filePath);
+							if (breakOnError)
+								break;
+						}
+					}
 				}
 			}
-			javaFiles = null;
-			System.out.println("build finished " + project.getProject().getLocation());
-		}
+			contexts = null;
+			System.out.println(
+					"j2s buildFinished " + ntotal + " file"+plural(ntotal) + " transpiled for " + project.getProject().getLocation());
+			System.out.println("j2s buildFinished nerror = " + nerror);
+		}	
 		isCleanBuild = false;
+	}
+
+	private static String plural(int n) {
+		return (n == 1 ? "" : "s");
 	}
 
 	/**
@@ -136,6 +181,7 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 	 * 
 	 * @return whether this participant is interested in only Annotations.
 	 */
+	@Override
 	public boolean isAnnotationProcessor() {
 		return false;
 	}
@@ -150,6 +196,7 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 	 * @param files
 	 *            is an array of BuildContext
 	 */
+	@Override
 	public void processAnnotations(BuildContext[] files) {
 		// nothing to do
 	}
@@ -170,6 +217,7 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 	 * @param context
 	 *            the reconcile context to act on
 	 */
+	@Override
 	public void reconcile(ReconcileContext context) {
 		// fired whenever a source file is changed -- before it is saved
 	}
