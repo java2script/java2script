@@ -50,9 +50,9 @@ public class Test_Applet_Scroll extends JApplet implements ChangeListener, Mouse
 		/**
 		 * @j2sNative
 		 * 
-		 * 	thisApplet.__Info.width = 500;
-		 *  thisApplet.__Info.height = 400;
-		 *  thisApplet.__Info.isResizable = true;
+		 * 	J2S.thisApplet.__Info.width = 800;
+		 *  J2S.thisApplet.__Info.height = 400;
+		 *  J2S.thisApplet.__Info.isResizable = true;
 		 */
 	}
 	static DecimalFormat df = new DecimalFormat("0.00");

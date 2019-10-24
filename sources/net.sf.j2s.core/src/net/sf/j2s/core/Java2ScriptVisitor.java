@@ -64,6 +64,7 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -189,12 +190,15 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	private static final String NULL_PACKAGE = "_";
 
-	static final int JAXB_TYPE_UNKNOWN = -1;
+	static final int ANNOTATION_TYPE_UNKNOWN = -1;
 	final static int JAXB_TYPE_NONE = 0;
 	final static int JAXB_TYPE_FIELD = 1;
 	final static int JAXB_TYPE_PUBLIC_MEMBER = 2;
 	final static int JAXB_TYPE_PROPERTY = 3;
 	static final int JAXB_TYPE_ENUM = 4;
+	
+	static final int TEST_TYPE = 10;
+	
 	/**
 	 * UNSPECIFIED indicates that no XMLAccesorType was indicated for the class, so
 	 * this must be determined at run time based on the package. In this case we
@@ -256,7 +260,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 */
 	private List<LocalVariable> class_visitedVars = new ArrayList<LocalVariable>();
 
-	int class_jaxbAccessorType = JAXB_TYPE_UNKNOWN;
+	int class_annotationType = ANNOTATION_TYPE_UNKNOWN;
 
 	/**
 	 * annotations collected for a class
@@ -407,8 +411,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		if (annotations != null && annotations.size() > 0) {
 			for (int i = 0; i < annotations.size(); i++)
 				addAnnotation((Annotation) annotations.get(i), node, CHECK_ANNOTATIONS_ONLY);
-			if (class_jaxbAccessorType == JAXB_TYPE_UNKNOWN)
-				class_jaxbAccessorType = JAXB_TYPE_PUBLIC_MEMBER;
+			if (class_annotationType == ANNOTATION_TYPE_UNKNOWN)
+				class_annotationType = JAXB_TYPE_PUBLIC_MEMBER;
 		}
 		setPackage(node.getName().toString());
 		return false;
@@ -2093,11 +2097,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// add any recently defined static field definitions, assert strings
 		// and Enum constants
 
-		if (class_jaxbAccessorType != JAXB_TYPE_UNKNOWN) {
-			ClassAnnotation.addClassAnnotations(class_jaxbAccessorType, class_annotations, enums, fields, methods,
+		if (class_annotationType != ANNOTATION_TYPE_UNKNOWN) {
+			ClassAnnotation.addClassAnnotations(class_annotationType, class_annotations, enums, fields, methods,
 					innerClasses, trailingBuffer);
 			class_annotations = null;
-			class_jaxbAccessorType = JAXB_TYPE_UNKNOWN;
+			class_annotationType = ANNOTATION_TYPE_UNKNOWN;
 		}
 
 		buffer.append(trailingBuffer); // also writes the assert string
@@ -5483,16 +5487,18 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			if (class_annotations == null)
 				class_annotations = new ArrayList<ClassAnnotation>();
 			class_annotations.add(new ClassAnnotation(qName, annotation, node));
-			if ("XmlAccessorType".equals(qName)) {
+			if ("Test".equals(qName)) {
+				class_annotationType = TEST_TYPE;
+			} else if ("XmlAccessorType".equals(qName)) {
 				String s = annotation.toString();
-				class_jaxbAccessorType = (s.contains("FIELD") ? JAXB_TYPE_FIELD
+				class_annotationType = (s.contains("FIELD") ? JAXB_TYPE_FIELD
 						: s.contains("PUBLIC") ? JAXB_TYPE_PUBLIC_MEMBER
 								: s.contains("PROPERTY") ? JAXB_TYPE_PROPERTY : JAXB_TYPE_NONE);
 			} else if (qName.startsWith("XmlEnum")) {
-				class_jaxbAccessorType = JAXB_TYPE_ENUM;
-			} else if (class_jaxbAccessorType == JAXB_TYPE_UNKNOWN && qName.startsWith("Xml")) {
-				System.out.println(">>>unspecified!");
-				class_jaxbAccessorType = JAXB_TYPE_UNSPECIFIED;
+				class_annotationType = JAXB_TYPE_ENUM;
+			} else if (class_annotationType == ANNOTATION_TYPE_UNKNOWN && qName.startsWith("Xml")) {
+				///System.out.println(">>>unspecified!");
+				class_annotationType = JAXB_TYPE_UNSPECIFIED;
 			} else if ("XmlElements".equals(qName) && annotation.isSingleMemberAnnotation()) {
 				Expression e = ((SingleMemberAnnotation) annotation).getValue();
 				if (e instanceof ArrayInitializer) {
@@ -5599,7 +5605,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @return List {elementName, js, elementName, js, ....}
 	 */
 	public List<String> getElementList() {
-		if (class_jaxbAccessorType != JAXB_TYPE_UNKNOWN) {
+		if (class_annotationType != ANNOTATION_TYPE_UNKNOWN) {
 			addDummyClassForPackageOnlyFile();
 		}
 
@@ -5631,7 +5637,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private void addDummyClassForPackageOnlyFile() {
 		appendElementKey("_$");
 		buffer.append("var C$=Clazz.newClass(\"_$\");\nC$.$clinit$ = function() {Clazz.load(C$, 1)};\n");
-		ClassAnnotation.addClassAnnotations(class_jaxbAccessorType, class_annotations, null, null, null, null,
+		ClassAnnotation.addClassAnnotations(class_annotationType, class_annotations, null, null, null, null,
 				trailingBuffer);
 		buffer.append(trailingBuffer);
 		addDefaultConstructor();
@@ -6319,6 +6325,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			for (int i = 0; i < class_annotations.size(); i++) {
 				ClassAnnotation a = class_annotations.get(i);
 				String str = a.annotation.toString();
+				IAnnotationBinding b = a.annotation.resolveAnnotationBinding();
+				if (b != null && global_j2sFlag_isDebugging)
+					System.out.println(">>>" + str + " qname=" + a.qName + " type=" + b.getClass().getName());
 				if (a.annotation instanceof NormalAnnotation) {
 					// @XmlElement(name="test",type=Integer.class)
 					// remove commas, add quotes
@@ -6376,7 +6385,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						IMethodBinding var = method.resolveBinding();
 						if (methods.contains(var))
 							methods.remove(var);
-						var = getJAXBGetMethod(var, methods, false);
+						if (accessType != TEST_TYPE)
+							var = getJAXBGetMethod(var, methods, false);
 						if (var == null)
 							continue;
 						varName = "M:" + var.getName();
@@ -6389,12 +6399,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						type = var.getType();
 					}
 					String className = (type == null ? null
-							: stripJavaLang(
-									// NameMapper.checkClassReplacement(
-									// removeBracketsAndFixNullPackageName(
-									NameMapper.fixPackageName(getJavaClassNameQualified(type))
-							// ))
-							));
+							: stripJavaLang(NameMapper.fixPackageName(getJavaClassNameQualified(type))));
 					if (className != null && className.equals(lastClassName)) {
 						className = ".";
 					} else {
@@ -6411,11 +6416,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			}
 			if (pt > 0) {
 				addTrailingFragments(fragments, trailingBuffer, ptBuf);
-				if (!isPackage)
+				if (!isPackage && accessType != TEST_TYPE)
 					addImplicitJAXBFieldsAndMethods(accessType, trailingBuffer, enums, fields, methods, innerClasses,
 							propOrder);
 				trailingBuffer.append("]]];\n");
 			}
+			if (global_j2sFlag_isDebugging)
+				System.out.println("pt=" + pt + " " + trailingBuffer);
 		}
 
 		private static String annotationNameValue(String name, Object value) {
