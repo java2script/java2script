@@ -38,11 +38,7 @@ class Java2ScriptCompiler {
 	 */
 	private static final String J2S_OPTIONS_FILE_NAME = ".j2s";
 	
-	// BH: added "true".equals(getProperty(props,
-	// "j2s.compiler.allow.compression")) to ensure compression only occurs when
-	// desired
-	private static final int JSL_LEVEL = AST.JLS8; // deprecation just because Java has moved on
-	private boolean showJ2SSettings = true;
+	private int nResources, nSources, nJS, nHTML;
 
 	// We copy all non .java files from any directory from which we loaded a
 	// java file into the site directory
@@ -54,44 +50,58 @@ class Java2ScriptCompiler {
 	private final static String J2S_COMPILER_STATUS_ENABLE = "enable";
 	private final static String J2S_COMPILER_STATUS_ENABLED = "enabled";
 
+	private final static String J2S_COMPILER_JAVA_VERSION = "j2s.compiler.java.version";
+	private final static String J2S_COMPILER_JAVA_VERSION_DEFAULT = "8";
+	
 	private static final String J2S_SITE_DIRECTORY = "j2s.site.directory";
+	private static final String J2S_SITE_DIRECTORY_DEFAULT = "site";
+
+	/**
+	 * stop processing files if any file throws an exception, probably because it is a 
+	 * 
+	 */
+	private static final String J2S_BREAK_ON_ERROR = "j2s.break.on.error";
+	private static final String J2S_BREAK_ON_ERROR_DEFAULT = "false";
+
+	/**
+	 * office use only
+	 */
+	private static final String J2S_TESTING = "j2s.testing";
+	private static final String J2S_TESTING_DEFAULT = "false";
 
 	/**
 	 * log file name for methods declared
 	 */
 	private static final String J2S_LOG_METHODS_DECLARED = "j2s.log.methods.declared";
+	private static final String J2S_LOG_METHODS_DECLARED_DEFAULT = "<no log file>";
 
 	/**
 	 * log file name for methods called
 	 */
 	private static final String J2S_LOG_METHODS_CALLED = "j2s.log.methods.called";
-
-	/**
-	 * stop processing files if any file has an exception; default is TRUE
-	 * 
-	 */
-	private static final String J2S_BREAK_ON_ERROR = "j2s.break.on.error";
-	private static final String J2S_BREAK_ON_ERROR_FALSE = "false";
+	private static final String J2S_LOG_METHODS_CALLED_DEFAULT = "<no log file>";
 
 	private static final String J2S_LOG_ALL_CALLS = "j2s.log.all.calls";
-	private static final String J2S_LOG_ALL_CALLS_TRUE = "true";
+	private static final String J2S_LOG_ALL_CALLS_DEFAULT = "false";
 
 	private static final String J2S_EXCLUDED_PATHS = "j2s.excluded.paths";
-
-	private static final String J2S_TESTING = "j2s.testing";
-	private static final String J2S_TESTING_TRUE = "true";
+	private static final String J2S_EXCLUDED_PATHS_DEFAULT = "<none>";
 
 	private static final String J2S_COMPILER_NONQUALIFIED_PACKAGES = "j2s.compiler.nonqualified.packages";
+	private static final String J2S_COMPILER_NONQUALIFIED_PACKAGES_DEFAULT = "<none>";
 
 	private static final String J2S_COMPILER_NONQUALIFIED_CLASSES = "j2s.compiler.nonqualified.classes";
+	private static final String J2S_COMPILER_NONQUALIFIED_CLASSES_DEFAULT = "<none>";
 
 	private static final String J2S_COMPILER_MODE = "j2s.compiler.mode";
+	private static final String J2S_COMPILER_MODE_DEFAULT = "nodebug";
 	private static final String J2S_COMPILER_MODE_DEBUG = "debug";
 
 	private static final String J2S_CLASS_REPLACEMENTS = "j2s.class.replacements";
+	private static final String J2S_CLASS_REPLACEMENTS_DEFAULT = "<none>";
 
 	private static final String J2S_TEMPLATE_HTML = "j2s.template.html";
-	
+	private static final String J2S_TEMPLATE_HTML_DEFAULT = "template.html";
 	
 	private Properties props;
 	private String htmlTemplate = null;
@@ -158,10 +168,9 @@ class Java2ScriptCompiler {
 			lstMethodsDeclared = null;
 			htMethodsCalled = null;
 		}
-
 	}
 
- 	/**
+	/**
 	 * from Java2ScriptCompilationParticipant.java
 	 * 
 	 * get all necessary .j2s params for a build
@@ -172,119 +181,142 @@ class Java2ScriptCompiler {
 	 * 
 	 */
 	boolean initializeProject(IJavaProject project, boolean isCompilationParticipant) {
-		this.project = project;
-		this.isCompilationParticipant = isCompilationParticipant;
-		if (!isActive(project)) {
-			// the file .j2s does not exist in the project directory -- skip this project
+
+		try {
+			nResources = nSources = nJS = nHTML = 0;
+			this.project = project;
+			this.isCompilationParticipant = isCompilationParticipant;
+			if (!isActive(project)) {
+				// the file .j2s does not exist in the project directory -- skip this project
+				return false;
+			}
+			projectPath = "/" + project.getProject().getName() + "/";
+			projectFolder = project.getProject().getLocation().toOSString();
+			props = new Properties();
+			try {
+				File j2sFile = new File(projectFolder, J2S_OPTIONS_FILE_NAME);
+				props.load(new FileInputStream(j2sFile));
+				String status = getProperty(J2S_COMPILER_STATUS, J2S_COMPILER_STATUS_ENABLED);
+				if (!J2S_COMPILER_STATUS_ENABLE.equalsIgnoreCase(status)
+						&& !J2S_COMPILER_STATUS_ENABLED.equalsIgnoreCase(status)) {
+					if (getFileContents(j2sFile).trim().length() == 0) {
+						writeToFile(j2sFile, getDefaultJ2SFile());
+					} else {
+						// not enabled
+						return false;
+					}
+				}
+			} catch (FileNotFoundException e1) {
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+
+			int jslLevel = AST.JLS8;
+			try {
+				String ver = getProperty(J2S_COMPILER_JAVA_VERSION, J2S_COMPILER_JAVA_VERSION_DEFAULT);
+				jslLevel = Integer.parseInt(ver);
+			} catch (Exception e) {
+				// ignore
+			}
+			if (jslLevel > 8) {
+				System.out.println("#j2s compiler version > 8 is experimental only");
+			}
+			try {
+				astParser = ASTParser.newParser(jslLevel);
+				System.out.println("#j2s compiler version set to " + jslLevel);
+			} catch (Exception e) {
+				System.out.println("#j2s compiler version " + jslLevel + " could not be set; using 8");
+				astParser = ASTParser.newParser(AST.JLS8);
+			}
+
+			breakOnError = !"false".equalsIgnoreCase(getProperty(J2S_BREAK_ON_ERROR, J2S_BREAK_ON_ERROR_DEFAULT));
+
+			// includes @j2sDebug blocks
+			isDebugging = J2S_COMPILER_MODE_DEBUG
+					.equalsIgnoreCase(getProperty(J2S_COMPILER_MODE, J2S_COMPILER_MODE_DEFAULT));
+
+			File file;
+			siteFolder = getProperty(J2S_SITE_DIRECTORY, J2S_SITE_DIRECTORY_DEFAULT);
+			siteFolder = projectFolder + "/" + siteFolder;
+			j2sPath = siteFolder + "/swingjs/j2s";
+			System.out.println("#j2s writing to " + j2sPath);
+			// method declarations and invocations are only logged
+			// when the designated files are deleted prior to building
+
+			logDeclared = (isCompilationParticipant && !isCleanBuild ? null
+					: getProperty(J2S_LOG_METHODS_DECLARED, J2S_LOG_METHODS_DECLARED_DEFAULT));
+			if (logDeclared != null) {
+				if (!(file = new File(projectFolder, logDeclared)).exists()) {
+					lstMethodsDeclared = new ArrayList<String>();
+					System.err.println("logging methods declared to " + file);
+				}
+				logDeclared = projectFolder + "/" + logDeclared;
+			}
+			logAllCalls = false;
+
+			logCalled = (isCompilationParticipant && !isCleanBuild ? null
+					: getProperty(J2S_LOG_METHODS_CALLED, J2S_LOG_METHODS_CALLED_DEFAULT));
+			if (logCalled != null) {
+				if (!(file = new File(projectFolder, logCalled)).exists()) {
+					htMethodsCalled = new Hashtable<String, String>();
+					System.err.println("logging methods called to " + file);
+				}
+				logCalled = projectFolder + "/" + logCalled;
+				logAllCalls = "true".equalsIgnoreCase(getProperty(J2S_LOG_ALL_CALLS, J2S_LOG_ALL_CALLS_DEFAULT));
+			}
+
+			excludedPaths = getProperty(J2S_EXCLUDED_PATHS, J2S_EXCLUDED_PATHS_DEFAULT);
+
+			lstExcludedPaths = null;
+
+			if (excludedPaths != null) {
+				lstExcludedPaths = new ArrayList<String>();
+				String[] paths = excludedPaths.split(";");
+				for (int i = 0; i < paths.length; i++)
+					if (paths[i].trim().length() > 0)
+						lstExcludedPaths.add(projectPath + paths[i].trim() + "/");
+				if (lstExcludedPaths.size() == 0)
+					lstExcludedPaths = null;
+			}
+
+			testing = "true".equalsIgnoreCase(getProperty(J2S_TESTING, J2S_TESTING_DEFAULT));
+
+			String prop = getProperty(J2S_COMPILER_NONQUALIFIED_PACKAGES, J2S_COMPILER_NONQUALIFIED_PACKAGES_DEFAULT);
+			// older version of the name
+			String nonqualifiedPackages = getProperty(J2S_COMPILER_NONQUALIFIED_CLASSES,
+					J2S_COMPILER_NONQUALIFIED_CLASSES_DEFAULT);
+			nonqualifiedPackages = (prop == null ? "" : prop)
+					+ (nonqualifiedPackages == null ? "" : (prop == null ? "" : ";") + nonqualifiedPackages);
+			if (nonqualifiedPackages.length() == 0)
+				nonqualifiedPackages = null;
+
+			String classReplacements = getProperty(J2S_CLASS_REPLACEMENTS, J2S_CLASS_REPLACEMENTS_DEFAULT);
+
+			String htmlTemplateFile = getProperty(J2S_TEMPLATE_HTML, J2S_TEMPLATE_HTML_DEFAULT);
+			if (htmlTemplate == null) {
+				file = new File(projectFolder, htmlTemplateFile);
+				if (!file.exists()) {
+					String html = getDefaultHTMLTemplate();
+					System.out.println("J2S creating new htmltemplate file " + file);
+					writeToFile(file, html);
+				}
+				htmlTemplate = getFileContents(file);
+				System.out.println("J2S using HTML template " + file);
+			}
+
+			Java2ScriptVisitor.setDebugging(isDebugging);
+			Java2ScriptVisitor.setLogging(lstMethodsDeclared, htMethodsCalled, logAllCalls);
+
+			Java2ScriptVisitor.NameMapper.setNonQualifiedNamePackages(nonqualifiedPackages);
+			Java2ScriptVisitor.NameMapper.setClassReplacements(classReplacements);
+
+		} catch (Exception e) {
+			System.out.println("error " + e + "  " + e.getStackTrace());
+			e.printStackTrace();
 			return false;
 		}
-		projectPath  = "/" + project.getProject().getName() + "/";
-		projectFolder = project.getProject().getLocation().toOSString();
-		props = new Properties();
-		try {
-			File j2sFile = new File(projectFolder, J2S_OPTIONS_FILE_NAME);
-			props.load(new FileInputStream(j2sFile));
-			String status = getProperty(J2S_COMPILER_STATUS);
-			if (!J2S_COMPILER_STATUS_ENABLE.equalsIgnoreCase(status) && !J2S_COMPILER_STATUS_ENABLED.equalsIgnoreCase(status)) {
-				if (getFileContents(j2sFile).trim().length() == 0) {
-				  writeToFile(j2sFile, getDefaultJ2SFile());
-				} else {
-				 // not enabled
-				return false;
-				}
-			}
-		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
 
-		File file;
-		siteFolder = getProperty(J2S_SITE_DIRECTORY);
-		if (siteFolder == null)
-			siteFolder = "site";
-		siteFolder = projectFolder + "/" + siteFolder;
-		j2sPath = siteFolder + "/swingjs/j2s";
-
-		if (isDebugging)
-			System.out.println("Java2ScriptCompiler writing to " + j2sPath);
-		// method declarations and invocations are only logged
-		// when the designated files are deleted prior to building
-
-		logDeclared = (isCompilationParticipant && !isCleanBuild ? null : getProperty(J2S_LOG_METHODS_DECLARED));
-		if (logDeclared != null) {
-			if (!(file = new File(projectFolder, logDeclared)).exists()) {
-				lstMethodsDeclared = new ArrayList<String>();
-				System.err.println("logging methods declared to " + file);
-			}
-			logDeclared = projectFolder + "/" + logDeclared;
-		}
-		logAllCalls = false;
-
-		logCalled = (isCompilationParticipant && !isCleanBuild ? null : getProperty(J2S_LOG_METHODS_CALLED));
-		if (logCalled != null) {
-			if (!(file = new File(projectFolder, logCalled)).exists()) {
-				htMethodsCalled = new Hashtable<String, String>();
-				System.err.println("logging methods called to " + file);
-			}
-			logCalled = projectFolder + "/" + logCalled;
-			logAllCalls = J2S_LOG_ALL_CALLS_TRUE.equalsIgnoreCase(getProperty(J2S_LOG_ALL_CALLS));
-		}
-
-		breakOnError = !J2S_BREAK_ON_ERROR_FALSE.equalsIgnoreCase(getProperty(J2S_BREAK_ON_ERROR));
-		
-		excludedPaths = getProperty(J2S_EXCLUDED_PATHS);
-
-		lstExcludedPaths = null;
-
-		if (excludedPaths != null) {
-			lstExcludedPaths = new ArrayList<String>();
-			String[] paths = excludedPaths.split(";");
-			for (int i = 0; i < paths.length; i++)
-				if (paths[i].trim().length() > 0)
-					lstExcludedPaths.add(projectPath + paths[i].trim() + "/");
-			if (lstExcludedPaths.size() == 0)
-				lstExcludedPaths = null;
-		}
-
-		testing = J2S_TESTING_TRUE.equalsIgnoreCase(getProperty(J2S_TESTING));
-
-		String prop = getProperty(J2S_COMPILER_NONQUALIFIED_PACKAGES);
-		// older version of the name
-		String nonqualifiedPackages = getProperty(J2S_COMPILER_NONQUALIFIED_CLASSES);
-		nonqualifiedPackages = (prop == null ? "" : prop)
-			+ (nonqualifiedPackages == null ? "" : (prop == null ? "" : ";") + nonqualifiedPackages);
-	    if (nonqualifiedPackages.length() == 0)
-	    	nonqualifiedPackages = null;
-		// includes @j2sDebug blocks
-		isDebugging = J2S_COMPILER_MODE_DEBUG.equalsIgnoreCase(getProperty(J2S_COMPILER_MODE));
-
-		String classReplacements = getProperty(J2S_CLASS_REPLACEMENTS);
-
-		String htmlTemplateFile = getProperty(J2S_TEMPLATE_HTML);
-		if (htmlTemplateFile == null)
-			htmlTemplateFile = "template.html";
-
-		if (htmlTemplate == null) {
-			file = new File(projectFolder, htmlTemplateFile);
-			if (!file.exists()) {
-				String html = getDefaultHTMLTemplate();
-				System.err.println("creating new htmltemplate\n" + html);
-				writeToFile(file, html);
-			}
-			htmlTemplate = getFileContents(file);
-			if (showJ2SSettings)
-				System.err.println("using HTML template " + file);
-		}
-
-		Java2ScriptVisitor.setDebugging(isDebugging);
-		Java2ScriptVisitor.setLogging(lstMethodsDeclared, htMethodsCalled, logAllCalls);
-
-		Java2ScriptVisitor.NameMapper.setNonQualifiedNamePackages(nonqualifiedPackages);
-		Java2ScriptVisitor.NameMapper.setClassReplacements(classReplacements);
-		
-		astParser = ASTParser.newParser(JSL_LEVEL);
-	
 		return true;
 	}
 
@@ -307,6 +339,8 @@ class Java2ScriptCompiler {
 	 * @param javaSource
 	 */
 	boolean compileToJavaScript(IFile javaSource) {
+		nSources++;
+		String sourceLocation = javaSource.getLocation().toString();
 		org.eclipse.jdt.core.ICompilationUnit createdUnit = JavaCore.createCompilationUnitFrom(javaSource);
 		astParser.setSource(createdUnit);
 		// note: next call must come before each createAST call
@@ -315,7 +349,6 @@ class Java2ScriptCompiler {
 		// If the Java2ScriptVisitor is ever extended, it is important to set the project.
 		// Java2ScriptVisitor#addClassOrInterface uses getClass().newInstance().setproject(project). 
 		Java2ScriptVisitor visitor = new Java2ScriptVisitor().setProject(project, testing);
-
 		try {
 
 			// transpile the code
@@ -345,7 +378,7 @@ class Java2ScriptCompiler {
 				outPath = folder.getAbsolutePath();
 				File jsFile = new File(outPath, rootName + ".js"); //$NON-NLS-1$
 				if (jsFile.exists()) {
-					System.out.println("Java2ScriptCompiler deleting " + jsFile);
+					System.out.println("J2S deleting " + jsFile);
 					jsFile.delete();
 				}
 			}
@@ -358,7 +391,8 @@ class Java2ScriptCompiler {
 				packageName = packageName.substring(0, pt);
 			if (!copyResources.contains(packageName)) {
 				copyResources.add(packageName);
-				File src = new File(projectFolder + "/src", packageName);
+				String sourceDir = sourceLocation.substring(0, sourceLocation.indexOf("/" + packageName + "/"));
+				File src = new File(sourceDir, packageName);
 				File dest = new File(j2sPath, packageName);
 				copySiteResources(src, dest);
 			}
@@ -403,10 +437,13 @@ class Java2ScriptCompiler {
 			}
 	}
 
-	private String getProperty(String key) {
+	private String getProperty(String key, String def) {
 		String val = props.getProperty(key);
-		if (showJ2SSettings)
-			System.out.println(key + " = " + val);
+		if (val == null)
+			val = def;
+		System.out.println(key + " = " + val);
+		if (val != null && val.indexOf("<") == 0)
+			val = null;
 		return val;
 	}
 
@@ -423,7 +460,6 @@ class Java2ScriptCompiler {
 			String element = elements.get(i++);
 			createJSFile(j2sPath, packageName, elementName, element);
 		}
-		showJ2SSettings = false; // just once per compilation run
 	}
 
 	private void createJSFile(String j2sPath, String packageName, String elementName, String js) {
@@ -432,13 +468,14 @@ class Java2ScriptCompiler {
 			j2sPath = folder.getAbsolutePath();
 			if (!folder.exists() || !folder.isDirectory()) {
 				if (!folder.mkdirs()) {
-					throw new RuntimeException("Failed to create folder " + j2sPath); //$NON-NLS-1$
+					throw new RuntimeException("J2S failed to create folder " + j2sPath); //$NON-NLS-1$
 				}
 			}
 		}
 		File f = new File(j2sPath, elementName + ".js");
 		if (isDebugging)
-			System.out.println("Java2ScriptCompiler creating " + f);
+			System.out.println("J2S Compiler creating " + f);
+		nJS++;
 		writeToFile(f, js);
 	}
 
@@ -592,8 +629,9 @@ class Java2ScriptCompiler {
 			String _MAIN_ = (isApplet ? "null" : cl);
 			String _CODE_ = (isApplet ? cl : "null");
 			template = template.replace("_NAME_", _NAME_).replace("_CODE_", _CODE_).replace("_MAIN_", _MAIN_);
-			System.err.println("Java2Script creating " + siteFolder + "/" + fname);
+			System.out.println("J2S creating " + siteFolder + "/" + fname);
 			writeToFile(new File(siteFolder, fname), template);
+			nHTML++;
 		}
 	}
 
@@ -607,15 +645,17 @@ class Java2ScriptCompiler {
 	};
 
 	private void copySiteResources(File from, File dest) {
+		System.out.println("j2s copying resources from " + from + " to " + dest);
 		copyNonclassFiles(from, dest);
 	}
 
+	
 	private void copyNonclassFiles(File dir, File target) {
 		if (dir.equals(target))
 			return;
 		File[] files = dir.listFiles(filter);
 		File f = null;
-		if (files != null) 
+		if (files != null)
 			try {
 				if (!target.exists())
 					Files.createDirectories(target.toPath());
@@ -626,16 +666,30 @@ class Java2ScriptCompiler {
 					} else if (f.isDirectory()) {
 						copyNonclassFiles(f, new File(target, f.getName()));
 					} else {
-						Files.copy(f.toPath(), new File(target, f.getName()).toPath(),
-								StandardCopyOption.REPLACE_EXISTING);
-						System.err.println("copied to site: " + f.toPath());
+						String path = f.toPath().toString();
+						if (!copyResources.contains(path)) {
+							//
+							copyResources.add(path);
+							nResources++;
+							Files.copy(f.toPath(), new File(target, f.getName()).toPath(),
+									StandardCopyOption.REPLACE_EXISTING);
+							if (isDebugging)
+								System.out.println("J2S copied to site: " + path);
+						}
 					}
 				}
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				System.err.println("error copying " + f + " to " + target);
+				System.out.println("J2S error copying " + f + " to " + target);
 				e1.printStackTrace();
 			}
+	}
+
+	public void finalizeProject() {
+		System.out.println("J2S processed " 
+				+ nSources + " .java file" + Java2ScriptCompilationParticipant.plural(nSources) 
+				+ ", created " + nJS + " .js file" + Java2ScriptCompilationParticipant.plural(nJS) 
+				+ " and " + nHTML + " .html file" + Java2ScriptCompilationParticipant.plural(nHTML) 
+				+ ", copied " + nResources + " resource" + Java2ScriptCompilationParticipant.plural(nResources));
 	}
 
 }

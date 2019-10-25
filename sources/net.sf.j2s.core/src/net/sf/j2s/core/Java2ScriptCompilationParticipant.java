@@ -1,6 +1,7 @@
 package net.sf.j2s.core;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IJavaProject;
@@ -21,7 +22,7 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 	private static String isActiveNotified = ""; 
 
 	public Java2ScriptCompilationParticipant() {
-		System.out.println("CompilationParticipant started");
+		System.out.println("J2S CompilationParticipant started");
 	}
 
 	/**
@@ -42,9 +43,11 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 	public boolean isActive(IJavaProject project) {
  		boolean isj2s = Java2ScriptCompiler.isActive(project);
  		String loc = " " + project.getProject().getLocation().toString() + " ";
- 		if (isActiveNotified.indexOf(loc) < 0) {
- 			System.out.println("j2s isActive " + isj2s + loc);
- 			isActiveNotified += loc;
+ 		// notify only if changed
+ 		if (isActiveNotified.indexOf(isj2s + loc) < 0) {
+ 			System.out.println("J2S isActive " + isj2s + loc);
+ 			isActiveNotified = isActiveNotified.replace((!isj2s) + loc, "");
+ 			isActiveNotified += isj2s + loc;
  		}
 		return isj2s;
 	}
@@ -66,7 +69,7 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 	 */
 	@Override
 	public int aboutToBuild(IJavaProject project) {
-		System.out.println("j2s aboutToBuild " + project.getProject().getName() + " " + project.getProject().getLocation());
+		System.out.println("J2S aboutToBuild " + project.getProject().getName() + " " + project.getProject().getLocation());
 		if (contexts == null)
 			contexts = new ArrayList<>();
 		return READY_FOR_BUILD;
@@ -82,7 +85,7 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 	 */
 	@Override
 	public void cleanStarting(IJavaProject project) {
-		System.out.println("j2s cleanStarting " + project.getProject().getLocation());
+		System.out.println("J2S cleanStarting " + project.getProject().getLocation());
 		isCleanBuild = true;
 	}
 
@@ -103,7 +106,7 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 		if (files.length == 0)
 			return;
 		contexts.add(files);
-		System.out.println("j2s buildStarting " + files.length + " files, contexts.size() = " + contexts.size() + ", isBatch=" + isBatch);
+		System.out.println("J2S buildStarting " + files.length + " files, contexts.size() = " + contexts.size() + ", isBatch=" + isBatch);
 	}
 
 	/**
@@ -117,20 +120,20 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 	 */
 	@Override
 	public void buildFinished(IJavaProject project) {
-		if (contexts != null) {
+		if (contexts != null && contexts.size() > 0) {
 			Java2ScriptCompiler j2sCompiler = new Java2ScriptCompiler();
-			boolean breakOnError = j2sCompiler.doBreakOnError();
 			j2sCompiler.startBuild(isCleanBuild);
 			if (!j2sCompiler.initializeProject(project, true)) {
-				System.out.println(".j2s disabled");
+				System.out.println("J2S .j2s disabled");
 				return;
 			}
-			System.out.println("j2s building JavaScript " + project.getProject().getName() + " "
-					+ project.getProject().getLocation());
+			boolean breakOnError = j2sCompiler.doBreakOnError();
+			System.out.println("J2S building JavaScript " + project.getProject().getName() + " "
+					+ project.getProject().getLocation() + " " + new Date());
 			int ntotal = 0, nerror = 0;
 			for (int j = 0; j < contexts.size(); j++) {
 				BuildContext[] files = contexts.get(j);
-				System.out.println("j2s building JavaScript for " + files.length + " file"+plural(files.length));
+				System.out.println("J2S building JavaScript for " + files.length + " file"+plural(files.length));
 
 				for (int i = 0, n = files.length; i < n; i++) {
 // trying to keep the progess monitor running - didn't work
@@ -139,7 +142,7 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 //				} catch (InterruptedException e) {
 //					// ignore
 //				}
-//					System.out.println("j2s file"
+//					System.out.println("J2S file"
 //							+ " name=" + files[i].getFile().getName() 
 //							+ " fullpath=" + files[i].getFile().getFullPath() 
 //							+ " location=" + files[i].getFile().getLocation());
@@ -147,29 +150,30 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 					IFile f = files[i].getFile();
 					String filePath = f.getLocation().toString();
 					if (j2sCompiler.excludeFile(f)) {
-						System.out.println("j2s excluded " + filePath);
+						System.out.println("J2S excluded " + filePath);
 					} else {
-						System.out.println("j2s transpiling (" + (i + 1) + "/" + n + ") " + filePath);
+						System.out.println("J2S transpiling (" + (i + 1) + "/" + n + ") " + filePath);
 						if (j2sCompiler.compileToJavaScript(f)) {
 							ntotal++;
 						} else {
 							nerror++;
-							System.out.println("j2s Error processing " + filePath);
+							System.out.println("J2S Error processing " + filePath);
 							if (breakOnError)
 								break;
 						}
 					}
 				}
 			}
+			j2sCompiler.finalizeProject();
 			contexts = null;
 			System.out.println(
-					"j2s buildFinished " + ntotal + " file"+plural(ntotal) + " transpiled for " + project.getProject().getLocation());
-			System.out.println("j2s buildFinished nerror = " + nerror);
+					"J2S buildFinished " + ntotal + " file"+plural(ntotal) + " transpiled for " + project.getProject().getLocation());
+			System.out.println("J2S buildFinished nerror = " + nerror + " " + new Date());
 		}	
 		isCleanBuild = false;
 	}
 
-	private static String plural(int n) {
+	static String plural(int n) {
 		return (n == 1 ? "" : "s");
 	}
 

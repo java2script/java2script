@@ -20,7 +20,10 @@ public class CorePlugin extends Plugin {
 	 * 
 	 */
 	public static String VERSION = "3.2.4.08";
-	// BH 2019.10.24 support for multiple buildStart
+	// BH 2019.10.25 -- 3.2.4.09 adds j2s.compiler.java.version (default 8)
+	// BH 2019.10.25 -- 3.2.4.09 adds j2s.break.on.error (default false)
+	// BH 2019.10.25 -- 3.2.4.09 fixes missing resource copy for git projects
+	// BH 2019.10.24 -- 3.2.4.08 support for multiple buildStart
 	// TODO/NOTE final static int FOO = (/**@j2sNative 5 || */3) stated but not recognized when used as its new value 
 	// BH 2/3/2019 -- 3.2.4.07 fixes "final static Float = (float)" missing definition
 	// BH 1/2/2019 -- 3.2.4.06 fixes try(resources) with more than one resource missing semicolon
