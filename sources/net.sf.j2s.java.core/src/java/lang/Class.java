@@ -1740,7 +1740,8 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		 * @j2sNative
 		 * 
 		 * 			for (m in c) { 
-		 *            if (!!modifiers != !!this.$clazz$[m])
+		 *            var isStatic = (typeof this.$clazz$[m] != "undefined");
+		 *            if (!!modifiers != isStatic)
 		 *              continue; 
 		 *            if (this.excludeField$S(m)) continue; 
 		 *            var o = c[m]; 
@@ -1766,6 +1767,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 				|| name == "$isInterface" 
 				|| name == "$isEnum" 
 				|| name == "implementz"
+				|| name == "$Class$"
 				|| name == "$init$"
 				|| name == "$init0$");
 	} 
