@@ -7,6 +7,7 @@ import java.awt.Image;
 import java.awt.JSComponent;
 import java.awt.Rectangle;
 
+import swingjs.JSGraphics2D;
 import swingjs.JSUtil;
 import swingjs.plaf.JSComponentUI;
 
@@ -202,11 +203,12 @@ public abstract class DOMNode {
 		 */
 	}
 
-	public static DOMNode getImageNode(Image img) {		
+	public static DOMNode getImageNode(Image img) {
 		// note that canvas takes precedence over imgNode, because
 		// imgNode is a placeholder for the original image, but canvas
 		// will be an op-filtered image
-		return (/** @j2sNative img.秘canvas || img.秘imgNode ||*/ null);
+		return (/** @j2sNative img.秘canvas || img.秘imgNode || */
+		(DOMNode) (Object) ((JSGraphics2D) (Object) img.getGraphics()).getCanvas());
 	}
 
 	public static void addHorizontalGap(DOMNode domNode, int gap) {
