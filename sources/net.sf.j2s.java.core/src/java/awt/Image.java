@@ -27,8 +27,12 @@
  */
 package java.awt;
 
+import java.awt.image.AreaAveragingScaleFilter;
+import java.awt.image.FilteredImageSource;
+import java.awt.image.ImageFilter;
 import java.awt.image.ImageObserver;
 import java.awt.image.ImageProducer;
+import java.awt.image.ReplicateScaleFilter;
 
 
 /**
@@ -164,16 +168,15 @@ public abstract class Image {
      * @since      JDK1.1
      */
     public Image getScaledInstance(int width, int height, int hints) {
-//        ImageFilter filter;
-//        if ((hints & (SCALE_SMOOTH | SCALE_AREA_AVERAGING)) != 0) {
-//            filter = new AreaAveragingScaleFilter(width, height);
-//        } else {
-//            filter = new ReplicateScaleFilter(width, height);
-//        }
-//        ImageProducer prod;
-//        prod = new FilteredImageSource(getSource(), filter);
-//        return Toolkit.getDefaultToolkit().createImage(prod);
-    	return null;
+        ImageFilter filter;
+        if ((hints & (SCALE_SMOOTH | SCALE_AREA_AVERAGING)) != 0) {
+            filter = new AreaAveragingScaleFilter(width, height);
+        } else {
+            filter = new ReplicateScaleFilter(width, height);
+        }
+        ImageProducer prod;
+        prod = new FilteredImageSource(getSource(), filter);
+        return Toolkit.getDefaultToolkit().createImage(prod);
     }
 
     /**
