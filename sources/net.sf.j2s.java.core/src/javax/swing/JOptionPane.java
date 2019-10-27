@@ -85,8 +85,8 @@ import swingjs.JSUtil;
  * 
  * For showOptionDialog (which returns Object) or showInputDialog (which returns
  * String), the initial return will be JDialog.ASYNCHRONOUS_OBJECT, testable as
- * ((Object) ret) instanceof javax.swing.UIResource if the parent implements
- * PropertyChangeListeneer, or null if not.
+ * ((Object) ret) instanceof javax.swing.plaf.UIResource if the parent implements
+ * PropertyChangeListener, or null if not.
  * 
  * The second return will be the desired return.
  * 

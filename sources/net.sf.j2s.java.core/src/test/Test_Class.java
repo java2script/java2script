@@ -4,11 +4,12 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.lang.reflect.Constructor;
 import java.util.Hashtable;
 
 @SuppressWarnings("rawtypes")
 class Test_Class extends Test_ {
-	
+
 	private void test(String s) {
 		
 	}
@@ -40,10 +41,12 @@ class Test_Class extends Test_ {
 		static char c3 = new Character('c');
 	}
 
-	
+
+	public Test_Class(Test_ t) {
+       System.out.println("Test_t constructor");		
+	}
 	public Test_Class() {
 	
-		
 		PropertyChangeListener l = new PropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
@@ -190,6 +193,14 @@ class Test_Class extends Test_ {
 	}
 
 	public static void main(String[] args) {
+
+		 try {
+			Constructor<Test_Class> constr = Test_Class.class.getConstructor(new Class[] {Test_.class});
+		} catch (NoSuchMethodException | SecurityException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+			
 
 	   System.out.println(Integer.TYPE.isPrimitive());
 	   System.out.println(Integer.TYPE.isArray());
