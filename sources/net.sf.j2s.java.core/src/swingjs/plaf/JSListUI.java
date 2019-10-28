@@ -475,7 +475,8 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 		}
 		// Empty out the renderer pane, allowing renderers to be gc'ed.
 		rendererPane.removeAll();
-		updateDOMNode();
+		// no -- this will paint the background over the painted backgrounds
+		// updateDOMNode();
 	}
 
 //	private void paintDropLine(Graphics g) {

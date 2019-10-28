@@ -13780,6 +13780,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // TODO: still a lot of references to window[...]
 
+// BH 2019.10.26 subclass def should exclude  __PARAMCODE
 // BH 2019.09.24 missing isArray$() in Integer.class
 // BH 2019.09.26 superfast byte[] -> String using TextDecoder
 // BH 2019.08.16 adds cache for instanceof
@@ -15118,6 +15119,7 @@ var excludeSuper = function(o) {
       || o == "$load$"
       || o == "$Class$"
       || o == "prototype" 
+      || o == "__PARAMCODE" 
       || o == "__CLASS_NAME__" 
       || o == "__CLASS_NAME$__" 
       || o == "superclazz"
@@ -19083,6 +19085,10 @@ var setEx = function(C$) {
  C$.$clinit$ = function() {Clazz.load(C$, 1);}
  m$(C$, "c$", function() { C$.superclazz.c$.apply(this, []);}, 1);
  m$(C$, "c$$S", function(detailMessage){C$.superclazz.c$$S.apply(this,[detailMessage]);},1);
+ m$(C$, "c$$Throwable", function(exception){C$.superclazz.c$$Throwable.apply(this, arguments);}, 1);
+ m$(C$, "c$$S$Throwable", function(detailMessage,exception){C$.superclazz.c$$S$Throwable.apply(this, arguments);
+}, 1);
+
  return C$;
 }
 
@@ -19091,20 +19097,14 @@ var C$ = Clazz.newClass(java.lang, "Error", function (){
 var err = Clazz._Error();
 return err;
 }, Throwable);
-
-//setSuperclass(java.lang.Error, Throwable);
-//setSuperclass(Clazz._Error, Throwable);
-
 setEx(C$);
-
 })();
 
 var newEx = function(prefix, name, clazzSuper) {
   return setEx(declareType(prefix, name, clazzSuper));
 }
 
-C$ = newEx(java.lang,"Exception",Throwable);
-m$(C$, "c$", function(){}, 1);
+newEx(java.lang,"Exception",Throwable);
 
 newEx(java.lang,"RuntimeException",Exception);
 newEx(java.lang,"IllegalArgumentException",RuntimeException);
@@ -19149,7 +19149,8 @@ newEx(java.lang,"VerifyError",LinkageError);
 
 newEx(java.lang,"ClassCastException",RuntimeException);
 
-C$=Clazz.newClass(java.lang,"ClassNotFoundException",function(){this.ex=null;},Exception);
+;(function() {
+var C$=Clazz.newClass(java.lang,"ClassNotFoundException",function(){this.ex=null;},Exception);
 m$(C$, "c$$S$Throwable", function(detailMessage,exception){
 C$.superclazz.c$$S$Throwable.apply(this, arguments);
 this.ex=exception;
@@ -19162,13 +19163,17 @@ m$(C$,"getCause$",
 function(){
 return this.ex;
 });
+})();
 
-C$=newEx(java.lang,"StringIndexOutOfBoundsException",IndexOutOfBoundsException);
+;(function() {
+var C$=newEx(java.lang,"StringIndexOutOfBoundsException",IndexOutOfBoundsException);
 m$(C$, "c$$I", function(index){
 C$.superclazz.c$$S.apply(this,["String index out of range: "+index]);
 }, 1);
+})();
 
-C$=Clazz.newClass(java.lang.reflect,"InvocationTargetException",function(){this.target=null;},ReflectiveOperationException);
+;(function() {
+var C$=Clazz.newClass(java.lang.reflect,"InvocationTargetException",function(){this.target=null;},ReflectiveOperationException);
 m$(C$, "c$$Throwable", function(exception){
 C$.superclazz.c$$Throwable.apply(this, arguments);
 this.target=exception;
@@ -19185,6 +19190,7 @@ m$(C$,"getCause$",
 function(){
 return this.target;
 });
+})()
 
 ;(function(){
 var C$=Clazz.newClass(java.lang.reflect,"UndeclaredThrowableException",function(){this.undeclaredThrowable=null;},RuntimeException);
@@ -19227,7 +19233,9 @@ C$=Clazz.newClass(java.io,"InterruptedIOException",function(){
 this.bytesTransferred=0;
 },java.io.IOException);
 
-C$=Clazz.newClass(java.io,"InvalidClassException",function(){
+
+;(function() {
+var C$=Clazz.newClass(java.io,"InvalidClassException",function(){
 this.classname=null;
 },java.io.ObjectStreamException);
 
@@ -19243,13 +19251,16 @@ if(this.classname!=null){
 msg=this.classname+';' + ' '+msg;
 }return msg;
 });
+})();
+
 
 C$=Clazz.newClass(java.io,"OptionalDataException",function(){
 this.eof=false;
 this.length=0;
 },java.io.ObjectStreamException);
 
-C$=Clazz.newClass(java.io,"WriteAbortedException",function(){
+;(function() {
+var C$=Clazz.newClass(java.io,"WriteAbortedException",function(){
 this.detail=null;
 },java.io.ObjectStreamException);
 
@@ -19268,6 +19279,7 @@ m$(C$,"getCause$",
 function(){
 return this.detail;
 });
+})();
 
 newEx(java.util,"EmptyStackException",RuntimeException);
 newEx(java.util,"NoSuchElementException",RuntimeException);
@@ -19313,7 +19325,8 @@ setJ2STypeclass(java.lang.Void, "void", "V");
 Clazz.newInterface(java.lang.reflect,"GenericDeclaration");
 Clazz.newInterface(java.lang.reflect,"AnnotatedElement");
 
-C$=declareType(java.lang.reflect,"AccessibleObject",null,java.lang.reflect.AnnotatedElement);
+;(function() {
+var C$=declareType(java.lang.reflect,"AccessibleObject",null,java.lang.reflect.AnnotatedElement);
 m$(C$, "c$",function(){
 }, 1);
 m$(C$,"isAccessible$",
@@ -19373,7 +19386,11 @@ function(receiver,args){
 return 0.0;
 });
 C$.emptyArgs=C$.prototype.emptyArgs=new Array(0);
+})();
+
+
 Clazz.newInterface(java.lang.reflect,"InvocationHandler");
+
 C$=Clazz.newInterface(java.lang.reflect,"Member");
 
 C$=declareType(java.lang.reflect,"Modifier");
