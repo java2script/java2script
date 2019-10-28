@@ -13,9 +13,13 @@ class Test_Class extends Test_ {
 	private void test(String s) {
 		
 	}
+
+    void c() {
+		
+	}
 	
 	private void test(Integer i) {
-		
+		c();
 	}
 	
 	int test1 = 0;
