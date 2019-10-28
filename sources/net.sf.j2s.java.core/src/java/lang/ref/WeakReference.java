@@ -72,7 +72,9 @@ public class WeakReference<T> extends Reference<T> {
     	super(null);
     	if (ok) {
         	/**
-        	 * @j2sNative this.o = new WeakMap([this, referent]);
+        	 * @j2sNative 
+        	 * this.o = new WeakMap();
+        	 * this.o.set(this, referent);
         	 */
     	} else {
     		// no weak maps in this browser
@@ -94,6 +96,6 @@ public class WeakReference<T> extends Reference<T> {
     }
 
     public T get(T referent) {
-    	return (T) (ok ? ((Map) o).get(this) : o);
+    	return (T) (/** @j2sNative C$.ok ? this.o.get(this) :*/ o);
     }
 }
