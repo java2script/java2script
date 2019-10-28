@@ -19085,6 +19085,10 @@ var setEx = function(C$) {
  C$.$clinit$ = function() {Clazz.load(C$, 1);}
  m$(C$, "c$", function() { C$.superclazz.c$.apply(this, []);}, 1);
  m$(C$, "c$$S", function(detailMessage){C$.superclazz.c$$S.apply(this,[detailMessage]);},1);
+ m$(C$, "c$$Throwable", function(exception){C$.superclazz.c$$Throwable.apply(this, arguments);}, 1);
+ m$(C$, "c$$S$Throwable", function(detailMessage,exception){C$.superclazz.c$$S$Throwable.apply(this, arguments);
+}, 1);
+
  return C$;
 }
 
@@ -19093,31 +19097,14 @@ var C$ = Clazz.newClass(java.lang, "Error", function (){
 var err = Clazz._Error();
 return err;
 }, Throwable);
-
-//setSuperclass(java.lang.Error, Throwable);
-//setSuperclass(Clazz._Error, Throwable);
-
 setEx(C$);
-
 })();
 
 var newEx = function(prefix, name, clazzSuper) {
   return setEx(declareType(prefix, name, clazzSuper));
 }
 
-;(function() {
-var C$ = newEx(java.lang,"Exception",Throwable);
-m$(C$, "c$", function(){}, 1);
-m$(C$, "c$$S", function(detailMessage){
-C$.superclazz.c$$S.apply(this, arguments);
-}, 1);
-m$(C$, "c$$Throwable", function(exception){
-C$.superclazz.c$$Throwable.apply(this, arguments);
-}, 1);
-m$(C$, "c$$S$Throwable", function(detailMessage,exception){
-C$.superclazz.c$$S$Throwable.apply(this, arguments);
-}, 1);
-})();
+newEx(java.lang,"Exception",Throwable);
 
 newEx(java.lang,"RuntimeException",Exception);
 newEx(java.lang,"IllegalArgumentException",RuntimeException);
