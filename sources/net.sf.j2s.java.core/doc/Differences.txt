@@ -1,5 +1,6 @@
 Notes
 =====
+updated 10/26/19 -- adds information about File.createTempFile()
 updated 8/16/19 -- minor typos and added summary paragraph
 updated 7/19/19 -- clarification that AWT and Swing classes are supported directly
 updated 5/13/19 -- Mandarin U+79D8 reserved character; Missing Math methods; int and long
@@ -233,6 +234,12 @@ a2s components, which in turn subclass JComponents. So no changes in code are ne
 successfully transpiled over 500 applets using this strategy. (Kind of surprising, actually, that
 the original Java developers did not see that option. But we have a hindsight advantage here.)
 
+Temporary Files
+===============
+
+SwingJS will maintain a pseudo-filesystem for files created with File.createTempFile(). This
+is useful in that closure of writing to the file does not generate a download to the user's
+machine (which typically requires user intervention).
 
 UNIMPLEMENTED CLASSES BY DESIGN
 ===============================
@@ -458,6 +465,76 @@ It's a simple modification:
 			// If we are here, the dialog has closed, in both Java and JavaScript.
 			System.out.println("int value is " + value);
 		}
+
+javax.swing.JOptionPane dialogs
+-------------------------------
+
+For this action to work, the parentComponent must implement
+propertyChangeListener, and any call to JOptionPanel should allow for
+asynchronous response.
+
+In addition, for compatibility with the Java version, implementation should
+wrap the call to getConfirmDialog or getOptionDialog in a method call to
+handle the Java:
+
+onDialogReturn(JOptionPane.showConfirmDialog(parentFrame,
+messageOrMessagePanel, "title", JOptionPane.OK_CANCEL_OPTION));
+
+Then parentFrame.propertyChange(event) should also call onDialogReturn.
+
+This will then work in both Java and JavaScript.
+
+Note that there is an int and an Object version of onDialogReturn().
+
+
+In JavaScript:
+
+The initial return from JOptionPane.showConfirmDialog and showMessageDialog
+will be NaN, testable as an impossible Java int value using ret !=
+Math.floor(ret) if the parent implements PropertyChangeListeneer, or -1
+(CLOSE_OPTION) if not.
+
+For showOptionDialog (which returns Object) or showInputDialog (which returns
+String), the initial return will be JDialog.ASYNCHRONOUS_OBJECT, testable as
+((Object) ret) instanceof javax.swing.plaf.UIResource if the parent implements
+PropertyChangeListeneer, or null if not.
+
+The second return will be the desired return.
+
+In Java:
+
+The initial return will be the one and only modal final return.
+
+
+
+For full compatibility, The calling method must not continue beyond this
+call.
+
+All of the standard Java events associated with Components are also
+available.
+
+Certain fall back mechanisms are possible, where onReturn does not exist, but
+only for the falling cases:
+
+
+For showMessageDialog, for WARNING_MESSAGE and ERROR_MESSAGE, a simple
+JavaScript alert() is used, returning 0 (OK_OPTION) or -1 (CLOSED_OPTION).
+
+For showInputDialog, if the message is a string, a simple JavaScript prompt()
+with input box is used, returning the entered string or null.
+
+For showConfirmDialog, a simple JavaScript confirm() is used, in which case:
+
+for YES_NO_OPTION: YES_OPTION or NO_OPTION
+
+for YES_NO_CANCEL_OPTION: YES_OPTION or CANCEL_OPTION
+
+for OK_CANCEL_OPTION or any other: OK_OPTION or CANCEL_OPTION
+
+Note that you should implement a response for CLOSED_OPTION for
+showConfirmDialog. For other dialogs, a null return indicates the dialog was
+closed, just as for Java.
+
 
 
 

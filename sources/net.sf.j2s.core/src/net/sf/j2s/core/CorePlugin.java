@@ -19,7 +19,8 @@ public class CorePlugin extends Plugin {
 	 * register the bundle version properly. So we use VERSION here instead.
 	 * 
 	 */
-	public static String VERSION = "3.2.4.08";
+	public static String VERSION = "3.2.4.09";
+	// BH 2019.10.27 -- 3.2.4.09 fixes problem with method of name c() becoming c$() -- constructor
 	// BH 2019.10.25 -- 3.2.4.09 adds j2s.compiler.java.version (default 8)
 	// BH 2019.10.25 -- 3.2.4.09 adds j2s.break.on.error (default false)
 	// BH 2019.10.25 -- 3.2.4.09 fixes missing resource copy for git projects

@@ -5014,7 +5014,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				|| j2sName.indexOf("$", 2) >= 0 || j2sName.equals("c$")
 				|| className != null && NameMapper.isMethodNonqualified(className, mBinding.getName()))
 			return j2sName;
-		return j2sName + "$";
+		// c() must be changed to c$$, not c$, which is the constructor
+		return (j2sName.equals("c") ? "c$$" : j2sName + "$");
 	}
 
 	/**

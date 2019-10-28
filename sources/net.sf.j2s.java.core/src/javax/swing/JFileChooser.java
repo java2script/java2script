@@ -830,7 +830,7 @@ public class JFileChooser extends JComponent {
 	}
 
 	private static void warnJSDeveloper() {
-		System.err.println("JFileChooser: Neither component nor this implements PropertyChangeListener.");
+		System.err.println("JFileChooser: Neither component nor \"this\" implements PropertyChangeListener for \"SelectedFile\".");
 	}
 
     private void closeDialog() {

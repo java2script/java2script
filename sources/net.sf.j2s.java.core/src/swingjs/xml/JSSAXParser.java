@@ -91,7 +91,7 @@ public class JSSAXParser implements Parser, XMLReader {
 	public void parseXMLString(String data, int mode) throws SAXException, IOException {	
 		try {
 			parseDocument(parseXML(data), mode);
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			error(e);
 		}
 	}
@@ -150,7 +150,9 @@ public class JSSAXParser implements Parser, XMLReader {
 //		uniqueSeq = s;
 //	}
 
-	private void error(Exception e) throws SAXException {
+	private void error(Throwable e) throws SAXException {
+		System.err.println(e);
+		e.printStackTrace();
 		SAXParseException ee = new SAXParseException("Invalid Document", null);
 		if (errorHandler == null)
 			throw(ee);
