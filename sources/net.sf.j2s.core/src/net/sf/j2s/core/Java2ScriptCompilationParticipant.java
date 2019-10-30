@@ -41,8 +41,12 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 	 */
 	@Override
 	public boolean isActive(IJavaProject project) {
+		if (project.getProject().getLocation() == null) {
+			// happens when comparing to team...show history item
+			return false;
+		}
  		boolean isj2s = Java2ScriptCompiler.isActive(project);
- 		String loc = " " + project.getProject().getLocation().toString() + " ";
+ 		String loc = " " + project.getProject().getLocation() + " ";
  		// notify only if changed
  		if (isActiveNotified.indexOf(isj2s + loc) < 0) {
  			System.out.println("J2S isActive " + isj2s + loc);
