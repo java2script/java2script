@@ -1204,9 +1204,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			}
 		} else {
 			appendFinalMethodQualifier(expression, declaringClass, bname,
-					(isStatic && !isPrivate ? FINAL_ESCAPECACHE : FINAL_CACHE));
+					(isStatic && !isPrivate ? FINAL_ESCAPECACHE : FINAL_CACHE)
+					| (isStatic ? FINAL_STATIC : 0));
 			buffer.append(".");
 		}
+
 		// keep a pointer, because we may rewrite this
 		int ptLog = (doLog ? buffer.length() : 0);
 
@@ -1247,10 +1249,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 			String j2sName = getFinalDotQualifiedNameForMethod(javaQualifier, mBinding,
 					(expression == null ? METHOD_NULLEXPRESSION : 0) | METHOD_ISQUALIFIED
-							| (lambdaArity >= 0 ? LAMBDA_METHOD : 0));
+							| (lambdaArity >= 0 ? LAMBDA_METHOD : 0) | (isStatic ? FINAL_STATIC : 0));
 
 			String finalMethodNameWith$Params = getFinalMethodNameWith$Params(j2sName, declaringClassJavaClassName,
 					mBinding, null, true, METHOD_NOTSPECIAL);
+
 			if (lambdaArity >= 0) {
 				// The problem here is that we cannot apply a method from an interface
 				// because those methods are not present in JavaScript.
@@ -1323,8 +1326,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			}
 		} else if (qualifier instanceof Name && !isVariableBinding(qualifier)) {
 			buffer.append(getFinalJ2SClassNameQualifier((Name) qualifier, declaringClass, null, flags));
+		} else if ((flags & FINAL_STATIC) != 0) {
+			// ensure even if field.method(), as long as method is static, we use Class.method()
+			// otherwise a null value for field will throw an exception.
+			buffer.append(getFinalJ2SClassNameQualifier(null, declaringClass, null, flags));
 		} else {
-			// xxxx.field.foo()
+			// xxxx.field.foo() -- but only if foo is not static
 			// (x ? y : z).foo()
 			// xxx.this.foo()
 			qualifier.accept(this);
@@ -1593,7 +1600,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private static final int FIELD_DECL_STATIC_NONDEFAULT = 1;
 	private static final int FIELD_DECL_STATIC_DEFAULTS = 2;
 	private static final int FIELD_DECL_NONSTATIC_ALL = 3;
-
+	
 	private void addAnonymousFunctionWrapper(boolean isOpen) {
 		buffer.append(
 				isOpen ? (buffer.lastIndexOf(")") >= buffer.length() - 3 ? ";" : "") + "\r\n(function(){" : "})()\r\n");
@@ -4543,6 +4550,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	private static final int FINAL_LAMBDA = 32;
 
+	private static final int FINAL_STATIC = 64;
+	
+
 	/**
 	 * Provide access to C$.$clinit$ when a static method is called or a static
 	 * field is accessed.
@@ -4565,9 +4575,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		if (declaringJavaClassName == null)
 			declaringJavaClassName = getJavaClassNameQualified(declaringJavaClass);
-		boolean doEscape = ((flags & FINAL_ESCAPE) == FINAL_ESCAPE);
+		boolean isStatic = ((flags & FINAL_STATIC) == FINAL_STATIC);
+		boolean doEscape = isStatic || ((flags & FINAL_ESCAPE) == FINAL_ESCAPE);
 		boolean doCache = ((flags & FINAL_CACHE) == FINAL_CACHE);
-
 		String name = removeBracketsAndFixNullPackageName(declaringJavaClassName);
 		doEscape &= !NameMapper.isClassKnown(name);
 		if (!doEscape) {
@@ -4585,7 +4595,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// lambda classes will always be defined at this point. No need to cache them
 		if (name.indexOf("$lambda") >= 0)
 			return getFinalJ2SClassName(name, FINAL_P);
-
 		return getFinalClazzLoadI$Reference(declaringJavaClass, name, doCache);
 	}
 
