@@ -20,6 +20,7 @@ public class CorePlugin extends Plugin {
 	 * 
 	 */
 	public static String VERSION = "3.2.4.09";
+	// BH 2019.10.30 -- 3.2.4.09 fixes problem with team...show history...compare having null project.getProject().getLocation()
 	// BH 2019.10.27 -- 3.2.4.09 fixes problem with method of name c() becoming c$() -- constructor
 	// BH 2019.10.25 -- 3.2.4.09 adds j2s.compiler.java.version (default 8)
 	// BH 2019.10.25 -- 3.2.4.09 adds j2s.break.on.error (default false)

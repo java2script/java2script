@@ -240,6 +240,8 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 	 */
 	boolean isLeftToRight = true;
 
+	private boolean awtScrollPaneNeedsLayout;
+
 	/*
 	 * The bits below define JList property changes that affect layout. When one
 	 * of these properties changes we set a bit in updateLayoutStateNeeded. The
@@ -399,7 +401,6 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 	}
 
 	private void paintImpl(Graphics g, JComponent c) {
-
 		// It is the responsibility of the JScrollPane scrollbar will move the JList
 		// to new x,y coordinates.
 
@@ -431,7 +432,6 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 		if ((renderer == null) || (size = dataModel.getSize()) == 0) {
 			return;
 		}
-
 		// Determine how many columns we need to paint
 		Rectangle paintBounds = g.getClipBounds();
 		int startColumn, endColumn;
@@ -477,6 +477,12 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 		rendererPane.removeAll();
 		// no -- this will paint the background over the painted backgrounds
 		// updateDOMNode();
+		if (awtScrollPaneNeedsLayout) {
+			awtScrollPaneNeedsLayout = false;
+			scrollPaneUI.jc.layout();
+		}
+
+
 	}
 
 //	private void paintDropLine(Graphics g) {
@@ -1422,6 +1428,8 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 	 */
 	protected void maybeUpdateLayoutState() {
 		if (updateLayoutStateNeeded != 0) {
+			if (isAWT && scrollPaneUI != null)
+				awtScrollPaneNeedsLayout = true;
 			updateLayoutStateNeeded = 0; // SwingJS switch of order here for getting
 																		// actual size
 			updateLayoutState();

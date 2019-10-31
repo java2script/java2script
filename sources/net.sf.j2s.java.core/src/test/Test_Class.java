@@ -270,6 +270,11 @@ class Test_Class extends Test_ {
 
 	}
 
+	public static void testStatic() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
 
 class Test_class1 {
