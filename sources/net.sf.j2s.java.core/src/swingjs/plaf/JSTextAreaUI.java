@@ -5,6 +5,7 @@ import java.awt.Point;
 import java.beans.PropertyChangeEvent;
 
 import javax.swing.JTextArea;
+import javax.swing.event.CaretEvent;
 import javax.swing.text.Element;
 import javax.swing.text.PlainView;
 import javax.swing.text.View;
@@ -172,5 +173,17 @@ public class JSTextAreaUI extends JSTextUI {
 		return CONSUMED;
 	}
 
+
+	@Override
+	public void caretUpdatedByProgram(CaretEvent e) {
+		if (!jc.isVisible() || !isAWT) // for now, AWT only
+			return;
+		@SuppressWarnings("unused")
+		int pt = e.getDot();
+		// Unfortunately, not MacOS, Edge, or MS Explorer
+		/**
+		 * @j2sNative this.domNode.scrollTo && this.domNode.scrollTo(0, pt);
+		 */
+	}
 
 }

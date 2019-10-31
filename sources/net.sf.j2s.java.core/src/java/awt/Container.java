@@ -1081,7 +1081,8 @@ public class Container extends JSComponent {
 	protected void addImplCont(Component comp, Object constraints, int index) {
 		synchronized (getTreeLock()) {
 			
-			if (/** @j2sNative comp.getWrap$  && !this.isWrapper$ || */ false) {
+			// AWT a2s.List alone right now has getWrap
+			if (/** @j2sNative comp.秘getWrap$  && !this.秘isWrapper$ || */ false) {
 				comp = ((A2SWrappedComponent) comp).秘getWrap();
 				comp.background = comp.foreground = null; // this parent should not set the background color				
 			}
@@ -1262,7 +1263,7 @@ public class Container extends JSComponent {
 	public void remove(Component comp) {
 		synchronized (getTreeLock()) {
 
-			if (/** @j2sNative comp.getWrap$ && !this.isWrapper$ || */ false) {
+			if (/** @j2sNative comp.秘getWrap$ && !this.秘isWrapper$ || */ false) {
 				comp = ((A2SWrappedComponent) comp).秘getWrap();
 			}
 

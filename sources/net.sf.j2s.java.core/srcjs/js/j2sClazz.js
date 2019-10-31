@@ -9,6 +9,7 @@
 
 // TODO: still a lot of references to window[...]
 
+// BH 2019.10.30 Foo.parseFoo not Foo.parseFooRadix 
 // BH 2019.10.26 subclass def should exclude  __PARAMCODE
 // BH 2019.09.24 missing isArray$() in Integer.class
 // BH 2019.09.26 superfast byte[] -> String using TextDecoder
@@ -3469,7 +3470,7 @@ Integer.toString=Integer.toString$I=Integer.toString$I$I=Integer.prototype.toStr
 m$(Integer, ["c$", "c$$S", "c$$I"], function(v){
  v == null && (v = 0);
  if (typeof v != "number")
-  v = Integer.parseIntRadix$S$I(v, 10);
+  v = Integer.parseInt$S$I(v, 10);
  v = v.intValue();  
  this.valueOf=function(){return v;};
 }, 1);
@@ -3552,7 +3553,7 @@ m$(Integer,"numberOfTrailingZeros$I",
 
 var radixChar = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-m$(Integer,"parseIntRadix$S$I",
+m$(Integer,"parseInt$S$I",
 function(s,radix){
  var v = parseInt(s, radix);
  if (isNaN(v)){
@@ -3561,9 +3562,9 @@ function(s,radix){
 return v;
 }, 1);
 
-m$(Integer,["parseInt$S","parseInt$S$I"],
+m$(Integer,["parseInt$S"],
 function(s,radix){
-return Integer.parseIntRadix$S$I(s, radix || 10);
+return Integer.parseInt$S$I(s, radix || 10);
 }, 1);
 
 m$(Integer,["valueOf$S","valueOf$I"],
@@ -3573,7 +3574,7 @@ function(s, radix){
 
 m$(Integer,["valueOf$S$I"],
 function(s, radix){
-  return Integer.parseIntRadix$S$I(s, radix || 10);
+  return Integer.parseInt$S$I(s, radix || 10);
 }, 1);
 
 m$(Integer,"equals$O",
@@ -3638,7 +3639,7 @@ Long.toString=Long.toString$J=Long.toString$J$I = Long.prototype.toString=functi
 
 m$(Long, ["c$", "c$$S", "c$$J"], function(v){
   v == null && (v = 0);
-  v = (typeof v == "number" ? Math.round(v) : Integer.parseIntRadix$S$I(v, 10));
+  v = (typeof v == "number" ? Math.round(v) : Integer.parseInt$S$I(v, 10));
   this.valueOf=function(){return v;};
 }, 1);
 
@@ -3648,7 +3649,7 @@ m$(Long, ["c$", "c$$S", "c$$J"], function(v){
 
 m$(Long,["parseLong$S", "parseLong$S$I"],
 function(s,radix){
- return Integer.parseIntRadix$S$I(s, radix || 10);
+ return Integer.parseInt$S$I(s, radix || 10);
 }, 1);
 
 m$(Long,["valueOf$S","valueOf$J","valueOf$S$I"],
@@ -3692,7 +3693,7 @@ m$(Short, ["c$", "c$$S", "c$$H"],
 function (v,radix) {
  v == null && (v = 0);
  if (typeof v != "number")
-  v = Integer.parseIntRadix$S$I(v, radix||10);
+  v = Integer.parseInt$S$I(v, radix||10);
  v = v.shortValue();
  this.valueOf = function () {return v;};
 }, 1);
@@ -3712,13 +3713,8 @@ Short.MIN_VALUE = Short.prototype.MIN_VALUE = -32768;
 Short.MAX_VALUE = Short.prototype.MAX_VALUE = 32767;
 //Short.TYPE = Short.prototype.TYPE = Short;
 
-m$(Short, "parseShortRadix$S$I",function (s, radix) {
-return Integer.parseIntRadix$S$I(s, radix).shortValue();
-}, 1);
-
-
-m$(Short, "parseShort$S",function (s) {
-return Short.parseShortRadix$S$I(s, 10);
+m$(Short, ["parseShort$S", "parseShort$S$I"],function (s, radix) {
+return Integer.parseInt$S$I(s, radix || 10).shortValue();
 }, 1);
 
 m$(Short, ["valueOf$S","valueOf$H","valueOf$S$I"],
@@ -3755,7 +3751,7 @@ decorateAsNumber(Byte,"Byte", "byte", "B");
 
 m$(Byte, ["c$", "c$$S", "c$$B"], function(v,radix){
  if (typeof v != "number")
-   v = Integer.parseIntRadix$S$I(v, radix||10);
+   v = Integer.parseInt$S$I(v, radix||10);
  v = v.byteValue();
 this.valueOf=function(){return v;};
 this.byteValue = function(){return v};
@@ -3778,14 +3774,9 @@ Byte.MAX_VALUE=Byte.prototype.MAX_VALUE=127;
 Byte.SIZE=Byte.prototype.SIZE=8;
 //Byte.TYPE=Byte.prototype.TYPE=Byte;
 
-m$(Byte,"parseByteRadix$S$I",
+m$(Byte,["parseByte$S", "parseByte$S$I"],
 function(s,radix){
- return Integer.parseIntRadix$S$I(s, radix).byteValue$();
-}, 1);
-
-m$(Byte,"parseByte$S",
-function(s){
-return Byte.parseByteRadix$S$I(s,10);
+ return Integer.parseInt$S$I(s, radix || 10).byteValue$();
 }, 1);
 
 m$(Byte, ["valueOf$S","valueOf$B","valueOf$S$I"],
