@@ -1,7 +1,8 @@
 ﻿// j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
-// J2S._version set to "3.2.4.07" 2019.01.04; 2019.02.06
+// J2S._version set to "3.2.4.09" 2019.10.31
 
+// BH 2019.10.31 (Karsten Blankenagel) adds Info.spinnerImage: ["none"|<j2sdir/>path|/path|http[s]://path]
 // BH 2019.10.20 fixes modal for popup dialog; still needs work for two applets?
 // BH 2019.09.13 fixes touchend canceling click
 // BH 2019.08.29 fixes mouseupoutjsmol not firing MouseEvent.MOUSE_UP
@@ -32,10 +33,13 @@ self.J2S
 
 try {
 	 // will alert in system.out.println with a message when events occur
-	J2S._traceEvents = (document.location.href.indexOf("j2sevents") >= 0)
-	J2S._traceMouse = (document.location.href.indexOf("j2smouse") >= 0)
-	J2S._traceMouseMove = (document.location.href.indexOf("j2smousemove") >= 0)
-	J2S._startProfiling = 	(document.location.href.indexOf("j2sprofile") >= 0)
+	J2S._traceEvents = (document.location.href.indexOf("j2sevents") >= 0);
+	J2S._traceMouse = (document.location.href.indexOf("j2smouse") >= 0);
+	J2S._traceMouseMove = (document.location.href.indexOf("j2smousemove") >= 0);
+	J2S._startProfiling = 	(document.location.href.indexOf("j2sprofile") >= 0);
+	if (document.location.href.indexOf("j2snozcore") >= 0)
+		J2S._coreZExt = "";
+
 } catch (e) {}
 
 J2S.onClazzLoaded || (J2S.onClazzLoaded = function(i, msg) {console.log([i,msg])});
@@ -64,7 +68,7 @@ if (!J2S._version)
 		var z = J2S.z || 9000;
 		var j = {
 
-			_version : "3.2.4.07", // svn.keywords:lastUpdated
+			_version : "3.2.4.09", // svn.keywords:lastUpdated
 			_alertNoBinary : true,
 			_allowedAppletSize : [ 25, 2048, 500 ], // min, max, default
 													// (pixels)
@@ -86,6 +90,7 @@ if (!J2S._version)
 			_applets : {},
 			_asynchronous : true,
 			_ajaxQueue : [],
+			_coreZExt : ".z",
 			_persistentMenu : false,
 			_getZOrders : getZOrders,
 			_z : getZOrders(z),
@@ -1179,6 +1184,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 			// when leaving page, Java applet may be dead
 			applet._appletPanel = (javaAppletPanel || javaApplet);
 			applet._applet = javaApplet;
+			J2S.$css(J2S.$(applet, 'appletdiv'), { 'background-image': '' });
 		}
 		J2S._track(applet.readyCallback(appId, fullId, isReady));
 	}
@@ -1236,6 +1242,8 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 ......<div id=\"ID_appletdiv\" style=\"z-index:"
 					+ J2S.getZ(applet, "header")
 					+ ";width:100%;height:100%;position:absolute;top:0px;left:0px;"
+			+ (applet._spinnerImage ? 
+					"background-image:url(" + applet._spinnerImage + "); background-repeat:no-repeat; background-position:center;" : "")
 					+ css + ">";
 			var height = applet._height;
 			var width = applet._width;
@@ -1289,7 +1297,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		!J2S._fileCache && obj._cacheFiles && (J2S._fileCache = {});
 		if (!obj._console)
 			obj._console = obj._id + "_infodiv";
-		if (obj._console == "none")
+		if (obj._console == "none" || obj._console == "NONE")
 			obj._console = null;
 
 		obj._color = (Info.color ? Info.color.replace(/0x/, "#") : "#FFFFFF");
@@ -2301,7 +2309,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			__coreSet.push(type);
 			__coreSet.sort();
 			J2S._coreFiles = [ path + "/core/core" + __coreSet.join("")
-					+ ".z.js" ];
+					+ J2S._coreZExt + ".js" ];
 		}
 		if (more && (more = more.split(" ")))
 			for (var i = 0; i < more.length; i++)
@@ -2326,6 +2334,9 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		this._isJSV = Info._isJSV || false;
 		this._isAstex = Info._isAstex || false;
 		this._platform = Info._platform || "";
+		this._spinnerImage = (!Info.spinnerImage || Info.spinnerImage == "NONE" || Info.spinnerImage == "none" ? null 
+				: Info.spinnerImage.indexOf("//") < 0 && Info.spinnerImage.indexOf("/") != 0 ? Info.j2sPath + "/" + Info.spinnerImage 
+				: Info.spinnerImage);
 		if (checkOnly)
 			return this;
 		J2S.setWindowVar(id, this);
@@ -2907,6 +2918,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				fDown(xy, 501);
 			} else if (target) {
 				var o = $(target(501)).position();
+				if (!o) return false;
 				xy = {
 					x : o.left,
 					y : o.top
