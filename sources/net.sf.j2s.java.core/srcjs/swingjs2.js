@@ -10702,10 +10702,13 @@ self.J2S
 
 try {
 	 // will alert in system.out.println with a message when events occur
-	J2S._traceEvents = (document.location.href.indexOf("j2sevents") >= 0)
-	J2S._traceMouse = (document.location.href.indexOf("j2smouse") >= 0)
-	J2S._traceMouseMove = (document.location.href.indexOf("j2smousemove") >= 0)
-	J2S._startProfiling = 	(document.location.href.indexOf("j2sprofile") >= 0)
+	J2S._traceEvents = (document.location.href.indexOf("j2sevents") >= 0);
+	J2S._traceMouse = (document.location.href.indexOf("j2smouse") >= 0);
+	J2S._traceMouseMove = (document.location.href.indexOf("j2smousemove") >= 0);
+	J2S._startProfiling = 	(document.location.href.indexOf("j2sprofile") >= 0);
+	if (document.location.href.indexOf("j2snozcore") >= 0)
+		J2S._coreZExt = "";
+
 } catch (e) {}
 
 J2S.onClazzLoaded || (J2S.onClazzLoaded = function(i, msg) {console.log([i,msg])});
@@ -10756,6 +10759,7 @@ if (!J2S._version)
 			_applets : {},
 			_asynchronous : true,
 			_ajaxQueue : [],
+			_coreZExt : ".z",
 			_persistentMenu : false,
 			_getZOrders : getZOrders,
 			_z : getZOrders(z),
@@ -12974,7 +12978,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			__coreSet.push(type);
 			__coreSet.sort();
 			J2S._coreFiles = [ path + "/core/core" + __coreSet.join("")
-					+ ".z.js" ];
+					+ J2S._coreZExt + ".js" ];
 		}
 		if (more && (more = more.split(" ")))
 			for (var i = 0; i < more.length; i++)
@@ -13583,6 +13587,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				fDown(xy, 501);
 			} else if (target) {
 				var o = $(target(501)).position();
+				if (!o) return false;
 				xy = {
 					x : o.left,
 					y : o.top
@@ -13843,8 +13848,8 @@ window["j2s.clazzloaded"] = true;
   _debugging: false,
   _loadcore: true,
   _nooutput: 0,
-  _VERSION_R: "3.2.4.07", //runtime
-  _VERSION_T: "3.2.4.07", //transpiler
+  _VERSION_R: "3.2.4.09", //runtime
+  _VERSION_T: "3.2.4.09", //transpiler
 };
 
 ;(function(Clazz, J2S) {
