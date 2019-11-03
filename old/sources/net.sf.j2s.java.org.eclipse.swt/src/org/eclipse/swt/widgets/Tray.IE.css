@@ -1,0 +1,19 @@
+/* IE 7.0 + */
+*:first-child+html .tray-cell-outer-wide-shadow {
+	background-image: url('images/strip-outer-wide.png');
+}
+*:first-child+html .tray-cell-outer-shadow {
+	background-image: url('images/strip-outer.png');
+}
+/* IE 6.0 - */
+* html .tray-cell-outer-wide-shadow {
+	background-image: none;
+	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/strip-outer-wide.png', sizingMethod='image');
+}
+* html .tray-cell-outer-shadow {
+	background-image: none;
+	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/strip-outer.png', sizingMethod='image');
+}
+.swt-widgets-tray-ie {
+	width:324px;
+}

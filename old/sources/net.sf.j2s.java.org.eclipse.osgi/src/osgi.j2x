@@ -1,0 +1,5 @@
+package.prefix=org.osgi
+package.name=osgi
+package.description=OSGI library
+package.id=osgi
+

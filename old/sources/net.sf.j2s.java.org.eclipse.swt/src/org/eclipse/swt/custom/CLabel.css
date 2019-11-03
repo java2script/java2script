@@ -1,0 +1,38 @@
+.clabel-icon {
+	position:absolute;
+	background-position:center center;
+	background-repeat:no-repeat;
+	z-index:2;
+}
+.clabel-text {
+	cursor:default;
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
+	z-index:3;
+}
+.clabel-line {
+	z-index:4;
+}
+.clabel-border {
+	border-style:solid;
+	border-width:1px;
+	font-size:0;
+	position:absolute;
+}
+.clabel-background {
+	position:absolute;
+	font-size:0;
+	margin:0;
+	padding:0;
+	z-index:1;
+}
+.clabel-background-block {
+	position:absolute;
+	font-size:0;
+	margin:0;
+	padding:0;
+	z-index:0;
+}
+.swt-custom-clabel {
+	width:324px;
+}

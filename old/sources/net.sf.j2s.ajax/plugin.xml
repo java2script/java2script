@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+   <extension
+         point="org.eclipse.jdt.core.classpathVariableInitializer">
+      <classpathVariableInitializer
+            class="net.sf.j2s.ajax.AJAXVariableInitializer"
+            variable="AJAX_CORE"/>
+      <classpathVariableInitializer
+            class="net.sf.j2s.ajax.AJAXVariableInitializer"
+            variable="AJAX_SWT"/>
+      <classpathVariableInitializer
+            class="net.sf.j2s.ajax.AJAXVariableInitializer"
+            variable="AJAX_RPC"/>
+      <classpathVariableInitializer
+            class="net.sf.j2s.ajax.AJAXVariableInitializer"
+            variable="AJAX_PIPE"/>
+      <classpathVariableInitializer
+            class="net.sf.j2s.ajax.AJAXVariableInitializer"
+            variable="AJAX_STORE"/>
+      <classpathVariableInitializer
+            class="net.sf.j2s.ajax.AJAXVariableInitializer"
+            variable="J2S_ANNOTATION"/>
+      <classpathVariableInitializer
+            class="net.sf.j2s.ajax.AJAXVariableInitializer"
+            variable="AJAX_CORE_SRC"/>
+      <classpathVariableInitializer
+            class="net.sf.j2s.ajax.AJAXVariableInitializer"
+            variable="AJAX_SWT_SRC"/>
+      <classpathVariableInitializer
+            class="net.sf.j2s.ajax.AJAXVariableInitializer"
+            variable="AJAX_RPC_SRC"/>
+      <classpathVariableInitializer
+            class="net.sf.j2s.ajax.AJAXVariableInitializer"
+            variable="AJAX_PIPE_SRC"/>
+      <classpathVariableInitializer
+            class="net.sf.j2s.ajax.AJAXVariableInitializer"
+            variable="AJAX_STORE_SRC"/>
+      <classpathVariableInitializer
+            class="net.sf.j2s.ajax.AJAXVariableInitializer"
+            variable="J2S_ANNOTATION_SRC"/>
+   </extension>
+
+</plugin>
