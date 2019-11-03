@@ -113,6 +113,11 @@ final public class XMLReaderFactory
 	catch (RuntimeException e) { /* normally fails for applets */ }
 
 	// 2. if that fails, try META-INF/services/
+	/**
+	 * @j2sIgnore
+	 * 
+	 */
+	{
 	if (className == null) {
 	    try {
 		String		service = "META-INF/services/" + property;
@@ -133,7 +138,7 @@ final public class XMLReaderFactory
 	    } catch (Exception e) {
 	    }
 	}
-
+	}
 	// 3. Distro-specific fallback
 	if (className == null) {
 // BEGIN DISTRIBUTION-SPECIFIC

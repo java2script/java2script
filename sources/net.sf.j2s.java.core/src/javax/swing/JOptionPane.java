@@ -927,7 +927,7 @@ public class JOptionPane extends JComponent {
 			}
 		}
 
-		return showOptionDialog(parentComponent, message, title, optionType, messageType, icon, null, null);
+		return showOptionDialog(parentComponent, message, title, optionType, messageType, icon, options, null);
 	}
 
 	/**

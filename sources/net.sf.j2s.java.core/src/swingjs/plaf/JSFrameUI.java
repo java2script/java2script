@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowEvent;
 import java.awt.peer.FramePeer;
@@ -13,6 +15,8 @@ import java.beans.PropertyChangeEvent;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.LookAndFeel;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 import javajs.api.JSFunction;
 import swingjs.api.js.DOMNode;
@@ -276,8 +280,6 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 			switch (/** @j2sNative jQueryEvent.type || */
 			"") {
 			case "click":
-				DOMNode tbar = titleBarNode;
-				J2S.setDraggable(tbar, false);
 				frameCloserAction();
 				return HANDLED;
 			case "mouseout":
@@ -292,10 +294,31 @@ public class JSFrameUI extends JSWindowUI implements FramePeer, JSComponentUI.Em
 	}
 
 	protected void frameCloserAction() {
-		frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+		// We use a timer so that all the focus-related window zindex business is done first, 
+		// in case a custom close-option dialog is thrown up.
+		Timer t = new Timer(100, new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+			}
+			
+		});
+		t.setRepeats(false);
+		t.start();
 	}
 
 	protected void closeFrame() {
+		DOMNode tbar = titleBarNode;
+		/**
+		 * @j2sNative
+		 * 
+		 * J2S.setDraggable(tbar, false);
+		 */
+		{
+			// but "false" here will become Boolean.FALSE
+			J2S.setDraggable(tbar, false);
+		}
 		J2S.unsetMouse(frameNode);
 		$(frameNode).remove();
 		$(outerNode).remove();

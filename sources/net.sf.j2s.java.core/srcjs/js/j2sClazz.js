@@ -65,8 +65,8 @@ window["j2s.clazzloaded"] = true;
   _debugging: false,
   _loadcore: true,
   _nooutput: 0,
-  _VERSION_R: "3.2.4.07", //runtime
-  _VERSION_T: "3.2.4.07", //transpiler
+  _VERSION_R: "3.2.4.09", //runtime
+  _VERSION_T: "3.2.4.09", //transpiler
 };
 
 ;(function(Clazz, J2S) {

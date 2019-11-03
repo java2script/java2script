@@ -340,7 +340,9 @@ public abstract class AbstractQueuedLongSynchronizer
      *         value was not equal to the expected value.
      */
     protected final boolean compareAndSetState(long expect, long update) {
-        // See below for intrinsics setup to support this
+    	if (state != expect)
+    		return false;
+    	state = update;
         return true;//unsafe.compareAndSwapLong(this, stateOffset, expect, update);
     }
 
@@ -2072,14 +2074,20 @@ public abstract class AbstractQueuedLongSynchronizer
      * CAS head field. Used only by enq.
      */
     private final boolean compareAndSetHead(Node update) {
-        return false;//unsafe.compareAndSwapObject(this, headOffset, null, update);
+    	if (head != null)
+    		return false;
+    	head = update;    		
+        return true;//unsafe.compareAndSwapObject(this, headOffset, null, update);
     }
 
     /**
      * CAS tail field. Used only by enq.
      */
     private final boolean compareAndSetTail(Node expect, Node update) {
-        return false;//unsafe.compareAndSwapObject(this, tailOffset, expect, update);
+    	if (tail != expect)
+    		return false;
+    	tail = update;
+        return true;//unsafe.compareAndSwapObject(this, tailOffset, expect, update);
     }
 
     /**
@@ -2088,8 +2096,10 @@ public abstract class AbstractQueuedLongSynchronizer
     private final static boolean compareAndSetWaitStatus(Node node,
                                                          int expect,
                                                          int update) {
-        return false;//unsafe.compareAndSwapInt(node, waitStatusOffset,
-    //                                    expect, update);
+    	if (node.waitStatus != expect)
+    		return false;
+    	node.waitStatus = update;
+        return true;//unsafe.compareAndSwapInt(node, waitStatusOffset,
     }
 
     /**
@@ -2098,6 +2108,9 @@ public abstract class AbstractQueuedLongSynchronizer
     private final static boolean compareAndSetNext(Node node,
                                                    Node expect,
                                                    Node update) {
-        return false;//unsafe.compareAndSwapObject(node, nextOffset, expect, update);
+    	if (node.next != expect)
+    		return false;
+    	node.next = update;
+        return true;//unsafe.compareAndSwapObject(node, nextOffset, expect, update);
     }
 }

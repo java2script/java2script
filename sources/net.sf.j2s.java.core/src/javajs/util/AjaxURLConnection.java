@@ -9,9 +9,10 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.UnknownServiceException;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javajs.api.js.J2SObjectInterface;
 
@@ -75,10 +76,7 @@ public class AjaxURLConnection extends HttpURLConnection {
    */
   @SuppressWarnings("null")
   private Object doAjax(boolean isBinary) {
-	if (streamOut != null) {
-		bytesOut = streamOut.toByteArray();
-		streamOut = null;
-	}
+	getBytesOut();
     J2SObjectInterface J2S = /** @j2sNative self.J2S || */ null;
     Object info = null;
     /** @j2sNative
@@ -88,7 +86,55 @@ public class AjaxURLConnection extends HttpURLConnection {
      *    info.isBinary = !!isBinary;
      *  }
      */
-    Object result = J2S.doAjax(url.toString(), postOut, bytesOut, info);
+
+    Map<String, List<String>> map = getRequestProperties();
+    boolean isnocache = false;
+    String type = null;
+    if (map != null) {
+    	// Unfortunately, AJAX now disallows just about all headers. 
+    	// Even cache-control can be blocked.
+    	// We could set this up to check if it is cross-domain CORS and
+    	// then not do this. But for now just not allowing headers.
+    	for (Entry<String, List<String>> e : map.entrySet()) {
+    		String key = e.getKey();
+    		switch (key.toLowerCase()) {
+    		case "content-type":
+    			type = e.getValue().get(0);
+    			break;
+    		case "cache-control":
+    			isnocache = e.getValue().get(0).equalsIgnoreCase("no-cache");
+    			break;
+    		}
+    		String s = "";
+    		List<String>values = e.getValue();
+    		for (int i = 0; i < values.size(); i++) {
+    			s += (i == 0 ? "" : ", ") + values.get(i);
+    		}
+    		if (s.length() > 0) {
+            	/**
+            	 * For now we are not enabling this. Causes too 
+            	 * much problem with CORS.
+            	 * 
+            	 * @j2sNative 
+            	 *  
+            	 * info.headers || (info.headers = {});
+            	 *  //info.headers[key] = s; 
+            	 */
+    		}	
+    	}
+    }
+    if ("application/json".equals(type)) {
+    	// Hack here we are turning off the content type for CORS for VBRC
+    	/**
+    	 * @j2sNative 
+    	 * 
+    	 * info.contentType = false;
+    	 */
+    }
+    String myURL = url.toString();
+    
+    
+    Object result = J2S.doAjax(myURL, postOut, bytesOut, info);
     boolean isEmpty = false;
     // the problem is that jsmol.php is still returning crlf even if output is 0 bytes
     // and it is not passing through the not-found state, just 200
@@ -114,6 +160,14 @@ public class AjaxURLConnection extends HttpURLConnection {
 		// type = "application/octet-stream;";
 		bytesOut = bytes;
 	}
+	
+	private byte[] getBytesOut() {
+		if (streamOut != null) {
+			bytesOut = streamOut.toByteArray();
+			streamOut = null;
+		}
+		return bytesOut;
+	}
 
 	public void outputString(String post) {
 		postOut = post;
@@ -128,33 +182,47 @@ public class AjaxURLConnection extends HttpURLConnection {
 	@Override
 	public InputStream getInputStream() throws FileNotFoundException {
 		responseCode = -1;
-		InputStream is = getInputStreamAndResponse(url, false);
+		InputStream is = getInputStreamAndResponse(false);
 		if (is == null)
 			throw new FileNotFoundException("opening " + url);
 		return is;
 	}
 
-	private InputStream getInputStreamAndResponse(URL url, boolean allowNWError) {
+	private InputStream getInputStreamAndResponse(boolean allowNWError) {
 		BufferedInputStream is = getAttachedStreamData(url, false);
-		if (is != null || getUseCaches() && (is = getCachedStream(url, allowNWError)) != null) {
+		if (is != null || doCache() 
+				&& (is = getCachedStream(allowNWError)) != null) {
 			return is;
 		}
 		is = attachStreamData(url, doAjax(ajax == null));
-		if (getUseCaches() && is != null) {
+		if (doCache() && is != null) {
 			isNetworkError(is);
-			setCachedStream(url);
+			setCachedStream();
 			return is;
 		}
-		isNetworkError(is);
+		if (!isNetworkError(is)) {
+		}
 		return is;
 	}
 
-	static Map<String, Object> urlCache = new Hashtable<String, Object>();
+	/**
+	 * We have to consider that POST is not 
+	 */
+	private boolean doCache() {
+		if (!useCaches || !getRequestMethod().equals("POST")) {
+			return useCaches;
+		}
+		String cc = getRequestProperty("Cache-Control");
+		return cc == null || !cc.equals("no-cache");
+	}
 
-	private BufferedInputStream getCachedStream(URL url, boolean allowNWError) {
-		Object data = urlCache.get(url.toString());
+	 static Map<String, Object> urlCache = new Hashtable<String, Object>();
+
+	private BufferedInputStream getCachedStream(boolean allowNWError) {
+		Object data = urlCache.get(getCacheKey());
 		if (data == null)
 			return null;
+		URL url = this.url;
 		boolean isAjax = /** @j2sNative url.ajax || */
 				false;
 		BufferedInputStream bis = getBIS(data, isAjax);
@@ -164,28 +232,37 @@ public class AjaxURLConnection extends HttpURLConnection {
 	private static BufferedInputStream getBIS(Object data, boolean isJSON) {
 		if (data == null)
 			return null;
-		if (!isJSON)
-			return Rdr.toBIS(data);
-		BufferedInputStream bis = Rdr.toBIS("");
+		BufferedInputStream bis = Rdr.toBIS(data);
+		if (isJSON) {
 		/**
 		 * @j2sNative
 		 * 
 		 * 			bis._jsonData = data;
 		 */
+		}
 		return bis;
 	}
 
 	@SuppressWarnings("unused")
-	private void setCachedStream(URL url) {
-		Object data = /** @j2sNative url._streamData || */
+	private void setCachedStream() {
+		Object data = /** @j2sNative this.url._streamData || */
 				null;
 		if (data != null) {
 			int code = this.responseCode;
 			/**
 			 * @j2sNative data._responseCode = code;
 			 */
-			urlCache.put(url.toString(), data);
+			urlCache.put(getCacheKey(), data);
 		}
+	}
+
+	private String getCacheKey() {
+		String key = url.toString();
+		if (getRequestMethod().equals("POST")) {
+			key += (postOut != null ? postOut.hashCode() : 0)
+					| (getBytesOut() != null ? getBytesOut().hashCode() : 0);
+		}
+		return key;
 	}
 
 	@SuppressWarnings("unused")
@@ -219,7 +296,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 	 * to see if it exists.
 	 * 
 	 * @param url
-	 * @return String, SB, or byte[], or JSON dat
+	 * @return String, SB, or byte[], or JSON data
 	 */
 	@SuppressWarnings("unused")
 	public static BufferedInputStream getAttachedStreamData(URL url, boolean andDelete) {
@@ -269,7 +346,7 @@ public class AjaxURLConnection extends HttpURLConnection {
 			 * re-throw it if there isn't a status line.
 			 */
 			try {
-				getInputStreamAndResponse(url, true);
+				getInputStreamAndResponse(true);
 			} catch (Exception e) {
 			}
 		}
@@ -298,4 +375,8 @@ public class AjaxURLConnection extends HttpURLConnection {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return (url == null ? "[AjaxURLConnection]" : url.toString());
+	}
 }

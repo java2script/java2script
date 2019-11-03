@@ -36,7 +36,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javajs.util.Lst;
+import sun.net.www.MessageHeader;
 
 /**
  * The abstract class <code>URLConnection</code> is the superclass of all
@@ -368,7 +368,7 @@ public abstract class URLConnection {
 		throw new UnknownServiceException("protocol doesn't support output");
 	}
 
-	private Lst<String[]> requests;
+	private MessageHeader requests;
 
 	/**
 	 * Sets the general request property. If a property with the key already
@@ -395,14 +395,9 @@ public abstract class URLConnection {
 			throw new IllegalStateException("Already connected");
 		if (key == null)
 			throw new NullPointerException("key is null");
-		if (requests == null)
-			requests = new Lst<String[]>();
-		for (int i = requests.size(); --i >= 0;)
-			if (requests.get(i)[0].equals(key)) {
-				requests.get(i)[1] = value;
-				return;
-			}
-		requests.addLast(new String[] { key, value });
+        if (requests == null)
+            requests = new MessageHeader();
+        requests.set(key, value);
 	}
 
 
@@ -548,73 +543,67 @@ public abstract class URLConnection {
  }
 
 
- /**
- * Adds a general request property specified by a
- * key-value pair. This method will not overwrite
- * existing values associated with the same key.
- *
- * @param key the keyword by which the request is known
- * (e.g., "<code>accept</code>").
- * @param value the value associated with it.
- * @throws IllegalStateException if already connected
- * @throws NullPointerException if key is null
- * @see #getRequestProperties()
- * @since 1.4
- */
- public void addRequestProperty(String key, String value) {
- if (connected)
- throw new IllegalStateException("Already connected");
- if (key == null)
- throw new NullPointerException ("key is null");
+	/**
+	 * Adds a general request property specified by a key-value pair. This method
+	 * will not overwrite existing values associated with the same key.
+	 *
+	 * @param key   the keyword by which the request is known (e.g.,
+	 *              "<code>accept</code>").
+	 * @param value the value associated with it.
+	 * @throws IllegalStateException if already connected
+	 * @throws NullPointerException  if key is null
+	 * @see #getRequestProperties()
+	 * @since 1.4
+	 */
+	public void addRequestProperty(String key, String value) {
+		if (connected)
+			throw new IllegalStateException("Already connected");
+		if (key == null)
+			throw new NullPointerException("key is null");
 
-// if (requests == null)
-// requests = new MessageHeader();
-//
-// requests.add(key, value);
- }
+		if (requests == null)
+			requests = new MessageHeader();
+
+		requests.add(key, value);
+	}
 
 
- /**
- * Returns the value of the named general request property for this
- * connection.
- *
- * @param key the keyword by which the request is known (e.g., "accept").
- * @return the value of the named general request property for this
- * connection. If key is null, then null is returned.
- * @throws IllegalStateException if already connected
- * @see #setRequestProperty(java.lang.String, java.lang.String)
- */
- public String getRequestProperty(String key) {
- if (connected)
- throw new IllegalStateException("Already connected");
+	/**
+	 * Returns the value of the named general request property for this connection.
+	 *
+	 * @param key the keyword by which the request is known (e.g., "accept").
+	 * @return the value of the named general request property for this connection.
+	 *         If key is null, then null is returned.
+	 * @throws IllegalStateException if already connected
+	 * @see #setRequestProperty(java.lang.String, java.lang.String)
+	 */
+	public String getRequestProperty(String key) {
+		if (connected)
+			throw new IllegalStateException("Already connected");
+		if (requests == null)
+			return null;
+		return requests.findValue(key);
+	}
 
-// if (requests == null)
- return null;
+	/**
+	 * Returns an unmodifiable Map of general request properties for this
+	 * connection. The Map keys are Strings that represent the request-header field
+	 * names. Each Map value is a unmodifiable List of Strings that represents the
+	 * corresponding field values.
+	 *
+	 * @return a Map of the general request properties for this connection.
+	 * @throws IllegalStateException if already connected
+	 * @since 1.4
+	 */
+	public Map<String, List<String>> getRequestProperties() {
+		if (connected)
+			throw new IllegalStateException("Already connected");
 
-// return requests.findValue(key);
- }
+		if (requests == null)
+			return Collections.EMPTY_MAP;
 
- /**
- * Returns an unmodifiable Map of general request
- * properties for this connection. The Map keys
- * are Strings that represent the request-header
- * field names. Each Map value is a unmodifiable List
- * of Strings that represents the corresponding
- * field values.
- *
- * @return a Map of the general request properties for this connection.
- * @throws IllegalStateException if already connected
- * @since 1.4
- */
- public Map<String,List<String>> getRequestProperties() {
- if (connected)
- throw new IllegalStateException("Already connected");
-
-// if (requests == null)
- return Collections.EMPTY_MAP;
-
-// return requests.getHeaders(null);
- }
+		return requests.getHeaders(null);
+	}
 
  /**
  * Sets the default value of a general request property. When a
