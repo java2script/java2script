@@ -1,5 +1,7 @@
 Notes
 =====
+
+updated 11/03/19 -- adds information about File.exists() and points to src/test/async
 updated 10/26/19 -- adds information about File.createTempFile()
 updated 8/16/19 -- minor typos and added summary paragraph
 updated 7/19/19 -- clarification that AWT and Swing classes are supported directly
@@ -147,7 +149,7 @@ Modal Dialogs
 Although true modal dialogs are not possible with only one thread, a functional equivalent -- 
 asynchronous modal dialogs -- is relatively easy to set up. All the JOptionPane dialogs will
 return PropertyChangeEvents to signal that they have been disposed of and containing the results. 
-More on this later....
+See below.
 
 
 Native calls
@@ -234,12 +236,22 @@ a2s components, which in turn subclass JComponents. So no changes in code are ne
 successfully transpiled over 500 applets using this strategy. (Kind of surprising, actually, that
 the original Java developers did not see that option. But we have a hindsight advantage here.)
 
-Temporary Files
-===============
+Working with Files
+==================
 
-SwingJS will maintain a pseudo-filesystem for files created with File.createTempFile(). This
-is useful in that closure of writing to the file does not generate a download to the user's
-machine (which typically requires user intervention).
+SwingJS will always return File.exists() == true. If this is being tested, provide a J2sNative 
+block that gives an appropriate "OK" message, for example:
+
+(/** @j2sNative 1 ? false : */ outputfile.exits())
+
+or 
+
+(/** @j2sNative 1 ? true : */ inputfile.exits())
+
+Temporary files can be created in SwingJS. SwingJS will maintain a pseudo-filesystem for files 
+created with File.createTempFile(). This is useful in that closure of writing to a temporary file 
+does not generate a pseudo-download to the user's machine.
+
 
 UNIMPLEMENTED CLASSES BY DESIGN
 ===============================
@@ -466,12 +478,20 @@ It's a simple modification:
 			System.out.println("int value is " + value);
 		}
 
+
+Developers are encouraged to create a separate class that handles general calls to JFileDialog. 
+An example class can be found in the SwingJS distribution as 
+
+/sources/net.sf.j2s.java.core/src/test/async/AsyncFileChooser.java.
+
+
 javax.swing.JOptionPane dialogs
 -------------------------------
 
 For this action to work, the parentComponent must implement
 propertyChangeListener, and any call to JOptionPanel should allow for
-asynchronous response.
+an asynchronous response, meaning that there is no actionable code following the
+call to the dialog opening. 
 
 In addition, for compatibility with the Java version, implementation should
 wrap the call to getConfirmDialog or getOptionDialog in a method call to
@@ -490,12 +510,12 @@ Note that there is an int and an Object version of onDialogReturn().
 In JavaScript:
 
 The initial return from JOptionPane.showConfirmDialog and showMessageDialog
-will be NaN, testable as an impossible Java int value using ret !=
-Math.floor(ret) if the parent implements PropertyChangeListeneer, or -1
+will be (SwingJS) JDialog.ASYNCHRONOUS_INTEGER (NaN), testable as an impossible 
+Java int value using ret != -(-ret) if the parent implements PropertyChangeListener, or -1
 (CLOSE_OPTION) if not.
 
 For showOptionDialog (which returns Object) or showInputDialog (which returns
-String), the initial return will be JDialog.ASYNCHRONOUS_OBJECT, testable as
+String), the initial return will be (SwingJS) JDialog.ASYNCHRONOUS_OBJECT, testable as
 ((Object) ret) instanceof javax.swing.plaf.UIResource if the parent implements
 PropertyChangeListeneer, or null if not.
 
@@ -514,7 +534,7 @@ All of the standard Java events associated with Components are also
 available.
 
 Certain fall back mechanisms are possible, where onReturn does not exist, but
-only for the falling cases:
+only for the following cases:
 
 
 For showMessageDialog, for WARNING_MESSAGE and ERROR_MESSAGE, a simple
@@ -535,8 +555,8 @@ Note that you should implement a response for CLOSED_OPTION for
 showConfirmDialog. For other dialogs, a null return indicates the dialog was
 closed, just as for Java.
 
-
-
+Developers are encouraged to create a separate class that handles general calls. 
+An example class can be found in the SwingJS distribution as src/test/async/AsyncDialog.java.
 
 native methods
 --------------

@@ -29,10 +29,10 @@ import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.JSDialog;
 import java.awt.EventQueue;
-import java.awt.JSFrame;
 import java.awt.HeadlessException;
+import java.awt.JSDialog;
+import java.awt.JSFrame;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -44,15 +44,13 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 //import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Map;
 
 import javax.swing.event.EventListenerList;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileSystemView;
 //import javax.swing.filechooser.FileSystemView;
 import javax.swing.filechooser.FileView;
 
-import javajs.api.JSFunction;
-import swingjs.JSToolkit;
 import swingjs.JSUtil;
 
 
@@ -368,23 +366,23 @@ public class JFileChooser extends JComponent {
 	}
 
 
-//    /**
-//     * Constructs a <code>JFileChooser</code> using the given
-//     * <code>FileSystemView</code>.
-//     */
-//    public JFileChooser(FileSystemView fsv) {
-//        this((File) null, fsv);
-//    }
-//
+    /**
+     * Constructs a <code>JFileChooser</code> using the given
+     * <code>FileSystemView</code>.
+     */
+    public JFileChooser(FileSystemView fsv) {
+        this((File) null, fsv);
+    }
 
-//    /**
-//     * Constructs a <code>JFileChooser</code> using the given current directory
-//     * and <code>FileSystemView</code>.
-//     */
-//    public JFileChooser(File currentDirectory, FileSystemView fsv) {
-//        setup(fsv);
-//        setCurrentDirectory(currentDirectory);
-//    }
+
+    /**
+     * Constructs a <code>JFileChooser</code> using the given current directory
+     * and <code>FileSystemView</code>.
+     */
+    public JFileChooser(File currentDirectory, FileSystemView fsv) {
+        //setup(fsv);
+        setCurrentDirectory(currentDirectory);
+    }
 
 //    /**
 //     * Constructs a <code>JFileChooser</code> using the given current directory
@@ -782,7 +780,7 @@ public class JFileChooser extends JComponent {
 				removePropertyChangeListener((PropertyChangeListener) parent);
 				addPropertyChangeListener((PropertyChangeListener) parent);
 			}
-			Runnable r = new Runnable() {
+			@SuppressWarnings("unused") Runnable r = new Runnable() {
 
 				@Override
 				public void run() {

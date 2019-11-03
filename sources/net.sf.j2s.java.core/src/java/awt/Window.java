@@ -448,36 +448,35 @@ public class Window extends JComponent {
     }
     
 
-//	/**
-//	 * This was never ever any use, since Frame subclasses Window
-//	 * 
-//	 * Constructs a new, initially invisible window with the specified
-//	 * <code>Frame</code> as its owner. The window will not be focusable unless
-//	 * its owner is showing on the screen.
-//	 * <p>
-//	 * If there is a security manager, this method first calls the security
-//	 * manager's <code>checkTopLevelWindow</code> method with <code>this</code> as
-//	 * its argument to determine whether or not the window must be displayed with
-//	 * a warning banner.
-//	 * 
-//	 * @param owner
-//	 *          the <code>Frame</code> to act as owner or <code>null</code> if
-//	 *          this window has no owner
-//	 * @exception IllegalArgumentException
-//	 *              if the <code>owner</code>'s <code>GraphicsConfiguration</code>
-//	 *              is not from a screen device
-//	 * @exception HeadlessException
-//	 *              when <code>GraphicsEnvironment.isHeadless</code> returns
-//	 *              <code>true</code>
-//	 * 
-//	 * @see java.awt.GraphicsEnvironment#isHeadless
-//	 * @see java.lang.SecurityManager#checkTopLevelWindow
-//	 * @see #isShowing
-//	 * 
-//	 */
-//	public Window(Frame owner) {
-//		this(owner, null);
-//	}
+	/**
+	 * 
+	 * Constructs a new, initially invisible window with the specified
+	 * <code>Frame</code> as its owner. The window will not be focusable unless
+	 * its owner is showing on the screen.
+	 * <p>
+	 * If there is a security manager, this method first calls the security
+	 * manager's <code>checkTopLevelWindow</code> method with <code>this</code> as
+	 * its argument to determine whether or not the window must be displayed with
+	 * a warning banner.
+	 * 
+	 * @param owner
+	 *          the <code>Frame</code> to act as owner or <code>null</code> if
+	 *          this window has no owner
+	 * @exception IllegalArgumentException
+	 *              if the <code>owner</code>'s <code>GraphicsConfiguration</code>
+	 *              is not from a screen device
+	 * @exception HeadlessException
+	 *              when <code>GraphicsEnvironment.isHeadless</code> returns
+	 *              <code>true</code>
+	 * 
+	 * @see java.awt.GraphicsEnvironment#isHeadless
+	 * @see java.lang.SecurityManager#checkTopLevelWindow
+	 * @see #isShowing
+	 * 
+	 */
+	public Window(Frame owner) {
+		this(owner, null);
+	}
 
 	/**
 	 * Constructs a new, initially invisible window with the specified
