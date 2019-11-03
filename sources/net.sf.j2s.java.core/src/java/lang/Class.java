@@ -1,4 +1,5 @@
 /*
+
  * Copyright 1994-2006 Sun Microsystems, Inc.  All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -664,7 +665,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		 * 			code = this.$clazz$.__CLASS_NAME$__ ||
 		 *            this.$clazz$.__CLASS_NAME__; 
 		 *            
-		 *            if (code) return code;
+		 *            if (code) return (code.indexOf(".") < 0 ? "java.lang." + code : code);
 		 * 
 		 *            code = this.$clazz$.__PARAMCODE;
 		 * 
