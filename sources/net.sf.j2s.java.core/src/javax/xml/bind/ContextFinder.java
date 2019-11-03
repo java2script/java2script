@@ -601,11 +601,16 @@ class ContextFinder {
         }
     }
 
-    // ServiceLoaderUtil.firstByServiceLoaderDeprecated should be used instead.
-    @Deprecated
+	// ServiceLoaderUtil.firstByServiceLoaderDeprecated should be used instead.
+	@Deprecated
     static String firstByServiceLoaderDeprecated(Class spiClass,
                                                  ClassLoader classLoader) throws JAXBException {
-
+    	/**
+    	 * @j2sNative
+    	 * 
+    	 * return null;
+    	 */
+    	{
         final String jaxbContextFQCN = spiClass.getName();
 
         //Logger.fine("Searching META-INF/services");
@@ -614,8 +619,7 @@ class ContextFinder {
         BufferedReader r = null;
         final String resource = "META-INF/services/" + jaxbContextFQCN;
         try {
-            final InputStream resourceStream =
-                    (classLoader == null) ?
+            final InputStream resourceStream =            (classLoader == null) ?
                             ClassLoader.getSystemResourceAsStream(resource) :
                             classLoader.getResourceAsStream(resource);
 
@@ -643,6 +647,7 @@ class ContextFinder {
                 //Logger.log(Level.SEVERE, "Unable to close resource: " + resource, ex);
             }
         }
+    	}
     }
 
     private static String jaxbProperties(String contextPath, ClassLoader classLoader, String factoryId) throws JAXBException {
