@@ -178,16 +178,16 @@ class Thread implements Runnable {
         return threadInitNumber++;
     }
 
-//    /* ThreadLocal values pertaining to this thread. This map is maintained
-//     * by the ThreadLocal class. */
-//    ThreadLocal.ThreadLocalMap threadLocals = null;
-//
-//    /*
-//     * InheritableThreadLocal values pertaining to this thread. This map is
-//     * maintained by the InheritableThreadLocal class.
-//     */
-//    ThreadLocal.ThreadLocalMap inheritableThreadLocals = null;
-//
+    /* ThreadLocal values pertaining to this thread. This map is maintained
+     * by the ThreadLocal class. */
+    ThreadLocal.ThreadLocalMap threadLocals = null;
+
+    /*
+     * InheritableThreadLocal values pertaining to this thread. This map is
+     * maintained by the InheritableThreadLocal class.
+     */
+    ThreadLocal.ThreadLocalMap inheritableThreadLocals = null;
+
 //    /*
 //     * The requested stack size for this thread, or 0 if the creator did
 //     * not specify a stack size.  It is up to the VM to do whatever it
@@ -432,9 +432,9 @@ class Thread implements Runnable {
 //                acc != null ? acc : AccessController.getContext();
         this.target = target;
         setPriority(priority);
-//        if (parent.inheritableThreadLocals != null)
-//            this.inheritableThreadLocals =
-//                ThreadLocal.createInheritedMap(parent.inheritableThreadLocals);
+        if (parent.inheritableThreadLocals != null)
+            this.inheritableThreadLocals =
+                ThreadLocal.createInheritedMap(parent.inheritableThreadLocals);
         /* Stash the specified stack size in case the VM cares */
 //        this.stackSize = stackSize;
 
