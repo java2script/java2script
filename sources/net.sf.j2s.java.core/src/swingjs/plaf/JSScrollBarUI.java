@@ -149,7 +149,7 @@ public class JSScrollBarUI extends JSSliderUI {
     public void scrollByBlock(int direction, int val0) {
     	// general click in track
 		JScrollBar sb = (JScrollBar) jc; 
-        int delta = sb.getBlockIncrement();
+        int delta = getBlockIncrement();
         if (delta == Integer.MIN_VALUE && direction > 0)
         	return;
         delta *= (direction > 0 ? POSITIVE_SCROLL : NEGATIVE_SCROLL);
@@ -176,7 +176,14 @@ public class JSScrollBarUI extends JSSliderUI {
 //	public void jqueryStop(Object event, Object ui) {
 //	}
 
-    @Override
+    private int getBlockIncrement() {
+		JScrollBar sb = (JScrollBar) jc; 
+    	if (myScrollPaneUI == null)
+    		return sb.getBlockIncrement();
+    	return sb.getVisibleAmount();
+	}
+
+	@Override
     public void scrollByUnit(int direction) {
     	// scroll click at end of scrollbar
 		JScrollBar sb = (JScrollBar) jc; 
