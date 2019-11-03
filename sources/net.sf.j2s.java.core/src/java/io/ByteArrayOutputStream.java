@@ -282,5 +282,10 @@ public class ByteArrayOutputStream extends OutputStream {
     @Override
     public void close() throws IOException {
     }
+    
+    @Override
+    public int hashCode() {
+    	return buf.hashCode();
+    }
 
 }

@@ -11,7 +11,7 @@ import java.util.Hashtable;
 class Test_Class extends Test_ {
 
 	private void test(String s) {
-		
+	
 	}
 
     void c() {
@@ -27,8 +27,13 @@ class Test_Class extends Test_ {
 	static String s = "test";
 
 	static {
-		System.out.println(java.lang.Number.class.getSuperclass());
-		System.out.println(java.lang.Object.class.getSuperclass());
+		assert (java.lang.Number.class.getSuperclass() == Object.class);
+		assert (java.lang.Object.class.getSuperclass() == null);
+		assert (Integer.TYPE.isPrimitive());
+		assert (!Integer.TYPE.isArray());
+		assert (Integer.class.getName().equals("java.lang.Integer"));
+		System.out.println("static java.lang OK");
+
 	}
 	private String test = "testing";
 
@@ -62,8 +67,6 @@ class Test_Class extends Test_ {
 			}
 		};
 
-		
-		System.out.println(true);
 		
 		final Test_Class me = Test_Class.this;
 		MouseListener c = new MouseListener() {
@@ -109,7 +112,7 @@ class Test_Class extends Test_ {
 		
 		Hashtable<String, Object> t = new Hashtable<String, Object>() {
 			public Object put(String key, Object value) {
-				super.put(key,  value);
+				super.put(key,  value); 
 				System.out.println("t.put:" + key + "/" + value);
 				// test for inner class access to an outer class's superclass method 
 				assert(showt() == 0);
@@ -206,10 +209,6 @@ class Test_Class extends Test_ {
 		}
 			
 
-	   System.out.println(Integer.TYPE.isPrimitive());
-	   System.out.println(Integer.TYPE.isArray());
-		
-		
 		class LocalClass {
 
 			String hello() {

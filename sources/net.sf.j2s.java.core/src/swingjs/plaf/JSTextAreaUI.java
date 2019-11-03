@@ -176,7 +176,7 @@ public class JSTextAreaUI extends JSTextUI {
 
 	@Override
 	public void caretUpdatedByProgram(CaretEvent e) {
-		if (!jc.isVisible() || !isAWT) // for now, AWT only
+		if (!jc.isVisible() || !isAWT || domNode == null) // for now, AWT only
 			return;
 		@SuppressWarnings("unused")
 		int pt = e.getDot();

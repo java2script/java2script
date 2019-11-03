@@ -34,10 +34,11 @@
  */
 
 package java.util.concurrent.locks;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.*;
-import sun.misc.Unsafe;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Provides a framework for implementing blocking locks and related
@@ -566,8 +567,12 @@ public abstract class AbstractQueuedSynchronizer
      *         value was not equal to the expected value.
      */
     protected final boolean compareAndSetState(int expect, int update) {
+    	if (state != expect)
+    		return false;
+    	state = update;
+    	return true;
         // See below for intrinsics setup to support this
-        return true;//unsafe.compareAndSwapInt(this, stateOffset, expect, update);
+//        return unsafe.compareAndSwapInt(this, stateOffset, expect, update);
     }
 
     // Queuing utilities
@@ -2269,6 +2274,8 @@ public abstract class AbstractQueuedSynchronizer
      * are at it, we do the same for other CASable fields (which could
      * otherwise be done with atomic field updaters).
      */
+// SwingJS implements this directly. We don't have access to memory addresses for objects
+    
 //    private static final Unsafe unsafe = Unsafe.getUnsafe();
 //    private static final long stateOffset;
 //    private static final long headOffset;
@@ -2296,6 +2303,9 @@ public abstract class AbstractQueuedSynchronizer
      * CAS head field. Used only by enq.
      */
     private final boolean compareAndSetHead(Node update) {
+    	if (head != null)
+    		return false;
+    	head = update;    		
         return true;//unsafe.compareAndSwapObject(this, headOffset, null, update);
     }
 
@@ -2303,6 +2313,9 @@ public abstract class AbstractQueuedSynchronizer
      * CAS tail field. Used only by enq.
      */
     private final boolean compareAndSetTail(Node expect, Node update) {
+    	if (tail != expect)
+    		return false;
+    	tail = update;
         return true;//unsafe.compareAndSwapObject(this, tailOffset, expect, update);
     }
 
@@ -2312,6 +2325,9 @@ public abstract class AbstractQueuedSynchronizer
     private final static boolean compareAndSetWaitStatus(Node node,
                                                          int expect,
                                                          int update) {
+    	if (node.waitStatus != expect)
+    		return false;
+    	node.waitStatus = update;
         return true;//unsafe.compareAndSwapInt(node, waitStatusOffset,
                       //                  expect, update);
     }
@@ -2322,6 +2338,9 @@ public abstract class AbstractQueuedSynchronizer
     private final static boolean compareAndSetNext(Node node,
                                                    Node expect,
                                                    Node update) {
+    	if (node.next != expect)
+    		return false;
+    	node.next = update;
         return true;//unsafe.compareAndSwapObject(node, nextOffset, expect, update);
     }
 }

@@ -200,7 +200,7 @@ public class Test_Editor_AWT extends Frame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Test_Editor action " + getID(e.getSource()));
+				System.out.println("Test_Editor action 1 " + e.getSource() + " " + getID(e.getSource()));
 				area.append("\ntesting" + ++n);
 //				area.requestFocus();
 			}
