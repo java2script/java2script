@@ -1,0 +1,130 @@
+.cool-bar-default {
+	position:absolute;
+	background-color:buttonface;
+	cursor:default;
+	/*overflow:visible;
+	overflow-x:hidden;*/
+}
+.cool-item-default {
+	position:absolute;
+	border:1px outset white;
+	cursor:default;
+	margin:0;
+	white-space:nowrap;
+	height:24px;
+	padding-left:7px;
+	padding-right:2px;
+	/*float:left;*/
+}
+* html .cool-item-default {
+	border-style:solid;
+	border-color:white gray gray white;
+}
+.cool-item-border-none-none {
+	border-width:0 0 0 0;
+}
+.cool-item-border-none-left {
+	border-width:0 0 0 1px;
+}
+.cool-item-border-none-both {
+	border-width:0 1px 0 1px;
+}
+.cool-item-border-none-right {
+	border-width:0 1px 0 0;
+}
+.cool-item-border-top-none {
+	border-width:1px 0 0 0;
+}
+.cool-item-border-top-left {
+	border-width:1px 0 0 1px;
+}
+.cool-item-border-top-both {
+	border-width:1px 1px 0 1px;
+}
+.cool-item-border-top-right {
+	border-width:1px 1px 0 0;
+}
+.cool-item-border-both-none {
+	border-width:1px 0 1px 0;
+}
+.cool-item-border-both-left {
+	border-width:1px 0 1px 1px;
+}
+.cool-item-border-both-both {
+	border-width:1px 1px 1px 1px;
+}
+.cool-item-border-both-right {
+	border-width:1px 1px 1px 0;
+}
+.cool-item-border-bottom-none {
+	border-width:0 0 1px 0;
+}
+.cool-item-border-bottom-left {
+	border-width:0 0 1px 1px;
+}
+.cool-item-border-bottom-both {
+	border-width:0 1px 1px 1px;
+}
+.cool-item-border-bottom-right {
+	border-width:0 1px 1px 0;
+}
+.cool-bar-flat .cool-item-default {
+	margin:1px; 
+	border:0 none transparent;
+	border:0 0 0 0;
+}
+.cool-item-handler {
+	position:absolute;
+	left:0;
+	font-size:0;
+	margin:2px 2px;
+	padding:0;
+	border-left:4px ridge #ddd;
+	height:18px;
+	cursor:w-resize;
+}
+* html .cool-item-handler {
+	border-left:2px solid white;
+	border-right:2px solid gray;
+}
+.cool-bar-locked .cool-item-handler {
+	border-left:4px solid buttonface;
+	cursor:default;
+}
+.cool-item-content {
+	position:absolute;
+	left:10px;
+	top:0;
+}
+.cool-item-more {
+	display:none;
+	position:absolute;
+	right:1px;
+	padding:2px 1px;
+	font-size:7pt;
+	font-family:Arial, sans-serif;
+}
+.cool-item-more .cool-item-more-arrow {
+	margin-left:-2px;
+}
+.cool-item-more-enabled .cool-item-more {
+	display:block !important;
+	float:right;
+	border:1px solid buttonface;
+}
+.cool-item-more-enabled .cool-item-more:hover {
+	border:1px outset white;
+}
+.cool-item-more-enabled {
+	padding-right:14px;
+}
+
+.cool-bar-disabled .cool-item-handler {
+	cursor:default;
+}
+.cool-bar-disabled .cool-item-more:hover {
+	border:1px solid buttonface !important;
+}
+.swt-widgets-coolbar {
+	width:324px;
+}

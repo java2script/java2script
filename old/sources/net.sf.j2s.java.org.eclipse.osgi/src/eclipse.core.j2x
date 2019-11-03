@@ -1,0 +1,5 @@
+package.prefix=org.eclipse.core
+package.name=eclipse.core
+package.description=Eclipse Core 3.1 library
+package.id=eclipse.core
+

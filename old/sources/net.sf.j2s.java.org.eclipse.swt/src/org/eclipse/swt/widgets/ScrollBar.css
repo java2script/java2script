@@ -1,0 +1,11 @@
+/* scrolled composite */
+.vscroll-default{
+	overflow-y:scroll;
+}
+
+.hscroll-default{
+	overflow-x:scroll;
+}
+.swt-widgets-scrollbar {
+	width:324px;
+}

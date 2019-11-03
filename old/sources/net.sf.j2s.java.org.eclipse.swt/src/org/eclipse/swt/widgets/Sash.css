@@ -1,0 +1,24 @@
+.sash-horizontal-default {
+	position:absolute;
+	cursor:e-resize;
+	width:4px;
+	font-size:0;
+	z-index:100;
+}
+.sash-vertical-default {
+	position:absolute;
+	cursor:s-resize;
+	height:4px;
+  	font-size:0;
+	z-index:100;
+}
+.sash-border {
+	border: 1px inset white;
+}
+.sash-mouse-down {
+	background-color:gray;
+	z-index:100;
+}
+.swt-widgets-sash {
+	width:324px;
+}
