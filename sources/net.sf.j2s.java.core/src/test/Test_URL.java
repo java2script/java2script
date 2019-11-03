@@ -9,6 +9,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -151,6 +153,7 @@ public class Test_URL extends Test_ {
 
 		InputStream response = connection.getInputStream();
 
+		System.out.println(response.hashCode());
 		// System.out.println(getClass().getName() + " took "
 		// + (System.currentTimeMillis() - now) + "ms to fetch");
 
@@ -190,39 +193,40 @@ public class Test_URL extends Test_ {
 	public static void main(String[] args) { 
 
 		try {
+			URI uri = new URI("https://4virology.net/");
 			URL url = new URL("https://asfadlkfj");
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			assert (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND);
-		} catch (IOException e1) {
+		} catch (IOException | URISyntaxException e1) {
 			// assert(false);
 		}
 
 		try {
 
-//			String path = "https://rest.ensemblgenomes.org/info/ping?content-type=application/json";
-//			URL url = new URL(path);
-//			System.out.println("getting " + url);
-//		    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-//		    connection.setRequestMethod("GET");
-//		    connection.setRequestProperty("Content-Type", getRequestMimeType());
-//		    connection.setRequestProperty("Accept", getResponseMimeType());
-//
-//		    connection.setUseCaches(false);
-//		    connection.setDoInput(true);
-//		    connection.setDoOutput(/*multipleIds*/true);
-//
-//		    connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
-//		    connection.setReadTimeout(10000);
-//
-//						
-//			InputStream fis = url.openStream();
-//			BufferedInputStream bis = new BufferedInputStream(fis);
-//			String s = Rdr.streamToUTF8String(bis);
-//			bis.close();
-//			System.out.println(s);
-//			assert(s.equals("{\"ping\":1}\n"));
+			String path = "https://rest.ensembl.org/info/ping?content-type=application/json";
+			URL url = new URL(path);
+			System.out.println("getting " + url);
+		    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		    connection.setRequestMethod("GET");
+		    connection.setRequestProperty("Content-Type", getRequestMimeType());
+		    connection.setRequestProperty("Accept", getResponseMimeType());
 
-//			assert checkEnsembl();
+		    connection.setUseCaches(false);
+		    connection.setDoInput(true);
+		    connection.setDoOutput(/*multipleIds*/true);
+
+		    connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
+		    connection.setReadTimeout(10000);
+
+						
+			InputStream fis = url.openStream();
+			BufferedInputStream bis = new BufferedInputStream(fis);
+			String s = Rdr.streamToUTF8String(bis);
+			bis.close();
+			System.out.println(s);
+			assert(s.equals("{\"ping\":1}\n"));
+
+			assert checkEnsembl();
 
 			testPost();
 

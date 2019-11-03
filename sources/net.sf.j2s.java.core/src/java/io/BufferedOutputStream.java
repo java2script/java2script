@@ -176,4 +176,13 @@ public class BufferedOutputStream extends FilterOutputStream {
         }
         buf[count++] = (byte) oneByte;
     }
+    
+    @Override
+	public int hashCode() {
+    	try {
+			flush();
+		} catch (IOException e) {
+		}
+    	return out.hashCode();
+    }
 }
