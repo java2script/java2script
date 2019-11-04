@@ -11632,6 +11632,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 	 * parentDiv: div id in which to insert this div, or null to use body
 	 */
 	J2S.getFileFromDialog = function(fDone, format, parentDiv) {
+		// NOTE: JavaScript will not return any notification of CANCEL
 		// streamlined file dialog using <input type="file">.click()
 		format || (format = "string");
 		var id = "filereader" + ("" + Math.random()).split(".")[1]

@@ -115,6 +115,8 @@ import sun.swing.SwingUtilities2;
 public class JColorChooser extends JComponent {
 
 
+	static Component listener;
+
 	private ColorSelectionModel selectionModel;
 
 	private JComponent previewPanel;
@@ -172,7 +174,8 @@ public class JColorChooser extends JComponent {
 	 */
 	public static Color showDialog(Component component, String title, Color initialColor) {
 
-		if (!(component instanceof PropertyChangeListener)) {
+		Component c = (listener == null ? component : listener);
+		if (!(c instanceof PropertyChangeListener)) {
 			System.err.println("JOptionPanel: parentComponent is not a PropertyChangeListener");
 			return null;
 		}
@@ -663,7 +666,7 @@ class ColorChooserDialog extends JDialog {
 		}
 
 		if (okListener == null && cancelListener == null) 
-			秘ensurePropertyChangeListener(this, c);
+			秘ensurePropertyChangeListener(this, JColorChooser.listener == null ? c : JColorChooser.listener);
 
         this.chooserPane = chooserPane;
 
