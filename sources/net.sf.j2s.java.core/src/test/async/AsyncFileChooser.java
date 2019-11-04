@@ -32,6 +32,35 @@ public class AsyncFileChooser extends JFileChooser implements PropertyChangeList
 		super(file, view);
 	}
 
+	@Deprecated
+	public int showDialog(Component frame) {
+		return err();
+	}
+
+	@Deprecated
+	public int showDialog(Component frame, String type) {
+		return (ok == null ? err() : super.showDialog(frame,  type));
+	}
+
+	@Deprecated
+	public int showOpenDialog(Component frame) {
+		return err();
+	}
+
+	@Deprecated
+	public int showSaveDialog(Component frame) {
+		return err();
+	}
+
+	private int err() {
+		try {
+			throw new java.lang.IllegalAccessException("Warning! AsyncFileChooser interface bypassed!");
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		return JFileChooser.CANCEL_OPTION;
+	}
+
 	/**
 	 * 
 	 * @param frame
@@ -43,19 +72,19 @@ public class AsyncFileChooser extends JFileChooser implements PropertyChangeList
 	public int showDialog(Component frame, String type, Runnable ok, Runnable cancel) {
 		this.ok = ok;
 		this.cancel = cancel;
-		return process(showDialog(frame, type));
+		return process(super.showDialog(frame, type));
 	}
 
 	public void showOpenDialog(Component frame, Runnable ok, Runnable cancel) {
 		this.ok = ok;
 		this.cancel = cancel;
-		process(showOpenDialog(frame));
+		process(super.showOpenDialog(frame));
 	}
 
 	public void showSaveDialog(Component frame, Runnable ok, Runnable cancel) {
 		this.ok = ok;
 		this.cancel = cancel;
-		process(showSaveDialog(frame));
+		process(super.showSaveDialog(frame));
 	}
 
 	@Override
