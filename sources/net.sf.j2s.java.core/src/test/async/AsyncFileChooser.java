@@ -39,6 +39,9 @@ public class AsyncFileChooser extends JFileChooser implements PropertyChangeList
 	@Override
 	@Deprecated
 	public int showDialog(Component frame, String type) {
+		
+		// this method will be called from super constructor(frame)
+		
 		return (ok == null ? err() : super.showDialog(frame,  type));
 	}
 
