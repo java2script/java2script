@@ -798,6 +798,8 @@ public class JFileChooser extends JComponent {
 			JSUtil.J2S.getFileFromDialog(/**@j2sNative function(file){r.run$(file)}||*/ null, "java.io.File");			
 			return JDialog.ASYNCHRONOUS_INTEGER;
 		case SAVE_DIALOG:
+			if (selectedFile != null)
+				lastFileName = selectedFile.getName();
 			String name = JSUtil.prompt((dialogTitle == null ? "File to Save?" : dialogTitle), lastFileName);
 			if (name == null)
 				return CANCEL_OPTION;

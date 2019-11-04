@@ -196,7 +196,10 @@ public abstract class JSTextUI extends JSLightweightUI {
 				 * 			jQueryEvent.preventDefault(); jQueryEvent.stopPropagation();
 				 */
 				// fall through
-			case KeyEvent.VK_SHIFT:
+				//case KeyEvent.VK_SHIFT: 
+					//BH note 2019.11.03 
+					//Including VK_SHIFT here caused Firefox to ignore a first upper-case L in 
+					//SequenceSearcher pattern JTextField
 			case KeyEvent.VK_CONTROL:
 				ret = HANDLED;
 				break;

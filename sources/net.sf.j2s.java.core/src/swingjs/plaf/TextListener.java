@@ -142,7 +142,7 @@ public class TextListener implements KeyListener, FocusListener, ChangeListener,
 			} else if (keyCode != KeyEvent.VK_BACK_SPACE){
 				setCaret = false;
 			}
-			if (lastKeyEvent != KeyEvent.KEY_TYPED)
+			if (lastKeyEvent != KeyEvent.KEY_TYPED);// could be lastKeyEvent == 0 ??
 			  break;
 			// fall through if this is a continuation press
 		case KeyEvent.KEY_RELEASED:

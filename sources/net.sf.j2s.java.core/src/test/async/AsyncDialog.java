@@ -11,7 +11,7 @@ import javax.swing.Icon;
 import javax.swing.JOptionPane;
 
 /**
- * A class to manage asynchronous input and confirmation dialogs.
+ * A class to manage asynchronous input, option, and confirmation dialogs.
  * 
  * @author Bob Hanson hansonr
  *
@@ -21,6 +21,7 @@ public class AsyncDialog extends Window implements PropertyChangeListener {
 
 	private ActionListener actionListener;
 	private Object choice;
+	private String[] options;
 
 	public AsyncDialog(ActionListener a) {
 		super(null);
@@ -35,16 +36,33 @@ public class AsyncDialog extends Window implements PropertyChangeListener {
 	public void propertyChange(PropertyChangeEvent evt) {
 		switch (evt.getPropertyName()) {
 		case "value":
-			process(evt.getNewValue());
+			Object val = evt.getNewValue();
+			if (options != null) {
+				int i;
+				for (i = 0; i < options.length; i++) {
+					if (options[i] == val) 
+						break;
+				}
+				val = Integer.valueOf(i < options.length ? i : JOptionPane.CLOSED_OPTION);
+			}
+			process(val);
 		}
 	}
 
-	public void showInputDialog(Component frame, String message, String title, int type,
-			Icon icon, Integer[] choices, Integer initialChoice) {
-		if (frame != null) {
-			setBounds(frame.getBounds());
-		}
+	// These options can be supplemented as desired.
+
+	public void showInputDialog(Component frame, String message, String title, int type, Icon icon, Integer[] choices,
+			Integer initialChoice) {
+		setFrame(frame);
 		process(JOptionPane.showInputDialog(this, message, title, type, icon, choices, initialChoice));
+	}
+
+	public void showOptionDialog(Component frame, String message, String title, int optionType, int messageType,
+			Icon icon, String[] options, String initialValue) {
+		setFrame(frame);
+		this.options = options;
+		process(JOptionPane.showOptionDialog(this, message, title, optionType, messageType, icon, options,
+				initialValue));
 	}
 
 	public void showConfirmDialog(Component frame, String message, String title, int optionType) {
@@ -52,34 +70,38 @@ public class AsyncDialog extends Window implements PropertyChangeListener {
 	}
 
 	public void showConfirmDialog(Component frame, String message, String title, int optionType, int messageType) {
-		if (frame != null) {
-			setBounds(frame.getBounds());
-		}
+		setFrame(frame);
 		process(JOptionPane.showConfirmDialog(this, message, title, optionType, messageType));
 	}
 
+	private void setFrame(Component frame) {
+		if (frame != null) {
+			setBounds(frame.getBounds());
+		}
+	}
+
 	private boolean processed;
-	
+
 	/**
 	 * Return for confirm dialog.
 	 * 
-	 * @param ret  may be JavaScript NaN, testable as ret != ret or ret != - -ret
+	 * @param ret may be JavaScript NaN, testable as ret != ret or ret != - -ret
 	 */
 	private void process(int ret) {
 		if (ret != - -ret || processed)
 			return;
 		process(new Integer(ret));
 	}
-	
+
 	private void process(Object ret) {
 		if (ret instanceof javax.swing.plaf.UIResource || processed)
 			return;
 		processed = true;
-		choice = ret;	
+		choice = ret;
 		actionListener.actionPerformed(new ActionEvent(this, 0, "SelectedOption"));
 		dispose();
 	}
-	
+
 	/**
 	 * retrieve selection from the ActionEvent, for which "this" is getSource()
 	 * 
@@ -95,5 +117,5 @@ public class AsyncDialog extends Window implements PropertyChangeListener {
 		}
 		return ((Integer) choice).intValue();
 	}
-	
+
 }
