@@ -4354,25 +4354,24 @@ public abstract class JComponent extends Container {
 			return;
 		}
 
-		while (!isOpaque()) {//see TextAnalyzer2 -- doesn't erase canvas on hide && ((JSComponent)c).秘paintsSelf()) {
-			parent = c.getParent();
-			if (parent != null) {
-				x += c.getX();
-				y += c.getY();
-				c = parent;
-			} else {
-				break;
-			}
+		// Get back to first opaque self or parent so as to draw the background and all parts in between, in order.
+		while (!c.isOpaque() && (parent = c.getParent()) != null) {//see TextAnalyzer2 -- doesn't erase canvas on hide && ((JSComponent)c).秘paintsSelf()) {
+			x += c.getX();
+			y += c.getY();
+			c = parent;
+		}
+		((JComponent) c)._paintImmediately(x, y, w, h);
 
-			if (!(c instanceof JComponent)) {
-				break;
-			}
-		}
-		if (c instanceof JComponent) {
-			((JComponent) c)._paintImmediately(x, y, w, h);
-		} else {
-			c.repaint(x, y, w, h);
-		}
+// SwingJS everything is a JComponent
+//			if (!(c instanceof JComponent)) {
+//				break;
+//			}
+//		}
+//		if (c instanceof JComponent) {
+//			((JComponent) c)._paintImmediately(x, y, w, h);
+//		} else {
+//			c.repaint(x, y, w, h);
+//		}
 	}
 
 	/**
