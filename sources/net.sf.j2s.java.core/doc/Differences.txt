@@ -1,6 +1,26 @@
 Notes
 =====
 
+---IMPORTANT CHARACTER SET NOTE---
+
+It is critical that all development work in Java2Script 
+be done in UTF-8. This means:
+
+- making sure your Exclipse project is set up for UTF-8 (not the Eclipse default?)
+- making sure your server can serve up UTF-8 by default for any browser-loaded files
+- making sure you don't edit a Java2Script class file or one of the site .js files
+  using a non-UTF-8 editor. It may replace non-Latin characters with "?" or garbage.
+  
+In particular, the Mandarin character 秘 (mi; "secret") is used extensively throughout
+the SwingJS class files to distinguish j2s-specific fields and methods that must not 
+ever be overridden by subclasses. As in java.lang.Thread.java:
+
+		public static JSThread 秘thisThread;
+
+
+----------------------------------
+
+
 updated 11/03/19 -- adds information about File.exists() and points to src/test/async
 updated 10/26/19 -- adds information about File.createTempFile()
 updated 8/16/19 -- minor typos and added summary paragraph
@@ -557,6 +577,46 @@ closed, just as for Java.
 
 Developers are encouraged to create a separate class that handles general calls. 
 An example class can be found in the SwingJS distribution as src/test/async/AsyncDialog.java.
+Very simple modifications to the Java allows asynchronous operation using AsyncDialog. Here
+is a simple "do you want to close this frame" example, where you can see that what we have
+done is to set the reply into an ActionListener that is defined in the constructor of 
+the AsyncDisplay object:
+
+// Original:
+//
+//	private void promptQuit() {
+//		int sel = JOptionPane.showConfirmDialog(null, PROMPT_EXIT, NAME, JOptionPane.YES_NO_OPTION);
+//		switch (sel) {
+//		case JOptionPane.YES_OPTION:
+//			resultsTab.clean();
+//			seqs.dispose();
+//			if (fromMain) {
+//				System.exit(0);
+//			}
+//			break;
+//		}
+//	}
+
+	private void promptQuitAsync() {
+		new AsyncDialog(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+			    int sel = ((AsyncDialog)e.getSource()).getOption();
+				switch (sel) {
+				case JOptionPane.YES_OPTION:
+					resultsTab.clean();
+					seqs.dispose();
+					if (fromMain) {
+						System.exit(0);
+					}
+					break;
+				}
+			}}).showConfirmDialog(null, PROMPT_EXIT, NAME, JOptionPane.YES_NO_OPTION);
+	}
+
+Very simple! 
+
 
 native methods
 --------------
