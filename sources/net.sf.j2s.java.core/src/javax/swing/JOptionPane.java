@@ -496,6 +496,8 @@ public class JOptionPane extends JComponent {
 
 	private static boolean USE_HTML5_MODAL_FOR_WARNINGS_AND_ERRORS = true;
 
+	private static Component listener;
+
 	/**
 	 * Shows a question-message dialog requesting input from the user. The
 	 * dialog uses the default frame, which usually means it is centered on the
@@ -640,7 +642,7 @@ public class JOptionPane extends JComponent {
 
 		Object value;
 
-		if (!(parentComponent instanceof PropertyChangeListener)) {
+		if (!isListener(parentComponent)) {
 
 			if (!(message instanceof String)) {
 				warnJSDeveloper();
@@ -754,9 +756,8 @@ public class JOptionPane extends JComponent {
 
 		boolean simplify = USE_HTML5_MODAL_FOR_WARNINGS_AND_ERRORS
 				&& (messageType == WARNING_MESSAGE || messageType == ERROR_MESSAGE);
-		boolean isPropertyListener = parentComponent instanceof PropertyChangeListener;
 
-		if (simplify || !isPropertyListener) {
+		if (simplify || !isListener(parentComponent)) {
 			if (!simplify && !(message instanceof String))
 				warnJSDeveloper();
 			String s = getMessageTypeString(messageType, ": ") + (title == "Message" ? "" : title + "\n\n")
@@ -765,6 +766,10 @@ public class JOptionPane extends JComponent {
 			return;
 		}
 		showOptionDialog(parentComponent, message, title, DEFAULT_OPTION, messageType, icon, null, null);
+	}
+
+	private static boolean isListener(Component parentComponent) {
+		return (listener != null ? listener : parentComponent) instanceof PropertyChangeListener;
 	}
 
 	private static void warnJSDeveloper() {
@@ -909,7 +914,7 @@ public class JOptionPane extends JComponent {
 
 		boolean jsReturn = true;
 
-		if (!(parentComponent instanceof PropertyChangeListener)) {
+		if (!isListener(parentComponent)) {
 			if (!(message instanceof String)) {
 				warnJSDeveloper();
 				message = "?";
@@ -985,7 +990,7 @@ public class JOptionPane extends JComponent {
 	public static int showOptionDialog(Component parentComponent, Object message, String title, int optionType,
 			int messageType, Icon icon, Object[] options, Object initialValue) {
 
-		if (!(parentComponent instanceof PropertyChangeListener)) {
+		if (!isListener(parentComponent)) {
 			warnJSDeveloper();
 			return CANCEL_OPTION;
 		}
@@ -1132,7 +1137,7 @@ public class JOptionPane extends JComponent {
 				setValue(UNINITIALIZED_VALUE);
 			}
 		});
-		秘ensurePropertyChangeListener(this, parentComponent);
+		秘ensurePropertyChangeListener(this, (listener == null ? parentComponent : listener));
 
 		addPropertyChangeListener(new PropertyChangeListener() {
 			@Override
