@@ -394,7 +394,8 @@ class Java2ScriptCompiler {
 				pt = sourceLocation.lastIndexOf("/" + packageName + "/");
 				if (pt <= 0) {
 					// also don't allow "" root directory
-					System.out.println("J2S ignoring bad sourceLocation for package \"" + packageName + "\": " + sourceLocation);
+					if (!"_".equals(packageName))
+						System.out.println("J2S ignoring bad sourceLocation for package \"" + packageName + "\": " + sourceLocation);
 				} else {
 					String sourceDir = sourceLocation.substring(0, pt);
 					File src = new File(sourceDir, packageName);
