@@ -137,7 +137,7 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 			int ntotal = 0, nerror = 0;
 			for (int j = 0; j < contexts.size(); j++) {
 				BuildContext[] files = contexts.get(j);
-				System.out.println("J2S building JavaScript for " + files.length + " file"+plural(files.length));
+				System.out.println("J2S building JavaScript for " + files.length + " file" + plural(files.length));
 
 				for (int i = 0, n = files.length; i < n; i++) {
 // trying to keep the progess monitor running - didn't work
@@ -157,23 +157,29 @@ public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.comp
 						System.out.println("J2S excluded " + filePath);
 					} else {
 						System.out.println("J2S transpiling (" + (i + 1) + "/" + n + ") " + filePath);
-						if (j2sCompiler.compileToJavaScript(f)) {
-							ntotal++;
-						} else {
-							nerror++;
-							System.out.println("J2S Error processing " + filePath);
-							if (breakOnError)
-								break;
+						try {
+							if (j2sCompiler.compileToJavaScript(f)) {
+								ntotal++;
+							} else {
+								nerror++;
+								System.out.println("J2S Error processing " + filePath);
+								if (breakOnError)
+									break;
+							}
+						} catch (Exception e) {
+							System.out.println("J2S Exception " + e);
+							e.printStackTrace(System.out);
+							e.printStackTrace(System.err);
 						}
 					}
 				}
 			}
 			j2sCompiler.finalizeProject();
 			contexts = null;
-			System.out.println(
-					"J2S buildFinished " + ntotal + " file"+plural(ntotal) + " transpiled for " + project.getProject().getLocation());
+			System.out.println("J2S buildFinished " + ntotal + " file" + plural(ntotal) + " transpiled for "
+					+ project.getProject().getLocation());
 			System.out.println("J2S buildFinished nerror = " + nerror + " " + new Date());
-		}	
+		}
 		isCleanBuild = false;
 	}
 

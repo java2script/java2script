@@ -390,11 +390,17 @@ class Java2ScriptCompiler {
 			if (pt >= 0)
 				packageName = packageName.substring(0, pt);
 			if (!copyResources.contains(packageName)) {
-				copyResources.add(packageName);
-				String sourceDir = sourceLocation.substring(0, sourceLocation.lastIndexOf("/" + packageName + "/"));
-				File src = new File(sourceDir, packageName);
-				File dest = new File(j2sPath, packageName);
-				copySiteResources(src, dest);
+				copyResources.add(packageName);				
+				pt = sourceLocation.lastIndexOf("/" + packageName + "/");
+				if (pt <= 0) {
+					// also don't allow "" root directory
+					System.out.println("J2S ignoring bad sourceLocation for package \"" + packageName + "\": " + sourceLocation);
+				} else {
+					String sourceDir = sourceLocation.substring(0, pt);
+					File src = new File(sourceDir, packageName);
+					File dest = new File(j2sPath, packageName);
+					copySiteResources(src, dest);
+				}
 			}
 		}
 		return true;
