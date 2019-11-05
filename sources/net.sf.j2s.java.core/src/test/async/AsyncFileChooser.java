@@ -19,7 +19,7 @@ import javax.swing.filechooser.FileSystemView;
 public class AsyncFileChooser extends JFileChooser implements PropertyChangeListener {
 
 	private int optionSelected;
-	private Runnable ok; // sorry, no CANCEL in JavaScript
+	private Runnable ok, cancel; // sorry, no CANCEL in JavaScript for file open
 	private static boolean notified;
 
 	public AsyncFileChooser() {
@@ -65,15 +65,15 @@ public class AsyncFileChooser extends JFileChooser implements PropertyChangeList
 	/**
 	 * 
 	 * @param frame
-	 * @param type "open" or "save"
+	 * @param btnLabel "open" or "save"
 	 * @param ok
 	 * @param cancel must be null; JavaScript cannot capture a cancel from a file dialog
 	 */
-	public void showDialog(Component frame, String type, Runnable ok, Runnable cancel) {
+	public void showDialog(Component frame, String btnLabel, Runnable ok, Runnable cancel) {
 		this.ok = ok;
-		if (cancel != null)
+		if (getDialogType() != JFileChooser.SAVE_DIALOG && cancel != null)
 			notifyCancel();
-		process(super.showDialog(frame, type));
+		process(super.showDialog(frame, btnLabel));
 	}
 
 	/**
@@ -91,14 +91,16 @@ public class AsyncFileChooser extends JFileChooser implements PropertyChangeList
 
 	/**
 	 * 
+	 * This just completes the set. It is not necessary for JavaScript, because JavaScript
+	 * will just throw up a simple modal OK/Cancel message anyway.
+	 * 
 	 * @param frame
 	 * @param ok
-	 * @param cancel must be null; JavaScript cannot capture a cancel from a file dialog
+	 * @param cancel must be null
 	 */
 	public void showSaveDialog(Component frame, Runnable ok, Runnable cancel) {
 		this.ok = ok;
-		if (cancel != null)
-			notifyCancel();
+		this.cancel = cancel;
 		process(super.showSaveDialog(frame));
 	}
 
@@ -124,6 +126,8 @@ public class AsyncFileChooser extends JFileChooser implements PropertyChangeList
 		optionSelected = ret;
 		File f = getSelectedFile();
 		if (f == null) {
+			if (cancel != null)
+				cancel.run();
 			return; // Sorry, JavaScript cannot do this, so we also do not do it in Java.
 		}
 		ok.run();
