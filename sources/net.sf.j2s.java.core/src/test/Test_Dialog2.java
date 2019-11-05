@@ -158,6 +158,45 @@ public class Test_Dialog2 extends JFrame {
 		});
 		p.add(b);
 
+		b = new JButton("FileSaveDialog");
+		b.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				AsyncFileChooser fc = new AsyncFileChooser();
+				fc.showSaveDialog(Test_Dialog2.this, new Runnable() {
+
+					@Override
+					public void run() {
+						File file = fc.getSelectedFile();
+						String msg = "FileChooser returned " + file;
+						System.out.println(msg);
+						status.setText(msg);
+					}
+					
+				}, null);
+			}
+
+		});
+		p.add(b);
+
+		b = new JButton("FileSaveDialog2");
+		b.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser fc = new JFileChooser();
+				int ret = fc.showSaveDialog(Test_Dialog2.this);						
+				File file = fc.getSelectedFile();
+				String msg = "FileChooser returned " + ret + " " + file + (file == null ? "" : " path=" + file.getAbsolutePath());
+				System.out.println(msg);
+				status.setText(msg);
+			}
+
+		});
+		p.add(b);
+
+
 		b = colorButton = new JButton("ColorDialog");
 		b.addActionListener(new ActionListener() {
 
