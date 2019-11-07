@@ -11685,8 +11685,6 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 				if (--nfiles == 0) {
 					J2S.$remove(id);
 					J2S.$remove("_filereader_modalscreen");
-//					document.body.style.position = '';
-//					document.body.style.top = '';
 					fDone(data, file.name);
 				}
 			};
@@ -11719,8 +11717,6 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 			if (parent == "body") {
 				J2S.$after(document.body, div);
 				J2S.$after(document.body, '<div id="_filereader_modalscreen" style="z-index:999999;background:rgba(100,100,100,0.4);position:fixed;left:0;top:0;width:100%;height:100%;"></div>')
-//				document.body.style.position = 'fixed';
-//				document.body.style.top = `-${window.scrollY}px`;
 			} else {
 				J2S.$append(parent, div);
 			}
