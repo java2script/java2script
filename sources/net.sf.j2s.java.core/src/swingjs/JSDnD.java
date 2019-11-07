@@ -53,7 +53,7 @@ public class JSDnD {
 		if (target != null) {
 		    offset = jc.getLocationOnScreen();
 //		    if (name == null)
-				target.drop(JSDnD.createDropEvent(target, t, name, data, x, y));
+				target.drop(createDropEvent(target, t, name, data, x, y));
 			return;
 		}
 	    Component top = jc.getTopLevelAncestor();
@@ -67,7 +67,32 @@ public class JSDnD {
 	    		//- offset.y
 	    		, t, name, data));
 	}
+
+	public static void drop(JComponent jc, Object html5DataTransfer, Object[][] data, int x, int y) {
+		if (html5DataTransfer == null)
+			return;
+		JSTransferable t = new JSTransferable(html5DataTransfer);
+		DropTarget target = jc.getDropTarget();
+		System.out.println("JSDnD[] drop for " +  jc.getUIClassID() + " target " + target);
+		Point offset;
+		if (target != null) {
+		    offset = jc.getLocationOnScreen();
+//		    if (name == null)
+				target.drop(createDropEvent(target, t, data, x, y));
+			return;
+		}
+	    Component top = jc.getTopLevelAncestor();
+	    offset = top.getLocationOnScreen();
+	    
+	    System.out.println("JSDnD drop for " + jc.getUIClassID() + " offset " + x + " " + y + "  -"+ offset);
 		
+	    top.dispatchEvent(new JSDropMouseEvent(jc, MouseEvent.MOUSE_RELEASED, x 
+	    		//- offset.x
+	    		, y 
+	    		//- offset.y
+	    		, t, null, null));
+	}
+
 	@SuppressWarnings("serial")
 	public static class JSDropMouseEvent extends MouseEvent implements ActiveEvent {
 
@@ -111,9 +136,9 @@ public class JSDnD {
 	    	try {
 	    		DropTarget target = ((Component) getSource()).getDropTarget();
 	    		if (name == null)
-		    		target.drop(JSDnD.createDropEvent(target, transferable, null, null, getX(), getY()));	
+		    		target.drop(createDropEvent(target, transferable, null, null, getX(), getY()));	
 	    		else
-		    		target.drop(JSDnD.createDropEvent(target, transferable, name, getBData(), getX(), getY()));	    		
+		    		target.drop(createDropEvent(target, transferable, name, getBData(), getX(), getY()));	    		
 	    	} catch (Throwable e) {
 	    		System.out.println("JSDnD Error creating Drop event "  + e);
 	    	}
@@ -139,6 +164,12 @@ public class JSDnD {
 
 	}
 
+	static DropTargetDropEvent createDropEvent(DropTarget target, Transferable t, Object[][] data, int x, int y) {
+		DropTargetContext context = new DropTargetContext(target);
+		context.addNotify(new JSDropTargetContextPeer(target, t, data));
+		return new DropTargetDropEvent(context, new Point(x, y), DnDConstants.ACTION_MOVE, DnDConstants.ACTION_LINK | DnDConstants.ACTION_COPY_OR_MOVE);
+	}
+
 	static DropTargetDropEvent createDropEvent(DropTarget target, Transferable t, String name, byte[] data, int x, int y) {
 		DropTargetContext context = new DropTargetContext(target);
 		context.addNotify(new JSDropTargetContextPeer(target, t, name, data));	
@@ -152,6 +183,11 @@ public class JSDnD {
 			transferable = (name == null ? t : new FileTransferable(name, data));
 		}
 		
+		public JSDropTargetContextPeer(DropTarget target, Transferable t, Object[][] data) {
+			this.target = target;
+			transferable =  new FileTransferable(data);
+		}
+
 		private Transferable transferable;
 		private DropTarget target;
 
@@ -274,12 +310,26 @@ public class JSDnD {
 
 	static public class FileTransferable extends JSTransferable {
 		
-		private File file;
+		private List<File> files;
 		
 		public FileTransferable(String name, byte[] data) {
 			super(null);
-			file = new File(name);
+			files = new ArrayList<File>();
+			addFile(name, data);
+		}
+
+		private void addFile(String name, byte[] data) {
+			File file = new File(name);
 			file.秘bytes = data;
+			files.add(file);
+		}
+
+		public FileTransferable(Object[][] data) {
+			super(null);
+			files = new ArrayList<File>();
+			for (int i = 0; i < data.length; i++) {
+				addFile((String) data[i][0],(byte[]) data[i][1]);
+			}
 		}
 
 		@Override
@@ -296,9 +346,9 @@ public class JSDnD {
 
 		@Override
 		public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
-			List<File> list = new ArrayList<File>();
-			list.add(file);
-			return list;
+			Object o = files;
+			files = null;
+			return o;
 		}
 		
 	}

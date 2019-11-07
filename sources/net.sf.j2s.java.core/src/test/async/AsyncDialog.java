@@ -1,6 +1,7 @@
 package test.async;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -56,6 +57,10 @@ public class AsyncDialog extends JOptionPane implements PropertyChangeListener {
 //	}}));
 //		}
 
+	
+	public AsyncDialog() {
+	}
+	
 	private ActionListener actionListener;
 	private Object choice;
 	private Object[] options;
@@ -94,16 +99,75 @@ public class AsyncDialog extends JOptionPane implements PropertyChangeListener {
 		unsetListener();
 	}
 
-	public void showConfirmDialog(Component frame, String message, String title, int optionType, ActionListener a) {
+	public void showConfirmDialog(Component frame, Object message, String title, ActionListener a) {
+		showConfirmDialog(frame, message, title, JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, a);
+	}
+
+	public void showConfirmDialog(Component frame, Object message, String title, int optionType, ActionListener a) {
 		showConfirmDialog(frame, message, title, optionType, JOptionPane.QUESTION_MESSAGE, a);
 	}
 
-	public void showConfirmDialog(Component frame, String message, String title, int optionType, int messageType,
+	public void showConfirmDialog(Component frame, Object message, String title, int optionType, int messageType,
 			ActionListener a) {
 		setListener(a);
 		process(JOptionPane.showConfirmDialog(frame, message, title, optionType, messageType));
 		unsetListener();
 	}
+
+	/**
+	 * A dialog option that allows for YES, NO, and CLOSE options via
+	 * ActionListener. ActionEvent.getID() contains the reply.
+	 * 
+	 * @param parent   The parent component for the dialog
+	 * @param message  The text of the message to display
+	 * @param title    Optional title defaults to "Question"
+	 * @param listener Handle options based on an ActionEvent
+	 */
+	public static void showYesNoAsync(Component parent, Object message, String title, ActionListener listener) {
+		new AsyncDialog().showConfirmDialog(parent, message, (title == null ? "Question" : title),
+				JOptionPane.YES_NO_OPTION, listener);
+	}
+
+	/**
+	 * A dialog option that involves just a YES follower.
+	 * @param parent
+	 * @param message
+	 * @param title TODO
+	 * @param yes
+	 */
+	public static void showYesAsync(Container parent, Object message, String title, Runnable yes) {
+		AsyncDialog.showYesNoAsync(parent, message, title, new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (e.getID() == JOptionPane.YES_OPTION) {
+					yes.run();
+				}
+			}
+			
+		});
+	}
+
+	/**
+	 * A dialog option that involves just an OK follower.
+	 * @param parent
+	 * @param message
+	 * @param title
+	 * @param ok
+	 */
+	public static void showOKAsync(Container parent, Object message, String title, Runnable ok) {
+		new AsyncDialog().showConfirmDialog(parent, message, title, JOptionPane.OK_CANCEL_OPTION, new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (e.getID() == JOptionPane.OK_OPTION) {
+					ok.run();
+				}
+			}
+			
+		});
+	}
+
 
 	private void setListener(ActionListener a) {
 		actionListener = a;
@@ -186,5 +250,6 @@ public class AsyncDialog extends JOptionPane implements PropertyChangeListener {
 		}
 		return ((Integer) choice).intValue();
 	}
+
 
 }

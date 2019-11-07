@@ -10,6 +10,17 @@ be done in UTF-8. This means:
 - making sure your server can serve up UTF-8 by default for any browser-loaded files
 - making sure you don't edit a Java2Script class file or one of the site .js files
   using a non-UTF-8 editor. It may replace non-Latin characters with "?" or garbage.
+- making sure that your web pages are delivered with 
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+
+Note that the DOCTYPE tag is critical for some browsers to switch into HTML5 mode. (MSIE?)
+
+
+
   
 In particular, the Mandarin character 秘 (mi; "secret") is used extensively throughout
 the SwingJS class files to distinguish j2s-specific fields and methods that must not 
@@ -497,6 +508,48 @@ It's a simple modification:
 			// If we are here, the dialog has closed, in both Java and JavaScript.
 			System.out.println("int value is " + value);
 		}
+
+
+	@Override
+	public void propertyChange(PropertyChangeEvent event) {
+		Object val = event.getNewValue();
+		String name = event.getPropertyName();
+		System.out.println(name);
+		switch (event.getSource().getClass().getName()) {
+		case "javax.swing.JOptionPane":
+			switch (name) {
+			case "inputValue":
+				onDialogReturn(val);
+				return;
+			case "value":
+				if (val instanceof Integer)
+					onDialogReturn(((Integer) val).intValue());
+				else
+					onDialogReturn(val);
+				return;
+			}
+			break;
+		case "javax.swing.ColorChooserDialog":
+			switch (name) {
+			case "SelectedColor":
+				onDialogReturn(val);
+				return;
+			}
+			break;
+		case "javax.swing.JFileChooser":
+			switch (name) {
+			case "SelectedFile":
+				File file = (File) val;
+				byte[] array = (val == null ? null : /** @j2sNative file.秘bytes || */
+						null);
+				onDialogReturn("fileName is '" + file.getName() + "'\n\n" + new String(array));
+				return;
+			}
+			break;
+		}
+		System.out.println(
+				event.getSource().getClass().getName() + " " + event.getPropertyName() + ": " + event.getNewValue());
+	}
 
 
 Developers are encouraged to create a separate class that handles general calls to JFileDialog. 
