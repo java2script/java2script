@@ -2,6 +2,7 @@
 
 // J2S._version set to "3.2.4.09" 2019.10.31
 
+// BH 2019.11.06 adds JFileChooser.setMultipleMode(true) and multiple-file DnD
 // BH 2019.10.31 (Karsten Blankenagel) adds Info.spinnerImage: ["none"|<j2sdir/>path|/path|http[s]://path]
 // BH 2019.10.20 fixes modal for popup dialog; still needs work for two applets?
 // BH 2019.09.13 fixes touchend canceling click
@@ -967,25 +968,41 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		// streamlined file dialog using <input type="file">.click()
 		format || (format = "string");
 		var id = "filereader" + ("" + Math.random()).split(".")[1]
-
+		var nfiles = 1;
+		var map = (format == "java.util.Map" ? Clazz.new_(Clazz.load("java.util.Hashtable")) : null);
+		var arr = (format == "java.util.Array" ? Clazz.array(Clazz.new_(Clazz.load("java.io.File")), [0]) : null);
+		var isMultiple = !!(map || arr);
+		var readFiles = function(files) {
+				nfiles = files.length;
+				for (var i = 0; i < nfiles; i++) {
+					readFile(files[i]);
+				}
+			};
 		var readFile = function(file) {
-			J2S.$remove(id);
 			var reader = new FileReader();
 			reader.onloadend = function(evt) {
 				var data = null;
 				if (evt.target.readyState == FileReader.DONE) {
 					var data = evt.target.result;
+					System.out.println("J2S.getFileFromDialog format=" + format + " file name=" + file.name  + " size=" + data.length)
 					switch (format) {
 					case "java.util.Map":
-						var map = Clazz.new_(Clazz.load("java.util.Hashtable"));
-						map.put$TK$TV("fileName", file.name);
-						map.put$TK$TV("bytes", J2S._toBytes(data));
-						return fDone(map);
+						map.put$TK$TV(file.name, J2S._toBytes(data));
+						data = map;
+						break;
+					case "java.util.Array":
+						var e = Clazz.new_(Clazz.load("java.io.File").c$$S,
+								[ file.name ]);
+						e.秘bytes = J2S._toBytes(data);
+						arr.push(e);
+						data = arr;
+						break;
 					case "java.io.File":
 						var f = Clazz.new_(Clazz.load("java.io.File").c$$S,
 								[ file.name ]);
 						f.秘bytes = J2S._toBytes(data);
-						return fDone(f);
+						data = f;
+						break;
 					case "ArrayBuffer":
 						break;
 					case "string":
@@ -996,7 +1013,11 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 						break;
 					}
 				}
-				fDone(data, file.name);
+				if (--nfiles == 0) {
+					J2S.$remove(id);
+					J2S.$remove("_filereader_modalscreen");
+					fDone(data, file.name);
+				}
 			};
 			reader.readAsArrayBuffer(file);
 		};
@@ -1006,37 +1027,38 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		if (J2S._canClickFileReader) {
 			var x = document.createElement("input");
 			x.type = "file";
+			if (isMultiple)
+				x.setAttribute("multiple", "true");
 			x.onchange = function(ev) {
-				readFile(this.files[0])
+				(isMultiple ? readFiles(this.files) : readFile(this.files[0]));
 			};
 			x.click();
 		} else {
-			var div = ('<div id="ID" style="z-index:1000000;position:absolute;background:#E0E0E0;left:400px;top:400px">'
-					+ '<div id="ID_modalscreen" style="z-index:999999;background:rgba(100,100,100,0.4);position:absolute;left:0px;top:0px;width:'
-					+ screen.width
-					+ ';height:'
-					+ screen.height
-					+ '"></div>'
+			var px = screen.width / 2 - 180; 
+			var py = screen.height / 2 - 40; 
+			var div = ('<div id="ID" style="z-index:1000000;position:fixed;background:#E0E0E0;left:' + px + 'px;top:' + py + 'px">'
 					+ '<div style="margin:5px 5px 5px 5px;">'
-					+ '<input type="file" id="ID_files" />'
+					+ '<input type="file" id="ID_files" ' + (isMultiple ? ' multiple="multiple"' :'')+')/>'
 					+ '<button id="ID_loadfile">load</button>'
 					+ '<button id="ID_cancel">cancel</button>' + '</div>' + '<div>')
 					.replace(/ID/g, id);
-			var parent = (!parentDiv | parentDiv == "body" ? "body"
-					: typeof parentDiv == "string" ? "#" + parentDiv
-							: parentDiv);
+			var parent = "body";//(!parentDiv || parentDiv == "body" ? "body"
+					//: typeof parentDiv == "string" ? "#" + parentDiv
+						//	: parentDiv);
 			if (parent == "body") {
 				J2S.$after(document.body, div);
+				J2S.$after(document.body, '<div id="_filereader_modalscreen" style="z-index:999999;background:rgba(100,100,100,0.4);position:fixed;left:0;top:0;width:100%;height:100%;"></div>')
 			} else {
 				J2S.$append(parent, div);
 			}
 			J2S.$appEvent("#" + id + "_loadfile", null, "click");
 			J2S.$appEvent("#" + id + "_loadfile", null, "click", function(evt) {
-				readFile(J2S.$("#" + id + "_files")[0].files[0]);
+				readFiles(J2S.$("#" + id + "_files")[0].files);
 			});
 			J2S.$appEvent("#" + id + "_cancel", null, "click");
 			J2S.$appEvent("#" + id + "_cancel", null, "click", function(evt) {
 				J2S.$remove(id);
+				J2S.$remove("_filereader_modalscreen");
 			});
 			J2S.$css(J2S.$("#" + id), {
 				display : "block"
@@ -2141,6 +2163,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				var kind = oe.dataTransfer.items[0].kind;
 				var type = oe.dataTransfer.items[0].type;
 				var file = oe.dataTransfer.files[0];
+				var files = oe.dataTransfer.files;
 			} catch (e) {
 				return;
 			} finally {
@@ -2150,7 +2173,6 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					oe.stopPropagation();
 				}
 			}
-			System.out.println("DnD kind=" + kind + " type=" + type + " file=" + file);
 			var target = oe.target;
 			var c = target;
 			var comp;
@@ -2172,17 +2194,27 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				return;
 			}
 			// MSIE will drop an image this way, though, and load it!
-			var reader = new FileReader();
-			reader.onloadend = function(evt) {
-				if (evt.target.readyState == FileReader.DONE) {
-					var target = oe.target;
-					var bytes = J2S._toBytes(evt.target.result);
-					Clazz.load("swingjs.JSDnD")
-							.drop$javax_swing_JComponent$O$S$BA$I$I(comp,
-									oe.dataTransfer, file.name, bytes, x, y);
-				}
-			};
-			reader.readAsArrayBuffer(file);
+			var nfiles = files.length;
+			var arr = [];
+			for (var i = 0; i < nfiles; i++) {
+				var file = files[i];
+				var reader = new FileReader();
+				reader.onloadend = function(evt) {
+					if (evt.target.readyState == FileReader.DONE) {
+						var target = oe.target;
+						var name = evt.target._filename;
+						var bytes = J2S._toBytes(evt.target.result);
+						arr.push([name, bytes]);
+						System.out.println("j2sApplet DnD kind=" + kind + " type=" + type + " name=" + name + " size="+ bytes.length);
+						if (--nfiles == 0) {
+						  Clazz.load("swingjs.JSDnD")
+								.drop$javax_swing_JComponent$O$OAA$I$I(comp, oe.dataTransfer, arr, -x, y);
+						}
+					}
+				};
+				reader._filename = file.name
+				reader.readAsArrayBuffer(file);
+			}
 		});
 	}
 

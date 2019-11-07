@@ -85,6 +85,8 @@ public class Test_Applet_DropFile extends JApplet implements DropTargetListener 
 		
 		try {
 			Transferable tr = dtde.getTransferable();
+			JTextArea target = (JTextArea) ((DropTarget) dtde.getSource()).getComponent();			
+			target.setText("");
 			DataFlavor[] flavors = tr.getTransferDataFlavors();
 			for (int i = 0; i < flavors.length; i++) {
 				if (flavors[i].isFlavorJavaFileListType()) {
@@ -93,9 +95,10 @@ public class Test_Applet_DropFile extends JApplet implements DropTargetListener 
 					for (int j = 0; j < list.size(); j++) {
 						File file = (File) list.get(j);
 						byte[] data = getDroppedFileBytes(file);
-						fileName.setText(file.getName() + " - " + data.length + " " + dtde.getLocation());
-						JTextArea target = (JTextArea) ((DropTarget) dtde.getSource()).getComponent();
-						target.setText(new String(data));						
+						String s = ">>>>>>>>>"+ file.getName() + " - " + data.length + " " + dtde.getLocation() + "\n";	
+						fileName.setText(s);
+						target.append(s);
+						target.append(new String(data));						
 						System.out.println("prefsize " + target.getPreferredSize());
 					}
 					dtde.dropComplete(true);					
@@ -103,7 +106,6 @@ public class Test_Applet_DropFile extends JApplet implements DropTargetListener 
 				} else if (flavors[i].isFlavorTextType()) {
 					dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
 					String data = (String) tr.getTransferData(flavors[i]);
-					JTextArea target = (JTextArea) ((DropTarget) dtde.getSource()).getComponent();
 					target.setText(data);
 					dtde.dropComplete(true);					
 				}
