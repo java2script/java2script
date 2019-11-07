@@ -780,7 +780,31 @@ public class JFileChooser extends JComponent {
 				removePropertyChangeListener((PropertyChangeListener) parent);
 				addPropertyChangeListener((PropertyChangeListener) parent);
 			}
-			@SuppressWarnings("unused") Runnable r = new Runnable() {
+			String format = (isMultiSelectionEnabled() ? "java.util.Array" : "java.io.File");
+			@SuppressWarnings("unused") Runnable r = 
+					
+					(isMultiSelectionEnabled() ? 
+			
+			new Runnable() {
+
+						@Override
+						public void run() {
+							/**
+							 * @j2sNative
+							 * 
+							 * this.b$['javax.swing.JFileChooser'].selectedFiles = arguments[0] || null;
+							 * this.b$['javax.swing.JFileChooser'].selectedFile = arguments[0][0] || null;
+							 * 
+							 * 
+							 */
+							firePropertyChange("SelectedFiles", null, selectedFiles);
+						}
+						
+			}
+							
+			:
+					
+			new Runnable() {
 
 				@Override
 				public void run() {
@@ -794,8 +818,12 @@ public class JFileChooser extends JComponent {
 					firePropertyChange("SelectedFile", null, selectedFile);
 				}
 				
-			};
-			JSUtil.J2S.getFileFromDialog(/**@j2sNative function(file){r.run$(file)}||*/ null, "java.io.File");			
+			}
+			
+			);
+			JSUtil.J2S.getFileFromDialog(/**@j2sNative function(file){r.run$(file)}||*/ null, 
+					format);
+			
 			return JDialog.ASYNCHRONOUS_INTEGER;
 		case SAVE_DIALOG:
 			if (selectedFile != null)

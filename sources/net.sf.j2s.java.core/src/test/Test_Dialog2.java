@@ -41,6 +41,8 @@ public class Test_Dialog2 extends JFrame {
 
 	JLabel status;
 
+	private File[] a = new File[0];
+	
 	private JButton colorButton;
 
 	public Test_Dialog2() {
@@ -150,6 +152,34 @@ public class Test_Dialog2 extends JFrame {
 					public void run() {
 						File file = fc.getSelectedFile();
 						System.out.println("FileChooser returned " + file.length() + " bytes for " + file);
+					}
+					
+				}, null);
+			}
+
+		});
+		p.add(b);
+
+		b = new JButton("FilesOpenDialog");
+		b.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				AsyncFileChooser fc = new AsyncFileChooser();
+				fc.setMultiSelectionEnabled(true);
+				fc.showOpenDialog(Test_Dialog2.this, new Runnable() {
+
+					@Override
+					public void run() {
+						System.out.println(fc.getSelectedFile());
+						File[] files = fc.getSelectedFiles();
+						String s = "";
+						for (int i = 0; i < files.length; i++) {
+							System.out.println("FileChooser returned " + files[i].length() + " bytes for files[" + i
+									+ "] = " + files[i]);
+							s += files[i].getName() + " " + files[i].length() + ",";
+						}
+						status.setText(s);
 					}
 					
 				}, null);

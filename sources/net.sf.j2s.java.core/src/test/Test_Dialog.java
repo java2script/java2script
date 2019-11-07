@@ -64,11 +64,19 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 			break;
 		case "javax.swing.JFileChooser":
 			switch (name) {
+			case "SelectedFiles":
+				File[] files = (File[]) val;
+				long[] len = new long[files.length];
+				for (int i = 0; i < files.length; i++) {
+					len[i] = files[i].length();
+				}
+				onDialogReturn(files.length + " files read sizes=" + len);
+				return;
 			case "SelectedFile":
 				File file = (File) val;
 				byte[] array = (val == null ? null : /** @j2sNative file.秘bytes || */
 						null);
-				onDialogReturn("fileName is '" + file.getName() + "'\n\n" + new String(array));
+				onDialogReturn("fileName is '" + file.getName() + " size=" + array.length);
 				return;
 			}
 			break;
@@ -164,6 +172,19 @@ public class Test_Dialog extends JFrame implements PropertyChangeListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fc = new JFileChooser();
+				onDialogReturn(fc.showOpenDialog(Test_Dialog.this));
+			}
+
+		});
+		p.add(b);
+
+		b = new JButton("FilesOpenDialog");
+		b.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser fc = new JFileChooser();
+				fc.setMultiSelectionEnabled(true);
 				onDialogReturn(fc.showOpenDialog(Test_Dialog.this));
 			}
 
