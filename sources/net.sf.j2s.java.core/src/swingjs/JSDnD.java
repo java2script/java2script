@@ -71,26 +71,18 @@ public class JSDnD {
 	public static void drop(JComponent jc, Object html5DataTransfer, Object[][] data, int x, int y) {
 		if (html5DataTransfer == null)
 			return;
-		JSTransferable t = new JSTransferable(html5DataTransfer);
+		JSTransferable t = new FileTransferable(data);
 		DropTarget target = jc.getDropTarget();
-		System.out.println("JSDnD[] drop for " +  jc.getUIClassID() + " target " + target);
-		Point offset;
+		System.out.println("JSDnD[] drop for " + jc.getUIClassID() + " target " + target);
 		if (target != null) {
-		    offset = jc.getLocationOnScreen();
-//		    if (name == null)
-				target.drop(createDropEvent(target, t, data, x, y));
+			target.drop(createDropEvent(target, t, data, x, y));
 			return;
 		}
-	    Component top = jc.getTopLevelAncestor();
-	    offset = top.getLocationOnScreen();
-	    
-	    System.out.println("JSDnD drop for " + jc.getUIClassID() + " offset " + x + " " + y + "  -"+ offset);
-		
-	    top.dispatchEvent(new JSDropMouseEvent(jc, MouseEvent.MOUSE_RELEASED, x 
-	    		//- offset.x
-	    		, y 
-	    		//- offset.y
-	    		, t, null, null));
+		Component top = jc.getTopLevelAncestor();
+
+		System.out.println("JSDnD drop for " + jc.getUIClassID() + " offset " + x + " " + y);
+
+		top.dispatchEvent(new JSDropMouseEvent(jc, MouseEvent.MOUSE_RELEASED, x, y, t, null, null));
 	}
 
 	@SuppressWarnings("serial")
@@ -109,6 +101,14 @@ public class JSDnD {
 	        	setBData(data);
 	    }
 
+//	    public JSDropMouseEvent(Component source, int id, int x, int y, Transferable t, Object[][] data) {
+//	        super(source, id, System.currentTimeMillis(), 0, x, y, 0, false, NOBUTTON);
+//	        System.out.println("new JSDropMouseEvent for " + source);
+//	        this.transferable = t;
+//	        // 
+//	        setBData((byte[]) (Object) data);
+//	    }
+//
 	    protected void copyPrivateDataInto(AWTEvent that) {
 
 	    	// in case this gets transferred. 
@@ -166,7 +166,7 @@ public class JSDnD {
 
 	static DropTargetDropEvent createDropEvent(DropTarget target, Transferable t, Object[][] data, int x, int y) {
 		DropTargetContext context = new DropTargetContext(target);
-		context.addNotify(new JSDropTargetContextPeer(target, t, data));
+		context.addNotify(new JSDropTargetContextPeer(target, t, null, null));
 		return new DropTargetDropEvent(context, new Point(x, y), DnDConstants.ACTION_MOVE, DnDConstants.ACTION_LINK | DnDConstants.ACTION_COPY_OR_MOVE);
 	}
 
@@ -183,11 +183,6 @@ public class JSDnD {
 			transferable = (name == null ? t : new FileTransferable(name, data));
 		}
 		
-		public JSDropTargetContextPeer(DropTarget target, Transferable t, Object[][] data) {
-			this.target = target;
-			transferable =  new FileTransferable(data);
-		}
-
 		private Transferable transferable;
 		private DropTarget target;
 
@@ -257,6 +252,20 @@ public class JSDnD {
 		public JSTransferable(Object html5DataTransfer) {
 			dataTransfer = (HTML5DataTransfer)html5DataTransfer;
 			mimeTypes = /** @j2sNative html5DataTransfer && html5DataTransfer.types ||*/null;
+			if (mimeTypes != null) {
+				if (mimeTypes.length == 0) {
+					// Chrome ver. 77 does this
+					mimeTypes = new String[] {"application/x-java-file-list;class=java.util.List"};
+					
+				} else {
+				String[] t = new String[mimeTypes.length];
+				// check for valid mimeType syntax; make a normal String
+				for (int i = 0; i < mimeTypes.length; i++)
+					t[i] = (mimeTypes[i].equals("Files") ? "application/x-java-file-list;class=java.util.List" 
+							: mimeTypes[i]);
+				mimeTypes = t;
+				}
+			}
 		}
 
 		@Override

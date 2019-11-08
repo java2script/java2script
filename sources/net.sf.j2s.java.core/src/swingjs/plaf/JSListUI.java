@@ -842,9 +842,9 @@ public class JSListUI extends JSLightweightUI //true, but unnecessary implements
 		// list.setTransferHandler(defaultTransferHandler);
 		// // default TransferHandler doesn't support drop
 		// // so we don't want drop handling
-		// if (list.getDropTarget() instanceof UIResource) {
+	if (list.getDropTarget() instanceof UIResource) {
 		list.setDropTarget(null);
-		// }
+	 }
 		// }
 
 		focusListener = createFocusListener();

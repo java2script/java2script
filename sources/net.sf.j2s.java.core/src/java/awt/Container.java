@@ -1134,9 +1134,8 @@ public class Container extends JSComponent {
 			adjustDescendants(comp.countHierarchyMembers());
 
 			invalidateIfValid();
-			if (peer != null) {
+			if (peer != null)
 				comp.addNotify();
-			}
 
 			/* Notify the layout manager of the added component. */
 			if (layoutMgr != null) {

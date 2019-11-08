@@ -5848,7 +5848,7 @@ public abstract class Component implements ImageObserver/*
 			// relocateComponent();
 			// }
 			// }
-			if (秘j2sInvalidateOnAdd )
+			if (秘j2sInvalidateOnAdd)
 				invalidate();
 
 			// int npopups = (popups != null? popups.size() : 0);
@@ -5858,8 +5858,10 @@ public abstract class Component implements ImageObserver/*
 			// popup.addNotify();
 			// }
 			//
-			// if (dropTarget != null) dropTarget.addNotify(peer);
-			//
+
+			if (dropTarget != null)
+				dropTarget.addNotify(peer);
+
 			peerFont = getFont();
 
 //			if (getContainer() != null && !isAddNotifyComplete) {
