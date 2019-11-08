@@ -2208,7 +2208,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 						System.out.println("j2sApplet DnD kind=" + kind + " type=" + type + " name=" + name + " size="+ bytes.length);
 						if (--nfiles == 0) {
 						  Clazz.load("swingjs.JSDnD")
-								.drop$javax_swing_JComponent$O$OAA$I$I(comp, oe.dataTransfer, arr, -x, y);
+								.drop$javax_swing_JComponent$O$OAA$I$I(comp, oe.dataTransfer, arr, x, y);
 						}
 					}
 				};
