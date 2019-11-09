@@ -118,6 +118,7 @@ public class DF {
       n = PT.parseInt(s1.substring(pt1 + 1));
       // 3.567E-2
       // 0.03567
+      // -0.0001
       s1 = "0." + zeros.substring(0, -n - 1) + s1.substring(0, 1) + s1.substring(2, pt1);
       pt = 1; 
     }
@@ -142,8 +143,11 @@ public class DF {
           value + (isNeg ? -1 : 1) * formatAdds[decimalDigits], decimalDigits);
     }
   
-    SB sb = SB.newS(s1.substring(0, (decimalDigits == 0 ? pt
-        : ++pt)));
+    String s0 = s1.substring(0, (decimalDigits == 0 ? pt
+        : ++pt));
+    SB sb = SB.newS(s0);
+    if (isNeg && s0.equals("0.") && decimalDigits + 2 <= len && s1.substring(2, 2 + decimalDigits).equals(zeros.substring(0, decimalDigits)))
+      isNeg = false;
     for (int i = 0; i < decimalDigits; i++, pt++) {
       if (pt < len)
         sb.appendC(s1.charAt(pt));
