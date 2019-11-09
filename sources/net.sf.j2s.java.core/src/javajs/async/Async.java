@@ -1,11 +1,7 @@
 package javajs.async;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.event.ActionListener;
-
 /**
- * A class to manage asynchronous aspects of SwingJS
+ * A package to manage asynchronous aspects of SwingJS
  * 
  * The javajs.async package simplifies the production of methods that can be
  * used equally well in Java and in JavaScript for handling "pseudo-modal"

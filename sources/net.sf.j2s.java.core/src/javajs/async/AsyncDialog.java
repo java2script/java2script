@@ -1,7 +1,6 @@
 package javajs.async;
 
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -66,6 +65,19 @@ public class AsyncDialog implements PropertyChangeListener {
 	private Object[] options;
 
 	// These options can be supplemented as desired.
+
+	
+	/**
+	 * Synchronous call; OK in JavaScript as long as we are using a JavaScript prompt() call
+	 * 
+	 * @param frame
+	 * @param msg
+	 * @return
+	 */
+	@Deprecated
+	public static String showInputDialog(Component frame, String msg) {
+		return JOptionPane.showInputDialog(frame, msg);
+	}
 
 	public void showInputDialog(Component frame, Object message, ActionListener a) {
 		setListener(a);
@@ -151,7 +163,7 @@ public class AsyncDialog implements PropertyChangeListener {
 	 * @param title TODO
 	 * @param yes
 	 */
-	public static void showYesAsync(Container parent, Object message, String title, Runnable yes) {
+	public static void showYesAsync(Component parent, Object message, String title, Runnable yes) {
 		AsyncDialog.showYesNoAsync(parent, message, title, new ActionListener() {
 
 			@Override
@@ -171,7 +183,7 @@ public class AsyncDialog implements PropertyChangeListener {
 	 * @param title
 	 * @param ok
 	 */
-	public static void showOKAsync(Container parent, Object message, String title, Runnable ok) {
+	public static void showOKAsync(Component parent, Object message, String title, Runnable ok) {
 		new AsyncDialog().showConfirmDialog(parent, message, title, JOptionPane.OK_CANCEL_OPTION, new ActionListener() {
 
 			@Override
@@ -187,7 +199,9 @@ public class AsyncDialog implements PropertyChangeListener {
 
 	private void setListener(ActionListener a) {
 		actionListener = a;
-		/** @j2sNative javax.swing.JOptionPane.listener = this */
+		@SuppressWarnings("unused")
+		Class c = JOptionPane.class; // loads the class
+		/** @j2sNative c.$clazz$.listener = this */
 	}
 
 	private void unsetListener() {
