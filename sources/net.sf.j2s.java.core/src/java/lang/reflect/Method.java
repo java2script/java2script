@@ -109,24 +109,26 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 	public Object invoke(Object receiver, Object... args)
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
-		// proxy does 
+		// proxy does uses this.Class_ as its receiver and ensures initialization
+		boolean isProxy = this.isProxy;
 		Object[] a = Class.getArgumentArray(parameterTypes, args, isProxy);
 		Object c = (isProxy ? receiver : this.Class_);
 		Object m = null, val = null;
 		/** 
 		 * @j2sNative
 		 * 
-		 * if (!this.isProxy) c = c.$clazz$;
+		 * if (!isProxy) {c = c.$clazz$;} 
+		 * c.$load$ && Clazz.load(c,2);
 		 * m= c[this.signature] || c.prototype && c.prototype[this.signature];
 		 * val = (m == null ? null : m.apply(receiver,a));
-		 * if (val != null && !this.isProxy) val = this.wrap$O(val);
 		 */
-		if (m == null) {
+				
+		 if (m == null) {
 		  String message = "Method " + getDeclaringClass().getName()
 				  + "." + signature + " was not found";
 		  throw new IllegalArgumentException(message); 
 		}
-		return val;
+		return (val == null || isProxy ? val : wrap(val));
 	}
 
 	Object wrap(Object o) {
