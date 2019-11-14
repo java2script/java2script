@@ -2093,9 +2093,10 @@ public abstract class Component implements ImageObserver/*
 				// windows here as it is done from peer or native code when
 				// the window is really resized or moved, otherwise some
 				// events may be sent twice
-				if (isJ2SWindowButNotJInternalFrame()) {
-					needNotify = false;
-				}
+				// needed because there is no system event to do this in SwingJS
+//				if (isJ2SWindowButNotJInternalFrame()) {
+//					needNotify = false;
+//				}
 				// }
 
 				if (resized) {
