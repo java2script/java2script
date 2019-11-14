@@ -82,6 +82,7 @@ public class TApp2_Swing extends JApplet {
 		b.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10 + i * 3));
 		l.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10 + i * 3));
 		l.setBackground(Color.cyan);
+		((JComponent) l).setOpaque(true);
 		add(b);
 		add(l);
 	}
