@@ -21,7 +21,12 @@ class Test_Char extends Test_ {
     public static final char separatorChar = '/';
 
 	public static void main(String[] args) {
-		
+
+		String octal = "\1 \02 \003 \0004 \00045";
+		assert(octal.length() == 12);
+		String octal1 = "\1\12\123\1234\12345";
+		assert(octal1.length() == 8);
+		System.out.println("octal to unicode OK");
 		// OK, this next one is pretty twisted!
 		int[] iii = new int[] {'s', Character.valueOf((char) (s.charAt(3) | 5)), 'u'};
 		assert(iii[1] == 'u');

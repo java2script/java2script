@@ -135,7 +135,39 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
-// BH 2019.10.18 fix for "P$.licationShutdownHooks"
+// BH 2019.11.12 3.2.5-v0 fix for string literals with \n \nn \nnn octals, but "use strict" does not allow for this.
+// BH 2019.11.12 3.2.5-v0 fix for static object being created before initialization is complete.
+// BH 2019.11.12 3.2.5-v0 proper semantic versioning
+
+// NOTE: The changes in 3.2.5-v0 are backward-compatible with .js files made from earlier versions.
+// But files created with 3.2.5-v0 cannot be run using older SwingJS runtimes.
+// NOTE: Initializing version 3.2.5-v0 requires starting Eclipse with the -clean option if 
+// the plugin as in Eclipse has the "3.2.4" version still affixed.
+
+// Case of org.biojava.bio.symbol.Location interface creating a static reference 
+// to [RangeLocation extends AbstractRangeLocation] during the instantiation
+// of [PointLocation extends AbstractRangeLocation], causing RangeLocation to 
+// not pull in AbstractRangeLocation's interface methods, since that was all
+// happening before AbstractRangeLocation's initialization was complete.
+//
+//Location      static RangeLocation rloc = new RangeLocation()
+//  AbstractLocation
+//      AbstractRangeLocation
+//           PointLocation 
+//           RangeLocation
+//           
+// Basically, a RangeLocation object was created that did not have 
+// AbstractRangeLocation's prototype methods. 
+//
+// The primary design issue here was that we did not recognize that class
+// dependency (superclass and interface) loading must fully precede execution
+// of <clinit>, where static fields are fully initialized. Obviously Java does this,
+// as in Java all dependencies must be present before compiling can occur. 
+// The solution was to carry out the class loading first, and only when necessary 
+// (class access via a reference to a static field or method, or during 
+// superclass/interface instantiation.
+//               
+// BH 2019.10.18 fix for "P$.licationShutdownHooks" missing first three letters "app"
 // BH 2019.09.07 adds optimization for lambda methods that do not have finals
 // BH 2019.08.29 fix for boxing of binary representation 0b01... (Google Closure Compiler bug)
 // BH 2019.05.13 fix for Math.getExponent, ulp, nextDown, nextUp, nextAfter needing qualification
@@ -148,14 +180,14 @@ import org.eclipse.jdt.core.dom.WildcardType;
 /**
  * 
  * @author zhou renjian 2006-12-3
- * @author Bob Hanson 2017-08,09,10
+ * @author Bob Hanson 2017-2020
  *
  * 
  *
  */
 public class Java2ScriptVisitor extends ASTVisitor {
 
-	private static final String VERSION = CorePlugin.VERSION;
+	static final String VERSION = CorePlugin.VERSION;
 
 	/**
 	 * The idea of simplifying the functional interfaces using Clazz.newLambda did
@@ -607,7 +639,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			// not lambda
 			finalQualifiedName = getFinalJ2SClassName(javaClassName, FINAL_PC);
 			if (!finalQualifiedName.equals("C$"))
-				finalQualifiedName = getFinalJ2SClassNameQualifier(null, javaClass, javaClassName, FINAL_ESCAPECACHE);
+				finalQualifiedName = getFinalJ2SClassNameQualifier(null, javaClass, javaClassName, FINAL_ESCAPECACHE | FINAL_NEW);
 		} else {
 			// use the lambda name directly without caching or changing.
 			finalQualifiedName = getFinalJ2SClassName(anonJavaName, FINAL_P);
@@ -1063,10 +1095,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 								&& !(firstStatement instanceof ConstructorInvocation)) {
 					buffer.append("{\r\n");
 					String superclassName = getJavaClassNameSuperNoBrackets(mClass);
-					if (superclassName == null)
+					if (superclassName == null) {
 						addCallInit();
-					else
+					} else {
 						addSuperConstructor(null, null);
+					}
 					package_blockLevel++;
 					visitList(statements, "");
 					endVisit((Block) body);
@@ -1619,7 +1652,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * 
 	 */
 	private void addCallInit() {
-		buffer.append("C$.$init$.apply(this);\r\n");
+		buffer.append(";C$.$init$.apply(this);\r\n");
+	}
+
+	private void appendClinit() {
+		buffer.append("\r\nC$.$clinit$=1;\r\n");
 	}
 
 	/**
@@ -1920,16 +1957,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		buffer.append(");\r\n");
 
-		// Add the class static initializer C$.$clinit$(), which
-		// finalizes all field values and running static{...} initializers.
-		// C$.$clinit$ is removed immediately when run so that it is only run
-		// just
-		// once per class. (In contrast, C$.$init$ is run once per instance.)
-
-		List<BodyDeclaration> lstStatic = new ArrayList<BodyDeclaration>();
-
-		// create a list of static fields and initializers
-
 		// add the Java8 compatibility local variable $o$
 
 		// also add the local var p$ short for C$.prototype if we have any
@@ -1940,19 +1967,15 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		TrailingBuffer oldTrailingBuffer = trailingBuffer;
 		trailingBuffer = new TrailingBuffer();
 
+		/**
+		 * the static initializer
+		 */
+		List<BodyDeclaration> lstStatic = new ArrayList<BodyDeclaration>();
 		if (!isLambda) {
+			// get the list of static methods and check for annotations
 			for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 				BodyDeclaration element = (BodyDeclaration) iter.next();
 				boolean isField = element instanceof FieldDeclaration;
-
-				// All static fields that have initializers must be (re)initialized,
-				// even if they are their default values. This is because
-				// they might have been modified by other actions between the
-				// time they were initially initialized and when $clinit$ is run.
-				// This happens when the static fields in class A reference
-				// static fields in class B, which in turn reference static fields
-				// in Class A.
-
 				if (isField || element instanceof Initializer) {
 					if ((isInterface || isStatic(element)) && checkAnnotations(element, CHECK_J2S_IGNORE_ONLY)) {
 						lstStatic.add(element);
@@ -1963,14 +1986,43 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			}
 		}
 
-		// for JAXB:
+		// for annotations:
 		List<EnumConstantDeclaration> enums = (isEnum ? new ArrayList<>() : null);
 		List<FieldDeclaration> fields = (isInterface || isLambda || isEnum ? null : new ArrayList<>());
 		List<IMethodBinding> methods = (fields == null ? null : new ArrayList<>());
 
-		if (lstStatic.size() > 0 || hasDependents) {
+		if (hasDependents) {
+			// Add the class static initializer C$.$clinit$(), which in SwingJS will trigger
+			// loading of all superclasses and interfaces, and set up the prototype
+			// correctly. It does not initialize fields.
+			// 
+			// C$.$clinit$ is set to 0 immediately when run so that it is run
+			// just once per class. (In contrast, C$.$init$ is run once per instance.)
+			// just "$clinit$=1;" now; this will be replaced by SwingJS 
+			// at runtime with a call to Clazz.load(C$,1)
+			
+			// Prior to 3.2.4.10, $clinit$ was also doing static initialization. But that
+			// turns out not to be quite right. Static intitialization (now in $static$)
+			// for a set of related classes must be done after all are loaded, as otherwise
+			// the superclass and interface methods may not be added to the subclass prototype.
+			// Only found (to date) only in biojava where the interface Location has a static 
+			// initializer for one of its implementing classes. Very tricky!
+
+			appendClinit(); 
+		}
+		if (lstStatic.size() > 0 || isEnum) {
+			// create $static$  (Java's <clinit>)
+
+			// All static fields that have initializers must be introduced first
+			// as null if Objects and then finalized in $static$(),
+			// even if they are their default values. This is because they might have been 
+			// modified by other actions between the time they were initially initialized 
+			// and when $static$ is run. This happens when the static fields in class A 
+			// reference static fields in class B, which in turn reference static fields
+			// in Class A.
+
 			int pt = buffer.length();
-			buffer.append("\r\nC$.$clinit$ = function() {Clazz.load(C$, 1);\r\n");
+			buffer.append("\r\nC$.$static$ = function() {C$.$static$=0;\r\n");
 			boolean haveDeclarations = isEnum;
 			if (isEnum)
 				addEnumConstants((EnumDeclaration) node, enums);
@@ -1984,7 +2036,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					haveDeclarations = true;
 				}
 			}
-			if (haveDeclarations || hasDependents)
+			if (haveDeclarations)
 				buffer.append("}\r\n");
 			else
 				buffer.setLength(pt);
@@ -2002,7 +2054,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			init0Buffer = new StringBuffer();
 
 			int len = buffer.length();
-			buffer.append("\r\nClazz.newMeth(C$, '$init$', function () {\r\n");
+			buffer.append("\r\nClazz.newMeth(C$, '$init$', function () {\r\n"); // C$.$load$&&Clazz.load(C$,2);
 			// we include all field definitions here and all nonstatic
 			// initializers
 
@@ -2257,8 +2309,6 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 */
 	private boolean addFieldDeclaration(FieldDeclaration field, int mode) {
 
-		boolean isStatic = (mode == FIELD_DECL_STATIC_NONDEFAULT || mode == FIELD_DECL_STATIC_DEFAULTS);
-		boolean needDefault = (mode == FIELD_DECL_NONSTATIC_ALL || mode == FIELD_DECL_STATIC_DEFAULTS);
 		List<?> fragments = field.fragments();
 		VariableDeclarationFragment identifier = (VariableDeclarationFragment) fragments.get(0);
 		IVariableBinding var = identifier.resolveBinding();
@@ -2266,9 +2316,13 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		boolean isPrimitive = (nodeType != null && nodeType.isPrimitiveType());
 		Code code = (isPrimitive ? ((PrimitiveType) nodeType).getPrimitiveTypeCode() : null);
 		// have to check here for final Object = "foo", as that must not be ignored.
+		boolean isStatic = (mode == FIELD_DECL_STATIC_NONDEFAULT || mode == FIELD_DECL_STATIC_DEFAULTS);
 		boolean checkFinalConstant = ((isPrimitive
 				|| var != null && var.getType().getQualifiedName().equals("java.lang.String")) && isStatic
 				&& Modifier.isFinal(field.getModifiers()));
+		boolean needDefault = (mode == FIELD_DECL_NONSTATIC_ALL || 
+				mode == FIELD_DECL_STATIC_DEFAULTS);
+
 		if (needDefault)
 			addJ2SDoc(field);
 		int len0 = buffer.length();
@@ -2291,7 +2345,19 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				// straight to the class if static
 				// if static and not initialized
 
-				buffer.append(code == null ? "null" : getPrimitiveDefault(code));
+				// but it cannot be bye or short, because those will use $b$ or $s$,
+				// which are not defined until the end. 
+				if (isStatic && isPrimitive && (initializer instanceof NumberLiteral
+						&& code != PrimitiveType.SHORT && code != PrimitiveType.BYTE
+						|| initializer instanceof BooleanLiteral
+						|| initializer instanceof CharacterLiteral)
+						) {
+					// let primitives be their default value. This allows, for example, 
+					// setting a static value to something read just by loading the class.
+					addExpressionAsTargetType(initializer, field.getType(), "v", null);
+				} else {
+					buffer.append(code == null ? "null" : getPrimitiveDefault(code));
+				}
 				buffer.append(";\r\n");
 				//
 				// $clinit$ -- statics; once only
@@ -2429,14 +2495,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	private void addSuperConstructor(SuperConstructorInvocation node, IMethodBinding methodDeclaration) {
 		if (node == null) {
 			// default constructor
-			buffer.append("Clazz.super_(C$, this,1);\r\n");
+			buffer.append("Clazz.super_(C$, this);\r\n");
 			return;
 		}
-		buffer.append(getFinalMethodNameWith$Params("C$.superclazz.c$", null, node.resolveConstructorBinding(), null,
+		buffer.append(getFinalMethodNameWith$Params(";C$.superclazz.c$", null, node.resolveConstructorBinding(), null,
 				false, METHOD_NOTSPECIAL));
 		buffer.append(".apply(this");
 		addMethodParameterList(node.arguments(), methodDeclaration, ", [", "]", METHOD_CONSTRUCTOR);
-		buffer.append(");\r\n");
+		buffer.append(")");
 		addCallInit();
 	}
 
@@ -2968,7 +3034,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	public boolean visit(CharacterLiteral node) {
-		buffer.append(node.getEscapedValue());
+		buffer.append('\'');
+		addChar(node.charValue(), buffer);
+		buffer.append('\'');
 		return false;
 	}
 
@@ -3435,9 +3503,31 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		return false;
 	}
 
+	private static Map<String,String> htStrLitCache = new Hashtable<>();
+	
 	public boolean visit(StringLiteral node) {
-		buffer.append(node.getEscapedValue().replace("\\u000a", "\\n"));
+		String s = node.getEscapedValue();
+		if (s.indexOf('\\') < 0) {
+			buffer.append(s);
+		} else {
+			// \1 doesn't work for JavaScript strict mode
+			String v = htStrLitCache.get(s);
+			if (v == null) {
+				htStrLitCache.put(s, v = !po0.matcher(s).find() ? s : replaceOctal(s));
+			}
+			buffer.append(v);
+		}
 		return false;
+	}
+
+	// \n, \nn, \nnn octal check -- ok for general JavaScript,
+    // but ECMAScript 6 does not accept this, and "use strict" does not, either.
+	private Pattern po0=Pattern.compile("([\\\\])([0-7])");
+	private Pattern po00=Pattern.compile("([\\\\])([0-7][0-7])");
+	private Pattern po000=Pattern.compile("([\\\\])([0-7][0-7][0-7])");
+
+	private String replaceOctal(String s) {
+		return po0.matcher(po00.matcher(po000.matcher(s).replaceAll("\\\\u0$2")).replaceAll("\\\\u00$2")).replaceAll("\\\\u000$2");
 	}
 
 	/**
@@ -4539,19 +4629,19 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		return qualifier + getFinalFieldOrLocalVariableName(declaringClass, name);
 	}
 
+	// different class naming options
 	private static final int FINAL_RAW = 0;
 	private static final int FINAL_P = 1;
 	private static final int FINAL_C = 2;
-	private static final int FINAL_PC = FINAL_P | FINAL_C;
+	private static final int FINAL_NEW = 4;
 
 	private static final int FINAL_ESCAPE = 8;
 	private static final int FINAL_CACHE = 16;
+	private static final int FINAL_LAMBDA = 32;
+	private static final int FINAL_STATIC = 64;
+	private static final int FINAL_PC = FINAL_P | FINAL_C;
 	private static final int FINAL_ESCAPECACHE = FINAL_ESCAPE | FINAL_CACHE;
 
-	private static final int FINAL_LAMBDA = 32;
-
-	private static final int FINAL_STATIC = 64;
-	
 
 	/**
 	 * Provide access to C$.$clinit$ when a static method is called or a static
@@ -4595,7 +4685,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// lambda classes will always be defined at this point. No need to cache them
 		if (name.indexOf("$lambda") >= 0)
 			return getFinalJ2SClassName(name, FINAL_P);
-		return getFinalClazzLoadI$Reference(declaringJavaClass, name, doCache);
+		return getFinalClazzLoadI$Reference(declaringJavaClass, name, doCache, ((flags & FINAL_NEW) == FINAL_NEW));
 	}
 
 	/**
@@ -4641,15 +4731,20 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * 
 	 * 'pkg.Foo.Bar', for example, becomes ['pkg.Foo','.Bar'] for Clazz.load().
 	 * 
-	 * If caching, put into the code $I$(n), where n is the index into the I$[]
-	 * array, starting at 1. [0] is reserved for the list of classes we are creating
-	 * here.
+	 * If caching, put into the code $I$(i,n), where 
+	 * 
+	 * i is the index into the I$[]
+	 * array, starting at 1 ([0] is reserved for the list of classes we are creating
+	 * here), and 
+	 * 
+	 * n is 1 if this is a Clazz.new_($I$ call. This flag, if 1, will not run $static$() 
+	 * i.e. Java's clinit. 
 	 * 
 	 * @param javaClassName
 	 * @param doCache
 	 * @return the string to include in the buffer
 	 */
-	private String getFinalClazzLoadI$Reference(ITypeBinding javaClass, String javaClassName, boolean doCache) {
+	private String getFinalClazzLoadI$Reference(ITypeBinding javaClass, String javaClassName, boolean doCache, boolean isNew) {
 		String s = getFinalInnerClassList(javaClass, javaClassName);
 		if (doCache) {
 			Integer n = package_htIncludeNames.get(s);
@@ -4659,7 +4754,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				package_includes.append(package_includeCount[0] == 1 ? ",I$=[[0," : ",").append(s);
 			}
 			if (n != null)
-				return "$I$(" + n + ")";
+				return "$I$(" + n + (isNew ? ",1" : "") + ")";
 		}
 		return "Clazz.load(" + s + ")";
 	}
@@ -5275,12 +5370,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			}
 		} else if (constValue instanceof String) {
 			sb = new StringBuffer();
-			String str = (String) constValue;
-			int length = str.length();
-			sb.append('"');
-			for (int i = 0; i < length; i++)
-				addChar(str.charAt(i), sb);
-			sb.append('"');
+			addString((String) constValue, sb);
 		}
 		if (sb == null)
 			return false;
@@ -5295,6 +5385,14 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				buffer.append(")");
 		}
 		return true;
+	}
+
+	private void addString(String str, StringBuffer sb) {
+		int length = str.length();
+		sb.append('"');
+		for (int i = 0; i < length; i++)
+			addChar(str.charAt(i), sb);
+		sb.append('"');
 	}
 
 	private static void addChar(char c, StringBuffer buffer) {
@@ -5629,7 +5727,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		String header = parts[0];
 		String header_noIncludes = header.replace(",I$=[[]]", "");
 		header = header.replace(",I$=[]", privateVarString + (package_includes.length() == 0 ? ""
-				: package_includes.append("]],$I$=function(i){return I$[i]||(I$[i]=Clazz.load(I$[0][i]))}")));
+				: package_includes.append("]],"
+						+ "$I$=function(i,n){return ("
+						+ "(i=(I$[i]||(I$[i]=Clazz.load(I$[0][i])))),"
+						+ "!n&&i.$load$&&Clazz.load(i,2),"
+						+ "i)}"
+						)));
 		for (int i = 1; i < parts.length; i++) {
 			js = parts[i];
 			int pt = js.indexOf("\r\n");
@@ -5646,7 +5749,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 	private void addDummyClassForPackageOnlyFile() {
 		appendElementKey("_$");
-		buffer.append("var C$=Clazz.newClass(\"_$\");\nC$.$clinit$ = function() {Clazz.load(C$, 1)};\n");
+		buffer.append("var C$=Clazz.newClass(\"_$\");");
+		appendClinit();
 		ClassAnnotation.addClassAnnotations(class_annotationType, class_annotations, null, null, null, null,
 				trailingBuffer);
 		buffer.append(trailingBuffer);

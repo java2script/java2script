@@ -1,4 +1,4 @@
-﻿// j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
+// j2sApplet.js BH = Bob Hanson hansonr@stolaf.edu
 
 // J2S._version set to "3.2.4.09" 2019.10.31
 
@@ -9,39 +9,96 @@
 // BH 2019.08.29 fixes mouseupoutjsmol not firing MouseEvent.MOUSE_UP
 // BH 5/16/2019 fixes POST method for OuputStream
 // BH 2/6/2019 adds check for non-DOM event handler in getXY
-// BH 1/4/2019 moves window.thisApplet to J2S.thisApplet; 
+// BH 1/4/2019 moves window.thisApplet to J2S.thisApplet 
 
 // see devnotes.txt for previous changes.
 
-if (typeof (jQuery) == "undefined")
-	alert("Note -- jQuery is required, but it's not defined.")
+// encapsulating function
+;(function(J2S, jQuery, window, document) {
 
-self.J2S
-		|| (J2S = {
-			getURIField : function(name, def) {
-				try {
-					var ref = document.location.href.toLowerCase();
-					var i = ref.indexOf(name + "=");
-					if (i >= 0)
-						def = (document.location.href + "&").substring(
-								i + name.length + 1).split("&")[0];
-				} finally {
-					return def;
-				}
-			}
+// check for already loaded
+	
+if (J2S && J2S._version) return;
 
-		});
+jQuery || alert("Note -- jQuery is required, but it's not defined.");
 
-try {
+var $ = jQuery;	
+
+// settings in user-defined J2S will be added last
+	
+J2S || (J2S = {
+		_debugCode: false,
+		_debugCore: false,
+		_debugPaint: false,
+		_loadcore: true,  
+		_nozcore: false,
+		_nooutput: false, 
+		_strict: false,
+		_trace: null, // =xxx to stop on message containing xxx; ="xxx" to stop on message equal to xxx
+		_traceEvents: false,
+		_traceMouse: false,
+		_traceMouseMove: false,
+		_startProfiling: false,
+		_useEval: true, // false here uses new Function() in j2sClazz.js, but then that totally messes up debugging
+		_verbose: false,
+		_lang: null,
+		_appArgs: null
+   });
+
+//These should match with what is at the end of the transpiled JavaScript
+J2S._version = "3.2.5-v0";
+
+// for now, Clazz is a window global. Wouldn't be hard to encapsulate that, 
+// but it has to be also encapsulated in Clazz. 
+	
+Clazz = {				   
+	  _VERSION_R: J2S._version,
+	  _VERSION_T: "unknown"
+	};
+	
+var getURIField = function(name, def) {
+	try {
+		var ref = document.location.href.toLowerCase();
+		var i = ref.indexOf(name + "=");
+		if (i >= 0)
+			def = (document.location.href + "&").substring(
+					i + name.length + 1).split("&")[0];
+	} catch (e) {
+	} finally {
+		return def;
+	}
+}
+		
+var getFlag = function(flag) {
+	try{ 
+		return (document.location.href.indexOf(flag) >= 0);
+	}catch(e){
+		return null;
+	} 
+};
+
+if (getFlag("j2s")) {
+	// note: these flag checks are purposely loose. "?j2smouse" will set j2smouse and j2smousemove. 
+	J2S._appArgs = getURIField("j2sargs", null); // to be passed on to application
+	J2S._debugCode = getFlag("j2sdebugcode");    // same as j2snocore?
+	J2S._debugCore = getFlag("j2sdebugcore");    // same as j2snozcore?
+	J2S._debugPaint = getFlag("j2sdebugpaint");  // repaint manager information
+	J2S._lang = getURIField("j2slang", null);    // preferred language; application should check
 	 // will alert in system.out.println with a message when events occur
-	J2S._traceEvents = (document.location.href.indexOf("j2sevents") >= 0);
-	J2S._traceMouse = (document.location.href.indexOf("j2smouse") >= 0);
-	J2S._traceMouseMove = (document.location.href.indexOf("j2smousemove") >= 0);
-	J2S._startProfiling = 	(document.location.href.indexOf("j2sprofile") >= 0);
-	if (document.location.href.indexOf("j2snozcore") >= 0)
-		J2S._coreZExt = "";
+	J2S._loadcore = !getFlag("j2snocore");		 // no core files 
+	J2S._nooutput = getFlag("j2snooutput");      // no System.out, only System.err message
+	J2S._nozcore = getFlag("j2snozcore");        // no compressed core.z.js files
+	J2S._strict = getFlag("j2sstrict");          // strict mode -- experimental
+	J2S._startProfiling = getFlag("j2sprofile"); // track object creation
+	J2S._traceEvents = getFlag("j2sevents");     // event queue messages 
+	J2S._traceMouse = getFlag("j2smouse");       // mouse events, but not move
+	J2S._traceMouseMove = getFlag("j2smousemove"); // mouse messages including move
+	J2S._traceOutput = getURIField("j2strace");  // look only for these
+	J2S._traceFilter = getURIField("j2sfilter"); // remove these
+	J2S._useEval = !getFlag("j2snoeval");        // use new Function() instead of eval(); breaks debugging
+	J2S._verbose = getFlag("j2sverbose");        // file loading reports
 
-} catch (e) {}
+}
 
 J2S.onClazzLoaded || (J2S.onClazzLoaded = function(i, msg) {console.log([i,msg])});
 
@@ -63,13 +120,13 @@ var getZOrders = function(z) {
 	}
 };
 
-
-if (!J2S._version)
-	J2S = (function(document) {
+window.J2S = J2S = (function() {
 		var z = J2S.z || 9000;
 		var j = {
+			clazzGlobals: {},
+			setClazzGlobal: function(a, v) { J2S.clazzGlobals[a] = v },
+			getClazzGlobal: function(a) { return J2S.clazzGlobals[a] },
 
-			_version : "3.2.4.09", // svn.keywords:lastUpdated
 			_alertNoBinary : true,
 			_allowedAppletSize : [ 25, 2048, 500 ], // min, max, default
 													// (pixels)
@@ -91,7 +148,6 @@ if (!J2S._version)
 			_applets : {},
 			_asynchronous : true,
 			_ajaxQueue : [],
-			_coreZExt : ".z",
 			_persistentMenu : false,
 			_getZOrders : getZOrders,
 			_z : getZOrders(z),
@@ -134,11 +190,6 @@ if (!J2S._version)
 		}
 		j.z = z;
 		var ref = document.location.href.toLowerCase();
-		j._debugCode = (ref.indexOf("j2sdebugcode") >= 0);
-		j._debugCore = (ref.indexOf("j2sdebugcore") >= 0);
-		j._debugPaint = (ref.indexOf("j2sdebugpaint") >= 0);
-		j._debugName = J2S.getURIField("j2sdebugname", null);
-		j._lang = J2S.getURIField("j2slang", null);
 		j._httpProto = (ref.indexOf("https") == 0 ? "https://" : "http://");
 		j._isFile = (ref.indexOf("file:") == 0);
 		if (j._isFile) // ensure no attempt to read XML in local request:
@@ -168,9 +219,7 @@ if (!J2S._version)
 		for ( var i in J2S)
 			j[i] = J2S[i]; // allows pre-definition
 		return j;
-	})(document, J2S);
-
-(function(J2S) {
+	})();
 
 	J2S.extend = function(map, map0, key0) {
 		for (key in map) {
@@ -184,9 +233,6 @@ if (!J2S._version)
 			}
 		}
 	}
-})(J2S);
-
-(function(J2S, $) {
 
 	J2S.__$ = $; // local jQuery object -- important if any other module
 					// needs to access it (JSmolMenu, for example)
@@ -714,7 +760,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 	J2S._canSyncBinary = function(isSilent) {
 		if (J2S._isAsync)
 			return true;
-		if (self.VBArray) // VisualBasic array MSIE 6-10
+		if (window.VBArray) // VisualBasic array MSIE 6-10
 			return (J2S._syncBinaryOK = false);
 		if (J2S._syncBinaryOK != "?")
 			return J2S._syncBinaryOK;
@@ -826,8 +872,8 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 	J2S._xhrReturn = function(xhr) {
 		if (xhr.state() == "rejected")
 			return null;
-		if (!xhr.responseText && !xhr.responseJSON || self.Clazz
-				&& Clazz.instanceOf(xhr.response, self.ArrayBuffer)) {
+		if (!xhr.responseText && !xhr.responseJSON 
+				|| Clazz.instanceOf(xhr.response, self.ArrayBuffer)) {
 			// Safari or error
 			return xhr.response || xhr.statusText;
 		}
@@ -1181,7 +1227,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 	}
 
 	J2S._setConsoleDiv = function(d) {
-		self.Clazz && Clazz.setConsoleDiv(d);
+		Clazz.setConsoleDiv && Clazz.setConsoleDiv(d);
 	}
 
 	J2S.setWindowVar = function(id, applet) {
@@ -2096,11 +2142,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 	var __profiling;
 
 	J2S.getProfile = function(doProfile) {
-		if (!self.Clazz || !self.JSON)
-			return;
 		if (!__profiling)
-			Clazz
-					._startProfiling(__profiling = (arguments.length == 0 || doProfile));
+			Clazz._startProfiling(__profiling = (arguments.length == 0 || doProfile));
 		return Clazz.getProfile();
 	}
 
@@ -2218,14 +2261,6 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		});
 	}
 
-})(J2S, jQuery);
-
-// J2S.js -- Java2Script adapter
-// author: Bob Hanson, hansonr@stolaf.edu 4/16/2012
-
-;
-(function(J2S) {
-
 	J2S._isAsync = false; // testing only
 	J2S._asyncCallbacks = {};
 
@@ -2264,8 +2299,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		if (self.System)
 			System.out.println(s);
 		// alert(s)
-		if (self.console)
-			console.log(s + " -- OK")
+		if (window.console)
+			window.console.log(s + " -- OK")
 		__execLog.push(s);
 		e[1](e[0], e[2]);
 	};
@@ -2274,13 +2309,15 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		if (!__clazzLoaded) {
 			__clazzLoaded = true;
 			// create the Clazz object
-			LoadClazz();
+			J2S.LoadClazz(Clazz);
+			if (J2S._strict)
+				System.err.println("j2sstrict - 'use strict' will be used - this is experimental");
 			if (J2S._startProfiling) 
 				Clazz.startProfiling();
 			if (applet._noMonitor)
 				Clazz._LoaderProgressMonitor.showStatus = function() {
 				}
-			LoadClazz = null;
+			J2S.LoadClazz = null;
 			if (applet.__Info.uncompressed)
 				Clazz.loadClass(); // for now; allows for no compression
 			Clazz._Loader.onGlobalLoaded = function(file) {
@@ -2342,7 +2379,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			__coreSet.push(type);
 			__coreSet.sort();
 			J2S._coreFiles = [ path + "/core/core" + __coreSet.join("")
-					+ J2S._coreZExt + ".js" ];
+					+ ".z.js" ];
 		}
 		if (more && (more = more.split(" ")))
 			for (var i = 0; i < more.length; i++)
@@ -2540,7 +2577,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		}
 
 		proto._setupJS = function() {
-			J2S.setWindowVar("j2s.lib", {
+			J2S.setClazzGlobal("j2s.lib", {
 				base : this._j2sPath + "/",
 				alias : ".",
 				console : this._console,
@@ -2569,9 +2606,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			Clazz.load("java.lang.Class");
 			J2S._registerApplet(applet._id, applet);
 			if (!applet.__Info.args || applet.__Info.args == "?") {
-				var s = J2S.getURIField("j2sargs", null);
-				if (s !== null)
-					applet.__Info.args = decodeURIComponent(s);
+				if (J2S._appArgs)
+					applet.__Info.args = decodeURIComponent(J2S.appArgs);
 			}
 			var isApp = applet._isApp = !!applet.__Info.main; 
 			try {
@@ -2585,7 +2621,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 							applet.__Info.code = clazz;
 					}
 					
-					var cl = Clazz.load(clazz);
+					var cl = Clazz.load(clazz);Clazz.load(cl,2);
 					if (clazz.indexOf("_.") == 0)
 						J2S.setWindowVar(clazz.substring(2), cl);
 					if (isApp && cl.j2sHeadless)
@@ -2599,8 +2635,6 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					cl.main$SA(applet.__Info.args || []);
 					System.exit$(0);
 				} else {
-					
-					applet.__Info.main
 					
 					var viewerOptions = Clazz.new_(Clazz
 							.load("java.util.Hashtable"));
@@ -3144,4 +3178,4 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		return image;
 	}
 
-})(J2S);
+})(self.J2S, self.jQuery, window, document);

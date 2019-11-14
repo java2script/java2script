@@ -28,6 +28,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -85,7 +86,9 @@ public class TApp2_Swing extends JApplet {
 		add(l);
 	}
 
+	@Override
 	public void init() {
+		
 		setSize(800, 600);
 		addButtonTest();
 		setFont(new Font(Font.MONOSPACED, Font.PLAIN, 14));
@@ -115,7 +118,7 @@ public class TApp2_Swing extends JApplet {
 		jc.setOpaque(true);
 		panel.add(jc);
 
-		JTextField tf = new JTextField("Text");
+		JPasswordField tf = new JPasswordField("Text");
 		tf.setBounds(5, 5, 50, 24);
 		tf.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 20));
 		tf.addFocusListener(new FocusListener() {
@@ -230,12 +233,14 @@ public class TApp2_Swing extends JApplet {
 
 				
 				class f extends javax.swing.LayoutFocusTraversalPolicy {
+					@Override
 					public boolean accept(Component c) {
 						return super.accept(c);
 					}
 				};
 			
 				class fd extends java.awt.DefaultFocusTraversalPolicy {
+					@Override
 					public boolean accept(Component c) {
 						return super.accept(c);
 					}
@@ -348,6 +353,7 @@ public class TApp2_Swing extends JApplet {
 		}
 	}
 
+	@Override
 	public void paint(Graphics g) {
 		super.paint(g);
 		g.fillRect(20, 330, 100, 10);
