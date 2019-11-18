@@ -314,6 +314,9 @@ class Java2ScriptCompiler {
 			Java2ScriptVisitor.NameMapper.setNonQualifiedNamePackages(nonqualifiedPackages);
 			Java2ScriptVisitor.NameMapper.setClassReplacements(classReplacements);
 
+			if (isCleanBuild)
+				Java2ScriptVisitor.clearStringLiteralCache();
+
 		} catch (Exception e) {
 			System.out.println("error " + e + "  " + e.getStackTrace());
 			e.printStackTrace();

@@ -135,6 +135,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+// todo: j2sdoc in static field showing up in default static block only, not in initializer block. 
+
+ //BH 2019.11.18 3.2.5-v0 fix for lambda expressions in classes with annotations
 // BH 2019.11.12 3.2.5-v0 fix for string literals with \n \nn \nnn octals, but "use strict" does not allow for this.
 // BH 2019.11.12 3.2.5-v0 fix for static object being created before initialization is complete.
 // BH 2019.11.12 3.2.5-v0 proper semantic versioning
@@ -2156,7 +2159,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		// add any recently defined static field definitions, assert strings
 		// and Enum constants
 
-		if (class_annotationType != ANNOTATION_TYPE_UNKNOWN) {
+		if (class_annotationType != ANNOTATION_TYPE_UNKNOWN && methods != null) {
+			// lambda expressions may have an enclosing annotation type, but they will not have methods
 			ClassAnnotation.addClassAnnotations(class_annotationType, class_annotations, enums, fields, methods,
 					innerClasses, trailingBuffer);
 			class_annotations = null;
@@ -2323,8 +2327,9 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		boolean needDefault = (mode == FIELD_DECL_NONSTATIC_ALL || 
 				mode == FIELD_DECL_STATIC_DEFAULTS);
 
-		if (needDefault)
+		if (needDefault) {
 			addJ2SDoc(field);
+		}
 		int len0 = buffer.length();
 		for (Iterator<?> iter = fragments.iterator(); iter.hasNext();) {
 			VariableDeclarationFragment fragment = (VariableDeclarationFragment) iter.next();
@@ -2347,24 +2352,24 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 				// but it cannot be bye or short, because those will use $b$ or $s$,
 				// which are not defined until the end. 
-				if (isStatic && isPrimitive && (initializer instanceof NumberLiteral
-						&& code != PrimitiveType.SHORT && code != PrimitiveType.BYTE
-						|| initializer instanceof BooleanLiteral
-						|| initializer instanceof CharacterLiteral)
-						) {
-					// let primitives be their default value. This allows, for example, 
-					// setting a static value to something read just by loading the class.
-					addExpressionAsTargetType(initializer, field.getType(), "v", null);
-				} else {
+//				if (isStatic && isPrimitive && (
+//						initializer instanceof NumberLiteral
+//						&& code != PrimitiveType.SHORT && code != PrimitiveType.BYTE
+//						|| initializer instanceof BooleanLiteral
+//						|| initializer instanceof CharacterLiteral)
+//						) {
+//					// let primitives be their default value. This allows, for example, 
+//					// setting a static value to something read just by loading the class.
+//					addExpressionAsTargetType(initializer, field.getType(), "v", null);
+//				} else {
 					buffer.append(code == null ? "null" : getPrimitiveDefault(code));
-				}
+//				}
 				buffer.append(";\r\n");
 				//
-				// $clinit$ -- statics; once only
-				// $init0$ -- from within Clazz.newInstance, before any
-				// constructors
-				// $init$ -- from the constructor, just after any super()
-				// call or whenever there is no this() call
+				// $clinit$ -- just runs Clazz.load(cl,1) for getting dependencies
+				// $static$ -- statics; once only; processed later by Clazz.load(cl,2)
+				// $init0$ -- from within Clazz.newInstance, before any constructors
+				// $init$ -- from the constructor, just after any super() call or whenever there is no this() call
 
 				// com.falstad.Diffraction.CrossAperature initialization was
 				// failing. Sequence was:
@@ -3504,6 +3509,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	private static Map<String,String> htStrLitCache = new Hashtable<>();
+	
+	static void clearStringLiteralCache() {
+		htStrLitCache = new Hashtable<>();
+	}
 	
 	public boolean visit(StringLiteral node) {
 		String s = node.getEscapedValue();
@@ -5061,7 +5070,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				&& !classHasNoParameterMethod(methodClass, methodName)) {
 			if (names == null)
 				names = new ArrayList<String>();
-			names.add(methodName + (methodName.indexOf("$") >= 0 ? "" : "$"));
+			names.add(methodName + (methodName.indexOf("$") >= 0 ? "" : methodName.equals("c") ? "$$" : "$"));
 		}
 		if ((qualification & METHOD_UNQUALIFIED) != 0) {
 			if (names == null)
@@ -5114,8 +5123,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * @return
 	 */
 	private static String ensureMethod$Name(String j2sName, IMethodBinding mBinding, String className) {
-		if (isPrivate(mBinding) && !isStatic(mBinding) || NameMapper.fieldNameCoversMethod(j2sName)
-				|| j2sName.indexOf("$", 2) >= 0 || j2sName.equals("c$")
+		if (isPrivate(mBinding) && !isStatic(mBinding) 
+				|| NameMapper.fieldNameCoversMethod(j2sName)
+				|| j2sName.indexOf("$", 2) >= 0 
+				|| j2sName.equals("c$")
 				|| className != null && NameMapper.isMethodNonqualified(className, mBinding.getName()))
 			return j2sName;
 		// c() must be changed to c$$, not c$, which is the constructor
@@ -5372,6 +5383,7 @@ public class Java2ScriptVisitor extends ASTVisitor {
 			sb = new StringBuffer();
 			addString((String) constValue, sb);
 		}
+
 		if (sb == null)
 			return false;
 		if (andWrite) {
@@ -5728,10 +5740,10 @@ public class Java2ScriptVisitor extends ASTVisitor {
 		String header_noIncludes = header.replace(",I$=[[]]", "");
 		header = header.replace(",I$=[]", privateVarString + (package_includes.length() == 0 ? ""
 				: package_includes.append("]],"
-						+ "$I$=function(i,n){return ("
+						+ "$I$=function(i,n){return"
 						+ "(i=(I$[i]||(I$[i]=Clazz.load(I$[0][i])))),"
 						+ "!n&&i.$load$&&Clazz.load(i,2),"
-						+ "i)}"
+						+ "i}"
 						)));
 		for (int i = 1; i < parts.length; i++) {
 			js = parts[i];
