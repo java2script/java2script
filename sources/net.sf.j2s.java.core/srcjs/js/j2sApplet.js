@@ -123,9 +123,9 @@ var getZOrders = function(z) {
 window.J2S = J2S = (function() {
 		var z = J2S.z || 9000;
 		var j = {
-			clazzGlobals: {},
-			setClazzGlobal: function(a, v) { J2S.clazzGlobals[a] = v },
-			getClazzGlobal: function(a) { return J2S.clazzGlobals[a] },
+			Globals: {},
+			setGlobal: function(a, v) { J2S.Globals[a] = v },
+			getGlobal: function(a) { return J2S.Globals[a] },
 
 			_alertNoBinary : true,
 			_allowedAppletSize : [ 25, 2048, 500 ], // min, max, default
@@ -1015,8 +1015,8 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		format || (format = "string");
 		var id = "filereader" + ("" + Math.random()).split(".")[1]
 		var nfiles = 1;
-		var map = (format == "java.util.Map" ? Clazz.new_(Clazz.load("java.util.Hashtable")) : null);
-		var arr = (format == "java.util.Array" ? Clazz.array(Clazz.new_(Clazz.load("java.io.File")), [0]) : null);
+		var map = (format == "java.util.Map" ? Clazz.new_("java.util.Hashtable") : null);
+		var arr = (format == "java.util.Array" ? Clazz.array(Clazz.new_("java.io.File"), [0]) : null);
 		var isMultiple = !!(map || arr);
 		var readFiles = function(files) {
 				nfiles = files.length;
@@ -1152,7 +1152,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 																.indexOf(".jpeg") >= 0 ? "image/jpg"
 														: ""));
 		var isString = (typeof data == "string");
-		data = Clazz.load("javajs.util.Base64").getBase64$BA(
+		data = Clazz.loadClass("javajs.util.Base64").getBase64$BA(
 				isString ? data.getBytes$S("UTF-8") : data).toString();
 		encoding || (encoding = "base64");
 		var url = J2S._serverUrl;
@@ -1199,7 +1199,7 @@ console.log("J2S._getRawDataFromServer " + J2S._serverUrl + " for " + query);
 		if (Clazz.instanceOf(s, self.ArrayBuffer))
 			return J2S._toBytes(s);
 		if (s.indexOf(";base64,") == 0) {
-			return Clazz.load("javajs.util.Base64").decodeBase64$S(
+			return Clazz.loadClass("javajs.util.Base64").decodeBase64$S(
 					s.substring(8));
 		}
 		// not UTF-8
@@ -2231,7 +2231,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 				// but it will be only a URL, not an actual file.
 
 				
-				Clazz.load("swingjs.JSDnD")
+				Clazz.loadClass("swingjs.JSDnD")
 						.drop$javax_swing_JComponent$O$S$BA$I$I(comp,
 								oe.dataTransfer, null, null, x, y);
 				return;
@@ -2250,7 +2250,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 						arr.push([name, bytes]);
 						System.out.println("j2sApplet DnD kind=" + kind + " type=" + type + " name=" + name + " size="+ bytes.length);
 						if (--nfiles == 0) {
-						  Clazz.load("swingjs.JSDnD")
+						  Clazz.loadClass("swingjs.JSDnD")
 								.drop$javax_swing_JComponent$O$OAA$I$I(comp, oe.dataTransfer, arr, x, y);
 						}
 					}
@@ -2577,7 +2577,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 		}
 
 		proto._setupJS = function() {
-			J2S.setClazzGlobal("j2s.lib", {
+			J2S.setGlobal("j2s.lib", {
 				base : this._j2sPath + "/",
 				alias : ".",
 				console : this._console,
@@ -2603,7 +2603,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 			if (J2S._version.indexOf("$Date: ") == 0)
 				J2S._version = (J2S._version.substring(7) + " -").split(" -")[0]
 						+ " (J2S)";
-			Clazz.load("java.lang.Class");
+			Clazz.loadClass("java.lang.Class");
 			J2S._registerApplet(applet._id, applet);
 			if (!applet.__Info.args || applet.__Info.args == "?") {
 				if (J2S._appArgs)
@@ -2621,7 +2621,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 							applet.__Info.code = clazz;
 					}
 					
-					var cl = Clazz.load(clazz);Clazz.load(cl,2);
+					var cl = Clazz.loadClass(clazz);
 					if (clazz.indexOf("_.") == 0)
 						J2S.setWindowVar(clazz.substring(2), cl);
 					if (isApp && cl.j2sHeadless)
@@ -2636,8 +2636,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 					System.exit$(0);
 				} else {
 					
-					var viewerOptions = Clazz.new_(Clazz
-							.load("java.util.Hashtable"));
+					var viewerOptions = Clazz.new_("java.util.Hashtable");
 					viewerOptions.put = viewerOptions.put$TK$TV;
 					J2S._setAppletParams(applet._availableParams,
 							viewerOptions, applet.__Info, true);
@@ -2814,9 +2813,9 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 									+ id)
 				}
 				image.src = (typeof bytes == "string" ? bytes : "data:"
-						+ Clazz.load("javajs.util.Rdr")
+						+ Clazz.loadClass("javajs.util.Rdr")
 								.guessMimeTypeForBytes$BA(bytes) + ";base64,"
-						+ Clazz.load("javajs.util.Base64").getBase64$BA(bytes));
+						+ Clazz.loadClass("javajs.util.Base64").getBase64$BA(bytes));
 			}
 			var width = image.width;
 			var height = image.height;

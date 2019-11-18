@@ -68,10 +68,10 @@ Clazz.setTVer = function(ver) { // from class loading
 }
 
 var lastLoaded;
-var consoleDiv = J2S.getClazzGlobal("j2s.lib").console;
+var consoleDiv = J2S.getGlobal("j2s.lib").console;
 
 Clazz.setConsoleDiv = function(d) {
-	J2S.getClazzGlobal("j2s.lib").console = consoleDiv = d;
+	J2S.getGlobal("j2s.lib").console = consoleDiv = d;
   };
 
 Clazz.ClassFilesLoaded = [];
@@ -233,7 +233,7 @@ Clazz.assert = function(clazz, obj, tf, msg) {
     if (Clazz._assertFunction) {
       return Clazz._assertFunction(clazz, obj, msg || Clazz._getStackTrace());
     }
-    Clazz.load("java.lang.AssertionError");
+    Clazz.load("AssertionError");
     if (msg == null)
       throw Clazz.new_(AssertionError.c$);
     else
@@ -305,6 +305,31 @@ Clazz.forName = function(name, initialize, loader, isQuiet) {
  return cl || Clazz._4Name(name, null, null, false, initialize, isQuiet);
 }
 
+Clazz._setDeclared = function(name, func) {
+  (name.indexOf(".") < 0) && (name = "java.lang." + name);
+   Clazz.allClasses[name] = func;
+}
+
+Clazz._getDeclared = function(name) { 
+	  (name.indexOf(".") < 0) && (name = "java.lang." + name);
+	return Clazz.allClasses[name] 
+}
+
+Clazz._isClassDefined = function(clazzName) {
+	  if (!clazzName) 
+	    return false;    /* consider null or empty name as non-defined class */
+	  if (Clazz.allClasses[clazzName])
+	    return true;
+	  var pkgFrags = clazzName.split (/\./);
+	  var pkg = null;
+	  for (var i = 0; i < pkgFrags.length; i++)
+	    if (!(pkg = (pkg ? pkg[pkgFrags[i]] : Clazz._allPackage[pkgFrags[0]]))) {
+	      return false;
+	    }
+	  return (pkg && (Clazz.allClasses[clazzName] = pkg));
+};
+
+
 Clazz.getClass = function(cl, methodList) {
   // $Class$ is the java.lang.Class object wrapper
   // $clazz$ is the unwrapped JavaScript object
@@ -332,7 +357,7 @@ Clazz.instanceOf = function (obj, clazz) {
   // allows obj to be a class already, from arrayX.getClass().isInstance(y)
   // unwrap java.lang.Class to JavaScript clazz using $clazz$
   if (typeof clazz == "string") {
-    clazz = J2S.getClazzGlobal(clazz);
+    clazz = Clazz._getDeclared(clazz);
   }
   
   if (obj == null || !clazz)
@@ -477,7 +502,7 @@ Clazz.newClass = function (prefix, name, clazz, clazzSuper, interfacez, type) {
   if (!prefix) {
     // e.g. Clazz.declareInterface (null, "ICorePlugin", org.eclipse.ui.IPlugin);
     qName = name;
-    J2S.setClazzGlobal(name, clazz);
+    Clazz._setDeclared(name, clazz);
   } else if (prefix.__PKG_NAME__) {
     // e.g. Clazz.declareInterface (org.eclipse.ui, "ICorePlugin", org.eclipse.ui.IPlugin);
     qName = prefix.__PKG_NAME__ + "." + name;
@@ -498,7 +523,7 @@ Clazz.newClass = function (prefix, name, clazz, clazzSuper, interfacez, type) {
 //    var name = minimalObjNames[i]; 
 //    clazz[name] = objMethods[name];
 //  }
-  J2S.setClazzGlobal(qName, clazz);
+  Clazz._setDeclared(qName, clazz);
   return clazz;
 
 };
@@ -532,6 +557,7 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
   objThis.__JSID__ = ++_jsid;
 
   if (!isInner) {
+	  if (args)
 	clazz && Clazz._initClass(clazz,1,1,objThis);
     if ((!args || args.length == 0) && objThis.c$) {
     // allow for direct default call "new foo()" to run with its default constructor
@@ -912,28 +938,6 @@ var addProfileNew = function(c, t) {
 ///////////////////// method creation ////////////////////////////////
 
 var doDebugger = function() { debugger }
-
-var _declared = {};
-
-//var checkDeclared = function(name, type) {
-//  if (J2S._debugName && name.toLowerCase() == J2S._debugName)doDebugger();
-//  _declared[name] = type;
-//}
-//
-/* public */
-Clazz._isClassDefined = function(clazzName) {
-  if (!clazzName) 
-    return false;    /* consider null or empty name as non-defined class */
-  if (Clazz.allClasses[clazzName])
-    return true;
-  var pkgFrags = clazzName.split (/\./);
-  var pkg = null;
-  for (var i = 0; i < pkgFrags.length; i++)
-    if (!(pkg = (pkg ? pkg[pkgFrags[i]] : Clazz._allPackage[pkgFrags[0]]))) {
-      return false;
-    }
-  return (pkg && (Clazz.allClasses[clazzName] = pkg));
-};
 
 ///////////////////////// private supporting method creation //////////////////////
 
@@ -1384,8 +1388,9 @@ var NullObject = function () {};
 var evalType = function (typeStr, isQualified) {
   if (typeStr == null)
     return null;
-  if (isQualified && J2S.getClazzGlobal(typeStr))
-    return J2S.getClazzGlobal(typeStr);
+  var cl = (isQualified && Clazz._getDeclared(typeStr));
+  if (cl)
+    return cl;
   var idx = typeStr.lastIndexOf(".");
   if (idx >= 0) {
     var pkgName = typeStr.substring (0, idx);
@@ -1393,8 +1398,6 @@ var evalType = function (typeStr, isQualified) {
     var clazzName = typeStr.substring (idx + 1);
     return pkg[clazzName];
   } 
-  if (isQualified)
-    return J2S.getClazzGlobal(typeStr);
   switch (typeStr) {
   case "string":
     return String;
@@ -1413,7 +1416,7 @@ var evalType = function (typeStr, isQualified) {
   case "NullObject":
     return NullObject;
   default:
-    return J2S.getClazzGlobal(typeStr);
+    return Clazz._getDeclared(typeStr);
   }
 };
 
@@ -1466,8 +1469,8 @@ var isInstanceOf = function (clazzTarget, clazzBase, isTgtStr, isBaseStr) {
   if (val)
 	return (val == 1 ? true : false); 
   
-  isTgtStr && (clazzTarget = J2S.getClazzGlobal(clazzTarget));
-  isBaseStr && (clazzBase = J2S.getClazzGlobal(clazzBase));
+  isTgtStr && (clazzTarget = Clazz._getDeclared(clazzTarget));
+  isBaseStr && (clazzBase = Clazz._getDeclared(clazzBase));
   var ret = (clazzBase && clazzTarget && (
     clazzTarget == clazzBase 
       || clazzBase === Object 
@@ -1672,7 +1675,7 @@ var setSuperclass = function(clazzThis, clazzSuper){
     if (clazzSuper == Number) {
       clazzThis.prototype = new Number();
     } else {
-      clazzThis.prototype = new clazzSuper ([inheritArgs]);     
+      clazzThis.prototype = new clazzSuper(inheritArgs);     
       if (clazzSuper == Error) {
         var pp = Throwable.prototype;
         for (o in pp) {
@@ -1735,7 +1738,7 @@ var addInterface = function (clazzThis, interfacez) {
 /* private */
 var needPackage = function(pkg) {
   // note that false != null and true != null
-  return (J2S.getClazzGlobal(pkg + ".registered") && !classpathMap["@" + pkg]);
+  return (J2S.getGlobal(pkg + ".registered") && !classpathMap["@" + pkg]);
 }
 
   // Make sure that packageClasspath ("java", base, true); 
@@ -1935,12 +1938,6 @@ setAType(Float64Array, 8, "DA");
 
 java.lang.Object = Clazz._O;
 
-Clazz._declared = {}
-Clazz._setDeclared = function(name, func) {
-   Clazz.allClasses[name] = func;
-   J2S.setClazzGlobal(name, func);
-}
-
 //////////////////////////// hotspot and unloading ////////////////////
 
 // not implemented in SwingJS
@@ -2007,7 +2004,7 @@ _Loader.prototype.clearAssertionStatus$ = function() {
 }
 
 _Loader.prototype.setClassAssertionStatus$S$Z = _Loader.prototype.setPackageAssertionStatus$S$Z = function(clazzName, tf) {
-  if (Clazz.allClasses[clazzName])Clazz.allClasses[clazzName].$_ASSERT_ENABLED_ = tf;
+  Clazz.allClasses[clazzName] && (Clazz.allClasses[clazzName].$_ASSERT_ENABLED_ = tf);
   assertionStatus[clazzName + "."] = tf;
 };
 
@@ -2131,7 +2128,7 @@ _Loader.loadPackageClasspath = function (pkg, base, isIndex, fSuccess, mode, pt)
   }
   if (base) // critical for multiple applets
     map["@" + pkg] = base;
-  if (isIndex && !isPkgDeclared && !J2S.getClazzGlobal(pkg + ".registered")) {
+  if (isIndex && !isPkgDeclared && !J2S.getGlobal(pkg + ".registered")) {
     //pkgRefCount++;
     if (pkg == "java")
       pkg = "core" // JSmol -- moves java/package.js to core/package.js
@@ -2145,9 +2142,13 @@ _Loader.loadPackageClasspath = function (pkg, base, isIndex, fSuccess, mode, pt)
   fSuccess && fSuccess();
 };
 
+
+
 /**
  * BH: allows user/developer to load classes even though wrapping and Google
  * Closure Compiler has not been run on the class.
+ * 
+ * Does initialize fully.
  * 
  *   
  *   
@@ -2161,11 +2162,10 @@ Clazz.loadClass = function (name, onLoaded, async) {
   if (!name)
     return null;
   if (!async)
-    return Clazz.load(name);   
+    return Clazz._4Name(name, null, null, true, true); 
   _Loader.loadClass(name, function() {
-    var cl = Clazz.allClasses[name];
-    cl && cl.$load$ && cl.$load$();
-    onLoaded(cl);
+    var cl = Clazz._getDeclared(name);
+    onLoaded(cl && Clazz._initClass(cl, 1, 1));
   }, true, async, 1);
   return true;
 
@@ -2193,7 +2193,7 @@ _Loader.loadClass = _Loader.prototype.loadClass = function (name, onLoaded, forc
 /* private */
 _Loader.loadPackage = function(pkg, fSuccess) {
   fSuccess || (fSuccess = null);
-  J2S.setClazzGlobal(pkg + ".registered", false);
+  J2S.setGlobal(pkg + ".registered", false);
   _Loader.loadPackageClasspath(pkg, 
     (_Loader.J2SLibBase || (_Loader.J2SLibBase = (_Loader.getJ2SLibBase() || "j2s/"))), 
     true, fSuccess);
@@ -2388,9 +2388,9 @@ Clazz._4Name = function(clazzName, applet, state, asClazz, initialize, isQuiet) 
     alert(clazzName + " could not be loaded");
     doDebugger();
   }
-  Clazz.allClasses[clazzName] = cl;
+  Clazz._setDeclared(clazzName, cl);
   // note triple== here
-  Clazz._initClass(cl,initialize !== false, initialize === true);
+  Clazz._initClass(cl, initialize !== false, initialize === true);
   return (asClazz ? cl : Clazz.getClass(cl));
 };
 
@@ -2445,7 +2445,7 @@ var J2sLibBase;
  */
 /* public */
 _Loader.getJ2SLibBase = function () {
-  var o = J2S.getClazzGlobal("j2s.lib");
+  var o = J2S.getGlobal("j2s.lib");
   return (o ? o.base + (o.alias == "." ? "" : (o.alias ? o.alias : (o.version ? o.version : "1.0.0")) + "/") : null);
 };
 
@@ -2642,7 +2642,7 @@ var createHandle = function () {
   var div = document.createElement ("DIV");
   div.id = "_Loader-status";
   div.style.cssText = "position:absolute;bottom:4px;left:4px;padding:2px 8px;"
-      + "z-index:" + (J2S.getClazzGlobal("j2s.lib").monitorZIndex || 10000) + ";background-color:#8e0000;color:yellow;" 
+      + "z-index:" + (J2S.getGlobal("j2s.lib").monitorZIndex || 10000) + ";background-color:#8e0000;color:yellow;" 
       + "font-family:Arial, sans-serif;font-size:10pt;white-space:nowrap;";
   div.onmouseover = hidingOnMouseOver;
   monitorEl = div;
@@ -3034,7 +3034,7 @@ Sys.err.flush$ = function() {}
 Clazz._Loader.registerPackages("java", [ "io", "lang", "lang.reflect", "util" ]);
 
 
-J2S.setClazzGlobal("java.registered", true);
+J2S.setGlobal("java.registered", true);
 
 ///////////////// special definitions of standard Java class methods ///////////
 
@@ -3550,7 +3550,7 @@ function(n){
   return Clazz.new_(Short.c$, [n]);
 }, 1);
 
-Clazz._setDeclared("java.lang.Byte", java.lang.Byte=Byte=function(){
+Clazz._setDeclared("Byte", java.lang.Byte=Byte=function(){
 if (typeof arguments[0] != "object")this.c$(arguments[0]);
 });
 decorateAsNumber(Byte,"Byte", "byte", "B");
@@ -3625,7 +3625,7 @@ Clazz._floatToString = function(f) {
  return s;
 }
 
-Clazz._setDeclared("java.lang.Float", java.lang.Float=Float=function(){
+Clazz._setDeclared("Float", java.lang.Float=Float=function(){
 if (typeof arguments[0] != "object")this.c$(arguments[0]);
 });
 decorateAsNumber(Float,"Float", "float", "F");
@@ -3707,7 +3707,7 @@ function(s){
 return (s instanceof Float) && s.valueOf()==this.valueOf();
 });
 
-Clazz._setDeclared("java.lang.Double", java.lang.Double=Double=function(){
+Clazz._setDeclared("Double", java.lang.Double=Double=function(){
 if (typeof arguments[0] != "object")this.c$(arguments[0]);
 });
 decorateAsNumber(Double,"Double", "double", "D");
@@ -3769,7 +3769,7 @@ function(s){
 return (s instanceof Double) && s.valueOf()==this.valueOf();
 });
 
-Clazz._setDeclared("java.lang.Boolean", 
+Clazz._setDeclared("Boolean", 
 Boolean = java.lang.Boolean = Boolean || function(){
 if (typeof arguments[0] != "object")this.c$(arguments[0]);
 });
@@ -3937,7 +3937,7 @@ if(!String.__PARAMCODE){
 
 String.__PARAMCODE = "S";
 
-Clazz._setDeclared("java.lang.String", java.lang.String=String);
+Clazz._setDeclared("String", java.lang.String=String);
 
 extendObject(String, EXT_NO_TOSTRING);
  
@@ -4481,7 +4481,7 @@ String.join$CharSequence$Iterable = function(sep,iter) {
 var C$=Clazz.newClass(java.lang,"Character",function(){
 if (typeof arguments[0] != "object")this.c$(arguments[0]);
 },null,[java.io.Serializable,Comparable]);
-Clazz._setDeclared("java.lang.Character", java.lang.Character); 
+Clazz._setDeclared("Character", java.lang.Character); 
 setJ2STypeclass(Character, "char", "C");
 
 var unicode_txt="";
