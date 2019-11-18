@@ -25,6 +25,8 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.FocusEvent;
@@ -282,7 +284,16 @@ public class TApp2 extends Applet {
 			b = new Button("XXX");
 			b.setBounds(500, 100, 100, 100);
 			tApp2.add(b);
-			
+			b.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					System.out.println("caret before: " + tApp2.ta.getCaretPosition());
+					tApp2.ta.appendText("XXXXXXXXXXXXX ");
+					System.out.println("caret after: " + tApp2.ta.getCaretPosition());
+				}
+				
+			});
 
 			System.out.println("Tapp2 OK");
 		}
