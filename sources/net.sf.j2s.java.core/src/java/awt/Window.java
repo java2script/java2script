@@ -946,7 +946,9 @@ public class Window extends JComponent {
     	// this is Component's not JComponent's
     	if (b) {
     		show();
-        	秘repaint(); // BH SwingJS needs this, because there is no system event set to do this.
+    		// BH removed because I added in Component needNotify so that a frame setBounds resize
+    		// will adjust its size for the root pane. 
+        	//秘repaint(); // BH SwingJS needs this, because there is no system event set to do this.
     	} else {
     		hide();
     	}

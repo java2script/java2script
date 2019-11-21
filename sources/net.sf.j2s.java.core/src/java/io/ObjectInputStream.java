@@ -40,6 +40,9 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import javajs.util.BC;
+
 import static java.io.ObjectStreamClass.processQueue;
 import sun.reflect.misc.ReflectUtil;
 
@@ -2031,17 +2034,21 @@ public class ObjectInputStream
      * Converts specified span of bytes into float values.
      */
     // REMIND: remove once hotspot inlines Float.intBitsToFloat
-    private static native void bytesToFloats(byte[] src, int srcpos,
+    private static void bytesToFloats(byte[] src, int srcpos,
                                              float[] dst, int dstpos,
-                                             int nfloats);
+                                             int nfloats) {
+    	BC.bytesToFloats(src, srcpos, dst, dstpos, nfloats);
+    }
 
     /**
      * Converts specified span of bytes into double values.
      */
     // REMIND: remove once hotspot inlines Double.longBitsToDouble
-    private static native void bytesToDoubles(byte[] src, int srcpos,
+    private static void bytesToDoubles(byte[] src, int srcpos,
                                               double[] dst, int dstpos,
-                                              int ndoubles);
+                                              int ndoubles) {
+    	BC.bytesToDouble(src, srcpos, dst, dstpos, ndoubles);    	
+    }
 
     /**
      * Returns the first non-null class loader (not counting class loaders of

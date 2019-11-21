@@ -2093,9 +2093,10 @@ public abstract class Component implements ImageObserver/*
 				// windows here as it is done from peer or native code when
 				// the window is really resized or moved, otherwise some
 				// events may be sent twice
-				if (isJ2SWindowButNotJInternalFrame()) {
-					needNotify = false;
-				}
+				// needed because there is no system event to do this in SwingJS
+//				if (isJ2SWindowButNotJInternalFrame()) {
+//					needNotify = false;
+//				}
 				// }
 
 				if (resized) {
@@ -5848,7 +5849,7 @@ public abstract class Component implements ImageObserver/*
 			// relocateComponent();
 			// }
 			// }
-			if (秘j2sInvalidateOnAdd )
+			if (秘j2sInvalidateOnAdd)
 				invalidate();
 
 			// int npopups = (popups != null? popups.size() : 0);
@@ -5858,8 +5859,10 @@ public abstract class Component implements ImageObserver/*
 			// popup.addNotify();
 			// }
 			//
-			// if (dropTarget != null) dropTarget.addNotify(peer);
-			//
+
+			if (dropTarget != null)
+				dropTarget.addNotify(peer);
+
 			peerFont = getFont();
 
 //			if (getContainer() != null && !isAddNotifyComplete) {

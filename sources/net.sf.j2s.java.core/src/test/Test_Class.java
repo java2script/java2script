@@ -4,11 +4,37 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.Hashtable;
 
 @SuppressWarnings("rawtypes")
-class Test_Class extends Test_ {
+class Test_Class extends Test_Class2 {
+
+	
+	static int istatic = 5;
+	static String sstatic = "test5";
+	
+	static class Singleton {
+		// reference to Test_Class.Singleton.instance 
+		// lazily initializes a new instance of Test_Class() 
+		static Test_Class instance = new Test_Class();
+		// actually, not recommended for JavaScript, because this
+		// instance would be shared among applications, unlike in Java.
+	}
+	
+	static  {
+		System.out.println("Test_Class static init " + istatic + " " + sstatic);
+	}
+
+    //static Test_Class cl0_1 = new Test_Class("test-static0_1 <<<<<<<<<<<<<<<<<<<");
+
+
+	{
+		istatic = 0;
+		System.out.println("Test_Class nonstatic init " + istatic + " " + sstatic);
+	}
 
 	private void test(String s) {
 	
@@ -22,8 +48,7 @@ class Test_Class extends Test_ {
 		c();
 	}
 	
-	int test1 = 0;
-	
+	int test1 = '0';
 	static String s = "test";
 
 	static {
@@ -35,9 +60,9 @@ class Test_Class extends Test_ {
 		System.out.println("static java.lang OK");
 
 	}
-	private String test = "testing";
+	private String test = "testing1";
 
-	private String getTesting() {
+	private String getTesting1() {
 		return test;
 	}
 	
@@ -52,10 +77,12 @@ class Test_Class extends Test_ {
 
 
 	public Test_Class(Test_ t) {
-       System.out.println("Test_t constructor");		
+       System.out.println("Test_Class(t) constructor");		
 	}
 	public Test_Class() {
-	
+
+	       System.out.println("Test_Class() constructor");		
+
 		PropertyChangeListener l = new PropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
@@ -63,7 +90,7 @@ class Test_Class extends Test_ {
 				// if the user closed the window without selecting a button
 				// (newValue = null in that case). Otherwise, close the dialog.
 				Test_Class x = Test_Class.this;
-				System.out.println(x);
+				System.out.println("Test_Class prop " + x);
 			}
 		};
 
@@ -117,9 +144,9 @@ class Test_Class extends Test_ {
 				// test for inner class access to an outer class's superclass method 
 				assert(showt() == 0);
 				// test for inner class access to a private outer-class method
-				assert(getTesting() == "testing");
+				assert(getTesting1() == "testing1");
 				// test for inner class access to a private outer-class field
-				assert(test == "testing");
+				assert(test == "testing1");
 				// test for inner class access to a final variable
 				String myfinal = testfinal;
 				assert(myfinal.equals("testFinal3.0"));
@@ -137,11 +164,16 @@ class Test_Class extends Test_ {
 		};
 		
 		Object o = t.put("test", getTesting());
-		assert(o == "testing");
+		assert(o == "testing2");
 		
 	}
 
+	public Test_Class(String s) {
+		System.out.println(">>>>>>>>>>>>>>>>>>Test_Class(s) " + s + " " + i5 + " " + i8);
+	}
 	public Test_Class(Object... ab) {
+		//System.out.println(">>>>>>Test_Class(Object...) " + cl1 +  " " + i5 + " " + i8 + " ??? ");
+		
 		System.out.println("a==test3 " + (ab[0] == "test3")); 
 		assert (ab[0] == "test3");
 		System.out.println("b==test4 " + (ab[1] == "test4"));
@@ -174,15 +206,15 @@ class Test_Class extends Test_ {
 			System.out.println(test);
 			assert (test.equals("testingB"));
 			System.out.println(Test_Class.this.test);
-			assert (Test_Class.this.test.equals("testing"));
+			assert (Test_Class.this.test.equals("testing1"));
 			test = "testc";
 			assert (test.equals("testc"));
 			test += "test";
 			assert (test.equals("testctest"));
 			test += Test_Class.this.test;
-			assert (test.equals("testctesttesting"));
+			assert (test.equals("testctesttesting1"));
 			Test_Class.this.test += test;
-			assert (Test_Class.this.test.equals("testingtestctesttesting"));
+			assert (Test_Class.this.test.equals("testing1testctesttesting1"));
 
 		}
 	}
@@ -201,6 +233,17 @@ class Test_Class extends Test_ {
 
 	public static void main(String[] args) {
 
+		
+		System.out.println(Test_Class.Singleton.instance);
+		String ss = "testing \10\13a \7777  \u0052";
+		System.out.println(ss + " "+ ss.length());
+		try {
+			System.out.println(new String(ss.getBytes(), "UTF-8"));
+		} catch (UnsupportedEncodingException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		//System.out.println("Test_Class.main() " + cl1);
 		 try {
 			Constructor<Test_Class> constr = Test_Class.class.getConstructor(new Class[] {Test_.class});
 		} catch (NoSuchMethodException | SecurityException e1) {
@@ -212,16 +255,29 @@ class Test_Class extends Test_ {
 		class LocalClass {
 
 			String hello() {
-				return "hello";
+				return "LocalClass says hello";
 			}
 		}
 
 		try {
+			
+			System.out.println("main istatic=" + istatic);
 
+			Class<?> cls = Class.forName("test.Test_Call",false, test.Test_Class.class.getClassLoader());
+			Method m = cls.getMethod("main", String[].class);
+			String[] params = null; 
+			m.invoke(null, (Object) params); 
+			
+			
+			
 			String s = new LocalClass().hello();
 			System.out.println(s);
-			assert (s.equals("hello"));
-			
+			assert (s.equals("LocalClass says hello"));
+
+			s = new Test_Class().getTesting();
+			System.out.println(s);
+			assert (s.equals("testing2"));
+
 			new Test_Class().new B().testB();
 			Class<?> cl;
 			ClassLoader loader = test.Test_Anon.class.getClassLoader();

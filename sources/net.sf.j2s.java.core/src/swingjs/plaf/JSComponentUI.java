@@ -1687,11 +1687,8 @@ public class JSComponentUI extends ComponentUI
 			// setting here
 
 			if (!isMenuItem) {
-				@SuppressWarnings("unused")
 				boolean simpleButton = isSimpleButton;
-				@SuppressWarnings("unused")
 				DOMNode centerNode = centeringNode;
-				@SuppressWarnings("unused")
 				DOMNode dnode = domNode;
 				/**
 				 * @j2sNative
@@ -2661,9 +2658,9 @@ public class JSComponentUI extends ComponentUI
 		if (isFullyCentered) {
 			// simple totally centered label or button
 			// can't have width or height here --- let the browser figure that out
-			fullyCenter(cssCtr);
-			fullyCenter(cssIcon);
-			fullyCenter(cssTxt);
+			fullyCenter(cssCtr, isSimpleButton || isLabel);
+			fullyCenter(cssIcon, isSimpleButton);
+			fullyCenter(cssTxt, isSimpleButton);
 		} else {
 
 			// horizontal
@@ -2795,8 +2792,8 @@ public class JSComponentUI extends ComponentUI
 			updateCellNode();
 	}
 
-	private void fullyCenter(Object css) {
-		if (isSimpleButton)
+	private void fullyCenter(Object css, boolean noOffsets) {
+		if (noOffsets)
 			addJSKeyVal(css, "width", null, "position", null, "padding", "0", "margin", "0 auto");
 		else
 			addJSKeyVal(css, "width", null, "top", "50%", "left", "50%", "transform",

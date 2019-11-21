@@ -104,9 +104,9 @@ implements java.io.Serializable
 
     private static final long serialVersionUID = -4821973115467008846L;
 
-    private static final sun.security.util.Debug debug =
-        sun.security.util.Debug.getInstance
-        ("policy,access", "UnresolvedPermission");
+//    private static final sun.security.util.Debug debug =
+//        sun.security.util.Debug.getInstance
+//        ("policy,access", "UnresolvedPermission");
 
     /**
      * The class name of the Permission class that will be
@@ -280,17 +280,17 @@ implements java.io.Serializable
                 }
             }
         } catch (NoSuchMethodException nsme) {
-            if (debug != null ) {
-                debug.println("NoSuchMethodException:\n  could not find " +
-                        "proper constructor for " + type);
-                nsme.printStackTrace();
-            }
+//            if (debug != null ) {
+//                debug.println("NoSuchMethodException:\n  could not find " +
+//                        "proper constructor for " + type);
+//                nsme.printStackTrace();
+//            }
             return null;
         } catch (Exception e) {
-            if (debug != null ) {
-                debug.println("unable to instantiate " + name);
-                e.printStackTrace();
-            }
+//            if (debug != null ) {
+//                debug.println("unable to instantiate " + name);
+//                e.printStackTrace();
+//            }
             return null;
         }
     }

@@ -72,6 +72,7 @@ java/awt/GraphicsCallback.js
 java/awt/GraphicsConfiguration.js
 java/awt/GraphicsDevice.js
 java/awt/GraphicsEnvironment.js
+java/awt/Image.js
 java/awt/image/ImageObserver.js
 java/awt/Insets.js
 java/awt/ItemSelectable.js
@@ -125,6 +126,9 @@ java/lang/ThreadGroup.js
 java/math/RoundingMode.js
 java/net/URL.js
 java/net/URLStreamHandlerFactory.js
+java/net/HttpURLConnection.js
+java/net/URLStreamHandler.js
+javax/net/ssl/HttpsUrlConnection.js
 java/text/CharacterIterator.js
 java/text/DecimalFormat.js
 java/text/DecimalFormatSymbols.js
@@ -173,8 +177,8 @@ javajs/util/AU.js
 javajs/util/JSThread.js
 javajs/util/Lst.js
 javajs/util/PT.js
+javajs/util/Rdr.js
 javajs/util/SB.js
-javax/net/ssl/HttpsUrlConnection.js
 javax/swing/AbstractAction.js
 javax/swing/AbstractButton.js
 javax/swing/AbstractListModel.js
@@ -189,6 +193,7 @@ javax/swing/border/CompoundBorder.js
 javax/swing/border/EmptyBorder.js
 javax/swing/border/EtchedBorder.js
 javax/swing/border/LineBorder.js
+javax/swing/border/TitledBorder.js
 javax/swing/BorderFactory.js
 javax/swing/BoundedRangeModel.js
 javax/swing/BoxLayout.js
@@ -221,6 +226,8 @@ javax/swing/LayoutFocusTraversalPolicy.js
 javax/swing/SortingFocusTraversalPolicy.js
 javax/swing/SwingContainerOrderFocusTraversalPolicy.js
 javax/swing/SwingDefaultFocusTraversalPolicy.js
+javax/swing/Icon.js
+javax/swing/ImageIcon.js
 javax/swing/InputMap.js
 javax/swing/JApplet.js
 javax/swing/JButton.js
@@ -317,6 +324,10 @@ sun/awt/RequestFocusController.js
 sun/awt/SunToolkit.js
 sun/awt/WindowClosingListener.js
 sun/awt/WindowClosingSupport.js
+sun/awt/image/DataStealer.js
+sun/awt/image/IntegerComponentRaster.js
+sun/awt/image/IntegerInterleavedRaster.js
+sun/awt/image/SunWritableRaster.js
 sun/font/FontDesignMetrics.js
 sun/swing/DefaultLookup.js
 sun/swing/SwingLazyValue.js
@@ -348,6 +359,8 @@ swingjs/JSFrameViewer.js
 swingjs/JSGraphics2D.js
 swingjs/JSGraphicsConfiguration.js
 swingjs/JSGraphicsEnvironment.js
+swingjs/JSImage.js
+swingjs/JSImagekit.js
 swingjs/JSMouse.js
 swingjs/JSNullComponentPeer.js
 swingjs/JSScreenDevice.js

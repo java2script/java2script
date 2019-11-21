@@ -2,6 +2,11 @@ package test;
 
 public class Test_Call extends Test_call0 implements Comparable<Test_Call>{
 
+	
+	static {
+		System.out.println("Test_call static init");
+	}
+	
 	String myclass = "Test_Call";
 
 	int y = 0;
@@ -84,6 +89,9 @@ public class Test_Call extends Test_call0 implements Comparable<Test_Call>{
 	}
 
 	public static void main(String[] args) {
+
+		System.out.println("Test_call main()");
+
 		new Test_Call();
 		System.out.println("Test_Call OK");
 	}

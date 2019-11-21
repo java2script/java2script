@@ -77,7 +77,7 @@ class ThreadGroup implements Thread.UncaughtExceptionHandler {
 
     private int ngroups;
     private ThreadGroup groups[];
-    protected HTML5Applet 秘html5Applet;
+    public HTML5Applet 秘html5Applet;
     public boolean 秘systemExited; 
 	public JSAppletViewer 秘appletViewer;
 

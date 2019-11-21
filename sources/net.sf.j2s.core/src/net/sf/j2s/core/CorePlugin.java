@@ -15,11 +15,19 @@ public class CorePlugin extends Plugin {
 	private static CorePlugin plugin;
 	
 	/**
-	 * Note that Eclipse must be started with the -clean flag if it is to 
-	 * register the bundle version properly. So we use VERSION here instead.
+	 * Version prerelease -xxx is for runtime use only.
+	 * 
+	 * the actual "x.y.z" version is specified in plugin.xml.
+	 * 
+	 * Note that Eclipse must be started with the -clean flag if it is to register
+	 * the bundle version properly. So we use VERSION here instead, and
+	 * also we recommend the plugin added to Eclipse be given just the name
+	 * "net.sf.j2s.core.jar" not "net.sf.j2s.core.3.2.5"
 	 * 
 	 */
-	public static String VERSION = "3.2.4.09";
+	public static String VERSION = "3.2.5-v0";
+	// BH 2019.11.12 -- 3.2.5-v0 fix for string literals with \n \nn \nnn octals, but "use strict" does not allow for this.
+	// BH 2019.11.13 -- 3.2.5-v0 fixes static initialization timing. See note in Java2ScriptVisitor
 	// BH 2019.10.30 -- 3.2.4.09 fixes problem with team...show history...compare having null project.getProject().getLocation()
 	// BH 2019.10.27 -- 3.2.4.09 fixes problem with method of name c() becoming c$() -- constructor
 	// BH 2019.10.25 -- 3.2.4.09 adds j2s.compiler.java.version (default 8)

@@ -187,6 +187,23 @@ public class BC {
     return f * fracIEEE[i + 140];
   }
 
+  /**
+   * @param src
+   * @param srcpos
+   * @param dst
+   * @param dstpos
+   * @param nfloats
+   */
+public static void bytesToFloats(byte[] src, int srcpos, float[] dst, int dstpos, int nfloats) {
+	float[] f = /** @j2sNative new Float32Array(src.buffer) || */null;
+	System.arraycopy(f, srcpos << 2, dst, dstpos, nfloats);
+}
+
+public static void bytesToDouble(byte[] src, int srcpos, double[] dst, int dstpos, int ndoubles) {
+	double[] f = /** @j2sNative new Float64Array(src.buffer) || */null;
+	System.arraycopy(f, srcpos << 2, dst, dstpos, ndoubles);
+}
+
 //  static {
 //    setFracIEEE();
 //    for (int i = -50; i < 50; i++) {

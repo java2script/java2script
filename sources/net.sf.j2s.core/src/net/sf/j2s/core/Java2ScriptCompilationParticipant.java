@@ -17,6 +17,9 @@ import org.eclipse.jdt.core.compiler.ReconcileContext;
  *
  */
 public class Java2ScriptCompilationParticipant extends org.eclipse.jdt.core.compiler.CompilationParticipant {
+
+	static final String VERSION = CorePlugin.VERSION;
+
 	private ArrayList<BuildContext[]>contexts;
 	private boolean isCleanBuild;
 	private static String isActiveNotified = ""; 
