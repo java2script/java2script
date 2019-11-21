@@ -118,7 +118,7 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 		 * @j2sNative
 		 * 
 		 * if (!isProxy) {c = c.$clazz$;} 
-		 * c.$load$ && Clazz.load(c,2);
+		 * Clazz._initClass(c,1,1,0);
 		 * m= c[this.signature] || c.prototype && c.prototype[this.signature];
 		 * val = (m == null ? null : m.apply(receiver,a));
 		 */
