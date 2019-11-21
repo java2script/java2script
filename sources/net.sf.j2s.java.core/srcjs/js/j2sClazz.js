@@ -424,7 +424,7 @@ Clazz.load = function(cName, from$clinit$) {
   }
   // allow for a clazz itself
   if (cName.__CLASS_NAME__)
-    return Clazz._initClass(cName);
+    return Clazz._initClass(cName,1,1,0);
   // standard load of class by name
   if (cName.indexOf("Thread.") == 0)
     Clazz._4Name("java.lang.Thread", null, null, true)
@@ -478,6 +478,12 @@ Clazz.new_ = function(c, args, cl) {
 
   return obj;
 }
+
+//var C$=Clazz.newClass(P$, 
+//        "Test_Local$1", 
+//		function(){Clazz.newInstance(this, arguments[0],1,C$);}, 
+//         Clazz.load('test.Test_Local$1ReducingSink'), null, 1);
+//
 
 Clazz.newClass = function (prefix, name, clazz, clazzSuper, interfacez, type) { 
 //  if (J2S._debugCore) {
