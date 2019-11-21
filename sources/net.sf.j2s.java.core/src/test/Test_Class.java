@@ -16,6 +16,13 @@ class Test_Class extends Test_Class2 {
 	static int istatic = 5;
 	static String sstatic = "test5";
 	
+	static class Singleton {
+		// reference to Test_Class.Singleton.instance 
+		// lazily initializes a new instance of Test_Class() 
+		static Test_Class instance = new Test_Class();
+		// actually, not recommended for JavaScript, because this
+		// instance would be shared among applications, unlike in Java.
+	}
 	
 	static  {
 		System.out.println("Test_Class static init " + istatic + " " + sstatic);
@@ -226,6 +233,8 @@ class Test_Class extends Test_Class2 {
 
 	public static void main(String[] args) {
 
+		
+		System.out.println(Test_Class.Singleton.instance);
 		String ss = "testing \10\13a \7777  \u0052";
 		System.out.println(ss + " "+ ss.length());
 		try {
