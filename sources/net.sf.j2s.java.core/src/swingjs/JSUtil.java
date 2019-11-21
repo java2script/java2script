@@ -652,11 +652,11 @@ public class JSUtil {
 		return new Color(rgb[0], rgb[1], rgb[2]);
 	}
 
-	public byte[] getFileBytes(File f) {
+	public static byte[] getFileBytes(File f) {
 		return f.秘bytes;
 	}
 	
-	public HTML5Applet getApplet() {
+	public static HTML5Applet getApplet() {
 		return Thread.currentThread().getThreadGroup().秘html5Applet;
 	} 
 	
