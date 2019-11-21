@@ -2,9 +2,17 @@ package test;
 
 class Test_Cinit extends Test_ {
 
+	static {
+		System.out.println("Test_Cinit static init");
+	}
+	{
+		System.out.println("Test_Cinit nonstatic init");
+	}
 	static int a = 0;
+	// note that i will be 0, not p, even though Test_cinit4.j points to Test_Cinit.p. 
+	
 	static int i = Test_cinit4.j;
-	static Test_cinit4 b = new Test_cinit4(55);
+	//static Test_cinit4 b = new Test_cinit4(55);
 	static int p = 33;
 
 	public Test_Cinit(int j) {

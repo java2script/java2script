@@ -478,7 +478,6 @@ public class DataInputStream extends FilterInputStream implements DataInput {
 	 */
 	@Override
 	public final float readFloat() throws IOException {
-		// fails in JavaScript because we are missing a native method
 		return Float.intBitsToFloat(readInt());
 	}
 
@@ -502,7 +501,6 @@ public class DataInputStream extends FilterInputStream implements DataInput {
 	 */
 	@Override
 	public final double readDouble() throws IOException {
-		// fails in JavaScript because we are missing a native method
 		return Double.longBitsToDouble(readLong());
 	}
 

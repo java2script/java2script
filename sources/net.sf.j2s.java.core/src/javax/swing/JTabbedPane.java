@@ -2449,8 +2449,7 @@ public class JTabbedPane extends JComponent
     }
      
      /**
-      * SwingJS added - needs this??
-      * 
+      * Needed in SwingJS because these really ARE components
       */
      @Override
 	public void addNotify() {
@@ -2458,6 +2457,7 @@ public class JTabbedPane extends JComponent
              Component c = getTabComponentAt(i);
              if (c != null)
             	 c.addNotify();
+             getComponentAt(i).addNotify();
          }
      }
 }

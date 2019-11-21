@@ -45,7 +45,7 @@ public class Interface {
   	/**
   	 * @j2sNative
   	 * 
-  	 * Clazz._isQuiet = isQuiet;
+  	 * Clazz._isQuietLoad = isQuiet;
   	 */
   	{}
     try {
@@ -68,7 +68,7 @@ public class Interface {
     	/**
     	 * @j2sNative
     	 * 
-    	 * Clazz._isQuiet = false;
+    	 * Clazz._isQuietLoad = false;
     	 */
     	{}      
     }

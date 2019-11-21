@@ -189,13 +189,13 @@ public class ObjectStreamClass implements Serializable {
     /** superclass descriptor appearing in stream */
     private ObjectStreamClass superDesc;
 
-    /**
-     * Initializes native code.
-     */
-    private static native void initNative();
-    static {
-        initNative();
-    }
+//    /**
+//     * Initializes native code.
+//     */
+//    private static native void initNative();
+//    static {
+//        initNative();
+//    }
 
     /**
      * Find the descriptor for a class that can be serialized.  Creates an
@@ -1815,11 +1815,12 @@ public class ObjectStreamClass implements Serializable {
 //        }
     }
 
-    /**
-     * Returns true if the given class defines a static initializer method,
-     * false otherwise.
-     */
-    private native static boolean hasStaticInitializer(Class<?> cl);
+//    /**
+//     * Ha! We can do this in java2script 3.2.4.10! C$.$static$ === 0
+//     * Returns true if the given class defines a static initializer method,
+//     * false otherwise.
+//     */
+//    private native static boolean hasStaticInitializer(Class<?> cl);
 
     /**
      * Class for computing and caching field/constructor/method signatures

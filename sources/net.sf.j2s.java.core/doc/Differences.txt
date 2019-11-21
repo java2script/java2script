@@ -9,8 +9,8 @@ be done in UTF-8. This means:
 - making sure your Exclipse project is set up for UTF-8 (not the Eclipse default?)
 - making sure your server can serve up UTF-8 by default for any browser-loaded files
 - making sure you don't edit a Java2Script class file or one of the site .js files
-  using a non-UTF-8 editor. It may replace non-Latin characters with "?" or garbage.
-- making sure that your web pages are delivered with 
+    using a non-UTF-8 editor. It may replace non-Latin characters with "?" or garbage.
+- making sure that your web pages are delivered with proper headings indicating HTML5 and UTF-8
 
 <!DOCTYPE html>
 <html>
@@ -32,7 +32,7 @@ ever be overridden by subclasses. As in java.lang.Thread.java:
 ----------------------------------
 
 
-updated 11/03/19 -- adds information about File.exists() and points to src/test/async
+updated 11/03/19 -- adds information about File.exists() and points to src/javajs/async
 updated 10/26/19 -- adds information about File.createTempFile()
 updated 8/16/19 -- minor typos and added summary paragraph
 updated 7/19/19 -- clarification that AWT and Swing classes are supported directly
@@ -173,6 +173,35 @@ myclass.xxx in Java (and JavaScript).
 
 This was done extensively in the Jalview project. See jalview.bin.Instance.
 
+Helper Packages -- swingjs/ and javajs/
+---------------------------------------
+
+The SwingJS library is the swingjs/ package. There are interfaces that may be of assistance
+in swingjs/api, but other than that, it is not recommended that developers access classes in 
+this package. The "public" nature of their methods is really an internal necessity.
+
+In addition to swingjs/, though, there are several useful classes in the javajs/ package
+that could be very useful. This package is a stand-alone package that can be 
+cloned in any Java project that also would be great to have in any JavaScript project
+-- SwingJS-related or not. Functionality ranges from reading and writing various file 
+formats, including PDF, BMP, PNG, GIF, JPG, JSON, ZIP, and CompoundDocument formats.
+
+A variety of highly efficient three- and four-dimensional point, vector, matrix, and 
+quaternion classes are included, as they were developed for JSmol and inherited from that
+project. 
+
+Of particular interest should be javajs/async/, which includes
+
+javajs.async.Async
+javajs.async.AsyncColorChooser
+javajs.async.AsyncDialog
+javajs.async.AsyncFileChooser
+
+See javajs.async.Async JavaDoc comments for a full description of 
+these useful classes.
+
+
+
 
 Modal Dialogs
 -------------
@@ -180,7 +209,7 @@ Modal Dialogs
 Although true modal dialogs are not possible with only one thread, a functional equivalent -- 
 asynchronous modal dialogs -- is relatively easy to set up. All the JOptionPane dialogs will
 return PropertyChangeEvents to signal that they have been disposed of and containing the results. 
-See below.
+See below and classes in the javajs.async package.
 
 
 Native calls
@@ -555,7 +584,7 @@ It's a simple modification:
 Developers are encouraged to create a separate class that handles general calls to JFileDialog. 
 An example class can be found in the SwingJS distribution as 
 
-/sources/net.sf.j2s.java.core/src/test/async/AsyncFileChooser.java.
+/sources/net.sf.j2s.java.core/src/javajs/async/AsyncFileChooser.java.
 
 
 javax.swing.JOptionPane dialogs
@@ -629,7 +658,7 @@ showConfirmDialog. For other dialogs, a null return indicates the dialog was
 closed, just as for Java.
 
 Developers are encouraged to create a separate class that handles general calls. 
-An example class can be found in the SwingJS distribution as src/test/async/AsyncDialog.java.
+An example class can be found in the SwingJS distribution as src/javajs/async/AsyncDialog.java.
 Very simple modifications to the Java allows asynchronous operation using AsyncDialog. Here
 is a simple "do you want to close this frame" example, where you can see that what we have
 done is to set the reply into an ActionListener that is defined in the constructor of 

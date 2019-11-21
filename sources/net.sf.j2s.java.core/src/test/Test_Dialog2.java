@@ -14,23 +14,20 @@ import java.awt.Panel;
 import java.awt.TextArea;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
 import java.io.File;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JColorChooser;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.plaf.UIResource;
 
-import test.async.AsyncColorChooser;
-import test.async.AsyncDialog;
-import test.async.AsyncFileChooser;
+import javajs.async.AsyncColorChooser;
+import javajs.async.AsyncDialog;
+import javajs.async.AsyncFileChooser;
 
 public class Test_Dialog2 extends JFrame {
 

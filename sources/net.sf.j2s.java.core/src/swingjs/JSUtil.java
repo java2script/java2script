@@ -21,6 +21,7 @@ import javajs.util.Rdr;
 import javajs.util.SB;
 import javajs.util.ZipTools;
 import swingjs.api.Interface;
+import swingjs.api.js.HTML5Applet;
 import swingjs.api.js.J2SInterface;
 import swingjs.api.js.JQuery;
 import swingjs.json.JSON;
@@ -650,6 +651,14 @@ public class JSUtil {
 		 */		
 		return new Color(rgb[0], rgb[1], rgb[2]);
 	}
+
+	public static byte[] getFileBytes(File f) {
+		return f.秘bytes;
+	}
+	
+	public static HTML5Applet getApplet() {
+		return Thread.currentThread().getThreadGroup().秘html5Applet;
+	} 
 	
 }
 

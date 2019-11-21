@@ -6,15 +6,37 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Hashtable;
 
-class Test_Class2 extends Test_ {
+class Test_Class2 extends Test_ implements Test_Class_int {
 
-	static String s = "test";
+
+	static  {
+		System.out.println("Test_Class2 static init ");
+	}
+
+	static  {
+		System.out.println("Test_Class2 nonstatic init ");
+	}
+
+//    static Test_Class cl2_1 = new Test_Class("test-static2_1 <<<<<<<<<");
+//    static Test_Class cl2_2 = new Test_Class("test-static2_2 <<<<<<<<<");
+//
+//    
+//	static {
+//		System.out.println("Test_Class2 static init" + cl2_1);
+//	}
+//
+//	{
+//		System.out.println("Test_Class2 nonstatic init " + cl2_1);
+//	}
+//
+
+//	static String s = "test";
 
 	int test1 = 2;
 
-	private String test = "testing";
+	private String test = "testing2";
 
-	private String getTesting() {
+	protected String getTesting() {
 		return test;
 	}
 
@@ -31,7 +53,8 @@ class Test_Class2 extends Test_ {
 			}
 		};
 
-		System.out.println(true);
+		System.out.println("TestClass2() constructor ");
+		
 		final Test_Class2 me = Test_Class2.this;
 		MouseListener c = new MouseListener() {
 

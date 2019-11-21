@@ -33,6 +33,9 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
  *
  */
 class Java2ScriptCompiler {
+	
+	static final String VERSION = CorePlugin.VERSION;
+
 	/**
 	 * The name of the J2S options file, aka as the "Dot-j2s" file.
 	 */
@@ -310,6 +313,9 @@ class Java2ScriptCompiler {
 
 			Java2ScriptVisitor.NameMapper.setNonQualifiedNamePackages(nonqualifiedPackages);
 			Java2ScriptVisitor.NameMapper.setClassReplacements(classReplacements);
+
+			if (isCleanBuild)
+				Java2ScriptVisitor.clearStringLiteralCache();
 
 		} catch (Exception e) {
 			System.out.println("error " + e + "  " + e.getStackTrace());

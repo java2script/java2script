@@ -17,7 +17,7 @@ class Test_ {
 		if (true && (/**@j2sNative 1? test : */false)) {
 			
 		}
-		System.out.println(t);
+		System.out.println("Test_.showt() " + t);
 		if (false || (/**@j2sNative test || */false)) {
 			
 		}
@@ -59,7 +59,7 @@ class Test_ {
 
 		System.out.println("abcde".indexOf(99));
 		assert ("test".contentEquals(new StringBuffer("test")));
-		int i = "test\2".charAt(4);
+		int i = "test\2ing".charAt(4);
 		switch (i | 'd') {
 		case 'f':
 			assert (true);

@@ -816,13 +816,12 @@ public class PT {
     while (true) {
       if (info instanceof String) {
         s = (String) info;
-        /**
-         * @j2sNative
-         * 
-         * if (typeof s == "undefined") s = "null"
-         * 
-         */
-        {}
+//        /**
+//         * @j2sNative
+//         * 
+//         * if (typeof s == "undefined") s = "null"
+//         * 
+//         */
         
         if (s.indexOf("{\"") != 0) {
           //don't doubly fix JSON strings when retrieving status
