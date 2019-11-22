@@ -541,8 +541,7 @@ final class DigitList implements Cloneable {
             decimalAt = MAX_COUNT - left;
             // Don't copy trailing zeros.  We are guaranteed that there is at
             // least one non-zero digit, so we don't have to check lower bounds.
-            for (right = MAX_COUNT - 1; digits[right] == '0'; --right)
-                ;
+            for (right = MAX_COUNT - 1; digits[right] == '0'; --right) {}
             count = right - left + 1;
             System.arraycopy(digits, left, digits, 0, count);
         }

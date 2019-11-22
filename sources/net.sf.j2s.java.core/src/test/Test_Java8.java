@@ -12,6 +12,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import test.baeldung.doublecolon.Computer;
 import test.baeldung.doublecolon.MacbookPro;
@@ -19,6 +22,9 @@ import test.baeldung.doublecolon.MacbookPro;
 public class Test_Java8 extends Test_ implements PropertyChangeListener {
 
 	public static int ntest;
+
+	// problem here was that String.class was not triggering use of $$.apply, rather t.apply
+	private static Function<Class<?>, Object> x = String.class::cast;
 
 	class TestFunc {
 
@@ -97,7 +103,7 @@ public class Test_Java8 extends Test_ implements PropertyChangeListener {
 	}
 
 	Object test2(Object o) {
-		System.out.println("test1 is  " + test1 + " " + o.getClass().getName());
+		System.out.println("test1 is  " + test1 + " " + o.getClass().getName() + " this is ?? " + this + "??");
 		return o;
 	};
 
@@ -155,6 +161,12 @@ public class Test_Java8 extends Test_ implements PropertyChangeListener {
 
 	public static void main(String[] args) {
 
+		double[] dd = new Test_Java8().values().toArray();
+		int[] data = new int[] {1,2,3,4};
+		checkData(data);
+		
+		double[] datad = IntStream.of(data).mapToDouble(i -> i).toArray();
+		System.out.println(Arrays.toString(datad));
 		// TODO:  Nodes.flatten issue?
 		
 		Function<String, Test_Java8> iaCreator2 = Test_Java8::new;
@@ -322,6 +334,24 @@ public class Test_Java8 extends Test_ implements PropertyChangeListener {
 
 		System.out.println("Test_Java8 OK");
 	}
+
+	private static void checkData(Object data) {
+		double[] datae = data instanceof String[] ? Stream.of((String[]) data).mapToDouble(Double::parseDouble).toArray() :
+            IntStream.of((int[]) data).mapToDouble(i ->i).toArray();
+		System.out.println(Arrays.toString(datae));
+		
+	}
+	
+    public DoubleStream values() {
+        return IntStream.range(0, 4)
+                .mapToDouble(this::get);
+    }
+
+	
+    public double get(int row) {
+        return row;
+    }
+
 
 	private static void testToIntFunction(TestFunc tf, Function<TestFunc, Integer> f) {
 		int val = f.apply(tf);
