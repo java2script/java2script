@@ -596,10 +596,10 @@ public interface Spliterator<T> {
      * @see Spliterator.OfDouble
      * @since 1.8
      */
-    public interface OfPrimitive<T, T_CONS, T_SPLITR extends Spliterator.OfPrimitive<T, T_CONS, T_SPLITR>>
+    public interface OfPrimitive<T, C, S extends Spliterator.OfPrimitive<T, C, S>>
             extends Spliterator<T> {
         @Override
-        T_SPLITR trySplit();
+        S trySplit();
 
         /**
          * If a remaining element exists, performs the given action on it,
@@ -614,7 +614,7 @@ public interface Spliterator<T> {
          * @throws NullPointerException if the specified action is null
          */
         @SuppressWarnings("overloads")
-        boolean tryAdvance(T_CONS action);
+        boolean tryAdvance(C action);
 
         /**
          * Performs the given action for each remaining element, sequentially in
@@ -632,7 +632,7 @@ public interface Spliterator<T> {
          * @throws NullPointerException if the specified action is null
          */
         @SuppressWarnings("overloads")
-        default void forEachRemaining(T_CONS action) {
+        default void forEachRemaining(C action) {
             do { } while (tryAdvance(action));
         }
     }
