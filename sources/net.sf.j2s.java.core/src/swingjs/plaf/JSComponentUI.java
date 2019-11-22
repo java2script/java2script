@@ -879,7 +879,7 @@ public class JSComponentUI extends ComponentUI
 		// The DOM attributes applet and _frameViewer are necessary for proper 
 		// direction to the target
 		J2S.unsetMouse(domNode);
-		if (domNode == null);
+		if (domNode == null)// BH GCC found semi here: ;
 			updateDOMNode();
 		DOMNode.setAttrs(domNode, "applet", applet, "_frameViewer", jc.getFrameViewer());
 		J2S.setMouse(domNode, true);

@@ -30,7 +30,6 @@ the Java Virtual Machine in JavaScript. Its two main JavaScript objects are
   Clazz (methods that emulate core java.lang methods) and 
   J2S (methods that provide an interface to the HTML5 document model) 
 
-<<<<<<< HEAD
 Raw JavaScript files are in site/swingjs/js, These files are concatenated into
 site/swingjs/swingjs2.js, which your web page needs to call. For example:
 
@@ -47,7 +46,7 @@ jQuery is used extensively, and a slightly enhanced version of jQuery (see site/
 adds synchronous binary file transfer as well as "jQuery outside events".
 
 The SwingJS runtime is distributed as SwingJS-site.zip, which you can unzip yourself into 
-your project site/ directory or let build-site.xml do that for you.
+your project site/ directory or let build-site.xml do that for you. It contains about 3000 files.
 
 -------------------------
 INSTALLATION INSTRUCTIONS
@@ -145,7 +144,8 @@ Updating the Java2Script compiler or SwingJS run-time
 
 If the Java2Script compiler is updated on GitHub, just update the swingjs/ directory from
 GitHub, replace the eclipse/dropins/net.sf.j2s.core.jar file with the new one, and
-restart Eclipse. 
+restart Eclipse. Note that if you change the filename of that file in dropins, you will
+need to restart Eclipse with the -clean option in order for it to recognize the new transpiler.
 
 If the SwingJS runtime is updated on GitHub, update the swingjs/ directory from GitHub
 and run build-site.xml.
@@ -183,164 +183,6 @@ to "false".
 All of the JavaScript produced will be in the project site/ directory. 
 You must prepopulate this site with all the JavaScript required by the 
 SwingJS JavaScript version of the JVM. The most recent version of site/ is at
-=======
-Raw JavaScript files are in site/swingjs/js, These files are concatentated into
-site/swingjs/swingjs2.js, which your web page needs to call. For example:
-
-	<!DOCTYPE html>
-	<html><title>...</title>
-	<head><meta charset="utf-8" />
-	<script src="swingjs/swingjs2.js"></script>
-	...
-
-Besides that, all the java, javax, swingjs, and various other classes can be found
-in the site/swingjs/j2s directory.
-
-jQuery is used extensively, and a slightly enhanced version of jQuery (see site/swingjs/js/j2sJQueryExt)
-adds synchronous binary file transfer as well as "jQuery outside events".
-
-The SwingJS runtime is distributed as SwingJS-site.zip, which you can unzip yourself into 
-your project site/ directory or let build-site.xml do that for you.
-
--------------------------
-INSTALLATION INSTRUCTIONS
--------------------------
-
-Eclipse Photon or higher is necessary.
-
-	----------------------------------------------------------
-	Important note to users using 3.1.1 and upgrading to 3.2.x 
-	----------------------------------------------------------
-	
-	net.sf.j2s.core_3.2.1.jar replaces net.sf.j2s.core_3.1.1.jar
-	 
-	
-	These versions differ only in their internal workings relative to Eclipse (and new bug fixes).
-	
-	Most importantly, the requirement that the .project file be changed to 
-	indicate a customized Java builder is dropped in version 3.2.1, which just uses
-	the standard Eclipse java builder, org.eclipse.jdt.core.javabuilder. 
-	
-	For v. 3.2.1, to get started with SwingJS, all you need is in 
-	
-	https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist
-	
-	Namely:
-	
-	1) the latest compiler (net.sf.j2s.core.jar) and run-time (Swingjs-site.zip)
-	
-	2) an empty .j2s file in your project directory. (The Java2Script compiler will fill this in with
-	a default .j2s configuration when it runs the first time. Or, you could use the one in /dist to start)
-	
-	NOTE! If you are updating to 3.2.x from 3.1.1, be sure to open your .project file and change the 
-	builder name from net.sf.j2s.core.java2scriptbuilder back to org.eclipse.jdt.core.javabuilder
-	or your project will no longer compile.
-
----------------------------------------------------------
-Installing the Java2Script compiler as an Eclipse plug-in
----------------------------------------------------------
-
-The easiest thing to do is to copy the contents of the dist/ directory 
-
-https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist
-
-into your project directory. It contains the following directories:
-
-swingjs/
- -- contains the necessary Eclipse drop-in as well as the run-time
- -- ver/ subfolder holds older versions
-tools/
- -- contains ant-contrib.jar, used by build-site.xml
-libjs/
- -- empty; reserved for foo.zip equivalents of dependency foo.jar files
- -- these will be unzipped into site/ by build-site.xml
-resources/
- -- empty; reserved for non-java resources your program might need
- -- these will go into site/swingjs/j2s by build-site.xml
-
-and files:
-
-.j2s           -- a starter j2s configuration file
-build-site.xml -- run this to build the site/ directory before or after you 
-                  update your Java code. 
-
-The following instructions include instructions for doing some of this manually:
-
-1. Copy net.sf.j2s.core.jar from 
-
-https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/swingjs
-
-specifically:
-
-https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/swingjs/net.sf.j2s.core.jar?raw=true
-
-into your eclipse/dropins directory.
-
-Also provided in that directory is a ver/ directory with previous core files. 
-These files have names that are purposely unversioned because some versions of Eclipse 
-will have to be entirely reinstalled every time you change versions if the names are different
-from version to version. We do not know why this is necessary, but it appears to be. 
-This is an Eclipse bug. So just always use dist/swingjs/net.sf.j2s.core.jar. 
-
-On Mac systems, the Eclipse directory is generally
-
-/Applications/Eclipse.app/Contents/Eclipse/dropins
-
-2. Restart Eclipse and check for the presence of the plug-in at
-   help...about Eclipse...installation details...Plug-ins...(wait several seconds for tabulation)
-
-Search for "j2s" to find j2s.sourceforge.net Java2Script Core
-
-If that is not there, you don't have net.sf.j2s.core.jar in the proper directory.
-
-   Note relating to updating to 3.2.x from 3.1.1 version of Java2Script:
-
-      If the version on this readout does not match the version that is 
-      reported at the end of each .js file created:
-
-         //Created 2018-07-15 04:35:10 net.sf.j2s.core.jar v. 3.2.1
-
-      then there is no real problem, but you can correct that by restarting 
-      Eclipse once with the -clean flag. 
-
--------------------------------------------------------
-Updating the Java2Script compiler or SwingJS run-time
--------------------------------------------------------
-
-If the Java2Script compiler is updated on GitHub, just update the swingjs/ directory from
-GitHub, replace the eclipse/dropins/net.sf.j2s.core.jar file with the new one, and
-restart Eclipse. 
-
-If the SwingJS runtime is updated on GitHub, update the swingjs/ directory from GitHub
-and run build-site.xml.
-  
-----------------------------------
-Creating a new J2S/SwingJS project
-----------------------------------
-
-Creating a new J2S/SwingJS project is very simple. 
-
-First create an Eclipse Java project for your work, if you have not done so already.
-If your source code is not all already in src/, navigate to the project...properties...
-Java Build Path...source and add all the source directories you need.
-
-Note that your project must not include any Jar file-based dependencies. 
-All source code must be available. (Source code from decompiling .class files will work.)
-
----------------------------------------------------------------------
-Installing the SwingJS JavaScript version of the Java Virtual Machine 
----------------------------------------------------------------------
-
-Chrome users should consider using WebServer for Chrome to serve local files. It is very
-simple to set up. 
-
-https://chrome.google.com/webstore/detail/web-server-for-chrome/ofhbbkphhbklhfoeikjpcbhemlocgigb?hl=en
-
-
-All of the JavaScript produced will be in the project site/ directory. 
-You must prepopulate this site with all the JavaScript required by the 
-JavaScript version of the JVM. The most recent version of site/ is at
->>>>>>> branch 'hanson1' of https://github.com/BobHanson/java2script.git
 
 https://github.com/BobHanson/java2script/blob/master/sources/net.sf.j2s.core/dist/swingjs/SwingJS-site.zip?raw=true
 

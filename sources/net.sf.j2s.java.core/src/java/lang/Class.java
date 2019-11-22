@@ -28,6 +28,7 @@ package java.lang;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericSignatureFormatError;
@@ -41,24 +42,13 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
 import sun.misc.CompoundEnumeration;
+import sun.reflect.annotation.AnnotationType;
 import swingjs.JSUtil;
-
-//import sun.misc.Unsafe;
-//import sun.reflect.ConstantPool;
-//import sun.reflect.Reflection;
-//import sun.reflect.ReflectionFactory;
-//import sun.reflect.annotation.AnnotationType;
-//import sun.reflect.generics.factory.CoreReflectionFactory;
-//import sun.reflect.generics.factory.GenericsFactory;
-//import sun.reflect.generics.repository.ClassRepository;
-//import sun.reflect.generics.repository.ConstructorRepository;
-//import sun.reflect.generics.repository.MethodRepository;
-//import sun.reflect.generics.scope.ClassScope;
-//import sun.security.util.SecurityConstants;
 
 /**
  * Instances of the class {@code Class} represent classes and interfaces in a
@@ -3431,7 +3421,6 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 *
 	 * @since 1.5
 	 */
-	@SuppressWarnings("unchecked")
 	public T cast(Object obj) {
 		if (obj != null && !isInstance(obj))
 			throw new ClassCastException(cannotCastMsg(obj));
@@ -3442,76 +3431,87 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		return "Cannot cast " + obj.getClass().getName() + " to " + getName();
 	}
 
-//	/**
-//	 * Casts this {@code Class} object to represent a subclass of the class
-//	 * represented by the specified class object. Checks that that the cast is
-//	 * valid, and throws a {@code ClassCastException} if it is not. If this
-//	 * method succeeds, it always returns a reference to this class object.
-//	 *
-//	 * <p>
-//	 * This method is useful when a client needs to "narrow" the type of a
-//	 * {@code Class} object to pass it to an API that restricts the
-//	 * {@code Class} objects that it is willing to accept. A cast would generate
-//	 * a compile-time warning, as the correctness of the cast could not be
-//	 * checked at runtime (because generic types are implemented by erasure).
-//	 *
-//	 * @return this {@code Class} object, cast to represent a subclass of the
-//	 *         specified class object.
-//	 * @throws ClassCastException
-//	 *             if this {@code Class} object does not represent a subclass of
-//	 *             the specified class (here "subclass" includes the class
-//	 *             itself).
-//	 * @since 1.5
-//	 */
-//	public <U> Class<? extends U> asSubclass(Class<U> clazz) {
-//		if (clazz.isAssignableFrom(this))
-//			return (Class<? extends U>) this;
-//		else
-//			throw new ClassCastException(this.toString());
-//	}
+	/**
+	 * Casts this {@code Class} object to represent a subclass of the class
+	 * represented by the specified class object. Checks that that the cast is
+	 * valid, and throws a {@code ClassCastException} if it is not. If this
+	 * method succeeds, it always returns a reference to this class object.
+	 *
+	 * <p>
+	 * This method is useful when a client needs to "narrow" the type of a
+	 * {@code Class} object to pass it to an API that restricts the
+	 * {@code Class} objects that it is willing to accept. A cast would generate
+	 * a compile-time warning, as the correctness of the cast could not be
+	 * checked at runtime (because generic types are implemented by erasure).
+	 *
+	 * @return this {@code Class} object, cast to represent a subclass of the
+	 *         specified class object.
+	 * @throws ClassCastException
+	 *             if this {@code Class} object does not represent a subclass of
+	 *             the specified class (here "subclass" includes the class
+	 *             itself).
+	 * @since 1.5
+	 */
+	public <U> Class<? extends U> asSubclass(Class<U> clazz) {
+		if (clazz.isAssignableFrom(this))
+			return (Class<? extends U>) this;
+		else
+			throw new ClassCastException(this.toString());
+	}
 
-//	/**
-//	 * @throws NullPointerException
-//	 *             {@inheritDoc}
-//	 * @since 1.5
-//	 */
-//	public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
-//		if (annotationClass == null)
-//			throw new NullPointerException();
-//
-//		initAnnotationsIfNecessary();
-//		return (A) annotations.get(annotationClass);
+    /**
+     * @throws NullPointerException {@inheritDoc}
+     * @since 1.5
+     */
+    public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
+        Objects.requireNonNull(annotationClass);
+		JSUtil.notImplemented(null);
+		return null;
+	}
+
+//	public XmlRootElement getAnnotation(Class<XmlRootElement> c) {
+//		
+//		// TODO Auto-generated method stub
+//		return null;
 //	}
 //
-//	/**
-//	 * @throws NullPointerException
-//	 *             {@inheritDoc}
-//	 * @since 1.5
-//	 */
-//	public boolean isAnnotationPresent(Class<? extends Annotation> annotationClass) {
-//		if (annotationClass == null)
-//			throw new NullPointerException();
-//
+	/**
+	 * @throws NullPointerException
+	 *             {@inheritDoc}
+	 * @since 1.5
+	 */
+	public boolean isAnnotationPresent(Class<? extends Annotation> annotationClass) {
+		if (annotationClass == null)
+			throw new NullPointerException();
+		JSUtil.notImplemented(null);
+		return false;
 //		return getAnnotation(annotationClass) != null;
-//	}
-//
-//	private static Annotation[] EMPTY_ANNOTATIONS_ARRAY = new Annotation[0];
-//
-//	/**
-//	 * @since 1.5
-//	 */
-//	public Annotation[] getAnnotations() {
+	}
+
+	private static Annotation[] EMPTY_ANNOTATIONS_ARRAY;
+	
+	private static Annotation[] getEmptyAnnotations() {
+		return (EMPTY_ANNOTATIONS_ARRAY == null ? EMPTY_ANNOTATIONS_ARRAY = new Annotation[0] : EMPTY_ANNOTATIONS_ARRAY);
+	}
+	/**
+	 * @since 1.5
+	 */
+	public Annotation[] getAnnotations() {
+		JSUtil.notImplemented(null);
+		return getEmptyAnnotations();
 //		initAnnotationsIfNecessary();
 //		return annotations.values().toArray(EMPTY_ANNOTATIONS_ARRAY);
-//	}
-//
-//	/**
-//	 * @since 1.5
-//	 */
-//	public Annotation[] getDeclaredAnnotations() {
+	}
+
+	/**
+	 * @since 1.5
+	 */
+	public Annotation[] getDeclaredAnnotations() {
+		JSUtil.notImplemented(null);
+		return getEmptyAnnotations();
 //		initAnnotationsIfNecessary();
 //		return declaredAnnotations.values().toArray(EMPTY_ANNOTATIONS_ARRAY);
-//	}
+	}
 
 //	// Annotations cache
 //	private transient Map<Class, Annotation> annotations;
@@ -3539,15 +3539,15 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 //
 //	// Annotation types cache their internal (AnnotationType) form
 //
-//	private AnnotationType annotationType;
-//
-//	void setAnnotationType(AnnotationType type) {
-//		annotationType = type;
-//	}
-//
-//	AnnotationType getAnnotationType() {
-//		return annotationType;
-//	}
+	private AnnotationType annotationType;
+
+	void setAnnotationType(AnnotationType type) {
+		annotationType = type;
+	}
+
+	AnnotationType getAnnotationType() {
+		return annotationType;
+	}
 	
 	@SuppressWarnings("null")
 	@Override
@@ -3589,12 +3589,6 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	}
 
 	public Object getPackage() {
-		return null;
-	}
-
-	public XmlRootElement getAnnotation(Class<XmlRootElement> c) {
-		
-		// TODO Auto-generated method stub
 		return null;
 	}
 

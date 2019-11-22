@@ -62,7 +62,7 @@
 J2S.LoadClazz = function(Clazz) {
 	
 Clazz.setTVer = function(ver) { // from class loading
-	if (Clazz._VERSION_T != ver)
+	if (Clazz._VERSION_T.split('-')[0] != ver.split('-')[0])
 		System.err.println("transpiler was " + Clazz._VERSION_T + " now " + ver + " for " + lastLoaded);
 	Clazz._VERSION_T = ver;
 }
