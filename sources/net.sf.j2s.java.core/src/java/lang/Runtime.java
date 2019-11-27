@@ -245,41 +245,41 @@ public class Runtime {
         return ApplicationShutdownHooks.remove(hook);
     }
 
-    /**
-     * Forcibly terminates the currently running Java virtual machine.  This
-     * method never returns normally.
-     *
-     * <p> This method should be used with extreme caution.  Unlike the
-     * <tt>{@link #exit exit}</tt> method, this method does not cause shutdown
-     * hooks to be started and does not run uninvoked finalizers if
-     * finalization-on-exit has been enabled.  If the shutdown sequence has
-     * already been initiated then this method does not wait for any running
-     * shutdown hooks or finalizers to finish their work. <p>
-     *
-     * @param  status
-     *         Termination status.  By convention, a nonzero status code
-     *         indicates abnormal termination.  If the <tt>{@link Runtime#exit
-     *         exit}</tt> (equivalently, <tt>{@link System#exit(int)
-     *         System.exit}</tt>) method has already been invoked then this
-     *         status code will override the status code passed to that method.
-     *
-     * @throws SecurityException
-     *         If a security manager is present and its <tt>{@link
-     *         SecurityManager#checkExit checkExit}</tt> method does not permit
-     *         an exit with the specified status
-     *
-     * @see #exit
-     * @see #addShutdownHook
-     * @see #removeShutdownHook
-     * @since 1.3
-     */
-    public void halt(int status) {
-        SecurityManager sm = System.getSecurityManager();
-        if (sm != null) {
-            sm.checkExit(status);
-        }
-        Shutdown.halt(status);
-    }
+	/**
+	 * Forcibly terminates the currently running Java virtual machine. This method
+	 * never returns normally.
+	 *
+	 * <p>
+	 * This method should be used with extreme caution. Unlike the
+	 * <tt>{@link #exit exit}</tt> method, this method does not cause shutdown hooks
+	 * to be started and does not run uninvoked finalizers if finalization-on-exit
+	 * has been enabled. If the shutdown sequence has already been initiated then
+	 * this method does not wait for any running shutdown hooks or finalizers to
+	 * finish their work.
+	 * <p>
+	 *
+	 * @param status Termination status. By convention, a nonzero status code
+	 *               indicates abnormal termination. If the <tt>{@link Runtime#exit
+	 *         exit}</tt> (equivalently, <tt>{@link System#exit(int)
+	 *         System.exit}</tt>) method has already been invoked then this status
+	 *               code will override the status code passed to that method.
+	 *
+	 * @throws SecurityException If a security manager is present and its <tt>{@link
+	 *         SecurityManager#checkExit checkExit}</tt> method does not permit an
+	 *                           exit with the specified status
+	 *
+	 * @see #exit
+	 * @see #addShutdownHook
+	 * @see #removeShutdownHook
+	 * @since 1.3
+	 */
+	public void halt(int status) {
+		SecurityManager sm = System.getSecurityManager();
+		if (sm != null) {
+			sm.checkExit(status);
+		}
+		Shutdown.halt(status);
+	}
 
     /**
      * Enable or disable finalization on exit; doing so specifies that the
