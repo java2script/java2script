@@ -67,6 +67,7 @@ class Shutdown {
 
     /* Lock object for the native halt method */
     private static Object haltLock = null;//new Lock();
+	private static boolean 秘isHalted;
 
     /* Invoked by Runtime.runFinalizersOnExit */
     static void setRunFinalizersOnExit(boolean run) {
@@ -158,16 +159,20 @@ class Shutdown {
 		}
 	}
 
-    /* The halt method is synchronized on the halt lock
-     * to avoid corruption of the delete-on-shutdown file list.
-     * It invokes the true native halt method.
-     */
-    static void halt(int status) {
-        synchronized (haltLock) {
-        	System.out.println("Shutdown(" + status + ") on " + Thread.currentThread().getThreadGroup().getName());
+	/*
+	 * The halt method is synchronized on the halt lock to avoid corruption of the
+	 * delete-on-shutdown file list. It invokes the true native halt method.
+	 */
+	static void halt(int status) {
+		synchronized (haltLock) {
+
+			if (!秘isHalted) {
+				秘isHalted = true;
+				System.out.println("Shutdown(" + status + ") on " + Thread.currentThread().getThreadGroup().getName());
 //            halt0(status);
-        }
-    }
+			}
+		}
+	}
 
 //    static native void halt0(int status);
 

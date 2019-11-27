@@ -90,4 +90,17 @@ public class V3d extends T3d {
     return Math.sqrt(lengthSquared());
   }
 
+	public final double angle(V3d v1) {
+		// return (double)Math.acos(dot(v1)/v1.length()/v.length());
+		// Numerically, near 0 and PI are very bad condition for acos.
+		// In 3-space, |atan2(sin,cos)| is much stable.
+
+		double xx = y * v1.z - z * v1.y;
+		double yy = z * v1.x - x * v1.z;
+		double zz = x * v1.y - y * v1.x;
+		double cross = Math.sqrt(xx * xx + yy * yy + zz * zz);
+
+		return Math.abs(Math.atan2(cross, dot(v1)));
+	}
+
 }
