@@ -84,7 +84,10 @@ public class JSLabelUI extends JSLightweightUI {
 			DOMNode.setStyles(centeringNode, "visibility", "visible");
 		super.paint(g, c);
 		// TODO: implement this for buttons?
-		DOMNode.setStyles(textNode, "overflow", "hidden", "white-space", "nowrap");
+		if (isHTML)
+			DOMNode.setStyles(textNode, "overflow", null, "white-space", null);
+		else
+			DOMNode.setStyles(textNode, "overflow", "hidden", "white-space", "nowrap");
 		if (icon != null) {
 			// The graphics object is translated to the label,
 			// not the image, at this point. In order to get
@@ -110,6 +113,8 @@ public class JSLabelUI extends JSLightweightUI {
 	@Override
 	public Dimension getPreferredSize(JComponent jc) {
 		updateDOMNode();
+		if (isHTML)
+			return null;
 		return (isAWT ? getMinimumSizePeer(jc, label)
 				: label == null ? super.getPreferredSize(jc)
 						: JSGraphicsUtils.getPreferredButtonSize(((AbstractButton) jc),

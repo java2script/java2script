@@ -590,7 +590,7 @@ public class JSComponentUI extends ComponentUI
 	/**
 	 * processed text (local to setIconAndText) is HTML
 	 */
-	private boolean isHTML;
+	protected boolean isHTML;
 
 	/**
 	 * set false for tool tip or other non-label object that has text
@@ -1754,7 +1754,8 @@ public class JSComponentUI extends ComponentUI
 		dim.height += h;
 		DOMNode.setStyles(node, "position", null);
 		if (w0 != null) {
-			DOMNode.setStyles(node, "width", w0, "height", h0);
+			DOMNode.setStyles(node, "width", 
+					 (isHTML && isLabel ? "inherit" : w0), "height", h0);
 		}
 		if (position != null) {
 			DOMNode.setStyles(node, "position", position);
@@ -2382,7 +2383,8 @@ public class JSComponentUI extends ComponentUI
 			if (text == "\0") {
 				isPaintedOnly = true; // this cannot be undone
 			}
-			DOMNode.setStyles(textNode, "white-space", "nowrap");
+			if (!isHTML || !isLabel)
+				DOMNode.setStyles(textNode, "white-space", "nowrap");
 			if (icon == null) {
 				// tool tip does not allow text alignment
 				if (iconNode != null && allowTextAlignment 
@@ -2648,11 +2650,10 @@ public class JSComponentUI extends ComponentUI
 		Object cssTxt = getJSObject();
 		Object cssIcon = getJSObject();
 
-		addJSKeyVal(cssCtr, "position", "absolute", "top", null, "left", null, "transform", null, "width", wCtr + "px",
+		addJSKeyVal(cssCtr, "position", "absolute", "top", null, "left", null, "transform", null, "width", (isHTML && isLabel ? "inherit" : wCtr + "px"),
 				"height", hCtr + "px");
 		addJSKeyVal(cssIcon, "position", "absolute", "top", null, "left", null, "transform", null);
 		addJSKeyVal(cssTxt, "position", "absolute", "top", null, "left", null, "transform", null);
-
 		isFullyCentered = (alignHCenter && alignVCenter && wIcon == 0 || wText == 0 && margins.left == margins.right
 				&& margins.top == margins.bottom && myInsets.left == myInsets.right && myInsets.top == myInsets.bottom);
 		if (isFullyCentered) {
