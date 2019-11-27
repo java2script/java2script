@@ -13863,6 +13863,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2019.11.26 3.2.5.v1 errant if (args) in newInstance
 // BH 2019.11.07 3.2.5.v0 full encapsulation
 // BH 2019.11.07 3.2.5.v0 adds encapsulation for window 
 // BH 2019.11.07 3.2.5.v0 splitting off $static$ from $clinit$ (see Java2ScriptVisitor notes)  
@@ -14320,13 +14321,15 @@ Clazz.new_ = function(c, args, cl) {
   // Integer will be passed as is here, without c.exClazz, or cl
   var clInner = cl;
   cl = cl || c.exClazz || c;
-  Clazz._initClass(cl,1,0,0); // critical here; next will call (0,1,0)
+  Clazz._initClass(cl,1,0,0); 
+  // BH note: Critical here that the above is not 1,1,0; 
+  // static init is the responsibility of newInstance
+  // or a static field or method call (which is handled
+  // by the $I$(n) handler in the function initializer in 
+  // the newClass() call.
   var obj = new (Function.prototype.bind.apply(cl, arguments));
   if (args[2] != inheritArgs) {
-    if (haveArgs) {
-//      Clazz._initClass(cl,0,1,0);
-      c.apply(obj, args);
-    }
+    haveArgs && c.apply(obj, args);
     clInner && clInner.$init$.apply(obj);
   }
     
@@ -14419,7 +14422,7 @@ Clazz.newInstance = function (objThis, args, isInner, clazz) {
   objThis.__JSID__ = ++_jsid;
 
   if (!isInner) {
-	  if (args)
+//	  if (args)
 	clazz && Clazz._initClass(clazz,1,1,objThis);
     if ((!args || args.length == 0) && objThis.c$) {
     // allow for direct default call "new foo()" to run with its default constructor
