@@ -13985,6 +13985,10 @@ var _array = function(baseClass, paramType, ndims, params, isClone) {
     var b = a.slice(arguments[2], arguments[3]);
     return copyArrayProps(a, b);
   }
+  if (arguments.length == 2 && baseClass.BYTES_PER_ELEMENT) {
+	// direct transfer of parameters from java.nio.ByteBuffer
+	return copyArrayProps(paramType, baseClass); 
+  }
   var prim = Clazz._getParamCode(baseClass);
   var dofill = true;
   if (arguments.length < 4) {
@@ -13993,7 +13997,7 @@ var _array = function(baseClass, paramType, ndims, params, isClone) {
     //   Array.newInstance(class, length), and 
     //   Array.newInstance(class, [dim1, dim2, dim3....])
     // three-parameter option for (Integer.TYPE, -1, [3, 4, 5])
-    var cl = arguments[0];
+	var cl = arguments[0];
     var baseClass = cl.__BASECLASS || cl;
     var haveDims = (typeof arguments[1] == "number");  
     var vals = arguments[haveDims ? 2 : 1];
@@ -14934,6 +14938,7 @@ var newTypedA = function(baseClass, args, nBits, ndims, isClone) {
   return setArray(arr, baseClass, paramType, ndims);
 }
 
+
 /**
  * Return the class name of the given class or object.
  *
@@ -15789,10 +15794,7 @@ var setAType = function (IntXArray, nBytes, atype) {
   if (!IntXArray.prototype.slice)
     IntXArray.prototype.slice = function() {return arraySlice.apply(this, arguments)};
   IntXArray.prototype.clone$ = function() {
-    var a = this.slice(); 
-    a.__BYTESIZE = 1;
-    a.__ARRAYTYPE = this.__ARRAYTYPE; 
-    return a; 
+    return copyArrayProps(this, this.slice());
   };
 }
 
