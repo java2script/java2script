@@ -2628,7 +2628,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 							applet.__Info.code = clazz;
 					}
 					
-					var cl = Clazz.loadClass(clazz);
+					var cl = Clazz.loadClass(clazz);cl.$static$ && cl.$static$();
 					if (clazz.indexOf("_.") == 0)
 						J2S.setWindowVar(clazz.substring(2), cl);
 					if (isApp && cl.j2sHeadless)

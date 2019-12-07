@@ -159,6 +159,8 @@ public class JSHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clo
 		 *            || v == null) {
 		 *            this.jsmap[key] = value; 
 		 *            this.modCount++;
+		 *            if (v === undefined)
+		 *            	this.size++;
 		 *            return v;
 		 *            }
 		 * 
@@ -183,8 +185,9 @@ public class JSHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clo
 		/**
 		 * @j2sNative
 		 * 
-		 * 			var v = this.jsmap[key]; delete this.jsmap.key; return (v ===
-		 *            undefined ? null : v);
+		 * 			var v = this.jsmap[key]; 
+		 * 			delete this.jsmap.key; 
+		 * 			return (v === undefined ? null : v);
 		 */
 		return null;
 	}
@@ -194,6 +197,7 @@ public class JSHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clo
 		 * @j2sNative this.jsmap={};
 		 */
 		modCount++;
+		size = 0;
 	}
 
 	/**
@@ -217,8 +221,6 @@ public class JSHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clo
 	}
 
 	final class KeySet extends AbstractSet<K> {
-		
-		
 		
 		public final int size() {
 			return size;
@@ -393,7 +395,7 @@ public class JSHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clo
 					
 					/**
 					 * 
-					 * var e = a.pop();
+					 * var e = a.shift();
 					 * key = e[0];
 					 * value = e[1];
 					 * 
@@ -456,6 +458,7 @@ public class JSHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clo
 		 * @j2sNative
 		 * 
 		 * 			var v = this.jsmap[key]; 
+		 *          if (v !== undefined) this.size--;
 		 * 			if (v != null && v.equals$O(value)) {
 		 *              delete this.jsmap.key; 
 		 *              return true;
@@ -558,7 +561,7 @@ public class JSHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clo
 		}
 		public final K next() {
 			/**
-			 * @j2sNative return a.pop();
+			 * @j2sNative return a.shift();
 			 */
 			return null;
 		}
@@ -597,7 +600,7 @@ public class JSHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clo
 		@Override
 		public V next() {
 			/**
-			 * @j2sNative return a.pop();
+			 * @j2sNative return a.shift();
 			 * 
 			 */
 			return null;
@@ -623,7 +626,7 @@ public class JSHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clo
 			
 			/**
 			 * 
-			 * var e = a.pop();
+			 * var e = a.shift();
 			 * key = e[0];
 			 * value = e[1];
 			 * 

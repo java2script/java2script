@@ -78,7 +78,9 @@ import sun.font.FontDesignMetrics;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class SunToolkit extends Toolkit implements
-		WindowClosingSupport, WindowClosingListener, ComponentFactory {// ,
+//		WindowClosingSupport, 
+//		WindowClosingListener, 
+		ComponentFactory {// ,
 																																		// InputMethodSupport
 																																		// {
 
@@ -1219,7 +1221,7 @@ public abstract class SunToolkit extends Toolkit implements
 	/**
 	 * @see sun.awt.WindowClosingSupport#getWindowClosingListener
 	 */
-	@Override
+//	@Override
 	public WindowClosingListener getWindowClosingListener() {
 		return windowClosingListener;
 	}
@@ -1227,7 +1229,7 @@ public abstract class SunToolkit extends Toolkit implements
 	/**
 	 * @see sun.awt.WindowClosingSupport#setWindowClosingListener
 	 */
-	@Override
+//	@Override
 	public void setWindowClosingListener(WindowClosingListener wcl) {
 		windowClosingListener = wcl;
 	}
@@ -1235,7 +1237,7 @@ public abstract class SunToolkit extends Toolkit implements
 	/**
 	 * @see sun.awt.WindowClosingListener#windowClosingNotify
 	 */
-	@Override
+//	@Override
 	public RuntimeException windowClosingNotify(WindowEvent event) {
 		if (windowClosingListener != null) {
 			return windowClosingListener.windowClosingNotify(event);
@@ -1247,7 +1249,7 @@ public abstract class SunToolkit extends Toolkit implements
 	/**
 	 * @see sun.awt.WindowClosingListener#windowClosingDelivered
 	 */
-	@Override
+//	@Override
 	public RuntimeException windowClosingDelivered(WindowEvent event) {
 		if (windowClosingListener != null) {
 			return windowClosingListener.windowClosingDelivered(event);

@@ -61,7 +61,6 @@ import javajs.api.JSFunction;
 import javajs.util.JSThread;
 import javajs.util.PT;
 import sun.awt.AppContext;
-import sun.awt.KeyboardFocusManagerPeerProvider;
 import sun.awt.SunToolkit;
 import swingjs.api.Interface;
 import swingjs.api.JSFileHandler;
@@ -71,7 +70,9 @@ import swingjs.api.js.JQuery;
 import swingjs.plaf.JSComponentUI;
 
 
-public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerProvider {
+public class JSToolkit extends SunToolkit 
+//implements KeyboardFocusManagerPeerProvider
+{
 
 	/**
 	 * for JSMouse only
@@ -117,13 +118,6 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 
 	public static JSAppletViewer getAppletViewer() {
 		return Thread.currentThread().getThreadGroup().秘appletViewer;
-	}
-
-	/**
-	 * From System.exit() in j2sClazz.js
-	 */
-	public static void exit(int status) {
-		Runtime.getRuntime().exit(status);
 	}
 
 	// ////// java.awt.Toolkit /////////
@@ -953,7 +947,7 @@ public class JSToolkit extends SunToolkit implements KeyboardFocusManagerPeerPro
 	}
 
 	
-	@Override
+//	@Override
 	public KeyboardFocusManagerPeer getKeyboardFocusManagerPeer() {
 		return getFocusPeer();
 	}

@@ -13297,7 +13297,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 							applet.__Info.code = clazz;
 					}
 					
-					var cl = Clazz.loadClass(clazz);
+					var cl = Clazz.loadClass(clazz);cl.$static$ && cl.$static$();
 					if (clazz.indexOf("_.") == 0)
 						J2S.setWindowVar(clazz.substring(2), cl);
 					if (isApp && cl.j2sHeadless)
@@ -13863,6 +13863,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
+// BH 2019.12.03 Object.class instanceof java.lang.Class
 // BH 2019.11.26 3.2.5.v1 errant if (args) in newInstance
 // BH 2019.11.07 3.2.5.v0 full encapsulation
 // BH 2019.11.07 3.2.5.v0 adds encapsulation for window 
@@ -14224,7 +14225,7 @@ Clazz.instanceOf = function (obj, clazz) {
   if (obj == null || !clazz)
     return false;
     // check for object being a java.lang.Class and the other not 
-  if (obj.$clazz$ && !clazz.$clazz$) return false;
+  if (obj.$clazz$ && !clazz.$clazz$) return (clazz == java.lang.Class);
   obj.$clazz$ && (obj = obj.$clazz$);
  if (clazz == String)
 	return typeof obj == "string";
@@ -16748,18 +16749,18 @@ java.lang.System = System = {
     }
   },
   
-  currentTimeMillis$ : function () {
-    return new Date ().getTime ();
+  currentTimeMillis$ : function() {
+    return new Date().getTime();
   },
   exit$ : function(status) { 
-	 swingjs.JSToolkit || Clazz.loadClass("swingjs.JSToolkit");
- 	 swingjs.JSToolkit.exit$I(status || 0) 
+	 java.lang.Runtime || Clazz.loadClass("java.lang.Runtime");
+	 java.lang.Runtime.getRuntime$().exit$I(status || 0);
   },
   gc$ : function() {}, // bh
-  getProperties$ : function () {
+  getProperties$ : function() {
     return System.props;
   },
-  getProperty$S$S : function (key, def) {
+  getProperty$S$S : function(key, def) {
     if (System.props)
       return System.props.getProperty$S$S (key, def);
     var v = System.$props[key];
@@ -18213,6 +18214,8 @@ String(byte[] bytes, int offset, int length, String charsetName)
 String(byte[] ascii, int hibyte, int offset, int count)
 */
 
+var textDecoder = null;
+
 String.instantialize=function(){
 var x=arguments[0];
 switch (arguments.length) {
@@ -18235,7 +18238,7 @@ case 2:
 
   var hibyte=arguments[1];
   return (typeof hibyte=="number" ? String.instantialize(x,hibyte,0,x.length) 
-	: self.TextDecoder && arguments[1].toString().toUpperCase() == "UTF-8" ? new TextDecoder().decode(arguments[0])
+	: self.TextDecoder && (textDecoder || (textDecoder = new TextDecoder())) && arguments[1].toString().toUpperCase() == "UTF-8" ? textDecoder.decode(arguments[0])
 	: String.instantialize(x,0,x.length,hibyte));
 case 3:
   // String(byte[] bytes, int offset, int length)
@@ -18585,9 +18588,9 @@ Byte.prototype.objectValue$ =
 Short.prototype.objectValue$ = 
 Long.prototype.objectValue$ =  
 Float.prototype.objectValue$ = 
+Boolean.prototype.objectValue$ = 
 Double.prototype.objectValue$ =  function() {return this.valueOf()};
 
-Boolean.prototype.objectValue$ = 
 Character.prototype.objectValue$ = function() { return this.value };
 
 Character.prototype.intValue$  = function() { return this.value.codePointAt(0) };
