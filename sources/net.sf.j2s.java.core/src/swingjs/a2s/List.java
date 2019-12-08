@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
 import java.awt.peer.ListPeer;
 import java.util.EventListener;
 
@@ -17,8 +18,13 @@ import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.LineBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
+import sun.swing.SwingUtilities2;
+
 import java.awt.JSComponent;
-public class List extends JList implements ItemSelectable, JSComponent.A2SWrappedComponent  {
+public class List extends JList implements ItemSelectable, JSComponent.A2SWrappedComponent, ListSelectionListener  {
 
 	public void isAWT() {} 
 	
@@ -225,6 +231,7 @@ public class List extends JList implements ItemSelectable, JSComponent.A2SWrappe
     public synchronized void remove(String item) {
     	awtmodel.removeElement(item);
     }
+    
 
     /**
      * Removes the item at the specified position
@@ -607,6 +614,8 @@ public class List extends JList implements ItemSelectable, JSComponent.A2SWrappe
         }
         itemListener = AWTEventMulticaster.add(itemListener, l);
         newEventsOnly = true;
+        removeListSelectionListener(this);
+        addListSelectionListener(this);
     }
 
     /**
@@ -630,6 +639,8 @@ public class List extends JList implements ItemSelectable, JSComponent.A2SWrappe
             return;
         }
         itemListener = AWTEventMulticaster.remove(itemListener, l);
+        if (itemListener == null)
+        	removeListSelectionListener(this);
     }
 
     /**
@@ -845,6 +856,15 @@ public class List extends JList implements ItemSelectable, JSComponent.A2SWrappe
         }
     }
 
+	@Override
+	public void valueChanged(ListSelectionEvent e) {
+		if (itemListener != null && getSelectionModel().getValueIsAdjusting()) {
+			processItemEvent(new ItemEvent(this, ItemEvent.ITEM_STATE_CHANGED, getSelectedItem(), ItemEvent.SELECTED));
+		}
+	}
+
+	
+
     /**
      * Processes action events occurring on this component
      * by dispatching them to any registered
@@ -884,5 +904,20 @@ public class List extends JList implements ItemSelectable, JSComponent.A2SWrappe
     protected String paramString() {
         return super.paramString() + ",selected=" + getSelectedItem();
     }
+
+	@Override
+	public boolean 秘processUIEvent(MouseEvent e) {
+		super.秘processUIEvent(e);
+		if (e.getID() == MouseEvent.MOUSE_CLICKED) {
+			if (e.getClickCount() == 2) {
+				processActionEvent(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, this.getSelectedItem()));
+				if (itemListener != null)
+					processItemEvent(new ItemEvent(this, ItemEvent.ITEM_STATE_CHANGED, getSelectedItem(), ItemEvent.SELECTED));
+				// indicate handled
+				return true;
+			}
+		}
+		return false;
+	}
 
 }
