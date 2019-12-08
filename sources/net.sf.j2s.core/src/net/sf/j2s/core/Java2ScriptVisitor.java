@@ -167,6 +167,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
 // HashSet as the basis for the {a:a,b:this.$finals$.b} mapping listFinalVariables.
 // This fixed all of the stream issues. See Test_Local, Test_java8, Test_Class.
 
+// BH 2019.12.07 3.2.5-v2 fix for lambda expression with $$ must not be cached
 // BH 2019.11.18 3.2.5-v0 fix for anonymous subclass of a local class not handling finals
 // BH 2019.11.18 3.2.5-v0 fix for main method that throws exception not generating html test 
 // BH 2019.11.18 3.2.5-v0 fix for lambda expressions in classes with annotations
@@ -1267,11 +1268,11 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					  	  ) // BH Added 2019.05.13
 						&& lambdaArity == mBinding.getParameterTypes().length));
 
-bufferDebug("addmeth isclasstarget " + isStatic + " classIsTarget="+ classIsTarget 
-						+ " ivarbinding=" +isVariableBinding(expression) + " exp=" + (expression == null ? 
-								null : expression.getClass().getName())
-						+ " " + declaringClassJavaClassName
-						);
+//bufferDebug("addmeth isclasstarget " + isStatic + " classIsTarget="+ classIsTarget 
+//						+ " ivarbinding=" +isVariableBinding(expression) + " exp=" + (expression == null ? 
+//								null : expression.getClass().getName())
+//						+ " " + declaringClassJavaClassName
+//						);
 				String opening = (classIsTarget ? "$$." : "t.") + finalMethodNameWith$Params + ".apply("
 						+ (isStatic ? "null" : classIsTarget ? "$$" : "t") + ",[";
 				buffer.append(opening);
@@ -1760,9 +1761,18 @@ bufferDebug("addmeth isclasstarget " + isStatic + " classIsTarget="+ classIsTarg
 				finalShortClassName = finalShortClassName.substring(3);
 			}
 			setClassAndBinding(finalShortClassName, binding);
-			if (isLambda)
+			if (isLambda) {
 				buffer.append("(");
-			buffer.append("(P$." + finalShortClassName + "||");
+				
+				
+				// problem here 2019.12.07 cifbinary was that $$-wrapped lambda methods must NOT be reused. 
+				//bufferDebug("addcoi " + isLambda + " " + class_localType);
+
+			
+			}
+			buffer.append("(");
+			if (!isLambda || class_localType != LAMBDA_WRAPPED)
+				buffer.append("P$." + finalShortClassName + "||");
 			finalPackageName = "P$";
 		} else {
 			// Top or inner named classes are already set.
@@ -6882,7 +6892,7 @@ bufferDebug("addmeth isclasstarget " + isStatic + " classIsTarget="+ classIsTarg
 		String tmp = buffer.substring(pt);
 		buffer.setLength(pt);
 		
-		bufferDebug("addLambdaReuse " + anonName);
+//		bufferDebug("addLambdaReuse " + anonName);
 		
 		anonName = getFinalJ2SClassName(anonName, FINAL_P);
 		buffer.append("(" + anonName + "$||(" + anonName + "$=(")
