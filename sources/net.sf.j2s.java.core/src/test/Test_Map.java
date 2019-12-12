@@ -28,6 +28,12 @@ class Test_Map extends Test_ {
 		  System.out.println(iter.next());
 	  }
 	  
+	  System.out.println(cache.size());
+	  cache.put("test", null);
+	  System.out.println(cache.size());
+	  cache.put("test3", null);
+	  cache.putIfAbsent("test3", "ok");
+	  System.out.println(cache.size() + " " + cache.get("test3"));
 	  
 	  
 	  System.out.println("Test_Map OK");

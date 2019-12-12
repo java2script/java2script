@@ -819,4 +819,53 @@ class Bits {                            // package-private
 //    static native void copyToLongArray(long srcAddr, Object dst, long dstPos,
 //                                       long length);
 
+    static int[] _ia = new int[0];
+    static short[] _ha = new short[0];
+    static float[] _fa = new float[0];
+    static double[] _da = new double[0];
+
+    public static int[] _toInt32(byte[] b) {
+    	/**
+    	 * @j2sNative
+    	 * 
+    	 * return Clazz.array(new Int32Array(b.buffer), C$._ia);
+    	 */
+		{
+			return null;
+		}
+    }
+
+    public static short[] _toInt16(byte[] b) {
+    	/**
+    	 * @j2sNative
+    	 * 
+    	 * return Clazz.array(new Int16Array(b.buffer), C$._ha);
+    	 */
+		{
+			return null;
+		}
+    }
+
+	public static float[] _toFloat32(byte[] b) {
+    	/**
+    	 * @j2sNative
+    	 * 
+    	 * return Clazz.array(new Float32Array(b.buffer), C$._fa);
+    	 */
+		{
+			return null;
+		}
+	}
+    
+	public static double[] _toFloat64(byte[] b) {
+    	/**
+    	 * @j2sNative
+    	 * 
+    	 * return Clazz.array(new Float64Array(b.buffer), C$._da);
+    	 */
+		{
+			return null;
+		}
+	}
+
 }

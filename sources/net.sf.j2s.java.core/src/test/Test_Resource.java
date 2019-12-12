@@ -1,5 +1,9 @@
 package test;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Properties;
 
 public class Test_Resource extends Test_ {
@@ -22,6 +26,14 @@ public class Test_Resource extends Test_ {
 			System.out.println(e);
 			assert(false);
 		}
+		
+		
+		try(OutputStream os = new FileOutputStream("test.test")) {
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 } 

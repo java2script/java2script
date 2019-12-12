@@ -425,7 +425,9 @@ public class JSFileSystem extends FileSystem {
 		}
 
 		private int write(ByteBuffer src, int n) {
-			return _get(src.array(), src.position() + src.arrayOffset(), pos, n, true);
+			int srcPos = src.position();
+			src.position(srcPos + n);
+			return _get(src.array(), srcPos + src.arrayOffset(), pos, n, true);
 		}
 
 		public long transferTo(int fromPos, JSByteChannel bc, int toPos, int n, boolean updatePos) {
@@ -932,7 +934,7 @@ public class JSFileSystem extends FileSystem {
 
 	@Override
 	public Path getPath(String first, String... more) {
-		if (more != null)
+		if (more != null && more.length > 0)
 			first = (first == null ? "" : first + "/") + (/** @j2sNative more.join("/")|| */
 			"");
 		return new JSPath(first, this);

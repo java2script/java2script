@@ -498,7 +498,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
      * @param evict false when initially constructing this map, else
      * true (relayed to method afterNodeInsertion).
      */
-    final void putMapEntries(Map<? extends K, ? extends V> m, boolean evict) {
+    void putMapEntries(Map<? extends K, ? extends V> m, boolean evict) {
         int s = m.size();
         if (s > 0) {
             if (table == null) { // pre-size
@@ -623,7 +623,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
      * @param evict if false, the table is in creation mode.
      * @return previous value, or null if none
      */
-    final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
+     V putVal(int hash, K key, V value, boolean onlyIfAbsent,
                    boolean evict) {
         Node<K,V>[] tab; Node<K,V> p; int n, i;
         if ((tab = table) == null || (n = tab.length) == 0)
@@ -1437,7 +1437,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
             return e;
         }
 
-        public final void remove() {
+        public void remove() {
             Node<K,V> p = current;
             if (p == null)
                 throw new IllegalStateException();

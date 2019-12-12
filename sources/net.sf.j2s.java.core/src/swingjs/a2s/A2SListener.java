@@ -17,6 +17,8 @@ import java.awt.event.TextListener;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 public class A2SListener  implements AdjustmentListener, ActionListener, KeyListener, MouseListener, MouseMotionListener, TextListener, ChangeListener, ItemListener {
 

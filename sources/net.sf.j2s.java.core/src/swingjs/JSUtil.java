@@ -659,6 +659,6 @@ public class JSUtil {
 	public static HTML5Applet getApplet() {
 		return Thread.currentThread().getThreadGroup().秘html5Applet;
 	} 
-	
+
 }
 
