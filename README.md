@@ -27,6 +27,15 @@ automated production of browser-ready JavaScript versions of Java applications a
 
 See https://github.com/BobHanson/java2script/tree/master/sources/net.sf.j2s.core/dist and the README file in that directory.
 
+# Relationship to Alternatives
+
+A number of alternative methods of using Java to create JavaScript have been proposed and developed to one extent or another. The following discussion compares java2script/SwingJS to these other methods
+
+## todo ##
+
+
+
+
 # History - 2019-
 
 SwingJS is now more than just "Swing"-JS. AWT applets and applications are now supported. A test suite of over 500 AWT applets has been used to refine the AWT runtime classes with great success. Many thanks to Karsten Blankenagel (University of Wuppertal) for access to this source code set.
