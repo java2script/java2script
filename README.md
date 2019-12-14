@@ -62,7 +62,7 @@ The primary differences between java2script/SwingJS and CheerpJ, to the best of 
 - implementing a true HTML5 UI rather than just painting a canvas the way Java does
 - delivering an easily interpretable and debuggable JavaScript translation of Java classes, with little or no obscurification (unless that is desired)
 - well-designed JavaScript-friendly Java core classes that leverage the considerable power of HTML5 rather than ignoring that completely
-
+- open source and completely extensible
 
 # History - 2019-
 
