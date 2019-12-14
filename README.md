@@ -55,8 +55,13 @@ In the author's own words, "There are Java APIs that are impossible to implement
 
 https://www.leaningtech.com/cheerpj/ "CheerpJ converts Java applications or libraries into JavaScript. Works on bytecode, does not require access to the source code. Compatible with 100% of Java including reflection and dynamic classes. Existing Java archives can be converted to Web applications effortlessly"
 
-This sounds terrific. Very straightforward -- just convert the Java class files to JavaScript. I don't doubt that most of what is written here is true. I'm dubious about that "100%" claim, and the demonstration at 
+This sounds terrific. Very straightforward -- just convert the Java class files to JavaScript. I don't doubt that most of what is written here is true. I am dubious about that "100%" claim, as there are plenty of problems in Java that would take considerably more work than just using class files directly. The Java Reporter demonstration at https://www.leaningtech.com/cheerpj/demos/ crashed both Firefox and Chrome for me, so I cannot really evaluate what I see here. 
 
+The primary differences between java2script/SwingJS and CheerpJ, to the best of my knowledge, include:
+
+- implementing a true HTML5 UI rather than just painting a canvas the way Java does
+- delivering an easily interpretable and debuggable JavaScript translation of Java classes, with little or no obscurification (unless that is desired)
+- well-designed JavaScript-friendly Java core classes that leverage the considerable power of HTML5 rather than ignoring that completely
 
 
 # History - 2019-
