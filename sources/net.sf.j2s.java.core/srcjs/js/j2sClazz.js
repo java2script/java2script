@@ -7,28 +7,9 @@
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
-// BH 2019.12.03 Object.class instanceof java.lang.Class
-// BH 2019.11.26 3.2.5.v1 errant if (args) in newInstance
-// BH 2019.11.07 3.2.5.v0 full encapsulation
-// BH 2019.11.07 3.2.5.v0 adds encapsulation for window 
-// BH 2019.11.07 3.2.5.v0 splitting off $static$ from $clinit$ (see Java2ScriptVisitor notes)  
-// BH 2019.10.30 Foo.parseFoo not Foo.parseFooRadix 
-// BH 2019.10.26 subclass def should exclude  __PARAMCODE
-// BH 2019.09.24 missing isArray$() in Integer.class
-// BH 2019.09.26 superfast byte[] -> String using TextDecoder
-// BH 2019.08.16 adds cache for instanceof
-// BH 2019.07.27 fixes array(intArray).clone
-// BH 2019.07.09 adds Java String.trim()
-// BH 2019.05.21 changes Clazz.isClassDefined to Clazz._isClassDefined for compression
-// BH 2019.05.13 fixes for Math.getExponent, Math.IEEERemainder, Array.equals(Object)
-// BH 2019.02.16 fixes typo in Integer.parseInt(s,radix)
-// BH 2019.02.07 fixes radix|10 should be radix||10  
-// BH 2019.01.29 adds String.join$CharSequence$Iterable, String.join$CharSequence$CharSequenceA
-// BH 2019.01.13 3.2.4.07 adds Character.to[Title|Lower|Upper]Case(int)
-// BH 2019.01.08 3.2.4.07 fixes String.prototype.to[Upper|Lower]Case$java_util_Locale - using toLocal[Upper|Lower]Case()
-// BH 2019.01.03 3.2.4.07 adds ByteBuffer/CharBuffer support, proper CharSet encoding, including GBK (Standard Chinese)
+// BH 2019.12.14 3.2.5.v2 Clazz._4Name initialization should be full static initialization 
 
-// see earlier notes at net.sf.j2s.java.core.srcjs/js/devnotes.txt
+`// see earlier notes at net.sf.j2s.java.core.srcjs/js/devnotes.txt
 
 //window["j2s.object.native"] = true;  // this is not an option
 
@@ -2367,7 +2348,7 @@ Clazz._4Name = function(clazzName, applet, state, asClazz, initialize, isQuiet) 
     clazzName = "java.lang." + clazzName;  
   var isok = Clazz._isClassDefined(clazzName);
   if (isok && asClazz) {
-    return Clazz._initClass(Clazz.allClasses[clazzName],1);
+    return Clazz._initClass(Clazz.allClasses[clazzName],1,1);
   } 
   if (!isok) {
     var name2 = null;
