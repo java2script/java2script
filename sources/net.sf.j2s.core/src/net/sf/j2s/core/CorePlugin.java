@@ -25,8 +25,9 @@ public class CorePlugin extends Plugin {
 	 * "net.sf.j2s.core.jar" not "net.sf.j2s.core.3.2.5"
 	 * 
 	 */
-	public static String VERSION = "3.2.5-v2";
-	// BH 2019.12.06 -- 3.2.5.v2 fix for try(resources) not closing those
+	public static String VERSION = "3.2.5-v3";
+	// BH 2019.12.12 -- 3.2.5-v3 fix for enums == null in annotations
+	// BH 2019.12.06 -- 3.2.5-v2 fix for try(resources) not closing those
 	// BH 2019.11.12 -- 3.2.5-v0 fix for string literals with \n \nn \nnn octals, but "use strict" does not allow for this.
 	// BH 2019.11.13 -- 3.2.5-v0 fixes static initialization timing. See note in Java2ScriptVisitor
 	// BH 2019.10.30 -- 3.2.4.09 fixes problem with team...show history...compare having null project.getProject().getLocation()

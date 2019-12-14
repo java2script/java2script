@@ -6414,7 +6414,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						type = ((TypeDeclaration) a.node).resolveBinding();
 					} else if (a.node instanceof FieldDeclaration) {
 						FieldDeclaration field = (FieldDeclaration) a.node;
-						fields.remove(field);
+						if (fields != null)
+							fields.remove(field);
 						fragments = field.fragments();
 						VariableDeclarationFragment identifier = (VariableDeclarationFragment) fragments.get(0);
 						IVariableBinding var = identifier.resolveBinding();
@@ -6423,7 +6424,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					} else if (a.node instanceof MethodDeclaration) {
 						MethodDeclaration method = (MethodDeclaration) a.node;
 						IMethodBinding var = method.resolveBinding();
-						if (methods.contains(var))
+						if (methods != null)
+							if (methods.contains(var))
 							methods.remove(var);
 						if (accessType != TEST_TYPE)
 							var = getJAXBGetMethod(var, methods, false);
@@ -6433,7 +6435,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						type = var.getReturnType();
 					} else if (a.node instanceof EnumConstantDeclaration) {
 						EnumConstantDeclaration con = (EnumConstantDeclaration) a.node;
-						enums.remove(con);
+						if (enums != null)
+							enums.remove(con);
 						IVariableBinding var = con.resolveVariable();
 						varName = var.getName();
 						type = var.getType();
