@@ -13297,7 +13297,7 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 							applet.__Info.code = clazz;
 					}
 					
-					var cl = Clazz.loadClass(clazz);
+					var cl = Clazz.loadClass(clazz);cl.$static$ && cl.$static$();
 					if (clazz.indexOf("_.") == 0)
 						J2S.setWindowVar(clazz.substring(2), cl);
 					if (isApp && cl.j2sHeadless)
@@ -13863,25 +13863,8 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
-// BH 2019.11.26 3.2.5.v1 errant if (args) in newInstance
-// BH 2019.11.07 3.2.5.v0 full encapsulation
-// BH 2019.11.07 3.2.5.v0 adds encapsulation for window 
-// BH 2019.11.07 3.2.5.v0 splitting off $static$ from $clinit$ (see Java2ScriptVisitor notes)  
-// BH 2019.10.30 Foo.parseFoo not Foo.parseFooRadix 
-// BH 2019.10.26 subclass def should exclude  __PARAMCODE
-// BH 2019.09.24 missing isArray$() in Integer.class
-// BH 2019.09.26 superfast byte[] -> String using TextDecoder
-// BH 2019.08.16 adds cache for instanceof
-// BH 2019.07.27 fixes array(intArray).clone
-// BH 2019.07.09 adds Java String.trim()
-// BH 2019.05.21 changes Clazz.isClassDefined to Clazz._isClassDefined for compression
-// BH 2019.05.13 fixes for Math.getExponent, Math.IEEERemainder, Array.equals(Object)
-// BH 2019.02.16 fixes typo in Integer.parseInt(s,radix)
-// BH 2019.02.07 fixes radix|10 should be radix||10  
-// BH 2019.01.29 adds String.join$CharSequence$Iterable, String.join$CharSequence$CharSequenceA
-// BH 2019.01.13 3.2.4.07 adds Character.to[Title|Lower|Upper]Case(int)
-// BH 2019.01.08 3.2.4.07 fixes String.prototype.to[Upper|Lower]Case$java_util_Locale - using toLocal[Upper|Lower]Case()
-// BH 2019.01.03 3.2.4.07 adds ByteBuffer/CharBuffer support, proper CharSet encoding, including GBK (Standard Chinese)
+// BH 2019.12.15 3.2.5.v4 Character.prototype.valueOf() missing 
+// BH 2019.12.14 3.2.5.v3 Clazz._4Name initialization should be full static initialization 
 
 // see earlier notes at net.sf.j2s.java.core.srcjs/js/devnotes.txt
 
@@ -13985,6 +13968,10 @@ var _array = function(baseClass, paramType, ndims, params, isClone) {
     var b = a.slice(arguments[2], arguments[3]);
     return copyArrayProps(a, b);
   }
+  if (arguments.length == 2 && baseClass.BYTES_PER_ELEMENT) {
+	// direct transfer of parameters from java.nio.ByteBuffer
+	return copyArrayProps(paramType, baseClass); 
+  }
   var prim = Clazz._getParamCode(baseClass);
   var dofill = true;
   if (arguments.length < 4) {
@@ -13993,7 +13980,7 @@ var _array = function(baseClass, paramType, ndims, params, isClone) {
     //   Array.newInstance(class, length), and 
     //   Array.newInstance(class, [dim1, dim2, dim3....])
     // three-parameter option for (Integer.TYPE, -1, [3, 4, 5])
-    var cl = arguments[0];
+	var cl = arguments[0];
     var baseClass = cl.__BASECLASS || cl;
     var haveDims = (typeof arguments[1] == "number");  
     var vals = arguments[haveDims ? 2 : 1];
@@ -14220,7 +14207,7 @@ Clazz.instanceOf = function (obj, clazz) {
   if (obj == null || !clazz)
     return false;
     // check for object being a java.lang.Class and the other not 
-  if (obj.$clazz$ && !clazz.$clazz$) return false;
+  if (obj.$clazz$ && !clazz.$clazz$) return (clazz == java.lang.Class);
   obj.$clazz$ && (obj = obj.$clazz$);
  if (clazz == String)
 	return typeof obj == "string";
@@ -14933,6 +14920,7 @@ var newTypedA = function(baseClass, args, nBits, ndims, isClone) {
   }
   return setArray(arr, baseClass, paramType, ndims);
 }
+
 
 /**
  * Return the class name of the given class or object.
@@ -15789,10 +15777,7 @@ var setAType = function (IntXArray, nBytes, atype) {
   if (!IntXArray.prototype.slice)
     IntXArray.prototype.slice = function() {return arraySlice.apply(this, arguments)};
   IntXArray.prototype.clone$ = function() {
-    var a = this.slice(); 
-    a.__BYTESIZE = 1;
-    a.__ARRAYTYPE = this.__ARRAYTYPE; 
-    return a; 
+    return copyArrayProps(this, this.slice());
   };
 }
 
@@ -16220,7 +16205,7 @@ Clazz._4Name = function(clazzName, applet, state, asClazz, initialize, isQuiet) 
     clazzName = "java.lang." + clazzName;  
   var isok = Clazz._isClassDefined(clazzName);
   if (isok && asClazz) {
-    return Clazz._initClass(Clazz.allClasses[clazzName],1);
+    return Clazz._initClass(Clazz.allClasses[clazzName],1,1);
   } 
   if (!isok) {
     var name2 = null;
@@ -16746,18 +16731,18 @@ java.lang.System = System = {
     }
   },
   
-  currentTimeMillis$ : function () {
-    return new Date ().getTime ();
+  currentTimeMillis$ : function() {
+    return new Date().getTime();
   },
   exit$ : function(status) { 
-	 swingjs.JSToolkit || Clazz.loadClass("swingjs.JSToolkit");
- 	 swingjs.JSToolkit.exit$I(status || 0) 
+	 java.lang.Runtime || Clazz.loadClass("java.lang.Runtime");
+	 java.lang.Runtime.getRuntime$().exit$I(status || 0);
   },
   gc$ : function() {}, // bh
-  getProperties$ : function () {
+  getProperties$ : function() {
     return System.props;
   },
-  getProperty$S$S : function (key, def) {
+  getProperty$S$S : function(key, def) {
     if (System.props)
       return System.props.getProperty$S$S (key, def);
     var v = System.$props[key];
@@ -18211,6 +18196,8 @@ String(byte[] bytes, int offset, int length, String charsetName)
 String(byte[] ascii, int hibyte, int offset, int count)
 */
 
+var textDecoder = null;
+
 String.instantialize=function(){
 var x=arguments[0];
 switch (arguments.length) {
@@ -18233,7 +18220,7 @@ case 2:
 
   var hibyte=arguments[1];
   return (typeof hibyte=="number" ? String.instantialize(x,hibyte,0,x.length) 
-	: self.TextDecoder && arguments[1].toString().toUpperCase() == "UTF-8" ? new TextDecoder().decode(arguments[0])
+	: self.TextDecoder && (textDecoder || (textDecoder = new TextDecoder())) && arguments[1].toString().toUpperCase() == "UTF-8" ? textDecoder.decode(arguments[0])
 	: String.instantialize(x,0,x.length,hibyte));
 case 3:
   // String(byte[] bytes, int offset, int length)
@@ -18377,6 +18364,7 @@ C$.prototype.$c = function(){return this.value.charCodeAt(0)};
 m$(C$,["c$", "c$$C"],
 function(value){
 this.value=value;
+this.valueOf=function(){return value};
 }, 1);
 
 m$(C$,["charValue", "charValue$"],
@@ -18583,9 +18571,9 @@ Byte.prototype.objectValue$ =
 Short.prototype.objectValue$ = 
 Long.prototype.objectValue$ =  
 Float.prototype.objectValue$ = 
+Boolean.prototype.objectValue$ = 
 Double.prototype.objectValue$ =  function() {return this.valueOf()};
 
-Boolean.prototype.objectValue$ = 
 Character.prototype.objectValue$ = function() { return this.value };
 
 Character.prototype.intValue$  = function() { return this.value.codePointAt(0) };

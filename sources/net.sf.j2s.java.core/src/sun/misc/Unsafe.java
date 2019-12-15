@@ -85,9 +85,9 @@ public final class Unsafe {
      */
     @CallerSensitive
     public static Unsafe getUnsafe() {
-        Class<?> caller = Reflection.getCallerClass();
-        if (!VM.isSystemDomainLoader(caller.getClassLoader()))
-            throw new SecurityException("Unsafe");
+//        Class<?> caller = Reflection.getCallerClass();
+//        if (!VM.isSystemDomainLoader(caller.getClassLoader()))
+//            throw new SecurityException("Unsafe");
         return theUnsafe;
     }
 
@@ -198,7 +198,7 @@ public final class Unsafe {
      * @see #putInt(Object, int, int)
      */
     public void putObject(Object o, long offset, Object x) {
-    	/** @j2sNative o[offset] = x ||*/
+    	/** @j2sNative o[offset] = x*/
     }
 
     /** @see #getInt(Object, long) */
@@ -435,7 +435,7 @@ public final class Unsafe {
      * @see #allocateMemory
      */
     public byte    getByte(long address) {
-    	return /** @j2sNative return C$.a[address] || */0;
+    	return /** @j2sNative C$.a[address] || */0;
     };
 
     /**
@@ -451,7 +451,7 @@ public final class Unsafe {
 
     /** @see #getByte(long) */
     public short   getShort(long address){
-    	return /** @j2sNative return C$.a[address] || */0;
+    	return /** @j2sNative C$.a[address] || */0;
     };
     /** @see #putByte(long, byte) */
     public void    putShort(long address, short x) {
@@ -459,7 +459,7 @@ public final class Unsafe {
     }
     /** @see #getByte(long) */
     public char    getChar(long address) {
-    	return /** @j2sNative return C$.a[address] || */0;
+    	return /** @j2sNative C$.a[address] || */0;
     };
     /** @see #putByte(long, byte) */
     public void    putChar(long address, char x){
@@ -467,7 +467,7 @@ public final class Unsafe {
     }
     /** @see #getByte(long) */
     public int     getInt(long address) {
-    	return /** @j2sNative return C$.a[address] || */0;
+    	return /** @j2sNative C$.a[address] || */0;
     };
     /** @see #putByte(long, byte) */
     public void    putInt(long address, int x){
@@ -475,7 +475,7 @@ public final class Unsafe {
     }
     /** @see #getByte(long) */
     public long    getLong(long address) {
-    	return /** @j2sNative return C$.a[address] || */0;
+    	return /** @j2sNative C$.a[address] || */0;
     };
     /** @see #putByte(long, byte) */
     public void    putLong(long address, long x){
@@ -483,7 +483,7 @@ public final class Unsafe {
     }
     /** @see #getByte(long) */
     public float   getFloat(long address) {
-    	return /** @j2sNative return C$.a[address] || */0;
+    	return /** @j2sNative C$.a[address] || */0;
     };
     /** @see #putByte(long, byte) */
     public void    putFloat(long address, float x){
@@ -491,7 +491,7 @@ public final class Unsafe {
     }
     /** @see #getByte(long) */
     public double  getDouble(long address) {
-    	return /** @j2sNative return C$.a[address] || */0;
+    	return /** @j2sNative C$.a[address] || */0;
     };
     /** @see #putByte(long, byte) */
     public void    putDouble(long address, double x){
@@ -548,7 +548,7 @@ public final class Unsafe {
      * @see #putByte(long, byte)
      */
     public long allocateMemory(long bytes)  {
-    	/** @j2sNative C$.a = [] || */
+    	/** @j2sNative C$.a = []; */
     	return bytes;
     };
     /**

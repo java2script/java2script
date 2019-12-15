@@ -250,7 +250,7 @@ public class File
      *          If the <code>pathname</code> argument is <code>null</code>
      */
     public File(String pathname) {
-    	this(pathname, "");
+    	this("", pathname);
 //        if (pathname == null) {
 //            throw new NullPointerException();
 //        }

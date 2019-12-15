@@ -27,6 +27,43 @@ automated production of browser-ready JavaScript versions of Java applications a
 
 See https://github.com/BobHanson/java2script/tree/master/sources/net.sf.j2s.core/dist and the README file in that directory.
 
+# Relationship to Alternatives
+
+A number of alternative methods of using Java to create JavaScript have been proposed and developed to one extent or another. The following discussion compares java2script/SwingJS to these other methods, based on my own limited understanding of them as of Dec. 2019. 
+
+## Google Web Toolkit ##
+
+http://www.gwtproject.org/  "GWT is a development toolkit for building and optimizing complex browser-based applications. Its goal is to enable productive development of high-performance web applications without the developer having to be an expert in browser quirks, XMLHttpRequest, and JavaScript." 
+
+I know that GWT has been successfully employed for relatively simple application conversions from Java to JavaScript. It implements a reasonably large set of JRE classes [http://www.gwtproject.org/doc/latest/RefJreEmulation.html], but not really a sufficiently large number of classes to support developed Java projects. For example, Class.forName() is missing, so that means no dynamic class loading; File, FileInputStream, and FileOutputStream are missing, meaning no standard file i/o. Most significantly, java.awt and javax.swing are missing. This means that whatever user interface is built must be built from scratch with JavaScript only in mind. 
+
+In contrast, java2script/SwingJS supports an HTML5-based "platform look and feel" (plaf) that leverages all the native features of HTML5 to match the Java AWT and Swing UI. For example, virtually all the Swing and AWT frame, window, panel, dialog, border, and layout classes have been implemented. There are no additional specialized classes that a developer needs to add to his or her project. Rather than using a working Java program as the basis for a JavaScript-specific application, as in GWT, java2script/SwingJS allows for parallel co-production of distributable Java and JavaScript _equivalent_ applications. 
+
+## TeaVM ##
+
+http://teavm.org/ "TeaVM is an ahead-of-time compiler for Java bytecode that emits JavaScript and WebAssembly that runs in a browser. Its close relative is the well-known GWT. The main difference is that TeaVM does not require source code, only compiled class files. Moreover, the source code is not required to be Java, so TeaVM successfully compiles Kotlin and Scala."
+
+I can only find a very few examples of TeaVM use. But from what I can see, TeaVM is still at "concept" stage. It appears that they are hand writing "pseudo" Java as they go. For example, we see at
+
+https://github.com/konsoletyper/teavm/tree/master/classlib/src/main/java/org/teavm/classlib
+
+that "java.awt" contains three classes: TColor, TDimension, and TPoint. TColor has exactly four methods: getRed(), getGreen(), getBlue(), and getAlpha(). It appears to me that the developer has hand-written a decent collection of 800 files as org.teavm.classlib.java. Apparently, the idea is that you would take your Java project and swap in these pseudo-java classes. But this is not scalable. One can't expect a 100,000-line Java program to be retooled or limited to this small hand-crafted set of classes. 
+
+In the author's own words, "There are Java APIs that are impossible to implement without generating inefficient JavaScript. Some of these APIs are: reflection, resources, class loaders, and JNI. TeaVM restricts usage of these APIs. Generally, you’ll have to manually rewrite your code to fit into TeaVM constraints." OK, but java2script/SwingJS implements reflection, does just-in-time class loading, uses property files and resource bundles, loads images, and much more. There are only minimal constraints that require modifying Java code. Yes, modal dialogs and Thread.sleep() do require refactoring a bit, but we have had no problem with this on over 500,000 lines of code in multiple projects. So it doesn't seem to be a major impediment. 
+
+## CheerpJ ##
+
+https://www.leaningtech.com/cheerpj/ "CheerpJ converts Java applications or libraries into JavaScript. Works on bytecode, does not require access to the source code. Compatible with 100% of Java including reflection and dynamic classes. Existing Java archives can be converted to Web applications effortlessly"
+
+This sounds terrific. Very straightforward -- just convert the Java class files to JavaScript. I don't doubt that most of what is written here is true. I am dubious about that "100%" claim, as there are plenty of problems in Java that would take considerably more work than just using class files directly. The Java Reporter demonstration at https://www.leaningtech.com/cheerpj/demos/ crashed both Firefox and Chrome for me, so I cannot really evaluate what I see here. 
+
+The primary differences between java2script/SwingJS and CheerpJ, to the best of my knowledge, include:
+
+- implementing a true HTML5 UI rather than just painting a canvas the way Java does
+- delivering an easily interpretable and debuggable JavaScript translation of Java classes, with little or no obscurification (unless that is desired)
+- well-designed JavaScript-friendly Java core classes that leverage the considerable power of HTML5 rather than ignoring that completely
+- open source and completely extensible
+
 # History - 2019-
 
 SwingJS is now more than just "Swing"-JS. AWT applets and applications are now supported. A test suite of over 500 AWT applets has been used to refine the AWT runtime classes with great success. Many thanks to Karsten Blankenagel (University of Wuppertal) for access to this source code set.

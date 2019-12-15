@@ -1044,9 +1044,5 @@ public abstract class ByteBuffer
     public abstract byte _get(int i);                          // package-private SwingJS -- NOT
     public abstract void _put(int i, byte b);                  // package-private SwingJS -- NOT
 
-    // #BIN
-    //
-    // Binary-data access methods  for short, char, int, long, float,
-    // and double will be inserted here
-
+    
 }

@@ -233,7 +233,9 @@ class Test_Class extends Test_Class2 {
 
 	public static void main(String[] args) {
 
-		
+		Class<?> type = Object.class;
+	    assert(type instanceof Class<?>);
+
 		System.out.println(Test_Class.Singleton.instance);
 		String ss = "testing \10\13a \7777  \u0052";
 		System.out.println(ss + " "+ ss.length());
