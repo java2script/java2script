@@ -13863,9 +13863,10 @@ if (ev.keyCode == 9 && ev.target["data-focuscomponent"]) {
 
 // Google closure compiler cannot handle Clazz.new or Clazz.super
 
-// BH 2019.12.14 3.2.5.v2 Clazz._4Name initialization should be full static initialization 
+// BH 2019.12.15 3.2.5.v4 Character.prototype.valueOf() missing 
+// BH 2019.12.14 3.2.5.v3 Clazz._4Name initialization should be full static initialization 
 
-`// see earlier notes at net.sf.j2s.java.core.srcjs/js/devnotes.txt
+// see earlier notes at net.sf.j2s.java.core.srcjs/js/devnotes.txt
 
 //window["j2s.object.native"] = true;  // this is not an option
 
@@ -18363,6 +18364,7 @@ C$.prototype.$c = function(){return this.value.charCodeAt(0)};
 m$(C$,["c$", "c$$C"],
 function(value){
 this.value=value;
+this.valueOf=function(){return value};
 }, 1);
 
 m$(C$,["charValue", "charValue$"],

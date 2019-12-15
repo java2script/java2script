@@ -25,7 +25,8 @@ public class CorePlugin extends Plugin {
 	 * "net.sf.j2s.core.jar" not "net.sf.j2s.core.3.2.5"
 	 * 
 	 */
-	public static String VERSION = "3.2.5-v3";
+	public static String VERSION = "3.2.5-v4";
+	// BH 2019.12.15 -- 3.2.5-v4 fix for local class within anonymous class not getting name 
 	// BH 2019.12.12 -- 3.2.5-v3 fix for enums == null in annotations
 	// BH 2019.12.06 -- 3.2.5-v2 fix for try(resources) not closing those
 	// BH 2019.11.12 -- 3.2.5-v0 fix for string literals with \n \nn \nnn octals, but "use strict" does not allow for this.
