@@ -167,7 +167,11 @@ import org.eclipse.jdt.core.dom.WildcardType;
 // HashSet as the basis for the {a:a,b:this.$finals$.b} mapping listFinalVariables.
 // This fixed all of the stream issues. See Test_Local, Test_java8, Test_Class.
 
-// BH 2019.12.07 3.2.5-v2 fix for lambda expression with $$ must not be cached
+// BH 2019.12.15 3.2.5-v4 fix for <? extends Byte> not getting name for boxing 
+// BH 2019.12.15 3.2.5-v4 fix for local class within anonymous class not getting name 
+// BH 2019.12.12 3.2.5-v3 fix for enums == null in annotations
+// BH 2019.12.07 3.2.5-v3 fix for lambda expression with $$ must not be cached
+// BH 2019.12.06 3.2.5-v2 fix for try(resources) not closing those
 // BH 2019.11.18 3.2.5-v0 fix for anonymous subclass of a local class not handling finals
 // BH 2019.11.18 3.2.5-v0 fix for main method that throws exception not generating html test 
 // BH 2019.11.18 3.2.5-v0 fix for lambda expressions in classes with annotations
@@ -4437,12 +4441,18 @@ public class Java2ScriptVisitor extends ASTVisitor {
 				// expression is the site of an unboxing conversion
 				ITypeBinding typeBinding = exp.resolveTypeBinding();
 				if (!typeBinding.isPrimitive()) {
-					String name = getJavaClassNameQualified(typeBinding);
-					name = (name.indexOf("Integer") >= 0 ? "int"
-							: name.indexOf("Character") >= 0 ? "char" : name.replace("java.lang.", "").toLowerCase());
 					buffer.append("(");
 					element.accept(this);
-					buffer.append(toCharCode && name == "char" ? ")" + CHARCODEAT0 : ")." + name + "Value$()");
+					if (toCharCode) {
+						String name = getJavaClassNameQualified(typeBinding);
+						if (toCharCode && name.length() == 0)
+							name = typeBinding.getKey();
+						if (name.indexOf("Character") >= 0) {
+							buffer.append(").intValue$()");
+							return true;
+						}
+					}
+					buffer.append(").valueOf()");
 					return true;
 				}
 			}
@@ -4495,11 +4505,22 @@ public class Java2ScriptVisitor extends ASTVisitor {
 
 		if (binding == null)
 			return null;
-		String binaryName = null, bindingKey;
-		if ((binding.isAnonymous() || binding.isLocal()) && (binaryName = binding.getBinaryName()) == null
+		String name = null, bindingKey;
+		if ((binding.isAnonymous() || binding.isLocal()) && (name = binding.getBinaryName()) == null
 				&& (bindingKey = binding.getKey()) != null)
-			binaryName = bindingKey.substring(1, bindingKey.length() - 1).replace('/', '.');
-		return (binaryName == null ? binding.getQualifiedName() : binaryName);
+			name = bindingKey.substring(1, bindingKey.length() - 1).replace('/', '.');
+		if (name == null) {
+			name = binding.getQualifiedName();
+			if (name.length() == 0) {
+				name = binding.getBinaryName();
+				if (name == null) {
+					System.out.println(">>name null?? bn=" + binding.getBinaryName() + " qn=" + binding.getQualifiedName() + " n=" + binding.getName() + " k=" +binding.getKey()
+					+ " isAnon" + binding.isAnonymous() + " " + binding.isLocal());
+					name = ""; // <? extends Byte>
+				}
+			}
+		}
+		return name;
 	}
 
 	private static String getJavaClassNameSuperNoBrackets(ITypeBinding typeBinding) {
@@ -4721,25 +4742,22 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	 * $I$[] dynamic class loading and interfaces, (but interfaces are handled
 	 * differently).
 	 * 
-	 * This is a temporary will fix and will fail if the program does not adhere to
-	 * class/package-capitalization standards.
-	 * 
 	 * @param packageName   Java package name or "_"
 	 * @param javaClassName
 	 * @return array listing classes that need to be loaded in order
 	 */
 	private String getFinalInnerClassList(ITypeBinding javaClass, String javaClassName) {
-		if (javaClassName == null)
+		String packageName = getPackageName(javaClass);		
+		if (javaClassName == null) {
 			javaClassName = getJavaClassNameQualified(javaClass);
-		// called by addClassOrInterface and getFinalClazzLoadI
+			System.out.println(">>jcn was null! " + javaClassName);
+//		} else if (javaClassName.length() == 0) {
+//			// local inner class within an anonymous class
+//			javaClassName = javaClass.getBinaryName();
+		}
 		if (javaClassName.indexOf("$lambda") >= 0)
 			return "'" + getFinalJ2SClassName(javaClassName, FINAL_RAW) + "'";
-		String name = removeBracketsAndFixNullPackageName(javaClassName);
-		String packageName = getPackageName(javaClass);
-//		if (name.indexOf(packageName) != 0) {
-//			dumpStack("???? packageName " + packageName + " " + name);
-//		}
-		name = name.substring(packageName.length() + 1);
+		String name = removeBracketsAndFixNullPackageName(javaClassName).substring(packageName.length() + 1);
 		String[] parts = name.split("\\.");
 		String s = packageName + "." + parts[0];
 		int len = parts.length;
@@ -5780,10 +5798,12 @@ public class Java2ScriptVisitor extends ASTVisitor {
 	}
 
 	public boolean visit(AnnotationTypeDeclaration node) {
+		System.out.println(">>AnnotationTypeDecl " + node);
 		return false;
 	}
 
 	public boolean visit(AnnotationTypeMemberDeclaration node) {
+		System.out.println(">>AnnotationTypeMembDecl " + node);
 		return false;
 	}
 
@@ -6414,7 +6434,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						type = ((TypeDeclaration) a.node).resolveBinding();
 					} else if (a.node instanceof FieldDeclaration) {
 						FieldDeclaration field = (FieldDeclaration) a.node;
-						fields.remove(field);
+						if (fields != null)
+							fields.remove(field);
 						fragments = field.fragments();
 						VariableDeclarationFragment identifier = (VariableDeclarationFragment) fragments.get(0);
 						IVariableBinding var = identifier.resolveBinding();
@@ -6423,7 +6444,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 					} else if (a.node instanceof MethodDeclaration) {
 						MethodDeclaration method = (MethodDeclaration) a.node;
 						IMethodBinding var = method.resolveBinding();
-						if (methods.contains(var))
+						if (methods != null)
+							if (methods.contains(var))
 							methods.remove(var);
 						if (accessType != TEST_TYPE)
 							var = getJAXBGetMethod(var, methods, false);
@@ -6433,7 +6455,8 @@ public class Java2ScriptVisitor extends ASTVisitor {
 						type = var.getReturnType();
 					} else if (a.node instanceof EnumConstantDeclaration) {
 						EnumConstantDeclaration con = (EnumConstantDeclaration) a.node;
-						enums.remove(con);
+						if (enums != null)
+							enums.remove(con);
 						IVariableBinding var = con.resolveVariable();
 						varName = var.getName();
 						type = var.getType();

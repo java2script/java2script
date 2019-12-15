@@ -81,12 +81,12 @@ public abstract class DataBuffer {
     /** Tag for int data. */
     public static final int TYPE_INT   = 3;
 
-//    /** Tag for float data.  Placeholder for future use. */
-//    public static final int TYPE_FLOAT  = 4;
-//
-//    /** Tag for double data.  Placeholder for future use. */
-//    public static final int TYPE_DOUBLE  = 5;
-//
+    /** Tag for float data.  Placeholder for future use. */
+    public static final int TYPE_FLOAT  = 4;
+
+    /** Tag for double data.  Placeholder for future use. */
+    public static final int TYPE_DOUBLE  = 5;
+
     /** Tag for undefined data. */
     public static final int TYPE_UNDEFINED = 32;
 
